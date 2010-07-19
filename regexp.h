@@ -229,7 +229,11 @@ and check for NULL.
 
 /* 0x3F of extflags is used by (RXf_)PMf_COMPILETIME
  * If you change these you need to change the equivalent flags in op.h, and
- * vice versa.  */
+/* vice versa.  These need to be ordered so that the msix are contiguous
+ * starting at bit 0, followed by the p; bit 0 is because of the shift below
+ * being 0; see STD_PAT_MODS and INT_PAT_MODS below for the contiguity cause */
+/* the flags above are transfered from the PMOP->op_pmflags member during
+ * compilation */
 #define RXf_PMf_MULTILINE	0x00000001 /* /m         */
 #define RXf_PMf_SINGLELINE	0x00000002 /* /s         */
 #define RXf_PMf_FOLD    	0x00000004 /* /i         */
@@ -271,8 +275,14 @@ and check for NULL.
 #define LOOP_PAT_MODS        "gc"
 #define NONDESTRUCT_PAT_MODS "r"
 
+/* This string is expected by regcomp.c to be ordered so that the first
+ * character is the flag in bit 0 of extflags; the next character is bit 1,
+ * etc. */
 #define STD_PAT_MODS        "msix"
 
+/* This string is expected by XS_re_regexp_pattern() in universal.c to be ordered
+ * so that the first character is the flag in bit 0 of extflags; the next
+ * character is bit 1, etc. */
 #define INT_PAT_MODS    STD_PAT_MODS    KEEPCOPY_PAT_MODS
 
 #define EXT_PAT_MODS    ONCE_PAT_MODS   KEEPCOPY_PAT_MODS
