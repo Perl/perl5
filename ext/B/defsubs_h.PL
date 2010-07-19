@@ -7,7 +7,7 @@ my (undef, $headerpath) = @ARGV;
 my ($out) = __FILE__ =~ /(^.*)\.PL/i;
 $out =~ s/_h$/.h/;
 unlink $out if -l $out;
-open(OUT,">$out") || die "Cannot open $file:$!";
+open(OUT,">$out") || die "Cannot open $out:$!";
 print "Extracting $out...\n";
 print OUT <<"END";
 /*
