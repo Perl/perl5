@@ -422,7 +422,9 @@ counted. To ensure consistent behaviour, direct assignment to it, for
 example C<CvGV(cv) = gv> is now a compile-time error. A new macro,
 C<CvGV_set(cv,gv)> has been introduced to perform this operation safely.
 Note that modification of this field is not part of of the public API,
-regardless of this new macro.
+regardless of this new macro. This change caused some
+L<issues|/"Known Problems"> in modules that used the private C<GvGV()>
+field.
 
 =item *
 
