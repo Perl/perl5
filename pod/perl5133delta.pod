@@ -51,8 +51,14 @@ See L<charnames> for details on all these changes.
 
 =head2 Uppercase X/B allowed in hexadecimal/binary literals
 
-Literals may now use either C<0X...> or C<0B...> in addition to C<0x...>
-and C<0b...> prefixes. (RT#76296) (a674e8d)
+Literals may now use either upper case C<0X...> or C<0B...> prefixes,
+in addition to the already supported C<0x...> and C<0b...>
+syntax. (RT#76296) (a674e8d)
+
+C, Ruby, Python and PHP already supported this syntax, and it makes
+Perl more internally consistent. A round-trip with C<eval sprintf
+"%#X", 0x10> now returns C<16> in addition to C<eval sprintf "%#x",
+0x10>, which worked before.
 
 =head1 Incompatible Changes
 
