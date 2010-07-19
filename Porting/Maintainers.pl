@@ -1215,6 +1215,8 @@ use File::Glob qw(:case);
 			     pod/pod2man.PL
 			     pod/pod2text.PL
 			    ],
+	'EXCLUDED'	=> [ qw{ Makefile.PL } ],
+	'CUSTOMIZED'	=> [ qw{ Makefile.PL } ],
 	'MAP'		=> { '' => 'cpan/podlators/',
 			     'scripts/' => 'pod/',
 			   },
