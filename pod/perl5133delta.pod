@@ -396,7 +396,7 @@ Several test files have been modernized to use Test::More
 
 Support for MacOS Classic within ExtUtils::MakeMaker was removed from Perl in
 December 2004.  Vestigial MacOS Classic specific code has now been removed
-from other core modules as well.
+from other core modules as well (8f8c2a4..c457df0).
 
 =back
 
