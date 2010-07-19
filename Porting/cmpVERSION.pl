@@ -97,10 +97,9 @@ foreach my $pm_file (@module_diffs) {
     my $pm_version = eval {MM->parse_version($pm_file)};
     my $orig_pm_content = get_file_from_git($pm_file, $tag_to_compare);
     my $orig_pm_version = eval {MM->parse_version(\$orig_pm_content)};
-    next unless
-	defined $pm_version &&
-	defined $orig_pm_version &&
-        $pm_version eq $orig_pm_version;
+    next if ( ! defined $pm_version || ! defined $orig_pm_version );
+    next if ( $pm_version eq 'undef' || $orig_pm_version eq 'undef' ); # sigh
+    next if $pm_version ne $orig_pm_version;
     push @output_files, $pm_file;
     push @output_diffs, $pm_file unless $pm_eq;
     push @output_diffs, $xs_file unless $xs_eq;
