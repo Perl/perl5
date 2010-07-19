@@ -581,7 +581,35 @@ which was excluded in the original release (d1e2db0)
 
 =head1 Acknowledgements
 
-XXX The list of people to thank goes here.
+Perl 5.13.3 represents approximately one month of development since Perl
+5.13.2, and contains 12,184 lines of changes across 575 files from 104
+authors and committers.
+
+Thank you to the following for contributing to this release:
+
+Abhijit Menon-Sen, Abigail, Alex Davies, Alex Vandiver, Alexandr
+Ciornii, Andreas J. Koenig, Andrew Rodland, Andy Dougherty, Aristotle
+Pagaltzis, Arkturuz, Ben Morrow, Bo Borgerson, Bo Lindbergh, Brad
+Gilbert, Bram, Brian Phillips, Chas. Owens, Chip Salzenberg, Chris
+Williams, Craig A. Berry, Curtis Jewell, Dan Dascalescu, Daniel
+Frederick Crisman, Dave Rolsky, David Caldwell, David E. Wheeler, David
+Golden, David Leadbeater, David Mitchell, Dennis Kaarsemaker, Eric
+Brine, Father Chrysostomos, Florian Ragwitz, Frank Wiegand, Gene
+Sullivan, George Greer, Gerard Goossen, Gisle Aas, Goro Fuji, Graham
+Barr, H.Merijn Brand, Harmen, Hugo van der Sanden, James E Keenan, James
+Mastros, Jan Dubois, Jerry D. Hedden, Jesse Vincent, Jim Cromie, John
+Peacock, Jos Boumans, Josh ben Jore, Karl Williamson, Kevin Ryde, Leon
+Brocard, Lubomir Rintel, Maik Hentsche, Marcus Holland-Moritz, Matt
+Johnson, Matt S Trout, Max Maischein, Michael Breen, Michael G Schwern,
+Moritz Lenz, Nga Tang Chan, Nicholas Clark, Nick Cleaton, Nick Johnston,
+Niko Tyni, Offer Kaye, Paul Marquess, Philip Hazel, Philippe Bruhat,
+Rafael Garcia-Suarez, Rainer Tammer, Reini Urban, Ricardo Signes,
+Richard Soderberg, Robin Barker, Ruslan Zakirov, Salvador Fandino,
+Salvador Ortiz Garcia, Shlomi Fish, Sinan Unur, Sisyphus, Slaven Rezic,
+Steffen Mueller, Stepan Kasal, Steve Hay, Steve Peters, Sullivan Beck,
+Tim Bunce, Todd Rinaldo, Tom Christiansen, Tom Hukins, Tony Cook,
+Vincent Pit, Yuval Kogman, Yves Orton, Zefram, brian d foy, chromatic,
+kmx, Ævar Arnfjörð Bjarmason
 
 =head1 Reporting Bugs
 
