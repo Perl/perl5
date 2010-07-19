@@ -412,7 +412,9 @@ use File::Glob qw(:case);
 				 t/031_CPANPLUS-Internals-Source-SQLite.t
 				 t/032_CPANPLUS-Internals-Source-via-sqlite.t
 			       },
+                             qw{ Makefile.PL },
 			   ],
+	'CUSTOMIZED'	=> [ qw{ Makefile.PL } ],
 	'UPSTREAM'	=> 'cpan',
 	'BUGS'		=> 'bug-cpanplus@rt.cpan.org',
 	},
