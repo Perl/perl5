@@ -256,14 +256,14 @@ sub do_compare {
         ( my $main_pm = $module ) =~ s{::}{/}g;
         $main_pm .= ".pm";
 
-        my ( $excluded, $map ) = get_map( $m, $module, \@perl_files );
+        my ( $excluded, $map, $customized) = get_map( $m, $module, \@perl_files );
 
         my %perl_unseen;
         @perl_unseen{@perl_files} = ();
         my %perl_files = %perl_unseen;
 
         foreach my $cpan_file (@cpan_files) {
-            my $mapped_file = cpan_to_perl( $excluded, $map, $cpan_file );
+            my $mapped_file = cpan_to_perl( $excluded, $map, $customized, $cpan_file );
             unless ( defined $mapped_file ) {
                 print $outfh "  Excluded:  $cpan_file\n" if $verbose;
                 next;
@@ -328,8 +328,13 @@ EOF
                 }
             }
 
-            if ( File::Compare::compare( $abs_cpan_file, $mapped_file ) ) {
-
+            my $different = File::Compare::compare( $abs_cpan_file, $mapped_file );
+            if ( $different && customized( $m, $relative_mapped_file) ) {
+                if ($verbose) {
+                    print $outfh "  Customized: $relative_mapped_file\n";
+                }
+            }
+            elsif ( $different ) {
                 if ($use_diff) {
                     file_diff( $outfh, $abs_cpan_file, $mapped_file, $reverse,
                         $diff_opts );
@@ -469,11 +474,12 @@ sub do_crosscheck {
 sub get_map {
     my ( $m, $module_name, $perl_files ) = @_;
 
-    my ( $excluded, $map ) = @$m{qw(EXCLUDED MAP)};
+    my ( $excluded, $map, $customized ) = @$m{qw(EXCLUDED MAP CUSTOMIZED)};
 
     $excluded ||= [];
+    $customized ||= [];
 
-    return $excluded, $map if $map;
+    return $excluded, $map, $customized if $map;
 
     # all files under ext/foo-bar (plus maybe some under t/lib)???
 
@@ -508,7 +514,7 @@ sub get_map {
             ''     => "$base/",
         };
     }
-    return $excluded, $map;
+    return $excluded, $map, $customized;
 }
 
 # Given an exclude list and a mapping hash, convert a CPAN filename
@@ -516,10 +522,10 @@ sub get_map {
 # Returns an empty list for an excluded file
 
 sub cpan_to_perl {
-    my ( $excluded, $map, $cpan_file ) = @_;
+    my ( $excluded, $map, $customized, $cpan_file ) = @_;
 
     for my $exclude (@$excluded) {
-
+        next if $exclude ~~ $customized;
         # may be a simple string to match exactly, or a pattern
         if ( ref $exclude ) {
             return if $cpan_file =~ $exclude;
@@ -647,6 +653,11 @@ sub file_diff {
     $result =~ s{^(--- |\+\+\+ )/tmp/[^/]+/}{$1}gm;
 
     print $outfh $result;
+}
+
+sub customized {
+  my ($module_data, $file) = @_;
+  return grep { $file eq $_ } @{ $module_data->{CUSTOMIZED} };
 }
 
 run();
