@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>73;
+plan tests=>74;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -575,3 +575,20 @@ sub fleen : lvalue { $pnare }
 $pnare = __PACKAGE__;
 ok eval { fleen = 1 }, "lvalues can return COWs (CATTLE?) [perl #75656]";\
 is $pnare, 1, 'and returning CATTLE actually works';
+
+{
+    my $result_3363;
+    sub a_3363 {
+        my ($word, $replace) = @_;
+        my $ref = \substr($word, 0, 1);
+        $$ref = $replace;
+        if ($replace eq "b") {
+            $result_3363 = $word;
+        } else {
+            a_3363($word, "b");
+        }
+    }
+    a_3363($_, "v") for "test";
+
+    is($result_3363, "best", "ref-to-substr retains lvalue-ness under recursion [perl #3363]");
+}
