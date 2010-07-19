@@ -318,7 +318,7 @@ EOF
             my $relative_mapped_file = $mapped_file;
             $relative_mapped_file =~ s/^(cpan|dist|ext)\/.*?\///;
 
-            for my $f ( catfile( 'lib', $main_pm ), $main_pm ) {
+            for my $f ( catfile( 'lib', $main_pm ), File::Basename::basename($main_pm) ) {
                 next unless $f eq $relative_mapped_file;
                 my $pv = MM->parse_version($mapped_file)   || '(unknown)';
                 my $cv = MM->parse_version($abs_cpan_file) || '(unknown)';
