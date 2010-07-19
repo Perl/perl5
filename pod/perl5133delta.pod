@@ -199,6 +199,12 @@ ExtUtil-ParseXS updated to version 2.2206 (494e8c4)
 
 File::Copy skips suid tests on a nosuid partition (cae9400)
 
+These tests were being skipped on OpenBSD, but nosuid partitions can
+exist on other systems too. Now it just checks if it can create a suid
+directory, if not the tests are skipped.
+
+Perl builds without errors in a nosuid /tmp with this patch.
+
 =item *
 
 IO-Compress upated to CPAN version 2.027 (e8796d6)
