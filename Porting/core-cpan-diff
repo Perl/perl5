@@ -256,14 +256,16 @@ sub do_compare {
         ( my $main_pm = $module ) =~ s{::}{/}g;
         $main_pm .= ".pm";
 
-        my ( $excluded, $map, $customized) = get_map( $m, $module, \@perl_files );
+        my ( $excluded, $map, $customized ) =
+          get_map( $m, $module, \@perl_files );
 
         my %perl_unseen;
         @perl_unseen{@perl_files} = ();
         my %perl_files = %perl_unseen;
 
         foreach my $cpan_file (@cpan_files) {
-            my $mapped_file = cpan_to_perl( $excluded, $map, $customized, $cpan_file );
+            my $mapped_file =
+              cpan_to_perl( $excluded, $map, $customized, $cpan_file );
             unless ( defined $mapped_file ) {
                 print $outfh "  Excluded:  $cpan_file\n" if $verbose;
                 next;
@@ -318,23 +320,14 @@ EOF
             my $relative_mapped_file = $mapped_file;
             $relative_mapped_file =~ s/^(cpan|dist|ext)\/.*?\///;
 
-            for my $f ( catfile( 'lib', $main_pm ), File::Basename::basename($main_pm) ) {
-                next unless $f eq $relative_mapped_file;
-                my $pv = MM->parse_version($mapped_file)   || '(unknown)';
-                my $cv = MM->parse_version($abs_cpan_file) || '(unknown)';
-                if ( $pv ne $cv ) {
-                    print $outfh
-                      "  Version mismatch: $cv (cpan) vs $pv (perl)\n";
-                }
-            }
-
-            my $different = File::Compare::compare( $abs_cpan_file, $mapped_file );
-            if ( $different && customized( $m, $relative_mapped_file) ) {
+            my $different =
+              File::Compare::compare( $abs_cpan_file, $mapped_file );
+            if ( $different && customized( $m, $relative_mapped_file ) ) {
                 if ($verbose) {
                     print $outfh "  Customized: $relative_mapped_file\n";
                 }
             }
-            elsif ( $different ) {
+            elsif ($different) {
                 if ($use_diff) {
                     file_diff( $outfh, $abs_cpan_file, $mapped_file, $reverse,
                         $diff_opts );
@@ -347,6 +340,16 @@ EOF
                         print $outfh
                           "  Modified:  $cpan_file $relative_mapped_file\n";
                     }
+
+                    if ( $cpan_file =~ m{\.pm\z} ) {
+                        my $pv = MM->parse_version($mapped_file)   || 'unknown';
+                        my $cv = MM->parse_version($abs_cpan_file) || 'unknown';
+                        if ( $pv ne $cv ) {
+                            print $outfh
+"  Version mismatch in '$cpan_file':\n    $cv (cpan) vs $pv (perl)\n";
+                        }
+                    }
+
                 }
             }
             elsif ($verbose) {
@@ -476,7 +479,7 @@ sub get_map {
 
     my ( $excluded, $map, $customized ) = @$m{qw(EXCLUDED MAP CUSTOMIZED)};
 
-    $excluded ||= [];
+    $excluded   ||= [];
     $customized ||= [];
 
     return $excluded, $map, $customized if $map;
@@ -526,6 +529,7 @@ sub cpan_to_perl {
 
     for my $exclude (@$excluded) {
         next if $exclude ~~ $customized;
+
         # may be a simple string to match exactly, or a pattern
         if ( ref $exclude ) {
             return if $cpan_file =~ $exclude;
@@ -656,8 +660,8 @@ sub file_diff {
 }
 
 sub customized {
-  my ($module_data, $file) = @_;
-  return grep { $file eq $_ } @{ $module_data->{CUSTOMIZED} };
+    my ( $module_data, $file ) = @_;
+    return grep { $file eq $_ } @{ $module_data->{CUSTOMIZED} };
 }
 
 run();
