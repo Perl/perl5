@@ -60,15 +60,10 @@ name will C<charnames::viacode()> return your custom one.
 
 See L<charnames> for details on all these changes.
 
-=head2 Other enhancements
+=head2 Uppercase X/B allowed in hexadecimal/binary literals
 
-=over
-
-=item *
-
-Uppercase X/B allowed in hexadecimal/binary literals (RT#76296) (a674e8d)
-
-=back
+Literals may now use either C<0X...> or C<0B...> in addition to C<0x...>
+and C<0b...> prefixes. (RT#76296) (a674e8d)
 
 =head1 Security
 
@@ -336,14 +331,14 @@ section.
 
 =item *
 
-Octal character escapes in documentation now prefer either the C<\gDIGIT>
-escape or else a three-digit octal escape as they have less ambiguity than
-other forms of octal escapes.  (ce7b6f0) (d8b950d)
+Octal character escapes in documentation now prefer a three-digit octal 
+escape or the new C<\o{}> escape as they have more consistent behavior
+in different contexts than other forms. (ce7b6f0) (d8b950d) (e1f120a)
 
 =item *
 
 Documentation now standardizes on the term 'capture group' over 'buffer'
-in regular expression documentation(c27a5cf)
+in regular expression documentation (c27a5cf)
 
 =back
 
@@ -369,6 +364,11 @@ Add additional notes regarding srand and forking (d460397)
 
 Improved documentation of unusual character escapes (bf82ca4)
 
+=item *
+
+Clarifies how hexadecimal escapes are interpreted, with particular
+attention to the treatment of invalid characters. (9644846)
+
 =back
 
 =head3 L<perlrun>
@@ -389,6 +389,17 @@ Clarifies the behavior of the C<-0NNN> switch for C<-0400> or higher (7ba31cb)
 
 Added the policy on compatibility and deprecation along with definitions of
 terms like "deprecation" (70e4a83)
+
+=back
+
+=head3 L<perlre>
+
+=over
+
+=item *
+
+Added examples on the perils of not using \g{} when there are more
+than nine back-references (9d86067)
 
 =back
 
@@ -688,6 +699,11 @@ from either 5.XXX.XXX or 5.XXX.XXX.
 [ List each fix as a =item entry ]
 
 =over 4
+
+=item *
+
+Bug fixes involving CvGV reference counting break L<Sub::Name>.  A
+patch has been sent upstream to the maintainer.
 
 =item *
 
