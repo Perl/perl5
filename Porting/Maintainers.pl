@@ -144,6 +144,11 @@ use File::Glob qw(:case);
 # full pathname (eg 't/foo.t') or a pattern (e.g. qr{^t/}).
 # It defaults to the empty list.
 
+# CUSTOMIZED is a list of files that have been customized within the
+# Perl core.  They should also be listed in EXCLUDED, but this will
+# additionally suppress core-cpan-diff warnings that they differ from
+# the CPAN tarballs
+
 # DEPRECATED contains the *first* version of Perl in which the module
 # was considered deprecated.  It should only be present if the module is
 # actually deprecated.  Such modules should use deprecated.pm to
@@ -784,6 +789,7 @@ use File::Glob qw(:case);
 	'DISTRIBUTION'	=> 'GBARR/libnet-1.22.tar.gz',
 	'FILES'		=> q[cpan/libnet],
 	'EXCLUDED'	=> [ qw{Configure install-nomake Makefile.PL} ],
+	'CUSTOMIZED'	=> [ qw{Makefile.PL} ],
 	'UPSTREAM'	=> undef,
 	},
 
