@@ -128,7 +128,7 @@ sub run {
           if ( $reverse || $use_diff || $diff_opts || $verbose );
     }
     else {
-        $diff_opts = '-u' unless defined $diff_opts;
+        $diff_opts = '-u -b' unless defined $diff_opts;
         usage("can't use -f without --crosscheck") if $force;
     }
 
@@ -321,7 +321,8 @@ EOF
             $relative_mapped_file =~ s/^(cpan|dist|ext)\/.*?\///;
 
             my $different =
-              File::Compare::compare( $abs_cpan_file, $mapped_file );
+              file_diff( $outfh, $abs_cpan_file, $mapped_file, $reverse,
+                $diff_opts );
             if ( $different && customized( $m, $relative_mapped_file ) ) {
                 if ($verbose) {
                     print $outfh "  Customized: $relative_mapped_file\n";
@@ -329,8 +330,8 @@ EOF
             }
             elsif ($different) {
                 if ($use_diff) {
-                    file_diff( $outfh, $abs_cpan_file, $mapped_file, $reverse,
-                        $diff_opts );
+                    $different =~ s{^(--- |\+\+\+ )/tmp/[^/]+/}{$1}gm;
+                    print $outfh $different;
                 }
                 else {
                     if ( $cpan_file eq $relative_mapped_file ) {
@@ -652,11 +653,8 @@ sub file_diff {
     else {
         push @cmd, $cpan_file, $perl_file;
     }
-    my $result = `@cmd`;
+    return `@cmd`;
 
-    $result =~ s{^(--- |\+\+\+ )/tmp/[^/]+/}{$1}gm;
-
-    print $outfh $result;
 }
 
 sub customized {
