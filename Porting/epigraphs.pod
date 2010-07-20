@@ -15,6 +15,35 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.13.3 - Neil Gaiman and Terry Pratchett, "Good Omens"
+
+Look at Crowley, doing 110 mph on the M40 heading towards
+Oxfordshire.  Even the most resolutely casual observer would
+notice a number of strange things about him.  The clenched teeth,
+for example, or the dull red glow coming from behind his
+sunglasses.  And the car.  The car was a definite hint.
+
+Crowley had started the journey in his Bentley, and he was
+dammned if he wasn't going to finish it in the Bentley as well.
+Not that even the kind of car buff who owns his own pair of
+motoring goggles would have been able to tell it was a vintage
+Bentley.  Not any more.  They wouldn't have been able to tell
+that it was a Bentley.  They would only offer fifty-fifty that it
+had ever even been a car.
+
+There was no paint left on it, for a start.  It might still have
+been black, where it wasn't a rusty, smudged reddish-brown, but
+this was a dull charcoal black.  It traveled in its own ball of
+flame, like a space capsule making a particularly difficult
+re-entry.
+
+There was a thin skin of crusted, melted rubber left around the
+metal wheel rims, but seeing that the wheel rims were still
+somhow riding an inch above the road surface this didn't seem to
+make an awful lot of difference to the suspension.
+
+It should have fallen apart miles back.
+
 =head2 v5.13.2 - Iain M Banks, "Use of Weapons"
 
 We deal in the moral equivalent of black holes, where the normal laws - 
