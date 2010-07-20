@@ -555,7 +555,7 @@ interrupted by a signal
 
 Test-Harness was updated from 3.17 to 3.21 for this release. A rewrite
 in how it handles non-Perl tests (in 3.17_01) broke argument passing to
-non-Perl tests with L<prove(1)> (RT #59186), and required that non-Perl
+non-Perl tests with L<prove> (RT #59186), and required that non-Perl
 tests be run as C<prove ./test.sh> instead of C<prove test.sh> These
 issues are being solved upstream, but didn't make it into this release.
 They're expected to be fixed in time for perl v5.13.4.  (RT #59457)
