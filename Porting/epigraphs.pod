@@ -46,9 +46,9 @@ It should have fallen apart miles back.
 
 =head2 v5.13.2 - Iain M Banks, "Use of Weapons"
 
-We deal in the moral equivalent of black holes, where the normal laws - 
-the rules of right and wrong that people imagine apply everywhere else 
-in the universe - break down; beyond those metaphysical event-horizons, 
+We deal in the moral equivalent of black holes, where the normal laws -
+the rules of right and wrong that people imagine apply everywhere else
+in the universe - break down; beyond those metaphysical event-horizons,
 there exist ... special circumstances.
 
 =head2 v5.13.1 - Miguel de Unamuno, "The Sepulchre of Don Quixote"
@@ -553,21 +553,21 @@ revolving door and comes out in front.'
 
 =head2 v5.8.8 - Joe Raposo, "Bein' Green"
 
-    It's not that easy bein' green                        
-    Having to spend each day the color of the leaves  
+    It's not that easy bein' green
+    Having to spend each day the color of the leaves
     When I think it could be nicer being red or yellow or gold
-    Or something much more colorful like that              
-                                                             
-    It's not easy bein' green                             
+    Or something much more colorful like that
+
+    It's not easy bein' green
     It seems you blend in with so many other ordinary things
-    And people tend to pass you over 'cause you're          
-    Not standing out like flashy sparkles in the water     
-    Or stars in the sky                                        
-                                                               
-    But green's the color of Spring                            
-    And green can be cool and friendly-like                  
-    And green can be big like an ocean                       
-    Or important like a mountain        
+    And people tend to pass you over 'cause you're
+    Not standing out like flashy sparkles in the water
+    Or stars in the sky
+
+    But green's the color of Spring
+    And green can be cool and friendly-like
+    And green can be big like an ocean
+    Or important like a mountain
     Or tall like a tree
 
     When green is all there is to be
@@ -577,9 +577,9 @@ revolving door and comes out in front.'
 
 =head2 v5.8.8-RC1 - Cosgrove Hall Productions, "Dangermouse"
 
-  Greenback: And the world is mine, all mine. Muhahahahaha. See to it! 
-  
-  Stiletto: Si, Barone. Subito, Barone. 
+  Greenback: And the world is mine, all mine. Muhahahahaha. See to it!
+
+  Stiletto: Si, Barone. Subito, Barone.
 
 =head2 v5.8.7 - Sergei Prokofiev, "Peter and the Wolf"
 
@@ -588,7 +588,7 @@ hunters leading the wolf; and winding up the procession, grandfather and the
 cat.
 
 Grandfather shook his head discontentedly: "Well, and if Peter hadn't caught
-the wolf? What then?" 
+the wolf? What then?"
 
 =head2 v5.8.7-RC1 - Sergei Prokofiev, "Peter and the Wolf"
 
@@ -611,38 +611,38 @@ The bird almost touched the wolf's head with its wings, while the wolf
 snapped angrily at him from this side and that.
 
 How that bird teased the wolf, how that wolf wanted to catch him! But
-the bird was clever and the wolf simply couldn't do anything about it. 
+the bird was clever and the wolf simply couldn't do anything about it.
 
 =head2 v5.8.6 - A. A. Milne, "The House at Pooh Corner"
 
 "Hallo, Pooh," said Piglet, giving a jump of surprise. "I knew it was
-you." 
+you."
 
-"So did I,", said Pooh.  "What are you doing?" 
+"So did I,", said Pooh.  "What are you doing?"
 
 "I'm planting a haycorn, Pooh, so that it can grow up into an oak-tree,
 and have lots of haycorns just outside the front door instead of having
-to walk miles and miles, do you see, Pooh?" 
+to walk miles and miles, do you see, Pooh?"
 
-"Supposing it doesn't?" said Pooh. 
+"Supposing it doesn't?" said Pooh.
 
 "It will, because Christopher Robin says it will, so that's why I'm
 planting it."
 
 "Well," aid Pooh, "if I plant a honeycomb outside my house, then it will
-grow up into a beehive." 
+grow up into a beehive."
 
-Piglet wasn't quite sure about this. 
+Piglet wasn't quite sure about this.
 
 "Or a /piece/ of a honeycomb," said Pooh, "so as not to waste too much.
 Only then I might only get a piece of a beehive, and it might be the
-wrong piece, where the bees were buzzing and not hunnying. Bother" 
+wrong piece, where the bees were buzzing and not hunnying. Bother"
 
-Piglet agreed that that would be rather bothering. 
+Piglet agreed that that would be rather bothering.
 
 "Besides, Pooh, it's a very difficult thing, planting unless you know
 how to do it," he said; and he put the acorn in the hole he had made,
-and covered it up with earth, and jumped on it. 
+and covered it up with earth, and jumped on it.
 
 =head2 v5.8.6-RC1 - A. A. Milne, "Winnie the Pooh"
 
@@ -686,7 +686,7 @@ Christian church found it expedient to use and take over existing sites.
 Another explanation is that the poisonous berries and foliage discourage
 farmers and drovers from letting their animals wander into the burial
 grounds. The yew tree is a frequent symbol in the Christian poetry of
-T.S. Eliot, especially his Four Quartets. 
+T.S. Eliot, especially his Four Quartets.
 
 =head2 v5.8.5-RC2 - wikipedia, "Beech"
 
@@ -698,7 +698,7 @@ shade tree is the European beech (Fagus sylvatica).
 
 The southern beeches belong to a different but related genus,
 Nothofagus. They are found in Australia, New Zealand, New Guinea, New
-Caledonia and South America. 
+Caledonia and South America.
 
 =head2 v5.8.5-RC1 - wikipedia, "Pedunculate Oak" (abridged)
 
@@ -721,7 +721,7 @@ acorns. The acorns form a valuable food resource for several small
 mammals and some birds, notably Jays Garrulus glandarius.
 
 It is planted for forestry, and produces a long-lasting and durable
-heartwood, much in demand for interior and furniture work. 
+heartwood, much in demand for interior and furniture work.
 
 =head2 v5.8.4 - T. S. Eliot, "The Old Gumbie Cat"
 
@@ -778,14 +778,14 @@ heartwood, much in demand for interior and furniture work.
 
 =head2 v5.8.3 - Arthur William Edgar O'Shaugnessy, "Ode"
 
-  We are the music makers, 
-  And we are the dreamers of dreams, 
-  Wandering by lonely sea-breakers, 
-  And sitting by desolate streams; -- 
-  World-losers and world-forsakers, 
-  On whom the pale moon gleams: 
-  Yet we are the movers and shakers 
-  Of the world for ever, it seems. 
+  We are the music makers,
+  And we are the dreamers of dreams,
+  Wandering by lonely sea-breakers,
+  And sitting by desolate streams; --
+  World-losers and world-forsakers,
+  On whom the pale moon gleams:
+  Yet we are the movers and shakers
+  Of the world for ever, it seems.
 
 =head2 v5.8.3-RC1 - Irving Berlin, "Let's Face the Music and Dance"
 
@@ -890,7 +890,7 @@ long in this instance.
 
 =head2 v5.6.2-RC1 - Sterne, "Tristram Shandy"
 
-"Pray, my dear", quoth my mother, "have you not forgot to wind up the clock?" 
+"Pray, my dear", quoth my mother, "have you not forgot to wind up the clock?"
 
 =head2 5.005_05-RC1 - no epigraph
 
@@ -926,7 +926,7 @@ hung upon pegs. She took down a jar from one of the shelves as she
 passed; it was labelled 'ORANGE MARMALADE', but to her great
 disappointment it was empty: she did not like to drop the jar for fear
 of killing somebody, so managed to put it into one of the cupboards as
-she fell past it. 
+she fell past it.
 
 =head1 ACKNOWLEDGEMENTS
 
