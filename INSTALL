@@ -47,7 +47,7 @@ If you have problems, corrections, or questions, please see
 L<"Reporting Problems"> below.
 
 For information on what's new in this release, see the
-pod/perl5133delta.pod file.  For more information about how to find more
+pod/perl5134delta.pod file.  For more information about how to find more
 specific detail about changes, see the Changes file.
 
 =head1 DESCRIPTION
@@ -80,10 +80,10 @@ directory.
 
 =head2 Changes and Incompatibilities
 
-Please see pod/perl5133delta.pod for a description of the changes and
+Please see pod/perl5134delta.pod for a description of the changes and
 potential incompatibilities introduced with this release.  A few of
 the most important issues are listed below, but you should refer
-to pod/perl5133delta.pod for more detailed information.
+to pod/perl5134delta.pod for more detailed information.
 
 B<WARNING:> This version is not binary compatible with prior releases of Perl.
 If you have built extensions (i.e. modules that include C code)
@@ -98,7 +98,7 @@ The standard extensions supplied with Perl will be handled automatically.
 
 On a related issue, old modules may possibly be affected by the changes
 in the Perl language in the current release.  Please see
-pod/perl5133delta.pod for a description of what's changed.  See your
+pod/perl5134delta.pod for a description of what's changed.  See your
 installed copy of the perllocal.pod file for a (possibly incomplete)
 list of locally installed modules.  Also see CPAN::autobundle for one
 way to make a "bundle" of your currently installed modules.
