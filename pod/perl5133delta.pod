@@ -72,7 +72,7 @@ C<\x{1FF}>, with no deprecation warning. Use of these values in the
 command line option C<"-0"> retains the current meaning to slurp input
 files whole; previously, this was documented only for C<"-0777">.  It is
 recommended, however, because of various ambiguities, to use the new
-L</\o{...}> construct to represent characters in octal.
+C<\o{...}> construct to represent characters in octal.
 (fa1639c..f6993e9).
 
 =head1 Deprecations
@@ -290,7 +290,7 @@ The Perl 5.12.1 perldelta file was added from the Perl maintenance branch
 =item *
 
 Octal character escapes in documentation now prefer a three-digit octal
-escape or the new C<\o{}> escape as they have more consistent behavior
+escape or the new C<\o{...}> escape as they have more consistent behavior
 in different contexts than other forms. (ce7b6f0) (d8b950d) (e1f120a)
 
 =item *
