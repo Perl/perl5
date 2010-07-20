@@ -128,6 +128,7 @@ my @exe = qw(
     Configure
     configpm
     configure.gnu
+    cpan/Test-Harness/t/source_tests/source.sh
     embed.pl
     installperl
     installman
