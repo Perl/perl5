@@ -4900,6 +4900,10 @@ typedef struct exitlistentry {
 				STRINGIFY(PERL_VERSION) "." \
 				STRINGIFY(PERL_SUBVERSION)
 
+#define PERL_API_VERSION_STRING	STRINGIFY(PERL_API_REVISION) "." \
+				STRINGIFY(PERL_API_VERSION) "." \
+				STRINGIFY(PERL_API_SUBVERSION)
+
 #ifdef PERL_GLOBAL_STRUCT
 struct perl_vars {
 #  include "perlvars.h"

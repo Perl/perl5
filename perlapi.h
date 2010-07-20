@@ -166,6 +166,8 @@ END_EXTERN_C
 #define PL_amagic_generation	(*Perl_Iamagic_generation_ptr(aTHX))
 #undef  PL_an
 #define PL_an			(*Perl_Ian_ptr(aTHX))
+#undef  PL_apiversion
+#define PL_apiversion		(*Perl_Iapiversion_ptr(aTHX))
 #undef  PL_argvgv
 #define PL_argvgv		(*Perl_Iargvgv_ptr(aTHX))
 #undef  PL_argvout_stack

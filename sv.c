@@ -12283,6 +12283,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* switches */
     PL_minus_c		= proto_perl->Iminus_c;
     PL_patchlevel	= sv_dup_inc(proto_perl->Ipatchlevel, param);
+    PL_apiversion	= sv_dup_inc(proto_perl->Iapiversion, param);
     PL_localpatches	= proto_perl->Ilocalpatches;
     PL_splitstr		= proto_perl->Isplitstr;
     PL_minus_n		= proto_perl->Iminus_n;

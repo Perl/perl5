@@ -228,6 +228,7 @@ PERLVAR(Iwarnhook,	SV *)
 
 /* switches */
 PERLVAR(Ipatchlevel,	SV *)
+PERLVAR(Iapiversion,	SV *)
 PERLVAR(Ilocalpatches,	const char * const *)
 PERLVARI(Isplitstr,	const char *, " ")
 
