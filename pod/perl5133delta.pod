@@ -102,156 +102,174 @@ There are several small optimizations to improve CPU cache performance
 
 =head2 Updated Modules and Pragmata
 
-XXX Make sure these get sorted, are phrased similarly and all version
-numbers are correct
-
 =over 4
 
-=item *
+=item C<autodie>
 
-autodie updated to CPAN version 2.10 (a009834)
+Upgraded from version 2.06_01 to 2.10.
 
-=item *
+=item C<charnames>
 
-charnames -- viacode() is now significantly faster (f3227b7)
+Upgraded from version 1.08 to 1.10.
 
-=item *
+C<viacode()> is now significantly faster. (f3227b7)
 
-version now prevents object methods from being called as class methods
-(d808b68)
+=item C<lib>
 
-=item *
+Upgraded from version 0.62 to 0.63.
 
-warnings updated to 1.10.  Calling C<use warnings> without
-arguments is now significantly more efficient. (8452af9)
+=item C<threads>
 
-=item *
+Upgraded from version 1.77_02 to 1.77_03.
 
-Archive-Extract updated to CPAN version 0.42 (d7f8799)
+=item C<threads::shared>
 
-Updates since 0.38 include: a safe print method that Michael Schwern
-contributed, that guards Archive::Extract from changes to $\; a
-fix to the tests when run in core perl from Robin Barker; and
-support for TZ files contributed by Paul Marquess, who also supplied a
-modification for the lzma logic to favour IO::Uncompress::Unlzma
+Upgraded from version 1.33_01 to 1.33_02.
 
-=item *
+=item C<warnings>
 
-Archive-Tar updated to version 1.64 (afabe0e)
+Upgraded from version 1.09 to 1.10.
+
+Calling C<use warnings> without arguments is now significantly more efficient.
+(8452af9)
+
+=item C<Archive::Extract>
+
+Upgraded from version 0.38 to 0.42.
+
+Updates since 0.38 include: a safe print method that guards
+Archive::Extract from changes to $\; a fix to the tests when run in core
+perl; support for TZ files; and a modification for the lzma logic to favour
+IO::Uncompress::Unlzma (d7f8799)
+
+=item C<Archive::Tar>
+
+Upgraded from version 1.54 to 1.64.
 
 Important changes since 1.54 include: compatibility with busybox
-implementations of tar which was added by Mark Swayne; a fix so
-that write() and create_archive() close only handles
-they opened by Darrell K.; and a bug was fixed regarding the exit code
-of extract_archive which was spotted by and upstreamed from RedHat by
-Martin Cermak.
+implementations of tar; a fix so that C<write()> and C<create_archive()>
+close only handles they opened; and a bug was fixed regarding the exit code
+of extract_archive. (afabe0e)
 
-=item *
+=item C<Attribute::Handlers>
 
-Attribute-Handlers updated to CPAN version 0.88 (f2ea78b)
+Upgraded from version 0.87 to 0.88.
 
-=item *
+=item C<Compress::Raw::Bzip2>
 
-Compress-Raw-Bzip2 updated to CPAN version 2.027 (9e09409)
+Upgraded from version 2.024 to 2.027.
 
-=item *
+=item C<Compress::Raw::Zlib>
 
-Compress-Raw-Zlib updated  to CPAN version 2.027 (f02c02e)
+Upgraded from version 2.024 to 2.027_01.
 
-=item *
+=item C<Compress::Zlib>
 
-CPANPLUS updated to version 0.9007 (d4e225a)
+Upgraded from version 2.024 to 2.027.
 
-Fix the shell test to skip if test is not being run under a
-terminal; resolved the issue where a prereq on Config would not be
-recognised as a core module
+=item C<CPANPLUS>
 
-=item *
+Upgraded from version 0.90 to 0.9007.
 
-Digest-MD5 updated to CPAN version 2.40 (326fafa)
+Fixed the shell test to skip if test is not being run under a terminal;
+resolved the issue where a prereq on Config would not be recognised as a
+core module. (d4e225a)
 
-=item *
+=item C<Digest::MD5>
 
-Digest-SHA updated to CPAN version 5.48 (dfe1edc)
+Upgraded from version 2.39 to 2.40.
 
-=item *
+=item C<Digest::SHA>
+
+Upgraded from version 5.47 to 5.48.
+
+=item C<Exporter>
+
+Upgraded from version 5.64_02 to 5.64_03.
 
 Exporter no longer overrides C<$SIG{__WARN__}> (RT #74472) (9b86bb5)
 
-=item *
+=item C<ExtUtils::CBuilder>
 
-ExtUtils-CBuilder updated to CPAN version 0.2703 (7b0eef9)
+Upgraded from version 0.27 to 0.2703.
 
-=item *
+=item C<ExtUtils::Manifest>
 
-ExtUtils-Manifest updated to CPAN version 1.58 (49c6bc4)
+Upgraded from version 1.57 to 1.58.
 
-=item *
+=item C<ExtUtils::ParseXS>
 
-ExtUtil-ParseXS updated to version 2.2206 (494e8c4)
+Upgraded from version 2.2205 to 2.2206.
 
-=item *
+=item C<File::Copy>
 
-File::Copy skips suid tests on a nosuid partition (cae9400)
+Upgraded from version 2.19 to 2.20.
 
-These tests were being skipped on OpenBSD, but nosuid partitions can
-exist on other systems too. Now it just checks if it can create a suid
-directory, if not the tests are skipped.
+Skips suid tests on a nosuid partition.  These tests were being skipped on
+OpenBSD, but nosuid partitions can exist on other systems too. Now it just
+checks if it can create a suid directory, if not the tests are skipped.
+Perl builds without errors in a nosuid /tmp with this patch.  (cae9400)
 
-Perl builds without errors in a nosuid /tmp with this patch.
+=item C<I18N::LangTags>
 
-=item *
+Upgraded from version 0.35 to 0.35_01.
 
-IO-Compress updated to CPAN version 2.027 (e8796d6)
+=item C<IPC::Cmd>
 
-=item *
+Upgraded from version 0.58 to 0.60.
 
-IPC-Cmd updated to CPAN version 0.60 (e667e1e)
+=item C<IPC::SysV>
 
-=item *
+Upgraded from version 2.01 to 2.03.
 
-IPC-SysV updated to CPAN version 2.03 (10613b6)
+=item C<Locale::Maketext>
 
-=item *
+Upgraded from version 1.14 to 1.15.
 
 Locale::Maketext guts have been merged back into the main module (87d86da)
 and adds external cache support (ace47d6)
 
-=item *
+=item C<Module::Build>
 
-Module-Build updated to CPAN version 0.3607 (40c9afb)
+Upgraded from version 0.3603 to 0.3607.
 
-=item *
+=item C<Module::CoreList>
 
-Module-Load updated to CPAN version 0.18 (93eaa32)
+Upgraded from version 2.34 to 2.36.
 
-=item *
+=item C<Module::Load>
 
-Term-ANSIColor to CPAN version 3.00 (2c33c76)
+Upgraded from version 0.16 to 0.18.
 
-=item *
+=item C<Term::ANSIColor>
 
-Test-Harness to CPAN version 3.21 (6d31366)
+Upgraded from version 2.02 to 3.00.
+
+=item C<Test::Harness>
+
+Upgraded from version 3.17 to 3.21.
 
 The core update from Test-Harness 3.17 to 3.21 fixed some things, but
-also L<introduced a known problem|/"Known Problems">.
+also L<introduced a known problem|/"Known Problems"> with argument
+passing to non-Perl tests.
 
-=item *
+=item C<Time::HiRes>
 
-Time-HiRes updated to CPAN version 1.9721 (68c5b4d)
+Upgraded from version 1.9719 to 1.9721.
 
-=item *
+=item C<Time::Piece>
 
-Time-Piece updated to CPAN version 1.20 (90d55c2)
+Upgraded from version 1.15_01 to 1.20_01.
 
-=item *
+=item C<Unicode::Collate>
 
-Unicode-Collate updated to CPAN version 0.53.  Includes Unicode Collation
-Algorithm 18 (74b94a7)
+Upgraded from version 0.52_01 to 0.53.
 
-=item *
+Includes Unicode Collation Algorithm 18 (74b94a7)
 
-Unicode-Normalize updated to CPAN release 1.06 (a96160d)
+=item C<Unicode::Normalize>
+
+Upgraded from version 1.03 to 1.06.
 
 =back
 
@@ -559,6 +577,11 @@ non-Perl tests with L<prove> (RT #59186), and required that non-Perl
 tests be run as C<prove ./test.sh> instead of C<prove test.sh> These
 issues are being solved upstream, but didn't make it into this release.
 They're expected to be fixed in time for perl v5.13.4.  (RT #59457)
+
+=item *
+
+C<version> now prevents object methods from being called as class methods
+(d808b68)
 
 =back
 
