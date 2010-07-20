@@ -6,10 +6,13 @@ use strict;
 #
 # * Are all dual-life programs being generated in utils/?
 
+require './test.pl';
+
+plan('no_plan');
+
 use File::Basename;
 use File::Find;
 use File::Spec::Functions;
-use Test::More; END { done_testing }
 
 # Exceptions are found in dual-life bin dirs but aren't
 # installed by default
