@@ -84,7 +84,11 @@ foreach my $tuple (['op.h'],['cop.h'],['regexp.h','RXf_'])
   open(OPH,"$path") || die "Cannot open $path:$!";
   while (<OPH>)
    {  
-    doconst($1) if (/#define\s+($pfx\w+)\s+([\(\)\|\dx]+)\s*(?:$|\/\*)/);
+    doconst($1) if (/ \#define \s+ ( $pfx \w+ ) \s+
+                        ( [()|\dx]+             # Parens, '|', digits, 'x'
+                          | \(? \d+ \s* << .*?  # digits left shifted by anything
+                        ) \s* (?: $| \/ \* )    # ending at comment or $
+                   /x);
    }  
   close(OPH);
  }
