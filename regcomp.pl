@@ -256,36 +256,39 @@ EXTCONST char * PL_reg_extflags_name[];
 EXTCONST char * const PL_reg_extflags_name[] = {
 EOP
 
-open my $fh,"<","regexp.h" or die "Can't read regexp.h: $!";
 my %rxfv;
 my %definitions;    # Remember what the symbol definitions are
 my $val = 0;
 my %reverse;
-while (<$fh>) {
+foreach my $file ("op_reg_common.h", "regexp.h") {
+    open my $fh,"<", $file or die "Can't read $file: $!";
+    while (<$fh>) {
 
-    # optional leading '_'.  Return symbol in $1, and strip it from
-    # rest of line
-    if (s/ \#define \s+ ( _? RXf_ \w+ ) \s+ //xi) {
-        chomp;
-        my $define = $1;
-        s: / \s* \* .*? \* \s* / : :x;    # Replace comments by a blank
+        # optional leading '_'.  Return symbol in $1, and strip it from
+        # rest of line
+        if (s/ \#define \s+ ( _? RXf_ \w+ ) \s+ //xi) {
+            chomp;
+            my $define = $1;
+            s: / \s* \* .*? \* \s* / : :x;    # Replace comments by a blank
 
-        # Replace any prior defined symbols by their values
-        foreach my $key (keys %definitions) {
-            s/\b$key\b/$definitions{$key}/g;
+            # Replace any prior defined symbols by their values
+            foreach my $key (keys %definitions) {
+                s/\b$key\b/$definitions{$key}/g;
+            }
+            my $newval = eval $_;   # Get numeric definition
+
+            $definitions{$define} = $newval;
+
+            next unless $_ =~ /<</; # Bit defines use left shift
+            if($val & $newval) {
+                die sprintf "Both $define and $reverse{$newval} use %08X", $newval;
+            }
+            $val|=$newval;
+            $rxfv{$define}= $newval;
+            $reverse{$newval} = $define;
         }
-        my $newval = eval $_;   # Get numeric definition
-
-        $definitions{$define} = $newval;
-
-        if($val & $newval) {
-            die sprintf "Both $define and $reverse{$newval} use %08X", $newval;
-        }
-        $val|=$newval;
-        $rxfv{$define}= $newval;
-        $reverse{$newval} = $define;
     }
-}    
+}
 my %vrxf=reverse %rxfv;
 printf $out "\t/* Bits in extflags defined: %032b */\n",$val;
 for (0..31) {

@@ -76,7 +76,7 @@ if ($] < 5.011) {
 # giving the prefix to limit the names of symbols to define that come
 # from that file.  If none, all symbols will be defined whose values
 # match the pattern below.
-foreach my $tuple (['op.h'],['cop.h'],['regexp.h','RXf_'])
+foreach my $tuple (['op_reg_common.h','(?:(?:RXf_)?PMf_)'],['op.h'],['cop.h'],['regexp.h','RXf_'])
  {
   my $file = $tuple->[0];
   my $pfx = $tuple->[1] || '';

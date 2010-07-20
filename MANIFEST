@@ -3790,6 +3790,7 @@ opcode.h			Automatically generated opcode header
 opcode.pl			Opcode header generator
 op.h				Opcode syntax tree header
 opnames.h			Automatically generated opcode header
+op_reg_common.h			Common parts of op.h, regexp.h header
 os2/Changes			Changelog for OS/2 port
 os2/diff.configure		Patches to Configure
 os2/dlfcn.h			Addon for dl_open

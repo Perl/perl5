@@ -8,6 +8,8 @@
  *
  */
 
+#include "op_reg_common.h"
+
 /*
  * Definitions etc. for regexp(3) routines.
  *
@@ -229,18 +231,11 @@ and check for NULL.
 
 /* 0x3F of extflags is used by (RXf_)PMf_COMPILETIME
  * If you change these you need to change the equivalent flags in op.h, and
-/* vice versa.  These need to be ordered so that the msix are contiguous
+ * vice versa.  These need to be ordered so that the msix are contiguous
  * starting at bit 0, followed by the p; bit 0 is because of the shift below
  * being 0; see STD_PAT_MODS and INT_PAT_MODS below for the contiguity cause */
 /* the flags above are transfered from the PMOP->op_pmflags member during
  * compilation */
-#define RXf_PMf_MULTILINE	0x00000001 /* /m         */
-#define RXf_PMf_SINGLELINE	0x00000002 /* /s         */
-#define RXf_PMf_FOLD    	0x00000004 /* /i         */
-#define RXf_PMf_EXTENDED	0x00000008 /* /x         */
-#define RXf_PMf_KEEPCOPY	0x00000010 /* /p         */
-#define RXf_PMf_LOCALE  	0x00000020 /* use locale */
-/* these flags are transfered from the PMOP->op_pmflags member during compilation */
 #define RXf_PMf_STD_PMMOD_SHIFT	0
 #define RXf_PMf_STD_PMMOD	(RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED)
 #define RXf_PMf_COMPILETIME	(RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_LOCALE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_KEEPCOPY)
@@ -297,53 +292,56 @@ and check for NULL.
  */
 
 /* Anchor and GPOS related stuff */
-#define RXf_ANCH_BOL    	0x00000100
-#define RXf_ANCH_MBOL   	0x00000200
-#define RXf_ANCH_SBOL   	0x00000400
-#define RXf_ANCH_GPOS   	0x00000800
-#define RXf_GPOS_SEEN   	0x00001000
-#define RXf_GPOS_FLOAT  	0x00002000
+#define RXf_ANCH_BOL    	(1<<(_RXf_PMf_SHIFT+3))
+#define RXf_ANCH_MBOL   	(1<<(_RXf_PMf_SHIFT+4))
+#define RXf_ANCH_SBOL   	(1<<(_RXf_PMf_SHIFT+5))
+#define RXf_ANCH_GPOS   	(1<<(_RXf_PMf_SHIFT+6))
+#define RXf_GPOS_SEEN   	(1<<(_RXf_PMf_SHIFT+7))
+#define RXf_GPOS_FLOAT  	(1<<(_RXf_PMf_SHIFT+8))
 /* two bits here */
 #define RXf_ANCH        	(RXf_ANCH_BOL|RXf_ANCH_MBOL|RXf_ANCH_GPOS|RXf_ANCH_SBOL)
 #define RXf_GPOS_CHECK          (RXf_GPOS_SEEN|RXf_ANCH_GPOS)
 #define RXf_ANCH_SINGLE         (RXf_ANCH_SBOL|RXf_ANCH_GPOS)
 
 /* What we have seen */
-#define RXf_LOOKBEHIND_SEEN	0x00004000
-#define RXf_EVAL_SEEN   	0x00008000
-#define RXf_CANY_SEEN   	0x00010000
+#define RXf_LOOKBEHIND_SEEN	(1<<(_RXf_PMf_SHIFT+9))
+#define RXf_EVAL_SEEN   	(1<<(_RXf_PMf_SHIFT+10))
+#define RXf_CANY_SEEN   	(1<<(_RXf_PMf_SHIFT+11))
 
 /* Special */
-#define RXf_NOSCAN      	0x00020000
-#define RXf_CHECK_ALL   	0x00040000
+#define RXf_NOSCAN      	(1<<(_RXf_PMf_SHIFT+12))
+#define RXf_CHECK_ALL   	(1<<(_RXf_PMf_SHIFT+13))
 
 /* UTF8 related */
-#define RXf_MATCH_UTF8  	0x00100000
+#define RXf_MATCH_UTF8  	(1<<(_RXf_PMf_SHIFT+15))
 
 /* Intuit related */
-#define RXf_USE_INTUIT_NOML	0x00200000
-#define RXf_USE_INTUIT_ML	0x00400000
-#define RXf_INTUIT_TAIL 	0x00800000
+#define RXf_USE_INTUIT_NOML	(1<<(_RXf_PMf_SHIFT+16))
+#define RXf_USE_INTUIT_ML	(1<<(_RXf_PMf_SHIFT+17))
+#define RXf_INTUIT_TAIL 	(1<<(_RXf_PMf_SHIFT+18))
 
 /*
   Set in Perl_pmruntime if op_flags & OPf_SPECIAL, i.e. split. Will
   be used by regex engines to check whether they should set
   RXf_SKIPWHITE
 */
-#define RXf_SPLIT		0x01000000
+#define RXf_SPLIT		(1<<(_RXf_PMf_SHIFT+19))
 
 #define RXf_USE_INTUIT		(RXf_USE_INTUIT_NOML|RXf_USE_INTUIT_ML)
 
 /* Copy and tainted info */
-#define RXf_COPY_DONE   	0x02000000
-#define RXf_TAINTED_SEEN	0x04000000
-#define RXf_TAINTED		0x08000000 /* this pattern is tainted */
+#define RXf_COPY_DONE   	(1<<(_RXf_PMf_SHIFT+20))
+#define RXf_TAINTED_SEEN	(1<<(_RXf_PMf_SHIFT+21))
+#define RXf_TAINTED		(1<<(_RXf_PMf_SHIFT+22)) /* this pattern is tainted */
 
 /* Flags indicating special patterns */
-#define RXf_START_ONLY		0x10000000 /* Pattern is /^/ */
-#define RXf_SKIPWHITE		0x20000000 /* Pattern is for a split / / */
-#define RXf_WHITE		0x40000000 /* Pattern is /\s+/ */
-#define RXf_NULL		0x80000000 /* Pattern is // */
+#define RXf_START_ONLY		(1<<(_RXf_PMf_SHIFT+23)) /* Pattern is /^/ */
+#define RXf_SKIPWHITE		(1<<(_RXf_PMf_SHIFT+24)) /* Pattern is for a split / / */
+#define RXf_WHITE		(1<<(_RXf_PMf_SHIFT+25)) /* Pattern is /\s+/ */
+#define RXf_NULL		(1<<(_RXf_PMf_SHIFT+26)) /* Pattern is // */
+#if _RXf_PMf_SHIFT+23 > 31
+#   error Too many RXf_PMf bits used.  See regnodes.h for any spare in middle
+#endif
 
 /*
  * NOTE: if you modify any RXf flags you should run regen.pl or regcomp.pl
