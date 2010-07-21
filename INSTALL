@@ -500,9 +500,10 @@ to avoid these leaks. The default is now to perform direct manipulation
 whenever perl is running as a stand alone interpreter, and to call the safe
 but potentially leaky C<putenv()> function when the perl interpreter is
 embedded in another application. You can force perl to always use C<putenv()>
-by compiling with -DPERL_USE_SAFE_PUTENV. You can force an embedded perl to
-use direct manipulation by setting C<PL_use_safe_putenv = 0;> after the
-C<perl_construct()> call.
+by compiling with C<-Accflags="-DPERL_USE_SAFE_PUTENV">, see section
+L</"Altering Configure variables for C compiler switches etc.">.
+You can force an embedded perl to use direct manipulation by setting
+C<PL_use_safe_putenv = 0;> after the C<perl_construct()> call.
 
 =head2 Installation Directories
 
