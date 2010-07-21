@@ -3950,7 +3950,7 @@ Perl_grok_bslash_o(pTHX_ const char *s, UV *uv, STRLEN *len, const bool output_w
  *	output_warning says whether to output any warning messages, or suppress
  *	    them
  */
-    char* e;
+    const char* e;
     STRLEN numbers_len;
     I32 flags = PERL_SCAN_ALLOW_UNDERSCORES
 		| PERL_SCAN_DISALLOW_PREFIX
