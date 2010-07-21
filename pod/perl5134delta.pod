@@ -1,5 +1,12 @@
 =encoding utf8
 
+=for rafl
+changelogged up to commit 2ea2ea91
+* PERL_STATIC_INLINE might want to be mentioned
+* perl5db.pl
+** what's with the one change but many changelog entries?
+** why a new version in the changelog but no version bump?
+
 =head1 NAME
 
 [ this is a template for a new perldelta file. Any text flagged as
@@ -94,9 +101,19 @@ XXX
 
 =over 4
 
-=item *
+=item C<Carp>
 
-XXX
+Upgraded from version 1.16 to 1.18.
+
+L<Carp> now detects incomplete L<caller()|perlfunc/"caller EXPR"> overrides and
+avoids using bogus C<@DB::args>. This fixes certain cases of C<Bizarre copy of
+ARRAY> caused by modules overriding C<caller()> incorrectly.
+
+=item C<File::Spec>
+
+Upgraded from version 3.31 to 3.31_01.
+
+Various issues in L<File::Spec::VMS> have been fixed.
 
 =back
 
@@ -129,13 +146,14 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlport>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Documented a L<limitation|perlport/alarm> of L<alarm()|perlfunc/"alarm SECONDS">
+on Win32.
 
 =back
 
@@ -206,7 +224,7 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+Improve compatibility with C<C++> compilers.
 
 =back
 
@@ -271,9 +289,19 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Win32
 
-XXX
+=over 4
+
+=item *
+
+Fixed a possible hang in F<t/op/readline.t>.
+
+=item *
+
+Fixed Makefile for SDK2003SP1 compilers.
+
+=back
 
 =back
 
@@ -287,9 +315,29 @@ be noted as well.
 
 =over 4
 
-=item *
+=item Removed C<PERL_POLLUTE>
 
-XXX
+The option to define C<PERL_POLLUTE> to expose older 5.005 symbols for backwards
+compatibility has been removed. It's use was always discouraged, and MakeMaker
+contains a more specific escape hatch:
+
+    perl Makefile.PL POLLUTE=1
+
+This can be used for modules that have not been upgraded to 5.6 naming
+conventions (and really should be completely obsolete by now).
+
+=item Declare API incompatibility between blead releases
+
+Only stable releases (5.10.x, 5.12.x, 5.14.x, ...) guarantee binary
+compatibility with each other, while blead releases (5.13.x, 5.15.x, ...) often
+break this compatibility. However, prior to perl 5.13.4, all blead releases had
+the same C<PERL_API_REVISION>, C<PERL_API_VERSION>, and C<PERL_API_SUBVERSION>,
+effectively declaring them as binary compatible, which they weren't. From now
+on, blead releases will have a C<PERL_API_SUBVERSION> equal to their
+C<PERL_SUBVERSION>, explicitly marking them as incompatible with each other.
+
+Maintainance releases of stable perl's will continue to make no intentionally
+incompatible changes.
 
 =back
 
@@ -305,7 +353,12 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Fixed possible memory leak when using L<caller()|perlfunc/"caller EXPR"> to set
+C<@DB::args>.
+
+=item *
+
+Several memory leaks when loading XS modules were fixed.
 
 =back
 
