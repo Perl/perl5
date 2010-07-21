@@ -507,8 +507,9 @@ sR	|bool	|ingroup	|Gid_t testgid|bool effective
 #endif
 : Used in toke.c
 p	|void	|init_argv_symbols|int argc|NN char **argv
+: Used in pp_ctl.c
+po	|void	|init_dbargs
 : Used in mg.c
-po	|void	|init_db_args
 p	|void	|init_debugger
 Ap	|void	|init_stacks
 Ap	|void	|init_tm	|NN struct tm *ptm
