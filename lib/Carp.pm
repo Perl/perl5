@@ -1,6 +1,6 @@
 package Carp;
 
-our $VERSION = '1.17';
+our $VERSION = '1.18';
 
 our $MaxEvalLen = 0;
 our $Verbose    = 0;
@@ -83,7 +83,17 @@ sub caller_info {
   if ($call_info{has_args}) {
     my @args;
     if (@DB::args == 1 && ref $DB::args[0] eq ref \$i && $DB::args[0] == \$i) {
-      @args = "** Incomplete caller override detected; \@DB::args were not set **";
+      local $@;
+      my $where = eval {
+	my $gv = B::svref_2object(\&CORE::GLOBAL::caller)->GV;
+	my $package = $gv->STASH->NAME;
+	my $subname = $gv->NAME;
+	return unless defined $package && defined $subname;
+	# returning CORE::GLOBAL::caller isn't useful for tracing the cause:
+	return if $package eq 'CORE::GLOBAL' && $subname eq 'caller';
+	" in &${package}::$subname";
+      } // '';
+      @args = "** Incomplete caller override detected$where; \@DB::args were not set **";
     } else {
       @args = map {Carp::format_arg($_)} @DB::args;
     }

@@ -11,7 +11,7 @@ my $Is_VMS = $^O eq 'VMS';
 
 use Carp qw(carp cluck croak confess);
 
-plan tests => 49;
+plan tests => 56;
 
 ok 1;
 
@@ -270,15 +270,19 @@ cluck_undef (0, "undef", 2, undef, 4);
 
 # check that Carp respects CORE::GLOBAL::caller override after Carp
 # has been compiled
-for my $proper_job (0, 1) {
-    print '# ', ($proper_job ? '' : 'Not '), "setting \@DB::args in caller override\n";
+for my $bodge_job (2, 1, 0) {
+    print '# ', ($bodge_job ? 'Not ' : ''), "setting \@DB::args in caller override\n";
+    if ($bodge_job == 1) {
+	require B;
+	print "# required B\n";
+    }
     my $accum = '';
     local *CORE::GLOBAL::caller = sub {
         local *__ANON__="fakecaller";
         my @c=CORE::caller(@_);
         $c[0] ||= 'undef';
         $accum .= "@c[0..3]\n";
-        if ($proper_job && CORE::caller() eq 'DB') {
+        if (!$bodge_job && CORE::caller() eq 'DB') {
             package DB;
             return CORE::caller(($_[0]||0)+1);
         } else {
@@ -291,17 +295,35 @@ for my $proper_job (0, 1) {
     my $got = A::long(42);
     like( $accum, qr/main::fakecaller/, "test CORE::GLOBAL::caller override in Carp");
     my $package = 'A';
-    my $warning = $proper_job ? ''
-	: "\Q** Incomplete caller override detected; \@DB::args were not set **\E";
+    my $where = $bodge_job == 1 ? ' in &main::__ANON__' : '';
+    my $warning = $bodge_job ?
+	"\Q** Incomplete caller override detected$where; \@DB::args were not set **\E"
+	    : '';
     for (0..2) {
 	my $previous_package = $package;
 	++$package;
 	like( $got, qr/${package}::long\($warning\) called at $previous_package line 7/, "Correct arguments for $package" );
     }
-    my $arg = $proper_job ? 42 : $warning;
+    my $arg = $bodge_job ? $warning : 42;
     like( $got, qr!A::long\($arg\) called at .*lib/Carp.t line \d+!,
 	  'Correct arguments for A' );
 }
+
+eval <<'EOT';
+no warnings 'redefine';
+sub CORE::GLOBAL::caller {
+    my $height = $_[0];
+    $height++;
+    return CORE::caller($height);
+}
+EOT
+
+my $got = A::long(42);
+
+like( $got, qr!A::long\(\Q** Incomplete caller override detected; \E\@DB::args\Q were not set **\E\) called at .*lib/Carp.t line \d+!,
+	  'Correct arguments for A' );
+
+# New tests go here
 
 # line 1 "A"
 package A;
@@ -344,3 +366,6 @@ sub long {
     eval{ Carp::confess("Error") };
     return $@;
 }
+
+# Put new tests at "new tests go here"
+__END__
