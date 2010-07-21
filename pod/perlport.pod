@@ -1517,6 +1517,12 @@ suffixes.  C<-S> is meaningless.  (Win32)
 C<-x> (or C<-X>) determine if a file has an executable file type.
 (S<RISC OS>)
 
+=item alarm
+
+Emulated using timers that must be explicitly polled whenever Perl
+wants to dispatch "safe signals" and therefore cannot interrupt
+blocking system calls.  (Win32)
+
 =item atan2
 
 Due to issues with various CPUs, math libraries, compilers, and standards,
