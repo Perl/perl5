@@ -170,12 +170,14 @@ SKIP: {
 
     my $twice;
     TODO: {
+        todo_skip( 'alarm() on Windows does not interrupt system calls)' ) if $^O eq 'MSWin32';
         todo_skip( 'readline not interrupted by alarm on VMS -- why?' ) if $^O eq 'VMS';
         $twice = test_eintr_readline( $in, 1 );
         isnt( $twice, "once\n", "readline didn't re-return things when interrupted" );
     }
 
     TODO: {
+        todo_skip( 'alarm() on Windows does not interrupt system calls)' ) if $^O eq 'MSWin32';
         todo_skip( 'readline not interrupted by alarm on VMS -- why?' ) if $^O eq 'VMS';
         local our $TODO = "bad readline returns '', not undef";
         is( $twice, undef, "readline returned undef when interrupted" );
