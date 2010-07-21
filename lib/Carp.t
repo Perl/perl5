@@ -11,7 +11,7 @@ my $Is_VMS = $^O eq 'VMS';
 
 use Carp qw(carp cluck croak confess);
 
-plan tests => 39;
+plan tests => 49;
 
 ok 1;
 
@@ -270,20 +270,37 @@ cluck_undef (0, "undef", 2, undef, 4);
 
 # check that Carp respects CORE::GLOBAL::caller override after Carp
 # has been compiled
-{
+for my $proper_job (0, 1) {
+    print '# ', ($proper_job ? '' : 'Not '), "setting \@DB::args in caller override\n";
     my $accum = '';
     local *CORE::GLOBAL::caller = sub {
         local *__ANON__="fakecaller";
         my @c=CORE::caller(@_);
         $c[0] ||= 'undef';
         $accum .= "@c[0..3]\n";
-        return CORE::caller(($_[0]||0)+1);
+        if ($proper_job && CORE::caller() eq 'DB') {
+            package DB;
+            return CORE::caller(($_[0]||0)+1);
+        } else {
+            return CORE::caller(($_[0]||0)+1);
+        }
     };
     eval "scalar caller()";
     like( $accum, qr/main::fakecaller/, "test CORE::GLOBAL::caller override in eval");
     $accum = '';
-    A::long();
+    my $got = A::long(42);
     like( $accum, qr/main::fakecaller/, "test CORE::GLOBAL::caller override in Carp");
+    my $package = 'A';
+    my $warning = $proper_job ? ''
+	: "\Q** Incomplete caller override detected; \@DB::args were not set **\E";
+    for (0..2) {
+	my $previous_package = $package;
+	++$package;
+	like( $got, qr/${package}::long\($warning\) called at $previous_package line 7/, "Correct arguments for $package" );
+    }
+    my $arg = $proper_job ? 42 : $warning;
+    like( $got, qr!A::long\($arg\) called at .*lib/Carp.t line \d+!,
+	  'Correct arguments for A' );
 }
 
 # line 1 "A"
