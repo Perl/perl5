@@ -1164,6 +1164,7 @@ PERL_CALLCONV void	Perl_init_argv_symbols(pTHX_ int argc, char **argv)
 #define PERL_ARGS_ASSERT_INIT_ARGV_SYMBOLS	\
 	assert(argv)
 
+PERL_CALLCONV void	Perl_init_db_args(pTHX);
 PERL_CALLCONV void	Perl_init_debugger(pTHX);
 PERL_CALLCONV void	Perl_init_stacks(pTHX);
 PERL_CALLCONV void	Perl_init_tm(pTHX_ struct tm *ptm)
