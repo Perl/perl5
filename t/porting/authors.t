@@ -14,6 +14,7 @@ if (! -d '.git' ) {
     exit 0;
 }
 
-system("git log --pretty=fuller | ./perl -Ilib Porting/checkAUTHORS.pl --tap --acknowledged AUTHORS -");
+my $dotslash = $^O eq "MSWin32" ? ".\\" : "./";
+system("git log --pretty=fuller | ${dotslash}perl -Ilib Porting/checkAUTHORS.pl --tap --acknowledged AUTHORS -");
 
 # EOF
