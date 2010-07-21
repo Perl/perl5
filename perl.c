@@ -3767,15 +3767,30 @@ S_forbid_setid(pTHX_ const char flag, const bool suidscript) /* g */
 }
 
 void
+Perl_init_dbargs(pTHX)
+{
+    AV *const args = PL_dbargs = GvAV(gv_AVadd((gv_fetchpvs("DB::args",
+							    GV_ADDMULTI,
+							    SVt_PVAV))));
+
+    if (AvREAL(args)) {
+	/* Someone has already created it.
+	   It might have entries, and if we just turn off AvREAL(), they will
+	   "leak" until global destruction.  */
+	av_clear(args);
+    }
+    AvREAL_off(PL_dbargs);	/* XXX should be REIFY (see av.h) */
+}
+
+void
 Perl_init_debugger(pTHX)
 {
     dVAR;
     HV * const ostash = PL_curstash;
 
     PL_curstash = PL_debstash;
-    PL_dbargs = GvAV(gv_AVadd((gv_fetchpvs("DB::args", GV_ADDMULTI,
-					   SVt_PVAV))));
-    AvREAL_off(PL_dbargs);
+
+    Perl_init_dbargs(aTHX);
     PL_DBgv = gv_fetchpvs("DB::DB", GV_ADDMULTI, SVt_PVGV);
     PL_DBline = gv_fetchpvs("DB::dbline", GV_ADDMULTI, SVt_PVAV);
     PL_DBsub = gv_HVadd(gv_fetchpvs("DB::sub", GV_ADDMULTI, SVt_PVHV));

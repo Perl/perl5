@@ -328,6 +328,8 @@
 #endif
 #ifdef PERL_CORE
 #define init_argv_symbols	Perl_init_argv_symbols
+#endif
+#ifdef PERL_CORE
 #define init_debugger		Perl_init_debugger
 #endif
 #define init_stacks		Perl_init_stacks
