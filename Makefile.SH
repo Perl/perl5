@@ -198,6 +198,8 @@ $this_target: lib/auto/List/Util/Util.$dlext" ;;
 $this_target: uni.data" ;;
 	Text/ParseWords) extra_dep="$extra_dep
 $this_target: lib/auto/Scalar/Util.$dlext" ;;
+	SDBM_File) extra_dep="$extra_dep
+$this_target: lib/auto/Cwd/Cwd.$dlext" ;;
     esac
 done
 
