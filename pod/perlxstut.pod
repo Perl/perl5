@@ -198,14 +198,6 @@ been deleted):
 You can safely ignore the line about "prototyping behavior" - it is
 explained in L<perlxs/"The PROTOTYPES: Keyword">.
 
-If you are on a Win32 system, and the build process fails with linker
-errors for functions in the C library, check if your Perl is configured
-to use PerlCRT (running B<perl -V:libc> should show you if this is the
-case).  If Perl is configured to use PerlCRT, you have to make sure
-PerlCRT.lib is copied to the same location that msvcrt.lib lives in,
-so that the compiler can find it on its own.  msvcrt.lib is usually
-found in the Visual C compiler's lib directory (e.g. C:/DevStudio/VC/lib).
-
 Perl has its own special way of easily writing test scripts, but for this
 example only, we'll create our own test script.  Create a file called hello
 that looks like this:

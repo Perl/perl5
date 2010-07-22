@@ -124,17 +124,6 @@ CCTYPE		= MSVC60
 #CFG		= Debug
 
 #
-# uncomment to enable use of PerlCRT.DLL when using the Visual C compiler.
-# It has patches that fix known bugs in older versions of MSVCRT.DLL.
-# This currently requires VC 5.0 with Service Pack 3 or later.
-# Get it from CPAN at http://www.cpan.org/authors/id/D/DO/DOUGL/
-# and follow the directions in the package to install.
-#
-# Not recommended if you have VC 6.x and you're not running Windows 9x.
-#
-#USE_PERLCRT	= define
-
-#
 # uncomment to enable linking with setargv.obj under the Visual C
 # compiler. Setting this options enables perl to expand wildcards in
 # arguments, but it may be harder to use alternate methods like
@@ -308,10 +297,6 @@ USE_PERLIO	= undef
 USE_LARGE_FILES	= undef
 !ENDIF
 
-!IF "$(USE_PERLCRT)" == ""
-USE_PERLCRT	= undef
-!ENDIF
-
 !IF "$(USE_IMP_SYS)$(USE_MULTI)" == "defineundef"
 USE_MULTI	= define
 !ENDIF
@@ -444,11 +429,7 @@ LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
 CXX_FLAG	= -TP -EHsc
 
-!IF "$(USE_PERLCRT)" != "define"
 LIBC	= msvcrt.lib
-!ELSE
-LIBC	= PerlCRT.lib
-!ENDIF
 
 !IF  "$(CFG)" == "Debug"
 !  IF "$(CCTYPE)" == "MSVC20"
@@ -490,13 +471,11 @@ OPTIMIZE	= $(OPTIMIZE) -fp:precise
 DEFINES		= $(DEFINES) -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
 !ENDIF
 
-# Use the MSVCRT read() fix if the PerlCRT was not chosen, but only when using
-# VC++ 6.x or earlier. Later versions use MSVCR70.dll, MSVCR71.dll, etc, which
-# do not require the fix.
+# Use the MSVCRT read() fix only when using VC++ 6.x or earlier. Later
+# versions use MSVCR70.dll, MSVCR71.dll, etc, which do not require the
+# fix.
 !IF "$(CCTYPE)" == "MSVC20" || "$(CCTYPE)" == "MSVC" || "$(CCTYPE)" == "MSVC60" 
-!  IF "$(USE_PERLCRT)" != "define"
 BUILDOPT	= $(BUILDOPT) -DPERL_MSVCRT_READFIX
-!  ENDIF
 !ENDIF
 
 LIBBASEFILES	= $(CRYPT_LIB) \
@@ -513,7 +492,6 @@ LIBBASEFILES	= $(CRYPT_LIB) \
 LIBBASEFILES    = $(LIBBASEFILES) bufferoverflowU.lib
 !ENDIF
 
-# we add LIBC here, since we may be using PerlCRT.dll
 LIBFILES	= $(LIBBASEFILES) $(LIBC)
 
 #EXTRACFLAGS	= -nologo -GF -W4 -wd4127 -wd4706
