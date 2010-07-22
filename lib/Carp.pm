@@ -83,6 +83,7 @@ sub caller_info {
   if ($call_info{has_args}) {
     my @args;
     if (@DB::args == 1 && ref $DB::args[0] eq ref \$i && $DB::args[0] == \$i) {
+      @DB::args = (); # Don't let anyone see the address of $i
       @args = "** Incomplete caller override detected; \@DB::args were not set **";
     } else {
       @args = map {Carp::format_arg($_)} @DB::args;
