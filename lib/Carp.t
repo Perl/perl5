@@ -299,7 +299,7 @@ for my $proper_job (0, 1) {
 	like( $got, qr/${package}::long\($warning\) called at $previous_package line 7/, "Correct arguments for $package" );
     }
     my $arg = $proper_job ? 42 : $warning;
-    like( $got, qr!A::long\($arg\) called at .*lib/Carp.t line \d+!,
+    like( $got, qr!A::long\($arg\) called at.+\b(?i:carp\.t) line \d+!,
 	  'Correct arguments for A' );
 }
 
