@@ -202,13 +202,13 @@ sub catdir {
             $path_unix = 1 if ($path =~ m#/#);
             $path_unix = 1 if ($path =~ /^\.\.?$/);
             my $path_vms = 0;
-            $path_vms = 1 if ($path =~ m#[\[<\]]#);
+            $path_vms = 1 if ($path =~ m#(?<!\^)[\[<\]:]#);
             $path_vms = 1 if ($path =~ /^--?$/);
             my $dir_unix = 0;
             $dir_unix = 1 if ($dir =~ m#/#);
             $dir_unix = 1 if ($dir =~ /^\.\.?$/);
             my $dir_vms = 0;
-            $dir_vms = 1 if ($dir =~ m#[\[<\]]#);
+            $dir_vms = 1 if ($dir =~ m#(?<!\^)[\[<\]:]#);
             $dir_vms = 1 if ($dir =~ /^--?$/);
 
             my $unix_mode = 0;
@@ -318,7 +318,7 @@ sub catdir {
                 $dir_unix = 1 if ($dir =~ m#/#);
                 $dir_unix = 1 if ($dir =~ /^\.\.?$/);
                 my $dir_vms = 0;
-                $dir_vms = 1 if ($dir =~ m#[\[<\]]#);
+                $dir_vms = 1 if ($dir =~ m#(?<!\^)[\[<\]:]#);
                 $dir_vms = 1 if ($dir =~ /^--?$/);
 
                 if ($dir_vms == $dir_unix) {
@@ -366,7 +366,7 @@ sub catfile {
         # of the specification in order to merge them.
         $file_unix = 1 if ($tfile =~ m#/#);
         $file_unix = 1 if ($tfile =~ /^\.\.?$/);
-        $file_vms = 1 if ($tfile =~ m#[\[<\]]#);
+        $file_vms = 1 if ($tfile =~ m#(?<!\^)[\[<\]:]#);
         $file_vms = 1 if ($tfile =~ /^--?$/);
 
         # We may know for sure what the format is.
@@ -390,7 +390,7 @@ sub catfile {
                 my $tdir = $files[$i];
                 my $tdir_vms = 0;
                 my $tdir_unix = 0;
-                $tdir_vms = 1 if ($tdir =~ m#[\[<\]]#);
+                $tdir_vms = 1 if ($tdir =~ m#(?<!\^)[\[<\]:]#);
                 $tdir_unix = 1 if ($tdir =~ m#/#);
                 $tdir_unix = 1 if ($tdir =~ /^\.\.?$/);
 
@@ -414,9 +414,7 @@ sub catfile {
 
         # if the spath ends with a directory delimiter and the file is bare,
         # then just concat them.
-        # FIX-ME: In VMS format "[]<>:" are not delimiters if preceded by '^' 
-        # Quite a bit of Perl does not know that yet.
-	if ($spath =~ /^[^\)\]\/:>]+\)\Z(?!\n)/s && basename($file) eq $file) {
+	if ($spath =~ /^(?<!\^)[^\)\]\/:>]+\)\Z(?!\n)/s && basename($file) eq $file) {
 	    $rslt = "$spath$file";
 	} else {
             if ($efs) {
@@ -427,7 +425,7 @@ sub catfile {
                 $spath_unix = 1 if ($spath =~ m#/#);
                 $spath_unix = 1 if ($spath =~ /^\.\.?$/);
                 my $spath_vms = 0;
-                $spath_vms = 1 if ($spath =~ m#[\[<\]]#);
+                $spath_vms = 1 if ($spath =~ m#(?<!\^)[\[<\]:]#);
                 $spath_vms = 1 if ($spath =~ /^--?$/);
 
                 # Assume VMS mode
@@ -548,7 +546,7 @@ sub rootdir {
 Returns a string representation of the first writable directory
 from the following list or '' if none are writable:
 
-    /tmp if C<DECC$FILENAME_REPORT_UNIX> is enabled.
+    /tmp if C<DECC$FILENAME_UNIX_REPORT> is enabled.
     sys$scratch:
     $ENV{TMPDIR}
 
@@ -638,7 +636,7 @@ sub splitpath {
     my $vmsify_path = vmsify($path);
     if ($efs) {
         my $path_vms = 0;
-        $path_vms = 1 if ($path =~ m#[\[<\]]#);
+        $path_vms = 1 if ($path =~ m#(?<!\^)[\[<\]:]#);
         $path_vms = 1 if ($path =~ /^--?$/);
         if (!$path_vms) {
             return $self->SUPER::splitpath($path, $nofile);
@@ -699,7 +697,7 @@ sub splitdir {
 						# [--.		==> [-.-.
 						# .--]		==> .-.-]
 						# [--]		==> [-.-]
-    $dirspec = "[$dirspec]" unless $dirspec =~ /[\[<]/; # make legal
+    $dirspec = "[$dirspec]" unless $dirspec =~ /(?<!\^)[\[<]/; # make legal
     $dirspec =~ s/^(\[|<)\./$1/;
     @dirs = split /(?<!\^)\./, vmspath($dirspec);
     $dirs[0] =~ s/^[\[<]//s;  $dirs[-1] =~ s/[\]>]\Z(?!\n)//s;
@@ -724,7 +722,7 @@ sub catpath {
     $dir_unix = 1 if ($dir =~ m#/#);
     $dir_unix = 1 if ($dir =~ /^\.\.?$/);
     my $dir_vms = 0;
-    $dir_vms = 1 if ($dir =~ m#[\[<\]]#);
+    $dir_vms = 1 if ($dir =~ m#(?<!\^)[\[<\]:]#);
     $dir_vms = 1 if ($dir =~ /^--?$/);
 
     if ($efs && (length($dev) == 0)) {
@@ -787,7 +785,7 @@ sub abs2rel {
     $path_unix = 1 if ($path =~ m#/#);
     $path_unix = 1 if ($path =~ /^\.\.?$/);
     my $path_vms = 0;
-    $path_vms = 1 if ($path =~ m#[\[<\]]#);
+    $path_vms = 1 if ($path =~ m#(?<!\^)[\[<\]:]#);
     $path_vms = 1 if ($path =~ /^--?$/);
 
     my $unix_mode = 0;
@@ -803,7 +801,7 @@ sub abs2rel {
     if (defined $base) {
         $base_unix = 1 if ($base =~ m#/#);
         $base_unix = 1 if ($base =~ /^\.\.?$/);
-        $base_vms = 1 if ($base =~ m#[\[<\]]#);
+        $base_vms = 1 if ($base =~ m#(?<!\^)[\[<\]:]#);
         $base_vms = 1 if ($base =~ /^--?$/);
 
         if ($path_vms == $path_unix) {
@@ -923,7 +921,7 @@ sub rel2abs {
     $path_unix = 1 if ($path =~ m#/#);
     $path_unix = 1 if ($path =~ /^\.\.?$/);
     my $path_vms = 0;
-    $path_vms = 1 if ($path =~ m#[\[<\]]#);
+    $path_vms = 1 if ($path =~ m#(?<!\^)[\[<\]:]#);
     $path_vms = 1 if ($path =~ /^--?$/);
 
     my $unix_mode = 0;
@@ -939,7 +937,7 @@ sub rel2abs {
     if (defined $base) {
         $base_unix = 1 if ($base =~ m#/#);
         $base_unix = 1 if ($base =~ /^\.\.?$/);
-        $base_vms = 1 if ($base =~ m#[\[<\]]#);
+        $base_vms = 1 if ($base =~ m#(?<!\^)[\[<\]:]#);
         $base_vms = 1 if ($base =~ /^--?$/);
 
         # If we could not determine the path mode, see if we can find out
@@ -981,7 +979,7 @@ sub rel2abs {
         if ($efs) {
             # base may have changed, so need to look up format again.
             if ($unix_mode) {
-                $base_vms = 1 if ($base =~ m#[\[<\]]#);
+                $base_vms = 1 if ($base =~ m#(?<!\^)[\[<\]:]#);
                 $base_vms = 1 if ($base =~ /^--?$/);
                 $base = unixpath($base) if $base_vms;
                 $base .= '/' unless ($base =~ m#/$#);
