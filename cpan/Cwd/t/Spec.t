@@ -377,6 +377,7 @@ if ($^O eq 'MacOS') {
 [ "VMS->catpath('','d1/d2/d3','file')",
                              $vms_efs ? 'd1/d2/d3/file' : '[.d1.d2.d3]file' ],
 [ "VMS->catpath('v','d1/d2/d3','file')",                              'v:[.d1.d2.d3]file' ],
+[ "VMS->catpath('v','','file')",                                      'v:file' ],
 [ "VMS->catpath('v','w:[d1.d2.d3]','file')",                          'v:[d1.d2.d3]file'                         ],
 [ "VMS->catpath('node::volume:','[d1.d2.d3]','')",                    'node::volume:[d1.d2.d3]'                  ],
 [ "VMS->catpath('node::volume:','[d1.d2.d3]','file')",                'node::volume:[d1.d2.d3]file'              ],
