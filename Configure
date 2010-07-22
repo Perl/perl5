@@ -748,6 +748,8 @@ d_sresuproto=''
 d_statblks=''
 d_statfs_f_flags=''
 d_statfs_s=''
+d_static_inline=''
+perl_static_inline=''
 d_fstatvfs=''
 d_statvfs=''
 d_stdio_cnt_lval=''
@@ -17874,6 +17876,112 @@ case "$d_statfs_f_flags" in
 *)              echo "No, it doesn't." ;;
 esac
 
+: see what flavor, if any, of static inline is supported
+echo " "
+echo "Checking to see if your system supports static inline..."
+$cat > try.c <<'EOCP'
+#include <stdlib.h>
+extern int f_via_a(int x);
+extern int f_via_b(int x);
+int main(int argc, char **argv)
+{
+    int y;
+
+    y = f_via_a(0);
+#ifdef USE_B
+    y = f_via_b(0);
+#endif
+    if (y == 42) {
+        return EXIT_SUCCESS;
+    }
+    else {
+        return EXIT_FAILURE;
+    }
+}
+EOCP
+$cat > a.c <<'EOCP'
+static INLINE int f(int x) {
+    int y;
+    y = x + 42;
+    return y;
+}
+
+int f_via_a(int x)
+{
+    return f(x);
+}
+EOCP
+$cat > b.c <<'EOCP'
+extern int f(int x);
+
+int f_via_b(int x)
+{
+    return f(x);
+}
+EOCP
+
+# Respect a hint (or previous) value for perl_static_inline, if there is one.
+case "$perl_static_inline" in
+'')	# Check the various possibilities, and break out on success.
+	# For gcc, prefer __inline__, which will still permit 
+	# cflags.SH to add in -ansi.
+	case "$gccversion" in
+		'') xxx="inline __inline__ __inline _inline";;
+		*)  xxx="__inline__ inline __inline _inline";;
+	esac
+	for inline in $xxx; do
+		set try -DINLINE=$inline a.c
+		if eval $compile && $run ./try; then
+			# Now make sure there is no external linkage of static
+			# functions
+			set try -DINLINE=$inline -DUSE_B a.c b.c
+			if eval $compile && $run ./try; then
+				$echo "Your compiler supports static $inline, " >&4
+				$echo "but it also creates an external definition," >&4
+				$echo "so I won't use it." >&4
+				val=$undef
+			else
+				$echo "Your compiler supports static $inline." >&4
+				val=$define
+				perl_static_inline="static $inline";
+				break;
+			fi
+		else
+			$echo "Your compiler does NOT support static $inline." >&4
+			val="$undef"
+		fi
+	done
+	;;
+*inline*) # Some variant of inline exists.
+	echo "Keeping your $hint value of $perl_static_inline."
+	val=$define
+	;;
+static)  # No inline capabilities
+	echo "Keeping your $hint value of $perl_static_inline."
+	val=$undef
+	;;
+*)  # Unrecognized previous value -- blindly trust the supplied
+	# value and hope it makes sense.  Use old value for
+	# d_static_inline, if there is one.
+	echo "Keeping your $hint value of $perl_static_inline."
+	case "$d_static_inline" in
+		'') val=$define ;;
+		*)  val=$d_static_inline ;;
+	esac
+	;;
+esac
+# Fallback to plain 'static' if nothing worked.
+case "$perl_static_inline" in
+'')
+	perl_static_inline="static"
+	val=$undef
+	;;
+esac
+set d_static_inline
+eval $setvar
+$rm -f a.[co] b.[co]
+$rm_try
+
 : Check stream access
 $cat >&4 <<EOM
 Checking how to access stdio streams by file descriptor number...
@@ -22716,6 +22824,7 @@ d_sresuproto='$d_sresuproto'
 d_statblks='$d_statblks'
 d_statfs_f_flags='$d_statfs_f_flags'
 d_statfs_s='$d_statfs_s'
+d_static_inline='$d_static_inline'
 d_statvfs='$d_statvfs'
 d_stdio_cnt_lval='$d_stdio_cnt_lval'
 d_stdio_ptr_lval='$d_stdio_ptr_lval'
@@ -23112,6 +23221,7 @@ path_sep='$path_sep'
 perl5='$perl5'
 perl='$perl'
 perl_patchlevel='$perl_patchlevel'
+perl_static_inline='$perl_static_inline'
 perladmin='$perladmin'
 perllibs='$perllibs'
 perlpath='$perlpath'

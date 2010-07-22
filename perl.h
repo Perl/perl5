@@ -140,6 +140,18 @@
 #  define EXTERN_C extern
 #endif
 
+/* Fallback definitions in case we don't have definitions from config.h.
+   This should only matter for systems that don't use Configure and
+   haven't been modified to define PERL_STATIC_INLINE yet.
+*/
+#if !defined(PERL_STATIC_INLINE)
+#  ifdef HAS_STATIC_INLINE
+#    define PERL_STATIC_INLINE static inline
+#  else
+#    define PERL_STATIC_INLINE static
+#  endif
+#endif
+
 #ifdef PERL_GLOBAL_STRUCT
 #  ifndef PERL_GET_VARS
 #    ifdef PERL_GLOBAL_STRUCT_PRIVATE
