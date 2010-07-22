@@ -118,14 +118,14 @@ my @maps =  (
     ],
     [
 	qr{^(api_subversion(?:=|\s+)'?) (\d+) ('?)  (?!\.)}x,
-	sub { $2, "${1}0$3" },
-	0,
+	sub { $2, ($newy % 2) ? "$1$newz$3" : "${1}0$3" },
+	($oldy % 2) ? $oldz : 0,
 	qr/config/,
     ],
     [
 	qr{^(api_versionstring(?:=|\s+)'?) ([\d\.]+) ('?) (?!\.)}x,
-	sub { $2, "$1$newx.$newy.0$3" },
-	"$oldx.$oldy.0",
+	sub { $2, ($newy % 2) ? "$1$newx.$newy.$newz$3": "$1$newx.$newy.0$3" },
+	($oldy % 2) ? "$oldx.$oldy.$oldz" : "$oldx.$oldy.0",
 	qr/config/,
     ],
     [
@@ -142,12 +142,12 @@ my @maps =  (
     [
 	qr{\b (PERL_SUBVERSION(?:=|\s+)'?) (\d+) ('?)  (?!\.)}x,
 	sub { $2, "$1$newz$3"},
-	$oldz,
+	($oldy % 2) ? $oldz : 0,
     ],
     [
 	qr{\b (PERL_API_SUBVERSION(?:=|\s+)'?) (\d+) ('?)  (?!\.)}x,
-	sub { $2, "${1}0$3"},
-	0,
+	sub { $2, ($newy % 2) ? "$1$newz$3" : "${1}0$3" },
+	$oldz,
     ],
     # these two formats are in README.vms
     [
