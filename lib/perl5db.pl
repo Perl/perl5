@@ -6137,7 +6137,7 @@ sub connect_remoteport {
 }
 
 sub socket_get_fork_TTY {
-    $tty = $IN = $OUT = connect_remoteport();
+    $tty = $LINEINFO = $IN = $OUT = connect_remoteport();
 
     # Do I need to worry about setting $term?
 
