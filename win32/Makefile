@@ -1,7 +1,7 @@
 #
-# Makefile to build perl on Windows NT using Microsoft NMAKE.
+# Makefile to build perl on Windows using Microsoft NMAKE.
 # Supported compilers:
-#	Visual C++ 2.0 or later
+#	Microsoft Visual C++ 6.0 or later
 #	Windows SDK 64-bit compiler and tools
 #
 # This is set up to build a perl.exe that runs off a shared library
@@ -95,10 +95,6 @@ USE_LARGE_FILES	= define
 #
 # uncomment exactly one of the following
 #
-# Visual C++ 2.x
-#CCTYPE		= MSVC20
-# Visual C++ > 2.x and < 6.x
-#CCTYPE		= MSVC
 # Visual C++ 6.x (aka Visual C++ 98)
 CCTYPE		= MSVC60
 # Visual C++ Toolkit 2003 (aka Visual C++ 7.x) (free command-line tools)
@@ -188,7 +184,6 @@ CRYPT_SRC	= fcrypt.c
 # so you may have to set CCHOME explicitly (spaces in the path name should
 # not be quoted)
 #
-#CCHOME		= f:\msvc20
 CCHOME		= $(MSVCDIR)
 CCINCDIR	= $(CCHOME)\include
 CCLIBDIR	= $(CCHOME)\lib
@@ -432,11 +427,7 @@ CXX_FLAG	= -TP -EHsc
 LIBC	= msvcrt.lib
 
 !IF  "$(CFG)" == "Debug"
-!  IF "$(CCTYPE)" == "MSVC20"
-OPTIMIZE	= -Od -MD -Z7 -DDEBUGGING
-!  ELSE
 OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
-!  ENDIF
 LINK_DBG	= -debug
 !ELSE
 OPTIMIZE	= -MD -Zi -DNDEBUG
@@ -474,7 +465,7 @@ DEFINES		= $(DEFINES) -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
 # Use the MSVCRT read() fix only when using VC++ 6.x or earlier. Later
 # versions use MSVCR70.dll, MSVCR71.dll, etc, which do not require the
 # fix.
-!IF "$(CCTYPE)" == "MSVC20" || "$(CCTYPE)" == "MSVC" || "$(CCTYPE)" == "MSVC60" 
+!IF "$(CCTYPE)" == "MSVC60" 
 BUILDOPT	= $(BUILDOPT) -DPERL_MSVCRT_READFIX
 !ENDIF
 
