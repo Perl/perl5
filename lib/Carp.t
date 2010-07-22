@@ -305,7 +305,7 @@ for my $bodge_job (2, 1, 0) {
 	like( $got, qr/${package}::long\($warning\) called at $previous_package line 7/, "Correct arguments for $package" );
     }
     my $arg = $bodge_job ? $warning : 42;
-    like( $got, qr!A::long\($arg\) called at .*lib/Carp.t line \d+!,
+    like( $got, qr!A::long\($arg\) called at.+\b(?i:carp\.t) line \d+!,
 	  'Correct arguments for A' );
 }
 
@@ -320,7 +320,7 @@ EOT
 
 my $got = A::long(42);
 
-like( $got, qr!A::long\(\Q** Incomplete caller override detected; \E\@DB::args\Q were not set **\E\) called at .*lib/Carp.t line \d+!,
+like( $got, qr!A::long\(\Q** Incomplete caller override detected; \E\@DB::args\Q were not set **\E\) called at.+\b(?i:carp\.t) line \d+!,
 	  'Correct arguments for A' );
 
 # New tests go here
