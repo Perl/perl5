@@ -480,7 +480,7 @@ OPTIMIZE	= $(OPTIMIZE) -O1
 
 !IF "$(WIN64)" == "define"
 DEFINES		= $(DEFINES) -DWIN64 -DCONSERVATIVE
-OPTIMIZE	= $(OPTIMIZE) -Wp64 -fp:precise
+OPTIMIZE	= $(OPTIMIZE) -fp:precise
 !ENDIF
 
 # For now, silence VC++ 8.x's and 9.x's warnings about "unsafe" CRT functions
