@@ -26,34 +26,16 @@ See File::Spec::Unix for a documentation of the methods provided
 there. This package overrides the implementation of these methods, not
 the semantics.
 
-The mode of operation of these routines depend on the VMS features that
-are controlled by the DECC features C<DECC$FILENAME_REPORT_UNIX> and
-C<DECC$EFS_CHARSET>.
+The default behavior is to allow either VMS or Unix syntax on input and to 
+return VMS syntax on output, even when Unix syntax was given on input.
 
-Perl needs to be at least at 5.10 for these feature settings to work.
-Use of them on older perl versions on VMS will result in unpredictable
-operations.
-
-The default and traditional mode of these routines have been to expect VMS
-syntax on input and to return VMS syntax on output, even when Unix syntax was
-given on input.
-
-The default and traditional mode is also incompatible with the VMS
-C<EFS>, Extended File system character set, and with running Perl scripts
-under <GNV>, Gnu is not VMS, an optional Unix like runtime environment on VMS.
-
-If the C<DECC$EFS_CHARSET> feature is enabled, These routines will now accept
-either VMS or UNIX syntax.  If the input parameters are clearly VMS syntax,
-the return value will be in VMS syntax.  If the input parameters are clearly
-in Unix syntax, the output will be in Unix syntax.
-
-This corresponds to the way that the VMS C library routines have always
-handled filenames, and what a programmer who has not specifically read this
-pod before would also expect.
-
-If the C<DECC$FILENAME_REPORT_UNIX> feature is enabled, then if the output
-syntax can not be determined from the input syntax, the output syntax will be
-UNIX.  If the feature is not enabled, VMS output will be the default.
+When used with a Perl of version 5.10 or greater and a CRTL possessing the
+relevant capabilities, override behavior depends on the CRTL features
+C<DECC$FILENAME_UNIX_REPORT> and C<DECC$EFS_CHARSET>.  When the
+C<DECC$EFS_CHARSET> feature is enabled and the input parameters are clearly
+in Unix syntax, the output will be in Unix syntax.  If
+C<DECC$FILENAME_UNIX_REPORT> is enabled and the output syntax cannot be
+determined from the input syntax, the output will be in Unix syntax.
 
 =over 4
 
@@ -757,6 +739,7 @@ sub catpath {
           $dir = vmspath($dir);
       }
     }
+    $dir = '' if length($dev) && ($dir eq '[]' || $dir eq '<>');
     "$dev$dir$file";
 }
 
@@ -773,11 +756,6 @@ sub abs2rel {
 
     my $efs = $self->_efs;
     my $unix_rpt = $self->_unix_rpt;
-
-    if (!$efs) {
-        return vmspath(File::Spec::Unix::abs2rel( $self, @_ ))
-            if grep m{/}, @_;
-    }
 
     # We need to identify what the directory is in
     # of the specification in order to process them
@@ -1039,7 +1017,7 @@ sub rel2abs {
 #
 # The traditional VMS mode using ODS-2 disks depends on these routines
 # being here.  These routines should not be called in when the
-# C<DECC$EFS_CHARSET> or C<DECC$FILENAME_REPORT_UNIX> modes are enabled.
+# C<DECC$EFS_CHARSET> or C<DECC$FILENAME_UNIX_REPORT> modes are enabled.
 
 sub eliminate_macros {
     my($self,$path) = @_;
@@ -1156,7 +1134,7 @@ See L<File::Spec> and L<File::Spec::Unix>.  This package overrides the
 implementation of these methods, not the semantics.
 
 An explanation of VMS file specs can be found at
-L<"http://h71000.www7.hp.com/doc/731FINAL/4506/4506pro_014.html#apps_locating_naming_files">.
+L<http://h71000.www7.hp.com/doc/731FINAL/4506/4506pro_014.html#apps_locating_naming_files>.
 
 =cut
 
