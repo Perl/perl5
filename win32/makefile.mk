@@ -258,16 +258,6 @@ BUILDOPT	*= $(BUILDOPTEXTRA)
 #BUILDOPT	+= -DNO_HASH_SEED
 
 #
-# This should normally be disabled.  Adding -DPERL_POLLUTE enables support
-# for old symbols by default, at the expense of extreme pollution.  You most
-# probably just want to build modules that won't compile with
-#         perl Makefile.PL POLLUTE=1
-# instead of enabling this.  Please report such modules to the respective
-# authors.
-#
-#BUILDOPT	+= -DPERL_POLLUTE
-
-#
 # This should normally be disabled.  Enabling it will disable the File::Glob
 # implementation of CORE::glob.
 #

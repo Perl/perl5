@@ -845,37 +845,4 @@
 
 #endif /* PERL_GLOBAL_STRUCT */
 
-#ifdef PERL_POLLUTE		/* disabled by default in 5.6.0 */
-
-#define DBassertion		PL_DBassertion
-#define DBsingle		PL_DBsingle
-#define DBsub			PL_DBsub
-#define compiling		PL_compiling
-#define curcop			PL_curcop
-#define curstash		PL_curstash
-#define debstash		PL_debstash
-#define defgv			PL_defgv
-#define diehook			PL_diehook
-#define dirty			PL_dirty
-#define dowarn			PL_dowarn
-#define errgv			PL_errgv
-#define na			PL_na
-#define no_modify		PL_no_modify
-#define perl_destruct_level	PL_perl_destruct_level
-#define perldb			PL_perldb
-#define ppaddr			PL_ppaddr
-#define rsfp			PL_rsfp
-#define rsfp_filters		PL_rsfp_filters
-#define stack_base		PL_stack_base
-#define stack_sp		PL_stack_sp
-#define stdingv			PL_stdingv
-#define sv_arenaroot		PL_sv_arenaroot
-#define sv_no			PL_sv_no
-#define sv_undef		PL_sv_undef
-#define sv_yes			PL_sv_yes
-#define tainted			PL_tainted
-#define tainting		PL_tainting
-
-#endif /* PERL_POLLUTE */
-
 /* ex: set ro: */

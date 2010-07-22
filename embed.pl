@@ -745,18 +745,6 @@ print $em <<'END';
 
 #endif /* PERL_GLOBAL_STRUCT */
 
-#ifdef PERL_POLLUTE		/* disabled by default in 5.6.0 */
-
-END
-
-for $sym (sort @extvars) {
-    print $em hide($sym,"PL_$sym");
-}
-
-print $em <<'END';
-
-#endif /* PERL_POLLUTE */
-
 /* ex: set ro: */
 END
 
