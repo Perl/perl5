@@ -954,8 +954,18 @@ sub eval {
 # Changes: 1.32: Jun 03, 2009 Jonathan Leto <jonathan@leto.net>
 #   + Fix bug where a key _< with undefined value was put into the symbol table
 #   +   when the $filename variable is not set
-# Changes: x.xx: Josh ben Jore <jjore@cpan.org>
-#   + TODO
+# Changes: 1.33:
+#   + Debugger prints lines to the remote port when it forks and openes a new port (f633fd2)
+#   + The debugger now continues to use RemotePort when it's been configured to use it. (11653f7)
+#   + Stop using $ENV{LESS} for parameters not intended for less (d463cf2)
+#   + Configure has a path to less and perl5db.pl can use it (bf320d6)
+#   + Die with $@ instead of empty message (86755f4)
+#   + Remove extra/useless $@ check after eval { require PadWalker } (which is still checked) (dab8d6d)
+#   + Promote eval( "require ..." ) to eval { require ... } (4a49187)
+#   + Promote eval { require( ... )} || die to mere require( ... ) (999f23b)
+#   + Remove indirect object notation from debugger (bee4b46)
+#   + Document that @{$main::{'_<'.$filename}} lines are dualvar to (COP*). (7e17a74)
+#   + Remove MacOS classic support from the debugger. (2b894b7)
 ########################################################################
 
 =head1 DEBUGGER INITIALIZATION
