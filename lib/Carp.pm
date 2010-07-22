@@ -83,6 +83,7 @@ sub caller_info {
   if ($call_info{has_args}) {
     my @args;
     if (@DB::args == 1 && ref $DB::args[0] eq ref \$i && $DB::args[0] == \$i) {
+      @DB::args = (); # Don't let anyone see the address of $i
       local $@;
       my $where = eval {
 	my $gv = B::svref_2object(\&CORE::GLOBAL::caller)->GV;
