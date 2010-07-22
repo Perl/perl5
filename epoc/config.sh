@@ -939,7 +939,7 @@ PERL_VERSION=13
 PERL_SUBVERSION=3
 PERL_API_REVISION=5
 PERL_API_VERSION=13
-PERL_API_SUBVERSION=0
+PERL_API_SUBVERSION=3
 PERL_CONFIG_SH=true
 # Variables propagated from previous config.sh file.
 pp_sys_cflags=''
@@ -1071,7 +1071,7 @@ PERL_VERSION=13
 PERL_SUBVERSION=3
 PERL_API_REVISION=5
 PERL_API_VERSION=13
-PERL_API_SUBVERSION=0
+PERL_API_SUBVERSION=3
 CONFIGDOTSH=true
 # Variables propagated from previous config.sh file.
 pp_sys_cflags=''
