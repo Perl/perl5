@@ -17,6 +17,8 @@ typedef struct {
     AV *cscav;
     AV *bhkav;
     bool bhk_record;
+    peep_t orig_peep;
+    AV *peep_record;
 } my_cxt_t;
 
 START_MY_CXT
@@ -327,6 +329,23 @@ blockhook_test_eval(pTHX_ OP *const o)
 
 STATIC BHK bhk_csc, bhk_test;
 
+STATIC void
+my_peep (pTHX_ OP *o, peep_next_t *next_peep)
+{
+    dMY_CXT;
+
+    if (!o)
+        return;
+
+    CALL_FPTR(MY_CXT.orig_peep)(aTHX_ o, next_peep);
+
+    for (; o; o = o->op_next) {
+        if (o->op_type == OP_CONST && cSVOPx_sv(o) && SvPOK(cSVOPx_sv(o))) {
+            av_push(MY_CXT.peep_record, newSVsv(cSVOPx_sv(o)));
+        }
+    }
+}
+
 #include "const-c.inc"
 
 MODULE = XS::APItest:Hash		PACKAGE = XS::APItest::Hash
@@ -618,9 +637,9 @@ refcounted_he_fetch(key, level=0)
 	SvREFCNT_inc(RETVAL);
 	OUTPUT:
 	RETVAL
-	
+
 #endif
-	
+
 =pod
 
 sub TIEHASH  { bless {}, $_[0] }
@@ -693,25 +712,28 @@ BOOT:
     BhkENTRY_set(&bhk_test, eval, blockhook_test_eval);
     Perl_blockhook_register(aTHX_ &bhk_test);
 
-    MY_CXT.cscgv = gv_fetchpvs("XS::APItest::COMPILE_SCOPE_CONTAINER", 
+    MY_CXT.cscgv = gv_fetchpvs("XS::APItest::COMPILE_SCOPE_CONTAINER",
         GV_ADDMULTI, SVt_PVAV);
     MY_CXT.cscav = GvAV(MY_CXT.cscgv);
 
     BhkENTRY_set(&bhk_csc, start, blockhook_csc_start);
     BhkENTRY_set(&bhk_csc, pre_end, blockhook_csc_pre_end);
     Perl_blockhook_register(aTHX_ &bhk_csc);
-}                              
+
+    MY_CXT.peep_record = newAV();
+}
 
 void
 CLONE(...)
     CODE:
     MY_CXT_CLONE;
     MY_CXT.sv = newSVpv("initial_clone",0);
-    MY_CXT.cscgv = gv_fetchpvs("XS::APItest::COMPILE_SCOPE_CONTAINER", 
+    MY_CXT.cscgv = gv_fetchpvs("XS::APItest::COMPILE_SCOPE_CONTAINER",
         GV_ADDMULTI, SVt_PVAV);
     MY_CXT.cscav = NULL;
     MY_CXT.bhkav = get_av("XS::APItest::bhkav", GV_ADDMULTI);
     MY_CXT.bhk_record = 0;
+    MY_CXT.peep_record = newAV();
 
 void
 print_double(val)
@@ -1090,3 +1112,28 @@ bhk_record(bool on)
         MY_CXT.bhk_record = on;
         if (on)
             av_clear(MY_CXT.bhkav);
+
+void
+peep_enable ()
+    PREINIT:
+        dMY_CXT;
+    CODE:
+        av_clear(MY_CXT.peep_record);
+        MY_CXT.orig_peep = PL_peepp;
+        PL_peepp = my_peep;
+
+AV *
+peep_record ()
+    PREINIT:
+        dMY_CXT;
+    CODE:
+        RETVAL = MY_CXT.peep_record;
+    OUTPUT:
+        RETVAL
+
+void
+peep_record_clear ()
+    PREINIT:
+        dMY_CXT;
+    CODE:
+        av_clear(MY_CXT.peep_record);

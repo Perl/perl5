@@ -4833,7 +4833,13 @@ struct perl_debug_pad {
 	PERL_DEBUG_PAD(i))
 
 /* Enable variables which are pointers to functions */
-typedef void (CPERLscope(*peep_t))(pTHX_ OP* o);
+struct peep_next;
+typedef void (CPERLscope(*peep_t))(pTHX_ OP* o, struct peep_next *next);
+typedef struct peep_next {
+    peep_t fn;
+    void *user_data;
+} peep_next_t;
+
 typedef regexp*(CPERLscope(*regcomp_t)) (pTHX_ char* exp, char* xend, PMOP* pm);
 typedef I32 (CPERLscope(*regexec_t)) (pTHX_ regexp* prog, char* stringarg,
 				      char* strend, char* strbeg, I32 minend,

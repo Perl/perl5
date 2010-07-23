@@ -1821,9 +1821,63 @@ of free()ing (i.e. their type is changed to OP_NULL).
 After the compile tree for a subroutine (or for an C<eval> or a file)
 is created, an additional pass over the code is performed. This pass
 is neither top-down or bottom-up, but in the execution order (with
-additional complications for conditionals).  These optimizations are
-done in the subroutine peep().  Optimizations performed at this stage
-are subject to the same restrictions as in the pass 2.
+additional complications for conditionals).  Optimizations performed
+at this stage are subject to the same restrictions as in the pass 2.
+
+Peephole optimizations are done by calling the function pointed to by
+the global variable C<PL_peepp>. By default, C<PL_peepp> points to the
+function C<Perl_peep>. However, extensions may provide their own
+peephole optimizers, like this:
+
+    peep_t original_peep;
+
+    void my_peep (pTHX_ OP *o, peep_next_t *next_peep)
+    {
+        /* Delegate perl's original optimizer. The function pointer
+         * in next_peep->fn will point to the optimizer function
+         * initially invoked, so when perl's peep recurses into some
+         * branch of the optree, it'll call back to my_peep.
+         */
+        CALL_FPTR(original_peep)(aTHX_ o, next_peep);
+
+        if (!o)
+            return;
+
+        for (; o; o = o->op_next) {
+            /* custom optimisations */
+        }
+    }
+
+    /* later, for example in a BOOT section */
+    original_peep = PL_peepp;
+    PL_peepp = my_peep;
+
+Do note that the peephole optimizer is called for each root of an
+optree. It has to traverse that optree itself, if necessary.
+
+However, it is not normally necessary for peep extensions to walk into
+branches of conditions. Perl's original optimizer, which extensions should
+always delegate to, already implements that and will call the optimizer
+pointed to by C<next_peep> for each root OP of branches. By default,
+C<next_peep> points to whatever is in C<PL_peepp>, but it is also possible
+to make the default optimizer call back to different optimizers:
+
+    void my_peep (pTHX_ OP *o, peep_next_t *next_peep)
+    {
+        peep_next_t other_peep = { my_other_peep, NULL };
+
+        /* call the original peep, and have it call my_other_peep when
+         * recursing into branches */
+        CALL_FPTR(original_peep)(aTHX_ o, &other_peep);
+    }
+
+The second member of C<peep_next_t>, C<user_data>, which is just set to
+C<NULL> in the above example, may be used to pass along arbitrary data to
+later invocations of peep functions.
+
+Also note that, under some conditions, the peephole optimizer will be
+called with a C<NULL> opcode. That is perfectly normal and optimizer
+functions need to accomodate for that.
 
 =head2 Pluggable runops
 
