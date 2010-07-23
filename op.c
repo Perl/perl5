@@ -5661,7 +5661,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     dVAR;
     GV *gv;
     const char *ps;
-    STRLEN ps_len;
+    STRLEN ps_len = 0; /* init it to avoid false uninit warning from icc */
     register CV *cv = NULL;
     SV *const_sv;
     /* If the subroutine has no body, no attributes, and no builtin attributes
