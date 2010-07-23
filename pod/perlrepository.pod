@@ -427,7 +427,6 @@ immediately after the source-changes that caused them, so as to have
 as little effect as possible on the bisectability of your patchset.
 
 =for XXX
-
 What should we recommend about binary files now? Do we need anything?
 
 =head2 Getting your patch accepted
