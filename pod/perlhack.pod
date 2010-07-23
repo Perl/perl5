@@ -384,6 +384,10 @@ core:
     dist/ is for dual-life modules, where the blead source is
           canonical.
 
+For some dual-life modules it has not been discussed if the CPAN version or the
+blead source is canonical. Until that is done, those modules should be in
+F<cpan/>.
+
 =item Tests
 
 There are tests for nearly all the modules, built-ins and major bits
