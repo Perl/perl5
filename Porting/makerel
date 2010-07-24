@@ -124,29 +124,11 @@ system("find . -type f -print     | xargs chmod 0444");
 system("find . -type d -print     | xargs chmod 0755");
 system("find $SEARCH_ROOTS -name '*.t'     -print | xargs chmod +x");
 system("find $SEARCH_ROOTS -name 'test.pl' -print | xargs chmod +x");
-my @exe = qw(
-    Configure
-    configpm
-    configure.gnu
-    cpan/Test-Harness/t/source_tests/source.sh
-    embed.pl
-    installperl
-    installman
-    keywords.pl
-    opcode.pl
-    t/TEST
-    *.SH
-    vms/ext/filespec.t
-    x2p/*.SH
-    Porting/findrfuncs
-    Porting/genlog
-    Porting/makerel
-    Porting/*.pl
-    mpeix/nm
-    mpeix/relink
-    Cross/generate_config_sh
-    Cross/warp
-);
+my @exe = map   { my ($f) = split; glob($f) } 
+          grep  { $_ !~ /\A#/ && $_ !~ /\A\s*\z/ }
+          map   { split "\n" }
+          do    { local (@ARGV, $/) = 'Porting/exec-bit.txt'; <> };
+
 system("chmod +x @exe") == 0
     or die "system: $!";
 

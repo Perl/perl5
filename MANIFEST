@@ -4059,6 +4059,7 @@ Porting/corelist-perldelta.pl	Generates data perldelta from Module::CoreList
 Porting/corelist.pl		Generates data for Module::CoreList
 Porting/curliff.pl		Curliff or liff your curliffable files.
 Porting/epigraphs.pod		the release epigraphs used over the years
+Porting/exec-bit.txt		List of files that get +x in release tarball
 Porting/expand-macro.pl		A tool to expand C macro definitions in the Perl source
 Porting/findrfuncs		Find reentrant variants of functions used in an executable
 Porting/findvars		Find occurrences of words
@@ -4572,7 +4573,8 @@ t/porting/args_assert.t		Check that all PERL_ARGS_ASSERT* macros are used
 t/porting/authors.t		Check that all authors have been acknowledged
 t/porting/checkcase.t		Check whether we are case-insensitive-fs-friendly
 t/porting/diag.t		Test completeness of perldiag.pod
-t/porting/dual-life.t		Check that dual-life bins are in utils
+t/porting/dual-life.t		Check that dual-life bins are in utils/
+t/porting/exec-bit.t		Check that exec-bit bins are identified
 t/porting/maintainers.t		Test that Porting/Maintaners.pl is up to date
 t/porting/manifest.t		Test that this MANIFEST file is well formed
 t/porting/podcheck.t		Test the POD of shipped modules is well formed

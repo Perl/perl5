@@ -1,0 +1,26 @@
+# This file contains a list of files that makerel will
+# ensure get an executable bit
+# 
+# List files (or glob patterns) one per line relative to the repo root
+# Lines starting with a pound and empty lines will be ignored
+Configure
+configpm
+configure.gnu
+cpan/Test-Harness/t/source_tests/source.sh
+embed.pl
+installperl
+installman
+keywords.pl
+opcode.pl
+t/TEST
+*.SH
+vms/ext/filespec.t
+x2p/*.SH
+Porting/findrfuncs
+Porting/genlog
+Porting/makerel
+Porting/*.pl
+mpeix/nm
+mpeix/relink
+Cross/generate_config_sh
+Cross/warp
