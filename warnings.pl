@@ -168,13 +168,13 @@ sub mkRange
 {
     my @a = @_ ;
     my @out = @a ;
-    my $i ;
 
-
-    for ($i = 1 ; $i < @a; ++ $i) {
+    for my $i (1 .. @a - 1) {
       	$out[$i] = ".."
-          if $a[$i] == $a[$i - 1] + 1 && $a[$i] + 1 == $a[$i + 1] ;
+          if $a[$i] == $a[$i - 1] + 1
+             && ($i >= @a  - 1 || $a[$i] + 1 == $a[$i + 1] );
     }
+    $out[-1] = $a[-1] if $out[-1] eq "..";
 
     my $out = join(",",@out);
 
