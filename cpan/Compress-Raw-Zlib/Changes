@@ -1,6 +1,14 @@
 CHANGES
 -------
 
+  2.030 22 July 2010
+
+      * Ran the zlib2ansi script against the files in zlib-src.
+        Thanks to Nicholas Clark for the reminder.
+
+      * Added "-DNO_VIZ" to DEFINE in Makefile.PL
+        [RT #65293]
+
   2.027 24 April 2010 
 
       * Updated to include zlib 1.2.5

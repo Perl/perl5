@@ -8,14 +8,14 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Uncompress::RawInflate  2.027 ;
-use IO::Compress::Base::Common  2.027 qw(:Status createSelfTiedObject);
-use IO::Uncompress::Adapter::Inflate  2.027 ;
-use IO::Uncompress::Adapter::Identity 2.027 ;
-use IO::Compress::Zlib::Extra 2.027 ;
-use IO::Compress::Zip::Constants 2.027 ;
+use IO::Uncompress::RawInflate  2.030 ;
+use IO::Compress::Base::Common  2.030 qw(:Status createSelfTiedObject);
+use IO::Uncompress::Adapter::Inflate  2.030 ;
+use IO::Uncompress::Adapter::Identity 2.030 ;
+use IO::Compress::Zlib::Extra 2.030 ;
+use IO::Compress::Zip::Constants 2.030 ;
 
-use Compress::Raw::Zlib  2.027 qw(crc32) ;
+use Compress::Raw::Zlib  2.030 qw(crc32) ;
 
 BEGIN
 {
@@ -30,7 +30,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $UnzipError, %headerLookup);
 
-$VERSION = '2.027';
+$VERSION = '2.030';
 $UnzipError = '';
 
 @ISA    = qw(Exporter IO::Uncompress::RawInflate);
@@ -63,7 +63,7 @@ sub unzip
 
 sub getExtraParams
 {
-    use IO::Compress::Base::Common  2.027 qw(:Parse);
+    use IO::Compress::Base::Common  2.030 qw(:Parse);
 
     
     return (
@@ -1056,17 +1056,43 @@ C<InputLength> option.
 
 =head2 Examples
 
-To read the contents of the file C<file1.txt.zip> and write the
-uncompressed data to the file C<file1.txt>.
+Say you have a zip file, C<file1.zip>, that only contains a
+single member, you can read it and write the uncompressed data to the
+file C<file1.txt> like this.
 
     use strict ;
     use warnings ;
     use IO::Uncompress::Unzip qw(unzip $UnzipError) ;
 
-    my $input = "file1.txt.zip";
+    my $input = "file1.zip";
     my $output = "file1.txt";
     unzip $input => $output
         or die "unzip failed: $UnzipError\n";
+
+If you have a zip file that contains multiple members and want to read a
+specific member from the file, say C<"data1">, use the C<Name> option
+
+    use strict ;
+    use warnings ;
+    use IO::Uncompress::Unzip qw(unzip $UnzipError) ;
+
+    my $input = "file1.zip";
+    my $output = "file1.txt";
+    unzip $input => $output, Name => "data1"
+        or die "unzip failed: $UnzipError\n";
+
+Alternatively, if you want to read the  C<"data1"> member into memory, use
+a scalar reference for the C<output> partameter.
+
+    use strict ;
+    use warnings ;
+    use IO::Uncompress::Unzip qw(unzip $UnzipError) ;
+
+    my $input = "file1.zip";
+    my $output ;
+    unzip $input => \$output, Name => "data1"
+        or die "unzip failed: $UnzipError\n";
+    # $output now contains the uncompressed data
 
 To read from an existing Perl filehandle, C<$input>, and write the
 uncompressed data to a buffer, C<$buffer>.
@@ -1076,34 +1102,11 @@ uncompressed data to a buffer, C<$buffer>.
     use IO::Uncompress::Unzip qw(unzip $UnzipError) ;
     use IO::File ;
 
-    my $input = new IO::File "<file1.txt.zip"
-        or die "Cannot open 'file1.txt.zip': $!\n" ;
+    my $input = new IO::File "<file1.zip"
+        or die "Cannot open 'file1.zip': $!\n" ;
     my $buffer ;
-    unzip $input => \$buffer 
+    unzip $input => \$buffer
         or die "unzip failed: $UnzipError\n";
-
-To uncompress all files in the directory "/my/home" that match "*.txt.zip" and store the compressed data in the same directory
-
-    use strict ;
-    use warnings ;
-    use IO::Uncompress::Unzip qw(unzip $UnzipError) ;
-
-    unzip '</my/home/*.txt.zip>' => '</my/home/#1.txt>'
-        or die "unzip failed: $UnzipError\n";
-
-and if you want to compress each file one at a time, this will do the trick
-
-    use strict ;
-    use warnings ;
-    use IO::Uncompress::Unzip qw(unzip $UnzipError) ;
-
-    for my $input ( glob "/my/home/*.txt.zip" )
-    {
-        my $output = $input;
-        $output =~ s/.zip// ;
-        unzip $input => $output 
-            or die "Error compressing '$input': $UnzipError\n";
-    }
 
 =head1 OO Interface
 
@@ -1165,7 +1168,7 @@ OPTS is a combination of the following options:
 
 =item C<< Name => "membername" >>
 
-Create "membername" in the zip file.
+Open "membername" from the zip file for reading.
 
 =item C<< AutoClose => 0|1 >>
 
@@ -1512,6 +1515,43 @@ Same as doing this
 =head2 Working with Net::FTP
 
 See L<IO::Uncompress::Unzip::FAQ|IO::Uncompress::Unzip::FAQ/"Compressed files and Net::FTP">
+
+=head2 Walking through a zip file
+
+The code below can be used to traverse a zip file, one compressed data
+stream at a time.
+
+    use IO::Uncompress::Unzip qw($UnzipError);
+
+    my $zipfile = "somefile.zip";
+    my $u = new IO::Uncompress::Unzip $zipfile
+        or die "Cannot open $zipfile: $UnzipError";
+
+    my $status;
+    for ($status = 1; ! $u->eof(); $status = $u->nextStream())
+    {
+
+        my $name = $u->getHeaderInfo()->{Name};
+        warn "Processing member $name\n" ;
+
+        my $buff;
+        while (($status = $u->read($buff)) > 0) {
+            # Do something here
+        }
+
+        last if $status < 0;
+    }
+
+    die "Error processing $zipfile: $!\n"
+        if $status < 0 ;
+
+Each individual compressed data stream is read until the logical
+end-of-file is reached. Then C<nextStream> is called. This will skip to the
+start of the next compressed data stream and clear the end-of-file flag.
+
+It is also worth noting that C<nextStream> can be called at any time -- you
+don't have to wait until you have exhausted a compressed data stream before
+skipping to the next one.
 
 =head1 SEE ALSO
 

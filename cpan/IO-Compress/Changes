@@ -1,6 +1,19 @@
 CHANGES
 -------
 
+  2.030 22 July 2010
+
+      * IO::Compress::Zip
+        - Updates to documentation.
+        - Changes default value for ExtAttr on Unix to 0100644
+
+      * IO::Uncompress::Unzip
+        Reworked the "Name" option and examples in the pod.
+
+      * IO::Uncompress::Base
+        Fixed problem with nextStream not returning 0 when there is no
+        next stream and Transparent is false.
+
   2.027 24 April 2010
 
       * Compress::Zlib

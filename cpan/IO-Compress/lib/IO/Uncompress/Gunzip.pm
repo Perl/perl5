@@ -9,12 +9,12 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Uncompress::RawInflate 2.027 ;
+use IO::Uncompress::RawInflate 2.030 ;
 
-use Compress::Raw::Zlib 2.027 qw( crc32 ) ;
-use IO::Compress::Base::Common 2.027 qw(:Status createSelfTiedObject);
-use IO::Compress::Gzip::Constants 2.027 ;
-use IO::Compress::Zlib::Extra 2.027 ;
+use Compress::Raw::Zlib 2.030 qw( crc32 ) ;
+use IO::Compress::Base::Common 2.030 qw(:Status createSelfTiedObject);
+use IO::Compress::Gzip::Constants 2.030 ;
+use IO::Compress::Zlib::Extra 2.030 ;
 
 require Exporter ;
 
@@ -28,7 +28,7 @@ Exporter::export_ok_tags('all');
 
 $GunzipError = '';
 
-$VERSION = '2.027';
+$VERSION = '2.030';
 
 sub new
 {
@@ -47,7 +47,7 @@ sub gunzip
 
 sub getExtraParams
 {
-    use IO::Compress::Base::Common  2.027 qw(:Parse);
+    use IO::Compress::Base::Common  2.030 qw(:Parse);
     return ( 'ParseExtra' => [1, 1, Parse_boolean,  0] ) ;
 }
 

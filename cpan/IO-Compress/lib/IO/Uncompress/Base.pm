@@ -9,12 +9,12 @@ our (@ISA, $VERSION, @EXPORT_OK, %EXPORT_TAGS);
 @ISA    = qw(Exporter IO::File);
 
 
-$VERSION = '2.027';
+$VERSION = '2.030';
 
 use constant G_EOF => 0 ;
 use constant G_ERR => -1 ;
 
-use IO::Compress::Base::Common 2.027 ;
+use IO::Compress::Base::Common 2.030 ;
 #use Parse::Parameters ;
 
 use IO::File ;
@@ -980,7 +980,7 @@ sub gotoNextStream
     #*$self->{EndStream} = 0 ;
 
     if ( ! defined $magic) {
-        if (! *$self->{Transparent} )
+        if (! *$self->{Transparent} || $self->eof())
         {
             *$self->{EndStream} = 1 ;
             return 0;

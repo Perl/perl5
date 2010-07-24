@@ -4,26 +4,26 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.027 qw(:Status createSelfTiedObject);
-use IO::Compress::RawDeflate 2.027 ;
-use IO::Compress::Adapter::Deflate 2.027 ;
-use IO::Compress::Adapter::Identity 2.027 ;
-use IO::Compress::Zlib::Extra 2.027 ;
-use IO::Compress::Zip::Constants 2.027 ;
+use IO::Compress::Base::Common  2.030 qw(:Status createSelfTiedObject);
+use IO::Compress::RawDeflate 2.030 ;
+use IO::Compress::Adapter::Deflate 2.030 ;
+use IO::Compress::Adapter::Identity 2.030 ;
+use IO::Compress::Zlib::Extra 2.030 ;
+use IO::Compress::Zip::Constants 2.030 ;
 
 
-use Compress::Raw::Zlib  2.027 qw(crc32) ;
+use Compress::Raw::Zlib  2.030 qw(crc32) ;
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.027 ; 
+           import  IO::Compress::Adapter::Bzip2 2.030 ;
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.027 ; 
+           import  IO::Compress::Bzip2 2.030 ;
          } ;
 #    eval { require IO::Compress::Adapter::Lzma ; 
 #           import  IO::Compress::Adapter::Lzma 2.020 ; 
 #           require IO::Compress::Lzma ; 
-#           import  IO::Compress::Lzma 2.027 ; 
+#           import  IO::Compress::Lzma 2.030 ;
 #         } ;
 }
 
@@ -32,7 +32,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $ZipError);
 
-$VERSION = '2.027';
+$VERSION = '2.030';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
@@ -156,7 +156,7 @@ sub mkHeader
     my $extFileAttr = 0 ;
     
     # This code assumes Unix.
-    $extFileAttr = 0666 << 16 
+    $extFileAttr = 0100644 << 16
         if $osCode == ZIP_OS_CODE_UNIX ;
 
     if (*$self->{ZipData}{Zip64}) {
@@ -513,8 +513,8 @@ sub getExtraParams
 {
     my $self = shift ;
 
-    use IO::Compress::Base::Common  2.027 qw(:Parse);
-    use Compress::Raw::Zlib  2.027 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+    use IO::Compress::Base::Common  2.030 qw(:Parse);
+    use Compress::Raw::Zlib  2.030 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
 
     my @Bzip2 = ();
     
@@ -540,7 +540,7 @@ sub getExtraParams
             'exUnix2'   => [0, 1, Parse_any,       undef], 
             'ExtAttr'   => [0, 1, Parse_any, 
                     $Compress::Raw::Zlib::gzip_os_code == 3 
-                        ? 0666 << 16 
+                        ? 0100644 << 16
                         : 0],
             'OS_Code'   => [0, 1, Parse_unsigned,  $Compress::Raw::Zlib::gzip_os_code],
             
@@ -1058,15 +1058,21 @@ This parameter defaults to 0.
 
 =item C<< Name => $string >>
 
-Stores the contents of C<$string> in the zip filename header field. If
-C<Name> is not specified, no zip filename field will be created.
+Stores the contents of C<$string> in the zip filename header field.
+
+If C<Name> is not specified and the C<$input> parameter is a filename that
+will be used for the zip filename header field.
+
+If C<Name> is not specified and the C<$input> parameter is not a filename,
+no zip filename field will be created.
 
 =item C<< Time => $number >>
 
 Sets the last modified time field in the zip header to $number.
 
 This field defaults to the time the C<IO::Compress::Zip> object was created
-if this option is not specified.
+if this option is not specified and the C<$input> parameter is not a
+filename.
 
 =item C<< ExtAttr => $attr >>
 
@@ -1075,7 +1081,7 @@ header of the zip file. This is a 4 byte field.
 
 If you are running a Unix derivative this value defaults to 
 
-    0666 << 16
+    0100644 << 16
 
 This should allow read/write access to any files that are extracted from
 the zip file/buffer.

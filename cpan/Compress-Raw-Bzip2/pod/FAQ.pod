@@ -39,7 +39,7 @@ available
 
 See previous FAQ item.
 
-If the C<Archive::Tar> module is installed and either the C<uncompress> or
+If the C<Archive::Tar> module is instaled and either the C<uncompress> or
 C<gunzip> programs are available, you can use one of these workarounds to
 read C<.tar.Z> files.
 
