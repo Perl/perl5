@@ -753,6 +753,21 @@ $(LIBPERL_NONSHR): $(obj)
 
 !NO!SUBS!
 	;;
+*)
+	if [ "$ld_can_script" = 'define' ]; then
+	    case "$useshrplib" in
+	    define|true|[yY]*)
+	        $spitshell >>$Makefile <<'!NO!SUBS!'
+LIBPERLLDSCRIPT = libperl.version
+SHRPLDFLAGS += -Wl,--version-script=$(LIBPERLLDSCRIPT)
+
+libperl.version: $(MINIPERL_EXE) makedef.pl config.sh $(SYM) $(SYMH) $(CONFIGPM)
+	$(MINIPERL) makedef.pl PLATFORM=gnuelf CC_FLAGS="$(OPTIMIZE)" > $@
+
+!NO!SUBS!
+		;;
+	    esac
+	fi
 esac
 
 if test -s $Makefile_s ; then
@@ -789,7 +804,7 @@ $(MINIDTRACE_O): perldtrace.d $(minindt_obj) perlmini$(OBJ_EXT)
 		;;
     esac
 	$spitshell >>$Makefile <<'!NO!SUBS!'
-$(LIBPERL): $& $(obj) $(DYNALOADER) $(LIBPERLEXPORT)
+$(LIBPERL): $& $(obj) $(DYNALOADER) $(LIBPERLEXPORT) $(LIBPERLLDSCRIPT)
 !NO!SUBS!
 	case "$useshrplib" in
 	true)

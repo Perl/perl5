@@ -62,7 +62,7 @@ while (@ARGV) {
 require "$ARGS{TARG_DIR}regen/embed_lib.pl";
 
 {
-    my @PLATFORM = qw(aix win32 wince os2 netware vms test);
+    my @PLATFORM = qw(aix win32 wince os2 netware vms test gnuelf);
     my %PLATFORM;
     @PLATFORM{@PLATFORM} = ();
 
@@ -1346,6 +1346,10 @@ elsif ($ARGS{PLATFORM} eq 'netware') {
 	print "EXPORTS\n";
 	}
 }
+elsif ($ARGS{PLATFORM} eq 'gnuelf') {
+    print "LIBPERL_5.13.3 {\n";
+    print "  global:\n";
+}
 
 # Then the symbols
 
@@ -1364,7 +1368,11 @@ foreach my $symbol (@symbols) {
     }
     elsif ($ARGS{PLATFORM} eq 'netware') {
 	print "\t$symbol,\n";
-    } else {
+    }
+    elsif ($ARGS{PLATFORM} eq 'gnuelf') {
+	print "    $symbol;\n";
+    }
+    else {
 	print "$symbol\n";
     }
 }
@@ -1380,6 +1388,9 @@ if ($ARGS{PLATFORM} eq 'os2') {
 
 ; LAST_ORDINAL=$sym_ord
 EOP
+}
+elsif ($ARGS{PLATFORM} eq 'gnuelf') {
+    print "\n  local: *;\n};\n";
 }
 
 1;

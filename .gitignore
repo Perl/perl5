@@ -69,6 +69,8 @@ perldtrace.h
 *.gcda
 *.gcno
 
+libperl.version
+
 dll.base
 /ext/DynaLoader/dl_win32.xs
 splittree.pl
