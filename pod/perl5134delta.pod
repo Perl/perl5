@@ -1,11 +1,8 @@
 =encoding utf8
 
 =for rafl
-changelogged up to commit 2ea2ea91
+changelogged up to commit a095c4ee
 * PERL_STATIC_INLINE might want to be mentioned
-* perl5db.pl
-** what's with the one change but many changelog entries?
-** why a new version in the changelog but no version bump?
 
 =head1 NAME
 
@@ -109,11 +106,23 @@ L<Carp> now detects incomplete L<caller()|perlfunc/"caller EXPR"> overrides and
 avoids using bogus C<@DB::args>. This fixes certain cases of C<Bizarre copy of
 ARRAY> caused by modules overriding C<caller()> incorrectly.
 
+=item C<Compress::Raw::Bzip2>
+
+Upgraded from version 2.027 to 2.030.
+
+=item C<Compress::Raw::Zlib>
+
+Upgraded from version 2.027 to 2.030.
+
 =item C<File::Spec>
 
 Upgraded from version 3.31 to 3.31_01.
 
 Various issues in L<File::Spec::VMS> have been fixed.
+
+=item C<IO::Compress>
+
+Upgraded from version 2.027 to 2.030.
 
 =back
 
