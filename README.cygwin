@@ -565,15 +565,15 @@ be kept as clean as possible.
   pod/perl590delta.pod pod/perlhist.pod pod/perlmodlib.pod
   pod/perltoc.pod pod.lst Porting/Glossary pod/perlrepository.pod
   Porting/checkAUTHORS.pl
-  ext/Compress-Raw-Zlib/Changes ext/Compress-Raw-Zlib/README
-  ext/Compress-Zlib/Changes cpan/Cwd/Changes ext/DB_File/Changes
-  ext/Encode/Changes ext/Sys-Syslog/Changes ext/Time-HiRes/Changes
-  ext/Win32API-File/Changes lib/CGI/Changes lib/ExtUtils/CBuilder/Changes
-  lib/ExtUtils/Changes lib/ExtUtils/NOTES lib/ExtUtils/PATCHING
-  lib/ExtUtils/README lib/Module/Build/Changes lib/Net/Ping/Changes
-  lib/Test/Harness/Changes
-  lib/Term/ANSIColor/ChangeLog lib/Term/ANSIColor/README
-  README.symbian symbian/TODO
+  dist/Cwd/Changes ext/Compress-Raw-Zlib/Changes
+  ext/Compress-Raw-Zlib/README ext/Compress-Zlib/Changes
+  ext/DB_File/Changes ext/Encode/Changes ext/Sys-Syslog/Changes
+  ext/Time-HiRes/Changes ext/Win32API-File/Changes lib/CGI/Changes
+  lib/ExtUtils/CBuilder/Changes lib/ExtUtils/Changes lib/ExtUtils/NOTES
+  lib/ExtUtils/PATCHING lib/ExtUtils/README lib/Module/Build/Changes
+  lib/Net/Ping/Changes lib/Test/Harness/Changes
+  lib/Term/ANSIColor/ChangeLog lib/Term/ANSIColor/README README.symbian
+  symbian/TODO
 
 =item Build, Configure, Make, Install
 
@@ -714,8 +714,8 @@ be kept as clean as possible.
 
 =item Perl Module Tests
 
+  dist/Cwd/t/cwd.t
   ext/Compress-Zlib/t/14gzopen.t
-  cpan/Cwd/t/cwd.t
   ext/DB_File/t/db-btree.t
   ext/DB_File/t/db-hash.t
   ext/DB_File/t/db-recno.t

@@ -4,12 +4,12 @@ use warnings;
 use Config;
 BEGIN {
     if ($^O eq 'MSWin32') {
-	unshift @INC, ('../cpan/Cwd', '../cpan/Cwd/lib');
+	unshift @INC, ('../dist/Cwd', '../dist/Cwd/lib');
 	require File::Spec::Functions;
 	require FindExt;
     }
     else {
-	unshift @INC, 'cpan/Cwd';
+	unshift @INC, 'dist/Cwd';
     }
 }
 use Cwd;
@@ -28,7 +28,7 @@ my $is_Unix = !$is_Win32 && !$is_VMS;
 # This list cannot get any longer without overflowing the length limit for
 # environment variables on VMS
 my @toolchain = qw(cpan/AutoLoader/lib
-		   cpan/Cwd cpan/Cwd/lib
+		   dist/Cwd dist/Cwd/lib
 		   cpan/ExtUtils-Command/lib
 		   dist/ExtUtils-Install/lib
 		   cpan/ExtUtils-MakeMaker/lib

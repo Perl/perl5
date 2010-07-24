@@ -1060,13 +1060,14 @@ use File::Glob qw(:case);
     'PathTools' =>
 	{
 	'MAINTAINER'	=> 'kwilliams',
-	'DISTRIBUTION'	=> 'SMUELLER/PathTools-3.31.tar.gz',
-	'FILES'		=> q[cpan/Cwd],
+	'DISTRIBUTION'	=> 'SMUELLER/PathTools-3.31_02.tar.gz',
+	'FILES'		=> q[dist/Cwd],
 	'EXCLUDED'	=> [ qr{^t/lib/Test/} ],
-	'UPSTREAM'	=> "cpan",
-	# NOTE: PathTools is in cpan/Cwd/ because it contains Cwd.xs and
-	# something, possibly Makefile.SH, makes an assumption that the
-	# leafname of some  file corresponds with the pathname of the directory.
+	'UPSTREAM'	=> "blead",
+	# NOTE: PathTools is in dist/Cwd/ instead of dist/PathTools because it
+	# contains Cwd.xs and something, possibly Makefile.SH, makes an assumption
+	# that the leafname of some file corresponds with the pathname of the
+	# directory.
 	},
 
     'perlebcdic' =>

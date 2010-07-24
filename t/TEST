@@ -33,7 +33,6 @@ my %abs = (
 	   '../cpan/AutoLoader' => 1,
 	   '../cpan/CPAN' => 1,
 	   '../cpan/Class-ISA' => 1,
-	   '../cpan/Cwd' => 1,
 	   '../cpan/Devel-PPPort' => 1,
 	   '../cpan/Encode' => 1,
 	   '../cpan/ExtUtils-Command' => 1,
@@ -62,8 +61,9 @@ my %abs = (
 	   '../cpan/bignum' => 1,
 	   '../cpan/podlators' => 1,
 	   '../dist/ExtUtils-Install' => 1,
+	   '../dist/Cwd' => 1,
 	  );
-	      
+
 my %temp_no_core =
     ('../cpan/B-Debug' => 1,
      '../cpan/Compress-Raw-Bzip2' => 1,
