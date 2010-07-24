@@ -37,7 +37,10 @@ find(
 );
 
 for my $f ( @programs ) {
-  next if $f ~~ @exceptions;
-  ok( -f catfile('..', 'utils', basename($f)), "$f" );
+  $f =~ s/\.\z// if $^O eq 'VMS';
+  next if qr/(?i:$f)/ ~~ @exceptions;
+  $f = basename($f);
+  $f .= '.com' if $^O eq 'VMS';
+  ok( -f catfile('..', 'utils', $f), "$f" );
 }
 
