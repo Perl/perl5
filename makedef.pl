@@ -59,7 +59,7 @@ while (@ARGV) {
     }
 }
 
-my @PLATFORM = qw(aix win32 wince os2 MacOS netware);
+my @PLATFORM = qw(aix win32 wince os2 MacOS netware gnuelf);
 my %PLATFORM;
 @PLATFORM{@PLATFORM} = ();
 
@@ -254,6 +254,10 @@ elsif ($PLATFORM eq 'netware') {
 	    output_symbol("perl_alloc_override");
 	    output_symbol("perl_clone_host");
 	}
+}
+elsif ($PLATFORM eq 'gnuelf') {
+    print "LIBPERL_5.13.3 {\n";
+    print "  global:\n";
 }
 
 my %skip;
@@ -620,6 +624,11 @@ elsif ($PLATFORM eq 'netware') {
 			Perl_PerlIO_clearerr
 			PerlIO_perlio
 			)];
+}
+elsif ($PLATFORM eq 'gnuelf') {
+	emit_symbols [qw(
+		boot_DynaLoader
+	)];
 }
 
 unless ($define{'DEBUGGING'}) {
@@ -1226,14 +1235,13 @@ if ($define{'MULTIPLICITY'}) {
 	my $glob = readvar($f, sub { "Perl_" . $_[1] . $_[2] . "_ptr" });
 	emit_symbols $glob;
     }
-    unless ($define{'USE_ITHREADS'}) {
-	# XXX needed for XS extensions that define PERL_CORE
-	emit_symbol("PL_curinterp");
-    }
-    # XXX AIX seems to want the perlvars.h symbols, for some reason
-    if ($PLATFORM eq 'aix' or $PLATFORM eq 'os2') {	# OS/2 needs PL_thr_key
+    if ($define{'USE_ITHREADS'}) {
 	my $glob = readvar($perlvars_h);
 	emit_symbols $glob;
+    }
+    else {
+	# XXX needed for XS extensions that define PERL_CORE
+	emit_symbol("PL_curinterp");
     }
 }
 else {
@@ -1622,6 +1630,9 @@ if ($PLATFORM eq 'os2') {
 ; LAST_ORDINAL=$sym_ord
 EOP
 }
+elsif ($PLATFORM eq 'gnuelf') {
+    print "\n  local: *;\n};\n";
+}
 
 sub emit_symbol {
     my $symbol = shift;
@@ -1670,6 +1681,9 @@ sub output_symbol {
 	elsif ($PLATFORM eq 'netware') {
 	print "\t$symbol,\n";
 	}
+    elsif ($PLATFORM eq 'gnuelf') {
+        print "    $symbol;\n";
+    }
 }
 
 1;

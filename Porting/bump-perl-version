@@ -105,6 +105,12 @@ my $old_decimal = sprintf "%d.%03d%03d", $oldx, $oldy, $oldz; # 5.011001
 
 my @maps =  (
     [
+        qr{\b (LIBPERL_) ([\d.]+) (\s+ \{)}x,
+        sub { $2, ($newy % 2) ? "$1$newx.$newy.$newz$3" : "$1$newx.$newy$3" },
+        ($oldy % 2) ? "$oldx.$oldy.$oldz" : "$oldx.$oldy",
+        qr/makedef/,
+    ],
+    [
 	qr{^((?:api_)?version(?:=|\s+)'?) (\d+) ('?) (?!\.)}x,
 	sub { $2, "$1$newy$3" },
 	$oldy,
