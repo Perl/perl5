@@ -322,7 +322,7 @@ use File::Glob qw(:case);
 			     qw( bzip2-src/bzip2-cpp.patch
 			     )
 			   ],
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'Compress::Raw::Zlib' =>
@@ -336,7 +336,7 @@ use File::Glob qw(:case);
 				 t/99pod.t
 			       )
 			   ],
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'constant' =>
