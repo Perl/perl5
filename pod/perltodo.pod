@@ -334,7 +334,8 @@ visibility just to symbols declared in that file. It would be good to extend
 F<makedef.pl> to support this format, and to provide a means within
 C<Configure> to enable it. This would allow Unix users to test that the
 export list is correct, and to build a perl that does not pollute the global
-namespace with private symbols.
+namespace with private symbols, and will fail in the same way as msvc or mingw 
+builds or when using PERL_DL_NONLAZY=1.
 
 =head2 Cross-compile support
 
