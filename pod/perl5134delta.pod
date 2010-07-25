@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for rafl
-changelogged up to commit 34edcf0c
+changelogged up to commit 65bfe90c
 * PERL_STATIC_INLINE might want to be mentioned
 
 =head1 NAME
@@ -351,6 +351,14 @@ C<PERL_SUBVERSION>, explicitly marking them as incompatible with each other.
 
 Maintainance releases of stable perl's will continue to make no intentionally
 incompatible changes.
+
+=item Make extending the peephole optimizer easier
+
+As of version 5.8, extension authors were allowed to replace perl's peephole
+optimizer function. However, this was B<very> hard to do, as there was no way to
+add new optimizations without having to copy large parts of perl's original
+optimizer. This problem is now solved by a rework of the optimizer extension
+API. See L<perlguts/"Compile pass 3: peephole optimization"> for details.
 
 =back
 
