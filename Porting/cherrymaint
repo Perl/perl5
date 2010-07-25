@@ -38,7 +38,7 @@ die $usage if grep { /^(--help|-h)$/ } @ARGV;
 my %opt = (address => \$addr);
 GetOptions( \%opt, 'address=s', keys %votemap ) or die $usage;
 
-if ( keys(%opt) > 1 ) {
+if ( keys(%opt) > 2 ) {
   die "Error: cherrymaint takes only one action argument\n\n$usage"
 }
 
