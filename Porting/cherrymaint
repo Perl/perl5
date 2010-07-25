@@ -8,15 +8,19 @@ use LWP::UserAgent;
 
 my %votemap = (
   'unexamined' => 0,
-  'rejected' => 1,
-  'vote' => 4,
-  'picked' => 5,
+  'rejected'   => 1,
+  'vote'       => 4,
+  'picked'     => 5,
 );
+
+
+chomp(my $git_addr = `git config --get cherrymaint.address`);
+my $addr = length $git_addr ? $git_addr : 'localhost:3000';
 
 # Usage
 my $program = basename $0;
 my $usage = << "HERE";
-Usage: $program [ACTION] [COMMIT]
+Usage: $program [--address address] [ACTION] [COMMIT]
 
   ACTIONS: (default is 'vote' if omitted)
 
@@ -31,14 +35,14 @@ HERE
 die $usage if grep { /^(--help|-h)$/ } @ARGV;
 
 # Determine action
-my %opt;
-GetOptions( \%opt, keys %votemap ) or die $usage;
+my %opt = (address => \$addr);
+GetOptions( \%opt, 'address=s', keys %votemap ) or die $usage;
 
 if ( keys(%opt) > 1 ) {
-  die "Error: cherrymaint takes only one action argument\n\n$usage" 
+  die "Error: cherrymaint takes only one action argument\n\n$usage"
 }
 
-my ($action) = keys %opt;
+my ($action) = grep { exists $votemap{$_} } keys %opt;
 $action ||= 'vote';
 
 # Determine commit SHA1
@@ -63,7 +67,7 @@ unless ( $action eq 'vote' ) {
 
 # Send the action to cherrymaint
 my $n = $votemap{$action};
-my $url = "http://localhost:3000/mark?commit=${short_id}&value=${n}";
+my $url = "http://$addr/mark?commit=${short_id}&value=${n}";
 
 my $ua = LWP::UserAgent->new(
   agent => 'Porting/cherrymaint ',
@@ -77,10 +81,15 @@ if ($response->is_success) {
     say "Done.";
 }
 else {
-    die $response->status_line . << 'HERE';
+    die $response->status_line . << "HERE";
 
-Have you remembered to tunnel localhost:3000 to perl5.git.perl.org:3000? E.g.
-  $ ssh -C -L3000:localhost:3000 perl5.git.perl.org
+Have you remembered to tunnel $addr to perl5.git.perl.org:3000? E.g.
+  \$ ssh -C -L${\ join q{:} => reverse split /:/, $addr}:3000 perl5.git.perl.org
+
+Or maybe you created a different tunnel? You can specify the address to use
+either on the command line with --address, or by doing
+  \$ git config cherrymaint.address host:port
+
 HERE
 }
 
