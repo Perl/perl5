@@ -3115,7 +3115,8 @@ and its section titled "8. gcov: a Test Coverage Program"
 
 quick hint:
 
-    $ sh Configure -des  -Doptimize='-g' -Accflags='-fprofile-arcs -ftest-coverage' \
+    $ sh Configure -des -Dusedevel -Doptimize='-g' \
+        -Accflags='-fprofile-arcs -ftest-coverage' \
         -Aldflags='-fprofile-arcs -ftest-coverage' && make perl.gcov
     $ rm -f regexec.c.gcov regexec.gcda
     $ ./perl.gcov
