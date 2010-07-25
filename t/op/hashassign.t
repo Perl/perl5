@@ -8,7 +8,7 @@ BEGIN {
 
 # use strict;
 
-plan tests => 215;
+plan tests => 217;
 
 my @comma = ("key", "value");
 
@@ -305,4 +305,15 @@ foreach my $chr (60, 200, 600, 6000, 60000) {
     @h{@refs} = @types;
     @expect{map "$_", @refs} = @types;
     ok (eq_hash(\%h, \%expect), 'blessed ref stringification');
+}
+
+# [perl #76716] Hash assignment should not zap weak refs.
+{
+ my %tb;
+ use Scalar::Util;
+ Scalar::Util::weaken(my $p = \%tb);
+ %tb = ();
+ is $p, \%tb, "hash assignment should not zap weak refs";
+ undef %tb;
+ is $p, \%tb, "hash undef should not zap weak refs";
 }
