@@ -100,6 +100,9 @@ t/tmp*
 t/perl
 t/test_state
 *.output
+cpan/ExtUtils-MakeMaker/t/Big-Dummy/
+cpan/Module-Build/MB-*
+*.tmp
 
 # t/op/require.t byproducts
 t/bleah.pm
