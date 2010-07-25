@@ -13,7 +13,7 @@
 :   A  Member of public API:
 :
 :         add entry to global.sym (unless x or m);
-:         any doc entry goes in perlapi.pod rather than perlintern.api
+:         any doc entry goes in perlapi.pod rather than perlintern.pod
 :         makes '#define foo Perl_foo' scope not just for PERL_CORE/PERL_EXT
 :
 :   a  Allocates memory a la malloc/calloc.  Also implies "R":
@@ -48,7 +48,7 @@
 :
 :   M  May change:
 :
-:         (currently no effect)
+:         any doc entry is marked that function may change
 :
 :   m  Implemented as a macro:
 :
