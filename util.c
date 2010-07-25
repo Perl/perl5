@@ -3935,18 +3935,28 @@ Perl_grok_bslash_c(pTHX_ const char source, const bool output_warning)
     return result;
 }
 
-char *
-Perl_grok_bslash_o(pTHX_ const char *s, UV *uv, STRLEN *len, const bool output_warning)
+bool
+Perl_grok_bslash_o(pTHX_ const char *s,
+			 UV *uv,
+			 STRLEN *len,
+			 const char** error_msg,
+			 const bool output_warning)
 {
 
 /*  Documentation to be supplied when interface nailed down finally
- *  This returns NULL on success, otherwise a pointer to an internal constant
- *  error message.  On input:
- *	s   points to a string that begins with o, and the previous character was
- *	    a backslash.
- *	uv  points to a UV that will hold the output value
- *	len will point to the next character in the string past the end of this
- *	    construct
+ *  This returns FALSE if there is an error which the caller need not recover
+ *  from; , otherwise TRUE.  In either case the caller should look at *len
+ *  On input:
+ *	s   points to a string that begins with 'o', and the previous character
+ *	    was a backslash.
+ *	uv  points to a UV that will hold the output value, valid only if the
+ *	    return from the function is TRUE
+ *	len on success will point to the next character in the string past the
+ *		       end of this construct.
+ *	    on failure, it will point to the failure
+ *      error_msg is a pointer that will be set to an internal buffer giving an
+ *	    error message upon failure (the return is FALSE).  Untouched if
+ *	    function succeeds
  *	output_warning says whether to output any warning messages, or suppress
  *	    them
  */
@@ -3966,13 +3976,15 @@ Perl_grok_bslash_o(pTHX_ const char *s, UV *uv, STRLEN *len, const bool output_w
 
     if (*s != '{') {
 	*len = 1;	/* Move past the o */
-	return "Missing braces on \\o{}";
+	*error_msg = "Missing braces on \\o{}";
+	return FALSE;
     }
 
     e = strchr(s, '}');
     if (!e) {
 	*len = 2;	/* Move past the o{ */
-	return "Missing right brace on \\o{";
+	*error_msg = "Missing right brace on \\o{";
+	return FALSE;
     }
 
     /* Return past the '}' no matter what is inside the braces */
@@ -3982,7 +3994,8 @@ Perl_grok_bslash_o(pTHX_ const char *s, UV *uv, STRLEN *len, const bool output_w
 
     numbers_len = e - s;
     if (numbers_len == 0) {
-	return "Number with no digits";
+	*error_msg = "Number with no digits";
+	return FALSE;
     }
 
     *uv = NATIVE_TO_UNI(grok_oct(s, &numbers_len, &flags, NULL));
@@ -3998,7 +4011,7 @@ Perl_grok_bslash_o(pTHX_ const char *s, UV *uv, STRLEN *len, const bool output_w
 		       s);
     }
 
-    return NULL;
+    return TRUE;
 }
 
 /* To workaround core dumps from the uninitialised tm_zone we get the

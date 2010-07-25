@@ -2883,10 +2883,11 @@ S_scan_const(pTHX_ char *start)
 	    case 'o':
 		{
 		    STRLEN len;
+		    const char* error;
 
-		    char* error = grok_bslash_o(s, &uv, &len, 1);
+		    bool valid = grok_bslash_o(s, &uv, &len, &error, 1);
 		    s += len;
-		    if (error) {
+		    if (! valid) {
 			yyerror(error);
 			continue;
 		    }
