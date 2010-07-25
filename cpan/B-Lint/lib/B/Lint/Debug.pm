@@ -1,6 +1,6 @@
 package B::Lint::Debug;
 
-our $VERSION = '0.01';
+our $VERSION = '1.12';
 
 =head1 NAME
 

@@ -10,6 +10,7 @@ BEGIN {
     }
     require 'test.pl';
 }
+
 use strict;
 use warnings;
 
@@ -98,7 +99,7 @@ RESULT
     'private-names (method)';
 
 runlint 'undefined-subs', 'foo()', <<'RESULT';
-Nonexistant subroutine 'foo' called at -e line 1
+Nonexistent subroutine 'foo' called at -e line 1
 RESULT
 
 runlint 'undefined-subs', 'foo();sub foo;', <<'RESULT';
@@ -126,7 +127,7 @@ RESULT
     # preloaded mdoules would register themselves with B::Lint.
     my $res = runperl(
         switches => ["-MB::Lint"],
-        prog     =>
+        prog =>
             'BEGIN{B::Lint->register_plugin(X=>[q[x]])};use O(qw[Lint x]);sub X::match{warn qq[X ok.\n]};dummy()',
         stderr => 1,
     );
