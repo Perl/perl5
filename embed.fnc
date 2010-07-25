@@ -640,8 +640,8 @@ Ap	|void	|vload_module|U32 flags|NN SV* name|NULLOK SV* ver|NULLOK va_list* args
 p	|OP*	|localize	|NN OP *o|I32 lex
 ApdR	|I32	|looks_like_number|NN SV *const sv
 Apd	|UV	|grok_bin	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
-EXpR	|char	|grok_bslash_c	|const char source|const bool output_warning
-EXpR	|char*	|grok_bslash_o	|NN const char* s|NN UV* uv|NN STRLEN* len|const bool output_warning
+EXMpR	|char	|grok_bslash_c	|const char source|const bool output_warning
+EXMpR	|char*	|grok_bslash_o	|NN const char* s|NN UV* uv|NN STRLEN* len|const bool output_warning
 Apd	|UV	|grok_hex	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
 Apd	|int	|grok_number	|NN const char *pv|STRLEN len|NULLOK UV *valuep
 ApdR	|bool	|grok_numeric_radix|NN const char **sp|NN const char *send
