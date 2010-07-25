@@ -61,6 +61,11 @@ Makefile.old
 *.res
 *.RES
 
+# gcov build products. see L<perlhack/"GCC gcov Profiling">
+*.gcov
+*.gcda
+*.gcno
+
 dll.base
 /ext/DynaLoader/dl_win32.xs
 splittree.pl
