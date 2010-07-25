@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for rafl
-changelogged up to commit a095c4ee
+changelogged up to commit 34edcf0c
 * PERL_STATIC_INLINE might want to be mentioned
 
 =head1 NAME
@@ -97,6 +97,10 @@ XXX
 =head2 Updated Modules and Pragmata
 
 =over 4
+
+=item C<B::Lint>
+
+Upgraded from version 1.11 to 1.12.
 
 =item C<Carp>
 
