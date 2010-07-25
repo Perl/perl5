@@ -2868,7 +2868,7 @@ S_scan_const(pTHX_ char *start)
 		    goto default_action;
 		}
 
-	    /* eg. \132 indicates the octal constant 0x132 */
+	    /* eg. \132 indicates the octal constant 0132 */
 	    case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7':
 		{
