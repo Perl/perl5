@@ -164,10 +164,6 @@ cpan/bignum/t/ratopt_a.t		See if bigrat a => X works
 cpan/bignum/t/scope_f.t			See if no bignum works
 cpan/bignum/t/scope_i.t			See if no bigint works
 cpan/bignum/t/scope_r.t			See if no bigrat works
-cpan/B-Lint/lib/B/Lint/Debug.pm			Adds debugging stringification to B::
-cpan/B-Lint/lib/B/Lint.pm			Compiler Lint backend
-cpan/B-Lint/t/lint.t				See if B::Lint works
-cpan/B-Lint/t/pluglib/B/Lint/Plugin/Test.pm	See if B::Lint works
 cpan/CGI/Changes			Changelog for CGI.pm
 cpan/CGI/examples/caution.xbm		CGI example
 cpan/CGI/examples/clickable_image.cgi	CGI example
@@ -2613,6 +2609,10 @@ dist/base/t/version.t		See if base works with versions
 dist/base/t/warnings.t		See if base works with warnings
 dist/B-Deparse/Deparse.pm	Compiler Deparse backend
 dist/B-Deparse/t/deparse.t	See if B::Deparse works
+dist/B-Lint/lib/B/Lint/Debug.pm			Adds debugging stringification to B::
+dist/B-Lint/lib/B/Lint.pm			Compiler Lint backend
+dist/B-Lint/t/lint.t				See if B::Lint works
+dist/B-Lint/t/pluglib/B/Lint/Plugin/Test.pm	See if B::Lint works
 dist/constant/lib/constant.pm	For "use constant"
 dist/constant/t/constant.t	See if compile-time constants work
 dist/Cwd/Changes			Cwd extension Changelog
