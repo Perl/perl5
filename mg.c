@@ -1385,6 +1385,7 @@ Perl_despatch_signals(pTHX)
     PL_sig_pending = 0;
     for (sig = 1; sig < SIG_SIZE; sig++) {
 	if (PL_psig_pend[sig]) {
+	    dSAVE_ERRNO;
 	    PERL_BLOCKSIG_ADD(set, sig);
  	    PL_psig_pend[sig] = 0;
 	    PERL_BLOCKSIG_BLOCK(set);
@@ -1394,6 +1395,7 @@ Perl_despatch_signals(pTHX)
 	    (*PL_sighandlerp)(sig);
 #endif
 	    PERL_BLOCKSIG_UNBLOCK(set);
+	    RESTORE_ERRNO;
 	}
     }
 }
