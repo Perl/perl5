@@ -2555,7 +2555,10 @@ PP(pp_leavesublv)
 	    if (MARK == SP) {
 		/* Temporaries are bad unless they happen to be elements
 		 * of a tied hash or array */
-		if (SvFLAGS(TOPs) & (SVs_TEMP | SVs_PADTMP | SVf_READONLY) &&
+		if ((SvFLAGS(TOPs) & (SVs_TEMP | SVs_PADTMP) ||
+		     (SvFLAGS(TOPs) & (SVf_READONLY | SVf_FAKE))
+		       == SVf_READONLY
+		    ) &&
 		    !(SvRMAGICAL(TOPs) && mg_find(TOPs, PERL_MAGIC_tiedelem))) {
 		    LEAVE;
 		    cxstack_ix--;

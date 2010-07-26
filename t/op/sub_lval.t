@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>71;
+plan tests=>73;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -570,3 +570,8 @@ Execution of - aborted due to compilation errors.
     lval_decl = 5;
     is($x, 5, "subroutine declared with lvalue before definition retains lvalue. [perl #68758]");
 }
+
+sub fleen : lvalue { $pnare }
+$pnare = __PACKAGE__;
+ok eval { fleen = 1 }, "lvalues can return COWs (CATTLE?) [perl #75656]";\
+is $pnare, 1, 'and returning CATTLE actually works';
