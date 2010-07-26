@@ -98,6 +98,14 @@ XXX
 
 =over 4
 
+=item C<Archive::Tar>
+
+Upgraded from version 1.64 to 1.66.
+
+Among other things, the new version adds a new option to C<ptar> to allow safe
+creation of tarballs without world-writable files on Windows, allowing those
+archives to be uploaded to CPAN.
+
 =item C<B::Lint>
 
 Upgraded from version 1.11 to 1.12.
@@ -255,7 +263,7 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+F<t/op/print.t> has been added to test implicit printing of C<$_>.
 
 =back
 
@@ -380,6 +388,15 @@ C<@DB::args>.
 =item *
 
 Several memory leaks when loading XS modules were fixed.
+
+=item *
+
+A panic in the regular expression optimizer has been fixed (RT#75762).
+
+=item *
+
+Assignments to lvalue subroutines now honor copy-on-write behavior again, which
+has been broken since version 5.10.0 (RT#75656).
 
 =back
 
