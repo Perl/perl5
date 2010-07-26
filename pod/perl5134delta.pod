@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for rafl
-changelogged up to commit 65bfe90c
+changelogged up to commit d6fa5a34
 * PERL_STATIC_INLINE might want to be mentioned
 
 =head1 NAME
@@ -42,12 +42,31 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
+=head2 Declare API incompatibility between blead releases
 
-    There are no changes intentionally incompatible with 5.XXX.XXX. If any
-    exist, they are bugs and reports are welcome.
+Only stable releases (5.10.x, 5.12.x, 5.14.x, ...) guarantee binary
+compatibility with each other, while blead releases (5.13.x, 5.15.x, ...) often
+break this compatibility. However, prior to perl 5.13.4, all blead releases had
+the same C<PERL_API_REVISION>, C<PERL_API_VERSION>, and C<PERL_API_SUBVERSION>,
+effectively declaring them as binary compatible, which they weren't. From now
+on, blead releases will have a C<PERL_API_SUBVERSION> equal to their
+C<PERL_SUBVERSION>, explicitly marking them as incompatible with each other.
 
-[ List each incompatible change as a =head2 entry ]
+Maintainance releases of stable perl versions will continue to make no
+intentionally incompatible API changes.
+
+=head2 Check API compatibility when loading XS modules
+
+When perl's API changes in incompatible ways (which usually happens between
+every major release), XS modules compiled for previous versions of perl will not
+work anymore. They will need to be recompiled against the new perl.
+
+In order to ensure that modules are recompiled, and to prevent users from
+accidentally loading modules compiled for old perls into newer ones, the
+C<XS_APIVERSION_BOOTCHECK> macro has been added. That macro, which is called
+when loading every newly compiled extension, compares the API version of the
+running perl with the version a module has been compiled for and raises an
+exception if they don't match.
 
 =head1 Deprecations
 
@@ -167,6 +186,36 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
+=head3 L<perldiag>
+
+=over 4
+
+=item *
+
+The following existing diagnostics are now documented:
+
+=over 4
+
+=item *
+
+L<Ambiguous use of %c resolved as operator %c|perldiag/"Ambiguous use of %c resolved as operator %c">
+
+=item *
+
+L<Ambiguous use of %c{%s} resolved to %c%s|perldiag/"Ambiguous use of %c{%s} resolved to %c%s">
+
+=item *
+
+L<Ambiguous use of %c{%s%s} resolved to %c%s%s|perldiag/"Ambiguous use of %c{%s%s} resolved to %c%s%s">
+
+=item *
+
+L<Ambiguous use of -%s resolved as -&%s()|perldiag/"Ambiguous use of -%s resolved as -&%s()">
+
+=back
+
+=back
+
 =head3 L<perlport>
 
 =over 4
@@ -265,6 +314,11 @@ that they represent may be covered elsewhere.
 
 F<t/op/print.t> has been added to test implicit printing of C<$_>.
 
+=item *
+
+F<t/io/errnosig.t> has been added to test for restoration of of C<$!> when
+leaving signal handlers.
+
 =back
 
 =head1 Platform Support
@@ -347,19 +401,6 @@ contains a more specific escape hatch:
 This can be used for modules that have not been upgraded to 5.6 naming
 conventions (and really should be completely obsolete by now).
 
-=item Declare API incompatibility between blead releases
-
-Only stable releases (5.10.x, 5.12.x, 5.14.x, ...) guarantee binary
-compatibility with each other, while blead releases (5.13.x, 5.15.x, ...) often
-break this compatibility. However, prior to perl 5.13.4, all blead releases had
-the same C<PERL_API_REVISION>, C<PERL_API_VERSION>, and C<PERL_API_SUBVERSION>,
-effectively declaring them as binary compatible, which they weren't. From now
-on, blead releases will have a C<PERL_API_SUBVERSION> equal to their
-C<PERL_SUBVERSION>, explicitly marking them as incompatible with each other.
-
-Maintainance releases of stable perl's will continue to make no intentionally
-incompatible changes.
-
 =item Make extending the peephole optimizer easier
 
 As of version 5.8, extension authors were allowed to replace perl's peephole
@@ -397,6 +438,15 @@ A panic in the regular expression optimizer has been fixed (RT#75762).
 
 Assignments to lvalue subroutines now honor copy-on-write behavior again, which
 has been broken since version 5.10.0 (RT#75656).
+
+=item *
+
+Assignments to glob copies now behave just like assignments to regular globs
+(RT#1804).
+
+=item *
+
+Within signal handlers, C<$!> is now implicitly localized.
 
 =back
 
