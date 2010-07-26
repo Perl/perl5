@@ -7,7 +7,7 @@ use Archive::Tar;
 use Data::Dumper;
 
 my $opts = {};
-getopts('Ddcvzthxf:I', $opts) or die usage();
+getopts('Ddcvzthxf:IC', $opts) or die usage();
 
 ### show the help message ###
 die usage() if $opts->{h};
@@ -40,8 +40,14 @@ if( $opts->{c} ) {
         $file->fdopen(fileno(STDOUT),"w");
     }
 
-    Archive::Tar->create_archive( $file, $compress, @files );
-
+    my $tar = Archive::Tar->new;
+    $tar->add_files(@files);
+    if( $opts->{C} ) {
+        for my $f ($tar->get_files) {
+            $f->mode($f->mode & ~022); # chmod go-w
+        }
+    }
+    $tar->write($file, $compress);
 } else {
     if ($file eq '-') {
         use IO::Handle;
@@ -81,7 +87,7 @@ sub usage {
 
 =head1 SYNOPSIS
 
-    ptar -c [-v] [-z] [-f ARCHIVE_FILE | -] FILE FILE ...
+    ptar -c [-v] [-z] [-C] [-f ARCHIVE_FILE | -] FILE FILE ...
     ptar -x [-v] [-z] [-f ARCHIVE_FILE | -]
     ptar -t [-z] [-f ARCHIVE_FILE | -]
     ptar -h
@@ -95,6 +101,7 @@ sub usage {
     z   Read/Write zlib compressed ARCHIVE_FILE (not always available)
     v   Print filenames as they are added or extraced from ARCHIVE_FILE
     h   Prints this help message
+    C   CPAN mode - drop 022 from permissions
 
 =head1 SEE ALSO
 
