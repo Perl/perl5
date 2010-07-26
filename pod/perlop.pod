@@ -1019,31 +1019,28 @@ and in transliterations.
 X<\t> X<\n> X<\r> X<\f> X<\b> X<\a> X<\e> X<\x> X<\0> X<\c> X<\N> X<\N{}>
 X<\o{}>
 
-    Sequence    Note  Description
-    \t                tab               (HT, TAB)
-    \n                newline           (NL)
-    \r                return            (CR)
-    \f                form feed         (FF)
-    \b                backspace         (BS)
-    \a                alarm (bell)      (BEL)
-    \e                escape            (ESC)
-    \x{263a}     [1]  hex char          (example: SMILEY)
-    \x1b         [2]  restricted range hex char (example: ESC)
-    \N{name}     [3]  named Unicode character
-    \N{U+263D}   [4]  Unicode character (example: FIRST QUARTER MOON)
-    \c[          [5]  control char      (example: chr(27))
-    \o{23072}    [6]  octal char        (example: SMILEY)
-    \033         [7]  restricted range octal char  (example: ESC)
+    Sequence     Note  Description
+    \t                  tab               (HT, TAB)
+    \n                  newline           (NL)
+    \r                  return            (CR)
+    \f                  form feed         (FF)
+    \b                  backspace         (BS)
+    \a                  alarm (bell)      (BEL)
+    \e                  escape            (ESC)
+    \x{263a}     [1,8]  hex char          (example: SMILEY)
+    \x1b         [2,8]  restricted range hex char (example: ESC)
+    \N{name}     [3]    named Unicode character
+    \N{U+263D}   [4,8]  Unicode character (example: FIRST QUARTER MOON)
+    \c[          [5]    control char      (example: chr(27))
+    \o{23072}    [6,8]  octal char        (example: SMILEY)
+    \033         [7,8]  restricted range octal char  (example: ESC)
 
 =over 4
 
 =item [1]
 
-The result is the character whose ordinal is the hexadecimal number between
-the braces.  If the ordinal is 0x100 and above, the character will be the
-Unicode character corresponding to the ordinal.  If the ordinal is between
-0 and 0xFF, the rules for which character it represents are the same as for
-L<restricted hex chars|/[2]>.
+The result is the character specified by the hexadecimal number between
+the braces.  See L</[8]> below for details on which character.
 
 Only hexadecimal digits are valid between the braces. If an invalid
 character is encountered, a warning will be issued and the invalid
@@ -1056,13 +1053,13 @@ will not cause a warning.
 
 =item [2]
 
-The result is a single-byte character whose ordinal is in the range 0x00 to
-0xFF.
+The result is the character specified by the hexadecimal number in the range
+0x00 to 0xFF.  See L</[8]> below for details on which character.
 
 Only hexadecimal digits are valid following C<\x>.  When C<\x> is followed
-by less than two valid digits, any valid digits will be zero-padded.  This
+by fewer than two valid digits, any valid digits will be zero-padded.  This
 means that C<\x7> will be interpreted as C<\x07> and C<\x> alone will be
-interpreted as C<\x00>.  Except at the end of a string, having less than
+interpreted as C<\x00>.  Except at the end of a string, having fewer than
 two valid digits will result in a warning.  Note that while the warning
 says the illegal character is ignored, it is only ignored as part of the
 escape and will still be used as the subsequent character in the string.
@@ -1074,32 +1071,15 @@ For example:
   "\x7q"      "\x07q"   yes
   "\xq"       "\x00q"   yes
 
-The B<run-time> interpretation of single-byte characters depends on the
-platform and on pragmata in effect.  On EBCDIC platforms the character is
-treated as native to the platform's code page.  On other platforms, the
-representation and semantics (sort order and which characters are upper
-case, lower case, digit, non-digit, etc.) depends on the current
-L<S<C<locale>>|perllocale> settings at run-time.
-
-However, when L<C<S<use feature 'unicode_strings'>>|feature> is in effect
-and both L<C<S<use bytes>>|bytes> and L<C<S<use locale>>|locale> are not,
-characters from 0x80 to 0xff are treated as Unicode code points from
-the Latin-1 Supplement block.
-
-Note that the locale semantics of single-byte characters in a regular
-expression are determined when the regular expression is compiled, not when
-the regular expression is used.  When a regular expression is interpolated
-into another regular expression -- any prior semantics are ignored and only
-current locale matters for the resulting regular expression.
-
 =item [3]
 
-For documentation of C<\N{name}>, see L<charnames>.
+The result is the Unicode character given by I<name>.
+See L<charnames>.
 
 =item [4]
 
-C<\N{U+I<wide hex char>}> means the Unicode character whose Unicode ordinal
-number is I<wide hex char>.
+C<\N{U+I<hexadecimal number>}> means the Unicode character whose Unicode code
+point is I<hexadecimal number>.
 
 =item [5]
 
@@ -1138,8 +1118,8 @@ To get platform independent controls, you can use C<\N{...}>.
 
 =item [6]
 
-The result is the character whose ordinal is the octal number between the
-braces.
+The result is the character specified by the octal number between the braces.
+See L</[8]> below for details on which character.
 
 If a character that isn't an octal digit is encountered, a warning is raised,
 and the value is based on the octal digits before it, discarding it and all
@@ -1148,8 +1128,11 @@ no octal digits at all.
 
 =item [7]
 
-The result is the character whose ordinal is the given three digit octal
-number.  Some contexts allow 2 or even 1 digit, but any usage without exactly
+The result is the character specified by the three digit octal number in the
+range 000 to 777 (but best to not use above 077, see next paragraph).  See
+L</[8]> below for details on which character.
+
+Some contexts allow 2 or even 1 digit, but any usage without exactly
 three digits, the first being a zero, may give unintended results.  (For
 example, see L<perlrebackslash/Octal escapes>.)  Starting in Perl 5.14, you may
 use C<\o{}> instead which avoids all these problems.  Otherwise, it is best to
@@ -1160,11 +1143,38 @@ instead.
 
 A backslash followed by a non-octal digit in a bracketed character class
 (C<[\8]> or C<[\9]>) will be interpreted as a NULL character and the digit.
+
 Having fewer than 3 digits may lead to a misleading warning message that says
 that what follows is ignored.  For example, C<"\128"> in the ASCII character set
 is equivalent to the two characters C<"\n8">, but the warning C<Illegal octal
 digit '8' ignored> will be thrown.  To avoid this warning, make sure to pad
 your octal number with C<0>s: C<"\0128">.
+
+=item [8]
+
+Several of the constructs above specify a character by a number.  That number
+gives the character's position in the character set encoding (indexed from 0).
+This is called synonymously its ordinal, code position, or code point).  Perl
+works on platforms that have a native encoding currently of either ASCII/Latin1
+or EBCDIC, each of which allow specification of 256 characters.  In general, if
+the number is 255 (0xFF, 0377) or below, Perl interprets this in the platform's
+native encoding.  If the number is 256 (0x100, 0400) or above, Perl interprets
+it as as a Unicode code point and the result is the corresponding Unicode
+character.  For example C<\x{50}> and C<\o{120}> both are the number 80 in
+decimal, which is less than 256, so the number is interpreted in the native
+character set encoding.  In ASCII the character in the 80th position (indexed
+from 0) is the letter "P", and in EBCDIC it is the ampersand symbol "&".
+C<\x{100}> and C<\o{400}> are both 256 in decimal, so the number is interpreted
+as a Unicode code point no matter what the native encoding is.  The name of the
+character in the 100th position (indexed by 0) in Unicode is
+C<LATIN CAPITAL LETTER A WITH MACRON>.
+
+There are a couple of exceptions to the above rule.  C<\N{U+I<hex number>}> is
+always interpreted as a Unicode code point, so that C<\N{U+0050}> is "P" even
+on EBCDIC platforms.  And if L<C<S<use encoding>>|encoding> is in effect, the
+number is considered to be in that encoding, and is translated from that into
+the platform's native encoding if there is a corresponding native character;
+otherwise to Unicode.
 
 =back
 
