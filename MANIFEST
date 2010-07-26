@@ -3261,6 +3261,7 @@ ext/XS-APItest/t/my_cxt.t	XS::APItest: test MY_CXT interface
 ext/XS-APItest/t/my_exit.t	XS::APItest: test my_exit
 ext/XS-APItest/t/Null.pm	Helper for ./blockhooks.t
 ext/XS-APItest/t/op.t		XS::APItest: tests for OP related APIs
+ext/XS-APItest/t/peep.t		Test hooking PL_peepp
 ext/XS-APItest/t/pmflag.t	Test removal of Perl_pmflag()
 ext/XS-APItest/t/printf.t	XS::APItest extension
 ext/XS-APItest/t/ptr_table.t	Test ptr_table_* APIs
