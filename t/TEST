@@ -39,7 +39,6 @@ my %abs = (
 	   '../cpan/ExtUtils-Constant' => 1,
 	   '../cpan/ExtUtils-MakeMaker' => 1,
 	   '../cpan/ExtUtils-Manifest' => 1,
-	   '../cpan/ExtUtils-ParseXS' => 1,
 	   '../cpan/File-Fetch' => 1,
 	   '../cpan/IPC-Cmd' => 1,
 	   '../cpan/IPC-SysV' => 1,
@@ -60,8 +59,9 @@ my %abs = (
 	   '../cpan/Tie-File' => 1,
 	   '../cpan/bignum' => 1,
 	   '../cpan/podlators' => 1,
-	   '../dist/ExtUtils-Install' => 1,
 	   '../dist/Cwd' => 1,
+	   '../dist/ExtUtils-Install' => 1,
+	   '../dist/ExtUtils-ParseXS' => 1,
 	  );
 
 my %temp_no_core =

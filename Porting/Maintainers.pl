@@ -607,8 +607,8 @@ use File::Glob qw(:case);
 					t/include/nsUniversalDetector.h
 					t/include/nscore.h
 				   }],
-	'FILES'		=> q[cpan/ExtUtils-ParseXS],
-	'UPSTREAM'	=> 'cpan',
+	'FILES'		=> q[dist/ExtUtils-ParseXS],
+	'UPSTREAM'	=> 'blead',
 	},
 
     'faq' =>
