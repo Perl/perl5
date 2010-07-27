@@ -7,9 +7,8 @@ use strict;
 # the exe bit in the release tarball
 
 require './test.pl';
-if ($^O eq "MSWin32") {
-  diag( "-x on MSWin32 only indicates file has executable suffix. Try Cygwin?" );
-  skip_all();
+if ( $^O eq "MSWin32" ) {
+  skip_all( "-x on MSWin32 only indicates file has executable suffix. Try Cygwin?" );
 }
 
 plan('no_plan');
