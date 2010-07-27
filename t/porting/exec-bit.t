@@ -33,7 +33,7 @@ for my $f ( @manifest ) {
   next unless -x "../$f";
 
   ok( $exe_list{$f}, "tarball will chmod +x $f" )
-    or diag( "Remove the exec bit or add to Porting/exec-bit.txt" );
+    or diag( "Remove the exec bit or add '$f' to Porting/exec-bit.txt" );
 
   delete $exe_list{$f}; # seen it
 }
