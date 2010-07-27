@@ -38,6 +38,16 @@ C<\N{}>, C<charnames::vianame>, C<charnames::viacode> now know about every
 character in Unicode.  Previously, they didn't know about the Hangul syllables
 nor a number of CJK (Chinese/Japanese/Korean) characters.
 
+=head2 C<srand()> now returns the seed
+
+This allows programs which need to have repeatable results to not have to come
+up with their own seed generating mechanism.  Instead, they can use C<srand()>
+and somehow stash the return for future use.  Typical is a test program which
+has too many combinations to test comprehensively in the time available to it
+each run.  It can test a random subset each time, and should there be a
+failure, log the seed used for that run so that it can later be used to
+reproduce the exact results.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

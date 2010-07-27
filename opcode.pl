@@ -757,7 +757,7 @@ atan2		atan2			ck_fun		fsT@	S S
 sin		sin			ck_fun		fsTu%	S?
 cos		cos			ck_fun		fsTu%	S?
 rand		rand			ck_fun		sT%	S?
-srand		srand			ck_fun		s%	S?
+srand		srand			ck_fun		sT%	S?
 exp		exp			ck_fun		fsTu%	S?
 log		log			ck_fun		fsTu%	S?
 sqrt		sqrt			ck_fun		fsTu%	S?

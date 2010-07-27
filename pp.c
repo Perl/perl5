@@ -2950,12 +2950,12 @@ PP(pp_rand)
 
 PP(pp_srand)
 {
-    dVAR; dSP;
+    dVAR; dSP; dTARGET;
     const UV anum = (MAXARG < 1) ? seed() : POPu;
     (void)seedDrand01((Rand_seed_t)anum);
     PL_srand_called = TRUE;
-    EXTEND(SP, 1);
-    RETPUSHYES;
+    XPUSHu(anum);
+    RETURN;
 }
 
 PP(pp_int)

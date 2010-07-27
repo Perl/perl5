@@ -6157,34 +6157,34 @@ X<srand> X<seed> X<randseed>
 
 =item srand
 
-Sets the random number seed for the C<rand> operator.
+Sets and returns the random number seed for the C<rand> operator.
 
 The point of the function is to "seed" the C<rand> function so that
 C<rand> can produce a different sequence each time you run your
-program.
+program.  When called with a parameter, C<srand> uses that for the seed;
+otherwise it (semi-)randomly chooses a seed.  In either case, starting with
+Perl 5.14, it returns the seed.
 
-If srand() is not called explicitly, it is called implicitly at the
-first use of the C<rand> operator.  However, this was not true of
-versions of Perl before 5.004, so if your script will run under older
-Perl versions, it should call C<srand>.
+If C<srand()> is not called explicitly, it is called implicitly without a
+parameter at the first use of the C<rand> operator.  However, this was not true
+of versions of Perl before 5.004, so if your script will run under older
+Perl versions, it should call C<srand>; otherwise most programs won't call
+C<srand()> at all.
 
-Most programs won't even call srand() at all, except those that
-need a cryptographically-strong starting point rather than the
-generally acceptable default, which is based on time of day,
-process ID, and memory allocation, or the F</dev/urandom> device
-if available. You may also want to call srand() after a fork() to
-avoid child processes sharing the same seed value as the parent (and
-consequently each other).
+But there are a few situations in recent Perls where programs are likely to
+want to call C<srand>.  One is for generating predictable results generally for
+testing or debugging.  There, you use C<srand($seed)>, with the same C<$seed>
+each time.  Another other case is where you need a cryptographically-strong
+starting point rather than the generally acceptable default, which is based on
+time of day, process ID, and memory allocation, or the F</dev/urandom> device
+if available.  And still another case is that you may want to call C<srand()>
+after a C<fork()> to avoid child processes sharing the same seed value as the
+parent (and consequently each other).
 
-You can call srand($seed) with the same $seed to reproduce the
-I<same> sequence from rand(), but this is usually reserved for
-generating predictable results for testing or debugging.
-Otherwise, don't call srand() more than once in your program.
-
-Do B<not> call srand() (i.e., without an argument) more than once per
+Do B<not> call C<srand()> (i.e., without an argument) more than once per
 process.  The internal state of the random number generator should
 contain more entropy than can be provided by any seed, so calling
-srand() again actually I<loses> randomness.
+C<srand()> again actually I<loses> randomness.
 
 Most implementations of C<srand> take an integer and will silently
 truncate decimal numbers.  This means C<srand(42)> will usually
@@ -6215,6 +6215,11 @@ for a seed can fall prey to the mathematical property that
     a^b == (a+1)^(b+1)
 
 one-third of the time.  So don't do that.
+
+A typical use of the returned seed is for a test program which has too many
+combinations to test comprehensively in the time available to it each run.  It
+can test a random subset each time, and should there be a failure, log the seed
+used for that run so that it can later be used to reproduce the exact results.
 
 =item stat FILEHANDLE
 X<stat> X<file, status> X<ctime>

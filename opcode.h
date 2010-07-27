@@ -1658,7 +1658,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x0001378e,	/* sin */
 	0x0001378e,	/* cos */
 	0x0001370c,	/* rand */
-	0x00013604,	/* srand */
+	0x0001370c,	/* srand */
 	0x0001378e,	/* exp */
 	0x0001378e,	/* log */
 	0x0001378e,	/* sqrt */
