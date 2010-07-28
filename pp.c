@@ -2954,7 +2954,14 @@ PP(pp_srand)
     const UV anum = (MAXARG < 1) ? seed() : POPu;
     (void)seedDrand01((Rand_seed_t)anum);
     PL_srand_called = TRUE;
-    XPUSHu(anum);
+    if (anum)
+	XPUSHu(anum);
+    else {
+	/* Historically srand always returned true. We can avoid breaking
+	   that like this:  */
+	sv_setpvs(TARG, "0 but true");
+	XPUSHTARG;
+    }
     RETURN;
 }
 
