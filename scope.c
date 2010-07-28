@@ -77,10 +77,10 @@ Perl_cxinc(pTHX)
     dVAR;
     const IV old_max = cxstack_max;
     cxstack_max = GROW(cxstack_max);
-    Renew(cxstack, cxstack_max, PERL_CONTEXT);
+    Renew(cxstack, cxstack_max + 1, PERL_CONTEXT);	/* XXX should fix CXINC macro */
     /* Without any kind of initialising deep enough recursion
      * will end up reading uninitialised PERL_CONTEXTs. */
-    PoisonNew(cxstack + old_max, cxstack_max - old_max, PERL_CONTEXT);
+    PoisonNew(cxstack + old_max + 1, cxstack_max - old_max, PERL_CONTEXT);
     return cxstack_ix + 1;
 }
 
