@@ -10,7 +10,7 @@ BEGIN {
 use strict;
 
 require "test.pl";
-plan(tests => 4);
+plan(tests => 5);
 
 # Generate a load of random numbers.
 # int() avoids possible floating point error.
@@ -57,3 +57,7 @@ sleep(1); # in case our srand() is too time-dependent
 @second_run = `$^X -le "print int rand 100 for 1..100"`;
 
 ok( !eq_array(\@first_run, \@second_run), 'srand() called automatically');
+
+# check srand's return value
+my $seed = srand(1764);
+is( $seed, 1764, "return value" );
