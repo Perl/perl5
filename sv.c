@@ -5373,16 +5373,14 @@ Perl_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
 
     PERL_ARGS_ASSERT_SV_DEL_BACKREF;
 
-    if (SvTYPE(tsv) == SVt_PVHV) {
-	if (SvOOK(tsv)) {
-	    /* SvOOK: We must avoid creating the hv_aux structure if its
-	     * not already there, as that is stored in the main HvARRAY(),
-	     * and hfreentries assumes that no-one reallocates HvARRAY()
-	     * while it is running.  */
-	    av = *Perl_hv_backreferences_p(aTHX_ MUTABLE_HV(tsv));
-	}
+    if (SvTYPE(tsv) == SVt_PVHV && SvOOK(tsv)) {
+	av = *Perl_hv_backreferences_p(aTHX_ MUTABLE_HV(tsv));
+	/* We mustn't attempt to "fix up" the hash here by moving the
+	   backreference array back to the hv_aux structure, as that is stored
+	   in the main HvARRAY(), and hfreentries assumes that no-one
+	   reallocates HvARRAY() while it is running.  */
     }
-    else {
+    if (!av) {
 	const MAGIC *const mg
 	    = SvMAGICAL(tsv) ? mg_find(tsv, PERL_MAGIC_backref) : NULL;
 	if (mg)
