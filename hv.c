@@ -1666,15 +1666,23 @@ S_hfreeentries(pTHX_ HV *hv)
 	    HE *entry;
             struct mro_meta *meta;
 	    struct xpvhv_aux *iter = HvAUX(hv);
-	    /* If there are weak references to this HV, we need to avoid
-	       freeing them up here.  In particular we need to keep the AV
-	       visible as what we're deleting might well have weak references
-	       back to this HV, so the for loop below may well trigger
-	       the removal of backreferences from this array.  */
+	    /* weak references: if called from sv_clear(), the backrefs
+	     * should already have been killed; if there are any left, its
+	     * because we're doing hv_clear() or hv_undef(), and the HV
+	     * will continue to live.
+	     * Because while freeing the entries we fake up a NULL HvARRAY
+	     * (and hence HvAUX), we need to store the backref array
+	     * somewhere else; but it still needs to be visible in case
+	     * any the things we free happen to call sv_del_backref().
+	     * We do this by storing it in magic instead.
+	     * If, during the entry freeing, a destructor happens to add
+	     * a new weak backref, then sv_add_backref will look in both
+	     * places (magic in HvAUX) for the AV, but will create a new
+	     * AV in HvAUX if it can't find one. So at the end of the
+	     * iteration we have to allow for this. */
 
 	    if (iter->xhv_backreferences) {
-		/* So donate them to regular backref magic to keep them safe.
-		   The sv_magic will increase the reference count of the AV,
+		/* The sv_magic will increase the reference count of the AV,
 		   so we need to drop it first. */
 		SvREFCNT_dec(iter->xhv_backreferences);
 		if (AvFILLp(iter->xhv_backreferences) == -1) {
