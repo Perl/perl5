@@ -571,7 +571,7 @@ do_test(23,
   RV = $ADDR
   SV = PVCV\\($ADDR\\) at $ADDR
     REFCNT = (2)
-    FLAGS = \\(POK,pPOK,CONST\\)
+    FLAGS = \\(POK,pPOK,CONST,ISXSUB\\)
     IV = 0					# $] < 5.009
     NV = 0					# $] < 5.009
     PROTOTYPE = ""
