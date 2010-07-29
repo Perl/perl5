@@ -5329,46 +5329,51 @@ void
 Perl_sv_add_backref(pTHX_ SV *const tsv, SV *const sv)
 {
     dVAR;
+    SV **svp;
     AV *av;
+    MAGIC *mg = NULL;
 
     PERL_ARGS_ASSERT_SV_ADD_BACKREF;
 
     if (SvTYPE(tsv) == SVt_PVHV) {
-	AV **const avp = Perl_hv_backreferences_p(aTHX_ MUTABLE_HV(tsv));
+	svp = (SV**)Perl_hv_backreferences_p(aTHX_ MUTABLE_HV(tsv));
 
-	av = *avp;
-	if (!av) {
-	    /* There is no AV in the official place - try a fixup.  */
-	    MAGIC *const mg = mg_find(tsv, PERL_MAGIC_backref);
-
-	    if (mg) {
-		/* Aha. They've got it stowed in magic.  Bring it back.  */
-		av = MUTABLE_AV(mg->mg_obj);
+	if (!*svp) {
+	    if ((mg = mg_find(tsv, PERL_MAGIC_backref))) {
+		/* Aha. They've got it stowed in magic instead.
+		 * Move it back to xhv_backreferences */
+		*svp = mg->mg_obj;
 		/* Stop mg_free decreasing the reference count.  */
 		mg->mg_obj = NULL;
 		/* Stop mg_free even calling the destructor, given that
 		   there's no AV to free up.  */
 		mg->mg_virtual = 0;
 		sv_unmagic(tsv, PERL_MAGIC_backref);
-	    } else {
-		av = newAV();
-		AvREAL_off(av);
-		SvREFCNT_inc_simple_void(av); /* see discussion above */
+		mg = NULL;
 	    }
-	    *avp = av;
 	}
     } else {
-	const MAGIC *const mg
-	    = SvMAGICAL(tsv) ? mg_find(tsv, PERL_MAGIC_backref) : NULL;
-	if (mg)
-	    av = MUTABLE_AV(mg->mg_obj);
-	else {
-	    av = newAV();
-	    AvREAL_off(av);
-	    sv_magic(tsv, MUTABLE_SV(av), PERL_MAGIC_backref, NULL, 0);
-	    /* av now has a refcnt of 2; see discussion above */
+	if (! ((mg =
+	    (SvMAGICAL(tsv) ? mg_find(tsv, PERL_MAGIC_backref) : NULL))))
+	{
+	    sv_magic(tsv, NULL, PERL_MAGIC_backref, NULL, 0);
+	    mg = mg_find(tsv, PERL_MAGIC_backref);
 	}
+	svp = &(mg->mg_obj);
     }
+
+    if (!*svp) {
+	av = newAV();
+	AvREAL_off(av);
+	SvREFCNT_inc_simple_void(av);
+	/* av now has a refcnt of 2; see discussion above */
+	if (mg)
+	    mg->mg_flags |= MGf_REFCOUNTED;
+	*svp = (SV*)av;
+    }
+    else
+	av = (AV*)*svp;
+
     if (AvFILLp(av) >= AvMAX(av)) {
         av_extend(av, AvFILLp(av)+1);
     }
