@@ -1722,7 +1722,7 @@ S_hfreeentries(pTHX_ HV *hv)
 	}
 
 	/* make everyone else think the array is empty, so that the destructors
-	 * called for freed entries can't recusively mess with us */
+	 * called for freed entries can't recursively mess with us */
 	HvARRAY(hv) = NULL;
 	((XPVHV*) SvANY(hv))->xhv_keys = 0;
 

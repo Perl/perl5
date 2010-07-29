@@ -5314,13 +5314,13 @@ Perl_sv_rvweaken(pTHX_ SV *const sv)
  * structure, from the xhv_backreferences field. (A HV without hv_aux will
  * have the standard magic instead.) The array is created with a refcount
  * of 2. This means that if during global destruction the array gets
- * picked on first to have its refcount decremented by the random zapper,
- * it won't actually be freed, meaning it's still theere for when its
- * parent gets freed.
+ * picked on before its parent to have its refcount decremented by the
+ * random zapper, it won't actually be freed, meaning it's still there for
+ * when its parent gets freed.
  * When the parent SV is freed, in the case of magic, the magic is freed,
  * Perl_magic_killbackrefs is called which decrements one refcount, then
  * mg_obj is freed which kills the second count.
- * In the vase of a HV being freed, one ref is removed by
+ * In the case of an HV being freed, one ref is removed by
  * Perl_hv_kill_backrefs, the other by Perl_sv_kill_backrefs, which it
  * calls.
  */
@@ -5435,10 +5435,10 @@ Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
 
     PERL_ARGS_ASSERT_SV_KILL_BACKREFS;
 
-    assert(!svp || !SvIS_FREED(av));
     if (svp) {
 	SV *const *const last = svp + AvFILLp(av);
 
+	assert(!SvIS_FREED(av));
 	while (svp <= last) {
 	    if (*svp) {
 		SV *const referrer = *svp;
@@ -5483,6 +5483,7 @@ Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
 	    }
 	    svp++;
 	}
+	AvFILLp(av) = -1;
     }
     SvREFCNT_dec(av); /* remove extra count added by sv_add_backref() */
     return 0;
