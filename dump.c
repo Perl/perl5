@@ -1733,7 +1733,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		do_hv_dump(level, file, "  OURSTASH", ost);
 	} else {
 	    if (SvMAGIC(sv))
-		do_magic_dump(level, file, SvMAGIC(sv), nest, maxnest, dumpops, pvlim);
+		do_magic_dump(level, file, SvMAGIC(sv), nest+1, maxnest, dumpops, pvlim);
 	}
 	if (SvSTASH(sv))
 	    do_hv_dump(level, file, "  STASH", SvSTASH(sv));
