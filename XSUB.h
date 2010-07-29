@@ -329,7 +329,7 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 	    SvREFCNT_dec(xssv);						\
 	    SvREFCNT_dec(pmsv);						\
 	    if (xpt)							\
-		Perl_croak(aTHX_ SvPVX(xpt));				\
+		Perl_croak(aTHX_ "%s", SvPVX(xpt));			\
 	}                                                               \
     } STMT_END
 #else
