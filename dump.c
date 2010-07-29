@@ -1884,29 +1884,34 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		}
 	    }
 	}
-	if (nest < maxnest && !HvEITER_get(sv)) { /* Try to preserve iterator */
-	    HE *he;
-	    HV * const hv = MUTABLE_HV(sv);
-	    int count = maxnest - nest;
+	if (nest < maxnest) {
+	    if (HvEITER_get(sv)) /* preserve iterator */
+		Perl_dump_indent(aTHX_ level, file,
+		    "  (*** Active iterator; skipping element dump ***)\n");
+	    else {
+		HE *he;
+		HV * const hv = MUTABLE_HV(sv);
+		int count = maxnest - nest;
 
-	    hv_iterinit(hv);
-	    while ((he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS))
-                   && count--) {
-		STRLEN len;
-		const U32 hash = HeHASH(he);
-		SV * const keysv = hv_iterkeysv(he);
-		const char * const keypv = SvPV_const(keysv, len);
-		SV * const elt = hv_iterval(hv, he);
+		hv_iterinit(hv);
+		while ((he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS))
+		       && count--) {
+		    STRLEN len;
+		    const U32 hash = HeHASH(he);
+		    SV * const keysv = hv_iterkeysv(he);
+		    const char * const keypv = SvPV_const(keysv, len);
+		    SV * const elt = hv_iterval(hv, he);
 
-		Perl_dump_indent(aTHX_ level+1, file, "Elt %s ", pv_display(d, keypv, len, 0, pvlim));
-		if (SvUTF8(keysv))
-		    PerlIO_printf(file, "[UTF8 \"%s\"] ", sv_uni_display(d, keysv, 6 * SvCUR(keysv), UNI_DISPLAY_QQ));
-		if (HeKREHASH(he))
-		    PerlIO_printf(file, "[REHASH] ");
-		PerlIO_printf(file, "HASH = 0x%"UVxf"\n", (UV)hash);
-		do_sv_dump(level+1, file, elt, nest+1, maxnest, dumpops, pvlim);
+		    Perl_dump_indent(aTHX_ level+1, file, "Elt %s ", pv_display(d, keypv, len, 0, pvlim));
+		    if (SvUTF8(keysv))
+			PerlIO_printf(file, "[UTF8 \"%s\"] ", sv_uni_display(d, keysv, 6 * SvCUR(keysv), UNI_DISPLAY_QQ));
+		    if (HeKREHASH(he))
+			PerlIO_printf(file, "[REHASH] ");
+		    PerlIO_printf(file, "HASH = 0x%"UVxf"\n", (UV)hash);
+		    do_sv_dump(level+1, file, elt, nest+1, maxnest, dumpops, pvlim);
+		}
+		hv_iterinit(hv);		/* Return to status quo */
 	    }
-	    hv_iterinit(hv);		/* Return to status quo */
 	}
 	break;
     case SVt_PVCV:
