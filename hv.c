@@ -1665,13 +1665,28 @@ S_hfreeentries(pTHX_ HV *hv)
 	if (SvOOK(hv)) {
 	    HE *entry;
             struct mro_meta *meta;
-	    struct xpvhv_aux * const iter = HvAUX(hv);
-	    AV *const av = iter->xhv_backreferences;
+	    struct xpvhv_aux *iter = HvAUX(hv);
+	    /* If there are weak references to this HV, we need to avoid
+	       freeing them up here.  In particular we need to keep the AV
+	       visible as what we're deleting might well have weak references
+	       back to this HV, so the for loop below may well trigger
+	       the removal of backreferences from this array.  */
 
-	    if (av) {
-		Perl_sv_kill_backrefs(aTHX_ MUTABLE_SV(hv), av);
-		SvREFCNT_dec(av);
-		iter->xhv_backreferences = 0;
+	    if (iter->xhv_backreferences) {
+		/* So donate them to regular backref magic to keep them safe.
+		   The sv_magic will increase the reference count of the AV,
+		   so we need to drop it first. */
+		SvREFCNT_dec(iter->xhv_backreferences);
+		if (AvFILLp(iter->xhv_backreferences) == -1) {
+		    /* Turns out that the array is empty. Just free it.  */
+		    SvREFCNT_dec(iter->xhv_backreferences);
+
+		} else {
+		    sv_magic(MUTABLE_SV(hv),
+			     MUTABLE_SV(iter->xhv_backreferences),
+			     PERL_MAGIC_backref, NULL, 0);
+		}
+		iter->xhv_backreferences = NULL;
 	    }
 
 	    entry = iter->xhv_eiter; /* HvEITER(hv) */
@@ -1707,7 +1722,7 @@ S_hfreeentries(pTHX_ HV *hv)
 	}
 
 	/* make everyone else think the array is empty, so that the destructors
-	 * called for freed entries can't recursively mess with us */
+	 * called for freed entries can't recusively mess with us */
 	HvARRAY(hv) = NULL;
 	((XPVHV*) SvANY(hv))->xhv_keys = 0;
 
@@ -2008,6 +2023,24 @@ Perl_hv_backreferences_p(pTHX_ HV *hv) {
     PERL_UNUSED_CONTEXT;
 
     return &(iter->xhv_backreferences);
+}
+
+void
+Perl_hv_kill_backrefs(pTHX_ HV *hv) {
+    AV *av;
+
+    PERL_ARGS_ASSERT_HV_KILL_BACKREFS;
+
+    if (!SvOOK(hv))
+	return;
+
+    av = HvAUX(hv)->xhv_backreferences;
+
+    if (av) {
+	HvAUX(hv)->xhv_backreferences = 0;
+	Perl_sv_kill_backrefs(aTHX_ MUTABLE_SV(hv), av);
+	SvREFCNT_dec(av);
+    }
 }
 
 /*

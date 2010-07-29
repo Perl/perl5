@@ -5310,17 +5310,19 @@ Perl_sv_rvweaken(pTHX_ SV *const sv)
 /* A discussion about the backreferences array and its refcount:
  *
  * The AV holding the backreferences is pointed to either as the mg_obj of
- * PERL_MAGIC_backref, or in the specific case of a HV, from the
- * xhv_backreferences field of the HvAUX structure. The array is created
- * with a refcount of 2. This means that if during global destruction the
- * array gets picked on before its parent to have its refcount decremented
- * by the random zapper, it won't actually be freed, meaning it's still
- * there for when its parent gets freed.
+ * PERL_MAGIC_backref, or in the specific case of a HV that has the hv_aux
+ * structure, from the xhv_backreferences field. (A HV without hv_aux will
+ * have the standard magic instead.) The array is created with a refcount
+ * of 2. This means that if during global destruction the array gets
+ * picked on first to have its refcount decremented by the random zapper,
+ * it won't actually be freed, meaning it's still theere for when its
+ * parent gets freed.
  * When the parent SV is freed, in the case of magic, the magic is freed,
  * Perl_magic_killbackrefs is called which decrements one refcount, then
  * mg_obj is freed which kills the second count.
- * In the vase of a HV being freed, one ref is removed by S_hfreeentries,
- * the other by Perl_sv_kill_backrefs, which it calls.
+ * In the vase of a HV being freed, one ref is removed by
+ * Perl_hv_kill_backrefs, the other by Perl_sv_kill_backrefs, which it
+ * calls.
  */
 
 void
@@ -5336,9 +5338,23 @@ Perl_sv_add_backref(pTHX_ SV *const tsv, SV *const sv)
 
 	av = *avp;
 	if (!av) {
-	    av = newAV();
-	    AvREAL_off(av);
-	    SvREFCNT_inc_simple_void(av); /* see discussion above */
+	    /* There is no AV in the offical place - try a fixup.  */
+	    MAGIC *const mg = mg_find(tsv, PERL_MAGIC_backref);
+
+	    if (mg) {
+		/* Aha. They've got it stowed in magic.  Bring it back.  */
+		av = MUTABLE_AV(mg->mg_obj);
+		/* Stop mg_free decreasing the refernce count.  */
+		mg->mg_obj = NULL;
+		/* Stop mg_free even calling the destructor, given that
+		   there's no AV to free up.  */
+		mg->mg_virtual = 0;
+		sv_unmagic(tsv, PERL_MAGIC_backref);
+	    } else {
+		av = newAV();
+		AvREAL_off(av);
+		SvREFCNT_inc_simple_void(av); /* see discussion above */
+	    }
 	    *avp = av;
 	}
     } else {
@@ -5419,10 +5435,10 @@ Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
 
     PERL_ARGS_ASSERT_SV_KILL_BACKREFS;
 
+    assert(!svp || !SvIS_FREED(av));
     if (svp) {
 	SV *const *const last = svp + AvFILLp(av);
 
-	assert(!SvIS_FREED(av));
 	while (svp <= last) {
 	    if (*svp) {
 		SV *const referrer = *svp;
@@ -5467,7 +5483,6 @@ Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
 	    }
 	    svp++;
 	}
-	AvFILLp(av) = -1;
     }
     SvREFCNT_dec(av); /* remove extra count added by sv_add_backref() */
     return 0;
@@ -5829,6 +5844,7 @@ Perl_sv_clear(pTHX_ register SV *const sv)
 	if (PL_last_swash_hv == (const HV *)sv) {
 	    PL_last_swash_hv = NULL;
 	}
+	Perl_hv_kill_backrefs(aTHX_ MUTABLE_HV(sv));
 	hv_undef(MUTABLE_HV(sv));
 	break;
     case SVt_PVAV:

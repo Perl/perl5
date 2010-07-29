@@ -2138,6 +2138,10 @@ Apo	|void	|hv_eiter_set	|NN HV *hv|NULLOK HE *eiter
 Ap	|void	|hv_name_set	|NN HV *hv|NULLOK const char *name|U32 len|U32 flags
 : Used in dump.c and hv.c
 poM	|AV**	|hv_backreferences_p	|NN HV *hv
+#if defined(PERL_IN_DUMP_C) || defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C)
+: Only used in sv.c
+poM	|void	|hv_kill_backrefs	|NN HV *hv
+#endif
 Apd	|void	|hv_clear_placeholders	|NN HV *hv
 ApoR	|I32*	|hv_placeholders_p	|NN HV *hv
 ApoR	|I32	|hv_placeholders_get	|NN const HV *hv
