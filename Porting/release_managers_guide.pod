@@ -175,7 +175,8 @@ run the following:
 to see any inconsistencies between the core and CPAN versions of distros,
 then fix the core, or cajole CPAN authors as appropriate. See also the
 C<-d> and C<-v> options for more detail.  You'll probably want to use the
-C<-c cachedir> option to avoid repeated CPAN downloads.
+C<-c cachedir> option to avoid repeated CPAN downloads and may want to
+use C<-m file:///mirror/path> if you made a local CPAN mirror.
 
 To see which core distro versions differ from the current CPAN versions:
 
@@ -241,6 +242,10 @@ changed since the previous release, but which still have the old version
 number. If there is more than one maintenance branch (e.g. 5.8.x, 5.10.x),
 then compare against both.
 
+Be sure to bump the version numbers in separate commits for each module
+(or group of related modules) so that changes can be cherry-picked later
+if necessary.
+
 Note that some of the files listed may be generated (e.g. copied from ext/
 to lib/, or a script like lib/lib_pm.PL is run to produce lib/lib.pm);
 make sure you edit the correct file!
@@ -266,11 +271,14 @@ edit the whole document.
 
 I<You MUST SKIP this step for SNAPSHOT>
 
-A week or two before the first release candidate, bump the perl version
-number (e.g. from 5.10.0 to 5.10.1), to allow sufficient time for testing
-and smoking with the target version built into the perl executable. For
-subsequent release candidates and the final release, it it not necessary
-to bump the version further.
+Bump the version number (e.g. from 5.12.0 to 5.12.1).
+
+For a blead release, this can happen on the day of the release.  For a
+release candidate for a stable perl, this should happen a week or two
+before the first release candidate to allow sufficient time for testing and
+smoking with the target version built into the perl executable. For
+subsequent release candidates and the final release, it it not necessary to
+bump the version further.
 
 There is a tool to semi-automate this process. It works in two stages.
 First, it generates a list of suggested changes, which you review and
@@ -305,6 +313,9 @@ currently only detects a single substitution per line: so in particular,
 this line in README.vms needs special handling:
 
     rename perl-5^.10^.1.dir perl-5_10_1.dir
+
+Also be careful of F<Porting/epigraphs.pod>, which has legacy version
+numbers that should not get changed.
 
 Commit your changes:
 
@@ -385,7 +396,15 @@ up-to-date.
 
 =item *
 
+For a blead release, if you did not bump the perl version number as part
+of I<advance actions>, do that now.
+
+=item *
+
 I<You MAY SKIP this step for SNAPSHOT>
+
+Finalize the perldelta.  In particular, fill in the Acknowledgements
+section.
 
 Re-read the perldelta to try to find any embarrassing typos and thinkos;
 remove any C<TODO> or C<XXX> flags; update the "Known Problems" section
