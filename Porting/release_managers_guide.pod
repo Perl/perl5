@@ -314,9 +314,6 @@ this line in README.vms needs special handling:
 
     rename perl-5^.10^.1.dir perl-5_10_1.dir
 
-Also be careful of F<Porting/epigraphs.pod>, which has legacy version
-numbers that should not get changed.
-
 Commit your changes:
 
     $ git st
