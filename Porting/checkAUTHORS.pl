@@ -6,7 +6,7 @@ use Text::Wrap;
 $Text::Wrap::columns = 80;
 
 my ($rank, $percentage, $cumulative, $reverse, $ta, @authors, %authors,
-    %untraced, %patchers, %committers, %real_names, $as_test_output);
+    %untraced, %patchers, %committers, %real_names, $as_test_output, $who);
 my $result = GetOptions ("rank" => \$rank,            # rank authors
              "thanks-applied" => \$ta,        # ranks committers
              "acknowledged=s"   => \@authors ,  # authors files
@@ -14,9 +14,10 @@ my $result = GetOptions ("rank" => \$rank,            # rank authors
              "cumulative" => \$cumulative,
              "reverse" => \$reverse,
              "tap" => \$as_test_output,
+             "who" => \$who,
             );
 
-if (!$result or (($rank||0) + ($ta||0) + (@authors ? 1 : 0) != 1) or !@ARGV) {
+if (!$result or (($rank||0) + ($ta||0) + ($who||0) + (@authors ? 1 : 0) != 1) or !@ARGV) {
     usage();
 }
 
@@ -34,27 +35,37 @@ if ($rank) {
   display_test_output(\%patchers, \%authors, \%real_names);
 } elsif (%authors) {
   display_missing_authors(\%patchers, \%authors, \%real_names);
+} elsif ($who) {
+  list_authors(\%patchers, \%real_names);
 }
-
-
 
 exit(0);
 
 sub usage {
 
   die <<"EOS";
+Usage: $0 [options] <git-log-output-file>
 $0 --rank changes                           # rank authors by patches
 $0 --acknowledged <authors file> changes    # Display unacknowledged authors
 $0 --thanks-applied changes                 # ranks committers of others' patches
 $0 --percentage ...                         # show rankings as percentages
 $0 --cumulative ...                         # show rankings cumulatively
 $0 --reverse ...                            # show rankings in reverse
+$0 --who ...                                # show list of unique authors
 Specify stdin as - if needs be. Remember that option names can be abbreviated.
 Generate changes with git log --pretty=fuller rev1..rev2
+For example:
+  \$ git log --pretty=fuller v5.12.0..v5.12.1 > gitlog
+  \$ perl Porting/checkAUTHORS.pl --who gitlog
 EOS
 }
 
-
+sub list_authors {
+    my ($patchers, $real_names) = @_;
+    print "$_\n" for  sort { lc $a cmp lc $b } 
+                      map { $real_names->{$_} } 
+                      keys %$patchers;
+}
 
 sub parse_commits_from_stdin {
     my @lines = split( /^commit\s*/sm, join( '', <> ) );
