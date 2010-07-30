@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 7;
+plan tests => 8;
 
 $x='banana';
 $x=~/.a/g;
@@ -36,3 +36,17 @@ $x = "\x{100}BC";
 $x =~ m/.*/g;
 is(pos $x, 3);
 
+
+my $destroyed;
+{ package Class; DESTROY { ++$destroyed; } }
+
+$destroyed = 0;
+{
+    my $x = '';
+    pos($x) = 0;
+    $x = bless({}, 'Class');
+}
+{
+    local $TODO = "RT#67838";
+    is($destroyed, 1, 'Timely scalar destruction with lvalue pos');
+}

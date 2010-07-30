@@ -24,7 +24,7 @@ $SIG{__WARN__} = sub {
 
 require './test.pl';
 
-plan(360);
+plan(361);
 
 run_tests() unless caller;
 
@@ -722,4 +722,19 @@ SKIP: {
     }
 }
 
+}
+
+
+my $destroyed;
+{ package Class; DESTROY { ++$destroyed; } }
+
+$destroyed = 0;
+{
+    my $x = '';
+    substr($x,0,1) = "";
+    $x = bless({}, 'Class');
+}
+{
+    local $TODO = "RT#67838";
+    is($destroyed, 1, 'Timely scalar destruction with lvalue substr');
 }
