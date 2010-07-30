@@ -24,8 +24,7 @@ sub STORE {1;}
 
 sub check_count {
     my $op = shift;
-    ok $count == 1, "FETCH called just once using '$op'",
-                    "FETCH called $count times";
+    is $count, 1, "FETCH called just once using '$op'";
     $count = 0;
 }
 
