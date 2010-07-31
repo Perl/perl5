@@ -106,7 +106,4 @@ $destroyed = 0;
     vec($x,0,1) = 0;
     $x = bless({}, 'Class');
 }
-{
-    local $TODO = "RT#67838";
-    is($destroyed, 1, 'Timely scalar destruction with lvalue vec');
-}
+is($destroyed, 1, 'Timely scalar destruction with lvalue vec');

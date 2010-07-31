@@ -336,26 +336,21 @@ PP(pp_av2arylen)
 
 PP(pp_pos)
 {
-    dVAR; dSP; dTARGET; dPOPss;
+    dVAR; dSP; dPOPss;
 
     if (PL_op->op_flags & OPf_MOD || LVRET) {
-	if (SvTYPE(TARG) < SVt_PVLV) {
-	    sv_upgrade(TARG, SVt_PVLV);
-	    sv_magic(TARG, NULL, PERL_MAGIC_pos, NULL, 0);
-	}
-
-	LvTYPE(TARG) = '.';
-	if (LvTARG(TARG) != sv) {
-	    SvREFCNT_dec(LvTARG(TARG));
-	    LvTARG(TARG) = SvREFCNT_inc_simple(sv);
-	}
-	PUSHs(TARG);	/* no SvSETMAGIC */
+	SV * const ret = sv_2mortal(newSV_type(SVt_PVLV));  /* Not TARG RT#67838 */
+	sv_magic(ret, NULL, PERL_MAGIC_pos, NULL, 0);
+	LvTYPE(ret) = '.';
+	LvTARG(ret) = SvREFCNT_inc_simple(sv);
+	PUSHs(ret);    /* no SvSETMAGIC */
 	RETURN;
     }
     else {
 	if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
 	    const MAGIC * const mg = mg_find(sv, PERL_MAGIC_regex_global);
 	    if (mg && mg->mg_len >= 0) {
+		dTARGET;
 		I32 i = mg->mg_len;
 		if (DO_UTF8(sv))
 		    sv_pos_b2u(sv, &i);
@@ -3153,8 +3148,6 @@ PP(pp_substr)
     bool repl_need_utf8_upgrade = FALSE;
     bool repl_is_utf8 = FALSE;
 
-    SvTAINTED_off(TARG);			/* decontaminate */
-    SvUTF8_off(TARG);				/* decontaminate */
     if (num_args > 2) {
 	if (num_args > 3) {
 	    repl_sv = POPs;
@@ -3262,26 +3255,46 @@ PP(pp_substr)
 	STRLEN byte_pos = utf8_curlen
 	    ? sv_pos_u2b_flags(sv, pos, &byte_len, SV_CONST_RETURN) : pos;
 
-	tmps += byte_pos;
-	/* we either return a PV or an LV. If the TARG hasn't been used
-	 * before, or is of that type, reuse it; otherwise use a mortal
-	 * instead. Note that LVs can have an extended lifetime, so also
-	 * dont reuse if refcount > 1 (bug #20933) */
-	if (SvTYPE(TARG) > SVt_NULL) {
-	    if ( (SvTYPE(TARG) == SVt_PVLV)
-		    ? (!lvalue || SvREFCNT(TARG) > 1)
-		    : lvalue)
-	    {
-		TARG = sv_newmortal();
+	if (lvalue && !repl) {
+	    SV * ret;
+
+	    if (!SvGMAGICAL(sv)) {
+		if (SvROK(sv)) {
+		    SvPV_force_nolen(sv);
+		    Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR),
+				   "Attempt to use reference as lvalue in substr");
+		}
+		if (isGV_with_GP(sv))
+		    SvPV_force_nolen(sv);
+		else if (SvOK(sv))	/* is it defined ? */
+		    (void)SvPOK_only_UTF8(sv);
+		else
+		    sv_setpvs(sv, ""); /* avoid lexical reincarnation */
 	    }
+
+	    ret = sv_2mortal(newSV_type(SVt_PVLV));  /* Not TARG RT#67838 */
+	    sv_magic(ret, NULL, PERL_MAGIC_substr, NULL, 0);
+	    LvTYPE(ret) = 'x';
+	    LvTARG(ret) = SvREFCNT_inc_simple(sv);
+	    LvTARGOFF(ret) = pos;
+	    LvTARGLEN(ret) = len;
+
+	    SPAGAIN;
+	    PUSHs(ret);    /* avoid SvSETMAGIC here */
+	    RETURN;
 	}
 
+	SvTAINTED_off(TARG);			/* decontaminate */
+	SvUTF8_off(TARG);			/* decontaminate */
+
+	tmps += byte_pos;
 	sv_setpvn(TARG, tmps, byte_len);
 #ifdef USE_LOCALE_COLLATE
 	sv_unmagic(TARG, PERL_MAGIC_collxfrm);
 #endif
 	if (utf8_curlen)
 	    SvUTF8_on(TARG);
+
 	if (repl) {
 	    SV* repl_sv_copy = NULL;
 
@@ -3298,34 +3311,6 @@ PP(pp_substr)
 		SvUTF8_on(sv);
 	    SvREFCNT_dec(repl_sv_copy);
 	}
-	else if (lvalue) {		/* it's an lvalue! */
-	    if (!SvGMAGICAL(sv)) {
-		if (SvROK(sv)) {
-		    SvPV_force_nolen(sv);
-		    Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR),
-				   "Attempt to use reference as lvalue in substr");
-		}
-		if (isGV_with_GP(sv))
-		    SvPV_force_nolen(sv);
-		else if (SvOK(sv))	/* is it defined ? */
-		    (void)SvPOK_only_UTF8(sv);
-		else
-		    sv_setpvs(sv, ""); /* avoid lexical reincarnation */
-	    }
-
-	    if (SvTYPE(TARG) < SVt_PVLV) {
-		sv_upgrade(TARG, SVt_PVLV);
-		sv_magic(TARG, NULL, PERL_MAGIC_substr, NULL, 0);
-	    }
-
-	    LvTYPE(TARG) = 'x';
-	    if (LvTARG(TARG) != sv) {
-		SvREFCNT_dec(LvTARG(TARG));
-		LvTARG(TARG) = SvREFCNT_inc_simple(sv);
-	    }
-	    LvTARGOFF(TARG) = pos;
-	    LvTARGLEN(TARG) = len;
-	}
     }
     SPAGAIN;
     PUSHs(TARG);		/* avoid SvSETMAGIC here */
@@ -3340,31 +3325,29 @@ bound_fail:
 
 PP(pp_vec)
 {
-    dVAR; dSP; dTARGET;
+    dVAR; dSP;
     register const IV size   = POPi;
     register const IV offset = POPi;
     register SV * const src = POPs;
     const I32 lvalue = PL_op->op_flags & OPf_MOD || LVRET;
+    SV * ret;
 
-    SvTAINTED_off(TARG);		/* decontaminate */
     if (lvalue) {			/* it's an lvalue! */
-	if (SvREFCNT(TARG) > 1)	/* don't share the TARG (#20933) */
-	    TARG = sv_newmortal();
-	if (SvTYPE(TARG) < SVt_PVLV) {
-	    sv_upgrade(TARG, SVt_PVLV);
-	    sv_magic(TARG, NULL, PERL_MAGIC_vec, NULL, 0);
-	}
-	LvTYPE(TARG) = 'v';
-	if (LvTARG(TARG) != src) {
-	    SvREFCNT_dec(LvTARG(TARG));
-	    LvTARG(TARG) = SvREFCNT_inc_simple(src);
-	}
-	LvTARGOFF(TARG) = offset;
-	LvTARGLEN(TARG) = size;
+	ret = sv_2mortal(newSV_type(SVt_PVLV));  /* Not TARG RT#67838 */
+	sv_magic(ret, NULL, PERL_MAGIC_vec, NULL, 0);
+	LvTYPE(ret) = 'v';
+	LvTARG(ret) = SvREFCNT_inc_simple(src);
+	LvTARGOFF(ret) = offset;
+	LvTARGLEN(ret) = size;
+    }
+    else {
+	dTARGET;
+	SvTAINTED_off(TARG);		/* decontaminate */
+	ret = TARG;
     }
 
-    sv_setuv(TARG, do_vecget(src, offset, size));
-    PUSHs(TARG);
+    sv_setuv(ret, do_vecget(src, offset, size));
+    PUSHs(ret);
     RETURN;
 }
 

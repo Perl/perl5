@@ -1456,32 +1456,26 @@ Perl_do_kv(pTHX)
 	RETURN;
 
     if (gimme == G_SCALAR) {
-	IV i;
-	dTARGET;
-
 	if (PL_op->op_flags & OPf_MOD || LVRET) {	/* lvalue */
-	    if (SvTYPE(TARG) < SVt_PVLV) {
-		sv_upgrade(TARG, SVt_PVLV);
-		sv_magic(TARG, NULL, PERL_MAGIC_nkeys, NULL, 0);
-	    }
-	    LvTYPE(TARG) = 'k';
-	    if (LvTARG(TARG) != (const SV *)keys) {
-		SvREFCNT_dec(LvTARG(TARG));
-		LvTARG(TARG) = SvREFCNT_inc_simple(keys);
-	    }
-	    PUSHs(TARG);
-	    RETURN;
-	}
-
-	if (! SvTIED_mg((const SV *)keys, PERL_MAGIC_tied) )
-	{
-	    i = HvKEYS(keys);
+	    SV * const ret = sv_2mortal(newSV_type(SVt_PVLV));  /* Not TARG RT#67838 */
+	    sv_magic(ret, NULL, PERL_MAGIC_nkeys, NULL, 0);
+	    LvTYPE(ret) = 'k';
+	    LvTARG(ret) = SvREFCNT_inc_simple(keys);
+	    PUSHs(ret);
 	}
 	else {
-	    i = 0;
-	    while (hv_iternext(keys)) i++;
+	    IV i;
+	    dTARGET;
+
+	    if (! SvTIED_mg((const SV *)keys, PERL_MAGIC_tied) ) {
+		i = HvKEYS(keys);
+	    }
+	    else {
+		i = 0;
+		while (hv_iternext(keys)) i++;
+	    }
+	    PUSHi( i );
 	}
-	PUSHi( i );
 	RETURN;
     }
 

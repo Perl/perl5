@@ -734,7 +734,4 @@ $destroyed = 0;
     substr($x,0,1) = "";
     $x = bless({}, 'Class');
 }
-{
-    local $TODO = "RT#67838";
-    is($destroyed, 1, 'Timely scalar destruction with lvalue substr');
-}
+is($destroyed, 1, 'Timely scalar destruction with lvalue substr');

@@ -46,7 +46,4 @@ $destroyed = 0;
     pos($x) = 0;
     $x = bless({}, 'Class');
 }
-{
-    local $TODO = "RT#67838";
-    is($destroyed, 1, 'Timely scalar destruction with lvalue pos');
-}
+is($destroyed, 1, 'Timely scalar destruction with lvalue pos');

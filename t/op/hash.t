@@ -129,7 +129,4 @@ $destroyed = 0;
     keys(%h) = 1;
     $h{key} = bless({}, 'Class');
 }
-{
-    local our $TODO = "RT#67838";
-    is($destroyed, 1, 'Timely hash destruction with lvalue keys');
-}
+is($destroyed, 1, 'Timely hash destruction with lvalue keys');
