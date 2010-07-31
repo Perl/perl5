@@ -738,7 +738,7 @@ The same patch as above, using github might look like this:
   % git push origin orange
 
 The orange branch has been pushed to GitHub, so you should now send an
-email (see L</Submitting a patch>) with a description of your changes
+email (see L</SUBMITTING A PATCH>) with a description of your changes
 and the following information:
 
   http://github.com/USERNAME/perl/tree/orange
