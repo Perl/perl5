@@ -291,7 +291,7 @@ and check for NULL.
  *
  */
 
-#define RXf_BASE_SHIFT _RXf_PMf_SHIFT
+#define RXf_BASE_SHIFT ((_RXf_PMf_SHIFT_NEXT)-1)
 
 /* Anchor and GPOS related stuff */
 #define RXf_ANCH_BOL    	(1<<(RXf_BASE_SHIFT+3))

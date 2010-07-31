@@ -24,4 +24,6 @@
 #define RXf_PMf_LOCALE		(1 << 5)
 #define PMf_LOCALE		(1 << 5)
 
-#define _RXf_PMf_SHIFT 5    /* Begins with '_' so won't be exported by B */
+/* Next available bit after the above.  Name begins with '_' so won't be
+ * exported by B */
+#define _RXf_PMf_SHIFT_NEXT 6

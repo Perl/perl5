@@ -360,7 +360,7 @@ struct pmop {
 #define PM_SETRE(o,r)   ((o)->op_pmregexp = (r))
 #endif
 
-#define PMf_BASE_SHIFT _RXf_PMf_SHIFT
+#define PMf_BASE_SHIFT ((_RXf_PMf_SHIFT_NEXT)-1)
 
 /* taint $1 etc. if target tainted */
 #define PMf_RETAINT	(1<<(PMf_BASE_SHIFT+1))
