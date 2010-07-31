@@ -360,37 +360,39 @@ struct pmop {
 #define PM_SETRE(o,r)   ((o)->op_pmregexp = (r))
 #endif
 
+#define PMf_BASE_SHIFT _RXf_PMf_SHIFT
+
 /* taint $1 etc. if target tainted */
-#define PMf_RETAINT	(1<<(_RXf_PMf_SHIFT+1))
+#define PMf_RETAINT	(1<<(PMf_BASE_SHIFT+1))
 
 /* match successfully only once per reset, with related flag RXf_USED in
  * re->extflags holding state.  This is used only for ?? matches, and only on
  * OP_MATCH and OP_QR */
-#define PMf_ONCE	(1<<(_RXf_PMf_SHIFT+2))
+#define PMf_ONCE	(1<<(PMf_BASE_SHIFT+2))
 
 /* replacement contains variables */
-#define PMf_MAYBE_CONST (1<<(_RXf_PMf_SHIFT+3))
+#define PMf_MAYBE_CONST (1<<(PMf_BASE_SHIFT+3))
 
 /* PMf_ONCE has matched successfully.  Not used under threading. */
-#define PMf_USED        (1<<(_RXf_PMf_SHIFT+4))
+#define PMf_USED        (1<<(PMf_BASE_SHIFT+4))
 
 /* subst replacement is constant */
-#define PMf_CONST	(1<<(_RXf_PMf_SHIFT+5))
+#define PMf_CONST	(1<<(PMf_BASE_SHIFT+5))
 
 /* keep 1st runtime pattern forever */
-#define PMf_KEEP	(1<<(_RXf_PMf_SHIFT+6))
-#define PMf_GLOBAL	(1<<(_RXf_PMf_SHIFT+7))	/* pattern had a g modifier */
+#define PMf_KEEP	(1<<(PMf_BASE_SHIFT+6))
+#define PMf_GLOBAL	(1<<(PMf_BASE_SHIFT+7))	/* pattern had a g modifier */
 
 /* don't reset pos() if //g fails */
-#define PMf_CONTINUE	(1<<(_RXf_PMf_SHIFT+8))
+#define PMf_CONTINUE	(1<<(PMf_BASE_SHIFT+8))
 
 /* evaluating replacement as expr */
-#define PMf_EVAL	(1<<(_RXf_PMf_SHIFT+9))
+#define PMf_EVAL	(1<<(PMf_BASE_SHIFT+9))
 
 /* Return substituted string instead of modifying it. */
-#define PMf_NONDESTRUCT	(1<<(_RXf_PMf_SHIFT+10))
+#define PMf_NONDESTRUCT	(1<<(PMf_BASE_SHIFT+10))
 
-#if _RXf_PMf_SHIFT+10 > 31
+#if PMf_BASE_SHIFT+10 > 31
 #   error Too many PMf_ bits used.  See above and regnodes.h for any spare in middle
 #endif
 
