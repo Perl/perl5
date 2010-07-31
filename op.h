@@ -391,7 +391,7 @@ struct pmop {
 #define PMf_NONDESTRUCT	(1<<(_RXf_PMf_SHIFT+10))
 
 #if _RXf_PMf_SHIFT+10 > 31
-#   error Too many RXf_PMf bits used.  See above and regnodes.h for any spare in middle
+#   error Too many PMf_ bits used.  See above and regnodes.h for any spare in middle
 #endif
 
 /* mask of bits that need to be transfered to re->extflags */
