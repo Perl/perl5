@@ -339,7 +339,7 @@ and check for NULL.
 #define RXf_SKIPWHITE		(1<<(_RXf_PMf_SHIFT+24)) /* Pattern is for a split / / */
 #define RXf_WHITE		(1<<(_RXf_PMf_SHIFT+25)) /* Pattern is /\s+/ */
 #define RXf_NULL		(1<<(_RXf_PMf_SHIFT+26)) /* Pattern is // */
-#if _RXf_PMf_SHIFT+23 > 31
+#if _RXf_PMf_SHIFT+26 > 31
 #   error Too many RXf_PMf bits used.  See regnodes.h for any spare in middle
 #endif
 
