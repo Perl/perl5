@@ -396,9 +396,6 @@ struct pmop {
 #   error Too many PMf_ bits used.  See above and regnodes.h for any spare in middle
 #endif
 
-/* mask of bits that need to be transfered to re->extflags */
-#define PMf_COMPILETIME	(PMf_MULTILINE|PMf_SINGLELINE|PMf_LOCALE|PMf_FOLD|PMf_EXTENDED|PMf_KEEPCOPY)
-
 #ifdef USE_ITHREADS
 
 #  define PmopSTASHPV(o)						\

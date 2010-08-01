@@ -8,8 +8,6 @@
  *
  */
 
-#include "op_reg_common.h"
-
 /*
  * Definitions etc. for regexp(3) routines.
  *
@@ -220,25 +218,17 @@ and check for NULL.
 /* Flags stored in regexp->extflags
  * These are used by code external to the regexp engine
  *
- * Note that flags starting with RXf_PMf_ have exact equivalents
- * stored in op_pmflags and which are defined in op.h, they are defined
- * numerically here only for clarity.
+ * Note that the flags whose names start with RXf_PMf_ are defined in
+ * op_reg_common.h, being copied from the parallel flags of op_pmflags
  *
  * NOTE: if you modify any RXf flags you should run regen.pl or regcomp.pl
  * so that regnodes.h is updated with the changes.
  *
  */
 
-/* 0x3F of extflags is used by (RXf_)PMf_COMPILETIME
- * If you change these you need to change the equivalent flags in op.h, and
- * vice versa.  These need to be ordered so that the msix are contiguous
- * starting at bit 0, followed by the p; bit 0 is because of the shift below
- * being 0; see STD_PAT_MODS and INT_PAT_MODS below for the contiguity cause */
-/* the flags above are transfered from the PMOP->op_pmflags member during
- * compilation */
-#define RXf_PMf_STD_PMMOD_SHIFT	0
+#include "op_reg_common.h"
+
 #define RXf_PMf_STD_PMMOD	(RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED)
-#define RXf_PMf_COMPILETIME	(RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_LOCALE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_KEEPCOPY)
 
 #define CASE_STD_PMMOD_FLAGS_PARSE_SET(pmfl)                        \
     case IGNORE_PAT_MOD:    *(pmfl) |= RXf_PMf_FOLD;       break;   \
