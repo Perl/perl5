@@ -271,13 +271,13 @@ and check for NULL.
 #define NONDESTRUCT_PAT_MODS "r"
 
 /* This string is expected by regcomp.c to be ordered so that the first
- * character is the flag in bit 0 of extflags; the next character is bit 1,
- * etc. */
+ * character is the flag in bit RXf_PMf_STD_PMMOD_SHIFT of extflags; the next
+ * character is bit +1, etc. */
 #define STD_PAT_MODS        "msix"
 
 /* This string is expected by XS_re_regexp_pattern() in universal.c to be ordered
- * so that the first character is the flag in bit 0 of extflags; the next
- * character is bit 1, etc. */
+ * so that the first character is the flag in bit RXf_PMf_STD_PMMOD_SHIFT of
+ * extflags; the next character is in bit +1, etc. */
 #define INT_PAT_MODS    STD_PAT_MODS    KEEPCOPY_PAT_MODS
 
 #define EXT_PAT_MODS    ONCE_PAT_MODS   KEEPCOPY_PAT_MODS
