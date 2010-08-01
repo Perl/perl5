@@ -1762,6 +1762,10 @@ so there are some snags (and it would be wonderful for you to brush
 them out), but it basically works that way.  Everything else lives in
 F<t/>.
 
+Testing of warning messages is often separately done by using expect scripts in
+F<t/lib/warnings>.  This is because much of the setup for them is already done
+for you.
+
 If you add a new test directory under F<t/>, it is imperative that you 
 add that directory to F<t/HARNESS> and F<t/TEST>.
 
