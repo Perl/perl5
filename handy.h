@@ -468,6 +468,9 @@ NOTE:  Since some of these are macros, there is no check in those that the
 parameter is a char or U8.  This means that if called with a larger width
 parameter, casts can silently truncate and yield wrong results.
 
+Also note that these macros are repeated in Devel::PPPort, so should also be
+patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
+
 */
 
 #define isALNUM(c)	(isALPHA(c) || isDIGIT(c) || (c) == '_')
