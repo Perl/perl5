@@ -281,57 +281,57 @@ and check for NULL.
  *
  */
 
-#define RXf_BASE_SHIFT ((_RXf_PMf_SHIFT_NEXT)-1)
+#define RXf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT+2)
 
 /* Anchor and GPOS related stuff */
-#define RXf_ANCH_BOL    	(1<<(RXf_BASE_SHIFT+3))
-#define RXf_ANCH_MBOL   	(1<<(RXf_BASE_SHIFT+4))
-#define RXf_ANCH_SBOL   	(1<<(RXf_BASE_SHIFT+5))
-#define RXf_ANCH_GPOS   	(1<<(RXf_BASE_SHIFT+6))
-#define RXf_GPOS_SEEN   	(1<<(RXf_BASE_SHIFT+7))
-#define RXf_GPOS_FLOAT  	(1<<(RXf_BASE_SHIFT+8))
+#define RXf_ANCH_BOL    	(1<<(RXf_BASE_SHIFT+0))
+#define RXf_ANCH_MBOL   	(1<<(RXf_BASE_SHIFT+1))
+#define RXf_ANCH_SBOL   	(1<<(RXf_BASE_SHIFT+2))
+#define RXf_ANCH_GPOS   	(1<<(RXf_BASE_SHIFT+3))
+#define RXf_GPOS_SEEN   	(1<<(RXf_BASE_SHIFT+4))
+#define RXf_GPOS_FLOAT  	(1<<(RXf_BASE_SHIFT+5))
 /* two bits here */
 #define RXf_ANCH        	(RXf_ANCH_BOL|RXf_ANCH_MBOL|RXf_ANCH_GPOS|RXf_ANCH_SBOL)
 #define RXf_GPOS_CHECK          (RXf_GPOS_SEEN|RXf_ANCH_GPOS)
 #define RXf_ANCH_SINGLE         (RXf_ANCH_SBOL|RXf_ANCH_GPOS)
 
 /* What we have seen */
-#define RXf_LOOKBEHIND_SEEN	(1<<(RXf_BASE_SHIFT+9))
-#define RXf_EVAL_SEEN   	(1<<(RXf_BASE_SHIFT+10))
-#define RXf_CANY_SEEN   	(1<<(RXf_BASE_SHIFT+11))
+#define RXf_LOOKBEHIND_SEEN	(1<<(RXf_BASE_SHIFT+6))
+#define RXf_EVAL_SEEN   	(1<<(RXf_BASE_SHIFT+7))
+#define RXf_CANY_SEEN   	(1<<(RXf_BASE_SHIFT+8))
 
 /* Special */
-#define RXf_NOSCAN      	(1<<(RXf_BASE_SHIFT+12))
-#define RXf_CHECK_ALL   	(1<<(RXf_BASE_SHIFT+13))
+#define RXf_NOSCAN      	(1<<(RXf_BASE_SHIFT+9))
+#define RXf_CHECK_ALL   	(1<<(RXf_BASE_SHIFT+10))
 
 /* UTF8 related */
-#define RXf_MATCH_UTF8  	(1<<(RXf_BASE_SHIFT+15))
+#define RXf_MATCH_UTF8  	(1<<(RXf_BASE_SHIFT+12))
 
 /* Intuit related */
-#define RXf_USE_INTUIT_NOML	(1<<(RXf_BASE_SHIFT+16))
-#define RXf_USE_INTUIT_ML	(1<<(RXf_BASE_SHIFT+17))
-#define RXf_INTUIT_TAIL 	(1<<(RXf_BASE_SHIFT+18))
+#define RXf_USE_INTUIT_NOML	(1<<(RXf_BASE_SHIFT+13))
+#define RXf_USE_INTUIT_ML	(1<<(RXf_BASE_SHIFT+14))
+#define RXf_INTUIT_TAIL 	(1<<(RXf_BASE_SHIFT+15))
 
 /*
   Set in Perl_pmruntime if op_flags & OPf_SPECIAL, i.e. split. Will
   be used by regex engines to check whether they should set
   RXf_SKIPWHITE
 */
-#define RXf_SPLIT		(1<<(RXf_BASE_SHIFT+19))
+#define RXf_SPLIT		(1<<(RXf_BASE_SHIFT+16))
 
 #define RXf_USE_INTUIT		(RXf_USE_INTUIT_NOML|RXf_USE_INTUIT_ML)
 
 /* Copy and tainted info */
-#define RXf_COPY_DONE   	(1<<(RXf_BASE_SHIFT+20))
-#define RXf_TAINTED_SEEN	(1<<(RXf_BASE_SHIFT+21))
-#define RXf_TAINTED		(1<<(RXf_BASE_SHIFT+22)) /* this pattern is tainted */
+#define RXf_COPY_DONE   	(1<<(RXf_BASE_SHIFT+17))
+#define RXf_TAINTED_SEEN	(1<<(RXf_BASE_SHIFT+18))
+#define RXf_TAINTED		(1<<(RXf_BASE_SHIFT+19)) /* this pattern is tainted */
 
 /* Flags indicating special patterns */
-#define RXf_START_ONLY		(1<<(RXf_BASE_SHIFT+23)) /* Pattern is /^/ */
-#define RXf_SKIPWHITE		(1<<(RXf_BASE_SHIFT+24)) /* Pattern is for a split / / */
-#define RXf_WHITE		(1<<(RXf_BASE_SHIFT+25)) /* Pattern is /\s+/ */
-#define RXf_NULL		(1<<(RXf_BASE_SHIFT+26)) /* Pattern is // */
-#if RXf_BASE_SHIFT+26 > 31
+#define RXf_START_ONLY		(1<<(RXf_BASE_SHIFT+20)) /* Pattern is /^/ */
+#define RXf_SKIPWHITE		(1<<(RXf_BASE_SHIFT+21)) /* Pattern is for a split / / */
+#define RXf_WHITE		(1<<(RXf_BASE_SHIFT+22)) /* Pattern is /\s+/ */
+#define RXf_NULL		(1<<(RXf_BASE_SHIFT+23)) /* Pattern is // */
+#if RXf_BASE_SHIFT+23 > 31
 #   error Too many RXf_PMf bits used.  See regnodes.h for any spare in middle
 #endif
 
