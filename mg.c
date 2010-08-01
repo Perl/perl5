@@ -2255,7 +2255,8 @@ int
 Perl_magic_killbackrefs(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_ARGS_ASSERT_MAGIC_KILLBACKREFS;
-    return Perl_sv_kill_backrefs(aTHX_ sv, MUTABLE_AV(mg->mg_obj));
+    Perl_sv_kill_backrefs(aTHX_ sv, MUTABLE_AV(mg->mg_obj));
+    return 0;
 }
 
 int

@@ -1862,7 +1862,7 @@ po	|void	|sv_add_backref	|NN SV *const tsv|NN SV *const sv
 
 #if defined(PERL_IN_HV_C) || defined(PERL_IN_MG_C) || defined(PERL_IN_SV_C)
 : Used in hv.c and mg.c
-poM	|int	|sv_kill_backrefs	|NN SV *const sv|NN AV *const av
+poM	|void	|sv_kill_backrefs	|NN SV *const sv|NULLOK AV *const av
 #endif
 
 pX	|void	|sv_del_backref	|NN SV *const tsv|NN SV *const sv

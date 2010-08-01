@@ -5305,6 +5305,11 @@ Perl_sv_rvweaken(pTHX_ SV *const sv)
 
 /* Give tsv backref magic if it hasn't already got it, then push a
  * back-reference to sv onto the array associated with the backref magic.
+ *
+ * As an optimisation, if there's only one backref and it's not an AV,
+ * store it directly in the HvAUX or mg_obj slot, avoiding the need to
+ * allocate an AV. (Whether the slot holds an AV tells us whether this is
+ * active.)
  */
 
 /* A discussion about the backreferences array and its refcount:
@@ -5317,12 +5322,13 @@ Perl_sv_rvweaken(pTHX_ SV *const sv)
  * picked on before its parent to have its refcount decremented by the
  * random zapper, it won't actually be freed, meaning it's still there for
  * when its parent gets freed.
- * When the parent SV is freed, in the case of magic, the magic is freed,
- * Perl_magic_killbackrefs is called which decrements one refcount, then
- * mg_obj is freed which kills the second count.
- * In the case of an HV being freed, one ref is removed by
- * Perl_hv_kill_backrefs, the other by Perl_sv_kill_backrefs, which it
- * calls.
+ *
+ * When the parent SV is freed, the extra ref is killed by
+ * Perl_sv_kill_backrefs.  The other ref is killed, in the case of magic,
+ * by mg_free() / MGf_REFCOUNTED, or for a hash, by Perl_hv_kill_backrefs.
+ *
+ * When a single backref SV is stored directly, it is not reference
+ * counted.
  */
 
 void
@@ -5330,10 +5336,12 @@ Perl_sv_add_backref(pTHX_ SV *const tsv, SV *const sv)
 {
     dVAR;
     SV **svp;
-    AV *av;
+    AV *av = NULL;
     MAGIC *mg = NULL;
 
     PERL_ARGS_ASSERT_SV_ADD_BACKREF;
+
+    /* find slot to store array or singleton backref */
 
     if (SvTYPE(tsv) == SVt_PVHV) {
 	svp = (SV**)Perl_hv_backreferences_p(aTHX_ MUTABLE_HV(tsv));
@@ -5362,18 +5370,35 @@ Perl_sv_add_backref(pTHX_ SV *const tsv, SV *const sv)
 	svp = &(mg->mg_obj);
     }
 
-    if (!*svp) {
+    /* create or retrieve the array */
+
+    if (   (!*svp && SvTYPE(sv) == SVt_PVAV)
+	|| (*svp && SvTYPE(*svp) != SVt_PVAV)
+    ) {
+	/* create array */
 	av = newAV();
 	AvREAL_off(av);
 	SvREFCNT_inc_simple_void(av);
 	/* av now has a refcnt of 2; see discussion above */
+	if (*svp) {
+	    /* move single existing backref to the array */
+	    av_extend(av, 1);
+	    AvARRAY(av)[++AvFILLp(av)] = *svp; /* av_push() */
+	}
+	*svp = (SV*)av;
 	if (mg)
 	    mg->mg_flags |= MGf_REFCOUNTED;
-	*svp = (SV*)av;
     }
     else
-	av = (AV*)*svp;
+	av = MUTABLE_AV(*svp);
 
+    if (!av) {
+	/* optimisation: store single backref directly in HvAUX or mg_obj */
+	*svp = sv;
+	return;
+    }
+    /* push new backref */
+    assert(SvTYPE(av) == SVt_PVAV);
     if (AvFILLp(av) >= AvMAX(av)) {
         av_extend(av, AvFILLp(av)+1);
     }
@@ -5388,62 +5413,84 @@ void
 Perl_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
 {
     dVAR;
-    AV *av = NULL;
-    SV **svp;
+    SV **svp = NULL;
     I32 i;
 
     PERL_ARGS_ASSERT_SV_DEL_BACKREF;
 
     if (SvTYPE(tsv) == SVt_PVHV && SvOOK(tsv)) {
-	av = *Perl_hv_backreferences_p(aTHX_ MUTABLE_HV(tsv));
+	svp = (SV**)Perl_hv_backreferences_p(aTHX_ MUTABLE_HV(tsv));
 	/* We mustn't attempt to "fix up" the hash here by moving the
 	   backreference array back to the hv_aux structure, as that is stored
 	   in the main HvARRAY(), and hfreentries assumes that no-one
 	   reallocates HvARRAY() while it is running.  */
     }
-    if (!av) {
-	const MAGIC *const mg
+    if (!svp || !*svp) {
+	MAGIC *const mg
 	    = SvMAGICAL(tsv) ? mg_find(tsv, PERL_MAGIC_backref) : NULL;
-	if (mg)
-	    av = MUTABLE_AV(mg->mg_obj);
+	svp =  mg ? &(mg->mg_obj) : NULL;
     }
 
-    if (!av)
+    if (!svp || !*svp)
 	Perl_croak(aTHX_ "panic: del_backref");
 
-    assert(!SvIS_FREED(av));
-
-    svp = AvARRAY(av);
-    /* We shouldn't be in here more than once, but for paranoia reasons lets
-       not assume this.  */
-    for (i = AvFILLp(av); i >= 0; i--) {
-	if (svp[i] == sv) {
-	    const SSize_t fill = AvFILLp(av);
-	    if (i != fill) {
-		/* We weren't the last entry.
-		   An unordered list has this property that you can take the
-		   last element off the end to fill the hole, and it's still
-		   an unordered list :-)
-		*/
-		svp[i] = svp[fill];
+    if (SvTYPE(*svp) == SVt_PVAV) {
+	AV * const av = (AV*)*svp;
+	assert(!SvIS_FREED(av));
+	svp = AvARRAY(av);
+	/* We shouldn't be in here more than once, but for paranoia reasons lets
+	   not assume this.  */
+	for (i = AvFILLp(av); i >= 0; i--) {
+	    if (svp[i] == sv) {
+		const SSize_t fill = AvFILLp(av);
+		if (i != fill) {
+		    /* We weren't the last entry.
+		       An unordered list has this property that you can take the
+		       last element off the end to fill the hole, and it's still
+		       an unordered list :-)
+		    */
+		    svp[i] = svp[fill];
+		}
+		svp[fill] = NULL;
+		AvFILLp(av) = fill - 1;
 	    }
-	    svp[fill] = NULL;
-	    AvFILLp(av) = fill - 1;
 	}
     }
+    else {
+	/* optimisation: only a single backref, stored directly */
+	if (*svp != sv)
+	    Perl_croak(aTHX_ "panic: del_backref");
+	*svp = NULL;
+    }
+
 }
 
-int
+void
 Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
 {
-    SV **svp = AvARRAY(av);
+    SV **svp;
+    SV **last;
+    bool is_array;
 
     PERL_ARGS_ASSERT_SV_KILL_BACKREFS;
 
-    if (svp) {
-	SV *const *const last = svp + AvFILLp(av);
+    if (!av)
+	return;
 
+    is_array = (SvTYPE(av) == SVt_PVAV);
+    if (is_array) {
 	assert(!SvIS_FREED(av));
+	svp = AvARRAY(av);
+	if (svp)
+	    last = svp + AvFILLp(av);
+    }
+    else {
+	/* optimisation: only a single backref, stored directly */
+	svp = (SV**)&av;
+	last = svp;
+    }
+
+    if (svp) {
 	while (svp <= last) {
 	    if (*svp) {
 		SV *const referrer = *svp;
@@ -5484,14 +5531,17 @@ Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
 			       (UV)SvFLAGS(referrer));
 		}
 
-		*svp = NULL;
+		if (is_array)
+		    *svp = NULL;
 	    }
 	    svp++;
 	}
-	AvFILLp(av) = -1;
     }
-    SvREFCNT_dec(av); /* remove extra count added by sv_add_backref() */
-    return 0;
+    if (is_array) {
+	AvFILLp(av) = -1;
+	SvREFCNT_dec(av); /* remove extra count added by sv_add_backref() */
+    }
+    return;
 }
 
 /*
@@ -10849,17 +10899,14 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *const param)
 	}
 	else
 	*/
-	if(nmg->mg_type == PERL_MAGIC_backref) {
-	    /* The backref AV has its reference count deliberately bumped by
-	       1.  */
-	    nmg->mg_obj
-		= SvREFCNT_inc(av_dup_inc((const AV *) nmg->mg_obj, param));
-	}
-	else {
-	    nmg->mg_obj	= (nmg->mg_flags & MGf_REFCOUNTED)
-			      ? sv_dup_inc(nmg->mg_obj, param)
-			      : sv_dup(nmg->mg_obj, param);
-	}
+	nmg->mg_obj = (nmg->mg_flags & MGf_REFCOUNTED)
+			  ? nmg->mg_type == PERL_MAGIC_backref
+				/* The backref AV has its reference
+				 * count deliberately bumped by 1 */
+				? SvREFCNT_inc(av_dup_inc((const AV *)
+						    nmg->mg_obj, param))
+				: sv_dup_inc(nmg->mg_obj, param)
+			  : sv_dup(nmg->mg_obj, param);
 
 	if (nmg->mg_ptr && nmg->mg_type != PERL_MAGIC_regex_global) {
 	    if (nmg->mg_len > 0) {
@@ -11422,8 +11469,12 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 				 * thread */
 			    ? NULL
 			    : saux->xhv_backreferences
-			    ? MUTABLE_AV(SvREFCNT_inc(
-						      sv_dup_inc((const SV *)saux->xhv_backreferences, param)))
+				? (SvTYPE(saux->xhv_backreferences) == SVt_PVAV)
+				    ? MUTABLE_AV(SvREFCNT_inc(
+					  sv_dup_inc((const SV *)
+					    saux->xhv_backreferences, param)))
+				    : MUTABLE_AV(sv_dup((const SV *)
+					    saux->xhv_backreferences, param))
 				: 0;
 
                         daux->xhv_mro_meta = saux->xhv_mro_meta

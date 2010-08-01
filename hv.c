@@ -1682,17 +1682,25 @@ S_hfreeentries(pTHX_ HV *hv)
 	     * iteration we have to allow for this. */
 
 	    if (iter->xhv_backreferences) {
-		/* The sv_magic will increase the reference count of the AV,
-		   so we need to drop it first. */
-		SvREFCNT_dec(iter->xhv_backreferences);
-		if (AvFILLp(iter->xhv_backreferences) == -1) {
-		    /* Turns out that the array is empty. Just free it.  */
+		if (SvTYPE(iter->xhv_backreferences) == SVt_PVAV) {
+		    /* The sv_magic will increase the reference count of the AV,
+		       so we need to drop it first. */
 		    SvREFCNT_dec(iter->xhv_backreferences);
+		    if (AvFILLp(iter->xhv_backreferences) == -1) {
+			/* Turns out that the array is empty. Just free it.  */
+			SvREFCNT_dec(iter->xhv_backreferences);
 
-		} else {
-		    sv_magic(MUTABLE_SV(hv),
-			     MUTABLE_SV(iter->xhv_backreferences),
-			     PERL_MAGIC_backref, NULL, 0);
+		    } else {
+			sv_magic(MUTABLE_SV(hv),
+				 MUTABLE_SV(iter->xhv_backreferences),
+				 PERL_MAGIC_backref, NULL, 0);
+		    }
+		}
+		else {
+		    MAGIC *mg;
+		    sv_magic(MUTABLE_SV(hv), NULL, PERL_MAGIC_backref, NULL, 0);
+		    mg = mg_find(MUTABLE_SV(hv), PERL_MAGIC_backref);
+		    mg->mg_obj = (SV*)iter->xhv_backreferences;
 		}
 		iter->xhv_backreferences = NULL;
 	    }
@@ -2047,7 +2055,8 @@ Perl_hv_kill_backrefs(pTHX_ HV *hv) {
     if (av) {
 	HvAUX(hv)->xhv_backreferences = 0;
 	Perl_sv_kill_backrefs(aTHX_ MUTABLE_SV(hv), av);
-	SvREFCNT_dec(av);
+	if (SvTYPE(av) == SVt_PVAV)
+	    SvREFCNT_dec(av);
     }
 }
 
