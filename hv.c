@@ -1678,8 +1678,10 @@ S_hfreeentries(pTHX_ HV *hv)
 	     * If, during the entry freeing, a destructor happens to add
 	     * a new weak backref, then sv_add_backref will look in both
 	     * places (magic in HvAUX) for the AV, but will create a new
-	     * AV in HvAUX if it can't find one. So at the end of the
-	     * iteration we have to allow for this. */
+	     * AV in HvAUX if it can't find one (if it finds it in magic,
+	     * it moves it back into HvAUX. So at the end of the iteration
+	     * we have to allow for this. */
+
 
 	    if (iter->xhv_backreferences) {
 		if (SvTYPE(iter->xhv_backreferences) == SVt_PVAV) {

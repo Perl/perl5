@@ -5310,6 +5310,8 @@ Perl_sv_rvweaken(pTHX_ SV *const sv)
  * store it directly in the HvAUX or mg_obj slot, avoiding the need to
  * allocate an AV. (Whether the slot holds an AV tells us whether this is
  * active.)
+ *
+ * If an HV's backref is stored in magic, it is moved back to HvAUX.
  */
 
 /* A discussion about the backreferences array and its refcount:
@@ -5420,10 +5422,6 @@ Perl_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
 
     if (SvTYPE(tsv) == SVt_PVHV && SvOOK(tsv)) {
 	svp = (SV**)Perl_hv_backreferences_p(aTHX_ MUTABLE_HV(tsv));
-	/* We mustn't attempt to "fix up" the hash here by moving the
-	   backreference array back to the hv_aux structure, as that is stored
-	   in the main HvARRAY(), and hfreentries assumes that no-one
-	   reallocates HvARRAY() while it is running.  */
     }
     if (!svp || !*svp) {
 	MAGIC *const mg
