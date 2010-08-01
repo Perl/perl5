@@ -281,7 +281,9 @@ and check for NULL.
  *
  */
 
-#define RXf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT+2)
+/* Leave some space, so future bit allocations can go either in the shared or
+ * unshared area without affecting binary compatibility */
+#define RXf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT+3)
 
 /* Anchor and GPOS related stuff */
 #define RXf_ANCH_BOL    	(1<<(RXf_BASE_SHIFT+0))
@@ -305,33 +307,33 @@ and check for NULL.
 #define RXf_CHECK_ALL   	(1<<(RXf_BASE_SHIFT+10))
 
 /* UTF8 related */
-#define RXf_MATCH_UTF8  	(1<<(RXf_BASE_SHIFT+12))
+#define RXf_MATCH_UTF8  	(1<<(RXf_BASE_SHIFT+11))
 
 /* Intuit related */
-#define RXf_USE_INTUIT_NOML	(1<<(RXf_BASE_SHIFT+13))
-#define RXf_USE_INTUIT_ML	(1<<(RXf_BASE_SHIFT+14))
-#define RXf_INTUIT_TAIL 	(1<<(RXf_BASE_SHIFT+15))
+#define RXf_USE_INTUIT_NOML	(1<<(RXf_BASE_SHIFT+12))
+#define RXf_USE_INTUIT_ML	(1<<(RXf_BASE_SHIFT+13))
+#define RXf_INTUIT_TAIL 	(1<<(RXf_BASE_SHIFT+14))
 
 /*
   Set in Perl_pmruntime if op_flags & OPf_SPECIAL, i.e. split. Will
   be used by regex engines to check whether they should set
   RXf_SKIPWHITE
 */
-#define RXf_SPLIT		(1<<(RXf_BASE_SHIFT+16))
+#define RXf_SPLIT		(1<<(RXf_BASE_SHIFT+15))
 
 #define RXf_USE_INTUIT		(RXf_USE_INTUIT_NOML|RXf_USE_INTUIT_ML)
 
 /* Copy and tainted info */
-#define RXf_COPY_DONE   	(1<<(RXf_BASE_SHIFT+17))
-#define RXf_TAINTED_SEEN	(1<<(RXf_BASE_SHIFT+18))
-#define RXf_TAINTED		(1<<(RXf_BASE_SHIFT+19)) /* this pattern is tainted */
+#define RXf_COPY_DONE   	(1<<(RXf_BASE_SHIFT+16))
+#define RXf_TAINTED_SEEN	(1<<(RXf_BASE_SHIFT+17))
+#define RXf_TAINTED		(1<<(RXf_BASE_SHIFT+18)) /* this pattern is tainted */
 
 /* Flags indicating special patterns */
-#define RXf_START_ONLY		(1<<(RXf_BASE_SHIFT+20)) /* Pattern is /^/ */
-#define RXf_SKIPWHITE		(1<<(RXf_BASE_SHIFT+21)) /* Pattern is for a split / / */
-#define RXf_WHITE		(1<<(RXf_BASE_SHIFT+22)) /* Pattern is /\s+/ */
-#define RXf_NULL		(1<<(RXf_BASE_SHIFT+23)) /* Pattern is // */
-#if RXf_BASE_SHIFT+23 > 31
+#define RXf_START_ONLY		(1<<(RXf_BASE_SHIFT+19)) /* Pattern is /^/ */
+#define RXf_SKIPWHITE		(1<<(RXf_BASE_SHIFT+20)) /* Pattern is for a split / / */
+#define RXf_WHITE		(1<<(RXf_BASE_SHIFT+21)) /* Pattern is /\s+/ */
+#define RXf_NULL		(1<<(RXf_BASE_SHIFT+22)) /* Pattern is // */
+#if RXf_BASE_SHIFT+22 > 31
 #   error Too many RXf_PMf bits used.  See regnodes.h for any spare in middle
 #endif
 

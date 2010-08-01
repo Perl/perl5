@@ -84,6 +84,11 @@ when loading every newly compiled extension, compares the API version of the
 running perl with the version a module has been compiled for and raises an
 exception if they don't match.
 
+=head2 Binary Incompatible with all previous Perls
+
+Some bit fields have been reordered, hence this release will not be binary
+comptible with any previous Perl release.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.

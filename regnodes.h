@@ -625,7 +625,7 @@ EXTCONST char * const PL_reg_name[] = {
 EXTCONST char * PL_reg_extflags_name[];
 #else
 EXTCONST char * const PL_reg_extflags_name[] = {
-	/* Bits in extflags defined: 11111111111101111111111100111111 */
+	/* Bits in extflags defined: 11111111111111111111111000111111 */
 	"MULTILINE",        /* 0x00000001 */
 	"SINGLELINE",       /* 0x00000002 */
 	"FOLD",             /* 0x00000004 */
@@ -634,18 +634,18 @@ EXTCONST char * const PL_reg_extflags_name[] = {
 	"LOCALE",           /* 0x00000020 */
 	"UNUSED_BIT_6",     /* 0x00000040 */
 	"UNUSED_BIT_7",     /* 0x00000080 */
-	"ANCH_BOL",         /* 0x00000100 */
-	"ANCH_MBOL",        /* 0x00000200 */
-	"ANCH_SBOL",        /* 0x00000400 */
-	"ANCH_GPOS",        /* 0x00000800 */
-	"GPOS_SEEN",        /* 0x00001000 */
-	"GPOS_FLOAT",       /* 0x00002000 */
-	"LOOKBEHIND_SEEN",  /* 0x00004000 */
-	"EVAL_SEEN",        /* 0x00008000 */
-	"CANY_SEEN",        /* 0x00010000 */
-	"NOSCAN",           /* 0x00020000 */
-	"CHECK_ALL",        /* 0x00040000 */
-	"UNUSED_BIT_19",    /* 0x00080000 */
+	"UNUSED_BIT_8",     /* 0x00000100 */
+	"ANCH_BOL",         /* 0x00000200 */
+	"ANCH_MBOL",        /* 0x00000400 */
+	"ANCH_SBOL",        /* 0x00000800 */
+	"ANCH_GPOS",        /* 0x00001000 */
+	"GPOS_SEEN",        /* 0x00002000 */
+	"GPOS_FLOAT",       /* 0x00004000 */
+	"LOOKBEHIND_SEEN",  /* 0x00008000 */
+	"EVAL_SEEN",        /* 0x00010000 */
+	"CANY_SEEN",        /* 0x00020000 */
+	"NOSCAN",           /* 0x00040000 */
+	"CHECK_ALL",        /* 0x00080000 */
 	"MATCH_UTF8",       /* 0x00100000 */
 	"USE_INTUIT_NOML",  /* 0x00200000 */
 	"USE_INTUIT_ML",    /* 0x00400000 */
