@@ -342,6 +342,18 @@ Now commit your change locally:
   Created commit 6196c1d: Rename Leon Brocard to Orange Brocard
    1 files changed, 1 insertions(+), 1 deletions(-)
 
+The C<-a> option is used to include all files that git tracks that you have
+changed.  If at this time, you only want to commit some of the files you have
+worked on, you can omit the C<-a> and use the command C<S<git add I<FILE ...>>>
+before doing the commit.  C<S<git add --interactive>> allows you to even just
+commit portions of files instead of all the changes in them.
+
+The C<-m> option is used to specify the commit message.  If you omit it, git
+will open a text editor for you to compose the message interactively.  This
+is useful when the changes are more complex than the sample given here, and,
+depending on the editor, to know that the first line of the commit message
+doesn't exceed the 50 character legal maximum.
+
 You can examine your last commit with:
 
   % git show HEAD
