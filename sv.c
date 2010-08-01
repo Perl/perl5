@@ -5435,11 +5435,10 @@ Perl_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
 	Perl_croak(aTHX_ "panic: del_backref");
 
     if (SvTYPE(*svp) == SVt_PVAV) {
+	int count = 0;
 	AV * const av = (AV*)*svp;
 	assert(!SvIS_FREED(av));
 	svp = AvARRAY(av);
-	/* We shouldn't be in here more than once, but for paranoia reasons lets
-	   not assume this.  */
 	for (i = AvFILLp(av); i >= 0; i--) {
 	    if (svp[i] == sv) {
 		const SSize_t fill = AvFILLp(av);
@@ -5453,8 +5452,13 @@ Perl_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
 		}
 		svp[fill] = NULL;
 		AvFILLp(av) = fill - 1;
+		count++;
+#ifndef DEBUGGING
+		break; /* should only be one */
+#endif
 	    }
 	}
+	assert(count == 1);
     }
     else {
 	/* optimisation: only a single backref, stored directly */
