@@ -294,7 +294,7 @@ S_new_SV(pTHX_ const char *file, int line, const char *func)
 		    : 0
 	    );
     sv->sv_debug_inpad = 0;
-    sv->sv_debug_cloned = 0;
+    sv->sv_debug_parent = NULL;
     sv->sv_debug_file = PL_curcop ? savepv(CopFILE(PL_curcop)): NULL;
 
     sv->sv_debug_serial = PL_sv_serial++;
@@ -11168,7 +11168,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
     dstr->sv_debug_optype = sstr->sv_debug_optype;
     dstr->sv_debug_line = sstr->sv_debug_line;
     dstr->sv_debug_inpad = sstr->sv_debug_inpad;
-    dstr->sv_debug_cloned = 1;
+    dstr->sv_debug_parent = (SV*)sstr;
     dstr->sv_debug_file = savepv(sstr->sv_debug_file);
 #endif
 

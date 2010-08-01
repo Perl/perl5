@@ -1164,7 +1164,8 @@ perl_destruct(pTHXx)
 		    PerlIO_printf(Perl_debug_log, "leaked: sv=0x%p"
 			" flags=0x%"UVxf
 			" refcnt=%"UVuf pTHX__FORMAT "\n"
-			"\tallocated at %s:%d %s %s%s; serial %"UVuf"\n",
+			"\tallocated at %s:%d %s %s (parent 0x%"UVxf");"
+			"serial %"UVuf"\n",
 			(void*)sv, (UV)sv->sv_flags, (UV)sv->sv_refcnt
 			pTHX__VALUE,
 			sv->sv_debug_file ? sv->sv_debug_file : "(unknown)",
@@ -1172,7 +1173,7 @@ perl_destruct(pTHXx)
 			sv->sv_debug_inpad ? "for" : "by",
 			sv->sv_debug_optype ?
 			    PL_op_name[sv->sv_debug_optype]: "(none)",
-			sv->sv_debug_cloned ? " (cloned)" : "",
+			PTR2UV(sv->sv_debug_parent),
 			sv->sv_debug_serial
 		    );
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
