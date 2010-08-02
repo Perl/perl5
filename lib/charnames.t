@@ -780,20 +780,27 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
                                     defined $ENV{PERL_TEST_CHARNAMES_SEED};
     $seed = srand($seed);
 
+    # We will look at the data grouped in "blocks" of the following
+    # size.
+    my $block_size_bits = 7;   # above 16 is not sensible
+    my $block_size = 2**$block_size_bits;
+
     # There are the regular names, like "SPACE", plus the ones
     # that are algorithmically determinable, such as "CKJ UNIFIED
     # IDEOGRAPH-hhhh" where the hhhh is the actual hex code point number
     # of the character.  The percentage of each type to test is
     # independently settable.
     my $percentage_of_regular_names = 25;
-    my $percentage_of_algorithmic_names = 1;
+    my $percentage_of_algorithmic_names = 100 / $block_size; # 1 test/block
+
+    # Changing the block size doesn't change anything with regards to
+    # testing the regular names, but will affect the algorithmic names.
+    # If you make the size too big so that blocks include both regular
+    # names and algorithmic, the whole block will be sampled at the sum
+    # of the two rates.  If you make it too small, then more algorithmic
+    # names will be tested than you probably intended.
 
     my @names;  # The names of every code point.
-
-    # We will look at the data grouped in "blocks" of the following
-    # size.
-    my $block_size_bits = 7;   # above 16 is not sensible
-    my $block_size = 2**$block_size_bits;
 
     # We look at one block past the Unicode maximum, to verify there are
     # no names in it.
