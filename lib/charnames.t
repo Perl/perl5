@@ -850,6 +850,7 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
     # from the web.
     while (<DATA>) {
         chomp;
+        next unless $_;     # Guard against empty lines getting inserted.
         my ($code, $name) = split ";";
         my $decimal = hex $code;
         $names[$decimal] = $name;
