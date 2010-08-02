@@ -938,9 +938,9 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
     unless ($all_pass) {
         diag(<<END
 Not all tests succeeded.  Because testing every single Unicode code
-point would take too long, $0 tests a random subset every run.  In
-order to reproduce this failure exactly, the same seed must be used.
-Save this seed!!: $seed
+point would take too long, $0
+tests a random subset every run.  In order to reproduce this failure exactly,
+the same seed must be used.  Save this seed!!: $seed
 
 Setting the environment variable PERL_TEST_CHARNAMES_SEED with
 $seed
