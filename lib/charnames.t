@@ -6,10 +6,6 @@ use strict;
 # is generated twice to verify that in fact a warning did happen
 my @WARN;
 
-# For randomized tests below.  This seed was stolen from Test::Sims
-my $seed = defined $ENV{PERL_TEST_CHARNAMES_SEED} ? $ENV{PERL_TEST_CHARNAMES_SEED} : (time ^ ($$ * $< * $());
-
-
 BEGIN {
     unless(grep /blib/, @INC) {
 	chdir 't' if -d 't';
@@ -778,7 +774,11 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
     # subset.  For now, don't test with \N{}, to avoid filling the internal
     # cache at compile time; use vianame
 
-    srand($seed);
+    # For randomized tests below.
+    my $seed;
+    $seed = $ENV{PERL_TEST_CHARNAMES_SEED} if
+                                    defined $ENV{PERL_TEST_CHARNAMES_SEED};
+    $seed = srand($seed);
 
     # There are the regular names, like "SPACE", plus the ones
     # that are algorithmically determinable, such as "CKJ UNIFIED
