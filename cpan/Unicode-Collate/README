@@ -1,4 +1,4 @@
-Unicode/Collate version 0.53
+Unicode/Collate version 0.55
 ===============================
 
 NAME
@@ -91,7 +91,7 @@ SADAHIRO Tomoyuki. Japan. All rights reserved.
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
-The file Unicode/Collate/allkeys.txt was copied directly
-from http://www.unicode.org/Public/UCA/5.1.0/allkeys.txt
-This file is Copyright (c) 1991-2008 Unicode, Inc. All rights reserved.
+The file Unicode/Collate/allkeys.txt was copied verbatim
+from http://www.unicode.org/Public/UCA/5.2.0/allkeys.txt
+This file is Copyright (c) 1991-2009 Unicode, Inc. All rights reserved.
 Distributed under the Terms of Use in http://www.unicode.org/copyright.html

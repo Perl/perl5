@@ -14,7 +14,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '0.53';
+our $VERSION = '0.55';
 our $PACKAGE = __PACKAGE__;
 
 my @Path = qw(Unicode Collate);
@@ -71,36 +71,49 @@ use constant NON_VAR => 0; # Non-Variable character
 use constant VAR     => 1; # Variable character
 
 # specific code points
+use constant Hangul_SBase  => 0xAC00;
+use constant Hangul_SIni   => 0xAC00;
+use constant Hangul_SFin   => 0xD7A3;
+use constant Hangul_NCount => 588;
+use constant Hangul_TCount => 28;
 use constant Hangul_LBase  => 0x1100;
 use constant Hangul_LIni   => 0x1100;
 use constant Hangul_LFin   => 0x1159;
 use constant Hangul_LFill  => 0x115F;
+use constant Hangul_LEnd   => 0x115F; # Unicode 5.2.0
 use constant Hangul_VBase  => 0x1161;
 use constant Hangul_VIni   => 0x1160; # from Vowel Filler
 use constant Hangul_VFin   => 0x11A2;
+use constant Hangul_VEnd   => 0x11A7; # Unicode 5.2.0
 use constant Hangul_TBase  => 0x11A7; # from "no-final" codepoint
 use constant Hangul_TIni   => 0x11A8;
 use constant Hangul_TFin   => 0x11F9;
-use constant Hangul_TCount => 28;
-use constant Hangul_NCount => 588;
-use constant Hangul_SBase  => 0xAC00;
-use constant Hangul_SIni   => 0xAC00;
-use constant Hangul_SFin   => 0xD7A3;
+use constant Hangul_TEnd   => 0x11FF; # Unicode 5.2.0
+use constant HangulL2Ini   => 0xA960; # Unicode 5.2.0
+use constant HangulL2Fin   => 0xA97C; # Unicode 5.2.0
+use constant HangulV2Ini   => 0xD7B0; # Unicode 5.2.0
+use constant HangulV2Fin   => 0xD7C6; # Unicode 5.2.0
+use constant HangulT2Ini   => 0xD7CB; # Unicode 5.2.0
+use constant HangulT2Fin   => 0xD7FB; # Unicode 5.2.0
+
 use constant CJK_UidIni    => 0x4E00;
 use constant CJK_UidFin    => 0x9FA5;
 use constant CJK_UidF41    => 0x9FBB;
 use constant CJK_UidF51    => 0x9FC3;
+use constant CJK_UidF52    => 0x9FCB;
 use constant CJK_ExtAIni   => 0x3400;
 use constant CJK_ExtAFin   => 0x4DB5;
 use constant CJK_ExtBIni   => 0x20000;
 use constant CJK_ExtBFin   => 0x2A6D6;
+use constant CJK_ExtCIni   => 0x2A700; # Unicode 5.2.0
+use constant CJK_ExtCFin   => 0x2B734; # Unicode 5.2.0
 
 # Logical_Order_Exception in PropList.txt
 my $DefaultRearrange = [ 0x0E40..0x0E44, 0x0EC0..0x0EC4 ];
 
-sub UCA_Version { "18" }
+sub UCA_Version { "20" }
 
-sub Base_Unicode_Version { "5.1.0" }
+sub Base_Unicode_Version { "5.2.0" }
 
 ######
 
@@ -130,8 +143,7 @@ our @ChangeNG = qw/
     entry mapping table maxlength
     ignoreChar ignoreName undefChar undefName variableTable
     versionTable alternateTable backwardsTable forwardsTable rearrangeTable
-    derivCode normCode rearrangeHash
-    backwardsFlag
+    derivCode normCode rearrangeHash backwardsFlag
   /;
 # The hash key 'ignored' is deleted at v 0.21.
 # The hash key 'isShift' is deleted at v 0.23.
@@ -190,6 +202,7 @@ my %DerivCode = (
    14 => \&_derivCE_14,
    16 => \&_derivCE_14, # 16 == 14
    18 => \&_derivCE_18,
+   20 => \&_derivCE_20,
 );
 
 sub checkCollator {
@@ -293,6 +306,30 @@ sub new
     return $self;
 }
 
+sub parseAtmark {
+    my $self = shift;
+    my $line = shift; # after s/^\s*\@//
+
+    if ($line =~ /^version\s*(\S*)/) {
+	$self->{versionTable} ||= $1;
+    }
+    elsif ($line =~ /^variable\s+(\S*)/) { # since UTS #10-9
+	$self->{variableTable} ||= $1;
+    }
+    elsif ($line =~ /^alternate\s+(\S*)/) { # till UTS #10-8
+	$self->{alternateTable} ||= $1;
+    }
+    elsif ($line =~ /^backwards\s+(\S*)/) {
+	push @{ $self->{backwardsTable} }, $1;
+    }
+    elsif ($line =~ /^forwards\s+(\S*)/) { # parhaps no use
+	push @{ $self->{forwardsTable} }, $1;
+    }
+    elsif ($line =~ /^rearrange\s+(.*)/) { # (\S*) is NG
+	push @{ $self->{rearrangeTable} }, _getHexArray($1);
+    }
+}
+
 sub read_table {
     my $self = shift;
 
@@ -309,29 +346,11 @@ sub read_table {
 
     while (my $line = <$fh>) {
 	next if $line =~ /^\s*#/;
-	unless ($line =~ s/^\s*\@//) {
-	    $self->parseEntry($line);
-	    next;
-	}
 
-	# matched ^\s*\@
-	if ($line =~ /^version\s*(\S*)/) {
-	    $self->{versionTable} ||= $1;
-	}
-	elsif ($line =~ /^variable\s+(\S*)/) { # since UTS #10-9
-	    $self->{variableTable} ||= $1;
-	}
-	elsif ($line =~ /^alternate\s+(\S*)/) { # till UTS #10-8
-	    $self->{alternateTable} ||= $1;
-	}
-	elsif ($line =~ /^backwards\s+(\S*)/) {
-	    push @{ $self->{backwardsTable} }, $1;
-	}
-	elsif ($line =~ /^forwards\s+(\S*)/) { # parhaps no use
-	    push @{ $self->{forwardsTable} }, $1;
-	}
-	elsif ($line =~ /^rearrange\s+(.*)/) { # (\S*) is NG
-	    push @{ $self->{rearrangeTable} }, _getHexArray($1);
+	if ($line =~ s/^\s*\@//) {
+	    $self->parseAtmark($line);
+	} else {
+	    $self->parseEntry($line);
 	}
     }
     close $fh;
@@ -651,8 +670,8 @@ sub getSortKey
     my $self = shift;
     my $lev  = $self->{level};
     my $rEnt = $self->splitEnt(shift); # get an arrayref of JCPS
-    my $v2i  = $self->{UCA_Version} >= 9 &&
-		$self->{variable} ne 'non-ignorable';
+    my $vers = $self->{UCA_Version};
+    my $v2i  = $vers >= 9 && $self->{variable} ne 'non-ignorable';
 
     my @buf; # weight arrays
     if ($self->{hangul_terminator}) {
@@ -661,7 +680,7 @@ sub getSortKey
 	    # weird things like VL, TL-contraction are not considered!
 	    my $curHST = '';
 	    foreach my $u (split /;/, $jcps) {
-		$curHST .= getHST($u);
+		$curHST .= getHST($u, $vers);
 	    }
 	    if ($preHST && !$curHST || # hangul before non-hangul
 		$preHST =~ /L\z/ && $curHST =~ /^T/ ||
@@ -758,6 +777,19 @@ sub sort {
 }
 
 
+sub _derivCE_20 {
+    my $u = shift;
+    my $base = (CJK_UidIni  <= $u && $u <= CJK_UidF52) ? 0xFB40 : # CJK
+	       (CJK_ExtAIni <= $u && $u <= CJK_ExtAFin ||
+		CJK_ExtBIni <= $u && $u <= CJK_ExtBFin ||
+		CJK_ExtCIni <= $u && $u <= CJK_ExtCFin) ? 0xFB80  # CJK ext.
+							: 0xFBC0; # others
+    my $aaaa = $base + ($u >> 15);
+    my $bbbb = ($u & 0x7FFF) | 0x8000;
+    return pack(VCE_TEMPLATE, NON_VAR, $aaaa, Min2Wt, Min3Wt, $u),
+	   pack(VCE_TEMPLATE, NON_VAR, $bbbb,      0,      0, $u);
+}
+
 sub _derivCE_18 {
     my $u = shift;
     my $base = (CJK_UidIni  <= $u && $u <= CJK_UidF51) ? 0xFB40 : # CJK
@@ -811,6 +843,7 @@ sub _uideoCE_8 {
 sub _isUIdeo {
     my ($u, $uca_vers) = @_;
     return((CJK_UidIni <= $u && (
+	    $uca_vers >= 20 ? ($u <= CJK_UidF52) :
 	    $uca_vers >= 18 ? ($u <= CJK_UidF51) :
 	    $uca_vers >= 14 ? ($u <= CJK_UidF41) :
 			      ($u <= CJK_UidFin)))
@@ -818,6 +851,9 @@ sub _isUIdeo {
 	(CJK_ExtAIni <= $u && $u <= CJK_ExtAFin)
 		||
 	(CJK_ExtBIni <= $u && $u <= CJK_ExtBFin)
+		||
+	($uca_vers >= 20 &&
+	 CJK_ExtCIni <= $u && $u <= CJK_ExtCFin)
     );
 }
 
@@ -864,12 +900,25 @@ sub _isIllegal {
 # Hangul Syllable Type
 sub getHST {
     my $u = shift;
-    return
-	Hangul_LIni <= $u && $u <= Hangul_LFin || $u == Hangul_LFill ? "L" :
-	Hangul_VIni <= $u && $u <= Hangul_VFin	     ? "V" :
-	Hangul_TIni <= $u && $u <= Hangul_TFin	     ? "T" :
-	Hangul_SIni <= $u && $u <= Hangul_SFin ?
-	    ($u - Hangul_SBase) % Hangul_TCount ? "LVT" : "LV" : "";
+    my $vers = shift || 0;
+
+    if (Hangul_SIni <= $u && $u <= Hangul_SFin) {
+	return +($u - Hangul_SBase) % Hangul_TCount ? "LVT" : "LV";
+    }
+
+    if ($vers < 20) {
+	return Hangul_LIni <= $u && $u <= Hangul_LFin ||
+			            $u == Hangul_LFill ? "L" :
+	       Hangul_VIni <= $u && $u <= Hangul_VFin  ? "V" :
+	       Hangul_TIni <= $u && $u <= Hangul_TFin  ? "T" : "";
+    } else {
+	return Hangul_LIni <= $u && $u <= Hangul_LEnd ||
+	       HangulL2Ini <= $u && $u <= HangulL2Fin  ? "L" :
+	       Hangul_VIni <= $u && $u <= Hangul_VEnd ||
+	       HangulV2Ini <= $u && $u <= HangulV2Fin  ? "V" :
+	       Hangul_TIni <= $u && $u <= Hangul_TEnd ||
+	       HangulT2Ini <= $u && $u <= HangulT2Fin  ? "T" : "";
+    }
 }
 
 
@@ -1178,7 +1227,7 @@ behavior of that tracking version is emulated on collating.
 If omitted, the return value of C<UCA_Version()> is used.
 C<UCA_Version()> should return the latest tracking version supported.
 
-The supported tracking version: 8, 9, 11, 14, 16 or 18.
+The supported tracking version: 8, 9, 11, 14, 16, 18 or 20.
 
      UCA       Unicode Standard         DUCET (@version)
      ---------------------------------------------------
@@ -1188,6 +1237,7 @@ The supported tracking version: 8, 9, 11, 14, 16 or 18.
      14             4.1.0               4.1.0 (4.1.0)
      16              5.0                5.0.0 (5.0.0)
      18             5.1.0               5.1.0 (5.1.0)
+     20             5.2.0               5.2.0 (5.2.0)
 
 Note: Recent UTS #10 renames "Tracking Version" to "Revision."
 
@@ -1375,12 +1425,18 @@ B<Unicode::Normalize> is required (see also B<CAVEAT>).
 -- see 7.1 Derived Collation Elements, UTS #10.
 
 By default, CJK Unified Ideographs are ordered in Unicode codepoint
-order but C<CJK Unified Ideographs>
-(if C<UCA_Version> is 8 to 11, its range is C<U+4E00..U+9FA5>;
-if C<UCA_Version> is 14 to 16, its range is C<U+4E00..U+9FBB>;
-if C<UCA_Version> is 18, its range is C<U+4E00..U+9FC3>)
-are lesser than C<CJK Unified Ideographs Extension>
-(its range is C<U+3400..U+4DB5> and C<U+20000..U+2A6D6>).
+order but C<CJK Unified Ideographs> are lesser than
+C<CJK Unified Ideographs Extension>.
+
+    CJK Unified Ideographs:
+    U+4E00..U+9FA5 if UCA_Version is 8 to 11;
+    U+4E00..U+9FBB if UCA_Version is 14 to 16;
+    U+4E00..U+9FC3 if UCA_Version is 18;
+    U+4E00..U+9FCB if UCA_Version> is 20.
+
+    CJK Unified Ideographs Extension:
+    Ext.A (U+3400..U+4DB5) and Ext.B (U+20000..U+2A6D6) if UCA_Version < 20;
+    Ext.A, Ext.B and Ext.C (U+2A700..U+2B734) if UCA_Version is 20.
 
 Through C<overrideCJK>, ordering of CJK Unified Ideographs can be overrided.
 
@@ -1475,6 +1531,12 @@ the table file is searched as F<Unicode/Collate/Foo.txt> in C<@INC>.
 By default, F<allkeys.txt> (as the filename of DUCET) is used.
 If you will prepare your own table file, any name other than F<allkeys.txt>
 may be better to avoid namespace conflict.
+
+B<NOTE>: When XSUB is used, the DUCET is compiled on building this
+module, and it may save time at the run time.
+Explicit saying C<table =E<gt> 'allkeys.txt'> (or using another table),
+or using C<ignoreChar>, C<ignoreName>, C<undefChar>, or C<undefName>
+will prevent this module using the compiled DUCET.
 
 If C<undef> is passed explicitly as the value for this key,
 no file is read (but you can define collation elements via C<entry>).
@@ -1851,9 +1913,9 @@ SADAHIRO Tomoyuki. Japan. All rights reserved.
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
-The file Unicode/Collate/allkeys.txt was copied directly
-from L<http://www.unicode.org/Public/UCA/5.1.0/allkeys.txt>.
-This file is Copyright (c) 1991-2008 Unicode, Inc. All rights reserved.
+The file Unicode/Collate/allkeys.txt was copied verbatim
+from L<http://www.unicode.org/Public/UCA/5.2.0/allkeys.txt>.
+This file is Copyright (c) 1991-2009 Unicode, Inc. All rights reserved.
 Distributed under the Terms of Use in L<http://www.unicode.org/copyright.html>.
 
 =head1 SEE ALSO

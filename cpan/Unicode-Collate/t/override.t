@@ -4,14 +4,10 @@ BEGIN {
 	    "cannot stringify a Unicode code point\n";
 	exit 0;
     }
-    if ($ENV{PERL_CORE}) {
-	chdir('t') if -d 't';
-	@INC = $^O eq 'MacOS' ? qw(::lib) : qw(../lib);
-    }
 }
 
 use Test;
-BEGIN { plan tests => 112 };
+BEGIN { plan tests => 137 };
 
 use strict;
 use warnings;
@@ -96,7 +92,7 @@ ok($ignoreCJK->eq("Pe\x{4E00}rl", "Perl")); # U+4E00 is a CJK.
 ok($ignoreCJK->gt("\x{4DFF}", "\x{4E00}")); # U+4DFF is not CJK.
 ok($ignoreCJK->lt("Pe\x{5B57}rl", "Perl")); # 'r' is unassigned.
 
-##### 22..31
+##### 22..35
 ok($ignoreCJK->eq("\x{3400}", ""));
 ok($ignoreCJK->eq("\x{4DB5}", ""));
 ok($ignoreCJK->eq("\x{9FA5}", ""));
@@ -104,11 +100,15 @@ ok($ignoreCJK->eq("\x{9FA6}", "")); # UI since Unicode 4.1.0
 ok($ignoreCJK->eq("\x{9FBB}", "")); # UI since Unicode 4.1.0
 ok($ignoreCJK->eq("\x{9FBC}", "")); # UI since Unicode 5.1.0
 ok($ignoreCJK->eq("\x{9FC3}", "")); # UI since Unicode 5.1.0
-ok($ignoreCJK->gt("\x{9FC4}", "Perl"));
+ok($ignoreCJK->eq("\x{9FC4}", "")); # UI since Unicode 5.2.0
+ok($ignoreCJK->eq("\x{9FCB}", "")); # UI since Unicode 5.2.0
+ok($ignoreCJK->gt("\x{9FCC}", "Perl"));
 ok($ignoreCJK->eq("\x{20000}", ""));
 ok($ignoreCJK->eq("\x{2A6D6}", ""));
+ok($ignoreCJK->eq("\x{2A700}", "")); # ExtC since Unicode 5.2.0
+ok($ignoreCJK->eq("\x{2B734}", "")); # ExtC since Unicode 5.2.0
 
-##### 32..41
+##### 36..45
 $ignoreCJK->change(UCA_Version => 8);
 ok($ignoreCJK->eq("\x{3400}", ""));
 ok($ignoreCJK->eq("\x{4DB5}", ""));
@@ -121,7 +121,7 @@ ok($ignoreCJK->gt("\x{9FC4}", "Perl"));
 ok($ignoreCJK->eq("\x{20000}", ""));
 ok($ignoreCJK->eq("\x{2A6D6}", ""));
 
-##### 42..51
+##### 46..55
 $ignoreCJK->change(UCA_Version => 9);
 ok($ignoreCJK->eq("\x{3400}", ""));
 ok($ignoreCJK->eq("\x{4DB5}", ""));
@@ -134,7 +134,7 @@ ok($ignoreCJK->gt("\x{9FC4}", "Perl"));
 ok($ignoreCJK->eq("\x{20000}", ""));
 ok($ignoreCJK->eq("\x{2A6D6}", ""));
 
-##### 52..61
+##### 56..67
 $ignoreCJK->change(UCA_Version => 14);
 ok($ignoreCJK->eq("\x{3400}", ""));
 ok($ignoreCJK->eq("\x{4DB5}", ""));
@@ -146,8 +146,10 @@ ok($ignoreCJK->gt("\x{9FC3}", "Perl"));
 ok($ignoreCJK->gt("\x{9FC4}", "Perl"));
 ok($ignoreCJK->eq("\x{20000}", ""));
 ok($ignoreCJK->eq("\x{2A6D6}", ""));
+ok($ignoreCJK->gt("\x{2A700}", "Perl"));
+ok($ignoreCJK->gt("\x{2B734}", "Perl"));
 
-##### 62..71
+##### 68..81
 $ignoreCJK->change(UCA_Version => 18);
 ok($ignoreCJK->eq("\x{3400}", ""));
 ok($ignoreCJK->eq("\x{4DB5}", ""));
@@ -157,8 +159,12 @@ ok($ignoreCJK->eq("\x{9FBB}", "")); # UI since Unicode 4.1.0
 ok($ignoreCJK->eq("\x{9FBC}", "")); # UI since Unicode 5.1.0
 ok($ignoreCJK->eq("\x{9FC3}", "")); # UI since Unicode 5.1.0
 ok($ignoreCJK->gt("\x{9FC4}", "Perl"));
+ok($ignoreCJK->gt("\x{9FCB}", "Perl"));
+ok($ignoreCJK->gt("\x{9FCC}", "Perl"));
 ok($ignoreCJK->eq("\x{20000}", ""));
 ok($ignoreCJK->eq("\x{2A6D6}", ""));
+ok($ignoreCJK->gt("\x{2A700}", "Perl"));
+ok($ignoreCJK->gt("\x{2B734}", "Perl"));
 
 #####
 
@@ -176,14 +182,14 @@ ENTRIES
   },
 );
 
-##### 72..76
+##### 82..86
 ok($overCJK->lt("a", "A")); # diff. at level 3.
 ok($overCJK->lt( "\x{4E03}",  "\x{4E00}")); # diff. at level 2.
 ok($overCJK->lt("A\x{4E03}", "A\x{4E00}"));
 ok($overCJK->lt("A\x{4E03}", "a\x{4E00}"));
 ok($overCJK->lt("a\x{4E03}", "A\x{4E00}"));
 
-##### 77..85
+##### 87..97
 ok($overCJK->gt("a\x{3400}", "A\x{4DB5}"));
 ok($overCJK->gt("a\x{4DB5}", "A\x{9FA5}"));
 ok($overCJK->gt("a\x{9FA5}", "A\x{9FA6}")); # UI since Unicode 4.1.0
@@ -191,10 +197,12 @@ ok($overCJK->gt("a\x{9FA6}", "A\x{9FBB}")); # UI since Unicode 4.1.0
 ok($overCJK->gt("a\x{9FBB}", "A\x{9FBC}")); # UI since Unicode 5.1.0
 ok($overCJK->gt("a\x{9FBC}", "A\x{9FBF}")); # UI since Unicode 5.1.0
 ok($overCJK->gt("a\x{9FBF}", "A\x{9FC3}")); # UI since Unicode 5.1.0
-ok($overCJK->lt("a\x{9FC3}", "A\x{9FC4}"));
+ok($overCJK->gt("a\x{9FC3}", "A\x{9FC4}")); # UI since Unicode 5.2.0
+ok($overCJK->gt("a\x{9FC4}", "A\x{9FCB}")); # UI since Unicode 5.2.0
+ok($overCJK->lt("a\x{9FCB}", "A\x{9FCC}"));
 ok($overCJK->lt("a\x{9FC4}", "A\x{9FCF}"));
 
-##### 86..94
+##### 98..106
 $overCJK->change(UCA_Version => 9);
 ok($overCJK->gt("a\x{3400}", "A\x{4DB5}"));
 ok($overCJK->gt("a\x{4DB5}", "A\x{9FA5}"));
@@ -206,7 +214,7 @@ ok($overCJK->lt("a\x{9FBF}", "A\x{9FC3}"));
 ok($overCJK->lt("a\x{9FC3}", "A\x{9FC4}"));
 ok($overCJK->lt("a\x{9FC4}", "A\x{9FCF}"));
 
-##### 95..103
+##### 107..115
 $overCJK->change(UCA_Version => 14);
 ok($overCJK->gt("a\x{3400}", "A\x{4DB5}"));
 ok($overCJK->gt("a\x{4DB5}", "A\x{9FA5}"));
@@ -218,7 +226,7 @@ ok($overCJK->lt("a\x{9FBF}", "A\x{9FC3}"));
 ok($overCJK->lt("a\x{9FC3}", "A\x{9FC4}"));
 ok($overCJK->lt("a\x{9FC4}", "A\x{9FCF}"));
 
-##### 104..112
+##### 116..126
 $overCJK->change(UCA_Version => 18);
 ok($overCJK->gt("a\x{3400}", "A\x{4DB5}"));
 ok($overCJK->gt("a\x{4DB5}", "A\x{9FA5}"));
@@ -228,4 +236,20 @@ ok($overCJK->gt("a\x{9FBB}", "A\x{9FBC}")); # UI since Unicode 5.1.0
 ok($overCJK->gt("a\x{9FBC}", "A\x{9FBF}")); # UI since Unicode 5.1.0
 ok($overCJK->gt("a\x{9FBF}", "A\x{9FC3}")); # UI since Unicode 5.1.0
 ok($overCJK->lt("a\x{9FC3}", "A\x{9FC4}"));
+ok($overCJK->lt("a\x{9FC3}", "A\x{9FCB}"));
+ok($overCJK->lt("a\x{9FC3}", "A\x{9FCC}"));
+ok($overCJK->lt("a\x{9FC4}", "A\x{9FCF}"));
+
+##### 127..137
+$overCJK->change(UCA_Version => 20);
+ok($overCJK->gt("a\x{3400}", "A\x{4DB5}"));
+ok($overCJK->gt("a\x{4DB5}", "A\x{9FA5}"));
+ok($overCJK->gt("a\x{9FA5}", "A\x{9FA6}")); # UI since Unicode 4.1.0
+ok($overCJK->gt("a\x{9FA6}", "A\x{9FBB}")); # UI since Unicode 4.1.0
+ok($overCJK->gt("a\x{9FBB}", "A\x{9FBC}")); # UI since Unicode 5.1.0
+ok($overCJK->gt("a\x{9FBC}", "A\x{9FBF}")); # UI since Unicode 5.1.0
+ok($overCJK->gt("a\x{9FBF}", "A\x{9FC3}")); # UI since Unicode 5.1.0
+ok($overCJK->gt("a\x{9FC3}", "A\x{9FC4}")); # UI since Unicode 5.2.0
+ok($overCJK->gt("a\x{9FC4}", "A\x{9FCB}")); # UI since Unicode 5.2.0
+ok($overCJK->lt("a\x{9FCB}", "A\x{9FCC}"));
 ok($overCJK->lt("a\x{9FC4}", "A\x{9FCF}"));

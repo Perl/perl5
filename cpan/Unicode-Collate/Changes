@@ -1,8 +1,28 @@
 Revision history for Perl module Unicode::Collate.
 
+0.55  Sun Aug  1 21:21:23 2010
+    - incorporated Unicode::Collate::Locale with some changes.
+ (see http://www.xray.mpe.mpg.de/mailing-lists/perl-unicode/2004-03/msg00030.html)
+    ! added t/locale*.t that uses DUCET.
+
+0.54  Sun Jul 25 21:37:04 2010
+    - Now UCA Revision 20 (based on Unicode 5.2.0).
+    - DUCET is also updated (for Unicode 5.2.0) as Collate/allkeys.txt,
+      which *is required* to test this module.
+    ! Please notice that allkeys.txt will be overwritten if you have had
+      other allkeys.txt already.
+    - U+9FC4..U+9FCB and U+2A700..U+2B734 are new CJK Unified Ideographs.
+    - Many hangul jamo are assigned (affecting hangul_terminator).
+
+    ! DUCET will be compiled when XS is used. Explicit saying
+      <table => 'allkeys.txt'> (or using another table) will prevent
+      this module using the compiled DUCET.
+
+    ! added t/default.t that uses DUCET.
+
 0.53  Sun Feb 14 20:46:27 2010
     - Now UCA Revision 18 (based on Unicode 5.1.0).
-    - DUCET is also upgrated (for Unicode 5.1.0) as Collate/allkeys.txt,
+    - DUCET is also updated (for Unicode 5.1.0) as Collate/allkeys.txt,
       which is not required to test this module.
     ! Please notice that allkeys.txt will be overwritten if you have had
       other allkeys.txt already.
