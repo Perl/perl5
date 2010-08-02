@@ -1764,6 +1764,7 @@ use File::Glob qw(:case);
 				lib/Thread.{pm,t}
 				lib/Tie/Array.pm
 				lib/Tie/Array/
+				lib/Tie/ExtraHash.t
 				lib/Tie/Handle.pm
 				lib/Tie/Handle/
 				lib/Tie/Hash.pm

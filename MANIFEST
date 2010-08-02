@@ -3608,6 +3608,7 @@ lib/Tie/Array/push.t		Test for Tie::Array
 lib/Tie/Array/splice.t		Test for Tie::Array::SPLICE
 lib/Tie/Array/stdpush.t		Test for Tie::StdArray
 lib/Tie/Array/std.t		Test for Tie::StdArray
+lib/Tie/ExtraHash.t		Test for Tie::ExtraHash (in Tie/Hash.pm)
 lib/Tie/Handle.pm		Base class for tied handles
 lib/Tie/Handle/stdhandle_from_handle.t	Test for Tie::StdHandle/Handle backwards compat
 lib/Tie/Handle/stdhandle.t	Test for Tie::StdHandle
