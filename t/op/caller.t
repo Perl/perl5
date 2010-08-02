@@ -195,6 +195,7 @@ print scalar @DB::args;
 
 # It shouldn't leak.
 EOP
+    close $fh;
 
     foreach (0, 1) {
         my $got = runperl(progfile => $tmpfile, args => [$_]);
