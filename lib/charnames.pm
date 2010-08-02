@@ -2,7 +2,7 @@ package charnames;
 use strict;
 use warnings;
 use File::Spec;
-our $VERSION = '1.14';
+our $VERSION = '1.15';
 
 use bytes ();          # for $bytes::hint_bits
 
@@ -502,6 +502,16 @@ sub alias_file ($)  # Reads a file containing alias definitions
   0;
 } # alias_file
 
+# For use when don't import anything.  This structure must be kept in
+# sync with the one that import() fills up.
+my %dummy_H = (
+                charnames_stringified_names => "",
+                charnames_stringified_ords => "",
+                charnames_scripts => "",
+                charnames_full => 1,
+                charnames_short => 0,
+              );
+
 
 sub lookup_name ($;$) {
 
@@ -517,13 +527,22 @@ sub lookup_name ($;$) {
   my $save_input;
 
   if ($runtime) {
+
+    # If we didn't import anything (which happens with 'use charnames ()',
+    # substitute a dummy structure.
+    $hints_ref = \%dummy_H if ! defined $hints_ref
+                              || ! defined $hints_ref->{charnames_full};
+
     # At runtime, but currently not at compile time, $^H gets
     # stringified, so un-stringify back to the original data structures.
     # These get thrown away by perl before the next invocation
     # Also fill in the hash with the non-stringified data.
+    # N.B.  New fields must be also added to %dummy_H
 
-    %{$^H{charnames_name_aliases}} = split ',', $hints_ref->{charnames_stringified_names};
-    %{$^H{charnames_ord_aliases}} = split ',', $hints_ref->{charnames_stringified_ords};
+    %{$^H{charnames_name_aliases}} = split ',',
+                                      $hints_ref->{charnames_stringified_names};
+    %{$^H{charnames_ord_aliases}} = split ',',
+                                      $hints_ref->{charnames_stringified_ords};
     $^H{charnames_scripts} = $hints_ref->{charnames_scripts};
     $^H{charnames_full} = $hints_ref->{charnames_full};
     $^H{charnames_short} = $hints_ref->{charnames_short};
@@ -685,6 +704,8 @@ sub import
   $^H{charnames_ord_aliases} = {};
   $^H{charnames_name_aliases} = {};
   $^H{charnames_inverse_ords} = {};
+  # New fields must be added to %dummy_H, and the code in lookup_name()
+  # that copies fields from the runtime structure
 
   ##
   ## fill %h keys with our @_ args.
@@ -719,8 +740,10 @@ sub import
   @args == 0 && $promote and @args = (":full");
   @h{@args} = (1) x @args;
 
-  $^H{charnames_full} = delete $h{':full'};
-  $^H{charnames_short} = delete $h{':short'};
+  $^H{charnames_full} = delete $h{':full'} || 0;  # Don't leave undefined,
+                                                  # as tested for in
+                                                  # lookup_names
+  $^H{charnames_short} = delete $h{':short'} || 0;
   my @scripts = map uc, keys %h;
 
   ##
@@ -806,9 +829,13 @@ sub viacode {
   }
 
   # See if there is a user name for it, before giving up completely.
-  # First get the scoped aliases.
+  # First get the scoped aliases, give up if have none.
+  my $H_ref = (caller(0))[10];
+  return if ! defined $H_ref
+            || ! exists $H_ref->{charnames_stringified_inverse_ords};
+
   my %code_point_aliases = split ',',
-                          (caller(0))[10]->{charnames_stringified_inverse_ords};
+                          $H_ref->{charnames_stringified_inverse_ords};
   if (! exists $code_point_aliases{$hex}) {
     if (CORE::hex($hex) > 0x10FFFF) {
         carp "Unicode characters only allocated up to U+10FFFF (you asked for U+$hex)";

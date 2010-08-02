@@ -288,3 +288,13 @@ use charnames ":alias" => ":xyzzy";
 EXPECT
 OPTIONS regex
 $
+########
+# charnames with no import still works for runtime functions
+use warnings;
+no warnings 'void';
+use charnames ();
+charnames::vianame('SPACE');
+charnames::viacode(0x41);
+EXPECT
+OPTIONS regex
+$
