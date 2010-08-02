@@ -105,10 +105,12 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 
 #define CALL_A_PEEP(peep, o) CALL_FPTR((peep)->fn)(aTHX_ o, peep)
 
-#define CALL_PEEP(o)							\
-    STMT_START {							\
-	peep_next_t _next_peep = { PL_peepp, NULL };			\
-	CALL_A_PEEP(&_next_peep, o);					\
+#define CALL_PEEP(o)				\
+    STMT_START {				\
+	peep_next_t _next_peep;			\
+	_next_peep.fn        = PL_peepp;	\
+	_next_peep.user_data = NULL;		\
+	CALL_A_PEEP(&_next_peep, o);		\
     } STMT_END
 
 #define CALL_OPFREEHOOK(o) if (PL_opfreehook) CALL_FPTR(PL_opfreehook)(aTHX_ o)
