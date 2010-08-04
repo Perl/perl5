@@ -19,7 +19,7 @@ lddlflags='-shared'
 ccdlflags='-Wl,-E'
 
 # Debian bug #258618
-ccflags='-D_GNU_SOURCE'
+ccflags="-D_GNU_SOURCE $ccflags"
 
 # The following routines are only available as stubs in GNU libc.
 # XXX remove this once metaconf detects the GNU libc stubs.
