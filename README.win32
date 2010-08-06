@@ -8,8 +8,7 @@ perlwin32 - Perl under Windows
 
 =head1 SYNOPSIS
 
-These are instructions for building Perl under Windows 9x/NT/2000/XP
-on the Intel x86 and Itanium architectures.
+These are instructions for building Perl under Windows 2000 and later.
 
 =head1 DESCRIPTION
 
@@ -26,36 +25,36 @@ only relevant to people building Perl on Unix-like systems.  In
 particular, you can safely ignore any information that talks about
 "Configure".
 
-You may also want to look at two other options for building
-a perl that will work on Windows NT:  the README.cygwin and
-README.os2 files, each of which give a different set of rules to
-build a Perl that will work on Win32 platforms.  Those two methods
-will probably enable you to build a more Unix-compatible perl, but
-you will also need to download and use various other build-time and
-run-time support software described in those files.
+You may also want to look at one other option for building a perl that
+will work on Windows: the README.cygwin file, which give a different
+set of rules to build a perl for Windows.  This method will probably
+enable you to build a more Unix-compatible perl, but you will also
+need to download and use various other build-time and run-time support
+software described in that file.
 
 This set of instructions is meant to describe a so-called "native"
-port of Perl to Win32 platforms.  This includes both 32-bit and
+port of Perl to the Windows platform.  This includes both 32-bit and
 64-bit Windows operating systems.  The resulting Perl requires no
 additional software to run (other than what came with your operating
 system).  Currently, this port is capable of using one of the
 following compilers on the Intel x86 architecture:
 
-      Borland C++           version 5.02 or later
-      Microsoft Visual C++  version 2.0 or later
-      MinGW with gcc        gcc version 2.95.2 or later
+      Borland C++             version 5.02 or later
+      Microsoft Visual C++    version 6.0 or later
       Gcc by mingw.org        gcc version 2.95.2 or later
       Gcc by mingw-w64.sf.net gcc version 4.4.3 or later
 
 Note that the last two of these are actually competing projects both
 delivering complete gcc toolchain for MS Windows:
+
 - http://mingw.org - delivers gcc toolchain targeting 32-bit Windows
-  platform.
-  Use version 3.2.x or later for the best results with this compiler.
+  platform.  Use version 3.2.x or later for the best results with this
+  compiler.
+
 - http://mingw-w64.sf.net - delivers gcc toolchain targeting both 64-bit
   Windows and 32-bit Windows platforms (despite the project name "mingw-w64"
   they are not only 64-bit oriented). They deliver the native gcc compilers
-  + cross-compilers that are also supported by perl's makefile.
+  and cross-compilers that are also supported by perl's makefile.
 
 The Borland C++ and Microsoft Visual C++ compilers are also now being given
 away free.  The Borland compiler is available as "Borland C++ Compiler Free
@@ -71,7 +70,7 @@ This port can also be built on IA64/AMD64 using:
       Microsoft Platform SDK	Nov 2001 (64-bit compiler and tools)
       MinGW64 compiler (gcc version 4.4.3 or later)
 
-The MS Platform SDK can be downloaded from http://www.microsoft.com/.
+The Windows SDK can be downloaded from http://www.microsoft.com/.
 The MinGW64 compiler is available at http://sourceforge.net/projects/mingw-w64.
 The latter is actually a cross-compiler targeting Win64. There's also a trimmed
 down compiler (no java, or gfortran) suitable for building perl available at:
@@ -85,17 +84,17 @@ Also, the trimmed down compiler only passes tests when USE_ITHREADS *= define
 This port fully supports MakeMaker (the set of modules that
 is used to build extensions to perl).  Therefore, you should be
 able to build and install most extensions found in the CPAN sites.
-See L<Usage Hints for Perl on Win32> below for general hints about this.
+See L<Usage Hints for Perl on Windows> below for general hints about this.
 
-=head2 Setting Up Perl on Win32
+=head2 Setting Up Perl on Windows
 
 =over 4
 
 =item Make
 
 You need a "make" program to build the sources.  If you are using
-Visual C++ or the Platform SDK tools under Windows NT/2000/XP, nmake
-will work.  All other builds need dmake.
+Visual C++ or the Windows SDK tools, nmake will work.  Builds using
+the Borland compiler or gcc need dmake.
 
 dmake is a freely available make that has very nice macro features
 and parallelability.
@@ -123,12 +122,6 @@ popular 4DOS/NT shell have incompatibilities that may cause you trouble.
 If the build fails under that shell, try building again with the cmd
 shell.
 
-The nmake Makefile also has known incompatibilities with the
-"command.com" shell that comes with Windows 9x.  You will need to
-use dmake and makefile.mk to build under Windows 9x.
-
-The surest way to build it is on Windows NT/2000/XP, using the cmd shell.
-
 Make sure the path to the build directory does not contain spaces.  The
 build usually works in this circumstance, but some tests will fail.
 
@@ -144,7 +137,7 @@ See L</"Make"> above.
 
 The nmake that comes with Visual C++ will suffice for building.
 You will need to run the VCVARS32.BAT file, usually found somewhere
-like C:\MSDEV4.2\BIN or C:\Program Files\Microsoft Visual Studio\VC98\Bin.
+like C:\Program Files\Microsoft Visual Studio\VC98\Bin.
 This will set your build environment.
 
 You can also use dmake to build using Visual C++; provided, however,
@@ -159,7 +152,7 @@ make for building extensions using MakeMaker.
 This free version of Visual C++ 2008 Professional contains the same compiler
 and linker that ship with the full version, and also contains everything
 necessary to build Perl, rather than requiring a separate download of the
-Platform SDK like previous versions did.
+Windows SDK like previous versions did.
 
 This package can be downloaded by searching for "Visual Studio 2008 Express
 Edition" in the Download Center at
@@ -186,7 +179,7 @@ This free version of Visual C++ 2005 Professional contains the same compiler
 and linker that ship with the full version, but doesn't contain everything
 necessary to build Perl.
 
-You will also need to download the "Platform SDK" (the "Core SDK" and "MDAC
+You will also need to download the "Windows SDK" (the "Core SDK" and "MDAC
 SDK" components are required) for more header files and libraries.
 
 These packages can both be downloaded by searching in the Download Center at
@@ -194,14 +187,10 @@ http://www.microsoft.com/downloads/search.aspx?displaylang=en.  (Providing exact
 links to these packages has proven a pointless task because the links keep on
 changing so often.)
 
-Try to obtain the latest version of the Platform SDK.  Sometimes these packages
+Try to obtain the latest version of the Windows SDK.  Sometimes these packages
 contain a particular Windows OS version in their name, but actually work on
 other OS versions too.  For example, the "Windows Server 2003 R2 Platform SDK"
 also runs on Windows XP SP2 and Windows 2000.
-
-According to the download pages these packages are only supported on Windows
-2000/XP/2003, so trying to use these tools on Windows 95/98/ME and even Windows
-NT probably won't work.
 
 Install Visual C++ 2005 first, then the Platform SDK.  Setup your environment
 as follows (assuming default installation locations were chosen):
@@ -246,14 +235,10 @@ http://www.microsoft.com/downloads/search.aspx?displaylang=en.  (Providing exact
 links to these packages has proven a pointless task because the links keep on
 changing so often.)
 
-Try to obtain the latest version of the Platform SDK.  Sometimes these packages
+Try to obtain the latest version of the Windows SDK.  Sometimes these packages
 contain a particular Windows OS version in their name, but actually work on
 other OS versions too.  For example, the "Windows Server 2003 R2 Platform SDK"
 also runs on Windows XP SP2 and Windows 2000.
-
-According to the download pages these packages are only supported on Windows
-2000/XP/2003, so trying to use these tools on Windows 95/98/ME and even Windows
-NT probably won't work.
 
 Install the Toolkit first, then the Platform SDK, then the .NET Framework SDK.
 Setup your environment as follows (assuming default installation locations
@@ -400,7 +385,7 @@ here:
 
 Make sure you are in the "win32" subdirectory under the perl toplevel.
 This directory contains a "Makefile" that will work with
-versions of nmake that come with Visual C++ or the Platform SDK, and
+versions of nmake that come with Visual C++ or the Windows SDK, and
 a dmake "makefile.mk" that will work for all supported compilers.  The
 defaults in the dmake makefile are setup to build using MinGW/gcc.
 
@@ -437,9 +422,6 @@ You may also need to comment out the C<DELAYLOAD = ...> line in the
 Makefile if you're using VC++ 6.0 without the latest service pack and
 the linker reports an internal error.
 
-If you are using VC++ 4.2 or earlier then you'll have to change the /EHsc
-option in the CXX_FLAG macro to the equivalent /GX option.
-
 If you have either the source or a library that contains des_fcrypt(),
 enable the appropriate option in the makefile.  A ready-to-use version
 of fcrypt.c, based on the version originally written by Eric Young at
@@ -466,13 +448,12 @@ sure you have done the previous steps correctly.
 
 =back
 
-=head2 Testing Perl on Win32
+=head2 Testing Perl on Windows
 
 Type "dmake test" (or "nmake test").  This will run most of the tests from
 the testsuite (many tests will be skipped).
 
-There should be no test failures when running under Windows NT/2000/XP.
-Many tests I<will> fail under Windows 9x due to the inferior command shell.
+There should be no test failures.
 
 Some test failures may occur if you use a command shell other than the
 native "cmd.exe", or if you are building from a path that contains
@@ -507,7 +488,7 @@ avoid these errors.
 
 Please report any other failures as described under L<BUGS AND CAVEATS>.
 
-=head2 Installation of Perl on Win32
+=head2 Installation of Perl on Windows
 
 Type "dmake install" (or "nmake install").  This will put the newly
 built perl and the libraries under whatever C<INST_TOP> points to in the
@@ -527,7 +508,7 @@ C<$INST_TOP\$INST_VER\bin\$ARCHNAME>, e.g.
 
     set PATH=c:\perl\5.6.0\bin;c:\perl\5.6.0\bin\MSWin32-x86;%PATH%
 
-=head2 Usage Hints for Perl on Win32
+=head2 Usage Hints for Perl on Windows
 
 =over 4
 
@@ -561,7 +542,7 @@ following entries (of type REG_SZ or REG_EXPAND_SZ) may be set:
 
 Note the C<$]> in the above is not literal.  Substitute whatever version
 of perl you want to honor that entry, e.g. C<5.6.0>.  Paths must be
-separated with semicolons, as usual on win32.
+separated with semicolons, as usual on Windows.
 
 =item File Globbing
 
@@ -668,7 +649,7 @@ of extensions, some of which require a C compiler to build.
 Look in http://www.cpan.org/ for more information on CPAN.
 
 Note that not all of the extensions available from CPAN may work
-in the Win32 environment; you should check the information at
+in the Windows environment; you should check the information at
 http://testers.cpan.org/ before investing too much effort into
 porting modules that don't readily build.
 
@@ -774,12 +755,12 @@ binary will always expand unquoted command lines, which may not be
 what you want if you use a shell that does that for you.  The expansion
 done is also somewhat less powerful than the approach suggested above.
 
-=item Win32 Specific Extensions
+=item Windows Specific Extensions
 
-A number of extensions specific to the Win32 platform are available
+A number of extensions specific to the Windows platform are available
 from CPAN.  You may find that many of these extensions are meant to
 be used under the Activeware port of Perl, which used to be the only
-native port for the Win32 platform.  Since the Activeware port does not
+native port for the Windows platform.  Since the Activeware port does not
 have adequate support for Perl's extension building tools, these
 extensions typically do not support those tools either and, therefore,
 cannot be built using the generic steps shown in the previous section.
@@ -842,11 +823,11 @@ Embedding Perl inside a 64-bit application.
 
 Perl scripts on UNIX use the "#!" (a.k.a "shebang") line to
 indicate to the OS that it should execute the file using perl.
-Win32 has no comparable means to indicate arbitrary files are
+Windows has no comparable means to indicate arbitrary files are
 executables.
 
 Instead, all available methods to execute plain text files on
-Win32 rely on the file "extension".  There are three methods
+Windows rely on the file "extension".  There are three methods
 to use this to execute perl scripts:
 
 =over 8
@@ -894,7 +875,7 @@ avoids both problems is possible.
 A script called "runperl.bat" is available that can be copied
 to any filename (along with the .bat suffix).  For example,
 if you call it "foo.bat", it will run the file "foo" when it is
-executed.  Since you can run batch files on Win32 platforms simply
+executed.  Since you can run batch files on Windows platforms simply
 by typing the name (without the extension), this effectively
 runs the file "foo", when you type either "foo" or "foo.bat".
 With this method, "foo.bat" can even be in a different location
@@ -916,7 +897,7 @@ system.
 
 C<perldoc> is also a useful tool for browsing information contained
 in the documentation, especially in conjunction with a pager
-like C<less> (recent versions of which have Win32 support).  You may
+like C<less> (recent versions of which have Windows support).  You may
 have to set the PAGER environment variable to use a specific pager.
 "perldoc -f foo" will print information about the perl operator
 "foo".
@@ -926,7 +907,7 @@ is assuming that Perl's normal behavior of opening a command-line
 window will go away.  This isn't the case.  If you want to start a copy
 of C<perl> without opening a command-line window, use the C<wperl>
 executable built during the installation process.  Usage is exactly
-the same as normal C<perl> on Win32, except that options like C<-h>
+the same as normal C<perl> on Windows, except that options like C<-h>
 don't work (since they need a command-line window to print to).
 
 If you find bugs in perl, you can run C<perlbug> to create a
@@ -957,7 +938,7 @@ that will be portable to other environments, see L<perlport>
 for a reasonably definitive list of these differences.
 
 Not all extensions available from CPAN may build or work properly
-in the Win32 environment.  See L</"Building Extensions">.
+in the Windows environment.  See L</"Building Extensions">.
 
 Most C<socket()> related calls are supported, but they may not
 behave as on Unix platforms.  See L<perlport> for the full list.
@@ -971,7 +952,7 @@ Later OS versions already include Winsock2 support.
 Signal handling may not behave as on Unix platforms (where it
 doesn't exactly "behave", either :).  For instance, calling C<die()>
 or C<exit()> from signal handlers will cause an exception, since most
-implementations of C<signal()> on Win32 are severely crippled.
+implementations of C<signal()> on Windows are severely crippled.
 Thus, signals may work only for simple things like setting a flag
 variable in the handler.  Using signals under this port should
 currently be considered unsupported.
