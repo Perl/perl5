@@ -712,27 +712,6 @@ binary will always expand unquoted command lines, which may not be
 what you want if you use a shell that does that for you.  The expansion
 done is also somewhat less powerful than the approach suggested above.
 
-=item Windows Specific Extensions
-
-A number of extensions specific to the Windows platform are available
-from CPAN.  You may find that many of these extensions are meant to
-be used under the Activeware port of Perl, which used to be the only
-native port for the Windows platform.  Since the Activeware port does not
-have adequate support for Perl's extension building tools, these
-extensions typically do not support those tools either and, therefore,
-cannot be built using the generic steps shown in the previous section.
-
-To ensure smooth transitioning of existing code that uses the
-ActiveState port, there is a bundle of Win32 extensions that contains
-all of the ActiveState extensions and several other Win32 extensions from
-CPAN in source form, along with many added bugfixes, and with MakeMaker
-support.  The latest version of this bundle is available at:
-
-    http://search.cpan.org/dist/libwin32/
-
-See the README in that distribution for building and installation
-instructions.
-
 =item Notes on 64-bit Windows
 
 Windows .NET Server supports the LLP64 data model on the Intel Itanium
