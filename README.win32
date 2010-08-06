@@ -41,15 +41,14 @@ following compilers on the Intel x86 architecture:
 
       Borland C++             version 5.02 or later
       Microsoft Visual C++    version 6.0 or later
-      Gcc by mingw.org        gcc version 2.95.2 or later
+      Gcc by mingw.org        gcc version 3.2 or later
       Gcc by mingw-w64.sf.net gcc version 4.4.3 or later
 
 Note that the last two of these are actually competing projects both
 delivering complete gcc toolchain for MS Windows:
 
 - http://mingw.org - delivers gcc toolchain targeting 32-bit Windows
-  platform.  Use version 3.2.x or later for the best results with this
-  compiler.
+  platform.
 
 - http://mingw-w64.sf.net - delivers gcc toolchain targeting both 64-bit
   Windows and 32-bit Windows platforms (despite the project name "mingw-w64"
@@ -326,54 +325,12 @@ shells available after you install the Platform SDK from the Start Menu.
 
 =item MinGW release 3 with gcc
 
-The latest release of MinGW at the time of writing is 3.1.0, which contains
-gcc-3.2.3.  It can be downloaded here:
+Perl can be compiled with gcc from MinGW release 3 and later (using gcc 3.2.x
+and later).  It can be downloaded here:
 
     http://www.mingw.org/
 
-Perl also compiles with earlier releases of gcc (2.95.2 and up).  See below
-for notes about using earlier versions of MinGW/gcc.
-
-And perl also compiles with gcc-4.3.0 and up, and perhaps even some of the
-earlier 4.x.x versions.
-
 You also need dmake.  See L</"Make"> above on how to get it.
-
-=item MinGW release 1 with gcc
-
-The MinGW-1.1 bundle contains gcc-2.95.3.
-
-Make sure you install the binaries that work with MSVCRT.DLL as indicated
-in the README for the GCC bundle.  You may need to set up a few environment
-variables (usually ran from a batch file).
-
-There are a couple of problems with the version of gcc-2.95.2-msvcrt.exe
-released 7 November 1999:
-
-=over
-
-=item *
-
-It left out a fix for certain command line quotes.  To fix this, be sure
-to download and install the file fixes/quote-fix-msvcrt.exe from the above
-ftp location.
-
-=item *
-
-The definition of the fpos_t type in stdio.h may be wrong.  If your
-stdio.h has this problem, you will see an exception when running the
-test t/lib/io_xs.t.  To fix this, change the typedef for fpos_t from
-"long" to "long long" in the file i386-mingw32msvc/include/stdio.h,
-and rebuild.
-
-=back
-
-A potentially simpler to install (but probably soon-to-be-outdated) bundle
-of the above package with the mentioned fixes already applied is available
-here:
-
-    http://downloads.ActiveState.com/pub/staff/gsar/gcc-2.95.2-msvcrt.zip
-    ftp://ftp.ActiveState.com/pub/staff/gsar/gcc-2.95.2-msvcrt.zip
 
 =back
 
@@ -1007,6 +964,6 @@ Win9x support was added in 5.6 (Benjamin Stuhl).
 
 Support for 64-bit Windows added in 5.8 (ActiveState Corp).
 
-Last updated: 29 August 2007
+Last updated: 6 August 2010
 
 =cut

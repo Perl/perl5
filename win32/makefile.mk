@@ -3,7 +3,7 @@
 # Supported compilers:
 #	Microsoft Visual C++ 6.0 or later
 #	Borland C++ 5.02 or later
-#	MinGW with gcc-2.95.2 or later
+#	MinGW with gcc-3.2 or later
 #	Windows SDK 64-bit compiler and tools **experimental**
 #
 # This is set up to build a perl.exe that runs off a shared library
@@ -113,7 +113,7 @@ USE_LARGE_FILES	*= define
 #CCTYPE		*= MSVC90
 # Borland 5.02 or later
 #CCTYPE		*= BORLAND
-# MinGW or mingw-w64 with gcc-2.95.2 or later
+# MinGW or mingw-w64 with gcc-3.2 or later
 CCTYPE		*= GCC
 
 #
