@@ -5,16 +5,16 @@
 [ this is a template for a new perldelta file. Any text flagged as
 XXX needs to be processed before release. ]
 
-perldelta - what is new for perl v5.XXX.XXX
+perldelta - what is new for perl v5.12.2
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.XXX.XXX release and
-the 5.XXX.XXX release.
+This document describes differences between the 5.12.2 release and
+the 5.12.2 release.
 
-If you are upgrading from an earlier release such as 5.XXX.XXX, first read
-L<perl5XXXdelta>, which describes differences between 5.XXX.XXX and
-5.XXX.XXX.
+If you are upgrading from an earlier release such as 5.12.0, first read
+L<perl5121delta>, which describes differences between 5.12.0 and
+5.12.1.
 
 =head1 Notice
 
@@ -22,11 +22,8 @@ XXX Any important notices here
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
-
-    There are no changes intentionally incompatible with 5.XXX.XXX. If any
-    exist, they are bugs and reports are welcome.
-
+There are no changes intentionally incompatible with 5.12.1. If any exist, they
+are bugs and reports are welcome.
 
 =head1 Core Enhancements
 
@@ -56,6 +53,18 @@ cribbed.
 =head2 Pragmata Changes
 
 =head2 Updated Modules
+
+=over 4
+
+=item C<Carp>
+
+Upgraded from version 1.16 to 1.17.
+
+L<Carp> now detects incomplete L<caller()|perlfunc/"caller EXPR"> overrides and
+avoids using bogus C<@DB::args>. This fixes certain cases of C<Bizarre copy of
+ARRAY> caused by modules overriding C<caller()> incorrectly.
+
+=back
 
 =head2 Removed Modules and Pragmata
 
@@ -89,6 +98,36 @@ XXX
 XXX Changes which significantly change existing files in F<pod/> go here.
 Any changes to F<pod/perldiag.pod> should go in L</New or Changed Diagnostics>.
 
+=head3 L<perlfaq>
+
+=over 4
+
+=item *
+
+The version of L<perlfaq> shipped with the perl core has been updated to the
+latest official FAQ version as available at
+L<git://github.com/briandfoy/perlfaq.git>.
+
+=back
+
+=head3 L<perlport>
+
+=over 4
+
+=item *
+
+Documented a L<limitation|perlport/alarm> of L<alarm()|perlfunc/"alarm SECONDS">
+on Win32.
+
+=head3 L<perlvar>
+
+=over 4
+
+=item *
+
+L<$#|perlvar/"$#"> and L<$*|perlvar/"$*"> have been documented as removed.
+
+=back
 
 =head1 Performance Enhancements
 
@@ -120,9 +159,30 @@ XXX
 
 =over 4
 
-=item XXX-some-platform
+=item VMS
 
-XXX
+=over 4
+
+=item *
+
+F<git_version.h> will now be installed, just like on all the other
+architectures.
+
+=item *
+
+Several memory leaks in L<stat()|perlfunc/"stat FILEHANDLE"> has been fixed.
+
+=back
+
+=item AIX
+
+=over 4
+
+=item *
+
+A new configure probe has been added to avoid memory alignment problems.
+
+=back
 
 =back
 
@@ -136,7 +196,25 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+A possible segfault in the C<T_PRTOBJ> default typemap has been fixed.
+
+=item *
+
+When doing C<no VERSION>, the loading of L<feature> bundles and L<strict> is now
+avoided.
+
+=item *
+
+Fixed possible memory leak when using L<caller()|perlfunc/"caller EXPR"> to set
+C<@DB::args>.
+
+=item *
+
+Several memory leaks when loading XS modules were fixed.
+
+=item *
+
+A potential crash in how exceptions are propagated has been fixed.
 
 =back
 
