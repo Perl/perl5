@@ -452,6 +452,21 @@ OPTIMIZE	= $(OPTIMIZE) -fp:precise
 DEFINES		= $(DEFINES) -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
 !ENDIF
 
+# In VS 2005 (VC++ 8.0) Microsoft changes time_t from 32-bit to
+# 64-bit, even in 32-bit mode.  It also provides the _USE_32BIT_TIME_T
+# preprocessor option to revert back to the old functionality for
+# backward compatibility.  We define this symbol here for older 32-bit
+# compilers only (which aren't using it at all) for the sole purpose
+# of getting it into $Config{ccflags}.  That way if someone builds
+# Perl itself with e.g. VC6 but later installs an XS module using VC8
+# the time_t types will still be compatible.
+!IF "$(WIN64)" == "undef"
+!  IF "$(CCTYPE)" == "MSVC60" || \
+      "$(CCTYPE)" == "MSVC70" || "$(CCTYPE)" == "MSVC70FREE"
+BUILDOPT	= $(BUILDOPT) -D_USE_32BIT_TIME_T
+!  ENDIF
+!ENDIF
+
 # Use the MSVCRT read() fix only when using VC++ 6.x or earlier. Later
 # versions use MSVCR70.dll, MSVCR71.dll, etc, which do not require the
 # fix.
