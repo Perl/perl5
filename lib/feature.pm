@@ -107,7 +107,7 @@ See L<perlsub/"Persistent Private Variables"> for details.
 
 C<use feature 'unicode_strings'> tells the compiler to treat
 all strings outside of C<use locale> and C<use bytes> as Unicode. It is
-available starting with Perl 5.11.3.
+available starting with Perl 5.11.3, but is not fully implemented.
 
 See L<perlunicode/The "Unicode Bug"> for details.
 
