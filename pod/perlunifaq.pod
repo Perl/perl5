@@ -155,7 +155,7 @@ have furnished your own casing functions to override the default, these will
 not be called unless the UTF8 flag is on)
 
 This remains a problem for the regular expression constructs
-C<\d>, C<\s>, C<\w>, C<\D>, C<\S>, C<\W>, C</.../i>, C<(?i:...)>,
+C<\s>, C<\w>, C<\S>, C<\W>, C</.../i>, C<(?i:...)>,
 and C</[[:posix:]]/>.
 
 To force Unicode semantics, you can upgrade the internal representation to
