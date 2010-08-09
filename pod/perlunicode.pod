@@ -1407,7 +1407,8 @@ Using caseless (C</i>) regular expression matching
 
 =item *
 
-Matching a number of properties in regular expressions, such as C<\w>
+Matching a number of properties in regular expressions, namely C<\s>, C<\w>,
+and all the Posix character classes I<except> C<[[:ascii:]]>.
 
 =item *
 
