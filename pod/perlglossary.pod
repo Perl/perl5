@@ -545,6 +545,17 @@ A system that writes code for you in a low-level language, such as
 code to implement the backend of a compiler.  See L</program
 generator>.
 
+=item code point
+
+The position of a character in a character set encoding.  The character
+C<NULL> is almost certainly at the zeroth position in all character
+sets, so it's code point is 0.  The code point for the C<SPACE>
+character in the ASCII character set is 0x20, or 32 decimal; in EBCDIC
+it is 0x40, or 64 decimal.  The L<ord|perlfunc/ord> function returns
+the code point of a character.
+
+"code position" and "ordinal" mean the same thing as "code point".
+
 =item code subpattern
 
 A L</regular expression> subpattern whose real purpose is to execute
@@ -2113,6 +2124,10 @@ L</pragma>.
 =item options
 
 See either L<switches|/switch> or L</regular expression modifier>.
+
+=item ordinal
+
+Another name for L</code point>
 
 =item overloading
 
