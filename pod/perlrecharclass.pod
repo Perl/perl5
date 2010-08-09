@@ -102,8 +102,8 @@ appear no more than one in a row, separated by characters that mean "times 10",
 "times 100", etc.  (See L<http://www.unicode.org/notes/tn21>.)
 
 Some of the non-European digits that C<\d> matches look like European ones, but
-have different values.  For example, BENGALI DIGIT FOUR (U+09A) looks very much
-like an ASCII DIGIT EIGHT (U+0038).
+have different values.  For example, BENGALI DIGIT FOUR (U+09EA) looks
+very much like an ASCII DIGIT EIGHT (U+0038).
 
 It may be useful for security purposes for an application to require that all
 digits in a row be from the same script.   See L<Unicode::UCD/charscript()>.
