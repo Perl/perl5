@@ -75,13 +75,13 @@ character classes, see L<perlrebackslash>.)
 =head3 Digits
 
 C<\d> matches a single character that is considered to be a decimal I<digit>.
-What is considered a decimal digit depends on the internal encoding of the
-source string and the locale that is in effect. If the source string is in
-UTF-8 format, C<\d> not only matches the digits '0' - '9', but also Arabic,
-Devanagari and digits from other languages. Otherwise, if there is a locale in
-effect, it will match whatever characters the locale considers decimal digits.
-Without a locale, C<\d> matches just the digits '0' to '9'.
-See L</Locale, EBCDIC, Unicode and UTF-8>.
+What is considered a decimal digit depends on several factors, detailed
+below in L</Locale, EBCDIC, Unicode and UTF-8>.  If those factors
+indicate a Unicode interpretation, C<\d> not only matches the digits
+'0' - '9', but also Arabic, Devanagari and digits from other languages.
+Otherwise, if there is a locale in effect, it will match whatever
+characters the locale considers decimal digits.  Without a locale, C<\d>
+matches just the digits '0' to '9'.
 
 Unicode digits may cause some confusion, and some security issues.  In UTF-8
 strings, C<\d> matches the same characters matched by
@@ -116,15 +116,15 @@ A C<\w> matches a single alphanumeric character (an alphabetic character, or a
 decimal digit) or an underscore (C<_>), not a whole word.  To match a whole
 word, use C<\w+>.  This isn't the same thing as matching an English word, but 
 is the same as a string of Perl-identifier characters.  What is considered a
-word character depends on the internal
-encoding of the string and the locale or EBCDIC code page that is in effect. If
-it's in UTF-8 format, C<\w> matches those characters that are considered word
+word character depends on several factors, detailed below in L</Locale,
+EBCDIC, Unicode and UTF-8>.  If those factors indicate a Unicode
+interpretation, C<\w> matches the characters that are considered word
 characters in the Unicode database. That is, it not only matches ASCII letters,
-but also Thai letters, Greek letters, etc.  If the source string isn't in UTF-8
-format, C<\w> matches those characters that are considered word characters by
-the current locale or EBCDIC code page.  Without a locale or EBCDIC code page,
-C<\w> matches the ASCII letters, digits and the underscore.
-See L</Locale, EBCDIC, Unicode and UTF-8>.
+but also Thai letters, Greek letters, etc.  If a Unicode interpretation
+is not indicated, C<\w> matches those characters that are considered
+word characters by the current locale or EBCDIC code page.  Without a
+locale or EBCDIC code page, C<\w> matches the ASCII letters, digits and
+the underscore.
 
 There are a number of security issues with the full Unicode list of word
 characters.  See L<http://unicode.org/reports/tr36>.
@@ -139,19 +139,19 @@ Any character that isn't matched by C<\w> will be matched by C<\W>.
 =head3 Whitespace
 
 C<\s> matches any single character that is considered whitespace.  The exact
-set of characters matched by C<\s> depends on whether the source string is in
-UTF-8 format and the locale or EBCDIC code page that is in effect. If it's in
-UTF-8 format, C<\s> matches what is considered whitespace in the Unicode
-database; the complete list is in the table below. Otherwise, if there is a
-locale or EBCDIC code page in effect, C<\s> matches whatever is considered
-whitespace by the current locale or EBCDIC code page. Without a locale or
-EBCDIC code page, C<\s> matches the horizontal tab (C<\t>), the newline
-(C<\n>), the form feed (C<\f>), the carriage return (C<\r>), and the space.
-(Note that it doesn't match the vertical tab, C<\cK>.)  Perhaps the most notable
-possible surprise is that C<\s> matches a non-breaking space only if the
-non-breaking space is in a UTF-8 encoded string or the locale or EBCDIC code
-page that is in effect has that character.
-See L</Locale, EBCDIC, Unicode and UTF-8>.
+set of characters matched by C<\s> depends on several factors, detailed
+below in L</Locale, EBCDIC, Unicode and UTF-8>.  If those factors
+indicate a Unicode interpretation, C<\s> matches what is considered
+whitespace in the Unicode database; the complete list is in the table
+below. Otherwise, if there is a locale or EBCDIC code page in effect,
+C<\s> matches whatever is considered whitespace by the current locale or
+EBCDIC code page. Without a locale or EBCDIC code page, C<\s> matches
+the horizontal tab (C<\t>), the newline (C<\n>), the form feed (C<\f>),
+the carriage return (C<\r>), and the space.  (Note that it doesn't match
+the vertical tab, C<\cK>.)  Perhaps the most notable possible surprise
+is that C<\s> matches a non-breaking space only if a Unicode
+interpretation is indicated, or the locale or EBCDIC code page that is
+in effect has that character.
 
 Any character that isn't matched by C<\s> will be matched by C<\S>.
 
@@ -172,9 +172,8 @@ class; use C<\v> instead (vertical whitespace).
 Details are discussed in L<perlrebackslash>.
 
 Note that unlike C<\s>, C<\d> and C<\w>, C<\h> and C<\v> always match
-the same characters, regardless whether the source string is in UTF-8
-format or not. The set of characters they match is also not influenced
-by locale nor EBCDIC code page.
+the same characters, without regard to other factors, such as if the
+source string is in UTF-8 format or not.
 
 One might think that C<\s> is equivalent to C<[\h\v]>. This is not true.  The
 vertical tab (C<"\x0b">) is not matched by C<\s>, it is however considered
@@ -661,28 +660,34 @@ such a construct will lead to an error.
 =head2 Locale, EBCDIC, Unicode and UTF-8
 
 Some of the character classes have a somewhat different behaviour depending
-on the internal encoding of the source string, and the locale that is
-in effect, and if the program is running on an EBCDIC platform.
+on the internal encoding of the source string, if the regular expression
+is marked as having Unicode semantics, the locale that is in effect,
+and if the program is running on an EBCDIC platform.
 
 C<\w>, C<\d>, C<\s> and the POSIX character classes (and their negations,
-including C<\W>, C<\D>, C<\S>) suffer from this behaviour.  (Since the backslash
+including C<\W>, C<\D>, C<\S>) have this behaviour.  (Since the backslash
 sequences C<\b> and C<\B> are defined in terms of C<\w> and C<\W>, they also are
 affected.)
 
-The rule is that if the source string is in UTF-8 format, the character
-classes match according to the Unicode properties. If the source string
-isn't, then the character classes match according to whatever locale or EBCDIC
-code page is in effect. If there is no locale nor EBCDIC, they match the ASCII
-defaults (0 to 9 for C<\d>; 52 letters, 10 digits and underscore for C<\w>;
-etc.).
+The rule is that if the source string is in UTF-8 format or the regular
+expression is marked as indicating Unicode semantics (see the next
+paragraph), the character classes match according to the Unicode
+properties.  Otherwise, the character classes match according to
+whatever locale or EBCDIC code page is in effect. If there is no locale
+nor EBCDIC, they match the ASCII defaults (0 to 9 for C<\d>; 52 letters,
+10 digits and underscore for C<\w>; etc.).
 
-This usually means that if you are matching against characters whose C<ord()>
-values are between 128 and 255 inclusive, your character class may match
-or not depending on the current locale or EBCDIC code page, and whether the
-source string is in UTF-8 format. The string will be in UTF-8 format if it
-contains characters whose C<ord()> value exceeds 255. But a string may be in
-UTF-8 format without it having such characters.  See L<perlunicode/The
-"Unicode Bug">.
+A regular expression is marked for Unicode semantics if it is encoded in
+utf8 (usually as a result of including a literal character whose code
+point is above 255), or if it contains a C<\N{U+...}> or C<\N{I<name>}>
+construct.
+
+The differences in behavior between locale and non-locale semantics
+can affect any character whose code point is 255 or less.  The
+differences in behavior between Unicode and non-Unicode semantics
+affects only ASCII platforms, and only when matching against characters
+whose code points are between 128 and 255 inclusive.  See
+L<perlunicode/The "Unicode Bug">.
 
 For portability reasons, it may be better to not use C<\w>, C<\d>, C<\s>
 or the POSIX character classes, and use the Unicode properties instead.
