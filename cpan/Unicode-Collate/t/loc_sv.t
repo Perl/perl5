@@ -1,0 +1,154 @@
+#!perl
+use strict;
+use warnings;
+use Unicode::Collate::Locale;
+
+use Test;
+plan tests => 95;
+
+my $eth  = pack 'U', 0xF0;
+my $ETH  = pack 'U', 0xD0;
+my $thrn = pack 'U', 0xFE;
+my $THRN = pack 'U', 0xDE;
+my $uuml = pack 'U', 0xFC;
+my $Uuml = pack 'U', 0xDC;
+my $arng = pack 'U', 0xE5;
+my $Arng = pack 'U', 0xC5;
+my $auml = pack 'U', 0xE4;
+my $Auml = pack 'U', 0xC4;
+my $ae   = pack 'U', 0xE6;
+my $AE   = pack 'U', 0xC6;
+my $ouml = pack 'U', 0xF6;
+my $Ouml = pack 'U', 0xD6;
+my $ostk = pack 'U', 0xF8;
+my $Ostk = pack 'U', 0xD8;
+my $ocrc = pack 'U', 0xF4;
+my $Ocrc = pack 'U', 0xD4;
+
+my $objSv = Unicode::Collate::Locale->
+    new(locale => 'SV', normalization => undef);
+
+ok(1);
+ok($objSv->getlocale, 'sv');
+
+$objSv->change(level => 1);
+
+ok($objSv->lt('z', $arng));
+ok($objSv->lt($arng, $auml));
+ok($objSv->lt($auml, $ouml));
+ok($objSv->lt($ouml, "\x{0292}"));
+
+# 6
+
+ok($objSv->eq('d', "\x{111}"));
+ok($objSv->eq("\x{111}", $eth));
+ok($objSv->eq('y', $uuml));
+ok($objSv->eq($uuml, "\x{0171}"));
+
+ok($objSv->eq($auml, $ae));
+ok($objSv->eq($ae, "\x{119}"));
+ok($objSv->eq($ouml, $ostk));
+ok($objSv->eq($ostk, "\x{151}"));
+ok($objSv->eq("\x{151}", "\x{153}"));
+ok($objSv->eq("\x{153}", $ocrc));
+
+# 16
+
+$objSv->change(level => 2);
+
+ok($objSv->lt('d', "\x{111}"));
+ok($objSv->lt("\x{111}", $eth));
+ok($objSv->lt('y', $uuml));
+ok($objSv->lt($uuml, "\x{0171}"));
+
+ok($objSv->lt($auml, $ae));
+ok($objSv->lt($ae, "\x{119}"));
+ok($objSv->lt($ouml, $ostk));
+ok($objSv->lt($ostk, "\x{151}"));
+ok($objSv->lt("\x{151}", "\x{153}"));
+ok($objSv->lt("\x{153}", $ocrc));
+
+# 26
+
+ok($objSv->eq("\x{111}", "\x{110}"));
+ok($objSv->eq($eth,  $ETH));
+ok($objSv->eq('th',  $thrn));
+ok($objSv->eq($thrn, 'TH'));
+ok($objSv->eq('TH',  $THRN));
+ok($objSv->eq('v',   'w'));
+ok($objSv->eq('w',   'V'));
+ok($objSv->eq('V',   'W'));
+ok($objSv->eq($uuml, $Uuml));
+ok($objSv->eq("\x{171}", "\x{170}"));
+ok($objSv->eq($arng, $Arng));
+ok($objSv->eq($auml, $Auml));
+ok($objSv->eq($ae,   $AE));
+ok($objSv->eq($AE, "\x{1D2D}"));
+ok($objSv->eq("\x{119}", "\x{118}"));
+ok($objSv->eq($ouml, $Ouml));
+ok($objSv->eq($ostk, $Ostk));
+ok($objSv->eq("\x{151}", "\x{150}"));
+ok($objSv->eq("\x{153}", "\x{152}"));
+ok($objSv->eq($ocrc, $Ocrc));
+
+# 46
+
+$objSv->change(level => 3);
+
+ok($objSv->lt("\x{111}", "\x{110}"));
+ok($objSv->lt($eth,  $ETH));
+ok($objSv->lt('th',  $thrn));
+ok($objSv->lt($thrn, 'TH'));
+ok($objSv->lt('TH',  $THRN));
+ok($objSv->lt('v',   'w'));
+ok($objSv->lt('w',   'V'));
+ok($objSv->lt('V',   'W'));
+ok($objSv->lt($uuml, $Uuml));
+ok($objSv->lt("\x{171}", "\x{170}"));
+ok($objSv->lt($arng, $Arng));
+ok($objSv->lt($auml, $Auml));
+ok($objSv->lt($ae,   $AE));
+ok($objSv->lt($AE, "\x{1D2D}"));
+ok($objSv->lt("\x{119}", "\x{118}"));
+ok($objSv->lt($ouml, $Ouml));
+ok($objSv->lt($ostk, $Ostk));
+ok($objSv->lt("\x{151}", "\x{150}"));
+ok($objSv->lt("\x{153}", "\x{152}"));
+ok($objSv->lt($ocrc, $Ocrc));
+
+# 66
+
+ok($objSv->eq("d\x{335}", "\x{111}"));
+ok($objSv->eq("D\x{335}", "\x{110}"));
+ok($objSv->eq("u\x{308}", $uuml));
+ok($objSv->eq("U\x{308}", $Uuml));
+ok($objSv->eq("u\x{30B}", "\x{171}"));
+ok($objSv->eq("U\x{30B}", "\x{170}"));
+ok($objSv->eq("a\x{30A}", $arng));
+ok($objSv->eq("A\x{30A}", $Arng));
+ok($objSv->eq("A\x{30A}", "\x{212B}"));
+ok($objSv->eq("a\x{30A}\x{301}", "\x{1FB}"));
+ok($objSv->eq("A\x{30A}\x{301}", "\x{1FA}"));
+ok($objSv->eq("a\x{308}", $auml));
+ok($objSv->eq("A\x{308}", $Auml));
+
+# 79
+
+ok($objSv->eq("\x{1FD}", "$ae\x{301}"));
+ok($objSv->eq("\x{1FC}", "$AE\x{301}"));
+ok($objSv->eq("\x{1E3}", "$ae\x{304}"));
+ok($objSv->eq("\x{1E2}", "$AE\x{304}"));
+ok($objSv->eq("e\x{328}", "\x{119}"));
+ok($objSv->eq("E\x{328}", "\x{118}"));
+ok($objSv->eq("o\x{308}", $ouml));
+ok($objSv->eq("O\x{308}", $Ouml));
+ok($objSv->eq("o\x{338}", $ostk));
+ok($objSv->eq("O\x{338}", $Ostk));
+ok($objSv->eq("o\x{338}\x{301}", "\x{1FF}"));
+ok($objSv->eq("O\x{338}\x{301}", "\x{1FE}"));
+ok($objSv->eq("o\x{30B}", "\x{151}"));
+ok($objSv->eq("O\x{30B}", "\x{150}"));
+ok($objSv->eq("o\x{302}", $ocrc));
+ok($objSv->eq("O\x{302}", $Ocrc));
+
+# 95

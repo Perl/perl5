@@ -4,7 +4,7 @@ use strict;
 use Carp;
 use base qw(Unicode::Collate);
 
-our $VERSION = '0.55';
+our $VERSION = '0.56';
 
 use File::Spec;
 
@@ -12,25 +12,21 @@ use File::Spec;
 my $KeyPath = File::Spec->catfile('allkeys.txt');
 my $PL_EXT  = '.pl';
 
-my %LocaleFile = (
-    'default'	=> '',
-    'cs'	=> 'cs',
-    'es'	=> 'es',
-    'es__traditional'	=> 'es_trad',
-    'fr'	=> 'fr',
-    'nn'	=> 'nn',
-    'pl'	=> 'pl',
-);
+my %LocaleFile = map { ($_, $_) } qw(cs eo es fr nn pl ro sv);
+   $LocaleFile{'default'}         = '';
+   $LocaleFile{'es__traditional'} = 'es_trad';
+   $LocaleFile{'nb'} = 'nn';
 
 sub _locale {
     my $locale = shift;
     if ($locale) {
 	$locale = lc $locale;
 	$locale =~ tr/\-\ \./_/;
+	$locale =~ s/_trad\z/_traditional/;
 	$LocaleFile{$locale} and return $locale;
 
 	my ($l,$t,$v) = split(/_/, $locale.'__');
-	for my $loc ("${l}_${t}_$v", "${l}_$t", "${l}__$v", $l) {
+	for my $loc ("${l}_${t}_$v", "${l}_$t", "${l}__$v", "${l}__$t", $l) {
 	    $LocaleFile{$loc} and return $loc;
 	}
     }
@@ -146,11 +142,15 @@ this method returns a string C<'default'> meaning no special tailoring.
     locale name        description
 
       cs                Czech
+      eo                Esperanto
       es                Spanish
       es__traditional   Spanish ('ch' and 'll' as a grapheme)
       fr                French
+      nb                Norwegian Bokmal
       nn                Norwegian Nynorsk
       pl                Polish
+      ro                Romanian
+      sv                Swedish
 
 =head1 AUTHOR
 

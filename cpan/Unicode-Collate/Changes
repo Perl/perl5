@@ -1,8 +1,13 @@
 Revision history for Perl module Unicode::Collate.
 
+0.56  Sun Aug  8 20:24:03 2010
+    - Unicode::Collate::Locale newly supports locales: eo, nb, ro, sv.
+    ! renamed t/locale_{xy}.t to t/loc_{xy}.t (for safer 8.3 names)
+
 0.55  Sun Aug  1 21:21:23 2010
-    - incorporated Unicode::Collate::Locale with some changes.
- (see http://www.xray.mpe.mpg.de/mailing-lists/perl-unicode/2004-03/msg00030.html)
+    - incorporated Unicode::Collate::Locale with some changes. (see:
+  http://www.xray.mpe.mpg.de/mailing-lists/perl-unicode/2004-03/msg00030.html)
+    - supported locales: cs, es, es__traditional, fr, nn, pl.
     ! added t/locale*.t that uses DUCET.
 
 0.54  Sun Jul 25 21:37:04 2010
