@@ -18,7 +18,7 @@ BEGIN {
 # strict
 use strict;
 
-print "1..153\n";
+print "1..160\n";
 
 my $i = 1;
 
@@ -650,4 +650,29 @@ print "ok ", $i++, "\n";
 # Ought to fail, doesn't in 5.8.1.
 eval 'sub bug (\[%@]) {  } my $array = [0 .. 1]; bug %$array;';
 print "not " unless $@ =~ /Not a HASH reference/;
+print "ok ", $i++, "\n";
+
+# [perl #75904]
+# Test that the following prototypes make subs parse as unary functions:
+#  * \sigil \[...] ;$ ;* ;\sigil ;\[...]
+print "not "
+ unless eval 'sub uniproto1 (*) {} uniproto1 $_, 1' or warn $@;
+print "ok ", $i++, "\n";
+print "not "
+ unless eval 'sub uniproto2 (\$) {} uniproto2 $_, 1' or warn $@;
+print "ok ", $i++, "\n";
+print "not "
+ unless eval 'sub uniproto3 (\[$%]) {} uniproto3 %_, 1' or warn $@;
+print "ok ", $i++, "\n";
+print "not "
+ unless eval 'sub uniproto4 (;$) {} uniproto4 $_, 1' or warn $@;
+print "ok ", $i++, "\n";
+print "not "
+ unless eval 'sub uniproto5 (;*) {} uniproto5 $_, 1' or warn $@;
+print "ok ", $i++, "\n";
+print "not "
+ unless eval 'sub uniproto6 (;\@) {} uniproto6 @_, 1' or warn $@;
+print "ok ", $i++, "\n";
+print "not "
+ unless eval 'sub uniproto7 (;\[$%@]) {} uniproto7 @_, 1' or warn $@;
 print "ok ", $i++, "\n";

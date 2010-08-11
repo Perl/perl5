@@ -6495,10 +6495,27 @@ Perl_yylex(pTHX)
 			const char *proto = SvPV_const(MUTABLE_SV(cv), protolen);
 			if (!protolen)
 			    TERM(FUNC0SUB);
-			if ((*proto == '$' || *proto == '_') && proto[1] == '\0')
-			    OPERATOR(UNIOPSUB);
 			while (*proto == ';')
 			    proto++;
+			if (
+			    (
+			        (
+			            *proto == '$' || *proto == '_'
+			         || *proto == '*'
+			        )
+			     && proto[1] == '\0'
+			    )
+			 || (
+			     *proto == '\\' && proto[1] && proto[2] == '\0'
+			    )
+			)
+			    OPERATOR(UNIOPSUB);
+			if (*proto == '\\' && proto[1] == '[') {
+			    const char *p = proto + 2;
+			    while(*p && *p != ']')
+				++p;
+			    if(*p == ']' && !p[1]) OPERATOR(UNIOPSUB);
+			}
 			if (*proto == '&' && *s == '{') {
 			    if (PL_curstash)
 				sv_setpvs(PL_subname, "__ANON__");
