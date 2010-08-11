@@ -1293,7 +1293,7 @@ XS(XS_re_regexp_pattern)
         /* Housten, we have a regex! */
         SV *pattern;
         STRLEN left = 0;
-        char reflags[sizeof(INT_PAT_MODS)];
+        char reflags[6];
 
         if ( GIMME_V == G_ARRAY ) {
             /*
