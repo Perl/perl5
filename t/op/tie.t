@@ -847,7 +847,7 @@ fetching... <=> 1
   map {
    my $op = $_;
    $_ => sub { print "$op"; 100 }
-  } qw< 0+ "" + ** * / % - neg int abs == < > <= >= != <=> >
+  } qw< 0+ "" + ** * / % - neg int abs == < > <= >= != <=> <> >
 }
 $o = bless [], overloaded;
 
@@ -872,6 +872,7 @@ $ghew=undef; $ghew<=1; print "\n";
 $ghew=undef; $ghew >=1; print "\n";
 $ghew=undef; $ghew != 1; print "\n";
 $ghew=undef; $ghew<=>1; print "\n";
+$ghew=undef; <$ghew>; print "\n";
 $ghew=\*shrext; *$ghew; print "\n";
 $ghew=\@spled; @$ghew; print "\n";
 $ghew=\%frit; %$ghew; print "\n";
@@ -893,6 +894,7 @@ fetching... <=
 fetching... >=
 fetching... !=
 fetching... <=>
+fetching... <>
 fetching... *{}
 fetching... @{}
 fetching... %{}

@@ -318,6 +318,7 @@ PP(pp_padsv)
 PP(pp_readline)
 {
     dVAR;
+    dSP; SvGETMAGIC(TOPs);
     tryAMAGICunTARGET(iter, 0);
     PL_last_in_gv = MUTABLE_GV(*PL_stack_sp--);
     if (!isGV_with_GP(PL_last_in_gv)) {
