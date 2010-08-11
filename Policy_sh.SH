@@ -130,8 +130,7 @@ esac
 #	$vendorman1dir $vendorman3dir $vendorhtml1dir $vendorhtml3dir
 
 for var in \
-	bin scriptdir privlib archlib man1dir man3dir man1ext man3ext \
-	html1dir html3dir \
+	bin scriptdir privlib archlib man1dir man3dir html1dir html3dir \
 	sitebin sitescript sitelib sitearch \
 		siteman1dir siteman3dir sitehtml1dir sitehtml3dir \
 	vendorbin vendorscript vendorlib vendorarch \
@@ -166,7 +165,7 @@ do
 
     # We don't know what to do with these yet.
     html1dir)	dflt='' ;;
-    html3dir)	dflt='' ;;
+    htm31dir)	dflt='' ;;
 
     # Directories for site-specific add-on files
     sitebin)	dflt=$siteprefix/bin ;;
@@ -185,11 +184,11 @@ do
 	;;
     sitearch)	dflt="$sitelib/$archname" ;;
 
-    siteman1dir) dflt="$siteprefix/man/man1" ;;
-    siteman3dir) dflt="$siteprefix/man/man3" ;;
+    siteman1)	dflt="$siteprefix/man/man1" ;;
+    siteman3)	dflt="$siteprefix/man/man3" ;;
     # We don't know what to do with these yet.
-    sitehtml1dir)	dflt='' ;;
-    sitehtml3dir)	dflt='' ;;
+    sitehtml1)	dflt='' ;;
+    sitehtm31dir)	dflt='' ;;
     
     # Directories for vendor-supplied add-on files
     # These are all usually empty.
@@ -214,11 +213,11 @@ do
 		;;
 	    vendorarch)	dflt="$vendorlib/$archname" ;;
 
-	    vendorman1dir)	dflt="$vendorprefix/man/man1" ;;
-	    vendorman3dir)	dflt="$vendorprefix/man/man3" ;;
+	    vendorman1)	dflt="$vendorprefix/man/man1" ;;
+	    vendorman3)	dflt="$vendorprefix/man/man3" ;;
 	    # We don't know what to do with these yet.
-	    vendorhtml1dir)	dflt='' ;;
-	    vendorhtml3dir)	dflt='' ;;
+	    vendorhtml1)	dflt='' ;;
+	    vendorhtm3)	dflt='' ;;
 
 	    esac  # End of vendorprefix != ''
 	fi
