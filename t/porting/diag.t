@@ -365,7 +365,6 @@ Invalid type '%c' in pack
 Invalid type '%c' in %s
 Invalid type '%c' in unpack
 Invalid type ',' in %s
-Invalid version object
 It is proposed that "\c{" no longer be valid. It has historically evaluated to  ";".  If you disagree with this proposal, send email to perl5-porters@perl.org Otherwise, or in the meantime, you can work around this failure by changing "\c{" to ";"
 'j' not supported on this platform
 'J' not supported on this platform
