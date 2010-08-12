@@ -314,6 +314,13 @@ this line in README.vms needs special handling:
 
     rename perl-5^.10^.1.dir perl-5_10_1.dir
 
+When doing a blead release, also make sure the C<PERL_API_*> constants in
+F<patchlevel.h> are in sync with the with the version you're releasing, unless
+you're absolutely sure the release you're about to make is 100% binary
+compatible to an earlier release. When releasing a stable perl version, the
+C<PERL_API_*> constants C<MUST NOT> be changed as we aim to guarantee binary
+compatibility in maint branches.
+
 Commit your changes:
 
     $ git st
