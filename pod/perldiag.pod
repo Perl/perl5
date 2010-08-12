@@ -2270,6 +2270,12 @@ dotted-decimal component.  The parenthesized text indicates which
 criteria was not met.  See the L<version> module for more details on
 allowed version formats.
 
+=item Invalid version object
+
+(F)  The internal structure of the version object was invalid.  Perhaps
+the internals were modified directly in some way or an arbitrary reference
+was blessed into the "version" class.
+
 =item ioctl is not implemented
 
 (F) Your machine apparently doesn't implement ioctl(), which is pretty
