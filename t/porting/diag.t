@@ -76,14 +76,14 @@ while (<$diagfh>) {
 }
 
 # Recursively descend looking for source files.
-my @todo = <*>;
+my @todo = sort <*>;
 while (@todo) {
   my $todo = shift @todo;
   next if $todo ~~ ['t', 'lib', 'ext', 'dist', 'cpan'];
   # opmini.c is just a copy of op.c, so there's no need to check again.
   next if $todo eq 'opmini.c';
   if (-d $todo) {
-    push @todo, glob "$todo/*";
+    unshift @todo, sort glob "$todo/*";
   } elsif ($todo =~ m/\.[ch]$/) {
     check_file($todo);
   }
@@ -105,10 +105,28 @@ sub find_message {
   return;
 }
 
+# Standardize messages with variants into the form that appears
+# in perldiag.pod -- useful for things without a diag_listed_as annotation
+sub standardize {
+  my ($name) = @_;
+
+  if    ( $name =~ m/^(Invalid strict version format) \([^\)]*\)/ ) {
+    $name = "$1 (\%s)";
+  }
+  elsif ( $name =~ m/^(Invalid version format) \([^\)]*\)/ ) {
+    $name = "$1 (\%s)";
+  }
+  elsif ($name =~ m/^panic: /) {
+    $name = "panic: \%s";
+  }
+
+  return $name;
+}
+
 sub check_file {
   my ($codefn) = @_;
 
-  print "# $codefn\n";
+  print "# Checking $codefn\n";
 
   open my $codefh, "<", $codefn
     or die "Can't open $codefn: $!";
@@ -209,33 +227,27 @@ sub check_file {
       # inside an #if 0 block.
       next if $name eq 'SKIPME';
 
-      # Standardize messages with variants into the form that appears
-      # in perldiag.pod
-      if    ( $name =~ m/^(Invalid strict version format) \([^\)]*\)/ ) {
-        $name = "$1 (\%s)";
-      }
-      elsif ( $name =~ m/^(Invalid version format) \([^\)]*\)/ ) {
-        $name = "$1 (\%s)";
-      }
+      $name = standardize($name);
 
       if (exists $entries{$name}) {
-        if ($entries{$name}{todo}) {
+        if ( $entries{$name}{seen}++ ) {
+          # no need to repeat entries we've tested
+        } elsif ($entries{$name}{todo}) {
         TODO: {
             no warnings 'once';
             local $::TODO = 'in DATA';
             # There is no listing, but it is in the list of exceptions.  TODO FAIL.
-            fail("No listing in pod/perldiag.pod for '$name' from $codefn line $ (but it wasn't documented in 5.10 either, so we're letting it slide).");
+            fail($name);
+            diag(
+              "    Message '$name'\n    from $codefn line $. is not listed in pod/perldiag.pod\n".
+              "    (but it wasn't documented in 5.10 either, so marking it TODO)."
+            );
           }
         } else {
           # We found an actual valid entry in perldiag.pod for this error.
-          ok("Found listing in pod/perldiag.pod for '$name' from $codefn line $.");
+          pass($name);
         }
         # Later, should start checking that the severity is correct, too.
-      } elsif ($name =~ m/^panic: /) {
-        # Just too many panic:s, they are hard to diagnose, and there
-        # is a generic "panic: %s" entry.  Leave these for another
-        # pass.
-        ok("Skipping lack of explicit perldiag entry for '$name' from $codefn line $., covered by panic: %s entry");
       } else {
         if ($make_exceptions_list) {
           # We're making an updated version of the exception list, to
@@ -247,8 +259,11 @@ sub check_file {
         } else {
           # No listing found, and no excuse either.
           # Find the correct place in perldiag.pod, and add a stanza beginning =item $name.
-          fail("No listing in pod/perldiag.pod for '$name' from $codefn line $.");
+          fail($name);
+          diag("    Message '$name'\n    from $codefn line $. is not listed in pod/perldiag.pod");
         }
+        # seen it, so only fail once for this message
+        $entries{$name}{seen}++;
       }
 
       die if $name =~ /%$/;
