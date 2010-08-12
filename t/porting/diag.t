@@ -89,6 +89,22 @@ while (@todo) {
   }
 }
 
+sub find_message {
+  my ($line) = @_;
+  my $text_re = qr/"(?<text>(?:\\"|[^"])*?)"/;
+  if ($line =~ m/$source_msg_re(?:_nocontext)? \s*
+    \(aTHX_ \s*
+    (?:packWARN\d*\((?<category>.*?)\),)? \s*
+    $text_re /x
+  ) {
+    return [$+{'text'}, $+{'category'}];
+  }
+  elsif ( $line =~ m{BADVERSION\([^"]*$text_re}) {
+    return [$+{'text'}, undef];
+  }
+  return;
+}
+
 sub check_file {
   my ($codefn) = @_;
 
@@ -153,26 +169,21 @@ sub check_file {
       s/%"\s*$from/\%$specialformats{$from}"/g;
     }
     # The %"foo" thing needs to happen *before* this regex.
-    if (m/$source_msg_re(?:_nocontext)? \s*
-          \(aTHX_ \s*
-          (?:packWARN\d*\((?<category>.*?)\),)? \s*
-          "(?<text>(?:\\"|[^"])*?)"/x)
-    {
+    if ( my $found = find_message($_) ) {
     # diag($_);
     # DIE is just return Perl_die
+    my ($name, $category) = @$found;
     my $severity = {croak => [qw/P F/],
                       die   => [qw/P F/],
                       warn  => [qw/W D S/],
                      }->{$+{'routine'}||'die'};
     my @categories;
-    if ($+{'category'}) {
-        @categories = map {s/^WARN_//; lc $_} split /\s*[|,]\s*/, $+{'category'};
+    if (defined $category) {
+        @categories = map {s/^WARN_//; lc $_} split /\s*[|,]\s*/, $category;
     }
-    my $name;
     if ($listed_as and $listed_as_line == $. - $multiline) {
         $name = $listed_as;
     } else {
-        $name = $+{'text'};
         # The form listed in perldiag ignores most sorts of fancy printf
         # formatting, or makes it more perlish.
         $name =~ s/%%/\\%/g;
@@ -330,14 +341,6 @@ Invalid type '%c' in pack
 Invalid type '%c' in %s
 Invalid type '%c' in unpack
 Invalid type ',' in %s
-Invalid strict version format (0 before decimal required)
-Invalid strict version format (no leading zeros)
-Invalid strict version format (no underscores)
-Invalid strict version format (v1.2.3 required)
-Invalid strict version format (version required)
-Invalid strict version format (1.[0-9] required)
-Invalid version format (alpha without decimal)
-Invalid version format (misplaced _ in number)
 Invalid version object
 It is proposed that "\c{" no longer be valid. It has historically evaluated to  ";".  If you disagree with this proposal, send email to perl5-porters@perl.org Otherwise, or in the meantime, you can work around this failure by changing "\c{" to ";"
 'j' not supported on this platform
