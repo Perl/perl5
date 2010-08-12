@@ -30,7 +30,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Wed Jun 23 16:03:55 CEST 2010 [metaconfig 3.5 PL0]
+# Generated on Thu Aug 12 11:38:08 CEST 2010 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -7674,7 +7674,7 @@ $echo $n ".$c"
 $grep fprintf libc.tmp > libc.ptf
 xscan='eval "<libc.ptf $com >libc.list"; $echo $n ".$c" >&4'
 xrun='eval "<libc.tmp $com >libc.list"; echo "done." >&4'
-xxx='[ADTSIW]'
+xxx='[ADTSIWi]'
 if com="$sed -n -e 's/__IO//' -e 's/^.* $xxx  *//p'";\
 	eval $xscan;\
 	$contains '^fprintf$' libc.list >/dev/null 2>&1; then

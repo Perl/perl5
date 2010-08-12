@@ -2153,6 +2153,12 @@ d_statfs_s (d_statfs_s.U):
 	This variable conditionally defines the HAS_STRUCT_STATFS symbol,
 	which indicates that the struct statfs is supported.
 
+d_static_inline (d_static_inline.U):
+	This variable conditionally defines the HAS_STATIC_INLINE symbol,
+	which indicates that the C compiler supports C99-style static
+	inline.  That is, the function can't be called from another
+	translation unit.
+
 d_statvfs (d_statvfs.U):
 	This variable conditionally defines the HAS_STATVFS symbol, which
 	indicates to the C program that the statvfs() routine is available.
@@ -4110,6 +4116,16 @@ perl_patchlevel (patchlevel.U):
 PERL_REVISION (Oldsyms.U):
 	In a Perl version number such as 5.6.2, this is the 5.
 	This value is manually set in patchlevel.h
+
+perl_static_inline (d_static_inline.U):
+	This variable defines the PERL_STATIC_INLINE symbol to
+	the best-guess incantation to use for static inline functions.
+	Possibilities include
+	static inline       (c99)
+	static __inline__   (gcc -ansi)
+	static __inline     (MSVC)
+	static _inline      (older MSVC)
+	static              (c89 compilers)
 
 PERL_SUBVERSION (Oldsyms.U):
 	In a Perl version number such as 5.6.2, this is the 2.
