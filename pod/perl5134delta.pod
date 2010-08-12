@@ -1,8 +1,11 @@
 =encoding utf8
 
 =for rafl
-changelogged up to commit d6fa5a34
+changelogged up to commit 2be7097
 * PERL_STATIC_INLINE might want to be mentioned
+
+* 5648c0a and 254f8c6 added an optimisation for backrefs. probably not worth
+mentioning
 
 =head1 NAME
 
@@ -30,23 +33,21 @@ XXX New core language features go here. Summarise user-visible core language
 enhancements. Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
-[ List each enhancement as a =head2 entry ]
-
-=head2 C<\N{I<name>}> and C<charnames> enhancements
-
-C<\N{}>, C<charnames::vianame>, C<charnames::viacode> now know about every
-character in Unicode.  Previously, they didn't know about the Hangul syllables
-nor a number of CJK (Chinese/Japanese/Korean) characters.
-
 =head2 C<srand()> now returns the seed
 
 This allows programs which need to have repeatable results to not have to come
 up with their own seed generating mechanism.  Instead, they can use C<srand()>
 and somehow stash the return for future use.  Typical is a test program which
 has too many combinations to test comprehensively in the time available to it
-each run.  It can test a random subset each time, and should there be a
-failure, log the seed used for that run so that it can later be used to
-reproduce the exact results.
+each run.  It can test a random subset each time, and should there be a failure,
+log the seed used for that run so that it can later be used to reproduce the
+exact results.
+
+=head2 C<\N{I<name>}> and C<charnames> enhancements
+
+C<\N{}>, C<charnames::vianame>, C<charnames::viacode> now know about every
+character in Unicode.  Previously, they didn't know about the Hangul syllables
+nor a number of CJK (Chinese/Japanese/Korean) characters.
 
 =head1 Security
 
@@ -175,6 +176,13 @@ Various issues in L<File::Spec::VMS> have been fixed.
 =item C<IO::Compress>
 
 Upgraded from version 2.027 to 2.030.
+
+=item C<Unicode::Collate>
+
+Upgraded from version 0.53 to 0.56.
+
+Among other things, it is now using UCA Revision 20 (based on Unicode 5.2.0) and
+supports a couple of new locales.
 
 =back
 
@@ -352,6 +360,16 @@ F<t/op/print.t> has been added to test implicit printing of C<$_>.
 F<t/io/errnosig.t> has been added to test for restoration of of C<$!> when
 leaving signal handlers.
 
+=item *
+
+F<t/op/tie_fetch_count.t> has been added to see if C<FETCH> is only called once
+on tied variables.
+
+=item *
+
+F<lib/Tie/ExtraHash.t> has been added to make sure the, previously untested,
+L<Tie::ExtraHash> keeps working.
+
 =back
 
 =head1 Platform Support
@@ -409,6 +427,12 @@ Fixed a possible hang in F<t/op/readline.t>.
 
 Fixed Makefile for SDK2003SP1 compilers.
 
+=item *
+
+When using old 32-bit compilers, the define C<_USE_32BIT_TIME_T> will now be set
+in C<$Config{ccflags}>. This improves portability when compiling XS extensions
+using new compilers, but for a perl compiled with old 32-bit compilers.
+
 =back
 
 =back
@@ -441,6 +465,15 @@ optimizer function. However, this was B<very> hard to do, as there was no way to
 add new optimizations without having to copy large parts of perl's original
 optimizer. This problem is now solved by a rework of the optimizer extension
 API. See L<perlguts/"Compile pass 3: peephole optimization"> for details.
+
+=item C<Perl_grok_bslash_o> and C<Perl_grok_bslash_c> may change in future
+
+The functions C<Perl_grok_bslash_o> and C<Perl_grok_bslash_c>, which are public
+and exported for use by dynamic extensions, are now marked as being able to
+change their interface in the future.
+
+In fact, C<Perl_grok_bslash_o> already changed its interface in this release,
+and returns a C<bool> instead of a C<char> now.
 
 =back
 
