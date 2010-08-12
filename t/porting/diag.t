@@ -209,6 +209,15 @@ sub check_file {
       # inside an #if 0 block.
       next if $name eq 'SKIPME';
 
+      # Standardize messages with variants into the form that appears
+      # in perldiag.pod
+      if    ( $name =~ m/^(Invalid strict version format) \([^\)]*\)/ ) {
+        $name = "$1 (\%s)";
+      }
+      elsif ( $name =~ m/^(Invalid version format) \([^\)]*\)/ ) {
+        $name = "$1 (\%s)";
+      }
+
       if (exists $entries{$name}) {
         if ($entries{$name}{todo}) {
         TODO: {

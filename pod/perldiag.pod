@@ -2241,6 +2241,15 @@ colon or whitespace was seen between the elements of a layer list.
 If the previous attribute had a parenthesised parameter list, perhaps that
 list was terminated too soon.
 
+=item Invalid strict version format (%s)
+
+(F)  A version number did not meet the "strict" criteria for versions.
+A "strict" version number is a positive decimal number (integer or
+decimal-fraction) without exponentiation or else a dotted-decimal
+v-string with a leading 'v' character and at least three components.
+The parenthesized text indicates which criteria was not met.
+See the L<version> module for more details on allowed version formats.
+
 =item Invalid type '%s' in %s
 
 (F) The given character is not a valid pack or unpack type.
@@ -2248,16 +2257,18 @@ See L<perlfunc/pack>.
 (W) The given character is not a valid pack or unpack type but used to be
 silently ignored.
 
-=item Invalid version format (multiple underscores)
+=item Invalid version format (%s)
 
-(F) Versions may contain at most a single underscore, which signals
-that the version is a beta release.  See L<version> for the allowed
-version formats.
-
-=item Invalid version format (underscores before decimal)
-
-(F) Versions may not contain decimals after the optional underscore.
-See L<version> for the allowed version formats.
+(F)  A version number did not meet the "lax" criteria for versions.
+A "lax" version number is a positive decimal number (integer or
+decimal-fraction) without exponentiation or else a dotted-decimal
+v-string. If the v-string has less than three components, it must have a
+leading 'v' character.  Otherwise, the leading 'v' is optional.  Both
+decimal and dotted-decimal versions may have a trailing "alpha"
+component separated by an underscore character after a fractional or
+dotted-decimal component.  The parenthesized text indicates which
+criteria was not met.  See the L<version> module for more details on
+allowed version formats.
 
 =item ioctl is not implemented
 
