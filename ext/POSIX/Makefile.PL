@@ -1,3 +1,4 @@
+# Expect this line to be read by t/posix.t, don't change it
 use ExtUtils::MakeMaker;
 use ExtUtils::Constant 0.11 'WriteConstants';
 use Config;
