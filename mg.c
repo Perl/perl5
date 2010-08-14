@@ -227,7 +227,7 @@ Perl_mg_get(pTHX_ SV *sv)
 	MAGIC * const nextmg = mg->mg_moremagic;	/* it may delete itself */
 
 	if (!(mg->mg_flags & MGf_GSKIP) && vtbl && vtbl->svt_get) {
-	    CALL_FPTR(vtbl->svt_get)(aTHX_ sv, mg);
+	    vtbl->svt_get(aTHX_ sv, mg);
 
 	    /* guard against magic having been deleted - eg FETCH calling
 	     * untie */
@@ -302,7 +302,7 @@ Perl_mg_set(pTHX_ SV *sv)
 	if (PL_localizing == 2 && !S_is_container_magic(mg))
 	    continue;
 	if (vtbl && vtbl->svt_set)
-	    CALL_FPTR(vtbl->svt_set)(aTHX_ sv, mg);
+	    vtbl->svt_set(aTHX_ sv, mg);
     }
 
     restore_magic(INT2PTR(void*, (IV)mgs_ix));
@@ -332,7 +332,7 @@ Perl_mg_length(pTHX_ SV *sv)
             const I32 mgs_ix = SSNEW(sizeof(MGS));
 	    save_magic(mgs_ix, sv);
 	    /* omit MGf_GSKIP -- not changed here */
-	    len = CALL_FPTR(vtbl->svt_len)(aTHX_ sv, mg);
+	    len = vtbl->svt_len(aTHX_ sv, mg);
 	    restore_magic(INT2PTR(void*, (IV)mgs_ix));
 	    return len;
 	}
@@ -364,7 +364,7 @@ Perl_mg_size(pTHX_ SV *sv)
             I32 len;
 	    save_magic(mgs_ix, sv);
 	    /* omit MGf_GSKIP -- not changed here */
-	    len = CALL_FPTR(vtbl->svt_len)(aTHX_ sv, mg);
+	    len = vtbl->svt_len(aTHX_ sv, mg);
 	    restore_magic(INT2PTR(void*, (IV)mgs_ix));
 	    return len;
 	}
@@ -408,7 +408,7 @@ Perl_mg_clear(pTHX_ SV *sv)
 	nextmg = mg->mg_moremagic; /* it may delete itself */
 
 	if (vtbl && vtbl->svt_clear)
-	    CALL_FPTR(vtbl->svt_clear)(aTHX_ sv, mg);
+	    vtbl->svt_clear(aTHX_ sv, mg);
     }
 
     restore_magic(INT2PTR(void*, (IV)mgs_ix));
@@ -456,7 +456,7 @@ Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, I32 klen)
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
         const MGVTBL* const vtbl = mg->mg_virtual;
 	if ((mg->mg_flags & MGf_COPY) && vtbl->svt_copy){
-	    count += CALL_FPTR(vtbl->svt_copy)(aTHX_ sv, mg, nsv, key, klen);
+	    count += vtbl->svt_copy(aTHX_ sv, mg, nsv, key, klen);
 	}
 	else {
 	    const char type = mg->mg_type;
@@ -503,7 +503,7 @@ Perl_mg_localize(pTHX_ SV *sv, SV *nsv, bool setmagic)
 	    continue;
 		
 	if ((mg->mg_flags & MGf_LOCAL) && vtbl->svt_local)
-	    (void)CALL_FPTR(vtbl->svt_local)(aTHX_ nsv, mg);
+	    (void)vtbl->svt_local(aTHX_ nsv, mg);
 	else
 	    sv_magicext(nsv, mg->mg_obj, mg->mg_type, vtbl,
 			    mg->mg_ptr, mg->mg_len);
@@ -542,7 +542,7 @@ Perl_mg_free(pTHX_ SV *sv)
         const MGVTBL* const vtbl = mg->mg_virtual;
 	moremagic = mg->mg_moremagic;
 	if (vtbl && vtbl->svt_free)
-	    CALL_FPTR(vtbl->svt_free)(aTHX_ sv, mg);
+	    vtbl->svt_free(aTHX_ sv, mg);
 	if (mg->mg_ptr && mg->mg_type != PERL_MAGIC_regex_global) {
 	    if (mg->mg_len > 0 || mg->mg_type == PERL_MAGIC_utf8)
 		Safefree(mg->mg_ptr);

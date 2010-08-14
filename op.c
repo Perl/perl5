@@ -103,8 +103,8 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 #include "perl.h"
 #include "keywords.h"
 
-#define CALL_PEEP(o) CALL_FPTR(PL_peepp)(aTHX_ o)
-#define CALL_OPFREEHOOK(o) if (PL_opfreehook) CALL_FPTR(PL_opfreehook)(aTHX_ o)
+#define CALL_PEEP(o) PL_peepp(aTHX_ o)
+#define CALL_OPFREEHOOK(o) if (PL_opfreehook) PL_opfreehook(aTHX_ o)
 
 #if defined(PL_OP_SLAB_ALLOC)
 
@@ -305,7 +305,7 @@ Perl_Slab_Free(pTHX_ void *op)
      ? ( op_free((OP*)o),					\
 	 Perl_croak(aTHX_ "'%s' trapped by operation mask", PL_op_desc[type]),	\
 	 (OP*)0 )						\
-     : CALL_FPTR(PL_check[type])(aTHX_ (OP*)o))
+     : PL_check[type](aTHX_ (OP*)o))
 
 #define RETURN_UNLIMITED_NUMBER (PERL_INT_MAX / 2)
 

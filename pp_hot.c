@@ -2925,7 +2925,7 @@ try_autoload:
 
 	/* CvXSUB(cv) must not be NULL because newXS() refuses NULL xsub address */
 	assert(CvXSUB(cv));
-	CALL_FPTR(CvXSUB(cv))(aTHX_ cv);
+	CvXSUB(cv)(aTHX_ cv);
 
 	/* Enforce some sanity in scalar context. */
 	if (gimme == G_SCALAR && ++markix != PL_stack_sp - PL_stack_base ) {

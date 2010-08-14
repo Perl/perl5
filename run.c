@@ -38,7 +38,7 @@ Perl_runops_standard(pTHX)
 {
     dVAR;
     register OP *op = PL_op;
-    while ((PL_op = op = CALL_FPTR(op->op_ppaddr)(aTHX))) {
+    while ((PL_op = op = op->op_ppaddr(aTHX))) {
     }
 
     TAINT_NOT;

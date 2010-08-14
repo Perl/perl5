@@ -210,6 +210,13 @@
 #endif
 
 #define STATIC static
+
+#ifndef PERL_CORE
+/* Do not use these macros. They were part of PERL_OBJECT, which was an
+ * implementation of multiplicity using C++ objects. They have been left
+ * here solely for the sake of XS code which has incorrectly
+ * cargo-culted them.
+ */
 #define CPERLscope(x) x
 #define CPERLarg void
 #define CPERLarg_
@@ -218,76 +225,76 @@
 #define _PERL_OBJECT_THIS
 #define PERL_OBJECT_THIS_
 #define CALL_FPTR(fptr) (*fptr)
+#endif /* !PERL_CORE */
 
-#define CALLRUNOPS  CALL_FPTR(PL_runops)
+#define CALLRUNOPS  PL_runops
 
 #define CALLREGCOMP(sv, flags) Perl_pregcomp(aTHX_ (sv),(flags))
 
-#define CALLREGCOMP_ENG(prog, sv, flags) \
-    CALL_FPTR(((prog)->comp))(aTHX_ sv, flags)
+#define CALLREGCOMP_ENG(prog, sv, flags) (prog)->comp(aTHX_ sv, flags)
 #define CALLREGEXEC(prog,stringarg,strend,strbeg,minend,screamer,data,flags) \
-    CALL_FPTR(RX_ENGINE(prog)->exec)(aTHX_ (prog),(stringarg),(strend), \
+    RX_ENGINE(prog)->exec(aTHX_ (prog),(stringarg),(strend), \
         (strbeg),(minend),(screamer),(data),(flags))
 #define CALLREG_INTUIT_START(prog,sv,strpos,strend,flags,data) \
-    CALL_FPTR(RX_ENGINE(prog)->intuit)(aTHX_ (prog), (sv), (strpos), \
+    RX_ENGINE(prog)->intuit(aTHX_ (prog), (sv), (strpos), \
         (strend),(flags),(data))
 #define CALLREG_INTUIT_STRING(prog) \
-    CALL_FPTR(RX_ENGINE(prog)->checkstr)(aTHX_ (prog))
+    RX_ENGINE(prog)->checkstr(aTHX_ (prog))
 
 #define CALLREGFREE(prog) \
     Perl_pregfree(aTHX_ (prog))
 
 #define CALLREGFREE_PVT(prog) \
-    if(prog) CALL_FPTR(RX_ENGINE(prog)->free)(aTHX_ (prog))
+    if(prog) RX_ENGINE(prog)->free(aTHX_ (prog))
 
 #define CALLREG_NUMBUF_FETCH(rx,paren,usesv)                                \
-    CALL_FPTR(RX_ENGINE(rx)->numbered_buff_FETCH)(aTHX_ (rx),(paren),(usesv))
+    RX_ENGINE(rx)->numbered_buff_FETCH(aTHX_ (rx),(paren),(usesv))
 
 #define CALLREG_NUMBUF_STORE(rx,paren,value) \
-    CALL_FPTR(RX_ENGINE(rx)->numbered_buff_STORE)(aTHX_ (rx),(paren),(value))
+    RX_ENGINE(rx)->numbered_buff_STORE(aTHX_ (rx),(paren),(value))
 
 #define CALLREG_NUMBUF_LENGTH(rx,sv,paren)                              \
-    CALL_FPTR(RX_ENGINE(rx)->numbered_buff_LENGTH)(aTHX_ (rx),(sv),(paren))
+    RX_ENGINE(rx)->numbered_buff_LENGTH(aTHX_ (rx),(sv),(paren))
 
 #define CALLREG_NAMED_BUFF_FETCH(rx, key, flags) \
-    CALL_FPTR(RX_ENGINE(rx)->named_buff)(aTHX_ (rx), (key), NULL, ((flags) | RXapif_FETCH))
+    RX_ENGINE(rx)->named_buff(aTHX_ (rx), (key), NULL, ((flags) | RXapif_FETCH))
 
 #define CALLREG_NAMED_BUFF_STORE(rx, key, value, flags) \
-    CALL_FPTR(RX_ENGINE(rx)->named_buff)(aTHX_ (rx), (key), (value), ((flags) | RXapif_STORE))
+    RX_ENGINE(rx)->named_buff(aTHX_ (rx), (key), (value), ((flags) | RXapif_STORE))
 
 #define CALLREG_NAMED_BUFF_DELETE(rx, key, flags) \
-    CALL_FPTR(RX_ENGINE(rx)->named_buff)(aTHX_ (rx),(key), NULL, ((flags) | RXapif_DELETE))
+    RX_ENGINE(rx)->named_buff(aTHX_ (rx),(key), NULL, ((flags) | RXapif_DELETE))
 
 #define CALLREG_NAMED_BUFF_CLEAR(rx, flags) \
-    CALL_FPTR(RX_ENGINE(rx)->named_buff)(aTHX_ (rx), NULL, NULL, ((flags) | RXapif_CLEAR))
+    RX_ENGINE(rx)->named_buff(aTHX_ (rx), NULL, NULL, ((flags) | RXapif_CLEAR))
 
 #define CALLREG_NAMED_BUFF_EXISTS(rx, key, flags) \
-    CALL_FPTR(RX_ENGINE(rx)->named_buff)(aTHX_ (rx), (key), NULL, ((flags) | RXapif_EXISTS))
+    RX_ENGINE(rx)->named_buff(aTHX_ (rx), (key), NULL, ((flags) | RXapif_EXISTS))
 
 #define CALLREG_NAMED_BUFF_FIRSTKEY(rx, flags) \
-    CALL_FPTR(RX_ENGINE(rx)->named_buff_iter)(aTHX_ (rx), NULL, ((flags) | RXapif_FIRSTKEY))
+    RX_ENGINE(rx)->named_buff_iter(aTHX_ (rx), NULL, ((flags) | RXapif_FIRSTKEY))
 
 #define CALLREG_NAMED_BUFF_NEXTKEY(rx, lastkey, flags) \
-    CALL_FPTR(RX_ENGINE(rx)->named_buff_iter)(aTHX_ (rx), (lastkey), ((flags) | RXapif_NEXTKEY))
+    RX_ENGINE(rx)->named_buff_iter(aTHX_ (rx), (lastkey), ((flags) | RXapif_NEXTKEY))
 
 #define CALLREG_NAMED_BUFF_SCALAR(rx, flags) \
-    CALL_FPTR(RX_ENGINE(rx)->named_buff)(aTHX_ (rx), NULL, NULL, ((flags) | RXapif_SCALAR))
+    RX_ENGINE(rx)->named_buff(aTHX_ (rx), NULL, NULL, ((flags) | RXapif_SCALAR))
 
 #define CALLREG_NAMED_BUFF_COUNT(rx) \
-    CALL_FPTR(RX_ENGINE(rx)->named_buff)(aTHX_ (rx), NULL, NULL, RXapif_REGNAMES_COUNT)
+    RX_ENGINE(rx)->named_buff(aTHX_ (rx), NULL, NULL, RXapif_REGNAMES_COUNT)
 
 #define CALLREG_NAMED_BUFF_ALL(rx, flags) \
-    CALL_FPTR(RX_ENGINE(rx)->named_buff)(aTHX_ (rx), NULL, NULL, flags)
+    RX_ENGINE(rx)->named_buff(aTHX_ (rx), NULL, NULL, flags)
 
 #define CALLREG_PACKAGE(rx) \
-    CALL_FPTR(RX_ENGINE(rx)->qr_package)(aTHX_ (rx))
+    RX_ENGINE(rx)->qr_package(aTHX_ (rx))
 
 #if defined(USE_ITHREADS)
 #define CALLREGDUPE(prog,param) \
     Perl_re_dup(aTHX_ (prog),(param))
 
 #define CALLREGDUPE_PVT(prog,param) \
-    (prog ? CALL_FPTR(RX_ENGINE(prog)->dupe)(aTHX_ (prog),(param)) \
+    (prog ? RX_ENGINE(prog)->dupe(aTHX_ (prog),(param)) \
           : (REGEXP *)NULL)
 #endif
 
@@ -4210,12 +4217,12 @@ struct perl_memory_debug_header {
 #  endif
 #endif
 
-typedef int (CPERLscope(*runops_proc_t)) (pTHX);
-typedef void (CPERLscope(*share_proc_t)) (pTHX_ SV *sv);
-typedef int  (CPERLscope(*thrhook_proc_t)) (pTHX);
-typedef OP* (CPERLscope(*PPADDR_t)[]) (pTHX);
-typedef bool (CPERLscope(*destroyable_proc_t)) (pTHX_ SV *sv);
-typedef void (CPERLscope(*despatch_signals_proc_t)) (pTHX);
+typedef int (*runops_proc_t)(pTHX);
+typedef void (*share_proc_t) (pTHX_ SV *sv);
+typedef int  (*thrhook_proc_t) (pTHX);
+typedef OP* (*PPADDR_t[]) (pTHX);
+typedef bool (*destroyable_proc_t) (pTHX_ SV *sv);
+typedef void (*despatch_signals_proc_t) (pTHX);
 
 /* _ (for $_) must be first in the following list (DEFSV requires it) */
 #define THREADSV_NAMES "_123456789&`'+/.,\\\";^-%=|~:\001\005!@"
@@ -4841,18 +4848,18 @@ struct perl_debug_pad {
 	PERL_DEBUG_PAD(i))
 
 /* Enable variables which are pointers to functions */
-typedef void (CPERLscope(*peep_t))(pTHX_ OP* o);
-typedef regexp*(CPERLscope(*regcomp_t)) (pTHX_ char* exp, char* xend, PMOP* pm);
-typedef I32 (CPERLscope(*regexec_t)) (pTHX_ regexp* prog, char* stringarg,
+typedef void (*peep_t)(pTHX_ OP* o);
+typedef regexp* (*regcomp_t) (pTHX_ char* exp, char* xend, PMOP* pm);
+typedef I32     (*regexec_t) (pTHX_ regexp* prog, char* stringarg,
 				      char* strend, char* strbeg, I32 minend,
 				      SV* screamer, void* data, U32 flags);
-typedef char* (CPERLscope(*re_intuit_start_t)) (pTHX_ regexp *prog, SV *sv,
+typedef char*   (*re_intuit_start_t) (pTHX_ regexp *prog, SV *sv,
 						char *strpos, char *strend,
 						U32 flags,
 						re_scream_pos_data *d);
-typedef SV*	(CPERLscope(*re_intuit_string_t)) (pTHX_ regexp *prog);
-typedef void	(CPERLscope(*regfree_t)) (pTHX_ struct regexp* r);
-typedef regexp*(CPERLscope(*regdupe_t)) (pTHX_ const regexp* r, CLONE_PARAMS *param);
+typedef SV*	(*re_intuit_string_t) (pTHX_ regexp *prog);
+typedef void	(*regfree_t) (pTHX_ struct regexp* r);
+typedef regexp* (*regdupe_t) (pTHX_ const regexp* r, CLONE_PARAMS *param);
 
 typedef void (*DESTRUCTORFUNC_NOCONTEXT_t) (void*);
 typedef void (*DESTRUCTORFUNC_t) (pTHX_ void*);
@@ -4869,10 +4876,10 @@ typedef void (*XSUBADDR_t) (pTHX_ CV *);
 #define PERLVARIC(var,type,init) type var;
 #define PERLVARISC(var,init) const char var[sizeof(init)];
 
-typedef OP* (CPERLscope(*Perl_ppaddr_t))(pTHX);
-typedef OP* (CPERLscope(*Perl_check_t)) (pTHX_ OP*);
-typedef void(CPERLscope(*Perl_ophook_t))(pTHX_ OP*);
-typedef int (CPERLscope(*Perl_keyword_plugin_t))(pTHX_ char*, STRLEN, OP**);
+typedef OP* (*Perl_ppaddr_t)(pTHX);
+typedef OP* (*Perl_check_t) (pTHX_ OP*);
+typedef void(*Perl_ophook_t)(pTHX_ OP*);
+typedef int (*Perl_keyword_plugin_t)(pTHX_ char*, STRLEN, OP**);
 
 #define KEYWORD_PLUGIN_DECLINE 0
 #define KEYWORD_PLUGIN_STMT    1
@@ -5721,7 +5728,7 @@ typedef struct am_table_short AMTS;
 
 #ifndef PERL_MICRO
 #	ifndef PERL_ASYNC_CHECK
-#		define PERL_ASYNC_CHECK() if (PL_sig_pending) CALL_FPTR(PL_signalhook)(aTHX)
+#		define PERL_ASYNC_CHECK() if (PL_sig_pending) PL_signalhook(aTHX)
 #	endif
 #endif
 

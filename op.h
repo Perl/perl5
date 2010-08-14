@@ -54,7 +54,7 @@ typedef PERL_BITFIELD16 Optype;
 #define BASEOP				\
     OP*		op_next;		\
     OP*		op_sibling;		\
-    OP*		(CPERLscope(*op_ppaddr))(pTHX);		\
+    OP*		(*op_ppaddr)(pTHX);	\
     MADPROP_IN_BASEOP			\
     PADOFFSET	op_targ;		\
     PERL_BITFIELD16 op_type:9;		\
@@ -733,7 +733,7 @@ preprocessing token; the type of I<arg> depends on I<which>.
 		    hk = INT2PTR(BHK *, SvIVX(sv)); \
 		\
 		if (BhkENTRY(hk, which)) \
-		    CALL_FPTR(BhkENTRY(hk, which))(aTHX_ arg); \
+		    BhkENTRY(hk, which)(aTHX_ arg); \
 	    } \
 	} \
     } STMT_END

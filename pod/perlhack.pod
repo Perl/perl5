@@ -557,7 +557,7 @@ that's left to do is run it. The actual execution is done by the
 C<runops_standard> function in F<run.c>; more specifically, it's done by
 these three innocent looking lines:
 
-    while ((PL_op = CALL_FPTR(PL_op->op_ppaddr)(aTHX))) {
+    while ((PL_op = PL_op->op_ppaddr(aTHX))) {
         PERL_ASYNC_CHECK();
     }
 

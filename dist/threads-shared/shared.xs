@@ -1181,7 +1181,7 @@ S_shared_signal_hook(pTHX) {
     MUTEX_UNLOCK(&PL_sharedsv_lock.mutex);
     if (us)
 	return; /* try again later */
-    CALL_FPTR(prev_signal_hook)(aTHX);
+    prev_signal_hook(aTHX);
 }
 #endif
 

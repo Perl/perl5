@@ -12,15 +12,15 @@
 STRUCT_MGVTBL_DEFINITION;
 #else
 struct mgvtbl {
-    int		(CPERLscope(*svt_get))	(pTHX_ SV *sv, MAGIC* mg);
-    int		(CPERLscope(*svt_set))	(pTHX_ SV *sv, MAGIC* mg);
-    U32		(CPERLscope(*svt_len))	(pTHX_ SV *sv, MAGIC* mg);
-    int		(CPERLscope(*svt_clear))(pTHX_ SV *sv, MAGIC* mg);
-    int		(CPERLscope(*svt_free))	(pTHX_ SV *sv, MAGIC* mg);
-    int		(CPERLscope(*svt_copy))	(pTHX_ SV *sv, MAGIC* mg,
+    int		(*svt_get)	(pTHX_ SV *sv, MAGIC* mg);
+    int		(*svt_set)	(pTHX_ SV *sv, MAGIC* mg);
+    U32		(*svt_len)	(pTHX_ SV *sv, MAGIC* mg);
+    int		(*svt_clear)(pTHX_ SV *sv, MAGIC* mg);
+    int		(*svt_free)	(pTHX_ SV *sv, MAGIC* mg);
+    int		(*svt_copy)	(pTHX_ SV *sv, MAGIC* mg,
     					SV *nsv, const char *name, I32 namlen);
-    int		(CPERLscope(*svt_dup))	(pTHX_ MAGIC *mg, CLONE_PARAMS *param);
-    int		(CPERLscope(*svt_local))(pTHX_ SV *nsv, MAGIC *mg);
+    int		(*svt_dup)	(pTHX_ MAGIC *mg, CLONE_PARAMS *param);
+    int		(*svt_local)(pTHX_ SV *nsv, MAGIC *mg);
 };
 #endif
 

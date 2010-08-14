@@ -574,7 +574,7 @@ perl_destruct(pTHXx)
     /* Need to flush since END blocks can produce output */
     my_fflush_all();
 
-    if (CALL_FPTR(PL_threadhook)(aTHX)) {
+    if (PL_threadhook(aTHX)) {
         /* Threads hook has vetoed further cleanup */
 	PL_veto_cleanup = TRUE;
         return STATUS_EXIT;

@@ -6131,7 +6131,7 @@ Perl_yylex(pTHX)
 	    int result;
 	    char *saved_bufptr = PL_bufptr;
 	    PL_bufptr = s;
-	    result = CALL_FPTR(PL_keyword_plugin)(aTHX_ PL_tokenbuf, len, &o);
+	    result = PL_keyword_plugin(aTHX_ PL_tokenbuf, len, &o);
 	    s = PL_bufptr;
 	    if (result == KEYWORD_PLUGIN_DECLINE) {
 		/* not a plugged-in keyword */
