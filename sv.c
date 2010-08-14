@@ -920,7 +920,7 @@ static const struct body_details bodies_by_type[] = {
       SVt_NV, FALSE, HADNV, HASARENA, FIT_ARENA(0, sizeof(NV)) },
 
     /* 8 bytes on most ILP32 with IEEE doubles */
-    { sizeof(XPV),
+    { sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur),
       copy_length(XPV, xpv_len) - STRUCT_OFFSET(XPV, xpv_cur),
       + STRUCT_OFFSET(XPV, xpv_cur),
       SVt_PV, FALSE, NONV, HASARENA,
@@ -928,7 +928,7 @@ static const struct body_details bodies_by_type[] = {
 
 #if 2 *PTRSIZE <= IVSIZE
     /* 12 */
-    { sizeof(XPVIV),
+    { sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur),
       copy_length(XPVIV, xiv_u) - STRUCT_OFFSET(XPV, xpv_cur),
       + STRUCT_OFFSET(XPV, xpv_cur),
       SVt_PVIV, FALSE, NONV, HASARENA,
@@ -944,7 +944,7 @@ static const struct body_details bodies_by_type[] = {
 
 #if (2 *PTRSIZE <= IVSIZE) && (2 *PTRSIZE <= NVSIZE)
     /* 20 */
-    { sizeof(XPVNV),
+    { sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur),
       copy_length(XPVNV, xnv_u) - STRUCT_OFFSET(XPV, xpv_cur),
       + STRUCT_OFFSET(XPV, xpv_cur),
       SVt_PVNV, FALSE, HADNV, HASARENA,
