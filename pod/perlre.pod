@@ -363,11 +363,11 @@ not counted when determining the length of the match. Thus the following
 will not match forever:
 X<\G>
 
-    $str = 'ABC';
-    pos($str) = 1;
-    while (/.\G/g) {
-        print $&;
-    }
+     my $string = 'ABC';
+     pos($string) = 1;
+     while ($string =~ /(.\G)/g) {
+         print $1;
+     }
 
 It will print 'A' and then terminate, as it considers the match to
 be zero-width, and thus will not match at the same position twice in a

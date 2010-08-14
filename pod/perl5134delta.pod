@@ -190,8 +190,20 @@ XXX
 
 =head1 Documentation
 
+=head2 Modifications
+
 XXX Changes to files in F<pod/> go here.  Consider grouping entries by
 file and be sure to link to the appropriate page, e.g. L<perlfunc>.
+
+=head3 perlre
+
+=over 4
+
+=item *
+
+Minor fix to a multiple scalar match example.
+
+=back
 
 =head2 New Documentation
 
