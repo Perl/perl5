@@ -17,11 +17,11 @@ $ENV{LANGUAGE} = 'C'; # GNU locale extension
 
 ok(mkdir('blurfl',0777));
 ok(!mkdir('blurfl',0777));
-like($!, qr/cannot move|exist|denied|unknown/i);
+ok($!{EEXIST} || $! =~ /cannot move|exist|denied|unknown/i);
 ok(-d 'blurfl');
 ok(rmdir('blurfl'));
 ok(!rmdir('blurfl'));
-like($!, qr/cannot find|such|exist|not found|not a directory|unknown/i);
+ok($!{ENOENT} || $! =~ /cannot find|such|exist|not found|not a directory|unknown/i);
 ok(mkdir('blurfl'));
 ok(rmdir('blurfl'));
 
