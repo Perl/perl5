@@ -1536,6 +1536,10 @@ Perl_sv_grow(pTHX_ register SV *const sv, register STRLEN newlen)
 	s = SvPVX_mutable(sv);
 
     if (newlen > SvLEN(sv)) {		/* need more room? */
+	STRLEN minlen = SvCUR(sv);
+	minlen += (minlen >> PERL_STRLEN_EXPAND_SHIFT) + 10;
+	if (newlen < minlen)
+	    newlen = minlen;
 #ifndef Perl_safesysmalloc_size
 	newlen = PERL_STRLEN_ROUNDUP(newlen);
 #endif

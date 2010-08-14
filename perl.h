@@ -979,6 +979,14 @@ EXTERN_C int usleep(unsigned int);
 #define PERL_STRLEN_ROUNDUP_QUANTUM Size_t_size
 #endif
 
+/* sv_grow() will expand strings by at least a certain percentage of
+   the previously *used* length to avoid excessive calls to realloc().
+   The default is 25% of the current length.
+*/
+#ifndef PERL_STRLEN_EXPAND_SHIFT
+#  define PERL_STRLEN_EXPAND_SHIFT 2
+#endif
+
 #if defined(STANDARD_C) && defined(I_STDDEF)
 #   include <stddef.h>
 #   define STRUCT_OFFSET(s,m)  offsetof(s,m)
