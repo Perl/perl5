@@ -2323,6 +2323,7 @@ cpan/Test-Simple/t/plan_shouldnt_import.t		Test::Simple test
 cpan/Test-Simple/t/plan_skip_all.t			Test::More test, plan() w/skip_all
 cpan/Test-Simple/t/plan.t				Test::More test, plan()
 cpan/Test-Simple/t/require_ok.t				Test::Simple test
+cpan/Test-Simple/t/Simple/load.t			Test::Builder tests
 cpan/Test-Simple/t/simple.t				Test::Simple test, basic stuff
 cpan/Test-Simple/t/skipall.t				Test::More test, skip all tests
 cpan/Test-Simple/t/skip.t				Test::More test, SKIP tests
@@ -2332,7 +2333,13 @@ cpan/Test-Simple/t/subtest/die.t			Test::More test
 cpan/Test-Simple/t/subtest/do.t				Test::More test
 cpan/Test-Simple/t/subtest/exceptions.t			Test::More test
 cpan/Test-Simple/t/subtest/for_do_t.test		Test::More test
+cpan/Test-Simple/t/subtest/fork.t			Test::Builder tests
+cpan/Test-Simple/t/subtest/implicit_done.t			Test::Builder tests
+cpan/Test-Simple/t/subtest/line_numbers.t			Test::Builder tests
+cpan/Test-Simple/t/subtest/plan.t			Test::Builder tests
+cpan/Test-Simple/t/subtest/predicate.t			Test::Builder tests
 cpan/Test-Simple/t/subtest/singleton.t			Test::More test
+cpan/Test-Simple/t/subtest/todo.t			Test::Builder tests
 cpan/Test-Simple/t/tbm_doesnt_set_exported_to.t		Test::Builder::Module test
 cpan/Test-Simple/t/Tester/tbt_01basic.t			Test::Builder::Tester test
 cpan/Test-Simple/t/Tester/tbt_02fhrestore.t		Test::Builder::Tester test

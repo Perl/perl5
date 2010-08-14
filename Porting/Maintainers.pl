@@ -1346,7 +1346,7 @@ use File::Glob qw(:case);
     'Test::Simple' =>
 	{
 	'MAINTAINER'	=> 'mschwern',
-	'DISTRIBUTION'	=> 'MSCHWERN/Test-Simple-0.94.tar.gz',
+	'DISTRIBUTION'	=> 'MSCHWERN/Test-Simple-0.96.tar.gz',
 	'FILES'		=> q[cpan/Test-Simple],
 	'EXCLUDED'	=> [
 			     qw{.perlcriticrc
