@@ -103,16 +103,7 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 #include "perl.h"
 #include "keywords.h"
 
-#define CALL_A_PEEP(peep, o) CALL_FPTR((peep)->fn)(aTHX_ o, peep)
-
-#define CALL_PEEP(o)				\
-    STMT_START {				\
-	peep_next_t _next_peep;			\
-	_next_peep.fn        = PL_peepp;	\
-	_next_peep.user_data = NULL;		\
-	CALL_A_PEEP(&_next_peep, o);		\
-    } STMT_END
-
+#define CALL_PEEP(o) CALL_FPTR(PL_peepp)(aTHX_ o)
 #define CALL_OPFREEHOOK(o) if (PL_opfreehook) CALL_FPTR(PL_opfreehook)(aTHX_ o)
 
 #if defined(PL_OP_SLAB_ALLOC)
@@ -8524,12 +8515,10 @@ S_is_inplace_av(pTHX_ OP *o, OP *oright) {
  * peep() is called */
 
 void
-Perl_peep(pTHX_ register OP *o, peep_next_t *next_peep)
+Perl_peep(pTHX_ register OP *o)
 {
     dVAR;
     register OP* oldop = NULL;
-
-    PERL_ARGS_ASSERT_PEEP;
 
     if (!o || o->op_opt)
 	return;
@@ -8725,7 +8714,7 @@ Perl_peep(pTHX_ register OP *o, peep_next_t *next_peep)
             sop = fop->op_sibling;
 	    while (cLOGOP->op_other->op_type == OP_NULL)
 		cLOGOP->op_other = cLOGOP->op_other->op_next;
-	    CALL_A_PEEP(next_peep, cLOGOP->op_other); /* Recursive calls are not replaced by fptr calls */
+	    peep(cLOGOP->op_other); /* Recursive calls are not replaced by fptr calls */
           
           stitch_keys:	    
 	    o->op_opt = 1;
@@ -8776,20 +8765,20 @@ Perl_peep(pTHX_ register OP *o, peep_next_t *next_peep)
 	case OP_ONCE:
 	    while (cLOGOP->op_other->op_type == OP_NULL)
 		cLOGOP->op_other = cLOGOP->op_other->op_next;
-	    CALL_A_PEEP(next_peep, cLOGOP->op_other); /* Recursive calls are not replaced by fptr calls */
+	    peep(cLOGOP->op_other); /* Recursive calls are not replaced by fptr calls */
 	    break;
 
 	case OP_ENTERLOOP:
 	case OP_ENTERITER:
 	    while (cLOOP->op_redoop->op_type == OP_NULL)
 		cLOOP->op_redoop = cLOOP->op_redoop->op_next;
-	    CALL_A_PEEP(next_peep, cLOOP->op_redoop);
+	    peep(cLOOP->op_redoop);
 	    while (cLOOP->op_nextop->op_type == OP_NULL)
 		cLOOP->op_nextop = cLOOP->op_nextop->op_next;
-	    CALL_A_PEEP(next_peep, cLOOP->op_nextop);
+	    peep(cLOOP->op_nextop);
 	    while (cLOOP->op_lastop->op_type == OP_NULL)
 		cLOOP->op_lastop = cLOOP->op_lastop->op_next;
-	    CALL_A_PEEP(next_peep, cLOOP->op_lastop);
+	    peep(cLOOP->op_lastop);
 	    break;
 
 	case OP_SUBST:
@@ -8798,7 +8787,7 @@ Perl_peep(pTHX_ register OP *o, peep_next_t *next_peep)
 		   cPMOP->op_pmstashstartu.op_pmreplstart->op_type == OP_NULL)
 		cPMOP->op_pmstashstartu.op_pmreplstart
 		    = cPMOP->op_pmstashstartu.op_pmreplstart->op_next;
-	    CALL_A_PEEP(next_peep, cPMOP->op_pmstashstartu.op_pmreplstart);
+	    peep(cPMOP->op_pmstashstartu.op_pmreplstart);
 	    break;
 
 	case OP_EXEC:

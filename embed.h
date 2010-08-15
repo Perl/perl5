@@ -3152,7 +3152,7 @@
 #endif
 #ifdef PERL_CORE
 #define pad_swipe(a,b)		Perl_pad_swipe(aTHX_ a,b)
-#define peep(a,b)		Perl_peep(aTHX_ a,b)
+#define peep(a)			Perl_peep(aTHX_ a)
 #endif
 #if defined(USE_REENTRANT_API)
 #define reentrant_size()	Perl_reentrant_size(aTHX)

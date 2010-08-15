@@ -532,14 +532,6 @@ contains a more specific escape hatch:
 This can be used for modules that have not been upgraded to 5.6 naming
 conventions (and really should be completely obsolete by now).
 
-=item Make extending the peephole optimizer easier
-
-As of version 5.8, extension authors were allowed to replace perl's peephole
-optimizer function. However, this was B<very> hard to do, as there was no way to
-add new optimizations without having to copy large parts of perl's original
-optimizer. This problem is now solved by a rework of the optimizer extension
-API. See L<perlguts/"Compile pass 3: peephole optimization"> for details.
-
 =item C<Perl_grok_bslash_o> and C<Perl_grok_bslash_c> may change in future
 
 The functions C<Perl_grok_bslash_o> and C<Perl_grok_bslash_c>, which are public
