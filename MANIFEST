@@ -4483,6 +4483,7 @@ t/op/exp.t			See if math functions work
 t/op/fh.t			See if filehandles work
 t/op/filehandle.t		Tests for http://rt.perl.org/rt3/Ticket/Display.html?id=72586
 t/op/filetest.t			See if file tests work
+t/op/filetest_stack_ok.t        See if file tests leave their argument on the stack
 t/op/filetest_t.t		See if -t file test works
 t/op/flip.t			See if range operator works
 t/op/fork.t			See if fork works

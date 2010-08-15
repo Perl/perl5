@@ -3219,16 +3219,22 @@ PP(pp_ftrowned)
     /* I believe that all these three are likely to be defined on most every
        system these days.  */
 #ifndef S_ISUID
-    if(PL_op->op_type == OP_FTSUID)
+    if(PL_op->op_type == OP_FTSUID) {
+	(void) POPs;
 	RETPUSHNO;
+    }
 #endif
 #ifndef S_ISGID
-    if(PL_op->op_type == OP_FTSGID)
+    if(PL_op->op_type == OP_FTSGID) {
+	(void) POPs;
 	RETPUSHNO;
+    }
 #endif
 #ifndef S_ISVTX
-    if(PL_op->op_type == OP_FTSVTX)
+    if(PL_op->op_type == OP_FTSVTX) {
+	(void) POPs;
 	RETPUSHNO;
+    }
 #endif
 
     STACKED_FTEST_CHECK;
