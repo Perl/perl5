@@ -1358,9 +1358,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     $x = 4 unless !$no && !$yes;	is($x, 4);
 }
 
-TODO: {
-    local $TODO = 'Test-Simple handling of overloads changed with 0.95_01';
-
+{
     use Scalar::Util 'weaken';
 
     package Shklitza;
@@ -1374,11 +1372,11 @@ TODO: {
     $obj = bless do {my $a; \$a}, 'Shklitza';
     $ref = $obj;
 
-    is ($obj, "CLiK KLAK");
-    is ($ref, "CLiK KLAK");
+    is ("$obj", "CLiK KLAK");
+    is ("$ref", "CLiK KLAK");
 
     weaken $ref;
-    is ($ref, "CLiK KLAK");
+    is ("$ref", "CLiK KLAK");
 
     bless $obj, 'Ksshfwoom';
 
