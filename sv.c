@@ -1014,18 +1014,13 @@ static const struct body_details bodies_by_type[] = {
 #define del_body_allocated(p, sv_type)		\
     del_body(p + bodies_by_type[sv_type].offset, &PL_body_roots[sv_type])
 
-
-#define my_safemalloc(s)	(void*)safemalloc(s)
-#define my_safecalloc(s)	(void*)safecalloc(s, 1)
-#define my_safefree(p)	safefree((char*)p)
-
 #ifdef PURIFY
 
-#define new_XNV()	my_safemalloc(sizeof(XPVNV))
-#define new_XPVNV()	my_safemalloc(sizeof(XPVNV))
-#define new_XPVMG()	my_safemalloc(sizeof(XPVMG))
+#define new_XNV()	safemalloc(sizeof(XPVNV))
+#define new_XPVNV()	safemalloc(sizeof(XPVNV))
+#define new_XPVMG()	safemalloc(sizeof(XPVMG))
 
-#define del_XPVGV(p)	my_safefree(p)
+#define del_XPVGV(p)	safefree(p)
 
 #else /* !PURIFY */
 
@@ -1040,9 +1035,9 @@ static const struct body_details bodies_by_type[] = {
 /* no arena for you! */
 
 #define new_NOARENA(details) \
-	my_safemalloc((details)->body_size + (details)->offset)
+	safemalloc((details)->body_size + (details)->offset)
 #define new_NOARENAZ(details) \
-	my_safecalloc((details)->body_size + (details)->offset)
+	safecalloc((details)->body_size + (details)->offset, 1)
 
 STATIC void *
 S_more_bodies (pTHX_ const svtype sv_type)
@@ -1420,7 +1415,7 @@ Perl_sv_upgrade(pTHX_ register SV *const sv, svtype new_type)
 
     if (old_type > SVt_IV) {
 #ifdef PURIFY
-	my_safefree(old_body);
+	safefree(old_body);
 #else
 	/* Note that there is an assumption that all bodies of types that
 	   can be upgraded came from arenas. Only the more complex non-
@@ -5980,7 +5975,7 @@ Perl_sv_clear(pTHX_ register SV *const sv)
 		 &PL_body_roots[type]);
     }
     else if (sv_type_details->body_size) {
-	my_safefree(SvANY(sv));
+	safefree(SvANY(sv));
     }
 }
 
