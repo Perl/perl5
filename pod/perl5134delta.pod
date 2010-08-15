@@ -1,11 +1,11 @@
 =encoding utf8
 
 =for rafl
-changelogged up to commit 2be7097
+changelogged up to commit a98d1b3
 * PERL_STATIC_INLINE might want to be mentioned
-
 * 5648c0a and 254f8c6 added an optimisation for backrefs. probably not worth
 mentioning
+* RT#67838 needs mentioning. e2fe06d to 2154eca
 
 =head1 NAME
 
@@ -42,6 +42,44 @@ has too many combinations to test comprehensively in the time available to it
 each run.  It can test a random subset each time, and should there be a failure,
 log the seed used for that run so that it can later be used to reproduce the
 exact results.
+
+=head2 Creating unary functions with prototypes
+
+Calls to functions created with the following prototypes are now correctly parsed
+
+Functions declared with the following prototypes now behave correctly as unary functions:
+
+=over 4
+
+=item *
+
+*
+
+=item *
+
+\sigil
+
+=item *
+
+\[...]
+
+=item *
+
+;$
+
+=item *
+
+;*
+
+=item *
+
+;\sigil
+
+=item *
+
+;\[...]
+
+=back
 
 =head2 C<\N{I<name>}> and C<charnames> enhancements
 
@@ -109,7 +147,21 @@ may well be none in a stable release.
 
 =item *
 
-XXX
+Make string appending 100 times faster
+
+When doing a lot of string appending, perl could end up allocating a lot more
+memory than needed in a very inefficient way, if perl was configured to use the
+system's C<malloc> implementation instead of its own.
+
+C<sv_grow>, which is what's being used to allocate more memory if necessary when
+appending to a string, has now been teached how to round up the memory it
+requests to a certain geometric progression, making it much faster on certain
+platforms and configurations. On Win32, it's now about 100 times faster.
+
+=item *
+
+C<XPV>, C<XPVIV>, and C<XPVNV> now only allocate the parts of the C<SV> body
+they actually use, saving some space.
 
 =back
 
@@ -177,6 +229,13 @@ Various issues in L<File::Spec::VMS> have been fixed.
 
 Upgraded from version 2.027 to 2.030.
 
+=item C<Test::Simple>
+
+Upgraded from version 0.94 to 0.96.
+
+Among many other things, subtests without a C<plan> or C<no_plan> now have an
+implicit C<done_testing()> added to them.
+
 =item C<Unicode::Collate>
 
 Upgraded from version 0.53 to 0.56.
@@ -198,20 +257,8 @@ XXX
 
 =head1 Documentation
 
-=head2 Modifications
-
 XXX Changes to files in F<pod/> go here.  Consider grouping entries by
 file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
-=head3 perlre
-
-=over 4
-
-=item *
-
-Minor fix to a multiple scalar match example.
-
-=back
 
 =head2 New Documentation
 
@@ -253,6 +300,18 @@ L<Ambiguous use of %c{%s%s} resolved to %c%s%s|perldiag/"Ambiguous use of %c{%s%
 
 L<Ambiguous use of -%s resolved as -&%s()|perldiag/"Ambiguous use of -%s resolved as -&%s()">
 
+=item *
+
+L<Invalid strict version format (%s)|perldiag/"Invalid strict version format (%s)">
+
+=item *
+
+L<Invalid version format (%s)|perldiag/"Invalid version format (%s)">
+
+=item *
+
+L<Invalid version object|perldiag/"Invalid version object">
+
 =back
 
 =back
@@ -265,6 +324,16 @@ L<Ambiguous use of -%s resolved as -&%s()|perldiag/"Ambiguous use of -%s resolve
 
 Documented a L<limitation|perlport/alarm> of L<alarm()|perlfunc/"alarm SECONDS">
 on Win32.
+
+=back
+
+=head3 L<perlre>
+
+=over 4
+
+=item *
+
+Minor fix to a multiple scalar match example.
 
 =back
 
@@ -335,7 +404,12 @@ L</Platform Support> section, instead.
 
 =item *
 
-Improve compatibility with C<C++> compilers.
+Compatibility with C<C++> compilers has been improved.
+
+=item *
+
+On compilers that support it, C<-Wwrite-strings> is now added to cflags by
+default.
 
 =back
 
@@ -513,6 +587,11 @@ Assignments to glob copies now behave just like assignments to regular globs
 =item *
 
 Within signal handlers, C<$!> is now implicitly localized.
+
+=item *
+
+L<readline|perlfunc/"readline EXPR"> now honors C<< <> >> overloading on tied
+arguments.
 
 =back
 
