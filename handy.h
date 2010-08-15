@@ -314,6 +314,13 @@ Like C<hv_fetch>, but takes a literal string instead of a string/length pair.
 Like C<hv_store>, but takes a literal string instead of a string/length pair
 and omits the hash parameter.
 
+=head1 Lexer interface
+
+=for apidoc Amx|void|lex_stuff_pvs|const char *pv|U32 flags
+
+Like L</lex_stuff_pvn>, but takes a literal string instead of a
+string/length pair.
+
 =cut
 */
 
@@ -343,6 +350,8 @@ and omits the hash parameter.
 #define hv_stores(hv,key,val)						\
   ((SV **)Perl_hv_common(aTHX_ (hv), NULL, STR_WITH_LEN(key), 0,	\
 			 (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV), (val), 0))
+
+#define lex_stuff_pvs(pv,flags) Perl_lex_stuff_pvn(aTHX_ STR_WITH_LEN(pv), flags)
 
 #define get_cvs(str, flags)					\
 	Perl_get_cvn_flags(aTHX_ STR_WITH_LEN(str), (flags))
