@@ -147,8 +147,7 @@ Private API to rest of sv.c
 
     new_SV(),  del_SV(),
 
-    new_XIV(), del_XIV(),
-    new_XNV(), del_XNV(),
+    new_XPVNV(), del_XPVGV(),
     etc
 
 Public API:
@@ -1023,41 +1022,17 @@ static const struct body_details bodies_by_type[] = {
 #ifdef PURIFY
 
 #define new_XNV()	my_safemalloc(sizeof(XPVNV))
-#define del_XNV(p)	my_safefree(p)
-
 #define new_XPVNV()	my_safemalloc(sizeof(XPVNV))
-#define del_XPVNV(p)	my_safefree(p)
-
-#define new_XPVAV()	my_safemalloc(sizeof(XPVAV))
-#define del_XPVAV(p)	my_safefree(p)
-
-#define new_XPVHV()	my_safemalloc(sizeof(XPVHV))
-#define del_XPVHV(p)	my_safefree(p)
-
 #define new_XPVMG()	my_safemalloc(sizeof(XPVMG))
-#define del_XPVMG(p)	my_safefree(p)
 
-#define new_XPVGV()	my_safemalloc(sizeof(XPVGV))
 #define del_XPVGV(p)	my_safefree(p)
 
 #else /* !PURIFY */
 
 #define new_XNV()	new_body_allocated(SVt_NV)
-#define del_XNV(p)	del_body_allocated(p, SVt_NV)
-
 #define new_XPVNV()	new_body_allocated(SVt_PVNV)
-#define del_XPVNV(p)	del_body_allocated(p, SVt_PVNV)
-
-#define new_XPVAV()	new_body_allocated(SVt_PVAV)
-#define del_XPVAV(p)	del_body_allocated(p, SVt_PVAV)
-
-#define new_XPVHV()	new_body_allocated(SVt_PVHV)
-#define del_XPVHV(p)	del_body_allocated(p, SVt_PVHV)
-
 #define new_XPVMG()	new_body_allocated(SVt_PVMG)
-#define del_XPVMG(p)	del_body_allocated(p, SVt_PVMG)
 
-#define new_XPVGV()	new_body_allocated(SVt_PVGV)
 #define del_XPVGV(p)	del_body_allocated(p, SVt_PVGV)
 
 #endif /* PURIFY */
