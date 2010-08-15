@@ -748,6 +748,7 @@ rmbarker\100cpan.org                    rmb1\100cise.npl.co.uk
 +                                       robin.barker\100npl.co.uk
 +                                       rmb\100cise.npl.co.uk
 +                                       robin\100spade-ubuntu.(none)
++                                       r.m.barker\100btinternet.com
 robertmay\100cpan.org                   rob\100themayfamily.me.uk
 roberto\100keltia.freenix.fr            roberto\100eurocontrol.fr
 robin\100cpan.org                       robin\100kitsite.com
