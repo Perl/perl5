@@ -586,18 +586,30 @@ utilities:	$(MINIPERL_EXE) $(CONFIGPM) $(plextract) FORCE
 .PHONY: FORCE
 FORCE:
 	@sh -c true
-
-# We do a copy of the op.c instead of a symlink because gcc gets huffy
-# if we have a symlink forest to another disk (it complains about too many
-# levels of symbolic links, even if we have only two)
 !NO!SUBS!
 
 for file in op perl; do
-    $spitshell >>$Makefile <<!GROK!THIS!
+    if $issymlink $file.c; then
+        $spitshell >>$Makefile <<!GROK!THIS!
+
+# We do a copy of the $file.c instead of a symlink because gcc gets huffy
+# if we have a symlink forest to another disk (it complains about too many
+# levels of symbolic links, even if we have only two)
 
 ${file}mini.c: $file.c
 	\$(RMS) ${file}mini.c
 	\$(CPS) ${file}.c ${file}mini.c
+!GROK!THIS!
+    else
+        $spitshell >>$Makefile <<!GROK!THIS!
+
+${file}mini.c: $file.c
+	\$(RMS) ${file}mini.c
+	\$(LNS) ${file}.c ${file}mini.c
+!GROK!THIS!
+    fi
+
+    $spitshell >>$Makefile <<!GROK!THIS!
 
 ${file}mini\$(OBJ_EXT): ${file}mini.c
 	\$(CCCMD) \$(PLDLFLAGS) $DPERL_IS_MINIPERL $DPERL_EXTERNAL_GLOB ${file}mini.c
