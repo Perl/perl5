@@ -586,39 +586,36 @@ utilities:	$(MINIPERL_EXE) $(CONFIGPM) $(plextract) FORCE
 .PHONY: FORCE
 FORCE:
 	@sh -c true
-!NO!SUBS!
-$spitshell >>$Makefile <<!GROK!THIS!
 
 # We do a copy of the op.c instead of a symlink because gcc gets huffy
 # if we have a symlink forest to another disk (it complains about too many
 # levels of symbolic links, even if we have only two)
+!NO!SUBS!
 
-opmini.c: op.c
-	\$(RMS) opmini.c
-	\$(CPS) op.c opmini.c
+for file in op perl; do
+    $spitshell >>$Makefile <<!GROK!THIS!
 
-opmini\$(OBJ_EXT): opmini.c
-	\$(CCCMD) \$(PLDLFLAGS) $DPERL_IS_MINIPERL $DPERL_EXTERNAL_GLOB opmini.c
+${file}mini.c: $file.c
+	\$(RMS) ${file}mini.c
+	\$(CPS) ${file}.c ${file}mini.c
 
-perlmini.c: perl.c
-	\$(RMS) perlmini.c
-	\$(CPS) perl.c perlmini.c
+${file}mini\$(OBJ_EXT): ${file}mini.c
+	\$(CCCMD) \$(PLDLFLAGS) $DPERL_IS_MINIPERL $DPERL_EXTERNAL_GLOB ${file}mini.c
+!GROK!THIS!
+done
 
-perlmini\$(OBJ_EXT): perlmini.c
-	\$(CCCMD) \$(PLDLFLAGS) $DPERL_IS_MINIPERL $DPERL_EXTERNAL_GLOB perlmini.c
+$spitshell >>$Makefile <<'!NO!SUBS!'
 
-globals\$(OBJ_EXT): uudmap.h bitcount.h
+globals$(OBJ_EXT): uudmap.h bitcount.h
 
 uudmap.h: bitcount.h
 
-bitcount.h: generate_uudmap\$(HOST_EXE_EXT)
-	\$(RUN) ./generate_uudmap\$(HOST_EXE_EXT) uudmap.h bitcount.h
+bitcount.h: generate_uudmap$(HOST_EXE_EXT)
+	$(RUN) ./generate_uudmap$(HOST_EXE_EXT) uudmap.h bitcount.h
 
-generate_uudmap\$(HOST_EXE_EXT): generate_uudmap\$(OBJ_EXT)
-	\$(CC) -o generate_uudmap\$(EXE_EXT) \$(LDFLAGS) generate_uudmap\$(OBJ_EXT) \$(libs)
+generate_uudmap$(HOST_EXE_EXT): generate_uudmap$(OBJ_EXT)
+	$(CC) -o generate_uudmap$(EXE_EXT) $(LDFLAGS) generate_uudmap$(OBJ_EXT) $(libs)
 
-!GROK!THIS!
-$spitshell >>$Makefile <<'!NO!SUBS!'
 miniperlmain$(OBJ_EXT): miniperlmain.c patchlevel.h
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
