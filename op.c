@@ -104,6 +104,7 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 #include "keywords.h"
 
 #define CALL_PEEP(o) PL_peepp(aTHX_ o)
+#define CALL_RPEEP(o) PL_rpeepp(aTHX_ o)
 #define CALL_OPFREEHOOK(o) if (PL_opfreehook) PL_opfreehook(aTHX_ o)
 
 #if defined(PL_OP_SLAB_ALLOC)
@@ -2668,7 +2669,7 @@ S_gen_constant_list(pTHX_ register OP *o)
     o->op_ppaddr = PL_ppaddr[OP_RV2AV];
     o->op_flags &= ~OPf_REF;	/* treat \(1..2) like an ordinary list */
     o->op_flags |= OPf_PARENS;	/* and flatten \(1..2,3) */
-    o->op_opt = 0;		/* needs to be revisited in peep() */
+    o->op_opt = 0;		/* needs to be revisited in rpeep() */
     curop = ((UNOP*)o)->op_first;
     ((UNOP*)o)->op_first = newSVOP(OP_CONST, 0, SvREFCNT_inc_NN(*PL_stack_sp--));
 #ifdef PERL_MAD
@@ -8843,7 +8844,7 @@ S_is_inplace_av(pTHX_ OP *o, OP *oright) {
  * peep() is called */
 
 void
-Perl_peep(pTHX_ register OP *o)
+Perl_rpeep(pTHX_ register OP *o)
 {
     dVAR;
     register OP* oldop = NULL;
@@ -8936,7 +8937,7 @@ Perl_peep(pTHX_ register OP *o)
 		PL_curcop = ((COP*)o);
 	    }
 	    /* XXX: We avoid setting op_seq here to prevent later calls
-	       to peep() from mistakenly concluding that optimisation
+	       to rpeep() from mistakenly concluding that optimisation
 	       has already occurred. This doesn't fix the real problem,
 	       though (See 20010220.007). AMS 20010719 */
 	    /* op_seq functionality is now replaced by op_opt */
@@ -9042,7 +9043,7 @@ Perl_peep(pTHX_ register OP *o)
             sop = fop->op_sibling;
 	    while (cLOGOP->op_other->op_type == OP_NULL)
 		cLOGOP->op_other = cLOGOP->op_other->op_next;
-	    peep(cLOGOP->op_other); /* Recursive calls are not replaced by fptr calls */
+	    CALL_RPEEP(cLOGOP->op_other);
           
           stitch_keys:	    
 	    o->op_opt = 1;
@@ -9093,20 +9094,20 @@ Perl_peep(pTHX_ register OP *o)
 	case OP_ONCE:
 	    while (cLOGOP->op_other->op_type == OP_NULL)
 		cLOGOP->op_other = cLOGOP->op_other->op_next;
-	    peep(cLOGOP->op_other); /* Recursive calls are not replaced by fptr calls */
+	    CALL_RPEEP(cLOGOP->op_other);
 	    break;
 
 	case OP_ENTERLOOP:
 	case OP_ENTERITER:
 	    while (cLOOP->op_redoop->op_type == OP_NULL)
 		cLOOP->op_redoop = cLOOP->op_redoop->op_next;
-	    peep(cLOOP->op_redoop);
+	    CALL_RPEEP(cLOOP->op_redoop);
 	    while (cLOOP->op_nextop->op_type == OP_NULL)
 		cLOOP->op_nextop = cLOOP->op_nextop->op_next;
-	    peep(cLOOP->op_nextop);
+	    CALL_RPEEP(cLOOP->op_nextop);
 	    while (cLOOP->op_lastop->op_type == OP_NULL)
 		cLOOP->op_lastop = cLOOP->op_lastop->op_next;
-	    peep(cLOOP->op_lastop);
+	    CALL_RPEEP(cLOOP->op_lastop);
 	    break;
 
 	case OP_SUBST:
@@ -9115,7 +9116,7 @@ Perl_peep(pTHX_ register OP *o)
 		   cPMOP->op_pmstashstartu.op_pmreplstart->op_type == OP_NULL)
 		cPMOP->op_pmstashstartu.op_pmreplstart
 		    = cPMOP->op_pmstashstartu.op_pmreplstart->op_next;
-	    peep(cPMOP->op_pmstashstartu.op_pmreplstart);
+	    CALL_RPEEP(cPMOP->op_pmstashstartu.op_pmreplstart);
 	    break;
 
 	case OP_EXEC:
@@ -9489,6 +9490,12 @@ Perl_peep(pTHX_ register OP *o)
 	oldop = o;
     }
     LEAVE;
+}
+
+void
+Perl_peep(pTHX_ register OP *o)
+{
+    CALL_RPEEP(o);
 }
 
 const char*

@@ -12740,6 +12740,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* Pluggable optimizer */
     PL_peepp		= proto_perl->Ipeepp;
+    PL_rpeepp		= proto_perl->Irpeepp;
     /* op_free() hook */
     PL_opfreehook	= proto_perl->Iopfreehook;
 

@@ -2572,6 +2572,7 @@ STATIC void	S_pad_reset(pTHX);
 #endif
 PERL_CALLCONV void	Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust);
 PERL_CALLCONV void	Perl_peep(pTHX_ OP* o);
+PERL_CALLCONV void	Perl_rpeep(pTHX_ OP* o);
 PERL_CALLCONV PerlIO*	Perl_start_glob(pTHX_ SV *tmpglob, IO *io)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
