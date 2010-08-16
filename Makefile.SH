@@ -598,14 +598,14 @@ opmini.c: op.c
 	\$(CPS) op.c opmini.c
 
 opmini\$(OBJ_EXT): opmini.c
-	\$(CCCMD) \$(PLDLFLAGS) $DPERL_EXTERNAL_GLOB opmini.c
+	\$(CCCMD) \$(PLDLFLAGS) $DPERL_IS_MINIPERL $DPERL_EXTERNAL_GLOB opmini.c
 
 perlmini.c: perl.c
 	\$(RMS) perlmini.c
 	\$(CPS) perl.c perlmini.c
 
 perlmini\$(OBJ_EXT): perlmini.c
-	\$(CCCMD) \$(PLDLFLAGS) $DPERL_IS_MINIPERL perlmini.c
+	\$(CCCMD) \$(PLDLFLAGS) $DPERL_IS_MINIPERL $DPERL_EXTERNAL_GLOB perlmini.c
 
 globals\$(OBJ_EXT): uudmap.h bitcount.h
 

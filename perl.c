@@ -1664,6 +1664,9 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef PERL_DONT_CREATE_GVSV
 			     " PERL_DONT_CREATE_GVSV"
 #  endif
+#  ifdef PERL_EXTERNAL_GLOB
+			     " PERL_EXTERNAL_GLOB"
+#  endif
 #  ifdef PERL_IS_MINIPERL
 			     " PERL_IS_MINIPERL"
 #  endif
