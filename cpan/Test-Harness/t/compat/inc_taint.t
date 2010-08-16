@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-  use lib 't/lib';
+    use lib 't/lib';
 }
 
 use strict;
@@ -26,11 +26,8 @@ sub _all_ok {
 
     tie *NULL, 'Dev::Null' or die $!;
     select NULL;
-    my ( $tot, $failed ) = Test::Harness::execute_tests(
-        tests => [
-            't/sample-tests/inc_taint'
-        ]
-    );
+    my ( $tot, $failed )
+      = Test::Harness::execute_tests( tests => ['t/sample-tests/inc_taint'] );
     select STDOUT;
 
     ok( _all_ok($tot), 'tests with taint on preserve @INC' );

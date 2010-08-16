@@ -17,11 +17,11 @@ App::Prove - Implements the C<prove> command.
 
 =head1 VERSION
 
-Version 3.21
+Version 3.22
 
 =cut
 
-$VERSION = '3.21';
+$VERSION = '3.22';
 
 =head1 DESCRIPTION
 
@@ -58,8 +58,8 @@ BEGIN {
       formatter harness includes modules plugins jobs lib merge parse quiet
       really_quiet recurse backwards shuffle taint_fail taint_warn timer
       verbose warnings_fail warnings_warn show_help show_man show_version
-      state_class test_args state dry extension ignore_exit rules state_manager
-      normalize sources
+      state_class test_args state dry extensions ignore_exit rules state_manager
+      normalize sources tapversion trap
     );
     __PACKAGE__->mk_methods(@ATTR);
 }
@@ -203,46 +203,48 @@ sub process_args {
 
         # Don't add coderefs to GetOptions
         GetOptions(
-            'v|verbose'   => \$self->{verbose},
-            'f|failures'  => \$self->{failures},
-            'o|comments'  => \$self->{comments},
-            'l|lib'       => \$self->{lib},
-            'b|blib'      => \$self->{blib},
-            's|shuffle'   => \$self->{shuffle},
-            'color!'      => \$self->{color},
-            'colour!'     => \$self->{color},
-            'count!'      => \$self->{show_count},
-            'c'           => \$self->{color},
-            'D|dry'       => \$self->{dry},
-            'ext=s'       => \$self->{extension},
-            'harness=s'   => \$self->{harness},
-            'ignore-exit' => \$self->{ignore_exit},
-            'source=s@'   => $self->{sources},
-            'formatter=s' => \$self->{formatter},
-            'r|recurse'   => \$self->{recurse},
-            'reverse'     => \$self->{backwards},
-            'p|parse'     => \$self->{parse},
-            'q|quiet'     => \$self->{quiet},
-            'Q|QUIET'     => \$self->{really_quiet},
-            'e|exec=s'    => \$self->{exec},
-            'm|merge'     => \$self->{merge},
-            'I=s@'        => $self->{includes},
-            'M=s@'        => $self->{modules},
-            'P=s@'        => $self->{plugins},
-            'state=s@'    => $self->{state},
-            'directives'  => \$self->{directives},
-            'h|help|?'    => \$self->{show_help},
-            'H|man'       => \$self->{show_man},
-            'V|version'   => \$self->{show_version},
-            'a|archive=s' => \$self->{archive},
-            'j|jobs=i'    => \$self->{jobs},
-            'timer'       => \$self->{timer},
-            'T'           => \$self->{taint_fail},
-            't'           => \$self->{taint_warn},
-            'W'           => \$self->{warnings_fail},
-            'w'           => \$self->{warnings_warn},
-            'normalize'   => \$self->{normalize},
-            'rules=s@'    => $self->{rules},
+            'v|verbose'    => \$self->{verbose},
+            'f|failures'   => \$self->{failures},
+            'o|comments'   => \$self->{comments},
+            'l|lib'        => \$self->{lib},
+            'b|blib'       => \$self->{blib},
+            's|shuffle'    => \$self->{shuffle},
+            'color!'       => \$self->{color},
+            'colour!'      => \$self->{color},
+            'count!'       => \$self->{show_count},
+            'c'            => \$self->{color},
+            'D|dry'        => \$self->{dry},
+            'ext=s@'       => \$self->{extensions},
+            'harness=s'    => \$self->{harness},
+            'ignore-exit'  => \$self->{ignore_exit},
+            'source=s@'    => $self->{sources},
+            'formatter=s'  => \$self->{formatter},
+            'r|recurse'    => \$self->{recurse},
+            'reverse'      => \$self->{backwards},
+            'p|parse'      => \$self->{parse},
+            'q|quiet'      => \$self->{quiet},
+            'Q|QUIET'      => \$self->{really_quiet},
+            'e|exec=s'     => \$self->{exec},
+            'm|merge'      => \$self->{merge},
+            'I=s@'         => $self->{includes},
+            'M=s@'         => $self->{modules},
+            'P=s@'         => $self->{plugins},
+            'state=s@'     => $self->{state},
+            'directives'   => \$self->{directives},
+            'h|help|?'     => \$self->{show_help},
+            'H|man'        => \$self->{show_man},
+            'V|version'    => \$self->{show_version},
+            'a|archive=s'  => \$self->{archive},
+            'j|jobs=i'     => \$self->{jobs},
+            'timer'        => \$self->{timer},
+            'T'            => \$self->{taint_fail},
+            't'            => \$self->{taint_warn},
+            'W'            => \$self->{warnings_fail},
+            'w'            => \$self->{warnings_warn},
+            'normalize'    => \$self->{normalize},
+            'rules=s@'     => $self->{rules},
+            'tapversion=s' => \$self->{tapversion},
+            'trap'         => \$self->{trap},
         ) or croak('Unable to continue');
 
         # Stash the remainder of argv for later
@@ -285,6 +287,8 @@ sub _get_args {
     my $self = shift;
 
     my %args;
+
+    $args{trap} = 1 if $self->trap;
 
     if ( defined $self->color ? $self->color : $self->_color_default ) {
         $args{color} = 1;
@@ -357,6 +361,8 @@ sub _get_args {
     $args{exec} = [ split( /\s+/, $self->exec ) ]
       if ( defined( $self->exec ) );
 
+    $args{version} = $self->tapversion if defined( $self->tapversion );
+
     if ( defined( my $test_args = $self->test_args ) ) {
         $args{test_args} = $test_args;
     }
@@ -428,14 +434,24 @@ sub _parse_source {
     my %config;
     Getopt::Long::GetOptions(
         "$opt_name-option=s%" => sub {
-            my ( undef, $k, $v ) = @_;
-            if ( exists $config{$k} ) {
-                $config{$k} = [ $config{$k} ]
-                  unless ref $config{$k} eq 'ARRAY';
-                push @{ $config{$k} } => $v;
-            }
-            else {
-                $config{$k} = $v;
+            my ( $name, $k, $v ) = @_;
+            if ($v =~ /(?<!\\)=/) {
+                # It's a hash option.
+                croak "Option $name must be consistently used as a hash"
+                    if exists $config{$k} && ref $config{$k} ne 'HASH';
+                $config{$k} ||= {};
+                my ($hk, $hv) = split /(?<!\\)=/, $v, 2;
+                $config{$k}{$hk} = $hv;
+            } else {
+                $v =~ s/\\=/=/g;
+                if ( exists $config{$k} ) {
+                    $config{$k} = [ $config{$k} ]
+                        unless ref $config{$k} eq 'ARRAY';
+                    push @{ $config{$k} } => $v;
+                }
+                else {
+                    $config{$k} = $v;
+                }
             }
         }
     );
@@ -493,8 +509,8 @@ sub _get_tests {
     my $self = shift;
 
     my $state = $self->state_manager;
-    my $ext   = $self->extension;
-    $state->extension($ext) if defined $ext;
+    my $ext   = $self->extensions;
+    $state->extensions($ext) if defined $ext;
     if ( defined( my $state_switch = $self->state ) ) {
         $state->apply_switch(@$state_switch);
     }
@@ -656,7 +672,7 @@ calling C<run>.
 
 =item C<exec>
 
-=item C<extension>
+=item C<extensions>
 
 =item C<failures>
 
@@ -717,6 +733,10 @@ calling C<run>.
 =item C<warnings_fail>
 
 =item C<warnings_warn>
+
+=item C<tapversion>
+
+=item C<trap>
 
 =back
 

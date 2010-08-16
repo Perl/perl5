@@ -3,7 +3,7 @@
 use strict;
 
 BEGIN {
-  unshift @INC, 't/lib';
+    unshift @INC, 't/lib';
 }
 
 use Test::More tests => 94;

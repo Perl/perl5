@@ -1,5 +1,37 @@
 Revision history for Test-Harness
 
+3.22    2010-08-14
+        - Allow TAP::Parser to recognize a nested BAIL_OUT directive.
+        - Add brief HOWTO for creating and running pgTAP tests to
+          TAP::Parser::SourceHandler::pgTAP.
+        - Fix trailing plan + embedded YAML + TAP 13 case. Thanks to
+          Steffen Schwigon. #54518.
+        - Numerous spelling fixes. Thanks to Ville Skyttä.
+        - Add new option --tapversion for prove to set the default
+          assumed TAP version. Thanks to Steffen Schwigon.
+        - Fixed tests to run successfully under Devel::Cover. Thanks to
+          Phillipe Bruhat.
+        - Fixed injection of test args to work with general executables
+          as well as Perl scripts (#59186).
+        - Allow multiple --ext=.foo arguments to prove, to allow running
+          different types of tests in the same prove run.
+        - App::Prove::extension() is now App::Prove::extensions(), and
+          returns an arrayref of extensions, rather than a single scalar.
+          The same change has been made to App::Prove::State::extension().
+        - Preserve old semantics for test scripts with a shebang line
+          by favouring Perl as the intepreter for any file with a
+          shebang (#59457).
+        - Add --trap (summary on Ctrl-C) option to prove (#59427).
+        - Removed TAP::Parser::SourceHandler::pgTAP. Find it in its own
+          distribution on CPAN.
+        - Source options to prove can now be specified so as to be passed to
+          the source as a hash reference, eg:
+
+              prove --source XYZ --xyz-option pset=foo=bar
+
+          Ths "pset" option will be passed as a hash reference with the key
+          "foo" and the value "bar".
+
 3.21    2010-01-30
         - Add test to ensure we're not depending on a module we no
           longer ship.

@@ -17,11 +17,11 @@ TAP::Parser::SourceHandler::Executable - Stream output from an executable TAP so
 
 =head1 VERSION
 
-Version 3.21
+Version 3.22
 
 =cut
 
-$VERSION = '3.21';
+$VERSION = '3.22';
 
 =head1 SYNOPSIS
 
@@ -39,13 +39,13 @@ $VERSION = '3.21';
 
 This is an I<executable> L<TAP::Parser::SourceHandler> - it has 2 jobs:
 
-1. Figure out if the L<TAP::Parser::Source> it's given is an executable command
-(L</can_handle>).
+1. Figure out if the L<TAP::Parser::Source> it's given is an executable
+   command (L</can_handle>).
 
 2. Creates an iterator for executable commands (L</make_iterator>).
 
-Unless you're writing a plugin or subclassing L<TAP::Parser>, you probably
-won't need to use this module directly.
+Unless you're writing a plugin or subclassing L<TAP::Parser>, you
+probably won't need to use this module directly.
 
 =head1 METHODS
 
@@ -55,10 +55,10 @@ won't need to use this module directly.
 
   my $vote = $class->can_handle( $source );
 
-Only votes if $source looks like an executable file.  Casts the following votes:
+Only votes if $source looks like an executable file. Casts the
+following votes:
 
   0.9  if it's a hash with an 'exec' key
-  0.8  if it's a .sh file
   0.8  if it's a .bat file
   0.75 if it's got an execute bit set
 
@@ -72,9 +72,8 @@ sub can_handle {
         my $file = $meta->{file};
 
         # Note: we go in low so we can be out-voted
-        return 0.8 if $file->{lc_ext} eq '.sh';
         return 0.8 if $file->{lc_ext} eq '.bat';
-        return 0.7 if $file->{execute};
+        return 0.25 if $file->{execute};
     }
     elsif ( $meta->{is_hash} ) {
         return 0.9 if $src->raw->{exec};
@@ -119,6 +118,8 @@ sub make_iterator {
 
     $class->_autoflush( \*STDOUT );
     $class->_autoflush( \*STDERR );
+
+    push @command, @{ $source->test_args || [] };
 
     return $class->iterator_class->new(
         {   command => \@command,

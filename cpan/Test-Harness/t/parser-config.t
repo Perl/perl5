@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-  unshift @INC, 't/lib';
+    unshift @INC, 't/lib';
 }
 
 use strict;
@@ -14,8 +14,8 @@ use TAP::Parser;
 use_ok('MyGrammar');
 use_ok('MyResultFactory');
 
-my @t_path = ();
-my $source = catfile( @t_path, 't', 'source_tests', 'source' );
+my @t_path    = ();
+my $source    = catfile( @t_path, 't', 'source_tests', 'source' );
 my %customize = (
     grammar_class        => 'MyGrammar',
     result_factory_class => 'MyResultFactory',

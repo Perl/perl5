@@ -3,7 +3,7 @@
 use strict;
 
 BEGIN {
-  use lib 't/lib';
+    use lib 't/lib';
 }
 
 use Test::More tests => 294;
@@ -447,8 +447,7 @@ is( scalar @results, 2, "Got two lines of TAP" );
 
 # Check source => $filehandle
 can_ok $PARSER, 'new';
-open my $fh,
-  't/data/catme.1';
+open my $fh, 't/data/catme.1';
 $parser = $PARSER->new( { source => $fh } );
 isa_ok $parser, $PARSER, '... and calling it should succeed';
 ok @results = _get_results($parser), 'The parser should return results';

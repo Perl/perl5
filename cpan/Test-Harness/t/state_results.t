@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-  unshift @INC, 't/lib';
+    unshift @INC, 't/lib';
 }
 
 use strict;

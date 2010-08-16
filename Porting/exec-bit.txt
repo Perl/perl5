@@ -7,6 +7,7 @@ Configure
 configpm
 configure.gnu
 cpan/Test-Harness/t/source_tests/source.sh
+cpan/Test-Harness/t/source_tests/source_args.sh
 embed.pl
 installperl
 installman

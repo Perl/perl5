@@ -2060,7 +2060,6 @@ cpan/Test-Harness/lib/TAP/Parser/SourceHandler/Executable.pm
 cpan/Test-Harness/lib/TAP/Parser/SourceHandler/File.pm
 cpan/Test-Harness/lib/TAP/Parser/SourceHandler/Handle.pm
 cpan/Test-Harness/lib/TAP/Parser/SourceHandler/Perl.pm
-cpan/Test-Harness/lib/TAP/Parser/SourceHandler/pgTAP.pm
 cpan/Test-Harness/lib/TAP/Parser/SourceHandler.pm		A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/SourceHandler/RawTAP.pm
 cpan/Test-Harness/lib/TAP/Parser/Source.pm		A parser for Test Anything Protocol
@@ -2110,13 +2109,13 @@ cpan/Test-Harness/t/lib/MyIterator.pm			Module for testing Test::Harness
 cpan/Test-Harness/t/lib/MyPerlSourceHandler.pm				Test::Harness test
 cpan/Test-Harness/t/lib/MyResultFactory.pm		Module for testing Test::Harness
 cpan/Test-Harness/t/lib/MyResult.pm			Module for testing Test::Harness
-cpan/Test-Harness/t/lib/MyShebangger.pm				Test::Harness test
 cpan/Test-Harness/t/lib/MySourceHandler.pm				Test::Harness test
 cpan/Test-Harness/t/lib/NoFork.pm			Module for testing Test::Harness
 cpan/Test-Harness/t/lib/NOP.pm				Module for testing Test::Harness
 cpan/Test-Harness/t/lib/TAP/Harness/TestSubclass.pm
 cpan/Test-Harness/t/lib/TAP/Parser/SubclassTest.pm	Module for testing Test::Harness
 cpan/Test-Harness/t/multiplexer.t			Test::Harness test
+cpan/Test-Harness/t/nested.t				Test::Harness test
 cpan/Test-Harness/t/nofork-mux.t			Test::Harness test
 cpan/Test-Harness/t/nofork.t				Test::Harness test
 cpan/Test-Harness/t/object.t				Test::Harness test
@@ -2131,6 +2130,7 @@ cpan/Test-Harness/t/proverc/emptyexec			Test data for Test::Harness
 cpan/Test-Harness/t/proverc.t				Test::Harness test
 cpan/Test-Harness/t/proverun.t				Test::Harness test
 cpan/Test-Harness/t/prove.t				Test::Harness test
+cpan/Test-Harness/t/proveversion.t				Test::Harness test
 cpan/Test-Harness/t/regression.t			Test::Harness test
 cpan/Test-Harness/t/results.t				Test::Harness test
 cpan/Test-Harness/t/sample-tests/bailout		Test data for Test::Harness
@@ -2167,6 +2167,7 @@ cpan/Test-Harness/t/sample-tests/shbang_misparse	Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/simple			Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/simple_fail		Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/simple_yaml		Test data for Test::Harness
+cpan/Test-Harness/t/sample-tests/simple_yaml_missing_version13		Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/skip			Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/skipall		Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/skipall_nomsg		Test data for Test::Harness
@@ -2187,6 +2188,7 @@ cpan/Test-Harness/t/sample-tests/version_late		Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/version_old		Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/vms_nit		Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/with_comments		Test data for Test::Harness
+cpan/Test-Harness/t/sample-tests/yaml_late_plan		Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/zero_valid		Test data for Test::Harness
 cpan/Test-Harness/t/scheduler.t				Test::Harness test
 cpan/Test-Harness/t/source_handler.t				Test::Harness test
@@ -2196,10 +2198,10 @@ cpan/Test-Harness/t/source_tests/harness_badtap		Test data for Test::Harness
 cpan/Test-Harness/t/source_tests/harness_complain	Test data for Test::Harness
 cpan/Test-Harness/t/source_tests/harness_directives	Test data for Test::Harness
 cpan/Test-Harness/t/source_tests/harness_failure	Test data for Test::Harness
-cpan/Test-Harness/t/source_tests/psql				Test::Harness test
 cpan/Test-Harness/t/source_tests/psql.bat				Test::Harness test
 cpan/Test-Harness/t/source_tests/source			Test data for Test::Harness
 cpan/Test-Harness/t/source_tests/source.1				Test::Harness test
+cpan/Test-Harness/t/source_tests/source_args.sh				Test::Harness test
 cpan/Test-Harness/t/source_tests/source.bat				Test::Harness test
 cpan/Test-Harness/t/source_tests/source.pl				Test::Harness test
 cpan/Test-Harness/t/source_tests/source.sh				Test::Harness test

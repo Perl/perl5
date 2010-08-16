@@ -226,7 +226,8 @@ document:
   use base qw( TAP::Harness ); use YAML;
 
   sub summary {
-    my ( $self, $aggregate ) = @_; print Dump( $aggregate );
+    my ( $self, $aggregate ) = @_; 
+    print Dump( $aggregate );
     $self->SUPER::summary( $aggregate );
   }
 
@@ -261,8 +262,8 @@ myprove:
 
   my $app = App::Prove->new;
 
-  # Use custom TAP::Harness subclass $app->harness( 'My::TAP::Harness'
-  );
+  # Use custom TAP::Harness subclass
+  $app->harness( 'My::TAP::Harness' );
 
   $app->process_args( @ARGV ); exit( $app->run ? 0 : 1 );
 

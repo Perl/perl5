@@ -14,11 +14,11 @@ TAP::Formatter::Console - Harness output delegate for default console output
 
 =head1 VERSION
 
-Version 3.21
+Version 3.22
 
 =cut
 
-$VERSION = '3.21';
+$VERSION = '3.22';
 
 =head1 DESCRIPTION
 

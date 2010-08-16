@@ -1,17 +1,16 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-   unshift @INC, 't/lib';
+    unshift @INC, 't/lib';
 }
 
 use strict;
 
-use Test::More tests => 123;
+use Test::More tests => 79;
 
 use IO::File;
 use IO::Handle;
 use File::Spec;
-use MyShebangger;
 
 use TAP::Parser::Source;
 use TAP::Parser::SourceHandler;
@@ -28,7 +27,8 @@ my $dir = File::Spec->catdir(
 my $perl = $^X;
 
 my %file = map { $_ => File::Spec->catfile( $dir, $_ ) }
-  qw( source source.1 source.bat source.pl source.sh source.t source.tap );
+  qw( source source.1 source.bat source.pl source.sh source_args.sh source.t
+      source.tap );
 
 # Abstract base class tests
 {
@@ -60,7 +60,7 @@ my %file = map { $_ => File::Spec->catfile( $dir, $_ ) }
                     is_file => 1,
                     file    => { lc_ext => '.sh' }
                 },
-                vote => 0.8,
+                vote => 0,
             },
             {   name => '.bat',
                 meta => {
@@ -74,7 +74,7 @@ my %file = map { $_ => File::Spec->catfile( $dir, $_ ) }
                     is_file => 1,
                     file    => { lc_ext => '', execute => 1 }
                 },
-                vote => 0.7,
+                vote => 0.25,
             },
             {   name => 'exec hash',
                 raw  => { exec => 'foo' },
@@ -83,9 +83,12 @@ my %file = map { $_ => File::Spec->catfile( $dir, $_ ) }
             },
         ],
         make_iterator => [
-            {   name   => "valid executable",
-                raw    => [ $perl, ($ENV{PERL_CORE} ? '-I../../lib' : ()), '-It/lib', '-T', $file{source} ],
-                iclass => 'TAP::Parser::Iterator::Process',
+            {   name => "valid executable",
+                raw  => [
+                    $perl, ( $ENV{PERL_CORE} ? '-I../../lib' : () ),
+                    '-It/lib', '-T', $file{source}
+                ],
+                iclass        => 'TAP::Parser::Iterator::Process',
                 output        => [ '1..1', 'ok 1 - source' ],
                 assemble_meta => 1,
             },
@@ -103,6 +106,15 @@ my %file = map { $_ => File::Spec->catfile( $dir, $_ ) }
                 skip_reason => 'no /bin/sh, /bin/echo',
                 iclass      => 'TAP::Parser::Iterator::Process',
                 output        => [ '1..1', 'ok 1 - source.sh' ],
+                assemble_meta => 1,
+            },
+            {   name        => $file{'source_args.sh'},
+                raw         => { exec => [ $file{'source_args.sh'} ] },
+                test_args   => [ 'foo' ],
+                skip        => $HAS_SH && $HAS_ECHO ? 0 : 1,
+                skip_reason => 'no /bin/sh, /bin/echo',
+                iclass      => 'TAP::Parser::Iterator::Process',
+                output        => [ '1..1', 'ok 1 - source_args.sh foo' ],
                 assemble_meta => 1,
             },
             {   name        => $file{'source.bat'},
@@ -304,111 +316,6 @@ my %file = map { $_ => File::Spec->catfile( $dir, $_ ) }
     test_handler( $class, $tests );
 }
 
-# pgTAP source tests
-{
-    my $class = 'TAP::Parser::SourceHandler::pgTAP';
-    my $test  = File::Spec->catfile( $dir, 'source.t' );
-    my $psql  = File::Spec->catfile( $dir, 'psql' );
-    if ( $^O eq 'MSWin32' ) {
-        $psql .= '.bat';
-    }
-    else {
-        $psql = MyShebangger::make_perl_executable($psql);
-    }
-    my @command = qw(
-      --no-psqlrc
-      --no-align
-      --quiet
-      --pset pager=
-      --pset tuples_only=true
-      --set ON_ERROR_ROLLBACK=1
-      --set ON_ERROR_STOP=1
-    );
-    my $tests = {
-        default_vote => 0,
-        can_handle   => [
-            {   name => '.pg',
-                meta => {
-                    is_file => 1,
-                    file    => { lc_ext => '.pg' }
-                },
-                config => {},
-                vote   => 0.9,
-            },
-            {   name => '.sql',
-                meta => {
-                    is_file => 1,
-                    file    => { lc_ext => '.sql' }
-                },
-                config => {},
-                vote   => 0.8,
-            },
-            {   name => '.s',
-                meta => {
-                    is_file => 1,
-                    file    => { lc_ext => '.s' }
-                },
-                config => {},
-                vote   => 0.75,
-            },
-            {   name => 'config_suffix',
-                meta => {
-                    is_file => 1,
-                    file    => { lc_ext => '.foo' }
-                },
-                config => { pgTAP => { suffix => '.foo' } },
-                vote   => 1,
-            },
-            {   name => 'not_file',
-                meta => {
-                    is_file => 0,
-                },
-                vote => 0,
-            },
-        ],
-        make_iterator => [
-            {   name   => 'psql',
-                raw    => \$test,
-                config => { pgTAP => { psql => $psql } },
-                iclass => 'TAP::Parser::Iterator::Process',
-                output => [ @command, '--file', $test ],
-            },
-            {   name   => 'config',
-                raw    => $test,
-                config => {
-                    pgTAP => {
-                        psql     => $psql,
-                        username => 'who',
-                        host     => 'f',
-                        port     => 2,
-                        dbname   => 'fred',
-                    }
-                },
-                iclass => 'TAP::Parser::Iterator::Process',
-                output => [
-                    @command,
-                    qw(--username who --host f --port 2 --dbname fred --file),
-                    $test
-                ],
-            },
-            {   name   => 'error',
-                raw    => 'blah.pg',
-                iclass => 'TAP::Parser::Iterator::Process',
-                error  => qr/^No such file or directory: blah[.]pg/,
-            },
-            {   name   => 'undef error',
-                raw    => undef,
-                iclass => 'TAP::Parser::Iterator::Process',
-                error  => qr/^No such file or directory: /,
-            },
-        ],
-    };
-
-    test_handler( $class, $tests );
-}
-
-exit;
-
 ###############################################################################
 # helper sub
 
@@ -451,6 +358,7 @@ sub test_handler {
 
             my $source = TAP::Parser::Source->new;
             $source->raw( $test->{raw} )       if $test->{raw};
+            $source->test_args( $test->{test_args} ) if $test->{test_args};
             $source->meta( $test->{meta} )     if $test->{meta};
             $source->config( $test->{config} ) if $test->{config};
             $source->assemble_meta             if $test->{assemble_meta};

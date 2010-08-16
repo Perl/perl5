@@ -24,11 +24,11 @@ TAP::Parser - Parse L<TAP|Test::Harness::TAP> output
 
 =head1 VERSION
 
-Version 3.21
+Version 3.22
 
 =cut
 
-$VERSION = '3.21';
+$VERSION = '3.22';
 
 my $DEFAULT_TAP_VERSION = 12;
 my $MAX_TAP_VERSION     = 13;
@@ -370,9 +370,7 @@ sub make_result           { shift->result_factory_class->make_result(@_); }
     my %initialize = (
         version       => $DEFAULT_TAP_VERSION,
         plan          => '',                    # the test plan (e.g., 1..3)
-        tap           => '',                    # the TAP
         tests_run     => 0,                     # actual current test numbers
-        results       => [],                    # TAP parser results
         skipped       => [],                    #
         todo          => [],                    #
         passed        => [],                    #
@@ -425,6 +423,7 @@ sub make_result           { shift->result_factory_class->make_result(@_); }
         my $iterator = delete $args{iterator};
         $iterator ||= delete $args{stream};    # deprecated
         my $tap         = delete $args{tap};
+        my $version     = delete $args{version};
         my $raw_source  = delete $args{source};
         my $sources     = delete $args{sources};
         my $exec        = delete $args{exec};
@@ -453,7 +452,7 @@ sub make_result           { shift->result_factory_class->make_result(@_); }
         }
         elsif ($exec) {
             $type = 'exec ' . $exec->[0];
-            $source->raw( { exec => [ @$exec, @$test_args ] } );
+            $source->raw( { exec => $exec } );
         }
         elsif ($raw_source) {
             $type = 'source ' . ref($raw_source) || $raw_source;
@@ -479,6 +478,7 @@ sub make_result           { shift->result_factory_class->make_result(@_); }
             $self->{$k} = 'ARRAY' eq ref $v ? [] : $v;
         }
 
+        $self->version($version) if $version;
         $self->_iterator($iterator);
         $self->_spool($spool);
         $self->ignore_exit($ignore_exit);
@@ -639,7 +639,7 @@ C<$result> object.
 Returns a list of pragmas each of which is a + or - followed by the
 pragma name.
  
-=head2 C<commment> methods
+=head2 C<comment> methods
 
  if ( $result->is_comment ) { ... }
 
@@ -716,7 +716,7 @@ line.
   my $explanation = $result->explanation;
 
 If a test had either a C<TODO> or C<SKIP> directive, this method will return
-the accompanying explantion, if present.
+the accompanying explanation, if present.
 
   not ok 17 - 'Pigs can fly' # TODO not enough acid
 
@@ -1044,7 +1044,7 @@ an executable, it returns the exit status of the executable.
 
 Once the parser is done, this will return the wait status.  If the parser ran
 an executable, it returns the wait status of the executable.  Otherwise, this
-mererely returns the C<exit> status.
+merely returns the C<exit> status.
 
 =head2 C<ignore_exit>
 
@@ -1309,7 +1309,7 @@ sub _make_state_table {
         UNPLANNED_AFTER_TEST => {
             test => { act  => sub { }, continue => 'UNPLANNED' },
             plan => { act  => sub { }, continue => 'UNPLANNED' },
-            yaml => { goto => 'PLANNED' },
+            yaml => { goto => 'UNPLANNED' },
         },
     );
 
@@ -1636,9 +1636,9 @@ passed instead.
 
 If you're looking for an EBNF grammar, see L<TAP::Parser::Grammar>.
 
-=head1 BACKWARDS COMPATABILITY
+=head1 BACKWARDS COMPATIBILITY
 
-The Perl-QA list attempted to ensure backwards compatability with
+The Perl-QA list attempted to ensure backwards compatibility with
 L<Test::Harness>.  However, there are some minor differences.
 
 =head2 Differences
@@ -1702,22 +1702,22 @@ Many C<TAP::*> classes have a I<SUBCLASSING> section to guide you.
 
 =item 3
 
-Note that C<TAP::Parser> is designed to be the central 'maker' - ie: it is
+Note that C<TAP::Parser> is designed to be the central "maker" - ie: it is
 responsible for creating most new objects in the C<TAP::Parser::*> namespace.
 
 This makes it possible for you to have a single point of configuring what
-subclasses should be used, which in turn means that in many cases you'll find
+subclasses should be used, which means that in many cases you'll find
 you only need to sub-class one of the parser's components.
 
 The exception to this rule are I<SourceHandlers> & I<Iterators>, but those are
-both created with customizeable I<IteratorFactory>.
+both created with customizable I<IteratorFactory>.
 
 =item 4
 
 By subclassing, you may end up overriding undocumented methods.  That's not
 a bad thing per se, but be forewarned that undocumented methods may change
 without warning from one release to the next - we cannot guarantee backwards
-compatability.  If any I<documented> method needs changing, it will be
+compatibility.  If any I<documented> method needs changing, it will be
 deprecated first, and changed in a later release.
 
 =back
@@ -1727,7 +1727,7 @@ deprecated first, and changed in a later release.
 =head3 Sources
 
 A TAP parser consumes input from a single I<raw source> of TAP, which could come
-from anywhere (a file, an executable, a database, an io handle, a uri, etc..).
+from anywhere (a file, an executable, a database, an IO handle, a URI, etc..).
 The source gets bundled up in a L<TAP::Parser::Source> object which gathers some
 meta data about it.  The parser then uses a L<TAP::Parser::IteratorFactory> to
 determine which L<TAP::Parser::SourceHandler> to use to turn the raw source
@@ -1753,7 +1753,7 @@ are now removed.
 A TAP parser uses I<iterators> to loop through the I<stream> of TAP read in
 from the I<source> it was given.  There are a few types of Iterators available
 by default, all sub-classes of L<TAP::Parser::Iterator>.  Choosing which
-iterator to use is the responsibility of the I<siterator factory>, though it
+iterator to use is the responsibility of the I<iterator factory>, though it
 simply delegates to the I<Source Handler> it uses.
 
 If you're writing your own L<TAP::Parser::SourceHandler>, you may need to
@@ -1791,7 +1791,7 @@ override L</make_result>.
 
 =head3 Grammar
 
-L<TAP::Parser::Grammar> is the heart of the parser - it tokenizes the TAP
+L<TAP::Parser::Grammar> is the heart of the parser.  It tokenizes the TAP
 input I<stream> and produces results.  If you need to customize its behaviour
 you should probably familiarize yourself with the source first.  Enough
 lecturing.
@@ -1802,7 +1802,7 @@ C<grammar_class> parameter.  See L</new> for more details.
 If you need to customize the objects on creation, subclass L<TAP::Parser> and
 override L</make_grammar>
 
-=head1 ACKNOWLEDGEMENTS
+=head1 ACKNOWLEDGMENTS
 
 All of the following have helped. Bug reports, patches, (im)moral
 support, or just words of encouragement have all been forthcoming.
@@ -1849,6 +1849,8 @@ support, or just words of encouragement have all been forthcoming.
 
 =item * Cosimo Streppone
 
+=item * Ville Skyttä
+
 =back
 
 =head1 AUTHORS
@@ -1868,6 +1870,8 @@ Steve Purkis <spurkis@cpan.org>
 Nicholas Clark <nick@ccl4.org>
 
 Lee Johnson <notfadeaway at btinternet dot com>
+
+Philippe Bruhat <book@cpan.org>
 
 =head1 BUGS
 

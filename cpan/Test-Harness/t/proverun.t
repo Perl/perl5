@@ -1,20 +1,19 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-  unshift @INC, 't/lib';
+    unshift @INC, 't/lib';
 }
 
 use strict;
 use Test::More;
 use File::Spec;
 use App::Prove;
+use TAP::Parser::Utils qw( split_shell );
 
 my @SCHEDULE;
 
 BEGIN {
-    my $t_dir = File::Spec->catdir(
-        't'
-    );
+    my $t_dir = File::Spec->catdir('t');
 
     # to add a new test to proverun, just list the name of the file in
     # t/sample-tests and a name for the test.  The rest is handled
@@ -47,6 +46,9 @@ BEGIN {
                         {   merge   => undef,
                             command => [
                                 'PERL',
+                                $ENV{HARNESS_PERL_SWITCHES}
+                                ? split_shell( $ENV{HARNESS_PERL_SWITCHES} )
+                                : (),
                                 $_->{file},
                             ],
                             setup    => \'CODE',

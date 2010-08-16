@@ -47,11 +47,11 @@ TAP::Formatter::Base - Base class for harness output delegates
 
 =head1 VERSION
 
-Version 3.21
+Version 3.22
 
 =cut
 
-$VERSION = '3.21';
+$VERSION = '3.22';
 
 =head1 DESCRIPTION
 
@@ -257,13 +257,15 @@ sub _output_success {
 
   $harness->summary( $aggregate );
 
-C<summary> prints the summary report after all tests are run.  The argument is
-an aggregate.
+C<summary> prints the summary report after all tests are run. The first
+argument is an aggregate to summarise. An optional second argument may
+be set to a true value to indicate that the summary is being output as a
+result of an interrupted test run.
 
 =cut
 
 sub summary {
-    my ( $self, $aggregate ) = @_;
+    my ( $self, $aggregate, $interrupted ) = @_;
 
     return if $self->silent;
 
@@ -278,6 +280,9 @@ sub summary {
     if ( $self->timer ) {
         $self->_output( $self->_format_now(), "\n" );
     }
+
+    $self->_failure_output("Test run interrupted!\n")
+      if $interrupted;
 
     # TODO: Check this condition still works when all subtests pass but
     # the exit status is nonzero

@@ -19,11 +19,11 @@ TAP::Harness - Run test scripts with statistics
 
 =head1 VERSION
 
-Version 3.21
+Version 3.22
 
 =cut
 
-$VERSION = '3.21';
+$VERSION = '3.22';
 
 $ENV{HARNESS_ACTIVE}  = 1;
 $ENV{HARNESS_VERSION} = $VERSION;
@@ -85,6 +85,8 @@ BEGIN {
         ignore_exit       => sub { shift; shift },
         rules             => sub { shift; shift },
         sources           => sub { shift; shift },
+        version           => sub { shift; shift },
+        trap              => sub { shift; shift },
     );
 
     for my $method ( sort keys %VALIDATION_FOR ) {
@@ -268,6 +270,13 @@ L<TAP::Parser::Source>, and L<TAP::Parser::IteratorFactory>.
 The name of the class to use to aggregate test results. The default is
 L<TAP::Parser::Aggregator>.
 
+=item * C<version>
+
+I<NEW to 3.22>.
+
+Assume this TAP version for L<TAP::Parser> instead of default TAP
+version 12.
+
 =item * C<formatter_class>
 
 The name of the class to use to format output. The default is
@@ -339,6 +348,11 @@ interface may change.
 =item * C<stdout>
 
 A filehandle for catching standard output.
+
+=item * C<trap>
+
+Attempt to print summary information if run is interrupted by
+SIGINT (Ctrl-C).
 
 =back
 
@@ -461,10 +475,28 @@ sub runtests {
 
     $self->_make_callback( 'before_runtests', $aggregate );
     $aggregate->start;
-    $self->aggregate_tests( $aggregate, @tests );
-    $aggregate->stop;
-    $self->summary($aggregate);
-    $self->_make_callback( 'after_runtests', $aggregate );
+    my $finish = sub {
+        my $interrupted = shift;
+        $aggregate->stop;
+        $self->summary( $aggregate, $interrupted );
+        $self->_make_callback( 'after_runtests', $aggregate );
+    };
+    my $run = sub {
+        $self->aggregate_tests( $aggregate, @tests );
+        $finish->();
+    };
+
+    if ( $self->trap ) {
+        local $SIG{INT} = sub {
+            print "\n";
+            $finish->(1);
+            exit;
+        };
+        $run->();
+    }
+    else {
+        $run->();
+    }
 
     return $aggregate;
 }
@@ -478,8 +510,8 @@ Output the summary for a L<TAP::Parser::Aggregator>.
 =cut
 
 sub summary {
-    my ( $self, $aggregate ) = @_;
-    $self->formatter->summary($aggregate);
+    my ( $self, @args ) = @_;
+    $self->formatter->summary(@args);
 }
 
 sub _after_test {
@@ -692,6 +724,7 @@ sub _get_parser_args {
     $args{spool}       = $self->_open_spool($test_prog);
     $args{merge}       = $self->merge;
     $args{ignore_exit} = $self->ignore_exit;
+    $args{version}     = $self->version if $self->version;
 
     if ( my $exec = $self->exec ) {
         $args{exec}

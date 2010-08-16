@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-  unshift @INC, 't/lib';
+    unshift @INC, 't/lib';
 }
 
 use strict;
@@ -15,8 +15,7 @@ use Test::Harness qw(execute_tests);
 # unset this global when self-testing ('testcover' and etc issue)
 local $ENV{HARNESS_PERL_SWITCHES};
 
-my $TEST_DIR
-  = 't/sample-tests';
+my $TEST_DIR = 't/sample-tests';
 
 {
 

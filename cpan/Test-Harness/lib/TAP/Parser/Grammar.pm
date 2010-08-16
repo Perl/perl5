@@ -15,11 +15,11 @@ TAP::Parser::Grammar - A grammar for the Test Anything Protocol.
 
 =head1 VERSION
 
-Version 3.21
+Version 3.22
 
 =cut
 
-$VERSION = '3.21';
+$VERSION = '3.22';
 
 =head1 SYNOPSIS
 
@@ -164,7 +164,7 @@ my %language_for;
             },
         },
         bailout => {
-            syntax  => qr/^Bail out!\s*(.*)/,
+            syntax  => qr/^\s*Bail out!\s*(.*)/,
             handler => sub {
                 my ( $self, $line ) = @_;
                 my $explanation = $1;
@@ -504,7 +504,7 @@ stream-based protocol.  In fact, it's quite legal to have an infinite stream.
 For the same reason that we don't apply regexes to streams, we're not using a
 formal grammar here.  Instead, we parse the TAP in lines.
 
-For purposes for forward compatability, any result which does not match the
+For purposes for forward compatibility, any result which does not match the
 following grammar is currently referred to as
 L<TAP::Parser::Result::Unknown>.  It is I<not> a parse error.
 

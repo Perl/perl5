@@ -46,11 +46,11 @@ Test::Harness - Run Perl standard test scripts with statistics
 
 =head1 VERSION
 
-Version 3.21
+Version 3.22
 
 =cut
 
-$VERSION = '3.21';
+$VERSION = '3.22';
 
 # Backwards compatibility for exportable variable names.
 *verbose  = *Verbose;
@@ -134,7 +134,7 @@ sub _aggregate {
     _aggregate_tests( $harness, $aggregate, @tests );
 }
 
-# Make sure the child seens all the extra junk in @INC
+# Make sure the child sees all the extra junk in @INC
 sub _apply_extra_INC {
     my $harness = shift;
 

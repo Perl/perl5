@@ -1,11 +1,10 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-  use lib 't/lib';
+    use lib 't/lib';
 }
 
 use strict;
 
 use NoFork;
-require(
-    't/multiplexer.t' );
+require('t/multiplexer.t');

@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 BEGIN {
-  unshift @INC, 't/lib';
+    unshift @INC, 't/lib';
 }
 
 use strict;
@@ -11,6 +11,8 @@ use File::Spec;
 
 use App::Prove;
 use Getopt::Long;
+
+use TAP::Parser::Utils qw( split_shell );
 
 package FakeProve;
 use vars qw( @ISA );
@@ -80,7 +82,7 @@ BEGIN {    # START PLAN
 
     # list of attributes
     @ATTR = qw(
-      archive argv blib color directives exec extension failures
+      archive argv blib color directives exec extensions failures
       formatter harness includes lib merge parse quiet really_quiet
       recurse backwards shuffle taint_fail taint_warn verbose
       warnings_fail warnings_warn
@@ -1011,7 +1013,7 @@ BEGIN {    # START PLAN
             args => {
                 argv => [qw( one two three )],
             },
-            proverc => 't/proverc/emptyexec',
+            proverc  => 't/proverc/emptyexec',
             switches => [$dummy_test],
             expect   => { exec => '' },
             runlog   => [
@@ -1083,6 +1085,34 @@ BEGIN {    # START PLAN
             ],
         },
 
+        # Specify an oddball extension
+        {   name => 'Switch --ext=.wango',
+            switches => [ '--ext=.wango' ],
+            expect => { extensions => ['.wango'] },
+            runlog => [
+                [   '_runtests',
+                    {   verbosity  => 0,
+                        show_count => 1,
+                    },
+                    'TAP::Harness',
+                ]
+            ],
+        },
+
+        # Handle multiple extensions
+        {   name => 'Switch --ext=.foo --ext=.bar',
+            switches => [ '--ext=.foo', '--ext=.bar', ],
+            expect => { extensions => ['.foo','.bar'] },
+            runlog => [
+                [   '_runtests',
+                    {   verbosity  => 0,
+                        show_count => 1,
+                    },
+                    'TAP::Harness',
+                ]
+            ],
+        },
+
         # Source handlers
         {   name     => 'Switch --source simple',
             args     => { argv => [qw( one two three )] },
@@ -1118,13 +1148,20 @@ BEGIN {    # START PLAN
                 '--source',      'File',
                 '--file-option', 'extensions=.txt',
                 '--file-option', 'extensions=.tmp',
+                '--file-option', 'hash=this=that',
+                '--file-option', 'hash=foo=bar',
+                '--file-option', 'sep=foo\\=bar',
                 $dummy_test
             ],
             expect => {
                 sources => {
                     Perl     => { foo => 'bar baz', avg => 0.278 },
                     MyCustom => {},
-                    File => { extensions => [ '.txt', '.tmp' ] },
+                    File => {
+                        extensions => [ '.txt', '.tmp' ],
+                        hash => { this => 'that', foo => 'bar'},
+                        sep => 'foo=bar',
+                    },
                 },
             },
             runlog => [
@@ -1132,7 +1169,11 @@ BEGIN {    # START PLAN
                     {   sources => {
                             Perl     => { foo => 'bar baz', avg => 0.278 },
                             MyCustom => {},
-                            File => { extensions => [ '.txt', '.tmp' ] },
+                            File => {
+                                extensions => [ '.txt', '.tmp' ],
+                                hash => { this => 'that', foo => 'bar'},
+                                sep => 'foo=bar',
+                            },
                         },
                         verbosity  => 0,
                         show_count => 1,
@@ -1583,6 +1624,11 @@ for my $test (@SCHEDULE) {
                 if ( my $extra = $test->{extra} ) {
                     $extra->($gotlog);
                 }
+
+                # adapt our expectations if HARNESS_PERL_SWITCHES is set
+                push @{ $runlog->[0][1]{switches} },
+                  split_shell( $ENV{HARNESS_PERL_SWITCHES} )
+                  if $ENV{HARNESS_PERL_SWITCHES};
 
                 unless (
                     is_deeply $gotlog, $runlog,

@@ -44,6 +44,7 @@ Boolean options:
  -p,  --parse           Show full list of TAP parse errors, if any.
       --directives      Only show results with TODO or SKIP directives.
       --timer           Print elapsed time after each test.
+      --trap            Trap Ctrl-C and print summary on interrupt.
       --normalize       Normalize TAP output in verbose output
  -T                     Enable tainting checks.
  -t                     Enable tainting warnings.
@@ -151,6 +152,11 @@ Caveat: this is a bit of a kludge. In particular note that if anything
 that appears on STDERR looks like a test result the test harness will
 get confused. Use this option only if you understand the consequences
 and can live with the risk.
+
+=head2 C<--trap>
+
+The C<--trap> option will attempt to trap SIGINT (Ctrl-C) during a test
+run and display the test summary even if the run is interrupted
 
 =head2 C<--state>
 
@@ -296,10 +302,13 @@ If you want to provide config to the source you can use:
   prove --source MyCustom \
         --source Perl --perl-option 'foo=bar baz' --perl-option avg=0.278 \
         --source File --file-option extensions=.txt --file-option extensions=.tmp t
+        --source pgTAP --pgtap-option pset=format=html --pgtap-option pset=border=2
 
 Each C<--$source-option> option must specify a key/value pair separated by an
 C<=>. If an option can take multiple values, just specify it multiple times,
-as with the C<extensions=> examples above.
+as with the C<extensions=> examples above. If the option should be a hash
+reference, specify the value as a second pair separated by a C<=>, as in the
+C<pset=> examples above (escape C<=> with a backslash).
 
 All C<--sources> are combined into a hash, and passed to L<TAP::Harness/new>'s
 C<sources> parameter.
