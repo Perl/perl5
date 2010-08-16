@@ -15,6 +15,37 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.13.4 - Lewis Carroll, "Alice's Adventures in Wonderland"
+
+`How the creatures order one about, and make one repeat lessons!' thought Alice;
+`I might as well be at school at once.' However, she got up, and began to repeat
+it, but her head was so full of the Lobster Quadrille, that she hardly knew what
+she was saying, and the words came very queer indeed:--
+
+    "'Tis the voice of the Lobster; I heard him declare,
+    "You have baked me too brown, I must sugar my hair."
+    As a duck with its eyelids, so he with his nose
+    Trims his belt and his buttons, and turns out his toes.'
+
+
+`That's different from what I used to say when I was a child,' said the Gryphon.
+
+`Well, I never heard it before,' said the Mock Turtle; `but it sounds uncommon
+nonsense.'
+
+Alice said nothing; she had sat down with her face in her hands, wondering if
+anything would ever happen in a natural way again.
+
+`I should like to have it explained,' said the Mock Turtle.
+
+`She can't explain it,' said the Gryphon hastily. `Go on with the next verse.'
+
+`But about his toes?' the Mock Turtle persisted. `How could he turn them out
+with his nose, you know?'
+
+`It's the first position in dancing.' Alice said; but was dreadfully puzzled by
+the whole thing, and longed to change the subject.
+
 =head2 v5.13.3 - Neil Gaiman and Terry Pratchett, "Good Omens"
 
 Look at Crowley, doing 110 mph on the M40 heading towards
