@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for rafl
-changelogged up to commit a98d1b3
+changelogged up to commit b474a1b
 * PERL_STATIC_INLINE might want to be mentioned
 * 5648c0a and 254f8c6 added an optimisation for backrefs. probably not worth
 mentioning
@@ -136,6 +136,12 @@ listed as an updated module in the L</Modules and Pragmata> section.
 
 [ List each deprecation as a =head2 entry ]
 
+=head2 List assignment to C<$[>
+
+After assignment to C<$[> has been deprecated and started to give warnings in
+perl version 5.12.0, this version of perl also starts to emit a warning when
+assigning to C<$[> in list context. This fixes an oversight in 5.12.0.
+
 =head1 Performance Enhancements
 
 XXX Changes which enhance performance without changing behaviour go here. There
@@ -228,6 +234,10 @@ Various issues in L<File::Spec::VMS> have been fixed.
 =item C<IO::Compress>
 
 Upgraded from version 2.027 to 2.030.
+
+=item C<Test::Harness>
+
+Upgraded from version 3.21 to 3.22.
 
 =item C<Test::Simple>
 
