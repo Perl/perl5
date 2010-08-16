@@ -26,13 +26,17 @@
    options such as usemultiplicity tend to break binary compatibility
    more often.
 
-   This is used by Configure et al to figure out 
+   This is used by Configure et al to figure out
    PERL_INC_VERSION_LIST, which lists version libraries
    to include in @INC.  See INSTALL for how this works.
+
+   Porting/bump-perl-version will automatically set these to the version of perl
+   to be released for blead releases, and to 5.X.0 for maint releases. Manually
+   changing them should not be necessary.
 */
-#define PERL_API_REVISION	5	/* Adjust manually as needed.  */
-#define PERL_API_VERSION	13	/* Adjust manually as needed.  */
-#define PERL_API_SUBVERSION	3	/* Adjust manually as needed.  */
+#define PERL_API_REVISION	5
+#define PERL_API_VERSION	13
+#define PERL_API_SUBVERSION	3
 /*
    XXX Note:  The selection of non-default Configure options, such
    as -Duselonglong may invalidate these settings.  Currently, Configure
@@ -66,8 +70,8 @@
 	   + 	,"MINE001 - my new patch"
 	     	,NULL
 	     };
-	
-	please change it to 
+
+	please change it to
 	   *** patchlevel.h.orig	<date here>
 	   --- patchlevel.h	<date here>
 	   *** 41,43 ***
@@ -75,7 +79,7 @@
 	   + 	,"MINE001 - my new patch"
 	     	,NULL
 	     };
-	
+
 	(Note changes to line numbers as well as removal of context lines.)
 	This will prevent patch from choking if someone has previously
 	applied different patches than you.
