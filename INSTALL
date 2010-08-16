@@ -2381,9 +2381,9 @@ seriously consider using a separate directory, since development
 subversions may not have all the compatibility wrinkles ironed out
 yet.
 
-=head2 Upgrading from 5.11.0 or earlier
+=head2 Upgrading from 5.13.2 or earlier
 
-B<Perl 5.13.3 is binary incompatible with Perl 5.11.1 and any earlier
+B<Perl 5.13.3 is binary incompatible with Perl 5.13.2 and any earlier
 Perl release.>  Perl modules having binary parts
 (meaning that a C compiler is used) will have to be recompiled to be
 used with 5.13.3.  If you find you do need to rebuild an extension with
