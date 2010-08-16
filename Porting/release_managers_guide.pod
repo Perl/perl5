@@ -322,6 +322,11 @@ I<You MUST SKIP this step for SNAPSHOT>
 Review and update INSTALL to account for the change in version number;
 in particular, the "Coexistence with earlier versions of perl 5" section.
 
+Be particularly careful with the section "Upgrading from 5.X.Y or earlier". For
+stable releases, this needs to refer to the last release in the previous
+development cycle. For blead releases, it needs to refer to the previous blead
+release.
+
 =item *
 
 I<You MUST SKIP this step for SNAPSHOT>
