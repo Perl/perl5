@@ -2393,7 +2393,7 @@ more detail in L<perlop/"I/O Operators">.
 Note that C<glob> splits its arguments on whitespace and treats
 each segment as separate pattern.  As such, C<glob("*.c *.h")> 
 matches all files with a F<.c> or F<.h> extension.  The expression
-C<glob(".* *")> matchs all files in the current working directory.
+C<glob(".* *")> matches all files in the current working directory.
 
 If non-empty braces are the only wildcard characters used in the
 C<glob>, no filenames are matched, but potentially many strings
