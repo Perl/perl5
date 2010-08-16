@@ -925,34 +925,19 @@ static const struct body_details bodies_by_type[] = {
       SVt_PV, FALSE, NONV, HASARENA,
       FIT_ARENA(0, sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur)) },
 
-#if 2 *PTRSIZE <= IVSIZE
     /* 12 */
     { sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur),
       copy_length(XPVIV, xiv_u) - STRUCT_OFFSET(XPV, xpv_cur),
       + STRUCT_OFFSET(XPV, xpv_cur),
       SVt_PVIV, FALSE, NONV, HASARENA,
       FIT_ARENA(0, sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur)) },
-    /* 12 */
-#else
-    { sizeof(XPVIV),
-      copy_length(XPVIV, xiv_u),
-      0,
-      SVt_PVIV, FALSE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(XPVIV)) },
-#endif
 
-#if (2 *PTRSIZE <= IVSIZE) && (2 *PTRSIZE <= NVSIZE)
     /* 20 */
     { sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur),
       copy_length(XPVNV, xnv_u) - STRUCT_OFFSET(XPV, xpv_cur),
       + STRUCT_OFFSET(XPV, xpv_cur),
       SVt_PVNV, FALSE, HADNV, HASARENA,
       FIT_ARENA(0, sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur)) },
-#else
-    /* 20 */
-    { sizeof(XPVNV), copy_length(XPVNV, xnv_u), 0, SVt_PVNV, FALSE, HADNV,
-      HASARENA, FIT_ARENA(0, sizeof(XPVNV)) },
-#endif
 
     /* 28 */
     { sizeof(XPVMG), copy_length(XPVMG, xnv_u), 0, SVt_PVMG, FALSE, HADNV,
