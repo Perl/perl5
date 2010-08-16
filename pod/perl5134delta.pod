@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for rafl
-changelogged up to commit b474a1b
+changelogged up to commit d5da2b2
 * PERL_STATIC_INLINE might want to be mentioned
 * 5648c0a and 254f8c6 added an optimisation for backrefs. probably not worth
 mentioning
@@ -252,6 +252,10 @@ Upgraded from version 0.53 to 0.56.
 
 Among other things, it is now using UCA Revision 20 (based on Unicode 5.2.0) and
 supports a couple of new locales.
+
+=item C<feature>
+
+Upgraded from version 1.17 to 1.18.
 
 =back
 
