@@ -4,7 +4,7 @@ designed to be readable as is.
 
 =head1 NAME
 
-README.aix - Perl version 5 on IBM AIX (UNIX) systems
+README.aix - Perl version 5.13.3 on IBM AIX (UNIX) systems
 
 =head1 DESCRIPTION
 
@@ -484,9 +484,5 @@ therefore in AIX 4.2 Perl is not linked against the libC_r.
 
 H.Merijn Brand <h.m.brand@xs4all.nl>
 Rainer Tammer <tammer@tammer.net>
-
-=head1 DATE
-
-Version 5.13.3 / 2010-07-20
 
 =cut
