@@ -209,10 +209,6 @@ Several memory leaks when loading XS modules were fixed.
 
 =item *
 
-A potential crash in how exceptions are propagated has been fixed.
-
-=item *
-
 C<unpack()> now handles scalar context correctly for C<%32H> and C<%32u>,
 fixing a potential crash.  C<split()> would crash because the third item
 on the stack wasn't the regular expression it expected.  C<unpack("%2H",
