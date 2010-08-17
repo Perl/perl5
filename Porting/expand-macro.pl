@@ -8,7 +8,7 @@ $Getopt::Std::STANDARD_HELP_VERSION = 1;
 my $trysource = "try.c";
 my $tryout = "try.i";
 
-getopts('fF:ekvI:', \my %opt) or pod2usage();
+getopts('fF:ekvI:X', \my %opt) or pod2usage();
 
 my($expr, @headers) = @ARGV ? splice @ARGV : "-";
 
@@ -54,13 +54,24 @@ open my $out, '>', $trysource or die "Can't open $trysource: $!";
 
 my $sentinel = "$macro expands to";
 
-print $out <<"EOF";
-#include "EXTERN.h"
-#include "perl.h"
+my %done_header;
+
+sub do_header {
+    my $header = shift;
+    return if $done_header{$header}++;
+    print $out qq{#include "$header"\n};
+}
+
+print $out <<'EOF' if $opt{X};
+/* Need to do this like this, as cflags.sh sets it for us come what may.  */
+#undef PERL_CORE
+
 EOF
 
-print $out qq{#include "$header"\n}
-    unless $header eq 'perl.h' or $header eq 'EXTERN.h';
+do_header('EXTERN.h');
+do_header('perl.h');
+do_header($header);
+do_header('XSUB.h') if $opt{X};
 
 print $out <<"EOF";
 #line 4 "$sentinel"
@@ -122,5 +133,6 @@ expand-macro.pl - expand C macros using the C preprocessor
     -k		keep them after generating (for handy inspection)
     -v		verbose
     -I <indent-opts>	passed into indent
+    -X		include "XSUB.h" (and undefine PERL_CORE)
 
 =cut
