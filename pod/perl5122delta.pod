@@ -236,7 +236,8 @@ A bug that could cause "C<Unknown error>" messages when
 
 =item *
 
-L<README.aix> has been updated with information about the XL C/C++ V11 compiler suite.
+F<README.aix> has been updated with information about the XL C/C++ V11 compiler
+suite.
 
 =back
 
