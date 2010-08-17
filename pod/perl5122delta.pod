@@ -58,8 +58,10 @@ overriding C<caller()> incorrectly.
 =item C<CPANPLUS>
 
 A patch to F<cpanp-run-perl> has been backported from CPANPLUS C<0.9004>. This
-resolves [perl #55964] and [perl #57106], both of which related to
-failures to install distributions that use C<Module::Install::DSL>.
+resolves L<[perl #55964]|http://rt.perl.org/rt3/Ticket/Display.html?id=55964>
+and L<[perl #57106]|http://rt.perl.org/rt3/Ticket/Display.html?id=57106>, both
+of which related to failures to install distributions that use
+C<Module::Install::DSL>.
 
 =item C<File::Glob>
 
@@ -220,7 +222,8 @@ C<unpack()> now handles scalar context correctly for C<%32H> and C<%32u>,
 fixing a potential crash.  C<split()> would crash because the third item
 on the stack wasn't the regular expression it expected.  C<unpack("%2H",
 ...)> would return both the unpacked result and the checksum on the stack,
-as would C<unpack("%2u", ...)>. [perl #73814]
+as would C<unpack("%2u", ...)>.
+L<[perl #73814]|http://rt.perl.org/rt3/Ticket/Display.html?id=73814>
 
 =item *
 
