@@ -12861,9 +12861,11 @@ S_unreferenced_to_tmp_stack(pTHX_ AV *const unreferenced)
 void
 Perl_clone_params_del(CLONE_PARAMS *param)
 {
-    PerlInterpreter *const was = PERL_GET_THX;
+    /* This seemingly funky ordering keeps the build with PERL_GLOBAL_STRUCT
+       happy: */
     PerlInterpreter *const to = param->new_perl;
     dTHXa(to);
+    PerlInterpreter *const was = PERL_GET_THX;
 
     PERL_ARGS_ASSERT_CLONE_PARAMS_DEL;
 
@@ -12885,6 +12887,7 @@ Perl_clone_params_del(CLONE_PARAMS *param)
 CLONE_PARAMS *
 Perl_clone_params_new(PerlInterpreter *const from, PerlInterpreter *const to)
 {
+    dVAR;
     /* Need to play this game, as newAV() can call safesysmalloc(), and that
        does a dTHX; to get the context from thread local storage.
        FIXME - under PERL_CORE Newx(), Safefree() and friends should expand to
