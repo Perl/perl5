@@ -223,7 +223,7 @@ when there are CODEREFs in C<@INC>.
 
 =item *
 
-A bug that could cause cause "C<Unknown error>" messages when
+A bug that could cause "C<Unknown error>" messages when
 "C<call_sv(code, G_EVAL)>" is called from an XS destructor has been fixed.
 
 =back
