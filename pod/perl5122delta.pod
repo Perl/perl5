@@ -188,16 +188,6 @@ Several memory leaks in L<stat()|perlfunc/"stat FILEHANDLE"> has been fixed.
 
 =back
 
-=item AIX
-
-=over 4
-
-=item *
-
-A new configure probe has been added to avoid memory alignment problems.
-
-=back
-
 =back
 
 =head1 Selected Bug Fixes
