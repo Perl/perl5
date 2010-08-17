@@ -5,7 +5,6 @@ changelogged up to commit d5da2b2
 * PERL_STATIC_INLINE might want to be mentioned
 * 5648c0a and 254f8c6 added an optimisation for backrefs. probably not worth
 mentioning
-* RT#67838 needs mentioning. e2fe06d to 2154eca
 
 =head1 NAME
 
@@ -598,6 +597,14 @@ Within signal handlers, C<$!> is now implicitly localized.
 
 L<readline|perlfunc/"readline EXPR"> now honors C<< <> >> overloading on tied
 arguments.
+
+=item *
+
+L<substr()|perlfunc/"index STR,SUBSTR,POSITION">,
+L<pos()|perlfunc/"index STR,SUBSTR,POSITION">, L<keys()|perlfunc/"keys HASH">,
+and L<vec()|perlfunc/"vec EXPR,OFFSET,BITS"> could, when used in combination
+with lvalues, result in leaking the scalar value they operate on, and cause its
+destruction to happen too late. This has now been fixed.
 
 =back
 
