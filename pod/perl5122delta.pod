@@ -179,8 +179,8 @@ as C<nosuid>.
 
 =item *
 
-F<git_version.h> will now be installed, just like on all the other
-architectures.
+F<git_version.h> is now installed on VMS. This was an oversight in v5.12.0 which
+caused some extensions to fail to build.
 
 =item *
 
@@ -257,10 +257,6 @@ are not immediately below C<$(CCHOME)>.
 =head2 VMS
 
 =over
-
-=item *
-
-F<git_version.h> is now installed on VMS. This was an oversight in v5.12.0 which caused some extensions to fail to build.
 
 =item *
 
