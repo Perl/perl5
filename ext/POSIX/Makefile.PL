@@ -18,7 +18,8 @@ WriteMakefile(
     NAME	=> 'POSIX',
     @libs,
     XSPROTOARG	=> '-noprototypes',	# XXX remove later?
-    VERSION_FROM => 'POSIX.pm',
+    VERSION_FROM => 'lib/POSIX.pm',
+    ABSTRACT_FROM => 'lib/POSIX.pod',
     realclean	=> {FILES=> 'const-c.inc const-xs.inc'},
 );
 
