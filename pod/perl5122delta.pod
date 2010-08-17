@@ -2,9 +2,6 @@
 
 =head1 NAME
 
-[ this is a template for a new perldelta file. Any text flagged as
-XXX needs to be processed before release. ]
-
 perldelta - what is new for perl v5.12.2
 
 =head1 DESCRIPTION
@@ -12,13 +9,10 @@ perldelta - what is new for perl v5.12.2
 This document describes differences between the 5.12.2 release and
 the 5.12.2 release.
 
-If you are upgrading from an earlier release such as 5.12.0, first read
-L<perl5121delta>, which describes differences between 5.12.0 and
-5.12.1.
-
-=head1 Notice
-
-XXX Any important notices here
+If you are upgrading from an earlier major version, such as 5.10.1,
+first read L<perl5120delta>, which describes differences between 5.10.1
+and 5.12.0, as well as L<perl5121delta>, which describes earlier changes
+in the 5.12 stable release series.
 
 =head1 Incompatible Changes
 
@@ -27,26 +21,10 @@ are bugs and reports are welcome.
 
 =head1 Core Enhancements
 
-XXX New core language features go here. Summarise user-visible core language
-enhancements. Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
-
-=head1 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not. These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
+Other than the bug fixes listed below, there should be no user-visible
+changes to the core language in this release.
 
 =head1 Modules and Pragmata
-
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>, which prints stub
-entries to STDOUT.  Results can be pasted in place of the '=head2' entries
-below.  A paragraph summary for important changes should then be added by hand.
-In an ideal world, dual-life modules would have a F<Changes> file that could be
-cribbed.
 
 =head2 New Modules and Pragmata
 
@@ -66,153 +44,90 @@ be enabled unintentionally.
 
 Upgraded from version 1.16 to 1.17.
 
-L<Carp> now detects incomplete L<caller()|perlfunc/"caller EXPR"> overrides and
-avoids using bogus C<@DB::args>. To provide backtraces, Carp relies on particular behaviour of the caller builtin. Carp now detects if other code has overriden this with an incomplete implementation, and modifies its backtrace accordingly. Previously incomplete overrides would cause incorrect values in backtraces (best case), or obscure fatal errors (worst case)
+L<Carp> now detects incomplete L<caller()|perlfunc/"caller EXPR">
+overrides and avoids using bogus C<@DB::args>. To provide backtraces, Carp
+relies on particular behaviour of the caller built-in. Carp now detects
+if other code has overridden this with an incomplete implementation, and
+modifies its backtrace accordingly. Previously incomplete overrides would
+cause incorrect values in backtraces (best case), or obscure fatal errors
+(worst case)
 
-This fixes certain cases of C<Bizarre copy of ARRAY> caused by modules overriding C<caller()> incorrectly.
+This fixes certain cases of C<Bizarre copy of ARRAY> caused by modules
+overriding C<caller()> incorrectly.
 
 =item C<CPANPLUS>
 
-    Backport patch from CPANPLUS-0.9004 to cpanp-run-perl This resolves RT #55964 and RT #57106 relating to the failure to install distributions that use Module::Install::DSL 
+A patch to F<cpanp-run-perl> has been backported from CPANPLUS C<0.9004>. This
+resolves [perl #55964] and [perl #57106], both of which related to
+failures to install distributions that use C<Module::Install::DSL>.
 
 =item C<File::Glob>
 
- In 5.6.2, a failure to find a CORE::GLOBAL::glob after loading File::Glob would result in a fallback to external glob via pp_glob.  Now it crashes.  The attached patch should fix this.
+A regression which caused a failure to find C<CORE::GLOBAL::glob> after
+loading C<File::Glob> to crash has been fixed.  Now, it correctly falls back
+to external globbing via C<pp_glob>.
 
 =item C<File::Copy>
 
-Resolve issue #74974: document File::Copy::copy(FILE, DIR)
+C<File::Copy::copy(FILE, DIR)> is now documented.
 
 
 =back
-
-=head2 Removed Modules and Pragmata
-
-This release does not remove any modules or pragmata.
 
 =head1 Utility Changes
 
-XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go
-here. Most of these are built within the directories F<utils> and F<x2p>.
-
-=over 4
-
-=item F<perlbug>
-
-=over 
+=over
 
 =item * 
 
-Always allow change of sender address The code that guessed a default sender address would under some circumstances not display this guess to the user with the option to change it. Specifically, if $Config{cf_me} eq {login id of the user running perlbug}.
+F<perlbug> now always gives the reporter a chance to change the email address it guesses for them.
 
 =item * 
 
--d,-v: fix uninit value warnings
-
-=back
-
-=back
-
-=head1 New Documentation
-
-XXX Changes which create B<new> files in F<pod/> go here.
-
-=over 4
-
-=item L<XXX>
-
-XXX
+F<perlbug> should no longer warn about uninitialized values when using the C<-d> and C<-v> options.
 
 =back
 
 =head1 Changes to Existing Documentation
 
-XXX Changes which significantly change existing files in F<pod/> go here.
-Any changes to F<pod/perldiag.pod> should go in L</New or Changed Diagnostics>.
-
 =over
 
 =item *
 
-Add additional notes regarding srand and forking perldoc -f srand states that typical use requires no srand() to be called.  This is true with the exception of forking where you may not want the same seed across various child processes (i.e. mod_perl).  This patch simply adds a note reminding the reader of this fact and more specifically states that srand should only be called once per *process* (instead of the previous language of once per *script*).
+The existing policy on backward-compatibility and deprecation has
+been added to L<perlpolicy>, along with definitions of terms like
+I<deprecation>.
 
 =item *
 
-Add the policy on compatibility and deprecation to perlpolicy.pod, along with definitions of terms like "deprecation"
+L<perlfunc/srand>'s usage has been clarified.
 
 =item *
 
-Attempt at improving the perlipc docs
+Perl's L<INSTALL> file has been clarified to explicitly state that Perl
+requires a C89 compliant ANSI C Compiler.
 
 =item *
 
-cautionary note about "no VERSION"
+L<IO::Socket>'s C<getsockopt()> and C<setsockopt()> have been documented.
 
 =item *
 
-Clarify Perl's L<INSTALL> file to explicitly state that Perl requires a C89 compliant ANSI C Compiler.
+F<alarm()>'s inability to interrupt blocking IO on Windows has been documented.
 
 =item *
 
-Clarify that mail to perlbug also goes to p5p
+L<Math::TrulyRandom> hasn't been updated since 1996 and has been removed
+as a recommended solution for random number generation.
 
 =item *
 
-Document IO::Socket getsockopt and setsockopt
+L<perlrun> has been updated to clarify the behaviour of octal flags to F<perl>.
 
 =item *
 
-Document that F<alarm()> on Windows cannot interrupt blocking I/O
-
-=item *
-
-Do not advertise Math::TrulyRandom, which hasn't been updated since 1996
-
-=item *
-
-* FAQ sync
-
-=item *
-
-Format perlhist consistently by maint/dev track
-
-=item *
-
-Improvements to git instructions in perlrepository.pod
-
-=item *
-
-Link to perlport/PLATFORMS from the $^O docs
-
-=item *
-
-perlrun.pod: Specify -0400 behavior All values -0400 through -0777 have the same effect, even though previously -0777 was the only one mentioned..
-
-=item *
-
-Point submitters to perlbug@perl.org, not perl5-porters@perl.org We usually want patches in RT. Patches should only go to perl5-porters if they're intended purely for discussion.
-
-=item *
-
-Spell-check fixes in ext, lib
-
-=item *
-
-To ease user confusion, document $# and $*, two special variables that were removed in earlier versions of Perl
-
-=item *
-
-Update perlhist.pod for 5.10.1-5.12.1
-
-=item *
-
-Update rsync sources in perlhack
-
-=back
-
-=head3 L<perlfaq>
-
-=over 4
+To ease user confusion, C<$#> and C<$*>, two special variables that were
+removed in earlier versions of Perl have been documented.
 
 =item *
 
@@ -222,48 +137,17 @@ L<git://github.com/briandfoy/perlfaq.git>.
 
 =back
 
-=head3 L<perlport>
-
-=over 4
-
-=item *
-
-Documented a L<limitation|perlport/alarm> of L<alarm()|perlfunc/"alarm SECONDS">
-on Win32.
-
-=back
-
-=head3 L<perlvar>
-
-=over 4
-
-=item *
-
-L<$#|perlvar/"$#"> and L<$*|perlvar/"$*"> have been documented as removed.
-
-=back
-
-=head1 Performance Enhancements
-
-XXX Changes which enhance performance without changing behaviour go here. There
-may well be none in a stable release.
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Installation and Configuration Improvements
-
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.
 
 =head2 Configuration improvements
 
-XXX
+=over
+
+=item *
+
+The C<d_u32align> configuration probe on ARM has been fixed.
+
+=back
 
 =head2 Compilation improvements
 
@@ -271,15 +155,11 @@ XXX
 
 =item *
 
-    Fix clang "incompatible operand types" error in ternary expressions.
+An "C<incompatible operand types>" error in ternary expressions when building with C<clang> has been fixed.
 
 =item *
 
- Fix d_u32align probe on ARM
-
-=item *
-
-    Skip suid File::Copy tests on a nosuid partition.  Perl builds without errors in a nosuid /tmp with this patch.
+Perl now skips setuid C<File::Copy> tests on partitions it detects to be mounted as C<nosuid>.
 
 =back
 
@@ -316,22 +196,15 @@ A new configure probe has been added to avoid memory alignment problems.
 
 =head1 Selected Bug Fixes
 
-XXX Important bug fixes in the core language are summarised here.
-Bug fixes in files in F<ext/> and F<lib/> are best summarised in
-L</Modules and Pragmata>.
-
 =over 4
 
 =item *
 
 A possible segfault in the C<T_PRTOBJ> default typemap has been fixed.
 
-
-
 =item *
 
-Fixed possible memory leak when using L<caller()|perlfunc/"caller EXPR"> to set
-C<@DB::args>.
+A possible memory leak when using L<caller()|perlfunc/"caller EXPR"> to set C<@DB::args>.
 
 =item *
 
@@ -343,102 +216,33 @@ A potential crash in how exceptions are propagated has been fixed.
 
 =item *
 
-unpack() didn't handle scalar context correctly for %32H and %32u split() would crash because the third item on the stack wasn't the regular expression it expected.  unpack("%2H", ...) would return both the unpacked result and the checksum on the stack, similarly for unpack("%2u", ...). [perl #73814]
-
-
-=item *
-
-In pp_require, with code refs in @INC, avoid using memory after free().
-
-=item *
-
-Save the popped cx->blk_eval.old_namesv before calling LEAVE It's fine to still refer to cx members between POPEVAL and LEAVE, but there are a few places where the namesv is read after LEAVE happens. This is bad because LEAVE can call arbitrary code ; in particular, it can call a destructor that does call_sv(cv, G_EVAL), in which case the old eval context cx gets overwritten by the new one and cx->blk_eval.old_namesv points to garbage.
-
-
-
-=back
-
-=head1 New or Changed Diagnostics
-
-XXX New or changed warnings emitted by the core's C<C> code go here.
-
-=over 4
-
-=item C<XXX>
-
-XXX
-
-=back
-
-=head1 Changed Internals
-
-XXX Changes which affect the interface available to C<XS> code go here.
-
-=over 4
+C<unpack()> now handles scalar context correctly for C<%32H> and C<%32u>,
+fixing a potential crash.  C<split()> would crash because the third item
+on the stack wasn't the regular expression it expected.  C<unpack("%2H",
+...)> would return both the unpacked result and the checksum on the stack,
+as would C<unpack("%2u", ...)>. [perl #73814]
 
 =item *
 
-XXX
-
-=back
-
-=head1 New Tests
-
-XXX Changes which create B<new> files in F<t/> go here. Changes to
-existing files in F<t/> aren't worth summarising, although the bugs that
-they represent may be.
-
-=over 4
-
-=item F<XXX>
-
-XXX
-
-=back
-
-=head1 Known Problems
-
-XXX Descriptions of platform agnostic bugs we know we can't fix go here. Any
-tests that had to be C<TODO>ed for the release would be noted here, unless
-they were specific to a particular platform (see below).
-
-This is a list of some significant unfixed bugs, which are regressions
-from either 5.XXX.XXX or 5.XXX.XXX.
-
-=over 4
+Perl now avoids using memory after calling C<free()> in F<pp_require>
+when there are CODEREFs in C<@INC>.
 
 =item *
 
-XXX
-
-=back
-
-=head1 Deprecations
-
-XXX Add any new known deprecations here.
-
-The following items are now deprecated.
-
-=over 4
-
-=item *
-
-XXX
+A bug that could cause cause "C<Unknown error>" messages when
+"C<call_sv(code, G_EVAL)>" is called from an XS destructor has been fixed.
 
 =back
 
 =head1 Platform Specific Notes
-
-XXX Any changes specific to a particular platform. VMS and Win32 are the usual
-stars here. It's probably best to group changes under the same section layout
-as the main perldelta
 
 =head2 AIX
 
 =over 
 
 =item *
-Fix for README.aix and XL C/C++ V11 Hello, I have attached a small doc fix for README.aix. It contains information regarding the new XL C/C++ V11 compiler. This patch is only for bleed.  I have already posted the correct fix for maint-5.12.
+
+L<README.aix> has been updated with information about the XL C/C++ V11 compiler suite.
 
 =back
 
@@ -448,7 +252,11 @@ Fix for README.aix and XL C/C++ V11 Hello, I have attached a small doc fix for R
 
 =item *
 
-When building perl with the mingw64 x64 cross-compiler 'incpath', 'libpth', 'ldflags', 'lddlflags' and 'ldflags_nolargefiles' values in Config.pm and Config_heavy.pl are not being set correctly because, with that compiler, the include and lib directories are not immediately below $(CCHOME).
+When building Perl with the mingw64 x64 cross-compiler C<incpath>,
+C<libpth>, C<ldflags>, C<lddlflags> and C<ldflags_nolargefiles> values
+in F<Config.pm> and F<Config_heavy.pl> were not previously not being set
+correctly because, with that compiler, the include and lib directories
+are not immediately below C<$(CCHOME)>.
 
 =back
 
@@ -458,26 +266,23 @@ When building perl with the mingw64 x64 cross-compiler 'incpath', 'libpth', 'ldf
 
 =item *
 
-Fix nasty memory leak in vms.c:Perl_flex_stat_int().
+F<git_version.h> is now installed on VMS. This was an oversight in v5.12.0 which caused some extensions to fail to build.
 
 =item *
 
-Install git_version.h on VMS.  This was an oversight in 5.12.0 and without it some extension builds fail.
+A memory leak in F<vms.c>'s C<Perl_flex_stat_int()> has been fixed.
 
 =item *
 
-Plug a memory leak   In Perl_rename() we were allocating the same thing twice.
+A memory leak in C<Perl_rename()> due to a double allocation has been
+fixed.
 
 =item *
 
-Plug a memory leak    In vms_fid_to_name() (used by realpath() and realname()), we had another flagrant omission of freeing local storage.
+A memory leak in C<vms_fid_to_name()> (used by C<realpath()> and
+C<realname()>) has been fixed.
 
 =back
-
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
 
 =head1 Acknowledgements
 
