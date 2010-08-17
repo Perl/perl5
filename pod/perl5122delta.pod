@@ -82,11 +82,13 @@ C<File::Copy::copy(FILE, DIR)> is now documented.
 
 =item * 
 
-F<perlbug> now always gives the reporter a chance to change the email address it guesses for them.
+F<perlbug> now always gives the reporter a chance to change the email address it
+guesses for them.
 
 =item * 
 
-F<perlbug> should no longer warn about uninitialized values when using the C<-d> and C<-v> options.
+F<perlbug> should no longer warn about uninitialized values when using the C<-d>
+and C<-v> options.
 
 =back
 
@@ -157,11 +159,13 @@ The C<d_u32align> configuration probe on ARM has been fixed.
 
 =item *
 
-An "C<incompatible operand types>" error in ternary expressions when building with C<clang> has been fixed.
+An "C<incompatible operand types>" error in ternary expressions when building
+with C<clang> has been fixed.
 
 =item *
 
-Perl now skips setuid C<File::Copy> tests on partitions it detects to be mounted as C<nosuid>.
+Perl now skips setuid C<File::Copy> tests on partitions it detects to be mounted
+as C<nosuid>.
 
 =back
 
@@ -206,7 +210,8 @@ A possible segfault in the C<T_PRTOBJ> default typemap has been fixed.
 
 =item *
 
-A possible memory leak when using L<caller()|perlfunc/"caller EXPR"> to set C<@DB::args>.
+A possible memory leak when using L<caller()|perlfunc/"caller EXPR"> to set
+C<@DB::args>.
 
 =item *
 
