@@ -475,12 +475,18 @@ upstream and will hopefully appear on CPAN soon.
 =head1 Acknowledgements
 
 Perl 5.13.4 represents approximately one month of development since Perl 5.13.3,
-and contains XXX lines of changes across XXX files from XXX authors and
+and contains 91,200 lines of changes across 436 files from 34 authors and
 committers.
 
 Thank you to the following for contributing to this release:
 
-XXX The list of people to thank goes here.
+Abigail, Andy Armstrong, Andy Dougherty, Chas. Owens, Chip Salzenberg, Chris
+'BinGOs' Williams, Craig A. Berry, David Cantrell, David Golden, David Mitchell,
+Eric Brine, Father Chrysostomos, Florian Ragwitz, George Greer, Gerard Goossen,
+H.Merijn Brand, James Mastros, Jan Dubois, Jerry D. Hedden, Joshua ben Jore,
+Karl Williamson, Lars Dɪᴇᴄᴋᴏᴡ 迪拉斯, Leon Brocard, Lubomir Rintel, Nicholas
+Clark, Paul Marquess, Rafael Garcia-Suarez, Reini Urban, Robin Barker, Slaven
+Rezic, Steve Peters, Tony Cook, Wolfram Humann, Zefram
 
 =head1 Reporting Bugs
 
