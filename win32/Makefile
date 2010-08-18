@@ -1098,7 +1098,7 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.vmesa    ..\pod\perlvmesa.pod
 	copy ..\README.vos      ..\pod\perlvos.pod
 	copy ..\README.win32    ..\pod\perlwin32.pod
-	copy ..\pod\perl5134delta.pod ..\pod\perldelta.pod
+	copy ..\pod\perl5135delta.pod ..\pod\perldelta.pod
 	$(MAKE) -f ..\win32\pod.mak converters
 	cd ..\win32
 	$(PERLEXE) $(PL2BAT) $(UTILS)
