@@ -490,7 +490,7 @@ http://www.cpan.org/misc/cpan-faq.html#How_mirror_CPAN)
 
 Then change to your perl checkout, and if necessary,
 
-    $ make perl
+    $ make
 
 If this not the first update for this version (e.g. if it was updated
 when the version number was originally bumped), first edit
