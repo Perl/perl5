@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for rafl
-changelogged up to commit ff7894f
+changelogged up to commit 41f69a9
 
 =head1 NAME
 
@@ -240,9 +240,25 @@ Upgraded from version 3.31 to 3.31_01.
 
 Various issues in L<File::Spec::VMS> have been fixed.
 
+=item <I18N::Langinfo>
+
+Upgraded from version 0.03 to 0.04.
+
+C<langinfo()> now defaults to using C<$_> if there is no argument given, just
+like the documentation always claimed it did.
+
 =item C<IO::Compress>
 
 Upgraded from version 2.027 to 2.030.
+
+=item C<Module::CoreList>
+
+Upgraded from version 2.36 to 2.37.
+
+Besides listing the updated core modules of this release, it also stops listing
+the C<Filespec> module. That module never existed in core. The scripts
+generating C<Module::CoreList> confused it with C<VMS::Filespec>, which actually
+is a core module, since the time of perl 5.8.7.
 
 =item C<Test::Harness>
 
