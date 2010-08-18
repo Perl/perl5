@@ -43,6 +43,7 @@ bug*.pl
 *.so
 *.i
 *.old
+*.xsc
 
 # general build products (Win32)
 *.def
