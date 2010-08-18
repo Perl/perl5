@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for rafl
-changelogged up to commit a8a2f4f
+changelogged up to commit ff7894f
 
 =head1 NAME
 
@@ -201,7 +201,7 @@ XXX
 
 =item C<Archive::Tar>
 
-Upgraded from version 1.64 to 1.66.
+Upgraded from version 1.64 to 1.68.
 
 Among other things, the new version adds a new option to C<ptar> to allow safe
 creation of tarballs without world-writable files on Windows, allowing those
