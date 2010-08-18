@@ -1,10 +1,7 @@
 =encoding utf8
 
 =for rafl
-changelogged up to commit d5da2b2
-* PERL_STATIC_INLINE might want to be mentioned
-* 5648c0a and 254f8c6 added an optimisation for backrefs. probably not worth
-mentioning
+changelogged up to commit a8a2f4f
 
 =head1 NAME
 
@@ -162,6 +159,12 @@ C<sv_grow>, which is what's being used to allocate more memory if necessary when
 appending to a string, has now been teached how to round up the memory it
 requests to a certain geometric progression, making it much faster on certain
 platforms and configurations. On Win32, it's now about 100 times faster.
+
+=item *
+
+For weak references, the common case of just a single weak reference per
+referent has been optimised to reduce the storage required. In this case
+it saves the equivalent of one small perl array per referent.
 
 =item *
 
@@ -545,6 +548,15 @@ contains a more specific escape hatch:
 This can be used for modules that have not been upgraded to 5.6 naming
 conventions (and really should be completely obsolete by now).
 
+=item Added C<PERL_STATIC_INLINE>
+
+The C<PERL_STATIC_INLINE> define has been added to provide the buest-guess
+incantation to use for static inline functions, if the C compiler supports
+C99-style static inline. If it doesn't, it'll give a plain C<static>.
+
+C<HAS_STATIC_INLINE> can be used to check if the compiler actually supports
+inline functions.
+
 =item C<Perl_grok_bslash_o> and C<Perl_grok_bslash_c> may change in future
 
 The functions C<Perl_grok_bslash_o> and C<Perl_grok_bslash_c>, which are public
@@ -605,6 +617,11 @@ L<pos()|perlfunc/"index STR,SUBSTR,POSITION">, L<keys()|perlfunc/"keys HASH">,
 and L<vec()|perlfunc/"vec EXPR,OFFSET,BITS"> could, when used in combination
 with lvalues, result in leaking the scalar value they operate on, and cause its
 destruction to happen too late. This has now been fixed.
+
+=item *
+
+Building with C<PERL_GLOBAL_STRUCT>, which has been broken accidentally in
+5.13.3, now works again.
 
 =back
 
