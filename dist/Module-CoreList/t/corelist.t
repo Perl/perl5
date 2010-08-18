@@ -1,7 +1,7 @@
 #!perl -w
 use strict;
 use Module::CoreList;
-use Test::More tests => 24;
+use Test::More tests => 25;
 
 BEGIN { require_ok('Module::CoreList'); }
 
@@ -37,6 +37,9 @@ is(Module::CoreList::first_release('File::Spec'), 5.00405,
 
 is(Module::CoreList::first_release('File::Spec', 0.82), 5.006_001,
    "File::Spec reached 0.82 with 5.006_001");
+
+ok(!Module::CoreList::first_release('Filespec'),
+   "Filespec was never a core module. It's called VMS::Filespec");
 
 is_deeply([ sort keys %Module::CoreList::released ],
           [ sort keys %Module::CoreList::version ],
