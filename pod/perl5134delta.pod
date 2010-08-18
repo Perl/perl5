@@ -619,7 +619,7 @@ arguments.
 
 =item *
 
-L<substr()|perlfunc/"index STR,SUBSTR,POSITION">,
+L<substr()|perlfunc/"substr EXPR,OFFSET,LENGTH,REPLACEMENT">,
 L<pos()|perlfunc/"index STR,SUBSTR,POSITION">, L<keys()|perlfunc/"keys HASH">,
 and L<vec()|perlfunc/"vec EXPR,OFFSET,BITS"> could, when used in combination
 with lvalues, result in leaking the scalar value they operate on, and cause its
@@ -647,7 +647,9 @@ from either 5.XXX.XXX or 5.XXX.XXX.
 
 =item *
 
-XXX
+The changes in L<substr()|perlfunc/"substr EXPR,OFFSET,LENGTH,REPLACEMENT">
+break L<HTML::Parser>. A patch has already been applied to its git repository
+and will hopefully be released shortly.
 
 =back
 
