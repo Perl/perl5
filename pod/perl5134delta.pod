@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for rafl
-changelogged up to commit a8a2f4f
+changelogged up to commit ff7894f
 
 =head1 NAME
 
@@ -201,7 +201,7 @@ XXX
 
 =item C<Archive::Tar>
 
-Upgraded from version 1.64 to 1.66.
+Upgraded from version 1.64 to 1.68.
 
 Among other things, the new version adds a new option to C<ptar> to allow safe
 creation of tarballs without world-writable files on Windows, allowing those
@@ -563,15 +563,6 @@ C99-style static inline. If it doesn't, it'll give a plain C<static>.
 
 C<HAS_STATIC_INLINE> can be used to check if the compiler actually supports
 inline functions.
-
-=item C<Perl_grok_bslash_o> and C<Perl_grok_bslash_c> may change in future
-
-The functions C<Perl_grok_bslash_o> and C<Perl_grok_bslash_c>, which are public
-and exported for use by dynamic extensions, are now marked as being able to
-change their interface in the future.
-
-In fact, C<Perl_grok_bslash_o> already changed its interface in this release,
-and returns a C<bool> instead of a C<char> now.
 
 =back
 
