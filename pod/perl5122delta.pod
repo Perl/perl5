@@ -201,7 +201,7 @@ A possible segfault in the C<T_PRTOBJ> default typemap has been fixed.
 =item *
 
 A possible memory leak when using L<caller()|perlfunc/"caller EXPR"> to set
-C<@DB::args>.
+C<@DB::args> has been fixed.
 
 =item *
 
