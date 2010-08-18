@@ -3169,7 +3169,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		while ( state && uc <= (U8*)PL_regeol ) {
                     U32 base = trie->states[ state ].trans.base;
                     UV uvc = 0;
-                    U16 charid;
+                    U16 charid = 0;
 		    U16 wordnum;
                     wordnum = trie->states[ state ].wordnum;
 
