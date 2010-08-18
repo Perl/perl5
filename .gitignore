@@ -13,7 +13,6 @@ bug*.pl
 /UU
 
 # files produced by './configure.gnu' on a Linux machine
-Makefile.old
 /Makefile
 /Policy.sh
 /cflags
@@ -23,7 +22,6 @@ Makefile.old
 /makedepend
 /makedir
 /makefile
-/makefile.old
 /myconfig
 /opmini.c
 /perlmain.c
@@ -34,19 +32,17 @@ Makefile.old
 /x2p/Makefile
 /x2p/cflags
 /x2p/makefile
-/x2p/makefile.old
 
 # alternative names on OS X
 /GNUmakefile
-/GNUmakefile.old
 /x2p/GNUmakefile
-/x2p/GNUmakefile.old
 
 # general build products
 *.o
 *.a
 *.so
 *.i
+*.old
 
 # general build products (Win32)
 *.def
