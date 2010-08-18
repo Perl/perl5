@@ -564,15 +564,6 @@ C99-style static inline. If it doesn't, it'll give a plain C<static>.
 C<HAS_STATIC_INLINE> can be used to check if the compiler actually supports
 inline functions.
 
-=item C<Perl_grok_bslash_o> and C<Perl_grok_bslash_c> may change in future
-
-The functions C<Perl_grok_bslash_o> and C<Perl_grok_bslash_c>, which are public
-and exported for use by dynamic extensions, are now marked as being able to
-change their interface in the future.
-
-In fact, C<Perl_grok_bslash_o> already changed its interface in this release,
-and returns a C<bool> instead of a C<char> now.
-
 =back
 
 =head1 Selected Bug Fixes
