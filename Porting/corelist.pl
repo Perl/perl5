@@ -86,7 +86,7 @@ find(
         $version =~ /\d/ and $version = "'$version'";
 
         # some heuristics to figure out the module name from the file name
-        $module =~ s{^(lib|cpan|dist|(?:vms/|symbian/)?ext)/}{}
+        $module =~ s{^(lib|cpan|dist|(?:symbian/)?ext)/}{}
 			and $1 ne 'lib'
             and (
             $module =~ s{\b(\w+)/\1\b}{$1},
@@ -98,6 +98,7 @@ find(
             $module =~ s{^MIME-Base64/QuotedPrint}{MIME/QuotedPrint},
             $module =~ s{^(?:DynaLoader|Errno|Opcode)/}{},
             );
+        $module =~ s{^vms/ext}{VMS};
 		$module =~ s{^lib/}{}g;
         $module =~ s{/}{::}g;
         $module =~ s{-}{::}g;
