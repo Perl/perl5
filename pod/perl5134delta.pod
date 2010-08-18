@@ -215,9 +215,16 @@ Upgraded from version 1.11 to 1.12.
 
 Upgraded from version 1.16 to 1.18.
 
-L<Carp> now detects incomplete L<caller()|perlfunc/"caller EXPR"> overrides and
-avoids using bogus C<@DB::args>. This fixes certain cases of C<Bizarre copy of
-ARRAY> caused by modules overriding C<caller()> incorrectly.
+L<Carp> now detects incomplete L<caller()|perlfunc/"caller EXPR">
+overrides and avoids using bogus C<@DB::args>. To provide backtraces, Carp
+relies on particular behaviour of the caller built-in. Carp now detects
+if other code has overridden this with an incomplete implementation, and
+modifies its backtrace accordingly. Previously incomplete overrides would
+cause incorrect values in backtraces (best case), or obscure fatal errors
+(worst case)
+
+This fixes certain cases of C<Bizarre copy of ARRAY> caused by modules
+overriding C<caller()> incorrectly.
 
 =item C<Compress::Raw::Bzip2>
 
@@ -580,8 +587,8 @@ L</Modules and Pragmata>.
 
 =item *
 
-Fixed possible memory leak when using L<caller()|perlfunc/"caller EXPR"> to set
-C<@DB::args>.
+A possible memory leak when using L<caller()|perlfunc/"caller EXPR"> to set
+C<@DB::args> has been fixed.
 
 =item *
 
