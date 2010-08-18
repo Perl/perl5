@@ -1,3 +1,8 @@
+2.37    Tue Jul 20 2010
+  - Updated for 5.13.4
+  - Remove 'Filespec' module. It never existed in the core and is supposed to be
+    'VMS::Filespec' instead.
+
 2.36    Tue Jul 20 2010
   - Updated for 5.13.3
 
@@ -14,7 +19,7 @@
   - Documented all functions and all hash structures (bingos)
   - Fixed functions with edge-case involving querying for Module::CoreList
     itself. Pointed out by Ilmari.
-  - Added removed_from() and removed_from_by_date() functions 
+  - Added removed_from() and removed_from_by_date() functions
     for querying which release a module was removed from core. (bingos)
   - Amended corelist utility to use new removed from functions when
     stating when a module entered core ( and when it left it ). (bingos)
