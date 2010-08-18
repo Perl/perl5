@@ -5156,7 +5156,7 @@ PerlIO_tmpfile(void)
      int fd = -1;
      char tempname[] = "/tmp/PerlIO_XXXXXX";
      const char * const tmpdir = PL_tainting ? NULL : PerlEnv_getenv("TMPDIR");
-     SV * sv;
+     SV * sv = NULL;
      /*
       * I have no idea how portable mkstemp() is ... NI-S
       */
