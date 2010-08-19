@@ -100,10 +100,6 @@ sub AUTOLOAD {
 
 bootstrap I18N::Langinfo $VERSION;
 
-sub langinfo(_) {
-    return internal_langinfo(shift);
-}
-
 1;
 __END__
 
