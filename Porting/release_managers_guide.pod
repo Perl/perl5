@@ -622,11 +622,6 @@ Then delete the temporary installation.
 
 =item *
 
-If this is maint release, make sure F<Porting/mergelog> is saved and
-committed.
-
-=item *
-
 Push all your recent commits:
 
     $ git push origin ....
@@ -985,13 +980,6 @@ Finally, commit:
 At this point you may want  to compare the commit with a previous bump to
 see if they look similar. See commit ca8de22071 for an example of a
 previous version bump.
-
-=item *
-
-I<You MUST SKIP this step for RC, BLEAD>
-
-If this was a maint release, then edit F<Porting/mergelog> to change
-all the C<d> (deferred) flags to C<.> (needs review).
 
 =item *
 
