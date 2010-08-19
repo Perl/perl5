@@ -20,9 +20,9 @@ use File::Spec::Functions;
 
 # Copied from Porting/makerel - these will get +x in the tarball
 # XXX refactor? -- dagolden, 2010-07-23
-my %exe_list = 
+my %exe_list =
   map   { $_ => 1 }
-  map   { my ($f) = split; glob($f) } 
+  map   { my ($f) = split; glob("../$f") }
   grep  { $_ !~ /\A#/ && $_ !~ /\A\s*\z/ }
   map   { split "\n" }
   do    { local (@ARGV, $/) = '../Porting/exec-bit.txt'; <> };
@@ -32,8 +32,8 @@ $ExtUtils::Manifest::Quiet = 1;
 my @manifest = sort keys %{ maniread("../MANIFEST") };
 
 # Check that +x files in repo get +x from makerel
-for my $f ( @manifest ) {
-  next unless -x "../$f";
+for my $f ( map { "../$_" } @manifest ) {
+  next unless -x $f;
 
   ok( $exe_list{$f}, "tarball will chmod +x $f" )
     or diag( "Remove the exec bit or add '$f' to Porting/exec-bit.txt" );
