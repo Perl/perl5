@@ -17,7 +17,7 @@ L<perl5133delta>, which describes differences between 5.13.2 and
 
 =head2 C<srand()> now returns the seed
 
-This allows programs which need to have repeatable results to not have to come
+This allows programs that need to have repeatable results to not have to come
 up with their own seed generating mechanism.  Instead, they can use C<srand()>
 and somehow stash the return for future use.  Typical is a test program which
 has too many combinations to test comprehensively in the time available to it
@@ -81,7 +81,7 @@ effectively declaring them as binary compatible, which they weren't. From now
 on, blead releases will have a C<PERL_API_SUBVERSION> equal to their
 C<PERL_SUBVERSION>, explicitly marking them as incompatible with each other.
 
-Maintainance releases of stable perl versions will continue to make no
+Maintenance releases of stable perl versions will continue to make no
 intentionally incompatible API changes.
 
 =head2 Check API compatibility when loading XS modules
@@ -99,7 +99,7 @@ exception if they don't match.
 
 =head2 Binary Incompatible with all previous Perls
 
-Some bit fields have been reordered, hence this release will not be binary
+Some bit fields have been reordered; therefore, this release will not be binary
 compatible with any previous Perl release.
 
 =head1 Deprecations
@@ -123,7 +123,7 @@ memory than needed in a very inefficient way, if perl was configured to use the
 system's C<malloc> implementation instead of its own.
 
 C<sv_grow>, which is what's being used to allocate more memory if necessary when
-appending to a string, has now been teached how to round up the memory it
+appending to a string, has now been taught how to round up the memory it
 requests to a certain geometric progression, making it much faster on certain
 platforms and configurations. On Win32, it's now about 100 times faster.
 
