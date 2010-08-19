@@ -462,8 +462,8 @@ Building with C<PERL_GLOBAL_STRUCT>, which has been broken accidentally in
 =item *
 
 The changes in L<substr()|perlfunc/"substr EXPR,OFFSET,LENGTH,REPLACEMENT">
-break L<HTML::Parser>. A patch has already been applied to its git repository
-and will hopefully be released shortly.
+broke C<HTML::Parser> <= 3.66. A fixed C<HTML::Parser> is available as version
+3.67 on CPAN.
 
 =back
 
