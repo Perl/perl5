@@ -5795,7 +5795,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		RExC_parse++;
 	    case '=':           /* (?=...) */
 		RExC_seen_zerolen++;
-			break;
+                break;
 	    case '!':           /* (?!...) */
 		RExC_seen_zerolen++;
 	        if (*RExC_parse == ')') {
