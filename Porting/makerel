@@ -117,14 +117,10 @@ print "\n";
 chdir "$relroot/$reldir" or die $!;
 
 
-my $SEARCH_ROOTS = 't ext lib dist cpan';
-
 print "Setting file permissions...\n";
 system("find . -type f -print     | xargs chmod 0444");
 system("find . -type d -print     | xargs chmod 0755");
-system("find $SEARCH_ROOTS -name '*.t'     -print | xargs chmod +x");
-system("find $SEARCH_ROOTS -name 'test.pl' -print | xargs chmod +x");
-my @exe = map   { my ($f) = split; glob($f) } 
+my @exe = map   { my ($f) = split; glob($f) }
           grep  { $_ !~ /\A#/ && $_ !~ /\A\s*\z/ }
           map   { split "\n" }
           do    { local (@ARGV, $/) = 'Porting/exec-bit.txt'; <> };
