@@ -760,7 +760,7 @@ print $capih do_not_edit ("perlapi.h"), <<'EOT';
 #ifndef __perlapi_h__
 #define __perlapi_h__
 
-#if defined (MULTIPLICITY)
+#if defined (MULTIPLICITY) && defined (PERL_GLOBAL_STRUCT)
 
 START_EXTERN_C
 
@@ -777,7 +777,6 @@ START_EXTERN_C
 #define PERLVARISC(v,i)	typedef const char PL_##v##_t[sizeof(i)];	\
 			EXTERN_C PL_##v##_t* Perl_##v##_ptr(pTHX);
 
-#include "intrpvar.h"
 #include "perlvars.h"
 
 #undef PERLVAR
@@ -786,20 +785,11 @@ START_EXTERN_C
 #undef PERLVARIC
 #undef PERLVARISC
 
-#ifndef PERL_GLOBAL_STRUCT
-EXTERN_C Perl_ppaddr_t** Perl_Gppaddr_ptr(pTHX);
-EXTERN_C Perl_check_t**  Perl_Gcheck_ptr(pTHX);
-EXTERN_C unsigned char** Perl_Gfold_locale_ptr(pTHX);
-#define Perl_ppaddr_ptr      Perl_Gppaddr_ptr
-#define Perl_check_ptr       Perl_Gcheck_ptr
-#define Perl_fold_locale_ptr Perl_Gfold_locale_ptr
-#endif
-
 END_EXTERN_C
 
 #if defined(PERL_CORE)
 
-/* accessor functions for Perl variables (provide binary compatibility) */
+/* accessor functions for Perl "global" variables */
 
 /* these need to be mentioned here, or most linkers won't put them in
    the perl executable */
@@ -835,7 +825,6 @@ EXTCONST void * const PL_force_link_funcs[] = {
 #pragma message disable (nonstandcast)
 #endif
 
-#include "intrpvar.h"
 #include "perlvars.h"
 
 #if defined(__DECC) && defined(__osf__)
@@ -858,10 +847,6 @@ END_EXTERN_C
 
 EOT
 
-foreach $sym (sort keys %intrp) {
-    print $capih bincompat_var('I',$sym);
-}
-
 foreach $sym (sort keys %globvar) {
     print $capih bincompat_var('G',$sym);
 }
@@ -869,7 +854,7 @@ foreach $sym (sort keys %globvar) {
 print $capih <<'EOT';
 
 #endif /* !PERL_CORE */
-#endif /* MULTIPLICITY */
+#endif /* MULTIPLICITY && PERL_GLOBAL_STRUCT */
 
 #endif /* __perlapi_h__ */
 
@@ -884,28 +869,13 @@ print $capi do_not_edit ("perlapi.c"), <<'EOT';
 #include "perl.h"
 #include "perlapi.h"
 
-#if defined (MULTIPLICITY)
+#if defined (MULTIPLICITY) && defined (PERL_GLOBAL_STRUCT)
 
-/* accessor functions for Perl variables (provides binary compatibility) */
+/* accessor functions for Perl "global" variables */
 START_EXTERN_C
 
-#undef PERLVAR
-#undef PERLVARA
 #undef PERLVARI
-#undef PERLVARIC
-#undef PERLVARISC
-
-#define PERLVAR(v,t)	t* Perl_##v##_ptr(pTHX)				\
-			{ dVAR; PERL_UNUSED_CONTEXT; return &(aTHX->v); }
-#define PERLVARA(v,n,t)	PL_##v##_t* Perl_##v##_ptr(pTHX)		\
-			{ dVAR; PERL_UNUSED_CONTEXT; return &(aTHX->v); }
-
-#define PERLVARI(v,t,i)	PERLVAR(v,t)
-#define PERLVARIC(v,t,i) PERLVAR(v, const t)
-#define PERLVARISC(v,i)	PL_##v##_t* Perl_##v##_ptr(pTHX)		\
-			{ dVAR; PERL_UNUSED_CONTEXT; return &(aTHX->v); }
-
-#include "intrpvar.h"
+#define PERLVARI(v,t,i) PERLVAR(v,t)
 
 #undef PERLVAR
 #undef PERLVARA
@@ -928,31 +898,9 @@ START_EXTERN_C
 #undef PERLVARIC
 #undef PERLVARISC
 
-#ifndef PERL_GLOBAL_STRUCT
-/* A few evil special cases.  Could probably macrofy this. */
-#undef PL_ppaddr
-#undef PL_check
-#undef PL_fold_locale
-Perl_ppaddr_t** Perl_Gppaddr_ptr(pTHX) {
-    static Perl_ppaddr_t* const ppaddr_ptr = PL_ppaddr;
-    PERL_UNUSED_CONTEXT;
-    return (Perl_ppaddr_t**)&ppaddr_ptr;
-}
-Perl_check_t**  Perl_Gcheck_ptr(pTHX) {
-    static Perl_check_t* const check_ptr  = PL_check;
-    PERL_UNUSED_CONTEXT;
-    return (Perl_check_t**)&check_ptr;
-}
-unsigned char** Perl_Gfold_locale_ptr(pTHX) {
-    static unsigned char* const fold_locale_ptr = PL_fold_locale;
-    PERL_UNUSED_CONTEXT;
-    return (unsigned char**)&fold_locale_ptr;
-}
-#endif
-
 END_EXTERN_C
 
-#endif /* MULTIPLICITY */
+#endif /* MULTIPLICITY && PERL_GLOBAL_STRUCT */
 
 /* ex: set ro: */
 EOT

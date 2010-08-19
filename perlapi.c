@@ -28,28 +28,13 @@
 #include "perl.h"
 #include "perlapi.h"
 
-#if defined (MULTIPLICITY)
+#if defined (MULTIPLICITY) && defined (PERL_GLOBAL_STRUCT)
 
-/* accessor functions for Perl variables (provides binary compatibility) */
+/* accessor functions for Perl "global" variables */
 START_EXTERN_C
 
-#undef PERLVAR
-#undef PERLVARA
 #undef PERLVARI
-#undef PERLVARIC
-#undef PERLVARISC
-
-#define PERLVAR(v,t)	t* Perl_##v##_ptr(pTHX)				\
-			{ dVAR; PERL_UNUSED_CONTEXT; return &(aTHX->v); }
-#define PERLVARA(v,n,t)	PL_##v##_t* Perl_##v##_ptr(pTHX)		\
-			{ dVAR; PERL_UNUSED_CONTEXT; return &(aTHX->v); }
-
-#define PERLVARI(v,t,i)	PERLVAR(v,t)
-#define PERLVARIC(v,t,i) PERLVAR(v, const t)
-#define PERLVARISC(v,i)	PL_##v##_t* Perl_##v##_ptr(pTHX)		\
-			{ dVAR; PERL_UNUSED_CONTEXT; return &(aTHX->v); }
-
-#include "intrpvar.h"
+#define PERLVARI(v,t,i) PERLVAR(v,t)
 
 #undef PERLVAR
 #undef PERLVARA
@@ -72,30 +57,8 @@ START_EXTERN_C
 #undef PERLVARIC
 #undef PERLVARISC
 
-#ifndef PERL_GLOBAL_STRUCT
-/* A few evil special cases.  Could probably macrofy this. */
-#undef PL_ppaddr
-#undef PL_check
-#undef PL_fold_locale
-Perl_ppaddr_t** Perl_Gppaddr_ptr(pTHX) {
-    static Perl_ppaddr_t* const ppaddr_ptr = PL_ppaddr;
-    PERL_UNUSED_CONTEXT;
-    return (Perl_ppaddr_t**)&ppaddr_ptr;
-}
-Perl_check_t**  Perl_Gcheck_ptr(pTHX) {
-    static Perl_check_t* const check_ptr  = PL_check;
-    PERL_UNUSED_CONTEXT;
-    return (Perl_check_t**)&check_ptr;
-}
-unsigned char** Perl_Gfold_locale_ptr(pTHX) {
-    static unsigned char* const fold_locale_ptr = PL_fold_locale;
-    PERL_UNUSED_CONTEXT;
-    return (unsigned char**)&fold_locale_ptr;
-}
-#endif
-
 END_EXTERN_C
 
-#endif /* MULTIPLICITY */
+#endif /* MULTIPLICITY && PERL_GLOBAL_STRUCT */
 
 /* ex: set ro: */
