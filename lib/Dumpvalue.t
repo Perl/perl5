@@ -130,7 +130,7 @@ is( $out->read, '', 'unwrap ignored glob on first try');
 $d->unwrap(*FOO);
 is( $out->read, "*DUMPED_GLOB*\n", 'unwrap worked on glob');
 $d->unwrap(qr/foo(.+)/);
-is( $out->read, "-> qr/(?-xism:foo(.+))/\n", 'unwrap worked on Regexp' );
+is( $out->read, "-> qr/(?^:foo(.+))/\n", 'unwrap worked on Regexp' );
 $d->unwrap( sub {} );
 like( $out->read, qr/^-> &CODE/, 'unwrap worked on sub ref' );
 

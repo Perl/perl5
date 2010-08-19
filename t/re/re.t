@@ -21,12 +21,11 @@ use re qw(is_regexp regexp_pattern
 
     is((regexp_pattern($qr))[0],'foo','regexp_pattern[0] (ref)');
     is((regexp_pattern($qr))[1],'ip','regexp_pattern[1] (ref)');
-    is(regexp_pattern($qr),'(?pi-xsm:foo)','scalar regexp_pattern (ref)');
+    is(regexp_pattern($qr),'(?^pi:foo)','scalar regexp_pattern (ref)');
 
     is((regexp_pattern($rx))[0],'foo','regexp_pattern[0] (bare REGEXP)');
     is((regexp_pattern($rx))[1],'ip','regexp_pattern[1] (bare REGEXP)');
-    is(regexp_pattern($rx),'(?pi-xsm:foo)',
-                                    'scalar regexp_pattern (bare REGEXP)');
+    is(regexp_pattern($rx),'(?^pi:foo)', 'scalar regexp_pattern (bare REGEXP)');
 
     ok(!regexp_pattern(''),'!regexp_pattern("")');
 }

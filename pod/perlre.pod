@@ -595,12 +595,20 @@ the comment as soon as it sees a C<)>, so there is no way to put a literal
 C<)> in the comment.
 
 =item C<(?pimsx-imsx)>
-X<(?)>
+
+=item C<(?^pimsx)>
+X<(?)> X<(?^)>
 
 One or more embedded pattern-match modifiers, to be turned on (or
 turned off, if preceded by C<->) for the remainder of the pattern or
-the remainder of the enclosing pattern group (if any). This is
-particularly useful for dynamic patterns, such as those read in from a
+the remainder of the enclosing pattern group (if any).
+
+Starting in Perl 5.14, a C<"^"> (caret or circumflex accent) immediately
+after the C<"?"> is a shorthand equivalent to C<-imsx> and compiling the
+regex under C<no locale>.  Flags may follow the caret to override it.
+But a minus sign is not legal with it.
+
+This is particularly useful for dynamic patterns, such as those read in from a
 configuration file, taken from an argument, or specified in a table
 somewhere.  Consider the case where some patterns want to be case
 sensitive and some do not:  The case insensitive ones merely need to
@@ -636,6 +644,9 @@ X<(?:)>
 
 =item C<(?imsx-imsx:pattern)>
 
+=item C<(?^imsx:pattern)>
+X<(?^:)>
+
 This is for clustering, not capturing; it groups subexpressions like
 "()", but doesn't make backreferences as "()" does.  So
 
@@ -656,6 +667,37 @@ C<(?imsx-imsx)>.  For example,
 is equivalent to the more verbose
 
     /(?:(?s-i)more.*than).*million/i
+
+Starting in Perl 5.14, a C<"^"> (caret or circumflex accent) immediately
+after the C<"?"> is a shorthand equivalent to C<-imsx> and compiling the
+regex under C<no locale>.  Any positive flags may follow the caret, so
+
+    (?^x:foo)
+
+is equivalent to
+
+    (?x-ims:foo)
+
+The caret tells Perl that this cluster doesn't inherit the flags of any
+surrounding pattern, but to go back to the system defaults (C<-imsx>),
+modified by any flags specified.
+
+The caret allows for simpler stringification of compiled regular
+expressions.  These look like
+
+    (?^:pattern)
+
+with any non-default flags appearing between the caret and the colon.
+A test that looks at such stringification thus doesn't need to have the
+system default flags hard-coded in it, just the caret.  If new flags are
+added to Perl, the meaning of the caret's expansion will change to include
+the default for those flags, so the test will still work, unchanged.
+
+Specifying a negative flag after the caret is an error, as the flag is
+redundant.
+
+Mnemonic for C<(?^...)>:  A fresh beginning since the usual use of a caret is
+to match at the beginning.
 
 =item C<(?|pattern)>
 X<(?|)> X<Branch reset>

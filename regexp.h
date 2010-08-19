@@ -236,6 +236,10 @@ and check for NULL.
     case SINGLE_PAT_MOD:    *(pmfl) |= RXf_PMf_SINGLELINE; break;   \
     case XTENDED_PAT_MOD:   *(pmfl) |= RXf_PMf_EXTENDED;   break
 
+/* Note, includes locale */
+#define STD_PMMOD_FLAGS_CLEAR(pmfl)                        \
+    *(pmfl) &= ~(RXf_PMf_FOLD|RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_EXTENDED|RXf_PMf_LOCALE)
+
 /* chars and strings used as regex pattern modifiers
  * Singlular is a 'c'har, plural is a "string"
  *

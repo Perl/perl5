@@ -605,7 +605,7 @@ EXPECT
 # reversed again as a result of [perl #17763]
 die qr(x)
 EXPECT
-(?-xism:x)
+(?^:x)
 ########
 # 20001210.003 mjd@plover.com
 format REMITOUT_TOP =

@@ -77,7 +77,7 @@ sub run_tests {
     {
         our $a = bless qr /foo/ => 'Foo';
         ok 'goodfood' =~ $a,     "Reblessed qr // matches";
-        iseq $a, '(?-xism:foo)', "Reblessed qr // stringifies";
+        iseq $a, '(?^:foo)', "Reblessed qr // stringifies";
         my $x = "\x{3fe}";
         my $z = my $y = "\317\276";  # Byte representation of $x
         $a = qr /$x/;
@@ -88,7 +88,7 @@ sub run_tests {
                         "Postponed interpolation of qr // preserves UTF-8";
         {
             local $BugId = '17776';
-            iseq length qr /##/x, 12, "## in qr // doesn't corrupt memory";
+            iseq length qr /##/x, 9, "## in qr // doesn't corrupt memory";
         }
         {
             use re 'eval';

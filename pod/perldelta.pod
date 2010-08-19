@@ -28,6 +28,18 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2  C<(?^...)> regex construct added to signify default modifiers
+
+A caret (also called a "cirumflex accent") C<"^"> immediately following
+a C<"(?"> in a regular expression now means that the subexpression is to
+not inherit the surrounding modifiers such as C</i>, but to revert to the
+Perl defaults.  Any modifiers following the caret override the defaults.
+
+The stringification of regular expressions now uses this notation.  The
+main purpose of this is to allow tests that rely on the stringification
+to not have to change when new modifiers are added.  See
+L<perlre/Extended Patterns>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -38,10 +50,21 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
+=head2 Stringification of regexes has changed
 
-    There are no changes intentionally incompatible with 5.XXX.XXX. If any
-    exist, they are bugs and reports are welcome.
+Default regular expression modifiers are now notated by using
+C<(?^...)>.  Code relying on the old stringification will fail.  The
+purpose of this is so that when new modifiers are added, such code will
+not have to change, as the stringification will automatically
+incorporate the new modifiers.
+
+Code that needs to work properly with both old- and new-style regexes
+can use something like the following:
+
+    # Accept both old and new-style stringification
+    my $modifiers = (qr/foobar/ =~ /\Q(?^/) ? '^' : '-xism';
+
+And then use C<$modifiers> instead of C<-xism>.
 
 [ List each incompatible change as a =head2 entry ]
 

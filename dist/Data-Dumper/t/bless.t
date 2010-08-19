@@ -44,7 +44,7 @@ SKIP: {
 my $t = bless( qr//, 'foo');
 my $dt = Dumper($t);
 my $o = <<'PERL';
-$VAR1 = bless( qr/(?-xism:)/, 'foo' );
+$VAR1 = bless( qr/(?^:)/, 'foo' );
 PERL
 
 is($dt, $o, "We can dump blessed qr//'s properly");

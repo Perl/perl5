@@ -125,7 +125,7 @@ is( $@, '', 'PL_lex_brackstack' );
     is("${a}[", "A[", "interpolation, qq//");
     my @b=("B");
     is("@{b}{", "B{", "interpolation, qq//");
-    is(qr/${a}{/, '(?-xism:A{)', "interpolation, qr//");
+    is(qr/${a}{/, '(?^:A{)', "interpolation, qr//");
     my $c = "A{";
     $c =~ /${a}{/;
     is($&, 'A{', "interpolation, m//");

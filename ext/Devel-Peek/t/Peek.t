@@ -329,8 +329,8 @@ do_test(15,
   SV = REGEXP\\($ADDR\\) at $ADDR
     REFCNT = 1
     FLAGS = \\(OBJECT,POK,FAKE,pPOK\\)
-    PV = $ADDR "\\(\\?-xism:tic\\)"
-    CUR = 12
+    PV = $ADDR "\\(\\?\\^:tic\\)"
+    CUR = 8
     LEN = 0
     STASH = $ADDR\\t"Regexp"');
 } else {
@@ -350,7 +350,7 @@ do_test(15,
       MG_VIRTUAL = $ADDR
       MG_TYPE = PERL_MAGIC_qr\(r\)
       MG_OBJ = $ADDR
-        PAT = "\(\?-xism:tic\)"			# $] >= 5.009
+        PAT = "\(\?^:tic\)"			# $] >= 5.009
         REFCNT = 2				# $] >= 5.009
     STASH = $ADDR\\t"Regexp"');
 }

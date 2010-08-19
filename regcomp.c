@@ -4428,32 +4428,28 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
 			    >> RXf_PMf_STD_PMMOD_SHIFT);
 	const char *fptr = STD_PAT_MODS;        /*"msix"*/
 	char *p;
-	const STRLEN wraplen = plen + has_minus + has_p + has_runon
+        /* Allocate for the worst case, which is all the std flags are turned
+         * on, but this means no caret.  We never output a minus, as all those
+         * are defaults, so are covered by the caret */
+	const STRLEN wraplen = plen + has_p + has_runon
             + (sizeof(STD_PAT_MODS) - 1)
             + (sizeof("(?:)") - 1);
 
 	p = sv_grow(MUTABLE_SV(rx), wraplen + 1);
-	SvCUR_set(rx, wraplen);
 	SvPOK_on(rx);
 	SvFLAGS(rx) |= SvUTF8(pattern);
         *p++='('; *p++='?';
+        if (has_minus) {    /* If a default, cover it using the caret */
+            *p++='^';
+        }
         if (has_p)
             *p++ = KEEPCOPY_PAT_MOD; /*'p'*/
         {
-            char *r = p + (sizeof(STD_PAT_MODS) - 1) + has_minus - 1;
-            char *colon = r + 1;
             char ch;
-
             while((ch = *fptr++)) {
                 if(reganch & 1)
                     *p++ = ch;
-                else
-                    *r-- = ch;
                 reganch >>= 1;
-            }
-            if(has_minus) {
-                *r = '-';
-                p = colon;
             }
         }
 
@@ -4466,6 +4462,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
             *p++ = '\n';
         *p++ = ')';
         *p = 0;
+	SvCUR_set(rx, p - SvPVX_const(rx));
     }
 
     r->intflags = 0;
@@ -5666,6 +5663,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	if (*RExC_parse == '?') { /* (?...) */
 	    bool is_logical = 0;
 	    const char * const seqstart = RExC_parse;
+            bool has_use_defaults = FALSE;
 
 	    RExC_parse++;
 	    paren = *RExC_parse++;
@@ -6120,6 +6118,10 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		RExC_parse--; /* for vFAIL to print correctly */
                 vFAIL("Sequence (? incomplete");
                 break;
+            case '^':   /* Use default flags with the exceptions that follow */
+                has_use_defaults = TRUE;
+                STD_PMMOD_FLAGS_CLEAR(&RExC_flags);
+                goto parse_flags;
 	    default:
 	        --RExC_parse;
 	        parse_flags:      /* (?i) */  
@@ -6173,7 +6175,10 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         }
 	                break;
                     case '-':
-                        if (flagsp == &negflags) {
+                        /* A flag is a default iff it is following a minus,  so
+                         * if there is a minus, it means will be trying to
+                         * re-specify a default which is an error */
+                        if (has_use_defaults || flagsp == &negflags) {
                             RExC_parse++;
 		            vFAIL3("Sequence (%.*s...) not recognized", RExC_parse-seqstart, seqstart);
 		            /*NOTREACHED*/

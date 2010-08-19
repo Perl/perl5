@@ -4033,7 +4033,10 @@ where the problem was discovered. See L<perlre>.
 
 (F) You used a regular expression extension that doesn't make sense.  The
 <-- HERE shows in the regular expression about where the problem was
-discovered.  See L<perlre>.
+discovered.  This happens when using the C<(?^...)> construct to tell
+Perl to use the default regular expression modifiers, and you
+redundantly specify a default modifier.  For other causes, see
+L<perlre>.
 
 =item Sequence \%s... not terminated in regex; marked by <-- HERE in m/%s/
 

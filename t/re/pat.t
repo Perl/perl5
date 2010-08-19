@@ -499,12 +499,12 @@ sub run_tests {
     }
 
     {
-        iseq qr/\b\v$/i,    '(?i-xsm:\b\v$)', 'qr/\b\v$/i';
-        iseq qr/\b\v$/s,    '(?s-xim:\b\v$)', 'qr/\b\v$/s';
-        iseq qr/\b\v$/m,    '(?m-xis:\b\v$)', 'qr/\b\v$/m';
-        iseq qr/\b\v$/x,    '(?x-ism:\b\v$)', 'qr/\b\v$/x';
+        iseq qr/\b\v$/i,    '(?^i:\b\v$)', 'qr/\b\v$/i';
+        iseq qr/\b\v$/s,    '(?^s:\b\v$)', 'qr/\b\v$/s';
+        iseq qr/\b\v$/m,    '(?^m:\b\v$)', 'qr/\b\v$/m';
+        iseq qr/\b\v$/x,    '(?^x:\b\v$)', 'qr/\b\v$/x';
         iseq qr/\b\v$/xism, '(?msix:\b\v$)',  'qr/\b\v$/xism';
-        iseq qr/\b\v$/,     '(?-xism:\b\v$)', 'qr/\b\v$/';
+        iseq qr/\b\v$/,     '(?^:\b\v$)', 'qr/\b\v$/';
     }
 
 
