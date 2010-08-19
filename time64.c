@@ -368,7 +368,7 @@ static struct TM *S_gmtime64_r (const Time64_T *in_time, struct TM *p)
     p->tm_isdst  = 0;
 
 #ifdef HAS_TM_TM_ZONE
-    p->tm_zone   = "UTC";
+    p->tm_zone   = (char *)"UTC";
 #endif
 
     v_tm_sec  = (int)fmod(time, 60.0);
