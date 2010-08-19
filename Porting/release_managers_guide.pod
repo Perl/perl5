@@ -473,10 +473,10 @@ We need to get a wizard to give better instructions on what to do or not do.)
 
 I<You MUST SKIP this step for SNAPSHOT>
 
-Update C<Module::Corelist> with module version data for the new release.
+Update C<Module::CoreList> with module version data for the new release.
 
 Note that if this is a maint release, you should run the following actions
-from the maint branch, but commit the C<Corelist.pm> changes in
+from the maint branch, but commit the C<CoreList.pm> changes in
 I<blead> and subsequently cherry-pick it.  XXX need a better example
 
 F<corelist.pl> uses ftp.funet.fi to verify information about dual-lived
