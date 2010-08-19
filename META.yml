@@ -14,10 +14,13 @@ no_index:
   directory:
     - cpan
     - dist/Attribute-Handlers
+    - dist/B-Lint
     - dist/base
     - dist/constant
+    - dist/Cwd
     - dist/Data-Dumper
     - dist/ExtUtils-Install
+    - dist/ExtUtils-ParseXS
     - dist/Filter-Simple
     - dist/I18N-LangTags
     - dist/IO/
