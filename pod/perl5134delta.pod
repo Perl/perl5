@@ -343,6 +343,11 @@ on tied variables.
 F<lib/Tie/ExtraHash.t> has been added to make sure the, previously untested,
 L<Tie::ExtraHash> keeps working.
 
+=item *
+
+F<t/re/overload.t> has been added to test against string corruption in pattern
+matches on overloaded objects. This is a TODO test.
+
 =back
 
 =head1 Platform Support
