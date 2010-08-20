@@ -832,11 +832,6 @@ all : .\config.h ..\git_version.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) \
 	$(UNIDATAFILES) MakePPPort $(PERLEXE) $(X2P) Extensions_nonxs Extensions $(PERLSTATIC)
 	@echo	Everything is up to date. '$(MAKE_BARE) test' to run test suite.
 
-..\regcharclass.h : ..\Porting\regcharclass.pl
-	cd ..
-	miniperl Porting\regcharclass.pl
-	cd win32
-
 regnodes : ..\regnodes.h
 
 ..\regcomp$(o) : ..\regnodes.h ..\regcharclass.h	
