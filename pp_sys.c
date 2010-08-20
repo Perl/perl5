@@ -3216,28 +3216,31 @@ PP(pp_ftrowned)
     }
     tryAMAGICftest_MG(opchar);
 
+    STACKED_FTEST_CHECK;
+
     /* I believe that all these three are likely to be defined on most every
        system these days.  */
 #ifndef S_ISUID
     if(PL_op->op_type == OP_FTSUID) {
-	(void) POPs;
+	if ((PL_op->op_flags & OPf_REF) == 0 && (PL_op->op_private & OPpFT_STACKED) == 0)
+	    (void) POPs;
 	RETPUSHNO;
     }
 #endif
 #ifndef S_ISGID
     if(PL_op->op_type == OP_FTSGID) {
-	(void) POPs;
+	if ((PL_op->op_flags & OPf_REF) == 0 && (PL_op->op_private & OPpFT_STACKED) == 0)
+	    (void) POPs;
 	RETPUSHNO;
     }
 #endif
 #ifndef S_ISVTX
     if(PL_op->op_type == OP_FTSVTX) {
-	(void) POPs;
+	if ((PL_op->op_flags & OPf_REF) == 0 && (PL_op->op_private & OPpFT_STACKED) == 0)
+	    (void) POPs;
 	RETPUSHNO;
     }
 #endif
-
-    STACKED_FTEST_CHECK;
 
     result = my_stat_flags(0);
     SPAGAIN;
