@@ -948,7 +948,7 @@ static const struct body_details bodies_by_type[] = {
       sizeof(regexp),
       0,
       SVt_REGEXP, FALSE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(regexp) - STRUCT_OFFSET(regexp, xpv_cur))
+      FIT_ARENA(0, sizeof(regexp))
     },
 
     /* 48 */
