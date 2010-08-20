@@ -1025,15 +1025,14 @@ static const struct body_details bodies_by_type[] = {
 	safecalloc((details)->body_size + (details)->offset, 1)
 
 STATIC void *
-S_more_bodies (pTHX_ const svtype sv_type)
+S_more_bodies (pTHX_ const svtype sv_type, const size_t body_size,
+	       const size_t arena_size)
 {
     dVAR;
     void ** const root = &PL_body_roots[sv_type];
-    const struct body_details * const bdp = &bodies_by_type[sv_type];
-    const size_t body_size = bdp->body_size;
     char *start;
     const char *end;
-    const size_t arena_size = Perl_malloc_good_size(bdp->arena_size);
+    const size_t good_arena_size = Perl_malloc_good_size(arena_size);
 #if defined(DEBUGGING) && !defined(PERL_GLOBAL_STRUCT_PRIVATE)
     static bool done_sanity_check;
 
@@ -1049,28 +1048,28 @@ S_more_bodies (pTHX_ const svtype sv_type)
     }
 #endif
 
-    assert(bdp->arena_size);
+    assert(arena_size);
 
-    start = (char*) Perl_get_arena(aTHX_ arena_size, sv_type);
+    start = (char*) Perl_get_arena(aTHX_ good_arena_size, sv_type);
 
     /* Get the address of the byte after the end of the last body we can fit.
        Remember, this is integer division:  */
-    end = start + arena_size / body_size * body_size;
+    end = start + good_arena_size / body_size * body_size;
 
     /* computed count doesnt reflect the 1st slot reservation */
 #if defined(MYMALLOC) || defined(HAS_MALLOC_GOOD_SIZE)
     DEBUG_m(PerlIO_printf(Perl_debug_log,
 			  "arena %p end %p arena-size %d (from %d) type %d "
 			  "size %d ct %d\n",
-			  (void*)start, (void*)end, (int)arena_size,
-			  (int)bdp->arena_size, sv_type, (int)body_size,
-			  (int)arena_size / (int)body_size));
+			  (void*)start, (void*)end, (int)good_arena_size,
+			  (int)arena_size, sv_type, (int)body_size,
+			  (int)good_arena_size / (int)body_size));
 #else
     DEBUG_m(PerlIO_printf(Perl_debug_log,
 			  "arena %p end %p arena-size %d type %d size %d ct %d\n",
 			  (void*)start, (void*)end,
-			  (int)bdp->arena_size, sv_type, (int)body_size,
-			  (int)bdp->arena_size / (int)body_size));
+			  (int)arena_size, sv_type, (int)body_size,
+			  (int)good_arena_size / (int)body_size));
 #endif
     *root = (void *)start;
 
@@ -1099,7 +1098,9 @@ S_more_bodies (pTHX_ const svtype sv_type)
     STMT_START { \
 	void ** const r3wt = &PL_body_roots[sv_type]; \
 	xpv = (PTR_TBL_ENT_t*) (*((void **)(r3wt))      \
-	  ? *((void **)(r3wt)) : more_bodies(sv_type)); \
+	  ? *((void **)(r3wt)) : more_bodies(sv_type, \
+					     bodies_by_type[sv_type].body_size,\
+					     bodies_by_type[sv_type].arena_size)); \
 	*(r3wt) = *(void**)(xpv); \
     } STMT_END
 

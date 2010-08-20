@@ -4070,7 +4070,7 @@
 #  endif
 #ifdef PERL_CORE
 #define more_sv()		S_more_sv(aTHX)
-#define more_bodies(a)		S_more_bodies(aTHX_ a)
+#define more_bodies(a,b,c)	S_more_bodies(aTHX_ a,b,c)
 #define sv_2iuv_common(a)	S_sv_2iuv_common(aTHX_ a)
 #define glob_assign_glob(a,b,c)	S_glob_assign_glob(aTHX_ a,b,c)
 #define glob_assign_ref(a,b)	S_glob_assign_ref(aTHX_ a,b)

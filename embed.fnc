@@ -1907,7 +1907,8 @@ sn	|char *	|F0convert	|NV nv|NN char *const endbuf|NN STRLEN *const len
 sM	|void	|sv_release_COW	|NN SV *sv|NN const char *pvx|NN SV *after
 #  endif
 s	|SV *	|more_sv
-s	|void *	|more_bodies	|const svtype sv_type
+s	|void *	|more_bodies	|const svtype sv_type|const size_t body_size \
+				|const size_t arena_size
 s	|bool	|sv_2iuv_common	|NN SV *const sv
 s	|void	|glob_assign_glob|NN SV *const dstr|NN SV *const sstr \
 		|const int dtype
