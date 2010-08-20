@@ -465,6 +465,11 @@ The changes in L<substr()|perlfunc/"substr EXPR,OFFSET,LENGTH,REPLACEMENT">
 broke C<HTML::Parser> <= 3.66. A fixed C<HTML::Parser> is available as version
 3.67 on CPAN.
 
+=item *
+
+The changes in prototype handling break C<Switch>. A patch has been sent
+upstream and will hopefully appear on CPAN soon.
+
 =back
 
 =head1 Acknowledgements
