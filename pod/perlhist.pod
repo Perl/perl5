@@ -29,7 +29,7 @@ Ing-Simmons, Chip Salzenberg, Tim Bunce, Malcolm Beattie, Gurusamy
 Sarathy, Graham Barr, Jarkko Hietaniemi, Hugo van der Sanden,
 Michael Schwern, Rafael Garcia-Suarez, Nicholas Clark, Richard Clamp,
 Leon Brocard, Dave Mitchell, Jesse Vincent, Ricardo Signes, Steve Hay,
-Matt S Trout and David Golden.
+Matt S Trout, David Golden, and Florian Ragwitz.
 
 =head2 PUMPKIN?
 
