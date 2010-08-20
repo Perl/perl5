@@ -1053,7 +1053,9 @@ S_more_bodies (pTHX_ const svtype sv_type)
 
     start = (char*) Perl_get_arena(aTHX_ arena_size, sv_type);
 
-    end = start + arena_size - 2 * body_size;
+    /* Get the address of the byte after the end of the last body we can fit.
+       Remember, this is integer division:  */
+    end = start + arena_size / body_size * body_size;
 
     /* computed count doesnt reflect the 1st slot reservation */
 #if defined(MYMALLOC) || defined(HAS_MALLOC_GOOD_SIZE)
@@ -1072,14 +1074,21 @@ S_more_bodies (pTHX_ const svtype sv_type)
 #endif
     *root = (void *)start;
 
-    while (start <= end) {
+    while (1) {
+	/* Where the next body would start:  */
 	char * const next = start + body_size;
+
+	if (next >= end) {
+	    /* This is the last body:  */
+	    assert(next == end);
+
+	    *(void **)start = 0;
+	    return *root;
+	}
+
 	*(void**) start = (void *)next;
 	start = next;
     }
-    *(void **)start = 0;
-
-    return *root;
 }
 
 /* grab a new thing from the free list, allocating more if necessary.
