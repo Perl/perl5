@@ -705,44 +705,6 @@ Perl_sv_free_arenas(pTHX)
   the pointers are used with offsets to the real memory.
 */
 
-static void *
-S_get_arena(pTHX_ const size_t arena_size, const svtype bodytype)
-{
-    dVAR;
-    struct arena_desc* adesc;
-    struct arena_set *aroot = (struct arena_set*) PL_body_arenas;
-    unsigned int curr;
-
-    /* shouldnt need this
-    if (!arena_size)	arena_size = PERL_ARENA_SIZE;
-    */
-
-    /* may need new arena-set to hold new arena */
-    if (!aroot || aroot->curr >= aroot->set_size) {
-	struct arena_set *newroot;
-	Newxz(newroot, 1, struct arena_set);
-	newroot->set_size = ARENAS_PER_SET;
-	newroot->next = aroot;
-	aroot = newroot;
-	PL_body_arenas = (void *) newroot;
-	DEBUG_m(PerlIO_printf(Perl_debug_log, "new arenaset %p\n", (void*)aroot));
-    }
-
-    /* ok, now have arena-set with at least 1 empty/available arena-desc */
-    curr = aroot->curr++;
-    adesc = &(aroot->set[curr]);
-    assert(!adesc->arena);
-    
-    Newx(adesc->arena, arena_size, char);
-    adesc->size = arena_size;
-    adesc->utype = bodytype;
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "arena %d added: %p size %"UVuf"\n", 
-			  curr, (void*)adesc->arena, (UV)arena_size));
-
-    return adesc->arena;
-}
-
-
 /* return a thing to the free list */
 
 #define del_body(thing, root)			\
@@ -803,7 +765,7 @@ linked list at PL_body_roots[sv_type], calling Perl_more_bodies() if
 necessary to refresh an empty list.  Then the lock is released, and
 the body is returned.
 
-Perl_more_bodies calls get_arena(), and carves it up into an array of N
+Perl_more_bodies allocates a new arena, and carves it up into an array of N
 bodies, which it strings into a linked list.  It looks up arena-size
 and body-size from the body_details table described below, thus
 supporting the multiple body-types.
@@ -1024,6 +986,9 @@ Perl_more_bodies (pTHX_ const svtype sv_type, const size_t body_size,
 {
     dVAR;
     void ** const root = &PL_body_roots[sv_type];
+    struct arena_desc *adesc;
+    struct arena_set *aroot = (struct arena_set *) PL_body_arenas;
+    unsigned int curr;
     char *start;
     const char *end;
     const size_t good_arena_size = Perl_malloc_good_size(arena_size);
@@ -1044,7 +1009,29 @@ Perl_more_bodies (pTHX_ const svtype sv_type, const size_t body_size,
 
     assert(arena_size);
 
-    start = (char*) S_get_arena(aTHX_ good_arena_size, sv_type);
+    /* may need new arena-set to hold new arena */
+    if (!aroot || aroot->curr >= aroot->set_size) {
+	struct arena_set *newroot;
+	Newxz(newroot, 1, struct arena_set);
+	newroot->set_size = ARENAS_PER_SET;
+	newroot->next = aroot;
+	aroot = newroot;
+	PL_body_arenas = (void *) newroot;
+	DEBUG_m(PerlIO_printf(Perl_debug_log, "new arenaset %p\n", (void*)aroot));
+    }
+
+    /* ok, now have arena-set with at least 1 empty/available arena-desc */
+    curr = aroot->curr++;
+    adesc = &(aroot->set[curr]);
+    assert(!adesc->arena);
+    
+    Newx(adesc->arena, good_arena_size, char);
+    adesc->size = good_arena_size;
+    adesc->utype = sv_type;
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "arena %d added: %p size %"UVuf"\n", 
+			  curr, (void*)adesc->arena, (UV)good_arena_size));
+
+    start = (char *) adesc->arena;
 
     /* Get the address of the byte after the end of the last body we can fit.
        Remember, this is integer division:  */
