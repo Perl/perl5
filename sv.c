@@ -703,18 +703,7 @@ Perl_sv_free_arenas(pTHX)
   because the leading fields arent accessed.  Pointers to such bodies
   are decremented to point at the unused 'ghost' memory, knowing that
   the pointers are used with offsets to the real memory.
-*/
 
-/* return a thing to the free list */
-
-#define del_body(thing, root)			\
-    STMT_START {				\
-	void ** const thing_copy = (void **)thing;\
-	*thing_copy = *root;			\
-	*root = (void*)thing_copy;		\
-    } STMT_END
-
-/* 
 
 =head1 SV-Body Allocation
 
@@ -772,10 +761,6 @@ supporting the multiple body-types.
 
 If PURIFY is defined, or PERL_ARENA_SIZE=0, arenas are not used, and
 the (new|del)_X*V macros are mapped directly to malloc/free.
-
-*/
-
-/* 
 
 For each sv-type, struct body_details bodies_by_type[] carries
 parameters which control these aspects of SV handling:
@@ -952,8 +937,14 @@ static const struct body_details bodies_by_type[] = {
     (void *)((char *)S_new_body(aTHX_ sv_type)	\
 	     - bodies_by_type[sv_type].offset)
 
-#define del_body_allocated(p, sv_type)		\
-    del_body(p + bodies_by_type[sv_type].offset, &PL_body_roots[sv_type])
+/* return a thing to the free list */
+
+#define del_body(thing, root)				\
+    STMT_START {					\
+	void ** const thing_copy = (void **)thing;	\
+	*thing_copy = *root;				\
+	*root = (void*)thing_copy;			\
+    } STMT_END
 
 #ifdef PURIFY
 
@@ -969,7 +960,8 @@ static const struct body_details bodies_by_type[] = {
 #define new_XPVNV()	new_body_allocated(SVt_PVNV)
 #define new_XPVMG()	new_body_allocated(SVt_PVMG)
 
-#define del_XPVGV(p)	del_body_allocated(p, SVt_PVGV)
+#define del_XPVGV(p)	del_body(p + bodies_by_type[SVt_PVGV].offset,	\
+				 &PL_body_roots[SVt_PVGV])
 
 #endif /* PURIFY */
 
