@@ -6,7 +6,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan (tests => 28);
+plan (tests => 34);
 
 print "not " unless length("")    == 0;
 print "ok 1\n";
@@ -192,6 +192,21 @@ is($u, undef);
 my $uo = bless [], 'U';
 
 is(length($uo), undef, "Length of overloaded reference");
+
+my $ul = 3;
+is(($ul = length(undef)), undef, 
+                    "Returned length of undef with result in TARG");
+is($ul, undef, "Assigned length of undef with result in TARG");
+
+$ul = 3;
+is(($ul = length($u)), undef,
+                "Returned length of tied undef with result in TARG");
+is($ul, undef, "Assigned length of tied undef with result in TARG");
+
+$ul = 3;
+is(($ul = length($uo)), undef,
+                "Returned length of overloaded undef with result in TARG");
+is($ul, undef, "Assigned length of overloaded undef with result in TARG");
 
 # ok(!defined $uo); Turns you can't test this. FIXME for pp_defined?
 

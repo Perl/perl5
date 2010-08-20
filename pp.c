@@ -3056,8 +3056,10 @@ PP(pp_length)
 	    = sv_2pv_flags(sv, &len,
 			   SV_UNDEF_RETURNS_NULL|SV_CONST_RETURN|SV_GMAGIC);
 
-	if (!p)
-	    SETs(&PL_sv_undef);
+	if (!p) {
+	    sv_setsv(TARG, &PL_sv_undef);
+	    SETTARG;
+	}
 	else if (DO_UTF8(sv)) {
 	    SETi(utf8_length((U8*)p, (U8*)p + len));
 	}
@@ -3070,7 +3072,8 @@ PP(pp_length)
 	else
 	    SETi(sv_len(sv));
     } else {
-	SETs(&PL_sv_undef);
+	sv_setsv_nomg(TARG, &PL_sv_undef);
+	SETTARG;
     }
     RETURN;
 }
