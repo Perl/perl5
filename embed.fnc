@@ -1494,11 +1494,6 @@ s	|HV*	|require_tie_mod|NN GV *gv|NN const char *varpv|NN SV* namesv \
 				|NN const char *methpv|const U32 flags
 #endif
 
-: #if defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C)
-: Used in hv.c
-paRxoM	|void*	|get_arena	|const size_t arenasize |const svtype bodytype
-: #endif
-
 #if defined(PERL_IN_HV_C)
 s	|void	|hsplit		|NN HV *hv
 s	|void	|hfreeentries	|NN HV *hv
@@ -1907,7 +1902,8 @@ sn	|char *	|F0convert	|NV nv|NN char *const endbuf|NN STRLEN *const len
 sM	|void	|sv_release_COW	|NN SV *sv|NN const char *pvx|NN SV *after
 #  endif
 s	|SV *	|more_sv
-s	|void *	|more_bodies	|const svtype sv_type|const size_t body_size \
+: Used in sv.c and hv.c
+po	|void *	|more_bodies	|const svtype sv_type|const size_t body_size \
 				|const size_t arena_size
 s	|bool	|sv_2iuv_common	|NN SV *const sv
 s	|void	|glob_assign_glob|NN SV *const dstr|NN SV *const sstr \

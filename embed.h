@@ -1614,7 +1614,8 @@
 #  endif
 #ifdef PERL_CORE
 #define more_sv			S_more_sv
-#define more_bodies		S_more_bodies
+#endif
+#ifdef PERL_CORE
 #define sv_2iuv_common		S_sv_2iuv_common
 #define glob_assign_glob	S_glob_assign_glob
 #define glob_assign_ref		S_glob_assign_ref
@@ -3686,8 +3687,6 @@
 #define require_tie_mod(a,b,c,d,e)	S_require_tie_mod(aTHX_ a,b,c,d,e)
 #endif
 #endif
-#ifdef PERL_CORE
-#endif
 #if defined(PERL_IN_HV_C)
 #ifdef PERL_CORE
 #define hsplit(a)		S_hsplit(aTHX_ a)
@@ -4070,7 +4069,6 @@
 #  endif
 #ifdef PERL_CORE
 #define more_sv()		S_more_sv(aTHX)
-#define more_bodies(a,b,c)	S_more_bodies(aTHX_ a,b,c)
 #define sv_2iuv_common(a)	S_sv_2iuv_common(aTHX_ a)
 #define glob_assign_glob(a,b,c)	S_glob_assign_glob(aTHX_ a,b,c)
 #define glob_assign_ref(a,b)	S_glob_assign_ref(aTHX_ a,b)

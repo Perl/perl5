@@ -40,24 +40,6 @@ holds the key and hash value.
 static const char S_strtab_error[]
     = "Cannot modify shared string table in hv_%s";
 
-STATIC void
-S_more_he(pTHX)
-{
-    dVAR;
-    /* We could generate this at compile time via (another) auxiliary C
-       program?  */
-    const size_t arena_size = Perl_malloc_good_size(PERL_ARENA_SIZE);
-    HE* he = (HE*) Perl_get_arena(aTHX_ arena_size, HE_SVSLOT);
-    HE * const heend = &he[arena_size / sizeof(HE) - 1];
-
-    PL_body_roots[HE_SVSLOT] = he;
-    while (he < heend) {
-	HeNEXT(he) = (HE*)(he + 1);
-	he++;
-    }
-    HeNEXT(he) = 0;
-}
-
 #ifdef PURIFY
 
 #define new_HE() (HE*)safemalloc(sizeof(HE))
@@ -73,7 +55,7 @@ S_new_he(pTHX)
     void ** const root = &PL_body_roots[HE_SVSLOT];
 
     if (!*root)
-	S_more_he(aTHX);
+	Perl_more_bodies(aTHX_ HE_SVSLOT, sizeof(HE), PERL_ARENA_SIZE);
     he = (HE*) *root;
     assert(he);
     *root = HeNEXT(he);

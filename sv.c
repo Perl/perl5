@@ -703,16 +703,10 @@ Perl_sv_free_arenas(pTHX)
   because the leading fields arent accessed.  Pointers to such bodies
   are decremented to point at the unused 'ghost' memory, knowing that
   the pointers are used with offsets to the real memory.
-
-  HE, HEK arenas are managed separately, with separate code, but may
-  be merge-able later..
 */
 
-/* get_arena(size): this creates custom-sized arenas
-   TBD: export properly for hv.c: S_more_he().
-*/
-void*
-Perl_get_arena(pTHX_ const size_t arena_size, const svtype bodytype)
+static void *
+S_get_arena(pTHX_ const size_t arena_size, const svtype bodytype)
 {
     dVAR;
     struct arena_desc* adesc;
@@ -805,11 +799,11 @@ they are no longer allocated.
 
 In turn, the new_body_* allocators call S_new_body(), which invokes
 new_body_inline macro, which takes a lock, and takes a body off the
-linked list at PL_body_roots[sv_type], calling S_more_bodies() if
+linked list at PL_body_roots[sv_type], calling Perl_more_bodies() if
 necessary to refresh an empty list.  Then the lock is released, and
 the body is returned.
 
-S_more_bodies calls get_arena(), and carves it up into an array of N
+Perl_more_bodies calls get_arena(), and carves it up into an array of N
 bodies, which it strings into a linked list.  It looks up arena-size
 and body-size from the body_details table described below, thus
 supporting the multiple body-types.
@@ -1024,9 +1018,9 @@ static const struct body_details bodies_by_type[] = {
 #define new_NOARENAZ(details) \
 	safecalloc((details)->body_size + (details)->offset, 1)
 
-STATIC void *
-S_more_bodies (pTHX_ const svtype sv_type, const size_t body_size,
-	       const size_t arena_size)
+void *
+Perl_more_bodies (pTHX_ const svtype sv_type, const size_t body_size,
+		  const size_t arena_size)
 {
     dVAR;
     void ** const root = &PL_body_roots[sv_type];
@@ -1050,7 +1044,7 @@ S_more_bodies (pTHX_ const svtype sv_type, const size_t body_size,
 
     assert(arena_size);
 
-    start = (char*) Perl_get_arena(aTHX_ good_arena_size, sv_type);
+    start = (char*) S_get_arena(aTHX_ good_arena_size, sv_type);
 
     /* Get the address of the byte after the end of the last body we can fit.
        Remember, this is integer division:  */
@@ -1098,7 +1092,7 @@ S_more_bodies (pTHX_ const svtype sv_type, const size_t body_size,
     STMT_START { \
 	void ** const r3wt = &PL_body_roots[sv_type]; \
 	xpv = (PTR_TBL_ENT_t*) (*((void **)(r3wt))      \
-	  ? *((void **)(r3wt)) : more_bodies(sv_type, \
+	  ? *((void **)(r3wt)) : Perl_more_bodies(aTHX_ sv_type, \
 					     bodies_by_type[sv_type].body_size,\
 					     bodies_by_type[sv_type].arena_size)); \
 	*(r3wt) = *(void**)(xpv); \

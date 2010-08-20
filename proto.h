@@ -4488,11 +4488,6 @@ STATIC HV*	S_require_tie_mod(pTHX_ GV *gv, const char *varpv, SV* namesv, const 
 
 #endif
 
-PERL_CALLCONV void*	Perl_get_arena(pTHX_ const size_t arenasize, const svtype bodytype)
-			__attribute__malloc__
-			__attribute__warn_unused_result__;
-
-
 #if defined(PERL_IN_HV_C)
 STATIC void	S_hsplit(pTHX_ HV *hv)
 			__attribute__nonnull__(pTHX_1);
@@ -5886,7 +5881,7 @@ STATIC void	S_sv_release_COW(pTHX_ SV *sv, const char *pvx, SV *after)
 
 #  endif
 STATIC SV *	S_more_sv(pTHX);
-STATIC void *	S_more_bodies(pTHX_ const svtype sv_type, const size_t body_size, const size_t arena_size);
+PERL_CALLCONV void *	Perl_more_bodies(pTHX_ const svtype sv_type, const size_t body_size, const size_t arena_size);
 STATIC bool	S_sv_2iuv_common(pTHX_ SV *const sv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_2IUV_COMMON	\
