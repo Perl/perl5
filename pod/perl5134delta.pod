@@ -35,31 +35,31 @@ Functions declared with the following prototypes now behave correctly as unary f
 
 =item *
 
-*
+C<*>
 
 =item *
 
-\sigil
+C<\sigil>
 
 =item *
 
-\[...]
+C<\[...]>
 
 =item *
 
-;$
+C<;$>
 
 =item *
 
-;*
+C<;*>
 
 =item *
 
-;\sigil
+C<;\sigil>
 
 =item *
 
-;\[...]
+C<;\[...]>
 
 =back
 
