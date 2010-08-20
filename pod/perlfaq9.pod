@@ -657,12 +657,23 @@ This can make tasks like fetching the newsgroup list as simple as
 
 =head2 How do I fetch/put an FTP file?
 
-C<LWP::Simple> (available from CPAN) can fetch but not put.  C<Net::FTP> (also
-available from CPAN) is more complex but can put as well as fetch.
+(contributed by brian d foy)
+
+The C<LWP> family of modules (available on CPAN as the libwww-perl distibution)
+can work with FTP just like it can with many other protocols. C<LWP::Simple>
+makes it quite easy to fetch a file:
+
+	use LWP::Simple;
+	
+	my $data = get( 'ftp://some.ftp.site/some/file.txt' );
+	
+If you want more direct or low-level control of the FTP process, you can use 
+the C<Net::FTP> module (in the Standard Library since Perl 5.8). It's
+documentation has examples showing you just how to do that.
 
 =head2 How can I do RPC in Perl?
 
-(Contributed by brian d foy)
+(contributed by brian d foy)
 
 Use one of the RPC modules you can find on CPAN (
 http://search.cpan.org/search?query=RPC&mode=all ).
