@@ -5881,7 +5881,6 @@ STATIC void	S_sv_release_COW(pTHX_ SV *sv, const char *pvx, SV *after)
 
 #  endif
 STATIC SV *	S_more_sv(pTHX);
-PERL_CALLCONV void *	Perl_more_bodies(pTHX_ const svtype sv_type, const size_t body_size, const size_t arena_size);
 STATIC bool	S_sv_2iuv_common(pTHX_ SV *const sv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_2IUV_COMMON	\
@@ -5912,6 +5911,8 @@ STATIC void	S_anonymise_cv_maybe(pTHX_ GV *gv, CV *cv)
 	assert(gv); assert(cv)
 
 #endif
+
+PERL_CALLCONV void *	Perl_more_bodies(pTHX_ const svtype sv_type, const size_t body_size, const size_t arena_size);
 
 #if defined(PERL_IN_TOKE_C)
 STATIC void	S_check_uni(pTHX);

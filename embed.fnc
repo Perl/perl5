@@ -1902,9 +1902,6 @@ sn	|char *	|F0convert	|NV nv|NN char *const endbuf|NN STRLEN *const len
 sM	|void	|sv_release_COW	|NN SV *sv|NN const char *pvx|NN SV *after
 #  endif
 s	|SV *	|more_sv
-: Used in sv.c and hv.c
-po	|void *	|more_bodies	|const svtype sv_type|const size_t body_size \
-				|const size_t arena_size
 s	|bool	|sv_2iuv_common	|NN SV *const sv
 s	|void	|glob_assign_glob|NN SV *const dstr|NN SV *const sstr \
 		|const int dtype
@@ -1912,6 +1909,10 @@ s	|void	|glob_assign_ref|NN SV *const dstr|NN SV *const sstr
 sRn	|PTR_TBL_ENT_t *|ptr_table_find|NN PTR_TBL_t *const tbl|NULLOK const void *const sv
 s	|void	|anonymise_cv_maybe	|NN GV *gv|NN CV *cv
 #endif
+
+: Used in sv.c and hv.c
+po	|void *	|more_bodies	|const svtype sv_type|const size_t body_size \
+				|const size_t arena_size
 
 #if defined(PERL_IN_TOKE_C)
 s	|void	|check_uni

@@ -1614,8 +1614,6 @@
 #  endif
 #ifdef PERL_CORE
 #define more_sv			S_more_sv
-#endif
-#ifdef PERL_CORE
 #define sv_2iuv_common		S_sv_2iuv_common
 #define glob_assign_glob	S_glob_assign_glob
 #define glob_assign_ref		S_glob_assign_ref
@@ -4075,6 +4073,8 @@
 #define ptr_table_find		S_ptr_table_find
 #define anonymise_cv_maybe(a,b)	S_anonymise_cv_maybe(aTHX_ a,b)
 #endif
+#endif
+#ifdef PERL_CORE
 #endif
 #if defined(PERL_IN_TOKE_C)
 #ifdef PERL_CORE
