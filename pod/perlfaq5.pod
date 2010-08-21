@@ -1131,8 +1131,8 @@ Once mapped, you can treat C<$string> as you would any other string.
 Since you don't necessarily have to load the data, mmap-ing can be
 very fast and may not increase your memory footprint.
 
-If you really want to load the entire file, you can use the
-C<File::Slurp> module to do it in one step.
+If you want to load the entire file, you can use the C<File::Slurp>
+module to do it in one one simple and efficient step:
 
 	use File::Slurp;
 
@@ -1158,13 +1158,14 @@ you see someone do this:
 
 You should think long and hard about why you need everything loaded at
 once. It's just not a scalable solution. You might also find it more
-fun to use the standard Tie::File module, or the DB_File module's
-$DB_RECNO bindings, which allow you to tie an array to a file so that
+fun to use the standard C<Tie::File> module, or the C<DB_File> module's
+C<$DB_RECNO> bindings, which allow you to tie an array to a file so that
 accessing an element the array actually accesses the corresponding
 line in the file.
 
 You can read the entire filehandle contents into a scalar.
 
+	my $var;
 	{
 	local $/;
 	open my $fh, '<', $file or die "can't open $file: $!";
@@ -1174,14 +1175,19 @@ You can read the entire filehandle contents into a scalar.
 That temporarily undefs your record separator, and will automatically
 close the file at block exit. If the file is already open, just use this:
 
-	$var = do { local $/; <$fh> };
+	my $var = do { local $/; <$fh> };
 
-For ordinary files you can also use the read function.
+You can do that one better by using a localized C<@ARGV> so you can 
+eliminate the C<open>:
+
+	my $var = do { local( @ARGV, $/ ) = $file; <> };
+
+For ordinary files you can also use the C<read> function.
 
 	read( $fh, $var, -s $fh );
 
-The third argument tests the byte size of the data on the INPUT filehandle
-and reads that many bytes into the buffer $var.
+That third argument tests the byte size of the data on the C<INPUT> filehandle
+and reads that many bytes into the buffer C<$var>.
 
 =head2 How can I read in a file by paragraphs?
 X<file, reading by paragraphs>
