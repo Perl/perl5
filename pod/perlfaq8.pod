@@ -545,7 +545,7 @@ details of this, see the section on signals, especially the time-out
 handler for a blocking C<flock()> in L<perlipc/"Signals"> or the
 section on "Signals" in I<Programming Perl>.
 
-If exception handling is all you're interested in, use one of the 
+If exception handling is all you're interested in, use one of the
 many CPAN modules that handle exceptions, such as C<Try::Tiny>.
 
 If you want the C<atexit()> syntax (and an C<rmexit()> as well), try the
@@ -1263,7 +1263,7 @@ See the entry for C<use> in L<perlfunc> for more details.
 
 =head2 How do I keep my own module/library directory?
 
-When you build modules, tell Perl where to install the modules. 
+When you build modules, tell Perl where to install the modules.
 
 If you want to install modules for your own use, the easiest way might
 be C<local::lib>, which you can download from CPAN. It sets various
@@ -1349,9 +1349,9 @@ directory of the currently running script and puts it in C<$Bin>, which
 you can then use to construct the right library path:
 
 	use FindBin qw($Bin);
-	
+
 You can also use C<local::lib> to do much of the same thing. Install
-modules using C<local::lib>'s settings then use the module in your 
+modules using C<local::lib>'s settings then use the module in your
 program:
 
 	 use local::lib; # sets up a local lib at ~/perl5
@@ -1386,9 +1386,9 @@ environment variables, run-time switches, and in-code statements:
 =item the C<local::lib> module:
 
 	use local::lib;
-	
+
 	use local::lib "~/myown_perllib";
-	
+
 =back
 
 The last is particularly useful because it knows about machine

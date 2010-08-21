@@ -646,21 +646,21 @@ X<write, into a string>
 
 (contributed by brian d foy)
 
-If you want to C<write> into a string, you just have to <open> a 
+If you want to C<write> into a string, you just have to <open> a
 filehandle to a string, which Perl has been able to do since Perl 5.6:
 
 	open FH, '>', \my $string;
 	write( FH );
-	
+
 Since you want to be a good programmer, you probably want to use a lexical
 filehandle, even though formats are designed to work with bareword filehandles
-since the default format names take the filehandle name. However, you can 
+since the default format names take the filehandle name. However, you can
 control this with some Perl special per-filehandle variables: C<$^>, which
 names the top-of-page format, and C<$~> which shows the line format. You have
 to change the default filehandle to set these variables:
 
 	open my($fh), '>', \my $string;
-	
+
 	{ # set per-filehandle variables
 	my $old_fh = select( $fh );
 	$~ = 'ANIMAL';
@@ -671,24 +671,24 @@ to change the default filehandle to set these variables:
 	format ANIMAL_TOP =
 	 ID  Type    Name
 	.
-	
+
 	format ANIMAL =
 	@##   @<<<    @<<<<<<<<<<<<<<
 	$id,  $type,  $name
 	.
 
 Although write can work with lexical or package variables, whatever variables
-you use have to scope in the format. That most likely means you'll want to 
+you use have to scope in the format. That most likely means you'll want to
 localize some package variables:
 
 	{
 	local( $id, $type, $name ) = qw( 12 cat Buster );
 	write( $fh );
 	}
-	
+
 	print $string;
 
-There are also some tricks that you can play with C<formline> and the 
+There are also some tricks that you can play with C<formline> and the
 accumulator variable C<$^A>, but you lose a lot of the value of formats
 since C<formline> won't handle paging and so on. You end up reimplementing
 formats when you use them.
@@ -1177,7 +1177,7 @@ close the file at block exit. If the file is already open, just use this:
 
 	my $var = do { local $/; <$fh> };
 
-You can do that one better by using a localized C<@ARGV> so you can 
+You can do that one better by using a localized C<@ARGV> so you can
 eliminate the C<open>:
 
 	my $var = do { local( @ARGV, $/ ) = $file; <> };
