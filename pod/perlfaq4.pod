@@ -1562,53 +1562,23 @@ that satisfies the condition.
 
 =head2 How do I handle linked lists?
 
-In general, you usually don't need a linked list in Perl, since with
-regular arrays, you can push and pop or shift and unshift at either
-end, or you can use splice to add and/or remove arbitrary number of
-elements at arbitrary points.  Both pop and shift are O(1)
-operations on Perl's dynamic arrays.  In the absence of shifts and
-pops, push in general needs to reallocate on the order every log(N)
-times, and unshift will need to copy pointers each time.
+(contributed by brian d foy)
 
-If you really, really wanted, you could use structures as described in
-L<perldsc> or L<perltoot> and do just what the algorithm book tells
-you to do.  For example, imagine a list node like this:
+Perl's arrays do not have a fixed size, so you don't need linked lists
+if you just want to add or remove items. You can use array operations
+such as C<push>, C<pop>, C<shift>, C<unshift>, or C<splice> to do
+that.
 
-	$node = {
-		VALUE => 42,
-		LINK  => undef,
-		};
+Sometimes, however, linked lists can be useful in situations where you
+want to "shard" an array so you have have many small arrays instead of
+a single big array. You can keep arrays longer than Perl's largest
+array index, lock smaller arrays separately in threaded programs,
+reallocate less memory, or quickly insert elements in the middle of
+the chain.
 
-You could walk the list this way:
-
-	print "List: ";
-	for ($node = $head;  $node; $node = $node->{LINK}) {
-		print $node->{VALUE}, " ";
-		}
-	print "\n";
-
-You could add to the list this way:
-
-	my ($head, $tail);
-	$tail = append($head, 1);       # grow a new head
-	for $value ( 2 .. 10 ) {
-		$tail = append($tail, $value);
-		}
-
-	sub append {
-		my($list, $value) = @_;
-		my $node = { VALUE => $value };
-		if ($list) {
-			$node->{LINK} = $list->{LINK};
-			$list->{LINK} = $node;
-			}
-		else {
-			$_[0] = $node;      # replace caller's version
-			}
-		return $node;
-		}
-
-But again, Perl's built-in are virtually always good enough.
+Steve Lembark goes through the details in his YAPC::NA 2009 talk "Perly
+Linked Lists" ( http://www.slideshare.net/lembark/perly-linked-lists ), 
+although you can just use his C<LinkedList::Single> module.
 
 =head2 How do I handle circular lists?
 X<circular> X<array> X<Tie::Cycle> X<Array::Iterator::Circular>
