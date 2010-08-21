@@ -9,6 +9,7 @@
 	 (SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK|SVp_IOK|SVp_NOK|SVp_POK)))
 
 static SV *hintkey_rpn_sv, *hintkey_calcrpn_sv, *hintkey_stufftest_sv;
+static SV *hintkey_swaptwostmts_sv;
 static int (*next_keyword_plugin)(pTHX_ char *, STRLEN, OP **);
 
 /* low-level parser helpers */
@@ -171,6 +172,18 @@ static OP *THX_parse_keyword_stufftest(pTHX)
 }
 #define parse_keyword_stufftest() THX_parse_keyword_stufftest(aTHX)
 
+static OP *THX_parse_keyword_swaptwostmts(pTHX)
+{
+	OP *a, *b;
+	a = parse_fullstmt(0);
+	b = parse_fullstmt(0);
+	if(a && b)
+		PL_hints |= HINT_BLOCK_SCOPE;
+	/* should use append_list(), but that's not part of the public API */
+	return !a ? b : !b ? a : newLISTOP(OP_LINESEQ, 0, b, a);
+}
+#define parse_keyword_swaptwostmts() THX_parse_keyword_swaptwostmts(aTHX)
+
 /* plugin glue */
 
 static int THX_keyword_active(pTHX_ SV *hintkey_sv)
@@ -225,6 +238,11 @@ static int my_keyword_plugin(pTHX_
 			keyword_active(hintkey_stufftest_sv)) {
 		*op_ptr = parse_keyword_stufftest();
 		return KEYWORD_PLUGIN_STMT;
+	} else if(keyword_len == 12 &&
+			strnEQ(keyword_ptr, "swaptwostmts", 12) &&
+			keyword_active(hintkey_swaptwostmts_sv)) {
+		*op_ptr = parse_keyword_swaptwostmts();
+		return KEYWORD_PLUGIN_STMT;
 	} else {
 		return next_keyword_plugin(aTHX_
 				keyword_ptr, keyword_len, op_ptr);
@@ -238,6 +256,8 @@ BOOT:
 	hintkey_calcrpn_sv = newSVpvs_share("XS::APItest::KeywordRPN/calcrpn");
 	hintkey_stufftest_sv =
 		newSVpvs_share("XS::APItest::KeywordRPN/stufftest");
+	hintkey_swaptwostmts_sv =
+		newSVpvs_share("XS::APItest::KeywordRPN/swaptwostmts");
 	next_keyword_plugin = PL_keyword_plugin;
 	PL_keyword_plugin = my_keyword_plugin;
 
@@ -255,6 +275,9 @@ PPCODE:
 		} else if(sv_is_string(item) &&
 				strEQ(SvPVX(item), "stufftest")) {
 			keyword_enable(hintkey_stufftest_sv);
+		} else if(sv_is_string(item) &&
+				strEQ(SvPVX(item), "swaptwostmts")) {
+			keyword_enable(hintkey_swaptwostmts_sv);
 		} else {
 			croak("\"%s\" is not exported by the %s module",
 				SvPV_nolen(item), SvPV_nolen(ST(0)));
@@ -275,6 +298,9 @@ PPCODE:
 		} else if(sv_is_string(item) &&
 				strEQ(SvPVX(item), "stufftest")) {
 			keyword_disable(hintkey_stufftest_sv);
+		} else if(sv_is_string(item) &&
+				strEQ(SvPVX(item), "swaptwostmts")) {
+			keyword_disable(hintkey_swaptwostmts_sv);
 		} else {
 			croak("\"%s\" is not exported by the %s module",
 				SvPV_nolen(item), SvPV_nolen(ST(0)));

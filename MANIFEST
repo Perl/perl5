@@ -3318,6 +3318,7 @@ ext/XS-APItest-KeywordRPN/README	XS::APItest::KeywordRPN extension
 ext/XS-APItest-KeywordRPN/t/keyword_plugin.t	test keyword plugin mechanism
 ext/XS-APItest-KeywordRPN/t/multiline.t	test plugin parsing across lines
 ext/XS-APItest-KeywordRPN/t/stuff_svcur_bug.t	test for a bug in lex_stuff_pvn
+ext/XS-APItest-KeywordRPN/t/swaptwostmts.t	test recursive descent statement parsing
 ext/XS-APItest/Makefile.PL	XS::APItest extension
 ext/XS-APItest/MANIFEST		XS::APItest extension
 ext/XS-APItest/notcore.c	Test API functions when PERL_CORE is not defined

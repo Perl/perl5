@@ -45,9 +45,6 @@ Individual members of C<PL_parser> have their own documentation.
 
 #define pl_yylval	(PL_parser->yylval)
 
-/* YYINITDEPTH -- initial size of the parser's stacks.  */
-#define YYINITDEPTH 200
-
 /* XXX temporary backwards compatibility */
 #define PL_lex_brackets		(PL_parser->lex_brackets)
 #define PL_lex_brackstack	(PL_parser->lex_brackstack)
@@ -675,13 +672,9 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, bool new_filter)
     parser->old_parser = oparser = PL_parser;
     PL_parser = parser;
 
-    Newx(parser->stack, YYINITDEPTH, yy_stack_frame);
-    parser->ps = parser->stack;
-    parser->stack_size = YYINITDEPTH;
-
-    parser->stack->state = 0;
-    parser->yyerrstatus = 0;
-    parser->yychar = YYEMPTY;		/* Cause a token to be read.  */
+    parser->stack = NULL;
+    parser->ps = NULL;
+    parser->stack_size = 0;
 
     /* on scope exit, free this parser and restore any outer one */
     SAVEPARSER(parser);
@@ -750,7 +743,6 @@ Perl_parser_free(pTHX_  const yy_parser *parser)
 	PerlIO_close(parser->rsfp);
     SvREFCNT_dec(parser->rsfp_filters);
 
-    Safefree(parser->stack);
     Safefree(parser->lex_brackstack);
     Safefree(parser->lex_casestack);
     PL_parser = parser->old_parser;
@@ -1927,6 +1919,17 @@ S_force_next(pTHX_ I32 type)
 	PL_lex_state = LEX_KNOWNEXT;
     }
 #endif
+}
+
+void
+Perl_yyunlex(pTHX)
+{
+    if (PL_parser->yychar != YYEMPTY) {
+	start_force(-1);
+	NEXTVAL_NEXTTOKE = PL_parser->yylval;
+	force_next(PL_parser->yychar);
+	PL_parser->yychar = YYEMPTY;
+    }
 }
 
 STATIC SV *
@@ -3953,7 +3956,7 @@ Perl_madlex(pTHX)
     PL_thismad = 0;
 
     /* just do what yylex would do on pending identifier; leave PL_thiswhite alone */
-    if (PL_pending_ident)
+    if (PL_lex_state != LEX_KNOWNEXT && PL_pending_ident)
         return S_pending_ident(aTHX);
 
     /* previous token ate up our whitespace? */
@@ -4212,7 +4215,7 @@ Perl_yylex(pTHX)
 	SvREFCNT_dec(tmp);
     } );
     /* check if there's an identifier for us to look at */
-    if (PL_pending_ident)
+    if (PL_lex_state != LEX_KNOWNEXT && PL_pending_ident)
         return REPORT(S_pending_ident(aTHX));
 
     /* no identifier pending identification */
@@ -13937,6 +13940,49 @@ Perl_keyword_plugin_standard(pTHX_
     PERL_UNUSED_ARG(keyword_len);
     PERL_UNUSED_ARG(op_ptr);
     return KEYWORD_PLUGIN_DECLINE;
+}
+
+/*
+=for apidoc Amx|OP *|parse_fullstmt|U32 flags
+
+Parse a single complete Perl statement.  This may be a normal imperative
+statement, including optional label, or a declaration that has
+compile-time effect.  It is up to the caller to ensure that the dynamic
+parser state (L</PL_parser> et al) is correctly set to reflect the source
+of the code to be parsed and the lexical context for the statement.
+
+The op tree representing the statement is returned.  This may be a
+null pointer if the statement is null, for example if it was actually
+a subroutine definition (which has compile-time side effects).  If not
+null, it will be the result of a L</newSTATEOP> call, normally including
+a C<nextstate> or equivalent op.
+
+If an error occurs in parsing or compilation, in most cases a valid op
+tree (most likely null) is returned anyway.  The error is reflected in
+the parser state, normally resulting in a single exception at the top
+level of parsing which covers all the compilation errors that occurred.
+Some compilation errors, however, will throw an exception immediately.
+
+The I<flags> parameter is reserved for future use, and must always
+be zero.
+
+=cut
+*/
+
+OP *
+Perl_parse_fullstmt(pTHX_ U32 flags)
+{
+    OP *fullstmtop;
+    if (flags)
+	Perl_croak(aTHX_ "Parsing code internal error (%s)", "parse_fullstmt");
+    ENTER;
+    SAVEVPTR(PL_eval_root);
+    PL_eval_root = NULL;
+    if(yyparse(GRAMFULLSTMT) && !PL_parser->error_count)
+	qerror(Perl_mess(aTHX_ "Parse error"));
+    fullstmtop = PL_eval_root;
+    LEAVE;
+    return fullstmtop;
 }
 
 /*

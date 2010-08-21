@@ -3478,6 +3478,11 @@ to even) byte length.
 
 (P) The lexer got into a bad state while processing a case modifier.
 
+=item Parsing code internal error (%s)
+
+(F) Parsing code supplied by an extension violated the parser's API in
+a detectable way.
+
 =item Pattern subroutine nesting without pos change exceeded limit in regex; marked by <-- HERE in m/%s/
 
 (F) You used a pattern that uses too many nested subpattern calls without

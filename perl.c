@@ -2168,7 +2168,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     /* now parse the script */
 
     SETERRNO(0,SS_NORMAL);
-    if (yyparse() || PL_parser->error_count) {
+    if (yyparse(GRAMPROG) || PL_parser->error_count) {
 	if (PL_minus_c)
 	    Perl_croak(aTHX_ "%s had compilation errors.\n", PL_origfilename);
 	else {

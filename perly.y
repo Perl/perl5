@@ -49,7 +49,7 @@
 
 /* FIXME for MAD - is the new mintro on while and until important?  */
 
-%start prog
+%start grammar
 
 %union {
     I32	ival; /* __DEFAULT__ (marker for regen_perly.pl;
@@ -69,6 +69,8 @@
 #endif
 }
 
+%token <ival> GRAMPROG GRAMFULLSTMT
+
 %token <i_tkval> '{' '}' '[' ']' '-' '+' '$' '@' '%' '*' '&' ';'
 
 %token <opval> WORD METHOD FUNCMETH THING PMFUNC PRIVATEREF
@@ -85,13 +87,12 @@
 %token <i_tkval> LOCAL MY MYSUB REQUIRE
 %token <i_tkval> COLONATTR
 
-%type <ival> prog progstart remember mremember
+%type <ival> grammar prog progstart remember mremember
 %type <ival>  startsub startanonsub startformsub
 /* FIXME for MAD - are these two ival? */
 %type <ival> mydefsv mintro
 
-%type <opval> decl format subrout mysubrout package use peg
-
+%type <opval> fullstmt decl format subrout mysubrout package use peg
 %type <opval> block package_block mblock lineseq line loop cond else
 %type <opval> expr term subscripted scalar ary hsh arylen star amper sideff
 %type <opval> argexpr nexpr texpr iexpr mexpr mnexpr miexpr
@@ -136,6 +137,18 @@
 %token <i_tkval> PEG
 
 %% /* RULES */
+
+/* Top-level choice of what kind of thing yyparse was called to parse */
+grammar	:	GRAMPROG prog
+			{ $$ = $2; }
+	|	GRAMFULLSTMT fullstmt
+			{
+			  PL_eval_root = $2;
+			  $$ = 0;
+			  yyunlex();
+			  parser->yychar = YYEOF;
+			}
+	;
 
 /* The whole program */
 prog	:	progstart
@@ -200,7 +213,17 @@ lineseq	:	/* NULL */
 			}
 	;
 
-/* A "line" in the program */
+/* A statement, or "line", in the program */
+fullstmt:	decl
+			{ $$ = $1; }
+	|	line
+			{
+			  PL_pad_reset_pending = TRUE;
+			  $$ = $1;
+			}
+	;
+
+/* A non-declaration statement */
 line	:	label cond
 			{ $$ = newSTATEOP(0, PVAL($1), $2);
 			  TOKEN_GETMAD($1,((LISTOP*)$$)->op_first,'L'); }

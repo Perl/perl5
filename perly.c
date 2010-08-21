@@ -34,6 +34,9 @@ typedef unsigned short int yytype_uint16;
 typedef short int yytype_int16;
 typedef signed char yysigned_char;
 
+/* YYINITDEPTH -- initial size of the parser's stacks.  */
+#define YYINITDEPTH 200
+
 #ifdef DEBUGGING
 #  define YYDEBUG 1
 #else
@@ -195,7 +198,7 @@ S_clear_yystack(pTHX_  const yy_parser *parser)
     yy_stack_frame *ps     = parser->ps;
     int i = 0;
 
-    if (!parser->stack || ps == parser->stack)
+    if (!parser->stack)
 	return;
 
     YYDPRINTF ((Perl_debug_log, "clearing the parse stack\n"));
@@ -311,6 +314,8 @@ S_clear_yystack(pTHX_  const yy_parser *parser)
 	SvREFCNT_dec(ps->compcv);
 	ps--;
     }
+
+    Safefree(parser->stack);
 }
 
 
@@ -320,9 +325,9 @@ S_clear_yystack(pTHX_  const yy_parser *parser)
 
 int
 #ifdef PERL_IN_MADLY_C
-Perl_madparse (pTHX)
+Perl_madparse (pTHX_ int gramtype)
 #else
-Perl_yyparse (pTHX)
+Perl_yyparse (pTHX_ int gramtype)
 #endif
 {
     dVAR;
@@ -346,16 +351,31 @@ Perl_yyparse (pTHX)
 #ifndef PERL_IN_MADLY_C
 #  ifdef PERL_MAD
     if (PL_madskills)
-	return madparse();
+	return madparse(gramtype);
 #  endif
 #endif
 
     YYDPRINTF ((Perl_debug_log, "Starting parse\n"));
 
     parser = PL_parser;
-    ps = parser->ps;
 
-    ENTER;  /* force parser stack cleanup before we return */
+    ENTER;  /* force parser state cleanup/restoration before we return */
+    SAVEPPTR(parser->yylval.pval);
+    SAVEINT(parser->yychar);
+    SAVEINT(parser->yyerrstatus);
+    SAVEINT(parser->stack_size);
+    SAVEINT(parser->yylen);
+    SAVEVPTR(parser->stack);
+    SAVEVPTR(parser->ps);
+
+    /* initialise state for this parse */
+    parser->yychar = gramtype;
+    parser->yyerrstatus = 0;
+    parser->stack_size = YYINITDEPTH;
+    parser->yylen = 0;
+    Newx(parser->stack, YYINITDEPTH, yy_stack_frame);
+    ps = parser->ps = parser->stack;
+    ps->state = 0;
     SAVEDESTRUCTOR_X(S_clear_yystack, parser);
 
 /*------------------------------------------------------------.

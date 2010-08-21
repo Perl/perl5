@@ -622,6 +622,8 @@ AMpd	|bool	|lex_next_chunk	|U32 flags
 AMpd	|I32	|lex_peek_unichar|U32 flags
 AMpd	|I32	|lex_read_unichar|U32 flags
 AMpd	|void	|lex_read_space	|U32 flags
+: Public parser API
+AMpd	|OP*	|parse_fullstmt	|U32 flags
 : Used in various files
 Ap	|void	|op_null	|NN OP* o
 : FIXME. Used by Data::Alias
@@ -1326,8 +1328,9 @@ p	|void	|write_to_stderr|NN SV* msv
 p	|int	|yyerror	|NN const char *const s
 : Used in perly.y, and by Data::Alias
 EXp	|int	|yylex
+p	|void	|yyunlex
 : Used in perl.c, pp_ctl.c
-p	|int	|yyparse
+p	|int	|yyparse	|int gramtype
 : Only used in scope.c
 p	|void	|parser_free	|NN const yy_parser *parser
 #if defined(PERL_IN_TOKE_C)
@@ -2341,7 +2344,7 @@ s	|void	|start_force	|int where
 s	|void	|curmad		|char slot|NULLOK SV *sv
 #  endif
 Mp	|int	|madlex
-Mp	|int	|madparse
+Mp	|int	|madparse	|int gramtype
 #endif
 #if !defined(HAS_SIGNBIT)
 AMdnoP	|int	|Perl_signbit	|NV f

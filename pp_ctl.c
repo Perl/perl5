@@ -3039,7 +3039,7 @@ Perl_find_runcv(pTHX_ U32 *db_seqp)
  *   3: yyparse() died
  */
 STATIC int
-S_try_yyparse(pTHX)
+S_try_yyparse(pTHX_ int gramtype)
 {
     int ret;
     dJMPENV;
@@ -3048,7 +3048,7 @@ S_try_yyparse(pTHX)
     JMPENV_PUSH(ret);
     switch (ret) {
     case 0:
-	ret = yyparse() ? 1 : 0;
+	ret = yyparse(gramtype) ? 1 : 0;
 	break;
     case 3:
 	break;
@@ -3137,7 +3137,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     /* note that yyparse() may raise an exception, e.g. C<BEGIN{die}>,
      * so honour CATCH_GET and trap it here if necessary */
 
-    yystatus = (!in_require && CATCH_GET) ? S_try_yyparse(aTHX) : yyparse();
+    yystatus = (!in_require && CATCH_GET) ? S_try_yyparse(aTHX_ GRAMPROG) : yyparse(GRAMPROG);
 
     if (yystatus || PL_parser->error_count || !PL_eval_root) {
 	SV **newsp;			/* Used by POPBLOCK. */
