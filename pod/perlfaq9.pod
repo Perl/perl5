@@ -663,10 +663,10 @@ can work with FTP just like it can with many other protocols. C<LWP::Simple>
 makes it quite easy to fetch a file:
 
 	use LWP::Simple;
-	
+
 	my $data = get( 'ftp://some.ftp.site/some/file.txt' );
-	
-If you want more direct or low-level control of the FTP process, you can use 
+
+If you want more direct or low-level control of the FTP process, you can use
 the C<Net::FTP> module (in the Standard Library since Perl 5.8). It's
 documentation has examples showing you just how to do that.
 

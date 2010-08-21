@@ -1577,7 +1577,7 @@ reallocate less memory, or quickly insert elements in the middle of
 the chain.
 
 Steve Lembark goes through the details in his YAPC::NA 2009 talk "Perly
-Linked Lists" ( http://www.slideshare.net/lembark/perly-linked-lists ), 
+Linked Lists" ( http://www.slideshare.net/lembark/perly-linked-lists ),
 although you can just use his C<LinkedList::Single> module.
 
 =head2 How do I handle circular lists?
