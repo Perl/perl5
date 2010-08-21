@@ -774,64 +774,64 @@ Within Perl, you may use this directly:
 =head2 How come when I open a file read-write it wipes it out?
 X<clobber> X<read-write> X<clobbering> X<truncate> X<truncating>
 
-Because you're using something like this, which truncates the file and
+Because you're using something like this, which truncates the file
 I<then> gives you read-write access:
 
 	open my $fh, '+>', '/path/name'; # WRONG (almost always)
 
 Whoops. You should instead use this, which will fail if the file
-doesn't exist.
+doesn't exist:
 
 	open my $fh, '+<', '/path/name'; # open for update
 
 Using ">" always clobbers or creates. Using "<" never does
 either. The "+" doesn't change this.
 
-Here are examples of many kinds of file opens. Those using sysopen()
-all assume
+Here are examples of many kinds of file opens. Those using C<sysopen>
+all assume that you've pulled in the constants from C<Fcntl>:
 
 	use Fcntl;
 
 To open file for reading:
 
-	open my $fh, '<', $path                                 or die $!;
-	sysopen my $fh, $path, O_RDONLY                         or die $!;
+	open my $fh, '<', $path                               or die $!;
+	sysopen my $fh, $path, O_RDONLY                       or die $!;
 
 To open file for writing, create new file if needed or else truncate old file:
 
-	open my $fh, '>', $path                                 or die $!;
-	sysopen my $fh, $path, O_WRONLY|O_TRUNC|O_CREAT         or die $!;
-	sysopen my $fh, $path, O_WRONLY|O_TRUNC|O_CREAT, 0666   or die $!;
+	open my $fh, '>', $path                               or die $!;
+	sysopen my $fh, $path, O_WRONLY|O_TRUNC|O_CREAT       or die $!;
+	sysopen my $fh, $path, O_WRONLY|O_TRUNC|O_CREAT, 0666 or die $!;
 
 To open file for writing, create new file, file must not exist:
 
-	sysopen my $fh, $path, O_WRONLY|O_EXCL|O_CREAT          or die $!;
-	sysopen my $fh, $path, O_WRONLY|O_EXCL|O_CREAT, 0666    or die $!;
+	sysopen my $fh, $path, O_WRONLY|O_EXCL|O_CREAT        or die $!;
+	sysopen my $fh, $path, O_WRONLY|O_EXCL|O_CREAT, 0666  or die $!;
 
 To open file for appending, create if necessary:
 
-	open my $fh, '>>' $path                                 or die $!;
-	sysopen my $fh, $path, O_WRONLY|O_APPEND|O_CREAT        or die $!;
-	sysopen my $fh, $path, O_WRONLY|O_APPEND|O_CREAT, 0666  or die $!;
+	open my $fh, '>>' $path                               or die $!;
+	sysopen my $fh, $path, O_WRONLY|O_APPEND|O_CREAT      or die $!;
+	sysopen my $fh, $path, O_WRONLY|O_APPEND|O_CREAT, 0666 or die $!;
 
 To open file for appending, file must exist:
 
-	sysopen my $fh, $path, O_WRONLY|O_APPEND                or die $!;
+	sysopen my $fh, $path, O_WRONLY|O_APPEND              or die $!;
 
 To open file for update, file must exist:
 
-	open my $fh, '+<', $path                                or die $!;
-	sysopen my $fh, $path, O_RDWR                           or die $!;
+	open my $fh, '+<', $path                              or die $!;
+	sysopen my $fh, $path, O_RDWR                         or die $!;
 
 To open file for update, create file if necessary:
 
-	sysopen my $fh, $path, O_RDWR|O_CREAT                   or die $!;
-	sysopen my $fh, $path, O_RDWR|O_CREAT, 0666             or die $!;
+	sysopen my $fh, $path, O_RDWR|O_CREAT                 or die $!;
+	sysopen my $fh, $path, O_RDWR|O_CREAT, 0666           or die $!;
 
 To open file for update, file must not exist:
 
-	sysopen my $fh, $path, O_RDWR|O_EXCL|O_CREAT            or die $!;
-	sysopen my $fh, $path, O_RDWR|O_EXCL|O_CREAT, 0666      or die $!;
+	sysopen my $fh, $path, O_RDWR|O_EXCL|O_CREAT          or die $!;
+	sysopen my $fh, $path, O_RDWR|O_EXCL|O_CREAT, 0666    or die $!;
 
 To open a file without blocking, creating if necessary:
 
