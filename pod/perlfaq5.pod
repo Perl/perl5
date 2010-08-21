@@ -1128,8 +1128,8 @@ string without actually storing it in memory:
 	map_file my $string, $filename;
 
 Once mapped, you can treat C<$string> as you would any other string.
-Since you don't actually load the data, mmap-ing is very fast and does
-not increase your memory footprint.
+Since you don't necessarily have to load the data, mmap-ing can be
+very fast and may not increase your memory footprint.
 
 If you really want to load the entire file, you can use the
 C<File::Slurp> module to do it in one step.
