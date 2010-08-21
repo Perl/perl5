@@ -333,9 +333,9 @@ Recommended books on (or mostly on) Perl follow.
 	http://www.oreilly.com/catalog/cookbook/
 
 	Effective Perl Programming
-	by Joseph Hall
-	ISBN 0-201-41975-0 [1st edition 1998]
-	http://www.awl.com/
+	by Joseph N. Hall, Joshua A. McAdams, brian d foy
+	ISBN 0-321-49694-9 [2nd edition 2010]
+	http://www.effectiveperlprogramming.com/
 
 	Real World SQL Server Administration with Perl
 	by Linchi Shea
