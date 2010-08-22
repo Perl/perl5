@@ -349,7 +349,7 @@ Recommended books on (or mostly on) Perl follow.
 	ISBN: 0-596-00173-8 [1st edition July 2005]
 	http://www.oreilly.com/catalog/perlbp/
 
-	Higher Order Perl
+	Higher-Order Perl
 	by Mark-Jason Dominus
 	ISBN: 1558607013 [1st edition March 2005]
 	http://hop.perl.plover.com/
