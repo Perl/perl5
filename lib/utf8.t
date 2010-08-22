@@ -37,7 +37,7 @@ no utf8; # Ironic, no?
 #
 #
 
-plan tests => 150;
+plan tests => 157;
 
 {
     # bug id 20001009.001
@@ -450,4 +450,16 @@ SKIP: {
     ok(utf8::valid(chr(0x260)), "0x260");
     ok(utf8::valid(chr(0x270)), "0x270");
     ok(utf8::valid(chr(0x280)), "0x280");
+}
+
+{
+   use utf8;
+   ok( !utf8::is_utf8( "asd"         ), "Wasteful format - qq{}" );
+   ok( !utf8::is_utf8( 'asd'         ), "Wasteful format - q{}" );
+   ok( !utf8::is_utf8( qw(asd)       ), "Wasteful format - qw{}" );
+   ok( !utf8::is_utf8( (asd => 1)[0] ), "Wasteful format - =>" );
+   local $TODO = 'Avoid needless use of UTF8=1 format [RT#56336]';
+   ok( !utf8::is_utf8( asd           ), "Wasteful format - bareword" );
+   ok( !utf8::is_utf8( -asd          ), "Wasteful format - -word" );
+   ok( !utf8::is_utf8( asd::         ), "Wasteful format - word::" );
 }
