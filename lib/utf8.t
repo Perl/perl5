@@ -458,7 +458,6 @@ SKIP: {
    ok( !utf8::is_utf8( 'asd'         ), "Wasteful format - q{}" );
    ok( !utf8::is_utf8( qw(asd)       ), "Wasteful format - qw{}" );
    ok( !utf8::is_utf8( (asd => 1)[0] ), "Wasteful format - =>" );
-   local $TODO = 'Avoid needless use of UTF8=1 format [RT#56336]';
    ok( !utf8::is_utf8( asd           ), "Wasteful format - bareword" );
    ok( !utf8::is_utf8( -asd          ), "Wasteful format - -word" );
    ok( !utf8::is_utf8( asd::         ), "Wasteful format - word::" );

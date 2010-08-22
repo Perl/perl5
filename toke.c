@@ -6290,16 +6290,15 @@ Perl_yylex(pTHX)
 
 		/* if we saw a global override before, get the right name */
 
+		sv = S_newSV_maybe_utf8(aTHX_ PL_tokenbuf,
+		    len ? len : strlen(PL_tokenbuf));
 		if (gvp) {
+		    SV * const tmp_sv = sv;
 		    sv = newSVpvs("CORE::GLOBAL::");
-		    sv_catpv(sv,PL_tokenbuf);
+		    sv_catsv(sv, tmp_sv);
+		    SvREFCNT_dec(tmp_sv);
 		}
-		else {
-		    /* If len is 0, newSVpv does strlen(), which is correct.
-		       If len is non-zero, then it will be the true length,
-		       and so the scalar will be created correctly.  */
-		    sv = newSVpv(PL_tokenbuf,len);
-		}
+
 #ifdef PERL_MAD
 		if (PL_madskills && !PL_thistoken) {
 		    char *start = SvPVX(PL_linestr) + PL_realtokenstart;
@@ -6309,17 +6308,11 @@ Perl_yylex(pTHX)
 #endif
 
 		/* Presume this is going to be a bareword of some sort. */
-
 		CLINE;
 		pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
 		pl_yylval.opval->op_private = OPpCONST_BARE;
-		/* UTF-8 package name? */
-		if (UTF && !IN_BYTES &&
-		    is_utf8_string((U8*)SvPVX_const(sv), SvCUR(sv)))
-		    SvUTF8_on(sv);
 
 		/* And if "Foo::", then that's what it certainly is. */
-
 		if (len)
 		    goto safe_bareword;
 
