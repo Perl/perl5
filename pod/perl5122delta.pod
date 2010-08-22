@@ -73,6 +73,15 @@ to external globbing via C<pp_glob>.
 
 C<File::Copy::copy(FILE, DIR)> is now documented.
 
+=item C<File::Spec>
+
+Upgraded from version 3.31 to 3.31_01.
+
+Several portability fixes were made in C<File::Spec::VMS>: a colon is now
+recognized as a delimiter in native filespecs; caret-escaped delimiters are
+recognized for better handling of extended filespecs; C<catpath()> returns
+an empty directory rather than the current directory if the input directory
+name is empty; C<abs2rel()> properly handles Unix-style input.
 
 =back
 
@@ -184,7 +193,7 @@ caused some extensions to fail to build.
 
 =item *
 
-Several memory leaks in L<stat()|perlfunc/"stat FILEHANDLE"> has been fixed.
+Several memory leaks in L<stat()|perlfunc/"stat FILEHANDLE"> have been fixed.
 
 =back
 
