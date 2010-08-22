@@ -497,7 +497,7 @@ of a variable, or as a delimiter for any kind of quote construct.
 Double darn.
 
     $a = ("foo bar");
-    $b = q baz;
+    $b = q baz ;
     print "a is $a, b is $b\n";
 
     # perl4 prints: a is foo bar, b is baz
