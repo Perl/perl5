@@ -135,8 +135,8 @@ h Miscellaneous
   perldoc		Look up Perl documentation in Pod format
 
   perlhist		Perl history records
-d perldelta		Perl changes since previous version
-D perl5135delta		Perl changes in version 5.13.5
+D perldelta		Perl changes since previous version
+d perl5135delta		Perl changes in version 5.13.5
   perl5134delta		Perl changes in version 5.13.4
   perl5133delta		Perl changes in version 5.13.3
   perl5132delta		Perl changes in version 5.13.2

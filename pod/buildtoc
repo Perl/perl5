@@ -111,11 +111,11 @@ foreach (<MASTER>) {
     $flags{aux} = 1 if $flags =~ tr/a//d;
 
     if ($flags =~ tr/D//d) {
-      $flags{perlpod_omit} = 1;
+      $flags{manifest_omit} = 1;
       $delta_source = "$filename.pod";
     }
     if ($flags =~ tr/d//d) {
-      $flags{manifest_omit} = 1;
+      $flags{perlpod_omit} = 1;
       $delta_target = "$filename.pod";
     }
     $Generated{"$filename.pod"}++ if $flags =~ tr/g//d;
@@ -713,8 +713,8 @@ sub do_unix {
 			sort keys %Copies, grep {!/perltoc/} keys %Generated
 		    }mge;
 
-# pod/perldelta.pod: pod/perl511delta.pod
-# 	cd pod && $(LNS) perl511delta.pod perldelta.pod
+# pod/perl511delta.pod: pod/perldelta.pod
+# 	cd pod && $(LNS) perldelta.pod perl511delta.pod
 
   $makefile_SH =~ s!(
 pod/perl[a-z0-9_]+\.pod: pod/perl[a-z0-9_]+\.pod

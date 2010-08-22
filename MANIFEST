@@ -3975,7 +3975,6 @@ pod/perl5131delta.pod		Perl changes in version 5.13.1
 pod/perl5132delta.pod		Perl changes in version 5.13.2
 pod/perl5133delta.pod		Perl changes in version 5.13.3
 pod/perl5134delta.pod		Perl changes in version 5.13.4
-pod/perl5135delta.pod		Perl changes in version 5.13.5
 pod/perl561delta.pod		Perl changes in version 5.6.1
 pod/perl56delta.pod		Perl changes in version 5.6
 pod/perl570delta.pod		Perl changes in version 5.7.0
@@ -4013,6 +4012,7 @@ pod/perldbmfilter.pod		Perl DBM filters
 pod/perldebguts.pod		Perl debugging guts and tips
 pod/perldebtut.pod		Perl debugging tutorial
 pod/perldebug.pod		Perl debugging
+pod/perldelta.pod		Perl changes since previous version
 pod/perldiag.pod		Perl diagnostic messages
 pod/perldoc.pod			Look up Perl documentation in Pod format
 pod/perldsc.pod			Perl data structures intro
