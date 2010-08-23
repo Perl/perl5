@@ -1,5 +1,8 @@
 Revision history for Perl module Unicode::Collate.
 
+0.57  Sun Aug 22 22:39:58 2010
+    - Unicode::Collate::Locale newly supports locales: ca, et, fi, lv, sk, sl.
+
 0.56  Sun Aug  8 20:24:03 2010
     - Unicode::Collate::Locale newly supports locales: eo, nb, ro, sv.
     ! renamed t/locale_{xy}.t to t/loc_{xy}.t (for safer 8.3 names)

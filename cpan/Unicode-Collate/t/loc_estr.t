@@ -4,7 +4,7 @@ use warnings;
 use Unicode::Collate::Locale;
 
 use Test;
-plan tests => 22;
+plan tests => 26;
 
 my $objEsTrad = Unicode::Collate::Locale->
     new(locale => 'ES-trad', normalization => undef);
@@ -25,7 +25,15 @@ ok($objEsTrad->gt("o", "n\x{303}"));
 
 # 10
 
+ok($objEsTrad->eq("a\x{300}a", "aa\x{300}"));
+
 $objEsTrad->change(level => 2);
+
+ok($objEsTrad->gt("a\x{300}a", "aa\x{300}"));
+ok($objEsTrad->lt("Ca\x{300}ca\x{302}", "ca\x{302}ca\x{300}"));
+ok($objEsTrad->lt("ca\x{300}ca\x{302}", "Ca\x{302}ca\x{300}"));
+
+# 14
 
 ok($objEsTrad->eq("ch", "Ch"));
 ok($objEsTrad->eq("Ch", "CH"));
@@ -33,7 +41,7 @@ ok($objEsTrad->eq("ll", "Ll"));
 ok($objEsTrad->eq("Ll", "LL"));
 ok($objEsTrad->eq("n\x{303}", "N\x{303}"));
 
-# 15
+# 19
 
 $objEsTrad->change(level => 3);
 
@@ -45,4 +53,4 @@ ok($objEsTrad->lt("n\x{303}", "N\x{303}"));
 ok($objEsTrad->eq("n\x{303}", pack('U', 0xF1)));
 ok($objEsTrad->eq("N\x{303}", pack('U', 0xD1)));
 
-# 22
+# 26
