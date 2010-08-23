@@ -240,6 +240,11 @@ when there are CODEREFs in C<@INC>.
 A bug that could cause "C<Unknown error>" messages when
 "C<call_sv(code, G_EVAL)>" is called from an XS destructor has been fixed.
 
+=item *
+
+The implementation of the C<open $fh, 'E<gt>' \$buffer> feature
+now supports get/set magic and thus tied buffers correctly.
+
 =back
 
 =head1 Platform Specific Notes
