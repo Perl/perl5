@@ -209,7 +209,7 @@ for (@ops) {
     my($safe_desc) = $desc{$_};
 
     # Have to escape double quotes and escape characters.
-    $safe_desc =~ s/(^|[^\\])([\\"])/$1\\$2/g;
+    $safe_desc =~ s/([\\"])/\\$1/g;
 
     print qq(\t"$safe_desc",\n);
 }
