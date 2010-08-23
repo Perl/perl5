@@ -13822,14 +13822,17 @@ File::Find::find({
 
 my @mktables_list_output_files;
 
-if ($write_unchanged_files) {
+if (! -e $file_list) {
+    print "'$file_list' doesn't exist, so forcing rebuild.\n" if $verbosity >= $VERBOSE;
+    $write_unchanged_files = 1;
+} elsif ($write_unchanged_files) {
     print "Not checking file list '$file_list'.\n" if $verbosity >= $VERBOSE;
 }
 else {
     print "Reading file list '$file_list'\n" if $verbosity >= $VERBOSE;
     my $file_handle;
     if (! open $file_handle, "<", $file_list) {
-        Carp::my_carp("Failed to open '$file_list' (this is expected to be missing the first time); turning on -globlist option instead: $!");
+        Carp::my_carp("Failed to open '$file_list'; turning on -globlist option instead: $!");
         $glob_list = 1;
     }
     else {
