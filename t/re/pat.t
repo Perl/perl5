@@ -23,7 +23,7 @@ BEGIN {
 }
 
 
-plan tests => 350;  # Update this when adding/deleting tests.
+plan tests => 360;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1003,7 +1003,27 @@ sub run_tests {
             ok $str=~/.*\z/, "implict MBOL check string disable does not break things length=$i";
         }
     }
+    {
+        # we are actually testing that we dont die when executing these patterns
+        use utf8;
+        my $e = "Böck";
+        ok(utf8::is_utf8($e),"got a unicode string - rt75680");
 
+        ok($e !~ m/.*?[x]$/, "unicode string against /.*?[x]\$/ - rt75680");
+        ok($e !~ m/.*?\p{Space}$/i, "unicode string against /.*?\\p{space}\$/i - rt75680");
+        ok($e !~ m/.*?[xyz]$/, "unicode string against /.*?[xyz]\$/ - rt75680");
+        ok($e !~ m/(.*?)[,\p{isSpace}]+((?:\p{isAlpha}[\p{isSpace}\.]{1,2})+)\p{isSpace}*$/, "unicode string against big pattern - rt75680");
+    }
+    {
+        # we are actually testing that we dont die when executing these patterns
+        my $e = "B\x{f6}ck";
+        ok(!utf8::is_utf8($e), "got a latin string - rt75680");
+
+        ok($e !~ m/.*?[x]$/, "latin string against /.*?[x]\$/ - rt75680");
+        ok($e !~ m/.*?\p{Space}$/i, "latin string against /.*?\\p{space}\$/i - rt75680");
+        ok($e !~ m/.*?[xyz]$/,"latin string against /.*?[xyz]\$/ - rt75680");
+        ok($e !~ m/(.*?)[,\p{isSpace}]+((?:\p{isAlpha}[\p{isSpace}\.]{1,2})+)\p{isSpace}*$/,"latin string against big pattern - rt75680");
+    }
 } # End of sub run_tests
 
 1;
