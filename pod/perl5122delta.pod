@@ -117,6 +117,11 @@ L<perlfunc/srand>'s usage has been clarified.
 
 =item *
 
+The entry for L<perlfunc/die> was reorganized to emphasize its
+role in the exception mechanism.
+
+=item *
+
 Perl's L<INSTALL> file has been clarified to explicitly state that Perl
 requires a C89 compliant ANSI C Compiler.
 
