@@ -3,14 +3,16 @@
    refactor it and keep the same name, than either alternative - rename it,
    or duplicate all of the Makefile logic for a second program.  */
 
-#include <stdio.h>
-#include <stdlib.h>
-/* If it turns out that we need to make this conditional on config.sh derived
-   values, it might be easier just to rip out the use of strerrer().  */
-#include <string.h>
-/* If a platform doesn't support errno.h, it's probably so strange that
-   "hello world" won't port easily to it.  */
-#include <errno.h>
+#define PERLIO_NOT_STDIO 0
+#define PERL_REENTR_API 0
+#define WIN32IO_IS_STDIO
+
+#include "EXTERN.h"
+#include "perl.h"
+
+#ifdef WIN32
+#  undef strerror
+#endif
 
 void output_block_to_file(const char *progname, const char *filename,
 			  const char *block, size_t count) {
@@ -43,14 +45,12 @@ void output_block_to_file(const char *progname, const char *filename,
 }
 
 
-static const char PL_uuemap[]
+static const char my_uuemap[]
 = "`!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_";
 
-typedef unsigned char U8;
-
 /* This will ensure it is all zeros.  */
-static char PL_uudmap[256];
-static char PL_bitcount[256];
+static char my_uudmap[256];
+static char my_bitcount[256];
 
 int main(int argc, char **argv) {
   size_t i;
@@ -61,28 +61,28 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  for (i = 0; i < sizeof(PL_uuemap) - 1; ++i)
-    PL_uudmap[(U8)PL_uuemap[i]] = (char)i;
+  for (i = 0; i < sizeof(my_uuemap) - 1; ++i)
+    my_uudmap[(U8)my_uuemap[i]] = (char)i;
   /*
    * Because ' ' and '`' map to the same value,
    * we need to decode them both the same.
    */
-  PL_uudmap[(U8)' '] = 0;
+  my_uudmap[(U8)' '] = 0;
 
-  output_block_to_file(argv[0], argv[1], PL_uudmap, sizeof(PL_uudmap));
+  output_block_to_file(argv[0], argv[1], my_uudmap, sizeof(my_uudmap));
 
   for (bits = 1; bits < 256; bits++) {
-    if (bits & 1)	PL_bitcount[bits]++;
-    if (bits & 2)	PL_bitcount[bits]++;
-    if (bits & 4)	PL_bitcount[bits]++;
-    if (bits & 8)	PL_bitcount[bits]++;
-    if (bits & 16)	PL_bitcount[bits]++;
-    if (bits & 32)	PL_bitcount[bits]++;
-    if (bits & 64)	PL_bitcount[bits]++;
-    if (bits & 128)	PL_bitcount[bits]++;
+    if (bits & 1)	my_bitcount[bits]++;
+    if (bits & 2)	my_bitcount[bits]++;
+    if (bits & 4)	my_bitcount[bits]++;
+    if (bits & 8)	my_bitcount[bits]++;
+    if (bits & 16)	my_bitcount[bits]++;
+    if (bits & 32)	my_bitcount[bits]++;
+    if (bits & 64)	my_bitcount[bits]++;
+    if (bits & 128)	my_bitcount[bits]++;
   }
 
-  output_block_to_file(argv[0], argv[2], PL_bitcount, sizeof(PL_bitcount));
+  output_block_to_file(argv[0], argv[2], my_bitcount, sizeof(my_bitcount));
 
   return 0;
 }
