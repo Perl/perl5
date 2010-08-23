@@ -1331,17 +1331,6 @@ listexprcom:	/* NULL */
 			{ $$ = (OP*)NULL; }
 	|	expr
 			{ $$ = $1; }
-	|	expr ','
-			{
-#ifdef MAD
-			  OP* op = newNULLLIST();
-			  token_getmad($2,op,',');
-			  $$ = append_elem(OP_LIST, $1, op);
-#else
-			  $$ = $1;
-#endif
-
-			}
 	;
 
 /* A little bit of trickery to make "for my $foo (@bar)" actually be
