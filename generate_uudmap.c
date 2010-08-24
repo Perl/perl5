@@ -14,17 +14,11 @@
 #  undef strerror
 #endif
 
-void output_block_to_file(const char *progname, const char *filename,
-			  const char *block, size_t count) {
-  FILE *const out = fopen(filename, "w");
+static void
+format_char_block(FILE *out, const void *thing, size_t count) {
+  const char *block = (const char *)thing;
 
-  if (!out) {
-    fprintf(stderr, "%s: Could not open '%s': %s\n", progname, filename,
-	    strerror(errno));
-    exit(1);
-  }
-
-  fputs("{\n    ", out);
+  fputs("    ", out);
   while (count--) {
     fprintf(out, "%d", *block);
     block++;
@@ -35,7 +29,24 @@ void output_block_to_file(const char *progname, const char *filename,
       }
     }
   }
-  fputs("\n}\n", out);
+  fputc('\n', out);
+}
+
+static void
+output_to_file(const char *progname, const char *filename,
+	       void (format_function)(FILE *out, const void *thing, size_t count),
+	       const void *thing, size_t count) {
+  FILE *const out = fopen(filename, "w");
+
+  if (!out) {
+    fprintf(stderr, "%s: Could not open '%s': %s\n", progname, filename,
+	    strerror(errno));
+    exit(1);
+  }
+
+  fputs("{\n", out);
+  format_function(out, thing, count);
+  fputs("}\n", out);
 
   if (fclose(out)) {
     fprintf(stderr, "%s: Could not close '%s': %s\n", progname, filename,
@@ -69,7 +80,8 @@ int main(int argc, char **argv) {
    */
   my_uudmap[(U8)' '] = 0;
 
-  output_block_to_file(argv[0], argv[1], my_uudmap, sizeof(my_uudmap));
+  output_to_file(argv[0], argv[1], &format_char_block,
+		 (const void *)my_uudmap, sizeof(my_uudmap));
 
   for (bits = 1; bits < 256; bits++) {
     if (bits & 1)	my_bitcount[bits]++;
@@ -82,9 +94,8 @@ int main(int argc, char **argv) {
     if (bits & 128)	my_bitcount[bits]++;
   }
 
-  output_block_to_file(argv[0], argv[2], my_bitcount, sizeof(my_bitcount));
+  output_to_file(argv[0], argv[2], &format_char_block,
+		 (const void *)my_bitcount, sizeof(my_bitcount));
 
   return 0;
 }
-
-  
