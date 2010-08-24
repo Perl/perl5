@@ -9,7 +9,7 @@ use 5.006;
 # Broken out of MakeMaker from version 4.11
 
 use strict;
-our $VERSION = 6.56;
+our $VERSION = 6.57_01;
 
 use Config;
 use Cwd 'cwd';
@@ -39,6 +39,7 @@ sub _unix_os2_ext {
     my($so)   = $Config{so};
     my($libs) = defined $Config{perllibs} ? $Config{perllibs} : $Config{libs};
     my $Config_libext = $Config{lib_ext} || ".a";
+    my $Config_dlext = $Config{dlext};
 
 
     # compute $extralibs, $bsloadlibs and $ldloadlibs from
@@ -130,8 +131,10 @@ sub _unix_os2_ext {
                  && ($Config{'archname'} !~ /RM\d\d\d-svr4/)
 		 && ($thislib .= "_s") ){ # we must explicitly use _s version
 	    } elsif (-f ($fullname="$thispth/lib$thislib$Config_libext")){
+	    } elsif (defined($Config_dlext)
+                 && -f ($fullname="$thispth/lib$thislib.$Config_dlext")){
 	    } elsif (-f ($fullname="$thispth/$thislib$Config_libext")){
-            } elsif (-f ($fullname="$thispth/lib$thislib.dll$Config_libext")){
+	    } elsif (-f ($fullname="$thispth/lib$thislib.dll$Config_libext")){
 	    } elsif (-f ($fullname="$thispth/Slib$thislib$Config_libext")){
 	    } elsif ($^O eq 'dgux'
 		 && -l ($fullname="$thispth/lib$thislib$Config_libext")

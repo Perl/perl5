@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '6.5601';
+$VERSION = '6.57_01';
 
 require ExtUtils::MM_Any;
 our @ISA = qw(ExtUtils::MM_Any);
@@ -2593,7 +2593,7 @@ sub parse_abstract {
         $inpod = /^=(?!cut)/ ? 1 : /^=cut/ ? 0 : $inpod;
         next if !$inpod;
         chop;
-        next unless /^($package(?:\.pm)?\s+\-+\s+)(.*)/;
+        next unless /^($package(?:\.pm)? \s+ -+ \s+)(.*)/x;
         $result = $2;
         last;
     }
@@ -2634,7 +2634,7 @@ sub parse_version {
         $inpod = /^=(?!cut)/ ? 1 : /^=cut/ ? 0 : $inpod;
         next if $inpod || /^\s*#/;
         chop;
-        next if /^\s*(if|unless)/;
+        next if /^\s*(if|unless|elsif)/;
         if ( m{^ \s* package \s+ \w[\w\:\']* \s+ (v?[0-9._]+) \s* ;  }x ) {
             local $^W = 0;
             $result = $1;

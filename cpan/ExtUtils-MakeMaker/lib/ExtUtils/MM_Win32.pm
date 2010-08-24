@@ -27,7 +27,7 @@ use ExtUtils::MakeMaker qw( neatvalue );
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
 our @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
-our $VERSION = '6.56';
+our $VERSION = '6.57_01';
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
 
@@ -288,17 +288,6 @@ sub dynamic_lib {
     my($inst_dynamic_dep) = $attribs{INST_DYNAMIC_DEP} || "";
     my($ldfrom) = '$(LDFROM)';
     my(@m);
-
-# one thing for GCC/Mingw32:
-# we try to overcome non-relocateable-DLL problems by generating
-#    a (hopefully unique) image-base from the dll's name
-# -- BKS, 10-19-1999
-    if ($GCC) { 
-	my $dllname = $self->{BASEEXT} . "." . $self->{DLEXT};
-	$dllname =~ /(....)(.{0,4})/;
-	my $baseaddr = unpack("n", $1 ^ $2);
-	$otherldflags .= sprintf("-Wl,--image-base,0x%x0000 ", $baseaddr);
-    }
 
     push(@m,'
 # This section creates the dynamically loadable $(INST_DYNAMIC)

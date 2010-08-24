@@ -1,7 +1,7 @@
 package ExtUtils::MM_Any;
 
 use strict;
-our $VERSION = '6.56';
+our $VERSION = '6.57_01';
 
 use Carp;
 use File::Spec;
@@ -984,7 +984,7 @@ sub _dump_hash {
                 );
                 if (exists $customs->{$key}) {
                     my %k_custom = %{$customs->{$key}};
-                    foreach my $k qw(key_sort max_key_length customs) {
+                    foreach my $k (qw(key_sort max_key_length customs)) {
                         $k_options{$k} = $k_custom{$k} if exists $k_custom{$k};
                     }
                 }
