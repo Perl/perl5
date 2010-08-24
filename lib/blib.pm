@@ -67,6 +67,11 @@ sub import
    $dir = File::Spec->curdir unless ($dir);
    die "$dir is not a directory\n" unless (-d $dir);
   }
+
+ # detaint: if the user asked for blib, s/he presumably knew
+ # what s/he wanted
+ $dir = $1 if $dir =~ /^(.*)$/;
+
  my $i = 5;
  my($blib, $blib_lib, $blib_arch);
  while ($i--)
