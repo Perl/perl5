@@ -245,6 +245,11 @@ A bug that could cause "C<Unknown error>" messages when
 The implementation of the C<open $fh, 'E<gt>' \$buffer> feature
 now supports get/set magic and thus tied buffers correctly.
 
+=item *
+
+The C<pp_getc>, C<pp_tell>, and C<pp_eof> opcodes now make room on the 
+stack for their return values in cases where no argument was passed in.
+
 =back
 
 =head1 Platform Specific Notes
