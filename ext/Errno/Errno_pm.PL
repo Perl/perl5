@@ -357,8 +357,9 @@ my %err;
 BEGIN {
     %err = (
 EDQ
-   
-    my @err = sort { $err{$a} <=> $err{$b} } keys %err;
+
+    my @err = sort { $err{$a} <=> $err{$b} }
+	grep { $err{$_} =~ /-?\d+$/ } keys %err;
 
     foreach $err (@err) {
 	print "\t$err => $err{$err},\n";
