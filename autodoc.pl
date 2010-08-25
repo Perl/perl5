@@ -184,11 +184,13 @@ _EOH_
     if (@$missing) {
         print $fh "\n=head1 Undocumented functions\n\n";
     print $fh <<'_EOB_';
-Some functions are currently undocumented; use at your own risk, as the
-interfaces are subject to change.  If you use one of these, do everyone a
-favor by creating documentation for it.  The acceptance of your patch will
-indicate that the interface is stable (unless it is explicitly marked
-otherwise).  The undocumented functions are:
+The following functions have been flagged as part of the public API,
+but are currently undocumented. Use them at your own risk, as the
+interfaces are subject to change.
+
+If you use one of them, you may wish to consider creating and submitting
+documentation for it. If your patch is accepted, this will indicate that
+the interface is stable (unless it is explicitly marked otherwise).
 
 =over
 
