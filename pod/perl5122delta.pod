@@ -250,6 +250,12 @@ now supports get/set magic and thus tied buffers correctly.
 The C<pp_getc>, C<pp_tell>, and C<pp_eof> opcodes now make room on the 
 stack for their return values in cases where no argument was passed in.
 
+=item *
+
+When matching unicode strings under some conditions inappropriate backtracking would
+result in a C<Malformed UTF-8 character (fatal)> error. This should no longer occur.
+See  L<[perl #75680]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75680>
+
 =back
 
 =head1 Platform Specific Notes
