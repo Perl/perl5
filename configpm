@@ -215,11 +215,11 @@ sub import {
     return;
 }
 
-die "Perl lib version (%s) doesn't match executable version ($])"
+die "Perl lib version (%s) doesn't match executable '$0' version ($])"
     unless $^V;
 
 $^V eq %s
-    or die "Perl lib version (%s) doesn't match executable version (" .
+    or die "Perl lib version (%s) doesn't match executable '$0' version (" .
 	sprintf("v%%vd",$^V) . ")";
 
 ENDOFBEG
