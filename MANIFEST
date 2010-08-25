@@ -3603,6 +3603,7 @@ lib/perl5db/t/proxy-constants	Tests for the Perl debugger
 lib/perl5db/t/rt-61222		Tests for the Perl debugger
 lib/perl5db/t/rt-66110		Tests for the Perl debugger
 lib/perl5db/t/symbol-table-bug	Tests for the Perl debugger
+lib/perl5db/t/taint		Tests for the Perl debugger
 lib/PerlIO.pm			PerlIO support module
 lib/Pod/Functions.pm		used by pod/splitpod
 lib/Pod/Html.pm			Convert POD data to HTML
