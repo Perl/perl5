@@ -5453,7 +5453,9 @@ END
 # multiple code points.  These do not appear in the main body, but are defined
 # in the hash below.
 
-# The key: UTF-8 _bytes_, the value: UTF-8 (speed hack)
+# Each key is the string of N bytes that together make up the UTF-8 encoding
+# for the code point.  (i.e. the same as looking at the code point's UTF-8
+# under "use bytes").  Each value is the UTF-8 of the translation, for speed.
 %utf8::ToSpec$name = (
 END
                 $pre_body .= join("\n", @multi_code_point_maps) . "\n);\n";
