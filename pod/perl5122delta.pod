@@ -149,9 +149,9 @@ removed in earlier versions of Perl have been documented.
 
 =item *
 
-The version of L<perlfaq> shipped with the perl core has been updated to the
-latest official FAQ version as available at
-L<git://github.com/briandfoy/perlfaq.git>.
+The version of L<perlfaq> shipped with the Perl core has been updated from the
+official FAQ version, which is now maintained in the C<briandfoy/perlfaq>
+branch of the Perl repository at L<git://perl5.git.perl.org/perl.git>.
 
 =back
 
