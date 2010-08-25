@@ -422,6 +422,7 @@ ben\100morrow.me.uk                     mauzo\100csv.warwick.ac.uk
 +                                       mauzo\100.(none)
 bepi\100perl.it                         enrico.sorcinelli\100gmail.com
 bert\100alum.mit.edu                    bert\100genscan.com
+bigbang7\100gmail.com                   ddascalescu+github\100gmail.com
 brian.d.foy\100gmail.com                bdfoy\100cpan.org
 BQW10602\100nifty.com                   sadahiro\100cpan.org
 
@@ -573,6 +574,7 @@ mikedlr\100tardis.ed.ac.uk              mikedlr\100it.com.pl
 moritz\100casella.verplant.org          moritz\100faui2k3.org
 +                                       moritz lenz
 
+mst\100shadowcat.co.uk                  matthewt\100hercule.scsys.co.uk
 neale\100VMA.TABNSW.COM.AU              neale\100pucc.princeton.edu
 neeracher\100mac.com                    neeri\100iis.ee.ethz.ch
 neil\100bowers.com                      neilb\100cre.canon.co.uk
