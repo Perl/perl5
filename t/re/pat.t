@@ -23,7 +23,7 @@ BEGIN {
 }
 
 
-plan tests => 360;  # Update this when adding/deleting tests.
+plan tests => 366;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1024,6 +1024,26 @@ sub run_tests {
         ok($e !~ m/.*?[xyz]$/,"latin string against /.*?[xyz]\$/ - rt75680");
         ok($e !~ m/(.*?)[,\p{isSpace}]+((?:\p{isAlpha}[\p{isSpace}\.]{1,2})+)\p{isSpace}*$/,"latin string against big pattern - rt75680");
     }
+
+    {
+        #
+        # Tests for bug 77414.
+        #
+
+        local $Message = '\p property after empty * match';
+        {
+            local $TODO = "Bug 77414";
+            ok "1" =~ /\s*\pN/;
+            ok "-" =~ /\s*\p{Dash}/;
+            ok " " =~ /\w*\p{Blank}/;
+        }
+
+        ok "1" =~ /\s*\pN+/;
+        ok "-" =~ /\s*\p{Dash}{1}/;
+        ok " " =~ /\w*\p{Blank}{1,4}/;
+
+    }
+
 } # End of sub run_tests
 
 1;
