@@ -2008,33 +2008,68 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 	    end = HOP3c(strend, -dontbother, strbeg) - 1;
 	    /* for multiline we only have to try after newlines */
 	    if (prog->check_substr || prog->check_utf8) {
-		if (s == startpos)
-		    goto after_try;
-		while (1) {
-		    if (regtry(&reginfo, &s))
-			goto got_it;
-		  after_try:
-		    if (s > end)
-			goto phooey;
-		    if (prog->extflags & RXf_USE_INTUIT) {
-			s = re_intuit_start(rx, sv, s + 1, strend, flags, NULL);
-			if (!s)
-			    goto phooey;
-		    }
-		    else
-			s++;
-		}		
-	    } else {
-		if (s > startpos)
+                /* because of the goto we can not easily reuse the macros for bifurcating the
+                   unicode/non-unicode match modes here like we do elsewhere - demerphq */
+                if (do_utf8) {
+                    if (s == startpos)
+                        goto after_try_utf8;
+                    while (1) {
+                        if (regtry(&reginfo, &s)) {
+                            goto got_it;
+                        }
+                      after_try_utf8:
+                        if (s > end) {
+                            goto phooey;
+                        }
+                        if (prog->extflags & RXf_USE_INTUIT) {
+                            s = re_intuit_start(rx, sv, s + UTF8SKIP(s), strend, flags, NULL);
+                            if (!s) {
+                                goto phooey;
+                            }
+                        }
+                        else {
+                            s += UTF8SKIP(s);
+                        }
+                    }
+                } /* end search for check string in unicode */
+                else {
+                    if (s == startpos) {
+                        goto after_try_latin;
+                    }
+                    while (1) {
+                        if (regtry(&reginfo, &s)) {
+                            goto got_it;
+                        }
+                      after_try_latin:
+                        if (s > end) {
+                            goto phooey;
+                        }
+                        if (prog->extflags & RXf_USE_INTUIT) {
+                            s = re_intuit_start(rx, sv, s + 1, strend, flags, NULL);
+                            if (!s) {
+                                goto phooey;
+                            }
+                        }
+                        else {
+                            s++;
+                        }
+                    }
+                } /* end search for check string in latin*/
+	    } /* end search for check string */
+	    else { /* search for newline */
+		if (s > startpos) {
+                    /*XXX: The s-- is almost definitely wrong here under unicode - demeprhq*/
 		    s--;
+		}
+                /* We can use a more efficient search as newlines are the same in unicode as they are in latin */
 		while (s < end) {
 		    if (*s++ == '\n') {	/* don't need PL_utf8skip here */
 			if (regtry(&reginfo, &s))
 			    goto got_it;
 		    }
-		}		
-	    }
-	}
+		}
+	    } /* end search for newline */
+	} /* end anchored/multiline check string search */
 	goto phooey;
     } else if (RXf_GPOS_CHECK == (prog->extflags & RXf_GPOS_CHECK)) 
     {
