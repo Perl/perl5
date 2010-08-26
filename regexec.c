@@ -252,7 +252,8 @@
     OP(rn) == EVAL ||   \
     OP(rn) == SUSPEND || OP(rn) == IFMATCH || \
     OP(rn) == PLUS || OP(rn) == MINMOD || \
-    OP(rn) == KEEPS || (PL_regkind[OP(rn)] == VERB) || \
+    OP(rn) == KEEPS || \
+    /*(PL_regkind[OP(rn)] == VERB && OP(rn) != PRUNE && OP(rn) != COMMIT && OP(rn) != MARKPOINT && OP(rn) != SKIP && OP(rn) != CUTGROUP)  || */\
     (PL_regkind[OP(rn)] == CURLY && ARG1(rn) > 0) \
 )
 #define IS_EXACT(rn) (PL_regkind[OP(rn)] == EXACT)

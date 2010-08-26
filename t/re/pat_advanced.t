@@ -21,7 +21,7 @@ BEGIN {
 }
 
 
-plan tests => 1159;  # Update this when adding/deleting tests.
+plan tests => 1303;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1779,6 +1779,297 @@ sub run_tests {
               if !$ENV{PERL_TEST_LEGACY_POSIX_CC};
         iseq join ('', @isPunctLatin1), '',
             'IsPunct agrees with [:punct:] with explicit Latin1';
+    }
+
+
+    {
+	# Tests for [#perl 71942]
+        our $count_a;
+        our $count_b;
+
+        my $c = 0;
+        for my $re (
+#            [
+#                should match?,
+#                input string,
+#                re 1,
+#                re 2,
+#                expected values of count_a and count_b,
+#            ]
+            [
+                0,
+                "xababz",
+                qr/a+(?{$count_a++})b?(*COMMIT)(*FAIL)/,
+                qr/a+(?{$count_b++})b?(*COMMIT)z/,
+                1,
+            ],
+            [
+                0,
+                "xababz",
+                qr/a+(?{$count_a++})b?(*COMMIT)\s*(*FAIL)/,
+                qr/a+(?{$count_b++})b?(*COMMIT)\s*z/,
+                1,
+            ],
+            [
+                0,
+                "xababz",
+                qr/a+(?{$count_a++})(?:b|)?(*COMMIT)(*FAIL)/,
+                qr/a+(?{$count_b++})(?:b|)?(*COMMIT)z/,
+                1,
+            ],
+            [
+                0,
+                "xababz",
+                qr/a+(?{$count_a++})b{0,6}(*COMMIT)(*FAIL)/,
+                qr/a+(?{$count_b++})b{0,6}(*COMMIT)z/,
+                1,
+            ],
+            [
+                0,
+                "xabcabcz",
+                qr/a+(?{$count_a++})(bc){0,6}(*COMMIT)(*FAIL)/,
+                qr/a+(?{$count_b++})(bc){0,6}(*COMMIT)z/,
+                1,
+            ],
+            [
+                0,
+                "xabcabcz",
+                qr/a+(?{$count_a++})(bc*){0,6}(*COMMIT)(*FAIL)/,
+                qr/a+(?{$count_b++})(bc*){0,6}(*COMMIT)z/,
+                1,
+            ],
+
+
+            [
+                0,
+                "aaaabtz",
+                qr/a+(?{$count_a++})b?(*PRUNE)(*FAIL)/,
+                qr/a+(?{$count_b++})b?(*PRUNE)z/,
+                4,
+            ],
+            [
+                0,
+                "aaaabtz",
+                qr/a+(?{$count_a++})b?(*PRUNE)\s*(*FAIL)/,
+                qr/a+(?{$count_b++})b?(*PRUNE)\s*z/,
+                4,
+            ],
+            [
+                0,
+                "aaaabtz",
+                qr/a+(?{$count_a++})(?:b|)(*PRUNE)(*FAIL)/,
+                qr/a+(?{$count_b++})(?:b|)(*PRUNE)z/,
+                4,
+            ],
+            [
+                0,
+                "aaaabtz",
+                qr/a+(?{$count_a++})b{0,6}(*PRUNE)(*FAIL)/,
+                qr/a+(?{$count_b++})b{0,6}(*PRUNE)z/,
+                4,
+            ],
+            [
+                0,
+                "aaaabctz",
+                qr/a+(?{$count_a++})(bc){0,6}(*PRUNE)(*FAIL)/,
+                qr/a+(?{$count_b++})(bc){0,6}(*PRUNE)z/,
+                4,
+            ],
+            [
+                0,
+                "aaaabctz",
+                qr/a+(?{$count_a++})(bc*){0,6}(*PRUNE)(*FAIL)/,
+                qr/a+(?{$count_b++})(bc*){0,6}(*PRUNE)z/,
+                4,
+            ],
+
+            [
+                0,
+                "aaabaaab",
+                qr/a+(?{$count_a++;})b?(*SKIP)(*FAIL)/,
+                qr/a+(?{$count_b++;})b?(*SKIP)z/,
+                2,
+            ],
+            [
+                0,
+                "aaabaaab",
+                qr/a+(?{$count_a++;})b?(*SKIP)\s*(*FAIL)/,
+                qr/a+(?{$count_b++;})b?(*SKIP)\s*z/,
+                2,
+            ],
+            [
+                0,
+                "aaabaaab",
+                qr/a+(?{$count_a++;})(?:b|)(*SKIP)(*FAIL)/,
+                qr/a+(?{$count_b++;})(?:b|)(*SKIP)z/,
+                2,
+            ],
+            [
+                0,
+                "aaabaaab",
+                qr/a+(?{$count_a++;})b{0,6}(*SKIP)(*FAIL)/,
+                qr/a+(?{$count_b++;})b{0,6}(*SKIP)z/,
+                2,
+            ],
+            [
+                0,
+                "aaabcaaabc",
+                qr/a+(?{$count_a++;})(bc){0,6}(*SKIP)(*FAIL)/,
+                qr/a+(?{$count_b++;})(bc){0,6}(*SKIP)z/,
+                2,
+            ],
+            [
+                0,
+                "aaabcaaabc",
+                qr/a+(?{$count_a++;})(bc*){0,6}(*SKIP)(*FAIL)/,
+                qr/a+(?{$count_b++;})(bc*){0,6}(*SKIP)z/,
+                2,
+            ],
+
+
+            [
+                0,
+                "aaddbdaabyzc",
+                qr/a (?{$count_a++;}) (*MARK:T1) (a*) .*? b?  (*SKIP:T1) (*FAIL) \s* c \1 /x,
+                qr/a (?{$count_b++;}) (*MARK:T1) (a*) .*? b?  (*SKIP:T1) z \s* c \1 /x,
+                4,
+            ],
+            [
+                0,
+                "aaddbdaabyzc",
+                qr/a (?{$count_a++;}) (*MARK:T1) (a*) .*? b?  (*SKIP:T1) \s* (*FAIL) \s* c \1 /x,
+                qr/a (?{$count_b++;}) (*MARK:T1) (a*) .*? b?  (*SKIP:T1) \s* z \s* c \1 /x,
+                4,
+            ],
+            [
+                0,
+                "aaddbdaabyzc",
+                qr/a (?{$count_a++;}) (*MARK:T1) (a*) .*? (?:b|)  (*SKIP:T1) (*FAIL) \s* c \1 /x,
+                qr/a (?{$count_b++;}) (*MARK:T1) (a*) .*? (?:b|)  (*SKIP:T1) z \s* c \1 /x,
+                4,
+            ],
+            [
+                0,
+                "aaddbdaabyzc",
+                qr/a (?{$count_a++;}) (*MARK:T1) (a*) .*? b{0,6}  (*SKIP:T1) (*FAIL) \s* c \1 /x,
+                qr/a (?{$count_b++;}) (*MARK:T1) (a*) .*? b{0,6}  (*SKIP:T1) z \s* c \1 /x,
+                4,
+            ],
+            [
+                0,
+                "aaddbcdaabcyzc",
+                qr/a (?{$count_a++;}) (*MARK:T1) (a*) .*? (bc){0,6}  (*SKIP:T1) (*FAIL) \s* c \1 /x,
+                qr/a (?{$count_b++;}) (*MARK:T1) (a*) .*? (bc){0,6}  (*SKIP:T1) z \s* c \1 /x,
+                4,
+            ],
+            [
+                0,
+                "aaddbcdaabcyzc",
+                qr/a (?{$count_a++;}) (*MARK:T1) (a*) .*? (bc*){0,6}  (*SKIP:T1) (*FAIL) \s* c \1 /x,
+                qr/a (?{$count_b++;}) (*MARK:T1) (a*) .*? (bc*){0,6}  (*SKIP:T1) z \s* c \1 /x,
+                4,
+            ],
+
+
+            [
+                0,
+                "aaaaddbdaabyzc",
+                qr/a (?{$count_a++;})  (a?) (*MARK:T1) (a*) .*? b?   (*MARK:T1) (*SKIP:T1) (*FAIL) \s* c \1 /x,
+                qr/a (?{$count_b++;})  (a?) (*MARK:T1) (a*) .*? b?   (*MARK:T1) (*SKIP:T1) z \s* c \1 /x,
+                2,
+            ],
+            [
+                0,
+                "aaaaddbdaabyzc",
+                qr/a (?{$count_a++;})  (a?) (*MARK:T1) (a*) .*? b?   (*MARK:T1) (*SKIP:T1) \s* (*FAIL) \s* c \1 /x,
+                qr/a (?{$count_b++;})  (a?) (*MARK:T1) (a*) .*? b?   (*MARK:T1) (*SKIP:T1) \s* z \s* c \1 /x,
+                2,
+            ],
+            [
+                0,
+                "aaaaddbdaabyzc",
+                qr/a (?{$count_a++;})  (a?) (*MARK:T1) (a*) .*? (?:b|)   (*MARK:T1) (*SKIP:T1) (*FAIL) \s* c \1 /x,
+                qr/a (?{$count_b++;})  (a?) (*MARK:T1) (a*) .*? (?:b|)   (*MARK:T1) (*SKIP:T1) z \s* c \1 /x,
+                2,
+            ],
+            [
+                0,
+                "aaaaddbdaabyzc",
+                qr/a (?{$count_a++;})  (a?) (*MARK:T1) (a*) .*? b{0,6}   (*MARK:T1) (*SKIP:T1) (*FAIL) \s* c \1 /x,
+                qr/a (?{$count_b++;})  (a?) (*MARK:T1) (a*) .*? b{0,6}   (*MARK:T1) (*SKIP:T1) z \s* c \1 /x,
+                2,
+            ],
+            [
+                0,
+                "aaaaddbcdaabcyzc",
+                qr/a (?{$count_a++;})  (a?) (*MARK:T1) (a*) .*? (bc){0,6}   (*MARK:T1) (*SKIP:T1) (*FAIL) \s* c \1 /x,
+                qr/a (?{$count_b++;})  (a?) (*MARK:T1) (a*) .*? (bc){0,6}   (*MARK:T1) (*SKIP:T1) z \s* c \1 /x,
+                2,
+            ],
+            [
+                0,
+                "aaaaddbcdaabcyzc",
+                qr/a (?{$count_a++;})  (a?) (*MARK:T1) (a*) .*? (bc*){0,6}   (*MARK:T1) (*SKIP:T1) (*FAIL) \s* c \1 /x,
+                qr/a (?{$count_b++;})  (a?) (*MARK:T1) (a*) .*? (bc*){0,6}   (*MARK:T1) (*SKIP:T1) z \s* c \1 /x,
+                2,
+            ],
+
+
+            [
+                0,
+                "AbcdCBefgBhiBqz",
+                qr/(A (.*)  (?{ $count_a++ }) C? (*THEN)  | A D) (*FAIL)/x,
+                qr/(A (.*)  (?{ $count_b++ }) C? (*THEN)  | A D) z/x,
+                1,
+            ],
+            [
+                0,
+                "AbcdCBefgBhiBqz",
+                qr/(A (.*)  (?{ $count_a++ }) C? (*THEN)  | A D) \s* (*FAIL)/x,
+                qr/(A (.*)  (?{ $count_b++ }) C? (*THEN)  | A D) \s* z/x,
+                1,
+            ],
+            [
+                0,
+                "AbcdCBefgBhiBqz",
+                qr/(A (.*)  (?{ $count_a++ }) (?:C|) (*THEN)  | A D) (*FAIL)/x,
+                qr/(A (.*)  (?{ $count_b++ }) (?:C|) (*THEN)  | A D) z/x,
+                1,
+            ],
+            [
+                0,
+                "AbcdCBefgBhiBqz",
+                qr/(A (.*)  (?{ $count_a++ }) C{0,6} (*THEN)  | A D) (*FAIL)/x,
+                qr/(A (.*)  (?{ $count_b++ }) C{0,6} (*THEN)  | A D) z/x,
+                1,
+            ],
+            [
+                0,
+                "AbcdCEBefgBhiBqz",
+                qr/(A (.*)  (?{ $count_a++ }) (CE){0,6} (*THEN)  | A D) (*FAIL)/x,
+                qr/(A (.*)  (?{ $count_b++ }) (CE){0,6} (*THEN)  | A D) z/x,
+                1,
+            ],
+            [
+                0,
+                "AbcdCBefgBhiBqz",
+                qr/(A (.*)  (?{ $count_a++ }) (CE*){0,6} (*THEN)  | A D) (*FAIL)/x,
+                qr/(A (.*)  (?{ $count_b++ }) (CE*){0,6} (*THEN)  | A D) z/x,
+                1,
+            ],
+        ) {
+            $c++;
+            $count_a = 0;
+            $count_b = 0;
+
+            my $match_a = ($re->[1] =~ $re->[2]) || 0;
+            my $match_b = ($re->[1] =~ $re->[3]) || 0;
+
+            iseq($match_a, $re->[0], "match a " . ($re->[0] ? "succeeded" : "failed") . " ($c)");
+            iseq($match_b, $re->[0], "match b " . ($re->[0] ? "succeeded" : "failed") . " ($c)");
+            iseq($count_a, $re->[4], "count a ($c)");
+            iseq($count_b, $re->[4], "count b ($c)");
+        }
     }
 
     #
