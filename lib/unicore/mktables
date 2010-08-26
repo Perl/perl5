@@ -586,6 +586,12 @@ sub uniques {
     # Encapsulated Cleverness".  p. 455 in first edition.
 
     my %seen;
+    # Arguably this breaks encapsulation, if the goal is to permit multiple
+    # distinct objects to stringify to the same value, and be interchangeable.
+    # However, for this program, no two objects stringify identically, and all
+    # lists passed to this function are either objects or strings. So this
+    # doesn't affect correctness, but it does give a couple of percent speedup.
+    no overloading;
     return grep { ! $seen{$_}++ } @_;
 }
 
