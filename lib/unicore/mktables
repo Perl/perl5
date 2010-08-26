@@ -1234,7 +1234,7 @@ sub objaddr($) {
     no overloading; # If overloaded, numifying below won't work.
 
     # Numifying a ref gives its address.
-    return 0 + $_[0];
+    return 0+$_[0];
 }
 
 # Commented code below should work on Perl 5.8.
@@ -1259,7 +1259,7 @@ sub objaddr($) {
 #    bless $_[0], 'main::Fake';
 #
 #    # Numifying a ref gives its address.
-#    my $addr = 0 + $_[0];
+#    my $addr = 0+$_[0];
 #
 #    # Return to original class
 #    bless $_[0], $pkg;
@@ -7746,7 +7746,7 @@ sub _operator_equal {
     return 0 unless defined $other;
     return 0 unless ref $other;
     no overloading;
-    return 0+$self == 0+$other;
+    return $self == $other;
 }
 
 sub _operator_not_equal {
@@ -8707,7 +8707,7 @@ END
                     $file->carp_bad_line("Unexpected property '$property_name'.  Skipped");
                     next LINE;
                 }
-                { no overloading; $property_addr = 0+($property_object); }
+                { no overloading; $property_addr = 0+$property_object; }
 
                 # Defer changing names until have a line that is acceptable
                 # (the 'next' statement above means is unacceptable)
