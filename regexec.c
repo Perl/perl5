@@ -245,7 +245,15 @@
 /* TODO: Combine JUMPABLE and HAS_TEXT to cache OP(rn) */
 
 /* for use after a quantifier and before an EXACT-like node -- japhy */
-/* it would be nice to rework regcomp.sym to generate this stuff. sigh */
+/* it would be nice to rework regcomp.sym to generate this stuff. sigh
+ *
+ * NOTE that *nothing* that affects backtracking should be in here, specifically
+ * VERBS must NOT be included. JUMPABLE is used to determine  if we can ignore a
+ * node that is in between two EXACT like nodes when ascertaining what the required
+ * "follow" character is. This should probably be moved to regex compile time
+ * although it may be done at run time beause of the REF possibility - more
+ * investigation required. -- demerphq
+*/
 #define JUMPABLE(rn) (      \
     OP(rn) == OPEN ||       \
     (OP(rn) == CLOSE && (!cur_eval || cur_eval->u.eval.close_paren != ARG(rn))) || \
@@ -253,7 +261,6 @@
     OP(rn) == SUSPEND || OP(rn) == IFMATCH || \
     OP(rn) == PLUS || OP(rn) == MINMOD || \
     OP(rn) == KEEPS || \
-    /*(PL_regkind[OP(rn)] == VERB && OP(rn) != PRUNE && OP(rn) != COMMIT && OP(rn) != MARKPOINT && OP(rn) != SKIP && OP(rn) != CUTGROUP)  || */\
     (PL_regkind[OP(rn)] == CURLY && ARG1(rn) > 0) \
 )
 #define IS_EXACT(rn) (PL_regkind[OP(rn)] == EXACT)
