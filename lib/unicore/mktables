@@ -7458,12 +7458,7 @@ sub write ($\@) {
 
     push @files_actually_output, $file;
 
-    my $text;
-    if (@$lines_ref) {
-        $text = join "", @$lines_ref;
-    }
-    else {
-        $text = "";
+    unless (@$lines_ref) {
         Carp::my_carp("Output file '$file' is empty; writing it anyway;");
     }
 
@@ -7474,10 +7469,12 @@ sub write ($\@) {
         Carp::my_carp("can't open $file for output.  Skipping this file: $!");
         return;
     }
+
+    print $OUT @$lines_ref or die Carp::my_carp("write to '$file' failed: $!");
+    close $OUT or die Carp::my_carp("close '$file' failed: $!");
+
     print "$file written.\n" if $verbosity >= $VERBOSE;
 
-    print $OUT $text;
-    close $OUT;
     return;
 }
 
@@ -13143,12 +13140,11 @@ sub generate_separator($) {
             . $spaces_after;
 }
 
-sub generate_tests($$$$$$) {
+sub generate_tests($$$$$) {
     # This used only for making the test script.  It generates test cases that
     # are expected to compile successfully in perl.  Note that the lhs and
     # rhs are assumed to already be as randomized as the caller wants.
 
-    my $file_handle = shift;   # Where to output the tests
     my $lhs = shift;           # The property: what's to the left of the colon
                                #  or equals separator
     my $rhs = shift;           # The property value; what's to the right
@@ -13165,35 +13161,31 @@ sub generate_tests($$$$$$) {
     # The whole 'property=value'
     my $name = "$lhs$separator$rhs";
 
+    my @output;
     # Create a complete set of tests, with complements.
     if (defined $valid_code) {
-        printf $file_handle
-                    qq/Expect(1, $valid_code, '\\p{$name}', $warning);\n/;
-        printf $file_handle
-                    qq/Expect(0, $valid_code, '\\p{^$name}', $warning);\n/;
-        printf $file_handle
-                    qq/Expect(0, $valid_code, '\\P{$name}', $warning);\n/;
-        printf $file_handle
-                    qq/Expect(1, $valid_code, '\\P{^$name}', $warning);\n/;
+	push @output, <<"EOC"
+Expect(1, $valid_code, '\\p{$name}', $warning);
+Expect(0, $valid_code, '\\p{^$name}', $warning);
+Expect(0, $valid_code, '\\P{$name}', $warning);
+Expect(1, $valid_code, '\\P{^$name}', $warning);
+EOC
     }
     if (defined $invalid_code) {
-        printf $file_handle
-                    qq/Expect(0, $invalid_code, '\\p{$name}', $warning);\n/;
-        printf $file_handle
-                    qq/Expect(1, $invalid_code, '\\p{^$name}', $warning);\n/;
-        printf $file_handle
-                    qq/Expect(1, $invalid_code, '\\P{$name}', $warning);\n/;
-        printf $file_handle
-                    qq/Expect(0, $invalid_code, '\\P{^$name}', $warning);\n/;
+	push @output, <<"EOC"
+Expect(0, $invalid_code, '\\p{$name}', $warning);
+Expect(1, $invalid_code, '\\p{^$name}', $warning);
+Expect(1, $invalid_code, '\\P{$name}', $warning);
+Expect(0, $invalid_code, '\\P{^$name}', $warning);
+EOC
     }
-    return;
+    return @output;
 }
 
-sub generate_error($$$$) {
+sub generate_error($$$) {
     # This used only for making the test script.  It generates test cases that
     # are expected to not only not match, but to be syntax or similar errors
 
-    my $file_handle = shift;        # Where to output to.
     my $lhs = shift;                # The property: what's to the left of the
                                     # colon or equals separator
     my $rhs = shift;                # The property value; what's to the right
@@ -13210,9 +13202,10 @@ sub generate_error($$$$) {
 
     my $property = $lhs . $separator . $rhs;
 
-    print $file_handle qq/Error('\\p{$property}');\n/;
-    print $file_handle qq/Error('\\P{$property}');\n/;
-    return;
+    return <<"EOC";
+Error('\\p{$property}');
+Error('\\P{$property}');
+EOC
 }
 
 # These are used only for making the test script
@@ -13378,14 +13371,6 @@ sub make_property_test_script() {
 
     $t_path = 'TestProp.pl' unless defined $t_path; # the traditional name
 
-    force_unlink ($t_path);
-    push @files_actually_output, $t_path;
-    my $OUT;
-    if (not open $OUT, "> $t_path") {
-        Carp::my_carp("Can't open $t_path.  Skipping: $!");
-        return;
-    }
-
     # Keep going down an order of magnitude
     # until find that adding this quantity to
     # 1 remains 1; but put an upper limit on
@@ -13402,7 +13387,10 @@ sub make_property_test_script() {
                             # use previous one
         $min_floating_slop = $next;
     }
-    print $OUT $HEADER, <DATA>;
+
+    # It doesn't matter whether the elements of this array contain single lines
+    # or multiple lines. main::write doesn't count the lines.
+    my @output;
 
     foreach my $property (property_ref('*')) {
         foreach my $table ($property->tables) {
@@ -13437,10 +13425,9 @@ sub make_property_test_script() {
                 my $already_error = ! $table->file_path;
 
                 # Generate error cases for this alias.
-                generate_error($OUT,
-                                $property_name,
-                                $table_name,
-                                $already_error);
+                push @output, generate_error($property_name,
+                                             $table_name,
+                                             $already_error);
 
                 # If the table is guaranteed to always generate an error,
                 # quit now without generating success cases.
@@ -13461,13 +13448,12 @@ sub make_property_test_script() {
                     # Don't output duplicate test cases.
                     if (! exists $test_generated{$test_name}) {
                         $test_generated{$test_name} = 1;
-                        generate_tests($OUT,
-                                        $property_name,
-                                        $standard,
-                                        $valid,
-                                        $invalid,
-                                        $warning,
-                                    );
+                        push @output, generate_tests($property_name,
+                                                     $standard,
+                                                     $valid,
+                                                     $invalid,
+                                                     $warning,
+                                                 );
                     }
                     $random = randomize_loose_name($table_name)
                 }
@@ -13479,13 +13465,12 @@ sub make_property_test_script() {
                 my $test_name = "$property_name=$random";
                 if (! exists $test_generated{$test_name}) {
                     $test_generated{$test_name} = 1;
-                    generate_tests($OUT,
-                                    $property_name,
-                                    $random,
-                                    $valid,
-                                    $invalid,
-                                    $warning,
-                                );
+                    push @output, generate_tests($property_name,
+                                                 $random,
+                                                 $valid,
+                                                 $invalid,
+                                                 $warning,
+                                             );
 
                     # If the name is a rational number, add tests for the
                     # floating point equivalent.
@@ -13527,24 +13512,22 @@ sub make_property_test_script() {
                                         if abs($table_name - $existing)
                                                 < $MAX_FLOATING_SLOP;
                                 }
-                                generate_error($OUT,
-                                            $property_name,
-                                            $table_name,
-                                            1   # 1 => already an error
-                                );
+                                push @output, generate_error($property_name,
+                                                             $table_name,
+                                                             1   # 1 => already an error
+                                              );
                             }
                             else {
 
                                 # Here the number of digits exceeds the
                                 # minimum we think is needed.  So generate a
                                 # success test case for it.
-                                generate_tests($OUT,
-                                                $property_name,
-                                                $table_name,
-                                                $valid,
-                                                $invalid,
-                                                $warning,
-                                );
+                                push @output, generate_tests($property_name,
+                                                             $table_name,
+                                                             $valid,
+                                                             $invalid,
+                                                             $warning,
+                                             );
                             }
                         }
                     }
@@ -13553,12 +13536,10 @@ sub make_property_test_script() {
         }
     }
 
-    foreach my $test (@backslash_X_tests) {
-        print $OUT "Test_X('$test');\n";
-    }
-
-    print $OUT "Finished();\n";
-    close $OUT;
+    &write($t_path, [<DATA>,
+		     @output,
+		     (map {"Test_X('$_');\n"} @backslash_X_tests),
+		     "Finished();\n"]);
     return;
 }
 
