@@ -184,7 +184,7 @@ On some operating systems, notably Solaris and Unixware, calling C<exit()>
 from a child process will flush and close open filehandles in the parent,
 thereby corrupting the filehandles.  On these systems, calling C<_exit()>
 is suggested instead.  C<_exit()> is available in Perl through the 
-C<POSIX> module.  Please consult your systems manpages for more information
+C<POSIX> module.  Please consult your system's manpages for more information
 on this.
 
 =item Forking pipe open() not yet implemented
