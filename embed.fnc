@@ -165,7 +165,7 @@ npR	|MEM_SIZE|malloc_good_size	|size_t nbytes
 
 AnpR	|void*	|get_context
 Anp	|void	|set_context	|NN void *t
-EXpRnP	|I32	|regcurly	|NN const char *s
+EXpRnPM	|I32	|regcurly	|NN const char *s
 
 END_EXTERN_C
 
@@ -768,26 +768,26 @@ p	|void	|my_unexec
 Apa	|OP*	|newANONLIST	|NULLOK OP* o
 Apa	|OP*	|newANONHASH	|NULLOK OP* o
 Ap	|OP*	|newANONSUB	|I32 floor|NULLOK OP* proto|NULLOK OP* block
-Apa	|OP*	|newASSIGNOP	|I32 flags|NULLOK OP* left|I32 optype|NULLOK OP* right
-Apa	|OP*	|newCONDOP	|I32 flags|NN OP* first|NULLOK OP* trueop|NULLOK OP* falseop
+Apda	|OP*	|newASSIGNOP	|I32 flags|NULLOK OP* left|I32 optype|NULLOK OP* right
+Apda	|OP*	|newCONDOP	|I32 flags|NN OP* first|NULLOK OP* trueop|NULLOK OP* falseop
 Apd	|CV*	|newCONSTSUB	|NULLOK HV* stash|NULLOK const char* name|NULLOK SV* sv
 #ifdef PERL_MAD
 Ap	|OP*	|newFORM	|I32 floor|NULLOK OP* o|NULLOK OP* block
 #else
 Ap	|void	|newFORM	|I32 floor|NULLOK OP* o|NULLOK OP* block
 #endif
-Apa	|OP*	|newFOROP	|I32 flags|NULLOK char* label|line_t forline \
+Apda	|OP*	|newFOROP	|I32 flags|NULLOK char* label|line_t forline \
 				|NULLOK OP* sv|NN OP* expr|NULLOK OP* block|NULLOK OP* cont
-Apa	|OP*	|newGIVENOP	|NN OP* cond|NN OP* block|PADOFFSET defsv_off
-Apa	|OP*	|newLOGOP	|I32 optype|I32 flags|NN OP *first|NN OP *other
-Apa	|OP*	|newLOOPEX	|I32 type|NN OP* label
-Apa	|OP*	|newLOOPOP	|I32 flags|I32 debuggable|NULLOK OP* expr|NULLOK OP* block
-Apa	|OP*	|newNULLLIST
-Apa	|OP*	|newOP		|I32 optype|I32 flags
+Apda	|OP*	|newGIVENOP	|NN OP* cond|NN OP* block|PADOFFSET defsv_off
+Apda	|OP*	|newLOGOP	|I32 optype|I32 flags|NN OP *first|NN OP *other
+Apda	|OP*	|newLOOPEX	|I32 type|NN OP* label
+Apda	|OP*	|newLOOPOP	|I32 flags|I32 debuggable|NULLOK OP* expr|NULLOK OP* block
+Apda	|OP*	|newNULLLIST
+Apda	|OP*	|newOP		|I32 optype|I32 flags
 Ap	|void	|newPROG	|NN OP* o
-Apa	|OP*	|newRANGE	|I32 flags|NN OP* left|NN OP* right
-Apa	|OP*	|newSLICEOP	|I32 flags|NULLOK OP* subscript|NULLOK OP* listop
-Apa	|OP*	|newSTATEOP	|I32 flags|NULLOK char* label|NULLOK OP* o
+Apda	|OP*	|newRANGE	|I32 flags|NN OP* left|NN OP* right
+Apda	|OP*	|newSLICEOP	|I32 flags|NULLOK OP* subscript|NULLOK OP* listop
+Apda	|OP*	|newSTATEOP	|I32 flags|NULLOK char* label|NULLOK OP* o
 Ap	|CV*	|newSUB		|I32 floor|NULLOK OP* o|NULLOK OP* proto|NULLOK OP* block
 ApM	|CV *	|newXS_flags	|NULLOK const char *name|NN XSUBADDR_t subaddr\
 				|NN const char *const filename \
@@ -796,26 +796,26 @@ Apd	|CV*	|newXS		|NULLOK const char *name|NN XSUBADDR_t subaddr\
 				|NN const char *filename
 AmdbR	|AV*	|newAV
 Apa	|OP*	|newAVREF	|NN OP* o
-Apa	|OP*	|newBINOP	|I32 type|I32 flags|NULLOK OP* first|NULLOK OP* last
+Apda	|OP*	|newBINOP	|I32 type|I32 flags|NULLOK OP* first|NULLOK OP* last
 Apa	|OP*	|newCVREF	|I32 flags|NULLOK OP* o
-Apa	|OP*	|newGVOP	|I32 type|I32 flags|NN GV* gv
+Apda	|OP*	|newGVOP	|I32 type|I32 flags|NN GV* gv
 Apa	|GV*	|newGVgen	|NN const char* pack
 Apa	|OP*	|newGVREF	|I32 type|NULLOK OP* o
 ApaR	|OP*	|newHVREF	|NN OP* o
 AmdbR	|HV*	|newHV
 ApaR	|HV*	|newHVhv	|NULLOK HV *hv
 Apabm	|IO*	|newIO
-Apa	|OP*	|newLISTOP	|I32 type|I32 flags|NULLOK OP* first|NULLOK OP* last
+Apda	|OP*	|newLISTOP	|I32 type|I32 flags|NULLOK OP* first|NULLOK OP* last
 #ifdef USE_ITHREADS
-Apa	|OP*	|newPADOP	|I32 type|I32 flags|NN SV* sv
+Apda	|OP*	|newPADOP	|I32 type|I32 flags|NN SV* sv
 #endif
-Apa	|OP*	|newPMOP	|I32 type|I32 flags
-Apa	|OP*	|newPVOP	|I32 type|I32 flags|NULLOK char* pv
+Apda	|OP*	|newPMOP	|I32 type|I32 flags
+Apda	|OP*	|newPVOP	|I32 type|I32 flags|NULLOK char* pv
 Apa	|SV*	|newRV		|NN SV *const sv
 Apda	|SV*	|newRV_noinc	|NN SV *const sv
 Apda	|SV*	|newSV		|const STRLEN len
 Apa	|OP*	|newSVREF	|NN OP* o
-Apa	|OP*	|newSVOP	|I32 type|I32 flags|NN SV* sv
+Apda	|OP*	|newSVOP	|I32 type|I32 flags|NN SV* sv
 Apda	|SV*	|newSViv	|const IV i
 Apda	|SV*	|newSVuv	|const UV u
 Apda	|SV*	|newSVnv	|const NV n
@@ -829,9 +829,9 @@ Apa	|SV*	|vnewSVpvf	|NN const char *const pat|NULLOK va_list *const args
 Apd	|SV*	|newSVrv	|NN SV *const rv|NULLOK const char *const classname
 Apda	|SV*	|newSVsv	|NULLOK SV *const old
 Apda	|SV*	|newSV_type	|const svtype type
-Apa	|OP*	|newUNOP	|I32 type|I32 flags|NULLOK OP* first
-Apa	|OP*	|newWHENOP	|NULLOK OP* cond|NN OP* block
-Apa	|OP*	|newWHILEOP	|I32 flags|I32 debuggable|NULLOK LOOP* loop \
+Apda	|OP*	|newUNOP	|I32 type|I32 flags|NULLOK OP* first
+Apda	|OP*	|newWHENOP	|NULLOK OP* cond|NN OP* block
+Apda	|OP*	|newWHILEOP	|I32 flags|I32 debuggable|NULLOK LOOP* loop \
 				|I32 whileline|NULLOK OP* expr|NULLOK OP* block|NULLOK OP* cont \
 				|I32 has_my
 Apa	|PERL_SI*|new_stackinfo|I32 stitems|I32 cxitems
@@ -887,8 +887,9 @@ sd	|void	|pad_reset
 #endif
 : Used in op.c
 pd	|void	|pad_swipe	|PADOFFSET po|bool refadjust
-: FIXME
+: peephole optimiser
 p	|void	|peep		|NULLOK OP* o
+p	|void	|rpeep		|NULLOK OP* o
 : Defined in doio.c, used only in pp_hot.c
 dopM	|PerlIO*|start_glob	|NN SV *tmpglob|NN IO *io
 #if defined(USE_REENTRANT_API)

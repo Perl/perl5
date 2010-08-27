@@ -398,7 +398,7 @@ B<-D14> is equivalent to B<-Dtls>):
     32768  D  Cleaning up
    131072  T  Tokenising
    262144  R  Include reference counts of dumped variables (eg when using -Ds)
-   524288  J  Do not s,t,P-debug (Jump over) opcodes within package DB
+   524288  J  show s,t,P-debug (don't Jump over) on opcodes within package DB
   1048576  v  Verbose: use in conjunction with other flags
   2097152  C  Copy On Write
   4194304  A  Consistency checks on internal structures

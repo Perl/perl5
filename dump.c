@@ -1434,7 +1434,14 @@ Perl_do_hv_dump(pTHX_ I32 level, PerlIO *file, const char *name, HV *sv)
 
     Perl_dump_indent(aTHX_ level, file, "%s = 0x%"UVxf, name, PTR2UV(sv));
     if (sv && (hvname = HvNAME_get(sv)))
-	PerlIO_printf(file, "\t\"%s\"\n", hvname);
+    {
+	/* we have to use pv_display and HvNAMELEN_get() so that we display the real package
+           name which quite legally could contain insane things like tabs, newlines, nulls or
+           other scary crap - this should produce sane results - except maybe for unicode package
+           names - but we will wait for someone to file a bug on that - demerphq */
+        SV * const tmpsv = newSVpvs("");
+        PerlIO_printf(file, "\t%s\n", pv_display(tmpsv, hvname, HvNAMELEN_get(sv), 0, 1024));
+    }
     else
 	PerlIO_putc(file, '\n');
 }

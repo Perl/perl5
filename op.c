@@ -104,6 +104,7 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 #include "keywords.h"
 
 #define CALL_PEEP(o) PL_peepp(aTHX_ o)
+#define CALL_RPEEP(o) PL_rpeepp(aTHX_ o)
 #define CALL_OPFREEHOOK(o) if (PL_opfreehook) PL_opfreehook(aTHX_ o)
 
 #if defined(PL_OP_SLAB_ALLOC)
@@ -2668,7 +2669,7 @@ S_gen_constant_list(pTHX_ register OP *o)
     o->op_ppaddr = PL_ppaddr[OP_RV2AV];
     o->op_flags &= ~OPf_REF;	/* treat \(1..2) like an ordinary list */
     o->op_flags |= OPf_PARENS;	/* and flatten \(1..2,3) */
-    o->op_opt = 0;		/* needs to be revisited in peep() */
+    o->op_opt = 0;		/* needs to be revisited in rpeep() */
     curop = ((UNOP*)o)->op_first;
     ((UNOP*)o)->op_first = newSVOP(OP_CONST, 0, SvREFCNT_inc_NN(*PL_stack_sp--));
 #ifdef PERL_MAD
@@ -3050,6 +3051,17 @@ Perl_mad_free(pTHX_ MADPROP* mp)
 
 #endif
 
+/*
+=head1 Optree construction
+
+=for apidoc Am|OP *|newNULLLIST
+
+Constructs, checks, and returns a new C<stub> op, which represents an
+empty list expression.
+
+=cut
+*/
+
 OP *
 Perl_newNULLLIST(pTHX)
 {
@@ -3064,6 +3076,18 @@ S_force_list(pTHX_ OP *o)
     op_null(o);
     return o;
 }
+
+/*
+=for apidoc Am|OP *|newLISTOP|I32 type|I32 flags|OP *first|OP *last
+
+Constructs, checks, and returns an op of any list type.  I<type> is
+the opcode.  I<flags> gives the eight bits of C<op_flags>, except that
+C<OPf_KIDS> will be set automatically if required.  I<first> and I<last>
+supply up to two ops to be direct children of the list op; they are
+consumed by this function and become part of the constructed op tree.
+
+=cut
+*/
 
 OP *
 Perl_newLISTOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
@@ -3101,6 +3125,17 @@ Perl_newLISTOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
     return CHECKOP(type, listop);
 }
 
+/*
+=for apidoc Am|OP *|newOP|I32 type|I32 flags
+
+Constructs, checks, and returns an op of any base type (any type that
+has no extra fields).  I<type> is the opcode.  I<flags> gives the
+eight bits of C<op_flags>, and, shifted up eight bits, the eight bits
+of C<op_private>.
+
+=cut
+*/
+
 OP *
 Perl_newOP(pTHX_ I32 type, I32 flags)
 {
@@ -3128,6 +3163,20 @@ Perl_newOP(pTHX_ I32 type, I32 flags)
 	o->op_targ = pad_alloc(type, SVs_PADTMP);
     return CHECKOP(type, o);
 }
+
+/*
+=for apidoc Am|OP *|newUNOP|I32 type|I32 flags|OP *first
+
+Constructs, checks, and returns an op of any unary type.  I<type> is
+the opcode.  I<flags> gives the eight bits of C<op_flags>, except that
+C<OPf_KIDS> will be set automatically if required, and, shifted up eight
+bits, the eight bits of C<op_private>, except that the bit with value 1
+is automatically set.  I<first> supplies an optional op to be the direct
+child of the unary op; it is consumed by this function and become part
+of the constructed op tree.
+
+=cut
+*/
 
 OP *
 Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
@@ -3160,6 +3209,20 @@ Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
 
     return fold_constants((OP *) unop);
 }
+
+/*
+=for apidoc Am|OP *|newBINOP|I32 type|I32 flags|OP *first|OP *last
+
+Constructs, checks, and returns an op of any binary type.  I<type>
+is the opcode.  I<flags> gives the eight bits of C<op_flags>, except
+that C<OPf_KIDS> will be set automatically, and, shifted up eight bits,
+the eight bits of C<op_private>, except that the bit with value 1 or
+2 is automatically set as required.  I<first> and I<last> supply up to
+two ops to be the direct children of the binary op; they are consumed
+by this function and become part of the constructed op tree.
+
+=cut
+*/
 
 OP *
 Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
@@ -3559,6 +3622,16 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     return o;
 }
 
+/*
+=for apidoc Am|OP *|newPMOP|I32 type|I32 flags
+
+Constructs, checks, and returns an op of any pattern matching type.
+I<type> is the opcode.  I<flags> gives the eight bits of C<op_flags>
+and, shifted up eight bits, the eight bits of C<op_private>.
+
+=cut
+*/
+
 OP *
 Perl_newPMOP(pTHX_ I32 type, I32 flags)
 {
@@ -3803,6 +3876,17 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
     return (OP*)pm;
 }
 
+/*
+=for apidoc Am|OP *|newSVOP|I32 type|I32 flags|SV *sv
+
+Constructs, checks, and returns an op of any type that involves an
+embedded SV.  I<type> is the opcode.  I<flags> gives the eight bits
+of C<op_flags>.  I<sv> gives the SV to embed in the op; this function
+takes ownership of one reference to it.
+
+=cut
+*/
+
 OP *
 Perl_newSVOP(pTHX_ I32 type, I32 flags, SV *sv)
 {
@@ -3829,6 +3913,21 @@ Perl_newSVOP(pTHX_ I32 type, I32 flags, SV *sv)
 }
 
 #ifdef USE_ITHREADS
+
+/*
+=for apidoc Am|OP *|newPADOP|I32 type|I32 flags|SV *sv
+
+Constructs, checks, and returns an op of any type that involves a
+reference to a pad element.  I<type> is the opcode.  I<flags> gives the
+eight bits of C<op_flags>.  A pad slot is automatically allocated, and
+is populated with I<sv>; this function takes ownership of one reference
+to it.
+
+This function only exists if Perl has been compiled to use ithreads.
+
+=cut
+*/
+
 OP *
 Perl_newPADOP(pTHX_ I32 type, I32 flags, SV *sv)
 {
@@ -3857,7 +3956,20 @@ Perl_newPADOP(pTHX_ I32 type, I32 flags, SV *sv)
 	padop->op_targ = pad_alloc(type, SVs_PADTMP);
     return CHECKOP(type, padop);
 }
-#endif
+
+#endif /* !USE_ITHREADS */
+
+/*
+=for apidoc Am|OP *|newGVOP|I32 type|I32 flags|GV *gv
+
+Constructs, checks, and returns an op of any type that involves an
+embedded reference to a GV.  I<type> is the opcode.  I<flags> gives the
+eight bits of C<op_flags>.  I<gv> identifies the GV that the op should
+reference; calling this function does not transfer ownership of any
+reference to it.
+
+=cut
+*/
 
 OP *
 Perl_newGVOP(pTHX_ I32 type, I32 flags, GV *gv)
@@ -3873,6 +3985,18 @@ Perl_newGVOP(pTHX_ I32 type, I32 flags, GV *gv)
     return newSVOP(type, flags, SvREFCNT_inc_simple_NN(gv));
 #endif
 }
+
+/*
+=for apidoc Am|OP *|newPVOP|I32 type|I32 flags|char *pv
+
+Constructs, checks, and returns an op of any type that involves an
+embedded C-level pointer (PV).  I<type> is the opcode.  I<flags> gives
+the eight bits of C<op_flags>.  I<pv> supplies the C-level pointer, which
+must have been allocated using L</PerlMemShared_malloc>; the memory will
+be freed when the op is destroyed.
+
+=cut
+*/
 
 OP *
 Perl_newPVOP(pTHX_ I32 type, I32 flags, char *pv)
@@ -4191,6 +4315,22 @@ Perl_dofile(pTHX_ OP *term, I32 force_builtin)
     return doop;
 }
 
+/*
+=head1 Optree construction
+
+=for apidoc Am|OP *|newSLICEOP|I32 flags|OP *subscript|OP *listval
+
+Constructs, checks, and returns an C<lslice> (list slice) op.  I<flags>
+gives the eight bits of C<op_flags>, except that C<OPf_KIDS> will
+be set automatically, and, shifted up eight bits, the eight bits of
+C<op_private>, except that the bit with value 1 or 2 is automatically
+set as required.  I<listval> and I<subscript> supply the parameters of
+the slice; they are consumed by this function and become part of the
+constructed op tree.
+
+=cut
+*/
+
 OP *
 Perl_newSLICEOP(pTHX_ I32 flags, OP *subscript, OP *listval)
 {
@@ -4242,6 +4382,29 @@ S_is_list_assignment(pTHX_ register const OP *o)
 
     return FALSE;
 }
+
+/*
+=for apidoc Am|OP *|newASSIGNOP|I32 flags|OP *left|I32 optype|OP *right
+
+Constructs, checks, and returns an assignment op.  I<left> and I<right>
+supply the parameters of the assignment; they are consumed by this
+function and become part of the constructed op tree.
+
+If I<optype> is C<OP_ANDASSIGN>, C<OP_ORASSIGN>, or C<OP_DORASSIGN>, then
+a suitable conditional optree is constructed.  If I<optype> is the opcode
+of a binary operator, such as C<OP_BIT_OR>, then an op is constructed that
+performs the binary operation and assigns the result to the left argument.
+Either way, if I<optype> is non-zero then I<flags> has no effect.
+
+If I<optype> is zero, then a plain scalar or list assignment is
+constructed.  Which type of assignment it is is automatically determined.
+I<flags> gives the eight bits of C<op_flags>, except that C<OPf_KIDS>
+will be set automatically, and, shifted up eight bits, the eight bits
+of C<op_private>, except that the bit with value 1 or 2 is automatically
+set as required.
+
+=cut
+*/
 
 OP *
 Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
@@ -4491,6 +4654,24 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
     return o;
 }
 
+/*
+=for apidoc Am|OP *|newSTATEOP|I32 flags|char *label|OP *o
+
+Constructs a state op (COP).  The state op is normally a C<nextstate> op,
+but will be a C<dbstate> op if debugging is enabled for currently-compiled
+code.  The state op is populated from L</PL_curcop> (or L</PL_compiling>).
+If I<label> is non-null, it supplies the name of a label to attach to
+the state op; this function takes ownership of the memory pointed at by
+I<label>, and will free it.  I<flags> gives the eight bits of C<op_flags>
+for the state op.
+
+If I<o> is null, the state op is returned.  Otherwise the state op is
+combined with I<o> into a C<lineseq> list op, which is returned.  I<o>
+is consumed by this function and becomes part of the returned op tree.
+
+=cut
+*/
+
 OP *
 Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 {
@@ -4568,6 +4749,19 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
     return prepend_elem(OP_LINESEQ, (OP*)cop, o);
 }
 
+/*
+=for apidoc Am|OP *|newLOGOP|I32 type|I32 flags|OP *first|OP *other
+
+Constructs, checks, and returns a logical (flow control) op.  I<type>
+is the opcode.  I<flags> gives the eight bits of C<op_flags>, except
+that C<OPf_KIDS> will be set automatically, and, shifted up eight bits,
+the eight bits of C<op_private>, except that the bit with value 1 is
+automatically set.  I<first> supplies the expression controlling the
+flow, and I<other> supplies the side (alternate) chain of ops; they are
+consumed by this function and become part of the constructed op tree.
+
+=cut
+*/
 
 OP *
 Perl_newLOGOP(pTHX_ I32 type, I32 flags, OP *first, OP *other)
@@ -4784,6 +4978,20 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
     return o;
 }
 
+/*
+=for apidoc Am|OP *|newCONDOP|I32 flags|OP *first|OP *trueop|OP *falseop
+
+Constructs, checks, and returns a conditional-expression (C<cond_expr>)
+op.  I<flags> gives the eight bits of C<op_flags>, except that C<OPf_KIDS>
+will be set automatically, and, shifted up eight bits, the eight bits of
+C<op_private>, except that the bit with value 1 is automatically set.
+I<first> supplies the expression selecting between the two branches,
+and I<trueop> and I<falseop> supply the branches; they are consumed by
+this function and become part of the constructed op tree.
+
+=cut
+*/
+
 OP *
 Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 {
@@ -4849,6 +5057,20 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
     return o;
 }
 
+/*
+=for apidoc Am|OP *|newRANGE|I32 flags|OP *left|OP *right
+
+Constructs and returns a C<range> op, with subordinate C<flip> and
+C<flop> ops.  I<flags> gives the eight bits of C<op_flags> for the
+C<flip> op and, shifted up eight bits, the eight bits of C<op_private>
+for both the C<flip> and C<range> ops, except that the bit with value
+1 is automatically set.  I<left> and I<right> supply the expressions
+controlling the endpoints of the range; they are consumed by this function
+and become part of the constructed op tree.
+
+=cut
+*/
+
 OP *
 Perl_newRANGE(pTHX_ I32 flags, OP *left, OP *right)
 {
@@ -4897,6 +5119,22 @@ Perl_newRANGE(pTHX_ I32 flags, OP *left, OP *right)
 
     return o;
 }
+
+/*
+=for apidoc Am|OP *|newLOOPOP|I32 flags|I32 debuggable|OP *expr|OP *block
+
+Constructs, checks, and returns an op tree expressing a loop.  This is
+only a loop in the control flow through the op tree; it does not have
+the heavyweight loop structure that allows exiting the loop by C<last>
+and suchlike.  I<flags> gives the eight bits of C<op_flags> for the
+top-level op, except that some bits will be set automatically as required.
+I<expr> supplies the expression controlling loop iteration, and I<block>
+supplies the body of the loop; they are consumed by this function and
+become part of the constructed op tree.  I<debuggable> is currently
+unused and should always be 1.
+
+=cut
+*/
 
 OP *
 Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
@@ -4961,6 +5199,31 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
     o->op_flags |= OPf_SPECIAL;	/* suppress POPBLOCK curpm restoration*/
     return o;
 }
+
+/*
+=for apidoc Am|OP *|newWHILEOP|I32 flags|I32 debuggable|LOOP *loop|I32 whileline|OP *expr|OP *block|OP *cont|I32 has_my
+
+Constructs, checks, and returns an op tree expressing a C<while> loop.
+This is a heavyweight loop, with structure that allows exiting the loop
+by C<last> and suchlike.
+
+I<loop> is an optional preconstructed C<enterloop> op to use in the
+loop; if it is null then a suitable op will be constructed automatically.
+I<expr> supplies the loop's controlling expression.  I<block> supplies the
+main body of the loop, and I<cont> optionally supplies a C<continue> block
+that operates as a second half of the body.  All of these optree inputs
+are consumed by this function and become part of the constructed op tree.
+
+I<flags> gives the eight bits of C<op_flags> for the C<leaveloop>
+op and, shifted up eight bits, the eight bits of C<op_private> for
+the C<leaveloop> op, except that (in both cases) some bits will be set
+automatically.  I<debuggable> is currently unused and should always be 1.
+I<whileline> is the line number that should be attributed to the loop's
+controlling expression.  I<has_my> can be supplied as true to force the
+loop body to be enclosed in its own scope.
+
+=cut
+*/
 
 OP *
 Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32
@@ -5064,6 +5327,33 @@ whileline, OP *expr, OP *block, OP *cont, I32 has_my)
     o->op_private |= (flags >> 8);
     return o;
 }
+
+/*
+=for apidoc Am|OP *|newFOROP|I32 flags|char *label|line_t forline|OP *sv|OP *expr|OP *block|OP *cont
+
+Constructs, checks, and returns an op tree expressing a C<foreach>
+loop (iteration through a list of values).  This is a heavyweight loop,
+with structure that allows exiting the loop by C<last> and suchlike.
+
+I<sv> optionally supplies the variable that will be aliased to each
+item in turn; if null, it defaults to C<$_> (either lexical or global).
+I<expr> supplies the list of values to iterate over.  I<block> supplies
+the main body of the loop, and I<cont> optionally supplies a C<continue>
+block that operates as a second half of the body.  All of these optree
+inputs are consumed by this function and become part of the constructed
+op tree.
+
+I<flags> gives the eight bits of C<op_flags> for the C<leaveloop>
+op and, shifted up eight bits, the eight bits of C<op_private> for
+the C<leaveloop> op, except that (in both cases) some bits will be set
+automatically.  I<forline> is the line number that should be attributed
+to the loop's list expression.  If I<label> is non-null, it supplies
+the name of a label to attach to the state op at the start of the loop;
+this function takes ownership of the memory pointed at by I<label>,
+and will free it.
+
+=cut
+*/
 
 OP *
 Perl_newFOROP(pTHX_ I32 flags, char *label, line_t forline, OP *sv, OP *expr, OP *block, OP *cont)
@@ -5190,6 +5480,17 @@ Perl_newFOROP(pTHX_ I32 flags, char *label, line_t forline, OP *sv, OP *expr, OP
     PL_parser->copline = forline;
     return newSTATEOP(0, label, wop);
 }
+
+/*
+=for apidoc Am|OP *|newLOOPEX|I32 type|OP *label
+
+Constructs, checks, and returns a loop-exiting op (such as C<goto>
+or C<last>).  I<type> is the opcode.  I<label> supplies the parameter
+determining the target of the op; it is consumed by this function and
+become part of the constructed op tree.
+
+=cut
+*/
 
 OP*
 Perl_newLOOPEX(pTHX_ I32 type, OP *label)
@@ -5381,6 +5682,19 @@ S_looks_like_bool(pTHX_ const OP *o)
     }
 }
 
+/*
+=for apidoc Am|OP *|newGIVENOP|OP *cond|OP *block|PADOFFSET defsv_off
+
+Constructs, checks, and returns an op tree expressing a C<given> block.
+I<cond> supplies the expression that will be locally assigned to a lexical
+variable, and I<block> supplies the body of the C<given> construct; they
+are consumed by this function and become part of the constructed op tree.
+I<defsv_off> is the pad offset of the scalar lexical variable that will
+be affected.
+
+=cut
+*/
+
 OP *
 Perl_newGIVENOP(pTHX_ OP *cond, OP *block, PADOFFSET defsv_off)
 {
@@ -5393,7 +5707,19 @@ Perl_newGIVENOP(pTHX_ OP *cond, OP *block, PADOFFSET defsv_off)
 	defsv_off);
 }
 
-/* If cond is null, this is a default {} block */
+/*
+=for apidoc Am|OP *|newWHENOP|OP *cond|OP *block
+
+Constructs, checks, and returns an op tree expressing a C<when> block.
+I<cond> supplies the test expression, and I<block> supplies the block
+that will be executed if the test evaluates to true; they are consumed
+by this function and become part of the constructed op tree.  I<cond>
+will be interpreted DWIMically, often as a comparison against C<$_>,
+and may be null to generate a C<default> block.
+
+=cut
+*/
+
 OP *
 Perl_newWHENOP(pTHX_ OP *cond, OP *block)
 {
@@ -5417,6 +5743,8 @@ Perl_newWHENOP(pTHX_ OP *cond, OP *block)
 }
 
 /*
+=head1 Embedding Functions
+
 =for apidoc cv_undef
 
 Clear out all the active components of a CV. This can happen either
@@ -8516,7 +8844,7 @@ S_is_inplace_av(pTHX_ OP *o, OP *oright) {
  * peep() is called */
 
 void
-Perl_peep(pTHX_ register OP *o)
+Perl_rpeep(pTHX_ register OP *o)
 {
     dVAR;
     register OP* oldop = NULL;
@@ -8609,7 +8937,7 @@ Perl_peep(pTHX_ register OP *o)
 		PL_curcop = ((COP*)o);
 	    }
 	    /* XXX: We avoid setting op_seq here to prevent later calls
-	       to peep() from mistakenly concluding that optimisation
+	       to rpeep() from mistakenly concluding that optimisation
 	       has already occurred. This doesn't fix the real problem,
 	       though (See 20010220.007). AMS 20010719 */
 	    /* op_seq functionality is now replaced by op_opt */
@@ -8715,7 +9043,7 @@ Perl_peep(pTHX_ register OP *o)
             sop = fop->op_sibling;
 	    while (cLOGOP->op_other->op_type == OP_NULL)
 		cLOGOP->op_other = cLOGOP->op_other->op_next;
-	    peep(cLOGOP->op_other); /* Recursive calls are not replaced by fptr calls */
+	    CALL_RPEEP(cLOGOP->op_other);
           
           stitch_keys:	    
 	    o->op_opt = 1;
@@ -8766,20 +9094,20 @@ Perl_peep(pTHX_ register OP *o)
 	case OP_ONCE:
 	    while (cLOGOP->op_other->op_type == OP_NULL)
 		cLOGOP->op_other = cLOGOP->op_other->op_next;
-	    peep(cLOGOP->op_other); /* Recursive calls are not replaced by fptr calls */
+	    CALL_RPEEP(cLOGOP->op_other);
 	    break;
 
 	case OP_ENTERLOOP:
 	case OP_ENTERITER:
 	    while (cLOOP->op_redoop->op_type == OP_NULL)
 		cLOOP->op_redoop = cLOOP->op_redoop->op_next;
-	    peep(cLOOP->op_redoop);
+	    CALL_RPEEP(cLOOP->op_redoop);
 	    while (cLOOP->op_nextop->op_type == OP_NULL)
 		cLOOP->op_nextop = cLOOP->op_nextop->op_next;
-	    peep(cLOOP->op_nextop);
+	    CALL_RPEEP(cLOOP->op_nextop);
 	    while (cLOOP->op_lastop->op_type == OP_NULL)
 		cLOOP->op_lastop = cLOOP->op_lastop->op_next;
-	    peep(cLOOP->op_lastop);
+	    CALL_RPEEP(cLOOP->op_lastop);
 	    break;
 
 	case OP_SUBST:
@@ -8788,7 +9116,7 @@ Perl_peep(pTHX_ register OP *o)
 		   cPMOP->op_pmstashstartu.op_pmreplstart->op_type == OP_NULL)
 		cPMOP->op_pmstashstartu.op_pmreplstart
 		    = cPMOP->op_pmstashstartu.op_pmreplstart->op_next;
-	    peep(cPMOP->op_pmstashstartu.op_pmreplstart);
+	    CALL_RPEEP(cPMOP->op_pmstashstartu.op_pmreplstart);
 	    break;
 
 	case OP_EXEC:
@@ -9162,6 +9490,12 @@ Perl_peep(pTHX_ register OP *o)
 	oldop = o;
     }
     LEAVE;
+}
+
+void
+Perl_peep(pTHX_ register OP *o)
+{
+    CALL_RPEEP(o);
 }
 
 const char*

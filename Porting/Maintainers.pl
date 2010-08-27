@@ -581,7 +581,7 @@ use File::Glob qw(:case);
     'ExtUtils::MakeMaker' =>
 	{
 	'MAINTAINER'	=> 'mschwern',
-	'DISTRIBUTION'	=> 'MSCHWERN/ExtUtils-MakeMaker-6.56.tar.gz',
+	'DISTRIBUTION'	=> 'MSCHWERN/ExtUtils-MakeMaker-6.57_01.tar.gz',
 	'FILES'		=> q[cpan/ExtUtils-MakeMaker],
 	'EXCLUDED'	=> [ qr{^t/lib/Test/},
 			     qr{^inc/ExtUtils/},
@@ -1506,7 +1506,7 @@ use File::Glob qw(:case);
     'Unicode::Collate' =>
 	{
 	'MAINTAINER'	=> 'sadahiro',
-	'DISTRIBUTION'	=> 'SADAHIRO/Unicode-Collate-0.56-withoutworldwriteables.tar.gz',
+	'DISTRIBUTION'	=> 'SADAHIRO/Unicode-Collate-0.57-withoutworldwriteables.tar.gz',
 	'FILES'		=> q[cpan/Unicode-Collate],
 			    # ignore experimental XS version
 	'EXCLUDED'	=> [ qr{X$},

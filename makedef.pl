@@ -1241,10 +1241,8 @@ else {
 	my $glob = readvar($perlvars_h);
 	emit_symbols $glob;
     }
-    unless ($define{'MULTIPLICITY'}) {
-	my $glob = readvar($intrpvar_h);
-	emit_symbols $glob;
-    }
+    my $glob = readvar($intrpvar_h);
+    emit_symbols $glob;
 }
 
 sub try_symbol {

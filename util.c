@@ -6489,12 +6489,15 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
 {
     dVAR;
     SV * const dbsv = GvSVn(PL_DBsub);
+    const bool save_taint = PL_tainted;
+
     /* We do not care about using sv to call CV;
      * it's for informational purposes only.
      */
 
     PERL_ARGS_ASSERT_GET_DB_SUB;
 
+    PL_tainted = FALSE;
     save_item(dbsv);
     if (!PERLDB_SUB_NN) {
 	GV * const gv = CvGV(cv);
@@ -6521,6 +6524,7 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
 	(void)SvIOK_on(dbsv);
 	SvIV_set(dbsv, PTR2IV(cv));	/* Do it the quickest way  */
     }
+    TAINT_IF(save_taint);
 }
 
 int

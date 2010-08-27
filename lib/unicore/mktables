@@ -9,11 +9,12 @@
 # 5.8: needs pack "U".  But almost all occurrences of objaddr have been
 # removed in favor of using 'no overloading'.  You also would have to go
 # through and replace occurrences like:
-#       my $addr; { no overloading; $addr = 0+$self; }
+#       my $addr = do { no overloading; pack 'J', $self; }
 # with
 #       my $addr = main::objaddr $self;
 # (or reverse commit 9b01bafde4b022706c3d6f947a0963f821b2e50b
-# that instituted this change.)
+# that instituted the change to main::objaddr, and subsequent commits that
+# changed 0+$self to pack 'J', $self.)
 
 require 5.010_001;
 use strict;
@@ -585,6 +586,12 @@ sub uniques {
     # Encapsulated Cleverness".  p. 455 in first edition.
 
     my %seen;
+    # Arguably this breaks encapsulation, if the goal is to permit multiple
+    # distinct objects to stringify to the same value, and be interchangeable.
+    # However, for this program, no two objects stringify identically, and all
+    # lists passed to this function are either objects or strings. So this
+    # doesn't affect correctness, but it does give a couple of percent speedup.
+    no overloading;
     return grep { ! $seen{$_}++ } @_;
 }
 
@@ -1234,7 +1241,7 @@ sub objaddr($) {
     no overloading; # If overloaded, numifying below won't work.
 
     # Numifying a ref gives its address.
-    return 0 + $_[0];
+    return pack 'J', $_[0];
 }
 
 # Commented code below should work on Perl 5.8.
@@ -1259,7 +1266,7 @@ sub objaddr($) {
 #    bless $_[0], 'main::Fake';
 #
 #    # Numifying a ref gives its address.
-#    my $addr = 0 + $_[0];
+#    my $addr = pack 'J', $_[0];
 #
 #    # Return to original class
 #    bless $_[0], $pkg;
@@ -1449,7 +1456,7 @@ package main;
             # Use typeglob to give the anonymous subroutine the name we want
             *$destroy_name = sub {
                 my $self = shift;
-                my $addr; { no overloading; $addr = 0+$self; }
+                my $addr = do { no overloading; pack 'J', $self; };
 
                 $self->$destroy_callback if $destroy_callback;
                 foreach my $field (keys %{$package_fields{$package}}) {
@@ -1548,7 +1555,7 @@ package main;
                     return Carp::carp_too_few_args(\@_, 2) if main::DEBUG && @_ < 2;
                     my $self = shift;
                     my $value = shift;
-                    my $addr; { no overloading; $addr = 0+$self; }
+                    my $addr = do { no overloading; pack 'J', $self; };
                     Carp::carp_extra_args(\@_) if main::DEBUG && @_;
                     if (ref $value) {
                         return if grep { $value == $_ } @{$field->{$addr}};
@@ -1582,7 +1589,7 @@ package main;
                     *$subname = sub {
                         use strict "refs";
                         Carp::carp_extra_args(\@_) if main::DEBUG && @_ > 1;
-                        my $addr; { no overloading; $addr = 0+$_[0]; }
+                        my $addr = do { no overloading; pack 'J', $_[0]; };
                         if (ref $field->{$addr} ne 'ARRAY') {
                             my $type = ref $field->{$addr};
                             $type = 'scalar' unless $type;
@@ -1605,7 +1612,7 @@ package main;
                         use strict "refs";
                         Carp::carp_extra_args(\@_) if main::DEBUG && @_ > 1;
                         no overloading;
-                        return $field->{0+$_[0]};
+                        return $field->{pack 'J', $_[0]};
                     }
                 }
             }
@@ -1620,7 +1627,7 @@ package main;
                     }
                     # $self is $_[0]; $value is $_[1]
                     no overloading;
-                    $field->{0+$_[0]} = $_[1];
+                    $field->{pack 'J', $_[0]} = $_[1];
                     return;
                 }
             }
@@ -1780,7 +1787,7 @@ sub trace { return main::trace(@_); }
         my $class = shift;
 
         my $self = bless \do{ my $anonymous_scalar }, $class;
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         # Set defaults
         $handler{$addr} = \&main::process_generic_property_file;
@@ -1871,7 +1878,7 @@ sub trace { return main::trace(@_); }
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         my $file = $file{$addr};
 
@@ -2041,7 +2048,7 @@ END
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         # Here the file is open (or if the handle is not a ref, is an open
         # 'virtual' file).  Get the next line; any inserted lines get priority
@@ -2186,7 +2193,7 @@ END
 #        # an each_line_handler() on the line.
 #
 #        my $self = shift;
-#        my $addr; { no overloading; $addr = 0+$self; }
+#        my $addr = do { no overloading; pack 'J', $self; };
 #
 #        foreach my $inserted_ref (@{$added_lines{$addr}}) {
 #            my ($adjusted, $line) = @{$inserted_ref};
@@ -2228,7 +2235,7 @@ END
         # indicate that this line hasn't been adjusted, and needs to be
         # processed.
         no overloading;
-        push @{$added_lines{0+$self}}, map { [ 0, $_ ] } @_;
+        push @{$added_lines{pack 'J', $self}}, map { [ 0, $_ ] } @_;
         return;
     }
 
@@ -2252,7 +2259,7 @@ END
         # Each inserted line is an array, with the first element being 1 to
         # indicate that this line has been adjusted
         no overloading;
-        push @{$added_lines{0+$self}}, map { [ 1, $_ ] } @_;
+        push @{$added_lines{pack 'J', $self}}, map { [ 1, $_ ] } @_;
         return;
     }
 
@@ -2265,7 +2272,7 @@ END
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         # If not accepting a list return, just return the first one.
         return shift @{$missings{$addr}} unless wantarray;
@@ -2279,7 +2286,7 @@ END
         # Add a property field to $_, if this file requires it.
 
         my $self = shift;
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
         my $property = $property{$addr};
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
@@ -2298,7 +2305,7 @@ END
         my $message = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         $message = 'Unexpected line' unless $message;
 
@@ -2363,7 +2370,7 @@ package Multi_Default;
         my $class = shift;
 
         my $self = bless \do{my $anonymous_scalar}, $class;
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         while (@_ > 1) {
             my $default = shift;
@@ -2381,7 +2388,7 @@ package Multi_Default;
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         return each %{$class_defaults{$addr}};
     }
@@ -2428,7 +2435,7 @@ package Alias;
         my $class = shift;
 
         my $self = bless \do { my $anonymous_scalar }, $class;
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         $name{$addr} = shift;
         $loose_match{$addr} = shift;
@@ -2490,7 +2497,7 @@ sub trace { return main::trace(@_); }
         my $class = shift;
 
         my $self = bless \do { my $anonymous_scalar }, $class;
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         $start{$addr} = shift;
         $end{$addr} = shift;
@@ -2520,7 +2527,7 @@ sub trace { return main::trace(@_); }
 
     sub _operator_stringify {
         my $self = shift;
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         # Output it like '0041..0065 (value)'
         my $return = sprintf("%04X", $start{$addr})
@@ -2543,7 +2550,7 @@ sub trace { return main::trace(@_); }
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         return $standard_form{$addr} if defined $standard_form{$addr};
         return $value{$addr};
@@ -2556,7 +2563,7 @@ sub trace { return main::trace(@_); }
         my $indent = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         my $return = $indent
                     . sprintf("%04X", $start{$addr})
@@ -2638,7 +2645,7 @@ sub trace { return main::trace(@_); }
         return _union($class, $initialize, %args) if defined $initialize;
 
         $self = bless \do { my $anonymous_scalar }, $class;
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         # Optional parent object, only for debug info.
         $owner_name_of{$addr} = delete $args{'Owner'};
@@ -2670,7 +2677,7 @@ sub trace { return main::trace(@_); }
 
     sub _operator_stringify {
         my $self = shift;
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         return "Range_List attached to '$owner_name_of{$addr}'"
                                                 if $owner_name_of{$addr};
@@ -2729,7 +2736,7 @@ sub trace { return main::trace(@_); }
                 my $message = "";
                 if (defined $self) {
                     no overloading;
-                    $message .= $owner_name_of{0+$self};
+                    $message .= $owner_name_of{pack 'J', $self};
                 }
                 Carp::my_carp_bug($message .= "Undefined argument to _union.  No union done.");
                 return;
@@ -2751,7 +2758,7 @@ sub trace { return main::trace(@_); }
                 my $message = "";
                 if (defined $self) {
                     no overloading;
-                    $message .= $owner_name_of{0+$self};
+                    $message .= $owner_name_of{pack 'J', $self};
                 }
                 Carp::my_carp_bug($message . "Cannot take the union of a $type.  No union done.");
                 return;
@@ -2792,7 +2799,7 @@ sub trace { return main::trace(@_); }
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         no overloading;
-        return scalar @{$ranges{0+$self}};
+        return scalar @{$ranges{pack 'J', $self}};
     }
 
     sub min {
@@ -2805,7 +2812,7 @@ sub trace { return main::trace(@_); }
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         # If the range list is empty, return a large value that isn't adjacent
         # to any that could be in the range list, for simpler tests
@@ -2830,7 +2837,7 @@ sub trace { return main::trace(@_); }
         # So is in the table if and only iff it is at least the start position
         # of range $i.
         no overloading;
-        return 0 if $ranges{0+$self}->[$i]->start > $codepoint;
+        return 0 if $ranges{pack 'J', $self}->[$i]->start > $codepoint;
         return $i + 1;
     }
 
@@ -2846,7 +2853,7 @@ sub trace { return main::trace(@_); }
 
         # contains() returns 1 beyond where we should look
         no overloading;
-        return $ranges{0+$self}->[$i-1]->value;
+        return $ranges{pack 'J', $self}->[$i-1]->value;
     }
 
     sub _search_ranges {
@@ -2860,7 +2867,7 @@ sub trace { return main::trace(@_); }
         my $code_point = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         return if $code_point > $max{$addr};
         my $r = $ranges{$addr};                # The current list of ranges
@@ -3034,7 +3041,7 @@ sub trace { return main::trace(@_); }
 
         Carp::carp_extra_args(\%args) if main::DEBUG && %args;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         if ($operation ne '+' && $operation ne '-') {
             Carp::my_carp_bug("$owner_name_of{$addr}First parameter to _add_delete must be '+' or '-'.  No action taken.");
@@ -3619,7 +3626,7 @@ sub trace { return main::trace(@_); }
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         no overloading;
-        undef $each_range_iterator{0+$self};
+        undef $each_range_iterator{pack 'J', $self};
         return;
     }
 
@@ -3630,7 +3637,7 @@ sub trace { return main::trace(@_); }
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         return if $self->is_empty;
 
@@ -3647,7 +3654,7 @@ sub trace { return main::trace(@_); }
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         my $count = 0;
         foreach my $range (@{$ranges{$addr}}) {
@@ -3671,7 +3678,7 @@ sub trace { return main::trace(@_); }
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         no overloading;
-        return scalar @{$ranges{0+$self}} == 0;
+        return scalar @{$ranges{pack 'J', $self}} == 0;
     }
 
     sub hash {
@@ -3682,7 +3689,7 @@ sub trace { return main::trace(@_); }
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         # These are quickly computable.  Return looks like 'min..max;count'
         return $self->min . "..$max{$addr};" . scalar @{$ranges{$addr}};
@@ -3990,7 +3997,7 @@ sub trace { return main::trace(@_); }
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         # On first pass, don't choose less desirable code points; if no good
         # one is found, repeat, allowing a less desirable one to be selected.
@@ -4182,7 +4189,7 @@ sub trace { return main::trace(@_); }
         my $class = shift;
 
         my $self = bless \do { my $anonymous_scalar }, $class;
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         my %args = @_;
 
@@ -4336,7 +4343,7 @@ sub trace { return main::trace(@_); }
         # Returns the array of ranges associated with this table.
 
         no overloading;
-        return $range_list{0+shift}->ranges;
+        return $range_list{pack 'J', shift}->ranges;
     }
 
     sub add_alias {
@@ -4372,7 +4379,7 @@ sub trace { return main::trace(@_); }
         # release
         $name = ucfirst($name) unless $name =~ /^k[A-Z]/;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         # Figure out if should be loosely matched if not already specified.
         if (! defined $loose_match) {
@@ -4434,7 +4441,7 @@ sub trace { return main::trace(@_); }
         # This name may be shorter than any existing ones, so clear the cache
         # of the shortest, so will have to be recalculated.
         no overloading;
-        undef $short_name{0+$self};
+        undef $short_name{pack 'J', $self};
         return;
     }
 
@@ -4457,7 +4464,7 @@ sub trace { return main::trace(@_); }
         my $nominal_length_ptr = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         # For efficiency, don't recalculate, but this means that adding new
         # aliases could change what the shortest is, so the code that does
@@ -4533,7 +4540,7 @@ sub trace { return main::trace(@_); }
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         no overloading;
-        push @{$description{0+$self}}, $description;
+        push @{$description{pack 'J', $self}}, $description;
 
         return;
     }
@@ -4546,7 +4553,7 @@ sub trace { return main::trace(@_); }
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         no overloading;
-        push @{$note{0+$self}}, $note;
+        push @{$note{pack 'J', $self}}, $note;
 
         return;
     }
@@ -4560,7 +4567,7 @@ sub trace { return main::trace(@_); }
         chomp $comment;
 
         no overloading;
-        push @{$comment{0+$self}}, $comment;
+        push @{$comment{pack 'J', $self}}, $comment;
 
         return;
     }
@@ -4573,7 +4580,7 @@ sub trace { return main::trace(@_); }
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
         my @list = @{$comment{$addr}};
         return @list if wantarray;
         my $return = "";
@@ -4591,7 +4598,7 @@ sub trace { return main::trace(@_); }
         # initialization for range lists.
 
         my $self = shift;
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
         my $initialization = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
@@ -4615,7 +4622,7 @@ sub trace { return main::trace(@_); }
         $return .= $DEVELOPMENT_ONLY if $compare_versions;
         $return .= $HEADER;
         no overloading;
-        $return .= $INTERNAL_ONLY if $internal_only{0+$self};
+        $return .= $INTERNAL_ONLY if $internal_only{pack 'J', $self};
         return $return;
     }
 
@@ -4630,7 +4637,7 @@ sub trace { return main::trace(@_); }
                                      # the range
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         # Start with the header
         my @OUT = $self->header;
@@ -4727,7 +4734,7 @@ sub trace { return main::trace(@_); }
         my $info = shift;   # Any message associated with it.
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         $status{$addr} = $status;
         $status_info{$addr} = $info;
@@ -4742,7 +4749,7 @@ sub trace { return main::trace(@_); }
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         $locked{$addr} = "";
 
@@ -4770,7 +4777,7 @@ sub trace { return main::trace(@_); }
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         return 0 if ! $locked{$addr};
         Carp::my_carp_bug("Can't modify a locked table. Stack trace of locking:\n$locked{$addr}\n\n");
@@ -4782,7 +4789,7 @@ sub trace { return main::trace(@_); }
         # Rest of parameters passed on
 
         no overloading;
-        @{$file_path{0+$self}} = @_;
+        @{$file_path{pack 'J', $self}} = @_;
         return
     }
 
@@ -4806,7 +4813,7 @@ sub trace { return main::trace(@_); }
             use strict "refs";
             my $self = shift;
             no overloading;
-            return $range_list{0+$self}->$sub(@_);
+            return $range_list{pack 'J', $self}->$sub(@_);
         }
     }
 
@@ -4822,7 +4829,7 @@ sub trace { return main::trace(@_); }
 
             return if $self->carp_if_locked;
             no overloading;
-            return $range_list{0+$self}->$sub(@_);
+            return $range_list{pack 'J', $self}->$sub(@_);
         }
     }
 
@@ -4928,7 +4935,7 @@ sub trace { return main::trace(@_); }
                                     _Range_List => $range_list,
                                     %args);
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         $anomalous_entries{$addr} = [];
         $core_access{$addr} = $core_access;
@@ -4980,7 +4987,7 @@ sub trace { return main::trace(@_); }
         # Can't change the table if locked.
         return if $self->carp_if_locked;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         $has_specials{$addr} = 1 if $type;
 
@@ -4998,7 +5005,7 @@ sub trace { return main::trace(@_); }
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         return "" unless @{$anomalous_entries{$addr}};
         return join("\n", @{$anomalous_entries{$addr}}) . "\n";
@@ -5025,8 +5032,8 @@ sub trace { return main::trace(@_); }
             return;
         }
 
-        my $addr; { no overloading; $addr = 0+$self; }
-        my $other_addr; { no overloading; $other_addr = 0+$other; }
+        my $addr = do { no overloading; pack 'J', $self; };
+        my $other_addr = do { no overloading; pack 'J', $other; };
 
         local $to_trace = 0 if main::DEBUG;
 
@@ -5059,7 +5066,7 @@ sub trace { return main::trace(@_); }
         my $map = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         # Convert the input to the standard equivalent, if any (won't have any
         # for $STRING properties)
@@ -5104,7 +5111,7 @@ sub trace { return main::trace(@_); }
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         # If overridden, use that
         return $to_output_map{$addr} if defined $to_output_map{$addr};
@@ -5149,7 +5156,7 @@ sub trace { return main::trace(@_); }
         # No sense generating a comment if aren't going to write it out.
         return if ! $self->to_output_map;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         my $property = $self->property;
 
@@ -5321,7 +5328,7 @@ END
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         my $name = $self->property->swash_name;
 
@@ -5453,7 +5460,9 @@ END
 # multiple code points.  These do not appear in the main body, but are defined
 # in the hash below.
 
-# The key: UTF-8 _bytes_, the value: UTF-8 (speed hack)
+# Each key is the string of N bytes that together make up the UTF-8 encoding
+# for the code point.  (i.e. the same as looking at the code point's UTF-8
+# under "use bytes").  Each value is the UTF-8 of the translation, for speed.
 %utf8::ToSpec$name = (
 END
                 $pre_body .= join("\n", @multi_code_point_maps) . "\n);\n";
@@ -5764,7 +5773,7 @@ END
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         return $self->SUPER::write(
             ($self->property == $block)
@@ -5911,7 +5920,7 @@ sub trace { return main::trace(@_); }
                                       _Property => $property,
                                       _Range_List => $range_list,
                                       );
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         $conflicting{$addr} = [ ];
         $equivalents{$addr} = [ ];
@@ -5952,7 +5961,7 @@ sub trace { return main::trace(@_); }
 
                         return if $self->carp_if_locked;
 
-                        my $addr; { no overloading; $addr = 0+$self; }
+                        my $addr = do { no overloading; pack 'J', $self; };
 
                         if (ref $other) {
 
@@ -6019,7 +6028,7 @@ sub trace { return main::trace(@_); }
                                         # be an optional parameter.
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         # Check if the conflicting name is exactly the same as any existing
         # alias in this table (as long as there is a real object there to
@@ -6067,7 +6076,7 @@ sub trace { return main::trace(@_); }
 
         # Two tables are equivalent if they have the same leader.
         no overloading;
-        return $leader{0+$self} == $leader{0+$other};
+        return $leader{pack 'J', $self} == $leader{pack 'J', $other};
         return;
     }
 
@@ -6141,7 +6150,7 @@ sub trace { return main::trace(@_); }
         my $are_equivalent = $self->is_equivalent_to($other);
         return if ! defined $are_equivalent || $are_equivalent;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
         my $current_leader = ($related) ? $parent{$addr} : $leader{$addr};
 
         if ($related &&
@@ -6152,8 +6161,8 @@ sub trace { return main::trace(@_); }
             $related = 0;
         }
 
-        my $leader; { no overloading; $leader = 0+$current_leader; }
-        my $other_addr; { no overloading; $other_addr = 0+$other; }
+        my $leader = do { no overloading; pack 'J', $current_leader; };
+        my $other_addr = do { no overloading; pack 'J', $other; };
 
         # Any tables that are equivalent to or children of this table must now
         # instead be equivalent to or (children) to the new leader (parent),
@@ -6168,7 +6177,7 @@ sub trace { return main::trace(@_); }
             next if $table == $other;
             trace "setting $other to be the leader of $table, status=$status" if main::DEBUG && $to_trace;
 
-            my $table_addr; { no overloading; $table_addr = 0+$table; }
+            my $table_addr = do { no overloading; pack 'J', $table; };
             $leader{$table_addr} = $other;
             $matches_all{$table_addr} = $matches_all;
             $self->_set_range_list($other->_range_list);
@@ -6222,7 +6231,7 @@ sub trace { return main::trace(@_); }
                               # an equivalent group
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$leader; }
+        my $addr = do { no overloading; pack 'J', $leader; };
 
         if ($leader{$addr} != $leader) {
             Carp::my_carp_bug(<<END
@@ -6277,7 +6286,7 @@ END
                 && $parent == $property->table('N')
                 && defined (my $yes = $property->table('Y')))
             {
-                my $yes_addr; { no overloading; $yes_addr = 0+$yes; }
+                my $yes_addr = do { no overloading; pack 'J', $yes; };
                 @yes_perl_synonyms
                     = grep { $_->property == $perl }
                                     main::uniques($yes,
@@ -6293,12 +6302,12 @@ END
             my @conflicting;        # Will hold the table conflicts.
 
             # Look at the parent, any yes synonyms, and all the children
-            my $parent_addr; { no overloading; $parent_addr = 0+$parent; }
+            my $parent_addr = do { no overloading; pack 'J', $parent; };
             for my $table ($parent,
                            @yes_perl_synonyms,
                            @{$children{$parent_addr}})
             {
-                my $table_addr; { no overloading; $table_addr = 0+$table; }
+                my $table_addr = do { no overloading; pack 'J', $table; };
                 my $table_property = $table->property;
 
                 # Tables are separated by a blank line to create a grouping.
@@ -6715,7 +6724,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         my %args = @_;
 
         $self = bless \do { my $anonymous_scalar }, $class;
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         $directory{$addr} = delete $args{'Directory'};
         $file{$addr} = delete $args{'File'};
@@ -6776,7 +6785,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         }
         else {
             no overloading;
-            $map{0+$self}->delete_range($other, $other);
+            $map{pack 'J', $self}->delete_range($other, $other);
         }
         return $self;
     }
@@ -6789,7 +6798,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         my $name = shift;
         my %args = @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         my $table = $table_ref{$addr}{$name};
         my $standard_name = main::standardize($name);
@@ -6857,7 +6866,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         my $name = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         return $table_ref{$addr}{$name} if defined $table_ref{$addr}{$name};
 
@@ -6876,7 +6885,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         # property
 
         no overloading;
-        return main::uniques(values %{$table_ref{0+shift}});
+        return main::uniques(values %{$table_ref{pack 'J', shift}});
     }
 
     sub directory {
@@ -6885,7 +6894,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         # priority;  'undef' is returned if the type isn't defined;
         # or $map_directory for everything else.
 
-        my $addr; { no overloading; $addr = 0+shift; }
+        my $addr = do { no overloading; pack 'J', shift; };
 
         return $directory{$addr} if defined $directory{$addr};
         return undef if $type{$addr} == $UNKNOWN;
@@ -6906,7 +6915,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         return $file{$addr} if defined $file{$addr};
         return $map{$addr}->external_name;
@@ -6922,7 +6931,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         # The whole point of this pseudo property is match tables.
         return 1 if $self == $perl;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         # Don't generate tables of code points that match the property values
         # of a string property.  Such a list would most likely have many
@@ -6957,7 +6966,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         }
 
         no overloading;
-        return $map{0+$self}->map_add_or_replace_non_nulls($map{0+$other});
+        return $map{pack 'J', $self}->map_add_or_replace_non_nulls($map{pack 'J', $other});
     }
 
     sub set_type {
@@ -6976,7 +6985,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
             return;
         }
 
-        { no overloading; $type{0+$self} = $type; }
+        { no overloading; $type{pack 'J', $self} = $type; }
         return if $type != $BINARY;
 
         my $yes = $self->table('Y');
@@ -7006,7 +7015,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         my $map = shift;    # What the range maps to.
         # Rest of parameters passed on.
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         # If haven't the type of the property, gather information to figure it
         # out.
@@ -7058,7 +7067,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $addr; { no overloading; $addr = 0+$self; }
+        my $addr = do { no overloading; pack 'J', $self; };
 
         my $type = $type{$addr};
 
@@ -7168,7 +7177,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
             use strict "refs";
             my $self = shift;
             no overloading;
-            return $map{0+$self}->$sub(@_);
+            return $map{pack 'J', $self}->$sub(@_);
         }
     }
 
@@ -7456,12 +7465,7 @@ sub write ($\@) {
 
     push @files_actually_output, $file;
 
-    my $text;
-    if (@$lines_ref) {
-        $text = join "", @$lines_ref;
-    }
-    else {
-        $text = "";
+    unless (@$lines_ref) {
         Carp::my_carp("Output file '$file' is empty; writing it anyway;");
     }
 
@@ -7472,10 +7476,12 @@ sub write ($\@) {
         Carp::my_carp("can't open $file for output.  Skipping this file: $!");
         return;
     }
+
+    print $OUT @$lines_ref or die Carp::my_carp("write to '$file' failed: $!");
+    close $OUT or die Carp::my_carp("close '$file' failed: $!");
+
     print "$file written.\n" if $verbosity >= $VERBOSE;
 
-    print $OUT $text;
-    close $OUT;
     return;
 }
 
@@ -7576,7 +7582,7 @@ sub standardize ($) {
         else {
 
             # Keep track of cycles in the input, and refuse to infinitely loop
-            my $addr; { no overloading; $addr = 0+$item; }
+            my $addr = do { no overloading; pack 'J', $item; };
             if (defined $already_output{$addr}) {
                 return "${indent}ALREADY OUTPUT: $item\n";
             }
@@ -7697,7 +7703,7 @@ sub dump_inside_out {
     my $fields_ref = shift;
     Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-    my $addr; { no overloading; $addr = 0+$object; }
+    my $addr = do { no overloading; pack 'J', $object; };
 
     my %hash;
     foreach my $key (keys %$fields_ref) {
@@ -7725,7 +7731,7 @@ sub _operator_dot {
         }
         else {
             my $ref = ref $$which;
-            my $addr; { no overloading; $addr = 0+$$which; }
+            my $addr = do { no overloading; pack 'J', $$which; };
             $$which = "$ref ($addr)";
         }
     }
@@ -7744,7 +7750,7 @@ sub _operator_equal {
     return 0 unless defined $other;
     return 0 unless ref $other;
     no overloading;
-    return 0+$self == 0+$other;
+    return $self == $other;
 }
 
 sub _operator_not_equal {
@@ -8705,7 +8711,7 @@ END
                     $file->carp_bad_line("Unexpected property '$property_name'.  Skipped");
                     next LINE;
                 }
-                { no overloading; $property_addr = 0+($property_object); }
+                { no overloading; $property_addr = pack 'J', $property_object; }
 
                 # Defer changing names until have a line that is acceptable
                 # (the 'next' statement above means is unacceptable)
@@ -8757,7 +8763,7 @@ END
                                             if $file->has_missings_defaults;
                     foreach my $default_ref (@missings_list) {
                         my $default = $default_ref->[0];
-                        my $addr; { no overloading; $addr = 0+property_ref($default_ref->[1]); }
+                        my $addr = do { no overloading; pack 'J', property_ref($default_ref->[1]); };
 
                         # For string properties, the default is just what the
                         # file says, but non-string properties should already
@@ -13141,12 +13147,11 @@ sub generate_separator($) {
             . $spaces_after;
 }
 
-sub generate_tests($$$$$$) {
+sub generate_tests($$$$$) {
     # This used only for making the test script.  It generates test cases that
     # are expected to compile successfully in perl.  Note that the lhs and
     # rhs are assumed to already be as randomized as the caller wants.
 
-    my $file_handle = shift;   # Where to output the tests
     my $lhs = shift;           # The property: what's to the left of the colon
                                #  or equals separator
     my $rhs = shift;           # The property value; what's to the right
@@ -13163,35 +13168,31 @@ sub generate_tests($$$$$$) {
     # The whole 'property=value'
     my $name = "$lhs$separator$rhs";
 
+    my @output;
     # Create a complete set of tests, with complements.
     if (defined $valid_code) {
-        printf $file_handle
-                    qq/Expect(1, $valid_code, '\\p{$name}', $warning);\n/;
-        printf $file_handle
-                    qq/Expect(0, $valid_code, '\\p{^$name}', $warning);\n/;
-        printf $file_handle
-                    qq/Expect(0, $valid_code, '\\P{$name}', $warning);\n/;
-        printf $file_handle
-                    qq/Expect(1, $valid_code, '\\P{^$name}', $warning);\n/;
+	push @output, <<"EOC"
+Expect(1, $valid_code, '\\p{$name}', $warning);
+Expect(0, $valid_code, '\\p{^$name}', $warning);
+Expect(0, $valid_code, '\\P{$name}', $warning);
+Expect(1, $valid_code, '\\P{^$name}', $warning);
+EOC
     }
     if (defined $invalid_code) {
-        printf $file_handle
-                    qq/Expect(0, $invalid_code, '\\p{$name}', $warning);\n/;
-        printf $file_handle
-                    qq/Expect(1, $invalid_code, '\\p{^$name}', $warning);\n/;
-        printf $file_handle
-                    qq/Expect(1, $invalid_code, '\\P{$name}', $warning);\n/;
-        printf $file_handle
-                    qq/Expect(0, $invalid_code, '\\P{^$name}', $warning);\n/;
+	push @output, <<"EOC"
+Expect(0, $invalid_code, '\\p{$name}', $warning);
+Expect(1, $invalid_code, '\\p{^$name}', $warning);
+Expect(1, $invalid_code, '\\P{$name}', $warning);
+Expect(0, $invalid_code, '\\P{^$name}', $warning);
+EOC
     }
-    return;
+    return @output;
 }
 
-sub generate_error($$$$) {
+sub generate_error($$$) {
     # This used only for making the test script.  It generates test cases that
     # are expected to not only not match, but to be syntax or similar errors
 
-    my $file_handle = shift;        # Where to output to.
     my $lhs = shift;                # The property: what's to the left of the
                                     # colon or equals separator
     my $rhs = shift;                # The property value; what's to the right
@@ -13208,9 +13209,10 @@ sub generate_error($$$$) {
 
     my $property = $lhs . $separator . $rhs;
 
-    print $file_handle qq/Error('\\p{$property}');\n/;
-    print $file_handle qq/Error('\\P{$property}');\n/;
-    return;
+    return <<"EOC";
+Error('\\p{$property}');
+Error('\\P{$property}');
+EOC
 }
 
 # These are used only for making the test script
@@ -13376,14 +13378,6 @@ sub make_property_test_script() {
 
     $t_path = 'TestProp.pl' unless defined $t_path; # the traditional name
 
-    force_unlink ($t_path);
-    push @files_actually_output, $t_path;
-    my $OUT;
-    if (not open $OUT, "> $t_path") {
-        Carp::my_carp("Can't open $t_path.  Skipping: $!");
-        return;
-    }
-
     # Keep going down an order of magnitude
     # until find that adding this quantity to
     # 1 remains 1; but put an upper limit on
@@ -13400,7 +13394,10 @@ sub make_property_test_script() {
                             # use previous one
         $min_floating_slop = $next;
     }
-    print $OUT $HEADER, <DATA>;
+
+    # It doesn't matter whether the elements of this array contain single lines
+    # or multiple lines. main::write doesn't count the lines.
+    my @output;
 
     foreach my $property (property_ref('*')) {
         foreach my $table ($property->tables) {
@@ -13435,10 +13432,9 @@ sub make_property_test_script() {
                 my $already_error = ! $table->file_path;
 
                 # Generate error cases for this alias.
-                generate_error($OUT,
-                                $property_name,
-                                $table_name,
-                                $already_error);
+                push @output, generate_error($property_name,
+                                             $table_name,
+                                             $already_error);
 
                 # If the table is guaranteed to always generate an error,
                 # quit now without generating success cases.
@@ -13459,13 +13455,12 @@ sub make_property_test_script() {
                     # Don't output duplicate test cases.
                     if (! exists $test_generated{$test_name}) {
                         $test_generated{$test_name} = 1;
-                        generate_tests($OUT,
-                                        $property_name,
-                                        $standard,
-                                        $valid,
-                                        $invalid,
-                                        $warning,
-                                    );
+                        push @output, generate_tests($property_name,
+                                                     $standard,
+                                                     $valid,
+                                                     $invalid,
+                                                     $warning,
+                                                 );
                     }
                     $random = randomize_loose_name($table_name)
                 }
@@ -13477,13 +13472,12 @@ sub make_property_test_script() {
                 my $test_name = "$property_name=$random";
                 if (! exists $test_generated{$test_name}) {
                     $test_generated{$test_name} = 1;
-                    generate_tests($OUT,
-                                    $property_name,
-                                    $random,
-                                    $valid,
-                                    $invalid,
-                                    $warning,
-                                );
+                    push @output, generate_tests($property_name,
+                                                 $random,
+                                                 $valid,
+                                                 $invalid,
+                                                 $warning,
+                                             );
 
                     # If the name is a rational number, add tests for the
                     # floating point equivalent.
@@ -13525,24 +13519,22 @@ sub make_property_test_script() {
                                         if abs($table_name - $existing)
                                                 < $MAX_FLOATING_SLOP;
                                 }
-                                generate_error($OUT,
-                                            $property_name,
-                                            $table_name,
-                                            1   # 1 => already an error
-                                );
+                                push @output, generate_error($property_name,
+                                                             $table_name,
+                                                             1   # 1 => already an error
+                                              );
                             }
                             else {
 
                                 # Here the number of digits exceeds the
                                 # minimum we think is needed.  So generate a
                                 # success test case for it.
-                                generate_tests($OUT,
-                                                $property_name,
-                                                $table_name,
-                                                $valid,
-                                                $invalid,
-                                                $warning,
-                                );
+                                push @output, generate_tests($property_name,
+                                                             $table_name,
+                                                             $valid,
+                                                             $invalid,
+                                                             $warning,
+                                             );
                             }
                         }
                     }
@@ -13551,12 +13543,10 @@ sub make_property_test_script() {
         }
     }
 
-    foreach my $test (@backslash_X_tests) {
-        print $OUT "Test_X('$test');\n";
-    }
-
-    print $OUT "Finished();\n";
-    close $OUT;
+    &write($t_path, [<DATA>,
+		     @output,
+		     (map {"Test_X('$_');\n"} @backslash_X_tests),
+		     "Finished();\n"]);
     return;
 }
 

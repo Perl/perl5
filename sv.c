@@ -839,8 +839,8 @@ struct body_details {
 	+ sizeof (((type*)SvANY((const SV *)0))->last_member)
 
 static const struct body_details bodies_by_type[] = {
-    { sizeof(HE), 0, 0, SVt_NULL,
-      FALSE, NONV, NOARENA, FIT_ARENA(0, sizeof(HE)) },
+    /* HEs use this offset for their arena.  */
+    { 0, 0, 0, SVt_NULL, FALSE, NONV, NOARENA, 0 },
 
     /* The bind placeholder pretends to be an RV for now.
        Also it's marked as "can't upgrade" to stop anyone using it before it's
@@ -12740,6 +12740,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* Pluggable optimizer */
     PL_peepp		= proto_perl->Ipeepp;
+    PL_rpeepp		= proto_perl->Irpeepp;
     /* op_free() hook */
     PL_opfreehook	= proto_perl->Iopfreehook;
 

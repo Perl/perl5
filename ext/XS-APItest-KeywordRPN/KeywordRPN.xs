@@ -166,7 +166,7 @@ static OP *THX_parse_keyword_stufftest(pTHX)
 	} else if(c != /*{*/'}') {
 		croak("syntax error");
 	}
-	if(do_stuff) lex_stuff_pvn(" ", 1, 0);
+	if(do_stuff) lex_stuff_pvs(" ", 0);
 	return newOP(OP_NULL, 0);
 }
 #define parse_keyword_stufftest() THX_parse_keyword_stufftest(aTHX)

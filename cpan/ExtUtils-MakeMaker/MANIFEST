@@ -7,6 +7,7 @@ inc/ExtUtils/Installed.pm
 inc/ExtUtils/Manifest.pm
 inc/ExtUtils/MANIFEST.SKIP
 inc/ExtUtils/Packlist.pm
+INSTALL
 lib/ExtUtils/Command/MM.pm
 lib/ExtUtils/Liblist.pm
 lib/ExtUtils/Liblist/Kid.pm
@@ -91,6 +92,7 @@ t/MM_Unix.t
 t/MM_VMS.t
 t/MM_Win32.t
 t/oneliner.t
+t/parse_abstract.t
 t/parse_version.t
 t/PL_FILES.t
 t/pm.t
@@ -115,3 +117,4 @@ t/writemakefile_args.t
 t/xs.t
 TODO
 META.yml                                 Module meta-data (added by MakeMaker)
+SIGNATURE                                Public-key signature (added by MakeMaker)

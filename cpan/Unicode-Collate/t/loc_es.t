@@ -4,7 +4,7 @@ use warnings;
 use Unicode::Collate::Locale;
 
 use Test;
-plan tests => 22;
+plan tests => 26;
 
 my $objEs = Unicode::Collate::Locale->
     new(locale => 'ES', normalization => undef);
@@ -25,7 +25,15 @@ ok($objEs->gt("o", "n\x{303}"));
 
 # 10
 
+ok($objEs->eq("a\x{300}a", "aa\x{300}"));
+
 $objEs->change(level => 2);
+
+ok($objEs->gt("a\x{300}a", "aa\x{300}"));
+ok($objEs->lt("Ca\x{300}ca\x{302}", "ca\x{302}ca\x{300}"));
+ok($objEs->lt("ca\x{300}ca\x{302}", "Ca\x{302}ca\x{300}"));
+
+# 14
 
 ok($objEs->eq("ch", "Ch"));
 ok($objEs->eq("Ch", "CH"));
@@ -33,7 +41,7 @@ ok($objEs->eq("ll", "Ll"));
 ok($objEs->eq("Ll", "LL"));
 ok($objEs->eq("n\x{303}", "N\x{303}"));
 
-# 15
+# 19
 
 $objEs->change(level => 3);
 
@@ -45,4 +53,4 @@ ok($objEs->lt("n\x{303}", "N\x{303}"));
 ok($objEs->eq("n\x{303}", pack('U', 0xF1)));
 ok($objEs->eq("N\x{303}", pack('U', 0xD1)));
 
-# 22
+# 26

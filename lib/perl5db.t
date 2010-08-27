@@ -27,7 +27,7 @@ my $dev_tty = '/dev/tty';
     }
 }
 
-plan(8);
+plan(9);
 
 sub rc {
     open RC, ">", ".perldb" or die $!;
@@ -165,6 +165,15 @@ SKIP: {
     local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
     my $output = runperl(switches => [ '-d' ], stderr => 1, progfile => '../lib/perl5db/t/rt-66110');
     like($output, "All tests successful.", "[perl #66110]");
+}
+
+# taint tests
+
+{
+    local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
+    my $output = runperl(switches => [ '-d', '-T' ], stderr => 1,
+			progfile => '../lib/perl5db/t/taint');
+    is($output, '[$^X][done]', "taint");
 }
 
 

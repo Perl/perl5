@@ -8,7 +8,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 52;
+use Test::More tests => 54;
 
 use Devel::Peek;
 
@@ -663,3 +663,25 @@ do_test(26,
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
     OUTSIDE = $ADDR \\(MAIN\\)');
+
+do_test(27,
+        (bless {}, "\0::foo::\n::baz::\t::\0"),
+'SV = $RV\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(ROK\\)
+  RV = $ADDR
+  SV = PVHV\\($ADDR\\) at $ADDR
+    REFCNT = 1
+    FLAGS = \\(OBJECT,SHAREKEYS\\)
+    IV = 0					# $] < 5.009
+    NV = 0					# $] < 5.009
+    STASH = $ADDR\\t"\\\\0::foo::\\\\n::baz::\\\\t::\\\\0"
+    ARRAY = $ADDR
+    KEYS = 0
+    FILL = 0
+    MAX = 7
+    RITER = -1
+    EITER = 0x0', '',
+	$] > 5.009 ? 'The hash iterator used in dump.c sets the OOK flag'
+	: "Something causes the HV's array to become allocated");
+

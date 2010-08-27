@@ -4,7 +4,7 @@ use strict;
 use Carp;
 use base qw(Unicode::Collate);
 
-our $VERSION = '0.56';
+our $VERSION = '0.57';
 
 use File::Spec;
 
@@ -12,7 +12,9 @@ use File::Spec;
 my $KeyPath = File::Spec->catfile('allkeys.txt');
 my $PL_EXT  = '.pl';
 
-my %LocaleFile = map { ($_, $_) } qw(cs eo es fr nn pl ro sv);
+my %LocaleFile = map { ($_, $_) } qw(
+   ca cs eo es et fi fr lv nn pl ro sk sl sv
+);
    $LocaleFile{'default'}         = '';
    $LocaleFile{'es__traditional'} = 'es_trad';
    $LocaleFile{'nb'} = 'nn';
@@ -47,6 +49,10 @@ sub new {
     if ($file) {
 	my $filepath = File::Spec->catfile($ModPath, $file.$PL_EXT);
 	$href = do $filepath;
+    }
+
+    if (exists $hash{table}) {
+	croak "your table can't be used with Unicode::Collate::Locale";
     }
     $href->{table} = $KeyPath;
 
@@ -98,11 +104,11 @@ C<es_ES_traditional> for Spanish in Spain (Traditional),
 If C<$localename> is not defined,
 fallback is selected in the following order:
 
-   1. language_territory_variant
-   2. language_territory
-   3. language__variant
-   4. language
-   5. default
+    1. language_territory_variant
+    2. language_territory
+    3. language__variant
+    4. language
+    5. default
 
 Tailoring tags provided by C<Unicode::Collate> are allowed
 as long as they are not used for C<'locale'> support.
@@ -113,10 +119,10 @@ E.g. a collator for French, which ignores diacritics and case difference
 (i.e. level 1), with reversed case ordering and no normalization.
 
     Unicode::Collate::Locale->new(
-	level => 1,
-	locale => 'fr',
-	upper_before_lower => 1,
-	normalization => undef
+        level => 1,
+        locale => 'fr',
+        upper_before_lower => 1,
+        normalization => undef
     )
 
 =head2 Methods
@@ -139,17 +145,23 @@ this method returns a string C<'default'> meaning no special tailoring.
 
 =head2 A list of tailorable locales
 
-    locale name        description
-
+      locale name       description
+    ----------------------------------------------------------
+      ca                Catalan
       cs                Czech
       eo                Esperanto
       es                Spanish
       es__traditional   Spanish ('ch' and 'll' as a grapheme)
+      et                Estonian
+      fi                Finnish
       fr                French
+      lv                Latvian
       nb                Norwegian Bokmal
       nn                Norwegian Nynorsk
       pl                Polish
       ro                Romanian
+      sk                Slovak
+      sl                Slovenian
       sv                Swedish
 
 =head1 AUTHOR

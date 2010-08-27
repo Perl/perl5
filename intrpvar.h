@@ -172,7 +172,9 @@ PERLVARI(Irehash_seed_set, bool, FALSE)	/* 582 hash initialized? */
 PERLVARA(Icolors,6,	char *)		/* from regcomp.c */
 
 PERLVARI(Ipeepp,	peep_t, MEMBER_TO_FPTR(Perl_peep))
-					/* Pointer to peephole optimizer */
+				/* Pointer to per-sub peephole optimizer */
+PERLVARI(Irpeepp,	peep_t, MEMBER_TO_FPTR(Perl_rpeep))
+				/* Pointer to recursive peephole optimizer */
 
 /*
 =for apidoc Amn|Perl_ophook_t|PL_opfreehook

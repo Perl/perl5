@@ -1,3 +1,21 @@
+6.57_01  Tue Aug 24 01:36:20 PDT 2010
+    Improvements
+    * parse_abstract() is more robust supporting "Package.pm" and multiple
+      dashes and spaces. [rt.perl.org 74438]
+
+    Bug Fixes
+    * Recognize .so files in AIX. [rt.cpan.org 41360] (Jens Rehsack)
+    * Remove manual image-base generation on Win32/gcc [rt.cpan.org 47138]
+      (Yasuhiro Matsumoto)
+    * Use the bundled versions of our dependencies if they're not installed.
+    * Eliminate use of foreach qw() which will be deprecated in 5.14.
+      [rt.cpan.org 57124] (Zefram)
+
+    Test Fixes
+    * Guard against old versions of YAML::Tiny that worked differently.
+      [rt.cpan.org 55500]
+
+
 6.56  Thu Dec 17 14:02:14 PST 2009
     * Stable release of 6.55_03
 

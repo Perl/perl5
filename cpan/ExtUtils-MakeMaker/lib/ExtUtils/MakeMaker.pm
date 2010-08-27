@@ -18,7 +18,7 @@ our @Overridable;
 my @Prepend_parent;
 my %Recognized_Att_Keys;
 
-our $VERSION = '6.5601';
+our $VERSION = '6.57_01';
 
 # Emulate something resembling CVS $Revision$
 (our $Revision = $VERSION) =~ s{_}{};
@@ -1000,10 +1000,12 @@ sub flush {
         or die "Unable to open MakeMaker.tmp: $!";
 
     for my $chunk (@{$self->{RESULT}}) {
-        print $fh "$chunk\n";
+        print $fh "$chunk\n"
+            or die "Can't write to MakeMaker.tmp: $!";
     }
 
-    close $fh;
+    close $fh
+        or die "Can't write to MakeMaker.tmp: $!";
     _rename("MakeMaker.tmp", $finalname) or
       warn "rename MakeMaker.tmp => $finalname: $!";
     chmod 0644, $finalname unless $Is_VMS;
@@ -1468,7 +1470,8 @@ the first line in the "=head1 NAME" section. $2 becomes the abstract.
 =item AUTHOR
 
 String containing name (and email address) of package author(s). Is used
-in PPD (Perl Package Description) files for PPM (Perl Package Manager).
+in META.yml and PPD (Perl Package Description) files for PPM (Perl
+Package Manager).
 
 =item BINARY_LOCATION
 
@@ -1942,7 +1945,7 @@ may hold a name for that binary. Defaults to perl
 A hashrefs of items to add to the F<META.yml>.
 
 They differ in how they behave if they have the same key as the
-default metadata.  META_ADD will override the default value with it's
+default metadata.  META_ADD will override the default value with its
 own.  META_MERGE will merge its value with the default.
 
 Unless you want to override the defaults, prefer META_MERGE so as to
@@ -2227,18 +2230,17 @@ will C<die> instead of simply informing the user of the missing dependencies.
 
 It is I<extremely> rare to have to use C<PREREQ_FATAL>. Its use by module
 authors is I<strongly discouraged> and should never be used lightly.
+
 Module installation tools have ways of resolving umet dependencies but
 to do that they need a F<Makefile>.  Using C<PREREQ_FATAL> breaks this.
 That's bad.
 
-The only situation where it is appropriate is when you have
-dependencies that are indispensible to actually I<write> a
-F<Makefile>. For example, MakeMaker's F<Makefile.PL> needs L<File::Spec>.
-If its not available it cannot write the F<Makefile>.
+Assuming you have good test coverage, your tests should fail with
+missing dependencies informing the user more strongly that something
+is wrong.  You can write a F<t/00compile.t> test which will simply
+check that your code compiles and stop "make test" prematurely if it
+doesn't.  See L<Test::More/BAIL_OUT> for more details.
 
-Note: see L<Test::Harness> for a shortcut for stopping tests early
-if you are missing dependencies and are afraid that users might
-use your module with an incomplete environment.
 
 =item PREREQ_PM
 
@@ -2797,6 +2799,8 @@ Send bug reports via http://rt.cpan.org/.  Please send your
 generated Makefile along with your report.
 
 For more up-to-date information, see L<http://www.makemaker.org>.
+
+Repository available at L<http://github.com/schwern/extutils-makemaker>.
 
 =head1 LICENSE
 

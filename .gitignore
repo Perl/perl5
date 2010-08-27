@@ -126,5 +126,7 @@ veryclean.sh
 U
 MANIFEST.new
 
-# ignore vim swap files
+# ignore editor droppings
 *.swp
+*~
+.#*

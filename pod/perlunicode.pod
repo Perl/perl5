@@ -884,18 +884,21 @@ properties: to define subroutines
 with names C<ToLower> (for C<lc()> and C<lcfirst()>); C<ToTitle> (for
 C<ucfirst()>); and C<ToUpper> (for C<uc()>).
 
-The string returned by the subroutines needs to be two hexadecimal numbers
-separated by two tabulators: the two numbers being, respectively, the source
-code point and the destination code point.  For example:
+The string returned by the subroutines needs to be lines each containing
+two hexadecimal numbers separated by two tabulators: the two numbers
+being, respectively, the source code point and the destination code
+point. For example:
 
     sub ToUpper {
         return <<END;
     0061\t\t0041
+    0062\t\t0042
     END
     }
 
 defines a mapping for C<uc()> (and C<\U>) that causes only the character "a"
-to be mapped to "A"; all other characters will remain unchanged.
+to be mapped to "A", and the character "b" to be mapped to "B"; the
+mapping for all other characters is to themselves.
 
 (For serious hackers only)  The above means you have to furnish a complete
 mapping; you can't just override a couple of characters and leave the rest
@@ -915,21 +918,24 @@ subroutine.  But this will only be valid on Perls that use the same Unicode
 version.  Another option would be to have your subroutine read the official
 mapping file(s) and overwrite the affected code points.
 
-If you have only a few mappings to change, starting in 5.14 you can use the
-following trick, here illustrated for Turkish.
+If you have only a few mappings to change you can use the
+following trick (but see below for a big caveat), here illustrated for
+Turkish:
 
     use Config;
+    use charnames ":full";
 
     sub ToUpper {
         my $official = do "$Config{privlib}/unicore/To/Upper.pl";
-        $utf8::ToSpecUpper{'i'} = 
+        $utf8::ToSpecUpper{'i'} =
                            "\N{LATIN CAPITAL LETTER I WITH DOT ABOVE}";
         return $official;
     }
 
 This takes the official mappings and overrides just one, for "LATIN SMALL
-LETTER I".  The keys to the hash must be in UTF-8 (or on EBCDIC platforms,
-UTF-EBCDIC), as illustrated by the inverse function.
+LETTER I".  Each hash key must be the string of bytes that form the UTF-8
+(on EBCDIC platforms, UTF-EBCDIC) of the character, as illustrated by
+the inverse function.
 
     sub ToLower {
         my $official = do $lower;
@@ -937,45 +943,89 @@ UTF-EBCDIC), as illustrated by the inverse function.
         return $official;
     }
 
-This example is for an ASCII platform, and C<\xc4\xb0> is the UTF-8 string that 
-represents C<\N{LATIN CAPITAL LETTER I WITH DOT ABOVE}>, C<U+0130>.
+This example is for an ASCII platform, and C<\xc4\xb0> is the string of
+bytes that together form the UTF-8 that represents C<\N{LATIN CAPITAL
+LETTER I WITH DOT ABOVE}>, C<U+0130>.  You can avoid having to figure out
+these bytes, and at the same time make it work on all platforms by
+instead writing:
 
-(The trick illustrated here does work in earlier releases, but only if all the
-characters you want to override have ordinal values of 256 or higher.)
-
-The mappings are in effect only for the package they are defined in, and only
-on scalars that have been marked as having Unicode characters, for example by
-using C<utf8::upgrade()>.  You can get around the latter restriction in the
-scope of a C<S<use subs>>:
-
-    use subs qw(uc ucfirst lc lcfirst);
-
-    sub uc($) {
-        my $string = shift;
-        utf8::upgrade($string);
-        return CORE::uc($string);
+    sub ToLower {
+        my $official = do $lower;
+        my $sequence = "\N{LATIN CAPITAL LETTER I WITH DOT ABOVE}";
+        utf8::encode($sequence);
+        $utf8::ToSpecLower{$sequence} = "i";
+        return $official;
     }
 
-    sub lc($) {
-        my $string = shift;
-        utf8::upgrade($string);
+This works because C<utf8::encode()> takes the single character and
+converts it to the sequence of bytes that constitute it.  Note that we took
+advantage of the fact that C<"i"> is the same in UTF-8 or UTF_EBCIDIC as not;
+otherwise we would have had to write
 
-        # Unless an I is before a dot_above, it turns into a dotless i.
-        $string =~ 
-              s/I (?! [^\p{ccc=0}\p{ccc=Above}]* \x{0307} )/\x{131}/gx;
+        $utf8::ToSpecLower{$sequence} = "\N{LATIN SMALL LETTER I}";
 
-        # But when the I is followed by a dot_above, remove the
-        # dot_above so the end result will be i.
-        $string =~ s/I ([^\p{ccc=0}\p{ccc=Above}]* ) \x{0307}/i$1/gx;
-        return CORE::lc($string);
-    }
+in the ToLower example, and in the ToUpper example, use
+
+        my $sequence = "\N{LATIN SMALL LETTER I}";
+        utf8::encode($sequence);
+
+The mappings are in effect only for the package they are defined in.
+Although probably not advisable, you can
+cause the mappings to be used globally by importing into C<CORE::GLOBAL>
+(see L<CORE>).
+
+A big caveat to the above trick, is that it works only on strings encoded in
+UTF-8 (which will happen automatically for characters whose code points are
+256 or higher), but you can partially get around this restriction
+by using C<use subs> (or not advisably by importing with C<CORE::GLOBAL>).
+For example:
+
+ use subs qw(uc ucfirst lc lcfirst);
+
+ sub uc($) {
+     my $string = shift;
+     utf8::upgrade($string);
+     return CORE::uc($string);
+ }
+
+ sub lc($) {
+     my $string = shift;
+     utf8::upgrade($string);
+
+     # Unless an I is before a dot_above, it turns into a dotless i.
+     # (The character class with the combining classes matches non-above
+     # marks following the I.  Any number of these may be between the 'I' and
+     # the dot_above and the dot_above will still apply to the 'I'.
+     use charnames ":full";
+     $string =~
+             s/I
+               (?! [^\p{ccc=0}\p{ccc=Above}]* \N{COMBINING DOT ABOVE} )
+              /\N{LATIN SMALL LETTER DOTLESS I}/gx;
+
+     # But when the I is followed by a dot_above, remove the
+     # dot_above so the end result will be i.
+     $string =~ s/I
+                    ([^\p{ccc=0}\p{ccc=Above}]* )
+                    \N{COMBINING DOT ABOVE}
+                 /i$1/gx;
+     return CORE::lc($string);
+ }
 
 These examples (also for Turkish) make sure the input is in UTF-8, and then
 call the corresponding official function, which will use the C<ToUpper()> and
-C<ToLower()> functions you have defined in the package.  The C<lc()> example
-shows how you can add context-dependent casing.  (For Turkish, there other
-required functions: C<ucfirst>, C<lcfirst>, and C<ToTitle>.  These are very
-similar to the ones given above.)
+C<ToLower()> functions you have defined in the package.
+(For Turkish, there are other required functions: C<ucfirst>, C<lcfirst>,
+and C<ToTitle>. These are very similar to the ones given above.)
+
+The reason this is a partial work-around is that it doesn't affect the C<\l>,
+C<\L>, C<\u>, and C<\U> case change operations, which still require the source
+to be encoded in utf8 (see L</The "Unicode Bug">).
+
+The C<lc()> example shows how you can add context-dependent casing. Note
+that context-dependent casing suffers from the problem that the string
+passed to the casing function may not have sufficient context to make
+the proper choice. And, it will not be called for the C<\l>, C<\L>, C<\u>,
+and C<\U>.
 
 =head2 Character Encodings for Input and Output
 

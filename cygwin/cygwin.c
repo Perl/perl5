@@ -51,12 +51,14 @@ do_aspawn (SV *really, void **mark, void **sp)
 {
     dTHX;
     int  rc;
-    char **a,*tmps,**argv; 
-    STRLEN n_a; 
+    char const **a;
+    char *tmps,**argv;
+    STRLEN n_a;
 
     if (sp<=mark)
         return -1;
-    a=argv=(char**) alloca ((sp-mark+3)*sizeof (char*));
+    argv=(char**) alloca ((sp-mark+3)*sizeof (char*));
+    a=(char const **)argv;
 
     while (++mark <= sp)
         if (*mark)
@@ -84,7 +86,8 @@ do_spawn (char *cmd)
 {
     dTHX;
     char const **a;
-    char *s,*metachars = "$&*(){}[]'\";\\?>|<~`\n";
+    char *s;
+    char const *metachars = "$&*(){}[]'\";\\?>|<~`\n";
     const char *command[4];
 
     while (*cmd && isSPACE(*cmd))
@@ -355,7 +358,7 @@ void
 init_os_extras(void)
 {
     dTHX;
-    char *file = __FILE__;
+    char const *file = __FILE__;
     void *handle;
 
     newXS("Cwd::cwd", Cygwin_cwd, file);

@@ -990,6 +990,7 @@ cpan/ExtUtils-MakeMaker/t/MM_VMS.t				See if ExtUtils::MM_VMS works
 cpan/ExtUtils-MakeMaker/t/MM_Win32.t				See if ExtUtils::MM_Win32 works
 cpan/ExtUtils-MakeMaker/TODO					Things TODO in MakeMaker
 cpan/ExtUtils-MakeMaker/t/oneliner.t				See if MM can generate perl one-liners
+cpan/ExtUtils-MakeMaker/t/parse_abstract.t			See if parse_abstract works
 cpan/ExtUtils-MakeMaker/t/parse_version.t			See if parse_version works
 cpan/ExtUtils-MakeMaker/t/PL_FILES.t				Test PL_FILES in MakeMaker
 cpan/ExtUtils-MakeMaker/t/pm.t					See if MakeMaker can handle PM
@@ -2479,15 +2480,21 @@ cpan/Time-Piece/t/07arith.t	Test for Time::Piece
 cpan/Unicode-Collate/Changes			Unicode::Collate
 cpan/Unicode-Collate/Collate/allkeys.txt	Unicode::Collate
 cpan/Unicode-Collate/Collate/keys.txt		Unicode::Collate
+cpan/Unicode-Collate/Collate/Locale/ca.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/cs.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/eo.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/es.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/es_trad.pl			Unicode::Collate
+cpan/Unicode-Collate/Collate/Locale/et.pl			Unicode::Collate
+cpan/Unicode-Collate/Collate/Locale/fi.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/fr.pl			Unicode::Collate
+cpan/Unicode-Collate/Collate/Locale/lv.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/nn.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/pl.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale.pm			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/ro.pl			Unicode::Collate
+cpan/Unicode-Collate/Collate/Locale/sk.pl			Unicode::Collate
+cpan/Unicode-Collate/Collate/Locale/sl.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/sv.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate.pm			Unicode::Collate
 cpan/Unicode-Collate/README			Unicode::Collate
@@ -2501,15 +2508,21 @@ cpan/Unicode-Collate/t/ignor.t			Unicode::Collate
 cpan/Unicode-Collate/t/illegalp.t		Unicode::Collate
 cpan/Unicode-Collate/t/illegal.t		Unicode::Collate
 cpan/Unicode-Collate/t/index.t			Unicode::Collate
+cpan/Unicode-Collate/t/loc_ca.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_cs.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_eo.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_es.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_estr.t			Unicode::Collate
+cpan/Unicode-Collate/t/loc_et.t			Unicode::Collate
+cpan/Unicode-Collate/t/loc_fi.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_fr.t			Unicode::Collate
+cpan/Unicode-Collate/t/loc_lv.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_nb.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_nn.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_pl.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_ro.t			Unicode::Collate
+cpan/Unicode-Collate/t/loc_sk.t			Unicode::Collate
+cpan/Unicode-Collate/t/loc_sl.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_sv.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_test.t			Unicode::Collate
 cpan/Unicode-Collate/t/normal.t			Unicode::Collate
@@ -3590,6 +3603,7 @@ lib/perl5db/t/proxy-constants	Tests for the Perl debugger
 lib/perl5db/t/rt-61222		Tests for the Perl debugger
 lib/perl5db/t/rt-66110		Tests for the Perl debugger
 lib/perl5db/t/symbol-table-bug	Tests for the Perl debugger
+lib/perl5db/t/taint		Tests for the Perl debugger
 lib/PerlIO.pm			PerlIO support module
 lib/Pod/Functions.pm		used by pod/splitpod
 lib/Pod/Html.pm			Convert POD data to HTML

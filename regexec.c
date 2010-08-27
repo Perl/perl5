@@ -245,14 +245,22 @@
 /* TODO: Combine JUMPABLE and HAS_TEXT to cache OP(rn) */
 
 /* for use after a quantifier and before an EXACT-like node -- japhy */
-/* it would be nice to rework regcomp.sym to generate this stuff. sigh */
+/* it would be nice to rework regcomp.sym to generate this stuff. sigh
+ *
+ * NOTE that *nothing* that affects backtracking should be in here, specifically
+ * VERBS must NOT be included. JUMPABLE is used to determine  if we can ignore a
+ * node that is in between two EXACT like nodes when ascertaining what the required
+ * "follow" character is. This should probably be moved to regex compile time
+ * although it may be done at run time beause of the REF possibility - more
+ * investigation required. -- demerphq
+*/
 #define JUMPABLE(rn) (      \
     OP(rn) == OPEN ||       \
     (OP(rn) == CLOSE && (!cur_eval || cur_eval->u.eval.close_paren != ARG(rn))) || \
     OP(rn) == EVAL ||   \
     OP(rn) == SUSPEND || OP(rn) == IFMATCH || \
     OP(rn) == PLUS || OP(rn) == MINMOD || \
-    OP(rn) == KEEPS || (PL_regkind[OP(rn)] == VERB) || \
+    OP(rn) == KEEPS || \
     (PL_regkind[OP(rn)] == CURLY && ARG1(rn) > 0) \
 )
 #define IS_EXACT(rn) (PL_regkind[OP(rn)] == EXACT)
@@ -2018,33 +2026,68 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 	    end = HOP3c(strend, -dontbother, strbeg) - 1;
 	    /* for multiline we only have to try after newlines */
 	    if (prog->check_substr || prog->check_utf8) {
-		if (s == startpos)
-		    goto after_try;
-		while (1) {
-		    if (regtry(&reginfo, &s))
-			goto got_it;
-		  after_try:
-		    if (s > end)
-			goto phooey;
-		    if (prog->extflags & RXf_USE_INTUIT) {
-			s = re_intuit_start(rx, sv, s + 1, strend, flags, NULL);
-			if (!s)
-			    goto phooey;
-		    }
-		    else
-			s++;
-		}		
-	    } else {
-		if (s > startpos)
+                /* because of the goto we can not easily reuse the macros for bifurcating the
+                   unicode/non-unicode match modes here like we do elsewhere - demerphq */
+                if (utf8_target) {
+                    if (s == startpos)
+                        goto after_try_utf8;
+                    while (1) {
+                        if (regtry(&reginfo, &s)) {
+                            goto got_it;
+                        }
+                      after_try_utf8:
+                        if (s > end) {
+                            goto phooey;
+                        }
+                        if (prog->extflags & RXf_USE_INTUIT) {
+                            s = re_intuit_start(rx, sv, s + UTF8SKIP(s), strend, flags, NULL);
+                            if (!s) {
+                                goto phooey;
+                            }
+                        }
+                        else {
+                            s += UTF8SKIP(s);
+                        }
+                    }
+                } /* end search for check string in unicode */
+                else {
+                    if (s == startpos) {
+                        goto after_try_latin;
+                    }
+                    while (1) {
+                        if (regtry(&reginfo, &s)) {
+                            goto got_it;
+                        }
+                      after_try_latin:
+                        if (s > end) {
+                            goto phooey;
+                        }
+                        if (prog->extflags & RXf_USE_INTUIT) {
+                            s = re_intuit_start(rx, sv, s + 1, strend, flags, NULL);
+                            if (!s) {
+                                goto phooey;
+                            }
+                        }
+                        else {
+                            s++;
+                        }
+                    }
+                } /* end search for check string in latin*/
+	    } /* end search for check string */
+	    else { /* search for newline */
+		if (s > startpos) {
+                    /*XXX: The s-- is almost definitely wrong here under unicode - demeprhq*/
 		    s--;
+		}
+                /* We can use a more efficient search as newlines are the same in unicode as they are in latin */
 		while (s < end) {
 		    if (*s++ == '\n') {	/* don't need PL_utf8skip here */
 			if (regtry(&reginfo, &s))
 			    goto got_it;
 		    }
-		}		
-	    }
-	}
+		}
+	    } /* end search for newline */
+	} /* end anchored/multiline check string search */
 	goto phooey;
     } else if (RXf_GPOS_CHECK == (prog->extflags & RXf_GPOS_CHECK)) 
     {
