@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 67;
+plan tests => 68;
 our $TODO;
 
 my $deprecated = 0;
@@ -483,3 +483,9 @@ is($deprecated, 0);
     is($x, 10,
        'labels outside evals can be distinguished from the start of the eval');
 }
+
+goto wham_eth;
+die "You can't get here";
+
+wham_eth: 1 if 0;
+ouch_eth: pass('labels persist even if their statement is optimised away');

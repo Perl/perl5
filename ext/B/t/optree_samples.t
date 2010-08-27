@@ -278,57 +278,57 @@ checkOptree ( name	=> '-basic sub { print "foo $_" foreach (1..10) }',
 	      bcopts	=> '-basic',
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# h  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->h
+# g  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->g
 # 1        <;> nextstate(main 445 optree.t:167) v:>,<,% ->2
-# 2        <;> nextstate(main 445 optree.t:167) v:>,<,% ->3
-# g        <2> leaveloop K/2 ->h
-# 7           <{> enteriter(next->d last->g redo->8) lKS/8 ->e
-# -              <0> ex-pushmark s ->3
-# -              <1> ex-list lK ->6
-# 3                 <0> pushmark s ->4
-# 4                 <$> const[IV 1] s ->5
-# 5                 <$> const[IV 10] s ->6
-# 6              <#> gv[*_] s ->7
-# -           <1> null K/1 ->g
-# f              <|> and(other->8) K/1 ->g
-# e                 <0> iter s ->f
+# -        <0> null v ->-
+# f        <2> leaveloop K/2 ->g
+# 6           <{> enteriter(next->c last->f redo->7) lKS/8 ->d
+# -              <0> ex-pushmark s ->2
+# -              <1> ex-list lK ->5
+# 2                 <0> pushmark s ->3
+# 3                 <$> const[IV 1] s ->4
+# 4                 <$> const[IV 10] s ->5
+# 5              <#> gv[*_] s ->6
+# -           <1> null K/1 ->f
+# e              <|> and(other->7) K/1 ->f
+# d                 <0> iter s ->e
 # -                 <@> lineseq sK ->-
-# c                    <@> print vK ->d
-# 8                       <0> pushmark s ->9
-# -                       <1> ex-stringify sK/1 ->c
-# -                          <0> ex-pushmark s ->9
-# b                          <2> concat[t2] sK/2 ->c
-# 9                             <$> const[PV "foo "] s ->a
-# -                             <1> ex-rv2sv sK/1 ->b
-# a                                <#> gvsv[*_] s ->b
-# d                    <0> unstack s ->e
+# b                    <@> print vK ->c
+# 7                       <0> pushmark s ->8
+# -                       <1> ex-stringify sK/1 ->b
+# -                          <0> ex-pushmark s ->8
+# a                          <2> concat[t2] sK/2 ->b
+# 8                             <$> const[PV "foo "] s ->9
+# -                             <1> ex-rv2sv sK/1 ->a
+# 9                                <#> gvsv[*_] s ->a
+# c                    <0> unstack s ->d
 EOT_EOT
-# h  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->h
+# g  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->g
 # 1        <;> nextstate(main 446 optree_samples.t:192) v:>,<,% ->2
-# 2        <;> nextstate(main 446 optree_samples.t:192) v:>,<,% ->3
-# g        <2> leaveloop K/2 ->h
-# 7           <{> enteriter(next->d last->g redo->8) lKS/8 ->e
-# -              <0> ex-pushmark s ->3
-# -              <1> ex-list lK ->6
-# 3                 <0> pushmark s ->4
-# 4                 <$> const(IV 1) s ->5
-# 5                 <$> const(IV 10) s ->6
-# 6              <$> gv(*_) s ->7
-# -           <1> null K/1 ->g
-# f              <|> and(other->8) K/1 ->g
-# e                 <0> iter s ->f
+# -        <0> null v ->-
+# f        <2> leaveloop K/2 ->g
+# 6           <{> enteriter(next->c last->f redo->7) lKS/8 ->d
+# -              <0> ex-pushmark s ->2
+# -              <1> ex-list lK ->5
+# 2                 <0> pushmark s ->3
+# 3                 <$> const(IV 1) s ->4
+# 4                 <$> const(IV 10) s ->5
+# 5              <$> gv(*_) s ->6
+# -           <1> null K/1 ->f
+# e              <|> and(other->7) K/1 ->f
+# d                 <0> iter s ->e
 # -                 <@> lineseq sK ->-
-# c                    <@> print vK ->d
-# 8                       <0> pushmark s ->9
-# -                       <1> ex-stringify sK/1 ->c
-# -                          <0> ex-pushmark s ->9
-# b                          <2> concat[t1] sK/2 ->c
-# 9                             <$> const(PV "foo ") s ->a
-# -                             <1> ex-rv2sv sK/1 ->b
-# a                                <$> gvsv(*_) s ->b
-# d                    <0> unstack s ->e
+# b                    <@> print vK ->c
+# 7                       <0> pushmark s ->8
+# -                       <1> ex-stringify sK/1 ->b
+# -                          <0> ex-pushmark s ->8
+# a                          <2> concat[t1] sK/2 ->b
+# 8                             <$> const(PV "foo ") s ->9
+# -                             <1> ex-rv2sv sK/1 ->a
+# 9                                <$> gvsv(*_) s ->a
+# c                    <0> unstack s ->d
 EONT_EONT
 
 checkOptree ( name	=> '-exec -e foreach (1..10) {print qq{foo $_}}',
@@ -383,42 +383,40 @@ checkOptree ( name	=> '-exec sub { print "foo $_" foreach (1..10) }',
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <;> nextstate(main 445 optree.t:167) v:>,<,%
-# 2  <;> nextstate(main 445 optree.t:167) v:>,<,%
-# 3  <0> pushmark s
-# 4  <$> const[IV 1] s
-# 5  <$> const[IV 10] s
-# 6  <#> gv[*_] s
-# 7  <{> enteriter(next->d last->g redo->8) lKS/8
-# e  <0> iter s
-# f  <|> and(other->8) K/1
-# 8      <0> pushmark s
-# 9      <$> const[PV "foo "] s
-# a      <#> gvsv[*_] s
-# b      <2> concat[t2] sK/2
-# c      <@> print vK
-# d      <0> unstack s
-#            goto e
-# g  <2> leaveloop K/2
-# h  <1> leavesub[1 ref] K/REFC,1
+# 2  <0> pushmark s
+# 3  <$> const[IV 1] s
+# 4  <$> const[IV 10] s
+# 5  <#> gv[*_] s
+# 6  <{> enteriter(next->c last->f redo->7) lKS/8
+# d  <0> iter s
+# e  <|> and(other->7) K/1
+# 7      <0> pushmark s
+# 8      <$> const[PV "foo "] s
+# 9      <#> gvsv[*_] s
+# a      <2> concat[t2] sK/2
+# b      <@> print vK
+# c      <0> unstack s
+#            goto d
+# f  <2> leaveloop K/2
+# g  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 447 optree_samples.t:252) v:>,<,%
-# 2  <;> nextstate(main 447 optree_samples.t:252) v:>,<,%
-# 3  <0> pushmark s
-# 4  <$> const(IV 1) s
-# 5  <$> const(IV 10) s
-# 6  <$> gv(*_) s
-# 7  <{> enteriter(next->d last->g redo->8) lKS/8
-# e  <0> iter s
-# f  <|> and(other->8) K/1
-# 8      <0> pushmark s
-# 9      <$> const(PV "foo ") s
-# a      <$> gvsv(*_) s
-# b      <2> concat[t1] sK/2
-# c      <@> print vK
-# d      <0> unstack s
-#            goto e
-# g  <2> leaveloop K/2
-# h  <1> leavesub[1 ref] K/REFC,1
+# 2  <0> pushmark s
+# 3  <$> const(IV 1) s
+# 4  <$> const(IV 10) s
+# 5  <$> gv(*_) s
+# 6  <{> enteriter(next->c last->f redo->7) lKS/8
+# d  <0> iter s
+# e  <|> and(other->7) K/1
+# 7      <0> pushmark s
+# 8      <$> const(PV "foo ") s
+# 9      <$> gvsv(*_) s
+# a      <2> concat[t1] sK/2
+# b      <@> print vK
+# c      <0> unstack s
+#            goto d
+# f  <2> leaveloop K/2
+# g  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 
 pass("GREP: SAMPLES FROM PERLDOC -F GREP");
