@@ -2598,7 +2598,11 @@ PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 	    mode++;
 	else {
 	    imode = PerlIOUnix_oflags(mode);
+#ifdef VMS
+	    perm = 0777; /* preserve RMS defaults, ACL inheritance, etc. */
+#else
 	    perm = 0666;
+#endif
 	}
 	if (imode != -1) {
 	    const char *path = SvPV_nolen_const(*args);
