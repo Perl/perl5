@@ -348,8 +348,8 @@ my %opflags = (
     'f' =>   2,		# fold constants
     's' =>   4,		# always produces scalar
     't' =>   8,		# needs target scalar
-    'T' =>   8 | 256,	# ... which may be lexical
-    'i' =>  16,		# always produces integer
+    'T' =>   8 | 16,	# ... which may be lexical
+    'i' =>   0,		# always produces integer (unused since e7311069)
     'I' =>  32,		# has corresponding int op
     'd' =>  64,		# danger, unknown side effects
     'u' => 128,		# defaults to $_
@@ -358,8 +358,8 @@ my %opflags = (
 my %OP_IS_SOCKET;
 my %OP_IS_FILETEST;
 my %OP_IS_FT_ACCESS;
-my $OCSHIFT = 9;
-my $OASHIFT = 13;
+my $OCSHIFT = 8;
+my $OASHIFT = 12;
 
 for my $op (@ops) {
     my $argsum = 0;
