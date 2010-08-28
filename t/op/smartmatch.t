@@ -73,7 +73,7 @@ my %keyandmore = map { $_ => 0 } @keyandmore;
 my %fooormore = map { $_ => 0 } @fooormore;
 
 # Load and run the tests
-plan tests => 335;
+plan tests => 351;
 
 while (<DATA>) {
   SKIP: {
@@ -483,6 +483,30 @@ __DATA__
 	@nums		{  1, '',  2, '' }
 	@nums		{  1, '', 12, '' }
 !	@nums		{ 11, '', 12, '' }
+
+# array slices
+	@nums[0..-1]	[]
+	@nums[0..0]	[1]
+!	@nums[0..1]	[0..2]
+	@nums[0..4]	[1..5]
+
+!	undef		@nums[0..-1]
+	1		@nums[0..0]
+	2		@nums[0..1]
+!	@nums[0..1]	2
+
+	@nums[0..1]	@nums[0..1]
+
+# hash slices
+	@keyandmore{qw(not)}		[undef]
+	@keyandmore{qw(key)}		[0]
+
+	undef				@keyandmore{qw(not)}
+	0				@keyandmore{qw(key and more)}
+!	2				@keyandmore{qw(key and)}
+
+	@fooormore{qw(foo)}		@keyandmore{qw(key)}
+	@fooormore{qw(foo or more)}	@keyandmore{qw(key and more)}
 
 # UNDEF
 !	3		undef

@@ -5542,6 +5542,18 @@ S_ref_array_or_hash(pTHX_ OP *cond)
 	return newUNOP(OP_REFGEN,
 	    0, mod(cond, OP_REFGEN));
 
+    else if(cond
+    && (cond->op_type == OP_ASLICE
+    ||  cond->op_type == OP_HSLICE)) {
+
+	/* anonlist now needs a list from this op, was previously used in
+	 * scalar context */
+	cond->op_flags |= ~(OPf_WANT_SCALAR | OPf_REF);
+	cond->op_flags |= OPf_WANT_LIST;
+
+	return newANONLIST(mod(cond, OP_ANONLIST));
+    }
+
     else
 	return cond;
 }
