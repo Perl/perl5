@@ -212,7 +212,7 @@ introduced by the keyword.  See L</Lexer interface> for details.
 When a keyword is being handled, the plugin function must build
 a tree of C<OP> structures, representing the code that was parsed.
 The root of the tree must be stored in C<*op_ptr>.  The function then
-returns a contant indicating the syntactic role of the construct that
+returns a constant indicating the syntactic role of the construct that
 it has parsed: C<KEYWORD_PLUGIN_STMT> if it is a complete statement, or
 C<KEYWORD_PLUGIN_EXPR> if it is an expression.  Note that a statement
 construct cannot be used inside an expression (except via C<do BLOCK>
