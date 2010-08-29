@@ -1015,6 +1015,111 @@ XS(XS_Internals_HvREHASH)	/* Subject to change  */
     Perl_croak(aTHX_ "Internals::HvREHASH $hashref");
 }
 
+XS(XS_mauve_reftype)
+{
+    SV *sv;
+    dVAR;
+    dXSARGS;
+    PERL_UNUSED_VAR(cv);
+
+    if (items != 1)
+	croak_xs_usage(cv, "sv");
+
+    SP -= items;
+    sv = (SV*)ST(0);
+
+    if (SvMAGICAL(sv))
+	mg_get(sv);
+    if (!SvROK(sv)) {
+       XSRETURN_NO;
+    } else {
+	STRLEN len;
+	char *type= (char *)sv_reftype_len(SvRV(sv),FALSE,&len);
+        XPUSHs(sv_2mortal(newSVpv(type,len)));
+    }
+}
+
+XS(XS_mauve_refaddr)
+{
+    SV *sv;
+    dVAR;
+    dXSARGS;
+    PERL_UNUSED_VAR(cv);
+
+    if (items != 1)
+	croak_xs_usage(cv, "sv");
+
+    SP -= items;
+    sv = (SV*)ST(0);
+
+    if (SvMAGICAL(sv))
+	mg_get(sv);
+    if (!SvROK(sv)) {
+       XSRETURN_NO;
+    } else {
+       XPUSHs(sv_2mortal(newSVuv(PTR2UV(SvRV(sv)))));
+    }
+}
+
+XS(XS_mauve_blessed)
+{
+    SV *sv;
+    dVAR;
+    dXSARGS;
+    PERL_UNUSED_VAR(cv);
+
+    if (items != 1)
+	croak_xs_usage(cv, "sv");
+
+    SP -= items;
+    sv = (SV*)ST(0);
+
+    if (SvMAGICAL(sv))
+	mg_get(sv);
+    if ( SvROK(sv) && SvOBJECT(SvRV(sv)) ) {
+	STRLEN len;
+	char *type= (char *)sv_reftype_len(SvRV(sv),TRUE,&len);
+        XPUSHs(sv_2mortal(newSVpv(type,len)));
+    } else {
+        XPUSHs(sv_2mortal(newSVpv("",0)));
+    }
+}
+
+XS(XS_mauve_weaken)
+{
+    SV *sv;
+    dVAR;
+    dXSARGS;
+    PERL_UNUSED_VAR(cv);
+
+    if (items != 1)
+	croak_xs_usage(cv, "sv");
+
+    SP -= items;
+    sv = (SV*)ST(0);
+
+    if (SvMAGICAL(sv))
+	mg_get(sv);
+    sv_rvweaken(sv);
+    XSRETURN_EMPTY;
+}
+
+XS(XS_mauve_isweak)
+{
+    dVAR;
+    dXSARGS;
+    if (items != 1)
+       croak_xs_usage(cv,  "sv");
+    {
+	SV *	sv = ST(0);
+	if (SvMAGICAL(sv))
+	    mg_get(sv);
+	ST(0) = boolSV(SvROK(sv) && SvWEAKREF(sv));
+	XSRETURN(1);
+    }
+    XSRETURN(1);
+}
+
 XS(XS_re_is_regexp)
 {
     dVAR; 
@@ -1531,6 +1636,11 @@ struct xsub_details details[] = {
     {"Tie::Hash::NamedCapture::NEXTKEY", XS_Tie_Hash_NamedCapture_NEXTK, NULL},
     {"Tie::Hash::NamedCapture::SCALAR", XS_Tie_Hash_NamedCapture_SCALAR, NULL},
     {"Tie::Hash::NamedCapture::flags", XS_Tie_Hash_NamedCapture_flags, NULL}
+    ,{"mauve::reftype", XS_mauve_reftype, "$"}
+    ,{"mauve::refaddr", XS_mauve_refaddr, "$"}
+    ,{"mauve::blessed", XS_mauve_blessed, "$"}
+    ,{"mauve::weaken", XS_mauve_weaken, "$"}
+    ,{"mauve::isweak", XS_mauve_isweak, "$"}
 };
 
 void

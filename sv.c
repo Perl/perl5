@@ -8717,7 +8717,7 @@ This should never be seen
 const char *
 Perl_sv_reftype_len(pTHX_ const SV *const sv, const int ob, STRLEN *const ret_len)
 {
-    PERL_ARGS_ASSERT_SV_REFTYPE;
+    PERL_ARGS_ASSERT_SV_REFTYPE_LEN;
     assert(ret_len!=NULL);
 
     /* The fact that I don't need to downcast to char * everywhere, only in ?: (not used anymore)
@@ -8811,6 +8811,7 @@ and null is legal in a class name. Use Perl_sv_reftype_len instead.
 const char *
 Perl_sv_reftype(pTHX_ const SV *const sv, const int ob){
     STRLEN len;
+    PERL_ARGS_ASSERT_SV_REFTYPE;
     return sv_reftype_len(sv,ob,&len);
 }
 

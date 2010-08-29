@@ -914,7 +914,6 @@ use File::Glob qw(:case);
 			   ],
 	'UPSTREAM'	=> 'cpan',
 	},
-
     'Memoize' =>
 	{
 	'MAINTAINER'	=> 'mjd',
@@ -1817,6 +1816,7 @@ use File::Glob qw(:case);
 				lib/less.{pm,t}
 				lib/locale.{pm,t}
 				lib/look.pl
+                                lib/mauve.{pm,t}
 				lib/open.{pm,t}
 				lib/open2.pl
 				lib/open3.pl
