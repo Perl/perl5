@@ -8643,23 +8643,112 @@ Perl_sv_pvutf8n_force(pTHX_ SV *const sv, STRLEN *const lp)
 }
 
 /*
-=for apidoc sv_reftype
+=for apidoc sv_reftype_len
 
-Returns a string describing what the SV is a reference to.
+Returns a string describing what type of item the SV is a reference to,
+storing the length of the string in *ret_len.
+
+If 'ob' is true and the item is an "object" returns the class name
+instead of the underlying type.
+
+Possible return values are:
+
+=over 4
+
+=item VSTRING
+
+Has special v-string magic
+
+=item REF
+
+Is a reference to another ref (C<< $$ref >>)
+
+=item SCALAR
+
+Is a reference to a scalar (C<< $$scalar >>)
+
+=item LVALUE
+
+An lvalue reference - B<NOTE>, tied lvalues appear to be of type C<SCALAR>
+for backwards compatibility reasons
+
+=item ARRAY
+
+An array reference (C<< @$array >>)
+
+=item HASH
+
+A hash reference (C<< %$hash >>)
+
+=item CODE
+
+A subroutine reference (C<< $code->() >>)
+
+=item GLOB
+
+A reference to a glob (C<< *$glob >>)
+
+=item FORMAT
+
+A format reference (C<< *IO{FORMAT} >>)
+
+=item IO
+
+An IO reference (C<< *STDOUT{IO} >>)
+
+=item BIND
+
+A bind reference
+
+=item REGEXP
+
+An executable regular expression (C<< qr/../ >>)
+
+=item UNKNOWN
+
+This should never be seen
+
+=back
 
 =cut
 */
 
+
 const char *
-Perl_sv_reftype(pTHX_ const SV *const sv, const int ob)
+Perl_sv_reftype_len(pTHX_ const SV *const sv, const int ob, STRLEN *const ret_len)
 {
     PERL_ARGS_ASSERT_SV_REFTYPE;
+    assert(ret_len!=NULL);
 
-    /* The fact that I don't need to downcast to char * everywhere, only in ?:
+    /* The fact that I don't need to downcast to char * everywhere, only in ?: (not used anymore)
        inside return suggests a const propagation bug in g++.  */
+
+    /*
+     *  NOTE:
+     *
+     *  This code is formatted so that the following command spits out a POD list of the
+     *  legal "reftypes" which is included above as well as in the lib/mauve.pm
+
+	    perl -MText::Wrap -le'local $/; $_= <>; while ( m!SV_REFTYPE_RETURN\("(\w+)"\);\s*[/][*]\s*(.*?)\s*[*][/]!gs) {
+		$i=$1; ($t=$2)=~s/\s+/ /g; $o.=wrap("\n\n=item $i\n\n","",$t);} print "=over 4\n$o\n\n=back\n"' sv.c
+
+     *
+     *  If you update this code please use the above to update the pod.
+     *
+     */
+    /* we use this to make it cleaner to return the size and length at the same time,
+     * and we use two aliases so we can use the above perl snippet to turn it into documentation
+     * the ("" s "") trick guarantees we getting a string passed in (see perl.h for similar stuff)
+     */
+#define SV_REFTYPE_RETURN(s) STMT_START { *ret_len= sizeof(s)-1; return ("" s ""); } STMT_END
+#define SV_BLESSED_RETURN(s) SV_REFTYPE_RETURN(s)
+
     if (ob && SvOBJECT(sv)) {
 	char * const name = HvNAME_get(SvSTASH(sv));
-	return name ? name : (char *) "__ANON__";
+	if (name) {
+	    *ret_len = HvNAMELEN_get(SvSTASH(sv));
+	    return name;
+	} else SV_BLESSED_RETURN("__ANON__"); /* I don't see when this could happen - demerphq */
     }
     else {
 	switch (SvTYPE(sv)) {
@@ -8671,29 +8760,58 @@ Perl_sv_reftype(pTHX_ const SV *const sv, const int ob)
 	case SVt_PVNV:
 	case SVt_PVMG:
 				if (SvVOK(sv))
-				    return "VSTRING";
+				    SV_REFTYPE_RETURN("VSTRING"); /* Has special v-string magic */
 				if (SvROK(sv))
-				    return "REF";
+				    SV_REFTYPE_RETURN("REF");     /* Is a reference to another ref (C<< $$ref >>) */
 				else
-				    return "SCALAR";
+				    SV_REFTYPE_RETURN("SCALAR");  /* Is a reference to a scalar (C<< $$scalar >>) */
 
-	case SVt_PVLV:		return (char *)  (SvROK(sv) ? "REF"
-				/* tied lvalues should appear to be
-				 * scalars for backwards compatitbility */
-				: (LvTYPE(sv) == 't' || LvTYPE(sv) == 'T')
-				    ? "SCALAR" : "LVALUE");
-	case SVt_PVAV:		return "ARRAY";
-	case SVt_PVHV:		return "HASH";
-	case SVt_PVCV:		return "CODE";
-	case SVt_PVGV:		return (char *) (isGV_with_GP(sv)
-				    ? "GLOB" : "SCALAR");
-	case SVt_PVFM:		return "FORMAT";
-	case SVt_PVIO:		return "IO";
-	case SVt_BIND:		return "BIND";
-	case SVt_REGEXP:	return "REGEXP"; 
-	default:		return "UNKNOWN";
+	case SVt_PVLV:		if  (SvROK(sv))
+				    SV_REFTYPE_RETURN("REF");
+				else if (LvTYPE(sv) == 't' || LvTYPE(sv) == 'T')
+				    /* tied lvalues appear to be scalars for back-compat reasons */
+				    SV_REFTYPE_RETURN("SCALAR");
+				else
+				    SV_REFTYPE_RETURN("LVALUE"); /* An lvalue reference - B<NOTE>, tied lvalues
+								    appear to be of type C<SCALAR> for backwards
+								    compatibility reasons */
+
+	case SVt_PVAV:		SV_REFTYPE_RETURN("ARRAY"); /* An array reference (C<< @$array >>) */
+	case SVt_PVHV:		SV_REFTYPE_RETURN("HASH");  /* A hash reference (C<< %$hash >>) */
+	case SVt_PVCV:		SV_REFTYPE_RETURN("CODE");  /* A subroutine reference (C<< $code->() >>) */
+	case SVt_PVGV:		if(isGV_with_GP(sv))
+				    SV_REFTYPE_RETURN("GLOB"); /* A reference to a glob (C<< *$glob >>) */
+				else
+				    SV_REFTYPE_RETURN("SCALAR");
+	case SVt_PVFM:		SV_REFTYPE_RETURN("FORMAT"); /* A format reference (C<< *IO{FORMAT} >>) */
+	case SVt_PVIO:		SV_REFTYPE_RETURN("IO");     /* An IO reference (C<< *STDOUT{IO} >>) */
+	case SVt_BIND:		SV_REFTYPE_RETURN("BIND");   /* A bind reference */
+	case SVt_REGEXP:	SV_REFTYPE_RETURN("REGEXP"); /* An executable regular expression (C<< qr/../ >>) */
+	default:		SV_REFTYPE_RETURN("UNKNOWN"); /* This should never be seen */
 	}
     }
+#undef SV_BLESSED_RETURN
+#undef SV_REFTYPE_RETURN
+
+}
+
+/*
+=for apidoc sv_reftype
+
+Returns a string describing what type of item the SV is a reference to.
+
+If 'ob' is true and the item is an "object" returns the class name
+instead of the underlying type. Note in this form this routine is not
+recommended as you have no way to know the correct length of the class,
+and null is legal in a class name. Use Perl_sv_reftype_len instead.
+
+=cut
+*/
+
+const char *
+Perl_sv_reftype(pTHX_ const SV *const sv, const int ob){
+    STRLEN len;
+    return sv_reftype_len(sv,ob,&len);
 }
 
 /*
