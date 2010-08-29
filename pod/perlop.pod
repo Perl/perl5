@@ -2103,7 +2103,7 @@ to be C<eval>ed before being run as a Perl expression.
 
 Examples:
 
-    s/\bgreen\b/mauve/g;	      # don't change wintergreen
+    s/\bgreen\b/core::scalar/g;	      # don't change wintergreen
 
     $path =~ s|/usr/bin|/usr/local/bin|;
 

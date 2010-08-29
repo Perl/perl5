@@ -10109,14 +10109,14 @@ otherwise it is the type of the SV, "SCALAR", "ARRAY" etc.
 const char *
 Perl_sv_reftype_len(pTHX_ const SV *const sv, const int ob, STRLEN *const ret_len)
 {
-    PERL_ARGS_ASSERT_SV_REFTYPE;
+    PERL_ARGS_ASSERT_SV_REFTYPE_LEN;
     assert(ret_len!=NULL);
 
     /*
      *  NOTE:
      *
      *  This code is formatted so that the following command spits out a POD list of the
-     *  legal "reftypes" which is included above as well as in the lib/mauve.pm
+     *  legal "reftypes" which is included above as well as in the lib/core::scalar.pm
 
 	    perl -MText::Wrap -le'local $/; $_= <>; while ( m!SV_REFTYPE_RETURN\("(\w+)"\);\s*[/][*]\s*(.*?)\s*[*][/]!gs) {
 		$i=$1; ($t=$2)=~s/\s+/ /g; $o.=wrap("\n\n=item $i\n\n","",$t);} print "=over 4\n$o\n\n=back\n"' sv.c
@@ -10216,6 +10216,7 @@ and null is legal in a class name. Use Perl_sv_reftype_len instead.
 const char *
 Perl_sv_reftype(pTHX_ const SV *const sv, const int ob){
     STRLEN len;
+    PERL_ARGS_ASSERT_SV_REFTYPE;
     return sv_reftype_len(sv,ob,&len);
 }
 

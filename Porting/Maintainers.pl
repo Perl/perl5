@@ -1509,6 +1509,7 @@ use File::Glob qw(:case);
                 lib/Unicode/UCD.{pm,t}
                 lib/User/grent.{pm,t}
                 lib/User/pwent.{pm,t}
+                lib/core/scalar.{pm,t}
                 lib/_charnames.pm
                 lib/blib.{pm,t}
                 lib/bytes.{pm,t}

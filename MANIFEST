@@ -4430,6 +4430,8 @@ lib/Config.t			See if Config works
 lib/Config/Extensions.pm	Convenient hash lookup for built extensions
 lib/Config/Extensions.t		See if Config::Extensions works
 lib/CORE.pod			document the CORE namespace
+lib/core/scalar.pm		namespace for internals functions related to scalars
+lib/core/scalar.t		tests for "core::scalar" namespace
 lib/DB.pm			Debugger API (draft)
 lib/DB.t			See if DB works
 lib/DBM_Filter.pm		DBM Filter module
@@ -4489,7 +4491,7 @@ lib/less.pm			For "use less"
 lib/less.t			See if less support works
 lib/locale.pm			For "use locale"
 lib/locale.t			See if locale support works
-lib/locale_threads.t		Tes locale and threads interactions
+lib/locale_threads.t		Test locale and threads interactions
 lib/meta_notation.pm		Helper for certain /lib .pm's
 lib/meta_notation.t		See if meta_notation.t works
 lib/Net/hostent.pm		By-name interface to Perl's builtin gethost*

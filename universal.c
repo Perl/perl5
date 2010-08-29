@@ -426,12 +426,12 @@ XS(XS_UNIVERSAL_DOES)
     }
 }
 
-XS(XS_utf8_is_utf8); /* prototype to pass -Wmissing-prototypes */
-XS(XS_utf8_is_utf8)
+XS(XS_utf8__is_utf8); /* prototype to pass -Wmissing-prototypes */
+XS(XS_utf8__is_utf8)
 {
      dXSARGS;
      if (items != 1)
-	 croak_xs_usage(cv, "sv");
+         croak_xs_usage(cv, "scalar");
      else {
 	SV * const sv = ST(0);
 	SvGETMAGIC(sv);
@@ -443,12 +443,12 @@ XS(XS_utf8_is_utf8)
      XSRETURN_EMPTY;
 }
 
-XS(XS_utf8_valid); /* prototype to pass -Wmissing-prototypes */
-XS(XS_utf8_valid)
+XS(XS_utf8__valid); /* prototype to pass -Wmissing-prototypes */
+XS(XS_utf8__valid)
 {
      dXSARGS;
      if (items != 1)
-	 croak_xs_usage(cv, "sv");
+         croak_xs_usage(cv, "scalar");
     else {
 	SV * const sv = ST(0);
 	STRLEN len;
@@ -461,23 +461,23 @@ XS(XS_utf8_valid)
      XSRETURN_EMPTY;
 }
 
-XS(XS_utf8_encode); /* prototype to pass -Wmissing-prototypes */
-XS(XS_utf8_encode)
+XS(XS_utf8__encode); /* prototype to pass -Wmissing-prototypes */
+XS(XS_utf8__encode)
 {
     dXSARGS;
     if (items != 1)
-	croak_xs_usage(cv, "sv");
+        croak_xs_usage(cv, "scalar");
     sv_utf8_encode(ST(0));
     SvSETMAGIC(ST(0));
     XSRETURN_EMPTY;
 }
 
-XS(XS_utf8_decode); /* prototype to pass -Wmissing-prototypes */
-XS(XS_utf8_decode)
+XS(XS_utf8__decode); /* prototype to pass -Wmissing-prototypes */
+XS(XS_utf8__decode)
 {
     dXSARGS;
     if (items != 1)
-	croak_xs_usage(cv, "sv");
+        croak_xs_usage(cv, "scalar");
     else {
 	SV * const sv = ST(0);
 	bool RETVAL;
@@ -489,12 +489,12 @@ XS(XS_utf8_decode)
     XSRETURN(1);
 }
 
-XS(XS_utf8_upgrade); /* prototype to pass -Wmissing-prototypes */
-XS(XS_utf8_upgrade)
+XS(XS_utf8__upgrade); /* prototype to pass -Wmissing-prototypes */
+XS(XS_utf8__upgrade)
 {
     dXSARGS;
     if (items != 1)
-	croak_xs_usage(cv, "sv");
+        croak_xs_usage(cv, "scalar");
     else {
 	SV * const sv = ST(0);
 	STRLEN	RETVAL;
@@ -506,8 +506,8 @@ XS(XS_utf8_upgrade)
     XSRETURN(1);
 }
 
-XS(XS_utf8_downgrade); /* prototype to pass -Wmissing-prototypes */
-XS(XS_utf8_downgrade)
+XS(XS_utf8__downgrade); /* prototype to pass -Wmissing-prototypes */
+XS(XS_utf8__downgrade)
 {
     dXSARGS;
     if (items < 1 || items > 2)
@@ -522,34 +522,34 @@ XS(XS_utf8_downgrade)
     XSRETURN(1);
 }
 
-XS(XS_utf8_native_to_unicode); /* prototype to pass -Wmissing-prototypes */
-XS(XS_utf8_native_to_unicode)
+XS(XS_utf8__native_to_unicode); /* prototype to pass -Wmissing-prototypes */
+XS(XS_utf8__native_to_unicode)
 {
  dXSARGS;
  const UV uv = SvUV(ST(0));
 
  if (items > 1)
-     croak_xs_usage(cv, "sv");
+     croak_xs_usage(cv, "scalar");
 
  ST(0) = sv_2mortal(newSVuv(NATIVE_TO_UNI(uv)));
  XSRETURN(1);
 }
 
-XS(XS_utf8_unicode_to_native); /* prototype to pass -Wmissing-prototypes */
-XS(XS_utf8_unicode_to_native)
+XS(XS_utf8__unicode_to_native); /* prototype to pass -Wmissing-prototypes */
+XS(XS_utf8__unicode_to_native)
 {
  dXSARGS;
  const UV uv = SvUV(ST(0));
 
  if (items > 1)
-     croak_xs_usage(cv, "sv");
+     croak_xs_usage(cv, "scalar");
 
  ST(0) = sv_2mortal(newSVuv(UNI_TO_NATIVE(uv)));
  XSRETURN(1);
 }
 
-XS(XS_Internals_SvREADONLY); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Internals_SvREADONLY)	/* This is dangerous stuff. */
+XS(XS_Internals__SvREADONLY); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Internals__SvREADONLY)        /* This is dangerous stuff. */
 {
     dXSARGS;
     SV * const svz = ST(0);
@@ -609,8 +609,8 @@ XS(XS_constant__make_const)	/* This is dangerous stuff. */
     XSRETURN(0);
 }
 
-XS(XS_Internals_SvREFCNT); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Internals_SvREFCNT)	/* This is dangerous stuff. */
+XS(XS_Internals__SvREFCNT); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Internals__SvREFCNT)        /* This is dangerous stuff. */
 {
     dXSARGS;
     SV * const svz = ST(0);
@@ -634,8 +634,8 @@ XS(XS_Internals_SvREFCNT)	/* This is dangerous stuff. */
 
 }
 
-XS(XS_Internals_hv_clear_placehold); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Internals_hv_clear_placehold)
+XS(XS_Internals__hv_clear_placehold); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Internals__hv_clear_placehold)
 {
     dXSARGS;
 
@@ -648,8 +648,8 @@ XS(XS_Internals_hv_clear_placehold)
     }
 }
 
-XS(XS_PerlIO_get_layers); /* prototype to pass -Wmissing-prototypes */
-XS(XS_PerlIO_get_layers)
+XS(XS_PerlIO__get_layers); /* prototype to pass -Wmissing-prototypes */
+XS(XS_PerlIO__get_layers)
 {
     dXSARGS;
     if (items < 1 || items % 2 == 0)
@@ -773,14 +773,129 @@ XS(XS_PerlIO_get_layers)
     XSRETURN(0);
 }
 
-XS(XS_re_is_regexp); /* prototype to pass -Wmissing-prototypes */
-XS(XS_re_is_regexp)
+XS(XS_Internals__hash_seed)
+{
+    dVAR;
+    /* Using dXSARGS would also have dITEM and dSP,
+     * which define 2 unused local variables.  */
+    dAXMARK;
+    PERL_UNUSED_ARG(cv);
+    PERL_UNUSED_VAR(mark);
+    XSRETURN_UV(PERL_HASH_SEED);
+}
+
+XS(XS_core__scalar__reftype)
+{
+    SV *sv;
+    dVAR;
+    dXSARGS;
+    PERL_UNUSED_VAR(cv);
+
+    if (items != 1)
+        croak_xs_usage(cv, "scalar");
+
+    SP -= items;
+    sv = (SV*)ST(0);
+
+    if (SvMAGICAL(sv))
+	mg_get(sv);
+    if (!SvROK(sv)) {
+       XSRETURN_NO;
+    } else {
+	STRLEN len;
+	char *type= (char *)sv_reftype_len(SvRV(sv),FALSE,&len);
+        XPUSHs(sv_2mortal(newSVpv(type,len)));
+    }
+}
+
+XS(XS_core__scalar__refaddr)
+{
+    SV *sv;
+    dVAR;
+    dXSARGS;
+    PERL_UNUSED_VAR(cv);
+
+    if (items != 1)
+        croak_xs_usage(cv, "scalar");
+
+    SP -= items;
+    sv = (SV*)ST(0);
+
+    if (SvMAGICAL(sv))
+	mg_get(sv);
+    if (!SvROK(sv)) {
+       XSRETURN_NO;
+    } else {
+       XPUSHs(sv_2mortal(newSVuv(PTR2UV(SvRV(sv)))));
+    }
+}
+
+XS(XS_core__scalar__blessed)
+{
+    SV *sv;
+    dVAR;
+    dXSARGS;
+    PERL_UNUSED_VAR(cv);
+
+    if (items != 1)
+        croak_xs_usage(cv, "scalar");
+
+    SP -= items;
+    sv = (SV*)ST(0);
+
+    if (SvMAGICAL(sv))
+	mg_get(sv);
+    if ( SvROK(sv) && SvOBJECT(SvRV(sv)) ) {
+	STRLEN len;
+	char *type= (char *)sv_reftype_len(SvRV(sv),TRUE,&len);
+        XPUSHs(sv_2mortal(newSVpv(type,len)));
+    } else {
+        XPUSHs(sv_2mortal(newSVpv("",0)));
+    }
+}
+
+XS(XS_core__scalar__weaken)
+{
+    SV *sv;
+    dVAR;
+    dXSARGS;
+    PERL_UNUSED_VAR(cv);
+
+    if (items != 1)
+        croak_xs_usage(cv, "scalar");
+
+    SP -= items;
+    sv = (SV*)ST(0);
+
+    if (SvMAGICAL(sv))
+	mg_get(sv);
+    sv_rvweaken(sv);
+    XSRETURN_EMPTY;
+}
+
+XS(XS_core__scalar__isweak)
+{
+    dVAR;
+    dXSARGS;
+    if (items != 1)
+       croak_xs_usage(cv,  "scalar");
+    {
+	SV *	sv = ST(0);
+	if (SvMAGICAL(sv))
+	    mg_get(sv);
+	ST(0) = boolSV(SvROK(sv) && SvWEAKREF(sv));
+	XSRETURN(1);
+    }
+    XSRETURN(1);
+}
+
+XS(XS_re__is_regexp)
 {
     dXSARGS;
     PERL_UNUSED_VAR(cv);
 
     if (items != 1)
-	croak_xs_usage(cv, "sv");
+        croak_xs_usage(cv, "scalar");
 
     if (SvRXOK(ST(0))) {
         XSRETURN_YES;
@@ -789,8 +904,8 @@ XS(XS_re_is_regexp)
     }
 }
 
-XS(XS_re_regnames_count); /* prototype to pass -Wmissing-prototypes */
-XS(XS_re_regnames_count)
+XS(XS_re__regnames_count); /* prototype to pass -Wmissing-prototypes */
+XS(XS_re__regnames_count)
 {
     REGEXP *rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
     SV * ret;
@@ -809,8 +924,8 @@ XS(XS_re_regnames_count)
     XSRETURN(1);
 }
 
-XS(XS_re_regname); /* prototype to pass -Wmissing-prototypes */
-XS(XS_re_regname)
+XS(XS_re__regname); /* prototype to pass -Wmissing-prototypes */
+XS(XS_re__regname)
 {
     dXSARGS;
     REGEXP * rx;
@@ -841,8 +956,8 @@ XS(XS_re_regname)
 }
 
 
-XS(XS_re_regnames); /* prototype to pass -Wmissing-prototypes */
-XS(XS_re_regnames)
+XS(XS_re__regnames); /* prototype to pass -Wmissing-prototypes */
+XS(XS_re__regnames)
 {
     dXSARGS;
     REGEXP * rx;
@@ -896,8 +1011,8 @@ XS(XS_re_regnames)
     return;
 }
 
-XS(XS_re_regexp_pattern); /* prototype to pass -Wmissing-prototypes */
-XS(XS_re_regexp_pattern)
+XS(XS_re__regexp_pattern); /* prototype to pass -Wmissing-prototypes */
+XS(XS_re__regexp_pattern)
 {
     dXSARGS;
     REGEXP *re;
@@ -906,7 +1021,7 @@ XS(XS_re_regexp_pattern)
     EXTEND(SP, 2);
     SP -= items;
     if (items != 1)
-	croak_xs_usage(cv, "sv");
+        croak_xs_usage(cv, "scalar");
 
     /*
        Checks if a reference is a regex or not. If the parameter is
@@ -1013,24 +1128,30 @@ static const struct xsub_details details[] = {
 #define VXS_XSUB_DETAILS
 #include "vxs.inc"
 #undef VXS_XSUB_DETAILS
-    {"utf8::is_utf8", XS_utf8_is_utf8, NULL},
-    {"utf8::valid", XS_utf8_valid, NULL},
-    {"utf8::encode", XS_utf8_encode, NULL},
-    {"utf8::decode", XS_utf8_decode, NULL},
-    {"utf8::upgrade", XS_utf8_upgrade, NULL},
-    {"utf8::downgrade", XS_utf8_downgrade, NULL},
-    {"utf8::native_to_unicode", XS_utf8_native_to_unicode, NULL},
-    {"utf8::unicode_to_native", XS_utf8_unicode_to_native, NULL},
-    {"Internals::SvREADONLY", XS_Internals_SvREADONLY, "\\[$%@];$"},
-    {"Internals::SvREFCNT", XS_Internals_SvREFCNT, "\\[$%@];$"},
-    {"Internals::hv_clear_placeholders", XS_Internals_hv_clear_placehold, "\\%"},
-    {"constant::_make_const", XS_constant__make_const, "\\[$@]"},
-    {"PerlIO::get_layers", XS_PerlIO_get_layers, "*;@"},
-    {"re::is_regexp", XS_re_is_regexp, "$"},
-    {"re::regname", XS_re_regname, ";$$"},
-    {"re::regnames", XS_re_regnames, ";$"},
-    {"re::regnames_count", XS_re_regnames_count, ""},
-    {"re::regexp_pattern", XS_re_regexp_pattern, "$"},
+    {"utf8::is_utf8",           XS_utf8__is_utf8,           NULL},
+    {"utf8::valid",             XS_utf8__valid,             NULL},
+    {"utf8::encode",            XS_utf8__encode,            NULL},
+    {"utf8::decode",            XS_utf8__decode,            NULL},
+    {"utf8::upgrade",           XS_utf8__upgrade,           NULL},
+    {"utf8::downgrade",         XS_utf8__downgrade,         NULL},
+    {"utf8::native_to_unicode", XS_utf8__native_to_unicode, NULL},
+    {"utf8::unicode_to_native", XS_utf8__unicode_to_native, NULL},
+    {"Internals::SvREADONLY",   XS_Internals__SvREADONLY,   "\\[$%@];$"},
+    {"Internals::SvREFCNT",     XS_Internals__SvREFCNT,     "\\[$%@];$"},
+    {"Internals::hv_clear_placeholders",
+                                XS_Internals__hv_clear_placehold, "\\%"},
+    {"constant::_make_const",   XS_constant__make_const,    "\\[$@]"},
+    {"PerlIO::get_layers",      XS_PerlIO__get_layers,      "*;@"},
+    {"re::is_regexp",           XS_re__is_regexp,           "$"},
+    {"re::regname",             XS_re__regname,             ";$$"},
+    {"re::regnames",            XS_re__regnames,            ";$"},
+    {"re::regnames_count",      XS_re__regnames_count,      ""},
+    {"re::regexp_pattern",      XS_re__regexp_pattern,      "$"},
+    {"core::scalar::reftype",   XS_core__scalar__reftype,   "$"},
+    {"core::scalar::refaddr",   XS_core__scalar__refaddr,   "$"},
+    {"core::scalar::blessed",   XS_core__scalar__blessed,   "$"},
+    {"core::scalar::weaken",    XS_core__scalar__weaken,    "$"},
+    {"core::scalar::isweak",    XS_core__scalar__isweak,    "$"}
 };
 
 STATIC OP*
