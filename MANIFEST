@@ -4490,6 +4490,8 @@ lib/less.t			See if less support works
 lib/locale.pm			For "use locale"
 lib/locale.t			See if locale support works
 lib/locale_threads.t		Tes locale and threads interactions
+lib/mauve.pm			Temporary namespace for new built in "reftype" pseduo keyword (and friends)
+lib/mauve.t			tests for "mauve" namespace for new built in "reftype" pseduo keyword (and friends)
 lib/meta_notation.pm		Helper for certain /lib .pm's
 lib/meta_notation.t		See if meta_notation.t works
 lib/Net/hostent.pm		By-name interface to Perl's builtin gethost*

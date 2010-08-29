@@ -773,7 +773,133 @@ XS(XS_PerlIO_get_layers)
     XSRETURN(0);
 }
 
-XS(XS_re_is_regexp); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Internals_hash_seed)
+{
+    dVAR;
+    /* Using dXSARGS would also have dITEM and dSP,
+     * which define 2 unused local variables.  */
+    dAXMARK;
+    PERL_UNUSED_ARG(cv);
+    PERL_UNUSED_VAR(mark);
+    XSRETURN_UV(PERL_HASH_SEED);
+}
+
+XS(XS_Internals_rehash_seed)
+{
+    dVAR;
+    /* Using dXSARGS would also have dITEM and dSP,
+     * which define 2 unused local variables.  */
+    dAXMARK;
+    PERL_UNUSED_ARG(cv);
+    PERL_UNUSED_VAR(mark);
+    XSRETURN_UV(PL_rehash_seed);
+}
+
+XS(XS_mauve_reftype)
+{
+    SV *sv;
+    dVAR;
+    dXSARGS;
+    PERL_UNUSED_VAR(cv);
+
+    if (items != 1)
+	croak_xs_usage(cv, "sv");
+
+    SP -= items;
+    sv = (SV*)ST(0);
+
+    if (SvMAGICAL(sv))
+	mg_get(sv);
+    if (!SvROK(sv)) {
+       XSRETURN_NO;
+    } else {
+	STRLEN len;
+	char *type= (char *)sv_reftype_len(SvRV(sv),FALSE,&len);
+        XPUSHs(sv_2mortal(newSVpv(type,len)));
+    }
+}
+
+XS(XS_mauve_refaddr)
+{
+    SV *sv;
+    dVAR;
+    dXSARGS;
+    PERL_UNUSED_VAR(cv);
+
+    if (items != 1)
+	croak_xs_usage(cv, "sv");
+
+    SP -= items;
+    sv = (SV*)ST(0);
+
+    if (SvMAGICAL(sv))
+	mg_get(sv);
+    if (!SvROK(sv)) {
+       XSRETURN_NO;
+    } else {
+       XPUSHs(sv_2mortal(newSVuv(PTR2UV(SvRV(sv)))));
+    }
+}
+
+XS(XS_mauve_blessed)
+{
+    SV *sv;
+    dVAR;
+    dXSARGS;
+    PERL_UNUSED_VAR(cv);
+
+    if (items != 1)
+	croak_xs_usage(cv, "sv");
+
+    SP -= items;
+    sv = (SV*)ST(0);
+
+    if (SvMAGICAL(sv))
+	mg_get(sv);
+    if ( SvROK(sv) && SvOBJECT(SvRV(sv)) ) {
+	STRLEN len;
+	char *type= (char *)sv_reftype_len(SvRV(sv),TRUE,&len);
+        XPUSHs(sv_2mortal(newSVpv(type,len)));
+    } else {
+        XPUSHs(sv_2mortal(newSVpv("",0)));
+    }
+}
+
+XS(XS_mauve_weaken)
+{
+    SV *sv;
+    dVAR;
+    dXSARGS;
+    PERL_UNUSED_VAR(cv);
+
+    if (items != 1)
+	croak_xs_usage(cv, "sv");
+
+    SP -= items;
+    sv = (SV*)ST(0);
+
+    if (SvMAGICAL(sv))
+	mg_get(sv);
+    sv_rvweaken(sv);
+    XSRETURN_EMPTY;
+}
+
+XS(XS_mauve_isweak)
+{
+    dVAR;
+    dXSARGS;
+    if (items != 1)
+       croak_xs_usage(cv,  "sv");
+    {
+	SV *	sv = ST(0);
+	if (SvMAGICAL(sv))
+	    mg_get(sv);
+	ST(0) = boolSV(SvROK(sv) && SvWEAKREF(sv));
+	XSRETURN(1);
+    }
+    XSRETURN(1);
+}
+
 XS(XS_re_is_regexp)
 {
     dXSARGS;
@@ -1031,6 +1157,11 @@ static const struct xsub_details details[] = {
     {"re::regnames", XS_re_regnames, ";$"},
     {"re::regnames_count", XS_re_regnames_count, ""},
     {"re::regexp_pattern", XS_re_regexp_pattern, "$"},
+    {"mauve::reftype", XS_mauve_reftype, "$"},
+    {"mauve::refaddr", XS_mauve_refaddr, "$"},
+    {"mauve::blessed", XS_mauve_blessed, "$"},
+    {"mauve::weaken", XS_mauve_weaken, "$"},
+    {"mauve::isweak", XS_mauve_isweak, "$"}
 };
 
 STATIC OP*
