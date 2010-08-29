@@ -3222,6 +3222,11 @@ PERL_CALLCONV const char*	Perl_sv_reftype(pTHX_ const SV *const sv, const int ob
 #define PERL_ARGS_ASSERT_SV_REFTYPE	\
 	assert(sv)
 
+PERL_CALLCONV const char*	Perl_sv_reftype_len(pTHX_ const SV *const sv, const int ob, STRLEN *const ret_len)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_SV_REFTYPE_LEN	\
+	assert(sv); assert(ret_len)
+
 PERL_CALLCONV void	Perl_sv_replace(pTHX_ SV *const sv, SV *const nsv);
 #define PERL_ARGS_ASSERT_SV_REPLACE	\
 	assert(sv); assert(nsv)

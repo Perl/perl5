@@ -660,6 +660,7 @@
 #define sv_recode_to_utf8(a,b)	Perl_sv_recode_to_utf8(aTHX_ a,b)
 #define sv_ref(a,b,c)		Perl_sv_ref(aTHX_ a,b,c)
 #define sv_reftype(a,b)		Perl_sv_reftype(aTHX_ a,b)
+#define sv_reftype_len(a,b,c)	Perl_sv_reftype_len(aTHX_ a,b,c)
 #define sv_replace(a,b)		Perl_sv_replace(aTHX_ a,b)
 #define sv_report_used()	Perl_sv_report_used(aTHX)
 #define sv_reset(a,b)		Perl_sv_reset(aTHX_ a,b)
