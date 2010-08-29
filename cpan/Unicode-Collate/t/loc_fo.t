@@ -1,0 +1,148 @@
+#!perl
+use strict;
+use warnings;
+use Unicode::Collate::Locale;
+
+use Test;
+plan tests => 93;
+
+my $eth  = pack 'U', 0xF0;
+my $ETH  = pack 'U', 0xD0;
+my $thrn = pack 'U', 0xFE;
+my $THRN = pack 'U', 0xDE;
+my $uuml = pack 'U', 0xFC;
+my $Uuml = pack 'U', 0xDC;
+my $ae   = pack 'U', 0xE6;
+my $AE   = pack 'U', 0xC6;
+my $auml = pack 'U', 0xE4;
+my $Auml = pack 'U', 0xC4;
+my $ostk = pack 'U', 0xF8;
+my $Ostk = pack 'U', 0xD8;
+my $ouml = pack 'U', 0xF6;
+my $Ouml = pack 'U', 0xD6;
+my $arng = pack 'U', 0xE5;
+my $Arng = pack 'U', 0xC5;
+
+my $objFo = Unicode::Collate::Locale->
+    new(locale => 'FO', normalization => undef);
+
+ok(1);
+ok($objFo->getlocale, 'fo');
+
+$objFo->change(level => 1);
+
+ok($objFo->lt('z', $ae));
+ok($objFo->lt($ae, $ostk));
+ok($objFo->lt($ostk, $arng));
+ok($objFo->lt($arng, "\x{292}"));
+
+# 6
+
+ok($objFo->eq('d', "\x{111}"));
+ok($objFo->eq("\x{111}", $eth));
+ok($objFo->eq('y', $uuml));
+ok($objFo->eq($uuml, "\x{171}"));
+ok($objFo->eq($ae, $auml));
+ok($objFo->eq($auml, "\x{119}"));
+ok($objFo->eq($ostk, $ouml));
+ok($objFo->eq($ouml, "\x{151}"));
+ok($objFo->eq("\x{151}", "\x{153}"));
+
+# 15
+
+$objFo->change(level => 2);
+
+ok($objFo->lt('d', "\x{111}"));
+ok($objFo->lt("\x{111}", $eth));
+ok($objFo->lt('y', $uuml));
+ok($objFo->lt($uuml, "\x{171}"));
+ok($objFo->lt($ae, $auml));
+ok($objFo->lt($auml, "\x{119}"));
+ok($objFo->lt($ostk, $ouml));
+ok($objFo->lt($ouml, "\x{151}"));
+ok($objFo->lt("\x{151}", "\x{153}"));
+
+# 24
+
+ok($objFo->eq("\x{111}", "\x{110}"));
+ok($objFo->eq($eth,  $ETH));
+ok($objFo->eq('th',  $thrn));
+ok($objFo->eq($thrn, 'TH'));
+ok($objFo->eq('TH',  $THRN));
+ok($objFo->eq($uuml, $Uuml));
+ok($objFo->eq("\x{171}", "\x{170}"));
+ok($objFo->eq($ae,   $AE));
+ok($objFo->eq($AE, "\x{1D2D}"));
+ok($objFo->eq($auml, $Auml));
+ok($objFo->eq("\x{119}", "\x{118}"));
+ok($objFo->eq($ostk, $Ostk));
+ok($objFo->eq($ouml, $Ouml));
+ok($objFo->eq("\x{151}", "\x{150}"));
+ok($objFo->eq("\x{153}", "\x{152}"));
+ok($objFo->eq($arng, $Arng));
+ok($objFo->eq($Arng, 'aa'));
+ok($objFo->eq('aa', 'aA'));
+ok($objFo->eq('aA', 'Aa'));
+ok($objFo->eq('Aa', 'AA'));
+ok($objFo->eq('aa', 'AA'));
+
+# 45
+
+$objFo->change(level => 3);
+
+ok($objFo->lt("\x{111}", "\x{110}"));
+ok($objFo->lt($eth,  $ETH));
+ok($objFo->lt('th',  $thrn));
+ok($objFo->lt($thrn, 'TH'));
+ok($objFo->lt('TH',  $THRN));
+ok($objFo->lt($uuml, $Uuml));
+ok($objFo->lt("\x{171}", "\x{170}"));
+ok($objFo->lt($ae,   $AE));
+ok($objFo->lt($AE, "\x{1D2D}"));
+ok($objFo->lt($auml, $Auml));
+ok($objFo->lt("\x{119}", "\x{118}"));
+ok($objFo->lt($ostk, $Ostk));
+ok($objFo->lt($ouml, $Ouml));
+ok($objFo->lt("\x{151}", "\x{150}"));
+ok($objFo->lt("\x{153}", "\x{152}"));
+ok($objFo->lt($arng, $Arng));
+ok($objFo->lt($Arng, 'aa'));
+ok($objFo->lt('aa', 'aA'));
+ok($objFo->lt('aA', 'Aa'));
+ok($objFo->lt('Aa', 'AA'));
+ok($objFo->lt('aa', 'AA'));
+
+# 66
+
+ok($objFo->eq("d\x{335}", "\x{111}"));
+ok($objFo->eq("D\x{335}", "\x{110}"));
+ok($objFo->eq("u\x{308}", $uuml));
+ok($objFo->eq("U\x{308}", $Uuml));
+ok($objFo->eq("u\x{30B}", "\x{171}"));
+ok($objFo->eq("U\x{30B}", "\x{170}"));
+ok($objFo->eq("\x{1FD}", "$ae\x{301}"));
+ok($objFo->eq("\x{1FC}", "$AE\x{301}"));
+ok($objFo->eq("\x{1E3}", "$ae\x{304}"));
+ok($objFo->eq("\x{1E2}", "$AE\x{304}"));
+ok($objFo->eq("a\x{308}", $auml));
+ok($objFo->eq("A\x{308}", $Auml));
+ok($objFo->eq("e\x{328}", "\x{119}"));
+ok($objFo->eq("E\x{328}", "\x{118}"));
+
+# 80
+
+ok($objFo->eq("o\x{338}", $ostk));
+ok($objFo->eq("O\x{338}", $Ostk));
+ok($objFo->eq("o\x{338}\x{301}", "\x{1FF}"));
+ok($objFo->eq("O\x{338}\x{301}", "\x{1FE}"));
+ok($objFo->eq("o\x{308}", $ouml));
+ok($objFo->eq("O\x{308}", $Ouml));
+ok($objFo->eq("o\x{30B}", "\x{151}"));
+ok($objFo->eq("O\x{30B}", "\x{150}"));
+ok($objFo->eq("a\x{30A}", $arng));
+ok($objFo->eq("A\x{30A}", $Arng));
+ok($objFo->eq("A\x{30A}", "\x{212B}"));
+ok($objFo->eq("a\x{30A}\x{301}", "\x{1FB}"));
+ok($objFo->eq("A\x{30A}\x{301}", "\x{1FA}"));
+
+# 93

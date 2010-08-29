@@ -34,14 +34,14 @@ $objNn->change(level => 1);
 ok($objNn->lt("z", $ae));
 ok($objNn->lt($ae, $ostk));
 ok($objNn->lt($ostk, $arng));
-ok($objNn->lt($arng, "\x{0292}"));
+ok($objNn->lt($arng, "\x{292}"));
 
 # 6
 
 ok($objNn->eq('d', "\x{111}"));
 ok($objNn->eq("\x{111}", $eth));
 ok($objNn->eq('y', $uuml));
-ok($objNn->eq($uuml, "\x{0171}"));
+ok($objNn->eq($uuml, "\x{171}"));
 
 ok($objNn->eq($ae,   $auml));
 ok($objNn->eq($auml, "\x{119}"));
@@ -56,7 +56,7 @@ $objNn->change(level => 2);
 ok($objNn->lt('d', "\x{111}"));
 ok($objNn->lt("\x{111}", $eth));
 ok($objNn->lt('y', $uuml));
-ok($objNn->lt($uuml, "\x{0171}"));
+ok($objNn->lt($uuml, "\x{171}"));
 
 ok($objNn->lt($ae,   $auml));
 ok($objNn->lt($auml, "\x{119}"));

@@ -4,7 +4,7 @@ use strict;
 use Carp;
 use base qw(Unicode::Collate);
 
-our $VERSION = '0.57';
+our $VERSION = '0.58';
 
 use File::Spec;
 
@@ -13,7 +13,7 @@ my $KeyPath = File::Spec->catfile('allkeys.txt');
 my $PL_EXT  = '.pl';
 
 my %LocaleFile = map { ($_, $_) } qw(
-   ca cs eo es et fi fr lv nn pl ro sk sl sv
+   af ca cs cy da eo es et fi fo fr haw is kl lv nn pl ro sk sl sv sw
 );
    $LocaleFile{'default'}         = '';
    $LocaleFile{'es__traditional'} = 'es_trad';
@@ -39,23 +39,28 @@ sub getlocale {
     return shift->{accepted_locale};
 }
 
+sub _fetch_locale {
+    my $accepted = shift;
+    my $f = $LocaleFile{$accepted};
+    return if !$f;
+    $f .= $PL_EXT;
+    my $path = File::Spec->catfile($ModPath, $f);
+    my $h = do $path;
+    croak "Unicode/Collate/Locale/$f can't be found" if !$h;
+    return $h;
+}
+
 sub new {
     my $class = shift;
     my %hash = @_;
-    my ($href,$file);
     $hash{accepted_locale} = _locale($hash{locale});
-
-    $file = $LocaleFile{ $hash{accepted_locale} };
-    if ($file) {
-	my $filepath = File::Spec->catfile($ModPath, $file.$PL_EXT);
-	$href = do $filepath;
-    }
 
     if (exists $hash{table}) {
 	croak "your table can't be used with Unicode::Collate::Locale";
     }
-    $href->{table} = $KeyPath;
+    $hash{table} = $KeyPath;
 
+    my $href = _fetch_locale($hash{accepted_locale});
     while (my($k,$v) = each %$href) {
 	if (exists $hash{$k}) {
 	    croak "$k is reserved by $hash{locale}, can't be overwritten";
@@ -147,14 +152,21 @@ this method returns a string C<'default'> meaning no special tailoring.
 
       locale name       description
     ----------------------------------------------------------
+      af                Afrikaans
       ca                Catalan
       cs                Czech
+      cy                Welsh
+      da                Danish
       eo                Esperanto
       es                Spanish
       es__traditional   Spanish ('ch' and 'll' as a grapheme)
       et                Estonian
       fi                Finnish
+      fo                Faroese
       fr                French
+      haw               Hawaiian
+      is                Icelandic
+      kl                Kalaallisut
       lv                Latvian
       nb                Norwegian Bokmal
       nn                Norwegian Nynorsk
@@ -163,6 +175,7 @@ this method returns a string C<'default'> meaning no special tailoring.
       sk                Slovak
       sl                Slovenian
       sv                Swedish
+      sw                Swahili
 
 =head1 AUTHOR
 

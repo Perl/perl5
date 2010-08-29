@@ -36,14 +36,14 @@ $objSv->change(level => 1);
 ok($objSv->lt('z', $arng));
 ok($objSv->lt($arng, $auml));
 ok($objSv->lt($auml, $ouml));
-ok($objSv->lt($ouml, "\x{0292}"));
+ok($objSv->lt($ouml, "\x{292}"));
 
 # 6
 
 ok($objSv->eq('d', "\x{111}"));
 ok($objSv->eq("\x{111}", $eth));
 ok($objSv->eq('y', $uuml));
-ok($objSv->eq($uuml, "\x{0171}"));
+ok($objSv->eq($uuml, "\x{171}"));
 
 ok($objSv->eq($auml, $ae));
 ok($objSv->eq($ae, "\x{119}"));
@@ -59,7 +59,7 @@ $objSv->change(level => 2);
 ok($objSv->lt('d', "\x{111}"));
 ok($objSv->lt("\x{111}", $eth));
 ok($objSv->lt('y', $uuml));
-ok($objSv->lt($uuml, "\x{0171}"));
+ok($objSv->lt($uuml, "\x{171}"));
 
 ok($objSv->lt($auml, $ae));
 ok($objSv->lt($ae, "\x{119}"));
