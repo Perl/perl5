@@ -11,7 +11,7 @@ BEGIN{
 	}
 }
 
-use Test::More tests => 31;
+use Test::More tests => 32;
 
 use strict;
 use vars qw/$bad $bad7 $ok10 $bad18 $ok/;
@@ -204,3 +204,10 @@ SKIP: {
 eval { sigaction(-999, "foo"); };
 like($@, qr/Negative signals/,
     "Prevent negative signals instead of core dumping");
+
+# RT 77432 - assertion failure with POSIX::SigAction
+{
+  local *SIG = {};
+  ok(sigaction(SIGHUP, POSIX::SigAction->new),
+     "sigaction would crash/assert with a replaced %SIG");
+}

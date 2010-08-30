@@ -1471,7 +1471,7 @@ sigaction(sig, optaction, oldaction = 0)
 		   right settings, including appropriate interpretation
 		   of DEFAULT and IGNORE.  However, why are we doing
 		   this when we're about to do it again just below?  XXX */
-		mg_set(*sigsvp);
+		SvSETMAGIC(*sigsvp);
 
 		/* And here again we duplicate -- DEFAULT/IGNORE checking. */
 		if(SvPOK(*svp)) {
