@@ -1,6 +1,6 @@
 #!./perl
 
-use Test::More tests => 32 + 29 + 12 + 22;
+use Test::More tests => 32 + 60 + 12 + 22;
 
 use mauve qw(refaddr reftype blessed weaken isweak);
 use vars qw($t $y $x *F $v $r $never_blessed);
@@ -57,32 +57,55 @@ foreach $r ({}, \$t, [], \*F, sub {}) {
 }
 {
 
-    my $RE = $] < 5.011 ? 'SCALAR' : 'REGEXP';
+    my $HAVE_RE = 5.011 <= $];
+    my $RE = $HAVE_RE ? 'REGEXP' : 'SCALAR';
+    my($m,@m,%m);
+    format STDOUT = # do not indent the lone dot in next line
+.
     @test = (
-     [ !1, 1,		'number'	],
-     [ !1, 'A',		'string'	],
-     [ HASH   => {},	'HASH ref'	],
-     [ ARRAY  => [],	'ARRAY ref'	],
-     [ SCALAR => \$t,	'SCALAR ref'	],
-     [ REF    => \(\$t),	'REF ref'	],
-     [ GLOB   => \*F,	'tied GLOB ref'	],
-     [ GLOB   => gensym,	'GLOB ref'	],
-     [ CODE   => sub {},	'CODE ref'	],
-     [ IO     => *STDIN{IO},'IO ref'        ],
-     [ $RE    => qr/x/,     'REGEEXP'       ],
+     [ 0, !1,        1,                 'number'        ],
+     [ 0, !1,        'A',               'string'        ],
+     [ 0, !1,        *::t,              'glob'          ],
+     [ 1, HASH    => {},                'HASH ref'      ],
+     [ 1, HASH    => \%::t,             'HASH ref'      ],
+     [ 1, HASH    => \%m,               'HASH ref'      ],
+     [ 1, ARRAY   => [],                'ARRAY ref'     ],
+     [ 1, ARRAY   => \@::t,             'ARRAY ref'     ],
+     [ 1, ARRAY   => \@m,               'ARRAY ref'     ],
+     [ 0, SCALAR  => \1,                'SCALAR ref'    ],
+     [ 1, SCALAR  => \$t,               'SCALAR ref'    ],
+     [ 1, SCALAR  => \$m,               'SCALAR ref'    ],
+     [ 1, REF     => \(\$t),            'REF ref'       ],
+     [ 1, REF     => \[],               'REF ref'       ],
+     [ 1, LVALUE  => \substr("",0),     'LVALUE ref'    ],
+     [ 0, VSTRING => \v1.0.0,           'VSTRING ref'   ],
+     [ 1, VSTRING => \(my $v = v1.0.0), 'VSTRING ref'   ],
+     [ 1, GLOB    => \*F,               'tied GLOB ref' ],
+     [ 1, GLOB    => gensym,            'GLOB ref'      ],
+     [ 1, CODE    => sub {},            'CODE ref'      ],
+     [ 1, IO      => *STDIN{IO},        'IO ref'        ],
+     [ 1, FORMAT  => *STDOUT{FORMAT},   'FORMAT ref'    ],
+     [ 1, $RE     => qr/x/,             'REGEXP'        ],
+     [ 0, !1,        ${qr//},           'derefed regex' ],
     );
 
     foreach $test (@test) {
-      my($type,$what, $n) = @$test;
+      my($writable,$type,$what, $n) = @$test;
+
+      SKIP: {
+      if ($n =~ /derefed regex/i && !$HAVE_RE) {
+        skip "regexes are not scalar references in perl < 5.011", 1;
+      }
 
       is( reftype($what), $type, "reftype: $n");
-      next unless ref($what);
+      next unless $writable;
 
       bless $what, "ABC";
-      is( reftype($what), $type, "reftype: $n");
+      is( reftype($what), $type, "reftype: blessed $n");
 
       bless $what, "0";
-      is( reftype($what), $type, "reftype: $n");
+      is( reftype($what), $type, "reftype: blessed to false $n");
+      }
     }
 }
 {
