@@ -1362,7 +1362,7 @@ XS(XS_Tie_Hash_NamedCapture_FETCH)
 
     SP -= items;
 
-    flags = (U32)INT2PTR(IV,SvIV(SvRV(MUTABLE_SV(ST(0)))));
+    flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
     ret = CALLREG_NAMED_BUFF_FETCH(rx, ST(1), flags);
 
     SPAGAIN;
@@ -1396,7 +1396,7 @@ XS(XS_Tie_Hash_NamedCapture_STORE)
 
     SP -= items;
 
-    flags = (U32)INT2PTR(IV,SvIV(SvRV(MUTABLE_SV(ST(0)))));
+    flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
     CALLREG_NAMED_BUFF_STORE(rx,ST(1), ST(2), flags);
 }
 
@@ -1415,7 +1415,7 @@ XS(XS_Tie_Hash_NamedCapture_DELETE)
 
     SP -= items;
 
-    flags = (U32)INT2PTR(IV,SvIV(SvRV(MUTABLE_SV(ST(0)))));
+    flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
     CALLREG_NAMED_BUFF_DELETE(rx, ST(1), flags);
 }
 
@@ -1436,7 +1436,7 @@ XS(XS_Tie_Hash_NamedCapture_CLEAR)
 
     SP -= items;
 
-    flags = (U32)INT2PTR(IV,SvIV(SvRV(MUTABLE_SV(ST(0)))));
+    flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
     CALLREG_NAMED_BUFF_CLEAR(rx, flags);
 }
 
@@ -1458,7 +1458,7 @@ XS(XS_Tie_Hash_NamedCapture_EXISTS)
 
     SP -= items;
 
-    flags = (U32)INT2PTR(IV,SvIV(SvRV(MUTABLE_SV(ST(0)))));
+    flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
     ret = CALLREG_NAMED_BUFF_EXISTS(rx, ST(1), flags);
 
     SPAGAIN;
@@ -1486,7 +1486,7 @@ XS(XS_Tie_Hash_NamedCapture_FIRSTK)
 
     SP -= items;
 
-    flags = (U32)INT2PTR(IV,SvIV(SvRV(MUTABLE_SV(ST(0)))));
+    flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
     ret = CALLREG_NAMED_BUFF_FIRSTKEY(rx, flags);
 
     SPAGAIN;
@@ -1518,7 +1518,7 @@ XS(XS_Tie_Hash_NamedCapture_NEXTK)
 
     SP -= items;
 
-    flags = (U32)INT2PTR(IV,SvIV(SvRV(MUTABLE_SV(ST(0)))));
+    flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
     ret = CALLREG_NAMED_BUFF_NEXTKEY(rx, ST(1), flags);
 
     SPAGAIN;
@@ -1549,7 +1549,7 @@ XS(XS_Tie_Hash_NamedCapture_SCALAR)
 
     SP -= items;
 
-    flags = (U32)INT2PTR(IV,SvIV(SvRV(MUTABLE_SV(ST(0)))));
+    flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
     ret = CALLREG_NAMED_BUFF_SCALAR(rx, flags);
 
     SPAGAIN;
