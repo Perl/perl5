@@ -559,6 +559,7 @@ PP(pp_ref)
     dVAR; dSP; dTARGET;
     const char *pv;
     SV * const sv = POPs;
+    STRLEN len;
 
     if (sv)
 	SvGETMAGIC(sv);
@@ -566,8 +567,8 @@ PP(pp_ref)
     if (!sv || !SvROK(sv))
 	RETPUSHNO;
 
-    pv = sv_reftype(SvRV(sv),TRUE);
-    PUSHp(pv, strlen(pv));
+    pv = sv_reftype_len(SvRV(sv),TRUE,&len);
+    PUSHp(pv, len);
     RETURN;
 }
 
