@@ -5,6 +5,7 @@ use Test::More tests => 32 + 29 + 12 + 22;
 use mauve qw(refaddr reftype blessed weaken isweak);
 use vars qw($t $y $x *F $v $r $never_blessed);
 use Symbol qw(gensym);
+use Config;
 
 # Ensure we do not trigger any tied methods
 tie *F, 'MyTie';
