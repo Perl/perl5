@@ -102,6 +102,29 @@ exception if they don't match.
 Some bit fields have been reordered; therefore, this release will not be binary
 compatible with any previous Perl release.
 
+=head2 Change in the parsing of certain prototypes
+
+Due to a bug fix, functions using the C<(*)>, C<(;$)> and C<(;*)>
+prototypes are parsed with higher precedence than before. So in the
+following example:
+
+  sub foo($);
+  foo $a < $b;
+
+the second line is now parsed correctly as C<< foo($a) < $b >>, rather than
+C<< foo($a < $b) >>. This happens when one of these operators is used in
+an unparenthesised argument:
+
+  < > <= >= lt gt le ge
+  == != <=> eq ne cmp ~~
+  &
+  | ^
+  &&
+  || //
+  .. ...
+  ?:
+  = += -= *= etc.
+
 =head1 Deprecations
 
 =head2 List assignment to C<$[>
