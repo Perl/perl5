@@ -2369,7 +2369,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
       setparen:
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
             CALLREG_NUMBUF_STORE((REGEXP * const)rx,paren,sv);
-            break;
 	} else {
             /* Croak with a READONLY error when a numbered match var is
              * set without a previous pattern match. Unless it's C<local $1>
@@ -2378,6 +2377,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
                 Perl_croak_no_modify(aTHX);
             }
         }
+        break;
     case '\001':	/* ^A */
 	sv_setsv(PL_bodytarget, sv);
 	break;
@@ -2476,6 +2476,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
       } else if (strEQ(remaining, "OSTMATCH")) { /* $^POSTMATCH */
           goto do_postmatch;
       }
+      break;
     case '\024':	/* ^T */
 #ifdef BIG_TIME
 	PL_basetime = (Time_t)(SvNOK(sv) ? SvNVX(sv) : sv_2nv(sv));
