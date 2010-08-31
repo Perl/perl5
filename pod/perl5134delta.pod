@@ -25,44 +25,6 @@ each run.  It can test a random subset each time, and should there be a failure,
 log the seed used for that run so that it can later be used to reproduce the
 exact results.
 
-=head2 Creating unary functions with prototypes
-
-Calls to functions created with the following prototypes are now correctly parsed
-
-Functions declared with the following prototypes now behave correctly as unary functions:
-
-=over 4
-
-=item *
-
-C<*>
-
-=item *
-
-C<\sigil>
-
-=item *
-
-C<\[...]>
-
-=item *
-
-C<;$>
-
-=item *
-
-C<;*>
-
-=item *
-
-C<;\sigil>
-
-=item *
-
-C<;\[...]>
-
-=back
-
 =head2 C<\N{I<name>}> and C<charnames> enhancements
 
 C<\N{}>, C<charnames::vianame>, C<charnames::viacode> now know about every
@@ -104,9 +66,43 @@ compatible with any previous Perl release.
 
 =head2 Change in the parsing of certain prototypes
 
-Due to a bug fix, functions using the C<(*)>, C<(;$)> and C<(;*)>
-prototypes are parsed with higher precedence than before. So in the
-following example:
+Functions declared with the following prototypes now behave correctly as unary
+functions:
+
+=over 4
+
+=item *
+
+C<*>
+
+=item *
+
+C<\sigil>
+
+=item *
+
+C<\[...]>
+
+=item *
+
+C<;$>
+
+=item *
+
+C<;*>
+
+=item *
+
+C<;\sigil>
+
+=item *
+
+C<;\[...]>
+
+=back
+
+Due to this bug fix, functions using the C<(*)>, C<(;$)> and C<(;*)> prototypes
+are parsed with higher precedence than before. So in the following example:
 
   sub foo($);
   foo $a < $b;
