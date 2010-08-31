@@ -335,7 +335,7 @@ sub removed_raw {
     5.013002 => '2010-06-22',
     5.013003 => '2010-07-20',
     5.013004 => '2010-08-20',
-    5.012002 => '2010-09-01',
+    5.012002 => '2010-09-06',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -18314,7 +18314,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
 	'Module::Build::PodParser'=> '0.3603',
 	'Module::Build::Version'=> '0.77',
 	'Module::Build::YAML'   => '1.40',
-	'Module::CoreList'      => '2.37',
+	'Module::CoreList'      => '2.38',
 	'Module::Load'          => '0.16',
 	'Module::Load::Conditional'=> '0.38',
 	'Module::Loaded'        => '0.06',
