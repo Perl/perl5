@@ -183,27 +183,6 @@ as C<nosuid>.
 
 =back
 
-=head2 Platform Specific Changes
-
-=over 4
-
-=item VMS
-
-=over 4
-
-=item *
-
-F<git_version.h> is now installed on VMS. This was an oversight in v5.12.0 which
-caused some extensions to fail to build.
-
-=item *
-
-Several memory leaks in L<stat()|perlfunc/"stat FILEHANDLE"> have been fixed.
-
-=back
-
-=back
-
 =head1 Selected Bug Fixes
 
 =over 4
@@ -291,6 +270,15 @@ are not immediately below C<$(CCHOME)>.
 
 =item *
 
+F<git_version.h> is now installed on VMS. This was an oversight in v5.12.0 which
+caused some extensions to fail to build.
+
+=item *
+
+Several memory leaks in L<stat()|perlfunc/"stat FILEHANDLE"> have been fixed.
+
+=item *
+
 A memory leak in F<vms.c>'s C<Perl_flex_stat_int()> has been fixed.
 
 =item *
@@ -307,8 +295,23 @@ C<realname()>) has been fixed.
 
 =head1 Acknowledgements
 
-XXX The list of people to thank goes here.
+Perl 5.12.2 represents approximately three months of development since
+Perl 5.12.1 and contains approximately 2,000 lines of changes across
+100 files from 36 authors.
 
+Perl continues to flourish into its third decade thanks to a vibrant
+community of users and developers.  The following people are known to
+have contributed the improvements that became Perl 5.12.1:
+
+Abigail, Ævar Arnfjörð Bjarmason, Ben Morrow, brian d foy, Brian
+Phillips, Chas. Owens, Chris 'BinGOs' Williams, Chris Williams,
+Craig A. Berry, Curtis Jewell, Dan Dascalescu, David Golden, David
+Mitchell, Father Chrysostomos, Florian Ragwitz, George Greer, H.Merijn
+Brand, Jan Dubois, Jesse Vincent, Jim Cromie, Karl Williamson, Lars
+Dɪᴇᴄᴋᴏᴡ 迪拉斯, Leon Brocard, Maik Hentsche, Matt S Trout,
+Nicholas Clark, Rafael Garcia-Suarez, Rainer Tammer, Ricardo Signes,
+Salvador Ortiz Garcia, Sisyphus, Slaven Rezic, Steffen Mueller, Tony Cook,
+Vincent Pit and Yves Orton.
 
 =head1 Reporting Bugs
 
