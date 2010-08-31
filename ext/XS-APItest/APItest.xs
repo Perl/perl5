@@ -634,7 +634,6 @@ sub CLEAR    { %{$_[0]} = () }
 
 =cut
 
-
 MODULE = XS::APItest:TempLv		PACKAGE = XS::APItest::TempLv
 
 void
@@ -1031,6 +1030,38 @@ rmagical_flags(sv)
 	mXPUSHu(SvFLAGS(sv) & SVs_SMG);
 	mXPUSHu(SvFLAGS(sv) & SVs_RMG);
         XSRETURN(3);
+
+void
+my_caller(level)
+        I32 level
+    PREINIT:
+        const PERL_CONTEXT *cx, *dbcx;
+        const char *pv;
+        const GV *gv;
+        HV *hv;
+    PPCODE:
+        cx = caller_cx(level, &dbcx);
+        EXTEND(SP, 8);
+
+        pv = CopSTASHPV(cx->blk_oldcop);
+        ST(0) = pv ? sv_2mortal(newSVpv(pv, 0)) : &PL_sv_undef;
+        gv = CvGV(cx->blk_sub.cv);
+        ST(1) = isGV(gv) ? sv_2mortal(newSVpv(GvNAME(gv), 0)) : &PL_sv_undef;
+
+        pv = CopSTASHPV(dbcx->blk_oldcop);
+        ST(2) = pv ? sv_2mortal(newSVpv(pv, 0)) : &PL_sv_undef;
+        gv = CvGV(dbcx->blk_sub.cv);
+        ST(3) = isGV(gv) ? sv_2mortal(newSVpv(GvNAME(gv), 0)) : &PL_sv_undef;
+
+        ST(4) = cop_hints_fetchpvs(cx->blk_oldcop, "foo");
+        ST(5) = cop_hints_fetchpvn(cx->blk_oldcop, "foo", 3, 0, 0);
+        ST(6) = cop_hints_fetchsv(cx->blk_oldcop, 
+                sv_2mortal(newSVpvn("foo", 3)), 0);
+
+        hv = cop_hints_2hv(cx->blk_oldcop);
+        ST(7) = hv ? sv_2mortal(newRV_noinc((SV *)hv)) : &PL_sv_undef;
+
+        XSRETURN(8);
 
 void
 DPeek (sv)
