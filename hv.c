@@ -2623,6 +2623,57 @@ S_refcounted_he_value(pTHX_ const struct refcounted_he *he)
 }
 
 /*
+=for apidoc cop_hints_2hv
+
+Generates and returns a C<HV *> from the hinthash in the provided
+C<COP>. Returns C<NULL> if there isn't one there.
+
+=cut
+*/
+HV *
+Perl_cop_hints_2hv(pTHX_ const COP *cop)
+{
+    PERL_ARGS_ASSERT_COP_HINTS_2HV;
+
+    if (!cop->cop_hints_hash)
+	return NULL;
+
+    return Perl_refcounted_he_chain_2hv(aTHX_ cop->cop_hints_hash);
+}
+
+/*
+=for apidoc cop_hints_fetchsv
+
+Fetches an entry from the hinthash in the provided C<COP>. Returns NULL
+if the entry isn't there.
+
+=for apidoc cop_hints_fetchpvn
+
+See L</cop_hints_fetchsv>. If C<flags> includes C<HVhek_UTF8>, C<key> is
+in UTF-8.
+
+=for apidoc cop_hints_fetchpvs
+
+See L</cop_hints_fetchpvn>. This is a macro that takes a constant string
+for its argument, which is assumed to be ASCII (rather than UTF-8).
+
+=cut
+*/
+SV *
+Perl_cop_hints_fetchpvn(pTHX_ const COP *cop, const char *key, STRLEN klen,
+			    int flags, U32 hash)
+{
+    PERL_ARGS_ASSERT_COP_HINTS_FETCHPVN;
+
+    /* refcounted_he_fetch takes more flags than we do. Make sure
+     * noone's depending on being able to pass them here. */
+    flags &= ~HVhek_UTF8;
+
+    return Perl_refcounted_he_fetch(aTHX_ cop->cop_hints_hash, NULL,
+	key, klen, flags, hash);
+}
+
+/*
 =for apidoc refcounted_he_chain_2hv
 
 Generates and returns a C<HV *> by walking up the tree starting at the passed

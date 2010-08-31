@@ -1670,20 +1670,32 @@ PP(pp_xor)
 	RETSETNO;
 }
 
-PP(pp_caller)
+/*
+=for apidoc caller_cx
+
+The XSUB-writer's equivalent of L<caller()|perlfunc/caller>. The
+returned C<PERL_CONTEXT> structure can be interrogated to find all the
+information returned to Perl by C<caller>. Note that XSUBs don't get a
+stack frame, so C<caller_cx(0, NULL)> will return information for the
+immediately-surrounding Perl code.
+
+This function skips over the automatic calls to C<&DB::sub> made on the
+behalf of the debugger. If the stack frame requested was a sub called by
+C<DB::sub>, the return value will be the frame for the call to
+C<DB::sub>, since that has the correct line number/etc. for the call
+site. If I<dbcxp> is non-C<NULL>, it will be set to a pointer to the
+frame for the sub call itself.
+
+=cut
+*/
+
+const PERL_CONTEXT *
+Perl_caller_cx(pTHX_ I32 count, const PERL_CONTEXT **dbcxp)
 {
-    dVAR;
-    dSP;
     register I32 cxix = dopoptosub(cxstack_ix);
     register const PERL_CONTEXT *cx;
     register const PERL_CONTEXT *ccstack = cxstack;
     const PERL_SI *top_si = PL_curstackinfo;
-    I32 gimme;
-    const char *stashname;
-    I32 count = 0;
-
-    if (MAXARG)
-	count = POPi;
 
     for (;;) {
 	/* we may be in a higher stacklevel, so dig down deeper */
@@ -1692,13 +1704,8 @@ PP(pp_caller)
 	    ccstack = top_si->si_cxstack;
 	    cxix = dopoptosub_at(ccstack, top_si->si_cxix);
 	}
-	if (cxix < 0) {
-	    if (GIMME != G_ARRAY) {
-		EXTEND(SP, 1);
-		RETPUSHUNDEF;
-            }
-	    RETURN;
-	}
+	if (cxix < 0)
+	    return NULL;
 	/* caller() should not report the automatic calls to &DB::sub */
 	if (PL_DBsub && GvCV(PL_DBsub) && cxix >= 0 &&
 		ccstack[cxix].blk_sub.cv == GvCV(PL_DBsub))
@@ -1709,6 +1716,8 @@ PP(pp_caller)
     }
 
     cx = &ccstack[cxix];
+    if (dbcxp) *dbcxp = cx;
+
     if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
         const I32 dbcxix = dopoptosub_at(ccstack, cxix - 1);
 	/* We expect that ccstack[dbcxix] is CXt_SUB, anyway, the
@@ -1716,6 +1725,31 @@ PP(pp_caller)
 	/* caller() should not report the automatic calls to &DB::sub */
 	if (PL_DBsub && GvCV(PL_DBsub) && dbcxix >= 0 && ccstack[dbcxix].blk_sub.cv == GvCV(PL_DBsub))
 	    cx = &ccstack[dbcxix];
+    }
+
+    return cx;
+}
+
+PP(pp_caller)
+{
+    dVAR;
+    dSP;
+    register const PERL_CONTEXT *cx;
+    const PERL_CONTEXT *dbcx;
+    I32 gimme;
+    const char *stashname;
+    I32 count = 0;
+
+    if (MAXARG)
+	count = POPi;
+
+    cx = caller_cx(count, &dbcx);
+    if (!cx) {
+	if (GIMME != G_ARRAY) {
+	    EXTEND(SP, 1);
+	    RETPUSHUNDEF;
+	}
+	RETURN;
     }
 
     stashname = CopSTASHPV(cx->blk_oldcop);
@@ -1742,7 +1776,7 @@ PP(pp_caller)
     if (!MAXARG)
 	RETURN;
     if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
-	GV * const cvgv = CvGV(ccstack[cxix].blk_sub.cv);
+	GV * const cvgv = CvGV(dbcx->blk_sub.cv);
 	/* So is ccstack[dbcxix]. */
 	if (isGV(cvgv)) {
 	    SV * const sv = newSV(0);

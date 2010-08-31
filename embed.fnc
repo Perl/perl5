@@ -220,6 +220,8 @@ p	|void	|boot_core_UNIVERSAL
 : Used in perl.c
 p	|void	|boot_core_PerlIO
 Ap	|void	|call_list	|I32 oldscope|NN AV *paramList
+Apd	|const PERL_CONTEXT *	|caller_cx|I32 level \
+				|NULLOK const PERL_CONTEXT **dbcxp
 : Used in serveral source files
 pR	|bool	|cando		|Mode_t mode|bool effective|NN const Stat_t* statbufp
 ApR	|U32	|cast_ulong	|NV f
@@ -231,6 +233,11 @@ ApR	|I32	|my_chsize	|int fd|Off_t length
 #endif
 : Used in perly.y
 pR	|OP*	|convert	|I32 optype|I32 flags|NULLOK OP* o
+Apd	|HV*	|cop_hints_2hv	|NN const COP *cop
+Apd	|SV*	|cop_hints_fetchpvn|NN const COP *cop|NN const char *key \
+				|STRLEN klen|int flags|U32 hash
+Amd	|SV*	|cop_hints_fetchpvs|NN const COP *cop|NN const char *const key
+Amd	|SV*	|cop_hints_fetchsv|NN const COP *cop|NN SV *keysv|U32 hash
 : Used in op.c and perl.c
 pM	|PERL_CONTEXT*	|create_eval_scope|U32 flags
 Aprd	|void	|croak_sv	|NN SV *baseex
