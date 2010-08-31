@@ -26,7 +26,26 @@ XXX New core language features go here. Summarise user-visible core language
 enhancements. Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
-[ List each enhancement as a =head2 entry ]
+=head2 Adjacent pairs of nextstate opcodes are now optimized away
+
+Previously, in code such as
+
+    use constant DEBUG => 0;
+
+    sub GAK {
+        warn if DEBUG;
+        print "stuff\n";
+    }
+
+the ops for C<warn if DEBUG;> would be folded to a C<null> op (C<ex-const>), but
+the C<nextstate> op would remain, resulting in a runtime op dispatch of
+C<nextstate>, C<nextstate>, ...
+
+The execution of a sequence of C<nexstate> ops is indistinguishable from just
+the last C<nextstate> op, so teach the peephole optimiser to eliminate the first
+of a pair of C<nextstate> ops. (Except where the first carries a label, as
+labels mustn't be eliminated by the optimiser, and label usage isn't
+conclusively known at compile time.)
 
 =head1 Security
 
@@ -64,7 +83,8 @@ may well be none in a stable release.
 
 =item *
 
-XXX
+Scalars containing regular expressions now only allocate the part of the C<SV>
+body they actually use, saving some space.
 
 =back
 
@@ -96,7 +116,11 @@ XXX
 
 =item *
 
-XXX
+C<ExtUtils::MakeMaker> has been upgraded from version 6.56 to 6.57_01.
+
+=item *
+
+C<Unicode::Collate> has been upgraded from version 0.56 to 0.58.
 
 =back
 
@@ -129,13 +153,13 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlapi>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Many of the optree construction functions are now documented.
 
 =back
 
@@ -224,7 +248,8 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+A rare race condition in F<t/op/while_readdir.t> has been fixed, stopping it
+from failing randomly when running tests in parallel.
 
 =back
 
@@ -271,9 +296,24 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item VMS
 
-XXX
+=over 4
+
+=item *
+
+Make PerlIOUnix_open honor default permissions on VMS.
+
+When perlio became the default and unixio became the default bottom layer, the
+most common path for creating files from Perl became C<PerlIOUnix_open>, which
+has always explicitly used C<0666> as the permission mask.
+
+To avoid this, C<0777> is now passed as the permissions to C<open()>. In the VMS
+CRTL, C<0777> has a special meaning over and above intersecting with the current
+umask; specifically, it allows Unix syscalls to preserve native default
+permissions.
+
+=back
 
 =back
 
@@ -289,7 +329,27 @@ be noted as well.
 
 =item *
 
-XXX
+C<CALL_FPTR> and C<CPERLscope> have been removed deprecated.
+
+Those are left from an old implementation of C<MULTIPLICITY> using C++ objects,
+which has been removed in 5.8. Nowadays these macros do exactly nothing, so they
+shouldn't be used anymore.
+
+For compatibility, they are still defined for external C<XS> code. Only
+extensions defining C<PERL_CORE> must be updated now.
+
+=item *
+
+C<lex_stuff_pvs()> has been added as a convenience macro wrapping
+C<lex_stuff_pvn()> for literal strings.
+
+=item *
+
+The recursive part of the peephole optimizer is how hookable.
+
+In addition to C<PL_peepp>, for hooking into the toplevel peephole optimizer, a
+C<PL_rpeepp> is now available to hook into the optimizer recursing into
+side-chains of the optree.
 
 =back
 
@@ -305,7 +365,23 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+A regression introduced in perl 5.10.0, making
+C<< my $x = 3; $x = length(undef) >> result in C<$x> set to C<3> has been
+fixed. C<$x> will now be C<undef>.
+
+=item *
+
+A fatal error in regular expressions when processing UTF-8 data has been fixed
+(RT#75680).
+
+=item *
+
+An erroneous regular expression engine optimization, that caused regex verbs
+like C<*COMMIT> to sometimes be ignored, has been removed.
+
+=item *
+
+The perl debugger now also works in taint mode (RT#76872).
 
 =back
 
