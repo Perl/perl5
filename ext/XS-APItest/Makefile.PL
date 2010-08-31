@@ -2,6 +2,7 @@ use 5.008;
 use ExtUtils::MakeMaker;
 use ExtUtils::Constant 0.11 'WriteConstants';
 use Config;
+
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 WriteMakefile(
@@ -20,7 +21,7 @@ WriteMakefile(
     # 'OBJECT'		=> '$(O_FILES)', # link all the C files too
     realclean => {FILES	=> 'const-c.inc const-xs.inc'},
     ($Config{gccversion} && $Config{d_attribute_deprecated} ?
-      (CCFLAGS => '-Wno-deprecated-declarations') : ()),
+      (CCFLAGS => $Config{ccflags} . ' -Wno-deprecated-declarations') : ()),
 );
 
 WriteConstants(
