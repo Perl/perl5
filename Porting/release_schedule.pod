@@ -34,6 +34,7 @@ you should reset the version numbers to the next blead series.
  September 20    -   Steve Hay
  October 20      -   Tatsuhiko Miyagawa
  November 20     -   Chris Williams
+ December 20     -   Zefram
 
 =head1 VICTIMS
 
@@ -53,6 +54,8 @@ Matt Trout <F<mst@shadowcat.co.uk>>
 Florian Ragwitz <F<rafl@debian.org>>
 Tatsuhiko Miyagawa <F<miyagawa@bulknews.net>>
 Chris Williams <F<bingos@cpan.org>>
+Zefram <F<zefram@fysh.org>>
+
 
 =head2 Reticent victims
 
