@@ -301,6 +301,7 @@ PERL_CALLCONV void	Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 #define PERL_ARGS_ASSERT_CALL_LIST	\
 	assert(paramList)
 
+PERL_CALLCONV const PERL_CONTEXT *	Perl_caller_cx(pTHX_ I32 level, const PERL_CONTEXT **dbcxp);
 PERL_CALLCONV bool	Perl_cando(pTHX_ Mode_t mode, bool effective, const Stat_t* statbufp)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_3);
@@ -326,6 +327,25 @@ PERL_CALLCONV I32	Perl_my_chsize(pTHX_ int fd, Off_t length)
 #endif
 PERL_CALLCONV OP*	Perl_convert(pTHX_ I32 optype, I32 flags, OP* o)
 			__attribute__warn_unused_result__;
+
+PERL_CALLCONV HV*	Perl_cop_hints_2hv(pTHX_ const COP *cop)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_COP_HINTS_2HV	\
+	assert(cop)
+
+PERL_CALLCONV SV*	Perl_cop_hints_fetchpvn(pTHX_ const COP *cop, const char *key, STRLEN klen, int flags, U32 hash)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_COP_HINTS_FETCHPVN	\
+	assert(cop); assert(key)
+
+/* PERL_CALLCONV SV*	cop_hints_fetchpvs(pTHX_ const COP *cop, const char *const key)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2); */
+
+/* PERL_CALLCONV SV*	cop_hints_fetchsv(pTHX_ const COP *cop, SV *keysv, U32 hash)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2); */
 
 PERL_CALLCONV PERL_CONTEXT*	Perl_create_eval_scope(pTHX_ U32 flags);
 PERL_CALLCONV void	Perl_croak_sv(pTHX_ SV *baseex)

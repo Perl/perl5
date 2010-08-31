@@ -58,11 +58,14 @@ Perl_av_iter_p
 Perl_block_gimme
 Perl_blockhook_register
 Perl_call_list
+Perl_caller_cx
 Perl_cast_ulong
 Perl_cast_i32
 Perl_cast_iv
 Perl_cast_uv
 Perl_my_chsize
+Perl_cop_hints_2hv
+Perl_cop_hints_fetchpvn
 Perl_croak_sv
 Perl_croak
 Perl_vcroak

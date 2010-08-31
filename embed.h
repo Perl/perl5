@@ -90,6 +90,7 @@
 #define boot_core_PerlIO	Perl_boot_core_PerlIO
 #endif
 #define call_list		Perl_call_list
+#define caller_cx		Perl_caller_cx
 #ifdef PERL_CORE
 #define cando			Perl_cando
 #endif
@@ -102,6 +103,10 @@
 #endif
 #ifdef PERL_CORE
 #define convert			Perl_convert
+#endif
+#define cop_hints_2hv		Perl_cop_hints_2hv
+#define cop_hints_fetchpvn	Perl_cop_hints_fetchpvn
+#ifdef PERL_CORE
 #define create_eval_scope	Perl_create_eval_scope
 #endif
 #define croak_sv		Perl_croak_sv
@@ -2552,6 +2557,7 @@
 #define boot_core_PerlIO()	Perl_boot_core_PerlIO(aTHX)
 #endif
 #define call_list(a,b)		Perl_call_list(aTHX_ a,b)
+#define caller_cx(a,b)		Perl_caller_cx(aTHX_ a,b)
 #ifdef PERL_CORE
 #define cando(a,b,c)		Perl_cando(aTHX_ a,b,c)
 #endif
@@ -2564,6 +2570,10 @@
 #endif
 #ifdef PERL_CORE
 #define convert(a,b,c)		Perl_convert(aTHX_ a,b,c)
+#endif
+#define cop_hints_2hv(a)	Perl_cop_hints_2hv(aTHX_ a)
+#define cop_hints_fetchpvn(a,b,c,d,e)	Perl_cop_hints_fetchpvn(aTHX_ a,b,c,d,e)
+#ifdef PERL_CORE
 #define create_eval_scope(a)	Perl_create_eval_scope(aTHX_ a)
 #endif
 #define croak_sv(a)		Perl_croak_sv(aTHX_ a)
