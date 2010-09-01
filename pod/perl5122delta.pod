@@ -301,7 +301,7 @@ Perl 5.12.1 and contains approximately 2,000 lines of changes across
 
 Perl continues to flourish into its third decade thanks to a vibrant
 community of users and developers.  The following people are known to
-have contributed the improvements that became Perl 5.12.1:
+have contributed the improvements that became Perl 5.12.2:
 
 Abigail, Ævar Arnfjörð Bjarmason, Ben Morrow, brian d foy, Brian
 Phillips, Chas. Owens, Chris 'BinGOs' Williams, Chris Williams,
