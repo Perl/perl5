@@ -12,16 +12,16 @@ blib - Use MakeMaker's uninstalled version of a package
 
 =head1 DESCRIPTION
 
-Looks for MakeMaker-like I<'blib'> directory structure starting in 
+Looks for MakeMaker-like I<'blib'> directory structure starting in
 I<dir> (or current directory) and working back up to five levels of '..'.
 
 Intended for use on command line with B<-M> option as a way of testing
 arbitrary scripts against an uninstalled version of a package.
 
-However it is possible to : 
+However it is possible to :
 
- use blib; 
- or 
+ use blib;
+ or
  use blib '..';
 
 etc. if you really must.
@@ -40,7 +40,7 @@ use Cwd;
 use File::Spec;
 
 use vars qw($VERSION $Verbose);
-$VERSION = '1.05';
+$VERSION = '1.06';
 $Verbose = 0;
 
 sub import
