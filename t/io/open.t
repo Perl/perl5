@@ -10,7 +10,7 @@ $|  = 1;
 use warnings;
 use Config;
 
-plan tests => 109;
+plan tests => 110;
 
 my $Perl = which_perl();
 
@@ -324,3 +324,16 @@ like($@, qr/Modification of a read-only value attempted/, "readonly fh");
 
     ok( open(my $f, '-|', $p),     'open -| magic');
 }
+
+# [perl #77492] Crash when stringifying a glob, a reference to which has
+#               been opened and written to.
+fresh_perl_is(
+    '
+      open my $fh, ">", \*STDOUT;
+      print $fh "hello";
+     "".*STDOUT;
+      print "ok";
+      unlink \*STDOUT;
+    ',
+    'ok', { stderr => 1 },
+    '[perl #77492]: open $fh, ">", \*glob causes SEGV');
