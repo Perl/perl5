@@ -221,7 +221,11 @@ typedef struct RExC_state_t {
 #define PAREN_SET(u8str,paren) PBYTE(u8str,paren) |= PBITVAL(paren)
 #define PAREN_UNSET(u8str,paren) PBYTE(u8str,paren) &= (~PBITVAL(paren))
 
-#define REQUIRE_UTF8	RExC_utf8 = 1
+/* If not already in utf8, do a longjmp back to the beginning */
+#define UTF8_LONGJMP 42 /* Choose a value not likely to ever conflict */
+#define REQUIRE_UTF8	STMT_START {                                       \
+                                     if (! UTF) JMPENV_JUMP(UTF8_LONGJMP); \
+                        } STMT_END
 
 /* About scan_data_t.
 
@@ -4273,6 +4277,8 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
     I32 minlen = 0;
     I32 sawplus = 0;
     I32 sawopen = 0;
+    U8 jump_ret = 0;
+    dJMPENV;
     scan_data_t data;
     RExC_state_t RExC_state;
     RExC_state_t * const pRExC_state = &RExC_state;
@@ -4296,7 +4302,37 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
 		       PL_colors[4],PL_colors[5],s);
     });
 
-redo_first_pass:
+    /* Longjmp back to here if have to switch in midstream to utf8 */
+    if (! RExC_orig_utf8) {
+	JMPENV_PUSH(jump_ret);
+    }
+
+    if (jump_ret != 0) {
+        STRLEN len = plen;
+
+        /* Here, we longjmped back.  If the cause was other than changing to
+         * utf8, pop our own setjmp, and longjmp to the correct handler */
+	if (jump_ret != UTF8_LONGJMP) {
+	    JMPENV_POP;
+	    JMPENV_JUMP(jump_ret);
+	}
+
+        /* It's possible to write a regexp in ascii that represents Unicode
+        codepoints outside of the byte range, such as via \x{100}. If we
+        detect such a sequence we have to convert the entire pattern to utf8
+        and then recompile, as our sizing calculation will have been based
+        on 1 byte == 1 character, but we will need to use utf8 to encode
+        at least some part of the pattern, and therefore must convert the whole
+        thing.
+        -- dmq */
+        DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
+	    "UTF8 mismatch! Converting to utf8 for resizing and compile\n"));
+        exp = (char*)Perl_bytes_to_utf8(aTHX_ (U8*)exp, &len);
+        xend = exp + len;
+        RExC_orig_utf8 = RExC_utf8 = 1;
+        SAVEFREEPV(exp);
+    }
+
     RExC_precomp = exp;
     RExC_flags = pm_flags;
     RExC_sawback = 0;
@@ -4335,24 +4371,14 @@ redo_first_pass:
 	RExC_precomp = NULL;
 	return(NULL);
     }
-    if (RExC_utf8 && !RExC_orig_utf8) {
-        /* It's possible to write a regexp in ascii that represents Unicode
-        codepoints outside of the byte range, such as via \x{100}. If we
-        detect such a sequence we have to convert the entire pattern to utf8
-        and then recompile, as our sizing calculation will have been based
-        on 1 byte == 1 character, but we will need to use utf8 to encode
-        at least some part of the pattern, and therefore must convert the whole
-        thing.
-        XXX: somehow figure out how to make this less expensive...
-        -- dmq */
-        STRLEN len = plen;
-        DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
-	    "UTF8 mismatch! Converting to utf8 for resizing and compile\n"));
-        exp = (char*)Perl_bytes_to_utf8(aTHX_ (U8*)exp, &len);
-        xend = exp + len;
-        RExC_orig_utf8 = RExC_utf8;
-        SAVEFREEPV(exp);
-        goto redo_first_pass;
+
+    /* Here, finished first pass.  Get rid of our setjmp, which we added for
+     * efficiency only if the passed-in string wasn't in utf8, as shown by
+     * RExC_orig_utf8.  But if the first pass was redone, that variable will be
+     * 1 here even though the original string wasn't utf8, but in this case
+     * there will have been a long jump */
+    if (jump_ret == UTF8_LONGJMP || ! RExC_orig_utf8) {
+	JMPENV_POP;
     }
     DEBUG_PARSE_r({
         PerlIO_printf(Perl_debug_log, 
