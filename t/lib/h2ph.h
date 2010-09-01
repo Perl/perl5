@@ -132,6 +132,11 @@ enum flimflam {
   flam                      
  } flamflim;
 
+static __inline__ int blli_in_use(struct atm_blli blli)
+{
+  return blli.l2_proto || blli.l3_proto;
+}
+
 /* Handle multi-line quoted strings: */
 __asm__ __volatile__("
     this
