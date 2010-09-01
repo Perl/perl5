@@ -482,6 +482,20 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 
 */
 
+/* FITS_IN_8_BITS(c) returns true if c occupies no more than 8 bits.  It is
+ * designed to be hopefully bomb-proof, making sure that no bits of
+ * information are lost even on a 64-bit machine, but to get the compiler to
+ * optimize it out if possible.  This is because Configure makes sure that the
+ * machine has an 8-bit byte, so if c is stored in a byte, the sizeof()
+ * guarantees that this evaluates to a constant true at compile time.  The use
+ * of the mask instead of '< 256' keeps gcc from complaining that it is alway
+ * true, when c's storage class is a byte */
+#ifdef HAS_QUAD
+#  define FITS_IN_8_BITS(c) ((sizeof(c) == 1) || (((U64)(c) & 0xFF) == (U64)(c)))
+#else
+#  define FITS_IN_8_BITS(c) ((sizeof(c) == 1) || (((U32)(c) & 0xFF) == (U32)(c)))
+#endif
+
 #define isALNUM(c)	(isALPHA(c) || isDIGIT(c) || (c) == '_')
 #define isIDFIRST(c)	(isALPHA(c) || (c) == '_')
 #define isALPHA(c)	(isUPPER(c) || isLOWER(c))
