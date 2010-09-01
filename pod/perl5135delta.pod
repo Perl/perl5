@@ -130,6 +130,12 @@ C<ExtUtils::MakeMaker> has been upgraded from version 6.56 to 6.57_01.
 
 =item *
 
+C<Tie::Hash> has been upgraded from version 1.03 to 1.04.
+
+Calling C<Tie::Hash->TIEHASH()> used to loop forever. Now it C<croak>s.
+
+=item *
+
 C<Unicode::Collate> has been upgraded from version 0.56 to 0.58.
 
 =back

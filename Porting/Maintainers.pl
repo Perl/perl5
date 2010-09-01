@@ -1766,7 +1766,7 @@ use File::Glob qw(:case);
 				lib/Tie/ExtraHash.t
 				lib/Tie/Handle.pm
 				lib/Tie/Handle/
-				lib/Tie/Hash.pm
+				lib/Tie/Hash.{pm,t}
 				lib/Tie/Hash/NamedCapture.pm
 				lib/Tie/Scalar.{pm,t}
 				lib/Tie/StdHandle.pm

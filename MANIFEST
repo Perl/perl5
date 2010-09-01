@@ -3677,6 +3677,7 @@ lib/Tie/Handle/stdhandle_from_handle.t	Test for Tie::StdHandle/Handle backwards 
 lib/Tie/Handle/stdhandle.t	Test for Tie::StdHandle
 lib/Tie/Hash/NamedCapture.pm	Implements %- and %+ behaviour
 lib/Tie/Hash.pm			Base class for tied hashes
+lib/Tie/Hash.t			See if Tie::Hash works
 lib/Tie/Scalar.pm		Base class for tied scalars
 lib/Tie/Scalar.t		See if Tie::Scalar works
 lib/Tie/StdHandle.pm		Tie::StdHandle
