@@ -11,7 +11,7 @@ BEGIN {
 
 use Config;
 use File::Path;
-use File::Spec::Functions;
+use File::Spec::Functions qw(catfile curdir rel2abs);
 
 use strict;
 use warnings;
@@ -55,6 +55,7 @@ foreach my $file (@w_files) {
     close F ;
 }
 
+$^X = rel2abs($^X);
 my $tempdir = tempfile;
 
 mkdir $tempdir, 0700 or die "Can't mkdir '$tempdir': $!";
