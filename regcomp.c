@@ -221,6 +221,7 @@ typedef struct RExC_state_t {
 #define PAREN_SET(u8str,paren) PBYTE(u8str,paren) |= PBITVAL(paren)
 #define PAREN_UNSET(u8str,paren) PBYTE(u8str,paren) &= (~PBITVAL(paren))
 
+#define REQUIRE_UTF8	RExC_utf8 = 1
 
 /* About scan_data_t.
 
@@ -6747,7 +6748,7 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
 	return (regnode *) &RExC_parse; /* Invalid regnode pointer */
     }
 
-    RExC_utf8 = 1;	/* named sequences imply Unicode semantics */
+    REQUIRE_UTF8;	/* named sequences imply Unicode semantics */
     RExC_parse += 2;	/* Skip past the 'U+' */
 
     if (valuep) {   /* In a bracketed char class */
@@ -7488,7 +7489,7 @@ tryagain:
 				goto recode_encoding;
 			    }
 			    if (ender > 0xff) {
-				RExC_utf8 = 1;
+				REQUIRE_UTF8;
 			    }
 			    break;
 			}
@@ -7506,7 +7507,7 @@ tryagain:
                                 STRLEN numlen = e - p - 1;
 				ender = grok_hex(p + 1, &numlen, &flags, NULL);
 				if (ender > 0xff)
-				    RExC_utf8 = 1;
+				    REQUIRE_UTF8;
 				p = e + 1;
 			    }
 			}
@@ -7531,7 +7532,7 @@ tryagain:
 			    STRLEN numlen = 3;
 			    ender = grok_oct(p, &numlen, &flags, NULL);
 			    if (ender > 0xff) {
-				RExC_utf8 = 1;
+				REQUIRE_UTF8;
 			    }
 			    p += numlen;
 			}
@@ -7548,7 +7549,7 @@ tryagain:
 			    ender = reg_recode((const char)(U8)ender, &enc);
 			    if (!enc && SIZE_ONLY)
 				ckWARNreg(p, "Invalid escape in the specified encoding");
-			    RExC_utf8 = 1;
+			    REQUIRE_UTF8;
 			}
 			break;
 		    case '\0':
