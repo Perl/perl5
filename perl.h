@@ -5805,35 +5805,35 @@ typedef struct am_table_short AMTS;
 /* START_MY_CXT must appear in all extensions that define a my_cxt_t structure,
  * right after the definition (i.e. at file scope).  The non-threads
  * case below uses it to declare the data as static. */
-#ifdef PERL_GLOBAL_STRUCT_PRIVATE
-#define START_MY_CXT
-#define MY_CXT_INDEX Perl_my_cxt_index(aTHX_ MY_CXT_KEY)
-#define MY_CXT_INIT_ARG MY_CXT_KEY
-#else
-#define START_MY_CXT static int my_cxt_index = -1;
-#define MY_CXT_INDEX my_cxt_index
-#define MY_CXT_INIT_ARG &my_cxt_index
-#endif /* #ifdef PERL_GLOBAL_STRUCT_PRIVATE */
+#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
+#    define START_MY_CXT
+#    define MY_CXT_INDEX Perl_my_cxt_index(aTHX_ MY_CXT_KEY)
+#    define MY_CXT_INIT_ARG MY_CXT_KEY
+#  else
+#    define START_MY_CXT static int my_cxt_index = -1;
+#    define MY_CXT_INDEX my_cxt_index
+#    define MY_CXT_INIT_ARG &my_cxt_index
+#  endif /* #ifdef PERL_GLOBAL_STRUCT_PRIVATE */
 
 /* Creates and zeroes the per-interpreter data.
  * (We allocate my_cxtp in a Perl SV so that it will be released when
  * the interpreter goes away.) */
-#define MY_CXT_INIT \
+#  define MY_CXT_INIT \
 	my_cxt_t *my_cxtp = \
 	    (my_cxt_t*)Perl_my_cxt_init(aTHX_ MY_CXT_INIT_ARG, sizeof(my_cxt_t))
-#define MY_CXT_INIT_INTERP(my_perl) \
+#  define MY_CXT_INIT_INTERP(my_perl) \
 	my_cxt_t *my_cxtp = \
 	    (my_cxt_t*)Perl_my_cxt_init(my_perl, MY_CXT_INIT_ARG, sizeof(my_cxt_t))
 
 /* This declaration should be used within all functions that use the
  * interpreter-local data. */
-#define dMY_CXT	\
+#  define dMY_CXT	\
 	my_cxt_t *my_cxtp = (my_cxt_t *)PL_my_cxt_list[MY_CXT_INDEX]
-#define dMY_CXT_INTERP(my_perl)	\
+#  define dMY_CXT_INTERP(my_perl)	\
 	my_cxt_t *my_cxtp = (my_cxt_t *)(my_perl)->Imy_cxt_list[MY_CXT_INDEX]
 
 /* Clones the per-interpreter data. */
-#define MY_CXT_CLONE \
+#  define MY_CXT_CLONE \
 	my_cxt_t *my_cxtp = (my_cxt_t*)SvPVX(newSV(sizeof(my_cxt_t)-1));\
 	Copy(PL_my_cxt_list[MY_CXT_INDEX], my_cxtp, 1, my_cxt_t);\
 	PL_my_cxt_list[MY_CXT_INDEX] = my_cxtp				\
@@ -5841,33 +5841,33 @@ typedef struct am_table_short AMTS;
 
 /* This macro must be used to access members of the my_cxt_t structure.
  * e.g. MYCXT.some_data */
-#define MY_CXT		(*my_cxtp)
+#  define MY_CXT		(*my_cxtp)
 
 /* Judicious use of these macros can reduce the number of times dMY_CXT
  * is used.  Use is similar to pTHX, aTHX etc. */
-#define pMY_CXT		my_cxt_t *my_cxtp
-#define pMY_CXT_	pMY_CXT,
-#define _pMY_CXT	,pMY_CXT
-#define aMY_CXT		my_cxtp
-#define aMY_CXT_	aMY_CXT,
-#define _aMY_CXT	,aMY_CXT
+#  define pMY_CXT	my_cxt_t *my_cxtp
+#  define pMY_CXT_	pMY_CXT,
+#  define _pMY_CXT	,pMY_CXT
+#  define aMY_CXT	my_cxtp
+#  define aMY_CXT_	aMY_CXT,
+#  define _aMY_CXT	,aMY_CXT
 
 #else /* PERL_IMPLICIT_CONTEXT */
 
-#define START_MY_CXT	static my_cxt_t my_cxt;
-#define dMY_CXT_SV	dNOOP
-#define dMY_CXT		dNOOP
-#define dMY_CXT_INTERP(my_perl)	dNOOP
-#define MY_CXT_INIT	NOOP
-#define MY_CXT_CLONE	NOOP
-#define MY_CXT		my_cxt
+#  define START_MY_CXT		static my_cxt_t my_cxt;
+#  define dMY_CXT_SV	    	dNOOP
+#  define dMY_CXT		dNOOP
+#  define dMY_CXT_INTERP(my_perl) dNOOP
+#  define MY_CXT_INIT		NOOP
+#  define MY_CXT_CLONE		NOOP
+#  define MY_CXT		my_cxt
 
-#define pMY_CXT		void
-#define pMY_CXT_
-#define _pMY_CXT
-#define aMY_CXT
-#define aMY_CXT_
-#define _aMY_CXT
+#  define pMY_CXT		void
+#  define pMY_CXT_
+#  define _pMY_CXT
+#  define aMY_CXT
+#  define aMY_CXT_
+#  define _aMY_CXT
 
 #endif /* !defined(PERL_IMPLICIT_CONTEXT) */
 
