@@ -1275,6 +1275,9 @@ S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 
     PERL_ARGS_ASSERT_DOFORM;
 
+    if (cv && CvCLONE(cv))
+	cv = MUTABLE_CV(sv_2mortal(MUTABLE_SV(cv_clone(cv))));
+
     ENTER;
     SAVETMPS;
 
@@ -1330,9 +1333,6 @@ PP(pp_enterwrite)
 	not_a_format_reference:
 	DIE(aTHX_ "Not a format reference");
     }
-    if (CvCLONE(cv))
-	cv = MUTABLE_CV(sv_2mortal(MUTABLE_SV(cv_clone(cv))));
-
     IoFLAGS(io) &= ~IOf_DIDTOP;
     return doform(cv,gv,PL_op->op_next);
 }
@@ -1421,8 +1421,6 @@ PP(pp_leavewrite)
 	    else
 		DIE(aTHX_ "Undefined top format called");
 	}
-	if (cv && CvCLONE(cv))
-	    cv = MUTABLE_CV(sv_2mortal(MUTABLE_SV(cv_clone(cv))));
 	return doform(cv, gv, PL_op);
     }
 
