@@ -12266,7 +12266,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_parser = NULL;
     Zero(&PL_debug_pad, 1, struct perl_debug_pad);
 #  ifdef DEBUG_LEAKING_SCALARS
-    PL_sv_serial = (((U32)my_perl >> 2) & 0xfff) * 1000000;
+    PL_sv_serial = (((UV)my_perl >> 2) & 0xfff) * 1000000;
 #  endif
 #else	/* !DEBUGGING */
     Zero(my_perl, 1, PerlInterpreter);

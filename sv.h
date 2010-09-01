@@ -117,7 +117,7 @@ struct STRUCT_SV {		/* struct sv { */
     PERL_BITFIELD32 sv_debug_optype:9;	/* the type of OP that allocated us */
     PERL_BITFIELD32 sv_debug_inpad:1;	/* was allocated in a pad for an OP */
     PERL_BITFIELD32 sv_debug_line:16;	/* the line where we were allocated */
-    U32		    sv_debug_serial;	/* serial number of sv allocation   */
+    UV		    sv_debug_serial;	/* serial number of sv allocation   */
     char *	    sv_debug_file;	/* the file where we were allocated */
     SV *	    sv_debug_parent;	/* what we were cloned from (ithreads)*/
 #endif
