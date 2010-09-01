@@ -1,5 +1,11 @@
 =encoding utf8
 
+=for release_engineer
+* changelogged up to 137127d
+* the mauve module will not be part of the release, so it's not changelogged
+yet. it also added some new api functions. those aren't covered either, as they
+might go away again in case mauve gets rolled back for 5.13.5.
+
 =head1 NAME
 
 [ this is a template for a new perldelta file. Any text flagged as
@@ -113,6 +119,10 @@ XXX
 =head2 Updated Modules and Pragmata
 
 =over 4
+
+=item *
+
+C<blib> has been upgraded from version 1.05 to 1.06.
 
 =item *
 
@@ -382,6 +392,11 @@ like C<*COMMIT> to sometimes be ignored, has been removed.
 =item *
 
 The perl debugger now also works in taint mode (RT#76872).
+
+=item *
+
+Several memory leaks in cloning and freeing threaded perl interpreters have been
+fixed (RT#77352).
 
 =back
 
