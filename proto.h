@@ -6948,10 +6948,11 @@ PERL_CALLCONV void	Perl_sys_init3(int* argc, char*** argv, char*** env)
 
 PERL_CALLCONV void	Perl_sys_term(void);
 PERL_CALLCONV const char *	Perl_fetch_cop_label(pTHX_ struct refcounted_he *const chain, STRLEN *len, U32 *flags);
-PERL_CALLCONV struct refcounted_he *	Perl_store_cop_label(pTHX_ struct refcounted_he *const chain, const char *label)
+PERL_CALLCONV void	Perl_store_cop_label(pTHX_ COP *cop, const char *label, STRLEN len, U32 flags)
+			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_STORE_COP_LABEL	\
-	assert(label)
+	assert(cop); assert(label)
 
 
 PERL_CALLCONV int	Perl_keyword_plugin_standard(pTHX_ char* keyword_ptr, STRLEN keyword_len, OP** op_ptr)

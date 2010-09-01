@@ -2382,8 +2382,8 @@ Apon	|void	|sys_term
 ApoM	|const char *|fetch_cop_label|NULLOK struct refcounted_he *const chain \
 		|NULLOK STRLEN *len|NULLOK U32 *flags
 : Only used  in op.c
-xpoM	|struct refcounted_he *|store_cop_label \
-		|NULLOK struct refcounted_he *const chain|NN const char *label
+xpoM	|void|store_cop_label \
+		|NN COP *cop|NN const char *label|STRLEN len|U32 flags
 
 xpo	|int	|keyword_plugin_standard|NN char* keyword_ptr|STRLEN keyword_len|NN OP** op_ptr
 

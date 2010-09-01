@@ -4708,8 +4708,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 	HINTS_REFCNT_UNLOCK;
     }
     if (label) {
-	cop->cop_hints_hash
-	    = Perl_store_cop_label(aTHX_ cop->cop_hints_hash, label);
+	Perl_store_cop_label(aTHX_ cop, label, strlen(label), 0);
 						     
 	PL_hints |= HINT_BLOCK_SCOPE;
 	/* It seems that we need to defer freeing this pointer, as other parts

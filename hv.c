@@ -2970,16 +2970,20 @@ Perl_fetch_cop_label(pTHX_ struct refcounted_he *const chain, STRLEN *len,
     return chain->refcounted_he_data + 1;
 }
 
-/* As newSTATEOP currently gets passed plain char* labels, we will only provide
-   that interface. Once it works out how to pass in length and UTF-8 ness, this
-   function will need superseding.  */
-struct refcounted_he *
-Perl_store_cop_label(pTHX_ struct refcounted_he *const chain, const char *label)
+void
+Perl_store_cop_label(pTHX_ COP *const cop, const char *label, STRLEN len,
+		     U32 flags)
 {
     PERL_ARGS_ASSERT_STORE_COP_LABEL;
 
-    return refcounted_he_new_common(chain, ":", 1, HVrhek_PV, HVrhek_PV,
-				    label, strlen(label));
+    if (flags & ~(SVf_UTF8))
+	Perl_croak(aTHX_ "panic: store_cop_label illegal flag bits 0x%" UVxf,
+		   (UV)flags);
+
+    cop->cop_hints_hash
+	= refcounted_he_new_common(cop->cop_hints_hash, ":", 1, HVrhek_PV,
+				   flags & SVf_UTF8 ? HVrhek_PV_UTF8 : HVrhek_PV,
+				   label, len);
 }
 
 /*
