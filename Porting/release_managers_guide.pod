@@ -45,7 +45,7 @@ The outline of a typical release cycle is as follows:
     perl-5.10.2 is released
 
     post-release actions are performed, including creating new
-	perl5103delta.pod
+	perldelta.pod
 
     ... the cycle continues ...
 
@@ -424,13 +424,13 @@ remove any C<TODO> or C<XXX> flags; update the "Known Problems" section
 with any serious issues for which fixes are not going to happen now; and
 run through pod and spell checkers, e.g.
 
-    $ podchecker -warnings -warnings pod/perl5101delta.pod
-    $ spell pod/perl5101delta.pod
+    $ podchecker -warnings -warnings pod/perldelta.pod
+    $ spell pod/perldelta.pod
 
 Also, you may want to generate and view an HTML version of it to check
 formatting, e.g.
 
-    $ perl pod/pod2html pod/perl5101delta.pod > /tmp/perl5101delta.html
+    $ perl pod/pod2html pod/perldelta.pod > /tmp/perldelta.html
 
 Another good HTML preview option is http://search.cpan.org/pod2html
 
@@ -911,38 +911,41 @@ to CPAN.
 
 I<You MUST SKIP this step for RC>
 
-Bump the perlXYZdelta version number.
+Create a new perldelta.
 
-First, create a new empty perlNNNdelta.pod file for the current release + 1;
-see F<Porting/how_to_write_a_perldelta.pod>.
+First, move the existing F<pod/perldelta.pod> to F<pod/perlNNNdelta.pod> (where
+NNN is the perl version number without the dots. i.e. 5134 for 5.13.4).
+
+Now edit the moved delta file to change the C<NAME> from C<perldelta> to
+C<perlNNNdelta>.
+
+Then create a new empty perldelta.pod file for the new release; see
+F<Porting/how_to_write_a_perldelta.pod>.
 
 You should be able to do this by just copying in a skeleton template and
 then doing a quick fix up of the version numbers, e.g.
 
-Then commit this file.  (If this new perldelta needs to get cherrypicked
-anywhere, this provides a clean base to merge from.)
+Then commit the move and the new file.
 
-For example, assuming 5.10.2:
+For example, assuming you just released 5.10.1:
 
-    $ cp -i Porting/perldelta_template.pod pod/perl5102delta.pod
-    $ (edit it)
-    $ git add pod/perl5102delta.pod
-    $ git commit -m 'create perl5102delta'
-
-Edit the previous delta file to change the C<NAME> from C<perldelta>
-to C<perlNNNdelta> and commit it.  For example:
-
+    $ git mv pod/perldelta.pod pod/perl5101delta.pod
+    $ (edit pod/perl5101delta.pod to retitle)
     $ git add pod/perl5101delta.pod
-    $ git commit -m 'retitle perl5101delta'
+
+    $ cp -i Porting/perldelta_template.pod pod/perldelta.pod
+    $ (edit pod/perldelta.pod)
+    $ git add pod/perldelta.pod
+    $ git commit -m 'create perldelta for 5.10.2'
 
 Now you need to update various tables of contents, most of which can be
 generated automatically.
 
-Edit F<pod.lst>: add the new entry, flagged as 'D', and unflag the previous
-entry from being 'D'; for example:
+Edit F<pod.lst>: add the new entry, flagged as 'd', and unflag the previous
+entry from being 'd'; for example:
 
-    -D perl5101delta                Perl changes in version 5.10.1
-    +D perl5102delta                Perl changes in version 5.10.2
+    -d perl5101delta                Perl changes in version 5.10.1
+    +d perl5102delta                Perl changes in version 5.10.2
     +  perl5101delta                Perl changes in version 5.10.1
 
 Run C<perl pod/buildtoc --build-all> to update the F<perldelta> version in
@@ -960,26 +963,20 @@ the following files:
 Then manually edit (F<vms/descrip_mms.template> to bump the version
 in the following entry:
 
-    [.pod]perldelta.pod : [.pod]perl5101delta.pod
+    [.pod]perl5101delta.pod : [.pod]perldelta.pod
 
 XXX this previous step needs to fixed to automate it in pod/buildtoc.
 
-Manually update references to the perlNNNdelta version in these files:
-
-    INSTALL
-    README
-
-These two lists of files probably aren't exhaustive; do a recursive grep
-on the previous filename to look for suitable candidates that may have
-been missed.
-
 Finally, commit:
 
-    $ git commit -a -m 'update TOC and perldelta references'
+    $ git commit -a -m 'update TOC for perlNNNdelta'
 
 At this point you may want  to compare the commit with a previous bump to
 see if they look similar. See commit ca8de22071 for an example of a
 previous version bump.
+
+XXX the commit uses the old perldelta naming scheme and we need to reference
+another one once this has been done with the scheme.
 
 =item *
 
@@ -1002,10 +999,10 @@ Assuming you're using git 1.7.x or newer:
 
 I<You MUST SKIP this step for RC, BLEAD>
 
-Copy the perlNNNdelta.pod for this release into the other branches; for
+Copy the perldelta.pod for this release into the other branches; for
 example:
 
-    $ cp -i ../5.10.x/pod/perl5101delta.pod pod/    # for example
+    $ cp -i ../5.10.x/pod/perldelta.pod pod/perl5101delta.pod    # for example
     $ git add pod/perl5101delta.pod
 
 Edit F<pod.lst> to add an entry for the file, e.g.:
