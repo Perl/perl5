@@ -189,7 +189,7 @@ OPTIONS regex
 unicore/perl_alias.pl cannot be used as alias file for charnames at
 ########
 # alias with bad file
---FILE-- ../lib/unicore/xyzzy_alias.pl
+--FILE-- ../../lib/unicore/xyzzy_alias.pl
 #!perl
 0;
 --FILE--
@@ -202,7 +202,7 @@ OPTIONS regex
 unicore/xyzzy_alias.pl did not return a \(valid\) list of alias pairs at
 ########
 # alias with file with empty list
---FILE-- ../lib/unicore/xyzzy_alias.pl
+--FILE-- ../../lib/unicore/xyzzy_alias.pl
 #!perl
 ();
 --FILE--
@@ -215,7 +215,7 @@ OPTIONS regex
 Unknown charname 'e_ACUTE' at
 ########
 # alias with file OK but file has :short aliasses
---FILE-- ../lib/unicore/xyzzy_alias.pl
+--FILE-- ../../lib/unicore/xyzzy_alias.pl
 #!perl
 (   e_ACUTE => "LATIN:e WITH ACUTE",
     a_ACUTE => "LATIN:a WITH ACUTE",
@@ -230,7 +230,7 @@ OPTIONS regex
 Unknown charname 'LATIN:e WITH ACUTE' at
 ########
 # alias with :short and file OK
---FILE-- ../lib/unicore/xyzzy_alias.pl
+--FILE-- ../../lib/unicore/xyzzy_alias.pl
 #!perl
 (   e_ACUTE => "LATIN:e WITH ACUTE",
     a_ACUTE => "LATIN:a WITH ACUTE",
@@ -245,7 +245,7 @@ OPTIONS regex
 $
 ########
 # alias with :short and file OK has :long aliasses
---FILE-- ../lib/unicore/xyzzy_alias.pl
+--FILE-- ../../lib/unicore/xyzzy_alias.pl
 #!perl
 (   e_ACUTE => "LATIN SMALL LETTER E WITH ACUTE",
     a_ACUTE => "LATIN SMALL LETTER A WITH ACUTE",
@@ -260,7 +260,7 @@ OPTIONS regex
 Unknown charname 'LATIN SMALL LETTER E WITH ACUTE' at
 ########
 # alias with file implicit :full but file has :short aliasses
---FILE-- ../lib/unicore/xyzzy_alias.pl
+--FILE-- ../../lib/unicore/xyzzy_alias.pl
 #!perl
 (   e_ACUTE => "LATIN:e WITH ACUTE",
     a_ACUTE => "LATIN:a WITH ACUTE",
@@ -275,7 +275,7 @@ OPTIONS regex
 Unknown charname 'LATIN:e WITH ACUTE' at
 ########
 # alias with file implicit :full and file has :long aliasses
---FILE-- ../lib/unicore/xyzzy_alias.pl
+--FILE-- ../../lib/unicore/xyzzy_alias.pl
 #!perl
 (   e_ACUTE => "LATIN SMALL LETTER E WITH ACUTE",
     a_ACUTE => "LATIN SMALL LETTER A WITH ACUTE",

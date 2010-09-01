@@ -55,6 +55,21 @@ foreach my $file (@w_files) {
     close F ;
 }
 
+my $tempdir = tempfile;
+
+mkdir $tempdir, 0700 or die "Can't mkdir '$tempdir': $!";
+chdir $tempdir or die die "Can't chdir '$tempdir': $!";
+unshift @INC, '../../lib';
+my $cleanup = 1;
+my %tempfiles;
+
+END {
+    if ($cleanup) {
+	chdir '..' or die "Couldn't chdir .. for cleanup: $!";
+	rmtree($tempdir);
+    }
+}
+
 local $/ = undef;
 
 my $tests = $::local_tests || 0;
@@ -121,7 +136,8 @@ for (@prgs){
     print TEST "\n#line 1\n";  # So the line numbers don't get messed up.
     print TEST $prog,"\n";
     close TEST or die "Cannot close $tmpfile: $!";
-    my $results = runperl( switches => [$switch], stderr => 1, progfile => $tmpfile );
+    my $results = runperl( switches => ["-I../../lib", $switch], nolib => 1,
+			   stderr => 1, progfile => $tmpfile );
     my $status = $?;
     $results =~ s/\n+$//;
     # allow expected output to be written as if $prog is on STDIN

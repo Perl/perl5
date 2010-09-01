@@ -810,8 +810,8 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
     my @algorithmic_names_count = (0) x $block_count;
 
     # Read the DB, and fill in @names with the character names.
-    open my $fh, "<", "../lib/unicore/UnicodeData.txt" or
-        die "Can't open ../lib/unicore/UnicodeData.txt: $!";
+    open my $fh, "<", "../../lib/unicore/UnicodeData.txt" or
+        die "Can't open ../../lib/unicore/UnicodeData.txt: $!";
     while (<$fh>) {
         chomp;
         my ($code, $name, undef, undef, undef, undef, undef, undef, undef, undef, $u1name) = split ";";

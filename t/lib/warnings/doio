@@ -262,9 +262,9 @@ EOM
 }
 use warnings 'io' ;
 close STDOUT;
-open FH1, "harness"; close FH1;
+open FH1, "../harness"; close FH1;
 no warnings 'io' ;
-open FH2, "harness"; close FH2;
+open FH2, "../harness"; close FH2;
 EXPECT
 Filehandle STDOUT reopened as FH1 only for input at - line 14.
 ########
