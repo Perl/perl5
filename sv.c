@@ -11412,6 +11412,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		else
 		    LvTARG(dstr) = sv_dup_inc(LvTARG(dstr), param);
 	    case SVt_PVGV:
+		/* non-GP case already handled above */
 		if(isGV_with_GP(sstr)) {
 		    GvNAME_HEK(dstr) = hek_dup(GvNAME_HEK(dstr), param);
 		    /* Don't call sv_add_backref here as it's going to be
@@ -11425,8 +11426,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 			Perl_sv_add_backref(aTHX_ MUTABLE_SV(GvSTASH(dstr)), dstr);
 		    GvGP(dstr)	= gp_dup(GvGP(sstr), param);
 		    (void)GpREFCNT_inc(GvGP(dstr));
-		} else
-		    Perl_rvpv_dup(aTHX_ dstr, sstr, param);
+		}
 		break;
 	    case SVt_PVIO:
 		/* PL_parser->rsfp_filters entries have fake IoDIRP() */
