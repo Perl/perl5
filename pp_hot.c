@@ -1336,7 +1336,7 @@ PP(pp_match)
        appears to be quite tricky.
        Test for the unsafe vars are TODO for now. */
     if ((  !global && RX_NPARENS(rx)) 
-	    || SvTEMP(TARG) || PL_sawampersand ||
+	    || SvTEMP(TARG) || SvAMAGIC(TARG) || PL_sawampersand ||
 	    (RX_EXTFLAGS(rx) & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY)))
 	r_flags |= REXEC_COPY_STR;
     if (SvSCREAM(TARG))
