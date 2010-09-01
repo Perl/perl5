@@ -559,7 +559,7 @@ running projects:
 	% perl5.11.2 -E 'say scalar gmtime( 0x9FFF_FFFFFFFF )'
 	Thu Nov  2 00:42:39 5576711
 
-You're still out of luck if you need to keep tracking of decaying protons
+You're still out of luck if you need to keep track of decaying protons
 though.
 
 =head1 Data: Strings
