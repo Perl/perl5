@@ -196,7 +196,10 @@ typedef struct RExC_state_t {
  */
 #define	WORST		0	/* Worst case. */
 #define	HASWIDTH	0x01	/* Known to match non-null strings. */
-#define	SIMPLE		0x02	/* Simple enough to be STAR/PLUS operand. */
+
+/* Simple enough to be STAR/PLUS operand, in an EXACT node must be a single
+ * character, and if utf8, must be invariant. */
+#define	SIMPLE		0x02
 #define	SPSTART		0x04	/* Starts with * or +. */
 #define TRYAGAIN	0x08	/* Weeded out a declaration. */
 #define POSTPONED	0x10    /* (?1),(?&name), (??{...}) or similar */
@@ -3289,11 +3292,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
 #ifdef DEBUGGING
 		    OP(nxt1 + 1) = OPTIMIZED; /* was count. */
-		    NEXT_OFF(nxt1+ 1) = 0; /* just for consistancy. */
-		    NEXT_OFF(nxt2) = 0;	/* just for consistancy with CURLY. */
+		    NEXT_OFF(nxt1+ 1) = 0; /* just for consistency. */
+		    NEXT_OFF(nxt2) = 0;	/* just for consistency with CURLY. */
 		    OP(nxt) = OPTIMIZED;	/* was CLOSE. */
 		    OP(nxt + 1) = OPTIMIZED; /* was count. */
-		    NEXT_OFF(nxt+ 1) = 0; /* just for consistancy. */
+		    NEXT_OFF(nxt+ 1) = 0; /* just for consistency. */
 #endif
 		}
 	      nogo:
@@ -6789,7 +6792,7 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
     }
     else {	/* Not a char class */
 	char *s;	    /* String to put in generated EXACT node */
-	STRLEN len = 0;	    /* Its current length */
+	STRLEN len = 0;	    /* Its current byte length */
 	char *endchar;	    /* Points to '.' or '}' ending cur char in the input
 			       stream */
 
@@ -6799,7 +6802,7 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
 
 	/* Exact nodes can hold only a U8 length's of text = 255.  Loop through
 	 * the input which is of the form now 'c1.c2.c3...}' until find the
-	 * ending brace or exeed length 255.  The characters that exceed this
+	 * ending brace or exceed length 255.  The characters that exceed this
 	 * limit are dropped.  The limit could be relaxed should it become
 	 * desirable by reparsing this as (?:\N{NAME}), so could generate
 	 * multiple EXACT nodes, as is done for just regular input.  But this
