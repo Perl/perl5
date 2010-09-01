@@ -96,7 +96,9 @@ course, does not generate the warning. (0111154)
 
 =head1 Performance Enhancements
 
-There are several small optimizations to improve CPU cache performance
+There are several small optimizations to reduce CPU cache misses in various very
+commonly used modules like C<warnings> and C<Carp> as well in accessing
+file-handles for reading.
 
 =head1 Modules and Pragmata
 
