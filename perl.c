@@ -1071,6 +1071,10 @@ perl_destruct(pTHXx)
 			     (long)cxstack_ix + 1);
     }
 
+    /* the entries in this list are allocated via SV PVX's, so get freed
+     * in sv_clean_all */
+    Safefree(PL_my_cxt_list);
+
     /* Now absolutely destruct everything, somehow or other, loops or no. */
 
     /* the 2 is for PL_fdpid and PL_strtab */
