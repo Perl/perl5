@@ -306,10 +306,10 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 	else {								\
 	    /* XXX GV_ADDWARN */					\
 	    _sv = get_sv(Perl_form(aTHX_ "%s::%s", module,		\
-				vn = "XS_VERSION"), FALSE);		\
+				vn = "XS_VERSION"), 0);			\
 	    if (!_sv || !SvOK(_sv))					\
 		_sv = get_sv(Perl_form(aTHX_ "%s::%s", module,		\
-				    vn = "VERSION"), FALSE);		\
+				    vn = "VERSION"), 0);		\
 	}								\
 	if (_sv) {							\
 	    SV *xpt = NULL;						\
