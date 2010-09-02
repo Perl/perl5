@@ -32,8 +32,7 @@ plan tests => 3;
     my $r = $o =~ /(.*)/g;
     push @realloc, "yyyyyy"; # encourage realloc of SV and PVX
     is $1, $TAG, "scalar context //g against overloaded object";
-
-    local our $TODO = "Bug #77084";
+    pos ($o) = 0;  # Reset pos, as //g in scalar context sets it to non-0.
 
     $o =~ /(.*)/g;
     push @realloc, "zzzzzz"; # encourage realloc of SV and PVX
