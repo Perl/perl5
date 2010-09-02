@@ -1374,66 +1374,6 @@ cpan/Math-BigInt-FastCalc/t/bigintfc.t	Math::BigInt::FastCalc extension
 cpan/Math-BigInt-FastCalc/t/bootstrap.t	Math::BigInt::FastCalc extension
 cpan/Math-BigInt-FastCalc/t/leak.t	test for memory leaks in Math::BigInt::FastCalc
 cpan/Math-BigInt-FastCalc/t/mbi_rand.t	Math::BigInt::FastCalc extension
-cpan/Math-BigInt/lib/Math/BigFloat.pm		An arbitrary precision floating-point arithmetic package
-cpan/Math-BigInt/lib/Math/BigInt/CalcEmu.pm	Pure Perl module to support Math::BigInt
-cpan/Math-BigInt/lib/Math/BigInt/Calc.pm	Pure Perl module to support Math::BigInt
-cpan/Math-BigInt/lib/Math/BigInt.pm	An arbitrary precision integer arithmetic package
-cpan/Math-BigInt/t/alias.inc		Support for BigInt tests
-cpan/Math-BigInt/t/bare_mbf.t		Test MBF under Math::BigInt::BareCalc
-cpan/Math-BigInt/t/bare_mbi.t		Test MBI under Math::BigInt::BareCalc
-cpan/Math-BigInt/t/bare_mif.t		Rounding tests under BareCalc
-cpan/Math-BigInt/t/bigfltpm.inc		Shared tests for bigfltpm.t and sub_mbf.t
-cpan/Math-BigInt/t/bigfltpm.t		See if BigFloat.pm works
-cpan/Math-BigInt/t/bigintc.t		See if BigInt/Calc.pm works
-cpan/Math-BigInt/t/bigintpm.inc		Shared tests for bigintpm.t and sub_mbi.t
-cpan/Math-BigInt/t/bigintpm.t		See if BigInt.pm works
-cpan/Math-BigInt/t/bigints.t		See if BigInt.pm works
-cpan/Math-BigInt/t/biglog.t		Test the log function
-cpan/Math-BigInt/t/big_pi_e.t		test bpi() and bexp()
-cpan/Math-BigInt/t/bigroot.t		Test the broot function
-cpan/Math-BigInt/t/calling.t		Test calling conventions
-cpan/Math-BigInt/t/config.t		Test Math::BigInt->config()
-cpan/Math-BigInt/t/constant.t		Test Math::BigInt/BigFloat under :constant
-cpan/Math-BigInt/t/const_mbf.t		Test Math::BigInt
-cpan/Math-BigInt/t/downgrade.t		Test if use Math::BigInt(); under downgrade works
-cpan/Math-BigInt/t/_e_math.t		Helper routine in BigFloat for _e math
-cpan/Math-BigInt/t/inf_nan.t		Special tests for inf and *NaN* handling
-cpan/Math-BigInt/t/isa.t		Test for Math::BigInt inheritance
-cpan/Math-BigInt/t/lib_load.t		Test sane lib names
-cpan/Math-BigInt/t/Math/BigFloat/Subclass.pm	Empty subclass of BigFloat for test
-cpan/Math-BigInt/t/Math/BigInt/BareCalc.pm	Bigint's simulation of Calc
-cpan/Math-BigInt/t/Math/BigInt/Scalar.pm	Pure Perl module to support Math::BigInt
-cpan/Math-BigInt/t/Math/BigInt/Subclass.pm	Empty subclass of BigInt for test
-cpan/Math-BigInt/t/mbf_ali.t		Tests for BigFloat
-cpan/Math-BigInt/t/mbi_ali.t		Tests for BigInt
-cpan/Math-BigInt/t/mbimbf.inc		Actual BigInt/BigFloat accuracy, precision and fallback, round_mode tests
-cpan/Math-BigInt/t/mbimbf.t		BigInt/BigFloat accuracy, precision and fallback, round_mode
-cpan/Math-BigInt/t/mbi_rand.t		Test Math::BigInt randomly
-cpan/Math-BigInt/t/nan_cmp.t		overloaded comparision involving *NaN*
-cpan/Math-BigInt/t/new_overloaded.t	test overloaded numbers in BigFloat's new()
-cpan/Math-BigInt/t/req_mbf0.t		test: require Math::BigFloat; ->bzero();
-cpan/Math-BigInt/t/req_mbf1.t		test: require Math::BigFloat; ->bone();
-cpan/Math-BigInt/t/req_mbfa.t		test: require Math::BigFloat; ->bnan();
-cpan/Math-BigInt/t/req_mbfi.t		test: require Math::BigFloat; ->binf();
-cpan/Math-BigInt/t/req_mbfn.t		test: require Math::BigFloat; ->new();
-cpan/Math-BigInt/t/req_mbfw.t		require Math::BigFloat; import ( with => );
-cpan/Math-BigInt/t/require.t		Test if require Math::BigInt works
-cpan/Math-BigInt/t/round.t		Test rounding with non-integer A and P
-cpan/Math-BigInt/t/sub_ali.t		Tests for aliases in BigInt subclasses
-cpan/Math-BigInt/t/sub_mbf.t		Empty subclass test of BigFloat
-cpan/Math-BigInt/t/sub_mbi.t		Empty subclass test of BigInt
-cpan/Math-BigInt/t/sub_mif.t		Test A & P with subclasses using mbimbf.inc
-cpan/Math-BigInt/t/trap.t		Test whether trap_nan and trap_inf work
-cpan/Math-BigInt/t/upgradef.t		Test if use Math::BigFloat(); under upgrade works
-cpan/Math-BigInt/t/upgrade.inc		Actual tests for upgrade.t
-cpan/Math-BigInt/t/upgrade.t		Test if use Math::BigInt(); under upgrade works
-cpan/Math-BigInt/t/use_lib1.t		Test combinations of Math::BigInt and BigFloat
-cpan/Math-BigInt/t/use_lib2.t		Test combinations of Math::BigInt and BigFloat
-cpan/Math-BigInt/t/use_lib3.t		Test combinations of Math::BigInt and BigFloat
-cpan/Math-BigInt/t/use_lib4.t		Test combinations of Math::BigInt and BigFloat
-cpan/Math-BigInt/t/use_mbfw.t		use BigFloat w/ with and lib at the same time
-cpan/Math-BigInt/t/use.t		Test if use Math::BigInt(); works
-cpan/Math-BigInt/t/with_sub.t		Test use Math::BigFloat with => package
 cpan/Math-BigRat/lib/Math/BigRat.pm	Math::BigRat
 cpan/Math-BigRat/t/big_ap.t		Math::BigRat test
 cpan/Math-BigRat/t/bigfltpm.inc		Math::BigRat test
@@ -2797,6 +2737,66 @@ dist/Locale-Maketext/t/40_super.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/50_super.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/60_super.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/90_utf8.t			See if Locale::Maketext works
+dist/Math-BigInt/lib/Math/BigFloat.pm		An arbitrary precision floating-point arithmetic package
+dist/Math-BigInt/lib/Math/BigInt/CalcEmu.pm	Pure Perl module to support Math::BigInt
+dist/Math-BigInt/lib/Math/BigInt/Calc.pm	Pure Perl module to support Math::BigInt
+dist/Math-BigInt/lib/Math/BigInt.pm	An arbitrary precision integer arithmetic package
+dist/Math-BigInt/t/alias.inc		Support for BigInt tests
+dist/Math-BigInt/t/bare_mbf.t		Test MBF under Math::BigInt::BareCalc
+dist/Math-BigInt/t/bare_mbi.t		Test MBI under Math::BigInt::BareCalc
+dist/Math-BigInt/t/bare_mif.t		Rounding tests under BareCalc
+dist/Math-BigInt/t/bigfltpm.inc		Shared tests for bigfltpm.t and sub_mbf.t
+dist/Math-BigInt/t/bigfltpm.t		See if BigFloat.pm works
+dist/Math-BigInt/t/bigintc.t		See if BigInt/Calc.pm works
+dist/Math-BigInt/t/bigintpm.inc		Shared tests for bigintpm.t and sub_mbi.t
+dist/Math-BigInt/t/bigintpm.t		See if BigInt.pm works
+dist/Math-BigInt/t/bigints.t		See if BigInt.pm works
+dist/Math-BigInt/t/biglog.t		Test the log function
+dist/Math-BigInt/t/big_pi_e.t		test bpi() and bexp()
+dist/Math-BigInt/t/bigroot.t		Test the broot function
+dist/Math-BigInt/t/calling.t		Test calling conventions
+dist/Math-BigInt/t/config.t		Test Math::BigInt->config()
+dist/Math-BigInt/t/constant.t		Test Math::BigInt/BigFloat under :constant
+dist/Math-BigInt/t/const_mbf.t		Test Math::BigInt
+dist/Math-BigInt/t/downgrade.t		Test if use Math::BigInt(); under downgrade works
+dist/Math-BigInt/t/_e_math.t		Helper routine in BigFloat for _e math
+dist/Math-BigInt/t/inf_nan.t		Special tests for inf and *NaN* handling
+dist/Math-BigInt/t/isa.t		Test for Math::BigInt inheritance
+dist/Math-BigInt/t/lib_load.t		Test sane lib names
+dist/Math-BigInt/t/Math/BigFloat/Subclass.pm	Empty subclass of BigFloat for test
+dist/Math-BigInt/t/Math/BigInt/BareCalc.pm	Bigint's simulation of Calc
+dist/Math-BigInt/t/Math/BigInt/Scalar.pm	Pure Perl module to support Math::BigInt
+dist/Math-BigInt/t/Math/BigInt/Subclass.pm	Empty subclass of BigInt for test
+dist/Math-BigInt/t/mbf_ali.t		Tests for BigFloat
+dist/Math-BigInt/t/mbi_ali.t		Tests for BigInt
+dist/Math-BigInt/t/mbimbf.inc		Actual BigInt/BigFloat accuracy, precision and fallback, round_mode tests
+dist/Math-BigInt/t/mbimbf.t		BigInt/BigFloat accuracy, precision and fallback, round_mode
+dist/Math-BigInt/t/mbi_rand.t		Test Math::BigInt randomly
+dist/Math-BigInt/t/nan_cmp.t		overloaded comparision involving *NaN*
+dist/Math-BigInt/t/new_overloaded.t	test overloaded numbers in BigFloat's new()
+dist/Math-BigInt/t/req_mbf0.t		test: require Math::BigFloat; ->bzero();
+dist/Math-BigInt/t/req_mbf1.t		test: require Math::BigFloat; ->bone();
+dist/Math-BigInt/t/req_mbfa.t		test: require Math::BigFloat; ->bnan();
+dist/Math-BigInt/t/req_mbfi.t		test: require Math::BigFloat; ->binf();
+dist/Math-BigInt/t/req_mbfn.t		test: require Math::BigFloat; ->new();
+dist/Math-BigInt/t/req_mbfw.t		require Math::BigFloat; import ( with => );
+dist/Math-BigInt/t/require.t		Test if require Math::BigInt works
+dist/Math-BigInt/t/round.t		Test rounding with non-integer A and P
+dist/Math-BigInt/t/sub_ali.t		Tests for aliases in BigInt subclasses
+dist/Math-BigInt/t/sub_mbf.t		Empty subclass test of BigFloat
+dist/Math-BigInt/t/sub_mbi.t		Empty subclass test of BigInt
+dist/Math-BigInt/t/sub_mif.t		Test A & P with subclasses using mbimbf.inc
+dist/Math-BigInt/t/trap.t		Test whether trap_nan and trap_inf work
+dist/Math-BigInt/t/upgradef.t		Test if use Math::BigFloat(); under upgrade works
+dist/Math-BigInt/t/upgrade.inc		Actual tests for upgrade.t
+dist/Math-BigInt/t/upgrade.t		Test if use Math::BigInt(); under upgrade works
+dist/Math-BigInt/t/use_lib1.t		Test combinations of Math::BigInt and BigFloat
+dist/Math-BigInt/t/use_lib2.t		Test combinations of Math::BigInt and BigFloat
+dist/Math-BigInt/t/use_lib3.t		Test combinations of Math::BigInt and BigFloat
+dist/Math-BigInt/t/use_lib4.t		Test combinations of Math::BigInt and BigFloat
+dist/Math-BigInt/t/use_mbfw.t		use BigFloat w/ with and lib at the same time
+dist/Math-BigInt/t/use.t		Test if use Math::BigInt(); works
+dist/Math-BigInt/t/with_sub.t		Test use Math::BigFloat with => package
 dist/Module-CoreList/Changes			Module::CoreList Changes
 dist/Module-CoreList/corelist			The corelist command-line utility
 dist/Module-CoreList/identify-dependencies	A usage example for Module::CoreList

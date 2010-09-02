@@ -44,7 +44,6 @@ my %abs = (
 	   '../cpan/IPC-SysV' => 1,
 	   '../cpan/Locale-Codes' => 1,
 	   '../cpan/Log-Message' => 1,
-	   '../cpan/Math-BigInt' => 1,
 	   '../cpan/Math-BigRat' => 1,
 	   '../cpan/Math-Complex' => 1,
 	   '../cpan/Module-Build' => 1,
@@ -62,6 +61,7 @@ my %abs = (
 	   '../dist/Cwd' => 1,
 	   '../dist/ExtUtils-Install' => 1,
 	   '../dist/ExtUtils-ParseXS' => 1,
+	   '../dist/Math-BigInt' => 1,
 	  );
 
 my %temp_no_core =

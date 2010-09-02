@@ -850,14 +850,14 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'tels',
 	'DISTRIBUTION'	=> 'TELS/math/Math-BigInt-1.89.tar.gz',
-	'FILES'		=> q[cpan/Math-BigInt],
+	'FILES'		=> q[dist/Math-BigInt],
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qr{^examples/},
 			     qw{t/pod.t
 				t/pod_cov.t
 			       }
 			   ],
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'blead',
 	},
 
     'Math::BigInt::FastCalc' =>
