@@ -864,7 +864,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'tels',
 	'DISTRIBUTION'	=> 'TELS/math/Math-BigInt-FastCalc-0.19.tar.gz',
-	'FILES'		=> q[cpan/Math-BigInt-FastCalc],
+	'FILES'		=> q[dist/Math-BigInt-FastCalc],
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qw{
 				t/pod.t
@@ -880,11 +880,11 @@ use File::Glob qw(:case);
 				t/mbimbf.t
 			       },
 			   ],
-	'MAP'		=> { '' => 'cpan/Math-BigInt-FastCalc/',
+	'MAP'		=> { '' => 'dist/Math-BigInt-FastCalc/',
 			     'lib/Math/BigInt/FastCalc.pm'
-				    => 'cpan/Math-BigInt-FastCalc/FastCalc.pm',
+				    => 'dist/Math-BigInt-FastCalc/FastCalc.pm',
 			   },
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'blead',
 	},
 
     'Math::BigRat' =>
