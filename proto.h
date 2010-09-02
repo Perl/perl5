@@ -6947,7 +6947,11 @@ PERL_CALLCONV void	Perl_sys_init3(int* argc, char*** argv, char*** env)
 	assert(argc); assert(argv); assert(env)
 
 PERL_CALLCONV void	Perl_sys_term(void);
-PERL_CALLCONV const char *	Perl_fetch_cop_label(pTHX_ struct refcounted_he *const chain, STRLEN *len, U32 *flags);
+PERL_CALLCONV const char *	Perl_fetch_cop_label(pTHX_ COP *const cop, STRLEN *len, U32 *flags)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_FETCH_COP_LABEL	\
+	assert(cop)
+
 PERL_CALLCONV void	Perl_store_cop_label(pTHX_ COP *cop, const char *label, STRLEN len, U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);

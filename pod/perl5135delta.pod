@@ -63,12 +63,15 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
+=head2 C API changes
 
-    There are no changes intentionally incompatible with 5.XXX.XXX. If any
-    exist, they are bugs and reports are welcome.
+The first argument of the C API function C<Perl_fetch_cop_label> has changed
+from C<struct refcounted he *> to C<COP *>, to better insulate the user from
+implementation details.
 
-[ List each incompatible change as a =head2 entry ]
+This API function was marked as "may change", and likely isn't in use outside
+the core. (Neither an unpacked CPAN, nor Google's codesearch, finds any other
+references to it.)
 
 =head1 Deprecations
 

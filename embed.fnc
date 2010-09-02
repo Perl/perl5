@@ -2379,7 +2379,7 @@ p	|void   |boot_core_mro
 Apon	|void	|sys_init	|NN int* argc|NN char*** argv
 Apon	|void	|sys_init3	|NN int* argc|NN char*** argv|NN char*** env
 Apon	|void	|sys_term
-ApoM	|const char *|fetch_cop_label|NULLOK struct refcounted_he *const chain \
+ApoM	|const char *|fetch_cop_label|NN COP *const cop \
 		|NULLOK STRLEN *len|NULLOK U32 *flags
 : Only used  in op.c
 xpoM	|void|store_cop_label \
