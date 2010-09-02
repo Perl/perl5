@@ -406,7 +406,7 @@ Math::BigInt/Math::BigFloat.
 
 =item l or lib
 
-Load a different math lib, see L<MATH LIBRARY>.
+Load a different math lib, see L<Math Library>.
 
 	perl -Mbignum=l,GMP -e 'print 2 ** 512'
 
