@@ -1,13 +1,6 @@
 use strict;
 use Config;
 
-sub to_string {
-    my ($value) = @_;
-    $value =~ s/\\/\\\\/g;
-    $value =~ s/'/\\'/g;
-    return "'$value'";
-}
-
 1 while unlink "XSLoader.pm";
 open OUT, ">XSLoader.pm" or die $!;
 print OUT <<'EOT';
@@ -15,18 +8,12 @@ print OUT <<'EOT';
 
 package XSLoader;
 
-$VERSION = "0.10";
+$VERSION = "0.11";
 
 #use strict;
 
 # enable debug/trace messages from DynaLoader perl code
 # $dl_debug = $ENV{PERL_DL_DEBUG} || 0 unless defined $dl_debug;
-
-EOT
-
-print OUT '  my $dl_dlext = ', to_string($Config::Config{'dlext'}), ";\n" ;
-
-print OUT <<'EOT';
 
 package DynaLoader;
 
@@ -74,7 +61,15 @@ print OUT <<'EOT';
     my $modlibname = (caller())[1];
     my $c = @modparts;
     $modlibname =~ s,[\\/][^\\/]+$,, while $c--;	# Q&D basename
-    my $file = "$modlibname/auto/$modpname/$modfname.$dl_dlext";
+EOT
+
+my $dl_dlext = quotemeta($Config::Config{'dlext'});
+
+print OUT <<"EOT";
+    my \$file = "\$modlibname/auto/\$modpname/\$modfname.$dl_dlext";
+EOT
+
+print OUT <<'EOT';
 
 #   print STDERR "XSLoader::load for $module ($file)\n" if $dl_debug;
 
