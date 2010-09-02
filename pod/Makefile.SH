@@ -54,7 +54,7 @@ LDLIBPTH = $ldlibpth
 ## In the following dollars and backticks do not need the extra backslash.
 $spitshell >>Makefile <<'!NO!SUBS!'
 
-CONVERTERS = pod2html pod2latex pod2man pod2text \
+CONVERTERS = pod2html pod2man pod2text \
 		pod2usage podchecker podselect
 
 HTMLROOT = /	# Change this to fix cross-references in HTML
@@ -62,6 +62,7 @@ POD2HTML = pod2html \
 	    --htmlroot=$(HTMLROOT) \
 	    --podroot=.. --podpath=pod:lib:ext:vms \
 	    --libpods=perlfunc:perlguts:perlvar:perlrun:perlop
+POD2LATEX = ../cpan/Pod-LaTeX/pod2latex
 
 PERL = ../miniperl
 PERLILIB = $(PERL) -I../lib
@@ -75,7 +76,7 @@ man:	pod2man $(MAN)
 
 html:	pod2html $(HTML)
 
-tex:	pod2latex $(TEX)
+tex:	$(POD2LATEX) $(TEX)
 
 toc perltoc.pod:	buildtoc
 	$(PERLILIB) buildtoc --build-toc
@@ -100,11 +101,11 @@ toc perltoc.pod:	buildtoc
 
 .SUFFIXES: .tex
 
-.pm.tex: pod2latex
-	$(PERL) -I../lib pod2latex $*.pm
+.pm.tex: $(POD2LATEX)
+	$(PERL) -I../lib $(POD2LATEX) $*.pm
 
-.pod.tex: pod2latex
-	$(PERL) -I../lib pod2latex $*.pod
+.pod.tex: $(POD2LATEX)
+	$(PERL) -I../lib $(POD2LATEX) $*.pod
 
 clean:
 	rm -f $(MAN)
@@ -126,9 +127,6 @@ check:	podchecker
 	$(PERL) -I../lib podchecker $(POD)
 
 # Dependencies.
-pod2latex:	pod2latex.PL ../lib/Config.pm
-	$(LDLIBPTH) $(PERL) -I../lib pod2latex.PL
-
 pod2html:	pod2html.PL ../lib/Config.pm
 	$(LDLIBPTH) $(PERL) -I ../lib pod2html.PL
 

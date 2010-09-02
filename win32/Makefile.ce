@@ -669,7 +669,6 @@ EXTENSION_PM	=		\
 
 POD2HTML	= $(PODDIR)\pod2html
 POD2MAN		= $(PODDIR)\pod2man
-POD2LATEX	= $(PODDIR)\pod2latex
 POD2TEXT	= $(PODDIR)\pod2text
 
 CFG_VARS = \

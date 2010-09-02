@@ -777,7 +777,6 @@ UTILS		=			\
 		..\utils\shasum		\
 		..\utils\instmodsh	\
 		..\pod\pod2html		\
-		..\pod\pod2latex	\
 		..\pod\pod2man		\
 		..\pod\pod2text		\
 		..\pod\pod2usage	\
@@ -1567,7 +1566,7 @@ distclean: realclean
 	    perlriscos.pod perlsolaris.pod perlsymbian.pod perltoc.pod \
 	    perltru64.pod perltw.pod perluniprops.pod perluts.pod \
 	    perlvmesa.pod perlvos.pod perlwin32.pod \
-	    pod2html pod2latex pod2man pod2text pod2usage \
+	    pod2html pod2man pod2text pod2usage \
 	    podchecker podselect
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs \
 	    perldoc perlivp dprofpp libnetcfg enc2xs piconv cpan *.bat \

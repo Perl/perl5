@@ -1148,13 +1148,8 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'tjenness',
 	'DISTRIBUTION'	=> 'TJENNESS/Pod-LaTeX-0.58.tar.gz',
-	'FILES'		=> q[cpan/Pod-LaTeX
-			     pod/pod2latex.PL
-			    ],
+	'FILES'		=> q[cpan/Pod-LaTeX],
 	'EXCLUDED'	=> [ qw( t/require.t ) ],
-	'MAP'		=> { '' => 'cpan/Pod-LaTeX/',
-			     'pod2latex.PL' => 'pod/pod2latex.PL',
-			   },
 	'UPSTREAM'	=> undef,
 	},
 

@@ -1,5 +1,5 @@
 pod/pod2html
-pod/pod2latex
+cpan/Pod-LaTeX/blib/script/pod2latex
 pod/pod2man
 pod/pod2text
 pod/pod2usage

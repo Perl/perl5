@@ -1635,6 +1635,7 @@ cpan/Pod-Escapes/t/01_about_verbose.t	test Pod::Escapes
 cpan/Pod-Escapes/t/10_main.t		test Pod::Escapes
 cpan/Pod-Escapes/t/15_name2charnum.t	test Pod::Escapes
 cpan/Pod-LaTeX/LaTeX.pm		Convert POD data to LaTeX
+cpan/Pod-LaTeX/pod2latex.PL	Precursor for translator to turn pod into LaTeX
 cpan/Pod-LaTeX/t/pod2latex.t	See if Pod::LaTeX works
 cpan/Pod-LaTeX/t/user.t		See if Pod::LaTeX works
 cpan/podlators/lib/Pod/Man.pm			Convert POD data to *roff
@@ -4139,7 +4140,6 @@ pod/perlvms.pod			Perl notes for VMS
 pod/perlxs.pod			Perl XS application programming interface
 pod/perlxstut.pod		Perl XS tutorial
 pod/pod2html.PL			Precursor for translator to turn pod into HTML
-pod/pod2latex.PL		Precursor for translator to turn pod into LaTeX
 pod/pod2man.PL			Precursor for translator to turn pod into manpage
 pod/pod2text.PL			Precursor for translator to turn pod into text
 pod/pod2usage.PL		Pod-Parser - print usage messages from POD docs

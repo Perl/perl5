@@ -1,4 +1,4 @@
-CONVERTERS = pod2html pod2latex pod2man pod2text \
+CONVERTERS = pod2html pod2man pod2text \
 		pod2usage podchecker podselect
 
 HTMLROOT = /	# Change this to fix cross-references in HTML
@@ -6,6 +6,7 @@ POD2HTML = pod2html \
 	    --htmlroot=$(HTMLROOT) \
 	    --podroot=.. --podpath=pod:lib:ext:vms \
 	    --libpods=perlfunc:perlguts:perlvar:perlrun:perlop
+POD2LATEX = ../cpan/Pod-LaTeX/pod2latex
 
 all: $(CONVERTERS) html
 
@@ -588,7 +589,7 @@ man:	pod2man $(MAN)
 
 html:	pod2html $(HTML)
 
-tex:	pod2latex $(TEX)
+tex:	$(POD2LATEX) $(TEX)
 
 toc:
 	$(PERL) -I../lib buildtoc >perltoc.pod
@@ -614,10 +615,10 @@ toc:
 .SUFFIXES: .tex
 
 .pm.tex:
-	$(PERL) -I../lib pod2latex $*.pm
+	$(PERL) -I../lib $(POD2LATEX) $*.pm
 
 .pod.tex:
-	$(PERL) -I../lib pod2latex $*.pod
+	$(PERL) -I../lib $(POD2LATEX) $*.pod
 
 clean:
 	rm -f $(MAN)
@@ -636,9 +637,6 @@ check:	podchecker
 	$(PERL) -I../lib podchecker $(POD)
 
 # Dependencies.
-pod2latex:	pod2latex.PL ../lib/Config.pm
-	$(PERL) -I../lib $(ICWD) pod2latex.PL
-
 pod2html:	pod2html.PL ../lib/Config.pm
 	$(PERL) -I ../lib $(ICWD) pod2html.PL
 
