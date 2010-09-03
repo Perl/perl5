@@ -7,7 +7,6 @@ BEGIN
   unshift @INC, '../blib/lib';
   unshift @INC, '../blib/arch';
   unshift @INC, '../lib';
-  chdir 't' if -d 't' && !$ENV{PERL_CORE};
   plan tests => 1;
   };
 

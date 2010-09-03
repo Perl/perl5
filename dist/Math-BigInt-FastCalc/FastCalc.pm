@@ -11,7 +11,7 @@ use vars qw/@ISA $VERSION $BASE $BASE_LEN/;
 
 @ISA = qw(DynaLoader);
 
-$VERSION = '0.19';
+$VERSION = '0.21';
 
 bootstrap Math::BigInt::FastCalc $VERSION;
 
