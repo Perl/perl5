@@ -509,6 +509,7 @@ perlmini$(O) : perlmini.c
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
 uudmap.h : bitcount.h
+	@ $(NOOP)
 
 bitcount.h : generate_uudmap$(E)
 	MCR SYS$DISK:[]generate_uudmap$(E) uudmap.h bitcount.h
