@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for release_engineer
-* changelogged up to 137127d
+* changelogged up to 45b279e
 * the mauve module will not be part of the release, so it's not changelogged
 yet. it also added some new api functions. those aren't covered either, as they
 might go away again in case mauve gets rolled back for 5.13.5.
@@ -129,17 +129,36 @@ C<blib> has been upgraded from version 1.05 to 1.06.
 
 =item *
 
+C<Errno> has been upgraded from version 1.12 to 1.13.
+
+On some platforms with unusual header files, like Win32/gcc using mingw64
+headers, some constants which weren't actually error numbers have been exposed
+by C<Errno>. This has been fixed (RT#77416).
+
+=item *
+
 C<ExtUtils::MakeMaker> has been upgraded from version 6.56 to 6.57_01.
+
+=item *
+
+C<Math::BigInt> has been upgraded from version 1.89_01 to 1.90.
+C<Math::BigInt::Calc> has been upgraded from version 0.52 to 0.53.
+
+This fixes incorrect results when computing binomial coefficients (RT#77640).
 
 =item *
 
 C<Tie::Hash> has been upgraded from version 1.03 to 1.04.
 
-Calling C<Tie::Hash->TIEHASH()> used to loop forever. Now it C<croak>s.
+Calling C<< Tie::Hash->TIEHASH() >> used to loop forever. Now it C<croak>s.
 
 =item *
 
 C<Unicode::Collate> has been upgraded from version 0.56 to 0.58.
+
+=item *
+
+C<XSLoader> has been upgraded from version 0.10 to 0.11.
 
 =back
 
@@ -226,13 +245,13 @@ here. Most of these are built within the directories F<utils> and F<x2p>.
 entries for each change
 Use L<XXX> with program names to get proper documentation linking. ]
 
-=head3 L<XXX>
+=head3 L<h2ph>
 
 =over 4
 
 =item *
 
-XXX
+The use of a deprecated C<goto> construct has been removed (RT#74404).
 
 =back
 
@@ -406,6 +425,11 @@ The perl debugger now also works in taint mode (RT#76872).
 
 Several memory leaks in cloning and freeing threaded perl interpreters have been
 fixed (RT#77352).
+
+=item *
+
+A possible string corruption when doing regular expression matches on overloaded
+objects has been fixed (RT#77084).
 
 =back
 
