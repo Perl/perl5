@@ -898,7 +898,7 @@ use File::Glob qw(:case);
 				t/pod_cov.t
 			       },
 			   ],
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'Math::Complex' =>
