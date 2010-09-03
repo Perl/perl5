@@ -21,7 +21,7 @@ BEGIN
     }
   print "# INC = @INC\n";
 
-  plan tests => 3273
+  plan tests => 3279
     + 5;	# +5 own tests
   }
 
@@ -37,7 +37,7 @@ require 'bigintpm.inc';	# perform same tests as bigintpm
 
 ###############################################################################
 # Now do custom tests for Subclass itself
- 
+
 my $ms = $class->new(23);
 print "# Missing custom attribute \$ms->{_custom}" if !ok (1, $ms->{_custom});
 

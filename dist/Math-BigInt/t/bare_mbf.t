@@ -22,7 +22,7 @@ BEGIN
     }
   print "# INC = @INC\n";
 
-  plan tests => 2308;
+  plan tests => 2316;
   }
 
 use Math::BigFloat lib => 'BareCalc';
@@ -30,5 +30,5 @@ use Math::BigFloat lib => 'BareCalc';
 use vars qw ($class $try $x $y $f @args $ans $ans1 $ans1_str $setup $CL);
 $class = "Math::BigFloat";
 $CL = "Math::BigInt::BareCalc";
-   
+
 require 'bigfltpm.inc';	# all tests here for sharing

@@ -1320,18 +1320,17 @@ sub bnok
     }
   else
     {
-    # ( 7 )    7!          7*6*5 * 4*3*2*1   7 * 6 * 5
-    # ( - ) = --------- =  --------------- = ---------
-    # ( 3 )   3! (7-3)!    3*2*1 * 4*3*2*1   3 * 2 * 1 
+    # ( 7 )       7!       1*2*3*4 * 5*6*7   5 * 6 * 7       6   7
+    # ( - ) = --------- =  --------------- = --------- = 5 * - * -
+    # ( 3 )   (7-3)! 3!    1*2*3*4 * 1*2*3   1 * 2 * 3       2   3
 
-    # compute n - k + 2 (so we start with 5 in the example above)
-    my $z = $x - $y;
-    if (!$z->is_one())
+    if (!$y->is_zero())
       {
+      my $z = $x - $y;
       $z->binc();
       my $r = $z->copy(); $z->binc();
       my $d = $self->new(2);
-      while ($z->bacmp($x) <= 0)		# f < x ?
+      while ($z->bacmp($x) <= 0)		# f <= x ?
         {
         $r->bmul($z); $r->bdiv($d);
         $z->binc(); $d->binc();

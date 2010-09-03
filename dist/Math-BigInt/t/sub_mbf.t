@@ -19,9 +19,9 @@ BEGIN
     {
     unshift @INC, $location;
     }
-  print "# INC = @INC\n"; 
-  
-  plan tests => 2308
+  print "# INC = @INC\n";
+
+  plan tests => 2316
     + 6;	# + our own tests
   }
 
