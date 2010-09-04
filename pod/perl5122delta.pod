@@ -279,10 +279,6 @@ Several memory leaks in L<stat()|perlfunc/"stat FILEHANDLE"> have been fixed.
 
 =item *
 
-A memory leak in F<vms.c>'s C<Perl_flex_stat_int()> has been fixed.
-
-=item *
-
 A memory leak in C<Perl_rename()> due to a double allocation has been
 fixed.
 
