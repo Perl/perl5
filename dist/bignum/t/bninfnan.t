@@ -9,14 +9,7 @@ BEGIN
   {
   $| = 1;
   my $location = $0; $location =~ s/bninfnan.t//i;
-  if ($ENV{PERL_CORE})
-    {
-    #@INC = qw(../lib ../lib/bignum/t); # testing with the core distribution
-    }
-  else
-    {
-    unshift @INC, '../lib';     # for testing manually
-    }
+  unshift @INC, '../lib';     # for testing manually
   if (-d 't')
     {
     chdir 't';
