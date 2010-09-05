@@ -2595,7 +2595,6 @@ dist/B-Lint/t/lint.t				See if B::Lint works
 dist/B-Lint/t/pluglib/B/Lint/Plugin/Test.pm	See if B::Lint works
 dist/constant/lib/constant.pm	For "use constant"
 dist/constant/t/constant.t	See if compile-time constants work
-dist/Cwd/Changes			Cwd extension Changelog
 dist/Cwd/Cwd.pm				Various cwd routines (getcwd, fastcwd, chdir)
 dist/Cwd/Cwd.xs				Cwd extension external subroutines
 dist/Cwd/lib/File/Spec/Cygwin.pm	portable operations on Cygwin file names
