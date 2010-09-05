@@ -1563,9 +1563,7 @@ cpan/Module-Pluggable/t/lib/No/Middle.pm		Module::Pluggable tests
 cpan/Module-Pluggable/t/lib/OddTest/Plugin/Foo.pm	Module::Pluggable tests
 cpan/Module-Pluggable/t/lib/TA/C/A/I.pm			Module::Pluggable tests
 cpan/Module-Pluggable/t/lib/Zot/.Zork.pm		Module::Pluggable tests
-cpan/NEXT/Changes		NEXT
 cpan/NEXT/lib/NEXT.pm		Pseudo-class NEXT for method redispatch
-cpan/NEXT/README		NEXT
 cpan/NEXT/t/actual.t		NEXT
 cpan/NEXT/t/actuns.t		NEXT
 cpan/NEXT/t/dynamically_scoped_regex_vars.t	NEXT
