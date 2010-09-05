@@ -2652,7 +2652,6 @@ dist/ExtUtils-ParseXS/t/XSTest.pm		Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSTest.xs		Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSUsage.pm		ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSUsage.xs		ExtUtils::ParseXS tests
-dist/Filter-Simple/Changes					Filter::Simple
 dist/Filter-Simple/lib/Filter/Simple.pm				Simple frontend to Filter::Util::Call
 dist/Filter-Simple/t/data.t					See if Filter::Simple works
 dist/Filter-Simple/t/export.t					See if Filter::Simple works
