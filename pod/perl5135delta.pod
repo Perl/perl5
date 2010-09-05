@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for release_engineer
-* changelogged up to 45b279e
+* changelogged up to be34c38
 * the mauve module will not be part of the release, so it's not changelogged
 yet. it also added some new api functions. those aren't covered either, as they
 might go away again in case mauve gets rolled back for 5.13.5.
@@ -129,6 +129,11 @@ C<blib> has been upgraded from version 1.05 to 1.06.
 
 =item *
 
+C<bignum>, C<bigint>, and C<bigrat> have been upgraded from version 0.23 to
+0.24.
+
+=item *
+
 C<Errno> has been upgraded from version 1.12 to 1.13.
 
 On some platforms with unusual header files, like Win32/gcc using mingw64
@@ -141,10 +146,18 @@ C<ExtUtils::MakeMaker> has been upgraded from version 6.56 to 6.57_01.
 
 =item *
 
+C<Filter::Simple> has been upgraded from version 0.84 to 0.85.
+
+=item *
+
 C<Math::BigInt> has been upgraded from version 1.89_01 to 1.90.
 C<Math::BigInt::Calc> has been upgraded from version 0.52 to 0.53.
 
 This fixes incorrect results when computing binomial coefficients (RT#77640).
+
+=item *
+
+C<Math::BigInt::FastCalc> has been upgraded from version 0.19 to 0.21.
 
 =item *
 
