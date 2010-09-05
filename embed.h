@@ -1003,7 +1003,6 @@
 #define sv_pvbyten_force	Perl_sv_pvbyten_force
 #define sv_recode_to_utf8	Perl_sv_recode_to_utf8
 #define sv_cat_decode		Perl_sv_cat_decode
-#define sv_reftype_len		Perl_sv_reftype_len
 #define sv_reftype		Perl_sv_reftype
 #define sv_replace		Perl_sv_replace
 #define sv_report_used		Perl_sv_report_used
@@ -3459,7 +3458,6 @@
 #define sv_pvbyten_force(a,b)	Perl_sv_pvbyten_force(aTHX_ a,b)
 #define sv_recode_to_utf8(a,b)	Perl_sv_recode_to_utf8(aTHX_ a,b)
 #define sv_cat_decode(a,b,c,d,e,f)	Perl_sv_cat_decode(aTHX_ a,b,c,d,e,f)
-#define sv_reftype_len(a,b,c)	Perl_sv_reftype_len(aTHX_ a,b,c)
 #define sv_reftype(a,b)		Perl_sv_reftype(aTHX_ a,b)
 #define sv_replace(a,b)		Perl_sv_replace(aTHX_ a,b)
 #define sv_report_used()	Perl_sv_report_used(aTHX)
