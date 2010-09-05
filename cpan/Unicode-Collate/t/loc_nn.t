@@ -4,7 +4,7 @@ use warnings;
 use Unicode::Collate::Locale;
 
 use Test;
-plan tests => 83;
+plan tests => 95;
 
 my $eth  = pack 'U', 0xF0;
 my $ETH  = pack 'U', 0xD0;
@@ -110,17 +110,27 @@ ok($objNn->eq("d\x{335}", "\x{111}"));
 ok($objNn->eq("D\x{335}", "\x{110}"));
 ok($objNn->eq("u\x{308}", $uuml));
 ok($objNn->eq("U\x{308}", $Uuml));
+ok($objNn->eq("u\x{308}\x{300}", "\x{1DC}"));
+ok($objNn->eq("U\x{308}\x{300}", "\x{1DB}"));
+ok($objNn->eq("u\x{308}\x{301}", "\x{1D8}"));
+ok($objNn->eq("U\x{308}\x{301}", "\x{1D7}"));
+ok($objNn->eq("u\x{308}\x{304}", "\x{1D6}"));
+ok($objNn->eq("U\x{308}\x{304}", "\x{1D5}"));
+ok($objNn->eq("u\x{308}\x{30C}", "\x{1DA}"));
+ok($objNn->eq("U\x{308}\x{30C}", "\x{1D9}"));
 ok($objNn->eq("u\x{30B}", "\x{171}"));
 ok($objNn->eq("U\x{30B}", "\x{170}"));
+
+# 70
+
 ok($objNn->eq("\x{1FD}", "$ae\x{301}"));
 ok($objNn->eq("\x{1FC}", "$AE\x{301}"));
 ok($objNn->eq("\x{1E3}", "$ae\x{304}"));
 ok($objNn->eq("\x{1E2}", "$AE\x{304}"));
-
-# 66
-
 ok($objNn->eq("a\x{308}", $auml));
 ok($objNn->eq("A\x{308}", $Auml));
+ok($objNn->eq("a\x{308}\x{304}", "\x{1DF}"));
+ok($objNn->eq("A\x{308}\x{304}", "\x{1DE}"));
 ok($objNn->eq("e\x{328}", "\x{119}"));
 ok($objNn->eq("E\x{328}", "\x{118}"));
 ok($objNn->eq("o\x{338}", $ostk));
@@ -129,6 +139,8 @@ ok($objNn->eq("o\x{338}\x{301}", "\x{1FF}"));
 ok($objNn->eq("O\x{338}\x{301}", "\x{1FE}"));
 ok($objNn->eq("o\x{308}", $ouml));
 ok($objNn->eq("O\x{308}", $Ouml));
+ok($objNn->eq("o\x{308}\x{304}", "\x{22B}"));
+ok($objNn->eq("O\x{308}\x{304}", "\x{22A}"));
 ok($objNn->eq("o\x{30B}", "\x{151}"));
 ok($objNn->eq("O\x{30B}", "\x{150}"));
 ok($objNn->eq("a\x{30A}", $arng));
@@ -137,4 +149,4 @@ ok($objNn->eq("A\x{30A}", "\x{212B}"));
 ok($objNn->eq("a\x{30A}\x{301}", "\x{1FB}"));
 ok($objNn->eq("A\x{30A}\x{301}", "\x{1FA}"));
 
-# 83
+# 95

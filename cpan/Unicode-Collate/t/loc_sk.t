@@ -4,7 +4,7 @@ use warnings;
 use Unicode::Collate::Locale;
 
 use Test;
-plan tests => 40;
+plan tests => 42;
 
 my $objSk = Unicode::Collate::Locale->
     new(locale => 'SK', normalization => undef);
@@ -57,6 +57,8 @@ ok($objSk->lt("Ch", "CH"));
 
 ok($objSk->eq("a\x{308}", pack('U', 0xE4)));
 ok($objSk->eq("A\x{308}", pack('U', 0xC4)));
+ok($objSk->eq("a\x{308}\x{304}", "\x{1DF}"));
+ok($objSk->eq("A\x{308}\x{304}", "\x{1DE}"));
 ok($objSk->eq("c\x{30C}", "\x{10D}"));
 ok($objSk->eq("C\x{30C}", "\x{10C}"));
 ok($objSk->eq("o\x{302}", pack('U', 0xF4)));
@@ -66,4 +68,4 @@ ok($objSk->eq("S\x{30C}", "\x{160}"));
 ok($objSk->eq("z\x{30C}", "\x{17E}"));
 ok($objSk->eq("Z\x{30C}", "\x{17D}"));
 
-# 40
+# 42

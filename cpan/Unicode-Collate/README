@@ -1,4 +1,4 @@
-Unicode/Collate version 0.58
+Unicode/Collate version 0.59
 ===============================
 
 NAME
@@ -22,33 +22,17 @@ SYNOPSIS
 
 INSTALL
 
-Perl 5.6.1 or later is required.
-Perl 5.8.1 or later is recommended.
+  Perl 5.6.1 or later is required.
+  Perl 5.8.1 or later is recommended.
 
-Though this module can be used without any C<table> file,
-to use this module easily, it is recommended to install a table file
-in the UCA format, by copying it under the directory
-<a place in @INC>/Unicode/Collate.
+  Though this distribution contains a subset of an old DUCET, named
+  "keys.txt", this one is intended only for doing a test of this module
+  and practically useless for any other purpose.
 
-You can install such a table file by adding it
-to "Collate" directory (where "keys.txt" is placed) in this distribution
-before executing Makefile.PL.
-
-The most preferable one is "The Default Unicode Collation Element Table"
-(aka DUCET), available from the Unicode Consortium's website:
-
-   http://www.unicode.org/Public/UCA/
-
-   http://www.unicode.org/Public/UCA/latest/allkeys.txt (latest version)
-
-If DUCET is not installed, it is recommended to copy the file
-from http://www.unicode.org/Public/UCA/latest/allkeys.txt
-to <a place in @INC>/Unicode/Collate/allkeys.txt
-manually.
-
-Though this distribution contains a subset of allkeys.txt, named "keys.txt",
-this one is intended only for doing a test of this module
-and practically useless for any other purpose.
+  Installation of Unicode::Collate::Locale requires Collate/Locale.pm,
+  Collate/Locale/*.pm and Collate/allkeys.txt.  On building,
+  Unicode::Collate::Locale doesn't require data/*.txt and mklocale.
+  Tests for Unicode::Collate::Locale are named t/loc_*.t.
 
 To install this module type the following:
 
@@ -57,7 +41,6 @@ To install this module type the following:
    make test
    make install
 
-(!! XSUB for Unicode::Collate is an EXPERIMENTAL support !!)
 If you have a C compiler and want to use XSUB edition,
 type the following (!! "enableXS" must run before "Makefile.PL" !!):
 
@@ -81,6 +64,28 @@ DEPENDENCIES
 
   The conformant collation requires Unicode::Normalize (v 0.10 or later)
   although Unicode::Collate can be used without Unicode::Normalize.
+
+ABOUT DUCET
+
+  Though this module can be used without any C<table> file,
+  to use this module easily, it is recommended to install a table file
+  in the UCA format, by copying it under the directory
+  <a place in @INC>/Unicode/Collate.
+
+  You can install such a table file by adding it to "Collate" directory
+  (where "keys.txt" is placed) in this distribution before executing
+  Makefile.PL.
+
+  The most preferable one is "The Default Unicode Collation Element Table"
+  (aka DUCET), available from the Unicode Consortium's website:
+
+   http://www.unicode.org/Public/UCA/
+
+   http://www.unicode.org/Public/UCA/latest/allkeys.txt (latest version)
+
+  If DUCET is not installed, it is recommended to copy the file
+  from http://www.unicode.org/Public/UCA/latest/allkeys.txt
+  to <a place in @INC>/Unicode/Collate/allkeys.txt manually.
 
 AUTHOR, COPYRIGHT AND LICENSE
 

@@ -4,7 +4,7 @@ use strict;
 use Carp;
 use base qw(Unicode::Collate);
 
-our $VERSION = '0.58';
+our $VERSION = '0.59';
 
 use File::Spec;
 
@@ -13,7 +13,8 @@ my $KeyPath = File::Spec->catfile('allkeys.txt');
 my $PL_EXT  = '.pl';
 
 my %LocaleFile = map { ($_, $_) } qw(
-   af ca cs cy da eo es et fi fo fr haw is kl lv nn pl ro sk sl sv sw
+   af az ca cs cy da eo es et fi fil fo fr ha haw
+   is kl lt lv mt nn pl ro sk sl sv sw tr wo yo
 );
    $LocaleFile{'default'}         = '';
    $LocaleFile{'es__traditional'} = 'es_trad';
@@ -39,7 +40,7 @@ sub getlocale {
     return shift->{accepted_locale};
 }
 
-sub _fetch_locale {
+sub _fetchpl {
     my $accepted = shift;
     my $f = $LocaleFile{$accepted};
     return if !$f;
@@ -60,7 +61,7 @@ sub new {
     }
     $hash{table} = $KeyPath;
 
-    my $href = _fetch_locale($hash{accepted_locale});
+    my $href = _fetchpl($hash{accepted_locale});
     while (my($k,$v) = each %$href) {
 	if (exists $hash{$k}) {
 	    croak "$k is reserved by $hash{locale}, can't be overwritten";
@@ -153,6 +154,7 @@ this method returns a string C<'default'> meaning no special tailoring.
       locale name       description
     ----------------------------------------------------------
       af                Afrikaans
+      az                Azerbaijani (Azeri)
       ca                Catalan
       cs                Czech
       cy                Welsh
@@ -162,12 +164,16 @@ this method returns a string C<'default'> meaning no special tailoring.
       es__traditional   Spanish ('ch' and 'll' as a grapheme)
       et                Estonian
       fi                Finnish
+      fil               Filipino
       fo                Faroese
       fr                French
+      ha                Hausa
       haw               Hawaiian
       is                Icelandic
       kl                Kalaallisut
+      lt                Lithuanian
       lv                Latvian
+      mt                Maltese
       nb                Norwegian Bokmal
       nn                Norwegian Nynorsk
       pl                Polish
@@ -176,6 +182,16 @@ this method returns a string C<'default'> meaning no special tailoring.
       sl                Slovenian
       sv                Swedish
       sw                Swahili
+      tr                Turkish
+      wo                Wolof
+      yo                Yoruba
+
+=head1 INSTALL
+
+Installation of Unicode::Collate::Locale requires F<Collate/Locale.pm>,
+F<Collate/Locale/*.pm> and F<Collate/allkeys.txt>.  On building,
+Unicode::Collate::Locale doesn't require F<data/*.txt> and F<mklocale>.
+Tests for Unicode::Collate::Locale are named F<t/loc_*.t>.
 
 =head1 AUTHOR
 

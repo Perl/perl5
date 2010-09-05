@@ -4,7 +4,7 @@ use warnings;
 use Unicode::Collate::Locale;
 
 use Test;
-plan tests => 94;
+plan tests => 98;
 
 my $eth  = pack 'U', 0xF0;
 my $ETH  = pack 'U', 0xD0;
@@ -127,8 +127,12 @@ ok($objIs->eq("\x{1E3}", "$ae\x{304}"));
 ok($objIs->eq("\x{1E2}", "$AE\x{304}"));
 ok($objIs->eq("a\x{308}", $auml));
 ok($objIs->eq("A\x{308}", $Auml));
+ok($objIs->eq("a\x{308}\x{304}", "\x{1DF}"));
+ok($objIs->eq("A\x{308}\x{304}", "\x{1DE}"));
 ok($objIs->eq("o\x{308}", $ouml));
 ok($objIs->eq("O\x{308}", $Ouml));
+ok($objIs->eq("o\x{308}\x{304}", "\x{22B}"));
+ok($objIs->eq("O\x{308}\x{304}", "\x{22A}"));
 ok($objIs->eq("o\x{338}", $ostk));
 ok($objIs->eq("O\x{338}", $Ostk));
 ok($objIs->eq("o\x{338}\x{301}", "\x{1FF}"));
@@ -139,7 +143,7 @@ ok($objIs->eq("A\x{30A}", "\x{212B}"));
 ok($objIs->eq("a\x{30A}\x{301}", "\x{1FB}"));
 ok($objIs->eq("A\x{30A}\x{301}", "\x{1FA}"));
 
-# 88
+# 92
 
 $objIs->change(upper_before_lower => 1);
 
@@ -150,4 +154,4 @@ ok($objIs->gt($ouml, $Ouml));
 ok($objIs->gt($ostk, $Ostk));
 ok($objIs->gt($arng, $Arng));
 
-# 94
+# 98

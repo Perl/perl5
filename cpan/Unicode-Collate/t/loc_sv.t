@@ -4,7 +4,7 @@ use warnings;
 use Unicode::Collate::Locale;
 
 use Test;
-plan tests => 95;
+plan tests => 107;
 
 my $eth  = pack 'U', 0xF0;
 my $ETH  = pack 'U', 0xD0;
@@ -122,8 +122,19 @@ ok($objSv->eq("d\x{335}", "\x{111}"));
 ok($objSv->eq("D\x{335}", "\x{110}"));
 ok($objSv->eq("u\x{308}", $uuml));
 ok($objSv->eq("U\x{308}", $Uuml));
+ok($objSv->eq("u\x{308}\x{300}", "\x{1DC}"));
+ok($objSv->eq("U\x{308}\x{300}", "\x{1DB}"));
+ok($objSv->eq("u\x{308}\x{301}", "\x{1D8}"));
+ok($objSv->eq("U\x{308}\x{301}", "\x{1D7}"));
+ok($objSv->eq("u\x{308}\x{304}", "\x{1D6}"));
+ok($objSv->eq("U\x{308}\x{304}", "\x{1D5}"));
+ok($objSv->eq("u\x{308}\x{30C}", "\x{1DA}"));
+ok($objSv->eq("U\x{308}\x{30C}", "\x{1D9}"));
 ok($objSv->eq("u\x{30B}", "\x{171}"));
 ok($objSv->eq("U\x{30B}", "\x{170}"));
+
+# 80
+
 ok($objSv->eq("a\x{30A}", $arng));
 ok($objSv->eq("A\x{30A}", $Arng));
 ok($objSv->eq("A\x{30A}", "\x{212B}"));
@@ -131,9 +142,8 @@ ok($objSv->eq("a\x{30A}\x{301}", "\x{1FB}"));
 ok($objSv->eq("A\x{30A}\x{301}", "\x{1FA}"));
 ok($objSv->eq("a\x{308}", $auml));
 ok($objSv->eq("A\x{308}", $Auml));
-
-# 79
-
+ok($objSv->eq("a\x{308}\x{304}", "\x{1DF}"));
+ok($objSv->eq("A\x{308}\x{304}", "\x{1DE}"));
 ok($objSv->eq("\x{1FD}", "$ae\x{301}"));
 ok($objSv->eq("\x{1FC}", "$AE\x{301}"));
 ok($objSv->eq("\x{1E3}", "$ae\x{304}"));
@@ -142,6 +152,8 @@ ok($objSv->eq("e\x{328}", "\x{119}"));
 ok($objSv->eq("E\x{328}", "\x{118}"));
 ok($objSv->eq("o\x{308}", $ouml));
 ok($objSv->eq("O\x{308}", $Ouml));
+ok($objSv->eq("o\x{308}\x{304}", "\x{22B}"));
+ok($objSv->eq("O\x{308}\x{304}", "\x{22A}"));
 ok($objSv->eq("o\x{338}", $ostk));
 ok($objSv->eq("O\x{338}", $Ostk));
 ok($objSv->eq("o\x{338}\x{301}", "\x{1FF}"));
@@ -151,4 +163,4 @@ ok($objSv->eq("O\x{30B}", "\x{150}"));
 ok($objSv->eq("o\x{302}", $ocrc));
 ok($objSv->eq("O\x{302}", $Ocrc));
 
-# 95
+# 107
