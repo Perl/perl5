@@ -63,6 +63,18 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
+=head2 Magic Variables Outside the Main Package
+
+In previous versions of perl, magic variables like C<$!>, C<%SIG>, etc.  would
+'leak' into other packages. So C<%foo::SIG> could be used to access signals,
+C<${"foo::!"}> (with strict mode off) to access C's C<errno>, etc.
+
+This was a bug, or an 'unintentional' feature, which caused various ill
+effects, such as signal handlers being wiped when modules were loaded, etc.
+
+This has been fixed (or the feature has been removed, depending on how you
+see it).
+
 =head2 C API changes
 
 The first argument of the C API function C<Perl_fetch_cop_label> has changed
@@ -302,6 +314,11 @@ that they represent may be covered elsewhere.
 A rare race condition in F<t/op/while_readdir.t> has been fixed, stopping it
 from failing randomly when running tests in parallel.
 
+=item *
+
+The new F<t/op/leaky-magic.t> script tests that magic applied to variables in
+the main packages does not affect other packages.
+
 =back
 
 =head1 Platform Support
@@ -443,6 +460,11 @@ fixed (RT#77352).
 
 A possible string corruption when doing regular expression matches on overloaded
 objects has been fixed (RT#77084).
+
+=item *
+
+Magic applied to variables in the main package no longer affects other
+packages. See L</Magic Variables Outside the Main Package>, above [perl #76138].
 
 =back
 

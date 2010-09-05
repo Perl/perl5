@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-require q(./test.pl); plan(tests => 48);
+BEGIN { require q(./test.pl); } plan(tests => 49);
 
 require mro;
 
@@ -286,4 +286,17 @@ is(eval { MRO_N->testfunc() }, 123);
         mro::invalidate_all_method_caches();
     };
     is($@, "");
+}
+
+{
+    # @main::ISA
+    no warnings 'once';
+    @main::ISA = 'parent';
+    my $output = '';
+    *parent::do = sub { $output .= 'parent' };
+    *parent2::do = sub { $output .= 'parent2' };
+    main->do;
+    @main::ISA = 'parent2';
+    main->do;
+    is $output, 'parentparent2', '@main::ISA is magical';
 }
