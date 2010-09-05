@@ -656,9 +656,9 @@ use File::Glob qw(:case);
     'Filter::Simple' =>
 	{
 	'MAINTAINER'	=> 'smueller',
-	'DISTRIBUTION'	=> 'SMUELLER/Filter-Simple-0.84.tar.gz',
+	'DISTRIBUTION'	=> 'SMUELLER/Filter-Simple-0.85.tar.gz',
 	'FILES'		=> q[dist/Filter-Simple],
-	'EXCLUDED'	=> [ qw(Makefile.PL MANIFEST README META.yml),
+	'EXCLUDED'	=> [ qw(Makefile.PL),
 			     qr{^demo/}
 			   ],
 	'UPSTREAM'	=> 'blead',
