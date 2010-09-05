@@ -631,6 +631,8 @@ sub get_distribution {
           or die
           "ERROR: failed to extract distribution '$download_file to temp. dir: "
           . $ae->error() . "\n";
+
+        $path = $ae->extract_path;
     }
 
     die "ERROR: Extracted tarball does not appear as $path\n" unless -d $path;
