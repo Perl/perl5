@@ -1558,7 +1558,7 @@ distclean: realclean
 	-cd $(PODDIR) && del /f *.html *.bat \
 	    perlaix.pod perlamiga.pod perlapi.pod perlapollo.pod \
 	    perlbeos.pod perlbs2000.pod perlce.pod perlcn.pod \
-	    perlcygwin.pod perldelta.pod perldgux.pod perldos.pod \
+	    perlcygwin.pod perl5135delta.pod perldgux.pod perldos.pod \
 	    perlepoc.pod perlfreebsd.pod perlhaiku.pod perlhpux.pod \
 	    perlhurd.pod perlintern.pod perlirix.pod perljp.pod perlko.pod \
 	    perllinux.pod perlmacos.pod perlmacosx.pod perlmodlib.pod \
