@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for release_engineer
-* changelogged up to be34c38
+* changelogged up to f4beb78
 * the mauve module will not be part of the release, so it's not changelogged
 yet. it also added some new api functions. those aren't covered either, as they
 might go away again in case mauve gets rolled back for 5.13.5.
@@ -146,6 +146,13 @@ C<bignum>, C<bigint>, and C<bigrat> have been upgraded from version 0.23 to
 
 =item *
 
+C<Data::Dumper> has been upgraded from version 2.126 to XXX.
+
+This fixes a crash when using custom sort functions that might cause the stack
+to change.
+
+=item *
+
 C<Errno> has been upgraded from version 1.12 to 1.13.
 
 On some platforms with unusual header files, like Win32/gcc using mingw64
@@ -179,7 +186,7 @@ Calling C<< Tie::Hash->TIEHASH() >> used to loop forever. Now it C<croak>s.
 
 =item *
 
-C<Unicode::Collate> has been upgraded from version 0.56 to 0.58.
+C<Unicode::Collate> has been upgraded from version 0.56 to 0.59.
 
 =item *
 
@@ -471,6 +478,11 @@ packages. See L</Magic Variables Outside the Main Package>, above [perl #76138].
 Opening a glob reference via C<< open $fh, ">", \*glob >> will no longer cause
 the glob to be corrupted when the file handle is printed to. This would cause
 perl to crash whenever the glob's contents were accessed [perl #77492].
+
+=item *
+
+The postincremend and postdecrement operators, C<++> and C<--> used to cause
+leaks when being used on references. This has now been fixed.
 
 =back
 
