@@ -441,6 +441,7 @@
 #define lex_peek_unichar	Perl_lex_peek_unichar
 #define lex_read_unichar	Perl_lex_read_unichar
 #define lex_read_space		Perl_lex_read_space
+#define parse_fullstmt		Perl_parse_fullstmt
 #define op_null			Perl_op_null
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define op_clear		Perl_op_clear
@@ -1110,6 +1111,7 @@
 #define yylex			Perl_yylex
 #endif
 #ifdef PERL_CORE
+#define yyunlex			Perl_yyunlex
 #define yyparse			Perl_yyparse
 #define parser_free		Perl_parser_free
 #endif
@@ -2892,6 +2894,7 @@
 #define lex_peek_unichar(a)	Perl_lex_peek_unichar(aTHX_ a)
 #define lex_read_unichar(a)	Perl_lex_read_unichar(aTHX_ a)
 #define lex_read_space(a)	Perl_lex_read_space(aTHX_ a)
+#define parse_fullstmt(a)	Perl_parse_fullstmt(aTHX_ a)
 #define op_null(a)		Perl_op_null(aTHX_ a)
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define op_clear(a)		Perl_op_clear(aTHX_ a)
@@ -3555,7 +3558,8 @@
 #define yylex()			Perl_yylex(aTHX)
 #endif
 #ifdef PERL_CORE
-#define yyparse()		Perl_yyparse(aTHX)
+#define yyunlex()		Perl_yyunlex(aTHX)
+#define yyparse(a)		Perl_yyparse(aTHX_ a)
 #define parser_free(a)		Perl_parser_free(aTHX_ a)
 #endif
 #if defined(PERL_IN_TOKE_C)
@@ -4508,7 +4512,7 @@
 #  endif
 #ifdef PERL_CORE
 #define madlex()		Perl_madlex(aTHX)
-#define madparse()		Perl_madparse(aTHX)
+#define madparse(a)		Perl_madparse(aTHX_ a)
 #endif
 #endif
 #if !defined(HAS_SIGNBIT)

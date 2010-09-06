@@ -1582,6 +1582,7 @@ PERL_CALLCONV bool	Perl_lex_next_chunk(pTHX_ U32 flags);
 PERL_CALLCONV I32	Perl_lex_peek_unichar(pTHX_ U32 flags);
 PERL_CALLCONV I32	Perl_lex_read_unichar(pTHX_ U32 flags);
 PERL_CALLCONV void	Perl_lex_read_space(pTHX_ U32 flags);
+PERL_CALLCONV OP*	Perl_parse_fullstmt(pTHX_ U32 flags);
 PERL_CALLCONV void	Perl_op_null(pTHX_ OP* o)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_OP_NULL	\
@@ -3958,7 +3959,8 @@ PERL_CALLCONV int	Perl_yyerror(pTHX_ const char *const s)
 	assert(s)
 
 PERL_CALLCONV int	Perl_yylex(pTHX);
-PERL_CALLCONV int	Perl_yyparse(pTHX);
+PERL_CALLCONV void	Perl_yyunlex(pTHX);
+PERL_CALLCONV int	Perl_yyparse(pTHX_ int gramtype);
 PERL_CALLCONV void	Perl_parser_free(pTHX_ const yy_parser *parser)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_PARSER_FREE	\
@@ -6852,7 +6854,7 @@ STATIC void	S_start_force(pTHX_ int where);
 STATIC void	S_curmad(pTHX_ char slot, SV *sv);
 #  endif
 PERL_CALLCONV int	Perl_madlex(pTHX);
-PERL_CALLCONV int	Perl_madparse(pTHX);
+PERL_CALLCONV int	Perl_madparse(pTHX_ int gramtype);
 #endif
 #if !defined(HAS_SIGNBIT)
 PERL_CALLCONV int	Perl_signbit(NV f)

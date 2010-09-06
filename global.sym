@@ -274,6 +274,7 @@ Perl_lex_next_chunk
 Perl_lex_peek_unichar
 Perl_lex_read_unichar
 Perl_lex_read_space
+Perl_parse_fullstmt
 Perl_op_null
 Perl_op_clear
 Perl_op_refcnt_lock
