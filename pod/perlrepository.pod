@@ -337,8 +337,8 @@ And you can see the changes:
    Lincoln D. Stein               <lstein@cshl.org>
 
 For changes significant enough to warrant a F<pod/perldelta.pod> entry, the
-porters would greatly appreciate it if you submit one along with your actual
-change. Significant changes include, but are not limited to:
+porters would greatly appreciate it if you submit an entry along with your
+actual change. Significant changes include, but are not limited to:
 
 =over 4
 
@@ -360,7 +360,7 @@ fixing security issues and user-visible bugs in the core
 
 =item *
 
-changes that might break existing code, both on the perl- or C-level
+changes that might break existing code, either on the perl or C level
 
 =item *
 
@@ -368,8 +368,8 @@ significant performance improvements
 
 =item *
 
-adding, removing, or significantly changing documentation documentation in the
-F<pod/> directory
+adding, removing, or significantly changing documentation in the F<pod/>
+directory
 
 =item *
 
@@ -377,7 +377,7 @@ important platform-specific changes
 
 =back
 
-Please make sure to add the perldelta entry to the right section within
+Please make sure you add the perldelta entry to the right section within
 F<pod/perldelta.pod>. More information on how to write good perldelta entries is
 available in the C<Style> section of F<Porting/how_to_write_a_perldelta.pod>.
 
