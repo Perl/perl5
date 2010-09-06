@@ -83,7 +83,7 @@ sub SKIP_TEST {
 $Data::Dumper::Useperl = 1;
 if (defined &Data::Dumper::Dumpxs) {
   print "### XS extension loaded, will run XS tests\n";
-  $TMAX = 363; $XS = 1;
+  $TMAX = 366; $XS = 1;
 }
 else {
   print "### XS extensions not loaded, will NOT run XS tests\n";
@@ -1429,4 +1429,13 @@ EOT
     TEST q(Data::Dumper->Dumpxs([\@foo])) if $XS;
 }
 
+############# 364
+# Make sure $obj->Dumpxs returns the right thing in list context. This was
+# broken by the initial attempt to fix [perl #74170].
+$WANT = <<'EOT';
+#$VAR1 = [];
+EOT
+TEST q(join " ", new Data::Dumper [[]],[] =>->Dumpxs),
+    '$obj->Dumpxs in list context'
+ if $XS;
 
