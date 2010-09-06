@@ -433,7 +433,7 @@ L</Modules and Pragmata>.
 
 =item *
 
-A regression introduced in perl 5.10.0, making
+A regression introduced in perl 5.12.0, making
 C<< my $x = 3; $x = length(undef) >> result in C<$x> set to C<3> has been
 fixed. C<$x> will now be C<undef>.
 
@@ -465,6 +465,12 @@ objects has been fixed (RT#77084).
 
 Magic applied to variables in the main package no longer affects other
 packages. See L</Magic Variables Outside the Main Package>, above [perl #76138].
+
+=item *
+
+Opening a glob reference via C<< open $fh, ">", \*glob >> will no longer cause
+the glob to be corrupted when the file handle is printed to. This would cause
+perl to crash whenever the glob's contents were accessed [perl #77492].
 
 =back
 
