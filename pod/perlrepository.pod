@@ -336,6 +336,51 @@ And you can see the changes:
    Lesley Binks                   <lesley.binks@gmail.com>
    Lincoln D. Stein               <lstein@cshl.org>
 
+For changes significant enough to warrant a F<pod/perldelta.pod> entry, the
+porters would greatly appreciate it if you submit one along with your actual
+change. Significant changes include, but are not limited to:
+
+=over 4
+
+=item *
+
+adding, deprecating, or removing core features
+
+=item *
+
+adding, deprecating, removing, or upgrading core or dual-life modules
+
+=item *
+
+adding new core tests
+
+=item *
+
+fixing security issues and user-visible bugs in the core
+
+=item *
+
+changes that might break existing code, both on the perl- or C-level
+
+=item *
+
+significant performance improvements
+
+=item *
+
+adding, removing, or significantly changing documentation documentation in the
+F<pod/> directory
+
+=item *
+
+important platform-specific changes
+
+=back
+
+Please make sure to add the perldelta entry to the right section within
+F<pod/perldelta.pod>. More information on how to write good perldelta entries is
+available in the C<Style> section of F<Porting/how_to_write_a_perldelta.pod>.
+
 Now commit your change locally:
 
   % git commit -a -m 'Rename Leon Brocard to Orange Brocard'
