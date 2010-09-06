@@ -160,7 +160,6 @@ close MASTER;
   my (@manireadmes, %manireadmes);
   my (@perlpods, %perlpods);
   my (%our_pods);
-  my (%sources);
 
   # Convert these to a list of filenames.
   foreach (keys %Pods, keys %Readmepods) {
@@ -173,7 +172,6 @@ close MASTER;
 
   # Things we copy from won't be in perl.pod
   # Things we copy to won't be in MANIFEST
-  @sources{values %Copies} = ();
 
   open(MANI, "../MANIFEST") || die "$0: opening ../MANIFEST failed: $!";
   while (<MANI>) {
@@ -207,12 +205,12 @@ close MASTER;
     warn "$0: $i exists but is unknown by ../MANIFEST\n"
       if !$manipods{$i} && !$manireadmes{$i} && !$Copies{$i} && !$Generated{$i};
     warn "$0: $i exists but is unknown by perl.pod\n"
-	if !$perlpods{$i} && !exists $sources{$i};
+	if !$perlpods{$i} && !exists $Copies{$i};
   }
   my @BuildTargets = grep {defined} @Targets{grep $_ ne 'all', keys %Build};
   my %BuildFiles;
   @BuildFiles{@BuildTargets} = @BuildTargets;
-  
+
   foreach my $i (sort keys %our_pods) {
     warn "$0: $i is known by buildtoc but does not exist\n"
       unless $disk_pods{$i} or $BuildFiles{$i};
