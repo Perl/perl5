@@ -2,7 +2,7 @@
 
 # use strict;
 
-print "1..54\n";
+print "1..56\n";
 
 my $test = 1;
 
@@ -281,3 +281,19 @@ ok (scalar eval { my $pvbm = PVBM; $pvbm-- });
 ok (scalar eval { my $pvbm = PVBM; ++$pvbm });
 ok (scalar eval { my $pvbm = PVBM; --$pvbm });
 
+# #9466
+
+# don't use pad TARG when the thing you're copying is a ref, or the referent
+# won't get freed.
+{
+    package P9466;
+    my $x;
+    sub DESTROY { $x = 1 }
+    for (0..1) {
+	$x = 0;
+	my $a = bless {};
+	my $b = $_ ? $a++ : $a--;
+	undef $a; undef $b;
+	::ok ($x, $x, "9466 case $_");
+    }
+}
