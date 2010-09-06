@@ -1188,10 +1188,12 @@ Data_Dumper_Dumpxs(href, ...)
 		    else
 			newapad = apad;
 		
+		    PUTBACK;
 		    DD_dump(aTHX_ val, SvPVX_const(name), SvCUR(name), valstr, seenhv,
 			    postav, &level, indent, pad, xpad, newapad, sep, pair,
 			    freezer, toaster, purity, deepcopy, quotekeys,
 			    bless, maxdepth, sortkeys);
+		    SPAGAIN;
 		
 		    if (indent >= 2 && !terse)
 			SvREFCNT_dec(newapad);
