@@ -481,7 +481,7 @@ perl to crash whenever the glob's contents were accessed [perl #77492].
 
 =item *
 
-The postincremend and postdecrement operators, C<++> and C<--> used to cause
+The postincrement and postdecrement operators, C<++> and C<--> used to cause
 leaks when being used on references. This has now been fixed.
 
 =back
