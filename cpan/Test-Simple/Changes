@@ -1,3 +1,19 @@
+0.97_01  Fri Aug 27 22:50:30 PDT 2010
+    Test Fixes
+    * Adapted the tests for the new Perl 5.14 regex stringification.
+      (Karl Williamson) [github 44]
+
+    Doc Fixes
+    * Document how to test "use Foo ()". (Todd Rinaldo) [github 41]
+
+    Feature Changes
+    * subtest() no longer has a prototype.  It was just getting in the way.
+      [rt.cpan.org 54239]
+    * The filehandles used by default will now inherit any filehandle
+      disciplines from STDOUT and STDERR IF AND ONLY IF they were applied
+      before Test::Builder is loaded.  More later. [rt.cpan.org 46542]
+
+
 0.96  Tue Aug 10 21:13:04 PDT 2010
     Bug Fixes
     * You can call done_testing() again after reset() [googlecode 59]
