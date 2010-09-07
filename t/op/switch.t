@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use warnings;
 
-plan tests => 160;
+plan tests => 164;
 
 # The behaviour of the feature pragma should be tested by lib/switch.t
 # using the tests in t/lib/switch/*. This file tests the behaviour of
@@ -1161,6 +1161,44 @@ unreified_check(undef,"");
 
     @list = $smart_hash->(999);
     is("@list", '',      "rvalue given - list context propagation [999]");
+}
+{
+    # Array slices
+    my @list = 10 .. 15;
+    my @in_list;
+    my @in_slice;
+    for (5, 10, 15) {
+        given ($_) {
+            when (@list) {
+                push @in_list, $_;
+                continue;
+            }
+            when (@list[0..2]) {
+                push @in_slice, $_;
+            }
+        }
+    }
+    is("@in_list", "10 15", "when(array)");
+    is("@in_slice", "10", "when(array slice)");
+}
+{
+    # Hash slices
+    my %list = map { $_ => $_ } "a" .. "f";
+    my @in_list;
+    my @in_slice;
+    for ("a", "e", "i") {
+        given ($_) {
+            when (%list) {
+                push @in_list, $_;
+                continue;
+            }
+            when (@list{"a".."c"}) {
+                push @in_slice, $_;
+            }
+        }
+    }
+    is("@in_list", "a e", "when(hash)");
+    is("@in_slice", "a", "when(hash slice)");
 }
 
 # Okay, that'll do for now. The intricacies of the smartmatch
