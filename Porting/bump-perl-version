@@ -195,8 +195,6 @@ my %SKIP_FILES = map { ($_ => 1) } qw(
     Porting/release_managers_guide.pod
     Porting/release_schedule.pod
     Porting/bump-perl-version
-    Porting/mergelog
-    Porting/mergelog-tool
     pod.lst
     pp_ctl.c
 );
