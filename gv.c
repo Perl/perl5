@@ -964,7 +964,7 @@ Perl_gv_fetchsv(pTHX_ SV *name, I32 flags, const svtype sv_type) {
 }
 
 STATIC void
-S_gv_magicalize_isa(GV *gv, const char *nambeg, I32 add)
+S_gv_magicalize_isa(pTHX_ GV *gv, const char *nambeg, I32 add)
 {
     AV* av;
 
@@ -992,7 +992,7 @@ S_gv_magicalize_isa(GV *gv, const char *nambeg, I32 add)
 }
 
 STATIC void
-S_gv_magicalize_overload(GV *gv)
+S_gv_magicalize_overload(pTHX_ GV *gv)
 {
     HV* hv;
 
