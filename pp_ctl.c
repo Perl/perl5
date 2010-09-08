@@ -1946,11 +1946,8 @@ PP(pp_enteriter)
     dVAR; dSP; dMARK;
     register PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
-    SV **svp;
+    void *itervar; /* location of the iteration variable */
     U8 cxtype = CXt_LOOP_FOR;
-#ifdef USE_ITHREADS
-    PAD *iterdata;
-#endif
 
     ENTER_with_name("loop1");
     SAVETMPS;
@@ -1963,18 +1960,20 @@ PP(pp_enteriter)
 	}
 	SAVEPADSVANDMORTALIZE(PL_op->op_targ);
 #ifndef USE_ITHREADS
-	svp = &PAD_SVl(PL_op->op_targ);		/* "my" variable */
+	itervar = &PAD_SVl(PL_op->op_targ);	/* "my" variable */
 #else
-	iterdata = NULL;
+	itervar = PL_comppad;
 #endif
     }
     else {
 	GV * const gv = MUTABLE_GV(POPs);
-	svp = &GvSV(gv);			/* symbol table variable */
+	SV** svp = &GvSV(gv);			/* symbol table variable */
 	SAVEGENERICSV(*svp);
 	*svp = newSV(0);
 #ifdef USE_ITHREADS
-	iterdata = (PAD*)gv;
+	itervar = (void *)gv;
+#else
+	itervar = (void *)svp;
 #endif
     }
 
@@ -1984,11 +1983,7 @@ PP(pp_enteriter)
     ENTER_with_name("loop2");
 
     PUSHBLOCK(cx, cxtype, SP);
-#ifdef USE_ITHREADS
-    PUSHLOOP_FOR(cx, iterdata, MARK, PL_op->op_targ);
-#else
-    PUSHLOOP_FOR(cx, svp, MARK, 0);
-#endif
+    PUSHLOOP_FOR(cx, itervar, MARK);
     if (PL_op->op_flags & OPf_STACKED) {
 	SV *maybe_ary = POPs;
 	if (SvTYPE(maybe_ary) != SVt_PVAV) {

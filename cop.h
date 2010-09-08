@@ -447,11 +447,11 @@ struct block_eval {
 struct block_loop {
     I32		resetsp;
     LOOP *	my_op;	/* My op, that contains redo, next and last ops.  */
-#ifdef USE_ITHREADS
-    PAD		*oldcomppad; /* Also used for the GV, if my_op->op_targ is 0 */
-#else
-    SV **	itervar;
-#endif
+    union {	/* different ways of locating the iteration variable */
+	SV      **svp;
+	GV      *gv;
+	PAD     *oldcomppad; /* only used in ITHREADS */
+    } itervar_u;
     union {
 	struct { /* valid if type is LOOP_FOR or LOOP_PLAIN (but {NULL,0})*/
 	    AV * ary; /* use the stack if this is NULL */
@@ -470,20 +470,13 @@ struct block_loop {
 
 #ifdef USE_ITHREADS
 #  define CxITERVAR(c)							\
-	((c)->blk_loop.oldcomppad					\
+	((c)->blk_loop.itervar_u.oldcomppad				\
 	 ? (CxPADLOOP(c) 						\
-	    ? &CX_CURPAD_SV( (c)->blk_loop, (c)->blk_loop.my_op->op_targ) \
-	    : &GvSV((GV*)(c)->blk_loop.oldcomppad))			\
+	    ? &CX_CURPAD_SV( (c)->blk_loop.itervar_u, (c)->blk_loop.my_op->op_targ) \
+	    : &GvSV((c)->blk_loop.itervar_u.gv))			\
 	 : (SV**)NULL)
-#  define CX_ITERDATA_SET(cx,idata,o)					\
-	if (cx->blk_loop.my_op->op_targ)				\
-	    CX_CURPAD_SAVE(cx->blk_loop);				\
-	else								\
-	    cx->blk_loop.oldcomppad = (idata);
 #else
-#  define CxITERVAR(c)		((c)->blk_loop.itervar)
-#  define CX_ITERDATA_SET(cx,ivar,o)					\
-	cx->blk_loop.itervar = (SV**)(ivar);
+#  define CxITERVAR(c)		((c)->blk_loop.itervar_u.svp)
 #endif
 #define CxLABEL(c)	(0 + CopLABEL((c)->blk_oldcop))
 #define CxHASARGS(c)	(((c)->cx_type & CXp_HASARGS) == CXp_HASARGS)
@@ -494,14 +487,14 @@ struct block_loop {
 	cx->blk_loop.my_op = cLOOP;					\
 	cx->blk_loop.state_u.ary.ary = NULL;				\
 	cx->blk_loop.state_u.ary.ix = 0;				\
-	CX_ITERDATA_SET(cx, NULL, 0);
+	cx->blk_loop.itervar_u.svp = NULL;
 
-#define PUSHLOOP_FOR(cx, dat, s, offset)				\
+#define PUSHLOOP_FOR(cx, ivar, s)					\
 	cx->blk_loop.resetsp = s - PL_stack_base;			\
 	cx->blk_loop.my_op = cLOOP;					\
 	cx->blk_loop.state_u.ary.ary = NULL;				\
 	cx->blk_loop.state_u.ary.ix = 0;				\
-	CX_ITERDATA_SET(cx, dat, offset);
+	cx->blk_loop.itervar_u.svp = (SV**)(ivar);
 
 #define POPLOOP(cx)							\
 	if (CxTYPE(cx) == CXt_LOOP_LAZYSV) {				\

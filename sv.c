@@ -11660,13 +11660,13 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 	    case CXt_LOOP_LAZYIV:
 	    case CXt_LOOP_PLAIN:
 		if (CxPADLOOP(ncx)) {
-		    ncx->blk_loop.oldcomppad
+		    ncx->blk_loop.itervar_u.oldcomppad
 			= (PAD*)ptr_table_fetch(PL_ptr_table,
-						ncx->blk_loop.oldcomppad);
+					ncx->blk_loop.itervar_u.oldcomppad);
 		} else {
-		    ncx->blk_loop.oldcomppad
-			= (PAD*)gv_dup((const GV *)ncx->blk_loop.oldcomppad,
-				       param);
+		    ncx->blk_loop.itervar_u.gv
+			= gv_dup((const GV *)ncx->blk_loop.itervar_u.gv,
+				    param);
 		}
 		break;
 	    case CXt_FORMAT:
