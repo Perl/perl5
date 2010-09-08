@@ -1959,10 +1959,10 @@ PP(pp_enteriter)
 		    SVs_PADSTALE, SVs_PADSTALE);
 	}
 	SAVEPADSVANDMORTALIZE(PL_op->op_targ);
-#ifndef USE_ITHREADS
-	itervar = &PAD_SVl(PL_op->op_targ);	/* "my" variable */
-#else
+#ifdef USE_ITHREADS
 	itervar = PL_comppad;
+#else
+	itervar = &PAD_SVl(PL_op->op_targ);	/* "my" variable */
 #endif
     }
     else {
