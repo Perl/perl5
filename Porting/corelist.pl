@@ -260,7 +260,7 @@ sub fetch_url {
     my $url = shift;
     eval { require LWP::Simple };
     if ( LWP::Simple->can('get') ) {
-        return LWP::Simple->get($url);
+        return LWP::Simple::get($url);
     } elsif (`which curl`) {
         return `curl -s $url`;
     } elsif (`which wget`) {
