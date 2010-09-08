@@ -36,7 +36,7 @@ BEGIN {
 }
 
 require "test.pl";
-plan( tests => 47 );
+plan( tests => 54 );
 
 my $ok;
 
@@ -978,3 +978,19 @@ cmp_ok($ok,'==',1,'dynamically scoped');
     cmp_ok("@a37725",'eq',"5 4 3 2",'bug 27725: reverse with empty slots bug');
 }
 
+# [perl #21469] bad things happened with for $x (...) { *x = *y }
+
+{
+    my $i = 1;
+    $x_21469  = 'X';
+    $y1_21469 = 'Y1';
+    $y2_21469 = 'Y2';
+    $y3_21469 = 'Y3';
+    for $x_21469 (1,2,3) {
+	is($x_21469, $i, "bug 21469: correct at start of loop $i");
+	*x_21469 = (*y1_21469, *y2_21469, *y3_21469)[$i-1];
+	is($x_21469, "Y$i", "bug 21469: correct at tail of loop $i");
+	$i++;
+    }
+    is($x_21469, 'X', "bug 21469: X okay at end of loop");
+}

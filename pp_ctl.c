@@ -1967,13 +1967,10 @@ PP(pp_enteriter)
     }
     else {					/* symbol table variable */
 	GV * const gv = MUTABLE_GV(POPs);
-	SV** svp = &GvSV(gv);	SAVEGENERICSV(*svp);
+	SV** svp = &GvSV(gv);
+	save_pushptrptr(gv, SvREFCNT_inc(*svp), SAVEt_GVSV);
 	*svp = newSV(0);
-#ifdef USE_ITHREADS
 	itervar = (void *)gv;
-#else
-	itervar = (void *)svp;
-#endif
     }
 
     if (PL_op->op_private & OPpITER_DEF)

@@ -469,15 +469,19 @@ struct block_loop {
 };
 
 #ifdef USE_ITHREADS
-#  define CxITERVAR(c)							\
+#  define CxITERVAR_PADSV(c) \
+	&CX_CURPAD_SV( (c)->blk_loop.itervar_u, (c)->blk_loop.my_op->op_targ)
+#else
+#  define CxITERVAR_PADSV(c) ((c)->blk_loop.itervar_u.svp)
+#endif
+
+#define CxITERVAR(c)							\
 	((c)->blk_loop.itervar_u.oldcomppad				\
 	 ? (CxPADLOOP(c) 						\
-	    ? &CX_CURPAD_SV( (c)->blk_loop.itervar_u, (c)->blk_loop.my_op->op_targ) \
+	    ? CxITERVAR_PADSV(c)					\
 	    : &GvSV((c)->blk_loop.itervar_u.gv))			\
 	 : (SV**)NULL)
-#else
-#  define CxITERVAR(c)		((c)->blk_loop.itervar_u.svp)
-#endif
+
 #define CxLABEL(c)	(0 + CopLABEL((c)->blk_oldcop))
 #define CxHASARGS(c)	(((c)->cx_type & CXp_HASARGS) == CXp_HASARGS)
 #define CxLVAL(c)	(0 + (c)->blk_u16)
