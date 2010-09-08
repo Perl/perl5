@@ -792,7 +792,7 @@ if ($v_version gt v3.2.0) {
 # unless explicitly added.
 if ($v_version ge v5.2.0) {
     my $unihan = 'Unihan; remove from list if using Unihan';
-    foreach my $table qw (
+    foreach my $table (qw (
                            kAccountingNumeric
                            kOtherNumeric
                            kPrimaryNumeric
@@ -808,7 +808,7 @@ if ($v_version ge v5.2.0) {
                            kIRG_USource
                            kIRG_VSource
                            kRSUnicode
-                        )
+                        ))
     {
         $why_suppress_if_empty_warn_if_not{$table} = $unihan;
     }
@@ -4314,10 +4314,10 @@ sub trace { return main::trace(@_); }
 
     # Here are the methods that are required to be defined by any derived
     # class
-    for my $sub qw(
+    for my $sub (qw(
                     append_to_body
                     pre_body
-                )
+                ))
                 # append_to_body and pre_body are called in the write() method
                 # to add stuff after the main body of the table, but before
                 # its close; and to prepend stuff before the beginning of the
@@ -4795,7 +4795,7 @@ sub trace { return main::trace(@_); }
 
     # Accessors for the range list stored in this table.  First for
     # unconditional
-    for my $sub qw(
+    for my $sub (qw(
                     contains
                     count
                     each_range
@@ -4806,7 +4806,7 @@ sub trace { return main::trace(@_); }
                     range_count
                     reset_each_range
                     value_of
-                )
+                ))
     {
         no strict "refs";
         *$sub = sub {
@@ -4818,9 +4818,9 @@ sub trace { return main::trace(@_); }
     }
 
     # Then for ones that should fail if locked
-    for my $sub qw(
+    for my $sub (qw(
                     delete_range
-                )
+                ))
     {
         no strict "refs";
         *$sub = sub {
@@ -5783,9 +5783,9 @@ END
     }
 
     # Accessors for the underlying list that should fail if locked.
-    for my $sub qw(
+    for my $sub (qw(
                     add_duplicate
-                )
+                ))
     {
         no strict "refs";
         *$sub = sub {
@@ -6553,10 +6553,10 @@ END
     }
 
     # Accessors for the underlying list
-    for my $sub qw(
+    for my $sub (qw(
                     get_valid_code_point
                     get_invalid_code_point
-                )
+                ))
     {
         no strict "refs";
         *$sub = sub {
@@ -7121,7 +7121,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
 
     # Most of the accessors for a property actually apply to its map table.
     # Setup up accessor functions for those, referring to %map
-    for my $sub qw(
+    for my $sub (qw(
                     add_alias
                     add_anomalous_entry
                     add_comment
@@ -7166,7 +7166,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
                     to_output_map
                     value_of
                     write
-                )
+                ))
                     # 'property' above is for symmetry, so that one can take
                     # the property of a property and get itself, and so don't
                     # have to distinguish between properties and tables in

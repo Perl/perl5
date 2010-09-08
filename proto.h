@@ -6998,6 +6998,11 @@ PERL_CALLCONV int	Perl_keyword_plugin_standard(pTHX_ char* keyword_ptr, STRLEN k
 #define PERL_ARGS_ASSERT_KEYWORD_PLUGIN_STANDARD	\
 	assert(keyword_ptr); assert(op_ptr)
 
+PERL_CALLCONV void	Perl_coerce_qwlist_to_paren_list(pTHX_ OP* qwlist)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_COERCE_QWLIST_TO_PAREN_LIST	\
+	assert(qwlist)
+
 
 #if defined(USE_ITHREADS)
 #  if defined(PERL_IN_SV_C)

@@ -523,7 +523,7 @@ sub notfoo {"bar"}
 
 {
     my $n = 0;
-    for my $l qw(a b c d) {
+    for my $l (qw(a b c d)) {
 	given ($l) {
 	    when ($_ eq "b" .. $_ eq "c") { $n = 1 }
 	    default { $n = 0 }
@@ -534,7 +534,7 @@ sub notfoo {"bar"}
 
 {
     my $n = 0;
-    for my $l qw(a b c d) {
+    for my $l (qw(a b c d)) {
 	given ($l) {
 	    when ($_ eq "b" ... $_ eq "c") { $n = 1 }
 	    default { $n = 0 }

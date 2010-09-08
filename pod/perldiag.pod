@@ -5055,6 +5055,17 @@ name. So no namespace is current at all. Using this can cause many
 otherwise reasonable constructs to fail in baffling ways. C<use strict;>
 instead.
 
+=item Use of qw(...) as parentheses is deprecated
+
+(D deprecated) You have something like C<foreach $x qw(a b c) {...}>,
+using a C<qw(...)> list literal where a parenthesised expression is
+expected.  Historically the parser fooled itself into thinking that
+C<qw(...)> literals were always enclosed in parentheses, and as a result
+you could sometimes omit parentheses around them.  (You could never do
+the C<foreach qw(a b c) {...}> that you might have expected, though.)
+The parser no longer lies to itself in this way.  Wrap the list literal
+in parentheses, like C<foreach $x (qw(a b c)) {...}>.
+
 =item Use of reference "%s" as array index
 
 (W misc) You tried to use a reference as an array index; this probably
