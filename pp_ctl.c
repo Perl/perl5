@@ -1952,8 +1952,8 @@ PP(pp_enteriter)
     ENTER_with_name("loop1");
     SAVETMPS;
 
-    if (PL_op->op_targ) {
-	if (PL_op->op_private & OPpLVAL_INTRO) { /* for my $x (...) */
+    if (PL_op->op_targ) {			 /* "my" variable */
+	if (PL_op->op_private & OPpLVAL_INTRO) {        /* for my $x (...) */
 	    SvPADSTALE_off(PAD_SVl(PL_op->op_targ));
 	    SAVESETSVFLAGS(PAD_SVl(PL_op->op_targ),
 		    SVs_PADSTALE, SVs_PADSTALE);
@@ -1962,13 +1962,12 @@ PP(pp_enteriter)
 #ifdef USE_ITHREADS
 	itervar = PL_comppad;
 #else
-	itervar = &PAD_SVl(PL_op->op_targ);	/* "my" variable */
+	itervar = &PAD_SVl(PL_op->op_targ);
 #endif
     }
-    else {
+    else {					/* symbol table variable */
 	GV * const gv = MUTABLE_GV(POPs);
-	SV** svp = &GvSV(gv);			/* symbol table variable */
-	SAVEGENERICSV(*svp);
+	SV** svp = &GvSV(gv);	SAVEGENERICSV(*svp);
 	*svp = newSV(0);
 #ifdef USE_ITHREADS
 	itervar = (void *)gv;
