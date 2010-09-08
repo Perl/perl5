@@ -448,9 +448,7 @@ struct block_loop {
     I32		resetsp;
     LOOP *	my_op;	/* My op, that contains redo, next and last ops.  */
 #ifdef USE_ITHREADS
-    PAD		*oldcomppad; /* Also used for the GV, if targoffset is 0 */
-    /* This is also accesible via cx->blk_loop.my_op->op_targ */
-    PADOFFSET	targoffset;
+    PAD		*oldcomppad; /* Also used for the GV, if my_op->op_targ is 0 */
 #else
     SV **	itervar;
 #endif
@@ -474,11 +472,11 @@ struct block_loop {
 #  define CxITERVAR(c)							\
 	((c)->blk_loop.oldcomppad					\
 	 ? (CxPADLOOP(c) 						\
-	    ? &CX_CURPAD_SV( (c)->blk_loop, (c)->blk_loop.targoffset )	\
+	    ? &CX_CURPAD_SV( (c)->blk_loop, (c)->blk_loop.my_op->op_targ) \
 	    : &GvSV((GV*)(c)->blk_loop.oldcomppad))			\
 	 : (SV**)NULL)
 #  define CX_ITERDATA_SET(cx,idata,o)					\
-	if ((cx->blk_loop.targoffset = (o)))				\
+	if (cx->blk_loop.my_op->op_targ)				\
 	    CX_CURPAD_SAVE(cx->blk_loop);				\
 	else								\
 	    cx->blk_loop.oldcomppad = (idata);
@@ -701,7 +699,7 @@ struct context {
 /* private flags for CXt_LOOP */
 #define CXp_FOR_DEF	0x10	/* foreach using $_ */
 #ifdef USE_ITHREADS
-#  define CxPADLOOP(c)	((c)->blk_loop.targoffset)
+#  define CxPADLOOP(c)	((c)->blk_loop.my_op->op_targ)
 #endif
 
 /* private flags for CXt_SUBST */
