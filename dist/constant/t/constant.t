@@ -9,7 +9,7 @@ END { @warnings && print STDERR join "\n- ", "accumulated warnings:", @warnings 
 
 
 use strict;
-use Test::More tests => 97;
+use Test::More tests => 96;
 my $TB = Test::More->builder;
 
 BEGIN { use_ok('constant'); }
@@ -347,16 +347,3 @@ $kloong = 'schlozhauer';
     eval 'use constant undef, 5; 1';
     like $@, qr/\ACan't use undef as constant name at /;
 }
-
-# [perl #76540]
-# this caused panics or 'Attempt to free unreferenced scalar'
-# (its a compile-time issue, so the die lets us skip the prints)
-
-eval <<EOF;
-use constant FOO => 'bar';
-die "made it";
-print FOO, "\n";
-print FOO, "\n";
-EOF
-like($@, qr/made it/, "#76540");
-

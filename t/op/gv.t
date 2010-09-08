@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 
 require './test.pl';
-plan( tests => 192 );
+plan( tests => 194 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -632,6 +632,24 @@ is (scalar $::{fake}, "*main::sym",
       "$x", '*_random::glob_that_is_not_used_elsewhere',
       '[perl #1804] *$x assignment when $x is FAKE',
     );
+}
+
+# [perl #76540]
+# this caused panics or 'Attempt to free unreferenced scalar'
+# (its a compile-time issue, so the die lets us skip the prints)
+{
+    my @warnings;
+    local $SIG{__WARN__} = sub { push @warnings, @_ };
+
+    eval <<'EOF';
+BEGIN { $::{FOO} = \'bar' }
+die "made it";
+print FOO, "\n";
+print FOO, "\n";
+EOF
+
+    like($@, qr/made it/, "#76540 - no panic");
+    ok(!@warnings, "#76540 - no 'Attempt to free unreferenced scalar'");
 }
 
 __END__
