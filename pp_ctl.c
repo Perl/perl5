@@ -2381,7 +2381,7 @@ PP(pp_next)
     if (PL_scopestack_ix < inner)
 	leave_scope(PL_scopestack[PL_scopestack_ix]);
     PL_curcop = cx->blk_oldcop;
-    return CX_LOOP_NEXTOP_GET(cx);
+    return (cx)->blk_loop.my_op->op_nextop;
 }
 
 PP(pp_redo)
@@ -4769,7 +4769,7 @@ PP(pp_break)
     PL_curcop = cx->blk_oldcop;
 
     if (CxFOREACH(cx))
-	return CX_LOOP_NEXTOP_GET(cx);
+	return (cx)->blk_loop.my_op->op_nextop;
     else
 	/* RETURNOP calls PUTBACK which restores the old old sp */
 	RETURNOP(cx->blk_givwhen.leave_op);

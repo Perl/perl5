@@ -447,14 +447,11 @@ struct block_eval {
 struct block_loop {
     I32		resetsp;
     LOOP *	my_op;	/* My op, that contains redo, next and last ops.  */
-    /* (except for non_ithreads we need to modify next_op in pp_ctl.c, hence
-	why next_op is conditionally defined below.)  */
 #ifdef USE_ITHREADS
     PAD		*oldcomppad; /* Also used for the GV, if targoffset is 0 */
     /* This is also accesible via cx->blk_loop.my_op->op_targ */
     PADOFFSET	targoffset;
 #else
-    OP *	next_op;
     SV **	itervar;
 #endif
     union {
@@ -494,18 +491,9 @@ struct block_loop {
 #define CxHASARGS(c)	(((c)->cx_type & CXp_HASARGS) == CXp_HASARGS)
 #define CxLVAL(c)	(0 + (c)->blk_u16)
 
-#ifdef USE_ITHREADS
-#  define PUSHLOOP_OP_NEXT		/* No need to do anything.  */
-#  define CX_LOOP_NEXTOP_GET(cx)	((cx)->blk_loop.my_op->op_nextop + 0)
-#else
-#  define PUSHLOOP_OP_NEXT		cx->blk_loop.next_op = cLOOP->op_nextop
-#  define CX_LOOP_NEXTOP_GET(cx)	((cx)->blk_loop.next_op + 0)
-#endif
-
 #define PUSHLOOP_PLAIN(cx, s)						\
 	cx->blk_loop.resetsp = s - PL_stack_base;			\
 	cx->blk_loop.my_op = cLOOP;					\
-	PUSHLOOP_OP_NEXT;						\
 	cx->blk_loop.state_u.ary.ary = NULL;				\
 	cx->blk_loop.state_u.ary.ix = 0;				\
 	CX_ITERDATA_SET(cx, NULL, 0);
@@ -513,7 +501,6 @@ struct block_loop {
 #define PUSHLOOP_FOR(cx, dat, s, offset)				\
 	cx->blk_loop.resetsp = s - PL_stack_base;			\
 	cx->blk_loop.my_op = cLOOP;					\
-	PUSHLOOP_OP_NEXT;						\
 	cx->blk_loop.state_u.ary.ary = NULL;				\
 	cx->blk_loop.state_u.ary.ix = 0;				\
 	CX_ITERDATA_SET(cx, dat, offset);

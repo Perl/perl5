@@ -1232,8 +1232,6 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 		(long)cx->blk_loop.resetsp);
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.MY_OP = 0x%"UVxf"\n",
 		PTR2UV(cx->blk_loop.my_op));
-	PerlIO_printf(Perl_debug_log, "BLK_LOOP.NEXT_OP = 0x%"UVxf"\n",
-		PTR2UV(CX_LOOP_NEXTOP_GET(cx)));
 	/* XXX: not accurate for LAZYSV/IV */
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERARY = 0x%"UVxf"\n",
 		PTR2UV(cx->blk_loop.state_u.ary.ary));
