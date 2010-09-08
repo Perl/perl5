@@ -162,26 +162,6 @@ Public API:
  * "A time to plant, and a time to uproot what was planted..."
  */
 
-void
-Perl_offer_nice_chunk(pTHX_ void *const chunk, const U32 chunk_size)
-{
-    dVAR;
-    void *new_chunk;
-    U32 new_chunk_size;
-
-    PERL_ARGS_ASSERT_OFFER_NICE_CHUNK;
-
-    new_chunk = (void *)(chunk);
-    new_chunk_size = (chunk_size);
-    if (new_chunk_size > PL_nice_chunk_size) {
-	Safefree(PL_nice_chunk);
-	PL_nice_chunk = (char *) new_chunk;
-	PL_nice_chunk_size = new_chunk_size;
-    } else {
-	Safefree(chunk);
-    }
-}
-
 #ifdef PERL_MEM_LOG
 #  define MEM_LOG_NEW_SV(sv, file, line, func)	\
 	    Perl_mem_log_new_sv(sv, file, line, func)
@@ -254,17 +234,9 @@ S_more_sv(pTHX)
 {
     dVAR;
     SV* sv;
-
-    if (PL_nice_chunk) {
-	sv_add_arena(PL_nice_chunk, PL_nice_chunk_size, 0);
-	PL_nice_chunk = NULL;
-        PL_nice_chunk_size = 0;
-    }
-    else {
-	char *chunk;                /* must use New here to match call to */
-	Newx(chunk,PERL_ARENA_SIZE,char);  /* Safefree() in sv_free_arenas() */
-	sv_add_arena(chunk, PERL_ARENA_SIZE, 0);
-    }
+    char *chunk;                /* must use New here to match call to */
+    Newx(chunk,PERL_ARENA_SIZE,char);  /* Safefree() in sv_free_arenas() */
+    sv_add_arena(chunk, PERL_ARENA_SIZE, 0);
     uproot_SV(sv);
     return sv;
 }
@@ -673,9 +645,6 @@ Perl_sv_free_arenas(pTHX)
     while (i--)
 	PL_body_roots[i] = 0;
 
-    Safefree(PL_nice_chunk);
-    PL_nice_chunk = NULL;
-    PL_nice_chunk_size = 0;
     PL_sv_arenaroot = 0;
     PL_sv_root = 0;
 }
@@ -12296,8 +12265,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_body_arenas = NULL;
     Zero(&PL_body_roots, 1, PL_body_roots);
     
-    PL_nice_chunk	= NULL;
-    PL_nice_chunk_size	= 0;
     PL_sv_count		= 0;
     PL_sv_objcount	= 0;
     PL_sv_root		= NULL;

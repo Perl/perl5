@@ -6691,12 +6691,6 @@ PERL_CALLCONV STRLEN *	Perl_new_warnings_bitfield(pTHX_ STRLEN *buffer, const ch
 	assert(bits)
 
 
-PERL_CALLCONV void	Perl_offer_nice_chunk(pTHX_ void *const chunk, const U32 chunk_size)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_OFFER_NICE_CHUNK	\
-	assert(chunk)
-
-
 #ifndef SPRINTF_RETURNS_STRLEN
 PERL_CALLCONV int	Perl_my_sprintf(char *buffer, const char *pat, ...)
 			__attribute__nonnull__(1)

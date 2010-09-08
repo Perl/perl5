@@ -204,8 +204,6 @@ na
 nexttoke
 nexttype
 nextval
-nice_chunk
-nice_chunk_size
 ninterps
 nomemok
 numeric_local

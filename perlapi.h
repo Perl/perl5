@@ -448,10 +448,6 @@ END_EXTERN_C
 #define PL_my_cxt_size		(*Perl_Imy_cxt_size_ptr(aTHX))
 #undef  PL_na
 #define PL_na			(*Perl_Ina_ptr(aTHX))
-#undef  PL_nice_chunk
-#define PL_nice_chunk		(*Perl_Inice_chunk_ptr(aTHX))
-#undef  PL_nice_chunk_size
-#define PL_nice_chunk_size	(*Perl_Inice_chunk_size_ptr(aTHX))
 #undef  PL_nomemok
 #define PL_nomemok		(*Perl_Inomemok_ptr(aTHX))
 #undef  PL_numeric_local

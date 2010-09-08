@@ -1989,9 +1989,6 @@
 #define ckwarn_common		S_ckwarn_common
 #endif
 #endif
-#ifdef PERL_CORE
-#define offer_nice_chunk	Perl_offer_nice_chunk
-#endif
 #ifndef SPRINTF_RETURNS_STRLEN
 #endif
 #ifdef PERL_CORE
@@ -4461,9 +4458,6 @@
 #endif
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
-#endif
-#ifdef PERL_CORE
-#define offer_nice_chunk(a,b)	Perl_offer_nice_chunk(aTHX_ a,b)
 #endif
 #ifndef SPRINTF_RETURNS_STRLEN
 #endif

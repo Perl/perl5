@@ -445,8 +445,7 @@ PERLVAR(Isighandlerp,	Sighandler_t)
 
 PERLVARA(Ibody_roots,	PERL_ARENA_ROOTS_SIZE, void*) /* array of body roots */
 
-PERLVAR(Inice_chunk,	char *)		/* a nice chunk of memory to reuse */
-PERLVAR(Inice_chunk_size,	U32)	/* how nice the chunk of memory is */
+/* Space for an int */
 
 PERLVARI(Imaxo,	int,	MAXO)		/* maximum number of ops */
 

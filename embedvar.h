@@ -206,8 +206,6 @@
 #define PL_my_cxt_list		(vTHX->Imy_cxt_list)
 #define PL_my_cxt_size		(vTHX->Imy_cxt_size)
 #define PL_na			(vTHX->Ina)
-#define PL_nice_chunk		(vTHX->Inice_chunk)
-#define PL_nice_chunk_size	(vTHX->Inice_chunk_size)
 #define PL_nomemok		(vTHX->Inomemok)
 #define PL_numeric_local	(vTHX->Inumeric_local)
 #define PL_numeric_name		(vTHX->Inumeric_name)
@@ -538,8 +536,6 @@
 #define PL_Imy_cxt_list		PL_my_cxt_list
 #define PL_Imy_cxt_size		PL_my_cxt_size
 #define PL_Ina			PL_na
-#define PL_Inice_chunk		PL_nice_chunk
-#define PL_Inice_chunk_size	PL_nice_chunk_size
 #define PL_Inomemok		PL_nomemok
 #define PL_Inumeric_local	PL_numeric_local
 #define PL_Inumeric_name	PL_numeric_name

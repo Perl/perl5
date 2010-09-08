@@ -150,11 +150,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 		assert(newmax >= AvMAX(av));
 		Newx(ary, newmax+1, SV*);
 		Copy(AvALLOC(av), ary, AvMAX(av)+1, SV*);
-		if (AvMAX(av) > 64)
-		    offer_nice_chunk(AvALLOC(av),
-				     (AvMAX(av)+1) * sizeof(const SV *));
-		else
-		    Safefree(AvALLOC(av));
+		Safefree(AvALLOC(av));
 		AvALLOC(av) = ary;
 #endif
 #ifdef Perl_safesysmalloc_size

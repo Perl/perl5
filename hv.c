@@ -1105,13 +1105,7 @@ S_hsplit(pTHX_ HV *hv)
     if (SvOOK(hv)) {
 	Copy(HvAUX(hv), &a[newsize * sizeof(HE*)], 1, struct xpvhv_aux);
     }
-    if (oldsize >= 64) {
-	offer_nice_chunk(HvARRAY(hv),
-			 PERL_HV_ARRAY_ALLOC_BYTES(oldsize)
-			 + (SvOOK(hv) ? sizeof(struct xpvhv_aux) : 0));
-    }
-    else
-	Safefree(HvARRAY(hv));
+    Safefree(HvARRAY(hv));
 #endif
 
     PL_nomemok = FALSE;
@@ -1270,13 +1264,7 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 	if (SvOOK(hv)) {
 	    Copy(HvAUX(hv), &a[newsize * sizeof(HE*)], 1, struct xpvhv_aux);
 	}
-	if (oldsize >= 64) {
-	    offer_nice_chunk(HvARRAY(hv),
-			     PERL_HV_ARRAY_ALLOC_BYTES(oldsize)
-			     + (SvOOK(hv) ? sizeof(struct xpvhv_aux) : 0));
-	}
-	else
-	    Safefree(HvARRAY(hv));
+	Safefree(HvARRAY(hv));
 #endif
 	PL_nomemok = FALSE;
 	Zero(&a[oldsize * sizeof(HE*)], (newsize-oldsize) * sizeof(HE*), char); /* zero 2nd half*/

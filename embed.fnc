@@ -2273,9 +2273,6 @@ Apo	|bool	|ckwarn_d	|U32 w
 XEopMa	|STRLEN *|new_warnings_bitfield|NULLOK STRLEN *buffer \
 				|NN const char *const bits|STRLEN size
 
-: Used in av.c, hv.c
-p	|void	|offer_nice_chunk	|NN void *const chunk|const U32 chunk_size
-
 #ifndef SPRINTF_RETURNS_STRLEN
 Apnod	|int	|my_sprintf	|NN char *buffer|NN const char *pat|...
 #endif
