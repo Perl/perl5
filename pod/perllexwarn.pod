@@ -520,6 +520,16 @@ a warning.
 Notice also that the warning is reported at the line where the object is first
 used.
 
+When registering new categories of warning, you can supply more names to
+warnings::register like this:
+
+    package MyModule;
+    use warnings::register qw(format precision);
+
+    ...
+
+    warnings::warnif('MyModule::format', '...');
+
 =head1 SEE ALSO
 
 L<warnings>, L<perldiag>.

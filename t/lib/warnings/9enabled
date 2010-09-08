@@ -1181,6 +1181,24 @@ my message 2 at - line 8
 my message 4 at - line 8
 ########
 
+--FILE-- abc52.pm
+package abc52 ;
+use warnings::register ('foo', 'bar');
+sub check {
+    warnings::warnif('abc52', "hello");
+    warnings::warnif('abc52::foo', "hello foo");
+    warnings::warnif('abc52::bar', "hello bar");
+}
+1;
+--FILE--
+use abc52;
+use warnings("abc52", "abc52::bar");
+abc52::check() ;
+EXPECT
+hello at - line 3
+hello bar at - line 3
+########
+
 --FILE--
 # test for bug [perl #15395]
 my ( $warn_cat, # warning category we'll try to control
