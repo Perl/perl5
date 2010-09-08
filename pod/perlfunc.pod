@@ -125,7 +125,7 @@ C<sin>, C<sqrt>, C<srand>
 =item Functions for real @ARRAYs
 X<array>
 
-C<pop>, C<push>, C<shift>, C<splice>, C<unshift>
+C<each>, C<keys>, C<pop>, C<push>, C<shift>, C<splice>, C<unshift>, C<values>
 
 =item Functions for list data
 X<list>
