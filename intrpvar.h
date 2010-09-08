@@ -445,7 +445,7 @@ PERLVAR(Isighandlerp,	Sighandler_t)
 
 PERLVARA(Ibody_roots,	PERL_ARENA_ROOTS_SIZE, void*) /* array of body roots */
 
-/* Space for an int */
+PERLVAR(Iunicode, U32)	/* Unicode features: $ENV{PERL_UNICODE} or -C */
 
 PERLVARI(Imaxo,	int,	MAXO)		/* maximum number of ops */
 
@@ -633,10 +633,6 @@ PERLVARI(Icheckav_save, AV*, NULL)	/* save CHECK{}s when compiling */
 PERLVARI(Iunitcheckav_save, AV*, NULL)	/* save UNITCHECK{}s when compiling */
 
 PERLVARI(Iclocktick, long, 0)	/* this many times() ticks in a second */
-
-/* Space for an int */
-
-PERLVAR(Iunicode, U32)	/* Unicode features: $ENV{PERL_UNICODE} or -C */
 
 PERLVAR(Isignals, U32)	/* Using which pre-5.8 signals */
 
