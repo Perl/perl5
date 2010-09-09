@@ -4675,16 +4675,23 @@ sub trace { return main::trace(@_); }
 
                 # If has or wants a single point range output
                 if ($start == $end || $range_size_1) {
-                    for my $i ($start .. $end) {
-                        push @OUT, sprintf "%04X\t\t%s\n", $i, $value;
-                        if ($output_names) {
-                            if (! defined $viacode[$i]) {
-                                $viacode[$i] =
-                                    Property::property_ref('Perl_Charnames')
-                                                                ->value_of($i)
-                                    || "";
+                    if (ref $range_size_1 eq 'CODE') {
+                        for my $i ($start .. $end) {
+                            push @OUT, &$range_size_1($i, $value);
+                        }
+                    }
+                    else {
+                        for my $i ($start .. $end) {
+                            push @OUT, sprintf "%04X\t\t%s\n", $i, $value;
+                            if ($output_names) {
+                                if (! defined $viacode[$i]) {
+                                    $viacode[$i] =
+                                        Property::property_ref('Perl_Charnames')
+                                                                    ->value_of($i)
+                                        || "";
+                                }
+                                $OUT[-1] =~ s/\n/\t# $viacode[$i]\n/;
                             }
-                            $OUT[-1] =~ s/\n/\t# $viacode[$i]\n/;
                         }
                     }
                 }
@@ -8536,6 +8543,17 @@ END
     return @return;
 }
 
+sub output_perl_charnames_line ($$) {
+
+    # Output the entries in Perl_charnames specially, using 5 digits instead
+    # of four.  This makes the entries a constant length, and simplifies
+    # charnames.pm which this table is for.  Unicode can have 6 digit
+    # ordinals, but they are all private use or noncharacters which do not
+    # have names, so won't be in this table.
+
+    return sprintf "%05X\t\t%s\n", $_[0], $_[1];
+}
+
 { # Closure
     # This is used to store the range list of all the code points usable when
     # the little used $compare_versions feature is enabled.
@@ -9120,7 +9138,7 @@ END
                        File => 'Name',
                        Internal_Only_Warning => 1,
                        Perl_Extension => 1,
-                       Range_Size_1 => 1,
+                       Range_Size_1 => \&output_perl_charnames_line,
                        Type => $STRING,
                        );
 

@@ -464,7 +464,7 @@ sub alias (@) # Set up a single alias
         $^H{charnames_ord_aliases}{$name} = $value;
 
         # Use a canonical form.
-        $^H{charnames_inverse_ords}{sprintf("%04X", $value)} = $name;
+        $^H{charnames_inverse_ords}{sprintf("%05X", $value)} = $name;
     }
     else {
         # XXX validate syntax when deprecation cycle complete. ie. start
@@ -578,7 +578,7 @@ sub lookup_name ($;$) {
 
       ## Suck in the code/name list as a big string.
       ## Lines look like:
-      ##     "0052\t\tLATIN CAPITAL LETTER R\n"
+      ##     "00052\t\tLATIN CAPITAL LETTER R\n"
       $txt = do "unicore/Name.pl" unless $txt;
 
       ## @off will hold the index into the code/name string of the start and
@@ -639,24 +639,10 @@ sub lookup_name ($;$) {
       }
 
       if (! defined $ord) {
-        ##
-        ## Now know where in the string the name starts.
-        ## The code, in hex, is before that.
-        ##
-        ## The code can be 4-6 characters long, so we've got to sort of
-        ## go look for it, just after the newline that comes before $off[0].
-        ##
-        ## This would be much easier if unicore/Name.pl had info in
-        ## a name/code order, instead of code/name order.
-        ##
-        ## The +1 after the rindex() is to skip past the newline we're finding,
-        ## or, if the rindex() fails, to put us to an offset of zero.
-        ##
-        my $hexstart = rindex($txt, "\n", $off[0]) + 1;
 
-        ## we know where it starts, so turn into number -
-        ## the ordinal for the char.
-        $ord = CORE::hex substr($txt, $hexstart, $off[0] - 2 - $hexstart);
+        # Now know where in the string the name starts.
+        # The code, 5 hex digits long (and 2 tabs) is before that.
+        $ord = CORE::hex substr($txt, $off[0] - 7, 5);
       }
 
       # Cache the input so as to not have to search the large table
@@ -792,10 +778,10 @@ sub viacode {
   # Must check if decimal first; see comments at that definition
   my $hex;
   if ($arg =~ $decimal_qr) {
-    $hex = sprintf "%04X", $arg;
+    $hex = sprintf "%05X", $arg;
   } elsif ($arg =~ $hex_qr) {
     # Below is the line that differs from the _getcode() source
-    $hex = sprintf "%04X", hex $1;
+    $hex = sprintf "%05X", hex $1;
   } else {
     carp("unexpected arg \"$arg\" to charnames::viacode()");
     return;
