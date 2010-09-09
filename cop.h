@@ -695,9 +695,7 @@ struct context {
 
 /* private flags for CXt_LOOP */
 #define CXp_FOR_DEF	0x10	/* foreach using $_ */
-#ifdef USE_ITHREADS
-#  define CxPADLOOP(c)	((c)->blk_loop.my_op->op_targ)
-#endif
+#define CxPADLOOP(c)	((c)->blk_loop.my_op->op_targ)
 
 /* private flags for CXt_SUBST */
 #define CXp_ONCE	0x10	/* What was sbu_once in struct subst */
