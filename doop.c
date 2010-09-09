@@ -1436,8 +1436,9 @@ Perl_do_kv(pTHX)
     register HE *entry;
     const I32 gimme = GIMME_V;
     const I32 dokv =     (PL_op->op_type == OP_RV2HV || PL_op->op_type == OP_PADHV);
-    const I32 dokeys =   dokv || (PL_op->op_type == OP_KEYS);
-    const I32 dovalues = dokv || (PL_op->op_type == OP_VALUES);
+    /* op_type is OP_RKEYS/OP_RVALUES if pp_rkeys delegated to here */
+    const I32 dokeys =   dokv || (PL_op->op_type == OP_KEYS || PL_op->op_type == OP_RKEYS);
+    const I32 dovalues = dokv || (PL_op->op_type == OP_VALUES || PL_op->op_type == OP_RVALUES);
 
     if (!hv) {
 	if (PL_op->op_flags & OPf_MOD || LVRET) {	/* lvalue */

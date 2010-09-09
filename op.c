@@ -310,6 +310,12 @@ Perl_Slab_Free(pTHX_ void *op)
 
 #define RETURN_UNLIMITED_NUMBER (PERL_INT_MAX / 2)
 
+#define CHANGE_TYPE(o,type) \
+    STMT_START {				\
+	o->op_type = (OPCODE)type;		\
+	o->op_ppaddr = PL_ppaddr[type];		\
+    } STMT_END
+
 STATIC const char*
 S_gv_ename(pTHX_ GV *gv)
 {
@@ -8259,7 +8265,7 @@ Perl_ck_shift(pTHX_ OP *o)
 	return newUNOP(type, 0, scalar(argop));
 #endif
     }
-    return scalar(modkids(ck_fun(o), type));
+    return scalar(modkids(ck_push(o), type));
 }
 
 OP *
@@ -9125,28 +9131,79 @@ Perl_ck_substr(pTHX_ OP *o)
 }
 
 OP *
-Perl_ck_each(pTHX_ OP *o)
+Perl_ck_push(pTHX_ OP *o)
 {
     dVAR;
     OP *kid = o->op_flags & OPf_KIDS ? cLISTOPo->op_first : NULL;
+    OP *cursor = NULL;
+    OP *proxy = NULL;
+
+    PERL_ARGS_ASSERT_CK_PUSH;
+
+    /* If 1st kid is pushmark (e.g. push, unshift, splice), we need 2nd kid */
+    if (kid) {
+	cursor = kid->op_type == OP_PUSHMARK ? kid->op_sibling : kid;
+    }
+
+    /* If not array or array deref, wrap it with an array deref.
+     * For OP_CONST, we only wrap arrayrefs */
+    if (cursor) {
+	if ( (    cursor->op_type != OP_PADAV
+	       && cursor->op_type != OP_RV2AV
+	       && cursor->op_type != OP_CONST
+	     )
+	     ||
+	     (    cursor->op_type == OP_CONST
+	       && SvROK(cSVOPx_sv(cursor))
+	       && SvTYPE(SvRV(cSVOPx_sv(cursor))) == SVt_PVAV
+	     )
+	) {
+	    proxy = newAVREF(cursor);
+	    if ( cursor == kid ) {
+		cLISTOPx(o)->op_first = proxy;
+	    }
+	    else {
+		cLISTOPx(kid)->op_sibling = proxy;
+	    }
+	    cLISTOPx(proxy)->op_sibling = cLISTOPx(cursor)->op_sibling;
+	    cLISTOPx(cursor)->op_sibling = NULL;
+	}
+    }
+    return ck_fun(o);
+}
+
+OP *
+Perl_ck_each(pTHX_ OP *o)
+{
+    dVAR;
+    OP *kid = o->op_flags & OPf_KIDS ? cUNOPo->op_first : NULL;
+    const unsigned orig_type  = o->op_type;
+    const unsigned array_type = orig_type == OP_EACH ? OP_AEACH
+	                      : orig_type == OP_KEYS ? OP_AKEYS : OP_AVALUES;
+    const unsigned ref_type   = orig_type == OP_EACH ? OP_REACH
+	                      : orig_type == OP_KEYS ? OP_RKEYS : OP_RVALUES;
 
     PERL_ARGS_ASSERT_CK_EACH;
 
     if (kid) {
-	if (kid->op_type == OP_PADAV || kid->op_type == OP_RV2AV) {
-	    const unsigned new_type = o->op_type == OP_EACH ? OP_AEACH
-		: o->op_type == OP_KEYS ? OP_AKEYS : OP_AVALUES;
-	    o->op_type = new_type;
-	    o->op_ppaddr = PL_ppaddr[new_type];
-	}
-	else if (!(kid->op_type == OP_PADHV || kid->op_type == OP_RV2HV
-		    || (kid->op_type == OP_CONST && kid->op_private & OPpCONST_BARE)
-		  )) {
-	    bad_type(1, "hash or array", PL_op_desc[o->op_type], kid);
-	    return o;
+	switch (kid->op_type) {
+	    case OP_PADHV:
+	    case OP_RV2HV:
+		break;
+	    case OP_PADAV:
+	    case OP_RV2AV:
+		CHANGE_TYPE(o, array_type);
+		break;
+	    case OP_CONST:
+		if (kid->op_private == OPpCONST_BARE)
+		    /* we let ck_fun treat as hash */
+		    break;
+	    default:
+		CHANGE_TYPE(o, ref_type);
 	}
     }
-    return ck_fun(o);
+    /* if treating as a reference, defer additional checks to runtime */
+    return o->op_type == ref_type ? o : ck_fun(o);
 }
 
 /* caller is supposed to assign the return to the 

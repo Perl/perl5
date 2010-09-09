@@ -1053,7 +1053,7 @@ X<prototype> X<subroutine, prototype>
 Perl supports a very limited kind of compile-time argument checking
 using function prototyping.  If you declare
 
-    sub mypush (\@@)
+    sub mypush (+@)
 
 then C<mypush()> takes arguments exactly like C<push()> does.  The
 function declaration must be visible at compile time.  The prototype
@@ -1083,9 +1083,9 @@ corresponding built-in.
     sub mysyswrite ($$$;$)   mysyswrite $buf, 0, length($buf) - $off, $off
     sub myreverse (@)	     myreverse $a, $b, $c
     sub myjoin ($@)	     myjoin ":", $a, $b, $c
-    sub mypop (\@)	     mypop @array
-    sub mysplice (\@$$@)     mysplice @array, 0, 2, @pushme
-    sub mykeys (\%)	     mykeys %{$hashref}
+    sub mypop (+)	     mypop @array
+    sub mysplice (+$$@)	     mysplice @array, 0, 2, @pushme
+    sub mykeys (+)	     mykeys %{$hashref}
     sub myopen (*;$)	     myopen HANDLE, $name
     sub mypipe (**)	     mypipe READHANDLE, WRITEHANDLE
     sub mygrep (&@)	     mygrep { /foo/ } $a, $b, $c
@@ -1141,7 +1141,7 @@ C<\[@%]> when given a literal array or hash variable, but will otherwise
 force scalar context on the argument.  This is useful for functions which
 should accept either a literal array or an array reference as the argument:
 
-    sub smartpush (+@) {
+    sub mypush (+@) {
         my $aref = shift;
         die "Not an array or arrayref" unless ref $aref eq 'ARRAY';
         push @$aref, @_;

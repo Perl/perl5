@@ -407,6 +407,12 @@ PERL_CALLCONV OP *	Perl_ck_open(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_CK_OPEN	\
 	assert(o)
 
+PERL_CALLCONV OP *	Perl_ck_push(pTHX_ OP *o)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_CK_PUSH	\
+	assert(o)
+
 PERL_CALLCONV OP *	Perl_ck_readline(pTHX_ OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -3073,6 +3079,7 @@ PERL_CALLCONV OP *	Perl_pp_quotemeta(pTHX);
 PERL_CALLCONV OP *	Perl_pp_rand(pTHX);
 PERL_CALLCONV OP *	Perl_pp_range(pTHX);
 PERL_CALLCONV OP *	Perl_pp_rcatline(pTHX);
+PERL_CALLCONV OP *	Perl_pp_reach(pTHX);
 PERL_CALLCONV OP *	Perl_pp_read(pTHX);
 PERL_CALLCONV OP *	Perl_pp_readdir(pTHX);
 PERL_CALLCONV OP *	Perl_pp_readline(pTHX);
@@ -3093,12 +3100,14 @@ PERL_CALLCONV OP *	Perl_pp_reverse(pTHX);
 PERL_CALLCONV OP *	Perl_pp_rewinddir(pTHX);
 PERL_CALLCONV OP *	Perl_pp_right_shift(pTHX);
 PERL_CALLCONV OP *	Perl_pp_rindex(pTHX);
+PERL_CALLCONV OP *	Perl_pp_rkeys(pTHX);
 PERL_CALLCONV OP *	Perl_pp_rmdir(pTHX);
 PERL_CALLCONV OP *	Perl_pp_rv2av(pTHX);
 PERL_CALLCONV OP *	Perl_pp_rv2cv(pTHX);
 PERL_CALLCONV OP *	Perl_pp_rv2gv(pTHX);
 PERL_CALLCONV OP *	Perl_pp_rv2hv(pTHX);
 PERL_CALLCONV OP *	Perl_pp_rv2sv(pTHX);
+PERL_CALLCONV OP *	Perl_pp_rvalues(pTHX);
 PERL_CALLCONV OP *	Perl_pp_sassign(pTHX);
 PERL_CALLCONV OP *	Perl_pp_say(pTHX);
 PERL_CALLCONV OP *	Perl_pp_scalar(pTHX);

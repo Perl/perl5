@@ -30,6 +30,7 @@ Perl_ck_match
 Perl_ck_method
 Perl_ck_null
 Perl_ck_open
+Perl_ck_push
 Perl_ck_readline
 Perl_ck_repeat
 Perl_ck_require
@@ -409,5 +410,8 @@ Perl_pp_getlogin
 Perl_pp_syscall
 Perl_pp_lock
 Perl_pp_once
+Perl_pp_reach
+Perl_pp_rkeys
+Perl_pp_rvalues
 
 # ex: set ro:

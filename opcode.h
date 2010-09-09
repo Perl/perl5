@@ -399,6 +399,9 @@ EXTCONST char* const PL_op_name[] = {
 	"lock",
 	"once",
 	"custom",
+	"reach",
+	"rkeys",
+	"rvalues",
 };
 #endif
 
@@ -772,6 +775,9 @@ EXTCONST char* const PL_op_desc[] = {
 	"lock",
 	"once",
 	"unknown custom operator",
+	"each on reference",
+	"keys on reference",
+	"values on reference",
 };
 #endif
 
@@ -1159,6 +1165,9 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_lock,
 	Perl_pp_once,
 	Perl_unimplemented_op,	/* Perl_pp_custom */
+	Perl_pp_rkeys,	/* Perl_pp_reach */
+	Perl_pp_rkeys,
+	Perl_pp_rkeys,	/* Perl_pp_rvalues */
 }
 #endif
 #ifdef PERL_PPADDR_INITED
@@ -1327,11 +1336,11 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* lslice */
 	Perl_ck_fun,		/* anonlist */
 	Perl_ck_fun,		/* anonhash */
-	Perl_ck_fun,		/* splice */
-	Perl_ck_fun,		/* push */
+	Perl_ck_push,		/* splice */
+	Perl_ck_push,		/* push */
 	Perl_ck_shift,		/* pop */
 	Perl_ck_shift,		/* shift */
-	Perl_ck_fun,		/* unshift */
+	Perl_ck_push,		/* unshift */
 	Perl_ck_sort,		/* sort */
 	Perl_ck_fun,		/* reverse */
 	Perl_ck_grep,		/* grepstart */
@@ -1543,6 +1552,9 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_rfun,		/* lock */
 	Perl_ck_null,		/* once */
 	Perl_ck_null,		/* custom */
+	Perl_ck_each,		/* reach */
+	Perl_ck_each,		/* rkeys */
+	Perl_ck_each,		/* rvalues */
 }
 #endif
 #ifdef PERL_CHECK_INITED
@@ -1921,6 +1933,9 @@ EXTCONST U32 PL_opargs[] = {
 	0x00007b04,	/* lock */
 	0x00000300,	/* once */
 	0x00000000,	/* custom */
+	0x00001b00,	/* reach */
+	0x00001b08,	/* rkeys */
+	0x00001b08,	/* rvalues */
 };
 #endif
 

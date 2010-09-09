@@ -76,6 +76,17 @@ on the operator (e.g. C<CORE::log($x)>) or declare the subroutine
 to be an object method (see L<perlsub/"Subroutine Attributes"> or
 L<attributes>).
 
+=item Ambiguous overloaded argument to %s resolved as %s
+
+(W ambiguous) You called C<keys>, C<values> or C<each> on an object that had
+overloading of C<%{}> or C<@{}> or both.  In such a case, the object is
+dereferenced according to its overloading, not its underlying reference type.
+The warning is issued when C<%{}> overloading exists on a blessed arrayref,
+when C<@{}> overloading exists on a blessed hashref, or when both overloadings
+are defined (in which case C<%{}> is used).  You can force the interpretation
+of the object by explictly dereferencing it as an array or hash instead of
+passing the object itself to C<keys>, C<values> or C<each>.
+
 =item Ambiguous range in transliteration operator
 
 (F) You wrote something like C<tr/a-z-0//> which doesn't mean anything at
@@ -4519,6 +4530,11 @@ Configure knows about.
 certain type.  Arrays must be @NAME or C<@{EXPR}>.  Hashes must be
 %NAME or C<%{EXPR}>.  No implicit dereferencing is allowed--use the
 {EXPR} forms as an explicit dereference.  See L<perlref>.
+
+=item Type of argument to %s must be hashref or arrayref
+
+(F) You called C<keys>, C<values> or C<each> with an argument that was
+expected to be a reference to a hash or a reference to an array.
 
 =item umask not implemented
 

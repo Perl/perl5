@@ -105,6 +105,7 @@ my @raw_alias = (
 		 Perl_pp_bit_or => ['bit_xor'],
 		 Perl_pp_rv2av => ['rv2hv'],
 		 Perl_pp_akeys => ['avalues'],
+		 Perl_pp_rkeys => [qw(rvalues reach)],
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {
@@ -808,11 +809,11 @@ lslice		list slice		ck_null		2	H L L
 anonlist	anonymous list ([])	ck_fun		ms@	L
 anonhash	anonymous hash ({})	ck_fun		ms@	L
 
-splice		splice			ck_fun		m@	A S? S? L
-push		push			ck_fun		imsT@	A L
+splice		splice			ck_push		m@	A S? S? L
+push		push			ck_push		imsT@	A L
 pop		pop			ck_shift	s%	A?
 shift		shift			ck_shift	s%	A?
-unshift		unshift			ck_fun		imsT@	A L
+unshift		unshift			ck_push		imsT@	A L
 sort		sort			ck_sort		dm@	C? L
 reverse		reverse			ck_fun		mt@	L
 
@@ -1099,3 +1100,8 @@ lock		lock			ck_rfun		s%	R
 once		once			ck_null		|	
 
 custom		unknown custom operator		ck_null		0
+
+# For smart dereference for each/keys/values
+reach		each on reference			ck_each		%	S
+rkeys		keys on reference			ck_each		t%	S
+rvalues		values on reference			ck_each		t%	S

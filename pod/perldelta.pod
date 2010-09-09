@@ -77,6 +77,52 @@ with regard to C<[[:posix:]]> character classes
 Work is underway to add the case sensitive matching to the control of
 this feature, but was not complete in time for this dot release.
 
+=head2 Array and hash container functions accept references
+
+All built-in functions that operate directly on array or hash
+containers now also accept hard references to arrays or hashes:
+
+  |----------------------------+---------------------------|
+  | Traditional syntax         | Terse syntax              |
+  |----------------------------+---------------------------|
+  | push @$arrayref, @stuff    | push $arrayref, @stuff    |
+  | unshift @$arrayref, @stuff | unshift $arrayref, @stuff |
+  | pop @$arrayref             | pop $arrayref             |
+  | shift @$arrayref           | shift $arrayref           |
+  | splice @$arrayref, 0, 2    | splice $arrayref, 0, 2    |
+  | keys %$hashref             | keys $hashref             |
+  | keys @$arrayref            | keys $arrayref            |
+  | values %$hashref           | values $hashref           |
+  | values @$arrayref          | values $arrayref          |
+  | ($k,$v) = each %$hashref   | ($k,$v) = each $hashref   |
+  | ($k,$v) = each @$arrayref  | ($k,$v) = each $arrayref  |
+  |----------------------------+---------------------------|
+
+This allows these built-in functions to act on long dereferencing chains
+or on the return value of subroutines without needing to wrap them in
+C<@{}> or C<%{}>:
+
+  push @{$obj->tags}, $new_tag;  # old way
+  push $obj->tags,    $new_tag;  # new way
+
+  for ( keys %{$hoh->{genres}{artists}} ) {...} # old way 
+  for ( keys $hoh->{genres}{artists}    ) {...} # new way 
+
+For C<push>, C<unshift> and C<splice>, the reference will auto-vivify
+if it is not defined, just as if it were wrapped with C<@{}>.
+
+Calling C<keys> or C<values> directly on a reference gives a substantial
+performance improvement over explicit dereferencing.
+
+For C<keys>, C<values>, C<each>, when overloaded dereferencing is
+present, the overloaded dereference is used instead of dereferencing the
+underlying reftype.  Warnings are issued about assumptions made in the
+following three ambiguous cases:
+
+  (a) If both %{} and @{} overloading exists, %{} is used
+  (b) If %{} overloading exists on a blessed arrayref, %{} is used
+  (c) If @{} overloading exists on a blessed hashref, @{} is used
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
