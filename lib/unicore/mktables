@@ -8978,23 +8978,6 @@ END
     }
 }
 
-# XXX Unused until revise charnames;
-#sub check_and_handle_compound_name {
-#    This looks at Name properties for parenthesized components and splits
-#    them off.  Thus it finds FF as an equivalent to Form Feed.
-#    my $code_point = shift;
-#    my $name = shift;
-#    if ($name =~ /^ ( .*? ) ( \s* ) \( ( [^)]* ) \) (.*) $/x) {
-#        #local $to_trace = 1 if main::DEBUG;
-#        trace $1, $2, $3, $4 if main::DEBUG && $to_trace;
-#        push @more_Names, "$code_point; $1";
-#        push @more_Names, "$code_point; $3";
-#        Carp::my_carp_bug("Expecting blank space before left parenthesis in '$_'.  Proceeding and assuming it was there;") if $2 ne " ";
-#        Carp::my_carp_bug("Not expecting anything after the right parenthesis in '$_'.  Proceeding and ignoring that;") if $4 ne "";
-#    }
-#    return;
-#}
-
 { # Closure for UnicodeData.txt handling
 
     # This file was the first one in the UCD; its design leads to some
@@ -9377,16 +9360,6 @@ END
                                  . $fields[$CHARNAME];
             }
             $fields[$NAME] = $fields[$CHARNAME];
-
-            # Some official names are really two alternate names with one in
-            # parentheses.  What we do here is use the full official one for
-            # the standard property (stored just above), but for the charnames
-            # table, we add two more entries, one for each of the alternate
-            # ones.
-            # elsif name ne ""
-            #check_and_handle_compound_name($cp, $fields[$CHARNAME]);
-            #check_and_handle_compound_name($cp, $unicode_1_name);
-            # XXX until charnames catches up.
         }
         elsif ($fields[$CHARNAME] =~ /^<(.+), First>$/) {
             $fields[$CHARNAME] = $fields[$NAME] = $1;
