@@ -197,6 +197,7 @@ sub read_authors_files {
     my (%count, %raw);
     foreach my $filename (@authors) {
         open FH, "<$filename" or die "Can't open $filename: $!";
+        binmode FH, ':encoding(ISO-8859-1)';
         while (<FH>) {
             next if /^\#/;
             next if /^-- /;
