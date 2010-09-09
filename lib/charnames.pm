@@ -578,7 +578,7 @@ sub lookup_name ($;$) {
 
       ## Suck in the code/name list as a big string.
       ## Lines look like:
-      ##     "00052\t\tLATIN CAPITAL LETTER R\n"
+      ##     "00052\tLATIN CAPITAL LETTER R\n"
       $txt = do "unicore/Name.pl" unless $txt;
 
       ## @off will hold the index into the code/name string of the start and
@@ -600,8 +600,8 @@ sub lookup_name ($;$) {
         if (! defined ($ord = name_to_code_point_special($name))) {
 
           # Not algorthmically determinable; look up in the table.
-          if ($txt =~ /\t\t\Q$name\E$/m) {
-            @off = ($-[0] + 2, $+[0]);    # The 2 is for the 2 tabs
+          if ($txt =~ /\t\Q$name\E$/m) {
+            @off = ($-[0] + 1, $+[0]);    # The 1 is for the tab
             $found_full_in_table = 1;
           }
         }
@@ -624,7 +624,7 @@ sub lookup_name ($;$) {
 
         my $case = $name =~ /[[:upper:]]/ ? "CAPITAL" : "SMALL";
         if ($txt !~
-            /\t\t (?: $scripts_trie ) \ (?:$case\ )? LETTER \ \U\Q$name\E $/xm)
+            /\t (?: $scripts_trie ) \ (?:$case\ )? LETTER \ \U\Q$name\E $/xm)
         {
           # Here we still don't have it, give up.
           return if $runtime;
@@ -635,14 +635,14 @@ sub lookup_name ($;$) {
           return 0xFFFD;
         }
 
-        @off = ($-[0] + 2, $+[0]);
+        @off = ($-[0] + 1, $+[0]);  # The 1 is for the tab
       }
 
       if (! defined $ord) {
 
         # Now know where in the string the name starts.
-        # The code, 5 hex digits long (and 2 tabs) is before that.
-        $ord = CORE::hex substr($txt, $off[0] - 7, 5);
+        # The code, 5 hex digits long (and a tab), is before that.
+        $ord = CORE::hex substr($txt, $off[0] - 6, 5);
       }
 
       # Cache the input so as to not have to search the large table
@@ -740,7 +740,7 @@ sub import
     $txt = do "unicore/Name.pl" unless $txt;
 
     for my $script (@scripts) {
-      if (not $txt =~ m/\t\t$script (?:CAPITAL |SMALL )?LETTER /) {
+      if (not $txt =~ m/\t$script (?:CAPITAL |SMALL )?LETTER /) {
         warnings::warn('utf8',  "No such script: '$script'");
         $script = quotemeta $script;  # Escape it, for use in the re.
       }
@@ -804,7 +804,7 @@ sub viacode {
     # Return the official name, if exists.  It's unclear to me (khw) at
     # this juncture if it is better to return a user-defined override, so
     # leaving it as is for now.
-    if ($txt =~ m/^$hex\t\t/m) {
+    if ($txt =~ m/^$hex\t/m) {
 
         # The name starts with the next character and goes up to the
         # next new-line.  Using capturing parentheses above instead of
