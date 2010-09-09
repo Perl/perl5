@@ -71,7 +71,6 @@ my %temp_no_core =
      '../cpan/Devel-PPPort' => 1,
      '../cpan/Getopt-Long' => 1,
      '../cpan/IO-Compress' => 1,
-     '../cpan/Math-BigInt' => 1,
      '../cpan/Math-BigRat' => 1,
      '../cpan/MIME-Base64' => 1,
      '../cpan/NEXT' => 1,
@@ -84,6 +83,7 @@ my %temp_no_core =
      '../cpan/Time-HiRes' => 1,
      '../cpan/Unicode-Collate' => 1,
      '../cpan/Unicode-Normalize' => 1,
+     '../dist/Math-BigInt' => 1,
     );
 
 # delete env vars that may influence the results
