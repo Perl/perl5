@@ -1,6 +1,6 @@
 #include this file into another test for subclass testing...
 
-ok ($class->config()->{lib},$CL);
+is ($class->config()->{lib},$CL);
 
 use strict;
 
@@ -164,29 +164,29 @@ while (<DATA>)
       my $pat = $1;
       if ($ans1 =~ /$pat/)
         {
-        ok (1,1);
+        is (1,1);
         }
       else
         {
-        print "# '$try' expected: /$pat/ got: '$ans1'\n" if !ok(1,0);
+        print "# '$try' expected: /$pat/ got: '$ans1'\n" if !is (1,0);
         }
       }
     else
       {
       if ($ans eq "")
         {
-        ok_undef ($ans1);
+	  is ($ans1, undef);
         }
       else
         {
-        print "# Tried: '$try'\n" if !ok ($ans1, $ans);
+        print "# Tried: '$try'\n" if !is ($ans1, $ans);
         if (ref($ans1) eq "$class")
 	  {
 	  # float numbers are normalized (for now), so mantissa shouldn't have
 	  # trailing zeros
 	  #print $ans1->_trailing_zeros(),"\n";
           print "# Has trailing zeros after '$try'\n"
-	   if !ok ($CL->_zeros( $ans1->{_m}), 0);
+	   if !is ($CL->_zeros( $ans1->{_m}), 0);
 	  }
         }
       } # end pattern or string
@@ -196,7 +196,7 @@ while (<DATA>)
 # check whether $class->new( Math::BigInt->new()) destroys it 
 # ($y == 12 in this case)
 $x = Math::BigInt->new(1200); $y = $class->new($x);
-ok ($y,1200); ok ($x,1200);
+is ($y,1200); is ($x,1200);
 
 ###############################################################################
 # Really huge, big, ultra-mega-biggy-monster exponents
@@ -210,43 +210,43 @@ ok ($y,1200); ok ($x,1200);
 my $monster = '1e1234567890123456789012345678901234567890';
 
 # new and exponent
-ok ($class->new($monster)->bsstr(), 
+is ($class->new($monster)->bsstr(), 
 		'1e+1234567890123456789012345678901234567890');
-ok ($class->new($monster)->exponent(), 
+is ($class->new($monster)->exponent(), 
 		'1234567890123456789012345678901234567890');
 # cmp
-ok ($class->new($monster) > 0,1);
+is ($class->new($monster) > 0,1);
 
 # sub/mul 
-ok ($class->new($monster)->bsub( $monster),0);
-ok ($class->new($monster)->bmul(2)->bsstr(),
+is ($class->new($monster)->bsub( $monster),0);
+is ($class->new($monster)->bmul(2)->bsstr(),
                 '2e+1234567890123456789012345678901234567890');
 
 # mantissa
 $monster = '1234567890123456789012345678901234567890e2';
-ok ($class->new($monster)->mantissa(), 
+is ($class->new($monster)->mantissa(), 
 		'123456789012345678901234567890123456789');
 
 ###############################################################################
 # zero,inf,one,nan
 
-$x = $class->new(2); $x->fzero(); ok_undef ($x->{_a}); ok_undef ($x->{_p});
-$x = $class->new(2); $x->finf();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
-$x = $class->new(2); $x->fone();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
-$x = $class->new(2); $x->fnan();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
+$x = $class->new(2); $x->fzero(); is ($x->{_a}, undef); is ($x->{_p}, undef);
+$x = $class->new(2); $x->finf();  is ($x->{_a}, undef); is ($x->{_p}, undef);
+$x = $class->new(2); $x->fone();  is ($x->{_a}, undef); is ($x->{_p}, undef);
+$x = $class->new(2); $x->fnan();  is ($x->{_a}, undef); is ($x->{_p}, undef);
 
 ###############################################################################
 # bone/binf etc as plain calls (Lite failed them)
 
-ok ($class->fzero(),0);
-ok ($class->fone(),1);
-ok ($class->fone('+'),1);
-ok ($class->fone('-'),-1);
-ok ($class->fnan(),'NaN');
-ok ($class->finf(),'inf');
-ok ($class->finf('+'),'inf');
-ok ($class->finf('-'),'-inf');
-ok ($class->finf('-inf'),'-inf');
+is ($class->fzero(),0);
+is ($class->fone(),1);
+is ($class->fone('+'),1);
+is ($class->fone('-'),-1);
+is ($class->fnan(),'NaN');
+is ($class->finf(),'inf');
+is ($class->finf('+'),'inf');
+is ($class->finf('-'),'-inf');
+is ($class->finf('-inf'),'-inf');
         
 $class->accuracy(undef); $class->precision(undef);	# reset
 
@@ -255,27 +255,27 @@ $class->accuracy(undef); $class->precision(undef);	# reset
 
 $x = $class->new('0.008'); $y = $class->new(2);
 $x->bdiv(3,$y);
-ok ($x,'0.0027');
+is ($x,'0.0027');
 
 ###############################################################################
 # fsqrt() with set global A/P or A/P enabled on $x, also a test whether fsqrt()
 # correctly modifies $x
 
 
-$x = $class->new(12); $class->precision(-2); $x->fsqrt(); ok ($x,'3.46');
+$x = $class->new(12); $class->precision(-2); $x->fsqrt(); is ($x,'3.46');
 
 $class->precision(undef);
-$x = $class->new(12); $class->precision(0); $x->fsqrt(); ok ($x,'3');
+$x = $class->new(12); $class->precision(0); $x->fsqrt(); is ($x,'3');
 
-$class->precision(-3); $x = $class->new(12); $x->fsqrt(); ok ($x,'3.464');
+$class->precision(-3); $x = $class->new(12); $x->fsqrt(); is ($x,'3.464');
 
 {
   no strict 'refs';
   # A and P set => NaN
   ${${class}.'::accuracy'} = 4; $x = $class->new(12);
-  $x->fsqrt(3); ok ($x,'NaN');
+  $x->fsqrt(3); is ($x,'NaN');
   # supplied arg overrides set global
-  $class->precision(undef); $x = $class->new(12); $x->fsqrt(3); ok ($x,'3.46');
+  $class->precision(undef); $x = $class->new(12); $x->fsqrt(3); is ($x,'3.46');
   $class->accuracy(undef); $class->precision(undef); # reset for further tests
 }
 
@@ -287,47 +287,47 @@ $class->precision(-3); $x = $class->new(12); $x->fsqrt(); ok ($x,'3.464');
   $try = 
     '@args' . " = $class" . "::objectify(2,$class,4,5);".'join(" ",@args);';
   $ans = eval $try;
-  ok ($ans,"$class 4 5");
+  is ($ans,"$class 4 5");
 }
 
 #############################################################################
 # is_one('-') (broken until v1.64)
 
-ok ($class->new(-1)->is_one(),0);
-ok ($class->new(-1)->is_one('-'),1);
+is ($class->new(-1)->is_one(),0);
+is ($class->new(-1)->is_one('-'),1);
 
 #############################################################################
 # bug 1/0.5 leaving 2e-0 instead of 2e0
 
-ok ($class->new(1)->fdiv('0.5')->bsstr(),'2e+0');
+is ($class->new(1)->fdiv('0.5')->bsstr(),'2e+0');
 
 ###############################################################################
 # [perl #30609] bug with $x -= $x not being 0, but 2*$x
 
-$x = $class->new(3);  $x -= $x; ok ($x, 0);
-$x = $class->new(-3); $x -= $x; ok ($x, 0);
-$x = $class->new(3);  $x += $x; ok ($x, 6);
-$x = $class->new(-3); $x += $x; ok ($x, -6);
+$x = $class->new(3);  $x -= $x; is ($x, 0);
+$x = $class->new(-3); $x -= $x; is ($x, 0);
+$x = $class->new(3);  $x += $x; is ($x, 6);
+$x = $class->new(-3); $x += $x; is ($x, -6);
 
-$x = $class->new('NaN'); $x -= $x; ok ($x->is_nan(), 1);
-$x = $class->new('inf'); $x -= $x; ok ($x->is_nan(), 1);
-$x = $class->new('-inf'); $x -= $x; ok ($x->is_nan(), 1);
+$x = $class->new('NaN'); $x -= $x; is ($x->is_nan(), 1);
+$x = $class->new('inf'); $x -= $x; is ($x->is_nan(), 1);
+$x = $class->new('-inf'); $x -= $x; is ($x->is_nan(), 1);
 
-$x = $class->new('NaN'); $x += $x; ok ($x->is_nan(), 1);
-$x = $class->new('inf'); $x += $x; ok ($x->is_inf(), 1);
-$x = $class->new('-inf'); $x += $x; ok ($x->is_inf('-'), 1);
+$x = $class->new('NaN'); $x += $x; is ($x->is_nan(), 1);
+$x = $class->new('inf'); $x += $x; is ($x->is_inf(), 1);
+$x = $class->new('-inf'); $x += $x; is ($x->is_inf('-'), 1);
 
-$x = $class->new('3.14');  $x -= $x; ok ($x, 0);
-$x = $class->new('-3.14'); $x -= $x; ok ($x, 0);
-$x = $class->new('3.14');  $x += $x; ok ($x, '6.28');
-$x = $class->new('-3.14'); $x += $x; ok ($x, '-6.28');
+$x = $class->new('3.14');  $x -= $x; is ($x, 0);
+$x = $class->new('-3.14'); $x -= $x; is ($x, 0);
+$x = $class->new('3.14');  $x += $x; is ($x, '6.28');
+$x = $class->new('-3.14'); $x += $x; is ($x, '-6.28');
 
-$x = $class->new('3.14');  $x *= $x; ok ($x, '9.8596');
-$x = $class->new('-3.14'); $x *= $x; ok ($x, '9.8596');
-$x = $class->new('3.14');  $x /= $x; ok ($x, '1');
-$x = $class->new('-3.14'); $x /= $x; ok ($x, '1');
-$x = $class->new('3.14');  $x %= $x; ok ($x, '0');
-$x = $class->new('-3.14'); $x %= $x; ok ($x, '0');
+$x = $class->new('3.14');  $x *= $x; is ($x, '9.8596');
+$x = $class->new('-3.14'); $x *= $x; is ($x, '9.8596');
+$x = $class->new('3.14');  $x /= $x; is ($x, '1');
+$x = $class->new('-3.14'); $x /= $x; is ($x, '1');
+$x = $class->new('3.14');  $x %= $x; is ($x, '0');
+$x = $class->new('-3.14'); $x %= $x; is ($x, '0');
 
 ###############################################################################
 # the following two were reported by "kenny" via hotmail.com:
@@ -336,49 +336,38 @@ $x = $class->new('-3.14'); $x %= $x; ok ($x, '0');
 #Use of uninitialized value in numeric le (<=) at BigFloat.pm line 1851.
 
 $x = $class->new(0); $y = $class->new('0.1');
-ok ($x ** $y, 0, 'no warnings and zero result');
+is ($x ** $y, 0, 'no warnings and zero result');
 
 #perl -MMath::BigFloat -lwe 'print Math::BigFloat->new(".222222222222222222222222222222222222222222")->bceil()'
 #Use of uninitialized value in numeric le (<=) at BigFloat.pm line 1851.
 
 $x = $class->new(".222222222222222222222222222222222222222222"); 
-ok ($x->bceil(), 1, 'no warnings and one as result');
+is ($x->bceil(), 1, 'no warnings and one as result');
 
 ###############################################################################
 # test **=, <<=, >>=
 
 # ((2^148)-1)/17
 $x = $class->new(2); $x **= 148; $x++; $x->bdiv(17, 60)->bfloor(); $x->accuracy(undef);
-ok ($x,"20988936657440586486151264256610222593863921");
-ok ($x->length(),length "20988936657440586486151264256610222593863921");
+is ($x,"20988936657440586486151264256610222593863921");
+is ($x->length(),length "20988936657440586486151264256610222593863921");
 
 $x = $class->new('2');
 my $y = $class->new('18');
-ok ($x <<= $y, 2 << 18);
-ok ($x, 2 << 18);
-ok ($x >>= $y, 2);
-ok ($x, 2);
+is ($x <<= $y, 2 << 18);
+is ($x, 2 << 18);
+is ($x >>= $y, 2);
+is ($x, 2);
 
 $x = $class->new('2');
 $y = $class->new('18.2');
 $x <<= $y;		# 2 * (2 ** 18.2);
 
-ok ($x->copy()->bfround(-9), '602248.763144685');
-ok ($x >>= $y, 2);	# 2 * (2 ** 18.2) / (2 ** 18.2) => 2
-ok ($x, 2);
+is ($x->copy()->bfround(-9), '602248.763144685');
+is ($x >>= $y, 2);	# 2 * (2 ** 18.2) / (2 ** 18.2) => 2
+is ($x, 2);
 
 1; # all done
-
-###############################################################################
-# Perl 5.005 does not like ok ($x,undef)
-
-sub ok_undef
-  {
-  my $x = shift;
-
-  ok (1,1) and return if !defined $x;
-  ok ($x,'undef');
-  }
 
 __DATA__
 &bgcd

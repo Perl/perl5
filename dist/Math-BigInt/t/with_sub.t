@@ -2,15 +2,8 @@
 
 # Test use Math::BigFloat with => 'Math::BigInt::SomeSubclass';
 
-use Test;
 use strict;
-
-BEGIN
-  {
-  unshift @INC, 't';
-  plan tests => 2316
-	+ 1;
-  }
+use Test::More tests => 2316 + 1;
 
 use Math::BigFloat with => 'Math::BigInt::Subclass', lib => 'Calc';
 
@@ -19,6 +12,6 @@ $class = "Math::BigFloat";
 $CL = "Math::BigInt::Calc";
 
 # the with argument is ignored
-ok (Math::BigFloat->config()->{with}, 'Math::BigInt::Calc');
+is (Math::BigFloat->config()->{with}, 'Math::BigInt::Calc');
 
 require 't/bigfltpm.inc';	# all tests here for sharing

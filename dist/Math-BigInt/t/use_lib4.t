@@ -5,18 +5,13 @@
 # the former lib statement
 
 use strict;
-use Test;
+use Test::More tests => 2;
 
-BEGIN
-  {
-  unshift @INC, 't';
-  plan tests => 2;
-  } 
+BEGIN { unshift @INC, 't'; }
 
 use Math::BigInt lib => 'BareCalc';
 use Math::BigFloat lib => 'Calc';
 
-ok (Math::BigInt->config()->{lib},'Math::BigInt::Calc');
+is (Math::BigInt->config()->{lib},'Math::BigInt::Calc');
 
-ok (Math::BigFloat->new(123)->badd(123),246);
-
+is (Math::BigFloat->new(123)->badd(123),246);

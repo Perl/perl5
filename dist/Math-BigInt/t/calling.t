@@ -3,14 +3,9 @@
 # test calling conventions, and :constant overloading
 
 use strict;
-use Test;
+use Test::More tests => 160;
 
-BEGIN 
-  {
-  unshift @INC, 't';
-  my $tests = 160;
-  plan tests => $tests;
-  }
+BEGIN { unshift @INC, 't'; }
 
 package Math::BigInt::Test;
 
@@ -60,7 +55,7 @@ while (<DATA>)
       $try = '' if $args[0] eq '';		# undef, no argument
       $try = "$class\->$func($try);";
       $rc = eval $try;
-      print "# Tried: '$try'\n" if !ok ($rc, $ans);
+      print "# Tried: '$try'\n" if !is ($rc, $ans);
       }
     } 
 
@@ -73,28 +68,28 @@ $class = 'Math::BigInt';
 #$try = "use $class ($version.'1');";
 #$try .= ' $x = $class->new(123); $x = "$x";';
 #eval $try;
-#ok_undef ( $x );               # should result in error!
+#is ( $x, undef );               # should result in error!
 
 # test whether fallback to calc works
 $try = "use $class ($version,'try','foo, bar , ');";
 $try .= "$class\->config()->{lib};";
 $ans = eval $try;
-ok ( $ans =~ /^Math::BigInt::(Fast)?Calc\z/, 1);
+like ( $ans, qr/^Math::BigInt::(Fast)?Calc\z/);
 
 # test whether constant works or not, also test for qw($version)
 # bgcd() is present in subclass, too
 $try = "use Math::BigInt ($version,'bgcd',':constant');";
 $try .= ' $x = 2**150; bgcd($x); $x = "$x";';
 $ans = eval $try;
-ok ( $ans, "1427247692705959881058285969449495136382746624");
+is ( $ans, "1427247692705959881058285969449495136382746624");
 
 # test wether Math::BigInt::Scalar via use works (w/ dff. spellings of calc)
 $try = "use $class ($version,'lib','Scalar');";
 $try .= ' $x = 2**10; $x = "$x";';
-$ans = eval $try; ok ( $ans, "1024");
+$ans = eval $try; is ( $ans, "1024");
 $try = "use $class ($version,'lib','$class\::Scalar');";
 $try .= ' $x = 2**10; $x = "$x";';
-$ans = eval $try; ok ( $ans, "1024");
+$ans = eval $try; is ( $ans, "1024");
 
 # all done
 

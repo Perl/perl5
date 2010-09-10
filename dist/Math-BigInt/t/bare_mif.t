@@ -4,14 +4,10 @@
 # of classes under BareCalc
 
 use strict;
-use Test;
-
-BEGIN
-  {
-  unshift @INC, 't';
-  plan tests => 684
+use Test::More tests => 684
     + 1;		# our own tests
-  }
+
+BEGIN { unshift @INC, 't'; }
 
 print "# ",Math::BigInt->config()->{lib},"\n";
 
@@ -23,6 +19,6 @@ use vars qw/$mbi $mbf/;
 $mbi = 'Math::BigInt';
 $mbf = 'Math::BigFloat';
 
-ok (Math::BigInt->config()->{lib},'Math::BigInt::BareCalc');
+is (Math::BigInt->config()->{lib},'Math::BigInt::BareCalc');
 
 require 't/mbimbf.inc';

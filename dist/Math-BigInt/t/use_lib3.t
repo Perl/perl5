@@ -4,18 +4,13 @@
 # all use_lib*.t should be equivalent
 
 use strict;
-use Test;
+use Test::More tests => 2;
 
-BEGIN
-  {
-  unshift @INC, 't';
-  plan tests => 2;
-  } 
+BEGIN { unshift @INC, 't'; }
 
 use Math::BigInt lib => 'BareCalc';
 use Math::BigFloat;
 
-ok (Math::BigInt->config()->{lib},'Math::BigInt::BareCalc');
+is (Math::BigInt->config()->{lib},'Math::BigInt::BareCalc');
 
-ok (Math::BigFloat->new(123)->badd(123),246);
-
+is (Math::BigFloat->new(123)->badd(123),246);

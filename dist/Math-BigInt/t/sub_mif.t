@@ -4,13 +4,9 @@
 # of classes
 
 use strict;
-use Test;
+use Test::More tests => 684;
 
-BEGIN
-  {
-  unshift @INC, 't';
-  plan tests => 684;
-  }
+BEGIN { unshift @INC, 't'; }
 
 use Math::BigInt::Subclass;
 use Math::BigFloat::Subclass;
@@ -21,4 +17,3 @@ $mbi = 'Math::BigInt::Subclass';
 $mbf = 'Math::BigFloat::Subclass';
 
 require 't/mbimbf.inc';
-

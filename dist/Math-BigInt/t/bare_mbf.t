@@ -1,13 +1,9 @@
 #!/usr/bin/perl -w
 
-use Test;
 use strict;
+use Test::More tests => 2316;
 
-BEGIN
-  {
-  unshift @INC, 't';
-  plan tests => 2316;
-  }
+BEGIN { unshift @INC, 't'; }
 
 use Math::BigFloat lib => 'BareCalc';
 

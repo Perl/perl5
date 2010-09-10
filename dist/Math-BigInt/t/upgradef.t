@@ -1,13 +1,7 @@
 #!/usr/bin/perl -w
 
-use Test;
 use strict;
-
-BEGIN
-  {
-  plan tests => 0
-   + 6;			# our own tests
-  }
+use Test::More tests => 6;
 
 ###############################################################################
 package Math::BigFloat::Test;
@@ -48,14 +42,14 @@ $class = "Math::BigFloat";
 $CL = "Math::BigInt::Calc";
 $ECL = "Math::BigFloat::Test";
 
-ok (Math::BigFloat->upgrade(),$ECL);
-ok (Math::BigFloat->downgrade()||'','');
+is (Math::BigFloat->upgrade(),$ECL);
+is (Math::BigFloat->downgrade()||'','');
 
 $x = $class->new(123); $y = $ECL->new(123); $z = $x->bmul($y);
-ok (ref($z),$ECL); ok ($z,123);
+is (ref($z),$ECL); is ($z,123);
 
 $x = $class->new(123); $y = $ECL->new(123); $z = $x->badd($y);
-ok (ref($z),$ECL); ok ($z,321);
+is (ref($z),$ECL); is ($z,321);
 
 
 

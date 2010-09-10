@@ -21,4 +21,3 @@ Math::BigFloat->import ( with => 'Math::BigInt::Subclass' );
 like (Math::BigFloat->config()->{with}, qr/^Math::BigInt::(Fast)?Calc\z/, 'with ignored' );
 
 # all tests done
-

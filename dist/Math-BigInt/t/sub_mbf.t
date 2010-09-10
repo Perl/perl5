@@ -1,14 +1,11 @@
 #!/usr/bin/perl -w
 
-use Test;
 use strict;
-
-BEGIN
-  {
-  unshift @INC, 't';
-  plan tests => 2316
+use Test::More tests => 2316
     + 6;	# + our own tests
-  }
+
+
+BEGIN { unshift @INC, 't'; }
 
 use Math::BigFloat::Subclass;
 
@@ -21,16 +18,16 @@ require 't/bigfltpm.inc';	# perform same tests as bigfltpm
 ###############################################################################
 # Now do custom tests for Subclass itself
 my $ms = $class->new(23);
-print "# Missing custom attribute \$ms->{_custom}" if !ok (1, $ms->{_custom});
+print "# Missing custom attribute \$ms->{_custom}" if !is (1, $ms->{_custom});
 
 # Check that subclass is a Math::BigFloat, but not a Math::Bigint
-ok ($ms->isa('Math::BigFloat'),1);
-ok ($ms->isa('Math::BigInt') || 0,0);
+isa_ok ($ms, 'Math::BigFloat');
+isnt ($ms->isa('Math::BigInt'), 1);
 
 use Math::BigFloat;
 
 my $bf = Math::BigFloat->new(23);		# same as other
 $ms += $bf;
-print "# Tried: \$ms += \$bf, got $ms" if !ok (46, $ms);
-print "# Missing custom attribute \$ms->{_custom}" if !ok (1, $ms->{_custom});
-print "# Wrong class: ref(\$ms) was ".ref($ms) if !ok ($class, ref($ms));
+print "# Tried: \$ms += \$bf, got $ms" if !is (46, $ms);
+print "# Missing custom attribute \$ms->{_custom}" if !is (1, $ms->{_custom});
+print "# Wrong class: ref(\$ms) was ".ref($ms) if !is ($class, ref($ms));

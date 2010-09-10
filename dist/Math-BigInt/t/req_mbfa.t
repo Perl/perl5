@@ -3,14 +3,8 @@
 # check that simple requiring BigFloat and then bnan() works
 
 use strict;
-use Test;
+use Test::More tests => 1;
 
-BEGIN
-  {
-  plan tests => 1;
-  } 
-
-require Math::BigFloat; my $x = Math::BigFloat->bnan(1); ok ($x,'NaN');
+require Math::BigFloat; my $x = Math::BigFloat->bnan(1); is ($x,'NaN');
 
 # all tests done
-

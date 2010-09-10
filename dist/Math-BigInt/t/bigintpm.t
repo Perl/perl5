@@ -1,12 +1,7 @@
 #!/usr/bin/perl -w
 
-use Test;
 use strict;
-
-BEGIN
-  {
-  plan tests => 3279 + 6;
-  }
+use Test::More tests => 3279 + 6;
 
 use Math::BigInt lib => 'Calc';
 
@@ -18,22 +13,22 @@ $CL = "Math::BigInt::Calc";
 # from_hex(), from_bin() and from_oct() tests
 
 my $x = Math::BigInt->from_hex('0xcafe');
-ok ($x, "51966", 'from_hex() works');
+is ($x, "51966", 'from_hex() works');
  
 $x = Math::BigInt->from_hex('0xcafebabedead');
-ok ($x, "223195403574957", 'from_hex() works with long numbers');
+is ($x, "223195403574957", 'from_hex() works with long numbers');
  
 $x = Math::BigInt->from_bin('0b1001');
-ok ($x, "9", 'from_bin() works');
+is ($x, "9", 'from_bin() works');
  
 $x = Math::BigInt->from_bin('0b1001100110011001100110011001');
-ok ($x, "161061273", 'from_bin() works with big numbers');
+is ($x, "161061273", 'from_bin() works with big numbers');
 
 $x = Math::BigInt->from_oct('0775');
-ok ($x, "509", 'from_oct() works');
+is ($x, "509", 'from_oct() works');
  
 $x = Math::BigInt->from_oct('07777777777777711111111222222222');
-ok ($x, "9903520314281112085086151826", 'from_oct() works with big numbers');
+is ($x, "9903520314281112085086151826", 'from_oct() works with big numbers');
 
 #############################################################################
 # all the other tests

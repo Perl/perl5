@@ -46,7 +46,7 @@ sub _swap
 ##############################################################################
 package main;
 
-my $CALC = $class->config()->{lib}; ok ($CALC,$CL);
+my $CALC = $class->config()->{lib}; is ($CALC,$CL);
 
 my ($f,$z,$a,$exp,@a,$m,$e,$round_mode,$expected_class);
 
@@ -197,16 +197,16 @@ while (<DATA>)
     }
   if ($ans eq "")
     {
-    ok_undef ($ans1); 
+      is ($ans1, undef);
     }
   else
     {
     # print "try: $try ans: $ans1 $ans\n";
-    print "# Tried: '$try'\n" if !ok ($ans1, $ans);
+    print "# Tried: '$try'\n" if !is ($ans1, $ans);
     if ($expected_class ne $class)
       {
-      ok (ref($ans1),$expected_class);	# also checks that it really is ref!
-      ok ($Math::BigInt::upgrade,'Math::BigFloat');	# still okay?
+      is (ref($ans1),$expected_class);	# also checks that it really is ref!
+      is ($Math::BigInt::upgrade,'Math::BigFloat');	# still okay?
       }
     }
   # check internal state of number objects
@@ -217,24 +217,12 @@ close DATA;
 my $warn = ''; $SIG{__WARN__} = sub { $warn = shift; };
 
 # these should not warn
-$warn = ''; eval "\$z = 3.17 <= \$y"; ok ($z, 1); ok ($warn, '');
-$warn = ''; eval "\$z = \$y >= 3.17"; ok ($z, 1); ok ($warn, '');
+$warn = ''; eval "\$z = 3.17 <= \$y"; is ($z, 1); is ($warn, '');
+$warn = ''; eval "\$z = \$y >= 3.17"; is ($z, 1); is ($warn, '');
 
 # all tests done
 
 1;
-
-###############################################################################
-###############################################################################
-# Perl 5.005 does not like ok ($x,undef)
-
-sub ok_undef
-  {
-  my $x = shift;
-
-  ok (1,1) and return if !defined $x;
-  ok ($x,'undef');
-  }
 
 ###############################################################################
 # sub to check validity of a BigInt internally, to ensure that no op leaves a
@@ -258,9 +246,9 @@ sub is_valid
   #$e = $CALC->_check($x->{value}) if $e eq '0';
 
   # test done, see if error did crop up
-  ok (1,1), return if ($e eq '0');
+  is (1,1), return if ($e eq '0');
 
-  ok (1,$e." after op '$f'");
+  is (1,$e." after op '$f'");
   }
 
 __DATA__

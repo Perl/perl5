@@ -6,20 +6,14 @@
 # works.
 
 use strict;
-use Test;
-
-BEGIN
-  {
-  plan tests => 1;
-  } 
+use Test::More tests => 1;
 
 my ($try,$ans,$x);
 
 use Math::BigInt(); $x = Math::BigInt->new(1); ++$x;
 
-ok ($x||'undef',2);
+is ($x,2);
 
 # all tests done
 
 1;
-
