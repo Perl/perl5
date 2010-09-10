@@ -1374,11 +1374,11 @@ sub bexp
   else { $x = $u; }
   }
 
-sub blcm 
-  { 
+sub blcm
+  {
   # (BINT or num_str, BINT or num_str) return BINT
   # does not modify arguments, but returns new object
-  # Lowest Common Multiplicator
+  # Lowest Common Multiple
 
   my $y = shift; my ($x);
   if (ref($y))
@@ -3211,14 +3211,14 @@ Math::BigInt - Arbitrary size integer/float math package
 
   $x->bfloor();		   # return integer less or equal than $x
   $x->bceil();		   # return integer greater or equal than $x
-  
+
   # The following do not modify their arguments:
 
   # greatest common divisor (no OO style)
   my $gcd = Math::BigInt::bgcd(@values);
-  # lowest common multiplicator (no OO style)
-  my $lcm = Math::BigInt::blcm(@values);	
- 
+  # lowest common multiple (no OO style)
+  my $lcm = Math::BigInt::blcm(@values);
+
   $x->length();		   # return number of digits in number
   ($xl,$f) = $x->length(); # length of number and length of fraction part,
 			   # latter is always 0 digits long for BigInts
@@ -3911,8 +3911,8 @@ does change $x in BigFloat.
 
 =head2 blcm()
 
-	blcm(@values);		# lowest common multiplicator (no OO style)
- 
+	blcm(@values);		# lowest common multiple (no OO style)
+
 head2 length()
 
 	$x->length();
