@@ -6,6 +6,20 @@ HISTORY - public release history for Data::Dumper
 
 =over 8
 
+=item 2.128 (Sep 10 2010)
+
+Promote previous release to stable version with the correct version.
+
+=item 2.127 (Sep 10 2010)
+
+Promote previous release to stable version.
+
+=item 2.126_01 (Sep  6 2010)
+
+Port core perl changes e3ec2293dc, fe642606b19.
+Fixes core perl RT #74170 (handle the stack changing in the
+custom sort functions) and adds a test.
+
 =item 2.126 (Apr 15 2010)
 
 Fix Data::Dumper's Fix Terse(1) + Indent(2):
