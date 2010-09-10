@@ -3604,7 +3604,7 @@ Returns -1, 0, 1 or undef.
 
 	$x->bacmp($y);
 
-Compares $x with $y while ignoring their. Returns -1, 0, 1 or undef.
+Compares $x with $y while ignoring their sign. Returns -1, 0, 1 or undef.
 
 =head2 sign()
 
