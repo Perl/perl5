@@ -795,12 +795,14 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
     # that are algorithmically determinable, such as "CKJ UNIFIED
     # IDEOGRAPH-hhhh" where the hhhh is the actual hex code point number
     # of the character.  The percentage of each type to test is
-    # independently settable.
+    # fuzzily independently settable.  This breaks down when the block size is
+    # 1 or is large enough that both types of names occur in the same block
     my $percentage_of_regular_names = 25;
     my $percentage_of_algorithmic_names = 100 / $block_size; # 1 test/block
 
     # Changing the block size doesn't change anything with regards to
-    # testing the regular names, but will affect the algorithmic names.
+    # testing the regular names (except if you set it to 1 so that each code
+    # point is in its own block), but will affect the algorithmic names.
     # If you make the size too big so that blocks include both regular
     # names and algorithmic, the whole block will be sampled at the sum
     # of the two rates.  If you make it too small, then more algorithmic
@@ -844,8 +846,9 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
             /^(.*?);/;
             my $end_decimal = hex $1;
 
-            # Only the CJK ones have names, and they all have the code
-            # point as part of the name, which we can construct
+            # Only the CJK (and the Hangul which are instead dealt with below)
+            # ones have names, and they all have the code point as part of the
+            # name, which we can construct
             if ($name =~ /^<CJK/) {
                 for my $i ($decimal .. $end_decimal) {
                     $names[$i] = sprintf "CJK UNIFIED IDEOGRAPH-%04X", $i;
