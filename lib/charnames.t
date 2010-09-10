@@ -798,7 +798,18 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
     # fuzzily independently settable.  This breaks down when the block size is
     # 1 or is large enough that both types of names occur in the same block
     my $percentage_of_regular_names = 25;
-    my $percentage_of_algorithmic_names = 100 / $block_size; # 1 test/block
+    my $percentage_of_algorithmic_names = (100 / $block_size); # 1 test/block
+
+    # If wants everything tested, do so by changing the block size to 1 so
+    # every character is in its own block, otherwise there is a risk that the
+    # randomness will cause something to be tested more than once at the
+    # expense of testing something else not at all.
+    if ($percentage_of_regular_names >= 100
+        || $percentage_of_algorithmic_names >= 100)
+    {
+        $block_size_bits = 0;
+        $block_size = 2**$block_size_bits;
+    }
 
     # Changing the block size doesn't change anything with regards to
     # testing the regular names (except if you set it to 1 so that each code
