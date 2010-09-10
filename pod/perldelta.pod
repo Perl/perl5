@@ -164,7 +164,9 @@ cribbed.
 
 =item *
 
-XXX
+L<warnings> and L<warnings::register> can now register categories other than
+the names of packages using warnings::register.  See L<perllexwarn> for more
+information.
 
 =back
 
