@@ -2,26 +2,21 @@
 
 ###############################################################################
 
-use Test;
 use strict;
-
-BEGIN
-  {
-  plan tests => 1;
-  }
+use Test::More;
 
 eval 'require Math::BigInt::Lite;';
 if ($@ eq '')
   {
+  plan (tests => 1);
   # can use Lite, so let bignum try it
   require bignum; bignum->import();
   # can't get to work a ref(1+1) here, presumable because :constant phase
   # already done
-  ok ($bignum::_lite,1);
+  is ($bignum::_lite,1);
   }
 else
   {
-  print "ok 1 # skipped, no Math::BigInt::Lite\n";
+  plan skip_all => "no Math::BigInt::Lite";
   }
-  
 

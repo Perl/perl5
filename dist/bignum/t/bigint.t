@@ -2,13 +2,7 @@
 
 ###############################################################################
 
-use Test;
-use strict;
-
-BEGIN
-  {
-  plan tests => 51;
-  }
+use Test::More tests => 51;
 
 use bigint qw/hex oct/;
 
@@ -37,7 +31,7 @@ foreach (qw/
   {
   my ($x,$y) = split /:/;
   print "# Try $x\n";
-  ok (bigint::_float_constant("$x"),"$y");
+  is (bigint::_float_constant("$x"),"$y");
   }
 
 foreach (qw/ 
@@ -49,72 +43,60 @@ foreach (qw/
   {
   my ($x,$y) = split /:/;
   print "# Try $x\n";
-  ok (bigint::_binary_constant("$x"),"$y");
+  is (bigint::_binary_constant("$x"),"$y");
   }
 
 ###############################################################################
 # general tests
 
-my $x = 5; ok (ref($x) =~ /^Math::BigInt/);		# :constant
+my $x = 5; like (ref($x), qr/^Math::BigInt/);		# :constant
 
-# todo:  ok (2 + 2.5,4.5);				# should still work
-# todo: $x = 2 + 3.5; ok (ref($x),'Math::BigFloat');
+# todo:  is (2 + 2.5,4.5);				# should still work
+# todo: $x = 2 + 3.5; is (ref($x),'Math::BigFloat');
 
-$x = 2 ** 255; ok (ref($x) =~ /^Math::BigInt/);
+$x = 2 ** 255; like (ref($x), qr/^Math::BigInt/);
 
-ok (12->bfac(),479001600);
-ok (9/4,2);
+is (12->bfac(),479001600);
+is (9/4,2);
 
-ok (4.5+4.5,8);					# truncate
-ok (ref(4.5+4.5) =~ /^Math::BigInt/);
+is (4.5+4.5,8);					# truncate
+like (ref(4.5+4.5), qr/^Math::BigInt/);
 
 
 ###############################################################################
 # accurarcy and precision
 
-ok_undef (bigint->accuracy());
-ok (bigint->accuracy(12),12);
-ok (bigint->accuracy(),12);
+is (bigint->accuracy(), undef);
+is (bigint->accuracy(12),12);
+is (bigint->accuracy(),12);
 
-ok_undef (bigint->precision());
-ok (bigint->precision(12),12);
-ok (bigint->precision(),12);
+is (bigint->precision(), undef);
+is (bigint->precision(12),12);
+is (bigint->precision(),12);
 
-ok (bigint->round_mode(),'even');
-ok (bigint->round_mode('odd'),'odd');
-ok (bigint->round_mode(),'odd');
+is (bigint->round_mode(),'even');
+is (bigint->round_mode('odd'),'odd');
+is (bigint->round_mode(),'odd');
 
 ###############################################################################
 # hex() and oct()
 
 my $c = 'Math::BigInt';
 
-ok (ref(hex(1)), $c);
-ok (ref(hex(0x1)), $c);
-ok (ref(hex("af")), $c);
-ok (hex("af"), Math::BigInt->new(0xaf));
-ok (ref(hex("0x1")), $c);
+is (ref(hex(1)), $c);
+is (ref(hex(0x1)), $c);
+is (ref(hex("af")), $c);
+is (hex("af"), Math::BigInt->new(0xaf));
+is (ref(hex("0x1")), $c);
 
-ok (ref(oct("0x1")), $c);
-ok (ref(oct("01")), $c);
-ok (ref(oct("0b01")), $c);
-ok (ref(oct("1")), $c);
-ok (ref(oct(" 1")), $c);
-ok (ref(oct(" 0x1")), $c);
+is (ref(oct("0x1")), $c);
+is (ref(oct("01")), $c);
+is (ref(oct("0b01")), $c);
+is (ref(oct("1")), $c);
+is (ref(oct(" 1")), $c);
+is (ref(oct(" 0x1")), $c);
 
-ok (ref(oct(0x1)), $c);
-ok (ref(oct(01)), $c);
-ok (ref(oct(0b01)), $c);
-ok (ref(oct(1)), $c);
-
-###############################################################################
-###############################################################################
-# Perl 5.005 does not like ok ($x,undef)
-
-sub ok_undef
-  {
-  my $x = shift;
-
-  ok (1,1) and return if !defined $x;
-  ok ($x,'undef');
-  }
+is (ref(oct(0x1)), $c);
+is (ref(oct(01)), $c);
+is (ref(oct(0b01)), $c);
+is (ref(oct(1)), $c);

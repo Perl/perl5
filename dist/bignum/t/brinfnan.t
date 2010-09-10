@@ -2,13 +2,8 @@
 
 ###############################################################################
 
-use Test;
 use strict;
-
-BEGIN
-  {
-  plan tests => 26;
-  }
+use Test::More tests => 26;
 
 use bigrat;
 
