@@ -183,7 +183,7 @@ C<bignum>, C<bigint>, and C<bigrat> have been upgraded from version 0.23 to
 
 =item *
 
-C<Data::Dumper> has been upgraded from version 2.126 to XXX.
+C<Data::Dumper> has been upgraded from version 2.126 to 2.128.
 
 This fixes a crash when using custom sort functions that might cause the stack
 to change.
