@@ -5,22 +5,6 @@ use strict;
 
 BEGIN
   {
-  $| = 1;
-  # to locate the testing files
-  my $location = $0; $location =~ s/bigfltpm.t//i;
-  unshift @INC, '../lib';
-  if (-d 't')
-    {
-    chdir 't';
-    require File::Spec;
-    unshift @INC, File::Spec->catdir(File::Spec->updir, $location);
-    }
-  else
-    {
-    unshift @INC, $location;
-    }
-  print "# INC = @INC\n";
-
   plan tests => 2316
 	+ 5;		# own tests
   }
@@ -46,4 +30,4 @@ my $e = $c->bdiv(Math::BigFloat->new(3),$d);
 ok ($e,'0.00267'); # '0.008 / 3 => 0.0027');
 ok (ref($e->{_e}->[0]), ''); # 'Not a BigInt');
 
-require 'bigfltpm.inc';	# all tests here for sharing
+require 't/bigfltpm.inc';	# all tests here for sharing

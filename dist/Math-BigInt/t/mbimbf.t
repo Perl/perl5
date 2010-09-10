@@ -8,22 +8,6 @@ use Test;
 
 BEGIN
   {
-  $| = 1;
-  # to locate the testing files
-  my $location = $0; $location =~ s/mbimbf.t//i;
-  unshift @INC, '../lib';	# for testing manually
-  if (-d 't')
-    {
-    chdir 't';
-    require File::Spec;
-    unshift @INC, File::Spec->catdir(File::Spec->updir, $location);
-    }
-  else
-    {
-    unshift @INC, $location;
-    }
-  print "# INC = @INC\n";
-
   plan tests => 684 
     + 26;		# own tests
   }
@@ -36,7 +20,7 @@ use vars qw/$mbi $mbf/;
 $mbi = 'Math::BigInt';
 $mbf = 'Math::BigFloat';
 
-require 'mbimbf.inc';
+require 't/mbimbf.inc';
 
 # some tests that won't work with subclasses, since the things are only
 # garantied in the Math::BigInt/BigFloat (unless subclass chooses to support

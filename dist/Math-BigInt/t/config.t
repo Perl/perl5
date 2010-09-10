@@ -1,15 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Test::More;
-
-BEGIN
-  {
-  $| = 1;
-  chdir 't' if -d 't';
-  unshift @INC, '../lib'; # for running manually
-  plan tests => 55;
-  } 
+use Test::More tests => 55;
 
 # test whether Math::BigInt->config() and Math::BigFloat->config() works
 

@@ -5,22 +5,7 @@ use strict;
 
 BEGIN
   {
-  $| = 1;
-  # to locate the testing files
-  my $location = $0; $location =~ s/sub_mbi.t//i;
-  unshift @INC, qw(../lib);
-  if (-d 't')
-    {
-    chdir 't';
-    require File::Spec;
-    unshift @INC, File::Spec->catdir(File::Spec->updir, $location);
-    }
-  else
-    {
-    unshift @INC, $location;
-    }
-  print "# INC = @INC\n";
-
+  unshift @INC, 't';
   plan tests => 3279
     + 5;	# +5 own tests
   }
@@ -33,7 +18,7 @@ $CL = "Math::BigInt::Calc";
 
 my $version = '0.02';   # for $VERSION tests, match current release (by hand!)
 
-require 'bigintpm.inc';	# perform same tests as bigintpm
+require 't/bigintpm.inc';	# perform same tests as bigintpm
 
 ###############################################################################
 # Now do custom tests for Subclass itself

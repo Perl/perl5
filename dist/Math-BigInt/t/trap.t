@@ -2,16 +2,8 @@
 
 # test that config ( trap_nan => 1, trap_inf => 1) really works/dies
 
+use Test::More tests => 43;
 use strict;
-use Test::More;
-
-BEGIN
-  {
-  $| = 1;
-  chdir 't' if -d 't';
-  unshift @INC, '../lib'; # for running manually
-  plan tests => 43;
-  } 
 
 use Math::BigInt;
 use Math::BigFloat;

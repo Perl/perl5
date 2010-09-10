@@ -1,28 +1,9 @@
 #!/usr/bin/perl -w
 
-use Test::More;
 use strict;
+use Test::More tests => 4;
 
-BEGIN
-  {
-  $| = 1;
-  # to locate the testing files
-  my $location = $0; $location =~ s/sub_mbf.t//i;
-  unshift @INC, '../lib';
-  if (-d 't')
-    {
-    chdir 't';
-    require File::Spec;
-    unshift @INC, File::Spec->catdir(File::Spec->updir, $location);
-    }
-  else
-    {
-    unshift @INC, $location;
-    }
-  print "# INC = @INC\n";
-
-  plan tests => 4;
-  }
+BEGIN { unshift @INC, 't'; }
 
 # first load BigInt with Calc
 use Math::BigInt lib => 'Calc';

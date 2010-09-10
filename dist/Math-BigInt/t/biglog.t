@@ -11,29 +11,8 @@
 # it at all (which did lead to wrong answers for 0 < $x < 1 in blog() in
 # versions up to v1.63, and for bsqrt($x) when $x << 1 for instance).
 
-use Test::More;
 use strict;
-
-BEGIN
-  {
-  $| = 1;
-  # to locate the testing files
-  my $location = $0; $location =~ s/biglog.t//i;
-  unshift @INC, '../lib';
-  if (-d 't')
-    {
-    chdir 't';
-    require File::Spec;
-    unshift @INC, File::Spec->catdir(File::Spec->updir, $location);
-    }
-  else
-    {
-    unshift @INC, $location;
-    }
-  print "# INC = @INC\n";
-
-  plan tests => 70;
-  }
+use Test::More tests => 70;
 
 use Math::BigFloat;
 use Math::BigInt;

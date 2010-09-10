@@ -5,11 +5,6 @@ use strict;
 
 BEGIN
   {
-  $| = 1;
-  unshift @INC, '../lib'; # for running manually
-  my $location = $0; $location =~ s/bigintpm.t//;
-  unshift @INC, $location; # to locate the testing files
-  chdir 't' if -d 't';
   plan tests => 3279 + 6;
   }
 
@@ -43,4 +38,4 @@ ok ($x, "9903520314281112085086151826", 'from_oct() works with big numbers');
 #############################################################################
 # all the other tests
  
-require 'bigintpm.inc';	# all tests here for sharing
+require 't/bigintpm.inc';	# all tests here for sharing

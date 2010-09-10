@@ -5,11 +5,6 @@ use strict;
 
 BEGIN
   {
-  $| = 1;
-  unshift @INC, '../lib'; # for running manually
-  my $location = $0; $location =~ s/downgrade.t//;
-  unshift @INC, $location; # to locate the testing files
-  chdir 't' if -d 't';
   plan tests => 15;
   }
 

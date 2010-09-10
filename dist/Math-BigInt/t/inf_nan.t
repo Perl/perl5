@@ -3,33 +3,15 @@
 # test inf/NaN handling all in one place
 # Thanx to Jarkko for the excellent explanations and the tables
 
-use Test::More;
 use strict;
 
-BEGIN
-  {
-  $| = 1;	
-  # to locate the testing files
-  my $location = $0; $location =~ s/inf_nan.t//i;
-  unshift @INC, '../lib';       # for testing manually
-  if (-d 't')
-    {
-    chdir 't';
-    require File::Spec;
-    unshift @INC, File::Spec->catdir(File::Spec->updir, $location);
-    }
-  else
-    {
-    unshift @INC, $location;
-    }
-  print "# INC = @INC\n";
-
-	        # values    groups   operators   classes   tests 
-  plan tests =>   7       * 6      * 5         * 4       * 2 +
+use Test::More
+       tests =>   7       * 6      * 5         * 4       * 2 +
                   7       * 6      * 2         * 4       * 1	  # bmod
 ;
 # see bottom:		+ 4 * 10;					  # 4 classes * 10 NaN == NaN tests
-  }
+
+BEGIN { unshift @INC, 't'; }
 
 use Math::BigInt;
 use Math::BigFloat;

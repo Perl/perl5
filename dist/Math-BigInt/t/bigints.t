@@ -5,26 +5,7 @@ use Test;
 
 BEGIN 
   {
-  $| = 1;
-  # to locate the testing files
-  my $location = $0; $location =~ s/bigints.t//i;
-  if ($ENV{PERL_CORE})
-    {
-    @INC = qw(../t/lib);                # testing with the core distribution
-    }
-  unshift @INC, '../lib';       # for testing manually
-  if (-d 't')
-    {
-    chdir 't';
-    require File::Spec;
-    unshift @INC, File::Spec->catdir(File::Spec->updir, $location);
-    }
-  else
-    {
-    unshift @INC, $location;
-    }
-  print "# INC = @INC\n";
-
+  unshift @INC, 't';
   plan tests => 51;
   }
 

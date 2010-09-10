@@ -2,29 +2,8 @@
 
 # Test bpi() and bexp()
 
-use Test::More;
 use strict;
-
-BEGIN
-  {
-  $| = 1;
-  # to locate the testing files
-  my $location = $0; $location =~ s/big_pi_e.t//i;
-  unshift @INC, '../lib';
-  if (-d 't')
-    {
-    chdir 't';
-    require File::Spec;
-    unshift @INC, File::Spec->catdir(File::Spec->updir, $location);
-    }
-  else
-    {
-    unshift @INC, $location;
-    }
-  print "# INC = @INC\n";
-
-  plan tests => 8;
-  }
+use Test::More tests => 8;
 
 use Math::BigFloat;
 

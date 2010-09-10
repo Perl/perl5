@@ -3,15 +3,7 @@
 # test that overloaded compare works when NaN are involved
 
 use strict;
-use Test::More;
-
-BEGIN
-  {
-  $| = 1;
-  chdir 't' if -d 't';
-  unshift @INC, '../lib';	# for running manually
-  plan tests => 26;
-  }
+use Test::More tests => 26;
 
 use Math::BigInt;
 use Math::BigFloat;

@@ -7,21 +7,7 @@ use Test;
 
 BEGIN 
   {
-  $| = 1;
-  # to locate the testing files
-  my $location = $0; $location =~ s/calling.t//i;
-  unshift @INC, '../lib';
-  if (-d 't')
-    {
-    chdir 't';
-    require File::Spec;
-    unshift @INC, File::Spec->catdir(File::Spec->updir, $location);
-    }
-  else
-    {
-    unshift @INC, $location;
-    }
-  print "# INC = @INC\n";
+  unshift @INC, 't';
   my $tests = 160;
   plan tests => $tests;
   }

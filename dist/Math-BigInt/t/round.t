@@ -3,28 +3,7 @@
 # test rounding with non-integer A and P parameters
 
 use strict;
-use Test::More;
-
-BEGIN
-  {
-  $| = 1;
-  # to locate the testing files
-  my $location = $0; $location =~ s/round.t//i;
-  unshift @INC, qw(../lib);
-  if (-d 't')
-    {
-    chdir 't';
-    require File::Spec;
-    unshift @INC, File::Spec->catdir(File::Spec->updir, $location);
-    }
-  else
-    {
-    unshift @INC, $location;
-    }
-  print "# INC = @INC\n";
-
-  plan tests => 95;
-  } 
+use Test::More tests => 95;
 
 use Math::BigFloat;
 
