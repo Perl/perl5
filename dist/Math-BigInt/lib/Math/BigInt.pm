@@ -3508,7 +3508,7 @@ See L<Input> for more info on accepted input formats.
 
 =head2 from_bin()
 
-	$x = Math::BigInt->from_oct("0x10011");	# input is binary
+	$x = Math::BigInt->from_bin("0x10011");	# input is binary
 
 =head2 bnan()
 
