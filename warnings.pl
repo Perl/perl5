@@ -599,6 +599,11 @@ Equivalent to:
     if (warnings::enabled($object))
       { warnings::warn($object, $message) }
 
+=item warnings::register(@names)
+
+This registers warning categories for the given names and is primarily for
+use by the warnings::register pragma, for which see L<perllexwarn>.
+
 =back
 
 See L<perlmodlib/Pragmatic Modules> and L<perllexwarn>.
@@ -775,10 +780,37 @@ sub __chk
     Carp::carp($message);
 }
 
+sub _mkMask
+{
+    my ($bit) = @_;
+    my $mask = "";
+
+    vec($mask, $bit, 1) = 1;
+    return $mask;
+}
+
+sub register
+{
+    my @names = @_;
+
+    for my $name (@names) {
+	if (! defined $Bits{$name}) {
+	    $Bits{$name}     = _mkMask($LAST_BIT);
+	    vec($Bits{'all'}, $LAST_BIT, 1) = 1;
+	    $Offsets{$name}  = $LAST_BIT ++;
+	    foreach my $k (keys %Bits) {
+		vec($Bits{$k}, $LAST_BIT, 1) = 0;
+	    }
+	    $DeadBits{$name} = _mkMask($LAST_BIT);
+	    vec($DeadBits{'all'}, $LAST_BIT++, 1) = 1;
+	}
+    }
+}
+
 sub _error_loc {
     require Carp;
     goto &Carp::short_error_loc; # don't introduce another stack frame
-}                                                             
+}
 
 sub enabled
 {

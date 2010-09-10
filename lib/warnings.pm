@@ -153,7 +153,6 @@ Equivalent to:
     if (warnings::enabled($object))
       { warnings::warn($object, $message) }
 
-
 =item warnings::register(@names)
 
 This registers warning categories for the given names and is primarily for
@@ -526,7 +525,7 @@ sub register
 sub _error_loc {
     require Carp;
     goto &Carp::short_error_loc; # don't introduce another stack frame
-}                                                             
+}
 
 sub enabled
 {
