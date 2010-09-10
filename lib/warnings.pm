@@ -6,7 +6,7 @@
 
 package warnings;
 
-our $VERSION = '1.10';
+our $VERSION = '1.11';
 
 # Verify that we're called correctly so that warnings will work.
 # see also strict.pm.
