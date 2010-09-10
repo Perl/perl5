@@ -12,7 +12,5 @@ BEGIN
 
 use bigrat;
 
-my ($x);
-
 require "t/infnan.inc";
 

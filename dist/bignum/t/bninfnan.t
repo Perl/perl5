@@ -12,7 +12,5 @@ BEGIN
 
 use bignum;
 
-my ($x);
-
 require "t/infnan.inc";
 
