@@ -1497,13 +1497,13 @@ sub is_even
 
 sub is_positive
   {
-  # return true when arg (BINT or num_str) is positive (>= 0)
+  # return true when arg (BINT or num_str) is positive (> 0)
   my ($self,$x) = ref($_[0]) ? (undef,$_[0]) : objectify(1,@_);
 
   return 1 if $x->{sign} eq '+inf';			# +inf is positive
- 
+
   # 0+ is neither positive nor negative
-  ($x->{sign} eq '+' && !$x->is_zero()) ? 1 : 0;	
+  ($x->{sign} eq '+' && !$x->is_zero()) ? 1 : 0;
   }
 
 sub is_negative
@@ -3135,8 +3135,8 @@ Math::BigInt - Arbitrary size integer/float math package
   $x->is_one('-');	# if $x is -1
   $x->is_odd();		# if $x is odd
   $x->is_even();	# if $x is even
-  $x->is_pos();		# if $x >= 0
-  $x->is_neg();		# if $x <  0
+  $x->is_pos();		# if $x > 0
+  $x->is_neg();		# if $x < 0
   $x->is_inf($sign);	# if $x is +inf, or -inf (sign is default '+')
   $x->is_int();		# if $x is an integer (not a float)
 
