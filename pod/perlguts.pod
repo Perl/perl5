@@ -1821,9 +1821,41 @@ of free()ing (i.e. their type is changed to OP_NULL).
 After the compile tree for a subroutine (or for an C<eval> or a file)
 is created, an additional pass over the code is performed. This pass
 is neither top-down or bottom-up, but in the execution order (with
-additional complications for conditionals).  These optimizations are
-done in the subroutine peep().  Optimizations performed at this stage
-are subject to the same restrictions as in the pass 2.
+additional complications for conditionals).  Optimizations performed
+at this stage are subject to the same restrictions as in the pass 2.
+
+Peephole optimizations are done by calling the function pointed to
+by the global variable C<PL_peepp>.  By default, C<PL_peepp> just
+calls the function pointed to by the global variable C<PL_rpeepp>.
+By default, that performs some basic op fixups and optimisations along
+the execution-order op chain, and recursively calls C<PL_rpeepp> for
+each side chain of ops (resulting from conditionals).  Extensions may
+provide additional optimisations or fixups, hooking into either the
+per-subroutine or recursive stage, like this:
+
+    static peep_t prev_peepp;
+    static void my_peep(pTHX_ OP *o)
+    {
+        /* custom per-subroutine optimisation goes here */
+        prev_peepp(o);
+        /* custom per-subroutine optimisation may also go here */
+    }
+    BOOT:
+        prev_peepp = PL_peepp;
+        PL_peepp = my_peep;
+
+    static peep_t prev_rpeepp;
+    static void my_rpeep(pTHX_ OP *o)
+    {
+        OP *orig_o = o;
+        for(; o; o = o->op_next) {
+            /* custom per-op optimisation goes here */
+        }
+        prev_rpeepp(orig_o);
+    }
+    BOOT:
+        prev_rpeepp = PL_rpeepp;
+        PL_rpeepp = my_rpeep;
 
 =head2 Pluggable runops
 

@@ -171,10 +171,52 @@ PERLVARI(Irehash_seed_set, bool, FALSE)	/* 582 hash initialized? */
 
 PERLVARA(Icolors,6,	char *)		/* from regcomp.c */
 
+/*
+=for apidoc Amn|peep_t|PL_peepp
+
+Pointer to the per-subroutine peephole optimiser.  This is a function
+that gets called at the end of compilation of a Perl subroutine (or
+equivalently independent piece of Perl code) to perform fixups of
+some ops and to perform small-scale optimisations.  The function is
+called once for each subroutine that is compiled, and is passed, as sole
+parameter, a pointer to the op that is the entry point to the subroutine.
+It modifies the op tree in place.
+
+The peephole optimiser should never be completely replaced.  Rather,
+add code to it by wrapping the existing optimiser.  The basic way to do
+this can be seen in L<perlguts/Compile pass 3: peephole optimization>.
+If the new code wishes to operate on ops throughout the subroutine's
+structure, rather than just at the top level, it is likely to be more
+convenient to wrap the L</PL_rpeepp> hook.
+
+=cut
+*/
+
 PERLVARI(Ipeepp,	peep_t, MEMBER_TO_FPTR(Perl_peep))
-				/* Pointer to per-sub peephole optimizer */
+
+/*
+=for apidoc Amn|peep_t|PL_rpeepp
+
+Pointer to the recursive peephole optimiser.  This is a function
+that gets called at the end of compilation of a Perl subroutine (or
+equivalently independent piece of Perl code) to perform fixups of some
+ops and to perform small-scale optimisations.  The function is called
+once for each chain of ops linked through their C<op_next> fields;
+it is recursively called to handle each side chain.  It is passed, as
+sole parameter, a pointer to the op that is at the head of the chain.
+It modifies the op tree in place.
+
+The peephole optimiser should never be completely replaced.  Rather,
+add code to it by wrapping the existing optimiser.  The basic way to do
+this can be seen in L<perlguts/Compile pass 3: peephole optimization>.
+If the new code wishes to operate only on ops at a subroutine's top level,
+rather than throughout the structure, it is likely to be more convenient
+to wrap the L</PL_peepp> hook.
+
+=cut
+*/
+
 PERLVARI(Irpeepp,	peep_t, MEMBER_TO_FPTR(Perl_rpeep))
-				/* Pointer to recursive peephole optimizer */
 
 /*
 =for apidoc Amn|Perl_ophook_t|PL_opfreehook
