@@ -3399,8 +3399,8 @@ Value must be greater than zero. Pass an undef value to disable it:
 	$x->accuracy(undef);
 	Math::BigInt->accuracy(undef);
 
-Returns the current accuracy. For C<$x->accuracy()> it will return either the
-local accuracy, or if not defined, the global. This means the return value
+Returns the current accuracy. For C<< $x->accuracy() >> it will return either
+the local accuracy, or if not defined, the global. This means the return value
 represents the accuracy that will be in effect for $x:
 
 	$y = Math::BigInt->new(1234567);	# unrounded
@@ -3449,8 +3449,8 @@ Pass an undef value to disable it:
 	$x->precision(undef);
 	Math::BigInt->precision(undef);
 
-Returns the current precision. For C<$x->precision()> it will return either the
-local precision of $x, or if not defined, the global. This means the return
+Returns the current precision. For C<< $x->precision() >> it will return either
+the local precision of $x, or if not defined, the global. This means the return
 value represents the prevision that will be in effect for $x:
 
 	$y = Math::BigInt->new(1234567);	# unrounded
@@ -4653,8 +4653,8 @@ directly.
 
 =item *
 
-The private object hash keys like C<$x->{sign}> may not be changed, but
-additional keys can be added, like C<$x->{_custom}>.
+The private object hash keys like C<< $x->{sign} >> may not be changed, but
+additional keys can be added, like C<< $x->{_custom} >>.
 
 =item *
 

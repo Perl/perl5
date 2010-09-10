@@ -3905,7 +3905,7 @@ Some routines (C<is_odd()>, C<is_even()>, C<is_zero()>, C<is_one()>,
 C<is_nan()>) return true or false, while others (C<bcmp()>, C<bacmp()>)
 return either undef, <0, 0 or >0 and are suited for sort.
 
-Actual math is done by using the class defined with C<with => Class;> (which
+Actual math is done by using the class defined with C<< with => Class; >> (which
 defaults to BigInts) to represent the mantissa and exponent.
 
 The sign C</^[+-]$/> is stored separately. The string 'NaN' is used to 
