@@ -776,9 +776,15 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
 
     # For randomized tests below.
     my $seed;
-    $seed = $ENV{PERL_TEST_CHARNAMES_SEED} if
-                                    defined $ENV{PERL_TEST_CHARNAMES_SEED};
-    $seed = srand($seed);
+    if (defined $ENV{PERL_TEST_CHARNAMES_SEED}) {
+        $seed = srand($ENV{PERL_TEST_CHARNAMES_SEED});
+        if ($seed != $ENV{PERL_TEST_CHARNAMES_SEED}) {
+            die "srand returned '$seed' instead of '$ENV{PERL_TEST_CHARNAMES_SEED}'";
+        };
+    }
+    else {
+        $seed = srand;
+    }
 
     # We will look at the data grouped in "blocks" of the following
     # size.
