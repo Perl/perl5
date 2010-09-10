@@ -83,7 +83,6 @@ my %temp_no_core =
      '../cpan/Time-HiRes' => 1,
      '../cpan/Unicode-Collate' => 1,
      '../cpan/Unicode-Normalize' => 1,
-     '../dist/Math-BigInt' => 1,
     );
 
 # delete env vars that may influence the results
