@@ -2,16 +2,8 @@
 
 # test the "l", "lib", "try" and "only" options:
 
-use Test::More;
 use strict;
-
-BEGIN
-  {
-  $| = 1;
-  chdir 't' if -d 't';
-  unshift @INC, '../lib';
-  plan tests => 19;
-  }
+use Test::More tests => 19;
 
 use bignum;
 

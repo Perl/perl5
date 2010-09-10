@@ -61,7 +61,6 @@ my %abs = (
 	   '../dist/ExtUtils-Install' => 1,
 	   '../dist/ExtUtils-ParseXS' => 1,
 	   '../dist/Math-BigInt' => 1,
-	   '../dist/bignum' => 1,
 	  );
 
 my %temp_no_core =

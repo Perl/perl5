@@ -3,16 +3,8 @@
 ###############################################################################
 # Test in_effect()
 
-use Test::More;
 use strict;
-
-BEGIN
-  {
-  $| = 1;
-  chdir 't' if -d 't';
-  unshift @INC, '../lib';
-  plan tests => 9;
-  }
+use Test::More tests => 9;
 
 use bigint;
 use bignum;

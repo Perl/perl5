@@ -2,16 +2,8 @@
 
 ###############################################################################
 
-use Test::More;
 use strict;
-
-BEGIN
-  {
-  $| = 1;
-  chdir 't' if -d 't';
-  unshift @INC, '../lib';
-  plan tests => 4;
-  }
+use Test::More tests => 4;
 
 use bignum a => '12';
 

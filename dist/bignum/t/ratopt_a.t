@@ -2,16 +2,8 @@
 
 ###############################################################################
 
-use Test::More;
 use strict;
-
-BEGIN
-  {
-  $| = 1;
-  chdir 't' if -d 't';
-  unshift @INC, '../lib';
-  plan tests => 7;
-  }
+use Test::More tests => 7;
 
 my @C = qw/Math::BigInt Math::BigFloat Math::BigRat/;
 

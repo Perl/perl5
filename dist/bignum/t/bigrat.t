@@ -7,9 +7,6 @@ use strict;
 
 BEGIN
   {
-  $| = 1;
-  chdir 't' if -d 't';
-  unshift @INC, '../lib';
   plan tests => 40;
   }
 

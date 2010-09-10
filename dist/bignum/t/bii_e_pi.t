@@ -3,16 +3,8 @@
 ###############################################################################
 # test for e() and PI() exports
 
-use Test::More;
 use strict;
-
-BEGIN
-  {
-  $| = 1;
-  chdir 't' if -d 't';
-  unshift @INC, '../lib';
-  plan tests => 5;
-  }
+use Test::More tests => 5;
 
 use bigint qw/e PI bpi bexp/;
 
