@@ -523,7 +523,7 @@ sub lookup_name ($;$) {
 
   my ($name, $hints_ref) = @_;
 
-  my $ord;
+  my $utf8;
   my $save_input;
 
   if ($runtime) {
@@ -551,28 +551,28 @@ sub lookup_name ($;$) {
   # User alias should be checked first or else can't override ours, and if we
   # add any, could conflict with theirs.
   if (exists $^H{charnames_ord_aliases}{$name}) {
-    $ord = $^H{charnames_ord_aliases}{$name};
+    $utf8 = $^H{charnames_ord_aliases}{$name};
   }
   elsif (exists $^H{charnames_name_aliases}{$name}) {
     $name = $^H{charnames_name_aliases}{$name};
     $save_input = $name;  # Cache the result for any error message
   }
   elsif (exists $system_aliases{$name}) {
-    $ord = $system_aliases{$name};
+    $utf8 = $system_aliases{$name};
   }
   elsif (exists $deprecated_aliases{$name}) {
     require warnings;
     warnings::warnif('deprecated', "Unicode character name \"$name\" is deprecated, use \"" . viacode($deprecated_aliases{$name}) . "\" instead");
-    $ord = $deprecated_aliases{$name};
+    $utf8 = $deprecated_aliases{$name};
   }
 
   my @off;
 
-  if (! defined $ord) {
+  if (! defined $utf8) {
 
     # See if has looked this up earlier.
     if ($^H{charnames_full} && exists $full_names_cache{$name}) {
-      $ord = $full_names_cache{$name};
+      $utf8 = $full_names_cache{$name};
     }
     else {
 
@@ -597,7 +597,7 @@ sub lookup_name ($;$) {
         # Algorithmically determinables are not placed in the cache (that
         # $found_full_in_table indicates) because that uses up memory,
         # and finding these again is fast.
-        if (! defined ($ord = name_to_code_point_special($name))) {
+        if (! defined ($utf8 = name_to_code_point_special($name))) {
 
           # Not algorthmically determinable; look up in the table.
           if ($txt =~ /\t\Q$name\E$/m) {
@@ -608,7 +608,7 @@ sub lookup_name ($;$) {
       }
 
       # If we didn't get it above, keep looking
-      if (! $found_full_in_table && ! defined $ord) {
+      if (! $found_full_in_table && ! defined $utf8) {
 
         # If :short is allowed, see if input is like "greek:Sigma".
         my $scripts_trie;
@@ -638,20 +638,20 @@ sub lookup_name ($;$) {
         @off = ($-[0] + 1, $+[0]);  # The 1 is for the tab
       }
 
-      if (! defined $ord) {
+      if (! defined $utf8) {
 
         # Now know where in the string the name starts.
         # The code, 5 hex digits long (and a tab), is before that.
-        $ord = CORE::hex substr($txt, $off[0] - 6, 5);
+        $utf8 = CORE::hex substr($txt, $off[0] - 6, 5);
       }
 
       # Cache the input so as to not have to search the large table
       # again, but only if it came from the one search that we cache.
-      $full_names_cache{$name} = $ord if $found_full_in_table;
+      $full_names_cache{$name} = $utf8 if $found_full_in_table;
     }
   }
 
-  return $ord if $runtime || $ord <= 255 || ! ($^H & $bytes::hint_bits);
+  return $utf8 if $runtime || $utf8 <= 255 || ! ($^H & $bytes::hint_bits);
 
   # Here is compile time, "use bytes" is in effect, and the character
   # won't fit in a byte
@@ -662,7 +662,7 @@ sub lookup_name ($;$) {
   else {
     $name = (defined $save_input) ? $save_input : $_[0];
   }
-  croak not_legal_use_bytes_msg($name, $ord);
+  croak not_legal_use_bytes_msg($name, $utf8);
 } # lookup_name
 
 sub charnames {
