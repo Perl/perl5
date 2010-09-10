@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for release_engineer
-* changelogged up to f4beb78
+* changelogged up to 95544aa
 * the mauve module will not be part of the release, so it's not changelogged
 yet. it also added some new api functions. those aren't covered either, as they
 might go away again in case mauve gets rolled back for 5.13.5.
@@ -53,6 +53,22 @@ of a pair of C<nextstate> ops. (Except where the first carries a label, as
 labels mustn't be eliminated by the optimiser, and label usage isn't
 conclusively known at compile time.)
 
+=head2 API function to parse statements
+
+The C<parse_fullstmt> function has been added to allow parsing of a single
+complete Perl statement. See L<perlapi> for details.
+
+=head2 API functions for accessing the runtime hinthash
+
+A new C API for introspecting the hinthash C<%^H> at runtime has been added. See
+C<cop_hints_2hv>, C<cop_hints_fetchpvn>, C<cop_hints_fetchpvs>, and
+C<cop_hints_fetchsv> in L<perlapi> for details.
+
+=head2 C interface to C<caller()>
+
+The C<caller_cx> function has been added as an XSUB-writer's equivalent of
+C<caller()>. See L<perlapi> for details.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -75,6 +91,16 @@ effects, such as signal handlers being wiped when modules were loaded, etc.
 This has been fixed (or the feature has been removed, depending on how you
 see it).
 
+=head2 Smart-matching against array slices
+
+Previously, the following code resulted in a successful match:
+
+    my @a = qw(a y0 z);
+    my @b = qw(a x0 z);
+    $a[0 .. $#b] ~~ @b;
+
+This odd behaviour has now been fixed [perl #77468].
+
 =head2 C API changes
 
 The first argument of the C API function C<Perl_fetch_cop_label> has changed
@@ -91,7 +117,18 @@ XXX Any deprecated features, syntax, modules etc. should be listed here.
 In particular, deprecated modules should be listed here even if they are
 listed as an updated module in the L</Modules and Pragmata> section.
 
-[ List each deprecation as a =head2 entry ]
+=head2 Use of qw(...) as parentheses
+
+Historically the parser fooled itself into thinking that C<qw(...)> literals
+were always enclosed in parentheses, and as a result you could sometimes omit
+parentheses around them:
+
+    for $x qw(a b c) { ... }
+
+The parser no longer lies to itself in this way.  Wrap the list literal in
+parentheses, like:
+
+    for $x (qw(a b c)) { ... }
 
 =head1 Performance Enhancements
 
@@ -169,7 +206,7 @@ C<Filter::Simple> has been upgraded from version 0.84 to 0.85.
 
 =item *
 
-C<Math::BigInt> has been upgraded from version 1.89_01 to 1.90.
+C<Math::BigInt> has been upgraded from version 1.89_01 to 1.92.
 C<Math::BigInt::Calc> has been upgraded from version 0.52 to 0.53.
 
 This fixes incorrect results when computing binomial coefficients (RT#77640).
@@ -177,6 +214,10 @@ This fixes incorrect results when computing binomial coefficients (RT#77640).
 =item *
 
 C<Math::BigInt::FastCalc> has been upgraded from version 0.19 to 0.21.
+
+=item *
+
+C<Module::CoreList> has been upgraded from version 2.37 to 2.38.
 
 =item *
 
@@ -252,7 +293,7 @@ XXX Newly added diagnostic messages go here
 
 =item *
 
-XXX
+Use of qw(...) as parentheses is deprecated
 
 =back
 
@@ -483,6 +524,15 @@ perl to crash whenever the glob's contents were accessed [perl #77492].
 
 The postincrement and postdecrement operators, C<++> and C<--> used to cause
 leaks when being used on references. This has now been fixed.
+
+=item *
+
+A bug when replacing the glob of a loop variable within the loop has been
+fixed [perl #21469]. This means the following code will no longer crash:
+
+    for $x (...) {
+        *x = *y;
+    }
 
 =back
 
