@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for release_engineer
-* changelogged up to 95544aa
+* changelogged up to 26e1fc4
 * the mauve module will not be part of the release, so it's not changelogged
 yet. it also added some new api functions. those aren't covered either, as they
 might go away again in case mauve gets rolled back for 5.13.5.
@@ -164,9 +164,7 @@ cribbed.
 
 =item *
 
-L<warnings> and L<warnings::register> can now register categories other than
-the names of packages using warnings::register.  See L<perllexwarn> for more
-information.
+XXX
 
 =back
 
@@ -182,6 +180,15 @@ C<blib> has been upgraded from version 1.05 to 1.06.
 
 C<bignum>, C<bigint>, and C<bigrat> have been upgraded from version 0.23 to
 0.24.
+
+=item *
+
+C<warnings> has been upgraded from version 1.10 to 1.11.
+
+C<warnings::register> has been upgraded from version 1.01 to 1.02.
+
+It is now possible to register warning categories other than the names of
+packages using warnings::register.  See L<perllexwarn> for more information.
 
 =item *
 
