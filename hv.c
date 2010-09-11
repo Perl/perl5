@@ -295,7 +295,7 @@ Returns the hash entry which corresponds to the specified key in the hash.
 C<hash> must be a valid precomputed hash number for the given C<key>, or 0
 if you want the function to compute it.  IF C<lval> is set then the fetch
 will be part of a store.  Make sure the return value is non-null before
-accessing it.  The return value when C<tb> is a tied hash is a pointer to a
+accessing it.  The return value when C<hv> is a tied hash is a pointer to a
 static location, so be sure to make a copy of the structure if you need to
 store it somewhere.
 
@@ -1869,12 +1869,12 @@ S_hv_auxinit(HV *hv) {
 =for apidoc hv_iterinit
 
 Prepares a starting point to traverse a hash table.  Returns the number of
-keys in the hash (i.e. the same as C<HvKEYS(tb)>).  The return value is
+keys in the hash (i.e. the same as C<HvKEYS(hv)>).  The return value is
 currently only meaningful for hashes without tie magic.
 
 NOTE: Before version 5.004_65, C<hv_iterinit> used to return the number of
 hash buckets that happen to be in use.  If you still need that esoteric
-value, you can get it through the macro C<HvFILL(tb)>.
+value, you can get it through the macro C<HvFILL(hv)>.
 
 
 =cut
