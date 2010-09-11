@@ -543,6 +543,16 @@ fixed [perl #21469]. This means the following code will no longer crash:
         *x = *y;
     }
 
+=item *
+
+Perl would segfault if the undocumented C<Internals> functions that
+used reference prototypes were called with the C<&foo()> syntax,
+e.g. C<&Internals::SvREADONLY(undef)> [perl #77776].
+
+These functions now call C<SvROK> on their arguments before
+dereferencing them with C<SvRV>, and we test for this case in
+F<t/lib/universal.t>.
+
 =back
 
 =head1 Known Problems

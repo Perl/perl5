@@ -794,8 +794,15 @@ XS(XS_Internals_SvREADONLY)	/* This is dangerous stuff. */
 {
     dVAR;
     dXSARGS;
-    SV * const sv = SvRV(ST(0));
+    SV * const svz = ST(0);
+    SV * sv;
     PERL_UNUSED_ARG(cv);
+
+    /* [perl #77776] - called as &foo() not foo() */
+    if (!SvROK(svz))
+        croak_xs_usage(cv, "SCALAR[, ON]");
+
+    sv = SvRV(svz);
 
     if (items == 1) {
 	 if (SvREADONLY(sv))
@@ -821,8 +828,15 @@ XS(XS_Internals_SvREFCNT)	/* This is dangerous stuff. */
 {
     dVAR;
     dXSARGS;
-    SV * const sv = SvRV(ST(0));
+    SV * const svz = ST(0);
+    SV * sv;
     PERL_UNUSED_ARG(cv);
+
+    /* [perl #77776] - called as &foo() not foo() */
+    if (!SvROK(svz))
+        croak_xs_usage(cv, "SCALAR[, REFCOUNT]");
+
+    sv = SvRV(svz);
 
     if (items == 1)
 	 XSRETURN_IV(SvREFCNT(sv) - 1); /* Minus the ref created for us. */
@@ -839,7 +853,7 @@ XS(XS_Internals_hv_clear_placehold)
     dVAR;
     dXSARGS;
 
-    if (items != 1)
+    if (items != 1 || !SvROK(ST(0)))
 	croak_xs_usage(cv, "hv");
     else {
 	HV * const hv = MUTABLE_HV(SvRV(ST(0)));
