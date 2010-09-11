@@ -5,15 +5,8 @@
 # XXX TODO: This test file doesn't actually seem to work! If you remove
 # the sv_2mortal() in the XS file, it still happily passes all tests...
 
-use Test::More;
 use strict;
-
-BEGIN
-  {
-  $| = 1;
-  unshift @INC, ('../lib', '../blib/arch');	# for running manually
-  plan tests => 22;
-  }
+use Test::More tests => 22;
 
 use Math::BigInt::FastCalc;
 

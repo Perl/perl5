@@ -1,21 +1,12 @@
 #!/usr/bin/perl -w
 
-use Test::More;
 use strict;
+use Test::More;
 
-my $count;
-  
-BEGIN
-  {
-  $| = 1;
-  if ($^O eq 'os390') { print "1..0\n"; exit(0) } # test takes too long there
-  unshift @INC, '../lib'; # for running manually
-  unshift @INC, '../blib/arch';
-  my $location = $0; $location =~ s/mbi_rand.t//;
-  unshift @INC, $location; # to locate the testing files
-  $count = 128;
-  plan tests => $count*2;
-  }
+my $count = 128;
+
+plan(($^O eq 'os390')
+     ? (skip_all => 'takes too long on os390') : (tests => $count*2));
 
 use Math::BigInt lib => 'FastCalc';
 my $c = 'Math::BigInt';
