@@ -174,12 +174,12 @@ To specify by name, the name of the character goes between the curly braces.
 In this case, you have to C<use charnames> to load the Unicode names of the
 characters, otherwise Perl will complain.
 
-To specify by Unicode ordinal number, use the form
+To specify a character by Unicode code point, use the form
 C<\N{U+I<wide hex character>}>, where I<wide hex character> is a number in
 hexadecimal that gives the ordinal number that Unicode has assigned to the
 desired character.  It is customary (but not required) to use leading zeros to
 pad the number to 4 digits.  Thus C<\N{U+0041}> means
-C<Latin Capital Letter A>, and you will rarely see it written without the two
+C<LATIN CAPITAL LETTER A>, and you will rarely see it written without the two
 leading zeros.  C<\N{U+0041}> means "A" even on EBCDIC machines (where the
 ordinal value of "A" is not 0x41).
 
