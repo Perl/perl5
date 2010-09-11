@@ -13993,6 +13993,7 @@ Perl_coerce_qwlist_to_paren_list(pTHX_ OP *qwlist)
 	op_free(qwlist);
     }
     else {
+	start_force(PL_curforce);
 	NEXTVAL_NEXTTOKE.opval = qwlist;
 	force_next(THING);
     }
