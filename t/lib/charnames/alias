@@ -127,7 +127,7 @@ EXPECT
 OPTIONS regex
 $
 ########
-# alias with hashref using mixed aliasses
+# alias with hashref using mixed aliases
 use warnings;
 use charnames ":short", ":alias" => {
     e_ACUTE => "LATIN:e WITH ACUTE",
@@ -138,7 +138,7 @@ EXPECT
 OPTIONS regex
 Unknown charname 'LATIN SMALL LETTER A WITH ACUT' at
 ########
-# alias with hashref using mixed aliasses
+# alias with hashref using mixed aliases
 use warnings;
 use charnames ":short", ":alias" => {
     e_ACUTE => "LATIN:e WITH ACUTE",
@@ -149,7 +149,7 @@ EXPECT
 OPTIONS regex
 Unknown charname 'LATIN SMALL LETTER A WITH ACUTE' at
 ########
-# alias with hashref using mixed aliasses
+# alias with hashref using mixed aliases
 use warnings;
 no warnings 'void';
 use charnames ":full", ":alias" => {
