@@ -1087,6 +1087,25 @@ Perl_savesvpv(pTHX_ SV *sv)
     return (char *) CopyD(pv,newaddr,len,char);
 }
 
+/*
+=for apidoc savesharedsvpv
+
+A version of C<savesharedpv()> which allocates the duplicate string in
+memory which is shared between threads.
+
+=cut
+*/
+
+char *
+Perl_savesharedsvpv(pTHX_ SV *sv)
+{
+    STRLEN len;
+    const char * const pv = SvPV_const(sv, len);
+
+    PERL_ARGS_ASSERT_SAVESHAREDSVPV;
+
+    return savesharedpvn(pv, len);
+}
 
 /* the SV for Perl_form() and mess() is not kept in an arena */
 

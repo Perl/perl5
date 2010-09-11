@@ -269,6 +269,7 @@ Perl_lex_end
 Perl_lex_bufutf8
 Perl_lex_grow_linestr
 Perl_lex_stuff_pvn
+Perl_lex_stuff_pv
 Perl_lex_stuff_sv
 Perl_lex_unstuff
 Perl_lex_read_to
@@ -383,6 +384,7 @@ Perl_newSVpvn
 Perl_newSVpvn_flags
 Perl_newSVhek
 Perl_newSVpvn_share
+Perl_newSVpv_share
 Perl_newSVpvf
 Perl_vnewSVpvf
 Perl_newSVrv
@@ -474,6 +476,7 @@ Perl_savepv
 Perl_savepvn
 Perl_savesharedpv
 Perl_savesharedpvn
+Perl_savesharedsvpv
 Perl_savesvpv
 Perl_savestack_grow
 Perl_savestack_grow_cnt
@@ -764,6 +767,7 @@ Perl_Slab_Free
 Perl_sv_del_backref
 Perl_sv_setsv_flags
 Perl_sv_catpvn_flags
+Perl_sv_catpv_flags
 Perl_sv_catsv_flags
 Perl_sv_utf8_upgrade_flags_grow
 Perl_sv_pvn_force_flags

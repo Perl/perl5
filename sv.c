@@ -4858,6 +4858,24 @@ Perl_sv_catpv(pTHX_ register SV *const sv, register const char *ptr)
 }
 
 /*
+=for apidoc sv_catpv_flags
+
+Concatenates the string onto the end of the string which is in the SV.
+If the SV has the UTF-8 status set, then the bytes appended should
+be valid UTF-8.  If C<flags> has C<SV_GMAGIC> bit set, will C<mg_get>
+on the SVs if appropriate, else not.
+
+=cut
+*/
+
+void
+Perl_sv_catpv_flags(pTHX_ SV *dstr, const char *sstr, I32 flags)
+{
+    PERL_ARGS_ASSERT_SV_CATPV_FLAGS;
+    sv_catpvn_flags(dstr, sstr, strlen(sstr), flags);
+}
+
+/*
 =for apidoc sv_catpv_mg
 
 Like C<sv_catpv>, but also handles 'set' magic.
@@ -8112,6 +8130,20 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
     return sv;
 }
 
+/*
+=for apidoc newSVpv_share
+
+Like C<newSVpvn_share>, but takes a nul-terminated string instead of a
+string/length pair.
+
+=cut
+*/
+
+SV *
+Perl_newSVpv_share(pTHX_ const char *src, U32 hash)
+{
+    return newSVpvn_share(src, strlen(src), hash);
+}
 
 #if defined(PERL_IMPLICIT_CONTEXT)
 

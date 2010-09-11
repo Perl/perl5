@@ -452,6 +452,7 @@
 #define lex_bufutf8()		Perl_lex_bufutf8(aTHX)
 #define lex_grow_linestr(a)	Perl_lex_grow_linestr(aTHX_ a)
 #define lex_stuff_pvn(a,b,c)	Perl_lex_stuff_pvn(aTHX_ a,b,c)
+#define lex_stuff_pv(a,b)	Perl_lex_stuff_pv(aTHX_ a,b)
 #define lex_stuff_sv(a,b)	Perl_lex_stuff_sv(aTHX_ a,b)
 #define lex_unstuff(a)		Perl_lex_unstuff(aTHX_ a)
 #define lex_read_to(a)		Perl_lex_read_to(aTHX_ a)
@@ -670,6 +671,7 @@
 #define newSVpvn_flags(a,b,c)	Perl_newSVpvn_flags(aTHX_ a,b,c)
 #define newSVhek(a)		Perl_newSVhek(aTHX_ a)
 #define newSVpvn_share(a,b,c)	Perl_newSVpvn_share(aTHX_ a,b,c)
+#define newSVpv_share(a,b)	Perl_newSVpv_share(aTHX_ a,b)
 #ifndef PERL_IMPLICIT_CONTEXT
 #define newSVpvf		Perl_newSVpvf
 #endif
@@ -854,6 +856,7 @@
 #define savepvn(a,b)		Perl_savepvn(aTHX_ a,b)
 #define savesharedpv(a)		Perl_savesharedpv(aTHX_ a)
 #define savesharedpvn(a,b)	Perl_savesharedpvn(aTHX_ a,b)
+#define savesharedsvpv(a)	Perl_savesharedsvpv(aTHX_ a)
 #define savesvpv(a)		Perl_savesvpv(aTHX_ a)
 #define savestack_grow()	Perl_savestack_grow(aTHX)
 #define savestack_grow_cnt(a)	Perl_savestack_grow_cnt(aTHX_ a)
@@ -1746,6 +1749,7 @@
 #endif
 #define sv_setsv_flags(a,b,c)	Perl_sv_setsv_flags(aTHX_ a,b,c)
 #define sv_catpvn_flags(a,b,c,d)	Perl_sv_catpvn_flags(aTHX_ a,b,c,d)
+#define sv_catpv_flags(a,b,c)	Perl_sv_catpv_flags(aTHX_ a,b,c)
 #define sv_catsv_flags(a,b,c)	Perl_sv_catsv_flags(aTHX_ a,b,c)
 #define sv_utf8_upgrade_flags_grow(a,b,c)	Perl_sv_utf8_upgrade_flags_grow(aTHX_ a,b,c)
 #define sv_pvn_force_flags(a,b,c)	Perl_sv_pvn_force_flags(aTHX_ a,b,c)
@@ -2043,6 +2047,7 @@
 #define xmldump_eval()		Perl_xmldump_eval(aTHX)
 #define sv_catxmlsv(a,b)	Perl_sv_catxmlsv(aTHX_ a,b)
 #define sv_catxmlpvn(a,b,c,d)	Perl_sv_catxmlpvn(aTHX_ a,b,c,d)
+#define sv_catxmlpv(a,b,c)	Perl_sv_catxmlpv(aTHX_ a,b,c)
 #define sv_xmlpeek(a)		Perl_sv_xmlpeek(aTHX_ a)
 #define do_pmop_xmldump(a,b,c)	Perl_do_pmop_xmldump(aTHX_ a,b,c)
 #define pmop_xmldump(a)		Perl_pmop_xmldump(aTHX_ a)

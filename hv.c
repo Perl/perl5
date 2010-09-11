@@ -2650,6 +2650,11 @@ if the entry isn't there.
 See L</cop_hints_fetchsv>. If C<flags> includes C<HVhek_UTF8>, C<key> is
 in UTF-8.
 
+=for apidoc cop_hints_fetchpv
+
+See L</cop_hints_fetchsv>. If C<flags> includes C<HVhek_UTF8>, C<key> is
+in UTF-8.
+
 =for apidoc cop_hints_fetchpvs
 
 See L</cop_hints_fetchpvn>. This is a macro that takes a constant string

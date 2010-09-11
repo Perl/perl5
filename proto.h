@@ -335,6 +335,10 @@ PERL_CALLCONV SV*	Perl_cop_hints_fetchpvn(pTHX_ const COP *cop, const char *key,
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2); */
 
+/* PERL_CALLCONV SV*	cop_hints_fetchpv(pTHX_ const COP *cop, const char *const key, int flags, U32 hash)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2); */
+
 /* PERL_CALLCONV SV*	cop_hints_fetchsv(pTHX_ const COP *cop, SV *keysv, U32 hash)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2); */
@@ -1572,6 +1576,11 @@ PERL_CALLCONV void	Perl_lex_stuff_pvn(pTHX_ const char* pv, STRLEN len, U32 flag
 #define PERL_ARGS_ASSERT_LEX_STUFF_PVN	\
 	assert(pv)
 
+PERL_CALLCONV void	Perl_lex_stuff_pv(pTHX_ const char* pv, U32 flags)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_LEX_STUFF_PV	\
+	assert(pv)
+
 PERL_CALLCONV void	Perl_lex_stuff_sv(pTHX_ SV* sv, U32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_LEX_STUFF_SV	\
@@ -2415,6 +2424,10 @@ PERL_CALLCONV SV*	Perl_newSVpvn_share(pTHX_ const char* s, I32 len, U32 hash)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV SV*	Perl_newSVpv_share(pTHX_ const char* s, U32 hash)
+			__attribute__malloc__
+			__attribute__warn_unused_result__;
+
 PERL_CALLCONV SV*	Perl_newSVpvf(pTHX_ const char *const pat, ...)
 			__attribute__malloc__
 			__attribute__warn_unused_result__
@@ -2951,6 +2964,13 @@ PERL_CALLCONV char*	Perl_savesharedpvn(pTHX_ const char *const pv, const STRLEN 
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SAVESHAREDPVN	\
 	assert(pv)
+
+PERL_CALLCONV char*	Perl_savesharedsvpv(pTHX_ SV *sv)
+			__attribute__malloc__
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_SAVESHAREDSVPV	\
+	assert(sv)
 
 PERL_CALLCONV char*	Perl_savesvpv(pTHX_ SV* sv)
 			__attribute__malloc__
@@ -6010,6 +6030,12 @@ PERL_CALLCONV void	Perl_sv_catpvn_flags(pTHX_ SV *const dstr, const char *sstr, 
 #define PERL_ARGS_ASSERT_SV_CATPVN_FLAGS	\
 	assert(dstr); assert(sstr)
 
+PERL_CALLCONV void	Perl_sv_catpv_flags(pTHX_ SV *dstr, const char *sstr, const I32 flags)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_CATPV_FLAGS	\
+	assert(dstr); assert(sstr)
+
 PERL_CALLCONV void	Perl_sv_catsv_flags(pTHX_ SV *const dsv, SV *const ssv, const I32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_CATSV_FLAGS	\
@@ -6561,6 +6587,12 @@ PERL_CALLCONV char*	Perl_sv_catxmlpvn(pTHX_ SV *dsv, const char *pv, STRLEN len,
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_SV_CATXMLPVN	\
+	assert(dsv); assert(pv)
+
+PERL_CALLCONV char*	Perl_sv_catxmlpv(pTHX_ SV *dsv, const char *pv, int utf8)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_CATXMLPV	\
 	assert(dsv); assert(pv)
 
 PERL_CALLCONV char*	Perl_sv_xmlpeek(pTHX_ SV* sv)

@@ -237,6 +237,8 @@ Apd	|HV*	|cop_hints_2hv	|NN const COP *cop
 Apd	|SV*	|cop_hints_fetchpvn|NN const COP *cop|NN const char *key \
 				|STRLEN klen|int flags|U32 hash
 Amd	|SV*	|cop_hints_fetchpvs|NN const COP *cop|NN const char *const key
+Amd	|SV*	|cop_hints_fetchpv|NN const COP *cop|NN const char *const key \
+				|int flags|U32 hash
 Amd	|SV*	|cop_hints_fetchsv|NN const COP *cop|NN SV *keysv|U32 hash
 : Used in op.c and perl.c
 pM	|PERL_CONTEXT*	|create_eval_scope|U32 flags
@@ -621,6 +623,7 @@ p	|void	|lex_start	|NULLOK SV* line|NULLOK PerlIO *rsfp|bool new_filter
 AMpd	|bool	|lex_bufutf8
 AMpd	|char*	|lex_grow_linestr|STRLEN len
 AMpd	|void	|lex_stuff_pvn	|NN const char* pv|STRLEN len|U32 flags
+AMpd	|void	|lex_stuff_pv	|NN const char* pv|U32 flags
 AMpd	|void	|lex_stuff_sv	|NN SV* sv|U32 flags
 AMpd	|void	|lex_unstuff	|NN char* ptr
 AMpd	|void	|lex_read_to	|NN char* ptr
@@ -833,6 +836,7 @@ Apda	|SV*	|newSVpvn	|NULLOK const char *const s|const STRLEN len
 Apda	|SV*	|newSVpvn_flags	|NULLOK const char *const s|const STRLEN len|const U32 flags
 Apda	|SV*	|newSVhek	|NULLOK const HEK *const hek
 Apda	|SV*	|newSVpvn_share	|NULLOK const char* s|I32 len|U32 hash
+Apda	|SV*	|newSVpv_share	|NULLOK const char* s|U32 hash
 Afpda	|SV*	|newSVpvf	|NN const char *const pat|...
 Apa	|SV*	|vnewSVpvf	|NN const char *const pat|NULLOK va_list *const args
 Apd	|SV*	|newSVrv	|NN SV *const rv|NULLOK const char *const classname
@@ -1024,6 +1028,7 @@ Apda	|char*	|savepv		|NULLOK const char* pv
 Apda	|char*	|savepvn	|NULLOK const char* pv|I32 len
 Apda	|char*	|savesharedpv	|NULLOK const char* pv
 Apda	|char*	|savesharedpvn	|NN const char *const pv|const STRLEN len
+Apda	|char*	|savesharedsvpv	|NN SV *sv
 Apda	|char*	|savesvpv	|NN SV* sv
 Ap	|void	|savestack_grow
 Ap	|void	|savestack_grow_cnt	|I32 need
@@ -1993,6 +1998,8 @@ START_EXTERN_C
 Apd	|void	|sv_setsv_flags	|NN SV *dstr|NULLOK SV *sstr|const I32 flags
 Apd	|void	|sv_catpvn_flags|NN SV *const dstr|NN const char *sstr|const STRLEN len \
 				|const I32 flags
+Apd	|void	|sv_catpv_flags	|NN SV *dstr|NN const char *sstr \
+				|const I32 flags
 Apd	|void	|sv_catsv_flags	|NN SV *const dsv|NULLOK SV *const ssv|const I32 flags
 Apmd	|STRLEN	|sv_utf8_upgrade_flags|NN SV *const sv|const I32 flags
 Ap	|STRLEN	|sv_utf8_upgrade_flags_grow|NN SV *const sv|const I32 flags|STRLEN extra
@@ -2283,6 +2290,7 @@ Mp	|void	|xmldump_form	|NN const GV* gv
 Mp	|void	|xmldump_eval
 Mp	|char*	|sv_catxmlsv	|NN SV *dsv|NN SV *ssv
 Mp	|char*	|sv_catxmlpvn	|NN SV *dsv|NN const char *pv|STRLEN len|int utf8
+Mp	|char*	|sv_catxmlpv	|NN SV *dsv|NN const char *pv|int utf8
 Mp	|char*	|sv_xmlpeek	|NN SV* sv
 Mp	|void	|do_pmop_xmldump|I32 level|NN PerlIO *file \
 				|NULLOK const PMOP *pm

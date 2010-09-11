@@ -454,6 +454,9 @@ C<SV*>.
     Perl_cop_hints_fetchpvn(aTHX_ (cop), SvPV_nolen(keysv), SvCUR(keysv), \
 	(SvUTF8(keysv) ? HVhek_UTF8 : 0), (hash))
 
+#define cop_hints_fetchpv(cop, key, flags, hash) \
+    Perl_cop_hints_fetchpvn(aTHX_ (cop), key, strlen(key), (flags), (hash))
+
 #define cop_hints_fetchpvs(cop, key) \
     Perl_cop_hints_fetchpvn(aTHX_ (cop), STR_WITH_LEN(key), 0, 0)
 

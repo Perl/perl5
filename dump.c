@@ -2396,6 +2396,13 @@ Perl_sv_catxmlsv(pTHX_ SV *dsv, SV *ssv)
 }
 
 char *
+Perl_sv_catxmlpv(pTHX_ SV *dsv, const char *pv, int utf8)
+{
+    PERL_ARGS_ASSERT_SV_CATXMLPV;
+    return sv_catxmlpvn(dsv, pv, strlen(pv), utf8);
+}
+
+char *
 Perl_sv_catxmlpvn(pTHX_ SV *dsv, const char *pv, STRLEN len, int utf8)
 {
     unsigned int c;
