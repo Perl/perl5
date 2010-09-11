@@ -169,7 +169,7 @@ sub to_bytes {
     use bytes;
     is(charnames::vianame("GOTHIC LETTER AHSA"), 0x10330, "Verify vianame \\N{name} is unaffected by 'use bytes'");
     is(charnames::vianame("U+FF"), chr(0xFF), "Verify vianame \\N{U+FF} is unaffected by 'use bytes'");
-    cmp_ok($warning_count, '==', scalar @WARN, "Verify vianame doesn't warn on legal inputs");
+    cmp_ok($warning_count, '==', scalar @WARN, "Verify vianame doesn't warn on legal inputs under 'use bytes'");
     ok(! defined charnames::vianame("U+100"), "Verify vianame \\N{U+100} is undef under 'use bytes'");
     ok($warning_count == scalar @WARN - 1 && $WARN[-1] =~ /above 0xFF/, "Verify vianame gives appropriate warning for previous test");
 }
