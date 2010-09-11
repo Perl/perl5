@@ -885,6 +885,16 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
         $algorithmic_names_count[$block] = 1;
     }
 
+    open $fh, "<", "../../lib/unicore/NameAliases.txt" or
+        die "Can't open ../../lib/unicore/NameAliases.txt: $!";
+    while (<$fh>) {
+        chomp;
+        s/^\s*#.*//;
+        next unless $_;
+        my ($hex, $name) = split ";";
+        is(charnames::vianame($name), hex $hex, "Verify vianame(\"$name\") is 0x$hex");
+    }
+    close $fh;
 
     # Now, have all the names populated.  Do the tests
 
