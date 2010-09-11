@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for release_engineer
-* changelogged up to 26e1fc4
+* changelogged up to 38ef960
 * the mauve module will not be part of the release, so it's not changelogged
 yet. it also added some new api functions. those aren't covered either, as they
 might go away again in case mauve gets rolled back for 5.13.5.
@@ -192,6 +192,10 @@ packages using warnings::register.  See L<perllexwarn> for more information.
 
 =item *
 
+C<B::Debug> has been upgraded from version 1.12 to 1.14.
+
+=item *
+
 C<Data::Dumper> has been upgraded from version 2.126 to 2.128.
 
 This fixes a crash when using custom sort functions that might cause the stack
@@ -227,6 +231,12 @@ C<Math::BigInt::FastCalc> has been upgraded from version 0.19 to 0.21.
 =item *
 
 C<Module::CoreList> has been upgraded from version 2.37 to 2.38.
+
+=item *
+
+C<POSIX> has been upgraded from version 1.19 to 1.20.
+
+It now includes constants for POSIX signal constants.
 
 =item *
 
