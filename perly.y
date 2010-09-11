@@ -1368,7 +1368,7 @@ listexprcom:	/* NULL */
 lpar_or_qw:	'('
 			{ $$ = $1; }
 	|	QWLIST
-			{ coerce_qwlist_to_paren_list($1); }
+			{ munge_qwlist_to_paren_list($1); }
 		'('
 			{ $$ = $3; }
 	;

@@ -13984,9 +13984,9 @@ Perl_parse_fullstmt(pTHX_ U32 flags)
 }
 
 void
-Perl_coerce_qwlist_to_paren_list(pTHX_ OP *qwlist)
+Perl_munge_qwlist_to_paren_list(pTHX_ OP *qwlist)
 {
-    PERL_ARGS_ASSERT_COERCE_QWLIST_TO_PAREN_LIST;
+    PERL_ARGS_ASSERT_MUNGE_QWLIST_TO_PAREN_LIST;
     deprecate("qw(...) as parentheses");
     force_next(')');
     if (qwlist->op_type == OP_STUB) {

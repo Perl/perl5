@@ -2079,7 +2079,7 @@
 #define boot_core_mro		Perl_boot_core_mro
 #endif
 #ifdef PERL_CORE
-#define coerce_qwlist_to_paren_list	Perl_coerce_qwlist_to_paren_list
+#define munge_qwlist_to_paren_list	Perl_munge_qwlist_to_paren_list
 #endif
 #if defined(USE_ITHREADS)
 #  if defined(PERL_IN_SV_C)
@@ -4553,7 +4553,7 @@
 #ifdef PERL_CORE
 #endif
 #ifdef PERL_CORE
-#define coerce_qwlist_to_paren_list(a)	Perl_coerce_qwlist_to_paren_list(aTHX_ a)
+#define munge_qwlist_to_paren_list(a)	Perl_munge_qwlist_to_paren_list(aTHX_ a)
 #endif
 #if defined(USE_ITHREADS)
 #  if defined(PERL_IN_SV_C)

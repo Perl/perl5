@@ -1631,7 +1631,7 @@ case 2:
 
   case 212:
 #line 1371 "perly.y"
-    { coerce_qwlist_to_paren_list((ps[(1) - (1)].val.opval)); ;}
+    { munge_qwlist_to_paren_list((ps[(1) - (1)].val.opval)); ;}
     break;
 
   case 213:
