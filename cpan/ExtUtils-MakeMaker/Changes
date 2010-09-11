@@ -1,3 +1,25 @@
+6.57_05  Sat Sep 11 23:24:00 EEST 2010
+    Bug Fixes
+    * AUTHOR compatibility code should also be called after CONFIGURE callback
+
+6.57_04  Thu Sep 09 23:59:00 EEST 2010
+    Bug Fixes
+    * Fix several_authors.t
+    * Upgrade bundled modules: ExtUtils::Manifest 1.58.
+
+6.57_03  Thu Sep 09 01:31:00 EEST 2010
+    Bug Fixes
+    * Update MANIFEST
+
+6.57_02  Wed Sep 08 02:40:00 EEST 2010
+    Bug Fixes
+    * Don't do MANIFEST checks in PERL_CORE (Robin Barker)
+
+    New Features
+    * Accept several values (arrayref) in AUTHOR (Alexandr Ciornii)
+    * Add MYMETA.yml support (Adam Kennedy, Alexandr Ciornii)
+    * NO_MYMETA key to suppress MYMETA.yml generation (Alexandr Ciornii)
+
 6.57_01  Tue Aug 24 01:36:20 PDT 2010
     Improvements
     * parse_abstract() is more robust supporting "Package.pm" and multiple

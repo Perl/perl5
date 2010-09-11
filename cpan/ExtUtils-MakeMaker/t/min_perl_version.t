@@ -8,7 +8,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 33;
+use Test::More tests => 35;
 
 use TieOut;
 use MakeMaker::Test::Utils;
@@ -179,6 +179,14 @@ END
 {
     my $distdir  = 'Min-PerlVers-0.05';
     $distdir =~ s{\.}{_}g if $Is_VMS;
+
+    my $mymeta_yml = "MYMETA.yml";
+    my $mymeta = slurp($mymeta_yml);
+
+    ok( defined($mymeta),  '  MYMETA.yml present' );
+
+    like( $mymeta, qr{\nrequires:[^\S\n]*\n\s+perl:\s+5\.005\n\s+strict:\s+0\n},
+                         '  MYMETA.yml content good');
 
     my $meta_yml = "$distdir/META.yml";
     my @make_out    = run(qq{$make metafile});

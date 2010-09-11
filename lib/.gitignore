@@ -159,6 +159,7 @@
 /ExtUtils/MakeMaker.pm
 /ExtUtils/MakeMaker/Config.pm
 /ExtUtils/MakeMaker/FAQ.pod
+/ExtUtils/MakeMaker/YAML.pm
 /ExtUtils/MakeMaker/Tutorial.pod
 /ExtUtils/Manifest.pm
 /ExtUtils/Miniperl.pm

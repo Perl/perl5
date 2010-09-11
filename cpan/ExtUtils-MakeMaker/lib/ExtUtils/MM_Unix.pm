@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '6.57_01';
+$VERSION = '6.57_05';
 
 require ExtUtils::MM_Any;
 our @ISA = qw(ExtUtils::MM_Any);
@@ -2884,7 +2884,7 @@ sub ppd {
     $abstract =~ s/</&lt;/g;
     $abstract =~ s/>/&gt;/g;
 
-    my $author = $self->{AUTHOR} || '';
+    my $author = join(', ',@{$self->{AUTHOR} || []});
     $author =~ s/</&lt;/g;
     $author =~ s/>/&gt;/g;
 

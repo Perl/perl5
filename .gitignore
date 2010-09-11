@@ -72,6 +72,7 @@ ext.libs
 
 # these are scattered everywhere, ignore them
 .exists
+MYMETA.yml
 
 /miniperl
 /perl

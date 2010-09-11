@@ -893,6 +893,7 @@ cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker/Config.pm	MakeMaker wrapper for C
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker/FAQ.pod		MakeMaker FAQ
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker.pm		Write Makefiles for extensions
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker/Tutorial.pod	Writing a module with MakeMaker
+cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker/YAML.pm		clone of YAML::Tiny
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/Mkbootstrap.pm		Writes a bootstrap file (see MakeMaker)
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/Mksymlists.pm		Writes a linker options file for extensions
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_AIX.pm			MakeMaker methods for AIX
@@ -942,6 +943,7 @@ cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/MPV.pm	MakeMaker test utiliti
 cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/PL_FILES.pm	MakeMaker test utilities
 cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/Problem.pm	MakeMaker test utilities
 cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/Recurs.pm	MakeMaker test utilities
+cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/SAS.pm	MakeMaker test utilities
 cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/XS.pm	MakeMaker test utilities
 cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Utils.pm		MakeMaker test utilities
 cpan/ExtUtils-MakeMaker/t/lib/TieIn.pm				Testing library for dummy input handles
@@ -978,6 +980,7 @@ cpan/ExtUtils-MakeMaker/t/problems.t				How MakeMaker reacts to build problems
 cpan/ExtUtils-MakeMaker/t/prompt.t				See if E::MM::prompt() works
 cpan/ExtUtils-MakeMaker/t/recurs.t				See if recursive builds work
 cpan/ExtUtils-MakeMaker/t/revision.t				See if $Revision is correct
+cpan/ExtUtils-MakeMaker/t/several_authors.t			See if multiple AUTHORs work
 cpan/ExtUtils-MakeMaker/t/split_command.t			See if MM's xargs-like function works
 cpan/ExtUtils-MakeMaker/t/test_boilerplate.t			MakeMaker test
 cpan/ExtUtils-MakeMaker/t/testdata/reallylongdirectoryname/arch1/Config.pm	test data for MakeMaker

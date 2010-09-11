@@ -1,7 +1,7 @@
 package ExtUtils::MM_Any;
 
 use strict;
-our $VERSION = '6.57_01';
+our $VERSION = '6.57_05';
 
 use Carp;
 use File::Spec;
@@ -486,8 +486,8 @@ clean :: clean_subdirs
                         split /\s+/, $attribs{FILES}   ;
     }
 
-    push(@files, qw[$(MAKE_APERL_FILE) 
-                    perlmain.c tmon.out mon.out so_locations 
+    push(@files, qw[$(MAKE_APERL_FILE)
+                    MYMETA.yml perlmain.c tmon.out mon.out so_locations
                     blibdirs.ts pm_to_blib pm_to_blib.ts
                     *$(OBJ_EXT) *$(LIB_EXT) perl.exe perl perl$(EXE_EXT)
                     $(BOOTSTRAP) $(BASEEXT).bso
@@ -880,7 +880,7 @@ sub metafile_data {
     );
 
     # The author key is required and it takes a list.
-    $meta{author}   = defined $self->{AUTHOR}    ? [$self->{AUTHOR}] : [];
+    $meta{author}   = defined $self->{AUTHOR}    ? $self->{AUTHOR} : [];
 
     $meta{requires} = $self->{PREREQ_PM} if defined $self->{PREREQ_PM};
     $meta{requires}{perl} = $self->{MIN_PERL_VERSION} if $self->{MIN_PERL_VERSION};
@@ -1082,6 +1082,99 @@ distmeta : create_distdir metafile
 
 MAKE
 
+}
+
+
+=head3 mymeta
+
+    my $mymeta = $mm->mymeta;
+
+Generate MYMETA information as a hash either from an existing META.yml
+or from internal data.
+
+=cut
+
+sub mymeta {
+    my $self = shift;
+
+    my $mymeta;
+
+    if ( -e 'META.yml' ) {
+        $mymeta = $self->_mymeta_from_meta();
+    }
+
+    unless ( $mymeta ) {
+        my @metadata = $self->metafile_data(
+            $self->{META_ADD}   || {},
+            $self->{META_MERGE} || {},
+        );
+        $mymeta = {@metadata};
+    }
+
+    $mymeta->{dynamic_config} = 0;
+
+    return $mymeta;
+}
+
+
+sub _mymeta_from_meta {
+    my $self = shift;
+
+    my $meta;
+    eval {
+        my @yaml = ExtUtils::MakeMaker::YAML::LoadFile('META.yml');
+        $meta = $yaml[0];
+    };
+    return undef unless $meta;
+
+    # META.yml before 6.25_01 cannot be trusted.  META.yml lived in the source directory.
+    # There was a good chance the author accidentally uploaded a stale META.yml if they
+    # rolled their own tarball rather than using "make dist".
+    if ($meta->{generated_by} &&
+        $meta->{generated_by} =~ /ExtUtils::MakeMaker version ([\d\._]+)/) {
+        my $eummv = do { local $^W = 0; $1+0; };
+        if ($eummv < 6.2501) {
+            return undef;
+        }
+    }
+
+    # Overwrite the non-configure dependency hashs
+    delete $meta->{requires};
+    delete $meta->{build_requires};
+    delete $meta->{recommends};
+    if ( exists $self->{PREREQ_PM} ) {
+        $meta->{requires} = $self->{PREREQ_PM} || {};
+    }
+    if ( exists $self->{BUILD_REQUIRES} ) {
+        $meta->{build_requires} = $self->{BUILD_REQUIRES} || {};
+    }
+    return $meta;
+}
+
+
+=head3 write_mymeta
+
+    $self->write_mymeta( $mymeta );
+
+Write MYMETA information to MYMETA.yml.
+
+This will probably be refactored into a more generic YAML dumping method.
+
+=cut
+
+sub write_mymeta {
+    my $self = shift;
+    my $mymeta = shift;
+
+    require ExtUtils::MakeMaker::YAML;
+    my $mymeta_content = ExtUtils::MakeMaker::YAML::Dump($mymeta);
+
+    open(my $myfh, ">", "MYMETA.yml")
+      or die "Unable to open MYMETA.yml: $!";
+    print $myfh $mymeta_content;
+    close $myfh;
+
+    return;
 }
 
 

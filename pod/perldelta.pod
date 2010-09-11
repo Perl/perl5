@@ -211,7 +211,7 @@ by C<Errno>. This has been fixed (RT#77416).
 
 =item *
 
-C<ExtUtils::MakeMaker> has been upgraded from version 6.56 to 6.57_01.
+C<ExtUtils::MakeMaker> has been upgraded from version 6.56 to 6.57_05.
 
 =item *
 

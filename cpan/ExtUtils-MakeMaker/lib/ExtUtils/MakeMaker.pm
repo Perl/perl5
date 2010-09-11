@@ -18,7 +18,7 @@ our @Overridable;
 my @Prepend_parent;
 my %Recognized_Att_Keys;
 
-our $VERSION = '6.57_01';
+our $VERSION = '6.57_05';
 
 # Emulate something resembling CVS $Revision$
 (our $Revision = $VERSION) =~ s{_}{};
@@ -52,6 +52,8 @@ sub WriteMakefile {
     require ExtUtils::MY;
     my %att = @_;
 
+    _convert_compat_attrs(\%att);
+
     _verify_att(\%att);
 
     my $mm = MM->new(\%att);
@@ -66,6 +68,7 @@ sub WriteMakefile {
 # scalar.
 my %Att_Sigs;
 my %Special_Sigs = (
+ AUTHOR             => 'ARRAY',
  C                  => 'ARRAY',
  CONFIG             => 'ARRAY',
  CONFIGURE          => 'CODE',
@@ -111,6 +114,19 @@ my %Special_Sigs = (
 @Att_Sigs{keys %Recognized_Att_Keys} = ('') x keys %Recognized_Att_Keys;
 @Att_Sigs{keys %Special_Sigs} = values %Special_Sigs;
 
+sub _convert_compat_attrs {
+    my($att) = @_;
+    if (exists $att->{AUTHOR}) {
+        if ($att->{AUTHOR}) {
+            if (!ref($att->{AUTHOR})) {
+                my $t = $att->{AUTHOR};
+                $att->{AUTHOR} = [$t];
+            }
+        } else {
+                $att->{AUTHOR} = [];
+        }
+    }
+}
 
 sub _verify_att {
     my($att) = @_;
@@ -257,8 +273,8 @@ sub full_setup {
     INC INCLUDE_EXT LDFROM LIB LIBPERL_A LIBS LICENSE
     LINKTYPE MAKE MAKEAPERL MAKEFILE MAKEFILE_OLD MAN1PODS MAN3PODS MAP_TARGET
     META_ADD META_MERGE MIN_PERL_VERSION BUILD_REQUIRES CONFIGURE_REQUIRES
-    MYEXTLIB NAME NEEDS_LINKING NOECHO NO_META NORECURS NO_VC OBJECT OPTIMIZE 
-    PERL_MALLOC_OK PERL PERLMAINCC PERLRUN PERLRUNINST PERL_CORE
+    MYEXTLIB NAME NEEDS_LINKING NOECHO NO_META NO_MYMETA NORECURS NO_VC OBJECT
+    OPTIMIZE PERL_MALLOC_OK PERL PERLMAINCC PERLRUN PERLRUNINST PERL_CORE
     PERL_SRC PERM_DIR PERM_RW PERM_RWX
     PL_FILES PM PM_FILTER PMLIBDIRS PMLIBPARENTDIRS POLLUTE PPM_INSTALL_EXEC
     PPM_INSTALL_SCRIPT PREREQ_FATAL PREREQ_PM PREREQ_PRINT PRINT_PREREQ
@@ -409,7 +425,7 @@ sub new {
    }
 
     print STDOUT "MakeMaker (v$VERSION)\n" if $Verbose;
-    if (-f "MANIFEST" && ! -f "Makefile"){
+    if (-f "MANIFEST" && ! -f "Makefile" && ! $ENV{PERL_CORE}){
         check_manifest();
     }
 
@@ -496,6 +512,7 @@ END
     if (defined $self->{CONFIGURE}) {
         if (ref $self->{CONFIGURE} eq 'CODE') {
             %configure_att = %{&{$self->{CONFIGURE}}};
+            _convert_compat_attrs(\%configure_att);
             $self = { %$self, %configure_att };
         } else {
             Carp::croak "Attribute 'CONFIGURE' to WriteMakefile() not a code reference\n";
@@ -1010,8 +1027,13 @@ sub flush {
       warn "rename MakeMaker.tmp => $finalname: $!";
     chmod 0644, $finalname unless $Is_VMS;
 
-    my %keep = map { ($_ => 1) } qw(NEEDS_LINKING HAS_LINK_CODE);
+    unless ($self->{NO_MYMETA}) {
+        # Write MYMETA.yml to communicate metadata up to the CPAN clients
+        print STDOUT "Writing MYMETA.yml\n";
 
+        $self->write_mymeta( $self->mymeta );
+    }
+    my %keep = map { ($_ => 1) } qw(NEEDS_LINKING HAS_LINK_CODE);
     if ($self->{PARENT} && !$self->{_KEEP_AFTER_FLUSH}) {
         foreach (keys %$self) { # safe memory
             delete $self->{$_} unless $keep{$_};
@@ -1020,7 +1042,6 @@ sub flush {
 
     system("$Config::Config{eunicefix} $finalname") unless $Config::Config{eunicefix} eq ":";
 }
-
 
 # This is a rename for OS's where the target must be unlinked first.
 sub _rename {
@@ -1469,8 +1490,8 @@ the first line in the "=head1 NAME" section. $2 becomes the abstract.
 
 =item AUTHOR
 
-String containing name (and email address) of package author(s). Is used
-in META.yml and PPD (Perl Package Description) files for PPM (Perl
+Array of strings containing name (and email address) of package author(s).
+Is used in META.yml and PPD (Perl Package Description) files for PPM (Perl
 Package Manager).
 
 =item BINARY_LOCATION
@@ -1992,6 +2013,13 @@ Boolean.  Attribute to inhibit descending into subdirectories.
 
 When true, suppresses the generation and addition to the MANIFEST of
 the META.yml module meta-data file during 'make distdir'.
+
+Defaults to false.
+
+=item NO_MYMETA
+
+When true, suppresses the generation of MYMETA.yml module meta-data file
+during 'perl Makefile.PL'.
 
 Defaults to false.
 
