@@ -957,7 +957,7 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
 
                 # Otherwise, test that the name and code point map
                 # correctly
-                $all_pass &= is(charnames::vianame($names[$i]), $i, "Verify vianame(\"$names[$i]\") is $hex");
+                $all_pass &= is(charnames::vianame($names[$i]), $i, "Verify vianame(\"$names[$i]\") is 0x$hex");
                 $all_pass &= is(charnames::viacode($i), $names[$i], "Verify viacode(0x$hex) is \"$names[$i]\"");
 
                 # And make sure that a non-algorithmically named code
