@@ -1,19 +1,19 @@
 package B::Debug;
 
-our $VERSION = '1.12';
+our $VERSION = '1.14';
 
 use strict;
 require 5.006;
 use B qw(peekop class walkoptree walkoptree_exec
-         main_start main_root cstring sv_undef);
+         main_start main_root cstring sv_undef SVf_NOK SVf_IOK);
 use Config;
 my (@optype, @specialsv_name);
 require B;
 if ($] < 5.009) {
   require B::Asmdata;
-  B::Asmdata->import qw(@optype @specialsv_name);
+  B::Asmdata->import (qw(@optype @specialsv_name));
 } else {
-  B->import qw(@optype @specialsv_name);
+  B->import (qw(@optype @specialsv_name));
 }
 my $have_B_Flags;
 if (!$ENV{PERL_CORE}){ # avoid CORE test crashes
@@ -25,18 +25,18 @@ sub _printop {
   my $op = shift;
   my $addr = ${$op} ? $op->ppaddr : '';
   $addr =~ s/^PL_ppaddr// if $addr;
-  return sprintf "0x%x %s %s", ${$op}, ${$op} ? class($op) : '', $addr;
+  return sprintf "0x%08x %6s %s", ${$op}, ${$op} ? class($op) : '', $addr;
 }
 
 sub B::OP::debug {
     my ($op) = @_;
-    printf <<'EOT', class($op), $$op, $op->ppaddr, _printop($op->next), _printop($op->sibling), $op->targ, $op->type;
+    printf <<'EOT', class($op), $$op, _printop($op), _printop($op->next), _printop($op->sibling), $op->targ, $op->type, $op->name;
 %s (0x%lx)
 	op_ppaddr	%s
 	op_next		%s
 	op_sibling	%s
 	op_targ		%d
-	op_type		%d
+	op_type		%d	%s
 EOT
     if ($] > 5.009) {
 	printf <<'EOT', $op->opt;
@@ -117,8 +117,8 @@ sub B::PMOP::debug {
 sub B::COP::debug {
     my ($op) = @_;
     $op->B::OP::debug();
-    my $cop_io = class($op->io) eq 'SPECIAL' ? '' : $op->io->as_string;
-    printf <<'EOT', $op->label, $op->stashpv, $op->file, $op->cop_seq, $op->arybase, $op->line, ${$op->warnings}, cstring($cop_io);
+    my $warnings = ref $op->warnings ? ${$op->warnings} : 0;
+    printf <<'EOT', $op->label, $op->stashpv, $op->file, $op->cop_seq, $op->arybase, $op->line, $warnings;
 	cop_label	"%s"
 	cop_stashpv	"%s"
 	cop_file	"%s"
@@ -126,8 +126,11 @@ sub B::COP::debug {
 	cop_arybase	%d
 	cop_line	%d
 	cop_warnings	0x%x
-	cop_io		%s
 EOT
+  if ($] >= 5.007 and $] < 5.011) {
+    my $cop_io = class($op->io) eq 'SPECIAL' ? '' : $op->io->as_string;
+    printf("	cop_io		%s\n", cstring($cop_io));
+  }
 }
 
 sub B::SVOP::debug {
@@ -193,25 +196,25 @@ EOT
 sub B::IV::debug {
     my ($sv) = @_;
     $sv->B::SV::debug();
-    printf "\txiv_iv\t\t%d\n", $sv->IV;
+    printf "\txiv_iv\t\t%d\n", $sv->IV if $sv->FLAGS & SVf_IOK;
 }
 
 sub B::NV::debug {
     my ($sv) = @_;
     $sv->B::IV::debug();
-    printf "\txnv_nv\t\t%s\n", $sv->NV;
+    printf "\txnv_nv\t\t%s\n", $sv->NV if $sv->FLAGS & SVf_NOK;
 }
 
 sub B::PVIV::debug {
     my ($sv) = @_;
     $sv->B::PV::debug();
-    printf "\txiv_iv\t\t%d\n", $sv->IV;
+    printf "\txiv_iv\t\t%d\n", $sv->IV if $sv->FLAGS & SVf_IOK;
 }
 
 sub B::PVNV::debug {
     my ($sv) = @_;
     $sv->B::PVIV::debug();
-    printf "\txnv_nv\t\t%s\n", $sv->NV;
+    printf "\txnv_nv\t\t%s\n", $sv->NV if $sv->FLAGS & SVf_NOK;
 }
 
 sub B::PVLV::debug {
@@ -235,11 +238,11 @@ sub B::CV::debug {
     $sv->B::PVNV::debug();
     my ($stash) = $sv->STASH;
     my ($start) = $sv->START;
-    my ($root) = $sv->ROOT;
+    my ($root)  = $sv->ROOT;
     my ($padlist) = $sv->PADLIST;
     my ($file) = $sv->FILE;
     my ($gv) = $sv->GV;
-    printf <<'EOT', $$stash, $$start, $$root, $$gv, $file, $sv->DEPTH, $padlist, ${$sv->OUTSIDE}, $sv->OUTSIDE_SEQ;
+    printf <<'EOT', $$stash, $$start, $$root, $$gv, $file, $sv->DEPTH, $padlist, ${$sv->OUTSIDE};
 	STASH		0x%x
 	START		0x%x
 	ROOT		0x%x
@@ -248,8 +251,8 @@ sub B::CV::debug {
 	DEPTH		%d
 	PADLIST		0x%x
 	OUTSIDE		0x%x
-	OUTSIDE_SEQ	%d
 EOT
+    printf("\tOUTSIDE_SEQ\t%d\n", , $sv->OUTSIDE_SEQ) if $] > 5.007;
     $start->debug if $start;
     $root->debug if $root;
     $gv->debug if $gv;
@@ -286,9 +289,9 @@ sub B::GV::debug {
 	printf "GV %s::%s\n", $gv->STASH->NAME, $gv->SAFENAME;
 	return;
     }
-    my ($sv) = $gv->SV;
-    my ($av) = $gv->AV;
-    my ($cv) = $gv->CV;
+    my $sv = $gv->SV;
+    my $av = $gv->AV;
+    my $cv = $gv->CV;
     $gv->B::SV::debug;
     printf <<'EOT', $gv->SAFENAME, $gv->STASH->NAME, $gv->STASH, $$sv, $gv->GvREFCNT, $gv->FORM, $$av, ${$gv->HV}, ${$gv->EGV}, $$cv, $gv->CVGEN, $gv->LINE, $gv->FILE, $gv->GvFLAGS;
 	NAME		%s
@@ -312,7 +315,8 @@ EOT
 
 sub B::SPECIAL::debug {
     my $sv = shift;
-    print $specialsv_name[$$sv], "\n";
+    my $i = ref $sv ? $$sv : 0;
+    print exists $specialsv_name[$i] ? $specialsv_name[$i] : "", "\n";
 }
 
 sub compile {
@@ -347,6 +351,16 @@ With option -exec, walks tree in execute order,
 otherwise in basic order.
 
 =head1 Changes
+
+  1.13 2010-09-09 rurban
+	print name of op_type
+	print ppaddr consistent with other op addr
+	fix cop_io
+        omit cv->OUTSIDE_SEQ for 5.6
+	fix NULL specials
+	fix NV assertion for CV
+	stabilize tests for space in runperl path
+	fix t/debug.t test 7
 
   1.12 2010-02-10 rurban
 	remove archlib installation cruft, and use the proper PM rule.

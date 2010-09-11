@@ -258,10 +258,10 @@ use File::Glob qw(:case);
     'B::Debug' =>
 	{
 	'MAINTAINER'	=> 'rurban',
-	'DISTRIBUTION'	=> 'RURBAN/B-Debug-1.12.tar.gz',
+	'DISTRIBUTION'	=> 'RURBAN/B-Debug-1.14.tar.gz',
 	'FILES'		=> q[cpan/B-Debug],
-	'EXCLUDED'	=> [ qw( t/coverage.html t/pod.t ) ],
-	'UPSTREAM'	=> undef,
+	'EXCLUDED'	=> [ qw( t/pod.t ) ],
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'B::Deparse' =>
