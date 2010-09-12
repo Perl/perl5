@@ -132,7 +132,8 @@ For state vars, SVs_PADSTALE is overloaded to mean 'not yet initialised'
 
 #ifdef PERL_MAD
 void pad_peg(const char* s) {
-    static int pegcnt;
+    static int pegcnt; /* XXX not threadsafe */
+    PERL_UNUSED_ARG(s);
 
     PERL_ARGS_ASSERT_PAD_PEG;
 

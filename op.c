@@ -8136,10 +8136,12 @@ Perl_ck_shift(pTHX_ OP *o)
 
 	argop = newUNOP(OP_RV2AV, 0, scalar(newGVOP(OP_GV, 0, PL_argvgv)));
 #ifdef PERL_MAD
-	OP * const oldo = o;
-	o = newUNOP(type, 0, scalar(argop));
-	op_getmad(oldo,o,'O');
-	return o;
+	{
+	    OP * const oldo = o;
+	    o = newUNOP(type, 0, scalar(argop));
+	    op_getmad(oldo,o,'O');
+	    return o;
+	}
 #else
 	op_free(o);
 	return newUNOP(type, 0, scalar(argop));
