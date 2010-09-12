@@ -523,7 +523,7 @@ sub lookup_name ($;$) {
 
   my ($name, $hints_ref) = @_;
 
-  my $utf8;
+  my $utf8;       # The string result
   my $save_input;
 
   if ($runtime) {
@@ -549,7 +549,7 @@ sub lookup_name ($;$) {
   }
 
   # User alias should be checked first or else can't override ours, and if we
-  # add any, could conflict with theirs.
+  # were to add any, could conflict with theirs.
   if (exists $^H{charnames_ord_aliases}{$name}) {
     $utf8 = $^H{charnames_ord_aliases}{$name};
   }
@@ -570,7 +570,7 @@ sub lookup_name ($;$) {
 
   if (! defined $utf8) {
 
-    # See if has looked this up earlier.
+    # See if has looked this input up earlier.
     if ($^H{charnames_full} && exists $full_names_cache{$name}) {
       $utf8 = $full_names_cache{$name};
     }
@@ -618,7 +618,7 @@ sub lookup_name ($;$) {
             $scripts_trie = "\U\Q$1";
             $name = $2;
         }
-        else {
+        else { # Otherwise look in allowed scripts
             $scripts_trie = $^H{charnames_scripts};
         }
 
@@ -668,8 +668,8 @@ sub lookup_name ($;$) {
 sub charnames {
   my $name = shift;
 
-  # For \N{...}.  Looks up the character name and returns its ordinal if
-  # found, undef otherwise.  If not in 'use bytes', forces into utf8
+  # For \N{...}.  Looks up the character name and returns the string
+  # representation of it.
 
   my $ord = lookup_name($name);
   return if ! defined $ord;
