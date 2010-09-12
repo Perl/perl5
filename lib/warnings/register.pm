@@ -40,9 +40,9 @@ sub import
     my @categories = @_;
 
     my $package = (caller(0))[0];
-    warnings::register($package);
+    warnings::register_categories($package);
 
-    warnings::register($package . "::$_") for @categories;
+    warnings::register_categories($package . "::$_") for @categories;
 }
 
 1;

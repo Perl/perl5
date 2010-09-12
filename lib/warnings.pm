@@ -153,7 +153,7 @@ Equivalent to:
     if (warnings::enabled($object))
       { warnings::warn($object, $message) }
 
-=item warnings::register(@names)
+=item warnings::register_categories(@names)
 
 This registers warning categories for the given names and is primarily for
 use by the warnings::register pragma, for which see L<perllexwarn>.
@@ -504,7 +504,7 @@ sub _mkMask
     return $mask;
 }
 
-sub register
+sub register_categories
 {
     my @names = @_;
 
