@@ -900,7 +900,7 @@ function, L</charnames::viacode(I<code>)>.
 
 Forms other than C<S<"use charnames ();">> enable the use of of
 C<\N{I<CHARNAME>}> sequences to compile a Unicode character into a
-string based on its name.
+string, based on its name.
 
 Note that C<\N{U+I<...>}>, where the I<...> is a hexadecimal number,
 also inserts a character into a string, but doesn't require the use of
@@ -910,8 +910,8 @@ the Unicode (white background, black foreground) smiley face; it doesn't
 require this pragma, whereas the equivalent, C<"\N{WHITE SMILING FACE}">
 does.
 Also, C<\N{I<...>}> can mean a regex quantifier instead of a character
-name, when the I<...> is a number (or comma separated pair of numbers;
-see L<perlreref/QUANTIFIERS>), and is not related to this pragma.
+name, when the I<...> is a number (or comma separated pair of numbers
+(see L<perlreref/QUANTIFIERS>), and is not related to this pragma.
 
 The C<charnames> pragma supports arguments C<:full>, C<:short>, script
 names and customized aliases.  If C<:full> is present, for expansion of
@@ -949,9 +949,9 @@ place, and ISO 6429 was updated, see L</ALIASES>.
 If the input name is unknown, C<\N{NAME}> raises a warning and
 substitutes the Unicode REPLACEMENT CHARACTER (U+FFFD).
 
-It is a fatal error if C<use bytes> is in effect and the input name is
-that of a character that won't fit into a byte (i.e., whose ordinal is
-above 255).
+For C<\N{NAME}>, it is a fatal error if C<use bytes> is in effect and the
+input name is that of a character that won't fit into a byte (i.e., whose
+ordinal is above 255).
 
 Otherwise, any string that includes a C<\N{I<charname>}> or
 C<S<\N{U+I<code point>}>> will automatically have Unicode semantics (see
@@ -1095,7 +1095,7 @@ or by using a file containing aliases:
 
     use charnames ":alias" => "pro";
 
-will try to read C<"unicore/pro_alias.pl"> from the C<@INC> path. This
+This will try to read C<"unicore/pro_alias.pl"> from the C<@INC> path. This
 file should return a list in plain perl:
 
     (
@@ -1115,6 +1115,10 @@ well, like
 
     use charnames ":full", ":alias" => "pro";
 
+Also, both these methods currently allow only a single character to be named.
+To name a sequence of characters, use a
+L<custom translator|/CUSTOM TRANSLATORS> (described below).
+
 =head1 charnames::viacode(I<code>)
 
 Returns the full name of the character indicated by the numeric code.
@@ -1125,7 +1129,7 @@ For example,
 prints "FOUR TEARDROP-SPOKED ASTERISK".
 
 The name returned is the official name for the code point, if
-available, otherwise your custom alias for it.  This means that your
+available; otherwise your custom alias for it.  This means that your
 alias will only be returned for code points that don't have an official
 Unicode name (nor Unicode version 1 name), such as private use code
 points, and the 4 control characters U+0080, U+0081, U+0084, and U+0099.
@@ -1208,11 +1212,10 @@ well.
 
 =head1 BUGS
 
-vianame returns a chr if the input name is of the form C<U+...>, and an ord
-otherwise.  It is proposed to change this to always return an ord.  Send email
-to C<perl5-porters@perl.org> to comment on this proposal.  If S<C<use
-bytes>> is in effect when a chr is returned, and if that chr won't fit
-into a byte, C<undef> is returned instead.
+vianame normally returns an ordinal code point, but when the input name is of
+the form C<U+...>, it returns a chr instead.  In this case, if C<use bytes> is
+in effect and the character won't fit into a byte, it returns C<undef> and
+raises a warning.
 
 Names must be ASCII characters only, which means that you are out of luck if
 you want to create aliases in a language where some or all the characters of
