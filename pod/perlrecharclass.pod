@@ -350,8 +350,10 @@ C<\r>,
 C<\t>,
 and
 C<\x>
-are also special and have the same meanings as they do outside a bracketed character
-class.
+are also special and have the same meanings as they do outside a
+bracketed character class.  (However, inside a bracketed character
+class, if C<\N{I<NAME>}> expands to a sequence of characters, only the first
+one in the sequence is used, with a warning.)
 
 Also, a backslash followed by two or three octal digits is considered an octal
 number.
