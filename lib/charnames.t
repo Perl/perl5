@@ -163,7 +163,7 @@ sub to_bytes {
     is(charnames::vianame("U+10330"), "\x{10330}", "Verify vianame \\N{U+hex} returns a chr");
     use warnings;
     my $warning_count = @WARN;
-    ok (! defined charnames::vianame("NONE SUCH"));
+    ok (! defined charnames::vianame("NONE SUCH"), "Verify vianame returns undef for an undefined name");
     cmp_ok($warning_count, '==', scalar @WARN, "Verify vianame doesn't warn on unknown names");
 
     use bytes;
