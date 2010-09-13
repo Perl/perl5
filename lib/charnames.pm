@@ -90,11 +90,10 @@ my %system_aliases = (
     'PM '           => pack("U", 0x9E), # PRIVACY MESSAGE
     'APC'           => pack("U", 0x9F), # APPLICATION PROGRAM COMMAND
 
-    # There are no names for these in the Unicode standard;
-    # perhaps should be deprecated, but then again there are
-    # no alternative names, so am not deprecating.  And if
-    # did, the code would have to change to not recommend an
-    # alternative for these.
+    # There are no names for these in the Unicode standard; perhaps should be
+    # deprecated, but then again there are no alternative names, so am not
+    # deprecating.  And if did, the code would have to change to not recommend
+    # an alternative for these.
     'PADDING CHARACTER'                     => pack("U", 0x80),
     'PAD'                                   => pack("U", 0x80),
     'HIGH OCTET PRESET'                     => pack("U", 0x81),
@@ -104,9 +103,8 @@ my %system_aliases = (
     'SINGLE GRAPHIC CHARACTER INTRODUCER'   => pack("U", 0x99),
     'SGC'                                   => pack("U", 0x99),
 
-    # More convenience.  For further convenience,
-    # it is suggested some way of using the NamesList
-    # aliases be implemented, but there are ambiguities in
+    # More convenience.  For further convenience, it is suggested some way of
+    # using the NamesList aliases be implemented, but there are ambiguities in
     # NamesList.txt
     'BOM'   => pack("U", 0xFEFF), # BYTE ORDER MARK
     'BYTE ORDER MARK'=> pack("U", 0xFEFF),
