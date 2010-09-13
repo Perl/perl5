@@ -53,6 +53,21 @@ The C<"d"> modifier is used in the scope of C<use locale> to compile the
 regular expression as if it were not in that scope.
 See L<perlre/(?dlupimsx-imsx)>.
 
+=head2 C<\N{...}> now handles Unicode named character sequences
+
+Unicode has a number of named character sequences, in which particular sequences
+of code points are given names.  C<\N{...}> now recognizes these.
+See L<charnames>.
+
+=head2 New function C<charnames::string_vianame()>
+
+This function is a run-time version of C<\N{...}>, returning the string
+of characters whose Unicode name is its parameter.  It can handle
+Unicode named character sequences, whereas the pre-existing
+C<charnames::vianame()> cannot, as the latter returns a single code
+point.
+See L<charnames>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

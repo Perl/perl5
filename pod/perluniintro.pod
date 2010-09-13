@@ -248,7 +248,7 @@ characters:
 
 Note that both C<\x{...}> and C<\N{...}> are compile-time string
 constants: you cannot use variables in them.  if you want similar
-run-time functionality, use C<chr()> and C<charnames::vianame()>.
+run-time functionality, use C<chr()> and C<charnames::string_vianame()>.
 
 If you want to force the result to Unicode characters, use the special
 C<"U0"> prefix.  It consumes no arguments but causes the following bytes

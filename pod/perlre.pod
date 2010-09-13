@@ -231,7 +231,7 @@ also work:
  \e          escape (think troff)  (ESC)
  \cK         control char          (example: VT)
  \x{}, \x00  character whose ordinal is the given hexadecimal number
- \N{name}    named Unicode character
+ \N{name}    named Unicode character or character sequence
  \N{U+263D}  Unicode character     (example: FIRST QUARTER MOON)
  \o{}, \000  character whose ordinal is the given octal number
  \l          lowercase next char (think vi)
@@ -316,9 +316,9 @@ See L</Extended Patterns> below for details.
 =item [7]
 
 Note that C<\N> has two meanings.  When of the form C<\N{NAME}>, it matches the
-character whose name is C<NAME>; and similarly when of the form
-C<\N{U+I<wide hex char>}>, it matches the character whose Unicode ordinal is
-I<wide hex char>.  Otherwise it matches any character but C<\n>.
+character or character sequence whose name is C<NAME>; and similarly
+when of the form C<\N{U+I<hex>}>, it matches the character whose Unicode
+code point is I<hex>.  Otherwise it matches any character but C<\n>.
 
 =back
 

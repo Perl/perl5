@@ -85,7 +85,7 @@ as C<Not in [].>
  \L                Lowercase till \E.  Not in [].
  \n                (Logical) newline character.
  \N                Any character but newline.  Experimental.  Not in [].
- \N{}              Named or numbered (Unicode) character.
+ \N{}              Named or numbered (Unicode) character or sequence.
  \o{}              Octal escape sequence.
  \p{}, \pP         Character with the given Unicode property.
  \P{}, \PP         Character without the given Unicode property.
@@ -165,14 +165,15 @@ Mnemonic: I<c>ontrol character.
 
  $str =~ /\cK/;  # Matches if $str contains a vertical tab (control-K).
 
-=head3 Named or numbered characters
+=head3 Named or numbered characters and character sequences
 
 Unicode characters have a Unicode name and numeric ordinal value.  Use the
 C<\N{}> construct to specify a character by either of these values.
+Certain sequences of characters also have names.
 
-To specify by name, the name of the character goes between the curly braces.
-In this case, you have to C<use charnames> to load the Unicode names of the
-characters, otherwise Perl will complain.
+To specify by name, the name of the character or character sequence goes
+between the curly braces.  In this case, you have to C<use charnames> to
+load the Unicode names of the characters, otherwise Perl will complain.
 
 To specify a character by Unicode code point, use the form
 C<\N{U+I<wide hex character>}>, where I<wide hex character> is a number in
@@ -183,8 +184,8 @@ C<LATIN CAPITAL LETTER A>, and you will rarely see it written without the two
 leading zeros.  C<\N{U+0041}> means "A" even on EBCDIC machines (where the
 ordinal value of "A" is not 0x41).
 
-It is even possible to give your own names to characters, and even to short
-sequences of characters.  For details, see L<charnames>.
+It is even possible to give your own names to characters and character
+sequences.  For details, see L<charnames>.
 
 (There is an expanded internal form that you may see in debug output:
 C<\N{U+I<wide hex character>.I<wide hex character>...}>.
@@ -194,9 +195,9 @@ form only, subject to change, and you should not try to use it yourself.)
 
 Mnemonic: I<N>amed character.
 
-Note that a character that is expressed as a named or numbered character is
-considered as a character without special meaning by the regex engine, and will
-match "as is".
+Note that a character or character sequence that is expressed as a named
+or numbered character is considered as a character without special
+meaning by the regex engine, and will match "as is".
 
 =head4 Example
 
@@ -572,7 +573,8 @@ identical to the C<.> metasymbol, except under the C</s> flag, which changes
 the meaning of C<.>, but not C<\N>.
 
 Note that C<\N{...}> can mean a
-L<named or numbered character|/Named or numbered characters>.
+L<named or numbered character
+|/Named or numbered characters and character sequences>.
 
 Mnemonic: Complement of I<\n>.
 

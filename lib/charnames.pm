@@ -2,401 +2,407 @@ package charnames;
 use strict;
 use warnings;
 use File::Spec;
-our $VERSION = '1.15';
+our $VERSION = '1.16';
 
 use bytes ();          # for $bytes::hint_bits
 
+# The hashes are stored as utf8 strings.  This makes it easier to deal with
+# sequences.  I (khw) also tried making Name.pl utf8, but it slowed things
+# down by a factor of 7.  I then tried making Name.pl store the ut8
+# equivalents but not calling them utf8.  That led to similar speed as leaving
+# it alone, but since that is harder for a human to parse, I left it as-is.
+
 my %system_aliases = (
                 # Icky 3.2 names with parentheses.
-                'LINE FEED'             => 0x0A, # LINE FEED (LF)
-                'FORM FEED'             => 0x0C, # FORM FEED (FF)
-                'CARRIAGE RETURN'       => 0x0D, # CARRIAGE RETURN (CR)
-                'NEXT LINE'             => 0x85, # NEXT LINE (NEL)
+                'LINE FEED'             => pack("U", 0x0A), # LINE FEED (LF)
+                'FORM FEED'             => pack("U", 0x0C), # FORM FEED (FF)
+                'CARRIAGE RETURN'       => pack("U", 0x0D), # CARRIAGE RETURN (CR)
+                'NEXT LINE'             => pack("U", 0x85), # NEXT LINE (NEL)
 
                 # Some variant names from Wikipedia
-                'SINGLE-SHIFT 2'                => 0x8E,
-                'SINGLE-SHIFT 3'                => 0x8F,
-                'PRIVATE USE 1'                 => 0x91,
-                'PRIVATE USE 2'                 => 0x92,
-                'START OF PROTECTED AREA'       => 0x96,
-                'END OF PROTECTED AREA'         => 0x97,
+                'SINGLE-SHIFT 2'                => pack("U", 0x8E),
+                'SINGLE-SHIFT 3'                => pack("U", 0x8F),
+                'PRIVATE USE 1'                 => pack("U", 0x91),
+                'PRIVATE USE 2'                 => pack("U", 0x92),
+                'START OF PROTECTED AREA'       => pack("U", 0x96),
+                'END OF PROTECTED AREA'         => pack("U", 0x97),
 
                 # Convenience.  Standard abbreviations for the controls
-                'NUL'           => 0x00, # NULL
-                'SOH'           => 0x01, # START OF HEADING
-                'STX'           => 0x02, # START OF TEXT
-                'ETX'           => 0x03, # END OF TEXT
-                'EOT'           => 0x04, # END OF TRANSMISSION
-                'ENQ'           => 0x05, # ENQUIRY
-                'ACK'           => 0x06, # ACKNOWLEDGE
-                'BEL'           => 0x07, # BELL
-                'BS'            => 0x08, # BACKSPACE
-                'HT'            => 0x09, # HORIZONTAL TABULATION
-                'LF'            => 0x0A, # LINE FEED (LF)
-                'VT'            => 0x0B, # VERTICAL TABULATION
-                'FF'            => 0x0C, # FORM FEED (FF)
-                'CR'            => 0x0D, # CARRIAGE RETURN (CR)
-                'SO'            => 0x0E, # SHIFT OUT
-                'SI'            => 0x0F, # SHIFT IN
-                'DLE'           => 0x10, # DATA LINK ESCAPE
-                'DC1'           => 0x11, # DEVICE CONTROL ONE
-                'DC2'           => 0x12, # DEVICE CONTROL TWO
-                'DC3'           => 0x13, # DEVICE CONTROL THREE
-                'DC4'           => 0x14, # DEVICE CONTROL FOUR
-                'NAK'           => 0x15, # NEGATIVE ACKNOWLEDGE
-                'SYN'           => 0x16, # SYNCHRONOUS IDLE
-                'ETB'           => 0x17, # END OF TRANSMISSION BLOCK
-                'CAN'           => 0x18, # CANCEL
-                'EOM'           => 0x19, # END OF MEDIUM
-                'SUB'           => 0x1A, # SUBSTITUTE
-                'ESC'           => 0x1B, # ESCAPE
-                'FS'            => 0x1C, # FILE SEPARATOR
-                'GS'            => 0x1D, # GROUP SEPARATOR
-                'RS'            => 0x1E, # RECORD SEPARATOR
-                'US'            => 0x1F, # UNIT SEPARATOR
-                'DEL'           => 0x7F, # DELETE
-                'BPH'           => 0x82, # BREAK PERMITTED HERE
-                'NBH'           => 0x83, # NO BREAK HERE
-                'NEL'           => 0x85, # NEXT LINE (NEL)
-                'SSA'           => 0x86, # START OF SELECTED AREA
-                'ESA'           => 0x87, # END OF SELECTED AREA
-                'HTS'           => 0x88, # CHARACTER TABULATION SET
-                'HTJ'           => 0x89, # CHARACTER TABULATION WITH JUSTIFICATION
-                'VTS'           => 0x8A, # LINE TABULATION SET
-                'PLD'           => 0x8B, # PARTIAL LINE FORWARD
-                'PLU'           => 0x8C, # PARTIAL LINE BACKWARD
-                'RI '           => 0x8D, # REVERSE LINE FEED
-                'SS2'           => 0x8E, # SINGLE SHIFT TWO
-                'SS3'           => 0x8F, # SINGLE SHIFT THREE
-                'DCS'           => 0x90, # DEVICE CONTROL STRING
-                'PU1'           => 0x91, # PRIVATE USE ONE
-                'PU2'           => 0x92, # PRIVATE USE TWO
-                'STS'           => 0x93, # SET TRANSMIT STATE
-                'CCH'           => 0x94, # CANCEL CHARACTER
-                'MW '           => 0x95, # MESSAGE WAITING
-                'SPA'           => 0x96, # START OF GUARDED AREA
-                'EPA'           => 0x97, # END OF GUARDED AREA
-                'SOS'           => 0x98, # START OF STRING
-                'SCI'           => 0x9A, # SINGLE CHARACTER INTRODUCER
-                'CSI'           => 0x9B, # CONTROL SEQUENCE INTRODUCER
-                'ST '           => 0x9C, # STRING TERMINATOR
-                'OSC'           => 0x9D, # OPERATING SYSTEM COMMAND
-                'PM '           => 0x9E, # PRIVACY MESSAGE
-                'APC'           => 0x9F, # APPLICATION PROGRAM COMMAND
+                'NUL'           => pack("U", 0x00), # NULL
+                'SOH'           => pack("U", 0x01), # START OF HEADING
+                'STX'           => pack("U", 0x02), # START OF TEXT
+                'ETX'           => pack("U", 0x03), # END OF TEXT
+                'EOT'           => pack("U", 0x04), # END OF TRANSMISSION
+                'ENQ'           => pack("U", 0x05), # ENQUIRY
+                'ACK'           => pack("U", 0x06), # ACKNOWLEDGE
+                'BEL'           => pack("U", 0x07), # BELL
+                'BS'            => pack("U", 0x08), # BACKSPACE
+                'HT'            => pack("U", 0x09), # HORIZONTAL TABULATION
+                'LF'            => pack("U", 0x0A), # LINE FEED (LF)
+                'VT'            => pack("U", 0x0B), # VERTICAL TABULATION
+                'FF'            => pack("U", 0x0C), # FORM FEED (FF)
+                'CR'            => pack("U", 0x0D), # CARRIAGE RETURN (CR)
+                'SO'            => pack("U", 0x0E), # SHIFT OUT
+                'SI'            => pack("U", 0x0F), # SHIFT IN
+                'DLE'           => pack("U", 0x10), # DATA LINK ESCAPE
+                'DC1'           => pack("U", 0x11), # DEVICE CONTROL ONE
+                'DC2'           => pack("U", 0x12), # DEVICE CONTROL TWO
+                'DC3'           => pack("U", 0x13), # DEVICE CONTROL THREE
+                'DC4'           => pack("U", 0x14), # DEVICE CONTROL FOUR
+                'NAK'           => pack("U", 0x15), # NEGATIVE ACKNOWLEDGE
+                'SYN'           => pack("U", 0x16), # SYNCHRONOUS IDLE
+                'ETB'           => pack("U", 0x17), # END OF TRANSMISSION BLOCK
+                'CAN'           => pack("U", 0x18), # CANCEL
+                'EOM'           => pack("U", 0x19), # END OF MEDIUM
+                'SUB'           => pack("U", 0x1A), # SUBSTITUTE
+                'ESC'           => pack("U", 0x1B), # ESCAPE
+                'FS'            => pack("U", 0x1C), # FILE SEPARATOR
+                'GS'            => pack("U", 0x1D), # GROUP SEPARATOR
+                'RS'            => pack("U", 0x1E), # RECORD SEPARATOR
+                'US'            => pack("U", 0x1F), # UNIT SEPARATOR
+                'DEL'           => pack("U", 0x7F), # DELETE
+                'BPH'           => pack("U", 0x82), # BREAK PERMITTED HERE
+                'NBH'           => pack("U", 0x83), # NO BREAK HERE
+                'NEL'           => pack("U", 0x85), # NEXT LINE (NEL)
+                'SSA'           => pack("U", 0x86), # START OF SELECTED AREA
+                'ESA'           => pack("U", 0x87), # END OF SELECTED AREA
+                'HTS'           => pack("U", 0x88), # CHARACTER TABULATION SET
+                'HTJ'           => pack("U", 0x89), # CHARACTER TABULATION WITH JUSTIFICATION
+                'VTS'           => pack("U", 0x8A), # LINE TABULATION SET
+                'PLD'           => pack("U", 0x8B), # PARTIAL LINE FORWARD
+                'PLU'           => pack("U", 0x8C), # PARTIAL LINE BACKWARD
+                'RI '           => pack("U", 0x8D), # REVERSE LINE FEED
+                'SS2'           => pack("U", 0x8E), # SINGLE SHIFT TWO
+                'SS3'           => pack("U", 0x8F), # SINGLE SHIFT THREE
+                'DCS'           => pack("U", 0x90), # DEVICE CONTROL STRING
+                'PU1'           => pack("U", 0x91), # PRIVATE USE ONE
+                'PU2'           => pack("U", 0x92), # PRIVATE USE TWO
+                'STS'           => pack("U", 0x93), # SET TRANSMIT STATE
+                'CCH'           => pack("U", 0x94), # CANCEL CHARACTER
+                'MW '           => pack("U", 0x95), # MESSAGE WAITING
+                'SPA'           => pack("U", 0x96), # START OF GUARDED AREA
+                'EPA'           => pack("U", 0x97), # END OF GUARDED AREA
+                'SOS'           => pack("U", 0x98), # START OF STRING
+                'SCI'           => pack("U", 0x9A), # SINGLE CHARACTER INTRODUCER
+                'CSI'           => pack("U", 0x9B), # CONTROL SEQUENCE INTRODUCER
+                'ST '           => pack("U", 0x9C), # STRING TERMINATOR
+                'OSC'           => pack("U", 0x9D), # OPERATING SYSTEM COMMAND
+                'PM '           => pack("U", 0x9E), # PRIVACY MESSAGE
+                'APC'           => pack("U", 0x9F), # APPLICATION PROGRAM COMMAND
 
                 # There are no names for these in the Unicode standard;
                 # perhaps should be deprecated, but then again there are
                 # no alternative names, so am not deprecating.  And if
                 # did, the code would have to change to not recommend an
                 # alternative for these.
-                'PADDING CHARACTER'                     => 0x80,
-                'PAD'                                   => 0x80,
-                'HIGH OCTET PRESET'                     => 0x81,
-                'HOP'                                   => 0x81,
-                'INDEX'                                 => 0x84,
-                'IND'                                   => 0x84,
-                'SINGLE GRAPHIC CHARACTER INTRODUCER'   => 0x99,
-                'SGC'                                   => 0x99,
+                'PADDING CHARACTER'                     => pack("U", 0x80),
+                'PAD'                                   => pack("U", 0x80),
+                'HIGH OCTET PRESET'                     => pack("U", 0x81),
+                'HOP'                                   => pack("U", 0x81),
+                'INDEX'                                 => pack("U", 0x84),
+                'IND'                                   => pack("U", 0x84),
+                'SINGLE GRAPHIC CHARACTER INTRODUCER'   => pack("U", 0x99),
+                'SGC'                                   => pack("U", 0x99),
 
                 # More convenience.  For further convenience,
                 # it is suggested some way of using the NamesList
                 # aliases be implemented, but there are ambiguities in
                 # NamesList.txt
-                'BOM'   => 0xFEFF, # BYTE ORDER MARK
-                'BYTE ORDER MARK'=> 0xFEFF,
-                'CGJ'   => 0x034F, # COMBINING GRAPHEME JOINER
-                'FVS1'  => 0x180B, # MONGOLIAN FREE VARIATION SELECTOR ONE
-                'FVS2'  => 0x180C, # MONGOLIAN FREE VARIATION SELECTOR TWO
-                'FVS3'  => 0x180D, # MONGOLIAN FREE VARIATION SELECTOR THREE
-                'LRE'   => 0x202A, # LEFT-TO-RIGHT EMBEDDING
-                'LRM'   => 0x200E, # LEFT-TO-RIGHT MARK
-                'LRO'   => 0x202D, # LEFT-TO-RIGHT OVERRIDE
-                'MMSP'  => 0x205F, # MEDIUM MATHEMATICAL SPACE
-                'MVS'   => 0x180E, # MONGOLIAN VOWEL SEPARATOR
-                'NBSP'  => 0x00A0, # NO-BREAK SPACE
-                'NNBSP' => 0x202F, # NARROW NO-BREAK SPACE
-                'PDF'   => 0x202C, # POP DIRECTIONAL FORMATTING
-                'RLE'   => 0x202B, # RIGHT-TO-LEFT EMBEDDING
-                'RLM'   => 0x200F, # RIGHT-TO-LEFT MARK
-                'RLO'   => 0x202E, # RIGHT-TO-LEFT OVERRIDE
-                'SHY'   => 0x00AD, # SOFT HYPHEN
-                'VS1'   => 0xFE00, # VARIATION SELECTOR-1
-                'VS2'   => 0xFE01, # VARIATION SELECTOR-2
-                'VS3'   => 0xFE02, # VARIATION SELECTOR-3
-                'VS4'   => 0xFE03, # VARIATION SELECTOR-4
-                'VS5'   => 0xFE04, # VARIATION SELECTOR-5
-                'VS6'   => 0xFE05, # VARIATION SELECTOR-6
-                'VS7'   => 0xFE06, # VARIATION SELECTOR-7
-                'VS8'   => 0xFE07, # VARIATION SELECTOR-8
-                'VS9'   => 0xFE08, # VARIATION SELECTOR-9
-                'VS10'  => 0xFE09, # VARIATION SELECTOR-10
-                'VS11'  => 0xFE0A, # VARIATION SELECTOR-11
-                'VS12'  => 0xFE0B, # VARIATION SELECTOR-12
-                'VS13'  => 0xFE0C, # VARIATION SELECTOR-13
-                'VS14'  => 0xFE0D, # VARIATION SELECTOR-14
-                'VS15'  => 0xFE0E, # VARIATION SELECTOR-15
-                'VS16'  => 0xFE0F, # VARIATION SELECTOR-16
-                'VS17'  => 0xE0100, # VARIATION SELECTOR-17
-                'VS18'  => 0xE0101, # VARIATION SELECTOR-18
-                'VS19'  => 0xE0102, # VARIATION SELECTOR-19
-                'VS20'  => 0xE0103, # VARIATION SELECTOR-20
-                'VS21'  => 0xE0104, # VARIATION SELECTOR-21
-                'VS22'  => 0xE0105, # VARIATION SELECTOR-22
-                'VS23'  => 0xE0106, # VARIATION SELECTOR-23
-                'VS24'  => 0xE0107, # VARIATION SELECTOR-24
-                'VS25'  => 0xE0108, # VARIATION SELECTOR-25
-                'VS26'  => 0xE0109, # VARIATION SELECTOR-26
-                'VS27'  => 0xE010A, # VARIATION SELECTOR-27
-                'VS28'  => 0xE010B, # VARIATION SELECTOR-28
-                'VS29'  => 0xE010C, # VARIATION SELECTOR-29
-                'VS30'  => 0xE010D, # VARIATION SELECTOR-30
-                'VS31'  => 0xE010E, # VARIATION SELECTOR-31
-                'VS32'  => 0xE010F, # VARIATION SELECTOR-32
-                'VS33'  => 0xE0110, # VARIATION SELECTOR-33
-                'VS34'  => 0xE0111, # VARIATION SELECTOR-34
-                'VS35'  => 0xE0112, # VARIATION SELECTOR-35
-                'VS36'  => 0xE0113, # VARIATION SELECTOR-36
-                'VS37'  => 0xE0114, # VARIATION SELECTOR-37
-                'VS38'  => 0xE0115, # VARIATION SELECTOR-38
-                'VS39'  => 0xE0116, # VARIATION SELECTOR-39
-                'VS40'  => 0xE0117, # VARIATION SELECTOR-40
-                'VS41'  => 0xE0118, # VARIATION SELECTOR-41
-                'VS42'  => 0xE0119, # VARIATION SELECTOR-42
-                'VS43'  => 0xE011A, # VARIATION SELECTOR-43
-                'VS44'  => 0xE011B, # VARIATION SELECTOR-44
-                'VS45'  => 0xE011C, # VARIATION SELECTOR-45
-                'VS46'  => 0xE011D, # VARIATION SELECTOR-46
-                'VS47'  => 0xE011E, # VARIATION SELECTOR-47
-                'VS48'  => 0xE011F, # VARIATION SELECTOR-48
-                'VS49'  => 0xE0120, # VARIATION SELECTOR-49
-                'VS50'  => 0xE0121, # VARIATION SELECTOR-50
-                'VS51'  => 0xE0122, # VARIATION SELECTOR-51
-                'VS52'  => 0xE0123, # VARIATION SELECTOR-52
-                'VS53'  => 0xE0124, # VARIATION SELECTOR-53
-                'VS54'  => 0xE0125, # VARIATION SELECTOR-54
-                'VS55'  => 0xE0126, # VARIATION SELECTOR-55
-                'VS56'  => 0xE0127, # VARIATION SELECTOR-56
-                'VS57'  => 0xE0128, # VARIATION SELECTOR-57
-                'VS58'  => 0xE0129, # VARIATION SELECTOR-58
-                'VS59'  => 0xE012A, # VARIATION SELECTOR-59
-                'VS60'  => 0xE012B, # VARIATION SELECTOR-60
-                'VS61'  => 0xE012C, # VARIATION SELECTOR-61
-                'VS62'  => 0xE012D, # VARIATION SELECTOR-62
-                'VS63'  => 0xE012E, # VARIATION SELECTOR-63
-                'VS64'  => 0xE012F, # VARIATION SELECTOR-64
-                'VS65'  => 0xE0130, # VARIATION SELECTOR-65
-                'VS66'  => 0xE0131, # VARIATION SELECTOR-66
-                'VS67'  => 0xE0132, # VARIATION SELECTOR-67
-                'VS68'  => 0xE0133, # VARIATION SELECTOR-68
-                'VS69'  => 0xE0134, # VARIATION SELECTOR-69
-                'VS70'  => 0xE0135, # VARIATION SELECTOR-70
-                'VS71'  => 0xE0136, # VARIATION SELECTOR-71
-                'VS72'  => 0xE0137, # VARIATION SELECTOR-72
-                'VS73'  => 0xE0138, # VARIATION SELECTOR-73
-                'VS74'  => 0xE0139, # VARIATION SELECTOR-74
-                'VS75'  => 0xE013A, # VARIATION SELECTOR-75
-                'VS76'  => 0xE013B, # VARIATION SELECTOR-76
-                'VS77'  => 0xE013C, # VARIATION SELECTOR-77
-                'VS78'  => 0xE013D, # VARIATION SELECTOR-78
-                'VS79'  => 0xE013E, # VARIATION SELECTOR-79
-                'VS80'  => 0xE013F, # VARIATION SELECTOR-80
-                'VS81'  => 0xE0140, # VARIATION SELECTOR-81
-                'VS82'  => 0xE0141, # VARIATION SELECTOR-82
-                'VS83'  => 0xE0142, # VARIATION SELECTOR-83
-                'VS84'  => 0xE0143, # VARIATION SELECTOR-84
-                'VS85'  => 0xE0144, # VARIATION SELECTOR-85
-                'VS86'  => 0xE0145, # VARIATION SELECTOR-86
-                'VS87'  => 0xE0146, # VARIATION SELECTOR-87
-                'VS88'  => 0xE0147, # VARIATION SELECTOR-88
-                'VS89'  => 0xE0148, # VARIATION SELECTOR-89
-                'VS90'  => 0xE0149, # VARIATION SELECTOR-90
-                'VS91'  => 0xE014A, # VARIATION SELECTOR-91
-                'VS92'  => 0xE014B, # VARIATION SELECTOR-92
-                'VS93'  => 0xE014C, # VARIATION SELECTOR-93
-                'VS94'  => 0xE014D, # VARIATION SELECTOR-94
-                'VS95'  => 0xE014E, # VARIATION SELECTOR-95
-                'VS96'  => 0xE014F, # VARIATION SELECTOR-96
-                'VS97'  => 0xE0150, # VARIATION SELECTOR-97
-                'VS98'  => 0xE0151, # VARIATION SELECTOR-98
-                'VS99'  => 0xE0152, # VARIATION SELECTOR-99
-                'VS100' => 0xE0153, # VARIATION SELECTOR-100
-                'VS101' => 0xE0154, # VARIATION SELECTOR-101
-                'VS102' => 0xE0155, # VARIATION SELECTOR-102
-                'VS103' => 0xE0156, # VARIATION SELECTOR-103
-                'VS104' => 0xE0157, # VARIATION SELECTOR-104
-                'VS105' => 0xE0158, # VARIATION SELECTOR-105
-                'VS106' => 0xE0159, # VARIATION SELECTOR-106
-                'VS107' => 0xE015A, # VARIATION SELECTOR-107
-                'VS108' => 0xE015B, # VARIATION SELECTOR-108
-                'VS109' => 0xE015C, # VARIATION SELECTOR-109
-                'VS110' => 0xE015D, # VARIATION SELECTOR-110
-                'VS111' => 0xE015E, # VARIATION SELECTOR-111
-                'VS112' => 0xE015F, # VARIATION SELECTOR-112
-                'VS113' => 0xE0160, # VARIATION SELECTOR-113
-                'VS114' => 0xE0161, # VARIATION SELECTOR-114
-                'VS115' => 0xE0162, # VARIATION SELECTOR-115
-                'VS116' => 0xE0163, # VARIATION SELECTOR-116
-                'VS117' => 0xE0164, # VARIATION SELECTOR-117
-                'VS118' => 0xE0165, # VARIATION SELECTOR-118
-                'VS119' => 0xE0166, # VARIATION SELECTOR-119
-                'VS120' => 0xE0167, # VARIATION SELECTOR-120
-                'VS121' => 0xE0168, # VARIATION SELECTOR-121
-                'VS122' => 0xE0169, # VARIATION SELECTOR-122
-                'VS123' => 0xE016A, # VARIATION SELECTOR-123
-                'VS124' => 0xE016B, # VARIATION SELECTOR-124
-                'VS125' => 0xE016C, # VARIATION SELECTOR-125
-                'VS126' => 0xE016D, # VARIATION SELECTOR-126
-                'VS127' => 0xE016E, # VARIATION SELECTOR-127
-                'VS128' => 0xE016F, # VARIATION SELECTOR-128
-                'VS129' => 0xE0170, # VARIATION SELECTOR-129
-                'VS130' => 0xE0171, # VARIATION SELECTOR-130
-                'VS131' => 0xE0172, # VARIATION SELECTOR-131
-                'VS132' => 0xE0173, # VARIATION SELECTOR-132
-                'VS133' => 0xE0174, # VARIATION SELECTOR-133
-                'VS134' => 0xE0175, # VARIATION SELECTOR-134
-                'VS135' => 0xE0176, # VARIATION SELECTOR-135
-                'VS136' => 0xE0177, # VARIATION SELECTOR-136
-                'VS137' => 0xE0178, # VARIATION SELECTOR-137
-                'VS138' => 0xE0179, # VARIATION SELECTOR-138
-                'VS139' => 0xE017A, # VARIATION SELECTOR-139
-                'VS140' => 0xE017B, # VARIATION SELECTOR-140
-                'VS141' => 0xE017C, # VARIATION SELECTOR-141
-                'VS142' => 0xE017D, # VARIATION SELECTOR-142
-                'VS143' => 0xE017E, # VARIATION SELECTOR-143
-                'VS144' => 0xE017F, # VARIATION SELECTOR-144
-                'VS145' => 0xE0180, # VARIATION SELECTOR-145
-                'VS146' => 0xE0181, # VARIATION SELECTOR-146
-                'VS147' => 0xE0182, # VARIATION SELECTOR-147
-                'VS148' => 0xE0183, # VARIATION SELECTOR-148
-                'VS149' => 0xE0184, # VARIATION SELECTOR-149
-                'VS150' => 0xE0185, # VARIATION SELECTOR-150
-                'VS151' => 0xE0186, # VARIATION SELECTOR-151
-                'VS152' => 0xE0187, # VARIATION SELECTOR-152
-                'VS153' => 0xE0188, # VARIATION SELECTOR-153
-                'VS154' => 0xE0189, # VARIATION SELECTOR-154
-                'VS155' => 0xE018A, # VARIATION SELECTOR-155
-                'VS156' => 0xE018B, # VARIATION SELECTOR-156
-                'VS157' => 0xE018C, # VARIATION SELECTOR-157
-                'VS158' => 0xE018D, # VARIATION SELECTOR-158
-                'VS159' => 0xE018E, # VARIATION SELECTOR-159
-                'VS160' => 0xE018F, # VARIATION SELECTOR-160
-                'VS161' => 0xE0190, # VARIATION SELECTOR-161
-                'VS162' => 0xE0191, # VARIATION SELECTOR-162
-                'VS163' => 0xE0192, # VARIATION SELECTOR-163
-                'VS164' => 0xE0193, # VARIATION SELECTOR-164
-                'VS165' => 0xE0194, # VARIATION SELECTOR-165
-                'VS166' => 0xE0195, # VARIATION SELECTOR-166
-                'VS167' => 0xE0196, # VARIATION SELECTOR-167
-                'VS168' => 0xE0197, # VARIATION SELECTOR-168
-                'VS169' => 0xE0198, # VARIATION SELECTOR-169
-                'VS170' => 0xE0199, # VARIATION SELECTOR-170
-                'VS171' => 0xE019A, # VARIATION SELECTOR-171
-                'VS172' => 0xE019B, # VARIATION SELECTOR-172
-                'VS173' => 0xE019C, # VARIATION SELECTOR-173
-                'VS174' => 0xE019D, # VARIATION SELECTOR-174
-                'VS175' => 0xE019E, # VARIATION SELECTOR-175
-                'VS176' => 0xE019F, # VARIATION SELECTOR-176
-                'VS177' => 0xE01A0, # VARIATION SELECTOR-177
-                'VS178' => 0xE01A1, # VARIATION SELECTOR-178
-                'VS179' => 0xE01A2, # VARIATION SELECTOR-179
-                'VS180' => 0xE01A3, # VARIATION SELECTOR-180
-                'VS181' => 0xE01A4, # VARIATION SELECTOR-181
-                'VS182' => 0xE01A5, # VARIATION SELECTOR-182
-                'VS183' => 0xE01A6, # VARIATION SELECTOR-183
-                'VS184' => 0xE01A7, # VARIATION SELECTOR-184
-                'VS185' => 0xE01A8, # VARIATION SELECTOR-185
-                'VS186' => 0xE01A9, # VARIATION SELECTOR-186
-                'VS187' => 0xE01AA, # VARIATION SELECTOR-187
-                'VS188' => 0xE01AB, # VARIATION SELECTOR-188
-                'VS189' => 0xE01AC, # VARIATION SELECTOR-189
-                'VS190' => 0xE01AD, # VARIATION SELECTOR-190
-                'VS191' => 0xE01AE, # VARIATION SELECTOR-191
-                'VS192' => 0xE01AF, # VARIATION SELECTOR-192
-                'VS193' => 0xE01B0, # VARIATION SELECTOR-193
-                'VS194' => 0xE01B1, # VARIATION SELECTOR-194
-                'VS195' => 0xE01B2, # VARIATION SELECTOR-195
-                'VS196' => 0xE01B3, # VARIATION SELECTOR-196
-                'VS197' => 0xE01B4, # VARIATION SELECTOR-197
-                'VS198' => 0xE01B5, # VARIATION SELECTOR-198
-                'VS199' => 0xE01B6, # VARIATION SELECTOR-199
-                'VS200' => 0xE01B7, # VARIATION SELECTOR-200
-                'VS201' => 0xE01B8, # VARIATION SELECTOR-201
-                'VS202' => 0xE01B9, # VARIATION SELECTOR-202
-                'VS203' => 0xE01BA, # VARIATION SELECTOR-203
-                'VS204' => 0xE01BB, # VARIATION SELECTOR-204
-                'VS205' => 0xE01BC, # VARIATION SELECTOR-205
-                'VS206' => 0xE01BD, # VARIATION SELECTOR-206
-                'VS207' => 0xE01BE, # VARIATION SELECTOR-207
-                'VS208' => 0xE01BF, # VARIATION SELECTOR-208
-                'VS209' => 0xE01C0, # VARIATION SELECTOR-209
-                'VS210' => 0xE01C1, # VARIATION SELECTOR-210
-                'VS211' => 0xE01C2, # VARIATION SELECTOR-211
-                'VS212' => 0xE01C3, # VARIATION SELECTOR-212
-                'VS213' => 0xE01C4, # VARIATION SELECTOR-213
-                'VS214' => 0xE01C5, # VARIATION SELECTOR-214
-                'VS215' => 0xE01C6, # VARIATION SELECTOR-215
-                'VS216' => 0xE01C7, # VARIATION SELECTOR-216
-                'VS217' => 0xE01C8, # VARIATION SELECTOR-217
-                'VS218' => 0xE01C9, # VARIATION SELECTOR-218
-                'VS219' => 0xE01CA, # VARIATION SELECTOR-219
-                'VS220' => 0xE01CB, # VARIATION SELECTOR-220
-                'VS221' => 0xE01CC, # VARIATION SELECTOR-221
-                'VS222' => 0xE01CD, # VARIATION SELECTOR-222
-                'VS223' => 0xE01CE, # VARIATION SELECTOR-223
-                'VS224' => 0xE01CF, # VARIATION SELECTOR-224
-                'VS225' => 0xE01D0, # VARIATION SELECTOR-225
-                'VS226' => 0xE01D1, # VARIATION SELECTOR-226
-                'VS227' => 0xE01D2, # VARIATION SELECTOR-227
-                'VS228' => 0xE01D3, # VARIATION SELECTOR-228
-                'VS229' => 0xE01D4, # VARIATION SELECTOR-229
-                'VS230' => 0xE01D5, # VARIATION SELECTOR-230
-                'VS231' => 0xE01D6, # VARIATION SELECTOR-231
-                'VS232' => 0xE01D7, # VARIATION SELECTOR-232
-                'VS233' => 0xE01D8, # VARIATION SELECTOR-233
-                'VS234' => 0xE01D9, # VARIATION SELECTOR-234
-                'VS235' => 0xE01DA, # VARIATION SELECTOR-235
-                'VS236' => 0xE01DB, # VARIATION SELECTOR-236
-                'VS237' => 0xE01DC, # VARIATION SELECTOR-237
-                'VS238' => 0xE01DD, # VARIATION SELECTOR-238
-                'VS239' => 0xE01DE, # VARIATION SELECTOR-239
-                'VS240' => 0xE01DF, # VARIATION SELECTOR-240
-                'VS241' => 0xE01E0, # VARIATION SELECTOR-241
-                'VS242' => 0xE01E1, # VARIATION SELECTOR-242
-                'VS243' => 0xE01E2, # VARIATION SELECTOR-243
-                'VS244' => 0xE01E3, # VARIATION SELECTOR-244
-                'VS245' => 0xE01E4, # VARIATION SELECTOR-245
-                'VS246' => 0xE01E5, # VARIATION SELECTOR-246
-                'VS247' => 0xE01E6, # VARIATION SELECTOR-247
-                'VS248' => 0xE01E7, # VARIATION SELECTOR-248
-                'VS249' => 0xE01E8, # VARIATION SELECTOR-249
-                'VS250' => 0xE01E9, # VARIATION SELECTOR-250
-                'VS251' => 0xE01EA, # VARIATION SELECTOR-251
-                'VS252' => 0xE01EB, # VARIATION SELECTOR-252
-                'VS253' => 0xE01EC, # VARIATION SELECTOR-253
-                'VS254' => 0xE01ED, # VARIATION SELECTOR-254
-                'VS255' => 0xE01EE, # VARIATION SELECTOR-255
-                'VS256' => 0xE01EF, # VARIATION SELECTOR-256
-                'WJ'    => 0x2060, # WORD JOINER
-                'ZWJ'   => 0x200D, # ZERO WIDTH JOINER
-                'ZWNJ'  => 0x200C, # ZERO WIDTH NON-JOINER
-                'ZWSP'  => 0x200B, # ZERO WIDTH SPACE
+                'BOM'   => pack("U", 0xFEFF), # BYTE ORDER MARK
+                'BYTE ORDER MARK'=> pack("U", 0xFEFF),
+                'CGJ'   => pack("U", 0x034F), # COMBINING GRAPHEME JOINER
+                'FVS1'  => pack("U", 0x180B), # MONGOLIAN FREE VARIATION SELECTOR ONE
+                'FVS2'  => pack("U", 0x180C), # MONGOLIAN FREE VARIATION SELECTOR TWO
+                'FVS3'  => pack("U", 0x180D), # MONGOLIAN FREE VARIATION SELECTOR THREE
+                'LRE'   => pack("U", 0x202A), # LEFT-TO-RIGHT EMBEDDING
+                'LRM'   => pack("U", 0x200E), # LEFT-TO-RIGHT MARK
+                'LRO'   => pack("U", 0x202D), # LEFT-TO-RIGHT OVERRIDE
+                'MMSP'  => pack("U", 0x205F), # MEDIUM MATHEMATICAL SPACE
+                'MVS'   => pack("U", 0x180E), # MONGOLIAN VOWEL SEPARATOR
+                'NBSP'  => pack("U", 0x00A0), # NO-BREAK SPACE
+                'NNBSP' => pack("U", 0x202F), # NARROW NO-BREAK SPACE
+                'PDF'   => pack("U", 0x202C), # POP DIRECTIONAL FORMATTING
+                'RLE'   => pack("U", 0x202B), # RIGHT-TO-LEFT EMBEDDING
+                'RLM'   => pack("U", 0x200F), # RIGHT-TO-LEFT MARK
+                'RLO'   => pack("U", 0x202E), # RIGHT-TO-LEFT OVERRIDE
+                'SHY'   => pack("U", 0x00AD), # SOFT HYPHEN
+                'VS1'   => pack("U", 0xFE00), # VARIATION SELECTOR-1
+                'VS2'   => pack("U", 0xFE01), # VARIATION SELECTOR-2
+                'VS3'   => pack("U", 0xFE02), # VARIATION SELECTOR-3
+                'VS4'   => pack("U", 0xFE03), # VARIATION SELECTOR-4
+                'VS5'   => pack("U", 0xFE04), # VARIATION SELECTOR-5
+                'VS6'   => pack("U", 0xFE05), # VARIATION SELECTOR-6
+                'VS7'   => pack("U", 0xFE06), # VARIATION SELECTOR-7
+                'VS8'   => pack("U", 0xFE07), # VARIATION SELECTOR-8
+                'VS9'   => pack("U", 0xFE08), # VARIATION SELECTOR-9
+                'VS10'  => pack("U", 0xFE09), # VARIATION SELECTOR-10
+                'VS11'  => pack("U", 0xFE0A), # VARIATION SELECTOR-11
+                'VS12'  => pack("U", 0xFE0B), # VARIATION SELECTOR-12
+                'VS13'  => pack("U", 0xFE0C), # VARIATION SELECTOR-13
+                'VS14'  => pack("U", 0xFE0D), # VARIATION SELECTOR-14
+                'VS15'  => pack("U", 0xFE0E), # VARIATION SELECTOR-15
+                'VS16'  => pack("U", 0xFE0F), # VARIATION SELECTOR-16
+                'VS17'  => pack("U", 0xE0100), # VARIATION SELECTOR-17
+                'VS18'  => pack("U", 0xE0101), # VARIATION SELECTOR-18
+                'VS19'  => pack("U", 0xE0102), # VARIATION SELECTOR-19
+                'VS20'  => pack("U", 0xE0103), # VARIATION SELECTOR-20
+                'VS21'  => pack("U", 0xE0104), # VARIATION SELECTOR-21
+                'VS22'  => pack("U", 0xE0105), # VARIATION SELECTOR-22
+                'VS23'  => pack("U", 0xE0106), # VARIATION SELECTOR-23
+                'VS24'  => pack("U", 0xE0107), # VARIATION SELECTOR-24
+                'VS25'  => pack("U", 0xE0108), # VARIATION SELECTOR-25
+                'VS26'  => pack("U", 0xE0109), # VARIATION SELECTOR-26
+                'VS27'  => pack("U", 0xE010A), # VARIATION SELECTOR-27
+                'VS28'  => pack("U", 0xE010B), # VARIATION SELECTOR-28
+                'VS29'  => pack("U", 0xE010C), # VARIATION SELECTOR-29
+                'VS30'  => pack("U", 0xE010D), # VARIATION SELECTOR-30
+                'VS31'  => pack("U", 0xE010E), # VARIATION SELECTOR-31
+                'VS32'  => pack("U", 0xE010F), # VARIATION SELECTOR-32
+                'VS33'  => pack("U", 0xE0110), # VARIATION SELECTOR-33
+                'VS34'  => pack("U", 0xE0111), # VARIATION SELECTOR-34
+                'VS35'  => pack("U", 0xE0112), # VARIATION SELECTOR-35
+                'VS36'  => pack("U", 0xE0113), # VARIATION SELECTOR-36
+                'VS37'  => pack("U", 0xE0114), # VARIATION SELECTOR-37
+                'VS38'  => pack("U", 0xE0115), # VARIATION SELECTOR-38
+                'VS39'  => pack("U", 0xE0116), # VARIATION SELECTOR-39
+                'VS40'  => pack("U", 0xE0117), # VARIATION SELECTOR-40
+                'VS41'  => pack("U", 0xE0118), # VARIATION SELECTOR-41
+                'VS42'  => pack("U", 0xE0119), # VARIATION SELECTOR-42
+                'VS43'  => pack("U", 0xE011A), # VARIATION SELECTOR-43
+                'VS44'  => pack("U", 0xE011B), # VARIATION SELECTOR-44
+                'VS45'  => pack("U", 0xE011C), # VARIATION SELECTOR-45
+                'VS46'  => pack("U", 0xE011D), # VARIATION SELECTOR-46
+                'VS47'  => pack("U", 0xE011E), # VARIATION SELECTOR-47
+                'VS48'  => pack("U", 0xE011F), # VARIATION SELECTOR-48
+                'VS49'  => pack("U", 0xE0120), # VARIATION SELECTOR-49
+                'VS50'  => pack("U", 0xE0121), # VARIATION SELECTOR-50
+                'VS51'  => pack("U", 0xE0122), # VARIATION SELECTOR-51
+                'VS52'  => pack("U", 0xE0123), # VARIATION SELECTOR-52
+                'VS53'  => pack("U", 0xE0124), # VARIATION SELECTOR-53
+                'VS54'  => pack("U", 0xE0125), # VARIATION SELECTOR-54
+                'VS55'  => pack("U", 0xE0126), # VARIATION SELECTOR-55
+                'VS56'  => pack("U", 0xE0127), # VARIATION SELECTOR-56
+                'VS57'  => pack("U", 0xE0128), # VARIATION SELECTOR-57
+                'VS58'  => pack("U", 0xE0129), # VARIATION SELECTOR-58
+                'VS59'  => pack("U", 0xE012A), # VARIATION SELECTOR-59
+                'VS60'  => pack("U", 0xE012B), # VARIATION SELECTOR-60
+                'VS61'  => pack("U", 0xE012C), # VARIATION SELECTOR-61
+                'VS62'  => pack("U", 0xE012D), # VARIATION SELECTOR-62
+                'VS63'  => pack("U", 0xE012E), # VARIATION SELECTOR-63
+                'VS64'  => pack("U", 0xE012F), # VARIATION SELECTOR-64
+                'VS65'  => pack("U", 0xE0130), # VARIATION SELECTOR-65
+                'VS66'  => pack("U", 0xE0131), # VARIATION SELECTOR-66
+                'VS67'  => pack("U", 0xE0132), # VARIATION SELECTOR-67
+                'VS68'  => pack("U", 0xE0133), # VARIATION SELECTOR-68
+                'VS69'  => pack("U", 0xE0134), # VARIATION SELECTOR-69
+                'VS70'  => pack("U", 0xE0135), # VARIATION SELECTOR-70
+                'VS71'  => pack("U", 0xE0136), # VARIATION SELECTOR-71
+                'VS72'  => pack("U", 0xE0137), # VARIATION SELECTOR-72
+                'VS73'  => pack("U", 0xE0138), # VARIATION SELECTOR-73
+                'VS74'  => pack("U", 0xE0139), # VARIATION SELECTOR-74
+                'VS75'  => pack("U", 0xE013A), # VARIATION SELECTOR-75
+                'VS76'  => pack("U", 0xE013B), # VARIATION SELECTOR-76
+                'VS77'  => pack("U", 0xE013C), # VARIATION SELECTOR-77
+                'VS78'  => pack("U", 0xE013D), # VARIATION SELECTOR-78
+                'VS79'  => pack("U", 0xE013E), # VARIATION SELECTOR-79
+                'VS80'  => pack("U", 0xE013F), # VARIATION SELECTOR-80
+                'VS81'  => pack("U", 0xE0140), # VARIATION SELECTOR-81
+                'VS82'  => pack("U", 0xE0141), # VARIATION SELECTOR-82
+                'VS83'  => pack("U", 0xE0142), # VARIATION SELECTOR-83
+                'VS84'  => pack("U", 0xE0143), # VARIATION SELECTOR-84
+                'VS85'  => pack("U", 0xE0144), # VARIATION SELECTOR-85
+                'VS86'  => pack("U", 0xE0145), # VARIATION SELECTOR-86
+                'VS87'  => pack("U", 0xE0146), # VARIATION SELECTOR-87
+                'VS88'  => pack("U", 0xE0147), # VARIATION SELECTOR-88
+                'VS89'  => pack("U", 0xE0148), # VARIATION SELECTOR-89
+                'VS90'  => pack("U", 0xE0149), # VARIATION SELECTOR-90
+                'VS91'  => pack("U", 0xE014A), # VARIATION SELECTOR-91
+                'VS92'  => pack("U", 0xE014B), # VARIATION SELECTOR-92
+                'VS93'  => pack("U", 0xE014C), # VARIATION SELECTOR-93
+                'VS94'  => pack("U", 0xE014D), # VARIATION SELECTOR-94
+                'VS95'  => pack("U", 0xE014E), # VARIATION SELECTOR-95
+                'VS96'  => pack("U", 0xE014F), # VARIATION SELECTOR-96
+                'VS97'  => pack("U", 0xE0150), # VARIATION SELECTOR-97
+                'VS98'  => pack("U", 0xE0151), # VARIATION SELECTOR-98
+                'VS99'  => pack("U", 0xE0152), # VARIATION SELECTOR-99
+                'VS100' => pack("U", 0xE0153), # VARIATION SELECTOR-100
+                'VS101' => pack("U", 0xE0154), # VARIATION SELECTOR-101
+                'VS102' => pack("U", 0xE0155), # VARIATION SELECTOR-102
+                'VS103' => pack("U", 0xE0156), # VARIATION SELECTOR-103
+                'VS104' => pack("U", 0xE0157), # VARIATION SELECTOR-104
+                'VS105' => pack("U", 0xE0158), # VARIATION SELECTOR-105
+                'VS106' => pack("U", 0xE0159), # VARIATION SELECTOR-106
+                'VS107' => pack("U", 0xE015A), # VARIATION SELECTOR-107
+                'VS108' => pack("U", 0xE015B), # VARIATION SELECTOR-108
+                'VS109' => pack("U", 0xE015C), # VARIATION SELECTOR-109
+                'VS110' => pack("U", 0xE015D), # VARIATION SELECTOR-110
+                'VS111' => pack("U", 0xE015E), # VARIATION SELECTOR-111
+                'VS112' => pack("U", 0xE015F), # VARIATION SELECTOR-112
+                'VS113' => pack("U", 0xE0160), # VARIATION SELECTOR-113
+                'VS114' => pack("U", 0xE0161), # VARIATION SELECTOR-114
+                'VS115' => pack("U", 0xE0162), # VARIATION SELECTOR-115
+                'VS116' => pack("U", 0xE0163), # VARIATION SELECTOR-116
+                'VS117' => pack("U", 0xE0164), # VARIATION SELECTOR-117
+                'VS118' => pack("U", 0xE0165), # VARIATION SELECTOR-118
+                'VS119' => pack("U", 0xE0166), # VARIATION SELECTOR-119
+                'VS120' => pack("U", 0xE0167), # VARIATION SELECTOR-120
+                'VS121' => pack("U", 0xE0168), # VARIATION SELECTOR-121
+                'VS122' => pack("U", 0xE0169), # VARIATION SELECTOR-122
+                'VS123' => pack("U", 0xE016A), # VARIATION SELECTOR-123
+                'VS124' => pack("U", 0xE016B), # VARIATION SELECTOR-124
+                'VS125' => pack("U", 0xE016C), # VARIATION SELECTOR-125
+                'VS126' => pack("U", 0xE016D), # VARIATION SELECTOR-126
+                'VS127' => pack("U", 0xE016E), # VARIATION SELECTOR-127
+                'VS128' => pack("U", 0xE016F), # VARIATION SELECTOR-128
+                'VS129' => pack("U", 0xE0170), # VARIATION SELECTOR-129
+                'VS130' => pack("U", 0xE0171), # VARIATION SELECTOR-130
+                'VS131' => pack("U", 0xE0172), # VARIATION SELECTOR-131
+                'VS132' => pack("U", 0xE0173), # VARIATION SELECTOR-132
+                'VS133' => pack("U", 0xE0174), # VARIATION SELECTOR-133
+                'VS134' => pack("U", 0xE0175), # VARIATION SELECTOR-134
+                'VS135' => pack("U", 0xE0176), # VARIATION SELECTOR-135
+                'VS136' => pack("U", 0xE0177), # VARIATION SELECTOR-136
+                'VS137' => pack("U", 0xE0178), # VARIATION SELECTOR-137
+                'VS138' => pack("U", 0xE0179), # VARIATION SELECTOR-138
+                'VS139' => pack("U", 0xE017A), # VARIATION SELECTOR-139
+                'VS140' => pack("U", 0xE017B), # VARIATION SELECTOR-140
+                'VS141' => pack("U", 0xE017C), # VARIATION SELECTOR-141
+                'VS142' => pack("U", 0xE017D), # VARIATION SELECTOR-142
+                'VS143' => pack("U", 0xE017E), # VARIATION SELECTOR-143
+                'VS144' => pack("U", 0xE017F), # VARIATION SELECTOR-144
+                'VS145' => pack("U", 0xE0180), # VARIATION SELECTOR-145
+                'VS146' => pack("U", 0xE0181), # VARIATION SELECTOR-146
+                'VS147' => pack("U", 0xE0182), # VARIATION SELECTOR-147
+                'VS148' => pack("U", 0xE0183), # VARIATION SELECTOR-148
+                'VS149' => pack("U", 0xE0184), # VARIATION SELECTOR-149
+                'VS150' => pack("U", 0xE0185), # VARIATION SELECTOR-150
+                'VS151' => pack("U", 0xE0186), # VARIATION SELECTOR-151
+                'VS152' => pack("U", 0xE0187), # VARIATION SELECTOR-152
+                'VS153' => pack("U", 0xE0188), # VARIATION SELECTOR-153
+                'VS154' => pack("U", 0xE0189), # VARIATION SELECTOR-154
+                'VS155' => pack("U", 0xE018A), # VARIATION SELECTOR-155
+                'VS156' => pack("U", 0xE018B), # VARIATION SELECTOR-156
+                'VS157' => pack("U", 0xE018C), # VARIATION SELECTOR-157
+                'VS158' => pack("U", 0xE018D), # VARIATION SELECTOR-158
+                'VS159' => pack("U", 0xE018E), # VARIATION SELECTOR-159
+                'VS160' => pack("U", 0xE018F), # VARIATION SELECTOR-160
+                'VS161' => pack("U", 0xE0190), # VARIATION SELECTOR-161
+                'VS162' => pack("U", 0xE0191), # VARIATION SELECTOR-162
+                'VS163' => pack("U", 0xE0192), # VARIATION SELECTOR-163
+                'VS164' => pack("U", 0xE0193), # VARIATION SELECTOR-164
+                'VS165' => pack("U", 0xE0194), # VARIATION SELECTOR-165
+                'VS166' => pack("U", 0xE0195), # VARIATION SELECTOR-166
+                'VS167' => pack("U", 0xE0196), # VARIATION SELECTOR-167
+                'VS168' => pack("U", 0xE0197), # VARIATION SELECTOR-168
+                'VS169' => pack("U", 0xE0198), # VARIATION SELECTOR-169
+                'VS170' => pack("U", 0xE0199), # VARIATION SELECTOR-170
+                'VS171' => pack("U", 0xE019A), # VARIATION SELECTOR-171
+                'VS172' => pack("U", 0xE019B), # VARIATION SELECTOR-172
+                'VS173' => pack("U", 0xE019C), # VARIATION SELECTOR-173
+                'VS174' => pack("U", 0xE019D), # VARIATION SELECTOR-174
+                'VS175' => pack("U", 0xE019E), # VARIATION SELECTOR-175
+                'VS176' => pack("U", 0xE019F), # VARIATION SELECTOR-176
+                'VS177' => pack("U", 0xE01A0), # VARIATION SELECTOR-177
+                'VS178' => pack("U", 0xE01A1), # VARIATION SELECTOR-178
+                'VS179' => pack("U", 0xE01A2), # VARIATION SELECTOR-179
+                'VS180' => pack("U", 0xE01A3), # VARIATION SELECTOR-180
+                'VS181' => pack("U", 0xE01A4), # VARIATION SELECTOR-181
+                'VS182' => pack("U", 0xE01A5), # VARIATION SELECTOR-182
+                'VS183' => pack("U", 0xE01A6), # VARIATION SELECTOR-183
+                'VS184' => pack("U", 0xE01A7), # VARIATION SELECTOR-184
+                'VS185' => pack("U", 0xE01A8), # VARIATION SELECTOR-185
+                'VS186' => pack("U", 0xE01A9), # VARIATION SELECTOR-186
+                'VS187' => pack("U", 0xE01AA), # VARIATION SELECTOR-187
+                'VS188' => pack("U", 0xE01AB), # VARIATION SELECTOR-188
+                'VS189' => pack("U", 0xE01AC), # VARIATION SELECTOR-189
+                'VS190' => pack("U", 0xE01AD), # VARIATION SELECTOR-190
+                'VS191' => pack("U", 0xE01AE), # VARIATION SELECTOR-191
+                'VS192' => pack("U", 0xE01AF), # VARIATION SELECTOR-192
+                'VS193' => pack("U", 0xE01B0), # VARIATION SELECTOR-193
+                'VS194' => pack("U", 0xE01B1), # VARIATION SELECTOR-194
+                'VS195' => pack("U", 0xE01B2), # VARIATION SELECTOR-195
+                'VS196' => pack("U", 0xE01B3), # VARIATION SELECTOR-196
+                'VS197' => pack("U", 0xE01B4), # VARIATION SELECTOR-197
+                'VS198' => pack("U", 0xE01B5), # VARIATION SELECTOR-198
+                'VS199' => pack("U", 0xE01B6), # VARIATION SELECTOR-199
+                'VS200' => pack("U", 0xE01B7), # VARIATION SELECTOR-200
+                'VS201' => pack("U", 0xE01B8), # VARIATION SELECTOR-201
+                'VS202' => pack("U", 0xE01B9), # VARIATION SELECTOR-202
+                'VS203' => pack("U", 0xE01BA), # VARIATION SELECTOR-203
+                'VS204' => pack("U", 0xE01BB), # VARIATION SELECTOR-204
+                'VS205' => pack("U", 0xE01BC), # VARIATION SELECTOR-205
+                'VS206' => pack("U", 0xE01BD), # VARIATION SELECTOR-206
+                'VS207' => pack("U", 0xE01BE), # VARIATION SELECTOR-207
+                'VS208' => pack("U", 0xE01BF), # VARIATION SELECTOR-208
+                'VS209' => pack("U", 0xE01C0), # VARIATION SELECTOR-209
+                'VS210' => pack("U", 0xE01C1), # VARIATION SELECTOR-210
+                'VS211' => pack("U", 0xE01C2), # VARIATION SELECTOR-211
+                'VS212' => pack("U", 0xE01C3), # VARIATION SELECTOR-212
+                'VS213' => pack("U", 0xE01C4), # VARIATION SELECTOR-213
+                'VS214' => pack("U", 0xE01C5), # VARIATION SELECTOR-214
+                'VS215' => pack("U", 0xE01C6), # VARIATION SELECTOR-215
+                'VS216' => pack("U", 0xE01C7), # VARIATION SELECTOR-216
+                'VS217' => pack("U", 0xE01C8), # VARIATION SELECTOR-217
+                'VS218' => pack("U", 0xE01C9), # VARIATION SELECTOR-218
+                'VS219' => pack("U", 0xE01CA), # VARIATION SELECTOR-219
+                'VS220' => pack("U", 0xE01CB), # VARIATION SELECTOR-220
+                'VS221' => pack("U", 0xE01CC), # VARIATION SELECTOR-221
+                'VS222' => pack("U", 0xE01CD), # VARIATION SELECTOR-222
+                'VS223' => pack("U", 0xE01CE), # VARIATION SELECTOR-223
+                'VS224' => pack("U", 0xE01CF), # VARIATION SELECTOR-224
+                'VS225' => pack("U", 0xE01D0), # VARIATION SELECTOR-225
+                'VS226' => pack("U", 0xE01D1), # VARIATION SELECTOR-226
+                'VS227' => pack("U", 0xE01D2), # VARIATION SELECTOR-227
+                'VS228' => pack("U", 0xE01D3), # VARIATION SELECTOR-228
+                'VS229' => pack("U", 0xE01D4), # VARIATION SELECTOR-229
+                'VS230' => pack("U", 0xE01D5), # VARIATION SELECTOR-230
+                'VS231' => pack("U", 0xE01D6), # VARIATION SELECTOR-231
+                'VS232' => pack("U", 0xE01D7), # VARIATION SELECTOR-232
+                'VS233' => pack("U", 0xE01D8), # VARIATION SELECTOR-233
+                'VS234' => pack("U", 0xE01D9), # VARIATION SELECTOR-234
+                'VS235' => pack("U", 0xE01DA), # VARIATION SELECTOR-235
+                'VS236' => pack("U", 0xE01DB), # VARIATION SELECTOR-236
+                'VS237' => pack("U", 0xE01DC), # VARIATION SELECTOR-237
+                'VS238' => pack("U", 0xE01DD), # VARIATION SELECTOR-238
+                'VS239' => pack("U", 0xE01DE), # VARIATION SELECTOR-239
+                'VS240' => pack("U", 0xE01DF), # VARIATION SELECTOR-240
+                'VS241' => pack("U", 0xE01E0), # VARIATION SELECTOR-241
+                'VS242' => pack("U", 0xE01E1), # VARIATION SELECTOR-242
+                'VS243' => pack("U", 0xE01E2), # VARIATION SELECTOR-243
+                'VS244' => pack("U", 0xE01E3), # VARIATION SELECTOR-244
+                'VS245' => pack("U", 0xE01E4), # VARIATION SELECTOR-245
+                'VS246' => pack("U", 0xE01E5), # VARIATION SELECTOR-246
+                'VS247' => pack("U", 0xE01E6), # VARIATION SELECTOR-247
+                'VS248' => pack("U", 0xE01E7), # VARIATION SELECTOR-248
+                'VS249' => pack("U", 0xE01E8), # VARIATION SELECTOR-249
+                'VS250' => pack("U", 0xE01E9), # VARIATION SELECTOR-250
+                'VS251' => pack("U", 0xE01EA), # VARIATION SELECTOR-251
+                'VS252' => pack("U", 0xE01EB), # VARIATION SELECTOR-252
+                'VS253' => pack("U", 0xE01EC), # VARIATION SELECTOR-253
+                'VS254' => pack("U", 0xE01ED), # VARIATION SELECTOR-254
+                'VS255' => pack("U", 0xE01EE), # VARIATION SELECTOR-255
+                'VS256' => pack("U", 0xE01EF), # VARIATION SELECTOR-256
+                'WJ'    => pack("U", 0x2060), # WORD JOINER
+                'ZWJ'   => pack("U", 0x200D), # ZERO WIDTH JOINER
+                'ZWNJ'  => pack("U", 0x200C), # ZERO WIDTH NON-JOINER
+                'ZWSP'  => pack("U", 0x200B), # ZERO WIDTH SPACE
             );
 
 my %deprecated_aliases = (
                 # Pre-3.2 compatibility (only for the first 256 characters).
                 # Use of these gives deprecated message.
-                'HORIZONTAL TABULATION' => 0x09, # CHARACTER TABULATION
-                'VERTICAL TABULATION'   => 0x0B, # LINE TABULATION
-                'FILE SEPARATOR'        => 0x1C, # INFORMATION SEPARATOR FOUR
-                'GROUP SEPARATOR'       => 0x1D, # INFORMATION SEPARATOR THREE
-                'RECORD SEPARATOR'      => 0x1E, # INFORMATION SEPARATOR TWO
-                'UNIT SEPARATOR'        => 0x1F, # INFORMATION SEPARATOR ONE
-                'HORIZONTAL TABULATION SET' => 0x88, # CHARACTER TABULATION SET
-                'HORIZONTAL TABULATION WITH JUSTIFICATION' => 0x89, # CHARACTER TABULATION WITH JUSTIFICATION
-                'PARTIAL LINE DOWN'       => 0x8B, # PARTIAL LINE FORWARD
-                'PARTIAL LINE UP'         => 0x8C, # PARTIAL LINE BACKWARD
-                'VERTICAL TABULATION SET' => 0x8A, # LINE TABULATION SET
-                'REVERSE INDEX'           => 0x8D, # REVERSE LINE FEED
+                'HORIZONTAL TABULATION' => pack("U", 0x09), # CHARACTER TABULATION
+                'VERTICAL TABULATION'   => pack("U", 0x0B), # LINE TABULATION
+                'FILE SEPARATOR'        => pack("U", 0x1C), # INFORMATION SEPARATOR FOUR
+                'GROUP SEPARATOR'       => pack("U", 0x1D), # INFORMATION SEPARATOR THREE
+                'RECORD SEPARATOR'      => pack("U", 0x1E), # INFORMATION SEPARATOR TWO
+                'UNIT SEPARATOR'        => pack("U", 0x1F), # INFORMATION SEPARATOR ONE
+                'HORIZONTAL TABULATION SET' => pack("U", 0x88), # CHARACTER TABULATION SET
+                'HORIZONTAL TABULATION WITH JUSTIFICATION' => pack("U", 0x89), # CHARACTER TABULATION WITH JUSTIFICATION
+                'PARTIAL LINE DOWN'       => pack("U", 0x8B), # PARTIAL LINE FORWARD
+                'PARTIAL LINE UP'         => pack("U", 0x8C), # PARTIAL LINE BACKWARD
+                'VERTICAL TABULATION SET' => pack("U", 0x8A), # LINE TABULATION SET
+                'REVERSE INDEX'           => pack("U", 0x8D), # REVERSE LINE FEED
             );
 
 
@@ -461,7 +467,8 @@ sub alias (@) # Set up a single alias
       $value = CORE::hex $1;
     }
     if ($value =~ $decimal_qr) {
-        $^H{charnames_ord_aliases}{$name} = $value;
+        no warnings 'utf8'; # Allow even illegal characters
+        $^H{charnames_ord_aliases}{$name} = pack("U", $value);
 
         # Use a canonical form.
         $^H{charnames_inverse_ords}{sprintf("%05X", $value)} = $name;
@@ -475,8 +482,15 @@ sub alias (@) # Set up a single alias
 } # alias
 
 sub not_legal_use_bytes_msg {
-  my ($name, $ord) = @_;
-  return sprintf("Character 0x%04x with name '$name' is above 0xFF with 'use bytes' in effect", $ord);
+  my ($name, $utf8) = @_;
+  my $return;
+
+  if (length($utf8) == 1) {
+    $return = sprintf("Character 0x%04x with name '%s' is", ord $utf8, $name);
+  } else {
+    $return = sprintf("String with name '%s' (and ordinals %s) contains character(s)", $name, join(" ", map { sprintf "0x%04X", ord $_ } split(//, $utf8)));
+  }
+  return $return . " above 0xFF with 'use bytes' in effect";
 }
 
 sub alias_file ($)  # Reads a file containing alias definitions
@@ -513,20 +527,27 @@ my %dummy_H = (
               );
 
 
-sub lookup_name ($;$) {
+sub lookup_name ($$$) {
+  my ($name, $wants_ord, $runtime) = @_;
 
-  # Finds the ordinal of a character name, first in the aliases, then in
-  # the large table.  If not found, returns undef if runtime; if
-  # compile, complains and returns the Unicode replacement character.
+  # Lookup the name or sequence $name in the tables.  If $wants_ord is false,
+  # returns the string equivalent of $name; if true, returns the ordinal value
+  # instead, but in this case $name must not be a sequence; otherwise undef is
+  # returned and a warning raised.  $runtime is 0 if compiletime, otherwise
+  # gives the number of stack frames to go back to get the application caller
+  # info.
+  # If $name is not found, returns undef in runtime with no warning; and in
+  # compiletime, the Unicode replacement character, with a warning.
 
-  my $runtime = (@_ > 1);  # compile vs run time
-
-  my ($name, $hints_ref) = @_;
+  # It looks first in the aliases, then in the large table of official Unicode
+  # names.
 
   my $utf8;       # The string result
   my $save_input;
 
   if ($runtime) {
+
+    my $hints_ref = (caller($runtime))[10];
 
     # If we didn't import anything (which happens with 'use charnames ()',
     # substitute a dummy structure.
@@ -562,7 +583,7 @@ sub lookup_name ($;$) {
   }
   elsif (exists $deprecated_aliases{$name}) {
     require warnings;
-    warnings::warnif('deprecated', "Unicode character name \"$name\" is deprecated, use \"" . viacode($deprecated_aliases{$name}) . "\" instead");
+    warnings::warnif('deprecated', "Unicode character name \"$name\" is deprecated, use \"" . viacode(ord $deprecated_aliases{$name}) . "\" instead");
     $utf8 = $deprecated_aliases{$name};
   }
 
@@ -579,6 +600,8 @@ sub lookup_name ($;$) {
       ## Suck in the code/name list as a big string.
       ## Lines look like:
       ##     "00052\tLATIN CAPITAL LETTER R\n"
+      # or
+      #      "0052 0303\tLATIN CAPITAL LETTER R WITH TILDE\n"
       $txt = do "unicore/Name.pl" unless $txt;
 
       ## @off will hold the index into the code/name string of the start and
@@ -597,7 +620,10 @@ sub lookup_name ($;$) {
         # Algorithmically determinables are not placed in the cache (that
         # $found_full_in_table indicates) because that uses up memory,
         # and finding these again is fast.
-        if (! defined ($utf8 = name_to_code_point_special($name))) {
+        if (defined (my $ord = name_to_code_point_special($name))) {
+          $utf8 = pack("U", $ord);
+        }
+        else {
 
           # Not algorthmically determinable; look up in the table.
           if ($txt =~ /\t\Q$name\E$/m) {
@@ -632,7 +658,7 @@ sub lookup_name ($;$) {
           # May have zapped input name, get it again.
           $name = (defined $save_input) ? $save_input : $_[0];
           carp "Unknown charname '$name'";
-          return 0xFFFD;
+          return ($wants_ord) ? 0xFFFD : pack("U", 0xFFFD);
         }
 
         @off = ($-[0] + 1, $+[0]);  # The 1 is for the tab
@@ -640,9 +666,28 @@ sub lookup_name ($;$) {
 
       if (! defined $utf8) {
 
-        # Now know where in the string the name starts.
-        # The code, 5 hex digits long (and a tab), is before that.
-        $utf8 = CORE::hex substr($txt, $off[0] - 6, 5);
+        # Here, we haven't set up the output, but we know where in the string
+        # the name starts.  The string is set up so that for single characters
+        # (and not named sequences), the name is preceeded immediately by a
+        # tab and 5 hex digits for its code, with a \n before those.  Named
+        # sequences won't have the 7th preceeding character be a \n.
+        # (Actually, for the very first entry in the table this isn't strictly
+        # true: subtracting 7 will yield -1, and the substr below will
+        # therefore yield the very last character in the table, which should
+        # also be a \n, so the statement works anyway.)
+        if (substr($txt, $off[0] - 7, 1) eq "\n") {
+          $utf8 = pack("U", CORE::hex substr($txt, $off[0] - 6, 5));
+        }
+        else {
+
+          # Here, is a named sequence.  Need to go looking for the beginning,
+          # which is just after the \n from the previous entry in the table.
+          # The +1 skips past that newline, or, if the rindex() fails, to put
+          # us to an offset of zero.
+          my $charstart = rindex($txt, "\n", $off[0] - 7) + 1;
+          $utf8 = pack("U*", map { CORE::hex }
+              split " ", substr($txt, $charstart, $off[0] - $charstart - 1));
+        }
       }
 
       # Cache the input so as to not have to search the large table
@@ -651,32 +696,59 @@ sub lookup_name ($;$) {
     }
   }
 
-  return $utf8 if $runtime || $utf8 <= 255 || ! ($^H & $bytes::hint_bits);
 
-  # Here is compile time, "use bytes" is in effect, and the character
-  # won't fit in a byte
-  # Prefer any official name over the input one.
+  # Here, have the utf8.  If the return is to be an ord, must be any single
+  # character.
+  if ($wants_ord) {
+    return ord($utf8) if length $utf8 == 1;
+  }
+  else {
+
+    # Here, wants string output.  If utf8 is acceptable, just return what
+    # we've got; otherwise attempt to convert it to non-utf8 and return that.
+    my $in_bytes = ($runtime)
+                   ? (caller $runtime)[8] & $bytes::hint_bits
+                   : $^H & $bytes::hint_bits;
+    return $utf8 if (! $in_bytes || utf8::downgrade($utf8, 1)) # The 1 arg
+                                                  # means don't die on failure
+  }
+
+  # Here, there is an error:  either there are too many characters, or the
+  # result string needs to be non-utf8, and at least one character requires
+  # utf8.  Prefer any official name over the input one for the error message.
   if (@off) {
     $name = substr($txt, $off[0], $off[1] - $off[0]) if @off;
   }
   else {
     $name = (defined $save_input) ? $save_input : $_[0];
   }
-  croak not_legal_use_bytes_msg($name, $utf8);
+
+  if ($wants_ord) {
+    # Only way to get here in this case is if result too long.  Message
+    # assumes that our only caller that requires single char result is
+    # vianame.
+    carp "charnames::vianame() doesn't handle named sequences ($name).  Use charnames::string_vianame() instead";
+    return;
+  }
+
+  # Only other possible failure here is from use bytes.
+  if ($runtime) {
+    carp not_legal_use_bytes_msg($name, $utf8);
+    return;
+  } else {
+    croak not_legal_use_bytes_msg($name, $utf8);
+  }
+
 } # lookup_name
 
 sub charnames {
-  my $name = shift;
 
   # For \N{...}.  Looks up the character name and returns the string
   # representation of it.
 
-  my $ord = lookup_name($name);
-  return if ! defined $ord;
-  return chr $ord if $^H & $bytes::hint_bits;
-
-  no warnings 'utf8'; # allow even illegal characters
-  return pack "U", $ord;
+  # The first 0 arg means wants a string returned; the second that we are in
+  # compile time
+  return lookup_name($_[0], 0, 0);
 }
 
 sub import
@@ -846,16 +918,47 @@ sub vianame
 
   if ($arg =~ /^U\+([0-9a-fA-F]+)$/) {
 
-    # khw claims that this is bad.  The function should return either a
-    # an ord or a chr for all inputs; not be bipolar.
+    # khw claims that this is poor interface design.  The function should
+    # return either a an ord or a chr for all inputs; not be bipolar.  But
+    # can't change it because of backward compatibility.  New code can use
+    # string_vianame() instead.
     my $ord = CORE::hex $1;
     return chr $ord if $ord <= 255 || ! ((caller 0)[8] & $bytes::hint_bits);
-    carp not_legal_use_bytes_msg($arg, $ord);
+    carp not_legal_use_bytes_msg($arg, chr $ord);
     return;
   }
 
-  return lookup_name($arg, (caller(0))[10]);
+  # The first 1 arg means wants an ord returned; the second that we are in
+  # runtime, and this is the first level routine called from the user
+  return lookup_name($arg, 1, 1);
 } # vianame
+
+sub string_vianame {
+
+  # Looks up the character name and returns its string representation if
+  # found, undef otherwise.
+
+  if (@_ != 1) {
+    carp "charnames::string_vianame() expects one name argument";
+    return;
+  }
+
+  my $arg = shift;
+
+  if ($arg =~ /^U\+([0-9a-fA-F]+)$/) {
+
+    my $ord = CORE::hex $1;
+    return chr $ord if $ord <= 255 || ! ((caller 0)[8] & $bytes::hint_bits);
+
+    carp not_legal_use_bytes_msg($arg, chr $ord);
+    return;
+  }
+
+  # The 0 arg means wants a string returned; the 1 arg means that we are in
+  # runtime, and this is the first level routine called from the user
+  return lookup_name($arg, 0, 1);
+} # string_vianame
+
 
 
 1;
@@ -863,12 +966,14 @@ __END__
 
 =head1 NAME
 
-charnames - access to Unicode character names; define character names for C<\N{named}> string literal escapes
+charnames - access to Unicode character names and named character sequences; also define character names
 
 =head1 SYNOPSIS
 
   use charnames ':full';
   print "\N{GREEK SMALL LETTER SIGMA} is called sigma.\n";
+  print "\N{LATIN CAPITAL LETTER E WITH VERTICAL LINE BELOW}",
+        " is an officially named sequence of two Unicode characters\n";
 
   use charnames ':short';
   print "\N{greek:Sigma} is an upper-case sigma.\n";
@@ -887,18 +992,41 @@ charnames - access to Unicode character names; define character names for C<\N{n
   print charnames::viacode(0x1234); # prints "ETHIOPIC SYLLABLE SEE"
   printf "%04X", charnames::vianame("GOTHIC LETTER AHSA"); # prints
                                                            # "10330"
+  print charnames::vianame("LATIN CAPITAL LETTER A"); # prints 65 on
+                                                      # ASCII platforms;
+                                                      # 193 on EBCDIC
+  print charnames::string_vianame("LATIN CAPITAL LETTER A"); # prints "A"
 
 =head1 DESCRIPTION
 
 Pragma C<use charnames> is used to gain access to the names of the
-Unicode characters, and to allow you to define your own character names.
+Unicode characters and named character sequences, and to allow you to define
+your own character and character sequence names.
 
-All forms of the pragma enable use of the
-L</charnames::vianame(I<name>)> function for run-time lookup of a
-character name to get its ordinal (code point), and the inverse
-function, L</charnames::viacode(I<code>)>.
+All forms of the pragma enable use of the following 3 functions:
 
-Forms other than C<S<"use charnames ();">> enable the use of of
+=over
+
+=item *
+
+L</charnames::string_vianame(I<name>)> for run-time lookup of a
+either a character name or a named character sequence, returning its string
+representation
+
+=item *
+
+L</charnames::vianame(I<name>)> for run-time lookup of a
+character name (but not a named character sequence) to get its ordinal value
+(code point)
+
+=item *
+
+L</charnames::viacode(I<code>)> for run-time lookup of a code point to get its
+Unicode name.
+
+=back
+
+All forms other than C<S<"use charnames ();">> also enable the use of
 C<\N{I<CHARNAME>}> sequences to compile a Unicode character into a
 string, based on its name.
 
@@ -938,7 +1066,8 @@ is ignored.
 Note that C<\N{...}> is compile-time; it's a special form of string
 constant used inside double-quotish strings; this means that you cannot
 use variables inside the C<\N{...}>.  If you want similar run-time
-functionality, use L<charnames::vianame()|/charnames::vianame(I<name>)>.
+functionality, use
+L<charnames::string_vianame()|/charnames::string_vianame(I<name>)>.
 
 For the C0 and C1 control characters (U+0000..U+001F, U+0080..U+009F)
 there are no official Unicode names but you can use instead the ISO 6429
@@ -1151,31 +1280,33 @@ non-decimal hex digits; otherwise it will be interpreted as decimal.
 Notice that the name returned for of U+FEFF is "ZERO WIDTH NO-BREAK
 SPACE", not "BYTE ORDER MARK".
 
+=head1 charnames::string_vianame(I<name>)
+
+This is a runtime equivalent to C<\N{...}>.  I<name> can be any expression
+that evaluates to a name accepted by C<\N{...}> under the L<C<:full>
+option|/DESCRIPTION> to C<charnames>.  In addition, any other options for the
+controlling C<"use charnames"> in the same scope apply, like any L<script
+list, C<:short> option|/DESCRIPTION>, or L<custom aliases|/CUSTOM ALIASES> you
+may have defined.
+
+The only difference is that if the input name is unknown, C<string_vianame>
+returns C<undef> instead of the REPLACEMENT CHARACTER and does not raise a
+warning message.
+
 =head1 charnames::vianame(I<name>)
 
-Returns the code point indicated by the name.
-For example,
+This is similar to C<string_vianame>.  The main difference is that under most
+circumstances (see L</BUGS> for the others), vianame returns an ordinal code
+point, whereas C<string_vianame> returns a string.  For example,
 
-    printf "%04X", charnames::vianame("FOUR TEARDROP-SPOKED ASTERISK");
+   printf "U+%04X", charnames::vianame("FOUR TEARDROP-SPOKED ASTERISK");
 
-prints "2722".
+prints "U+2722".
 
-C<vianame> takes the identical inputs that C<\N{...}> does under the
-L<C<:full> option|/DESCRIPTION> to C<charnames>.  In addition, any other
-options for the controlling C<"use charnames"> in the same scope apply,
-like any L<script list, C<:short> option|/DESCRIPTION>, or L<custom
-aliases|/CUSTOM ALIASES> you may have defined.
-
-There are just a few differences.  The main one is that under
-most (see L</BUGS> for the others) circumstances, vianame returns
-an ord, whereas C<\\N{...}> is seamlessly placed as a chr into the
-string in which it appears.  This leads to a second difference.
-Since an ord is returned, it can be that of any character, even one
-that isn't legal under the C<S<use bytes>> pragma.
-
-The final difference is that if the input name is unknown C<vianame>
-returns C<undef> instead of the REPLACEMENT CHARACTER, and it does not
-raise a warning message.
+This leads to the other two differences.  Since a single code point is
+returned, the function can't handle named character sequences, as these are
+composed of multiple characters.  And, the code point can be that of any
+character, even ones that aren't legal under the C<S<use bytes>> pragma,
 
 =head1 CUSTOM TRANSLATORS
 
@@ -1220,11 +1351,6 @@ raises a warning.
 Names must be ASCII characters only, which means that you are out of luck if
 you want to create aliases in a language where some or all the characters of
 the desired aliases are non-ASCII.
-
-Unicode standard named sequences are not recognized, such as
-C<LATIN CAPITAL LETTER A WITH MACRON AND GRAVE>
-(which should mean C<LATIN CAPITAL LETTER A WITH MACRON> with an additional
-C<COMBINING GRAVE ACCENT>).
 
 Since evaluation of the translation function (see L</CUSTOM
 TRANSLATORS>) happens in the middle of compilation (of a string

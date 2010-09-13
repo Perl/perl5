@@ -1029,7 +1029,7 @@ X<\o{}>
     \e                  escape            (ESC)
     \x{263a}     [1,8]  hex char          (example: SMILEY)
     \x1b         [2,8]  restricted range hex char (example: ESC)
-    \N{name}     [3]    named Unicode character
+    \N{name}     [3]    named Unicode character or character sequence
     \N{U+263D}   [4,8]  Unicode character (example: FIRST QUARTER MOON)
     \c[          [5]    control char      (example: chr(27))
     \o{23072}    [6,8]  octal char        (example: SMILEY)
@@ -1073,7 +1073,7 @@ For example:
 
 =item [3]
 
-The result is the Unicode character given by I<name>.
+The result is the Unicode character or character sequence given by I<name>.
 See L<charnames>.
 
 =item [4]

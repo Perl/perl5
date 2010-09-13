@@ -94,7 +94,7 @@ These work as in normal strings.
    \x7f     Char whose ordinal is the 2 hex digits, max \xFF
    \x{263a} Char whose ordinal is the hex number, unrestricted
    \cx      Control-x
-   \N{name} A named Unicode character
+   \N{name} A named Unicode character or character sequence
    \N{U+263D} A Unicode character by hex ordinal
 
    \l  Lowercase next character

@@ -9749,7 +9749,6 @@ sub process_NamedSequences {
     #
     # This just adds the sequence to an array for later handling
 
-    return; # XXX Until charnames catches up
     my $file = shift;
     Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
@@ -9760,7 +9759,12 @@ sub process_NamedSequences {
                 "Doesn't look like 'KHMER VOWEL SIGN OM;17BB 17C6'");
             next;
         }
-        push @named_sequences, "$sequence\t\t$name";
+
+        # Note single \t in keeping with special output format of
+        # Perl_charnames.  But it turns out that the code points don't have to
+        # be 5 digits long, like the rest, based on the internal workings of
+        # charnames.pm.  This could be easily changed for consistency.
+        push @named_sequences, "$sequence\t$name";
     }
     return;
 }
@@ -12611,8 +12615,8 @@ Case_Folding is accessible through the /i modifier in regular expressions.
 
 The Name property is accessible through the \\N{} interpolation in
 double-quoted strings and regular expressions, but both usages require a C<use
-charnames;> to be specified, which also contains related functions viacode()
-and vianame().
+charnames;> to be specified, which also contains related functions viacode(),
+vianame(), and string_vianame().
 
 =head1 Unicode regular expression properties that are NOT accepted by Perl
 
