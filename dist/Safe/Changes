@@ -1,3 +1,7 @@
+2.28 Mon Sep 13 2010
+    - Avoid infinite loop in _find_code_refs.
+      Patch by Yasushi Nakajima (rt.cpan.org #61262)
+
 2.27 Thu Apr 29 2010
     - Wrap coderefs returned by reval() and rdo()
     - Add even more version::vxs routines to the default share
