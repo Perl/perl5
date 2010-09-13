@@ -227,7 +227,7 @@ coefficients (RT#77640).
 
 =item *
 
-C<Math::BigInt::FastCalc> has been upgraded from version 0.19 to 0.21.
+C<Math::BigInt::FastCalc> has been upgraded from version 0.19 to 0.22.
 
 =item *
 

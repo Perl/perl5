@@ -863,7 +863,7 @@ use File::Glob qw(:case);
     'Math::BigInt::FastCalc' =>
 	{
 	'MAINTAINER'	=> 'tels',
-	'DISTRIBUTION'	=> 'FLORA/Math-BigInt-FastCalc-0.21.tar.gz',
+	'DISTRIBUTION'	=> 'FLORA/Math-BigInt-FastCalc-0.22.tar.gz',
 	'FILES'		=> q[dist/Math-BigInt-FastCalc],
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qw{
