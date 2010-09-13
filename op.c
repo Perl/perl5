@@ -8407,6 +8407,10 @@ Perl_ck_subr(pTHX_ OP *o)
     PERL_ARGS_ASSERT_CK_SUBR;
 
     o->op_private |= OPpENTERSUB_HASTARG;
+    o->op_private |= (PL_hints & HINT_STRICT_REFS);
+    if (PERLDB_SUB && PL_curstash != PL_debstash)
+	o->op_private |= OPpENTERSUB_DB;
+
     for (cvop = o2; cvop->op_sibling; cvop = cvop->op_sibling) ;
     if (cvop->op_type == OP_RV2CV) {
 	o->op_private |= (cvop->op_private & OPpENTERSUB_AMPER);
@@ -8444,9 +8448,7 @@ Perl_ck_subr(pTHX_ OP *o)
 		sib->op_private &= ~OPpCONST_STRICT;
 	}
     }
-    o->op_private |= (PL_hints & HINT_STRICT_REFS);
-    if (PERLDB_SUB && PL_curstash != PL_debstash)
-	o->op_private |= OPpENTERSUB_DB;
+
     if (!proto) {
 	while (o2 != cvop) {
 	    OP* o3;
