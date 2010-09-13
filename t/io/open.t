@@ -10,7 +10,7 @@ $|  = 1;
 use warnings;
 use Config;
 
-plan tests => 110;
+plan tests => 111;
 
 my $Perl = which_perl();
 
@@ -337,3 +337,13 @@ fresh_perl_is(
     ',
     'ok', { stderr => 1 },
     '[perl #77492]: open $fh, ">", \*glob causes SEGV');
+
+# [perl #77684] Opening a reference to a glob copy.
+{
+    my $var = *STDOUT;
+    open my $fh, ">", \$var;
+    print $fh "hello";
+    is $var, "hello", '[perl #77684]: open $fh, ">", \$glob_copy'
+        # when this fails, it leaves an extra file:
+        or unlink \*STDOUT;
+}

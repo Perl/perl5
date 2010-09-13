@@ -47,9 +47,15 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
     SvUPGRADE(s->var, SVt_PV);
     code = PerlIOBase_pushed(aTHX_ f, mode, Nullsv, tab);
     if (!SvOK(s->var) || (PerlIOBase(f)->flags) & PERLIO_F_TRUNCATE)
+    {
+	sv_force_normal(s->var);
 	SvCUR_set(s->var, 0);
+    }
     if ((PerlIOBase(f)->flags) & PERLIO_F_APPEND)
+    {
+	sv_force_normal(s->var);
 	s->posn = SvCUR(s->var);
+    }
     else
 	s->posn = 0;
     SvSETMAGIC(s->var);
@@ -166,6 +172,7 @@ PerlIOScalar_write(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
 	SV *sv = s->var;
 	char *dst;
 	SvGETMAGIC(sv);
+	sv_force_normal(sv);
 	if ((PerlIOBase(f)->flags) & PERLIO_F_APPEND) {
 	    dst = SvGROW(sv, SvCUR(sv) + count);
 	    offset = SvCUR(sv);

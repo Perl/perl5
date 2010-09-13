@@ -1449,7 +1449,7 @@ PerlIO_layer_from_ref(pTHX_ SV *sv)
     /*
      * For any scalar type load the handler which is bundled with perl
      */
-    if (SvTYPE(sv) < SVt_PVAV && !isGV_with_GP(sv)) {
+    if (SvTYPE(sv) < SVt_PVAV && (!isGV_with_GP(sv) || SvFAKE(sv))) {
 	PerlIO_funcs *f = PerlIO_find_layer(aTHX_ STR_WITH_LEN("scalar"), 1);
 	/* This isn't supposed to happen, since PerlIO::scalar is core,
 	 * but could happen anyway in smaller installs or with PAR */
