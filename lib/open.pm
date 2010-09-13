@@ -108,7 +108,7 @@ sub import {
 	    $in = $out = join(' ', @val);
 	}
 	else {
-	    croak "Unknown PerlIO layer class '$type'";
+	    croak "Unknown PerlIO layer class '$type' (need IN, OUT or IO)";
 	}
     }
     ${^OPEN} = join("\0", $in, $out);
