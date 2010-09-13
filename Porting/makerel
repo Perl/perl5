@@ -161,7 +161,7 @@ my @writables = qw(
     utils/Makefile
     uconfig.h
 );
-system("chmod +w @writables") == 0
+system("chmod u+w @writables") == 0
     or die "system: $!";
 
 chdir ".." or die $!;
