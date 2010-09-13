@@ -1425,7 +1425,11 @@ of the original subroutine magically appears in the global $AUTOLOAD
 variable of the same package as the C<AUTOLOAD> routine.  The name
 is not passed as an ordinary argument because, er, well, just
 because, that's why.  (As an exception, a method call to a nonexistent
-C<import> or C<unimport> method is just skipped instead.)
+C<import> or C<unimport> method is just skipped instead.  Also, if
+the AUTOLOAD subroutine is an XSUB, C<$AUTOLOAD> is not populated;
+instead, you should call L<< C<SvPVX>E<sol>C<SvCUR>|perlapi >> on the
+C<CV> for C<AUTOLOAD> to retrieve the method name.)
+
 
 Many C<AUTOLOAD> routines load in a definition for the requested
 subroutine using eval(), then execute that subroutine using a special
