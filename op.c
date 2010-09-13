@@ -8447,17 +8447,38 @@ Perl_ck_subr(pTHX_ OP *o)
     o->op_private |= (PL_hints & HINT_STRICT_REFS);
     if (PERLDB_SUB && PL_curstash != PL_debstash)
 	o->op_private |= OPpENTERSUB_DB;
-    while (o2 != cvop) {
-	OP* o3;
-	if (PL_madskills && o2->op_type == OP_STUB) {
+    if (!proto) {
+	while (o2 != cvop) {
+	    OP* o3;
+	    if (PL_madskills && o2->op_type == OP_STUB) {
+		o2 = o2->op_sibling;
+		continue;
+	    }
+	    if (PL_madskills && o2->op_type == OP_NULL)
+		o3 = ((UNOP*)o2)->op_first;
+	    else
+		o3 = o2;
+	    /* Yes, this while loop is duplicated. But it's a lot clearer
+	       to see what is going on without that massive switch(*proto)
+	       block just here.  */
+	    list(o2); /* This is only called if !proto  */
+
+	    mod(o2, OP_ENTERSUB);
+	    prev = o2;
 	    o2 = o2->op_sibling;
-	    continue;
-	}
-	if (PL_madskills && o2->op_type == OP_NULL)
-	    o3 = ((UNOP*)o2)->op_first;
-	else
-	    o3 = o2;
-	if (proto) {
+	} /* while */
+    } else {
+	while (o2 != cvop) {
+	    OP* o3;
+	    if (PL_madskills && o2->op_type == OP_STUB) {
+		o2 = o2->op_sibling;
+		continue;
+	    }
+	    if (PL_madskills && o2->op_type == OP_NULL)
+		o3 = ((UNOP*)o2)->op_first;
+	    else
+		o3 = o2;
+
 	    if (proto >= proto_end)
 		return too_many_arguments(o, gv_ename(namegv));
 
@@ -8621,13 +8642,12 @@ Perl_ck_subr(pTHX_ OP *o)
 		Perl_croak(aTHX_ "Malformed prototype for %s: %"SVf,
 			   gv_ename(namegv), SVfARG(cv));
 	    }
-	}
-	else
-	    list(o2);
-	mod(o2, OP_ENTERSUB);
-	prev = o2;
-	o2 = o2->op_sibling;
-    } /* while */
+
+	    mod(o2, OP_ENTERSUB);
+	    prev = o2;
+	    o2 = o2->op_sibling;
+	} /* while */
+    }
     if (o2 == cvop && proto && *proto == '_') {
 	/* generate an access to $_ */
 	o2 = newDEFSVOP();
