@@ -8464,7 +8464,6 @@ Perl_ck_subr(pTHX_ OP *o)
 	    list(o2); /* This is only called if !proto  */
 
 	    mod(o2, OP_ENTERSUB);
-	    prev = o2;
 	    o2 = o2->op_sibling;
 	} /* while */
     } else {
@@ -8647,16 +8646,17 @@ Perl_ck_subr(pTHX_ OP *o)
 	    prev = o2;
 	    o2 = o2->op_sibling;
 	} /* while */
+
+	if (o2 == cvop && *proto == '_') {
+	    /* generate an access to $_ */
+	    o2 = newDEFSVOP();
+	    o2->op_sibling = prev->op_sibling;
+	    prev->op_sibling = o2; /* instead of cvop */
+	}
+	if (!optional && proto_end > proto &&
+	    (*proto != '@' && *proto != '%' && *proto != ';' && *proto != '_'))
+	    return too_few_arguments(o, gv_ename(namegv));
     }
-    if (o2 == cvop && proto && *proto == '_') {
-	/* generate an access to $_ */
-	o2 = newDEFSVOP();
-	o2->op_sibling = prev->op_sibling;
-	prev->op_sibling = o2; /* instead of cvop */
-    }
-    if (proto && !optional && proto_end > proto &&
-	(*proto != '@' && *proto != '%' && *proto != ';' && *proto != '_'))
-	return too_few_arguments(o, gv_ename(namegv));
     if(delete_op) {
 #ifdef PERL_MAD
 	OP * const oldo = o;
