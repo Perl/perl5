@@ -710,7 +710,7 @@ See the module String::Approx available from CPAN.
 X<regex, efficiency> X<regexp, efficiency>
 X<regular expression, efficiency>
 
-( contributed by brian d foy )
+(contributed by brian d foy)
 
 Avoid asking Perl to compile a regular expression every time
 you want to match it. In this example, perl must recompile
@@ -764,9 +764,9 @@ backtracking though.
 		}
 
 For more details on regular expression efficiency, see I<Mastering
-Regular Expressions> by Jeffrey Freidl.  He explains how regular
+Regular Expressions> by Jeffrey Freidl. He explains how regular
 expressions engine work and why some patterns are surprisingly
-inefficient.  Once you understand how perl applies regular
+inefficient. Once you understand how perl applies regular
 expressions, you can tune them for individual situations.
 
 =head2 Why don't word-boundary searches with C<\b> work for me?
@@ -787,7 +787,7 @@ meaning that it doesn't represent a character in the string, but a
 condition at a certain position.
 
 For the regular expression, /\bPerl\b/, there has to be a word
-boundary before the "P" and after the "l".  As long as something other
+boundary before the "P" and after the "l". As long as something other
 than a word character precedes the "P" and succeeds the "l", the
 pattern will match. These strings match /\bPerl\b/.
 
@@ -801,8 +801,8 @@ These strings do not match /\bPerl\b/.
 	"Perl_"   # _ is a word char!
 	"Perler"  # no word char before P, but one after l
 
-You don't have to use \b to match words though.  You can look for
-non-word characters surrounded by word characters.  These strings
+You don't have to use \b to match words though. You can look for
+non-word characters surrounded by word characters. These strings
 match the pattern /\b'\b/.
 
 	"don't"   # the ' char is surrounded by "n" and "t"
@@ -843,7 +843,7 @@ really appreciate them. As of the 5.005 release, the $& variable is no
 longer "expensive" the way the other two are.
 
 Since Perl 5.6.1 the special variables @- and @+ can functionally replace
-$`, $& and $'.  These arrays contain pointers to the beginning and end
+$`, $& and $'. These arrays contain pointers to the beginning and end
 of each match (see perlvar for the full story), so they give you
 essentially the same information, but without the risk of excessive
 string copying.
@@ -857,12 +857,12 @@ regular expression with the C</p> modifier.
 X<\G>
 
 You use the C<\G> anchor to start the next match on the same
-string where the last match left off.  The regular
+string where the last match left off. The regular
 expression engine cannot skip over any characters to find
 the next match with this anchor, so C<\G> is similar to the
-beginning of string anchor, C<^>.  The C<\G> anchor is typically
-used with the C<g> flag.  It uses the value of C<pos()>
-as the position to start the next match.  As the match
+beginning of string anchor, C<^>. The C<\G> anchor is typically
+used with the C<g> flag. It uses the value of C<pos()>
+as the position to start the next match. As the match
 operator makes successive matches, it updates C<pos()> with the
 position of the next character past the last match (or the
 first character of the next match, depending on how you like
@@ -870,7 +870,7 @@ to look at it). Each string has its own C<pos()> value.
 
 Suppose you want to match all of consecutive pairs of digits
 in a string like "1122a44" and stop matching when you
-encounter non-digits.  You want to match C<11> and C<22> but
+encounter non-digits. You want to match C<11> and C<22> but
 the letter <a> shows up between C<22> and C<44> and you want
 to stop at C<a>. Simply matching pairs of digits skips over
 the C<a> and still matches C<44>.
@@ -879,7 +879,7 @@ the C<a> and still matches C<44>.
 	my @pairs = m/(\d\d)/g;   # qw( 11 22 44 )
 
 If you use the C<\G> anchor, you force the match after C<22> to
-start with the C<a>.  The regular expression cannot match
+start with the C<a>. The regular expression cannot match
 there since it does not find a digit, so the next match
 fails and the match operator returns the pairs it already
 found.
@@ -939,7 +939,7 @@ which works in 5.004 or later.
 	}
 
 For each line, the C<PARSER> loop first tries to match a series
-of digits followed by a word boundary.  This match has to
+of digits followed by a word boundary. This match has to
 start at the place the last match left off (or the beginning
 of the string on the first match). Since C<m/ \G( \d+\b
 )/gcx> uses the C<c> flag, if the string does not match that
@@ -947,16 +947,16 @@ regular expression, perl does not reset pos() and the next
 match starts at the same position to try a different
 pattern.
 
-=head2 Are Perl regexes DFAs or NFAs?  Are they POSIX compliant?
+=head2 Are Perl regexes DFAs or NFAs? Are they POSIX compliant?
 X<DFA> X<NFA> X<POSIX>
 
 While it's true that Perl's regular expressions resemble the DFAs
 (deterministic finite automata) of the egrep(1) program, they are in
 fact implemented as NFAs (non-deterministic finite automata) to allow
-backtracking and backreferencing.  And they aren't POSIX-style either,
-because those guarantee worst-case behavior for all cases.  (It seems
+backtracking and backreferencing. And they aren't POSIX-style either,
+because those guarantee worst-case behavior for all cases. (It seems
 that some people prefer guarantees of consistency, even when what's
-guaranteed is slowness.)  See the book "Mastering Regular Expressions"
+guaranteed is slowness.) See the book "Mastering Regular Expressions"
 (from O'Reilly) by Jeffrey Friedl for all the details you could ever
 hope to know on these matters (a full citation appears in
 L<perlfaq2>).
@@ -979,14 +979,14 @@ X<regex, and multibyte characters> X<regexp, and multibyte characters>
 X<regular expression, and multibyte characters> X<martian> X<encoding, Martian>
 
 Starting from Perl 5.6 Perl has had some level of multibyte character
-support.  Perl 5.8 or later is recommended.  Supported multibyte
+support. Perl 5.8 or later is recommended. Supported multibyte
 character repertoires include Unicode, and legacy encodings
-through the Encode module.  See L<perluniintro>, L<perlunicode>,
+through the Encode module. See L<perluniintro>, L<perlunicode>,
 and L<Encode>.
 
 If you are stuck with older Perls, you can do Unicode with the
 C<Unicode::String> module, and character conversions using the
-C<Unicode::Map8> and C<Unicode::Map> modules.  If you are using
+C<Unicode::Map8> and C<Unicode::Map> modules. If you are using
 Japanese encodings, you might try using the jperl 5.005_03.
 
 Finally, the following set of approaches was offered by Jeffrey
@@ -1004,9 +1004,9 @@ nine characters 'I', ' ', 'a', 'm', ' ', 'CV', 'SG', 'XX', '!'.
 
 Now, say you want to search for the single character C</GX/>. Perl
 doesn't know about Martian, so it'll find the two bytes "GX" in the "I
-am CVSGXX!"  string, even though that character isn't there: it just
+am CVSGXX!" string, even though that character isn't there: it just
 looks like it is because "SG" is next to "XX", but there's no real
-"GX".  This is a big problem.
+"GX". This is a big problem.
 
 Here are a few ways, all painful, to deal with it:
 
@@ -1040,7 +1040,7 @@ Goldberg, who uses a zero-width negative look-behind assertion.
 		/x;
 
 This succeeds if the "martian" character GX is in the string, and fails
-otherwise.  If you don't like using (?<!), a zero-width negative
+otherwise. If you don't like using (?<!), a zero-width negative
 look-behind assertion, you can replace (?<![A-Z]) with (?:^|[^A-Z]).
 
 It does have the drawback of putting the wrong thing in $-[0] and $+[0],
@@ -1099,7 +1099,7 @@ for more details).
 	if( $string =~ m/\Q$regex\E/ ) { ... }
 
 Alternately, you can use C<qr//>, the regular expression quote operator (see
-L<perlop> for more details).  It quotes and perhaps compiles the pattern,
+L<perlop> for more details). It quotes and perhaps compiles the pattern,
 and you can apply regular expression flags to the pattern.
 
 	chomp( my $input = <STDIN> );
@@ -1137,7 +1137,7 @@ This documentation is free; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
 Irrespective of its distribution, all code examples in this file
-are hereby placed into the public domain.  You are permitted and
+are hereby placed into the public domain. You are permitted and
 encouraged to use this code in your own programs for fun
-or for profit as you see fit.  A simple comment in the code giving
+or for profit as you see fit. A simple comment in the code giving
 credit would be courteous but is not required.
