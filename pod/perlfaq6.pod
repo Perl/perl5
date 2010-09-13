@@ -5,7 +5,7 @@ perlfaq6 - Regular Expressions
 =head1 DESCRIPTION
 
 This section is surprisingly small because the rest of the FAQ is
-littered with answers involving regular expressions.  For example,
+littered with answers involving regular expressions. For example,
 decoding a URL and checking whether something is a number are handled
 with regular expressions, but those answers are found elsewhere in
 this document (in L<perlfaq9>: "How do I decode or create those %-encodings
@@ -34,7 +34,7 @@ comments.
 
 The C</x> modifier causes whitespace to be ignored in a regex pattern
 (except in a character class and a few other places), and also allows you to
-use normal comments there, too.  As you can imagine, whitespace and comments
+use normal comments there, too. As you can imagine, whitespace and comments
 help a lot.
 
 C</x> lets you turn this:
@@ -60,9 +60,9 @@ describing the meaning of each part of the pattern.
 =item Different Delimiters
 
 While we normally think of patterns as being delimited with C</>
-characters, they can be delimited by almost any character.  L<perlre>
-describes this.  For example, the C<s///> above uses braces as
-delimiters.  Selecting another delimiter can avoid quoting the
+characters, they can be delimited by almost any character. L<perlre>
+describes this. For example, the C<s///> above uses braces as
+delimiters. Selecting another delimiter can avoid quoting the
 delimiter within the pattern:
 
 	s/\/usr\/local/\/usr\/share/g;	# bad delimiter choice
@@ -70,14 +70,14 @@ delimiter within the pattern:
 
 =back
 
-=head2 I'm having trouble matching over more than one line.  What's wrong?
+=head2 I'm having trouble matching over more than one line. What's wrong?
 X<regex, multiline> X<regexp, multiline> X<regular expression, multiline>
 
 Either you don't have more than one line in the string you're looking
 at (probably), or else you aren't using the correct modifier(s) on
 your pattern (possibly).
 
-There are many ways to get multiline data into a string.  If you want
+There are many ways to get multiline data into a string. If you want
 it to happen automatically while reading input, you'll want to set $/
 (probably to '' for paragraphs or C<undef> for the whole file) to
 allow you to read more than one line at a time.
@@ -85,15 +85,15 @@ allow you to read more than one line at a time.
 Read L<perlre> to help you decide which of C</s> and C</m> (or both)
 you might want to use: C</s> allows dot to include newline, and C</m>
 allows caret and dollar to match next to a newline, not just at the
-end of the string.  You do need to make sure that you've actually
+end of the string. You do need to make sure that you've actually
 got a multiline string in there.
 
 For example, this program detects duplicate words, even when they span
-line breaks (but not paragraph ones).  For this example, we don't need
+line breaks (but not paragraph ones). For this example, we don't need
 C</s> because we aren't using dot in a regular expression that we want
-to cross line boundaries.  Neither do we need C</m> because we aren't
+to cross line boundaries. Neither do we need C</m> because we aren't
 wanting caret or dollar to match at any point inside the record next
-to newlines.  But it's imperative that $/ be set to something other
+to newlines. But it's imperative that $/ be set to something other
 than the default, or else we won't actually ever have a multiline
 record read in.
 
@@ -194,7 +194,7 @@ Good luck!
 X<$/, regexes in> X<$INPUT_RECORD_SEPARATOR, regexes in>
 X<$RS, regexes in>
 
-$/ has to be a string.  You can use these examples if you really need to
+$/ has to be a string. You can use these examples if you really need to
 do this.
 
 If you have File::Stream, this is easy.
@@ -211,7 +211,7 @@ If you have File::Stream, this is easy.
 If you don't have File::Stream, you have to do a little more work.
 
 You can use the four-argument form of sysread to continually add to
-a buffer.  After you add to the buffer, you check if you have a
+a buffer. After you add to the buffer, you check if you have a
 complete line (using your regular expression).
 
 	local $_ = "";
@@ -239,7 +239,7 @@ being in memory at the end.
 X<replace, case preserving> X<substitute, case preserving>
 X<substitution, case preserving> X<s, case preserving>
 
-Here's a lovely Perlish solution by Larry Rosler.  It exploits
+Here's a lovely Perlish solution by Larry Rosler. It exploits
 properties of bitwise xor on ASCII strings.
 
 	$_= "this is a TEsT case";
@@ -329,7 +329,7 @@ the case of the last character is used for the rest of the substitution.
 =head2 How can I make C<\w> match national character sets?
 X<\w>
 
-Put C<use locale;> in your script.  The \w character class is taken
+Put C<use locale;> in your script. The \w character class is taken
 from the current locale.
 
 See L<perllocale> for details.
@@ -342,7 +342,7 @@ documented in L<perlre>.
 
 No matter which locale you are in, the alphabetic characters are
 the characters in \w without the digits and the underscore.
-As a regex, that looks like C</[^\W\d_]/>.  Its complement,
+As a regex, that looks like C</[^\W\d_]/>. Its complement,
 the non-alphabetics, is then everything in \W along with
 the digits and the underscore, or C</[\W\d_]/>.
 
@@ -350,11 +350,11 @@ the digits and the underscore, or C</[\W\d_]/>.
 X<regex, escaping> X<regexp, escaping> X<regular expression, escaping>
 
 The Perl parser will expand $variable and @variable references in
-regular expressions unless the delimiter is a single quote.  Remember,
+regular expressions unless the delimiter is a single quote. Remember,
 too, that the right-hand side of a C<s///> substitution is considered
-a double-quoted string (see L<perlop> for more details).  Remember
+a double-quoted string (see L<perlop> for more details). Remember
 also that any regex special characters will be acted on unless you
-precede the substitution with \Q.  Here's an example:
+precede the substitution with \Q. Here's an example:
 
 	$string = "Placido P. Octopus";
 	$regex  = "P.";
@@ -443,9 +443,9 @@ For example, this one-liner
 
 	perl -0777 -pe 's{/\*.*?\*/}{}gs' foo.c
 
-will work in many but not all cases.  You see, it's too simple-minded for
+will work in many but not all cases. You see, it's too simple-minded for
 certain kinds of C programs, in particular, those with what appear to be
-comments in quoted strings.  For that, you'd need something like this,
+comments in quoted strings. For that, you'd need something like this,
 created by Jeffrey Friedl and later modified by Fred Curtis.
 
 	$/ = undef;
@@ -454,7 +454,7 @@ created by Jeffrey Friedl and later modified by Fred Curtis.
 	print;
 
 This could, of course, be more legibly written with the C</x> modifier, adding
-whitespace and comments.  Here it is expanded, courtesy of Fred Curtis.
+whitespace and comments. Here it is expanded, courtesy of Fred Curtis.
 
     s{
        /\*         ##  Start of /* ... */ comment
@@ -524,7 +524,7 @@ nesting. There are five total groups in angle brackets:
 	<another group <nested once <nested twice> > >
 	and that's it.
 
-The regular expression to match the balanced text  uses two new (to
+The regular expression to match the balanced text uses two new (to
 Perl 5.10) regular expression features. These are covered in L<perlre>
 and this example is a modified version of one in that documentation.
 
@@ -537,7 +537,7 @@ backtracking.
 Second, the new C<(?PARNO)> refers to the sub-pattern in the
 particular capture group given by C<PARNO>. In the following regex,
 the first capture group finds (and remembers) the balanced text, and
-you  need that same pattern within the first buffer to get past the
+you need that same pattern within the first buffer to get past the
 nested text. That's the recursive part. The C<(?1)> uses the pattern
 in the outer capture group as an independent part of the regex.
 
@@ -626,13 +626,13 @@ first and the nested matches so up later:
 	Found:
 		<nested twice>
 
-=head2 What does it mean that regexes are greedy?  How can I get around it?
+=head2 What does it mean that regexes are greedy? How can I get around it?
 X<greedy> X<greediness>
 
 Most people mean that greedy regexes match as much as they can.
 Technically speaking, it's actually the quantifiers (C<?>, C<*>, C<+>,
 C<{}>) that are greedy rather than the whole pattern; Perl prefers local
-greed and immediate gratification to overall greed.  To get non-greedy
+greed and immediate gratification to overall greed. To get non-greedy
 versions of the same quantifiers, use (C<??>, C<*?>, C<+?>, C<{}?>).
 
 An example:
@@ -642,7 +642,7 @@ An example:
 	$s2 =~ s/ve.*?y //;     # I am very cold
 
 Notice how the second substitution stopped matching as soon as it
-encountered "y ".  The C<*?> quantifier effectively tells the regular
+encountered "y ". The C<*?> quantifier effectively tells the regular
 expression engine to find a match as quickly as possible and pass
 control on to whatever is next in line, like you would if you were
 playing hot potato.
@@ -672,7 +672,7 @@ might consider
 
 =head2 How can I print out a word-frequency or line-frequency summary?
 
-To do this, you have to parse out each word in the input stream.  We'll
+To do this, you have to parse out each word in the input stream. We'll
 pretend that by word you mean chunk of alphabetics, hyphens, or
 apostrophes, rather than the non-whitespace chunk idea of a word given
 in the previous question:
@@ -731,8 +731,8 @@ loop since it has no way to know what $pattern will be.
 			}
 		}
 
-The C<qr//> operator showed up in perl 5.005.  It compiles a
-regular expression, but doesn't apply it.  When you use the
+The C<qr//> operator showed up in perl 5.005. It compiles a
+regular expression, but doesn't apply it. When you use the
 pre-compiled version of the regex, perl does less work. In
 this example, I inserted a C<map> to turn each pattern into
 its pre-compiled form. The rest of the script is the same,
