@@ -5,7 +5,7 @@ use strict;
 # use warnings;	# dont use warnings for older Perls
 use vars qw/$VERSION/;
 
-$VERSION = '0.05';
+$VERSION = '0.06';
 
 package Math::BigInt;
 

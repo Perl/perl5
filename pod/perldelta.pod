@@ -219,10 +219,11 @@ C<Filter::Simple> has been upgraded from version 0.84 to 0.85.
 
 =item *
 
-C<Math::BigInt> has been upgraded from version 1.89_01 to 1.92.
+C<Math::BigInt> has been upgraded from version 1.89_01 to 1.93.
 C<Math::BigInt::Calc> has been upgraded from version 0.52 to 0.53.
 
-This fixes incorrect results when computing binomial coefficients (RT#77640).
+This fixes, among other things, incorrect results when computing binomial
+coefficients (RT#77640).
 
 =item *
 
