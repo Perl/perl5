@@ -14,8 +14,8 @@
 # of the release process (namely, Porting\corelist.pl and generating the commit
 # statistics for the perlXYZdelta.pod file respectively). Finally, ensure that
 # the 'awk' and 'shasum' commands are copies of gawk.exe and sha1sum.exe
-# respectively, rather the links to them that only work in a Cygwin bash shell
-# which they are by default.
+# respectively, rather than the links to them that only work in a Cygwin bash
+# shell which they are by default.
 #
 # No matter how automated this gets, you'll always need to read
 # and re-read pumpkin.pod and release_managers_guide.pod to
