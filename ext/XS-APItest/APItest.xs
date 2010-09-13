@@ -17,6 +17,11 @@ typedef struct {
     AV *cscav;
     AV *bhkav;
     bool bhk_record;
+    peep_t orig_peep;
+    peep_t orig_rpeep;
+    int peep_recording;
+    AV *peep_recorder;
+    AV *rpeep_recorder;
 } my_cxt_t;
 
 START_MY_CXT
@@ -326,6 +331,46 @@ blockhook_test_eval(pTHX_ OP *const o)
 }
 
 STATIC BHK bhk_csc, bhk_test;
+
+STATIC void
+my_peep (pTHX_ OP *o)
+{
+    dMY_CXT;
+
+    if (!o)
+	return;
+
+    MY_CXT.orig_peep(aTHX_ o);
+
+    if (!MY_CXT.peep_recording)
+	return;
+
+    for (; o; o = o->op_next) {
+	if (o->op_type == OP_CONST && cSVOPx_sv(o) && SvPOK(cSVOPx_sv(o))) {
+	    av_push(MY_CXT.peep_recorder, newSVsv(cSVOPx_sv(o)));
+	}
+    }
+}
+
+STATIC void
+my_rpeep (pTHX_ OP *o)
+{
+    dMY_CXT;
+
+    if (!o)
+	return;
+
+    MY_CXT.orig_rpeep(aTHX_ o);
+
+    if (!MY_CXT.peep_recording)
+	return;
+
+    for (; o; o = o->op_next) {
+	if (o->op_type == OP_CONST && cSVOPx_sv(o) && SvPOK(cSVOPx_sv(o))) {
+	    av_push(MY_CXT.rpeep_recorder, newSVsv(cSVOPx_sv(o)));
+	}
+    }
+}
 
 #include "const-c.inc"
 
@@ -722,6 +767,14 @@ BOOT:
     BhkENTRY_set(&bhk_csc, start, blockhook_csc_start);
     BhkENTRY_set(&bhk_csc, pre_end, blockhook_csc_pre_end);
     Perl_blockhook_register(aTHX_ &bhk_csc);
+
+    MY_CXT.peep_recorder = newAV();
+    MY_CXT.rpeep_recorder = newAV();
+
+    MY_CXT.orig_peep = PL_peepp;
+    MY_CXT.orig_rpeep = PL_rpeepp;
+    PL_peepp = my_peep;
+    PL_rpeepp = my_rpeep;
 }
 
 void
@@ -734,6 +787,8 @@ CLONE(...)
     MY_CXT.cscav = NULL;
     MY_CXT.bhkav = get_av("XS::APItest::bhkav", GV_ADDMULTI);
     MY_CXT.bhk_record = 0;
+    MY_CXT.peep_recorder = newAV();
+    MY_CXT.rpeep_recorder = newAV();
 
 void
 print_double(val)
@@ -1212,6 +1267,40 @@ test_copyhints()
 	sv_setiv_mg(*hv_fetchs(b, "t0", 1), 789);
 	if (SvIV(cop_hints_fetchpvs(&PL_compiling, "t0")) != 789) croak("fail");
 	LEAVE;
+
+void
+peep_enable ()
+    PREINIT:
+	dMY_CXT;
+    CODE:
+	av_clear(MY_CXT.peep_recorder);
+	av_clear(MY_CXT.rpeep_recorder);
+	MY_CXT.peep_recording = 1;
+
+void
+peep_disable ()
+    PREINIT:
+	dMY_CXT;
+    CODE:
+	MY_CXT.peep_recording = 0;
+
+SV *
+peep_record ()
+    PREINIT:
+	dMY_CXT;
+    CODE:
+	RETVAL = newRV_inc(MY_CXT.peep_recorder);
+    OUTPUT:
+	RETVAL
+
+SV *
+rpeep_record ()
+    PREINIT:
+	dMY_CXT;
+    CODE:
+	RETVAL = newRV_inc(MY_CXT.rpeep_recorder);
+    OUTPUT:
+	RETVAL
 
 BOOT:
 	{
