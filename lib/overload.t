@@ -47,7 +47,8 @@ sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 package main;
 
 $| = 1;
-use Test::More tests => 4880;
+BEGIN { require './test.pl' }
+plan tests => 4881;
 
 use Scalar::Util qw(tainted);
 
@@ -1989,5 +1990,13 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 	}
     }
 }
+
+# Test overload from the main package
+fresh_perl_is
+ '$^W = 1; use overload q\""\ => sub {"ning"}; print bless []',
+ 'ning',
+  { switches => ['-wl'], stderr => 1 },
+ 'use overload from the main package'
+;
 
 # EOF
