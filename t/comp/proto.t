@@ -18,7 +18,7 @@ BEGIN {
 # strict
 use strict;
 
-print "1..160\n";
+print "1..168\n";
 
 my $i = 1;
 
@@ -546,6 +546,25 @@ sub sreftest (\$$) {
     sreftest $aelem[0], $i++;
 }
 
+# test single term
+sub lazy (+$$) {
+    print "not " unless @_ == 3 && ref $_[0] eq $_[1];
+    print "ok $_[2] - non container test\n";
+}
+sub quietlazy (+) { return shift(@_) }
+sub give_aref { [] }
+sub list_or_scalar { wantarray ? (1..10) : [] }
+{
+    my @multiarray = ("a".."z");
+    my %bighash = @multiarray;
+    lazy(\@multiarray, 'ARRAY', $i++);
+    lazy(\%bighash, 'HASH', $i++);
+    lazy({}, 'HASH', $i++);
+    lazy(give_aref, 'ARRAY', $i++);
+    lazy(3, '', $i++); # allowed by prototype, even if runtime error
+    lazy(list_or_scalar, 'ARRAY', $i++); # propagate scalar context
+}
+
 # test prototypes when they are evaled and there is a syntax error
 # Byacc generates the string "syntax error".  Bison gives the
 # string "parse error".
@@ -675,4 +694,10 @@ print "not "
 print "ok ", $i++, "\n";
 print "not "
  unless eval 'sub uniproto7 (;\[$%@]) {} uniproto7 @_, 1' or warn $@;
+print "ok ", $i++, "\n";
+print "not "
+ unless eval 'sub uniproto8 (+) {} uniproto8 $_, 1' or warn $@;
+print "ok ", $i++, "\n";
+print "not "
+ unless eval 'sub uniproto9 (;+) {} uniproto9 $_, 1' or warn $@;
 print "ok ", $i++, "\n";

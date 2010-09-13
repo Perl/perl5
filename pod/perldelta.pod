@@ -28,6 +28,22 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Single term prototype
+
+The C<+> prototype is a special alternative to C<$> that will act like
+C<\[@%]> when given a literal array or hash variable, but will otherwise
+force scalar context on the argument.  This is useful for functions which
+should accept either a literal array or an array reference as the argument:
+
+    sub smartpush (+@) {
+        my $aref = shift;
+        die "Not an array or arrayref" unless ref $aref eq 'ARRAY';
+        push @$aref, @_;
+    }
+
+When using the C<+> prototype, your function must check that the argument
+is of an acceptable type.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

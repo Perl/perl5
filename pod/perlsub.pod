@@ -1100,8 +1100,8 @@ C<< my_function()->[0] >>. The value passed as part of C<@_> will be a
 reference to the actual argument given in the subroutine call,
 obtained by applying C<\> to that argument.
 
-You can also backslash several argument types simultaneously by using
-the C<\[]> notation:
+You can use the C<\[]> backslash group notation to specify more than one
+allowed argument type. For example:
 
     sub myref (\[$@%&*])
 
@@ -1135,6 +1135,20 @@ follows:
 	my $fh = qualify_to_ref(shift, caller);
 	...
     }
+
+The C<+> prototype is a special alternative to C<$> that will act like
+C<\[@%]> when given a literal array or hash variable, but will otherwise
+force scalar context on the argument.  This is useful for functions which
+should accept either a literal array or an array reference as the argument:
+
+    sub smartpush (+@) {
+        my $aref = shift;
+        die "Not an array or arrayref" unless ref $aref eq 'ARRAY';
+        push @$aref, @_;
+    }
+
+When using the C<+> prototype, your function must check that the argument
+is of an acceptable type.
 
 A semicolon (C<;>) separates mandatory arguments from optional arguments.
 It is redundant before C<@> or C<%>, which gobble up everything else.

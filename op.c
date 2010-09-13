@@ -8735,6 +8735,18 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 		}
 		scalar(aop);
 		break;
+	    case '+':
+		proto++;
+		arg++;
+		if (o3->op_type == OP_RV2AV ||
+		    o3->op_type == OP_PADAV ||
+		    o3->op_type == OP_RV2HV ||
+		    o3->op_type == OP_PADHV
+		) {
+		    goto wrapref;
+		}
+		scalar(aop);
+		break;
 	    case '[': case ']':
 		goto oops;
 		break;

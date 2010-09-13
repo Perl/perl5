@@ -6523,7 +6523,7 @@ Perl_yylex(pTHX)
 			    (
 			        (
 			            *proto == '$' || *proto == '_'
-			         || *proto == '*'
+			         || *proto == '*' || *proto == '+'
 			        )
 			     && proto[1] == '\0'
 			    )
@@ -7735,7 +7735,7 @@ Perl_yylex(pTHX)
 			    if (warnillegalproto) {
 				if (must_be_last)
 				    proto_after_greedy_proto = TRUE;
-				if (!strchr("$@%*;[]&\\_", *p)) {
+				if (!strchr("$@%*;[]&\\_+", *p)) {
 				    bad_proto = TRUE;
 				}
 				else {
