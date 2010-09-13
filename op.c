@@ -8402,7 +8402,6 @@ Perl_ck_subr(pTHX_ OP *o)
     I32 arg = 0;
     I32 contextclass = 0;
     const char *e = NULL;
-    bool delete_op = 0;
 
     PERL_ARGS_ASSERT_CK_SUBR;
 
@@ -8658,15 +8657,6 @@ Perl_ck_subr(pTHX_ OP *o)
 	if (!optional && proto_end > proto &&
 	    (*proto != '@' && *proto != '%' && *proto != ';' && *proto != '_'))
 	    return too_few_arguments(o, gv_ename(namegv));
-    }
-    if(delete_op) {
-#ifdef PERL_MAD
-	OP * const oldo = o;
-#else
-	op_free(o);
-#endif
-	o=newSVOP(OP_CONST, 0, newSViv(0));
-	op_getmad(oldo,o,'O');
     }
     return o;
 }
