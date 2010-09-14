@@ -2421,6 +2421,74 @@ If you actually need to be able to get a real reference back from
 each hash entry, you can use the Tie::RefHash module, which does the
 required work for you.
 
+=head2 How can I check if a keys exists in a multilevel hash?
+
+(contributed by brian d foy)
+
+The trick to this problem is avoiding accidental autovivification. If 
+you want to check three keys deep, you might naïvely try this:
+
+	my %hash;
+	if( exists $hash{key1}{key2}{key3} ) {
+		...;
+		}
+		
+Even though you started with a completely empty hash, after that call to 
+C<exists> you've created the structure you needed to check for C<key3>:
+
+	%hash = (
+			  'key1' => {
+						  'key2' => {}
+						}
+			);
+
+That's autovivification. You can get around this in a few ways. The
+easiest way is to just turn it off. The lexical C<autovivification>
+pragma is available on CPAN. Now you don't add to the hash:
+
+	{
+	no autovivification;
+	my %hash;
+	if( exists $hash{key1}{key2}{key3} ) {
+		...;
+		}
+	}
+
+The C<Data::Diver> module on CPAN can do it for you too. Its C<Dive>
+subroutine can tell you not only if the keys exist but also get the
+value:
+
+	use Data::Diver qw(Dive);
+	
+    my @exists = Dive( \%hash, qw(key1 key2 key3) );
+    if(  ! @exists  ) {
+        ...; # keys do not exist
+    	} 
+    elsif(  ! defined $exists[0]  ) {
+        ...; # keys exist but value is undef
+    	}
+
+You can easily do this yourself too by checking each level of the hash
+before you move onto the next level. This is essentially what
+C<Data::Diver> does for you:
+
+	if( check_hash( \%hash, qw(key1 key2 key3) ) ) {
+		...;
+		}
+	
+	sub check_hash {
+	   my( $hash, @keys ) = @_;
+	
+	   return unless @keys;
+	
+	   foreach my $key ( @keys ) {
+		   return unless eval { exists $hash->{$key} };
+		   $hash = $hash->{$key};
+		   }
+	
+	   return 1;
+	   }
+
 =head1 Data: Misc
 
 =head2 How do I handle binary data correctly?
