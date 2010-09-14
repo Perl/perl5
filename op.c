@@ -8450,18 +8450,15 @@ Perl_ck_subr(pTHX_ OP *o)
 
     if (!proto) {
 	while (o2 != cvop) {
-	    OP* o3;
 	    if (PL_madskills && o2->op_type == OP_STUB) {
 		o2 = o2->op_sibling;
 		continue;
 	    }
-	    if (PL_madskills && o2->op_type == OP_NULL)
-		o3 = ((UNOP*)o2)->op_first;
-	    else
-		o3 = o2;
+
 	    /* Yes, this while loop is duplicated. But it's a lot clearer
 	       to see what is going on without that massive switch(*proto)
 	       block just here.  */
+
 	    list(o2); /* This is only called if !proto  */
 
 	    mod(o2, OP_ENTERSUB);
