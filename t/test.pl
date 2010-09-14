@@ -77,17 +77,27 @@ END {
     }
 }
 
-# Use this instead of "print STDERR" when outputing failure diagnostic
-# messages
 sub _diag {
     return unless @_;
-    my @mess = map { /^#/ ? "$_\n" : "# $_\n" }
-               map { split /\n/ } @_;
+    my @mess = _comment(@_);
     $TODO ? _print(@mess) : _print_stderr(@mess);
 }
 
+# Use this instead of "print STDERR" when outputing failure diagnostic
+# messages
 sub diag {
     _diag(@_);
+}
+
+# Use this instead of "print" when outputing informational messages
+sub note {
+    return unless @_;
+    _print( _comment(@_) );
+}
+
+sub _comment {
+    return map { /^#/ ? "$_\n" : "# $_\n" }
+           map { split /\n/ } @_;
 }
 
 sub skip_all {
