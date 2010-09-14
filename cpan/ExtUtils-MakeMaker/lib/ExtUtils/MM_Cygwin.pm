@@ -139,6 +139,16 @@ sub dynamic_lib {
     $s;
 }
 
+=item all_target
+
+Build man pages, too
+
+=cut
+
+sub all_target {
+    ExtUtils::MM_Unix::all_target(shift);
+}
+
 =back
 
 =cut
