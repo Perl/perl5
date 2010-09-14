@@ -712,38 +712,45 @@ X<regular expression, efficiency>
 
 (contributed by brian d foy)
 
-Avoid asking Perl to compile a regular expression every time
-you want to match it. In this example, perl must recompile
-the regular expression for every iteration of the C<foreach>
-loop since it has no way to know what $pattern will be.
+If you have Perl 5.10 or later, this is almost trivial. You just smart
+match against an array of regular expression objects:
 
-	@patterns = qw( foo bar baz );
+	my @patterns = ( qr/Fr.d/, qr/B.rn.y/, qr/W.lm./ );
+	
+	if( $string ~~ @patterns ) {
+		...
+		};
 
-	LINE: while( <DATA> )
-		{
-		foreach $pattern ( @patterns )
-			{
-			if( /\b$pattern\b/i )
-				{
+The smart match stops when it finds a match, so it doesn't have to try
+every expression.
+
+Earlier than Perl 5.10, you have a bit of work to do. You want to
+avoid compiling a regular expression every time you want to match it.
+In this example, perl must recompile the regular expression for every
+iteration of the C<foreach> loop since it has no way to know what
+C<$pattern> will be:
+
+	my @patterns = qw( foo bar baz );
+
+	LINE: while( <DATA> ) {
+		foreach $pattern ( @patterns ) {
+			if( /\b$pattern\b/i ) {
 				print;
 				next LINE;
 				}
 			}
 		}
 
-The C<qr//> operator showed up in perl 5.005. It compiles a
-regular expression, but doesn't apply it. When you use the
-pre-compiled version of the regex, perl does less work. In
-this example, I inserted a C<map> to turn each pattern into
-its pre-compiled form. The rest of the script is the same,
-but faster.
+The C<qr//> operator showed up in perl 5.005. It compiles a regular
+expression, but doesn't apply it. When you use the pre-compiled
+version of the regex, perl does less work. In this example, I inserted
+a C<map> to turn each pattern into its pre-compiled form. The rest of
+the script is the same, but faster:
 
-	@patterns = map { qr/\b$_\b/i } qw( foo bar baz );
+	my @patterns = map { qr/\b$_\b/i } qw( foo bar baz );
 
-	LINE: while( <> )
-		{
-		foreach $pattern ( @patterns )
-			{
+	LINE: while( <> ) {
+		foreach $pattern ( @patterns ) {
 			if( /$pattern/ )
 				{
 				print;
@@ -752,22 +759,21 @@ but faster.
 			}
 		}
 
-In some cases, you may be able to make several patterns into
-a single regular expression. Beware of situations that require
-backtracking though.
+In some cases, you may be able to make several patterns into a single
+regular expression. Beware of situations that require backtracking
+though.
 
-	$regex = join '|', qw( foo bar baz );
+	my $regex = join '|', qw( foo bar baz );
 
-	LINE: while( <> )
-		{
+	LINE: while( <> ) {
 		print if /\b(?:$regex)\b/i;
 		}
 
 For more details on regular expression efficiency, see I<Mastering
 Regular Expressions> by Jeffrey Freidl. He explains how regular
 expressions engine work and why some patterns are surprisingly
-inefficient. Once you understand how perl applies regular
-expressions, you can tune them for individual situations.
+inefficient. Once you understand how perl applies regular expressions,
+you can tune them for individual situations.
 
 =head2 Why don't word-boundary searches with C<\b> work for me?
 X<\b>
