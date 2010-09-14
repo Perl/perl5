@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for release_engineer
-* changelogged up to 38ef960
+* changelogged up to a1bbdff
 * the mauve module will not be part of the release, so it's not changelogged
 yet. it also added some new api functions. those aren't covered either, as they
 might go away again in case mauve gets rolled back for 5.13.5.
@@ -144,6 +144,12 @@ may well be none in a stable release.
 Scalars containing regular expressions now only allocate the part of the C<SV>
 body they actually use, saving some space.
 
+=item *
+
+Compiling regular expressions has been made faster for the case where upgrading
+the regex to utf8 is necessary, but that isn't known when the compilation
+begins.
+
 =back
 
 =head1 Modules and Pragmata
@@ -241,6 +247,12 @@ It now includes constants for POSIX signal constants.
 
 =item *
 
+C<Safe> has been upgraded from version 2.27 to 2.28.
+
+This fixes a possible infinite loop when looking for coderefs.
+
+=item *
+
 C<Tie::Hash> has been upgraded from version 1.03 to 1.04.
 
 Calling C<< Tie::Hash->TIEHASH() >> used to loop forever. Now it C<croak>s.
@@ -293,6 +305,15 @@ section.
 Many of the optree construction functions are now documented.
 
 =back
+
+=head3 L<perlfaq>
+
+=over 4
+
+=item *
+
+L<perlfaq>, L<perlfaq2>, L<perlfaq4>, L<perlfaq5>, L<perlfaq6>, L<perlfaq8>, and
+L<perlfaq9> have seen various updates and modernisations.
 
 =head1 Diagnostics
 
@@ -563,6 +584,26 @@ e.g. C<&Internals::SvREADONLY(undef)> [perl #77776].
 These functions now call C<SvROK> on their arguments before
 dereferencing them with C<SvRV>, and we test for this case in
 F<t/lib/universal.t>.
+
+=item *
+
+When assigning a list with duplicated keys to a hash, the assignment used to
+return garbage and/or freed values:
+
+   @a = %h = (list with some duplicate keys);
+
+This has now been fixed [perl #31865].
+
+=item *
+
+An earlier release of the 5.13 series of perl changed the semantics of opening a
+reference to a copy of a glob:
+
+    my $var = *STDOUT;
+    open my $fh, '>', \$var;
+
+This was a mistake, and the previous behaviour from perl 5.10 and 5.12, which is
+to treat \$var as a scalar reference, has now been restored.
 
 =back
 
