@@ -608,7 +608,7 @@ Perl_save_hints(pTHX)
     if (PL_hints & HINT_LOCALIZE_HH) {
 	save_pushptri32ptr(GvHV(PL_hintgv), PL_hints,
 			   PL_compiling.cop_hints_hash, SAVEt_HINTS);
-	GvHV(PL_hintgv) = Perl_hv_copy_hints_hv(aTHX_ GvHV(PL_hintgv));
+	GvHV(PL_hintgv) = hv_copy_hints_hv(GvHV(PL_hintgv));
     } else {
 	save_pushi32ptr(PL_hints, PL_compiling.cop_hints_hash, SAVEt_HINTS);
     }

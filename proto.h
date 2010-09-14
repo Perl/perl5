@@ -1017,7 +1017,9 @@ PERL_CALLCONV HV*	Perl_gv_stashsv(pTHX_ SV* sv, I32 flags)
 	assert(sv)
 
 PERL_CALLCONV void	Perl_hv_clear(pTHX_ HV *hv);
-PERL_CALLCONV HV *	Perl_hv_copy_hints_hv(pTHX_ HV *const ohv);
+PERL_CALLCONV HV *	Perl_hv_copy_hints_hv(pTHX_ HV *const ohv)
+			__attribute__warn_unused_result__;
+
 PERL_CALLCONV void	Perl_hv_delayfree_ent(pTHX_ HV *hv, HE *entry)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_HV_DELAYFREE_ENT	\

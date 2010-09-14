@@ -1145,6 +1145,74 @@ bhk_record(bool on)
         if (on)
             av_clear(MY_CXT.bhkav);
 
+void
+test_savehints()
+    PREINIT:
+	SV **svp, *sv;
+    CODE:
+#define store_hint(KEY, VALUE) \
+		sv_setiv_mg(*hv_fetchs(GvHV(PL_hintgv), KEY, 1), (VALUE))
+#define hint_ok(KEY, EXPECT) \
+		((svp = hv_fetchs(GvHV(PL_hintgv), KEY, 0)) && \
+		    (sv = *svp) && SvIV(sv) == (EXPECT) && \
+		    (sv = cop_hints_fetchpvs(&PL_compiling, KEY)) && \
+		    SvIV(sv) == (EXPECT))
+#define check_hint(KEY, EXPECT) \
+		do { if (!hint_ok(KEY, EXPECT)) croak("fail"); } while(0)
+	PL_hints |= HINT_LOCALIZE_HH;
+	ENTER;
+	SAVEHINTS();
+	PL_hints &= HINT_INTEGER;
+	store_hint("t0", 123);
+	store_hint("t1", 456);
+	if (PL_hints & HINT_INTEGER) croak("fail");
+	check_hint("t0", 123); check_hint("t1", 456);
+	ENTER;
+	SAVEHINTS();
+	if (PL_hints & HINT_INTEGER) croak("fail");
+	check_hint("t0", 123); check_hint("t1", 456);
+	PL_hints |= HINT_INTEGER;
+	store_hint("t0", 321);
+	if (!(PL_hints & HINT_INTEGER)) croak("fail");
+	check_hint("t0", 321); check_hint("t1", 456);
+	LEAVE;
+	if (PL_hints & HINT_INTEGER) croak("fail");
+	check_hint("t0", 123); check_hint("t1", 456);
+	ENTER;
+	SAVEHINTS();
+	if (PL_hints & HINT_INTEGER) croak("fail");
+	check_hint("t0", 123); check_hint("t1", 456);
+	store_hint("t1", 654);
+	if (PL_hints & HINT_INTEGER) croak("fail");
+	check_hint("t0", 123); check_hint("t1", 654);
+	LEAVE;
+	if (PL_hints & HINT_INTEGER) croak("fail");
+	check_hint("t0", 123); check_hint("t1", 456);
+	LEAVE;
+#undef store_hint
+#undef hint_ok
+#undef check_hint
+
+void
+test_copyhints()
+    PREINIT:
+	HV *a, *b;
+    CODE:
+	PL_hints |= HINT_LOCALIZE_HH;
+	ENTER;
+	SAVEHINTS();
+	sv_setiv_mg(*hv_fetchs(GvHV(PL_hintgv), "t0", 1), 123);
+	if (SvIV(cop_hints_fetchpvs(&PL_compiling, "t0")) != 123) croak("fail");
+	a = newHVhv(GvHV(PL_hintgv));
+	sv_2mortal((SV*)a);
+	sv_setiv_mg(*hv_fetchs(a, "t0", 1), 456);
+	if (SvIV(cop_hints_fetchpvs(&PL_compiling, "t0")) != 123) croak("fail");
+	b = hv_copy_hints_hv(a);
+	sv_2mortal((SV*)b);
+	sv_setiv_mg(*hv_fetchs(b, "t0", 1), 789);
+	if (SvIV(cop_hints_fetchpvs(&PL_compiling, "t0")) != 789) croak("fail");
+	LEAVE;
+
 BOOT:
 	{
 	HV* stash;

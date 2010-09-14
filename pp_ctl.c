@@ -3770,7 +3770,7 @@ PP(pp_hintseval)
 {
     dVAR;
     dSP;
-    mXPUSHs(MUTABLE_SV(Perl_hv_copy_hints_hv(aTHX_ MUTABLE_HV(cSVOP_sv))));
+    mXPUSHs(MUTABLE_SV(hv_copy_hints_hv(MUTABLE_HV(cSVOP_sv))));
     RETURN;
 }
 

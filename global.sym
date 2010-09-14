@@ -164,6 +164,7 @@ Perl_gv_stashpv
 Perl_gv_stashpvn
 Perl_gv_stashsv
 Perl_hv_clear
+Perl_hv_copy_hints_hv
 Perl_hv_delayfree_ent
 Perl_hv_delete
 Perl_hv_delete_ent
@@ -496,6 +497,7 @@ Perl_save_generic_pvref
 Perl_save_shared_pvref
 Perl_save_gp
 Perl_save_hash
+Perl_save_hints
 Perl_save_helem_flags
 Perl_save_hptr
 Perl_save_I16

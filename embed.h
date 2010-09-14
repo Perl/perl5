@@ -309,6 +309,7 @@
 #define gv_stashpvn		Perl_gv_stashpvn
 #define gv_stashsv		Perl_gv_stashsv
 #define hv_clear		Perl_hv_clear
+#define hv_copy_hints_hv	Perl_hv_copy_hints_hv
 #define hv_delayfree_ent	Perl_hv_delayfree_ent
 #define hv_common		Perl_hv_common
 #define hv_common_key_len	Perl_hv_common_key_len
@@ -853,9 +854,7 @@
 #define save_shared_pvref	Perl_save_shared_pvref
 #define save_gp			Perl_save_gp
 #define save_hash		Perl_save_hash
-#ifdef PERL_CORE
 #define save_hints		Perl_save_hints
-#endif
 #define save_helem_flags	Perl_save_helem_flags
 #define save_hptr		Perl_save_hptr
 #define save_I16		Perl_save_I16
@@ -2763,8 +2762,7 @@
 #define gv_stashpvn(a,b,c)	Perl_gv_stashpvn(aTHX_ a,b,c)
 #define gv_stashsv(a,b)		Perl_gv_stashsv(aTHX_ a,b)
 #define hv_clear(a)		Perl_hv_clear(aTHX_ a)
-#ifdef PERL_CORE
-#endif
+#define hv_copy_hints_hv(a)	Perl_hv_copy_hints_hv(aTHX_ a)
 #define hv_delayfree_ent(a,b)	Perl_hv_delayfree_ent(aTHX_ a,b)
 #define hv_common(a,b,c,d,e,f,g,h)	Perl_hv_common(aTHX_ a,b,c,d,e,f,g,h)
 #define hv_common_key_len(a,b,c,d,e,f)	Perl_hv_common_key_len(aTHX_ a,b,c,d,e,f)
@@ -3311,9 +3309,7 @@
 #define save_shared_pvref(a)	Perl_save_shared_pvref(aTHX_ a)
 #define save_gp(a,b)		Perl_save_gp(aTHX_ a,b)
 #define save_hash(a)		Perl_save_hash(aTHX_ a)
-#ifdef PERL_CORE
 #define save_hints()		Perl_save_hints(aTHX)
-#endif
 #define save_helem_flags(a,b,c,d)	Perl_save_helem_flags(aTHX_ a,b,c,d)
 #define save_hptr(a)		Perl_save_hptr(aTHX_ a)
 #define save_I16(a)		Perl_save_I16(aTHX_ a)
