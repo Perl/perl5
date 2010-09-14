@@ -546,7 +546,8 @@ sub runperl {
     return $result;
 }
 
-*run_perl = \&runperl; # Nice alias.
+# Nice alias
+*run_perl = *run_perl = \&runperl; # shut up "used only once" warning
 
 sub DIE {
     _print_stderr "# @_\n";
@@ -824,9 +825,12 @@ sub watchdog ($;$)
         goto WATCHDOG_VIA_ALARM;
     }
 
+    # shut up use only once warning
+    my $threads_on = $threads::threads && $threads::threads;
+
     # Don't use a watchdog process if 'threads' is loaded -
     #   use a watchdog thread instead
-    if (! $threads::threads) {
+    if (!$threads_on) {
 
         # On Windows and VMS, try launching a watchdog process
         #   using system(1, ...) (see perlport.pod)
