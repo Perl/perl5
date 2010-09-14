@@ -308,10 +308,6 @@ Many of the optree construction functions are now documented.
 
 =head3 L<perlfaq>
 
-=over 4
-
-=item *
-
 L<perlfaq>, L<perlfaq2>, L<perlfaq4>, L<perlfaq5>, L<perlfaq6>, L<perlfaq8>, and
 L<perlfaq9> have seen various updates and modernisations.
 
