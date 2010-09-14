@@ -24,7 +24,7 @@ at http://faq.perl.org/ . The perlfaq-workers periodically post extracts
 of the latest perlfaq to comp.lang.perl.misc.
 
 The perlfaq documents are in the perl source tree (see
-perlrepository). The git repository notes all changes to the FAQ and
+L<perlrepository>). The git repository notes all changes to the FAQ and
 holds the latest version of the working documents and may vary
 significantly from the version distributed with the latest version of
 Perl. Check the repository before sending your corrections.
@@ -37,10 +37,13 @@ address to coordinate their efforts and track the perlfaq development.
 They appreciate your contributions to the FAQ but do not have time to
 provide individual help, so don't use this address to ask FAQs.
 
-The perlfaq server posts extracts of the perlfaq to that newsgroup every
-6 hours (or so), and the community of volunteers reviews and updates the
-answers. If you'd like to help review and update the answers, check out
-comp.lang.perl.misc.
+The perlfaq server posts extracts of the perlfaq to that newsgroup
+every 6 hours (or so), and the community of volunteers reviews and
+updates the answers. If you'd like to help review and update the
+answers, check out comp.lang.perl.misc.
+
+You can also fork the perl repository, make your changes, and send them
+to Perl 5 Porters. See L<perlrepository>.
 
 =head2 What will happen if you mail your Perl programming problems to the authors?
 
@@ -60,13 +63,13 @@ it, try the resources in L<perlfaq2>.
 
 Tom Christiansen wrote the original perlfaq then expanded it with the
 help of Nat Torkington. The perlfaq-workers maintain current document
-and the dezinens of comp.lang.perl.misc regularly review and update the
+and the denizens of comp.lang.perl.misc regularly review and update the
 FAQ. Several people have contributed answers, corrections, and comments,
 and the perlfaq notes those contributions wherever appropriate.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Tom Christainsen wrote the original version of this document.
+Tom Christiansen wrote the original version of this document.
 brian d foy C<< <bdfoy@cpan.org> >> wrote this version. See the
 individual perlfaq documents for additional copyright information.
 
@@ -114,7 +117,7 @@ What is Perl?
 
 =item *
 
-Who supports Perl?  Who develops it?  Why is it free?
+Who supports Perl? Who develops it? Why is it free?
 
 =item *
 
@@ -304,7 +307,7 @@ Where can I get Perl macros for vi?
 
 =item *
 
-Where can I get perl-mode for emacs?
+Where can I get perl-mode or cperl-mode for emacs?
 
 =item *
 
@@ -669,6 +672,10 @@ How can I use a reference as a hash key?
 
 =item *
 
+How can I check if a keys exists in a multilevel hash?
+
+=item *
+
 How do I handle binary data correctly?
 
 =item *
@@ -794,11 +801,11 @@ Why can't I just open(FH, "E<gt>file.lock")?
 
 =item *
 
-I still don't get locking.  I just want to increment the number in the file.  How can I do this?
+I still don't get locking. I just want to increment the number in the file. How can I do this?
 
 =item *
 
-All I want to do is append a small amount of text to the end of a file.  Do I still have to use locking?
+All I want to do is append a small amount of text to the end of a file. Do I still have to use locking?
 
 =item *
 
@@ -891,7 +898,7 @@ How can I hope to use regular expressions without creating illegible and unmaint
 
 =item *
 
-I'm having trouble matching over more than one line.  What's wrong?
+I'm having trouble matching over more than one line. What's wrong?
 
 =item *
 
@@ -935,7 +942,7 @@ Can I use Perl regular expressions to match balanced text?
 
 =item *
 
-What does it mean that regexes are greedy?  How can I get around it?
+What does it mean that regexes are greedy? How can I get around it?
 
 =item *
 
@@ -967,7 +974,7 @@ What good is C<\G> in a regular expression?
 
 =item *
 
-Are Perl regexes DFAs or NFAs?  Are they POSIX compliant?
+Are Perl regexes DFAs or NFAs? Are they POSIX compliant?
 
 =item *
 
@@ -1334,7 +1341,7 @@ What is the correct form of response from a CGI script?
 
 =item *
 
-My CGI script runs from the command line but not the browser.  (500 Server Error)
+My CGI script runs from the command line but not the browser. (500 Server Error)
 
 =item *
 
