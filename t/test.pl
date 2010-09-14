@@ -788,6 +788,33 @@ sub can_ok ($@) {
     _ok( !@nok, _where(), $name );
 }
 
+
+# Call $class->new( @$args ); and run the result through isa_ok.
+# See Test::More::new_ok
+sub new_ok {
+    my($class, $args, $obj_name) = @_;
+    $args ||= [];
+    $object_name = "The object" unless defined $obj_name;
+
+    local $Level = $Level + 1;
+
+    my $obj;
+    my $ok = eval { $obj = $class->new(@$args); 1 };
+    my $error = $@;
+
+    if($ok) {
+        isa_ok($obj, $class, $object_name);
+    }
+    else {
+        ok( 0, "new() died" );
+        diag("Error was:  $@");
+    }
+
+    return $obj;
+
+}
+
+
 sub isa_ok ($$;$) {
     my($object, $class, $obj_name) = @_;
 
