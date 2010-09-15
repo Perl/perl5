@@ -1,7 +1,7 @@
 package open;
 use warnings;
 
-our $VERSION = '1.07';
+our $VERSION = '1.08';
 
 require 5.008001; # for PerlIO::get_layers()
 

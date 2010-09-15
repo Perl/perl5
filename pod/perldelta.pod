@@ -189,6 +189,10 @@ C<bignum>, C<bigint>, and C<bigrat> have been upgraded from version 0.23 to
 
 =item *
 
+C<open> has been upgraded from version 1.07 to 1.08.
+
+=item *
+
 C<warnings> has been upgraded from version 1.10 to 1.11.
 
 C<warnings::register> has been upgraded from version 1.01 to 1.02.
