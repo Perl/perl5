@@ -185,7 +185,7 @@ C<blib> has been upgraded from version 1.05 to 1.06.
 =item *
 
 C<bignum>, C<bigint>, and C<bigrat> have been upgraded from version 0.23 to
-0.24.
+0.25.
 
 =item *
 

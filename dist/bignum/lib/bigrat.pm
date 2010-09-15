@@ -1,7 +1,7 @@
 package bigrat;
 use 5.006;
 
-$VERSION = '0.24';
+$VERSION = '0.25';
 require Exporter;
 @ISA		= qw( bigint );
 @EXPORT_OK 	= qw( PI e bpi bexp );
