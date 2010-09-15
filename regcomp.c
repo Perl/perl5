@@ -4317,6 +4317,8 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
 	    JMPENV_JUMP(jump_ret);
 	}
 
+	GET_RE_DEBUG_FLAGS;
+
         /* It's possible to write a regexp in ascii that represents Unicode
         codepoints outside of the byte range, such as via \x{100}. If we
         detect such a sequence we have to convert the entire pattern to utf8
@@ -4327,7 +4329,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
         -- dmq */
         DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
 	    "UTF8 mismatch! Converting to utf8 for resizing and compile\n"));
-        exp = (char*)Perl_bytes_to_utf8(aTHX_ (U8*)exp, &len);
+        exp = (char*)Perl_bytes_to_utf8(aTHX_ (U8*)SvPV(pattern, plen), &len);
         xend = exp + len;
         RExC_orig_utf8 = RExC_utf8 = 1;
         SAVEFREEPV(exp);
