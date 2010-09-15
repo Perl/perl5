@@ -3,15 +3,7 @@
 # test for bug #34584: hang in exp(1/2)
 
 use strict;
-use Test::More;
-
-BEGIN 
-  {
-  $| = 1;
-  chdir 't' if -d 't';
-  unshift @INC, '../lib'; # for running manually
-  plan tests => 1;
-  }
+use Test::More tests => 1;
 
 use Math::BigRat;
 

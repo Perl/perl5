@@ -2,34 +2,8 @@
 
 # Test blog function (and bpow, since it uses blog), as well as bexp().
 
-use Test::More;
 use strict;
-
-BEGIN
-  {
-  $| = 1;
-  # to locate the testing files
-  my $location = $0; $location =~ s/biglog.t//i;
-  if ($ENV{PERL_CORE})
-    {
-    # testing with the core distribution
-    @INC = qw(../lib);
-    }
-  unshift @INC, '../lib';
-  if (-d 't')
-    {
-    chdir 't';
-    require File::Spec;
-    unshift @INC, File::Spec->catdir(File::Spec->updir, $location);
-    }
-  else
-    {
-    unshift @INC, $location;
-    }
-  print "# INC = @INC\n";
-
-  plan tests => 17;
-  }
+use Test::More tests => 17;
 
 use Math::BigRat;
 

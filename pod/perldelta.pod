@@ -241,7 +241,7 @@ C<Math::BigInt::FastCalc> has been upgraded from version 0.19 to 0.22.
 
 =item *
 
-C<Math::BigRat> has been upgraded from version 0.24 to 0.25.
+C<Math::BigRat> has been upgraded from version 0.24 to 0.26.
 
 =item *
 

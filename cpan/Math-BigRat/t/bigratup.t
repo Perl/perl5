@@ -2,16 +2,8 @@
 
 # Test whether $Math::BigInt::upgrade breaks our neck
 
-use Test::More;
 use strict;
-
-BEGIN
-  {
-  $| = 1;
-  chdir 't' if -d 't';
-  unshift @INC, '../lib';
-  plan tests => 5;
-  }
+use Test::More tests => 5;
 
 use Math::BigInt upgrade => 'Math::BigRat';
 use Math::BigRat;

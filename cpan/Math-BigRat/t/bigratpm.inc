@@ -1,6 +1,6 @@
 #include this file into another test for subclass testing...
 
-ok ($class->config()->{lib},$CL);
+is ($class->config()->{lib},$CL);
 
 $setup = '';
 
@@ -126,31 +126,24 @@ while (<DATA>)
     if ($ans =~ m|^/(.*)$|)
       {
       my $pat = $1;
-      if ($ans1 =~ /$pat/)
-        {
-        ok (1,1);
-        }
-      else
-        {
-        print "# '$try' expected: /$pat/ got: '$ans1'\n" if !ok(1,0);
-        }
+      like ($ans1, qr/$pat/);
       }
     else
       {
       if ($ans eq "")
         {
-        ok_undef ($ans1);
+        is ($ans1, undef);
         }
       else
         {
-        print "# Tried: '$try'\n" if !ok ($ans1, $ans);
+	is ($ans1, $ans) or diag("Tried: '$try'");
 #        if (ref($ans1) eq "$class")
 #	  {
 #	  # float numbers are normalized (for now), so mantissa shouldn't have
 #	  # trailing zeros
 #	  #print $ans1->_trailing_zeros(),"\n";
 #          print "# Has trailing zeros after '$try'\n"
-#	   if !ok ($ans1->{_m}->_trailing_zeros(), 0);
+#	   if !is ($ans1->{_m}->_trailing_zeros(), 0);
 #	  }
         }
       } # end pattern or string
@@ -160,28 +153,15 @@ while (<DATA>)
 # check whether $class->new( Math::BigInt->new()) destroys it 
 # ($y == 12 in this case)
 $x = Math::BigInt->new(1200); $y = $class->new($x);
-ok ($y,1200); ok ($x,1200);
+is ($y,1200); is ($x,1200);
 
 ###############################################################################
 # zero,inf,one,nan
 
-$x = $class->new(2); $x->bzero(); ok_undef ($x->{_a}); ok_undef ($x->{_p});
-$x = $class->new(2); $x->binf();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
-$x = $class->new(2); $x->bone();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
-$x = $class->new(2); $x->bnan();  ok_undef ($x->{_a}); ok_undef ($x->{_p});
-        
-1; # all done
-
-###############################################################################
-# Perl 5.005 does not like ok ($x,undef)
-
-sub ok_undef
-  {
-  my $x = shift;
-
-  ok (1,1) and return if !defined $x;
-  ok ($x,'undef');
-  }
+$x = $class->new(2); $x->bzero(); is ($x->{_a}, undef); is ($x->{_p}, undef);
+$x = $class->new(2); $x->binf();  is ($x->{_a}, undef); is ($x->{_p}, undef);
+$x = $class->new(2); $x->bone();  is ($x->{_a}, undef); is ($x->{_p}, undef);
+$x = $class->new(2); $x->bnan();  is ($x->{_a}, undef); is ($x->{_p}, undef);
 
 __DATA__
 &digit

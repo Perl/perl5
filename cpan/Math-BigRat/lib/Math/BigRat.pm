@@ -23,7 +23,7 @@ use vars qw($VERSION @ISA $upgrade $downgrade
 
 @ISA = qw(Math::BigFloat);
 
-$VERSION = '0.25';
+$VERSION = '0.26';
 $VERSION = eval $VERSION;
 
 use overload;			# inherit overload from Math::BigFloat
