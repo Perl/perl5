@@ -469,7 +469,7 @@ use File::Glob qw(:case);
 	'DISTRIBUTION'	=> 'GAAS/Digest-1.16.tar.gz',
 	'FILES'		=> q[cpan/Digest],
 	'EXCLUDED'	=> [ qw{digest-bench} ],
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> "cpan",
 	},
 
     'Digest::MD5' =>
@@ -478,7 +478,7 @@ use File::Glob qw(:case);
 	'DISTRIBUTION'	=> 'GAAS/Digest-MD5-2.40.tar.gz',
 	'FILES'		=> q[cpan/Digest-MD5],
 	'EXCLUDED'	=> [ qw{rfc1321.txt} ],
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> "cpan",
 	},
 
     'Digest::SHA' =>
