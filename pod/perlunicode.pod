@@ -266,8 +266,9 @@ complement B<and> the full character-wide bit complement.
 
 You can define your own mappings to be used in C<lc()>,
 C<lcfirst()>, C<uc()>, and C<ucfirst()> (or their double-quoted string inlined
-versions such as C<\U>).
-See L</"User-Defined Case Mappings"> for more details.
+versions such as C<\U>). See
+L<User-Defined Case-Mappings|/"User-Defined Case Mappings (for serious hackers only)">
+for more details.
 
 =back
 
