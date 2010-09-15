@@ -874,34 +874,56 @@ two (or more) classes.
 It's important to remember not to use "&" for the first set; that
 would be intersecting with nothing (resulting in an empty set).
 
-=head2 User-Defined Case Mappings
+=head2 User-Defined Case Mappings (for serious hackers only)
 
 You can also define your own mappings to be used in C<lc()>,
 C<lcfirst()>, C<uc()>, and C<ucfirst()> (or their string-inlined versions,
-C<\L>, C<\l>, C<\U>, and C<\u>).
-The principle is similar to that of user-defined character
-properties: to define subroutines
-with names C<ToLower> (for C<lc()> and C<lcfirst()>); C<ToTitle> (for
-C<ucfirst()>); and C<ToUpper> (for C<uc()>).
+C<\L>, C<\l>, C<\U>, and C<\u>).  The mappings are currently only valid
+on strings encoded in UTF-8, but see below for a partial workaround for
+this restriction.
 
-The string returned by the subroutines needs to be lines each containing
-two hexadecimal numbers separated by two tabulators: the two numbers
-being, respectively, the source code point and the destination code
-point. For example:
+The principle is similar to that of user-defined character
+properties: define subroutines that do the mappings.
+C<ToLower> is used for C<lc()>, C<\L>, C<lcfirst()>, and C<\l>; C<ToTitle> for
+C<ucfirst()> and C<\u>; and C<ToUpper> for C<uc()> and C<\U>.
+
+C<ToUpper()> should look something like this:
 
     sub ToUpper {
         return <<END;
-    0061\t\t0041
-    0062\t\t0042
+    0061\t007A\t0041
+    0101\t\t0100
     END
     }
 
-defines a mapping for C<uc()> (and C<\U>) that causes only the character "a"
-to be mapped to "A", and the character "b" to be mapped to "B"; the
-mapping for all other characters is to themselves.
+This sample C<ToUpper()> has the effect of mapping "a-z" to "A-Z", 0x101
+to 0x100, and all other characters map to themselves.  The first
+returned line means to map the code point at 0x61 ("a") to 0x41 ("A"),
+the code point at 0x62 ("b") to 0x42 ("B"),  ..., 0x7A ("z") to 0x5A
+("Z").  The second line maps just the code point 0x101 to 0x100.  Since
+there are no other mappings defined, all other code points map to
+themselves.
 
-(For serious hackers only)  The above means you have to furnish a complete
-mapping; you can't just override a couple of characters and leave the rest
+This mechanism is not well behaved as far as affecting other packages
+and scopes.  All non-threaded programs have exactly one uppercasing
+behavior, one lowercasing behavior, and one titlecasing behavior in
+effect for utf8-encoded strings for the duration of the program.  Each
+of these behaviors is irrevocably determined the first time the
+corresponding function is called to change a utf8-encoded string's case.
+If a corresponding C<To-> function has been defined in the package that
+makes that first call, the mapping defined by that function will be the
+mapping used for the duration of the program's execution across all
+packages and scopes.  If no corresponding C<To-> function has been
+defined in that package, the standard official mapping will be used for
+all packages and scopes, and any corresponding C<To-> function anywhere
+will be ignored.  Threaded programs have similar behavior.  If the
+program's casing behavior has been decided at the time of a thread's
+creation, the thread will inherit that behavior.  But, if the behavior
+hasn't been decided, the thread gets to decide for itself, and its
+decision does not affect other threads nor its creator.
+
+As shown by the example above, you have to furnish a complete mapping;
+you can't just override a couple of characters and leave the rest
 unchanged.  You can find all the official mappings in the directory
 C<$Config{privlib}>F</unicore/To/>.  The mapping data is returned as the
 here-document.  The C<utf8::ToSpecI<Foo>> hashes in those files are special
@@ -969,16 +991,9 @@ in the ToLower example, and in the ToUpper example, use
         my $sequence = "\N{LATIN SMALL LETTER I}";
         utf8::encode($sequence);
 
-The mappings are in effect only for the package they are defined in.
-Although probably not advisable, you can
-cause the mappings to be used globally by importing into C<CORE::GLOBAL>
-(see L<CORE>).
-
-A big caveat to the above trick, is that it works only on strings encoded in
-UTF-8 (which will happen automatically for characters whose code points are
-256 or higher), but you can partially get around this restriction
-by using C<use subs> (or not advisably by importing with C<CORE::GLOBAL>).
-For example:
+A big caveat to the above trick, and to this whole mechanism in general,
+is that they work only on strings encoded in UTF-8.  You can partially
+get around this by using C<use subs>.  For example:
 
  use subs qw(uc ucfirst lc lcfirst);
 
@@ -995,7 +1010,7 @@ For example:
      # Unless an I is before a dot_above, it turns into a dotless i.
      # (The character class with the combining classes matches non-above
      # marks following the I.  Any number of these may be between the 'I' and
-     # the dot_above and the dot_above will still apply to the 'I'.
+     # the dot_above, and the dot_above will still apply to the 'I'.
      use charnames ":full";
      $string =~
              s/I
@@ -1013,7 +1028,7 @@ For example:
 
 These examples (also for Turkish) make sure the input is in UTF-8, and then
 call the corresponding official function, which will use the C<ToUpper()> and
-C<ToLower()> functions you have defined in the package.
+C<ToLower()> functions you have defined.
 (For Turkish, there are other required functions: C<ucfirst>, C<lcfirst>,
 and C<ToTitle>. These are very similar to the ones given above.)
 
@@ -1024,7 +1039,7 @@ to be encoded in utf8 (see L</The "Unicode Bug">).
 The C<lc()> example shows how you can add context-dependent casing. Note
 that context-dependent casing suffers from the problem that the string
 passed to the casing function may not have sufficient context to make
-the proper choice. And, it will not be called for the C<\l>, C<\L>, C<\u>,
+the proper choice. And, it will not be called for C<\l>, C<\L>, C<\u>,
 and C<\U>.
 
 =head2 Character Encodings for Input and Output
