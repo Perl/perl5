@@ -1399,10 +1399,8 @@ Perl_write_to_stderr(pTHX_ SV* msv)
 	dSAVED_ERRNO;
 #endif
 	PerlIO * const serr = Perl_error_log;
-	STRLEN msglen;
-	const char* message = SvPVx_const(msv, msglen);
 
-	PERL_WRITE_MSG_TO_CONSOLE(serr, message, msglen);
+	do_print(msv, serr);
 	(void)PerlIO_flush(serr);
 #ifdef USE_SFIO
 	RESTORE_ERRNO;

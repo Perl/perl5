@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan 18;
+plan 20;
 
 my @warnings;
 my $wa = []; my $ea = [];
@@ -106,5 +106,29 @@ ok @warnings==1 && ref($warnings[0]) eq "ARRAY" && $warnings[0] == $ea;
 $@ = $ea;
 warn;
 ok @warnings==1 && ref($warnings[0]) eq "ARRAY" && $warnings[0] == $ea;
+
+fresh_perl_like(
+ '
+   $a = "\xee\n";
+   print STDERR $a; warn $a;
+   utf8::upgrade($a);
+   print STDERR $a; warn $a;
+ ',
+  qr/^\xee(?:\r?\n\xee){3}/,
+  {},
+ 'warn emits logical characters, not internal bytes [perl #45549]'  
+);
+
+fresh_perl_like(
+ '
+   $a = "\xee\n";
+   print STDERR $a; warn $a;
+   utf8::upgrade($a);
+   print STDERR $a; warn $a;
+ ',
+  qr/^\xc3\xae(?:\r?\n\xc3\xae){3}/,
+  { switches => ['-CE'] },
+ 'warn respects :utf8 layer'
+);
 
 1;
