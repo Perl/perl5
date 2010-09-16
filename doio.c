@@ -1241,7 +1241,7 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 	    else {
 		assert((char *)result == tmps);
 		Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8),
-				 "Wide character in print");
+				 "Wide character in %s", OP_DESC(PL_op));
 	    }
 	}
 	/* To detect whether the process is about to overstep its

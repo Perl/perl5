@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan 20;
+plan 21;
 
 my @warnings;
 my $wa = []; my $ea = [];
@@ -129,6 +129,13 @@ fresh_perl_like(
   qr/^\xc3\xae(?:\r?\n\xc3\xae){3}/,
   { switches => ['-CE'] },
  'warn respects :utf8 layer'
+);
+
+fresh_perl_like(
+ 'warn chr 300',
+  qr/^Wide character in warn .*\n\xc4\xac at /,
+  {},
+ 'Wide character in warn (not print)'
 );
 
 1;
