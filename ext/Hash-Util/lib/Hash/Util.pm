@@ -29,7 +29,7 @@ our @EXPORT_OK  = qw(
                      hash_seed hv_store
 
                     );
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 require DynaLoader;
 local @ISA = qw(DynaLoader);
 bootstrap Hash::Util $VERSION;
@@ -321,7 +321,8 @@ sub lock_hashref_recurse {
 
     lock_ref_keys($hash);
     foreach my $value (values %$hash) {
-        if (reftype($value) eq 'HASH') {
+        my $type = reftype($value);
+        if (defined($type) and $type eq 'HASH') {
             lock_hashref_recurse($value);
         }
         Internals::SvREADONLY($value,1);
@@ -333,7 +334,8 @@ sub unlock_hashref_recurse {
     my $hash = shift;
 
     foreach my $value (values %$hash) {
-        if (reftype($value) eq 'HASH') {
+        my $type = reftype($value);
+        if (defined($type) and $type eq 'HASH') {
             unlock_hashref_recurse($value);
         }
         Internals::SvREADONLY($value,1);
