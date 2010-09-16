@@ -47,7 +47,7 @@ exempt in these ways:
 	ARGVOUT		_
 	SIG
 
-In particular, the new special C<${^_XYZ}> variables are always taken
+In particular, the special C<${^_XYZ}> variables are always taken
 to be in package C<main>, regardless of any C<package> declarations
 presently in scope.
 
@@ -198,9 +198,17 @@ Mnemonic: comma (the syntactic subscript separator) is a semi-semicolon.
 =item $"
 X<$"> X<$LIST_SEPARATOR>
 
-This is like C<$,> except that it applies to array and slice values
-interpolated into a double-quoted string (or similar interpreted
-string).  Default is a space.  (Mnemonic: obvious, I think.)
+When an array or an array slice is interpolated into a double-quoted
+string or a similar context such as C</.../>, its elements are
+separated by this value. Default is a space. For example, this:
+
+    print "The array is: @array\n";
+
+is equivalent to this:
+
+    print "The array is: " . join($", @array) . "\n";
+
+Mnemonic: works in double-quoted context.
 
 =item ${^ENCODING}
 X<$^ENCODING>
@@ -254,8 +262,8 @@ X<< $> >> X<$EUID> X<$EFFECTIVE_USER_ID>
 
 The effective uid of this process. For example:
 
-    $< = $>;		# set real to effective uid
-    ($<,$>) = ($>,$<);	# swap real and effective uid
+    $< = $>;            # set real to effective uid
+    ($<,$>) = ($>,$<);  # swap real and effective uids
 
 You can change both the effective uid and the real uid at the same
 time by using C<POSIX::setuid()>. Changes to C<< $> >> require a check
@@ -331,14 +339,14 @@ X<$0> X<$PROGRAM_NAME>
 
 Contains the name of the program being executed.
 
-On some (read: not all) operating systems assigning to C<$0> modifies
+On some (but not all) operating systems assigning to C<$0> modifies
 the argument area that the C<ps> program sees.  On some platforms you
 may have to use special C<ps> options or a different C<ps> to see the
 changes.  Modifying the C<$0> is more useful as a way of indicating the
 current program state than it is for hiding the program you're
 running.
 
-Note that there are platform specific limitations on the maximum
+Note that there are platform-specific limitations on the maximum
 length of C<$0>. In the most extreme case it may be limited to the
 space occupied by the original C<$0>.
 
