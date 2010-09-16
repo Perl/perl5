@@ -193,6 +193,15 @@ in L<perllol>.
 
 Mnemonic: comma (the syntactic subscript separator) is a semi-semicolon. 
 
+=item $LIST_SEPARATOR
+
+=item $"
+X<$"> X<$LIST_SEPARATOR>
+
+This is like C<$,> except that it applies to array and slice values
+interpolated into a double-quoted string (or similar interpreted
+string).  Default is a space.  (Mnemonic: obvious, I think.)
+
 =item ${^ENCODING}
 X<$^ENCODING>
 
