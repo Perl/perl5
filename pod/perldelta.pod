@@ -609,6 +609,14 @@ reference to a copy of a glob:
 This was a mistake, and the previous behaviour from perl 5.10 and 5.12, which is
 to treat \$var as a scalar reference, has now been restored.
 
+=item *
+
+The regular expression bracketed character class C<[\8\9]> was
+effectively the same as C<[89\000]>, incorrectly matching a NULL character.
+It also gave incorrect warnings that the C<8> and C<9> were ignored.
+Now C<[\8\9]> is the same as C<[89]> and gives legitimate warnings that
+C<\8> and C<\9> are unrecognized escape sequences, passed-through.
+
 =back
 
 =head1 Known Problems
