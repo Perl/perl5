@@ -1,10 +1,7 @@
 =encoding utf8
 
 =for release_engineer
-* changelogged up to a1bbdff
-* the mauve module will not be part of the release, so it's not changelogged
-yet. it also added some new api functions. those aren't covered either, as they
-might go away again in case mauve gets rolled back for 5.13.5.
+* changelogged up to ebeb11a
 
 =head1 NAME
 
@@ -61,8 +58,8 @@ complete Perl statement. See L<perlapi> for details.
 =head2 API functions for accessing the runtime hinthash
 
 A new C API for introspecting the hinthash C<%^H> at runtime has been added. See
-C<cop_hints_2hv>, C<cop_hints_fetchpvn>, C<cop_hints_fetchpvs>, and
-C<cop_hints_fetchsv> in L<perlapi> for details.
+C<cop_hints_2hv>, C<cop_hints_fetchpvn>, C<cop_hints_fetchpvs>,
+C<cop_hints_fetchsv>, and C<hv_copy_hints_hv> in L<perlapi> for details.
 
 =head2 C interface to C<caller()>
 
@@ -226,6 +223,10 @@ C<ExtUtils::MakeMaker> has been upgraded from version 6.56 to 6.57_05.
 =item *
 
 C<Filter::Simple> has been upgraded from version 0.84 to 0.85.
+
+=item *
+
+C<Hash::Util> has been upgraded from version 0.08 to 0.09.
 
 =item *
 
@@ -616,6 +617,10 @@ effectively the same as C<[89\000]>, incorrectly matching a NULL character.
 It also gave incorrect warnings that the C<8> and C<9> were ignored.
 Now C<[\8\9]> is the same as C<[89]> and gives legitimate warnings that
 C<\8> and C<\9> are unrecognized escape sequences, passed-through.
+
+=item *
+
+C<warn()> now respects utf8-encoded scalars [perl #45549].
 
 =back
 
