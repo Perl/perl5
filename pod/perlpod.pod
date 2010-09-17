@@ -474,7 +474,7 @@ C<EE<lt>verbarE<gt>> -- a literal | (I<ver>tical I<bar>)
 
 =item *
 
-C<EE<lt>solE<gt>> = a literal / (I<sol>idus)
+C<EE<lt>solE<gt>> -- a literal / (I<sol>idus)
 
 The above four are optional except in other formatting codes,
 notably C<LE<lt>...E<gt>>, and when preceded by a
