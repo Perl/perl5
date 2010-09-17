@@ -2421,7 +2421,7 @@ If you actually need to be able to get a real reference back from
 each hash entry, you can use the Tie::RefHash module, which does the
 required work for you.
 
-=head2 How can I check if a keys exists in a multilevel hash?
+=head2 How can I check if a key exists in a multilevel hash?
 
 (contributed by brian d foy)
 

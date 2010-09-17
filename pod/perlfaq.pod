@@ -672,7 +672,7 @@ How can I use a reference as a hash key?
 
 =item *
 
-How can I check if a keys exists in a multilevel hash?
+How can I check if a key exists in a multilevel hash?
 
 =item *
 
