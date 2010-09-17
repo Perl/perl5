@@ -115,7 +115,7 @@ fresh_perl_like(
    print STDERR $a; warn $a;
  ',
   qr/^\xee(?:\r?\n\xee){3}/,
-  {},
+  { switches => [ "-C0" ] },
  'warn emits logical characters, not internal bytes [perl #45549]'  
 );
 
@@ -134,7 +134,7 @@ fresh_perl_like(
 fresh_perl_like(
  'warn chr 300',
   qr/^Wide character in warn .*\n\xc4\xac at /,
-  {},
+  { switches => [ "-C0" ] },
  'Wide character in warn (not print)'
 );
 
