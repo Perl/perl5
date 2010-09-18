@@ -465,7 +465,7 @@ PERLVAR(IDBcv,		CV *)		/* from perl.c */
 PERLVARI(Igeneration,	int,	100)	/* from op.c */
 
 PERLVARI(Iin_clean_objs,bool,    FALSE)	/* from sv.c */
-PERLVARI(Iin_clean_all,	bool,    FALSE)	/* from sv.c */
+PERLVARI(Iin_clean_all,	bool,    FALSE)	/* ptrs to freed SVs now legal */
 PERLVAR(Inomemok,	bool)		/* let malloc context handle nomem */
 PERLVARI(Isavebegin,     bool,	FALSE)	/* save BEGINs for compiler	*/
 

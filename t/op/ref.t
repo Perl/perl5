@@ -9,7 +9,7 @@ require 'test.pl';
 use strict qw(refs subs);
 use re ();
 
-plan(196);
+plan(197);
 
 # Test glob operations.
 
@@ -625,6 +625,22 @@ is( runperl(stderr => 1, prog => $hushed . 'for $a (3) {@b=sort {die} 4,5}'), "D
 
 # bug 57564
 is( runperl(stderr => 1, prog => 'my $i;for $i (1) { for $i (2) { } }'), "");
+
+# The mechanism for freeing objects in globs used to leave dangling
+# pointers to freed SVs. To test this, we construct this nested structure:
+#    GV => blessed(AV) => RV => GV => blessed(SV)
+# all with a refcnt of 1, and hope that the second GV gets processed first
+# by do_clean_named_objs.  Then when the first GV is processed, it mustn't
+# find anything nastly left by the previous GV processing.
+# The eval is stop things in the main body of the code holding a reference
+# to a GV, and the print at the end seems to bee necessary to ensure
+# the correct freeing order of *x and *y (no, I don't know why - DAPM).
+
+is (runperl(
+	prog => 'eval q[bless \@y; bless \$x; $y[0] = \*x; $z = \*y; ]; '
+		. 'delete $::{x}; delete $::{y}; print "ok\n";',
+	stderr => 1),
+    "ok\n", 'freeing freed glob in global destruction');
 
 
 # Bit of a hack to make test.pl happy. There are 3 more tests after it leaves.

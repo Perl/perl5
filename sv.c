@@ -481,25 +481,47 @@ static void
 do_clean_named_objs(pTHX_ SV *const sv)
 {
     dVAR;
+    SV *obj;
     assert(SvTYPE(sv) == SVt_PVGV);
     assert(isGV_with_GP(sv));
-    if (GvGP(sv)) {
-	if ((
-#ifdef PERL_DONT_CREATE_GVSV
-	     GvSV(sv) &&
-#endif
-	     SvOBJECT(GvSV(sv))) ||
-	     (GvAV(sv) && SvOBJECT(GvAV(sv))) ||
-	     (GvHV(sv) && SvOBJECT(GvHV(sv))) ||
-	     /* In certain rare cases GvIOp(sv) can be NULL, which would make SvOBJECT(GvIO(sv)) dereference NULL. */
-	     (GvIO(sv) ? (SvFLAGS(GvIOp(sv)) & SVs_OBJECT) : 0) ||
-	     (GvCV(sv) && SvOBJECT(GvCV(sv))) )
-	{
-	    DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning named glob object:\n "), sv_dump(sv)));
-	    SvFLAGS(sv) |= SVf_BREAK;
-	    SvREFCNT_dec(sv);
-	}
+    if (!GvGP(sv))
+	return;
+
+    /* freeing GP entries may indirectly free the current GV;
+     * hold onto it while we mess with the GP slots */
+    SvREFCNT_inc(sv);
+
+    if ( ((obj = GvSV(sv) )) && SvOBJECT(obj)) {
+	DEBUG_D((PerlIO_printf(Perl_debug_log,
+		"Cleaning named glob SV object:\n "), sv_dump(obj)));
+	GvSV(sv) = NULL;
+	SvREFCNT_dec(obj);
     }
+    if ( ((obj = MUTABLE_SV(GvAV(sv)) )) && SvOBJECT(obj)) {
+	DEBUG_D((PerlIO_printf(Perl_debug_log,
+		"Cleaning named glob AV object:\n "), sv_dump(obj)));
+	GvAV(sv) = NULL;
+	SvREFCNT_dec(obj);
+    }
+    if ( ((obj = MUTABLE_SV(GvHV(sv)) )) && SvOBJECT(obj)) {
+	DEBUG_D((PerlIO_printf(Perl_debug_log,
+		"Cleaning named glob HV object:\n "), sv_dump(obj)));
+	GvHV(sv) = NULL;
+	SvREFCNT_dec(obj);
+    }
+    if ( ((obj = MUTABLE_SV(GvCV(sv)) )) && SvOBJECT(obj)) {
+	DEBUG_D((PerlIO_printf(Perl_debug_log,
+		"Cleaning named glob CV object:\n "), sv_dump(obj)));
+	GvCV(sv) = NULL;
+	SvREFCNT_dec(obj);
+    }
+    if ( ((obj = MUTABLE_SV(GvIO(sv)) )) && SvOBJECT(obj)) {
+	DEBUG_D((PerlIO_printf(Perl_debug_log,
+		"Cleaning named glob IO object:\n "), sv_dump(obj)));
+	GvIOp(sv) = NULL;
+	SvREFCNT_dec(obj);
+    }
+    SvREFCNT_dec(sv); /* undo the inc above */
 }
 #endif
 
@@ -556,7 +578,6 @@ Perl_sv_clean_all(pTHX)
     I32 cleaned;
     PL_in_clean_all = TRUE;
     cleaned = visit(do_clean_all, 0,0);
-    PL_in_clean_all = FALSE;
     return cleaned;
 }
 
