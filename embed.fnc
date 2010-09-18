@@ -2391,7 +2391,7 @@ ApoM	|const char *|fetch_cop_label|NN COP *const cop \
 		|NULLOK STRLEN *len|NULLOK U32 *flags
 : Only used  in op.c
 xpoM	|void|store_cop_label \
-		|NN COP *cop|NN const char *label|STRLEN len|U32 flags
+		|NN COP *const cop|NN const char *label|STRLEN len|U32 flags
 
 xpo	|int	|keyword_plugin_standard|NN char* keyword_ptr|STRLEN keyword_len|NN OP** op_ptr
 : Used in perly.y
