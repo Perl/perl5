@@ -27,14 +27,13 @@ use Config;
 use Test::More tests => 11;
 use B;
 use B::Debug;
+use File::Spec;
 
 my $a;
-my $Is_VMS = $^O eq 'VMS';
-my $Is_MacOS = $^O eq 'MacOS';
 my $X = $^X =~ m/\s/ ? qq{"$^X"} : $^X;
 
-my $path = join " ", map { qq["-I$_"] } @INC;
-my $redir = $Is_MacOS ? "" : "2>&1";
+my $path = join " ", map { qq["-I$_"] } (File::Spec->catfile("blib","lib"), @INC);
+my $redir = $^O =~ /VMS|MSWin32|MacOS/ ? "" : "2>&1";
 
 $a = `$X $path "-MO=Debug" -e 1 $redir`;
 like($a, qr/\bLISTOP\b.*\bOP\b.*\bCOP\b.*\bOP\b/s);
@@ -81,20 +80,18 @@ $a = `$X $path "-MO=Debug" -e "B::main_start->debug" $redir`;
 like($a, qr/\[OP_ENTER\]/m);
 
 # pass missing FETCHSIZE, fixed with 1.06
-my $tmp = "tmp.pl";
-open TMP, "> $tmp";
-print TMP 'BEGIN{tie @a, __PACKAGE__;sub TIEARRAY {bless{}} sub FETCH{1}};
-print $a[1]';
-close TMP;
-$a = `$X $path "-MO=Debug" $tmp $redir`;
-unlink $tmp;
+my $e = q(BEGIN{tie @a, __PACKAGE__;sub TIEARRAY {bless{}} sub FETCH{1}};print $a[1]);
+$a = `$X $path "-MO=Debug" -e"$e" $redir`;
 unlike($a, qr/locate object method "FETCHSIZE"/m);
 
 # NV assertion with CV, fixed with 1.13
-my $e = 'my $p=1;$g=2;sub p($){my $i=1;$i+1};print p(0)+$g;';
-$a = `$X $path "-MO=Debug" -e'$e' $redir`;
+my $tmp = "tmp.pl";
+open TMP, ">", $tmp;
+print TMP 'my $p=1;$g=2;sub p($){my $i=1;$i+1};print p(0)+$g;';
+close TMP;
+$a = `$X $path "-MO=Debug" $tmp $redir`;
 ok(! $?);
 unlike($a, qr/assertion "SvTYPE(sv) != SVt_PVCV" failed.*function: S_sv_2iuv_common/m);
 unlike($a, qr/Use of uninitialized value in print/m);
 
-END { unlink $tmp; }
+END { unlink $tmp if $tmp; }
