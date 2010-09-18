@@ -96,7 +96,8 @@ Previously, the following code resulted in a successful match:
     my @b = qw(a x0 z);
     $a[0 .. $#b] ~~ @b;
 
-This odd behaviour has now been fixed [perl #77468].
+This odd behaviour has now been fixed
+L<[perl #77468]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=77468>.
 
 =head2 C API changes
 
@@ -195,7 +196,7 @@ C<warnings> has been upgraded from version 1.10 to 1.11.
 C<warnings::register> has been upgraded from version 1.01 to 1.02.
 
 It is now possible to register warning categories other than the names of
-packages using warnings::register.  See L<perllexwarn> for more information.
+packages using C<warnings::register>.  See L<perllexwarn> for more information.
 
 =item *
 
@@ -218,7 +219,8 @@ C<Errno> has been upgraded from version 1.12 to 1.13.
 
 On some platforms with unusual header files, like Win32/gcc using mingw64
 headers, some constants which weren't actually error numbers have been exposed
-by C<Errno>. This has been fixed (RT#77416).
+by C<Errno>. This has been fixed
+L<[perl #77416]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=77416>.
 
 =item *
 
@@ -238,7 +240,8 @@ C<Math::BigInt> has been upgraded from version 1.89_01 to 1.95.
 C<Math::BigInt::Calc> has been upgraded from version 0.52 to 0.54.
 
 This fixes, among other things, incorrect results when computing binomial
-coefficients (RT#77640).
+coefficients
+L<[perl #77640]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77640>.
 
 =item *
 
@@ -345,6 +348,8 @@ XXX Newly added diagnostic messages go here
 
 Use of qw(...) as parentheses is deprecated
 
+See L</"Use of qw(...) as parentheses"> for details.
+
 =back
 
 =head2 Changes to Existing Diagnostics
@@ -374,7 +379,8 @@ Use L<XXX> with program names to get proper documentation linking. ]
 
 =item *
 
-The use of a deprecated C<goto> construct has been removed (RT#74404).
+The use of a deprecated C<goto> construct has been removed
+L<[perl #74404]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=74404>.
 
 =back
 
@@ -468,11 +474,11 @@ L</Modules and Pragmata> section.
 
 =item *
 
-Make PerlIOUnix_open honor default permissions on VMS.
+Make PerlIOUnix_open honour default permissions on VMS.
 
-When perlio became the default and unixio became the default bottom layer, the
-most common path for creating files from Perl became C<PerlIOUnix_open>, which
-has always explicitly used C<0666> as the permission mask.
+When C<perlio> became the default and C<unixio> became the default bottom layer,
+the most common path for creating files from Perl became C<PerlIOUnix_open>,
+which has always explicitly used C<0666> as the permission mask.
 
 To avoid this, C<0777> is now passed as the permissions to C<open()>. In the VMS
 CRTL, C<0777> has a special meaning over and above intersecting with the current
@@ -495,7 +501,7 @@ be noted as well.
 
 =item *
 
-C<CALL_FPTR> and C<CPERLscope> have been removed deprecated.
+C<CALL_FPTR> and C<CPERLscope> have been deprecated.
 
 Those are left from an old implementation of C<MULTIPLICITY> using C++ objects,
 which has been removed in 5.8. Nowadays these macros do exactly nothing, so they
@@ -538,7 +544,7 @@ fixed. C<$x> will now be C<undef>.
 =item *
 
 A fatal error in regular expressions when processing UTF-8 data has been fixed
-(RT#75680).
+L<[perl #75680]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75680>.
 
 =item *
 
@@ -547,28 +553,32 @@ like C<*COMMIT> to sometimes be ignored, has been removed.
 
 =item *
 
-The perl debugger now also works in taint mode (RT#76872).
+The perl debugger now also works in taint mode
+L<[perl #76872]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=76872>.
 
 =item *
 
 Several memory leaks in cloning and freeing threaded perl interpreters have been
-fixed (RT#77352).
+fixed L<[perl #77352]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77352>.
 
 =item *
 
 A possible string corruption when doing regular expression matches on overloaded
-objects has been fixed (RT#77084).
+objects has been fixed
+L<[perl #77084]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77084>.
 
 =item *
 
 Magic applied to variables in the main package no longer affects other
-packages. See L</Magic Variables Outside the Main Package>, above [perl #76138].
+packages. See L</Magic Variables Outside the Main Package>, above
+L<[perl #76138]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=76138>.
 
 =item *
 
 Opening a glob reference via C<< open $fh, ">", \*glob >> will no longer cause
 the glob to be corrupted when the file handle is printed to. This would cause
-perl to crash whenever the glob's contents were accessed [perl #77492].
+perl to crash whenever the glob's contents were accessed
+L<[perl #77492]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77492>.
 
 =item *
 
@@ -577,8 +587,9 @@ leaks when being used on references. This has now been fixed.
 
 =item *
 
-A bug when replacing the glob of a loop variable within the loop has been
-fixed [perl #21469]. This means the following code will no longer crash:
+A bug when replacing the glob of a loop variable within the loop has been fixed
+L<[perl #21469]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=21469>. This
+means the following code will no longer crash:
 
     for $x (...) {
         *x = *y;
@@ -588,7 +599,8 @@ fixed [perl #21469]. This means the following code will no longer crash:
 
 Perl would segfault if the undocumented C<Internals> functions that
 used reference prototypes were called with the C<&foo()> syntax,
-e.g. C<&Internals::SvREADONLY(undef)> [perl #77776].
+e.g. C<&Internals::SvREADONLY(undef)>
+L<[perl #77776]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77776>.
 
 These functions now call C<SvROK> on their arguments before
 dereferencing them with C<SvRV>, and we test for this case in
@@ -624,7 +636,8 @@ C<\8> and C<\9> are unrecognized escape sequences, passed-through.
 
 =item *
 
-C<warn()> now respects utf8-encoded scalars [perl #45549].
+C<warn()> now respects utf8-encoded scalars
+L<[perl #45549]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=45549>.
 
 =back
 
