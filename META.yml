@@ -1,6 +1,6 @@
 name: perl
 version: 5.013004
-abstract: Practical Extraction and Report Language
+abstract: The Perl language interpreter
 author: perl5-porters@perl.org
 license: perl
 resources:
@@ -16,6 +16,7 @@ no_index:
     - dist/Attribute-Handlers
     - dist/B-Lint
     - dist/base
+    - dist/bignum
     - dist/constant
     - dist/Cwd
     - dist/Data-Dumper
@@ -23,9 +24,12 @@ no_index:
     - dist/ExtUtils-ParseXS
     - dist/Filter-Simple
     - dist/I18N-LangTags
+    - dist/if
     - dist/IO/
     - dist/lib/
     - dist/Locale-Maketext
+    - dist/Math-BigInt
+    - dist/Math-BigInt-FastCalc
     - dist/Module-CoreList
     - dist/Net-Ping
     - dist/Pod-Perldoc
