@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for release_engineer
-* changelogged up to ebeb11a
+* changelogged up to 45a6a02
 
 =head1 NAME
 
@@ -199,7 +199,7 @@ packages using warnings::register.  See L<perllexwarn> for more information.
 
 =item *
 
-C<B::Debug> has been upgraded from version 1.12 to 1.14.
+C<B::Debug> has been upgraded from version 1.12 to 1.16.
 
 =item *
 
@@ -207,6 +207,10 @@ C<Data::Dumper> has been upgraded from version 2.126 to 2.128.
 
 This fixes a crash when using custom sort functions that might cause the stack
 to change.
+
+=item *
+
+C<Encode> has been upgraded from version 2.39 to 2.40.
 
 =item *
 
