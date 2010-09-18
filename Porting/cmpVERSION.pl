@@ -39,7 +39,9 @@ die "$0: '$source_dir' does not look like a Perl directory\n"
 die "$0: '$source_dir' is a Perl directory but does not look like Git working directory\n"
     unless -d catdir($source_dir, ".git");
 
-my $tag_exists = `git --no-pager tag -l $tag_to_compare 2>/dev/null`;
+my $null = $^O eq 'MSWin32' ? 'nul' : '/dev/null';
+
+my $tag_exists = `git --no-pager tag -l $tag_to_compare 2>$null`;
 chomp $tag_exists;
 
 die "$0: '$tag_to_compare' is not a known Git tag\n"
@@ -107,7 +109,7 @@ foreach my $pm_file (@module_diffs) {
 
 sub compare_git_file {
     my ($file, $tag) = @_;
-    open(my $orig_fh, "-|", "git --no-pager show $tag:$file 2>/dev/null");
+    open(my $orig_fh, "-|", "git --no-pager show $tag:$file 2>$null");
     return undef if eof($orig_fh);
     my $is_eq = compare($file, $orig_fh) == 0;
     close($orig_fh);
@@ -117,7 +119,7 @@ sub compare_git_file {
 sub get_file_from_git {
     my ($file, $tag) = @_;
     local $/ = undef;
-    my $file_content = `git --no-pager show $tag:$file 2>/dev/null`;
+    my $file_content = `git --no-pager show $tag:$file 2>$null`;
     return $file_content;
 }
 
