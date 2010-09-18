@@ -1,10 +1,10 @@
 #
-# $Id: Encode.pm,v 2.39 2009/11/26 09:23:48 dankogai Exp $
+# $Id: Encode.pm,v 2.40 2010/09/18 18:39:51 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
 use warnings;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.39 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.40 $ =~ /(\d+)/g;
 sub DEBUG () { 0 }
 use XSLoader ();
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -203,17 +203,31 @@ sub encode_utf8($) {
     return $str;
 }
 
+my $utf8enc;
+
 sub decode_utf8($;$) {
-    my ( $str, $check ) = @_;
-    return $str if is_utf8($str);
-    if ($check) {
-        return decode( "utf8", $str, $check );
-    }
-    else {
-        return decode( "utf8", $str );
-        return $str;
-    }
+    my ( $octets, $check ) = @_;
+    return $octets if is_utf8($octets);
+    return undef unless defined $octets;
+    $octets .= '' if ref $octets;
+    $check   ||= 0;
+    $utf8enc ||= find_encoding('utf8');
+    my $string = $utf8enc->decode( $octets, $check );
+    $_[0] = $octets if $check and !ref $check and !( $check & LEAVE_SRC() );
+    return $string;
 }
+
+# sub decode_utf8($;$) {
+#     my ( $str, $check ) = @_;
+#     return $str if is_utf8($str);
+#     if ($check) {
+#         return decode( "utf8", $str, $check );
+#     }
+#     else {
+#         return decode( "utf8", $str );
+#         return $str;
+#     }
+# }
 
 predefine_encodings(1);
 

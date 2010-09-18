@@ -741,6 +741,7 @@ cpan/Encode/t/piconv.t			Test for piconv.t
 cpan/Encode/t/rt.pl			test script
 cpan/Encode/t/unibench.pl		benchmark script
 cpan/Encode/t/Unicode.t			test script
+cpan/Encode/t/utf8ref.t			test script
 cpan/Encode/t/utf8strict.t		test script
 cpan/Encode/TW/Makefile.PL		Encode extension
 cpan/Encode/TW/TW.pm			Encode extension

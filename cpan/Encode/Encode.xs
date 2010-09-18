@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.18 2009/11/26 09:23:59 dankogai Exp dankogai $
+ $Id: Encode.xs,v 2.19 2010/09/18 18:39:51 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -432,7 +432,7 @@ PREINIT:
 CODE:
 {
     dSP; ENTER; SAVETMPS;
-    if (src == &PL_sv_undef) src = newSV(0);
+    if (src == &PL_sv_undef || SvROK(src)) src = sv_2mortal(newSV(0));
     s = (U8 *) SvPV(src, slen);
     e = (U8 *) SvEND(src);
     dst = newSV(slen>0?slen:1); /* newSV() abhors 0 -- inaba */
@@ -496,7 +496,7 @@ PREINIT:
 CODE:
 {
     check = SvROK(check_sv) ? ENCODE_PERLQQ|ENCODE_LEAVE_SRC : SvIV(check_sv);
-    if (src == &PL_sv_undef) src = newSV(0);
+    if (src == &PL_sv_undef || SvROK(src)) src = sv_2mortal(newSV(0));
     s = (U8 *) SvPV(src, slen);
     e = (U8 *) SvEND(src);
     dst = newSV(slen>0?slen:1); /* newSV() abhors 0 -- inaba */
