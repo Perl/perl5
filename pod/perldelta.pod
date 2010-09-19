@@ -504,6 +504,18 @@ L<[perl #45549]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=45549>.
 
 =back
 
+=head1 Known Problems
+
+=over 4
+
+=item *
+
+The upgrade to Encode-2.40 has caused some tests in the libwww-perl distribution
+on CPAN to fail. (Specifically, F<base/message-charset.t> tests 33-36 in version
+5.836 of that distribution currently fail.)
+
+=back
+
 =head1 Acknowledgements
 
 Perl 5.13.5 represents approximately one month of development since
