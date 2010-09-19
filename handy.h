@@ -438,44 +438,51 @@ C<strncmp>).
 /*
 
 =head1 Character classes
+The functions in this section operate using the character set of the platform
+Perl is running on, and are unaffected by locale.  For ASCII platforms, they
+will all return false for characters outside the ASCII range.  For EBCDIC
+platforms, they use the code page of the platform.  The code pages that Perl
+knows about all have 8-bit characters, so most of these functions will return
+true for more characters than on ASCII platforms.
 
 =for apidoc Am|bool|isALNUM|char ch
-Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin)
-alphanumeric character (including underscore) or digit.
+Returns a boolean indicating whether the C C<char> is an
+alphanumeric character (including underscore) or digit in the platform's native
+character set.
 
 =for apidoc Am|bool|isALPHA|char ch
-Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin)
-alphabetic character.
+Returns a boolean indicating whether the C C<char> is an
+alphabetic character in the platform's native character set.
 
 =for apidoc Am|bool|isSPACE|char ch
-Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin)
-whitespace.
+Returns a boolean indicating whether the C C<char> is a
+whitespace character in the platform's native character set.
 
 =for apidoc Am|bool|isDIGIT|char ch
-Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin)
-digit.
+Returns a boolean indicating whether the C C<char> is a
+digit in the platform's native character set.
 
 =for apidoc Am|bool|isOCTAL|char ch
-Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin)
-octal digit, [0-7].
+Returns a boolean indicating whether the C C<char> is an
+octal digit, [0-7] in the platform's native character set.
 
 =for apidoc Am|bool|isUPPER|char ch
-Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin)
-uppercase character.
+Returns a boolean indicating whether the C C<char> is an
+uppercase character in the platform's native character set.
 
 =for apidoc Am|bool|isLOWER|char ch
-Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin)
-lowercase character.
+Returns a boolean indicating whether the C C<char> is a
+lowercase character in the platform's native character set.
 
 =head1 Character case changing
 
 =for apidoc Am|char|toUPPER|char ch
-Converts the specified character to uppercase.  Characters outside the
-US-ASCII (Basic Latin) range are viewed as not having any case.
+Converts the specified character to uppercase in the platform's native
+character set, if possible; otherwise returns the input character itself.
 
 =for apidoc Am|char|toLOWER|char ch
-Converts the specified character to lowercase.  Characters outside the
-US-ASCII (Basic Latin) range are viewed as not having any case.
+Converts the specified character to lowercase in the platform's native
+character set, if possible; otherwise returns the input character itself.
 
 =cut
 
