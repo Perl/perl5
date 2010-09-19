@@ -7801,7 +7801,7 @@ SV is set to 1.  Note that if C<len> is zero, Perl will create a zero length
 string.  You are responsible for ensuring that the source string is at least
 C<len> bytes long.  If the C<s> argument is NULL the new SV will be undefined.
 Currently the only flag bits accepted are C<SVf_UTF8> and C<SVs_TEMP>.
-If C<SVs_TEMP> is set, then C<sv2mortal()> is called on the result before
+If C<SVs_TEMP> is set, then C<sv_2mortal()> is called on the result before
 returning. If C<SVf_UTF8> is set, C<s> is considered to be in UTF-8 and the
 C<SVf_UTF8> flag will be set on the new SV.
 C<newSVpvn_utf8()> is a convenience wrapper for this function, defined as
