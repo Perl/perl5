@@ -6,11 +6,6 @@
 my $threads;
 BEGIN {
     require Config; import Config;
-    if ($Config{'extensions'} !~ /\bXS\/APItest\b/) {
-	# Look, I'm using this fully-qualified variable more than once!
-        print "1..0 # Skip: XS::APItest was not built\n";
-        exit 0;
-    }
     $threads = $Config{'useithreads'};
     # must 'use threads' before 'use Test::More'
     eval 'use threads' if $threads;

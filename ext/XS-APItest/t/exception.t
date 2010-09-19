@@ -1,11 +1,3 @@
-BEGIN {
-    require Config; import Config;
-    if ($Config{'extensions'} !~ /\bXS\/APItest\b/) {
-        print "1..0 # Skip: XS::APItest was not built\n";
-        exit 0;
-    }
-}
-
 use Test::More tests => 12;
 
 BEGIN { use_ok('XS::APItest') };
