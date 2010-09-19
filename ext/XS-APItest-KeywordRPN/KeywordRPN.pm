@@ -84,7 +84,7 @@ package XS::APItest::KeywordRPN;
 use warnings;
 use strict;
 
-our $VERSION = "0.004";
+our $VERSION = "0.005";
 
 require XSLoader;
 XSLoader::load(__PACKAGE__, $VERSION);
