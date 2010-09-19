@@ -751,6 +751,10 @@ perl_destruct(pTHXx)
 	PL_main_root = NULL;
     }
     PL_main_start = NULL;
+    /* note that  PL_main_cv isn't usually actually freed at this point,
+     * due to the CvOUTSIDE refs from subs compiled within it. It will
+     * get freed once all the subs are freed in sv_clean_all(), for
+     * destruct_level > 0 */
     SvREFCNT_dec(PL_main_cv);
     PL_main_cv = NULL;
     PL_dirty = TRUE;
