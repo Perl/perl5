@@ -1250,8 +1250,6 @@ perl_destruct(pTHXx)
     Safefree(PL_psig_name);
     PL_psig_name = (SV**)NULL;
     PL_psig_ptr = (SV**)NULL;
-    Safefree(PL_psig_pend);
-    PL_psig_pend = (int*)NULL;
     {
 	/* We need to NULL PL_psig_pend first, so that
 	   signal handlers know not to use it */
