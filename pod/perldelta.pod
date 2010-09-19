@@ -1,12 +1,6 @@
 =encoding utf8
 
-=for release_engineer
-* changelogged up to 45a6a02
-
 =head1 NAME
-
-[ this is a template for a new perldelta file. Any text flagged as
-XXX needs to be processed before release. ]
 
 perldelta - what is new for perl v5.13.5
 
@@ -19,15 +13,7 @@ If you are upgrading from an earlier release such as 5.13.3, first read
 L<perl5134delta>, which describes differences between 5.13.3 and
 5.13.4.
 
-=head1 Notice
-
-XXX Any important notices here
-
 =head1 Core Enhancements
-
-XXX New core language features go here. Summarise user-visible core language
-enhancements. Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
 
 =head2 Adjacent pairs of nextstate opcodes are now optimized away
 
@@ -44,49 +30,41 @@ the ops for C<warn if DEBUG;> would be folded to a C<null> op (C<ex-const>), but
 the C<nextstate> op would remain, resulting in a runtime op dispatch of
 C<nextstate>, C<nextstate>, ...
 
-The execution of a sequence of C<nexstate> ops is indistinguishable from just
-the last C<nextstate> op, so teach the peephole optimiser to eliminate the first
-of a pair of C<nextstate> ops. (Except where the first carries a label, as
-labels mustn't be eliminated by the optimiser, and label usage isn't
-conclusively known at compile time.)
+The execution of a sequence of C<nextstate> ops is indistinguishable from just
+the last C<nextstate> op so the peephole optimizer now eliminates the first of
+a pair of C<nextstate> ops, except where the first carries a label, since labels
+must not be eliminated by the optimizer and label usage isn't conclusively known
+at compile time.
 
 =head2 API function to parse statements
 
 The C<parse_fullstmt> function has been added to allow parsing of a single
-complete Perl statement. See L<perlapi> for details.
+complete Perl statement.  See L<perlapi> for details.
 
 =head2 API functions for accessing the runtime hinthash
 
-A new C API for introspecting the hinthash C<%^H> at runtime has been added. See
-C<cop_hints_2hv>, C<cop_hints_fetchpvn>, C<cop_hints_fetchpvs>,
+A new C API for introspecting the hinthash C<%^H> at runtime has been added.
+See C<cop_hints_2hv>, C<cop_hints_fetchpvn>, C<cop_hints_fetchpvs>,
 C<cop_hints_fetchsv>, and C<hv_copy_hints_hv> in L<perlapi> for details.
 
 =head2 C interface to C<caller()>
 
 The C<caller_cx> function has been added as an XSUB-writer's equivalent of
-C<caller()>. See L<perlapi> for details.
-
-=head1 Security
-
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
-
-[ List each security issue as a =head2 entry ]
+C<caller()>.  See L<perlapi> for details.
 
 =head1 Incompatible Changes
 
-=head2 Magic Variables Outside the Main Package
+=head2 Magic variables outside the main package
 
-In previous versions of perl, magic variables like C<$!>, C<%SIG>, etc.  would
-'leak' into other packages. So C<%foo::SIG> could be used to access signals,
+In previous versions of Perl, magic variables like C<$!>, C<%SIG>, etc. would
+'leak' into other packages.  So C<%foo::SIG> could be used to access signals,
 C<${"foo::!"}> (with strict mode off) to access C's C<errno>, etc.
 
-This was a bug, or an 'unintentional' feature, which caused various ill
-effects, such as signal handlers being wiped when modules were loaded, etc.
+This was a bug, or an 'unintentional' feature, which caused various ill effects,
+such as signal handlers being wiped when modules were loaded, etc.
 
-This has been fixed (or the feature has been removed, depending on how you
-see it).
+This has been fixed (or the feature has been removed, depending on how you see
+it).
 
 =head2 Smart-matching against array slices
 
@@ -106,14 +84,10 @@ from C<struct refcounted he *> to C<COP *>, to better insulate the user from
 implementation details.
 
 This API function was marked as "may change", and likely isn't in use outside
-the core. (Neither an unpacked CPAN, nor Google's codesearch, finds any other
+the core.  (Neither an unpacked CPAN, nor Google's codesearch, finds any other
 references to it.)
 
 =head1 Deprecations
-
-XXX Any deprecated features, syntax, modules etc. should be listed here.
-In particular, deprecated modules should be listed here even if they are
-listed as an updated module in the L</Modules and Pragmata> section.
 
 =head2 Use of qw(...) as parentheses
 
@@ -130,11 +104,6 @@ parentheses, like:
 
 =head1 Performance Enhancements
 
-XXX Changes which enhance performance without changing behaviour go here. There
-may well be none in a stable release.
-
-[ List each enhancement as a =item entry ]
-
 =over 4
 
 =item *
@@ -145,172 +114,127 @@ body they actually use, saving some space.
 =item *
 
 Compiling regular expressions has been made faster for the case where upgrading
-the regex to utf8 is necessary, but that isn't known when the compilation
-begins.
+the regex to utf8 is necessary but that isn't known when the compilation begins.
 
 =back
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>, which prints stub
-entries to STDOUT.  Results can be pasted in place of the '=head2' entries
-below.  A paragraph summary for important changes should then be added by hand.
-In an ideal world, dual-life modules would have a F<Changes> file that could be
-cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head2 Updated Modules and Pragmata
 
 =over 4
 
-=item *
+=item C<bigint>, C<bignum>, and C<bigrat>
 
-C<blib> has been upgraded from version 1.05 to 1.06.
+Upgraded from version 0.23 to 0.25.
 
-=item *
+=item C<blib>
 
-C<bignum>, C<bigint>, and C<bigrat> have been upgraded from version 0.23 to
-0.25.
+Upgraded from version 1.05 to 1.06.
 
-=item *
+=item C<open>
 
-C<open> has been upgraded from version 1.07 to 1.08.
+Upgraded from version 1.07 to 1.08.
 
-=item *
+=item C<warnings>
 
-C<warnings> has been upgraded from version 1.10 to 1.11.
+Upgraded from version 1.10 to 1.11.
 
-C<warnings::register> has been upgraded from version 1.01 to 1.02.
+=item C<warnings::register>
+
+Upgraded from version 1.01 to 1.02.
 
 It is now possible to register warning categories other than the names of
 packages using C<warnings::register>.  See L<perllexwarn> for more information.
 
-=item *
+=item C<B::Debug>
 
-C<B::Debug> has been upgraded from version 1.12 to 1.16.
+Upgraded from version 1.12 to 1.16.
 
-=item *
+=item C<Data::Dumper>
 
-C<Data::Dumper> has been upgraded from version 2.126 to 2.128.
+Upgraded from version 2.126 to 2.128.
 
 This fixes a crash when using custom sort functions that might cause the stack
 to change.
 
-=item *
+=item C<Encode>
 
-C<Encode> has been upgraded from version 2.39 to 2.40.
+Upgraded from version 2.39 to 2.40.
 
-=item *
+=item C<Errno>
 
-C<Errno> has been upgraded from version 1.12 to 1.13.
+Upgraded from version 1.12 to 1.13.
 
 On some platforms with unusual header files, like Win32/gcc using mingw64
 headers, some constants which weren't actually error numbers have been exposed
-by C<Errno>. This has been fixed
+by C<Errno>.  This has been fixed
 L<[perl #77416]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=77416>.
 
-=item *
+=item C<ExtUtils::MakeMaker>
 
-C<ExtUtils::MakeMaker> has been upgraded from version 6.56 to 6.57_05.
+Upgraded from version 6.56 to 6.57_05.
 
-=item *
+=item C<Filter::Simple>
 
-C<Filter::Simple> has been upgraded from version 0.84 to 0.85.
+Upgraded from version 0.84 to 0.85.
 
-=item *
+=item C<Hash::Util>
 
-C<Hash::Util> has been upgraded from version 0.08 to 0.09.
+Upgraded from version 0.08 to 0.09.
 
-=item *
+=item C<Math::BigInt> and C<Math::BigInt::Calc>
 
-C<Math::BigInt> has been upgraded from version 1.89_01 to 1.95.
-C<Math::BigInt::Calc> has been upgraded from version 0.52 to 0.54.
+Upgraded from version 1.89_01 to 1.95 and from version 0.52 to 0.54
+respectively.
 
 This fixes, among other things, incorrect results when computing binomial
 coefficients
 L<[perl #77640]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77640>.
 
-=item *
+=item C<Math::BigInt::FastCalc>
 
-C<Math::BigInt::FastCalc> has been upgraded from version 0.19 to 0.22.
+Upgraded from version 0.19 to 0.22.
 
-=item *
+=item C<Math::BigRat>
 
-C<Math::BigRat> has been upgraded from version 0.24 to 0.26.
+Upgraded from version 0.24 to 0.26.
 
-=item *
+=item C<Module::CoreList>
 
-C<Module::CoreList> has been upgraded from version 2.37 to 2.38.
+Upgraded from version 2.37 to 2.38.
 
-=item *
+=item C<POSIX>
 
-C<POSIX> has been upgraded from version 1.19 to 1.20.
+Upgraded from version 1.19 to 1.20.
 
 It now includes constants for POSIX signal constants.
 
-=item *
+=item C<Safe>
 
-C<Safe> has been upgraded from version 2.27 to 2.28.
+Upgraded from version 2.27 to 2.28.
 
 This fixes a possible infinite loop when looking for coderefs.
 
-=item *
+=item C<Tie::Hash>
 
-C<Tie::Hash> has been upgraded from version 1.03 to 1.04.
+Upgraded from version 1.03 to 1.04.
 
-Calling C<< Tie::Hash->TIEHASH() >> used to loop forever. Now it C<croak>s.
+Calling C<< Tie::Hash-E<gt>TIEHASH() >> used to loop forever.  Now it C<croak>s.
 
-=item *
+=item C<Unicode::Collate>
 
-C<Unicode::Collate> has been upgraded from version 0.56 to 0.59.
+Upgraded from version 0.56 to 0.59.
 
-=item *
+=item C<XSLoader>
 
-C<XSLoader> has been upgraded from version 0.10 to 0.11.
-
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
+Upgraded from version 0.10 to 0.11.
 
 =back
 
 =head1 Documentation
 
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
-=head2 New Documentation
-
-XXX Changes which create B<new> files in F<pod/> go here.
-
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
-
 =head2 Changes to Existing Documentation
-
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
 
 =head3 L<perlapi>
 
@@ -324,8 +248,14 @@ Many of the optree construction functions are now documented.
 
 =head3 L<perlfaq>
 
+=over 4
+
+=item *
+
 L<perlfaq>, L<perlfaq2>, L<perlfaq4>, L<perlfaq5>, L<perlfaq6>, L<perlfaq8>, and
-L<perlfaq9> have seen various updates and modernisations.
+L<perlfaq9> have seen various updates and modernizations.
+
+=back
 
 =head1 Diagnostics
 
@@ -333,14 +263,7 @@ The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
-XXX New or changed warnings emitted by the core's C<C> code go here. Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
-[ Within each section, list entries as a =item entry ]
-
 =head2 New Diagnostics
-
-XXX Newly added diagnostic messages go here
 
 =over 4
 
@@ -352,26 +275,7 @@ See L</"Use of qw(...) as parentheses"> for details.
 
 =back
 
-=head2 Changes to Existing Diagnostics
-
-XXX Changes (i.e. rewording) of diagnostic messages go here
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Utility Changes
-
-XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go
-here. Most of these are built within the directories F<utils> and F<x2p>.
-
-[ List utility changes as a =head3 entry for each utility and =item
-entries for each change
-Use L<XXX> with program names to get proper documentation linking. ]
 
 =head3 L<h2ph>
 
@@ -384,32 +288,7 @@ L<[perl #74404]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=74404>.
 
 =back
 
-=head1 Configuration and Compilation
-
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.  Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as a =item entry ].
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Testing
-
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarising, although the bugs
-that they represent may be covered elsewhere.
-
-[ List each test improvement as a =item entry ]
 
 =over 4
 
@@ -427,44 +306,7 @@ the main packages does not affect other packages.
 
 =head1 Platform Support
 
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
-
-=head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not. These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-=head2 Discontinued Platforms
-
-XXX List any platforms that this version of perl no longer compiles on.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
 =head2 Platform-Specific Notes
-
-XXX List any changes for specific platforms. This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
 
 =over 4
 
@@ -474,15 +316,15 @@ L</Modules and Pragmata> section.
 
 =item *
 
-Make PerlIOUnix_open honour default permissions on VMS.
+Make C<PerlIOUnix_open> honour default permissions on VMS.
 
 When C<perlio> became the default and C<unixio> became the default bottom layer,
 the most common path for creating files from Perl became C<PerlIOUnix_open>,
 which has always explicitly used C<0666> as the permission mask.
 
-To avoid this, C<0777> is now passed as the permissions to C<open()>. In the VMS
-CRTL, C<0777> has a special meaning over and above intersecting with the current
-umask; specifically, it allows Unix syscalls to preserve native default
+To avoid this, C<0777> is now passed as the permissions to C<open()>.  In the
+VMS CRTL, C<0777> has a special meaning over and above intersecting with the
+current umask; specifically, it allows Unix syscalls to preserve native default
 permissions.
 
 =back
@@ -491,12 +333,6 @@ permissions.
 
 =head1 Internal Changes
 
-XXX Changes which affect the interface available to C<XS> code go here.
-Other significant internal changes for future core maintainers should
-be noted as well.
-
-[ List each test improvement as a =item entry ]
-
 =over 4
 
 =item *
@@ -504,10 +340,10 @@ be noted as well.
 C<CALL_FPTR> and C<CPERLscope> have been deprecated.
 
 Those are left from an old implementation of C<MULTIPLICITY> using C++ objects,
-which has been removed in 5.8. Nowadays these macros do exactly nothing, so they
-shouldn't be used anymore.
+which was removed in Perl 5.8.  Nowadays these macros do exactly nothing, so
+they shouldn't be used anymore.
 
-For compatibility, they are still defined for external C<XS> code. Only
+For compatibility, they are still defined for external C<XS> code.  Only
 extensions defining C<PERL_CORE> must be updated now.
 
 =item *
@@ -517,7 +353,7 @@ C<lex_stuff_pvn()> for literal strings.
 
 =item *
 
-The recursive part of the peephole optimizer is how hookable.
+The recursive part of the peephole optimizer is now hookable.
 
 In addition to C<PL_peepp>, for hooking into the toplevel peephole optimizer, a
 C<PL_rpeepp> is now available to hook into the optimizer recursing into
@@ -527,19 +363,13 @@ side-chains of the optree.
 
 =head1 Selected Bug Fixes
 
-XXX Important bug fixes in the core language are summarised here.
-Bug fixes in files in F<ext/> and F<lib/> are best summarised in
-L</Modules and Pragmata>.
-
-[ List each fix as a =item entry ]
-
 =over 4
 
 =item *
 
-A regression introduced in perl 5.12.0, making
+A regression introduced in Perl 5.12.0, making
 C<< my $x = 3; $x = length(undef) >> result in C<$x> set to C<3> has been
-fixed. C<$x> will now be C<undef>.
+fixed.  C<$x> will now be C<undef>.
 
 =item *
 
@@ -548,17 +378,17 @@ L<[perl #75680]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75680>.
 
 =item *
 
-An erroneous regular expression engine optimization, that caused regex verbs
-like C<*COMMIT> to sometimes be ignored, has been removed.
+An erroneous regular expression engine optimization that caused regex verbs like
+C<*COMMIT> to sometimes be ignored has been removed.
 
 =item *
 
-The perl debugger now also works in taint mode
+The Perl debugger now also works in taint mode
 L<[perl #76872]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=76872>.
 
 =item *
 
-Several memory leaks in cloning and freeing threaded perl interpreters have been
+Several memory leaks in cloning and freeing threaded Perl interpreters have been
 fixed L<[perl #77352]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77352>.
 
 =item *
@@ -569,26 +399,26 @@ L<[perl #77084]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77084>.
 
 =item *
 
-Magic applied to variables in the main package no longer affects other
-packages. See L</Magic Variables Outside the Main Package>, above
+Magic applied to variables in the main package no longer affects other packages.
+See L</Magic variables outside the main package> above
 L<[perl #76138]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=76138>.
 
 =item *
 
-Opening a glob reference via C<< open $fh, ">", \*glob >> will no longer cause
-the glob to be corrupted when the file handle is printed to. This would cause
-perl to crash whenever the glob's contents were accessed
+Opening a glob reference via C<< open $fh, "E<gt>", \*glob >> will no longer
+cause the glob to be corrupted when the filehandle is printed to.  This would
+cause perl to crash whenever the glob's contents were accessed
 L<[perl #77492]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77492>.
 
 =item *
 
-The postincrement and postdecrement operators, C<++> and C<--> used to cause
-leaks when being used on references. This has now been fixed.
+The postincrement and postdecrement operators, C<++> and C<-->, used to cause
+leaks when being used on references.  This has now been fixed.
 
 =item *
 
 A bug when replacing the glob of a loop variable within the loop has been fixed
-L<[perl #21469]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=21469>. This
+L<[perl #21469]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=21469>.  This
 means the following code will no longer crash:
 
     for $x (...) {
@@ -597,42 +427,42 @@ means the following code will no longer crash:
 
 =item *
 
-Perl would segfault if the undocumented C<Internals> functions that
-used reference prototypes were called with the C<&foo()> syntax,
-e.g. C<&Internals::SvREADONLY(undef)>
+Perl would segfault if the undocumented C<Internals> functions that used
+reference prototypes were called with the C<&foo()> syntax, e.g.
+C<&Internals::SvREADONLY(undef)>
 L<[perl #77776]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77776>.
 
-These functions now call C<SvROK> on their arguments before
-dereferencing them with C<SvRV>, and we test for this case in
-F<t/lib/universal.t>.
+These functions now call C<SvROK> on their arguments before dereferencing them
+with C<SvRV>, and we test for this case in F<t/lib/universal.t>.
 
 =item *
 
 When assigning a list with duplicated keys to a hash, the assignment used to
 return garbage and/or freed values:
 
-   @a = %h = (list with some duplicate keys);
+    @a = %h = (list with some duplicate keys);
 
-This has now been fixed [perl #31865].
+This has now been fixed
+L<[perl #31865]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=31865>.
 
 =item *
 
-An earlier release of the 5.13 series of perl changed the semantics of opening a
+An earlier release of the 5.13 series of Perl changed the semantics of opening a
 reference to a copy of a glob:
 
     my $var = *STDOUT;
     open my $fh, '>', \$var;
 
-This was a mistake, and the previous behaviour from perl 5.10 and 5.12, which is
+This was a mistake, and the previous behaviour from Perl 5.10 and 5.12, which is
 to treat \$var as a scalar reference, has now been restored.
 
 =item *
 
-The regular expression bracketed character class C<[\8\9]> was
-effectively the same as C<[89\000]>, incorrectly matching a NULL character.
-It also gave incorrect warnings that the C<8> and C<9> were ignored.
-Now C<[\8\9]> is the same as C<[89]> and gives legitimate warnings that
-C<\8> and C<\9> are unrecognized escape sequences, passed-through.
+The regular expression bracketed character class C<[\8\9]> was effectively the
+same as C<[89\000]>, incorrectly matching a NULL character.  It also gave
+incorrect warnings that the C<8> and C<9> were ignored.  Now C<[\8\9]> is the
+same as C<[89]> and gives legitimate warnings that C<\8> and C<\9> are
+unrecognized escape sequences, passed-through.
 
 =item *
 
@@ -640,30 +470,6 @@ C<warn()> now respects utf8-encoded scalars
 L<[perl #45549]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=45549>.
 
 =back
-
-=head1 Known Problems
-
-XXX Descriptions of platform agnostic bugs we know we can't fix go here. Any
-tests that had to be C<TODO>ed for the release would be noted here, unless
-they were specific to a particular platform (see below).
-
-This is a list of some significant unfixed bugs, which are regressions
-from either 5.XXX.XXX or 5.XXX.XXX.
-
-[ List each fix as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
 
 =head1 Acknowledgements
 
@@ -684,11 +490,11 @@ analysed by the Perl porting team.
 
 If the bug you are reporting has security implications, which make it
 inappropriate to send to a publicly archived mailing list, then please send
-it to perl5-security-report@perl.org. This points to a closed subscription
+it to perl5-security-report@perl.org.  This points to a closed subscription
 unarchived mailing list, which includes all the core committers, who be able
 to help assess the impact of issues, figure out a resolution, and help
 co-ordinate the release of patches to mitigate or fix the problem across all
-platforms on which Perl is supported. Please only use this address for
+platforms on which Perl is supported.  Please only use this address for
 security issues in the Perl core, not for modules independently
 distributed on CPAN.
 
