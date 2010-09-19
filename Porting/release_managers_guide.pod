@@ -913,8 +913,12 @@ I<You MUST SKIP this step for RC>
 
 Create a new perldelta.
 
-First, move the existing F<pod/perldelta.pod> to F<pod/perlNNNdelta.pod> (where
-NNN is the perl version number without the dots. i.e. 5134 for 5.13.4).
+First, update the F<.gitignore> file in the F<pod/> folder to ignore the next
+release's generated F<pod/perlNNNdelta.pod> file rather than this releases's
+one which we are about to set in stone (where NNN is the perl version number
+without the dots. i.e. 5135 for 5.13.5).
+
+Then, move the existing F<pod/perldelta.pod> to F<pod/perlNNNdelta.pod>.
 
 Now edit the moved delta file to change the C<NAME> from C<perldelta> to
 C<perlNNNdelta>.
@@ -923,7 +927,7 @@ Then create a new empty perldelta.pod file for the new release; see
 F<Porting/how_to_write_a_perldelta.pod>.
 
 You should be able to do this by just copying in a skeleton template and
-then doing a quick fix up of the version numbers, e.g.
+then doing a quick fix up of the version numbers.
 
 Then commit the move and the new file.
 
@@ -972,11 +976,8 @@ Finally, commit:
     $ git commit -a -m 'update TOC for perlNNNdelta'
 
 At this point you may want  to compare the commit with a previous bump to
-see if they look similar. See commit ca8de22071 for an example of a
+see if they look similar. See commit 2b6e134265 for an example of a
 previous version bump.
-
-XXX the commit uses the old perldelta naming scheme and we need to reference
-another one once this has been done with the scheme.
 
 =item *
 
