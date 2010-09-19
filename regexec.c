@@ -3975,7 +3975,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		COP * const ocurcop = PL_curcop;
 		PAD *old_comppad;
 		char *saved_regeol = PL_regeol;
-	    
+		struct re_save_state saved_state;
+
+		Copy(&PL_reg_state, &saved_state, 1, struct re_save_state);
+
 		n = ARG(scan);
 		PL_op = (OP_4tree*)rexi->data->data[n];
 		DEBUG_STATE_r( PerlIO_printf(Perl_debug_log, 
@@ -3996,6 +3999,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    ret = POPs;
 		    PUTBACK;
 		}
+
+		Copy(&saved_state, &PL_reg_state, 1, struct re_save_state);
 
 		PL_op = oop;
 		PAD_RESTORE_LOCAL(old_comppad);
