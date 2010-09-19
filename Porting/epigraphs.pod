@@ -15,6 +15,32 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.13.5 - Joseph Sheridan Le Fanu, "The Room in the Dragon Volant"
+
+Candle in hand I stepped in.  I do not know whether the quality of
+air, long undisturbed, is peculiar; to me it has always seemed so, and
+the damp smell of the old masonry hung in this atmosphere.  My candle
+faintly lighted the bare stone wall that enclosed the stair, the foot
+of which I could not see.  Down I went, and a few turns brought me to
+the stone floor.  Here was another door, of the simple, old, oak kind,
+deep sunk in the thickness of the wall.  The large end of the key
+fitted this.  The lock was stiff; I set the candle down upon the
+stair, and applied both hands; it turned with difficulty, and as it
+revolved, uttered a shriek that alarmed me for my secret.
+
+For some minutes I did not move.  In a little time, however, I took
+courage, and opened the door.  The night-air floating in puffed out
+the candle.  There was a thicket of holly and underwood, as dense as a
+jungle, close about the door.  I should have been in pitch-darkness,
+were it not that through the topmost leaves there twinkled, here and
+there, a glimmer of moonshine.
+
+Softly, lest any one should have opened his window at the sound of the
+rusty bolt, I struggled through this till I gained a view of the open
+grounds.  Here I found that the brushwood spread a good way up the
+park, uniting with the wood that approached the little temple I have
+described. 
+
 =head2 v5.13.4 - Lewis Carroll, "Alice's Adventures in Wonderland"
 
 `How the creatures order one about, and make one repeat lessons!' thought Alice;
