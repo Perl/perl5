@@ -512,7 +512,15 @@ L<[perl #45549]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=45549>.
 
 The upgrade to Encode-2.40 has caused some tests in the libwww-perl distribution
 on CPAN to fail. (Specifically, F<base/message-charset.t> tests 33-36 in version
-5.836 of that distribution currently fail.)
+5.836 of that distribution now fail.)
+
+=item *
+
+The upgrade to ExtUtils-MakeMaker-6.57_05 has caused some tests in the
+Module-Install distribution on CPAN to fail. (Specifically, F<02_mymeta.t> tests
+5 and 21, F<18_all_from.t> tests 6 and 15, F<19_authors.t> tests 5, 13, 21 and
+29, and F<20_authors_with_special_characters.t> tests 6, 15 and 23 in version
+1.00 of that distribution now fail.)
 
 =back
 
