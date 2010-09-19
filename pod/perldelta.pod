@@ -506,7 +506,23 @@ L<[perl #45549]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=45549>.
 
 =head1 Acknowledgements
 
-XXX The list of people to thank goes here.
+Perl 5.13.5 represents approximately one month of development since
+Perl 5.13.4 and contains 74558 lines of changes across 549 files
+from 45 authors and committers:
+
+Abigail, Alexander Alekseev, Aristotle Pagaltzis, Ben Morrow, Bram, brian d foy,
+Chas. Owens, Chris 'BinGOs' Williams, Craig A. Berry, Curtis Jewell, Dagfinn
+Ilmari Mannsåker, David Golden, David Leadbeater, David Mitchell, Eric Brine,
+Father Chrysostomos, Florian Ragwitz, Gisle Aas, Jan Dubois, Jerry D. Hedden,
+Jesse Vincent, Jim Cromie, Jirka Hruška, Karl Williamson, Michael G. Schwern,
+Nicholas Clark, Paul Johnson, Philippe Bruhat (BooK), Piotr Fusik, Rafael
+Garcia-Suarez, Rainer Tammer, Reini Urban, Ricardo Signes, Rob Hoelz, Robin
+Barker, Steffen Mueller, Steve Hay, Steve Peters, Todd Rinaldo, Tony Cook,
+Vincent Pit, Yves Orton, Zefram, Zsbán Ambrus, Ævar Arnfjörð Bjarmason.
+
+Many of the changes included in this version originated in the CPAN
+modules included in Perl's core. We're grateful to the entire CPAN
+community for helping Perl to flourish.
 
 =head1 Reporting Bugs
 
