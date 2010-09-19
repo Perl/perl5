@@ -467,6 +467,8 @@ uppercase character.
 Returns a boolean indicating whether the C C<char> is a US-ASCII (Basic Latin)
 lowercase character.
 
+=head1 Character case changing
+
 =for apidoc Am|char|toUPPER|char ch
 Converts the specified character to uppercase.  Characters outside the
 US-ASCII (Basic Latin) range are viewed as not having any case.
