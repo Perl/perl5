@@ -124,7 +124,7 @@ the regex to utf8 is necessary but that isn't known when the compilation begins.
 
 =over 4
 
-=item C<bigint>, C<bignum>, and C<bigrat>
+=item C<bignum>
 
 Upgraded from version 0.23 to 0.25.
 
@@ -136,13 +136,13 @@ Upgraded from version 1.05 to 1.06.
 
 Upgraded from version 1.07 to 1.08.
 
-=item C<warnings>
+=item C<threads-shared>
 
-Upgraded from version 1.10 to 1.11.
+Upgraded from version 1.33_02 to 1.33_03.
 
-=item C<warnings::register>
+=item C<warnings> and C<warnings::register>
 
-Upgraded from version 1.01 to 1.02.
+Upgraded from version 1.10 to 1.11 and from version 1.01 to 1.02 respectively.
 
 It is now possible to register warning categories other than the names of
 packages using C<warnings::register>.  See L<perllexwarn> for more information.
@@ -150,6 +150,10 @@ packages using C<warnings::register>.  See L<perllexwarn> for more information.
 =item C<B::Debug>
 
 Upgraded from version 1.12 to 1.16.
+
+=item C<CPANPLUS::Dist::Build>
+
+Upgraded from version 0.46 to 0.48.
 
 =item C<Data::Dumper>
 
@@ -173,7 +177,7 @@ L<[perl #77416]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=77416>.
 
 =item C<ExtUtils::MakeMaker>
 
-Upgraded from version 6.56 to 6.57_05.
+Upgraded from version 6.5601 to 6.57_05.
 
 =item C<Filter::Simple>
 
@@ -183,10 +187,9 @@ Upgraded from version 0.84 to 0.85.
 
 Upgraded from version 0.08 to 0.09.
 
-=item C<Math::BigInt> and C<Math::BigInt::Calc>
+=item C<Math::BigInt>
 
-Upgraded from version 1.89_01 to 1.95 and from version 0.52 to 0.54
-respectively.
+Upgraded from version 1.89_01 to 1.95.
 
 This fixes, among other things, incorrect results when computing binomial
 coefficients
@@ -204,6 +207,10 @@ Upgraded from version 0.24 to 0.26.
 
 Upgraded from version 2.37 to 2.38.
 
+=item C<PerlIO::scalar>
+
+Upgraded from version 0.08 to 0.09.
+
 =item C<POSIX>
 
 Upgraded from version 1.19 to 1.20.
@@ -215,6 +222,10 @@ It now includes constants for POSIX signal constants.
 Upgraded from version 2.27 to 2.28.
 
 This fixes a possible infinite loop when looking for coderefs.
+
+=item C<Test::Simple>
+
+Upgraded from version 0.96 to 0.97_01.
 
 =item C<Tie::Hash>
 
@@ -246,6 +257,16 @@ Many of the optree construction functions are now documented.
 
 =back
 
+=head3 L<perlbook>
+
+=over 4
+
+=item *
+
+Expanded to cover many more popular books.
+
+=back
+
 =head3 L<perlfaq>
 
 =over 4
@@ -266,6 +287,13 @@ diagnostic messages, see L<perldiag>.
 =head2 New Diagnostics
 
 =over 4
+
+=item *
+
+Parsing code internal error (%s)
+
+New fatal error produced when parsing code supplied by an extension violated the
+parser's API in a detectable way.
 
 =item *
 
@@ -291,6 +319,11 @@ L<[perl #74404]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=74404>.
 =head1 Testing
 
 =over 4
+
+=item *
+
+The new F<t/lib/universal.t> script tests the Internal::* functions and other
+things in F<universal.c>.
 
 =item *
 
