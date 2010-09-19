@@ -430,6 +430,7 @@ the strings?).
  Matt     5.13.2        2010-Jun-22
  David G  5.13.3        2010-Jul-20
  Florian  5.13.4        2010-Aug-20
+ Steve    5.13.5        2010-Sep-19
 
 =head2 SELECTED RELEASE SIZES
 
