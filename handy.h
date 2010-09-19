@@ -502,9 +502,10 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
  * machine has an 8-bit byte, so if c is stored in a byte, the sizeof()
  * guarantees that this evaluates to a constant true at compile time.  The use
  * of the mask instead of '< 256' keeps gcc from complaining that it is alway
- * true, when c's storage class is a byte */
+ * true, when c's storage class is a byte.  Use U64TYPE because U64 is known
+ * only in the perl core, and this macro can be called from outside that */
 #ifdef HAS_QUAD
-#  define FITS_IN_8_BITS(c) ((sizeof(c) == 1) || (((U64)(c) & 0xFF) == (U64)(c)))
+#  define FITS_IN_8_BITS(c) ((sizeof(c) == 1) || (((U64TYPE)(c) & 0xFF) == (U64TYPE)(c)))
 #else
 #  define FITS_IN_8_BITS(c) ((sizeof(c) == 1) || (((U32)(c) & 0xFF) == (U32)(c)))
 #endif
@@ -530,7 +531,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #define isBLANK(c)	((c) == ' ' || (c) == '\t')
 #define isDIGIT(c)	((c) >= '0' && (c) <= '9')
 #define isOCTAL(c)	((c) >= '0' && (c) <= '7')
-#define isASCII(c)	(NATIVE_TO_UNI((U8) c) <= 127)
+#define isASCII(c)	(FITS_IN_8_BITS(c) ? NATIVE_TO_UNI((U8) c) <= 127 : 0)
 #ifdef EBCDIC
     /* In EBCDIC we do not do locales: therefore() isupper() is fine. */
 #   define isUPPER(c)	isupper(c)
