@@ -15,6 +15,13 @@
 #
 # This script is normally invoked as part of 'make all', but is also
 # called from from regen.pl.
+#
+# '=head1' are the only headings looked for.  If the next line after the
+# heading begins with a word character, it is considered to be the first line
+# of documentation that applies to the heading itself.  That is, it is output
+# immediately after the heading, before the first function, and not indented.
+# The next input line that is a pod directive terminates this heading-level
+# documentation.
 
 use strict;
 
@@ -39,7 +46,7 @@ my $curheader = "Unknown section";
 
 sub autodoc ($$) { # parse a file and extract documentation info
     my($fh,$file) = @_;
-    my($in, $doc, $line);
+    my($in, $doc, $line, $header_doc);
 FUNC:
     while (defined($in = <$fh>)) {
 	if ($in =~ /^#\s*define\s+([A-Za-z_][A-Za-z_0-9]+)\(/ &&
@@ -49,6 +56,35 @@ FUNC:
 	}
         if ($in=~ /^=head1 (.*)/) {
             $curheader = $1;
+
+            # If the next line begins with a word char, then is the start of
+            # heading-level documentation.
+	    if (defined($doc = <$fh>)) {
+                if ($doc !~ /^\w/) {
+                    $in = $doc;
+                    redo FUNC;
+                }
+                $header_doc = $doc;
+                $line++;
+
+                # Continue getting the heading-level documentation until read
+                # in any pod directive (or as a fail-safe, find a closing
+                # comment to this pod in a C language file
+HDR_DOC:
+                while (defined($doc = <$fh>)) {
+                    if ($doc =~ /^=\w/) {
+                        $in = $doc;
+                        redo FUNC;
+                    }
+                    $line++;
+
+                    if ($doc =~ m:^\s*\*/$:) {
+                        warn "=cut missing? $file:$line:$doc";;
+                        last HDR_DOC;
+                    }
+                    $header_doc .= $doc;
+                }
+            }
             next FUNC;
         }
 	$line++;
@@ -110,6 +146,13 @@ DOC:
 
 	    $docs{$inline_where}{$curheader}{$name}
 		= [$flags, $docs, $ret, $file, @args];
+
+            # Create a special entry with an empty-string name for the
+            # heading-level documentation.
+	    if (defined $header_doc) {
+                $docs{$inline_where}{$curheader}{""} = $header_doc;
+                undef $header_doc;
+            }
 
 	    if (defined $doc) {
 		if ($doc =~ /^=(?:for|head)/) {
@@ -173,7 +216,16 @@ _EOH_
     # case insensitive sort, with fallback for determinacy
     for $key (sort { uc($a) cmp uc($b) || $a cmp $b } keys %$dochash) {
 	my $section = $dochash->{$key}; 
-	print $fh "\n=head1 $key\n\n=over 8\n\n";
+	print $fh "\n=head1 $key\n\n";
+
+        # Output any heading-level documentation and delete so won't get in
+        # the way later
+        if (exists $section->{""}) {
+            print $fh $section->{""} . "\n";
+            delete $section->{""};
+        }
+	print $fh "=over 8\n\n";
+
 	# Again, fallback for determinacy
 	for my $key (sort { uc($a) cmp uc($b) || $a cmp $b } keys %$section) {
 	    docout($fh, $key, $section->{$key});
