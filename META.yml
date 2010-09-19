@@ -1,5 +1,5 @@
 name: perl
-version: 5.013004
+version: 5.013005
 abstract: The Perl language interpreter
 author: perl5-porters@perl.org
 license: perl
