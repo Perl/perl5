@@ -530,12 +530,12 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #define isBLANK(c)	((c) == ' ' || (c) == '\t')
 #define isDIGIT(c)	((c) >= '0' && (c) <= '9')
 #define isOCTAL(c)	((c) >= '0' && (c) <= '7')
+#define isASCII(c)	(NATIVE_TO_UNI((U8) c) <= 127)
 #ifdef EBCDIC
     /* In EBCDIC we do not do locales: therefore() isupper() is fine. */
 #   define isUPPER(c)	isupper(c)
 #   define isLOWER(c)	islower(c)
 #   define isALNUMC(c)	isalnum(c)
-#   define isASCII(c)	isascii(c)
 #   define isCNTRL(c)	iscntrl(c)
 #   define isGRAPH(c)	isgraph(c)
 #   define isPRINT(c)	isprint(c)
@@ -547,7 +547,6 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #   define isUPPER(c)	((c) >= 'A' && (c) <= 'Z')
 #   define isLOWER(c)	((c) >= 'a' && (c) <= 'z')
 #   define isALNUMC(c)	(isALPHA(c) || isDIGIT(c))
-#   define isASCII(c)	((U8) (c) <= 127)
 #   define isCNTRL(c)	((U8) (c) < ' ' || (c) == 127)
 #   define isGRAPH(c)	(isALNUM(c) || isPUNCT(c))
 #   define isPRINT(c)	(((c) >= 32 && (c) < 127))
