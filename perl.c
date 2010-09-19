@@ -1042,6 +1042,8 @@ perl_destruct(pTHXx)
     /* Prepare to destruct main symbol table.  */
 
     hv = PL_defstash;
+    /* break ref loop  *:: <=> %:: */
+    (void)hv_delete(hv, "main::", 6, G_DISCARD);
     PL_defstash = 0;
     SvREFCNT_dec(hv);
     SvREFCNT_dec(PL_curstname);
