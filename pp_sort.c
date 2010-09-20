@@ -1679,6 +1679,9 @@ PP(pp_sort)
 
 	    if (!(flags & OPf_SPECIAL)) {
 		SV *sv;
+		/* Reset cx, in case the context stack has been
+		   reallocated. */
+		cx = &cxstack[cxstack_ix];
 		POPSUB(cx, sv);
 		LEAVESUB(sv);
 	    }

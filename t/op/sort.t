@@ -6,7 +6,7 @@ BEGIN {
     require 'test.pl';
 }
 use warnings;
-plan( tests => 159 );
+plan( tests => 160 );
 
 # these shouldn't hang
 {
@@ -890,3 +890,21 @@ fresh_perl_is('sub w ($$) {my ($l, my $r) = @_; my $v = \@_; undef @_; @_ = 0..2
 
     is($count, 0, 'all gone');
 }
+
+# [perl #77930] The context stack may be reallocated during a sort, as a
+#               result of deeply-nested (or not-so-deeply-nested) calls
+#               from a custom sort subroutine.
+fresh_perl_is
+ '
+   $sub = sub {
+    local $count = $count+1;
+    ()->$sub if $count < 1000;
+    $a cmp $b
+   };
+   () = sort $sub qw<a b c d e f g>;
+   print "ok"
+ ',
+ 'ok',
+  {},
+ '[perl #_____] cx_stack reallocation during sort'
+;
