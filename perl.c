@@ -774,8 +774,6 @@ perl_destruct(pTHXx)
 	 */
 	sv_clean_objs();
 	PL_sv_objcount = 0;
-	if (PL_defoutgv && !SvREFCNT(PL_defoutgv))
-	    PL_defoutgv = NULL; /* may have been freed */
     }
 
     /* unhook hooks which will soon be, or use, destroyed data */
@@ -836,9 +834,6 @@ perl_destruct(pTHXx)
 	/* The exit() function will do everything that needs doing. */
         return STATUS_EXIT;
     }
-
-    /* reset so print() ends up where we expect */
-    setdefout(NULL);
 
 #ifdef USE_ITHREADS
     /* the syntax tree is shared between clones

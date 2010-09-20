@@ -522,7 +522,7 @@ do_clean_named_objs(pTHX_ SV *const sv)
     SvREFCNT_dec(sv); /* undo the inc above */
 }
 
-/* clear any IO slots in a GV which hold objects;
+/* clear any IO slots in a GV which hold objects (except stderr, defout);
  * called by sv_clean_objs() for each live GV */
 
 static void
@@ -532,7 +532,7 @@ do_clean_named_io_objs(pTHX_ SV *const sv)
     SV *obj;
     assert(SvTYPE(sv) == SVt_PVGV);
     assert(isGV_with_GP(sv));
-    if (!GvGP(sv))
+    if (!GvGP(sv) || sv == (SV*)PL_stderrgv || sv == (SV*)PL_defoutgv)
 	return;
 
     SvREFCNT_inc(sv);
@@ -558,6 +558,7 @@ void
 Perl_sv_clean_objs(pTHX)
 {
     dVAR;
+    GV *olddef, *olderr;
     PL_in_clean_objs = TRUE;
     visit(do_clean_objs, SVf_ROK, SVf_ROK);
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
@@ -566,6 +567,15 @@ Perl_sv_clean_objs(pTHX)
      * error messages, close files etc */
     visit(do_clean_named_objs, SVt_PVGV|SVpgv_GP, SVTYPEMASK|SVp_POK|SVpgv_GP);
     visit(do_clean_named_io_objs, SVt_PVGV|SVpgv_GP, SVTYPEMASK|SVp_POK|SVpgv_GP);
+    olddef = PL_defoutgv;
+    PL_defoutgv = NULL; /* disable skip of PL_defoutgv */
+    if (olddef && isGV_with_GP(olddef))
+	do_clean_named_io_objs(aTHX_ MUTABLE_SV(olddef));
+    olderr = PL_stderrgv;
+    PL_stderrgv = NULL; /* disable skip of PL_stderrgv */
+    if (olderr && isGV_with_GP(olderr))
+	do_clean_named_io_objs(aTHX_ MUTABLE_SV(olderr));
+    SvREFCNT_dec(olddef);
 #endif
     PL_in_clean_objs = FALSE;
 }
