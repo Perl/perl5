@@ -96,7 +96,7 @@ XXX
 
 =item *
 
-XXX
+C<PathTools> has been upgraded from version 3.31_01 to 3.32.
 
 =back
 

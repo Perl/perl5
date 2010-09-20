@@ -3,7 +3,7 @@ package File::Spec;
 use strict;
 use vars qw(@ISA $VERSION);
 
-$VERSION = '3.31_01';
+$VERSION = '3.32';
 $VERSION = eval $VERSION;
 
 my %module = (MacOS   => 'Mac',
@@ -166,6 +166,7 @@ directory. (Does not strip symlinks, only '.', '..', and equivalents.)
 
 Returns a true or false value indicating, respectively, that alphabetic
 case is not or is significant when comparing file specifications.
+Cygwin and Win32 accept an optional drive argument.
 
     $is_case_tolerant = File::Spec->case_tolerant();
 
@@ -328,7 +329,7 @@ splitpath(), splitdir(), catpath() and catdir() by Barrie Slaymaker.
 
 =head1 COPYRIGHT
 
-Copyright (c) 2004 by the Perl 5 Porters.  All rights reserved.
+Copyright (c) 2004-2010 by the Perl 5 Porters.  All rights reserved.
 
 This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
