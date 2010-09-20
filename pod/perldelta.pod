@@ -123,7 +123,11 @@ C<NEXT> has been upgraded from version 0.64 to 0.65.
 
 =item *
 
-C<PathTools> has been upgraded from version 3.31_01 to 3.32.
+C<PathTools> has been upgraded from version 3.31_01 to 3.33.
+
+=item *
+
+C<Unicode::Normalize> has been upgraded from version 1.06 to 1.07
 
 =back
 
