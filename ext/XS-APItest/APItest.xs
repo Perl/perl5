@@ -1289,7 +1289,7 @@ peep_record ()
     PREINIT:
 	dMY_CXT;
     CODE:
-	RETVAL = newRV_inc(MY_CXT.peep_recorder);
+	RETVAL = newRV_inc((SV *)MY_CXT.peep_recorder);
     OUTPUT:
 	RETVAL
 
@@ -1298,7 +1298,7 @@ rpeep_record ()
     PREINIT:
 	dMY_CXT;
     CODE:
-	RETVAL = newRV_inc(MY_CXT.rpeep_recorder);
+	RETVAL = newRV_inc((SV *)MY_CXT.rpeep_recorder);
     OUTPUT:
 	RETVAL
 
