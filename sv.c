@@ -123,7 +123,8 @@ called by visit() for each SV]):
     sv_report_used() / do_report_used()
 			dump all remaining SVs (debugging aid)
 
-    sv_clean_objs() / do_clean_objs(),do_clean_named_objs()
+    sv_clean_objs() / do_clean_objs(),do_clean_named_objs(),
+		      do_clean_named_io_objs()
 			Attempt to free all objects pointed to by RVs,
 			and, unless DISABLE_DESTRUCTOR_KLUDGE is defined,
 			try to do the same for all objects indirectly
@@ -474,9 +475,12 @@ do_clean_objs(pTHX_ SV *const ref)
     /* XXX Might want to check arrays, etc. */
 }
 
-/* called by sv_clean_objs() for each live SV */
 
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
+
+/* clear any slots in a GV which hold objects - except IO;
+ * called by sv_clean_objs() for each live GV */
+
 static void
 do_clean_named_objs(pTHX_ SV *const sv)
 {
@@ -515,6 +519,23 @@ do_clean_named_objs(pTHX_ SV *const sv)
 	GvCV(sv) = NULL;
 	SvREFCNT_dec(obj);
     }
+    SvREFCNT_dec(sv); /* undo the inc above */
+}
+
+/* clear any IO slots in a GV which hold objects;
+ * called by sv_clean_objs() for each live GV */
+
+static void
+do_clean_named_io_objs(pTHX_ SV *const sv)
+{
+    dVAR;
+    SV *obj;
+    assert(SvTYPE(sv) == SVt_PVGV);
+    assert(isGV_with_GP(sv));
+    if (!GvGP(sv))
+	return;
+
+    SvREFCNT_inc(sv);
     if ( ((obj = MUTABLE_SV(GvIO(sv)) )) && SvOBJECT(obj)) {
 	DEBUG_D((PerlIO_printf(Perl_debug_log,
 		"Cleaning named glob IO object:\n "), sv_dump(obj)));
@@ -540,8 +561,11 @@ Perl_sv_clean_objs(pTHX)
     PL_in_clean_objs = TRUE;
     visit(do_clean_objs, SVf_ROK, SVf_ROK);
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
-    /* some barnacles may yet remain, clinging to typeglobs */
+    /* Some barnacles may yet remain, clinging to typeglobs.
+     * Run the non-IO destructors first: they may want to output
+     * error messages, close files etc */
     visit(do_clean_named_objs, SVt_PVGV|SVpgv_GP, SVTYPEMASK|SVp_POK|SVpgv_GP);
+    visit(do_clean_named_io_objs, SVt_PVGV|SVpgv_GP, SVTYPEMASK|SVp_POK|SVpgv_GP);
 #endif
     PL_in_clean_objs = FALSE;
 }
