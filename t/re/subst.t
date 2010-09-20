@@ -677,7 +677,7 @@ is($name, "cis", q[#22351 bug with 'e' substitution modifier]);
 fresh_perl_is( '$_=q(foo);s/(.)\G//g;print' => 'foo', '[perl #69056] positive GPOS regex segfault' );
 fresh_perl_is( '$_="abcef"; s/bc|(.)\G(.)/$1 ? "[$1-$2]" : "XX"/ge; print' => 'aXX[c-e][e-f]f', 'positive GPOS regex substitution failure' );
 
-# [perl #~~~~~] $var =~ s/$qr//e calling get-magic on $_ as well as $var
+# [perl #71470] $var =~ s/$qr//e calling get-magic on $_ as well as $var
 {
  local *_;
  my $scratch;

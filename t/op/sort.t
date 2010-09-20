@@ -906,5 +906,5 @@ fresh_perl_is
  ',
  'ok',
   {},
- '[perl #_____] cx_stack reallocation during sort'
+ '[perl #77930] cx_stack reallocation during sort'
 ;
