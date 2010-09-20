@@ -4162,11 +4162,6 @@ else
 	perl_patchlevel=0
 	$echo "(You do not have patchlevel.h.  Eek.)"
 fi
-if $test -r $rsrc/.patch ; then
-	if $test "X$perl_patchlevel" = "X" || $test "`cat $rsrc/.patch`" -gt "$perl_patchlevel" ; then
-		perl_patchlevel=`cat $rsrc/.patch`
-	fi
-fi
 : Define a handy string here to avoid duplication in myconfig.SH and configpm.
 version_patchlevel_string="version $patchlevel subversion $subversion"
 case "$perl_patchlevel" in
