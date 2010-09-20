@@ -1004,7 +1004,7 @@ use File::Glob qw(:case);
     'NEXT' =>
 	{
 	'MAINTAINER'	=> 'rafl',
-	'DISTRIBUTION'	=> 'FLORA/NEXT-0.64.tar.gz',
+	'DISTRIBUTION'	=> 'FLORA/NEXT-0.65.tar.gz',
 	'FILES'		=> q[cpan/NEXT],
 	'EXCLUDED'	=> [ qr{^demo/} ],
 	'UPSTREAM'	=> 'cpan',

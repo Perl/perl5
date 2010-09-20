@@ -96,6 +96,10 @@ XXX
 
 =item *
 
+C<NEXT> has been upgraded from version 0.64 to 0.65.
+
+=item *
+
 C<PathTools> has been upgraded from version 3.31_01 to 3.32.
 
 =back
