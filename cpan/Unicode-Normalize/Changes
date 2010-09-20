@@ -1,7 +1,11 @@
 Revision history for Perl extension Unicode::Normalize.
 
+1.07  Mon Sep 20 20:20:02 2010
+    - doc: about perl 5.12.x and Unicode 5.2.0
+    - test: prototype of normalize_partial() and cousins in proto.t.
+
 1.06  Thu Feb 11 16:19:54 2010
-    - Pure Perl/mkheader: fixed the internal _getHexArray() for perl 5.11.3
+    - mkheader/Pure Perl: fixed the internal _getHexArray() for perl 5.11.3
       changes (Bug #53197).
 
 1.05  Mon Sep 28 21:43:17 2009
@@ -19,7 +23,7 @@ Revision history for Perl extension Unicode::Normalize.
 
 1.02  Tue Jun  5 22:46:45 2007
     - XSUB: mkheader, _U_stringify() - avoid unpack('C*') on unicode.
-    - test: short.t removed - pure perl is not inapprotiate for test of
+    - test: short.t removed - pure perl is not appropriate for test of
             unicode edge cases.
 
 1.01  Tue Jun 13 22:01:53 2006

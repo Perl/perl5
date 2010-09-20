@@ -19,7 +19,7 @@ BEGIN {
 use Test;
 use strict;
 use warnings;
-BEGIN { plan tests => 42 };
+BEGIN { plan tests => 48 };
 use Unicode::Normalize qw(:all);
 ok(1); # If we made it this far, we're ok.
 
@@ -72,4 +72,11 @@ ok(prototype \&isNFC_MAYBE,   '$');
 ok(prototype \&isNFKD_NO,     '$');
 ok(prototype \&isNFKC_NO,     '$');
 ok(prototype \&isNFKC_MAYBE,  '$');
+
+ok(prototype \&splitOnLastStarter, undef);
+ok(prototype \&normalize_partial, '$$');
+ok(prototype \&NFD_partial,  '$');
+ok(prototype \&NFC_partial,  '$');
+ok(prototype \&NFKD_partial, '$');
+ok(prototype \&NFKC_partial, '$');
 
