@@ -908,25 +908,4 @@ EOT
 safer_close($capi);
 rename_if_different('perlapi.c-new', 'perlapi.c');
 
-# functions that take va_list* for implementing vararg functions
-# NOTE: makedef.pl must be updated if you add symbols to %vfuncs
-# XXX %vfuncs currently unused
-my %vfuncs = qw(
-    Perl_croak			Perl_vcroak
-    Perl_warn			Perl_vwarn
-    Perl_warner			Perl_vwarner
-    Perl_die			Perl_vdie
-    Perl_form			Perl_vform
-    Perl_load_module		Perl_vload_module
-    Perl_mess			Perl_vmess
-    Perl_deb			Perl_vdeb
-    Perl_newSVpvf		Perl_vnewSVpvf
-    Perl_sv_setpvf		Perl_sv_vsetpvf
-    Perl_sv_setpvf_mg		Perl_sv_vsetpvf_mg
-    Perl_sv_catpvf		Perl_sv_vcatpvf
-    Perl_sv_catpvf_mg		Perl_sv_vcatpvf_mg
-    Perl_dump_indent		Perl_dump_vindent
-    Perl_default_protect	Perl_vdefault_protect
-);
-
 # ex: set ts=8 sts=4 sw=4 noet:
