@@ -9,7 +9,7 @@ require ExtUtils::Constant::XS;
 use ExtUtils::Constant::Utils qw(C_stringify);
 use ExtUtils::Constant::XS qw(%XS_TypeSet);
 
-$VERSION = '0.06';
+$VERSION = '0.07';
 @ISA = 'ExtUtils::Constant::XS';
 
 %type_to_struct =
@@ -527,13 +527,12 @@ $xs_subname(sv)
 	STRLEN		len;
     INPUT:
 	SV *		sv;
-        const char *	s = SvPV(sv, len);
     PPCODE:
 #ifdef SYMBIAN
 	sv = newSVpvf("%"SVf" is not a valid $package_sprintf_safe macro", sv);
 #else
 	HV *${c_subname}_missing = get_missing_hash(aTHX);
-	if (hv_exists(${c_subname}_missing, s, SvUTF8(sv) ? -(I32)len : (I32)len)) {
+	if (hv_exists_ent(${c_subname}_missing, sv, 0)) {
 	    sv = newSVpvf("Your vendor has not defined $package_sprintf_safe macro %" SVf
 			  ", used", sv);
 	} else {
