@@ -5,29 +5,47 @@ use strict;
 use warnings;
 use Carp;
 
-use base qw/ DynaLoader Exporter /;
-
-# Items to export into callers namespace by default. Note: do not export
-# names by default without a very good reason. Use EXPORT_OK instead.
-# Do not simply export all your public functions/methods/constants.
+use base 'DynaLoader';
 
 # Export everything since these functions are only used by a test script
-our @EXPORT = qw( print_double print_int print_long
-		  print_float print_long_double have_long_double print_flush
-		  mpushp mpushn mpushi mpushu
-		  mxpushp mxpushn mxpushi mxpushu
-		  call_sv call_pv call_method eval_sv eval_pv require_pv
-		  G_SCALAR G_ARRAY G_VOID G_DISCARD G_EVAL G_NOARGS
-		  G_KEEPERR G_NODEBUG G_METHOD G_WANT
-		  apitest_exception mycroak strtab
-		  my_cxt_getint my_cxt_getsv my_cxt_setint my_cxt_setsv
-		  sv_setsv_cow_hashkey_core sv_setsv_cow_hashkey_notcore
-		  rmagical_cast rmagical_flags
-		  DPeek utf16_to_utf8 utf16_to_utf8_reversed my_exit
-		  sv_count
-);
+# Export subpackages too - in effect, export all their routines into us, then
+# export everything from us.
+sub import {
+    my $package = shift;
+    croak ("Can't export for '$package'") unless $package eq __PACKAGE__;
+    my $exports;
+    @{$exports}{@_} = () if @_;
 
-our $VERSION = '0.21';
+    my $callpkg = caller;
+
+    my @stashes = ('XS::APItest::', \%XS::APItest::);
+    while (my ($stash_name, $stash) = splice @stashes, 0, 2) {
+	while (my ($sym_name, $glob) = each %$stash) {
+	    if ($sym_name =~ /::$/) {
+		# Skip any subpackages that are clearly OO
+		next if *{$glob}{HASH}{'new'};
+		push @stashes, "$stash_name$sym_name", *{$glob}{HASH};
+	    } elsif (ref $glob eq 'SCALAR' || *{$glob}{CODE}) {
+		if ($exports) {
+		    next if !exists $exports->{$sym_name};
+		    delete $exports->{$sym_name};
+		}
+		no strict 'refs';
+		*{"$callpkg\::$sym_name"} = \&{"$stash_name$sym_name"};
+	    }
+	}
+    }
+    if ($exports) {
+	my @carp = keys %$exports;
+	if (@carp) {
+	    croak(join '',
+		  (map "\"$_\" is not exported by the $package module\n", sort @carp),
+		  "Can't continue after import errors");
+	}
+    }
+}
+
+our $VERSION = '0.22';
 
 use vars '$WARNINGS_ON_BOOTSTRAP';
 use vars map "\$${_}_called_PP", qw(BEGIN UNITCHECK CHECK INIT END);
