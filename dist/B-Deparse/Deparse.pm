@@ -4221,6 +4221,7 @@ sub matchop {
     }
     my $quote = 1;
     my $extended = ($op->pmflags & PMf_EXTENDED);
+    my $rhs_bound_to_defsv;
     if (null $kid) {
 	my $unbacked = re_unback($op->precomp);
 	if ($extended) {
@@ -4232,6 +4233,7 @@ sub matchop {
 	carp("found ".$kid->name." where regcomp expected");
     } else {
 	($re, $quote) = $self->regcomp($kid, 21, $extended);
+	$rhs_bound_to_defsv = 1 if $kid->first->first->flags & OPf_SPECIAL;
     }
     my $flags = "";
     $flags .= "c" if $op->pmflags & PMf_CONTINUE;
@@ -4250,7 +4252,13 @@ sub matchop {
     }
     $re = $re . $flags if $quote;
     if ($binop) {
-	return $self->maybe_parens("$var =~ $re", $cx, 20);
+	return
+	 $self->maybe_parens(
+	  $rhs_bound_to_defsv
+	   ? "$var =~ (\$_ =~ $re)"
+	   : "$var =~ $re",
+	  $cx, 20
+	 );
     } else {
 	return $re;
     }

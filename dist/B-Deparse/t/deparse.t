@@ -17,7 +17,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 89;
+use Test::More tests => 90;
 use Config ();
 
 use B::Deparse;
@@ -645,3 +645,12 @@ pop;
 pop();
 ####
 pop @_;
+####
+# 82 [perl #20444]
+"foo" =~ (1 ? /foo/ : /bar/);
+"foo" =~ (1 ? y/foo// : /bar/);
+"foo" =~ (1 ? s/foo// : /bar/);
+>>>>
+'foo' =~ ($_ =~ /foo/);
+'foo' =~ ($_ =~ tr/fo//);
+'foo' =~ ($_ =~ s/foo//);
