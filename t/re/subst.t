@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 170 );
+plan( tests => 172 );
 
 # Stolen from re/ReTest.pl. Can't just use the file since it doesn't support
 # like() and it conflicts with test.pl
@@ -723,4 +723,26 @@ fresh_perl_is( '$_="abcef"; s/bc|(.)\G(.)/$1 ? "[$1-$2]" : "XX"/ge; print' => 'a
     is($string, chr 0x180, "Verify that handles s/foo/\\600/");
     $string =~ s/./\777/;
     is($string, chr 0x1FF, "Verify that handles s/foo/\\777/");
+}
+
+# Scoping of s//the RHS/ when there is no /e
+# Tests based on [perl #19078]
+{
+ local *_;
+ my $output = ''; my %a;
+ no warnings 'uninitialized';
+
+ $_="CCCGGG";
+ s!.!<@a{$output .= ("$&"),/[$&]/g}>!g;
+ $output .= $_;
+ is(
+   $output, "CCCGGG<   ><  >< ><   ><  >< >",
+  's/// sets PL_curpm for each iteration even when the RHS has set it'
+ );
+ 
+ s/C/$a{m\G\}/;
+ is(
+  "$&", G =>
+  'Match vars reflect the last match after s/pat/$a{m|pat|}/ without /e'
+ );
 }

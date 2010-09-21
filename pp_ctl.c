@@ -377,6 +377,7 @@ PP(pp_substcont)
 	(void)ReREFCNT_inc(rx);
     cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
     rxres_save(&cx->sb_rxres, rx);
+    PL_curpm = pm;
     RETURNOP(pm->op_pmstashstartu.op_pmreplstart);
 }
 
