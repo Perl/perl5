@@ -95,6 +95,7 @@ EOW
 open IN, "embed.fnc" or die $!;
 
 my @embed;
+my (%has_va, %has_nocontext);
 
 while (<IN>) {
     chomp;
@@ -110,6 +111,11 @@ while (<IN>) {
     }
     else {
 	@args = split /\s*\|\s*/, $_;
+	my $func = $args[2];
+	if ($func) {
+	    ++$has_va{$func} if $args[-1] =~ /\.\.\./;
+	    ++$has_nocontext{$1} if $func =~ /(.*)_nocontext/;
+	}
     }
     push @embed, \@args;
 }
@@ -397,10 +403,11 @@ sub undefine ($) {
     "#undef  $sym\n";
 }
 
-sub hide ($$) {
-    my ($from, $to) = @_;
-    my $t = int(length($from) / 8);
-    "#define $from" . "\t" x ($t < 3 ? 3 - $t : 1) . "$to\n";
+sub hide {
+    my ($from, $to, $indent) = @_;
+    $indent = '' unless defined $indent;
+    my $t = int(length("$indent$from") / 8);
+    "#${indent}define $from" . "\t" x ($t < 3 ? 3 - $t : 1) . "$to\n";
 }
 
 sub bincompat_var ($$) {
@@ -633,38 +640,30 @@ print $em <<'END';
    dTHX.
  */
 #if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_NO_SHORT_NAMES)
-#  define croak				Perl_croak_nocontext
-#  define deb				Perl_deb_nocontext
-#  define die				Perl_die_nocontext
-#  define form				Perl_form_nocontext
-#  define load_module			Perl_load_module_nocontext
-#  define mess				Perl_mess_nocontext
-#  define newSVpvf			Perl_newSVpvf_nocontext
-#  define sv_catpvf			Perl_sv_catpvf_nocontext
-#  define sv_setpvf			Perl_sv_setpvf_nocontext
-#  define warn				Perl_warn_nocontext
-#  define warner			Perl_warner_nocontext
-#  define sv_catpvf_mg			Perl_sv_catpvf_mg_nocontext
-#  define sv_setpvf_mg			Perl_sv_setpvf_mg_nocontext
+END
+
+foreach (sort keys %has_va) {
+    next unless $has_nocontext{$_};
+    next if /printf/; # Not clear to me why these are skipped but they are.
+    print $em hide($_, "Perl_${_}_nocontext", "  ");
+}
+
+print $em <<'END';
 #endif
 
 #endif /* !defined(PERL_CORE) && !defined(PERL_NOCOMPAT) */
 
 #if !defined(PERL_IMPLICIT_CONTEXT)
 /* undefined symbols, point them back at the usual ones */
-#  define Perl_croak_nocontext		Perl_croak
-#  define Perl_die_nocontext		Perl_die
-#  define Perl_deb_nocontext		Perl_deb
-#  define Perl_form_nocontext		Perl_form
-#  define Perl_load_module_nocontext	Perl_load_module
-#  define Perl_mess_nocontext		Perl_mess
-#  define Perl_newSVpvf_nocontext	Perl_newSVpvf
-#  define Perl_sv_catpvf_nocontext	Perl_sv_catpvf
-#  define Perl_sv_setpvf_nocontext	Perl_sv_setpvf
-#  define Perl_warn_nocontext		Perl_warn
-#  define Perl_warner_nocontext		Perl_warner
-#  define Perl_sv_catpvf_mg_nocontext	Perl_sv_catpvf_mg
-#  define Perl_sv_setpvf_mg_nocontext	Perl_sv_setpvf_mg
+END
+
+foreach (sort keys %has_va) {
+    next unless $has_nocontext{$_};
+    next if /printf/; # Not clear to me why these are skipped but they are.
+    print $em hide("Perl_${_}_nocontext", "Perl_$_", "  ");
+}
+
+print $em <<'END';
 #endif
 
 /* ex: set ro: */

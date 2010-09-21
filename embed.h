@@ -5007,38 +5007,38 @@
    dTHX.
  */
 #if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_NO_SHORT_NAMES)
-#  define croak				Perl_croak_nocontext
-#  define deb				Perl_deb_nocontext
-#  define die				Perl_die_nocontext
-#  define form				Perl_form_nocontext
-#  define load_module			Perl_load_module_nocontext
-#  define mess				Perl_mess_nocontext
-#  define newSVpvf			Perl_newSVpvf_nocontext
-#  define sv_catpvf			Perl_sv_catpvf_nocontext
-#  define sv_setpvf			Perl_sv_setpvf_nocontext
-#  define warn				Perl_warn_nocontext
-#  define warner			Perl_warner_nocontext
-#  define sv_catpvf_mg			Perl_sv_catpvf_mg_nocontext
-#  define sv_setpvf_mg			Perl_sv_setpvf_mg_nocontext
+#  define croak			Perl_croak_nocontext
+#  define deb			Perl_deb_nocontext
+#  define die			Perl_die_nocontext
+#  define form			Perl_form_nocontext
+#  define load_module		Perl_load_module_nocontext
+#  define mess			Perl_mess_nocontext
+#  define newSVpvf		Perl_newSVpvf_nocontext
+#  define sv_catpvf		Perl_sv_catpvf_nocontext
+#  define sv_catpvf_mg		Perl_sv_catpvf_mg_nocontext
+#  define sv_setpvf		Perl_sv_setpvf_nocontext
+#  define sv_setpvf_mg		Perl_sv_setpvf_mg_nocontext
+#  define warn			Perl_warn_nocontext
+#  define warner		Perl_warner_nocontext
 #endif
 
 #endif /* !defined(PERL_CORE) && !defined(PERL_NOCOMPAT) */
 
 #if !defined(PERL_IMPLICIT_CONTEXT)
 /* undefined symbols, point them back at the usual ones */
-#  define Perl_croak_nocontext		Perl_croak
-#  define Perl_die_nocontext		Perl_die
-#  define Perl_deb_nocontext		Perl_deb
-#  define Perl_form_nocontext		Perl_form
+#  define Perl_croak_nocontext	Perl_croak
+#  define Perl_deb_nocontext	Perl_deb
+#  define Perl_die_nocontext	Perl_die
+#  define Perl_form_nocontext	Perl_form
 #  define Perl_load_module_nocontext	Perl_load_module
-#  define Perl_mess_nocontext		Perl_mess
+#  define Perl_mess_nocontext	Perl_mess
 #  define Perl_newSVpvf_nocontext	Perl_newSVpvf
 #  define Perl_sv_catpvf_nocontext	Perl_sv_catpvf
-#  define Perl_sv_setpvf_nocontext	Perl_sv_setpvf
-#  define Perl_warn_nocontext		Perl_warn
-#  define Perl_warner_nocontext		Perl_warner
 #  define Perl_sv_catpvf_mg_nocontext	Perl_sv_catpvf_mg
+#  define Perl_sv_setpvf_nocontext	Perl_sv_setpvf
 #  define Perl_sv_setpvf_mg_nocontext	Perl_sv_setpvf_mg
+#  define Perl_warn_nocontext	Perl_warn
+#  define Perl_warner_nocontext	Perl_warner
 #endif
 
 /* ex: set ro: */
