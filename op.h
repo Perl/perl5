@@ -142,6 +142,10 @@ Deprecated.  Use C<GIMME_V> instead.
 				/*  On OP_HELEM and OP_HSLICE, localization will be followed
 				    by assignment, so do not wipe the target if it is special
 				    (e.g. a glob or a magic SV) */
+				/*  On OP_MATCH, OP_SUBST & OP_TRANS, the
+				    operand of a logical or conditional
+				    that was optimised away, so it should
+				    not be bound via =~ */
 
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	OPf_WANT_LIST

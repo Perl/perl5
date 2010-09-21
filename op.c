@@ -2236,9 +2236,10 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
 	type == OP_NOT)
 	yyerror("Using !~ with s///r doesn't make sense");
 
-    ismatchop = rtype == OP_MATCH ||
-		rtype == OP_SUBST ||
-		rtype == OP_TRANS;
+    ismatchop = (rtype == OP_MATCH ||
+		 rtype == OP_SUBST ||
+		 rtype == OP_TRANS)
+	     && !(right->op_flags & OPf_SPECIAL);
     if (ismatchop && right->op_private & OPpTARGET_MY) {
 	right->op_targ = 0;
 	right->op_private &= ~OPpTARGET_MY;
@@ -4876,6 +4877,11 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	    op_free(first);
 	    if (other->op_type == OP_LEAVE)
 		other = newUNOP(OP_NULL, OPf_SPECIAL, other);
+	    else if (other->op_type == OP_MATCH
+	          || other->op_type == OP_SUBST
+	          || other->op_type == OP_TRANS)
+		/* Mark the op as being unbindable with =~ */
+		other->op_flags |= OPf_SPECIAL;
 	    return other;
 	}
 	else {
@@ -5028,6 +5034,10 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 	}
 	if (live->op_type == OP_LEAVE)
 	    live = newUNOP(OP_NULL, OPf_SPECIAL, live);
+	else if (live->op_type == OP_MATCH || live->op_type == OP_SUBST
+	      || live->op_type == OP_TRANS)
+	    /* Mark the op as being unbindable with =~ */
+	    live->op_flags |= OPf_SPECIAL;
 	return live;
     }
     NewOp(1101, logop, 1, LOGOP);
