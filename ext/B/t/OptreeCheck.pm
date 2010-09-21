@@ -102,11 +102,11 @@ various modes.
  # 7  <1> leavesub\[\d+ refs?\] K/REFC,1
  # $)/
  # got:          '2  <#> gvsv[*b] s'
- # want:  (?-xism:2  <\$> gvsv\(\*b\) s)
+ # want:  (?^:2  <\$> gvsv\(\*b\) s)
  # got:          '3  <$> const[IV 42] s'
- # want:  (?-xism:3  <\$> const\(IV 42\) s)
+ # want:  (?^:3  <\$> const\(IV 42\) s)
  # got:          '5  <#> gvsv[*a] s'
- # want:  (?-xism:5  <\$> gvsv\(\*a\) s)
+ # want:  (?^:5  <\$> gvsv\(\*a\) s)
  # remainder:
  # 2  <#> gvsv[*b] s
  # 3  <$> const[IV 42] s

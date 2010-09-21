@@ -655,7 +655,7 @@ Used during execution phase for managing search and replace patterns.
 =head2 C<wrapped> C<wraplen>
 
 Stores the string C<qr//> stringifies to. The perl engine for example
-stores C<(?-xism:eek)> in the case of C<qr/eek/>.
+stores C<(?^:eek)> in the case of C<qr/eek/>.
 
 When using a custom engine that doesn't support the C<(?:)> construct
 for inline modifiers, it's probably best to have C<qr//> stringify to
