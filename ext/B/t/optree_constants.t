@@ -54,7 +54,7 @@ my $want = {	# expected types, how value renders in-line, todos (maybe)
     myfl	=> [ 'NV', myfl ],
     myint	=> [ 'IV', myint ],
     $] >= 5.011 ? (
-    myrex	=> [ $RV_class, '\\\\"\\(?-xism:Foo\\)"' ],
+    myrex	=> [ $RV_class, '\\\\"\\(?^:Foo\\)"' ],
     ) : (
     myrex	=> [ $RV_class, '\\\\' ],
     ),
