@@ -29,14 +29,15 @@
 #define RXf_PMf_EXTENDED       (1 << (RXf_PMf_STD_PMMOD_SHIFT+3))    /* /x */
 #define RXf_PMf_KEEPCOPY       (1 << (RXf_PMf_STD_PMMOD_SHIFT+4))    /* /p */
 #define RXf_PMf_LOCALE         (1 << (RXf_PMf_STD_PMMOD_SHIFT+5))
+#define RXf_PMf_UNICODE        (1 << (RXf_PMf_STD_PMMOD_SHIFT+6))
 
 /* Next available bit after the above.  Name begins with '_' so won't be
  * exported by B */
-#define _RXf_PMf_SHIFT_NEXT (RXf_PMf_STD_PMMOD_SHIFT+6)
+#define _RXf_PMf_SHIFT_NEXT (RXf_PMf_STD_PMMOD_SHIFT+7)
 
 /* Mask of the above bits.  These need to be transferred from op_pmflags to
  * re->extflags during compilation */
-#define RXf_PMf_COMPILETIME    (RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_LOCALE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_KEEPCOPY)
+#define RXf_PMf_COMPILETIME    (RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_LOCALE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_KEEPCOPY|RXf_PMf_UNICODE)
 
 /* These copies need to be numerical or defsubs_h.PL won't know about them. */
 #define PMf_MULTILINE    1<<0

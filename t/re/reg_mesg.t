@@ -55,6 +55,12 @@ my @death =
  '/(?\<=x/' => 'Sequence (?\...) not recognized in regex; marked by {#} in m/(?\{#}<=x/',
  '/(?\<!x/' => 'Sequence (?\...) not recognized in regex; marked by {#} in m/(?\{#}<!x/',
  '/(?\>x/' => 'Sequence (?\...) not recognized in regex; marked by {#} in m/(?\{#}>x/',
+ '/(?^-i:foo)/' => 'Sequence (?^-...) not recognized in regex; marked by {#} in m/(?^-{#}i:foo)/',
+ '/(?^-i)foo/' => 'Sequence (?^-...) not recognized in regex; marked by {#} in m/(?^-{#}i)foo/',
+ '/(?^d:foo)/' => 'Sequence (?^d...) not recognized in regex; marked by {#} in m/(?^d{#}:foo)/',
+ '/(?^d)foo/' => 'Sequence (?^d...) not recognized in regex; marked by {#} in m/(?^d{#})foo/',
+ '/(?^lu:foo)/' => 'Sequence (?^lu...) not recognized in regex; marked by {#} in m/(?^lu{#}:foo)/',
+ '/(?^lu)foo/' => 'Sequence (?^lu...) not recognized in regex; marked by {#} in m/(?^lu{#})foo/',
 
  '/((x)/' => 'Unmatched ( in regex; marked by {#} in m/({#}(x)/',
 

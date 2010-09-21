@@ -23,7 +23,7 @@ BEGIN {
 }
 
 
-plan tests => 385;  # Update this when adding/deleting tests.
+plan tests => 398;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -503,8 +503,36 @@ sub run_tests {
         iseq qr/\b\v$/s,    '(?^s:\b\v$)', 'qr/\b\v$/s';
         iseq qr/\b\v$/m,    '(?^m:\b\v$)', 'qr/\b\v$/m';
         iseq qr/\b\v$/x,    '(?^x:\b\v$)', 'qr/\b\v$/x';
-        iseq qr/\b\v$/xism, '(?msix:\b\v$)',  'qr/\b\v$/xism';
+        iseq qr/\b\v$/xism, '(?^msix:\b\v$)',  'qr/\b\v$/xism';
         iseq qr/\b\v$/,     '(?^:\b\v$)', 'qr/\b\v$/';
+    }
+
+    {   # Test that charset modifier work, and are interpolated
+        iseq qr/\b\v$/, '(?^:\b\v$)', 'Verify no locale, no unicode_strings gives default modifier';
+        iseq qr/(?l:\b\v$)/, '(?^:(?l:\b\v$))', 'Verify infix l modifier compiles';
+        iseq qr/(?u:\b\v$)/, '(?^:(?u:\b\v$))', 'Verify infix u modifier compiles';
+        iseq qr/(?l)\b\v$/, '(?^:(?l)\b\v$)', 'Verify (?l) compiles';
+        iseq qr/(?u)\b\v$/, '(?^:(?u)\b\v$)', 'Verify (?u) compiles';
+
+        my $dual = qr/\b\v$/;
+        use locale;
+        my $locale = qr/\b\v$/;
+        iseq $locale,    '(?^l:\b\v$)', 'Verify has l modifier when compiled under use locale';
+        no locale;
+
+        use feature 'unicode_strings';
+        my $unicode = qr/\b\v$/;
+        iseq $unicode,    '(?^u:\b\v$)', 'Verify has u modifier when compiled under unicode_strings';
+        iseq qr/abc$dual/,    '(?^u:abc(?^:\b\v$))', 'Verify retains d meaning when interpolated under locale';
+        iseq qr/abc$locale/,    '(?^u:abc(?^l:\b\v$))', 'Verify retains l when interpolated under unicode_strings';
+
+        no feature 'unicode_strings';
+        iseq qr/abc$locale/,    '(?^:abc(?^l:\b\v$))', 'Verify retains l when interpolated outside locale and unicode strings';
+        iseq qr/def$unicode/,    '(?^:def(?^u:\b\v$))', 'Verify retains u when interpolated outside locale and unicode strings';
+
+        use locale;
+        iseq qr/abc$dual/,    '(?^l:abc(?^:\b\v$))', 'Verify retains d meaning when interpolated under locale';
+        iseq qr/abc$unicode/,    '(?^l:abc(?^u:\b\v$))', 'Verify retains u when interpolated under locale';
     }
 
 

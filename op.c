@@ -3649,8 +3649,12 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
 
     if (PL_hints & HINT_RE_TAINT)
 	pmop->op_pmflags |= PMf_RETAINT;
-    if (PL_hints & HINT_LOCALE)
+    if (PL_hints & HINT_LOCALE) {
 	pmop->op_pmflags |= PMf_LOCALE;
+    }
+    else if ((! (PL_hints & HINT_BYTES)) && (PL_hints & HINT_UNI_8_BIT)) {
+        pmop->op_pmflags |= RXf_PMf_UNICODE;
+    }
 
 
 #ifdef USE_ITHREADS

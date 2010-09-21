@@ -370,6 +370,7 @@ static const scan_data_t zero_scan_data =
 
 #define UTF (RExC_utf8 != 0)
 #define LOC ((RExC_flags & RXf_PMf_LOCALE) != 0)
+#define UNI_SEMANTICS ((RExC_flags & RXf_PMf_UNICODE) != 0)
 #define FOLD ((RExC_flags & RXf_PMf_FOLD) != 0)
 
 #define OOB_UNICODE		12345678
@@ -4441,8 +4442,16 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
 	SvPOK_on(rx);
 	SvFLAGS(rx) |= SvUTF8(pattern);
         *p++='('; *p++='?';
-        if (has_minus) {    /* If a default, cover it using the caret */
+
+        /* If a default, cover it using the caret */
+        if (has_minus || (r->extflags & ~(RXf_PMf_LOCALE|RXf_PMf_UNICODE))) {
             *p++= DEFAULT_PAT_MOD;
+        }
+        if (r->extflags & RXf_PMf_LOCALE) {
+            *p++ = LOCALE_PAT_MOD;
+        }
+        else if (r->extflags & RXf_PMf_UNICODE) {
+            *p++ = UNICODE_PAT_MOD;
         }
         if (has_p)
             *p++ = KEEPCOPY_PAT_MOD; /*'p'*/
@@ -6124,6 +6133,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 				       that follow */
                 has_use_defaults = TRUE;
                 STD_PMMOD_FLAGS_CLEAR(&RExC_flags);
+                RExC_flags &= ~(RXf_PMf_LOCALE|RXf_PMf_UNICODE);
                 goto parse_flags;
 	    default:
 	        --RExC_parse;
@@ -6131,6 +6141,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    {
                 U32 posflags = 0, negflags = 0;
 	        U32 *flagsp = &posflags;
+                bool has_charset_modifier = 0;
 
 		while (*RExC_parse) {
 		    /* && strchr("iogcmsx", *RExC_parse) */
@@ -6138,6 +6149,32 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		       and must be globally applied -- japhy */
                     switch (*RExC_parse) {
 	            CASE_STD_PMMOD_FLAGS_PARSE_SET(flagsp);
+                    case LOCALE_PAT_MOD:
+                        if (has_charset_modifier || flagsp == &negflags) {
+                            goto fail_modifiers;
+                        }
+                        *flagsp &= ~RXf_PMf_UNICODE;
+                        *flagsp |= RXf_PMf_LOCALE;
+                        has_charset_modifier = 1;
+                        break;
+                    case UNICODE_PAT_MOD:
+                        if (has_charset_modifier || flagsp == &negflags) {
+                            goto fail_modifiers;
+                        }
+                        *flagsp &= ~RXf_PMf_LOCALE;
+                        *flagsp |= RXf_PMf_UNICODE;
+                        has_charset_modifier = 1;
+                        break;
+                    case DUAL_PAT_MOD:
+                        if (has_use_defaults
+                            || has_charset_modifier
+                            || flagsp == &negflags)
+                        {
+                            goto fail_modifiers;
+                        }
+                        *flagsp &= ~(RXf_PMf_LOCALE|RXf_PMf_UNICODE);
+                        has_charset_modifier = 1;
+                        break;
                     case ONCE_PAT_MOD: /* 'o' */
                     case GLOBAL_PAT_MOD: /* 'g' */
 			if (SIZE_ONLY && ckWARN(WARN_REGEXP)) {
@@ -6182,6 +6219,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                          * if there is a minus, it means will be trying to
                          * re-specify a default which is an error */
                         if (has_use_defaults || flagsp == &negflags) {
+            fail_modifiers:
                             RExC_parse++;
 		            vFAIL3("Sequence (%.*s...) not recognized", RExC_parse-seqstart, seqstart);
 		            /*NOTREACHED*/

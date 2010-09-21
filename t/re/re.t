@@ -12,7 +12,9 @@ use warnings;
 use re qw(is_regexp regexp_pattern
           regname regnames regnames_count);
 {
+    use feature 'unicode_strings';  # Force 'u' pat mod
     my $qr=qr/foo/pi;
+    no feature 'unicode_strings';
     my $rx = $$qr;
 
     ok(is_regexp($qr),'is_regexp(REGEXP ref)');
@@ -20,12 +22,12 @@ use re qw(is_regexp regexp_pattern
     ok(!is_regexp(''),'is_regexp("")');
 
     is((regexp_pattern($qr))[0],'foo','regexp_pattern[0] (ref)');
-    is((regexp_pattern($qr))[1],'ip','regexp_pattern[1] (ref)');
-    is(regexp_pattern($qr),'(?^pi:foo)','scalar regexp_pattern (ref)');
+    is((regexp_pattern($qr))[1],'uip','regexp_pattern[1] (ref)');
+    is(regexp_pattern($qr),'(?^upi:foo)','scalar regexp_pattern (ref)');
 
     is((regexp_pattern($rx))[0],'foo','regexp_pattern[0] (bare REGEXP)');
-    is((regexp_pattern($rx))[1],'ip','regexp_pattern[1] (bare REGEXP)');
-    is(regexp_pattern($rx),'(?^pi:foo)', 'scalar regexp_pattern (bare REGEXP)');
+    is((regexp_pattern($rx))[1],'uip','regexp_pattern[1] (bare REGEXP)');
+    is(regexp_pattern($rx),'(?^upi:foo)', 'scalar regexp_pattern (bare REGEXP)');
 
     ok(!regexp_pattern(''),'!regexp_pattern("")');
 }

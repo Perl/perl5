@@ -40,6 +40,19 @@ main purpose of this is to allow tests that rely on the stringification
 to not have to change when new modifiers are added.  See
 L<perlre/Extended Patterns>.
 
+=head2 C<"d">, C<"l">, and C<"u"> regex modifiers added
+
+These modifiers are currently only available within a C<(?...)> construct.
+
+The C<"l"> modifier says to compile the regular expression as if it were
+in the scope of C<use locale>, even if it is not.
+
+The C<"u"> modifier currently does nothing.
+
+The C<"d"> modifier is used in the scope of C<use locale> to compile the
+regular expression as if it were not in that scope.
+See L<perlre/(?dlupimsx-imsx)>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -65,6 +78,17 @@ can use something like the following:
     my $modifiers = (qr/foobar/ =~ /\Q(?^/) ? '^' : '-xism';
 
 And then use C<$modifiers> instead of C<-xism>.
+
+=head2 Regular expressions retain their localeness when interpolated
+
+Regular expressions compiled under C<"use locale"> now retain this when
+interpolated into a new regular expression compiled outside a
+C<"use locale">, and vice-versa.
+
+Previously, a regular expression interpolated into another one inherited
+the localeness of the surrounding one, losing whatever state it
+originally had.  This is considered a bug fix, but may trip up code that
+has come to rely on the incorrect behavior.
 
 [ List each incompatible change as a =head2 entry ]
 
@@ -320,7 +344,7 @@ be noted as well.
 
 =item *
 
-XXX
+See L</Regular expressions retain their localeness when interpolated>
 
 =back
 

@@ -625,14 +625,14 @@ EXTCONST char * const PL_reg_name[] = {
 EXTCONST char * PL_reg_extflags_name[];
 #else
 EXTCONST char * const PL_reg_extflags_name[] = {
-	/* Bits in extflags defined: 11111111111111111111111000111111 */
+	/* Bits in extflags defined: 11111111111111111111111001111111 */
 	"MULTILINE",        /* 0x00000001 */
 	"SINGLELINE",       /* 0x00000002 */
 	"FOLD",             /* 0x00000004 */
 	"EXTENDED",         /* 0x00000008 */
 	"KEEPCOPY",         /* 0x00000010 */
 	"LOCALE",           /* 0x00000020 */
-	"UNUSED_BIT_6",     /* 0x00000040 */
+	"UNICODE",          /* 0x00000040 */
 	"UNUSED_BIT_7",     /* 0x00000080 */
 	"UNUSED_BIT_8",     /* 0x00000100 */
 	"ANCH_BOL",         /* 0x00000200 */

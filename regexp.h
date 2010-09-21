@@ -236,9 +236,9 @@ and check for NULL.
     case SINGLE_PAT_MOD:    *(pmfl) |= RXf_PMf_SINGLELINE; break;   \
     case XTENDED_PAT_MOD:   *(pmfl) |= RXf_PMf_EXTENDED;   break
 
-/* Note, includes locale */
+/* Note, includes locale, unicode */
 #define STD_PMMOD_FLAGS_CLEAR(pmfl)                        \
-    *(pmfl) &= ~(RXf_PMf_FOLD|RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_EXTENDED|RXf_PMf_LOCALE)
+    *(pmfl) &= ~(RXf_PMf_FOLD|RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_EXTENDED|RXf_PMf_LOCALE|RXf_PMf_UNICODE)
 
 /* chars and strings used as regex pattern modifiers
  * Singlular is a 'c'har, plural is a "string"
@@ -258,12 +258,18 @@ and check for NULL.
 #define IGNORE_PAT_MOD       'i'
 #define XTENDED_PAT_MOD      'x'
 #define NONDESTRUCT_PAT_MOD  'r'
+#define LOCALE_PAT_MOD       'l'
+#define UNICODE_PAT_MOD      'u'
+#define DUAL_PAT_MOD         'd'
 
 #define ONCE_PAT_MODS        "o"
 #define KEEPCOPY_PAT_MODS    "p"
 #define EXEC_PAT_MODS        "e"
 #define LOOP_PAT_MODS        "gc"
 #define NONDESTRUCT_PAT_MODS "r"
+#define LOCALE_PAT_MODS      "l"
+#define UNICODE_PAT_MODS     "u"
+#define DUAL_PAT_MODS        "d"
 
 /* This string is expected by regcomp.c to be ordered so that the first
  * character is the flag in bit RXf_PMf_STD_PMMOD_SHIFT of extflags; the next
@@ -288,7 +294,7 @@ and check for NULL.
 
 /* Leave some space, so future bit allocations can go either in the shared or
  * unshared area without affecting binary compatibility */
-#define RXf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT+3)
+#define RXf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT+2)
 
 /* Anchor and GPOS related stuff */
 #define RXf_ANCH_BOL    	(1<<(RXf_BASE_SHIFT+0))
