@@ -368,10 +368,10 @@ static const scan_data_t zero_scan_data =
 #define SCF_TRIE_RESTUDY        0x4000 /* Do restudy? */
 #define SCF_SEEN_ACCEPT         0x8000 
 
-#define UTF (RExC_utf8 != 0)
-#define LOC ((RExC_flags & RXf_PMf_LOCALE) != 0)
-#define UNI_SEMANTICS ((RExC_flags & RXf_PMf_UNICODE) != 0)
-#define FOLD ((RExC_flags & RXf_PMf_FOLD) != 0)
+#define UTF cBOOL(RExC_utf8)
+#define LOC cBOOL(RExC_flags & RXf_PMf_LOCALE)
+#define UNI_SEMANTICS cBOOL(RExC_flags & RXf_PMf_UNICODE)
+#define FOLD cBOOL(RExC_flags & RXf_PMf_FOLD)
 
 #define OOB_UNICODE		12345678
 #define OOB_NAMEDCLASS		-1
