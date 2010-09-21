@@ -4442,7 +4442,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
 	SvFLAGS(rx) |= SvUTF8(pattern);
         *p++='('; *p++='?';
         if (has_minus) {    /* If a default, cover it using the caret */
-            *p++='^';
+            *p++= DEFAULT_PAT_MOD;
         }
         if (has_p)
             *p++ = KEEPCOPY_PAT_MOD; /*'p'*/
@@ -6120,7 +6120,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		RExC_parse--; /* for vFAIL to print correctly */
                 vFAIL("Sequence (? incomplete");
                 break;
-            case '^':   /* Use default flags with the exceptions that follow */
+            case DEFAULT_PAT_MOD:   /* Use default flags with the exceptions
+				       that follow */
                 has_use_defaults = TRUE;
                 STD_PMMOD_FLAGS_CLEAR(&RExC_flags);
                 goto parse_flags;

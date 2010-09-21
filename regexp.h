@@ -247,6 +247,7 @@ and check for NULL.
  * for compatibility reasons with Regexp::Common which highjacked (?k:...)
  * for its own uses. So 'k' is out as well.
  */
+#define DEFAULT_PAT_MOD      '^'    /* Short for all the default modifiers */
 #define EXEC_PAT_MOD         'e'
 #define KEEPCOPY_PAT_MOD     'p'
 #define ONCE_PAT_MOD         'o'
