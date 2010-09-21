@@ -94,6 +94,26 @@ EOW
 
 open IN, "embed.fnc" or die $!;
 
+my @embed;
+
+while (<IN>) {
+    chomp;
+    next if /^:/;
+    while (s|\\$||) {
+	$_ .= <IN>;
+	chomp;
+    }
+    s/\s+$//;
+    my @args;
+    if (/^\s*(#|$)/) {
+	@args = $_;
+    }
+    else {
+	@args = split /\s*\|\s*/, $_;
+    }
+    push @embed, \@args;
+}
+
 # walk table providing an array of components in each line to
 # subroutine, printing the result
 sub walk_table (&@) {
@@ -111,23 +131,8 @@ sub walk_table (&@) {
 	$F = safer_open("$filename-new");
     }
     print $F $leader if $leader;
-    seek IN, 0, 0;		# so we may restart
-    while (<IN>) {
-	chomp;
-	next if /^:/;
-	while (s|\\$||) {
-	    $_ .= <IN>;
-	    chomp;
-	}
-	s/\s+$//;
-	my @args;
-	if (/^\s*(#|$)/) {
-	    @args = $_;
-	}
-	else {
-	    @args = split /\s*\|\s*/, $_;
-	}
-	my @outs = &{$function}(@args);
+    foreach (@embed) {
+	my @outs = &{$function}(@$_);
 	print $F @outs; # $function->(@args) is not 5.003
     }
     print $F $trailer if $trailer;
