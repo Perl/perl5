@@ -336,7 +336,25 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+A regular expression match in the right-hand side of a substitution
+(C<s///>) that is in the same scope will no longer cause match variables to
+have the wrong values on subsequent iterations. This can happen when an
+array or hash subscript is interpolated in the right-hand side, as in
+C<s|(.)|@a{ print($1), /./ }|g>
+L<[perl #19078]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=19078>.
+
+=item *
+
+Constant-folding used to cause
+
+  $text =~ ( 1 ? /phoo/ : /bear/)
+
+to turn into
+
+  $text =~ /phoo/
+
+at compile time. Now it correctly matches against C<$_>
+L<[perl #20444]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=20444>.
 
 =back
 
