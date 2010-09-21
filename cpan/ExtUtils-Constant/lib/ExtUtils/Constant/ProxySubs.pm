@@ -356,11 +356,12 @@ EOBOOT
 		carp("Attempting to supply a default for '$name' which has no conditional macro");
 		next;
 	    }
-	    print $xs_fh $ifdef;
 	    if ($item->{invert_macro}) {
+		print $xs_fh $self->macro_to_ifndef($macro);
 		print $xs_fh
-		    "        /* This is the default value: */\n" if $type;
-		print $xs_fh "#else\n";
+			"        /* This is the default value: */\n" if $type;
+	    } else {
+		print $xs_fh $ifdef;
 	    }
 	    print $xs_fh "        { ", join (', ', "\"$name\"", $namelen,
 					     &$type_to_value($value)), " },\n",
