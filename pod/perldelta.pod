@@ -336,9 +336,9 @@ L</Modules and Pragmata>.
 
 =item *
 
-A regular expression match in the right-hand side of a substitution
-(C<s///>) that is in the same scope will no longer cause match variables to
-have the wrong values on subsequent iterations. This can happen when an
+A regular expression match in the right-hand side of a global substitution
+(C<s///g>) that is in the same scope will no longer cause match variables
+to have the wrong values on subsequent iterations. This can happen when an
 array or hash subscript is interpolated in the right-hand side, as in
 C<s|(.)|@a{ print($1), /./ }|g>
 L<[perl #19078]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=19078>.
