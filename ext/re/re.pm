@@ -415,7 +415,7 @@ C<qr//> with the same pattern inside.  If the argument is not a compiled
 reference then this routine returns false but defined in scalar context,
 and the empty list in list context. Thus the following
 
-    if (regexp_pattern($ref) eq '(?i-xsm:foo)')
+    if (regexp_pattern($ref) eq '(?^i:foo)')
 
 will be warning free regardless of what $ref actually is.
 
