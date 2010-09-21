@@ -931,7 +931,6 @@ Let's give it a try:
  #include <perl.h>
 
  /* we're going to embed two interpreters */
- /* we're going to embed two interpreters */
 
  #define SAY_HELLO "-e", "print qq(Hi, I'm $^X\n)"
 
