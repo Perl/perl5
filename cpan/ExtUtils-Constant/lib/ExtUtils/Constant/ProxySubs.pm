@@ -503,12 +503,21 @@ EOBOOT
         print $xs_fh $self->macro_to_endif($macro);
     }
 
-    print $xs_fh <<EOBOOT;
+    if ($] >= 5.009) {
+	print $xs_fh <<EOBOOT;
+    /* As we've been creating subroutines, we better invalidate any cached
+       methods  */
+    mro_method_changed_in(symbol_table);
+  }
+EOBOOT
+    } else {
+	print $xs_fh <<EOBOOT;
     /* As we've been creating subroutines, we better invalidate any cached
        methods  */
     ++PL_sub_generation;
   }
 EOBOOT
+    }
 
     print $xs_fh $explosives ? <<"EXPLODE" : <<"DONT";
 
