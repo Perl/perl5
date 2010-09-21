@@ -15,7 +15,7 @@ BEGIN {
         keys %Config;
 
     # Resolve symlink to ./TEST if this build is configured with -Dmksymlinks
-    our $file = 'TEST';
+    our $file = '../lib/File/stat.t';
     if ( $Dmksymlinks ) {
         $file = readlink $file;
         die "Can't readlink(TEST): $!" if ! defined $file;
