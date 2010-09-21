@@ -303,6 +303,17 @@ See L</"Use of qw(...) as parentheses"> for details.
 
 =back
 
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+C<warn> and C<die> now produce 'Wide character' warnings when fed a
+character outside the byte range if STDERR is a byte-sized handle.
+
+=back
+
 =head1 Utility Changes
 
 =head3 L<h2ph>
@@ -499,7 +510,7 @@ unrecognized escape sequences, passed-through.
 
 =item *
 
-C<warn()> now respects utf8-encoded scalars
+C<warn()> and C<die()> now respect utf8-encoded scalars
 L<[perl #45549]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=45549>.
 
 =back
