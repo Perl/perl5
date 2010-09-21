@@ -1,20 +1,10 @@
 use ExtUtils::MakeMaker;
-# See lib/ExtUtils/MakeMaker.pm for details of how to influence
-# the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'		=> 'I18N::Langinfo',
     'VERSION_FROM'	=> 'Langinfo.pm', # finds $VERSION
-    'PREREQ_PM'		=> {}, # e.g., Module::Name => 1.1
-    ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
-      (ABSTRACT_FROM => 'Langinfo.pm', # retrieve abstract from module
-       AUTHOR     => 'Jarkko Hietaniemi <jhi@hut.fi>') : ()),
-    'LIBS'		=> [''], # e.g., '-lm'
-    'DEFINE'		=> '', # e.g., '-DHAVE_SOMETHING'
-	# Insert -I. if you add *.h files later:
-    'INC'		=> '', # e.g., '-I/usr/include/other'
+     ABSTRACT_FROM	=> 'Langinfo.pm', # retrieve abstract from module
+     AUTHOR		=> 'Jarkko Hietaniemi <jhi@hut.fi>',
     realclean => {FILES=> 'const-c.inc const-xs.inc'},
-	# Un-comment this if you add C files to link with later:
-    # 'OBJECT'		=> '$(O_FILES)', # link all the C files too
 );
 if (eval {require ExtUtils::Constant; 1}) {
   # Some older versions of glibc use only enums, no defines, hence all this
