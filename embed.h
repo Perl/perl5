@@ -2581,6 +2581,21 @@
 #define croak_no_modify()	Perl_croak_no_modify(aTHX)
 #define croak_xs_usage(a,b)	Perl_croak_xs_usage(aTHX_ a,b)
 #if defined(PERL_IMPLICIT_CONTEXT)
+#define croak_nocontext		Perl_croak_nocontext
+#define die_nocontext		Perl_die_nocontext
+#define deb_nocontext		Perl_deb_nocontext
+#define form_nocontext		Perl_form_nocontext
+#define load_module_nocontext	Perl_load_module_nocontext
+#define mess_nocontext		Perl_mess_nocontext
+#define warn_nocontext		Perl_warn_nocontext
+#define warner_nocontext	Perl_warner_nocontext
+#define newSVpvf_nocontext	Perl_newSVpvf_nocontext
+#define sv_catpvf_nocontext	Perl_sv_catpvf_nocontext
+#define sv_setpvf_nocontext	Perl_sv_setpvf_nocontext
+#define sv_catpvf_mg_nocontext	Perl_sv_catpvf_mg_nocontext
+#define sv_setpvf_mg_nocontext	Perl_sv_setpvf_mg_nocontext
+#define fprintf_nocontext	Perl_fprintf_nocontext
+#define printf_nocontext	Perl_printf_nocontext
 #endif
 #ifdef PERL_CORE
 #define cv_ckproto_len(a,b,c,d)	Perl_cv_ckproto_len(aTHX_ a,b,c,d)
@@ -3172,6 +3187,7 @@
 #define reentrant_size()	Perl_reentrant_size(aTHX)
 #define reentrant_init()	Perl_reentrant_init(aTHX)
 #define reentrant_free()	Perl_reentrant_free(aTHX)
+#define reentrant_retry		Perl_reentrant_retry
 #endif
 #define call_atexit(a,b)	Perl_call_atexit(aTHX_ a,b)
 #define call_argv(a,b,c)	Perl_call_argv(aTHX_ a,b,c)

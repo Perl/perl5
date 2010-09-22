@@ -517,16 +517,16 @@ walk_table {
 	my ($flags,$retval,$func,@args) = @_;
 	unless ($flags =~ /[om]/) {
 	    my $args = scalar @args;
-	    if ($args and $args[$args-1] =~ /\.\.\./) {
-	        # we're out of luck for varargs functions under CPP
-	    }
-	    elsif ($flags =~ /n/) {
+	    if ($flags =~ /n/) {
 		if ($flags =~ /s/) {
 		    $ret .= hide($func,"S_$func");
 		}
 		elsif ($flags =~ /p/) {
 		    $ret .= hide($func,"Perl_$func");
 		}
+	    }
+	    elsif ($args and $args[$args-1] =~ /\.\.\./) {
+	        # we're out of luck for varargs functions under CPP
 	    }
 	    else {
 		my $alist = join(",", @az[0..$args-1]);
