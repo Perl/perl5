@@ -123,11 +123,8 @@ while (<IN>) {
 # walk table providing an array of components in each line to
 # subroutine, printing the result
 sub walk_table (&@) {
-    my $function = shift;
-    my $filename = shift || '-';
-    my $leader = shift;
+    my ($function, $filename, $leader, $trailer) = @_;
     defined $leader or $leader = do_not_edit ($filename);
-    my $trailer = shift;
     my $F;
     if (ref $filename) {	# filehandle
 	$F = $filename;
