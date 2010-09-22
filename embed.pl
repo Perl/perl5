@@ -379,8 +379,6 @@ print $em do_not_edit ("embed.h"), <<'END';
 
 /* Hide global symbols */
 
-#if !defined(PERL_IMPLICIT_CONTEXT)
-
 END
 
 # Try to elimiate lots of repeated
@@ -393,64 +391,8 @@ END
 # by tracking state and merging foo and bar into one block.
 my $ifdef_state = '';
 
-walk_table {
-    my $ret = "";
-    my $new_ifdef_state = '';
-    if (@_ == 1) {
-	my $arg = shift;
-	$ret = "$arg\n" if $arg =~ /^#\s*(if|ifn?def|else|endif)\b/;
-    }
-    else {
-	my ($flags,$retval,$func,@args) = @_;
-	unless ($flags =~ /[om]/) {
-	    if ($flags =~ /s/) {
-		$ret = hide($func,"S_$func");
-	    }
-	    elsif ($flags =~ /p/) {
-		$ret = hide($func,"Perl_$func");
-	    }
-	}
-	if ($ret ne '' && $flags !~ /A/) {
-	    if ($flags =~ /E/) {
-		$new_ifdef_state
-		    = "#if defined(PERL_CORE) || defined(PERL_EXT)\n";
-	    }
-	    else {
-		$new_ifdef_state = "#ifdef PERL_CORE\n";
-	    }
-
-	    if ($new_ifdef_state ne $ifdef_state) {
-		$ret = $new_ifdef_state . $ret;
-	    }
-        }
-    }
-    if ($ifdef_state && $new_ifdef_state ne $ifdef_state) {
-	# Close the old one ahead of opening the new one.
-	$ret = "#endif\n$ret";
-    }
-    # Remember the new state.
-    $ifdef_state = $new_ifdef_state;
-    $ret;
-} $em;
-
-if ($ifdef_state) {
-    print $em "#endif\n";
-}
-
-for $sym (sort keys %ppsym) {
-    $sym =~ s/^Perl_//;
-    print $em hide($sym, "Perl_$sym");
-}
-
-print $em <<'END';
-
-#else	/* PERL_IMPLICIT_CONTEXT */
-
-END
-
 my @az = ('a'..'z');
 
-$ifdef_state = '';
 walk_table {
     my $ret = "";
     my $new_ifdef_state = '';
@@ -471,7 +413,12 @@ walk_table {
 		}
 	    }
 	    elsif ($args and $args[$args-1] =~ /\.\.\./) {
-	        # we're out of luck for varargs functions under CPP
+		if ($flags =~ /p/) {
+		    # we're out of luck for varargs functions under CPP
+		    # So we can only do these macros for no implicit context:
+		    $ret = "#ifndef PERL_IMPLICIT_CONTEXT\n"
+			. hide($func,"Perl_$func") . "#endif\n";
+		}
 	    }
 	    else {
 		my $alist = join(",", @az[0..$args-1]);
@@ -530,13 +477,7 @@ for $sym (sort keys %ppsym) {
 
 print $em <<'END';
 
-#endif	/* PERL_IMPLICIT_CONTEXT */
-
 #endif	/* #ifndef PERL_NO_SHORT_NAMES */
-
-END
-
-print $em <<'END';
 
 /* Compatibility stubs.  Compile extensions with -DPERL_NOCOMPAT to
    disable them.
