@@ -149,10 +149,10 @@ sub walk_table (&@) {
 my $wrote_protected = 0;
 
 sub write_protos {
-    my $ret = "";
+    my $ret;
     if (@_ == 1) {
 	my $arg = shift;
-	$ret .= "$arg\n";
+	$ret = "$arg\n";
     }
     else {
 	my ($flags,$retval,$plain_func,@args) = @_;
@@ -186,7 +186,7 @@ sub write_protos {
 		$func = $plain_func;
 	    }
 	}
-	$ret .= "$retval\t$func(";
+	$ret = "$retval\t$func(";
 	if ( $has_context ) {
 	    $ret .= @args ? "pTHX_ " : "pTHX";
 	}
@@ -274,19 +274,18 @@ sub write_protos {
 {
   my %seen;
   sub write_global_sym {
-      my $ret = "";
       if (@_ > 1) {
 	  my ($flags,$retval,$func,@args) = @_;
 	  # If a function is defined twice, for example before and after an
 	  # #else, only process the flags on the first instance for global.sym
-	  return $ret if $seen{$func}++;
+	  return '' if $seen{$func}++;
 	  if ($flags =~ /[AX]/ && $flags !~ /[xm]/
 	      || $flags =~ /b/) { # public API, so export
 	      $func = "Perl_$func" if $flags =~ /[pbX]/;
-	      $ret = "$func\n";
+	      return "$func\n";
 	  }
       }
-      $ret;
+      return '';
   }
 }
 
@@ -422,16 +421,16 @@ walk_table {
     my $new_ifdef_state = '';
     if (@_ == 1) {
 	my $arg = shift;
-	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifn?def|else|endif)\b/;
+	$ret = "$arg\n" if $arg =~ /^#\s*(if|ifn?def|else|endif)\b/;
     }
     else {
 	my ($flags,$retval,$func,@args) = @_;
 	unless ($flags =~ /[om]/) {
 	    if ($flags =~ /s/) {
-		$ret .= hide($func,"S_$func");
+		$ret = hide($func,"S_$func");
 	    }
 	    elsif ($flags =~ /p/) {
-		$ret .= hide($func,"Perl_$func");
+		$ret = hide($func,"Perl_$func");
 	    }
 	}
 	if ($ret ne '' && $flags !~ /A/) {
@@ -480,7 +479,7 @@ walk_table {
     my $new_ifdef_state = '';
     if (@_ == 1) {
 	my $arg = shift;
-	$ret .= "$arg\n" if $arg =~ /^#\s*(if|ifn?def|else|endif)\b/;
+	$ret = "$arg\n" if $arg =~ /^#\s*(if|ifn?def|else|endif)\b/;
     }
     else {
 	my ($flags,$retval,$func,@args) = @_;
@@ -488,10 +487,10 @@ walk_table {
 	    my $args = scalar @args;
 	    if ($flags =~ /n/) {
 		if ($flags =~ /s/) {
-		    $ret .= hide($func,"S_$func");
+		    $ret = hide($func,"S_$func");
 		}
 		elsif ($flags =~ /p/) {
-		    $ret .= hide($func,"Perl_$func");
+		    $ret = hide($func,"Perl_$func");
 		}
 	    }
 	    elsif ($args and $args[$args-1] =~ /\.\.\./) {
