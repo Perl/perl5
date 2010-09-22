@@ -31,7 +31,6 @@ Perl_realloc
 Perl_mfree
 Perl_get_context
 Perl_set_context
-Perl_regcurly
 Perl_try_amagic_bin
 Perl_try_amagic_un
 Perl_amagic_call

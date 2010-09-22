@@ -43,9 +43,6 @@
 #endif
 #define get_context		Perl_get_context
 #define set_context		Perl_set_context
-#if defined(PERL_CORE) || defined(PERL_EXT)
-#define regcurly		Perl_regcurly
-#endif
 #define amagic_call		Perl_amagic_call
 #define Gv_AMupdate		Perl_Gv_AMupdate
 #define gv_handler		Perl_gv_handler
@@ -2508,9 +2505,6 @@
 #endif
 #define get_context		Perl_get_context
 #define set_context		Perl_set_context
-#if defined(PERL_CORE) || defined(PERL_EXT)
-#define regcurly		Perl_regcurly
-#endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #endif
 #define amagic_call(a,b,c,d)	Perl_amagic_call(aTHX_ a,b,c,d)

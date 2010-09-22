@@ -119,13 +119,6 @@ PERL_CALLCONV void	Perl_set_context(void *t)
 #define PERL_ARGS_ASSERT_SET_CONTEXT	\
 	assert(t)
 
-PERL_CALLCONV I32	Perl_regcurly(const char *s)
-			__attribute__warn_unused_result__
-			__attribute__pure__
-			__attribute__nonnull__(1);
-#define PERL_ARGS_ASSERT_REGCURLY	\
-	assert(s)
-
 
 END_EXTERN_C
 
