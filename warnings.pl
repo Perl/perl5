@@ -95,7 +95,6 @@ my %list ;
 my %Value ;
 my %ValueToName ;
 my %NameToValue ;
-my $index ;
 
 my %v_list = () ;
 
@@ -145,7 +144,6 @@ sub walk
     foreach $k (sort keys %$tre) {
 	$v = $tre->{$k};
 	die "duplicate key $k\n" if defined $list{$k} ;
-	#$Value{$index} = uc $k ;
 	die "Can't find key '$k'"
 	    if ! defined $NameToValue{uc $k} ;
         push @{ $list{$k} }, $NameToValue{uc $k} ;
@@ -300,8 +298,6 @@ EOM
 
 my $offset = 0 ;
 
-$index = $offset ;
-#@{ $list{"all"} } = walk ($tree) ;
 valueWalk ($tree) ;
 my $index = orderValues();
 
@@ -386,8 +382,6 @@ while (<DATA>) {
     print $pm $_ ;
 }
 
-#$list{'all'} = [ $offset .. 8 * ($warn_size/2) - 1 ] ;
-
 $last_ver = 0;
 print $pm "our %Offsets = (\n" ;
 foreach my $k (sort { $a <=> $b } keys %ValueToName) {
@@ -412,7 +406,6 @@ foreach $k (sort keys  %list) {
     my @list = sort { $a <=> $b } @$v ;
 
     print $pm tab(4, "    '$k'"), '=> "',
-		# mkHex($warn_size, @list),
 		mkHex($warn_size, map $_ * 2 , @list),
 		'", # [', mkRange(@list), "]\n" ;
 }
@@ -426,7 +419,6 @@ foreach $k (sort keys  %list) {
     my @list = sort { $a <=> $b } @$v ;
 
     print $pm tab(4, "    '$k'"), '=> "',
-		# mkHex($warn_size, @list),
 		mkHex($warn_size, map $_ * 2 + 1 , @list),
 		'", # [', mkRange(@list), "]\n" ;
 }
