@@ -109,7 +109,9 @@ my @raw_alias = (
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {
-    $alias{$_} = $func for @$names;
+    foreach (@$names) {
+	$alias{$_} = $func;
+    }
 }
 
 # Emit defines.

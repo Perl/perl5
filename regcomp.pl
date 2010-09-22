@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 # 
 # Regenerate (overwriting only if changed):
 #
@@ -19,7 +19,6 @@ BEGIN {
 }
 #use Fatal qw(open close rename chmod unlink);
 use strict;
-use warnings;
 
 open DESC, 'regcomp.sym';
 
@@ -29,7 +28,8 @@ my ($desc,$lastregop);
 while (<DESC>) {
     s/#.*$//;
     next if /^\s*$/;
-    s/\s*\z//;
+    chomp; # No \z in 5.004
+    s/\s*$//;
     if (/^-+\s*$/) {
         $lastregop= $ind;
         next;
@@ -91,13 +91,12 @@ sub process_flags {
     # Whilst I could do this with vec, I'd prefer to do longhand the arithmetic
     # ops in the C code.
     my $current = do {
-      no warnings 'uninitialized';
+      local $^W;
       ord do {
-	no warnings 'substr';
 	substr $bitmap, ($ind >> 3);
       }
     };
-    substr $bitmap, ($ind >> 3), 1, chr($current | ($set << ($ind & 7)));
+    substr($bitmap, ($ind >> 3), 1) = chr($current | ($set << ($ind & 7)));
 
     push @selected, $name[$ind] if $set;
   } while (++$ind < $lastregop);
@@ -110,9 +109,9 @@ sub process_flags {
 #define REGNODE_\U$varname\E(node) (PL_${varname}_bitmask[(node) >> 3] & (1 << ((node) & 7)))
 
 #ifndef DOINIT
-EXTCONST U8 PL_${varname}[] __attribute__deprecated__;
+EXTCONST U8 PL_${varname}\[] __attribute__deprecated__;
 #else
-EXTCONST U8 PL_${varname}[] __attribute__deprecated__ = {
+EXTCONST U8 PL_${varname}\[] __attribute__deprecated__ = {
     $out_string
 };
 #endif /* DOINIT */
@@ -261,8 +260,8 @@ my %definitions;    # Remember what the symbol definitions are
 my $val = 0;
 my %reverse;
 foreach my $file ("op_reg_common.h", "regexp.h") {
-    open my $fh,"<", $file or die "Can't read $file: $!";
-    while (<$fh>) {
+    open FH,"<$file" or die "Can't read $file: $!";
+    while (<FH>) {
 
         # optional leading '_'.  Return symbol in $1, and strip it from
         # rest of line
@@ -290,7 +289,7 @@ foreach my $file ("op_reg_common.h", "regexp.h") {
     }
 }
 my %vrxf=reverse %rxfv;
-printf $out "\t/* Bits in extflags defined: %032b */\n",$val;
+printf $out "\t/* Bits in extflags defined: %s */\n", unpack 'B*', pack 'N', $val;
 for (0..31) {
     my $n=$vrxf{2**$_}||"UNUSED_BIT_$_";
     $n=~s/^RXf_(PMf_)?//;

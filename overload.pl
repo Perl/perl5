@@ -21,8 +21,6 @@ BEGIN {
 
 use strict;
 
-use File::Spec::Functions qw(catdir catfile);;
-
 my (@enums, @names);
 while (<DATA>) {
   next if /^#/;
@@ -32,11 +30,11 @@ while (<DATA>) {
   push @names, $name;
 }
 
-safer_unlink (catfile(qw(lib overload numbers.pm)));
+safer_unlink ('lib/overload/numbers.pm');
 my $c = safer_open("overload.c-new");
 my $h = safer_open("overload.h-new");
-mkdir("lib/overload") unless -d catdir(qw(lib overload));
-my $p = safer_open(catfile(qw(lib overload numbers.pm)));
+mkdir("lib/overload", 0777) unless -d 'lib/overload';
+my $p = safer_open('lib/overload/numbers.pm');
 
 
 select $p;
@@ -104,7 +102,7 @@ print <<'EOF';
 enum {
 EOF
 
-print "    ${_}_amg,\n", foreach @enums;
+print map "    ${_}_amg,\n", @enums;
 
 print <<'EOF';
     max_amg_code
@@ -125,7 +123,7 @@ EOF
 
 my $last = pop @names;
 
-print $c "    $_,\n" foreach map { length $_ } @names;
+print $c map { "    " . (length $_) . ",\n" } @names;
 
 my $lastlen = length $last;
 print $c <<"EOT";
@@ -140,7 +138,7 @@ static const char * const PL_AMG_names[NofAMmeth] = {
      overload.pm.  */
 EOT
 
-print $c "    \"$_\",\n" foreach map { s/(["\\"])/\\$1/g; $_ } @names;
+print $c map { s/(["\\"])/\\$1/g; "    \"$_\",\n" } @names;
 
 print $c <<"EOT";
     "$last"

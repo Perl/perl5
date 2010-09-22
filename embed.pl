@@ -22,7 +22,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-require 5.003;	# keep this compatible, an old perl is all we may have before
+require 5.004;	# keep this compatible, an old perl is all we may have before
                 # we build the new one
 
 use strict;
@@ -33,6 +33,7 @@ BEGIN {
 }
 
 my $SPLINT = 0; # Turn true for experimental splint support http://www.splint.org
+my $unflagged_pointers;
 
 #
 # See database of global and static function prototypes in embed.fnc
@@ -227,7 +228,6 @@ sub write_protos {
 		++$n;
 		if ( $arg =~ /\*/ && $arg !~ /\b(NN|NULLOK)\b/ ) {
 		    warn "$func: $arg needs NN or NULLOK\n";
-		    our $unflagged_pointers;
 		    ++$unflagged_pointers;
 		}
 		my $nn = ( $arg =~ s/\s*\bNN\b\s+// );
@@ -322,8 +322,6 @@ sub write_protos {
   }
 }
 
-
-our $unflagged_pointers;
 walk_table(\&write_protos,     "proto.h", undef, "/* ex: set ro: */\n");
 warn "$unflagged_pointers pointer arguments to clean up\n" if $unflagged_pointers;
 walk_table(\&write_global_sym, "global.sym", undef, "# ex: set ro:\n");
