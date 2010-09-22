@@ -14,7 +14,10 @@ BEGIN {
         grep { /^config_arg\d+$/ && $Config{$_} eq '-Dmksymlinks' }
         keys %Config;
 
-    # Resolve symlink to ./TEST if this build is configured with -Dmksymlinks
+    # Resolve symlink to ./lib/File/stat.t if this build is configured
+    # with -Dmksymlinks
+    # Originally we worked with ./TEST, but other test scripts read from
+    # that file and modify its access time.
     our $file = '../lib/File/stat.t';
     if ( $Dmksymlinks ) {
         $file = readlink $file;
@@ -28,9 +31,16 @@ BEGIN {
     use Config;
     $hasst = 0 unless $Config{'i_sysstat'} eq 'define';
     unless ($hasst) { plan skip_all => "no sys/stat.h"; exit 0 }
-    our @stat = stat $file; # This is the function stat.
-    unless (@stat) { plan skip_all => "1..0 # Skip: no file $file"; exit 0 }
 }
+
+# Originally this was done in the BEGIN block, but perl is still
+# compiling (and hence reading) the script at that point, which can
+# change the file's access time, causing a different in the comparison
+# tests if the clock ticked over the second between the stat() and the
+# final read.
+# At this point all of the reading is done.
+our @stat = stat $file; # This is the function stat.
+unless (@stat) { plan skip_all => "1..0 # Skip: no file $file"; exit 0 }
 
 plan tests => 19 + 24*2 + 3;
 
