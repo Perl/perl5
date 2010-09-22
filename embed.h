@@ -4985,21 +4985,21 @@
  */
 #  define perl_atexit(a,b)		call_atexit(a,b)
 #  define perl_call_argv(a,b,c)		call_argv(a,b,c)
-#  define perl_call_pv(a,b)		call_pv(a,b)
 #  define perl_call_method(a,b)		call_method(a,b)
+#  define perl_call_pv(a,b)		call_pv(a,b)
 #  define perl_call_sv(a,b)		call_sv(a,b)
-#  define perl_eval_sv(a,b)		eval_sv(a,b)
 #  define perl_eval_pv(a,b)		eval_pv(a,b)
-#  define perl_require_pv(a)		require_pv(a)
+#  define perl_eval_sv(a,b)		eval_sv(a,b)
 #  define perl_get_sv(a,b)		get_sv(a,b)
 #  define perl_get_av(a,b)		get_av(a,b)
 #  define perl_get_hv(a,b)		get_hv(a,b)
 #  define perl_get_cv(a,b)		get_cv(a,b)
 #  define perl_init_i18nl10n(a)		init_i18nl10n(a)
 #  define perl_init_i18nl14n(a)		init_i18nl14n(a)
-#  define perl_new_ctype(a)		new_ctype(a)
 #  define perl_new_collate(a)		new_collate(a)
+#  define perl_new_ctype(a)		new_ctype(a)
 #  define perl_new_numeric(a)		new_numeric(a)
+#  define perl_require_pv(a)		require_pv(a)
 
 /* varargs functions can't be handled with CPP macros. :-(
    This provides a set of compatibility functions that don't take

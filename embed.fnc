@@ -63,6 +63,10 @@
 :             "#define foo Perl_foo",      rather than
 :             "#define foo(a,b,c) Perl_foo(aTHX_ a,b,c)
 :
+:   O  Has a perl_ compatibility macro.
+:
+:      The really OLD name for API funcs
+:
 :   o  Has no Perl_foo compatibility macro:
 :
 :         embed.h: suppress "#define foo Perl_foo"
@@ -907,29 +911,31 @@ Ap	|void	|reentrant_init
 Ap	|void	|reentrant_free
 Anp	|void*	|reentrant_retry|NN const char *f|...
 #endif
+: "Very" special - can't use the O flag for this one:
+: (The rename from perl_atexit to Perl_call_atexit was in 864dbfa3ca8032ef)
 Ap	|void	|call_atexit	|ATEXIT_t fn|NULLOK void *ptr
-Apd	|I32	|call_argv	|NN const char* sub_name|I32 flags|NN char** argv
-Apd	|I32	|call_method	|NN const char* methname|I32 flags
-Apd	|I32	|call_pv	|NN const char* sub_name|I32 flags
-Apd	|I32	|call_sv	|NN SV* sv|VOL I32 flags
+ApdO	|I32	|call_argv	|NN const char* sub_name|I32 flags|NN char** argv
+ApdO	|I32	|call_method	|NN const char* methname|I32 flags
+ApdO	|I32	|call_pv	|NN const char* sub_name|I32 flags
+ApdO	|I32	|call_sv	|NN SV* sv|VOL I32 flags
 Ap	|void	|despatch_signals
 Ap	|OP *	|doref		|NN OP *o|I32 type|bool set_op_ref
-Apd	|SV*	|eval_pv	|NN const char* p|I32 croak_on_error
-Apd	|I32	|eval_sv	|NN SV* sv|I32 flags
-Apd	|SV*	|get_sv		|NN const char *name|I32 flags
-Apd	|AV*	|get_av		|NN const char *name|I32 flags
-Apd	|HV*	|get_hv		|NN const char *name|I32 flags
-Apd	|CV*	|get_cv		|NN const char* name|I32 flags
+ApdO	|SV*	|eval_pv	|NN const char* p|I32 croak_on_error
+ApdO	|I32	|eval_sv	|NN SV* sv|I32 flags
+ApdO	|SV*	|get_sv		|NN const char *name|I32 flags
+ApdO	|AV*	|get_av		|NN const char *name|I32 flags
+ApdO	|HV*	|get_hv		|NN const char *name|I32 flags
+ApdO	|CV*	|get_cv		|NN const char* name|I32 flags
 Apd	|CV*	|get_cvn_flags	|NN const char* name|STRLEN len|I32 flags
-Ap	|int	|init_i18nl10n	|int printwarn
-Ap	|int	|init_i18nl14n	|int printwarn
-Ap	|void	|new_collate	|NULLOK const char* newcoll
-Ap	|void	|new_ctype	|NN const char* newctype
-Ap	|void	|new_numeric	|NULLOK const char* newcoll
+ApO	|int	|init_i18nl10n	|int printwarn
+ApO	|int	|init_i18nl14n	|int printwarn
+ApO	|void	|new_collate	|NULLOK const char* newcoll
+ApO	|void	|new_ctype	|NN const char* newctype
+ApO	|void	|new_numeric	|NULLOK const char* newcoll
 Ap	|void	|set_numeric_local
 Ap	|void	|set_numeric_radix
 Ap	|void	|set_numeric_standard
-Apd	|void	|require_pv	|NN const char* pv
+ApdO	|void	|require_pv	|NN const char* pv
 Apd	|void	|pack_cat	|NN SV *cat|NN const char *pat|NN const char *patend \
 				|NN SV **beglist|NN SV **endlist|NN SV ***next_in_list|U32 flags
 Apd	|void	|packlist 	|NN SV *cat|NN const char *pat|NN const char *patend|NN SV **beglist|NN SV **endlist
