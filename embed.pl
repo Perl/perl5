@@ -129,52 +129,21 @@ sub walk_table (&@) {
     if (ref $filename) {	# filehandle
 	$F = $filename;
     }
-    elsif (defined $filename) {
+    else {
 	$F = safer_open("$filename-new");
 	print $F do_not_edit ($filename);
     }
     foreach (@embed) {
 	my @outs = &{$function}(@$_);
 	# $function->(@args) is not 5.003
-	print $F @outs if $F;
+	print $F @outs;
     }
     print $F $trailer if $trailer;
-    if (defined $filename && !ref $filename) {
+    unless (ref $filename) {
 	safer_close($F);
 	rename_if_different("$filename-new", $filename);
     }
 }
-
-sub munge_c_files () {
-    my $functions = {};
-    unless (@ARGV) {
-	warn "\@ARGV empty, nothing to do\n";
-	return;
-    }
-    walk_table {
-	if (@_ > 1) {
-	    $functions->{$_[2]} = \@_ if $_[@_-1] =~ /\.\.\./;
-	}
-    };
-    local $^I = '.bak';
-    while (<>) {
-	s{(\b(\w+)[ \t]*\([ \t]*(?!aTHX))}
-	 {
-	    my $repl = $1;
-	    my $f = $2;
-	    if (exists $functions->{$f}) {
-		$repl .= "aTHX_ ";
-		warn("$ARGV:$.:$`#$repl#$'");
-	    }
-	    $repl;
-	 }eg;
-	print;
-	close ARGV if eof;	# restart $.
-    }
-    exit;
-}
-
-#munge_c_files();
 
 # generate proto.h
 my $wrote_protected = 0;
