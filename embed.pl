@@ -124,23 +124,22 @@ while (<IN>) {
 # walk table providing an array of components in each line to
 # subroutine, printing the result
 sub walk_table (&@) {
-    my ($function, $filename, $leader, $trailer) = @_;
-    defined $leader or $leader = do_not_edit ($filename);
+    my ($function, $filename, $trailer) = @_;
     my $F;
     if (ref $filename) {	# filehandle
 	$F = $filename;
     }
-    else {
-	# safer_unlink $filename if $filename ne '/dev/null';
+    elsif (defined $filename) {
 	$F = safer_open("$filename-new");
+	print $F do_not_edit ($filename);
     }
-    print $F $leader if $leader;
     foreach (@embed) {
 	my @outs = &{$function}(@$_);
-	print $F @outs; # $function->(@args) is not 5.003
+	# $function->(@args) is not 5.003
+	print $F @outs if $F;
     }
     print $F $trailer if $trailer;
-    unless (ref $filename) {
+    if (defined $filename && !ref $filename) {
 	safer_close($F);
 	rename_if_different("$filename-new", $filename);
     }
@@ -156,7 +155,7 @@ sub munge_c_files () {
 	if (@_ > 1) {
 	    $functions->{$_[2]} = \@_ if $_[@_-1] =~ /\.\.\./;
 	}
-    } '/dev/null', '', '';
+    };
     local $^I = '.bak';
     while (<>) {
 	s{(\b(\w+)[ \t]*\([ \t]*(?!aTHX))}
@@ -322,9 +321,9 @@ sub write_protos {
   }
 }
 
-walk_table(\&write_protos,     "proto.h", undef, "/* ex: set ro: */\n");
+walk_table(\&write_protos,     "proto.h", "/* ex: set ro: */\n");
 warn "$unflagged_pointers pointer arguments to clean up\n" if $unflagged_pointers;
-walk_table(\&write_global_sym, "global.sym", undef, "# ex: set ro:\n");
+walk_table(\&write_global_sym, "global.sym", "# ex: set ro:\n");
 
 # XXX others that may need adding
 #       warnhook
@@ -487,7 +486,7 @@ walk_table {
     # Remember the new state.
     $ifdef_state = $new_ifdef_state;
     $ret;
-} $em, "";
+} $em;
 
 if ($ifdef_state) {
     print $em "#endif\n";
@@ -565,7 +564,7 @@ walk_table {
     # Remember the new state.
     $ifdef_state = $new_ifdef_state;
     $ret;
-} $em, "";
+} $em;
 
 if ($ifdef_state) {
     print $em "#endif\n";
@@ -624,7 +623,7 @@ walk_table {
     my $t = (length $ret) >> 3;
     $ret .=  "\t" x ($t < 5 ? 5 - $t : 1);
     "$ret$func($alist)\n";
-} $em, "";
+} $em;
 
 print $em <<'END';
 
