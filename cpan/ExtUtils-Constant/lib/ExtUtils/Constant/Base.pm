@@ -87,7 +87,7 @@ sub macro_to_ifndef {
     my ($self, $macro) = @_;
     if (ref $macro) {
 	# Can't invert these stylishly, so "bodge it"
-	return "$macro->[0]#else";
+	return "$macro->[0]#else\n";
     }
     if (defined $macro && $macro ne "" && $macro ne "1") {
 	return $macro ? "#ifndef $macro\n" : "#if 1\n";
