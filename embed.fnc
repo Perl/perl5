@@ -169,7 +169,6 @@ npR	|MEM_SIZE|malloc_good_size	|size_t nbytes
 
 AnpR	|void*	|get_context
 Anp	|void	|set_context	|NN void *t
-EXpRnPM	|I32	|regcurly	|NN const char *s
 
 END_EXTERN_C
 

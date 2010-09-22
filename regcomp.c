@@ -85,6 +85,8 @@
 #  include "regcomp.h"
 #endif
 
+#include "dquote_static.c"
+
 #ifdef op
 #undef op
 #endif /* op */
@@ -9002,31 +9004,6 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p, const regnode *val,
     }
 
     return exact;
-}
-#endif
-
-/*
- - regcurly - a little FSA that accepts {\d+,?\d*}
- */
-#ifndef PERL_IN_XSUB_RE
-I32
-Perl_regcurly(register const char *s)
-{
-    PERL_ARGS_ASSERT_REGCURLY;
-
-    if (*s++ != '{')
-	return FALSE;
-    if (!isDIGIT(*s))
-	return FALSE;
-    while (isDIGIT(*s))
-	s++;
-    if (*s == ',')
-	s++;
-    while (isDIGIT(*s))
-	s++;
-    if (*s != '}')
-	return FALSE;
-    return TRUE;
 }
 #endif
 

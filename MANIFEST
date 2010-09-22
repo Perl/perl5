@@ -2997,6 +2997,7 @@ djgpp/fixpmain		DOS/DJGPP port
 doio.c			I/O operations
 doop.c			Support code for various operations
 dosish.h		Some defines for MS/DOSish machines
+dquote_static.c		Static functions for double quotish contexts
 dump.c			Debugging output
 embed.fnc		Database used by embed.pl
 embed.h			Maps symbols to safer names
