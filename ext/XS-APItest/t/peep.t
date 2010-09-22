@@ -6,8 +6,6 @@ use Test::More tests => 9;
 
 use XS::APItest;
 
-use Devel::Peek;
-
 my $record = XS::APItest::peep_record;
 my $rrecord = XS::APItest::rpeep_record;
 
