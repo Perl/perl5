@@ -26,7 +26,7 @@ my @posix_to_lower
 = my @latin1_to_title
 = @posix_to_upper;
 
-# Override the elements in the to_lower arrays that have different lower case 
+# Override the elements in the to_lower arrays that have different lower case
 # mappings
 for my $i (0x41 .. 0x5A) {
     $posix_to_lower[$i] = chr(ord($posix_to_lower[$i]) + 32);
@@ -84,7 +84,7 @@ for my  $prefix (\%empty, \%posix, \%cyrillic, \%latin1) {
             my $cp = sprintf "U+%04X", $i;
 
             # First try using latin1 (Unicode) semantics.
-            use feature "unicode_strings";    
+            use feature "unicode_strings";
 
             my $phrase = 'with uni8bit';
             my $char = chr($i);
