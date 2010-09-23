@@ -374,9 +374,13 @@ my_rpeep (pTHX_ OP *o)
 
 #include "const-c.inc"
 
-MODULE = XS::APItest:Hash		PACKAGE = XS::APItest::Hash
+MODULE = XS::APItest		PACKAGE = XS::APItest
 
 INCLUDE: const-xs.inc
+
+INCLUDE: numeric.xs
+
+MODULE = XS::APItest:Hash		PACKAGE = XS::APItest::Hash
 
 void
 rot13_hash(hash)
