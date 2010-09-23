@@ -86,7 +86,7 @@ for my  $prefix (\%empty, \%posix, \%cyrillic, \%latin1) {
             # First try using latin1 (Unicode) semantics.
             use feature "unicode_strings";
 
-            my $phrase = 'with uni8bit';
+            my $phrase = 'in uni8bit';
             my $char = chr($i);
             my $pre_lc = $prefix->{'lc'};
             my $pre_uc = $prefix->{'uc'};
@@ -98,17 +98,17 @@ for my  $prefix (\%empty, \%posix, \%cyrillic, \%latin1) {
             my $expected_lower = $pre_lc . $latin1_to_lower[$i] . $post_lc;
 
             is (uc($to_upper), $expected_upper,
-                display("$cp: $phrase: uc($to_upper) eq $expected_upper"));
+                display("$cp: $phrase: Verify uc($to_upper) eq $expected_upper"));
             is (lc($to_lower), $expected_lower,
-                display("$cp: $phrase: lc($to_lower) eq $expected_lower"));
+                display("$cp: $phrase: Verify lc($to_lower) eq $expected_lower"));
 
             if ($pre_uc eq "") {    # Title case if null prefix.
                 my $expected_title = $latin1_to_title[$i] . $post_lc;
                 is (ucfirst($to_upper), $expected_title,
-                    display("$cp: $phrase: ucfirst($to_upper) eq $expected_title"));
+                    display("$cp: $phrase: Verify ucfirst($to_upper) eq $expected_title"));
                 my $expected_lcfirst = $latin1_to_lower[$i] . $post_uc;
                 is (lcfirst($to_lower), $expected_lcfirst,
-                    display("$cp: $phrase: lcfirst($to_lower) eq $expected_lcfirst"));
+                    display("$cp: $phrase: Verify lcfirst($to_lower) eq $expected_lcfirst"));
             }
 
             # Then try with posix semantics.
@@ -125,17 +125,17 @@ for my  $prefix (\%empty, \%posix, \%cyrillic, \%latin1) {
             $expected_lower = $pre_lc . $posix_to_lower[$i] . $post_lc;
 
             is (uc($to_upper), $expected_upper,
-                display("$cp: $phrase: uc($to_upper) eq $expected_upper"));
+                display("$cp: $phrase: Verify uc($to_upper) eq $expected_upper"));
             is (lc($to_lower), $expected_lower,
-                display("$cp: $phrase: lc($to_lower) eq $expected_lower"));
+                display("$cp: $phrase: Verify lc($to_lower) eq $expected_lower"));
 
             if ($pre_uc eq "") {
                 my $expected_title = $posix_to_title[$i] . $post_lc;
                 is (ucfirst($to_upper), $expected_title,
-                    display("$cp: $phrase: ucfirst($to_upper) eq $expected_title"));
+                    display("$cp: $phrase: Verify ucfirst($to_upper) eq $expected_title"));
                 my $expected_lcfirst = $posix_to_lower[$i] . $post_uc;
                 is (lcfirst($to_lower), $expected_lcfirst,
-                    display("$cp: $phrase: lcfirst($to_lower) eq $expected_lcfirst"));
+                    display("$cp: $phrase: Verify lcfirst($to_lower) eq $expected_lcfirst"));
             }
         }
     }
