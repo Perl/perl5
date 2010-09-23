@@ -881,7 +881,7 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
   Dumps the final compressed table form of the trie to Perl_debug_log.
   Used for debugging make_trie().
 */
- 
+
 STATIC void
 S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap,
 	    AV *revcharmap, U32 depth)
@@ -3207,7 +3207,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		/* These are the cases when once a subexpression
 		   fails at a particular position, it cannot succeed
 		   even after backtracking at the enclosing scope.
-		
+
 		   XXXX what if minimal match and we are at the
 		        initial run of {n,m}? */
 		if ((mincount != maxcount - 1) && (maxcount != REG_INFTY))
@@ -3348,7 +3348,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 #if 0
 			while ( nxt1 && (OP(nxt1) != WHILEM)) {
 			    regnode *nnxt = regnext(nxt1);
-			
 			    if (nnxt == nxt) {
 				if (reg_off_by_arg[OP(nxt1)])
 				    ARG_SET(nxt1, nxt2 - nxt1);
@@ -3415,7 +3414,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
 			if (UTF)
 			    old = utf8_hop((U8*)s, old) - (U8*)s;
-			
 			l -= old;
 			/* Get the added string: */
 			last_str = newSVpvn_utf8(s  + old, l, UTF);
@@ -3503,13 +3501,13 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
     	        if (flags & SCF_DO_STCLASS_AND) {
                     for (value = 0; value < 256; value++)
                         if (!is_VERTWS_cp(value))
-                            ANYOF_BITMAP_CLEAR(data->start_class, value);  
-                }                                                              
-                else {                                                         
+                            ANYOF_BITMAP_CLEAR(data->start_class, value);
+                }
+                else {
                     for (value = 0; value < 256; value++)
                         if (is_VERTWS_cp(value))
-                            ANYOF_BITMAP_SET(data->start_class, value);	   
-                }                                                              
+                            ANYOF_BITMAP_SET(data->start_class, value);
+                }
                 if (flags & SCF_DO_STCLASS_OR)
 		    cl_and(data->start_class, and_withp);
 		flags &= ~SCF_DO_STCLASS;
@@ -3522,7 +3520,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	        data->pos_delta += 1;
 		data->longest = &(data->longest_float);
     	    }
-    	    
 	}
 	else if (OP(scan) == FOLDCHAR) {
 	    int d = ARG(scan)==0xDF ? 1 : 2;
@@ -3620,7 +3617,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			else {
 			    for (value = 0; value < 256; value++)
 				if (!isALNUM(value))
-				    ANYOF_BITMAP_SET(data->start_class, value);			
+				    ANYOF_BITMAP_SET(data->start_class, value);
 			}
 		    }
 		    break;
@@ -3709,7 +3706,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			else {
 			    for (value = 0; value < 256; value++)
 				if (isDIGIT(value))
-				    ANYOF_BITMAP_SET(data->start_class, value);			
+				    ANYOF_BITMAP_SET(data->start_class, value);
 			}
 		    }
 		    break;
@@ -3726,7 +3723,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			else {
 			    for (value = 0; value < 256; value++)
 				if (!isDIGIT(value))
-				    ANYOF_BITMAP_SET(data->start_class, value);			
+				    ANYOF_BITMAP_SET(data->start_class, value);
 			}
 		    }
 		    break;
