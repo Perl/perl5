@@ -529,7 +529,6 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 /* continuation character for legal NAME in \N{NAME} */
 #define isCHARNAME_CONT(c) (isALNUMU(c) || (c) == ' ' || (c) == '-' || (c) == '(' || (c) == ')' || (c) == ':' || NATIVE_TO_UNI((U8) c) == 0xA0)
 
-#define isDIGIT(c)	((c) >= '0' && (c) <= '9')
 #define isIDFIRST(c)	(isALPHA(c) || (c) == '_')
 #define isOCTAL(c)	((c) >= '0' && (c) <= '7')
 #define isSPACE_L1(c) (isSPACE(c) \
@@ -541,6 +540,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #   define isALNUMC(c)	isalnum(c)
 #   define isBLANK(c)	((c) == ' ' || (c) == '\t' || NATIVE_TO_UNI(c) == 0xA0)
 #   define isCNTRL(c)	iscntrl(c)
+#   define isDIGIT(c)	isdigit(c)
 #   define isGRAPH(c)	isgraph(c)
 #   define isLOWER(c)	islower(c)
 #   define isPRINT(c)	isprint(c)
@@ -555,6 +555,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #   define isALNUMC(c)	(isALPHA(c) || isDIGIT(c))
 #   define isBLANK(c)	((c) == ' ' || (c) == '\t')
 #   define isCNTRL(c)	((U8) (c) < ' ' || (c) == 127)
+#   define isDIGIT(c)	((c) >= '0' && (c) <= '9')
 #   define isGRAPH(c)	(isALNUM(c) || isPUNCT(c))
 #   define isLOWER(c)	((c) >= 'a' && (c) <= 'z')
 #   define isPRINT(c)	(((c) >= 32 && (c) < 127))
