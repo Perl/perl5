@@ -510,8 +510,8 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #  define FITS_IN_8_BITS(c) ((sizeof(c) == 1) || (((U32)(c) & 0xFF) == (U32)(c)))
 #endif
 
-#define isALNUM(c)	(isALPHA(c) || isDIGIT(c) || (c) == '_')
-#define isALNUMU(c)	(isDIGIT(c) || isALPHAU(c) || (c) == '_')
+#define isALNUM(c)      isWORDCHAR(c)
+#define isALNUMU(c)     isWORDCHAR_L1(c)
 #define isALPHA(c)	(isUPPER(c) || isLOWER(c))
 /* ALPHAU includes Unicode semantics for latin1 characters.  It has an extra
  * >= AA test to speed up ASCII-only tests at the expense of the others */
@@ -533,7 +533,8 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #define isOCTAL(c)	((c) >= '0' && (c) <= '7')
 #define isSPACE_L1(c) (isSPACE(c) \
 		    || (NATIVE_TO_UNI(c) == 0x85 || NATIVE_TO_UNI(c) == 0xA0))
-#define isWORDCHAR_L1(c)	isALNUMU(c)
+#define isWORDCHAR(c)   (isALPHA(c) || isDIGIT(c) || (c) == '_')
+#define isWORDCHAR_L1(c) (isDIGIT(c) || isALPHAU(c) || (c) == '_')
 #ifdef EBCDIC
     /* In EBCDIC we do not do locales: therefore can use native functions */
 #   define isALNUMC(c)	isalnum(c)
