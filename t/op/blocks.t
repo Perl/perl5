@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 3;
+plan tests => 4;
 
 my @expect = qw(
 b1
@@ -105,3 +105,7 @@ sub CHECK {print ":check"}
 sub INIT {print ":init"}
 sub END {print ":end"}
 SCRIPT3
+
+fresh_perl_is(<<'SCRIPT70614', "still here",{switches => [''], stdin => '', stderr => 1 },'eval-UNITCHECK-eval (bug 70614)');
+eval "UNITCHECK { eval 0 }"; print "still here";
+SCRIPT70614

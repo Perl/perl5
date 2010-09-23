@@ -3255,8 +3255,11 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	}
     }
 
-    if (PL_unitcheckav)
+    if (PL_unitcheckav) {
+	OP *es = PL_eval_start;
 	call_list(PL_scopestack_ix, PL_unitcheckav);
+	PL_eval_start = es;
+    }
 
     /* compiled okay, so do it */
 
