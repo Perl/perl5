@@ -176,90 +176,90 @@
 #endif
 
 
-#define _CCC_TRY_AFF_COMMON(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNC)                       \
-        case NAMEL:                                                                     \
-            PL_reg_flags |= RF_tainted;                                                 \
-            /* FALL THROUGH */                                                          \
-        case NAME:                                                                      \
-            if (!nextchr)                                                               \
-                sayNO;                                                                  \
-            if (utf8_target && UTF8_IS_CONTINUED(nextchr)) {                                \
-                if (!CAT2(PL_utf8_,CLASS)) {                                            \
-                    bool ok;                                                            \
-                    ENTER;                                                              \
-                    save_re_context();                                                  \
-                    ok=CAT2(is_utf8_,CLASS)((const U8*)STR);                            \
-                    assert(ok);                                                         \
-                    LEAVE;                                                              \
-                }                                                                       \
-                if (!(OP(scan) == NAME                                                  \
+#define _CCC_TRY_AFF_COMMON(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNC)          \
+        case NAMEL:                                                         \
+            PL_reg_flags |= RF_tainted;                                     \
+            /* FALL THROUGH */                                              \
+        case NAME:                                                          \
+            if (!nextchr)                                                   \
+                sayNO;                                                      \
+            if (utf8_target && UTF8_IS_CONTINUED(nextchr)) {                \
+                if (!CAT2(PL_utf8_,CLASS)) {                                \
+                    bool ok;                                                \
+                    ENTER;                                                  \
+                    save_re_context();                                      \
+                    ok=CAT2(is_utf8_,CLASS)((const U8*)STR);                \
+                    assert(ok);                                             \
+                    LEAVE;                                                  \
+                }                                                           \
+                if (!(OP(scan) == NAME                                      \
                     ? cBOOL(swash_fetch(CAT2(PL_utf8_,CLASS), (U8*)locinput, utf8_target))  \
-                    : LCFUNC_utf8((U8*)locinput)))                                      \
-                {                                                                       \
-                    sayNO;                                                              \
-                }                                                                       \
-                locinput += PL_utf8skip[nextchr];                                       \
-                nextchr = UCHARAT(locinput);                                            \
-                break;                                                                  \
-            }                                                                           \
-	    /* Finished up by calling macro */
+                    : LCFUNC_utf8((U8*)locinput)))                          \
+                {                                                           \
+                    sayNO;                                                  \
+                }                                                           \
+                locinput += PL_utf8skip[nextchr];                           \
+                nextchr = UCHARAT(locinput);                                \
+                break;                                                      \
+            }                                                               \
+	    /* Finished up by macro calling this one */
 
-#define CCC_TRY_AFF(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNC,LCFUNC)                       \
-    _CCC_TRY_AFF_COMMON(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNC)                    \
-            if (!(OP(scan) == NAME ? FUNC(nextchr) : LCFUNC(nextchr)))                  \
-                sayNO;                                                                  \
-            nextchr = UCHARAT(++locinput);                                              \
+#define CCC_TRY_AFF(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNC,LCFUNC)           \
+    _CCC_TRY_AFF_COMMON(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNC)              \
+            if (!(OP(scan) == NAME ? FUNC(nextchr) : LCFUNC(nextchr)))      \
+                sayNO;                                                      \
+            nextchr = UCHARAT(++locinput);                                  \
             break
 
 /* Almost identical to the above, but has a case for a node that matches chars
  * between 128 and 255 using Unicode (latin1) semantics. */
 #define CCC_TRY_AFF_U(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNCU,LCFUNC)         \
-    _CCC_TRY_AFF_COMMON(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNC)                    \
+    _CCC_TRY_AFF_COMMON(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNC)               \
             if (!(OP(scan) == NAMEL ? LCFUNC(nextchr) : (FUNCU(nextchr) && (isASCII(nextchr) || (FLAGS(scan) & USE_UNI))))) \
-                sayNO;                                                                  \
-            nextchr = UCHARAT(++locinput);                                              \
+                sayNO;                                                       \
+            nextchr = UCHARAT(++locinput);                                   \
             break
 
-#define _CCC_TRY_NEG_COMMON(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNC)                        \
-        case NAMEL:                                                              \
-            PL_reg_flags |= RF_tainted;                                                 \
-            /* FALL THROUGH */                                                          \
-        case NAME :                                                                     \
-            if (!nextchr && locinput >= PL_regeol)                                      \
-                sayNO;                                                                  \
-            if (utf8_target && UTF8_IS_CONTINUED(nextchr)) {                                \
-                if (!CAT2(PL_utf8_,CLASS)) {                                            \
-                    bool ok;                                                            \
-                    ENTER;                                                              \
-                    save_re_context();                                                  \
-                    ok=CAT2(is_utf8_,CLASS)((const U8*)STR);                            \
-                    assert(ok);                                                         \
-                    LEAVE;                                                              \
-                }                                                                       \
-                if ((OP(scan) == NAME                                                  \
+#define _CCC_TRY_NEG_COMMON(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNC)           \
+        case NAMEL:                                                          \
+            PL_reg_flags |= RF_tainted;                                      \
+            /* FALL THROUGH */                                               \
+        case NAME :                                                          \
+            if (!nextchr && locinput >= PL_regeol)                           \
+                sayNO;                                                       \
+            if (utf8_target && UTF8_IS_CONTINUED(nextchr)) {                 \
+                if (!CAT2(PL_utf8_,CLASS)) {                                 \
+                    bool ok;                                                 \
+                    ENTER;                                                   \
+                    save_re_context();                                       \
+                    ok=CAT2(is_utf8_,CLASS)((const U8*)STR);                 \
+                    assert(ok);                                              \
+                    LEAVE;                                                   \
+                }                                                            \
+                if ((OP(scan) == NAME                                        \
                     ? cBOOL(swash_fetch(CAT2(PL_utf8_,CLASS), (U8*)locinput, utf8_target))  \
-                    : LCFUNC_utf8((U8*)locinput)))                                      \
-                {                                                                       \
-                    sayNO;                                                              \
-                }                                                                       \
-                locinput += PL_utf8skip[nextchr];                                       \
-                nextchr = UCHARAT(locinput);                                            \
-                break;                                                                  \
+                    : LCFUNC_utf8((U8*)locinput)))                           \
+                {                                                            \
+                    sayNO;                                                   \
+                }                                                            \
+                locinput += PL_utf8skip[nextchr];                            \
+                nextchr = UCHARAT(locinput);                                 \
+                break;                                                       \
             }
 
-#define CCC_TRY_NEG(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNC,LCFUNC)                        \
-    _CCC_TRY_NEG_COMMON(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNC)                        \
-            if ((OP(scan) == NAME ? FUNC(nextchr) : LCFUNC(nextchr)))                   \
-                sayNO;                                                                  \
-            nextchr = UCHARAT(++locinput);                                              \
+#define CCC_TRY_NEG(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNC,LCFUNC)            \
+    _CCC_TRY_NEG_COMMON(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNC)               \
+            if ((OP(scan) == NAME ? FUNC(nextchr) : LCFUNC(nextchr)))        \
+                sayNO;                                                       \
+            nextchr = UCHARAT(++locinput);                                   \
             break
 
 
-#define CCC_TRY_NEG_U(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNCU,LCFUNC)          \
-    _CCC_TRY_NEG_COMMON(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNCU)                \
+#define CCC_TRY_NEG_U(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNCU,LCFUNC)         \
+    _CCC_TRY_NEG_COMMON(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNCU)              \
             if ((OP(scan) == NAMEL ? LCFUNC(nextchr) : (FUNCU(nextchr) && (isASCII(nextchr) || (FLAGS(scan) & USE_UNI))))) \
-                sayNO;                                                          \
-            nextchr = UCHARAT(++locinput);                                      \
+                sayNO;                                                       \
+            nextchr = UCHARAT(++locinput);                                   \
             break
 
 
