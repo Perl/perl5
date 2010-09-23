@@ -532,7 +532,6 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 	((c) == ' ' || (c) == '\t' || (c) == '\n' || (c) =='\r' || (c) == '\f')
 #define isSPACE_L1(c) (isSPACE(c) \
 		    || (NATIVE_TO_UNI(c) == 0x85 || NATIVE_TO_UNI(c) == 0xA0))
-#define isBLANK(c)	((c) == ' ' || (c) == '\t')
 #define isDIGIT(c)	((c) >= '0' && (c) <= '9')
 #define isOCTAL(c)	((c) >= '0' && (c) <= '7')
 #define isASCII(c)	(FITS_IN_8_BITS(c) ? NATIVE_TO_UNI((U8) c) <= 127 : 0)
@@ -541,6 +540,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #   define isUPPER(c)	isupper(c)
 #   define isLOWER(c)	islower(c)
 #   define isALNUMC(c)	isalnum(c)
+#   define isBLANK(c)	((c) == ' ' || (c) == '\t' || NATIVE_TO_UNI(c) == 0xA0)
 #   define isCNTRL(c)	iscntrl(c)
 #   define isGRAPH(c)	isgraph(c)
 #   define isPRINT(c)	isprint(c)
@@ -553,6 +553,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #   define isUPPER(c)	((c) >= 'A' && (c) <= 'Z')
 #   define isLOWER(c)	((c) >= 'a' && (c) <= 'z')
 #   define isALNUMC(c)	(isALPHA(c) || isDIGIT(c))
+#   define isBLANK(c)	((c) == ' ' || (c) == '\t')
 #   define isCNTRL(c)	((U8) (c) < ' ' || (c) == 127)
 #   define isGRAPH(c)	(isALNUM(c) || isPUNCT(c))
 #   define isPRINT(c)	(((c) >= 32 && (c) < 127))
