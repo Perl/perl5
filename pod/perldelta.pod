@@ -387,6 +387,13 @@ Parsing Perl code (either with string C<eval> or by loading modules) from
 within a C<UNITCHECK> block no longer causes the interpreter to crash
 L<[perl #70614]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=70614>.
 
+=item *
+
+When C<-d> is used on the shebang (C<#!>) line, the debugger now has access
+to the lines of the main program. In the past, this sometimes worked and
+sometimes did not, depending on what order things happened to be arranged
+in memory.
+
 =back
 
 =head1 Known Problems

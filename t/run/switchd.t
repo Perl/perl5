@@ -9,7 +9,7 @@ BEGIN { require "./test.pl"; }
 
 # This test depends on t/lib/Devel/switchd.pm.
 
-plan(tests => 2);
+plan(tests => 3);
 
 my $r;
 
@@ -44,3 +44,16 @@ __SWDTEST__
     like($r, qr/^sub<Devel::switchd::import>;import<Devel::switchd a 42>;DB<main,$::tempfile_regexp,9>;sub<Foo::foo>;DB<Foo,$::tempfile_regexp,5>;DB<Foo,$::tempfile_regexp,6>;DB<Foo,$::tempfile_regexp,6>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;$/);
 }
 
+# [perl #71806]
+cmp_ok(
+  runperl(       # less is useful for something :-)
+   switches => [ '"-Mless ++INC->{q-Devel/_.pm-}"' ],
+   progs    => [
+    '#!perl -d:_',
+    'sub DB::DB{} print scalar @{q/_</.__FILE__}',
+   ],
+  ),
+ '>',
+  0,
+ 'The debugger can see the lines of the main program under #!perl -d',
+);
