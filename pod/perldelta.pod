@@ -344,7 +344,8 @@ be noted as well.
 
 =item *
 
-See L</Regular expressions retain their localeness when interpolated>
+See L</Regular expressions retain their localeness when interpolated>,
+above.
 
 =back
 
@@ -379,6 +380,12 @@ to turn into
 
 at compile time. Now it correctly matches against C<$_>
 L<[perl #20444]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=20444>.
+
+=item *
+
+Parsing Perl code (either with string C<eval> or by loading modules) from
+within a C<UNITCHECK> block no longer causes the interpreter to crash
+L<[perl #70614]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=70614>.
 
 =back
 
