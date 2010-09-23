@@ -532,7 +532,6 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 	((c) == ' ' || (c) == '\t' || (c) == '\n' || (c) =='\r' || (c) == '\f')
 #define isSPACE_L1(c) (isSPACE(c) \
 		    || (NATIVE_TO_UNI(c) == 0x85 || NATIVE_TO_UNI(c) == 0xA0))
-#define isPSXSPC(c)	(isSPACE(c) || (c) == '\v')
 #define isBLANK(c)	((c) == ' ' || (c) == '\t')
 #define isDIGIT(c)	((c) >= '0' && (c) <= '9')
 #define isOCTAL(c)	((c) >= '0' && (c) <= '7')
@@ -545,6 +544,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #   define isCNTRL(c)	iscntrl(c)
 #   define isGRAPH(c)	isgraph(c)
 #   define isPRINT(c)	isprint(c)
+#   define isPSXSPC(c)	isspace(c)
 #   define isPUNCT(c)	ispunct(c)
 #   define isXDIGIT(c)	isxdigit(c)
 #   define toUPPER(c)	toupper(c)
@@ -556,6 +556,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #   define isCNTRL(c)	((U8) (c) < ' ' || (c) == 127)
 #   define isGRAPH(c)	(isALNUM(c) || isPUNCT(c))
 #   define isPRINT(c)	(((c) >= 32 && (c) < 127))
+#   define isPSXSPC(c)	(isSPACE(c) || (c) == '\v')
 #   define isPUNCT(c)	(((c) >= 33 && (c) <= 47) || ((c) >= 58 && (c) <= 64)  || ((c) >= 91 && (c) <= 96) || ((c) >= 123 && (c) <= 126))
 #   define isXDIGIT(c)  (isDIGIT(c) || ((c) >= 'a' && (c) <= 'f') || ((c) >= 'A' && (c) <= 'F'))
 
