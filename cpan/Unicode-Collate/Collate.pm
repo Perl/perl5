@@ -14,7 +14,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '0.59';
+our $VERSION = '0.60';
 our $PACKAGE = __PACKAGE__;
 
 my @Path = qw(Unicode Collate);
@@ -1015,9 +1015,10 @@ sub index
 
 	if (@subWt && !$var && !$wt[0]) {
 	    push @{ $subWt[-1] }, \@wt if $to_be_pushed;
-	} else {
+	} elsif ($to_be_pushed) {
 	    push @subWt, [ \@wt ];
 	}
+	# else ===> skipped
     }
 
     my $count = 0;
@@ -1536,7 +1537,7 @@ B<NOTE>: When XSUB is used, the DUCET is compiled on building this
 module, and it may save time at the run time.
 Explicit saying C<table =E<gt> 'allkeys.txt'> (or using another table),
 or using C<ignoreChar>, C<ignoreName>, C<undefChar>, or C<undefName>
-will prevent this module using the compiled DUCET.
+will prevent this module from using the compiled DUCET.
 
 If C<undef> is passed explicitly as the value for this key,
 no file is read (but you can define collation elements via C<entry>).

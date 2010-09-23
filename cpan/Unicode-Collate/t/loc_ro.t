@@ -4,7 +4,7 @@ use warnings;
 use Unicode::Collate::Locale;
 
 use Test;
-plan tests => 51;
+plan tests => 71;
 
 my $objRo = Unicode::Collate::Locale->
     new(locale => 'RO', normalization => undef);
@@ -52,7 +52,12 @@ ok($objRo->lt("s\x{327}", "S\x{327}"));
 ok($objRo->lt("t\x{327}", "T\x{327}"));
 ok($objRo->lt("z\x{307}", "Z\x{307}"));
 
-# 29
+ok($objRo->eq("s\x{327}", "s\x{326}"));
+ok($objRo->eq("S\x{327}", "S\x{326}"));
+ok($objRo->eq("t\x{327}", "t\x{326}"));
+ok($objRo->eq("T\x{327}", "T\x{326}"));
+
+# 33
 
 ok($objRo->eq("a\x{306}", "\x{103}"));
 ok($objRo->eq("A\x{306}", "\x{102}"));
@@ -73,11 +78,28 @@ ok($objRo->eq("T\x{326}", "\x{21A}"));
 ok($objRo->eq("z\x{307}", "\x{17C}"));
 ok($objRo->eq("Z\x{307}", "\x{17B}"));
 
-# 47
-
-ok($objRo->eq("s\x{327}", "s\x{326}"));
-ok($objRo->eq("S\x{327}", "S\x{326}"));
-ok($objRo->eq("t\x{327}", "t\x{326}"));
-ok($objRo->eq("T\x{327}", "T\x{326}"));
-
 # 51
+
+ok($objRo->eq("a\x{306}\x{300}", "\x{1EB1}"));
+ok($objRo->eq("A\x{306}\x{300}", "\x{1EB0}"));
+ok($objRo->eq("a\x{306}\x{301}", "\x{1EAF}"));
+ok($objRo->eq("A\x{306}\x{301}", "\x{1EAE}"));
+ok($objRo->eq("a\x{306}\x{303}", "\x{1EB5}"));
+ok($objRo->eq("A\x{306}\x{303}", "\x{1EB4}"));
+ok($objRo->eq("a\x{306}\x{309}", "\x{1EB3}"));
+ok($objRo->eq("A\x{306}\x{309}", "\x{1EB2}"));
+ok($objRo->eq("a\x{306}\x{323}", "\x{1EB7}"));
+ok($objRo->eq("A\x{306}\x{323}", "\x{1EB6}"));
+
+ok($objRo->eq("a\x{302}\x{300}", "\x{1EA7}"));
+ok($objRo->eq("A\x{302}\x{300}", "\x{1EA6}"));
+ok($objRo->eq("a\x{302}\x{301}", "\x{1EA5}"));
+ok($objRo->eq("A\x{302}\x{301}", "\x{1EA4}"));
+ok($objRo->eq("a\x{302}\x{303}", "\x{1EAB}"));
+ok($objRo->eq("A\x{302}\x{303}", "\x{1EAA}"));
+ok($objRo->eq("a\x{302}\x{309}", "\x{1EA9}"));
+ok($objRo->eq("A\x{302}\x{309}", "\x{1EA8}"));
+ok($objRo->eq("a\x{302}\x{323}", "\x{1EAD}"));
+ok($objRo->eq("A\x{302}\x{323}", "\x{1EAC}"));
+
+# 71

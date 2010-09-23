@@ -1506,7 +1506,7 @@ use File::Glob qw(:case);
     'Unicode::Collate' =>
 	{
 	'MAINTAINER'	=> 'sadahiro',
-	'DISTRIBUTION'	=> 'SADAHIRO/Unicode-Collate-0.59-withoutworldwriteables.tar.gz',
+	'DISTRIBUTION'	=> 'SADAHIRO/Unicode-Collate-0.60-withoutworldwriteables.tar.gz',
 	'FILES'		=> q[cpan/Unicode-Collate],
 			    # ignore experimental XS version
 	'EXCLUDED'	=> [ qr{X$},

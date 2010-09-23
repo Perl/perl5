@@ -4,7 +4,7 @@ use warnings;
 use Unicode::Collate::Locale;
 
 use Test;
-plan tests => 42;
+plan tests => 52;
 
 my $objSk = Unicode::Collate::Locale->
     new(locale => 'SK', normalization => undef);
@@ -69,3 +69,16 @@ ok($objSk->eq("z\x{30C}", "\x{17E}"));
 ok($objSk->eq("Z\x{30C}", "\x{17D}"));
 
 # 42
+
+ok($objSk->eq("o\x{302}\x{300}", "\x{1ED3}"));
+ok($objSk->eq("O\x{302}\x{300}", "\x{1ED2}"));
+ok($objSk->eq("o\x{302}\x{301}", "\x{1ED1}"));
+ok($objSk->eq("O\x{302}\x{301}", "\x{1ED0}"));
+ok($objSk->eq("o\x{302}\x{303}", "\x{1ED7}"));
+ok($objSk->eq("O\x{302}\x{303}", "\x{1ED6}"));
+ok($objSk->eq("o\x{302}\x{309}", "\x{1ED5}"));
+ok($objSk->eq("O\x{302}\x{309}", "\x{1ED4}"));
+ok($objSk->eq("o\x{302}\x{323}", "\x{1ED9}"));
+ok($objSk->eq("O\x{302}\x{323}", "\x{1ED8}"));
+
+# 52

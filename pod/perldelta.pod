@@ -151,6 +151,10 @@ C<PathTools> has been upgraded from version 3.31_01 to 3.33.
 
 =item *
 
+C<Unicode::Collate> has been upgraded from version 0.59 to 0.60
+
+=item *
+
 C<Unicode::Normalize> has been upgraded from version 1.06 to 1.07
 
 =back

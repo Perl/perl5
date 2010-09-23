@@ -4,7 +4,7 @@ use strict;
 use Carp;
 use base qw(Unicode::Collate);
 
-our $VERSION = '0.59';
+our $VERSION = '0.60';
 
 use File::Spec;
 
@@ -14,9 +14,10 @@ my $PL_EXT  = '.pl';
 
 my %LocaleFile = map { ($_, $_) } qw(
    af az ca cs cy da eo es et fi fil fo fr ha haw
-   is kl lt lv mt nn pl ro sk sl sv sw tr wo yo
+   is kl lt lv mt nn nso om pl ro sk sl sv sw tn tr vi wo yo
 );
    $LocaleFile{'default'}         = '';
+   $LocaleFile{'de__phonebook'}   = 'de_phone';
    $LocaleFile{'es__traditional'} = 'es_trad';
    $LocaleFile{'nb'} = 'nn';
 
@@ -25,6 +26,7 @@ sub _locale {
     if ($locale) {
 	$locale = lc $locale;
 	$locale =~ tr/\-\ \./_/;
+	$locale =~ s/_phone\z/_phonebook/;
 	$locale =~ s/_trad\z/_traditional/;
 	$LocaleFile{$locale} and return $locale;
 
@@ -159,6 +161,7 @@ this method returns a string C<'default'> meaning no special tailoring.
       cs                Czech
       cy                Welsh
       da                Danish
+      de__phonebook     German (umlaut as 'ae', 'oe', 'ue')
       eo                Esperanto
       es                Spanish
       es__traditional   Spanish ('ch' and 'll' as a grapheme)
@@ -176,13 +179,17 @@ this method returns a string C<'default'> meaning no special tailoring.
       mt                Maltese
       nb                Norwegian Bokmal
       nn                Norwegian Nynorsk
+      nso               Northern Sotho
+      om                Oromo
       pl                Polish
       ro                Romanian
       sk                Slovak
       sl                Slovenian
       sv                Swedish
       sw                Swahili
+      tn                Tswana
       tr                Turkish
+      vi                Vietnamese
       wo                Wolof
       yo                Yoruba
 
@@ -192,6 +199,20 @@ Installation of Unicode::Collate::Locale requires F<Collate/Locale.pm>,
 F<Collate/Locale/*.pm> and F<Collate/allkeys.txt>.  On building,
 Unicode::Collate::Locale doesn't require F<data/*.txt> and F<mklocale>.
 Tests for Unicode::Collate::Locale are named F<t/loc_*.t>.
+
+=head1 CAVEAT
+
+=over 4
+
+=item tailoring is not maximum
+
+If a certain letter is tailored, its equivalents are not always
+tailored as well as it. For example, even though W is tailored,
+fullwidth W (C<U+FF37>), W with acute (C<U+1E82>), etc. are not
+tailored. Thus the result may depend on whether source strings
+are normalized or not.
+
+=back
 
 =head1 AUTHOR
 

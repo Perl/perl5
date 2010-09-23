@@ -1,5 +1,15 @@
 Revision history for Perl module Unicode::Collate.
 
+0.60  Thu Sep 23 21:37:36 2010
+    - bug fix: index() [and its friends including gmatch()] didn't remove
+      ignorable characters in the substring correctly.
+      Thanks for the bug report:
+   http://www.xray.mpe.mpg.de/mailing-lists/perl-unicode/2010-09/msg00014.html
+
+    - U::C::Locale newly supports locales: de__phonebook, nso, om, tn, vi.
+    - precomposites of a-breve, a-circ, e-circ, o-circ are tailored as well.
+        (affected locales: ro, sk, sv)
+
 0.59  Sun Sep  5 17:03:52 2010
     - U::C::Locale newly supports locales: az, fil, ha, lt, mt, tr, wo, yo.
     - precomposites of a-uml, o-uml, and u-uml are tailored as well.
@@ -32,7 +42,7 @@ Revision history for Perl module Unicode::Collate.
 
     ! DUCET will be compiled when XS is used. Explicit saying
       <table => 'allkeys.txt'> (or using another table) will prevent
-      this module using the compiled DUCET.
+      this module from using the compiled DUCET.
 
     ! added t/default.t that uses DUCET.
 

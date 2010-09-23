@@ -114,6 +114,23 @@ ok($objKl->eq("d\x{335}", "\x{111}"));
 ok($objKl->eq("D\x{335}", "\x{110}"));
 ok($objKl->eq("u\x{308}", $uuml));
 ok($objKl->eq("U\x{308}", $Uuml));
+ok($objKl->eq("u\x{30B}", "\x{171}"));
+ok($objKl->eq("U\x{30B}", "\x{170}"));
+ok($objKl->eq("a\x{308}", $auml));
+ok($objKl->eq("A\x{308}", $Auml));
+ok($objKl->eq("e\x{328}", "\x{119}"));
+ok($objKl->eq("E\x{328}", "\x{118}"));
+ok($objKl->eq("o\x{338}", $ostk));
+ok($objKl->eq("O\x{338}", $Ostk));
+ok($objKl->eq("o\x{308}", $ouml));
+ok($objKl->eq("O\x{308}", $Ouml));
+ok($objKl->eq("o\x{30B}", "\x{151}"));
+ok($objKl->eq("O\x{30B}", "\x{150}"));
+ok($objKl->eq("a\x{30A}", $arng));
+ok($objKl->eq("A\x{30A}", $Arng));
+
+# 80
+
 ok($objKl->eq("u\x{308}\x{300}", "\x{1DC}"));
 ok($objKl->eq("U\x{308}\x{300}", "\x{1DB}"));
 ok($objKl->eq("u\x{308}\x{301}", "\x{1D8}"));
@@ -122,33 +139,16 @@ ok($objKl->eq("u\x{308}\x{304}", "\x{1D6}"));
 ok($objKl->eq("U\x{308}\x{304}", "\x{1D5}"));
 ok($objKl->eq("u\x{308}\x{30C}", "\x{1DA}"));
 ok($objKl->eq("U\x{308}\x{30C}", "\x{1D9}"));
-ok($objKl->eq("u\x{30B}", "\x{171}"));
-ok($objKl->eq("U\x{30B}", "\x{170}"));
-
-# 76
-
 ok($objKl->eq("\x{1FD}", "$ae\x{301}"));
 ok($objKl->eq("\x{1FC}", "$AE\x{301}"));
 ok($objKl->eq("\x{1E3}", "$ae\x{304}"));
 ok($objKl->eq("\x{1E2}", "$AE\x{304}"));
-ok($objKl->eq("a\x{308}", $auml));
-ok($objKl->eq("A\x{308}", $Auml));
 ok($objKl->eq("a\x{308}\x{304}", "\x{1DF}"));
 ok($objKl->eq("A\x{308}\x{304}", "\x{1DE}"));
-ok($objKl->eq("e\x{328}", "\x{119}"));
-ok($objKl->eq("E\x{328}", "\x{118}"));
-ok($objKl->eq("o\x{338}", $ostk));
-ok($objKl->eq("O\x{338}", $Ostk));
 ok($objKl->eq("o\x{338}\x{301}", "\x{1FF}"));
 ok($objKl->eq("O\x{338}\x{301}", "\x{1FE}"));
-ok($objKl->eq("o\x{308}", $ouml));
-ok($objKl->eq("O\x{308}", $Ouml));
 ok($objKl->eq("o\x{308}\x{304}", "\x{22B}"));
 ok($objKl->eq("O\x{308}\x{304}", "\x{22A}"));
-ok($objKl->eq("o\x{30B}", "\x{151}"));
-ok($objKl->eq("O\x{30B}", "\x{150}"));
-ok($objKl->eq("a\x{30A}", $arng));
-ok($objKl->eq("A\x{30A}", $Arng));
 ok($objKl->eq("A\x{30A}", "\x{212B}"));
 ok($objKl->eq("a\x{30A}\x{301}", "\x{1FB}"));
 ok($objKl->eq("A\x{30A}\x{301}", "\x{1FA}"));

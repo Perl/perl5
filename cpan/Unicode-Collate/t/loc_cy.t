@@ -44,62 +44,62 @@ ok($objCy->gt("u", "th"));
 $objCy->change(level => 2);
 
 ok($objCy->eq("ch", "Ch"));
-ok($objCy->eq("CH", "Ch"));
+ok($objCy->eq("Ch", "CH"));
 ok($objCy->eq("dd", "Dd"));
-ok($objCy->eq("DD", "Dd"));
+ok($objCy->eq("Dd", "DD"));
 ok($objCy->eq("ff", "Ff"));
-ok($objCy->eq("FF", "Ff"));
+ok($objCy->eq("Ff", "FF"));
 ok($objCy->eq("ng", "Ng"));
-ok($objCy->eq("NG", "Ng"));
+ok($objCy->eq("Ng", "NG"));
 ok($objCy->eq("ll", "Ll"));
-ok($objCy->eq("LL", "Ll"));
+ok($objCy->eq("Ll", "LL"));
 ok($objCy->eq("ph", "Ph"));
-ok($objCy->eq("PH", "Ph"));
+ok($objCy->eq("Ph", "PH"));
 ok($objCy->eq("rh", "Rh"));
-ok($objCy->eq("RH", "Rh"));
+ok($objCy->eq("Rh", "RH"));
 ok($objCy->eq("th", "Th"));
-ok($objCy->eq("TH", "Th"));
+ok($objCy->eq("Th", "TH"));
 
 # 42
 
 $objCy->change(level => 3);
 
 ok($objCy->lt("ch", "Ch"));
-ok($objCy->gt("CH", "Ch"));
+ok($objCy->lt("Ch", "CH"));
 ok($objCy->lt("dd", "Dd"));
-ok($objCy->gt("DD", "Dd"));
+ok($objCy->lt("Dd", "DD"));
 ok($objCy->lt("ff", "Ff"));
-ok($objCy->gt("FF", "Ff"));
+ok($objCy->lt("Ff", "FF"));
 ok($objCy->lt("ng", "Ng"));
-ok($objCy->gt("NG", "Ng"));
+ok($objCy->lt("Ng", "NG"));
 ok($objCy->lt("ll", "Ll"));
-ok($objCy->gt("LL", "Ll"));
+ok($objCy->lt("Ll", "LL"));
 ok($objCy->lt("ph", "Ph"));
-ok($objCy->gt("PH", "Ph"));
+ok($objCy->lt("Ph", "PH"));
 ok($objCy->lt("rh", "Rh"));
-ok($objCy->gt("RH", "Rh"));
+ok($objCy->lt("Rh", "RH"));
 ok($objCy->lt("th", "Th"));
-ok($objCy->gt("TH", "Th"));
+ok($objCy->lt("Th", "TH"));
 
 # 58
 
 $objCy->change(upper_before_lower => 1);
 
 ok($objCy->gt("ch", "Ch"));
-ok($objCy->lt("CH", "Ch"));
+ok($objCy->gt("Ch", "CH"));
 ok($objCy->gt("dd", "Dd"));
-ok($objCy->lt("DD", "Dd"));
+ok($objCy->gt("Dd", "DD"));
 ok($objCy->gt("ff", "Ff"));
-ok($objCy->lt("FF", "Ff"));
+ok($objCy->gt("Ff", "FF"));
 ok($objCy->gt("ng", "Ng"));
-ok($objCy->lt("NG", "Ng"));
+ok($objCy->gt("Ng", "NG"));
 ok($objCy->gt("ll", "Ll"));
-ok($objCy->lt("LL", "Ll"));
+ok($objCy->gt("Ll", "LL"));
 ok($objCy->gt("ph", "Ph"));
-ok($objCy->lt("PH", "Ph"));
+ok($objCy->gt("Ph", "PH"));
 ok($objCy->gt("rh", "Rh"));
-ok($objCy->lt("RH", "Rh"));
+ok($objCy->gt("Rh", "RH"));
 ok($objCy->gt("th", "Th"));
-ok($objCy->lt("TH", "Th"));
+ok($objCy->gt("Th", "TH"));
 
 # 74

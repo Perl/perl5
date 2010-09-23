@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 65 };
+BEGIN { plan tests => 71 };
 
 use strict;
 use warnings;
@@ -340,6 +340,33 @@ $str = "Camel donkey zebra came\x{301}l CAMEL horse cAm\0E\0L...";
 $Collator->gsubst($str, "camel", sub { "<b>$_[0]</b>" });
 ok($str, "<b>Camel</b> donkey zebra <b>came\x{301}l</b> "
 	. "<b>CAMEL</b> horse <b>cAm\0E\0L</b>...");
+
+# http://www.xray.mpe.mpg.de/mailing-lists/perl-unicode/2010-09/msg00014.html
+# when the substring includes an ignorable element like a space...
+
+$str = "Camel donkey zebra came\x{301}l CAMEL horse cAm\0E\0L...";
+$Collator->gsubst($str, "camel horse", sub { "<b>$_[0]</b>" });
+ok($str, "Camel donkey zebra came\x{301}l <b>CAMEL horse</b> cAm\0E\0L...");
+
+$str = "Camel donkey zebra camex{301}l CAMEL horse cAmEL-horse...";
+$Collator->gsubst($str, "camel horse", sub { "=$_[0]=" });
+ok($str, "Camel donkey zebra camex{301}l =CAMEL horse= =cAmEL-horse=...");
+
+$str = "Camel donkey zebra camex{301}l CAMEL horse cAmEL-horse...";
+$Collator->gsubst($str, "camel-horse", sub { "=$_[0]=" });
+ok($str, "Camel donkey zebra camex{301}l =CAMEL horse= =cAmEL-horse=...");
+
+$str = "Camel donkey zebra camex{301}l CAMEL horse cAmEL-horse...";
+$Collator->gsubst($str, "camelhorse", sub { "=$_[0]=" });
+ok($str, "Camel donkey zebra camex{301}l =CAMEL horse= =cAmEL-horse=...");
+
+$str = "Camel donkey zebra camex{301}l CAMEL horse cAmEL-horse...";
+$Collator->gsubst($str, "  ca  mel  hor  se  ", sub { "=$_[0]=" });
+ok($str, "Camel donkey zebra camex{301}l =CAMEL horse= =cAmEL-horse=...");
+
+$str = "Camel donkey zebra camex{301}l CAMEL horse cAmEL-horse...";
+$Collator->gsubst($str, "ca\x{300}melho\x{302}rse", sub { "=$_[0]=" });
+ok($str, "Camel donkey zebra camex{301}l =CAMEL horse= =cAmEL-horse=...");
 
 $Collator->change(level => 3);
 

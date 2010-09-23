@@ -42,62 +42,62 @@ ok($objSw->gt("u", "th"));
 $objSw->change(level => 2);
 
 ok($objSw->eq("ch", "Ch"));
-ok($objSw->eq("CH", "Ch"));
+ok($objSw->eq("Ch", "CH"));
 ok($objSw->eq("dh", "Dh"));
-ok($objSw->eq("DH", "Dh"));
+ok($objSw->eq("Dh", "DH"));
 ok($objSw->eq("gh", "Gh"));
-ok($objSw->eq("GH", "Gh"));
+ok($objSw->eq("Gh", "GH"));
 ok($objSw->eq("kh", "Kh"));
-ok($objSw->eq("KH", "Kh"));
+ok($objSw->eq("Kh", "KH"));
 ok($objSw->eq("ng'","Ng'"));
-ok($objSw->eq("NG'","Ng'"));
+ok($objSw->eq("Ng'","NG'"));
 ok($objSw->eq("ny", "Ny"));
-ok($objSw->eq("NY", "Ny"));
+ok($objSw->eq("Ny", "NY"));
 ok($objSw->eq("sh", "Sh"));
-ok($objSw->eq("SH", "Sh"));
+ok($objSw->eq("Sh", "SH"));
 ok($objSw->eq("th", "Th"));
-ok($objSw->eq("TH", "Th"));
+ok($objSw->eq("Th", "TH"));
 
 # 40
 
 $objSw->change(level => 3);
 
 ok($objSw->lt("ch", "Ch"));
-ok($objSw->gt("CH", "Ch"));
+ok($objSw->lt("Ch", "CH"));
 ok($objSw->lt("dh", "Dh"));
-ok($objSw->gt("DH", "Dh"));
+ok($objSw->lt("Dh", "DH"));
 ok($objSw->lt("gh", "Gh"));
-ok($objSw->gt("GH", "Gh"));
+ok($objSw->lt("Gh", "GH"));
 ok($objSw->lt("kh", "Kh"));
-ok($objSw->gt("KH", "Kh"));
+ok($objSw->lt("Kh", "KH"));
 ok($objSw->lt("ng'","Ng'"));
-ok($objSw->gt("NG'","Ng'"));
+ok($objSw->lt("Ng'","NG'"));
 ok($objSw->lt("ny", "Ny"));
-ok($objSw->gt("NY", "Ny"));
+ok($objSw->lt("Ny", "NY"));
 ok($objSw->lt("sh", "Sh"));
-ok($objSw->gt("SH", "Sh"));
+ok($objSw->lt("Sh", "SH"));
 ok($objSw->lt("th", "Th"));
-ok($objSw->gt("TH", "Th"));
+ok($objSw->lt("Th", "TH"));
 
 # 56
 
 $objSw->change(upper_before_lower => 1);
 
 ok($objSw->gt("ch", "Ch"));
-ok($objSw->lt("CH", "Ch"));
+ok($objSw->gt("Ch", "CH"));
 ok($objSw->gt("dh", "Dh"));
-ok($objSw->lt("DH", "Dh"));
+ok($objSw->gt("Dh", "DH"));
 ok($objSw->gt("gh", "Gh"));
-ok($objSw->lt("GH", "Gh"));
+ok($objSw->gt("Gh", "GH"));
 ok($objSw->gt("kh", "Kh"));
-ok($objSw->lt("KH", "Kh"));
+ok($objSw->gt("Kh", "KH"));
 ok($objSw->gt("ng'","Ng'"));
-ok($objSw->lt("NG'","Ng'"));
+ok($objSw->gt("Ng'","NG'"));
 ok($objSw->gt("ny", "Ny"));
-ok($objSw->lt("NY", "Ny"));
+ok($objSw->gt("Ny", "NY"));
 ok($objSw->gt("sh", "Sh"));
-ok($objSw->lt("SH", "Sh"));
+ok($objSw->gt("Sh", "SH"));
 ok($objSw->gt("th", "Th"));
-ok($objSw->lt("TH", "Th"));
+ok($objSw->gt("Th", "TH"));
 
 # 72
