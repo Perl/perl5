@@ -510,6 +510,8 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #  define FITS_IN_8_BITS(c) ((sizeof(c) == 1) || (((U32)(c) & 0xFF) == (U32)(c)))
 #endif
 
+#define isASCII(c)	(FITS_IN_8_BITS(c) ? NATIVE_TO_UNI((U8) c) <= 127 : 0)
+
 #define isALNUM(c)      isWORDCHAR(c)
 #define isALNUMU(c)     isWORDCHAR_L1(c)
 #define isALPHA(c)	(isUPPER(c) || isLOWER(c))
@@ -523,7 +525,6 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 	|| NATIVE_TO_UNI((U8) c) == 0xAA \
 	|| NATIVE_TO_UNI((U8) c) == 0xB5 \
 	|| NATIVE_TO_UNI((U8) c) == 0xBA)))
-#define isASCII(c)	(FITS_IN_8_BITS(c) ? NATIVE_TO_UNI((U8) c) <= 127 : 0)
 
 /* continuation character for legal NAME in \N{NAME} */
 #define isCHARNAME_CONT(c) (isALNUMU(c) || (c) == ' ' || (c) == '-' || (c) == '(' || (c) == ')' || (c) == ':' || NATIVE_TO_UNI((U8) c) == 0xA0)
