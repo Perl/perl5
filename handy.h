@@ -563,7 +563,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #   define isUPPER(c)	((c) >= 'A' && (c) <= 'Z')
 #   define isXDIGIT(c)  (isDIGIT(c) || ((c) >= 'a' && (c) <= 'f') || ((c) >= 'A' && (c) <= 'F'))
 
-/* ASCII casing. */
+    /* ASCII casing. */
 #   define toLOWER(c)	(isUPPER(c) ? (c) + ('a' - 'A') : (c))
 #   define toUPPER(c)	(isLOWER(c) ? (c) - ('a' - 'A') : (c))
 #endif
