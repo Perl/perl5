@@ -1194,6 +1194,10 @@ XS(XS_re_regexp_pattern)
 	    STRLEN left = 0;
 	    char reflags[sizeof(INT_PAT_MODS) + 1]; /* The +1 is for the charset
 						        modifier */
+            const char *fptr;
+            char ch;
+            U16 match_flags;
+
             /*
                we are in list context so stringify
                the modifiers that apply. We ignore "negative
@@ -1206,9 +1210,8 @@ XS(XS_re_regexp_pattern)
 	    else if (RX_EXTFLAGS(re) & RXf_PMf_UNICODE) {
 		reflags[left++] = UNICODE_PAT_MOD;
 	    }
-            const char *fptr = INT_PAT_MODS;
-            char ch;
-            U16 match_flags = (U16)((RX_EXTFLAGS(re) & PMf_COMPILETIME)
+            fptr = INT_PAT_MODS;
+            match_flags = (U16)((RX_EXTFLAGS(re) & PMf_COMPILETIME)
                                     >> RXf_PMf_STD_PMMOD_SHIFT);
 
             while((ch = *fptr++)) {
