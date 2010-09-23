@@ -528,8 +528,6 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 
 /* continuation character for legal NAME in \N{NAME} */
 #define isCHARNAME_CONT(c) (isALNUMU(c) || (c) == ' ' || (c) == '-' || (c) == '(' || (c) == ')' || (c) == ':' || NATIVE_TO_UNI((U8) c) == 0xA0)
-#define isSPACE(c) \
-	((c) == ' ' || (c) == '\t' || (c) == '\n' || (c) =='\r' || (c) == '\f')
 #define isSPACE_L1(c) (isSPACE(c) \
 		    || (NATIVE_TO_UNI(c) == 0x85 || NATIVE_TO_UNI(c) == 0xA0))
 #define isDIGIT(c)	((c) >= '0' && (c) <= '9')
@@ -546,6 +544,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #   define isPRINT(c)	isprint(c)
 #   define isPSXSPC(c)	isspace(c)
 #   define isPUNCT(c)	ispunct(c)
+#   define isSPACE(c)   (isPSXSPC(c) && (c) != '\v')
 #   define isXDIGIT(c)	isxdigit(c)
 #   define toUPPER(c)	toupper(c)
 #   define toLOWER(c)	tolower(c)
@@ -559,6 +558,8 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #   define isPRINT(c)	(((c) >= 32 && (c) < 127))
 #   define isPSXSPC(c)	(isSPACE(c) || (c) == '\v')
 #   define isPUNCT(c)	(((c) >= 33 && (c) <= 47) || ((c) >= 58 && (c) <= 64)  || ((c) >= 91 && (c) <= 96) || ((c) >= 123 && (c) <= 126))
+#   define isSPACE(c) \
+	((c) == ' ' || (c) == '\t' || (c) == '\n' || (c) =='\r' || (c) == '\f')
 #   define isXDIGIT(c)  (isDIGIT(c) || ((c) >= 'a' && (c) <= 'f') || ((c) >= 'A' && (c) <= 'F'))
 
 /* ASCII casing. */
