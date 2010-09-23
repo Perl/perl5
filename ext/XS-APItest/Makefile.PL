@@ -8,7 +8,7 @@ WriteMakefile(
     'VERSION_FROM'	=> 'APItest.pm', # finds $VERSION
     'PREREQ_PM'		=> {}, # e.g., Module::Name => 1.1
     ABSTRACT_FROM	=> 'APItest.pm', # retrieve abstract from module
-    AUTHOR		=> 'Tim Jenness <t.jenness@jach.hawaii.edu>, Christian Soeller <csoelle@mph.auckland.ac.nz>, Hugo van der Sanden <hv@crypt.compulink.co.uk>',
+    AUTHOR		=> 'Tim Jenness <t.jenness@jach.hawaii.edu>, Christian Soeller <csoelle@mph.auckland.ac.nz>, Hugo van der Sanden <hv@crypt.compulink.co.uk>, Andrew Main (Zefram) <zefram@fysh.org>',
     'C'                 => ['exception.c', 'core.c', 'notcore.c'],
     'OBJECT'            => '$(BASEEXT)$(OBJ_EXT) $(O_FILES)',
     realclean => {FILES	=> 'const-c.inc const-xs.inc'},

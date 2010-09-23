@@ -9,7 +9,7 @@ my $t;
 
 $t = "";
 eval q{
-	use XS::APItest::KeywordRPN ();
+	use XS::APItest ();
 	$t .= "a";
 	swaptwostmts
 	$t .= "b";
@@ -20,7 +20,7 @@ isnt $@, "";
 
 $t = "";
 eval q{
-	use XS::APItest::KeywordRPN qw(swaptwostmts);
+	use XS::APItest qw(swaptwostmts);
 	$t .= "a";
 	swaptwostmts
 	$t .= "b";
@@ -32,7 +32,7 @@ is $t, "acbd";
 
 $t = "";
 eval q{
-	use XS::APItest::KeywordRPN qw(swaptwostmts);
+	use XS::APItest qw(swaptwostmts);
 	$t .= "a";
 	swaptwostmts
 	if(1) { $t .= "b"; }
@@ -44,7 +44,7 @@ is $t, "acbd";
 
 $t = "";
 eval q{
-	use XS::APItest::KeywordRPN qw(swaptwostmts);
+	use XS::APItest qw(swaptwostmts);
 	$t .= "a";
 	swaptwostmts
 	$t .= "b";
@@ -56,7 +56,7 @@ is $t, "acbd";
 
 $t = "";
 eval q{
-	use XS::APItest::KeywordRPN qw(swaptwostmts);
+	use XS::APItest qw(swaptwostmts);
 	$t .= "a";
 	swaptwostmts
 	$t .= "b";
@@ -74,7 +74,7 @@ is $t, "acedfcedfcedfbg";
 
 $t = "";
 eval q{
-	use XS::APItest::KeywordRPN qw(swaptwostmts);
+	use XS::APItest qw(swaptwostmts);
 	$t .= "a";
 	swaptwostmts
 	$t .= "b";
@@ -85,7 +85,7 @@ is $t, "acb";
 
 $t = "";
 eval q{
-	use XS::APItest::KeywordRPN qw(swaptwostmts);
+	use XS::APItest qw(swaptwostmts);
 	$t .= "a";
 	swaptwostmts
 	$t .= "b";
@@ -96,7 +96,7 @@ is $t, "acb";
 
 $t = "";
 eval q{
-	use XS::APItest::KeywordRPN qw(swaptwostmts);
+	use XS::APItest qw(swaptwostmts);
 	$t .= "a";
 	swaptwostmts
 	$t .= "b"
@@ -105,7 +105,7 @@ isnt $@, "";
 
 $t = "";
 eval q{
-	use XS::APItest::KeywordRPN qw(swaptwostmts);
+	use XS::APItest qw(swaptwostmts);
 	$_ = $t;
 	$_ .= "a";
 	swaptwostmts
@@ -119,7 +119,7 @@ is $t, "Abd";
 
 $t = "";
 eval q{
-	use XS::APItest::KeywordRPN qw(swaptwostmts);
+	use XS::APItest qw(swaptwostmts);
 	sub add_to_t { $t .= $_[0]; }
 	add_to_t "a";
 	swaptwostmts
@@ -132,7 +132,7 @@ is $t, "acbd";
 
 $t = "";
 eval q{
-	use XS::APItest::KeywordRPN qw(swaptwostmts);
+	use XS::APItest qw(swaptwostmts);
 	{ $t .= "a"; }
 	swaptwostmts
 	if(1) { { $t .= "b"; } }
@@ -144,7 +144,7 @@ is $t, "acbd";
 
 $t = "";
 eval q{
-	use XS::APItest::KeywordRPN qw(swaptwostmts);
+	use XS::APItest qw(swaptwostmts);
 	no warnings "void";
 	"@{[ $t .= 'a' ]}";
 	swaptwostmts

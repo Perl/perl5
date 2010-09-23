@@ -1,6 +1,6 @@
 package XS::APItest;
 
-use 5.008;
+{ use 5.011001; }
 use strict;
 use warnings;
 use Carp;
@@ -35,6 +35,11 @@ sub import {
 	    }
 	}
     }
+    foreach (keys %{$exports||{}}) {
+	next unless /\A(?:rpn|calcrpn|stufftest|swaptwostmts)\z/;
+	$^H{"XS::APItest/$_"} = 1;
+	delete $exports->{$_};
+    }
     if ($exports) {
 	my @carp = keys %$exports;
 	if (@carp) {
@@ -45,7 +50,7 @@ sub import {
     }
 }
 
-our $VERSION = '0.22';
+our $VERSION = '0.23';
 
 use vars '$WARNINGS_ON_BOOTSTRAP';
 use vars map "\$${_}_called_PP", qw(BEGIN UNITCHECK CHECK INIT END);
@@ -100,6 +105,10 @@ XS::APItest - Test the perl C API
 
   use XS::APItest;
   print_double(4);
+
+  use XS::APItest qw(rpn calcrpn);
+  $triangle = rpn($n $n 1 + * 2 /);
+  calcrpn $triangle { $n $n 1 + * 2 / }
 
 =head1 ABSTRACT
 
@@ -226,6 +235,86 @@ Exercises the C function of the same name. Returns nothing.
 
 =back
 
+=head1 KEYWORDS
+
+These are not supplied by default, but must be explicitly imported.
+They are lexically scoped.
+
+=over
+
+=item rpn(EXPRESSION)
+
+This construct is a Perl expression.  I<EXPRESSION> must be an RPN
+arithmetic expression, as described below.  The RPN expression is
+evaluated, and its value is returned as the value of the Perl expression.
+
+=item calcrpn VARIABLE { EXPRESSION }
+
+This construct is a complete Perl statement.  (No semicolon should
+follow the closing brace.)  I<VARIABLE> must be a Perl scalar C<my>
+variable, and I<EXPRESSION> must be an RPN arithmetic expression as
+described below.  The RPN expression is evaluated, and its value is
+assigned to the variable.
+
+=back
+
+=head2 RPN expression syntax
+
+Tokens of an RPN expression may be separated by whitespace, but such
+separation is usually not required.  It is required only where unseparated
+tokens would look like a longer token.  For example, C<12 34 +> can be
+written as C<12 34+>, but not as C<1234 +>.
+
+An RPN expression may be any of:
+
+=over
+
+=item C<1234>
+
+A sequence of digits is an unsigned decimal literal number.
+
+=item C<$foo>
+
+An alphanumeric name preceded by dollar sign refers to a Perl scalar
+variable.  Only variables declared with C<my> or C<state> are supported.
+If the variable's value is not a native integer, it will be converted
+to an integer, by Perl's usual mechanisms, at the time it is evaluated.
+
+=item I<A> I<B> C<+>
+
+Sum of I<A> and I<B>.
+
+=item I<A> I<B> C<->
+
+Difference of I<A> and I<B>, the result of subtracting I<B> from I<A>.
+
+=item I<A> I<B> C<*>
+
+Product of I<A> and I<B>.
+
+=item I<A> I<B> C</>
+
+Quotient when I<A> is divided by I<B>, rounded towards zero.
+Division by zero generates an exception.
+
+=item I<A> I<B> C<%>
+
+Remainder when I<A> is divided by I<B> with the quotient rounded towards zero.
+Division by zero generates an exception.
+
+=back
+
+Because the arithmetic operators all have fixed arity and are postfixed,
+there is no need for operator precedence, nor for a grouping operator
+to override precedence.  This is half of the point of RPN.
+
+An RPN expression can also be interpreted in another way, as a sequence
+of operations on a stack, one operation per token.  A literal or variable
+token pushes a value onto the stack.  A binary operator pulls two items
+off the stack, performs a calculation with them, and pushes the result
+back onto the stack.  The stack starts out empty, and at the end of the
+expression there must be exactly one value left on the stack.
+
 =head1 SEE ALSO
 
 L<XS::Typemap>, L<perlapi>.
@@ -234,12 +323,15 @@ L<XS::Typemap>, L<perlapi>.
 
 Tim Jenness, E<lt>t.jenness@jach.hawaii.eduE<gt>,
 Christian Soeller, E<lt>csoelle@mph.auckland.ac.nzE<gt>,
-Hugo van der Sanden E<lt>hv@crypt.compulink.co.ukE<gt>
+Hugo van der Sanden E<lt>hv@crypt.compulink.co.ukE<gt>,
+Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2002,2004 Tim Jenness, Christian Soeller, Hugo van der Sanden.
 All Rights Reserved.
+
+Copyright (C) 2009 Andrew Main (Zefram) <zefram@fysh.org>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself. 

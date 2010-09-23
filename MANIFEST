@@ -3329,14 +3329,6 @@ ext/XS-APItest/APItest.xs	XS::APItest extension
 ext/XS-APItest/core.c		Test API functions when PERL_CORE is defined
 ext/XS-APItest/core_or_not.inc	Code common to core.c and notcore.c
 ext/XS-APItest/exception.c	XS::APItest extension
-ext/XS-APItest-KeywordRPN/KeywordRPN.pm	XS::APItest::KeywordRPN extension
-ext/XS-APItest-KeywordRPN/KeywordRPN.xs	XS::APItest::KeywordRPN extension
-ext/XS-APItest-KeywordRPN/Makefile.PL	XS::APItest::KeywordRPN extension
-ext/XS-APItest-KeywordRPN/README	XS::APItest::KeywordRPN extension
-ext/XS-APItest-KeywordRPN/t/keyword_plugin.t	test keyword plugin mechanism
-ext/XS-APItest-KeywordRPN/t/multiline.t	test plugin parsing across lines
-ext/XS-APItest-KeywordRPN/t/stuff_svcur_bug.t	test for a bug in lex_stuff_pvn
-ext/XS-APItest-KeywordRPN/t/swaptwostmts.t	test recursive descent statement parsing
 ext/XS-APItest/Makefile.PL	XS::APItest extension
 ext/XS-APItest/MANIFEST		XS::APItest extension
 ext/XS-APItest/notcore.c	Test API functions when PERL_CORE is not defined
@@ -3352,6 +3344,8 @@ ext/XS-APItest/t/copyhints.t	test hv_copy_hints_hv() API
 ext/XS-APItest/t/exception.t	XS::APItest extension
 ext/XS-APItest/t/grok.t		XS::APItest: tests for grok* functions
 ext/XS-APItest/t/hash.t		XS::APItest: tests for hash related APIs
+ext/XS-APItest/t/keyword_multiline.t	test keyword plugin parsing across lines
+ext/XS-APItest/t/keyword_plugin.t	test keyword plugin mechanism
 ext/XS-APItest/t/Markers.pm	Helper for ./blockhooks.t
 ext/XS-APItest/t/my_cxt.t	XS::APItest: test MY_CXT interface
 ext/XS-APItest/t/my_exit.t	XS::APItest: test my_exit
@@ -3364,8 +3358,10 @@ ext/XS-APItest/t/ptr_table.t	Test ptr_table_* APIs
 ext/XS-APItest/t/push.t		XS::APItest extension
 ext/XS-APItest/t/rmagical.t	XS::APItest extension
 ext/XS-APItest/t/savehints.t	test SAVEHINTS() API
+ext/XS-APItest/t/stuff_svcur_bug.t	test for a bug in lex_stuff_pvn
 ext/XS-APItest/t/svpeek.t	XS::APItest extension
 ext/XS-APItest/t/svsetsv.t	Test behaviour of sv_setsv with/without PERL_CORE
+ext/XS-APItest/t/swaptwostmts.t	test recursive descent statement parsing
 ext/XS-APItest/t/temp_lv_sub.t	XS::APItest: tests for lvalue subs returning temps
 ext/XS-APItest/t/utf16_to_utf8.t	Test behaviour of utf16_to_utf8{,reversed}
 ext/XS-APItest/t/xs_special_subs_require.t	for require too

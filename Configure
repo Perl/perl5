@@ -22046,13 +22046,6 @@ for xxx in $known_extensions ; do
 		$define) avail_ext="$avail_ext $xxx" ;;
 		esac
 		;;
-	XS/APItest/KeywordRPN|xs/apitest/keywordrpn)
-		# This is just for testing.  Skip it unless we have dynamic loading.
-
-		case "$usedl" in
-		$define) avail_ext="$avail_ext $xxx" ;;
-		esac
-		;;
 	XS/Typemap|xs/typemap)
 		# This is just for testing.  Skip it unless we have dynamic loading.
 		case "$usedl" in

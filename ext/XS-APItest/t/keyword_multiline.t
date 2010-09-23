@@ -6,7 +6,7 @@ use Test::More tests => 4;
 my($t, $n);
 $n = 5;
 
-use XS::APItest::KeywordRPN qw(rpn);
+use XS::APItest qw(rpn);
 $t = rpn($n
 	 $n 1 +
 		* #wibble

@@ -1598,13 +1598,6 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
-    'XS::APItest::KeywordRPN' =>
-	{
-	'MAINTAINER'	=> 'zefram',
-	'FILES'		=> q[ext/XS-APItest-KeywordRPN],
-	'UPSTREAM'	=> 'blead',
-	},
-
     'XSLoader' =>
 	{
 	'MAINTAINER'	=> 'saper',
