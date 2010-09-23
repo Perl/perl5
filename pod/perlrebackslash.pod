@@ -476,7 +476,7 @@ backslash sequences.
 =item \A
 
 C<\A> only matches at the beginning of the string. If the C</m> modifier
-isn't used, then C</\A/> is equivalent with C</^/>. However, if the C</m>
+isn't used, then C</\A/> is equivalent to C</^/>. However, if the C</m>
 modifier is used, then C</^/> matches internal newlines, but the meaning
 of C</\A/> isn't changed by the C</m> modifier. C<\A> matches at the beginning
 of the string regardless whether the C</m> modifier is used.
@@ -484,7 +484,7 @@ of the string regardless whether the C</m> modifier is used.
 =item \z, \Z
 
 C<\z> and C<\Z> match at the end of the string. If the C</m> modifier isn't
-used, then C</\Z/> is equivalent with C</$/>, that is, it matches at the
+used, then C</\Z/> is equivalent to C</$/>, that is, it matches at the
 end of the string, or before the newline at the end of the string. If the
 C</m> modifier is used, then C</$/> matches at internal newlines, but the
 meaning of C</\Z/> isn't changed by the C</m> modifier. C<\Z> matches at
