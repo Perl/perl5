@@ -535,7 +535,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 		    || (NATIVE_TO_UNI(c) == 0x85 || NATIVE_TO_UNI(c) == 0xA0))
 #define isWORDCHAR_L1(c)	isALNUMU(c)
 #ifdef EBCDIC
-    /* In EBCDIC we do not do locales: therefore() isupper() is fine. */
+    /* In EBCDIC we do not do locales: therefore can use native functions */
 #   define isALNUMC(c)	isalnum(c)
 #   define isBLANK(c)	((c) == ' ' || (c) == '\t' || NATIVE_TO_UNI(c) == 0xA0)
 #   define isCNTRL(c)	iscntrl(c)
@@ -549,7 +549,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #   define isXDIGIT(c)	isxdigit(c)
 #   define toLOWER(c)	tolower(c)
 #   define toUPPER(c)	toupper(c)
-#else
+#else /* Not EBCDIC */
 #   define isALNUMC(c)	(isALPHA(c) || isDIGIT(c))
 #   define isBLANK(c)	((c) == ' ' || (c) == '\t')
 #   define isCNTRL(c)	((U8) (c) < ' ' || (c) == 127)
