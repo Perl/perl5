@@ -515,6 +515,8 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #define isALPHA(c)	(isUPPER(c) || isLOWER(c))
 /* ALPHAU includes Unicode semantics for latin1 characters.  It has an extra
  * >= AA test to speed up ASCII-only tests at the expense of the others */
+/* XXX decide whether to document the ALPHAU, ALNUMU and isSPACE_L1 functions.
+ * Most of these should be implemented as table lookup for speed */
 #define isALPHAU(c)	(isALPHA(c) || (NATIVE_TO_UNI((U8) c) >= 0xAA \
     && ((NATIVE_TO_UNI((U8) c) >= 0xC0 \
 	    && NATIVE_TO_UNI((U8) c) != 0xD7 && NATIVE_TO_UNI((U8) c) != 0xF7) \
@@ -527,6 +529,8 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #define isCHARNAME_CONT(c) (isALNUMU(c) || (c) == ' ' || (c) == '-' || (c) == '(' || (c) == ')' || (c) == ':' || NATIVE_TO_UNI((U8) c) == 0xA0)
 #define isSPACE(c) \
 	((c) == ' ' || (c) == '\t' || (c) == '\n' || (c) =='\r' || (c) == '\f')
+#define isSPACE_L1(c) (isSPACE(c) \
+		    || (NATIVE_TO_UNI(c) == 0x85 || NATIVE_TO_UNI(c) == 0xA0))
 #define isPSXSPC(c)	(isSPACE(c) || (c) == '\v')
 #define isBLANK(c)	((c) == ' ' || (c) == '\t')
 #define isDIGIT(c)	((c) >= '0' && (c) <= '9')
