@@ -927,8 +927,9 @@ sub _find_dir($$$) {
 		$CdLvl = $Level;
 	    }
 
-	    if ($^O eq 'MSWin32') {
-		$dir_name = ($p_dir =~ m|\w:/?$| ? "$p_dir$dir_rel" : "$p_dir/$dir_rel");
+	    if ($Is_Win32) {
+		$dir_name = ($p_dir =~ m{^(?:\w:[/\\]?|[/\\])$}
+		    ? "$p_dir$dir_rel" : "$p_dir/$dir_rel");
 		$dir_pref = "$dir_name/";
 	    }
 	    elsif ($^O eq 'VMS') {
@@ -1206,13 +1207,16 @@ if ($^O eq 'VMS') {
     $Is_VMS = 1;
     $File::Find::dont_use_nlink  = 1;
 }
+elsif ($^O eq 'MSWin32') {
+    $Is_Win32 = 1;
+}
 
 # this _should_ work properly on all platforms
 # where File::Find can be expected to work
 $File::Find::current_dir = File::Spec->curdir || '.';
 
 $File::Find::dont_use_nlink = 1
-    if $^O eq 'os2' || $^O eq 'dos' || $^O eq 'amigaos' || $^O eq 'MSWin32' ||
+    if $^O eq 'os2' || $^O eq 'dos' || $^O eq 'amigaos' || $Is_Win32 ||
        $^O eq 'interix' || $^O eq 'cygwin' || $^O eq 'epoc' || $^O eq 'qnx' ||
 	   $^O eq 'nto';
 
