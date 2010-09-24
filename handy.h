@@ -524,7 +524,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 	|| NATIVE_TO_UNI((U8) c) == 0xB5 \
 	|| NATIVE_TO_UNI((U8) c) == 0xBA)))
 #define isALNUMU(c)	(isDIGIT(c) || isALPHAU(c) || (c) == '_')
-#define isALNUM_L1(c)	isALNUMU(c)
+#define isWORDCHAR_L1(c)	isALNUMU(c)
 
 /* continuation character for legal NAME in \N{NAME} */
 #define isCHARNAME_CONT(c) (isALNUMU(c) || (c) == ' ' || (c) == '-' || (c) == '(' || (c) == ')' || (c) == ':' || NATIVE_TO_UNI((U8) c) == 0xA0)
