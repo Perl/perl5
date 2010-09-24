@@ -9,13 +9,14 @@
 
 package File::DosGlob;
 
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 use strict;
 use warnings;
 
 sub doglob {
     my $cond = shift;
     my @retval = ();
+    my $fix_drive_relative_paths;
     #print "doglob: ", join('|', @_), "\n";
   OUTER:
     for my $pat (@_) {
@@ -36,6 +37,7 @@ sub doglob {
 	# to h:./*.pm to expand correctly
 	if ($pat =~ m|^([A-Za-z]:)[^/\\]|s) {
 	    substr($pat,0,2) = $1 . "./";
+	    $fix_drive_relative_paths = 1;
 	}
 	if ($pat =~ m|^(.*)([\\/])([^\\/]*)\z|s) {
 	    ($head, $sepchr, $tail) = ($1,$2,$3);
@@ -66,7 +68,7 @@ sub doglob {
 	$head .= $sepchr unless $head eq '' or substr($head,-1) eq $sepchr;
 
 	# escape regex metachars but not glob chars
-        $pat =~ s:([].+^\-\${}[|]):\\$1:g;
+	$pat =~ s:([].+^\-\${}()[|]):\\$1:g;
 	# and convert DOS-style wildcards to regex
 	$pat =~ s/\*/.*/g;
 	$pat =~ s/\?/.?/g;
@@ -90,6 +92,9 @@ sub doglob {
 	    }
 	}
 	push @retval, @matched if @matched;
+    }
+    if ($fix_drive_relative_paths) {
+	s|^([A-Za-z]:)\./|$1| for @retval;
     }
     return @retval;
 }

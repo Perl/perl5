@@ -9,10 +9,12 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..10\n";
+print "1..17\n";
 
 # override it in main::
 use File::DosGlob 'glob';
+
+require Cwd;
 
 # test if $_ takes as the default
 my $expected;
@@ -160,3 +162,44 @@ if ($^O eq 'MacOS') {
 print "not " if "@r" ne "@s";
 print "ok 10\n";
 EOT
+
+# Test that a glob pattern containing ()'s works.
+# NB. The spaces in the glob patters need to be backslash escaped.
+my $filename_containing_parens = "foo (123) bar";
+open(TOUCH, ">", $filename_containing_parens) && close(TOUCH)
+    or die "can't create '$filename_containing_parens': $!";
+
+@r = ();
+eval { @r = File::DosGlob::glob("foo\\ (*") };
+print +($@ ? "not " : ""), "ok 11\n";
+print "not " unless (@r == 1 and $r[0] eq $filename_containing_parens);
+print "ok 12\n";
+
+@r = ();
+eval { @r = File::DosGlob::glob("*)\\ bar") };
+print +($@ ? "not " : ""), "ok 13\n";
+print "not " unless (@r == 1 and $r[0] eq $filename_containing_parens);
+print "ok 14\n";
+
+@r = ();
+eval { @r = File::DosGlob::glob("foo\\ (1*3)\\ bar") };
+print +($@ ? "not " : ""), "ok 15\n";
+print "not " unless (@r == 1 and $r[0] eq $filename_containing_parens);
+print "ok 16\n";
+
+unlink $filename_containing_parens;
+
+# Test the globbing of a drive relative pattern such as "c:*.pl".
+# NB. previous versions of DosGlob inserted "./ after the drive letter to
+# make the expansion process work correctly. However, while it is harmless,
+# there is no reason for it to be in the result.
+my $cwd = Cwd::cwd();
+if ($cwd =~ /^([a-zA-Z]:)/) {
+    my $drive = $1;
+    @r = ();
+    # This assumes we're in the "t" directory.
+    eval { @r = File::DosGlob::glob("${drive}io/*.t") };
+    print +((@r and !grep !m|^${drive}io/[^/]*\.t$|, @r) ? "" : "not "), "ok 17\n";
+} else {
+    print "ok 17\n";
+}
