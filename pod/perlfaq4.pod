@@ -331,7 +331,7 @@ all integers in the range.  This can take a lot of memory for large
 ranges.  Instead use:
 
 	@results = ();
-	for ($i=5; $i < 500_005; $i++) {
+	for ($i=5; $i <= 500_005; $i++) {
 		push(@results, some_func($i));
 		}
 
