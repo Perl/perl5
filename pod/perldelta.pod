@@ -423,7 +423,8 @@ L<[perl #70614]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=70614>.
 When C<-d> is used on the shebang (C<#!>) line, the debugger now has access
 to the lines of the main program. In the past, this sometimes worked and
 sometimes did not, depending on what order things happened to be arranged
-in memory.
+in memory
+L<[perl #71806]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=71806>.
 
 =back
 
