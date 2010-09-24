@@ -454,25 +454,25 @@ character set.
 Returns a boolean indicating whether the C C<char> is an
 alphabetic character in the platform's native character set.
 
-=for apidoc Am|bool|isSPACE|char ch
-Returns a boolean indicating whether the C C<char> is a
-whitespace character in the platform's native character set.
-
 =for apidoc Am|bool|isDIGIT|char ch
 Returns a boolean indicating whether the C C<char> is a
 digit in the platform's native character set.
+
+=for apidoc Am|bool|isLOWER|char ch
+Returns a boolean indicating whether the C C<char> is a
+lowercase character in the platform's native character set.
 
 =for apidoc Am|bool|isOCTAL|char ch
 Returns a boolean indicating whether the C C<char> is an
 octal digit, [0-7] in the platform's native character set.
 
+=for apidoc Am|bool|isSPACE|char ch
+Returns a boolean indicating whether the C C<char> is a
+whitespace character in the platform's native character set.
+
 =for apidoc Am|bool|isUPPER|char ch
 Returns a boolean indicating whether the C C<char> is an
 uppercase character in the platform's native character set.
-
-=for apidoc Am|bool|isLOWER|char ch
-Returns a boolean indicating whether the C C<char> is a
-lowercase character in the platform's native character set.
 
 =head1 Character case changing
 
