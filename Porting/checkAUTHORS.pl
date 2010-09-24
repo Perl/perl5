@@ -688,6 +688,8 @@ ilya\100math.berkeley.edu               ilya\100math.ohio-state.edu
 +                                       [9]ilya\100math.ohio-state.edu
 ilya\100martynov.org                    ilya\100juil.nonet
 
+joshua.pritikin\100db.com               joshua\100paloalto.com
+
 okamoto\100corp.hp.com                  okamoto\100hpcc123.corp.hp.com
 orwant\100oreilly.com                   orwant\100media.mit.edu
 
