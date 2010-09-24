@@ -143,6 +143,13 @@ XXX
 
 =item *
 
+C<File::Find> has been upgraded from version 1.17 to 1.18.
+
+It improves handling of backslashes on Windows, so that paths such as
+F<c:\dir\/file> are no longer generated.
+
+=item *
+
 C<NEXT> has been upgraded from version 0.64 to 0.65.
 
 =item *
