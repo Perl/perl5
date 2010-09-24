@@ -95,7 +95,8 @@ sub handler_traceback {
     # Now go for broke.
     for ($i = 1; ($p,$f,$l,$s,$h,$w,$e,$r) = caller($i); $i++) {
         @a = ();
-	for (@args) {
+	for my $fr (@args) {
+            my $_ = $fr;
 	    s/([\'\\])/\\$1/g;
 	    s/([^\0]*)/'$1'/
 	      unless /^(?: -?[\d.]+ | \*[\w:]* )$/x;
