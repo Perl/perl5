@@ -1500,10 +1500,10 @@ regexp tries to match where the previous one leaves off.
 
 Here is the output (split into several lines):
 
- line-noise lowercase line-noise lowercase UPPERCASE line-noise
- UPPERCASE line-noise lowercase line-noise lowercase line-noise
- lowercase lowercase line-noise lowercase lowercase line-noise
- MiXeD line-noise. That's all!
+	line-noise lowercase line-noise UPPERCASE line-noise UPPERCASE
+	line-noise lowercase line-noise lowercase line-noise lowercase
+	lowercase line-noise lowercase lowercase line-noise lowercase
+	lowercase line-noise MiXeD line-noise. That's all!
 
 =item ?PATTERN?
 X<?>
