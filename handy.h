@@ -510,31 +510,70 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #  define FITS_IN_8_BITS(c) ((sizeof(c) == 1) || (((U32)(c) & 0xFF) == (U32)(c)))
 #endif
 
-#define isASCII(c)	(FITS_IN_8_BITS(c) ? NATIVE_TO_UNI((U8) c) <= 127 : 0)
+#define isASCII(c)    (FITS_IN_8_BITS(c) ? NATIVE_TO_UNI((U8) c) <= 127 : 0)
+#define isASCII_A(c)  isASCII(c)
 
-#define isALNUM(c)      isWORDCHAR(c)
-#define isALNUMU(c)     isWORDCHAR_L1(c)
-#define isALPHA(c)	(isUPPER(c) || isLOWER(c))
+/* ASCII range only */
+#ifdef EBCDIC
+#   define isALNUMC_A(c)   (isASCII(c) && isALNUMC(c))
+#   define isALPHA_A(c)    (isASCII(c) && isALPHA(c))
+#   define isBLANK_A(c)    (isASCII(c) && isBLANK(c))
+#   define isCNTRL_A(c)    (isASCII(c) && isCNTRL(c))
+#   define isDIGIT_A(c)    (isASCII(c) && isDIGIT(c))
+#   define isGRAPH_A(c)    (isASCII(c) && isGRAPH(c))
+#   define isLOWER_A(c)    (isASCII(c) && isLOWER(c))
+#   define isPRINT_A(c)    (isASCII(c) && isPRINT(c))
+#   define isPSXSPC_A(c)   (isASCII(c) && isPSXSPC(c))
+#   define isPUNCT_A(c)    (isASCII(c) && isPUNCT(c))
+#   define isSPACE_A(c)    (isASCII(c) && isSPACE(c))
+#   define isUPPER_A(c)    (isASCII(c) && isUPPER(c))
+#   define isWORDCHAR_A(c) (isASCII(c) && isWORDCHAR(c))
+#   define isXDIGIT_A(c)   (isASCII(c) && isXDIGIT(c))
+#else   /* ASCII */
+#   define isALNUMC_A(c) (isALPHA_A(c) || isDIGIT_A(c))
+#   define isALPHA_A(c) (isUPPER_A(c) || isLOWER_A(c))
+#   define isBLANK_A(c) ((c) == ' ' || (c) == '\t')
+#   define isCNTRL_A(c) (FITS_IN_8_BITS(c) ? ((U8) (c) < ' ' || (c) == 127) : 0)
+#   define isDIGIT_A(c) ((c) >= '0' && (c) <= '9')
+#   define isGRAPH_A(c) (isWORDCHAR_A(c) || isPUNCT_A(c))
+#   define isLOWER_A(c) ((c) >= 'a' && (c) <= 'z')
+#   define isPRINT_A(c) (((c) >= 32 && (c) < 127))
+#   define isPSXSPC_A(c) (isSPACE_A(c) || (c) == '\v')
+#   define isPUNCT_A(c) (((c) >= 33 && (c) <= 47) || ((c) >= 58 && (c) <= 64)  || ((c) >= 91 && (c) <= 96) || ((c) >= 123 && (c) <= 126))
+#   define isSPACE_A(c) ((c) == ' ' || (c) == '\t' || (c) == '\n' || (c) =='\r' \
+                         || (c) == '\f')
+#   define isUPPER_A(c) ((c) >= 'A' && (c) <= 'Z')
+#   define isWORDCHAR_A(c) (isALPHA_A(c) || isDIGIT_A(c) || (c) == '_')
+#   define isXDIGIT_A(c)   (isDIGIT_A(c) || ((c) >= 'a' && (c) <= 'f') || ((c) >= 'A' && (c) <= 'F'))
+#endif
+
+/* Latin1 definitions */
 /* ALPHAU includes Unicode semantics for latin1 characters.  It has an extra
  * >= AA test to speed up ASCII-only tests at the expense of the others */
 /* XXX decide whether to document the ALPHAU, ALNUMU and isSPACE_L1 functions.
  * Most of these should be implemented as table lookup for speed */
-#define isALPHAU(c)	(isALPHA(c) || (NATIVE_TO_UNI((U8) c) >= 0xAA \
-    && ((NATIVE_TO_UNI((U8) c) >= 0xC0 \
+#define isALPHAU(c)	(isALPHA_A(c) || (NATIVE_TO_UNI((U8) c) >= 0xAA \
+     && ((NATIVE_TO_UNI((U8) c) >= 0xC0 \
 	    && NATIVE_TO_UNI((U8) c) != 0xD7 && NATIVE_TO_UNI((U8) c) != 0xF7) \
 	|| NATIVE_TO_UNI((U8) c) == 0xAA \
 	|| NATIVE_TO_UNI((U8) c) == 0xB5 \
 	|| NATIVE_TO_UNI((U8) c) == 0xBA)))
-
-/* continuation character for legal NAME in \N{NAME} */
-#define isCHARNAME_CONT(c) (isALNUMU(c) || (c) == ' ' || (c) == '-' || (c) == '(' || (c) == ')' || (c) == ':' || NATIVE_TO_UNI((U8) c) == 0xA0)
-
-#define isIDFIRST(c)	(isALPHA(c) || (c) == '_')
-#define isOCTAL(c)	((c) >= '0' && (c) <= '7')
 #define isSPACE_L1(c) (isSPACE(c) \
 		    || (NATIVE_TO_UNI(c) == 0x85 || NATIVE_TO_UNI(c) == 0xA0))
-#define isWORDCHAR(c)   (isALPHA(c) || isDIGIT(c) || (c) == '_')
 #define isWORDCHAR_L1(c) (isDIGIT(c) || isALPHAU(c) || (c) == '_')
+
+/* Same macro in non-EBCDIC and EBCDIC.  Called macros may evaluate
+ * differently between the two */
+#define isALNUM(c)      isWORDCHAR(c)
+#define isALNUMU(c)     isWORDCHAR_L1(c)
+#define isALPHA(c)	(isUPPER(c) || isLOWER(c))
+/* continuation character for legal NAME in \N{NAME} */
+#define isCHARNAME_CONT(c) (isWORDCHAR_L1(c) || (c) == ' ' || (c) == '-' || (c) == '(' || (c) == ')' || (c) == ':' || NATIVE_TO_UNI((U8) c) == 0xA0)
+#define isIDFIRST(c)	(isALPHA(c) || (c) == '_')
+#define isOCTAL_A(c)	((c) >= '0' && (c) <= '7')
+#define isOCTAL(c)	isOCTAL_A(c)
+#define isWORDCHAR(c)   (isALPHA(c) || isDIGIT(c) || (c) == '_')
+
 #ifdef EBCDIC
     /* In EBCDIC we do not do locales: therefore can use native functions */
 #   define isALNUMC(c)	isalnum(c)
@@ -551,20 +590,19 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #   define isXDIGIT(c)	isxdigit(c)
 #   define toLOWER(c)	tolower(c)
 #   define toUPPER(c)	toupper(c)
-#else /* Not EBCDIC */
-#   define isALNUMC(c)	(isALPHA(c) || isDIGIT(c))
-#   define isBLANK(c)	((c) == ' ' || (c) == '\t')
-#   define isCNTRL(c)	((U8) (c) < ' ' || (c) == 127)
-#   define isDIGIT(c)	((c) >= '0' && (c) <= '9')
-#   define isGRAPH(c)	(isALNUM(c) || isPUNCT(c))
-#   define isLOWER(c)	((c) >= 'a' && (c) <= 'z')
-#   define isPRINT(c)	(((c) >= 32 && (c) < 127))
-#   define isPSXSPC(c)	(isSPACE(c) || (c) == '\v')
-#   define isPUNCT(c)	(((c) >= 33 && (c) <= 47) || ((c) >= 58 && (c) <= 64)  || ((c) >= 91 && (c) <= 96) || ((c) >= 123 && (c) <= 126))
-#   define isSPACE(c) \
-	((c) == ' ' || (c) == '\t' || (c) == '\n' || (c) =='\r' || (c) == '\f')
-#   define isUPPER(c)	((c) >= 'A' && (c) <= 'Z')
-#   define isXDIGIT(c)  (isDIGIT(c) || ((c) >= 'a' && (c) <= 'f') || ((c) >= 'A' && (c) <= 'F'))
+#else /* Not EBCDIC: ASCII-only matching */
+#   define isALNUMC(c)  isALNUMC_A(c)
+#   define isBLANK(c)   isBLANK_A(c)
+#   define isCNTRL(c)   isCNTRL_A(c)
+#   define isDIGIT(c)   isDIGIT_A(c)
+#   define isGRAPH(c)   isGRAPH_A(c)
+#   define isLOWER(c)   isLOWER_A(c)
+#   define isPRINT(c)   isPRINT_A(c)
+#   define isPSXSPC(c)	isPSXSPC_A(c)
+#   define isPUNCT(c)   isPUNCT_A(c)
+#   define isSPACE(c)   isSPACE_A(c)
+#   define isUPPER(c)   isUPPER_A(c)
+#   define isXDIGIT(c)  isXDIGIT_A(c)
 
     /* ASCII casing. */
 #   define toLOWER(c)	(isUPPER(c) ? (c) + ('a' - 'A') : (c))
