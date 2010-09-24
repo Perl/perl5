@@ -72,7 +72,7 @@ not have to change (after this one time), as the stringification will
 automatically incorporate the new modifiers.
 
 Code that needs to work properly with both old- and new-style regexes
-can avoid the whole issue by using:
+can avoid the whole issue by using (for Perls since 5.9.5):
 
  use re qw(regexp_pattern);
  my ($pat, $mods) = regexp_pattern($re_ref);
@@ -82,8 +82,8 @@ return, C<$mods> will be a string containing all the non-default
 modifiers used when the regular expression was compiled, and C<$pattern>
 the actual pattern.
 
-If the actual stringification is important, you can use something like
-the following:
+If the actual stringification is important, or older Perls need to be
+supported, you can use something like the following:
 
     # Accept both old and new-style stringification
     my $modifiers = (qr/foobar/ =~ /\Q(?^/) ? '^' : '-xism';
