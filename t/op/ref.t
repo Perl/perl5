@@ -638,7 +638,7 @@ is( runperl(stderr => 1, prog => 'my $i;for $i (1) { for $i (2) { } }'), "");
 
 is (runperl(
 	prog => 'eval q[bless \@y; bless \$x; $y[0] = \*x; $z = \*y; ]; '
-		. 'delete $::{x}; delete $::{y}; print "ok\n";',
+		. 'delete $::{x}; delete $::{y}; print qq{ok\n};',
 	stderr => 1),
     "ok\n", 'freeing freed glob in global destruction');
 
