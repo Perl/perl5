@@ -3577,19 +3577,37 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    if (flags & SCF_DO_STCLASS_AND) {
 			if (!(data->start_class->flags & ANYOF_LOCALE)) {
 			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_NALNUM);
-			    for (value = 0; value < 256; value++)
-				if (!isALNUM(value))
-				    ANYOF_BITMAP_CLEAR(data->start_class, value);
+                            if (FLAGS(scan) & USE_UNI) {
+                                for (value = 0; value < 256; value++) {
+                                    if (!isWORDCHAR_L1(value)) {
+                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
+                                    }
+                                }
+                            } else {
+                                for (value = 0; value < 256; value++) {
+                                    if (!isALNUM(value)) {
+                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
+                                    }
+                                }
+                            }
 			}
 		    }
 		    else {
 			if (data->start_class->flags & ANYOF_LOCALE)
 			    ANYOF_CLASS_SET(data->start_class,ANYOF_ALNUM);
-			else {
-			    for (value = 0; value < 256; value++)
-				if (isALNUM(value))
-				    ANYOF_BITMAP_SET(data->start_class, value);			
-			}
+                        else if (FLAGS(scan) & USE_UNI) {
+                            for (value = 0; value < 256; value++) {
+                                if (isWORDCHAR_L1(value)) {
+                                    ANYOF_BITMAP_SET(data->start_class, value);
+                                }
+                            }
+                        } else {
+                            for (value = 0; value < 256; value++) {
+                                if (isALNUM(value)) {
+                                    ANYOF_BITMAP_SET(data->start_class, value);
+                                }
+                            }
+                        }
 		    }
 		    break;
 		case ALNUML:
@@ -3606,9 +3624,19 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    if (flags & SCF_DO_STCLASS_AND) {
 			if (!(data->start_class->flags & ANYOF_LOCALE)) {
 			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_ALNUM);
-			    for (value = 0; value < 256; value++)
-				if (isALNUM(value))
-				    ANYOF_BITMAP_CLEAR(data->start_class, value);
+                            if (FLAGS(scan) & USE_UNI) {
+                                for (value = 0; value < 256; value++) {
+                                    if (isWORDCHAR_L1(value)) {
+                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
+                                    }
+                                }
+                            } else {
+                                for (value = 0; value < 256; value++) {
+                                    if (isALNUM(value)) {
+                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
+                                    }
+                                }
+			    }
 			}
 		    }
 		    else {
@@ -3635,18 +3663,37 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    if (flags & SCF_DO_STCLASS_AND) {
 			if (!(data->start_class->flags & ANYOF_LOCALE)) {
 			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_NSPACE);
-			    for (value = 0; value < 256; value++)
-				if (!isSPACE(value))
-				    ANYOF_BITMAP_CLEAR(data->start_class, value);
+			    if (FLAGS(scan) & USE_UNI) {
+                                for (value = 0; value < 256; value++) {
+                                    if (!isSPACE_L1(value)) {
+                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
+                                    }
+                                }
+                            } else {
+                                for (value = 0; value < 256; value++) {
+                                    if (!isSPACE(value)) {
+                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
+                                    }
+                                }
+                            }
 			}
 		    }
 		    else {
-			if (data->start_class->flags & ANYOF_LOCALE)
+                        if (data->start_class->flags & ANYOF_LOCALE) {
 			    ANYOF_CLASS_SET(data->start_class,ANYOF_SPACE);
-			else {
-			    for (value = 0; value < 256; value++)
-				if (isSPACE(value))
-				    ANYOF_BITMAP_SET(data->start_class, value);			
+                        }
+                        else if (FLAGS(scan) & USE_UNI) {
+                            for (value = 0; value < 256; value++) {
+                                if (isSPACE_L1(value)) {
+                                    ANYOF_BITMAP_SET(data->start_class, value);
+                                }
+                            }
+                        } else {
+                            for (value = 0; value < 256; value++) {
+                                if (isSPACE(value)) {
+                                    ANYOF_BITMAP_SET(data->start_class, value);
+                                }
+                            }
 			}
 		    }
 		    break;
@@ -3664,19 +3711,38 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    if (flags & SCF_DO_STCLASS_AND) {
 			if (!(data->start_class->flags & ANYOF_LOCALE)) {
 			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_SPACE);
-			    for (value = 0; value < 256; value++)
-				if (isSPACE(value))
-				    ANYOF_BITMAP_CLEAR(data->start_class, value);
+                            if (FLAGS(scan) & USE_UNI) {
+                                for (value = 0; value < 256; value++) {
+                                    if (isSPACE_L1(value)) {
+                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
+                                    }
+                                }
+                            } else {
+                                for (value = 0; value < 256; value++) {
+                                    if (isSPACE(value)) {
+                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
+                                    }
+                                }
+                            }
 			}
 		    }
 		    else {
 			if (data->start_class->flags & ANYOF_LOCALE)
 			    ANYOF_CLASS_SET(data->start_class,ANYOF_NSPACE);
-			else {
-			    for (value = 0; value < 256; value++)
-				if (!isSPACE(value))
-				    ANYOF_BITMAP_SET(data->start_class, value);			
-			}
+                        else if (FLAGS(scan) & USE_UNI) {
+                            for (value = 0; value < 256; value++) {
+                                if (!isSPACE_L1(value)) {
+                                    ANYOF_BITMAP_SET(data->start_class, value);
+                                }
+                            }
+                        }
+                        else {
+                            for (value = 0; value < 256; value++) {
+                                if (!isSPACE(value)) {
+                                    ANYOF_BITMAP_SET(data->start_class, value);
+                                }
+                            }
+                        }
 		    }
 		    break;
 		case NSPACEL:
@@ -7229,31 +7295,61 @@ tryagain:
 	    *flagp |= HASWIDTH;
 	    goto finish_meta_pat;
 	case 'w':
-	    ret = reg_node(pRExC_state, (U8)(LOC ? ALNUML     : ALNUM));
+	    if (LOC) {
+                ret = reg_node(pRExC_state, (U8)(ALNUML));
+            } else {
+                ret = reg_node(pRExC_state, (U8)(ALNUM));
+                FLAGS(ret) = (UNI_SEMANTICS) ? USE_UNI : 0;
+            }
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'W':
-	    ret = reg_node(pRExC_state, (U8)(LOC ? NALNUML    : NALNUM));
+            if (LOC) {
+                ret = reg_node(pRExC_state, (U8)(NALNUML));
+            } else {
+                ret = reg_node(pRExC_state, (U8)(NALNUM));
+                FLAGS(ret) = (UNI_SEMANTICS) ? USE_UNI : 0;
+            }
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'b':
 	    RExC_seen_zerolen++;
 	    RExC_seen |= REG_SEEN_LOOKBEHIND;
-	    ret = reg_node(pRExC_state, (U8)(LOC ? BOUNDL     : BOUND));
+            if (LOC) {
+                ret = reg_node(pRExC_state, (U8)(BOUNDL));
+            } else {
+                ret = reg_node(pRExC_state, (U8)(BOUND));
+                FLAGS(ret) = (UNI_SEMANTICS) ? USE_UNI : 0;
+            }
 	    *flagp |= SIMPLE;
 	    goto finish_meta_pat;
 	case 'B':
 	    RExC_seen_zerolen++;
 	    RExC_seen |= REG_SEEN_LOOKBEHIND;
-	    ret = reg_node(pRExC_state, (U8)(LOC ? NBOUNDL    : NBOUND));
+            if (LOC) {
+                ret = reg_node(pRExC_state, (U8)(NBOUNDL));
+            } else {
+                ret = reg_node(pRExC_state, (U8)(NBOUND));
+                FLAGS(ret) = (UNI_SEMANTICS) ? USE_UNI : 0;
+            }
 	    *flagp |= SIMPLE;
 	    goto finish_meta_pat;
 	case 's':
-	    ret = reg_node(pRExC_state, (U8)(LOC ? SPACEL     : SPACE));
+            if (LOC) {
+                ret = reg_node(pRExC_state, (U8)(SPACEL));
+            } else {
+                ret = reg_node(pRExC_state, (U8)(SPACE));
+                FLAGS(ret) = (UNI_SEMANTICS) ? USE_UNI : 0;
+            }
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'S':
-	    ret = reg_node(pRExC_state, (U8)(LOC ? NSPACEL    : NSPACE));
+            if (LOC) {
+                ret = reg_node(pRExC_state, (U8)(NSPACEL));
+            } else {
+                ret = reg_node(pRExC_state, (U8)(NSPACE));
+                FLAGS(ret) = (UNI_SEMANTICS) ? USE_UNI : 0;
+            }
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'd':
@@ -7985,6 +8081,7 @@ case ANYOF_N##NAME:                                     \
     what = WORD;                                        \
     break
 
+/* Like above, but no locale test */
 #define _C_C_T_NOLOC_(NAME,TEST,WORD)                   \
 ANYOF_##NAME:                                           \
 	for (value = 0; value < 256; value++)           \
@@ -7997,6 +8094,42 @@ case ANYOF_N##NAME:                                     \
 	for (value = 0; value < 256; value++)           \
 	    if (!TEST)                                  \
 		ANYOF_BITMAP_SET(ret, value);           \
+    yesno = '!';                                        \
+    what = WORD;                                        \
+    break
+
+/* Like the above, but there are differences if we are in uni-8-bit or not, so
+ * there are two tests passed in, to use depending on that. There aren't any
+ * cases where the label is different from the name, so no need for that
+ * parameter */
+#define _C_C_T_UNI_8_BIT(NAME,TEST_8,TEST_7,WORD)       \
+ANYOF_##NAME:                                           \
+    if (LOC) ANYOF_CLASS_SET(ret, ANYOF_##NAME);        \
+    else if (UNI_SEMANTICS) {                           \
+        for (value = 0; value < 256; value++) {         \
+            if (TEST_8) ANYOF_BITMAP_SET(ret, value);   \
+        }                                               \
+    }                                                   \
+    else {                                              \
+        for (value = 0; value < 256; value++) {         \
+            if (TEST_7) ANYOF_BITMAP_SET(ret, value);   \
+        }                                               \
+    }                                                   \
+    yesno = '+';                                        \
+    what = WORD;                                        \
+    break;                                              \
+case ANYOF_N##NAME:                                     \
+    if (LOC) ANYOF_CLASS_SET(ret, ANYOF_N##NAME);       \
+    else if (UNI_SEMANTICS) {                           \
+        for (value = 0; value < 256; value++) {         \
+            if (! TEST_8) ANYOF_BITMAP_SET(ret, value); \
+        }                                               \
+    }                                                   \
+    else {                                              \
+        for (value = 0; value < 256; value++) {         \
+            if (! TEST_7) ANYOF_BITMAP_SET(ret, value); \
+        }                                               \
+    }                                                   \
     yesno = '!';                                        \
     what = WORD;                                        \
     break
@@ -8336,11 +8469,13 @@ parseit:
 		case _C_C_T_(PUNCT, isPUNCT(value), POSIX_CC_UNI_NAME("Punct"));
 		case _C_C_T_(UPPER, isUPPER(value), POSIX_CC_UNI_NAME("Upper"));
 #ifdef BROKEN_UNICODE_CHARCLASS_MAPPINGS
-		case _C_C_T_(ALNUM, isALNUM(value), "Word");
-		case _C_C_T_(SPACE, isSPACE(value), "SpacePerl");
+                /* \s, \w match all unicode if utf8. */
+                case _C_C_T_UNI_8_BIT(SPACE, isSPACE_L1(value), isSPACE(value), "SpacePerl");
+                case _C_C_T_UNI_8_BIT(ALNUM, isWORDCHAR_L1(value), isALNUM(value), "Word");
 #else
-		case _C_C_T_(SPACE, isSPACE(value), "PerlSpace");
-		case _C_C_T_(ALNUM, isALNUM(value), "PerlWord");
+                /* \s, \w match ascii and locale only */
+                case _C_C_T_UNI_8_BIT(SPACE, isSPACE_L1(value), isSPACE(value), "PerlSpace");
+                case _C_C_T_UNI_8_BIT(ALNUM, isWORDCHAR_L1(value), isALNUM(value), "PerlWord");
 #endif		
 		case _C_C_T_(XDIGIT, isXDIGIT(value), "XDigit");
 		case _C_C_T_NOLOC_(VERTWS, is_VERTWS_latin1(&value), "VertSpace");

@@ -57,11 +57,24 @@ These modifiers are currently only available within a C<(?...)> construct.
 The C<"l"> modifier says to compile the regular expression as if it were
 in the scope of C<use locale>, even if it is not.
 
-The C<"u"> modifier currently does nothing.
+The C<"u"> modifier says to compile the regular expression as if it were
+in the scope of a C<use feature "unicode_strings"> pragma.
 
-The C<"d"> modifier is used in the scope of C<use locale> to compile the
-regular expression as if it were not in that scope.
-See L<perlre/(?dlupimsx-imsx)>.
+The C<"d"> modifier is used to override any C<use locale> and
+C<use feature "unicode_strings"> pragmas that are in effect at the time
+of compiling the regular expression.
+
+See just below and L<perlre/(?dlupimsx-imsx)>.
+
+=head2 C<use feature "unicode_strings"> now applies to some regex matching
+
+Another chunk of the L<perlunicode/The "Unicode Bug"> is fixed in this
+release.  Now, regular expressions compiled within the scope of the
+"unicode_strings" feature will match the same whether or not the target
+string is encoded in utf8, with regard to C<\s>, C<\w>, C<\b>, and their
+complements.  Work is underway to add the C<[[:posix:]]> character
+classes and case sensitive matching to the control of this feature, but
+was not complete in time for this dot release.
 
 =head2 C<\N{...}> now handles Unicode named character sequences
 

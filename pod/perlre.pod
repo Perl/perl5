@@ -646,9 +646,23 @@ L<setlocale() function|perllocale/The setlocale function>.
 This modifier is automatically set if the regular expression is compiled
 within the scope of a C<"use locale"> pragma.
 
-C<"u"> has no effect currently.  It is automatically set if the regular
-expression is compiled within the scope of a
-L<C<"use feature 'unicode_strings">|feature> pragma.
+C<"u"> means to use Unicode semantics when pattern matching.  It is
+automatically set if the regular expression is compiled within the scope
+of a L<C<"use feature 'unicode_strings">|feature> pragma (and isn't
+also in the scope of L<C<"use locale">|locale> nor
+L<C<"use bytes">|bytes> pragmas.  It is not fully implemented at the
+time of this writing, but work is being done to complete the job.  On
+EBCDIC platforms this currently has no effect, but on ASCII platforms,
+it effectively turns them into Latin-1 platforms.  That is, the ASCII
+characters remain as ASCII characters (since ASCII is a subset of
+Latin-1), but the non-ASCII code points are treated as Latin-1
+characters.  Right now, this only applies to the C<"\b">, C<"\s">, and
+C<"\w"> pattern matching operators, plus their complements.  For
+example, when this option is not on, C<"\w"> matches precisely
+C<[A-Za-z0-9_]> (on a non-utf8 string).  When the option is on, it
+matches not just those, but all the Latin-1 word characters (such as an
+"n" with a tilde).  It thus matches exactly the same set of code points
+from 0 to 255 as it would if the string were encoded in utf8.
 
 C<"d"> means to use the traditional Perl pattern matching behavior.
 This is dualistic (hence the name C<"d">, which also could stand for

@@ -1509,17 +1509,20 @@ ASCII range (except in a locale), along with Perl's desire to add Unicode
 support seamlessly.  The result wasn't seamless: these characters were
 orphaned.
 
-Work is being done to correct this, but only some of it was complete in time
-for the 5.12 release.  What has been finished is the important part of the case
+Work is being done to correct this, but only some of it is complete.
+What has been finished is the matching of C<\b>, C<\s>, C<\w> and their
+complements in regular expressions, and the important part of the case
 changing component.  Due to concerns, and some evidence, that older code might
 have come to rely on the existing behavior, the new behavior must be explicitly
 enabled by the feature C<unicode_strings> in the L<feature> pragma, even though
 no new syntax is involved.
 
 See L<perlfunc/lc> for details on how this pragma works in combination with
-various others for casing.  Even though the pragma only affects casing
-operations in the 5.12 release, it is planned to have it affect all the
-problematic behaviors in later releases: you can't have one without them all.
+various others for casing.
+
+Even though the implementation is incomplete, it is planned to have this
+pragma affect all the problematic behaviors in later releases: you can't
+have one without them all.
 
 In the meantime, a workaround is to always call utf8::upgrade($string), or to
 use the standard module L<Encode>.   Also, a scalar that has any characters

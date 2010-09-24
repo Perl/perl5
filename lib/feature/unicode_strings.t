@@ -7,9 +7,10 @@ BEGIN {
     require './test.pl';
 }
 
-plan(13312);    # Determined by experimentation
+plan(20736);    # Determined by experimentation
 
-# Test the upper/lower/title case mappings for all characters 0-255.
+# In this section, test the upper/lower/title case mappings for all characters
+# 0-255.
 
 # First compute the case mappings without resorting to the functions we're
 # testing.
@@ -137,6 +138,125 @@ for my  $prefix (\%empty, \%posix, \%cyrillic, \%latin1) {
                 is (lcfirst($to_lower), $expected_lcfirst,
                     display("$cp: $phrase: Verify lcfirst($to_lower) eq $expected_lcfirst"));
             }
+        }
+    }
+}
+
+# In this section test that \w, \s, and \b work correctly.  These are the only
+# character classes affected by this pragma.
+
+# Boolean if w[$i] is a \w character
+my @w = (0) x 256;
+@w[0x30 .. 0x39] = (1) x 10;     # 0-9
+@w[0x41 .. 0x5a] = (1) x 26;     # A-Z
+@w[0x61 .. 0x7a] = (1) x 26;     # a-z
+$w[0x5F] = 1;                    # _
+$w[0xAA] = 1;                    # FEMININE ORDINAL INDICATOR
+$w[0xB5] = 1;                    # MICRO SIGN
+$w[0xBA] = 1;                    # MASCULINE ORDINAL INDICATOR
+@w[0xC0 .. 0xD6] = (1) x 23;     # various
+@w[0xD8 .. 0xF6] = (1) x 31;     # various
+@w[0xF8 .. 0xFF] = (1) x 8;      # various
+
+# Boolean if s[$i] is a \s character
+my @s = (0) x 256;
+$s[0x09] = 1;   # Tab
+$s[0x0A] = 1;   # LF
+$s[0x0C] = 1;   # FF
+$s[0x0D] = 1;   # CR
+$s[0x20] = 1;   # SPACE
+$s[0x85] = 1;   # NEL
+$s[0xA0] = 1;   # NO BREAK SPACE
+
+for my $i (0 .. 255) {
+    my $char = chr($i);
+    my $hex_i = sprintf "%02X", $i;
+    foreach my $which (\@s, \@w) {
+        my $basic_name;
+        if ($which == \@s) {
+            $basic_name = 's';
+        } else {
+            $basic_name = 'w'
+        }
+
+        # Test \w \W \s \S
+        foreach my $complement (0, 1) {
+            my $name = '\\' . (($complement) ? uc($basic_name) : $basic_name);
+
+            # in and out of [...]
+            foreach my $charclass (0, 1) {
+
+                # And like [^...] or just plain [...]
+                foreach my $complement_class (0, 1) {
+                    next if ! $charclass && $complement_class;
+
+                    # Start with the boolean as to if the character is in the
+                    # class, and then complement as needed.
+                    my $expect_success = $which->[$i];
+                    $expect_success = ! $expect_success if $complement;
+                    $expect_success = ! $expect_success if $complement_class;
+
+                    my $test = $name;
+                    $test = "^$test" if $complement_class;
+                    $test = "[$test]" if $charclass;
+                    $test = "^$test\$";
+
+                    use feature 'unicode_strings';
+                    my $prefix = "in uni8bit; Verify chr(0x$hex_i)";
+                    if ($expect_success) {
+                        like($char, qr/$test/, display("$prefix =~ qr/$test/"));
+                    } else {
+                        unlike($char, qr/$test/, display("$prefix !~ qr/$test/"));
+                    }
+
+                    no feature 'unicode_strings';
+                    $prefix = "no uni8bit; Verify chr(0x$hex_i)";
+
+                    # With the legacy, nothing above 128 should be in the
+                    # class
+                    if ($i >= 128) {
+                        $expect_success = 0;
+                        $expect_success = ! $expect_success if $complement;
+                        $expect_success = ! $expect_success if $complement_class;
+                    }
+                    if ($expect_success) {
+                        like($char, qr/$test/, display("$prefix =~ qr/$test/"));
+                    } else {
+                        unlike($char, qr/$test/, display("$prefix !~ qr/$test/"));
+                    }
+                }
+            }
+        }
+    }
+
+    # Similarly for \b and \B.
+    foreach my $complement (0, 1) {
+        my $name = '\\' . (($complement) ? 'B' : 'b');
+        my $expect_success = ! $w[$i];  # \b is complement of \w
+        $expect_success = ! $expect_success if $complement;
+
+        my $string = "a$char";
+        my $test = "(^a$name\\x{$hex_i}\$)";
+
+        use feature 'unicode_strings';
+        my $prefix = "in uni8bit; Verify $string";
+        if ($expect_success) {
+            like($string, qr/$test/, display("$prefix =~ qr/$test/"));
+        } else {
+            unlike($string, qr/$test/, display("$prefix !~ qr/$test/"));
+        }
+
+        no feature 'unicode_strings';
+        $prefix = "no uni8bit; Verify $string";
+        if ($i >= 128) {
+            $expect_success = 1;
+            $expect_success = ! $expect_success if $complement;
+        }
+        if ($expect_success) {
+            like($string, qr/$test/, display("$prefix =~ qr/$test/"));
+            like($string, qr/$test/, display("$prefix =~ qr/$test/"));
+        } else {
+            unlike($string, qr/$test/, display("$prefix !~ qr/$test/"));
         }
     }
 }

@@ -682,7 +682,8 @@ nor EBCDIC, they match the ASCII defaults (0 to 9 for C<\d>; 52 letters,
 A regular expression is marked for Unicode semantics if it is encoded in
 utf8 (usually as a result of including a literal character whose code
 point is above 255), or if it contains a C<\N{U+...}> or C<\N{I<name>}>
-construct.
+construct, or (starting in Perl 5.14) if it was compiled in the scope of a
+C<S<use feature "unicode_strings">> pragma.
 
 The differences in behavior between locale and non-locale semantics
 can affect any character whose code point is 255 or less.  The
@@ -693,6 +694,11 @@ L<perlunicode/The "Unicode Bug">.
 
 For portability reasons, it may be better to not use C<\w>, C<\d>, C<\s>
 or the POSIX character classes, and use the Unicode properties instead.
+That way you can control whether you want matching of just characters in
+the ASCII character set, or any Unicode characters.
+C<S<use feature "unicode_strings">> will allow seamless Unicode behavior
+no matter what the internal encodings are, but won't allow restricting
+to just the ASCII characters.
 
 =head4 Examples
 

@@ -308,6 +308,9 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 
 #define SIZE_ONLY (RExC_emit == &PL_regdummy)
 
+/* Flags for node->flags of several of the node types */
+#define USE_UNI                0x01
+
 /* Flags for node->flags of ANYOF */
 
 #define ANYOF_CLASS		0x08	/* has [[:blah:]] classes */
