@@ -159,14 +159,16 @@ C<File::DosGlob> has been upgraded from version 1.02 to 1.03.
 It allows patterns containing literal parentheses (they no longer need to
 be escaped). On Windows, it no longer adds an extra F<./> to the file names
 returned when the pattern is a relative glob with a drive specification,
-like F<c:*.pl>.
+like F<c:*.pl>
+L<[perl #71712]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=71712>.
 
 =item *
 
 C<File::Find> has been upgraded from version 1.17 to 1.18.
 
 It improves handling of backslashes on Windows, so that paths such as
-F<c:\dir\/file> are no longer generated.
+F<c:\dir\/file> are no longer generated
+L<[perl #71710]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=71710>.
 
 =item *
 
@@ -175,6 +177,14 @@ C<NEXT> has been upgraded from version 0.64 to 0.65.
 =item *
 
 C<PathTools> has been upgraded from version 3.31_01 to 3.33.
+
+=item *
+
+C<sigtrap> has been upgraded from version 1.04 to 1.05.
+
+It no longer tries to modify read-only arguments when generating a
+backtrace
+L<[perl #72340]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=72340>.
 
 =item *
 

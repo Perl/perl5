@@ -8,7 +8,7 @@ sigtrap - Perl pragma to enable simple signal handling
 
 use Carp;
 
-$VERSION = 1.04;
+$VERSION = 1.05;
 $Verbose ||= 0;
 
 sub import {
