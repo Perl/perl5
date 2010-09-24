@@ -3,12 +3,13 @@
 BEGIN {
 	chdir 't' if -d 't';
 	@INC = '../lib';
+	require './test.pl';
 }
 
 use strict;
 use Config;
 
-use Test::More tests => 15;
+plan 15;
 
 use_ok( 'sigtrap' );
 
