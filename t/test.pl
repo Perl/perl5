@@ -427,6 +427,7 @@ USE_OK
 # Arguments :
 #   switches => [ command-line switches ]
 #   nolib    => 1 # don't use -I../lib (included by default)
+#   non_portable => Don't warn if a one liner contains quotes
 #   prog     => one-liner (avoid quotes)
 #   progs    => [ multi-liner (avoid quotes) ]
 #   progfile => perl script
@@ -480,6 +481,9 @@ sub _create_runperl { # Create the string to qx in runperl().
 	die "test.pl:runperl(): 'progs' must be an ARRAYREF " . _where()
 	    unless ref $args{progs} eq "ARRAY";
         foreach my $prog (@{$args{progs}}) {
+	    if ($prog =~ tr/'"// && !$args{non_portable}) {
+		warn "quotes in prog >>$prog<< are not portable";
+	    }
             if ($is_mswin || $is_netware || $is_vms) {
                 $runperl = $runperl . qq ( -e "$prog" );
             }

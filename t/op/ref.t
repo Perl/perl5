@@ -432,7 +432,7 @@ is ($?, 0, 'coredump on typeglob = (SvRV && !SvROK)');
 # "Attempt to free unreferenced scalar" warnings
 
 is (runperl(
-    prog => 'use Symbol;my $x=bless \gensym,"t"; print;*$$x=$x',
+    prog => 'use Symbol;my $x=bless \gensym,q{t}; print;*$$x=$x',
     stderr => 1
 ), '', 'freeing self-referential typeglob');
 
@@ -443,7 +443,7 @@ is (runperl(
 TODO: {
     local $TODO = "works but output through pipe is mangled" if $^O eq 'VMS';
     like (runperl(
-        prog => '$x=bless[]; sub IO::Handle::DESTROY{$_="bad";s/bad/ok/;print}',
+        prog => '$x=bless[]; sub IO::Handle::DESTROY{$_=q{bad};s/bad/ok/;print}',
         stderr => 1
           ), qr/^(ok)+$/, 'STDOUT destructor');
 }

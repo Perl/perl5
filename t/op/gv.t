@@ -286,7 +286,7 @@ $| = 1;
 sub DESTROY {eval {die qq{Farewell $_[0]}}; print $@}
 package main;
 
-bless \$A::B, 'M';
+bless \$A::B, q{M};
 *A:: = \*B::;
 EOPROG
     like($output, qr/^Farewell M=SCALAR/, "DESTROY was called");

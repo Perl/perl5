@@ -276,7 +276,7 @@ tary();
 my $got = runperl (
 	prog => q{
 		    sub X::DESTROY { @a = () }
-		    @a = (bless {}, 'X');
+		    @a = (bless {}, q{X});
 		    @a = ();
 		},
 	stderr => 1
