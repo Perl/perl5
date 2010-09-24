@@ -1342,6 +1342,7 @@ ithread_kill(...)
         ithread *thread;
         char *sig_name;
         IV signal;
+        int no_handler = 1;
     CODE:
         /* Must have safe signals */
         if (PL_signals & PERL_SIGNALS_UNSAFE_FLAG) {
@@ -1371,10 +1372,20 @@ ithread_kill(...)
         MUTEX_LOCK(&thread->mutex);
         if (thread->interp) {
             dTHXa(thread->interp);
-            PL_psig_pend[signal]++;
-            PL_sig_pending = 1;
+            if (PL_psig_pend && PL_psig_ptr[signal]) {
+                PL_psig_pend[signal]++;
+                PL_sig_pending = 1;
+                no_handler = 0;
+            }
+        } else {
+            /* Ignore signal to terminated thread */
+            no_handler = 0;
         }
         MUTEX_UNLOCK(&thread->mutex);
+
+        if (no_handler) {
+            Perl_croak(aTHX_ "Signal %s received in thread %"UVuf", but no signal handler set.", sig_name, thread->tid);
+        }
 
         /* Return the thread to allow for method chaining */
         ST(0) = ST(0);
