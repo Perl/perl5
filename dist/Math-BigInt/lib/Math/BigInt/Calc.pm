@@ -2598,7 +2598,7 @@ the same terms as Perl itself.
 
 Original math code by Mark Biggar, rewritten by Tels L<http://bloodgate.com/>
 in late 2000.
-Seperated from BigInt and shaped API with the help of John Peacock.
+Separated from BigInt and shaped API with the help of John Peacock.
 
 Fixed, speed-up, streamlined and enhanced by Tels 2001 - 2007.
 

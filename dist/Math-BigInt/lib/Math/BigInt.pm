@@ -30,7 +30,7 @@ use vars qw/$round_mode $accuracy $precision $div_scale $rnd_mode
 use strict;
 
 # Inside overload, the first arg is always an object. If the original code had
-# it reversed (like $x = 2 * $y), then the third paramater is true.
+# it reversed (like $x = 2 * $y), then the third parameter is true.
 # In some cases (like add, $x = $x + 2 is the same as $x = 2 + $x) this makes
 # no difference, but in some cases it does.
 
@@ -4160,7 +4160,7 @@ versions <= 5.7.2) is like this:
 =item Accuracy (significant digits)
 
   * fround($a) rounds to $a significant digits
-  * only fdiv() and fsqrt() take A as (optional) paramater
+  * only fdiv() and fsqrt() take A as (optional) parameter
     + other operations simply create the same number (fneg etc), or more (fmul)
       of digits
     + rounding/truncating is only done when explicitly calling one of fround
@@ -4418,7 +4418,7 @@ These all might have problems handling infinity right.
 
 =head1 INTERNALS
 
-The actual numbers are stored as unsigned big integers (with seperate sign).
+The actual numbers are stored as unsigned big integers (with separate sign).
 
 You should neither care about nor depend on the internal representation; it
 might change without notice. Use B<ONLY> method calls like C<< $x->sign(); >>
@@ -4465,7 +4465,7 @@ small numbers (less than about 20 digits) and when converting very large
 numbers to decimal (for instance for printing, rounding, calculating their
 length in decimal etc).
 
-So please select carefully what libary you want to use.
+So please select carefully what library you want to use.
 
 Different low-level libraries use different formats to store the numbers.
 However, you should B<NOT> depend on the number having a specific format

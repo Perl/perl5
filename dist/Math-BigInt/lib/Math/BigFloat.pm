@@ -4241,7 +4241,7 @@ request a different storage class for use with Math::BigFloat:
         use Math::BigFloat with => 'Math::BigInt::Lite';
 
 However, this request is ignored, as the current code now uses the low-level
-math libary for directly storing the number parts.
+math library for directly storing the number parts.
 
 =head1 EXPORTS
 
