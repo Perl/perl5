@@ -445,11 +445,6 @@ platforms, they use the code page of the platform.  The code pages that Perl
 knows about all have 8-bit characters, so most of these functions will return
 true for more characters than on ASCII platforms.
 
-=for apidoc Am|bool|isALNUM|char ch
-Returns a boolean indicating whether the specified character is an
-alphanumeric character (including underscore) in the platform's native
-character set.
-
 =for apidoc Am|bool|isALPHA|char ch
 Returns a boolean indicating whether the specified character is an
 alphabetic character in the platform's native character set.
@@ -473,6 +468,14 @@ whitespace character in the platform's native character set.
 =for apidoc Am|bool|isUPPER|char ch
 Returns a boolean indicating whether the specified character is an
 uppercase character in the platform's native character set.
+
+=for apidoc Am|bool|isWORDCHAR|char ch
+Returns a boolean indicating whether the specified character is a
+character that is any of: alphabetic, numeric, or an underscore.  This is the
+same as what C<\w> matches in a regular expression.
+C<isALNUM()> is a synonym provided for backward compatibility.  Note that it
+does not have the standard C language meaning of alphanumeric, since it matches
+an underscore and the standard meaning does not.
 
 =head1 Character case changing
 
