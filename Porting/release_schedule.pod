@@ -1,6 +1,32 @@
 =encoding utf8
 
-=head1 Release schedule
+=head1 Perl 5.14 release schedule
+
+=over
+
+=item December 20, 2010
+
+Contentious Changes freeze
+
+=item February 20, 2010
+
+User-visible Changes freeze
+
+=item March 20, 2010
+
+Code Freeze
+
+=item April 1, 2010
+
+Target date for 5.14.0 RC0
+
+=item 7 days after the release of a 5.14.0-RCx with no showstoppers reported
+
+5.14.0
+
+=back
+
+=head1 Development Release schedule
 
 This document lists the release engineers for at least the next
 four months of releases of bleadperl. If there are fewer than 
