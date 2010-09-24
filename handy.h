@@ -566,7 +566,6 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
  * differently between the two */
 #define isALNUM(c)      isWORDCHAR(c)
 #define isALNUMU(c)     isWORDCHAR_L1(c)
-#define isALPHA(c)	(isUPPER(c) || isLOWER(c))
 /* continuation character for legal NAME in \N{NAME} */
 #define isCHARNAME_CONT(c) (isWORDCHAR_L1(c) || (c) == ' ' || (c) == '-' || (c) == '(' || (c) == ')' || (c) == ':' || NATIVE_TO_UNI((U8) c) == 0xA0)
 #define isIDFIRST(c)	(isALPHA(c) || (c) == '_')
@@ -577,6 +576,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #ifdef EBCDIC
     /* In EBCDIC we do not do locales: therefore can use native functions */
 #   define isALNUMC(c)	isalnum(c)
+#   define isALPHA(c)	isalpha(c)
 #   define isBLANK(c)	((c) == ' ' || (c) == '\t' || NATIVE_TO_UNI(c) == 0xA0)
 #   define isCNTRL(c)	iscntrl(c)
 #   define isDIGIT(c)	isdigit(c)
@@ -592,6 +592,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #   define toUPPER(c)	toupper(c)
 #else /* Not EBCDIC: ASCII-only matching */
 #   define isALNUMC(c)  isALNUMC_A(c)
+#   define isALPHA(c)   isALPHA_A(c)
 #   define isBLANK(c)   isBLANK_A(c)
 #   define isCNTRL(c)   isCNTRL_A(c)
 #   define isDIGIT(c)   isDIGIT_A(c)
