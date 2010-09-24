@@ -61,8 +61,10 @@ my $out = tie *STDOUT, 'TieOut';
 $SIG{FAKE} = 'DEFAULT';
 $sigtrap::Verbose = 1;
 sigtrap->import('any', 'FAKE');
+my $read = $out->read;
+untie *STDOUT;
 is( $SIG{FAKE}, \&sigtrap::handler_traceback, 'should set default handler' );
-like( $out->read, qr/^Installing handler/, 'does it talk with $Verbose set?' );
+like( $read, qr/^Installing handler/, 'does it talk with $Verbose set?' );
 
 # handler_die croaks with first argument
 eval { sigtrap::handler_die('FAKE') };
