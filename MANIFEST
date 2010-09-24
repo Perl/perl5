@@ -3511,6 +3511,7 @@ intrpvar.h			Variables held in each interpreter instance
 iperlsys.h			Perl's interface to the system
 keywords.h			The keyword numbers
 keywords.pl			Program to write keywords.h
+l1_char_class_tab.h		256 word bit table of character classes (for handy.h)
 lib/abbrev.pl			An abbreviation table builder
 lib/AnyDBM_File.pm		Perl module to emulate dbmopen
 lib/AnyDBM_File.t		See if AnyDBM_File works
@@ -4184,6 +4185,7 @@ Porting/makerel			Release making utility
 Porting/make_snapshot.pl	Make a tgz snapshot of our tree with a .patch file in it
 Porting/manicheck		Check against MANIFEST
 Porting/manisort		Sort the MANIFEST
+Porting/mk_PL_charclass.pl	Populate the PL_charclass table
 Porting/newtests-perldelta.pl	Generate Perldelta stub for newly added tests
 Porting/perldelta_template.pod	Template for creating new perldelta.pod files
 Porting/perlhist_calculate.pl		Perform calculations to update perlhist
