@@ -68,11 +68,22 @@ L</Selected Bug Fixes> section.
 Default regular expression modifiers are now notated by using
 C<(?^...)>.  Code relying on the old stringification will fail.  The
 purpose of this is so that when new modifiers are added, such code will
-not have to change, as the stringification will automatically
-incorporate the new modifiers.
+not have to change (after this one time), as the stringification will
+automatically incorporate the new modifiers.
 
 Code that needs to work properly with both old- and new-style regexes
-can use something like the following:
+can avoid the whole issue by using:
+
+ use re qw(regexp_pattern);
+ my ($pat, $mods) = regexp_pattern($re_ref);
+
+where C<$re_ref> is a reference to a compiled regular expression.  Upon
+return, C<$mods> will be a string containing all the non-default
+modifiers used when the regular expression was compiled, and C<$pattern>
+the actual pattern.
+
+If the actual stringification is important, you can use something like
+the following:
 
     # Accept both old and new-style stringification
     my $modifiers = (qr/foobar/ =~ /\Q(?^/) ? '^' : '-xism';
