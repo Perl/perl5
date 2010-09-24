@@ -446,32 +446,32 @@ knows about all have 8-bit characters, so most of these functions will return
 true for more characters than on ASCII platforms.
 
 =for apidoc Am|bool|isALNUM|char ch
-Returns a boolean indicating whether the C C<char> is an
-alphanumeric character (including underscore) or digit in the platform's native
+Returns a boolean indicating whether the specified character is an
+alphanumeric character (including underscore) in the platform's native
 character set.
 
 =for apidoc Am|bool|isALPHA|char ch
-Returns a boolean indicating whether the C C<char> is an
+Returns a boolean indicating whether the specified character is an
 alphabetic character in the platform's native character set.
 
 =for apidoc Am|bool|isDIGIT|char ch
-Returns a boolean indicating whether the C C<char> is a
+Returns a boolean indicating whether the specified character is a
 digit in the platform's native character set.
 
 =for apidoc Am|bool|isLOWER|char ch
-Returns a boolean indicating whether the C C<char> is a
+Returns a boolean indicating whether the specified character is a
 lowercase character in the platform's native character set.
 
 =for apidoc Am|bool|isOCTAL|char ch
-Returns a boolean indicating whether the C C<char> is an
+Returns a boolean indicating whether the specified character is an
 octal digit, [0-7] in the platform's native character set.
 
 =for apidoc Am|bool|isSPACE|char ch
-Returns a boolean indicating whether the C C<char> is a
+Returns a boolean indicating whether the specified character is a
 whitespace character in the platform's native character set.
 
 =for apidoc Am|bool|isUPPER|char ch
-Returns a boolean indicating whether the C C<char> is an
+Returns a boolean indicating whether the specified character is an
 uppercase character in the platform's native character set.
 
 =head1 Character case changing
