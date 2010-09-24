@@ -72,7 +72,7 @@ Previously, the following code resulted in a successful match:
 
     my @a = qw(a y0 z);
     my @b = qw(a x0 z);
-    $a[0 .. $#b] ~~ @b;
+    @a[0 .. $#b] ~~ @b;
 
 This odd behaviour has now been fixed
 L<[perl #77468]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=77468>.

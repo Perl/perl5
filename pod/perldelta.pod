@@ -462,6 +462,16 @@ XXX
 XXX If any significant core contributor has died, we've added a short obituary
 here.
 
+=head1 Errata
+
+=over 4
+
+=item *
+
+Fixed a typo in L<perl5135delta> regarding array slices and smart matching
+
+=back
+
 =head1 Acknowledgements
 
 XXX The list of people to thank goes here.
