@@ -20,7 +20,7 @@ BEGIN {
 
 my $test_count = 85;
 $test_count += 119 if $symlink_exists;
-$test_count += 18 if $^O eq 'MSWin32';
+$test_count += 26 if $^O eq 'MSWin32';
 $test_count += 2 if $^O eq 'MSWin32' and $symlink_exists;
 
 print "1..$test_count\n";
@@ -929,4 +929,65 @@ if ($symlink_exists) {  # Issue 68260
     );
 
     Check (!$dangling_symlink);
+}
+
+
+if ($^O eq 'MSWin32') {
+    # Check F:F:f correctly handles a root directory path.
+    # Rather than processing the entire drive (!), simply test that the
+    # first file passed to the wanted routine is correct and then bail out.
+    $orig_dir =~ /^(\w:)/ or die "expected a drive: $orig_dir";
+    my $drive = $1;
+
+    # Determine the file in the root directory which would be
+    # first if processed in sorted order. Create one if necessary.
+    my $expected_first_file;
+    opendir(ROOT_DIR, "/") or die "cannot opendir /: $!\n";
+    foreach my $f (sort readdir ROOT_DIR) {
+        if (-f "/$f") {
+            $expected_first_file = $f;
+            last;
+        }
+    }
+    closedir ROOT_DIR;
+    my $created_file;
+    unless (defined $expected_first_file) {
+        $expected_first_file = '__perl_File_Find_test.tmp';
+        open(F, ">", "/$expected_first_file") && close(F)
+            or die "cannot create file in root directory: $!\n";
+        $created_file = 1;
+    }
+
+    # Run F:F:f with/without no_chdir for each possible style of root path.
+    # NB. If HOME were "/", then an inadvertent chdir('') would fluke the
+    # expected result, so ensure it is something else:
+    local $ENV{HOME} = $orig_dir;
+    foreach my $no_chdir (0, 1) {
+        foreach my $root_dir ("/", "\\", "$drive/", "$drive\\") {
+            eval {
+                File::Find::find({
+                    'no_chdir' => $no_chdir,
+                    'preprocess' => sub { return sort @_ },
+                    'wanted' => sub {
+                        -f or return; # the first call is for $root_dir itself.
+                        my $got = $File::Find::name;
+                        my $exp = "$root_dir$expected_first_file";
+                        print "# no_chdir=$no_chdir $root_dir '$got'\n";
+                        Check($got eq $exp);
+                        die "done"; # don't process the entire drive!
+                    },
+                }, $root_dir);
+            };
+            # If F:F:f did not die "done" then it did not Check() either.
+            unless ($@ and $@ =~ /done/) {
+                print "# no_chdir=$no_chdir $root_dir ",
+                    ($@ ? "error: $@" : "no files found"), "\n";
+                Check(0);
+            }
+        }
+    }
+    if ($created_file) {
+        unlink("/$expected_first_file")
+            or warn "can't unlink /$expected_first_file: $!\n";
+    }
 }
