@@ -329,8 +329,9 @@ END
 SKIP: {
     skip("Embedded UTF-8 does not work in EBCDIC", 1) if ord("A") == 193;
     use utf8;
-    eval qq{is(q \xc3\xbc test \xc3\xbc, qq\xc2\xb7 test \xc2\xb7,
-	       "utf8 quote delimiters [perl #16823]");};
+    is eval qq{q \xc3\xbc test \xc3\xbc . qq\xc2\xa1 test \xc2\xa1},
+      ' test  test ',
+      "utf8 quote delimiters [perl #16823]";
 }
 
 # Test the "internals".
