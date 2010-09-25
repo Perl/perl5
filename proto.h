@@ -3359,12 +3359,18 @@ PERL_CALLCONV void	Perl_sv_clear(pTHX_ SV *const sv)
 	assert(sv)
 
 PERL_CALLCONV I32	Perl_sv_cmp(pTHX_ SV *const sv1, SV *const sv2);
+PERL_CALLCONV I32	Perl_sv_cmp_flags(pTHX_ SV *const sv1, SV *const sv2, const I32 flags);
 PERL_CALLCONV I32	Perl_sv_cmp_locale(pTHX_ SV *const sv1, SV *const sv2);
+PERL_CALLCONV I32	Perl_sv_cmp_locale_flags(pTHX_ SV *const sv1, SV *const sv2, const I32 flags);
 #if defined(USE_LOCALE_COLLATE)
-PERL_CALLCONV char*	Perl_sv_collxfrm(pTHX_ SV *const sv, STRLEN *const nxp)
+/* PERL_CALLCONV char*	sv_collxfrm(pTHX_ SV *const sv, STRLEN *const nxp)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2); */
+
+PERL_CALLCONV char*	Perl_sv_collxfrm_flags(pTHX_ SV *const sv, STRLEN *const nxp, I32 const flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_SV_COLLXFRM	\
+#define PERL_ARGS_ASSERT_SV_COLLXFRM_FLAGS	\
 	assert(sv); assert(nxp)
 
 #endif
@@ -3402,7 +3408,8 @@ PERL_CALLCONV bool	Perl_sv_does(pTHX_ SV* sv, const char *const name)
 #define PERL_ARGS_ASSERT_SV_DOES	\
 	assert(sv); assert(name)
 
-PERL_CALLCONV I32	Perl_sv_eq(pTHX_ SV* sv1, SV* sv2);
+/* PERL_CALLCONV I32	sv_eq(pTHX_ SV* sv1, SV* sv2); */
+PERL_CALLCONV I32	Perl_sv_eq_flags(pTHX_ SV* sv1, SV* sv2, const I32 flags);
 PERL_CALLCONV void	Perl_sv_free(pTHX_ SV *const sv);
 PERL_CALLCONV void	Perl_sv_free2(pTHX_ SV *const sv)
 			__attribute__nonnull__(pTHX_1);

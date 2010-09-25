@@ -1799,6 +1799,8 @@ mg.c:1024: warning: left-hand operand of comma expression has no effect
 #define sv_2iv(sv) sv_2iv_flags(sv, SV_GMAGIC)
 #define sv_2uv(sv) sv_2uv_flags(sv, SV_GMAGIC)
 #define sv_2nv(sv) sv_2nv_flags(sv, SV_GMAGIC)
+#define sv_eq(sv1, sv2) sv_eq_flags(sv1, sv2, SV_GMAGIC)
+#define sv_collxfrm(sv, nxp) sv_cmp_flags(sv, nxp, SV_GMAGIC)
 #define sv_insert(bigstr, offset, len, little, littlelen)		\
 	Perl_sv_insert_flags(aTHX_ (bigstr),(offset), (len), (little),	\
 			     (littlelen), SV_GMAGIC)

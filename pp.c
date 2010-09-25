@@ -2336,8 +2336,8 @@ PP(pp_sle)
     {
       dPOPTOPssrl;
       const int cmp = (IN_LOCALE_RUNTIME
-		 ? sv_cmp_locale(left, right)
-		 : sv_cmp(left, right));
+		 ? sv_cmp_locale_flags(left, right, 0)
+		 : sv_cmp_flags(left, right, 0));
       SETs(boolSV(cmp * multiplier < rhs));
       RETURN;
     }
@@ -2349,7 +2349,7 @@ PP(pp_seq)
     tryAMAGICbin_MG(seq_amg, AMGf_set);
     {
       dPOPTOPssrl;
-      SETs(boolSV(sv_eq(left, right)));
+      SETs(boolSV(sv_eq_flags(left, right, 0)));
       RETURN;
     }
 }
@@ -2360,7 +2360,7 @@ PP(pp_sne)
     tryAMAGICbin_MG(sne_amg, AMGf_set);
     {
       dPOPTOPssrl;
-      SETs(boolSV(!sv_eq(left, right)));
+      SETs(boolSV(!sv_eq_flags(left, right, 0)));
       RETURN;
     }
 }
@@ -2372,8 +2372,8 @@ PP(pp_scmp)
     {
       dPOPTOPssrl;
       const int cmp = (IN_LOCALE_RUNTIME
-		 ? sv_cmp_locale(left, right)
-		 : sv_cmp(left, right));
+		 ? sv_cmp_locale_flags(left, right, 0)
+		 : sv_cmp_flags(left, right, 0));
       SETi( cmp );
       RETURN;
     }

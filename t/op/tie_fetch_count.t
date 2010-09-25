@@ -68,16 +68,13 @@ $dummy  =  $var  !=   1 ; check_count '!=';
 $dummy  =  $var <=>   1 ; check_count '<=>';
 
 # String comparison
-TODO: {
-    local $::TODO = $TODO;
-    $dummy  =  $var  lt   1 ; check_count 'lt';
-    $dummy  =  $var  le   1 ; check_count 'le';
-    $dummy  =  $var  eq   1 ; check_count 'eq';
-    $dummy  =  $var  ge   1 ; check_count 'ge';
-    $dummy  =  $var  gt   1 ; check_count 'gt';
-    $dummy  =  $var  ne   1 ; check_count 'ne';
-    $dummy  =  $var cmp   1 ; check_count 'cmp';
-}
+$dummy  =  $var  lt   1 ; check_count 'lt';
+$dummy  =  $var  le   1 ; check_count 'le';
+$dummy  =  $var  eq   1 ; check_count 'eq';
+$dummy  =  $var  ge   1 ; check_count 'ge';
+$dummy  =  $var  gt   1 ; check_count 'gt';
+$dummy  =  $var  ne   1 ; check_count 'ne';
+$dummy  =  $var cmp   1 ; check_count 'cmp';
 
 # Bitwise operators
 $dummy  =  $var   &   1 ; check_count '&';

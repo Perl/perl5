@@ -962,9 +962,11 @@
 #endif
 #define sv_clear		Perl_sv_clear
 #define sv_cmp			Perl_sv_cmp
+#define sv_cmp_flags		Perl_sv_cmp_flags
 #define sv_cmp_locale		Perl_sv_cmp_locale
+#define sv_cmp_locale_flags	Perl_sv_cmp_locale_flags
 #if defined(USE_LOCALE_COLLATE)
-#define sv_collxfrm		Perl_sv_collxfrm
+#define sv_collxfrm_flags	Perl_sv_collxfrm_flags
 #endif
 #define sv_compile_2op		Perl_sv_compile_2op
 #define getcwd_sv		Perl_getcwd_sv
@@ -973,7 +975,7 @@
 #define sv_dump			Perl_sv_dump
 #define sv_derived_from		Perl_sv_derived_from
 #define sv_does			Perl_sv_does
-#define sv_eq			Perl_sv_eq
+#define sv_eq_flags		Perl_sv_eq_flags
 #define sv_free			Perl_sv_free
 #ifdef PERL_CORE
 #define sv_free_arenas		Perl_sv_free_arenas
@@ -3430,9 +3432,11 @@
 #endif
 #define sv_clear(a)		Perl_sv_clear(aTHX_ a)
 #define sv_cmp(a,b)		Perl_sv_cmp(aTHX_ a,b)
+#define sv_cmp_flags(a,b,c)	Perl_sv_cmp_flags(aTHX_ a,b,c)
 #define sv_cmp_locale(a,b)	Perl_sv_cmp_locale(aTHX_ a,b)
+#define sv_cmp_locale_flags(a,b,c)	Perl_sv_cmp_locale_flags(aTHX_ a,b,c)
 #if defined(USE_LOCALE_COLLATE)
-#define sv_collxfrm(a,b)	Perl_sv_collxfrm(aTHX_ a,b)
+#define sv_collxfrm_flags(a,b,c)	Perl_sv_collxfrm_flags(aTHX_ a,b,c)
 #endif
 #define sv_compile_2op(a,b,c,d)	Perl_sv_compile_2op(aTHX_ a,b,c,d)
 #define getcwd_sv(a)		Perl_getcwd_sv(aTHX_ a)
@@ -3441,7 +3445,7 @@
 #define sv_dump(a)		Perl_sv_dump(aTHX_ a)
 #define sv_derived_from(a,b)	Perl_sv_derived_from(aTHX_ a,b)
 #define sv_does(a,b)		Perl_sv_does(aTHX_ a,b)
-#define sv_eq(a,b)		Perl_sv_eq(aTHX_ a,b)
+#define sv_eq_flags(a,b,c)	Perl_sv_eq_flags(aTHX_ a,b,c)
 #define sv_free(a)		Perl_sv_free(aTHX_ a)
 #ifdef PERL_CORE
 #define sv_free_arenas()	Perl_sv_free_arenas(aTHX)

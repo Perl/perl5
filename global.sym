@@ -559,8 +559,10 @@ Perl_sv_catsv
 Perl_sv_chop
 Perl_sv_clear
 Perl_sv_cmp
+Perl_sv_cmp_flags
 Perl_sv_cmp_locale
-Perl_sv_collxfrm
+Perl_sv_cmp_locale_flags
+Perl_sv_collxfrm_flags
 Perl_sv_compile_2op
 Perl_getcwd_sv
 Perl_sv_dec
@@ -568,7 +570,7 @@ Perl_sv_dec_nomg
 Perl_sv_dump
 Perl_sv_derived_from
 Perl_sv_does
-Perl_sv_eq
+Perl_sv_eq_flags
 Perl_sv_free
 Perl_sv_free2
 Perl_sv_gets

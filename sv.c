@@ -6773,11 +6773,17 @@ Returns a boolean indicating whether the strings in the two SVs are
 identical. Is UTF-8 and 'use bytes' aware, handles get magic, and will
 coerce its args to strings if necessary.
 
+=for apidoc sv_eq_flags
+
+Returns a boolean indicating whether the strings in the two SVs are
+identical. Is UTF-8 and 'use bytes' aware and coerces its args to strings
+if necessary. If the flags include SV_GMAGIC, it handles get-magic, too.
+
 =cut
 */
 
 I32
-Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
+Perl_sv_eq_flags(pTHX_ register SV *sv1, register SV *sv2, const I32 flags)
 {
     dVAR;
     const char *pv1;
@@ -6794,12 +6800,14 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
     }
     else {
 	/* if pv1 and pv2 are the same, second SvPV_const call may
-	 * invalidate pv1, so we may need to make a copy */
-	if (sv1 == sv2 && (SvTHINKFIRST(sv1) || SvGMAGICAL(sv1))) {
+	 * invalidate pv1 (if we are handling magic), so we may need to
+	 * make a copy */
+	if (sv1 == sv2 && flags & SV_GMAGIC
+	 && (SvTHINKFIRST(sv1) || SvGMAGICAL(sv1))) {
 	    pv1 = SvPV_const(sv1, cur1);
 	    sv1 = newSVpvn_flags(pv1, cur1, SVs_TEMP | SvUTF8(sv2));
 	}
-	pv1 = SvPV_const(sv1, cur1);
+	pv1 = SvPV_flags_const(sv1, cur1, flags);
     }
 
     if (!sv2){
@@ -6807,7 +6815,7 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 	cur2 = 0;
     }
     else
-	pv2 = SvPV_const(sv2, cur2);
+	pv2 = SvPV_flags_const(sv2, cur2, flags);
 
     if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTES) {
         /* Differing utf8ness.
@@ -6874,11 +6882,25 @@ string in C<sv1> is less than, equal to, or greater than the string in
 C<sv2>. Is UTF-8 and 'use bytes' aware, handles get magic, and will
 coerce its args to strings if necessary.  See also C<sv_cmp_locale>.
 
+=for apidoc sv_cmp_flags
+
+Compares the strings in two SVs.  Returns -1, 0, or 1 indicating whether the
+string in C<sv1> is less than, equal to, or greater than the string in
+C<sv2>. Is UTF-8 and 'use bytes' aware and will coerce its args to strings
+if necessary. If the flags include SV_GMAGIC, it handles get magic. See
+also C<sv_cmp_locale_flags>.
+
 =cut
 */
 
 I32
 Perl_sv_cmp(pTHX_ register SV *const sv1, register SV *const sv2)
+{
+    return sv_cmp_flags(sv1, sv2, SV_GMAGIC);
+}
+
+I32
+Perl_sv_cmp_flags(pTHX_ register SV *const sv1, register SV *const sv2, const I32 flags)
 {
     dVAR;
     STRLEN cur1, cur2;
@@ -6892,14 +6914,14 @@ Perl_sv_cmp(pTHX_ register SV *const sv1, register SV *const sv2)
 	cur1 = 0;
     }
     else
-	pv1 = SvPV_const(sv1, cur1);
+	pv1 = SvPV_flags_const(sv1, cur1, flags);
 
     if (!sv2) {
 	pv2 = "";
 	cur2 = 0;
     }
     else
-	pv2 = SvPV_const(sv2, cur2);
+	pv2 = SvPV_flags_const(sv2, cur2, flags);
 
     if (cur1 && cur2 && SvUTF8(sv1) != SvUTF8(sv2) && !IN_BYTES) {
         /* Differing utf8ness.
@@ -6956,11 +6978,23 @@ Compares the strings in two SVs in a locale-aware manner. Is UTF-8 and
 'use bytes' aware, handles get magic, and will coerce its args to strings
 if necessary.  See also C<sv_cmp>.
 
+=for apidoc sv_cmp_locale_flags
+
+Compares the strings in two SVs in a locale-aware manner. Is UTF-8 and
+'use bytes' aware and will coerce its args to strings if necessary. If the
+flags contain SV_GMAGIC, it handles get magic. See also C<sv_cmp_flags>.
+
 =cut
 */
 
 I32
 Perl_sv_cmp_locale(pTHX_ register SV *const sv1, register SV *const sv2)
+{
+    return sv_cmp_locale_flags(sv1, sv2, SV_GMAGIC);
+}
+
+I32
+Perl_sv_cmp_locale_flags(pTHX_ register SV *const sv1, register SV *const sv2, const I32 flags)
 {
     dVAR;
 #ifdef USE_LOCALE_COLLATE
@@ -6973,9 +7007,9 @@ Perl_sv_cmp_locale(pTHX_ register SV *const sv1, register SV *const sv2)
 	goto raw_compare;
 
     len1 = 0;
-    pv1 = sv1 ? sv_collxfrm(sv1, &len1) : (char *) NULL;
+    pv1 = sv1 ? sv_collxfrm_flags(sv1, &len1, flags) : (char *) NULL;
     len2 = 0;
-    pv2 = sv2 ? sv_collxfrm(sv2, &len2) : (char *) NULL;
+    pv2 = sv2 ? sv_collxfrm_flags(sv2, &len2, flags) : (char *) NULL;
 
     if (!pv1 || !len1) {
 	if (pv2 && len2)
@@ -7014,7 +7048,13 @@ Perl_sv_cmp_locale(pTHX_ register SV *const sv1, register SV *const sv2)
 /*
 =for apidoc sv_collxfrm
 
-Add Collate Transform magic to an SV if it doesn't already have it.
+This calls C<sv_collxfrm_flags> with the SV_GMAGIC flag. See
+C<sv_collxfrm_flags>.
+
+=for apidoc sv_collxfrm_flags
+
+Add Collate Transform magic to an SV if it doesn't already have it. If the
+flags contain SV_GMAGIC, it handles get-magic.
 
 Any scalar variable may carry PERL_MAGIC_collxfrm magic that contains the
 scalar data of the variable, but transformed to such a format that a normal
@@ -7025,12 +7065,12 @@ settings.
 */
 
 char *
-Perl_sv_collxfrm(pTHX_ SV *const sv, STRLEN *const nxp)
+Perl_sv_collxfrm_flags(pTHX_ SV *const sv, STRLEN *const nxp, const I32 flags)
 {
     dVAR;
     MAGIC *mg;
 
-    PERL_ARGS_ASSERT_SV_COLLXFRM;
+    PERL_ARGS_ASSERT_SV_COLLXFRM_FLAGS;
 
     mg = SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_collxfrm) : (MAGIC *) NULL;
     if (!mg || !mg->mg_ptr || *(U32*)mg->mg_ptr != PL_collation_ix) {
@@ -7040,7 +7080,7 @@ Perl_sv_collxfrm(pTHX_ SV *const sv, STRLEN *const nxp)
 
 	if (mg)
 	    Safefree(mg->mg_ptr);
-	s = SvPV_const(sv, len);
+	s = SvPV_flags_const(sv, len, flags);
 	if ((xf = mem_collxfrm(s, len, &xlen))) {
 	    if (! mg) {
 #ifdef PERL_OLD_COPY_ON_WRITE

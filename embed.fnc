@@ -1162,9 +1162,12 @@ pd	|I32	|sv_clean_all
 pd	|void	|sv_clean_objs
 Apd	|void	|sv_clear	|NN SV *const sv
 Apd	|I32	|sv_cmp		|NULLOK SV *const sv1|NULLOK SV *const sv2
+Apd	|I32	|sv_cmp_flags	|NULLOK SV *const sv1|NULLOK SV *const sv2|const I32 flags
 Apd	|I32	|sv_cmp_locale	|NULLOK SV *const sv1|NULLOK SV *const sv2
+Apd	|I32	|sv_cmp_locale_flags	|NULLOK SV *const sv1|NULLOK SV *const sv2|const I32 flags
 #if defined(USE_LOCALE_COLLATE)
-Apd	|char*	|sv_collxfrm	|NN SV *const sv|NN STRLEN *const nxp
+Amd	|char*	|sv_collxfrm	|NN SV *const sv|NN STRLEN *const nxp
+Apd	|char*	|sv_collxfrm_flags	|NN SV *const sv|NN STRLEN *const nxp|I32 const flags
 #endif
 Ap	|OP*	|sv_compile_2op	|NN SV *sv|NN OP **startop \
 				|NN const char *code|NN PAD **padp
@@ -1174,7 +1177,8 @@ Apd	|void	|sv_dec_nomg	|NULLOK SV *const sv
 Ap	|void	|sv_dump	|NN SV* sv
 ApdR	|bool	|sv_derived_from|NN SV* sv|NN const char *const name
 ApdR	|bool	|sv_does	|NN SV* sv|NN const char *const name
-Apd	|I32	|sv_eq		|NULLOK SV* sv1|NULLOK SV* sv2
+Amd	|I32	|sv_eq		|NULLOK SV* sv1|NULLOK SV* sv2
+Apd	|I32	|sv_eq_flags	|NULLOK SV* sv1|NULLOK SV* sv2|const I32 flags
 Apd	|void	|sv_free	|NULLOK SV *const sv
 : FIXME Used in SvREFCNT_dec() but only
 : if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
