@@ -919,7 +919,7 @@
 #ifdef PERL_CORE
 #define sub_crush_depth		Perl_sub_crush_depth
 #endif
-#define sv_2bool		Perl_sv_2bool
+#define sv_2bool_flags		Perl_sv_2bool_flags
 #define sv_2cv			Perl_sv_2cv
 #define sv_2io			Perl_sv_2io
 #if defined(PERL_IN_SV_C)
@@ -3390,7 +3390,7 @@
 #ifdef PERL_CORE
 #define sub_crush_depth(a)	Perl_sub_crush_depth(aTHX_ a)
 #endif
-#define sv_2bool(a)		Perl_sv_2bool(aTHX_ a)
+#define sv_2bool_flags(a,b)	Perl_sv_2bool_flags(aTHX_ a,b)
 #define sv_2cv(a,b,c,d)		Perl_sv_2cv(aTHX_ a,b,c,d)
 #define sv_2io(a)		Perl_sv_2io(aTHX_ a)
 #if defined(PERL_IN_SV_C)

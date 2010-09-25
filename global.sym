@@ -528,7 +528,7 @@ Perl_share_hek
 Perl_csighandler
 Perl_stack_grow
 Perl_start_subparse
-Perl_sv_2bool
+Perl_sv_2bool_flags
 Perl_sv_2cv
 Perl_sv_2io
 Perl_sv_2iv

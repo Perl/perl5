@@ -3072,20 +3072,28 @@ Perl_sv_2pvutf8(pTHX_ register SV *const sv, STRLEN *const lp)
 /*
 =for apidoc sv_2bool
 
-This function is only called on magical items, and is only used by
-sv_true() or its macro equivalent.
+This macro is only used by sv_true() or its macro equivalent, and only if
+the latter's argument is neither SvPOK, SvIOK nor SvNOK.
+It calls sv_2bool_flags with the SV_GMAGIC flag.
+
+=for apidoc sv_2bool_flags
+
+This function is only used by sv_true() and friends,  and only if
+the latter's argument is neither SvPOK, SvIOK nor SvNOK. If the flags
+contain SV_GMAGIC, then it does an mg_get() first.
+
 
 =cut
 */
 
 bool
-Perl_sv_2bool(pTHX_ register SV *const sv)
+Perl_sv_2bool_flags(pTHX_ register SV *const sv, const I32 flags)
 {
     dVAR;
 
-    PERL_ARGS_ASSERT_SV_2BOOL;
+    PERL_ARGS_ASSERT_SV_2BOOL_FLAGS;
 
-    SvGETMAGIC(sv);
+    if(flags & SV_GMAGIC) SvGETMAGIC(sv);
 
     if (!SvOK(sv))
 	return 0;

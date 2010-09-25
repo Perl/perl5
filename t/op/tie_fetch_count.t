@@ -83,9 +83,9 @@ $dummy  =  $var   |   1 ; check_count '|';
 $dummy  = ~$var         ; check_count '~';
 
 # Logical operators
+$dummy  = !$var         ; check_count '!';
 TODO: {
     local $::TODO = $TODO;
-    $dummy  = !$var         ; check_count '!';
     $dummy  =  $var  ||   1 ; check_count '||';
     $dummy  = ($var  or   1); check_count 'or';
 }

@@ -1459,6 +1459,12 @@ otherwise use the more efficient C<SvUV>.
 
 =for apidoc Am|bool|SvTRUE|SV* sv
 Returns a boolean indicating whether Perl would evaluate the SV as true or
+false.  See SvOK() for a defined/undefined test.  Handles 'get' magic
+unless the scalar is already SvPOK, SvIOK or SvNOK (the public, not the
+private flags).
+
+=for apidoc Am|bool|SvTRUE_nomg|SV* sv
+Returns a boolean indicating whether Perl would evaluate the SV as true or
 false.  See SvOK() for a defined/undefined test.  Does not handle 'get' magic.
 
 =for apidoc Am|char*|SvPVutf8_force|SV* sv|STRLEN len
@@ -1653,6 +1659,22 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>
 	    :   SvNOK(sv)					\
 		? SvNVX(sv) != 0.0				\
 		: sv_2bool(sv) )
+#  define SvTRUE_nomg(sv) (					\
+    !sv								\
+    ? 0								\
+    :    SvPOK(sv)						\
+	?   (({XPV *nxpv = (XPV*)SvANY(sv);			\
+	     nxpv &&						\
+	     (nxpv->xpv_cur > 1 ||				\
+	      (nxpv->xpv_cur && *(sv)->sv_u.svu_pv != '0')); })	\
+	     ? 1						\
+	     : 0)						\
+	:							\
+	    SvIOK(sv)						\
+	    ? SvIVX(sv) != 0					\
+	    :   SvNOK(sv)					\
+		? SvNVX(sv) != 0.0				\
+		: sv_2bool_flags(sv,0) )
 #  define SvTRUEx(sv) ({SV *_sv = (sv); SvTRUE(_sv); })
 
 #else /* __GNUC__ */
@@ -1801,6 +1823,7 @@ mg.c:1024: warning: left-hand operand of comma expression has no effect
 #define sv_2nv(sv) sv_2nv_flags(sv, SV_GMAGIC)
 #define sv_eq(sv1, sv2) sv_eq_flags(sv1, sv2, SV_GMAGIC)
 #define sv_collxfrm(sv, nxp) sv_cmp_flags(sv, nxp, SV_GMAGIC)
+#define sv_2bool(sv) sv_2bool_flags(sv, SV_GMAGIC)
 #define sv_insert(bigstr, offset, len, little, littlelen)		\
 	Perl_sv_insert_flags(aTHX_ (bigstr),(offset), (len), (little),	\
 			     (littlelen), SV_GMAGIC)

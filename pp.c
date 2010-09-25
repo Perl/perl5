@@ -2507,7 +2507,7 @@ PP(pp_not)
 {
     dVAR; dSP;
     tryAMAGICun_MG(not_amg, AMGf_set);
-    *PL_stack_sp = boolSV(!SvTRUE(*PL_stack_sp));
+    *PL_stack_sp = boolSV(!SvTRUE_nomg(*PL_stack_sp));
     return NORMAL;
 }
 
