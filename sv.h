@@ -1707,6 +1707,21 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>
 	    :   SvNOK(sv)					\
 		? SvNVX(sv) != 0.0				\
 		: sv_2bool(sv) )
+#  define SvTRUE_nomg(sv) (					\
+    !sv								\
+    ? 0								\
+    :    SvPOK(sv)						\
+	?   ((PL_Xpv = (XPV*)SvANY(PL_Sv = (sv))) &&		\
+	     (PL_Xpv->xpv_cur > 1 ||				\
+	      (PL_Xpv->xpv_cur && *PL_Sv->sv_u.svu_pv != '0'))	\
+	     ? 1						\
+	     : 0)						\
+	:							\
+	    SvIOK(sv)						\
+	    ? SvIVX(sv) != 0					\
+	    :   SvNOK(sv)					\
+		? SvNVX(sv) != 0.0				\
+		: sv_2bool_flags(sv,0) )
 #  define SvTRUEx(sv) ((PL_Sv = (sv)), SvTRUE(PL_Sv))
 #endif /* __GNU__ */
 
