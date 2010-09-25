@@ -57,13 +57,15 @@ $SIG{FAKE} = 'IGNORE';
 sigtrap->import('untrapped', 'FAKE');
 is( $SIG{FAKE}, 'IGNORE', 'respect existing handler set to IGNORE' );
 
-unlike
-   runperl(
-    switches => [ '-Msigtrap=INT' ],
-    prog => 'sub { kill q-INT-, $$ } -> (3)',
-    stderr => 1
-   ),
-   qr/Modification of a read-only value/,
+fresh_perl_like
+  '
+    BEGIN { *CORE::GLOBAL::kill = sub {} }
+    require sigtrap;
+    import sigtrap "INT";
+    sub { $SIG{INT}->("INT") } -> (3)
+  ',
+   qr/\$ = main::__ANON__\(3\) called/,
+  { stderr => 1 },
   "stack-trace does not try to modify read-only arguments"
 ;
 
