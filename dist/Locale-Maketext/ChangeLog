@@ -1,5 +1,25 @@
 Revision history for Perl suite Locale::Maketext
 
+<date here>
+    * Release 1.16
+
+    Fix for CPAN RT #40727: infinite loop in
+    Locale::Maketext::Guts::_compile() when working with tainted values
+
+2010−06−22
+    * Release 1.15 (included in perl 5.13.3; not released separately)
+
+    Locale::Maketext guts have been merged back into the main module
+
+    External cache support
+
+2009-11-20
+    * Release 1.14 (included in perl 5.11.2; not released separately)
+
+    In Locale::Maketext, avoid using defined @array and defined %hash.
+
+    Convert the odd Locale::Maketext test out from Test to Test::More.
+
 2008-05-28  Adriano Ferreira
     * Release 1.13
 

@@ -187,6 +187,14 @@ L<[perl #71710]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=71710>.
 
 =item *
 
+C<Locale::Maketext> has been upgraded from version 1.15 to 1.16.
+
+It fixes an infinite loop in C<Locale::Maketext::Guts::_compile()> when
+working with tainted values
+(L<CPAN RT #40727|https://rt.cpan.org/Public/Bug/Display.html?id=40727>).
+
+=item *
+
 C<NEXT> has been upgraded from version 0.64 to 0.65.
 
 =item *
