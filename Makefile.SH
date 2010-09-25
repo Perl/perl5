@@ -1548,24 +1548,7 @@ Makefile: Makefile.SH ./config.sh
 distcheck: FORCE
 	perl '-MExtUtils::Manifest=&fullcheck' -e 'fullcheck()'
 
-.PHONY: elc
-elc:	emacs/cperl-mode.elc
-
-emacs/cperl-mode.elc: emacs/cperl-mode.el
-	-cd emacs; emacs -batch -q -no-site-file -f batch-byte-compile cperl-mode.el
-
-.PHONY: etags ctags tags
-
-etags:	TAGS
-
-TAGS: emacs/cperl-mode.elc
-	sh emacs/ptags
-
-# Let's hope make will not go into an infinite loop on case-unsensitive systems
-# This may also fail if . is in the head of the path, since perl will
-# require -Ilib
-tags:	TAGS
-	perl emacs/e2ctags.pl TAGS > tags
+.PHONY: ctags
 
 ctags:
 	ctags -f Tags -N --totals --languages=c --langmap=c:+.h --exclude=opmini.c --exclude=perlmini.c *.c *.h
