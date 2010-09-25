@@ -1,3 +1,23 @@
+2010-09-25   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.50
+
+   Chris 'BinGOs' Williams (1):
+      Amended tests to work with perl core.
+
+   Florian Ragwitz (3):
+      Attach context pointers using sv magic
+      Add failing test for thread cloning
+      Clone MD5 contexts on thread cloning
+
+   Gisle Aas (1):
+      perl-5.6 no longer supported
+
+   Jesse Vincent (1):
+      Preserve utf8ness of argument [RT#44927]
+
+
+
 2010-07-03   Gisle Aas <gisle@ActiveState.com>
 
    Release 2.40

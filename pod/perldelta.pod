@@ -169,6 +169,12 @@ XXX
 
 =item *
 
+C<Digest::MD5> has been upgraded from version 2.40 to 2.50.
+
+It is now safe to use this module in combination with threads.
+
+=item *
+
 C<File::DosGlob> has been upgraded from version 1.02 to 1.03.
 
 It allows patterns containing literal parentheses (they no longer need to
