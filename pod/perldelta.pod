@@ -231,7 +231,8 @@ section.
 
 =item *
 
-XXX Description of the change here
+The documentation for the C<SvTRUE> macro was simply wrong in stating that
+get-magic is not processed. It has been corrected.
 
 =back
 
@@ -388,6 +389,37 @@ be noted as well.
 See L</Regular expressions retain their localeness when interpolated>,
 above.
 
+=item *
+
+The C<sv_cmp_flags>, C<sv_cmp_locale_flags>, C<sv_eq_flags> and
+C<sv_collxfrm_flags> functions have been added. These are like their
+non-_flags counterparts, but allow one to specify whether get-magic is
+processed.
+
+The C<sv_cmp>, C<sv_cmp_locale>, C<sv_eq> and C<sv_collxfrm> functions have
+been replaced with wrappers around the new functions. 
+
+=item *
+
+A new C<sv_2bool_flags> function has been added.
+
+This is like C<sv_2bool>, but it lets the calling code decide whether
+get-magic is handled. C<sv_2bool> is now a macro that calls the new
+function.
+
+=item *
+
+A new macro, C<SvTRUE_nomg>, has been added.
+
+This is like C<SvTRUE>, except that it does not process magic. It uses the
+new C<sv_2bool_flags> function.
+
+=item *
+
+C<sv_catsv_flags> no longer calls C<mg_get> on its second argument (the
+source string) if the flags passed to it do not include SV_GMAGIC. So it
+now matches what the documentation says it does.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -435,6 +467,31 @@ to the lines of the main program. In the past, this sometimes worked and
 sometimes did not, depending on what order things happened to be arranged
 in memory
 L<[perl #71806]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=71806>.
+
+=item *
+
+The C<y///> or C<tr///> operator now calls get-magic (e.g., the C<FETCH>
+method of a tie) on its left-hand side just once, not twice
+L<[perl #76814]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=76814>.
+
+=item *
+
+String comparison (C<eq>, C<ne>, C<lt>, C<gt>, C<le>, C<ge> and
+C<cmp>) and logical not (C<not> and C<!>) operators no longer call magic
+(e.g., tie methods) twice on their operands
+L<[perl #76814]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=76814>.
+
+This bug was introduced in an earlier 5.13 release, and does not affect
+perl 5.12.
+
+=item *
+
+When a tied (or other magic) variable is used as, or in, a regular
+expression, it no longer has its C<FETCH> method called twice
+L<[perl #76814]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=76814>.
+
+This bug was introduced in an earlier 5.13 release, and does not affect
+perl 5.12.
 
 =back
 
