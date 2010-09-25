@@ -143,10 +143,7 @@ $_ = "foo";
 $dummy  =  $var =~ m/ / ; check_count 'm//';
 $dummy  =  $var =~ s/ //; check_count 's///';
 $dummy  =  $var ~~    1 ; check_count '~~';
-TODO: {
-    local $::TODO = $TODO;
-    $dummy  =  $var =~ y/ //; check_count 'y///';
-}
+$dummy  =  $var =~ y/ //; check_count 'y///';
            /$var/       ; check_count 'm/pattern/';
            /$var foo/   ; check_count 'm/$tied foo/';
           s/$var//      ; check_count 's/pattern//';

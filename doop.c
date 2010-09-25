@@ -33,7 +33,7 @@ S_do_trans_simple(pTHX_ SV * const sv)
     dVAR;
     I32 matches = 0;
     STRLEN len;
-    U8 *s = (U8*)SvPV(sv,len);
+    U8 *s = (U8*)SvPV_nomg(sv,len);
     U8 * const send = s+len;
     const short * const tbl = (short*)cPVOP->op_pv;
 
@@ -101,7 +101,7 @@ S_do_trans_count(pTHX_ SV * const sv)
 {
     dVAR;
     STRLEN len;
-    const U8 *s = (const U8*)SvPV_const(sv, len);
+    const U8 *s = (const U8*)SvPV_nomg_const(sv, len);
     const U8 * const send = s + len;
     I32 matches = 0;
     const short * const tbl = (short*)cPVOP->op_pv;
@@ -139,7 +139,7 @@ S_do_trans_complex(pTHX_ SV * const sv)
 {
     dVAR;
     STRLEN len;
-    U8 *s = (U8*)SvPV(sv, len);
+    U8 *s = (U8*)SvPV_nomg(sv, len);
     U8 * const send = s+len;
     I32 matches = 0;
     const short * const tbl = (short*)cPVOP->op_pv;
@@ -325,7 +325,7 @@ S_do_trans_simple_utf8(pTHX_ SV * const sv)
 
     PERL_ARGS_ASSERT_DO_TRANS_SIMPLE_UTF8;
 
-    s = (U8*)SvPV(sv, len);
+    s = (U8*)SvPV_nomg(sv, len);
     if (!SvUTF8(sv)) {
 	const U8 *t = s;
 	const U8 * const e = s + len;
@@ -426,7 +426,7 @@ S_do_trans_count_utf8(pTHX_ SV * const sv)
 
     PERL_ARGS_ASSERT_DO_TRANS_COUNT_UTF8;
 
-    s = (const U8*)SvPV_const(sv, len);
+    s = (const U8*)SvPV_nomg_const(sv, len);
     if (!SvUTF8(sv)) {
 	const U8 *t = s;
 	const U8 * const e = s + len;
@@ -478,7 +478,7 @@ S_do_trans_complex_utf8(pTHX_ SV * const sv)
     STRLEN len;
     U8 *dstart, *dend;
     U8 hibit = 0;
-    U8 *s = (U8*)SvPV(sv, len);
+    U8 *s = (U8*)SvPV_nomg(sv, len);
 
     PERL_ARGS_ASSERT_DO_TRANS_COMPLEX_UTF8;
 
