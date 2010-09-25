@@ -193,6 +193,10 @@ L<[perl #71710]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=71710>.
 
 =item *
 
+C<if> has been upgraded from version 0.05 to 0.06
+
+=item *
+
 C<Locale::Maketext> has been upgraded from version 1.15 to 1.16.
 
 It fixes an infinite loop in C<Locale::Maketext::Guts::_compile()> when
