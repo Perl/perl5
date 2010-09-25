@@ -8,15 +8,15 @@
 
 Contentious Changes freeze
 
-=item February 20, 2010
+=item February 20, 2011
 
 User-visible Changes freeze
 
-=item March 20, 2010
+=item March 20, 2011
 
 Code Freeze
 
-=item April 1, 2010
+=item April 1, 2011
 
 Target date for 5.14.0 RC0
 
