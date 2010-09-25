@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 92);
+    plan (tests => 94);
 }
 
 use strict;
@@ -146,9 +146,11 @@ $dummy  =  $var ~~    1 ; check_count '~~';
 TODO: {
     local $::TODO = $TODO;
     $dummy  =  $var =~ y/ //; check_count 'y///';
-               /$var/       ; check_count 'm/pattern/';
-              s/$var//      ; check_count 's/pattern//';
 }
+           /$var/       ; check_count 'm/pattern/';
+           /$var foo/   ; check_count 'm/$tied foo/';
+          s/$var//      ; check_count 's/pattern//';
+          s/$var foo//  ; check_count 's/$tied foo//';
           s/./$var/     ; check_count 's//replacement/';
 
 # Dereferencing

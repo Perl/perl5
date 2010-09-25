@@ -127,7 +127,7 @@ PP(pp_regcomp)
 	       sv_setsv(tmpstr, sv);
 	       continue;
 	    }
-	    sv_catsv(tmpstr, msv);
+	    sv_catsv_nomg(tmpstr, msv);
 	}
     	SvSETMAGIC(tmpstr);
 	SP = ORIGMARK;
@@ -217,6 +217,14 @@ PP(pp_regcomp)
 	    else if (SvAMAGIC(tmpstr)) {
 		/* make a copy to avoid extra stringifies */
 		tmpstr = newSVpvn_flags(t, len, SVs_TEMP | SvUTF8(tmpstr));
+	    }
+
+	    /* If it is gmagical, create a mortal copy, but without calling
+	       get-magic, as we have already done that. */
+	    if(SvGMAGICAL(tmpstr)) {
+		SV *mortalcopy = sv_newmortal();
+		sv_setsv_flags(mortalcopy, tmpstr, 0);
+		tmpstr = mortalcopy;
 	    }
 
 	    if (eng)

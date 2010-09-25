@@ -4789,7 +4789,7 @@ Perl_sv_catsv_flags(pTHX_ SV *const dsv, register SV *const ssv, const I32 flags
 
    if (ssv) {
 	STRLEN slen;
-	const char *spv = SvPV_const(ssv, slen);
+	const char *spv = SvPV_flags_const(ssv, slen, flags);
 	if (spv) {
 	    /*  sutf8 and dutf8 were type bool, but under USE_ITHREADS,
 		gcc version 2.95.2 20000220 (Debian GNU/Linux) for
