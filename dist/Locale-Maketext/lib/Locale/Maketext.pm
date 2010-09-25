@@ -1,3 +1,4 @@
+
 package Locale::Maketext;
 use strict;
 use vars qw( @ISA $VERSION $MATCH_SUPERS $USING_LANGUAGE_TAGS
@@ -498,7 +499,8 @@ sub _compile {
         my $in_group = 0; # start out outside a group
         my($m, @params); # scratch
 
-        while($_[1] =~  # Iterate over chunks.
+	my $string_to_compile = $_[1]; # There are taint issues using regex on @_ - perlbug 60378,27344
+        while($string_to_compile =~  # Iterate over chunks.
             m/\G(
                 [^\~\[\]]+  # non-~[] stuff
                 |
@@ -520,10 +522,10 @@ sub _compile {
                 #  preceding literal.
                 if($in_group) {
                     if($1 eq '') {
-                        $target->_die_pointing($_[1], 'Unterminated bracket group');
+                        $target->_die_pointing($string_to_compile, 'Unterminated bracket group');
                     }
                     else {
-                        $target->_die_pointing($_[1], 'You can\'t nest bracket groups');
+                        $target->_die_pointing($string_to_compile, 'You can\'t nest bracket groups');
                     }
                 }
                 else {
@@ -533,7 +535,7 @@ sub _compile {
                     else {
                         $in_group = 1;
                     }
-                    die "How come \@c is empty?? in <$_[1]>" unless @c; # sanity
+                    die "How come \@c is empty?? in <$string_to_compile>" unless @c; # sanity
                     if(length $c[-1]) {
                         # Now actually processing the preceding literal
                         $big_pile .= $c[-1];
@@ -612,7 +614,7 @@ sub _compile {
                         # Yes, it even supports the demented (and undocumented?)
                         #  $obj->Foo::bar(...) syntax.
                         $target->_die_pointing(
-                            $_[1], q{Can't use "SUPER::" in a bracket-group method},
+                            $string_to_compile, q{Can't use "SUPER::" in a bracket-group method},
                             2 + length($c[-1])
                         )
                         if $m =~ m/^SUPER::/s;
@@ -625,7 +627,7 @@ sub _compile {
                     else {
                         # TODO: implement something?  or just too icky to consider?
                         $target->_die_pointing(
-                            $_[1],
+                            $string_to_compile,
                             "Can't use \"$m\" as a method name in bracket group",
                             2 + length($c[-1])
                         );
@@ -666,7 +668,7 @@ sub _compile {
                     push @c, '';
                 }
                 else {
-                    $target->_die_pointing($_[1], q{Unbalanced ']'});
+                    $target->_die_pointing($string_to_compile, q{Unbalanced ']'});
                 }
 
             }
