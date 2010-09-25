@@ -1,6 +1,6 @@
 package if;
 
-$VERSION = '0.05';
+$VERSION = '0.06';
 
 sub work {
   my $method = shift() ? 'import' : 'unimport';
@@ -50,7 +50,7 @@ required version of the module.
 
 =head1 AUTHOR
 
-Ilya Zakharevich L<mailto:perl-module-if@ilyaz.org>.
+Ilya Zakharevich L<mailto:ilyaz@cpan.org>.
 
 =cut
 
