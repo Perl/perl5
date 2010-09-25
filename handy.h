@@ -549,26 +549,61 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #define isASCII(c)    (FITS_IN_8_BITS(c) ? NATIVE_TO_UNI((U8) c) <= 127 : 0)
 #define isASCII_A(c)  isASCII(c)
 
-/* include the Latin1 lookup table */
-#include "l1_char_class_tab.h"
-
 /* ASCII range only */
-#define isALNUMC_A(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_ALNUMC_A))
-#define isALPHA_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_ALPHA_A))
-#define isBLANK_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_BLANK_A))
-#define isCNTRL_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_CNTRL_A))
-#define isDIGIT_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_DIGIT_A))
-#define isGRAPH_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_GRAPH_A))
-#define isIDFIRST_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_IDFIRST_A))
-#define isLOWER_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_LOWER_A))
-#define isOCTAL_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_OCTAL_A))
-#define isPRINT_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_PRINT_A))
-#define isPSXSPC_A(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_PSXSPC_A))
-#define isPUNCT_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_PUNCT_A))
-#define isSPACE_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_SPACE_A))
-#define isUPPER_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_UPPER_A))
-#define isWORDCHAR_A(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_WORDCHAR_A))
-#define isXDIGIT_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_XDIGIT_A))
+#ifdef H_PERL       /* If have access to perl.h, lookup in its table */
+#   include "l1_char_class_tab.h"
+#   define isALNUMC_A(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_ALNUMC_A))
+#   define isALPHA_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_ALPHA_A))
+#   define isBLANK_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_BLANK_A))
+#   define isCNTRL_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_CNTRL_A))
+#   define isDIGIT_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_DIGIT_A))
+#   define isGRAPH_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_GRAPH_A))
+#   define isIDFIRST_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_IDFIRST_A))
+#   define isLOWER_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_LOWER_A))
+#   define isOCTAL_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_OCTAL_A))
+#   define isPRINT_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_PRINT_A))
+#   define isPSXSPC_A(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_PSXSPC_A))
+#   define isPUNCT_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_PUNCT_A))
+#   define isSPACE_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_SPACE_A))
+#   define isUPPER_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_UPPER_A))
+#   define isWORDCHAR_A(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_WORDCHAR_A))
+#   define isXDIGIT_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_XDIGIT_A))
+#else   /* No perl.h. */
+#   define isOCTAL_A(c)  ((c) >= '0' && (c) <= '9')
+#   ifdef EBCDIC
+#       define isALNUMC_A(c)   (isASCII(c) && isALNUMC(c))
+#       define isALPHA_A(c)    (isASCII(c) && isALPHA(c))
+#       define isBLANK_A(c)    (isASCII(c) && isBLANK(c))
+#       define isCNTRL_A(c)    (isASCII(c) && isCNTRL(c))
+#       define isDIGIT_A(c)    (isASCII(c) && isDIGIT(c))
+#       define isGRAPH_A(c)    (isASCII(c) && isGRAPH(c))
+#       define isIDFIRST_A(c)  (isASCII(c) && isIDFIRST(c))
+#       define isLOWER_A(c)    (isASCII(c) && isLOWER(c))
+#       define isPRINT_A(c)    (isASCII(c) && isPRINT(c))
+#       define isPSXSPC_A(c)   (isASCII(c) && isPSXSPC(c))
+#       define isPUNCT_A(c)    (isASCII(c) && isPUNCT(c))
+#       define isSPACE_A(c)    (isASCII(c) && isSPACE(c))
+#       define isUPPER_A(c)    (isASCII(c) && isUPPER(c))
+#       define isWORDCHAR_A(c) (isASCII(c) && isWORDCHAR(c))
+#       define isXDIGIT_A(c)   (isASCII(c) && isXDIGIT(c))
+#   else   /* ASCII platform, no perl.h */
+#       define isALNUMC_A(c) (isALPHA_A(c) || isDIGIT_A(c))
+#       define isALPHA_A(c)  (isUPPER_A(c) || isLOWER_A(c))
+#       define isBLANK_A(c)  ((c) == ' ' || (c) == '\t')
+#       define isCNTRL_A(c)  (FITS_IN_8_BITS(c) ? ((U8) (c) < ' ' || (c) == 127) : 0)
+#       define isDIGIT_A(c)  ((c) >= '0' && (c) <= '9')
+#       define isGRAPH_A(c)  (isWORDCHAR_A(c) || isPUNCT_A(c))
+#       define isIDFIRST_A(c) (isALPHA_A(c) || (c) == '_')
+#       define isLOWER_A(c)  ((c) >= 'a' && (c) <= 'z')
+#       define isPRINT_A(c)  (((c) >= 32 && (c) < 127))
+#       define isPSXSPC_A(c) (isSPACE_A(c) || (c) == '\v')
+#       define isPUNCT_A(c)  (((c) >= 33 && (c) <= 47) || ((c) >= 58 && (c) <= 64)  || ((c) >= 91 && (c) <= 96) || ((c) >= 123 && (c) <= 126))
+#       define isSPACE_A(c)  ((c) == ' ' || (c) == '\t' || (c) == '\n' || (c) =='\r' || (c) == '\f')
+#       define isUPPER_A(c) ((c) >= 'A' && (c) <= 'Z')
+#       define isWORDCHAR_A(c) (isALPHA_A(c) || isDIGIT_A(c) || (c) == '_')
+#       define isXDIGIT_A(c)   (isDIGIT_A(c) || ((c) >= 'a' && (c) <= 'f') || ((c) >= 'A' && (c) <= 'F'))
+#   endif
+#endif  /* ASCII range definitions */
 
 /* Latin1 definitions */
 #ifdef H_PERL
