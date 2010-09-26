@@ -123,7 +123,7 @@ PP(pp_sassign)
     if (PL_op->op_private & OPpASSIGN_CV_TO_GV) {
 	SV * const cv = SvRV(left);
 	const U32 cv_type = SvTYPE(cv);
-	const U32 gv_type = SvTYPE(right);
+	const bool is_gv = isGV_with_GP(right);
 	const bool got_coderef = cv_type == SVt_PVCV || cv_type == SVt_PVFM;
 
 	if (!got_coderef) {
@@ -133,7 +133,7 @@ PP(pp_sassign)
 	/* Can do the optimisation if right (LVALUE) is not a typeglob,
 	   left (RVALUE) is a reference to something, and we're in void
 	   context. */
-	if (!got_coderef && gv_type != SVt_PVGV && GIMME_V == G_VOID) {
+	if (!got_coderef && !is_gv && GIMME_V == G_VOID) {
 	    /* Is the target symbol table currently empty?  */
 	    GV * const gv = gv_fetchsv(right, GV_NOINIT, SVt_PVGV);
 	    if (SvTYPE(gv) != SVt_PVGV && !SvOK(gv)) {
@@ -151,7 +151,7 @@ PP(pp_sassign)
 	}
 
 	/* Need to fix things up.  */
-	if (gv_type != SVt_PVGV) {
+	if (!is_gv) {
 	    /* Need to fix GV.  */
 	    right = MUTABLE_SV(gv_fetchsv(right, GV_ADD, SVt_PVGV));
 	}
@@ -201,7 +201,7 @@ PP(pp_sassign)
     /* Allow glob assignments like *$x = ..., which, when the glob has a
        SVf_FAKE flag, cannot be distinguished from $x = ... without looking
        at the op tree. */
-    if( SvTYPE(right) == SVt_PVGV && cBINOP->op_last->op_type == OP_RV2GV
+    if( isGV_with_GP(right) && cBINOP->op_last->op_type == OP_RV2GV
      && (wasfake = SvFLAGS(right) & SVf_FAKE) )
 	SvFLAGS(right) &= ~SVf_FAKE;
     SvSetMagicSV(right, left);
@@ -2749,6 +2749,7 @@ PP(pp_entersub)
     case SVt_PVGV:
 	if (!isGV_with_GP(sv))
 	    DIE(aTHX_ "Not a CODE reference");
+      we_have_a_glob:
 	if (!(cv = GvCVu((const GV *)sv))) {
 	    HV *stash;
 	    cv = sv_2cv(sv, &stash, &gv, 0);
@@ -2759,6 +2760,9 @@ PP(pp_entersub)
 	    goto try_autoload;
 	}
 	break;
+    case SVt_PVLV:
+	if(isGV_with_GP(sv)) goto we_have_a_glob;
+	/*FALLTHROUGH*/
     default:
 	if (sv == &PL_sv_yes) {		/* unfound import, ignore */
 	    if (hasargs)

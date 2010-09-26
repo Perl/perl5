@@ -3826,7 +3826,8 @@ Perl_my_fflush_all(pTHX)
 void
 Perl_report_evil_fh(pTHX_ const GV *gv, const IO *io, I32 op)
 {
-    const char * const name = gv && isGV(gv) ? GvENAME(gv) : NULL;
+    const char * const name
+     = gv && (isGV(gv) || isGV_with_GP(gv)) ? GvENAME(gv) : NULL;
 
     if (op == OP_phoney_OUTPUT_ONLY || op == OP_phoney_INPUT_ONLY) {
 	if (ckWARN(WARN_IO)) {

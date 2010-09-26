@@ -7,12 +7,12 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require './test.pl';
 }
 
 use warnings;
 
-require './test.pl';
-plan( tests => 194 );
+plan( tests => 219 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -253,11 +253,12 @@ is($j[0], 1);
     # test the assignment of a GLOB to an LVALUE
     my $e = '';
     local $SIG{__DIE__} = sub { $e = $_[0] };
-    my $v;
+    my %v;
     sub f { $_[0] = 0; $_[0] = "a"; $_[0] = *DATA }
-    f($v);
-    is ($v, '*main::DATA');
-    my $x = <$v>;
+    f($v{v});
+    is ($v{v}, '*main::DATA');
+    is (ref\$v{v}, 'GLOB', 'lvalue assignment preserves globs');
+    my $x = readline $v{v};
     is ($x, "perl\n");
 }
 
@@ -272,6 +273,10 @@ is($j[0], 1);
     tie my @ary => "T";
     $ary[0] = *DATA;
     is ($ary[0], '*main::DATA');
+    is (
+      ref\tied(@ary)->[0], 'GLOB',
+     'tied elem assignment preserves globs'
+    );
     is ($e, '');
     my $x = readline $ary[0];
     is($x, "rocks\n");
@@ -650,6 +655,125 @@ EOF
 
     like($@, qr/made it/, "#76540 - no panic");
     ok(!@warnings, "#76540 - no 'Attempt to free unreferenced scalar'");
+}
+
+# [perl #77362] various bugs related to globs as PVLVs
+{
+ no warnings qw 'once void';
+ my %h; # We pass a key of this hash to the subroutine to get a PVLV.
+ sub { for(shift) {
+  # Set up our glob-as-PVLV
+  $_ = *hon;
+
+  # Bad symbol for array
+  ok eval{ @$_; 1 }, 'PVLV glob slots can be autovivified' or diag $@;
+
+  # This should call TIEHANDLE, not TIESCALAR
+  *thext::TIEHANDLE = sub{};
+  ok eval{ tie *$_, 'thext'; 1 }, 'PVLV globs can be tied as handles'
+   or diag $@;
+
+  # Assigning undef to the glob should not overwrite it...
+  {
+   my $w;
+   local $SIG{__WARN__} = sub { $w = shift };
+   *$_ = undef;
+   is $_, "*main::hon", 'PVLV: assigning undef to the glob does nothing';
+   like $w, qr\Undefined value assigned to typeglob\,
+    'PVLV: assigning undef to the glob warns';
+  }
+
+  # Neither should number assignment...
+  *$_ = 1;
+  is $_, "*main::1", "PVLV: integer-to-glob assignment assigns a glob";
+  *$_ = 2.0;
+  is $_, "*main::2", "PVLV: float-to-glob assignment assigns a glob";
+
+  # Nor reference assignment.
+  *$_ = \*thit;
+  is $_, "*main::thit", "PVLV: globref-to-glob assignment assigns a glob";
+  *$_ = [];
+  is $_, "*main::thit", "PVLV: arrayref assignment assigns to the AV slot";
+
+  # Concatenation should still work.
+  ok eval { $_ .= 'thlew' }, 'PVLV concatenation does not die' or diag $@;
+  is $_, '*main::thitthlew', 'PVLV concatenation works';
+
+  # And we should be able to overwrite it with a string, number, or refer-
+  # ence, too, if we omit the *.
+  $_ = *hon; $_ = 'tzor';
+  is $_, 'tzor', 'PVLV: assigning a string over a glob';
+  $_ = *hon; $_ = 23;
+  is $_, 23, 'PVLV: assigning an integer over a glob';
+  $_ = *hon; $_ = 23.23;
+  is $_, 23.23, 'PVLV: assigning a float over a glob';
+  $_ = *hon; $_ = \my $sthat;
+  is $_, \$sthat, 'PVLV: assigning a reference over a glob';
+
+  # This bug was found by code inspection. Could this ever happen in
+  # real life? :-)
+  # This duplicates a file handle, accessing it through a PVLV glob, the
+  # glob having been removed from the symbol table, so a stringified form
+  # of it does not work. This checks that sv_2io does not stringify a PVLV.
+  $_ = *quin;
+  open *quin, "test.pl"; # test.pl is as good a file as any
+  delete $::{quin};
+  ok eval { open my $zow, "<&", $_ }, 'PVLV: sv_2io stringifieth not'
+   or diag $@;
+
+  # Similar tests to make sure sv_2cv etc. do not stringify.
+  *$_ = sub { 1 };
+  ok eval { &$_ }, "PVLV glob can be called as a sub" or diag $@;
+  *flelp = sub { 2 };
+  $_ = 'flelp';
+  is eval { &$_ }, 2, 'PVLV holding a string can be called as a sub'
+   or diag $@;
+
+  # Coderef-to-glob assignment when the glob is no longer accessible
+  # under its name: These tests are to make sure the OPpASSIGN_CV_TO_GV
+  # optimisation takes PVLVs into account, which is why the RHSs have to be
+  # named subs.
+  use constant gheen => 'quare';
+  $_ = *ming;
+  delete $::{ming};
+  *$_ = \&gheen;
+  is eval { &$_ }, 'quare',
+   'PVLV: constant assignment when the glob is detached from the symtab'
+    or diag $@;
+  $_ = *bength;
+  delete $::{bength};
+  *gheck = sub { 'lon' };
+  *$_ = \&gheck;
+  is eval { &$_ }, 'lon',
+   'PVLV: coderef assignment when the glob is detached from the symtab'
+    or diag $@;
+
+  # open should accept a PVLV as its first argument
+  $_ = *hon;
+  ok eval { open $_,'<', \my $thlext }, 'PVLV can be the first arg to open'
+   or diag $@;
+
+  # -t should not stringify
+  $_ = *thlit; delete $::{thlit};
+  *$_ = *STDOUT{IO};
+  ok defined -t $_, 'PVLV: -t does not stringify';
+
+  # neither should -T
+  open my $quile, "<", 'test.pl';
+  $_ = *$quile;
+  ok -T $_, "PVLV: -T does not stringify";
+  
+  # Unopened file handle
+  {
+   my $w;
+   local $SIG{__WARN__} = sub { $w .= shift };
+   $_ = *vor;
+   close $_;
+   like $w, qr\unopened filehandle vor\,
+    'PVLV globs get their names reported in unopened error messages';
+  }
+
+ }}->($h{k});
 }
 
 __END__
