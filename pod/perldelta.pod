@@ -169,6 +169,13 @@ XXX
 
 =item *
 
+C<Data::Dumper> has been upgraded from version 2.128 to 2.129.
+
+C<Dumpxs> no longer crashes with globs returned by C<*$io_ref>
+L<[perl #72332]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=72332>.
+
+=item *
+
 C<Digest::MD5> has been upgraded from version 2.40 to 2.50.
 
 It is now safe to use this module in combination with threads.

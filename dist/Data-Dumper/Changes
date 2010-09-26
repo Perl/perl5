@@ -6,6 +6,11 @@ HISTORY - public release history for Data::Dumper
 
 =over 8
 
+=item 2.129 (date here)
+
+C<Dumpxs> no longer crashes with globs returned by C<*$io_ref>
+[perl #72332].
+
 =item 2.128 (Sep 10 2010)
 
 Promote previous release to stable version with the correct version.
