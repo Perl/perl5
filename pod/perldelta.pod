@@ -197,6 +197,15 @@ C<if> has been upgraded from version 0.05 to 0.06
 
 =item *
 
+C<IPC::Open3> has been upgraded from version 1.06 to 1.07.
+
+The internal C<xclose> routine now knows how to handle file descriptors, as
+documented, so duplicating STDIN in a child process using its file
+descriptor now works
+L<[perl #76474]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=71710>.
+
+=item *
+
 C<Locale::Maketext> has been upgraded from version 1.15 to 1.16.
 
 It fixes an infinite loop in C<Locale::Maketext::Guts::_compile()> when
