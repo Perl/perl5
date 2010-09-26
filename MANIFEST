@@ -3178,6 +3178,7 @@ ext/I18N-Langinfo/t/Langinfo.t	See whether I18N::Langinfo works
 ext/IPC-Open2/lib/IPC/Open2.pm	Open a two-ended pipe
 ext/IPC-Open2/t/IPC-Open2.t	See if IPC::Open2 works
 ext/IPC-Open3/lib/IPC/Open3.pm	Open a three-ended pipe
+ext/IPC-Open3/t/fd.t		See if IPC::Open3 works w/ file descriptors
 ext/IPC-Open3/t/IPC-Open3.t	See if IPC::Open3 works
 ext/mro/Changes			mro extension
 ext/mro/mro.pm			mro extension
