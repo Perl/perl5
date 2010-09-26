@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 5;
+use Test::More tests => 6;
 use Data::Dumper;
 
 {
@@ -79,5 +79,10 @@ sub doh
 }
 doh('fixed');
 ok(1, "[perl #56766]"); # Still no core dump? We are fine.
+
+# [perl #72332] Segfault on empty-string glob
+Data::Dumper->Dump([*{*STDERR{IO}}]);
+ok("ok", #ok
+   "empty-string glob [perl #72332]");
 
 # EOF
