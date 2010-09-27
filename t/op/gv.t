@@ -759,9 +759,16 @@ EOF
   ok defined -t $_, 'PVLV: -t does not stringify';
 
   # neither should -T
-  open my $quile, "<", 'test.pl';
-  $_ = *$quile;
-  ok -T $_, "PVLV: -T does not stringify";
+  # but some systems don’t support this on file handles
+  my $pass;
+  ok
+    eval {
+     open my $quile, "<", 'test.pl';
+     $_ = *$quile;
+     $pass = -T $_;
+     1
+    } ? $pass : $@ =~ /not implemented on filehandles/,
+   "PVLV: -T does not stringify";
   
   # Unopened file handle
   {
