@@ -99,8 +99,8 @@ if (exists $opt{cc}) {
         my $output = `bcc32 --version 2>&1`;
         $opt{ccversion} = $output =~ /([\d.]+)/ ? $1 : '?';
     }
-    elsif ($opt{cc} eq 'gcc') {
-        chomp($opt{gccversion} = `gcc -dumpversion`);
+    elsif ($opt{cc} =~ /\bgcc\b/) {
+        chomp($opt{gccversion} = `$opt{cc} -dumpversion`);
     }
 }
 
@@ -127,7 +127,7 @@ if ($opt{uselargefiles} eq 'define' and $opt{cc} ne 'bcc32') {
     if ($opt{cc} eq 'cl') {
 	$opt{lseektype} = '__int64';
     }
-    elsif ($opt{cc} eq 'gcc') {
+    elsif ($opt{cc} =~ /\bgcc\b/) {
 	$opt{lseektype} = 'long long';
     }
 }
