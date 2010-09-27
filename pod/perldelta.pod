@@ -245,6 +245,10 @@ L<[perl #72340]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=72340>.
 
 =item *
 
+C<threads> has been upgrade from version 1.77_03 to 1.81
+
+=item *
+
 C<Unicode::Collate> has been upgraded from version 0.59 to 0.60
 
 =item *
