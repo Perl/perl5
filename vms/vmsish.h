@@ -138,7 +138,6 @@
 #define my_getenv_len		Perl_my_getenv_len
 #define vmssetenv		Perl_vmssetenv
 #define my_trnlnm		Perl_my_trnlnm
-#define my_setenv		Perl_my_setenv
 #define my_getenv		Perl_my_getenv
 #define tounixspec		Perl_tounixspec
 #define tounixspec_ts		Perl_tounixspec_ts
@@ -178,12 +177,10 @@
 #define my_utime		Perl_my_utime
 #define my_chdir		Perl_my_chdir
 #define my_chmod		Perl_my_chmod
-#define do_aspawn		Perl_do_aspawn
 #define seekdir			Perl_seekdir
 #define my_gmtime		Perl_my_gmtime
 #define my_localtime		Perl_my_localtime
 #define my_time			Perl_my_time
-#define do_spawn		Perl_do_spawn
 #define flex_fstat		Perl_flex_fstat
 #define flex_stat		Perl_flex_stat
 #define flex_lstat		Perl_flex_lstat
@@ -199,7 +196,6 @@
 #define my_trnlnm(a,b,c)	Perl_my_trnlnm(aTHX_ a,b,c)
 #define fileify_dirspec(a,b)	Perl_fileify_dirspec(aTHX_ a,b)
 #define fileify_dirspec_ts(a,b)	Perl_fileify_dirspec_ts(aTHX_ a,b)
-#define my_setenv(a,b)		Perl_my_setenv(aTHX_ a,b)
 #define my_getenv(a,b)		Perl_my_getenv(aTHX_ a,b)
 #define tounixspec(a,b)		Perl_tounixspec_utf8(aTHX_ a,b,NULL)
 #define tounixspec_ts(a,b)	Perl_tounixspec_utf8_ts(aTHX_ a,b,NULL)
@@ -243,12 +239,10 @@
 #define my_utime(a,b)		Perl_my_utime(aTHX_ a,b)
 #define my_chdir(a)		Perl_my_chdir(aTHX_ a)
 #define my_chmod(a,b)		Perl_my_chmod(aTHX_ a,b)
-#define do_aspawn(a,b,c)	Perl_do_aspawn(aTHX_ a,b,c)
 #define seekdir(a,b)		Perl_seekdir(aTHX_ a,b)
 #define my_gmtime(a)		Perl_my_gmtime(aTHX_ a)
 #define my_localtime(a)		Perl_my_localtime(aTHX_ a)
 #define my_time(a)		Perl_my_time(aTHX_ a)
-#define do_spawn(a)		Perl_do_spawn(aTHX_ a)
 #define flex_fstat(a,b)		Perl_flex_fstat(aTHX_ a,b)
 #define cando_by_name(a,b,c)	Perl_cando_by_name(aTHX_ a,b,c)
 #define flex_stat(a,b)		Perl_flex_stat(aTHX_ a,b)
