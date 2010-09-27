@@ -18,7 +18,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan(tests => 9);
+plan(tests => 11);
 
 my $r;
 
@@ -68,6 +68,19 @@ $r = runperl( switches => [ '-CS', '-w' ],
 	      progs    => [ '#!perl -CS', 'print chr(256)'],
               stderr   => 1, );
 like( $r, qr/^$b(?:\r?\n)?$/s, '#!perl -C' );
+
+$r = runperl( switches => [ '-CS' ],
+	      progs    => [ '#!perl -CS -w', 'print chr(256), !!$^W'],
+              stderr   => 1, );
+like( $r, qr/^${b}1(?:\r?\n)?$/s, '#!perl -C followed by another switch' );
+
+$r = runperl( switches => [ '-CS' ],
+	      progs    => [ '#!perl -C7 -w', 'print chr(256), !!$^W'],
+              stderr   => 1, );
+like(
+  $r, qr/^${b}1(?:\r?\n)?$/s,
+ '#!perl -C<num> followed by another switch'
+);
 
 $r = runperl( switches => [ '-CA', '-w' ],
 	      progs    => [ '#!perl -CS', 'print chr(256)' ],

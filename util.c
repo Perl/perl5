@@ -5719,8 +5719,11 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
 	    opt = (U32) atoi(p);
 	    while (isDIGIT(*p))
 		p++;
-	    if (*p && *p != '\n' && *p != '\r')
+	    if (*p && *p != '\n' && *p != '\r') {
+	     if(isSPACE(*p)) goto the_end_of_the_opts_parser;
+	     else
 		 Perl_croak(aTHX_ "Unknown Unicode option letter '%c'", *p);
+	    }
        }
        else {
 	    for (; *p; p++) {
@@ -5746,15 +5749,20 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
 		 case PERL_UNICODE_UTF8CACHEASSERT:
 		      opt |= PERL_UNICODE_UTF8CACHEASSERT_FLAG; break;
 		 default:
-		      if (*p != '\n' && *p != '\r')
+		      if (*p != '\n' && *p != '\r') {
+			if(isSPACE(*p)) goto the_end_of_the_opts_parser;
+			else
 			  Perl_croak(aTHX_
 				     "Unknown Unicode option letter '%c'", *p);
+		      }
 		 }
 	    }
        }
   }
   else
        opt = PERL_UNICODE_DEFAULT_FLAGS;
+
+  the_end_of_the_opts_parser:
 
   if (opt & ~PERL_UNICODE_ALL_FLAGS)
        Perl_croak(aTHX_ "Unknown Unicode option value %"UVuf,

@@ -542,6 +542,11 @@ L<[perl #76814]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=76814>.
 This bug was introduced in an earlier 5.13 release, and does not affect
 perl 5.12.
 
+=item *
+
+The C<-C> option can now be followed by other options
+L<[perl #72434]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=72434>.
+
 =back
 
 =head1 Known Problems
