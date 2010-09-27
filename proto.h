@@ -7018,8 +7018,8 @@ PERL_CALLCONV void	Perl_clone_params_del(CLONE_PARAMS *param)
 	assert(param)
 
 #endif
-END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:
  */
+END_EXTERN_C
 /* ex: set ro: */

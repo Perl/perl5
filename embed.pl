@@ -287,7 +287,19 @@ sub write_protos {
   }
 }
 
-walk_table(\&write_protos,     "proto.h", "/* ex: set ro: */\n");
+{
+    my $pr = safer_open('proto.h-new');
+
+    print $pr do_not_edit ("proto.h"), "\nSTART_EXTERN_C\n";
+
+    walk_table(\&write_protos, $pr);
+
+    print $pr "END_EXTERN_C\n/* ex: set ro: */\n";
+
+    safer_close($pr);
+    rename_if_different('proto.h-new', 'proto.h');
+}
+
 warn "$unflagged_pointers pointer arguments to clean up\n" if $unflagged_pointers;
 walk_table(\&write_global_sym, "global.sym", "# ex: set ro:\n");
 

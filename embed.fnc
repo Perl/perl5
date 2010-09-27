@@ -118,8 +118,6 @@
 :
 : Individual flags may be separated by whitespace.
 
-START_EXTERN_C
-
 #if defined(PERL_IMPLICIT_SYS)
 Ano	|PerlInterpreter*|perl_alloc_using \
 				|NN struct IPerlMem *ipM \
@@ -2415,7 +2413,6 @@ Aanop	|CLONE_PARAMS *|clone_params_new|NN PerlInterpreter *const from \
 		|NN PerlInterpreter *const to
 Anop	|void	|clone_params_del|NN CLONE_PARAMS *param
 #endif
-END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:
  */
