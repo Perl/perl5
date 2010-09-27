@@ -569,7 +569,7 @@ perl 5.12.
 
 =item *
 
-The C<-C> option can now be followed by other options
+The C<-C> command line option can now be followed by other options
 L<[perl #72434]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=72434>.
 
 =item *
