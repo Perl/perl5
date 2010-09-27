@@ -2745,7 +2745,6 @@ dist/lib/lib_pm.PL		For "use lib", produces lib/lib.pm
 dist/lib/Makefile.PL
 dist/lib/t/01lib.t		For "use lib" testing
 dist/Locale-Maketext/ChangeLog				Locale::Maketext
-dist/Locale-Maketext/lib/Locale/Maketext/Cookbook.pod	Locale::Maketext
 dist/Locale-Maketext/lib/Locale/Maketext/GutsLoader.pm	Locale::Maketext
 dist/Locale-Maketext/lib/Locale/Maketext/Guts.pm	Locale::Maketext
 dist/Locale-Maketext/lib/Locale/Maketext.pm		Locale::Maketext
@@ -2761,7 +2760,6 @@ dist/Locale-Maketext/t/30_local.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/40_super.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/50_super.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/60_super.t			See if Locale::Maketext works
-dist/Locale-Maketext/t/70_fail_auto.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/90_utf8.t			See if Locale::Maketext works
 dist/Math-BigInt-FastCalc/FastCalc.pm	Math::BigInt::FastCalc extension
 dist/Math-BigInt-FastCalc/FastCalc.xs	Math::BigInt::FastCalc extension
