@@ -1211,13 +1211,18 @@ PerlIO *
 PerlIO_push(pTHX_ PerlIO *f, PERLIO_FUNCS_DECL(*tab), const char *mode, SV *arg)
 {
     if (tab->fsize != sizeof(PerlIO_funcs)) {
-      mismatch:
-	Perl_croak(aTHX_ "Layer does not match this perl");
+	Perl_croak( aTHX_
+	    "%s (%d) does not match %s (%d)",
+	    "PerlIO layer function table size", tab->fsize,
+	    "size expected by this perl", sizeof(PerlIO_funcs) );
     }
     if (tab->size) {
 	PerlIOl *l;
 	if (tab->size < sizeof(PerlIOl)) {
-	    goto mismatch;
+	    Perl_croak( aTHX_
+		"%s (%d) smaller than %s (%d)",
+		"PerlIO layer instance size", tab->size,
+		"size expected by this perl", sizeof(PerlIOl) );
 	}
 	/* Real layer with a data area */
 	if (f) {
