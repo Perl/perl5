@@ -11,9 +11,14 @@ my $Is_VMS = $^O eq 'VMS';
 
 use Carp qw(carp cluck croak confess);
 
-plan tests => 56;
+BEGIN {
+	plan tests => 56;
 
-ok 1;
+	# This test must be run at BEGIN time, because code later in this file
+	# sets CORE::GLOBAL::caller
+	ok !exists $CORE::GLOBAL::{caller},
+	  "Loading doesn't create CORE::GLOBAL::caller"
+}
 
 { local $SIG{__WARN__} = sub {
     like $_[0], qr/ok (\d+)\n at.+\b(?i:carp\.t) line \d+$/, 'ok 2\n' };
