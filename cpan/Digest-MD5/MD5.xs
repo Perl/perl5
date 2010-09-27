@@ -480,7 +480,7 @@ static SV * new_md5_ctx(pTHX_ MD5_CTX *context, const char *klass)
 #ifdef USE_ITHREADS
     mg =
 #endif
-	sv_magicext(sv, NULL, PERL_MAGIC_ext, &vtbl_md5, (void *)context, 0);
+	sv_magicext(sv, NULL, PERL_MAGIC_ext, &vtbl_md5, (const char *)context, 0);
 
 #ifdef USE_ITHREADS
     mg->mg_flags |= MGf_DUP;
