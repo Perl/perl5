@@ -13,11 +13,16 @@ perl_version=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $src/patchlevel.h`
 perl_subversion=`awk '/define[ 	]+PERL_SUBVERSION/ {print $3}' $src/patchlevel.h`
 version="${perl_revision}.${perl_version}.${perl_subversion}"
 
-# Pretend that Darwin doesn't know about those system calls [perl #24122]
-d_setregid='undef'
-d_setreuid='undef'
-d_setrgid='undef'
-d_setruid='undef'
+# Pretend that Darwin doesn't know about those system calls in Tiger
+# (10.4/darwin 8) and earlier [perl #24122]
+case "$osvers" in
+[1-8].*)
+    d_setregid='undef'
+    d_setreuid='undef'
+    d_setrgid='undef'
+    d_setruid='undef'
+    ;;
+esac
 
 # This was previously used in all but causes three cases
 # (no -Ddprefix=, -Dprefix=/usr, -Dprefix=/some/thing/else)
