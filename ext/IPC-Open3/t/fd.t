@@ -1,6 +1,12 @@
 #!./perl
 
-BEGIN { require "../../t/test.pl"; }
+BEGIN {
+    if (!PerlIO::Layer->find('perlio') || $ENV{PERLIO} eq 'stdio') {
+	print "1..0 # Skip: not perlio\n";
+	exit 0;
+    }
+    require "../../t/test.pl";
+}
 use strict;
 use warnings;
 
