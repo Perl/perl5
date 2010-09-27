@@ -2509,13 +2509,13 @@ some gotchas.  See the section on Regular Expressions.
 Assuming that you don't care about IEEE notations like "NaN" or
 "Infinity", you probably just want to use a regular expression.
 
-	if (/\D/)            { print "has nondigits\n" }
-	if (/^\d+$/)         { print "is a whole number\n" }
-	if (/^-?\d+$/)       { print "is an integer\n" }
-	if (/^[+-]?\d+$/)    { print "is a +/- integer\n" }
-	if (/^-?\d+\.?\d*$/) { print "is a real number\n" }
-	if (/^-?(?:\d+(?:\.\d*)?|\.\d+)$/) { print "is a decimal number\n" }
-	if (/^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/)
+	if (/\D/)             { print "has nondigits\n" }
+	if (/^\d+\z/)         { print "is a whole number\n" }
+	if (/^-?\d+\z/)       { print "is an integer\n" }
+	if (/^[+-]?\d+\z/)    { print "is a +/- integer\n" }
+	if (/^-?\d+\.?\d*\z/) { print "is a real number\n" }
+	if (/^-?(?:\d+(?:\.\d*)?|\.\d+)\z/) { print "is a decimal number\n" }
+	if (/^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?\z/)
 			{ print "a C float\n" }
 
 There are also some commonly used modules for the task.
