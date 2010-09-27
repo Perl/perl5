@@ -316,7 +316,24 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX
+The 'Layer does not match this perl' error message has been replaced with
+these more helpful messages:
+
+=over 4
+
+=item *
+
+PerlIO layer function table size (%d) does not match size expected by this
+perl (%d)
+
+=item *
+
+PerlIO layer instance size (%d) does not match size expected by this perl
+(%d)
+
+=back
+
+L<[perl #73754]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=73754>
 
 =back
 
@@ -546,6 +563,19 @@ perl 5.12.
 
 The C<-C> option can now be followed by other options
 L<[perl #72434]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=72434>.
+
+=item *
+
+Assigning a glob to a PVLV used to convert it to a plain string. Now it
+works correctly, and a PVLV can hold a glob. This would happen when a
+nonexistent hash or array element was passed to a subroutine:
+
+  sub { $_[0] = *foo }->($hash{key});
+  # $_[0] would have been the string "*main::foo"
+
+It also happened when a glob was assigned to, or returned from, an element
+of a tied array or hash
+L<[perl #36051]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=36051>.
 
 =back
 
