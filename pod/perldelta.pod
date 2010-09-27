@@ -169,6 +169,14 @@ XXX
 
 =item *
 
+C<Carp> has been upgraded from version 1.18 to 1.19.
+
+It no longer autovivifies the C<*CORE::GLOBAL::caller> glob, something it
+started doing in 1.18, which was released with perl 5.13.4
+L<[perl #78082]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=78082>
+
+=item *
+
 C<Data::Dumper> has been upgraded from version 2.128 to 2.129.
 
 C<Dumpxs> no longer crashes with globs returned by C<*$io_ref>
