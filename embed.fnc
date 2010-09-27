@@ -172,7 +172,6 @@ END_EXTERN_C
 
 /* functions with flag 'n' should come before here */
 START_EXTERN_C
-#  include "pp_proto.h"
 XEop	|bool	|try_amagic_bin	|int method|int flags
 XEop	|bool	|try_amagic_un	|int method|int flags
 Ap	|SV*	|amagic_call	|NN SV* left|NN SV* right|int method|int dir
@@ -1544,48 +1543,6 @@ s	|void	|unwind_handler_stack|NN const void *p
 #endif
 
 #if defined(PERL_IN_OP_C)
-: These are all indirectly referenced by globals.c. This is somewhat annoying.
-pR	|OP*	|ck_anoncode	|NN OP *o
-pR	|OP*	|ck_bitop	|NN OP *o
-pR	|OP*	|ck_concat	|NN OP *o
-pR	|OP*	|ck_defined	|NN OP *o
-pR	|OP*	|ck_delete	|NN OP *o
-pR	|OP*	|ck_die		|NN OP *o
-pR	|OP*	|ck_eof		|NN OP *o
-pR	|OP*	|ck_eval	|NN OP *o
-pR	|OP*	|ck_exec	|NN OP *o
-pR	|OP*	|ck_exists	|NN OP *o
-pR	|OP*	|ck_exit	|NN OP *o
-pR	|OP*	|ck_ftst	|NN OP *o
-pR	|OP*	|ck_fun		|NN OP *o
-pR	|OP*	|ck_glob	|NN OP *o
-pR	|OP*	|ck_grep	|NN OP *o
-pR	|OP*	|ck_index	|NN OP *o
-pR	|OP*	|ck_join	|NN OP *o
-pR	|OP*	|ck_lfun	|NN OP *o
-pR	|OP*	|ck_listiob	|NN OP *o
-pR	|OP*	|ck_match	|NN OP *o
-pR	|OP*	|ck_method	|NN OP *o
-pR	|OP*	|ck_null	|NN OP *o
-pR	|OP*	|ck_open	|NN OP *o
-pR	|OP*	|ck_readline	|NN OP *o
-pR	|OP*	|ck_repeat	|NN OP *o
-pR	|OP*	|ck_require	|NN OP *o
-pR	|OP*	|ck_return	|NN OP *o
-pR	|OP*	|ck_rfun	|NN OP *o
-pR	|OP*	|ck_rvconst	|NN OP *o
-pR	|OP*	|ck_sassign	|NN OP *o
-pR	|OP*	|ck_select	|NN OP *o
-pR	|OP*	|ck_shift	|NN OP *o
-pR	|OP*	|ck_sort	|NN OP *o
-pR	|OP*	|ck_spair	|NN OP *o
-pR	|OP*	|ck_split	|NN OP *o
-pR	|OP*	|ck_subr	|NN OP *o
-pR	|OP*	|ck_substr	|NN OP *o
-pR	|OP*	|ck_svconst	|NN OP *o
-pR	|OP*	|ck_trunc	|NN OP *o
-pR	|OP*	|ck_unpack	|NN OP *o
-pR	|OP*	|ck_each	|NN OP *o
 sRn	|bool	|is_handle_constructor|NN const OP *o|I32 numargs
 sR	|I32	|is_list_assignment|NULLOK const OP *o
 #  ifdef USE_ITHREADS

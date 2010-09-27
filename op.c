@@ -7779,6 +7779,7 @@ OP *
 Perl_ck_smartmatch(pTHX_ OP *o)
 {
     dVAR;
+    PERL_ARGS_ASSERT_CK_SMARTMATCH;
     if (0 == (o->op_flags & OPf_SPECIAL)) {
 	OP *first  = cBINOPo->op_first;
 	OP *second = first->op_sibling;
@@ -8684,6 +8685,7 @@ Perl_ck_svconst(pTHX_ OP *o)
 OP *
 Perl_ck_chdir(pTHX_ OP *o)
 {
+    PERL_ARGS_ASSERT_CK_CHDIR;
     if (o->op_flags & OPf_KIDS) {
 	SVOP * const kid = (SVOP*)cUNOPo->op_first;
 

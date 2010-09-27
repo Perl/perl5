@@ -119,6 +119,35 @@ while (<IN>) {
     push @embed, \@args;
 }
 
+open IN, 'pp.sym' or die $!;
+{
+    my %syms;
+
+    while (<IN>) {
+	s/[ \t]*#.*//;		# Delete comments.
+	if (/^\s*(\S+)\s*$/) {
+	    my $sym = $1;
+	    warn "duplicate symbol $sym while processing 'pp.sym' line $.\n"
+		if $syms{$sym}++;
+	}
+    }
+
+    foreach (sort keys %syms) {
+	s/^Perl_//;
+	if (/^ck_/) {
+	    # These are all indirectly referenced by globals.c.
+	    # This is somewhat annoying.
+	    push @embed, ['pR', 'OP *', $_, 'NN OP *o'];
+	}
+	elsif (/^pp_/) {
+	    push @embed, ['p', 'OP *', $_];
+	}
+	else {
+	    warn "Illegal symbol '$_' in pp.sym";
+	}
+    }
+}
+
 # walk table providing an array of components in each line to
 # subroutine, printing the result
 sub walk_table (&@) {
@@ -303,26 +332,6 @@ sub write_protos {
 warn "$unflagged_pointers pointer arguments to clean up\n" if $unflagged_pointers;
 walk_table(\&write_global_sym, "global.sym", "# ex: set ro:\n");
 
-sub readsyms (\%$) {
-    my ($syms, $file) = @_;
-    local (*FILE, $_);
-    open(FILE, "< $file")
-	or die "embed.pl: Can't open $file: $!\n";
-    while (<FILE>) {
-	s/[ \t]*#.*//;		# Delete comments.
-	if (/^\s*(\S+)\s*$/) {
-	    my $sym = $1;
-	    warn "duplicate symbol $sym while processing $file line $.\n"
-		if exists $$syms{$sym};
-	    $$syms{$sym} = 1;
-	}
-    }
-    close(FILE);
-}
-
-# Perl_pp_* and Perl_ck_* are in pp.sym
-readsyms my %ppsym, 'pp.sym';
-
 sub readvars(\%$$@) {
     my ($syms, $file,$pre,$keep_pre) = @_;
     local (*FILE, $_);
@@ -472,19 +481,6 @@ walk_table {
 
 if ($ifdef_state) {
     print $em "#endif\n";
-}
-
-for $sym (sort keys %ppsym) {
-    $sym =~ s/^Perl_//;
-    if ($sym =~ /^ck_/) {
-	print $em hide("$sym(a)", "Perl_$sym(aTHX_ a)");
-    }
-    elsif ($sym =~ /^pp_/) {
-	print $em hide("$sym()", "Perl_$sym(aTHX)");
-    }
-    else {
-	warn "Illegal symbol '$sym' in pp.sym";
-    }
 }
 
 print $em <<'END';

@@ -4206,7 +4206,7 @@ pp_ctl.c			Push/Pop code for control flow
 pp.h				Push/Pop code defs
 pp_hot.c			Push/Pop code for heavily used opcodes
 pp_pack.c			Push/Pop code for pack/unpack
-pp_proto.h			C++ definitions for Push/Pop code
+pp_proto.h			Not needed, but EU::MM currently references it
 pp_sort.c			Push/Pop code for sort
 pp.sym				Push/Pop code symbols
 pp_sys.c			Push/Pop code for system interaction

@@ -1324,47 +1324,6 @@
 #endif
 #if defined(PERL_IN_OP_C)
 #ifdef PERL_CORE
-#define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
-#define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
-#define ck_concat(a)		Perl_ck_concat(aTHX_ a)
-#define ck_defined(a)		Perl_ck_defined(aTHX_ a)
-#define ck_delete(a)		Perl_ck_delete(aTHX_ a)
-#define ck_die(a)		Perl_ck_die(aTHX_ a)
-#define ck_eof(a)		Perl_ck_eof(aTHX_ a)
-#define ck_eval(a)		Perl_ck_eval(aTHX_ a)
-#define ck_exec(a)		Perl_ck_exec(aTHX_ a)
-#define ck_exists(a)		Perl_ck_exists(aTHX_ a)
-#define ck_exit(a)		Perl_ck_exit(aTHX_ a)
-#define ck_ftst(a)		Perl_ck_ftst(aTHX_ a)
-#define ck_fun(a)		Perl_ck_fun(aTHX_ a)
-#define ck_glob(a)		Perl_ck_glob(aTHX_ a)
-#define ck_grep(a)		Perl_ck_grep(aTHX_ a)
-#define ck_index(a)		Perl_ck_index(aTHX_ a)
-#define ck_join(a)		Perl_ck_join(aTHX_ a)
-#define ck_lfun(a)		Perl_ck_lfun(aTHX_ a)
-#define ck_listiob(a)		Perl_ck_listiob(aTHX_ a)
-#define ck_match(a)		Perl_ck_match(aTHX_ a)
-#define ck_method(a)		Perl_ck_method(aTHX_ a)
-#define ck_null(a)		Perl_ck_null(aTHX_ a)
-#define ck_open(a)		Perl_ck_open(aTHX_ a)
-#define ck_readline(a)		Perl_ck_readline(aTHX_ a)
-#define ck_repeat(a)		Perl_ck_repeat(aTHX_ a)
-#define ck_require(a)		Perl_ck_require(aTHX_ a)
-#define ck_return(a)		Perl_ck_return(aTHX_ a)
-#define ck_rfun(a)		Perl_ck_rfun(aTHX_ a)
-#define ck_rvconst(a)		Perl_ck_rvconst(aTHX_ a)
-#define ck_sassign(a)		Perl_ck_sassign(aTHX_ a)
-#define ck_select(a)		Perl_ck_select(aTHX_ a)
-#define ck_shift(a)		Perl_ck_shift(aTHX_ a)
-#define ck_sort(a)		Perl_ck_sort(aTHX_ a)
-#define ck_spair(a)		Perl_ck_spair(aTHX_ a)
-#define ck_split(a)		Perl_ck_split(aTHX_ a)
-#define ck_subr(a)		Perl_ck_subr(aTHX_ a)
-#define ck_substr(a)		Perl_ck_substr(aTHX_ a)
-#define ck_svconst(a)		Perl_ck_svconst(aTHX_ a)
-#define ck_trunc(a)		Perl_ck_trunc(aTHX_ a)
-#define ck_unpack(a)		Perl_ck_unpack(aTHX_ a)
-#define ck_each(a)		Perl_ck_each(aTHX_ a)
 #define is_handle_constructor	S_is_handle_constructor
 #define is_list_assignment(a)	S_is_list_assignment(aTHX_ a)
 #endif
@@ -2155,6 +2114,7 @@
 #endif
 #  endif
 #endif
+#ifdef PERL_CORE
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
 #define ck_chdir(a)		Perl_ck_chdir(aTHX_ a)
@@ -2559,6 +2519,7 @@
 #define pp_wantarray()		Perl_pp_wantarray(aTHX)
 #define pp_warn()		Perl_pp_warn(aTHX)
 #define pp_xor()		Perl_pp_xor(aTHX)
+#endif
 
 #endif	/* #ifndef PERL_NO_SHORT_NAMES */
 
