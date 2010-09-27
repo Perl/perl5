@@ -450,8 +450,6 @@ L<[perl #73754]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=73754>.
 
 =back
 
-=back
-
 =head1 Internal Changes
 
 XXX Changes which affect the interface available to C<XS> code go here.
