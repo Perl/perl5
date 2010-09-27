@@ -1620,8 +1620,6 @@
 #  endif
 #ifdef PERL_CORE
 #define expect_number(a)	S_expect_number(aTHX_ a)
-#endif
-#ifdef PERL_CORE
 #define sv_pos_u2b_forwards	S_sv_pos_u2b_forwards
 #define sv_pos_u2b_midway	S_sv_pos_u2b_midway
 #define sv_pos_u2b_cached(a,b,c,d,e,f,g)	S_sv_pos_u2b_cached(aTHX_ a,b,c,d,e,f,g)
