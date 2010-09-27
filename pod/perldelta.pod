@@ -442,9 +442,13 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+C<$Config{gccversion}> is now set correctly when perl is built using the
+mingw64 compiler from L<http://mingw64.org>
+L<[perl #73754]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=73754>.
+
+=back
 
 =back
 
