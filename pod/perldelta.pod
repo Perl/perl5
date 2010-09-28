@@ -118,6 +118,13 @@ has come to rely on the incorrect behavior.
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 Directory handles not copied to threads
+
+On systems that do not have a C<fchdir> function, newly-created threads no
+longer inherit directory handles from their parent threads. Such programs
+would probably have crashed anyway
+L<[perl #75154]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75154>.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
@@ -604,6 +611,17 @@ nonexistent hash or array element was passed to a subroutine:
 It also happened when a glob was assigned to, or returned from, an element
 of a tied array or hash
 L<[perl #36051]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=36051>.
+
+=item *
+
+Creating a new thread when directory handles were open used to cause a
+crash, because the handles were not cloned, but simply passed to the new
+thread, resulting in a double free.
+
+Now directory handles are properly, on systems that have a C<fchdir>
+function. On other systems, new threads simply do not inherit directory
+handles from their parent threads
+L<[perl #75154]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75154>.
 
 =back
 
