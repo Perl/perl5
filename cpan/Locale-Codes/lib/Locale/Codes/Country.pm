@@ -2,7 +2,7 @@ package Locale::Codes::Country;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Tue Jun  1 15:12:34 EDT 2010
+#    Generated on: Tue Sep 28 11:38:01 EDT 2010
 
 =pod
 
@@ -37,7 +37,7 @@ use warnings;
 require 5.002;
 
 use vars qw($VERSION);
-$VERSION='3.13';
+$VERSION='3.14';
 
 $Locale::Codes::Data{'country'}{'id'} = '0278';
 
@@ -5244,22 +5244,6 @@ $Locale::Codes::Data{'country'}{'code2id'} = {
          ],
       },
    q(dom) => {
-      q(&#1088;&#1092;<br/><span class="tld-table-so">rf:ru-Cyrl</span>) => [
-         q(0182),
-         q(0),
-         ],
-      q(&#1575;&#1604;&#1587;&#1593;&#1608;&#1583;&#1610;&#1577;<br/><span class="tld-table-so">alsaudiah:ar-Arab</span>) => [
-         q(0194),
-         q(0),
-         ],
-      q(&#1575;&#1605;&#1575;&#1585;&#1575;&#1578;<br/><span class="tld-table-so">emarat:ar-Arab</span>) => [
-         q(0231),
-         q(0),
-         ],
-      q(&#1605;&#1589;&#1585;<br/><span class="tld-table-so">misr:ar-Arab</span>) => [
-         q(0064),
-         q(0),
-         ],
       q(AC) => [
          q(0272),
          q(0),
@@ -8893,7 +8877,7 @@ $Locale::Codes::Data{'country'}{'id2code'} = {
       q(0061) => q(DM),
       q(0062) => q(DO),
       q(0063) => q(EC),
-      q(0064) => q(&#1605;&#1589;&#1585;<br/><span class="tld-table-so">misr:ar-Arab</span>),
+      q(0064) => q(EG),
       q(0065) => q(SV),
       q(0066) => q(GQ),
       q(0067) => q(ER),
@@ -9011,7 +8995,7 @@ $Locale::Codes::Data{'country'}{'id2code'} = {
       q(0179) => q(QA),
       q(0180) => q(RE),
       q(0181) => q(RO),
-      q(0182) => q(&#1088;&#1092;<br/><span class="tld-table-so">rf:ru-Cyrl</span>),
+      q(0182) => q(RU),
       q(0183) => q(RW),
       q(0184) => q(BL),
       q(0185) => q(SH),
@@ -9023,7 +9007,7 @@ $Locale::Codes::Data{'country'}{'id2code'} = {
       q(0191) => q(WS),
       q(0192) => q(SM),
       q(0193) => q(ST),
-      q(0194) => q(&#1575;&#1604;&#1587;&#1593;&#1608;&#1583;&#1610;&#1577;<br/><span class="tld-table-so">alsaudiah:ar-Arab</span>),
+      q(0194) => q(SA),
       q(0195) => q(SN),
       q(0196) => q(RS),
       q(0197) => q(SC),
@@ -9060,7 +9044,7 @@ $Locale::Codes::Data{'country'}{'id2code'} = {
       q(0228) => q(TV),
       q(0229) => q(UG),
       q(0230) => q(UA),
-      q(0231) => q(&#1575;&#1605;&#1575;&#1585;&#1575;&#1578;<br/><span class="tld-table-so">emarat:ar-Arab</span>),
+      q(0231) => q(AE),
       q(0232) => q(UK),
       q(0233) => q(US),
       q(0234) => q(UM),

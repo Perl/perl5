@@ -27,7 +27,7 @@ use vars qw($VERSION %Data);
 #              { id        }                      = FIRST_UNUSED_ID
 #              { codealias }{ CODESET } { ALIAS } = CODE
 
-$VERSION='3.13';
+$VERSION='3.14';
 
 #=======================================================================
 #
