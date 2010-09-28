@@ -10838,11 +10838,101 @@ Perl_fp_dup(pTHX_ PerlIO *const fp, const char type, CLONE_PARAMS *const param)
 DIR *
 Perl_dirp_dup(pTHX_ DIR *const dp)
 {
+#ifdef HAS_FCHDIR
+    DIR *ret;
+    DIR *pwd;
+    register const Direntry_t *dirent;
+    char smallbuf[256];
+    char *name = NULL;
+    STRLEN len = -1;
+    long pos;
+#endif
+
     PERL_UNUSED_CONTEXT;
+
+#ifdef HAS_FCHDIR
     if (!dp)
 	return (DIR*)NULL;
-    /* XXX TODO */
-    return dp;
+    /* look for it in the table first */
+    ret = (DIR*)ptr_table_fetch(PL_ptr_table, dp);
+    if (ret)
+	return ret;
+
+    /* create anew */
+
+    /* open the current directory (so we can switch back) */
+    if (!(pwd = PerlDir_open("."))) return (DIR *)NULL;
+
+    /* chdir to our dir handle and open the present working directory */
+    if (fchdir(my_dirfd(dp)) < 0 || !(ret = PerlDir_open("."))) {
+	PerlDir_close(pwd);
+	return (DIR *)NULL;
+    }
+    /* Now we should have two dir handles pointing to the same dir. */
+
+    /* Be nice to the calling code and chdir back to where we were. */
+    fchdir(my_dirfd(pwd)); /* If this fails, then what? */
+
+    /* We have no need of the pwd handle any more. */
+    PerlDir_close(pwd);
+
+#ifdef DIRNAMLEN
+# define d_namlen(d) (d)->d_namlen
+#else
+# define d_namlen(d) strlen((d)->d_name)
+#endif
+    /* Iterate once through dp, to get the file name at the current posi-
+       tion. Then step back. */
+    pos = PerlDir_tell(dp);
+    if ((dirent = PerlDir_read(dp))) {
+	len = d_namlen(dirent);
+	if (len <= sizeof smallbuf) name = smallbuf;
+	else Newx(name, len, char);
+	Move(dirent->d_name, name, len, char);
+    }
+    PerlDir_seek(dp, pos);
+
+    /* Iterate through the new dir handle, till we find a file with the
+       right name. */
+    if (!dirent) /* just before the end */
+	for(;;) {
+	    pos = PerlDir_tell(ret);
+	    if (PerlDir_read(ret)) continue; /* not there yet */
+	    PerlDir_seek(ret, pos); /* step back */
+	    break;
+	}
+    else {
+	const long pos0 = PerlDir_tell(ret);
+	for(;;) {
+	    pos = PerlDir_tell(ret);
+	    if ((dirent = PerlDir_read(ret))) {
+		if (len == d_namlen(dirent)
+		 && memEQ(name, dirent->d_name, len)) {
+		    /* found it */
+		    PerlDir_seek(ret, pos); /* step back */
+		    break;
+		}
+		/* else we are not there yet; keep iterating */
+	    }
+	    else { /* This is not meant to happen. The best we can do is
+	              reset the iterator to the beginning. */
+		PerlDir_seek(ret, pos0);
+		break;
+	    }
+	}
+    }
+#undef d_namlen
+
+    if (name && name != smallbuf)
+	Safefree(name);
+
+    /* pop it in the pointer table */
+    ptr_table_store(PL_ptr_table, dp, ret);
+
+    return ret;
+#else
+    return (DIR*)NULL;
+#endif
 }
 
 /* duplicate a typeglob */
