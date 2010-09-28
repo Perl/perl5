@@ -637,6 +637,15 @@ L<[perl #75154]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75154>.
 Assignment through a glob no longer triggers set-magic on the glob itself
 L<[perl #77928]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77928>.
 
+=item *
+
+The regular expression parser no longer hangs when parsing C<\18> and
+C<\88>.
+
+This bug was introduced in version 5.13.5 and did not affect earlier
+versions
+L<[perl #78058]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78058>.
+
 =back
 
 =head1 Known Problems
