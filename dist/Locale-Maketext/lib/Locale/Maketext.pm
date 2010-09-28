@@ -489,6 +489,13 @@ sub _compile {
     # It returns either a coderef if there's brackety bits in this, or
     #  otherwise a ref to a scalar.
 
+    my $string_to_compile = $_[1]; # There are taint issues using regex on @_ - perlbug 60378,27344
+
+    # The while() regex is more expensive than this check on strings that don't need a compile.
+    # this op causes a ~2% speed hit for strings that need compile and a 250% speed improvement
+    # on strings that don't need compiling.
+    return \"$string_to_compile" if($string_to_compile !~ m/[\[~\]]/ms); # return a string ref if chars [~] are not in the string
+
     my $target = ref($_[0]) || $_[0];
 
     my(@code);
@@ -499,10 +506,9 @@ sub _compile {
         my $in_group = 0; # start out outside a group
         my($m, @params); # scratch
 
-	my $string_to_compile = $_[1]; # There are taint issues using regex on @_ - perlbug 60378,27344
         while($string_to_compile =~  # Iterate over chunks.
-            m/\G(
-                [^\~\[\]]+  # non-~[] stuff
+            m/(
+                [^\~\[\]]+  # non-~[] stuff (Capture everything else here)
                 |
                 ~.       # ~[, ~], ~~, ~other
                 |
