@@ -4,7 +4,8 @@ use strict;
 use vars qw( @ISA $VERSION $MATCH_SUPERS $USING_LANGUAGE_TAGS
 $USE_LITERALS $MATCH_SUPERS_TIGHTLY);
 use Carp ();
-use I18N::LangTags 0.30 ();
+use I18N::LangTags ();
+use I18N::LangTags::Detect ();
 
 #--------------------------------------------------------------------------
 
@@ -380,7 +381,6 @@ sub _langtag_munging {
 ###########################################################################
 
 sub _ambient_langprefs {
-    require I18N::LangTags::Detect;
     return  I18N::LangTags::Detect::detect();
 }
 
