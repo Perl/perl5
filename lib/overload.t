@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 4881;
+plan tests => 4882;
 
 use Scalar::Util qw(tainted);
 
@@ -1998,5 +1998,13 @@ fresh_perl_is
   { switches => ['-wl'], stderr => 1 },
  'use overload from the main package'
 ;
+
+{
+    package blessed_methods;
+    use overload '+' => sub {};
+    bless overload::Method __PACKAGE__,'+';
+    eval { overload::Method __PACKAGE__,'+' };
+    ::is($@, '', 'overload::Method and blessed overload methods');
+}
 
 # EOF

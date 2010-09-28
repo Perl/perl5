@@ -244,6 +244,14 @@ C<NEXT> has been upgraded from version 0.64 to 0.65.
 
 =item *
 
+C<overload> has been upgraded from version 1.10 to 1.11.
+
+C<overload::Method> can now handle subroutines that are themselves blessed
+into overloaded classes
+L<[perl #71998]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=71998>.
+
+=item *
+
 C<PathTools> has been upgraded from version 3.31_01 to 3.33.
 
 =item *

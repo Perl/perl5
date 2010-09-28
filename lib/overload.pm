@@ -1,6 +1,6 @@
 package overload;
 
-our $VERSION = '1.10';
+our $VERSION = '1.11';
 
 sub nil {}
 
@@ -57,7 +57,9 @@ sub ov_method {
   my $globref = shift;
   return undef unless $globref;
   my $sub = \&{*$globref};
-  return $sub if $sub ne \&nil;
+  require Scalar::Util;
+  return $sub
+    if Scalar::Util::refaddr($sub) != Scalar::Util::refaddr(\&nil);
   return shift->can($ {*$globref});
 }
 
