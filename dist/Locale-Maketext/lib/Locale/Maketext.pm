@@ -148,8 +148,7 @@ sub failure_handler_auto {
     $handle->{'failure_lex'} ||= {};
     my $lex = $handle->{'failure_lex'};
 
-    my $value;
-    $lex->{$phrase} ||= ($value = $handle->_compile($phrase));
+    my $value ||= ($lex->{$phrase} ||= $handle->_compile($phrase));
 
     # Dumbly copied from sub maketext:
     return ${$value} if ref($value) eq 'SCALAR';

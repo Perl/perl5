@@ -2,12 +2,8 @@
 
 use strict;
 
-use Test::More tests => 4;
+use Test::More tests => 3;
 use Locale::Maketext;
-print "# Hi there...\n";
-pass();
-
-print "# --- Making sure that Perl globals are localized ---\n";
 
 # declare a class...
 {
@@ -20,11 +16,8 @@ print "# --- Making sure that Perl globals are localized ---\n";
 }
 
 my $lh = Woozle->new();
-ok(ref $lh, 'Basic sanity');
+isa_ok($lh, 'Woozle');
 
 $@ = 'foo';
-is($lh->maketext('Eval error: [_1]', $@), 'Eval error: foo',
-  'Make sure $@ is localized');
-
-print "# Byebye!\n";
-pass();
+is($lh->maketext('Eval error: [_1]', $@), 'Eval error: foo', "Make sure \$@ is localized when passed to maketext");
+is($@, 'foo', "\$@ wasn't modified during call");

@@ -20,6 +20,25 @@ Revision history for Perl suite Locale::Maketext
 
     Convert the odd Locale::Maketext test out from Test to Test::More.
 
+2009-06-23  Adriano Ferreira
+    * Development release 1.13_82
+
+    One more recipe: on [numf,...] with decimal precision
+
+2009-06-23  Adriano Ferreira
+    * Development release 1.13_81
+
+    Change a few straggling 'DEBUG and print' to 'DEBUG and warn' (thanks Dan Muey)
+
+    A start of a cookbook.
+
+2009-06-23  Adriano Ferreira
+    * Development release 1.13_80
+
+    Fixes CPAN RT #25877 (thanks imacat)
+
+    Add a test for failure_handler_auto()
+
 2008-05-28  Adriano Ferreira
     * Release 1.13
 
