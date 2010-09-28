@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 use strict;
-use vars qw($Needs_Write $Verbose @Changed);
+use vars qw($Needs_Write $Verbose @Changed $TAP);
 use File::Compare;
 use Symbol;
 
@@ -10,6 +10,7 @@ $Needs_Write = $^O eq 'cygwin' || $^O eq 'os2' || $^O eq 'MSWin32';
 
 $Verbose = 0;
 @ARGV = grep { not($_ eq '-q' and $Verbose = -1) }
+  grep { not($_ eq '--tap' and $TAP = 1) }
   grep { not($_ eq '-v' and $Verbose = 1) } @ARGV;
 
 END {
@@ -42,6 +43,12 @@ sub safer_rename_silent {
 sub rename_if_different {
   my ($from, $to) = @_;
 
+  if ($TAP) {
+      my $not = compare($from, $to) ? 'not ' : '';
+      print STDOUT $not . "ok - $0 $to\n";
+      safer_unlink($from);
+      return;
+  }
   if (compare($from, $to) == 0) {
       warn "no changes between '$from' & '$to'\n" if $Verbose > 0;
       safer_unlink($from);

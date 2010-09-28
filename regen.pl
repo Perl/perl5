@@ -26,8 +26,9 @@ warnings.pl
 embed.pl
 );
 
+my $tap = $ARGV[0] && $ARGV[0] eq '--tap' ? '# ' : '';
 foreach my $pl (@scripts) {
   my @command =  ($^X, $pl, @ARGV);
-  print "@command\n";
+  print "$tap@command\n";
   system @command;
 }
