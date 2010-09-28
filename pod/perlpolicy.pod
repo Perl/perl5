@@ -8,6 +8,70 @@ This document is the master document which records all written
 policies about how the Perl 5 Porters collectively develop and maintain
 the Perl core.
 
+=head1 MAINTENANCE AND SUPPORT
+
+Perl 5 is developed by a community, not a corporate entity. Every change
+contributed to the Perl core is the result of a donation. Typically, these
+donations are contributions of code or time by individual members of our
+community. On occasion, these donations come in the form of corporate
+or organizational sponsorship of a particular individual or project.
+
+As a volunteer organization, the commitments we make are heavily dependent
+on the goodwill and hard work of individuals who have no obligation to
+contribute to Perl.
+
+That being said, we value Perl's stabilty and security and have long
+had an unwritten covenant with the broader Perl community to support
+and maintain releases of Perl.
+
+This document codifies the support and maintenance commitments that
+the Perl community should expect from Perl's developers:
+
+=over
+
+=item *
+
+We "officially" support the two most recent stable release
+series'.  As of the release of 5.14.0, we will "officially"
+end support for Perl 5.10, other than providing security
+updates as described below.
+
+=item *
+
+To the best of our ability, we will attempt to fix critical issues
+n the two most recent stable 5.x release series'.  Fixes for the
+current release series take precedence over fixes for the previous
+release series.
+
+=item *
+
+To the best of our ability, we will provide "critical" security patches
+/ releases for any major version of Perl initially released within the
+past three years.  We can only commit to providing these for the most
+recent .y release in any 5.x.y series.
+
+=item *
+
+We will not provide security updates or bug fixes for development
+releases of Perl.
+
+=item *
+
+We encourage vendors to ship the most recent supported release of
+Perl at the time of their code freeze.
+
+=item *
+
+As a vendor, you may have a requirement to backport security fixes
+beyond our 3 year support commitment.  We can provide limited support and
+advice to you as you do so and, where possible will try to apply
+those patches to the relevant -maint branches in git, though we may or
+may not choose to make numbered releases or "official" patches
+available.  Contact us at E<lt>perl5-security-report@perl.orgE<gt>
+to begin that process.
+
+=back
+
 =head1 BACKWARD COMPATIBILITY AND DEPRECATION
 
 Our community has a long-held belief that backward-compatibility is a
