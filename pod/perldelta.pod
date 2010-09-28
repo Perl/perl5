@@ -624,6 +624,11 @@ function. On other systems, new threads simply do not inherit directory
 handles from their parent threads
 L<[perl #75154]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75154>.
 
+=item *
+
+Assignment through a glob no longer triggers set-magic on the glob itself
+L<[perl #77928]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77928>.
+
 =back
 
 =head1 Known Problems

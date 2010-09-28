@@ -1945,9 +1945,23 @@ Returns a pointer to the character buffer.
 		SvSetSV_nosteal_and(dst,src,/*nothing*/;)
 
 #define SvSetMagicSV(dst,src) \
-		SvSetSV_and(dst,src,SvSETMAGIC(dst))
+    SvSetSV_and(dst,src,       \
+	if (SvSMAGICAL(dst)     \
+	 && (                    \
+	     !isGV_with_GP(dst) || !SvROK(src) || isGV_with_GP(SvRV(src)) \
+	    )                                                             \
+	   )                                                              \
+	    mg_set(dst)                                                   \
+    )
 #define SvSetMagicSV_nosteal(dst,src) \
-		SvSetSV_nosteal_and(dst,src,SvSETMAGIC(dst))
+    SvSetSV_nosteal_and(dst,src,       \
+	if (SvSMAGICAL(dst)             \
+	 && (                            \
+	     !isGV_with_GP(dst) || !SvROK(src) || isGV_with_GP(SvRV(src)) \
+	    )                                                             \
+	   )                                                              \
+	    mg_set(dst)                                                   \
+    )
 
 
 #if !defined(SKIP_DEBUGGING)

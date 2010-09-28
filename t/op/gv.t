@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 219 );
+plan( tests => 220 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -781,6 +781,19 @@ EOF
   }
 
  }}->($h{k});
+}
+
+# [perl #77928] Glob slot assignment and set-magic
+{
+ package Readonly::Alias;
+ sub TIESCALAR { bless \(my $x = \pop) }
+ sub FETCH { $${$_[0]} }
+ sub STORE { die "Assignment to read-only value" }
+ package main;
+ tie my $alias, "Readonly::Alias", my $var;
+ $var = *bength;
+ # Now modify a glob slot, not the alias itself:
+ ok(scalar eval { *$alias = [] }, 'glob slot assignment skips set-magic');
 }
 
 __END__
