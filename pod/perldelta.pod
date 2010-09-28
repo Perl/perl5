@@ -410,7 +410,8 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+The script F<t/op/threads-dirh.t> has been added, which tests interaction
+of threads and directory handles.
 
 =back
 
