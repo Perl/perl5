@@ -7601,7 +7601,7 @@ tryagain:
 		    case '0': case '1': case '2': case '3':case '4':
 		    case '5': case '6': case '7': case '8':case '9':
 			if (*p == '0' ||
-			    (isOCTAL(p[1]) && atoi(p) >= RExC_npar))
+			    (isDIGIT(p[1]) && atoi(p) >= RExC_npar))
 			{
 			    I32 flags = PERL_SCAN_SILENT_ILLDIGIT;
 			    STRLEN numlen = 3;
