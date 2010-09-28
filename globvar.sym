@@ -27,6 +27,7 @@ no_wrongref
 op_desc
 op_name
 opargs
+phase_names
 ppaddr
 regkind
 reg_name

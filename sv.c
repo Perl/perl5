@@ -13124,6 +13124,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_in_eval		= proto_perl->Iin_eval;
     PL_delaymagic	= proto_perl->Idelaymagic;
     PL_dirty		= proto_perl->Idirty;
+    PL_phase		= proto_perl->Iphase;
     PL_localizing	= proto_perl->Ilocalizing;
 
     PL_errors		= sv_dup_inc(proto_perl->Ierrors, param);

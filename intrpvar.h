@@ -253,6 +253,9 @@ PERLVARI(Idirty,	bool, FALSE)	/* in the middle of tearing things
 PERLVAR(Iin_eval,	U8)		/* trap "fatal" errors? */
 PERLVAR(Itainted,	bool)		/* using variables controlled by $< */
 
+/* current phase the interpreter is in */
+PERLVARI(Iphase,	enum perl_phase, PERL_PHASE_CONSTRUCT)
+
 /* This value may be set when embedding for full cleanup  */
 /* 0=none, 1=full, 2=full with checks */
 /* mod_perl is special, and also assigns a meaning -1 */

@@ -4687,6 +4687,7 @@ t/op/localref.t			See if local ${deref} works
 t/op/local.t			See if local works
 t/op/loopctl.t			See if next/last/redo work
 t/op/lop.t			See if logical operators work
+t/op/magic_phase.t		See if ${^GLOBAL_PHASE} works
 t/op/magic.t			See if magic variables work
 t/op/method.t			See if method calls work
 t/op/mkdir.t			See if mkdir works

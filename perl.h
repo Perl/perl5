@@ -4712,6 +4712,32 @@ EXTCONST char PL_bincompat_options[] =
 EXTCONST char PL_bincompat_options[];
 #endif
 
+/* The interpreter phases. If these ever change, PL_phase_names right below will
+ * need to be updated accordingly. */
+enum perl_phase {
+    PERL_PHASE_CONSTRUCT	= 0,
+    PERL_PHASE_START		= 1,
+    PERL_PHASE_CHECK		= 2,
+    PERL_PHASE_INIT		= 3,
+    PERL_PHASE_RUN		= 4,
+    PERL_PHASE_END		= 5,
+    PERL_PHASE_DESTRUCT		= 6
+};
+
+#ifdef DOINIT
+EXTCONST char *const PL_phase_names[] = {
+    "CONSTRUCT",
+    "START",
+    "CHECK",
+    "INIT",
+    "RUN",
+    "END",
+    "DESTRUCT"
+};
+#else
+EXTCONST char *const PL_phase_names[];
+#endif
+
 END_EXTERN_C
 
 /*****************************************************************************/

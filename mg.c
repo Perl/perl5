@@ -877,6 +877,12 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '\006':		/* ^F */
 	sv_setiv(sv, (IV)PL_maxsysfd);
 	break;
+    case '\007':		/* ^GLOBAL_PHASE */
+	if (strEQ(remaining, "LOBAL_PHASE")) {
+	    sv_setpvn(sv, PL_phase_names[PL_phase],
+		      strlen(PL_phase_names[PL_phase]));
+	}
+	break;
     case '\010':		/* ^H */
 	sv_setiv(sv, (IV)PL_hints);
 	break;
@@ -892,7 +898,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    Perl_emulate_cop_io(aTHX_ &PL_compiling, sv);
 	}
 	break;
-    case '\020':		
+    case '\020':
 	if (nextchar == '\0') {       /* ^P */
 	    sv_setiv(sv, (IV)PL_perldb);
 	} else if (strEQ(remaining, "REMATCH")) { /* $^PREMATCH */
