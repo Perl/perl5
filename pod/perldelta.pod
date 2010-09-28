@@ -446,6 +446,16 @@ L</Modules and Pragmata> section.
 
 =over 4
 
+=item Mac OS X
+
+Early versions of Mac OS X (Darwin) had buggy implementations of the
+C<setregid>, C<setreuid>, C<setrgid> and C<setruid> functions, so perl
+would pretend they did not exist.
+
+These functions are now recognised on Mac OS 10.5 (Leopard; Darwin 9) and
+higher, as they have been fixed
+L<[perl #72990]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=72990>.
+
 =item Windows
 
 C<$Config{gccversion}> is now set correctly when perl is built using the
