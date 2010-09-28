@@ -229,6 +229,10 @@ working with tainted values
 
 =item *
 
+C<Math::BigInt> has been upgraded from version 1.95 to 1.96.
+
+=item *
+
 C<NEXT> has been upgraded from version 0.64 to 0.65.
 
 =item *
