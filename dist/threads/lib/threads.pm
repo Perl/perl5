@@ -1007,8 +1007,14 @@ discouraged.
 
 =item Open directory handles
 
-Spawning threads with open directory handles (see
-L<opendir|perlfunc/"opendir DIRHANDLE,EXPR">) will crash the interpreter.
+In perl 5.14.0 and higher, if your system does not support the C<fchdir> C
+function, directory handles (see
+L<opendir|perlfunc/"opendir DIRHANDLE,EXPR">) will not be copied to new
+threads. You can use the C<d_fchdir> variable in L<Config.pm|Config> to
+determine whether your system supports it.
+
+In prior perl versions, spawning threads with open directory handles would
+crash the interpreter.
 L<[perl #75154]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75154>
 
 =item Perl Bugs and the CPAN Version of L<threads>
