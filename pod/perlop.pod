@@ -2635,17 +2635,17 @@ floating point.  But by saying
 
     use integer;
 
-you may tell the compiler that it's okay to use integer operations
-(if it feels like it) from here to the end of the enclosing BLOCK.
-An inner BLOCK may countermand this by saying
+you may tell the compiler to use integer operations
+(see L<integer> for a detailed explanation) from here to the end of
+the enclosing BLOCK.  An inner BLOCK may countermand this by saying
 
     no integer;
 
 which lasts until the end of that BLOCK.  Note that this doesn't
-mean everything is only an integer, merely that Perl may use integer
-operations if it is so inclined.  For example, even under C<use
-integer>, if you take the C<sqrt(2)>, you'll still get C<1.4142135623731>
-or so.
+mean everything is an integer, merely that Perl will use integer
+operations for arithmetic, comparison, and bitwise operators.  For
+example, even under C<use integer>, if you take the C<sqrt(2)>, you'll
+still get C<1.4142135623731> or so.
 
 Used on numbers, the bitwise operators ("&", "|", "^", "~", "<<",
 and ">>") always produce integral results.  (But see also
