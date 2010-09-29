@@ -6794,9 +6794,6 @@ PERL_CALLCONV void	Perl_clone_params_del(CLONE_PARAMS *param)
 	assert(param)
 
 #endif
-/*
- * ex: set ts=8 sts=4 sw=4 noet:
- */
 PERL_CALLCONV OP *	Perl_ck_anoncode(pTHX_ OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
