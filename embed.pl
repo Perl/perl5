@@ -99,6 +99,7 @@ my (%has_va, %has_nocontext);
 while (<IN>) {
     chomp;
     next if /^:/;
+    next if /^$/;
     while (s|\\$||) {
 	$_ .= <IN>;
 	chomp;

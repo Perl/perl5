@@ -823,11 +823,7 @@
 #define reg_numbered_buff_fetch(a,b,c)	Perl_reg_numbered_buff_fetch(aTHX_ a,b,c)
 #define reg_numbered_buff_store(a,b,c)	Perl_reg_numbered_buff_store(aTHX_ a,b,c)
 #define reg_numbered_buff_length(a,b,c)	Perl_reg_numbered_buff_length(aTHX_ a,b,c)
-#endif
-#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reg_qr_package(a)	Perl_reg_qr_package(aTHX_ a)
-#endif
-#if defined(PERL_CORE) || defined(PERL_EXT)
 #define regprop(a,b,c)		Perl_regprop(aTHX_ a,b,c)
 #endif
 #define repeatcpy		Perl_repeatcpy
@@ -1815,8 +1811,6 @@
 #define pad_tidy(a)		Perl_pad_tidy(aTHX_ a)
 #define do_dump_pad(a,b,c,d)	Perl_do_dump_pad(aTHX_ a,b,c,d)
 #define pad_fixup_inner_anons(a,b,c)	Perl_pad_fixup_inner_anons(aTHX_ a,b,c)
-#endif
-#ifdef PERL_CORE
 #define pad_push(a,b)		Perl_pad_push(aTHX_ a,b)
 #define pad_compname_type(a)	Perl_pad_compname_type(aTHX_ a)
 #endif
@@ -2053,8 +2047,6 @@
 #define pmop_xmldump(a)		Perl_pmop_xmldump(aTHX_ a)
 #define do_op_xmldump(a,b,c)	Perl_do_op_xmldump(aTHX_ a,b,c)
 #define op_xmldump(a)		Perl_op_xmldump(aTHX_ a)
-#endif
-#ifdef PERL_CORE
 #define newTOKEN(a,b,c)		Perl_newTOKEN(aTHX_ a,b,c)
 #define token_free(a)		Perl_token_free(aTHX_ a)
 #define token_getmad(a,b,c)	Perl_token_getmad(aTHX_ a,b,c)
@@ -2104,8 +2096,6 @@
 #define mro_method_changed_in(a)	Perl_mro_method_changed_in(aTHX_ a)
 #ifdef PERL_CORE
 #define boot_core_mro()		Perl_boot_core_mro(aTHX)
-#endif
-#ifdef PERL_CORE
 #endif
 #ifdef PERL_CORE
 #define munge_qwlist_to_paren_list(a)	Perl_munge_qwlist_to_paren_list(aTHX_ a)
