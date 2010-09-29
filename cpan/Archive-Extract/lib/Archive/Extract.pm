@@ -43,7 +43,7 @@ use vars qw[$VERSION $PREFER_BIN $PROGRAMS $WARN $DEBUG
             $_ALLOW_BIN $_ALLOW_PURE_PERL $_ALLOW_TAR_ITER
          ];
 
-$VERSION            = '0.42';
+$VERSION            = '0.44';
 $PREFER_BIN         = 0;
 $WARN               = 1;
 $DEBUG              = 0;
@@ -402,22 +402,22 @@ sub extract {
 
         my($na, $fail);
         for my $method (@methods) {
-            print "# Extracting with ->$method\n" if $DEBUG;
+            $self->debug( "# Extracting with ->$method\n" );
         
             my $rv = $self->$method;
             
             ### a positive extraction
             if( $rv and $rv ne METHOD_NA ) {
-                print "# Extraction succeeded\n" if $DEBUG;
+                $self->debug( "# Extraction succeeded\n" );
                 $self->_extractor($method);
                 last;
             
             ### method is not available
             } elsif ( $rv and $rv eq METHOD_NA ) {               
-                print "# Extraction method not available\n" if $DEBUG;
+                $self->debug( "# Extraction method not available\n" );
                 $na++;                
             } else {
-                print "# Extraction method failed\n" if $DEBUG;
+                $self->debug( "# Extraction method failed\n" );
                 $fail++;
             }                
         }
@@ -1513,6 +1513,21 @@ sub error {
     } || [];
    
     return join $/, @$aref;
+}
+
+=head2 debug( MESSAGE )
+
+This method outputs MESSAGE to the default filehandle if C<$DEBUG> is
+true. It's a small method, but it's here if you'd like to subclass it
+so you can so something else with any debugging output.
+
+=cut
+
+### this is really a stub for subclassing
+sub debug {
+    return unless $DEBUG;
+
+    print $_[1];
 }
 
 sub _no_buffer_files {
