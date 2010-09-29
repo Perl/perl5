@@ -465,6 +465,7 @@ walk_table {
 		$ret .= $alist . ")\n";
 	    }
 	}
+	return "" unless $ret;
 	unless ($flags =~ /A/) {
 	    if ($flags =~ /E/) {
 		$new_ifdef_state
