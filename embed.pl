@@ -176,14 +176,18 @@ sub walk_table (&@) {
 # generate proto.h
 my $wrote_protected = 0;
 
-sub write_protos {
+{
+    my $pr = safer_open('proto.h-new');
+    print $pr do_not_edit ("proto.h"), "\nSTART_EXTERN_C\n";
     my $ret;
-    if (@_ == 1) {
-	my $arg = shift;
-	$ret = "$arg\n";
-    }
-    else {
-	my ($flags,$retval,$plain_func,@args) = @_;
+
+    foreach (@embed) {
+	if (@$_ == 1) {
+	    print $pr "$_->[0]\n";
+	    next;
+	}
+
+	my ($flags,$retval,$plain_func,@args) = @$_;
 	my @nonnull;
 	my $has_context = ( $flags !~ /n/ );
 	my $never_returns = ( $flags =~ /r/ );
@@ -294,8 +298,14 @@ sub write_protos {
 		. join '; ', map "assert($_)", @names_of_nn;
 	}
 	$ret .= @attrs ? "\n\n" : "\n";
+
+	print $pr $ret;
     }
-    $ret;
+
+    print $pr "END_EXTERN_C\n/* ex: set ro: */\n";
+
+    safer_close($pr);
+    rename_if_different('proto.h-new', 'proto.h');
 }
 
 # generates global.sym (API export list)
@@ -315,19 +325,6 @@ sub write_protos {
       }
       return '';
   }
-}
-
-{
-    my $pr = safer_open('proto.h-new');
-
-    print $pr do_not_edit ("proto.h"), "\nSTART_EXTERN_C\n";
-
-    walk_table(\&write_protos, $pr);
-
-    print $pr "END_EXTERN_C\n/* ex: set ro: */\n";
-
-    safer_close($pr);
-    rename_if_different('proto.h-new', 'proto.h');
 }
 
 warn "$unflagged_pointers pointer arguments to clean up\n" if $unflagged_pointers;
