@@ -117,6 +117,9 @@ while (<IN>) {
 	    ++$has_nocontext{$1} if $func =~ /(.*)_nocontext/;
 	}
     }
+    if (@args == 1 && $args[0] !~ /^#\s*(?:if|ifdef|ifndef|else|endif)/) {
+	die "Illegal line $. '$args[0]' in embed.fnc";
+    }
     push @embed, \@args;
 }
 
