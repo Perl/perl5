@@ -3977,6 +3977,20 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		char *saved_regeol = PL_regeol;
 		struct re_save_state saved_state;
 
+		/* To not corrupt the existing regex state while executign the
+		 * eval we would normally put it on the save stack, like with
+		 * save_re_context. However, re-evals have a weird scoping so we
+		 * can't just add ENTER/LEAVE here. With that, things like
+		 *
+		 *    (?{$a=2})(a(?{local$a=$a+1}))*aak*c(?{$b=$a})
+		 *
+		 * would break, as they expect the localisation to be unwound
+		 * only when the re-engine backtracks through the bit that
+		 * localised it.
+		 *
+		 * What we do instead is just saving the state in a local c
+		 * variable.
+		 */
 		Copy(&PL_reg_state, &saved_state, 1, struct re_save_state);
 
 		n = ARG(scan);
