@@ -849,7 +849,6 @@ win32_opendir(const char *filename)
     long		len;
     long		idx;
     char		scanname[MAX_PATH+3];
-    Stat_t		sbuf;
     WIN32_FIND_DATAA	aFindData;
     WIN32_FIND_DATAW	wFindData;
     bool                using_wide;
@@ -857,12 +856,24 @@ win32_opendir(const char *filename)
     char		*ptr;
 
     len = strlen(filename);
-    if (len > MAX_PATH)
+    if (len == 0) {
+	errno = ENOENT;
 	return NULL;
+    }
+    if (len > MAX_PATH) {
+	errno = ENAMETOOLONG;
+	return NULL;
+    }
 
-    /* check to see if filename is a directory */
-    if (win32_stat(filename, &sbuf) < 0 || !S_ISDIR(sbuf.st_mode))
-	return NULL;
+#if 0 /* This call to stat is unnecessary. The FindFirstFile() below will
+       * fail with ERROR_PATH_NOT_FOUND if filename is not a directory. */
+    {
+	/* check to see if filename is a directory */
+	Stat_t sbuf;
+	if (win32_stat(filename, &sbuf) < 0 || !S_ISDIR(sbuf.st_mode))
+	    return NULL;
+    }
+#endif
 
     /* Get us a DIR structure */
     Newxz(dirp, 1, DIR);
