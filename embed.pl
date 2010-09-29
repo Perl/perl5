@@ -174,8 +174,6 @@ sub walk_table (&@) {
 }
 
 # generate proto.h
-my $wrote_protected = 0;
-
 {
     my $pr = safer_open('proto.h-new');
     print $pr do_not_edit ("proto.h"), "\nSTART_EXTERN_C\n";
