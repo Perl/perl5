@@ -151,15 +151,81 @@ open IN, 'pp.sym' or die $!;
 	}
     }
 }
+close IN;
 
+my (@core, @ext, @api);
 {
+    # Cluster entries in embed.fnc that have the same #ifdef guards.
+    # Also, split out at the top level the three classes of functions.
+    my @state;
+    my %groups;
+    my $current;
     foreach (@embed) {
-	next if @$_ > 1;
+	if (@$_ > 1) {
+	    push @$current, $_;
+	    next;
+	}
 	$_->[0] =~ s/^#\s+/#/;
 	$_->[0] =~ /^\S*/;
 	$_->[0] =~ s/^#ifdef\s+(\S+)/#if defined($1)/;
 	$_->[0] =~ s/^#ifndef\s+(\S+)/#if !defined($1)/;
+	if ($_->[0] =~ /^#if\s*(.*)/) {
+	    push @state, $1;
+	} elsif ($_->[0] =~ /^#else\s*$/) {
+	    die "Unmatched #else in embed.fnc" unless @state;
+	    $state[-1] = "!($state[-1])";
+	} elsif ($_->[0] =~ m!^#endif\s*(?:/\*.*\*/)?$!) {
+	    die "Unmatched #endif in embed.fnc" unless @state;
+	    pop @state;
+	} else {
+	    die "Unhandled pre-processor directive '$_->[0]' in embed.fnc";
+	}
+	$current = \%groups;
+	# Nested #if blocks are effectively &&ed together
+	# For embed.fnc, ordering withing the && isn't relevant, so we can
+	# sort them to try to group more functions together.
+	my @sorted = sort @state;
+	while (my $directive = shift @sorted) {
+	    $current->{$directive} ||= {};
+	    $current = $current->{$directive};
+	}
+	$current->{''} ||= [];
+	$current = $current->{''};
     }
+
+    sub add_level {
+	my ($level, $indent, $wanted) = @_;
+	my $funcs = $level->{''};
+	my @entries;
+	if ($funcs) {
+	    if (!defined $wanted) {
+		@entries = @$funcs;
+	    } else {
+		foreach (@$funcs) {
+		    if ($_->[0] =~ /A/) {
+			push @entries, $_ if $wanted eq 'A';
+		    } elsif ($_->[0] =~ /E/) {
+			push @entries, $_ if $wanted eq 'E';
+		    } else {
+			push @entries, $_ if $wanted eq '';
+		    }
+		}
+	    }
+	    @entries = sort {$a->[2] cmp $b->[2]} @entries;
+	}
+	foreach (sort grep {length $_} keys %$level) {
+	    my @conditional = add_level($level->{$_}, $indent . '  ', $wanted);
+	    push @entries,
+		["#${indent}if $_"], @conditional, ["#${indent}endif"]
+		    if @conditional;
+	}
+	return @entries;
+    }
+    @core = add_level(\%groups, '', '');
+    @ext = add_level(\%groups, '', 'E');
+    @api = add_level(\%groups, '', 'A');
+
+    @embed = add_level(\%groups, '');
 }
 
 # walk table providing an array of components in each line to
@@ -411,27 +477,22 @@ print $em do_not_edit ("embed.h"), <<'END';
 
 END
 
-# Try to elimiate lots of repeated
-# #ifdef PERL_CORE
-# foo
-# #endif
-# #ifdef PERL_CORE
-# bar
-# #endif
-# by tracking state and merging foo and bar into one block.
-my $ifdef_state = '';
-
 my @az = ('a'..'z');
 
-walk_table {
-    my $ret = "";
-    my $new_ifdef_state = '';
-    if (@_ == 1) {
-	my $arg = shift;
-	$ret = "$arg\n" if $arg =~ /^#\s*(if|ifn?def|else|endif)\b/;
-    }
-    else {
-	my ($flags,$retval,$func,@args) = @_;
+sub embed_h {
+    my ($guard, $funcs) = @_;
+    print $em "$guard\n" if $guard;
+
+    foreach (@$funcs) {
+	if (@$_ == 1) {
+	    my $cond = $_->[0];
+	    # Indent the conditionals if we are wrapped in an #if/#endif pair.
+	    $cond =~ s/#(.*)/#  $1/ if $guard;
+	    print $em "$cond\n";
+	    next;
+	}
+	my $ret = "";
+	my ($flags,$retval,$func,@args) = @$_;
 	unless ($flags =~ /[om]/) {
 	    my $args = scalar @args;
 	    if ($flags =~ /n/) {
@@ -465,33 +526,14 @@ walk_table {
 		$ret .= $alist . ")\n";
 	    }
 	}
-	return "" unless $ret;
-	unless ($flags =~ /A/) {
-	    if ($flags =~ /E/) {
-		$new_ifdef_state
-		    = "#if defined(PERL_CORE) || defined(PERL_EXT)\n";
-	    }
-	    else {
-		$new_ifdef_state = "#ifdef PERL_CORE\n";
-	    }
-
-	    if ($new_ifdef_state ne $ifdef_state) {
-		$ret = $new_ifdef_state . $ret;
-	    }
-        }
+	print $em $ret if $ret;
     }
-    if ($ifdef_state && $new_ifdef_state ne $ifdef_state) {
-	# Close the old one ahead of opening the new one.
-	$ret = "#endif\n$ret";
-    }
-    # Remember the new state.
-    $ifdef_state = $new_ifdef_state;
-    $ret;
-} $em;
-
-if ($ifdef_state) {
-    print $em "#endif\n";
+    print $em "#endif\n" if $guard;
 }
+
+embed_h('', \@api);
+embed_h('#if defined(PERL_CORE) || defined(PERL_EXT)', \@ext);
+embed_h('#ifdef PERL_CORE', \@core);
 
 print $em <<'END';
 
