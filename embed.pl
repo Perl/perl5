@@ -152,6 +152,16 @@ open IN, 'pp.sym' or die $!;
     }
 }
 
+{
+    foreach (@embed) {
+	next if @$_ > 1;
+	$_->[0] =~ s/^#\s+/#/;
+	$_->[0] =~ /^\S*/;
+	$_->[0] =~ s/^#ifdef\s+(\S+)/#if defined($1)/;
+	$_->[0] =~ s/^#ifndef\s+(\S+)/#if !defined($1)/;
+    }
+}
+
 # walk table providing an array of components in each line to
 # subroutine, printing the result
 sub walk_table (&@) {
