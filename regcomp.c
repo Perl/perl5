@@ -4425,33 +4425,46 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
     r->extflags = pm_flags;
     {
         bool has_p     = ((r->extflags & RXf_PMf_KEEPCOPY) == RXf_PMf_KEEPCOPY);
-	bool has_minus = ((r->extflags & RXf_PMf_STD_PMMOD) != RXf_PMf_STD_PMMOD);
+        bool has_charset = (r->extflags & (RXf_PMf_LOCALE|RXf_PMf_UNICODE));
+
+        /* The caret is output if there are any defaults: if not all the STD
+         * flags are set, or if no character set specifier is needed */
+        bool has_default =
+                    (((r->extflags & RXf_PMf_STD_PMMOD) != RXf_PMf_STD_PMMOD)
+                    || ! has_charset);
 	bool has_runon = ((RExC_seen & REG_SEEN_RUN_ON_COMMENT)==REG_SEEN_RUN_ON_COMMENT);
 	U16 reganch = (U16)((r->extflags & RXf_PMf_STD_PMMOD)
 			    >> RXf_PMf_STD_PMMOD_SHIFT);
 	const char *fptr = STD_PAT_MODS;        /*"msix"*/
 	char *p;
         /* Allocate for the worst case, which is all the std flags are turned
-         * on, but this means no caret.  We never output a minus, as all those
-         * are defaults, so are covered by the caret */
+         * on.  If more precision is desired, we could do a population count of
+         * the flags set.  This could be done with a small lookup table, or by
+         * shifting, masking and adding, or even, when available, assembly
+         * language for a machine-language population count.
+         * We never output a minus, as all those are defaults, so are
+         * covered by the caret */
 	const STRLEN wraplen = plen + has_p + has_runon
+            + has_default       /* If needs a caret */
+            + has_charset       /* If needs a character set specifier */
             + (sizeof(STD_PAT_MODS) - 1)
             + (sizeof("(?:)") - 1);
 
-	p = sv_grow(MUTABLE_SV(rx), wraplen + 1);
+        p = sv_grow(MUTABLE_SV(rx), wraplen + 1); /* +1 for the ending NUL */
 	SvPOK_on(rx);
 	SvFLAGS(rx) |= SvUTF8(pattern);
         *p++='('; *p++='?';
 
         /* If a default, cover it using the caret */
-        if (has_minus || (r->extflags & ~(RXf_PMf_LOCALE|RXf_PMf_UNICODE))) {
+        if (has_default) {
             *p++= DEFAULT_PAT_MOD;
         }
-        if (r->extflags & RXf_PMf_LOCALE) {
-            *p++ = LOCALE_PAT_MOD;
-        }
-        else if (r->extflags & RXf_PMf_UNICODE) {
-            *p++ = UNICODE_PAT_MOD;
+        if (has_charset) {
+            if (r->extflags & RXf_PMf_LOCALE) {
+                *p++ = LOCALE_PAT_MOD;
+            } else {
+                *p++ = UNICODE_PAT_MOD;
+            }
         }
         if (has_p)
             *p++ = KEEPCOPY_PAT_MOD; /*'p'*/
