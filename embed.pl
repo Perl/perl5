@@ -325,11 +325,11 @@ sub walk_table (&@) {
   sub write_global_sym {
       if (@_ > 1) {
 	  my ($flags,$retval,$func,@args) = @_;
-	  # If a function is defined twice, for example before and after an
-	  # #else, only process the flags on the first instance for global.sym
-	  return '' if $seen{$func}++;
 	  if ($flags =~ /[AX]/ && $flags !~ /[xm]/
 	      || $flags =~ /b/) { # public API, so export
+	      # If a function is defined twice, for example before and after
+	      # an #else, only export its name once.
+	      return '' if $seen{$func}++;
 	      $func = "Perl_$func" if $flags =~ /[pbX]/;
 	      return "$func\n";
 	  }
