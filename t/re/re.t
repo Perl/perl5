@@ -61,6 +61,7 @@ if ('1234'=~/(?:(?<A>\d)|(?<C>!))(?<B>\d)(?<A>\d)(?<B>\d)/){
 
         # Bug #78058; this can loop
         watchdog(2);
+        no warnings;    # Because the 8 may be warned on
         eval 'qr/\18/';
         pass("qr/\18/ didn't loop");
     }
