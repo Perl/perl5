@@ -39,7 +39,7 @@ updates as described below.
 =item *
 
 To the best of our ability, we will attempt to fix critical issues
-n the two most recent stable 5.x release series'.  Fixes for the
+in the two most recent stable 5.x release series'.  Fixes for the
 current release series take precedence over fixes for the previous
 release series.
 
