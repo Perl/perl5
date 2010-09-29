@@ -497,6 +497,7 @@ anno4000\100lublin.zrz.tu-berlin.de     anno4000\100mailbox.tu-berlin.de
 +                                       siegel\100zrz.tu-berlin.de
 arnold\100gnu.ai.mit.edu                arnold\100emoryu2.arpa
 +                                       gatech!skeeve!arnold
+arodland\100cpan.org                    andrew\100hbslabs.com
 arussell\100cs.uml.edu                  adam\100adam-pc.(none)
 ash\100cpan.org                         ash_cpan\100firemirror.com
 avarab\100gmail.com                     avar\100cpan.org

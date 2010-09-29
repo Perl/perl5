@@ -4713,6 +4713,7 @@ t/re/qr.t			See if qr works
 t/re/reg_60508.t		See if bug #60508 is fixed
 t/re/reg_email.t		See if regex recursion works by parsing email addresses
 t/re/reg_email_thr.t		See if regex recursion works by parsing email addresses in another thread
+t/re/reg_eval.t			Test again regexp state corruption in (?{ }) and (??{ })
 t/re/regexp_noamp.t		See if regular expressions work with optimizations
 t/re/regexp_notrie.t		See if regular expressions work without trie optimisation
 t/re/regexp_qr_embed.t		See if regular expressions work with embedded qr//
