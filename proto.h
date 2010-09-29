@@ -120,10 +120,6 @@ PERL_CALLCONV void	Perl_set_context(void *t)
 	assert(t)
 
 
-END_EXTERN_C
-
-/* functions with flag 'n' should come before here */
-START_EXTERN_C
 PERL_CALLCONV bool	Perl_try_amagic_bin(pTHX_ int method, int flags);
 PERL_CALLCONV bool	Perl_try_amagic_un(pTHX_ int method, int flags);
 PERL_CALLCONV SV*	Perl_amagic_call(pTHX_ SV* left, SV* right, int method, int dir)
@@ -4473,8 +4469,6 @@ PERL_CALLCONV void	Perl_sv_nounlocking(pTHX_ SV *sv);
 #endif
 PERL_CALLCONV int	Perl_nothreadhook(pTHX);
 
-END_EXTERN_C
-
 #if defined(PERL_IN_DOOP_C)
 STATIC I32	S_do_trans_simple(pTHX_ SV * const sv)
 			__attribute__warn_unused_result__
@@ -6016,8 +6010,6 @@ STATIC SV*	S_swash_get(pTHX_ SV* swash, UV start, UV span)
 	assert(swash)
 
 #endif
-
-START_EXTERN_C
 
 PERL_CALLCONV void	Perl_sv_setsv_flags(pTHX_ SV *dstr, SV *sstr, const I32 flags)
 			__attribute__nonnull__(pTHX_1);

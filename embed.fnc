@@ -168,10 +168,6 @@ npR	|MEM_SIZE|malloc_good_size	|size_t nbytes
 AnpR	|void*	|get_context
 Anp	|void	|set_context	|NN void *t
 
-END_EXTERN_C
-
-/* functions with flag 'n' should come before here */
-START_EXTERN_C
 XEop	|bool	|try_amagic_bin	|int method|int flags
 XEop	|bool	|try_amagic_un	|int method|int flags
 Ap	|SV*	|amagic_call	|NN SV* left|NN SV* right|int method|int dir
@@ -1499,8 +1495,6 @@ Adpb	|void	|sv_nounlocking	|NULLOK SV *sv
 #endif
 Adp	|int	|nothreadhook
 
-END_EXTERN_C
-
 #if defined(PERL_IN_DOOP_C)
 sR	|I32	|do_trans_simple	|NN SV * const sv
 sR	|I32	|do_trans_count		|NN SV * const sv
@@ -1992,8 +1986,6 @@ sRn	|STRLEN	|is_utf8_char_slow|NN const U8 *s|const STRLEN len
 sR	|bool	|is_utf8_common	|NN const U8 *const p|NN SV **swash|NN const char * const swashname
 sR	|SV*	|swash_get	|NN SV* swash|UV start|UV span
 #endif
-
-START_EXTERN_C
 
 Apd	|void	|sv_setsv_flags	|NN SV *dstr|NULLOK SV *sstr|const I32 flags
 Apd	|void	|sv_catpvn_flags|NN SV *const dstr|NN const char *sstr|const STRLEN len \
