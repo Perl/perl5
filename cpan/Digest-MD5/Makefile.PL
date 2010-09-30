@@ -29,7 +29,9 @@ WriteMakefile(
 			'XSLoader' => 0,
 		      },
     'META_MERGE'   => {
-        repository => 'http://github.com/gisle/digest-md5',
+        resources  => {
+            repository => 'http://github.com/gisle/digest-md5',
+        }
     },
     'INSTALLDIRS'  => 'perl',
     @extra,
