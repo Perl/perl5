@@ -61,8 +61,6 @@
 #define cast_uv(a)		Perl_cast_uv(aTHX_ a)
 #ifndef PERL_IMPLICIT_CONTEXT
 #define ck_warner		Perl_ck_warner
-#endif
-#ifndef PERL_IMPLICIT_CONTEXT
 #define ck_warner_d		Perl_ck_warner_d
 #endif
 #define cop_hints_2hv(a)	Perl_cop_hints_2hv(aTHX_ a)
@@ -497,8 +495,6 @@
 #define sv_catpv_mg(a,b)	Perl_sv_catpv_mg(aTHX_ a,b)
 #ifndef PERL_IMPLICIT_CONTEXT
 #define sv_catpvf		Perl_sv_catpvf
-#endif
-#ifndef PERL_IMPLICIT_CONTEXT
 #define sv_catpvf_mg		Perl_sv_catpvf_mg
 #endif
 #define sv_catpvn_flags(a,b,c,d)	Perl_sv_catpvn_flags(aTHX_ a,b,c,d)
@@ -562,8 +558,6 @@
 #define sv_setpv_mg(a,b)	Perl_sv_setpv_mg(aTHX_ a,b)
 #ifndef PERL_IMPLICIT_CONTEXT
 #define sv_setpvf		Perl_sv_setpvf
-#endif
-#ifndef PERL_IMPLICIT_CONTEXT
 #define sv_setpvf_mg		Perl_sv_setpvf_mg
 #endif
 #define sv_setpviv(a,b)		Perl_sv_setpviv(aTHX_ a,b)

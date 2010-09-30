@@ -532,6 +532,14 @@ sub embed_h {
     # Prune empty #if/#endif pairs.
     while ($lines =~ s/#\s*if[^\n]+\n#\s*endif\n//) {
     }
+    # Merge adjacent blocks.
+    while ($lines =~ s/(#ifndef PERL_IMPLICIT_CONTEXT
+[^\n]+
+)#endif
+#ifndef PERL_IMPLICIT_CONTEXT
+/$1/) {
+    }
+
     print $em $lines;
     print $em "#endif\n" if $guard;
 }
