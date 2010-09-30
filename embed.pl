@@ -483,12 +483,13 @@ sub embed_h {
     my ($guard, $funcs) = @_;
     print $em "$guard\n" if $guard;
 
+    my $lines;
     foreach (@$funcs) {
 	if (@$_ == 1) {
 	    my $cond = $_->[0];
 	    # Indent the conditionals if we are wrapped in an #if/#endif pair.
 	    $cond =~ s/#(.*)/#  $1/ if $guard;
-	    print $em "$cond\n";
+	    $lines .= "$cond\n";
 	    next;
 	}
 	my $ret = "";
@@ -526,8 +527,12 @@ sub embed_h {
 		$ret .= $alist . ")\n";
 	    }
 	}
-	print $em $ret if $ret;
+	$lines .= $ret;
     }
+    # Prune empty #if/#endif pairs.
+    while ($lines =~ s/#\s*if[^\n]+\n#\s*endif\n//) {
+    }
+    print $em $lines;
     print $em "#endif\n" if $guard;
 }
 

@@ -651,17 +651,11 @@
 #define warner			Perl_warner
 #endif
 #define whichsig(a)		Perl_whichsig(aTHX_ a)
-#if !(defined(EBCDIC))
-#endif
 #if !(defined(HAS_SIGACTION) && defined(SA_SIGINFO))
 #define csighandler		Perl_csighandler
 #endif
 #if !(defined(NO_MATHOMS))
 #define sv_nounlocking(a)	Perl_sv_nounlocking(aTHX_ a)
-#endif
-#if !(defined(PERL_GLOBAL_STRUCT_PRIVATE))
-#  if defined(PERL_IMPLICIT_CONTEXT)
-#  endif
 #endif
 #if !(defined(PERL_MAD))
 #define newFORM(a,b,c)		Perl_newFORM(aTHX_ a,b,c)
@@ -676,16 +670,8 @@
 #if !defined(HAS_MEMSET)
 #define my_memset		Perl_my_memset
 #endif
-#if !defined(HAS_SIGNBIT)
-#endif
-#if !defined(HAS_STRLCAT)
-#endif
-#if !defined(HAS_STRLCPY)
-#endif
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
 #define my_chsize(a,b)		Perl_my_chsize(aTHX_ a,b)
-#endif
-#if !defined(SPRINTF_RETURNS_STRLEN)
 #endif
 #if (!defined(HAS_MEMCPY) && !defined(HAS_BCOPY)) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY) && !defined(HAS_SAFE_BCOPY))
 #define my_bcopy		Perl_my_bcopy
@@ -719,18 +705,10 @@
 #define my_ntohl(a)		Perl_my_ntohl(aTHX_ a)
 #define my_swap(a)		Perl_my_swap(aTHX_ a)
 #endif
-#if defined(NO_MATHOMS)
-#endif
-#if defined(PERL_DONT_CREATE_GVSV)
-#endif
 #if defined(PERL_GLOBAL_STRUCT)
 #define GetVars()		Perl_GetVars(aTHX)
 #define free_global_struct(a)	Perl_free_global_struct(aTHX_ a)
 #define init_global_struct()	Perl_init_global_struct(aTHX)
-#endif
-#if defined(PERL_GLOBAL_STRUCT_PRIVATE)
-#  if defined(PERL_IMPLICIT_CONTEXT)
-#  endif
 #endif
 #if defined(PERL_IMPLICIT_CONTEXT)
 #define croak_nocontext		Perl_croak_nocontext
@@ -748,10 +726,6 @@
 #define sv_setpvf_nocontext	Perl_sv_setpvf_nocontext
 #define warn_nocontext		Perl_warn_nocontext
 #define warner_nocontext	Perl_warner_nocontext
-#endif
-#if defined(PERL_IMPLICIT_SYS)
-#  if defined(USE_ITHREADS)
-#  endif
 #endif
 #if defined(PERL_MAD)
 #define newFORM(a,b,c)		Perl_newFORM(aTHX_ a,b,c)
@@ -1504,10 +1478,6 @@
 #define package(a)		Perl_package(aTHX_ a)
 #define utilize(a,b,c,d,e)	Perl_utilize(aTHX_ a,b,c,d,e)
 #  endif
-#  if !(defined(USE_ITHREADS))
-#    if defined(PERL_IN_OP_C)
-#    endif
-#  endif
 #  if !defined(HAS_GETENV_LEN)
 #define getenv_len(a,b)		Perl_getenv_len(aTHX_ a,b)
 #  endif
@@ -1535,10 +1505,6 @@
 #    if defined(PERL_IN_TOKE_C)
 #define add_utf16_textfilter(a,b)	S_add_utf16_textfilter(aTHX_ a,b)
 #define utf16_textfilter(a,b,c)	S_utf16_textfilter(aTHX_ a,b,c)
-#    endif
-#  endif
-#  if !defined(SETUID_SCRIPTS_ARE_SECURE_NOW)
-#    if defined(PERL_IN_PERL_C)
 #    endif
 #  endif
 #  if !defined(WIN32)
@@ -1588,10 +1554,6 @@
 #define Slab_to_rw(a)		S_Slab_to_rw(aTHX_ a)
 #      endif
 #    endif
-#    if defined(PL_OP_SLAB_ALLOC)
-#    endif
-#  endif
-#  if defined(PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION)
 #  endif
 #  if defined(PERL_IN_AV_C)
 #define get_aux_mg(a)		S_get_aux_mg(aTHX_ a)
@@ -1618,10 +1580,6 @@
 #define sequence(a)		S_sequence(aTHX_ a)
 #define sequence_num(a)		S_sequence_num(aTHX_ a)
 #define sequence_tail(a)	S_sequence_tail(aTHX_ a)
-#    if defined(PERL_MAD)
-#    endif
-#  endif
-#  if defined(PERL_IN_DUMP_C) || defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C)
 #  endif
 #  if defined(PERL_IN_GV_C)
 #define gv_get_super_pkg(a,b)	S_gv_get_super_pkg(aTHX_ a,b)
@@ -1629,8 +1587,6 @@
 #define gv_magicalize_isa(a,b,c)	S_gv_magicalize_isa(aTHX_ a,b,c)
 #define gv_magicalize_overload(a)	S_gv_magicalize_overload(aTHX_ a)
 #define require_tie_mod(a,b,c,d,e)	S_require_tie_mod(aTHX_ a,b,c,d,e)
-#  endif
-#  if defined(PERL_IN_GV_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_PAD_C) || defined(PERL_IN_OP_C)
 #  endif
 #  if defined(PERL_IN_HV_C)
 #define clear_placeholders(a,b)	S_clear_placeholders(aTHX_ a,b)
@@ -1646,8 +1602,6 @@
 #define save_hek_flags		S_save_hek_flags
 #define share_hek_flags(a,b,c,d)	S_share_hek_flags(aTHX_ a,b,c,d)
 #define unshare_hek_or_pvn(a,b,c,d)	S_unshare_hek_or_pvn(aTHX_ a,b,c,d)
-#  endif
-#  if defined(PERL_IN_HV_C) || defined(PERL_IN_MG_C) || defined(PERL_IN_SV_C)
 #  endif
 #  if defined(PERL_IN_LOCALE_C)
 #    if defined(USE_LOCALE_NUMERIC) || defined(USE_LOCALE_COLLATE)
@@ -1704,8 +1658,6 @@
 #define simplify_sort(a)	S_simplify_sort(aTHX_ a)
 #define too_few_arguments(a,b)	S_too_few_arguments(aTHX_ a,b)
 #define too_many_arguments(a,b)	S_too_many_arguments(aTHX_ a,b)
-#    if defined(USE_ITHREADS)
-#    endif
 #  endif
 #  if defined(PERL_IN_PAD_C)
 #define pad_add_name_sv(a,b,c,d)	S_pad_add_name_sv(aTHX_ a,b,c,d)
@@ -1735,8 +1687,6 @@
 #  if defined(PERL_IN_PP_C)
 #define do_delete_local()	S_do_delete_local(aTHX)
 #define refto(a)		S_refto(aTHX_ a)
-#  endif
-#  if defined(PERL_IN_PP_C) || defined(PERL_IN_PP_HOT_C)
 #  endif
 #  if defined(PERL_IN_PP_CTL_C)
 #define check_type_and_open(a)	S_check_type_and_open(aTHX_ a)
@@ -1795,8 +1745,6 @@
 #  if defined(PERL_IN_PP_SYS_C)
 #define doform(a,b,c)		S_doform(aTHX_ a,b,c)
 #define space_join_names_mortal(a)	S_space_join_names_mortal(aTHX_ a)
-#  endif
-#  if defined(PERL_IN_REGCOMP_C)
 #  endif
 #  if defined(PERL_IN_SCOPE_C)
 #define save_pushptri32ptr(a,b,c,d)	S_save_pushptri32ptr(aTHX_ a,b,c,d)
