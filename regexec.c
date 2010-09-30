@@ -3977,7 +3977,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		char *saved_regeol = PL_regeol;
 		struct re_save_state saved_state;
 
-		/* To not corrupt the existing regex state while executign the
+		/* To not corrupt the existing regex state while executing the
 		 * eval we would normally put it on the save stack, like with
 		 * save_re_context. However, re-evals have a weird scoping so we
 		 * can't just add ENTER/LEAVE here. With that, things like
