@@ -4273,8 +4273,8 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
     struct regexp *r;
     register regexp_internal *ri;
     STRLEN plen;
-    char  *exp = SvPV(pattern, plen);
-    char* xend = exp + plen;
+    char  *exp;
+    char* xend;
     regnode *scan;
     I32 flags;
     I32 minlen = 0;
@@ -4286,7 +4286,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
     RExC_state_t RExC_state;
     RExC_state_t * const pRExC_state = &RExC_state;
 #ifdef TRIE_STUDY_OPT    
-    int restudied= 0;
+    int restudied;
     RExC_state_t copyRExC_state;
 #endif    
     GET_RE_DEBUG_FLAGS_DECL;
@@ -4297,24 +4297,29 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
 
     RExC_utf8 = RExC_orig_utf8 = SvUTF8(pattern);
 
-    DEBUG_COMPILE_r({
-        SV *dsv= sv_newmortal();
-        RE_PV_QUOTED_DECL(s, RExC_utf8,
-            dsv, exp, plen, 60);
-        PerlIO_printf(Perl_debug_log, "%sCompiling REx%s %s\n",
-		       PL_colors[4],PL_colors[5],s);
-    });
 
     /* Longjmp back to here if have to switch in midstream to utf8 */
     if (! RExC_orig_utf8) {
 	JMPENV_PUSH(jump_ret);
     }
 
-    if (jump_ret != 0) {
+    if (jump_ret == 0) {    /* First time through */
+        exp = SvPV(pattern, plen);
+        xend = exp + plen;
+
+        DEBUG_COMPILE_r({
+            SV *dsv= sv_newmortal();
+            RE_PV_QUOTED_DECL(s, RExC_utf8,
+                dsv, exp, plen, 60);
+            PerlIO_printf(Perl_debug_log, "%sCompiling REx%s %s\n",
+                           PL_colors[4],PL_colors[5],s);
+        });
+    }
+    else {  /* longjumped back */
         STRLEN len = plen;
 
-        /* Here, we longjmped back.  If the cause was other than changing to
-         * utf8, pop our own setjmp, and longjmp to the correct handler */
+        /* If the cause for the longjmp was other than changing to utf8, pop
+         * our own setjmp, and longjmp to the correct handler */
 	if (jump_ret != UTF8_LONGJMP) {
 	    JMPENV_POP;
 	    JMPENV_JUMP(jump_ret);
@@ -4337,6 +4342,10 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
         RExC_orig_utf8 = RExC_utf8 = 1;
         SAVEFREEPV(exp);
     }
+
+#ifdef TRIE_STUDY_OPT
+    restudied = 0;
+#endif
 
     RExC_precomp = exp;
     RExC_flags = pm_flags;
