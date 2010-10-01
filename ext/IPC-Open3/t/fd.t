@@ -16,7 +16,7 @@ plan 1;
 {
   my $stderr = runperl(
      switches => ['-MIPC::Open3', '-w'],
-     prog => 'open3(q _<&1_, my $out, undef, $ENV{PERLEXE})',
+     prog => 'open3(q _<&1_, my $out, undef, $ENV{PERLEXE}, q_-e0_)',
      stderr => 1,
      stdin => '',
   );
