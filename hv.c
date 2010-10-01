@@ -1856,7 +1856,7 @@ Perl_hv_undef(pTHX_ HV *hv)
     DEBUG_A(Perl_hv_assert(aTHX_ hv));
     xhv = (XPVHV*)SvANY(hv);
 
-    if ((name = HvENAME_get(hv)) && !PL_dirty)
+    if ((name = HvENAME_get(hv)) && PL_phase != PERL_PHASE_DESTRUCT)
     {
         /* Delete the @ISA element before calling mro_package_moved, so it
            does not see it. */

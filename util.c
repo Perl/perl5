@@ -1116,7 +1116,7 @@ S_mess_alloc(pTHX)
     SV *sv;
     XPVMG *any;
 
-    if (!PL_dirty)
+    if (PL_phase != PERL_PHASE_DESTRUCT)
 	return newSVpvs_flags("", SVs_TEMP);
 
     if (PL_mess_sv)
@@ -1343,7 +1343,7 @@ Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
 			   line_mode ? "line" : "chunk",
 			   (IV)IoLINES(GvIOp(PL_last_in_gv)));
 	}
-	if (PL_dirty)
+	if (PL_phase == PERL_PHASE_DESTRUCT)
 	    sv_catpvs(sv, " during global destruction");
 	sv_catpvs(sv, ".\n");
     }

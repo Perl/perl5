@@ -754,7 +754,6 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_main_cv);
     PL_main_cv = NULL;
     PL_phase = PERL_PHASE_DESTRUCT;
-    PL_dirty = TRUE;
 
     /* Tell PerlIO we are about to tear things apart in case
        we have layers which are using resources that should

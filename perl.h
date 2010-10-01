@@ -4738,6 +4738,13 @@ EXTCONST char *const PL_phase_names[] = {
 EXTCONST char *const PL_phase_names[];
 #endif
 
+#ifndef PERL_CORE
+/* Do not use this macro. It only exists for extensions that rely on PL_dirty
+ * instead of using the newer PL_phase, which provides everything PL_dirty
+ * provided, and more. */
+#  define PL_dirty (PL_phase == PERL_PHASE_DESTRUCT)
+#endif /* !PERL_CORE */
+
 END_EXTERN_C
 
 /*****************************************************************************/

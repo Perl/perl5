@@ -118,7 +118,6 @@
 #define PL_delaymagic		(vTHX->Idelaymagic)
 #define PL_destroyhook		(vTHX->Idestroyhook)
 #define PL_diehook		(vTHX->Idiehook)
-#define PL_dirty		(vTHX->Idirty)
 #define PL_doswitches		(vTHX->Idoswitches)
 #define PL_dowarn		(vTHX->Idowarn)
 #define PL_dumper_fd		(vTHX->Idumper_fd)
@@ -449,7 +448,6 @@
 #define PL_Idelaymagic		PL_delaymagic
 #define PL_Idestroyhook		PL_destroyhook
 #define PL_Idiehook		PL_diehook
-#define PL_Idirty		PL_dirty
 #define PL_Idoswitches		PL_doswitches
 #define PL_Idowarn		PL_dowarn
 #define PL_Idumper_fd		PL_dumper_fd

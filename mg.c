@@ -1617,7 +1617,7 @@ Perl_magic_clearisa(pTHX_ SV *sv, MAGIC *mg)
     PERL_ARGS_ASSERT_MAGIC_CLEARISA;
 
     /* Bail out if destruction is going on */
-    if(PL_dirty) return 0;
+    if(PL_phase == PERL_PHASE_DESTRUCT) return 0;
 
     if (sv)
 	av_clear(MUTABLE_AV(sv));

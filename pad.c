@@ -277,7 +277,7 @@ Perl_pad_undef(pTHX_ CV* cv)
     /* XXX DAPM for efficiency, we should only do this if we know we have
      * children, or integrate this loop with general cleanup */
 
-    if (!PL_dirty) { /* don't bother during global destruction */
+    if (PL_phase != PERL_PHASE_DESTRUCT) { /* don't bother during global destruction */
 	CV * const outercv = CvOUTSIDE(cv);
         const U32 seq = CvOUTSIDE_SEQ(cv);
 	AV *  const comppad_name = MUTABLE_AV(AvARRAY(padlist)[0]);

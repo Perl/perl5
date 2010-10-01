@@ -2628,7 +2628,7 @@ Perl_gv_try_downgrade(pTHX_ GV *gv)
 
     /* XXX Why and where does this leave dangling pointers during global
        destruction? */
-    if (PL_dirty) return;
+    if (PL_phase == PERL_PHASE_DESTRUCT) return;
 
     if (!(SvREFCNT(gv) == 1 && SvTYPE(gv) == SVt_PVGV && !SvFAKE(gv) &&
 	    !SvOBJECT(gv) && !SvREADONLY(gv) &&

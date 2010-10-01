@@ -383,7 +383,11 @@ other_variables()
 		ppp_TESTVAR(PL_debstash);
 		ppp_TESTVAR(PL_defgv);
 		ppp_TESTVAR(PL_diehook);
+#if defined(PL_phase) || defined(PL_Iphase)
+		ppp_PARSERVAR_dummy;
+#else
 		ppp_TESTVAR(PL_dirty);
+#endif
 		ppp_TESTVAR(PL_dowarn);
 		ppp_TESTVAR(PL_errgv);
 		ppp_TESTVAR(PL_laststatval);

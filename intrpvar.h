@@ -248,8 +248,6 @@ PERLVAR(Iregmatch_state, regmatch_state *)
 PERLVAR(Idelaymagic,	U16)		/* ($<,$>) = ... */
 PERLVAR(Ilocalizing,	U8)		/* are we processing a local() list? */
 PERLVAR(Icolorset,	bool)		/* from regcomp.c */
-PERLVARI(Idirty,	bool, FALSE)	/* in the middle of tearing things
-					   down? */
 PERLVAR(Iin_eval,	U8)		/* trap "fatal" errors? */
 PERLVAR(Itainted,	bool)		/* using variables controlled by $< */
 
