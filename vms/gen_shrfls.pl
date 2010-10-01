@@ -35,11 +35,12 @@
 #
 # Author: Charles Bailey  bailey@newman.upenn.edu
 
+use strict;
 require 5.000;
 
-$debug = $ENV{'GEN_SHRFLS_DEBUG'};
+my $debug = $ENV{'GEN_SHRFLS_DEBUG'};
 
-print "gen_shrfls.pl Rev. 18-Dec-2003\n" if $debug;
+print "gen_shrfls.pl Rev. 30-Sep-2010\n" if $debug;
 
 if ($ARGV[0] eq '-f') {
   open(INP,$ARGV[1]) or die "Can't read input file $ARGV[1]: $!\n";
@@ -53,32 +54,34 @@ if ($ARGV[0] eq '-f') {
   print "Read input data | ",join(' | ',@ARGV)," |\n" if $debug > 1;
 }
 
-$cc_cmd = shift @ARGV;
+my $cc_cmd = shift @ARGV;
+my $cpp_file;
 
 # Someday, we'll have $GetSyI built into perl . . .
-$isvax = `\$ Write Sys\$Output \(F\$GetSyI(\"HW_MODEL\") .LE. 1024 .AND. F\$GetSyI(\"HW_MODEL\") .GT. 0\)`;
+my $isvax = `\$ Write Sys\$Output \(F\$GetSyI(\"HW_MODEL\") .LE. 1024 .AND. F\$GetSyI(\"HW_MODEL\") .GT. 0\)`;
 chomp $isvax;
 print "\$isvax: \\$isvax\\\n" if $debug;
 
-$isi64 = `\$ Write Sys\$Output \(F\$GetSyI(\"HW_MODEL\") .GE. 4096)`;
+my $isi64 = `\$ Write Sys\$Output \(F\$GetSyI(\"HW_MODEL\") .GE. 4096)`;
 chomp $isi64;
 print "\$isi64: \\$isi64\\\n" if $debug;
 
 print "Input \$cc_cmd: \\$cc_cmd\\\n" if $debug;
-$docc = ($cc_cmd !~ /^~~/);
+my $docc = ($cc_cmd !~ /^~~/);
 print "\$docc = $docc\n" if $debug;
+
+my ( $use_threads, $use_mymalloc, $care_about_case, $debugging_enabled, 
+     $hide_mymalloc, $isgcc, $use_perlio, $dir )
+   = ( 0, 0, 0, 0, 0, 0, 0, 0 );
 
 if ($docc) {
   if (-f 'perl.h') { $dir = '[]'; }
   elsif (-f '[-]perl.h') { $dir = '[-]'; }
   else { die "$0: Can't find perl.h\n"; }
 
-  $use_threads = $use_mymalloc = $case_about_case = $debugging_enabled = 0;
-  $hide_mymalloc = $isgcc = $use_perlio = 0;
-
   # Go see what is enabled in config.sh
-  $config = $dir . "config.sh";
-  open CONFIG, "< $config";
+  my $config = $dir . "config.sh";
+  open CONFIG, '<', $config;
   while(<CONFIG>) {
     $use_threads++ if /usethreads='(define|yes|true|t|y|1)'/i;
     $use_mymalloc++ if /usemymalloc='(define|yes|true|t|y|1)'/i;
@@ -91,11 +94,11 @@ if ($docc) {
   close CONFIG;
   
   # put quotes back onto defines - they were removed by DCL on the way in
-  if (($prefix,$defines,$suffix) =
+  if (my ($prefix,$defines,$suffix) =
          ($cc_cmd =~ m#(.*)/Define=(.*?)([/\s].*)#i)) {
     $defines =~ s/^\((.*)\)$/$1/;
     $debugging_enabled ||= $defines =~ /\bDEBUGGING\b/;
-    @defines = split(/,/,$defines);
+    my @defines = split(/,/,$defines);
     $cc_cmd = "$prefix/Define=(" . join(',',grep($_ = "\"$_\"",@defines)) 
               . ')' . $suffix;
   }
@@ -109,7 +112,7 @@ if ($docc) {
 
 }
 else { 
-  ($junk,$junk,$cpp_file,$cc_cmd) = split(/~~/,$cc_cmd,4);
+  (undef,undef,$cpp_file,$cc_cmd) = split(/~~/,$cc_cmd,4);
   $isgcc = $cc_cmd =~ /case_hack/i
            or 0;  # for nice debug output
   $debugging_enabled = $cc_cmd =~ /\bdebugging\b/i;
@@ -118,17 +121,19 @@ else {
   print "Not running cc, preprocesor output in \\$cpp_file\\\n" if $debug;
 }
 
-$objsuffix = shift @ARGV;
+my $objsuffix = shift @ARGV;
 print "\$objsuffix: \\$objsuffix\\\n" if $debug;
-$dbgprefix = shift @ARGV;
+my $dbgprefix = shift @ARGV;
 print "\$dbgprefix: \\$dbgprefix\\\n" if $debug;
-$olbsuffix = shift @ARGV;
+my $olbsuffix = shift @ARGV;
 print "\$olbsuffix: \\$olbsuffix\\\n" if $debug;
-$libperl = "${dbgprefix}libperl$olbsuffix";
-$extnames = shift @ARGV;
+my $libperl = "${dbgprefix}libperl$olbsuffix";
+my $extnames = shift @ARGV;
 print "\$extnames: \\$extnames\\\n" if $debug;
-$rtlopt = shift @ARGV;
+my $rtlopt = shift @ARGV;
 print "\$rtlopt: \\$rtlopt\\\n" if $debug;
+
+my (%vars, %cvars, %fcns);
 
 sub scan_var {
   my($line) = @_;
@@ -150,7 +155,7 @@ sub scan_var {
 }
 
 sub scan_func {
-  my @lines = split /;/, @_[0];
+  my @lines = split /;/, $_[0];
 
   for my $line (@lines) {
     print "\tchecking for global routine\n" if $debug > 1;
@@ -175,12 +180,12 @@ if ($use_mymalloc) {
   $fcns{'Perl_mfree'}++;
 }
 
-$used_expectation_enum = $used_opcode_enum = 0; # avoid warnings
+my ($used_expectation_enum, $used_opcode_enum) = (0, 0); # avoid warnings
 if ($docc) {
   1 while unlink 'perlincludes.tmp';
   END { 1 while unlink 'perlincludes.tmp'; }  # and clean up after
 
-  open(PERLINC, '>perlincludes.tmp') or die "Couldn't open 'perlincludes.tmp' $!";
+  open(PERLINC, '>', 'perlincludes.tmp') or die "Couldn't open 'perlincludes.tmp' $!";
 
   print PERLINC qq/#include "${dir}perl.h"\n/;
   print PERLINC qq/#include "${dir}perlapi.h"\n/; 
@@ -188,7 +193,7 @@ if ($docc) {
   print PERLINC qq/#include "${dir}regcomp.h"\n/;
 
   close PERLINC;
-  $preprocess_list = 'perlincludes.tmp';
+  my $preprocess_list = 'perlincludes.tmp';
 
   open(CPP,"${cc_cmd}/NoObj/PreProc=Sys\$Output $preprocess_list|")
     or die "$0: Can't preprocess $preprocess_list: $!\n";
@@ -196,9 +201,9 @@ if ($docc) {
 else {
   open(CPP,"$cpp_file") or die "$0: Can't read preprocessed file $cpp_file: $!\n";
 }
-%checkh = map { $_,1 } qw( bytecode byterun intrpvar perlapi perlio perliol 
+my %checkh = map { $_,1 } qw( bytecode byterun intrpvar perlapi perlio perliol 
                            perlvars proto regcomp thrdvar thread );
-$ckfunc = 0;
+my $ckfunc = 0;
 LINE: while (<CPP>) {
   while (/^#.*vmsish\.h/i .. /^#.*perl\.h/i) {
     while (/__VMS_PROTOTYPES__/i .. /__VMS_SEPYTOTORP__/i) {
@@ -218,6 +223,7 @@ LINE: while (<CPP>) {
     last LINE unless defined($_ = <CPP>);
   }
   # Check for transition to new header file
+  my $scanname;
   if (/^# \d+ "(\S+)"/) {
     my $spec = $1;
     # Pull name from library module or header filespec
@@ -243,7 +249,7 @@ while (<DATA>) {
   next if /^#/;
   s/\s+#.*\n//;
   next if /^\s*$/;
-  ($key,$array) = split('=',$_);
+  my ($key,$array) = split('=',$_);
   if ($array eq 'vars') { $key = "PL_$key";   }
   else                  { $key = "Perl_$key"; }
   print "Adding $key to \%$array list\n" if $debug > 1;
@@ -260,11 +266,11 @@ foreach (split /\s+/, $extnames) {
 # Eventually, we'll check against existing copies here, so we can add new
 # symbols to an existing options file in an upwardly-compatible manner.
 
-$marord++;
-open(OPTBLD,">${dir}${dbgprefix}perlshr_bld.opt")
+my $marord = 1;
+open(OPTBLD,'>', "${dir}${dbgprefix}perlshr_bld.opt")
   or die "$0: Can't write to ${dir}${dbgprefix}perlshr_bld.opt: $!\n";
 if ($isvax) {
-  open(MAR,">${dir}perlshr_gbl${marord}.mar")
+  open(MAR, '>', "${dir}perlshr_gbl${marord}.mar")
     or die "$0: Can't write to ${dir}perlshr_gbl${marord}.mar: $!\n";
   print MAR "\t.title perlshr_gbl$marord\n";
 }
@@ -280,7 +286,8 @@ unless ($isgcc) {
   }
 }
 print OPTBLD "case_sensitive=yes\n" if $care_about_case;
-foreach $var (sort (keys %vars,keys %cvars)) {
+my $count = 0;
+foreach my $var (sort (keys %vars,keys %cvars)) {
   if ($isvax) { print OPTBLD "UNIVERSAL=$var\n"; }
   else { print OPTBLD "SYMBOL_VECTOR=($var=DATA)\n"; }
   # This hack brought to you by the lack of a globaldef in gcc.
@@ -289,7 +296,7 @@ foreach $var (sort (keys %vars,keys %cvars)) {
       print MAR "\t.end\n";
       close MAR;
       $marord++;
-      open(MAR,">${dir}perlshr_gbl${marord}.mar")
+      open(MAR, '>', "${dir}perlshr_gbl${marord}.mar")
         or die "$0: Can't write to ${dir}perlshr_gbl${marord}.mar: $!\n";
       print MAR "\t.title perlshr_gbl$marord\n";
       $count = 0;
@@ -300,7 +307,7 @@ foreach $var (sort (keys %vars,keys %cvars)) {
 }
 
 print MAR "\t.psect \$transfer_vec,pic,rd,nowrt,exe,shr\n" if ($isvax);
-foreach $func (sort keys %fcns) {
+foreach my $func (sort keys %fcns) {
   if ($isvax) {
     print MAR "\t.transfer $func\n";
     print MAR "\t.mask $func\n";
@@ -313,13 +320,13 @@ if ($isvax) {
   close MAR;
 }
 
-open(OPTATTR,">${dir}perlshr_attr.opt")
+open(OPTATTR, '>', "${dir}perlshr_attr.opt")
   or die "$0: Can't write to ${dir}perlshr_attr.opt: $!\n";
 if ($isgcc) {
-  foreach $var (sort keys %cvars) {
+  foreach my $var (sort keys %cvars) {
     print OPTATTR "PSECT_ATTR=${var},PIC,OVR,RD,NOEXE,NOWRT,SHR\n";
   }
-  foreach $var (sort keys %vars) {
+  foreach my $var (sort keys %vars) {
     print OPTATTR "PSECT_ATTR=${var},PIC,OVR,RD,NOEXE,WRT,NOSHR\n";
   }
 }
@@ -328,10 +335,11 @@ else {
 }
 close OPTATTR;
 
-$incstr = 'PERL,GLOBALS';
+my $incstr = 'PERL,GLOBALS';
+my (@symfiles, $drvrname);
 if ($isvax) {
   $drvrname = "Compile_shrmars.tmp_".time;
-  open (DRVR,">$drvrname") or die "$0: Can't write to $drvrname: $!\n";
+  open (DRVR,'>', $drvrname) or die "$0: Can't write to $drvrname: $!\n";
   print DRVR "\$ Set NoOn\n";  
   print DRVR "\$ Delete/NoLog/NoConfirm $drvrname;\n";
   print DRVR "\$ old_proc_vfy = F\$Environment(\"VERIFY_PROCEDURE\")\n";
@@ -362,9 +370,9 @@ if ($ENV{PERLSHR_USE_GSMATCH}) {
     # Build up a major ID. Since it can only be 8 bits, we encode the version
     # number in the top four bits and use the bottom four for build options
     # that'll cause incompatibilities
-    ($ver, $sub) = $] =~ /\.(\d\d\d)(\d\d)/;
+    my ($ver, $sub) = $] =~ /\.(\d\d\d)(\d\d)/;
     $ver += 0; $sub += 0;
-    $gsmatch = ($sub >= 50) ? "equal" : "lequal"; # Force an equal match for
+    my $gsmatch = ($sub >= 50) ? "equal" : "lequal"; # Force an equal match for
 						  # dev, but be more forgiving
 						  # for releases
 
