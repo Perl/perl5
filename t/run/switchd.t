@@ -7,9 +7,9 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-# This test depends on t/lib/Devel/switchd.pm.
+# This test depends on t/lib/Devel/switchd*.pm.
 
-plan(tests => 3);
+plan(tests => 4);
 
 my $r;
 
@@ -56,4 +56,19 @@ cmp_ok(
  '>',
   0,
  'The debugger can see the lines of the main program under #!perl -d',
+);
+
+# [perl #48332]
+like(
+  runperl(
+   switches => [ '-Ilib', '-d:switchd_empty' ],
+   progs    => [
+    'sub foo { print qq _1\n_ }',
+    '*old_foo = \&foo;',
+    '*foo = sub { print qq _2\n_ };',
+    'old_foo(); foo();',
+   ],
+  ),
+  qr "1\r?\n2\r?\n",
+ 'Subroutine redefinition works in the debugger [perl #48332]',
 );

@@ -4413,6 +4413,7 @@ t/lib/cygwin.t			Builtin cygwin function tests
 t/lib/deprecate/Deprecated.pm	Deprecated module to test deprecate.pm
 t/lib/deprecate/Optionally.pm	Optionally deprecated module to test deprecate.pm
 t/lib/deprecate.t		Test deprecate.pm
+t/lib/Devel/switchd_empty.pm	Module for t/run/switchd.t
 t/lib/Devel/switchd.pm		Module for t/run/switchd.t
 t/lib/feature/bundle		Tests for feature bundles
 t/lib/feature/implicit		Tests for implicit loading of feature.pm

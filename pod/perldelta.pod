@@ -645,6 +645,11 @@ This bug was introduced in version 5.13.5 and did not affect earlier
 versions
 L<[perl #78058]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78058>.
 
+=item *
+
+Subroutine redefinition works once more in the debugger
+L<[perl #48332]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=48332>.
+
 =back
 
 =head1 Known Problems

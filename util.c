@@ -6526,13 +6526,17 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
     PL_tainted = FALSE;
     save_item(dbsv);
     if (!PERLDB_SUB_NN) {
-	GV * const gv = CvGV(cv);
+	GV *gv = CvGV(cv);
 
 	if ( svp && ((CvFLAGS(cv) & (CVf_ANON | CVf_CLONED))
 	     || strEQ(GvNAME(gv), "END")
 	     || ((GvCV(gv) != cv) && /* Could be imported, and old sub redefined. */
 		 !( (SvTYPE(*svp) == SVt_PVGV)
-		    && (GvCV((const GV *)*svp) == cv) )))) {
+		    && (GvCV((const GV *)*svp) == cv)
+		    && (gv = (GV *)*svp) 
+		  )
+		)
+	)) {
 	    /* Use GV from the stack as a fallback. */
 	    /* GV is potentially non-unique, or contain different CV. */
 	    SV * const tmp = newRV(MUTABLE_SV(cv));
