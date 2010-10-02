@@ -80,12 +80,6 @@ static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
 #  define validate_suid(validarg, scriptname, fdscript, suidscript, linestr_sv, rsfp) S_validate_suid(aTHX_ rsfp)
 #endif
 
-#define CALL_BODY_EVAL(myop) \
-    if (PL_op == (myop)) \
-	PL_op = PL_ppaddr[OP_ENTEREVAL](aTHX); \
-    if (PL_op) \
-	CALLRUNOPS(aTHX);
-
 #define CALL_BODY_SUB(myop) \
     if (PL_op == (myop)) \
 	PL_op = PL_ppaddr[OP_ENTERSUB](aTHX); \
@@ -2715,7 +2709,11 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     switch (ret) {
     case 0:
  redo_body:
-	CALL_BODY_EVAL((OP*)&myop);
+	assert(PL_op == (OP*)(&myop));
+	PL_op = PL_ppaddr[OP_ENTEREVAL](aTHX);
+	if (!PL_op)
+	    goto fail; /* failed in compilation */
+	CALLRUNOPS(aTHX);
 	retval = PL_stack_sp - (PL_stack_base + oldmark);
 	if (!(flags & G_KEEPERR)) {
 	    CLEAR_ERRSV();
@@ -2738,6 +2736,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 	    PL_restartop = 0;
 	    goto redo_body;
 	}
+      fail:
 	PL_stack_sp = PL_stack_base + oldmark;
 	if ((flags & G_WANT) == G_ARRAY)
 	    retval = 0;
