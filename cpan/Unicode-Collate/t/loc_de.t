@@ -4,7 +4,7 @@ use warnings;
 use Unicode::Collate::Locale;
 
 use Test;
-plan tests => 20;
+plan tests => 32;
 
 my $auml = pack 'U', 0xE4;
 my $Auml = pack 'U', 0xC4;
@@ -48,4 +48,23 @@ ok($objDe->gt("O\x{308}", "O"));
 ok($objDe->gt("u\x{308}", "u"));
 ok($objDe->gt("U\x{308}", "U"));
 
-# 20
+ok($objDe->eq("a\x{308}", "A\x{308}"));
+ok($objDe->eq("o\x{308}", "O\x{308}"));
+ok($objDe->eq("u\x{308}", "U\x{308}"));
+
+# 23
+
+$objDe->change(level => 3);
+
+ok($objDe->lt("a\x{308}", "A\x{308}"));
+ok($objDe->lt("o\x{308}", "O\x{308}"));
+ok($objDe->lt("u\x{308}", "U\x{308}"));
+
+ok($objDe->eq("a\x{308}", $auml));
+ok($objDe->eq("A\x{308}", $Auml));
+ok($objDe->eq("o\x{308}", $ouml));
+ok($objDe->eq("O\x{308}", $Ouml));
+ok($objDe->eq("u\x{308}", $uuml));
+ok($objDe->eq("U\x{308}", $Uuml));
+
+# 32

@@ -4,7 +4,7 @@ use warnings;
 use Unicode::Collate::Locale;
 
 use Test;
-plan tests => 53;
+plan tests => 61;
 
 my $objEt = Unicode::Collate::Locale->
     new(locale => 'ET', normalization => undef);
@@ -62,14 +62,25 @@ ok($objEt->eq("o\x{303}", pack('U', 0xF5)));
 ok($objEt->eq("O\x{303}", pack('U', 0xD5)));
 ok($objEt->eq("a\x{308}", pack('U', 0xE4)));
 ok($objEt->eq("A\x{308}", pack('U', 0xC4)));
-ok($objEt->eq("a\x{308}\x{304}", "\x{1DF}"));
-ok($objEt->eq("A\x{308}\x{304}", "\x{1DE}"));
 ok($objEt->eq("o\x{308}", pack('U', 0xF6)));
 ok($objEt->eq("O\x{308}", pack('U', 0xD6)));
-ok($objEt->eq("o\x{308}\x{304}", "\x{22B}"));
-ok($objEt->eq("O\x{308}\x{304}", "\x{22A}"));
 ok($objEt->eq("u\x{308}", pack('U', 0xFC)));
 ok($objEt->eq("U\x{308}", pack('U', 0xDC)));
+
+# 41
+
+ok($objEt->eq("o\x{303}\x{301}","\x{1E4D}"));
+ok($objEt->eq("O\x{303}\x{301}","\x{1E4C}"));
+ok($objEt->eq("o\x{303}\x{304}", "\x{22D}"));
+ok($objEt->eq("O\x{303}\x{304}", "\x{22C}"));
+ok($objEt->eq("o\x{303}\x{308}","\x{1E4F}"));
+ok($objEt->eq("O\x{303}\x{308}","\x{1E4E}"));
+ok($objEt->eq("o\x{303}\x{31B}","\x{1EE1}"));
+ok($objEt->eq("O\x{303}\x{31B}","\x{1EE0}"));
+ok($objEt->eq("a\x{308}\x{304}", "\x{1DF}"));
+ok($objEt->eq("A\x{308}\x{304}", "\x{1DE}"));
+ok($objEt->eq("o\x{308}\x{304}", "\x{22B}"));
+ok($objEt->eq("O\x{308}\x{304}", "\x{22A}"));
 ok($objEt->eq("u\x{308}\x{300}", "\x{1DC}"));
 ok($objEt->eq("U\x{308}\x{300}", "\x{1DB}"));
 ok($objEt->eq("u\x{308}\x{301}", "\x{1D8}"));
@@ -79,4 +90,4 @@ ok($objEt->eq("U\x{308}\x{304}", "\x{1D5}"));
 ok($objEt->eq("u\x{308}\x{30C}", "\x{1DA}"));
 ok($objEt->eq("U\x{308}\x{30C}", "\x{1D9}"));
 
-# 53
+# 61

@@ -31,7 +31,7 @@ ok($objNb->getlocale, 'nb');
 
 $objNb->change(level => 1);
 
-ok($objNb->lt("z", $ae));
+ok($objNb->lt('z', $ae));
 ok($objNb->lt($ae, $ostk));
 ok($objNb->lt($ostk, $arng));
 ok($objNb->lt($arng, "\x{292}"));
@@ -42,8 +42,7 @@ ok($objNb->eq('d', "\x{111}"));
 ok($objNb->eq("\x{111}", $eth));
 ok($objNb->eq('y', $uuml));
 ok($objNb->eq($uuml, "\x{171}"));
-
-ok($objNb->eq($ae,   $auml));
+ok($objNb->eq($ae, $auml));
 ok($objNb->eq($auml, "\x{119}"));
 ok($objNb->eq($ostk, $ouml));
 ok($objNb->eq($ouml, "\x{151}"));
@@ -57,8 +56,7 @@ ok($objNb->lt('d', "\x{111}"));
 ok($objNb->lt("\x{111}", $eth));
 ok($objNb->lt('y', $uuml));
 ok($objNb->lt($uuml, "\x{171}"));
-
-ok($objNb->lt($ae,   $auml));
+ok($objNb->lt($ae, $auml));
 ok($objNb->lt($auml, "\x{119}"));
 ok($objNb->lt($ostk, $ouml));
 ok($objNb->lt($ouml, "\x{151}"));

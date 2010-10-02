@@ -4,7 +4,7 @@ use warnings;
 use Unicode::Collate::Locale;
 
 use Test;
-plan tests => 27;
+plan tests => 33;
 
 my $objYo = Unicode::Collate::Locale->
     new(locale => 'YO', normalization => undef);
@@ -53,4 +53,11 @@ ok($objYo->eq("O\x{323}", "\x{1ECC}"));
 ok($objYo->eq("s\x{323}", "\x{1E63}"));
 ok($objYo->eq("S\x{323}", "\x{1E62}"));
 
-# 27
+ok($objYo->eq("e\x{323}\x{302}", "\x{1EC7}"));
+ok($objYo->eq("E\x{323}\x{302}", "\x{1EC6}"));
+ok($objYo->eq("o\x{323}\x{302}", "\x{1ED9}"));
+ok($objYo->eq("O\x{323}\x{302}", "\x{1ED8}"));
+ok($objYo->eq("o\x{323}\x{31B}", "\x{1EE3}"));
+ok($objYo->eq("O\x{323}\x{31B}", "\x{1EE2}"));
+
+# 33

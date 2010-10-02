@@ -272,7 +272,9 @@ C<threads> has been upgrade from version 1.77_03 to 1.81
 
 =item *
 
-C<Unicode::Collate> has been upgraded from version 0.59 to 0.60
+C<Unicode::Collate> has been upgraded from version 0.59 to 0.61
+
+U::C::Locale newly supports locales: de__phonebook, nso, om, tn, vi, hr, ig, sq
 
 =item *
 

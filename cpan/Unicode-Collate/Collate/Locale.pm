@@ -4,7 +4,7 @@ use strict;
 use Carp;
 use base qw(Unicode::Collate);
 
-our $VERSION = '0.60';
+our $VERSION = '0.61';
 
 use File::Spec;
 
@@ -13,8 +13,8 @@ my $KeyPath = File::Spec->catfile('allkeys.txt');
 my $PL_EXT  = '.pl';
 
 my %LocaleFile = map { ($_, $_) } qw(
-   af az ca cs cy da eo es et fi fil fo fr ha haw
-   is kl lt lv mt nn nso om pl ro sk sl sv sw tn tr vi wo yo
+   af az ca cs cy da eo es et fi fil fo fr ha haw hr ig is kl
+   lt lv mt nn nso om pl ro sk sl sq sv sw tn tr vi wo yo
 );
    $LocaleFile{'default'}         = '';
    $LocaleFile{'de__phonebook'}   = 'de_phone';
@@ -172,6 +172,8 @@ this method returns a string C<'default'> meaning no special tailoring.
       fr                French
       ha                Hausa
       haw               Hawaiian
+      hr                Croatian
+      ig                Igbo
       is                Icelandic
       kl                Kalaallisut
       lt                Lithuanian
@@ -185,6 +187,7 @@ this method returns a string C<'default'> meaning no special tailoring.
       ro                Romanian
       sk                Slovak
       sl                Slovenian
+      sq                Albanian
       sv                Swedish
       sw                Swahili
       tn                Tswana
@@ -209,8 +212,9 @@ Tests for Unicode::Collate::Locale are named F<t/loc_*.t>.
 If a certain letter is tailored, its equivalents are not always
 tailored as well as it. For example, even though W is tailored,
 fullwidth W (C<U+FF37>), W with acute (C<U+1E82>), etc. are not
-tailored. Thus the result may depend on whether source strings
-are normalized or not.
+tailored. The result may depend on whether source strings are
+normalized or not, and whether decomposed or composed.
+Thus C<(normalization =E<gt> undef> is less preferred.
 
 =back
 

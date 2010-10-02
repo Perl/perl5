@@ -6,8 +6,8 @@ use Unicode::Collate::Locale;
 use Test;
 plan tests => 26;
 
-my $ae   = pack 'U', 0xE6;
-my $AE   = pack 'U', 0xC6;
+my $ae = pack 'U', 0xE6;
+my $AE = pack 'U', 0xC6;
 
 my $objFr = Unicode::Collate::Locale->
     new(locale => 'FR', normalization => undef);
