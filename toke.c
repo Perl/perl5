@@ -3513,19 +3513,10 @@ S_intuit_more(pTHX_ register char *s)
 
     /* In a pattern, so maybe we have {n,m}. */
     if (*s == '{') {
-	s++;
-	if (!isDIGIT(*s))
-	    return TRUE;
-	while (isDIGIT(*s))
-	    s++;
-	if (*s == ',')
-	    s++;
-	while (isDIGIT(*s))
-	    s++;
-	if (*s == '}')
+	if (regcurly(s)) {
 	    return FALSE;
+	}
 	return TRUE;
-	
     }
 
     /* On the other hand, maybe we have a character class */
