@@ -261,7 +261,7 @@ either on the way in or the way out.
 If you have to encode a string yourself, remember that you should
 never try to encode an already-composed URI. You need to escape the
 components separately then put them together. To encode a string, you
-can use the the C<URI::Escape> module. The C<uri_escape> function
+can use the C<URI::Escape> module. The C<uri_escape> function
 returns the escaped string:
 
 	my $original = "Colon : Hash # Percent %";
