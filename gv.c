@@ -2593,6 +2593,11 @@ Perl_gv_try_downgrade(pTHX_ GV *gv)
     HEK *namehek;
     SV **gvp;
     PERL_ARGS_ASSERT_GV_TRY_DOWNGRADE;
+
+    /* XXX Why and where does this leave dangling pointers during global
+       destruction? */
+    if (PL_dirty) return;
+
     if (!(SvREFCNT(gv) == 1 && SvTYPE(gv) == SVt_PVGV && !SvFAKE(gv) &&
 	    !SvOBJECT(gv) && !SvREADONLY(gv) &&
 	    isGV_with_GP(gv) && GvGP(gv) &&
