@@ -887,7 +887,14 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
  * both the first and last digit, since neither can hold all values from
  * 0..9; but for calculating the value we must examine those two digits.
  */
-#define MAX_SIG_DIGITS (NV_DIG+2)
+#ifdef MAX_SIG_DIG_PLUS
+    /* It is not necessarily the case that adding 2 to NV_DIG gets all the
+       possible digits in a NV, especially if NVs are not IEEE compliant
+       (e.g., long doubles on IRIX) - Allen <allens@cpan.org> */
+# define MAX_SIG_DIGITS (NV_DIG+MAX_SIG_DIG_PLUS)
+#else
+# define MAX_SIG_DIGITS (NV_DIG+2)
+#endif
 
 /* the max number we can accumulate in a UV, and still safely do 10*N+9 */
 #define MAX_ACCUMULATE ( (UV) ((UV_MAX - 9)/10))
