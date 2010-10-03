@@ -2710,10 +2710,11 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     switch (ret) {
     case 0:
  redo_body:
-	assert(PL_op == (OP*)(&myop));
-	PL_op = PL_ppaddr[OP_ENTEREVAL](aTHX);
-	if (!PL_op)
-	    goto fail; /* failed in compilation */
+	if (PL_op == (OP*)(&myop)) {
+	    PL_op = PL_ppaddr[OP_ENTEREVAL](aTHX);
+	    if (!PL_op)
+		goto fail; /* failed in compilation */
+	}
 	CALLRUNOPS(aTHX);
 	retval = PL_stack_sp - (PL_stack_base + oldmark);
 	if (!(flags & G_KEEPERR)) {
