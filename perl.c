@@ -2661,7 +2661,8 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 /*
 =for apidoc p||eval_sv
 
-Tells Perl to C<eval> the string in the SV.
+Tells Perl to C<eval> the string in the SV. It supports the same flags
+as C<call_sv>, with the obvious exception of G_EVAL. See L<perlcall>.
 
 =cut
 */

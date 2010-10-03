@@ -336,8 +336,9 @@ It may also be useful to do this with code for C<__DIE__> or C<__WARN__>
 hooks, and C<tie> functions.
 
 The G_KEEPERR flag is meant to be used in conjunction with G_EVAL in
-I<call_*> functions that are used to implement such code.  This flag
-has no effect when G_EVAL is not used.
+I<call_*> functions that are used to implement such code, or with
+C<eval_sv>.  This flag has no effect on the C<call_*> functions when
+G_EVAL is not used.
 
 When G_KEEPERR is used, any error in the called code will terminate the
 call as usual, and the error will not propagate beyond the call (as usual
@@ -345,6 +346,9 @@ for G_EVAL), but it will not go into C<$@>.  Instead the error will be
 converted into a warning, prefixed with the string "\t(in cleanup)".
 This can be disabled using C<no warnings 'misc'>.  If there is no error,
 C<$@> will not be cleared.
+
+Note that the G_KEEPERR flag does not propagate into inner evals; these
+may still set C<$@>.
 
 The G_KEEPERR flag was introduced in Perl version 5.002.
 
