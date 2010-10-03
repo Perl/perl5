@@ -555,7 +555,7 @@ splintfiles = $(c1)
 .c.s:
 	$(CCCMDSRC) -S $*.c
 
-all: $(FIRSTMAKEFILE) $(MINIPERL_EXE) miniperl $(generated_pods) $(private) $(unidatafiles) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
+all: $(FIRSTMAKEFILE) $(MINIPERL_EXE) $(generated_pods) $(private) $(unidatafiles) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
 	@echo " ";
 	@echo "	Everything is up to date. Type '$(MAKE) test' to run test suite."
 
