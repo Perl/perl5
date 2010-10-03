@@ -549,7 +549,7 @@ generator>.
 
 The position of a character in a character set encoding.  The character
 C<NULL> is almost certainly at the zeroth position in all character
-sets, so it's code point is 0.  The code point for the C<SPACE>
+sets, so its code point is 0.  The code point for the C<SPACE>
 character in the ASCII character set is 0x20, or 32 decimal; in EBCDIC
 it is 0x40, or 64 decimal.  The L<ord|perlfunc/ord> function returns
 the code point of a character.
