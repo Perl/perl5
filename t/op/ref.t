@@ -3,13 +3,13 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = qw(. ../lib);
+    require 'test.pl';
 }
 
-require 'test.pl';
 use strict qw(refs subs);
 use re ();
 
-plan(197);
+plan(198);
 
 # Test glob operations.
 
@@ -119,6 +119,15 @@ is (join(':',@{$spring2{"foo"}}), "1:2:3:4");
     $subref = \&mysub;
     &$subref;
     is ($called, 1);
+}
+
+# Test references to return values of operators (TARGs/PADTMPs)
+{
+    my @refs;
+    for("a", "b") {
+        push @refs, \"$_"
+    }
+    is join(" ", map $$_, @refs), "a b", 'refgen+PADTMP';
 }
 
 $subrefref = \\&mysub2;
