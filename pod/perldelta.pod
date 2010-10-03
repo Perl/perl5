@@ -472,6 +472,12 @@ L</Modules and Pragmata> section.
 
 =over 4
 
+=item IRIX
+
+Conversion of strings to floating-point numbers is now more accurate on
+IRIX systems
+L<[perl #32380]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=32380>.
+
 =item Mac OS X
 
 Early versions of Mac OS X (Darwin) had buggy implementations of the
@@ -481,6 +487,11 @@ would pretend they did not exist.
 These functions are now recognised on Mac OS 10.5 (Leopard; Darwin 9) and
 higher, as they have been fixed
 L<[perl #72990]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=72990>.
+
+=item OpenVOS
+
+perl now builds again with OpenVOS (formerly known as Stratus VOS)
+L<[perl #78132]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=78132>.
 
 =item Windows
 
