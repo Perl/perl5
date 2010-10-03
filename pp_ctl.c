@@ -1577,8 +1577,14 @@ Perl_qerror(pTHX_ SV *err)
 
     PERL_ARGS_ASSERT_QERROR;
 
-    if (PL_in_eval)
-	sv_catsv(ERRSV, err);
+    if (PL_in_eval) {
+	if (PL_in_eval & EVAL_KEEPERR) {
+		Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "\t(in cleanup) %s",
+			       SvPV_nolen_const(err));
+	}
+	else
+	    sv_catsv(ERRSV, err);
+    }
     else if (PL_errors)
 	sv_catsv(PL_errors, err);
     else

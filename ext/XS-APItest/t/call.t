@@ -11,7 +11,7 @@ use strict;
 
 BEGIN {
     require '../../t/test.pl';
-    plan(392);
+    plan(435);
     use_ok('XS::APItest')
 };
 
@@ -200,7 +200,7 @@ sub f99 { 99 };
 for my $fn_type (0..2) { #   0:eval_pv   1:eval_sv   2:call_sv
 
     my $warn_msg;
-    local $SIG{__WARN__} = sub { $warn_msg = $_[0] };
+    local $SIG{__WARN__} = sub { $warn_msg .= $_[0] };
 
     for my $code_type (0..3) {
 
@@ -215,7 +215,6 @@ for my $fn_type (0..2) { #   0:eval_pv   1:eval_sv   2:call_sv
 	)[$code_type];
 
 	for my $keep (0, G_KEEPERR) {
-	    next if $keep == G_KEEPERR; # XXX not fixed yet
 	    my $keep_desc = $keep ? 'G_KEEPERR' : '0';
 
 	    my $desc;
@@ -255,7 +254,10 @@ for my $fn_type (0..2) { #   0:eval_pv   1:eval_sv   2:call_sv
 	    is($ret[-1], $expect, "$desc - return value");
 
 	    if ($keep && $fn_type != 0) {
-		is($@, 'pre-err', "$desc - \$@ unmodified");
+		# G_KEEPERR doesn't propagate into inner evals, requires etc
+		unless ($keep && $code_type == 2) {
+		    is($@, 'pre-err', "$desc - \$@ unmodified");
+		}
 		$@ = $warn_msg;
 	    }
 	    else {
