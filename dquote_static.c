@@ -32,10 +32,11 @@ regcurly(register const char *s)
 	return FALSE;
     while (isDIGIT(*s))
 	s++;
-    if (*s == ',')
+    if (*s == ',') {
 	s++;
-    while (isDIGIT(*s))
-	s++;
+	while (isDIGIT(*s))
+	    s++;
+    }
     if (*s != '}')
 	return FALSE;
     return TRUE;
