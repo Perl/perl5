@@ -4750,6 +4750,8 @@ t/re/subst_wamp.t		See if substitution works with $& present
 t/re/uniprops.t			Test unicode \p{} regex constructs
 t/run/cloexec.t			Test close-on-exec.
 t/run/exit.t			Test perl's exit status.
+t/run/fake_shebang.aux		Data for fake_shebang.t
+t/run/fake_shebang.t		Test fake-line-1 deprecation.
 t/run/fresh_perl.t		Tests that require a fresh perl.
 t/run/noswitch.t		Test aliasing ARGV for other switch tests
 t/run/runenv.t			Test if perl honors its environment variables.

@@ -1,0 +1,12 @@
+#!./perl -w
+
+BEGIN { print STDERR $^W ? "ok 1" : "not ok 1", "\n"; }
+
+#!./perl -X
+
+BEGIN { print STDERR $^W ? "ok 2" : "not ok 2", "\n"; }
+
+#line 1
+#!./perl -X
+
+BEGIN { print STDERR !$^W ? "ok 3" : "not ok 3", "\n"; }

@@ -4939,6 +4939,16 @@ you can write it as C<push(@tied_array,())> to avoid this warning.
 (F) The "use" keyword is recognized and executed at compile time, and
 returns no useful value.  See L<perlmod>.
 
+=item Use of #! on fake line 1 is deprecated
+
+(D deprecated) You have a C<#!> line that is numbered 1 due to a preceding
+"C<#line 1>".  This isn't really the first line of the script, where
+such an interpreter-invoking line belongs, and so it doesn't take effect
+to actually tell the kernel which interpreter to use.  However, perl
+has historically treated such a line as if it were an effective C<#!>
+line, allowing you to set command-line switches.  This interpretation
+is deprecated.  Put your C<#!> line on the real first line only.
+
 =item Use of assignment to $[ is deprecated
 
 (D deprecated) The C<$[> variable (index of the first element in an array)
@@ -4963,6 +4973,16 @@ will simply fail.
 
 Be careful to check that what you pass to chdir() is defined and not
 blank, else you might find yourself in your home directory.
+
+=item Use of csh : on fake line 1 is deprecated
+
+(D deprecated) You have a C<:> line that is numbered 1 due to a preceding
+"C<#line 1>".  This isn't really the first line of the script, where
+such an interpreter-invoking line belongs, and so it doesn't take
+effect to actually tell csh which interpreter to use.  However, perl has
+historically treated such a line as if it were an effective C<:> line,
+and therefore ignored the colon.  This interpretation is deprecated.
+Put your C<:> line on the real first line only.
 
 =item Use of /c modifier is meaningless in s///
 

@@ -724,6 +724,8 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, bool new_filter)
 	parser->linestart = SvPVX(parser->linestr);
     parser->bufend = parser->bufptr + SvCUR(parser->linestr);
     parser->last_lop = parser->last_uni = NULL;
+
+    parser->seen_sheline = 0;
 }
 
 
@@ -1525,6 +1527,7 @@ S_incline(pTHX_ const char *s)
 	s += 4;
     else
 	return;
+    PL_parser->seen_sheline = 1;
     if (SPACE_OR_TAB(*s))
 	s++;
     else
@@ -4729,8 +4732,11 @@ Perl_yylex(pTHX)
 	if (CopLINE(PL_curcop) == 1) {
 	    while (s < PL_bufend && isSPACE(*s))
 		s++;
-	    if (*s == ':' && s[1] != ':') /* for csh execing sh scripts */
+	    if (*s == ':' && s[1] != ':') { /* for csh execing sh scripts */
+		if (PL_parser->seen_sheline)
+		    deprecate("csh : on fake line 1");
 		s++;
+	    }
 #ifdef PERL_MAD
 	    if (PL_madskills)
 		PL_thiswhite = newSVpvn(PL_linestart, s - PL_linestart);
@@ -4751,6 +4757,8 @@ Perl_yylex(pTHX)
 		char *ipath;
 		char *ipathend;
 
+		if (PL_parser->seen_sheline)
+		    deprecate("#! on fake line 1");
 		while (isSPACE(*d))
 		    d++;
 		ipath = d;

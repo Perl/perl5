@@ -105,6 +105,7 @@ typedef struct yy_parser {
     COP		*saved_curcop;	/* the previous PL_curcop */
     char	tokenbuf[256];
 
+    bool	seen_sheline;	/* seen #line directive */
 } yy_parser;
 
 /* flags for lexer API */

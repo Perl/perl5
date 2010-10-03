@@ -15,13 +15,6 @@ EXPECT
 Reversed += operator at - line 3.
 Name "main::a" used only once: possible typo at - line 3.
 ########
-#! perl -w
-# warnable code, warnings enabled via #! line
-$a =+ 3 ;
-EXPECT
-Reversed += operator at - line 3.
-Name "main::a" used only once: possible typo at - line 3.
-########
 
 # warnable code, warnings enabled via compile time $^W
 BEGIN { $^W = 1 }
@@ -66,16 +59,6 @@ Use of uninitialized value $b in scalar chop at - line 5.
 my $b ; chop $b ;
 1 ;
 --FILE-- 
-require "./abcd";
-EXPECT
-Use of uninitialized value $b in scalar chop at ./abcd line 1.
-########
-
---FILE-- abcd
-my $b ; chop $b ;
-1 ;
---FILE-- 
-#! perl -w
 require "./abcd";
 EXPECT
 Use of uninitialized value $b in scalar chop at ./abcd line 1.
