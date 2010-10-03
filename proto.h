@@ -288,6 +288,25 @@ PERL_CALLCONV OP *	Perl_ck_each(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_CK_EACH	\
 	assert(o)
 
+PERL_CALLCONV OP*	Perl_ck_entersub_args_list(pTHX_ OP *entersubop)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_LIST	\
+	assert(entersubop)
+
+PERL_CALLCONV OP*	Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_PROTO	\
+	assert(entersubop); assert(namegv); assert(protosv)
+
+PERL_CALLCONV OP*	Perl_ck_entersub_args_proto_or_list(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_PROTO_OR_LIST	\
+	assert(entersubop); assert(namegv); assert(protosv)
+
 PERL_CALLCONV OP *	Perl_ck_eof(pTHX_ OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -583,6 +602,20 @@ PERL_CALLCONV CV*	Perl_cv_clone(pTHX_ CV* proto)
 
 PERL_CALLCONV SV*	Perl_cv_const_sv(pTHX_ const CV *const cv)
 			__attribute__warn_unused_result__;
+
+PERL_CALLCONV void	Perl_cv_get_call_checker(pTHX_ CV *cv, Perl_call_checker *ckfun_p, SV **ckobj_p)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_CV_GET_CALL_CHECKER	\
+	assert(cv); assert(ckfun_p); assert(ckobj_p)
+
+PERL_CALLCONV void	Perl_cv_set_call_checker(pTHX_ CV *cv, Perl_call_checker ckfun, SV *ckobj)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_CV_SET_CALL_CHECKER	\
+	assert(cv); assert(ckfun); assert(ckobj)
 
 PERL_CALLCONV void	Perl_cv_undef(pTHX_ CV* cv)
 			__attribute__nonnull__(pTHX_1);
@@ -2146,6 +2179,11 @@ PERL_CALLCONV int	Perl_mg_free(pTHX_ SV* sv)
 #define PERL_ARGS_ASSERT_MG_FREE	\
 	assert(sv)
 
+PERL_CALLCONV void	Perl_mg_free_type(pTHX_ SV* sv, int how)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_MG_FREE_TYPE	\
+	assert(sv)
+
 PERL_CALLCONV int	Perl_mg_get(pTHX_ SV* sv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_MG_GET	\
@@ -2649,6 +2687,11 @@ PERL_CALLCONV void	Perl_op_clear(pTHX_ OP* o)
 
 PERL_CALLCONV SV*	Perl_op_const_sv(pTHX_ const OP* o, CV* cv)
 			__attribute__warn_unused_result__;
+
+PERL_CALLCONV OP*	Perl_op_contextualize(pTHX_ OP* o, I32 context)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_OP_CONTEXTUALIZE	\
+	assert(o)
 
 PERL_CALLCONV void	Perl_op_dump(pTHX_ const OP *o)
 			__attribute__nonnull__(pTHX_1);
@@ -3393,6 +3436,11 @@ PERL_CALLCONV int	Perl_rsignal_save(pTHX_ int i, Sighandler_t t1, Sigsave_t* sav
 PERL_CALLCONV Sighandler_t	Perl_rsignal_state(pTHX_ int i);
 PERL_CALLCONV int	Perl_runops_debug(pTHX);
 PERL_CALLCONV int	Perl_runops_standard(pTHX);
+PERL_CALLCONV CV*	Perl_rv2cv_op_cv(pTHX_ OP *cvop, U32 flags)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_RV2CV_OP_CV	\
+	assert(cvop)
+
 PERL_CALLCONV void	Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);

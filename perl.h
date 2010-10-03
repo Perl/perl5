@@ -3901,6 +3901,7 @@ Gid_t getegid (void);
 #define PERL_MAGIC_rhash	  '%' /* extra data for restricted hashes */
 #define PERL_MAGIC_arylen_p	  '@' /* to move arylen out of XPVAV */
 #define PERL_MAGIC_ext		  '~' /* Available for use by extensions */
+#define PERL_MAGIC_checkcall	  ']' /* inlining/mutation of call to this CV */
 
 #if defined(DEBUGGING) && defined(I_ASSERT)
 #  include <assert.h>

@@ -59,6 +59,9 @@
 #define cast_iv(a)		Perl_cast_iv(aTHX_ a)
 #define cast_ulong(a)		Perl_cast_ulong(aTHX_ a)
 #define cast_uv(a)		Perl_cast_uv(aTHX_ a)
+#define ck_entersub_args_list(a)	Perl_ck_entersub_args_list(aTHX_ a)
+#define ck_entersub_args_proto(a,b,c)	Perl_ck_entersub_args_proto(aTHX_ a,b,c)
+#define ck_entersub_args_proto_or_list(a,b,c)	Perl_ck_entersub_args_proto_or_list(aTHX_ a,b,c)
 #ifndef PERL_IMPLICIT_CONTEXT
 #define ck_warner		Perl_ck_warner
 #define ck_warner_d		Perl_ck_warner_d
@@ -74,6 +77,8 @@
 #define custom_op_desc(a)	Perl_custom_op_desc(aTHX_ a)
 #define custom_op_name(a)	Perl_custom_op_name(aTHX_ a)
 #define cv_const_sv(a)		Perl_cv_const_sv(aTHX_ a)
+#define cv_get_call_checker(a,b,c)	Perl_cv_get_call_checker(aTHX_ a,b,c)
+#define cv_set_call_checker(a,b,c)	Perl_cv_set_call_checker(aTHX_ a,b,c)
 #define cv_undef(a)		Perl_cv_undef(aTHX_ a)
 #define cx_dump(a)		Perl_cx_dump(aTHX_ a)
 #define cxinc()			Perl_cxinc(aTHX)
@@ -273,6 +278,7 @@
 #define mg_copy(a,b,c,d)	Perl_mg_copy(aTHX_ a,b,c,d)
 #define mg_find(a,b)		Perl_mg_find(aTHX_ a,b)
 #define mg_free(a)		Perl_mg_free(aTHX_ a)
+#define mg_free_type(a,b)	Perl_mg_free_type(aTHX_ a,b)
 #define mg_get(a)		Perl_mg_get(aTHX_ a)
 #define mg_length(a)		Perl_mg_length(aTHX_ a)
 #define mg_magical(a)		Perl_mg_magical(aTHX_ a)
@@ -358,6 +364,7 @@
 #define new_version(a)		Perl_new_version(aTHX_ a)
 #define ninstr			Perl_ninstr
 #define nothreadhook()		Perl_nothreadhook(aTHX)
+#define op_contextualize(a,b)	Perl_op_contextualize(aTHX_ a,b)
 #define op_dump(a)		Perl_op_dump(aTHX_ a)
 #define op_free(a)		Perl_op_free(aTHX_ a)
 #define op_null(a)		Perl_op_null(aTHX_ a)
@@ -409,6 +416,7 @@
 #define rsignal_state(a)	Perl_rsignal_state(aTHX_ a)
 #define runops_debug()		Perl_runops_debug(aTHX)
 #define runops_standard()	Perl_runops_standard(aTHX)
+#define rv2cv_op_cv(a,b)	Perl_rv2cv_op_cv(aTHX_ a,b)
 #define safesyscalloc		Perl_safesyscalloc
 #define safesysfree		Perl_safesysfree
 #define safesysmalloc		Perl_safesysmalloc

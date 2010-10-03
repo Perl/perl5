@@ -372,6 +372,50 @@ my_rpeep (pTHX_ OP *o)
     }
 }
 
+STATIC OP *
+THX_ck_entersub_args_lists(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
+{
+    return ck_entersub_args_list(entersubop);
+}
+
+STATIC OP *
+THX_ck_entersub_args_scalars(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
+{
+    OP *aop = cUNOPx(entersubop)->op_first;
+    if (!aop->op_sibling)
+	aop = cUNOPx(aop)->op_first;
+    for (aop = aop->op_sibling; aop->op_sibling; aop = aop->op_sibling) {
+	op_contextualize(aop, G_SCALAR);
+    }
+    return entersubop;
+}
+
+STATIC OP *
+THX_ck_entersub_multi_sum(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
+{
+    OP *sumop = NULL;
+    OP *pushop = cUNOPx(entersubop)->op_first;
+    if (!pushop->op_sibling)
+	pushop = cUNOPx(pushop)->op_first;
+    while (1) {
+	OP *aop = pushop->op_sibling;
+	if (!aop->op_sibling)
+	    break;
+	pushop->op_sibling = aop->op_sibling;
+	aop->op_sibling = NULL;
+	op_contextualize(aop, G_SCALAR);
+	if (sumop) {
+	    sumop = newBINOP(OP_ADD, 0, sumop, aop);
+	} else {
+	    sumop = aop;
+	}
+    }
+    if (!sumop)
+	sumop = newSVOP(OP_CONST, 0, newSViv(0));
+    op_free(entersubop);
+    return sumop;
+}
+
 /** RPN keyword parser **/
 
 #define sv_is_glob(sv) (SvTYPE(sv) == SVt_PVGV)
@@ -1459,6 +1503,221 @@ bhk_record(bool on)
         MY_CXT.bhk_record = on;
         if (on)
             av_clear(MY_CXT.bhkav);
+
+void
+test_magic_chain()
+    PREINIT:
+	SV *sv;
+	MAGIC *callmg, *uvarmg;
+    CODE:
+	sv = sv_2mortal(newSV(0));
+	if (SvTYPE(sv) >= SVt_PVMG) croak("fail");
+	if (SvMAGICAL(sv)) croak("fail");
+	sv_magic(sv, &PL_sv_yes, PERL_MAGIC_checkcall, (char*)&callmg, 0);
+	if (SvTYPE(sv) < SVt_PVMG) croak("fail");
+	if (!SvMAGICAL(sv)) croak("fail");
+	if (mg_find(sv, PERL_MAGIC_uvar)) croak("fail");
+	callmg = mg_find(sv, PERL_MAGIC_checkcall);
+	if (!callmg) croak("fail");
+	if (callmg->mg_obj != &PL_sv_yes || callmg->mg_ptr != (char*)&callmg)
+	    croak("fail");
+	sv_magic(sv, &PL_sv_no, PERL_MAGIC_uvar, (char*)&uvarmg, 0);
+	if (SvTYPE(sv) < SVt_PVMG) croak("fail");
+	if (!SvMAGICAL(sv)) croak("fail");
+	if (mg_find(sv, PERL_MAGIC_checkcall) != callmg) croak("fail");
+	uvarmg = mg_find(sv, PERL_MAGIC_uvar);
+	if (!uvarmg) croak("fail");
+	if (callmg->mg_obj != &PL_sv_yes || callmg->mg_ptr != (char*)&callmg)
+	    croak("fail");
+	if (uvarmg->mg_obj != &PL_sv_no || uvarmg->mg_ptr != (char*)&uvarmg)
+	    croak("fail");
+	mg_free_type(sv, PERL_MAGIC_vec);
+	if (SvTYPE(sv) < SVt_PVMG) croak("fail");
+	if (!SvMAGICAL(sv)) croak("fail");
+	if (mg_find(sv, PERL_MAGIC_checkcall) != callmg) croak("fail");
+	if (mg_find(sv, PERL_MAGIC_uvar) != uvarmg) croak("fail");
+	if (callmg->mg_obj != &PL_sv_yes || callmg->mg_ptr != (char*)&callmg)
+	    croak("fail");
+	if (uvarmg->mg_obj != &PL_sv_no || uvarmg->mg_ptr != (char*)&uvarmg)
+	    croak("fail");
+	mg_free_type(sv, PERL_MAGIC_uvar);
+	if (SvTYPE(sv) < SVt_PVMG) croak("fail");
+	if (!SvMAGICAL(sv)) croak("fail");
+	if (mg_find(sv, PERL_MAGIC_checkcall) != callmg) croak("fail");
+	if (mg_find(sv, PERL_MAGIC_uvar)) croak("fail");
+	if (callmg->mg_obj != &PL_sv_yes || callmg->mg_ptr != (char*)&callmg)
+	    croak("fail");
+	sv_magic(sv, &PL_sv_no, PERL_MAGIC_uvar, (char*)&uvarmg, 0);
+	if (SvTYPE(sv) < SVt_PVMG) croak("fail");
+	if (!SvMAGICAL(sv)) croak("fail");
+	if (mg_find(sv, PERL_MAGIC_checkcall) != callmg) croak("fail");
+	uvarmg = mg_find(sv, PERL_MAGIC_uvar);
+	if (!uvarmg) croak("fail");
+	if (callmg->mg_obj != &PL_sv_yes || callmg->mg_ptr != (char*)&callmg)
+	    croak("fail");
+	if (uvarmg->mg_obj != &PL_sv_no || uvarmg->mg_ptr != (char*)&uvarmg)
+	    croak("fail");
+	mg_free_type(sv, PERL_MAGIC_checkcall);
+	if (SvTYPE(sv) < SVt_PVMG) croak("fail");
+	if (!SvMAGICAL(sv)) croak("fail");
+	if (mg_find(sv, PERL_MAGIC_uvar) != uvarmg) croak("fail");
+	if (mg_find(sv, PERL_MAGIC_checkcall)) croak("fail");
+	if (uvarmg->mg_obj != &PL_sv_no || uvarmg->mg_ptr != (char*)&uvarmg)
+	    croak("fail");
+	mg_free_type(sv, PERL_MAGIC_uvar);
+	if (SvMAGICAL(sv)) croak("fail");
+	if (mg_find(sv, PERL_MAGIC_checkcall)) croak("fail");
+	if (mg_find(sv, PERL_MAGIC_uvar)) croak("fail");
+
+void
+test_op_contextualize()
+    PREINIT:
+	OP *o;
+    CODE:
+	o = newSVOP(OP_CONST, 0, newSViv(0));
+	o->op_flags &= ~OPf_WANT;
+	o = op_contextualize(o, G_SCALAR);
+	if (o->op_type != OP_CONST ||
+		(o->op_flags & OPf_WANT) != OPf_WANT_SCALAR)
+	    croak("fail");
+	op_free(o);
+	o = newSVOP(OP_CONST, 0, newSViv(0));
+	o->op_flags &= ~OPf_WANT;
+	o = op_contextualize(o, G_ARRAY);
+	if (o->op_type != OP_CONST ||
+		(o->op_flags & OPf_WANT) != OPf_WANT_LIST)
+	    croak("fail");
+	op_free(o);
+	o = newSVOP(OP_CONST, 0, newSViv(0));
+	o->op_flags &= ~OPf_WANT;
+	o = op_contextualize(o, G_VOID);
+	if (o->op_type != OP_NULL) croak("fail");
+	op_free(o);
+
+void
+test_rv2cv_op_cv()
+    PROTOTYPE:
+    PREINIT:
+	GV *troc_gv, *wibble_gv;
+	CV *troc_cv;
+	OP *o;
+    CODE:
+	troc_gv = gv_fetchpv("XS::APItest::test_rv2cv_op_cv", 0, SVt_PVGV);
+	troc_cv = get_cv("XS::APItest::test_rv2cv_op_cv", 0);
+	wibble_gv = gv_fetchpv("XS::APItest::wibble", 0, SVt_PVGV);
+	o = newCVREF(0, newGVOP(OP_GV, 0, troc_gv));
+	if (rv2cv_op_cv(o, 0) != troc_cv) croak("fail");
+	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV) != (CV*)troc_gv)
+	    croak("fail");
+	o->op_private |= OPpENTERSUB_AMPER;
+	if (rv2cv_op_cv(o, 0)) croak("fail");
+	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV)) croak("fail");
+	o->op_private &= ~OPpENTERSUB_AMPER;
+	if (cUNOPx(o)->op_first->op_private & OPpEARLY_CV) croak("fail");
+	if (rv2cv_op_cv(o, RV2CVOPCV_MARK_EARLY) != troc_cv) croak("fail");
+	if (cUNOPx(o)->op_first->op_private & OPpEARLY_CV) croak("fail");
+	op_free(o);
+	o = newSVOP(OP_CONST, 0, newSVpv("XS::APItest::test_rv2cv_op_cv", 0));
+	o->op_private = OPpCONST_BARE;
+	o = newCVREF(0, o);
+	if (rv2cv_op_cv(o, 0) != troc_cv) croak("fail");
+	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV) != (CV*)troc_gv)
+	    croak("fail");
+	o->op_private |= OPpENTERSUB_AMPER;
+	if (rv2cv_op_cv(o, 0)) croak("fail");
+	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV)) croak("fail");
+	op_free(o);
+	o = newCVREF(0, newSVOP(OP_CONST, 0, newRV_inc((SV*)troc_cv)));
+	if (rv2cv_op_cv(o, 0) != troc_cv) croak("fail");
+	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV) != (CV*)troc_gv)
+	    croak("fail");
+	o->op_private |= OPpENTERSUB_AMPER;
+	if (rv2cv_op_cv(o, 0)) croak("fail");
+	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV)) croak("fail");
+	o->op_private &= ~OPpENTERSUB_AMPER;
+	if (cUNOPx(o)->op_first->op_private & OPpEARLY_CV) croak("fail");
+	if (rv2cv_op_cv(o, RV2CVOPCV_MARK_EARLY) != troc_cv) croak("fail");
+	if (cUNOPx(o)->op_first->op_private & OPpEARLY_CV) croak("fail");
+	op_free(o);
+	o = newCVREF(0, newUNOP(OP_RAND, 0, newSVOP(OP_CONST, 0, newSViv(0))));
+	if (rv2cv_op_cv(o, 0)) croak("fail");
+	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV)) croak("fail");
+	o->op_private |= OPpENTERSUB_AMPER;
+	if (rv2cv_op_cv(o, 0)) croak("fail");
+	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV)) croak("fail");
+	o->op_private &= ~OPpENTERSUB_AMPER;
+	if (cUNOPx(o)->op_first->op_private & OPpEARLY_CV) croak("fail");
+	if (rv2cv_op_cv(o, RV2CVOPCV_MARK_EARLY)) croak("fail");
+	if (cUNOPx(o)->op_first->op_private & OPpEARLY_CV) croak("fail");
+	op_free(o);
+	o = newUNOP(OP_RAND, 0, newSVOP(OP_CONST, 0, newSViv(0)));
+	if (rv2cv_op_cv(o, 0)) croak("fail");
+	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV)) croak("fail");
+	op_free(o);
+
+void
+test_cv_getset_call_checker()
+    PREINIT:
+	CV *troc_cv, *tsh_cv;
+	Perl_call_checker ckfun;
+	SV *ckobj;
+    CODE:
+#define check_cc(cv, xckfun, xckobj) \
+    do { \
+	cv_get_call_checker((cv), &ckfun, &ckobj); \
+	if (ckfun != (xckfun) || ckobj != (xckobj)) croak("fail"); \
+    } while(0)
+	troc_cv = get_cv("XS::APItest::test_rv2cv_op_cv", 0);
+	tsh_cv = get_cv("XS::APItest::test_savehints", 0);
+	check_cc(troc_cv, Perl_ck_entersub_args_proto_or_list, (SV*)troc_cv);
+	check_cc(tsh_cv, Perl_ck_entersub_args_proto_or_list, (SV*)tsh_cv);
+	cv_set_call_checker(tsh_cv, Perl_ck_entersub_args_proto_or_list,
+				    &PL_sv_yes);
+	check_cc(troc_cv, Perl_ck_entersub_args_proto_or_list, (SV*)troc_cv);
+	check_cc(tsh_cv, Perl_ck_entersub_args_proto_or_list, &PL_sv_yes);
+	cv_set_call_checker(troc_cv, THX_ck_entersub_args_scalars, &PL_sv_no);
+	check_cc(troc_cv, THX_ck_entersub_args_scalars, &PL_sv_no);
+	check_cc(tsh_cv, Perl_ck_entersub_args_proto_or_list, &PL_sv_yes);
+	cv_set_call_checker(tsh_cv, Perl_ck_entersub_args_proto_or_list,
+				    (SV*)tsh_cv);
+	check_cc(troc_cv, THX_ck_entersub_args_scalars, &PL_sv_no);
+	check_cc(tsh_cv, Perl_ck_entersub_args_proto_or_list, (SV*)tsh_cv);
+	cv_set_call_checker(troc_cv, Perl_ck_entersub_args_proto_or_list,
+				    (SV*)troc_cv);
+	check_cc(troc_cv, Perl_ck_entersub_args_proto_or_list, (SV*)troc_cv);
+	check_cc(tsh_cv, Perl_ck_entersub_args_proto_or_list, (SV*)tsh_cv);
+	if (SvMAGICAL((SV*)troc_cv) || SvMAGIC((SV*)troc_cv)) croak("fail");
+	if (SvMAGICAL((SV*)tsh_cv) || SvMAGIC((SV*)tsh_cv)) croak("fail");
+#undef check_cc
+
+void
+cv_set_call_checker_lists(CV *cv)
+    CODE:
+	cv_set_call_checker(cv, THX_ck_entersub_args_lists, &PL_sv_undef);
+
+void
+cv_set_call_checker_scalars(CV *cv)
+    CODE:
+	cv_set_call_checker(cv, THX_ck_entersub_args_scalars, &PL_sv_undef);
+
+void
+cv_set_call_checker_proto(CV *cv, SV *proto)
+    CODE:
+	if (SvROK(proto))
+	    proto = SvRV(proto);
+	cv_set_call_checker(cv, Perl_ck_entersub_args_proto, proto);
+
+void
+cv_set_call_checker_proto_or_list(CV *cv, SV *proto)
+    CODE:
+	if (SvROK(proto))
+	    proto = SvRV(proto);
+	cv_set_call_checker(cv, Perl_ck_entersub_args_proto_or_list, proto);
+
+void
+cv_set_call_checker_multi_sum(CV *cv)
+    CODE:
+	cv_set_call_checker(cv, THX_ck_entersub_multi_sum, &PL_sv_undef);
 
 void
 test_savehints()

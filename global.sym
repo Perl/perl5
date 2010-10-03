@@ -54,6 +54,9 @@ Perl_cast_i32
 Perl_cast_iv
 Perl_cast_ulong
 Perl_cast_uv
+Perl_ck_entersub_args_list
+Perl_ck_entersub_args_proto
+Perl_ck_entersub_args_proto_or_list
 Perl_ck_warner
 Perl_ck_warner_d
 Perl_ckwarn
@@ -67,6 +70,8 @@ Perl_croak_xs_usage
 Perl_custom_op_desc
 Perl_custom_op_name
 Perl_cv_const_sv
+Perl_cv_get_call_checker
+Perl_cv_set_call_checker
 Perl_cv_undef
 Perl_cvgv_set
 Perl_cx_dump
@@ -302,6 +307,7 @@ Perl_mg_clear
 Perl_mg_copy
 Perl_mg_find
 Perl_mg_free
+Perl_mg_free_type
 Perl_mg_get
 Perl_mg_length
 Perl_mg_magical
@@ -403,6 +409,7 @@ Perl_new_warnings_bitfield
 Perl_ninstr
 Perl_nothreadhook
 Perl_op_clear
+Perl_op_contextualize
 Perl_op_dump
 Perl_op_free
 Perl_op_null
@@ -474,6 +481,7 @@ Perl_rsignal
 Perl_rsignal_state
 Perl_runops_debug
 Perl_runops_standard
+Perl_rv2cv_op_cv
 Perl_safesyscalloc
 Perl_safesysfree
 Perl_safesysmalloc

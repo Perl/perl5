@@ -1248,6 +1248,7 @@ static const struct { const char type; const char *name; } magic_names[] = {
 	{ PERL_MAGIC_tied,           "tied(P)" },
 	{ PERL_MAGIC_sig,            "sig(S)" },
 	{ PERL_MAGIC_uvar,           "uvar(U)" },
+	{ PERL_MAGIC_checkcall,      "checkcall(])" },
 	{ PERL_MAGIC_overload_elem,  "overload_elem(a)" },
 	{ PERL_MAGIC_overload_table, "overload_table(c)" },
 	{ PERL_MAGIC_regdatum,       "regdatum(d)" },

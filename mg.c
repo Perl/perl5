@@ -179,6 +179,7 @@ S_is_container_magic(const MAGIC *mg)
     case PERL_MAGIC_rhash:
     case PERL_MAGIC_symtab:
     case PERL_MAGIC_tied: /* treat as value, so 'local @tied' isn't tied */
+    case PERL_MAGIC_checkcall:
 	return 0;
     default:
 	return 1;
@@ -522,6 +523,24 @@ Perl_mg_localize(pTHX_ SV *sv, SV *nsv, bool setmagic)
     }	    
 }
 
+#define mg_free_struct(sv, mg) S_mg_free_struct(aTHX_ sv, mg)
+static void
+S_mg_free_struct(pTHX_ SV *sv, MAGIC *mg)
+{
+    const MGVTBL* const vtbl = mg->mg_virtual;
+    if (vtbl && vtbl->svt_free)
+	vtbl->svt_free(aTHX_ sv, mg);
+    if (mg->mg_ptr && mg->mg_type != PERL_MAGIC_regex_global) {
+	if (mg->mg_len > 0 || mg->mg_type == PERL_MAGIC_utf8)
+	    Safefree(mg->mg_ptr);
+	else if (mg->mg_len == HEf_SVKEY)
+	    SvREFCNT_dec(MUTABLE_SV(mg->mg_ptr));
+    }
+    if (mg->mg_flags & MGf_REFCOUNTED)
+	SvREFCNT_dec(mg->mg_obj);
+    Safefree(mg);
+}
+
 /*
 =for apidoc mg_free
 
@@ -539,24 +558,46 @@ Perl_mg_free(pTHX_ SV *sv)
     PERL_ARGS_ASSERT_MG_FREE;
 
     for (mg = SvMAGIC(sv); mg; mg = moremagic) {
-        const MGVTBL* const vtbl = mg->mg_virtual;
 	moremagic = mg->mg_moremagic;
-	if (vtbl && vtbl->svt_free)
-	    vtbl->svt_free(aTHX_ sv, mg);
-	if (mg->mg_ptr && mg->mg_type != PERL_MAGIC_regex_global) {
-	    if (mg->mg_len > 0 || mg->mg_type == PERL_MAGIC_utf8)
-		Safefree(mg->mg_ptr);
-	    else if (mg->mg_len == HEf_SVKEY)
-		SvREFCNT_dec(MUTABLE_SV(mg->mg_ptr));
-	}
-	if (mg->mg_flags & MGf_REFCOUNTED)
-	    SvREFCNT_dec(mg->mg_obj);
-	Safefree(mg);
+	mg_free_struct(sv, mg);
 	SvMAGIC_set(sv, moremagic);
     }
     SvMAGIC_set(sv, NULL);
     SvMAGICAL_off(sv);
     return 0;
+}
+
+/*
+=for apidoc Am|void|mg_free_type|SV *sv|int how
+
+Remove any magic of type I<how> from the SV I<sv>.  See L</sv_magic>.
+
+=cut
+*/
+
+void
+Perl_mg_free_type(pTHX_ SV *sv, int how)
+{
+    MAGIC *mg, *prevmg, *moremg;
+    PERL_ARGS_ASSERT_MG_FREE_TYPE;
+    for (prevmg = NULL, mg = SvMAGIC(sv); mg; prevmg = mg, mg = moremg) {
+	MAGIC *newhead;
+	moremg = mg->mg_moremagic;
+	if (mg->mg_type == how) {
+	    /* temporarily move to the head of the magic chain, in case
+	       custom free code relies on this historical aspect of mg_free */
+	    if (prevmg) {
+		prevmg->mg_moremagic = moremg;
+		mg->mg_moremagic = SvMAGIC(sv);
+		SvMAGIC_set(sv, mg);
+	    }
+	    newhead = mg->mg_moremagic;
+	    mg_free_struct(sv, mg);
+	    SvMAGIC_set(sv, newhead);
+	    mg = prevmg;
+	}
+    }
+    mg_magical(sv);
 }
 
 #include <signal.h>

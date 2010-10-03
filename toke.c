@@ -6340,29 +6340,12 @@ Perl_yylex(pTHX)
 		if (len)
 		    goto safe_bareword;
 
-		cv = NULL;
 		{
 		    OP *const_op = newSVOP(OP_CONST, 0, SvREFCNT_inc(sv));
 		    const_op->op_private = OPpCONST_BARE;
 		    rv2cv_op = newCVREF(0, const_op);
 		}
-		if (rv2cv_op->op_type == OP_RV2CV &&
-			(rv2cv_op->op_flags & OPf_KIDS)) {
-		    OP *rv_op = cUNOPx(rv2cv_op)->op_first;
-		    switch (rv_op->op_type) {
-			case OP_CONST: {
-			    SV *sv = cSVOPx_sv(rv_op);
-			    if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVCV)
-				cv = (CV*)SvRV(sv);
-			} break;
-			case OP_GV: {
-			    GV *gv = cGVOPx_gv(rv_op);
-			    CV *maybe_cv = GvCVu(gv);
-			    if (maybe_cv && SvTYPE((SV*)maybe_cv) == SVt_PVCV)
-				cv = maybe_cv;
-			} break;
-		    }
-		}
+		cv = rv2cv_op_cv(rv2cv_op, 0);
 
 		/* See if it's the indirect object for a list operator. */
 

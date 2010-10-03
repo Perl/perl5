@@ -192,6 +192,8 @@ should print 123:
 =cut
 */
 
+typedef OP *(*Perl_call_checker)(pTHX_ OP *, GV *, SV *);
+
 /*
  * Local variables:
  * c-indentation-style: bsd

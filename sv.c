@@ -5203,6 +5203,7 @@ Perl_sv_magic(pTHX_ register SV *const sv, SV *const obj, const int how,
     case PERL_MAGIC_rhash:
     case PERL_MAGIC_symtab:
     case PERL_MAGIC_vstring:
+    case PERL_MAGIC_checkcall:
 	vtable = NULL;
 	break;
     case PERL_MAGIC_utf8:

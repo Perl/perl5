@@ -741,6 +741,11 @@ preprocessing token; the type of I<arg> depends on I<which>.
 	} \
     } STMT_END
 
+/* flags for rv2cv_op_cv */
+
+#define RV2CVOPCV_MARK_EARLY     0x00000001
+#define RV2CVOPCV_RETURN_NAME_GV 0x00000002
+
 #ifdef PERL_MAD
 #  define MAD_NULL 1
 #  define MAD_PV 2

@@ -818,6 +818,31 @@ Perl_op_refcnt_unlock(pTHX)
 
 /* Contextualizers */
 
+/*
+=for apidoc Am|OP *|op_contextualize|OP *o|I32 context
+
+Applies a syntactic context to an op tree representing an expression.
+I<o> is the op tree, and I<context> must be C<G_SCALAR>, C<G_ARRAY>,
+or C<G_VOID> to specify the context to apply.  The modified op tree
+is returned.
+
+=cut
+*/
+
+OP *
+Perl_op_contextualize(pTHX_ OP *o, I32 context)
+{
+    PERL_ARGS_ASSERT_OP_CONTEXTUALIZE;
+    switch (context) {
+	case G_SCALAR: return scalar(o);
+	case G_ARRAY:  return list(o);
+	case G_VOID:   return scalarvoid(o);
+	default:
+	    Perl_croak(aTHX_ "panic: op_contextualize bad context");
+	    return o;
+    }
+}
+
 #define LINKLIST(o) ((o)->op_next ? (o)->op_next : linklist((OP*)o))
 
 static OP *
@@ -8401,276 +8426,539 @@ Perl_ck_join(pTHX_ OP *o)
     return ck_fun(o);
 }
 
-OP *
-Perl_ck_subr(pTHX_ OP *o)
+/*
+=for apidoc Am|CV *|rv2cv_op_cv|OP *cvop|U32 flags
+
+Examines an op, which is expected to identify a subroutine at runtime,
+and attempts to determine at compile time which subroutine it identifies.
+This is normally used during Perl compilation to determine whether
+a prototype can be applied to a function call.  I<cvop> is the op
+being considered, normally an C<rv2cv> op.  A pointer to the identified
+subroutine is returned, if it could be determined statically, and a null
+pointer is returned if it was not possible to determine statically.
+
+Currently, the subroutine can be identified statically if the RV that the
+C<rv2cv> is to operate on is provided by a suitable C<gv> or C<const> op.
+A C<gv> op is suitable if the GV's CV slot is populated.  A C<const> op is
+suitable if the constant value must be an RV pointing to a CV.  Details of
+this process may change in future versions of Perl.  If the C<rv2cv> op
+has the C<OPpENTERSUB_AMPER> flag set then no attempt is made to identify
+the subroutine statically: this flag is used to suppress compile-time
+magic on a subroutine call, forcing it to use default runtime behaviour.
+
+If I<flags> has the bit C<RV2CVOPCV_MARK_EARLY> set, then the handling
+of a GV reference is modified.  If a GV was examined and its CV slot was
+found to be empty, then the C<gv> op has the C<OPpEARLY_CV> flag set.
+If the op is not optimised away, and the CV slot is later populated with
+a subroutine having a prototype, that flag eventually triggers the warning
+"called too early to check prototype".
+
+If I<flags> has the bit C<RV2CVOPCV_RETURN_NAME_GV> set, then instead
+of returning a pointer to the subroutine it returns a pointer to the
+GV giving the most appropriate name for the subroutine in this context.
+Normally this is just the C<CvGV> of the subroutine, but for an anonymous
+(C<CvANON>) subroutine that is referenced through a GV it will be the
+referencing GV.  The resulting C<GV*> is cast to C<CV*> to be returned.
+A null pointer is returned as usual if there is no statically-determinable
+subroutine.
+
+=cut
+*/
+
+CV *
+Perl_rv2cv_op_cv(pTHX_ OP *cvop, U32 flags)
 {
-    dVAR;
-    OP *prev = ((cUNOPo->op_first->op_sibling)
-	     ? cUNOPo : ((UNOP*)cUNOPo->op_first))->op_first;
-    OP *o2 = prev->op_sibling;
-    OP *cvop;
-    const char *proto = NULL;
-    const char *proto_end = NULL;
-    CV *cv = NULL;
-    GV *namegv = NULL;
+    OP *rvop;
+    CV *cv;
+    GV *gv;
+    PERL_ARGS_ASSERT_RV2CV_OP_CV;
+    if (flags & ~(RV2CVOPCV_MARK_EARLY|RV2CVOPCV_RETURN_NAME_GV))
+	Perl_croak(aTHX_ "panic: rv2cv_op_cv bad flags %x", (unsigned)flags);
+    if (cvop->op_type != OP_RV2CV)
+	return NULL;
+    if (cvop->op_private & OPpENTERSUB_AMPER)
+	return NULL;
+    if (!(cvop->op_flags & OPf_KIDS))
+	return NULL;
+    rvop = cUNOPx(cvop)->op_first;
+    switch (rvop->op_type) {
+	case OP_GV: {
+	    gv = cGVOPx_gv(rvop);
+	    cv = GvCVu(gv);
+	    if (!cv) {
+		if (flags & RV2CVOPCV_MARK_EARLY)
+		    rvop->op_private |= OPpEARLY_CV;
+		return NULL;
+	    }
+	} break;
+	case OP_CONST: {
+	    SV *rv = cSVOPx_sv(rvop);
+	    if (!SvROK(rv))
+		return NULL;
+	    cv = (CV*)SvRV(rv);
+	    gv = NULL;
+	} break;
+	default: {
+	    return NULL;
+	} break;
+    }
+    if (SvTYPE((SV*)cv) != SVt_PVCV)
+	return NULL;
+    if (flags & RV2CVOPCV_RETURN_NAME_GV) {
+	if (!CvANON(cv) || !gv)
+	    gv = CvGV(cv);
+	return (CV*)gv;
+    } else {
+	return cv;
+    }
+}
+
+/*
+=for apidoc Am|OP *|ck_entersub_args_list|OP *entersubop
+
+Performs the default fixup of the arguments part of an C<entersub>
+op tree.  This consists of applying list context to each of the
+argument ops.  This is the standard treatment used on a call marked
+with C<&>, or a method call, or a call through a subroutine reference,
+or any other call where the callee can't be identified at compile time,
+or a call where the callee has no prototype.
+
+=cut
+*/
+
+OP *
+Perl_ck_entersub_args_list(pTHX_ OP *entersubop)
+{
+    OP *aop;
+    PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_LIST;
+    aop = cUNOPx(entersubop)->op_first;
+    if (!aop->op_sibling)
+	aop = cUNOPx(aop)->op_first;
+    for (aop = aop->op_sibling; aop->op_sibling; aop = aop->op_sibling) {
+	if (!(PL_madskills && aop->op_type == OP_STUB)) {
+	    list(aop);
+	    mod(aop, OP_ENTERSUB);
+	}
+    }
+    return entersubop;
+}
+
+/*
+=for apidoc Am|OP *|ck_entersub_args_proto|OP *entersubop|GV *namegv|SV *protosv
+
+Performs the fixup of the arguments part of an C<entersub> op tree
+based on a subroutine prototype.  This makes various modifications to
+the argument ops, from applying context up to inserting C<refgen> ops,
+and checking the number and syntactic types of arguments, as directed by
+the prototype.  This is the standard treatment used on a subroutine call,
+not marked with C<&>, where the callee can be identified at compile time
+and has a prototype.
+
+I<protosv> supplies the subroutine prototype to be applied to the call.
+It may be a normal defined scalar, of which the string value will be used.
+Alternatively, for convenience, it may be a subroutine object (a C<CV*>
+that has been cast to C<SV*>) which has a prototype.  The prototype
+supplied, in whichever form, does not need to match the actual callee
+referenced by the op tree.
+
+If the argument ops disagree with the prototype, for example by having
+an unacceptable number of arguments, a valid op tree is returned anyway.
+The error is reflected in the parser state, normally resulting in a single
+exception at the top level of parsing which covers all the compilation
+errors that occurred.  In the error message, the callee is referred to
+by the name defined by the I<namegv> parameter.
+
+=cut
+*/
+
+OP *
+Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
+{
+    STRLEN proto_len;
+    const char *proto, *proto_end;
+    OP *aop, *prev, *cvop;
     int optional = 0;
     I32 arg = 0;
     I32 contextclass = 0;
     const char *e = NULL;
+    PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_PROTO;
+    if (SvTYPE(protosv) == SVt_PVCV ? !SvPOK(protosv) : !SvOK(protosv))
+	Perl_croak(aTHX_ "panic: ck_entersub_args_proto CV with no proto");
+    proto = SvPV(protosv, proto_len);
+    proto_end = proto + proto_len;
+    aop = cUNOPx(entersubop)->op_first;
+    if (!aop->op_sibling)
+	aop = cUNOPx(aop)->op_first;
+    prev = aop;
+    aop = aop->op_sibling;
+    for (cvop = aop; cvop->op_sibling; cvop = cvop->op_sibling) ;
+    while (aop != cvop) {
+	OP* o3;
+	if (PL_madskills && aop->op_type == OP_STUB) {
+	    aop = aop->op_sibling;
+	    continue;
+	}
+	if (PL_madskills && aop->op_type == OP_NULL)
+	    o3 = ((UNOP*)aop)->op_first;
+	else
+	    o3 = aop;
+
+	if (proto >= proto_end)
+	    return too_many_arguments(entersubop, gv_ename(namegv));
+
+	switch (*proto) {
+	case ';':
+	    optional = 1;
+	    proto++;
+	    continue;
+	case '_':
+	    /* _ must be at the end */
+	    if (proto[1] && proto[1] != ';')
+		goto oops;
+	case '$':
+	    proto++;
+	    arg++;
+	    scalar(aop);
+	    break;
+	case '%':
+	case '@':
+	    list(aop);
+	    arg++;
+	    break;
+	case '&':
+	    proto++;
+	    arg++;
+	    if (o3->op_type != OP_REFGEN && o3->op_type != OP_UNDEF)
+		bad_type(arg,
+		    arg == 1 ? "block or sub {}" : "sub {}",
+		    gv_ename(namegv), o3);
+	    break;
+	case '*':
+	    /* '*' allows any scalar type, including bareword */
+	    proto++;
+	    arg++;
+	    if (o3->op_type == OP_RV2GV)
+		goto wrapref;	/* autoconvert GLOB -> GLOBref */
+	    else if (o3->op_type == OP_CONST)
+		o3->op_private &= ~OPpCONST_STRICT;
+	    else if (o3->op_type == OP_ENTERSUB) {
+		/* accidental subroutine, revert to bareword */
+		OP *gvop = ((UNOP*)o3)->op_first;
+		if (gvop && gvop->op_type == OP_NULL) {
+		    gvop = ((UNOP*)gvop)->op_first;
+		    if (gvop) {
+			for (; gvop->op_sibling; gvop = gvop->op_sibling)
+			    ;
+			if (gvop &&
+			    (gvop->op_private & OPpENTERSUB_NOPAREN) &&
+			    (gvop = ((UNOP*)gvop)->op_first) &&
+			    gvop->op_type == OP_GV)
+			{
+			    GV * const gv = cGVOPx_gv(gvop);
+			    OP * const sibling = aop->op_sibling;
+			    SV * const n = newSVpvs("");
+#ifdef PERL_MAD
+			    OP * const oldaop = aop;
+#else
+			    op_free(aop);
+#endif
+			    gv_fullname4(n, gv, "", FALSE);
+			    aop = newSVOP(OP_CONST, 0, n);
+			    op_getmad(oldaop,aop,'O');
+			    prev->op_sibling = aop;
+			    aop->op_sibling = sibling;
+			}
+		    }
+		}
+	    }
+	    scalar(aop);
+	    break;
+	case '[': case ']':
+	     goto oops;
+	     break;
+	case '\\':
+	    proto++;
+	    arg++;
+	again:
+	    switch (*proto++) {
+	    case '[':
+		 if (contextclass++ == 0) {
+		      e = strchr(proto, ']');
+		      if (!e || e == proto)
+			   goto oops;
+		 }
+		 else
+		      goto oops;
+		 goto again;
+		 break;
+	    case ']':
+		 if (contextclass) {
+		     const char *p = proto;
+		     const char *const end = proto;
+		     contextclass = 0;
+		     while (*--p != '[') {}
+		     bad_type(arg, Perl_form(aTHX_ "one of %.*s",
+					     (int)(end - p), p),
+			      gv_ename(namegv), o3);
+		 } else
+		      goto oops;
+		 break;
+	    case '*':
+		 if (o3->op_type == OP_RV2GV)
+		      goto wrapref;
+		 if (!contextclass)
+		      bad_type(arg, "symbol", gv_ename(namegv), o3);
+		 break;
+	    case '&':
+		 if (o3->op_type == OP_ENTERSUB)
+		      goto wrapref;
+		 if (!contextclass)
+		      bad_type(arg, "subroutine entry", gv_ename(namegv),
+			       o3);
+		 break;
+	    case '$':
+		if (o3->op_type == OP_RV2SV ||
+		    o3->op_type == OP_PADSV ||
+		    o3->op_type == OP_HELEM ||
+		    o3->op_type == OP_AELEM)
+		     goto wrapref;
+		if (!contextclass)
+		    bad_type(arg, "scalar", gv_ename(namegv), o3);
+		 break;
+	    case '@':
+		if (o3->op_type == OP_RV2AV ||
+		    o3->op_type == OP_PADAV)
+		     goto wrapref;
+		if (!contextclass)
+		    bad_type(arg, "array", gv_ename(namegv), o3);
+		break;
+	    case '%':
+		if (o3->op_type == OP_RV2HV ||
+		    o3->op_type == OP_PADHV)
+		     goto wrapref;
+		if (!contextclass)
+		     bad_type(arg, "hash", gv_ename(namegv), o3);
+		break;
+	    wrapref:
+		{
+		    OP* const kid = aop;
+		    OP* const sib = kid->op_sibling;
+		    kid->op_sibling = 0;
+		    aop = newUNOP(OP_REFGEN, 0, kid);
+		    aop->op_sibling = sib;
+		    prev->op_sibling = aop;
+		}
+		if (contextclass && e) {
+		     proto = e + 1;
+		     contextclass = 0;
+		}
+		break;
+	    default: goto oops;
+	    }
+	    if (contextclass)
+		 goto again;
+	    break;
+	case ' ':
+	    proto++;
+	    continue;
+	default:
+	  oops:
+	    Perl_croak(aTHX_ "Malformed prototype for %s: %"SVf,
+		       gv_ename(namegv), SVfARG(protosv));
+	}
+
+	mod(aop, OP_ENTERSUB);
+	prev = aop;
+	aop = aop->op_sibling;
+    }
+    if (aop == cvop && *proto == '_') {
+	/* generate an access to $_ */
+	aop = newDEFSVOP();
+	aop->op_sibling = prev->op_sibling;
+	prev->op_sibling = aop; /* instead of cvop */
+    }
+    if (!optional && proto_end > proto &&
+	(*proto != '@' && *proto != '%' && *proto != ';' && *proto != '_'))
+	return too_few_arguments(entersubop, gv_ename(namegv));
+    return entersubop;
+}
+
+/*
+=for apidoc Am|OP *|ck_entersub_args_proto_or_list|OP *entersubop|GV *namegv|SV *protosv
+
+Performs the fixup of the arguments part of an C<entersub> op tree either
+based on a subroutine prototype or using default list-context processing.
+This is the standard treatment used on a subroutine call, not marked
+with C<&>, where the callee can be identified at compile time.
+
+I<protosv> supplies the subroutine prototype to be applied to the call,
+or indicates that there is no prototype.  It may be a normal scalar,
+in which case if it is defined then the string value will be used
+as a prototype, and if it is undefined then there is no prototype.
+Alternatively, for convenience, it may be a subroutine object (a C<CV*>
+that has been cast to C<SV*>), of which the prototype will be used if it
+has one.  The prototype (or lack thereof) supplied, in whichever form,
+does not need to match the actual callee referenced by the op tree.
+
+If the argument ops disagree with the prototype, for example by having
+an unacceptable number of arguments, a valid op tree is returned anyway.
+The error is reflected in the parser state, normally resulting in a single
+exception at the top level of parsing which covers all the compilation
+errors that occurred.  In the error message, the callee is referred to
+by the name defined by the I<namegv> parameter.
+
+=cut
+*/
+
+OP *
+Perl_ck_entersub_args_proto_or_list(pTHX_ OP *entersubop,
+	GV *namegv, SV *protosv)
+{
+    PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_PROTO_OR_LIST;
+    if (SvTYPE(protosv) == SVt_PVCV ? SvPOK(protosv) : SvOK(protosv))
+	return ck_entersub_args_proto(entersubop, namegv, protosv);
+    else
+	return ck_entersub_args_list(entersubop);
+}
+
+/*
+=for apidoc Am|void|cv_get_call_checker|CV *cv|Perl_call_checker *ckfun_p|SV **ckobj_p
+
+Retrieves the function that will be used to fix up a call to I<cv>.
+Specifically, the function is applied to an C<entersub> op tree for a
+subroutine call, not marked with C<&>, where the callee can be identified
+at compile time as I<cv>.
+
+The C-level function pointer is returned in I<*ckfun_p>, and an SV
+argument for it is returned in I<*ckobj_p>.  The function is intended
+to be called in this manner:
+
+    entersubop = (*ckfun_p)(aTHX_ entersubop, namegv, (*ckobj_p));
+
+In this call, I<entersubop> is a pointer to the C<entersub> op,
+which may be replaced by the check function, and I<namegv> is a GV
+supplying the name that should be used by the check function to refer
+to the callee of the C<entersub> op if it needs to emit any diagnostics.
+It is permitted to apply the check function in non-standard situations,
+such as to a call to a different subroutine or to a method call.
+
+By default, the function is
+L<Perl_ck_entersub_args_proto_or_list|/ck_entersub_args_proto_or_list>,
+and the SV parameter is I<cv> itself.  This implements standard
+prototype processing.  It can be changed, for a particular subroutine,
+by L</cv_set_call_checker>.
+
+=cut
+*/
+
+void
+Perl_cv_get_call_checker(pTHX_ CV *cv, Perl_call_checker *ckfun_p, SV **ckobj_p)
+{
+    MAGIC *callmg;
+    PERL_ARGS_ASSERT_CV_GET_CALL_CHECKER;
+    callmg = SvMAGICAL((SV*)cv) ? mg_find((SV*)cv, PERL_MAGIC_checkcall) : NULL;
+    if (callmg) {
+	*ckfun_p = DPTR2FPTR(Perl_call_checker, callmg->mg_ptr);
+	*ckobj_p = callmg->mg_obj;
+    } else {
+	*ckfun_p = Perl_ck_entersub_args_proto_or_list;
+	*ckobj_p = (SV*)cv;
+    }
+}
+
+/*
+=for apidoc Am|void|cv_set_call_checker|CV *cv|Perl_call_checker ckfun|SV *ckobj
+
+Sets the function that will be used to fix up a call to I<cv>.
+Specifically, the function is applied to an C<entersub> op tree for a
+subroutine call, not marked with C<&>, where the callee can be identified
+at compile time as I<cv>.
+
+The C-level function pointer is supplied in I<ckfun>, and an SV argument
+for it is supplied in I<ckobj>.  The function is intended to be called
+in this manner:
+
+    entersubop = ckfun(aTHX_ entersubop, namegv, ckobj);
+
+In this call, I<entersubop> is a pointer to the C<entersub> op,
+which may be replaced by the check function, and I<namegv> is a GV
+supplying the name that should be used by the check function to refer
+to the callee of the C<entersub> op if it needs to emit any diagnostics.
+It is permitted to apply the check function in non-standard situations,
+such as to a call to a different subroutine or to a method call.
+
+The current setting for a particular CV can be retrieved by
+L</cv_get_call_checker>.
+
+=cut
+*/
+
+void
+Perl_cv_set_call_checker(pTHX_ CV *cv, Perl_call_checker ckfun, SV *ckobj)
+{
+    PERL_ARGS_ASSERT_CV_SET_CALL_CHECKER;
+    if (ckfun == Perl_ck_entersub_args_proto_or_list && ckobj == (SV*)cv) {
+	if (SvMAGICAL((SV*)cv))
+	    mg_free_type((SV*)cv, PERL_MAGIC_checkcall);
+    } else {
+	MAGIC *callmg;
+	sv_magic((SV*)cv, &PL_sv_undef, PERL_MAGIC_checkcall, NULL, 0);
+	callmg = mg_find((SV*)cv, PERL_MAGIC_checkcall);
+	if (callmg->mg_flags & MGf_REFCOUNTED) {
+	    SvREFCNT_dec(callmg->mg_obj);
+	    callmg->mg_flags &= ~MGf_REFCOUNTED;
+	}
+	callmg->mg_ptr = FPTR2DPTR(char *, ckfun);
+	callmg->mg_obj = ckobj;
+	if (ckobj != (SV*)cv) {
+	    SvREFCNT_inc_simple_void_NN(ckobj);
+	    callmg->mg_flags |= MGf_REFCOUNTED;
+	}
+    }
+}
+
+OP *
+Perl_ck_subr(pTHX_ OP *o)
+{
+    OP *aop, *cvop;
+    CV *cv;
+    GV *namegv;
 
     PERL_ARGS_ASSERT_CK_SUBR;
+
+    aop = cUNOPx(o)->op_first;
+    if (!aop->op_sibling)
+	aop = cUNOPx(aop)->op_first;
+    aop = aop->op_sibling;
+    for (cvop = aop; cvop->op_sibling; cvop = cvop->op_sibling) ;
+    cv = rv2cv_op_cv(cvop, RV2CVOPCV_MARK_EARLY);
+    namegv = cv ? (GV*)rv2cv_op_cv(cvop, RV2CVOPCV_RETURN_NAME_GV) : NULL;
 
     o->op_private |= OPpENTERSUB_HASTARG;
     o->op_private |= (PL_hints & HINT_STRICT_REFS);
     if (PERLDB_SUB && PL_curstash != PL_debstash)
 	o->op_private |= OPpENTERSUB_DB;
-
-    for (cvop = o2; cvop->op_sibling; cvop = cvop->op_sibling) ;
     if (cvop->op_type == OP_RV2CV) {
 	o->op_private |= (cvop->op_private & OPpENTERSUB_AMPER);
-	op_null(cvop);		/* disable rv2cv */
-	if (!(o->op_private & OPpENTERSUB_AMPER)) {
-	    SVOP *tmpop = (SVOP*)((UNOP*)cvop)->op_first;
-	    GV *gv = NULL;
-	    switch (tmpop->op_type) {
-		case OP_GV: {
-		    gv = cGVOPx_gv(tmpop);
-		    cv = GvCVu(gv);
-		    if (!cv)
-			tmpop->op_private |= OPpEARLY_CV;
-		} break;
-		case OP_CONST: {
-		    SV *sv = cSVOPx_sv(tmpop);
-		    if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVCV)
-			cv = (CV*)SvRV(sv);
-		} break;
-	    }
-	    if (cv && SvPOK(cv)) {
-		STRLEN len;
-		namegv = gv && CvANON(cv) ? gv : CvGV(cv);
-		proto = SvPV(MUTABLE_SV(cv), len);
-		proto_end = proto + len;
-	    }
-	}
-    }
-    else if (cvop->op_type == OP_METHOD || cvop->op_type == OP_METHOD_NAMED) {
-	if (o2->op_type == OP_CONST)
-	    o2->op_private &= ~OPpCONST_STRICT;
-	else if (o2->op_type == OP_LIST) {
-	    OP * const sib = ((UNOP*)o2)->op_first->op_sibling;
+	op_null(cvop);
+    } else if (cvop->op_type == OP_METHOD || cvop->op_type == OP_METHOD_NAMED) {
+	if (aop->op_type == OP_CONST)
+	    aop->op_private &= ~OPpCONST_STRICT;
+	else if (aop->op_type == OP_LIST) {
+	    OP * const sib = ((UNOP*)aop)->op_first->op_sibling;
 	    if (sib && sib->op_type == OP_CONST)
 		sib->op_private &= ~OPpCONST_STRICT;
 	}
     }
 
-    if (!proto) {
-	while (o2 != cvop) {
-	    if (PL_madskills && o2->op_type == OP_STUB) {
-		o2 = o2->op_sibling;
-		continue;
-	    }
-
-	    /* Yes, this while loop is duplicated. But it's a lot clearer
-	       to see what is going on without that massive switch(*proto)
-	       block just here.  */
-
-	    list(o2); /* This is only called if !proto  */
-
-	    mod(o2, OP_ENTERSUB);
-	    o2 = o2->op_sibling;
-	} /* while */
+    if (!cv) {
+	return ck_entersub_args_list(o);
     } else {
-	while (o2 != cvop) {
-	    OP* o3;
-	    if (PL_madskills && o2->op_type == OP_STUB) {
-		o2 = o2->op_sibling;
-		continue;
-	    }
-	    if (PL_madskills && o2->op_type == OP_NULL)
-		o3 = ((UNOP*)o2)->op_first;
-	    else
-		o3 = o2;
-
-	    if (proto >= proto_end)
-		return too_many_arguments(o, gv_ename(namegv));
-
-	    switch (*proto) {
-	    case ';':
-		optional = 1;
-		proto++;
-		continue;
-	    case '_':
-		/* _ must be at the end */
-		if (proto[1] && proto[1] != ';')
-		    goto oops;
-	    case '$':
-		proto++;
-		arg++;
-		scalar(o2);
-		break;
-	    case '%':
-	    case '@':
-		list(o2);
-		arg++;
-		break;
-	    case '&':
-		proto++;
-		arg++;
-		if (o3->op_type != OP_REFGEN && o3->op_type != OP_UNDEF)
-		    bad_type(arg,
-			arg == 1 ? "block or sub {}" : "sub {}",
-			gv_ename(namegv), o3);
-		break;
-	    case '*':
-		/* '*' allows any scalar type, including bareword */
-		proto++;
-		arg++;
-		if (o3->op_type == OP_RV2GV)
-		    goto wrapref;	/* autoconvert GLOB -> GLOBref */
-		else if (o3->op_type == OP_CONST)
-		    o3->op_private &= ~OPpCONST_STRICT;
-		else if (o3->op_type == OP_ENTERSUB) {
-		    /* accidental subroutine, revert to bareword */
-		    OP *gvop = ((UNOP*)o3)->op_first;
-		    if (gvop && gvop->op_type == OP_NULL) {
-			gvop = ((UNOP*)gvop)->op_first;
-			if (gvop) {
-			    for (; gvop->op_sibling; gvop = gvop->op_sibling)
-				;
-			    if (gvop &&
-				(gvop->op_private & OPpENTERSUB_NOPAREN) &&
-				(gvop = ((UNOP*)gvop)->op_first) &&
-				gvop->op_type == OP_GV)
-			    {
-				GV * const gv = cGVOPx_gv(gvop);
-				OP * const sibling = o2->op_sibling;
-				SV * const n = newSVpvs("");
-#ifdef PERL_MAD
-				OP * const oldo2 = o2;
-#else
-				op_free(o2);
-#endif
-				gv_fullname4(n, gv, "", FALSE);
-				o2 = newSVOP(OP_CONST, 0, n);
-				op_getmad(oldo2,o2,'O');
-				prev->op_sibling = o2;
-				o2->op_sibling = sibling;
-			    }
-			}
-		    }
-		}
-		scalar(o2);
-		break;
-	    case '[': case ']':
-		 goto oops;
-		 break;
-	    case '\\':
-		proto++;
-		arg++;
-	    again:
-		switch (*proto++) {
-		case '[':
-		     if (contextclass++ == 0) {
-		          e = strchr(proto, ']');
-			  if (!e || e == proto)
-			       goto oops;
-		     }
-		     else
-			  goto oops;
-		     goto again;
-		     break;
-		case ']':
-		     if (contextclass) {
-		         const char *p = proto;
-			 const char *const end = proto;
-			 contextclass = 0;
-			 while (*--p != '[') {}
-			 bad_type(arg, Perl_form(aTHX_ "one of %.*s",
-						 (int)(end - p), p),
-				  gv_ename(namegv), o3);
-		     } else
-			  goto oops;
-		     break;
-		case '*':
-		     if (o3->op_type == OP_RV2GV)
-			  goto wrapref;
-		     if (!contextclass)
-			  bad_type(arg, "symbol", gv_ename(namegv), o3);
-		     break;
-		case '&':
-		     if (o3->op_type == OP_ENTERSUB)
-			  goto wrapref;
-		     if (!contextclass)
-			  bad_type(arg, "subroutine entry", gv_ename(namegv),
-				   o3);
-		     break;
-		case '$':
-		    if (o3->op_type == OP_RV2SV ||
-			o3->op_type == OP_PADSV ||
-			o3->op_type == OP_HELEM ||
-			o3->op_type == OP_AELEM)
-			 goto wrapref;
-		    if (!contextclass)
-			bad_type(arg, "scalar", gv_ename(namegv), o3);
-		     break;
-		case '@':
-		    if (o3->op_type == OP_RV2AV ||
-			o3->op_type == OP_PADAV)
-			 goto wrapref;
-		    if (!contextclass)
-			bad_type(arg, "array", gv_ename(namegv), o3);
-		    break;
-		case '%':
-		    if (o3->op_type == OP_RV2HV ||
-			o3->op_type == OP_PADHV)
-			 goto wrapref;
-		    if (!contextclass)
-			 bad_type(arg, "hash", gv_ename(namegv), o3);
-		    break;
-		wrapref:
-		    {
-			OP* const kid = o2;
-			OP* const sib = kid->op_sibling;
-			kid->op_sibling = 0;
-			o2 = newUNOP(OP_REFGEN, 0, kid);
-			o2->op_sibling = sib;
-			prev->op_sibling = o2;
-		    }
-		    if (contextclass && e) {
-			 proto = e + 1;
-			 contextclass = 0;
-		    }
-		    break;
-		default: goto oops;
-		}
-		if (contextclass)
-		     goto again;
-		break;
-	    case ' ':
-		proto++;
-		continue;
-	    default:
-	      oops:
-		Perl_croak(aTHX_ "Malformed prototype for %s: %"SVf,
-			   gv_ename(namegv), SVfARG(cv));
-	    }
-
-	    mod(o2, OP_ENTERSUB);
-	    prev = o2;
-	    o2 = o2->op_sibling;
-	} /* while */
-
-	if (o2 == cvop && *proto == '_') {
-	    /* generate an access to $_ */
-	    o2 = newDEFSVOP();
-	    o2->op_sibling = prev->op_sibling;
-	    prev->op_sibling = o2; /* instead of cvop */
-	}
-	if (!optional && proto_end > proto &&
-	    (*proto != '@' && *proto != '%' && *proto != ';' && *proto != '_'))
-	    return too_few_arguments(o, gv_ename(namegv));
+	Perl_call_checker ckfun;
+	SV *ckobj;
+	cv_get_call_checker(cv, &ckfun, &ckobj);
+	return ckfun(aTHX_ o, namegv, ckobj);
     }
-    return o;
 }
 
 OP *
