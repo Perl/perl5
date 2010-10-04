@@ -2440,6 +2440,11 @@ PP(pp_negate)
     {
 	SV * const sv = TOPs;
 	const int flags = SvFLAGS(sv);
+
+        if( looks_like_number( sv ) ){
+           SvIV_please( sv );
+        }   
+
 	if ((flags & SVf_IOK) || ((flags & (SVp_IOK | SVp_NOK)) == SVp_IOK)) {
 	    /* It's publicly an integer, or privately an integer-not-float */
 	oops_its_an_int:
