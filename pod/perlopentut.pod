@@ -117,11 +117,28 @@ like C<my $infile>, there's no clash and no need to worry about future
 conflicts.
 
 Another convenient behavior is that an indirect filehandle automatically
-closes when it goes out of scope or when you undefine it:
+closes when there are no more references to it:
 
     sub firstline {
 	open( my $in, shift ) && return scalar <$in>;
 	# no close() required
+    }
+
+Indirect filehandles also make it easy to pass filehandles to and return
+filehandles from subroutines:
+
+    for my $file ( qw(this.conf that.conf) ) {
+        my $fin = open_or_throw('<', $file);
+        process_conf( $fin );
+        # no close() needed
+    }
+
+    use Carp;
+    sub open_or_throw {
+        my ($mode, $filename) = @_;
+        open my $h, $mode, $filename
+            or croak "Could not open '$filename': $!";
+        return $h;
     }
 
 =head2 Pipe Opens
