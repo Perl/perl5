@@ -1959,7 +1959,7 @@ S_dup_attrlist(pTHX_ OP *o)
 	rop = NULL;
 	for (o = cLISTOPo->op_first; o; o=o->op_sibling) {
 	    if (o->op_type == OP_CONST)
-		rop = append_elem(OP_LIST, rop,
+		rop = op_append_elem(OP_LIST, rop,
 				  newSVOP(OP_CONST, o->op_flags,
 					  SvREFCNT_inc_NN(cSVOPo->op_sv)));
 	}
@@ -1995,9 +1995,9 @@ S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs, bool for_my)
 	Perl_load_module(aTHX_ PERL_LOADMOD_IMPORT_OPS,
 			 newSVpvs(ATTRSMODULE),
 			 NULL,
-			 prepend_elem(OP_LIST,
+			 op_prepend_elem(OP_LIST,
 				      newSVOP(OP_CONST, 0, stashsv),
-				      prepend_elem(OP_LIST,
+				      op_prepend_elem(OP_LIST,
 						   newSVOP(OP_CONST, 0,
 							   newRV(target)),
 						   dup_attrlist(attrs))));
@@ -2032,9 +2032,9 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
 
     arg = newOP(OP_PADSV, 0);
     arg->op_targ = target->op_targ;
-    arg = prepend_elem(OP_LIST,
+    arg = op_prepend_elem(OP_LIST,
 		       newSVOP(OP_CONST, 0, stashsv),
-		       prepend_elem(OP_LIST,
+		       op_prepend_elem(OP_LIST,
 				    newUNOP(OP_REFGEN, 0,
 					    mod(arg, OP_REFGEN)),
 				    dup_attrlist(attrs)));
@@ -2042,13 +2042,13 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
     /* Fake up a method call to import */
     meth = newSVpvs_share("import");
     imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL|OPf_WANT_VOID,
-		   append_elem(OP_LIST,
-			       prepend_elem(OP_LIST, pack, list(arg)),
+		   op_append_elem(OP_LIST,
+			       op_prepend_elem(OP_LIST, pack, list(arg)),
 			       newSVOP(OP_METHOD_NAMED, 0, meth)));
     imop->op_private |= OPpENTERSUB_NOMOD;
 
     /* Combine the ops. */
-    *imopsp = append_elem(OP_LIST, *imopsp, imop);
+    *imopsp = op_append_elem(OP_LIST, *imopsp, imop);
 }
 
 /*
@@ -2085,7 +2085,7 @@ Perl_apply_attrs_string(pTHX_ const char *stashpv, CV *cv,
         if (len) {
             const char * const sstr = attrstr;
             for (; !isSPACE(*attrstr) && len; --len, ++attrstr) ;
-            attrs = append_elem(OP_LIST, attrs,
+            attrs = op_append_elem(OP_LIST, attrs,
                                 newSVOP(OP_CONST, 0,
                                         newSVpvn(sstr, attrstr-sstr)));
         }
@@ -2093,9 +2093,9 @@ Perl_apply_attrs_string(pTHX_ const char *stashpv, CV *cv,
 
     Perl_load_module(aTHX_ PERL_LOADMOD_IMPORT_OPS,
 		     newSVpvs(ATTRSMODULE),
-                     NULL, prepend_elem(OP_LIST,
+                     NULL, op_prepend_elem(OP_LIST,
 				  newSVOP(OP_CONST, 0, newSVpv(stashpv,0)),
-				  prepend_elem(OP_LIST,
+				  op_prepend_elem(OP_LIST,
 					       newSVOP(OP_CONST, 0,
 						       newRV(MUTABLE_SV(cv))),
                                                attrs)));
@@ -2206,11 +2206,11 @@ Perl_my_attrs(pTHX_ OP *o, OP *attrs)
     o = my_kid(o, attrs, &rops);
     if (rops) {
 	if (maybe_scalar && o->op_type == OP_PADSV) {
-	    o = scalar(append_list(OP_LIST, (LISTOP*)rops, (LISTOP*)o));
+	    o = scalar(op_append_list(OP_LIST, rops, o));
 	    o->op_private |= OPpLVAL_INTRO;
 	}
 	else
-	    o = append_list(OP_LIST, (LISTOP*)o, (LISTOP*)rops);
+	    o = op_append_list(OP_LIST, o, rops);
     }
     PL_parser->in_my = FALSE;
     PL_parser->in_my_stash = NULL;
@@ -2284,7 +2284,7 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
 	if (right->op_type == OP_TRANS)
 	    o = newBINOP(OP_NULL, OPf_STACKED, scalar(newleft), right);
 	else
-	    o = prepend_elem(rtype, scalar(newleft), right);
+	    o = op_prepend_elem(rtype, scalar(newleft), right);
 	if (type == OP_NOT)
 	    return newUNOP(OP_NOT, 0, scalar(o));
 	return o;
@@ -2308,7 +2308,7 @@ Perl_scope(pTHX_ OP *o)
     dVAR;
     if (o) {
 	if (o->op_flags & OPf_PARENS || PERLDB_NOOPT || PL_tainting) {
-	    o = prepend_elem(OP_LINESEQ, newOP(OP_ENTER, 0), o);
+	    o = op_prepend_elem(OP_LINESEQ, newOP(OP_ENTER, 0), o);
 	    o->op_type = OP_LEAVE;
 	    o->op_ppaddr = PL_ppaddr[OP_LEAVE];
 	}
@@ -2523,7 +2523,7 @@ Perl_jmaybe(pTHX_ OP *o)
     if (o->op_type == OP_LIST) {
 	OP * const o2
 	    = newSVREF(newGVOP(OP_GV, 0, gv_fetchpvs(";", GV_ADD|GV_NOTQUAL, SVt_PV)));
-	o = convert(OP_JOIN, 0, prepend_elem(OP_LIST, o2, o));
+	o = convert(OP_JOIN, 0, op_prepend_elem(OP_LIST, o2, o));
     }
     return o;
 }
@@ -2730,10 +2730,27 @@ Perl_convert(pTHX_ I32 type, I32 flags, OP *o)
     return fold_constants(o);
 }
 
+/*
+=head1 Optree Manipulation Functions
+*/
+
 /* List constructors */
 
+/*
+=for apidoc Am|OP *|op_append_elem|I32 optype|OP *first|OP *last
+
+Append an item to the list of ops contained directly within a list-type
+op, returning the lengthened list.  I<first> is the list-type op,
+and I<last> is the op to append to the list.  I<optype> specifies the
+intended opcode for the list.  If I<first> is not already a list of the
+right type, it will be upgraded into one.  If either I<first> or I<last>
+is null, the other is returned unchanged.
+
+=cut
+*/
+
 OP *
-Perl_append_elem(pTHX_ I32 type, OP *first, OP *last)
+Perl_op_append_elem(pTHX_ I32 type, OP *first, OP *last)
 {
     if (!first)
 	return last;
@@ -2757,48 +2774,74 @@ Perl_append_elem(pTHX_ I32 type, OP *first, OP *last)
     return first;
 }
 
+/*
+=for apidoc Am|OP *|op_append_list|I32 optype|OP *first|OP *last
+
+Concatenate the lists of ops contained directly within two list-type ops,
+returning the combined list.  I<first> and I<last> are the list-type ops
+to concatenate.  I<optype> specifies the intended opcode for the list.
+If either I<first> or I<last> is not already a list of the right type,
+it will be upgraded into one.  If either I<first> or I<last> is null,
+the other is returned unchanged.
+
+=cut
+*/
+
 OP *
-Perl_append_list(pTHX_ I32 type, LISTOP *first, LISTOP *last)
+Perl_op_append_list(pTHX_ I32 type, OP *first, OP *last)
 {
     if (!first)
-	return (OP*)last;
+	return last;
 
     if (!last)
-	return (OP*)first;
+	return first;
 
     if (first->op_type != (unsigned)type)
-	return prepend_elem(type, (OP*)first, (OP*)last);
+	return op_prepend_elem(type, first, last);
 
     if (last->op_type != (unsigned)type)
-	return append_elem(type, (OP*)first, (OP*)last);
+	return op_append_elem(type, first, last);
 
-    first->op_last->op_sibling = last->op_first;
-    first->op_last = last->op_last;
+    ((LISTOP*)first)->op_last->op_sibling = ((LISTOP*)last)->op_first;
+    ((LISTOP*)first)->op_last = ((LISTOP*)last)->op_last;
     first->op_flags |= (last->op_flags & OPf_KIDS);
 
 #ifdef PERL_MAD
-    if (last->op_first && first->op_madprop) {
-	MADPROP *mp = last->op_first->op_madprop;
+    if (((LISTOP*)last)->op_first && first->op_madprop) {
+	MADPROP *mp = ((LISTOP*)last)->op_first->op_madprop;
 	if (mp) {
 	    while (mp->mad_next)
 		mp = mp->mad_next;
 	    mp->mad_next = first->op_madprop;
 	}
 	else {
-	    last->op_first->op_madprop = first->op_madprop;
+	    ((LISTOP*)last)->op_first->op_madprop = first->op_madprop;
 	}
     }
     first->op_madprop = last->op_madprop;
     last->op_madprop = 0;
 #endif
 
-    S_op_destroy(aTHX_ (OP*)last);
+    S_op_destroy(aTHX_ last);
 
-    return (OP*)first;
+    return first;
 }
 
+/*
+=for apidoc Am|OP *|op_prepend_elem|I32 optype|OP *first|OP *last
+
+Prepend an item to the list of ops contained directly within a list-type
+op, returning the lengthened list.  I<first> is the op to prepend to the
+list, and I<last> is the list-type op.  I<optype> specifies the intended
+opcode for the list.  If I<last> is not already a list of the right type,
+it will be upgraded into one.  If either I<first> or I<last> is null,
+the other is returned unchanged.
+
+=cut
+*/
+
 OP *
-Perl_prepend_elem(pTHX_ I32 type, OP *first, OP *last)
+Perl_op_prepend_elem(pTHX_ I32 type, OP *first, OP *last)
 {
     if (!first)
 	return last;
@@ -3824,7 +3867,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	    expr->op_next = (OP*)rcop;
 	}
 
-	prepend_elem(o->op_type, scalar((OP*)rcop), o);
+	op_prepend_elem(o->op_type, scalar((OP*)rcop), o);
     }
 
     if (repl) {
@@ -3878,7 +3921,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 		     || RX_EXTFLAGS(PM_GETRE(pm)) & RXf_EVAL_SEEN)))
 	{
 	    pm->op_pmflags |= PMf_CONST;	/* const for long enough */
-	    prepend_elem(o->op_type, scalar(repl), o);
+	    op_prepend_elem(o->op_type, scalar(repl), o);
 	}
 	else {
 	    if (curop == repl && !PM_GETRE(pm)) { /* Has variables. */
@@ -4148,8 +4191,8 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	    /* Fake up a method call to VERSION */
 	    meth = newSVpvs_share("VERSION");
 	    veop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
-			    append_elem(OP_LIST,
-					prepend_elem(OP_LIST, pack, list(version)),
+			    op_append_elem(OP_LIST,
+					op_prepend_elem(OP_LIST, pack, list(version)),
 					newSVOP(OP_METHOD_NAMED, 0, meth)));
 	}
     }
@@ -4178,8 +4221,8 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	meth = aver
 	    ? newSVpvs_share("import") : newSVpvs_share("unimport");
 	imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
-		       append_elem(OP_LIST,
-				   prepend_elem(OP_LIST, pack, list(arg)),
+		       op_append_elem(OP_LIST,
+				   op_prepend_elem(OP_LIST, pack, list(arg)),
 				   newSVOP(OP_METHOD_NAMED, 0, meth)));
     }
 
@@ -4188,8 +4231,8 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	newSVOP(OP_CONST, 0, newSVpvs_share("BEGIN")),
 	NULL,
 	NULL,
-	append_elem(OP_LINESEQ,
-	    append_elem(OP_LINESEQ,
+	op_append_elem(OP_LINESEQ,
+	    op_append_elem(OP_LINESEQ,
 	        newSTATEOP(0, NULL, newUNOP(OP_REQUIRE, 0, idop)),
 	        newSTATEOP(0, NULL, veop)),
 	    newSTATEOP(0, NULL, imop) ));
@@ -4297,7 +4340,7 @@ Perl_vload_module(pTHX_ U32 flags, SV *name, SV *ver, va_list *args)
 	imop = NULL;
 	sv = va_arg(*args, SV*);
 	while (sv) {
-	    imop = append_elem(OP_LIST, imop, newSVOP(OP_CONST, 0, sv));
+	    imop = op_append_elem(OP_LIST, imop, newSVOP(OP_CONST, 0, sv));
 	    sv = va_arg(*args, SV*);
 	}
     }
@@ -4335,7 +4378,7 @@ Perl_dofile(pTHX_ OP *term, I32 force_builtin)
 
     if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) {
 	doop = ck_subr(newUNOP(OP_ENTERSUB, OPf_STACKED,
-			       append_elem(OP_LIST, term,
+			       op_append_elem(OP_LIST, term,
 					   scalar(newUNOP(OP_RV2CV, 0,
 							  newGVOP(OP_GV, 0, gv))))));
     }
@@ -4775,7 +4818,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 
     if (flags & OPf_SPECIAL)
 	op_null((OP*)cop);
-    return prepend_elem(OP_LINESEQ, (OP*)cop, o);
+    return op_prepend_elem(OP_LINESEQ, (OP*)cop, o);
 }
 
 /*
@@ -5216,11 +5259,11 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
 	}
     }
 
-    /* if block is null, the next append_elem() would put UNSTACK, a scalar
+    /* if block is null, the next op_append_elem() would put UNSTACK, a scalar
      * op, in listop. This is wrong. [perl #27024] */
     if (!block)
 	block = newOP(OP_NULL, 0);
-    listop = append_elem(OP_LINESEQ, block, newOP(OP_UNSTACK, 0));
+    listop = op_append_elem(OP_LINESEQ, block, newOP(OP_UNSTACK, 0));
     o = new_logop(OP_AND, 0, &expr, &listop);
 
     if (listop)
@@ -5318,11 +5361,11 @@ whileline, OP *expr, OP *block, OP *cont, I32 has_my)
 	OP * const unstack = newOP(OP_UNSTACK, 0);
 	if (!next)
 	    next = unstack;
-	cont = append_elem(OP_LINESEQ, cont, unstack);
+	cont = op_append_elem(OP_LINESEQ, cont, unstack);
     }
 
     assert(block);
-    listop = append_list(OP_LINESEQ, (LISTOP*)block, (LISTOP*)cont);
+    listop = op_append_list(OP_LINESEQ, block, cont);
     assert(listop);
     redo = LINKLIST(listop);
 
@@ -5495,7 +5538,7 @@ Perl_newFOROP(pTHX_ I32 flags, char *label, line_t forline, OP *sv, OP *expr, OP
     }
 
     loop = (LOOP*)list(convert(OP_ENTERITER, iterflags,
-			       append_elem(OP_LIST, expr, scalar(sv))));
+			       op_append_elem(OP_LIST, expr, scalar(sv))));
     assert(!loop->op_next);
     /* for my  $x () sets OPpLVAL_INTRO;
      * for our $x () sets OPpOUR_INTRO */
@@ -5788,7 +5831,7 @@ Perl_newWHENOP(pTHX_ OP *cond, OP *block)
     
     return newGIVWHENOP(
 	cond_op,
-	append_elem(block->op_type, block, newOP(OP_BREAK, OPf_SPECIAL)),
+	op_append_elem(block->op_type, block, newOP(OP_BREAK, OPf_SPECIAL)),
 	OP_ENTERWHEN, OP_LEAVEWHEN, 0);
 }
 
@@ -7032,7 +7075,7 @@ Perl_ck_eval(pTHX_ OP *o)
 	    /* establish postfix order */
 	    enter->op_next = (OP*)enter;
 
-	    o = prepend_elem(OP_LINESEQ, (OP*)enter, (OP*)kid);
+	    o = op_prepend_elem(OP_LINESEQ, (OP*)enter, (OP*)kid);
 	    o->op_type = OP_LEAVETRY;
 	    o->op_ppaddr = PL_ppaddr[OP_LEAVETRY];
 	    enter->op_other = o;
@@ -7565,7 +7608,7 @@ Perl_ck_glob(pTHX_ OP *o)
 
     o = ck_fun(o);
     if ((o->op_flags & OPf_KIDS) && !cLISTOPo->op_first->op_sibling)
-	append_elem(OP_GLOB, o, newDEFSVOP());
+	op_append_elem(OP_GLOB, o, newDEFSVOP());
 
     if (!((gv = gv_fetchpvs("glob", GV_NOTQUAL, SVt_PVCV))
 	  && GvCVu(gv) && GvIMPORTED_CV(gv)))
@@ -7591,7 +7634,7 @@ Perl_ck_glob(pTHX_ OP *o)
 #endif /* PERL_EXTERNAL_GLOB */
 
     if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) {
-	append_elem(OP_GLOB, o,
+	op_append_elem(OP_GLOB, o,
 		    newSVOP(OP_CONST, 0, newSViv(PL_glob_index++)));
 	o->op_type = OP_LIST;
 	o->op_ppaddr = PL_ppaddr[OP_LIST];
@@ -7599,7 +7642,7 @@ Perl_ck_glob(pTHX_ OP *o)
 	cLISTOPo->op_first->op_ppaddr = PL_ppaddr[OP_PUSHMARK];
 	cLISTOPo->op_first->op_targ = 0;
 	o = newUNOP(OP_ENTERSUB, OPf_STACKED,
-		    append_elem(OP_LIST, o,
+		    op_append_elem(OP_LIST, o,
 				scalar(newUNOP(OP_RV2CV, 0,
 					       newGVOP(OP_GV, 0, gv)))));
 	o = newUNOP(OP_NULL, 0, ck_subr(o));
@@ -7608,7 +7651,7 @@ Perl_ck_glob(pTHX_ OP *o)
     }
     gv = newGVgen("main");
     gv_IOadd(gv);
-    append_elem(OP_GLOB, o, newGVOP(OP_GV, 0, gv));
+    op_append_elem(OP_GLOB, o, newGVOP(OP_GV, 0, gv));
     scalarkids(o);
     return o;
 }
@@ -7795,7 +7838,7 @@ Perl_ck_listiob(pTHX_ OP *o)
     }
 
     if (!kid)
-	append_elem(o->op_type, o, newDEFSVOP());
+	op_append_elem(o->op_type, o, newDEFSVOP());
 
     return listkids(o);
 }
@@ -8093,7 +8136,7 @@ Perl_ck_require(pTHX_ OP *o)
 	op_free(o);
 #endif
 	newop = ck_subr(newUNOP(OP_ENTERSUB, OPf_STACKED,
-				append_elem(OP_LIST, kid,
+				op_append_elem(OP_LIST, kid,
 					    scalar(newUNOP(OP_RV2CV, 0,
 							   newGVOP(OP_GV, 0,
 								   gv))))));
@@ -8388,13 +8431,13 @@ Perl_ck_split(pTHX_ OP *o)
     }
 
     if (!kid->op_sibling)
-	append_elem(OP_SPLIT, o, newDEFSVOP());
+	op_append_elem(OP_SPLIT, o, newDEFSVOP());
 
     kid = kid->op_sibling;
     scalar(kid);
 
     if (!kid->op_sibling)
-	append_elem(OP_SPLIT, o, newSVOP(OP_CONST, 0, newSViv(0)));
+	op_append_elem(OP_SPLIT, o, newSVOP(OP_CONST, 0, newSViv(0)));
     assert(kid->op_sibling);
 
     kid = kid->op_sibling;

@@ -418,6 +418,36 @@ THX_ck_entersub_multi_sum(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     return sumop;
 }
 
+STATIC void test_op_list_describe_part(SV *res, OP *o);
+STATIC void
+test_op_list_describe_part(SV *res, OP *o)
+{
+    sv_catpv(res, PL_op_name[o->op_type]);
+    switch (o->op_type) {
+	case OP_CONST: {
+	    sv_catpvf(res, "(%d)", (int)SvIV(cSVOPx(o)->op_sv));
+	} break;
+    }
+    if (o->op_flags & OPf_KIDS) {
+	OP *k;
+	sv_catpvs(res, "[");
+	for (k = cUNOPx(o)->op_first; k; k = k->op_sibling)
+	    test_op_list_describe_part(res, k);
+	sv_catpvs(res, "]");
+    } else {
+	sv_catpvs(res, ".");
+    }
+}
+
+STATIC char *
+test_op_list_describe(OP *o)
+{
+    SV *res = sv_2mortal(newSVpvs(""));
+    if (o)
+	test_op_list_describe_part(res, o);
+    return SvPVX(res);
+}
+
 /** RPN keyword parser **/
 
 #define sv_is_glob(sv) (SvTYPE(sv) == SVt_PVGV)
@@ -595,8 +625,7 @@ static OP *THX_parse_keyword_swaptwostmts(pTHX)
     b = parse_fullstmt(0);
     if(a && b)
 	PL_hints |= HINT_BLOCK_SCOPE;
-    /* should use append_list(), but that's not part of the public API */
-    return !a ? b : !b ? a : newLISTOP(OP_LINESEQ, 0, b, a);
+    return op_append_list(OP_LINESEQ, b, a);
 }
 
 #define parse_keyword_looprest() THX_parse_keyword_looprest(aTHX)
@@ -1788,6 +1817,123 @@ test_copyhints()
 	sv_setiv_mg(*hv_fetchs(b, "t0", 1), 789);
 	if (SvIV(cop_hints_fetchpvs(&PL_compiling, "t0")) != 789) croak_fail();
 	LEAVE;
+
+void
+test_op_list()
+    PREINIT:
+	OP *a;
+    CODE:
+#define iv_op(iv) newSVOP(OP_CONST, 0, newSViv(iv))
+#define check_op(o, expect) \
+    do { \
+	if (strcmp(test_op_list_describe(o), (expect))) \
+	    croak("fail %s %s", test_op_list_describe(o), (expect)); \
+    } while(0)
+	a = op_append_elem(OP_LIST, NULL, NULL);
+	check_op(a, "");
+	a = op_append_elem(OP_LIST, iv_op(1), a);
+	check_op(a, "const(1).");
+	a = op_append_elem(OP_LIST, NULL, a);
+	check_op(a, "const(1).");
+	a = op_append_elem(OP_LIST, a, iv_op(2));
+	check_op(a, "list[pushmark.const(1).const(2).]");
+	a = op_append_elem(OP_LIST, a, iv_op(3));
+	check_op(a, "list[pushmark.const(1).const(2).const(3).]");
+	a = op_append_elem(OP_LIST, a, NULL);
+	check_op(a, "list[pushmark.const(1).const(2).const(3).]");
+	a = op_append_elem(OP_LIST, NULL, a);
+	check_op(a, "list[pushmark.const(1).const(2).const(3).]");
+	a = op_append_elem(OP_LIST, iv_op(4), a);
+	check_op(a, "list[pushmark.const(4)."
+		"list[pushmark.const(1).const(2).const(3).]]");
+	a = op_append_elem(OP_LIST, a, iv_op(5));
+	check_op(a, "list[pushmark.const(4)."
+		"list[pushmark.const(1).const(2).const(3).]const(5).]");
+	a = op_append_elem(OP_LIST, a, 
+		op_append_elem(OP_LIST, iv_op(7), iv_op(6)));
+	check_op(a, "list[pushmark.const(4)."
+		"list[pushmark.const(1).const(2).const(3).]const(5)."
+		"list[pushmark.const(7).const(6).]]");
+	op_free(a);
+	a = op_append_elem(OP_LINESEQ, iv_op(1), iv_op(2));
+	check_op(a, "lineseq[const(1).const(2).]");
+	a = op_append_elem(OP_LINESEQ, a, iv_op(3));
+	check_op(a, "lineseq[const(1).const(2).const(3).]");
+	op_free(a);
+	a = op_append_elem(OP_LINESEQ,
+		op_append_elem(OP_LIST, iv_op(1), iv_op(2)),
+		iv_op(3));
+	check_op(a, "lineseq[list[pushmark.const(1).const(2).]const(3).]");
+	op_free(a);
+	a = op_prepend_elem(OP_LIST, NULL, NULL);
+	check_op(a, "");
+	a = op_prepend_elem(OP_LIST, a, iv_op(1));
+	check_op(a, "const(1).");
+	a = op_prepend_elem(OP_LIST, a, NULL);
+	check_op(a, "const(1).");
+	a = op_prepend_elem(OP_LIST, iv_op(2), a);
+	check_op(a, "list[pushmark.const(2).const(1).]");
+	a = op_prepend_elem(OP_LIST, iv_op(3), a);
+	check_op(a, "list[pushmark.const(3).const(2).const(1).]");
+	a = op_prepend_elem(OP_LIST, NULL, a);
+	check_op(a, "list[pushmark.const(3).const(2).const(1).]");
+	a = op_prepend_elem(OP_LIST, a, NULL);
+	check_op(a, "list[pushmark.const(3).const(2).const(1).]");
+	a = op_prepend_elem(OP_LIST, a, iv_op(4));
+	check_op(a, "list[pushmark."
+		"list[pushmark.const(3).const(2).const(1).]const(4).]");
+	a = op_prepend_elem(OP_LIST, iv_op(5), a);
+	check_op(a, "list[pushmark.const(5)."
+		"list[pushmark.const(3).const(2).const(1).]const(4).]");
+	a = op_prepend_elem(OP_LIST,
+		op_prepend_elem(OP_LIST, iv_op(6), iv_op(7)), a);
+	check_op(a, "list[pushmark.list[pushmark.const(6).const(7).]const(5)."
+		"list[pushmark.const(3).const(2).const(1).]const(4).]");
+	op_free(a);
+	a = op_prepend_elem(OP_LINESEQ, iv_op(2), iv_op(1));
+	check_op(a, "lineseq[const(2).const(1).]");
+	a = op_prepend_elem(OP_LINESEQ, iv_op(3), a);
+	check_op(a, "lineseq[const(3).const(2).const(1).]");
+	op_free(a);
+	a = op_prepend_elem(OP_LINESEQ, iv_op(3),
+		op_prepend_elem(OP_LIST, iv_op(2), iv_op(1)));
+	check_op(a, "lineseq[const(3).list[pushmark.const(2).const(1).]]");
+	op_free(a);
+	a = op_append_list(OP_LINESEQ, NULL, NULL);
+	check_op(a, "");
+	a = op_append_list(OP_LINESEQ, iv_op(1), a);
+	check_op(a, "const(1).");
+	a = op_append_list(OP_LINESEQ, NULL, a);
+	check_op(a, "const(1).");
+	a = op_append_list(OP_LINESEQ, a, iv_op(2));
+	check_op(a, "lineseq[const(1).const(2).]");
+	a = op_append_list(OP_LINESEQ, a, iv_op(3));
+	check_op(a, "lineseq[const(1).const(2).const(3).]");
+	a = op_append_list(OP_LINESEQ, iv_op(4), a);
+	check_op(a, "lineseq[const(4).const(1).const(2).const(3).]");
+	a = op_append_list(OP_LINESEQ, a, NULL);
+	check_op(a, "lineseq[const(4).const(1).const(2).const(3).]");
+	a = op_append_list(OP_LINESEQ, NULL, a);
+	check_op(a, "lineseq[const(4).const(1).const(2).const(3).]");
+	a = op_append_list(OP_LINESEQ, a,
+		op_append_list(OP_LINESEQ, iv_op(5), iv_op(6)));
+	check_op(a, "lineseq[const(4).const(1).const(2).const(3)."
+		"const(5).const(6).]");
+	op_free(a);
+	a = op_append_list(OP_LINESEQ,
+		op_append_list(OP_LINESEQ, iv_op(1), iv_op(2)),
+		op_append_list(OP_LIST, iv_op(3), iv_op(4)));
+	check_op(a, "lineseq[const(1).const(2)."
+		"list[pushmark.const(3).const(4).]]");
+	op_free(a);
+	a = op_append_list(OP_LINESEQ,
+		op_append_list(OP_LIST, iv_op(1), iv_op(2)),
+		op_append_list(OP_LINESEQ, iv_op(3), iv_op(4)));
+	check_op(a, "lineseq[list[pushmark.const(1).const(2).]"
+		"const(3).const(4).]");
+	op_free(a);
+#undef iv_op
+#undef check_op
 
 void
 peep_enable ()

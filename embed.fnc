@@ -173,10 +173,9 @@ XEop	|bool	|try_amagic_un	|int method|int flags
 Ap	|SV*	|amagic_call	|NN SV* left|NN SV* right|int method|int dir
 Ap	|int	|Gv_AMupdate	|NN HV* stash|bool destructing
 ApR	|CV*	|gv_handler	|NULLOK HV* stash|I32 id
-: Used in perly.y
-p	|OP*	|append_elem	|I32 optype|NULLOK OP* first|NULLOK OP* last
-: Used in perly.y
-p	|OP*	|append_list	|I32 optype|NULLOK LISTOP* first|NULLOK LISTOP* last
+Apd	|OP*	|op_append_elem	|I32 optype|NULLOK OP* first|NULLOK OP* last
+Apd	|OP*	|op_append_list	|I32 optype|NULLOK OP* first|NULLOK OP* last
+Apd	|OP*	|op_prepend_elem|I32 optype|NULLOK OP* first|NULLOK OP* last
 : FIXME - this is only called by pp_chown. They should be merged.
 p	|I32	|apply		|I32 type|NN SV** mark|NN SV** sp
 ApM	|void	|apply_attrs_string|NN const char *stashpv|NN CV *cv|NN const char *attrstr|STRLEN len
@@ -952,8 +951,6 @@ p	|OP*	|pmruntime	|NN OP *o|NN OP *expr|bool isreg
 s	|OP*	|pmtrans	|NN OP* o|NN OP* expr|NN OP* repl
 #endif
 Ap	|void	|pop_scope
-: Used in perly.y
-p	|OP*	|prepend_elem	|I32 optype|NULLOK OP* head|NULLOK OP* tail
 Ap	|void	|push_scope
 Amb	|OP*	|ref		|NULLOK OP* o|I32 type
 #if defined(PERL_IN_OP_C)

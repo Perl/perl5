@@ -408,11 +408,14 @@ Perl_new_version
 Perl_new_warnings_bitfield
 Perl_ninstr
 Perl_nothreadhook
+Perl_op_append_elem
+Perl_op_append_list
 Perl_op_clear
 Perl_op_contextualize
 Perl_op_dump
 Perl_op_free
 Perl_op_null
+Perl_op_prepend_elem
 Perl_op_refcnt_lock
 Perl_op_refcnt_unlock
 Perl_pack_cat

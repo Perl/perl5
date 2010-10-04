@@ -364,10 +364,13 @@
 #define new_version(a)		Perl_new_version(aTHX_ a)
 #define ninstr			Perl_ninstr
 #define nothreadhook()		Perl_nothreadhook(aTHX)
+#define op_append_elem(a,b,c)	Perl_op_append_elem(aTHX_ a,b,c)
+#define op_append_list(a,b,c)	Perl_op_append_list(aTHX_ a,b,c)
 #define op_contextualize(a,b)	Perl_op_contextualize(aTHX_ a,b)
 #define op_dump(a)		Perl_op_dump(aTHX_ a)
 #define op_free(a)		Perl_op_free(aTHX_ a)
 #define op_null(a)		Perl_op_null(aTHX_ a)
+#define op_prepend_elem(a,b,c)	Perl_op_prepend_elem(aTHX_ a,b,c)
 #define op_refcnt_lock()	Perl_op_refcnt_lock(aTHX)
 #define op_refcnt_unlock()	Perl_op_refcnt_unlock(aTHX)
 #define pack_cat(a,b,c,d,e,f,g)	Perl_pack_cat(aTHX_ a,b,c,d,e,f,g)
@@ -899,8 +902,6 @@
 #endif
 #ifdef PERL_CORE
 #define allocmy(a,b,c)		Perl_allocmy(aTHX_ a,b,c)
-#define append_elem(a,b,c)	Perl_append_elem(aTHX_ a,b,c)
-#define append_list(a,b,c)	Perl_append_list(aTHX_ a,b,c)
 #define apply(a,b,c)		Perl_apply(aTHX_ a,b,c)
 #define bind_match(a,b,c)	Perl_bind_match(aTHX_ a,b,c)
 #define block_end(a,b)		Perl_block_end(aTHX_ a,b)
@@ -1441,7 +1442,6 @@
 #define pp_wantarray()		Perl_pp_wantarray(aTHX)
 #define pp_warn()		Perl_pp_warn(aTHX)
 #define pp_xor()		Perl_pp_xor(aTHX)
-#define prepend_elem(a,b,c)	Perl_prepend_elem(aTHX_ a,b,c)
 #define report_evil_fh(a,b,c)	Perl_report_evil_fh(aTHX_ a,b,c)
 #define rpeep(a)		Perl_rpeep(aTHX_ a)
 #define rsignal_restore(a,b)	Perl_rsignal_restore(aTHX_ a,b)

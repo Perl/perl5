@@ -226,14 +226,10 @@ lineseq	:	/* NULL */
 			{ $$ = (OP*)NULL; }
 	|	lineseq decl
 			{
-			$$ = IF_MAD(
-				append_list(OP_LINESEQ,
-			    	    (LISTOP*)$1, (LISTOP*)$2),
-				$1);
+			  $$ = IF_MAD(op_append_list(OP_LINESEQ, $1, $2), $1);
 			}
 	|	lineseq line
-			{   $$ = append_list(OP_LINESEQ,
-				(LISTOP*)$1, (LISTOP*)$2);
+			{   $$ = op_append_list(OP_LINESEQ, $1, $2);
 			    PL_pad_reset_pending = TRUE;
 			    if ($1 && $2)
 				PL_hints |= HINT_BLOCK_SCOPE;
@@ -451,7 +447,7 @@ loop	:	label WHILE lpar_or_qw remember texpr ')' mintro mblock cont
 						IVAL($2), scalar($7),
 						$12, $10, $9));
 #ifdef MAD
-			  forop = newUNOP(OP_NULL, 0, append_elem(OP_LINESEQ,
+			  forop = newUNOP(OP_NULL, 0, op_append_elem(OP_LINESEQ,
 				newSTATEOP(0,
 					   CopLABEL_alloc(($1)->tk_lval.pval),
 					   ($5 ? $5 : newOP(OP_NULL, 0)) ),
@@ -465,7 +461,7 @@ loop	:	label WHILE lpar_or_qw remember texpr ')' mintro mblock cont
 			  token_getmad($1,forop,'L');
 #else
 			  if ($5) {
-				forop = append_elem(OP_LINESEQ,
+				forop = op_append_elem(OP_LINESEQ,
                                         newSTATEOP(0, CopLABEL_alloc($1), $5),
 					forop);
 			  }
@@ -779,7 +775,7 @@ argexpr	:	argexpr ','
 #ifdef MAD
 			  OP* op = newNULLLIST();
 			  token_getmad($2,op,',');
-			  $$ = append_elem(OP_LIST, $1, op);
+			  $$ = op_append_elem(OP_LIST, $1, op);
 #else
 			  $$ = $1;
 #endif
@@ -791,7 +787,7 @@ argexpr	:	argexpr ','
 			      term = newUNOP(OP_NULL, 0, term);
 			      token_getmad($2,term,',');
 			  )
-			  $$ = append_elem(OP_LIST, $1, term);
+			  $$ = op_append_elem(OP_LIST, $1, term);
 			}
 	|	term %prec PREC_LOW
 	;
@@ -799,20 +795,20 @@ argexpr	:	argexpr ','
 /* List operators */
 listop	:	LSTOP indirob argexpr /* map {...} @args or print $fh @args */
 			{ $$ = convert(IVAL($1), OPf_STACKED,
-				prepend_elem(OP_LIST, newGVREF(IVAL($1),$2), $3) );
+				op_prepend_elem(OP_LIST, newGVREF(IVAL($1),$2), $3) );
 			  TOKEN_GETMAD($1,$$,'o');
 			}
 	|	FUNC '(' indirob expr ')'      /* print ($fh @args */
 			{ $$ = convert(IVAL($1), OPf_STACKED,
-				prepend_elem(OP_LIST, newGVREF(IVAL($1),$3), $4) );
+				op_prepend_elem(OP_LIST, newGVREF(IVAL($1),$3), $4) );
 			  TOKEN_GETMAD($1,$$,'o');
 			  TOKEN_GETMAD($2,$$,'(');
 			  TOKEN_GETMAD($5,$$,')');
 			}
 	|	term ARROW method lpar_or_qw listexprcom ')' /* $foo->bar(list) */
 			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
-				append_elem(OP_LIST,
-				    prepend_elem(OP_LIST, scalar($1), $5),
+				op_append_elem(OP_LIST,
+				    op_prepend_elem(OP_LIST, scalar($1), $5),
 				    newUNOP(OP_METHOD, 0, $3)));
 			  TOKEN_GETMAD($2,$$,'A');
 			  TOKEN_GETMAD($4,$$,'(');
@@ -820,20 +816,20 @@ listop	:	LSTOP indirob argexpr /* map {...} @args or print $fh @args */
 			}
 	|	term ARROW method                     /* $foo->bar */
 			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
-				append_elem(OP_LIST, scalar($1),
+				op_append_elem(OP_LIST, scalar($1),
 				    newUNOP(OP_METHOD, 0, $3)));
 			  TOKEN_GETMAD($2,$$,'A');
 			}
 	|	METHOD indirob listexpr              /* new Class @args */
 			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
-				append_elem(OP_LIST,
-				    prepend_elem(OP_LIST, $2, $3),
+				op_append_elem(OP_LIST,
+				    op_prepend_elem(OP_LIST, $2, $3),
 				    newUNOP(OP_METHOD, 0, $1)));
 			}
 	|	FUNCMETH indirob '(' listexprcom ')' /* method $object (@args) */
 			{ $$ = convert(OP_ENTERSUB, OPf_STACKED,
-				append_elem(OP_LIST,
-				    prepend_elem(OP_LIST, $2, $4),
+				op_append_elem(OP_LIST,
+				    op_prepend_elem(OP_LIST, $2, $4),
 				    newUNOP(OP_METHOD, 0, $1)));
 			  TOKEN_GETMAD($3,$$,'(');
 			  TOKEN_GETMAD($5,$$,')');
@@ -853,8 +849,8 @@ listop	:	LSTOP indirob argexpr /* map {...} @args or print $fh @args */
 			  $<opval>$ = newANONATTRSUB($2, 0, (OP*)NULL, $3); }
 		    listexpr		%prec LSTOP  /* ... @bar */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
-				 append_elem(OP_LIST,
-				   prepend_elem(OP_LIST, $<opval>4, $5), $1));
+				 op_append_elem(OP_LIST,
+				   op_prepend_elem(OP_LIST, $<opval>4, $5), $1));
 			}
 	;
 
@@ -928,7 +924,7 @@ subscripted:    star '{' expr ';' '}'        /* *main::{something} */
 			}
 	|	term ARROW '(' expr ')'     /* $subref->(@args) */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
-				   append_elem(OP_LIST, $4,
+				   op_append_elem(OP_LIST, $4,
 				       newCVREF(0, scalar($1))));
 			  TOKEN_GETMAD($2,$$,'a');
 			  TOKEN_GETMAD($3,$$,'(');
@@ -937,7 +933,7 @@ subscripted:    star '{' expr ';' '}'        /* *main::{something} */
 
 	|	subscripted lpar_or_qw expr ')'   /* $foo->{bar}->(@args) */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
-				   append_elem(OP_LIST, $3,
+				   op_append_elem(OP_LIST, $3,
 					       newCVREF(0, scalar($1))));
 			  TOKEN_GETMAD($2,$$,'(');
 			  TOKEN_GETMAD($4,$$,')');
@@ -1129,7 +1125,7 @@ termdo	:       DO term	%prec UNIOP                     /* do $filename */
 	|	DO WORD lpar_or_qw ')'                  /* do somesub() */
 			{ $$ = newUNOP(OP_ENTERSUB,
 			    OPf_SPECIAL|OPf_STACKED,
-			    prepend_elem(OP_LIST,
+			    op_prepend_elem(OP_LIST,
 				scalar(newCVREF(
 				    (OPpENTERSUB_AMPER<<8),
 				    scalar($2)
@@ -1141,7 +1137,7 @@ termdo	:       DO term	%prec UNIOP                     /* do $filename */
 	|	DO WORD lpar_or_qw expr ')'             /* do somesub(@args) */
 			{ $$ = newUNOP(OP_ENTERSUB,
 			    OPf_SPECIAL|OPf_STACKED,
-			    append_elem(OP_LIST,
+			    op_append_elem(OP_LIST,
 				$4,
 				scalar(newCVREF(
 				    (OPpENTERSUB_AMPER<<8),
@@ -1153,7 +1149,7 @@ termdo	:       DO term	%prec UNIOP                     /* do $filename */
 			}
 	|	DO scalar lpar_or_qw ')'                /* do $subref () */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_SPECIAL|OPf_STACKED,
-			    prepend_elem(OP_LIST,
+			    op_prepend_elem(OP_LIST,
 				scalar(newCVREF(0,scalar($2))), (OP*)NULL)); dep();
 			  TOKEN_GETMAD($1,$$,'o');
 			  TOKEN_GETMAD($3,$$,'(');
@@ -1161,7 +1157,7 @@ termdo	:       DO term	%prec UNIOP                     /* do $filename */
 			}
 	|	DO scalar lpar_or_qw expr ')'           /* do $subref (@args) */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_SPECIAL|OPf_STACKED,
-			    prepend_elem(OP_LIST,
+			    op_prepend_elem(OP_LIST,
 				$4,
 				scalar(newCVREF(0,scalar($2))))); dep();
 			  TOKEN_GETMAD($1,$$,'o');
@@ -1215,7 +1211,7 @@ term	:	termbinop
 	|       subscripted
 			{ $$ = $1; }
 	|	ary '[' expr ']'                     /* array slice */
-			{ $$ = prepend_elem(OP_ASLICE,
+			{ $$ = op_prepend_elem(OP_ASLICE,
 				newOP(OP_PUSHMARK, 0),
 				    newLISTOP(OP_ASLICE, 0,
 					list($3),
@@ -1224,7 +1220,7 @@ term	:	termbinop
 			  TOKEN_GETMAD($4,$$,']');
 			}
 	|	ary '{' expr ';' '}'                 /* @hash{@keys} */
-			{ $$ = prepend_elem(OP_HSLICE,
+			{ $$ = op_prepend_elem(OP_HSLICE,
 				newOP(OP_PUSHMARK, 0),
 				    newLISTOP(OP_HSLICE, 0,
 					list($3),
@@ -1246,7 +1242,7 @@ term	:	termbinop
 	|	amper lpar_or_qw expr ')'            /* &foo(@args) */
 			{
 			  $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
-				append_elem(OP_LIST, $3, scalar($1)));
+				op_append_elem(OP_LIST, $3, scalar($1)));
 			  DO_MAD({
 			      OP* op = $$;
 			      if (op->op_type == OP_CONST) { /* defeat const fold */
@@ -1258,7 +1254,7 @@ term	:	termbinop
 			}
 	|	NOAMP WORD listexpr                  /* foo(@args) */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
-			    append_elem(OP_LIST, $3, scalar($2)));
+			    op_append_elem(OP_LIST, $3, scalar($2)));
 			  TOKEN_GETMAD($1,$$,'o');
 			}
 	|	LOOPEX  /* loop exiting command (goto, last, dump, etc) */
@@ -1298,7 +1294,7 @@ term	:	termbinop
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, scalar($1)); }
 	|	UNIOPSUB term                        /* Sub treated as unop */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
-			    append_elem(OP_LIST, $2, scalar($1))); }
+			    op_append_elem(OP_LIST, $2, scalar($1))); }
 	|	FUNC0                                /* Nullary operator */
 			{ $$ = newOP(IVAL($1), 0);
 			  TOKEN_GETMAD($1,$$,'o');

@@ -34,8 +34,6 @@ PERL_CALLCONV SV*	Perl_amagic_call(pTHX_ SV* left, SV* right, int method, int di
 #define PERL_ARGS_ASSERT_AMAGIC_CALL	\
 	assert(left); assert(right)
 
-PERL_CALLCONV OP*	Perl_append_elem(pTHX_ I32 optype, OP* first, OP* last);
-PERL_CALLCONV OP*	Perl_append_list(pTHX_ I32 optype, LISTOP* first, LISTOP* last);
 PERL_CALLCONV I32	Perl_apply(pTHX_ I32 type, SV** mark, SV** sp)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
@@ -2675,6 +2673,8 @@ PERL_CALLCONV OP*	Perl_oopsHV(pTHX_ OP* o)
 #define PERL_ARGS_ASSERT_OOPSHV	\
 	assert(o)
 
+PERL_CALLCONV OP*	Perl_op_append_elem(pTHX_ I32 optype, OP* first, OP* last);
+PERL_CALLCONV OP*	Perl_op_append_list(pTHX_ I32 optype, OP* first, OP* last);
 PERL_CALLCONV void	Perl_op_clear(pTHX_ OP* o)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_OP_CLEAR	\
@@ -2699,6 +2699,7 @@ PERL_CALLCONV void	Perl_op_null(pTHX_ OP* o)
 #define PERL_ARGS_ASSERT_OP_NULL	\
 	assert(o)
 
+PERL_CALLCONV OP*	Perl_op_prepend_elem(pTHX_ I32 optype, OP* first, OP* last);
 PERL_CALLCONV void	Perl_op_refcnt_lock(pTHX);
 PERL_CALLCONV void	Perl_op_refcnt_unlock(pTHX);
 PERL_CALLCONV void	Perl_pack_cat(pTHX_ SV *cat, const char *pat, const char *patend, SV **beglist, SV **endlist, SV ***next_in_list, U32 flags)
@@ -3204,7 +3205,6 @@ PERL_CALLCONV void	Perl_pregfree2(pTHX_ REGEXP *rx)
 #define PERL_ARGS_ASSERT_PREGFREE2	\
 	assert(rx)
 
-PERL_CALLCONV OP*	Perl_prepend_elem(pTHX_ I32 optype, OP* head, OP* tail);
 PERL_CALLCONV const char*	Perl_prescan_version(pTHX_ const char *s, bool strict, const char** errstr, bool *sqv, int *ssaw_decimal, int *swidth, bool *salpha)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_PRESCAN_VERSION	\
