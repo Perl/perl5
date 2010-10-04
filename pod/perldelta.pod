@@ -256,7 +256,7 @@ L<[perl #71998]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=71998>.
 
 =item *
 
-C<PathTools> has been upgraded from version 3.31_01 to 3.33.
+C<PathTools> has been upgraded from version 3.31_01 to 3.34.
 
 =item *
 
@@ -498,6 +498,9 @@ L<[perl #78132]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=78132>.
 C<$Config{gccversion}> is now set correctly when perl is built using the
 mingw64 compiler from L<http://mingw64.org>
 L<[perl #73754]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=73754>.
+
+The build process proceeds more smoothly with mingw and dmake when
+F<C:\MSYS\bin> is in the PATH, due to a C<Cwd> fix.
 
 =back
 
