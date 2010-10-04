@@ -194,11 +194,12 @@ Unary "!" performs logical negation, i.e., "not".  See also C<not> for a lower
 precedence version of this.
 X<!>
 
-Unary "-" performs arithmetic negation if the operand is numeric.  If
-the operand is an identifier, a string consisting of a minus sign
-concatenated with the identifier is returned.  Otherwise, if the string
-starts with a plus or minus, a string starting with the opposite sign
-is returned.  One effect of these rules is that -bareword is equivalent
+Unary "-" performs arithmetic negation if the operand is numeric,
+including any string that looks like a number.  If the operand is
+an identifier, a string consisting of a minus sign concatenated
+with the identifier is returned.  Otherwise, if the string starts
+with a plus or minus, a string starting with the opposite sign is
+returned.  One effect of these rules is that -bareword is equivalent
 to the string "-bareword".  If, however, the string begins with a
 non-alphabetic character (excluding "+" or "-"), Perl will attempt to convert
 the string to a numeric and the arithmetic negation is performed. If the
