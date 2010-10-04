@@ -2729,6 +2729,7 @@ PERL_CALLCONV void	Perl_pad_undef(pTHX_ CV* cv)
 	assert(cv)
 
 PERL_CALLCONV OP*	Perl_parse_fullstmt(pTHX_ U32 flags);
+PERL_CALLCONV OP*	Perl_parse_stmtseq(pTHX_ U32 flags);
 PERL_CALLCONV U32	Perl_parse_unicode_opts(pTHX_ const char **popt)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_PARSE_UNICODE_OPTS	\

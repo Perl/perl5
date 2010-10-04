@@ -367,6 +367,7 @@
 #define packlist(a,b,c,d,e)	Perl_packlist(aTHX_ a,b,c,d,e)
 #define pad_findmy(a,b,c)	Perl_pad_findmy(aTHX_ a,b,c)
 #define parse_fullstmt(a)	Perl_parse_fullstmt(aTHX_ a)
+#define parse_stmtseq(a)	Perl_parse_stmtseq(aTHX_ a)
 #define pmop_dump(a)		Perl_pmop_dump(aTHX_ a)
 #define pop_scope()		Perl_pop_scope(aTHX)
 #define pregcomp(a,b)		Perl_pregcomp(aTHX_ a,b)

@@ -630,6 +630,7 @@ AMpd	|I32	|lex_read_unichar|U32 flags
 AMpd	|void	|lex_read_space	|U32 flags
 : Public parser API
 AMpd	|OP*	|parse_fullstmt	|U32 flags
+AMpd	|OP*	|parse_stmtseq	|U32 flags
 : Used in various files
 Ap	|void	|op_null	|NN OP* o
 : FIXME. Used by Data::Alias

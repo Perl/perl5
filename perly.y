@@ -69,7 +69,7 @@
 #endif
 }
 
-%token <ival> GRAMPROG GRAMFULLSTMT
+%token <ival> GRAMPROG GRAMFULLSTMT GRAMSTMTSEQ
 
 %token <i_tkval> '{' '}' '[' ']' '-' '+' '$' '@' '%' '*' '&' ';'
 
@@ -89,7 +89,7 @@
 
 %type <i_tkval> lpar_or_qw
 
-%type <ival> grammar prog progstart remember mremember
+%type <ival> grammar closebrace_or_eof prog progstart remember mremember
 %type <ival>  startsub startanonsub startformsub
 /* FIXME for MAD - are these two ival? */
 %type <ival> mydefsv mintro
@@ -150,6 +150,31 @@ grammar	:	GRAMPROG prog
 			  yyunlex();
 			  parser->yychar = YYEOF;
 			}
+	|	GRAMSTMTSEQ
+			{
+			  parser->expect = XSTATE;
+			}
+		lineseq closebrace_or_eof
+			{
+			  PL_eval_root = $3;
+			  $$ = 0;
+			}
+	;
+
+closebrace_or_eof:	'}'
+			{
+			  assert(parser->yychar == YYEMPTY);
+			  assert(parser->bufptr != SvPVX(parser->linestr));
+			  assert(parser->bufptr[-1] == '}');
+			  parser->bufptr--;
+			  parser->lex_brackstack[parser->lex_brackets++] =
+			      XSTATE;
+			  parser->expect = XSTATE;
+			  parser->yychar = YYEOF;
+			  $$ = 0;
+			}
+	| /* NULL */
+			{ $$ = 0; }
 	;
 
 /* The whole program */

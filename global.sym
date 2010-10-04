@@ -413,6 +413,7 @@ Perl_packlist
 Perl_pad_findmy
 Perl_pad_push
 Perl_parse_fullstmt
+Perl_parse_stmtseq
 perl_alloc
 perl_construct
 perl_destruct

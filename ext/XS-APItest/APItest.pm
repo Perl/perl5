@@ -36,7 +36,7 @@ sub import {
 	}
     }
     foreach (keys %{$exports||{}}) {
-	next unless /\A(?:rpn|calcrpn|stufftest|swaptwostmts)\z/;
+	next unless /\A(?:rpn|calcrpn|stufftest|swaptwostmts|looprest)\z/;
 	$^H{"XS::APItest/$_"} = 1;
 	delete $exports->{$_};
     }
