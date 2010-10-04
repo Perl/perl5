@@ -1042,7 +1042,7 @@ Ap	|void	|save_destructor|DESTRUCTORFUNC_NOCONTEXT_t f|NN void* p
 Ap	|void	|save_destructor_x|DESTRUCTORFUNC_t f|NULLOK void* p
 Apmb	|void	|save_freesv	|NULLOK SV* sv
 : Used in SAVEFREOP(), used in op.c, pp_ctl.c
-pmb	|void	|save_freeop	|NULLOK OP* o
+Apmb	|void	|save_freeop	|NULLOK OP* o
 Apmb	|void	|save_freepv	|NULLOK char* pv
 Ap	|void	|save_generic_svref|NN SV** sptr
 Ap	|void	|save_generic_pvref|NN char** str
@@ -1064,7 +1064,7 @@ Ap	|void	|save_long	|NN long* longp
 Apmb	|void	|save_mortalizesv|NN SV* sv
 Ap	|void	|save_nogv	|NN GV* gv
 : Used in SAVEFREOP(), used in gv.c, op.c, perl.c, pp_ctl.c, pp_sort.c
-pmb	|void	|save_op
+Apmb	|void	|save_op
 Ap	|SV*	|save_scalar	|NN GV* gv
 Ap	|void	|save_pptr	|NN char** pptr
 Ap	|void	|save_vptr	|NN void *ptr
@@ -1074,9 +1074,9 @@ Ap	|void	|save_sptr	|NN SV** sptr
 Ap	|SV*	|save_svref	|NN SV** sptr
 Ap	|void	|save_pushptr	|NULLOK void *const ptr|const int type
 : Used by SAVECOPARYBASE() in op.c
-p	|void	|save_pushi32ptr|const I32 i|NULLOK void *const ptr|const int type
+Ap	|void	|save_pushi32ptr|const I32 i|NULLOK void *const ptr|const int type
 : Used by SAVESWITCHSTACK() in pp.c
-p	|void	|save_pushptrptr|NULLOK void *const ptr1 \
+Ap	|void	|save_pushptrptr|NULLOK void *const ptr1 \
 				|NULLOK void *const ptr2|const int type
 #if defined(PERL_IN_SCOPE_C)
 s	|void	|save_pushptri32ptr|NULLOK void *const ptr1|const I32 i \

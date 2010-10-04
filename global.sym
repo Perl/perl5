@@ -511,7 +511,9 @@ Perl_save_nogv
 Perl_save_op
 Perl_save_padsv_and_mortalize
 Perl_save_pptr
+Perl_save_pushi32ptr
 Perl_save_pushptr
+Perl_save_pushptrptr
 Perl_save_re_context
 Perl_save_scalar
 Perl_save_set_svflags
