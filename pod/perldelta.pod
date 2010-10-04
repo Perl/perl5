@@ -125,6 +125,12 @@ longer inherit directory handles from their parent threads. Such programs
 would probably have crashed anyway
 L<[perl #75154]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75154>.
 
+=head2 Negation treats strings differently from before
+
+The unary negation operator C<-> now treats strings that look like numbers
+as numbers
+L<[perl #57706]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=57706>.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
