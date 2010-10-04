@@ -15,7 +15,7 @@ BEGIN {
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 161 + (10*13*2) + 4;
+plan tests => 170 + (10*13*2) + 4;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -62,6 +62,20 @@ is (($foo & $bar), ($Aaz x 75 ));
 is (($foo | $bar), ($Aoz x 75 . $zap));
 # ^ does not truncate
 is (($foo ^ $bar), ($Axz x 75 . $zap));
+
+# string constants
+sub _and($) { $_[0] & "+0" }
+sub _oar($) { $_[0] | "+0" }
+sub _xor($) { $_[0] ^ "+0" }
+is _and "waf", '# ',  'str var & const str'; # These three
+is _and  0,    '0',   'num var & const str';    # are from
+is _and "waf", '# ',  'str var & const str again'; # [perl #20661]
+is _oar "yit", '{yt', 'str var | const str';
+is _oar  0,    '0',   'num var | const str';
+is _oar "yit", '{yt', 'str var | const str again';
+is _xor "yit", 'RYt', 'str var ^ const str';
+is _xor  0,    '0',   'num var ^ const str';
+is _xor "yit", 'RYt', 'str var ^ const str again';
 
 #
 is ("ok \xFF\xFF\n" & "ok 19\n", "ok 19\n");

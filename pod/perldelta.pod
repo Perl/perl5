@@ -672,6 +672,11 @@ L<[perl #78058]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78058>.
 Subroutine redefinition works once more in the debugger
 L<[perl #48332]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=48332>.
 
+=item *
+
+The C<&> C<|> C<^> bitwise operators no longer coerce read-only arguments
+L<[perl #20661]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=20661>.
+
 =back
 
 =head1 Known Problems

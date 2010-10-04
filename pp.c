@@ -2386,6 +2386,8 @@ PP(pp_bit_and)
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
+	const bool left_ro_nonnum  = !SvNIOKp(left) && SvREADONLY(left);
+	const bool right_ro_nonnum = !SvNIOKp(right) && SvREADONLY(right);
 	if (PL_op->op_private & HINT_INTEGER) {
 	  const IV i = SvIV_nomg(left) & SvIV_nomg(right);
 	  SETi(i);
@@ -2394,6 +2396,8 @@ PP(pp_bit_and)
 	  const UV u = SvUV_nomg(left) & SvUV_nomg(right);
 	  SETu(u);
 	}
+	if (left_ro_nonnum)  SvNIOK_off(left);
+	if (right_ro_nonnum) SvNIOK_off(right);
       }
       else {
 	do_vop(PL_op->op_type, TARG, left, right);
@@ -2412,6 +2416,8 @@ PP(pp_bit_or)
     {
       dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
+	const bool left_ro_nonnum  = !SvNIOKp(left) && SvREADONLY(left);
+	const bool right_ro_nonnum = !SvNIOKp(right) && SvREADONLY(right);
 	if (PL_op->op_private & HINT_INTEGER) {
 	  const IV l = (USE_LEFT(left) ? SvIV_nomg(left) : 0);
 	  const IV r = SvIV_nomg(right);
@@ -2424,6 +2430,8 @@ PP(pp_bit_or)
 	  const UV result = op_type == OP_BIT_OR ? (l | r) : (l ^ r);
 	  SETu(result);
 	}
+	if (left_ro_nonnum)  SvNIOK_off(left);
+	if (right_ro_nonnum) SvNIOK_off(right);
       }
       else {
 	do_vop(op_type, TARG, left, right);
