@@ -38,6 +38,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require './test.pl';
 }
 
 use strict 'vars';
@@ -72,6 +73,7 @@ my $st_t = 4*4;			# We try 4 initializers and 4 reporters
 my $num = 0;
 $num += 10**$_ - 4**$_ for 1.. $max_chain;
 $num *= $st_t;
+$num += $::additional_tests;
 print "1..$num\n";		# In fact 15 times more subsubtests...
 
 my $max_uv = ~0;
@@ -256,3 +258,13 @@ for my $num_chain (1..$max_chain) {
     }
   }
 }
+
+# Tests that use test.pl start here.
+BEGIN { $::additional_tests = 3 }
+
+curr_test($test);
+
+ok(-0.0 eq "0", 'negative zero stringifies as 0');
+ok(!-0.0, "neg zero is boolean false");
+my $nz = -0.0; "$nz";
+ok(!$nz, 'previously stringified -0.0 is boolean false');

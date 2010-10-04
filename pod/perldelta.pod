@@ -131,6 +131,14 @@ The unary negation operator C<-> now treats strings that look like numbers
 as numbers
 L<[perl #57706]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=57706>.
 
+=head2 Negative zero
+
+Negative zero (-0.0), when converted to a string, now becomes "0" on all
+platforms. It used to become "-0" on some, but "0" on others.
+
+If you still need to determine whether a zero is negative, use
+C<sprintf("%g", $zero) =~ /^-/> or the L<Data::Float> module on CPAN.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
@@ -676,6 +684,12 @@ L<[perl #48332]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=48332>.
 
 The C<&> C<|> C<^> bitwise operators no longer coerce read-only arguments
 L<[perl #20661]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=20661>.
+
+=item *
+
+Stringifying a scalar containing -0.0 no longer has the affect of turning
+false into true
+L<[perl #45133]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=45133>.
 
 =back
 

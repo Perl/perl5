@@ -2741,13 +2741,11 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 	    {
 		dVAR;
 
-#ifdef FIXNEGATIVEZERO
 		if (len == 2 && tbuf[0] == '-' && tbuf[1] == '0') {
 		    tbuf[0] = '0';
 		    tbuf[1] = 0;
 		    len = 1;
 		}
-#endif
 		SvUPGRADE(sv, SVt_PV);
 		if (lp)
 		    *lp = len;
@@ -2934,12 +2932,10 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 	    Gconvert(SvNVX(sv), NV_DIG, 0, s);
 	}
 	RESTORE_ERRNO;
-#ifdef FIXNEGATIVEZERO
         if (*s == '-' && s[1] == '0' && !s[2]) {
 	    s[0] = '0';
 	    s[1] = 0;
 	}
-#endif
 	while (*s) s++;
 #ifdef hcx
 	if (s[-1] == '.')
