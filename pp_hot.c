@@ -2461,6 +2461,7 @@ PP(pp_grepwhile)
     if (SvTRUEx(POPs))
 	PL_stack_base[PL_markstack_ptr[-1]++] = PL_stack_base[*PL_markstack_ptr];
     ++*PL_markstack_ptr;
+    FREETMPS;
     LEAVE_with_name("grep_item");					/* exit inner scope */
 
     /* All done yet? */

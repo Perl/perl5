@@ -1113,8 +1113,41 @@ PP(pp_mapwhile)
 	/* copy the new items down to the destination list */
 	dst = PL_stack_base + (PL_markstack_ptr[-2] += items) - 1;
 	if (gimme == G_ARRAY) {
-	    while (items-- > 0)
-		*dst-- = SvTEMP(TOPs) ? POPs : sv_mortalcopy(POPs);
+	    /* add returned items to the collection (making mortal copies
+	     * if necessary), then clear the current temps stack frame
+	     * *except* for those items. We do this splicing the items
+	     * into the start of the tmps frame (so some items may be on
+	     * the tmps stack twice), then moving PL_stack_floor above
+	     * them, then freeing the frame. That way, the only tmps that
+	     * accumulate over iterations are the return values for map.
+	     * We have to do to this way so that everything gets correctly
+	     * freed if we die during the map.
+	     */
+	    I32 tmpsbase;
+	    I32 i = items;
+	    /* make space for the slice */
+	    EXTEND_MORTAL(items);
+	    tmpsbase = PL_tmps_floor + 1;
+	    Move(PL_tmps_stack + tmpsbase,
+		 PL_tmps_stack + tmpsbase + items,
+		 PL_tmps_ix - PL_tmps_floor,
+		 SV*);
+	    PL_tmps_ix += items;
+
+	    while (i-- > 0) {
+		SV *sv = POPs;
+		if (!SvTEMP(sv))
+		    sv = sv_mortalcopy(sv);
+		*dst-- = sv;
+		PL_tmps_stack[tmpsbase++] = SvREFCNT_inc_simple(sv);
+	    }
+	    /* clear the stack frame except for the items */
+	    PL_tmps_floor += items;
+	    FREETMPS;
+	    /* FREETMPS may have cleared the TEMP flag on some of the items */
+	    i = items;
+	    while (i-- > 0)
+		SvTEMP_on(PL_tmps_stack[--tmpsbase]);
 	}
 	else {
 	    /* scalar context: we don't care about which values map returns
@@ -1124,7 +1157,11 @@ PP(pp_mapwhile)
 		(void)POPs;
 		*dst-- = &PL_sv_undef;
 	    }
+	    FREETMPS;
 	}
+    }
+    else {
+	FREETMPS;
     }
     LEAVE_with_name("grep_item");					/* exit inner scope */
 
