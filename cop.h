@@ -161,7 +161,7 @@ typedef struct refcounted_he COPHH;
 #define COPHH_KEY_UTF8 REFCOUNTED_HE_KEY_UTF8
 
 /*
-=for apidoc Am|SV *|cophh_fetch_pvn|const COPHH *cophh|const char *keypv|STRLEN keylen|U32 hash|U32 flags
+=for apidoc Amx|SV *|cophh_fetch_pvn|const COPHH *cophh|const char *keypv|STRLEN keylen|U32 hash|U32 flags
 
 Look up the entry in the cop hints hash I<cophh> with the key specified by
 I<keypv> and I<keylen>.  If I<flags> has the C<COPHH_KEY_UTF8> bit set,
@@ -178,7 +178,7 @@ associated with the key.
     Perl_refcounted_he_fetch_pvn(aTHX_ cophh, keypv, keylen, hash, flags)
 
 /*
-=for apidoc Am|SV *|cophh_fetch_pvs|const COPHH *cophh|const char *key|U32 flags
+=for apidoc Amx|SV *|cophh_fetch_pvs|const COPHH *cophh|const char *key|U32 flags
 
 Like L</cophh_fetch_pvn>, but takes a literal string instead of a
 string/length pair, and no precomputed hash.
@@ -190,7 +190,7 @@ string/length pair, and no precomputed hash.
     Perl_refcounted_he_fetch_pvn(aTHX_ cophh, STR_WITH_LEN(key), 0, flags)
 
 /*
-=for apidoc Am|SV *|cophh_fetch_pv|const COPHH *cophh|const char *key|U32 hash|U32 flags
+=for apidoc Amx|SV *|cophh_fetch_pv|const COPHH *cophh|const char *key|U32 hash|U32 flags
 
 Like L</cophh_fetch_pvn>, but takes a nul-terminated string instead of
 a string/length pair.
@@ -202,7 +202,7 @@ a string/length pair.
     Perl_refcounted_he_fetch_pv(aTHX_ cophh, key, hash, flags)
 
 /*
-=for apidoc Am|SV *|cophh_fetch_sv|const COPHH *cophh|SV *key|U32 hash|U32 flags
+=for apidoc Amx|SV *|cophh_fetch_sv|const COPHH *cophh|SV *key|U32 hash|U32 flags
 
 Like L</cophh_fetch_pvn>, but takes a Perl scalar instead of a
 string/length pair.
@@ -214,7 +214,7 @@ string/length pair.
     Perl_refcounted_he_fetch_sv(aTHX_ cophh, key, hash, flags)
 
 /*
-=for apidoc Am|HV *|cophh_2hv|const COPHH *cophh|U32 flags
+=for apidoc Amx|HV *|cophh_2hv|const COPHH *cophh|U32 flags
 
 Generates and returns a standard Perl hash representing the full set of
 key/value pairs in the cop hints hash I<cophh>.  I<flags> is currently
@@ -227,7 +227,7 @@ unused and must be zero.
     Perl_refcounted_he_chain_2hv(aTHX_ cophh, flags)
 
 /*
-=for apidoc Am|COPHH *|cophh_copy|COPHH *cophh
+=for apidoc Amx|COPHH *|cophh_copy|COPHH *cophh
 
 Make and return a complete copy of the cop hints hash I<cophh>.
 
@@ -237,7 +237,7 @@ Make and return a complete copy of the cop hints hash I<cophh>.
 #define cophh_copy(cophh) Perl_refcounted_he_inc(aTHX_ cophh)
 
 /*
-=for apidoc Am|void|cophh_free|COPHH *cophh
+=for apidoc Amx|void|cophh_free|COPHH *cophh
 
 Discard the cop hints hash I<cophh>, freeing all resources associated
 with it.
@@ -248,7 +248,7 @@ with it.
 #define cophh_free(cophh) Perl_refcounted_he_free(aTHX_ cophh)
 
 /*
-=for apidoc Am|COPHH *|cophh_new_empty
+=for apidoc Amx|COPHH *|cophh_new_empty
 
 Generate and return a fresh cop hints hash containing no entries.
 
@@ -258,7 +258,7 @@ Generate and return a fresh cop hints hash containing no entries.
 #define cophh_new_empty() ((COPHH *)NULL)
 
 /*
-=for apidoc Am|COPHH *|cophh_store_pvn|COPHH *cophh|const char *keypv|STRLEN keylen|U32 hash|SV *value|U32 flags
+=for apidoc Amx|COPHH *|cophh_store_pvn|COPHH *cophh|const char *keypv|STRLEN keylen|U32 hash|SV *value|U32 flags
 
 Stores a value, associated with a key, in the cop hints hash I<cophh>,
 and returns the modified hash.  The returned hash pointer is in general
@@ -284,7 +284,7 @@ be stored with referential integrity, but will be coerced to strings.
     Perl_refcounted_he_new_pvn(aTHX_ cophh, keypv, keylen, hash, value, flags)
 
 /*
-=for apidoc Am|COPHH *|cophh_store_pvs|const COPHH *cophh|const char *key|SV *value|U32 flags
+=for apidoc Amx|COPHH *|cophh_store_pvs|const COPHH *cophh|const char *key|SV *value|U32 flags
 
 Like L</cophh_store_pvn>, but takes a literal string instead of a
 string/length pair, and no precomputed hash.
@@ -296,7 +296,7 @@ string/length pair, and no precomputed hash.
     Perl_refcounted_he_new_pvn(aTHX_ cophh, STR_WITH_LEN(key), 0, value, flags)
 
 /*
-=for apidoc Am|COPHH *|cophh_store_pv|const COPHH *cophh|const char *key|U32 hash|SV *value|U32 flags
+=for apidoc Amx|COPHH *|cophh_store_pv|const COPHH *cophh|const char *key|U32 hash|SV *value|U32 flags
 
 Like L</cophh_store_pvn>, but takes a nul-terminated string instead of
 a string/length pair.
@@ -308,7 +308,7 @@ a string/length pair.
     Perl_refcounted_he_new_pv(aTHX_ cophh, key, hash, value, flags)
 
 /*
-=for apidoc Am|COPHH *|cophh_store_sv|const COPHH *cophh|SV *key|U32 hash|SV *value|U32 flags
+=for apidoc Amx|COPHH *|cophh_store_sv|const COPHH *cophh|SV *key|U32 hash|SV *value|U32 flags
 
 Like L</cophh_store_pvn>, but takes a Perl scalar instead of a
 string/length pair.
@@ -320,7 +320,7 @@ string/length pair.
     Perl_refcounted_he_new_sv(aTHX_ cophh, key, hash, value, flags)
 
 /*
-=for apidoc Am|COPHH *|cophh_delete_pvn|COPHH *cophh|const char *keypv|STRLEN keylen|U32 hash|U32 flags
+=for apidoc Amx|COPHH *|cophh_delete_pvn|COPHH *cophh|const char *keypv|STRLEN keylen|U32 hash|U32 flags
 
 Delete a key and its associated value from the cop hints hash I<cophh>,
 and returns the modified hash.  The returned hash pointer is in general
@@ -341,7 +341,7 @@ hash of the key string, or zero if it has not been precomputed.
 	(SV *)NULL, flags)
 
 /*
-=for apidoc Am|COPHH *|cophh_delete_pvs|const COPHH *cophh|const char *key|U32 flags
+=for apidoc Amx|COPHH *|cophh_delete_pvs|const COPHH *cophh|const char *key|U32 flags
 
 Like L</cophh_delete_pvn>, but takes a literal string instead of a
 string/length pair, and no precomputed hash.
@@ -354,7 +354,7 @@ string/length pair, and no precomputed hash.
 	(SV *)NULL, flags)
 
 /*
-=for apidoc Am|COPHH *|cophh_delete_pv|const COPHH *cophh|const char *key|U32 hash|U32 flags
+=for apidoc Amx|COPHH *|cophh_delete_pv|const COPHH *cophh|const char *key|U32 hash|U32 flags
 
 Like L</cophh_delete_pvn>, but takes a nul-terminated string instead of
 a string/length pair.
@@ -366,7 +366,7 @@ a string/length pair.
     Perl_refcounted_he_new_pv(aTHX_ cophh, key, hash, (SV *)NULL, flags)
 
 /*
-=for apidoc Am|COPHH *|cophh_delete_sv|const COPHH *cophh|SV *key|U32 hash|U32 flags
+=for apidoc Amx|COPHH *|cophh_delete_sv|const COPHH *cophh|SV *key|U32 hash|U32 flags
 
 Like L</cophh_delete_pvn>, but takes a Perl scalar instead of a
 string/length pair.
