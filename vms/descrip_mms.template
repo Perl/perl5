@@ -394,7 +394,7 @@ libmods : $(LIBPREREQ)
 	@ $(NOOP)
 utils : $(utils1) $(utils2) $(utils3) $(utils4) $(utils5)
 	@ $(NOOP)
-podxform : [.lib.pods]pod2text.com [.lib.pods]pod2html.com [.lib.pods]pod2man.com [.lib.pods]podchecker.com [.lib.pods]pod2usage.com [.lib.pods]podselect.com
+podxform : [.lib.pods]pod2text.com [.lib.pods]pod2html.com [.lib.pods]pod2man.com
 	@ $(NOOP)
 x2p : [.x2p]$(DBG)a2p$(E) [.x2p]s2p.com [.x2p]find2perl.com 
 	@ $(NOOP)
@@ -708,21 +708,6 @@ nonxsext : $(LIBPREREQ) preplibrary $(MINIPERL_EXE)
 	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
 	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 	Copy/NoConfirm/Log [.pod]pod2text.com [.lib.pods]
-
-[.lib.pods]podchecker.com : [.pod]podchecker.PL $(ARCHDIR)Config.pm
-	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
-	Copy/NoConfirm/Log [.pod]podchecker.com [.lib.pods]
-
-[.lib.pods]pod2usage.com : [.pod]pod2usage.PL $(ARCHDIR)Config.pm
-	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
-	Copy/NoConfirm/Log [.pod]pod2usage.com [.lib.pods]
-
-[.lib.pods]podselect.com : [.pod]podselect.PL $(ARCHDIR)Config.pm
-	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
-	Copy/NoConfirm/Log [.pod]podselect.com [.lib.pods]
 
 preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) 
 

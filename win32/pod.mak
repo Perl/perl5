@@ -1,5 +1,4 @@
-CONVERTERS = pod2html pod2man pod2text \
-		pod2usage podchecker podselect
+CONVERTERS = pod2html pod2man pod2text
 
 HTMLROOT = /	# Change this to fix cross-references in HTML
 POD2HTML = pod2html \
@@ -7,6 +6,7 @@ POD2HTML = pod2html \
 	    --podroot=.. --podpath=pod:lib:ext:vms \
 	    --libpods=perlfunc:perlguts:perlvar:perlrun:perlop
 POD2LATEX = ../cpan/Pod-LaTeX/pod2latex
+PODCHECKER = ../cpan/Pod-Parser/podchecker
 
 all: $(CONVERTERS) html
 
@@ -632,9 +632,9 @@ realclean:	clean
 
 distclean:	realclean
 
-check:	podchecker
+check:	$(PODCHECKER)
 	@echo "checking..."; \
-	$(PERL) -I../lib podchecker $(POD)
+	$(PERL) -I../lib $(PODCHECKER) $(POD)
 
 # Dependencies.
 pod2html:	pod2html.PL ../lib/Config.pm
@@ -645,12 +645,3 @@ pod2man:	pod2man.PL ../lib/Config.pm
 
 pod2text:	pod2text.PL ../lib/Config.pm
 	$(PERL) -I ../lib $(ICWD) pod2text.PL
-
-pod2usage:	pod2usage.PL ../lib/Config.pm
-	$(PERL) -I ../lib $(ICWD) pod2usage.PL
-
-podchecker:	podchecker.PL ../lib/Config.pm
-	$(PERL) -I ../lib $(ICWD) podchecker.PL
-
-podselect:	podselect.PL ../lib/Config.pm
-	$(PERL) -I ../lib $(ICWD) podselect.PL

@@ -16,12 +16,18 @@ use File::Spec::Functions;
 
 # Exceptions are found in dual-life bin dirs but aren't
 # installed by default
-my @exceptions = qw(
+my @not_installed = qw(
   ../cpan/Encode/bin/ucm2table
   ../cpan/Encode/bin/ucmlint
   ../cpan/Encode/bin/ucmsort
   ../cpan/Encode/bin/unidump
 );
+
+my %dist_dir_exe;
+
+foreach (qw (podchecker podselect pod2usage)) {
+    $dist_dir_exe{lc "$_.PL"} = "../cpan/Pod-Parser/$_";
+};
 
 my @programs;
 
@@ -36,11 +42,16 @@ find(
   qw( ../cpan ../dist ../ext ),
 );
 
+my $ext = $^O eq 'VMS' ? '.com' : '';
+
 for my $f ( @programs ) {
   $f =~ s/\.\z// if $^O eq 'VMS';
-  next if qr/(?i:$f)/ ~~ @exceptions;
+  next if qr/(?i:$f)/ ~~ @not_installed;
   $f = basename($f);
-  $f .= '.com' if $^O eq 'VMS';
-  ok( -f catfile('..', 'utils', $f), "$f" );
+  if(qr/\A(?i:$f)\z/ ~~ %dist_dir_exe) {
+    ok( -f "$dist_dir_exe{lc $f}$ext", "$f$ext");
+  } else {
+    ok( -f catfile('..', 'utils', "$f$ext"), "$f$ext" );
+  }
 }
 

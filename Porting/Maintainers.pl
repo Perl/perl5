@@ -1160,12 +1160,7 @@ use File::Glob qw(:case);
 	# version 1.37!
 
 	'DISTRIBUTION'	=> 'MAREKR/Pod-Parser-1.38.tar.gz',
-	'FILES'		=> q[cpan/Pod-Parser
-			     pod/pod{2usage,checker,select}.PL
-			    ],
-	'MAP'		=> { '' => 'cpan/Pod-Parser/',
-			     'scripts/' => 'pod/',
-			   },
+	'FILES'		=> q[cpan/Pod-Parser],
 	'UPSTREAM'	=> undef,
 	},
 

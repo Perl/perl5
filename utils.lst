@@ -2,9 +2,9 @@ pod/pod2html
 cpan/Pod-LaTeX/blib/script/pod2latex
 pod/pod2man
 pod/pod2text
-pod/pod2usage
-pod/podchecker
-pod/podselect
+cpan/Pod-Parser/blib/script/pod2usage
+cpan/Pod-Parser/blib/script/podchecker
+cpan/Pod-Parser/blib/script/podselect
 utils/c2ph      # link = utils/pstruct
 utils/cpan
 utils/config_data

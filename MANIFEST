@@ -1678,6 +1678,9 @@ cpan/Pod-Parser/lib/Pod/ParseUtils.pm		Pod-Parser - pod utility functions
 cpan/Pod-Parser/lib/Pod/PlainText.pm		Convert POD data to formatted ASCII text
 cpan/Pod-Parser/lib/Pod/Select.pm		Pod-Parser - select portions of POD docs
 cpan/Pod-Parser/lib/Pod/Usage.pm		Pod-Parser - print usage messages
+cpan/Pod-Parser/scripts/pod2usage.PL	Pod-Parser - print usage messages from POD docs
+cpan/Pod-Parser/scripts/podchecker.PL	Pod-Parser - Pod::Checker::podchecker() CLI
+cpan/Pod-Parser/scripts/podselect.PL	Pod-Parser - Pod::Select::podselect() CLI
 cpan/Pod-Parser/t/pod/contains_bad_pod.xr	Pod-Parser test file
 cpan/Pod-Parser/t/pod/contains_pod.t		Pod-Parser test
 cpan/Pod-Parser/t/pod/contains_pod.xr		Pod-Parser test file
@@ -4142,9 +4145,6 @@ pod/perlxstut.pod		Perl XS tutorial
 pod/pod2html.PL			Precursor for translator to turn pod into HTML
 pod/pod2man.PL			Precursor for translator to turn pod into manpage
 pod/pod2text.PL			Precursor for translator to turn pod into text
-pod/pod2usage.PL		Pod-Parser - print usage messages from POD docs
-pod/podchecker.PL		Pod-Parser - Pod::Checker::podchecker() CLI
-pod/podselect.PL		Pod-Parser - Pod::Select::podselect() CLI
 pod/roffitall			troff the whole man page set
 pod/rofftoc			Generate a table of contents in troff format
 pod/splitman			Splits perlfunc into multiple man pages
