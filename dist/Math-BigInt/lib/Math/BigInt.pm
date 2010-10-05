@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 use 5.006002;
 
-$VERSION = '1.96';
+$VERSION = '1.97';
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(objectify bgcd blcm); 
@@ -2559,7 +2559,7 @@ sub objectify
         {
         $k = $a[0]->new($k);
         }
-      elsif (!defined $up && ref($k) ne $a[0])
+      elsif (ref($k) ne $a[0] and !defined $up || ref $k ne $up)
 	{
 	# foreign object, try to convert to integer
         $k->can('as_number') ? $k = $k->as_number() : $k = $a[0]->new($k);

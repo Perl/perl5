@@ -2825,6 +2825,7 @@ dist/Math-BigInt/t/sub_mbf.t		Empty subclass test of BigFloat
 dist/Math-BigInt/t/sub_mbi.t		Empty subclass test of BigInt
 dist/Math-BigInt/t/sub_mif.t		Test A & P with subclasses using mbimbf.inc
 dist/Math-BigInt/t/trap.t		Test whether trap_nan and trap_inf work
+dist/Math-BigInt/t/upgrade2.t		Test that two upgrade levels work
 dist/Math-BigInt/t/upgradef.t		Test if use Math::BigFloat(); under upgrade works
 dist/Math-BigInt/t/upgrade.inc		Actual tests for upgrade.t
 dist/Math-BigInt/t/upgrade.t		Test if use Math::BigInt(); under upgrade works

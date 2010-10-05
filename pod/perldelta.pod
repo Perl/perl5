@@ -258,7 +258,10 @@ messages are not supressed
 
 =item *
 
-C<Math::BigInt> has been upgraded from version 1.95 to 1.96.
+C<Math::BigInt> has been upgraded from version 1.95 to 1.97.
+
+This prevents C<sqrt($int)> from crashing under C<use bigrat;>
+L<[perl #73534]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=73534>.
 
 =item *
 
