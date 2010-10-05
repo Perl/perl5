@@ -2763,7 +2763,7 @@ dist/Locale-Maketext/t/04_use_external_lex_cache.t	See if Locale::Maketext works
 dist/Locale-Maketext/t/09_compile.t	Test Locale::Maketext::_compile
 dist/Locale-Maketext/t/10_make.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/20_get.t				See if Locale::Maketext works
-dist/Locale-Maketext/t/30_local.t			See if Locale::Maketext works
+dist/Locale-Maketext/t/30_eval_dollar_at.t		See if Locale::Maketext works
 dist/Locale-Maketext/t/40_super.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/50_super.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/60_super.t			See if Locale::Maketext works
