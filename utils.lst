@@ -1,7 +1,7 @@
 pod/pod2html
 cpan/Pod-LaTeX/blib/script/pod2latex
-pod/pod2man
-pod/pod2text
+cpan/podlators/blib/script/pod2man
+cpan/podlators/blib/script/pod2text
 cpan/Pod-Parser/blib/script/pod2usage
 cpan/Pod-Parser/blib/script/podchecker
 cpan/Pod-Parser/blib/script/podselect

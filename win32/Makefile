@@ -613,8 +613,6 @@ UTILS		=			\
 		..\utils\shasum		\
 		..\utils\instmodsh	\
 		..\pod\pod2html		\
-		..\pod\pod2man		\
-		..\pod\pod2text		\
 		..\x2p\find2perl	\
 		..\x2p\psed		\
 		..\x2p\s2p		\
@@ -1199,7 +1197,7 @@ distclean: realclean
 	    perlriscos.pod perlsolaris.pod perlsymbian.pod perltoc.pod \
 	    perltru64.pod perltw.pod perluniprops.pod perluts.pod \
 	    perlvmesa.pod perlvos.pod perlwin32.pod \
-	    pod2html pod2man pod2text
+	    pod2html
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs \
 	    perldoc perlivp dprofpp libnetcfg enc2xs piconv cpan *.bat \
 	    xsubpp instmodsh prove ptar ptardiff cpanp-run-perl cpanp cpan2dist shasum corelist config_data

@@ -1645,6 +1645,8 @@ cpan/podlators/lib/Pod/Text/Overstrike.pm	Convert POD data to formatted overstri
 cpan/podlators/lib/Pod/Text.pm			Pod-Parser - convert POD data to formatted ASCII text
 cpan/podlators/lib/Pod/Text/Termcap.pm		Convert POD data to ASCII text with format escapes
 cpan/podlators/Makefile.PL
+cpan/podlators/scripts/pod2man.PL	Precursor for translator to turn pod into manpage
+cpan/podlators/scripts/pod2text.PL	Precursor for translator to turn pod into text
 cpan/podlators/t/basic.cap			podlators test
 cpan/podlators/t/basic.clr			podlators test
 cpan/podlators/t/basic.man			podlators test
@@ -4143,8 +4145,6 @@ pod/perlvms.pod			Perl notes for VMS
 pod/perlxs.pod			Perl XS application programming interface
 pod/perlxstut.pod		Perl XS tutorial
 pod/pod2html.PL			Precursor for translator to turn pod into HTML
-pod/pod2man.PL			Precursor for translator to turn pod into manpage
-pod/pod2text.PL			Precursor for translator to turn pod into text
 pod/roffitall			troff the whole man page set
 pod/rofftoc			Generate a table of contents in troff format
 pod/splitman			Splits perlfunc into multiple man pages

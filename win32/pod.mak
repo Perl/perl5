@@ -1,10 +1,12 @@
-CONVERTERS = pod2html pod2man pod2text
+CONVERTERS = pod2html
 
 HTMLROOT = /	# Change this to fix cross-references in HTML
 POD2HTML = pod2html \
 	    --htmlroot=$(HTMLROOT) \
 	    --podroot=.. --podpath=pod:lib:ext:vms \
 	    --libpods=perlfunc:perlguts:perlvar:perlrun:perlop
+POD2MAN = ../cpan/podlators/pod2man
+POD2TEXT = ../cpan/podlators/pod2text
 POD2LATEX = ../cpan/Pod-LaTeX/pod2latex
 PODCHECKER = ../cpan/Pod-Parser/podchecker
 
@@ -585,7 +587,7 @@ TEX = \
 	perlxs.tex	\
 	perlxstut.tex	
 
-man:	pod2man $(MAN)
+man:	$(POD2MAN) $(MAN)
 
 html:	pod2html $(HTML)
 
@@ -599,10 +601,10 @@ toc:
 .SUFFIXES: .man
 
 .pm.man:
-	$(PERL) -I../lib pod2man $*.pm >$*.man
+	$(PERL) -I../lib $(POD2MAN) $*.pm >$*.man
 
 .pod.man:
-	$(PERL) -I../lib pod2man $*.pod >$*.man
+	$(PERL) -I../lib $(POD2MAN) $*.pod >$*.man
 
 .SUFFIXES: .html
 
@@ -640,8 +642,3 @@ check:	$(PODCHECKER)
 pod2html:	pod2html.PL ../lib/Config.pm
 	$(PERL) -I ../lib $(ICWD) pod2html.PL
 
-pod2man:	pod2man.PL ../lib/Config.pm
-	$(PERL) -I ../lib $(ICWD) pod2man.PL
-
-pod2text:	pod2text.PL ../lib/Config.pm
-	$(PERL) -I ../lib $(ICWD) pod2text.PL

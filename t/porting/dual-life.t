@@ -28,6 +28,9 @@ my %dist_dir_exe;
 foreach (qw (podchecker podselect pod2usage)) {
     $dist_dir_exe{lc "$_.PL"} = "../cpan/Pod-Parser/$_";
 };
+foreach (qw (pod2man pod2text)) {
+    $dist_dir_exe{lc "$_.PL"} = "../cpan/podlators/$_";
+};
 
 my @programs;
 

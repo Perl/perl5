@@ -1202,15 +1202,9 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'rra',
 	'DISTRIBUTION'	=> 'RRA/podlators-2.3.1.tar.gz',
-	'FILES'		=> q[cpan/podlators
-			     pod/pod2man.PL
-			     pod/pod2text.PL
-			    ],
+	'FILES'		=> q[cpan/podlators],
 	'EXCLUDED'	=> [ qw{ Makefile.PL } ],
 	'CUSTOMIZED'	=> [ qw{ Makefile.PL } ],
-	'MAP'		=> { '' => 'cpan/podlators/',
-			     'scripts/' => 'pod/',
-			   },
 	'UPSTREAM'	=> 'cpan',
 	},
 

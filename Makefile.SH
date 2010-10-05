@@ -443,9 +443,9 @@ shextract = Makefile cflags config.h makeaperl makedepend \
 # Files to be built with variable substitution after miniperl is
 # available.  Dependencies handled manually below (for now).
 
-pl = pod/pod2html.PL pod/pod2man.PL pod/pod2text.PL
+pl = pod/pod2html.PL
 
-plextract = pod/pod2html pod/pod2man pod/pod2text
+plextract = pod/pod2html
 
 addedbyconf = UU $(shextract) $(plextract) pstruct
 
