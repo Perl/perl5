@@ -6,6 +6,9 @@ Revision history for Perl suite Locale::Maketext
     Fix for CPAN RT #40727: infinite loop in
     Locale::Maketext::Guts::_compile() when working with tainted values
 
+    Fix for CPAN RT #34182: Don't localize $@. 
+    ->maketext calls will now backup and restore $@ so that die messages are not supressed.
+    
 2010−06−22
     * Release 1.15 (included in perl 5.13.3; not released separately)
 
