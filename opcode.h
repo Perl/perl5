@@ -793,372 +793,372 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 #if (defined(DOINIT) && !defined(PERL_GLOBAL_STRUCT)) || defined(PERL_GLOBAL_STRUCT_INIT)
 #  define PERL_PPADDR_INITED
 = {
-	MEMBER_TO_FPTR(Perl_pp_null),
-	MEMBER_TO_FPTR(Perl_pp_stub),
-	MEMBER_TO_FPTR(Perl_pp_null),	/* Perl_pp_scalar */
-	MEMBER_TO_FPTR(Perl_pp_pushmark),
-	MEMBER_TO_FPTR(Perl_pp_wantarray),
-	MEMBER_TO_FPTR(Perl_pp_const),
-	MEMBER_TO_FPTR(Perl_pp_gvsv),
-	MEMBER_TO_FPTR(Perl_pp_gv),
-	MEMBER_TO_FPTR(Perl_pp_gelem),
-	MEMBER_TO_FPTR(Perl_pp_padsv),
-	MEMBER_TO_FPTR(Perl_pp_padav),
-	MEMBER_TO_FPTR(Perl_pp_padhv),
-	MEMBER_TO_FPTR(Perl_unimplemented_op),	/* Perl_pp_padany */
-	MEMBER_TO_FPTR(Perl_pp_pushre),
-	MEMBER_TO_FPTR(Perl_pp_rv2gv),
-	MEMBER_TO_FPTR(Perl_pp_rv2sv),
-	MEMBER_TO_FPTR(Perl_pp_av2arylen),
-	MEMBER_TO_FPTR(Perl_pp_rv2cv),
-	MEMBER_TO_FPTR(Perl_pp_anoncode),
-	MEMBER_TO_FPTR(Perl_pp_prototype),
-	MEMBER_TO_FPTR(Perl_pp_refgen),
-	MEMBER_TO_FPTR(Perl_pp_srefgen),
-	MEMBER_TO_FPTR(Perl_pp_ref),
-	MEMBER_TO_FPTR(Perl_pp_bless),
-	MEMBER_TO_FPTR(Perl_pp_backtick),
-	MEMBER_TO_FPTR(Perl_pp_glob),
-	MEMBER_TO_FPTR(Perl_pp_readline),
-	MEMBER_TO_FPTR(Perl_pp_rcatline),
-	MEMBER_TO_FPTR(Perl_pp_null),	/* Perl_pp_regcmaybe */
-	MEMBER_TO_FPTR(Perl_pp_regcreset),
-	MEMBER_TO_FPTR(Perl_pp_regcomp),
-	MEMBER_TO_FPTR(Perl_pp_match),
-	MEMBER_TO_FPTR(Perl_pp_qr),
-	MEMBER_TO_FPTR(Perl_pp_subst),
-	MEMBER_TO_FPTR(Perl_pp_substcont),
-	MEMBER_TO_FPTR(Perl_pp_trans),
-	MEMBER_TO_FPTR(Perl_pp_sassign),
-	MEMBER_TO_FPTR(Perl_pp_aassign),
-	MEMBER_TO_FPTR(Perl_pp_chop),
-	MEMBER_TO_FPTR(Perl_pp_schop),
-	MEMBER_TO_FPTR(Perl_pp_chomp),
-	MEMBER_TO_FPTR(Perl_pp_schomp),
-	MEMBER_TO_FPTR(Perl_pp_defined),
-	MEMBER_TO_FPTR(Perl_pp_undef),
-	MEMBER_TO_FPTR(Perl_pp_study),
-	MEMBER_TO_FPTR(Perl_pp_pos),
-	MEMBER_TO_FPTR(Perl_pp_preinc),
-	MEMBER_TO_FPTR(Perl_pp_i_preinc),
-	MEMBER_TO_FPTR(Perl_pp_predec),
-	MEMBER_TO_FPTR(Perl_pp_i_predec),
-	MEMBER_TO_FPTR(Perl_pp_postinc),
-	MEMBER_TO_FPTR(Perl_pp_i_postinc),
-	MEMBER_TO_FPTR(Perl_pp_postdec),
-	MEMBER_TO_FPTR(Perl_pp_i_postdec),
-	MEMBER_TO_FPTR(Perl_pp_pow),
-	MEMBER_TO_FPTR(Perl_pp_multiply),
-	MEMBER_TO_FPTR(Perl_pp_i_multiply),
-	MEMBER_TO_FPTR(Perl_pp_divide),
-	MEMBER_TO_FPTR(Perl_pp_i_divide),
-	MEMBER_TO_FPTR(Perl_pp_modulo),
-	MEMBER_TO_FPTR(Perl_pp_i_modulo),
-	MEMBER_TO_FPTR(Perl_pp_repeat),
-	MEMBER_TO_FPTR(Perl_pp_add),
-	MEMBER_TO_FPTR(Perl_pp_i_add),
-	MEMBER_TO_FPTR(Perl_pp_subtract),
-	MEMBER_TO_FPTR(Perl_pp_i_subtract),
-	MEMBER_TO_FPTR(Perl_pp_concat),
-	MEMBER_TO_FPTR(Perl_pp_stringify),
-	MEMBER_TO_FPTR(Perl_pp_left_shift),
-	MEMBER_TO_FPTR(Perl_pp_right_shift),
-	MEMBER_TO_FPTR(Perl_pp_lt),
-	MEMBER_TO_FPTR(Perl_pp_i_lt),
-	MEMBER_TO_FPTR(Perl_pp_gt),
-	MEMBER_TO_FPTR(Perl_pp_i_gt),
-	MEMBER_TO_FPTR(Perl_pp_le),
-	MEMBER_TO_FPTR(Perl_pp_i_le),
-	MEMBER_TO_FPTR(Perl_pp_ge),
-	MEMBER_TO_FPTR(Perl_pp_i_ge),
-	MEMBER_TO_FPTR(Perl_pp_eq),
-	MEMBER_TO_FPTR(Perl_pp_i_eq),
-	MEMBER_TO_FPTR(Perl_pp_ne),
-	MEMBER_TO_FPTR(Perl_pp_i_ne),
-	MEMBER_TO_FPTR(Perl_pp_ncmp),
-	MEMBER_TO_FPTR(Perl_pp_i_ncmp),
-	MEMBER_TO_FPTR(Perl_pp_sle),	/* Perl_pp_slt */
-	MEMBER_TO_FPTR(Perl_pp_sle),	/* Perl_pp_sgt */
-	MEMBER_TO_FPTR(Perl_pp_sle),
-	MEMBER_TO_FPTR(Perl_pp_sle),	/* Perl_pp_sge */
-	MEMBER_TO_FPTR(Perl_pp_seq),
-	MEMBER_TO_FPTR(Perl_pp_sne),
-	MEMBER_TO_FPTR(Perl_pp_scmp),
-	MEMBER_TO_FPTR(Perl_pp_bit_and),
-	MEMBER_TO_FPTR(Perl_pp_bit_or),	/* Perl_pp_bit_xor */
-	MEMBER_TO_FPTR(Perl_pp_bit_or),
-	MEMBER_TO_FPTR(Perl_pp_negate),
-	MEMBER_TO_FPTR(Perl_pp_i_negate),
-	MEMBER_TO_FPTR(Perl_pp_not),
-	MEMBER_TO_FPTR(Perl_pp_complement),
-	MEMBER_TO_FPTR(Perl_pp_smartmatch),
-	MEMBER_TO_FPTR(Perl_pp_atan2),
-	MEMBER_TO_FPTR(Perl_pp_sin),
-	MEMBER_TO_FPTR(Perl_pp_sin),	/* Perl_pp_cos */
-	MEMBER_TO_FPTR(Perl_pp_rand),
-	MEMBER_TO_FPTR(Perl_pp_srand),
-	MEMBER_TO_FPTR(Perl_pp_sin),	/* Perl_pp_exp */
-	MEMBER_TO_FPTR(Perl_pp_sin),	/* Perl_pp_log */
-	MEMBER_TO_FPTR(Perl_pp_sin),	/* Perl_pp_sqrt */
-	MEMBER_TO_FPTR(Perl_pp_int),
-	MEMBER_TO_FPTR(Perl_pp_oct),	/* Perl_pp_hex */
-	MEMBER_TO_FPTR(Perl_pp_oct),
-	MEMBER_TO_FPTR(Perl_pp_abs),
-	MEMBER_TO_FPTR(Perl_pp_length),
-	MEMBER_TO_FPTR(Perl_pp_substr),
-	MEMBER_TO_FPTR(Perl_pp_vec),
-	MEMBER_TO_FPTR(Perl_pp_index),
-	MEMBER_TO_FPTR(Perl_pp_index),	/* Perl_pp_rindex */
-	MEMBER_TO_FPTR(Perl_pp_sprintf),
-	MEMBER_TO_FPTR(Perl_pp_formline),
-	MEMBER_TO_FPTR(Perl_pp_ord),
-	MEMBER_TO_FPTR(Perl_pp_chr),
-	MEMBER_TO_FPTR(Perl_pp_crypt),
-	MEMBER_TO_FPTR(Perl_pp_ucfirst),
-	MEMBER_TO_FPTR(Perl_pp_ucfirst),	/* Perl_pp_lcfirst */
-	MEMBER_TO_FPTR(Perl_pp_uc),
-	MEMBER_TO_FPTR(Perl_pp_lc),
-	MEMBER_TO_FPTR(Perl_pp_quotemeta),
-	MEMBER_TO_FPTR(Perl_pp_rv2av),
-	MEMBER_TO_FPTR(Perl_pp_aelemfast),
-	MEMBER_TO_FPTR(Perl_pp_aelem),
-	MEMBER_TO_FPTR(Perl_pp_aslice),
-	MEMBER_TO_FPTR(Perl_pp_aeach),
-	MEMBER_TO_FPTR(Perl_pp_akeys),
-	MEMBER_TO_FPTR(Perl_pp_akeys),	/* Perl_pp_avalues */
-	MEMBER_TO_FPTR(Perl_pp_each),
-	MEMBER_TO_FPTR(Perl_do_kv),	/* Perl_pp_values */
-	MEMBER_TO_FPTR(Perl_do_kv),	/* Perl_pp_keys */
-	MEMBER_TO_FPTR(Perl_pp_delete),
-	MEMBER_TO_FPTR(Perl_pp_exists),
-	MEMBER_TO_FPTR(Perl_pp_rv2av),	/* Perl_pp_rv2hv */
-	MEMBER_TO_FPTR(Perl_pp_helem),
-	MEMBER_TO_FPTR(Perl_pp_hslice),
-	MEMBER_TO_FPTR(Perl_pp_boolkeys),
-	MEMBER_TO_FPTR(Perl_pp_unpack),
-	MEMBER_TO_FPTR(Perl_pp_pack),
-	MEMBER_TO_FPTR(Perl_pp_split),
-	MEMBER_TO_FPTR(Perl_pp_join),
-	MEMBER_TO_FPTR(Perl_pp_list),
-	MEMBER_TO_FPTR(Perl_pp_lslice),
-	MEMBER_TO_FPTR(Perl_pp_anonlist),
-	MEMBER_TO_FPTR(Perl_pp_anonhash),
-	MEMBER_TO_FPTR(Perl_pp_splice),
-	MEMBER_TO_FPTR(Perl_pp_push),
-	MEMBER_TO_FPTR(Perl_pp_shift),	/* Perl_pp_pop */
-	MEMBER_TO_FPTR(Perl_pp_shift),
-	MEMBER_TO_FPTR(Perl_pp_unshift),
-	MEMBER_TO_FPTR(Perl_pp_sort),
-	MEMBER_TO_FPTR(Perl_pp_reverse),
-	MEMBER_TO_FPTR(Perl_pp_grepstart),
-	MEMBER_TO_FPTR(Perl_pp_grepwhile),
-	MEMBER_TO_FPTR(Perl_unimplemented_op),	/* Perl_pp_mapstart */
-	MEMBER_TO_FPTR(Perl_pp_mapwhile),
-	MEMBER_TO_FPTR(Perl_pp_range),
-	MEMBER_TO_FPTR(Perl_pp_flip),
-	MEMBER_TO_FPTR(Perl_pp_flop),
-	MEMBER_TO_FPTR(Perl_pp_and),
-	MEMBER_TO_FPTR(Perl_pp_or),
-	MEMBER_TO_FPTR(Perl_pp_xor),
-	MEMBER_TO_FPTR(Perl_pp_defined),	/* Perl_pp_dor */
-	MEMBER_TO_FPTR(Perl_pp_cond_expr),
-	MEMBER_TO_FPTR(Perl_pp_and),	/* Perl_pp_andassign */
-	MEMBER_TO_FPTR(Perl_pp_or),	/* Perl_pp_orassign */
-	MEMBER_TO_FPTR(Perl_pp_defined),	/* Perl_pp_dorassign */
-	MEMBER_TO_FPTR(Perl_pp_method),
-	MEMBER_TO_FPTR(Perl_pp_entersub),
-	MEMBER_TO_FPTR(Perl_pp_leavesub),
-	MEMBER_TO_FPTR(Perl_pp_leavesublv),
-	MEMBER_TO_FPTR(Perl_pp_caller),
-	MEMBER_TO_FPTR(Perl_pp_warn),
-	MEMBER_TO_FPTR(Perl_pp_die),
-	MEMBER_TO_FPTR(Perl_pp_reset),
-	MEMBER_TO_FPTR(Perl_pp_null),	/* Perl_pp_lineseq */
-	MEMBER_TO_FPTR(Perl_pp_nextstate),
-	MEMBER_TO_FPTR(Perl_pp_dbstate),
-	MEMBER_TO_FPTR(Perl_pp_unstack),
-	MEMBER_TO_FPTR(Perl_pp_enter),
-	MEMBER_TO_FPTR(Perl_pp_leave),
-	MEMBER_TO_FPTR(Perl_pp_null),	/* Perl_pp_scope */
-	MEMBER_TO_FPTR(Perl_pp_enteriter),
-	MEMBER_TO_FPTR(Perl_pp_iter),
-	MEMBER_TO_FPTR(Perl_pp_enterloop),
-	MEMBER_TO_FPTR(Perl_pp_leaveloop),
-	MEMBER_TO_FPTR(Perl_pp_return),
-	MEMBER_TO_FPTR(Perl_pp_last),
-	MEMBER_TO_FPTR(Perl_pp_next),
-	MEMBER_TO_FPTR(Perl_pp_redo),
-	MEMBER_TO_FPTR(Perl_pp_goto),	/* Perl_pp_dump */
-	MEMBER_TO_FPTR(Perl_pp_goto),
-	MEMBER_TO_FPTR(Perl_pp_exit),
-	MEMBER_TO_FPTR(Perl_pp_method_named),
-	MEMBER_TO_FPTR(Perl_pp_entergiven),
-	MEMBER_TO_FPTR(Perl_pp_leavegiven),
-	MEMBER_TO_FPTR(Perl_pp_enterwhen),
-	MEMBER_TO_FPTR(Perl_pp_leavewhen),
-	MEMBER_TO_FPTR(Perl_pp_break),
-	MEMBER_TO_FPTR(Perl_pp_continue),
-	MEMBER_TO_FPTR(Perl_pp_open),
-	MEMBER_TO_FPTR(Perl_pp_close),
-	MEMBER_TO_FPTR(Perl_pp_pipe_op),
-	MEMBER_TO_FPTR(Perl_pp_fileno),
-	MEMBER_TO_FPTR(Perl_pp_umask),
-	MEMBER_TO_FPTR(Perl_pp_binmode),
-	MEMBER_TO_FPTR(Perl_pp_tie),
-	MEMBER_TO_FPTR(Perl_pp_untie),
-	MEMBER_TO_FPTR(Perl_pp_tied),
-	MEMBER_TO_FPTR(Perl_pp_dbmopen),
-	MEMBER_TO_FPTR(Perl_pp_untie),	/* Perl_pp_dbmclose */
-	MEMBER_TO_FPTR(Perl_pp_sselect),
-	MEMBER_TO_FPTR(Perl_pp_select),
-	MEMBER_TO_FPTR(Perl_pp_getc),
-	MEMBER_TO_FPTR(Perl_pp_sysread),	/* Perl_pp_read */
-	MEMBER_TO_FPTR(Perl_pp_enterwrite),
-	MEMBER_TO_FPTR(Perl_pp_leavewrite),
-	MEMBER_TO_FPTR(Perl_pp_prtf),
-	MEMBER_TO_FPTR(Perl_pp_print),
-	MEMBER_TO_FPTR(Perl_pp_print),	/* Perl_pp_say */
-	MEMBER_TO_FPTR(Perl_pp_sysopen),
-	MEMBER_TO_FPTR(Perl_pp_sysseek),
-	MEMBER_TO_FPTR(Perl_pp_sysread),
-	MEMBER_TO_FPTR(Perl_pp_send),	/* Perl_pp_syswrite */
-	MEMBER_TO_FPTR(Perl_pp_eof),
-	MEMBER_TO_FPTR(Perl_pp_tell),
-	MEMBER_TO_FPTR(Perl_pp_sysseek),	/* Perl_pp_seek */
-	MEMBER_TO_FPTR(Perl_pp_truncate),
-	MEMBER_TO_FPTR(Perl_pp_ioctl),	/* Perl_pp_fcntl */
-	MEMBER_TO_FPTR(Perl_pp_ioctl),
-	MEMBER_TO_FPTR(Perl_pp_flock),
-	MEMBER_TO_FPTR(Perl_pp_send),
-	MEMBER_TO_FPTR(Perl_pp_sysread),	/* Perl_pp_recv */
-	MEMBER_TO_FPTR(Perl_pp_socket),
-	MEMBER_TO_FPTR(Perl_pp_sockpair),
-	MEMBER_TO_FPTR(Perl_pp_bind),
-	MEMBER_TO_FPTR(Perl_pp_connect),
-	MEMBER_TO_FPTR(Perl_pp_listen),
-	MEMBER_TO_FPTR(Perl_pp_accept),
-	MEMBER_TO_FPTR(Perl_pp_shutdown),
-	MEMBER_TO_FPTR(Perl_pp_ssockopt),	/* Perl_pp_gsockopt */
-	MEMBER_TO_FPTR(Perl_pp_ssockopt),
-	MEMBER_TO_FPTR(Perl_pp_getpeername),	/* Perl_pp_getsockname */
-	MEMBER_TO_FPTR(Perl_pp_getpeername),
-	MEMBER_TO_FPTR(Perl_pp_stat),	/* Perl_pp_lstat */
-	MEMBER_TO_FPTR(Perl_pp_stat),
-	MEMBER_TO_FPTR(Perl_pp_ftrread),
-	MEMBER_TO_FPTR(Perl_pp_ftrread),	/* Perl_pp_ftrwrite */
-	MEMBER_TO_FPTR(Perl_pp_ftrread),	/* Perl_pp_ftrexec */
-	MEMBER_TO_FPTR(Perl_pp_ftrread),	/* Perl_pp_fteread */
-	MEMBER_TO_FPTR(Perl_pp_ftrread),	/* Perl_pp_ftewrite */
-	MEMBER_TO_FPTR(Perl_pp_ftrread),	/* Perl_pp_fteexec */
-	MEMBER_TO_FPTR(Perl_pp_ftis),
-	MEMBER_TO_FPTR(Perl_pp_ftis),	/* Perl_pp_ftsize */
-	MEMBER_TO_FPTR(Perl_pp_ftis),	/* Perl_pp_ftmtime */
-	MEMBER_TO_FPTR(Perl_pp_ftis),	/* Perl_pp_ftatime */
-	MEMBER_TO_FPTR(Perl_pp_ftis),	/* Perl_pp_ftctime */
-	MEMBER_TO_FPTR(Perl_pp_ftrowned),
-	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_fteowned */
-	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftzero */
-	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftsock */
-	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftchr */
-	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftblk */
-	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftfile */
-	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftdir */
-	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftpipe */
-	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftsuid */
-	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftsgid */
-	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftsvtx */
-	MEMBER_TO_FPTR(Perl_pp_ftlink),
-	MEMBER_TO_FPTR(Perl_pp_fttty),
-	MEMBER_TO_FPTR(Perl_pp_fttext),
-	MEMBER_TO_FPTR(Perl_pp_fttext),	/* Perl_pp_ftbinary */
-	MEMBER_TO_FPTR(Perl_pp_chdir),
-	MEMBER_TO_FPTR(Perl_pp_chown),
-	MEMBER_TO_FPTR(Perl_pp_chroot),
-	MEMBER_TO_FPTR(Perl_pp_chown),	/* Perl_pp_unlink */
-	MEMBER_TO_FPTR(Perl_pp_chown),	/* Perl_pp_chmod */
-	MEMBER_TO_FPTR(Perl_pp_chown),	/* Perl_pp_utime */
-	MEMBER_TO_FPTR(Perl_pp_rename),
-	MEMBER_TO_FPTR(Perl_pp_link),
-	MEMBER_TO_FPTR(Perl_pp_link),	/* Perl_pp_symlink */
-	MEMBER_TO_FPTR(Perl_pp_readlink),
-	MEMBER_TO_FPTR(Perl_pp_mkdir),
-	MEMBER_TO_FPTR(Perl_pp_rmdir),
-	MEMBER_TO_FPTR(Perl_pp_open_dir),
-	MEMBER_TO_FPTR(Perl_pp_readdir),
-	MEMBER_TO_FPTR(Perl_pp_telldir),
-	MEMBER_TO_FPTR(Perl_pp_seekdir),
-	MEMBER_TO_FPTR(Perl_pp_rewinddir),
-	MEMBER_TO_FPTR(Perl_pp_closedir),
-	MEMBER_TO_FPTR(Perl_pp_fork),
-	MEMBER_TO_FPTR(Perl_pp_wait),
-	MEMBER_TO_FPTR(Perl_pp_waitpid),
-	MEMBER_TO_FPTR(Perl_pp_system),
-	MEMBER_TO_FPTR(Perl_pp_exec),
-	MEMBER_TO_FPTR(Perl_pp_chown),	/* Perl_pp_kill */
-	MEMBER_TO_FPTR(Perl_pp_getppid),
-	MEMBER_TO_FPTR(Perl_pp_getpgrp),
-	MEMBER_TO_FPTR(Perl_pp_setpgrp),
-	MEMBER_TO_FPTR(Perl_pp_getpriority),
-	MEMBER_TO_FPTR(Perl_pp_setpriority),
-	MEMBER_TO_FPTR(Perl_pp_time),
-	MEMBER_TO_FPTR(Perl_pp_tms),
-	MEMBER_TO_FPTR(Perl_pp_gmtime),	/* Perl_pp_localtime */
-	MEMBER_TO_FPTR(Perl_pp_gmtime),
-	MEMBER_TO_FPTR(Perl_pp_alarm),
-	MEMBER_TO_FPTR(Perl_pp_sleep),
-	MEMBER_TO_FPTR(Perl_pp_semget),	/* Perl_pp_shmget */
-	MEMBER_TO_FPTR(Perl_pp_semctl),	/* Perl_pp_shmctl */
-	MEMBER_TO_FPTR(Perl_pp_shmwrite),	/* Perl_pp_shmread */
-	MEMBER_TO_FPTR(Perl_pp_shmwrite),
-	MEMBER_TO_FPTR(Perl_pp_semget),	/* Perl_pp_msgget */
-	MEMBER_TO_FPTR(Perl_pp_semctl),	/* Perl_pp_msgctl */
-	MEMBER_TO_FPTR(Perl_pp_shmwrite),	/* Perl_pp_msgsnd */
-	MEMBER_TO_FPTR(Perl_pp_shmwrite),	/* Perl_pp_msgrcv */
-	MEMBER_TO_FPTR(Perl_pp_shmwrite),	/* Perl_pp_semop */
-	MEMBER_TO_FPTR(Perl_pp_semget),
-	MEMBER_TO_FPTR(Perl_pp_semctl),
-	MEMBER_TO_FPTR(Perl_pp_require),
-	MEMBER_TO_FPTR(Perl_pp_require),	/* Perl_pp_dofile */
-	MEMBER_TO_FPTR(Perl_pp_hintseval),
-	MEMBER_TO_FPTR(Perl_pp_entereval),
-	MEMBER_TO_FPTR(Perl_pp_leaveeval),
-	MEMBER_TO_FPTR(Perl_pp_entertry),
-	MEMBER_TO_FPTR(Perl_pp_leavetry),
-	MEMBER_TO_FPTR(Perl_pp_ghostent),	/* Perl_pp_ghbyname */
-	MEMBER_TO_FPTR(Perl_pp_ghostent),	/* Perl_pp_ghbyaddr */
-	MEMBER_TO_FPTR(Perl_pp_ghostent),
-	MEMBER_TO_FPTR(Perl_pp_gnetent),	/* Perl_pp_gnbyname */
-	MEMBER_TO_FPTR(Perl_pp_gnetent),	/* Perl_pp_gnbyaddr */
-	MEMBER_TO_FPTR(Perl_pp_gnetent),
-	MEMBER_TO_FPTR(Perl_pp_gprotoent),	/* Perl_pp_gpbyname */
-	MEMBER_TO_FPTR(Perl_pp_gprotoent),	/* Perl_pp_gpbynumber */
-	MEMBER_TO_FPTR(Perl_pp_gprotoent),
-	MEMBER_TO_FPTR(Perl_pp_gservent),	/* Perl_pp_gsbyname */
-	MEMBER_TO_FPTR(Perl_pp_gservent),	/* Perl_pp_gsbyport */
-	MEMBER_TO_FPTR(Perl_pp_gservent),
-	MEMBER_TO_FPTR(Perl_pp_shostent),
-	MEMBER_TO_FPTR(Perl_pp_snetent),
-	MEMBER_TO_FPTR(Perl_pp_sprotoent),
-	MEMBER_TO_FPTR(Perl_pp_sservent),
-	MEMBER_TO_FPTR(Perl_pp_ehostent),
-	MEMBER_TO_FPTR(Perl_pp_enetent),
-	MEMBER_TO_FPTR(Perl_pp_eprotoent),
-	MEMBER_TO_FPTR(Perl_pp_eservent),
-	MEMBER_TO_FPTR(Perl_pp_gpwent),	/* Perl_pp_gpwnam */
-	MEMBER_TO_FPTR(Perl_pp_gpwent),	/* Perl_pp_gpwuid */
-	MEMBER_TO_FPTR(Perl_pp_gpwent),
-	MEMBER_TO_FPTR(Perl_pp_spwent),
-	MEMBER_TO_FPTR(Perl_pp_epwent),
-	MEMBER_TO_FPTR(Perl_pp_ggrent),	/* Perl_pp_ggrnam */
-	MEMBER_TO_FPTR(Perl_pp_ggrent),	/* Perl_pp_ggrgid */
-	MEMBER_TO_FPTR(Perl_pp_ggrent),
-	MEMBER_TO_FPTR(Perl_pp_sgrent),
-	MEMBER_TO_FPTR(Perl_pp_egrent),
-	MEMBER_TO_FPTR(Perl_pp_getlogin),
-	MEMBER_TO_FPTR(Perl_pp_syscall),
-	MEMBER_TO_FPTR(Perl_pp_lock),
-	MEMBER_TO_FPTR(Perl_pp_once),
-	MEMBER_TO_FPTR(Perl_unimplemented_op),	/* Perl_pp_custom */
+	Perl_pp_null,
+	Perl_pp_stub,
+	Perl_pp_null,	/* Perl_pp_scalar */
+	Perl_pp_pushmark,
+	Perl_pp_wantarray,
+	Perl_pp_const,
+	Perl_pp_gvsv,
+	Perl_pp_gv,
+	Perl_pp_gelem,
+	Perl_pp_padsv,
+	Perl_pp_padav,
+	Perl_pp_padhv,
+	Perl_unimplemented_op,	/* Perl_pp_padany */
+	Perl_pp_pushre,
+	Perl_pp_rv2gv,
+	Perl_pp_rv2sv,
+	Perl_pp_av2arylen,
+	Perl_pp_rv2cv,
+	Perl_pp_anoncode,
+	Perl_pp_prototype,
+	Perl_pp_refgen,
+	Perl_pp_srefgen,
+	Perl_pp_ref,
+	Perl_pp_bless,
+	Perl_pp_backtick,
+	Perl_pp_glob,
+	Perl_pp_readline,
+	Perl_pp_rcatline,
+	Perl_pp_null,	/* Perl_pp_regcmaybe */
+	Perl_pp_regcreset,
+	Perl_pp_regcomp,
+	Perl_pp_match,
+	Perl_pp_qr,
+	Perl_pp_subst,
+	Perl_pp_substcont,
+	Perl_pp_trans,
+	Perl_pp_sassign,
+	Perl_pp_aassign,
+	Perl_pp_chop,
+	Perl_pp_schop,
+	Perl_pp_chomp,
+	Perl_pp_schomp,
+	Perl_pp_defined,
+	Perl_pp_undef,
+	Perl_pp_study,
+	Perl_pp_pos,
+	Perl_pp_preinc,
+	Perl_pp_i_preinc,
+	Perl_pp_predec,
+	Perl_pp_i_predec,
+	Perl_pp_postinc,
+	Perl_pp_i_postinc,
+	Perl_pp_postdec,
+	Perl_pp_i_postdec,
+	Perl_pp_pow,
+	Perl_pp_multiply,
+	Perl_pp_i_multiply,
+	Perl_pp_divide,
+	Perl_pp_i_divide,
+	Perl_pp_modulo,
+	Perl_pp_i_modulo,
+	Perl_pp_repeat,
+	Perl_pp_add,
+	Perl_pp_i_add,
+	Perl_pp_subtract,
+	Perl_pp_i_subtract,
+	Perl_pp_concat,
+	Perl_pp_stringify,
+	Perl_pp_left_shift,
+	Perl_pp_right_shift,
+	Perl_pp_lt,
+	Perl_pp_i_lt,
+	Perl_pp_gt,
+	Perl_pp_i_gt,
+	Perl_pp_le,
+	Perl_pp_i_le,
+	Perl_pp_ge,
+	Perl_pp_i_ge,
+	Perl_pp_eq,
+	Perl_pp_i_eq,
+	Perl_pp_ne,
+	Perl_pp_i_ne,
+	Perl_pp_ncmp,
+	Perl_pp_i_ncmp,
+	Perl_pp_sle,	/* Perl_pp_slt */
+	Perl_pp_sle,	/* Perl_pp_sgt */
+	Perl_pp_sle,
+	Perl_pp_sle,	/* Perl_pp_sge */
+	Perl_pp_seq,
+	Perl_pp_sne,
+	Perl_pp_scmp,
+	Perl_pp_bit_and,
+	Perl_pp_bit_or,	/* Perl_pp_bit_xor */
+	Perl_pp_bit_or,
+	Perl_pp_negate,
+	Perl_pp_i_negate,
+	Perl_pp_not,
+	Perl_pp_complement,
+	Perl_pp_smartmatch,
+	Perl_pp_atan2,
+	Perl_pp_sin,
+	Perl_pp_sin,	/* Perl_pp_cos */
+	Perl_pp_rand,
+	Perl_pp_srand,
+	Perl_pp_sin,	/* Perl_pp_exp */
+	Perl_pp_sin,	/* Perl_pp_log */
+	Perl_pp_sin,	/* Perl_pp_sqrt */
+	Perl_pp_int,
+	Perl_pp_oct,	/* Perl_pp_hex */
+	Perl_pp_oct,
+	Perl_pp_abs,
+	Perl_pp_length,
+	Perl_pp_substr,
+	Perl_pp_vec,
+	Perl_pp_index,
+	Perl_pp_index,	/* Perl_pp_rindex */
+	Perl_pp_sprintf,
+	Perl_pp_formline,
+	Perl_pp_ord,
+	Perl_pp_chr,
+	Perl_pp_crypt,
+	Perl_pp_ucfirst,
+	Perl_pp_ucfirst,	/* Perl_pp_lcfirst */
+	Perl_pp_uc,
+	Perl_pp_lc,
+	Perl_pp_quotemeta,
+	Perl_pp_rv2av,
+	Perl_pp_aelemfast,
+	Perl_pp_aelem,
+	Perl_pp_aslice,
+	Perl_pp_aeach,
+	Perl_pp_akeys,
+	Perl_pp_akeys,	/* Perl_pp_avalues */
+	Perl_pp_each,
+	Perl_do_kv,	/* Perl_pp_values */
+	Perl_do_kv,	/* Perl_pp_keys */
+	Perl_pp_delete,
+	Perl_pp_exists,
+	Perl_pp_rv2av,	/* Perl_pp_rv2hv */
+	Perl_pp_helem,
+	Perl_pp_hslice,
+	Perl_pp_boolkeys,
+	Perl_pp_unpack,
+	Perl_pp_pack,
+	Perl_pp_split,
+	Perl_pp_join,
+	Perl_pp_list,
+	Perl_pp_lslice,
+	Perl_pp_anonlist,
+	Perl_pp_anonhash,
+	Perl_pp_splice,
+	Perl_pp_push,
+	Perl_pp_shift,	/* Perl_pp_pop */
+	Perl_pp_shift,
+	Perl_pp_unshift,
+	Perl_pp_sort,
+	Perl_pp_reverse,
+	Perl_pp_grepstart,
+	Perl_pp_grepwhile,
+	Perl_unimplemented_op,	/* Perl_pp_mapstart */
+	Perl_pp_mapwhile,
+	Perl_pp_range,
+	Perl_pp_flip,
+	Perl_pp_flop,
+	Perl_pp_and,
+	Perl_pp_or,
+	Perl_pp_xor,
+	Perl_pp_defined,	/* Perl_pp_dor */
+	Perl_pp_cond_expr,
+	Perl_pp_and,	/* Perl_pp_andassign */
+	Perl_pp_or,	/* Perl_pp_orassign */
+	Perl_pp_defined,	/* Perl_pp_dorassign */
+	Perl_pp_method,
+	Perl_pp_entersub,
+	Perl_pp_leavesub,
+	Perl_pp_leavesublv,
+	Perl_pp_caller,
+	Perl_pp_warn,
+	Perl_pp_die,
+	Perl_pp_reset,
+	Perl_pp_null,	/* Perl_pp_lineseq */
+	Perl_pp_nextstate,
+	Perl_pp_dbstate,
+	Perl_pp_unstack,
+	Perl_pp_enter,
+	Perl_pp_leave,
+	Perl_pp_null,	/* Perl_pp_scope */
+	Perl_pp_enteriter,
+	Perl_pp_iter,
+	Perl_pp_enterloop,
+	Perl_pp_leaveloop,
+	Perl_pp_return,
+	Perl_pp_last,
+	Perl_pp_next,
+	Perl_pp_redo,
+	Perl_pp_goto,	/* Perl_pp_dump */
+	Perl_pp_goto,
+	Perl_pp_exit,
+	Perl_pp_method_named,
+	Perl_pp_entergiven,
+	Perl_pp_leavegiven,
+	Perl_pp_enterwhen,
+	Perl_pp_leavewhen,
+	Perl_pp_break,
+	Perl_pp_continue,
+	Perl_pp_open,
+	Perl_pp_close,
+	Perl_pp_pipe_op,
+	Perl_pp_fileno,
+	Perl_pp_umask,
+	Perl_pp_binmode,
+	Perl_pp_tie,
+	Perl_pp_untie,
+	Perl_pp_tied,
+	Perl_pp_dbmopen,
+	Perl_pp_untie,	/* Perl_pp_dbmclose */
+	Perl_pp_sselect,
+	Perl_pp_select,
+	Perl_pp_getc,
+	Perl_pp_sysread,	/* Perl_pp_read */
+	Perl_pp_enterwrite,
+	Perl_pp_leavewrite,
+	Perl_pp_prtf,
+	Perl_pp_print,
+	Perl_pp_print,	/* Perl_pp_say */
+	Perl_pp_sysopen,
+	Perl_pp_sysseek,
+	Perl_pp_sysread,
+	Perl_pp_send,	/* Perl_pp_syswrite */
+	Perl_pp_eof,
+	Perl_pp_tell,
+	Perl_pp_sysseek,	/* Perl_pp_seek */
+	Perl_pp_truncate,
+	Perl_pp_ioctl,	/* Perl_pp_fcntl */
+	Perl_pp_ioctl,
+	Perl_pp_flock,
+	Perl_pp_send,
+	Perl_pp_sysread,	/* Perl_pp_recv */
+	Perl_pp_socket,
+	Perl_pp_sockpair,
+	Perl_pp_bind,
+	Perl_pp_connect,
+	Perl_pp_listen,
+	Perl_pp_accept,
+	Perl_pp_shutdown,
+	Perl_pp_ssockopt,	/* Perl_pp_gsockopt */
+	Perl_pp_ssockopt,
+	Perl_pp_getpeername,	/* Perl_pp_getsockname */
+	Perl_pp_getpeername,
+	Perl_pp_stat,	/* Perl_pp_lstat */
+	Perl_pp_stat,
+	Perl_pp_ftrread,
+	Perl_pp_ftrread,	/* Perl_pp_ftrwrite */
+	Perl_pp_ftrread,	/* Perl_pp_ftrexec */
+	Perl_pp_ftrread,	/* Perl_pp_fteread */
+	Perl_pp_ftrread,	/* Perl_pp_ftewrite */
+	Perl_pp_ftrread,	/* Perl_pp_fteexec */
+	Perl_pp_ftis,
+	Perl_pp_ftis,	/* Perl_pp_ftsize */
+	Perl_pp_ftis,	/* Perl_pp_ftmtime */
+	Perl_pp_ftis,	/* Perl_pp_ftatime */
+	Perl_pp_ftis,	/* Perl_pp_ftctime */
+	Perl_pp_ftrowned,
+	Perl_pp_ftrowned,	/* Perl_pp_fteowned */
+	Perl_pp_ftrowned,	/* Perl_pp_ftzero */
+	Perl_pp_ftrowned,	/* Perl_pp_ftsock */
+	Perl_pp_ftrowned,	/* Perl_pp_ftchr */
+	Perl_pp_ftrowned,	/* Perl_pp_ftblk */
+	Perl_pp_ftrowned,	/* Perl_pp_ftfile */
+	Perl_pp_ftrowned,	/* Perl_pp_ftdir */
+	Perl_pp_ftrowned,	/* Perl_pp_ftpipe */
+	Perl_pp_ftrowned,	/* Perl_pp_ftsuid */
+	Perl_pp_ftrowned,	/* Perl_pp_ftsgid */
+	Perl_pp_ftrowned,	/* Perl_pp_ftsvtx */
+	Perl_pp_ftlink,
+	Perl_pp_fttty,
+	Perl_pp_fttext,
+	Perl_pp_fttext,	/* Perl_pp_ftbinary */
+	Perl_pp_chdir,
+	Perl_pp_chown,
+	Perl_pp_chroot,
+	Perl_pp_chown,	/* Perl_pp_unlink */
+	Perl_pp_chown,	/* Perl_pp_chmod */
+	Perl_pp_chown,	/* Perl_pp_utime */
+	Perl_pp_rename,
+	Perl_pp_link,
+	Perl_pp_link,	/* Perl_pp_symlink */
+	Perl_pp_readlink,
+	Perl_pp_mkdir,
+	Perl_pp_rmdir,
+	Perl_pp_open_dir,
+	Perl_pp_readdir,
+	Perl_pp_telldir,
+	Perl_pp_seekdir,
+	Perl_pp_rewinddir,
+	Perl_pp_closedir,
+	Perl_pp_fork,
+	Perl_pp_wait,
+	Perl_pp_waitpid,
+	Perl_pp_system,
+	Perl_pp_exec,
+	Perl_pp_chown,	/* Perl_pp_kill */
+	Perl_pp_getppid,
+	Perl_pp_getpgrp,
+	Perl_pp_setpgrp,
+	Perl_pp_getpriority,
+	Perl_pp_setpriority,
+	Perl_pp_time,
+	Perl_pp_tms,
+	Perl_pp_gmtime,	/* Perl_pp_localtime */
+	Perl_pp_gmtime,
+	Perl_pp_alarm,
+	Perl_pp_sleep,
+	Perl_pp_semget,	/* Perl_pp_shmget */
+	Perl_pp_semctl,	/* Perl_pp_shmctl */
+	Perl_pp_shmwrite,	/* Perl_pp_shmread */
+	Perl_pp_shmwrite,
+	Perl_pp_semget,	/* Perl_pp_msgget */
+	Perl_pp_semctl,	/* Perl_pp_msgctl */
+	Perl_pp_shmwrite,	/* Perl_pp_msgsnd */
+	Perl_pp_shmwrite,	/* Perl_pp_msgrcv */
+	Perl_pp_shmwrite,	/* Perl_pp_semop */
+	Perl_pp_semget,
+	Perl_pp_semctl,
+	Perl_pp_require,
+	Perl_pp_require,	/* Perl_pp_dofile */
+	Perl_pp_hintseval,
+	Perl_pp_entereval,
+	Perl_pp_leaveeval,
+	Perl_pp_entertry,
+	Perl_pp_leavetry,
+	Perl_pp_ghostent,	/* Perl_pp_ghbyname */
+	Perl_pp_ghostent,	/* Perl_pp_ghbyaddr */
+	Perl_pp_ghostent,
+	Perl_pp_gnetent,	/* Perl_pp_gnbyname */
+	Perl_pp_gnetent,	/* Perl_pp_gnbyaddr */
+	Perl_pp_gnetent,
+	Perl_pp_gprotoent,	/* Perl_pp_gpbyname */
+	Perl_pp_gprotoent,	/* Perl_pp_gpbynumber */
+	Perl_pp_gprotoent,
+	Perl_pp_gservent,	/* Perl_pp_gsbyname */
+	Perl_pp_gservent,	/* Perl_pp_gsbyport */
+	Perl_pp_gservent,
+	Perl_pp_shostent,
+	Perl_pp_snetent,
+	Perl_pp_sprotoent,
+	Perl_pp_sservent,
+	Perl_pp_ehostent,
+	Perl_pp_enetent,
+	Perl_pp_eprotoent,
+	Perl_pp_eservent,
+	Perl_pp_gpwent,	/* Perl_pp_gpwnam */
+	Perl_pp_gpwent,	/* Perl_pp_gpwuid */
+	Perl_pp_gpwent,
+	Perl_pp_spwent,
+	Perl_pp_epwent,
+	Perl_pp_ggrent,	/* Perl_pp_ggrnam */
+	Perl_pp_ggrent,	/* Perl_pp_ggrgid */
+	Perl_pp_ggrent,
+	Perl_pp_sgrent,
+	Perl_pp_egrent,
+	Perl_pp_getlogin,
+	Perl_pp_syscall,
+	Perl_pp_lock,
+	Perl_pp_once,
+	Perl_unimplemented_op,	/* Perl_pp_custom */
 }
 #endif
 #ifdef PERL_PPADDR_INITED
@@ -1177,372 +1177,372 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 #if (defined(DOINIT) && !defined(PERL_GLOBAL_STRUCT)) || defined(PERL_GLOBAL_STRUCT_INIT)
 #  define PERL_CHECK_INITED
 = {
-	MEMBER_TO_FPTR(Perl_ck_null),	/* null */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* stub */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* scalar */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* pushmark */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* wantarray */
-	MEMBER_TO_FPTR(Perl_ck_svconst),	/* const */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* gvsv */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* gv */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* gelem */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* padsv */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* padav */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* padhv */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* padany */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* pushre */
-	MEMBER_TO_FPTR(Perl_ck_rvconst),	/* rv2gv */
-	MEMBER_TO_FPTR(Perl_ck_rvconst),	/* rv2sv */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* av2arylen */
-	MEMBER_TO_FPTR(Perl_ck_rvconst),	/* rv2cv */
-	MEMBER_TO_FPTR(Perl_ck_anoncode),	/* anoncode */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* prototype */
-	MEMBER_TO_FPTR(Perl_ck_spair),	/* refgen */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* srefgen */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* ref */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* bless */
-	MEMBER_TO_FPTR(Perl_ck_open),	/* backtick */
-	MEMBER_TO_FPTR(Perl_ck_glob),	/* glob */
-	MEMBER_TO_FPTR(Perl_ck_readline),	/* readline */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* rcatline */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* regcmaybe */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* regcreset */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* regcomp */
-	MEMBER_TO_FPTR(Perl_ck_match),	/* match */
-	MEMBER_TO_FPTR(Perl_ck_match),	/* qr */
-	MEMBER_TO_FPTR(Perl_ck_match),	/* subst */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* substcont */
-	MEMBER_TO_FPTR(Perl_ck_match),	/* trans */
-	MEMBER_TO_FPTR(Perl_ck_sassign),	/* sassign */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* aassign */
-	MEMBER_TO_FPTR(Perl_ck_spair),	/* chop */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* schop */
-	MEMBER_TO_FPTR(Perl_ck_spair),	/* chomp */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* schomp */
-	MEMBER_TO_FPTR(Perl_ck_defined),	/* defined */
-	MEMBER_TO_FPTR(Perl_ck_lfun),	/* undef */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* study */
-	MEMBER_TO_FPTR(Perl_ck_lfun),	/* pos */
-	MEMBER_TO_FPTR(Perl_ck_lfun),	/* preinc */
-	MEMBER_TO_FPTR(Perl_ck_lfun),	/* i_preinc */
-	MEMBER_TO_FPTR(Perl_ck_lfun),	/* predec */
-	MEMBER_TO_FPTR(Perl_ck_lfun),	/* i_predec */
-	MEMBER_TO_FPTR(Perl_ck_lfun),	/* postinc */
-	MEMBER_TO_FPTR(Perl_ck_lfun),	/* i_postinc */
-	MEMBER_TO_FPTR(Perl_ck_lfun),	/* postdec */
-	MEMBER_TO_FPTR(Perl_ck_lfun),	/* i_postdec */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* pow */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* multiply */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* i_multiply */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* divide */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* i_divide */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* modulo */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* i_modulo */
-	MEMBER_TO_FPTR(Perl_ck_repeat),	/* repeat */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* add */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* i_add */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* subtract */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* i_subtract */
-	MEMBER_TO_FPTR(Perl_ck_concat),	/* concat */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* stringify */
-	MEMBER_TO_FPTR(Perl_ck_bitop),	/* left_shift */
-	MEMBER_TO_FPTR(Perl_ck_bitop),	/* right_shift */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* lt */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* i_lt */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* gt */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* i_gt */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* le */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* i_le */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* ge */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* i_ge */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* eq */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* i_eq */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* ne */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* i_ne */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* ncmp */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* i_ncmp */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* slt */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* sgt */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* sle */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* sge */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* seq */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* sne */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* scmp */
-	MEMBER_TO_FPTR(Perl_ck_bitop),	/* bit_and */
-	MEMBER_TO_FPTR(Perl_ck_bitop),	/* bit_xor */
-	MEMBER_TO_FPTR(Perl_ck_bitop),	/* bit_or */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* negate */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* i_negate */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* not */
-	MEMBER_TO_FPTR(Perl_ck_bitop),	/* complement */
-	MEMBER_TO_FPTR(Perl_ck_smartmatch),	/* smartmatch */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* atan2 */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* sin */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* cos */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* rand */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* srand */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* exp */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* log */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* sqrt */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* int */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* hex */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* oct */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* abs */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* length */
-	MEMBER_TO_FPTR(Perl_ck_substr),	/* substr */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* vec */
-	MEMBER_TO_FPTR(Perl_ck_index),	/* index */
-	MEMBER_TO_FPTR(Perl_ck_index),	/* rindex */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* sprintf */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* formline */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* ord */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* chr */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* crypt */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* ucfirst */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* lcfirst */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* uc */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* lc */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* quotemeta */
-	MEMBER_TO_FPTR(Perl_ck_rvconst),	/* rv2av */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* aelemfast */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* aelem */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* aslice */
-	MEMBER_TO_FPTR(Perl_ck_each),	/* aeach */
-	MEMBER_TO_FPTR(Perl_ck_each),	/* akeys */
-	MEMBER_TO_FPTR(Perl_ck_each),	/* avalues */
-	MEMBER_TO_FPTR(Perl_ck_each),	/* each */
-	MEMBER_TO_FPTR(Perl_ck_each),	/* values */
-	MEMBER_TO_FPTR(Perl_ck_each),	/* keys */
-	MEMBER_TO_FPTR(Perl_ck_delete),	/* delete */
-	MEMBER_TO_FPTR(Perl_ck_exists),	/* exists */
-	MEMBER_TO_FPTR(Perl_ck_rvconst),	/* rv2hv */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* helem */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* hslice */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* boolkeys */
-	MEMBER_TO_FPTR(Perl_ck_unpack),	/* unpack */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* pack */
-	MEMBER_TO_FPTR(Perl_ck_split),	/* split */
-	MEMBER_TO_FPTR(Perl_ck_join),	/* join */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* list */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* lslice */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* anonlist */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* anonhash */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* splice */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* push */
-	MEMBER_TO_FPTR(Perl_ck_shift),	/* pop */
-	MEMBER_TO_FPTR(Perl_ck_shift),	/* shift */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* unshift */
-	MEMBER_TO_FPTR(Perl_ck_sort),	/* sort */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* reverse */
-	MEMBER_TO_FPTR(Perl_ck_grep),	/* grepstart */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* grepwhile */
-	MEMBER_TO_FPTR(Perl_ck_grep),	/* mapstart */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* mapwhile */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* range */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* flip */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* flop */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* and */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* or */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* xor */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* dor */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* cond_expr */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* andassign */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* orassign */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* dorassign */
-	MEMBER_TO_FPTR(Perl_ck_method),	/* method */
-	MEMBER_TO_FPTR(Perl_ck_subr),	/* entersub */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* leavesub */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* leavesublv */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* caller */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* warn */
-	MEMBER_TO_FPTR(Perl_ck_die),	/* die */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* reset */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* lineseq */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* nextstate */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* dbstate */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* unstack */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* enter */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* leave */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* scope */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* enteriter */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* iter */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* enterloop */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* leaveloop */
-	MEMBER_TO_FPTR(Perl_ck_return),	/* return */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* last */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* next */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* redo */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* dump */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* goto */
-	MEMBER_TO_FPTR(Perl_ck_exit),	/* exit */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* method_named */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* entergiven */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* leavegiven */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* enterwhen */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* leavewhen */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* break */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* continue */
-	MEMBER_TO_FPTR(Perl_ck_open),	/* open */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* close */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* pipe_op */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* fileno */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* umask */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* binmode */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* tie */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* untie */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* tied */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* dbmopen */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* dbmclose */
-	MEMBER_TO_FPTR(Perl_ck_select),	/* sselect */
-	MEMBER_TO_FPTR(Perl_ck_select),	/* select */
-	MEMBER_TO_FPTR(Perl_ck_eof),	/* getc */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* read */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* enterwrite */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* leavewrite */
-	MEMBER_TO_FPTR(Perl_ck_listiob),	/* prtf */
-	MEMBER_TO_FPTR(Perl_ck_listiob),	/* print */
-	MEMBER_TO_FPTR(Perl_ck_listiob),	/* say */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* sysopen */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* sysseek */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* sysread */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* syswrite */
-	MEMBER_TO_FPTR(Perl_ck_eof),	/* eof */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* tell */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* seek */
-	MEMBER_TO_FPTR(Perl_ck_trunc),	/* truncate */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* fcntl */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* ioctl */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* flock */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* send */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* recv */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* socket */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* sockpair */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* bind */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* connect */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* listen */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* accept */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* shutdown */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* gsockopt */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* ssockopt */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* getsockname */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* getpeername */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* lstat */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* stat */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftrread */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftrwrite */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftrexec */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* fteread */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftewrite */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* fteexec */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftis */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftsize */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftmtime */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftatime */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftctime */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftrowned */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* fteowned */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftzero */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftsock */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftchr */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftblk */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftfile */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftdir */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftpipe */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftsuid */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftsgid */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftsvtx */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftlink */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* fttty */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* fttext */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftbinary */
-	MEMBER_TO_FPTR(Perl_ck_chdir),	/* chdir */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* chown */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* chroot */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* unlink */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* chmod */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* utime */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* rename */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* link */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* symlink */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* readlink */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* mkdir */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* rmdir */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* open_dir */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* readdir */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* telldir */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* seekdir */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* rewinddir */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* closedir */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* fork */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* wait */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* waitpid */
-	MEMBER_TO_FPTR(Perl_ck_exec),	/* system */
-	MEMBER_TO_FPTR(Perl_ck_exec),	/* exec */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* kill */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* getppid */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* getpgrp */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* setpgrp */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* getpriority */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* setpriority */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* time */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* tms */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* localtime */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* gmtime */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* alarm */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* sleep */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* shmget */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* shmctl */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* shmread */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* shmwrite */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* msgget */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* msgctl */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* msgsnd */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* msgrcv */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* semop */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* semget */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* semctl */
-	MEMBER_TO_FPTR(Perl_ck_require),	/* require */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* dofile */
-	MEMBER_TO_FPTR(Perl_ck_svconst),	/* hintseval */
-	MEMBER_TO_FPTR(Perl_ck_eval),	/* entereval */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* leaveeval */
-	MEMBER_TO_FPTR(Perl_ck_eval),	/* entertry */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* leavetry */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* ghbyname */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* ghbyaddr */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* ghostent */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* gnbyname */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* gnbyaddr */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* gnetent */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* gpbyname */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* gpbynumber */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* gprotoent */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* gsbyname */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* gsbyport */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* gservent */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* shostent */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* snetent */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* sprotoent */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* sservent */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* ehostent */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* enetent */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* eprotoent */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* eservent */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* gpwnam */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* gpwuid */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* gpwent */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* spwent */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* epwent */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* ggrnam */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* ggrgid */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* ggrent */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* sgrent */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* egrent */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* getlogin */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* syscall */
-	MEMBER_TO_FPTR(Perl_ck_rfun),	/* lock */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* once */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* custom */
+	Perl_ck_null,		/* null */
+	Perl_ck_null,		/* stub */
+	Perl_ck_fun,		/* scalar */
+	Perl_ck_null,		/* pushmark */
+	Perl_ck_null,		/* wantarray */
+	Perl_ck_svconst,	/* const */
+	Perl_ck_null,		/* gvsv */
+	Perl_ck_null,		/* gv */
+	Perl_ck_null,		/* gelem */
+	Perl_ck_null,		/* padsv */
+	Perl_ck_null,		/* padav */
+	Perl_ck_null,		/* padhv */
+	Perl_ck_null,		/* padany */
+	Perl_ck_null,		/* pushre */
+	Perl_ck_rvconst,	/* rv2gv */
+	Perl_ck_rvconst,	/* rv2sv */
+	Perl_ck_null,		/* av2arylen */
+	Perl_ck_rvconst,	/* rv2cv */
+	Perl_ck_anoncode,	/* anoncode */
+	Perl_ck_null,		/* prototype */
+	Perl_ck_spair,		/* refgen */
+	Perl_ck_null,		/* srefgen */
+	Perl_ck_fun,		/* ref */
+	Perl_ck_fun,		/* bless */
+	Perl_ck_open,		/* backtick */
+	Perl_ck_glob,		/* glob */
+	Perl_ck_readline,	/* readline */
+	Perl_ck_null,		/* rcatline */
+	Perl_ck_fun,		/* regcmaybe */
+	Perl_ck_fun,		/* regcreset */
+	Perl_ck_null,		/* regcomp */
+	Perl_ck_match,		/* match */
+	Perl_ck_match,		/* qr */
+	Perl_ck_match,		/* subst */
+	Perl_ck_null,		/* substcont */
+	Perl_ck_match,		/* trans */
+	Perl_ck_sassign,	/* sassign */
+	Perl_ck_null,		/* aassign */
+	Perl_ck_spair,		/* chop */
+	Perl_ck_null,		/* schop */
+	Perl_ck_spair,		/* chomp */
+	Perl_ck_null,		/* schomp */
+	Perl_ck_defined,	/* defined */
+	Perl_ck_lfun,		/* undef */
+	Perl_ck_fun,		/* study */
+	Perl_ck_lfun,		/* pos */
+	Perl_ck_lfun,		/* preinc */
+	Perl_ck_lfun,		/* i_preinc */
+	Perl_ck_lfun,		/* predec */
+	Perl_ck_lfun,		/* i_predec */
+	Perl_ck_lfun,		/* postinc */
+	Perl_ck_lfun,		/* i_postinc */
+	Perl_ck_lfun,		/* postdec */
+	Perl_ck_lfun,		/* i_postdec */
+	Perl_ck_null,		/* pow */
+	Perl_ck_null,		/* multiply */
+	Perl_ck_null,		/* i_multiply */
+	Perl_ck_null,		/* divide */
+	Perl_ck_null,		/* i_divide */
+	Perl_ck_null,		/* modulo */
+	Perl_ck_null,		/* i_modulo */
+	Perl_ck_repeat,		/* repeat */
+	Perl_ck_null,		/* add */
+	Perl_ck_null,		/* i_add */
+	Perl_ck_null,		/* subtract */
+	Perl_ck_null,		/* i_subtract */
+	Perl_ck_concat,		/* concat */
+	Perl_ck_fun,		/* stringify */
+	Perl_ck_bitop,		/* left_shift */
+	Perl_ck_bitop,		/* right_shift */
+	Perl_ck_null,		/* lt */
+	Perl_ck_null,		/* i_lt */
+	Perl_ck_null,		/* gt */
+	Perl_ck_null,		/* i_gt */
+	Perl_ck_null,		/* le */
+	Perl_ck_null,		/* i_le */
+	Perl_ck_null,		/* ge */
+	Perl_ck_null,		/* i_ge */
+	Perl_ck_null,		/* eq */
+	Perl_ck_null,		/* i_eq */
+	Perl_ck_null,		/* ne */
+	Perl_ck_null,		/* i_ne */
+	Perl_ck_null,		/* ncmp */
+	Perl_ck_null,		/* i_ncmp */
+	Perl_ck_null,		/* slt */
+	Perl_ck_null,		/* sgt */
+	Perl_ck_null,		/* sle */
+	Perl_ck_null,		/* sge */
+	Perl_ck_null,		/* seq */
+	Perl_ck_null,		/* sne */
+	Perl_ck_null,		/* scmp */
+	Perl_ck_bitop,		/* bit_and */
+	Perl_ck_bitop,		/* bit_xor */
+	Perl_ck_bitop,		/* bit_or */
+	Perl_ck_null,		/* negate */
+	Perl_ck_null,		/* i_negate */
+	Perl_ck_null,		/* not */
+	Perl_ck_bitop,		/* complement */
+	Perl_ck_smartmatch,	/* smartmatch */
+	Perl_ck_fun,		/* atan2 */
+	Perl_ck_fun,		/* sin */
+	Perl_ck_fun,		/* cos */
+	Perl_ck_fun,		/* rand */
+	Perl_ck_fun,		/* srand */
+	Perl_ck_fun,		/* exp */
+	Perl_ck_fun,		/* log */
+	Perl_ck_fun,		/* sqrt */
+	Perl_ck_fun,		/* int */
+	Perl_ck_fun,		/* hex */
+	Perl_ck_fun,		/* oct */
+	Perl_ck_fun,		/* abs */
+	Perl_ck_fun,		/* length */
+	Perl_ck_substr,		/* substr */
+	Perl_ck_fun,		/* vec */
+	Perl_ck_index,		/* index */
+	Perl_ck_index,		/* rindex */
+	Perl_ck_fun,		/* sprintf */
+	Perl_ck_fun,		/* formline */
+	Perl_ck_fun,		/* ord */
+	Perl_ck_fun,		/* chr */
+	Perl_ck_fun,		/* crypt */
+	Perl_ck_fun,		/* ucfirst */
+	Perl_ck_fun,		/* lcfirst */
+	Perl_ck_fun,		/* uc */
+	Perl_ck_fun,		/* lc */
+	Perl_ck_fun,		/* quotemeta */
+	Perl_ck_rvconst,	/* rv2av */
+	Perl_ck_null,		/* aelemfast */
+	Perl_ck_null,		/* aelem */
+	Perl_ck_null,		/* aslice */
+	Perl_ck_each,		/* aeach */
+	Perl_ck_each,		/* akeys */
+	Perl_ck_each,		/* avalues */
+	Perl_ck_each,		/* each */
+	Perl_ck_each,		/* values */
+	Perl_ck_each,		/* keys */
+	Perl_ck_delete,		/* delete */
+	Perl_ck_exists,		/* exists */
+	Perl_ck_rvconst,	/* rv2hv */
+	Perl_ck_null,		/* helem */
+	Perl_ck_null,		/* hslice */
+	Perl_ck_fun,		/* boolkeys */
+	Perl_ck_unpack,		/* unpack */
+	Perl_ck_fun,		/* pack */
+	Perl_ck_split,		/* split */
+	Perl_ck_join,		/* join */
+	Perl_ck_null,		/* list */
+	Perl_ck_null,		/* lslice */
+	Perl_ck_fun,		/* anonlist */
+	Perl_ck_fun,		/* anonhash */
+	Perl_ck_fun,		/* splice */
+	Perl_ck_fun,		/* push */
+	Perl_ck_shift,		/* pop */
+	Perl_ck_shift,		/* shift */
+	Perl_ck_fun,		/* unshift */
+	Perl_ck_sort,		/* sort */
+	Perl_ck_fun,		/* reverse */
+	Perl_ck_grep,		/* grepstart */
+	Perl_ck_null,		/* grepwhile */
+	Perl_ck_grep,		/* mapstart */
+	Perl_ck_null,		/* mapwhile */
+	Perl_ck_null,		/* range */
+	Perl_ck_null,		/* flip */
+	Perl_ck_null,		/* flop */
+	Perl_ck_null,		/* and */
+	Perl_ck_null,		/* or */
+	Perl_ck_null,		/* xor */
+	Perl_ck_null,		/* dor */
+	Perl_ck_null,		/* cond_expr */
+	Perl_ck_null,		/* andassign */
+	Perl_ck_null,		/* orassign */
+	Perl_ck_null,		/* dorassign */
+	Perl_ck_method,		/* method */
+	Perl_ck_subr,		/* entersub */
+	Perl_ck_null,		/* leavesub */
+	Perl_ck_null,		/* leavesublv */
+	Perl_ck_fun,		/* caller */
+	Perl_ck_fun,		/* warn */
+	Perl_ck_die,		/* die */
+	Perl_ck_fun,		/* reset */
+	Perl_ck_null,		/* lineseq */
+	Perl_ck_null,		/* nextstate */
+	Perl_ck_null,		/* dbstate */
+	Perl_ck_null,		/* unstack */
+	Perl_ck_null,		/* enter */
+	Perl_ck_null,		/* leave */
+	Perl_ck_null,		/* scope */
+	Perl_ck_null,		/* enteriter */
+	Perl_ck_null,		/* iter */
+	Perl_ck_null,		/* enterloop */
+	Perl_ck_null,		/* leaveloop */
+	Perl_ck_return,		/* return */
+	Perl_ck_null,		/* last */
+	Perl_ck_null,		/* next */
+	Perl_ck_null,		/* redo */
+	Perl_ck_null,		/* dump */
+	Perl_ck_null,		/* goto */
+	Perl_ck_exit,		/* exit */
+	Perl_ck_null,		/* method_named */
+	Perl_ck_null,		/* entergiven */
+	Perl_ck_null,		/* leavegiven */
+	Perl_ck_null,		/* enterwhen */
+	Perl_ck_null,		/* leavewhen */
+	Perl_ck_null,		/* break */
+	Perl_ck_null,		/* continue */
+	Perl_ck_open,		/* open */
+	Perl_ck_fun,		/* close */
+	Perl_ck_fun,		/* pipe_op */
+	Perl_ck_fun,		/* fileno */
+	Perl_ck_fun,		/* umask */
+	Perl_ck_fun,		/* binmode */
+	Perl_ck_fun,		/* tie */
+	Perl_ck_fun,		/* untie */
+	Perl_ck_fun,		/* tied */
+	Perl_ck_fun,		/* dbmopen */
+	Perl_ck_fun,		/* dbmclose */
+	Perl_ck_select,		/* sselect */
+	Perl_ck_select,		/* select */
+	Perl_ck_eof,		/* getc */
+	Perl_ck_fun,		/* read */
+	Perl_ck_fun,		/* enterwrite */
+	Perl_ck_null,		/* leavewrite */
+	Perl_ck_listiob,	/* prtf */
+	Perl_ck_listiob,	/* print */
+	Perl_ck_listiob,	/* say */
+	Perl_ck_fun,		/* sysopen */
+	Perl_ck_fun,		/* sysseek */
+	Perl_ck_fun,		/* sysread */
+	Perl_ck_fun,		/* syswrite */
+	Perl_ck_eof,		/* eof */
+	Perl_ck_fun,		/* tell */
+	Perl_ck_fun,		/* seek */
+	Perl_ck_trunc,		/* truncate */
+	Perl_ck_fun,		/* fcntl */
+	Perl_ck_fun,		/* ioctl */
+	Perl_ck_fun,		/* flock */
+	Perl_ck_fun,		/* send */
+	Perl_ck_fun,		/* recv */
+	Perl_ck_fun,		/* socket */
+	Perl_ck_fun,		/* sockpair */
+	Perl_ck_fun,		/* bind */
+	Perl_ck_fun,		/* connect */
+	Perl_ck_fun,		/* listen */
+	Perl_ck_fun,		/* accept */
+	Perl_ck_fun,		/* shutdown */
+	Perl_ck_fun,		/* gsockopt */
+	Perl_ck_fun,		/* ssockopt */
+	Perl_ck_fun,		/* getsockname */
+	Perl_ck_fun,		/* getpeername */
+	Perl_ck_ftst,		/* lstat */
+	Perl_ck_ftst,		/* stat */
+	Perl_ck_ftst,		/* ftrread */
+	Perl_ck_ftst,		/* ftrwrite */
+	Perl_ck_ftst,		/* ftrexec */
+	Perl_ck_ftst,		/* fteread */
+	Perl_ck_ftst,		/* ftewrite */
+	Perl_ck_ftst,		/* fteexec */
+	Perl_ck_ftst,		/* ftis */
+	Perl_ck_ftst,		/* ftsize */
+	Perl_ck_ftst,		/* ftmtime */
+	Perl_ck_ftst,		/* ftatime */
+	Perl_ck_ftst,		/* ftctime */
+	Perl_ck_ftst,		/* ftrowned */
+	Perl_ck_ftst,		/* fteowned */
+	Perl_ck_ftst,		/* ftzero */
+	Perl_ck_ftst,		/* ftsock */
+	Perl_ck_ftst,		/* ftchr */
+	Perl_ck_ftst,		/* ftblk */
+	Perl_ck_ftst,		/* ftfile */
+	Perl_ck_ftst,		/* ftdir */
+	Perl_ck_ftst,		/* ftpipe */
+	Perl_ck_ftst,		/* ftsuid */
+	Perl_ck_ftst,		/* ftsgid */
+	Perl_ck_ftst,		/* ftsvtx */
+	Perl_ck_ftst,		/* ftlink */
+	Perl_ck_ftst,		/* fttty */
+	Perl_ck_ftst,		/* fttext */
+	Perl_ck_ftst,		/* ftbinary */
+	Perl_ck_chdir,		/* chdir */
+	Perl_ck_fun,		/* chown */
+	Perl_ck_fun,		/* chroot */
+	Perl_ck_fun,		/* unlink */
+	Perl_ck_fun,		/* chmod */
+	Perl_ck_fun,		/* utime */
+	Perl_ck_fun,		/* rename */
+	Perl_ck_fun,		/* link */
+	Perl_ck_fun,		/* symlink */
+	Perl_ck_fun,		/* readlink */
+	Perl_ck_fun,		/* mkdir */
+	Perl_ck_fun,		/* rmdir */
+	Perl_ck_fun,		/* open_dir */
+	Perl_ck_fun,		/* readdir */
+	Perl_ck_fun,		/* telldir */
+	Perl_ck_fun,		/* seekdir */
+	Perl_ck_fun,		/* rewinddir */
+	Perl_ck_fun,		/* closedir */
+	Perl_ck_null,		/* fork */
+	Perl_ck_null,		/* wait */
+	Perl_ck_fun,		/* waitpid */
+	Perl_ck_exec,		/* system */
+	Perl_ck_exec,		/* exec */
+	Perl_ck_fun,		/* kill */
+	Perl_ck_null,		/* getppid */
+	Perl_ck_fun,		/* getpgrp */
+	Perl_ck_fun,		/* setpgrp */
+	Perl_ck_fun,		/* getpriority */
+	Perl_ck_fun,		/* setpriority */
+	Perl_ck_null,		/* time */
+	Perl_ck_null,		/* tms */
+	Perl_ck_fun,		/* localtime */
+	Perl_ck_fun,		/* gmtime */
+	Perl_ck_fun,		/* alarm */
+	Perl_ck_fun,		/* sleep */
+	Perl_ck_fun,		/* shmget */
+	Perl_ck_fun,		/* shmctl */
+	Perl_ck_fun,		/* shmread */
+	Perl_ck_fun,		/* shmwrite */
+	Perl_ck_fun,		/* msgget */
+	Perl_ck_fun,		/* msgctl */
+	Perl_ck_fun,		/* msgsnd */
+	Perl_ck_fun,		/* msgrcv */
+	Perl_ck_fun,		/* semop */
+	Perl_ck_fun,		/* semget */
+	Perl_ck_fun,		/* semctl */
+	Perl_ck_require,	/* require */
+	Perl_ck_fun,		/* dofile */
+	Perl_ck_svconst,	/* hintseval */
+	Perl_ck_eval,		/* entereval */
+	Perl_ck_null,		/* leaveeval */
+	Perl_ck_eval,		/* entertry */
+	Perl_ck_null,		/* leavetry */
+	Perl_ck_fun,		/* ghbyname */
+	Perl_ck_fun,		/* ghbyaddr */
+	Perl_ck_null,		/* ghostent */
+	Perl_ck_fun,		/* gnbyname */
+	Perl_ck_fun,		/* gnbyaddr */
+	Perl_ck_null,		/* gnetent */
+	Perl_ck_fun,		/* gpbyname */
+	Perl_ck_fun,		/* gpbynumber */
+	Perl_ck_null,		/* gprotoent */
+	Perl_ck_fun,		/* gsbyname */
+	Perl_ck_fun,		/* gsbyport */
+	Perl_ck_null,		/* gservent */
+	Perl_ck_fun,		/* shostent */
+	Perl_ck_fun,		/* snetent */
+	Perl_ck_fun,		/* sprotoent */
+	Perl_ck_fun,		/* sservent */
+	Perl_ck_null,		/* ehostent */
+	Perl_ck_null,		/* enetent */
+	Perl_ck_null,		/* eprotoent */
+	Perl_ck_null,		/* eservent */
+	Perl_ck_fun,		/* gpwnam */
+	Perl_ck_fun,		/* gpwuid */
+	Perl_ck_null,		/* gpwent */
+	Perl_ck_null,		/* spwent */
+	Perl_ck_null,		/* epwent */
+	Perl_ck_fun,		/* ggrnam */
+	Perl_ck_fun,		/* ggrgid */
+	Perl_ck_null,		/* ggrent */
+	Perl_ck_null,		/* sgrent */
+	Perl_ck_null,		/* egrent */
+	Perl_ck_null,		/* getlogin */
+	Perl_ck_fun,		/* syscall */
+	Perl_ck_rfun,		/* lock */
+	Perl_ck_null,		/* once */
+	Perl_ck_null,		/* custom */
 }
 #endif
 #ifdef PERL_CHECK_INITED

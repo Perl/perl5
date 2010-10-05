@@ -192,7 +192,7 @@ convenient to wrap the L</PL_rpeepp> hook.
 =cut
 */
 
-PERLVARI(Ipeepp,	peep_t, MEMBER_TO_FPTR(Perl_peep))
+PERLVARI(Ipeepp,	peep_t, Perl_peep)
 
 /*
 =for apidoc Amn|peep_t|PL_rpeepp
@@ -216,7 +216,7 @@ to wrap the L</PL_peepp> hook.
 =cut
 */
 
-PERLVARI(Irpeepp,	peep_t, MEMBER_TO_FPTR(Perl_rpeep))
+PERLVARI(Irpeepp,	peep_t, Perl_rpeep)
 
 /*
 =for apidoc Amn|Perl_ophook_t|PL_opfreehook
@@ -491,7 +491,7 @@ PERLVAR(Iunicode, U32)	/* Unicode features: $ENV{PERL_UNICODE} or -C */
 
 PERLVARI(Imaxo,	int,	MAXO)		/* maximum number of ops */
 
-PERLVARI(Irunops,	runops_proc_t,	MEMBER_TO_FPTR(RUNOPS_DEFAULT))
+PERLVARI(Irunops,	runops_proc_t,	RUNOPS_DEFAULT)
 
 /*
 =for apidoc Amn|SV|PL_sv_undef
@@ -683,19 +683,19 @@ PERLVAR(Ireentrant_retint, int)	/* Integer return value from reentrant functions
 PERLVAR(Istashcache,	HV *)		/* Cache to speed up S_method_common */
 
 /* Hooks to shared SVs and locks. */
-PERLVARI(Isharehook,	share_proc_t,	MEMBER_TO_FPTR(Perl_sv_nosharing))
-PERLVARI(Ilockhook,	share_proc_t,	MEMBER_TO_FPTR(Perl_sv_nosharing))
+PERLVARI(Isharehook,	share_proc_t,	Perl_sv_nosharing)
+PERLVARI(Ilockhook,	share_proc_t,	Perl_sv_nosharing)
 #ifdef NO_MATHOMS
 #  define PERL_UNLOCK_HOOK Perl_sv_nosharing
 #else
 /* This reference ensures that the mathoms are linked with perl */
 #  define PERL_UNLOCK_HOOK Perl_sv_nounlocking
 #endif
-PERLVARI(Iunlockhook,	share_proc_t,	MEMBER_TO_FPTR(PERL_UNLOCK_HOOK))
+PERLVARI(Iunlockhook,	share_proc_t,	PERL_UNLOCK_HOOK)
 
-PERLVARI(Ithreadhook,	thrhook_proc_t,	MEMBER_TO_FPTR(Perl_nothreadhook))
+PERLVARI(Ithreadhook,	thrhook_proc_t,	Perl_nothreadhook)
 
-PERLVARI(Isignalhook,	despatch_signals_proc_t, MEMBER_TO_FPTR(Perl_despatch_signals))
+PERLVARI(Isignalhook,	despatch_signals_proc_t, Perl_despatch_signals)
 
 PERLVARI(Ihash_seed, UV, 0)		/* Hash initializer */
 
@@ -750,7 +750,7 @@ PERLVARI(Islab_count, U32, 0)	/* Size of the array */
 #endif
 
 /* Can shared object be destroyed */
-PERLVARI(Idestroyhook, destroyable_proc_t, MEMBER_TO_FPTR(Perl_sv_destroyable))
+PERLVARI(Idestroyhook, destroyable_proc_t, Perl_sv_destroyable)
 
 #ifdef DEBUG_LEAKING_SCALARS
 PERLVARI(Isv_serial, U32, 0) /* SV serial number, used in sv.c */

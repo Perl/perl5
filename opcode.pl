@@ -258,10 +258,10 @@ END
 
 for (@ops) {
     if (my $name = $alias{$_}) {
-	print "\tMEMBER_TO_FPTR($name),\t/* Perl_pp_$_ */\n";
+	print "\t$name,\t/* Perl_pp_$_ */\n";
     }
     else {
-	print "\tMEMBER_TO_FPTR(Perl_pp_$_),\n";
+	print "\tPerl_pp_$_,\n";
     }
 }
 
@@ -292,7 +292,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 END
 
 for (@ops) {
-    print "\t", &tab(3, "MEMBER_TO_FPTR(Perl_$check{$_}),"), "\t/* $_ */\n";
+    print "\t", &tab(3, "Perl_$check{$_},"), "\t/* $_ */\n";
 }
 
 print <<END;

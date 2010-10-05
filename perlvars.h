@@ -158,8 +158,8 @@ PERLVARI(Gveto_cleanup,	int, FALSE)	/* exit without cleanup */
 /* dummy variables that hold pointers to both runops functions, thus forcing
  * them *both* to get linked in (useful for Peek.xs, debugging etc) */
 
-PERLVARI(Grunops_std,	runops_proc_t,	MEMBER_TO_FPTR(Perl_runops_standard))
-PERLVARI(Grunops_dbg,	runops_proc_t,	MEMBER_TO_FPTR(Perl_runops_debug))
+PERLVARI(Grunops_std,	runops_proc_t,	Perl_runops_standard)
+PERLVARI(Grunops_dbg,	runops_proc_t,	Perl_runops_debug)
 
 
 /* These are baked at compile time into any shared perl library.
@@ -241,4 +241,4 @@ the Perl core) will normally return C<KEYWORD_PLUGIN_DECLINE>.
 =cut
 */
 
-PERLVARI(Gkeyword_plugin, Perl_keyword_plugin_t, MEMBER_TO_FPTR(Perl_keyword_plugin_standard))
+PERLVARI(Gkeyword_plugin, Perl_keyword_plugin_t, Perl_keyword_plugin_standard)

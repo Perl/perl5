@@ -569,7 +569,7 @@ Perl_op_clear(pTHX_ OP *o)
 	break;
     default:
 	if (!(o->op_flags & OPf_REF)
-	    || (PL_check[o->op_type] != MEMBER_TO_FPTR(Perl_ck_ftst)))
+	    || (PL_check[o->op_type] != Perl_ck_ftst))
 	    break;
 	/* FALL THROUGH */
     case OP_GVSV:
@@ -1704,7 +1704,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
        their argument is a filehandle; thus \stat(".") should not set
        it. AMS 20011102 */
     if (type == OP_REFGEN &&
-        PL_check[o->op_type] == MEMBER_TO_FPTR(Perl_ck_ftst))
+        PL_check[o->op_type] == Perl_ck_ftst)
         return o;
 
     if (type != OP_LEAVESUBLV)
@@ -7235,7 +7235,7 @@ Perl_ck_ftst(pTHX_ OP *o)
 	}
 	if ((PL_hints & HINT_FILETEST_ACCESS) && OP_IS_FILETEST_ACCESS(o->op_type))
 	    o->op_private |= OPpFT_ACCESS;
-	if (PL_check[kidtype] == MEMBER_TO_FPTR(Perl_ck_ftst)
+	if (PL_check[kidtype] == Perl_ck_ftst
 		&& kidtype != OP_STAT && kidtype != OP_LSTAT)
 	    o->op_private |= OPpFT_STACKED;
     }

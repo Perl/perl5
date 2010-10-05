@@ -225,6 +225,7 @@
 #define _PERL_OBJECT_THIS
 #define PERL_OBJECT_THIS_
 #define CALL_FPTR(fptr) (*fptr)
+#define MEMBER_TO_FPTR(name) name
 #endif /* !PERL_CORE */
 
 #define CALLRUNOPS  PL_runops
@@ -3123,10 +3124,6 @@ typedef pthread_key_t	perl_key;
 #define PERL_EXIT_EXPECTED	0x01
 #define PERL_EXIT_DESTRUCT_END  0x02  /* Run END in perl_destruct */
 
-#ifndef MEMBER_TO_FPTR
-#  define MEMBER_TO_FPTR(name)		name
-#endif
-
 #ifndef PERL_CORE
 /* format to use for version numbers in file/directory names */
 /* XXX move to Configure? */
@@ -5078,9 +5075,9 @@ START_EXTERN_C
 
 MGVTBL_SET(
     PL_vtbl_sv,
-    MEMBER_TO_FPTR(Perl_magic_get),
-    MEMBER_TO_FPTR(Perl_magic_set),
-    MEMBER_TO_FPTR(Perl_magic_len),
+    Perl_magic_get,
+    Perl_magic_set,
+    Perl_magic_len,
     0,
     0,
     0,
@@ -5091,9 +5088,9 @@ MGVTBL_SET(
 MGVTBL_SET(
     PL_vtbl_env,
     0,
-    MEMBER_TO_FPTR(Perl_magic_set_all_env),
+    Perl_magic_set_all_env,
     0,
-    MEMBER_TO_FPTR(Perl_magic_clear_all_env),
+    Perl_magic_clear_all_env,
     0,
     0,
     0,
@@ -5103,9 +5100,9 @@ MGVTBL_SET(
 MGVTBL_SET(
     PL_vtbl_envelem,
     0,
-    MEMBER_TO_FPTR(Perl_magic_setenv),
+    Perl_magic_setenv,
     0,
-    MEMBER_TO_FPTR(Perl_magic_clearenv),
+    Perl_magic_clearenv,
     0,
     0,
     0,
@@ -5140,10 +5137,10 @@ MGVTBL_SET(
 #else
 MGVTBL_SET(
     PL_vtbl_sigelem,
-    MEMBER_TO_FPTR(Perl_magic_getsig),
-    MEMBER_TO_FPTR(Perl_magic_setsig),
+    Perl_magic_getsig,
+    Perl_magic_setsig,
     0,
-    MEMBER_TO_FPTR(Perl_magic_clearsig),
+    Perl_magic_clearsig,
     0,
     0,
     0,
@@ -5155,8 +5152,8 @@ MGVTBL_SET(
     PL_vtbl_pack,
     0,
     0,
-    MEMBER_TO_FPTR(Perl_magic_sizepack),
-    MEMBER_TO_FPTR(Perl_magic_wipepack),
+    Perl_magic_sizepack,
+    Perl_magic_wipepack,
     0,
     0,
     0,
@@ -5165,10 +5162,10 @@ MGVTBL_SET(
 
 MGVTBL_SET(
     PL_vtbl_packelem,
-    MEMBER_TO_FPTR(Perl_magic_getpack),
-    MEMBER_TO_FPTR(Perl_magic_setpack),
+    Perl_magic_getpack,
+    Perl_magic_setpack,
     0,
-    MEMBER_TO_FPTR(Perl_magic_clearpack),
+    Perl_magic_clearpack,
     0,
     0,
     0,
@@ -5178,7 +5175,7 @@ MGVTBL_SET(
 MGVTBL_SET(
     PL_vtbl_dbline,
     0,
-    MEMBER_TO_FPTR(Perl_magic_setdbline),
+    Perl_magic_setdbline,
     0,
     0,
     0,
@@ -5190,9 +5187,9 @@ MGVTBL_SET(
 MGVTBL_SET(
     PL_vtbl_isa,
     0,
-    MEMBER_TO_FPTR(Perl_magic_setisa),
+    Perl_magic_setisa,
     0,
-    MEMBER_TO_FPTR(Perl_magic_clearisa),
+    Perl_magic_clearisa,
     0,
     0,
     0,
@@ -5202,7 +5199,7 @@ MGVTBL_SET(
 MGVTBL_SET(
     PL_vtbl_isaelem,
     0,
-    MEMBER_TO_FPTR(Perl_magic_setisa),
+    Perl_magic_setisa,
     0,
     0,
     0,
@@ -5213,8 +5210,8 @@ MGVTBL_SET(
 
 MGVTBL_SET_CONST_MAGIC_GET(
     PL_vtbl_arylen,
-    MEMBER_TO_FPTR(Perl_magic_getarylen),
-    MEMBER_TO_FPTR(Perl_magic_setarylen),
+    Perl_magic_getarylen,
+    Perl_magic_setarylen,
     0,
     0,
     0,
@@ -5229,7 +5226,7 @@ MGVTBL_SET(
     0,
     0,
     0,
-    MEMBER_TO_FPTR(Perl_magic_freearylen_p),
+    Perl_magic_freearylen_p,
     0,
     0,
     0
@@ -5238,7 +5235,7 @@ MGVTBL_SET(
 MGVTBL_SET(
     PL_vtbl_mglob,
     0,
-    MEMBER_TO_FPTR(Perl_magic_setmglob),
+    Perl_magic_setmglob,
     0,
     0,
     0,
@@ -5249,8 +5246,8 @@ MGVTBL_SET(
 
 MGVTBL_SET(
     PL_vtbl_nkeys,
-    MEMBER_TO_FPTR(Perl_magic_getnkeys),
-    MEMBER_TO_FPTR(Perl_magic_setnkeys),
+    Perl_magic_getnkeys,
+    Perl_magic_setnkeys,
     0,
     0,
     0,
@@ -5261,8 +5258,8 @@ MGVTBL_SET(
 
 MGVTBL_SET(
     PL_vtbl_taint,
-    MEMBER_TO_FPTR(Perl_magic_gettaint),
-    MEMBER_TO_FPTR(Perl_magic_settaint),
+    Perl_magic_gettaint,
+    Perl_magic_settaint,
     0,
     0,
     0,
@@ -5273,8 +5270,8 @@ MGVTBL_SET(
 
 MGVTBL_SET(
     PL_vtbl_substr,
-    MEMBER_TO_FPTR(Perl_magic_getsubstr),
-    MEMBER_TO_FPTR(Perl_magic_setsubstr),
+    Perl_magic_getsubstr,
+    Perl_magic_setsubstr,
     0,
     0,
     0,
@@ -5285,8 +5282,8 @@ MGVTBL_SET(
 
 MGVTBL_SET(
     PL_vtbl_vec,
-    MEMBER_TO_FPTR(Perl_magic_getvec),
-    MEMBER_TO_FPTR(Perl_magic_setvec),
+    Perl_magic_getvec,
+    Perl_magic_setvec,
     0,
     0,
     0,
@@ -5297,8 +5294,8 @@ MGVTBL_SET(
 
 MGVTBL_SET(
     PL_vtbl_pos,
-    MEMBER_TO_FPTR(Perl_magic_getpos),
-    MEMBER_TO_FPTR(Perl_magic_setpos),
+    Perl_magic_getpos,
+    Perl_magic_setpos,
     0,
     0,
     0,
@@ -5310,7 +5307,7 @@ MGVTBL_SET(
 MGVTBL_SET(
     PL_vtbl_bm,
     0,
-    MEMBER_TO_FPTR(Perl_magic_setregexp),
+    Perl_magic_setregexp,
     0,
     0,
     0,
@@ -5322,7 +5319,7 @@ MGVTBL_SET(
 MGVTBL_SET(
     PL_vtbl_fm,
     0,
-    MEMBER_TO_FPTR(Perl_magic_setregexp),
+    Perl_magic_setregexp,
     0,
     0,
     0,
@@ -5333,8 +5330,8 @@ MGVTBL_SET(
 
 MGVTBL_SET(
     PL_vtbl_uvar,
-    MEMBER_TO_FPTR(Perl_magic_getuvar),
-    MEMBER_TO_FPTR(Perl_magic_setuvar),
+    Perl_magic_getuvar,
+    Perl_magic_setuvar,
     0,
     0,
     0,
@@ -5345,8 +5342,8 @@ MGVTBL_SET(
 
 MGVTBL_SET(
     PL_vtbl_defelem,
-    MEMBER_TO_FPTR(Perl_magic_getdefelem),
-    MEMBER_TO_FPTR(Perl_magic_setdefelem),
+    Perl_magic_getdefelem,
+    Perl_magic_setdefelem,
     0,
     0,
     0,
@@ -5358,7 +5355,7 @@ MGVTBL_SET(
 MGVTBL_SET(
     PL_vtbl_regexp,
     0,
-    MEMBER_TO_FPTR(Perl_magic_setregexp),
+    Perl_magic_setregexp,
     0,
     0,
     0,
@@ -5371,7 +5368,7 @@ MGVTBL_SET(
     PL_vtbl_regdata,
     0,
     0,
-    MEMBER_TO_FPTR(Perl_magic_regdata_cnt),
+    Perl_magic_regdata_cnt,
     0,
     0,
     0,
@@ -5381,8 +5378,8 @@ MGVTBL_SET(
 
 MGVTBL_SET(
     PL_vtbl_regdatum,
-    MEMBER_TO_FPTR(Perl_magic_regdatum_get),
-    MEMBER_TO_FPTR(Perl_magic_regdatum_set),
+    Perl_magic_regdatum_get,
+    Perl_magic_regdatum_set,
     0,
     0,
     0,
@@ -5394,10 +5391,10 @@ MGVTBL_SET(
 MGVTBL_SET(
     PL_vtbl_amagic,
     0,
-    MEMBER_TO_FPTR(Perl_magic_setamagic),
+    Perl_magic_setamagic,
     0,
     0,
-    MEMBER_TO_FPTR(Perl_magic_setamagic),
+    Perl_magic_setamagic,
     0,
     0,
     0
@@ -5406,10 +5403,10 @@ MGVTBL_SET(
 MGVTBL_SET(
     PL_vtbl_amagicelem,
     0,
-    MEMBER_TO_FPTR(Perl_magic_setamagic),
+    Perl_magic_setamagic,
     0,
     0,
-    MEMBER_TO_FPTR(Perl_magic_setamagic),
+    Perl_magic_setamagic,
     0,
     0,
     0
@@ -5421,7 +5418,7 @@ MGVTBL_SET(
     0,
     0,
     0,
-    MEMBER_TO_FPTR(Perl_magic_killbackrefs),
+    Perl_magic_killbackrefs,
     0,
     0,
     0
@@ -5433,7 +5430,7 @@ MGVTBL_SET(
     0,
     0,
     0,
-    MEMBER_TO_FPTR(Perl_magic_freeovrld),
+    Perl_magic_freeovrld,
     0,
     0,
     0
@@ -5442,7 +5439,7 @@ MGVTBL_SET(
 MGVTBL_SET(
     PL_vtbl_utf8,
     0,
-    MEMBER_TO_FPTR(Perl_magic_setutf8),
+    Perl_magic_setutf8,
     0,
     0,
     0,
@@ -5454,7 +5451,7 @@ MGVTBL_SET(
 MGVTBL_SET(
     PL_vtbl_collxfrm,
     0,
-    MEMBER_TO_FPTR(Perl_magic_setcollxfrm),
+    Perl_magic_setcollxfrm,
     0,
     0,
     0,
@@ -5467,9 +5464,9 @@ MGVTBL_SET(
 MGVTBL_SET(
     PL_vtbl_hintselem,
     0,
-    MEMBER_TO_FPTR(Perl_magic_sethint),
+    Perl_magic_sethint,
     0,
-    MEMBER_TO_FPTR(Perl_magic_clearhint),
+    Perl_magic_clearhint,
     0,
     0,
     0,
@@ -5481,7 +5478,7 @@ MGVTBL_SET(
     0,
     0,
     0,
-    MEMBER_TO_FPTR(Perl_magic_clearhints),
+    Perl_magic_clearhints,
     0,
     0,
     0,

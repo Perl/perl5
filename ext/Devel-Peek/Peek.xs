@@ -7,11 +7,10 @@ static bool
 _runops_debug(int flag)
 {
     dTHX;
-    const bool d = PL_runops == MEMBER_TO_FPTR(Perl_runops_debug);
+    const bool d = PL_runops == Perl_runops_debug;
 
     if (flag >= 0)
-	PL_runops 
-	    = MEMBER_TO_FPTR(flag ? Perl_runops_debug : Perl_runops_standard);
+	PL_runops = flag ? Perl_runops_debug : Perl_runops_standard;
     return d;
 }
 
