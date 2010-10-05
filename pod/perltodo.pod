@@ -146,14 +146,6 @@ do so. Test it with older perl releases, and fix the problems you find.
 To make a minimal perl distribution, it's useful to look at
 F<t/lib/commonsense.t>.
 
-=head2 Move dual-life pod/*.PL into ext
-
-Nearly all the dual-life modules have been moved to F<ext>. However, we
-still  need to move F<pod/*.PL> into their respective directories
-in F<ext/>. They're referenced by (at least) C<plextract> in F<Makefile.SH>
-and C<utils> in F<win32/Makefile> and F<win32/makefile.ml>, and listed
-explicitly in F<win32/pod.mak>, F<vms/descrip_mms.template> and F<utils.lst>
-
 =head2 POSIX memory footprint
 
 Ilya observed that use POSIX; eats memory like there's no tomorrow, and at
