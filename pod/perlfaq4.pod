@@ -890,14 +890,14 @@ Perl distribution) lets you say:
 
 A substitution can do this for you. For a single line, you want to
 replace all the leading or trailing whitespace with nothing. You
-can do that with a pair of substitutions.
+can do that with a pair of substitutions:
 
 	s/^\s+//;
 	s/\s+$//;
 
 You can also write that as a single substitution, although it turns
 out the combined statement is slower than the separate ones. That
-might not matter to you, though.
+might not matter to you, though:
 
 	s/^\s+|\s+$//g;
 
@@ -906,30 +906,29 @@ beginning or the end of the string since the anchors have a lower
 precedence than the alternation. With the C</g> flag, the substitution
 makes all possible matches, so it gets both. Remember, the trailing
 newline matches the C<\s+>, and  the C<$> anchor can match to the
-physical end of the string, so the newline disappears too. Just add
+absolute end of the string, so the newline disappears too. Just add
 the newline to the output, which has the added benefit of preserving
 "blank" (consisting entirely of whitespace) lines which the C<^\s+>
-would remove all by itself.
+would remove all by itself:
 
-	while( <> )
-		{
+	while( <> ) {
 		s/^\s+|\s+$//g;
 		print "$_\n";
 		}
 
-For a multi-line string, you can apply the regular expression
-to each logical line in the string by adding the C</m> flag (for
+For a multi-line string, you can apply the regular expression to each
+logical line in the string by adding the C</m> flag (for
 "multi-line"). With the C</m> flag, the C<$> matches I<before> an
-embedded newline, so it doesn't remove it. It still removes the
-newline at the end of the string.
+embedded newline, so it doesn't remove it. This pattern still removes
+the newline at the end of the string:
 
 	$string =~ s/^\s+|\s+$//gm;
 
 Remember that lines consisting entirely of whitespace will disappear,
 since the first part of the alternation can match the entire string
-and replace it with nothing. If need to keep embedded blank lines,
+and replace it with nothing. If you need to keep embedded blank lines,
 you have to do a little more work. Instead of matching any whitespace
-(since that includes a newline), just match the other whitespace.
+(since that includes a newline), just match the other whitespace:
 
 	$string =~ s/^[\t\f ]+|[\t\f ]+$//mg;
 
