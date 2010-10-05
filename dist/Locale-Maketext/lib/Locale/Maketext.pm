@@ -198,6 +198,9 @@ sub maketext {
     # If no failures, we'll re-set it back to what it was later.
     my $at = $@;
 
+    # Copy @_ case one of its elements is $@.
+    @_ = @_;
+
     # Look up the value:
 
     my $value;

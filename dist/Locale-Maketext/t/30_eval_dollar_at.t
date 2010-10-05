@@ -17,7 +17,7 @@ use warnings;
 package main;
 use strict;
 use warnings;
-use Test::More tests => 10;
+use Test::More tests => 12;
 
 my $lh = TEST->get_handle('en');
 $@ = "foo";
@@ -49,3 +49,7 @@ is($@, '', '$@ is clean after failed _try_use');
     is($err, undef, "die event calling failure_handler on bad code");
     like($@, qr/^Error in maketexting "foo_fail":/ms, "\$@ is re-written as expected.");
 }
+
+$@ = 'foo';
+is($lh->maketext('Eval error: [_1]', $@), 'Eval error: foo', "Make sure \$@ is localized when passed to maketext");
+is($@, 'foo', "\$@ wasn't modified during call");
