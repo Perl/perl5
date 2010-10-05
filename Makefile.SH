@@ -574,9 +574,14 @@ perl$(OBJ_EXT): git_version.h
 translators:	$(MINIPERL_EXE) $(CONFIGPM) $(dynamic_ext) FORCE
 	@echo " "; echo "	Making x2p stuff"; cd x2p; $(LDLIBPTH) $(MAKE) all
 
-utilities:	$(MINIPERL_EXE) $(CONFIGPM) $(plextract) FORCE
-	@echo " "; echo "	Making utilities"; cd utils; $(LDLIBPTH) $(MAKE) all
+!NO!SUBS!
 
+$spitshell >>$Makefile <<!GROK!THIS!
+utilities:	\$(MINIPERL_EXE) \$(CONFIGPM) \$(plextract) FORCE lib/auto/Cwd/Cwd.$dlext
+	@echo " "; echo "	Making utilities"; cd utils; \$(LDLIBPTH) \$(MAKE) all
+
+!GROK!THIS!
+$spitshell >>$Makefile <<'!NO!SUBS!'
 
 # This is now done by installman only if you actually want the man pages.
 #	@echo " "; echo "	Making docs"; cd pod; $(MAKE) all;
