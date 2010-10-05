@@ -1203,8 +1203,6 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'rra',
 	'DISTRIBUTION'	=> 'RRA/podlators-2.3.1.tar.gz',
 	'FILES'		=> q[cpan/podlators],
-	'EXCLUDED'	=> [ qw{ Makefile.PL } ],
-	'CUSTOMIZED'	=> [ qw{ Makefile.PL } ],
 	'UPSTREAM'	=> 'cpan',
 	},
 

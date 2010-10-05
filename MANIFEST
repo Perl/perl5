@@ -1644,7 +1644,6 @@ cpan/podlators/lib/Pod/Text/Color.pm		Convert POD data to color ASCII text
 cpan/podlators/lib/Pod/Text/Overstrike.pm	Convert POD data to formatted overstrike text
 cpan/podlators/lib/Pod/Text.pm			Pod-Parser - convert POD data to formatted ASCII text
 cpan/podlators/lib/Pod/Text/Termcap.pm		Convert POD data to ASCII text with format escapes
-cpan/podlators/Makefile.PL
 cpan/podlators/scripts/pod2man.PL	Precursor for translator to turn pod into manpage
 cpan/podlators/scripts/pod2text.PL	Precursor for translator to turn pod into text
 cpan/podlators/t/basic.cap			podlators test

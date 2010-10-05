@@ -321,29 +321,39 @@ sub build_extension {
     if (!-f $makefile) {
 	if (!-f 'Makefile.PL') {
 	    print "\nCreating Makefile.PL in $ext_dir for $mname\n";
-	    # We need to cope well with various possible layouts
-	    my @dirs = split /::/, $mname;
-	    my $leaf = pop @dirs;
-	    my $leafname = "$leaf.pm";
-	    my $pathname = join '/', @dirs, $leafname;
-	    my @locations = ($leafname, $pathname, "lib/$pathname");
-	    my $fromname;
-	    foreach (@locations) {
-		if (-f $_) {
-		    $fromname = $_;
-		    last;
+	    my ($fromname, $key, $value);
+	    if ($mname eq 'podlators') {
+		# We need to special case this somewhere, and this is fewer
+		# lines of code than a core-only Makefile.PL, and no more
+		# complex
+		$fromname = 'VERSION';
+		$key = 'DISTNAME';
+		$value = 'podlators';
+		$mname = 'Pod';
+	    } else {
+		$key = 'ABSTRACT_FROM';
+		# We need to cope well with various possible layouts
+		my @dirs = split /::/, $mname;
+		my $leaf = pop @dirs;
+		my $leafname = "$leaf.pm";
+		my $pathname = join '/', @dirs, $leafname;
+		my @locations = ($leafname, $pathname, "lib/$pathname");
+		foreach (@locations) {
+		    if (-f $_) {
+			$fromname = $_;
+			last;
+		    }
 		}
-	    }
 
-	    unless ($fromname) {
-		die "For $mname tried @locations in in $ext_dir but can't find source";
+		unless ($fromname) {
+		    die "For $mname tried @locations in in $ext_dir but can't find source";
+		}
+		($value = $fromname) =~ s/\.pm\z/.pod/;
+		$value = $fromname unless -e $value;
 	    }
-            my $pod_name;
-	    ($pod_name = $fromname) =~ s/\.pm\z/.pod/;
-	    $pod_name = $fromname unless -e $pod_name;
 	    open my $fh, '>', 'Makefile.PL'
 		or die "Can't open Makefile.PL for writing: $!";
-	    printf $fh <<'EOM', $0, $mname, $fromname, $pod_name;
+	    printf $fh <<'EOM', $0, $mname, $fromname, $key, $value;
 #-*- buffer-read-only: t -*-
 
 # This Makefile.PL was written by %s.
@@ -385,7 +395,7 @@ my @exe_files = values %%pod_scripts;
 WriteMakefile(
     NAME          => '%s',
     VERSION_FROM  => '%s',
-    ABSTRACT_FROM => '%s',
+    %-13s => '%s',
     realclean     => { FILES => "@temps" },
     (%%pod_scripts ? (
         PL_FILES  => \%%pod_scripts,
