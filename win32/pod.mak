@@ -1,18 +1,14 @@
-CONVERTERS = pod2html
-
 HTMLROOT = /	# Change this to fix cross-references in HTML
-POD2HTML = pod2html \
-	    --htmlroot=$(HTMLROOT) \
+POD2HTML_ARGS = --htmlroot=$(HTMLROOT) \
 	    --podroot=.. --podpath=pod:lib:ext:vms \
 	    --libpods=perlfunc:perlguts:perlvar:perlrun:perlop
+POD2HTML = ../ext/Pod-Html/pod2html
 POD2MAN = ../cpan/podlators/pod2man
 POD2TEXT = ../cpan/podlators/pod2text
 POD2LATEX = ../cpan/Pod-LaTeX/pod2latex
 PODCHECKER = ../cpan/Pod-Parser/podchecker
 
-all: $(CONVERTERS) html
-
-converters: $(CONVERTERS)
+all: html
 
 PERL = ..\miniperl.exe
 REALPERL = ..\perl.exe
@@ -589,7 +585,7 @@ TEX = \
 
 man:	$(POD2MAN) $(MAN)
 
-html:	pod2html $(HTML)
+html:	$(POD2HTML) $(HTML)
 
 tex:	$(POD2LATEX) $(TEX)
 
@@ -609,10 +605,10 @@ toc:
 .SUFFIXES: .html
 
 .pm.html:
-	$(PERL) -I../lib $(POD2HTML) --infile=$*.pm --outfile=$*.html
+	$(PERL) -I../lib $(POD2HTML) $(POD2HTML_ARGS) --infile=$*.pm --outfile=$*.html
 
 .pod.html:
-	$(PERL) -I../lib $(POD2HTML) --infile=$*.pod --outfile=$*.html
+	$(PERL) -I../lib $(POD2HTML) $(POD2HTML_ARGS) --infile=$*.pod --outfile=$*.html
 
 .SUFFIXES: .tex
 
@@ -630,15 +626,9 @@ clean:
 	rm -f *.aux *.log *.exe
 
 realclean:	clean
-	rm -f $(CONVERTERS)
 
 distclean:	realclean
 
 check:	$(PODCHECKER)
 	@echo "checking..."; \
 	$(PERL) -I../lib $(PODCHECKER) $(POD)
-
-# Dependencies.
-pod2html:	pod2html.PL ../lib/Config.pm
-	$(PERL) -I ../lib $(ICWD) pod2html.PL
-

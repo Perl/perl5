@@ -3247,6 +3247,7 @@ ext/PerlIO-via/t/via.t		See if PerlIO::via works
 ext/PerlIO-via/via.pm		PerlIO layer for layers in perl
 ext/PerlIO-via/via.xs		PerlIO layer for layers in perl
 ext/Pod-Html/Html.pm		Convert POD data to HTML
+ext/Pod-Html/pod2html.PL	Precursor for translator to turn pod into HTML
 ext/Pod-Html/t/htmlescp.pod	pod2html escape test input data
 ext/Pod-Html/t/htmlescp.t	pod2html escape test
 ext/Pod-Html/t/htmllink.pod	pod2html link test input data
@@ -4144,7 +4145,6 @@ pod/perlvar.pod			Perl predefined variables
 pod/perlvms.pod			Perl notes for VMS
 pod/perlxs.pod			Perl XS application programming interface
 pod/perlxstut.pod		Perl XS tutorial
-pod/pod2html.PL			Precursor for translator to turn pod into HTML
 pod/roffitall			troff the whole man page set
 pod/rofftoc			Generate a table of contents in troff format
 pod/splitman			Splits perlfunc into multiple man pages

@@ -54,13 +54,11 @@ LDLIBPTH = $ldlibpth
 ## In the following dollars and backticks do not need the extra backslash.
 $spitshell >>Makefile <<'!NO!SUBS!'
 
-CONVERTERS = pod2html
-
 HTMLROOT = /	# Change this to fix cross-references in HTML
-POD2HTML = pod2html \
-	    --htmlroot=$(HTMLROOT) \
+POD2HTML_ARGS = --htmlroot=$(HTMLROOT) \
 	    --podroot=.. --podpath=pod:lib:ext:vms \
 	    --libpods=perlfunc:perlguts:perlvar:perlrun:perlop
+POD2HTML = ../ext/Pod-Html/pod2html
 POD2MAN = ../cpan/podlators/pod2man
 POD2LATEX = ../cpan/Pod-LaTeX/pod2latex
 PODCHECKER =  ../cpan/Pod-Parser/podchecker
@@ -69,13 +67,11 @@ PERL = ../miniperl
 PERLILIB = $(PERL) -I../lib
 REALPERL = ../perl
 
-all: $(CONVERTERS) man
-
-converters: $(CONVERTERS)
+all: man
 
 man:	$(POD2MAN) $(MAN)
 
-html:	pod2html $(HTML)
+html:	$(POD2HTML) $(HTML)
 
 tex:	$(POD2LATEX) $(TEX)
 
@@ -94,11 +90,11 @@ toc perltoc.pod:	buildtoc
 
 .SUFFIXES: .html
 
-.pm.html:    pod2html
-	$(PERL) -I../lib $(POD2HTML) --infile=$*.pm --outfile=$*.html
+.pm.html:    $(POD2HTML)
+	$(PERL) -I../lib $(POD2HTML) $(POD2HTML_ARGS) --infile=$*.pm --outfile=$*.html
 
-.pod.html:    pod2html
-	$(PERL) -I../lib $(POD2HTML) --infile=$*.pod --outfile=$*.html
+.pod.html:    $(POD2HTML)
+	$(PERL) -I../lib $(POD2HTML) $(POD2HTML_ARGS) --infile=$*.pod --outfile=$*.html
 
 .SUFFIXES: .tex
 
@@ -116,7 +112,6 @@ clean:
 	rm -f *.aux *.log *.exe
 
 realclean:	clean
-	rm -f $(CONVERTERS)
 
 distclean:	realclean
 
@@ -126,9 +121,4 @@ veryclean:	distclean
 check:	$(PODCHECKER)
 	@echo "checking..."; \
 	$(PERL) -I../lib $(PODCHECKER) $(POD)
-
-# Dependencies.
-pod2html:	pod2html.PL ../lib/Config.pm
-	$(LDLIBPTH) $(PERL) -I ../lib pod2html.PL
-
 !NO!SUBS!

@@ -667,8 +667,6 @@ ERRNO_PM	= $(LIBDIR)\Errno.pm
 EXTENSION_PM	=		\
 		$(ERRNO_PM)
 
-POD2HTML	= $(PODDIR)\pod2html
-
 CFG_VARS = \
  "INST_DRV=$(INST_DRV)" \
  "INST_TOP=$(INST_TOP)" \

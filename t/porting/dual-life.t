@@ -31,6 +31,7 @@ foreach (qw (podchecker podselect pod2usage)) {
 foreach (qw (pod2man pod2text)) {
     $dist_dir_exe{lc "$_.PL"} = "../cpan/podlators/$_";
 };
+$dist_dir_exe{'pod2html.pl'} = '../ext/Pod-Html';
 
 my @programs;
 

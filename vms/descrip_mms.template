@@ -388,13 +388,11 @@ git_version.h : $(MINIPERL_EXE) make_patchnum.pl
 
 base : miniperl git_version.h nonxsext perl
 	@ $(NOOP)
-extras : dynext libmods utils podxform extra.pods
+extras : dynext libmods utils extra.pods
 	@ $(NOOP)
 libmods : $(LIBPREREQ)
 	@ $(NOOP)
 utils : $(utils1) $(utils2) $(utils3) $(utils4) $(utils5)
-	@ $(NOOP)
-podxform : [.lib.pods]pod2html.com
 	@ $(NOOP)
 x2p : [.x2p]$(DBG)a2p$(E) [.x2p]s2p.com [.x2p]find2perl.com 
 	@ $(NOOP)
@@ -693,11 +691,6 @@ nonxsext : $(LIBPREREQ) preplibrary $(MINIPERL_EXE)
 [.x2p]walk$(O) : [.x2p]walk.c
 	$(CC) $(X2PCFLAGS) /Include=[.x2p] $(MMS$SOURCE)
 .endif
-
-[.lib.pods]pod2html.com : [.pod]pod2html.PL $(ARCHDIR)Config.pm
-	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
-	Copy/NoConfirm/Log [.pod]pod2html.com [.lib.pods]
 
 preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) 
 

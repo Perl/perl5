@@ -612,7 +612,6 @@ UTILS		=			\
 		..\utils\cpan2dist	\
 		..\utils\shasum		\
 		..\utils\instmodsh	\
-		..\pod\pod2html		\
 		..\x2p\find2perl	\
 		..\x2p\psed		\
 		..\x2p\s2p		\
@@ -1095,7 +1094,6 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.vos      ..\pod\perlvos.pod
 	copy ..\README.win32    ..\pod\perlwin32.pod
 	copy ..\pod\perldelta.pod ..\pod\perl5136delta.pod
-	$(MAKE) -f ..\win32\pod.mak converters
 	cd ..\win32
 	$(PERLEXE) $(PL2BAT) $(UTILS)
 	$(PERLEXE) $(ICWD) ..\autodoc.pl ..
@@ -1196,8 +1194,7 @@ distclean: realclean
 	    perlos390.pod perlos400.pod perlplan9.pod perlqnx.pod \
 	    perlriscos.pod perlsolaris.pod perlsymbian.pod perltoc.pod \
 	    perltru64.pod perltw.pod perluniprops.pod perluts.pod \
-	    perlvmesa.pod perlvos.pod perlwin32.pod \
-	    pod2html
+	    perlvmesa.pod perlvos.pod perlwin32.pod
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs \
 	    perldoc perlivp dprofpp libnetcfg enc2xs piconv cpan *.bat \
 	    xsubpp instmodsh prove ptar ptardiff cpanp-run-perl cpanp cpan2dist shasum corelist config_data

@@ -1,4 +1,4 @@
-pod/pod2html
+ext/Pod-Html/blib/script/pod2html
 cpan/Pod-LaTeX/blib/script/pod2latex
 cpan/podlators/blib/script/pod2man
 cpan/podlators/blib/script/pod2text
