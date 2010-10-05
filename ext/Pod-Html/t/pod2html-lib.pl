@@ -7,14 +7,13 @@ sub convert_n_test {
     my($podfile, $testname) = @_;
 
     my $cwd = Cwd::cwd();
-    my $base_dir = catdir $cwd, updir(), "lib", "Pod";
-    my $new_dir  = catdir $base_dir, "t";
+    my $new_dir  = catdir $cwd, "t";
     my $infile   = catfile $new_dir, "$podfile.pod";
     my $outfile  = catfile $new_dir, "$podfile.html";
 
     Pod::Html::pod2html(
         "--podpath=t",
-        "--podroot=$base_dir",
+        "--podroot=$cwd",
         "--htmlroot=/",
         "--infile=$infile",
         "--outfile=$outfile"

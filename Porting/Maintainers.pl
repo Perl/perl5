@@ -1687,6 +1687,7 @@ use File::Glob qw(:case);
 				ext/ODBM_File/
 				ext/Opcode/
 				ext/POSIX/
+				ext/Pod-Html/
 				ext/PerlIO-encoding/
 				ext/PerlIO-scalar/
 				ext/PerlIO-via/
@@ -1739,14 +1740,11 @@ use File::Glob qw(:case);
 				lib/Net/servent.{pm,t}
 				lib/PerlIO.pm
 				lib/Pod/Functions.pm
-				lib/Pod/Html.pm
 				lib/Pod/t/Functions.t
 				lib/Pod/t/InputObjects.t
 				lib/Pod/t/Select.t
 				lib/Pod/t/Usage.t
 				lib/Pod/t/eol.t
-				lib/Pod/t/html*
-				lib/Pod/t/pod2html-lib.pl
 				lib/Pod/t/utils.t
 				lib/Search/Dict.{pm,t}
 				lib/SelectSaver.{pm,t}
