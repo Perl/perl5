@@ -252,6 +252,10 @@ It fixes an infinite loop in C<Locale::Maketext::Guts::_compile()> when
 working with tainted values
 (L<CPAN RT #40727|https://rt.cpan.org/Public/Bug/Display.html?id=40727>).
 
+C<< ->maketext >> calls will now backup and restore C<$@> so that error
+messages are not supressed
+(L<CPAN RT #34182|https://rt.cpan.org/Public/Bug/Display.html?id=34182>).
+
 =item *
 
 C<Math::BigInt> has been upgraded from version 1.95 to 1.96.
