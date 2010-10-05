@@ -61,7 +61,7 @@ users the informal support will more than suffice. See the answer to
 There is often a matter of opinion and taste, and there isn't any one
 answer that fits everyone. In general, you want to use either the current
 stable release, or the stable release immediately prior to that one.
-Currently, those are perl5.10.x and perl5.8.x, respectively.
+Currently, those are perl5.14.x and perl5.12.x, respectively.
 
 Beyond that, you have to consider several things and decide which is best
 for you.
