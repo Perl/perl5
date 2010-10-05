@@ -4434,7 +4434,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
     r->extflags = pm_flags;
     {
         bool has_p     = ((r->extflags & RXf_PMf_KEEPCOPY) == RXf_PMf_KEEPCOPY);
-        bool has_charset = (r->extflags & (RXf_PMf_LOCALE|RXf_PMf_UNICODE));
+        bool has_charset = cBOOL(r->extflags & (RXf_PMf_LOCALE|RXf_PMf_UNICODE));
 
         /* The caret is output if there are any defaults: if not all the STD
          * flags are set, or if no character set specifier is needed */
