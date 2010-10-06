@@ -8,7 +8,7 @@ print OUT <<'EOT';
 
 package XSLoader;
 
-$VERSION = "0.11";
+$VERSION = "0.12";
 
 #use strict;
 
@@ -34,7 +34,7 @@ sub load {
     my $boots = "$module\::bootstrap";
     goto &$boots if defined &$boots;
 
-    goto retry unless $module and defined &dl_load_file;
+    goto \&XSLoader::bootstrap_inherit unless $module and defined &dl_load_file;
 
     my @modparts = split(/::/,$module);
     my $modfname = $modparts[-1];
@@ -82,7 +82,7 @@ print OUT <<'EOT';
         warn "$bs: $@\n" if $@;
     }
 
-    goto retry if not -f $file or -s $bs;
+    goto \&XSLoader::bootstrap_inherit if not -f $file or -s $bs;
 
     my $bootname = "boot_$module";
     $bootname =~ s/\W/_/g;
@@ -133,15 +133,26 @@ print OUT <<'EOT';
     # See comment block above
     push(@DynaLoader::dl_shared_objects, $file); # record files loaded
     return &$xs(@_);
+}
+EOT
 
-  retry:
-    my $bootstrap_inherit = DynaLoader->can('bootstrap_inherit') || 
-                            XSLoader->can('bootstrap_inherit');
-    goto &$bootstrap_inherit;
+# Can't test with DynaLoader->can('bootstrap_inherit' when building in the
+# core, as XSLoader gets built before DynaLoader.
+
+if ($] >= 5.006) {
+    print OUT <<'EOT';
+
+sub bootstrap_inherit {
+    require DynaLoader;
+    goto \&DynaLoader::bootstrap_inherit;
 }
 
-# Versions of DynaLoader prior to 5.6.0 don't have this function.
+EOT
+} else {
+    print OUT <<'EOT';
+
 sub bootstrap_inherit {
+    # Versions of DynaLoader prior to 5.6.0 don't have bootstrap_inherit.
     package DynaLoader;
 
     my $module = $_[0];
@@ -152,6 +163,10 @@ sub bootstrap_inherit {
     DynaLoader::bootstrap(@_);
 }
 
+EOT
+}
+
+print OUT <<'EOT';
 1;
 
 
