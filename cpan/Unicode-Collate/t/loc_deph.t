@@ -4,7 +4,7 @@ use warnings;
 use Unicode::Collate::Locale;
 
 use Test;
-plan tests => 40;
+plan tests => 42;
 
 my $auml = pack 'U', 0xE4;
 my $Auml = pack 'U', 0xC4;
@@ -85,3 +85,14 @@ $objDePhoneBook->change(level => 1);
 ok($objDePhoneBook->eq("a\x{308}", "ae"));
 
 # 40
+
+my $objDePhonebk = Unicode::Collate::Locale->
+    new(locale => 'de-phonebk', normalization => undef);
+
+ok($objDePhonebk->getlocale, 'de__phonebook');
+
+$objDePhonebk->change(level => 1);
+
+ok($objDePhonebk->eq("a\x{308}", "ae"));
+
+# 42

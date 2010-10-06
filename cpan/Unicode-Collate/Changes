@@ -1,12 +1,16 @@
 Revision history for Perl module Unicode::Collate.
 
+0.62  Wed Oct  6 21:35:54 2010
+    - U::C::Locale newly supports locales: ar, hu, hy, se, to, uk.
+    - Vietnamese (vi): added tailoring for U+0340 and U+0341.
+
 0.61  Sat Oct  2 11:41:29 2010
     - U::C::Locale newly supports locales: hr, ig, sq.
     - precomposites of e-dot-below, o-dot-below, o-tilde are tailored as well.
         (affected locales: et, yo)
     - Vietnamese (vi): added contractions for non-blocked decompositions
-      * base + dot-below + diacritical such as "a\x{323}\x{306} etc.
-      * base + tone + horn such as "o\x{300}\x{31B}" etc.
+      * base + dot-below + diacritical such as a\x{323}\x{306}, \x{1EA1}\x{306} etc.
+      * base + tone + horn such as o\x{309}\x{31B}, \x{1ECF}\x{31B} etc.
 
 0.60  Thu Sep 23 21:37:36 2010
     - bug fix: index() [and its friends including gmatch()] didn't remove

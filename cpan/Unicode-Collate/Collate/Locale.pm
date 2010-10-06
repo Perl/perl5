@@ -4,7 +4,7 @@ use strict;
 use Carp;
 use base qw(Unicode::Collate);
 
-our $VERSION = '0.61';
+our $VERSION = '0.62';
 
 use File::Spec;
 
@@ -13,20 +13,20 @@ my $KeyPath = File::Spec->catfile('allkeys.txt');
 my $PL_EXT  = '.pl';
 
 my %LocaleFile = map { ($_, $_) } qw(
-   af az ca cs cy da eo es et fi fil fo fr ha haw hr ig is kl
-   lt lv mt nn nso om pl ro sk sl sq sv sw tn tr vi wo yo
+   af ar az ca cs cy da eo es et fi fil fo fr ha haw
+   hr hu hy ig is kl lt lv mt nb nn nso om pl ro
+   se sk sl sq sv sw tn to tr uk vi wo yo
 );
    $LocaleFile{'default'}         = '';
    $LocaleFile{'de__phonebook'}   = 'de_phone';
    $LocaleFile{'es__traditional'} = 'es_trad';
-   $LocaleFile{'nb'} = 'nn';
 
 sub _locale {
     my $locale = shift;
     if ($locale) {
 	$locale = lc $locale;
 	$locale =~ tr/\-\ \./_/;
-	$locale =~ s/_phone\z/_phonebook/;
+	$locale =~ s/_phone(?:bk)?\z/_phonebook/;
 	$locale =~ s/_trad\z/_traditional/;
 	$LocaleFile{$locale} and return $locale;
 
@@ -156,6 +156,7 @@ this method returns a string C<'default'> meaning no special tailoring.
       locale name       description
     ----------------------------------------------------------
       af                Afrikaans
+      ar                Arabic
       az                Azerbaijani (Azeri)
       ca                Catalan
       cs                Czech
@@ -173,6 +174,8 @@ this method returns a string C<'default'> meaning no special tailoring.
       ha                Hausa
       haw               Hawaiian
       hr                Croatian
+      hu                Hungarian
+      hy                Armenian
       ig                Igbo
       is                Icelandic
       kl                Kalaallisut
@@ -185,13 +188,16 @@ this method returns a string C<'default'> meaning no special tailoring.
       om                Oromo
       pl                Polish
       ro                Romanian
+      se                Northern Sami
       sk                Slovak
       sl                Slovenian
       sq                Albanian
       sv                Swedish
       sw                Swahili
       tn                Tswana
+      to                Tonga
       tr                Turkish
+      uk                Ukrainian
       vi                Vietnamese
       wo                Wolof
       yo                Yoruba
