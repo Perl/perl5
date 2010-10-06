@@ -52,6 +52,11 @@ while ($how_many_common--) {
     $Common{$1} = $1;
 }
 
+# Post 37589e1eefb1bd62 DynaLoader defaults to reading these at runtime.
+# Ideally we're redo the data below, but Fotango's build system made it
+# wonderfully easy to instrument, and no longer exists.
+$Common{$_} = $_ foreach qw(dlext so);
+
 # names of things which may need to have slashes changed to double-colons
 my %Extensions = map {($_,$_)}
                  qw(dynamic_ext static_ext extensions known_extensions);
