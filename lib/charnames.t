@@ -94,6 +94,17 @@ sub to_bytes {
     unpack"U0a*", shift;
 }
 
+sub test_vianame ($$$) {
+
+    # Run the vianame tests on a code point
+
+    my ($i, $hex, $name) = @_;
+
+    # Half the time use vianame, and half string_vianame
+    return is(charnames::vianame($name), $i, "Verify vianame(\"$name\") is 0x$hex") if rand() < .5;
+    return is(charnames::string_vianame($name), chr($i), "Verify string_vianame(\"$name\") is chr(0x$hex)");
+}
+
 {
   use charnames ':full';
 
@@ -943,12 +954,8 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
         s/^\s*#.*//;
         next unless $_;
         my ($hex, $name) = split ";";
-        if (rand() < .5) {
-            is(charnames::vianame($name), hex $hex, "Verify vianame(\"$name\") is 0x$hex");
-        }
-        else {
-            is(charnames::string_vianame($name), chr(hex $hex), "Verify string_vianame(\"$name\") is chr(0x$hex)");
-        }
+        my $i = CORE::hex $hex;
+        test_vianame($i, $hex, $name);
     }
     close $fh;
 
@@ -1012,13 +1019,8 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
             } else {
 
                 # Otherwise, test that the name and code point map
-                # correctly.  Half the time use vianame, and half
-                # string_vianame
-                if (rand() < .5) {
-                    $all_pass &= is(charnames::vianame($names[$i]), $i, "Verify vianame(\"$names[$i]\") is 0x$hex");
-                } else {
-                    $all_pass &= is(charnames::string_vianame($names[$i]), chr($i), "Verify string_vianame(\"$names[$i]\") is chr(0x$hex)");
-                }
+                # correctly.
+                $all_pass &= test_vianame($i, $hex, $names[$i]);
                 $all_pass &= is(charnames::viacode($i), $names[$i], "Verify viacode(0x$hex) is \"$names[$i]\"");
 
                 # And make sure that a non-algorithmically named code
