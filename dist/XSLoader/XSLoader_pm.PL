@@ -274,18 +274,22 @@ in F<YourPackage.pm>) and XS code (defined in F<YourPackage.xs>).  If this
 Perl code makes calls into this XS code, and/or this XS code makes calls to
 the Perl code, one should be careful with the order of initialization.
 
-The call to C<XSLoader::load()> (or C<bootstrap()>) has three side effects:
+The call to C<XSLoader::load()> (or C<bootstrap()>) calls the module's
+bootstrap code. For modules build by F<xsubpp> (nearly all modules) this
+has three side effects:
 
 =over
 
 =item *
 
-if C<$VERSION> was specified, a sanity check is done to ensure that the
-versions of the F<.pm> and the (compiled) F<.xs> parts are compatible;
+A sanity check is done to ensure that the versions of the F<.pm> and the
+(compiled) F<.xs> parts are compatible. If C<$VERSION> was specified, this
+is used for the check. If not specified, it defaults to
+C<$XS_VERSION // $VERSION> (in the module's namespace)
 
 =item *
 
-the XSUBs are made accessible from Perl;
+the XSUBs are made accessible from Perl
 
 =item *
 
