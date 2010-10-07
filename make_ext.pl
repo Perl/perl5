@@ -387,7 +387,7 @@ my $script_ext = $^O eq 'VMS' ? '.com' : '';
 my %%pod_scripts;
 foreach (glob('pod*.PL')) {
     my $script = $_;
-    s/.PL$/$script_ext/;
+    s/.PL$/$script_ext/i;
     $pod_scripts{$script} = $_;
 }
 my @exe_files = values %%pod_scripts;
