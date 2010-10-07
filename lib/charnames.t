@@ -955,7 +955,11 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
         next unless $_;
         my ($hex, $name) = split ";";
         my $i = CORE::hex $hex;
+
+        # Make sure that both aliases (the one in UnicodeData, and the one we
+        # just read) return the same code point.
         test_vianame($i, $hex, $name);
+        test_vianame($i, $hex, $names[$i]);
     }
     close $fh;
 
