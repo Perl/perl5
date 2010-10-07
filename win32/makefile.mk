@@ -1548,17 +1548,17 @@ distclean: realclean
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
 	-if exist $(LIBDIR)\Win32API rmdir /s /q $(LIBDIR)\Win32API
 	-cd $(PODDIR) && del /f *.html *.bat \
-	    perlaix.pod perlamiga.pod perlapi.pod perlapollo.pod \
-	    perlbeos.pod perlbs2000.pod perlce.pod perlcn.pod \
-	    perlcygwin.pod perl5136delta.pod perldgux.pod perldos.pod \
-	    perlepoc.pod perlfreebsd.pod perlhaiku.pod perlhpux.pod \
-	    perlhurd.pod perlintern.pod perlirix.pod perljp.pod perlko.pod \
-	    perllinux.pod perlmacos.pod perlmacosx.pod perlmodlib.pod \
-	    perlmpeix.pod perlnetware.pod perlopenbsd.pod perlos2.pod \
-	    perlos390.pod perlos400.pod perlplan9.pod perlqnx.pod \
-	    perlriscos.pod perlsolaris.pod perlsymbian.pod perltoc.pod \
-	    perltru64.pod perltw.pod perluniprops.pod perluts.pod \
-	    perlvmesa.pod perlvos.pod perlwin32.pod
+	    perl5136delta.pod perlaix.pod perlamiga.pod perlapi.pod \
+	    perlapollo.pod perlbeos.pod perlbs2000.pod perlce.pod \
+	    perlcn.pod perlcygwin.pod perldgux.pod perldos.pod perlepoc.pod \
+	    perlfreebsd.pod perlhaiku.pod perlhpux.pod perlhurd.pod \
+	    perlintern.pod perlirix.pod perljp.pod perlko.pod perllinux.pod \
+	    perlmacos.pod perlmacosx.pod perlmodlib.pod perlmpeix.pod \
+	    perlnetware.pod perlopenbsd.pod perlos2.pod perlos390.pod \
+	    perlos400.pod perlplan9.pod perlqnx.pod perlriscos.pod \
+	    perlsolaris.pod perlsymbian.pod perltoc.pod perltru64.pod \
+	    perltw.pod perluniprops.pod perluts.pod perlvmesa.pod \
+	    perlvos.pod perlwin32.pod
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs \
 	    perldoc perlivp dprofpp libnetcfg enc2xs piconv cpan *.bat \
 	    xsubpp instmodsh prove ptar ptardiff cpanp-run-perl cpanp cpan2dist shasum corelist config_data

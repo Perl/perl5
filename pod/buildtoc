@@ -591,6 +591,7 @@ sub generate_nmake_2 {
 		   join " ", sort keys %Copies, keys %Generated,
 				  map {"perl$_.pod"} keys %Readmes);
   $line =~ s/$/ \\/mg;
+  $line =~ s/ \\$//;
   $line;
 }
 
@@ -635,8 +636,8 @@ sub do_nmake {
   1 while $makefile =~ s/\0\tcopy .*\n/\0/gm;
   $makefile =~ s/\0+/join ("", &generate_nmake_1)/se;
 
-  $makefile =~ s{(del /f [^\n]+podchecker[^\n]+).*?(pod2html)}
-    {"$1\n" . &generate_nmake_2."\n\t    $2"}se;
+  $makefile =~ s{(-cd \$\(PODDIR\) && del /f[^\n]+).*?(-cd \.\.\\utils && del /f)}
+    {"$1\n" . &generate_nmake_2."\n\t$2"}se;
   $makefile;
 }
 
