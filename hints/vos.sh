@@ -10,7 +10,7 @@
 
 # C compiler and default options.
 cc=gcc
-ccflags="-D_SVID_SOURCE -D_POSIX_C_SOURCE=200112L"
+ccflags="-D_SVID_SOURCE -D_POSIX_C_SOURCE=200112L -D_VOS_EXTENDED_NAMES"
 
 # Make command.
 make="/system/gnu_library/bin/gmake"

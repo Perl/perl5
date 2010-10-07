@@ -1159,9 +1159,10 @@ vmsperl on the web, http://www.sidhe.org/vmsperl/index.html
 
 =head2 VOS
 
-Perl on VOS is discussed in F<README.vos> in the perl distribution
-(installed as L<perlvos>).  Perl on VOS can accept either VOS- or
-Unix-style file specifications as in either of the following:
+Perl on VOS (also known as OpenVOS) is discussed in F<README.vos>
+in the perl distribution (installed as L<perlvos>).  Perl on VOS
+can accept either VOS- or Unix-style file specifications as in
+either of the following:
 
     $ perl -ne "print if /perl_setup/i" >system>notices
     $ perl -ne "print if /perl_setup/i" /system/notices
@@ -1172,15 +1173,35 @@ or even a mixture of both as in:
 
 Even though VOS allows the slash character to appear in object
 names, because the VOS port of Perl interprets it as a pathname
-delimiting character, VOS files, directories, or links whose names
-contain a slash character cannot be processed.  Such files must be
-renamed before they can be processed by Perl.  Note that VOS limits
-file names to 32 or fewer characters, file names cannot start with a
-C<-> character, or contain any character matching C<< tr/ !%&'()*+;<>?// >>
+delimiting character, VOS files, directories, or links whose
+names contain a slash character cannot be processed.  Such files
+must be renamed before they can be processed by Perl.
 
-The value of C<$^O> on VOS is "VOS".  To determine the architecture that
-you are running on without resorting to loading all of C<%Config> you
-can examine the content of the @INC array like so:
+Older releases of VOS (prior to OpenVOS Release 17.0) limit file
+names to 32 or fewer characters, prohibit file names from
+starting with a C<-> character, and prohibit file names from
+containing any character matching C<< tr/ !#%&'()*;<=>?// >>.
+
+Newer releases of VOS (OpenVOS Release 17.0 or later) support a
+feature known as extended names.  On these releases, file names
+can contain up to 255 characters, are prohibited from starting
+with a C<-> character, and the set of prohibited characters is
+reduced to any character matching C<< tr/#%*<>?// >>.  There are
+restrictions involving spaces and apostrophies:  these characters
+must not begin or end a name, nor can they immediately precede or
+follow a period.  Additionally, a space must not immediately
+precede another space or hyphen.  Specifically, the following
+character combinations are prohibited:  space-space,
+space-hyphen, period-space, space-period, period-apostrophe,
+apostrophe-period, leading or trailing space, and leading or
+trailing apostrophe.  Although an extended file name is limited
+to 255 characters, a path name is still limited to 256
+characters.
+
+The value of C<$^O> on VOS is "VOS".  To determine the
+architecture that you are running on without resorting to loading
+all of C<%Config> you can examine the content of the @INC array
+like so:
 
     if ($^O =~ /VOS/) {
         print "I'm on a Stratus box!\n";
@@ -1202,9 +1223,9 @@ F<README.vos> (installed as L<perlvos>)
 The VOS mailing list.
 
 There is no specific mailing list for Perl on VOS.  You can post
-comments to the comp.sys.stratus newsgroup, or subscribe to the general
-Stratus mailing list.  Send a letter with "subscribe Info-Stratus" in
-the message body to majordomo@list.stratagy.com.
+comments to the comp.sys.stratus newsgroup, or use the contact
+information located in the distribution files on the Stratus
+Anonymous FTP site.
 
 =item *
 
@@ -1764,6 +1785,8 @@ because work arounds in the implementation use floating point numbers,
 it will become inaccurate as the time gets larger.  This is a bug and
 will be fixed in the future.
 
+On VOS, time values are 32-bit quantities.
+
 =item ioctl FILEHANDLE,FUNCTION,SCALAR
 
 Not implemented. (VMS)
@@ -1795,7 +1818,7 @@ numbers. (VMS)
 
 =item link
 
-Not implemented. (MPE/iX, S<RISC OS>)
+Not implemented. (MPE/iX, S<RISC OS>, VOS)
 
 Link count not updated because hard links are not quite that hard
 (They are sort of half-way between hard and soft links). (AmigaOS)
@@ -1859,11 +1882,11 @@ Note that the C<select FILEHANDLE> form is generally portable.
 
 =item semop
 
-Not implemented. ( Win32, VMS, S<RISC OS>, VOS)
+Not implemented. (Win32, VMS, S<RISC OS>)
 
 =item setgrent
 
-Not implemented. (MPE/iX, VMS, Win32, S<RISC OS>, VOS)
+Not implemented. (MPE/iX, VMS, Win32, S<RISC OS>)
 
 =item setpgrp
 
@@ -1875,7 +1898,7 @@ Not implemented. (Win32, VMS, S<RISC OS>, VOS)
 
 =item setpwent
 
-Not implemented. (MPE/iX, Win32, S<RISC OS>, VOS)
+Not implemented. (MPE/iX, Win32, S<RISC OS>)
 
 =item setsockopt
 
@@ -1898,7 +1921,9 @@ be implemented even in Unix platforms.
 
 =item socketpair
 
-Not implemented. (S<RISC OS>, VOS, VM/ESA)
+Not implemented. (S<RISC OS>, VM/ESA)
+
+Available on OpenVOS Release 17.0 or later. (VOS)
 
 Available on 64 bit OpenVMS 8.2 and later.  (VMS)
 
@@ -2101,7 +2126,7 @@ Caveats:
 
 =item Symbian (Series 60 v3, 3.2 and 5 - what else?)
 
-=item Stratus VOS
+=item Stratus VOS / OpenVOS
 
 =item AIX
 
