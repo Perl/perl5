@@ -298,43 +298,7 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 
 #ifdef XS_VERSION
 #  define XS_VERSION_BOOTCHECK						\
-    STMT_START {							\
-	SV *_sv;							\
-	const char *vn = NULL, *module = SvPV_nolen_const(ST(0));	\
-	if (items >= 2)	 /* version supplied as bootstrap arg */	\
-	    _sv = ST(1);						\
-	else {								\
-	    /* XXX GV_ADDWARN */					\
-	    _sv = get_sv(Perl_form(aTHX_ "%s::%s", module,		\
-				vn = "XS_VERSION"), 0);			\
-	    if (!_sv || !SvOK(_sv))					\
-		_sv = get_sv(Perl_form(aTHX_ "%s::%s", module,		\
-				    vn = "VERSION"), 0);		\
-	}								\
-	if (_sv) {							\
-	    SV *xpt = NULL;						\
-	    SV *xssv = Perl_newSVpvn(aTHX_ STR_WITH_LEN(XS_VERSION));	\
-	    SV *pmsv = sv_derived_from(_sv, "version")			\
-		? SvREFCNT_inc_simple_NN(_sv)				\
-		: new_version(_sv);					\
-	    xssv = upg_version(xssv, 0);				\
-	    if ( vcmp(pmsv,xssv) ) {	 				\
-		xpt = Perl_newSVpvf(aTHX_ "%s object version %"SVf	\
-				    " does not match %s%s%s%s %"SVf,	\
-				    module,				\
-				    SVfARG(Perl_sv_2mortal(aTHX_ vstringify(xssv))), \
-				    vn ? "$" : "", vn ? module : "",	\
-				    vn ? "::" : "",			\
-				    vn ? vn : "bootstrap parameter",	\
-				    SVfARG(Perl_sv_2mortal(aTHX_ vstringify(pmsv)))); \
-		Perl_sv_2mortal(aTHX_ xpt);				\
-	    }								\
-	    SvREFCNT_dec(xssv);						\
-	    SvREFCNT_dec(pmsv);						\
-	    if (xpt)							\
-		Perl_croak_sv(aTHX_ xpt);				\
-	}                                                               \
-    } STMT_END
+    Perl_xs_version_bootcheck(aTHX_ items, ax, STR_WITH_LEN(XS_VERSION))
 #else
 #  define XS_VERSION_BOOTCHECK
 #endif

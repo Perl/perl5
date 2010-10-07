@@ -2255,6 +2255,9 @@ Apo	|void*	|my_cxt_init	|NN int *index|size_t size
 #endif
 #endif
 
+Apo	|void	|xs_version_bootcheck|U32 items|U32 ax|NN const char *xs_p \
+				|STRLEN xs_len
+
 #ifndef HAS_STRLCAT
 Apno	|Size_t	|my_strlcat	|NULLOK char *dst|NULLOK const char *src|Size_t size
 #endif

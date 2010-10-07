@@ -6471,6 +6471,49 @@ Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
 #endif /* #ifndef PERL_GLOBAL_STRUCT_PRIVATE */
 #endif /* PERL_IMPLICIT_CONTEXT */
 
+void
+Perl_xs_version_bootcheck(pTHX_ U32 items, U32 ax, const char *xs_p,
+			  STRLEN xs_len)
+{
+    SV *sv;
+    const char *vn = NULL;
+    const char *module = SvPV_nolen_const(PL_stack_base[ax]);
+
+    PERL_ARGS_ASSERT_XS_VERSION_BOOTCHECK;
+
+    if (items >= 2)	 /* version supplied as bootstrap arg */
+	sv = PL_stack_base[ax + 1];
+    else {
+	/* XXX GV_ADDWARN */
+	sv = get_sv(Perl_form(aTHX_ "%s::%s", module, vn = "XS_VERSION"), 0);
+	if (!sv || !SvOK(sv))
+	    sv = get_sv(Perl_form(aTHX_ "%s::%s", module, vn = "VERSION"), 0);
+    }
+    if (sv) {
+	SV *xpt = NULL;
+	SV *xssv = Perl_newSVpvn(aTHX_ xs_p, xs_len);
+	SV *pmsv = sv_derived_from(sv, "version")
+	    ? SvREFCNT_inc_simple_NN(sv)
+	    : new_version(sv);
+	xssv = upg_version(xssv, 0);
+	if ( vcmp(pmsv,xssv) ) {
+	    xpt = Perl_newSVpvf(aTHX_ "%s object version %"SVf
+				" does not match %s%s%s%s %"SVf,
+				module,
+				SVfARG(Perl_sv_2mortal(aTHX_ vstringify(xssv))),
+				vn ? "$" : "", vn ? module : "",
+				vn ? "::" : "",
+				vn ? vn : "bootstrap parameter",
+				SVfARG(Perl_sv_2mortal(aTHX_ vstringify(pmsv))));
+	    Perl_sv_2mortal(aTHX_ xpt);
+	}
+	SvREFCNT_dec(xssv);
+	SvREFCNT_dec(pmsv);
+	if (xpt)
+	    Perl_croak_sv(aTHX_ xpt);
+    }
+}
+
 #ifndef HAS_STRLCAT
 Size_t
 Perl_my_strlcat(char *dst, const char *src, Size_t size)
