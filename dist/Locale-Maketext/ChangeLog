@@ -3,18 +3,31 @@ Revision history for Perl suite Locale::Maketext
 <date here>
     * Release 1.16
 
+    Blead commit bac7bf8 - Copy @_ to @_ to de-alias passed variables
+    to assure that the aliases cannot be altered during maketext calls.
+
     Fix for CPAN RT #40727: infinite loop in
     Locale::Maketext::Guts::_compile() when working with tainted values
 
     Fix for CPAN RT #34182: Don't localize $@. 
     ->maketext calls will now backup and restore $@ so that die messages are not supressed.
-    
+
+    Fix for CPAN RT #55461
+    %hash deprecated messages cleaned up with perl 5.12
+
+    Fix for CPAN RT #48118. Perl 76674
+    Speed and efficiency tweaks in _compile calls when string has no ~][ in it.
+
+    Fix for CPAN RT #48808. Perl 76668
+    I18N::LangTags use() fixups.
+
 2010−06−22
     * Release 1.15 (included in perl 5.13.3; not released separately)
 
     Locale::Maketext guts have been merged back into the main module
 
-    External cache support
+    Fix for CPAN RT #46738. Perl 76354
+    Support for RO Lexicon hashes (External cache support)
 
 2009-11-20
     * Release 1.14 (included in perl 5.11.2; not released separately)
