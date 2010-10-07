@@ -605,6 +605,8 @@ static int my_keyword_plugin(pTHX_
     }
 }
 
+XS(XS_XS__APItest__XSUB_XS_VERSION_undef);
+
 #include "const-c.inc"
 
 MODULE = XS::APItest		PACKAGE = XS::APItest
@@ -612,6 +614,17 @@ MODULE = XS::APItest		PACKAGE = XS::APItest
 INCLUDE: const-xs.inc
 
 INCLUDE: numeric.xs
+
+MODULE = XS::APItest		PACKAGE = XS::APItest::XSUB
+
+BOOT:
+    newXS("XS::APItest::XSUB::XS_VERSION_undef", XS_XS__APItest__XSUB_XS_VERSION_undef, __FILE__);
+
+void
+XS_VERSION_defined(...)
+    PPCODE:
+        XS_VERSION_BOOTCHECK;
+        XSRETURN_EMPTY;
 
 MODULE = XS::APItest:Hash		PACKAGE = XS::APItest::Hash
 

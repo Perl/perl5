@@ -3404,7 +3404,9 @@ ext/XS-APItest/t/temp_lv_sub.t	XS::APItest: tests for lvalue subs returning temp
 ext/XS-APItest/t/utf16_to_utf8.t	Test behaviour of utf16_to_utf8{,reversed}
 ext/XS-APItest/t/xs_special_subs_require.t	for require too
 ext/XS-APItest/t/xs_special_subs.t	Test that XS BEGIN/CHECK/INIT/END work
+ext/XS-APItest/t/xsub_h.t	Tests for XSUB.h
 ext/XS-APItest/typemap
+ext/XS-APItest/XSUB-undef-XS_VERSION.xs	XS code needing #undef XS_VERSION
 ext/XS-Typemap/Makefile.PL	XS::Typemap extension
 ext/XS-Typemap/README		XS::Typemap extension
 ext/XS-Typemap/stdio.c		XS::Typemap extension
