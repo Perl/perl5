@@ -2255,7 +2255,9 @@ Apo	|void*	|my_cxt_init	|NN int *index|size_t size
 #endif
 #endif
 
-Apo	|void	|xs_version_bootcheck|U32 items|U32 ax|NN const char *xs_p \
+: This function is an implementation detail. The public API for this is
+: XS_VERSION_BOOTCHECK
+Xpo	|void	|xs_version_bootcheck|U32 items|U32 ax|NN const char *xs_p \
 				|STRLEN xs_len
 
 #ifndef HAS_STRLCAT
