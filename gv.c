@@ -1052,16 +1052,17 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 
 	    len = name_cursor - name;
 	    if (len > 0) {
-		char smallbuf[128];
 		char *tmpbuf;
 
-		if (len + 2 <= (I32)sizeof (smallbuf))
-		    tmpbuf = smallbuf;
-		else
+		if (name_cursor == ':') {
+		    tmpbuf = name;
+		    len += 2;
+		} else {
 		    Newx(tmpbuf, len+2, char);
-		Copy(name, tmpbuf, len, char);
-		tmpbuf[len++] = ':';
-		tmpbuf[len++] = ':';
+		    Copy(name, tmpbuf, len, char);
+		    tmpbuf[len++] = ':';
+		    tmpbuf[len++] = ':';
+		}
 		gvp = (GV**)hv_fetch(stash,tmpbuf,len,add);
 		gv = gvp ? *gvp : NULL;
 		if (gv && gv != (const GV *)&PL_sv_undef) {
@@ -1070,7 +1071,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		    else
 			GvMULTI_on(gv);
 		}
-		if (tmpbuf != smallbuf)
+		if (tmpbuf != name)
 		    Safefree(tmpbuf);
 		if (!gv || gv == (const GV *)&PL_sv_undef)
 		    return NULL;
