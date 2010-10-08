@@ -1052,27 +1052,28 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 
 	    len = name_cursor - name;
 	    if (len > 0) {
-		char *tmpbuf;
-
-		if (name_cursor == ':') {
-		    tmpbuf = name;
+		const char *key;
+		if (*name_cursor == ':') {
+		    key = name;
 		    len += 2;
 		} else {
+		    char *tmpbuf;
 		    Newx(tmpbuf, len+2, char);
 		    Copy(name, tmpbuf, len, char);
 		    tmpbuf[len++] = ':';
 		    tmpbuf[len++] = ':';
+		    key = tmpbuf;
 		}
-		gvp = (GV**)hv_fetch(stash,tmpbuf,len,add);
+		gvp = (GV**)hv_fetch(stash, key, len, add);
 		gv = gvp ? *gvp : NULL;
 		if (gv && gv != (const GV *)&PL_sv_undef) {
 		    if (SvTYPE(gv) != SVt_PVGV)
-			gv_init(gv, stash, tmpbuf, len, (add & GV_ADDMULTI));
+			gv_init(gv, stash, key, len, (add & GV_ADDMULTI));
 		    else
 			GvMULTI_on(gv);
 		}
-		if (tmpbuf != name)
-		    Safefree(tmpbuf);
+		if (key != name)
+		    Safefree((char *)key);
 		if (!gv || gv == (const GV *)&PL_sv_undef)
 		    return NULL;
 
