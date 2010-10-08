@@ -5,6 +5,8 @@
 
 #undef XS_VERSION
 #define XS_VERSION ""
+#undef PERL_API_VERSION_STRING
+#define PERL_API_VERSION_STRING "1.0.16"
 #include "XSUB.h"
 
 /* This can't be "MODULE = XS::APItest" as then we get duplicate bootstraps.  */
@@ -16,4 +18,10 @@ void
 XS_VERSION_empty(...)
     PPCODE:
         XS_VERSION_BOOTCHECK;
+        XSRETURN_EMPTY;
+
+void
+XS_APIVERSION_invalid(...)
+    PPCODE:
+        XS_APIVERSION_BOOTCHECK;
         XSRETURN_EMPTY;

@@ -607,6 +607,7 @@ static int my_keyword_plugin(pTHX_
 
 XS(XS_XS__APItest__XSUB_XS_VERSION_undef);
 XS(XS_XS__APItest__XSUB_XS_VERSION_empty);
+XS(XS_XS__APItest__XSUB_XS_APIVERSION_invalid);
 
 #include "const-c.inc"
 
@@ -621,11 +622,18 @@ MODULE = XS::APItest		PACKAGE = XS::APItest::XSUB
 BOOT:
     newXS("XS::APItest::XSUB::XS_VERSION_undef", XS_XS__APItest__XSUB_XS_VERSION_undef, __FILE__);
     newXS("XS::APItest::XSUB::XS_VERSION_empty", XS_XS__APItest__XSUB_XS_VERSION_empty, __FILE__);
+    newXS("XS::APItest::XSUB::XS_APIVERSION_invalid", XS_XS__APItest__XSUB_XS_APIVERSION_invalid, __FILE__);
 
 void
 XS_VERSION_defined(...)
     PPCODE:
         XS_VERSION_BOOTCHECK;
+        XSRETURN_EMPTY;
+
+void
+XS_APIVERSION_valid(...)
+    PPCODE:
+        XS_APIVERSION_BOOTCHECK;
         XSRETURN_EMPTY;
 
 MODULE = XS::APItest:Hash		PACKAGE = XS::APItest::Hash
