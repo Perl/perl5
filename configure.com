@@ -44,6 +44,7 @@ $ extra_flags = ""
 $ user_c_flags = ""
 $ use_ieee_math = "y"
 $ be_case_sensitive = "n"
+$ shorten_long_symbols = "n"
 $ unlink_all_versions = "n"
 $ builder = "MMK"
 $ use_vmsdebug_perl = "n"
@@ -479,6 +480,11 @@ $     IF ( F$SEARCH("UU.DIR").EQS."" )
 $     THEN
 $       CREATE/DIRECTORY [.UU]
 $     ELSE
+$       IF ( F$SEARCH("[.UU.CXX_REPOSITORY]*.*").NES."" )
+$       THEN
+$         DELETE/NOLOG/NOCONFIRM [.UU.CXX_REPOSITORY]*.*;*
+$         SET PROTECTION=(SYSTEM:RWED,OWNER:RWED) [.UU]CXX_REPOSITORY.DIR
+$       ENDIF
 $       IF ( F$SEARCH("[.UU]*.*").NES."" ) THEN DELETE/NOLOG/NOCONFIRM [.UU]*.*;*
 $     ENDIF
 $!: Configure runs within the UU subdirectory
@@ -923,7 +929,7 @@ $   config_symbols1 ="|installprivlib|installscript|installsitearch|installsitel
 $   config_symbols2 ="|prefix|privlib|privlibexp|scriptdir|sitearch|sitearchexp|sitebin|sitelib|sitelib_stem|sitelibexp|try_cxx|use64bitall|use64bitint|"
 $   config_symbols3 ="|usecasesensitive|usedefaulttypes|usedevel|useieee|useithreads|uselongdouble|usemultiplicity|usemymalloc|usedebugging_perl|"
 $   config_symbols4 ="|useperlio|usesecurelog|usethreads|usevmsdebug|usefaststdio|usemallocwrap|unlink_all_versions|uselargefiles|usesitecustomize|"
-$   config_symbols5 ="|buildmake|builder|usethreadupcalls|usekernelthread"
+$   config_symbols5 ="|buildmake|builder|usethreadupcalls|usekernelthreads|useshortenedsymbols"
 $!  
 $   open/read CONFIG 'config_sh'
 $   rd_conf_loop:
@@ -2528,8 +2534,6 @@ $   ENDIF
 $ ENDIF
 $ IF F$TYPE(usethreadupcalls) .EQS. "" THEN usethreadupcalls = "undef"
 $ IF F$TYPE(usekernelthreads) .EQS. "" THEN usekernelthreads = "undef"
-$ IF archname .NES. "VMS_VAX"
-$ THEN
 $! Case sensitive?
 $   echo ""
 $   echo "By default, perl (and pretty much everything else on VMS) uses"
@@ -2551,6 +2555,22 @@ $   endif
 $   rp = "Build with case-sensitive symbols? [''bool_dflt'] "
 $   GOSUB myread
 $   be_case_sensitive = ans
+$!
+$! Shortened symbols?
+$   echo ""
+$   echo "The VMS linker does not handle symbol names longer than 31 characters,"
+$   echo "but the compiler can shorten long symbols if requested."
+$   bool_dflt = shorten_long_symbols
+$   if f$type(useshortenedsymbols) .nes. ""
+$   then
+$       if useshortenedsymbols .or. useshortenedsymbols .eqs. "define" then bool_dflt = "y"
+$       if f$extract(0,1,f$edit(useshortenedsymbols,"collapse,upcase")) .eqs. "N" .or. useshortenedsymbols .eqs. "undef"  then bool_dflt = "n"
+$   endif
+$   rp = "Build with long symbols shortened? [''bool_dflt'] "
+$   GOSUB myread
+$   shorten_long_symbols = ans
+$ IF archname .NES. "VMS_VAX"
+$ THEN
 $! IEEE math?
 $   echo ""
 $   echo "Perl normally uses IEEE format (T_FLOAT) floating point numbers on"
@@ -2571,13 +2591,14 @@ $   rp = "Use IEEE math? [''bool_dflt'] "
 $   GOSUB myread
 $   use_ieee_math = ans
 $ ELSE
-$   be_case_sensitive = "n"
 $   use_ieee_math = "n"
 $ ENDIF
 $ useieee = "undef"
 $ usecasesensitive = "undef"
+$ useshortenedsymbols = "undef"
 $ if (use_ieee_math) then useieee = "define"
 $ if (be_case_sensitive) then usecasesensitive = "define"
+$ if (shorten_long_symbols) then useshortenedsymbols = "define"
 $! Unlink all versions?
 $ echo ""
 $ echo "By default, Perl's unlink() provides VMS-like behavior and only"
@@ -3027,10 +3048,25 @@ $   THEN
 $     extra_flags = "''extra_flags'" + "/float=g_float"
 $   ENDIF
 $ ENDIF
+$ names_flags = ""
 $ IF be_case_sensitive
 $ THEN
-$   extra_flags = "''extra_flags'" + "/Names=As_Is"
+$   names_flags = "AS_IS"
 $ ENDIF
+$ IF shorten_long_symbols
+$ THEN
+$   IF be_case_sensitive
+$   THEN
+$     names_flags = "''names_flags',SHORTENED"
+$   ELSE
+$     names_flags = "SHORTENED"
+$   ENDIF
+$ ENDIF
+$ IF F$LENGTH(names_flags) .ne. 0
+$ THEN
+$   extra_flags = "''extra_flags'" + "/NAMES=(''names_flags')"
+$ ENDIF
+$ DELETE/SYMBOLS names_flags
 $ extra_flags = "''extra_flags'" + "''user_c_flags'"
 $!
 $ min_pgflquota = "100000"
@@ -3154,6 +3190,12 @@ $ THEN
 $   d_vms_be_case_sensitive = "define"
 $ ELSE
 $   d_vms_be_case_sensitive = "undef"
+$ ENDIF
+$ IF shorten_long_symbols
+$ THEN
+$   d_vms_shorten_long_symbols = "define"
+$ ELSE
+$   d_vms_shorten_long_symbols = "undef"
 $ ENDIF
 $! Some constant defaults.
 $ hwname = f$getsyi("HW_NAME")
@@ -6269,6 +6311,7 @@ $ WC "d_vendorlib='undef'"
 $ WC "d_vfork='define'"
 $ WC "d_vms_case_sensitive_symbols='" + d_vms_be_case_sensitive + "'" ! VMS
 $ WC "d_vms_do_sockets='" + d_vms_do_sockets + "'" ! VMS
+$ WC "d_vms_shorten_long_symbols='" + d_vms_shorten_long_symbols + "'" ! VMS
 $ WC "d_void_closedir='define'"
 $ WC "d_volatile='define'"
 $ WC "d_vprintf='define'"
@@ -6631,6 +6674,7 @@ $ WC "useposix='false'"
 $ WC "usereentrant='undef'"
 $ WC "userelocatableinc='undef'"
 $ WC "usesecurelog='" + usesecurelog + "'"  ! VMS-specific
+$ WC "useshortenedsymbols='" + useshortenedsymbols + "'"    ! VMS-specific
 $ WC "useshrplib='true'"
 $ WC "usesitecustomize='" + usesitecustomize + "'"
 $ WC "usesocks='undef'"
@@ -6866,6 +6910,7 @@ $ ENDIF
 $ IF use64bitall .OR. use64bitall .EQS. "define" THEN -
     WC "#define USE_64_BIT_ALL"
 $ IF be_case_sensitive THEN WC "#define VMS_WE_ARE_CASE_SENSITIVE"
+$ IF shorten_long_symbols THEN WC "#define VMS_SHORTEN_LONG_SYMBOLS"
 $ IF use_ieee_math THEN WC "#define USE_IEEE"
 $ IF d_herrno .EQS. "undef" THEN WC "#define NEED_AN_H_ERRNO"
 $ WC "#define HAS_ENVGETENV"
@@ -7317,6 +7362,11 @@ $ ENDIF
 $ dflt = F$ENVIRONMENT("DEFAULT")
 $ IF F$LOCATE("UU]",dflt).EQS.(F$LENGTH(dflt)-3)
 $ THEN
+$   IF ( F$SEARCH("[.CXX_REPOSITORY]*.*").NES."" ) 
+$   THEN 
+$     DELETE/NOLOG/NOCONFIRM [.CXX_REPOSITORY]*.*;*
+$     SET PROTECTION=(SYSTEM:RWED,OWNER:RWED) CXX_REPOSITORY.DIR
+$   ENDIF
 $   IF ( F$SEARCH("[]*.*").NES."" ) THEN DELETE/NOLOG/NOCONFIRM []*.*;*
 $   SET DEFAULT [-]
 $   SET PROTECTION=(SYSTEM:RWED,OWNER:RWED) UU.DIR
