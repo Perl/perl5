@@ -853,7 +853,7 @@ Apd	|const char*	|prescan_version	|NN const char *s\
 	|NULLOK int *ssaw_decimal|NULLOK int *swidth|NULLOK bool *salpha
 Apd	|SV*	|new_version	|NN SV *ver
 Apd	|SV*	|upg_version	|NN SV *ver|bool qv
-Apd	|bool	|vverify	|NN SV *vs
+Apd	|SV*	|vverify	|NN SV *vs
 Apd	|SV*	|vnumify	|NN SV *vs
 Apd	|SV*	|vnormal	|NN SV *vs
 Apd	|SV*	|vstringify	|NN SV *vs

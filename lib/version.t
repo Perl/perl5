@@ -96,9 +96,15 @@ like($@, qr/Invalid version object/,
 eval { my $test = ($testobj > 1.0) };
 like($@, qr/Invalid version object/,
     "Bad subclass vcmp");
-strict_lax_tests();
+
+# Invalid structure
+eval { $a = \\version->new(1); bless $a, "version"; print "# $a\n" };
+like($@, qr/Invalid version object/,
+    "Bad internal structure (RT#78286)");
 
 # do strict lax tests in a sub to isolate a package to test importing
+strict_lax_tests();
+
 sub strict_lax_tests {
   package temp12345;
   # copied from perl core test t/op/packagev.t

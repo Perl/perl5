@@ -4635,7 +4635,7 @@ PERL_CALLCONV SV*	Perl_vstringify(pTHX_ SV *vs)
 #define PERL_ARGS_ASSERT_VSTRINGIFY	\
 	assert(vs)
 
-PERL_CALLCONV bool	Perl_vverify(pTHX_ SV *vs)
+PERL_CALLCONV SV*	Perl_vverify(pTHX_ SV *vs)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_VVERIFY	\
 	assert(vs)

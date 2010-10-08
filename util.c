@@ -5108,27 +5108,30 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 /*
 =for apidoc vverify
 
-Validates that the SV contains a valid version object.
+Validates that the SV contains valid internal structure for a version object.
+It may be passed either the version object (RV) or the hash itself (HV).  If
+the structure is valid, it returns the HV.  If the structure is invalid,
+it returns NULL.
 
-    bool vverify(SV *vobj);
+    SV *hv = vverify(sv);
 
 Note that it only confirms the bare minimum structure (so as not to get
 confused by derived classes which may contain additional hash entries):
 
 =over 4
 
-=item * The SV contains a [reference to a] hash
+=item * The SV is an HV or a reference to an HV
 
 =item * The hash contains a "version" key
 
-=item * The "version" key has [a reference to] an AV as its value
+=item * The "version" key has a reference to an AV as its value
 
 =back
 
 =cut
 */
 
-bool
+SV *
 Perl_vverify(pTHX_ SV *vs)
 {
     SV *sv;
@@ -5143,9 +5146,9 @@ Perl_vverify(pTHX_ SV *vs)
 	 && hv_exists(MUTABLE_HV(vs), "version", 7)
 	 && (sv = SvRV(*hv_fetchs(MUTABLE_HV(vs), "version", FALSE)))
 	 && SvTYPE(sv) == SVt_PVAV )
-	return TRUE;
+	return vs;
     else
-	return FALSE;
+	return NULL;
 }
 
 /*
@@ -5173,10 +5176,9 @@ Perl_vnumify(pTHX_ SV *vs)
 
     PERL_ARGS_ASSERT_VNUMIFY;
 
-    if ( SvROK(vs) )
-	vs = SvRV(vs);
-
-    if ( !vverify(vs) )
+    /* extract the HV from the object */
+    vs = vverify(vs);
+    if ( ! vs )
 	Perl_croak(aTHX_ "Invalid version object");
 
     /* see if various flags exist */
@@ -5252,10 +5254,9 @@ Perl_vnormal(pTHX_ SV *vs)
 
     PERL_ARGS_ASSERT_VNORMAL;
 
-    if ( SvROK(vs) )
-	vs = SvRV(vs);
-
-    if ( !vverify(vs) )
+    /* extract the HV from the object */
+    vs = vverify(vs);
+    if ( ! vs )
 	Perl_croak(aTHX_ "Invalid version object");
 
     if ( hv_exists(MUTABLE_HV(vs), "alpha", 5 ) )
@@ -5307,10 +5308,9 @@ Perl_vstringify(pTHX_ SV *vs)
 {
     PERL_ARGS_ASSERT_VSTRINGIFY;
 
-    if ( SvROK(vs) )
-	vs = SvRV(vs);
-
-    if ( !vverify(vs) )
+    /* extract the HV from the object */
+    vs = vverify(vs);
+    if ( ! vs )
 	Perl_croak(aTHX_ "Invalid version object");
 
     if (hv_exists(MUTABLE_HV(vs), "original",  sizeof("original") - 1)) {
@@ -5350,15 +5350,10 @@ Perl_vcmp(pTHX_ SV *lhv, SV *rhv)
 
     PERL_ARGS_ASSERT_VCMP;
 
-    if ( SvROK(lhv) )
-	lhv = SvRV(lhv);
-    if ( SvROK(rhv) )
-	rhv = SvRV(rhv);
-
-    if ( !vverify(lhv) )
-	Perl_croak(aTHX_ "Invalid version object");
-
-    if ( !vverify(rhv) )
+    /* extract the HVs from the objects */
+    lhv = vverify(lhv);
+    rhv = vverify(rhv);
+    if ( ! ( lhv && rhv ) )
 	Perl_croak(aTHX_ "Invalid version object");
 
     /* get the left hand term */
