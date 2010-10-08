@@ -21,7 +21,7 @@ Revision history for Perl suite Locale::Maketext
     Fix for CPAN RT #48808. Perl 76668
     I18N::LangTags use() fixups.
 
-2010−06−22
+2010-06-22
     * Release 1.15 (included in perl 5.13.3; not released separately)
 
     Locale::Maketext guts have been merged back into the main module
