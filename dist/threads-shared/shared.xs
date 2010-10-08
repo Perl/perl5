@@ -1194,7 +1194,8 @@ Perl_sharedsv_init(pTHX)
     /* This pair leaves us in shared context ... */
     PL_sharedsv_space = perl_alloc();
     perl_construct(PL_sharedsv_space);
-    CALLER_CONTEXT;
+    LEAVE; /* This balances the ENTER at the end of perl_construct.  */
+    PERL_SET_CONTEXT((aTHX = caller_perl));
     recursive_lock_init(aTHX_ &PL_sharedsv_lock);
     PL_lockhook = &Perl_sharedsv_locksv;
     PL_sharehook = &Perl_sharedsv_share;
