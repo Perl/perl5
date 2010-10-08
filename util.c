@@ -6514,6 +6514,31 @@ Perl_xs_version_bootcheck(pTHX_ U32 items, U32 ax, const char *xs_p,
     }
 }
 
+void
+Perl_xs_apiversion_bootcheck(pTHX_ SV *module, const char *api_p,
+			     STRLEN api_len)
+{
+    SV *xpt = NULL;
+    SV *compver = Perl_newSVpvn(aTHX_ api_p, api_len);
+    SV *runver = new_version(PL_apiversion);
+
+    PERL_ARGS_ASSERT_XS_APIVERSION_BOOTCHECK;
+
+    compver = upg_version(compver, 0);
+    if (vcmp(compver, runver)) {
+	xpt = Perl_newSVpvf(aTHX_ "Perl API version %"SVf
+			     " of %s does not match %"SVf,
+			     SVfARG(Perl_sv_2mortal(aTHX_ vstringify(compver))),
+			     SvPV_nolen_const(module),
+			     SVfARG(Perl_sv_2mortal(aTHX_ vstringify(runver))));
+	Perl_sv_2mortal(aTHX_ xpt);
+    }
+    SvREFCNT_dec(compver);
+    SvREFCNT_dec(runver);
+    if (xpt)
+	Perl_croak_sv(aTHX_ xpt);
+}
+
 #ifndef HAS_STRLCAT
 Size_t
 Perl_my_strlcat(char *dst, const char *src, Size_t size)

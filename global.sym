@@ -742,6 +742,7 @@ Perl_warn
 Perl_warn_sv
 Perl_warner
 Perl_whichsig
+Perl_xs_apiversion_bootcheck
 Perl_xs_version_bootcheck
 Perl_yylex
 Perl_utf8n_to_uvchr

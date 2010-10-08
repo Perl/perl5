@@ -304,24 +304,7 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #endif
 
 #define XS_APIVERSION_BOOTCHECK						\
-    STMT_START {							\
-	SV *_xpt = NULL;						\
-	SV *_compver = Perl_newSVpv(aTHX_ "v" PERL_API_VERSION_STRING, 0); \
-	SV *_runver = new_version(PL_apiversion);			\
-	_compver = upg_version(_compver, 0);				\
-	if (vcmp(_compver, _runver)) {					\
-	    _xpt = Perl_newSVpvf(aTHX_ "Perl API version %"SVf		\
-				 " of %s does not match %"SVf,		\
-				 SVfARG(Perl_sv_2mortal(aTHX_ vstringify(_compver))), \
-				 SvPV_nolen_const(ST(0)),		\
-				 SVfARG(Perl_sv_2mortal(aTHX_ vstringify(_runver)))); \
-	    Perl_sv_2mortal(aTHX_ _xpt);				\
-	}								\
-	SvREFCNT_dec(_compver);						\
-	SvREFCNT_dec(_runver);						\
-	if (_xpt)							\
-	    Perl_croak_sv(aTHX_ _xpt);					\
-    } STMT_END
+    Perl_xs_apiversion_bootcheck(aTHX_ ST(0), STR_WITH_LEN("v" PERL_API_VERSION_STRING))
 
 #ifdef NO_XSLOCKS
 #  define dXCPT             dJMPENV; int rEtV = 0
