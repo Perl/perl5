@@ -289,7 +289,11 @@ L<[perl #72340]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=72340>.
 
 =item *
 
-C<threads> has been upgrade from version 1.77_03 to 1.81
+C<threads> has been upgraded from version 1.77_03 to 1.81
+
+=item *
+
+C<threads::shared> has been upgrade from version 1.33_03 to 1.34
 
 =item *
 
