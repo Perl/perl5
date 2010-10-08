@@ -1160,7 +1160,7 @@ Apd	|void	|sv_chop	|NN SV *const sv|NULLOK const char *const ptr
 pd	|I32	|sv_clean_all
 : Used only in perl.c
 pd	|void	|sv_clean_objs
-Apd	|void	|sv_clear	|NN SV *const sv
+Apd	|void	|sv_clear	|NN SV *const orig_sv
 Apd	|I32	|sv_cmp		|NULLOK SV *const sv1|NULLOK SV *const sv2
 Apd	|I32	|sv_cmp_flags	|NULLOK SV *const sv1|NULLOK SV *const sv2|const I32 flags
 Apd	|I32	|sv_cmp_locale	|NULLOK SV *const sv1|NULLOK SV *const sv2

@@ -5814,15 +5814,26 @@ instead.
 */
 
 void
-Perl_sv_clear(pTHX_ register SV *const sv)
+Perl_sv_clear(pTHX_ SV *const orig_sv)
 {
     dVAR;
-    const U32 type = SvTYPE(sv);
-    const struct body_details *const sv_type_details
-	= bodies_by_type + type;
     HV *stash;
+    U32 type;
+    const struct body_details *sv_type_details;
+    SV* iter_sv = NULL;
+    SV* next_sv = NULL;
+    register SV *sv = orig_sv;
 
     PERL_ARGS_ASSERT_SV_CLEAR;
+
+    /* within this loop, sv is the SV currently being freed, and
+     * iter_sv is the most recent AV or whatever that's being iterated
+     * over to provide more SVs */
+
+    while (sv) {
+
+    type = SvTYPE(sv);
+
     assert(SvREFCNT(sv) == 0);
     assert(SvTYPE(sv) != SVTYPEMASK);
 
@@ -5833,7 +5844,7 @@ Perl_sv_clear(pTHX_ register SV *const sv)
 	    goto free_rv;
 	SvFLAGS(sv) &= SVf_BREAK;
 	SvFLAGS(sv) |= SVTYPEMASK;
-	return;
+	goto free_head;
     }
 
     if (SvOBJECT(sv)) {
@@ -5885,7 +5896,7 @@ Perl_sv_clear(pTHX_ register SV *const sv)
 		    Perl_croak(aTHX_ "DESTROY created new reference to dead object '%s'",
 			  HvNAME_get(stash));
 		/* DESTROY gave object new lease on life */
-		return;
+		goto get_next_sv;
 	    }
 	}
 
@@ -5942,11 +5953,23 @@ Perl_sv_clear(pTHX_ register SV *const sv)
 	hv_undef(MUTABLE_HV(sv));
 	break;
     case SVt_PVAV:
-	if (PL_comppad == MUTABLE_AV(sv)) {
-	    PL_comppad = NULL;
-	    PL_curpad = NULL;
+	{
+	    AV* av = MUTABLE_AV(sv);
+	    if (PL_comppad == av) {
+		PL_comppad = NULL;
+		PL_curpad = NULL;
+	    }
+	    if (AvREAL(av) && AvFILLp(av) > -1) {
+		next_sv = AvARRAY(av)[AvFILLp(av)--];
+		/* save old iter_sv in top-most slot of AV,
+		 * and pray that it doesn't get wiped in the meantime */
+		AvARRAY(av)[AvMAX(av)] = iter_sv;
+		iter_sv = sv;
+		goto get_next_sv; /* process this new sv */
+	    }
+	    Safefree(AvALLOC(av));
 	}
-	av_undef(MUTABLE_AV(sv));
+
 	break;
     case SVt_PVLV:
 	if (LvTYPE(sv) == 'T') { /* for tie: return HE to pool */
@@ -6029,9 +6052,12 @@ Perl_sv_clear(pTHX_ register SV *const sv)
 	break;
     }
 
+  free_body:
+
     SvFLAGS(sv) &= SVf_BREAK;
     SvFLAGS(sv) |= SVTYPEMASK;
 
+    sv_type_details = bodies_by_type + type;
     if (sv_type_details->arena) {
 	del_body(((char *)SvANY(sv) + sv_type_details->offset),
 		 &PL_body_roots[type]);
@@ -6039,6 +6065,64 @@ Perl_sv_clear(pTHX_ register SV *const sv)
     else if (sv_type_details->body_size) {
 	safefree(SvANY(sv));
     }
+
+      free_head:
+	/* caller is responsible for freeing the head of the original sv */
+	if (sv != orig_sv && !SvREFCNT(sv))
+	    del_SV(sv);
+
+	/* grab and free next sv, if any */
+      get_next_sv:
+	while (1) {
+	    sv = NULL;
+	    if (next_sv) {
+		sv = next_sv;
+		next_sv = NULL;
+	    }
+	    else if (!iter_sv) {
+		break;
+	    } else if (SvTYPE(iter_sv) == SVt_PVAV) {
+		AV *const av = (AV*)iter_sv;
+		if (AvFILLp(av) > -1) {
+		    sv = AvARRAY(av)[AvFILLp(av)--];
+		}
+		else { /* no more elements of current AV to free */
+		    sv = iter_sv;
+		    type = SvTYPE(sv);
+		    /* restore previous value, squirrelled away */
+		    iter_sv = AvARRAY(av)[AvMAX(av)];
+		    Safefree(AvALLOC(av));
+		    goto free_body;
+		}
+	    }
+
+	    /* unrolled SvREFCNT_dec and sv_free2 follows: */
+
+	    if (!sv)
+		continue;
+	    if (!SvREFCNT(sv)) {
+		sv_free(sv);
+		continue;
+	    }
+	    if (--(SvREFCNT(sv)))
+		continue;
+    #ifdef DEBUGGING
+	    if (SvTEMP(sv)) {
+		Perl_ck_warner_d(aTHX_ packWARN(WARN_DEBUGGING),
+			 "Attempt to free temp prematurely: SV 0x%"UVxf
+			 pTHX__FORMAT, PTR2UV(sv) pTHX__VALUE);
+		continue;
+	    }
+    #endif
+	    if (SvREADONLY(sv) && SvIMMORTAL(sv)) {
+		/* make sure SvREFCNT(sv)==0 happens very seldom */
+		SvREFCNT(sv) = (~(U32)0)/2;
+		continue;
+	    }
+	    break;
+	} /* while 1 */
+
+    } /* while sv */
 }
 
 /*
