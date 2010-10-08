@@ -89,4 +89,29 @@ foreach $XS_VERSION (undef, @versions) {
     }
 }
 
+{
+    my $count = 0;
+    {
+	package Counter;
+	our @ISA = 'version';
+	sub new {
+	    ++$count;
+	    return version::new(@_);
+	}
+
+	sub DESTROY {
+	    --$count;
+	}
+    }
+
+    {
+	my $var = Counter->new();
+	is ($count, 1, "1 object exists");
+	is (eval {XS_VERSION_empty('main', $var); 1}, undef);
+	like ($@, qr/Invalid version format \(version required\)/);
+    }
+
+    is ($count, 0, "no objects exist");
+}
+
 done_testing();

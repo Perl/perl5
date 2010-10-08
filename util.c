@@ -6486,10 +6486,9 @@ Perl_xs_version_bootcheck(pTHX_ U32 items, U32 ax, const char *xs_p,
     }
     if (sv) {
 	SV *xpt = NULL;
-	SV *xssv = Perl_newSVpvn(aTHX_ xs_p, xs_len);
+	SV *xssv = Perl_newSVpvn_flags(aTHX_ xs_p, xs_len, SVs_TEMP);
 	SV *pmsv = sv_derived_from(sv, "version")
-	    ? SvREFCNT_inc_simple_NN(sv)
-	    : new_version(sv);
+	    ? sv : sv_2mortal(new_version(sv));
 	xssv = upg_version(xssv, 0);
 	if ( vcmp(pmsv,xssv) ) {
 	    xpt = Perl_newSVpvf(aTHX_ "%s object version %"SVf
@@ -6501,11 +6500,8 @@ Perl_xs_version_bootcheck(pTHX_ U32 items, U32 ax, const char *xs_p,
 				vn ? vn : "bootstrap parameter",
 				SVfARG(Perl_sv_2mortal(aTHX_ vstringify(pmsv))));
 	    Perl_sv_2mortal(aTHX_ xpt);
-	}
-	SvREFCNT_dec(xssv);
-	SvREFCNT_dec(pmsv);
-	if (xpt)
 	    Perl_croak_sv(aTHX_ xpt);
+	}
     }
 }
 

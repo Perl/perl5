@@ -606,6 +606,7 @@ static int my_keyword_plugin(pTHX_
 }
 
 XS(XS_XS__APItest__XSUB_XS_VERSION_undef);
+XS(XS_XS__APItest__XSUB_XS_VERSION_empty);
 
 #include "const-c.inc"
 
@@ -619,6 +620,7 @@ MODULE = XS::APItest		PACKAGE = XS::APItest::XSUB
 
 BOOT:
     newXS("XS::APItest::XSUB::XS_VERSION_undef", XS_XS__APItest__XSUB_XS_VERSION_undef, __FILE__);
+    newXS("XS::APItest::XSUB::XS_VERSION_empty", XS_XS__APItest__XSUB_XS_VERSION_empty, __FILE__);
 
 void
 XS_VERSION_defined(...)
