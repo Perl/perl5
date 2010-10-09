@@ -173,6 +173,7 @@ SKIP: {
     local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
     my $output = runperl(switches => [ '-d', '-T' ], stderr => 1,
 			progfile => '../lib/perl5db/t/taint');
+    chomp $output if $^O eq 'VMS'; # newline guaranteed at EOF
     is($output, '[$^X][done]', "taint");
 }
 
