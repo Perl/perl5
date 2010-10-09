@@ -9872,7 +9872,7 @@ sub setup_special_casing {
         # The simple version's name in each mapping merely has an 's' in front
         # of the full one's
         my $simple = property_ref('s' . $case);
-        $simple->initialize($case) if $simple->to_output_map();
+        $simple->initialize($full) if $simple->to_output_map();
     }
 
     return;
