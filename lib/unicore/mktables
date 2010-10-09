@@ -1151,7 +1151,7 @@ my %map_table_formats = (
     $INTEGER_FORMAT => 'integer',
     $HEX_FORMAT => 'positive hex whole number; a code point',
     $RATIONAL_FORMAT => 'rational: an integer or a fraction',
-    $STRING_FORMAT => 'arbitrary string',
+    $STRING_FORMAT => 'string',
 );
 
 # Unicode didn't put such derived files in a separate directory at first.
