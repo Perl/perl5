@@ -9604,7 +9604,6 @@ END
             # essentially be this code.)  This uses the algorithm published by
             # Unicode.
             if (property_ref('Decomposition_Mapping')->to_output_map) {
-        local $to_trace = 1 if main::DEBUG;
                 for (my $S = $SBase; $S < $SBase + $SCount; $S++) {
                     use integer;
                     my $SIndex = $S - $SBase;
