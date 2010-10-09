@@ -5428,11 +5428,10 @@ STATIC void	S_gv_init_sv(pTHX_ GV *gv, const svtype sv_type)
 #define PERL_ARGS_ASSERT_GV_INIT_SV	\
 	assert(gv)
 
-STATIC void	S_gv_magicalize_isa(pTHX_ GV *gv, const char *nambeg, I32 add)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+STATIC void	S_gv_magicalize_isa(pTHX_ GV *gv)
+			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GV_MAGICALIZE_ISA	\
-	assert(gv); assert(nambeg)
+	assert(gv)
 
 STATIC void	S_gv_magicalize_overload(pTHX_ GV *gv)
 			__attribute__nonnull__(pTHX_1);

@@ -968,7 +968,7 @@ Perl_gv_fetchsv(pTHX_ SV *name, I32 flags, const svtype sv_type) {
 }
 
 STATIC void
-S_gv_magicalize_isa(pTHX_ GV *gv, const char *nambeg, I32 add)
+S_gv_magicalize_isa(pTHX_ GV *gv)
 {
     AV* av;
 
@@ -1247,7 +1247,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		break;
 	    case 'I':
 		if (strEQ(name2, "SA"))
-		    gv_magicalize_isa(gv, nambeg, add);
+		    gv_magicalize_isa(gv);
 		break;
 	    case 'O':
 		if (strEQ(name2, "VERLOAD"))
@@ -1287,7 +1287,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		break;
 	    case 'I':
 		if (strEQ(name2, "SA")) {
-		    gv_magicalize_isa(gv, nambeg, add);
+		    gv_magicalize_isa(gv);
 		}
 		break;
 	    case 'O':
