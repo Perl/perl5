@@ -2847,6 +2847,21 @@ sub trace { return main::trace(@_); }
         return $i + 1;
     }
 
+    sub containing_range {
+        # Returns the range object that contains the code point, undef if none
+
+        my $self = shift;
+        my $codepoint = shift;
+        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+        my $i = $self->contains($codepoint);
+        return unless $i;
+
+        # contains() returns 1 beyond where we should look
+        no overloading;
+        return $ranges{pack 'J', $self}->[$i-1];
+    }
+
     sub value_of {
         # Returns the value associated with the code point, undef if none
 
@@ -4809,6 +4824,7 @@ sub trace { return main::trace(@_); }
     # Accessors for the range list stored in this table.  First for
     # unconditional
     for my $sub (qw(
+                    containing_range
                     contains
                     count
                     each_range
@@ -7145,6 +7161,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
                     aliases
                     comment
                     complete_name
+                    containing_range
                     core_access
                     count
                     default_map
