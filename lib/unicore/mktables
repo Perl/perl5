@@ -12641,8 +12641,8 @@ accessible through the Perl core, although some may be accessed indirectly.
 For example, the uc() function implements the Uppercase_Mapping property and
 uses the F<Upper.pl> file found in this directory.
 
-The available files with their properties (short names in parentheses),
-and any flags or comments about them, are:
+The available files in the current installation, with their properties (short
+names in parentheses), and any flags or comments about them, are:
 
 @map_tables_actually_output
 
