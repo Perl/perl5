@@ -11180,27 +11180,6 @@ END
         $comment .= ", and $composition[-1]";
     }
 
-    # Wait for charnames to catch up
-#    foreach my $entry (@more_Names,
-#                        split "\n", <<"END"
-#000A; LF
-#000C; FF
-#000D; CR
-#0085; NEL
-#200C; ZWNJ
-#200D; ZWJ
-#FEFF; BOM
-#FEFF; BYTE ORDER MARK
-#END
-#    ) {
-#        #local $to_trace = 1 if main::DEBUG;
-#        trace $entry if main::DEBUG && $to_trace;
-#        my ($code_point, $name) = split /\s*;\s*/, $entry;
-#        $code_point = hex $code_point;
-#        trace $code_point, $name if main::DEBUG && $to_trace;
-#        $perl_charname->add_duplicate($code_point, $name);
-#    }
-#    #$perl_charname->add_comment("This file is for charnames.pm.  It is the union of the $comment properties, plus certain commonly used but unofficial names, such as 'FF' and 'ZWNJ'.  Unicode_1_Name entries are used only for otherwise nameless code points.$alias_sentence");
     $perl_charname->add_comment(join_lines( <<END
 This file is for charnames.pm.  It is the union of the $comment properties.
 Unicode_1_Name entries are used only for otherwise nameless code
