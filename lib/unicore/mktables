@@ -2875,6 +2875,20 @@ sub trace { return main::trace(@_); }
         return $range->value;
     }
 
+    sub type_of {
+        # Returns the type of the range containing the code point, undef if
+        # the code point is not in the table
+
+        my $self = shift;
+        my $codepoint = shift;
+        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+        my $range = $self->containing_range($codepoint);
+        return unless defined $range;
+
+        return $range->type;
+    }
+
     sub _search_ranges {
         # Find the range in the list which contains a code point, or where it
         # should go if were to add it.  That is, it returns $i, such that:
@@ -4832,6 +4846,7 @@ sub trace { return main::trace(@_); }
                     min
                     range_count
                     reset_each_range
+                    type_of
                     value_of
                 ))
     {
@@ -7192,6 +7207,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
                     status
                     status_info
                     to_output_map
+                    type_of
                     value_of
                     write
                 ))
