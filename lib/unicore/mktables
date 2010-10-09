@@ -1169,11 +1169,16 @@ my %loose_property_name_of; # Loosely maps property names to standard form
 
 # These constants names and values were taken from the Unicode standard,
 # version 5.1, section 3.12.  They are used in conjunction with Hangul
-# syllables
-my $SBase = 0xAC00;
-my $LBase = 0x1100;
-my $VBase = 0x1161;
-my $TBase = 0x11A7;
+# syllables.  The '_string' versions are so generated tables can retain the
+# hex format, which is the more familiar value
+my $SBase_string = "0xAC00";
+my $SBase = CORE::hex $SBase_string;
+my $LBase_string = "0x1100";
+my $LBase = CORE::hex $LBase_string;
+my $VBase_string = "0x1161";
+my $VBase = CORE::hex $VBase_string;
+my $TBase_string = "0x11A7";
+my $TBase = CORE::hex $TBase_string;
 my $SCount = 11172;
 my $LCount = 19;
 my $VCount = 21;
@@ -5585,14 +5590,14 @@ $jamo_t
     # These constants names and values were taken from the Unicode standard,
     # version 5.1, section 3.12.  They are used in conjunction with Hangul
     # syllables
-    my \$SBase = 0xAC00;
-    my \$LBase = 0x1100;
-    my \$VBase = 0x1161;
-    my \$TBase = 0x11A7;
-    my \$SCount = 11172;
-    my \$LCount = 19;
-    my \$VCount = 21;
-    my \$TCount = 28;
+    my \$SBase = $SBase_string;
+    my \$LBase = $LBase_string;
+    my \$VBase = $VBase_string;
+    my \$TBase = $TBase_string;
+    my \$SCount = $SCount;
+    my \$LCount = $LCount;
+    my \$VCount = $VCount;
+    my \$TCount = $TCount;
     my \$NCount = \$VCount * \$TCount;
 END
                 } # End of has Jamos
