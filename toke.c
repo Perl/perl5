@@ -6914,7 +6914,23 @@ Perl_yylex(pTHX)
 	    UNI(OP_DELETE);
 
 	case KEY_dbmopen:
-	    gv_fetchpvs("AnyDBM_File::ISA", GV_ADDMULTI, SVt_PVAV);
+	    {
+		/* NOTE: No support for tied ISA */
+		AV *isa = get_av("AnyDBM_File::ISA", GV_ADD | GV_ADDMULTI);
+
+		if(AvFILLp(isa) == -1) {
+		    av_push(isa, newSVpvs("NDBM_File"));
+		    gv_stashpvs("NDBM_File", GV_ADD);
+		    av_push(isa, newSVpvs("DB_File"));
+		    gv_stashpvs("DB_File", GV_ADD);
+		    av_push(isa, newSVpvs("GDBM_File"));
+		    gv_stashpvs("GDBM_File", GV_ADD);
+		    av_push(isa, newSVpvs("SDBM_File"));
+		    gv_stashpvs("SDBM_File", GV_ADD);
+		    av_push(isa, newSVpvs("ODBM_File"));
+		    gv_stashpvs("ODBM_File", GV_ADD);
+		}
+	    }
 	    LOP(OP_DBMOPEN,XTERM);
 
 	case KEY_dbmclose:

@@ -978,21 +978,6 @@ S_gv_magicalize_isa(pTHX_ GV *gv, const char *nambeg, I32 add)
     GvMULTI_on(gv);
     sv_magic(MUTABLE_SV(av), MUTABLE_SV(gv), PERL_MAGIC_isa,
 	     NULL, 0);
-    /* NOTE: No support for tied ISA */
-    if ((add & GV_ADDMULTI) && strEQ(nambeg,"AnyDBM_File::ISA")
-	&& AvFILLp(av) == -1)
-	{
-	    av_push(av, newSVpvs("NDBM_File"));
-	    gv_stashpvs("NDBM_File", GV_ADD);
-	    av_push(av, newSVpvs("DB_File"));
-	    gv_stashpvs("DB_File", GV_ADD);
-	    av_push(av, newSVpvs("GDBM_File"));
-	    gv_stashpvs("GDBM_File", GV_ADD);
-	    av_push(av, newSVpvs("SDBM_File"));
-	    gv_stashpvs("SDBM_File", GV_ADD);
-	    av_push(av, newSVpvs("ODBM_File"));
-	    gv_stashpvs("ODBM_File", GV_ADD);
-	}
 }
 
 STATIC void
