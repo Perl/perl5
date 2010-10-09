@@ -13970,7 +13970,7 @@ if ($ok) {
     }
 }
 if ($ok) {
-    print "Files seem to be ok, not bothering to rebuild.\n";
+    print "Files seem to be ok, not bothering to rebuild.  Add '-w' option to force build\n";
     exit(0);
 }
 print "Must rebuild tables.\n" if $verbosity >= $VERBOSE;
