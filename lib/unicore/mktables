@@ -1214,6 +1214,8 @@ my $MAX_FLOATING_SLOP = 10 ** - $MIN_FRACTION_LENGTH; # And in floating terms
 my $gc;
 my $perl;
 my $block;
+my $perl_charname;
+my $print;
 
 # Are there conflicting names because of beginning with 'In_', or 'Is_'
 my $has_In_conflicts = 0;
@@ -9135,7 +9137,7 @@ END
         # Name_Alias properties.  (The final duplicates elements of the
         # first.)  A comment for it will later be constructed based on the
         # actual properties present and used
-        Property->new('Perl_Charnames',
+        $perl_charname = Property->new('Perl_Charnames',
                        Core_Access => '\N{...} and "use charnames"',
                        Default_Map => "",
                        Directory => File::Spec->curdir(),
@@ -10995,14 +10997,14 @@ sub compile_perl() {
                             Initialize => $Graph & $ASCII,
                             );
 
-    my $Print = $perl->add_match_table('Print',
+    $print = $perl->add_match_table('Print',
                         Description => 'Characters that are graphical plus space characters (but no controls)',
                         Initialize => $Blank + $Graph - $gc->table('Control'),
                         );
     $perl->add_match_table("PosixPrint",
                             Description =>
                               '[- 0-9A-Za-z!"#$%&\'()*+,./:;<>?@[\\\]^_`{|}~]',
-                            Initialize => $Print & $ASCII,
+                            Initialize => $print & $ASCII,
                             );
 
     my $Punct = $perl->add_match_table('Punct');
@@ -11142,7 +11144,6 @@ sub compile_perl() {
         $lv_lvt_v->add_comment('For use in \X; matches: HST=LV | HST=LVT | HST=V');
     }
 
-    my $perl_charname = property_ref('Perl_Charnames');
     # Was previously constructed to contain both Name and Unicode_1_Name
     my @composition = ('Name', 'Unicode_1_Name');
 
