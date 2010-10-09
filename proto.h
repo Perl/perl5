@@ -2775,6 +2775,11 @@ PERL_CALLCONV OP*	Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	assert(o); assert(expr)
 
 PERL_CALLCONV void	Perl_pop_scope(pTHX);
+PERL_CALLCONV void	Perl_populate_isa(pTHX_ const char *name, STRLEN len, ...)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_POPULATE_ISA	\
+	assert(name)
+
 PERL_CALLCONV OP *	Perl_pp_aassign(pTHX);
 PERL_CALLCONV OP *	Perl_pp_abs(pTHX);
 PERL_CALLCONV OP *	Perl_pp_accept(pTHX);

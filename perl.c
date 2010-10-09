@@ -3893,6 +3893,39 @@ S_nuke_stacks(pTHX)
     Safefree(PL_savestack);
 }
 
+void
+Perl_populate_isa(pTHX_ const char *name, STRLEN len, ...)
+{
+    GV *const gv = gv_fetchpvn(name, len, GV_ADD | GV_ADDMULTI, SVt_PVAV);
+    AV *const isa = GvAVn(gv);
+    va_list args;
+
+    PERL_ARGS_ASSERT_POPULATE_ISA;
+
+    if(AvFILLp(isa) != -1)
+	return;
+
+    /* NOTE: No support for tied ISA */
+
+    va_start(args, len);
+    do {
+	const char *const parent = va_arg(args, const char*);
+	size_t parent_len;
+
+	if (!parent)
+	    break;
+	parent_len = va_arg(args, size_t);
+
+	/* Arguments are supplied with a trailing ::  */
+	assert(parent_len > 2);
+	assert(parent[parent_len - 1] == ':');
+	assert(parent[parent_len - 2] == ':');
+	av_push(isa, newSVpvn(parent, parent_len - 2));
+	(void) gv_fetchpvn(parent, parent_len, GV_ADD, SVt_PVGV);
+    } while (1);
+    va_end(args);
+}
+
 
 STATIC void
 S_init_predump_symbols(pTHX)
@@ -3900,7 +3933,6 @@ S_init_predump_symbols(pTHX)
     dVAR;
     GV *tmpgv;
     IO *io;
-    AV *isa;
 
     sv_setpvs(get_sv("\"", GV_ADD), " ");
     PL_ofsgv = (GV*)SvREFCNT_inc(gv_fetchpvs(",", GV_ADD|GV_NOTQUAL, SVt_PV));
@@ -3919,14 +3951,11 @@ S_init_predump_symbols(pTHX)
        so that code that does C<use IO::Handle>; will still work.
     */
 		   
-    isa = get_av("IO::File::ISA", GV_ADD | GV_ADDMULTI);
-    av_push(isa, newSVpvs("IO::Handle"));
-    av_push(isa, newSVpvs("IO::Seekable"));
-    av_push(isa, newSVpvs("Exporter"));
-    (void) gv_fetchpvs("IO::Handle::", GV_ADD, SVt_PVGV);
-    (void) gv_fetchpvs("IO::Seekable::", GV_ADD, SVt_PVGV);
-    (void) gv_fetchpvs("Exporter::", GV_ADD, SVt_PVGV);
-
+    Perl_populate_isa(aTHX_ STR_WITH_LEN("IO::File::ISA"),
+		      STR_WITH_LEN("IO::Handle::"),
+		      STR_WITH_LEN("IO::Seekable::"),
+		      STR_WITH_LEN("Exporter::"),
+		      NULL);
 
     PL_stdingv = gv_fetchpvs("STDIN", GV_ADD|GV_NOTQUAL, SVt_PVIO);
     GvMULTI_on(PL_stdingv);
