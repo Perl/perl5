@@ -2869,12 +2869,10 @@ sub trace { return main::trace(@_); }
         my $codepoint = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        my $i = $self->contains($codepoint);
-        return unless $i;
+        my $range = $self->containing_range($codepoint);
+        return unless defined $range;
 
-        # contains() returns 1 beyond where we should look
-        no overloading;
-        return $ranges{pack 'J', $self}->[$i-1]->value;
+        return $range->value;
     }
 
     sub _search_ranges {
