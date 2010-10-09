@@ -311,7 +311,7 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 #   is nonsensical.
 #
 # There are no match tables generated for matches of the null string.  These
-# would like like qr/\p{JSN=}/ currently without modifying the regex code.
+# would look like qr/\p{JSN=}/ currently without modifying the regex code.
 # Perhaps something like them could be added if necessary.  The JSN does have
 # a real code point U+110B that maps to the null string, but it is a
 # contributory property, and therefore not output by default.  And it's easily
@@ -413,7 +413,6 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # kPrimaryNumeric property have commas and an unexpected comment.  A filter
 # could be added for these; or for a particular installation, the Unihan.txt
 # file could be edited to fix them.
-# have to be
 #
 # HOW TO ADD A FILE TO BE PROCESSED
 #
@@ -1502,7 +1501,7 @@ package main;
         # "protection" is only by convention.  All that happens is that the
         # accessor functions' names begin with an underscore.  So instead of
         # calling set_foo, the call is _set_foo.  (Real protection could be
-        # accomplished by having a new subroutine, end_package called at the
+        # accomplished by having a new subroutine, end_package, called at the
         # end of each package, and then storing the __LINE__ ranges and
         # checking them on every accessor.  But that is way overkill.)
 
@@ -2972,10 +2971,10 @@ sub trace { return main::trace(@_); }
         #
         # The range list is kept sorted so that the range with the lowest
         # starting position is first in the list, and generally, adjacent
-        # ranges with the same values are merged into single larger one (see
+        # ranges with the same values are merged into a single larger one (see
         # exceptions below).
         #
-        # There are more parameters, all are key => value pairs:
+        # There are more parameters; all are key => value pairs:
         #   Type    gives the type of the value.  It is only valid for '+'.
         #           All ranges have types; if this parameter is omitted, 0 is
         #           assumed.  Ranges with type 0 are assumed to obey the
@@ -2999,7 +2998,7 @@ sub trace { return main::trace(@_); }
         #       => $IF_NOT_EQUIVALENT means to replace the existing values
         #                         with this one if they are not equivalent.
         #                         Ranges are equivalent if their types are the
-        #                         same, and they are the same string, or if
+        #                         same, and they are the same string; or if
         #                         both are type 0 ranges, if their Unicode
         #                         standard forms are identical.  In this last
         #                         case, the routine chooses the more "modern"
@@ -3018,8 +3017,8 @@ sub trace { return main::trace(@_); }
         #                         multiple times.
         #       => anything else  is the same as => $IF_NOT_EQUIVALENT
         #
-        # "same value" means identical for type-0 ranges, and it means having
-        # the same standard forms for non-type-0 ranges.
+        # "same value" means identical for non-type-0 ranges, and it means
+        # having the same standard forms for type-0 ranges.
 
         return Carp::carp_too_few_args(\@_, 5) if main::DEBUG && @_ < 5;
 
@@ -9325,7 +9324,7 @@ END
         # Certain fields just haven't been empty so far in any Unicode
         # version, so don't look at those, namely $MIRRORED, $BIDI, $CCC,
         # $CATEGORY.  This leaves just the two fields, and so we hard-code in
-        # the defaults; which are verly unlikely to ever change.
+        # the defaults; which are very unlikely to ever change.
         $fields[$UPPER] = $CODE_POINT if $fields[$UPPER] eq "";
         $fields[$LOWER] = $CODE_POINT if $fields[$LOWER] eq "";
 
@@ -9505,6 +9504,7 @@ END
             # code in this subroutine that does the same thing, but doesn't
             # know about these ranges.
             $_ = "";
+
             return;
         }
 
