@@ -7912,7 +7912,7 @@ sub finish_property_setup {
         ;
 
         # The defaults apply only to unassigned characters
-        $default_R .= '$gc->table("Cn") & $default;';
+        $default_R .= '$gc->table("Unassigned") & $default;';
 
         if ($v_version lt v3.0.0) {
             $default = Multi_Default->new(R => $default_R, 'L');
@@ -7932,7 +7932,7 @@ sub finish_property_setup {
             if ($v_version ge 3.1.0) {
                 $default_AL .= '$default->delete_range(0xFDD0, 0xFDEF);';
             }
-            $default_AL .= '$gc->table("Cn") & $default';
+            $default_AL .= '$gc->table("Unassigned") & $default';
             $default = Multi_Default->new(AL => $default_AL,
                                           R => $default_R,
                                           'L');
