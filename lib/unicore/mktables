@@ -10027,6 +10027,7 @@ sub filter_old_style_case_folding {
     # it takes no part in anything we do.
     my $to_output_simple;
 
+    # XXX
     # These are experimental, perhaps will need these to pass to regcomp.c to
     # handle the cases where for example the Kelvin sign character folds to k,
     # and in regcomp, we need to know which of the characters can have a
@@ -10095,7 +10096,7 @@ sub filter_old_style_case_folding {
             $file->insert_adjusted_lines("$range; Simple_Case_Folding; $map");
         }
 
-        # Experimental, see comment above
+        # XXX Experimental, see comment above
         if ($type ne 'S' && hex($range) >= 256) {   # assumes range is 1 point
             my @folded = split ' ', $map;
             if (hex $folded[0] < 256 && @folded == 1) {
@@ -10110,7 +10111,7 @@ sub filter_old_style_case_folding {
     }
 
     sub post_fold {
-        # Experimental, see comment above
+        # XXX Experimental, see comment above
         return;
 
         #local $to_trace = 1 if main::DEBUG;
