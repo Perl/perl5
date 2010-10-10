@@ -3772,7 +3772,15 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 	    && CopSTASH_ne(PL_curcop, GvSTASH(dstr))) {
 	    GvFLAGS(dstr) |= import_flag;
 	}
-	if (stype == SVt_PVAV && strEQ(GvNAME((GV*)dstr), "ISA")) {
+	if (stype == SVt_PVHV) {
+	    const char * const name = GvNAME((GV*)dstr);
+	    const STRLEN len = GvNAMELEN(dstr);
+	    if (len > 1 && name[len-2] == ':' && name[len-1] == ':') {
+		if(HvNAME(dref)) mro_package_moved((HV *)dref);
+		if(HvNAME(sref)) mro_package_moved((HV *)sref);
+	    }
+	}
+	else if (stype == SVt_PVAV && strEQ(GvNAME((GV*)dstr), "ISA")) {
 	    sv_magic(sref, dstr, PERL_MAGIC_isa, NULL, 0);
 	    mro_isa_changed_in(GvSTASH(dstr));
 	}
@@ -4016,9 +4024,27 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 	else {
 	    GV *gv = gv_fetchsv(sstr, GV_ADD, SVt_PVGV);
 	    if (dstr != (const SV *)gv) {
+		const char * const name = GvNAME((const GV *)dstr);
+		const STRLEN len = GvNAMELEN(dstr);
+		HV *old_stash = NULL;
+		bool reset_isa = FALSE;
+		if (len > 1 && name[len-2] == ':' && name[len-1] == ':') {
+		    /* Set aside the old stash, so we can reset isa caches
+		       on its subclasses. */
+		    old_stash = GvHV(dstr);
+		    reset_isa = TRUE;
+		}
+
 		if (GvGP(dstr))
 		    gp_free(MUTABLE_GV(dstr));
 		GvGP(dstr) = gp_ref(GvGP(gv));
+
+		if (reset_isa) {
+		    const HV * const stash = GvHV(dstr);
+		    if(stash && HvNAME(stash)) mro_package_moved(stash);
+		    if(old_stash && HvNAME(old_stash))
+			mro_package_moved(old_stash);
+		}
 	    }
 	}
     }

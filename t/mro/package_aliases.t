@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 use warnings;
-plan(tests => 10);
+plan(tests => 12);
 
 {
     package New;
@@ -38,50 +38,84 @@ no warnings; # temporary, until bug #77358 is fixed
 
 # Test that replacing a package by assigning to an existing glob
 # invalidates the isa caches
-{
- @Subclass::ISA = "Left";
- @Left::ISA = "TopLeft";
+for(
+ {
+   name => 'assigning a glob to a glob',
+   code => '$life_raft = $::{"Left::"}; *Left:: = $::{"Right::"}',
+ },
+ {
+   name => 'assigning a string to a glob',
+   code => '$life_raft = $::{"Left::"}; *Left:: = "Right::"',
+ },
+ {
+   name => 'assigning a stashref to a glob',
+   code => '$life_raft = \%Left::; *Left:: = \%Right::',
+ },
+) {
+ fresh_perl_is
+   q~
+     @Subclass::ISA = "Left";
+     @Left::ISA = "TopLeft";
 
- sub TopLeft::speak { "Woof!" }
- sub TopRight::speak { "Bow-wow!" }
+     sub TopLeft::speak { "Woof!" }
+     sub TopRight::speak { "Bow-wow!" }
 
- my $thing = bless [], "Subclass";
+     my $thing = bless [], "Subclass";
 
- # mro_package_moved needs to know to skip non-globs
- $Right::{"gleck::"} = 3;
+     # mro_package_moved needs to know to skip non-globs
+     $Right::{"gleck::"} = 3;
 
- @Right::ISA = 'TopRight';
- my $life_raft = $::{'Left::'};
- *Left:: = $::{'Right::'};
+     @Right::ISA = 'TopRight';
+     my $life_raft;
+    __code__;
 
- is $thing->speak, 'Bow-wow!',
-  'rearranging packages by assigning to a stash elem updates isa caches';
+     print $thing->speak, "\n";
 
- undef $life_raft;
- is $thing->speak, 'Bow-wow!',
-  'isa caches are up to date after the replaced stash is freed';
+     undef $life_raft;
+     print $thing->speak, "\n";
+   ~ =~ s\__code__\$$_{code}\r,
+  "Bow-wow!\nBow-wow!\n",
+   {},
+  "replacing packages by $$_{name} updates isa caches";
 }
 
 # Similar test, but with nested packages
-{
- @Subclass::ISA = "Left::Side";
- @Left::Side::ISA = "TopLeft";
+for(
+ {
+   name => 'assigning a glob to a glob',
+   code => '$life_raft = $::{"Left::"}; *Left:: = $::{"Right::"}',
+ },
+ {
+   name => 'assigning a string to a glob',
+   code => '$life_raft = $::{"Left::"}; *Left:: = "Right::"',
+ },
+ {
+   name => 'assigning a stashref to a glob',
+   code => '$life_raft = \%Left::; *Left:: = \%Right::',
+ },
+) {
+ fresh_perl_is
+   q~
+     @Subclass::ISA = "Left::Side";
+     @Left::Side::ISA = "TopLeft";
 
- sub TopLeft::speak { "Woof!" }
- sub TopRight::speak { "Bow-wow!" }
+     sub TopLeft::speak { "Woof!" }
+     sub TopRight::speak { "Bow-wow!" }
 
- my $thing = bless [], "Subclass";
+     my $thing = bless [], "Subclass";
 
- @Right::Side::ISA = 'TopRight';
- my $life_raft = $::{'Left::'};
- *Left:: = $::{'Right::'};
+     @Right::Side::ISA = 'TopRight';
+     my $life_raft;
+    __code__;
 
- is $thing->speak, 'Bow-wow!',
-  'moving nested packages by assigning to a stash elem updates isa caches';
+     print $thing->speak, "\n";
 
- undef $life_raft;
- is $thing->speak, 'Bow-wow!',
-  'isa caches are up to date after the replaced nested stash is freed';
+     undef $life_raft;
+     print $thing->speak, "\n";
+   ~ =~ s\__code__\$$_{code}\r,
+  "Bow-wow!\nBow-wow!\n",
+   {},
+  "replacing nested packages by $$_{name} updates isa caches";
 }
 
 # Test that deleting stash elements containing
