@@ -6021,7 +6021,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		    if (SvWEAKREF(sv))
 			sv_del_backref(target, sv);
 		    else
-			SvREFCNT_dec(target);
+			next_sv = target;
 		}
 	    }
 #ifdef PERL_OLD_COPY_ON_WRITE
