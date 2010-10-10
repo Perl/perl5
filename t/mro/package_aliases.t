@@ -80,6 +80,15 @@ for(
 }
 
 # Similar test, but with nested packages
+#
+#  TopLeft (Woof)    TopRight (Bow-wow)
+#      |                 |
+#  Left::Side   <-   Right::Side
+#      |
+#   Subclass
+#
+# This test assigns Right:: to Left::, indirectly making Left::Side an
+# alias to Right::Side (following the arrow in the diagram).
 for(
  {
    name => 'assigning a glob to a glob',
