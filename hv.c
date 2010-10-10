@@ -692,32 +692,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		}
 		HeVAL(entry) = val;
 	    } else if (action & HV_FETCH_ISSTORE) {
-		bool moving_package = FALSE;
-		SV *old_val = HeVAL(entry);
-
-		/* If this is a stash and the key ends with ::, then some-
-		   one is aliasing (or moving) a package. */
-		if (HvNAME(hv)) {
-		    if (keysv) key = SvPV(keysv, klen);
-		    if (klen > 1
-		     && key[klen-2] == ':' && key[klen-1] == ':') {
-			if(SvTYPE(old_val) == SVt_PVGV) {
-			    const HV * const old_stash
-			     = GvHV((GV *)old_val);
-			    if(old_stash && HvNAME(old_stash))
-				mro_package_moved(old_stash);
-			}
-			moving_package = TRUE;
-		    }
-		}
-
-		SvREFCNT_dec(old_val);
 		HeVAL(entry) = val;
-
-		if (moving_package && SvTYPE(val) == SVt_PVGV) {
-		    const HV * const stash = GvHV((GV *)val);
-		    if (stash && HvNAME(stash)) mro_package_moved(stash);
-		}
 	    }
 	} else if (HeVAL(entry) == &PL_sv_placeholder) {
 	    /* if we find a placeholder, we pretend we haven't found
