@@ -13978,16 +13978,16 @@ foreach my $in (@input_files) {
     }
 }
 
-my $ok = ! $write_unchanged_files
-        && scalar @mktables_list_output_files;        # If none known, rebuild
+my $rebuild = ! (! $write_unchanged_files
+                 && scalar @mktables_list_output_files); # If none known, rebuild
 
 # Now we check to see if any output files are older than youngest, if
 # they are, we need to continue on, otherwise we can presumably bail.
-if ($ok) {
+if (! $rebuild) {
     foreach my $out (@mktables_list_output_files) {
         if ( ! file_exists($out)) {
             print "'$out' is missing.\n" if $verbosity >= $VERBOSE;
-            $ok = 0;
+            $rebuild = 1;
             last;
          }
         #local $to_trace = 1 if main::DEBUG;
@@ -13995,12 +13995,12 @@ if ($ok) {
         if ( -M $out > $youngest ) {
             #trace "$out: age: ", -M $out, ", youngest: $youngest\n" if main::DEBUG && $to_trace;
             print "'$out' is too old.\n" if $verbosity >= $VERBOSE;
-            $ok = 0;
+            $rebuild = 1;
             last;
         }
     }
 }
-if ($ok) {
+if (! $rebuild) {
     print "Files seem to be ok, not bothering to rebuild.  Add '-w' option to force build\n";
     exit(0);
 }
