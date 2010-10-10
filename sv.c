@@ -3582,7 +3582,7 @@ static void
 S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
 {
     I32 mro_changes = 0; /* 1 = method, 2 = isa, 3 = recursive isa */
-    HV *old_stash;
+    HV *old_stash = NULL;
 
     PERL_ARGS_ASSERT_GLOB_ASSIGN_GLOB;
 
