@@ -1142,7 +1142,8 @@ my %status_past_participles = (
     $DEPRECATED => 'deprecated',
 );
 
-# The format of the values of the map tables:
+# The format of the values of the tables:
+my $EMPTY_FORMAT = "";
 my $BINARY_FORMAT = 'b';
 my $DECIMAL_FORMAT = 'd';
 my $FLOAT_FORMAT = 'f';
@@ -4220,6 +4221,12 @@ sub trace { return main::trace(@_); }
     # The constructor can override the global flag of the same name.
     main::set_access('output_range_counts', \%output_range_counts, 'r');
 
+    my %format;
+    # The format of the entries of the table.  This is calculated from the
+    # data in the table (or passed in the constructor).  This is an enum e.g.,
+    # $STRING_FORMAT
+    main::set_access('format', \%format, 'r', 'p_s');
+
     sub new {
         # All arguments are key => value pairs, which you can see below, most
         # of which match fields documented above.  Otherwise: Pod_Entry,
@@ -4240,6 +4247,7 @@ sub trace { return main::trace(@_); }
         $full_name{$addr} = delete $args{'Full_Name'};
         my $complete_name = $complete_name{$addr}
                           = delete $args{'Complete_Name'};
+        $format{$addr} = delete $args{'Format'};
         $internal_only{$addr} = delete $args{'Internal_Only_Warning'} || 0;
         $output_range_counts{$addr} = delete $args{'Output_Range_Counts'};
         $property{$addr} = delete $args{'_Property'};
@@ -4935,12 +4943,6 @@ sub trace { return main::trace(@_); }
                     \%anomalous_entries,
                     'readable_array');
 
-    my %format;
-    # The format of the entries of the table.  This is calculated from the
-    # data in the table (or passed in the constructor).  This is an enum e.g.,
-    # $STRING_FORMAT
-    main::set_access('format', \%format);
-
     my %core_access;
     # This is a string, solely for documentation, indicating how one can get
     # access to this property via the Perl core.
@@ -4971,7 +4973,6 @@ sub trace { return main::trace(@_); }
 
         my $core_access = delete $args{'Core_Access'};
         my $default_map = delete $args{'Default_Map'};
-        my $format = delete $args{'Format'};
         my $property = delete $args{'_Property'};
         my $full_name = delete $args{'Full_Name'};
         # Rest of parameters passed on
@@ -4991,7 +4992,6 @@ sub trace { return main::trace(@_); }
         $anomalous_entries{$addr} = [];
         $core_access{$addr} = $core_access;
         $default_map{$addr} = $default_map;
-        $format{$addr} = $format;
 
         $self->initialize($initialize) if defined $initialize;
 
@@ -5732,7 +5732,7 @@ END
         } # End of has specials
 
         # Calculate the format of the table if not already done.
-        my $format = $format{$addr};
+        my $format = $self->format;
         my $property = $self->property;
         my $type = $property->type;
         if (! defined $format) {
@@ -5799,11 +5799,11 @@ END
         my $missing = $default_map;
         if ($missing eq $CODE_POINT
             && $format ne $HEX_FORMAT
-            && ! defined $format{$addr})    # Is expected if was manually set
+            && ! defined $self->format)    # Is expected if was manually set
         {
             Carp::my_carp_bug("Expecting hex format for mapping table for $self, instead got '$format'")
         }
-        $format{$addr} = $format;
+        $self->_set_format($format);
         $return .= "\$utf8::SwashInfo{'To$name'}{'missing'} = '$missing';";
         if ($missing eq $CODE_POINT) {
             $return .= ' # code point maps to itself';
@@ -5948,6 +5948,7 @@ sub trace { return main::trace(@_); }
         # Optional
         my $initialize = delete $args{'Initialize'};
         my $matches_all = delete $args{'Matches_All'} || 0;
+        my $format = delete $args{'Format'};
         # Rest of parameters passed on.
 
         my $range_list = Range_List->new(Initialize => $initialize,
@@ -5970,6 +5971,7 @@ sub trace { return main::trace(@_); }
                                       Full_Name => $full_name,
                                       _Property => $property,
                                       _Range_List => $range_list,
+                                      Format => $EMPTY_FORMAT,
                                       );
         my $addr = do { no overloading; pack 'J', $self; };
 
@@ -5979,6 +5981,10 @@ sub trace { return main::trace(@_); }
         $matches_all{$addr} = $matches_all;
         $leader{$addr} = $self;
         $parent{$addr} = $self;
+
+        if (defined $format && $format ne $EMPTY_FORMAT) {
+            Carp::my_carp_bug("'Format' must be '$EMPTY_FORMAT' in a match table instead of '$format'.  Using '$EMPTY_FORMAT'");
+        }
 
         return $self;
     }
