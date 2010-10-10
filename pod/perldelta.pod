@@ -703,6 +703,13 @@ Stringifying a scalar containing -0.0 no longer has the affect of turning
 false into true
 L<[perl #45133]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=45133>.
 
+=item *
+
+Aliasing packages by assigning to globs or deleting packages by deleting
+their containing stash elements used to have erratic effects on method
+resolution, because the internal 'isa' caches were not reset. This has been
+fixed.
+
 =back
 
 =head1 Known Problems

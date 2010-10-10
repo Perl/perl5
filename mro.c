@@ -549,6 +549,56 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
 }
 
 /*
+=for apidoc mro_package_moved
+
+Invalidates isa caches on this stash, on all subpackages nested inside it,
+and on the subclasses of all those.
+
+=cut
+*/
+void
+Perl_mro_package_moved(pTHX_ const HV *stash)
+{
+    register XPVHV* xhv;
+    register HE *entry;
+    I32 riter = -1;
+
+    PERL_ARGS_ASSERT_MRO_PACKAGE_MOVED;
+
+    mro_isa_changed_in((HV *)stash);
+
+    if(!HvARRAY(stash)) return;
+
+    /* This is partly based on code in hv_iternext_flags. We are not call-
+       ing that here, as we want to avoid resetting the hash iterator. */
+
+    xhv = (XPVHV*)SvANY(stash);
+
+    /* Skip the entire loop if the hash is empty.   */
+    if (HvUSEDKEYS(stash)) {
+	while (++riter <= (I32)xhv->xhv_max) {
+	    entry = (HvARRAY(stash))[riter];
+
+	    /* Iterate through the entries in this list */
+	    for(; entry; entry = HeNEXT(entry)) {
+		const char* key;
+		I32 len;
+
+		/* If this entry is not a glob, ignore it.
+		   Try the next.  */
+		if (!isGV(HeVAL(entry))) continue;
+
+		key = hv_iterkey(entry, &len);
+		if(len > 1 && key[len-2] == ':' && key[len-1] == ':') {
+		    const HV * const stash = GvHV(HeVAL(entry));
+		    if(stash && HvNAME(stash)) mro_package_moved(stash);
+		}
+	    }
+	}
+    }
+}
+
+/*
 =for apidoc mro_method_changed_in
 
 Invalidates method caching on any child classes

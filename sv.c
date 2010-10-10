@@ -3581,7 +3581,8 @@ copy-ish functions and macros use this underneath.
 static void
 S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
 {
-    I32 mro_changes = 0; /* 1 = method, 2 = isa */
+    I32 mro_changes = 0; /* 1 = method, 2 = isa, 3 = recursive isa */
+    HV *old_stash;
 
     PERL_ARGS_ASSERT_GLOB_ASSIGN_GLOB;
 
@@ -3627,8 +3628,23 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
         mro_changes = 1;
     }
 
-    if(strEQ(GvNAME((const GV *)dstr),"ISA"))
-        mro_changes = 2;
+    /* We don’t need to check the name of the destination if it was not a
+       glob to begin with. */
+    if(dtype == SVt_PVGV) {
+        const char * const name = GvNAME((const GV *)dstr);
+        if(strEQ(name,"ISA"))
+            mro_changes = 2;
+        else {
+            const STRLEN len = GvNAMELEN(dstr);
+            if (len > 1 && name[len-2] == ':' && name[len-1] == ':') {
+                mro_changes = 3;
+
+                /* Set aside the old stash, so we can reset isa caches on
+                   its subclasses. */
+                old_stash = GvHV(dstr);
+            }
+        }
+    }
 
     gp_free(MUTABLE_GV(dstr));
     isGV_with_GP_off(dstr);
@@ -3645,6 +3661,11 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
 	}
     GvMULTI_on(dstr);
     if(mro_changes == 2) mro_isa_changed_in(GvSTASH(dstr));
+    else if(mro_changes == 3) {
+	const HV * const stash = GvHV(dstr);
+	if(stash && HvNAME(stash)) mro_package_moved(stash);
+	if(old_stash && HvNAME(old_stash)) mro_package_moved(old_stash);
+    }
     else if(mro_changes) mro_method_changed_in(GvSTASH(dstr));
     return;
 }

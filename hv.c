@@ -692,8 +692,32 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		}
 		HeVAL(entry) = val;
 	    } else if (action & HV_FETCH_ISSTORE) {
-		SvREFCNT_dec(HeVAL(entry));
+		bool moving_package = FALSE;
+		SV *old_val = HeVAL(entry);
+
+		/* If this is a stash and the key ends with ::, then some-
+		   one is aliasing (or moving) a package. */
+		if (HvNAME(hv)) {
+		    if (keysv) key = SvPV(keysv, klen);
+		    if (klen > 1
+		     && key[klen-2] == ':' && key[klen-1] == ':') {
+			if(SvTYPE(old_val) == SVt_PVGV) {
+			    const HV * const old_stash
+			     = GvHV((GV *)old_val);
+			    if(old_stash && HvNAME(old_stash))
+				mro_package_moved(old_stash);
+			}
+			moving_package = TRUE;
+		    }
+		}
+
+		SvREFCNT_dec(old_val);
 		HeVAL(entry) = val;
+
+		if (moving_package && SvTYPE(val) == SVt_PVGV) {
+		    const HV * const stash = GvHV((GV *)val);
+		    if (stash && HvNAME(stash)) mro_package_moved(stash);
+		}
 	    }
 	} else if (HeVAL(entry) == &PL_sv_placeholder) {
 	    /* if we find a placeholder, we pretend we haven't found
@@ -1036,6 +1060,18 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    HvPLACEHOLDERS(hv)++;
 	} else {
 	    *oentry = HeNEXT(entry);
+
+	    /* If this is a stash and the key ends with ::, then someone is 
+	       deleting a package. */
+	    if (sv && HvNAME(hv)) {
+		if (keysv) key = SvPV(keysv, klen);
+		if (klen > 1 && key[klen-2] == ':' && key[klen-1] == ':'
+		 && SvTYPE(sv) == SVt_PVGV) {
+		    const HV * const stash = GvHV((GV *)sv);
+		    if (stash && HvNAME(stash)) mro_package_moved(stash);
+		}
+	    }
+
 	    if (SvOOK(hv) && entry == HvAUX(hv)->xhv_eiter /* HvEITER(hv) */)
 		HvLAZYDEL_on(hv);
 	    else

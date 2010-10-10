@@ -1042,6 +1042,7 @@
 #define mg_localize(a,b,c)	Perl_mg_localize(aTHX_ a,b,c)
 #define mode_from_discipline(a,b)	Perl_mode_from_discipline(aTHX_ a,b)
 #define mro_isa_changed_in(a)	Perl_mro_isa_changed_in(aTHX_ a)
+#define mro_package_moved(a)	Perl_mro_package_moved(aTHX_ a)
 #define munge_qwlist_to_paren_list(a)	Perl_munge_qwlist_to_paren_list(aTHX_ a)
 #define my_attrs(a,b)		Perl_my_attrs(aTHX_ a,b)
 #define my_clearenv()		Perl_my_clearenv(aTHX)

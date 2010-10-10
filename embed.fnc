@@ -2356,6 +2356,7 @@ sd	|AV*	|mro_get_linear_isa_dfs|NN HV* stash|U32 level
 : Used in hv.c, mg.c, pp.c, sv.c
 pd	|void   |mro_isa_changed_in|NN HV* stash
 Apd	|void	|mro_method_changed_in	|NN HV* stash
+pdx	|void	|mro_package_moved	|NN const HV *stash
 : Only used in perl.c
 p	|void   |boot_core_mro
 Apon	|void	|sys_init	|NN int* argc|NN char*** argv
