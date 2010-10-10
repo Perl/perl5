@@ -836,6 +836,13 @@ modules, you can specify to not include the paths found:
 
        sh Configure -Dinc_version_list=none ...
 
+If you do want to use modules from some previous perl versions, the variable
+must contain a space separated list of directories under the site_perl
+directory, and has to include architecture-dependent directories separately,
+eg.
+
+       sh Configure -Dinc_version_list="5.12.0/x86_64-linux 5.12.0" ...
+
 When using the newer perl, you can add these paths again in the
 $PERL5LIB environment variable or with perl's -I runtime option.
 
