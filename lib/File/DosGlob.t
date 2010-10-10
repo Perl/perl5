@@ -164,30 +164,36 @@ print "ok 10\n";
 EOT
 
 # Test that a glob pattern containing ()'s works.
-# NB. The spaces in the glob patters need to be backslash escaped.
+# NB. The spaces in the glob patterns need to be backslash escaped.
 my $filename_containing_parens = "foo (123) bar";
-open(TOUCH, ">", $filename_containing_parens) && close(TOUCH)
-    or die "can't create '$filename_containing_parens': $!";
+if (open(TOUCH, ">", $filename_containing_parens)) {
+    close(TOUCH);
 
-@r = ();
-eval { @r = File::DosGlob::glob("foo\\ (*") };
-print +($@ ? "not " : ""), "ok 11\n";
-print "not " unless (@r == 1 and $r[0] eq $filename_containing_parens);
-print "ok 12\n";
+    @r = ();
+    eval { @r = File::DosGlob::glob("foo\\ (*") };
+    print +($@ ? "not " : ""), "ok 11\n";
+    print "not " unless (@r == 1 and $r[0] eq $filename_containing_parens);
+    print "ok 12\n";
 
-@r = ();
-eval { @r = File::DosGlob::glob("*)\\ bar") };
-print +($@ ? "not " : ""), "ok 13\n";
-print "not " unless (@r == 1 and $r[0] eq $filename_containing_parens);
-print "ok 14\n";
+    @r = ();
+    eval { @r = File::DosGlob::glob("*)\\ bar") };
+    print +($@ ? "not " : ""), "ok 13\n";
+    print "not " unless (@r == 1 and $r[0] eq $filename_containing_parens);
+    print "ok 14\n";
 
-@r = ();
-eval { @r = File::DosGlob::glob("foo\\ (1*3)\\ bar") };
-print +($@ ? "not " : ""), "ok 15\n";
-print "not " unless (@r == 1 and $r[0] eq $filename_containing_parens);
-print "ok 16\n";
+    @r = ();
+    eval { @r = File::DosGlob::glob("foo\\ (1*3)\\ bar") };
+    print +($@ ? "not " : ""), "ok 15\n";
+    print "not " unless (@r == 1 and $r[0] eq $filename_containing_parens);
+    print "ok 16\n";
 
-unlink $filename_containing_parens;
+    1 while unlink $filename_containing_parens;
+}
+else {
+    for (11..16) {
+        print "ok $_ # skip - can't create '$filename_containing_parens': $!\n";
+    }
+}
 
 # Test the globbing of a drive relative pattern such as "c:*.pl".
 # NB. previous versions of DosGlob inserted "./ after the drive letter to
