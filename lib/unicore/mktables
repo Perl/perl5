@@ -4964,15 +4964,6 @@ sub trace { return main::trace(@_); }
     # access to this property via the Perl core.
     main::set_access('core_access', \%core_access, 'r', 's');
 
-    my %has_specials;
-    # Boolean set when non-zero map-type ranges are added to this table,
-    # which happens in only a few tables.  This is purely for performance, to
-    # avoid having to search through every table upon output, so if all the
-    # non-zero maps got deleted before output, this would remain set, and the
-    # only penalty would be performance.  Currently, most map tables that get
-    # output have specials in them, so this doesn't help that much anyway.
-    main::set_access('has_specials', \%has_specials);
-
     my %to_output_map;
     # Boolean as to whether or not to write out this map table
     main::set_access('to_output_map', \%to_output_map, 's');
@@ -5056,8 +5047,6 @@ sub trace { return main::trace(@_); }
 
         my $addr = do { no overloading; pack 'J', $self; };
 
-        $has_specials{$addr} = 1 if $type;
-
         $self->_range_list->add_map($lower, $upper,
                                     $string,
                                     @_,
@@ -5115,11 +5104,6 @@ sub trace { return main::trace(@_); }
                                           $value,
                                           Type => $range->type,
                                           Replace => $UNCONDITIONALLY);
-        }
-
-        # Copy the specials information from the other table to $self
-        if ($has_specials{$other_addr}) {
-            $has_specials{$addr} = 1;
         }
 
         return;
