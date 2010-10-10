@@ -1546,7 +1546,7 @@ use File::Glob qw(:case);
     'warnings' =>
 	{
 	'MAINTAINER'	=> 'pmqs',
-	'FILES'		=> q[warnings.pl
+	'FILES'		=> q[regen/warnings.pl
 			     lib/warnings.{pm,t}
 			     lib/warnings
 			     t/lib/warnings

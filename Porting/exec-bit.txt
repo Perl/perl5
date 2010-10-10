@@ -12,14 +12,14 @@ configure.gnu
 config_h.SH
 cpan/Test-Harness/t/source_tests/source.sh
 cpan/Test-Harness/t/source_tests/source_args.sh
-embed.pl
 installperl
 installman
-keywords.pl
 makeaperl.SH
 makedepend.SH
 myconfig.SH
-opcode.pl
+regen/embed.pl
+regen/keywords.pl
+regen/opcode.pl
 runtests.SH
 writemain.SH
 t/TEST

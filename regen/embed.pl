@@ -27,7 +27,7 @@ use strict;
 
 BEGIN {
     # Get function prototypes
-    require 'regen_lib.pl';
+    require 'regen/regen_lib.pl';
 }
 
 my $SPLINT = 0; # Turn true for experimental splint support http://www.splint.org

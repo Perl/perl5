@@ -27,7 +27,7 @@ embed.pl
 );
 
 my $tap = $ARGV[0] && $ARGV[0] eq '--tap' ? '# ' : '';
-foreach my $pl (@scripts) {
+foreach my $pl (map {"regen/$_"} @scripts) {
   my @command =  ($^X, $pl, @ARGV);
   print "$tap@command\n";
   system @command;

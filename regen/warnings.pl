@@ -16,7 +16,7 @@
 $VERSION = '1.02_03';
 
 BEGIN {
-    require 'regen_lib.pl';
+    require 'regen/regen_lib.pl';
     push @INC, './lib';
 }
 use strict ;

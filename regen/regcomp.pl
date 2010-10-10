@@ -15,7 +15,7 @@
 
 BEGIN {
     # Get function prototypes
-    require 'regen_lib.pl';
+    require 'regen/regen_lib.pl';
 }
 #use Fatal qw(open close rename chmod unlink);
 use strict;

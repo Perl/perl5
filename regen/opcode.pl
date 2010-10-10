@@ -17,7 +17,7 @@ use strict;
 
 BEGIN {
     # Get function prototypes
-    require 'regen_lib.pl';
+    require 'regen/regen_lib.pl';
 }
 
 my $opcode_new = 'opcode.h-new';

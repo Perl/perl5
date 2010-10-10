@@ -12,7 +12,7 @@
 
 use strict;
 
-require 'regen_lib.pl';
+require 'regen/regen_lib.pl';
 
 my $kw = safer_open("keywords.h-new");
 select $kw;
