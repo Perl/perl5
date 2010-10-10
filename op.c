@@ -2345,7 +2345,7 @@ Perl_block_start(pTHX_ int full)
     SAVECOMPILEWARNINGS();
     PL_compiling.cop_warnings = DUP_WARNINGS(PL_compiling.cop_warnings);
 
-    CALL_BLOCK_HOOKS(start, full);
+    CALL_BLOCK_HOOKS(bhk_start, full);
 
     return retval;
 }
@@ -2357,7 +2357,7 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
     const int needblockscope = PL_hints & HINT_BLOCK_SCOPE;
     OP* retval = scalarseq(seq);
 
-    CALL_BLOCK_HOOKS(pre_end, &retval);
+    CALL_BLOCK_HOOKS(bhk_pre_end, &retval);
 
     LEAVE_SCOPE(floor);
     CopHINTS_set(&PL_compiling, PL_hints);
@@ -2365,7 +2365,7 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
 	PL_hints |= HINT_BLOCK_SCOPE; /* propagate out */
     pad_leavemy();
 
-    CALL_BLOCK_HOOKS(post_end, &retval);
+    CALL_BLOCK_HOOKS(bhk_post_end, &retval);
 
     return retval;
 }

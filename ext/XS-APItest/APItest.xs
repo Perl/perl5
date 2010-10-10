@@ -1058,18 +1058,18 @@ BOOT:
     MY_CXT.bhkav = get_av("XS::APItest::bhkav", GV_ADDMULTI);
     MY_CXT.bhk_record = 0;
 
-    BhkENTRY_set(&bhk_test, start, blockhook_test_start);
-    BhkENTRY_set(&bhk_test, pre_end, blockhook_test_pre_end);
-    BhkENTRY_set(&bhk_test, post_end, blockhook_test_post_end);
-    BhkENTRY_set(&bhk_test, eval, blockhook_test_eval);
+    BhkENTRY_set(&bhk_test, bhk_start, blockhook_test_start);
+    BhkENTRY_set(&bhk_test, bhk_pre_end, blockhook_test_pre_end);
+    BhkENTRY_set(&bhk_test, bhk_post_end, blockhook_test_post_end);
+    BhkENTRY_set(&bhk_test, bhk_eval, blockhook_test_eval);
     Perl_blockhook_register(aTHX_ &bhk_test);
 
     MY_CXT.cscgv = gv_fetchpvs("XS::APItest::COMPILE_SCOPE_CONTAINER",
         GV_ADDMULTI, SVt_PVAV);
     MY_CXT.cscav = GvAV(MY_CXT.cscgv);
 
-    BhkENTRY_set(&bhk_csc, start, blockhook_csc_start);
-    BhkENTRY_set(&bhk_csc, pre_end, blockhook_csc_pre_end);
+    BhkENTRY_set(&bhk_csc, bhk_start, blockhook_csc_start);
+    BhkENTRY_set(&bhk_csc, bhk_pre_end, blockhook_csc_pre_end);
     Perl_blockhook_register(aTHX_ &bhk_csc);
 
     MY_CXT.peep_recorder = newAV();

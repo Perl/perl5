@@ -3209,7 +3209,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     else
 	CLEAR_ERRSV();
 
-    CALL_BLOCK_HOOKS(eval, saveop);
+    CALL_BLOCK_HOOKS(bhk_eval, saveop);
 
     /* note that yyparse() may raise an exception, e.g. C<BEGIN{die}>,
      * so honour CATCH_GET and trap it here if necessary */

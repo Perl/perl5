@@ -696,13 +696,13 @@ preprocessing token; the type of I<arg> depends on I<which>.
 
 #define BhkFLAGS(hk)		((hk)->bhk_flags)
 
-#define BHKf_start	    0x01
-#define BHKf_pre_end	    0x02
-#define BHKf_post_end	    0x04
-#define BHKf_eval	    0x08
+#define BHKf_bhk_start	    0x01
+#define BHKf_bhk_pre_end    0x02
+#define BHKf_bhk_post_end   0x04
+#define BHKf_bhk_eval	    0x08
 
 #define BhkENTRY(hk, which) \
-    ((BhkFLAGS(hk) & BHKf_ ## which) ? ((hk)->bhk_ ## which) : NULL)
+    ((BhkFLAGS(hk) & BHKf_ ## which) ? ((hk)->which) : NULL)
 
 #define BhkENABLE(hk, which) \
     STMT_START { \
@@ -717,7 +717,7 @@ preprocessing token; the type of I<arg> depends on I<which>.
 
 #define BhkENTRY_set(hk, which, ptr) \
     STMT_START { \
-	(hk)->bhk_ ## which = ptr; \
+	(hk)->which = ptr; \
 	BhkENABLE(hk, which); \
     } STMT_END
 

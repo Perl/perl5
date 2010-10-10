@@ -1884,7 +1884,7 @@ this:
     STATIC BHK my_hooks;
 
     BOOT:
-        BhkENTRY_set(&my_hooks, start, my_start_hook);
+        BhkENTRY_set(&my_hooks, bhk_start, my_start_hook);
         Perl_blockhook_register(aTHX_ &my_hooks);
 
 This will arrange to have C<my_start_hook> called at the start of
@@ -1892,7 +1892,7 @@ compiling every lexical scope. The available hooks are:
 
 =over 4
 
-=item C<void start(pTHX_ int full)>
+=item C<void bhk_start(pTHX_ int full)>
 
 This is called just after starting a new lexical scope. Note that Perl
 code like
@@ -1905,20 +1905,20 @@ C<}>, so calls to C<start> and C<pre/post_end> will match. Anything
 pushed onto the save stack by this hook will be popped just before the
 scope ends (between the C<pre_> and C<post_end> hooks, in fact).
 
-=item C<void pre_end(pTHX_ OP **o)>
+=item C<void bhk_pre_end(pTHX_ OP **o)>
 
 This is called at the end of a lexical scope, just before unwinding the
 stack. I<o> is the root of the optree representing the scope; it is a
 double pointer so you can replace the OP if you need to.
 
-=item C<void post_end(pTHX_ OP **o)>
+=item C<void bhk_post_end(pTHX_ OP **o)>
 
 This is called at the end of a lexical scope, just after unwinding the
 stack. I<o> is as above. Note that it is possible for calls to C<pre_>
 and C<post_end> to nest, if there is something on the save stack that
 calls string eval.
 
-=item C<void eval(pTHX_ OP *const o)>
+=item C<void bhk_eval(pTHX_ OP *const o)>
 
 This is called just before starting to compile an C<eval STRING>, C<do
 FILE>, C<require> or C<use>, after the eval has been set up. I<o> is the
