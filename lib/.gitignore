@@ -299,6 +299,7 @@
 /Pod/Checker.pm
 /Pod/Escapes.pm
 /Pod/Find.pm
+/Pod/Html.pm
 /Pod/InputObjects.pm
 /Pod/LaTeX.pm
 /Pod/Man.pm
