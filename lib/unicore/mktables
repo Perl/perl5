@@ -4365,12 +4365,18 @@ sub trace { return main::trace(@_); }
     # Here are the methods that are required to be defined by any derived
     # class
     for my $sub (qw(
+                    handle_special_range
                     append_to_body
                     pre_body
                 ))
-                # append_to_body and pre_body are called in the write() method
-                # to add stuff after the main body of the table, but before
-                # its close; and to prepend stuff before the beginning of the
+                # write() knows how to write out normal ranges, but it calls
+                # handle_special_range() when it encounters a non-normal one.
+                # append_to_body() is called by it after it has handled all
+                # ranges to add anything after the main portion of the table.
+                # And finally, pre_body() is called after all this to build up
+                # anything that should appear before the main portion of the
+                # table.  Doing it this way allows things in the middle to
+                # affect what should appear before the main portion of the
                 # table.
     {
         no strict "refs";
@@ -4677,7 +4683,10 @@ sub trace { return main::trace(@_); }
     }
 
     sub write {
-        # Write a representation of the table to its file.
+        # Write a representation of the table to its file.  It calls several
+        # functions furnished by sub-classes of this abstract base class to
+        # handle non-normal ranges, to add stuff before the table, and at its
+        # end.
 
         my $self = shift;
         my $tab_stops = shift;       # The number of tab stops over to put any
@@ -4690,17 +4699,18 @@ sub trace { return main::trace(@_); }
         my $addr = do { no overloading; pack 'J', $self; };
 
         # Start with the header
-        my @OUT = $self->header;
+        my @HEADER = $self->header;
 
         # Then the comments
-        push @OUT, "\n", main::simple_fold($comment{$addr}, '# '), "\n"
+        push @HEADER, "\n", main::simple_fold($comment{$addr}, '# '), "\n"
                                                         if $comment{$addr};
 
-        # Then any pre-body stuff.
-        my $pre_body = $self->pre_body;
-        push @OUT, $pre_body, "\n" if $pre_body;
+        # Things discovered processing the main body of the document may
+        # affect what gets output before it, therefore pre_body() isn't called
+        # until after all other processing of the table is done.
 
-        # The main body looks like a 'here' document
+        # The main body looks like a 'here' document.
+        my @OUT;
         push @OUT, "return <<'END';\n";
 
         if ($range_list{$addr}->is_empty) {
@@ -4777,6 +4787,12 @@ sub trace { return main::trace(@_); }
 
         # And finish the here document.
         push @OUT, "END\n";
+
+        # Done with the main portion of the body.  Can now figure out what
+        # should appear before it in the file.
+        my $pre_body = $self->pre_body;
+        push @HEADER, $pre_body, "\n" if $pre_body;
+        unshift @OUT, @HEADER;
 
         # All these files have a .pl suffix
         $file_path{$addr}->[-1] .= '.pl';
@@ -5369,12 +5385,117 @@ END
 
     my %swash_keys; # Makes sure don't duplicate swash names.
 
+    # The remaining variables are temporaries used while writing each table,
+    # to output special ranges.
+    my $has_hangul_syllables;
+    my @multi_code_point_maps;  # Map is to more than one code point.
+
+    # The key is the base name of the code point, and the value is an
+    # array giving all the ranges that use this base name.  Each range
+    # is actually a hash giving the 'low' and 'high' values of it.
+    my %names_ending_in_code_point;
+
+    # Inverse mapping.  The list of ranges that have these kinds of
+    # names.  Each element contains the low, high, and base names in a
+    # hash.
+    my @code_points_ending_in_code_point;
+
+    sub handle_special_range {
+        # Called in the middle of write when it finds a range it doesn't know
+        # how to handle.
+
+        my $self = shift;
+        my $range = shift;
+        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+        my $addr = do { no overloading; pack 'J', $self; };
+
+        my $type = $range->type;
+
+        my $low = $range->start;
+        my $high = $range->end;
+        my $map = $range->value;
+
+        # No need to output the range if it maps to the default.
+        return if $map eq $default_map{$addr};
+
+        # Switch based on the map type...
+        if ($type == $HANGUL_SYLLABLE) {
+
+            # These are entirely algorithmically determinable based on
+            # some constants furnished by Unicode; for now, just set a
+            # flag to indicate that have them.  After everything is figured
+            # out, we will output the code that does the algorithm.
+            $has_hangul_syllables = 1;
+        }
+        elsif ($type == $CP_IN_NAME) {
+
+            # Code points whose the name ends in their code point are also
+            # algorithmically determinable, but need information about the map
+            # to do so.  Both the map and its inverse are stored in data
+            # structures output in the file.
+            push @{$names_ending_in_code_point{$map}->{'low'}}, $low;
+            push @{$names_ending_in_code_point{$map}->{'high'}}, $high;
+
+            push @code_points_ending_in_code_point, { low => $low,
+                                                        high => $high,
+                                                        name => $map
+                                                    };
+        }
+        elsif ($range->type == $MULTI_CP || $range->type == $NULL) {
+
+            # Multi-code point maps and null string maps have an entry
+            # for each code point in the range.  They use the same
+            # output format.
+            for my $code_point ($low .. $high) {
+
+                # The pack() below can't cope with surrogates.
+                if ($code_point >= 0xD800 && $code_point <= 0xDFFF) {
+                    Carp::my_carp("Surrogage code point '$code_point' in mapping to '$map' in $self.  No map created");
+                    next;
+                }
+
+                # Generate the hash entries for these in the form that
+                # utf8.c understands.
+                my $tostr = "";
+                my $to_name = "";
+                my $to_chr = "";
+                foreach my $to (split " ", $map) {
+                    if ($to !~ /^$code_point_re$/) {
+                        Carp::my_carp("Illegal code point '$to' in mapping '$map' from $code_point in $self.  No map created");
+                        next;
+                    }
+                    $tostr .= sprintf "\\x{%s}", $to;
+                    $to = CORE::hex $to;
+                }
+
+                # I (khw) have never waded through this line to
+                # understand it well enough to comment it.
+                my $utf8 = sprintf(qq["%s" => "$tostr",],
+                        join("", map { sprintf "\\x%02X", $_ }
+                            unpack("U0C*", pack("U", $code_point))));
+
+                # Add a comment so that a human reader can more easily
+                # see what's going on.
+                push @multi_code_point_maps,
+                        sprintf("%-45s # U+%04X", $utf8, $code_point);
+                $multi_code_point_maps[-1] .= " => $map";
+            }
+        }
+        else {
+            Carp::my_carp("Unrecognized map type '$range->type' in '$range' in $self.  Not written");
+        }
+
+        return;
+    }
+
     sub pre_body {
         # Returns the string that should be output in the file before the main
-        # body of this table.  This includes some hash entries identifying the
-        # format of the body, and what the single value should be for all
-        # ranges missing from it.  It also includes any code points which have
-        # map_types that don't go in the main table.
+        # body of this table.  It isn't called until the main body is
+        # calculated, saving a pass.  The string includes some hash entries
+        # identifying the format of the body, and what the single value should
+        # be for all ranges missing from it.  It also includes any code points
+        # which have map_types that don't go in the main table.
 
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
@@ -5393,119 +5514,13 @@ END
         }
         $swash_keys{$name} = "$self";
 
-        my $default_map = $default_map{$addr};
-
         my $pre_body = "";
-        if ($has_specials{$addr}) {
 
-            # Here, some maps with non-zero type have been added to the table.
-            # Go through the table and handle each of them.  None will appear
-            # in the body of the table, so delete each one as we go.  The
-            # code point count has already been calculated, so ok to delete
-            # now.
-
-            my @multi_code_point_maps;
-            my $has_hangul_syllables = 0;
-
-            # The key is the base name of the code point, and the value is an
-            # array giving all the ranges that use this base name.  Each range
-            # is actually a hash giving the 'low' and 'high' values of it.
-            my %names_ending_in_code_point;
-
-            # Inverse mapping.  The list of ranges that have these kinds of
-            # names.  Each element contains the low, high, and base names in a
-            # hash.
-            my @code_points_ending_in_code_point;
-
-            my $range_map = $self->_range_list;
-            foreach my $range ($range_map->ranges) {
-                next unless $range->type != 0;
-                my $low = $range->start;
-                my $high = $range->end;
-                my $map = $range->value;
-                my $type = $range->type;
-
-                # No need to output the range if it maps to the default.  And
-                # the write method won't output it either, so no need to
-                # delete it to keep it from being output, and is faster to
-                # skip than to delete anyway.
-                next if $map eq $default_map;
-
-                # Delete the range to keep write() from trying to output it
-                $range_map->delete_range($low, $high);
-
-                # Switch based on the map type...
-                if ($type == $HANGUL_SYLLABLE) {
-
-                    # These are entirely algorithmically determinable based on
-                    # some constants furnished by Unicode; for now, just set a
-                    # flag to indicate that have them.  Below we will output
-                    # the code that does the algorithm.
-                    $has_hangul_syllables = 1;
-                }
-                elsif ($type == $CP_IN_NAME) {
-
-                    # If the name ends in the code point it represents, are
-                    # also algorithmically determinable, but need information
-                    # about the map to do so.  Both the map and its inverse
-                    # are stored in data structures output in the file.
-                    push @{$names_ending_in_code_point{$map}->{'low'}}, $low;
-                    push @{$names_ending_in_code_point{$map}->{'high'}}, $high;
-
-                    push @code_points_ending_in_code_point, { low => $low,
-                                                              high => $high,
-                                                              name => $map
-                                                            };
-                }
-                elsif ($range->type == $MULTI_CP || $range->type == $NULL) {
-
-                    # Multi-code point maps and null string maps have an entry
-                    # for each code point in the range.  They use the same
-                    # output format.
-                    for my $code_point ($low .. $high) {
-
-                        # The pack() below can't cope with surrogates.
-                        if ($code_point >= 0xD800 && $code_point <= 0xDFFF) {
-                            Carp::my_carp("Surrogage code point '$code_point' in mapping to '$map' in $self.  No map created");
-                            next;
-                        }
-
-                        # Generate the hash entries for these in the form that
-                        # utf8.c understands.
-                        my $tostr = "";
-                        foreach my $to (split " ", $map) {
-                            if ($to !~ /^$code_point_re$/) {
-                                Carp::my_carp("Illegal code point '$to' in mapping '$map' from $code_point in $self.  No map created");
-                                next;
-                            }
-                            $tostr .= sprintf "\\x{%s}", $to;
-                        }
-
-                        # I (khw) have never waded through this line to
-                        # understand it well enough to comment it.
-                        my $utf8 = sprintf(qq["%s" => "$tostr",],
-                                join("", map { sprintf "\\x%02X", $_ }
-                                    unpack("U0C*", pack("U", $code_point))));
-
-                        # Add a comment so that a human reader can more easily
-                        # see what's going on.
-                        push @multi_code_point_maps,
-                                sprintf("%-45s # U+%04X => %s", $utf8,
-                                                                $code_point,
-                                                                $map);
-                    }
-                }
-                else {
-                    Carp::my_carp("Unrecognized map type '$range->type' in '$range' in $self.  Using type 0 instead");
-                    $range_map->add_map($low, $high, $map, Replace => $UNCONDITIONALLY, Type => 0);
-                }
-            } # End of loop through all ranges
-
-            # Here have gone through the whole file.  If actually generated
-            # anything for each map type, add its respective header and
-            # trailer
-            if (@multi_code_point_maps) {
-                $pre_body .= <<END;
+        # Here we assume we were called after have gone through the whole
+        # file.  If we actually generated anything for each map type, add its
+        # respective header and trailer
+        if (@multi_code_point_maps) {
+            $pre_body .= <<END;
 
 # Some code points require special handling because their mappings are each to
 # multiple code points.  These do not appear in the main body, but are defined
@@ -5516,59 +5531,59 @@ END
 # under "use bytes").  Each value is the UTF-8 of the translation, for speed.
 %utf8::ToSpec$name = (
 END
-                $pre_body .= join("\n", @multi_code_point_maps) . "\n);\n";
-            }
+            $pre_body .= join("\n", @multi_code_point_maps) . "\n);\n";
+        }
 
-            if ($has_hangul_syllables || @code_points_ending_in_code_point) {
+        if ($has_hangul_syllables || @code_points_ending_in_code_point) {
 
-                # Convert these structures to output format.
-                my $code_points_ending_in_code_point =
-                    main::simple_dumper(\@code_points_ending_in_code_point,
-                                        ' ' x 8);
-                my $names = main::simple_dumper(\%names_ending_in_code_point,
-                                                ' ' x 8);
+            # Convert these structures to output format.
+            my $code_points_ending_in_code_point =
+                main::simple_dumper(\@code_points_ending_in_code_point,
+                                    ' ' x 8);
+            my $names = main::simple_dumper(\%names_ending_in_code_point,
+                                            ' ' x 8);
 
-                # Do the same with the Hangul names,
-                my $jamo;
-                my $jamo_l;
-                my $jamo_v;
-                my $jamo_t;
-                my $jamo_re;
-                if ($has_hangul_syllables) {
+            # Do the same with the Hangul names,
+            my $jamo;
+            my $jamo_l;
+            my $jamo_v;
+            my $jamo_t;
+            my $jamo_re;
+            if ($has_hangul_syllables) {
 
-                    # Construct a regular expression of all the possible
-                    # combinations of the Hangul syllables.
-                    my @L_re;   # Leading consonants
-                    for my $i ($LBase .. $LBase + $LCount - 1) {
-                        push @L_re, $Jamo{$i}
-                    }
-                    my @V_re;   # Middle vowels
-                    for my $i ($VBase .. $VBase + $VCount - 1) {
-                        push @V_re, $Jamo{$i}
-                    }
-                    my @T_re;   # Trailing consonants
-                    for my $i ($TBase + 1 .. $TBase + $TCount - 1) {
-                        push @T_re, $Jamo{$i}
-                    }
-
-                    # The whole re is made up of the L V T combination.
-                    $jamo_re = '('
-                               . join ('|', sort @L_re)
-                               . ')('
-                               . join ('|', sort @V_re)
-                               . ')('
-                               . join ('|', sort @T_re)
-                               . ')?';
-
-                    # These hashes needed by the algorithm were generated
-                    # during reading of the Jamo.txt file
-                    $jamo = main::simple_dumper(\%Jamo, ' ' x 8);
-                    $jamo_l = main::simple_dumper(\%Jamo_L, ' ' x 8);
-                    $jamo_v = main::simple_dumper(\%Jamo_V, ' ' x 8);
-                    $jamo_t = main::simple_dumper(\%Jamo_T, ' ' x 8);
+                # Construct a regular expression of all the possible
+                # combinations of the Hangul syllables.
+                my @L_re;   # Leading consonants
+                for my $i ($LBase .. $LBase + $LCount - 1) {
+                    push @L_re, $Jamo{$i}
+                }
+                my @V_re;   # Middle vowels
+                for my $i ($VBase .. $VBase + $VCount - 1) {
+                    push @V_re, $Jamo{$i}
+                }
+                my @T_re;   # Trailing consonants
+                for my $i ($TBase + 1 .. $TBase + $TCount - 1) {
+                    push @T_re, $Jamo{$i}
                 }
 
-                $pre_body .= <<END;
+                # The whole re is made up of the L V T combination.
+                $jamo_re = '('
+                            . join ('|', sort @L_re)
+                            . ')('
+                            . join ('|', sort @V_re)
+                            . ')('
+                            . join ('|', sort @T_re)
+                            . ')?';
+
+                # These hashes needed by the algorithm were generated
+                # during reading of the Jamo.txt file
+                $jamo = main::simple_dumper(\%Jamo, ' ' x 8);
+                $jamo_l = main::simple_dumper(\%Jamo_L, ' ' x 8);
+                $jamo_v = main::simple_dumper(\%Jamo_V, ' ' x 8);
+                $jamo_t = main::simple_dumper(\%Jamo_T, ' ' x 8);
+            }
+
+            $pre_body .= <<END;
 
 # To achieve significant memory savings when this file is read in,
 # algorithmically derivable code points are omitted from the main body below.
@@ -5595,10 +5610,10 @@ $names
 $code_points_ending_in_code_point
     );
 END
-                # Earlier releases didn't have Jamos.  No sense outputting
-                # them unless will be used.
-                if ($has_hangul_syllables) {
-                    $pre_body .= <<END;
+            # Earlier releases didn't have Jamos.  No sense outputting
+            # them unless will be used.
+            if ($has_hangul_syllables) {
+                $pre_body .= <<END;
 
     # Convert from code point to Jamo short name for use in composing Hangul
     # syllable names
@@ -5640,9 +5655,9 @@ $jamo_t
     my \$TCount = $TCount;
     my \$NCount = \$VCount * \$TCount;
 END
-                } # End of has Jamos
+            } # End of has Jamos
 
-                $pre_body .= << 'END';
+            $pre_body .= << 'END';
 
     sub name_to_code_point_special {
         my $name = shift;
@@ -5650,8 +5665,8 @@ END
         # Returns undef if not one of the specially handled names; otherwise
         # returns the code point equivalent to the input name
 END
-                if ($has_hangul_syllables) {
-                    $pre_body .= << 'END';
+            if ($has_hangul_syllables) {
+                $pre_body .= << 'END';
 
         if (substr($name, 0, $HANGUL_SYLLABLE_LENGTH) eq $HANGUL_SYLLABLE) {
             $name = substr($name, $HANGUL_SYLLABLE_LENGTH);
@@ -5662,8 +5677,8 @@ END
             return ($L * $VCount + $V) * $TCount + $T + $SBase;
         }
 END
-                }
-                $pre_body .= << 'END';
+            }
+            $pre_body .= << 'END';
 
         # Name must end in '-code_point' for this to handle.
         if ($name !~ /^ (.*) - ($code_point_re) $/x) {
@@ -5697,8 +5712,8 @@ END
         # Returns the name of a code point if algorithmically determinable;
         # undef if not
 END
-                if ($has_hangul_syllables) {
-                    $pre_body .= << 'END';
+            if ($has_hangul_syllables) {
+                $pre_body .= << 'END';
 
         # If in the Hangul range, calculate the name based on Unicode's
         # algorithm
@@ -5713,8 +5728,8 @@ END
             return $name;
         }
 END
-                }
-                $pre_body .= << 'END';
+            }
+            $pre_body .= << 'END';
 
         # Look through list of these code points for one in range.
         foreach my $hash (@code_points_ending_in_code_point) {
@@ -5728,13 +5743,50 @@ END
 } # End closure
 
 END
-            } # End of has hangul or code point in name maps.
-        } # End of has specials
+        } # End of has hangul or code point in name maps.
+
+        my $format = $self->format;
+
+        my $return = <<END;
+# The name this swash is to be known by, with the format of the mappings in
+# the main body of the table, and what all code points missing from this file
+# map to.
+\$utf8::SwashInfo{'To$name'}{'format'} = '$format'; # $map_table_formats{$format}
+END
+        my $default_map = $default_map{$addr};
+        $return .= "\$utf8::SwashInfo{'To$name'}{'missing'} = '$default_map';";
+
+        if ($default_map eq $CODE_POINT) {
+            $return .= ' # code point maps to itself';
+        }
+        elsif ($default_map eq "") {
+            $return .= ' # code point maps to the null string';
+        }
+        $return .= "\n";
+
+        $return .= $pre_body;
+
+        return $return;
+    }
+
+    sub write {
+        # Write the table to the file.
+
+        my $self = shift;
+        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+        my $addr = do { no overloading; pack 'J', $self; };
+
+        # Clear the temporaries
+        $has_hangul_syllables = 0;
+        undef @multi_code_point_maps;
+        undef %names_ending_in_code_point;
+        undef @code_points_ending_in_code_point;
 
         # Calculate the format of the table if not already done.
         my $format = $self->format;
-        my $property = $self->property;
-        my $type = $property->type;
+        my $type = $self->property->type;
+        my $default_map = $self->default_map;
         if (! defined $format) {
             if ($type == $BINARY) {
 
@@ -5765,6 +5817,8 @@ END
                     # most restrictive, and so on.
                     $format = $DECIMAL_FORMAT;
                     foreach my $range (@ranges) {
+                        next if $range->type != 0;  # Non-normal ranges don't
+                                                    # affect the main body
                         my $map = $range->value;
                         if ($map ne $default_map) {
                             last if $format eq $STRING_FORMAT;  # already at
@@ -5790,47 +5844,21 @@ END
             }
         } # end of calculating format
 
-        my $return = <<END;
-# The name this swash is to be known by, with the format of the mappings in
-# the main body of the table, and what all code points missing from this file
-# map to.
-\$utf8::SwashInfo{'To$name'}{'format'} = '$format'; # $map_table_formats{$format}
-END
-        my $missing = $default_map;
-        if ($missing eq $CODE_POINT
+        if ($default_map eq $CODE_POINT
             && $format ne $HEX_FORMAT
-            && ! defined $self->format)    # Is expected if was manually set
+            && ! defined $self->format)    # manual settings are always
+                                           # considered ok
         {
             Carp::my_carp_bug("Expecting hex format for mapping table for $self, instead got '$format'")
         }
+
         $self->_set_format($format);
-        $return .= "\$utf8::SwashInfo{'To$name'}{'missing'} = '$missing';";
-        if ($missing eq $CODE_POINT) {
-            $return .= ' # code point maps to itself';
-        }
-        elsif ($missing eq "") {
-            $return .= ' # code point maps to the null string';
-        }
-        $return .= "\n";
-
-        $return .= $pre_body;
-
-        return $return;
-    }
-
-    sub write {
-        # Write the table to the file.
-
-        my $self = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
-        my $addr = do { no overloading; pack 'J', $self; };
 
         return $self->SUPER::write(
             ($self->property == $block)
                 ? 7     # block file needs more tab stops
                 : 3,
-            $default_map{$addr});   # don't write defaulteds
+            $default_map);   # don't write defaulteds
     }
 
     # Accessors for the underlying list that should fail if locked.
