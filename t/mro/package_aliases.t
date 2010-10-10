@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 use warnings;
-require q(./test.pl); plan(tests => 10);
+plan(tests => 10);
 
 {
     package New;
