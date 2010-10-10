@@ -1150,6 +1150,7 @@ my $INTEGER_FORMAT = 'i';
 my $HEX_FORMAT = 'x';
 my $RATIONAL_FORMAT = 'r';
 my $STRING_FORMAT = 's';
+my $DECOMP_STRING_FORMAT = 'c';
 
 my %map_table_formats = (
     $BINARY_FORMAT => 'binary',
@@ -1159,6 +1160,7 @@ my %map_table_formats = (
     $HEX_FORMAT => 'positive hex whole number; a code point',
     $RATIONAL_FORMAT => 'rational: an integer or a fraction',
     $STRING_FORMAT => 'string',
+    $DECOMP_STRING_FORMAT => 'Perl\'s internal (Normalize.pm) decompostion mapping',
 );
 
 # Unicode didn't put such derived files in a separate directory at first.
@@ -9189,7 +9191,7 @@ END
         my $Perl_decomp = Property->new('Perl_Decomposition_Mapping',
                                         Directory => File::Spec->curdir(),
                                         File => 'Decomposition',
-                                        Format => $STRING_FORMAT,
+                                        Format => $DECOMP_STRING_FORMAT,
                                         Internal_Only_Warning => 1,
                                         Perl_Extension => 1,
                                         Default_Map => $CODE_POINT,
