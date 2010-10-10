@@ -13978,8 +13978,8 @@ foreach my $in (@input_files) {
     }
 }
 
-my $rebuild = ! (! $write_unchanged_files
-                 && scalar @mktables_list_output_files); # If none known, rebuild
+my $rebuild = $write_unchanged_files    # Rebuild: if unconditional rebuild
+              || ! scalar @mktables_list_output_files; # or if no outputs known
 
 # Now we check to see if any output files are older than youngest, if
 # they are, we need to continue on, otherwise we can presumably bail.
