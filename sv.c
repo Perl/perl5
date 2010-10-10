@@ -11404,6 +11404,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
     dstr->sv_debug_line = sstr->sv_debug_line;
     dstr->sv_debug_inpad = sstr->sv_debug_inpad;
     dstr->sv_debug_parent = (SV*)sstr;
+    FREE_SV_DEBUG_FILE(dstr);
     dstr->sv_debug_file = savepv(sstr->sv_debug_file);
 #endif
 
