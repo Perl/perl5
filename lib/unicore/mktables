@@ -357,7 +357,7 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # to 1, and every file whose object is in @input_file_objects and doesn't have
 # a, 'non_skip => 1,' in its constructor will be skipped.
 #
-# To compare the output tables, it may be useful to specify the -output_names
+# To compare the output tables, it may be useful to specify the -annotate
 # flag.  This causes the tables to expand so there is one entry for each
 # non-algorithmically named code point giving, currently its name, and its
 # graphic representation if printable (and you have a font that knows about
@@ -692,7 +692,7 @@ while (@ARGV) {
     elsif ($arg eq '-c') {
         $output_range_counts = ! $output_range_counts
     }
-    elsif ($arg eq '-output_names') {
+    elsif ($arg eq '-annotate') {
         $annotate = 1;
     }
     else {
@@ -719,7 +719,7 @@ usage: $0 [-c|-p|-q|-v|-w] [-C dir] [-L filelist] [ -P pod_dir ]
   -maketest   : Make test script 'TestProp.pl' in current (or -C directory),
                 overrides -T
   -makelist   : Rewrite the file list $file_list based on current setup
-  -output_names: Output an annotation for each character in the table files;
+  -annotate   : Output an annotation for each character in the table files;
                 useful for debugging mktables, looking at diffs; but is slow,
                 memory intensive; resulting tables are usable but slow and
                 very large.
