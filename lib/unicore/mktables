@@ -4725,13 +4725,18 @@ sub trace { return main::trace(@_); }
             my $range_size_1 = $range_size_1{$addr};
 
             # Output each range as part of the here document.
+            RANGE:
             for my $set ($range_list{$addr}->ranges) {
+                if ($set->type != 0) {
+                    $self->handle_special_range($set);
+                    next RANGE;
+                }
                 my $start = $set->start;
                 my $end   = $set->end;
                 my $value  = $set->value;
 
                 # Don't output ranges whose value is the one to suppress
-                next if defined $suppress_value && $value eq $suppress_value;
+                next RANGE if defined $suppress_value && $value eq $suppress_value;
 
                 # If has or wants a single point range output
                 if ($start == $end || $range_size_1) {
