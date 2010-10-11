@@ -6130,7 +6130,7 @@ sub trace { return main::trace(@_); }
         return;
     }
 
-    sub is_equivalent_to {
+    sub is_set_equivalent_to {
         # Return boolean of whether or not the other object is a table of this
         # type and has been marked equivalent to this one.
 
@@ -6143,7 +6143,7 @@ sub trace { return main::trace(@_); }
         unless ($other->isa(__PACKAGE__)) {
             my $ref_other = ref $other;
             my $ref_self = ref $self;
-            Carp::my_carp_bug("Argument to 'is_equivalent_to' must be another $ref_self, not a '$ref_other'.  $other not set equivalent to $self.");
+            Carp::my_carp_bug("Argument to 'is_set_equivalent_to' must be another $ref_self, not a '$ref_other'.  $other not set equivalent to $self.");
             return 0;
         }
 
@@ -6220,7 +6220,7 @@ sub trace { return main::trace(@_); }
 
         # If already are equivalent, no need to re-do it;  if subroutine
         # returns null, it found an error, also do nothing
-        my $are_equivalent = $self->is_equivalent_to($other);
+        my $are_equivalent = $self->is_set_equivalent_to($other);
         return if ! defined $are_equivalent || $are_equivalent;
 
         my $addr = do { no overloading; pack 'J', $self; };
@@ -11531,7 +11531,7 @@ sub add_perl_synonyms() {
                 # name.  We could be in trouble, but not if this is just a
                 # synonym for another table that we have already made a child
                 # of the pre-existing one.
-                if ($pre_existing->is_equivalent_to($actual)) {
+                if ($pre_existing->is_set_equivalent_to($actual)) {
                     trace "$pre_existing is already equivalent to $actual; adding alias perl=$proposed_name to it" if main::DEBUG && $to_trace;
                     $pre_existing->add_alias($proposed_name);
                     next;
