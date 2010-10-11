@@ -302,7 +302,7 @@ mini_obj = perlmini$(O) $(obj1) $(obj2) $(obj3) $(obj4)
 obj = $(obj0) $(obj1) $(obj2) $(obj3) $(obj4)
 
 h0 = av.h cc_runtime.h config.h cop.h cv.h embed.h embedvar.h
-h1 = EXTERN.h form.h gv.h handy.h hv.h INTERN.h intrpvar.h
+h1 = EXTERN.h form.h gv.h handy.h hv.h l1_char_class_tab.h INTERN.h intrpvar.h
 h2 = iperlsys.h keywords.h mydtrace.h mg.h nostdio.h op.h op_reg_common.h 
 h3 = opcode.h opnames.h overload.h pad.h parser.h patchlevel.h perl.h 
 h4 = perlapi.h perlio.h perlsdio.h perlvars.h perly.h
@@ -315,7 +315,7 @@ ac0 = $(ARCHCORE)$(sockh) $(ARCHCORE)av.h $(ARCHCORE)cc_runtime.h
 ac1 = $(ARCHCORE)config.h $(ARCHCORE)cop.h $(ARCHCORE)cv.h $(ARCHCORE)embed.h
 ac2 = $(ARCHCORE)embedvar.h $(ARCHCORE)EXTERN.h $(ARCHCORE)fakethr.h
 ac3 = $(ARCHCORE)form.h $(ARCHCORE)git_version.h $(ARCHCORE)gv.h $(ARCHCORE)handy.h $(ARCHCORE)hv.h
-ac4 = $(ARCHCORE)INTERN.h $(ARCHCORE)intrpvar.h $(ARCHCORE)iperlsys.h
+ac4 = $(ARCHCORE)l1_char_class_tab.h $(ARCHCORE)INTERN.h $(ARCHCORE)intrpvar.h $(ARCHCORE)iperlsys.h
 ac5 = $(ARCHCORE)keywords.h $(ARCHCORE)mydtrace.h $(ARCHCORE)mg.h $(ARCHCORE)nostdio.h
 ac6 = $(ARCHCORE)op_reg_common.h $(ARCHCORE)op.h $(ARCHCORE)opcode.h $(ARCHCORE)opnames.h  
 ac7 = $(ARCHCORE)overload.h $(ARCHCORE)pad.h $(ARCHCORE)parser.h $(ARCHCORE)patchlevel.h
@@ -1550,6 +1550,9 @@ $(ARCHCORE)handy.h : handy.h
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/NoConfirm/Log $(MMS$SOURCE) $(ARCHCORE)
 $(ARCHCORE)hv.h : hv.h
+	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
+	Copy/NoConfirm/Log $(MMS$SOURCE) $(ARCHCORE)
+$(ARCHCORE)l1_char_class_tab.h : l1_char_class_tab.h
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/NoConfirm/Log $(MMS$SOURCE) $(ARCHCORE)
 $(ARCHCORE)INTERN.h : INTERN.h
