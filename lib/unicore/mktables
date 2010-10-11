@@ -4004,6 +4004,36 @@ sub trace { return main::trace(@_); }
         return $self->_add_delete('+', $start, $end, "");
     }
 
+    sub matches_identically_to {
+        # Return a boolean as to whether or not two Range_Lists match identical
+        # sets of code points.
+
+        my $self = shift;
+        my $other = shift;
+        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+        # These are ordered in increasing real time to figure out (at least
+        # until a patch changes that and doesn't change this)
+        return 0 if $self->max != $other->max;
+        return 0 if $self->min != $other->min;
+        return 0 if $self->range_count != $other->range_count;
+        return 0 if $self->count != $other->count;
+
+        # Here they could be identical because all the tests above passed.
+        # The loop below is somewhat simpler since we know they have the same
+        # number of elements.  Compare range by range, until reach the end or
+        # find something that differs.
+        my @a_ranges = $self->ranges;
+        my @b_ranges = $other->ranges;
+        for my $i (0 .. @a_ranges - 1) {
+            my $a = $a_ranges[$i];
+            my $b = $b_ranges[$i];
+            trace "self $a; other $b" if main::DEBUG && $to_trace;
+            return 0 if $a->start != $b->start || $a->end != $b->end;
+        }
+        return 1;
+    }
+
     sub is_code_point_usable {
         # This used only for making the test script.  See if the input
         # proposed trial code point is one that Perl will handle.  If second
@@ -4879,6 +4909,7 @@ sub trace { return main::trace(@_); }
                     each_range
                     hash
                     is_empty
+                    matches_identically_to
                     max
                     min
                     range_count
@@ -6151,36 +6182,6 @@ sub trace { return main::trace(@_); }
         no overloading;
         return $leader{pack 'J', $self} == $leader{pack 'J', $other};
         return;
-    }
-
-    sub matches_identically_to {
-        # Return a boolean as to whether or not two tables match identical
-        # sets of code points.
-
-        my $self = shift;
-        my $other = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
-        # These are ordered in increasing real time to figure out (at least
-        # until a patch changes that and doesn't change this)
-        return 0 if $self->max != $other->max;
-        return 0 if $self->min != $other->min;
-        return 0 if $self->range_count != $other->range_count;
-        return 0 if $self->count != $other->count;
-
-        # Here they could be identical because all the tests above passed.
-        # The loop below is somewhat simpler since we know they have the same
-        # number of elements.  Compare range by range, until reach the end or
-        # find something that differs.
-        my @a_ranges = $self->_range_list->ranges;
-        my @b_ranges = $other->_range_list->ranges;
-        for my $i (0 .. @a_ranges - 1) {
-            my $a = $a_ranges[$i];
-            my $b = $b_ranges[$i];
-            trace "self $a; other $b" if main::DEBUG && $to_trace;
-            return 0 if $a->start != $b->start || $a->end != $b->end;
-        }
-        return 1;
     }
 
     sub set_equivalent_to {
