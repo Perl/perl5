@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..53\n";
+print "1..57\n";
 
 # First test whether the number stringification works okay.
 # (Testing with == would exercize the IV/NV part, not the PV.)
@@ -209,3 +209,17 @@ print $a eq "16702650"     ? "ok 52\n" : "not ok 52 # $a\n";
 
 $a = 0B1101; "$a";
 print $a eq "13"           ? "ok 53\n" : "not ok 53 # $a\n";
+
+# NaN and Inf
+
+$a = 9 ** 9 ** 9; "$a";
+print $a eq "inf" ? "ok 54\n" : "not ok 54 # $a\n";
+
+$a = -9 ** 9 ** 9; "$a";
+print $a eq "-inf" ? "ok 55\n" : "not ok 55 # $a\n";
+
+$a = -sin 9 ** 9 ** 9; "$a";
+print $a eq "nan" ? "ok 56\n" : "not ok 56 # $a\n";
+
+$a = sin 9 ** 9 ** 9; "$a";
+print $a eq "-nan" ? "ok 57\n" : "not ok 57 # $a\n";
