@@ -4831,7 +4831,10 @@ sub trace { return main::trace(@_); }
         # All these files have a .pl suffix
         $file_path{$addr}->[-1] .= '.pl';
 
-        main::write($file_path{$addr}, \@HEADER, \@OUT);
+        main::write($file_path{$addr},
+                    0,
+                    \@HEADER,
+                    \@OUT);
         return;
     }
 
@@ -7509,14 +7512,15 @@ sub force_unlink ($) {
     return;
 }
 
-sub write ($@) {
+sub write ($$@) {
     # Given a filename and references to arrays of lines, write the lines of
     # each array to the file
     # Filename can be given as an arrayref of directory names
 
-    return Carp::carp_too_few_args(\@_, 2) if main::DEBUG && @_ < 2;
+    return Carp::carp_too_few_args(\@_, 3) if main::DEBUG && @_ < 3;
 
     my $file  = shift;
+    my $use_utf8 = shift;
 
     # Get into a single string if an array, and get rid of, in Unix terms, any
     # leading '.'
@@ -7536,6 +7540,9 @@ sub write ($@) {
         Carp::my_carp("can't open $file for output.  Skipping this file: $!");
         return;
     }
+
+    # $output_names outputs the utf8 of each character as well
+    binmode $OUT, ":utf8" if $use_utf8;
 
     while (defined (my $lines_ref = shift)) {
         unless (@$lines_ref) {
@@ -12741,8 +12748,8 @@ L<perlunicode>
 
 END
 
-    # And write it.
-    main::write([ $pod_directory, "$pod_file.pod" ], \@OUT);
+    # And write it.  The 0 means no utf8.
+    main::write([ $pod_directory, "$pod_file.pod" ], 0, \@OUT);
     return;
 }
 
@@ -12803,7 +12810,7 @@ END
 1;
 END
 
-    main::write("Heavy.pl", \@heavy);
+    main::write("Heavy.pl", 0, \@heavy);  # The 0 means no utf8.
     return;
 }
 
@@ -13576,10 +13583,12 @@ sub make_property_test_script() {
         }
     }
 
-    &write($t_path, [<DATA>,
-		     @output,
-		     (map {"Test_X('$_');\n"} @backslash_X_tests),
-		     "Finished();\n"]);
+    &write($t_path,
+           0,           # Not utf8;
+           [<DATA>,
+            @output,
+            (map {"Test_X('$_');\n"} @backslash_X_tests),
+            "Finished();\n"]);
     return;
 }
 
