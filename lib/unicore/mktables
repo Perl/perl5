@@ -4792,12 +4792,11 @@ sub trace { return main::trace(@_); }
         # should appear before it in the file.
         my $pre_body = $self->pre_body;
         push @HEADER, $pre_body, "\n" if $pre_body;
-        unshift @OUT, @HEADER;
 
         # All these files have a .pl suffix
         $file_path{$addr}->[-1] .= '.pl';
 
-        main::write($file_path{$addr}, \@OUT);
+        main::write($file_path{$addr}, \@HEADER, \@OUT);
         return;
     }
 
@@ -7511,19 +7510,14 @@ sub force_unlink ($) {
     return;
 }
 
-sub write ($\@) {
-    # Given a filename and a reference to an array of lines, write the lines
-    # to the file
+sub write ($@) {
+    # Given a filename and references to arrays of lines, write the lines of
+    # each array to the file
     # Filename can be given as an arrayref of directory names
 
-    my $file  = shift;
-    my $lines_ref = shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+    return Carp::carp_too_few_args(\@_, 2) if main::DEBUG && @_ < 2;
 
-    if (! defined $lines_ref) {
-        Carp::my_carp("Missing lines to write parameter for $file.  Writing skipped;");
-        return;
-    }
+    my $file  = shift;
 
     # Get into a single string if an array, and get rid of, in Unix terms, any
     # leading '.'
@@ -7536,10 +7530,6 @@ sub write ($\@) {
 
     push @files_actually_output, $file;
 
-    unless (@$lines_ref) {
-        Carp::my_carp("Output file '$file' is empty; writing it anyway;");
-    }
-
     force_unlink ($file);
 
     my $OUT;
@@ -7548,7 +7538,13 @@ sub write ($\@) {
         return;
     }
 
-    print $OUT @$lines_ref or die Carp::my_carp("write to '$file' failed: $!");
+    while (defined (my $lines_ref = shift)) {
+        unless (@$lines_ref) {
+            Carp::my_carp("An array of lines for writing to file '$file' is empty; writing it anyway;");
+        }
+
+        print $OUT @$lines_ref or die Carp::my_carp("write to '$file' failed: $!");
+    }
     close $OUT or die Carp::my_carp("close '$file' failed: $!");
 
     print "$file written.\n" if $verbosity >= $VERBOSE;
@@ -12747,7 +12743,7 @@ L<perlunicode>
 END
 
     # And write it.
-    main::write([ $pod_directory, "$pod_file.pod" ], @OUT);
+    main::write([ $pod_directory, "$pod_file.pod" ], \@OUT);
     return;
 }
 
@@ -12808,7 +12804,7 @@ END
 1;
 END
 
-    main::write("Heavy.pl", @heavy);
+    main::write("Heavy.pl", \@heavy);
     return;
 }
 
