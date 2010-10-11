@@ -635,7 +635,7 @@ my $glob_list = 0;             # ? Should we try to include unknown .txt files
                                # in the input.
 my $output_range_counts = 1;   # ? Should we include the number of code points
                                # in ranges in the output
-my $output_names = 0;          # ? Should character names be in the output
+my $annotate = 0;              # ? Should character names be in the output
 
 # Verbosity levels; 0 is quiet
 my $NORMAL_VERBOSITY = 1;
@@ -693,7 +693,7 @@ while (@ARGV) {
         $output_range_counts = ! $output_range_counts
     }
     elsif ($arg eq '-output_names') {
-        $output_names = 1;
+        $annotate = 1;
     }
     else {
         my $with_c = 'with';
@@ -1271,7 +1271,7 @@ sub objaddr($) {
     return pack 'J', $_[0];
 }
 
-# These are used only if $output_names is true.
+# These are used only if $annotate is true.
 # The entire range of Unicode characters is examined to populate these
 # after all the input has been processed.  But most can be skipped, as they
 # have the same descriptive phrases, such as being unassigned
@@ -1300,7 +1300,7 @@ my $CONTROL_TYPE = -5;
 my $UNKNOWN_TYPE = -6;  # Used only if there is a bug in this program
 
 sub populate_char_info ($) {
-    # Used only with the $output_names option.  Populates the arrays with the
+    # Used only with the $annotate option.  Populates the arrays with the
     # input code point's info that are needed for outputting more detailed
     # comments.  If calling context wants a return, it is the end point of
     # any contiguous range of characters that share essentially the same info
@@ -4891,7 +4891,7 @@ sub trace { return main::trace(@_); }
         # can't cope with comments, and there aren't that many of them that
         # it's worth the extra real time to get rid of them).
         my @OUT;
-        if ($output_names) {
+        if ($annotate) {
             # Use the line below in Perls that don't have /r
             #push @OUT, 'return join "\n",  map { s/\s*#.*//mg; $_ } split "\n", <<\'END\';' . "\n";
             push @OUT, "return <<'END' =~ s/\\s*#.*//mgr;\n";
@@ -4909,10 +4909,10 @@ sub trace { return main::trace(@_); }
         }
         else {
             my $range_size_1 = $range_size_1{$addr};
-            my $format;            # Used only in $output_names option
-            my $include_name;      # Used only in $output_names option
+            my $format;            # Used only in $annotate option
+            my $include_name;      # Used only in $annotate option
 
-            if ($output_names) {
+            if ($annotate) {
 
                 # if annotating each code point, must print 1 per line.
                 # The variable could point to a subroutine, and we don't want
@@ -4976,7 +4976,7 @@ sub trace { return main::trace(@_); }
                 # Here to output a single code point per line
 
                 # If not to annotate, use the simple formats
-                if (! $output_names) {
+                if (! $annotate) {
 
                     # Use any passed in subroutine to output.
                     if (ref $range_size_1 eq 'CODE') {
@@ -5151,7 +5151,7 @@ sub trace { return main::trace(@_); }
         $file_path{$addr}->[-1] .= '.pl';
 
         main::write($file_path{$addr},
-                    $output_names,      # utf8 iff annotating
+                    $annotate,      # utf8 iff annotating
                     \@HEADER,
                     \@OUT);
         return;
@@ -5808,7 +5808,7 @@ END
                     }
                     $tostr .= sprintf "\\x{%s}", $to;
                     $to = CORE::hex $to;
-                    if ($output_names) {
+                    if ($annotate) {
                         $to_name .= " + " if $to_name;
                         $to_chr .= chr($to);
                         main::populate_char_info($to)
@@ -5827,7 +5827,7 @@ END
                 # see what's going on.
                 push @multi_code_point_maps,
                         sprintf("%-45s # U+%04X", $utf8, $code_point);
-                if (! $output_names) {
+                if (! $annotate) {
                     $multi_code_point_maps[-1] .= " => $map";
                 }
                 else {
@@ -7876,7 +7876,6 @@ sub write ($$@) {
         return;
     }
 
-    # $output_names outputs the utf8 of each character as well
     binmode $OUT, ":utf8" if $use_utf8;
 
     while (defined (my $lines_ref = shift)) {
@@ -11704,7 +11703,7 @@ END
 
     # Here done with all the basic stuff.  Ready to populate the information
     # about each character if annotating them.
-    if ($output_names) {
+    if ($annotate) {
 
         # See comments at its declaration
         $annotate_ranges = Range_Map->new;
