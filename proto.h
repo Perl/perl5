@@ -2244,11 +2244,10 @@ PERL_CALLCONV SV*	Perl_mro_get_private_data(pTHX_ struct mro_meta *const smeta, 
 #define PERL_ARGS_ASSERT_MRO_GET_PRIVATE_DATA	\
 	assert(smeta); assert(which)
 
-PERL_CALLCONV void	Perl_mro_isa_changed_in(pTHX_ HV* stash)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_MRO_ISA_CHANGED_IN	\
-	assert(stash)
+/* PERL_CALLCONV void	mro_isa_changed_in(pTHX_ HV* stash)
+			__attribute__nonnull__(pTHX_1); */
 
+PERL_CALLCONV void	Perl_mro_isa_changed_in3(pTHX_ HV* stash, const char *stashname, STRLEN stashname_len);
 PERL_CALLCONV struct mro_meta*	Perl_mro_meta_init(pTHX_ HV* stash)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_MRO_META_INIT	\

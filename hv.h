@@ -67,6 +67,7 @@ struct mro_meta {
     (((smeta)->mro_which && (which) == (smeta)->mro_which) \
      ? (smeta)->mro_linear_current			   \
      : Perl_mro_get_private_data(aTHX_ (smeta), (which)))
+#define mro_isa_changed_in(stash) mro_isa_changed_in3(stash, NULL, 0)
 
 /* Subject to change.
    Don't access this directly.

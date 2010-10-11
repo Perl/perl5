@@ -83,6 +83,7 @@ PERL_CALLCONV I32 Perl_my_lstat(pTHX);
 PERL_CALLCONV I32 Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2);
 PERL_CALLCONV char * Perl_sv_collxfrm(pTHX_ SV *const sv, STRLEN *const nxp);
 PERL_CALLCONV bool Perl_sv_2bool(pTHX_ register SV *const sv);
+PERL_CALLCONV void Perl_mro_isa_changed_in(HV* stash);
 
 /* ref() is now a macro using Perl_doref;
  * this version provided for binary compatibility only.
@@ -1552,6 +1553,12 @@ bool
 Perl_sv_2bool(pTHX_ register SV *const sv)
 {
     return sv_2bool_flags(sv, SV_GMAGIC);
+}
+
+void
+Perl_mro_isa_changed_in(pTHX_ HV* stash)
+{
+    return mro_isa_changed_in3(stash, NULL, 0);
 }
 
 #endif /* NO_MATHOMS */
