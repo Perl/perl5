@@ -357,6 +357,18 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # to 1, and every file whose object is in @input_file_objects and doesn't have
 # a, 'non_skip => 1,' in its constructor will be skipped.
 #
+# To compare the output tables, it may be useful to specify the -output_names
+# flag.  This causes the tables to expand so there is one entry for each
+# non-algorithmically named code point giving, currently its name, and its
+# graphic representation if printable (and you have a font that knows about
+# it).  This makes it easier to see what the particular code points are in
+# each output table.  The tables are usable, but because they don't have
+# ranges (for the most part), a Perl using them will run slower.  Non-named
+# code points are annotated with a description of their status, and contiguous
+# ones with the same description will be output as a range rather than
+# individually.  Algorithmically named characters are also output as ranges,
+# except when there are just a few contiguous ones.
+#
 # FUTURE ISSUES
 #
 # The program would break if Unicode were to change its names so that
@@ -624,8 +636,6 @@ my $glob_list = 0;             # ? Should we try to include unknown .txt files
 my $output_range_counts = 1;   # ? Should we include the number of code points
                                # in ranges in the output
 my $output_names = 0;          # ? Should character names be in the output
-my @viacode;                   # Contains the 1 million character names, if
-                               # $output_names is true
 
 # Verbosity levels; 0 is quiet
 my $NORMAL_VERBOSITY = 1;
@@ -709,9 +719,10 @@ usage: $0 [-c|-p|-q|-v|-w] [-C dir] [-L filelist] [ -P pod_dir ]
   -maketest   : Make test script 'TestProp.pl' in current (or -C directory),
                 overrides -T
   -makelist   : Rewrite the file list $file_list based on current setup
-  -output_names : Output each character's name in the table files; useful for
-                doing what-ifs, looking at diffs; is slow, memory intensive,
-                resulting tables are usable but very large.
+  -output_names: Output an annotation for each character in the table files;
+                useful for debugging mktables, looking at diffs; but is slow,
+                memory intensive; resulting tables are usable but slow and
+                very large.
   -check A B  : Executes $0 only if A and B are the same
 END
     }
@@ -1258,6 +1269,141 @@ sub objaddr($) {
 
     # Numifying a ref gives its address.
     return pack 'J', $_[0];
+}
+
+# These are used only if $output_names is true.
+# The entire range of Unicode characters is examined to populate these
+# after all the input has been processed.  But most can be skipped, as they
+# have the same descriptive phrases, such as being unassigned
+my @viacode;            # Contains the 1 million character names
+my @printable;          # boolean: And are those characters printable?
+my @annotate_char_type; # Contains a type of those characters, specifically
+                        # for the purposes of annotation.
+my $annotate_ranges;    # A map of ranges of code points that have the same
+                        # name for the purposes of annoation.  They map to the
+                        # upper edge of the range, so that the end point can
+                        # be immediately found.  This is used to skip ahead to
+                        # the end of a range, and avoid processing each
+                        # individual code point in it.
+my $unassigned_sans_noncharacters; # A Range_List of the unassigned
+                                   # characters, but excluding those which are
+                                   # also noncharacter code points
+
+# The annotation types are an extension of the regular range types, though
+# some of the latter are folded into one.  Make the new types negative to
+# avoid conflicting with the regular types
+my $SURROGATE_TYPE = -1;
+my $UNASSIGNED_TYPE = -2;
+my $PRIVATE_USE_TYPE = -3;
+my $NONCHARACTER_TYPE = -4;
+my $CONTROL_TYPE = -5;
+my $UNKNOWN_TYPE = -6;  # Used only if there is a bug in this program
+
+sub populate_char_info ($) {
+    # Used only with the $output_names option.  Populates the arrays with the
+    # input code point's info that are needed for outputting more detailed
+    # comments.  If calling context wants a return, it is the end point of
+    # any contiguous range of characters that share essentially the same info
+
+    my $i = shift;
+    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+    $viacode[$i] = $perl_charname->value_of($i) || "";
+
+    # A character is generally printable if Unicode says it is,
+    # but below we make sure that most Unicode general category 'C' types
+    # aren't.
+    $printable[$i] = $print->contains($i);
+
+    $annotate_char_type[$i] = $perl_charname->type_of($i) || 0;
+
+    # Only these two regular types are treated specially for annotations
+    # purposes
+    $annotate_char_type[$i] = 0 if $annotate_char_type[$i] != $CP_IN_NAME
+                                && $annotate_char_type[$i] != $HANGUL_SYLLABLE;
+
+    # Give a generic name to all code points that don't have a real name.
+    # We output ranges, if applicable, for these.  Also calculate the end
+    # point of the range.
+    my $end;
+    if (! $viacode[$i]) {
+        if ($gc-> table('Surrogate')->contains($i)) {
+            $viacode[$i] = 'Surrogate';
+            $annotate_char_type[$i] = $SURROGATE_TYPE;
+            $printable[$i] = 0;
+            $end = $gc->table('Surrogate')->containing_range($i)->end;
+        }
+        elsif ($gc-> table('Private_use')->contains($i)) {
+            $viacode[$i] = 'Private Use';
+            $annotate_char_type[$i] = $PRIVATE_USE_TYPE;
+            $printable[$i] = 0;
+            $end = $gc->table('Private_Use')->containing_range($i)->end;
+        }
+        elsif (Property::property_ref('Noncharacter_Code_Point')-> table('Y')->
+                                                                contains($i))
+        {
+            $viacode[$i] = 'Noncharacter';
+            $annotate_char_type[$i] = $NONCHARACTER_TYPE;
+            $printable[$i] = 0;
+            $end = property_ref('Noncharacter_Code_Point')->table('Y')->
+                                                    containing_range($i)->end;
+        }
+        elsif ($gc-> table('Control')->contains($i)) {
+            $viacode[$i] = 'Control';
+            $annotate_char_type[$i] = $CONTROL_TYPE;
+            $printable[$i] = 0;
+            $end = 0x81 if $i == 0x80;  # Hard-code this one known case
+        }
+        elsif ($gc-> table('Unassigned')->contains($i)) {
+            $viacode[$i] = 'Unassigned, block=' . $block-> value_of($i);
+            $annotate_char_type[$i] = $UNASSIGNED_TYPE;
+            $printable[$i] = 0;
+
+            # Because we name the unassigned by the blocks they are in, it
+            # can't go past the end of that block, and it also can't go past
+            # the unassigned range it is in.  The special table makes sure
+            # that the non-characters, which are unassigned, are separated
+            # out.
+            $end = min($block->containing_range($i)->end,
+                       $unassigned_sans_noncharacters-> containing_range($i)->
+                                                                         end);
+        } else {
+            my_carp_bug("Can't figure out how to annotate"
+                        . sprintf("U+%04X", $i)
+                        . "Proceeding anyway.");
+            $viacode[$i] = 'UNKNOWN';
+            $annotate_char_type[$i] = $UNKNOWN_TYPE;
+            $printable[$i] = 0;
+        }
+    }
+
+    # Here, has a name, but if it's one in which the code point number is
+    # appended to the name, do that.
+    elsif ($annotate_char_type[$i] == $CP_IN_NAME) {
+        $viacode[$i] .= sprintf("-%04X", $i);
+        $end = $perl_charname->containing_range($i)->end;
+    }
+
+    # And here, has a name, but if it's a hangul syllable one, replace it with
+    # the correct name from the Unicode algorithm
+    elsif ($annotate_char_type[$i] == $HANGUL_SYLLABLE) {
+        use integer;
+        my $SIndex = $i - $SBase;
+        my $L = $LBase + $SIndex / $NCount;
+        my $V = $VBase + ($SIndex % $NCount) / $TCount;
+        my $T = $TBase + $SIndex % $TCount;
+        $viacode[$i] = "HANGUL SYLLABLE $Jamo{$L}$Jamo{$V}";
+        $viacode[$i] .= $Jamo{$T} if $T != $TBase;
+        $end = $perl_charname->containing_range($i)->end;
+    }
+
+    return if ! defined wantarray;
+    return $i if ! defined $end;    # If not a range, return the input
+
+    # Save this whole range so can find the end point quickly
+    $annotate_ranges->add_map($i, $end, $end);
+
+    return $end;
 }
 
 # Commented code below should work on Perl 5.8.
@@ -4285,7 +4431,6 @@ sub trace { return main::trace(@_); }
         $status{$addr} = delete $args{'Status'} || $NORMAL;
         $status_info{$addr} = delete $args{'_Status_Info'} || "";
         $range_size_1{$addr} = delete $args{'Range_Size_1'} || 0;
-        $range_size_1{$addr} = 1 if $output_names;  # Make sure 1 name per line
 
         my $description = delete $args{'Description'};
         my $externally_ok = delete $args{'Externally_Ok'};
@@ -4739,9 +4884,20 @@ sub trace { return main::trace(@_); }
         # affect what gets output before it, therefore pre_body() isn't called
         # until after all other processing of the table is done.
 
-        # The main body looks like a 'here' document.
+        # The main body looks like a 'here' document.  If annotating, get rid
+        # of the comments before passing to the caller, as some callers, such
+        # as charnames.pm, can't cope with them.  (Outputting range counts
+        # also introduces comments, but these don't show up in the tables that
+        # can't cope with comments, and there aren't that many of them that
+        # it's worth the extra real time to get rid of them).
         my @OUT;
-        push @OUT, "return <<'END';\n";
+        if ($output_names) {
+            # Use the line below in Perls that don't have /r
+            #push @OUT, 'return join "\n",  map { s/\s*#.*//mg; $_ } split "\n", <<\'END\';' . "\n";
+            push @OUT, "return <<'END' =~ s/\\s*#.*//mgr;\n";
+        } else {
+            push @OUT, "return <<'END';\n";
+        }
 
         if ($range_list{$addr}->is_empty) {
 
@@ -4753,6 +4909,28 @@ sub trace { return main::trace(@_); }
         }
         else {
             my $range_size_1 = $range_size_1{$addr};
+            my $format;            # Used only in $output_names option
+            my $include_name;      # Used only in $output_names option
+
+            if ($output_names) {
+
+                # if annotating each code point, must print 1 per line.
+                # The variable could point to a subroutine, and we don't want
+                # to lose that fact, so only set if not set already
+                $range_size_1 = 1 if ! $range_size_1;
+
+                $format = $self->format;
+
+                # The name of the character is output only for tables that
+                # don't already include the name in the output.
+                my $property = $self->property;
+                $include_name =
+                    !  ($property == $perl_charname
+                        || $property == main::property_ref('Unicode_1_Name')
+                        || $property == main::property_ref('Name')
+                        || $property == main::property_ref('Name_Alias')
+                       );
+            }
 
             # Output each range as part of the here document.
             RANGE:
@@ -4766,31 +4944,12 @@ sub trace { return main::trace(@_); }
                 my $value  = $set->value;
 
                 # Don't output ranges whose value is the one to suppress
-                next RANGE if defined $suppress_value && $value eq $suppress_value;
+                next RANGE if defined $suppress_value
+                              && $value eq $suppress_value;
 
-                # If has or wants a single point range output
-                if ($start == $end || $range_size_1) {
-                    if (ref $range_size_1 eq 'CODE') {
-                        for my $i ($start .. $end) {
-                            push @OUT, &$range_size_1($i, $value);
-                        }
-                    }
-                    else {
-                        for my $i ($start .. $end) {
-                            push @OUT, sprintf "%04X\t\t%s\n", $i, $value;
-                            if ($output_names) {
-                                if (! defined $viacode[$i]) {
-                                    $viacode[$i] =
-                                        Property::property_ref('Perl_Charnames')
-                                                                    ->value_of($i)
-                                        || "";
-                                }
-                                $OUT[-1] =~ s/\n/\t# $viacode[$i]\n/;
-                            }
-                        }
-                    }
-                }
-                else  {
+                # If there is a range and doesn't need a single point range
+                # output
+                if ($start != $end && ! $range_size_1) {
                     push @OUT, sprintf "%04X\t%04X\t%s", $start, $end, $value;
 
                     # Add a comment with the size of the range, if requested.
@@ -4810,6 +4969,166 @@ sub trace { return main::trace(@_); }
                                             $OUT[-1],
                                             $count);
                         $OUT[-1] = Text::Tabs::unexpand($OUT[-1]);
+                    }
+                    next RANGE;
+                }
+
+                # Here to output a single code point per line
+
+                # If not to annotate, use the simple formats
+                if (! $output_names) {
+
+                    # Use any passed in subroutine to output.
+                    if (ref $range_size_1 eq 'CODE') {
+                        for my $i ($start .. $end) {
+                            push @OUT, &{$range_size_1}($i, $value);
+                        }
+                    }
+                    else {
+
+                        # Here, caller is ok with default output.
+                        for (my $i = $start; $i <= $end; $i++) {
+                            push @OUT, sprintf "%04X\t\t%s\n", $i, $value;
+                        }
+                    }
+                    next RANGE;
+                }
+
+                # Here, wants annotation.
+                for (my $i = $start; $i <= $end; $i++) {
+
+                    # Get character information if don't have it already
+                    main::populate_char_info($i)
+                                        if ! defined $viacode[$i];
+                    my $type = $annotate_char_type[$i];
+
+                    # Figure out if should output the next code points as part
+                    # of a range or not.  If this is not in an annotation
+                    # range, then won't output as a range, so returns $i.
+                    # Otherwise use the end of the annotation range, but no
+                    # further than the maximum possible end point of the loop.
+                    my $range_end = main::min($annotate_ranges->value_of($i)
+                                                                        || $i,
+                                               $end);
+
+                    # Use a range if it is a range, and either is one of the
+                    # special annotation ranges, or the range is at most 3
+                    # long.  This last case causes the algorithmically named
+                    # code points to be output individually in spans of at
+                    # most 3, as they are the ones whose $type is > 0.
+                    if ($range_end != $i
+                        && ( $type < 0 || $range_end - $i > 2))
+                    {
+                        # Here is to output a range.  We don't allow a
+                        # caller-specified output format--just use the
+                        # standard one.
+                        push @OUT, sprintf "%04X\t%04X\t%s\t#", $i,
+                                                                $range_end,
+                                                                $value;
+                        my $range_name = $viacode[$i];
+
+                        # For the code points which end in their hex value, we
+                        # eliminate that from the output annotation, and
+                        # capitalize only the first letter of each word.
+                        if ($type == $CP_IN_NAME) {
+                            my $hex = sprintf "%04X", $i;
+                            $range_name =~ s/-$hex$//;
+                            my @words = split " ", $range_name;
+                            for my $word (@words) {
+                                $word = ucfirst(lc($word)) if $word ne 'CJK';
+                            }
+                            $range_name = join " ", @words;
+                        }
+                        elsif ($type == $HANGUL_SYLLABLE) {
+                            $range_name = "Hangul Syllable";
+                        }
+
+                        $OUT[-1] .= " $range_name" if $range_name;
+
+                        # Include the number of code points in the range
+                        my $count = main::clarify_number($range_end - $i + 1);
+                        $OUT[-1] .= " [$count]\n";
+
+                        # Skip to the end of the range
+                        $i = $range_end;
+                    }
+                    else { # Not in a range.
+                        my $comment = "";
+
+                        # When outputting the names of each character, use
+                        # the character itself if printable
+                        $comment .= "'" . chr($i) . "' " if $printable[$i];
+
+                        # To make it more readable, use a minimum indentation
+                        my $comment_indent;
+
+                        # Determine the annotation
+                        if ($format eq $DECOMP_STRING_FORMAT) {
+
+                            # This is very specialized, with the type of
+                            # decomposition beginning the line enclosed in
+                            # <...>, and the code points that the code point
+                            # decomposes to separated by blanks.  Create two
+                            # strings, one of the printable characters, and
+                            # one of their official names.
+                            (my $map = $value) =~ s/ \ * < .*? > \ +//x;
+                            my $tostr = "";
+                            my $to_name = "";
+                            my $to_chr = "";
+                            foreach my $to (split " ", $map) {
+                                $to = CORE::hex $to;
+                                $to_name .= " + " if $to_name;
+                                $to_chr .= chr($to);
+                                main::populate_char_info($to)
+                                                    if ! defined $viacode[$to];
+                                $to_name .=  $viacode[$to];
+                            }
+
+                            $comment .=
+                                    "=> '$to_chr'; $viacode[$i] => $to_name";
+                            $comment_indent = 25;   # Determined by experiment
+                        }
+                        else {
+
+                            # Assume that any table that has hex format is a
+                            # mapping of one code point to another.
+                            if ($format eq $HEX_FORMAT) {
+                                my $decimal_value = CORE::hex $value;
+                                main::populate_char_info($decimal_value)
+                                        if ! defined $viacode[$decimal_value];
+                                $comment .= "=> '"
+                                         . chr($decimal_value)
+                                         . "'; " if $printable[$decimal_value];
+                            }
+                            $comment .= $viacode[$i] if $include_name
+                                                        && $viacode[$i];
+                            if ($format eq $HEX_FORMAT) {
+                                my $decimal_value = CORE::hex $value;
+                                $comment .= " => $viacode[$decimal_value]"
+                                                    if $viacode[$decimal_value];
+                            }
+
+                            # If including the name, no need to indent, as the
+                            # name will already be way across the line.
+                            $comment_indent = ($include_name) ? 0 : 60;
+                        }
+
+                        # Use any passed in routine to output the base part of
+                        # the line.
+                        if (ref $range_size_1 eq 'CODE') {
+                            my $base_part = &{$range_size_1}($i, $value);
+                            chomp $base_part;
+                            push @OUT, $base_part;
+                        }
+                        else {
+                            push @OUT, sprintf "%04X\t\t%s", $i, $value;
+                        }
+
+                        # And add the annotation.
+                        $OUT[-1] = sprintf "%-*s\t# %s", $comment_indent,
+                                                         $OUT[-1],
+                                                         $comment if $comment;
+                        $OUT[-1] .= "\n";
                     }
                 }
             } # End of loop through all the table's ranges
@@ -4832,7 +5151,7 @@ sub trace { return main::trace(@_); }
         $file_path{$addr}->[-1] .= '.pl';
 
         main::write($file_path{$addr},
-                    0,
+                    $output_names,      # utf8 iff annotating
                     \@HEADER,
                     \@OUT);
         return;
@@ -5489,6 +5808,13 @@ END
                     }
                     $tostr .= sprintf "\\x{%s}", $to;
                     $to = CORE::hex $to;
+                    if ($output_names) {
+                        $to_name .= " + " if $to_name;
+                        $to_chr .= chr($to);
+                        main::populate_char_info($to)
+                                            if ! defined $viacode[$to];
+                        $to_name .=  $viacode[$to];
+                    }
                 }
 
                 # I (khw) have never waded through this line to
@@ -5501,7 +5827,16 @@ END
                 # see what's going on.
                 push @multi_code_point_maps,
                         sprintf("%-45s # U+%04X", $utf8, $code_point);
-                $multi_code_point_maps[-1] .= " => $map";
+                if (! $output_names) {
+                    $multi_code_point_maps[-1] .= " => $map";
+                }
+                else {
+                    main::populate_char_info($code_point)
+                                    if ! defined $viacode[$code_point];
+                    $multi_code_point_maps[-1] .= " '"
+                        . chr($code_point)
+                        . "' => '$to_chr'; $viacode[$code_point] => $to_name";
+                }
             }
         }
         else {
@@ -11364,6 +11699,24 @@ END
                                Pod_Entry => 0,
                                Status => $alias->status,
                                Externally_Ok => 0);
+        }
+    }
+
+    # Here done with all the basic stuff.  Ready to populate the information
+    # about each character if annotating them.
+    if ($output_names) {
+
+        # See comments at its declaration
+        $annotate_ranges = Range_Map->new;
+
+        # This separates out the non-characters from the other unassigneds, so
+        # can give different annotations for each.
+        $unassigned_sans_noncharacters = Range_List->new(
+         Initialize => $gc->table('Unassigned')
+                       & property_ref('Noncharacter_Code_Point')->table('N'));
+
+        for (my $i = 0; $i <= $LAST_UNICODE_CODEPOINT; $i++ ) {
+            $i = populate_char_info($i);    # Note sets $i so may cause skips
         }
     }
 
