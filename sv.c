@@ -2733,6 +2733,10 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 		len = SvIsUV(sv)
 		    ? my_snprintf(tbuf, sizeof(tbuf), "%"UVuf, (UV)SvUVX(sv))
 		    : my_snprintf(tbuf, sizeof(tbuf), "%"IVdf, (IV)SvIVX(sv));
+	    } else if(SvNVX(sv) == 0.0) {
+		    tbuf[0] = '0';
+		    tbuf[1] = 0;
+		    len = 1;
 	    } else {
 		Gconvert(SvNVX(sv), NV_DIG, 0, tbuf);
 		len = strlen(tbuf);
@@ -2741,11 +2745,6 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 	    {
 		dVAR;
 
-		if (len == 2 && tbuf[0] == '-' && tbuf[1] == '0') {
-		    tbuf[0] = '0';
-		    tbuf[1] = 0;
-		    len = 1;
-		}
 		SvUPGRADE(sv, SVt_PV);
 		if (lp)
 		    *lp = len;
@@ -2917,26 +2916,21 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 	*s = '\0';
     }
     else if (SvNOKp(sv)) {
-	dSAVE_ERRNO;
 	if (SvTYPE(sv) < SVt_PVNV)
 	    sv_upgrade(sv, SVt_PVNV);
-	/* The +20 is pure guesswork.  Configure test needed. --jhi */
-	s = SvGROW_mutable(sv, NV_DIG + 20);
-	/* some Xenix systems wipe out errno here */
-#ifdef apollo
-	if (SvNVX(sv) == 0.0)
-	    my_strlcpy(s, "0", SvLEN(sv));
-	else
-#endif /*apollo*/
-	{
+	if (SvNVX(sv) == 0.0) {
+	    s = SvGROW_mutable(sv, 2);
+	    *s++ = '0';
+	    *s = '\0';
+	} else {
+	    dSAVE_ERRNO;
+	    /* The +20 is pure guesswork.  Configure test needed. --jhi */
+	    s = SvGROW_mutable(sv, NV_DIG + 20);
+	    /* some Xenix systems wipe out errno here */
 	    Gconvert(SvNVX(sv), NV_DIG, 0, s);
+	    RESTORE_ERRNO;
+	    while (*s) s++;
 	}
-	RESTORE_ERRNO;
-        if (*s == '-' && s[1] == '0' && !s[2]) {
-	    s[0] = '0';
-	    s[1] = 0;
-	}
-	while (*s) s++;
 #ifdef hcx
 	if (s[-1] == '.')
 	    *--s = '\0';
