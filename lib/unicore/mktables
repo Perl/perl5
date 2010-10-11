@@ -6161,13 +6161,6 @@ sub trace { return main::trace(@_); }
         my $other = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        unless ($other->isa(__PACKAGE__)) {
-            my $ref_other = ref $other;
-            my $ref_self = ref $self;
-            Carp::my_carp_bug("Argument to 'matches_identically_to' must be another $ref_self, not a '$ref_other'.  $other not set equivalent to $self.");
-            return 0;
-        }
-
         # These are ordered in increasing real time to figure out (at least
         # until a patch changes that and doesn't change this)
         return 0 if $self->max != $other->max;
