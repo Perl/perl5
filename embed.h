@@ -369,6 +369,7 @@
 #define op_contextualize(a,b)	Perl_op_contextualize(aTHX_ a,b)
 #define op_dump(a)		Perl_op_dump(aTHX_ a)
 #define op_free(a)		Perl_op_free(aTHX_ a)
+#define op_linklist(a)		Perl_op_linklist(aTHX_ a)
 #define op_null(a)		Perl_op_null(aTHX_ a)
 #define op_prepend_elem(a,b,c)	Perl_op_prepend_elem(aTHX_ a,b,c)
 #define op_refcnt_lock()	Perl_op_refcnt_lock(aTHX)
@@ -1639,7 +1640,6 @@
 #define is_handle_constructor	S_is_handle_constructor
 #define is_inplace_av(a,b)	S_is_inplace_av(aTHX_ a,b)
 #define is_list_assignment(a)	S_is_list_assignment(aTHX_ a)
-#define linklist(a)		S_linklist(aTHX_ a)
 #define listkids(a)		S_listkids(aTHX_ a)
 #define looks_like_bool(a)	S_looks_like_bool(aTHX_ a)
 #define modkids(a,b)		S_modkids(aTHX_ a,b)

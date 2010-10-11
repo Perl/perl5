@@ -448,6 +448,66 @@ test_op_list_describe(OP *o)
     return SvPVX(res);
 }
 
+/* the real new*OP functions have a tendancy to call fold_constants, and
+ * other such unhelpful things, so we need our own versions for testing */
+
+#define mkUNOP(t, f) THX_mkUNOP(aTHX_ (t), (f))
+static OP *
+THX_mkUNOP(pTHX_ U32 type, OP *first)
+{
+    UNOP *unop;
+    NewOp(1103, unop, 1, UNOP);
+    unop->op_type   = (OPCODE)type;
+    unop->op_first  = first;
+    unop->op_flags  = OPf_KIDS;
+    return (OP *)unop;
+}
+
+#define mkBINOP(t, f, l) THX_mkBINOP(aTHX_ (t), (f), (l))
+static OP *
+THX_mkBINOP(pTHX_ U32 type, OP *first, OP *last)
+{
+    BINOP *binop;
+    NewOp(1103, binop, 1, BINOP);
+    binop->op_type      = (OPCODE)type;
+    binop->op_first     = first;
+    binop->op_flags     = OPf_KIDS;
+    binop->op_last      = last;
+    first->op_sibling   = last;
+    return (OP *)binop;
+}
+
+#define mkLISTOP(t, f, s, l) THX_mkLISTOP(aTHX_ (t), (f), (s), (l))
+static OP *
+THX_mkLISTOP(pTHX_ U32 type, OP *first, OP *sib, OP *last)
+{
+    LISTOP *listop;
+    NewOp(1103, listop, 1, LISTOP);
+    listop->op_type     = (OPCODE)type;
+    listop->op_flags    = OPf_KIDS;
+    listop->op_first    = first;
+    first->op_sibling   = sib;
+    sib->op_sibling     = last;
+    listop->op_last     = last;
+    return (OP *)listop;
+}
+
+static char *
+test_op_linklist_describe(OP *start)
+{
+    SV *rv = sv_2mortal(newSVpvs(""));
+    OP *o;
+    o = start = LINKLIST(start);
+    do {
+        sv_catpvs(rv, ".");
+        sv_catpv(rv, OP_NAME(o));
+        if (o->op_type == OP_CONST)
+            sv_catsv(rv, cSVOPo->op_sv);
+        o = o->op_next;
+    } while (o && o != start);
+    return SvPVX(rv);
+}
+
 /** RPN keyword parser **/
 
 #define sv_is_glob(sv) (SvTYPE(sv) == SVt_PVGV)
@@ -1932,8 +1992,61 @@ test_op_list()
 	check_op(a, "lineseq[list[pushmark.const(1).const(2).]"
 		"const(3).const(4).]");
 	op_free(a);
-#undef iv_op
 #undef check_op
+
+void
+test_op_linklist ()
+    PREINIT:
+        OP *o;
+    CODE:
+#define check_ll(o, expect) \
+    STMT_START { \
+	if (strNE(test_op_linklist_describe(o), (expect))) \
+	    croak("fail %s %s", test_op_linklist_describe(o), (expect)); \
+    } STMT_END
+        o = iv_op(1);
+        check_ll(o, ".const1");
+        op_free(o);
+
+        o = mkUNOP(OP_NOT, iv_op(1));
+        check_ll(o, ".const1.not");
+        op_free(o);
+
+        o = mkUNOP(OP_NOT, mkUNOP(OP_NEGATE, iv_op(1)));
+        check_ll(o, ".const1.negate.not");
+        op_free(o);
+
+        o = mkBINOP(OP_ADD, iv_op(1), iv_op(2));
+        check_ll(o, ".const1.const2.add");
+        op_free(o);
+
+        o = mkBINOP(OP_ADD, mkUNOP(OP_NOT, iv_op(1)), iv_op(2));
+        check_ll(o, ".const1.not.const2.add");
+        op_free(o);
+
+        o = mkUNOP(OP_NOT, mkBINOP(OP_ADD, iv_op(1), iv_op(2)));
+        check_ll(o, ".const1.const2.add.not");
+        op_free(o);
+
+        o = mkLISTOP(OP_LINESEQ, iv_op(1), iv_op(2), iv_op(3));
+        check_ll(o, ".const1.const2.const3.lineseq");
+        op_free(o);
+
+        o = mkLISTOP(OP_LINESEQ,
+                mkBINOP(OP_ADD, iv_op(1), iv_op(2)),
+                mkUNOP(OP_NOT, iv_op(3)),
+                mkLISTOP(OP_SUBSTR, iv_op(4), iv_op(5), iv_op(6)));
+        check_ll(o, ".const1.const2.add.const3.not"
+                    ".const4.const5.const6.substr.lineseq");
+        op_free(o);
+
+        o = mkBINOP(OP_ADD, iv_op(1), iv_op(2));
+        LINKLIST(o);
+        o = mkBINOP(OP_SUBTRACT, o, iv_op(3));
+        check_ll(o, ".const1.const2.add.const3.subtract");
+        op_free(o);
+#undef check_ll
+#undef iv_op
 
 void
 peep_enable ()

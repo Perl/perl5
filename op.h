@@ -622,6 +622,21 @@ struct loop {
 #define ref(o, type) doref(o, type, TRUE)
 #endif
 
+/*
+=head1 Optree Manipulation Functions
+
+=for apidoc Am|OP*|LINKLIST|OP *o
+Given the root of an optree, link the tree in execution order using the
+C<op_next> pointers and return the first op executed. If this has
+already been done, it will not be redone, and C<< o->op_next >> will be
+returned. If C<< o->op_next >> is not already set, I<o> should be at
+least an C<UNOP>.
+
+=cut
+*/
+
+#define LINKLIST(o) ((o)->op_next ? (o)->op_next : op_linklist((OP*)o))
+
 /* no longer used anywhere in core */
 #ifndef PERL_CORE
 #define cv_ckproto(cv, gv, p) \

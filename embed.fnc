@@ -175,6 +175,7 @@ Ap	|int	|Gv_AMupdate	|NN HV* stash|bool destructing
 ApR	|CV*	|gv_handler	|NULLOK HV* stash|I32 id
 Apd	|OP*	|op_append_elem	|I32 optype|NULLOK OP* first|NULLOK OP* last
 Apd	|OP*	|op_append_list	|I32 optype|NULLOK OP* first|NULLOK OP* last
+Apd	|OP*	|op_linklist	|NN OP *o
 Apd	|OP*	|op_prepend_elem|I32 optype|NULLOK OP* first|NULLOK OP* last
 : FIXME - this is only called by pp_chown. They should be merged.
 p	|I32	|apply		|I32 type|NN SV** mark|NN SV** sp
@@ -637,7 +638,6 @@ EXp	|void	|op_clear	|NN OP* o
 Ap	|void	|op_refcnt_lock
 Ap	|void	|op_refcnt_unlock
 #if defined(PERL_IN_OP_C)
-s	|OP*	|linklist	|NN OP *o
 s	|OP*	|listkids	|NULLOK OP* o
 #endif
 : Used in S_doeval in pp_ctl.c

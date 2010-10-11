@@ -2694,6 +2694,11 @@ PERL_CALLCONV void	Perl_op_dump(pTHX_ const OP *o)
 	assert(o)
 
 PERL_CALLCONV void	Perl_op_free(pTHX_ OP* arg);
+PERL_CALLCONV OP*	Perl_op_linklist(pTHX_ OP *o)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_OP_LINKLIST	\
+	assert(o)
+
 PERL_CALLCONV void	Perl_op_null(pTHX_ OP* o)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_OP_NULL	\
@@ -5688,11 +5693,6 @@ STATIC OP*	S_is_inplace_av(pTHX_ OP* o, OP* oright)
 
 STATIC I32	S_is_list_assignment(pTHX_ const OP *o)
 			__attribute__warn_unused_result__;
-
-STATIC OP*	S_linklist(pTHX_ OP *o)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_LINKLIST	\
-	assert(o)
 
 STATIC OP*	S_listkids(pTHX_ OP* o);
 STATIC bool	S_looks_like_bool(pTHX_ const OP* o)

@@ -843,14 +843,22 @@ Perl_op_contextualize(pTHX_ OP *o, I32 context)
     }
 }
 
-#define LINKLIST(o) ((o)->op_next ? (o)->op_next : linklist((OP*)o))
+/*
+=head1 Optree Manipulation Functions
 
-static OP *
-S_linklist(pTHX_ OP *o)
+=for apidoc Am|OP*|op_linklist|OP *o
+This function is the implementation of the L</LINKLIST> macro. It should
+not be called directly.
+
+=cut
+*/
+
+OP *
+Perl_op_linklist(pTHX_ OP *o)
 {
     OP *first;
 
-    PERL_ARGS_ASSERT_LINKLIST;
+    PERL_ARGS_ASSERT_OP_LINKLIST;
 
     if (o->op_next)
 	return o->op_next;
@@ -2417,7 +2425,10 @@ Perl_newPROG(pTHX_ OP *o)
 	PL_eval_root = newUNOP(OP_LEAVEEVAL,
 			       ((PL_in_eval & EVAL_KEEPERR)
 				? OPf_SPECIAL : 0), o);
-	PL_eval_start = linklist(PL_eval_root);
+	/* don't use LINKLIST, since PL_eval_root might indirect through
+	 * a rather expensive function call and LINKLIST evaluates its
+	 * argument more than once */
+	PL_eval_start = op_linklist(PL_eval_root);
 	PL_eval_root->op_private |= OPpREFCOUNTED;
 	OpREFCNT_set(PL_eval_root, 1);
 	PL_eval_root->op_next = 0;
@@ -2703,7 +2714,7 @@ S_gen_constant_list(pTHX_ register OP *o)
 #else
     op_free(curop);
 #endif
-    linklist(o);
+    LINKLIST(o);
     return list(o);
 }
 
@@ -5180,7 +5191,7 @@ Perl_newRANGE(pTHX_ I32 flags, OP *left, OP *right)
     flip = newUNOP(OP_FLIP, flags, (OP*)range);
     flop = newUNOP(OP_FLOP, 0, flip);
     o = newUNOP(OP_NULL, 0, flop);
-    linklist(flop);
+    LINKLIST(flop);
     range->op_next = leftstart;
 
     left->op_next = flip;
@@ -5196,7 +5207,7 @@ Perl_newRANGE(pTHX_ I32 flags, OP *left, OP *right)
 
     flip->op_next = o;
     if (!flip->op_private || !flop->op_private)
-	linklist(o);		/* blow off optimizer unless constant */
+	LINKLIST(o);		/* blow off optimizer unless constant */
 
     return o;
 }
@@ -7434,7 +7445,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		{
 		    OP * const newop = newUNOP(OP_NULL, 0, kid);
 		    kid->op_sibling = 0;
-		    linklist(kid);
+		    LINKLIST(kid);
 		    newop->op_next = newop;
 		    kid = newop;
 		    kid->op_sibling = sibl;
@@ -8263,7 +8274,7 @@ Perl_ck_sort(pTHX_ OP *o)
 	OP *kid = cUNOPx(firstkid)->op_first;		/* get past null */
 
 	if (kid->op_type == OP_SCOPE || kid->op_type == OP_LEAVE) {
-	    linklist(kid);
+	    LINKLIST(kid);
 	    if (kid->op_type == OP_SCOPE) {
 		k = kid->op_next;
 		kid->op_next = 0;
