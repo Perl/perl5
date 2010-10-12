@@ -1224,10 +1224,24 @@ C<join $", @array>.    "Punctuation" arrays such as C<@*> are only
 interpolated if the name is enclosed in braces C<@{*}>, but special
 arrays C<@_>, C<@+>, and C<@-> are interpolated, even without braces.
 
-You cannot include a literal C<$> or C<@> within a C<\Q> sequence.
-An unescaped C<$> or C<@> interpolates the corresponding variable,
-while escaping will cause the literal string C<\$> to be inserted.
-You'll need to write something like C<m/\Quser\E\@\Qhost/>.
+For double-quoted strings, the quoting from C<\Q> is applied after
+interpolation and escapes are processed.
+
+    "abc\Qfoo\tbar$s\Exyz"
+
+is equivalent to
+
+    "abc" . quotemeta("foo\tbar$s") . "xyz"
+
+For the pattern of regex operators (C<qr//>, C<m//> and C<s///>),
+the quoting from C<\Q> is applied after interpolation is processed,
+but before escapes are processed. This allows the pattern to match
+literally (except for C<$> and C<@>). For example, the following matches:
+
+    '\s\t' =~ /\Q\s\t/
+
+Because C<$> or C<@> trigger interpolation, you'll need to use something
+like C</\Quser\E\@\Qhost/> to match them literally.
 
 Patterns are subject to an additional level of interpretation as a
 regular expression.  This is done as a second pass, after variables are
