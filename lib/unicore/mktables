@@ -50,7 +50,7 @@ sub DEBUG () { 0 }  # Set to 0 for production; 1 for development
 #   the small actual loop to process the input files and finish up; then
 #   a __DATA__ section, for the .t tests
 #
-# This program works on all releases of Unicode through at least 5.2.  The
+# This program works on all releases of Unicode through at least 6.0.  The
 # outputs have been scrutinized most intently for release 5.1.  The others
 # have been checked for somewhat more than just sanity.  It can handle all
 # existing Unicode character properties in those releases.
@@ -183,9 +183,9 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # More information on Unicode version glitches is further down in these
 # introductory comments.
 #
-# This program works on all properties as of 5.2, though the files for some
-# are suppressed from apparent lack of demand for them.  You can change which
-# are output by changing lists in this program.
+# This program works on all non-provisional properties as of 6.0, though the
+# files for some are suppressed from apparent lack of demand for them.  You
+# can change which are output by changing lists in this program.
 #
 # The old version of mktables emphasized the term "Fuzzy" to mean Unocde's
 # loose matchings rules (from Unicode TR18):
@@ -418,7 +418,7 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # Unicode_Radical_Stroke was listed in those files, so if the Unihan database
 # is present in the directory, a table will be generated for that property.
 # In 5.2, several more properties were added.  For your convenience, the two
-# arrays are initialized with all the 5.2 listed properties that are also in
+# arrays are initialized with all the 6.0 listed properties that are also in
 # earlier releases.  But these are commented out.  You can just uncomment the
 # ones you want, or use them as a template for adding entries for other
 # properties.
@@ -805,7 +805,7 @@ if ($v_version gt v3.2.0) {
                                 'Canonical_Combining_Class=Attached_Below_Left'
 }
 
-# These are listed in the Property aliases file in 5.2, but Unihan is ignored
+# These are listed in the Property aliases file in 6.0, but Unihan is ignored
 # unless explicitly added.
 if ($v_version ge v5.2.0) {
     my $unihan = 'Unihan; remove from list if using Unihan';
@@ -848,10 +848,10 @@ my %why_obsolete;    # Documentation only
 
     my $other_properties = 'other properties';
     my $contributory = "Used by Unicode internally for generating $other_properties and not intended to be used stand-alone";
-    my $why_no_expand  = "Easily computed, and yet doesn't cover the common encoding forms (UTF-16/8)",
+    my $why_no_expand  = "Deprecated by Unicode: less useful than UTF-specific calculations",
 
     %why_deprecated = (
-        'Grapheme_Link' => 'Deprecated by Unicode.  Use ccc=vr (Canonical_Combining_Class=Virama) instead',
+        'Grapheme_Link' => 'Deprecated by Unicode:  Duplicates ccc=vr (Canonical_Combining_Class=Virama)',
         'Jamo_Short_Name' => $contributory,
         'Line_Break=Surrogate' => 'Deprecated by Unicode because surrogates should never appear in well-formed text, and therefore shouldn\'t be the basis for line breaking',
         'Other_Alphabetic' => $contributory,
@@ -865,7 +865,7 @@ my %why_obsolete;    # Documentation only
     );
 
     %why_suppressed = (
-        # There is a lib/unicore/Decomposition.pl (used by normalize.pm) which
+        # There is a lib/unicore/Decomposition.pl (used by Normalize.pm) which
         # contains the same information, but without the algorithmically
         # determinable Hangul syllables'.  This file is not published, so it's
         # existence is not noted in the comment.
@@ -882,10 +882,7 @@ my %why_obsolete;    # Documentation only
         'Name' => "Accessible via 'use charnames;'",
         'Name_Alias' => "Accessible via 'use charnames;'",
 
-        # These are sort of jumping the gun; deprecation is proposed for
-        # Unicode version 6.0, but they have never been exposed by Perl, and
-        # likely are soon to be deprecated, so best not to expose them.
-        FC_NFKC_Closure => 'Use NFKC_Casefold instead',
+        FC_NFKC_Closure => 'Supplanted in usage by NFKC_Casefold; otherwise not useful',
         Expands_On_NFC => $why_no_expand,
         Expands_On_NFD => $why_no_expand,
         Expands_On_NFKC => $why_no_expand,
@@ -907,9 +904,15 @@ my %why_obsolete;    # Documentation only
 
 if ($v_version ge 4.0.0) {
     $why_stabilized{'Hyphen'} = 'Use the Line_Break property instead; see www.unicode.org/reports/tr14';
+    if ($v_version ge 6.0.0) {
+        $why_deprecated{'Hyphen'} = 'Supplanted by Line_Break property values; see www.unicode.org/reports/tr14';
+    }
 }
-if ($v_version ge 5.2.0) {
+if ($v_version ge 5.2.0 && $v_version lt 6.0.0) {
     $why_obsolete{'ISO_Comment'} = 'Code points for it have been removed';
+    if ($v_version ge 6.0.0) {
+        $why_deprecated{'ISO_Comment'} = 'No longer needed for chart generation; otherwise not useful, and code points for it have been removed';
+    }
 }
 
 # Probably obsolete forever
@@ -928,7 +931,7 @@ END
 
 # If you are using the Unihan database, you need to add the properties that
 # you want to extract from it to this table.  For your convenience, the
-# properties in the 5.2 PropertyAliases.txt file are listed, commented out
+# properties in the 6.0 PropertyAliases.txt file are listed, commented out
 my @cjk_properties = split "\n", <<'END';
 #cjkAccountingNumeric; kAccountingNumeric
 #cjkOtherNumeric; kOtherNumeric
@@ -947,7 +950,7 @@ my @cjk_properties = split "\n", <<'END';
 END
 
 # Similarly for the property values.  For your convenience, the lines in the
-# 5.2 PropertyAliases.txt file are listed.  Just remove the first BUT NOT both
+# 6.0 PropertyAliases.txt file are listed.  Just remove the first BUT NOT both
 # '#' marks
 my @cjk_property_values = split "\n", <<'END';
 ## @missing: 0000..10FFFF; cjkAccountingNumeric; NaN
@@ -1030,6 +1033,10 @@ my %ignored_files = (
     'ReadMe.txt' => 'Just comments',
     'README.TXT' => 'Just comments',
     'StandardizedVariants.txt' => 'Only for glyph changes, not a Unicode character property.  Does not fit into current scheme where one code point is mapped',
+    'EmojiSources.txt' => 'Not of general utility: for Japanese legacy cell-phone applications',
+    'IndicMatraCategory.txt' => 'Provisional',
+    'IndicSyllabicCategory.txt' => 'Provisional',
+    'ScriptExtensions.txt' => 'Provisional',
 );
 
 ### End of externally interesting definitions, except for @input_file_objects
@@ -8229,7 +8236,7 @@ sub finish_property_setup {
         }
     }
 
-    # This entry is still missing as of 5.2, perhaps because no short name for
+    # This entry is still missing as of 6.0, perhaps because no short name for
     # it.
     if (-e 'NameAliases.txt') {
         my $aliases = property_ref('Name_Alias');
@@ -10308,7 +10315,7 @@ sub filter_special_casing_line {
     # implemented, it would be by hard-coding in the casing functions in the
     # Perl core, not through tables.  But if there is a new condition we don't
     # know about, output a warning.  We know about all the conditions through
-    # 5.2
+    # 6.0
     if ($fields[4] ne "") {
         my @conditions = split ' ', $fields[4];
         if ($conditions[0] ne 'tr'  # We know that these languages have
@@ -12925,22 +12932,21 @@ several varieties of obsolesence:
 =item Obsolete
 
 Properties marked with $a_bold_obsolete in the table are considered
-obsolete.  At the time of this writing (Unicode version 5.2) there is no
-information in the Unicode standard about the implications of a property being
 obsolete.
 
 =item Stabilized
 
-Obsolete properties may be stabilized.  This means that they are not actively
-maintained by Unicode, and will not be extended as new characters are added to
-the standard.  Such properties are marked with $a_bold_stabilized in the
-table.  At the time of this writing (Unicode version 5.2) there is no further
-information in the Unicode standard about the implications of a property being
-stabilized.
+Obsolete properties may be stabilized.  Such a determination does not indicate
+that the property should or should not be used; instead it is a declaration
+that the property will not be maintained nor extended for newly encoded
+characters.  Such properties are marked with $a_bold_stabilized in the
+table.
 
 =item Deprecated
 
-Obsolete properties may be deprecated.  This means that their use is strongly
+An obsolete property may be deprecated, perhaps because its original intent
+has been replaced by another property or because its specification was somehow
+defective.  This means that its use is strongly
 discouraged, so much so that a warning will be issued if used, unless the
 regular expression is in the scope of a C<S<no warnings 'deprecated'>>
 statement.  $A_bold_deprecated flags each such entry in the table, and
