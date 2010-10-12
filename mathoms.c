@@ -1558,7 +1558,7 @@ Perl_sv_2bool(pTHX_ register SV *const sv)
 void
 Perl_mro_isa_changed_in(pTHX_ HV* stash)
 {
-    return mro_isa_changed_in3(stash, NULL, 0);
+    mro_isa_changed_in3(stash, NULL, 0);
 }
 
 #endif /* NO_MATHOMS */
