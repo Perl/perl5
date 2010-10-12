@@ -1307,10 +1307,7 @@ XS(XS_Tie_Hash_NamedCapture_STORE)
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
     if (!rx || !SvROK(ST(0))) {
-        if (!PL_localizing)
-            Perl_croak_no_modify(aTHX);
-        else
-            XSRETURN_UNDEF;
+	Perl_croak_no_modify(aTHX);
     }
 
     SP -= items;
