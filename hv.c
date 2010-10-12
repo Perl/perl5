@@ -1043,7 +1043,8 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		if (klen > 1 && key[klen-2] == ':' && key[klen-1] == ':'
 		 && SvTYPE(sv) == SVt_PVGV) {
 		    const HV * const stash = GvHV((GV *)sv);
-		    if (stash && HvNAME(stash)) mro_package_moved(stash);
+		    if (stash && HvNAME(stash))
+			mro_package_moved(NULL, stash, NULL, NULL, 0);
 		}
 	    }
 

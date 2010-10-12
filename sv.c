@@ -3656,9 +3656,13 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
     GvMULTI_on(dstr);
     if(mro_changes == 2) mro_isa_changed_in(GvSTASH(dstr));
     else if(mro_changes == 3) {
-	const HV * const stash = GvHV(dstr);
-	if(stash && HvNAME(stash)) mro_package_moved(stash);
-	if(old_stash && HvNAME(old_stash)) mro_package_moved(old_stash);
+	HV * const stash = GvHV(dstr);
+	if((stash && HvNAME(stash)) || (old_stash && HvNAME(old_stash)))
+	    mro_package_moved(
+		stash && HvNAME(stash) ? stash : NULL,
+		old_stash && HvNAME(old_stash) ? old_stash : NULL,
+		(GV *)dstr, NULL, 0
+	    );
     }
     else if(mro_changes) mro_method_changed_in(GvSTASH(dstr));
     return;
@@ -3769,9 +3773,15 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 	if (stype == SVt_PVHV) {
 	    const char * const name = GvNAME((GV*)dstr);
 	    const STRLEN len = GvNAMELEN(dstr);
-	    if (len > 1 && name[len-2] == ':' && name[len-1] == ':') {
-		if(HvNAME(dref)) mro_package_moved((HV *)dref);
-		if(HvNAME(sref)) mro_package_moved((HV *)sref);
+	    if (
+	        len > 1 && name[len-2] == ':' && name[len-1] == ':'
+	     && (HvNAME(dref) || HvNAME(sref))
+	    ) {
+		mro_package_moved(
+		    HvNAME(sref) ? (HV *)sref : NULL,
+		    HvNAME(dref) ? (HV *)dref : NULL,
+		    (GV *)dstr, NULL, 0
+		);
 	    }
 	}
 	else if (stype == SVt_PVAV && strEQ(GvNAME((GV*)dstr), "ISA")) {
@@ -4034,10 +4044,16 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 		GvGP(dstr) = gp_ref(GvGP(gv));
 
 		if (reset_isa) {
-		    const HV * const stash = GvHV(dstr);
-		    if(stash && HvNAME(stash)) mro_package_moved(stash);
-		    if(old_stash && HvNAME(old_stash))
-			mro_package_moved(old_stash);
+		    HV * const stash = GvHV(dstr);
+		    if(
+		        (stash && HvNAME(stash))
+		     || (old_stash && HvNAME(old_stash))
+		    )
+			mro_package_moved(
+			 stash && HvNAME(stash) ? stash : NULL,
+			 old_stash && HvNAME(old_stash) ? old_stash : NULL,
+			 (GV *)dstr, NULL, 0
+			);
 		}
 	    }
 	}

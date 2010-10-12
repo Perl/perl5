@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 use warnings;
-plan(tests => 12);
+plan(tests => 15);
 
 {
     package New;
@@ -125,6 +125,49 @@ for(
   "Bow-wow!\nBow-wow!\n",
    {},
   "replacing nested packages by $$_{name} updates isa caches";
+}
+
+# Another nested package test, in which the isa cache needs to be reset on
+# the subclass of a package that does not exist.
+#
+# Parenthesized packages do not exist.
+#
+#  outer::inner    ( clone::inner )
+#       |                 |
+#     left              right
+#
+#        outer  ->  clone
+#
+# This test assigns outer:: to clone::, making clone::inner an alias to
+# outer::inner.
+for(
+ {
+   name => 'assigning a glob to a glob',
+   code => '*clone:: = *outer::',
+ },
+ {
+   name => 'assigning a string to a glob',
+   code => '*clone:: = "outer::"',
+ },
+ {
+   name => 'assigning a stashref to a glob',
+   code => '*clone:: = \%outer::',
+ },
+) {
+ fresh_perl_is
+   q~
+     @left::ISA = 'outer::inner';
+     @right::ISA = 'clone::inner';
+     {package outer::inner}
+
+    __code__;
+
+     print "ok 1", "\n" if left->isa("clone::inner");
+     print "ok 2", "\n" if right->isa("outer::inner");
+   ~ =~ s\__code__\$$_{code}\r,
+  "ok 1\nok 2\n",
+   {},
+  "replacing nonexistent nested packages by $$_{name} updates isa caches";
 }
 
 # Test that deleting stash elements containing
