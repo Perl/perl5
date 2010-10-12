@@ -539,14 +539,14 @@ in restricted hashes. This caused such hash entries not to appear
 when iterating over the hash or when checking for the keys
 with the C<hv_exists> function.
 
-You can run into similar problems when you store C<&PL_sv_true> or
-C<&PL_sv_false> into AVs or HVs. Trying to modify such elements
+You can run into similar problems when you store C<&PL_sv_yes> or
+C<&PL_sv_no> into AVs or HVs. Trying to modify such elements
 will give you the following error:
 
     Modification of a read-only value attempted
 
 To make a long story short, you can use the special variables
-C<&PL_sv_undef>, C<&PL_sv_true> and C<&PL_sv_false> with AVs and
+C<&PL_sv_undef>, C<&PL_sv_yes> and C<&PL_sv_no> with AVs and
 HVs, but you have to make sure you know what you're doing.
 
 Generally, if you want to store an undefined value in an AV
