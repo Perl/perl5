@@ -6,6 +6,8 @@
 typedef SV *SVREF;
 typedef PTR_TBL_t *XS__APItest__PtrTable;
 
+#define croak_fail() croak("fail at " __FILE__ " line %d", __LINE__)
+
 /* for my_cxt tests */
 
 #define MY_CXT_KEY "XS::APItest::_guts" XS_VERSION
@@ -1511,63 +1513,63 @@ test_magic_chain()
 	MAGIC *callmg, *uvarmg;
     CODE:
 	sv = sv_2mortal(newSV(0));
-	if (SvTYPE(sv) >= SVt_PVMG) croak("fail");
-	if (SvMAGICAL(sv)) croak("fail");
+	if (SvTYPE(sv) >= SVt_PVMG) croak_fail();
+	if (SvMAGICAL(sv)) croak_fail();
 	sv_magic(sv, &PL_sv_yes, PERL_MAGIC_checkcall, (char*)&callmg, 0);
-	if (SvTYPE(sv) < SVt_PVMG) croak("fail");
-	if (!SvMAGICAL(sv)) croak("fail");
-	if (mg_find(sv, PERL_MAGIC_uvar)) croak("fail");
+	if (SvTYPE(sv) < SVt_PVMG) croak_fail();
+	if (!SvMAGICAL(sv)) croak_fail();
+	if (mg_find(sv, PERL_MAGIC_uvar)) croak_fail();
 	callmg = mg_find(sv, PERL_MAGIC_checkcall);
-	if (!callmg) croak("fail");
+	if (!callmg) croak_fail();
 	if (callmg->mg_obj != &PL_sv_yes || callmg->mg_ptr != (char*)&callmg)
-	    croak("fail");
+	    croak_fail();
 	sv_magic(sv, &PL_sv_no, PERL_MAGIC_uvar, (char*)&uvarmg, 0);
-	if (SvTYPE(sv) < SVt_PVMG) croak("fail");
-	if (!SvMAGICAL(sv)) croak("fail");
-	if (mg_find(sv, PERL_MAGIC_checkcall) != callmg) croak("fail");
+	if (SvTYPE(sv) < SVt_PVMG) croak_fail();
+	if (!SvMAGICAL(sv)) croak_fail();
+	if (mg_find(sv, PERL_MAGIC_checkcall) != callmg) croak_fail();
 	uvarmg = mg_find(sv, PERL_MAGIC_uvar);
-	if (!uvarmg) croak("fail");
+	if (!uvarmg) croak_fail();
 	if (callmg->mg_obj != &PL_sv_yes || callmg->mg_ptr != (char*)&callmg)
-	    croak("fail");
+	    croak_fail();
 	if (uvarmg->mg_obj != &PL_sv_no || uvarmg->mg_ptr != (char*)&uvarmg)
-	    croak("fail");
+	    croak_fail();
 	mg_free_type(sv, PERL_MAGIC_vec);
-	if (SvTYPE(sv) < SVt_PVMG) croak("fail");
-	if (!SvMAGICAL(sv)) croak("fail");
-	if (mg_find(sv, PERL_MAGIC_checkcall) != callmg) croak("fail");
-	if (mg_find(sv, PERL_MAGIC_uvar) != uvarmg) croak("fail");
+	if (SvTYPE(sv) < SVt_PVMG) croak_fail();
+	if (!SvMAGICAL(sv)) croak_fail();
+	if (mg_find(sv, PERL_MAGIC_checkcall) != callmg) croak_fail();
+	if (mg_find(sv, PERL_MAGIC_uvar) != uvarmg) croak_fail();
 	if (callmg->mg_obj != &PL_sv_yes || callmg->mg_ptr != (char*)&callmg)
-	    croak("fail");
+	    croak_fail();
 	if (uvarmg->mg_obj != &PL_sv_no || uvarmg->mg_ptr != (char*)&uvarmg)
-	    croak("fail");
+	    croak_fail();
 	mg_free_type(sv, PERL_MAGIC_uvar);
-	if (SvTYPE(sv) < SVt_PVMG) croak("fail");
-	if (!SvMAGICAL(sv)) croak("fail");
-	if (mg_find(sv, PERL_MAGIC_checkcall) != callmg) croak("fail");
-	if (mg_find(sv, PERL_MAGIC_uvar)) croak("fail");
+	if (SvTYPE(sv) < SVt_PVMG) croak_fail();
+	if (!SvMAGICAL(sv)) croak_fail();
+	if (mg_find(sv, PERL_MAGIC_checkcall) != callmg) croak_fail();
+	if (mg_find(sv, PERL_MAGIC_uvar)) croak_fail();
 	if (callmg->mg_obj != &PL_sv_yes || callmg->mg_ptr != (char*)&callmg)
-	    croak("fail");
+	    croak_fail();
 	sv_magic(sv, &PL_sv_no, PERL_MAGIC_uvar, (char*)&uvarmg, 0);
-	if (SvTYPE(sv) < SVt_PVMG) croak("fail");
-	if (!SvMAGICAL(sv)) croak("fail");
-	if (mg_find(sv, PERL_MAGIC_checkcall) != callmg) croak("fail");
+	if (SvTYPE(sv) < SVt_PVMG) croak_fail();
+	if (!SvMAGICAL(sv)) croak_fail();
+	if (mg_find(sv, PERL_MAGIC_checkcall) != callmg) croak_fail();
 	uvarmg = mg_find(sv, PERL_MAGIC_uvar);
-	if (!uvarmg) croak("fail");
+	if (!uvarmg) croak_fail();
 	if (callmg->mg_obj != &PL_sv_yes || callmg->mg_ptr != (char*)&callmg)
-	    croak("fail");
+	    croak_fail();
 	if (uvarmg->mg_obj != &PL_sv_no || uvarmg->mg_ptr != (char*)&uvarmg)
-	    croak("fail");
+	    croak_fail();
 	mg_free_type(sv, PERL_MAGIC_checkcall);
-	if (SvTYPE(sv) < SVt_PVMG) croak("fail");
-	if (!SvMAGICAL(sv)) croak("fail");
-	if (mg_find(sv, PERL_MAGIC_uvar) != uvarmg) croak("fail");
-	if (mg_find(sv, PERL_MAGIC_checkcall)) croak("fail");
+	if (SvTYPE(sv) < SVt_PVMG) croak_fail();
+	if (!SvMAGICAL(sv)) croak_fail();
+	if (mg_find(sv, PERL_MAGIC_uvar) != uvarmg) croak_fail();
+	if (mg_find(sv, PERL_MAGIC_checkcall)) croak_fail();
 	if (uvarmg->mg_obj != &PL_sv_no || uvarmg->mg_ptr != (char*)&uvarmg)
-	    croak("fail");
+	    croak_fail();
 	mg_free_type(sv, PERL_MAGIC_uvar);
-	if (SvMAGICAL(sv)) croak("fail");
-	if (mg_find(sv, PERL_MAGIC_checkcall)) croak("fail");
-	if (mg_find(sv, PERL_MAGIC_uvar)) croak("fail");
+	if (SvMAGICAL(sv)) croak_fail();
+	if (mg_find(sv, PERL_MAGIC_checkcall)) croak_fail();
+	if (mg_find(sv, PERL_MAGIC_uvar)) croak_fail();
 
 void
 test_op_contextualize()
@@ -1579,19 +1581,19 @@ test_op_contextualize()
 	o = op_contextualize(o, G_SCALAR);
 	if (o->op_type != OP_CONST ||
 		(o->op_flags & OPf_WANT) != OPf_WANT_SCALAR)
-	    croak("fail");
+	    croak_fail();
 	op_free(o);
 	o = newSVOP(OP_CONST, 0, newSViv(0));
 	o->op_flags &= ~OPf_WANT;
 	o = op_contextualize(o, G_ARRAY);
 	if (o->op_type != OP_CONST ||
 		(o->op_flags & OPf_WANT) != OPf_WANT_LIST)
-	    croak("fail");
+	    croak_fail();
 	op_free(o);
 	o = newSVOP(OP_CONST, 0, newSViv(0));
 	o->op_flags &= ~OPf_WANT;
 	o = op_contextualize(o, G_VOID);
-	if (o->op_type != OP_NULL) croak("fail");
+	if (o->op_type != OP_NULL) croak_fail();
 	op_free(o);
 
 void
@@ -1606,53 +1608,53 @@ test_rv2cv_op_cv()
 	troc_cv = get_cv("XS::APItest::test_rv2cv_op_cv", 0);
 	wibble_gv = gv_fetchpv("XS::APItest::wibble", 0, SVt_PVGV);
 	o = newCVREF(0, newGVOP(OP_GV, 0, troc_gv));
-	if (rv2cv_op_cv(o, 0) != troc_cv) croak("fail");
+	if (rv2cv_op_cv(o, 0) != troc_cv) croak_fail();
 	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV) != (CV*)troc_gv)
-	    croak("fail");
+	    croak_fail();
 	o->op_private |= OPpENTERSUB_AMPER;
-	if (rv2cv_op_cv(o, 0)) croak("fail");
-	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV)) croak("fail");
+	if (rv2cv_op_cv(o, 0)) croak_fail();
+	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV)) croak_fail();
 	o->op_private &= ~OPpENTERSUB_AMPER;
-	if (cUNOPx(o)->op_first->op_private & OPpEARLY_CV) croak("fail");
-	if (rv2cv_op_cv(o, RV2CVOPCV_MARK_EARLY) != troc_cv) croak("fail");
-	if (cUNOPx(o)->op_first->op_private & OPpEARLY_CV) croak("fail");
+	if (cUNOPx(o)->op_first->op_private & OPpEARLY_CV) croak_fail();
+	if (rv2cv_op_cv(o, RV2CVOPCV_MARK_EARLY) != troc_cv) croak_fail();
+	if (cUNOPx(o)->op_first->op_private & OPpEARLY_CV) croak_fail();
 	op_free(o);
 	o = newSVOP(OP_CONST, 0, newSVpv("XS::APItest::test_rv2cv_op_cv", 0));
 	o->op_private = OPpCONST_BARE;
 	o = newCVREF(0, o);
-	if (rv2cv_op_cv(o, 0) != troc_cv) croak("fail");
+	if (rv2cv_op_cv(o, 0) != troc_cv) croak_fail();
 	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV) != (CV*)troc_gv)
-	    croak("fail");
+	    croak_fail();
 	o->op_private |= OPpENTERSUB_AMPER;
-	if (rv2cv_op_cv(o, 0)) croak("fail");
-	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV)) croak("fail");
+	if (rv2cv_op_cv(o, 0)) croak_fail();
+	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV)) croak_fail();
 	op_free(o);
 	o = newCVREF(0, newSVOP(OP_CONST, 0, newRV_inc((SV*)troc_cv)));
-	if (rv2cv_op_cv(o, 0) != troc_cv) croak("fail");
+	if (rv2cv_op_cv(o, 0) != troc_cv) croak_fail();
 	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV) != (CV*)troc_gv)
-	    croak("fail");
+	    croak_fail();
 	o->op_private |= OPpENTERSUB_AMPER;
-	if (rv2cv_op_cv(o, 0)) croak("fail");
-	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV)) croak("fail");
+	if (rv2cv_op_cv(o, 0)) croak_fail();
+	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV)) croak_fail();
 	o->op_private &= ~OPpENTERSUB_AMPER;
-	if (cUNOPx(o)->op_first->op_private & OPpEARLY_CV) croak("fail");
-	if (rv2cv_op_cv(o, RV2CVOPCV_MARK_EARLY) != troc_cv) croak("fail");
-	if (cUNOPx(o)->op_first->op_private & OPpEARLY_CV) croak("fail");
+	if (cUNOPx(o)->op_first->op_private & OPpEARLY_CV) croak_fail();
+	if (rv2cv_op_cv(o, RV2CVOPCV_MARK_EARLY) != troc_cv) croak_fail();
+	if (cUNOPx(o)->op_first->op_private & OPpEARLY_CV) croak_fail();
 	op_free(o);
 	o = newCVREF(0, newUNOP(OP_RAND, 0, newSVOP(OP_CONST, 0, newSViv(0))));
-	if (rv2cv_op_cv(o, 0)) croak("fail");
-	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV)) croak("fail");
+	if (rv2cv_op_cv(o, 0)) croak_fail();
+	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV)) croak_fail();
 	o->op_private |= OPpENTERSUB_AMPER;
-	if (rv2cv_op_cv(o, 0)) croak("fail");
-	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV)) croak("fail");
+	if (rv2cv_op_cv(o, 0)) croak_fail();
+	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV)) croak_fail();
 	o->op_private &= ~OPpENTERSUB_AMPER;
-	if (cUNOPx(o)->op_first->op_private & OPpEARLY_CV) croak("fail");
-	if (rv2cv_op_cv(o, RV2CVOPCV_MARK_EARLY)) croak("fail");
-	if (cUNOPx(o)->op_first->op_private & OPpEARLY_CV) croak("fail");
+	if (cUNOPx(o)->op_first->op_private & OPpEARLY_CV) croak_fail();
+	if (rv2cv_op_cv(o, RV2CVOPCV_MARK_EARLY)) croak_fail();
+	if (cUNOPx(o)->op_first->op_private & OPpEARLY_CV) croak_fail();
 	op_free(o);
 	o = newUNOP(OP_RAND, 0, newSVOP(OP_CONST, 0, newSViv(0)));
-	if (rv2cv_op_cv(o, 0)) croak("fail");
-	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV)) croak("fail");
+	if (rv2cv_op_cv(o, 0)) croak_fail();
+	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV)) croak_fail();
 	op_free(o);
 
 void
@@ -1665,7 +1667,7 @@ test_cv_getset_call_checker()
 #define check_cc(cv, xckfun, xckobj) \
     do { \
 	cv_get_call_checker((cv), &ckfun, &ckobj); \
-	if (ckfun != (xckfun) || ckobj != (xckobj)) croak("fail"); \
+	if (ckfun != (xckfun) || ckobj != (xckobj)) croak_fail(); \
     } while(0)
 	troc_cv = get_cv("XS::APItest::test_rv2cv_op_cv", 0);
 	tsh_cv = get_cv("XS::APItest::test_savehints", 0);
@@ -1686,8 +1688,8 @@ test_cv_getset_call_checker()
 				    (SV*)troc_cv);
 	check_cc(troc_cv, Perl_ck_entersub_args_proto_or_list, (SV*)troc_cv);
 	check_cc(tsh_cv, Perl_ck_entersub_args_proto_or_list, (SV*)tsh_cv);
-	if (SvMAGICAL((SV*)troc_cv) || SvMAGIC((SV*)troc_cv)) croak("fail");
-	if (SvMAGICAL((SV*)tsh_cv) || SvMAGIC((SV*)tsh_cv)) croak("fail");
+	if (SvMAGICAL((SV*)troc_cv) || SvMAGIC((SV*)troc_cv)) croak_fail();
+	if (SvMAGICAL((SV*)tsh_cv) || SvMAGIC((SV*)tsh_cv)) croak_fail();
 #undef check_cc
 
 void
@@ -1732,35 +1734,35 @@ test_savehints()
 		    (sv = cop_hints_fetchpvs(&PL_compiling, KEY)) && \
 		    SvIV(sv) == (EXPECT))
 #define check_hint(KEY, EXPECT) \
-		do { if (!hint_ok(KEY, EXPECT)) croak("fail"); } while(0)
+		do { if (!hint_ok(KEY, EXPECT)) croak_fail(); } while(0)
 	PL_hints |= HINT_LOCALIZE_HH;
 	ENTER;
 	SAVEHINTS();
 	PL_hints &= HINT_INTEGER;
 	store_hint("t0", 123);
 	store_hint("t1", 456);
-	if (PL_hints & HINT_INTEGER) croak("fail");
+	if (PL_hints & HINT_INTEGER) croak_fail();
 	check_hint("t0", 123); check_hint("t1", 456);
 	ENTER;
 	SAVEHINTS();
-	if (PL_hints & HINT_INTEGER) croak("fail");
+	if (PL_hints & HINT_INTEGER) croak_fail();
 	check_hint("t0", 123); check_hint("t1", 456);
 	PL_hints |= HINT_INTEGER;
 	store_hint("t0", 321);
-	if (!(PL_hints & HINT_INTEGER)) croak("fail");
+	if (!(PL_hints & HINT_INTEGER)) croak_fail();
 	check_hint("t0", 321); check_hint("t1", 456);
 	LEAVE;
-	if (PL_hints & HINT_INTEGER) croak("fail");
+	if (PL_hints & HINT_INTEGER) croak_fail();
 	check_hint("t0", 123); check_hint("t1", 456);
 	ENTER;
 	SAVEHINTS();
-	if (PL_hints & HINT_INTEGER) croak("fail");
+	if (PL_hints & HINT_INTEGER) croak_fail();
 	check_hint("t0", 123); check_hint("t1", 456);
 	store_hint("t1", 654);
-	if (PL_hints & HINT_INTEGER) croak("fail");
+	if (PL_hints & HINT_INTEGER) croak_fail();
 	check_hint("t0", 123); check_hint("t1", 654);
 	LEAVE;
-	if (PL_hints & HINT_INTEGER) croak("fail");
+	if (PL_hints & HINT_INTEGER) croak_fail();
 	check_hint("t0", 123); check_hint("t1", 456);
 	LEAVE;
 #undef store_hint
@@ -1776,15 +1778,15 @@ test_copyhints()
 	ENTER;
 	SAVEHINTS();
 	sv_setiv_mg(*hv_fetchs(GvHV(PL_hintgv), "t0", 1), 123);
-	if (SvIV(cop_hints_fetchpvs(&PL_compiling, "t0")) != 123) croak("fail");
+	if (SvIV(cop_hints_fetchpvs(&PL_compiling, "t0")) != 123) croak_fail();
 	a = newHVhv(GvHV(PL_hintgv));
 	sv_2mortal((SV*)a);
 	sv_setiv_mg(*hv_fetchs(a, "t0", 1), 456);
-	if (SvIV(cop_hints_fetchpvs(&PL_compiling, "t0")) != 123) croak("fail");
+	if (SvIV(cop_hints_fetchpvs(&PL_compiling, "t0")) != 123) croak_fail();
 	b = hv_copy_hints_hv(a);
 	sv_2mortal((SV*)b);
 	sv_setiv_mg(*hv_fetchs(b, "t0", 1), 789);
-	if (SvIV(cop_hints_fetchpvs(&PL_compiling, "t0")) != 789) croak("fail");
+	if (SvIV(cop_hints_fetchpvs(&PL_compiling, "t0")) != 789) croak_fail();
 	LEAVE;
 
 void
