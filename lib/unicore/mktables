@@ -1172,7 +1172,7 @@ my %map_table_formats = (
     $HEX_FORMAT => 'positive hex whole number; a code point',
     $RATIONAL_FORMAT => 'rational: an integer or a fraction',
     $STRING_FORMAT => 'string',
-    $DECOMP_STRING_FORMAT => 'Perl\'s internal (Normalize.pm) decompostion mapping',
+    $DECOMP_STRING_FORMAT => 'Perl\'s internal (Normalize.pm) decomposition mapping',
 );
 
 # Unicode didn't put such derived files in a separate directory at first.
@@ -8970,7 +8970,7 @@ sub output_perl_charnames_line ($$) {
         # 0374          ; NFD_QC; N
         # 003C..003E    ; Math
         #
-        # the fields are: "codepoint range ; property; map"
+        # the fields are: "codepoint-range ; property; map"
         #
         # meaning the codepoints in the range all have the value 'map' under
         # 'property'.
