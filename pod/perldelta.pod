@@ -68,6 +68,23 @@ C<charnames::vianame()> cannot, as the latter returns a single code
 point.
 See L<charnames>.
 
+=head2 Custom per-subroutine check hooks
+
+XS code in an extension module can now annotate a subroutine (whether
+implemented in XS or in Perl) so that nominated XS code will be called
+at compile time (specifically as part of op checking) to change the op
+tree of that subroutine.  The compile-time check function (supplied by
+the extension module) can implement argument processing that can't be
+expressed as a prototype, generate customised compile-time warnings,
+perform constant folding for a pure function, inline a subroutine
+consisting of sufficiently simple ops, replace the whole call with a
+custom op, and so on.  This was previously all possible by hooking the
+C<entersub> op checker, but the new mechanism makes it easy to tie the
+hook to a specific subroutine.  See L<perlapi/cv_set_call_checker>.
+
+To help in writing custom check hooks, several subtasks within standard
+C<entersub> op checking have been separated out and exposed in the API.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -115,8 +132,6 @@ Previously, a regular expression interpolated into another one inherited
 the localeness of the surrounding one, losing whatever state it
 originally had.  This is considered a bug fix, but may trip up code that
 has come to rely on the incorrect behavior.
-
-[ List each incompatible change as a =head2 entry ]
 
 =head2 Directory handles not copied to threads
 
@@ -575,6 +590,11 @@ new C<sv_2bool_flags> function.
 C<sv_catsv_flags> no longer calls C<mg_get> on its second argument (the
 source string) if the flags passed to it do not include SV_GMAGIC. So it
 now matches what the documentation says it does.
+
+=item *
+
+A new interface has been added for custom check hooks on subroutines. See
+L/Custom per-subroutine check hooks>, above.
 
 =back
 
