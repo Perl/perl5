@@ -926,7 +926,7 @@ use File::Glob qw(:case);
 				Memoize/Saves.pm
 			       },
 			   ],
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'MIME::Base64' =>
