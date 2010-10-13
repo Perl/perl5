@@ -704,15 +704,10 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp)
 
     if (!len) {
 	parser->linestr = newSVpvs("\n;");
-    } else if (SvREADONLY(line) || s[len-1] != ';' || !SvPOK(line)) {
-	/* avoid tie/overload weirdness */
+    } else {
 	parser->linestr = newSVpvn_flags(s, len, SvUTF8(line));
 	if (s[len-1] != ';')
 	    sv_catpvs(parser->linestr, "\n;");
-    } else {
-	SvTEMP_off(line);
-	SvREFCNT_inc_simple_void_NN(line);
-	parser->linestr = line;
     }
     parser->oldoldbufptr =
 	parser->oldbufptr =
