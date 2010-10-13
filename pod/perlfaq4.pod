@@ -2506,31 +2506,39 @@ some gotchas.  See the section on Regular Expressions.
 =head2 How do I determine whether a scalar is a number/whole/integer/float?
 
 Assuming that you don't care about IEEE notations like "NaN" or
-"Infinity", you probably just want to use a regular expression.
+"Infinity", you probably just want to use a regular expression:
 
-	if (/\D/)             { print "has nondigits\n" }
-	if (/^\d+\z/)         { print "is a whole number\n" }
-	if (/^-?\d+\z/)       { print "is an integer\n" }
-	if (/^[+-]?\d+\z/)    { print "is a +/- integer\n" }
-	if (/^-?\d+\.?\d*\z/) { print "is a real number\n" }
-	if (/^-?(?:\d+(?:\.\d*)?|\.\d+)\z/) { print "is a decimal number\n" }
-	if (/^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?\z/)
-			{ print "a C float\n" }
+	use 5.010;
+	
+	given( $number ) {
+		when( /\D/ )             
+			{ say "\thas nondigits"; continue }
+		when( /^\d+\z/ )         
+			{ say "\tis a whole number"; continue }
+		when( /^-?\d+\z/ )       
+			{ say "\tis an integer"; continue }
+		when( /^[+-]?\d+\z/ )    
+			{ say "\tis a +/- integer"; continue }
+		when( /^-?(?:\d+\.?|\.\d)\d*\z/ ) 
+			{ say "\tis a real number"; continue }
+		when( /^[+-]?(?=\.?\d)\d*\.?\d*(?:e[+-]?\d+)?\z/i)
+			{ say "\tis a C float" }
+		}
 
 There are also some commonly used modules for the task.
 L<Scalar::Util> (distributed with 5.8) provides access to perl's
 internal function C<looks_like_number> for determining whether a
-variable looks like a number.  L<Data::Types> exports functions that
+variable looks like a number. L<Data::Types> exports functions that
 validate data types using both the above and other regular
 expressions. Thirdly, there is C<Regexp::Common> which has regular
 expressions to match various types of numbers. Those three modules are
 available from the CPAN.
 
 If you're on a POSIX system, Perl supports the C<POSIX::strtod>
-function.  Its semantics are somewhat cumbersome, so here's a
-C<getnum> wrapper function for more convenient access.  This function
+function. Its semantics are somewhat cumbersome, so here's a
+C<getnum> wrapper function for more convenient access. This function
 takes a string and returns the number it found, or C<undef> for input
-that isn't a C float.  The C<is_numeric> function is a front end to
+that isn't a C float. The C<is_numeric> function is a front end to
 C<getnum> if you just want to say, "Is this a float?"
 
 	sub getnum {
