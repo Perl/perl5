@@ -1280,18 +1280,14 @@ XS(XS_Tie_Hash_NamedCapture_FETCH)
         XSRETURN_UNDEF;
 
     SP -= items;
+    PUTBACK;
 
     flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
     ret = CALLREG_NAMED_BUFF_FETCH(rx, ST(1), flags);
 
     SPAGAIN;
-
-    if (ret) {
-        mXPUSHs(ret);
-        PUTBACK;
-        return;
-    }
-    XSRETURN_UNDEF;
+    PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
+    XSRETURN(1);
 }
 
 XS(XS_Tie_Hash_NamedCapture_STORE)
@@ -1311,6 +1307,7 @@ XS(XS_Tie_Hash_NamedCapture_STORE)
     }
 
     SP -= items;
+    PUTBACK;
 
     flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
     CALLREG_NAMED_BUFF_STORE(rx,ST(1), ST(2), flags);
@@ -1334,10 +1331,12 @@ XS(XS_Tie_Hash_NamedCapture_DELETE)
         Perl_croak_no_modify(aTHX);
 
     SP -= items;
+    PUTBACK;
 
     flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
     ret = CALLREG_NAMED_BUFF_DELETE(rx, ST(1), flags);
 
+    SPAGAIN;
     PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
     XSRETURN(1);
 }
@@ -1358,6 +1357,7 @@ XS(XS_Tie_Hash_NamedCapture_CLEAR)
         Perl_croak_no_modify(aTHX);
 
     SP -= items;
+    PUTBACK;
 
     flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
     CALLREG_NAMED_BUFF_CLEAR(rx, flags);
@@ -1383,15 +1383,14 @@ XS(XS_Tie_Hash_NamedCapture_EXISTS)
         XSRETURN_UNDEF;
 
     SP -= items;
+    PUTBACK;
 
     flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
     ret = CALLREG_NAMED_BUFF_EXISTS(rx, ST(1), flags);
 
     SPAGAIN;
-
-	XPUSHs(ret);
-	PUTBACK;
-	return;
+    PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
+    XSRETURN(1);
 }
 
 XS(XS_Tie_Hash_NamedCapture_FIRSTK)
@@ -1411,19 +1410,14 @@ XS(XS_Tie_Hash_NamedCapture_FIRSTK)
         XSRETURN_UNDEF;
 
     SP -= items;
+    PUTBACK;
 
     flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
     ret = CALLREG_NAMED_BUFF_FIRSTKEY(rx, flags);
 
     SPAGAIN;
-
-    if (ret) {
-        mXPUSHs(ret);
-        PUTBACK;
-    } else {
-        XSRETURN_UNDEF;
-    }
-
+    PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
+    XSRETURN(1);
 }
 
 XS(XS_Tie_Hash_NamedCapture_NEXTK)
@@ -1443,18 +1437,14 @@ XS(XS_Tie_Hash_NamedCapture_NEXTK)
         XSRETURN_UNDEF;
 
     SP -= items;
+    PUTBACK;
 
     flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
     ret = CALLREG_NAMED_BUFF_NEXTKEY(rx, ST(1), flags);
 
     SPAGAIN;
-
-    if (ret) {
-        mXPUSHs(ret);
-    } else {
-        XSRETURN_UNDEF;
-    }  
-    PUTBACK;
+    PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
+    XSRETURN(1);
 }
 
 XS(XS_Tie_Hash_NamedCapture_SCALAR)
@@ -1474,19 +1464,14 @@ XS(XS_Tie_Hash_NamedCapture_SCALAR)
         XSRETURN_UNDEF;
 
     SP -= items;
+    PUTBACK;
 
     flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
     ret = CALLREG_NAMED_BUFF_SCALAR(rx, flags);
 
     SPAGAIN;
-
-    if (ret) {
-        mXPUSHs(ret);
-        PUTBACK;
-        return;
-    } else {
-        XSRETURN_UNDEF;
-    }
+    PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
+    XSRETURN(1);
 }
 
 XS(XS_Tie_Hash_NamedCapture_flags)
