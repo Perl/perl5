@@ -2152,7 +2152,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     }
 #endif
 
-    lex_start(linestr_sv, rsfp);
+    lex_start(linestr_sv, rsfp, 0);
     PL_subname = newSVpvs("main");
 
     if (add_read_e_script)

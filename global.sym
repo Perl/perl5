@@ -290,6 +290,7 @@ Perl_lex_peek_unichar
 Perl_lex_read_space
 Perl_lex_read_to
 Perl_lex_read_unichar
+Perl_lex_start
 Perl_lex_stuff_pv
 Perl_lex_stuff_pvn
 Perl_lex_stuff_sv

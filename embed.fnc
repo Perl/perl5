@@ -611,9 +611,8 @@ s	|OP*	|opt_scalarhv	|NN OP* rep_op
 s	|OP*	|is_inplace_av	|NN OP* o|NULLOK OP* oright
 #endif
 Ap	|void	|leave_scope	|I32 base
-: Used in various files
-p	|void	|lex_start	|NULLOK SV* line|NULLOK PerlIO *rsfp
 : Public lexer API
+AMpd	|void	|lex_start	|NULLOK SV* line|NULLOK PerlIO *rsfp|U32 flags
 AMpd	|bool	|lex_bufutf8
 AMpd	|char*	|lex_grow_linestr|STRLEN len
 AMpd	|void	|lex_stuff_pvn	|NN const char* pv|STRLEN len|U32 flags

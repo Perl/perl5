@@ -643,26 +643,39 @@ S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 }
 #endif
 
-
-
 /*
- * Perl_lex_start
- *
- * Create a parser object and initialise its parser and lexer fields
- *
- * rsfp       is the opened file handle to read from (if any),
- *
- * line       holds any initial content already read from the file (or in
- *            the case of no file, such as an eval, the whole contents);
- */
+=for apidoc Amx|void|lex_start|SV *line|PerlIO *rsfp|U32 flags
+
+Creates and initialises a new lexer/parser state object, supplying
+a context in which to lex and parse from a new source of Perl code.
+A pointer to the new state object is placed in L</PL_parser>.  An entry
+is made on the save stack so that upon unwinding the new state object
+will be destroyed and the former value of L</PL_parser> will be restored.
+Nothing else need be done to clean up the parsing context.
+
+The code to be parsed comes from I<line> and I<rsfp>.  I<line>, if
+non-null, provides a string (in SV form) containing code to be parsed.
+A copy of the string is made, so subsequent modification of I<line>
+does not affect parsing.  I<rsfp>, if non-null, provides an input stream
+from which code will be read to be parsed.  If both are non-null, the
+code in I<line> comes first and must consist of complete lines of input,
+and I<rsfp> supplies the remainder of the source.
+
+The I<flags> parameter is reserved for future use, and must always
+be zero.
+
+=cut
+*/
 
 void
-Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp)
+Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
 {
     dVAR;
     const char *s = NULL;
     STRLEN len;
     yy_parser *parser, *oparser;
+    if (flags)
+	Perl_croak(aTHX_ "Lexing code internal error (%s)", "lex_start");
 
     /* create and initialise a parser */
 

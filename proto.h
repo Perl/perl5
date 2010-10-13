@@ -1794,7 +1794,7 @@ PERL_CALLCONV void	Perl_lex_read_to(pTHX_ char* ptr)
 	assert(ptr)
 
 PERL_CALLCONV I32	Perl_lex_read_unichar(pTHX_ U32 flags);
-PERL_CALLCONV void	Perl_lex_start(pTHX_ SV* line, PerlIO *rsfp);
+PERL_CALLCONV void	Perl_lex_start(pTHX_ SV* line, PerlIO *rsfp, U32 flags);
 PERL_CALLCONV void	Perl_lex_stuff_pv(pTHX_ const char* pv, U32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_LEX_STUFF_PV	\

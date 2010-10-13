@@ -2992,7 +2992,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, const char *code, PAD** padp)
     PERL_ARGS_ASSERT_SV_COMPILE_2OP;
 
     ENTER_with_name("eval");
-    lex_start(sv, NULL);
+    lex_start(sv, NULL, 0);
     SAVETMPS;
     /* switch to eval mode */
 
@@ -3764,7 +3764,7 @@ PP(pp_require)
 
     ENTER_with_name("eval");
     SAVETMPS;
-    lex_start(NULL, tryrsfp);
+    lex_start(NULL, tryrsfp, 0);
 
     SAVEHINTS();
     PL_hints = 0;
@@ -3859,7 +3859,7 @@ PP(pp_entereval)
     TAINT_PROPER("eval");
 
     ENTER_with_name("eval");
-    lex_start(sv, NULL);
+    lex_start(sv, NULL, 0);
     SAVETMPS;
 
     /* switch to eval mode */
