@@ -31,15 +31,15 @@ is($-{a}[1], "a", "FETCH");
 
 # STORE
 eval { $+{a} = "yon" };
-ok(index($@, "read-only") != -1, "STORE");
+like($@, qr/read-only/, "STORE");
 
 # DELETE
 eval { delete $+{a} };
-ok(index($@, "read-only") != -1, "DELETE");
+like($@, qr/read-only/, "DELETE");
 
 # CLEAR
 eval { %+ = () };
-ok(index($@, "read-only") != -1, "CLEAR");
+like($@, qr/read-only/, "CLEAR");
 
 # EXISTS
 ok(exists $+{e}, "EXISTS");
