@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been logged up to 2748c776108ea3c2dab18eeb6a710e819486df17,
+This has been logged up to 91332126cd9c948fe94d99b88f88ed9f528cc0d8,
 except for:
 57ef47cc7bcd1b57927d5010f363ccaa10f1d990
 b2ea9a00b30eb5881b863d7239dd6a3721e73136
@@ -78,6 +78,14 @@ Unicode named character sequences, whereas the pre-existing
 C<charnames::vianame()> cannot, as the latter returns a single code
 point.
 See L<charnames>.
+
+=head2 Reentrant regular expression engine
+
+It is now safe to use regular expressions within C<(?{...})> and
+C<(??{...})> code blocks inside regular expressions.
+
+These block are still experimental, however, and still have problems with
+lexical (C<my>) variables and abnormal exiting.
 
 =head2 Custom per-subroutine check hooks
 
@@ -269,6 +277,10 @@ The internal C<xclose> routine now knows how to handle file descriptors, as
 documented, so duplicating STDIN in a child process using its file
 descriptor now works
 L<[perl #76474]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=71710>.
+
+=item *
+
+C<Locale::Codes> has been upgraded from version 3.13 to 3.14.
 
 =item *
 
@@ -618,6 +630,10 @@ L<op_prepend_elem|perlapi/op_prepend_elem>.
 
 The L<LINKLIST|perlapi/LINKLIST> macro, part of op building that
 constructs the execution-order op chain, has been added to the API.
+
+=item *
+
+Many functions ending with pvn now have equivalent pv/pvs/sv versions.
 
 =back
 
