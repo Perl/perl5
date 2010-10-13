@@ -53,24 +53,30 @@ presently in scope.
 
 =head1 SPECIAL VARIABLES
 
-The following names have special meaning to Perl.  Most
-punctuation names have reasonable mnemonics, or analogs in the
-shells.  Nevertheless, if you wish to use long variable names,
-you need only say
+The following names have special meaning to Perl.  Most punctuation
+names have reasonable mnemonics, or analogs in the shells. 
+Nevertheless, if you wish to use long variable names, you need only
+say
 
     use English;
 
 at the top of your program. This aliases all the short names to the long
 names in the current package. Some even have medium names, generally
-borrowed from B<awk>. In general, it's best to use the
+borrowed from B<awk>. To avoid a performance hit, if you don't need the
+C<$PREMATCH>, C<$MATCH>, or C<$POSTMATCH> it's best to use the C<English>
+module without them:
 
     use English '-no_match_vars';
 
-invocation if you don't need $PREMATCH, $MATCH, or $POSTMATCH, as it avoids
-a certain performance hit with the use of regular expressions. See
-L<English>.
+Before you continue, note the sort order for variables. In general, we first list
+the variables in order of their type, scalars first, then arrays and hashes, followed
+by the odd barewords (i.e. filehandles). Within each variable type, we sort the
+names in lexicographical order. However, C<$_> gets pride of place since its
+extra special.
 
 =head2 General Variables
+
+=over 8
 
 =item $ARG
 
@@ -99,7 +105,7 @@ don't use it:
 
 =item *
 
-The following functions:
+The following functions use C<$_> as a default argument:
 
 abs, alarm, chomp, chop, chr, chroot, cos, defined, eval, exp, glob,
 hex, int, lc, lcfirst, length, log, lstat, mkdir, oct, ord, pos, print,
@@ -145,10 +151,6 @@ C<$_> by declaring it in a file or in a block with C<my>. Moreover,
 declaring C<our $_> restores the global C<$_> in the current scope.
 
 Mnemonic: underline is understood in certain operations.
-
-=back
-
-=over 8
 
 =item $a
 
@@ -1363,18 +1365,6 @@ changes to the special variables.
 
 =over 8
 
-=item ARGV
-X<ARGV>
-
-The special filehandle that iterates over command-line filenames in
-C<@ARGV>. Usually written as the null filehandle in the angle operator
-C<< <> >>. Note that currently C<ARGV> only has its magical effect
-within the C<< <> >> operator; elsewhere it is just a plain filehandle
-corresponding to the last file opened by C<< <> >>. In particular,
-passing C<\*ARGV> as a parameter to a function that expects a filehandle
-may not cause your function to automatically read the contents of all the
-files in C<@ARGV>.
-
 =item $ARGV
 X<$ARGV>
 
@@ -1388,6 +1378,18 @@ the script. C<$#ARGV> is generally the number of arguments minus
 one, because C<$ARGV[0]> is the first argument, I<not> the program's
 command name itself. See C<$0> for the command name.
 
+=item ARGV
+X<ARGV>
+
+The special filehandle that iterates over command-line filenames in
+C<@ARGV>. Usually written as the null filehandle in the angle operator
+C<< <> >>. Note that currently C<ARGV> only has its magical effect
+within the C<< <> >> operator; elsewhere it is just a plain filehandle
+corresponding to the last file opened by C<< <> >>. In particular,
+passing C<\*ARGV> as a parameter to a function that expects a filehandle
+may not cause your function to automatically read the contents of all the
+files in C<@ARGV>.
+
 =item ARGVOUT
 X<ARGVOUT>
 
@@ -1395,6 +1397,20 @@ The special filehandle that points to the currently open output file
 when doing edit-in-place processing with B<-i>. Useful when you have
 to do a lot of inserting and don't want to keep modifying C<$_>. See
 L<perlrun> for the B<-i> switch.
+
+=item Handle->output_field_separator EXPR
+
+=item $OUTPUT_FIELD_SEPARATOR
+
+=item $OFS
+
+=item $,
+X<$,> X<$OFS> X<$OUTPUT_FIELD_SEPARATOR>
+
+The output field separator for the print operator. If defined, this
+value is printed between each of print's arguments. Default is C<undef>.
+
+Mnemonic: what is printed when there is a "," in your print statement.
 
 =item HANDLE->input_line_number(EXPR)
 
@@ -1431,7 +1447,7 @@ which handle you last accessed.
 
 Mnemonic: many programs use "." to mean the current line number.
 
-=item IO::Handle->input_record_separator(EXPR)
+=item HANDLE->input_record_separator(EXPR)
 
 =item $INPUT_RECORD_SEPARATOR
 
@@ -1440,18 +1456,17 @@ Mnemonic: many programs use "." to mean the current line number.
 =item $/
 X<$/> X<$RS> X<$INPUT_RECORD_SEPARATOR>
 
-The input record separator, newline by default. This
-influences Perl's idea of what a "line" is.  Works like B<awk>'s RS
-variable, including treating empty lines as a terminator if set to
-the null string (an empty line cannot contain any spaces
-or tabs). You may set it to a multi-character string to match a
-multi-character terminator, or to C<undef> to read through the end
-of file. Setting it to C<"\n\n"> means something slightly
-different than setting to C<"">, if the file contains consecutive
-empty lines. Setting to C<""> will treat two or more consecutive
-empty lines as a single empty line. Setting to C<"\n\n"> will
-blindly assume that the next input character belongs to the next
-paragraph, even if it's a newline.
+The input record separator, newline by default. This influences Perl's
+idea of what a "line" is.  Works like B<awk>'s RS variable, including
+treating empty lines as a terminator if set to the null string (an
+empty line cannot contain any spaces or tabs). You may set it to a
+multi-character string to match a multi-character terminator, or to
+C<undef> to read through the end of file. Setting it to C<"\n\n">
+means something slightly different than setting to C<"">, if the file
+contains consecutive empty lines. Setting to C<""> will treat two or
+more consecutive empty lines as a single empty line. Setting to
+C<"\n\n"> will blindly assume that the next input character belongs to
+the next paragraph, even if it's a newline.
 
     local $/;           # enable "slurp" mode
     local $_ = <FH>;    # whole file now here
@@ -1491,39 +1506,7 @@ Mnemonic: / delimits line boundaries when quoting poetry.
 
 =item $OUTPUT_AUTOFLUSH
 
-=item $|
-X<$|> X<autoflush> X<flush> X<$OUTPUT_AUTOFLUSH>
-
-If set to nonzero, forces a flush right away and after every write
-or print on the currently selected output channel.  Default is 0
-(regardless of whether the channel is really buffered by the
-system or not; C<$|> tells you only whether you've asked Perl
-explicitly to flush after each write). STDOUT will
-typically be line buffered if output is to the terminal and block
-buffered otherwise.  Setting this variable is useful primarily when
-you are outputting to a pipe or socket, such as when you are running
-a Perl program under B<rsh> and want to see the output as it's
-happening.  This has no effect on input buffering.  See L<perlfunc/getc>
-for that.  See L<perldoc/select> on how to select the output channel.
-See also L<IO::Handle>.
-
-Mnemonic: when you want your pipes to be piping hot.
-
-=item IO::Handle->output_field_separator EXPR
-
-=item $OUTPUT_FIELD_SEPARATOR
-
-=item $OFS
-
-=item $,
-X<$,> X<$OFS> X<$OUTPUT_FIELD_SEPARATOR>
-
-The output field separator for the print operator. If defined, this
-value is printed between each of print's arguments. Default is C<undef>.
-
-Mnemonic: what is printed when there is a "," in your print statement.
-
-=item IO::Handle->output_record_separator EXPR
+=item Handle->output_record_separator EXPR
 
 =item $OUTPUT_RECORD_SEPARATOR
 
@@ -1538,8 +1521,24 @@ value is printed after the last of print's arguments. Default is C<undef>.
 Mnemonic: you set C<$\> instead of adding "\n" at the end of the print.
 Also, it's just like C<$/>, but it's what you get "back" from Perl.
 
-=back
+=item $|
+X<$|> X<autoflush> X<flush> X<$OUTPUT_AUTOFLUSH>
 
+If set to nonzero, forces a flush right away and after every write or
+print on the currently selected output channel.  Default is 0
+(regardless of whether the channel is really buffered by the system or
+not; C<$|> tells you only whether you've asked Perl explicitly to
+flush after each write). STDOUT will typically be line buffered if
+output is to the terminal and block buffered otherwise.  Setting this
+variable is useful primarily when you are outputting to a pipe or
+socket, such as when you are running a Perl program under B<rsh> and
+want to see the output as it's happening.  This has no effect on input
+buffering.  See L<perlfunc/getc> for that.  See L<perldoc/select> on
+how to select the output channel. See also L<IO::Handle>.
+
+Mnemonic: when you want your pipes to be piping hot.
+
+=back
 
 =head3 Variables related to formats
 
@@ -1549,6 +1548,27 @@ filehandles so they have
 See L<perlform> for more information about Perl's formats.
 
 =over 8
+
+=item HANDLE->format_formfeed(EXPR)
+
+=item $FORMAT_FORMFEED
+
+=item $ACCUMULATOR
+
+=item $^A
+X<$^A> X<$ACCUMULATOR>
+
+The current value of the C<write()> accumulator for C<format()> lines.
+A format contains C<formline()> calls that put their result into
+C<$^A>.  After calling its format, C<write()> prints out the contents
+of C<$^A> and empties. So you never really see the contents of C<$^A>
+unless you call C<formline()> yourself and then look at it. See
+L<perlform> and L<perlfunc/formline()>.
+
+=item $^L
+X<$^L> X<$FORMAT_FORMFEED>
+
+What formats output as a form feed. The default is C<\f>.
 
 =item HANDLE->format_page_number(EXPR)
 
@@ -1560,18 +1580,6 @@ X<$%> X<$FORMAT_PAGE_NUMBER>
 The current page number of the currently selected output channel.
 
 Mnemonic: C<%> is page number in B<nroff>.
-
-=item HANDLE->format_lines_per_page(EXPR)
-
-=item $FORMAT_LINES_PER_PAGE
-
-=item $=
-X<$=> X<$FORMAT_LINES_PER_PAGE>
-
-The current page length (printable lines) of the currently selected
-output channel. The default is 60.
-
-Mnemonic: = has horizontal lines.
 
 =item HANDLE->format_lines_left(EXPR)
 
@@ -1585,19 +1593,30 @@ channel.
 
 Mnemonic: lines_on_page - lines_printed.
 
-=item HANDLE->format_name(EXPR)
+=item Handle->format_line_break_characters EXPR
 
-=item $FORMAT_NAME
+=item $FORMAT_LINE_BREAK_CHARACTERS
 
-=item $~
-X<$~> X<$FORMAT_NAME>
+=item $:
+X<$:> X<FORMAT_LINE_BREAK_CHARACTERS>
 
-The name of the current report format for the currently selected
-output channel. The default format name is the same as the filehandle
-name. For example, the default format name for the C<STDOUT>
-filehandle is just C<STDOUT>.
+The current set of characters after which a string may be broken to
+fill continuation fields (starting with C<^>) in a format. The default is
+S<" \n-">, to break on a space, newline, or a hyphen.
 
-Mnemonic: brother to C<$^>.
+Mnemonic: a "colon" in poetry is a part of a line.
+
+=item HANDLE->format_lines_per_page(EXPR)
+
+=item $FORMAT_LINES_PER_PAGE
+
+=item $=
+X<$=> X<$FORMAT_LINES_PER_PAGE>
+
+The current page length (printable lines) of the currently selected
+output channel. The default is 60.
+
+Mnemonic: = has horizontal lines.
 
 =item HANDLE->format_top_name(EXPR)
 
@@ -1613,43 +1632,23 @@ filehanlde is C<STDOUT_TOP>.
 
 Mnemonic: points to top of page.
 
-=item IO::Handle->format_line_break_characters EXPR
+=item HANDLE->format_name(EXPR)
 
-=item $FORMAT_LINE_BREAK_CHARACTERS
+=item $FORMAT_NAME
 
-=item $:
-X<$:> X<FORMAT_LINE_BREAK_CHARACTERS>
+=item $~
+X<$~> X<$FORMAT_NAME>
 
-The current set of characters after which a string may be broken to
-fill continuation fields (starting with C<^>) in a format. The default is
-S<" \n-">, to break on a space, newline, or a hyphen.
+The name of the current report format for the currently selected
+output channel. The default format name is the same as the filehandle
+name. For example, the default format name for the C<STDOUT>
+filehandle is just C<STDOUT>.
 
-Mnemonic: a "colon" in poetry is a part of a line.
-
-=item IO::Handle->format_formfeed EXPR
-
-=item $FORMAT_FORMFEED
-
-=item $^L
-X<$^L> X<$FORMAT_FORMFEED>
-
-What formats output as a form feed. The default is C<\f>.
-
-=item $ACCUMULATOR
-
-=item $^A
-X<$^A> X<$ACCUMULATOR>
-
-The current value of the C<write()> accumulator for C<format()> lines.
-A format contains C<formline()> calls that put their result into
-C<$^A>.  After calling its format, C<write()> prints out the contents
-of C<$^A> and empties. So you never really see the contents of C<$^A>
-unless you call C<formline()> yourself and then look at it. See
-L<perlform> and L<perlfunc/formline()>.
+Mnemonic: brother to C<$^>.
 
 =back
 
-=head2 Error Indicators
+=head2 Error Variables
 X<error> X<exception>
 
 The variables C<$@>, C<$!>, C<$^E>, and C<$?> contain information
@@ -1671,35 +1670,167 @@ following Perl expression, which uses a single-quoted string:
 
 After execution of this statement all 4 variables may have been set.
 
-C<$@> is set if the string to be C<eval>-ed did not compile (this
-may happen if C<open> or C<close> were imported with bad prototypes),
-or if Perl code executed during evaluation die()d . In these cases
-the value of $@ is the compile error, or the argument to C<die>
-(which will interpolate C<$!> and C<$?>). (See also L<Fatal>,
-though.)
+C<$@> is set if the string to be C<eval>-ed did not compile (this may
+happen if C<open> or C<close> were imported with bad prototypes), or
+if Perl code executed during evaluation die()d . In these cases the
+value of $@ is the compile error, or the argument to C<die> (which
+will interpolate C<$!> and C<$?>). (See also L<Fatal>, though.)
 
-When the C<eval()> expression above is executed, C<open()>, C<< <PIPE> >>,
-and C<close> are translated to calls in the C run-time library and
+When the C<eval()> expression above is executed, C<open()>, C<< <PIPE>
+>>, and C<close> are translated to calls in the C run-time library and
 thence to the operating system kernel. C<$!> is set to the C library's
 C<errno> if one of these calls fails.
 
-Under a few operating systems, C<$^E> may contain a more verbose
-error indicator, such as in this case, "CDROM tray not closed."
-Systems that do not support extended error messages leave C<$^E>
-the same as C<$!>.
+Under a few operating systems, C<$^E> may contain a more verbose error
+indicator, such as in this case, "CDROM tray not closed." Systems that
+do not support extended error messages leave C<$^E> the same as C<$!>.
 
 Finally, C<$?> may be set to non-0 value if the external program
-F</cdrom/install> fails. The upper eight bits reflect specific
-error conditions encountered by the program (the program's C<exit()>
-value). The lower eight bits reflect mode of failure, like signal
-death and core dump information. See C<wait(2)> for details. In
-contrast to C<$!> and C<$^E>, which are set only if error condition
-is detected, the variable C<$?> is set on each C<wait> or pipe
-C<close>, overwriting the old value. This is more like C<$@>, which
-on every C<eval()> is always set on failure and cleared on success.
+F</cdrom/install> fails. The upper eight bits reflect specific error
+conditions encountered by the program (the program's C<exit()> value).
+The lower eight bits reflect mode of failure, like signal death and
+core dump information. See C<wait(2)> for details. In contrast to
+C<$!> and C<$^E>, which are set only if error condition is detected,
+the variable C<$?> is set on each C<wait> or pipe C<close>,
+overwriting the old value. This is more like C<$@>, which on every
+C<eval()> is always set on failure and cleared on success.
 
 For more details, see the individual descriptions at C<$@>, C<$!>,
 C<$^E>, and C<$?>.
+
+=item $EXTENDED_OS_ERROR
+
+=item ${^CHILD_ERROR_NATIVE}
+X<$^CHILD_ERROR_NATIVE>
+
+The native status returned by the last pipe close, backtick (C<``>)
+command, successful call to C<wait()> or C<waitpid()>, or from the
+C<system()> operator. On POSIX-like systems this value can be decoded
+with the WIFEXITED, WEXITSTATUS, WIFSIGNALED, WTERMSIG, WIFSTOPPED,
+WSTOPSIG and WIFCONTINUED functions provided by the L<POSIX> module.
+
+Under VMS this reflects the actual VMS exit status; i.e. it is the
+same as C<$?> when the pragma C<use vmsish 'status'> is in effect.
+
+This variable was added in Perl 5.8.9.
+
+=item $^E
+X<$^E> X<$EXTENDED_OS_ERROR>
+
+Error information specific to the current operating system. At the
+moment, this differs from C<$!> under only VMS, OS/2, and Win32 (and
+for MacPerl). On all other platforms, C<$^E> is always just the same
+as C<$!>.
+
+Under VMS, C<$^E> provides the VMS status value from the last system
+error. This is more specific information about the last system error
+than that provided by C<$!>. This is particularly important when C<$!>
+is set to B<EVMSERR>.
+
+Under OS/2, C<$^E> is set to the error code of the last call to OS/2
+API either via CRT, or directly from perl.
+
+Under Win32, C<$^E> always returns the last error information reported
+by the Win32 call C<GetLastError()> which describes the last error
+from within the Win32 API. Most Win32-specific code will report errors
+via C<$^E>. ANSI C and Unix-like calls set C<errno> and so most
+portable Perl code will report errors via C<$!>.
+
+Caveats mentioned in the description of C<$!> generally apply to
+C<$^E>, also.
+
+This variable was added in Perl 5.003.
+
+Mnemonic: Extra error explanation.
+ 
+=item $EXCEPTIONS_BEING_CAUGHT
+
+=item $^S
+X<$^S> X<$EXCEPTIONS_BEING_CAUGHT>
+
+Current state of the interpreter.
+
+    $^S         State
+    ---------   -------------------
+    undef       Parsing module/eval
+    true (1)    Executing an eval
+    false (0)   Otherwise
+
+The first state may happen in C<$SIG{__DIE__}> and C<$SIG{__WARN__}>
+handlers.
+
+This variable was added in Perl 5.004.
+
+=item $WARNING
+
+=item $^W
+X<$^W> X<$WARNING>
+
+The current value of the warning switch, initially true if B<-w> was
+used, false otherwise, but directly modifiable.
+
+See also L<warnings>.
+
+Mnemonic: related to the B<-w> switch.  
+
+=item ${^WARNING_BITS}
+
+The current set of warning checks enabled by the C<use warnings> pragma.
+See the documentation of C<warnings> for more details.
+
+This variable was added in Perl 5.10.
+
+=item $OS_ERROR
+
+=item $ERRNO
+
+=item $!
+X<$!> X<$ERRNO> X<$OS_ERROR>
+
+If used numerically, yields the current value of the C C<errno>
+variable, or in other words, if a system or library call fails, it
+sets this variable. This means that the value of C<$!> is meaningful
+only I<immediately> after a B<failure>:
+
+    if (open my $fh, "<", $filename) {
+	# Here $! is meaningless.
+	...
+    } else {
+	# ONLY here is $! meaningful.
+	...
+	# Already here $! might be meaningless.
+    }
+    # Since here we might have either success or failure,
+    # here $! is meaningless.
+
+In the above I<meaningless> stands for anything: zero, non-zero,
+C<undef>. A successful system or library call does B<not> set the
+variable to zero.
+
+If used as a string, yields the corresponding system error string. You
+can assign a number to C<$!> to set I<errno> if, for instance, you
+want C<"$!"> to return the string for error I<n>, or you want to set
+the exit value for the C<die()> operator.
+
+Mnemonic: What just went bang?
+
+=item %OS_ERROR
+
+=item %ERRNO
+
+=item %!
+X<%!>
+
+Each element of C<%!> has a true value only if C<$!> is set to that
+value. For example, C<$!{ENOENT}> is true if and only if the current
+value of C<$!> is C<ENOENT>; that is, if the most recent error was "No
+such file or directory" (or its moral equivalent: not all operating
+systems give that exact error, and certainly not all languages). To
+check if a particular key is meaningful on your system, use C<exists
+$!{the_key}>; for a list of legal keys, use C<keys %!>. See L<Errno>
+for more information, and also see above for the validity of C<$!>.
+
+This variable was added in Perl 5.005.
 
 =item $CHILD_ERROR
 
@@ -1732,111 +1863,8 @@ Under VMS, the pragma C<use vmsish 'status'> makes C<$?> reflect the
 actual VMS exit status, instead of the default emulation of POSIX
 status; see L<perlvms/$?> for details.
 
-Also see L<Error Indicators>.
-
 Mnemonic: similar to B<sh> and B<ksh>.
 
-=item ${^CHILD_ERROR_NATIVE}
-X<$^CHILD_ERROR_NATIVE>
-
-The native status returned by the last pipe close, backtick (C<``>)
-command, successful call to C<wait()> or C<waitpid()>, or from the
-C<system()> operator. On POSIX-like systems this value can be decoded
-with the WIFEXITED, WEXITSTATUS, WIFSIGNALED, WTERMSIG, WIFSTOPPED,
-WSTOPSIG and WIFCONTINUED functions provided by the L<POSIX> module.
-
-Under VMS this reflects the actual VMS exit status; i.e. it is the
-same as C<$?> when the pragma C<use vmsish 'status'> is in effect.
-
-This variable was added in Perl 5.8.9.
-
-=item $OS_ERROR
-
-=item $ERRNO
-
-=item $!
-X<$!> X<$ERRNO> X<$OS_ERROR>
-
-If used numerically, yields the current value of the C C<errno>
-variable, or in other words, if a system or library call fails, it
-sets this variable. This means that the value of C<$!> is meaningful
-only I<immediately> after a B<failure>:
-
-    if (open my $fh, "<", $filename) {
-	# Here $! is meaningless.
-	...
-    } else {
-	# ONLY here is $! meaningful.
-	...
-	# Already here $! might be meaningless.
-    }
-    # Since here we might have either success or failure,
-    # here $! is meaningless.
-
-In the above I<meaningless> stands for anything: zero, non-zero,
-C<undef>. A successful system or library call does B<not> set
-the variable to zero.
-
-If used as a string, yields the corresponding system error string.
-You can assign a number to C<$!> to set I<errno> if, for instance,
-you want C<"$!"> to return the string for error I<n>, or you want
-to set the exit value for the C<die()> operator. 
-
-Also see L<Error Indicators>.
-
-Mnemonic: What just went bang?
-
-=item %OS_ERROR
-
-=item %ERRNO
-
-=item %!
-X<%!>
-
-Each element of C<%!> has a true value only if C<$!> is set to that
-value. For example, C<$!{ENOENT}> is true if and only if the current
-value of C<$!> is C<ENOENT>; that is, if the most recent error was
-"No such file or directory" (or its moral equivalent: not all operating
-systems give that exact error, and certainly not all languages).
-To check if a particular key is meaningful on your system, use
-C<exists $!{the_key}>; for a list of legal keys, use C<keys %!>.
-See L<Errno> for more information, and also see above for the
-validity of C<$!>.
-
-This variable was added in Perl 5.005.
-
-=item $EXTENDED_OS_ERROR
-
-=item $^E
-X<$^E> X<$EXTENDED_OS_ERROR>
-
-Error information specific to the current operating system. At
-the moment, this differs from C<$!> under only VMS, OS/2, and Win32
-(and for MacPerl). On all other platforms, C<$^E> is always just
-the same as C<$!>.
-
-Under VMS, C<$^E> provides the VMS status value from the last
-system error. This is more specific information about the last
-system error than that provided by C<$!>. This is particularly
-important when C<$!> is set to B<EVMSERR>.
-
-Under OS/2, C<$^E> is set to the error code of the last call to
-OS/2 API either via CRT, or directly from perl.
-
-Under Win32, C<$^E> always returns the last error information
-reported by the Win32 call C<GetLastError()> which describes
-the last error from within the Win32 API. Most Win32-specific
-code will report errors via C<$^E>. ANSI C and Unix-like calls
-set C<errno> and so most portable Perl code will report errors
-via C<$!>.
-
-Caveats mentioned in the description of C<$!> generally apply to
-C<$^E>, also.
-
-This variable was added in Perl 5.003.
-
-Mnemonic: Extra error explanation.
- 
 =item $EVAL_ERROR
 
 =item $@
@@ -1851,73 +1879,64 @@ Warning messages are not collected in this variable. You can, however,
 set up a routine to process warnings by setting C<$SIG{__WARN__}> as
 described below.
 
-Also see L<Error Indicators>.
-
 Mnemonic: Where was the syntax error "at"?
- 
-=item $EXCEPTIONS_BEING_CAUGHT
-
-=item $^S
-X<$^S> X<$EXCEPTIONS_BEING_CAUGHT>
-
-Current state of the interpreter.
-
-    $^S         State
-    ---------   -------------------
-    undef       Parsing module/eval
-    true (1)    Executing an eval
-    false (0)   Otherwise
-
-The first state may happen in C<$SIG{__DIE__}> and C<$SIG{__WARN__}> handlers.
-
-This variable was added in Perl 5.004.
-
-=item $WARNING
-
-=item $^W
-X<$^W> X<$WARNING>
-
-The current value of the warning switch, initially true if B<-w> was
-used, false otherwise, but directly modifiable.
-
-See also L<warnings>.
-
-Mnemonic: related to the B<-w> switch.  
-
-=item ${^WARNING_BITS}
-
-The current set of warning checks enabled by the C<use warnings> pragma.
-See the documentation of C<warnings> for more details.
-
-This variable was added in Perl 5.10.
 
 =back
 
 =head2 Deprecated and removed variables
 
-Deprecating a variable announces the perl maintainers intent to 
-eventually remove the varaible from the langauge. It may still be
+Deprecating a variable announces the intent of the perl maintainers to 
+eventually remove the variable from the langauge. It may still be
 available despite its status. Using a deprecated variable triggers
 a warning.
 
-Once the variable is removed, its use triggers an error telling you
+Once a variable is removed, its use triggers an error telling you
 the variable is unsupported.
 
-See L<perldiag> for details about the error messages.
+See L<perldiag> for details about error messages.
 
 =over 8
 
-=item $*
-X<$*>
+=item $#
+X<$#>
 
-C<$*> used to be a variable that enabled multiline matching.
-After a deprecation cycle, its magic was removed in Perl 5.10.
-Using it now triggers a warning: C<$* is no longer supported>.
-Use the C</s> and C</m> regexp modifiers instead.
+C<$#> was a variable that you could be use to format printed numbers.
+After a deprecation cycle, its magic was removed in Perl 5.10 and
+using it now triggers a warning: C<$# is no longer supported>.
+
+This is not the sigil you use in front of an array name to get the
+last index, like C<$#array>. That's still how you get the last index
+of an array in Perl. The two have nothing to do with each other.
 
 Deprecated in Perl 5.
 
 Removed in Perl 5.10.
+
+=item $*
+X<$*>
+
+C<$*> was a variable that you could use to enable multiline matching.
+After a deprecation cycle, its magic was removed in Perl 5.10.
+Using it now triggers a warning: C<$* is no longer supported>.
+You should use the C</s> and C</m> regexp modifiers instead.
+
+Deprecated in Perl 5.
+
+Removed in Perl 5.10.
+
+=item $[
+X<$[>
+
+This variable stores the index of the first element in an array, and
+of the first character in a substring. You use to be able to assign to
+this variable, but you can't do that anymore. It's now always 0, like
+God intended.
+
+Mnemonic: [ begins subscripts.
+
+This variable is read-only.
+
+Deprecated in Perl 5.12. 
 
 =item $]
 X<$]>
@@ -1938,32 +1957,6 @@ the Perl version that allows accurate string comparisons.
 Mnemonic: Is this version of perl in the right bracket?
 
 Deprecated in Perl 5.6.
-
-=item $#
-X<$#>
-
-C<$#> used to be a variable that could be used to format printed numbers.
-After a deprecation cycle, its magic was removed in Perl 5.10 and using it
-now triggers a warning: C<$# is no longer supported>.
-
-This is not the sigil you use in front of an array name to get the
-last index, like C<$#array>. That's still how you get the last index
-of an array in Perl. The two have nothing to do with each other.
-
-Deprecated in Perl 5.
-
-Removed in Perl 5.10.
-
-=item $[
-X<$[>
-
-The index of the first element in an array, and of the first character
-in a substring. You use to be able to assign to this variable, but you
-can't do that anymore. It's always 0, like God intended.
-
-Mnemonic: [ begins subscripts.
-
-Deprecated in Perl 5.12. 
 
 =back
 
