@@ -26,9 +26,18 @@ esac
 
 echo "Extracting utils/Makefile (with variable substitutions)"
 rm -f Makefile
+# These use the Cwd extension.  For statically-built perls, we
+# need perl, not just miniperl.
+case "$usedl" in
+    define) perl="../miniperl" ;;
+    *)      perl="../perl" ;;
+esac
 cat >Makefile <<!GROK!THIS!
+# Generated from utils/Makefile.SH.  The generated file is
+# shipped with the source kit for systems such as win32
+# which don't do .SH extraction.
 
-PERL = ../miniperl
+PERL = $perl
 REALPERL = ../perl
 RUN = $run  # Used mainly cross-compilation setups.
 

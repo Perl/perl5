@@ -1,3 +1,6 @@
+# Generated from utils/Makefile.SH.  The generated file is
+# shipped with the source kit for systems such as win32
+# which don't do .SH extraction.
 
 PERL = ../miniperl
 REALPERL = ../perl

@@ -562,16 +562,30 @@ lib/Config_git.pl: $(MINIPERL_EXE) make_patchnum.pl
 # make sure that we recompile perl.c if the git version changes
 perl$(OBJ_EXT): git_version.h
 
-translators:	$(MINIPERL_EXE) $(CONFIGPM) $(dynamic_ext) FORCE
-	@echo " "; echo "	Making x2p stuff"; cd x2p; $(LDLIBPTH) $(MAKE) all
-
 !NO!SUBS!
 
+# Making utilities and translators require Cwd.  If we have dynamic
+# loading, we only need miniperl and Cwd.$dlext.  If we have static
+# loading, we need to build perl first.
+case "$usedl" in
+define)
+    util_deps='$(MINIPERL_EXE) $(CONFIGPM) lib/auto/Cwd/Cwd$(DLSUFFIX) FORCE'
+     x2p_deps='$(MINIPERL_EXE) $(CONFIGPM) $(dynamic_ext) FORCE'
+    ;;
+*)  util_deps='$(PERL_EXE) $(CONFIGPM) FORCE'
+     x2p_deps='$(PERL_EXE) $(CONFIGPM) FORCE'
+    ;;
+esac
+
 $spitshell >>$Makefile <<!GROK!THIS!
-utilities:	\$(MINIPERL_EXE) \$(CONFIGPM) FORCE lib/auto/Cwd/Cwd.$dlext
+translators:	$x2p_deps
+	@echo " "; echo "	Making x2p stuff"; cd x2p; \$(LDLIBPTH) \$(MAKE) all
+
+utilities:	$util_deps
 	@echo " "; echo "	Making utilities"; cd utils; \$(LDLIBPTH) \$(MAKE) all
 
 !GROK!THIS!
+
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
 # This is now done by installman only if you actually want the man pages.
