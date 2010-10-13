@@ -864,7 +864,6 @@ perl_destruct(pTHXx)
     PL_minus_F      = FALSE;
     PL_doswitches   = FALSE;
     PL_dowarn       = G_WARN_OFF;
-    PL_doextract    = FALSE;
     PL_sawampersand = FALSE;	/* must save all match strings */
     PL_unsafe       = FALSE;
 
@@ -1746,6 +1745,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     const char *scriptname = NULL;
     VOL bool dosearch = FALSE;
     register char c;
+    bool doextract = FALSE;
     const char *cddir = NULL;
 #ifdef USE_SITECUSTOMIZE
     bool minus_f = FALSE;
@@ -1874,7 +1874,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		goto reswitch;
 	    }
 	case 'x':
-	    PL_doextract = TRUE;
+	    doextract = TRUE;
 	    s++;
 	    if (*s)
 		cddir = s;
@@ -2018,7 +2018,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  endif
 #endif
 
-	if (PL_doextract) {
+	if (doextract) {
 
 	    /* This will croak if suidscript is true, as -x cannot be used with
 	       setuid scripts.  */
@@ -3674,24 +3674,21 @@ S_find_beginning(pTHX_ SV* linestr_sv, PerlIO *rsfp)
 
     /* skip forward in input to the real script? */
 
-    while (PL_doextract) {
+    do {
 	if ((s = sv_gets(linestr_sv, rsfp, 0)) == NULL)
 	    Perl_croak(aTHX_ "No Perl script found in input\n");
 	s2 = s;
-	if (*s == '#' && s[1] == '!' && ((s = instr(s,"perl")) || (s = instr(s2,"PERL")))) {
-	    PerlIO_ungetc(rsfp, '\n');		/* to keep line count right */
-	    PL_doextract = FALSE;
-	    while (*s && !(isSPACE (*s) || *s == '#')) s++;
-	    s2 = s;
-	    while (*s == ' ' || *s == '\t') s++;
-	    if (*s++ == '-') {
-		while (isDIGIT(s2[-1]) || s2[-1] == '-' || s2[-1] == '.'
-		       || s2[-1] == '_') s2--;
-		if (strnEQ(s2-4,"perl",4))
-		    while ((s = moreswitches(s)))
-			;
-	    }
-	}
+    } while (!(*s == '#' && s[1] == '!' && ((s = instr(s,"perl")) || (s = instr(s2,"PERL")))));
+    PerlIO_ungetc(rsfp, '\n');		/* to keep line count right */
+    while (*s && !(isSPACE (*s) || *s == '#')) s++;
+    s2 = s;
+    while (*s == ' ' || *s == '\t') s++;
+    if (*s++ == '-') {
+	while (isDIGIT(s2[-1]) || s2[-1] == '-' || s2[-1] == '.'
+	       || s2[-1] == '_') s2--;
+	if (strnEQ(s2-4,"perl",4))
+	    while ((s = moreswitches(s)))
+		;
     }
 }
 
