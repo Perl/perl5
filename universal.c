@@ -1038,8 +1038,6 @@ XS(XS_re_is_regexp)
     if (items != 1)
 	croak_xs_usage(cv, "sv");
 
-    SP -= items;
-
     if (SvRXOK(ST(0))) {
         XSRETURN_YES;
     } else {
@@ -1058,6 +1056,7 @@ XS(XS_re_regnames_count)
 	croak_xs_usage(cv, "");
 
     SP -= items;
+    PUTBACK;
 
     if (!rx)
         XSRETURN_UNDEF;
@@ -1065,14 +1064,8 @@ XS(XS_re_regnames_count)
     ret = CALLREG_NAMED_BUFF_COUNT(rx);
 
     SPAGAIN;
-
-    if (ret) {
-        mXPUSHs(ret);
-        PUTBACK;
-        return;
-    } else {
-        XSRETURN_UNDEF;
-    }
+    PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
+    XSRETURN(1);
 }
 
 XS(XS_re_regname)
@@ -1087,6 +1080,7 @@ XS(XS_re_regname)
 	croak_xs_usage(cv, "name[, all ]");
 
     SP -= items;
+    PUTBACK;
 
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
@@ -1100,11 +1094,9 @@ XS(XS_re_regname)
     }
     ret = CALLREG_NAMED_BUFF_FETCH(rx, ST(0), (flags | RXapif_REGNAME));
 
-    if (ret) {
-        mXPUSHs(ret);
-        XSRETURN(1);
-    }
-    XSRETURN_UNDEF;    
+    SPAGAIN;
+    PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
+    XSRETURN(1);
 }
 
 
@@ -1135,12 +1127,11 @@ XS(XS_re_regnames)
     }
 
     SP -= items;
+    PUTBACK;
 
     ret = CALLREG_NAMED_BUFF_ALL(rx, (flags | RXapif_REGNAMES));
 
     SPAGAIN;
-
-    SP -= items;
 
     if (!ret)
         XSRETURN_UNDEF;
