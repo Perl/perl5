@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 use warnings;
-plan(tests => 15);
+plan(tests => 16);
 
 {
     package New;
@@ -192,3 +192,10 @@ for(
  is $pet->speak, 'Woof!',
   'the deleted stash is gone completely when freed';
 }
+
+# mro_package_moved needs to check for self-referential packages.
+# This broke Text::Template [perl #78362].
+watchdog 3;
+*foo:: = \%::;
+*Acme::META::Acme:: = \*Acme::; # indirect self-reference
+pass("mro_package_moved and self-referential packages");

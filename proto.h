@@ -2256,7 +2256,7 @@ PERL_CALLCONV void	Perl_mro_method_changed_in(pTHX_ HV* stash)
 #define PERL_ARGS_ASSERT_MRO_METHOD_CHANGED_IN	\
 	assert(stash)
 
-PERL_CALLCONV void	Perl_mro_package_moved(pTHX_ HV * const stash, const HV * const oldstash, const GV * const gv, const char *newname, STRLEN newname_len);
+PERL_CALLCONV void	Perl_mro_package_moved(pTHX_ HV * const stash, const HV * const oldstash, const GV * const gv, const char *newname, I32 newname_len);
 PERL_CALLCONV void	Perl_mro_register(pTHX_ const struct mro_alg *mro)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_MRO_REGISTER	\

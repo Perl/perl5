@@ -2362,7 +2362,7 @@ sd	|AV*	|mro_get_linear_isa_dfs|NN HV* stash|U32 level
 md	|void   |mro_isa_changed_in|NN HV* stash
 pd	|void   |mro_isa_changed_in3|NULLOK HV* stash|NULLOK const char *stashname|STRLEN stashname_len
 Apd	|void	|mro_method_changed_in	|NN HV* stash
-pdx	|void	|mro_package_moved	|NULLOK HV * const stash|NULLOK const HV * const oldstash|NULLOK const GV * const gv|NULLOK const char *newname|STRLEN newname_len
+pdx	|void	|mro_package_moved	|NULLOK HV * const stash|NULLOK const HV * const oldstash|NULLOK const GV * const gv|NULLOK const char *newname|I32 newname_len
 : Only used in perl.c
 p	|void   |boot_core_mro
 Apon	|void	|sys_init	|NN int* argc|NN char*** argv

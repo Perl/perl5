@@ -589,15 +589,20 @@ non-existent packages that have corresponding entries in C<stash>.
 void
 Perl_mro_package_moved(pTHX_ HV * const stash, const HV * const oldstash,
                        const GV * const gv, const char *newname,
-                       STRLEN newname_len)
+                       I32 newname_len)
 {
     register XPVHV* xhv;
     register HE *entry;
     I32 riter = -1;
     HV *seen = NULL;
+    /* If newname_len is negative, it is actually the call depth (negated).
+     */
+    const I32 level = newname_len < 0 ? newname_len : 0;
 
     assert(stash || oldstash);
     assert(oldstash || gv || newname);
+
+    if(level < -100) return;
 
     if(!newname && oldstash) {
 	newname = HvNAME_get(oldstash);
@@ -605,10 +610,14 @@ Perl_mro_package_moved(pTHX_ HV * const stash, const HV * const oldstash,
     }
     if(!newname && gv) {
 	SV * const namesv = sv_newmortal();
+	STRLEN len;
 	gv_fullname4(namesv, gv, NULL, 0);
-	newname = SvPV_const(namesv, newname_len);
-	newname_len -= 2; /* skip trailing :: */
+	newname = SvPV_const(namesv, len);
+	newname_len = len - 2; /* skip trailing :: */
     }
+    /* XXX This relies on the fact that package names cannot contain nulls.
+     */
+    if(newname_len < 0) newname_len = strlen(newname);
 
     mro_isa_changed_in3((HV *)oldstash, newname, newname_len);
 
@@ -649,13 +658,17 @@ Perl_mro_package_moved(pTHX_ HV * const stash, const HV * const oldstash,
 		    SV ** const stashentry
 		     = stash ? hv_fetch(stash, key, len, 0) : NULL;
 		    HV *substash;
+
+		    /* Avoid main::main::main::... */
+		    if(oldsubstash == oldstash) continue;
+
 		    if(
 		        stashentry && *stashentry
 		     && (substash = GvHV(*stashentry))
 		     && HvNAME(substash)
 		    )
 			mro_package_moved(
-			 substash, oldsubstash, NULL, NULL, 0
+			 substash, oldsubstash, NULL, NULL, level-1
 			);
 		    else if(oldsubstash && HvNAME(oldsubstash))
 			mro_isa_changed_in(oldsubstash);
@@ -697,15 +710,21 @@ Perl_mro_package_moved(pTHX_ HV * const stash, const HV * const oldstash,
 
 		    substash = GvHV(HeVAL(entry));
 		    if(substash && HvNAME(substash)) {
+			SV *namesv;
+
+			/* Avoid checking main::main::main::... */
+			if(substash == stash) continue;
+
 			/* Add :: and the key (minus the trailing ::)
 			   to newname. */
-			SV *namesv
+			namesv
 			 = newSVpvn_flags(newname, newname_len, SVs_TEMP);
 			sv_catpvs(namesv, "::");
 			sv_catpvn(namesv, key, len-2);
 			mro_package_moved(
 			    substash, NULL, NULL,
-			    SvPV_nolen_const(namesv), newname_len+len
+			    SvPV_nolen_const(namesv),
+			    level-1
 			);
 		    }
 		}
