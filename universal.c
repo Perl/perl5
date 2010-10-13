@@ -1272,7 +1272,7 @@ XS(XS_Tie_Hash_NamedCapture_FETCH)
     SV * ret;
 
     if (items != 2)
-	croak_xs_usage(cv, "$key, $flags");
+	croak_xs_usage(cv, "$key");
 
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
@@ -1299,7 +1299,7 @@ XS(XS_Tie_Hash_NamedCapture_STORE)
     SV *ret;
 
     if (items != 3)
-	croak_xs_usage(cv, "$key, $value, $flags");
+	croak_xs_usage(cv, "$key, $value");
 
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
@@ -1331,7 +1331,7 @@ XS(XS_Tie_Hash_NamedCapture_DELETE)
     SV *ret;
 
     if (items != 2)
-	croak_xs_usage(cv, "$key, $flags");
+	croak_xs_usage(cv, "$key");
 
     if (!rx || !SvROK(ST(0)))
         Perl_croak_no_modify(aTHX);
@@ -1356,7 +1356,7 @@ XS(XS_Tie_Hash_NamedCapture_CLEAR)
     SV *ret;
 
     if (items != 1)
-	croak_xs_usage(cv, "$flags");
+	croak_xs_usage(cv, "");
 
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
@@ -1386,7 +1386,7 @@ XS(XS_Tie_Hash_NamedCapture_EXISTS)
     SV * ret;
 
     if (items != 2)
-	croak_xs_usage(cv, "$key, $flags");
+	croak_xs_usage(cv, "$key");
 
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
