@@ -1314,6 +1314,9 @@ XS(XS_Tie_Hash_NamedCapture_STORE)
 
     flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
     CALLREG_NAMED_BUFF_STORE(rx,ST(1), ST(2), flags);
+
+    /* Perl_magic_setpack calls us with G_DISCARD, so our return stack state
+       is thrown away.  */
 }
 
 XS(XS_Tie_Hash_NamedCapture_DELETE)
@@ -1322,6 +1325,7 @@ XS(XS_Tie_Hash_NamedCapture_DELETE)
     dXSARGS;
     REGEXP * rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
     U32 flags;
+    SV *ret;
 
     if (items != 2)
 	croak_xs_usage(cv, "$key, $flags");
@@ -1332,7 +1336,10 @@ XS(XS_Tie_Hash_NamedCapture_DELETE)
     SP -= items;
 
     flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
-    CALLREG_NAMED_BUFF_DELETE(rx, ST(1), flags);
+    ret = CALLREG_NAMED_BUFF_DELETE(rx, ST(1), flags);
+
+    PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
+    XSRETURN(1);
 }
 
 XS(XS_Tie_Hash_NamedCapture_CLEAR)
@@ -1354,6 +1361,9 @@ XS(XS_Tie_Hash_NamedCapture_CLEAR)
 
     flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
     CALLREG_NAMED_BUFF_CLEAR(rx, flags);
+
+    /* Perl_magic_wipepack calls us with G_DISCARD, so our return stack state
+       is thrown away.  */
 }
 
 XS(XS_Tie_Hash_NamedCapture_EXISTS)
