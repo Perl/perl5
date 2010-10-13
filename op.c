@@ -4364,7 +4364,7 @@ Perl_vload_module(pTHX_ U32 flags, SV *name, SV *ver, va_list *args)
 
     ENTER;
     SAVEVPTR(PL_curcop);
-    lex_start(NULL, NULL, FALSE);
+    lex_start(NULL, NULL);
     utilize(!(flags & PERL_LOADMOD_DENY), start_subparse(FALSE, 0),
 	    veop, modname, imop);
     LEAVE;

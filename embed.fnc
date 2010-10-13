@@ -614,7 +614,7 @@ Ap	|void	|leave_scope	|I32 base
 : Used in pp_ctl.c, and by Data::Alias
 EXp	|void	|lex_end
 : Used in various files
-p	|void	|lex_start	|NULLOK SV* line|NULLOK PerlIO *rsfp|bool new_filter
+p	|void	|lex_start	|NULLOK SV* line|NULLOK PerlIO *rsfp
 : Public lexer API
 AMpd	|bool	|lex_bufutf8
 AMpd	|char*	|lex_grow_linestr|STRLEN len

@@ -654,13 +654,10 @@ S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen)
  *
  * line       holds any initial content already read from the file (or in
  *            the case of no file, such as an eval, the whole contents);
- *
- * new_filter indicates that this is a new file and it shouldn't inherit
- *            the filters from the current parser (ie require).
  */
 
 void
-Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, bool new_filter)
+Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp)
 {
     dVAR;
     const char *s = NULL;
@@ -693,8 +690,7 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, bool new_filter)
     parser->lex_state = LEX_NORMAL;
     parser->expect = XSTATE;
     parser->rsfp = rsfp;
-    parser->rsfp_filters = (new_filter || !oparser) ? newAV()
-		: MUTABLE_AV(SvREFCNT_inc(oparser->rsfp_filters));
+    parser->rsfp_filters = newAV();
 
     Newx(parser->lex_brackstack, 120, char);
     Newx(parser->lex_casestack, 12, char);
