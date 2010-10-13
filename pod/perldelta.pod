@@ -596,6 +596,18 @@ now matches what the documentation says it does.
 A new interface has been added for custom check hooks on subroutines. See
 L/Custom per-subroutine check hooks>, above.
 
+=item *
+
+List op building functions have been added to the
+API.  See L<op_append_elem|perlapi/op_append_elem>,
+L<op_append_list|perlapi/op_append_list>, and
+L<op_prepend_elem|perlapi/op_prepend_elem>.
+
+=item *
+
+The L<LINKLIST|perlapi/LINKLIST> macro, part of op building that
+constructs the execution-order op chain, has been added to the API.
+
 =back
 
 =head1 Selected Bug Fixes
