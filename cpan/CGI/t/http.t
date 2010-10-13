@@ -7,6 +7,8 @@ use lib qw(t/lib);
 use Test::More tests => 7;
 use CGI;
 
+%ENV=();
+
 my $cgi = CGI->new();
 
 {
