@@ -1500,7 +1500,7 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.vmesa    ..\pod\perlvmesa.pod
 	copy ..\README.vos      ..\pod\perlvos.pod
 	copy ..\README.win32    ..\pod\perlwin32.pod
-	copy ..\pod\perl5122delta.pod ..\pod\perldelta.pod
+	copy ..\pod\perl5123delta.pod ..\pod\perldelta.pod
 	cd ..\pod && $(MAKE) -f ..\win32\pod.mak converters
 	$(PERLEXE) $(PL2BAT) $(UTILS)
 	$(PERLEXE) $(ICWD) ..\autodoc.pl ..
