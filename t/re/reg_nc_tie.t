@@ -8,7 +8,7 @@ BEGIN {
 
 # Do a basic test on all the tied methods of Tie::Hash::NamedCapture
 
-plan(tests => 21);
+plan(tests => 37);
 
 # PL_curpm->paren_names can be a null pointer. See that this succeeds anyway.
 'x' =~ /(.)/;
@@ -66,3 +66,20 @@ is(Tie::Hash::NamedCapture::EXISTS(undef, undef), undef, 'EXISTS with undef');
 is(Tie::Hash::NamedCapture::FIRSTKEY(undef), undef, 'FIRSTKEY with undef');
 is(Tie::Hash::NamedCapture::NEXTKEY(undef, undef), undef, 'NEXTKEY with undef');
 is(Tie::Hash::NamedCapture::SCALAR(undef), undef, 'SCALAR with undef');
+
+my $obj = tied %+;
+foreach ([FETCH => '$key'],
+	 [STORE => '$key, $value'],
+	 [DELETE => '$key'],
+	 [CLEAR => ''],
+	 [EXISTS => '$key'],
+	 [FIRSTKEY => ''],
+	 [NEXTKEY => '$lastkey'],
+	 [SCALAR => ''],
+	) {
+    my ($method, $error) = @$_;
+
+    is(eval {$obj->$method(0..3); 1}, undef, "$method with undef");
+    like($@, qr/Usage: Tie::Hash::NamedCapture::$method\(\Q$error\E\)/,
+	 "usage method for $method");
+}
