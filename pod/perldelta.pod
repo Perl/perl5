@@ -140,6 +140,14 @@ introspection of the current phase of the perl interpreter. It's explained in
 detail in L<perlvar/"${^GLOBAL_PHASE}"> and
 L<perlmod/"BEGIN, UNITCHECK, CHECK, INIT and END">.
 
+=head2 Unicode Version 6.0 is now supported.
+
+Perl comes with the Unicode 6.0 data base.
+See L<http://unicode.org/versions/Unicode6.0.0> for details on the new
+release.  Perl does not support any Unicode provisional properties,
+including the new ones for this release, but their database files are
+packaged with Perl.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

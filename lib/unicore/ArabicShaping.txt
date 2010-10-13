@@ -1,18 +1,18 @@
-# ArabicShaping-5.2.0.txt
-# Date: 2009-08-17, 11:11:00 PDT [KW]
+# ArabicShaping-6.0.0.txt
+# Date: 2010-04-30, 13:47:00 PDT [KW]
 #
 # This file is a normative contributory data file in the
 # Unicode Character Database.
 #
-# Copyright (c) 1991-2009 Unicode, Inc.
+# Copyright (c) 1991-2010 Unicode, Inc.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 #
 # This file defines the shaping classes for Arabic, Syriac, and N'Ko
 # positional shaping, repeating in machine readable form the
 # information exemplified in Tables 8-3, 8-7, 8-8, 8-11, 8-12,
-# 8-13, and 13-5 of The Unicode Standard, Version 5.2.
+# 8-13, and 13-5 of The Unicode Standard, Version 6.0.
 #
-# See sections 8.2, 8.3, and 13.5 of The Unicode Standard, Version 5.2
+# See sections 8.2, 8.3, and 13.5 of The Unicode Standard, Version 6.0
 # for more information.
 #
 # Each line contains four fields, separated by a semicolon.
@@ -22,6 +22,8 @@
 #
 # Field 1: gives a short schematic name for that character,
 #   abbreviated from the normative Unicode character name.
+#   Note that this schematic name is considered a comment,
+#   and does not constitute a formal property value.
 #
 # Field 2: defines the joining type (property name: Joining_Type)
 #   R Right_Joining
@@ -44,8 +46,8 @@
 #
 # corresponds to [Joining_Group = Teh_Marbuta].
 #
-# Note: For historical reasons, the property value [Joining_Group = Hamza_On_Heh_Goal]
-#   is anachronistically named. It used to apply to both of the following characters
+# Note: The property value now designated [Joining_Group = Teh_Marbuta_Goal] 
+#   used to apply to both of the following characters
 #   in earlier versions of the standard:
 #
 #   U+06C2 ARABIC LETTER HEH GOAL WITH HAMZA ABOVE
@@ -53,8 +55,10 @@
 #
 #   However, it currently applies only to U+06C3, and *not* to U+06C2.
 #   To avoid destabilizing existing Joining_Group property aliases, the
-#   value Hamza_On_Heh_Goal has not been changed, despite the fact that it
-#   no longer applies to Hamza On Heh Goal, but only to Teh Marbuta Goal.
+#   prior Joining_Group value for U+06C3 (Hamza_On_Heh_Goal) has been
+#   retained as a property value alias, despite the fact that it
+#   no longer applies to its namesake character, U+06C2.
+#   See PropertyValueAliases.txt.
 #
 # When other cursive scripts are added to the Unicode Standard in
 # the future, the joining group value of all its letters will default
@@ -88,6 +92,7 @@
 0603; ARABIC SIGN SAFHA; U; No_Joining_Group
 0608; ARABIC RAY; U; No_Joining_Group
 060B; AFGHANI SIGN; U; No_Joining_Group
+0620; YEH WITH RING; D; YEH
 0621; HAMZA; U; No_Joining_Group
 0622; MADDA ON ALEF; R; ALEF
 0623; HAMZA ON ALEF; R; ALEF
@@ -214,7 +219,7 @@
 06C0; HAMZA ON HEH; R; TEH MARBUTA
 06C1; HEH GOAL; D; HEH GOAL
 06C2; HAMZA ON HEH GOAL; D; HEH GOAL
-06C3; TEH MARBUTA GOAL; R; HAMZA ON HEH GOAL
+06C3; TEH MARBUTA GOAL; R; TEH MARBUTA GOAL
 06C4; WAW WITH RING; R; WAW
 06C5; WAW WITH BAR; R; WAW
 06C6; WAW WITH SMALL V; R; WAW

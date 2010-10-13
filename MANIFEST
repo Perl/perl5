@@ -3834,6 +3834,7 @@ lib/unicore/DAge.txt				Unicode character database
 lib/unicore/DCoreProperties.txt			Unicode character database
 lib/unicore/DNormalizationProps.txt		Unicode character database
 lib/unicore/EastAsianWidth.txt			Unicode character database
+lib/unicore/EmojiSources.txt			Unicode character database
 lib/unicore/extracted/DBidiClass.txt		Unicode character database
 lib/unicore/extracted/DBinaryProperties.txt	Unicode character database
 lib/unicore/extracted/DCombiningClass.txt	Unicode character database
@@ -3847,6 +3848,8 @@ lib/unicore/extracted/DNumType.txt		Unicode character database
 lib/unicore/extracted/DNumValues.txt		Unicode character database
 lib/unicore/HangulSyllableType.txt		Unicode character database
 lib/unicore/Index.txt				Unicode character database
+lib/unicore/IndicMatraCategory.txt		Unicode character database
+lib/unicore/IndicSyllabicCategory.txt		Unicode character database
 lib/unicore/Jamo.txt				Unicode character database
 lib/unicore/LineBreak.txt			Unicode character database
 lib/unicore/Makefile				Unicode character database
@@ -3861,6 +3864,7 @@ lib/unicore/PropList.txt			Unicode character database
 lib/unicore/PropValueAliases.txt		Unicode character database
 lib/unicore/README.perl				Unicode character database
 lib/unicore/ReadMe.txt				Unicode character database info
+lib/unicore/ScriptExtensions.txt		Unicode character database
 lib/unicore/Scripts.txt				Unicode character database
 lib/unicore/SpecialCasing.txt			Unicode character database
 lib/unicore/StandardizedVariants.txt		Unicode character database

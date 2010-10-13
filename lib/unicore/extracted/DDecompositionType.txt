@@ -1,8 +1,8 @@
-# DerivedDecompositionType-5.2.0.txt
-# Date: 2009-08-22, 04:58:19 GMT [MD]
+# DerivedDecompositionType-6.0.0.txt
+# Date: 2010-05-18, 00:49:11 GMT [MD]
 #
 # Unicode Character Database
-# Copyright (c) 1991-2009 Unicode, Inc.
+# Copyright (c) 1991-2010 Unicode, Inc.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 # For documentation, see http://www.unicode.org/reports/tr44/
 
@@ -787,8 +787,9 @@ FEFB          ; Isolated # Lo       ARABIC LIGATURE LAM WITH ALEF ISOLATED FORM
 32B1..32BF    ; Circle # No  [15] CIRCLED NUMBER THIRTY SIX..CIRCLED NUMBER FIFTY
 32D0..32FE    ; Circle # So  [47] CIRCLED KATAKANA A..CIRCLED KATAKANA WO
 1F12B..1F12E  ; Circle # So   [4] CIRCLED ITALIC LATIN CAPITAL LETTER C..CIRCLED WZ
+1F250..1F251  ; Circle # So   [2] CIRCLED IDEOGRAPH ADVANTAGE..CIRCLED IDEOGRAPH ACCEPT
 
-# Total code points: 238
+# Total code points: 240
 
 # ================================================
 
@@ -829,10 +830,10 @@ A770          ; Super # Lm       MODIFIER LETTER US
 208A..208C    ; Sub # Sm   [3] SUBSCRIPT PLUS SIGN..SUBSCRIPT EQUALS SIGN
 208D          ; Sub # Ps       SUBSCRIPT LEFT PARENTHESIS
 208E          ; Sub # Pe       SUBSCRIPT RIGHT PARENTHESIS
-2090..2094    ; Sub # Lm   [5] LATIN SUBSCRIPT SMALL LETTER A..LATIN SUBSCRIPT SMALL LETTER SCHWA
+2090..209C    ; Sub # Lm  [13] LATIN SUBSCRIPT SMALL LETTER A..LATIN SUBSCRIPT SMALL LETTER T
 2C7C          ; Sub # L&       LATIN SUBSCRIPT SMALL LETTER J
 
-# Total code points: 30
+# Total code points: 38
 
 # ================================================
 
@@ -954,17 +955,12 @@ FE6A..FE6B    ; Small # Po   [2] SMALL PERCENT SIGN..SMALL COMMERCIAL AT
 3300..3357    ; Square # So  [88] SQUARE APAATO..SQUARE WATTO
 3371..33DF    ; Square # So [111] SQUARE HPA..SQUARE A OVER M
 33FF          ; Square # So       SQUARE GAL
-1F131         ; Square # So       SQUARED LATIN CAPITAL LETTER B
-1F13D         ; Square # So       SQUARED LATIN CAPITAL LETTER N
-1F13F         ; Square # So       SQUARED LATIN CAPITAL LETTER P
-1F142         ; Square # So       SQUARED LATIN CAPITAL LETTER S
-1F146         ; Square # So       SQUARED LATIN CAPITAL LETTER W
-1F14A..1F14E  ; Square # So   [5] SQUARED HV..SQUARED PPV
+1F130..1F14F  ; Square # So  [32] SQUARED LATIN CAPITAL LETTER A..SQUARED WC
 1F190         ; Square # So       SQUARE DJ
-1F200         ; Square # So       SQUARE HIRAGANA HOKA
-1F210..1F231  ; Square # So  [34] SQUARED CJK UNIFIED IDEOGRAPH-624B..SQUARED CJK UNIFIED IDEOGRAPH-6253
+1F200..1F202  ; Square # So   [3] SQUARE HIRAGANA HOKA..SQUARED KATAKANA SA
+1F210..1F23A  ; Square # So  [43] SQUARED CJK UNIFIED IDEOGRAPH-624B..SQUARED CJK UNIFIED IDEOGRAPH-55B6
 
-# Total code points: 251
+# Total code points: 284
 
 # ================================================
 

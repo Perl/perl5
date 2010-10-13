@@ -1,13 +1,13 @@
-@@@	The Unicode Standard 5.2
-@@@+	U52M090904.lst
-	Final Unicode 5.2 names list. (Amd 5 & Amd 6)
+@@@	The Unicode Standard 6.0
+@@@+	U60M100817.lst
+	Final Unicode 6.0 names list.
 	This file is semi-automatically derived from UnicodeData.txt and
 	a set of manually created annotations using a script to select
 	or suppress information from the data file. The rules used
 	for this process are aimed at readability for the human reader,
 	at the expense of some details; therefore, this file should not
 	be parsed for machine-readable information.
-@+		Copyright (c) 1991-2009 Unicode, Inc.
+@+		Copyright (c) 1991-2010 Unicode, Inc.
 	For terms of use, see http://www.unicode.org/terms_of_use.html
 @@	0000	C0 Controls and Basic Latin (Basic Latin)	007F
 @@+
@@ -120,8 +120,9 @@
 0024	DOLLAR SIGN
 	= milreis, escudo
 	* glyph may have one or two vertical bars
-	* other currency symbol characters: 20A0-20B5
+	* other currency symbol characters: 20A0-20B8
 	x (currency sign - 00A4)
+	x (heavy dollar sign - 1F4B2)
 0025	PERCENT SIGN
 	x (arabic percent sign - 066A)
 	x (per mille sign - 2030)
@@ -155,6 +156,7 @@
 	x (sextile - 26B9)
 	x (heavy asterisk - 2731)
 002B	PLUS SIGN
+	x (heavy plus sign - 2795)
 002C	COMMA
 	= decimal separator
 	x (arabic comma - 060C)
@@ -635,6 +637,7 @@
 @		Mathematical operator
 00D7	MULTIPLICATION SIGN
 	= z notation Cartesian product
+	x (cross mark - 274C)
 @		Letters
 00D8	LATIN CAPITAL LETTER O WITH STROKE
 	= o slash
@@ -718,6 +721,7 @@
 00F7	DIVISION SIGN
 	x (division slash - 2215)
 	x (divides - 2223)
+	x (heavy division sign - 2797)
 @		Letters
 00F8	LATIN SMALL LETTER O WITH STROKE
 	= o slash
@@ -739,7 +743,7 @@
 	* Runic letter borrowed into Latin script
 	x (runic letter thurisaz thurs thorn - 16A6)
 00FF	LATIN SMALL LETTER Y WITH DIAERESIS
-	* French
+	* French, medieval Hungarian orthography
 	x (latin capital letter y with diaeresis - 0178)
 	: 0079 0308
 @@	0100	Latin Extended-A	017F
@@ -1008,7 +1012,7 @@
 	: 0053 0327
 015F	LATIN SMALL LETTER S WITH CEDILLA
 	* Turkish, Azerbaijani, ...
-	* the character 0219 is preferred for Romanian
+	* the character 0219 should be used instead for Romanian
 	x (latin small letter s with comma below - 0219)
 	: 0073 0327
 0160	LATIN CAPITAL LETTER S WITH CARON
@@ -1020,7 +1024,7 @@
 	: 0054 0327
 0163	LATIN SMALL LETTER T WITH CEDILLA
 	* Semitic transliteration, ...
-	* the character 021B is preferred for Romanian
+	* the character 021B should be used instead for Romanian
 	x (latin small letter t with comma below - 021B)
 	: 0074 0327
 0164	LATIN CAPITAL LETTER T WITH CARON
@@ -1182,7 +1186,7 @@
 	= barred i, i bar
 	* African
 	* lowercase is 0268
-@+		* ISO 6438 gives lowercase as 026A, not 0268
+	* ISO 6438 gives lowercase as 026A, not 0268
 	x (latin letter small capital i - 026A)
 0198	LATIN CAPITAL LETTER K WITH HOOK
 0199	LATIN SMALL LETTER K WITH HOOK
@@ -1553,7 +1557,6 @@
 	* Middle English, Scots
 	x (latin small letter ezh - 0292)
 	x (latin small letter insular g - 1D79)
-	x (ounce sign - 2125)
 021E	LATIN CAPITAL LETTER H WITH CARON
 	: 0048 030C
 021F	LATIN SMALL LETTER H WITH CARON
@@ -1683,6 +1686,7 @@
 0254	LATIN SMALL LETTER OPEN O
 	* typographically a turned c
 	* lower-mid back rounded vowel
+	* in older Danish usage "0254:" means "that is"
 	* uppercase is 0186
 0255	LATIN SMALL LETTER C WITH CURL
 	* voiceless alveolo-palatal laminal fricative
@@ -1740,6 +1744,7 @@
 	* upper-mid back unrounded vowel
 0265	LATIN SMALL LETTER TURNED H
 	* voiced rounded palatal approximant
+	* uppercase is A78D
 0266	LATIN SMALL LETTER H WITH HOOK
 	* breathy-voiced glottal fricative
 	x (modifier letter small h with hook - 02B1)
@@ -1899,6 +1904,7 @@
 	x (latin small letter yogh - 021D)
 	x (cyrillic small letter abkhasian dze - 04E1)
 	x (ounce sign - 2125)
+	x (alchemical symbol for half dram - 1F772)
 0293	LATIN SMALL LETTER EZH WITH CURL
 	* palatalized voiced postalveolar fricative
 0294	LATIN LETTER GLOTTAL STOP
@@ -1973,6 +1979,8 @@
 02AF	LATIN SMALL LETTER TURNED H WITH FISHHOOK AND TAIL
 @@	02B0	Spacing Modifier Letters	02FF
 @		Latin superscript modifier letters
+	x (superscript latin small letter i - 2071)
+	x (superscript latin small letter n - 207F)
 02B0	MODIFIER LETTER SMALL H
 	* aspiration
 	# <super> 0068
@@ -3246,13 +3254,13 @@
 050D	CYRILLIC SMALL LETTER KOMI SJE
 050E	CYRILLIC CAPITAL LETTER KOMI TJE
 050F	CYRILLIC SMALL LETTER KOMI TJE
-@		Cyrillic extensions
+@		Khanty letters
 0510	CYRILLIC CAPITAL LETTER REVERSED ZE
 0511	CYRILLIC SMALL LETTER REVERSED ZE
-	* Enets, Khanty
+	* also used for Enets
 0512	CYRILLIC CAPITAL LETTER EL WITH HOOK
 0513	CYRILLIC SMALL LETTER EL WITH HOOK
-	* Chukchi, Itelmen, Khanty
+	* also used for Chukchi and Itelmen
 @		Mordvin letters
 0514	CYRILLIC CAPITAL LETTER LHA
 0515	CYRILLIC SMALL LETTER LHA
@@ -3267,7 +3275,7 @@
 051B	CYRILLIC SMALL LETTER QA
 051C	CYRILLIC CAPITAL LETTER WE
 051D	CYRILLIC SMALL LETTER WE
-@		Aleut letter
+@		Aleut letters
 051E	CYRILLIC CAPITAL LETTER ALEUT KA
 051F	CYRILLIC SMALL LETTER ALEUT KA
 	* used for [q] in Aleut
@@ -3284,6 +3292,9 @@
 0525	CYRILLIC SMALL LETTER PE WITH DESCENDER
 	* used in modern Abkhaz orthography
 	x (cyrillic small letter pe with middle hook - 04A7)
+@		Azerbaijani letters
+0526	CYRILLIC CAPITAL LETTER SHHA WITH DESCENDER
+0527	CYRILLIC SMALL LETTER SHHA WITH DESCENDER
 @@	0530	Armenian	058F
 @		Uppercase letters
 0531	ARMENIAN CAPITAL LETTER AYB
@@ -3390,7 +3401,7 @@
 @		Punctuation
 0589	ARMENIAN FULL STOP
 	= vertsaket
-	* may also be used for Georgian
+	* may also be used for historic Georgian texts
 	x (colon - 003A)
 058A	ARMENIAN HYPHEN
 	= yentamna
@@ -3596,6 +3607,8 @@
 	* also used with Thaana and Syriac in modern text
 	x (question mark - 003F)
 	x (reversed question mark - 2E2E)
+@		Addition for Kashmiri
+0620	ARABIC LETTER KASHMIRI YEH
 @		Based on ISO 8859-6
 0621	ARABIC LETTER HAMZA
 	x (modifier letter right half ring - 02BE)
@@ -3677,7 +3690,7 @@
 	= ulta pesh
 	* Kashmiri, Urdu
 0658	ARABIC MARK NOON GHUNNA
-	* Kashmiri and Baluchi
+	* Baluchi
 	* indicates nasalization in Urdu
 0659	ARABIC ZWARAKAY
 	* Pashto
@@ -3691,6 +3704,8 @@
 	* Ormuri, African languages
 065E	ARABIC FATHA WITH TWO DOTS
 	* Kalami
+065F	ARABIC WAVY HAMZA BELOW
+	* Kashmiri
 @		Arabic-Indic digits
 @+		These digits are used with Arabic proper; for languages of Iran, Pakistan, and India, see the Eastern Arabic-Indic digits at 06F0..06F9.
 0660	ARABIC-INDIC DIGIT ZERO
@@ -3915,7 +3930,7 @@
 06CB	ARABIC LETTER VE
 	* Uighur, Kazakh
 06CC	ARABIC LETTER FARSI YEH
-	* Arabic, Persian, Urdu, ...
+	* Arabic, Persian, Urdu, Kashmiri, ...
 	* initial and medial forms of this letter have dots
 	x (arabic letter alef maksura - 0649)
 	x (arabic letter yeh - 064A)
@@ -4409,6 +4424,43 @@
 	= full stop
 083E	SAMARITAN PUNCTUATION ANNAAU
 	= rest
+@@	0840	Mandaic	085F
+@		Letters
+0840	MANDAIC LETTER HALQA
+	= a
+0841	MANDAIC LETTER AB
+0842	MANDAIC LETTER AG
+0843	MANDAIC LETTER AD
+0844	MANDAIC LETTER AH
+0845	MANDAIC LETTER USHENNA
+	= u
+0846	MANDAIC LETTER AZ
+0847	MANDAIC LETTER IT
+0848	MANDAIC LETTER ATT
+0849	MANDAIC LETTER AKSA
+	= i
+084A	MANDAIC LETTER AK
+084B	MANDAIC LETTER AL
+084C	MANDAIC LETTER AM
+084D	MANDAIC LETTER AN
+084E	MANDAIC LETTER AS
+084F	MANDAIC LETTER IN
+0850	MANDAIC LETTER AP
+0851	MANDAIC LETTER ASZ
+0852	MANDAIC LETTER AQ
+0853	MANDAIC LETTER AR
+0854	MANDAIC LETTER ASH
+0855	MANDAIC LETTER AT
+0856	MANDAIC LETTER DUSHENNA
+	= di
+0857	MANDAIC LETTER KAD
+0858	MANDAIC LETTER AIN
+@		Diacritics
+0859	MANDAIC AFFRICATION MARK
+085A	MANDAIC VOCALIZATION MARK
+085B	MANDAIC GEMINATION MARK
+@		Punctuation
+085E	MANDAIC PUNCTUATION
 @@	0900	Devanagari	097F
 @@+
 @		Various signs
@@ -4485,6 +4537,9 @@
 0937	DEVANAGARI LETTER SSA
 0938	DEVANAGARI LETTER SA
 0939	DEVANAGARI LETTER HA
+@		Dependent vowel signs for Kashmiri
+093A	DEVANAGARI VOWEL SIGN OE
+093B	DEVANAGARI VOWEL SIGN OOE
 @		Various signs
 093C	DEVANAGARI SIGN NUKTA
 	* for extending the alphabet to new letters
@@ -4513,16 +4568,18 @@
 094D	DEVANAGARI SIGN VIRAMA
 	= halant (the preferred Hindi name)
 	* suppresses inherent vowel
-@		Archaic dependent vowel sign
+@		Dependent vowel signs
 094E	DEVANAGARI VOWEL SIGN PRISHTHAMATRA E
 	* character has historic use only
 	* combines with E to form AI, with AA to form O, and with O to form AU
+094F	DEVANAGARI VOWEL SIGN AW
+	* Kashmiri
 @		Sign
 0950	DEVANAGARI OM
 @		Vedic tone marks
 0951	DEVANAGARI STRESS SIGN UDATTA
 	= Vedic tone svarita
-	* mostly used for Rigvedic svarita, with rare use for Yajurvedic udatta
+	* mostly used for svarita, with rare use for udatta
 	* used also in Vedic texts written in other scripts
 	x (vedic tone double svarita - 1CDA)
 0952	DEVANAGARI STRESS SIGN ANUDATTA
@@ -4536,6 +4593,9 @@
 	x (combining acute accent - 0301)
 0955	DEVANAGARI VOWEL SIGN CANDRA LONG E
 	* used in transliteration of Avestan
+@		Dependent vowel signs for Kashmiri
+0956	DEVANAGARI VOWEL SIGN UE
+0957	DEVANAGARI VOWEL SIGN UUE
 @		Additional consonants
 0958	DEVANAGARI LETTER QA
 	: 0915 093C
@@ -4559,7 +4619,7 @@
 0962	DEVANAGARI VOWEL SIGN VOCALIC L
 0963	DEVANAGARI VOWEL SIGN VOCALIC LL
 @		Generic punctuation for scripts of India
-@+		These punctuation marks are for common use for the scripts of India despite being named "DEVANAGARI".
+@+		These punctuation marks are for common use for the scripts of India despite being named "DEVANAGARI". They also occur as abbreviation signs in some South Indian scripts.
 0964	DEVANAGARI DANDA
 	= purna viram
 	* phrase separator
@@ -4576,12 +4636,18 @@
 096D	DEVANAGARI DIGIT SEVEN
 096E	DEVANAGARI DIGIT EIGHT
 096F	DEVANAGARI DIGIT NINE
-@		Devanagari-specific additions
+@		Abbreviation sign
 0970	DEVANAGARI ABBREVIATION SIGN
+	* intended for Devanagari-specific abbreviations
 0971	DEVANAGARI SIGN HIGH SPACING DOT
-@		Additional vowel for Marathi
+@		Independent vowel for Marathi
 0972	DEVANAGARI LETTER CANDRA A
-	* Marathi
+@		Independent vowels for Kashmiri
+0973	DEVANAGARI LETTER OE
+0974	DEVANAGARI LETTER OOE
+0975	DEVANAGARI LETTER AW
+0976	DEVANAGARI LETTER UE
+0977	DEVANAGARI LETTER UUE
 @		Additional consonants
 0979	DEVANAGARI LETTER ZHA
 	* used in transliteration of Avestan
@@ -5072,6 +5138,13 @@
 0B71	ORIYA LETTER WA
 	x (oriya letter o - 0B13)
 	x (oriya letter va - 0B35)
+@		Fraction signs
+0B72	ORIYA FRACTION ONE QUARTER
+0B73	ORIYA FRACTION ONE HALF
+0B74	ORIYA FRACTION THREE QUARTERS
+0B75	ORIYA FRACTION ONE SIXTEENTH
+0B76	ORIYA FRACTION ONE EIGHTH
+0B77	ORIYA FRACTION THREE SIXTEENTHS
 @@	0B80	Tamil	0BFF
 @		Various signs
 0B82	TAMIL SIGN ANUSVARA
@@ -5408,8 +5481,7 @@
 0CED	KANNADA DIGIT SEVEN
 0CEE	KANNADA DIGIT EIGHT
 0CEF	KANNADA DIGIT NINE
-@		Vedic signs
-@+		The Vedic signs for jihvamuliya and upadhmaniya were encoded in the Kannada block, but are intended for general Vedic use with all scripts.
+@		Signs used in Sanskrit
 0CF1	KANNADA SIGN JIHVAMULIYA
 	* marks a velar fricative occurring only before unvoiced velar stops
 	x (tibetan sign lce tsa can - 0F88)
@@ -5470,6 +5542,8 @@
 0D27	MALAYALAM LETTER DHA
 	= soft dda
 0D28	MALAYALAM LETTER NA
+0D29	MALAYALAM LETTER NNNA
+	* historic use only
 0D2A	MALAYALAM LETTER PA
 0D2B	MALAYALAM LETTER PHA
 0D2C	MALAYALAM LETTER BA
@@ -5489,6 +5563,8 @@
 	= sha
 0D38	MALAYALAM LETTER SA
 0D39	MALAYALAM LETTER HA
+0D3A	MALAYALAM LETTER TTTA
+	* historic use only
 @		Addition for Sanskrit
 0D3D	MALAYALAM SIGN AVAGRAHA
 	= praslesham
@@ -5520,6 +5596,9 @@
 0D4D	MALAYALAM SIGN VIRAMA
 	= chandrakkala (the preferred name)
 	= vowel half-u
+@		Dot reph
+0D4E	MALAYALAM LETTER DOT REPH
+	* not used in reformed modern Malayalam orthography
 @		Various signs
 0D57	MALAYALAM AU LENGTH MARK
 	* used alone to write the /au/ dependent vowel in modern texts
@@ -5997,6 +6076,7 @@
 0EDD	LAO HO MO
 	# 0EAB 0EA1
 @@	0F00	Tibetan	0FFF
+@+		The Tibetan script is called the Bodhi script in Bhutan.
 @		Syllable
 0F00	TIBETAN SYLLABLE OM
 @		Head marks
@@ -6053,6 +6133,7 @@
 0F1A	TIBETAN SIGN RDEL DKAR GCIG
 0F1B	TIBETAN SIGN RDEL DKAR GNYIS
 0F1C	TIBETAN SIGN RDEL DKAR GSUM
+	x (alchemical symbol for oil - 1F746)
 0F1D	TIBETAN SIGN RDEL NAG GCIG
 0F1E	TIBETAN SIGN RDEL NAG GNYIS
 0F1F	TIBETAN SIGN RDEL DKAR RDEL NAG
@@ -6217,6 +6298,12 @@
 0F8A	TIBETAN SIGN GRU CAN RGYINGS
 	* always followed by 0F82
 0F8B	TIBETAN SIGN GRU MED RGYINGS
+0F8C	TIBETAN SIGN INVERTED MCHU CAN
+	x (mongolian letter ali gali ubadama - 1883)
+@		Transliteration subjoined signs
+0F8D	TIBETAN SUBJOINED SIGN LCE TSA CAN
+0F8E	TIBETAN SUBJOINED SIGN MCHU CAN
+0F8F	TIBETAN SUBJOINED SIGN INVERTED MCHU CAN
 @		Subjoined consonants
 @+		The subjoined letters for WA, YA, and RA appear in both full and short forms. The short forms, wa.zur, ya-btags, and ra-btags, respectively, are most common and are the forms shown in the charts.
 0F90	TIBETAN SUBJOINED LETTER KA
@@ -6296,6 +6383,7 @@
 @		Symbols
 0FC4	TIBETAN SYMBOL DRIL BU
 	* symbol of a Tibetan hand bell
+	x (bell - 1F514)
 0FC5	TIBETAN SYMBOL RDO RJE
 0FC6	TIBETAN SYMBOL PADMA GDAN
 0FC7	TIBETAN SYMBOL RDO RJE RGYA GRAM
@@ -6339,6 +6427,9 @@
 	= gyung drung nang -khor bzhi mig can
 0FD8	LEFT-FACING SVASTI SIGN WITH DOTS
 	= gyung drung phyi -khor bzhi mig can
+@		Annotation marks
+0FD9	TIBETAN MARK LEADING MCHAN RTAGS
+0FDA	TIBETAN MARK TRAILING MCHAN RTAGS
 @@	1000	Myanmar	109F
 @		Consonants
 1000	MYANMAR LETTER KA
@@ -7285,7 +7376,11 @@
 1358	ETHIOPIC SYLLABLE RYA
 1359	ETHIOPIC SYLLABLE MYA
 135A	ETHIOPIC SYLLABLE FYA
-@		Combining mark
+@		Combining marks
+135D	ETHIOPIC COMBINING GEMINATION AND VOWEL LENGTH MARK
+	* Basketo
+135E	ETHIOPIC COMBINING VOWEL LENGTH MARK
+	* Basketo
 135F	ETHIOPIC COMBINING GEMINATION MARK
 @		Punctuation
 1360	ETHIOPIC SECTION MARK
@@ -9284,6 +9379,7 @@
 @		Consonants
 1A53	TAI THAM LETTER LAE
 1A54	TAI THAM LETTER GREAT SA
+@		Consonant signs
 1A55	TAI THAM CONSONANT SIGN MEDIAL RA
 1A56	TAI THAM CONSONANT SIGN MEDIAL LA
 1A57	TAI THAM CONSONANT SIGN LA TANG LAI
@@ -9317,15 +9413,18 @@
 1A72	TAI THAM VOWEL SIGN THAM AI
 1A73	TAI THAM VOWEL SIGN OA ABOVE
 1A74	TAI THAM SIGN MAI KANG
-@		Tone marks and other marks
+@		Tone marks
 1A75	TAI THAM SIGN TONE-1
 1A76	TAI THAM SIGN TONE-2
 1A77	TAI THAM SIGN KHUEN TONE-3
 1A78	TAI THAM SIGN KHUEN TONE-4
 1A79	TAI THAM SIGN KHUEN TONE-5
+@		Other marks
 1A7A	TAI THAM SIGN RA HAAM
+	* indicates following character(s) are not sounded
 1A7B	TAI THAM SIGN MAI SAM
 1A7C	TAI THAM SIGN KHUEN-LUE KARAN
+@		Cryptogrammic mark
 1A7F	TAI THAM COMBINING CRYPTOGRAMMIC DOT
 @		Hora digits
 1A80	TAI THAM HORA DIGIT ZERO
@@ -9349,19 +9448,36 @@
 1A97	TAI THAM THAM DIGIT SEVEN
 1A98	TAI THAM THAM DIGIT EIGHT
 1A99	TAI THAM THAM DIGIT NINE
+@		Logographs
 1AA0	TAI THAM SIGN WIANG
+	* logograph for city
 1AA1	TAI THAM SIGN WIANGWAAK
+	* logograph for village
 1AA2	TAI THAM SIGN SAWAN
+	* logograph for heaven
+@		Punctuation
+@+		These characters are used as dingbats and section starters.
 1AA3	TAI THAM SIGN KEOW
+	= courtyard
 1AA4	TAI THAM SIGN HOY
+	= oyster
 1AA5	TAI THAM SIGN DOKMAI
+	= flower
+	x (flower punctuation mark - 2055)
 1AA6	TAI THAM SIGN REVERSED ROTATED RANA
+@		Sign
 1AA7	TAI THAM SIGN MAI YAMOK
+	x (thai character maiyamok - 0E46)
+@		Punctuation
 1AA8	TAI THAM SIGN KAAN
+	* danda
 1AA9	TAI THAM SIGN KAANKUU
+	* double danda
 1AAA	TAI THAM SIGN SATKAAN
 1AAB	TAI THAM SIGN SATKAANKUU
+	x (thai character angkhankhu - 0E5A)
 1AAC	TAI THAM SIGN HANG
+	* used in combinations with other punctuation marks at ends of sections
 1AAD	TAI THAM SIGN CAANG
 @@	1B00	Balinese	1B7F
 @		Various signs
@@ -9608,7 +9724,7 @@
 1B9E	SUNDANESE LETTER SA
 1B9F	SUNDANESE LETTER XA
 1BA0	SUNDANESE LETTER HA
-@		Consonants signs
+@		Consonant signs
 1BA1	SUNDANESE CONSONANT SIGN PAMINGKAL
 	= subjoined ya
 1BA2	SUNDANESE CONSONANT SIGN PANYAKRA
@@ -9646,6 +9762,92 @@
 1BB7	SUNDANESE DIGIT SEVEN
 1BB8	SUNDANESE DIGIT EIGHT
 1BB9	SUNDANESE DIGIT NINE
+@@	1BC0	Batak	1BFF
+@		Letters
+@+		Annotations for letters indicate different usage among the various alphabets sharing the Batak script.
+1BC0	BATAK LETTER A
+	 * letter a or ha for Karo and Pakpak
+1BC1	BATAK LETTER SIMALUNGUN A
+1BC2	BATAK LETTER HA
+	* Toba letter ha or ka
+	* also known as letter ka for Karo and Pakpak
+1BC3	BATAK LETTER SIMALUNGUN HA
+	* also known as Simalungun letter ka
+1BC4	BATAK LETTER MANDAILING HA
+1BC5	BATAK LETTER BA
+1BC6	BATAK LETTER KARO BA
+1BC7	BATAK LETTER PA
+1BC8	BATAK LETTER SIMALUNGUN PA
+1BC9	BATAK LETTER NA
+1BCA	BATAK LETTER MANDAILING NA
+1BCB	BATAK LETTER WA
+	* Toba letter wa can be represented by either 1BCB or 1BCD
+1BCC	BATAK LETTER SIMALUNGUN WA
+1BCD	BATAK LETTER PAKPAK WA
+1BCE	BATAK LETTER GA
+1BCF	BATAK LETTER SIMALUNGUN GA
+1BD0	BATAK LETTER JA
+1BD1	BATAK LETTER DA
+1BD2	BATAK LETTER RA
+1BD3	BATAK LETTER SIMALUNGUN RA
+1BD4	BATAK LETTER MA
+1BD5	BATAK LETTER SIMALUNGUN MA
+1BD6	BATAK LETTER SOUTHERN TA
+	* Toba letter ta can be represented by either 1BD6 or 1BD7
+1BD7	BATAK LETTER NORTHERN TA
+1BD8	BATAK LETTER SA
+	* Pakpak letter sa or ca
+1BD9	BATAK LETTER SIMALUNGUN SA
+1BDA	BATAK LETTER MANDAILING SA
+1BDB	BATAK LETTER YA
+1BDC	BATAK LETTER SIMALUNGUN YA
+1BDD	BATAK LETTER NGA
+1BDE	BATAK LETTER LA
+1BDF	BATAK LETTER SIMALUNGUN LA
+1BE0	BATAK LETTER NYA
+	* Karo letter ca can be represented by either 1BE0 or 1BE1
+1BE1	BATAK LETTER CA
+1BE2	BATAK LETTER NDA
+1BE3	BATAK LETTER MBA
+1BE4	BATAK LETTER I
+1BE5	BATAK LETTER U
+@		Sign
+1BE6	BATAK SIGN TOMPI
+@		Dependent vowel signs
+1BE7	BATAK VOWEL SIGN E
+	= kebereten
+1BE8	BATAK VOWEL SIGN PAKPAK E
+	= ketolongen
+1BE9	BATAK VOWEL SIGN EE
+	= talinga
+1BEA	BATAK VOWEL SIGN I
+	= ulua
+1BEB	BATAK VOWEL SIGN KARO I
+	= haluan
+1BEC	BATAK VOWEL SIGN O
+	= siala ulu
+1BED	BATAK VOWEL SIGN KARO O
+	= hatulungan
+1BEE	BATAK VOWEL SIGN U
+	= boruta
+1BEF	BATAK VOWEL SIGN U FOR SIMALUNGUN SA
+	= haboritan for simalungun sa 
+@		Dependent consonant signs
+1BF0	BATAK CONSONANT SIGN NG
+	= amisara
+1BF1	BATAK CONSONANT SIGN H
+	= hajoringan
+@		Signs
+1BF2	BATAK PANGOLAT
+	= virama
+	* cannot follow a vowel sign
+1BF3	BATAK PANONGONAN
+	= virama
+@		Punctuation
+1BFC	BATAK SYMBOL BINDU NA METEK
+1BFD	BATAK SYMBOL BINDU PINARBORAS
+1BFE	BATAK SYMBOL BINDU JUDUL
+1BFF	BATAK SYMBOL BINDU PANGOLAT
 @@	1C00	Lepcha	1C4F
 @		Consonants
 1C00	LEPCHA LETTER KA
@@ -9796,11 +9998,13 @@
 1CD2	VEDIC TONE PRENKHA
 	* indicates vibrato
 	= vaidika saamasvara prenkha
+@		Breathing mark for the Samaveda
 1CD3	VEDIC SIGN NIHSHVASA
 	= vaidika saamagaana yogakaala
+	* separates sections between which a pause is disallowed
 @		Signs for Yajurvedic
 1CD4	VEDIC SIGN YAJURVEDIC MIDLINE SVARITA
-	* also used in the Vajasaneyi Madhyandina Samhita
+	* used predominantly in the Maitrayani Samhita and in some manuscripts of the Vajasaneyi Madhyandina Samhita
 1CD5	VEDIC TONE YAJURVEDIC AGGRAVATED INDEPENDENT SVARITA
 	= vaidika svarita adho nyubja
 1CD6	VEDIC TONE YAJURVEDIC INDEPENDENT SVARITA
@@ -9867,6 +10071,7 @@
 1CF1	VEDIC SIGN ANUSVARA UBHAYATO MUKHA
 	= vaidika anusvaara ubhayato mukha
 @		Ardhavisarga
+@+		Ardhavisarga denotes the sounds jihvamuliya and upadhmaniya (velar and bilabial voicelss fricatives) in Sanskrit. Its use is not limited to Vedic.
 1CF2	VEDIC SIGN ARDHAVISARGA
 	= vaidika jihvaamuuliiya upadhmaaniiya
 	x (kannada sign jihvamuliya - 0CF1)
@@ -9930,6 +10135,7 @@
 	* in italic style, the glyph is obliqued, not italicized
 	x (cyrillic small letter el - 043B)
 @		Latin superscript modifier letters
+@+		See also superscript Latin letters in the Spacing Modifier Letters block starting at 02B0.
 1D2C	MODIFIER LETTER CAPITAL A
 	# <super> 0041
 1D2D	MODIFIER LETTER CAPITAL AE
@@ -10289,6 +10495,8 @@
 1DE4	COMBINING LATIN SMALL LETTER S
 1DE5	COMBINING LATIN SMALL LETTER LONG S
 1DE6	COMBINING LATIN SMALL LETTER Z
+@		Double diacritic mark for UPA
+1DFC	COMBINING DOUBLE INVERTED BREVE BELOW
 @		Miscellaneous mark
 1DFD	COMBINING ALMOST EQUAL TO BELOW
 @		Additional marks for UPA
@@ -10360,6 +10568,7 @@
 1E1C	LATIN CAPITAL LETTER E WITH CEDILLA AND BREVE
 	: 0228 0306
 1E1D	LATIN SMALL LETTER E WITH CEDILLA AND BREVE
+	* Hebrew transliteration
 	: 0229 0306
 1E1E	LATIN CAPITAL LETTER F WITH DOT ABOVE
 	: 0046 0307
@@ -10624,7 +10833,8 @@
 1E92	LATIN CAPITAL LETTER Z WITH DOT BELOW
 	: 005A 0323
 1E93	LATIN SMALL LETTER Z WITH DOT BELOW
-	* Indic transliteration
+	* Semitic transliteration
+	x (arabic letter zah - 0638)
 	: 007A 0323
 1E94	LATIN CAPITAL LETTER Z WITH LINE BELOW
 	: 005A 0331
@@ -10647,7 +10857,10 @@
 	: 017F 0307
 @		Medievalist additions
 1E9C	LATIN SMALL LETTER LONG S WITH DIAGONAL STROKE
-	* Sorbian
+	* medievalist use for several abbreviations
+	* used in pre-1921 Latvian orthography
+	* used in Blackletter types of pre-1950 Lower Sorbian orthography
+	x (latin small letter s with oblique stroke - A7A9)
 1E9D	LATIN SMALL LETTER LONG S WITH HIGH STROKE
 @		Addition for German typography
 1E9E	LATIN CAPITAL LETTER SHARP S
@@ -11664,9 +11877,11 @@
 206F	NOMINAL DIGIT SHAPES
 @@	2070	Superscripts and Subscripts	209F
 @		Superscripts
+@+		See also superscript Latin letters in the Spacing Modifier Letters block starting at 02B0.
 2070	SUPERSCRIPT ZERO
 	# <super> 0030
 2071	SUPERSCRIPT LATIN SMALL LETTER I
+	* functions as a modifier letter
 	# <super> 0069
 2072	<reserved>
 	x (superscript two - 00B2)
@@ -11695,6 +11910,7 @@
 207E	SUPERSCRIPT RIGHT PARENTHESIS
 	# <super> 0029
 207F	SUPERSCRIPT LATIN SMALL LETTER N
+	* functions as a modifier letter
 	# <super> 006E
 @		Subscripts
 2080	SUBSCRIPT ZERO
@@ -11737,6 +11953,23 @@
 	# <sub> 0078
 2094	LATIN SUBSCRIPT SMALL LETTER SCHWA
 	# <sub> 0259
+@		Subscripts for UPA
+2095	LATIN SUBSCRIPT SMALL LETTER H
+	# <sub> 0068
+2096	LATIN SUBSCRIPT SMALL LETTER K
+	# <sub> 006B
+2097	LATIN SUBSCRIPT SMALL LETTER L
+	# <sub> 006C
+2098	LATIN SUBSCRIPT SMALL LETTER M
+	# <sub> 006D
+2099	LATIN SUBSCRIPT SMALL LETTER N
+	# <sub> 006E
+209A	LATIN SUBSCRIPT SMALL LETTER P
+	# <sub> 0070
+209B	LATIN SUBSCRIPT SMALL LETTER S
+	# <sub> 0073
+209C	LATIN SUBSCRIPT SMALL LETTER T
+	# <sub> 0074
 @@	20A0	Currency Symbols	20CF
 @		Currency symbols
 @+		A number of currency symbols are found in other blocks. Fullwidth versions of some currency symbols are found in the Halfwidth and Fullwidth Forms block.
@@ -11781,7 +12014,8 @@
 	* Spain
 	x (peso sign - 20B1)
 20A8	RUPEE SIGN
-	* India
+	* India, unofficial legacy practice
+	x (indian rupee sign - 20B9)
 	# 0052 0073
 20A9	WON SIGN
 	* Korea
@@ -11826,6 +12060,10 @@
 	x (apl functional symbol up tack overbar - 2351)
 	x (box drawings down single and horizontal double - 2564)
 	x (postal mark - 3012)
+20B9	INDIAN RUPEE SIGN
+	* official Rupee currency sign for India
+	* contrasts with script-specific Rupee signs and abbreviations
+	x (devanagari letter ra - 0930)
 @@	20D0	Combining Diacritical Marks for Symbols	20FF
 @		Combining diacritical marks for symbols
 20D0	COMBINING LEFT HARPOON ABOVE
@@ -11949,7 +12187,7 @@
 	= mathematical symbol 'ell'
 	= liter (traditional symbol)
 	* despite its character name, this symbol is derived from a special italicized version of the small letter l
-	* the SI recommended symbol for liter is 006C
+	* the SI recommended symbol for liter is 006C or 004C
 	x (mathematical script small l - 1D4C1)
 	# <font> 006C latin small letter l
 2114	L B BAR SYMBOL
@@ -11993,6 +12231,7 @@
 	* typical forms for this symbol may use lower case, small caps or superscripted letter shapes
 	x (black telephone - 260E)
 	x (telephone location sign - 2706)
+	x (telephone receiver - 1F4DE)
 	# 0054 0045 004C
 2122	TRADE MARK SIGN
 	x (circled wz - 1F12E)
@@ -12002,7 +12241,8 @@
 	= the set of integers
 	# <font> 005A latin capital letter z
 2125	OUNCE SIGN
-	x (latin small letter yogh - 021D)
+	x (latin small letter ezh - 0292)
+	x (alchemical symbol for half ounce - 1F773)
 2126	OHM SIGN
 	* SI unit of resistance, named after G. S. Ohm, German physicist
 	* preferred representation is 03A9
@@ -12080,6 +12320,7 @@
 213B	FACSIMILE SIGN
 	* typical forms for this symbol may use lower case, small caps or superscripted letter shapes
 	x (telephone sign - 2121)
+	x (fax machine - 1F4E0)
 	# 0046 0041 0058
 213C	DOUBLE-STRUCK SMALL PI
 	# <font> 03C0 greek small letter pi
@@ -12501,6 +12742,7 @@
 @		Operators
 2212	MINUS SIGN
 	x (hyphen-minus - 002D)
+	x (heavy minus sign - 2796)
 2213	MINUS-OR-PLUS SIGN
 	x (plus-minus sign - 00B1)
 2214	DOT PLUS
@@ -12587,6 +12829,7 @@
 	* clockwise or anticlockwise arrows do not reverse during layout mirroring
 @		Miscellaneous mathematical symbols
 2234	THEREFORE
+	x (historic site - 26EC)
 2235	BECAUSE
 @		Relations
 2236	RATIO
@@ -12760,14 +13003,16 @@
 2295	CIRCLED PLUS
 	= direct sum
 	= vector pointing into page
-	x (earth - 2641)
 	x (n-ary circled plus operator - 2A01)
+	x (alchemical symbol for verdigris - 1F728)
 2296	CIRCLED MINUS
 	= symmetric difference
 	x (circle with horizontal bar - 29B5)
+	x (alchemical symbol for salt - 1F714)
 2297	CIRCLED TIMES
 	= tensor product
 	= vector pointing into page
+	x (circled crossing lanes - 26D2)
 	x (n-ary circled times operator - 2A02)
 2298	CIRCLED DIVISION SLASH
 2299	CIRCLED DOT OPERATOR
@@ -12788,7 +13033,9 @@
 22A0	SQUARED TIMES
 	x (ballot box with x - 2612)
 	x (squared saltire - 26DD)
+	x (alchemical symbol for month - 1F771)
 22A1	SQUARED DOT OPERATOR
+	x (alchemical symbol for urine - 1F755)
 22A2	RIGHT TACK
 	= turnstile
 	= proves, implies, yields
@@ -12800,6 +13047,7 @@
 22A4	DOWN TACK
 	= top
 	x (raised interpolation marker - 2E06)
+	x (alchemical symbol for crucible-4 - 1F768)
 22A5	UP TACK
 	= base, bottom
 	x (perpendicular - 27C2)
@@ -13003,20 +13251,26 @@
 	= Kissen (pillow)
 	* used as a command delimiter in some very old computers
 2312	ARC
+	= position of any line
 	x (upper half circle - 25E0)
 2313	SEGMENT
+	= position of a surface
 2314	SECTOR
 2315	TELEPHONE RECORDER
 2316	POSITION INDICATOR
+	= true position
 2317	VIEWDATA SQUARE
 	x (equal and parallel to - 22D5)
 2318	PLACE OF INTEREST SIGN
 	= command key (1.0)
 2319	TURNED NOT SIGN
 	= line marker
-@		GUI icons
+@		User interface symbols
 231A	WATCH
+	x (alarm clock - 23F0)
+	x (clock face one oclock - 1F550)
 231B	HOURGLASS
+	= alchemical symbol for hour
 @		Quine corners
 @+		These form a set of four quine corners, for quincuncial arrangement. They are also used in upper and lower pairs in mathematic, or more rarely in editorial usage as alternatives to half brackets.
 231C	TOP LEFT CORNER
@@ -13224,6 +13478,7 @@
 @		Keyboard symbols from ISO 9995-7
 2396	DECIMAL SEPARATOR KEY SYMBOL
 2397	PREVIOUS PAGE
+	x (back with leftwards arrow above - 1F519)
 2398	NEXT PAGE
 2399	PRINT SCREEN SYMBOL
 239A	CLEAR SCREEN SYMBOL
@@ -13359,6 +13614,23 @@
 23E7	ELECTRICAL INTERSECTION
 23E8	DECIMAL EXPONENT SYMBOL
 	* Algol-60 token for scientific notation literals
+@		User interface symbols
+23E9	BLACK RIGHT-POINTING DOUBLE TRIANGLE
+	= fast forward
+23EA	BLACK LEFT-POINTING DOUBLE TRIANGLE
+	= fast rewind
+23EB	BLACK UP-POINTING DOUBLE TRIANGLE
+23EC	BLACK DOWN-POINTING DOUBLE TRIANGLE
+23ED	BLACK RIGHT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR
+23EE	BLACK LEFT-POINTING DOUBLE TRIANGLE WITH VERTICAL BAR
+23EF	BLACK RIGHT-POINTING TRIANGLE WITH DOUBLE VERTICAL BAR
+23F0	ALARM CLOCK
+	x (watch - 231A)
+	x (clock face one oclock - 1F550)
+23F1	STOPWATCH
+23F2	TIMER CLOCK
+23F3	HOURGLASS WITH FLOWING SAND
+	x (hourglass - 231B)
 @@	2400	Control Pictures	243F
 @+		The diagonal lettering glyphs are only exemplary; alternate representations may be, and often are used in the visible display of control codes.
 @		Graphic pictures for control codes
@@ -13746,13 +14018,15 @@
 24FF	NEGATIVE CIRCLED DIGIT ZERO
 	x (dingbat negative circled digit one - 2776)
 @@	2500	Box Drawing	257F
-@		Form and chart components
+@+	All of these characters are intended for compatibility with old sets oriented toward character cell graphics.
+@		Light and heavy solid lines
 2500	BOX DRAWINGS LIGHT HORIZONTAL
 	= Videotex Mosaic DG 15
 2501	BOX DRAWINGS HEAVY HORIZONTAL
 2502	BOX DRAWINGS LIGHT VERTICAL
 	= Videotex Mosaic DG 14
 2503	BOX DRAWINGS HEAVY VERTICAL
+@		Light and heavy dashed lines
 2504	BOX DRAWINGS LIGHT TRIPLE DASH HORIZONTAL
 2505	BOX DRAWINGS HEAVY TRIPLE DASH HORIZONTAL
 2506	BOX DRAWINGS LIGHT TRIPLE DASH VERTICAL
@@ -13761,6 +14035,7 @@
 2509	BOX DRAWINGS HEAVY QUADRUPLE DASH HORIZONTAL
 250A	BOX DRAWINGS LIGHT QUADRUPLE DASH VERTICAL
 250B	BOX DRAWINGS HEAVY QUADRUPLE DASH VERTICAL
+@		Light and heavy line box components
 250C	BOX DRAWINGS LIGHT DOWN AND RIGHT
 	= Videotex Mosaic DG 16
 250D	BOX DRAWINGS DOWN LIGHT AND RIGHT HEAVY
@@ -13839,12 +14114,15 @@
 2549	BOX DRAWINGS RIGHT LIGHT AND LEFT VERTICAL HEAVY
 254A	BOX DRAWINGS LEFT LIGHT AND RIGHT VERTICAL HEAVY
 254B	BOX DRAWINGS HEAVY VERTICAL AND HORIZONTAL
+@		Light and heavy dashed lines
 254C	BOX DRAWINGS LIGHT DOUBLE DASH HORIZONTAL
 254D	BOX DRAWINGS HEAVY DOUBLE DASH HORIZONTAL
 254E	BOX DRAWINGS LIGHT DOUBLE DASH VERTICAL
 254F	BOX DRAWINGS HEAVY DOUBLE DASH VERTICAL
+@		Double lines
 2550	BOX DRAWINGS DOUBLE HORIZONTAL
 2551	BOX DRAWINGS DOUBLE VERTICAL
+@		Light and double line box components
 2552	BOX DRAWINGS DOWN SINGLE AND RIGHT DOUBLE
 2553	BOX DRAWINGS DOWN DOUBLE AND RIGHT SINGLE
 2554	BOX DRAWINGS DOUBLE DOWN AND RIGHT
@@ -13872,13 +14150,26 @@
 256A	BOX DRAWINGS VERTICAL SINGLE AND HORIZONTAL DOUBLE
 256B	BOX DRAWINGS VERTICAL DOUBLE AND HORIZONTAL SINGLE
 256C	BOX DRAWINGS DOUBLE VERTICAL AND HORIZONTAL
+@		Character cell arcs
 256D	BOX DRAWINGS LIGHT ARC DOWN AND RIGHT
 256E	BOX DRAWINGS LIGHT ARC DOWN AND LEFT
 256F	BOX DRAWINGS LIGHT ARC UP AND LEFT
 2570	BOX DRAWINGS LIGHT ARC UP AND RIGHT
+@		Character cell diagonals
 2571	BOX DRAWINGS LIGHT DIAGONAL UPPER RIGHT TO LOWER LEFT
+	* not intended for mathematical symbol \diagup
+	x (reverse solidus - 005C)
+	x (set minus - 2216)
+	x (reverse solidus operator - 29F5)
 2572	BOX DRAWINGS LIGHT DIAGONAL UPPER LEFT TO LOWER RIGHT
+	* not intended for mathematical symbol \diagdown
+	x (solidus - 002F)
+	x (fraction slash - 2044)
+	x (division slash - 2215)
 2573	BOX DRAWINGS LIGHT DIAGONAL CROSS
+	x (saltire - 2613)
+	x (multiplication x - 2715)
+@		Light and heavy half lines
 2574	BOX DRAWINGS LIGHT LEFT
 2575	BOX DRAWINGS LIGHT UP
 2576	BOX DRAWINGS LIGHT RIGHT
@@ -13887,6 +14178,7 @@
 2579	BOX DRAWINGS HEAVY UP
 257A	BOX DRAWINGS HEAVY RIGHT
 257B	BOX DRAWINGS HEAVY DOWN
+@		Mixed light and heavy lines
 257C	BOX DRAWINGS LIGHT LEFT AND HEAVY RIGHT
 257D	BOX DRAWINGS LIGHT UP AND HEAVY DOWN
 257E	BOX DRAWINGS HEAVY LEFT AND LIGHT RIGHT
@@ -13942,6 +14234,7 @@
 	x (black large square - 2B1B)
 25A1	WHITE SQUARE
 	= quadrature
+	= alchemical symbol for salt
 	* may be used to represent a missing ideograph
 	x (combining enclosing square - 20DE)
 	x (ballot box - 2610)
@@ -13970,11 +14263,15 @@
 25B0	BLACK PARALLELOGRAM
 25B1	WHITE PARALLELOGRAM
 25B2	BLACK UP-POINTING TRIANGLE
+	x (mountain - 26F0)
+	x (up-pointing red triangle - 1F53A)
 25B3	WHITE UP-POINTING TRIANGLE
 	= trine
 	x (combining enclosing upward pointing triangle - 20E4)
 	x (increment - 2206)
+	x (alchemical symbol for fire - 1F702)
 25B4	BLACK UP-POINTING SMALL TRIANGLE
+	x (up-pointing small red triangle - 1F53C)
 25B5	WHITE UP-POINTING SMALL TRIANGLE
 25B6	BLACK RIGHT-POINTING TRIANGLE
 25B7	WHITE RIGHT-POINTING TRIANGLE
@@ -13987,11 +14284,14 @@
 	= forward arrow indicator
 	x (contains as normal subgroup - 22B3)
 25BC	BLACK DOWN-POINTING TRIANGLE
+	x (down-pointing red triangle - 1F53B)
 25BD	WHITE DOWN-POINTING TRIANGLE
 	= Hamilton operator
 	x (nabla - 2207)
 	x (heavy white down-pointing triangle - 26DB)
+	x (alchemical symbol for water - 1F704)
 25BE	BLACK DOWN-POINTING SMALL TRIANGLE
+	x (down-pointing small red triangle - 1F53D)
 25BF	WHITE DOWN-POINTING SMALL TRIANGLE
 25C0	BLACK LEFT-POINTING TRIANGLE
 25C1	WHITE LEFT-POINTING TRIANGLE
@@ -14004,10 +14304,14 @@
 	x (normal subgroup of - 22B2)
 25C6	BLACK DIAMOND
 	x (black diamond suit - 2666)
+	x (black medium diamond - 2B25)
+	x (large orange diamond - 1F536)
 25C7	WHITE DIAMOND
 	x (combining enclosing diamond - 20DF)
 	x (diamond operator - 22C4)
 	x (white diamond suit - 2662)
+	x (white medium diamond - 2B26)
+	x (alchemical symbol for soap - 1F754)
 25C8	WHITE DIAMOND CONTAINING BLACK SMALL DIAMOND
 25C9	FISHEYE
 	= tainome (Japanese, a kind of bullet)
@@ -14018,15 +14322,22 @@
 	x (large circle - 25EF)
 	x (heavy circle - 2B58)
 	x (ideographic number zero - 3007)
+	x (full moon symbol - 1F315)
 25CC	DOTTED CIRCLE
 	* note that the reference glyph for this character is intentionally larger than the dotted circle glyph used to indicate combining characters in this standard; see, for example, 0300
 25CD	CIRCLE WITH VERTICAL FILL
 25CE	BULLSEYE
 	x (circled ring operator - 229A)
 	x (heavy circle with circle inside - 2B57)
+	x (direct hit - 1F3AF)
 25CF	BLACK CIRCLE
+	x (black large circle - 2B24)
+	x (new moon symbol - 1F311)
+	x (large red circle - 1F534)
 25D0	CIRCLE WITH LEFT HALF BLACK
+	x (first quarter moon symbol - 1F313)
 25D1	CIRCLE WITH RIGHT HALF BLACK
+	x (last quarter moon symbol - 1F317)
 25D2	CIRCLE WITH LOWER HALF BLACK
 25D3	CIRCLE WITH UPPER HALF BLACK
 25D4	CIRCLE WITH UPPER RIGHT QUADRANT BLACK
@@ -14100,10 +14411,12 @@
 2600	BLACK SUN WITH RAYS
 	= clear weather
 	x (sun - 2609)
+	x (high brightness symbol - 1F506)
 2601	CLOUD
 	= cloudy weather
 2602	UMBRELLA
 	= rainy weather
+	x (closed umbrella - 1F302)
 2603	SNOWMAN
 	= snowy weather
 2604	COMET
@@ -14111,20 +14424,28 @@
 	x (star operator - 22C6)
 2606	WHITE STAR
 	x (stress outlined white star - 2729)
+	x (glowing star - 1F31F)
 2607	LIGHTNING
 2608	THUNDERSTORM
 2609	SUN
+	= alchemical symbol for gold
 	x (circled dot operator - 2299)
 	x (black sun with rays - 2600)
 	x (white sun with rays - 263C)
+	x (sun with face - 1F31E)
 260A	ASCENDING NODE
+	= alchemical symbol for sublimate
 260B	DESCENDING NODE
+	= alchemical symbol for purify
+	x (alchemical symbol for purify - 1F763)
 260C	CONJUNCTION
+	= alchemical symbol for day
 260D	OPPOSITION
 @		Miscellaneous symbols
 260E	BLACK TELEPHONE
 	x (telephone sign - 2121)
 	x (telephone location sign - 2706)
+	x (telephone receiver - 1F4DE)
 260F	WHITE TELEPHONE
 2610	BALLOT BOX
 	x (white square - 25A1)
@@ -14143,11 +14464,13 @@
 	* can be used to indicate a wait
 	x (watch - 231A)
 	x (hourglass - 231B)
+	x (teacup without handle - 1F375)
 @		Japanese chess symbols
 2616	WHITE SHOGI PIECE
 2617	BLACK SHOGI PIECE
 @		Miscellaneous symbols
 2618	SHAMROCK
+	x (four leaf clover - 1F340)
 2619	REVERSED ROTATED FLORAL HEART BULLET
 	* a binding signature mark
 	x (rotated floral heart bullet - 2767)
@@ -14155,6 +14478,7 @@
 261A	BLACK LEFT POINTING INDEX
 261B	BLACK RIGHT POINTING INDEX
 261C	WHITE LEFT POINTING INDEX
+	x (white left pointing backhand index - 1F448)
 261D	WHITE UP POINTING INDEX
 261E	WHITE RIGHT POINTING INDEX
 	= fist (typographic term)
@@ -14168,6 +14492,7 @@
 @		Medical and healing symbols
 2624	CADUCEUS
 	x (staff of aesculapius - 2695)
+	x (alchemical symbol for caduceus - 1F750)
 2625	ANKH
 @		Religious and political symbols
 2626	ORTHODOX CROSS
@@ -14176,6 +14501,7 @@
 	x (coptic symbol khi ro - 2CE9)
 2628	CROSS OF LORRAINE
 2629	CROSS OF JERUSALEM
+	x (alchemical symbol for vinegar - 1F70A)
 262A	STAR AND CRESCENT
 262B	FARSI SYMBOL
 	= symbol of iran (1.0)
@@ -14202,30 +14528,49 @@
 	= gen4
 2637	TRIGRAM FOR EARTH
 	= kun1
-@		Miscellaneous symbols
+@		Miscellaneous symbol
 2638	WHEEL OF DHARMA
 	x (helm symbol - 2388)
+@		Emoticons
+@+		Many other emoticons are encoded in the Emoticons block starting at U+1F600.
 2639	WHITE FROWNING FACE
 263A	WHITE SMILING FACE
 	= have a nice day!
 263B	BLACK SMILING FACE
+@		Miscellaneous symbol
 263C	WHITE SUN WITH RAYS
 	= compass
 	x (sun - 2609)
+	x (high brightness symbol - 1F506)
 @		Astrological symbols
 263D	FIRST QUARTER MOON
+	= alchemical symbol for silver
 263E	LAST QUARTER MOON
+	= alchemical symbol for silver
+	x (crescent moon - 1F319)
 263F	MERCURY
+	= alchemical symbol for quicksilver
 2640	FEMALE SIGN
 	= Venus
+	= alchemical symbol for copper
+	x (woman - 1F469)
+	x (womens symbol - 1F6BA)
 2641	EARTH
-	x (circled plus - 2295)
+	= alchemical symbol for antimony
+	x (alchemical symbol for verdigris - 1F728)
 2642	MALE SIGN
 	= Mars
+	= alchemical symbol for iron
+	x (man - 1F468)
+	x (mens symbol - 1F6B9)
 2643	JUPITER
+	= alchemical symbol for tin
 2644	SATURN
+	= alchemical symbol for lead
 2645	URANUS
+	x (astronomical symbol for uranus - 26E2)
 2646	NEPTUNE
+	= alchemical symbol for bismuth/tinglass
 2647	PLUTO
 @		Zodiacal symbols
 2648	ARIES
@@ -14236,6 +14581,7 @@
 264D	VIRGO
 	= minim (alternate glyph)
 264E	LIBRA
+	x (alchemical symbol for sublimation - 1F75E)
 264F	SCORPIUS
 	= scorpio
 	= minim, drop
@@ -14268,6 +14614,7 @@
 2665	BLACK HEART SUIT
 	= valentine
 	x (heavy black heart - 2764)
+	x (blue heart - 1F499)
 2666	BLACK DIAMOND SUIT
 	x (black diamond - 25C6)
 2667	WHITE CLUB SUIT
@@ -14275,9 +14622,17 @@
 2668	HOT SPRINGS
 @		Musical symbols
 2669	QUARTER NOTE
+	= crotchet
+	x (musical symbol quarter note - 1D15F)
 266A	EIGHTH NOTE
+	= quaver
+	x (musical symbol eighth note - 1D160)
+	x (musical note - 1F3B5)
 266B	BEAMED EIGHTH NOTES
+	= beamed quavers
+	x (multiple musical notes - 1F3B6)
 266C	BEAMED SIXTEENTH NOTES
+	= beamed semiquavers
 266D	MUSIC FLAT SIGN
 266E	MUSIC NATURAL SIGN
 266F	MUSIC SHARP SIGN
@@ -14307,6 +14662,7 @@
 267A	RECYCLING SYMBOL FOR GENERIC MATERIALS
 	* used together with other text and labels to indicate the type of material to be recycled
 267B	BLACK UNIVERSAL RECYCLING SYMBOL
+	x (clockwise rightwards and leftwards open circle arrows - 1F501)
 267C	RECYCLED PAPER SYMBOL
 	* used to indicate 100% recycled paper content
 267D	PARTIALLY-RECYCLED PAPER SYMBOL
@@ -14316,6 +14672,7 @@
 267F	WHEELCHAIR SYMBOL
 @		Dice
 2680	DIE FACE-1
+	x (game die - 1F3B2)
 2681	DIE FACE-2
 2682	DIE FACE-3
 2683	DIE FACE-4
@@ -14324,6 +14681,7 @@
 @		Go markers
 2686	WHITE CIRCLE WITH DOT RIGHT
 2687	WHITE CIRCLE WITH TWO DOTS
+	x (face without mouth - 1F636)
 2688	BLACK CIRCLE WITH WHITE DOT RIGHT
 2689	BLACK CIRCLE WITH TWO WHITE DOTS
 @		Yijing monogram and digram symbols
@@ -14339,6 +14697,7 @@
 2691	BLACK FLAG
 2692	HAMMER AND PICK
 	= mining, working day (in timetables)
+	x (pick - 26CF)
 2693	ANCHOR
 	= nautical term, harbor (on maps)
 2694	CROSSED SWORDS
@@ -14354,8 +14713,8 @@
 2698	FLOWER
 	= botanical term
 	x (flower punctuation mark - 2055)
-	x (shamrock - 2618)
 	x (white florette - 2740)
+	x (tulip - 1F337)
 2699	GEAR
 	= technology, tools
 269A	STAFF OF HERMES
@@ -14367,6 +14726,7 @@
 269C	FLEUR-DE-LIS
 269D	OUTLINED WHITE STAR
 	* alternative form of the interlaced pentagram (a symbol of Morocco)
+	x (right-handed interlaced pentagram - 26E5)
 @		Symbols for closed captioning from ARIB STD B24
 269E	THREE LINES CONVERGING RIGHT
 	= someone speaking
@@ -14376,12 +14736,15 @@
 26A0	WARNING SIGN
 26A1	HIGH VOLTAGE SIGN
 	= thunder
+	= lightning symbol
 @		Gender symbols
 26A2	DOUBLED FEMALE SIGN
 	= lesbianism
+	x (two women holding hands - 1F46D)
 26A3	DOUBLED MALE SIGN
 	* a glyph variant has the two circles on the same line
 	= male homosexuality
+	x (two men holding hands - 1F46C)
 26A4	INTERLOCKED FEMALE AND MALE SIGN
 	* a glyph variant has the two circles on the same line
 	= bisexuality
@@ -14390,12 +14753,13 @@
 	= hermaphrodite (in entomology)
 26A6	MALE WITH STROKE SIGN
 	= transgendered sexuality
+	= alchemical symbol for iron or crocus of iron
 26A7	MALE WITH STROKE AND MALE AND FEMALE SIGN
 	= transgendered sexuality
 26A8	VERTICAL MALE WITH STROKE SIGN
-	= ferrous iron sulphate (alchemy and older chemistry)
+	= alchemical symbol for iron
 26A9	HORIZONTAL MALE WITH STROKE SIGN
-	= magnesium (alchemy and older chemistry)
+	= alchemical symbol for iron
 @		Circles
 26AA	MEDIUM WHITE CIRCLE
 	= asexuality, sexless, genderless
@@ -14409,6 +14773,7 @@
 @		Genealogical symbols
 26AD	MARRIAGE SYMBOL
 	x (infinity - 221E)
+	x (wedding - 1F492)
 26AE	DIVORCE SYMBOL
 	x (infinity negated with vertical bar - 29DE)
 26AF	UNMARRIED PARTNERSHIP SYMBOL
@@ -14429,17 +14794,20 @@
 26B8	BLACK MOON LILITH
 26B9	SEXTILE
 	x (asterisk - 002A)
+	x (alchemical symbol for sal-ammoniac - 1F739)
 26BA	SEMISEXTILE
 	x (xor - 22BB)
 26BB	QUINCUNX
 	x (nand - 22BC)
 26BC	SESQUIQUADRATE
-@		Sports symbols
+@		Sport symbols
+@+		See other sport symbols in the Miscellaneous Symbols and Pictographs block.
 26BD	SOCCER BALL
 26BE	BASEBALL
 @		Miscellaneous symbol from ARIB STD B24
 26BF	SQUARED KEY
 	= parental lock
+	x (key - 1F511)
 @		Symbols for draughts and checkers
 26C0	WHITE DRAUGHTS MAN
 26C1	WHITE DRAUGHTS KING
@@ -14466,17 +14834,24 @@
 	= accident
 	x (falling diagonal crossing rising diagonal - 292C)
 26CD	DISABLED CAR
+@		Zodiacal symbol
+26CE	OPHIUCHUS
+@		Traffic signs from ARIB STD B24
 26CF	PICK
 	= under construction
+	x (hammer and pick - 2692)
+	x (construction sign - 1F6A7)
 26D0	CAR SLIDING
 	= icy road
 26D1	HELMET WITH WHITE CROSS
 	= maintenance
 26D2	CIRCLED CROSSING LANES
 	= road closed
+	x (circled times - 2297)
 26D3	CHAINS
 	= tyre chains required
 26D4	NO ENTRY
+	x (no entry sign - 1F6AB)
 26D5	ALTERNATE ONE-WAY LEFT WAY TRAFFIC
 	* left side traffic
 26D6	BLACK TWO-WAY LEFT WAY TRAFFIC
@@ -14500,39 +14875,66 @@
 26DF	BLACK TRUCK
 	= black lorry
 	= closed to large vehicles, alternate
+	x (delivery truck - 1F69A)
 26E0	RESTRICTED LEFT ENTRY-1
 26E1	RESTRICTED LEFT ENTRY-2
-@		Dictionary and map symbols from ARIB STD B24
+@		Astronomical symbol
+26E2	ASTRONOMICAL SYMBOL FOR URANUS
+	x (uranus - 2645)
+@		Map symbol from ARIB STD B24
 26E3	HEAVY CIRCLE WITH STROKE AND TWO DOTS ABOVE
 	= public office
+@		Pentagram symbols
+@+		These are mystic or occult symbols.
+26E4	PENTAGRAM
+	= pentalpha, pentangle
+	* symbol of various uses, including symbol on Moroccan flag
+	x (white star - 2606)
+26E5	RIGHT-HANDED INTERLACED PENTAGRAM
+	* symbol of various countries, including Morocco
+	x (outlined white star - 269D)
+26E6	LEFT-HANDED INTERLACED PENTAGRAM
+	* symbol of various countries, including Ethiopia
+26E7	INVERTED PENTAGRAM
+@		Map symbols from ARIB STD B24
 26E8	BLACK CROSS ON SHIELD
 	= hospital
+	x (hospital - 1F3E5)
 26E9	SHINTO SHRINE
 	= torii
 26EA	CHURCH
 26EB	CASTLE
+	x (european castle - 1F3F0)
 26EC	HISTORIC SITE
+	x (therefore - 2234)
 26ED	GEAR WITHOUT HUB
 	= factory
 	x (gear - 2699)
+	x (factory - 1F3ED)
 26EE	GEAR WITH HANDLES
 	= power plant, power substation
 26EF	MAP SYMBOL FOR LIGHTHOUSE
 26F0	MOUNTAIN
+	x (black up-pointing triangle - 25B2)
 26F1	UMBRELLA ON GROUND
 	= bathing beach
+	x (umbrella - 2602)
 26F2	FOUNTAIN
 	= park
 26F3	FLAG IN HOLE
 	= golf course
+	x (triangular flag on post - 1F6A9)
 26F4	FERRY
 	= ferry boat terminal
+	x (ship - 1F6A2)
 26F5	SAILBOAT
 	= marina or yacht harbour
+	x (rowboat - 1F6A3)
 26F6	SQUARE FOUR CORNERS
 	= intersection
 26F7	SKIER
 	= ski resort
+	x (ski and ski boot - 1F3BF)
 26F8	ICE SKATE
 	= ice skating rink
 26F9	PERSON WITH BALL
@@ -14540,33 +14942,53 @@
 26FA	TENT
 	= camping site
 26FB	JAPANESE BANK SYMBOL
+	x (bank - 1F3E6)
 26FC	HEADSTONE GRAVEYARD SYMBOL
 	= graveyard, memorial park, cemetery
 26FD	FUEL PUMP
 	= petrol station, gas station
 26FE	CUP ON BLACK SQUARE
 	= drive-in restaurant
+	x (hot beverage - 2615)
+	x (teacup without handle - 1F375)
 26FF	WHITE FLAG WITH HORIZONTAL MIDDLE BLACK STRIPE
 	= Japanese self-defence force site
 @@	2700	Dingbats	27BF
 @+		ITC Zapf dingbats series 100. Some of the ITC Zapf dingbats have been unified with geometric shape characters. Gaps in the chart have subsequently been filled with other dingbat-like symbols.
+	x (black telephone - 260E)
+	x (black right pointing index - 261B)
+	x (white right pointing index - 261E)
+	x (black star - 2605)
+	x (black circle - 25CF)
+	x (black square - 25A0)
+	x (black up-pointing triangle - 25B2)
+	x (black down-pointing triangle - 25BC)
+	x (black diamond - 25C6)
+	x (rightwards arrow - 2192)
+	x (left right arrow - 2194)
+	x (up down arrow - 2195)
 @		Miscellaneous
 2701	UPPER BLADE SCISSORS
 2702	BLACK SCISSORS
 2703	LOWER BLADE SCISSORS
 2704	WHITE SCISSORS
-2705	<reserved>
-	x (black telephone - 260E)
+2705	WHITE HEAVY CHECK MARK
+	x (heavy check mark - 2714)
 2706	TELEPHONE LOCATION SIGN
 	x (telephone sign - 2121)
+	x (telephone receiver - 1F4DE)
 2707	TAPE DRIVE
 2708	AIRPLANE
 2709	ENVELOPE
-270A	<reserved>
-	x (black right pointing index - 261B)
-270B	<reserved>
-	x (white right pointing index - 261E)
+	x (incoming envelope - 1F4E8)
+270A	RAISED FIST
+	= rock in Rock, Paper, Scissors game
+	x (fisted hand sign - 1F44A)
+270B	RAISED HAND
+	= paper in Rock, Paper, Scissors game
+	x (waving hand sign - 1F44B)
 270C	VICTORY HAND
+	= scissors in Rock, Paper, Scissors game
 270D	WRITING HAND
 270E	LOWER RIGHT PENCIL
 270F	PENCIL
@@ -14595,14 +15017,14 @@
 	* Historically, the Maltese cross took many forms; the shape shown in the Zapf Dingbats is similar to one known as the Cross Formée.
 @		Stars, asterisks and snowflakes
 2721	STAR OF DAVID
+	x (six pointed star with middle dot - 1F52F)
 2722	FOUR TEARDROP-SPOKED ASTERISK
 2723	FOUR BALLOON-SPOKED ASTERISK
 2724	HEAVY FOUR BALLOON-SPOKED ASTERISK
 2725	FOUR CLUB-SPOKED ASTERISK
 2726	BLACK FOUR POINTED STAR
 2727	WHITE FOUR POINTED STAR
-2728	<reserved>
-	x (black star - 2605)
+2728	SPARKLES
 2729	STRESS OUTLINED WHITE STAR
 	x (white star - 2606)
 272A	CIRCLED WHITE STAR
@@ -14631,6 +15053,7 @@
 273E	SIX PETALLED BLACK AND WHITE FLORETTE
 273F	BLACK FLORETTE
 2740	WHITE FLORETTE
+	x (white flower - 1F4AE)
 2741	EIGHT PETALLED OUTLINED BLACK FLORETTE
 2742	CIRCLED OPEN CENTRE EIGHT POINTED STAR
 2743	HEAVY TEARDROP-SPOKED PINWHEEL ASTERISK
@@ -14645,21 +15068,18 @@
 274B	HEAVY EIGHT TEARDROP-SPOKED PROPELLER ASTERISK
 	= turbofan
 @		Miscellaneous
-274C	<reserved>
-	x (black circle - 25CF)
+274C	CROSS MARK
+	* forms a game tally pair with 2B55
+	x (multiplication sign - 00D7)
 274D	SHADOWED WHITE CIRCLE
-274E	<reserved>
-	x (black square - 25A0)
+274E	NEGATIVE SQUARED CROSS MARK
 274F	LOWER RIGHT DROP-SHADOWED WHITE SQUARE
 2750	UPPER RIGHT DROP-SHADOWED WHITE SQUARE
 2751	LOWER RIGHT SHADOWED WHITE SQUARE
 2752	UPPER RIGHT SHADOWED WHITE SQUARE
-2753	<reserved>
-	x (black up-pointing triangle - 25B2)
-2754	<reserved>
-	x (black down-pointing triangle - 25BC)
-2755	<reserved>
-	x (black diamond - 25C6)
+2753	BLACK QUESTION MARK ORNAMENT
+2754	WHITE QUESTION MARK ORNAMENT
+2755	WHITE EXCLAMATION MARK ORNAMENT
 2756	BLACK DIAMOND MINUS WHITE X
 2757	HEAVY EXCLAMATION MARK SYMBOL
 	= obstacles on the road, ARIB STD B24
@@ -14676,6 +15096,10 @@
 	x (left double quotation mark - 201C)
 275E	HEAVY DOUBLE COMMA QUOTATION MARK ORNAMENT
 	x (right double quotation mark - 201D)
+275F	HEAVY LOW SINGLE COMMA QUOTATION MARK ORNAMENT
+	x (single low-9 quotation mark - 201A)
+2760	HEAVY LOW DOUBLE COMMA QUOTATION MARK ORNAMENT
+	x (double low-9 quotation mark - 201E)
 2761	CURVED STEM PARAGRAPH SIGN ORNAMENT
 	x (pilcrow sign - 00B6)
 2762	HEAVY EXCLAMATION MARK ORNAMENT
@@ -14745,14 +15169,16 @@
 2791	DINGBAT NEGATIVE CIRCLED SANS-SERIF DIGIT EIGHT
 2792	DINGBAT NEGATIVE CIRCLED SANS-SERIF DIGIT NINE
 2793	DINGBAT NEGATIVE CIRCLED SANS-SERIF NUMBER TEN
-@		Dingbat arrows
+@		Dingbat arrow
 2794	HEAVY WIDE-HEADED RIGHTWARDS ARROW
-2795	<reserved>
-	x (rightwards arrow - 2192)
-2796	<reserved>
-	x (left right arrow - 2194)
-2797	<reserved>
-	x (up down arrow - 2195)
+@		Heavy variants of arithmetic symbols
+2795	HEAVY PLUS SIGN
+	x (plus sign - 002B)
+2796	HEAVY MINUS SIGN
+	x (minus sign - 2212)
+2797	HEAVY DIVISION SIGN
+	x (division sign - 00F7)
+@		Dingbat arrows
 2798	HEAVY SOUTH EAST ARROW
 2799	HEAVY RIGHTWARDS ARROW
 279A	HEAVY NORTH EAST ARROW
@@ -14779,6 +15205,10 @@
 27AD	HEAVY LOWER RIGHT-SHADOWED WHITE RIGHTWARDS ARROW
 27AE	HEAVY UPPER RIGHT-SHADOWED WHITE RIGHTWARDS ARROW
 27AF	NOTCHED LOWER RIGHT-SHADOWED WHITE RIGHTWARDS ARROW
+@		Miscellaneous
+27B0	CURLY LOOP
+	= kururi
+@		Dingbat arrows
 27B1	NOTCHED UPPER RIGHT-SHADOWED WHITE RIGHTWARDS ARROW
 27B2	CIRCLED HEAVY WHITE RIGHTWARDS ARROW
 27B3	WHITE-FEATHERED RIGHTWARDS ARROW
@@ -14793,6 +15223,8 @@
 27BC	WEDGE-TAILED RIGHTWARDS ARROW
 27BD	HEAVY WEDGE-TAILED RIGHTWARDS ARROW
 27BE	OPEN-OUTLINED RIGHTWARDS ARROW
+@		Miscellaneous
+27BF	DOUBLE CURLY LOOP
 @@	27C0	Miscellaneous Mathematical Symbols-A	27EF
 @		Miscellaneous symbols
 27C0	THREE DIMENSIONAL ANGLE
@@ -14820,8 +15252,20 @@
 	x (division sign - 00F7)
 	x (division slash - 2215)
 	x (square root - 221A)
+@		Operators
+27CE	SQUARED LOGICAL AND
+	= box min
+	* morphological min product operator
+	* morphological erosion operator
+	* additive minimum operator
+27CF	SQUARED LOGICAL OR
+	= box max
+	* morphological max product operator
+	* morphological dilation operator
+	* additive maximum operator
 @		Miscellaneous symbol
 27D0	WHITE DIAMOND WITH CENTRED DOT
+	x (diamond shape with a dot inside - 1F4A0)
 @		Operators
 27D1	AND WITH DOT
 	x (logical and - 2227)
@@ -15475,6 +15919,7 @@
 29B5	CIRCLE WITH HORIZONTAL BAR
 	x (circled minus - 2296)
 29B6	CIRCLED VERTICAL BAR
+	x (alchemical symbol for nitre - 1F715)
 29B7	CIRCLED PARALLEL
 29B8	CIRCLED REVERSE SOLIDUS
 29B9	CIRCLED PERPENDICULAR
@@ -15544,6 +15989,7 @@
 29DE	INFINITY NEGATED WITH VERTICAL BAR
 29DF	DOUBLE-ENDED MULTIMAP
 	x (multimap - 22B8)
+	x (alchemical symbol for arsenic - 1F73A)
 29E0	SQUARE WITH CONTOURED OUTLINE
 	= D'Alembertian
 	x (lower right drop-shadowed white square - 274F)
@@ -16071,15 +16517,19 @@
 2B24	BLACK LARGE CIRCLE
 	x (black circle - 25CF)
 	x (large circle - 25EF)
+	x (large red circle - 1F534)
 @		Diamonds and lozenges
 2B25	BLACK MEDIUM DIAMOND
 	x (black diamond - 25C6)
 2B26	WHITE MEDIUM DIAMOND
+	x (white diamond - 25C7)
+	x (alchemical symbol for soap - 1F754)
 2B27	BLACK MEDIUM LOZENGE
 2B28	WHITE MEDIUM LOZENGE
 	x (lozenge - 25CA)
 2B29	BLACK SMALL DIAMOND
 	x (diamond operator - 22C4)
+	x (small orange diamond - 1F538)
 2B2A	BLACK SMALL LOZENGE
 2B2B	WHITE SMALL LOZENGE
 @		Ellipses
@@ -16162,6 +16612,7 @@
 @		Traffic sign from ARIB STD B24
 2B55	HEAVY LARGE CIRCLE
 	= basic symbol for speed limit
+	* forms a game tally pair with 274C
 	x (large circle - 25EF)
 @		Dictionary and map symbols from ARIB STD B24
 2B56	HEAVY OVAL WITH OVAL INSIDE
@@ -16575,6 +17026,14 @@
 2D6F	TIFINAGH MODIFIER LETTER LABIALIZATION MARK
 	= tamatart
 	# <super> 2D61
+@		Punctuation
+2D70	TIFINAGH SEPARATOR MARK
+	= tazarast
+@		Sign
+2D7F	TIFINAGH CONSONANT JOINER
+	* suppresses an inherent vowel
+	* functions to indicate that previous and following character are part of a bi-consonant cluster
+	* shape shown is arbitrary and is not visibly rendered
 @@	2D80	Ethiopic Extended	2DDF
 @		Syllables for Me'en
 2D80	ETHIOPIC SYLLABLE LOA
@@ -16726,6 +17185,7 @@
 2E10	FORKED PARAGRAPHOS
 2E11	REVERSED FORKED PARAGRAPHOS
 2E12	HYPODIASTOLE
+	= ypodiastoli
 2E13	DOTTED OBELOS
 	* glyph variants may look like '00F7' or '2238'
 	x (commercial minus sign - 2052)
@@ -17570,6 +18030,7 @@
 3011	RIGHT BLACK LENTICULAR BRACKET
 @		CJK symbols
 3012	POSTAL MARK
+	x (japanese post office - 1F3E3)
 3013	GETA MARK
 	* substitute for ideograph not in font
 	* editorial convention to represent ideographic lacuna
@@ -18097,9 +18558,9 @@
 	# 1175 hangul jungseong i
 @		Special character
 3164	HANGUL FILLER
-	= chae um
+	= chaeum
 	# 1160 hangul jungseong filler
-@		Archaic letters
+@		Old letters
 3165	HANGUL LETTER SSANGNIEUN
 	# 1114 hangul choseong ssangnieun
 3166	HANGUL LETTER NIEUN-TIKEUT
@@ -18158,7 +18619,7 @@
 	= ssangyesieung
 	# 1147 hangul choseong ssangieung
 3181	HANGUL LETTER YESIEUNG
-	* archaic velar nasal
+	* old velar nasal
 	# 114C hangul choseong yesieung
 3182	HANGUL LETTER YESIEUNG-SIOS
 	# 11F1 hangul jongseong yesieung-sios
@@ -18169,7 +18630,7 @@
 3185	HANGUL LETTER SSANGHIEUH
 	# 1158 hangul choseong ssanghieuh
 3186	HANGUL LETTER YEORINHIEUH
-	* archaic glottal stop
+	* old glottal stop
 	# 1159 hangul choseong yeorinhieuh
 3187	HANGUL LETTER YO-YA
 	# 1184 hangul jungseong yo-ya
@@ -18249,44 +18710,100 @@
 31B5	BOPOMOFO FINAL LETTER T
 31B6	BOPOMOFO FINAL LETTER K
 31B7	BOPOMOFO FINAL LETTER H
+@		Extended Bopomofo for Hmu and Ge
+31B8	BOPOMOFO LETTER GH
+31B9	BOPOMOFO LETTER LH
+31BA	BOPOMOFO LETTER ZY
 @@	31C0	CJK Strokes	31EF
 @		CJK strokes
 31C0	CJK STROKE T
+	* 2nd stroke of 51B0
 31C1	CJK STROKE WG
+	* 2nd stroke of 72D0
 31C2	CJK STROKE XG
+	* 5th stroke of 6211
 31C3	CJK STROKE BXG
+	* occurs only in Kaiti typefaces
+	* equivalent to SWG stroke in Songti typefaces
+	* 2nd stroke of 5FC3
 31C4	CJK STROKE SW
+	* 3rd stroke of 4EA1
+	* 4th stroke of 56DB
 31C5	CJK STROKE HZZ
+	* 1st stroke of 534D
 31C6	CJK STROKE HZG
+	* 1st stroke of 7FBD
+	* 1st stroke of 4E5F
 31C7	CJK STROKE HP
+	* 1st stroke of 53C8
+	* 4th stroke of 4ECA
 31C8	CJK STROKE HZWG
+	* 1st stroke of 98DE
+	* 2nd stroke of 4E5D
 31C9	CJK STROKE SZWG
+	* 3rd stroke of 5F13
+	* 2nd stroke of 9A6C
 31CA	CJK STROKE HZT
+	* 2nd stroke of 8BA1
+	* 2nd stroke of 9CE9
 31CB	CJK STROKE HZZP
+	* 1st stroke of 53CA
 31CC	CJK STROKE HPWG
+	* 1st stroke of 961D
+	* 6th stroke of 90AE
 31CD	CJK STROKE HZW
+	* 5th stroke of 6295
 31CE	CJK STROKE HZZZ
+	* 1st stroke of 51F8
 31CF	CJK STROKE N
+	* 3rd stroke of 5927
 31D0	CJK STROKE H
+	* 1st stroke of 5927
+	* 1st stroke of 4E03
 31D1	CJK STROKE S
+	* 4th stroke of 4E2D
 31D2	CJK STROKE P
+	* 1st stroke of 4E4F
 31D3	CJK STROKE SP
+	* 1st stroke of 6708
 31D4	CJK STROKE D
+	* 3rd stroke of 4E38
 31D5	CJK STROKE HZ
+	* 2nd stroke of 56DB
 31D6	CJK STROKE HG
+	* 1st stroke of 758B
+	* 1st stroke of 5B50
 31D7	CJK STROKE SZ
+	* 2nd stroke of 5C71
+	* 2nd stroke of 4E1C
 31D8	CJK STROKE SWZ
+	* 6th stroke of 8085
 31D9	CJK STROKE ST
+	* 3rd stroke of 6C11
 31DA	CJK STROKE SG
+	* 1st stroke of 6C34
 31DB	CJK STROKE PD
+	* 1st stroke of 5DE1
+	* 1st stroke of 5973
 31DC	CJK STROKE PZ
+	* 3rd stroke of 516C
+	* 4th stroke of 5F18
 31DD	CJK STROKE TN
+	* 8th stroke of 5EFB
 31DE	CJK STROKE SZZ
+	* 1st stroke of 5350
+	* 4th stroke of 4E9E
 31DF	CJK STROKE SWG
+	* 7th stroke of 4E71
+	* 3rd stroke of 5DF1
 31E0	CJK STROKE HXWG
+	* 1st stroke of 4E59
 31E1	CJK STROKE HZZZG
+	* 1st stroke of 4E43
 31E2	CJK STROKE PG
+	* 1st stroke of 4E44
 31E3	CJK STROKE Q
+	* 6th stroke of 3514
 @@	31F0	Katakana Phonetic Extensions	31FF
 @		Phonetic extensions for Ainu
 31F0	KATAKANA LETTER SMALL KU
@@ -18370,6 +18887,7 @@
 321D	PARENTHESIZED KOREAN CHARACTER OJEON
 	# 0028 110B 1169 110C 1165 11AB 0029
 321E	PARENTHESIZED KOREAN CHARACTER O HU
+	* preferred spelling for the name is ohu
 	# 0028 110B 1169 1112 116E 0029
 @		Parenthesized ideographs
 3220	PARENTHESIZED IDEOGRAPH ONE
@@ -21217,6 +21735,8 @@ A65D	CYRILLIC SMALL LETTER IOTIFIED CLOSED LITTLE YUS
 A65E	CYRILLIC CAPITAL LETTER YN
 A65F	CYRILLIC SMALL LETTER YN
 	* Romanian Cyrillic
+A660	CYRILLIC CAPITAL LETTER REVERSED TSE
+A661	CYRILLIC SMALL LETTER REVERSED TSE
 A662	CYRILLIC CAPITAL LETTER SOFT DE
 A663	CYRILLIC SMALL LETTER SOFT DE
 A664	CYRILLIC CAPITAL LETTER SOFT EL
@@ -21566,6 +22086,32 @@ A78C	LATIN SMALL LETTER SALTILLO
 	x (latin letter glottal stop - 0294)
 	x (modifier letter apostrophe - 02BC)
 	x (modifier letter glottal stop - 02C0)
+@		African letter
+A78D	LATIN CAPITAL LETTER TURNED H
+	* used in the Dan/Gio orthography in Liberia
+	* lowercase is 0265
+@		Phonetic symbol
+A78E	LATIN SMALL LETTER L WITH RETROFLEX HOOK AND BELT
+	* voiceless lateral retroflex fricative
+	* used to transcribe Toda
+@		Janalif letters
+A790	LATIN CAPITAL LETTER N WITH DESCENDER
+A791	LATIN SMALL LETTER N WITH DESCENDER
+@		Latvian letters for pre-1921 orthography
+A7A0	LATIN CAPITAL LETTER G WITH OBLIQUE STROKE
+A7A1	LATIN SMALL LETTER G WITH OBLIQUE STROKE
+A7A2	LATIN CAPITAL LETTER K WITH OBLIQUE STROKE
+A7A3	LATIN SMALL LETTER K WITH OBLIQUE STROKE
+A7A4	LATIN CAPITAL LETTER N WITH OBLIQUE STROKE
+A7A5	LATIN SMALL LETTER N WITH OBLIQUE STROKE
+A7A6	LATIN CAPITAL LETTER R WITH OBLIQUE STROKE
+A7A7	LATIN SMALL LETTER R WITH OBLIQUE STROKE
+A7A8	LATIN CAPITAL LETTER S WITH OBLIQUE STROKE
+A7A9	LATIN SMALL LETTER S WITH OBLIQUE STROKE
+	* also used in pre-1950 Lower Sorbian orthography
+	x (latin small letter long s with diagonal stroke - 1E9C)
+@		Addition for UPA
+A7FA	LATIN LETTER SMALL CAPITAL TURNED M
 @		Ancient Roman epigraphic letters
 A7FB	LATIN EPIGRAPHIC LETTER REVERSED F
 A7FC	LATIN EPIGRAPHIC LETTER REVERSED P
@@ -22456,6 +23002,42 @@ AADE	TAI VIET SYMBOL HO HOI
 	* marks start of text in songs and poems
 AADF	TAI VIET SYMBOL KOI KOI
 	* marks end of text in songs and poems
+@@	AB00	Ethiopic Extended-A	AB2F
+@		Gamo-Gofa-Dawro and Basketo
+AB01	ETHIOPIC SYLLABLE TTHU
+AB02	ETHIOPIC SYLLABLE TTHI
+AB03	ETHIOPIC SYLLABLE TTHAA
+AB04	ETHIOPIC SYLLABLE TTHEE
+AB05	ETHIOPIC SYLLABLE TTHE
+AB06	ETHIOPIC SYLLABLE TTHO
+AB09	ETHIOPIC SYLLABLE DDHU
+AB0A	ETHIOPIC SYLLABLE DDHI
+AB0B	ETHIOPIC SYLLABLE DDHAA
+AB0C	ETHIOPIC SYLLABLE DDHEE
+AB0D	ETHIOPIC SYLLABLE DDHE
+AB0E	ETHIOPIC SYLLABLE DDHO
+@		Gamo-Gofa-Dawro
+AB11	ETHIOPIC SYLLABLE DZU
+AB12	ETHIOPIC SYLLABLE DZI
+AB13	ETHIOPIC SYLLABLE DZAA
+AB14	ETHIOPIC SYLLABLE DZEE
+AB15	ETHIOPIC SYLLABLE DZE
+AB16	ETHIOPIC SYLLABLE DZO
+@		Gumuz
+AB20	ETHIOPIC SYLLABLE CCHHA
+AB21	ETHIOPIC SYLLABLE CCHHU
+AB22	ETHIOPIC SYLLABLE CCHHI
+AB23	ETHIOPIC SYLLABLE CCHHAA
+AB24	ETHIOPIC SYLLABLE CCHHEE
+AB25	ETHIOPIC SYLLABLE CCHHE
+AB26	ETHIOPIC SYLLABLE CCHHO
+AB28	ETHIOPIC SYLLABLE BBA
+AB29	ETHIOPIC SYLLABLE BBU
+AB2A	ETHIOPIC SYLLABLE BBI
+AB2B	ETHIOPIC SYLLABLE BBAA
+AB2C	ETHIOPIC SYLLABLE BBEE
+AB2D	ETHIOPIC SYLLABLE BBE
+AB2E	ETHIOPIC SYLLABLE BBO
 @@	ABC0	Meetei Mayek	ABFF
 @+		The name "Meetei Mayek" is used in official documentation in Manipur. Many linguists also use the name "Meitei Mayek", and other transliterations also occur.
 @		Letters
@@ -22655,6 +23237,7 @@ D7FB	HANGUL JONGSEONG PHIEUPH-THIEUTH
 @+		This range of 6400 code points is dedicated to private use.
 @@	F900	CJK Compatibility Ideographs	FAFF
 @@+
+@+		This block, despite its name, contains a number of unified CJK ideographs. Those characters are individually identified by annotations.
 @		Pronunciation variants from KS X 1001:1998
 F900	CJK COMPATIBILITY IDEOGRAPH-F900
 	: 8C48
@@ -23199,20 +23782,21 @@ FA0C	CJK COMPATIBILITY IDEOGRAPH-FA0C
 FA0D	CJK COMPATIBILITY IDEOGRAPH-FA0D
 	: 55C0
 @		The IBM 32 compatibility ideographs
+@+		This section contains twelve characters that are CJK unified ideographs. Each CJK unified ideograph is annotated as such.
 FA0E	CJK COMPATIBILITY IDEOGRAPH-FA0E
-	* a unified CJK ideograph, not a compatibility ideograph, despite its name
+	* a CJK unified ideograph
 FA0F	CJK COMPATIBILITY IDEOGRAPH-FA0F
-	* a unified CJK ideograph, not a compatibility ideograph, despite its name
+	* a CJK unified ideograph
 FA10	CJK COMPATIBILITY IDEOGRAPH-FA10
 	: 585A
 FA11	CJK COMPATIBILITY IDEOGRAPH-FA11
-	* a unified CJK ideograph, not a compatibility ideograph, despite its name
+	* a CJK unified ideograph
 FA12	CJK COMPATIBILITY IDEOGRAPH-FA12
 	: 6674
 FA13	CJK COMPATIBILITY IDEOGRAPH-FA13
-	* a unified CJK ideograph, not a compatibility ideograph, despite its name
+	* a CJK unified ideograph
 FA14	CJK COMPATIBILITY IDEOGRAPH-FA14
-	* a unified CJK ideograph, not a compatibility ideograph, despite its name
+	* a CJK unified ideograph
 FA15	CJK COMPATIBILITY IDEOGRAPH-FA15
 	: 51DE
 FA16	CJK COMPATIBILITY IDEOGRAPH-FA16
@@ -23234,27 +23818,27 @@ FA1D	CJK COMPATIBILITY IDEOGRAPH-FA1D
 FA1E	CJK COMPATIBILITY IDEOGRAPH-FA1E
 	: 7FBD
 FA1F	CJK COMPATIBILITY IDEOGRAPH-FA1F
-	* a unified CJK ideograph, not a compatibility ideograph, despite its name
+	* a CJK unified ideograph
 FA20	CJK COMPATIBILITY IDEOGRAPH-FA20
 	: 8612
 FA21	CJK COMPATIBILITY IDEOGRAPH-FA21
-	* a unified CJK ideograph, not a compatibility ideograph, despite its name
+	* a CJK unified ideograph
 FA22	CJK COMPATIBILITY IDEOGRAPH-FA22
 	: 8AF8
 FA23	CJK COMPATIBILITY IDEOGRAPH-FA23
-	* a unified CJK ideograph, not a compatibility ideograph, despite its name
+	* a CJK unified ideograph
 FA24	CJK COMPATIBILITY IDEOGRAPH-FA24
-	* a unified CJK ideograph, not a compatibility ideograph, despite its name
+	* a CJK unified ideograph
 FA25	CJK COMPATIBILITY IDEOGRAPH-FA25
 	: 9038
 FA26	CJK COMPATIBILITY IDEOGRAPH-FA26
 	: 90FD
 FA27	CJK COMPATIBILITY IDEOGRAPH-FA27
-	* a unified CJK ideograph, not a compatibility ideograph, despite its name
+	* a CJK unified ideograph
 FA28	CJK COMPATIBILITY IDEOGRAPH-FA28
-	* a unified CJK ideograph, not a compatibility ideograph, despite its name
+	* a CJK unified ideograph
 FA29	CJK COMPATIBILITY IDEOGRAPH-FA29
-	* a unified CJK ideograph, not a compatibility ideograph, despite its name
+	* a CJK unified ideograph
 FA2A	CJK COMPATIBILITY IDEOGRAPH-FA2A
 	: 98EF
 FA2B	CJK COMPATIBILITY IDEOGRAPH-FA2B
@@ -23591,6 +24175,8 @@ FAD2	CJK COMPATIBILITY IDEOGRAPH-FAD2
 FAD3	CJK COMPATIBILITY IDEOGRAPH-FAD3
 	: 4018
 FAD4	CJK COMPATIBILITY IDEOGRAPH-FAD4
+	* mapping change removed original source
+	x (cjk compatibility ideograph-2F949 - 2F949)
 	: 4039
 FAD5	CJK COMPATIBILITY IDEOGRAPH-FAD5
 	: 25249
@@ -23925,6 +24511,32 @@ FBB0	ARABIC LETTER YEH BARREE WITH HAMZA ABOVE ISOLATED FORM
 	# <isolated> 06D3
 FBB1	ARABIC LETTER YEH BARREE WITH HAMZA ABOVE FINAL FORM
 	# <final> 06D3
+@		Arabic pedagogical symbols
+@+		These are spacing symbols representing Arabic letter diacritics considered in isolation, as for example as in discussions about the Arabic script.
+FBB2	ARABIC SYMBOL DOT ABOVE
+FBB3	ARABIC SYMBOL DOT BELOW
+FBB4	ARABIC SYMBOL TWO DOTS ABOVE
+FBB5	ARABIC SYMBOL TWO DOTS BELOW
+FBB6	ARABIC SYMBOL THREE DOTS ABOVE
+FBB7	ARABIC SYMBOL THREE DOTS BELOW
+FBB8	ARABIC SYMBOL THREE DOTS POINTING DOWNWARDS ABOVE
+FBB9	ARABIC SYMBOL THREE DOTS POINTING DOWNWARDS BELOW
+FBBA	ARABIC SYMBOL FOUR DOTS ABOVE
+	* Sindhi
+FBBB	ARABIC SYMBOL FOUR DOTS BELOW
+	* Sindhi
+FBBC	ARABIC SYMBOL DOUBLE VERTICAL BAR BELOW
+	* Sindhi
+FBBD	ARABIC SYMBOL TWO DOTS VERTICALLY ABOVE
+	* Sindhi
+FBBE	ARABIC SYMBOL TWO DOTS VERTICALLY BELOW
+	* Sindhi
+FBBF	ARABIC SYMBOL RING
+	* Pashto
+FBC0	ARABIC SYMBOL SMALL TAH ABOVE
+	* Urdu
+FBC1	ARABIC SYMBOL SMALL TAH BELOW
+	* Urdu
 @		Glyphs for contextual forms of letters for Central Asian languages
 FBD3	ARABIC LETTER NG ISOLATED FORM
 	# <isolated> 06AD
@@ -27448,6 +28060,123 @@ FFFF	<not a character>
 10E7C	RUMI FRACTION ONE QUARTER
 10E7D	RUMI FRACTION ONE THIRD
 10E7E	RUMI FRACTION TWO THIRDS
+@@	11000	Brahmi	1107F
+@		Various signs
+11000	BRAHMI SIGN CANDRABINDU
+11001	BRAHMI SIGN ANUSVARA
+11002	BRAHMI SIGN VISARGA
+11003	BRAHMI SIGN JIHVAMULIYA
+11004	BRAHMI SIGN UPADHMANIYA
+@		Independent vowels
+11005	BRAHMI LETTER A
+11006	BRAHMI LETTER AA
+11007	BRAHMI LETTER I
+11008	BRAHMI LETTER II
+11009	BRAHMI LETTER U
+1100A	BRAHMI LETTER UU
+1100B	BRAHMI LETTER VOCALIC R
+1100C	BRAHMI LETTER VOCALIC RR
+1100D	BRAHMI LETTER VOCALIC L
+1100E	BRAHMI LETTER VOCALIC LL
+1100F	BRAHMI LETTER E
+11010	BRAHMI LETTER AI
+11011	BRAHMI LETTER O
+11012	BRAHMI LETTER AU
+@		Consonants
+11013	BRAHMI LETTER KA
+11014	BRAHMI LETTER KHA
+11015	BRAHMI LETTER GA
+11016	BRAHMI LETTER GHA
+11017	BRAHMI LETTER NGA
+11018	BRAHMI LETTER CA
+11019	BRAHMI LETTER CHA
+1101A	BRAHMI LETTER JA
+1101B	BRAHMI LETTER JHA
+1101C	BRAHMI LETTER NYA
+1101D	BRAHMI LETTER TTA
+1101E	BRAHMI LETTER TTHA
+1101F	BRAHMI LETTER DDA
+11020	BRAHMI LETTER DDHA
+11021	BRAHMI LETTER NNA
+11022	BRAHMI LETTER TA
+11023	BRAHMI LETTER THA
+11024	BRAHMI LETTER DA
+11025	BRAHMI LETTER DHA
+11026	BRAHMI LETTER NA
+11027	BRAHMI LETTER PA
+11028	BRAHMI LETTER PHA
+11029	BRAHMI LETTER BA
+1102A	BRAHMI LETTER BHA
+1102B	BRAHMI LETTER MA
+1102C	BRAHMI LETTER YA
+1102D	BRAHMI LETTER RA
+1102E	BRAHMI LETTER LA
+1102F	BRAHMI LETTER VA
+11030	BRAHMI LETTER SHA
+11031	BRAHMI LETTER SSA
+11032	BRAHMI LETTER SA
+11033	BRAHMI LETTER HA
+11034	BRAHMI LETTER LLA
+11035	BRAHMI LETTER OLD TAMIL LLLA
+11036	BRAHMI LETTER OLD TAMIL RRA
+11037	BRAHMI LETTER OLD TAMIL NNNA
+@		Dependent vowel signs
+11038	BRAHMI VOWEL SIGN AA
+11039	BRAHMI VOWEL SIGN BHATTIPROLU AA
+1103A	BRAHMI VOWEL SIGN I
+1103B	BRAHMI VOWEL SIGN II
+1103C	BRAHMI VOWEL SIGN U
+1103D	BRAHMI VOWEL SIGN UU
+1103E	BRAHMI VOWEL SIGN VOCALIC R
+1103F	BRAHMI VOWEL SIGN VOCALIC RR
+11040	BRAHMI VOWEL SIGN VOCALIC L
+11041	BRAHMI VOWEL SIGN VOCALIC LL
+11042	BRAHMI VOWEL SIGN E
+11043	BRAHMI VOWEL SIGN AI
+11044	BRAHMI VOWEL SIGN O
+11045	BRAHMI VOWEL SIGN AU
+@		Virama
+11046	BRAHMI VIRAMA
+@		Punctuation
+11047	BRAHMI DANDA
+11048	BRAHMI DOUBLE DANDA
+11049	BRAHMI PUNCTUATION DOT
+1104A	BRAHMI PUNCTUATION DOUBLE DOT
+1104B	BRAHMI PUNCTUATION LINE
+1104C	BRAHMI PUNCTUATION CRESCENT BAR
+1104D	BRAHMI PUNCTUATION LOTUS
+@		Numbers
+11052	BRAHMI NUMBER ONE
+11053	BRAHMI NUMBER TWO
+11054	BRAHMI NUMBER THREE
+11055	BRAHMI NUMBER FOUR
+11056	BRAHMI NUMBER FIVE
+11057	BRAHMI NUMBER SIX
+11058	BRAHMI NUMBER SEVEN
+11059	BRAHMI NUMBER EIGHT
+1105A	BRAHMI NUMBER NINE
+1105B	BRAHMI NUMBER TEN
+1105C	BRAHMI NUMBER TWENTY
+1105D	BRAHMI NUMBER THIRTY
+1105E	BRAHMI NUMBER FORTY
+1105F	BRAHMI NUMBER FIFTY
+11060	BRAHMI NUMBER SIXTY
+11061	BRAHMI NUMBER SEVENTY
+11062	BRAHMI NUMBER EIGHTY
+11063	BRAHMI NUMBER NINETY
+11064	BRAHMI NUMBER ONE HUNDRED
+11065	BRAHMI NUMBER ONE THOUSAND
+@		Digits
+11066	BRAHMI DIGIT ZERO
+11067	BRAHMI DIGIT ONE
+11068	BRAHMI DIGIT TWO
+11069	BRAHMI DIGIT THREE
+1106A	BRAHMI DIGIT FOUR
+1106B	BRAHMI DIGIT FIVE
+1106C	BRAHMI DIGIT SIX
+1106D	BRAHMI DIGIT SEVEN
+1106E	BRAHMI DIGIT EIGHT
+1106F	BRAHMI DIGIT NINE
 @@	11080	Kaithi	110CF
 @		Various signs
 11080	KAITHI SIGN CANDRABINDU
@@ -29769,6 +30498,614 @@ FFFF	<not a character>
 1342C	EGYPTIAN HIEROGLYPH AA030
 1342D	EGYPTIAN HIEROGLYPH AA031
 1342E	EGYPTIAN HIEROGLYPH AA032
+@@	16800	Bamum Supplement	16A3F
+@	Characters found through Phase A
+16800	BAMUM LETTER PHASE-A NGKUE MFON
+16801	BAMUM LETTER PHASE-A GBIEE FON
+16802	BAMUM LETTER PHASE-A PON MFON PIPAEMGBIEE
+16803	BAMUM LETTER PHASE-A PON MFON PIPAEMBA
+16804	BAMUM LETTER PHASE-A NAA MFON
+16805	BAMUM LETTER PHASE-A SHUENSHUET
+16806	BAMUM LETTER PHASE-A TITA MFON
+16807	BAMUM LETTER PHASE-A NZA MFON
+16808	BAMUM LETTER PHASE-A SHINDA PA NJI
+16809	BAMUM LETTER PHASE-A PON PA NJI PIPAEMGBIEE
+1680A	BAMUM LETTER PHASE-A PON PA NJI PIPAEMBA
+1680B	BAMUM LETTER PHASE-A MAEMBGBIEE
+1680C	BAMUM LETTER PHASE-A TU MAEMBA
+1680D	BAMUM LETTER PHASE-A NGANGU
+1680E	BAMUM LETTER PHASE-A MAEMVEUX
+1680F	BAMUM LETTER PHASE-A MANSUAE
+16810	BAMUM LETTER PHASE-A MVEUAENGAM
+16811	BAMUM LETTER PHASE-A SEUNYAM
+16812	BAMUM LETTER PHASE-A NTOQPEN
+16813	BAMUM LETTER PHASE-A KEUKEUTNDA
+16814	BAMUM LETTER PHASE-A NKINDI
+16815	BAMUM LETTER PHASE-A SUU
+16816	BAMUM LETTER PHASE-A NGKUENZEUM
+16817	BAMUM LETTER PHASE-A LAPAQ
+16818	BAMUM LETTER PHASE-A LET KUT
+16819	BAMUM LETTER PHASE-A NTAP MFAA
+1681A	BAMUM LETTER PHASE-A MAEKEUP
+1681B	BAMUM LETTER PHASE-A PASHAE
+1681C	BAMUM LETTER PHASE-A GHEUAERAE
+1681D	BAMUM LETTER PHASE-A PAMSHAE
+1681E	BAMUM LETTER PHASE-A MON NGGEUAET
+1681F	BAMUM LETTER PHASE-A NZUN MEUT
+16820	BAMUM LETTER PHASE-A U YUQ NAE
+16821	BAMUM LETTER PHASE-A GHEUAEGHEUAE
+16822	BAMUM LETTER PHASE-A NTAP NTAA
+16823	BAMUM LETTER PHASE-A SISA
+16824	BAMUM LETTER PHASE-A MGBASA
+16825	BAMUM LETTER PHASE-A MEUNJOMNDEUQ
+16826	BAMUM LETTER PHASE-A MOOMPUQ
+16827	BAMUM LETTER PHASE-A KAFA
+16828	BAMUM LETTER PHASE-A PA LEERAEWA
+16829	BAMUM LETTER PHASE-A NDA LEERAEWA
+1682A	BAMUM LETTER PHASE-A PET
+1682B	BAMUM LETTER PHASE-A MAEMKPEN
+1682C	BAMUM LETTER PHASE-A NIKA
+1682D	BAMUM LETTER PHASE-A PUP
+1682E	BAMUM LETTER PHASE-A TUAEP
+1682F	BAMUM LETTER PHASE-A LUAEP
+16830	BAMUM LETTER PHASE-A SONJAM
+16831	BAMUM LETTER PHASE-A TEUTEUWEN
+16832	BAMUM LETTER PHASE-A MAENYI
+16833	BAMUM LETTER PHASE-A KET
+16834	BAMUM LETTER PHASE-A NDAANGGEUAET
+16835	BAMUM LETTER PHASE-A KUOQ
+16836	BAMUM LETTER PHASE-A MOOMEUT
+16837	BAMUM LETTER PHASE-A SHUM
+16838	BAMUM LETTER PHASE-A LOMMAE
+16839	BAMUM LETTER PHASE-A FIRI
+1683A	BAMUM LETTER PHASE-A ROM
+1683B	BAMUM LETTER PHASE-A KPOQ
+1683C	BAMUM LETTER PHASE-A SOQ
+1683D	BAMUM LETTER PHASE-A MAP PIEET
+1683E	BAMUM LETTER PHASE-A SHIRAE
+1683F	BAMUM LETTER PHASE-A NTAP
+16840	BAMUM LETTER PHASE-A SHOQ NSHUT YUM
+16841	BAMUM LETTER PHASE-A NYIT MONGKEUAEQ
+16842	BAMUM LETTER PHASE-A PAARAE
+16843	BAMUM LETTER PHASE-A NKAARAE
+16844	BAMUM LETTER PHASE-A UNKNOWN
+16845	BAMUM LETTER PHASE-A NGGEN
+16846	BAMUM LETTER PHASE-A MAESI
+16847	BAMUM LETTER PHASE-A NJAM
+16848	BAMUM LETTER PHASE-A MBANYI
+16849	BAMUM LETTER PHASE-A NYET
+1684A	BAMUM LETTER PHASE-A TEUAEN
+1684B	BAMUM LETTER PHASE-A SOT
+1684C	BAMUM LETTER PHASE-A PAAM
+1684D	BAMUM LETTER PHASE-A NSHIEE
+1684E	BAMUM LETTER PHASE-A MAEM
+1684F	BAMUM LETTER PHASE-A NYI
+16850	BAMUM LETTER PHASE-A KAQ
+16851	BAMUM LETTER PHASE-A NSHA
+16852	BAMUM LETTER PHASE-A VEE
+16853	BAMUM LETTER PHASE-A LU
+16854	BAMUM LETTER PHASE-A NEN
+16855	BAMUM LETTER PHASE-A NAQ
+16856	BAMUM LETTER PHASE-A MBAQ
+@	Characters found through Phase B
+16857	BAMUM LETTER PHASE-B NSHUET
+16858	BAMUM LETTER PHASE-B TU MAEMGBIEE
+16859	BAMUM LETTER PHASE-B SIEE
+1685A	BAMUM LETTER PHASE-B SET TU
+1685B	BAMUM LETTER PHASE-B LOM NTEUM
+1685C	BAMUM LETTER PHASE-B MBA MAELEE
+1685D	BAMUM LETTER PHASE-B KIEEM
+1685E	BAMUM LETTER PHASE-B YEURAE
+1685F	BAMUM LETTER PHASE-B MBAARAE
+16860	BAMUM LETTER PHASE-B KAM
+16861	BAMUM LETTER PHASE-B PEESHI
+16862	BAMUM LETTER PHASE-B YAFU LEERAEWA
+16863	BAMUM LETTER PHASE-B LAM NSHUT NYAM
+16864	BAMUM LETTER PHASE-B NTIEE SHEUOQ
+16865	BAMUM LETTER PHASE-B NDU NJAA
+16866	BAMUM LETTER PHASE-B GHEUGHEUAEM
+16867	BAMUM LETTER PHASE-B PIT
+16868	BAMUM LETTER PHASE-B TU NSIEE
+16869	BAMUM LETTER PHASE-B SHET NJAQ
+1686A	BAMUM LETTER PHASE-B SHEUAEQTU
+1686B	BAMUM LETTER PHASE-B MFON TEUAEQ
+1686C	BAMUM LETTER PHASE-B MBIT MBAAKET
+1686D	BAMUM LETTER PHASE-B NYI NTEUM
+1686E	BAMUM LETTER PHASE-B KEUPUQ
+1686F	BAMUM LETTER PHASE-B GHEUGHEN
+16870	BAMUM LETTER PHASE-B KEUYEUX
+16871	BAMUM LETTER PHASE-B LAANAE
+16872	BAMUM LETTER PHASE-B PARUM
+	* nsen in Phases C-E
+16873	BAMUM LETTER PHASE-B VEUM
+16874	BAMUM LETTER PHASE-B NGKINDI MVOP
+16875	BAMUM LETTER PHASE-B NGGEU MBU
+16876	BAMUM LETTER PHASE-B WUAET
+16877	BAMUM LETTER PHASE-B SAKEUAE
+16878	BAMUM LETTER PHASE-B TAAM
+16879	BAMUM LETTER PHASE-B MEUQ
+1687A	BAMUM LETTER PHASE-B NGGUOQ
+1687B	BAMUM LETTER PHASE-B NGGUOQ LARGE
+1687C	BAMUM LETTER PHASE-B MFIYAQ
+1687D	BAMUM LETTER PHASE-B SUE
+1687E	BAMUM LETTER PHASE-B MBEURI
+1687F	BAMUM LETTER PHASE-B MONTIEEN
+16880	BAMUM LETTER PHASE-B NYAEMAE
+16881	BAMUM LETTER PHASE-B PUNGAAM
+16882	BAMUM LETTER PHASE-B MEUT NGGEET
+16883	BAMUM LETTER PHASE-B FEUX
+16884	BAMUM LETTER PHASE-B MBUOQ
+16885	BAMUM LETTER PHASE-B FEE
+16886	BAMUM LETTER PHASE-B KEUAEM
+16887	BAMUM LETTER PHASE-B MA NJEUAENA
+16888	BAMUM LETTER PHASE-B MA NJUQA
+16889	BAMUM LETTER PHASE-B LET
+1688A	BAMUM LETTER PHASE-B NGGAAM
+1688B	BAMUM LETTER PHASE-B NSEN
+1688C	BAMUM LETTER PHASE-B MA
+1688D	BAMUM LETTER PHASE-B KIQ
+1688E	BAMUM LETTER PHASE-B NGOM
+@	Characters found through Phase C
+1688F	BAMUM LETTER PHASE-C NGKUE MAEMBA
+16890	BAMUM LETTER PHASE-C NZA
+16891	BAMUM LETTER PHASE-C YUM
+16892	BAMUM LETTER PHASE-C WANGKUOQ
+16893	BAMUM LETTER PHASE-C NGGEN
+16894	BAMUM LETTER PHASE-C NDEUAEREE
+16895	BAMUM LETTER PHASE-C NGKAQ
+16896	BAMUM LETTER PHASE-C GHARAE
+16897	BAMUM LETTER PHASE-C MBEEKEET
+16898	BAMUM LETTER PHASE-C GBAYI
+16899	BAMUM LETTER PHASE-C NYIR MKPARAQ MEUN
+1689A	BAMUM LETTER PHASE-C NTU MBIT
+1689B	BAMUM LETTER PHASE-C MBEUM
+1689C	BAMUM LETTER PHASE-C PIRIEEN
+1689D	BAMUM LETTER PHASE-C NDOMBU
+1689E	BAMUM LETTER PHASE-C MBAA CABBAGE-TREE
+1689F	BAMUM LETTER PHASE-C KEUSHEUAEP
+168A0	BAMUM LETTER PHASE-C GHAP
+168A1	BAMUM LETTER PHASE-C KEUKAQ
+168A2	BAMUM LETTER PHASE-C YU MUOMAE
+168A3	BAMUM LETTER PHASE-C NZEUM
+168A4	BAMUM LETTER PHASE-C MBUE
+168A5	BAMUM LETTER PHASE-C NSEUAEN
+168A6	BAMUM LETTER PHASE-C MBIT
+168A7	BAMUM LETTER PHASE-C YEUQ
+168A8	BAMUM LETTER PHASE-C KPARAQ
+168A9	BAMUM LETTER PHASE-C KAA
+168AA	BAMUM LETTER PHASE-C SEUX
+168AB	BAMUM LETTER PHASE-C NDIDA
+168AC	BAMUM LETTER PHASE-C TAASHAE
+168AD	BAMUM LETTER PHASE-C NJUEQ
+168AE	BAMUM LETTER PHASE-C TITA YUE
+168AF	BAMUM LETTER PHASE-C SUAET
+168B0	BAMUM LETTER PHASE-C NGGUAEN NYAM
+168B1	BAMUM LETTER PHASE-C VEUX
+168B2	BAMUM LETTER PHASE-C NANSANAQ
+168B3	BAMUM LETTER PHASE-C MA KEUAERI
+168B4	BAMUM LETTER PHASE-C NTAA
+168B5	BAMUM LETTER PHASE-C NGGUON
+168B6	BAMUM LETTER PHASE-C LAP
+168B7	BAMUM LETTER PHASE-C MBIRIEEN
+168B8	BAMUM LETTER PHASE-C MGBASAQ
+168B9	BAMUM LETTER PHASE-C NTEUNGBA
+168BA	BAMUM LETTER PHASE-C TEUTEUX
+168BB	BAMUM LETTER PHASE-C NGGUM
+168BC	BAMUM LETTER PHASE-C FUE
+168BD	BAMUM LETTER PHASE-C NDEUT
+168BE	BAMUM LETTER PHASE-C NSA
+168BF	BAMUM LETTER PHASE-C NSHAQ
+168C0	BAMUM LETTER PHASE-C BUNG
+168C1	BAMUM LETTER PHASE-C VEUAEPEN
+168C2	BAMUM LETTER PHASE-C MBERAE
+168C3	BAMUM LETTER PHASE-C RU
+168C4	BAMUM LETTER PHASE-C NJAEM
+168C5	BAMUM LETTER PHASE-C LAM
+168C6	BAMUM LETTER PHASE-C TITUAEP
+168C7	BAMUM LETTER PHASE-C NSUOT NGOM
+168C8	BAMUM LETTER PHASE-C NJEEEE
+168C9	BAMUM LETTER PHASE-C KET
+168CA	BAMUM LETTER PHASE-C NGGU
+168CB	BAMUM LETTER PHASE-C MAESI
+168CC	BAMUM LETTER PHASE-C MBUAEM
+168CD	BAMUM LETTER PHASE-C LU
+168CE	BAMUM LETTER PHASE-C KUT
+168CF	BAMUM LETTER PHASE-C NJAM
+168D0	BAMUM LETTER PHASE-C NGOM
+168D1	BAMUM LETTER PHASE-C WUP
+168D2	BAMUM LETTER PHASE-C NGGUEET
+168D3	BAMUM LETTER PHASE-C NSOM
+168D4	BAMUM LETTER PHASE-C NTEN
+168D5	BAMUM LETTER PHASE-C KUOP NKAARAE
+168D6	BAMUM LETTER PHASE-C NSUN
+168D7	BAMUM LETTER PHASE-C NDAM
+	* pen in Phase D
+168D8	BAMUM LETTER PHASE-C MA NSIEE
+168D9	BAMUM LETTER PHASE-C YAA
+168DA	BAMUM LETTER PHASE-C NDAP
+168DB	BAMUM LETTER PHASE-C SHUEQ
+168DC	BAMUM LETTER PHASE-C SETFON
+168DD	BAMUM LETTER PHASE-C MBI
+168DE	BAMUM LETTER PHASE-C MAEMBA
+168DF	BAMUM LETTER PHASE-C MBANYI
+168E0	BAMUM LETTER PHASE-C KEUSEUX
+168E1	BAMUM LETTER PHASE-C MBEUX
+168E2	BAMUM LETTER PHASE-C KEUM
+168E3	BAMUM LETTER PHASE-C MBAA PICKET
+168E4	BAMUM LETTER PHASE-C YUWOQ
+168E5	BAMUM LETTER PHASE-C NJEUX
+168E6	BAMUM LETTER PHASE-C MIEE
+168E7	BAMUM LETTER PHASE-C MUAE
+168E8	BAMUM LETTER PHASE-C SHIQ
+168E9	BAMUM LETTER PHASE-C KEN LAW
+168EA	BAMUM LETTER PHASE-C KEN FATIGUE
+168EB	BAMUM LETTER PHASE-C NGAQ
+168EC	BAMUM LETTER PHASE-C NAQ
+168ED	BAMUM LETTER PHASE-C LIQ
+168EE	BAMUM LETTER PHASE-C PIN
+168EF	BAMUM LETTER PHASE-C PEN
+168F0	BAMUM LETTER PHASE-C TET
+@	Characters found through Phase D
+168F1	BAMUM LETTER PHASE-D MBUO
+168F2	BAMUM LETTER PHASE-D WAP
+168F3	BAMUM LETTER PHASE-D NJI
+168F4	BAMUM LETTER PHASE-D MFON
+168F5	BAMUM LETTER PHASE-D NJIEE
+168F6	BAMUM LETTER PHASE-D LIEE
+168F7	BAMUM LETTER PHASE-D NJEUT
+168F8	BAMUM LETTER PHASE-D NSHEE
+168F9	BAMUM LETTER PHASE-D NGGAAMAE
+168FA	BAMUM LETTER PHASE-D NYAM
+168FB	BAMUM LETTER PHASE-D WUAEN
+	* ti in Phases E-F
+168FC	BAMUM LETTER PHASE-D NGKUN
+168FD	BAMUM LETTER PHASE-D SHEE
+168FE	BAMUM LETTER PHASE-D NGKAP
+168FF	BAMUM LETTER PHASE-D KEUAETMEUN
+16900	BAMUM LETTER PHASE-D TEUT
+16901	BAMUM LETTER PHASE-D SHEUAE
+16902	BAMUM LETTER PHASE-D NJAP
+16903	BAMUM LETTER PHASE-D SUE
+16904	BAMUM LETTER PHASE-D KET
+16905	BAMUM LETTER PHASE-D YAEMMAE
+16906	BAMUM LETTER PHASE-D KUOM
+16907	BAMUM LETTER PHASE-D SAP
+16908	BAMUM LETTER PHASE-D MFEUT
+16909	BAMUM LETTER PHASE-D NDEUX
+1690A	BAMUM LETTER PHASE-D MALEERI
+1690B	BAMUM LETTER PHASE-D MEUT
+1690C	BAMUM LETTER PHASE-D SEUAEQ
+1690D	BAMUM LETTER PHASE-D YEN
+1690E	BAMUM LETTER PHASE-D NJEUAEM
+1690F	BAMUM LETTER PHASE-D KEUOT MBUAE
+16910	BAMUM LETTER PHASE-D NGKEURI
+16911	BAMUM LETTER PHASE-D TU
+16912	BAMUM LETTER PHASE-D GHAA
+16913	BAMUM LETTER PHASE-D NGKYEE
+16914	BAMUM LETTER PHASE-D FEUFEUAET
+16915	BAMUM LETTER PHASE-D NDEE
+16916	BAMUM LETTER PHASE-D MGBOFUM
+16917	BAMUM LETTER PHASE-D LEUAEP
+16918	BAMUM LETTER PHASE-D NDON
+16919	BAMUM LETTER PHASE-D MONI
+1691A	BAMUM LETTER PHASE-D MGBEUN
+1691B	BAMUM LETTER PHASE-D PUUT
+1691C	BAMUM LETTER PHASE-D MGBIEE
+1691D	BAMUM LETTER PHASE-D MFO
+1691E	BAMUM LETTER PHASE-D LUM
+1691F	BAMUM LETTER PHASE-D NSIEEP
+16920	BAMUM LETTER PHASE-D MBAA
+16921	BAMUM LETTER PHASE-D KWAET
+16922	BAMUM LETTER PHASE-D NYET
+16923	BAMUM LETTER PHASE-D TEUAEN
+16924	BAMUM LETTER PHASE-D SOT
+16925	BAMUM LETTER PHASE-D YUWOQ
+16926	BAMUM LETTER PHASE-D KEUM
+16927	BAMUM LETTER PHASE-D RAEM
+16928	BAMUM LETTER PHASE-D TEEEE
+16929	BAMUM LETTER PHASE-D NGKEUAEQ
+	* faamae '8' in Phase F
+1692A	BAMUM LETTER PHASE-D MFEUAE
+1692B	BAMUM LETTER PHASE-D NSIEET
+1692C	BAMUM LETTER PHASE-D KEUP
+1692D	BAMUM LETTER PHASE-D PIP
+1692E	BAMUM LETTER PHASE-D PEUTAE
+1692F	BAMUM LETTER PHASE-D NYUE
+16930	BAMUM LETTER PHASE-D LET
+	* lee in Phases E-F
+16931	BAMUM LETTER PHASE-D NGGAAM
+	* mu in Phases E-F
+16932	BAMUM LETTER PHASE-D MFIEE
+16933	BAMUM LETTER PHASE-D NGGWAEN
+16934	BAMUM LETTER PHASE-D YUOM
+16935	BAMUM LETTER PHASE-D PAP
+16936	BAMUM LETTER PHASE-D YUOP
+16937	BAMUM LETTER PHASE-D NDAM
+16938	BAMUM LETTER PHASE-D NTEUM
+16939	BAMUM LETTER PHASE-D SUAE
+1693A	BAMUM LETTER PHASE-D KUN
+1693B	BAMUM LETTER PHASE-D NGGEUX
+1693C	BAMUM LETTER PHASE-D NGKIEE
+1693D	BAMUM LETTER PHASE-D TUOT
+1693E	BAMUM LETTER PHASE-D MEUN
+1693F	BAMUM LETTER PHASE-D KUQ
+16940	BAMUM LETTER PHASE-D NSUM
+16941	BAMUM LETTER PHASE-D TEUN
+16942	BAMUM LETTER PHASE-D MAENJET
+16943	BAMUM LETTER PHASE-D NGGAP
+16944	BAMUM LETTER PHASE-D LEUM
+16945	BAMUM LETTER PHASE-D NGGUOM
+16946	BAMUM LETTER PHASE-D NSHUT
+16947	BAMUM LETTER PHASE-D NJUEQ
+16948	BAMUM LETTER PHASE-D GHEUAE
+16949	BAMUM LETTER PHASE-D KU
+1694A	BAMUM LETTER PHASE-D REN OLD
+1694B	BAMUM LETTER PHASE-D TAE
+1694C	BAMUM LETTER PHASE-D TOQ
+1694D	BAMUM LETTER PHASE-D NYI
+1694E	BAMUM LETTER PHASE-D RII
+1694F	BAMUM LETTER PHASE-D LEEEE
+16950	BAMUM LETTER PHASE-D MEEEE
+	* meq in Phase E
+16951	BAMUM LETTER PHASE-D M
+16952	BAMUM LETTER PHASE-D SUU
+16953	BAMUM LETTER PHASE-D MU
+16954	BAMUM LETTER PHASE-D SHII
+16955	BAMUM LETTER PHASE-D SHEUX
+16956	BAMUM LETTER PHASE-D KYEE
+16957	BAMUM LETTER PHASE-D NU
+16958	BAMUM LETTER PHASE-D SHU
+16959	BAMUM LETTER PHASE-D NTEE
+1695A	BAMUM LETTER PHASE-D PEE
+1695B	BAMUM LETTER PHASE-D NI
+1695C	BAMUM LETTER PHASE-D SHOQ
+1695D	BAMUM LETTER PHASE-D PUQ
+1695E	BAMUM LETTER PHASE-D MVOP
+1695F	BAMUM LETTER PHASE-D LOQ
+16960	BAMUM LETTER PHASE-D REN MUCH
+16961	BAMUM LETTER PHASE-D TI
+16962	BAMUM LETTER PHASE-D NTUU
+16963	BAMUM LETTER PHASE-D MBAA SEVEN
+	* used after 16985 for samba '7' in Phases A-D
+16964	BAMUM LETTER PHASE-D SAQ
+16965	BAMUM LETTER PHASE-D FAA
+	* used before 169B8 for faamae '8' in Phases A-D
+@	Characters found through Phase E
+16966	BAMUM LETTER PHASE-E NDAP
+	* i in Phase F
+16967	BAMUM LETTER PHASE-E TOON
+16968	BAMUM LETTER PHASE-E MBEUM
+16969	BAMUM LETTER PHASE-E LAP
+	* men in Phase F
+1696A	BAMUM LETTER PHASE-E VOM
+1696B	BAMUM LETTER PHASE-E LOON
+1696C	BAMUM LETTER PHASE-E PAA
+1696D	BAMUM LETTER PHASE-E SOM
+1696E	BAMUM LETTER PHASE-E RAQ
+	* nga in Phase F
+1696F	BAMUM LETTER PHASE-E NSHUOP
+	* pa in Phase F
+16970	BAMUM LETTER PHASE-E NDUN
+	* pue in Phase F
+16971	BAMUM LETTER PHASE-E PUAE
+	* fae in Phase F
+16972	BAMUM LETTER PHASE-E TAM
+16973	BAMUM LETTER PHASE-E NGKA
+16974	BAMUM LETTER PHASE-E KPEUX
+16975	BAMUM LETTER PHASE-E WUO
+16976	BAMUM LETTER PHASE-E SEE
+16977	BAMUM LETTER PHASE-E NGGEUAET
+16978	BAMUM LETTER PHASE-E PAAM
+16979	BAMUM LETTER PHASE-E TOO
+1697A	BAMUM LETTER PHASE-E KUOP
+1697B	BAMUM LETTER PHASE-E LOM
+1697C	BAMUM LETTER PHASE-E NSHIEE
+1697D	BAMUM LETTER PHASE-E NGOP
+1697E	BAMUM LETTER PHASE-E MAEM
+1697F	BAMUM LETTER PHASE-E NGKEUX
+16980	BAMUM LETTER PHASE-E NGOQ
+16981	BAMUM LETTER PHASE-E NSHUE
+16982	BAMUM LETTER PHASE-E RIMGBA
+16983	BAMUM LETTER PHASE-E NJEUX
+16984	BAMUM LETTER PHASE-E PEEM
+16985	BAMUM LETTER PHASE-E SAA
+	* used before 16963 for samba '7' in Phases A-D
+16986	BAMUM LETTER PHASE-E NGGURAE
+16987	BAMUM LETTER PHASE-E MGBA
+16988	BAMUM LETTER PHASE-E GHEUX
+16989	BAMUM LETTER PHASE-E NGKEUAEM
+1698A	BAMUM LETTER PHASE-E NJAEMLI
+1698B	BAMUM LETTER PHASE-E MAP
+1698C	BAMUM LETTER PHASE-E LOOT
+1698D	BAMUM LETTER PHASE-E NGGEEEE
+1698E	BAMUM LETTER PHASE-E NDIQ
+1698F	BAMUM LETTER PHASE-E TAEN NTEUM
+16990	BAMUM LETTER PHASE-E SET
+16991	BAMUM LETTER PHASE-E PUM
+	* o in Phase F
+16992	BAMUM LETTER PHASE-E NDAA SOFTNESS
+16993	BAMUM LETTER PHASE-E NGGUAESHAE NYAM
+	* fee in Phase F
+16994	BAMUM LETTER PHASE-E YIEE
+16995	BAMUM LETTER PHASE-E GHEUN
+16996	BAMUM LETTER PHASE-E TUAE
+16997	BAMUM LETTER PHASE-E YEUAE
+16998	BAMUM LETTER PHASE-E PO
+16999	BAMUM LETTER PHASE-E TUMAE
+1699A	BAMUM LETTER PHASE-E KEUAE
+1699B	BAMUM LETTER PHASE-E SUAEN
+1699C	BAMUM LETTER PHASE-E TEUAEQ
+1699D	BAMUM LETTER PHASE-E VEUAE
+1699E	BAMUM LETTER PHASE-E WEUX
+1699F	BAMUM LETTER PHASE-E LAAM
+169A0	BAMUM LETTER PHASE-E PU
+	* also puq in Phase E
+169A1	BAMUM LETTER PHASE-E TAAQ
+169A2	BAMUM LETTER PHASE-E GHAAMAE
+169A3	BAMUM LETTER PHASE-E NGEUREUT
+169A4	BAMUM LETTER PHASE-E SHEUAEQ
+169A5	BAMUM LETTER PHASE-E MGBEN
+169A6	BAMUM LETTER PHASE-E MBEE
+169A7	BAMUM LETTER PHASE-E NZAQ
+169A8	BAMUM LETTER PHASE-E NKOM
+	* ten in Phase F
+169A9	BAMUM LETTER PHASE-E GBET
+169AA	BAMUM LETTER PHASE-E TUM
+169AB	BAMUM LETTER PHASE-E KUET
+169AC	BAMUM LETTER PHASE-E YAP
+169AD	BAMUM LETTER PHASE-E NYI CLEAVER
+169AE	BAMUM LETTER PHASE-E YIT
+169AF	BAMUM LETTER PHASE-E MFEUQ
+169B0	BAMUM LETTER PHASE-E NDIAQ
+169B1	BAMUM LETTER PHASE-E PIEEQ
+169B2	BAMUM LETTER PHASE-E YUEQ
+169B3	BAMUM LETTER PHASE-E LEUAEM
+169B4	BAMUM LETTER PHASE-E FUE
+169B5	BAMUM LETTER PHASE-E GBEUX
+169B6	BAMUM LETTER PHASE-E NGKUP
+169B7	BAMUM LETTER PHASE-E KET
+169B8	BAMUM LETTER PHASE-E MAE
+	* used after 16965 for faamae '8' in Phases A-D
+169B9	BAMUM LETTER PHASE-E NGKAAMI
+169BA	BAMUM LETTER PHASE-E GHET
+169BB	BAMUM LETTER PHASE-E FA
+169BC	BAMUM LETTER PHASE-E NTUM
+169BD	BAMUM LETTER PHASE-E PEUT
+169BE	BAMUM LETTER PHASE-E YEUM
+169BF	BAMUM LETTER PHASE-E NGGEUAE
+169C0	BAMUM LETTER PHASE-E NYI BETWEEN
+169C1	BAMUM LETTER PHASE-E NZUQ
+169C2	BAMUM LETTER PHASE-E POON
+169C3	BAMUM LETTER PHASE-E MIEE
+169C4	BAMUM LETTER PHASE-E FUET
+169C5	BAMUM LETTER PHASE-E NAE
+169C6	BAMUM LETTER PHASE-E MUAE
+169C7	BAMUM LETTER PHASE-E GHEUAE
+169C8	BAMUM LETTER PHASE-E FU I
+169C9	BAMUM LETTER PHASE-E MVI
+169CA	BAMUM LETTER PHASE-E PUAQ
+169CB	BAMUM LETTER PHASE-E NGKUM
+169CC	BAMUM LETTER PHASE-E KUT
+169CD	BAMUM LETTER PHASE-E PIET
+169CE	BAMUM LETTER PHASE-E NTAP
+169CF	BAMUM LETTER PHASE-E YEUAET
+169D0	BAMUM LETTER PHASE-E NGGUP
+169D1	BAMUM LETTER PHASE-E PA PEOPLE
+169D2	BAMUM LETTER PHASE-E FU CALL
+169D3	BAMUM LETTER PHASE-E FOM
+169D4	BAMUM LETTER PHASE-E NJEE
+169D5	BAMUM LETTER PHASE-E A
+169D6	BAMUM LETTER PHASE-E TOQ
+169D7	BAMUM LETTER PHASE-E O
+169D8	BAMUM LETTER PHASE-E I
+169D9	BAMUM LETTER PHASE-E LAQ
+169DA	BAMUM LETTER PHASE-E PA PLURAL
+169DB	BAMUM LETTER PHASE-E TAA
+169DC	BAMUM LETTER PHASE-E TAQ
+169DD	BAMUM LETTER PHASE-E NDAA MY HOUSE
+169DE	BAMUM LETTER PHASE-E SHIQ
+169DF	BAMUM LETTER PHASE-E YEUX
+169E0	BAMUM LETTER PHASE-E NGUAE
+169E1	BAMUM LETTER PHASE-E YUAEN
+	* pi in Phase F
+169E2	BAMUM LETTER PHASE-E YOQ SWIMMING
+169E3	BAMUM LETTER PHASE-E YOQ COVER
+169E4	BAMUM LETTER PHASE-E YUQ
+169E5	BAMUM LETTER PHASE-E YUN
+169E6	BAMUM LETTER PHASE-E KEUX
+169E7	BAMUM LETTER PHASE-E PEUX
+169E8	BAMUM LETTER PHASE-E NJEE EPOCH
+169E9	BAMUM LETTER PHASE-E PUE
+169EA	BAMUM LETTER PHASE-E WUE
+169EB	BAMUM LETTER PHASE-E FEE
+169EC	BAMUM LETTER PHASE-E VEE
+169ED	BAMUM LETTER PHASE-E LU
+169EE	BAMUM LETTER PHASE-E MI
+169EF	BAMUM LETTER PHASE-E REUX
+169F0	BAMUM LETTER PHASE-E RAE
+169F1	BAMUM LETTER PHASE-E NGUAET
+169F2	BAMUM LETTER PHASE-E NGA
+169F3	BAMUM LETTER PHASE-E SHO
+169F4	BAMUM LETTER PHASE-E SHOQ
+169F5	BAMUM LETTER PHASE-E FU REMEDY
+169F6	BAMUM LETTER PHASE-E NA
+169F7	BAMUM LETTER PHASE-E PI
+169F8	BAMUM LETTER PHASE-E LOQ
+169F9	BAMUM LETTER PHASE-E KO
+	* used before 16A02 for koghom '10' in Phases A-D
+	* used before 16A38 for kovue '9' in Phases A-D
+169FA	BAMUM LETTER PHASE-E MEN
+169FB	BAMUM LETTER PHASE-E MA
+169FC	BAMUM LETTER PHASE-E MAQ
+169FD	BAMUM LETTER PHASE-E TEU
+169FE	BAMUM LETTER PHASE-E KI
+	* koghom in Phase F
+169FF	BAMUM LETTER PHASE-E MON
+16A00	BAMUM LETTER PHASE-E TEN
+16A01	BAMUM LETTER PHASE-E FAQ
+16A02	BAMUM LETTER PHASE-E GHOM
+	* used after 169F9 for koghom '10' in Phases A-D
+@	Characters found through Phase F
+16A03	BAMUM LETTER PHASE-F KA
+16A04	BAMUM LETTER PHASE-F U
+16A05	BAMUM LETTER PHASE-F KU
+16A06	BAMUM LETTER PHASE-F EE
+16A07	BAMUM LETTER PHASE-F REE
+16A08	BAMUM LETTER PHASE-F TAE
+16A09	BAMUM LETTER PHASE-F NYI
+16A0A	BAMUM LETTER PHASE-F LA
+16A0B	BAMUM LETTER PHASE-F RII
+16A0C	BAMUM LETTER PHASE-F RIEE
+16A0D	BAMUM LETTER PHASE-F MEEEE
+16A0E	BAMUM LETTER PHASE-F TAA
+16A0F	BAMUM LETTER PHASE-F NDAA
+16A10	BAMUM LETTER PHASE-F NJAEM
+16A11	BAMUM LETTER PHASE-F M
+16A12	BAMUM LETTER PHASE-F SUU
+16A13	BAMUM LETTER PHASE-F SHII
+16A14	BAMUM LETTER PHASE-F SI
+16A15	BAMUM LETTER PHASE-F SEUX
+16A16	BAMUM LETTER PHASE-F KYEE
+16A17	BAMUM LETTER PHASE-F KET
+16A18	BAMUM LETTER PHASE-F NUAE
+16A19	BAMUM LETTER PHASE-F NU
+16A1A	BAMUM LETTER PHASE-F NJUAE
+16A1B	BAMUM LETTER PHASE-F YOQ
+16A1C	BAMUM LETTER PHASE-F SHU
+16A1D	BAMUM LETTER PHASE-F YA
+16A1E	BAMUM LETTER PHASE-F NSHA
+16A1F	BAMUM LETTER PHASE-F PEUX
+16A20	BAMUM LETTER PHASE-F NTEE
+16A21	BAMUM LETTER PHASE-F WUE
+16A22	BAMUM LETTER PHASE-F PEE
+16A23	BAMUM LETTER PHASE-F RU
+16A24	BAMUM LETTER PHASE-F NI
+16A25	BAMUM LETTER PHASE-F REUX
+16A26	BAMUM LETTER PHASE-F KEN
+16A27	BAMUM LETTER PHASE-F NGKWAEN
+16A28	BAMUM LETTER PHASE-F NGGA
+16A29	BAMUM LETTER PHASE-F SHO
+16A2A	BAMUM LETTER PHASE-F PUAE
+16A2B	BAMUM LETTER PHASE-F FOM
+16A2C	BAMUM LETTER PHASE-F WA
+16A2D	BAMUM LETTER PHASE-F LI
+16A2E	BAMUM LETTER PHASE-F LOQ
+16A2F	BAMUM LETTER PHASE-F KO
+16A30	BAMUM LETTER PHASE-F MBEN
+16A31	BAMUM LETTER PHASE-F REN
+16A32	BAMUM LETTER PHASE-F MA
+16A33	BAMUM LETTER PHASE-F MO
+16A34	BAMUM LETTER PHASE-F MBAA
+16A35	BAMUM LETTER PHASE-F TET
+16A36	BAMUM LETTER PHASE-F KPA
+16A37	BAMUM LETTER PHASE-F SAMBA
+16A38	BAMUM LETTER PHASE-F VUEQ
+	* used after 169F9 for kovue '9' in Phases A-D
+@@	1B000	Kana Supplement	1B0FF
+@		Historic Katakana
+1B000	KATAKANA LETTER ARCHAIC E
+@		Historic Hiragana
+1B001	HIRAGANA LETTER ARCHAIC YE
 @@	1D000	Byzantine Musical Symbols	1D0FF
 @@+
 @		Prosodies (Prosodics)
@@ -30087,6 +31424,7 @@ FFFF	<not a character>
 1D11D	MUSICAL SYMBOL FOUR-STRING FRETBOARD
 @		Clefs
 1D11E	MUSICAL SYMBOL G CLEF
+	x (musical score - 1F3BC)
 1D11F	MUSICAL SYMBOL G CLEF OTTAVA ALTA
 1D120	MUSICAL SYMBOL G CLEF OTTAVA BASSA
 1D121	MUSICAL SYMBOL C CLEF
@@ -30133,10 +31471,15 @@ FFFF	<not a character>
 1D13D	MUSICAL SYMBOL QUARTER REST
 	= crochet rest
 1D13E	MUSICAL SYMBOL EIGHTH REST
+	= quaver rest
 1D13F	MUSICAL SYMBOL SIXTEENTH REST
+	= semiquaver rest
 1D140	MUSICAL SYMBOL THIRTY-SECOND REST
+	= demisemiquaver rest
 1D141	MUSICAL SYMBOL SIXTY-FOURTH REST
+	= hemidemisemiquaver rest, semidemisemiquaver rest
 1D142	MUSICAL SYMBOL ONE HUNDRED TWENTY-EIGHTH REST
+	= semihemidemisemiquaver rest, quasihemidemisemiquaver rest
 @		Noteheads
 1D143	MUSICAL SYMBOL X NOTEHEAD
 1D144	MUSICAL SYMBOL PLUS NOTEHEAD
@@ -30166,19 +31509,29 @@ FFFF	<not a character>
 @		Notes
 1D15C	MUSICAL SYMBOL BREVE
 1D15D	MUSICAL SYMBOL WHOLE NOTE
+	= semibreve
 1D15E	MUSICAL SYMBOL HALF NOTE
+	= minim
 	: 1D157 1D165
 1D15F	MUSICAL SYMBOL QUARTER NOTE
+	= crotchet
+	x (quarter note - 2669)
 	: 1D158 1D165
 1D160	MUSICAL SYMBOL EIGHTH NOTE
+	= quaver
+	x (eighth note - 266A)
 	: 1D15F 1D16E
 1D161	MUSICAL SYMBOL SIXTEENTH NOTE
+	= semiquaver
 	: 1D15F 1D16F
 1D162	MUSICAL SYMBOL THIRTY-SECOND NOTE
+	= demisemiquaver
 	: 1D15F 1D170
 1D163	MUSICAL SYMBOL SIXTY-FOURTH NOTE
+	= hemidemisemiquaver, semidemisemiquaver
 	: 1D15F 1D171
 1D164	MUSICAL SYMBOL ONE HUNDRED TWENTY-EIGHTH NOTE
+	= semihemidemisemiquaver, quasihemidemisemiquaver
 	: 1D15F 1D172
 @		Stems
 1D165	MUSICAL SYMBOL COMBINING STEM
@@ -32884,6 +34237,80 @@ FFFF	<not a character>
 1F091	DOMINO TILE VERTICAL-06-04
 1F092	DOMINO TILE VERTICAL-06-05
 1F093	DOMINO TILE VERTICAL-06-06
+@@	1F0A0	Playing Cards	1F0FF
+@+		These characters are used to represent the 52-card and 56-card variants of modern playing cards, as well as the 56-card Minor Arcana of the Western Tarot.
+1F0A0	PLAYING CARD BACK
+@		Spades or swords
+1F0A1	PLAYING CARD ACE OF SPADES
+1F0A2	PLAYING CARD TWO OF SPADES
+1F0A3	PLAYING CARD THREE OF SPADES
+1F0A4	PLAYING CARD FOUR OF SPADES
+1F0A5	PLAYING CARD FIVE OF SPADES
+1F0A6	PLAYING CARD SIX OF SPADES
+1F0A7	PLAYING CARD SEVEN OF SPADES
+1F0A8	PLAYING CARD EIGHT OF SPADES
+1F0A9	PLAYING CARD NINE OF SPADES
+1F0AA	PLAYING CARD TEN OF SPADES
+1F0AB	PLAYING CARD JACK OF SPADES
+	= valet, Bube, Unter, Page, fante
+	= page of swords
+1F0AC	PLAYING CARD KNIGHT OF SPADES
+	= chevalier, Ober, Ritter, cavall, cavaliere
+	= knight of swords
+1F0AD	PLAYING CARD QUEEN OF SPADES
+	= dame, Dame, Königin, regina
+	= queen of swords
+1F0AE	PLAYING CARD KING OF SPADES
+	= roi, König, re
+	= king of swords
+@		Hearts or cups
+1F0B1	PLAYING CARD ACE OF HEARTS
+1F0B2	PLAYING CARD TWO OF HEARTS
+1F0B3	PLAYING CARD THREE OF HEARTS
+1F0B4	PLAYING CARD FOUR OF HEARTS
+1F0B5	PLAYING CARD FIVE OF HEARTS
+1F0B6	PLAYING CARD SIX OF HEARTS
+1F0B7	PLAYING CARD SEVEN OF HEARTS
+1F0B8	PLAYING CARD EIGHT OF HEARTS
+1F0B9	PLAYING CARD NINE OF HEARTS
+1F0BA	PLAYING CARD TEN OF HEARTS
+1F0BB	PLAYING CARD JACK OF HEARTS
+1F0BC	PLAYING CARD KNIGHT OF HEARTS
+1F0BD	PLAYING CARD QUEEN OF HEARTS
+1F0BE	PLAYING CARD KING OF HEARTS
+@		Diamonds or pentacles
+1F0C1	PLAYING CARD ACE OF DIAMONDS
+1F0C2	PLAYING CARD TWO OF DIAMONDS
+1F0C3	PLAYING CARD THREE OF DIAMONDS
+1F0C4	PLAYING CARD FOUR OF DIAMONDS
+1F0C5	PLAYING CARD FIVE OF DIAMONDS
+1F0C6	PLAYING CARD SIX OF DIAMONDS
+1F0C7	PLAYING CARD SEVEN OF DIAMONDS
+1F0C8	PLAYING CARD EIGHT OF DIAMONDS
+1F0C9	PLAYING CARD NINE OF DIAMONDS
+1F0CA	PLAYING CARD TEN OF DIAMONDS
+1F0CB	PLAYING CARD JACK OF DIAMONDS
+1F0CC	PLAYING CARD KNIGHT OF DIAMONDS
+1F0CD	PLAYING CARD QUEEN OF DIAMONDS
+1F0CE	PLAYING CARD KING OF DIAMONDS
+1F0CF	PLAYING CARD BLACK JOKER
+@		Clubs or wands
+1F0D1	PLAYING CARD ACE OF CLUBS
+1F0D2	PLAYING CARD TWO OF CLUBS
+1F0D3	PLAYING CARD THREE OF CLUBS
+1F0D4	PLAYING CARD FOUR OF CLUBS
+1F0D5	PLAYING CARD FIVE OF CLUBS
+1F0D6	PLAYING CARD SIX OF CLUBS
+1F0D7	PLAYING CARD SEVEN OF CLUBS
+1F0D8	PLAYING CARD EIGHT OF CLUBS
+1F0D9	PLAYING CARD NINE OF CLUBS
+1F0DA	PLAYING CARD TEN OF CLUBS
+1F0DB	PLAYING CARD JACK OF CLUBS
+1F0DC	PLAYING CARD KNIGHT OF CLUBS
+1F0DD	PLAYING CARD QUEEN OF CLUBS
+1F0DE	PLAYING CARD KING OF CLUBS
+1F0DF	PLAYING CARD WHITE JOKER
+	* may also be red
 @@	1F100	Enclosed Alphanumeric Supplement	1F1FF
 @		Number with full stop
 @+		This symbol completes the set of numbers with full stop starting at U+2488.
@@ -32985,22 +34412,66 @@ FFFF	<not a character>
 	x (trade mark sign - 2122)
 	# <circle> 0057 005A
 @		Squared Latin letters
+1F130	SQUARED LATIN CAPITAL LETTER A
+	= Anreisetag (day of arrival)
+	# <square> 0041
 1F131	SQUARED LATIN CAPITAL LETTER B
 	= bank
 	= b-mode stereo compression broadcasting service (ARIB STD B24)
 	# <square> 0042
+1F132	SQUARED LATIN CAPITAL LETTER C
+	# <square> 0043
+1F133	SQUARED LATIN CAPITAL LETTER D
+	# <square> 0044
+1F134	SQUARED LATIN CAPITAL LETTER E
+	# <square> 0045
+1F135	SQUARED LATIN CAPITAL LETTER F
+	# <square> 0046
+1F136	SQUARED LATIN CAPITAL LETTER G
+	# <square> 0047
+1F137	SQUARED LATIN CAPITAL LETTER H
+	# <square> 0048
+1F138	SQUARED LATIN CAPITAL LETTER I
+	# <square> 0049
+1F139	SQUARED LATIN CAPITAL LETTER J
+	# <square> 004A
+1F13A	SQUARED LATIN CAPITAL LETTER K
+	# <square> 004B
+1F13B	SQUARED LATIN CAPITAL LETTER L
+	# <square> 004C
+1F13C	SQUARED LATIN CAPITAL LETTER M
+	# <square> 004D
 1F13D	SQUARED LATIN CAPITAL LETTER N
 	= news (ARIB STD B24)
 	# <square> 004E
+1F13E	SQUARED LATIN CAPITAL LETTER O
+	# <square> 004F
 1F13F	SQUARED LATIN CAPITAL LETTER P
 	= progressive broadcasting (ARIB STD B24)
 	# <square> 0050
+1F140	SQUARED LATIN CAPITAL LETTER Q
+	# <square> 0051
+1F141	SQUARED LATIN CAPITAL LETTER R
+	# <square> 0052
 1F142	SQUARED LATIN CAPITAL LETTER S
 	= stereo broadcasting service (ARIB STD B24)
 	# <square> 0053
+1F143	SQUARED LATIN CAPITAL LETTER T
+	= tobacconist
+	# <square> 0054
+1F144	SQUARED LATIN CAPITAL LETTER U
+	# <square> 0055
+1F145	SQUARED LATIN CAPITAL LETTER V
+	# <square> 0056
 1F146	SQUARED LATIN CAPITAL LETTER W
 	= wide-format 16:9 broadcasting service (ARIB STD B24)
 	# <square> 0057
+1F147	SQUARED LATIN CAPITAL LETTER X
+	# <square> 0058
+1F148	SQUARED LATIN CAPITAL LETTER Y
+	# <square> 0059
+1F149	SQUARED LATIN CAPITAL LETTER Z
+	# <square> 005A
 1F14A	SQUARED HV
 	= hdtv
 	# <square> 0048 0056
@@ -33016,21 +34487,91 @@ FFFF	<not a character>
 1F14E	SQUARED PPV
 	= pay-per-view
 	# <square> 0050 0050 0056
+1F14F	SQUARED WC
+	= water closet, public toilet
+	# <square> 0057 0043
 @		White on black circled Latin letters
+1F150	NEGATIVE CIRCLED LATIN CAPITAL LETTER A
+	= airport
+1F151	NEGATIVE CIRCLED LATIN CAPITAL LETTER B
+1F152	NEGATIVE CIRCLED LATIN CAPITAL LETTER C
+1F153	NEGATIVE CIRCLED LATIN CAPITAL LETTER D
+1F154	NEGATIVE CIRCLED LATIN CAPITAL LETTER E
+1F155	NEGATIVE CIRCLED LATIN CAPITAL LETTER F
+	= ferry
+1F156	NEGATIVE CIRCLED LATIN CAPITAL LETTER G
 1F157	NEGATIVE CIRCLED LATIN CAPITAL LETTER H
 	= hotel (ARIB STD B24)
+1F158	NEGATIVE CIRCLED LATIN CAPITAL LETTER I
+1F159	NEGATIVE CIRCLED LATIN CAPITAL LETTER J
+1F15A	NEGATIVE CIRCLED LATIN CAPITAL LETTER K
+	= Kurort (spa)
+	x (hot springs - 2668)
+1F15B	NEGATIVE CIRCLED LATIN CAPITAL LETTER L
+	= light rail
+	x (light rail - 1F688)
+1F15C	NEGATIVE CIRCLED LATIN CAPITAL LETTER M
+	= metro
+	x (metro - 1F687)
+1F15D	NEGATIVE CIRCLED LATIN CAPITAL LETTER N
+1F15E	NEGATIVE CIRCLED LATIN CAPITAL LETTER O
 1F15F	NEGATIVE CIRCLED LATIN CAPITAL LETTER P
 	= parking space (ARIB STD B24)
+1F160	NEGATIVE CIRCLED LATIN CAPITAL LETTER Q
+1F161	NEGATIVE CIRCLED LATIN CAPITAL LETTER R
+	= Raststätte (rest stop)
+1F162	NEGATIVE CIRCLED LATIN CAPITAL LETTER S
+	= Stadtbahn (metropolitan railway)
+1F163	NEGATIVE CIRCLED LATIN CAPITAL LETTER T
+	= Tankstelle (petrol station)
+	x (fuel pump - 26FD)
+1F164	NEGATIVE CIRCLED LATIN CAPITAL LETTER U
+	= underground rail
+	x (metro - 1F687)
+1F165	NEGATIVE CIRCLED LATIN CAPITAL LETTER V
+1F166	NEGATIVE CIRCLED LATIN CAPITAL LETTER W
+1F167	NEGATIVE CIRCLED LATIN CAPITAL LETTER X
+1F168	NEGATIVE CIRCLED LATIN CAPITAL LETTER Y
+1F169	NEGATIVE CIRCLED LATIN CAPITAL LETTER Z
 @		White on black squared Latin letters
 @+		The square edges may be slightly rounded.
+1F170	NEGATIVE SQUARED LATIN CAPITAL LETTER A
+	= blood type A
+1F171	NEGATIVE SQUARED LATIN CAPITAL LETTER B
+	= blood type B
+1F172	NEGATIVE SQUARED LATIN CAPITAL LETTER C
+	= centre, city centre
+1F173	NEGATIVE SQUARED LATIN CAPITAL LETTER D
+1F174	NEGATIVE SQUARED LATIN CAPITAL LETTER E
+1F175	NEGATIVE SQUARED LATIN CAPITAL LETTER F
+	= Feuerwache (fire department)
+1F176	NEGATIVE SQUARED LATIN CAPITAL LETTER G
+1F177	NEGATIVE SQUARED LATIN CAPITAL LETTER H
+	= Haltestelle (bus stop)
+	x (bus stop - 1F68F)
+1F178	NEGATIVE SQUARED LATIN CAPITAL LETTER I
 1F179	NEGATIVE SQUARED LATIN CAPITAL LETTER J
 	= junction (ARIB STD B24)
+1F17A	NEGATIVE SQUARED LATIN CAPITAL LETTER K
 1F17B	NEGATIVE SQUARED LATIN CAPITAL LETTER L
 	= leisure center (ARIB STD B24)
 1F17C	NEGATIVE SQUARED LATIN CAPITAL LETTER M
 	= museum, cultural center (ARIB STD B24)
+1F17D	NEGATIVE SQUARED LATIN CAPITAL LETTER N
+1F17E	NEGATIVE SQUARED LATIN CAPITAL LETTER O
+	= blood type O
 1F17F	NEGATIVE SQUARED LATIN CAPITAL LETTER P
 	= parking space empty-full (ARIB STD B24)
+1F180	NEGATIVE SQUARED LATIN CAPITAL LETTER Q
+1F181	NEGATIVE SQUARED LATIN CAPITAL LETTER R
+1F182	NEGATIVE SQUARED LATIN CAPITAL LETTER S
+1F183	NEGATIVE SQUARED LATIN CAPITAL LETTER T
+1F184	NEGATIVE SQUARED LATIN CAPITAL LETTER U
+1F185	NEGATIVE SQUARED LATIN CAPITAL LETTER V
+1F186	NEGATIVE SQUARED LATIN CAPITAL LETTER W
+1F187	NEGATIVE SQUARED LATIN CAPITAL LETTER X
+1F188	NEGATIVE SQUARED LATIN CAPITAL LETTER Y
+1F189	NEGATIVE SQUARED LATIN CAPITAL LETTER Z
 1F18A	CROSSED NEGATIVE SQUARED LATIN CAPITAL LETTER P
 	= parking space closed
 1F18B	NEGATIVE SQUARED IC
@@ -33039,15 +34580,72 @@ FFFF	<not a character>
 	= parking area
 1F18D	NEGATIVE SQUARED SA
 	= service area
+1F18E	NEGATIVE SQUARED AB
+	= blood type AB
+1F18F	NEGATIVE SQUARED WC
+	= water closet, public toilet
 @		Squared Latin letter sequences
 1F190	SQUARE DJ
 	= disc jockey
 	# <square> 0044 004A
+1F191	SQUARED CL
+	= clear
+1F192	SQUARED COOL
+1F193	SQUARED FREE
+	= free postage
+1F194	SQUARED ID
+	= identification, ID
+1F195	SQUARED NEW
+1F196	SQUARED NG
+	= no good
+1F197	SQUARED OK
+1F198	SQUARED SOS
+	= search, hunt for missing person
+1F199	SQUARED UP WITH EXCLAMATION MARK
+	= new information, update
+1F19A	SQUARED VS
+	= versus
+@		Regional indicator symbols
+@+	These characters can be used in pairs to represent regional codes. In some emoji implementations, certain pairs may be recognized and displayed by alternate means; for instance, an implementation might recognize F + R and display this combination with a symbol representing the flag of France.
+1F1E6	REGIONAL INDICATOR SYMBOL LETTER A
+1F1E7	REGIONAL INDICATOR SYMBOL LETTER B
+1F1E8	REGIONAL INDICATOR SYMBOL LETTER C
+1F1E9	REGIONAL INDICATOR SYMBOL LETTER D
+1F1EA	REGIONAL INDICATOR SYMBOL LETTER E
+1F1EB	REGIONAL INDICATOR SYMBOL LETTER F
+1F1EC	REGIONAL INDICATOR SYMBOL LETTER G
+1F1ED	REGIONAL INDICATOR SYMBOL LETTER H
+1F1EE	REGIONAL INDICATOR SYMBOL LETTER I
+1F1EF	REGIONAL INDICATOR SYMBOL LETTER J
+1F1F0	REGIONAL INDICATOR SYMBOL LETTER K
+1F1F1	REGIONAL INDICATOR SYMBOL LETTER L
+1F1F2	REGIONAL INDICATOR SYMBOL LETTER M
+1F1F3	REGIONAL INDICATOR SYMBOL LETTER N
+1F1F4	REGIONAL INDICATOR SYMBOL LETTER O
+1F1F5	REGIONAL INDICATOR SYMBOL LETTER P
+1F1F6	REGIONAL INDICATOR SYMBOL LETTER Q
+1F1F7	REGIONAL INDICATOR SYMBOL LETTER R
+1F1F8	REGIONAL INDICATOR SYMBOL LETTER S
+1F1F9	REGIONAL INDICATOR SYMBOL LETTER T
+1F1FA	REGIONAL INDICATOR SYMBOL LETTER U
+1F1FB	REGIONAL INDICATOR SYMBOL LETTER V
+1F1FC	REGIONAL INDICATOR SYMBOL LETTER W
+1F1FD	REGIONAL INDICATOR SYMBOL LETTER X
+1F1FE	REGIONAL INDICATOR SYMBOL LETTER Y
+1F1FF	REGIONAL INDICATOR SYMBOL LETTER Z
 @@	1F200	Enclosed Ideographic Supplement	1F2FF
 @		Squared hiragana from ARIB STD B24
 1F200	SQUARE HIRAGANA HOKA
 	= and others
 	# <square> 307B 304B
+@		Squared katakana
+1F201	SQUARED KATAKANA KOKO
+	= here sign
+	# <square> 30B3 30B3
+1F202	SQUARED KATAKANA SA
+	= service sign
+	x (circled katakana sa - 32DA)
+	# <square> 30B5
 @		Squared ideographs and kana from ARIB STD B24
 1F210	SQUARED CJK UNIFIED IDEOGRAPH-624B
 	= broadcasting service with sign language interpretation
@@ -33082,6 +34680,7 @@ FFFF	<not a character>
 	# <square> 6620
 1F21A	SQUARED CJK UNIFIED IDEOGRAPH-7121
 	= free broadcasting service
+	= non-existence sign
 	# <square> 7121
 1F21B	SQUARED CJK UNIFIED IDEOGRAPH-6599
 	= pay broadcasting service
@@ -33145,6 +34744,7 @@ FFFF	<not a character>
 	# <square> 53F3
 1F22F	SQUARED CJK UNIFIED IDEOGRAPH-6307
 	= designated hitter
+	= reserved sign
 	# <square> 6307
 1F230	SQUARED CJK UNIFIED IDEOGRAPH-8D70
 	= runner
@@ -33152,6 +34752,36 @@ FFFF	<not a character>
 1F231	SQUARED CJK UNIFIED IDEOGRAPH-6253
 	= batter
 	# <square> 6253
+@		Squared ideographs
+1F232	SQUARED CJK UNIFIED IDEOGRAPH-7981
+	= prohibited sign
+	# <square> 7981
+1F233	SQUARED CJK UNIFIED IDEOGRAPH-7A7A
+	= empty sign
+	# <square> 7A7A
+1F234	SQUARED CJK UNIFIED IDEOGRAPH-5408
+	= passed sign
+	# <square> 5408
+1F235	SQUARED CJK UNIFIED IDEOGRAPH-6E80
+	= full sign
+	# <square> 6E80
+1F236	SQUARED CJK UNIFIED IDEOGRAPH-6709
+	= existence sign
+	x (circled ideograph have - 3292)
+	# <square> 6709
+1F237	SQUARED CJK UNIFIED IDEOGRAPH-6708
+	= monthly sign
+	x (circled ideograph moon - 328A)
+	# <square> 6708
+1F238	SQUARED CJK UNIFIED IDEOGRAPH-7533
+	= application sign
+	# <square> 7533
+1F239	SQUARED CJK UNIFIED IDEOGRAPH-5272
+	= discount sign
+	# <square> 5272
+1F23A	SQUARED CJK UNIFIED IDEOGRAPH-55B6
+	= in business sign
+	# <square> 55B6
 @		Ideographs with tortoise shell brackets from ARIB STD B24
 1F240	TORTOISE SHELL BRACKETED CJK UNIFIED IDEOGRAPH-672C
 	= home run
@@ -33180,6 +34810,1192 @@ FFFF	<not a character>
 1F248	TORTOISE SHELL BRACKETED CJK UNIFIED IDEOGRAPH-6557
 	= loss
 	# 3014 6557 3015
+@		Circled ideographs
+1F250	CIRCLED IDEOGRAPH ADVANTAGE
+	= advantage sign
+	# <circle> 5F97
+1F251	CIRCLED IDEOGRAPH ACCEPT
+	= accept sign
+	# <circle> 53EF
+@@	1F300	Miscellaneous Symbols and Pictographs	1F5FF
+@		Weather, landscape, and sky symbols
+1F300	CYCLONE
+	= typhoon, hurricane
+1F301	FOGGY
+1F302	CLOSED UMBRELLA
+1F303	NIGHT WITH STARS
+1F304	SUNRISE OVER MOUNTAINS
+1F305	SUNRISE
+1F306	CITYSCAPE AT DUSK
+1F307	SUNSET OVER BUILDINGS
+1F308	RAINBOW
+1F309	BRIDGE AT NIGHT
+1F30A	WATER WAVE
+1F30B	VOLCANO
+1F30C	MILKY WAY
+@		Globe symbols
+1F30D	EARTH GLOBE EUROPE-AFRICA
+1F30E	EARTH GLOBE AMERICAS
+1F30F	EARTH GLOBE ASIA-AUSTRALIA
+1F310	GLOBE WITH MERIDIANS
+	* used to indicate international input source, world clocks with time zones, etc.
+@		Moon, sun, and star symbols
+1F311	NEW MOON SYMBOL
+	x (black circle - 25CF)
+1F312	WAXING CRESCENT MOON SYMBOL
+1F313	FIRST QUARTER MOON SYMBOL
+	= half moon
+	x (circle with left half black - 25D0)
+1F314	WAXING GIBBOUS MOON SYMBOL
+	= waxing moon
+1F315	FULL MOON SYMBOL
+	x (white circle - 25CB)
+1F316	WANING GIBBOUS MOON SYMBOL
+1F317	LAST QUARTER MOON SYMBOL
+	x (circle with right half black - 25D1)
+1F318	WANING CRESCENT MOON SYMBOL
+1F319	CRESCENT MOON
+	* may indicate either the first or last quarter moon
+	x (first quarter moon - 263D)
+	x (last quarter moon - 263E)
+1F31A	NEW MOON WITH FACE
+1F31B	FIRST QUARTER MOON WITH FACE
+1F31C	LAST QUARTER MOON WITH FACE
+1F31D	FULL MOON WITH FACE
+1F31E	SUN WITH FACE
+1F31F	GLOWING STAR
+1F320	SHOOTING STAR
+@		Plant symbols
+1F330	CHESTNUT
+1F331	SEEDLING
+1F332	EVERGREEN TREE
+1F333	DECIDUOUS TREE
+1F334	PALM TREE
+1F335	CACTUS
+1F337	TULIP
+	x (flower - 2698)
+1F338	CHERRY BLOSSOM
+1F339	ROSE
+1F33A	HIBISCUS
+1F33B	SUNFLOWER
+1F33C	BLOSSOM
+	= daisy
+1F33D	EAR OF MAIZE
+1F33E	EAR OF RICE
+1F33F	HERB
+1F340	FOUR LEAF CLOVER
+	x (shamrock - 2618)
+1F341	MAPLE LEAF
+1F342	FALLEN LEAF
+1F343	LEAF FLUTTERING IN WIND
+1F344	MUSHROOM
+@		Fruit and vegetable symbols
+1F345	TOMATO
+1F346	AUBERGINE
+	= eggplant
+1F347	GRAPES
+1F348	MELON
+1F349	WATERMELON
+1F34A	TANGERINE
+1F34B	LEMON
+1F34C	BANANA
+1F34D	PINEAPPLE
+1F34E	RED APPLE
+1F34F	GREEN APPLE
+1F350	PEAR
+1F351	PEACH
+1F352	CHERRIES
+1F353	STRAWBERRY
+@		Food symbols
+1F354	HAMBURGER
+	= fast food place
+1F355	SLICE OF PIZZA
+1F356	MEAT ON BONE
+1F357	POULTRY LEG
+1F358	RICE CRACKER
+1F359	RICE BALL
+1F35A	COOKED RICE
+	= bowl of rice
+1F35B	CURRY AND RICE
+	= Japanese style curry
+1F35C	STEAMING BOWL
+	= ramen noodles
+1F35D	SPAGHETTI
+1F35E	BREAD
+1F35F	FRENCH FRIES
+1F360	ROASTED SWEET POTATO
+1F361	DANGO
+	= mochi balls on skewer
+1F362	ODEN
+	= seafood on skewer
+1F363	SUSHI
+1F364	FRIED SHRIMP
+1F365	FISH CAKE WITH SWIRL DESIGN
+1F366	SOFT ICE CREAM
+1F367	SHAVED ICE
+1F368	ICE CREAM
+1F369	DOUGHNUT
+1F36A	COOKIE
+	= biscuit
+1F36B	CHOCOLATE BAR
+1F36C	CANDY
+1F36D	LOLLIPOP
+1F36E	CUSTARD
+1F36F	HONEY POT
+1F370	SHORTCAKE
+1F371	BENTO BOX
+1F372	POT OF FOOD
+1F373	COOKING
+	= frying pan, cooking utensil
+1F374	FORK AND KNIFE
+	= restaurant, meal
+	* glyph may show a fork and spoon
+	* glyph may show a crossed fork and knife
+	* glyph may show a fork and knife with a plate
+@		Beverage symbols
+1F375	TEACUP WITHOUT HANDLE
+	x (hot beverage - 2615)
+	x (cup on black square - 26FE)
+1F376	SAKE BOTTLE AND CUP
+1F377	WINE GLASS
+1F378	COCKTAIL GLASS
+1F379	TROPICAL DRINK
+1F37A	BEER MUG
+1F37B	CLINKING BEER MUGS
+	= cheers
+1F37C	BABY BOTTLE
+@		Celebration symbols
+1F380	RIBBON
+1F381	WRAPPED PRESENT
+	x (package - 1F4E6)
+1F382	BIRTHDAY CAKE
+1F383	JACK-O-LANTERN
+	= Hallowe'en
+1F384	CHRISTMAS TREE
+1F385	FATHER CHRISTMAS
+	= Santa Claus
+1F386	FIREWORKS
+1F387	FIREWORK SPARKLER
+	* long, stick-like firework that looks like a burning incense stick
+1F388	BALLOON
+1F389	PARTY POPPER
+1F38A	CONFETTI BALL
+	= congratulations
+1F38B	TANABATA TREE
+	= tanabata tree with wishing papers
+1F38C	CROSSED FLAGS
+	* Japanese national holiday
+1F38D	PINE DECORATION
+	* Japanese new year's door decoration
+1F38E	JAPANESE DOLLS
+	* Japanese Hinamatsuri or girls' doll festival
+1F38F	CARP STREAMER
+1F390	WIND CHIME
+1F391	MOON VIEWING CEREMONY
+	* Japanese Otsukimi harvest celebration
+1F392	SCHOOL SATCHEL
+	* Japanese school entrance ceremony
+1F393	GRADUATION CAP
+	* graduation ceremony
+@		Entertainment symbols
+1F3A0	CAROUSEL HORSE
+	= amusement park
+1F3A1	FERRIS WHEEL
+	= amusement park
+1F3A2	ROLLER COASTER
+1F3A3	FISHING POLE AND FISH
+	= fishing
+1F3A4	MICROPHONE
+	= karaoke
+1F3A5	MOVIE CAMERA
+	= film, movies
+1F3A6	CINEMA
+	= movie theater, movie projector
+1F3A7	HEADPHONE
+	= music
+1F3A8	ARTIST PALETTE
+	= art
+1F3A9	TOP HAT
+	= drama, performing arts, theater
+1F3AA	CIRCUS TENT
+	= event
+1F3AB	TICKET
+	* indicates an event
+1F3AC	CLAPPER BOARD
+1F3AD	PERFORMING ARTS
+@		Game symbols
+1F3AE	VIDEO GAME
+	= video game controller
+1F3AF	DIRECT HIT
+	= archery target, hitting the target
+	x (bullseye - 25CE)
+1F3B0	SLOT MACHINE
+1F3B1	BILLIARDS
+1F3B2	GAME DIE
+1F3B3	BOWLING
+1F3B4	FLOWER PLAYING CARDS
+	= flower cards
+@		Music symbols
+1F3B5	MUSICAL NOTE
+	= music, being in good mood
+	x (eighth note - 266A)
+1F3B6	MULTIPLE MUSICAL NOTES
+	= dancing notes, mood, melody
+	x (beamed eighth notes - 266B)
+1F3B7	SAXOPHONE
+1F3B8	GUITAR
+1F3B9	MUSICAL KEYBOARD
+1F3BA	TRUMPET
+1F3BB	VIOLIN
+1F3BC	MUSICAL SCORE
+	x (musical symbol g clef - 1D11E)
+@		Sport symbols
+@+		See other sport symbols in the Miscelleaneous Symbols block.
+1F3BD	RUNNING SHIRT WITH SASH
+1F3BE	TENNIS RACQUET AND BALL
+	= tennis
+1F3BF	SKI AND SKI BOOT
+	= skiing
+	x (skier - 26F7)
+1F3C0	BASKETBALL AND HOOP
+	= basketball
+1F3C1	CHEQUERED FLAG
+	= motor sports
+1F3C2	SNOWBOARDER
+1F3C3	RUNNER
+	= running, marathon, track and fields
+1F3C4	SURFER
+	= surfing
+1F3C6	TROPHY
+1F3C7	HORSE RACING
+1F3C8	AMERICAN FOOTBALL
+1F3C9	RUGBY FOOTBALL
+1F3CA	SWIMMER
+@		Building and map symbols
+1F3E0	HOUSE BUILDING
+1F3E1	HOUSE WITH GARDEN
+	= home, house with yard
+1F3E2	OFFICE BUILDING
+1F3E3	JAPANESE POST OFFICE
+	x (postal mark - 3012)
+1F3E4	EUROPEAN POST OFFICE
+1F3E5	HOSPITAL
+	x (black cross on shield - 26E8)
+1F3E6	BANK
+	x (squared latin capital letter b - 1F131)
+1F3E7	AUTOMATED TELLER MACHINE
+	= ATM
+1F3E8	HOTEL
+	x (negative circled latin capital letter h - 1F157)
+1F3E9	LOVE HOTEL
+1F3EA	CONVENIENCE STORE
+1F3EB	SCHOOL
+1F3EC	DEPARTMENT STORE
+1F3ED	FACTORY
+	= industrial production site
+	= date of production
+	x (gear without hub - 26ED)
+1F3EE	IZAKAYA LANTERN
+	= japanese izakaya restaurant
+1F3EF	JAPANESE CASTLE
+1F3F0	EUROPEAN CASTLE
+	x (castle - 26EB)
+@		Animal symbols
+1F400	RAT
+	* first of the signs of the Asian zodiac
+1F401	MOUSE
+	* first of the signs of the Asian zodiac, used in Persia
+1F402	OX
+	* second of the signs of the Asian zodiac
+1F403	WATER BUFFALO
+	* second of the signs of the Asian zodiac, used in Vietnam
+1F404	COW
+	* second of the signs of the Asian zodiac, used in Persia
+	= beef (on menus)
+1F405	TIGER
+	* third of the signs of the Asian zodiac
+1F406	LEOPARD
+	* third of the signs of the Asian zodiac, used in Persia
+1F407	RABBIT
+	* fourth of the signs of the Asian zodiac
+1F408	CAT
+	* fourth of the signs of the Asian zodiac, used in Vietnam
+1F409	DRAGON
+	* fifth of the signs of the Asian zodiac
+1F40A	CROCODILE
+	* fifth of the signs of the Asian zodiac, used in Persia
+1F40B	WHALE
+	* fifth of the signs of the Asian zodiac, used in Persia
+1F40C	SNAIL
+	* fifth of the signs of the Asian zodiac, used in Kazakhstan
+1F40D	SNAKE
+	* sixth of the signs of the Asian zodiac
+1F40E	HORSE
+	* seventh of the signs of the Asian zodiac
+1F40F	RAM
+	* eighth of the signs of the Asian zodiac
+1F410	GOAT
+	* eighth of the signs of the Asian zodiac, used in Vietnam
+1F411	SHEEP
+	* eighth of the signs of the Asian zodiac, used in Persia
+1F412	MONKEY
+	* ninth of the signs of the Asian zodiac
+1F413	ROOSTER
+	* tenth of the signs of the Asian zodiac
+	= cock
+1F414	CHICKEN
+	* tenth of the signs of the Asian zodiac, used in Persia
+	= hen
+	= poultry (on menus)
+1F415	DOG
+	* eleventh of the signs of the Asian zodiac
+1F416	PIG
+	* twelfth of the signs of the Asian zodiac
+	= pork (on menus)
+1F417	BOAR
+	* twelfth of the signs of the Asian zodiac, used in Japan
+1F418	ELEPHANT
+	* twelfth of the signs of the Asian zodiac, used in Thailand
+1F419	OCTOPUS
+1F41A	SPIRAL SHELL
+1F41B	BUG
+1F41C	ANT
+1F41D	HONEYBEE
+1F41E	LADY BEETLE
+	= ladybird, ladybug, coccinellids
+1F41F	FISH
+1F420	TROPICAL FISH
+1F421	BLOWFISH
+1F422	TURTLE
+1F423	HATCHING CHICK
+1F424	BABY CHICK
+1F425	FRONT-FACING BABY CHICK
+1F426	BIRD
+1F427	PENGUIN
+1F428	KOALA
+1F429	POODLE
+1F42A	DROMEDARY CAMEL
+	* has a single hump
+1F42B	BACTRIAN CAMEL
+	* has two humps
+1F42C	DOLPHIN
+@		Animal faces
+1F42D	MOUSE FACE
+1F42E	COW FACE
+1F42F	TIGER FACE
+1F430	RABBIT FACE
+1F431	CAT FACE
+	x (smiling cat face with open mouth - 1F63A)
+1F432	DRAGON FACE
+1F433	SPOUTING WHALE
+1F434	HORSE FACE
+1F435	MONKEY FACE
+1F436	DOG FACE
+1F437	PIG FACE
+1F438	FROG FACE
+1F439	HAMSTER FACE
+1F43A	WOLF FACE
+1F43B	BEAR FACE
+1F43C	PANDA FACE
+1F43D	PIG NOSE
+1F43E	PAW PRINTS
+	x (footprints - 1F463)
+@		Facial parts symbols
+1F440	EYES
+1F442	EAR
+1F443	NOSE
+1F444	MOUTH
+1F445	TONGUE
+@		Hand symbols
+1F446	WHITE UP POINTING BACKHAND INDEX
+	x (white up pointing index - 261D)
+1F447	WHITE DOWN POINTING BACKHAND INDEX
+	x (white down pointing index - 261F)
+1F448	WHITE LEFT POINTING BACKHAND INDEX
+	x (white left pointing index - 261C)
+1F449	WHITE RIGHT POINTING BACKHAND INDEX
+	x (white right pointing index - 261E)
+1F44A	FISTED HAND SIGN
+	= punch
+	x (raised fist - 270A)
+1F44B	WAVING HAND SIGN
+	x (raised hand - 270B)
+1F44C	OK HAND SIGN
+1F44D	THUMBS UP SIGN
+1F44E	THUMBS DOWN SIGN
+1F44F	CLAPPING HANDS SIGN
+1F450	OPEN HANDS SIGN
+@		Clothing and accessories
+1F451	CROWN
+1F452	WOMANS HAT
+1F453	EYEGLASSES
+1F454	NECKTIE
+1F455	T-SHIRT
+1F456	JEANS
+1F457	DRESS
+1F458	KIMONO
+1F459	BIKINI
+1F45A	WOMANS CLOTHES
+1F45B	PURSE
+1F45C	HANDBAG
+1F45D	POUCH
+1F45E	MANS SHOE
+1F45F	ATHLETIC SHOE
+	= runner, sneaker, tennis shoe
+1F460	HIGH-HEELED SHOE
+1F461	WOMANS SANDAL
+1F462	WOMANS BOOTS
+1F463	FOOTPRINTS
+	x (paw prints - 1F43E)
+@		Portrait and role symbols
+1F464	BUST IN SILHOUETTE
+	= guest account
+1F465	BUSTS IN SILHOUETTE
+	= accounts
+1F466	BOY
+1F467	GIRL
+1F468	MAN
+1F469	WOMAN
+1F46A	FAMILY
+1F46B	MAN AND WOMAN HOLDING HANDS
+	x (restroom - 1F6BB)
+1F46C	TWO MEN HOLDING HANDS
+1F46D	TWO WOMEN HOLDING HANDS
+1F46E	POLICE OFFICER
+1F46F	WOMAN WITH BUNNY EARS
+1F470	BRIDE WITH VEIL
+1F471	PERSON WITH BLOND HAIR
+1F472	MAN WITH GUA PI MAO
+1F473	MAN WITH TURBAN
+1F474	OLDER MAN
+1F475	OLDER WOMAN
+1F476	BABY
+1F477	CONSTRUCTION WORKER
+@		Fairy tale symbols
+1F478	PRINCESS
+1F479	JAPANESE OGRE
+1F47A	JAPANESE GOBLIN
+1F47B	GHOST
+1F47C	BABY ANGEL
+1F47D	EXTRATERRESTRIAL ALIEN
+1F47E	ALIEN MONSTER
+1F47F	IMP
+1F480	SKULL
+@		Role symbols
+1F481	INFORMATION DESK PERSON
+1F482	GUARDSMAN
+1F483	DANCER
+@		Personal care symbols
+1F484	LIPSTICK
+1F485	NAIL POLISH
+	= manicure, nail care
+1F486	FACE MASSAGE
+1F487	HAIRCUT
+	* usually indicates a beauty parlor
+1F488	BARBER POLE
+@		Medical symbols
+1F489	SYRINGE
+1F48A	PILL
+@		Romance symbols
+1F48B	KISS MARK
+	= lips
+1F48C	LOVE LETTER
+1F48D	RING
+	= jewelry
+1F48E	GEM STONE
+1F48F	KISS
+	= two people kissing
+1F490	BOUQUET
+1F491	COUPLE WITH HEART
+1F492	WEDDING
+	= wedding chapel
+	x (marriage symbol - 26AD)
+@		Heart symbols
+1F493	BEATING HEART
+1F494	BROKEN HEART
+1F495	TWO HEARTS
+1F496	SPARKLING HEART
+1F497	GROWING HEART
+1F498	HEART WITH ARROW
+1F499	BLUE HEART
+	x (white heart suit - 2661)
+	x (black heart suit - 2665)
+	x (heavy black heart - 2764)
+1F49A	GREEN HEART
+1F49B	YELLOW HEART
+1F49C	PURPLE HEART
+1F49D	HEART WITH RIBBON
+1F49E	REVOLVING HEARTS
+1F49F	HEART DECORATION
+@		Comic style symbols
+1F4A0	DIAMOND SHAPE WITH A DOT INSIDE
+	= kawaii, cute
+	x (white diamond with centred dot - 27D0)
+1F4A1	ELECTRIC LIGHT BULB
+	= idea
+1F4A2	ANGER SYMBOL
+1F4A3	BOMB
+1F4A4	SLEEPING SYMBOL
+1F4A5	COLLISION SYMBOL
+1F4A6	SPLASHING SWEAT SYMBOL
+	= plewds
+1F4A7	DROPLET
+	* represents a drop of sweat or drop of water
+1F4A8	DASH SYMBOL
+	= running dash, briffits
+1F4A9	PILE OF POO
+	= dog dirt
+1F4AA	FLEXED BICEPS
+	= strong, muscled
+1F4AB	DIZZY SYMBOL
+	= circling stars, squeans
+1F4AC	SPEECH BALLOON
+	= comic book conversation bubble
+1F4AD	THOUGHT BALLOON
+@		Japanese school grade symbols
+1F4AE	WHITE FLOWER
+	= brilliant homework
+	x (white florette - 2740)
+1F4AF	HUNDRED POINTS SYMBOL
+	= perfect score
+@		Money symbols
+1F4B0	MONEY BAG
+	* glyph may show any currency symbol instead of a dollar sign
+1F4B1	CURRENCY EXCHANGE
+1F4B2	HEAVY DOLLAR SIGN
+	x (dollar sign - 0024)
+1F4B3	CREDIT CARD
+1F4B4	BANKNOTE WITH YEN SIGN
+1F4B5	BANKNOTE WITH DOLLAR SIGN
+1F4B6	BANKNOTE WITH EURO SIGN
+1F4B7	BANKNOTE WITH POUND SIGN
+1F4B8	MONEY WITH WINGS
+1F4B9	CHART WITH UPWARDS TREND AND YEN SIGN
+@		Office symbols
+1F4BA	SEAT
+1F4BB	PERSONAL COMPUTER
+1F4BC	BRIEFCASE
+1F4BD	MINIDISC
+1F4BE	FLOPPY DISK
+	= flexible disk cartridge, floppy disc, floppy, diskette
+1F4BF	OPTICAL DISC
+1F4C0	DVD
+	= digital video/versatile disc
+1F4C1	FILE FOLDER
+1F4C2	OPEN FILE FOLDER
+1F4C3	PAGE WITH CURL
+1F4C4	PAGE FACING UP
+1F4C5	CALENDAR
+1F4C6	TEAR-OFF CALENDAR
+1F4C7	CARD INDEX
+1F4C8	CHART WITH UPWARDS TREND
+1F4C9	CHART WITH DOWNWARDS TREND
+1F4CA	BAR CHART
+1F4CB	CLIPBOARD
+1F4CC	PUSHPIN
+1F4CD	ROUND PUSHPIN
+1F4CE	PAPERCLIP
+1F4CF	STRAIGHT RULER
+1F4D0	TRIANGULAR RULER
+1F4D1	BOOKMARK TABS
+1F4D2	LEDGER
+1F4D3	NOTEBOOK
+1F4D4	NOTEBOOK WITH DECORATIVE COVER
+1F4D5	CLOSED BOOK
+1F4D6	OPEN BOOK
+	= read operator's manual
+	* similar to ISO/IEC 7000-0790 "Read operator's manual"
+1F4D7	GREEN BOOK
+1F4D8	BLUE BOOK
+1F4D9	ORANGE BOOK
+1F4DA	BOOKS
+1F4DB	NAME BADGE
+1F4DC	SCROLL
+@		Communication symbols
+1F4DD	MEMO
+1F4DE	TELEPHONE RECEIVER
+1F4DF	PAGER
+1F4E0	FAX MACHINE
+	x (facsimile sign - 213B)
+1F4E1	SATELLITE ANTENNA
+	= position indicator, news
+1F4E2	PUBLIC ADDRESS LOUDSPEAKER
+1F4E3	CHEERING MEGAPHONE
+1F4E4	OUTBOX TRAY
+1F4E5	INBOX TRAY
+1F4E6	PACKAGE
+	x (wrapped present - 1F381)
+1F4E7	E-MAIL SYMBOL
+	* glyph may show an @-sign instead of an E
+1F4E8	INCOMING ENVELOPE
+	x (envelope - 2709)
+1F4E9	ENVELOPE WITH DOWNWARDS ARROW ABOVE
+	* sending mail
+1F4EA	CLOSED MAILBOX WITH LOWERED FLAG
+	= letter box, mail reception
+	= empty mailbox
+1F4EB	CLOSED MAILBOX WITH RAISED FLAG
+	= mailbox containing mail
+1F4EC	OPEN MAILBOX WITH RAISED FLAG
+1F4ED	OPEN MAILBOX WITH LOWERED FLAG
+1F4EE	POSTBOX
+	= mailbox for sending mail
+1F4EF	POSTAL HORN
+1F4F0	NEWSPAPER
+1F4F1	MOBILE PHONE
+1F4F2	MOBILE PHONE WITH RIGHTWARDS ARROW AT LEFT
+	* making a phone call
+1F4F3	VIBRATION MODE
+1F4F4	MOBILE PHONE OFF
+1F4F5	NO MOBILE PHONES
+1F4F6	ANTENNA WITH BARS
+	= cellular reception
+@		Audio and video symbols
+1F4F7	CAMERA
+1F4F9	VIDEO CAMERA
+1F4FA	TELEVISION
+1F4FB	RADIO
+1F4FC	VIDEOCASSETTE
+@		User interface symbols
+1F500	TWISTED RIGHTWARDS ARROWS
+	= shuffle
+1F501	CLOCKWISE RIGHTWARDS AND LEFTWARDS OPEN CIRCLE ARROWS
+	= repeat
+	x (black universal recycling symbol - 267B)
+1F502	CLOCKWISE RIGHTWARDS AND LEFTWARDS OPEN CIRCLE ARROWS WITH CIRCLED ONE OVERLAY
+	= repeat one item over
+1F503	CLOCKWISE DOWNWARDS AND UPWARDS OPEN CIRCLE ARROWS
+	= reload
+1F504	ANTICLOCKWISE DOWNWARDS AND UPWARDS OPEN CIRCLE ARROWS
+	= reload
+1F505	LOW BRIGHTNESS SYMBOL
+1F506	HIGH BRIGHTNESS SYMBOL
+	x (black sun with rays - 2600)
+	x (white sun with rays - 263C)
+	x (gear without hub - 26ED)
+1F507	SPEAKER WITH CANCELLATION STROKE
+1F508	SPEAKER
+1F509	SPEAKER WITH ONE SOUND WAVE
+1F50A	SPEAKER WITH THREE SOUND WAVES
+	= sound
+1F50B	BATTERY
+1F50C	ELECTRIC PLUG
+1F50D	LEFT-POINTING MAGNIFYING GLASS
+	= search
+1F50E	RIGHT-POINTING MAGNIFYING GLASS
+	= get more details
+1F50F	LOCK WITH INK PEN
+	= privacy
+1F510	CLOSED LOCK WITH KEY
+	= secure
+1F511	KEY
+	x (squared key - 26BF)
+1F512	LOCK
+	= padlock in locked position
+1F513	OPEN LOCK
+1F514	BELL
+	x (tibetan symbol dril bu - 0FC4)
+	x (symbol for bell - 2407)
+1F515	BELL WITH CANCELLATION STROKE
+1F516	BOOKMARK
+1F517	LINK SYMBOL
+1F518	RADIO BUTTON
+	x (circled dot operator - 2299)
+	x (fisheye - 25C9)
+	x (bullseye - 25CE)
+@		Words with arrows
+1F519	BACK WITH LEFTWARDS ARROW ABOVE
+	x (previous page - 2397)
+1F51A	END WITH LEFTWARDS ARROW ABOVE
+1F51B	ON WITH EXCLAMATION MARK WITH LEFT RIGHT ARROW ABOVE
+1F51C	SOON WITH RIGHTWARDS ARROW ABOVE
+1F51D	TOP WITH UPWARDS ARROW ABOVE
+	= top of page
+@		Enclosed alphanumeric symbols
+1F51E	NO ONE UNDER EIGHTEEN SYMBOL
+1F51F	KEYCAP TEN
+	x (combining enclosing keycap - 20E3)
+@		User interface input status symbols
+1F520	INPUT SYMBOL FOR LATIN CAPITAL LETTERS
+1F521	INPUT SYMBOL FOR LATIN SMALL LETTERS
+1F522	INPUT SYMBOL FOR NUMBERS
+1F523	INPUT SYMBOL FOR SYMBOLS
+1F524	INPUT SYMBOL FOR LATIN LETTERS
+	= English input (ABC)
+@		Tool symbols
+1F525	FIRE
+1F526	ELECTRIC TORCH
+	= flashlight
+1F527	WRENCH
+1F528	HAMMER
+1F529	NUT AND BOLT
+1F52A	HOCHO
+	= Japanese kitchen knife
+1F52B	PISTOL
+1F52C	MICROSCOPE
+1F52D	TELESCOPE
+1F52E	CRYSTAL BALL
+1F52F	SIX POINTED STAR WITH MIDDLE DOT
+	x (star of david - 2721)
+1F530	JAPANESE SYMBOL FOR BEGINNER
+1F531	TRIDENT EMBLEM
+@		Geometric shapes
+1F532	BLACK SQUARE BUTTON
+1F533	WHITE SQUARE BUTTON
+1F534	LARGE RED CIRCLE
+	x (black circle - 25CF)
+	x (large circle - 25EF)
+	x (black large circle - 2B24)
+	x (heavy large circle - 2B55)
+1F535	LARGE BLUE CIRCLE
+1F536	LARGE ORANGE DIAMOND
+	x (black diamond - 25C6)
+1F537	LARGE BLUE DIAMOND
+1F538	SMALL ORANGE DIAMOND
+	x (black small diamond - 2B29)
+1F539	SMALL BLUE DIAMOND
+@		User interface symbols
+1F53A	UP-POINTING RED TRIANGLE
+	x (black up-pointing triangle - 25B2)
+1F53B	DOWN-POINTING RED TRIANGLE
+	x (black down-pointing triangle - 25BC)
+1F53C	UP-POINTING SMALL RED TRIANGLE
+	= play arrow up
+	x (black up-pointing small triangle - 25B4)
+1F53D	DOWN-POINTING SMALL RED TRIANGLE
+	= play arrow down
+	x (black down-pointing small triangle - 25BE)
+@		Clock face symbols
+1F550	CLOCK FACE ONE OCLOCK
+	x (watch - 231A)
+	x (alarm clock - 23F0)
+1F551	CLOCK FACE TWO OCLOCK
+1F552	CLOCK FACE THREE OCLOCK
+1F553	CLOCK FACE FOUR OCLOCK
+1F554	CLOCK FACE FIVE OCLOCK
+1F555	CLOCK FACE SIX OCLOCK
+1F556	CLOCK FACE SEVEN OCLOCK
+1F557	CLOCK FACE EIGHT OCLOCK
+1F558	CLOCK FACE NINE OCLOCK
+1F559	CLOCK FACE TEN OCLOCK
+1F55A	CLOCK FACE ELEVEN OCLOCK
+1F55B	CLOCK FACE TWELVE OCLOCK
+1F55C	CLOCK FACE ONE-THIRTY
+1F55D	CLOCK FACE TWO-THIRTY
+1F55E	CLOCK FACE THREE-THIRTY
+1F55F	CLOCK FACE FOUR-THIRTY
+1F560	CLOCK FACE FIVE-THIRTY
+1F561	CLOCK FACE SIX-THIRTY
+1F562	CLOCK FACE SEVEN-THIRTY
+1F563	CLOCK FACE EIGHT-THIRTY
+1F564	CLOCK FACE NINE-THIRTY
+1F565	CLOCK FACE TEN-THIRTY
+1F566	CLOCK FACE ELEVEN-THIRTY
+1F567	CLOCK FACE TWELVE-THIRTY
+@		Cultural symbols
+1F5FB	MOUNT FUJI
+1F5FC	TOKYO TOWER
+1F5FD	STATUE OF LIBERTY
+1F5FE	SILHOUETTE OF JAPAN
+1F5FF	MOYAI
+	* Japanese stone statue like Moai on Easter Island
+@@	1F600	Emoticons	1F64F
+@+	The emoticons have been organized by mouth shape to make it easier to locate the different characters in the code chart.
+@		Faces
+1F601	GRINNING FACE WITH SMILING EYES
+1F602	FACE WITH TEARS OF JOY
+1F603	SMILING FACE WITH OPEN MOUTH
+	x (white smiling face - 263A)
+1F604	SMILING FACE WITH OPEN MOUTH AND SMILING EYES
+1F605	SMILING FACE WITH OPEN MOUTH AND COLD SWEAT
+1F606	SMILING FACE WITH OPEN MOUTH AND TIGHTLY-CLOSED EYES
+1F607	SMILING FACE WITH HALO
+1F608	SMILING FACE WITH HORNS
+1F609	WINKING FACE
+1F60A	SMILING FACE WITH SMILING EYES
+1F60B	FACE SAVOURING DELICIOUS FOOD
+1F60C	RELIEVED FACE
+1F60D	SMILING FACE WITH HEART-SHAPED EYES
+1F60E	SMILING FACE WITH SUNGLASSES
+1F60F	SMIRKING FACE
+1F610	NEUTRAL FACE
+	* used for the West Wind in some Mahjong annotation
+1F612	UNAMUSED FACE
+1F613	FACE WITH COLD SWEAT
+1F614	PENSIVE FACE
+1F616	CONFOUNDED FACE
+1F618	FACE THROWING A KISS
+1F61A	KISSING FACE WITH CLOSED EYES
+1F61C	FACE WITH STUCK-OUT TONGUE AND WINKING EYE
+	* kidding, not serious
+1F61D	FACE WITH STUCK-OUT TONGUE AND TIGHTLY-CLOSED EYES
+	* kidding, not serious
+1F61E	DISAPPOINTED FACE
+	x (white frowning face - 2639)
+1F620	ANGRY FACE
+1F621	POUTING FACE
+1F622	CRYING FACE
+1F623	PERSEVERING FACE
+1F624	FACE WITH LOOK OF TRIUMPH
+1F625	DISAPPOINTED BUT RELIEVED FACE
+1F628	FEARFUL FACE
+1F629	WEARY FACE
+1F62A	SLEEPY FACE
+1F62B	TIRED FACE
+1F62D	LOUDLY CRYING FACE
+1F630	FACE WITH OPEN MOUTH AND COLD SWEAT
+1F631	FACE SCREAMING IN FEAR
+1F632	ASTONISHED FACE
+1F633	FLUSHED FACE
+1F635	DIZZY FACE
+1F636	FACE WITHOUT MOUTH
+	* used for the South Wind in some Mahjong annotation
+	x (white circle with two dots - 2687)
+1F637	FACE WITH MEDICAL MASK
+@		Cat faces
+1F638	GRINNING CAT FACE WITH SMILING EYES
+1F639	CAT FACE WITH TEARS OF JOY
+1F63A	SMILING CAT FACE WITH OPEN MOUTH
+1F63B	SMILING CAT FACE WITH HEART-SHAPED EYES
+1F63C	CAT FACE WITH WRY SMILE
+1F63D	KISSING CAT FACE WITH CLOSED EYES
+1F63E	POUTING CAT FACE
+1F63F	CRYING CAT FACE
+1F640	WEARY CAT FACE
+@		Gesture symbols
+1F645	FACE WITH NO GOOD GESTURE
+1F646	FACE WITH OK GESTURE
+1F647	PERSON BOWING DEEPLY
+1F648	SEE-NO-EVIL MONKEY
+1F649	HEAR-NO-EVIL MONKEY
+1F64A	SPEAK-NO-EVIL MONKEY
+1F64B	HAPPY PERSON RAISING ONE HAND
+1F64C	PERSON RAISING BOTH HANDS IN CELEBRATION
+	= banzai!
+1F64D	PERSON FROWNING
+1F64E	PERSON WITH POUTING FACE
+1F64F	PERSON WITH FOLDED HANDS
+	* can indicate sorrow or regret
+	* can indicate pleading
+@@	1F680	Transport and Map Symbols	1F6FF
+@		Vehicles
+1F680	ROCKET
+1F681	HELICOPTER
+	x (airplane - 2708)
+1F682	STEAM LOCOMOTIVE
+1F683	RAILWAY CAR
+1F684	HIGH-SPEED TRAIN
+1F685	HIGH-SPEED TRAIN WITH BULLET NOSE
+1F686	TRAIN
+	= intercity train
+1F687	METRO
+	= subway, underground train
+1F688	LIGHT RAIL
+1F689	STATION
+	= train, subway station
+1F68A	TRAM
+1F68B	TRAM CAR
+1F68C	BUS
+1F68D	ONCOMING BUS
+1F68E	TROLLEYBUS
+1F68F	BUS STOP
+1F690	MINIBUS
+1F691	AMBULANCE
+1F692	FIRE ENGINE
+1F693	POLICE CAR
+1F694	ONCOMING POLICE CAR
+1F695	TAXI
+1F696	ONCOMING TAXI
+1F697	AUTOMOBILE
+1F698	ONCOMING AUTOMOBILE
+1F699	RECREATIONAL VEHICLE
+1F69A	DELIVERY TRUCK
+	x (black truck - 26DF)
+1F69B	ARTICULATED LORRY
+1F69C	TRACTOR
+1F69D	MONORAIL
+1F69E	MOUNTAIN RAILWAY
+1F69F	SUSPENSION RAILWAY
+1F6A0	MOUNTAIN CABLEWAY
+1F6A1	AERIAL TRAMWAY
+1F6A2	SHIP
+	x (ferry - 26F4)
+1F6A3	ROWBOAT
+	x (sailboat - 26F5)
+1F6A4	SPEEDBOAT
+@		Traffic signs
+1F6A5	HORIZONTAL TRAFFIC LIGHT
+1F6A6	VERTICAL TRAFFIC LIGHT
+1F6A7	CONSTRUCTION SIGN
+	x (pick - 26CF)
+1F6A8	POLICE CARS REVOLVING LIGHT
+	= rotating beacon
+@		Signage and other symbols
+1F6A9	TRIANGULAR FLAG ON POST
+	= location information
+	x (flag in hole - 26F3)
+1F6AA	DOOR
+1F6AB	NO ENTRY SIGN
+	x (combining enclosing circle backslash - 20E0)
+	x (no entry - 26D4)
+1F6AC	SMOKING SYMBOL
+1F6AD	NO SMOKING SYMBOL
+1F6AE	PUT LITTER IN ITS PLACE SYMBOL
+1F6AF	DO NOT LITTER SYMBOL
+1F6B0	POTABLE WATER SYMBOL
+1F6B1	NON-POTABLE WATER SYMBOL
+1F6B2	BICYCLE
+1F6B3	NO BICYCLES
+1F6B4	BICYCLIST
+1F6B5	MOUNTAIN BICYCLIST
+1F6B6	PEDESTRIAN
+	= walking
+1F6B7	NO PEDESTRIANS
+1F6B8	CHILDREN CROSSING
+1F6B9	MENS SYMBOL
+	= man symbol
+	= men's restroom
+1F6BA	WOMENS SYMBOL
+	= woman symbol
+	= women's restroom
+1F6BB	RESTROOM
+	= man and woman symbol with divider
+	= unisex restroom
+	x (man and woman holding hands - 1F46B)
+1F6BC	BABY SYMBOL
+	= baby on board, baby changing station
+1F6BD	TOILET
+1F6BE	WATER CLOSET
+1F6BF	SHOWER
+1F6C0	BATH
+1F6C1	BATHTUB
+1F6C2	PASSPORT CONTROL
+1F6C3	CUSTOMS
+1F6C4	BAGGAGE CLAIM
+1F6C5	LEFT LUGGAGE
+@@	1F700	Alchemical Symbols	1F77F
+@		Symbols for Aristotelian elements
+1F700	ALCHEMICAL SYMBOL FOR QUINTESSENCE
+1F701	ALCHEMICAL SYMBOL FOR AIR
+1F702	ALCHEMICAL SYMBOL FOR FIRE
+	x (white up-pointing triangle - 25B3)
+1F703	ALCHEMICAL SYMBOL FOR EARTH
+	x (earth - 2641)
+1F704	ALCHEMICAL SYMBOL FOR WATER
+	x (white down-pointing triangle - 25BD)
+@		Symbols for important solvents
+1F705	ALCHEMICAL SYMBOL FOR AQUAFORTIS
+1F706	ALCHEMICAL SYMBOL FOR AQUA REGIA
+1F707	ALCHEMICAL SYMBOL FOR AQUA REGIA-2
+	= balneum arenae (sand bath), lapis armenus (Armenian stone)
+1F708	ALCHEMICAL SYMBOL FOR AQUA VITAE
+	= spiritus vini
+1F709	ALCHEMICAL SYMBOL FOR AQUA VITAE-2
+1F70A	ALCHEMICAL SYMBOL FOR VINEGAR
+	= crucible; acid; distill; atrament; vitriol; red sulfur; borax; wine; alkali salt; mercurius vivus, quick silver
+	x (cross of jerusalem - 2629)
+1F70B	ALCHEMICAL SYMBOL FOR VINEGAR-2
+	= distilled vinegar
+1F70C	ALCHEMICAL SYMBOL FOR VINEGAR-3
+@		Symbols for sulfur and mercury
+1F70D	ALCHEMICAL SYMBOL FOR SULFUR
+	= brimstone
+1F70E	ALCHEMICAL SYMBOL FOR PHILOSOPHERS SULFUR
+1F70F	ALCHEMICAL SYMBOL FOR BLACK SULFUR
+	= sulfur nigra, dye
+1F710	ALCHEMICAL SYMBOL FOR MERCURY SUBLIMATE
+	x (mercury - 263F)
+	x (alchemical symbol for sublimation - 1F75E)
+1F711	ALCHEMICAL SYMBOL FOR MERCURY SUBLIMATE-2
+1F712	ALCHEMICAL SYMBOL FOR MERCURY SUBLIMATE-3
+1F713	ALCHEMICAL SYMBOL FOR CINNABAR
+@		Symbols for salt, vitriol, and nitre
+1F714	ALCHEMICAL SYMBOL FOR SALT
+	x (white square - 25A1)
+	x (circled minus - 2296)
+1F715	ALCHEMICAL SYMBOL FOR NITRE
+	x (circled vertical bar - 29B6)
+1F716	ALCHEMICAL SYMBOL FOR VITRIOL
+1F717	ALCHEMICAL SYMBOL FOR VITRIOL-2
+1F718	ALCHEMICAL SYMBOL FOR ROCK SALT
+	= sal gemmae
+1F719	ALCHEMICAL SYMBOL FOR ROCK SALT-2
+@		Symbols for gold and silver
+1F71A	ALCHEMICAL SYMBOL FOR GOLD
+	x (sun - 2609)
+1F71B	ALCHEMICAL SYMBOL FOR SILVER
+	x (first quarter moon - 263D)
+	x (last quarter moon - 263E)
+@		Symbols for iron, iron ore and derivatives
+1F71C	ALCHEMICAL SYMBOL FOR IRON ORE
+	x (male sign - 2642)
+1F71D	ALCHEMICAL SYMBOL FOR IRON ORE-2
+1F71E	ALCHEMICAL SYMBOL FOR CROCUS OF IRON
+	= crocus martis, red or yellow calcined powder of iron
+1F71F	ALCHEMICAL SYMBOL FOR REGULUS OF IRON
+	= regulus martis, scoria from refining stibnite/antimony with iron
+@		Symbols for copper, copper ore and derivatives
+1F720	ALCHEMICAL SYMBOL FOR COPPER ORE
+	x (female sign - 2640)
+1F721	ALCHEMICAL SYMBOL FOR IRON-COPPER ORE
+	x (male and female sign - 26A5)
+1F722	ALCHEMICAL SYMBOL FOR SUBLIMATE OF COPPER
+	x (alchemical symbol for sal-ammoniac - 1F739)
+1F723	ALCHEMICAL SYMBOL FOR CROCUS OF COPPER
+	= crocus veneris, aes ustum
+1F724	ALCHEMICAL SYMBOL FOR CROCUS OF COPPER-2
+1F725	ALCHEMICAL SYMBOL FOR COPPER ANTIMONIATE
+	= crocus of copper, crocus veneris, lapis haematites
+	x (earth - 2641)
+1F726	ALCHEMICAL SYMBOL FOR SALT OF COPPER ANTIMONIATE
+	x (alchemical symbol for salt - 1F714)
+1F727	ALCHEMICAL SYMBOL FOR SUBLIMATE OF SALT OF COPPER
+	x (alchemical symbol for sal-ammoniac - 1F739)
+1F728	ALCHEMICAL SYMBOL FOR VERDIGRIS
+	= aes viride, copper subacetate
+	= early astronomical symbol for earth
+	x (circled plus - 2295)
+@		Symbols for tin and lead ore
+1F729	ALCHEMICAL SYMBOL FOR TIN ORE
+	x (jupiter - 2643)
+1F72A	ALCHEMICAL SYMBOL FOR LEAD ORE
+	x (saturn - 2644)
+@		Symbols for antimony, antimony ore and derivatives
+1F72B	ALCHEMICAL SYMBOL FOR ANTIMONY ORE
+	= stibnite
+	x (earth - 2641)
+1F72C	ALCHEMICAL SYMBOL FOR SUBLIMATE OF ANTIMONY
+	x (alchemical symbol for sal-ammoniac - 1F739)
+1F72D	ALCHEMICAL SYMBOL FOR SALT OF ANTIMONY
+	= cinnabar
+	x (alchemical symbol for salt - 1F714)
+1F72E	ALCHEMICAL SYMBOL FOR SUBLIMATE OF SALT OF ANTIMONY
+1F72F	ALCHEMICAL SYMBOL FOR VINEGAR OF ANTIMONY
+1F730	ALCHEMICAL SYMBOL FOR REGULUS OF ANTIMONY
+	= antimony metal
+1F731	ALCHEMICAL SYMBOL FOR REGULUS OF ANTIMONY-2
+1F732	ALCHEMICAL SYMBOL FOR REGULUS
+1F733	ALCHEMICAL SYMBOL FOR REGULUS-2
+1F734	ALCHEMICAL SYMBOL FOR REGULUS-3
+1F735	ALCHEMICAL SYMBOL FOR REGULUS-4
+@		Symbols for other substances
+1F736	ALCHEMICAL SYMBOL FOR ALKALI
+	= sal alkali
+1F737	ALCHEMICAL SYMBOL FOR ALKALI-2
+1F738	ALCHEMICAL SYMBOL FOR MARCASITE
+	= iron pyrite, iron sulfide
+1F739	ALCHEMICAL SYMBOL FOR SAL-AMMONIAC
+	= ammonium chloride
+	x (asterisk - 002A)
+	x (sextile - 26B9)
+	x (eight spoked asterisk - 2733)
+1F73A	ALCHEMICAL SYMBOL FOR ARSENIC
+	x (double-ended multimap - 29DF)
+1F73B	ALCHEMICAL SYMBOL FOR REALGAR
+	= arsenic sulfide
+1F73C	ALCHEMICAL SYMBOL FOR REALGAR-2
+	= arsenic sulfide
+1F73D	ALCHEMICAL SYMBOL FOR AURIPIGMENT
+	= orpiment
+	= arsenic trisulfide
+1F73E	ALCHEMICAL SYMBOL FOR BISMUTH ORE
+	= tinglass
+	x (neptune - 2646)
+1F73F	ALCHEMICAL SYMBOL FOR TARTAR
+	= impure potassium tartrate
+1F740	ALCHEMICAL SYMBOL FOR TARTAR-2
+	= impure potassium tartrate
+1F741	ALCHEMICAL SYMBOL FOR QUICK LIME
+	= calx viva
+	= calcium oxide
+1F742	ALCHEMICAL SYMBOL FOR BORAX
+1F743	ALCHEMICAL SYMBOL FOR BORAX-2
+1F744	ALCHEMICAL SYMBOL FOR BORAX-3
+1F745	ALCHEMICAL SYMBOL FOR ALUM
+1F746	ALCHEMICAL SYMBOL FOR OIL
+	x (tibetan sign rdel dkar gsum - 0F1C)
+1F747	ALCHEMICAL SYMBOL FOR SPIRIT
+1F748	ALCHEMICAL SYMBOL FOR TINCTURE
+1F749	ALCHEMICAL SYMBOL FOR GUM
+1F74A	ALCHEMICAL SYMBOL FOR WAX
+	= cera
+1F74B	ALCHEMICAL SYMBOL FOR POWDER
+	= pulvis
+1F74C	ALCHEMICAL SYMBOL FOR CALX
+	= calcinare
+	= oxide residue, calcium oxide
+1F74D	ALCHEMICAL SYMBOL FOR TUTTY
+	= tutia, crude zinc oxide sublimate
+	= aes viride
+1F74E	ALCHEMICAL SYMBOL FOR CAPUT MORTUUM
+	= worthless residue of sublimation or distillation
+1F74F	ALCHEMICAL SYMBOL FOR SCEPTER OF JOVE
+1F750	ALCHEMICAL SYMBOL FOR CADUCEUS
+	x (caduceus - 2624)
+1F751	ALCHEMICAL SYMBOL FOR TRIDENT
+1F752	ALCHEMICAL SYMBOL FOR STARRED TRIDENT
+1F753	ALCHEMICAL SYMBOL FOR LODESTONE
+	= magnes
+1F754	ALCHEMICAL SYMBOL FOR SOAP
+	x (lozenge - 25CA)
+	x (white medium diamond - 2B26)
+1F755	ALCHEMICAL SYMBOL FOR URINE
+	x (squared dot operator - 22A1)
+1F756	ALCHEMICAL SYMBOL FOR HORSE DUNG
+	= fimus equinus
+1F757	ALCHEMICAL SYMBOL FOR ASHES
+	= cineres
+1F758	ALCHEMICAL SYMBOL FOR POT ASHES
+	= cineres clavellati, alumen
+1F759	ALCHEMICAL SYMBOL FOR BRICK
+1F75A	ALCHEMICAL SYMBOL FOR POWDERED BRICK
+	= later cibratus, farina laterum
+1F75B	ALCHEMICAL SYMBOL FOR AMALGAM
+1F75C	ALCHEMICAL SYMBOL FOR STRATUM SUPER STRATUM
+1F75D	ALCHEMICAL SYMBOL FOR STRATUM SUPER STRATUM-2
+@		Processes
+1F75E	ALCHEMICAL SYMBOL FOR SUBLIMATION
+	x (ascending node - 260A)
+	x (libra - 264E)
+1F75F	ALCHEMICAL SYMBOL FOR PRECIPITATE
+1F760	ALCHEMICAL SYMBOL FOR DISTILL
+	= sublimate
+1F761	ALCHEMICAL SYMBOL FOR DISSOLVE
+1F762	ALCHEMICAL SYMBOL FOR DISSOLVE-2
+	= water, aqua
+1F763	ALCHEMICAL SYMBOL FOR PURIFY
+	x (descending node - 260B)
+1F764	ALCHEMICAL SYMBOL FOR PUTREFACTION
+@		Apparatus
+1F765	ALCHEMICAL SYMBOL FOR CRUCIBLE
+	= tigellum
+	x (alchemical symbol for vinegar - 1F70A)
+1F766	ALCHEMICAL SYMBOL FOR CRUCIBLE-2
+1F767	ALCHEMICAL SYMBOL FOR CRUCIBLE-3
+1F768	ALCHEMICAL SYMBOL FOR CRUCIBLE-4
+	x (down tack - 22A4)
+1F769	ALCHEMICAL SYMBOL FOR CRUCIBLE-5
+1F76A	ALCHEMICAL SYMBOL FOR ALEMBIC
+1F76B	ALCHEMICAL SYMBOL FOR BATH OF MARY
+	= balneum mariae
+1F76C	ALCHEMICAL SYMBOL FOR BATH OF VAPOURS
+	= balneum vaporis
+1F76D	ALCHEMICAL SYMBOL FOR RETORT
+@		Time
+1F76E	ALCHEMICAL SYMBOL FOR HOUR
+	x (hourglass - 231B)
+1F76F	ALCHEMICAL SYMBOL FOR NIGHT
+1F770	ALCHEMICAL SYMBOL FOR DAY-NIGHT
+1F771	ALCHEMICAL SYMBOL FOR MONTH
+	= mensis
+	x (squared times - 22A0)
+@		Measures
+1F772	ALCHEMICAL SYMBOL FOR HALF DRAM
+	= drachma semis
+	x (latin small letter ezh - 0292)
+1F773	ALCHEMICAL SYMBOL FOR HALF OUNCE
+	= uncia semis
+	x (ounce sign - 2125)
 @@	1FF80	Unassigned	1FFFF
 @		Not character codes
 @+		These codes are intended for process-internal uses, but are not permitted for interchange.
@@ -33189,6 +36005,7 @@ FFFF	<not a character>
 	* the value 1FFFF is guaranteed not to be a Unicode character at all
 @@	20000	CJK Unified Ideographs Extension B	2A6D6
 @@	2A700	CJK Unified Ideographs Extension C	2B734
+@@	2B740	CJK Unified Ideographs Extension D	2B81D
 @@	2F800	CJK Compatibility Ideographs Supplement	2FA1F
 @		Duplicate characters from CNS 11643-1992
 2F800	CJK COMPATIBILITY IDEOGRAPH-2F800
