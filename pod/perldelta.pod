@@ -1,5 +1,16 @@
 =encoding utf8
 
+=for comment
+This has been logged up to 2748c776108ea3c2dab18eeb6a710e819486df17,
+except for:
+57ef47cc7bcd1b57927d5010f363ccaa10f1d990
+b2ea9a00b30eb5881b863d7239dd6a3721e73136
+ca556bcdca736b2f85c11650c70b2371169c0225
+e4487e9b537f1be1e95aba1c87790c2a411788a7
+68b590d93559da1f7a0d3956202180d507013365
+Everything noteworthy committed by a certain Father Chrysostomos already
+has an entry in this file.
+
 =head1 NAME
 
 [ this is a template for a new perldelta file. Any text flagged as
@@ -589,7 +600,7 @@ new C<sv_2bool_flags> function.
 
 C<sv_catsv_flags> no longer calls C<mg_get> on its second argument (the
 source string) if the flags passed to it do not include SV_GMAGIC. So it
-now matches what the documentation says it does.
+now matches the documentation.
 
 =item *
 
@@ -705,7 +716,7 @@ Creating a new thread when directory handles were open used to cause a
 crash, because the handles were not cloned, but simply passed to the new
 thread, resulting in a double free.
 
-Now directory handles are properly, on systems that have a C<fchdir>
+Now directory handles are cloned properly, on systems that have a C<fchdir>
 function. On other systems, new threads simply do not inherit directory
 handles from their parent threads
 L<[perl #75154]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75154>.
@@ -741,6 +752,15 @@ Aliasing packages by assigning to globs or deleting packages by deleting
 their containing stash elements used to have erratic effects on method
 resolution, because the internal 'isa' caches were not reset. This has been
 fixed.
+
+=item *
+
+C<sort> with a custom sort routine could crash if too many nested
+subroutine calls occurrred from within the sort routine
+L<[perl #77930]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77930>.
+
+This bug was introduced in an earlier 5.13 release, and did not affect
+perl 5.12.
 
 =back
 
