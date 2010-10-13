@@ -750,17 +750,6 @@ Perl_parser_free(pTHX_  const yy_parser *parser)
 
 
 /*
- * Perl_lex_end
- * Finalizer for lexing operations.  Must be called when the parser is
- * done with the lexer.
- */
-
-void
-Perl_lex_end(pTHX)
-{
-}
-
-/*
 =for apidoc AmxU|SV *|PL_parser-E<gt>linestr
 
 Buffer scalar containing the chunk currently under consideration of the

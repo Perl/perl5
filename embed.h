@@ -818,7 +818,6 @@
 #define is_utf8_X_extend(a)	Perl_is_utf8_X_extend(aTHX_ a)
 #define is_utf8_X_non_hangul(a)	Perl_is_utf8_X_non_hangul(aTHX_ a)
 #define is_utf8_X_prepend(a)	Perl_is_utf8_X_prepend(aTHX_ a)
-#define lex_end()		Perl_lex_end(aTHX)
 #define mod(a,b)		Perl_mod(aTHX_ a,b)
 #define op_clear(a)		Perl_op_clear(aTHX_ a)
 #define qerror(a)		Perl_qerror(aTHX_ a)

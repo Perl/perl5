@@ -611,8 +611,6 @@ s	|OP*	|opt_scalarhv	|NN OP* rep_op
 s	|OP*	|is_inplace_av	|NN OP* o|NULLOK OP* oright
 #endif
 Ap	|void	|leave_scope	|I32 base
-: Used in pp_ctl.c, and by Data::Alias
-EXp	|void	|lex_end
 : Used in various files
 p	|void	|lex_start	|NULLOK SV* line|NULLOK PerlIO *rsfp
 : Public lexer API

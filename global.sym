@@ -284,7 +284,6 @@ Perl_is_utf8_xdigit
 Perl_leave_scope
 Perl_lex_bufutf8
 Perl_lex_discard_to
-Perl_lex_end
 Perl_lex_grow_linestr
 Perl_lex_next_chunk
 Perl_lex_peek_unichar

@@ -2229,7 +2229,6 @@ PP(pp_return)
 	retop = cx->blk_eval.retop;
 	if (CxTRYBLOCK(cx))
 	    break;
-	lex_end();
 	if (optype == OP_REQUIRE &&
 	    (MARK == SP || (gimme == G_SCALAR && !SvTRUE(*SP))) )
 	{
@@ -3053,7 +3052,6 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, const char *code, PAD** padp)
 
     (*startop)->op_type = OP_NULL;
     (*startop)->op_ppaddr = PL_ppaddr[OP_NULL];
-    lex_end();
     /* XXX DAPM do this properly one year */
     *padp = MUTABLE_AV(SvREFCNT_inc_simple(PL_comppad));
     LEAVE_with_name("eval");
@@ -3241,7 +3239,6 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 		namesv = cx->blk_eval.old_namesv;
 	    }
 	}
-	lex_end();
 	if (yystatus != 3)
 	    LEAVE_with_name("eval"); /* pp_entereval knows about this LEAVE.  */
 
@@ -4005,7 +4002,6 @@ PP(pp_leaveeval)
     assert(CvDEPTH(PL_compcv) == 1);
 #endif
     CvDEPTH(PL_compcv) = 0;
-    lex_end();
 
     if (optype == OP_REQUIRE &&
 	!(gimme == G_SCALAR ? SvTRUE(*SP) : SP > newsp))

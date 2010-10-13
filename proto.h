@@ -1784,7 +1784,6 @@ PERL_CALLCONV void	Perl_lex_discard_to(pTHX_ char* ptr)
 #define PERL_ARGS_ASSERT_LEX_DISCARD_TO	\
 	assert(ptr)
 
-PERL_CALLCONV void	Perl_lex_end(pTHX);
 PERL_CALLCONV char*	Perl_lex_grow_linestr(pTHX_ STRLEN len);
 PERL_CALLCONV bool	Perl_lex_next_chunk(pTHX_ U32 flags);
 PERL_CALLCONV I32	Perl_lex_peek_unichar(pTHX_ U32 flags);
