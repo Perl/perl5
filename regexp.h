@@ -221,8 +221,8 @@ and check for NULL.
  * Note that the flags whose names start with RXf_PMf_ are defined in
  * op_reg_common.h, being copied from the parallel flags of op_pmflags
  *
- * NOTE: if you modify any RXf flags you should run regen.pl or regcomp.pl
- * so that regnodes.h is updated with the changes.
+ * NOTE: if you modify any RXf flags you should run regen.pl or
+ * regen/regcomp.pl so that regnodes.h is updated with the changes.
  *
  */
 
@@ -287,8 +287,8 @@ and check for NULL.
 #define S_PAT_MODS      M_PAT_MODS      EXEC_PAT_MODS      NONDESTRUCT_PAT_MODS
 
 /*
- * NOTE: if you modify any RXf flags you should run regen.pl or regcomp.pl
- * so that regnodes.h is updated with the changes.
+ * NOTE: if you modify any RXf flags you should run regen.pl or
+ * regen/regcomp.pl so that regnodes.h is updated with the changes.
  *
  */
 
@@ -349,8 +349,8 @@ and check for NULL.
 #endif
 
 /*
- * NOTE: if you modify any RXf flags you should run regen.pl or regcomp.pl
- * so that regnodes.h is updated with the changes.
+ * NOTE: if you modify any RXf flags you should run regen.pl or
+ * regen/regcomp.pl so that regnodes.h is updated with the changes.
  *
  */
 
