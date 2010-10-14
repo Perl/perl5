@@ -1255,7 +1255,7 @@ XS(XS_re_regexp_pattern)
 }
 
 static void
-S_named_capture_common(pTHX_ CV *const cv, const U32 action)
+S_named_capture_common(pTHX_ CV *const cv, const int expect, const U32 action)
 {
     dVAR;
     dXSARGS;
@@ -1263,8 +1263,8 @@ S_named_capture_common(pTHX_ CV *const cv, const U32 action)
     U32 flags;
     SV * ret;
 
-    if (items != 2)
-	croak_xs_usage(cv, "$key");
+    if (items != expect)
+	croak_xs_usage(cv, expect == 2 ? "$key" : "");
 
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
@@ -1275,7 +1275,8 @@ S_named_capture_common(pTHX_ CV *const cv, const U32 action)
     PUTBACK;
 
     flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
-    ret = RX_ENGINE(rx)->named_buff(aTHX_ (rx), ST(1), NULL, flags | action);
+    ret = RX_ENGINE(rx)->named_buff(aTHX_ (rx), expect >= 2 ? ST(1) : NULL,
+				    NULL, flags | action);
 
     SPAGAIN;
     PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
@@ -1284,7 +1285,7 @@ S_named_capture_common(pTHX_ CV *const cv, const U32 action)
 
 XS(XS_Tie_Hash_NamedCapture_FETCH)
 {
-    S_named_capture_common(aTHX_ cv, RXapif_FETCH);
+    S_named_capture_common(aTHX_ cv, 2, RXapif_FETCH);
 }
 
 XS(XS_Tie_Hash_NamedCapture_STORE)
@@ -1376,7 +1377,7 @@ XS(XS_Tie_Hash_NamedCapture_CLEAR)
 
 XS(XS_Tie_Hash_NamedCapture_EXISTS)
 {
-    S_named_capture_common(aTHX_ cv, RXapif_EXISTS);
+    S_named_capture_common(aTHX_ cv, 2, RXapif_EXISTS);
 }
 
 XS(XS_Tie_Hash_NamedCapture_FIRSTK)
@@ -1435,29 +1436,7 @@ XS(XS_Tie_Hash_NamedCapture_NEXTK)
 
 XS(XS_Tie_Hash_NamedCapture_SCALAR)
 {
-    dVAR;
-    dXSARGS;
-    REGEXP * rx;
-    U32 flags;
-    SV * ret;
-
-    if (items != 1)
-	croak_xs_usage(cv, "");
-
-    rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
-
-    if (!rx || !SvROK(ST(0)))
-        XSRETURN_UNDEF;
-
-    SP -= items;
-    PUTBACK;
-
-    flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
-    ret = RX_ENGINE(rx)->named_buff(aTHX_ (rx), NULL, NULL, flags | RXapif_SCALAR);
-
-    SPAGAIN;
-    PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
-    XSRETURN(1);
+    S_named_capture_common(aTHX_ cv, 1, RXapif_SCALAR);
 }
 
 XS(XS_Tie_Hash_NamedCapture_flags)
