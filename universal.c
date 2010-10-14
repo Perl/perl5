@@ -1274,7 +1274,7 @@ XS(XS_Tie_Hash_NamedCapture_FETCH)
     PUTBACK;
 
     flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
-    ret = CALLREG_NAMED_BUFF_FETCH(rx, ST(1), flags);
+    ret = RX_ENGINE(rx)->named_buff(aTHX_ (rx), ST(1), NULL, flags | RXapif_FETCH);
 
     SPAGAIN;
     PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
@@ -1302,7 +1302,7 @@ XS(XS_Tie_Hash_NamedCapture_STORE)
     PUTBACK;
 
     flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
-    ret = CALLREG_NAMED_BUFF_STORE(rx,ST(1), ST(2), flags);
+    ret = RX_ENGINE(rx)->named_buff(aTHX_ (rx), ST(1), ST(2), flags | RXapif_STORE);
 
 
     /* Perl_magic_setpack calls us with G_DISCARD, so our return stack state
@@ -1331,7 +1331,7 @@ XS(XS_Tie_Hash_NamedCapture_DELETE)
     PUTBACK;
 
     flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
-    ret = CALLREG_NAMED_BUFF_DELETE(rx, ST(1), flags);
+    ret = RX_ENGINE(rx)->named_buff(aTHX_ (rx), ST(1), NULL, flags | RXapif_DELETE);
 
     SPAGAIN;
     PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
@@ -1358,7 +1358,7 @@ XS(XS_Tie_Hash_NamedCapture_CLEAR)
     PUTBACK;
 
     flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
-    ret = CALLREG_NAMED_BUFF_CLEAR(rx, flags);
+    ret = RX_ENGINE(rx)->named_buff(aTHX_ (rx), NULL, NULL, flags | RXapif_CLEAR);
 
     /* Perl_magic_wipepack calls us with G_DISCARD, so our return stack state
        is thrown away.  */
@@ -1388,7 +1388,7 @@ XS(XS_Tie_Hash_NamedCapture_EXISTS)
     PUTBACK;
 
     flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
-    ret = CALLREG_NAMED_BUFF_EXISTS(rx, ST(1), flags);
+    ret = RX_ENGINE(rx)->named_buff(aTHX_ (rx), ST(1), NULL, flags | RXapif_EXISTS);
 
     SPAGAIN;
     PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
@@ -1415,7 +1415,7 @@ XS(XS_Tie_Hash_NamedCapture_FIRSTK)
     PUTBACK;
 
     flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
-    ret = CALLREG_NAMED_BUFF_FIRSTKEY(rx, flags);
+    ret = RX_ENGINE(rx)->named_buff_iter(aTHX_ (rx), NULL, flags | RXapif_FIRSTKEY);
 
     SPAGAIN;
     PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
@@ -1442,7 +1442,7 @@ XS(XS_Tie_Hash_NamedCapture_NEXTK)
     PUTBACK;
 
     flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
-    ret = CALLREG_NAMED_BUFF_NEXTKEY(rx, ST(1), flags);
+    ret = RX_ENGINE(rx)->named_buff_iter(aTHX_ (rx), ST(1), flags | RXapif_NEXTKEY);
 
     SPAGAIN;
     PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
@@ -1469,7 +1469,7 @@ XS(XS_Tie_Hash_NamedCapture_SCALAR)
     PUTBACK;
 
     flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
-    ret = CALLREG_NAMED_BUFF_SCALAR(rx, flags);
+    ret = RX_ENGINE(rx)->named_buff(aTHX_ (rx), NULL, NULL, flags | RXapif_SCALAR);
 
     SPAGAIN;
     PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
