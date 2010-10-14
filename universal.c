@@ -1254,7 +1254,8 @@ XS(XS_re_regexp_pattern)
     /* NOT-REACHED */
 }
 
-XS(XS_Tie_Hash_NamedCapture_FETCH)
+static void
+S_named_capture_common(pTHX_ CV *const cv, const U32 action)
 {
     dVAR;
     dXSARGS;
@@ -1274,11 +1275,16 @@ XS(XS_Tie_Hash_NamedCapture_FETCH)
     PUTBACK;
 
     flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
-    ret = RX_ENGINE(rx)->named_buff(aTHX_ (rx), ST(1), NULL, flags | RXapif_FETCH);
+    ret = RX_ENGINE(rx)->named_buff(aTHX_ (rx), ST(1), NULL, flags | action);
 
     SPAGAIN;
     PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
     XSRETURN(1);
+}
+
+XS(XS_Tie_Hash_NamedCapture_FETCH)
+{
+    S_named_capture_common(aTHX_ cv, RXapif_FETCH);
 }
 
 XS(XS_Tie_Hash_NamedCapture_STORE)
@@ -1370,29 +1376,7 @@ XS(XS_Tie_Hash_NamedCapture_CLEAR)
 
 XS(XS_Tie_Hash_NamedCapture_EXISTS)
 {
-    dVAR;
-    dXSARGS;
-    REGEXP * rx;
-    U32 flags;
-    SV * ret;
-
-    if (items != 2)
-	croak_xs_usage(cv, "$key");
-
-    rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
-
-    if (!rx || !SvROK(ST(0)))
-        XSRETURN_UNDEF;
-
-    SP -= items;
-    PUTBACK;
-
-    flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
-    ret = RX_ENGINE(rx)->named_buff(aTHX_ (rx), ST(1), NULL, flags | RXapif_EXISTS);
-
-    SPAGAIN;
-    PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
-    XSRETURN(1);
+    S_named_capture_common(aTHX_ cv, RXapif_EXISTS);
 }
 
 XS(XS_Tie_Hash_NamedCapture_FIRSTK)
