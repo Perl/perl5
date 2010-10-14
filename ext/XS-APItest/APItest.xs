@@ -519,6 +519,7 @@ test_op_linklist_describe(OP *start)
 static SV *hintkey_rpn_sv, *hintkey_calcrpn_sv, *hintkey_stufftest_sv;
 static SV *hintkey_swaptwostmts_sv, *hintkey_looprest_sv;
 static SV *hintkey_scopelessblock_sv;
+static SV *hintkey_stmtasexpr_sv,  *hintkey_stmtsasexpr_sv;
 static int (*next_keyword_plugin)(pTHX_ char *, STRLEN, OP **);
 
 /* low-level parser helpers */
@@ -715,6 +716,33 @@ static OP *THX_parse_keyword_scopelessblock(pTHX)
     return body;
 }
 
+#define parse_keyword_stmtasexpr() THX_parse_keyword_stmtasexpr(aTHX)
+static OP *THX_parse_keyword_stmtasexpr(pTHX)
+{
+    OP *o = parse_fullstmt(0);
+    o = op_prepend_elem(OP_LINESEQ, newOP(OP_ENTER, 0), o);
+    o->op_type = OP_LEAVE;
+    o->op_ppaddr = PL_ppaddr[OP_LEAVE];
+    return o;
+}
+
+#define parse_keyword_stmtsasexpr() THX_parse_keyword_stmtsasexpr(aTHX)
+static OP *THX_parse_keyword_stmtsasexpr(pTHX)
+{
+    OP *o;
+    lex_read_space(0);
+    if(lex_peek_unichar(0) != '{'/*}*/) croak("syntax error");
+    lex_read_unichar(0);
+    o = parse_stmtseq(0);
+    lex_read_space(0);
+    if(lex_peek_unichar(0) != /*{*/'}') croak("syntax error");
+    lex_read_unichar(0);
+    o = op_prepend_elem(OP_LINESEQ, newOP(OP_ENTER, 0), o);
+    o->op_type = OP_LEAVE;
+    o->op_ppaddr = PL_ppaddr[OP_LEAVE];
+    return o;
+}
+
 /* plugin glue */
 
 #define keyword_active(hintkey_sv) THX_keyword_active(aTHX_ hintkey_sv)
@@ -755,6 +783,14 @@ static int my_keyword_plugin(pTHX_
 		    keyword_active(hintkey_scopelessblock_sv)) {
 	*op_ptr = parse_keyword_scopelessblock();
 	return KEYWORD_PLUGIN_STMT;
+    } else if(keyword_len == 10 && strnEQ(keyword_ptr, "stmtasexpr", 10) &&
+		    keyword_active(hintkey_stmtasexpr_sv)) {
+	*op_ptr = parse_keyword_stmtasexpr();
+	return KEYWORD_PLUGIN_EXPR;
+    } else if(keyword_len == 11 && strnEQ(keyword_ptr, "stmtsasexpr", 11) &&
+		    keyword_active(hintkey_stmtsasexpr_sv)) {
+	*op_ptr = parse_keyword_stmtsasexpr();
+	return KEYWORD_PLUGIN_EXPR;
     } else {
 	return next_keyword_plugin(aTHX_ keyword_ptr, keyword_len, op_ptr);
     }
@@ -2163,6 +2199,8 @@ BOOT:
     hintkey_swaptwostmts_sv = newSVpvs_share("XS::APItest/swaptwostmts");
     hintkey_looprest_sv = newSVpvs_share("XS::APItest/looprest");
     hintkey_scopelessblock_sv = newSVpvs_share("XS::APItest/scopelessblock");
+    hintkey_stmtasexpr_sv = newSVpvs_share("XS::APItest/stmtasexpr");
+    hintkey_stmtsasexpr_sv = newSVpvs_share("XS::APItest/stmtsasexpr");
     next_keyword_plugin = PL_keyword_plugin;
     PL_keyword_plugin = my_keyword_plugin;
 }

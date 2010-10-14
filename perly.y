@@ -143,9 +143,13 @@
 /* Top-level choice of what kind of thing yyparse was called to parse */
 grammar	:	GRAMPROG prog
 			{ $$ = $2; }
-	|	GRAMFULLSTMT fullstmt
+	|	GRAMFULLSTMT
 			{
-			  PL_eval_root = $2;
+			  parser->expect = XSTATE;
+			}
+		fullstmt
+			{
+			  PL_eval_root = $3;
 			  $$ = 0;
 			  yyunlex();
 			  parser->yychar = YYEOF;
