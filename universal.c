@@ -1265,7 +1265,8 @@ S_named_capture_common(pTHX_ CV *const cv, const bool fatal, const int expect,
     SV * ret;
 
     if (items != expect)
-	croak_xs_usage(cv, expect == 2 ? "$key" : "");
+	croak_xs_usage(cv, expect == 2 ? "$key"
+				       : (expect == 3 ? "$key, $value" : ""));
 
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
@@ -1281,7 +1282,7 @@ S_named_capture_common(pTHX_ CV *const cv, const bool fatal, const int expect,
 
     flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
     ret = RX_ENGINE(rx)->named_buff(aTHX_ (rx), expect >= 2 ? ST(1) : NULL,
-				    NULL, flags | action);
+				    expect >= 3 ? ST(2) : NULL, flags | action);
 
     if (discard) {
 	/* Called with G_DISCARD, so our return stack state is thrown away.
@@ -1302,34 +1303,7 @@ XS(XS_Tie_Hash_NamedCapture_FETCH)
 
 XS(XS_Tie_Hash_NamedCapture_STORE)
 {
-    dVAR;
-    dXSARGS;
-    REGEXP * rx;
-    U32 flags;
-    SV *ret;
-
-    if (items != 3)
-	croak_xs_usage(cv, "$key, $value");
-
-    rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
-
-    if (!rx || !SvROK(ST(0))) {
-	Perl_croak_no_modify(aTHX);
-    }
-
-    SP -= items;
-    PUTBACK;
-
-    flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
-    ret = RX_ENGINE(rx)->named_buff(aTHX_ (rx), ST(1), ST(2), flags | RXapif_STORE);
-
-
-    /* Perl_magic_setpack calls us with G_DISCARD, so our return stack state
-       is thrown away.  */
-
-    /* If we were returned anything, free it immediately.  */
-    SvREFCNT_dec(ret);
-    XSRETURN_EMPTY;
+    S_named_capture_common(aTHX_ cv, TRUE, 3, TRUE, RXapif_STORE);
 }
 
 XS(XS_Tie_Hash_NamedCapture_DELETE)
