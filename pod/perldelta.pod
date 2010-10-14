@@ -643,7 +643,7 @@ Many functions ending with pvn now have equivalent pv/pvs/sv versions.
 
 =item *
 
-The C<save_freeop>, C<save_op>, C<save_pushi32ptr> and <save_pushptrptr>
+The C<save_freeop>, C<save_op>, C<save_pushi32ptr> and C<save_pushptrptr>
 functions have been added to the API.
 
 =item *
