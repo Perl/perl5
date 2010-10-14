@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.81';
+our $VERSION = '1.82';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -1007,7 +1007,7 @@ discouraged.
 
 =item Open directory handles
 
-In perl 5.14.0 and higher, if your system does not support the C<fchdir> C
+In perl 5.13.6 and higher, if your system does not support the C<fchdir> C
 function, directory handles (see
 L<opendir|perlfunc/"opendir DIRHANDLE,EXPR">) will not be copied to new
 threads. You can use the C<d_fchdir> variable in L<Config.pm|Config> to
