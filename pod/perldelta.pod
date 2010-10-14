@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been logged up to 07ffcb738e9467df21e3d33604cf09c125e7ff52,
+This has been logged up to 7ec2c349a5d9e979773c2f7c684c26ebde61cf67,
 except for:
 57ef47cc7bcd1b57927d5010f363ccaa10f1d990
 b2ea9a00b30eb5881b863d7239dd6a3721e73136
@@ -794,6 +794,23 @@ The C<eval_sv> and C<eval_pv> C functions now set C<$@> correctly when
 there is a syntax error and no C<G_KEEPERR> flag, and never set it if the
 C<G_KEEPERR> flag is present 
 L<[perl #3719]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=3719>.
+
+=item *
+
+Nested C<map> and C<grep> blocks no longer leak memory when processing
+large lists
+L<[perl #48004]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=48004>.
+
+=item *
+
+Malformed C<version> objects no longer cause crashes
+L<[perl #78286]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78286>.
+
+=item *
+
+The interpreter no longer crashes when freeing deeply-nested arrays of
+arrays. Hashes have not been fixed yet
+L<[perl #44225]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=44225>.
 
 =back
 
