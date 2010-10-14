@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been logged up to 825563b9,
+This has been logged up to 97a3247,
 except for:
 57ef47cc7bcd1b57927d5010f363ccaa10f1d990
 b2ea9a00b30eb5881b863d7239dd6a3721e73136
@@ -84,7 +84,7 @@ It is now safe to use regular expressions within C<(?{...})> and
 C<(??{...})> code blocks inside regular expressions.
 
 These block are still experimental, however, and still have problems with
-lexical (C<my>) variables and abnormal exiting.
+lexical (C<my>) variables, lexical pragmata and abnormal exiting.
 
 =head2 Custom per-subroutine check hooks
 
@@ -196,7 +196,9 @@ may well be none in a stable release.
 
 =item *
 
-XXX
+The bulk of the C<Tie::Hash::NamedCapture> module used to be in the perl
+core. It has now been moved to an XS module, to reduce the overhead for
+programs that do not use C<%+> or C<%->.
 
 =back
 
