@@ -8,7 +8,7 @@ print OUT <<'EOT';
 
 package XSLoader;
 
-$VERSION = "0.12";
+$VERSION = "0.13";
 
 #use strict;
 
@@ -26,9 +26,13 @@ package XSLoader;
 sub load {
     package DynaLoader;
 
-    die q{XSLoader::load('Your::Module', $Your::Module::VERSION)} unless @_;
+    my ($module, $modlibname) = caller();
 
-    my($module) = $_[0];
+    if (@_) {
+	$module = $_[0];
+    } else {
+	$_[0] = $module;
+    }
 
     # work with static linking too
     my $boots = "$module\::bootstrap";
@@ -58,7 +62,6 @@ EOT
 
 print OUT <<'EOT';
     my $modpname = join('/',@modparts);
-    my $modlibname = (caller())[1];
     my $c = @modparts;
     $modlibname =~ s,[\\/][^\\/]+$,, while $c--;	# Q&D basename
 EOT
@@ -178,14 +181,14 @@ XSLoader - Dynamically load C libraries into Perl code
 
 =head1 VERSION
 
-Version 0.10
+Version 0.13
 
 =head1 SYNOPSIS
 
     package YourPackage;
-    use XSLoader;
+    require XSLoader;
 
-    XSLoader::load 'YourPackage', $YourPackage::VERSION;
+    XSLoader::load();
 
 =head1 DESCRIPTION
 
@@ -233,6 +236,13 @@ one can remove this reference to C<@ISA> together with the C<@ISA> assignment.
 If no C<$VERSION> was specified on the C<bootstrap> line, the last line becomes
 
     XSLoader::load 'YourPackage';
+
+If the call to C<load> is from the YourPackage, then that can be further
+simplified to
+
+    XSLoader::load();
+
+as C<load> will use C<caller> to determine the package.
 
 =head2 Backward compatible boilerplate
 
@@ -367,13 +377,7 @@ B<(W)> As the message says, some symbols stay undefined although the
 extension module was correctly loaded and initialised. The list of undefined
 symbols follows.
 
-=item C<XSLoader::load('Your::Module', $Your::Module::VERSION)>
-
-B<(F)> You tried to invoke C<load()> without any argument. You must supply
-a module name, and optionally its version.
-
 =back
-
 
 =head1 LIMITATIONS
 
