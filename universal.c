@@ -1321,7 +1321,9 @@ XS(XS_Tie_Hash_NamedCapture_EXISTS)
     S_named_capture_common(aTHX_ cv, FALSE, 2, FALSE, RXapif_EXISTS);
 }
 
-XS(XS_Tie_Hash_NamedCapture_FIRSTK)
+static void
+S_named_capture_iter_common(pTHX_ CV *const cv, const int expect,
+			    const U32 action)
 {
     dVAR;
     dXSARGS;
@@ -1329,8 +1331,8 @@ XS(XS_Tie_Hash_NamedCapture_FIRSTK)
     U32 flags;
     SV * ret;
 
-    if (items != 1)
-	croak_xs_usage(cv, "");
+    if (items != expect)
+	croak_xs_usage(cv, expect == 2 ? "$lastkey" : "");
 
     rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
@@ -1341,38 +1343,22 @@ XS(XS_Tie_Hash_NamedCapture_FIRSTK)
     PUTBACK;
 
     flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
-    ret = RX_ENGINE(rx)->named_buff_iter(aTHX_ (rx), NULL, flags | RXapif_FIRSTKEY);
+    ret = RX_ENGINE(rx)->named_buff_iter(aTHX_ (rx), expect >= 2 ? ST(1) : NULL,
+					 flags | action);
 
     SPAGAIN;
     PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
     XSRETURN(1);
 }
 
+XS(XS_Tie_Hash_NamedCapture_FIRSTK)
+{
+    S_named_capture_iter_common(aTHX_ cv, 1, RXapif_FIRSTKEY);
+}
+
 XS(XS_Tie_Hash_NamedCapture_NEXTK)
 {
-    dVAR;
-    dXSARGS;
-    REGEXP * rx;
-    U32 flags;
-    SV * ret;
-
-    if (items != 2)
-	croak_xs_usage(cv, "$lastkey");
-
-    rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
-
-    if (!rx || !SvROK(ST(0)))
-        XSRETURN_UNDEF;
-
-    SP -= items;
-    PUTBACK;
-
-    flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
-    ret = RX_ENGINE(rx)->named_buff_iter(aTHX_ (rx), ST(1), flags | RXapif_NEXTKEY);
-
-    SPAGAIN;
-    PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
-    XSRETURN(1);
+    S_named_capture_iter_common(aTHX_ cv, 2, RXapif_NEXTKEY);
 }
 
 XS(XS_Tie_Hash_NamedCapture_SCALAR)
