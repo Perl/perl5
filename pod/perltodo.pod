@@ -1265,11 +1265,6 @@ it would be a good thing.
 
 Fix (or rewrite) the implementation of the C</(?{...})/> closures.
 
-=head2 A re-entrant regexp engine
-
-This will allow the use of a regex from inside (?{ }), (??{ }) and
-(?(?{ })|) constructs.
-
 =head2 Add class set operations to regexp engine
 
 Apparently these are quite useful. Anyway, Jeffery Friedl wants them.

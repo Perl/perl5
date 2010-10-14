@@ -979,10 +979,11 @@ B<WARNING>: Use of lexical (C<my>) variables in these blocks is
 broken. The result is unpredictable and will make perl unstable. The
 workaround is to use global (C<our>) variables.
 
-B<WARNING>: Because Perl's regex engine is currently not re-entrant,
-interpolated code may not invoke the regex engine either directly with
+B<WARNING>: In perl 5.12.x and earlier, the regex engine
+was not re-entrant, so interpolated code could not
+safely invoke the regex engine either directly with
 C<m//> or C<s///>), or indirectly with functions such as
-C<split>. Invoking the regex engine in these blocks will make perl
+C<split>. Invoking the regex engine in these blocks would make perl
 unstable.
 
 =item C<(??{ code })>
@@ -1031,9 +1032,9 @@ perilous C<use re 'eval'> pragma has been used (see L<re>), or the
 variables contain results of C<qr//> operator (see
 L<perlop/"qrE<sol>STRINGE<sol>msixpo">).
 
-Because perl's regex engine is not currently re-entrant, delayed
-code may not invoke the regex engine either directly with C<m//> or C<s///>),
-or indirectly with functions such as C<split>.
+In perl 5.12.x and earlier, because the regex engine was not re-entrant,
+delayed code could not safely invoke the regex engine either directly with
+C<m//> or C<s///>), or indirectly with functions such as C<split>.
 
 Recursing deeper than 50 times without consuming any input string will
 result in a fatal error.  The maximum depth is compiled into perl, so
