@@ -15,7 +15,7 @@
 /* These variables are per-interpreter in threaded/multiplicity builds,
  * global otherwise.
 
- * Don't forget to re-run embed.pl to propagate changes! */
+ * Don't forget to re-run regen/embed.pl to propagate changes! */
 
 /* New variables must be added to the very end for binary compatibility.
  * XSUB.h provides wrapper functions via perlapi.h that make this

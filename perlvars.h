@@ -12,7 +12,7 @@
 =head1 Global Variables
 */
 
-/* Don't forget to re-run embed.pl to propagate changes! */
+/* Don't forget to re-run regen/embed.pl to propagate changes! */
 
 /* This file describes the "global" variables used by perl
  * This used to be in perl.h directly but we want to abstract out into

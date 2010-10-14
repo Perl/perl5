@@ -1,6 +1,6 @@
-: BEGIN {die "You meant to run embed.pl"} # Stop early if fed to perl.
+: BEGIN{die "You meant to run regen/embed.pl"} # Stop early if fed to perl.
 :
-: This file is processed by embed.pl and autodoc.pl
+: This file is processed by regen/embed.pl and autodoc.pl
 :
 : Lines are of the form:
 :    flags|return_type|function_name|arg1|arg2|...|argN
