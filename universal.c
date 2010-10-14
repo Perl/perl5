@@ -1254,78 +1254,6 @@ XS(XS_re_regexp_pattern)
     /* NOT-REACHED */
 }
 
-static void
-S_named_capture_common(pTHX_ CV *const cv, const bool fatal, const int expect,
-		       const bool discard, const U32 action)
-{
-    dVAR;
-    dXSARGS;
-    REGEXP * rx;
-    U32 flags;
-    SV * ret;
-
-    if (items != expect)
-	croak_xs_usage(cv, expect == 2 ? "$key"
-				       : (expect == 3 ? "$key, $value" : ""));
-
-    rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
-
-    if (!rx || !SvROK(ST(0))) {
-	if (fatal)
-	    Perl_croak_no_modify(aTHX);
-	else
-	    XSRETURN_UNDEF;
-    }
-
-    SP -= items;
-    PUTBACK;
-
-    flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
-    ret = RX_ENGINE(rx)->named_buff(aTHX_ (rx), expect >= 2 ? ST(1) : NULL,
-				    expect >= 3 ? ST(2) : NULL, flags | action);
-
-    if (discard) {
-	/* Called with G_DISCARD, so our return stack state is thrown away.
-	   Hence if we were returned anything, free it immediately.  */
-	SvREFCNT_dec(ret);
-	XSRETURN_EMPTY;
-    }
-
-    SPAGAIN;
-    PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
-    XSRETURN(1);
-}
-
-XS(XS_Tie_Hash_NamedCapture_FETCH)
-{
-    S_named_capture_common(aTHX_ cv, FALSE, 2, FALSE, RXapif_FETCH);
-}
-
-XS(XS_Tie_Hash_NamedCapture_STORE)
-{
-    S_named_capture_common(aTHX_ cv, TRUE, 3, TRUE, RXapif_STORE);
-}
-
-XS(XS_Tie_Hash_NamedCapture_DELETE)
-{
-    S_named_capture_common(aTHX_ cv, TRUE, 2, FALSE, RXapif_DELETE);
-}
-
-XS(XS_Tie_Hash_NamedCapture_CLEAR)
-{
-    S_named_capture_common(aTHX_ cv, TRUE, 1, TRUE, RXapif_CLEAR);
-}
-
-XS(XS_Tie_Hash_NamedCapture_EXISTS)
-{
-    S_named_capture_common(aTHX_ cv, FALSE, 2, FALSE, RXapif_EXISTS);
-}
-
-XS(XS_Tie_Hash_NamedCapture_SCALAR)
-{
-    S_named_capture_common(aTHX_ cv, FALSE, 1, FALSE, RXapif_SCALAR);
-}
-
 struct xsub_details {
     const char *name;
     XSUBADDR_t xsub;
@@ -1376,12 +1304,6 @@ struct xsub_details details[] = {
     {"re::regnames", XS_re_regnames, ";$"},
     {"re::regnames_count", XS_re_regnames_count, ""},
     {"re::regexp_pattern", XS_re_regexp_pattern, "$"},
-    {"Tie::Hash::NamedCapture::FETCH", XS_Tie_Hash_NamedCapture_FETCH, NULL},
-    {"Tie::Hash::NamedCapture::STORE", XS_Tie_Hash_NamedCapture_STORE, NULL},
-    {"Tie::Hash::NamedCapture::DELETE", XS_Tie_Hash_NamedCapture_DELETE, NULL},
-    {"Tie::Hash::NamedCapture::CLEAR", XS_Tie_Hash_NamedCapture_CLEAR, NULL},
-    {"Tie::Hash::NamedCapture::EXISTS", XS_Tie_Hash_NamedCapture_EXISTS, NULL},
-    {"Tie::Hash::NamedCapture::SCALAR", XS_Tie_Hash_NamedCapture_SCALAR, NULL},
 };
 
 void
