@@ -15,12 +15,12 @@ our $VERSION;
 our $host;
 
 BEGIN {
-    $VERSION = '1.11';
+    $VERSION = '1.13';
     {
 	local $SIG{__DIE__};
 	eval {
 	    require XSLoader;
-	    XSLoader::load('Sys::Hostname', $VERSION);
+	    XSLoader::load();
 	};
 	warn $@ if $@;
     }

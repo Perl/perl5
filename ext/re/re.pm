@@ -4,7 +4,7 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.12";
+our $VERSION     = "0.13";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = ('regmust',
                     qw(is_regexp regexp_pattern
@@ -66,7 +66,7 @@ $flags{TRIE} = $flags{DUMP} | $flags{EXECUTE} | $flags{TRIEC};
 
 if (defined &DynaLoader::boot_DynaLoader) {
     require XSLoader;
-    XSLoader::load( __PACKAGE__, $VERSION);
+    XSLoader::load();
 }
 # else we're miniperl
 # We need to work for miniperl, because the XS toolchain uses Text::Wrap, which

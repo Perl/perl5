@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Scalar::Util qw( reftype);
 
-our $VERSION = '1.04';
+our $VERSION = '1.05';
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -26,7 +26,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
     require XSLoader;
     my %ob_reg; # private object registry
     sub _ob_reg { \ %ob_reg }
-    XSLoader::load('Hash::Util::FieldHash', $VERSION);
+    XSLoader::load();
 }
 
 sub fieldhash (\%) {

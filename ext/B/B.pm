@@ -7,9 +7,9 @@
 #
 package B;
 
-our $VERSION = '1.23';
+our $VERSION = '1.24';
 
-use XSLoader ();
+require XSLoader;
 require Exporter;
 @ISA = qw(Exporter);
 
@@ -315,7 +315,7 @@ sub walksymtable {
     }
 }
 
-XSLoader::load 'B';
+XSLoader::load();
 
 1;
 

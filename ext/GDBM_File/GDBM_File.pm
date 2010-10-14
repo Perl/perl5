@@ -48,7 +48,7 @@ our($VERSION, @ISA, @EXPORT, $AUTOLOAD);
 require Carp;
 require Tie::Hash;
 require Exporter;
-use XSLoader ();
+require XSLoader;
 @ISA = qw(Tie::Hash Exporter);
 @EXPORT = qw(
 	GDBM_CACHESIZE
@@ -81,6 +81,6 @@ sub AUTOLOAD {
     goto &{$AUTOLOAD};
 }
 
-XSLoader::load 'GDBM_File', $VERSION;
+XSLoader::load();
 
 1;

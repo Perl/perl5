@@ -4,7 +4,7 @@ package Tie::Hash::NamedCapture;
 our $VERSION = "0.07";
 
 require XSLoader;
-XSLoader::load(__PACKAGE__);
+XSLoader::load();
 
 my ($one, $all) = Tie::Hash::NamedCapture::flags();
 

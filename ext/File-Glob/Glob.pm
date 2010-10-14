@@ -4,7 +4,7 @@ use strict;
 our($VERSION, @ISA, @EXPORT_OK, @EXPORT_FAIL, %EXPORT_TAGS,
     $AUTOLOAD, $DEFAULT_FLAGS);
 
-use XSLoader ();
+require XSLoader;
 
 @ISA = qw(Exporter);
 
@@ -56,7 +56,7 @@ use XSLoader ();
     ) ],
 );
 
-$VERSION = '1.08';
+$VERSION = '1.09';
 
 sub import {
     require Exporter;
@@ -93,7 +93,7 @@ sub AUTOLOAD {
     goto &$AUTOLOAD;
 }
 
-XSLoader::load 'File::Glob', $VERSION;
+XSLoader::load();
 
 # Preloaded methods go here.
 

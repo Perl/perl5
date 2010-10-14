@@ -1,7 +1,7 @@
 package PerlIO::via;
-our $VERSION = '0.09';
-use XSLoader ();
-XSLoader::load 'PerlIO::via';
+our $VERSION = '0.10';
+require XSLoader;
+XSLoader::load();
 1;
 __END__
 

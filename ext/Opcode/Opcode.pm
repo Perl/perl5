@@ -6,11 +6,11 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.15";
+$VERSION = "1.16";
 
 use Carp;
 use Exporter ();
-use XSLoader ();
+use XSLoader;
 
 BEGIN {
     @ISA = qw(Exporter);
@@ -28,7 +28,7 @@ sub opset_to_hex ($);
 sub opdump (;$);
 use subs @EXPORT_OK;
 
-XSLoader::load 'Opcode', $VERSION;
+XSLoader::load();
 
 _init_optags();
 

@@ -3,12 +3,12 @@
 
 package Devel::Peek;
 
-$VERSION = '1.04';
+$VERSION = '1.05';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
 require Exporter;
-use XSLoader ();
+require XSLoader;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(Dump mstat DeadCode DumpArray DumpWithOP DumpProg
@@ -16,7 +16,7 @@ use XSLoader ();
 @EXPORT_OK = qw(SvREFCNT SvREFCNT_inc SvREFCNT_dec CvGV);
 %EXPORT_TAGS = ('ALL' => [@EXPORT, @EXPORT_OK]);
 
-XSLoader::load 'Devel::Peek';
+XSLoader::load();
 
 sub import {
   my $c = shift;

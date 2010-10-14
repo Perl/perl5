@@ -59,10 +59,9 @@ use strict;
 our($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS, $AUTOLOAD);
 
 require Exporter;
-use XSLoader ();
 @ISA = qw(Exporter);
 BEGIN {
-  $VERSION = "1.06";
+  $VERSION = "1.07";
 }
 
 # Items to export into callers namespace by default
@@ -212,7 +211,8 @@ BEGIN {
 
 # Force the constants to become inlined
 BEGIN {
-  XSLoader::load 'Fcntl', $VERSION;
+  require XSLoader;
+  XSLoader::load();
 }
 
 sub S_IFMT  { @_ ? ( $_[0] & _S_IFMT() ) : _S_IFMT()  }
