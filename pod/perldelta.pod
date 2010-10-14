@@ -103,6 +103,11 @@ hook to a specific subroutine.  See L<perlapi/cv_set_call_checker>.
 To help in writing custom check hooks, several subtasks within standard
 C<entersub> op checking have been separated out and exposed in the API.
 
+=head2 Return value of C<delete $+{...}>
+
+Custom regular expression engines can now determine the return value of
+C<delete> on an entry of C<%+> or C<%->.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -171,11 +176,6 @@ platforms. It used to become "-0" on some, but "0" on others.
 
 If you still need to determine whether a zero is negative, use
 C<sprintf("%g", $zero) =~ /^-/> or the L<Data::Float> module on CPAN.
-
-=head2 Return value of C<delete $+{...}>
-
-Custom regular expression engines can now determine the return value of
-C<delete> on an entry of C<%+> or C<%->.
 
 =head1 Deprecations
 
