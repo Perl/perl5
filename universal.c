@@ -1256,7 +1256,7 @@ XS(XS_re_regexp_pattern)
 
 static void
 S_named_capture_common(pTHX_ CV *const cv, const bool fatal, const int expect,
-		       const U32 action)
+		       const bool discard, const U32 action)
 {
     dVAR;
     dXSARGS;
@@ -1283,6 +1283,13 @@ S_named_capture_common(pTHX_ CV *const cv, const bool fatal, const int expect,
     ret = RX_ENGINE(rx)->named_buff(aTHX_ (rx), expect >= 2 ? ST(1) : NULL,
 				    NULL, flags | action);
 
+    if (discard) {
+	/* Called with G_DISCARD, so our return stack state is thrown away.
+	   Hence if we were returned anything, free it immediately.  */
+	SvREFCNT_dec(ret);
+	XSRETURN_EMPTY;
+    }
+
     SPAGAIN;
     PUSHs(ret ? sv_2mortal(ret) : &PL_sv_undef);
     XSRETURN(1);
@@ -1290,7 +1297,7 @@ S_named_capture_common(pTHX_ CV *const cv, const bool fatal, const int expect,
 
 XS(XS_Tie_Hash_NamedCapture_FETCH)
 {
-    S_named_capture_common(aTHX_ cv, FALSE, 2, RXapif_FETCH);
+    S_named_capture_common(aTHX_ cv, FALSE, 2, FALSE, RXapif_FETCH);
 }
 
 XS(XS_Tie_Hash_NamedCapture_STORE)
@@ -1327,42 +1334,17 @@ XS(XS_Tie_Hash_NamedCapture_STORE)
 
 XS(XS_Tie_Hash_NamedCapture_DELETE)
 {
-    S_named_capture_common(aTHX_ cv, TRUE, 2, RXapif_DELETE);
+    S_named_capture_common(aTHX_ cv, TRUE, 2, FALSE, RXapif_DELETE);
 }
 
 XS(XS_Tie_Hash_NamedCapture_CLEAR)
 {
-    dVAR;
-    dXSARGS;
-    REGEXP * rx;
-    U32 flags;
-    SV *ret;
-
-    if (items != 1)
-	croak_xs_usage(cv, "");
-
-    rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
-
-    if (!rx || !SvROK(ST(0)))
-        Perl_croak_no_modify(aTHX);
-
-    SP -= items;
-    PUTBACK;
-
-    flags = (U32)SvUV(SvRV(MUTABLE_SV(ST(0))));
-    ret = RX_ENGINE(rx)->named_buff(aTHX_ (rx), NULL, NULL, flags | RXapif_CLEAR);
-
-    /* Perl_magic_wipepack calls us with G_DISCARD, so our return stack state
-       is thrown away.  */
-
-    /* If we were returned anything, free it immediately.  */
-    SvREFCNT_dec(ret);
-    XSRETURN_EMPTY;
+    S_named_capture_common(aTHX_ cv, TRUE, 1, TRUE, RXapif_CLEAR);
 }
 
 XS(XS_Tie_Hash_NamedCapture_EXISTS)
 {
-    S_named_capture_common(aTHX_ cv, FALSE, 2, RXapif_EXISTS);
+    S_named_capture_common(aTHX_ cv, FALSE, 2, FALSE, RXapif_EXISTS);
 }
 
 XS(XS_Tie_Hash_NamedCapture_FIRSTK)
@@ -1421,7 +1403,7 @@ XS(XS_Tie_Hash_NamedCapture_NEXTK)
 
 XS(XS_Tie_Hash_NamedCapture_SCALAR)
 {
-    S_named_capture_common(aTHX_ cv, FALSE, 1, RXapif_SCALAR);
+    S_named_capture_common(aTHX_ cv, FALSE, 1, FALSE, RXapif_SCALAR);
 }
 
 XS(XS_Tie_Hash_NamedCapture_flags)
