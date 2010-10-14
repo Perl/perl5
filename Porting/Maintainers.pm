@@ -89,17 +89,7 @@ sub expand_glob {
 
 sub get_module_files {
     my $m = shift;
-    my %exclude;
-    my @files;
-    for (get_module_pat($m)) {
-	if (s/^!//) {
-	    $exclude{$_}=1 for expand_glob($_);
-	}
-	else {
-	    push @files, expand_glob($_);
-	}
-    }
-    return grep !$exclude{$_}, @files;
+    return map { expand_glob($_) } get_module_pat($m);
 }
 
 
