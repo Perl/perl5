@@ -348,6 +348,7 @@
 /Text/Wrap.pm
 /Thread
 /Tie/File.pm
+/Tie/Hash/NamedCapture.pm
 /Tie/Memoize.pm
 /Tie/RefHash.pm
 /Time/HiRes.pm
