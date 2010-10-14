@@ -1,15 +1,14 @@
 =encoding utf8
 
 =for comment
-This has been logged up to 7ec2c349a5d9e979773c2f7c684c26ebde61cf67,
+This has been logged up to 825563b9,
 except for:
 57ef47cc7bcd1b57927d5010f363ccaa10f1d990
 b2ea9a00b30eb5881b863d7239dd6a3721e73136
 ca556bcdca736b2f85c11650c70b2371169c0225
 e4487e9b537f1be1e95aba1c87790c2a411788a7
 68b590d93559da1f7a0d3956202180d507013365
-Everything noteworthy committed by a certain Father Chrysostomos already
-has an entry in this file.
+cb525dbe8838a8e289f2e8f893dd8df441c740c4
 
 =head1 NAME
 
@@ -172,6 +171,11 @@ platforms. It used to become "-0" on some, but "0" on others.
 
 If you still need to determine whether a zero is negative, use
 C<sprintf("%g", $zero) =~ /^-/> or the L<Data::Float> module on CPAN.
+
+=head2 Return value of C<delete $+{...}>
+
+Custom regular expression engines can now determine the return value of
+C<delete> on an entry of C<%+> or C<%->.
 
 =head1 Deprecations
 
