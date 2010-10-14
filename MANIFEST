@@ -3342,6 +3342,8 @@ ext/Socket/t/Socket.t		See if Socket works
 ext/Sys-Hostname/Hostname.pm	Sys::Hostname extension Perl module
 ext/Sys-Hostname/Hostname.xs	Sys::Hostname extension external subroutines
 ext/Sys-Hostname/t/Hostname.t	See if Sys::Hostname works
+ext/Tie-Hash-NamedCapture/NamedCapture.pm	Implements %- and %+ behaviour
+ext/Tie-Hash-NamedCapture/NamedCapture.xs	Implements %- and %+ behaviour
 ext/Tie-Memoize/lib/Tie/Memoize.pm	Base class for memoized tied hashes
 ext/Tie-Memoize/t/Tie-Memoize.t		Test for Tie::Memoize
 ext/Time-Local/lib/Time/Local.pm	Reverse translation of localtime, gmtime
@@ -3744,7 +3746,6 @@ lib/Tie/ExtraHash.t		Test for Tie::ExtraHash (in Tie/Hash.pm)
 lib/Tie/Handle.pm		Base class for tied handles
 lib/Tie/Handle/stdhandle_from_handle.t	Test for Tie::StdHandle/Handle backwards compat
 lib/Tie/Handle/stdhandle.t	Test for Tie::StdHandle
-lib/Tie/Hash/NamedCapture.pm	Implements %- and %+ behaviour
 lib/Tie/Hash.pm			Base class for tied hashes
 lib/Tie/Hash.t			See if Tie::Hash works
 lib/Tie/Scalar.pm		Base class for tied scalars

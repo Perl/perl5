@@ -1676,6 +1676,7 @@ use File::Glob qw(:case);
 				ext/SDBM_File/
 				ext/Socket/
 				ext/Sys-Hostname/
+				ext/Tie-Hash-NamedCapture/
 				ext/Tie-Memoize/
 				ext/XS-APItest/
 				ext/XS-Typemap/

@@ -1,10 +1,10 @@
+use strict;
 package Tie::Hash::NamedCapture;
 
-our $VERSION = "0.06";
+our $VERSION = "0.07";
 
-# The real meat implemented in XS in universal.c in the core, but this
-# method was left behind because gv.c expects a Purl-Perl method in
-# this package when it loads the tie magic for %+ and %-
+require XSLoader;
+XSLoader::load(__PACKAGE__);
 
 my ($one, $all) = Tie::Hash::NamedCapture::flags();
 

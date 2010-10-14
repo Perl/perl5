@@ -1366,20 +1366,6 @@ XS(XS_Tie_Hash_NamedCapture_SCALAR)
     S_named_capture_common(aTHX_ cv, FALSE, 1, FALSE, RXapif_SCALAR);
 }
 
-XS(XS_Tie_Hash_NamedCapture_flags)
-{
-    dVAR;
-    dXSARGS;
-
-    if (items != 0)
-	croak_xs_usage(cv, "");
-
-	mXPUSHu(RXapif_ONE);
-	mXPUSHu(RXapif_ALL);
-	PUTBACK;
-	return;
-}
-
 struct xsub_details {
     const char *name;
     XSUBADDR_t xsub;
@@ -1438,7 +1424,6 @@ struct xsub_details details[] = {
     {"Tie::Hash::NamedCapture::FIRSTKEY", XS_Tie_Hash_NamedCapture_FIRSTK, NULL},
     {"Tie::Hash::NamedCapture::NEXTKEY", XS_Tie_Hash_NamedCapture_NEXTK, NULL},
     {"Tie::Hash::NamedCapture::SCALAR", XS_Tie_Hash_NamedCapture_SCALAR, NULL},
-    {"Tie::Hash::NamedCapture::flags", XS_Tie_Hash_NamedCapture_flags, NULL}
 };
 
 void

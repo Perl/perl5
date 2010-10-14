@@ -1315,7 +1315,7 @@ _cleaner2:
 	-rmdir lib/Package lib/Params
 	-rmdir lib/Pod/Perldoc lib/Pod/Simple lib/Pod/Text
 	-rmdir lib/Sys lib/Scalar/Util lib/Scalar
-	-rmdir lib/Term/UI lib/Thread
+	-rmdir lib/Term/UI lib/Thread lib/Tie/Hash
 	-rmdir lib/Test/Builder/Tester lib/Test/Builder lib/Test
 	-rmdir lib/Unicode/Collate
 	-rmdir lib/XS/APItest lib/XS
