@@ -124,8 +124,9 @@ static const char ident_too_long[] = "Identifier too long";
 #  define NEXTVAL_NEXTTOKE PL_nextval[PL_nexttoke]
 #endif
 
-#define XFAKEBRACK 128
-#define XENUMMASK 127
+#define XENUMMASK  0x3f
+#define XFAKEEOF   0x40
+#define XFAKEBRACK 0x80
 
 #ifdef USE_UTF8_SCRIPTS
 #   define UTF (!IN_BYTES)
@@ -1947,10 +1948,17 @@ S_force_next(pTHX_ I32 type)
 void
 Perl_yyunlex(pTHX)
 {
-    if (PL_parser->yychar != YYEMPTY) {
-	start_force(-1);
-	NEXTVAL_NEXTTOKE = PL_parser->yylval;
-	force_next(PL_parser->yychar);
+    int yyc = PL_parser->yychar;
+    if (yyc != YYEMPTY) {
+	if (yyc) {
+	    start_force(-1);
+	    NEXTVAL_NEXTTOKE = PL_parser->yylval;
+	    if (yyc == '{'/*}*/ || yyc == HASHBRACK || yyc == '['/*]*/) {
+		PL_lex_brackets--;
+		yyc |= (1<<24) | (PL_lex_brackstack[PL_lex_brackets] << 16);
+	    }
+	    force_next(yyc);
+	}
 	PL_parser->yychar = YYEMPTY;
     }
 }
@@ -4272,12 +4280,26 @@ Perl_yylex(pTHX)
 	    PL_lex_defer = LEX_NORMAL;
 	}
 #endif
+	{
+	    I32 next_type;
 #ifdef PERL_MAD
-	/* FIXME - can these be merged?  */
-	return(PL_nexttoke[PL_lasttoke].next_type);
+	    next_type = PL_nexttoke[PL_lasttoke].next_type;
 #else
-	return REPORT(PL_nexttype[PL_nexttoke]);
+	    next_type = PL_nexttype[PL_nexttoke];
 #endif
+	    if (next_type & (1<<24)) {
+		if (PL_lex_brackets > 100)
+		    Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
+		PL_lex_brackstack[PL_lex_brackets++] = (next_type >> 16) & 0xff;
+		next_type &= 0xffff;
+	    }
+#ifdef PERL_MAD
+	    /* FIXME - can these be merged?  */
+	    return next_type;
+#else
+	    return REPORT(next_type);
+#endif
+	}
 
     /* interpolated case modifiers like \L \U, including \Q and \E.
        when we get here, PL_bufptr is at the \
@@ -4567,7 +4589,8 @@ Perl_yylex(pTHX)
 	if (!PL_rsfp) {
 	    PL_last_uni = 0;
 	    PL_last_lop = 0;
-	    if (PL_lex_brackets) {
+	    if (PL_lex_brackets &&
+		    PL_lex_brackstack[PL_lex_brackets-1] != XFAKEEOF) {
 		yyerror((const char *)
 			(PL_lex_formbrack
 			 ? "Format not terminated"
@@ -5156,7 +5179,9 @@ Perl_yylex(pTHX)
 	s++;
 	BOop(OP_BIT_XOR);
     case '[':
-	PL_lex_brackets++;
+	if (PL_lex_brackets > 100)
+	    Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
+	PL_lex_brackstack[PL_lex_brackets++] = 0;
 	{
 	    const char tmp = *s++;
 	    OPERATOR(tmp);
@@ -5356,6 +5381,8 @@ Perl_yylex(pTHX)
 	    TERM(tmp);
 	}
     case ']':
+	if (PL_lex_brackets && PL_lex_brackstack[PL_lex_brackets-1] == XFAKEEOF)
+	    TOKEN(0);
 	s++;
 	if (PL_lex_brackets <= 0)
 	    yyerror("Unmatched right square bracket");
@@ -5533,6 +5560,8 @@ Perl_yylex(pTHX)
 	    PL_copline = NOLINE;   /* invalidate current command line number */
 	TOKEN('{');
     case '}':
+	if (PL_lex_brackets && PL_lex_brackstack[PL_lex_brackets-1] == XFAKEEOF)
+	    TOKEN(0);
       rightbracket:
 	s++;
 	if (PL_lex_brackets <= 0)
@@ -13943,6 +13972,17 @@ Perl_keyword_plugin_standard(pTHX_
     return KEYWORD_PLUGIN_DECLINE;
 }
 
+#define parse_recdescent(g) S_parse_recdescent(aTHX_ g)
+static void S_parse_recdescent(pTHX_ int gramtype)
+{
+    SAVEI32(PL_lex_brackets);
+    if (PL_lex_brackets > 100)
+	Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
+    PL_lex_brackstack[PL_lex_brackets++] = XFAKEEOF;
+    if(yyparse(gramtype) && !PL_parser->error_count)
+	qerror(Perl_mess(aTHX_ "Parse error"));
+}
+
 /*
 =for apidoc Amx|OP *|parse_fullstmt|U32 flags
 
@@ -13979,8 +14019,7 @@ Perl_parse_fullstmt(pTHX_ U32 flags)
     ENTER;
     SAVEVPTR(PL_eval_root);
     PL_eval_root = NULL;
-    if(yyparse(GRAMFULLSTMT) && !PL_parser->error_count)
-	qerror(Perl_mess(aTHX_ "Parse error"));
+    parse_recdescent(GRAMFULLSTMT);
     fullstmtop = PL_eval_root;
     LEAVE;
     return fullstmtop;
@@ -14025,7 +14064,8 @@ Perl_parse_stmtseq(pTHX_ U32 flags)
     ENTER;
     SAVEVPTR(PL_eval_root);
     PL_eval_root = NULL;
-    if(yyparse(GRAMSTMTSEQ) && !PL_parser->error_count)
+    parse_recdescent(GRAMSTMTSEQ);
+    if (!((PL_bufptr == PL_bufend && !PL_rsfp) || *PL_bufptr == /*{*/'}'))
 	qerror(Perl_mess(aTHX_ "Parse error"));
     stmtseqop = PL_eval_root;
     LEAVE;

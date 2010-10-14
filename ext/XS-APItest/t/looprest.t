@@ -1,7 +1,7 @@
 use warnings;
 use strict;
 
-use Test::More tests => 10;
+use Test::More tests => 14;
 
 BEGIN { $^H |= 0x20000; }
 
@@ -83,5 +83,32 @@ eval q{
 };
 is $@, "";
 is $t, "aabbccdbca";
+
+$t = "";
+eval q{
+	use XS::APItest qw(looprest);
+	do {
+		{ $t .= "a"; }
+		looprest
+		{ $t .= "b"; }
+		last unless length($t) < 5;
+		{ $t .= "c"; }
+	};
+	$t .= "d";
+};
+is $@, "";
+is $t, "abcbcbd";
+
+$t = "";
+eval q{
+	use XS::APItest qw(looprest);
+	{ $t .= "a"; }
+	looprest
+	{ $t .= "b"; }
+	last unless length($t) < 5;
+	{ $t .= "c"; }
+};
+is $@, "";
+is $t, "abcbcb";
 
 1;

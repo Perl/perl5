@@ -518,6 +518,7 @@ test_op_linklist_describe(OP *start)
 
 static SV *hintkey_rpn_sv, *hintkey_calcrpn_sv, *hintkey_stufftest_sv;
 static SV *hintkey_swaptwostmts_sv, *hintkey_looprest_sv;
+static SV *hintkey_scopelessblock_sv;
 static int (*next_keyword_plugin)(pTHX_ char *, STRLEN, OP **);
 
 /* low-level parser helpers */
@@ -699,6 +700,21 @@ static OP *THX_parse_keyword_looprest(pTHX)
 			body, NULL, 1);
 }
 
+#define parse_keyword_scopelessblock() THX_parse_keyword_scopelessblock(aTHX)
+static OP *THX_parse_keyword_scopelessblock(pTHX)
+{
+    I32 c;
+    OP *body;
+    lex_read_space(0);
+    if(lex_peek_unichar(0) != '{'/*}*/) croak("syntax error");
+    lex_read_unichar(0);
+    body = parse_stmtseq(0);
+    c = lex_peek_unichar(0);
+    if(c != /*{*/'}' && c != /*[*/']' && c != /*(*/')') croak("syntax error");
+    lex_read_unichar(0);
+    return body;
+}
+
 /* plugin glue */
 
 #define keyword_active(hintkey_sv) THX_keyword_active(aTHX_ hintkey_sv)
@@ -734,6 +750,10 @@ static int my_keyword_plugin(pTHX_
     } else if(keyword_len == 8 && strnEQ(keyword_ptr, "looprest", 8) &&
 		    keyword_active(hintkey_looprest_sv)) {
 	*op_ptr = parse_keyword_looprest();
+	return KEYWORD_PLUGIN_STMT;
+    } else if(keyword_len == 14 && strnEQ(keyword_ptr, "scopelessblock", 14) &&
+		    keyword_active(hintkey_scopelessblock_sv)) {
+	*op_ptr = parse_keyword_scopelessblock();
 	return KEYWORD_PLUGIN_STMT;
     } else {
 	return next_keyword_plugin(aTHX_ keyword_ptr, keyword_len, op_ptr);
@@ -2142,6 +2162,7 @@ BOOT:
     hintkey_stufftest_sv = newSVpvs_share("XS::APItest/stufftest");
     hintkey_swaptwostmts_sv = newSVpvs_share("XS::APItest/swaptwostmts");
     hintkey_looprest_sv = newSVpvs_share("XS::APItest/looprest");
+    hintkey_scopelessblock_sv = newSVpvs_share("XS::APItest/scopelessblock");
     next_keyword_plugin = PL_keyword_plugin;
     PL_keyword_plugin = my_keyword_plugin;
 }

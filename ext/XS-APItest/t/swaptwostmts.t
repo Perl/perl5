@@ -1,7 +1,7 @@
 use warnings;
 use strict;
 
-use Test::More tests => 22;
+use Test::More tests => 26;
 
 BEGIN { $^H |= 0x20000; }
 
@@ -141,6 +141,32 @@ eval q{
 };
 is $@, "";
 is $t, "acbd";
+
+$t = "";
+eval q{
+	use XS::APItest qw(swaptwostmts);
+	no warnings "void";
+	{ $t .= "a"; }
+	swaptwostmts
+	if(1) { { $t .= "b"; } }
+	{};
+	{ $t .= "d"; }
+};
+is $@, "";
+is $t, "abd";
+
+$t = "";
+eval q{
+	use XS::APItest qw(swaptwostmts);
+	no warnings "void";
+	{ $t .= "a"; }
+	swaptwostmts
+	if(1) { { $t .= "b"; } }
+	[];
+	{ $t .= "d"; }
+};
+is $@, "";
+is $t, "abd";
 
 $t = "";
 eval q{
