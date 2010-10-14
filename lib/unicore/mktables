@@ -3442,14 +3442,14 @@ sub trace { return main::trace(@_); }
         # $i still points to the first potential affected range.  Now find the
         # highest range affected, which will determine the length parameter to
         # splice.  (The input range can span multiple existing ones.)  While
-        # we are looking through the range list, see also if this is an
-        # insertion that will change the values of at least one of the
-        # affected ranges.  We don't need to do this check unless this is an
-        # insertion of non-multiples, and also since this is a boolean, we
-        # don't need to do it if have already determined that it will make a
-        # change; just unconditionally change them.  $cdm is created to be 1
-        # if either of these is true. (The 'c' in the name comes from below)
-        my $cdm = ($operation eq '-' || $replace == $MULTIPLE);
+        # we are looking through the range list, see also if this is a "clean
+        # insertion" that doesn't change the values in any existing range.  It
+        # isn't a clean insertion if it is a deletion, and we know it is a
+        # clean insertion if we are adding duplicates (because by definition
+        # they don't affect existing ranges), so we don't need to do the check
+        # for either of those cases.  But otherwise, start off assuming it is
+        # a clean insertion until proven otherwise.
+        my $clean_insert = ($operation eq '+' && $replace != $MULTIPLE);
         my $j;        # This will point to the highest affected range
 
         # For non-zero types, the standard form is the value itself;
@@ -3462,12 +3462,12 @@ sub trace { return main::trace(@_); }
             # searching
             last if $end < $r->[$j]->start;
 
-            # Here, overlaps the range at $j.  If the value's don't match,
-            # and this is supposedly an insertion, it becomes a change
-            # instead.  This is what the 'c' stands for in $cdm.
-            if (! $cdm) {
+            # Here, overlaps the range at $j.  If the values don't match,
+            # and so far we think this is a clean insertion, it becomes a
+            # non-clean insertion, i.e., a 'change' or 'replace' instead.
+            if ($clean_insert) {
                 if ($r->[$j]->standard_form ne $standard_form) {
-                    $cdm = 1;
+                    $clean_insert = 0;
                 }
                 else {
 
@@ -3481,7 +3481,7 @@ sub trace { return main::trace(@_); }
                         # same, but the non-standardized values aren't.  If
                         # replacing unconditionally, then replace
                         if( $replace == $UNCONDITIONALLY) {
-                            $cdm = 1;
+                            $clean_insert = 0;
                         }
                         else {
 
@@ -3495,13 +3495,13 @@ sub trace { return main::trace(@_); }
                                             && $pre_existing =~ /[a-z]/;
 
                             if ($old_mixed != $new_mixed) {
-                                $cdm = 1 if $new_mixed;
+                                $clean_insert = 0 if $new_mixed;
                                 if (main::DEBUG && $to_trace) {
-                                    if ($cdm) {
-                                        trace "Replacing $pre_existing with $value";
+                                    if ($clean_insert) {
+                                        trace "Retaining $pre_existing over $value";
                                     }
                                     else {
-                                        trace "Retaining $pre_existing over $value";
+                                        trace "Replacing $pre_existing with $value";
                                     }
                                 }
                             }
@@ -3515,13 +3515,13 @@ sub trace { return main::trace(@_); }
                                 my $old_punct = $pre_existing =~ /[-_]/;
 
                                 if ($old_punct != $new_punct) {
-                                    $cdm = 1 if $new_punct;
+                                    $clean_insert = 0 if $new_punct;
                                     if (main::DEBUG && $to_trace) {
-                                        if ($cdm) {
-                                            trace "Replacing $pre_existing with $value";
+                                        if ($clean_insert) {
+                                            trace "Retaining $pre_existing over $value";
                                         }
                                         else {
-                                            trace "Retaining $pre_existing over $value";
+                                            trace "Replacing $pre_existing with $value";
                                         }
                                     }
                                 }   # else existing one is just as "good";
@@ -3607,8 +3607,9 @@ sub trace { return main::trace(@_); }
         }
         else {
 
-            # Here the entire input range is not in the gap before $i.  There
-            # is an affected one, and $j points to the highest such one.
+            # Here part of the input range is not in the gap before $i.  Thus,
+            # there is at least one affected one, and $j points to the highest
+            # such one.
 
             # At this point, here is the situation:
             # This is not an insertion of a multiple, nor of tentative ($NO)
@@ -3624,21 +3625,21 @@ sub trace { return main::trace(@_); }
             #   r[$i-1]->end < $start <= $end <= r[$j]->end
             #
             # Also:
-            #   $cdm is a boolean which is set true if and only if this is a
-            #        change or deletion (multiple was handled above).  In
-            #        other words, it could be renamed to be just $cd.
+            #   $clean_insert is a boolean which is set true if and only if
+            #        this is a "clean insertion", i.e., not a change nor a
+            #        deletion (multiple was handled above).
 
             # We now have enough information to decide if this call is a no-op
-            # or not.  It is a no-op if it is a deletion of a non-existent
-            # range, or an insertion of already existing data.
+            # or not.  It is a no-op if this is an insertion of already
+            # existing data.
 
-            if (main::DEBUG && $to_trace && ! $cdm
+            if (main::DEBUG && $to_trace && $clean_insert
                                          && $i == $j
                                          && $start >= $r->[$i]->start)
             {
                     trace "no-op";
             }
-            return if ! $cdm      # change or delete => not no-op
+            return if $clean_insert
                       && $i == $j # more than one affected range => not no-op
 
                       # Here, r[$i-1]->end < $start <= $end <= r[$i]->end
@@ -3700,7 +3701,7 @@ sub trace { return main::trace(@_); }
                 # Here the new element adds to the one below, but not to the
                 # one above.  If inserting, and only to that one range,  can
                 # just change its ending to include the new one.
-                if ($length == 0 && ! $cdm) {
+                if ($length == 0 && $clean_insert) {
                     $r->[$i-1]->set_end($end);
                     trace "inserted range extends range to below so it is now $r->[$i-1]" if main::DEBUG && $to_trace;
                     return;
@@ -3716,7 +3717,7 @@ sub trace { return main::trace(@_); }
 
                 # Here the new element adds to the one above, but not below.
                 # Mirror the code above
-                if ($length == 0 && ! $cdm) {
+                if ($length == 0 && $clean_insert) {
                     $r->[$j+1]->set_start($start);
                     trace "inserted range extends range to above so it is now $r->[$j+1]" if main::DEBUG && $to_trace;
                     return;
