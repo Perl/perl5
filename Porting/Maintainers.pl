@@ -1652,8 +1652,6 @@ use File::Glob qw(:case);
 				ext/Devel-Peek/
 				ext/Devel-SelfStubber/
 				ext/DynaLoader/
-				    !ext/DynaLoader/t/XSLoader.t
-				    !ext/DynaLoader/XSLoader_pm.PL
 				ext/Errno
 				ext/Fcntl/
 				ext/File-Glob/
