@@ -79,8 +79,7 @@ sub import {
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
-    # XS function.  If a constant is not found then control is passed
-    # to the AUTOLOAD in AutoLoader.
+    # XS function.
 
     my $constname;
     ($constname = $AUTOLOAD) =~ s/.*:://;
@@ -94,8 +93,6 @@ sub AUTOLOAD {
 }
 
 XSLoader::load();
-
-# Preloaded methods go here.
 
 sub GLOB_ERROR {
     return (constant('GLOB_ERROR'))[1];
@@ -113,8 +110,6 @@ $DEFAULT_FLAGS = GLOB_CSH();
 if ($^O =~ /^(?:MSWin32|VMS|os2|dos|riscos)$/) {
     $DEFAULT_FLAGS |= GLOB_NOCASE();
 }
-
-# Autoload methods go after =cut, and are processed by the autosplit program.
 
 sub bsd_glob {
     my ($pat,$flags) = @_;
