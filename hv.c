@@ -879,17 +879,18 @@ Perl_hv_scalar(pTHX_ HV *hv)
 /*
 =for apidoc hv_delete
 
-Deletes a key/value pair in the hash.  The value SV is removed from the
-hash and returned to the caller.  The C<klen> is the length of the key.
-The C<flags> value will normally be zero; if set to G_DISCARD then NULL
-will be returned.
+Deletes a key/value pair in the hash.  The value's SV is removed from the
+hash, made mortal, and returned to the caller.  The C<klen> is the length of
+the key.  The C<flags> value will normally be zero; if set to G_DISCARD then
+NULL will be returned.  NULL will also be returned if the key is not found.
 
 =for apidoc hv_delete_ent
 
-Deletes a key/value pair in the hash.  The value SV is removed from the
-hash and returned to the caller.  The C<flags> value will normally be zero;
-if set to G_DISCARD then NULL will be returned.  C<hash> can be a valid
-precomputed hash value, or 0 to ask for it to be computed.
+Deletes a key/value pair in the hash.  The value SV is removed from the hash,
+made mortal, and returned to the caller.  The C<flags> value will normally be
+zero; if set to G_DISCARD then NULL will be returned.  NULL will also be
+returned if the key is not found.  C<hash> can be a valid precomputed hash
+value, or 0 to ask for it to be computed.
 
 =cut
 */
