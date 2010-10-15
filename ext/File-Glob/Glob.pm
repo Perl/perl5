@@ -74,14 +74,6 @@ sub AUTOLOAD {
 
 XSLoader::load();
 
-sub GLOB_CSH () {
-    GLOB_BRACE()
-	| GLOB_NOMAGIC()
-	| GLOB_QUOTE()
-	| GLOB_TILDE()
-	| GLOB_ALPHASORT()
-}
-
 $DEFAULT_FLAGS = GLOB_CSH();
 if ($^O =~ /^(?:MSWin32|VMS|os2|dos|riscos)$/) {
     $DEFAULT_FLAGS |= GLOB_NOCASE();
