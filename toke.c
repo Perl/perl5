@@ -13973,7 +13973,8 @@ Perl_keyword_plugin_standard(pTHX_
 }
 
 #define parse_recdescent(g) S_parse_recdescent(aTHX_ g)
-static void S_parse_recdescent(pTHX_ int gramtype)
+static void
+S_parse_recdescent(pTHX_ int gramtype)
 {
     SAVEI32(PL_lex_brackets);
     if (PL_lex_brackets > 100)
@@ -13981,6 +13982,56 @@ static void S_parse_recdescent(pTHX_ int gramtype)
     PL_lex_brackstack[PL_lex_brackets++] = XFAKEEOF;
     if(yyparse(gramtype) && !PL_parser->error_count)
 	qerror(Perl_mess(aTHX_ "Parse error"));
+}
+
+#define parse_recdescent_for_op(g) S_parse_recdescent_for_op(aTHX_ g)
+static OP *
+S_parse_recdescent_for_op(pTHX_ int gramtype)
+{
+    OP *o;
+    ENTER;
+    SAVEVPTR(PL_eval_root);
+    PL_eval_root = NULL;
+    parse_recdescent(gramtype);
+    o = PL_eval_root;
+    LEAVE;
+    return o;
+}
+
+/*
+=for apidoc Amx|OP *|parse_block|U32 flags
+
+Parse a single complete Perl code block.  This consists of an opening
+brace, a sequence of statements, and a closing brace.  The block
+constitutes a lexical scope, so C<my> variables and various compile-time
+effects can be contained within it.  It is up to the caller to ensure
+that the dynamic parser state (L</PL_parser> et al) is correctly set to
+reflect the source of the code to be parsed and the lexical context for
+the statement.
+
+The op tree representing the code block is returned.  This is always a
+real op, never a null pointer.  It will normally be a C<lineseq> list,
+including C<nextstate> or equivalent ops.  No ops to construct any kind
+of runtime scope are included by virtue of it being a block.
+
+If an error occurs in parsing or compilation, in most cases a valid op
+tree (most likely null) is returned anyway.  The error is reflected in
+the parser state, normally resulting in a single exception at the top
+level of parsing which covers all the compilation errors that occurred.
+Some compilation errors, however, will throw an exception immediately.
+
+The I<flags> parameter is reserved for future use, and must always
+be zero.
+
+=cut
+*/
+
+OP *
+Perl_parse_block(pTHX_ U32 flags)
+{
+    if (flags)
+	Perl_croak(aTHX_ "Parsing code internal error (%s)", "parse_block");
+    return parse_recdescent_for_op(GRAMBLOCK);
 }
 
 /*
@@ -14013,16 +14064,9 @@ be zero.
 OP *
 Perl_parse_fullstmt(pTHX_ U32 flags)
 {
-    OP *fullstmtop;
     if (flags)
 	Perl_croak(aTHX_ "Parsing code internal error (%s)", "parse_fullstmt");
-    ENTER;
-    SAVEVPTR(PL_eval_root);
-    PL_eval_root = NULL;
-    parse_recdescent(GRAMFULLSTMT);
-    fullstmtop = PL_eval_root;
-    LEAVE;
-    return fullstmtop;
+    return parse_recdescent_for_op(GRAMFULLSTMT);
 }
 
 /*
@@ -14059,16 +14103,13 @@ OP *
 Perl_parse_stmtseq(pTHX_ U32 flags)
 {
     OP *stmtseqop;
+    I32 c;
     if (flags)
 	Perl_croak(aTHX_ "Parsing code internal error (%s)", "parse_fullstmt");
-    ENTER;
-    SAVEVPTR(PL_eval_root);
-    PL_eval_root = NULL;
-    parse_recdescent(GRAMSTMTSEQ);
-    if (!((PL_bufptr == PL_bufend && !PL_rsfp) || *PL_bufptr == /*{*/'}'))
+    stmtseqop = parse_recdescent_for_op(GRAMSTMTSEQ);
+    c = lex_peek_unichar(0);
+    if (c != -1 && c != /*{*/'}')
 	qerror(Perl_mess(aTHX_ "Parse error"));
-    stmtseqop = PL_eval_root;
-    LEAVE;
     return stmtseqop;
 }
 

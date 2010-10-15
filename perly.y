@@ -69,7 +69,7 @@
 #endif
 }
 
-%token <ival> GRAMPROG GRAMFULLSTMT GRAMSTMTSEQ
+%token <ival> GRAMPROG GRAMBLOCK GRAMFULLSTMT GRAMSTMTSEQ
 
 %token <i_tkval> '{' '}' '[' ']' '-' '+' '$' '@' '%' '*' '&' ';'
 
@@ -143,6 +143,17 @@
 /* Top-level choice of what kind of thing yyparse was called to parse */
 grammar	:	GRAMPROG prog
 			{ $$ = $2; }
+	|	GRAMBLOCK
+			{
+			  parser->expect = XBLOCK;
+			}
+		block
+			{
+			  PL_eval_root = $3;
+			  $$ = 0;
+			  yyunlex();
+			  parser->yychar = YYEOF;
+			}
 	|	GRAMFULLSTMT
 			{
 			  parser->expect = XSTATE;
