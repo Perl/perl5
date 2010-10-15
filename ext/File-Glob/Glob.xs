@@ -27,6 +27,15 @@ errfunc(const char *foo, int bar) {
 
 MODULE = File::Glob		PACKAGE = File::Glob
 
+int
+GLOB_ERROR()
+    PREINIT:
+	dMY_CXT;
+    CODE:
+	RETVAL = GLOB_ERROR;
+    OUTPUT:
+	RETVAL
+
 BOOT:
 {
     MY_CXT_INIT;

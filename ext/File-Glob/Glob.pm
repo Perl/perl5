@@ -94,10 +94,6 @@ sub AUTOLOAD {
 
 XSLoader::load();
 
-sub GLOB_ERROR {
-    return (constant('GLOB_ERROR'))[1];
-}
-
 sub GLOB_CSH () {
     GLOB_BRACE()
 	| GLOB_NOMAGIC()
