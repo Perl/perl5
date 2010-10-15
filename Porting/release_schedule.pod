@@ -77,20 +77,20 @@ The following porters have all consented to do at least
 one release of bleadperl.  If you can't do a release
 and can't find a substitute amongst this list, mail p5p.
 
-Jesse Vincent <F<jesse@cpan.org>>
-Leon Brocard <F<acme@astray.com>>
-Yves Orton <F<demerphq@gmail.com>>
-Ricardo Signes <F<rjbs@cpan.org>>
-Steve Hay <F<steve.m.hay@googlemail.com>>
-Ask Bjørn Hansen <F<ask@perl.org>>
-David Golden <F<dagolden@cpan.org>>
-Philippe Bruhat <F<book@cpan.org>>
-Matt Trout <F<mst@shadowcat.co.uk>>
-Florian Ragwitz <F<rafl@debian.org>>
-Tatsuhiko Miyagawa <F<miyagawa@bulknews.net>>
-Chris Williams <F<bingos@cpan.org>>
-Zefram <F<zefram@fysh.org>>
-Ævar Arnfjörð Bjarmason <F<avar@cpan.org>>
+Jesse Vincent <jesse@cpan.org>
+Leon Brocard <acme@astray.com>
+Yves Orton <demerphq@gmail.com>
+Ricardo Signes <rjbs@cpan.org>
+Steve Hay <steve.m.hay@googlemail.com>
+Ask Bjørn Hansen <ask@perl.org>
+David Golden <dagolden@cpan.org>
+Philippe Bruhat <book@cpan.org>
+Matt Trout <mst@shadowcat.co.uk>
+Florian Ragwitz <rafl@debian.org>
+Tatsuhiko Miyagawa <miyagawa@bulknews.net>
+Chris Williams <bingos@cpan.org>
+Zefram <zefram@fysh.org>
+Ævar Arnfjörð Bjarmason <avar@cpan.org>
 
 
 =head2 Reticent victims
@@ -102,6 +102,6 @@ prefer that others have the opportunity before they pitch in:
 
 =head1 AUTHOR
 
-Jesse Vincent <F<jesse@cpan.org>>
+Jesse Vincent <jesse@cpan.org>
 
 =cut
