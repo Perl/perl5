@@ -55,6 +55,14 @@
 #define DllExport __declspec(dllimport)
 #endif
 
+#ifndef PERL_CORE
+#  ifdef __cplusplus
+#    define PERL_CALLCONV extern "C" __declspec(dllimport)
+#  else
+#    define PERL_CALLCONV __declspec(dllimport)
+#  endif
+#endif
+
 #define  WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
