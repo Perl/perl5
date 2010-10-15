@@ -11,28 +11,6 @@ require XSLoader;
 # NOTE: The glob() export is only here for compatibility with 5.6.0.
 # csh_glob() should not be used directly, unless you know what you're doing.
 
-@EXPORT_OK   = qw(
-    csh_glob
-    bsd_glob
-    glob
-    GLOB_ABEND
-    GLOB_ALPHASORT
-    GLOB_ALTDIRFUNC
-    GLOB_BRACE
-    GLOB_CSH
-    GLOB_ERR
-    GLOB_ERROR
-    GLOB_LIMIT
-    GLOB_MARK
-    GLOB_NOCASE
-    GLOB_NOCHECK
-    GLOB_NOMAGIC
-    GLOB_NOSORT
-    GLOB_NOSPACE
-    GLOB_QUOTE
-    GLOB_TILDE
-);
-
 %EXPORT_TAGS = (
     'glob' => [ qw(
         GLOB_ABEND
@@ -55,6 +33,8 @@ require XSLoader;
         bsd_glob
     ) ],
 );
+
+@EXPORT_OK   = (@{$EXPORT_TAGS{'glob'}}, 'csh_glob');
 
 $VERSION = '1.09';
 
