@@ -70,8 +70,8 @@ print "Input \$cc_cmd: \\$cc_cmd\\\n" if $debug;
 my $docc = ($cc_cmd !~ /^~~/);
 print "\$docc = $docc\n" if $debug;
 
-my ( $use_threads, $use_mymalloc, $care_about_case, $debugging_enabled, 
-     $hide_mymalloc, $isgcc, $use_perlio, $dir )
+my ( $use_threads, $use_mymalloc, $care_about_case, $shorten_symbols,
+     $debugging_enabled, $hide_mymalloc, $isgcc, $use_perlio, $dir )
    = ( 0, 0, 0, 0, 0, 0, 0, 0 );
 
 if ($docc) {
@@ -86,6 +86,7 @@ if ($docc) {
     $use_threads++ if /usethreads='(define|yes|true|t|y|1)'/i;
     $use_mymalloc++ if /usemymalloc='(define|yes|true|t|y|1)'/i;
     $care_about_case++ if /d_vms_case_sensitive_symbols='(define|yes|true|t|y|1)'/i;
+    $shorten_symbols++ if /d_vms_shorten_long_symbols='(define|yes|true|t|y|1)'/i;
     $debugging_enabled++ if /usedebugging_perl='(define|yes|true|t|y|1)'/i;
     $hide_mymalloc++ if /embedmymalloc='(define|yes|true|t|y|1)'/i;
     $isgcc++ if /gccversion='[^']/;
@@ -261,6 +262,25 @@ foreach (split /\s+/, $extnames) {
   $pkgname =~ s/::/__/g;
   $fcns{"boot_$pkgname"}++;
   print "Adding boot_$pkgname to \%fcns (for extension $_)\n" if $debug;
+}
+
+# For symbols over 31 characters, export the shortened name.
+# TODO: Make this general purpose so we can predict the shortened name the
+# compiler will generate for any symbol over 31 characters in length.  The
+# docs to CC/NAMES=SHORTENED describe the CRC used to shorten the name, but
+# don't describe its use fully enough to actually mimic what the compiler
+# does.
+
+if ($shorten_symbols) {
+  if (exists $fcns{'Perl_ck_entersub_args_proto_or_list'}) {
+    delete $fcns{'Perl_ck_entersub_args_proto_or_list'};
+    if ($care_about_case) {
+      $fcns{'Perl_ck_entersub_args_p11c2bjj$'}++;
+    }
+    else {
+      $fcns{'PERL_CK_ENTERSUB_ARGS_P3IAT616$'}++;
+    }
+  }
 }
 
 # Eventually, we'll check against existing copies here, so we can add new
