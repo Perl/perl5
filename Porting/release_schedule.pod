@@ -61,6 +61,11 @@ you should reset the version numbers to the next blead series.
  October 20      -   Tatsuhiko Miyagawa
  November 20     -   Chris Williams
  December 20     -   Zefram
+ January 20      -   Jesse
+ February 20     -
+ March 20        -
+ April 20        -   Jesse (5.14.0-RC0)
+ May 20          -
 
 =head1 VICTIMS
 
