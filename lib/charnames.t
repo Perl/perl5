@@ -960,6 +960,14 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
         # just read) return the same code point.
         test_vianame($i, $hex, $name);
         test_vianame($i, $hex, $names[$i]);
+
+        # Set up so that a test below of this code point will use the alias
+        # instead of the less-correct original.  We can't test here that
+        # viacode is correct, because the alias file may contain multiple
+        # aliases for the same code point, and viacode should return only the
+        # final one.  So don't do it here; instead rely on the loop below to
+        # pick up the test.
+        $names[$i] = $name;
     }
     close $fh;
 

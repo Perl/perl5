@@ -3204,7 +3204,9 @@ sub trace { return main::trace(@_); }
         #                         existing one, but has a different value,
         #                         don't replace the existing one, but insert
         #                         this, one so that the same range can occur
-        #                         multiple times.
+        #                         multiple times.  They are stored LIFO, so
+        #                         that the final one inserted is the first one
+        #                         returned in an ordered search of the table.
         #       => anything else  is the same as => $IF_NOT_EQUIVALENT
         #
         # "same value" means identical for non-type-0 ranges, and it means
@@ -3433,23 +3435,60 @@ sub trace { return main::trace(@_); }
             return;
         }
 
-        # Here, we have taken care of the case where $replace is $NO, which
-        # means that whatever action we now take is done unconditionally.  It
-        # still could be that this call will result in a no-op, if duplicates
-        # aren't allowed, and we are inserting a range that merely duplicates
-        # data already in the range list; or also if deleting a non-existent
-        # range.
-        # $i still points to the first potential affected range.  Now find the
-        # highest range affected, which will determine the length parameter to
-        # splice.  (The input range can span multiple existing ones.)  While
-        # we are looking through the range list, see also if this is a "clean
-        # insertion" that doesn't change the values in any existing range.  It
-        # isn't a clean insertion if it is a deletion, and we know it is a
-        # clean insertion if we are adding duplicates (because by definition
-        # they don't affect existing ranges), so we don't need to do the check
-        # for either of those cases.  But otherwise, start off assuming it is
-        # a clean insertion until proven otherwise.
-        my $clean_insert = ($operation eq '+' && $replace != $MULTIPLE);
+        # Here, we have taken care of the case where $replace is $NO.
+        # Remember that here, r[$i-1]->end < $start <= r[$i]->end
+        # If inserting a multiple record, this is where it goes, before the
+        # first (if any) existing one.  This implies an insertion, and no
+        # change to any existing ranges.  Note that $i can be -1 if this new
+        # range doesn't actually duplicate any existing, and comes at the
+        # beginning of the list.
+        if ($replace == $MULTIPLE) {
+
+            if ($start != $end) {
+                Carp::my_carp_bug("$owner_name_of{$addr}Can't cope with adding a multiple record when the range ($start..$end) contains more than one code point.  No action taken.");
+                return;
+            }
+
+            # Don't add an exact duplicate, as it isn't really a multiple
+            if ($end >= $r->[$i]->start) {
+                if ($r->[$i]->start != $r->[$i]->end) {
+                    Carp::my_carp_bug("$owner_name_of{$addr}Can't cope with adding a multiple record when the other range ($r->[$i]) contains more than one code point.  No action taken.");
+                    return;
+                }
+                return if $value eq $r->[$i]->value && $type eq $r->[$i]->type;
+            }
+
+            trace "Adding multiple record at $i with $start..$end, $value" if main::DEBUG && $to_trace;
+            my @return = splice @$r,
+                                $i,
+                                0,
+                                Range->new($start,
+                                           $end,
+                                           Value => $value,
+                                           Type => $type);
+            if (main::DEBUG && $to_trace) {
+                trace "After splice:";
+                trace 'i-2=[', $i-2, ']', $r->[$i-2] if $i >= 2;
+                trace 'i-1=[', $i-1, ']', $r->[$i-1] if $i >= 1;
+                trace "i  =[", $i, "]", $r->[$i] if $i >= 0;
+                trace 'i+1=[', $i+1, ']', $r->[$i+1] if $i < @$r - 1;
+                trace 'i+2=[', $i+2, ']', $r->[$i+2] if $i < @$r - 2;
+                trace 'i+3=[', $i+3, ']', $r->[$i+3] if $i < @$r - 3;
+            }
+            return @return;
+        }
+
+        # Here, we have taken care of $NO and $MULTIPLE replaces.  This leaves
+        # delete, insert, and replace either unconditionally or if not
+        # equivalent.  $i still points to the first potential affected range.
+        # Now find the highest range affected, which will determine the length
+        # parameter to splice.  (The input range can span multiple existing
+        # ones.)  If this isn't a deletion, while we are looking through the
+        # range list, see also if this is a replacement rather than a clean
+        # insertion; that is if it will change the values of at least one
+        # existing range.  Start off assuming it is an insert, until find it
+        # isn't.
+        my $clean_insert = $operation eq '+';
         my $j;        # This will point to the highest affected range
 
         # For non-zero types, the standard form is the value itself;
@@ -3543,44 +3582,6 @@ sub trace { return main::trace(@_); }
 
         $j--;        # $j now points to the highest affected range.
         trace "Final affected range is $j: $r->[$j]" if main::DEBUG && $to_trace;
-
-        # If inserting a multiple record, this is where it goes, after all the
-        # existing ones for this range.  This implies an insertion, and no
-        # change to any existing ranges.  Note that $j can be -1 if this new
-        # range doesn't actually duplicate any existing, and comes at the
-        # beginning of the list, in which case we can handle it like any other
-        # insertion, and is easier to do so.
-        if ($replace == $MULTIPLE && $j >= 0) {
-
-            # This restriction could be remedied with a little extra work, but
-            # it won't hopefully ever be necessary
-            if ($r->[$j]->start != $r->[$j]->end) {
-                Carp::my_carp_bug("$owner_name_of{$addr}Can't cope with adding a multiple when the other range ($r->[$j]) contains more than one code point.  No action taken.");
-                return;
-            }
-
-            # Don't add an exact duplicate, as it isn't really a multiple
-            return if $value eq $r->[$j]->value && $type eq $r->[$j]->type;
-
-            trace "Adding multiple record at $j+1 with $start..$end, $value" if main::DEBUG && $to_trace;
-            my @return = splice @$r,
-                                $j+1,
-                                0,
-                                Range->new($start,
-                                           $end,
-                                           Value => $value,
-                                           Type => $type);
-            if (main::DEBUG && $to_trace) {
-                trace "After splice:";
-                trace 'j-2=[', $j-2, ']', $r->[$j-2] if $j >= 2;
-                trace 'j-1=[', $j-1, ']', $r->[$j-1] if $j >= 1;
-                trace "j  =[", $j, "]", $r->[$j] if $j >= 0;
-                trace 'j+1=[', $j+1, ']', $r->[$j+1] if $j < @$r - 1;
-                trace 'j+2=[', $j+2, ']', $r->[$j+2] if $j < @$r - 2;
-                trace 'j+3=[', $j+3, ']', $r->[$j+3] if $j < @$r - 3;
-            }
-            return @return;
-        }
 
         # Here, have taken care of $NO and $MULTIPLE replaces.
         # $j points to the highest affected range.  But it can be < $i or even
@@ -11564,7 +11565,7 @@ sub compile_perl() {
         $alias_sentence = <<END;
 The Name_Alias property adds duplicate code point entries with a corrected
 name.  The original (less correct, but still valid) name will be physically
-first.
+last.
 END
     }
     my $comment;
