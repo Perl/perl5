@@ -5,9 +5,8 @@ use strict;
 use Carp;
 
 require Exporter;
-require AutoLoader;
 
-our @ISA     = qw/ Exporter AutoLoader /;
+our @ISA     = qw/ Exporter /;
 our @EXPORT  = qw/ hostname /;
 
 our $VERSION;
