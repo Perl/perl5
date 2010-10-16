@@ -95,7 +95,7 @@
 %type <ival> mydefsv mintro
 
 %type <opval> fullstmt decl format subrout mysubrout package use peg
-%type <opval> block package_block mblock lineseq line loop cond else
+%type <opval> block package_block mblock stmtseq loop cond else
 %type <opval> expr term subscripted scalar ary hsh arylen star amper sideff
 %type <opval> argexpr nexpr texpr iexpr mexpr mnexpr miexpr
 %type <opval> listexpr listexprcom indirob listop method
@@ -149,6 +149,7 @@ grammar	:	GRAMPROG prog
 			}
 		block
 			{
+			  PL_pad_reset_pending = TRUE;
 			  PL_eval_root = $3;
 			  $$ = 0;
 			  yyunlex();
@@ -160,6 +161,7 @@ grammar	:	GRAMPROG prog
 			}
 		fullstmt
 			{
+			  PL_pad_reset_pending = TRUE;
 			  PL_eval_root = $3;
 			  $$ = 0;
 			  yyunlex();
@@ -169,7 +171,7 @@ grammar	:	GRAMPROG prog
 			{
 			  parser->expect = XSTATE;
 			}
-		lineseq
+		stmtseq
 			{
 			  PL_eval_root = $3;
 			  $$ = 0;
@@ -178,12 +180,12 @@ grammar	:	GRAMPROG prog
 
 /* The whole program */
 prog	:	progstart
-	/*CONTINUED*/	lineseq
+	/*CONTINUED*/	stmtseq
 			{ $$ = $1; newPROG(block_end($1,$2)); }
 	;
 
 /* An ordinary block */
-block	:	'{' remember lineseq '}'
+block	:	'{' remember stmtseq '}'
 			{ if (PL_parser->copline > (line_t)IVAL($1))
 			      PL_parser->copline = (line_t)IVAL($1);
 			  $$ = block_end($2, $3);
@@ -207,7 +209,7 @@ progstart:
 	;
 
 
-mblock	:	'{' mremember lineseq '}'
+mblock	:	'{' mremember stmtseq '}'
 			{ if (PL_parser->copline > (line_t)IVAL($1))
 			      PL_parser->copline = (line_t)IVAL($1);
 			  $$ = block_end($2, $3);
@@ -221,13 +223,9 @@ mremember:	/* NULL */	/* start a partial lexical scope */
 	;
 
 /* A collection of "lines" in the program */
-lineseq	:	/* NULL */
+stmtseq	:	/* NULL */
 			{ $$ = (OP*)NULL; }
-	|	lineseq decl
-			{
-			  $$ = IF_MAD(op_append_list(OP_LINESEQ, $1, $2), $1);
-			}
-	|	lineseq line
+	|	stmtseq fullstmt
 			{   $$ = op_append_list(OP_LINESEQ, $1, $2);
 			    PL_pad_reset_pending = TRUE;
 			    if ($1 && $2)
@@ -235,18 +233,8 @@ lineseq	:	/* NULL */
 			}
 	;
 
-/* A statement, or "line", in the program */
-fullstmt:	decl
-			{ $$ = $1; }
-	|	line
-			{
-			  PL_pad_reset_pending = TRUE;
-			  $$ = $1;
-			}
-	;
-
-/* A non-declaration statement */
-line	:	label cond
+/* A statement in the program */
+fullstmt:	label cond
 			{ $$ = newSTATEOP(0, PVAL($1), $2);
 			  TOKEN_GETMAD($1,((LISTOP*)$$)->op_first,'L'); }
 	|	loop	/* loops add their own labels */
@@ -287,13 +275,21 @@ line	:	label cond
 			      }
 			  })
 			}
-	|	package_block
-			{ $$ = newSTATEOP(0, NULL,
+	|	label package_block
+			{ $$ = newSTATEOP(0, PVAL($1),
 				 newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
-					    NOLINE, (OP*)NULL, $1,
+					    NOLINE, (OP*)NULL, $2,
 					    (OP*)NULL, 0)); }
 	|	label PLUGSTMT
 			{ $$ = newSTATEOP(0, PVAL($1), $2); }
+	|	label decl
+			{
+			  if (PVAL($1)) {
+			      $$ = newSTATEOP(0, PVAL($1), $2);
+			  } else {
+			      $$ = IF_MAD($2 ? $2 : newOP(OP_NULL, 0), $2);
+			  }
+			}
 	;
 
 /* An expression which may have a side-effect */
@@ -438,7 +434,7 @@ loop	:	label WHILE lpar_or_qw remember texpr ')' mintro mblock cont
 			}
 	|	label FOR lpar_or_qw remember mnexpr ';' texpr ';' mintro mnexpr ')'
 	    	    mblock
-			/* basically fake up an initialize-while lineseq */
+			/* basically fake up an initialize-while stmtseq */
 			{ OP *forop;
 			  PL_parser->copline = (line_t)IVAL($2);
 			  forop = newSTATEOP(0, PVAL($1),
@@ -722,7 +718,7 @@ package_block:	PACKAGE WORD WORD '{' remember
 			      $2->op_latefree = save_2_latefree;
 			  }
 			}
-		    lineseq '}'
+		    stmtseq '}'
 			{ if (PL_parser->copline > (line_t)IVAL($4))
 			      PL_parser->copline = (line_t)IVAL($4);
 			  $$ = block_end($5, $7);

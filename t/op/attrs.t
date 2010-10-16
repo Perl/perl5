@@ -34,7 +34,7 @@ like $@, qr/^Invalid CODE attributes: ["']?plugh\(0,0\)["']? /;
 eval 'sub e3 ($) : plugh(0,0 xyzzy ;';
 like $@, qr/Unterminated attribute parameter in attribute list at/;
 
-eval 'sub e4 ($) : plugh + xyzzy ;';
+eval 'sub e4 ($) : plugh + XYZZY ;';
 like $@, qr/Invalid separator character '[+]' in attribute list at/;
 
 eval_ok 'my main $x : = 0;';
