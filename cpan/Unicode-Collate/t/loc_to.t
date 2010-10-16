@@ -4,7 +4,7 @@ use warnings;
 use Unicode::Collate::Locale;
 
 use Test;
-plan tests => 122;
+plan tests => 132;
 
 my $objTo = Unicode::Collate::Locale->
     new(locale => 'TO', normalization => undef);
@@ -124,17 +124,27 @@ ok($objTo->eq("u\x{304}", "\x{16B}"));
 ok($objTo->eq("U\x{304}", "\x{16A}"));
 
 ok($objTo->eq("a\x{301}", pack('U', 0xE1)));
+ok($objTo->eq("a\x{341}", pack('U', 0xE1)));
 ok($objTo->eq("A\x{301}", pack('U', 0xC1)));
+ok($objTo->eq("A\x{341}", pack('U', 0xC1)));
 ok($objTo->eq("e\x{301}", pack('U', 0xE9)));
+ok($objTo->eq("e\x{341}", pack('U', 0xE9)));
 ok($objTo->eq("E\x{301}", pack('U', 0xC9)));
+ok($objTo->eq("E\x{341}", pack('U', 0xC9)));
 ok($objTo->eq("i\x{301}", pack('U', 0xED)));
+ok($objTo->eq("i\x{341}", pack('U', 0xED)));
 ok($objTo->eq("I\x{301}", pack('U', 0xCD)));
+ok($objTo->eq("I\x{341}", pack('U', 0xCD)));
 ok($objTo->eq("o\x{301}", pack('U', 0xF3)));
+ok($objTo->eq("o\x{341}", pack('U', 0xF3)));
 ok($objTo->eq("O\x{301}", pack('U', 0xD3)));
+ok($objTo->eq("O\x{341}", pack('U', 0xD3)));
 ok($objTo->eq("u\x{301}", pack('U', 0xFA)));
+ok($objTo->eq("u\x{341}", pack('U', 0xFA)));
 ok($objTo->eq("U\x{301}", pack('U', 0xDA)));
+ok($objTo->eq("U\x{341}", pack('U', 0xDA)));
 
-# 97
+# 107
 
 $objTo->change(upper_before_lower => 1);
 
@@ -166,4 +176,4 @@ ok($objTo->lt("O\x{304}", "O\x{301}"));
 ok($objTo->lt("u\x{304}", "u\x{301}"));
 ok($objTo->lt("U\x{304}", "U\x{301}"));
 
-# 122
+# 132

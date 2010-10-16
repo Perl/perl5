@@ -4,7 +4,7 @@ use warnings;
 use Unicode::Collate::Locale;
 
 use Test;
-plan tests => 213;
+plan tests => 217;
 
 my $objSe = Unicode::Collate::Locale->
     new(locale => 'SE', normalization => undef);
@@ -155,7 +155,9 @@ ok($objSe->lt("o\x{328}", "O\x{328}"));
 # 116
 
 ok($objSe->eq("a\x{301}", pack('U', 0xE1)));
+ok($objSe->eq("a\x{341}", pack('U', 0xE1)));
 ok($objSe->eq("A\x{301}", pack('U', 0xC1)));
+ok($objSe->eq("A\x{341}", pack('U', 0xC1)));
 ok($objSe->eq("c\x{30C}", "\x{10D}"));
 ok($objSe->eq("C\x{30C}", "\x{10C}"));
 ok($objSe->eq("\x{1EF}", "\x{292}\x{30C}"));
@@ -167,7 +169,9 @@ ok($objSe->eq("G\x{30C}", "\x{1E6}"));
 ok($objSe->eq("k\x{30C}", "\x{1E9}"));
 ok($objSe->eq("K\x{30C}", "\x{1E8}"));
 ok($objSe->eq("n\x{301}", "\x{144}"));
+ok($objSe->eq("n\x{341}", "\x{144}"));
 ok($objSe->eq("N\x{301}", "\x{143}"));
+ok($objSe->eq("N\x{341}", "\x{143}"));
 ok($objSe->eq("n\x{303}", pack('U', 0xF1)));
 ok($objSe->eq("N\x{303}", pack('U', 0xD1)));
 ok($objSe->eq("s\x{30C}", "\x{161}"));
@@ -177,7 +181,7 @@ ok($objSe->eq("U\x{308}", pack('U', 0xDC)));
 ok($objSe->eq("u\x{30B}", "\x{171}"));
 ok($objSe->eq("U\x{30B}", "\x{170}"));
 
-# 138
+# 142
 
 ok($objSe->eq("z\x{30C}", "\x{17E}"));
 ok($objSe->eq("Z\x{30C}", "\x{17D}"));
@@ -202,7 +206,7 @@ ok($objSe->eq("O\x{302}", pack('U', 0xD4)));
 ok($objSe->eq("o\x{328}", "\x{1EB}"));
 ok($objSe->eq("O\x{328}", "\x{1EA}"));
 
-# 160
+# 164
 
 ok($objSe->eq("u\x{308}\x{300}", "\x{1DC}"));
 ok($objSe->eq("U\x{308}\x{300}", "\x{1DB}"));
@@ -247,7 +251,7 @@ ok($objSe->eq("O\x{302}\x{309}", "\x{1ED4}"));
 ok($objSe->eq("o\x{302}\x{323}", "\x{1ED9}"));
 ok($objSe->eq("O\x{302}\x{323}", "\x{1ED8}"));
 
-# 199
+# 203
 
 $objSe->change(upper_before_lower => 1);
 
@@ -266,4 +270,4 @@ ok($objSe->gt("o\x{303}", "O\x{303}"));
 ok($objSe->gt("o\x{302}", "O\x{302}"));
 ok($objSe->gt("o\x{328}", "O\x{328}"));
 
-# 213
+# 217

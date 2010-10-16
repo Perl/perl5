@@ -354,10 +354,10 @@ C<threads::shared> has been upgrade from version 1.33_03 to 1.34
 
 =item *
 
-C<Unicode::Collate> has been upgraded from version 0.59 to 0.62
+C<Unicode::Collate> has been upgraded from version 0.59 to 0.63
 
-U::C::Locale newly supports locales: ar, de__phonebook, hu, hy, nso, om, 
-tn, vi, hr, ig, sq, se to and uk
+U::C::Locale newly supports locales: ar, be, bg, de__phonebook, hu, hy, kk, mk, nso, om, 
+tn, vi, hr, ig, ru, sq, se, sr, to and uk
 
 =item *
 

@@ -4,7 +4,7 @@ use warnings;
 use Unicode::Collate::Locale;
 
 use Test;
-plan tests => 86;
+plan tests => 88;
 
 my $objHr = Unicode::Collate::Locale->
     new(locale => 'HR', normalization => undef);
@@ -77,7 +77,9 @@ ok($objHr->lt("z\x{30C}", "Z\x{30C}"));
 ok($objHr->eq("c\x{30C}", "\x{10D}"));
 ok($objHr->eq("C\x{30C}", "\x{10C}"));
 ok($objHr->eq("c\x{301}", "\x{107}"));
+ok($objHr->eq("c\x{341}", "\x{107}"));
 ok($objHr->eq("C\x{301}", "\x{106}"));
+ok($objHr->eq("C\x{341}", "\x{106}"));
 ok($objHr->eq("dz\x{30C}", "\x{1C6}"));
 ok($objHr->eq("Dz\x{30C}", "\x{1C5}"));
 ok($objHr->eq("DZ\x{30C}", "\x{1C4}"));
@@ -98,7 +100,7 @@ ok($objHr->eq("S\x{30C}", "\x{160}"));
 ok($objHr->eq("z\x{30C}", "\x{17E}"));
 ok($objHr->eq("Z\x{30C}", "\x{17D}"));
 
-# 72
+# 74
 
 $objHr->change(upper_before_lower => 1);
 
@@ -117,4 +119,4 @@ ok($objHr->gt("Nj", "NJ"));
 ok($objHr->gt("s\x{30C}", "S\x{30C}"));
 ok($objHr->gt("z\x{30C}", "Z\x{30C}"));
 
-# 86
+# 88

@@ -4,7 +4,7 @@ use warnings;
 use Unicode::Collate::Locale;
 
 use Test;
-plan tests => 98;
+plan tests => 110;
 
 my $eth  = pack 'U', 0xF0;
 my $ETH  = pack 'U', 0xD0;
@@ -105,19 +105,31 @@ ok($objIs->lt($arng, $Arng));
 # 57
 
 ok($objIs->eq("a\x{301}", pack('U', 0xE1)));
+ok($objIs->eq("a\x{341}", pack('U', 0xE1)));
 ok($objIs->eq("A\x{301}", pack('U', 0xC1)));
+ok($objIs->eq("A\x{341}", pack('U', 0xC1)));
 ok($objIs->eq("d\x{335}", "\x{111}"));
 ok($objIs->eq("D\x{335}", "\x{110}"));
 ok($objIs->eq("e\x{301}", pack('U', 0xE9)));
+ok($objIs->eq("e\x{341}", pack('U', 0xE9)));
 ok($objIs->eq("E\x{301}", pack('U', 0xC9)));
+ok($objIs->eq("E\x{341}", pack('U', 0xC9)));
 ok($objIs->eq("i\x{301}", pack('U', 0xED)));
+ok($objIs->eq("i\x{341}", pack('U', 0xED)));
 ok($objIs->eq("I\x{301}", pack('U', 0xCD)));
+ok($objIs->eq("I\x{341}", pack('U', 0xCD)));
 ok($objIs->eq("o\x{301}", pack('U', 0xF3)));
+ok($objIs->eq("o\x{341}", pack('U', 0xF3)));
 ok($objIs->eq("O\x{301}", pack('U', 0xD3)));
+ok($objIs->eq("O\x{341}", pack('U', 0xD3)));
 ok($objIs->eq("u\x{301}", pack('U', 0xFA)));
+ok($objIs->eq("u\x{341}", pack('U', 0xFA)));
 ok($objIs->eq("U\x{301}", pack('U', 0xDA)));
+ok($objIs->eq("U\x{341}", pack('U', 0xDA)));
 ok($objIs->eq("y\x{301}", pack('U', 0xFD)));
+ok($objIs->eq("y\x{341}", pack('U', 0xFD)));
 ok($objIs->eq("Y\x{301}", pack('U', 0xDD)));
+ok($objIs->eq("Y\x{341}", pack('U', 0xDD)));
 ok($objIs->eq("a\x{308}", $auml));
 ok($objIs->eq("A\x{308}", $Auml));
 ok($objIs->eq("o\x{308}", $ouml));
@@ -127,7 +139,7 @@ ok($objIs->eq("O\x{338}", $Ostk));
 ok($objIs->eq("a\x{30A}", $arng));
 ok($objIs->eq("A\x{30A}", $Arng));
 
-# 79
+# 91
 
 ok($objIs->eq("\x{1FD}", "$ae\x{301}"));
 ok($objIs->eq("\x{1FC}", "$AE\x{301}"));
@@ -143,7 +155,7 @@ ok($objIs->eq("A\x{30A}", "\x{212B}"));
 ok($objIs->eq("a\x{30A}\x{301}", "\x{1FB}"));
 ok($objIs->eq("A\x{30A}\x{301}", "\x{1FA}"));
 
-# 92
+# 104
 
 $objIs->change(upper_before_lower => 1);
 
@@ -154,4 +166,4 @@ ok($objIs->gt($ouml, $Ouml));
 ok($objIs->gt($ostk, $Ostk));
 ok($objIs->gt($arng, $Arng));
 
-# 98
+# 110

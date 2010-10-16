@@ -4,7 +4,7 @@ use warnings;
 use Unicode::Collate::Locale;
 
 use Test;
-plan tests => 55;
+plan tests => 65;
 
 my $objPl = Unicode::Collate::Locale->
     new(locale => 'PL', normalization => undef);
@@ -65,20 +65,30 @@ ok($objPl->lt("z\x{307}", "Z\x{307}"));
 ok($objPl->eq("a\x{328}", "\x{105}"));
 ok($objPl->eq("A\x{328}", "\x{104}"));
 ok($objPl->eq("c\x{301}", "\x{107}"));
+ok($objPl->eq("c\x{341}", "\x{107}"));
 ok($objPl->eq("C\x{301}", "\x{106}"));
+ok($objPl->eq("C\x{341}", "\x{106}"));
 ok($objPl->eq("e\x{328}", "\x{119}"));
 ok($objPl->eq("E\x{328}", "\x{118}"));
 ok($objPl->eq("l\x{335}", "\x{142}"));
 ok($objPl->eq("L\x{335}", "\x{141}"));
 ok($objPl->eq("n\x{301}", "\x{144}"));
+ok($objPl->eq("n\x{341}", "\x{144}"));
 ok($objPl->eq("N\x{301}", "\x{143}"));
+ok($objPl->eq("N\x{341}", "\x{143}"));
 ok($objPl->eq("o\x{301}", pack('U', 0xF3)));
+ok($objPl->eq("o\x{341}", pack('U', 0xF3)));
 ok($objPl->eq("O\x{301}", pack('U', 0xD3)));
+ok($objPl->eq("O\x{341}", pack('U', 0xD3)));
 ok($objPl->eq("s\x{301}", "\x{15B}"));
+ok($objPl->eq("s\x{341}", "\x{15B}"));
 ok($objPl->eq("S\x{301}", "\x{15A}"));
+ok($objPl->eq("S\x{341}", "\x{15A}"));
 ok($objPl->eq("z\x{301}", "\x{17A}"));
+ok($objPl->eq("z\x{341}", "\x{17A}"));
 ok($objPl->eq("Z\x{301}", "\x{179}"));
+ok($objPl->eq("Z\x{341}", "\x{179}"));
 ok($objPl->eq("z\x{307}", "\x{17C}"));
 ok($objPl->eq("Z\x{307}", "\x{17B}"));
 
-# 55
+# 65

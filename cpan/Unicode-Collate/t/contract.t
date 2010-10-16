@@ -11,7 +11,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 40 };
+BEGIN { plan tests => 44 };
 
 use strict;
 use warnings;
@@ -54,16 +54,16 @@ my $kjeNoN = Unicode::Collate->new(
     entry => $kjeEntry,
 );
 
-ok($kjeNoN->lt("\x{043A}", "\x{043A}\x{0301}"));
-ok($kjeNoN->gt("\x{045C}", "\x{043A}\x{0334}\x{0301}"));
-ok($kjeNoN->eq("\x{043A}", "\x{043A}\x{0334}\x{0301}"));
-ok($kjeNoN->eq("\x{045C}", "\x{043A}\x{0301}\x{0334}"));
+ok($kjeNoN->lt("\x{43A}", "\x{43A}\x{301}"));
+ok($kjeNoN->gt("\x{45C}", "\x{43A}\x{334}\x{301}"));
+ok($kjeNoN->eq("\x{43A}", "\x{43A}\x{334}\x{301}"));
+ok($kjeNoN->eq("\x{45C}", "\x{43A}\x{301}\x{334}"));
 
 our %sortkeys;
 
-$sortkeys{'KAac'} = $kjeNoN->viewSortKey("\x{043A}\x{0301}");
-$sortkeys{'KAta'} = $kjeNoN->viewSortKey("\x{043A}\x{0334}\x{0301}");
-$sortkeys{'KAat'} = $kjeNoN->viewSortKey("\x{043A}\x{0301}\x{0334}");
+$sortkeys{'KAac'} = $kjeNoN->viewSortKey("\x{43A}\x{301}");
+$sortkeys{'KAta'} = $kjeNoN->viewSortKey("\x{43A}\x{334}\x{301}");
+$sortkeys{'KAat'} = $kjeNoN->viewSortKey("\x{43A}\x{301}\x{334}");
 
 eval { require Unicode::Normalize };
 if (!$@) {
@@ -72,10 +72,10 @@ if (!$@) {
 	table => undef,
 	entry => $kjeEntry,
     );
-ok($kjeNFD->lt("\x{043A}", "\x{043A}\x{0301}"));
-ok($kjeNFD->eq("\x{045C}", "\x{043A}\x{0334}\x{0301}"));
-ok($kjeNFD->lt("\x{043A}", "\x{043A}\x{0334}\x{0301}"));
-ok($kjeNFD->eq("\x{045C}", "\x{043A}\x{0301}\x{0334}"));
+ok($kjeNFD->lt("\x{43A}", "\x{43A}\x{301}"));
+ok($kjeNFD->eq("\x{45C}", "\x{43A}\x{334}\x{301}"));
+ok($kjeNFD->lt("\x{43A}", "\x{43A}\x{334}\x{301}"));
+ok($kjeNFD->eq("\x{45C}", "\x{43A}\x{301}\x{334}"));
 
     my $aaNFD = Unicode::Collate->new(
 	level => 1,
@@ -113,14 +113,14 @@ else {
 }
 
 # again: loading Unicode::Normalize should not affect $kjeNoN.
-ok($kjeNoN->lt("\x{043A}", "\x{043A}\x{0301}"));
-ok($kjeNoN->gt("\x{045C}", "\x{043A}\x{0334}\x{0301}"));
-ok($kjeNoN->eq("\x{043A}", "\x{043A}\x{0334}\x{0301}"));
-ok($kjeNoN->eq("\x{045C}", "\x{043A}\x{0301}\x{0334}"));
+ok($kjeNoN->lt("\x{43A}", "\x{43A}\x{301}"));
+ok($kjeNoN->gt("\x{45C}", "\x{43A}\x{334}\x{301}"));
+ok($kjeNoN->eq("\x{43A}", "\x{43A}\x{334}\x{301}"));
+ok($kjeNoN->eq("\x{45C}", "\x{43A}\x{301}\x{334}"));
 
-ok($sortkeys{'KAac'}, $kjeNoN->viewSortKey("\x{043A}\x{0301}"));
-ok($sortkeys{'KAta'}, $kjeNoN->viewSortKey("\x{043A}\x{0334}\x{0301}"));
-ok($sortkeys{'KAat'}, $kjeNoN->viewSortKey("\x{043A}\x{0301}\x{0334}"));
+ok($sortkeys{'KAac'}, $kjeNoN->viewSortKey("\x{43A}\x{301}"));
+ok($sortkeys{'KAta'}, $kjeNoN->viewSortKey("\x{43A}\x{334}\x{301}"));
+ok($sortkeys{'KAat'}, $kjeNoN->viewSortKey("\x{43A}\x{301}\x{334}"));
 
 my $aaNoN = Unicode::Collate->new(
     level => 1,
@@ -137,4 +137,19 @@ ok($aaNoN->eq("A", "A\x{327}\x{30A}"));
 ok($aaNoN->lt("Z", "A\x{30A}\x{327}"));
 ok($aaNoN->eq("A", "A\x{31A}\x{30A}"));
 ok($aaNoN->lt("Z", "A\x{30A}\x{31A}"));
+
+# suppress contractions
+
+my $kjeSup = Unicode::Collate->new(
+    level => 1,
+    table => undef,
+    normalization => undef,
+    entry => $kjeEntry,
+    suppress => [0x400..0x45F],
+);
+
+ok($kjeSup->eq("\x{43A}", "\x{43A}\x{301}"));
+ok($kjeSup->gt("\x{45C}", "\x{43A}\x{301}"));
+ok($kjeSup->eq("\x{41A}", "\x{41A}\x{301}"));
+ok($kjeSup->gt("\x{40C}", "\x{41A}\x{301}"));
 

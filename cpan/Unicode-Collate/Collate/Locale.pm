@@ -4,7 +4,7 @@ use strict;
 use Carp;
 use base qw(Unicode::Collate);
 
-our $VERSION = '0.62';
+our $VERSION = '0.63';
 
 use File::Spec;
 
@@ -14,12 +14,16 @@ my $PL_EXT  = '.pl';
 
 my %LocaleFile = map { ($_, $_) } qw(
    af ar az ca cs cy da eo es et fi fil fo fr ha haw
-   hr hu hy ig is kl lt lv mt nb nn nso om pl ro
+   hr hu hy ig is kk kl lt lv mt nb nn nso om pl ro ru
    se sk sl sq sv sw tn to tr uk vi wo yo
 );
    $LocaleFile{'default'}         = '';
    $LocaleFile{'de__phonebook'}   = 'de_phone';
    $LocaleFile{'es__traditional'} = 'es_trad';
+   $LocaleFile{'be'} = "ru";
+   $LocaleFile{'bg'} = "ru";
+   $LocaleFile{'mk'} = "ru";
+   $LocaleFile{'sr'} = "ru";
 
 sub _locale {
     my $locale = shift;
@@ -158,6 +162,8 @@ this method returns a string C<'default'> meaning no special tailoring.
       af                Afrikaans
       ar                Arabic
       az                Azerbaijani (Azeri)
+      be                Belarusian
+      bg                Bulgarian
       ca                Catalan
       cs                Czech
       cy                Welsh
@@ -178,9 +184,11 @@ this method returns a string C<'default'> meaning no special tailoring.
       hy                Armenian
       ig                Igbo
       is                Icelandic
+      kk                Kazakh
       kl                Kalaallisut
       lt                Lithuanian
       lv                Latvian
+      mk                Macedonian
       mt                Maltese
       nb                Norwegian Bokmal
       nn                Norwegian Nynorsk
@@ -188,10 +196,12 @@ this method returns a string C<'default'> meaning no special tailoring.
       om                Oromo
       pl                Polish
       ro                Romanian
+      ru                Russian
       se                Northern Sami
       sk                Slovak
       sl                Slovenian
       sq                Albanian
+      sr                Serbian
       sv                Swedish
       sw                Swahili
       tn                Tswana
@@ -201,6 +211,22 @@ this method returns a string C<'default'> meaning no special tailoring.
       vi                Vietnamese
       wo                Wolof
       yo                Yoruba
+    ----------------------------------------------------------
+
+Locales according to default UCA rules include:
+de (German),
+en (English),
+ga (Irish),
+id (Indonesian),
+it (Italian),
+ka (Georgian),
+ln (Lingala),
+ms (Malay),
+nl (Dutch),
+pt (Portuguese),
+st (Southern Sotho),
+xh (Xhosa),
+zu (Zulu).
 
 =head1 INSTALL
 
@@ -245,6 +271,10 @@ L<http://www.unicode.org/reports/tr10/>
 =item The Default Unicode Collation Element Table (DUCET)
 
 L<http://www.unicode.org/Public/UCA/latest/allkeys.txt>
+
+=item Unicode Locale Data Markup Language (LDML) - UTS #35
+
+L<http://www.unicode.org/reports/tr35/>
 
 =item CLDR - Unicode Common Locale Data Repository
 

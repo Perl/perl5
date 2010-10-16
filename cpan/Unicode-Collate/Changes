@@ -1,5 +1,12 @@
 Revision history for Perl module Unicode::Collate.
 
+0.63  Sun Oct 10 22:13:21 2010
+    - supported suppress contractions (see 'suppress' in POD).
+    - internal for hangul_terminator in getSortKey().
+    - U::C::Locale newly supports locales: be, bg, kk, mk, ru, sr.
+    - added tailoring with U+0340 or U+0341 instead of U+0300 or U+0301.
+        (affected locales: hr, is, pl, se, to, wo)
+
 0.62  Wed Oct  6 21:35:54 2010
     - U::C::Locale newly supports locales: ar, hu, hy, se, to, uk.
     - Vietnamese (vi): added tailoring for U+0340 and U+0341.
@@ -9,14 +16,14 @@ Revision history for Perl module Unicode::Collate.
     - precomposites of e-dot-below, o-dot-below, o-tilde are tailored as well.
         (affected locales: et, yo)
     - Vietnamese (vi): added contractions for non-blocked decompositions
-      * base + dot-below + diacritical such as a\x{323}\x{306}, \x{1EA1}\x{306} etc.
+      * base + dot-below + mark such as a\x{323}\x{306}, \x{1EA1}\x{306} etc.
       * base + tone + horn such as o\x{309}\x{31B}, \x{1ECF}\x{31B} etc.
 
 0.60  Thu Sep 23 21:37:36 2010
     - bug fix: index() [and its friends including gmatch()] didn't remove
       ignorable characters in the substring correctly.
       Thanks for the bug report:
-   http://www.xray.mpe.mpg.de/mailing-lists/perl-unicode/2010-09/msg00014.html
+  http://www.xray.mpe.mpg.de/mailing-lists/perl-unicode/2010-09/msg00014.html
 
     - U::C::Locale newly supports locales: de__phonebook, nso, om, tn, vi.
     - precomposites of a-breve, a-circ, e-circ, o-circ are tailored as well.
@@ -38,8 +45,8 @@ Revision history for Perl module Unicode::Collate.
     ! renamed t/locale_{xy}.t to t/loc_{xy}.t (for safer 8.3 names)
 
 0.55  Sun Aug  1 21:21:23 2010
-    - incorporated Unicode::Collate::Locale with some changes. (see:
-  http://www.xray.mpe.mpg.de/mailing-lists/perl-unicode/2004-03/msg00030.html)
+    - incorporated Unicode::Collate::Locale with some changes. see:
+  http://www.xray.mpe.mpg.de/mailing-lists/perl-unicode/2004-03/msg00030.html
     - supported locales: cs, es, es__traditional, fr, nn, pl.
     ! added t/locale*.t that uses DUCET.
 
