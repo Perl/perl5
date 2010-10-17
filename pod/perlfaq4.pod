@@ -2387,7 +2387,7 @@ Usually a hash ref, perhaps like this:
 		PALS   => [ "Norbert", "Rhys", "Phineas"],
 	};
 
-References are documented in L<perlref> and the upcoming L<perlreftut>.
+References are documented in L<perlref> and L<perlreftut>.
 Examples of complex data structures are given in L<perldsc> and
 L<perllol>.  Examples of structures and object-oriented classes are
 in L<perltoot>.
