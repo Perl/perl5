@@ -914,8 +914,8 @@ static void
 peep_xop(pTHX_ OP *o, OP *oldop)
 {
     dMY_CXT;
-    av_push(MY_CXT.xop_record, newSVpvf("peep:%x", o));
-    av_push(MY_CXT.xop_record, newSVpvf("oldop:%x", oldop));
+    av_push(MY_CXT.xop_record, newSVpvf("peep:%"UVxf, PTR2UV(o)));
+    av_push(MY_CXT.xop_record, newSVpvf("oldop:%"UVxf, PTR2UV(oldop)));
 }
 
 XS(XS_XS__APItest__XSUB_XS_VERSION_undef);
@@ -1456,8 +1456,8 @@ xop_build_optree ()
         unop->op_next       = NULL;
         kid->op_next        = (OP*)unop;
 
-        av_push(MY_CXT.xop_record, newSVpvf("unop:%x", unop));
-        av_push(MY_CXT.xop_record, newSVpvf("kid:%x", kid));
+        av_push(MY_CXT.xop_record, newSVpvf("unop:%"UVxf, PTR2UV(unop)));
+        av_push(MY_CXT.xop_record, newSVpvf("kid:%"UVxf, PTR2UV(kid)));
 
         av_push(MY_CXT.xop_record, newSVpvf("NAME:%s", OP_NAME((OP*)unop)));
         av_push(MY_CXT.xop_record, newSVpvf("DESC:%s", OP_DESC((OP*)unop)));
