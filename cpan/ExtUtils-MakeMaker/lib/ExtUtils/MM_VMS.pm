@@ -1067,14 +1067,14 @@ $(INST_STATIC) : $(OBJECT) $(MYEXTLIB)
 =item extra_clean_files
 
 Clean up some OS specific files.  Plus the temp file used to shorten
-a lot of commands.
+a lot of commands.  And the name mangler database.
 
 =cut
 
 sub extra_clean_files {
     return qw(
               *.Map *.Dmp *.Lis *.cpp *.$(DLEXT) *.Opt $(BASEEXT).bso
-              .MM_Tmp
+              .MM_Tmp cxx_repository
              );
 }
 
