@@ -19,7 +19,7 @@ use vars qw(@ISA @EXPORT $VERSION
 use strict;
 
 # This is not a dual-life module, so no need for development version numbers
-$VERSION = '1.28';
+$VERSION = '1.29';
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&xsinit &ldopts 
@@ -144,6 +144,7 @@ sub static_ext {
 
 sub _escape {
     my $arg = shift;
+    return $$arg if $^O eq 'VMS'; # parens legal in qualifier lists
     $$arg =~ s/([\(\)])/\\$1/g;
 }
 
