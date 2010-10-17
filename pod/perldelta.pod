@@ -3,9 +3,7 @@
 =for comment
 This has been logged up to 97a3247,
 except for:
-57ef47cc7bcd1b57927d5010f363ccaa10f1d990
 b2ea9a00b30eb5881b863d7239dd6a3721e73136
-ca556bcdca736b2f85c11650c70b2371169c0225
 e4487e9b537f1be1e95aba1c87790c2a411788a7
 68b590d93559da1f7a0d3956202180d507013365
 
@@ -44,10 +42,13 @@ a C<"(?"> in a regular expression now means that the subexpression is to
 not inherit the surrounding modifiers such as C</i>, but to revert to the
 Perl defaults.  Any modifiers following the caret override the defaults.
 
-The stringification of regular expressions now uses this notation.  The
-main purpose of this is to allow tests that rely on the stringification
-to not have to change when new modifiers are added.  See
-L<perlre/Extended Patterns>.
+The stringification of regular expressions now uses this
+notation.  E.g., before, C<qr/hlagh/i> would be stringified as
+C<(?i-xsm:hlagh)>, but now it's stringified as C<(?^i:hlagh)>.
+
+The main purpose of this is to allow tests that rely on the
+stringification to not have to change when new modifiers are added.
+See L<perlre/Extended Patterns>.
 
 =head2 C<"d">, C<"l">, and C<"u"> regex modifiers added
 
@@ -829,6 +830,21 @@ L<[perl #78286]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78286>.
 The interpreter no longer crashes when freeing deeply-nested arrays of
 arrays. Hashes have not been fixed yet
 L<[perl #44225]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=44225>.
+
+=item *
+
+The mechanism for freeing objects in globs used to leave dangling
+pointers to freed SVs, meaning Perl users could see corrupted state
+during destruction.
+
+Perl now only frees the affected slots of the GV, rather than freeing
+the GV itself. This makes sure that there are no dangling refs or
+corrupted state during destruction.
+
+=item *
+
+Perl no longer leaks C<PL_main_cv> or C<PL_defstash> during
+destruction L<[perl #40388]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=40388>.
 
 =back
 
