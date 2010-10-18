@@ -218,14 +218,6 @@ BEGIN {
 sub S_IFMT  { @_ ? ( $_[0] & _S_IFMT() ) : _S_IFMT()  }
 sub S_IMODE { $_[0] & 07777 }
 
-sub S_ISLNK    { ( $_[0] & _S_IFMT() ) == S_IFLNK()   }
-sub S_ISSOCK   { ( $_[0] & _S_IFMT() ) == S_IFSOCK()  }
-sub S_ISBLK    { ( $_[0] & _S_IFMT() ) == S_IFBLK()   }
-sub S_ISCHR    { ( $_[0] & _S_IFMT() ) == S_IFCHR()   }
-sub S_ISFIFO   { ( $_[0] & _S_IFMT() ) == S_IFIFO()   }
-sub S_ISWHT    { ( $_[0] & _S_IFMT() ) == S_IFWHT()   }
-sub S_ISENFMT  { ( $_[0] & _S_IFMT() ) == S_ENFMT()   }
-
 sub AUTOLOAD {
     (my $constname = $AUTOLOAD) =~ s/.*:://;
     die "&Fcntl::constant not defined" if $constname eq 'constant';
