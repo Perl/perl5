@@ -34,6 +34,13 @@ XXX New core language features go here. Summarise user-visible core language
 enhancements. Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
+=head2 C<keys>, C<values> work on arrays
+
+You can now use the C<keys>, C<values>, C<each> builtin functions on arrays
+(previously you could only use them on hashes).  See L<perlfunc> for details.
+This is actually a change introduced in perl 5.12.0, but it was missed from
+that release's perldelta.
+
 =head1 New Platforms
 
 XXX List any platforms that this version of perl compiles on, that previous
