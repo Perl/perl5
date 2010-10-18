@@ -1,7 +1,8 @@
 package SelfLoader;
 use 5.008;
 use strict;
-our $VERSION = "1.17";
+use IO::Handle;
+our $VERSION = "1.18";
 
 # The following bit of eval-magic is necessary to make this work on
 # perls < 5.009005.
@@ -102,6 +103,7 @@ sub _load_stubs {
       close $fh or die "close: $!";                 # autocloses, but be paranoid
       open $fh, '<&', $nfh or croak "reopen2: $!";  # dup() the fd "back"
       close $nfh or die "close after reopen: $!";   # autocloses, but be paranoid
+      $fh->untaint;
     }
     $Cache{"${currpack}::<DATA"} = 1;   # indicate package is cached
 
