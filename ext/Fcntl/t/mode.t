@@ -18,7 +18,7 @@ if (-c $devnull) {
     push @tests, ['CHR', $devnull, (stat $devnull)[2]];
 }
 
-plan(tests => 9 * @tests);
+plan(tests => 3 + 9 * @tests);
 foreach (@tests) {
     my ($type, $name, $mode) = @$_;
 
@@ -68,4 +68,16 @@ foreach (@tests) {
 	ok(!S_ISENFMT($mode), "!S_ISENFMT $name");
     }
 }
-	
+
+{
+    my @warnings;
+    my $ret;
+
+    {
+	local $SIG{__WARN__} = sub { push @warnings, "@_" };
+	$ret = S_ISREG();
+    }
+    ok(!$ret, 'S_ISREG() is false');
+    is(scalar @warnings, 1, '1 warning');
+    like($warnings[0], qr/^Use of uninitialized value/, 'expected warning');
+}

@@ -38,3 +38,22 @@
 MODULE = Fcntl		PACKAGE = Fcntl
 
 INCLUDE: const-xs.inc
+
+void
+S_ISREG(...)
+    ALIAS:
+	Fcntl::S_ISREG = S_IFREG
+	Fcntl::S_ISDIR = S_IFDIR
+    PREINIT:
+	/* Preserve the semantics of the perl code, which was:
+	   sub S_ISREG    { ( $_[0] & _S_IFMT() ) == S_IFREG()   }
+	 */
+	SV *mode;
+    PPCODE:
+	if (items > 0)
+	    mode = ST(0);
+	else {
+	    mode = &PL_sv_undef;
+	    EXTEND(SP, 1);
+	}
+	PUSHs(((SvUV(mode) & S_IFMT) == ix) ? &PL_sv_yes : &PL_sv_no);
