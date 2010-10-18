@@ -576,6 +576,12 @@ L<[perl #72990]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=72990>.
 perl now builds again with OpenVOS (formerly known as Stratus VOS)
 L<[perl #78132]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=78132>.
 
+=item VMS
+
+The shortening of symbols longer than 31 characters in the C sources is
+now done by the compiler rather than by xsubpp (which could only do so
+for generated symbols in XS code).
+
 =item Windows
 
 C<$Config{gccversion}> is now set correctly when perl is built using the
