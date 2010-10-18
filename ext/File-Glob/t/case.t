@@ -2,12 +2,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    if ($^O eq 'MacOS') { 
-	@INC = qw(: ::lib ::macos:lib); 
-    } else { 
-	@INC = '.'; 
-	push @INC, '../lib'; 
-    }
+    @INC = '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bFile\/Glob\b/i) {
         print "1..0\n";
@@ -22,7 +17,7 @@ use File::Glob qw(:glob csh_glob);
 $loaded = 1;
 print "ok 1\n";
 
-my $pat = $^O eq "MacOS" ? ":op:G*.t" : "op/G*.t";
+my $pat = "op/G*.t";
 
 # Test the actual use of the case sensitivity tags, via csh_glob()
 import File::Glob ':nocase';

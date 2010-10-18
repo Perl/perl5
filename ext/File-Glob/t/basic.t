@@ -2,12 +2,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    if ($^O eq 'MacOS') { 
-	@INC = qw(: ::lib ::macos:lib); 
-    } else { 
-	@INC = '.'; 
-	push @INC, '../lib'; 
-    }
+    @INC = '../lib';
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bFile\/Glob\b/i) {
         print "1..0\n";
@@ -40,7 +35,7 @@ if ($^O eq 'VMS') {
 $ENV{PATH} = "/bin";
 delete @ENV{qw(BASH_ENV CDPATH ENV IFS)};
 my @correct = ();
-if (opendir(D, $^O eq "MacOS" ? ":" : ".")) {
+if (opendir(D, ".")) {
    @correct = grep { !/^\./ } sort readdir(D);
    closedir D;
 }
@@ -131,10 +126,7 @@ is_deeply(\@a, [($vms_mode ? 'test.' : 'TEST'), 'a', 'b']);
 # "~" should expand to $ENV{HOME}
 $ENV{HOME} = "sweet home";
 @a = bsd_glob('~', GLOB_TILDE | GLOB_NOMAGIC);
-SKIP: {
-    skip $^O, 1 if $^O eq "MacOS";
-    is_deeply(\@a, [$ENV{HOME}]);
-}
+is_deeply(\@a, [$ENV{HOME}]);
 
 # GLOB_ALPHASORT (default) should sort alphabetically regardless of case
 mkdir "pteerslo", 0777;
