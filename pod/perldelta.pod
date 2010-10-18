@@ -121,6 +121,13 @@ C<entersub> op checking have been separated out and exposed in the API.
 Custom regular expression engines can now determine the return value of
 C<delete> on an entry of C<%+> or C<%->.
 
+=head2 C<keys>, C<values> work on arrays
+
+You can now use the C<keys>, C<values>, C<each> builtin functions on arrays
+(previously you could only use them on hashes).  See L<perlfunc> for details.
+This is actually a change introduced in perl 5.12.0, but it was missed from
+that release's perldelta.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
