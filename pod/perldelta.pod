@@ -338,6 +338,10 @@ C<PathTools> has been upgraded from version 3.31_01 to 3.34.
 
 =item *
 
+C<podlators> has been upgraded from version 2.3.1 to 2.4.0
+
+=item *
+
 C<sigtrap> has been upgraded from version 1.04 to 1.05.
 
 It no longer tries to modify read-only arguments when generating a

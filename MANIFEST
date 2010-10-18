@@ -1644,8 +1644,9 @@ cpan/podlators/lib/Pod/Text/Color.pm		Convert POD data to color ASCII text
 cpan/podlators/lib/Pod/Text/Overstrike.pm	Convert POD data to formatted overstrike text
 cpan/podlators/lib/Pod/Text.pm			Pod-Parser - convert POD data to formatted ASCII text
 cpan/podlators/lib/Pod/Text/Termcap.pm		Convert POD data to ASCII text with format escapes
-cpan/podlators/scripts/pod2man.PL	Precursor for translator to turn pod into manpage
-cpan/podlators/scripts/pod2text.PL	Precursor for translator to turn pod into text
+cpan/podlators/Makefile.PL			Convert POD data to *roff
+cpan/podlators/scripts/pod2man	Precursor for translator to turn pod into manpage
+cpan/podlators/scripts/pod2text	Precursor for translator to turn pod into text
 cpan/podlators/t/basic.cap			podlators test
 cpan/podlators/t/basic.clr			podlators test
 cpan/podlators/t/basic.man			podlators test
@@ -1658,6 +1659,7 @@ cpan/podlators/t/devise-date.t			podlators test
 cpan/podlators/t/filehandle.t			podlators test
 cpan/podlators/t/man-heading.t			podlators test
 cpan/podlators/t/man-options.t			podlators test
+cpan/podlators/t/man-perlio.t				podlators test
 cpan/podlators/t/man.t				podlators test
 cpan/podlators/t/man-utf8.t			podlators test
 cpan/podlators/t/overstrike.t			podlators test
@@ -1668,6 +1670,7 @@ cpan/podlators/t/pod.t				podlators test
 cpan/podlators/t/termcap.t			podlators test
 cpan/podlators/t/text-encoding.t		podlators test
 cpan/podlators/t/text-options.t			podlators test
+cpan/podlators/t/text-perlio.t			podlators test
 cpan/podlators/t/text.t				podlators test
 cpan/podlators/t/text-utf8.t			podlators test
 cpan/podlators/VERSION				podlators distribution version
@@ -4138,6 +4141,7 @@ pod/perlperf.pod		Perl Performance and Optimization Techniques
 pod/perl.pod			Perl overview (this section)
 pod/perlpod.pod			Perl plain old documentation
 pod/perlpodspec.pod		Perl plain old documentation format specification
+pod/perlpodstyle.pod		Perl POD style guide
 pod/perlpolicy.pod		Perl development policies
 pod/perlport.pod		Perl portability guide
 pod/perlpragma.pod		Perl modules: writing a user pragma

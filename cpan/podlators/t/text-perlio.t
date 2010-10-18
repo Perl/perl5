@@ -1,8 +1,9 @@
 #!/usr/bin/perl -w
 #
-# man-utf8.t -- Test Pod::Man with UTF-8 input.
+# text-perlio.t -- Test Pod::Text with a PerlIO UTF-8 encoding layer.
 #
-# Copyright 2002, 2004, 2006, 2008, 2009 Russ Allbery <rra@stanford.edu>
+# Copyright 2002, 2004, 2006, 2007, 2008, 2009, 2010
+#     Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -25,48 +26,35 @@ BEGIN {
     if ($] < 5.008) {
         plan skip_all => 'Perl 5.8 required for UTF-8 support';
     } else {
-        plan tests => 7;
+        plan tests => 4;
     }
 }
-BEGIN { use_ok ('Pod::Man') }
+BEGIN { use_ok ('Pod::Text') }
 
-# Force UTF-8 on all relevant file handles.  Do this inside eval in case the
-# encoding parameter doesn't work.
+my $parser = Pod::Text->new (utf8 => 1);
+isa_ok ($parser, 'Pod::Text', 'Parser object');
+my $n = 1;
 eval { binmode (\*DATA, ':encoding(utf-8)') };
 eval { binmode (\*STDOUT, ':encoding(utf-8)') };
 my $builder = Test::More->builder;
 eval { binmode ($builder->output, ':encoding(utf-8)') };
 eval { binmode ($builder->failure_output, ':encoding(utf-8)') };
-
-my $n = 1;
 while (<DATA>) {
-    my %options;
     next until $_ eq "###\n";
-    while (<DATA>) {
-        last if $_ eq "###\n";
-        my ($option, $value) = split;
-        $options{$option} = $value;
-    }
     open (TMP, '> tmp.pod') or die "Cannot create tmp.pod: $!\n";
     eval { binmode (\*TMP, ':encoding(utf-8)') };
-    print TMP "=encoding utf-8\n\n";
+    print TMP "=encoding UTF-8\n\n";
     while (<DATA>) {
         last if $_ eq "###\n";
         print TMP $_;
     }
     close TMP;
-    my $parser = Pod::Man->new (%options);
-    isa_ok ($parser, 'Pod::Man', 'Parser object');
     open (OUT, '> out.tmp') or die "Cannot create out.tmp: $!\n";
+    eval { binmode (\*OUT, ':encoding(utf-8)') };
     $parser->parse_from_file ('tmp.pod', \*OUT);
     close OUT;
-    my $accents = 0;
     open (TMP, 'out.tmp') or die "Cannot open out.tmp: $!\n";
     eval { binmode (\*TMP, ':encoding(utf-8)') };
-    while (<TMP>) {
-        $accents = 1 if /Accent mark definitions/;
-        last if /^\.nh/;
-    }
     my $output;
     {
         local $/;
@@ -74,11 +62,6 @@ while (<DATA>) {
     }
     close TMP;
     1 while unlink ('tmp.pod', 'out.tmp');
-    if ($options{utf8}) {
-        ok (!$accents, "Saw no accent definitions for test $n");
-    } else {
-        ok ($accents, "Saw accent definitions for test $n");
-    }
     my $expected = '';
     while (<DATA>) {
         last if $_ eq "###\n";
@@ -89,45 +72,52 @@ while (<DATA>) {
 }
 
 # Below the marker are bits of POD and corresponding expected text output.
-# This is used to test specific features or problems with Pod::Man.  The
+# This is used to test specific features or problems with Pod::Text.  The
 # input and output are separated by lines containing only ###.
 
 __DATA__
 
 ###
-utf8 1
+=head1 Test of SE<lt>E<gt>
+
+This is S<some whitespace>.
 ###
-=head1 BEYONCÉ
+Test of S<>
+    This is some whitespace.
 
-Beyoncé!  Beyoncé!  Beyoncé!!
-
-    Beyoncé!  Beyoncé!
-      Beyoncé!  Beyoncé!
-        Beyoncé!  Beyoncé!
-
-Older versions did not convert Beyoncé in verbatim.
-###
-.SH "BEYONCÉ"
-.IX Header "BEYONCÉ"
-Beyoncé!  Beyoncé!  Beyoncé!!
-.PP
-.Vb 3
-\&    Beyoncé!  Beyoncé!
-\&      Beyoncé!  Beyoncé!
-\&        Beyoncé!  Beyoncé!
-.Ve
-.PP
-Older versions did not convert Beyoncé in verbatim.
 ###
 
 ###
-utf8 1
-###
-=head1 SE<lt>E<gt> output with UTF-8
+=head1 I can eat glass
 
-This is S<non-breaking output>.
+=over 4
+
+=item Esperanto
+
+Mi povas manĝi vitron, ĝi ne damaĝas min.
+
+=item Braille
+
+⠊⠀⠉⠁⠝⠀⠑⠁⠞⠀⠛⠇⠁⠎⠎⠀⠁⠝⠙⠀⠊⠞⠀⠙⠕⠑⠎⠝⠞⠀⠓⠥⠗⠞⠀⠍⠑
+
+=item Hindi
+
+मैं काँच खा सकता हूँ और मुझे उससे कोई चोट नहीं पहुंचती.
+
+=back
+
+See L<http://www.columbia.edu/kermit/utf8.html>
 ###
-.SH "S<> output with UTF\-8"
-.IX Header "S<> output with UTF-8"
-This is non-breaking output.
+I can eat glass
+    Esperanto
+        Mi povas manĝi vitron, ĝi ne damaĝas min.
+
+    Braille
+        ⠊⠀⠉⠁⠝⠀⠑⠁⠞⠀⠛⠇⠁⠎⠎⠀⠁⠝⠙⠀⠊⠞⠀⠙⠕⠑⠎⠝⠞⠀⠓⠥⠗⠞⠀⠍⠑
+
+    Hindi
+        मैं काँच खा सकता हूँ और मुझे उससे कोई चोट नहीं पहुंचती.
+
+    See <http://www.columbia.edu/kermit/utf8.html>
+
 ###

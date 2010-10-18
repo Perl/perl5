@@ -1,8 +1,8 @@
 #!/usr/bin/perl -w
 #
-# man-utf8.t -- Test Pod::Man with UTF-8 input.
+# man-perlio.t -- Test Pod::Man with a PerlIO UTF-8 encoding layer.
 #
-# Copyright 2002, 2004, 2006, 2008, 2009 Russ Allbery <rra@stanford.edu>
+# Copyright 2002, 2004, 2006, 2008, 2009, 2010 Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -58,6 +58,7 @@ while (<DATA>) {
     my $parser = Pod::Man->new (%options);
     isa_ok ($parser, 'Pod::Man', 'Parser object');
     open (OUT, '> out.tmp') or die "Cannot create out.tmp: $!\n";
+    eval { binmode (\*OUT, ':encoding(utf-8)') };
     $parser->parse_from_file ('tmp.pod', \*OUT);
     close OUT;
     my $accents = 0;
