@@ -1,6 +1,10 @@
 CHANGES
 -------
 
+  2.031 21 September 2010
+
+      * Updated to use bzip2 1.0.6
+
   2.030 22 July 2010
 
       * No Changes

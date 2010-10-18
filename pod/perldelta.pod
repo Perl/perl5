@@ -255,6 +255,12 @@ L<[perl #78082]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=78082>
 
 =item *
 
+C<Compress::Raw::Bzip2> has been upgraded from version 2.030 to 2.031
+
+Updated to use bzip2 1.0.6
+
+=item *
+
 C<Data::Dumper> has been upgraded from version 2.128 to 2.129.
 
 C<Dumpxs> no longer crashes with globs returned by C<*$io_ref>
