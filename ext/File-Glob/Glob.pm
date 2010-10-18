@@ -5,6 +5,7 @@ our($VERSION, @ISA, @EXPORT_OK, @EXPORT_FAIL, %EXPORT_TAGS,
     $AUTOLOAD, $DEFAULT_FLAGS);
 
 require XSLoader;
+use feature 'switch';
 
 @ISA = qw(Exporter);
 
@@ -42,17 +43,19 @@ sub import {
     require Exporter;
     my $i = 1;
     while ($i < @_) {
-	if ($_[$i] =~ /^:(case|nocase|globally)$/) {
-	    splice(@_, $i, 1);
-	    $DEFAULT_FLAGS &= ~GLOB_NOCASE() if $1 eq 'case';
-	    $DEFAULT_FLAGS |= GLOB_NOCASE() if $1 eq 'nocase';
-	    if ($1 eq 'globally') {
-		local $^W;
+	given ($_[$i]) {
+	    $DEFAULT_FLAGS &= ~GLOB_NOCASE() when ':case';
+	    $DEFAULT_FLAGS |= GLOB_NOCASE() when ':nocase';
+	    when (':globally') {
+		no warnings 'redefine';
 		*CORE::GLOBAL::glob = \&File::Glob::csh_glob;
 	    }
+	    # We didn't match any special tags, so keep this argument.
+	    ++$i;
 	    next;
 	}
-	++$i;
+	# We matched a special argument, so remove it
+	splice @_, $i, 1;
     }
     goto &Exporter::import;
 }
