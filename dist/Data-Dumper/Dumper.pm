@@ -1297,7 +1297,7 @@ modify it under the same terms as Perl itself.
 
 =head1 VERSION
 
-Version 2.129  (Sep 10 2010)
+Version 2.129  (Oct 20 2010)
 
 =head1 SEE ALSO
 
