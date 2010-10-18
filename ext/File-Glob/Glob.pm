@@ -41,23 +41,20 @@ $VERSION = '1.09';
 
 sub import {
     require Exporter;
-    my $i = 1;
-    while ($i < @_) {
-	given ($_[$i]) {
+    local $Exporter::ExportLevel = $Exporter::ExportLevel + 1;
+    Exporter::import(grep {
+	my $passthrough;
+	given ($_) {
 	    $DEFAULT_FLAGS &= ~GLOB_NOCASE() when ':case';
 	    $DEFAULT_FLAGS |= GLOB_NOCASE() when ':nocase';
 	    when (':globally') {
 		no warnings 'redefine';
 		*CORE::GLOBAL::glob = \&File::Glob::csh_glob;
 	    }
-	    # We didn't match any special tags, so keep this argument.
-	    ++$i;
-	    next;
+	    $passthrough = 1;
 	}
-	# We matched a special argument, so remove it
-	splice @_, $i, 1;
-    }
-    goto &Exporter::import;
+	$passthrough;
+    } @_);
 }
 
 sub AUTOLOAD {
