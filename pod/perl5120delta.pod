@@ -199,9 +199,9 @@ See the documentation for C<ExtUtils::MakeMaker> or C<Module::Build> for
 more on how to specify C<configure_requires> when creating a distribution
 for CPAN.
 
-=head2 C<each> is now more flexible
+=head2 C<each>, C<keys>, C<values> are now more flexible
 
-The C<each> function can now operate on arrays.
+The C<each>, C<keys>, C<values> function can now operate on arrays.
 
 =head2 C<when> as a statement modifier
 
