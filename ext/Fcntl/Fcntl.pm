@@ -61,7 +61,7 @@ our($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS, $AUTOLOAD);
 require Exporter;
 @ISA = qw(Exporter);
 BEGIN {
-  $VERSION = "1.07";
+  $VERSION = '1.08';
 }
 
 # Items to export into callers namespace by default
@@ -226,7 +226,7 @@ sub S_ISBLK    { ( $_[0] & _S_IFMT() ) == S_IFBLK()   }
 sub S_ISCHR    { ( $_[0] & _S_IFMT() ) == S_IFCHR()   }
 sub S_ISFIFO   { ( $_[0] & _S_IFMT() ) == S_IFIFO()   }
 sub S_ISWHT    { ( $_[0] & _S_IFMT() ) == S_IFWHT()   }
-sub S_ISENFMT  { ( $_[0] & _S_IFMT() ) == S_IFENFMT() }
+sub S_ISENFMT  { ( $_[0] & _S_IFMT() ) == S_ENFMT()   }
 
 sub AUTOLOAD {
     (my $constname = $AUTOLOAD) =~ s/.*:://;
