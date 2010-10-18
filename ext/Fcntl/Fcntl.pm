@@ -216,7 +216,6 @@ BEGIN {
 }
 
 sub S_IFMT  { @_ ? ( $_[0] & _S_IFMT() ) : _S_IFMT()  }
-sub S_IMODE { $_[0] & 07777 }
 
 sub AUTOLOAD {
     (my $constname = $AUTOLOAD) =~ s/.*:://;

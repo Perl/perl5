@@ -64,6 +64,20 @@ MODULE = Fcntl		PACKAGE = Fcntl
 
 INCLUDE: const-xs.inc
 
+void
+S_IMODE(...)
+    PREINIT:
+	dXSTARG;
+	SV *mode;
+    PPCODE:
+	if (items > 0)
+	   mode = ST(0);
+	else {
+	     mode = &PL_sv_undef;
+ 	     EXTEND(SP, 1);
+	}
+	PUSHu(SvUV(mode) & 07777);
+
 BOOT:
     {
         CV *cv;
