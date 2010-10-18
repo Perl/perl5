@@ -55,7 +55,16 @@
 #define DllExport __declspec(dllimport)
 #endif
 
-#ifndef PERL_CORE
+/* The Perl APIs can only be called directly inside the perl5xx.dll.
+ * All other code has to import them.  By declaring them as "dllimport"
+ * we tell the compiler to generate an indirect call instruction and
+ * avoid redirection through a call thunk.
+ *
+ * The XS code in the re extension is special, in that it redefines
+ * core APIs locally, so don't mark them as "dllimport" because GCC
+ * cannot handle this situation.
+ */
+#if !defined(PERLDLL) && !defined(PERL_EXT_RE_BUILD)
 #  ifdef __cplusplus
 #    define PERL_CALLCONV extern "C" __declspec(dllimport)
 #  else
