@@ -18,7 +18,7 @@ if (-c $devnull) {
     push @tests, ['CHR', $devnull, (stat $devnull)[2]];
 }
 
-plan(tests => 6 + 9 * @tests);
+plan(tests => 34 + 6 + 9 * @tests);
 foreach (@tests) {
     my ($type, $name, $mode) = @$_;
 
@@ -83,4 +83,10 @@ foreach ([S_ISREG => \&S_ISREG],
     ok(!$ret, "$name() is false");
     is(scalar @warnings, 1, '1 warning');
     like($warnings[0], qr/^Use of uninitialized value/, 'expected warning');
+}
+
+is (S_IFMT(), _S_IFMT(), 'S_IFMT()');
+is (S_IFMT(0), 0, 'S_IFMT(0)');
+for my $shift (0..31) {
+    is (S_IFMT(1 << $shift), ((1 << $shift) & _S_IFMT()), "S_IFMT(1 << $shift)");
 }

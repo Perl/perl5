@@ -78,6 +78,13 @@ S_IMODE(...)
 	}
 	PUSHu(SvUV(mode) & 07777);
 
+void
+S_IFMT(...)
+    PREINIT:
+	dXSTARG;
+    PPCODE:
+	PUSHu(items ? (SvUV(ST(0)) & S_IFMT) : S_IFMT);
+
 BOOT:
     {
         CV *cv;
