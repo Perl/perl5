@@ -780,7 +780,7 @@ Ap	|OP*	|newFORM	|I32 floor|NULLOK OP* o|NULLOK OP* block
 #else
 Ap	|void	|newFORM	|I32 floor|NULLOK OP* o|NULLOK OP* block
 #endif
-Apda	|OP*	|newFOROP	|I32 flags|NULLOK char* label|line_t forline \
+Apda	|OP*	|newFOROP	|I32 flags|line_t forline \
 				|NULLOK OP* sv|NN OP* expr|NULLOK OP* block|NULLOK OP* cont
 Apda	|OP*	|newGIVENOP	|NN OP* cond|NN OP* block|PADOFFSET defsv_off
 Apda	|OP*	|newLOGOP	|I32 optype|I32 flags|NN OP *first|NN OP *other

@@ -94,15 +94,13 @@
 /* FIXME for MAD - are these two ival? */
 %type <ival> mydefsv mintro
 
-%type <opval> fullstmt decl format subrout mysubrout package use peg
-%type <opval> block package_block mblock stmtseq loop cond else
+%type <opval> stmtseq fullstmt barestmt block mblock else
 %type <opval> expr term subscripted scalar ary hsh arylen star amper sideff
 %type <opval> argexpr nexpr texpr iexpr mexpr mnexpr miexpr
 %type <opval> listexpr listexprcom indirob listop method
 %type <opval> formname subname proto subbody cont my_scalar
 %type <opval> subattrlist myattrlist myattrterm myterm
 %type <opval> termbinop termunop anonymous termdo
-%type <opval> switch case
 %type <p_tkval> label
 
 %nonassoc <i_tkval> PREC_LOW
@@ -222,7 +220,7 @@ mremember:	/* NULL */	/* start a partial lexical scope */
 			{ $$ = block_start(FALSE); }
 	;
 
-/* A collection of "lines" in the program */
+/* A sequence of statements in the program */
 stmtseq	:	/* NULL */
 			{ $$ = (OP*)NULL; }
 	|	stmtseq fullstmt
@@ -233,62 +231,252 @@ stmtseq	:	/* NULL */
 			}
 	;
 
-/* A statement in the program */
-fullstmt:	label cond
-			{ $$ = newSTATEOP(0, PVAL($1), $2);
-			  TOKEN_GETMAD($1,((LISTOP*)$$)->op_first,'L'); }
-	|	loop	/* loops add their own labels */
-	|	switch  /* ... and so do switches */
-			{ $$ = $1; }
-	|	label case
-			{ $$ = newSTATEOP(0, PVAL($1), $2); }
-	|	label ';'
+/* A statement in the program, including optional label */
+fullstmt:	label barestmt
 			{
-			  if (PVAL($1)) {
-			      $$ = newSTATEOP(0, PVAL($1), newOP(OP_NULL, 0));
-			      TOKEN_GETMAD($1,$$,'L');
-			      TOKEN_GETMAD($2,((LISTOP*)$$)->op_first,';');
-			  }
-			  else {
-			      $$ = IF_MAD(
-					newOP(OP_NULL, 0),
-					(OP*)NULL);
-                              PL_parser->copline = NOLINE;
-			      TOKEN_FREE($1);
-			      TOKEN_GETMAD($2,$$,';');
-			  }
-			  PL_parser->expect = XSTATE;
-			}
-	|	label sideff ';'
-			{
-			  $$ = newSTATEOP(0, PVAL($1), $2);
-			  PL_parser->expect = XSTATE;
-			  DO_MAD({
-			      /* sideff might already have a nexstate */
-			      OP* op = ((LISTOP*)$$)->op_first;
-			      if (op) {
-				  while (op->op_sibling &&
-				     op->op_sibling->op_type == OP_NEXTSTATE)
-					op = op->op_sibling;
-				  token_getmad($1,op,'L');
-				  token_getmad($3,op,';');
-			      }
-			  })
-			}
-	|	label package_block
-			{ $$ = newSTATEOP(0, PVAL($1),
-				 newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
-					    NOLINE, (OP*)NULL, $2,
-					    (OP*)NULL, 0)); }
-	|	label PLUGSTMT
-			{ $$ = newSTATEOP(0, PVAL($1), $2); }
-	|	label decl
-			{
-			  if (PVAL($1)) {
+			  if (PVAL($1) || $2) {
 			      $$ = newSTATEOP(0, PVAL($1), $2);
+			      TOKEN_GETMAD($1,
+				  $2 ? cLISTOPx($$)->op_first : $$, 'L');
 			  } else {
-			      $$ = IF_MAD($2 ? $2 : newOP(OP_NULL, 0), $2);
+			      $$ = IF_MAD(newOP(OP_NULL, 0), $2);
 			  }
+			}
+	;
+
+/* A bare statement, lacking label and other aspects of state op */
+barestmt:	PLUGSTMT
+			{ $$ = $1; }
+	|	PEG
+			{
+			  $$ = newOP(OP_NULL,0);
+			  TOKEN_GETMAD($1,$$,'p');
+			}
+	|	FORMAT startformsub formname block
+			{
+			  CV *fmtcv = PL_compcv;
+			  SvREFCNT_inc_simple_void(PL_compcv);
+#ifdef MAD
+			  $$ = newFORM($2, $3, $4);
+			  prepend_madprops($1->tk_mad, $$, 'F');
+			  $1->tk_mad = 0;
+			  token_free($1);
+#else
+			  newFORM($2, $3, $4);
+			  $$ = (OP*)NULL;
+#endif
+			  if (CvOUTSIDE(fmtcv) && !CvUNIQUE(CvOUTSIDE(fmtcv))) {
+			      SvREFCNT_inc_simple_void(fmtcv);
+			      pad_add_anon((SV*)fmtcv, OP_NULL);
+			  }
+			}
+	|	SUB startsub subname proto subattrlist subbody
+			{
+			  SvREFCNT_inc_simple_void(PL_compcv);
+#ifdef MAD
+			  {
+			      OP* o = newSVOP(OP_ANONCODE, 0,
+				(SV*)newATTRSUB($2, $3, $4, $5, $6));
+			      $$ = newOP(OP_NULL,0);
+			      op_getmad(o,$$,'&');
+			      op_getmad($3,$$,'n');
+			      op_getmad($4,$$,'s');
+			      op_getmad($5,$$,'a');
+			      token_getmad($1,$$,'d');
+			      append_madprops($6->op_madprop, $$, 0);
+			      $6->op_madprop = 0;
+			  }
+#else
+			  newATTRSUB($2, $3, $4, $5, $6);
+			  $$ = (OP*)NULL;
+#endif
+			}
+	|	MYSUB startsub subname proto subattrlist subbody
+			{
+			  /* Unimplemented "my sub foo { }" */
+			  SvREFCNT_inc_simple_void(PL_compcv);
+#ifdef MAD
+			  $$ = newMYSUB($2, $3, $4, $5, $6);
+			  token_getmad($1,$$,'d');
+#else
+			  newMYSUB($2, $3, $4, $5, $6);
+			  $$ = (OP*)NULL;
+#endif
+			}
+	|	PACKAGE WORD WORD ';'
+			{
+#ifdef MAD
+			  $$ = package($3);
+			  token_getmad($1,$$,'o');
+			  if ($2)
+			      package_version($2);
+			  token_getmad($4,$$,';');
+#else
+			  package($3);
+			  if ($2)
+			      package_version($2);
+			  $$ = (OP*)NULL;
+#endif
+			}
+	|	USE startsub
+			{ CvSPECIAL_on(PL_compcv); /* It's a BEGIN {} */ }
+		WORD WORD listexpr ';'
+			{
+			  SvREFCNT_inc_simple_void(PL_compcv);
+#ifdef MAD
+			  $$ = utilize(IVAL($1), $2, $4, $5, $6);
+			  token_getmad($1,$$,'o');
+			  token_getmad($7,$$,';');
+			  if (PL_parser->rsfp_filters &&
+				      AvFILLp(PL_parser->rsfp_filters) >= 0)
+			      append_madprops(newMADPROP('!', MAD_NULL, NULL, 0), $$, 0);
+#else
+			  utilize(IVAL($1), $2, $4, $5, $6);
+			  $$ = (OP*)NULL;
+#endif
+			}
+	|	IF lpar_or_qw remember mexpr ')' mblock else
+			{
+			  $$ = block_end($3, newCONDOP(0, $4, scope($6), $7));
+			  TOKEN_GETMAD($1,$$,'I');
+			  TOKEN_GETMAD($2,$$,'(');
+			  TOKEN_GETMAD($5,$$,')');
+			  PL_parser->copline = (line_t)IVAL($1);
+			}
+	|	UNLESS lpar_or_qw remember miexpr ')' mblock else
+			{
+			  $$ = block_end($3, newCONDOP(0, $4, scope($6), $7));
+			  TOKEN_GETMAD($1,$$,'I');
+			  TOKEN_GETMAD($2,$$,'(');
+			  TOKEN_GETMAD($5,$$,')');
+			  PL_parser->copline = (line_t)IVAL($1);
+			}
+	|	GIVEN lpar_or_qw remember mydefsv mexpr ')' mblock
+			{
+			  $$ = block_end($3,
+				  newGIVENOP($5, scope($7), (PADOFFSET)$4));
+			  PL_parser->copline = (line_t)IVAL($1);
+			}
+	|	WHEN lpar_or_qw remember mexpr ')' mblock
+			{ $$ = block_end($3, newWHENOP($4, scope($6))); }
+	|	DEFAULT block
+			{ $$ = newWHENOP(0, scope($2)); }
+	|	WHILE lpar_or_qw remember texpr ')' mintro mblock cont
+			{
+			  $$ = block_end($3,
+				  newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
+				      IVAL($1), $4, $7, $8, $6));
+			  TOKEN_GETMAD($1,$$,'W');
+			  TOKEN_GETMAD($2,$$,'(');
+			  TOKEN_GETMAD($5,$$,')');
+			  PL_parser->copline = (line_t)IVAL($1);
+			}
+	|	UNTIL lpar_or_qw remember iexpr ')' mintro mblock cont
+			{
+			  $$ = block_end($3,
+			 	  newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
+				      IVAL($1), $4, $7, $8, $6));
+			  TOKEN_GETMAD($1,$$,'W');
+			  TOKEN_GETMAD($2,$$,'(');
+			  TOKEN_GETMAD($5,$$,')');
+			  PL_parser->copline = (line_t)IVAL($1);
+			}
+	|	FOR lpar_or_qw remember mnexpr ';' texpr ';' mintro mnexpr ')'
+		mblock
+			{
+			  OP *initop = IF_MAD($4 ? $4 : newOP(OP_NULL, 0), $4);
+			  OP *forop = newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
+				      IVAL($1), scalar($6), $11, $9, $8);
+			  if (initop) {
+			      forop = op_prepend_elem(OP_LINESEQ, initop,
+				  op_append_elem(OP_LINESEQ,
+				      newOP(OP_UNSTACK, OPf_SPECIAL),
+				      forop));
+			  }
+			  DO_MAD({ forop = newUNOP(OP_NULL, 0, forop); })
+			  $$ = block_end($3, forop);
+			  TOKEN_GETMAD($1,$$,'3');
+			  TOKEN_GETMAD($2,$$,'(');
+			  TOKEN_GETMAD($5,$$,'1');
+			  TOKEN_GETMAD($7,$$,'2');
+			  TOKEN_GETMAD($10,$$,')');
+			  PL_parser->copline = (line_t)IVAL($1);
+			}
+	|	FOR MY remember my_scalar lpar_or_qw mexpr ')' mblock cont
+			{
+			  $$ = block_end($3,
+			 	  newFOROP(0, (line_t)IVAL($1),
+				      $4, $6, $8, $9));
+			  TOKEN_GETMAD($1,$$,'W');
+			  TOKEN_GETMAD($2,$$,'d');
+			  TOKEN_GETMAD($5,$$,'(');
+			  TOKEN_GETMAD($7,$$,')');
+			  PL_parser->copline = (line_t)IVAL($1);
+			}
+	|	FOR scalar lpar_or_qw remember mexpr ')' mblock cont
+			{
+			  $$ = block_end($4,
+			 	  newFOROP(0, (line_t)IVAL($1),
+				      mod($2, OP_ENTERLOOP), $5, $7, $8));
+			  TOKEN_GETMAD($1,$$,'W');
+			  TOKEN_GETMAD($3,$$,'(');
+			  TOKEN_GETMAD($6,$$,')');
+			  PL_parser->copline = (line_t)IVAL($1);
+			}
+	|	FOR lpar_or_qw remember mexpr ')' mblock cont
+			{
+			  $$ = block_end($3,
+			 	  newFOROP(0, (line_t)IVAL($1),
+				      (OP*)NULL, $4, $6, $7));
+			  TOKEN_GETMAD($1,$$,'W');
+			  TOKEN_GETMAD($2,$$,'(');
+			  TOKEN_GETMAD($5,$$,')');
+			  PL_parser->copline = (line_t)IVAL($1);
+			}
+	|	block cont
+			{
+			  /* a block is a loop that happens once */
+			  $$ = newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
+				  NOLINE, (OP*)NULL, $1, $2, 0);
+			}
+	|	PACKAGE WORD WORD '{' remember
+			{
+			  int save_3_latefree = $3->op_latefree;
+			  $3->op_latefree = 1;
+			  package($3);
+			  $3->op_latefree = save_3_latefree;
+			  if ($2) {
+			      int save_2_latefree = $2->op_latefree;
+			      $2->op_latefree = 1;
+			      package_version($2);
+			      $2->op_latefree = save_2_latefree;
+			  }
+			}
+		stmtseq '}'
+			{
+			  /* a block is a loop that happens once */
+			  $$ = newWHILEOP(0, 1, (LOOP*)(OP*)NULL, NOLINE,
+				  (OP*)NULL, block_end($5, $7), (OP*)NULL, 0);
+			  op_free($3);
+			  if ($2)
+			      op_free($2);
+			  TOKEN_GETMAD($4,$$,'{');
+			  TOKEN_GETMAD($8,$$,'}');
+			  if (PL_parser->copline > (line_t)IVAL($4))
+			      PL_parser->copline = (line_t)IVAL($4);
+			}
+	|	sideff ';'
+			{
+			  PL_parser->expect = XSTATE;
+			  $$ = $1;
+			  TOKEN_GETMAD($2,$$,';');
+			}
+	|	';'
+			{
+			  PL_parser->expect = XSTATE;
+			  $$ = IF_MAD(newOP(OP_NULL, 0), (OP*)NULL);
+			  TOKEN_GETMAD($1,$$,';');
+			  PL_parser->copline = NOLINE;
 			}
 	;
 
@@ -314,9 +502,9 @@ sideff	:	error
 			  TOKEN_GETMAD($2,$$,'w');
 			}
 	|	expr FOR expr
-			{ $$ = newFOROP(0, NULL, (line_t)IVAL($2),
+			{ $$ = newFOROP(0, (line_t)IVAL($2),
 					(OP*)NULL, $3, $1, (OP*)NULL);
-			  TOKEN_GETMAD($2,((LISTOP*)$$)->op_first->op_sibling,'w');
+			  TOKEN_GETMAD($2,$$,'w');
 			}
 	|	expr WHEN expr
 			{ $$ = newWHENOP($3, scope($1)); }
@@ -339,33 +527,6 @@ else	:	/* NULL */
 			}
 	;
 
-/* Real conditional expressions */
-cond	:	IF lpar_or_qw remember mexpr ')' mblock else
-			{ PL_parser->copline = (line_t)IVAL($1);
-			    $$ = block_end($3,
-				   newCONDOP(0, $4, scope($6), $7));
-			  TOKEN_GETMAD($1,$$,'I');
-			  TOKEN_GETMAD($2,$$,'(');
-			  TOKEN_GETMAD($5,$$,')');
-			}
-	|	UNLESS lpar_or_qw remember miexpr ')' mblock else
-			{ PL_parser->copline = (line_t)IVAL($1);
-			    $$ = block_end($3,
-				   newCONDOP(0, $4, scope($6), $7));
-			  TOKEN_GETMAD($1,$$,'I');
-			  TOKEN_GETMAD($2,$$,'(');
-			  TOKEN_GETMAD($5,$$,')');
-			}
-	;
-
-/* Cases for a switch statement */
-case	:	WHEN lpar_or_qw remember mexpr ')' mblock
-	{ $$ = block_end($3,
-		newWHENOP($4, scope($6))); }
-	|	DEFAULT block
-	{ $$ = newWHENOP(0, scope($2)); }
-	;
-
 /* Continue blocks */
 cont	:	/* NULL */
 			{ $$ = (OP*)NULL; }
@@ -373,111 +534,6 @@ cont	:	/* NULL */
 			{ $$ = scope($2);
 			  TOKEN_GETMAD($1,$$,'o');
 			}
-	;
-
-/* Loops: while, until, for, and a bare block */
-loop	:	label WHILE lpar_or_qw remember texpr ')' mintro mblock cont
-			{ OP *innerop;
-			  PL_parser->copline = (line_t)IVAL($2);
-			    $$ = block_end($4,
-				   newSTATEOP(0, PVAL($1),
-				     innerop = newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
-						IVAL($2), $5, $8, $9, $7)));
-			  TOKEN_GETMAD($1,innerop,'L');
-			  TOKEN_GETMAD($2,innerop,'W');
-			  TOKEN_GETMAD($3,innerop,'(');
-			  TOKEN_GETMAD($6,innerop,')');
-			}
-
-	|	label UNTIL lpar_or_qw remember iexpr ')' mintro mblock cont
-			{ OP *innerop;
-			  PL_parser->copline = (line_t)IVAL($2);
-			    $$ = block_end($4,
-				   newSTATEOP(0, PVAL($1),
-				     innerop = newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
-						IVAL($2), $5, $8, $9, $7)));
-			  TOKEN_GETMAD($1,innerop,'L');
-			  TOKEN_GETMAD($2,innerop,'W');
-			  TOKEN_GETMAD($3,innerop,'(');
-			  TOKEN_GETMAD($6,innerop,')');
-			}
-	|	label FOR MY remember my_scalar lpar_or_qw mexpr ')' mblock cont
-			{ OP *innerop;
-			  $$ = block_end($4,
-			     innerop = newFOROP(0, PVAL($1), (line_t)IVAL($2),
-					    $5, $7, $9, $10));
-			  TOKEN_GETMAD($1,((LISTOP*)innerop)->op_first,'L');
-			  TOKEN_GETMAD($2,((LISTOP*)innerop)->op_first->op_sibling,'W');
-			  TOKEN_GETMAD($3,((LISTOP*)innerop)->op_first->op_sibling,'d');
-			  TOKEN_GETMAD($6,((LISTOP*)innerop)->op_first->op_sibling,'(');
-			  TOKEN_GETMAD($8,((LISTOP*)innerop)->op_first->op_sibling,')');
-			}
-	|	label FOR scalar lpar_or_qw remember mexpr ')' mblock cont
-			{ OP *innerop;
-			  $$ = block_end($5,
-			     innerop = newFOROP(0, PVAL($1), (line_t)IVAL($2),
-				    mod($3, OP_ENTERLOOP), $6, $8, $9));
-			  TOKEN_GETMAD($1,((LISTOP*)innerop)->op_first,'L');
-			  TOKEN_GETMAD($2,((LISTOP*)innerop)->op_first->op_sibling,'W');
-			  TOKEN_GETMAD($4,((LISTOP*)innerop)->op_first->op_sibling,'(');
-			  TOKEN_GETMAD($7,((LISTOP*)innerop)->op_first->op_sibling,')');
-			}
-	|	label FOR lpar_or_qw remember mexpr ')' mblock cont
-			{ OP *innerop;
-			  $$ = block_end($4,
-			     innerop = newFOROP(0, PVAL($1), (line_t)IVAL($2),
-						    (OP*)NULL, $5, $7, $8));
-			  TOKEN_GETMAD($1,((LISTOP*)innerop)->op_first,'L');
-			  TOKEN_GETMAD($2,((LISTOP*)innerop)->op_first->op_sibling,'W');
-			  TOKEN_GETMAD($3,((LISTOP*)innerop)->op_first->op_sibling,'(');
-			  TOKEN_GETMAD($6,((LISTOP*)innerop)->op_first->op_sibling,')');
-			}
-	|	label FOR lpar_or_qw remember mnexpr ';' texpr ';' mintro mnexpr ')'
-	    	    mblock
-			/* basically fake up an initialize-while stmtseq */
-			{ OP *forop;
-			  PL_parser->copline = (line_t)IVAL($2);
-			  forop = newSTATEOP(0, PVAL($1),
-					    newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
-						IVAL($2), scalar($7),
-						$12, $10, $9));
-#ifdef MAD
-			  forop = newUNOP(OP_NULL, 0, op_append_elem(OP_LINESEQ,
-				newSTATEOP(0,
-					   CopLABEL_alloc(($1)->tk_lval.pval),
-					   ($5 ? $5 : newOP(OP_NULL, 0)) ),
-				forop));
-
-			  token_getmad($2,forop,'3');
-			  token_getmad($3,forop,'(');
-			  token_getmad($6,forop,'1');
-			  token_getmad($8,forop,'2');
-			  token_getmad($11,forop,')');
-			  token_getmad($1,forop,'L');
-#else
-			  if ($5) {
-				forop = op_append_elem(OP_LINESEQ,
-                                        newSTATEOP(0, CopLABEL_alloc($1), $5),
-					forop);
-			  }
-
-
-#endif
-			  $$ = block_end($4, forop); }
-	|	label block cont  /* a block is a loop that happens once */
-			{ $$ = newSTATEOP(0, PVAL($1),
-				 newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
-					    NOLINE, (OP*)NULL, $2, $3, 0));
-			  TOKEN_GETMAD($1,((LISTOP*)$$)->op_first,'L'); }
-	;
-
-/* Switch blocks */
-switch	:	label GIVEN lpar_or_qw remember mydefsv mexpr ')' mblock
-			{ PL_parser->copline = (line_t) IVAL($2);
-			    $$ = block_end($4,
-				newSTATEOP(0, PVAL($1),
-				    newGIVENOP($6, scope($8),
-					(PADOFFSET) $5) )); }
 	;
 
 /* determine whether there are any new my declarations */
@@ -532,88 +588,8 @@ label	:	/* empty */
 	|	LABEL
 	;
 
-/* Some kind of declaration - just hang on peg in the parse tree */
-decl	:	format
-			{ $$ = $1; }
-	|	subrout
-			{ $$ = $1; }
-	|	mysubrout
-			{ $$ = $1; }
-	|	package
-			{ $$ = $1; }
-	|	use
-			{ $$ = $1; }
-
-    /* these two are only used by MAD */
-
-	|	peg
-			{ $$ = $1; }
-	;
-
-peg	:	PEG
-			{ $$ = newOP(OP_NULL,0);
-			  TOKEN_GETMAD($1,$$,'p');
-			}
-	;
-
-format	:	FORMAT startformsub formname block
-			{
-			  CV *fmtcv = PL_compcv;
-			  SvREFCNT_inc_simple_void(PL_compcv);
-#ifdef MAD
-			  $$ = newFORM($2, $3, $4);
-			  prepend_madprops($1->tk_mad, $$, 'F');
-			  $1->tk_mad = 0;
-			  token_free($1);
-#else
-			  newFORM($2, $3, $4);
-			  $$ = (OP*)NULL;
-#endif
-			  if (CvOUTSIDE(fmtcv) && !CvUNIQUE(CvOUTSIDE(fmtcv))) {
-			    SvREFCNT_inc_simple_void(fmtcv);
-			    pad_add_anon((SV*)fmtcv, OP_NULL);
-			  }
-			}
-	;
-
 formname:	WORD		{ $$ = $1; }
 	|	/* NULL */	{ $$ = (OP*)NULL; }
-	;
-
-/* Unimplemented "my sub foo { }" */
-mysubrout:	MYSUB startsub subname proto subattrlist subbody
-			{ SvREFCNT_inc_simple_void(PL_compcv);
-#ifdef MAD
-			  $$ = newMYSUB($2, $3, $4, $5, $6);
-			  token_getmad($1,$$,'d');
-#else
-			  newMYSUB($2, $3, $4, $5, $6);
-			  $$ = (OP*)NULL;
-#endif
-			}
-	;
-
-/* Subroutine definition */
-subrout	:	SUB startsub subname proto subattrlist subbody
-			{ SvREFCNT_inc_simple_void(PL_compcv);
-#ifdef MAD
-			  {
-			      OP* o = newSVOP(OP_ANONCODE, 0,
-				(SV*)newATTRSUB($2, $3, $4, $5, $6));
-			      $$ = newOP(OP_NULL,0);
-			      op_getmad(o,$$,'&');
-			      op_getmad($3,$$,'n');
-			      op_getmad($4,$$,'s');
-			      op_getmad($5,$$,'a');
-			      token_getmad($1,$$,'d');
-			      append_madprops($6->op_madprop, $$, 0);
-			      $6->op_madprop = 0;
-			    }
-#else
-			  newATTRSUB($2, $3, $4, $5, $6);
-			  $$ = (OP*)NULL;
-#endif
-			}
 	;
 
 startsub:	/* NULL */	/* start a regular subroutine scope */
@@ -685,66 +661,6 @@ subbody	:	block	{ $$ = $1; }
 				);
 			  PL_parser->expect = XSTATE;
 			  TOKEN_GETMAD($1,$$,';');
-			}
-	;
-
-package :	PACKAGE WORD WORD ';'
-			{
-#ifdef MAD
-			  $$ = package($3);
-			  token_getmad($1,$$,'o');
-			  if ($2)
-			      package_version($2);
-			  token_getmad($4,$$,';');
-#else
-			  package($3);
-			  if ($2)
-			      package_version($2);
-			  $$ = (OP*)NULL;
-#endif
-			}
-	;
-
-package_block:	PACKAGE WORD WORD '{' remember
-			{
-			  int save_3_latefree = $3->op_latefree;
-			  $3->op_latefree = 1;
-			  package($3);
-			  $3->op_latefree = save_3_latefree;
-			  if ($2) {
-			      int save_2_latefree = $2->op_latefree;
-			      $2->op_latefree = 1;
-			      package_version($2);
-			      $2->op_latefree = save_2_latefree;
-			  }
-			}
-		    stmtseq '}'
-			{ if (PL_parser->copline > (line_t)IVAL($4))
-			      PL_parser->copline = (line_t)IVAL($4);
-			  $$ = block_end($5, $7);
-			  TOKEN_GETMAD($4,$$,'{');
-			  TOKEN_GETMAD($8,$$,'}');
-			  op_free($3);
-			  if ($2)
-			      op_free($2);
-			}
-	;
-
-use	:	USE startsub
-			{ CvSPECIAL_on(PL_compcv); /* It's a BEGIN {} */ }
-		    WORD WORD listexpr ';'
-			{ SvREFCNT_inc_simple_void(PL_compcv);
-#ifdef MAD
-			  $$ = utilize(IVAL($1), $2, $4, $5, $6);
-			  token_getmad($1,$$,'o');
-			  token_getmad($7,$$,';');
-			  if (PL_parser->rsfp_filters &&
-				      AvFILLp(PL_parser->rsfp_filters) >= 0)
-			      append_madprops(newMADPROP('!', MAD_NULL, NULL, 0), $$, 0);
-#else
-			  utilize(IVAL($1), $2, $4, $5, $6);
-			  $$ = (OP*)NULL;
-#endif
 			}
 	;
 

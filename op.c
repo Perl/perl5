@@ -5429,7 +5429,7 @@ whileline, OP *expr, OP *block, OP *cont, I32 has_my)
 }
 
 /*
-=for apidoc Am|OP *|newFOROP|I32 flags|char *label|line_t forline|OP *sv|OP *expr|OP *block|OP *cont
+=for apidoc Am|OP *|newFOROP|I32 flags|line_t forline|OP *sv|OP *expr|OP *block|OP *cont
 
 Constructs, checks, and returns an op tree expressing a C<foreach>
 loop (iteration through a list of values).  This is a heavyweight loop,
@@ -5447,16 +5447,13 @@ I<flags> gives the eight bits of C<op_flags> for the C<leaveloop>
 op and, shifted up eight bits, the eight bits of C<op_private> for
 the C<leaveloop> op, except that (in both cases) some bits will be set
 automatically.  I<forline> is the line number that should be attributed
-to the loop's list expression.  If I<label> is non-null, it supplies
-the name of a label to attach to the state op at the start of the loop;
-this function takes ownership of the memory pointed at by I<label>,
-and will free it.
+to the loop's list expression.
 
 =cut
 */
 
 OP *
-Perl_newFOROP(pTHX_ I32 flags, char *label, line_t forline, OP *sv, OP *expr, OP *block, OP *cont)
+Perl_newFOROP(pTHX_ I32 flags, line_t forline, OP *sv, OP *expr, OP *block, OP *cont)
 {
     dVAR;
     LOOP *loop;
@@ -5577,8 +5574,7 @@ Perl_newFOROP(pTHX_ I32 flags, char *label, line_t forline, OP *sv, OP *expr, OP
     wop = newWHILEOP(flags, 1, loop, forline, newOP(OP_ITER, 0), block, cont, 0);
     if (madsv)
 	op_getmad(madsv, (OP*)loop, 'v');
-    PL_parser->copline = forline;
-    return newSTATEOP(0, label, wop);
+    return wop;
 }
 
 /*

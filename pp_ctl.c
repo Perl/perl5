@@ -2783,6 +2783,14 @@ PP(pp_goto)
 				    enterops, enterops + GOTO_DEPTH);
 		if (retop)
 		    break;
+		if (gotoprobe->op_sibling &&
+			gotoprobe->op_sibling->op_type == OP_UNSTACK &&
+			gotoprobe->op_sibling->op_sibling) {
+		    retop = dofindlabel(gotoprobe->op_sibling->op_sibling,
+					label, enterops, enterops + GOTO_DEPTH);
+		    if (retop)
+			break;
+		}
 	    }
 	    PL_lastgotoprobe = gotoprobe;
 	}

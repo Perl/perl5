@@ -223,13 +223,14 @@ PP(pp_cond_expr)
 PP(pp_unstack)
 {
     dVAR;
-    I32 oldsave;
     PERL_ASYNC_CHECK();
     TAINT_NOT;		/* Each statement is presumed innocent */
     PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
     FREETMPS;
-    oldsave = PL_scopestack[PL_scopestack_ix - 1];
-    LEAVE_SCOPE(oldsave);
+    if (!(PL_op->op_flags & OPf_SPECIAL)) {
+	I32 oldsave = PL_scopestack[PL_scopestack_ix - 1];
+	LEAVE_SCOPE(oldsave);
+    }
     return NORMAL;
 }
 

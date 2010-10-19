@@ -23,7 +23,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED),
 	 ($] < 5.009 ? 'PMf_SKIPWHITE' : 'RXf_SKIPWHITE'),
 	 ($] < 5.011 ? 'CVf_LOCKED' : ());
-$VERSION = 0.99;
+$VERSION = 1.00;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -958,14 +958,19 @@ sub is_for_loop {
     my $op = shift;
     # This OP might be almost anything, though it won't be a
     # nextstate. (It's the initialization, so in the canonical case it
-    # will be an sassign.) The sibling is a lineseq whose first child
-    # is a nextstate and whose second is a leaveloop.
+    # will be an sassign.) The sibling is (old style) a lineseq whose
+    # first child is a nextstate and whose second is a leaveloop, or
+    # (new style) an unstack whose sibling is a leaveloop.
     my $lseq = $op->sibling;
-    if (!is_state $op and !null($lseq) and $lseq->name eq "lineseq") {
+    return 0 unless !is_state($op) and !null($lseq);
+    if ($lseq->name eq "lineseq") {
 	if ($lseq->first && !null($lseq->first) && is_state($lseq->first)
 	    && (my $sib = $lseq->first->sibling)) {
 	    return (!null($sib) && $sib->name eq "leaveloop");
 	}
+    } elsif ($lseq->name eq "unstack" && ($lseq->flags & OPf_SPECIAL)) {
+	my $sib = $lseq->sibling;
+	return $sib && !null($sib) && $sib->name eq "leaveloop";
     }
     return 0;
 }
@@ -1215,7 +1220,8 @@ sub walk_lineseq {
 	    }
 	}
 	if (is_for_loop($kids[$i])) {
-	    $callback->($expr . $self->for_loop($kids[$i], 0), $i++);
+	    $callback->($expr . $self->for_loop($kids[$i], 0),
+		$i += $kids[$i]->sibling->name eq "unstack" ? 2 : 1);
 	    next;
 	}
 	$expr .= $self->deparse($kids[$i], (@kids != 1)/2);
@@ -2757,7 +2763,9 @@ sub for_loop {
     my $self = shift;
     my($op, $cx) = @_;
     my $init = $self->deparse($op, 1);
-    return $self->loop_common($op->sibling->first->sibling, $cx, $init);
+    my $s = $op->sibling;
+    my $ll = $s->name eq "unstack" ? $s->sibling : $s->first->sibling;
+    return $self->loop_common($ll, $cx, $init);
 }
 
 sub pp_leavetry {

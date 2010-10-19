@@ -2378,10 +2378,10 @@ PERL_CALLCONV OP*	Perl_newCVREF(pTHX_ I32 flags, OP* o)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV OP*	Perl_newFOROP(pTHX_ I32 flags, char* label, line_t forline, OP* sv, OP* expr, OP* block, OP* cont)
+PERL_CALLCONV OP*	Perl_newFOROP(pTHX_ I32 flags, line_t forline, OP* sv, OP* expr, OP* block, OP* cont)
 			__attribute__malloc__
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_5);
+			__attribute__nonnull__(pTHX_4);
 #define PERL_ARGS_ASSERT_NEWFOROP	\
 	assert(expr)
 

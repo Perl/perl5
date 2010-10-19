@@ -281,7 +281,6 @@ checkOptree ( name	=> '-basic sub { print "foo $_" foreach (1..10) }',
 # g  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->g
 # 1        <;> nextstate(main 445 optree.t:167) v:>,<,% ->2
-# -        <0> null v ->-
 # f        <2> leaveloop K/2 ->g
 # 6           <{> enteriter(next->c last->f redo->7) lKS/8 ->d
 # -              <0> ex-pushmark s ->2
@@ -307,7 +306,6 @@ EOT_EOT
 # g  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->g
 # 1        <;> nextstate(main 446 optree_samples.t:192) v:>,<,% ->2
-# -        <0> null v ->-
 # f        <2> leaveloop K/2 ->g
 # 6           <{> enteriter(next->c last->f redo->7) lKS/8 ->d
 # -              <0> ex-pushmark s ->2
@@ -337,7 +335,7 @@ checkOptree ( name	=> '-exec -e foreach (1..10) {print qq{foo $_}}',
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <0> enter 
-# 2  <;> nextstate(main 2 -e:1) v:>,<,%
+# 2  <;> nextstate(main 2 -e:1) v:>,<,%,{
 # 3  <0> pushmark s
 # 4  <$> const[IV 1] s
 # 5  <$> const[IV 10] s
@@ -357,7 +355,7 @@ checkOptree ( name	=> '-exec -e foreach (1..10) {print qq{foo $_}}',
 # i  <@> leave[1 ref] vKP/REFC
 EOT_EOT
 # 1  <0> enter 
-# 2  <;> nextstate(main 2 -e:1) v:>,<,%
+# 2  <;> nextstate(main 2 -e:1) v:>,<,%,{
 # 3  <0> pushmark s
 # 4  <$> const(IV 1) s
 # 5  <$> const(IV 10) s
@@ -545,7 +543,7 @@ checkOptree ( name	=> '%h=(); for $_(@a){$h{getkey($_)} = $_}',
 # n      <2> sassign vKS/2
 # o      <0> unstack s
 #            goto p
-# r  <2> leaveloop K/2
+# r  <2> leaveloop KP/2
 # s  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 505 (eval 24):1) v
@@ -575,7 +573,7 @@ EOT_EOT
 # n      <2> sassign vKS/2
 # o      <0> unstack s
 #            goto p
-# r  <2> leaveloop K/2
+# r  <2> leaveloop KP/2
 # s  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 

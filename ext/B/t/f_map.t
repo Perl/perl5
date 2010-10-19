@@ -185,7 +185,7 @@ checkOptree(note   => q{},
 # p      <2> sassign vKS/2
 # q      <0> unstack s
 #            goto r
-# t  <2> leaveloop K/2
+# t  <2> leaveloop KP/2
 # u  <2> leaveloop K/2
 # v  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
@@ -218,7 +218,7 @@ EOT_EOT
 # p      <2> sassign vKS/2
 # q      <0> unstack s
 #            goto r
-# t  <2> leaveloop K/2
+# t  <2> leaveloop KP/2
 # u  <2> leaveloop K/2
 # v  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
