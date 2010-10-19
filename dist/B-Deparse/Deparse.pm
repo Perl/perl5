@@ -1041,9 +1041,11 @@ sub maybe_local {
 	and not $self->{'avoid_local'}{$$op}) {
 	my $our_local = ($op->private & OPpLVAL_INTRO) ? "local" : "our";
 	if( $our_local eq 'our' ) {
-	    # XXX This assertion fails code with non-ASCII identifiers,
-	    # like ./ext/Encode/t/jperl.t
-	    die "Unexpected our($text)\n" unless $text =~ /^\W(\w+::)*\w+\z/;
+	    if ( $text !~ /^\W(\w+::)*\w+\z/
+	     and !utf8::decode($text) || $text !~ /^\W(\w+::)*\w+\z/
+	    ) {
+		die "Unexpected our($text)\n";
+	    }
 	    $text =~ s/(\w+::)+//;
 	}
         if (want_scalar($op)) {
