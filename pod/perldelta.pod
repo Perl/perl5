@@ -1,11 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been logged up to 97a3247,
-except for:
-b2ea9a00b30eb5881b863d7239dd6a3721e73136
-e4487e9b537f1be1e95aba1c87790c2a411788a7
-68b590d93559da1f7a0d3956202180d507013365
+This has been logged up to 97a3247.
 
 =head1 NAME
 
@@ -886,8 +882,8 @@ corrupted state during destruction.
 
 =item *
 
-Perl no longer leaks C<PL_main_cv> or C<PL_defstash> during
-destruction L<[perl #40388]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=40388>.
+The typeglob C<*,>, which holds the scalar variable C<$,> (output field
+separator), had the wrong reference count in child threads.
 
 =back
 
