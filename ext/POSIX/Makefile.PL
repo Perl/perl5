@@ -119,7 +119,7 @@ if ($rt_signals) {
 }
 
 WriteConstants(
-    ($] > 5.009002 ? (PROXYSUBS => 1) : ()),
+    PROXYSUBS => 1,
     NAME => 'POSIX',
     NAMES => \@names,
 );

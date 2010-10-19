@@ -72,7 +72,7 @@ push @names,
          foreach qw(INADDR_ANY INADDR_LOOPBACK INADDR_NONE INADDR_BROADCAST);
 
 WriteConstants(
-    ($] > 5.009002 ? (PROXYSUBS => 1) : ()),
+    PROXYSUBS => 1,
     NAME => 'Socket',
     NAMES => \@names,
 );
