@@ -538,18 +538,17 @@ $xs_subname(sv)
     INPUT:
 	SV *		sv;
     PPCODE:
-#ifdef SYMBIAN
-	sv = newSVpvf("%"SVf" is not a valid $package_sprintf_safe macro", sv);
-#else
+#ifndef SYMBIAN
 	HV *${c_subname}_missing = get_missing_hash(aTHX);
 	if (hv_exists_ent(${c_subname}_missing, sv, 0)) {
 	    sv = newSVpvf("Your vendor has not defined $package_sprintf_safe macro %" SVf
 			  ", used", sv);
-	} else {
+	} else
+#endif
+	{
 	    sv = newSVpvf("%"SVf" is not a valid $package_sprintf_safe macro",
 			  sv);
 	}
-#endif
 	PUSHs(sv_2mortal(sv));
 DONT
 
