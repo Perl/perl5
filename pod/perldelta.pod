@@ -388,6 +388,10 @@ B::Deparse now properly handles the code that applies a conditional
 pattern match against implicit C<$_> as it was fixed in
 L<[perl #20444]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=20444>.
 
+=item *
+
+C<GDBM_File> has been upgraded from version 1.10 to 1.11
+
 =back
 
 =head2 Removed Modules and Pragmata

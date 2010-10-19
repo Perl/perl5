@@ -69,7 +69,7 @@ require XSLoader;
 );
 
 # This module isn't dual life, so no need for dev version numbers.
-$VERSION = '1.10';
+$VERSION = '1.11';
 
 sub AUTOLOAD {
     my($constname);
