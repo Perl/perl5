@@ -37,7 +37,7 @@ use feature 'switch';
 
 @EXPORT_OK   = (@{$EXPORT_TAGS{'glob'}}, 'csh_glob');
 
-$VERSION = '1.09';
+$VERSION = '1.10';
 
 sub import {
     require Exporter;
@@ -63,13 +63,7 @@ sub AUTOLOAD {
 
     my $constname;
     ($constname = $AUTOLOAD) =~ s/.*:://;
-    my ($error, $val) = constant($constname);
-    if ($error) {
-	require Carp;
-	Carp::croak($error);
-    }
-    eval "sub $AUTOLOAD { $val }";
-    goto &$AUTOLOAD;
+    constant($constname);
 }
 
 XSLoader::load();

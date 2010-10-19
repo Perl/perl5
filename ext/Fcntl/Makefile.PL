@@ -1,5 +1,5 @@
 use ExtUtils::MakeMaker;
-use ExtUtils::Constant 0.11 'WriteConstants';
+use ExtUtils::Constant 0.23 'WriteConstants';
 WriteMakefile(
     NAME 	=> 'Fcntl',
     XSPROTOARG => '-noprototypes', 		# XXX remove later?
@@ -39,7 +39,7 @@ my @names = (qw(
             {name=>"SEEK_END", default=>["IV", "2"]},
             {name=>"_S_IFMT", macro=>"S_IFMT", value=>"S_IFMT"});
 WriteConstants(
-    PROXYSUBS => 1,
+    PROXYSUBS => {croak_on_error => 1},
     NAME => 'Fcntl',
     NAMES => \@names,
 );

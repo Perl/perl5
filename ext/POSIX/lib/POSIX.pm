@@ -4,7 +4,7 @@ use warnings;
 
 our(@ISA, %EXPORT_TAGS, @EXPORT_OK, @EXPORT, $AUTOLOAD, %SIGRT) = ();
 
-our $VERSION = "1.21";
+our $VERSION = "1.22";
 
 use AutoLoader;
 
@@ -36,21 +36,15 @@ sub usage;
 XSLoader::load();
 
 sub AUTOLOAD {
-    no strict;
     no warnings 'uninitialized';
     if ($AUTOLOAD =~ /::(_?[a-z])/) {
 	# require AutoLoader;
 	$AutoLoader::AUTOLOAD = $AUTOLOAD;
 	goto &AutoLoader::AUTOLOAD
     }
-    local $! = 0;
     my $constname = $AUTOLOAD;
     $constname =~ s/.*:://;
-    my ($error, $val) = constant($constname);
-    croak $error if $error;
-    *$AUTOLOAD = sub { $val };
-
-    goto &$AUTOLOAD;
+    constant($constname);
 }
 
 package POSIX::SigAction;

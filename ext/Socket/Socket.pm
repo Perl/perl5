@@ -1,7 +1,7 @@
 package Socket;
 
 our($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-$VERSION = "1.90";
+$VERSION = "1.91";
 
 =head1 NAME
 
@@ -435,12 +435,7 @@ sub AUTOLOAD {
     my($constname);
     ($constname = $AUTOLOAD) =~ s/.*:://;
     croak "&Socket::constant not defined" if $constname eq 'constant';
-    my ($error, $val) = constant($constname);
-    if ($error) {
-	croak $error;
-    }
-    *$AUTOLOAD = sub { $val };
-    goto &$AUTOLOAD;
+    constant($constname);
 }
 
 XSLoader::load();

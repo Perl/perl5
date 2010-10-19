@@ -186,14 +186,7 @@ XSLoader::load();
 sub AUTOLOAD {
     (my $constname = $AUTOLOAD) =~ s/.*:://;
     die "&Fcntl::constant not defined" if $constname eq 'constant';
-    my ($error, $val) = constant($constname);
-    if ($error) {
-        my (undef,$file,$line) = caller;
-        die "$error at $file line $line\n";
-    }
-    no strict 'refs';
-    *$AUTOLOAD = sub { $val };
-    goto &$AUTOLOAD;
+    constant($constname);
 }
 
 1;

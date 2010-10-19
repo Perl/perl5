@@ -1,6 +1,6 @@
 # Expect this line to be read by t/posix.t, don't change it
 use ExtUtils::MakeMaker;
-use ExtUtils::Constant 0.11 'WriteConstants';
+use ExtUtils::Constant 0.23 'WriteConstants';
 use Config;
 my $rt_signals;
 if ($Config{sig_name} =~ /\bRTMIN\b/ && $Config{sig_name} =~ /\bRTMAX\b/) {
@@ -119,7 +119,7 @@ if ($rt_signals) {
 }
 
 WriteConstants(
-    PROXYSUBS => 1,
+    PROXYSUBS => {croak_on_error => 1},
     NAME => 'POSIX',
     NAMES => \@names,
 );

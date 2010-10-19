@@ -1,5 +1,5 @@
 use ExtUtils::MakeMaker;
-use ExtUtils::Constant;
+use ExtUtils::Constant 0.23;
 
 WriteMakefile(
     'NAME'		=> 'I18N::Langinfo',
@@ -30,7 +30,7 @@ push @names,           # This lot are only enums for __SVR4_I386_ABI_L1__:
       foreach qw (CRNCYSTR THOUSEP RADIXCHAR);
 
 ExtUtils::Constant::WriteConstants(
-				   PROXYSUBS => 1,
+				   PROXYSUBS => {croak_on_error => 1},
 				   NAME => 'I18N::Langinfo',
 				   NAMES => \@names,
 				  );
