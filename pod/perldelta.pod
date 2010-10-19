@@ -380,6 +380,14 @@ tn, vi, hr, ig, ru, sq, se, sr, to and uk
 
 C<Unicode::Normalize> has been upgraded from version 1.06 to 1.07
 
+=item *
+
+C<B::Deparse> has been upgraded from version 0.98 to 0.99
+
+B::Deparse now properly handles the code that applies a conditional
+pattern match against implicit C<$_> as it was fixed in
+L<[perl #20444]|http://rt.perl.org/rt3//Public/Bug/Display.html?id=20444>.
+
 =back
 
 =head2 Removed Modules and Pragmata
