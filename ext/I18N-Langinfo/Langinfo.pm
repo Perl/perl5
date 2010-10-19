@@ -6,9 +6,9 @@ use warnings;
 use Carp;
 
 require Exporter;
-require DynaLoader;
+require XSLoader;
 
-our @ISA = qw(Exporter DynaLoader);
+our @ISA = qw(Exporter);
 
 our @EXPORT = qw(langinfo);
 
@@ -72,7 +72,7 @@ our @EXPORT_OK = qw(
 	YESSTR
 );
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
@@ -97,7 +97,7 @@ sub AUTOLOAD {
     goto &$AUTOLOAD;
 }
 
-bootstrap I18N::Langinfo $VERSION;
+XSLoader::load();
 
 1;
 __END__
