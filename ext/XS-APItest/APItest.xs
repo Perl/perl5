@@ -2082,6 +2082,45 @@ rpeep_record ()
     OUTPUT:
 	RETVAL
 
+=pod
+
+multicall_each: call a sub for each item in the list. Used to test MULTICALL
+
+=cut
+
+void
+multicall_each(block,...)
+    SV * block
+PROTOTYPE: &@
+CODE:
+{
+    dMULTICALL;
+    int index;
+    GV *gv;
+    HV *stash;
+    I32 gimme = G_SCALAR;
+    SV **args = &PL_stack_base[ax];
+    CV *cv;
+
+    if(items <= 1) {
+	XSRETURN_UNDEF;
+    }
+    cv = sv_2cv(block, &stash, &gv, 0);
+    if (cv == Nullcv) {
+       croak("multicall_each: not a subroutine reference");
+    }
+    PUSH_MULTICALL(cv);
+    SAVESPTR(GvSV(PL_defgv));
+
+    for(index = 1 ; index < items ; index++) {
+	GvSV(PL_defgv) = args[index];
+	MULTICALL;
+    }
+    POP_MULTICALL;
+    XSRETURN_UNDEF;
+}
+
+
 BOOT:
 	{
 	HV* stash;
