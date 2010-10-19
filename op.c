@@ -717,7 +717,7 @@ S_cop_free(pTHX_ COP* cop)
     CopSTASH_free(cop);
     if (! specialWARN(cop->cop_warnings))
 	PerlMemShared_free(cop->cop_warnings);
-    Perl_refcounted_he_free(aTHX_ cop->cop_hints_hash);
+    cophh_free(CopHINTHASH_get(cop));
 }
 
 STATIC void
@@ -3735,12 +3735,12 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
         pmop->op_pmflags |= RXf_PMf_UNICODE;
     }
     if (PL_hints & HINT_RE_FLAGS) {
-        SV *reflags = Perl_refcounted_he_fetch(aTHX_
-         PL_compiling.cop_hints_hash, 0, STR_WITH_LEN("reflags"), 0, 0
+        SV *reflags = Perl_refcounted_he_fetch_pvn(aTHX_
+         PL_compiling.cop_hints_hash, STR_WITH_LEN("reflags"), 0, 0
         );
         if (reflags && SvOK(reflags)) pmop->op_pmflags |= SvIV(reflags);
-        reflags = Perl_refcounted_he_fetch(aTHX_
-         PL_compiling.cop_hints_hash, 0, STR_WITH_LEN("reflags_dul"), 0, 0
+        reflags = Perl_refcounted_he_fetch_pvn(aTHX_
+         PL_compiling.cop_hints_hash, STR_WITH_LEN("reflags_dul"), 0, 0
         );
         if (reflags && SvOK(reflags)) {
             pmop->op_pmflags &= ~(RXf_PMf_LOCALE|RXf_PMf_UNICODE);
@@ -4798,12 +4798,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
        CopHINTS and a possible value in cop_hints_hash, so no need to copy it.
     */
     cop->cop_warnings = DUP_WARNINGS(PL_curcop->cop_warnings);
-    cop->cop_hints_hash = PL_curcop->cop_hints_hash;
-    if (cop->cop_hints_hash) {
-	HINTS_REFCNT_LOCK;
-	cop->cop_hints_hash->refcounted_he_refcnt++;
-	HINTS_REFCNT_UNLOCK;
-    }
+    CopHINTHASH_set(cop, cophh_copy(CopHINTHASH_get(PL_curcop)));
     if (label) {
 	Perl_store_cop_label(aTHX_ cop, label, strlen(label), 0);
 						     

@@ -598,17 +598,12 @@ void
 Perl_save_hints(pTHX)
 {
     dVAR;
-    if (PL_compiling.cop_hints_hash) {
-	HINTS_REFCNT_LOCK;
-	    PL_compiling.cop_hints_hash->refcounted_he_refcnt++;
-	    HINTS_REFCNT_UNLOCK;
-    }
+    COPHH *save_cophh = cophh_copy(CopHINTHASH_get(&PL_compiling));
     if (PL_hints & HINT_LOCALIZE_HH) {
-	save_pushptri32ptr(GvHV(PL_hintgv), PL_hints,
-			   PL_compiling.cop_hints_hash, SAVEt_HINTS);
+	save_pushptri32ptr(GvHV(PL_hintgv), PL_hints, save_cophh, SAVEt_HINTS);
 	GvHV(PL_hintgv) = hv_copy_hints_hv(GvHV(PL_hintgv));
     } else {
-	save_pushi32ptr(PL_hints, PL_compiling.cop_hints_hash, SAVEt_HINTS);
+	save_pushi32ptr(PL_hints, save_cophh, SAVEt_HINTS);
     }
 }
 
@@ -1019,8 +1014,8 @@ Perl_leave_scope(pTHX_ I32 base)
 		SvREFCNT_dec(MUTABLE_SV(GvHV(PL_hintgv)));
 		GvHV(PL_hintgv) = NULL;
 	    }
-	    Perl_refcounted_he_free(aTHX_ PL_compiling.cop_hints_hash);
-	    PL_compiling.cop_hints_hash = (struct refcounted_he *) SSPOPPTR;
+	    cophh_free(CopHINTHASH_get(&PL_compiling));
+	    CopHINTHASH_set(&PL_compiling, (COPHH*)SSPOPPTR);
 	    *(I32*)&PL_hints = (I32)SSPOPINT;
 	    if (PL_hints & HINT_LOCALIZE_HH) {
 		SvREFCNT_dec(MUTABLE_SV(GvHV(PL_hintgv)));

@@ -61,8 +61,6 @@ Perl_ck_warner
 Perl_ck_warner_d
 Perl_ckwarn
 Perl_ckwarn_d
-Perl_cop_hints_2hv
-Perl_cop_hints_fetchpvn
 Perl_croak
 Perl_croak_no_modify
 Perl_croak_sv
@@ -457,8 +455,14 @@ Perl_re_intuit_string
 Perl_realloc
 Perl_ref
 Perl_refcounted_he_chain_2hv
-Perl_refcounted_he_fetch
-Perl_refcounted_he_new
+Perl_refcounted_he_fetch_pv
+Perl_refcounted_he_fetch_pvn
+Perl_refcounted_he_fetch_sv
+Perl_refcounted_he_free
+Perl_refcounted_he_inc
+Perl_refcounted_he_new_pv
+Perl_refcounted_he_new_pvn
+Perl_refcounted_he_new_sv
 Perl_reg_named_buff
 Perl_reg_named_buff_all
 Perl_reg_named_buff_exists

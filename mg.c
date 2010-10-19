@@ -781,17 +781,13 @@ Perl_emulate_cop_io(pTHX_ const COP *const c, SV *const sv)
 	sv_setpvs(sv, "");
 	SvUTF8_off(sv);
 	if ((CopHINTS_get(c) & HINT_LEXICAL_IO_IN)) {
-	    SV *const value = Perl_refcounted_he_fetch(aTHX_
-						       c->cop_hints_hash,
-						       0, "open<", 5, 0, 0);
+	    SV *const value = cop_hints_fetch_pvs(c, "open<", 0);
 	    assert(value);
 	    sv_catsv(sv, value);
 	}
 	sv_catpvs(sv, "\0");
 	if ((CopHINTS_get(c) & HINT_LEXICAL_IO_OUT)) {
-	    SV *const value = Perl_refcounted_he_fetch(aTHX_
-						       c->cop_hints_hash,
-						       0, "open>", 5, 0, 0);
+	    SV *const value = cop_hints_fetch_pvs(c, "open>", 0);
 	    assert(value);
 	    sv_catsv(sv, value);
 	}
@@ -3170,8 +3166,8 @@ Perl_magic_sethint(pTHX_ SV *sv, MAGIC *mg)
        Doing this here saves a lot of doing it manually in perl code (and
        forgetting to do it, and consequent subtle errors.  */
     PL_hints |= HINT_LOCALIZE_HH;
-    PL_compiling.cop_hints_hash
-	= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints_hash, key, sv);
+    CopHINTHASH_set(&PL_compiling,
+	cophh_store_sv(CopHINTHASH_get(&PL_compiling), key, 0, sv, 0));
     return 0;
 }
 
@@ -3196,9 +3192,9 @@ Perl_magic_clearhint(pTHX_ SV *sv, MAGIC *mg)
     PERL_UNUSED_ARG(sv);
 
     PL_hints |= HINT_LOCALIZE_HH;
-    PL_compiling.cop_hints_hash
-	= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints_hash,
-				 MUTABLE_SV(mg->mg_ptr), &PL_sv_placeholder);
+    CopHINTHASH_set(&PL_compiling,
+	cophh_delete_sv(CopHINTHASH_get(&PL_compiling),
+				 MUTABLE_SV(mg->mg_ptr), 0, 0));
     return 0;
 }
 
@@ -3215,10 +3211,8 @@ Perl_magic_clearhints(pTHX_ SV *sv, MAGIC *mg)
     PERL_ARGS_ASSERT_MAGIC_CLEARHINTS;
     PERL_UNUSED_ARG(sv);
     PERL_UNUSED_ARG(mg);
-    if (PL_compiling.cop_hints_hash) {
-	Perl_refcounted_he_free(aTHX_ PL_compiling.cop_hints_hash);
-	PL_compiling.cop_hints_hash = NULL;
-    }
+    cophh_free(CopHINTHASH_get(&PL_compiling));
+    CopHINTHASH_set(&PL_compiling, cophh_new_empty());
     return 0;
 }
 

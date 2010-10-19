@@ -1274,7 +1274,7 @@ B::RHE
 COP_hints_hash(o)
 	B::COP o
     CODE:
-	RETVAL = o->cop_hints_hash;
+	RETVAL = CopHINTHASH_get(o);
     OUTPUT:
 	RETVAL
 
@@ -2046,7 +2046,7 @@ SV*
 RHE_HASH(h)
 	B::RHE h
     CODE:
-	RETVAL = newRV( (SV*)Perl_refcounted_he_chain_2hv(aTHX_ h) );
+	RETVAL = newRV( (SV*)cophh_2hv(h, 0) );
     OUTPUT:
 	RETVAL
 

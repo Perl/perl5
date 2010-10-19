@@ -2021,8 +2021,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
   PERL_ARGS_ASSERT_AMAGIC_CALL;
 
   if ( PL_curcop->cop_hints & HINT_NO_AMAGIC ) {
-      SV *lex_mask = Perl_refcounted_he_fetch(aTHX_ PL_curcop->cop_hints_hash,
-					      0, "overloading", 11, 0, 0);
+      SV *lex_mask = cop_hints_fetch_pvs(PL_curcop, "overloading", 0);
 
       if ( !lex_mask || !SvOK(lex_mask) )
 	  /* overloading lexically disabled */

@@ -66,8 +66,6 @@
 #define ck_warner		Perl_ck_warner
 #define ck_warner_d		Perl_ck_warner_d
 #endif
-#define cop_hints_2hv(a)	Perl_cop_hints_2hv(aTHX_ a)
-#define cop_hints_fetchpvn(a,b,c,d,e)	Perl_cop_hints_fetchpvn(aTHX_ a,b,c,d,e)
 #ifndef PERL_IMPLICIT_CONTEXT
 #define croak			Perl_croak
 #endif
@@ -1443,6 +1441,15 @@
 #define pp_wantarray()		Perl_pp_wantarray(aTHX)
 #define pp_warn()		Perl_pp_warn(aTHX)
 #define pp_xor()		Perl_pp_xor(aTHX)
+#define refcounted_he_chain_2hv(a,b)	Perl_refcounted_he_chain_2hv(aTHX_ a,b)
+#define refcounted_he_fetch_pv(a,b,c,d)	Perl_refcounted_he_fetch_pv(aTHX_ a,b,c,d)
+#define refcounted_he_fetch_pvn(a,b,c,d,e)	Perl_refcounted_he_fetch_pvn(aTHX_ a,b,c,d,e)
+#define refcounted_he_fetch_sv(a,b,c,d)	Perl_refcounted_he_fetch_sv(aTHX_ a,b,c,d)
+#define refcounted_he_free(a)	Perl_refcounted_he_free(aTHX_ a)
+#define refcounted_he_inc(a)	Perl_refcounted_he_inc(aTHX_ a)
+#define refcounted_he_new_pv(a,b,c,d,e)	Perl_refcounted_he_new_pv(aTHX_ a,b,c,d,e)
+#define refcounted_he_new_pvn(a,b,c,d,e,f)	Perl_refcounted_he_new_pvn(aTHX_ a,b,c,d,e,f)
+#define refcounted_he_new_sv(a,b,c,d,e)	Perl_refcounted_he_new_sv(aTHX_ a,b,c,d,e)
 #define report_evil_fh(a,b,c)	Perl_report_evil_fh(aTHX_ a,b,c)
 #define rpeep(a)		Perl_rpeep(aTHX_ a)
 #define rsignal_restore(a,b)	Perl_rsignal_restore(aTHX_ a,b)
@@ -1602,7 +1609,6 @@
 #define hv_magic_check		S_hv_magic_check
 #define hv_notallowed(a,b,c,d)	S_hv_notallowed(aTHX_ a,b,c,d)
 #define new_he()		S_new_he(aTHX)
-#define refcounted_he_new_common(a,b,c,d,e,f,g)	S_refcounted_he_new_common(aTHX_ a,b,c,d,e,f,g)
 #define refcounted_he_value(a)	S_refcounted_he_value(aTHX_ a)
 #define save_hek_flags		S_save_hek_flags
 #define share_hek_flags(a,b,c,d)	S_share_hek_flags(aTHX_ a,b,c,d)

@@ -532,29 +532,6 @@ PERL_CALLCONV bool	Perl_ckwarn_d(pTHX_ U32 w);
 PERL_CALLCONV OP*	Perl_convert(pTHX_ I32 optype, I32 flags, OP* o)
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV HV*	Perl_cop_hints_2hv(pTHX_ const COP *cop)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_COP_HINTS_2HV	\
-	assert(cop)
-
-/* PERL_CALLCONV SV*	cop_hints_fetchpv(pTHX_ const COP *cop, const char *const key, int flags, U32 hash)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2); */
-
-PERL_CALLCONV SV*	Perl_cop_hints_fetchpvn(pTHX_ const COP *cop, const char *key, STRLEN klen, int flags, U32 hash)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_COP_HINTS_FETCHPVN	\
-	assert(cop); assert(key)
-
-/* PERL_CALLCONV SV*	cop_hints_fetchpvs(pTHX_ const COP *cop, const char *const key)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2); */
-
-/* PERL_CALLCONV SV*	cop_hints_fetchsv(pTHX_ const COP *cop, SV *keysv, U32 hash)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2); */
-
 PERL_CALLCONV PERL_CONTEXT*	Perl_create_eval_scope(pTHX_ U32 flags);
 PERL_CALLCONV void	Perl_croak(pTHX_ const char* pat, ...)
 			__attribute__noreturn__
@@ -3292,10 +3269,39 @@ PERL_CALLCONV Malloc_t	Perl_realloc(Malloc_t where, MEM_SIZE nbytes)
 			__attribute__warn_unused_result__;
 
 /* PERL_CALLCONV OP*	Perl_ref(pTHX_ OP* o, I32 type); */
-PERL_CALLCONV HV *	Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *c);
-PERL_CALLCONV SV *	Perl_refcounted_he_fetch(pTHX_ const struct refcounted_he *chain, SV *keysv, const char *key, STRLEN klen, int flags, U32 hash);
+PERL_CALLCONV HV *	Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *c, U32 flags);
+PERL_CALLCONV SV *	Perl_refcounted_he_fetch_pv(pTHX_ const struct refcounted_he *chain, const char *key, U32 hash, U32 flags)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_REFCOUNTED_HE_FETCH_PV	\
+	assert(key)
+
+PERL_CALLCONV SV *	Perl_refcounted_he_fetch_pvn(pTHX_ const struct refcounted_he *chain, const char *keypv, STRLEN keylen, U32 hash, U32 flags)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_REFCOUNTED_HE_FETCH_PVN	\
+	assert(keypv)
+
+PERL_CALLCONV SV *	Perl_refcounted_he_fetch_sv(pTHX_ const struct refcounted_he *chain, SV *key, U32 hash, U32 flags)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_REFCOUNTED_HE_FETCH_SV	\
+	assert(key)
+
 PERL_CALLCONV void	Perl_refcounted_he_free(pTHX_ struct refcounted_he *he);
-PERL_CALLCONV struct refcounted_he *	Perl_refcounted_he_new(pTHX_ struct refcounted_he *const parent, SV *const key, SV *const value);
+PERL_CALLCONV struct refcounted_he *	Perl_refcounted_he_inc(pTHX_ struct refcounted_he *he);
+PERL_CALLCONV struct refcounted_he *	Perl_refcounted_he_new_pv(pTHX_ struct refcounted_he *parent, const char *key, U32 hash, SV *value, U32 flags)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_REFCOUNTED_HE_NEW_PV	\
+	assert(key)
+
+PERL_CALLCONV struct refcounted_he *	Perl_refcounted_he_new_pvn(pTHX_ struct refcounted_he *parent, const char *keypv, STRLEN keylen, U32 hash, SV *value, U32 flags)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_REFCOUNTED_HE_NEW_PVN	\
+	assert(keypv)
+
+PERL_CALLCONV struct refcounted_he *	Perl_refcounted_he_new_sv(pTHX_ struct refcounted_he *parent, SV *key, U32 hash, SV *value, U32 flags)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_REFCOUNTED_HE_NEW_SV	\
+	assert(key)
+
 PERL_CALLCONV SV*	Perl_reg_named_buff(pTHX_ REGEXP * const rx, SV * const key, SV * const value, const U32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_REG_NAMED_BUFF	\
@@ -5552,12 +5558,6 @@ STATIC void	S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen, const ch
 STATIC HE*	S_new_he(pTHX)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
-
-STATIC struct refcounted_he *	S_refcounted_he_new_common(pTHX_ struct refcounted_he *const parent, const char *const key_p, const STRLEN key_len, const char flags, char value_type, const void *value, const STRLEN value_len)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_6);
-#define PERL_ARGS_ASSERT_REFCOUNTED_HE_NEW_COMMON	\
-	assert(key_p); assert(value)
 
 STATIC SV *	S_refcounted_he_value(pTHX_ const struct refcounted_he *he)
 			__attribute__nonnull__(pTHX_1);

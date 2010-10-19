@@ -5232,8 +5232,7 @@ Perl_PerlIO_context_layers(pTHX_ const char *mode)
     if (!direction)
 	return NULL;
 
-    layers = Perl_refcounted_he_fetch(aTHX_ PL_curcop->cop_hints_hash,
-				      0, direction, 5, 0, 0);
+    layers = cop_hints_fetch_pvn(PL_curcop, direction, 5, 0, 0);
 
     assert(layers);
     return SvOK(layers) ? SvPV_nolen_const(layers) : NULL;

@@ -2627,93 +2627,44 @@ S_refcounted_he_value(pTHX_ const struct refcounted_he *he)
 	    SvUTF8_on(value);
 	break;
     default:
-	Perl_croak(aTHX_ "panic: refcounted_he_value bad flags %x",
-		   he->refcounted_he_data[0]);
+	Perl_croak(aTHX_ "panic: refcounted_he_value bad flags %"UVxf,
+		   (UV)he->refcounted_he_data[0]);
     }
     return value;
 }
 
 /*
-=for apidoc cop_hints_2hv
+=for apidoc m|HV *|refcounted_he_chain_2hv|const struct refcounted_he *c|U32 flags
 
-Generates and returns a C<HV *> from the hinthash in the provided
-C<COP>. Returns C<NULL> if there isn't one there.
-
-=cut
-*/
-HV *
-Perl_cop_hints_2hv(pTHX_ const COP *cop)
-{
-    PERL_ARGS_ASSERT_COP_HINTS_2HV;
-
-    if (!cop->cop_hints_hash)
-	return NULL;
-
-    return Perl_refcounted_he_chain_2hv(aTHX_ cop->cop_hints_hash);
-}
-
-/*
-=for apidoc cop_hints_fetchsv
-
-Fetches an entry from the hinthash in the provided C<COP>. Returns NULL
-if the entry isn't there.
-
-=for apidoc cop_hints_fetchpvn
-
-See L</cop_hints_fetchsv>. If C<flags> includes C<HVhek_UTF8>, C<key> is
-in UTF-8.
-
-=for apidoc cop_hints_fetchpv
-
-See L</cop_hints_fetchsv>. If C<flags> includes C<HVhek_UTF8>, C<key> is
-in UTF-8.
-
-=for apidoc cop_hints_fetchpvs
-
-See L</cop_hints_fetchpvn>. This is a macro that takes a constant string
-for its argument, which is assumed to be ASCII (rather than UTF-8).
-
-=cut
-*/
-SV *
-Perl_cop_hints_fetchpvn(pTHX_ const COP *cop, const char *key, STRLEN klen,
-			    int flags, U32 hash)
-{
-    PERL_ARGS_ASSERT_COP_HINTS_FETCHPVN;
-
-    /* refcounted_he_fetch takes more flags than we do. Make sure
-     * noone's depending on being able to pass them here. */
-    flags &= ~HVhek_UTF8;
-
-    return Perl_refcounted_he_fetch(aTHX_ cop->cop_hints_hash, NULL,
-	key, klen, flags, hash);
-}
-
-/*
-=for apidoc refcounted_he_chain_2hv
-
-Generates and returns a C<HV *> by walking up the tree starting at the passed
-in C<struct refcounted_he *>.
+Generates and returns a C<HV *> representing the content of a
+C<refcounted_he> chain.
+I<flags> is currently unused and must be zero.
 
 =cut
 */
 HV *
-Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain)
+Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain, U32 flags)
 {
     dVAR;
-    HV *hv = newHV();
-    U32 placeholders = 0;
+    HV *hv;
+    U32 placeholders, max;
+
+    if (flags)
+	Perl_croak(aTHX_ "panic: refcounted_he_chain_2hv bad flags %"UVxf,
+	    (UV)flags);
+
     /* We could chase the chain once to get an idea of the number of keys,
        and call ksplit.  But for now we'll make a potentially inefficient
        hash with only 8 entries in its array.  */
-    const U32 max = HvMAX(hv);
-
+    hv = newHV();
+    max = HvMAX(hv);
     if (!HvARRAY(hv)) {
 	char *array;
 	Newxz(array, PERL_HV_ARRAY_ALLOC_BYTES(max + 1), char);
 	HvARRAY(hv) = (HE**)array;
     }
 
+    placeholders = 0;
     while (chain) {
 #ifdef USE_ITHREADS
 	U32 hash = chain->refcounted_he_hash;
@@ -2790,190 +2741,316 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain)
     return hv;
 }
 
+/*
+=for apidoc m|SV *|refcounted_he_fetch_pvn|const struct refcounted_he *chain|const char *keypv|STRLEN keylen|U32 hash|U32 flags
+
+Search along a C<refcounted_he> chain for an entry with the key specified
+by I<keypv> and I<keylen>.  If I<flags> has the C<REFCOUNTED_HE_KEY_UTF8>
+bit set, the key octets are interpreted as UTF-8, otherwise they
+are interpreted as Latin-1.  I<hash> is a precomputed hash of the key
+string, or zero if it has not been precomputed.  Returns a mortal scalar
+representing the value associated with the key, or C<&PL_sv_placeholder>
+if there is no value associated with the key.
+
+=cut
+*/
+
 SV *
-Perl_refcounted_he_fetch(pTHX_ const struct refcounted_he *chain, SV *keysv,
-			 const char *key, STRLEN klen, int flags, U32 hash)
+Perl_refcounted_he_fetch_pvn(pTHX_ const struct refcounted_he *chain,
+			 const char *keypv, STRLEN keylen, U32 hash, U32 flags)
 {
     dVAR;
-    /* Just to be awkward, if you're using this interface the UTF-8-or-not-ness
-       of your key has to exactly match that which is stored.  */
-    SV *value = &PL_sv_placeholder;
+    U8 utf8_flag;
+    PERL_ARGS_ASSERT_REFCOUNTED_HE_FETCH_PVN;
 
-    if (chain) {
-	/* No point in doing any of this if there's nothing to find.  */
-	bool is_utf8;
-
-	if (keysv) {
-	    if (flags & HVhek_FREEKEY)
-		Safefree(key);
-	    key = SvPV_const(keysv, klen);
-	    flags = 0;
-	    is_utf8 = (SvUTF8(keysv) != 0);
-	} else {
-	    is_utf8 = ((flags & HVhek_UTF8) ? TRUE : FALSE);
-	}
-
-	if (!hash) {
-	    if (keysv && (SvIsCOW_shared_hash(keysv))) {
-		hash = SvSHARED_HASH(keysv);
-	    } else {
-		PERL_HASH(hash, key, klen);
+    if (flags & ~REFCOUNTED_HE_KEY_UTF8)
+	Perl_croak(aTHX_ "panic: refcounted_he_fetch_pvn bad flags %"UVxf,
+	    (UV)flags);
+    if (!chain)
+	return &PL_sv_placeholder;
+    if (flags & REFCOUNTED_HE_KEY_UTF8) {
+	/* For searching purposes, canonicalise to Latin-1 where possible. */
+	const char *keyend = keypv + keylen, *p;
+	STRLEN nonascii_count = 0;
+	for (p = keypv; p != keyend; p++) {
+	    U8 c = (U8)*p;
+	    if (c & 0x80) {
+		if (!((c & 0xfe) == 0xc2 && ++p != keyend &&
+			    (((U8)*p) & 0xc0) == 0x80))
+		    goto canonicalised_key;
+		nonascii_count++;
 	    }
 	}
-
-	for (; chain; chain = chain->refcounted_he_next) {
-#ifdef USE_ITHREADS
-	    if (hash != chain->refcounted_he_hash)
-		continue;
-	    if (klen != chain->refcounted_he_keylen)
-		continue;
-	    if (memNE(REF_HE_KEY(chain),key,klen))
-		continue;
-	    if (!!is_utf8 != !!(chain->refcounted_he_data[0] & HVhek_UTF8))
-		continue;
-#else
-	    if (hash != HEK_HASH(chain->refcounted_he_hek))
-		continue;
-	    if (klen != (STRLEN)HEK_LEN(chain->refcounted_he_hek))
-		continue;
-	    if (memNE(HEK_KEY(chain->refcounted_he_hek),key,klen))
-		continue;
-	    if (!!is_utf8 != !!HEK_UTF8(chain->refcounted_he_hek))
-		continue;
-#endif
-
-	    value = sv_2mortal(refcounted_he_value(chain));
-	    break;
+	if (nonascii_count) {
+	    char *q;
+	    const char *p = keypv, *keyend = keypv + keylen;
+	    keylen -= nonascii_count;
+	    Newx(q, keylen, char);
+	    SAVEFREEPV(q);
+	    keypv = q;
+	    for (; p != keyend; p++, q++) {
+		U8 c = (U8)*p;
+		*q = (char)
+		    ((c & 0x80) ? ((c & 0x03) << 6) | (((U8)*++p) & 0x3f) : c);
+	    }
 	}
+	flags &= ~REFCOUNTED_HE_KEY_UTF8;
+	canonicalised_key: ;
     }
+    utf8_flag = (flags & REFCOUNTED_HE_KEY_UTF8) ? HVhek_UTF8 : 0;
+    if (!hash)
+	PERL_HASH(hash, keypv, keylen);
 
-    if (flags & HVhek_FREEKEY)
-	Safefree(key);
-
-    return value;
+    for (; chain; chain = chain->refcounted_he_next) {
+	if (
+#ifdef USE_ITHREADS
+	    hash == chain->refcounted_he_hash &&
+	    keylen == chain->refcounted_he_keylen &&
+	    memEQ(REF_HE_KEY(chain), keypv, keylen) &&
+	    utf8_flag == (chain->refcounted_he_data[0] & HVhek_UTF8)
+#else
+	    hash == HEK_HASH(chain->refcounted_he_hek) &&
+	    keylen == (STRLEN)HEK_LEN(chain->refcounted_he_hek) &&
+	    memEQ(HEK_KEY(chain->refcounted_he_hek), keypv, keylen) &&
+	    utf8_flag == (HEK_FLAGS(chain->refcounted_he_hek) & HVhek_UTF8)
+#endif
+	)
+	    return sv_2mortal(refcounted_he_value(chain));
+    }
+    return &PL_sv_placeholder;
 }
 
 /*
-=for apidoc refcounted_he_new
+=for apidoc m|SV *|refcounted_he_fetch_pv|const struct refcounted_he *chain|const char *key|U32 hash|U32 flags
 
-Creates a new C<struct refcounted_he>. As S<key> is copied, and value is
-stored in a compact form, all references remain the property of the caller.
-The C<struct refcounted_he> is returned with a reference count of 1.
+Like L</refcounted_he_fetch_pvn>, but takes a nul-terminated string
+instead of a string/length pair.
+
+=cut
+*/
+
+SV *
+Perl_refcounted_he_fetch_pv(pTHX_ const struct refcounted_he *chain,
+			 const char *key, U32 hash, U32 flags)
+{
+    PERL_ARGS_ASSERT_REFCOUNTED_HE_FETCH_PV;
+    return refcounted_he_fetch_pvn(chain, key, strlen(key), hash, flags);
+}
+
+/*
+=for apidoc m|SV *|refcounted_he_fetch_sv|const struct refcounted_he *chain|SV *key|U32 hash|U32 flags
+
+Like L</refcounted_he_fetch_pvn>, but takes a Perl scalar instead of a
+string/length pair.
+
+=cut
+*/
+
+SV *
+Perl_refcounted_he_fetch_sv(pTHX_ const struct refcounted_he *chain,
+			 SV *key, U32 hash, U32 flags)
+{
+    const char *keypv;
+    STRLEN keylen;
+    PERL_ARGS_ASSERT_REFCOUNTED_HE_FETCH_SV;
+    if (flags & REFCOUNTED_HE_KEY_UTF8)
+	Perl_croak(aTHX_ "panic: refcounted_he_fetch_sv bad flags %"UVxf,
+	    (UV)flags);
+    keypv = SvPV_const(key, keylen);
+    if (SvUTF8(key))
+	flags |= REFCOUNTED_HE_KEY_UTF8;
+    if (!hash && SvIsCOW_shared_hash(key))
+	hash = SvSHARED_HASH(key);
+    return refcounted_he_fetch_pvn(chain, keypv, keylen, hash, flags);
+}
+
+/*
+=for apidoc m|struct refcounted_he *|refcounted_he_new_pvn|struct refcounted_he *parent|const char *keypv|STRLEN keylen|U32 hash|SV *value|U32 flags
+
+Creates a new C<refcounted_he>.  This consists of a single key/value
+pair and a reference to an existing C<refcounted_he> chain (which may
+be empty), and thus forms a longer chain.  When using the longer chain,
+the new key/value pair takes precedence over any entry for the same key
+further along the chain.
+
+The new key is specified by I<keypv> and I<keylen>.  If I<flags> has
+the C<REFCOUNTED_HE_KEY_UTF8> bit set, the key octets are interpreted
+as UTF-8, otherwise they are interpreted as Latin-1.  I<hash> is
+a precomputed hash of the key string, or zero if it has not been
+precomputed.
+
+I<value> is the scalar value to store for this key.  I<value> is copied
+by this function, which thus does not take ownership of any reference
+to it, and later changes to the scalar will not be reflected in the
+value visible in the C<refcounted_he>.  Complex types of scalar will not
+be stored with referential integrity, but will be coerced to strings.
+I<value> may be either null or C<&PL_sv_placeholder> to indicate that no
+value is to be associated with the key; this, as with any non-null value,
+takes precedence over the existence of a value for the key further along
+the chain.
+
+I<parent> points to the rest of the C<refcounted_he> chain to be
+attached to the new C<refcounted_he>.  This function takes ownership
+of one reference to I<parent>, and returns one reference to the new
+C<refcounted_he>.
 
 =cut
 */
 
 struct refcounted_he *
-Perl_refcounted_he_new(pTHX_ struct refcounted_he *const parent,
-		       SV *const key, SV *const value) {
+Perl_refcounted_he_new_pvn(pTHX_ struct refcounted_he *parent,
+	const char *keypv, STRLEN keylen, U32 hash, SV *value, U32 flags)
+{
     dVAR;
-    STRLEN key_len;
-    const char *key_p = SvPV_const(key, key_len);
     STRLEN value_len = 0;
     const char *value_p = NULL;
+    bool is_pv;
     char value_type;
-    char flags;
-    bool is_utf8 = SvUTF8(key) ? TRUE : FALSE;
+    char hekflags;
+    STRLEN key_offset = 1;
+    struct refcounted_he *he;
+    PERL_ARGS_ASSERT_REFCOUNTED_HE_NEW_PVN;
 
-    if (SvPOK(value)) {
+    if (!value || value == &PL_sv_placeholder) {
+	value_type = HVrhek_delete;
+    } else if (SvPOK(value)) {
 	value_type = HVrhek_PV;
     } else if (SvIOK(value)) {
 	value_type = SvUOK((const SV *)value) ? HVrhek_UV : HVrhek_IV;
-    } else if (value == &PL_sv_placeholder) {
-	value_type = HVrhek_delete;
     } else if (!SvOK(value)) {
 	value_type = HVrhek_undef;
     } else {
 	value_type = HVrhek_PV;
     }
-
-    if (value_type == HVrhek_PV) {
+    is_pv = value_type == HVrhek_PV;
+    if (is_pv) {
 	/* Do it this way so that the SvUTF8() test is after the SvPV, in case
 	   the value is overloaded, and doesn't yet have the UTF-8flag set.  */
 	value_p = SvPV_const(value, value_len);
 	if (SvUTF8(value))
 	    value_type = HVrhek_PV_UTF8;
+	key_offset = value_len + 2;
     }
-    flags = value_type;
+    hekflags = value_type;
 
-    if (is_utf8) {
-	/* Hash keys are always stored normalised to (yes) ISO-8859-1.
-	   As we're going to be building hash keys from this value in future,
-	   normalise it now.  */
-	key_p = (char*)bytes_from_utf8((const U8*)key_p, &key_len, &is_utf8);
-	flags |= is_utf8 ? HVhek_UTF8 : HVhek_WASUTF8;
+    if (flags & REFCOUNTED_HE_KEY_UTF8) {
+	/* Canonicalise to Latin-1 where possible. */
+	const char *keyend = keypv + keylen, *p;
+	STRLEN nonascii_count = 0;
+	for (p = keypv; p != keyend; p++) {
+	    U8 c = (U8)*p;
+	    if (c & 0x80) {
+		if (!((c & 0xfe) == 0xc2 && ++p != keyend &&
+			    (((U8)*p) & 0xc0) == 0x80))
+		    goto canonicalised_key;
+		nonascii_count++;
+	    }
+	}
+	if (nonascii_count) {
+	    char *q;
+	    const char *p = keypv, *keyend = keypv + keylen;
+	    keylen -= nonascii_count;
+	    Newx(q, keylen, char);
+	    SAVEFREEPV(q);
+	    keypv = q;
+	    for (; p != keyend; p++, q++) {
+		U8 c = (U8)*p;
+		*q = (char)
+		    ((c & 0x80) ? ((c & 0x03) << 6) | (((U8)*++p) & 0x3f) : c);
+	    }
+	}
+	flags &= ~REFCOUNTED_HE_KEY_UTF8;
+	canonicalised_key: ;
     }
+    if (flags & REFCOUNTED_HE_KEY_UTF8)
+	hekflags |= HVhek_UTF8;
+    if (!hash)
+	PERL_HASH(hash, keypv, keylen);
 
-    return refcounted_he_new_common(parent, key_p, key_len, flags, value_type,
-				    ((value_type == HVrhek_PV
-				      || value_type == HVrhek_PV_UTF8) ?
-				     (void *)value_p : (void *)value),
-				    value_len);
-}
-
-static struct refcounted_he *
-S_refcounted_he_new_common(pTHX_ struct refcounted_he *const parent,
-			   const char *const key_p, const STRLEN key_len,
-			   const char flags, char value_type,
-			   const void *value, const STRLEN value_len) {
-    dVAR;
-    struct refcounted_he *he;
-    U32 hash;
-    const bool is_pv = value_type == HVrhek_PV || value_type == HVrhek_PV_UTF8;
-    STRLEN key_offset = is_pv ? value_len + 2 : 1;
-
-    PERL_ARGS_ASSERT_REFCOUNTED_HE_NEW_COMMON;
-
+    he = (struct refcounted_he*)
+	PerlMemShared_malloc(sizeof(struct refcounted_he) - 1
 #ifdef USE_ITHREADS
-    he = (struct refcounted_he*)
-	PerlMemShared_malloc(sizeof(struct refcounted_he) - 1
-			     + key_len
-			     + key_offset);
-#else
-    he = (struct refcounted_he*)
-	PerlMemShared_malloc(sizeof(struct refcounted_he) - 1
-			     + key_offset);
+			     + keylen
 #endif
+			     + key_offset);
 
     he->refcounted_he_next = parent;
 
     if (is_pv) {
-	Copy((char *)value, he->refcounted_he_data + 1, value_len + 1, char);
+	Copy(value_p, he->refcounted_he_data + 1, value_len + 1, char);
 	he->refcounted_he_val.refcounted_he_u_len = value_len;
     } else if (value_type == HVrhek_IV) {
-	he->refcounted_he_val.refcounted_he_u_iv = SvIVX((const SV *)value);
+	he->refcounted_he_val.refcounted_he_u_iv = SvIVX(value);
     } else if (value_type == HVrhek_UV) {
-	he->refcounted_he_val.refcounted_he_u_uv = SvUVX((const SV *)value);
+	he->refcounted_he_val.refcounted_he_u_uv = SvUVX(value);
     }
-
-    PERL_HASH(hash, key_p, key_len);
 
 #ifdef USE_ITHREADS
     he->refcounted_he_hash = hash;
-    he->refcounted_he_keylen = key_len;
-    Copy(key_p, he->refcounted_he_data + key_offset, key_len, char);
+    he->refcounted_he_keylen = keylen;
+    Copy(keypv, he->refcounted_he_data + key_offset, keylen, char);
 #else
-    he->refcounted_he_hek = share_hek_flags(key_p, key_len, hash, flags);
+    he->refcounted_he_hek = share_hek_flags(keypv, keylen, hash, hekflags);
 #endif
 
-    if (flags & HVhek_WASUTF8) {
-	/* If it was downgraded from UTF-8, then the pointer returned from
-	   bytes_from_utf8 is an allocated pointer that we must free.  */
-	Safefree(key_p);
-    }
-
-    he->refcounted_he_data[0] = flags;
+    he->refcounted_he_data[0] = hekflags;
     he->refcounted_he_refcnt = 1;
 
     return he;
 }
 
 /*
-=for apidoc refcounted_he_free
+=for apidoc m|struct refcounted_he *|refcounted_he_new_pv|struct refcounted_he *parent|const char *key|U32 hash|SV *value|U32 flags
 
-Decrements the reference count of the passed in C<struct refcounted_he *>
-by one. If the reference count reaches zero the structure's memory is freed,
-and C<refcounted_he_free> iterates onto the parent node.
+Like L</refcounted_he_new_pvn>, but takes a nul-terminated string instead
+of a string/length pair.
+
+=cut
+*/
+
+struct refcounted_he *
+Perl_refcounted_he_new_pv(pTHX_ struct refcounted_he *parent,
+	const char *key, U32 hash, SV *value, U32 flags)
+{
+    PERL_ARGS_ASSERT_REFCOUNTED_HE_NEW_PV;
+    return refcounted_he_new_pvn(parent, key, strlen(key), hash, value, flags);
+}
+
+/*
+=for apidoc m|struct refcounted_he *|refcounted_he_new_sv|struct refcounted_he *parent|SV *key|U32 hash|SV *value|U32 flags
+
+Like L</refcounted_he_new_pvn>, but takes a Perl scalar instead of a
+string/length pair.
+
+=cut
+*/
+
+struct refcounted_he *
+Perl_refcounted_he_new_sv(pTHX_ struct refcounted_he *parent,
+	SV *key, U32 hash, SV *value, U32 flags)
+{
+    const char *keypv;
+    STRLEN keylen;
+    PERL_ARGS_ASSERT_REFCOUNTED_HE_NEW_SV;
+    if (flags & REFCOUNTED_HE_KEY_UTF8)
+	Perl_croak(aTHX_ "panic: refcounted_he_new_sv bad flags %"UVxf,
+	    (UV)flags);
+    keypv = SvPV_const(key, keylen);
+    if (SvUTF8(key))
+	flags |= REFCOUNTED_HE_KEY_UTF8;
+    if (!hash && SvIsCOW_shared_hash(key))
+	hash = SvSHARED_HASH(key);
+    return refcounted_he_new_pvn(parent, keypv, keylen, hash, value, flags);
+}
+
+/*
+=for apidoc m|void|refcounted_he_free|struct refcounted_he *he
+
+Decrements the reference count of a C<refcounted_he> by one.  If the
+reference count reaches zero the structure's memory is freed, which
+(recursively) causes a reduction of its parent C<refcounted_he>'s
+reference count.  It is safe to pass a null pointer to this function:
+no action occurs in this case.
 
 =cut
 */
@@ -3002,6 +3079,27 @@ Perl_refcounted_he_free(pTHX_ struct refcounted_he *he) {
 	he = he->refcounted_he_next;
 	PerlMemShared_free(copy);
     }
+}
+
+/*
+=for apidoc m|struct refcounted_he *|refcounted_he_inc|struct refcounted_he *he
+
+Increment the reference count of a C<refcounted_he>.  The pointer to the
+C<refcounted_he> is also returned.  It is safe to pass a null pointer
+to this function: no action occurs and a null pointer is returned.
+
+=cut
+*/
+
+struct refcounted_he *
+Perl_refcounted_he_inc(pTHX_ struct refcounted_he *he)
+{
+    if (he) {
+	HINTS_REFCNT_LOCK;
+	he->refcounted_he_refcnt++;
+	HINTS_REFCNT_UNLOCK;
+    }
+    return he;
 }
 
 /* pp_entereval is aware that labels are stored with a key ':' at the top of
@@ -3044,16 +3142,17 @@ void
 Perl_store_cop_label(pTHX_ COP *const cop, const char *label, STRLEN len,
 		     U32 flags)
 {
+    SV *labelsv;
     PERL_ARGS_ASSERT_STORE_COP_LABEL;
 
     if (flags & ~(SVf_UTF8))
 	Perl_croak(aTHX_ "panic: store_cop_label illegal flag bits 0x%" UVxf,
 		   (UV)flags);
-
+    labelsv = sv_2mortal(newSVpvn(label, len));
+    if (flags & SVf_UTF8)
+	SvUTF8_on(labelsv);
     cop->cop_hints_hash
-	= refcounted_he_new_common(cop->cop_hints_hash, ":", 1, HVrhek_PV,
-				   flags & SVf_UTF8 ? HVrhek_PV_UTF8 : HVrhek_PV,
-				   label, len);
+	= refcounted_he_new_pvs(cop->cop_hints_hash, ":", labelsv, 0);
 }
 
 /*

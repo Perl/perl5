@@ -1125,9 +1125,7 @@ refcounted_he_exists(key, level=0)
 	if (level) {
 	    croak("level must be zero, not %"IVdf, level);
 	}
-	RETVAL = (Perl_refcounted_he_fetch(aTHX_ PL_curcop->cop_hints_hash,
-					   key, NULL, 0, 0, 0)
-		  != &PL_sv_placeholder);
+	RETVAL = (cop_hints_fetch_sv(PL_curcop, key, 0, 0) != &PL_sv_placeholder);
 	OUTPUT:
 	RETVAL
 
@@ -1139,8 +1137,7 @@ refcounted_he_fetch(key, level=0)
 	if (level) {
 	    croak("level must be zero, not %"IVdf, level);
 	}
-	RETVAL = Perl_refcounted_he_fetch(aTHX_ PL_curcop->cop_hints_hash, key,
-					  NULL, 0, 0, 0);
+	RETVAL = cop_hints_fetch_sv(PL_curcop, key, 0, 0);
 	SvREFCNT_inc(RETVAL);
 	OUTPUT:
 	RETVAL
@@ -1589,12 +1586,12 @@ my_caller(level)
         gv = CvGV(dbcx->blk_sub.cv);
         ST(3) = isGV(gv) ? sv_2mortal(newSVpv(GvNAME(gv), 0)) : &PL_sv_undef;
 
-        ST(4) = cop_hints_fetchpvs(cx->blk_oldcop, "foo");
-        ST(5) = cop_hints_fetchpvn(cx->blk_oldcop, "foo", 3, 0, 0);
-        ST(6) = cop_hints_fetchsv(cx->blk_oldcop, 
-                sv_2mortal(newSVpvn("foo", 3)), 0);
+        ST(4) = cop_hints_fetch_pvs(cx->blk_oldcop, "foo", 0);
+        ST(5) = cop_hints_fetch_pvn(cx->blk_oldcop, "foo", 3, 0, 0);
+        ST(6) = cop_hints_fetch_sv(cx->blk_oldcop, 
+                sv_2mortal(newSVpvn("foo", 3)), 0, 0);
 
-        hv = cop_hints_2hv(cx->blk_oldcop);
+        hv = cop_hints_2hv(cx->blk_oldcop, 0);
         ST(7) = hv ? sv_2mortal(newRV_noinc((SV *)hv)) : &PL_sv_undef;
 
         XSRETURN(8);
@@ -1897,6 +1894,118 @@ cv_set_call_checker_multi_sum(CV *cv)
 	cv_set_call_checker(cv, THX_ck_entersub_multi_sum, &PL_sv_undef);
 
 void
+test_cophh()
+    PREINIT:
+	COPHH *a, *b;
+    CODE:
+#define check_ph(EXPR) \
+    	    do { if((EXPR) != &PL_sv_placeholder) croak("fail"); } while(0)
+#define check_iv(EXPR, EXPECT) \
+    	    do { if(SvIV(EXPR) != (EXPECT)) croak("fail"); } while(0)
+#define msvpvs(STR) sv_2mortal(newSVpvs(STR))
+#define msviv(VALUE) sv_2mortal(newSViv(VALUE))
+	a = cophh_new_empty();
+	check_ph(cophh_fetch_pvn(a, "foo_1", 5, 0, 0));
+	check_ph(cophh_fetch_pvs(a, "foo_1", 0));
+	check_ph(cophh_fetch_pv(a, "foo_1", 0, 0));
+	check_ph(cophh_fetch_sv(a, msvpvs("foo_1"), 0, 0));
+	a = cophh_store_pvn(a, "foo_1abc", 5, 0, msviv(111), 0);
+	a = cophh_store_pvs(a, "foo_2", msviv(222), 0);
+	a = cophh_store_pv(a, "foo_3", 0, msviv(333), 0);
+	a = cophh_store_sv(a, msvpvs("foo_4"), 0, msviv(444), 0);
+	check_iv(cophh_fetch_pvn(a, "foo_1xyz", 5, 0, 0), 111);
+	check_iv(cophh_fetch_pvs(a, "foo_1", 0), 111);
+	check_iv(cophh_fetch_pv(a, "foo_1", 0, 0), 111);
+	check_iv(cophh_fetch_sv(a, msvpvs("foo_1"), 0, 0), 111);
+	check_iv(cophh_fetch_pvs(a, "foo_2", 0), 222);
+	check_iv(cophh_fetch_pvs(a, "foo_3", 0), 333);
+	check_iv(cophh_fetch_pvs(a, "foo_4", 0), 444);
+	check_ph(cophh_fetch_pvs(a, "foo_5", 0));
+	b = cophh_copy(a);
+	b = cophh_store_pvs(b, "foo_1", msviv(1111), 0);
+	check_iv(cophh_fetch_pvs(a, "foo_1", 0), 111);
+	check_iv(cophh_fetch_pvs(a, "foo_2", 0), 222);
+	check_iv(cophh_fetch_pvs(a, "foo_3", 0), 333);
+	check_iv(cophh_fetch_pvs(a, "foo_4", 0), 444);
+	check_ph(cophh_fetch_pvs(a, "foo_5", 0));
+	check_iv(cophh_fetch_pvs(b, "foo_1", 0), 1111);
+	check_iv(cophh_fetch_pvs(b, "foo_2", 0), 222);
+	check_iv(cophh_fetch_pvs(b, "foo_3", 0), 333);
+	check_iv(cophh_fetch_pvs(b, "foo_4", 0), 444);
+	check_ph(cophh_fetch_pvs(b, "foo_5", 0));
+	a = cophh_delete_pvn(a, "foo_1abc", 5, 0, 0);
+	a = cophh_delete_pvs(a, "foo_2", 0);
+	b = cophh_delete_pv(b, "foo_3", 0, 0);
+	b = cophh_delete_sv(b, msvpvs("foo_4"), 0, 0);
+	check_ph(cophh_fetch_pvs(a, "foo_1", 0));
+	check_ph(cophh_fetch_pvs(a, "foo_2", 0));
+	check_iv(cophh_fetch_pvs(a, "foo_3", 0), 333);
+	check_iv(cophh_fetch_pvs(a, "foo_4", 0), 444);
+	check_ph(cophh_fetch_pvs(a, "foo_5", 0));
+	check_iv(cophh_fetch_pvs(b, "foo_1", 0), 1111);
+	check_iv(cophh_fetch_pvs(b, "foo_2", 0), 222);
+	check_ph(cophh_fetch_pvs(b, "foo_3", 0));
+	check_ph(cophh_fetch_pvs(b, "foo_4", 0));
+	check_ph(cophh_fetch_pvs(b, "foo_5", 0));
+	b = cophh_delete_pvs(b, "foo_3", 0);
+	b = cophh_delete_pvs(b, "foo_5", 0);
+	check_iv(cophh_fetch_pvs(b, "foo_1", 0), 1111);
+	check_iv(cophh_fetch_pvs(b, "foo_2", 0), 222);
+	check_ph(cophh_fetch_pvs(b, "foo_3", 0));
+	check_ph(cophh_fetch_pvs(b, "foo_4", 0));
+	check_ph(cophh_fetch_pvs(b, "foo_5", 0));
+	cophh_free(b);
+	check_ph(cophh_fetch_pvs(a, "foo_1", 0));
+	check_ph(cophh_fetch_pvs(a, "foo_2", 0));
+	check_iv(cophh_fetch_pvs(a, "foo_3", 0), 333);
+	check_iv(cophh_fetch_pvs(a, "foo_4", 0), 444);
+	check_ph(cophh_fetch_pvs(a, "foo_5", 0));
+	a = cophh_store_pvs(a, "foo_1", msviv(11111), COPHH_KEY_UTF8);
+	a = cophh_store_pvs(a, "foo_\xaa", msviv(123), 0);
+	a = cophh_store_pvs(a, "foo_\xc2\xbb", msviv(456), COPHH_KEY_UTF8);
+	a = cophh_store_pvs(a, "foo_\xc3\x8c", msviv(789), COPHH_KEY_UTF8);
+	a = cophh_store_pvs(a, "foo_\xd9\xa6", msviv(666), COPHH_KEY_UTF8);
+	check_iv(cophh_fetch_pvs(a, "foo_1", 0), 11111);
+	check_iv(cophh_fetch_pvs(a, "foo_1", COPHH_KEY_UTF8), 11111);
+	check_iv(cophh_fetch_pvs(a, "foo_\xaa", 0), 123);
+	check_iv(cophh_fetch_pvs(a, "foo_\xc2\xaa", COPHH_KEY_UTF8), 123);
+	check_ph(cophh_fetch_pvs(a, "foo_\xc2\xaa", 0));
+	check_iv(cophh_fetch_pvs(a, "foo_\xbb", 0), 456);
+	check_iv(cophh_fetch_pvs(a, "foo_\xc2\xbb", COPHH_KEY_UTF8), 456);
+	check_ph(cophh_fetch_pvs(a, "foo_\xc2\xbb", 0));
+	check_iv(cophh_fetch_pvs(a, "foo_\xcc", 0), 789);
+	check_iv(cophh_fetch_pvs(a, "foo_\xc3\x8c", COPHH_KEY_UTF8), 789);
+	check_ph(cophh_fetch_pvs(a, "foo_\xc2\x8c", 0));
+	check_iv(cophh_fetch_pvs(a, "foo_\xd9\xa6", COPHH_KEY_UTF8), 666);
+	check_ph(cophh_fetch_pvs(a, "foo_\xd9\xa6", 0));
+	cophh_free(a);
+#undef check_ph
+#undef check_iv
+#undef msvpvs
+#undef msviv
+
+HV *
+example_cophh_2hv()
+    PREINIT:
+	COPHH *a;
+    CODE:
+#define msviv(VALUE) sv_2mortal(newSViv(VALUE))
+	a = cophh_new_empty();
+	a = cophh_store_pvs(a, "foo_0", msviv(999), 0);
+	a = cophh_store_pvs(a, "foo_1", msviv(111), 0);
+	a = cophh_store_pvs(a, "foo_\xaa", msviv(123), 0);
+	a = cophh_store_pvs(a, "foo_\xc2\xbb", msviv(456), COPHH_KEY_UTF8);
+	a = cophh_store_pvs(a, "foo_\xc3\x8c", msviv(789), COPHH_KEY_UTF8);
+	a = cophh_store_pvs(a, "foo_\xd9\xa6", msviv(666), COPHH_KEY_UTF8);
+	a = cophh_delete_pvs(a, "foo_0", 0);
+	a = cophh_delete_pvs(a, "foo_2", 0);
+	RETVAL = cophh_2hv(a, 0);
+	cophh_free(a);
+#undef msviv
+    OUTPUT:
+	RETVAL
+
+void
 test_savehints()
     PREINIT:
 	SV **svp, *sv;
@@ -1906,7 +2015,7 @@ test_savehints()
 #define hint_ok(KEY, EXPECT) \
 		((svp = hv_fetchs(GvHV(PL_hintgv), KEY, 0)) && \
 		    (sv = *svp) && SvIV(sv) == (EXPECT) && \
-		    (sv = cop_hints_fetchpvs(&PL_compiling, KEY)) && \
+		    (sv = cop_hints_fetch_pvs(&PL_compiling, KEY, 0)) && \
 		    SvIV(sv) == (EXPECT))
 #define check_hint(KEY, EXPECT) \
 		do { if (!hint_ok(KEY, EXPECT)) croak_fail(); } while(0)
@@ -1953,15 +2062,18 @@ test_copyhints()
 	ENTER;
 	SAVEHINTS();
 	sv_setiv_mg(*hv_fetchs(GvHV(PL_hintgv), "t0", 1), 123);
-	if (SvIV(cop_hints_fetchpvs(&PL_compiling, "t0")) != 123) croak_fail();
+	if (SvIV(cop_hints_fetch_pvs(&PL_compiling, "t0", 0)) != 123)
+	    croak_fail();
 	a = newHVhv(GvHV(PL_hintgv));
 	sv_2mortal((SV*)a);
 	sv_setiv_mg(*hv_fetchs(a, "t0", 1), 456);
-	if (SvIV(cop_hints_fetchpvs(&PL_compiling, "t0")) != 123) croak_fail();
+	if (SvIV(cop_hints_fetch_pvs(&PL_compiling, "t0", 0)) != 123)
+	    croak_fail();
 	b = hv_copy_hints_hv(a);
 	sv_2mortal((SV*)b);
 	sv_setiv_mg(*hv_fetchs(b, "t0", 1), 789);
-	if (SvIV(cop_hints_fetchpvs(&PL_compiling, "t0")) != 789) croak_fail();
+	if (SvIV(cop_hints_fetch_pvs(&PL_compiling, "t0", 0)) != 789)
+	    croak_fail();
 	LEAVE;
 
 void

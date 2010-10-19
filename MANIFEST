@@ -3391,6 +3391,7 @@ ext/XS-APItest/t/Block.pm	Helper for ./blockhooks.t
 ext/XS-APItest/t/call_checker.t	test call checker plugin API
 ext/XS-APItest/t/caller.t	XS::APItest: tests for caller_cx
 ext/XS-APItest/t/call.t		XS::APItest extension
+ext/XS-APItest/t/cophh.t	test COPHH API
 ext/XS-APItest/t/copyhints.t	test hv_copy_hints_hv() API
 ext/XS-APItest/t/exception.t	XS::APItest extension
 ext/XS-APItest/t/grok.t		XS::APItest: tests for grok* functions

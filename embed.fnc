@@ -229,13 +229,6 @@ ApR	|I32	|my_chsize	|int fd|Off_t length
 #endif
 : Used in perly.y
 pR	|OP*	|convert	|I32 optype|I32 flags|NULLOK OP* o
-Apd	|HV*	|cop_hints_2hv	|NN const COP *cop
-Apd	|SV*	|cop_hints_fetchpvn|NN const COP *cop|NN const char *key \
-				|STRLEN klen|int flags|U32 hash
-Amd	|SV*	|cop_hints_fetchpvs|NN const COP *cop|NN const char *const key
-Amd	|SV*	|cop_hints_fetchpv|NN const COP *cop|NN const char *const key \
-				|int flags|U32 hash
-Amd	|SV*	|cop_hints_fetchsv|NN const COP *cop|NN SV *keysv|U32 hash
 : Used in op.c and perl.c
 pM	|PERL_CONTEXT*	|create_eval_scope|U32 flags
 Aprd	|void	|croak_sv	|NN SV *baseex
@@ -480,26 +473,30 @@ ApMdR	|HE*	|hv_iternext_flags|NN HV *hv|I32 flags
 ApdR	|SV*	|hv_iterval	|NN HV *hv|NN HE *entry
 Ap	|void	|hv_ksplit	|NN HV *hv|IV newmax
 Apdbm	|void	|hv_magic	|NN HV *hv|NULLOK GV *gv|int how
-: Used in B.xs
-XEdpoM	|HV *	|refcounted_he_chain_2hv|NULLOK const struct refcounted_he *c
-: Used in APItest.xs
-XEpoM	|SV *	|refcounted_he_fetch|NULLOK const struct refcounted_he *chain \
-				|NULLOK SV *keysv|NULLOK const char *key \
-				|STRLEN klen, int flags, U32 hash
-: Used in various files
-dpoM	|void	|refcounted_he_free|NULLOK struct refcounted_he *he
-: Used in various files
-XEdpoM	|struct refcounted_he *|refcounted_he_new \
-				|NULLOK struct refcounted_he *const parent \
-				|NULLOK SV *const key|NULLOK SV *const value
 #if defined(PERL_IN_HV_C)
-s	|struct refcounted_he *	|refcounted_he_new_common \
-				|NULLOK struct refcounted_he *const parent \
-				|NN const char *const key_p \
-				|const STRLEN key_len|const char flags \
-				|char value_type|NN const void *value \
-				|const STRLEN value_len
+s	|SV *	|refcounted_he_value	|NN const struct refcounted_he *he
 #endif
+Xpd	|HV *	|refcounted_he_chain_2hv|NULLOK const struct refcounted_he *c|U32 flags
+Xpd	|SV *	|refcounted_he_fetch_pvn|NULLOK const struct refcounted_he *chain \
+				|NN const char *keypv|STRLEN keylen|U32 hash|U32 flags
+Xpd	|SV *	|refcounted_he_fetch_pv|NULLOK const struct refcounted_he *chain \
+				|NN const char *key|U32 hash|U32 flags
+Xpd	|SV *	|refcounted_he_fetch_sv|NULLOK const struct refcounted_he *chain \
+				|NN SV *key|U32 hash|U32 flags
+Xpd	|struct refcounted_he *|refcounted_he_new_pvn \
+				|NULLOK struct refcounted_he *parent \
+				|NN const char *keypv|STRLEN keylen \
+				|U32 hash|NULLOK SV *value|U32 flags
+Xpd	|struct refcounted_he *|refcounted_he_new_pv \
+				|NULLOK struct refcounted_he *parent \
+				|NN const char *key \
+				|U32 hash|NULLOK SV *value|U32 flags
+Xpd	|struct refcounted_he *|refcounted_he_new_sv \
+				|NULLOK struct refcounted_he *parent \
+				|NN SV *key \
+				|U32 hash|NULLOK SV *value|U32 flags
+Xpd	|void	|refcounted_he_free|NULLOK struct refcounted_he *he
+Xpd	|struct refcounted_he *|refcounted_he_inc|NULLOK struct refcounted_he *he
 Abmd	|SV**	|hv_store	|NULLOK HV *hv|NULLOK const char *key \
 				|I32 klen|NULLOK SV *val|U32 hash
 Abmd	|HE*	|hv_store_ent	|NULLOK HV *hv|NULLOK SV *key|NULLOK SV *val\
@@ -1531,7 +1528,6 @@ sM	|SV*	|hv_delete_common|NULLOK HV *hv|NULLOK SV *keysv \
 		|NULLOK const char *key|STRLEN klen|int k_flags|I32 d_flags \
 		|U32 hash
 sM	|void	|clear_placeholders	|NN HV *hv|U32 items
-sM	|SV *	|refcounted_he_value	|NN const struct refcounted_he *he
 #endif
 
 #if defined(PERL_IN_MG_C)

@@ -451,17 +451,10 @@ C<SV*>.
    between threads (because it hangs from OPs, which are shared), hence the
    alternate definition and mutex.  */
 
-#define cop_hints_fetchsv(cop, keysv, hash) \
-    Perl_cop_hints_fetchpvn(aTHX_ (cop), SvPV_nolen(keysv), SvCUR(keysv), \
-	(SvUTF8(keysv) ? HVhek_UTF8 : 0), (hash))
-
-#define cop_hints_fetchpv(cop, key, flags, hash) \
-    Perl_cop_hints_fetchpvn(aTHX_ (cop), key, strlen(key), (flags), (hash))
-
-#define cop_hints_fetchpvs(cop, key) \
-    Perl_cop_hints_fetchpvn(aTHX_ (cop), STR_WITH_LEN(key), 0, 0)
-
 struct refcounted_he;
+
+/* flags for the refcounted_he API */
+#define REFCOUNTED_HE_KEY_UTF8		0x00000001
 
 #ifdef PERL_CORE
 
@@ -485,6 +478,30 @@ struct refcounted_he {
        non-NUL terminated key.  */
     char                  refcounted_he_data[1];
 };
+
+/*
+=for apidoc m|SV *|refcounted_he_fetch_pvs|const struct refcounted_he *chain|const char *key|U32 flags
+
+Like L</refcounted_he_fetch_pvn>, but takes a literal string instead of
+a string/length pair, and no precomputed hash.
+
+=cut
+*/
+
+#define refcounted_he_fetch_pvs(chain, key, flags) \
+    Perl_refcounted_he_fetch_pvn(aTHX_ chain, STR_WITH_LEN(key), 0, flags)
+
+/*
+=for apidoc m|struct refcounted_he *|refcounted_he_new_pvs|struct refcounted_he *parent|const char *key|SV *value|U32 flags
+
+Like L</refcounted_he_new_pvn>, but takes a literal string instead of
+a string/length pair, and no precomputed hash.
+
+=cut
+*/
+
+#define refcounted_he_new_pvs(parent, key, value, flags) \
+    Perl_refcounted_he_new_pvn(aTHX_ parent, STR_WITH_LEN(key), 0, value, flags)
 
 /* Flag bits are HVhek_UTF8, HVhek_WASUTF8, then */
 #define HVrhek_undef	0x00 /* Value is undef. */
