@@ -307,6 +307,10 @@ C<if> has been upgraded from version 0.05 to 0.06
 
 =item *
 
+C<IPC::Cmd> has been upgraded from version 0.60 to 0.64
+
+=item *
+
 C<IPC::Open3> has been upgraded from version 1.06 to 1.07.
 
 The internal C<xclose> routine now knows how to handle file descriptors, as

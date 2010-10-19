@@ -14,9 +14,10 @@ BEGIN {
     use Exporter    ();
     use vars        qw[ @ISA $VERSION @EXPORT_OK $VERBOSE $DEBUG
                         $USE_IPC_RUN $USE_IPC_OPEN3 $CAN_USE_RUN_FORKED $WARN
+                        $INSTANCES
                     ];
 
-    $VERSION        = '0.60';
+    $VERSION        = '0.64';
     $VERBOSE        = 0;
     $DEBUG          = 0;
     $WARN           = 1;
@@ -185,13 +186,17 @@ providing C<run_forked> on the current platform.
 C<can_run> takes but a single argument: the name of a binary you wish
 to locate. C<can_run> works much like the unix binary C<which> or the bash
 command C<type>, which scans through your path, looking for the requested
-binary .
+binary.
 
 Unlike C<which> and C<type>, this function is platform independent and
 will also work on, for example, Win32.
 
-It will return the full path to the binary you asked for if it was
-found, or C<undef> if it was not.
+If called in a scalar context it will return the full path to the binary
+you asked for if it was found, or C<undef> if it was not.
+
+If called in a list context and the global variable C<$INSTANCES> is a true value 
+it will return a list of the full paths to instances
+of the binary where found in C<PATH> or an empty list if it was not found.
 
 =cut
 
@@ -210,6 +215,8 @@ sub can_run {
     require File::Spec;
     require ExtUtils::MakeMaker;
 
+    my @possibles;
+
     if( File::Spec->file_name_is_absolute($command) ) {
         return MM->maybe_command($command);
 
@@ -220,9 +227,11 @@ sub can_run {
         ) {
             next if ! $dir || ! -d $dir;
             my $abs = File::Spec->catfile( IS_WIN32 ? Win32::GetShortPathName( $dir ) : $dir, $command);
-            return $abs if $abs = MM->maybe_command($abs);
+            push @possibles, $abs if $abs = MM->maybe_command($abs);
         }
     }
+    return @possibles if wantarray and $INSTANCES;
+    return shift @possibles;
 }
 
 =head2 $ok | ($ok, $err, $full_buf, $stdout_buff, $stderr_buff) = run( command => COMMAND, [verbose => BOOL, buffer => \$SCALAR, timeout => DIGIT] );
@@ -1701,6 +1710,13 @@ This variable controls whether run time warnings should be issued, like
 the failure to load an C<IPC::*> module you explicitly requested.
 
 Defaults to true. Turn this off at your own risk.
+
+=head2 $IPC::Cmd::INSTANCES
+
+This variable controls whether C<can_run> will return all instances of
+the binary it finds in the C<PATH> when called in a list context.
+
+Defaults to false, set to true to enable the described behaviour.
 
 =head1 Caveats
 
