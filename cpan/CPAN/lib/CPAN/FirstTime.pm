@@ -496,14 +496,14 @@ improves the overall quality and value of CPAN.
 
 One way you can contribute is to send test results for each module
 that you install.  If you install the CPAN::Reporter module, you have
-the option to automatically generate and email test reports to CPAN
+the option to automatically generate and deliver test reports to CPAN
 Testers whenever you run tests on a CPAN package.
 
 See the CPAN::Reporter documentation for additional details and
-configuration settings.  If your firewall blocks outgoing email,
-you will need to configure CPAN::Reporter before sending reports.
+configuration settings.  If your firewall blocks outgoing traffic,
+you may need to configure CPAN::Reporter before sending reports.
 
-Email test reports if CPAN::Reporter is installed (yes/no)?
+Generate test reports if CPAN::Reporter is installed (yes/no)?
 
 =item perl5lib_verbosity
 

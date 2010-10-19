@@ -1,3 +1,44 @@
+2010-10-03  Andreas J. Koenig  <andk@cpan.org>
+
+	* release 1.94_61
+
+	* address RT #61735: stop talking about sending test reports by email (Schwern)
+
+	* prevent the use of old versions of Parse::CPAN::Meta which caused test failures
+
+	* bandaid for native solaris patch program to actually do patching
+
+2010-09-28  Andreas J. Koenig  <andk@cpan.org>
+
+	* release 1.94_60
+
+	* improvements to find_perl() by David Golden
+
+	* test fixes to address the issues demonstrated by some cpantesters
+
+2010-09-26  Andreas J. Koenig  <andk@cpan.org>
+
+	* release 1.94_59
+
+	* address RT #61607: make the FTP download code more robust  (Reini Urban)
+
+	* omit useless arithmetic in CPAN::Version to possibly help netbsd
+	(reported by Nigel Horne and suggested David Golden)
+
+	* address RT #59216: make sure $builddir exists before calling tempdir
+	(Lee Goddard)
+
+	* a couple of new distropref files
+
+2010-06-24  Andreas J. Koenig  <andk@cpan.org>
+
+	* release 1.94_58
+
+	* bugfix: Non-English locales got no diagnostics on a failed locking due
+	to permissions (reported by Frank Wiegand)
+
+	* chasing test failures with test fixes.
+
 2010-05-24  Andreas J. Koenig  <andk@cpan.org>
 
 	* release 1.94_57

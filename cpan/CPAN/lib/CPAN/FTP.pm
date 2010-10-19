@@ -14,7 +14,7 @@ use vars qw($connect_to_internet_ok $Ua $Thesite $ThesiteURL $Themethod);
 use vars qw(
             $VERSION
 );
-$VERSION = "5.5004";
+$VERSION = "5.5005";
 
 #-> sub CPAN::FTP::ftp_statistics
 # if they want to rewrite, they need to pass in a filehandle
@@ -576,13 +576,16 @@ sub hostdleasy { #called from hostdlxxx
                     $ThesiteURL = $ro_url;
                     return $ungz;
                 }
-                else {
+                elsif (-f $l && -r _) {
                     eval { CPAN::Tarzip->new($l)->gunzip($aslocal) };
-                    if ( -f $aslocal) {
+                    if ( -f $aslocal && -s _) {
                         $ThesiteURL = $ro_url;
                         return $aslocal;
                     }
-                    else {
+                    elsif (! -s $aslocal) {
+                        unlink $aslocal;
+                    }
+                    elsif (-f $l) {
                         $CPAN::Frontend->mywarn("Error decompressing '$l': $@\n")
                             if $@;
                         return;

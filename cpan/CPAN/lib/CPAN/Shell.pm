@@ -1456,6 +1456,7 @@ sub print_ornamented {
 
     local $| = 1; # Flush immediately
     if ( $CPAN::Be_Silent ) {
+        # WARNING: variable Be_Silent is poisoned and must be eliminated.
         print {report_fh()} $what;
         return;
     }
