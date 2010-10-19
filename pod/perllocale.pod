@@ -115,8 +115,7 @@ ucfirst(), and lcfirst()) use C<LC_CTYPE>
 
 =item *
 
-B<The formatting functions> (printf(), sprintf() and write()) use
-C<LC_NUMERIC>
+B<Format declarations> (format()) use C<LC_NUMERIC>
 
 =item *
 
@@ -967,13 +966,11 @@ system's implementation of the locale system than by Perl.
 
 =head2 write() and LC_NUMERIC
 
-Formats are the only part of Perl that unconditionally use information
-from a program's locale; if a program's environment specifies an
-LC_NUMERIC locale, it is always used to specify the decimal point
-character in formatted output.  Formatted output cannot be controlled by
-C<use locale> because the pragma is tied to the block structure of the
-program, and, for historical reasons, formats exist outside that block
-structure.
+If a program's environment specifies an LC_NUMERIC locale and C<use
+locale> is in effect when the format is declared, the locale is used
+to specify the decimal point character in formatted output.  Formatted
+output cannot be controlled by C<use locale> at the time when write()
+is called.
 
 =head2 Freely available locale definitions
 

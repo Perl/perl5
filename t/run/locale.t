@@ -8,12 +8,12 @@ BEGIN {
 use strict;
 
 ########
-# This test is here instead of lib/locale.t because
-# the bug depends on in the internal state of the locale
+# These tests are here instead of lib/locale.t because
+# some bugs depend on in the internal state of the locale
 # settings and pragma/locale messes up that state pretty badly.
-# We need a "fresh run".
+# We need "fresh runs".
 BEGIN {
-    eval { require POSIX };
+    eval { require POSIX; POSIX->import("locale_h") };
     if ($@) {
 	skip_all("could not load the POSIX module"); # running minitest?
     }
@@ -47,4 +47,87 @@ fresh_perl_is("for (qw(@locales)) {\n" . <<'EOF',
 EOF
     "", {}, "no locales where LC_NUMERIC breaks");
 
-sub last { 1 }
+fresh_perl_is("for (qw(@locales)) {\n" . <<'EOF',
+    use POSIX qw(locale_h);
+    use locale;
+    my $in = 4.2;
+    my $s = sprintf "%g", $in; # avoid any constant folding bugs
+    next if $s eq "4.2";
+    print "$_ $s\n";
+}
+EOF
+    "", {}, "LC_NUMERIC without setlocale() has no effect in any locale");
+
+# try to find out a locale where LC_NUMERIC makes a difference
+my $original_locale = setlocale(LC_NUMERIC);
+
+my ($base, $different, $difference);
+for ("C", @locales) { # prefer C for the base if available
+    use locale;
+    setlocale(LC_NUMERIC, $_) or next;
+    my $in = 4.2; # avoid any constant folding bugs
+    if ((my $s = sprintf("%g", $in)) eq "4.2")  {
+	$base ||= $_;
+    } else {
+	$different ||= $_;
+	$difference ||= $s;
+    }
+
+    last if $base && $different;
+}
+setlocale(LC_NUMERIC, $original_locale);
+
+SKIP: {
+    skip("no locale available where LC_NUMERIC makes a difference", &last - 2)
+	if !$different;
+    note("using the '$different' locale for LC_NUMERIC tests");
+    for ($different) {
+	local $ENV{LC_NUMERIC} = $_;
+	local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
+
+	fresh_perl_is(<<'EOF', "4.2", {},
+format STDOUT =
+@.#
+4.179
+.
+write;
+EOF
+	    "format() does not look at LC_NUMERIC without 'use locale'");
+
+        {
+	    fresh_perl_is(<<'EOF', $difference, {},
+use locale;
+format STDOUT =
+@.#
+4.179
+.
+write;
+EOF
+	    "format() looks at LC_NUMERIC with 'use locale'");
+        }
+
+        {
+	    fresh_perl_is(<<'EOF', "4.2", {},
+format STDOUT =
+@.#
+4.179
+.
+{ use locale; write; }
+EOF
+	    "too late to look at the locale at write() time");
+        }
+
+        {
+	    fresh_perl_is(<<'EOF', $difference, {},
+use locale; format STDOUT =
+@.#
+4.179
+.
+{ no locale; write; }
+EOF
+	    "too late to ignore the locale at write() time");
+        }
+    }
+} # SKIP
+
+sub last { 6 }

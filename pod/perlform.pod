@@ -166,9 +166,9 @@ token on the first line.  If an expression evaluates to a number with a
 decimal part, and if the corresponding picture specifies that the decimal
 part should appear in the output (that is, any picture except multiple "#"
 characters B<without> an embedded "."), the character used for the decimal
-point is B<always> determined by the current LC_NUMERIC locale.  This
-means that, if, for example, the run-time environment happens to specify a
-German locale, "," will be used instead of the default ".".  See
+point is determined by the current LC_NUMERIC locale if C<use locale> is in
+effect.  This means that, if, for example, the run-time environment happens
+to specify a German locale, "," will be used instead of the default ".".  See
 L<perllocale> and L<"WARNINGS"> for more information.
 
 
@@ -442,15 +442,11 @@ Lexical variables (declared with "my") are not visible within a
 format unless the format is declared within the scope of the lexical
 variable.  (They weren't visible at all before version 5.001.)
 
-Formats are the only part of Perl that unconditionally use information
-from a program's locale; if a program's environment specifies an
-LC_NUMERIC locale, it is always used to specify the decimal point
-character in formatted output.  Perl ignores all other aspects of locale
-handling unless the C<use locale> pragma is in effect.  Formatted output
-cannot be controlled by C<use locale> because the pragma is tied to the
-block structure of the program, and, for historical reasons, formats
-exist outside that block structure.  See L<perllocale> for further
-discussion of locale handling.
+If a program's environment specifies an LC_NUMERIC locale and C<use
+locale> is in effect when the format is declared, the locale is used
+to specify the decimal point character in formatted output.  Formatted
+output cannot be controlled by C<use locale> at the time when write()
+is called. See L<perllocale> for further discussion of locale handling.
 
 Within strings that are to be displayed in a fixed length text field,
 each control character is substituted by a space. (But remember the
