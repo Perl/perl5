@@ -25,18 +25,15 @@ print "1..11\n";
 
 # We don't know what symbols are defined in platform X's system headers.
 # We don't even want to guess, because some platform out there will
-# likely do the unthinkable.  However, Fcntl::constant("LOCK_SH",0)
-# should always return a value, even on platforms which don't define the
-# cpp symbol; Fcntl.xs says:
-#           /* We support flock() on systems which don't have it, so
-#              always supply the constants. */
+# likely do the unthinkable.  However, Fcntl::S_IMODE(0)
+# should always return a value.
 # If this ceases to be the case, we're in trouble. =)
-$VALID = 'LOCK_SH';
+$VALID = 0;
 
-### First, we check whether Fcntl::constant returns sane answers.
-# Fcntl::constant("LOCK_SH",0) should always succeed.
+### First, we check whether Fcntl::S_IMODE returns sane answers.
+# Fcntl::S_IMODE(0) should always succeed.
 
-$value = Fcntl::constant($VALID);
+$value = Fcntl::S_IMODE($VALID);
 print((!defined $value)
       ? "not ok 1\n# Sanity check broke, remaining tests will fail.\n"
       : "ok 1\n");
@@ -44,13 +41,13 @@ print((!defined $value)
 ### OK, we're ready to do real tests.
 
 # test "goto &function_constant"
-sub goto_const { goto &Fcntl::constant; }
+sub goto_const { goto &Fcntl::S_IMODE; }
 
 $ret = goto_const($VALID);
 print(($ret == $value) ? "ok 2\n" : "not ok 2\n# ($ret != $value)\n");
 
 # test "goto &$function_package_and_name"
-$FNAME1 = 'Fcntl::constant';
+$FNAME1 = 'Fcntl::S_IMODE';
 sub goto_name1 { goto &$FNAME1; }
 
 $ret = goto_name1($VALID);
@@ -64,7 +61,7 @@ print(($ret == $value) ? "ok 5\n" : "not ok 5\n# ($ret != $value)\n");
 
 # test "goto &$function_name" from local package
 package Fcntl;
-$FNAME2 = 'constant';
+$FNAME2 = 'S_IMODE';
 sub goto_name2 { goto &$FNAME2; }
 package main;
 
@@ -72,7 +69,7 @@ $ret = Fcntl::goto_name2($VALID);
 print(($ret == $value) ? "ok 6\n" : "not ok 6\n# ($ret != $value)\n");
 
 # test "goto &$function_ref"
-$FREF = \&Fcntl::constant;
+$FREF = \&Fcntl::S_IMODE;
 sub goto_ref { goto &$FREF; }
 
 $ret = goto_ref($VALID);
