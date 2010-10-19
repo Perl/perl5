@@ -9,7 +9,7 @@ require ExtUtils::Constant::XS;
 use ExtUtils::Constant::Utils qw(C_stringify);
 use ExtUtils::Constant::XS qw(%XS_TypeSet);
 
-$VERSION = '0.07';
+$VERSION = '0.08';
 @ISA = 'ExtUtils::Constant::XS';
 
 %type_to_struct =
@@ -170,6 +170,13 @@ sub WriteConstants {
     my $options = $ARGS->{PROXYSUBS};
     $options = {} unless ref $options;
     my $explosives = $options->{croak_on_read};
+    my $croak_on_error = $options->{croak_on_error};
+    # Until someone patches this (with test cases):
+    carp ("PROXYSUBS options 'croak_on_read' and 'croak_on_error' cannot be used together")
+	if $explosives && $croak_on_error; 
+    # Strictly it requires Perl_caller_cx
+    carp ("PROXYSUBS options 'croak_on_error' requires v5.13.5 or later")
+	if $croak_on_error && $^V < v5.13.5;
 
     $xs_subname ||= 'constant';
 
@@ -519,7 +526,34 @@ EOBOOT
 EOBOOT
     }
 
-    print $xs_fh $explosives ? <<"EXPLODE" : <<"DONT";
+    if ($croak_on_error) {
+        print $xs_fh <<"EOC";
+
+void
+$xs_subname(sv)
+    PREINIT:
+	const PERL_CONTEXT *cx = caller_cx(0, NULL);
+	/* cx is NULL if we've been called from the top level. PL_curcop isn't
+	   ideal, but it's much cheaper than other ways of not going SEGV.  */
+	const COP *cop = cx ? cx->blk_oldcop : PL_curcop;
+    INPUT:
+	SV *		sv;
+    PPCODE:
+#ifndef SYMBIAN
+	HV *${c_subname}_missing = get_missing_hash(aTHX);
+	if (hv_exists_ent(${c_subname}_missing, sv, 0)) {
+	    sv = newSVpvf("Your vendor has not defined $package_sprintf_safe macro %" SVf
+			  ", used at %s line %d\\n", sv, CopFILE(cop), CopLINE(cop));
+	} else
+#endif
+	{
+	    sv = newSVpvf("%"SVf" is not a valid $package_sprintf_safe macro at %s line %d\\n",
+			  sv, CopFILE(cop), CopLINE(cop));
+	}
+	croak_sv(sv_2mortal(sv));
+EOC
+    } else {
+        print $xs_fh $explosives ? <<"EXPLODE" : <<"DONT";
 
 void
 $xs_subname(sv)
@@ -549,7 +583,7 @@ $xs_subname(sv)
 	}
 	PUSHs(sv_2mortal(sv));
 DONT
-
+    }
 }
 
 1;
