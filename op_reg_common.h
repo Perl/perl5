@@ -18,11 +18,13 @@
 /* This tells where the first of these bits is.  Setting it to 0 saved cycles
  * and memory.  I (khw) think the code will work if changed back, but haven't
  * tested it */
+/* Make sure to update lib/re.pm when changing this! */
 #define RXf_PMf_STD_PMMOD_SHIFT 0
 
 /* The bits need to be ordered so that the msix are contiguous starting at bit
  * RXf_PMf_STD_PMMOD_SHIFT, followed by the p.  See STD_PAT_MODS and
  * INT_PAT_MODS in regexp.h for the reason contiguity is needed */
+/* Make sure to update lib/re.pm when changing these! */
 #define RXf_PMf_MULTILINE      (1 << (RXf_PMf_STD_PMMOD_SHIFT+0))    /* /m */
 #define RXf_PMf_SINGLELINE     (1 << (RXf_PMf_STD_PMMOD_SHIFT+1))    /* /s */
 #define RXf_PMf_FOLD           (1 << (RXf_PMf_STD_PMMOD_SHIFT+2))    /* /i */

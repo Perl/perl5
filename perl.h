@@ -4823,6 +4823,8 @@ enum {		/* pass one of these to get_vtbl */
 
 #define HINT_NO_AMAGIC		0x01000000 /* overloading pragma */
 
+#define HINT_RE_FLAGS		0x02000000 /* re '/xism' pragma */
+
 /* The following are stored in $^H{sort}, not in PL_hints */
 #define HINT_SORT_SORT_BITS	0x000000FF /* allow 256 different ones */
 #define HINT_SORT_QUICKSORT	0x00000001

@@ -16,6 +16,20 @@ my %bitmask = (
     eval    => 0x00200000, # HINT_RE_EVAL
 );
 
+my $flags_hint = 0x02000000; # HINT_RE_FLAGS
+my $PMMOD_SHIFT = 0;
+my %reflags = (
+    m => 1 << ($PMMOD_SHIFT + 0),
+    s => 1 << ($PMMOD_SHIFT + 1),
+    i => 1 << ($PMMOD_SHIFT + 2),
+    x => 1 << ($PMMOD_SHIFT + 3),
+    p => 1 << ($PMMOD_SHIFT + 4),
+# special cases:
+    l => 1 << ($PMMOD_SHIFT + 5),
+    u => 1 << ($PMMOD_SHIFT + 6),
+    d => 0,
+);
+
 sub setcolor {
  eval {				# Ignore errors
   require Term::Cap;
@@ -96,6 +110,7 @@ sub bits {
 	require Carp;
 	Carp::carp("Useless use of \"re\" pragma"); 
     }
+   ARG:
     foreach my $idx (0..$#_){
         my $s=$_[$idx];
         if ($s eq 'Debug' or $s eq 'Debugcolor') {
@@ -125,6 +140,33 @@ sub bits {
 	} elsif ($EXPORT_OK{$s}) {
 	    require Exporter;
 	    re->export_to_level(2, 're', $s);
+	} elsif ($s =~ s/^\///) {
+	    my $reflags = $^H{reflags} || 0;
+	    for(split//, $s) {
+		if (/[dul]/) {
+		    if ($on) {
+			$^H{reflags_dul} = $reflags{$_};
+		    }
+		    else {
+			delete $^H{reflags_dul}
+			 if  defined $^H{reflags_dul}
+			  && $^H{reflags_dul} == $reflags{$_};
+		    }
+		} elsif (exists $reflags{$_}) {
+		    $on
+		      ? $reflags |= $reflags{$_}
+		      : ($reflags &= ~$reflags{$_});
+		} else {
+		    require Carp;
+		    Carp::carp(
+		     qq'Unknown regular expression flag "$_"'
+		    );
+		    next ARG;
+		}
+	    }
+	    ($^H{reflags} = $reflags or defined $^H{reflags_dul})
+	     ? $^H |= $flags_hint
+	     : ($^H &= ~$flags_hint);
 	} else {
 	    require Carp;
 	    Carp::carp("Unknown \"re\" subpragma '$s' (known ones are: ",
@@ -169,6 +211,11 @@ re - Perl pragma to alter regular expression behaviour
 	no re 'eval';		   # the default
 	/foo${pat}bar/;		   # disallowed (with or without -T switch)
     }
+
+    use re '/ix';
+    "FOO" =~ / foo /; # /ix implied
+    no re '/x';
+    "FOO" =~ /foo/; # just /i implied
 
     use re 'debug';		   # output debugging info during
     /^(.*)$/s;			   #     compile and run time
@@ -219,6 +266,41 @@ interpolation.  Thus:
 
 I<is> allowed if $pat is a precompiled regular expression, even
 if $pat contains C<(?{ ... })> assertions or C<(??{ ... })> subexpressions.
+
+=head2 '/flags' mode
+
+When C<use re '/flags'> is specified, the given flags are automatically
+added to every regular expression till the end of the lexical scope.
+
+C<no re '/flags'> will turn off the effect of C<use re '/flags'> for the
+given flags.
+
+For example, if you want all your regular expressions to have /msx on by
+default, simply put
+
+    use re '/msx';
+
+at the top of your code.
+
+The /dul flags cancel each other out. So, in this example,
+
+    use re "/u";
+    "ss" =~ /\xdf/;
+    use re "/d";
+    "ss" =~ /\xdf/;
+
+The second C<use re> does an implicit C<no re '/u'>.
+
+Turning on the /l and /u flags with C<use re> takes precedence over the
+C<locale> pragma and the 'unicode_strings' C<feature>, for regular
+expressions. Turning off one of these flags when it is active reverts to
+the behaviour specified by whatever other pragmata are in scope. For
+example:
+
+    use feature "unicode_strings";
+    no re "/u"; # does nothing
+    use re "/l";
+    no re "/l"; # reverts to unicode_strings behaviour
 
 =head2 'debug' mode
 

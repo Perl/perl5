@@ -3734,6 +3734,19 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
     else if ((! (PL_hints & HINT_BYTES)) && (PL_hints & HINT_UNI_8_BIT)) {
         pmop->op_pmflags |= RXf_PMf_UNICODE;
     }
+    if (PL_hints & HINT_RE_FLAGS) {
+        SV *reflags = Perl_refcounted_he_fetch(aTHX_
+         PL_compiling.cop_hints_hash, 0, STR_WITH_LEN("reflags"), 0, 0
+        );
+        if (reflags && SvOK(reflags)) pmop->op_pmflags |= SvIV(reflags);
+        reflags = Perl_refcounted_he_fetch(aTHX_
+         PL_compiling.cop_hints_hash, 0, STR_WITH_LEN("reflags_dul"), 0, 0
+        );
+        if (reflags && SvOK(reflags)) {
+            pmop->op_pmflags &= ~(RXf_PMf_LOCALE|RXf_PMf_UNICODE);
+            pmop->op_pmflags |= SvIV(reflags);
+        }
+    }
 
 
 #ifdef USE_ITHREADS

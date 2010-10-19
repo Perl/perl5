@@ -3312,6 +3312,7 @@ ext/re/re.xs			re extension external subroutines
 ext/re/t/lexical_debug.pl	generate debug output for lexical re 'debug'
 ext/re/t/lexical_debug.t	test that lexical re 'debug' works
 ext/re/t/qr.t			test that qr// is a Regexp
+ext/re/t/reflags.t		see if re '/xism' pragma works
 ext/re/t/re_funcs.t		See if exportable 're' funcs in re.xs work
 ext/re/t/regop.pl		generate debug output for various patterns
 ext/re/t/regop.t		test RE optimizations by scraping debug output
