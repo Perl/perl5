@@ -928,8 +928,8 @@ See L<perlcall/Lightweight Callbacks>.
 
 #define POP_MULTICALL \
     STMT_START {							\
-	LEAVESUB(multicall_cv);						\
-	CvDEPTH(multicall_cv)--;					\
+	if (! --CvDEPTH(multicall_cv))					\
+	    LEAVESUB(multicall_cv);					\
 	POPBLOCK(cx,PL_curpm);						\
 	POPSTACK;							\
 	CATCH_SET(multicall_oldcatch);					\
