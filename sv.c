@@ -126,8 +126,7 @@ called by visit() for each SV]):
     sv_clean_objs() / do_clean_objs(),do_clean_named_objs(),
 		      do_clean_named_io_objs()
 			Attempt to free all objects pointed to by RVs,
-			and, unless DISABLE_DESTRUCTOR_KLUDGE is defined,
-			try to do the same for all objects indirectly
+			and try to do the same for all objects indirectly
 			referenced by typeglobs too.  Called once from
 			perl_destruct(), prior to calling sv_clean_all()
 			below.
@@ -476,8 +475,6 @@ do_clean_objs(pTHX_ SV *const ref)
 }
 
 
-#ifndef DISABLE_DESTRUCTOR_KLUDGE
-
 /* clear any slots in a GV which hold objects - except IO;
  * called by sv_clean_objs() for each live GV */
 
@@ -544,7 +541,6 @@ do_clean_named_io_objs(pTHX_ SV *const sv)
     }
     SvREFCNT_dec(sv); /* undo the inc above */
 }
-#endif
 
 /*
 =for apidoc sv_clean_objs
@@ -561,7 +557,6 @@ Perl_sv_clean_objs(pTHX)
     GV *olddef, *olderr;
     PL_in_clean_objs = TRUE;
     visit(do_clean_objs, SVf_ROK, SVf_ROK);
-#ifndef DISABLE_DESTRUCTOR_KLUDGE
     /* Some barnacles may yet remain, clinging to typeglobs.
      * Run the non-IO destructors first: they may want to output
      * error messages, close files etc */
@@ -576,7 +571,6 @@ Perl_sv_clean_objs(pTHX)
     if (olderr && isGV_with_GP(olderr))
 	do_clean_named_io_objs(aTHX_ MUTABLE_SV(olderr));
     SvREFCNT_dec(olddef);
-#endif
     PL_in_clean_objs = FALSE;
 }
 
