@@ -189,7 +189,7 @@ sub AUTOLOAD {
     my ($error, $val) = constant($constname);
     if ($error) {
         my (undef,$file,$line) = caller;
-        die "$error at $file line $line.\n";
+        die "$error at $file line $line\n";
     }
     no strict 'refs';
     *$AUTOLOAD = sub { $val };
