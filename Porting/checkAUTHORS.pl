@@ -664,6 +664,7 @@ mgjv\100comdyn.com.au                   mgjv\100tradingpost.com.au
 mlh\100swl.msd.ray.com                  webtools\100uewrhp03.msd.ray.com
 michael.schroeder\100informatik.uni-erlangen.de mls\100suse.de
 mike\100stok.co.uk                      mike\100exegenix.com
+miyagawa\100bulknews.net                    miyagawa\100edge.co.jp
 mjtg\100cam.ac.uk                       mjtg\100cus.cam.ac.uk
 mikedlr\100tardis.ed.ac.uk              mikedlr\100it.com.pl
 moritz\100casella.verplant.org          moritz\100faui2k3.org
