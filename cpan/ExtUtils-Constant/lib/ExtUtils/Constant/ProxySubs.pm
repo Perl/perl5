@@ -533,8 +533,6 @@ EXPLODE
 
 void
 $xs_subname(sv)
-    PREINIT:
-	STRLEN		len;
     INPUT:
 	SV *		sv;
     PPCODE:
