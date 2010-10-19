@@ -33,9 +33,8 @@
    --AD  October 16, 1995
 */
 
-static XS(XS_Fcntl_S_ISREG); /* prototype to pass -Wmissing-prototypes */
-static
-XS(XS_Fcntl_S_ISREG)
+static void
+XS_Fcntl_S_ISREG(pTHX_ CV* cv)
 {
     dVAR;
     dXSARGS;
