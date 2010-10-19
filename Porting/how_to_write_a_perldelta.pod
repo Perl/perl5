@@ -3,7 +3,7 @@
 This is intended as a guide for how to write a perldelta. There has never
 been a formal specification - the working rule is "fake up a document that
 looks something close to the existing perldeltas". So if it's unclear how
-do to do something, see if it's been done before, and if the approach works
+to do something, see if it's been done before, and if the approach works
 there, steal it.
 
 =head2 Template
