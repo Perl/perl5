@@ -30,9 +30,8 @@ our @EXPORT_OK  = qw(
 
                     );
 our $VERSION = '0.09';
-require DynaLoader;
-local @ISA = qw(DynaLoader);
-bootstrap Hash::Util $VERSION;
+require XSLoader;
+XSLoader::load();
 
 sub import {
     my $class = shift;

@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Carp;
 
-use base 'DynaLoader';
+require XSLoader;
 
 # Export everything since these functions are only used by a test script
 # Export subpackages too - in effect, export all their routines into us, then
@@ -50,7 +50,7 @@ sub import {
     }
 }
 
-our $VERSION = '0.23';
+our $VERSION = '0.24';
 
 use vars '$WARNINGS_ON_BOOTSTRAP';
 use vars map "\$${_}_called_PP", qw(BEGIN UNITCHECK CHECK INIT END);
@@ -87,11 +87,11 @@ END {
 }
 
 if ($WARNINGS_ON_BOOTSTRAP) {
-    bootstrap XS::APItest $VERSION;
+    XSLoader::load();
 } else {
     # More CHECK and INIT blocks that could warn:
     local $^W;
-    bootstrap XS::APItest $VERSION;
+    XSLoader::load();
 }
 
 1;
