@@ -43,7 +43,7 @@ package GDBM_File;
 
 use strict;
 use warnings;
-our($VERSION, @ISA, @EXPORT, $AUTOLOAD);
+our($VERSION, @ISA, @EXPORT);
 
 require Carp;
 require Tie::Hash;
@@ -70,16 +70,6 @@ require XSLoader;
 
 # This module isn't dual life, so no need for dev version numbers.
 $VERSION = '1.12';
-
-sub AUTOLOAD {
-    my($constname);
-    ($constname = $AUTOLOAD) =~ s/.*:://;
-    my ($error, $val) = constant($constname);
-    Carp::croak $error if $error;
-    no strict 'refs';
-    *{$AUTOLOAD} = sub { $val };
-    goto &{$AUTOLOAD};
-}
 
 XSLoader::load();
 
