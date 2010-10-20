@@ -795,6 +795,8 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
          * and split that value on the last '::',
          * pass along the same data via some unused fields in the CV
          */
+	if (CvSTASH(cv))
+	    sv_del_backref(MUTABLE_SV(CvSTASH(cv)), MUTABLE_SV(cv));
         CvSTASH(cv) = stash;
 	if (stash)
 	    Perl_sv_add_backref(aTHX_ MUTABLE_SV(stash), MUTABLE_SV(cv));
