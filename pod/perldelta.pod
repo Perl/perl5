@@ -507,7 +507,7 @@ now matches the documentation.
 =item *
 
 A new interface has been added for custom check hooks on subroutines. See
-L/Custom per-subroutine check hooks>, above.
+L</Custom per-subroutine check hooks>, above.
 
 =item *
 
