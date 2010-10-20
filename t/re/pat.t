@@ -23,7 +23,7 @@ BEGIN {
 }
 
 
-plan tests => 402;  # Update this when adding/deleting tests.
+plan tests => 406;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
