@@ -63,12 +63,6 @@ if ($^O =~ /^(?:MSWin32|VMS|os2|dos|riscos)$/) {
     $DEFAULT_FLAGS |= GLOB_NOCASE();
 }
 
-sub bsd_glob {
-    my ($pat,$flags) = @_;
-    $flags = $DEFAULT_FLAGS if @_ < 2;
-    return doglob($pat,$flags);
-}
-
 # File::Glob::glob() is deprecated because its prototype is different from
 # CORE::glob() (use bsd_glob() instead)
 sub glob {
