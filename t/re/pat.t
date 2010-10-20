@@ -23,7 +23,7 @@ BEGIN {
 }
 
 
-plan tests => 406;  # Update this when adding/deleting tests.
+plan tests => 408;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1086,6 +1086,15 @@ sub run_tests {
         ok $c =~ /$pattern/i, "\\xc0 =~ /$pattern/i; target utf8, pattern not";
         ok $c =~ $utf8_pattern, "\\xc0 =~ $pattern; Both target and pattern utf8";
         ok $c =~ /$utf8_pattern/i, "\\xc0 =~ /$pattern/i; Both target and pattern utf8";
+    }
+
+    SKIP: {   # Make sure can override the formatting
+        if ($IS_EBCDIC) {
+            skip "Needs to be customized to run on EBCDIC", 2;
+        }
+        use feature 'unicode_strings';
+        ok "\xc0" =~ /\w/, 'Under unicode_strings: "\xc0" =~ /\w/';
+        ok "\xc0" !~ /(?d:\w)/, 'Under unicode_strings: "\xc0" !~ /(?d:\w)/';
     }
 
     {

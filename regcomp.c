@@ -6238,16 +6238,16 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         if (has_charset_modifier || flagsp == &negflags) {
                             goto fail_modifiers;
                         }
-                        *flagsp &= ~RXf_PMf_UNICODE;
-                        *flagsp |= RXf_PMf_LOCALE;
+                        posflags |= RXf_PMf_LOCALE;
+                        negflags |= RXf_PMf_UNICODE;
                         has_charset_modifier = 1;
                         break;
                     case UNICODE_PAT_MOD:
                         if (has_charset_modifier || flagsp == &negflags) {
                             goto fail_modifiers;
                         }
-                        *flagsp &= ~RXf_PMf_LOCALE;
-                        *flagsp |= RXf_PMf_UNICODE;
+                        posflags |= RXf_PMf_UNICODE;
+                        negflags |= RXf_PMf_LOCALE;
                         has_charset_modifier = 1;
                         break;
                     case DUAL_PAT_MOD:
@@ -6257,7 +6257,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         {
                             goto fail_modifiers;
                         }
-                        *flagsp &= ~(RXf_PMf_LOCALE|RXf_PMf_UNICODE);
+                        negflags |= (RXf_PMf_LOCALE|RXf_PMf_UNICODE);
                         has_charset_modifier = 1;
                         break;
                     case ONCE_PAT_MOD: /* 'o' */
