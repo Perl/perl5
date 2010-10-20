@@ -98,7 +98,7 @@ hv_store(hvref, key, val)
     CODE:
     {
 	if (!SvROK(hvref) || SvTYPE(SvRV(hvref)) != SVt_PVHV)
-	   croak("First argument to hv_store() must be a hash reference");
+	   croak("First argument to hv_store() must be a HASH reference");
 	hv = (HV*)SvRV(hvref);
         SvREFCNT_inc(val);
 	if (!hv_store_ent(hv, key, val, 0)) {
