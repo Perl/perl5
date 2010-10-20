@@ -5750,10 +5750,44 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
     case CANY:
 	scan = loceol;
 	break;
-    case EXACT:		/* length of string is 1 */
+    case EXACT:
+	/* To get here, EXACT nodes must have *byte* length == 1.  That means
+	 * they match only characters in the string that can be expressed as a
+	 * single byte.  For non-utf8 strings, that means a simple match.  For
+	 * utf8 strings, the character matched must be an invariant, or
+	 * downgradable to a single byte.  The pattern's utf8ness is
+	 * irrelevant, as it must be a single byte, so either it isn't utf8, or
+	 * if it is it's an invariant */
+
 	c = (U8)*STRING(p);
-	while (scan < loceol && UCHARAT(scan) == c)
-	    scan++;
+	assert(! UTF_PATTERN || UNI_IS_INVARIANT(c));
+	if ((! utf8_target) || UNI_IS_INVARIANT(c)) {
+
+	    /* Here, the string isn't utf8, or the character in the EXACT
+	     * node is the same in utf8 as not, so can just do equality.
+	     * Each matching char must be 1 byte long */
+	    while (scan < loceol && UCHARAT(scan) == c) {
+		scan++;
+	    }
+	}
+	else {
+
+	    /* Here, the string is utf8, and the char to match is different
+	     * in utf8 than not.  Fastest to find the two utf8 bytes that
+	     * represent c, and then look for those in sequence in the utf8
+	     * string */
+	    U8 high = UTF8_TWO_BYTE_HI(c);
+	    U8 low = UTF8_TWO_BYTE_LO(c);
+	    loceol = PL_regeol;
+	    while (hardcount < max
+		   && scan + 1 < loceol
+		   && UCHARAT(scan) == high
+		   && UCHARAT(scan + 1) == low)
+	    {
+		scan += 2;
+		hardcount++;
+	    }
+	}
 	break;
     case EXACTF:	/* length of string is 1 */
 	c = (U8)*STRING(p);

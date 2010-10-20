@@ -23,7 +23,7 @@ BEGIN {
 }
 
 
-plan tests => 398;  # Update this when adding/deleting tests.
+plan tests => 402;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1070,6 +1070,18 @@ sub run_tests {
         ok "-" =~ /\s*\p{Dash}{1}/;
         ok " " =~ /\w*\p{Blank}{1,4}/;
 
+    }
+
+    {   # Some constructs with Latin1 characters cause a utf8 string not to
+        # match itself in non-utf8
+        my $c = "\xc0";
+        my $pattern = my $utf8_pattern = qr/((\xc0)+,?)/;
+        utf8::upgrade($utf8_pattern);
+        ok $c =~ $pattern, "\\xc0 =~ $pattern; Neither pattern nor target utf8";
+        ok $c =~ $utf8_pattern, "\\xc0 =~ $pattern; pattern utf8, target not";
+        utf8::upgrade($c);
+        ok $c =~ $pattern, "\\xc0 =~ $pattern; target utf8, pattern not";
+        ok $c =~ $utf8_pattern, "\\xc0 =~ $pattern; Both target and pattern utf8";
     }
 
     {
