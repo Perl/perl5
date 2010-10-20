@@ -179,6 +179,26 @@ The bulk of the C<Tie::Hash::NamedCapture> module used to be in the perl
 core. It has now been moved to an XS module, to reduce the overhead for
 programs that do not use C<%+> or C<%->.
 
+=item *
+
+Eliminate C<PL_*> accessor functions under ithreads.
+
+When C<MULTIPLICITY> was first developed, and interpreter state moved into an
+interpreter struct, thread and interpreter local C<PL_*> variables were defined
+as macros that called accessor functions, returning the address of the value,
+outside of the perl core. The intent was to allow members within the interpreter
+struct to change size without breaking binary compatibility, so that bug fixes
+could be merged to a maintenance branch that necessitated such a size change.
+
+However, some non-core code defines C<PERL_CORE>, sometimes intentionally to
+bypass this mechanism for speed reasons, sometimes for other reasons but with
+the inadvertent side effect of bypassing this mechanism. As some of this code is
+widespread in production use, the result is that the core B<can't> change the
+size of members of the interpreter struct, as it will break such modules
+compiled against a previous release on that maintenance branch. The upshot is
+that this mechanism is redundant, and well-behaved code is penalised by
+it. Hence it can and should be removed.
+
 =back
 
 =head1 Modules and Pragmata
