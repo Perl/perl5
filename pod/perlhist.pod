@@ -431,6 +431,7 @@ the strings?).
  David G  5.13.3        2010-Jul-20
  Florian  5.13.4        2010-Aug-20
  Steve    5.13.5        2010-Sep-19
+ Miyagawa 5.13.6        2010-Oct-20
 
 =head2 SELECTED RELEASE SIZES
 
