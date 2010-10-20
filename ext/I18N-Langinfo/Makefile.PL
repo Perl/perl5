@@ -30,7 +30,7 @@ push @names,           # This lot are only enums for __SVR4_I386_ABI_L1__:
       foreach qw (CRNCYSTR THOUSEP RADIXCHAR);
 
 ExtUtils::Constant::WriteConstants(
-				   PROXYSUBS => {croak_on_error => 1},
+				   PROXYSUBS => {autoload => 1},
 				   NAME => 'I18N::Langinfo',
 				   NAMES => \@names,
 				  );

@@ -72,7 +72,7 @@ push @names,
          foreach qw(INADDR_ANY INADDR_LOOPBACK INADDR_NONE INADDR_BROADCAST);
 
 WriteConstants(
-    PROXYSUBS => {croak_on_error => 1},
+    PROXYSUBS => {autoload => 1},
     NAME => 'Socket',
     NAMES => \@names,
 );

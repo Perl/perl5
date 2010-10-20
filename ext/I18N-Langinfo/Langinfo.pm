@@ -74,17 +74,6 @@ our @EXPORT_OK = qw(
 
 our $VERSION = '0.07';
 
-sub AUTOLOAD {
-    # This AUTOLOAD is used to 'autoload' constants from the constant()
-    # XS function.
-
-    my $constname;
-    our $AUTOLOAD;
-    ($constname = $AUTOLOAD) =~ s/.*:://;
-    croak "&I18N::Langinfo::constant not defined" if $constname eq 'constant';
-    constant($constname);
-}
-
 XSLoader::load();
 
 1;

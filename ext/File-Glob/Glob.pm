@@ -1,8 +1,7 @@
 package File::Glob;
 
 use strict;
-our($VERSION, @ISA, @EXPORT_OK, @EXPORT_FAIL, %EXPORT_TAGS,
-    $AUTOLOAD, $DEFAULT_FLAGS);
+our($VERSION, @ISA, @EXPORT_OK, @EXPORT_FAIL, %EXPORT_TAGS, $DEFAULT_FLAGS);
 
 require XSLoader;
 use feature 'switch';
@@ -55,15 +54,6 @@ sub import {
 	}
 	$passthrough;
     } @_);
-}
-
-sub AUTOLOAD {
-    # This AUTOLOAD is used to 'autoload' constants from the constant()
-    # XS function.
-
-    my $constname;
-    ($constname = $AUTOLOAD) =~ s/.*:://;
-    constant($constname);
 }
 
 XSLoader::load();

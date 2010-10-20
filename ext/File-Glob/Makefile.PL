@@ -22,7 +22,7 @@ sub MY::cflags {
 }
 
 WriteConstants(
-    PROXYSUBS => {croak_on_error => 1},
+    PROXYSUBS => {autoload => 1},
     NAME => 'File::Glob',
     NAMES => [qw(GLOB_ABEND GLOB_ALPHASORT GLOB_ALTDIRFUNC GLOB_BRACE GLOB_ERR
                  GLOB_LIMIT GLOB_MARK GLOB_NOCASE GLOB_NOCHECK GLOB_NOMAGIC
