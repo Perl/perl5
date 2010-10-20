@@ -73,8 +73,7 @@ gdbm_TIEHASH(dbtype, name, read_write, mode, fatal_func = (FATALFUNC)croak)
 
 	    RETVAL = NULL ;
 	    if ((dbp =  gdbm_open(name, GDBM_BLOCKSIZE, read_write, mode, fatal_func))) {
-	        RETVAL = (GDBM_File)safemalloc(sizeof(GDBM_File_type)) ;
-    	        Zero(RETVAL, 1, GDBM_File_type) ;
+	        RETVAL = (GDBM_File)safecalloc(1, sizeof(GDBM_File_type)) ;
 		RETVAL->dbp = dbp ;
 	    }
 	    
