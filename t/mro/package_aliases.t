@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 use warnings;
-plan(tests => 16);
+plan(tests => 18);
 
 {
     package New;
@@ -192,6 +192,26 @@ for(
  is $pet->speak, 'Woof!',
   'the deleted stash is gone completely when freed';
 }
+# Same thing, but with nested packages
+{
+ @Pett::ISA = ("Curr::Curr::Curr", "Hownd");
+ @Curr::Curr::Curr::ISA = "Latrator";
+
+ sub Latrator::speak { "Arff!" }
+ sub Hownd::speak { "Woof!" }
+
+ my $pet = bless [], "Pett";
+
+ my $life_raft = delete $::{'Curr::'};
+
+ is $pet->speak, 'Woof!',
+  'deleting a stash from its parent stash resets caches of substashes';
+
+ undef $life_raft;
+ is $pet->speak, 'Woof!',
+  'the deleted substash is gone completely when freed';
+}
+
 
 # mro_package_moved needs to check for self-referential packages.
 # This broke Text::Template [perl #78362].

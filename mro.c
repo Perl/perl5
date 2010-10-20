@@ -671,7 +671,9 @@ Perl_mro_package_moved(pTHX_ HV * const stash, const HV * const oldstash,
 			 substash, oldsubstash, NULL, NULL, level-1
 			);
 		    else if(oldsubstash && HvNAME(oldsubstash))
-			mro_isa_changed_in(oldsubstash);
+			mro_package_moved(
+			 NULL, oldsubstash, NULL, NULL, level-1
+			);
 
 		    (void)hv_store(seen, key, len, &PL_sv_yes, 0);
 		}
