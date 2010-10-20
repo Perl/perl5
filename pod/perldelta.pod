@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been logged up to 97a3247.
+This has been logged up to c3b19b5c6.
 
 =head1 NAME
 
@@ -884,6 +884,25 @@ corrupted state during destruction.
 
 The typeglob C<*,>, which holds the scalar variable C<$,> (output field
 separator), had the wrong reference count in child threads.
+
+=item *
+
+C<splice> now calls set-magic. This means that, for instance, changes made
+by C<splice @ISA> are respected by method calls
+L<[perl #78400]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78400>.
+
+=item *
+
+C<use v5.8> no longer leaks memory
+L<[perl #78436]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78436>.
+
+=item *
+
+The XS multicall API no longer causes subroutines to lose reference counts
+if called via the multicall interface from within those very subroutines.
+This affects modules like List::Util. Calling one of its functions with an
+active subroutine as the first argument could cause a crash
+L<[perl #78070]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78070>.
 
 =back
 
