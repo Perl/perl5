@@ -171,9 +171,17 @@ sub WriteConstants {
     $options = {} unless ref $options;
     my $explosives = $options->{croak_on_read};
     my $croak_on_error = $options->{croak_on_error};
-    # Until someone patches this (with test cases):
-    carp ("PROXYSUBS options 'croak_on_read' and 'croak_on_error' cannot be used together")
-	if $explosives && $croak_on_error; 
+    my $autoload = $options->{autoload};
+    {
+	my $exclusive = 0;
+	++$exclusive if $explosives;
+	++$exclusive if $croak_on_error;
+	++$exclusive if $autoload;
+
+	# Until someone patches this (with test cases):
+	carp ("PROXYSUBS options 'autoload', 'croak_on_read' and 'croak_on_error' cannot be used together")
+	    if $exclusive > 1;
+    }
     # Strictly it requires Perl_caller_cx
     carp ("PROXYSUBS options 'croak_on_error' requires v5.13.5 or later")
 	if $croak_on_error && $^V < v5.13.5;
@@ -526,18 +534,28 @@ EOBOOT
 EOBOOT
     }
 
-    if ($croak_on_error) {
-        print $xs_fh <<"EOC";
+    if ($croak_on_error || $autoload) {
+        print $xs_fh $croak_on_error ? <<"EOC" : <<'EOA';
 
 void
 $xs_subname(sv)
+    INPUT:
+	SV *		sv;
     PREINIT:
 	const PERL_CONTEXT *cx = caller_cx(0, NULL);
 	/* cx is NULL if we've been called from the top level. PL_curcop isn't
 	   ideal, but it's much cheaper than other ways of not going SEGV.  */
 	const COP *cop = cx ? cx->blk_oldcop : PL_curcop;
-    INPUT:
-	SV *		sv;
+EOC
+
+void
+AUTOLOAD()
+    PROTOTYPE: DISABLE
+    PREINIT:
+	SV *sv = newSVpvn_flags(SvPVX(cv), SvCUR(cv), SVs_TEMP | SvUTF8(cv));
+	const COP *cop = PL_curcop;
+EOA
+        print $xs_fh <<"EOC";
     PPCODE:
 #ifndef SYMBIAN
 	HV *${c_subname}_missing = get_missing_hash(aTHX);
