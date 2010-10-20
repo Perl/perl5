@@ -2,9 +2,7 @@
 #include "perl.h"
 #include "XSUB.h"
 
-
 MODULE = Hash::Util		PACKAGE = Hash::Util
-
 
 void
 all_keys(hash,keys,placeholder)
@@ -22,42 +20,27 @@ all_keys(hash,keys,placeholder)
         (void)hv_iterinit(hash);
 	while((he = hv_iternext_flags(hash, HV_ITERNEXT_WANTPLACEHOLDERS))!= NULL) {
 	    key=hv_iterkeysv(he);
-            if (HeVAL(he) == &PL_sv_placeholder) {
-                SvREFCNT_inc(key);
-	        av_push(placeholder, key);
-            } else {
-                SvREFCNT_inc(key);
-	        av_push(keys, key);
-            }
+	    av_push(HeVAL(he) == &PL_sv_placeholder ? placeholder : keys,
+		    SvREFCNT_inc(key));
         }
 	XSRETURN(1);
 
 void
 hidden_ref_keys(hash)
 	HV *hash
+    ALIAS:
+	Hash::Util::legal_ref_keys = 1
     PREINIT:
+	dXSI32;
         SV *key;
         HE *he;
     PPCODE:
         (void)hv_iterinit(hash);
 	while((he = hv_iternext_flags(hash, HV_ITERNEXT_WANTPLACEHOLDERS))!= NULL) {
 	    key=hv_iterkeysv(he);
-            if (HeVAL(he) == &PL_sv_placeholder) {
+            if (ix || HeVAL(he) == &PL_sv_placeholder) {
                 XPUSHs( key );
             }
-        }
-
-void
-legal_ref_keys(hash)
-	HV *hash
-    PREINIT:
-        SV *key;
-        HE *he;
-    PPCODE:
-        (void)hv_iterinit(hash);
-	while((he = hv_iternext_flags(hash, HV_ITERNEXT_WANTPLACEHOLDERS))!= NULL) {
-	    key=hv_iterkeysv(he);
-            XPUSHs( key );
         }
 
 void
