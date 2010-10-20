@@ -744,7 +744,23 @@ Fixed a typo in L<perl5135delta> regarding array slices and smart matching
 
 =head1 Acknowledgements
 
-XXX The list of people to thank goes here.
+Perl 5.13.6 represents approximately one month of development since Perl
+5.13.5 and contains 67920 lines of changes across 566 files from 47 authors
+and committers:
+
+A. Sinan Unur, Aaron Crane, Alex Davies, Ali Polatel, Allen Smith, Andrew Rodland,
+Andy Dougherty, Ben Morrow, brian d foy, Casey West, Chip Salzenberg, Chris
+'BinGOs' Williams, Craig A. Berry, David Golden, David Mitchell, Eric Brine,
+Father Chrysostomos, Florian Ragwitz, George Greer, gregor herrmann, Jan Dubois,
+Jerry D. Hedden, Jesse Vincent, Joshua Pritikin, Karl Williamson, kmx, Michael
+G Schwern, Mike Kelly, Nicholas Clark, Paul Green, Rafael Garcia-Suarez, Renee
+Baecker, Ricardo Signes, Sisyphus, Slaven Rezic, Steffen Müller, Steve Hay,
+Sullivan Beck, Tatsuhiko Miyagawa, Todd Rinaldo, Tony Cook, Tye McQueen, Vernon
+Lyon, Walt Mankowski, Zefram, Zsbán Ambrus, Ævar Arnfjörð Bjarmason.
+
+Many of the changes included in this version originated in the CPAN
+modules included in Perl's core. We're grateful to the entire CPAN
+community for helping Perl to flourish.
 
 =head1 Reporting Bugs
 
