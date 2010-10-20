@@ -215,7 +215,23 @@ sub WriteConstants {
     my $can_do_pcs = $] >= 5.009;
     my $cast_CONSTSUB = $] < 5.010 ? '(char *)' : '';
 
-    print $c_fh $self->header(), <<"EOADD";
+    print $c_fh $self->header();
+    if ($autoload || $croak_on_error) {
+	print $c_fh <<'EOC';
+
+/* This allows slightly more efficient code on !USE_ITHREADS: */
+#ifdef USE_ITHREADS
+#  define COP_FILE(c)	CopFILE(c)
+#  define COP_FILE_F	"s"
+#else
+#  define COP_FILE(c)	CopFILESV(c)
+#  define COP_FILE_F	SVf
+#endif
+EOC
+    }
+
+    print $c_fh <<"EOADD";
+
 static void
 ${c_subname}_add_symbol($pthx HV *hash, const char *name, I32 namelen, SV *value) {
 EOADD
@@ -561,12 +577,13 @@ EOA
 	HV *${c_subname}_missing = get_missing_hash(aTHX);
 	if (hv_exists_ent(${c_subname}_missing, sv, 0)) {
 	    sv = newSVpvf("Your vendor has not defined $package_sprintf_safe macro %" SVf
-			  ", used at %s line %d\\n", sv, CopFILE(cop), CopLINE(cop));
+			  ", used at %" COP_FILE_F " line %d\\n", sv,
+			  COP_FILE(cop), CopLINE(cop));
 	} else
 #endif
 	{
-	    sv = newSVpvf("%"SVf" is not a valid $package_sprintf_safe macro at %s line %d\\n",
-			  sv, CopFILE(cop), CopLINE(cop));
+	    sv = newSVpvf("%"SVf" is not a valid $package_sprintf_safe macro at %"
+			  COP_FILE_F " line %d\\n", sv, COP_FILE(cop), CopLINE(cop));
 	}
 	croak_sv(sv_2mortal(sv));
 EOC
