@@ -2988,12 +2988,16 @@ Perl_refcounted_he_new_pvn(pTHX_ struct refcounted_he *parent,
     if (!hash)
 	PERL_HASH(hash, keypv, keylen);
 
+#ifdef USE_ITHREADS
     he = (struct refcounted_he*)
 	PerlMemShared_malloc(sizeof(struct refcounted_he) - 1
-#ifdef USE_ITHREADS
 			     + keylen
-#endif
 			     + key_offset);
+#else
+    he = (struct refcounted_he*)
+	PerlMemShared_malloc(sizeof(struct refcounted_he) - 1
+			     + key_offset);
+#endif
 
     he->refcounted_he_next = parent;
 
