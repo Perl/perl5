@@ -5,12 +5,14 @@
 #include <gdbm.h>
 #include <fcntl.h>
 
+#define fetch_key 0
+#define store_key 1
+#define fetch_value 2
+#define store_value 3
+
 typedef struct {
 	GDBM_FILE 	dbp ;
-	SV *    filter_fetch_key ;
-	SV *    filter_store_key ;
-	SV *    filter_fetch_value ;
-	SV *    filter_store_value ;
+	SV *    filter[4];
 	int     filtering ;
 	} GDBM_File_type;
 
@@ -91,16 +93,14 @@ gdbm_close(db)
 void
 gdbm_DESTROY(db)
 	GDBM_File	db
+	PREINIT:
+	int i = store_value;
 	CODE:
 	gdbm_close(db);
-	if (db->filter_fetch_key)
-	    SvREFCNT_dec(db->filter_fetch_key) ;
-	if (db->filter_store_key)
-	    SvREFCNT_dec(db->filter_store_key) ;
-	if (db->filter_fetch_value)
-	    SvREFCNT_dec(db->filter_fetch_value) ;
-	if (db->filter_store_value)
-	    SvREFCNT_dec(db->filter_store_value) ;
+	do {
+	    if (db->filter[i])
+		SvREFCNT_dec(db->filter[i]);
+	} while (i-- > 0);
 	safefree(db);
 
 #define gdbm_FETCH(db,key)			gdbm_fetch(db->dbp,key)
@@ -172,30 +172,10 @@ filter_fetch_key(db, code)
 	GDBM_File	db
 	SV *		code
 	SV *		RETVAL = &PL_sv_undef ;
+	ALIAS:
+	GDBM_File::filter_fetch_key = fetch_key
+	GDBM_File::filter_store_key = store_key
+	GDBM_File::filter_fetch_value = fetch_value
+	GDBM_File::filter_store_value = store_value
 	CODE:
-	    DBM_setFilter(db->filter_fetch_key, code) ;
-
-SV *
-filter_store_key(db, code)
-	GDBM_File	db
-	SV *		code
-	SV *		RETVAL =  &PL_sv_undef ;
-	CODE:
-	    DBM_setFilter(db->filter_store_key, code) ;
-
-SV *
-filter_fetch_value(db, code)
-	GDBM_File	db
-	SV *		code
-	SV *		RETVAL =  &PL_sv_undef ;
-	CODE:
-	    DBM_setFilter(db->filter_fetch_value, code) ;
-
-SV *
-filter_store_value(db, code)
-	GDBM_File	db
-	SV *		code
-	SV *		RETVAL =  &PL_sv_undef ;
-	CODE:
-	    DBM_setFilter(db->filter_store_value, code) ;
-
+	    DBM_setFilter(db->filter[ix], code);

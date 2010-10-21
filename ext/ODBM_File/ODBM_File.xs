@@ -37,12 +37,14 @@ datum	nextkey(datum key);
 
 #include <fcntl.h>
 
+#define fetch_key 0
+#define store_key 1
+#define fetch_value 2
+#define store_value 3
+
 typedef struct {
 	void * 	dbp ;
-	SV *    filter_fetch_key ;
-	SV *    filter_store_key ;
-	SV *    filter_fetch_value ;
-	SV *    filter_store_value ;
+	SV *    filter[4];
 	int     filtering ;
 	} ODBM_File_type;
 
@@ -118,17 +120,14 @@ DESTROY(db)
 	ODBM_File	db
 	PREINIT:
 	dMY_CXT;
+	int i = store_value;
 	CODE:
 	dbmrefcnt--;
 	dbmclose();
-	if (db->filter_fetch_key)
-	    SvREFCNT_dec(db->filter_fetch_key) ;
-	if (db->filter_store_key)
-	    SvREFCNT_dec(db->filter_store_key) ;
-	if (db->filter_fetch_value)
-	    SvREFCNT_dec(db->filter_fetch_value) ;
-	if (db->filter_store_value)
-	    SvREFCNT_dec(db->filter_store_value) ;
+	do {
+	    if (db->filter[i])
+		SvREFCNT_dec(db->filter[i]);
+	} while (i-- > 0);
 	safefree(db);
 
 datum_value
@@ -189,30 +188,10 @@ filter_fetch_key(db, code)
 	ODBM_File	db
 	SV *		code
 	SV *		RETVAL = &PL_sv_undef ;
+	ALIAS:
+	ODBM_File::filter_fetch_key = fetch_key
+	ODBM_File::filter_store_key = store_key
+	ODBM_File::filter_fetch_value = fetch_value
+	ODBM_File::filter_store_value = store_value
 	CODE:
-	    DBM_setFilter(db->filter_fetch_key, code) ;
-
-SV *
-filter_store_key(db, code)
-	ODBM_File	db
-	SV *		code
-	SV *		RETVAL =  &PL_sv_undef ;
-	CODE:
-	    DBM_setFilter(db->filter_store_key, code) ;
-
-SV *
-filter_fetch_value(db, code)
-	ODBM_File	db
-	SV *		code
-	SV *		RETVAL =  &PL_sv_undef ;
-	CODE:
-	    DBM_setFilter(db->filter_fetch_value, code) ;
-
-SV *
-filter_store_value(db, code)
-	ODBM_File	db
-	SV *		code
-	SV *		RETVAL =  &PL_sv_undef ;
-	CODE:
-	    DBM_setFilter(db->filter_store_value, code) ;
-
+	    DBM_setFilter(db->filter[ix], code);
