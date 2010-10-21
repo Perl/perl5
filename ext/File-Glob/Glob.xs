@@ -80,7 +80,10 @@ BOOT:
 {
     CV *cv = newXS("File::Glob::bsd_glob", XS_File__Glob_doglob, __FILE__);
     XSANY.any_i32 = 1;
+}
 
+BOOT:
+{
     MY_CXT_INIT;
 }
 
