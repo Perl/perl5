@@ -106,19 +106,14 @@ sdbm_NEXTKEY(db, key)
 int
 sdbm_error(db)
 	SDBM_File	db
+	ALIAS:
+	sdbm_clearerr = 1
+	PREINIT:
+	dXSI32;
 	CODE:
-	RETVAL = sdbm_error(db->dbp) ;
+	RETVAL = ix ? sdbm_clearerr(db->dbp) : sdbm_error(db->dbp);
 	OUTPUT:
 	  RETVAL
-
-int
-sdbm_clearerr(db)
-	SDBM_File	db
-	CODE:
-	RETVAL = sdbm_clearerr(db->dbp) ;
-	OUTPUT:
-	  RETVAL
-
 
 SV *
 filter_fetch_key(db, code)
