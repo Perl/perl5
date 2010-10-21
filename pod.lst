@@ -137,7 +137,8 @@ h Miscellaneous
 
   perlhist		Perl history records
 D perldelta		Perl changes since previous version
-d perl5136delta		Perl changes in version 5.13.6
+d perl5137delta		Perl changes in version 5.13.7
+  perl5136delta		Perl changes in version 5.13.6
   perl5135delta		Perl changes in version 5.13.5
   perl5134delta		Perl changes in version 5.13.4
   perl5133delta		Perl changes in version 5.13.3
