@@ -79,7 +79,9 @@ struct xpvhv_aux {
     HE		*xhv_eiter;	/* current entry of iterator */
     I32		xhv_riter;	/* current root of iterator */
     struct mro_meta *xhv_mro_meta;
-};
+    U32		xhv_name_count;	/* When non-zero, xhv_name is actually */
+				/* a pointer to an array of HEKs, this */
+};				/* being the length. */
 
 /* hash structure: */
 /* This structure must match the beginning of struct xpvmg in sv.h. */
@@ -256,12 +258,19 @@ C<SV*>.
 
 /* FIXME - all of these should use a UTF8 aware API, which should also involve
    getting the length. */
+#define HvNAME_HEK_NN(hv)      \
+ (                              \
+  HvAUX(hv)->xhv_name_count      \
+   ? *(HEK **)HvAUX(hv)->xhv_name \
+   : HvAUX(hv)->xhv_name           \
+ )
 /* This macro may go away without notice.  */
-#define HvNAME_HEK(hv) (SvOOK(hv) ? HvAUX(hv)->xhv_name : NULL)
+#define HvNAME_HEK(hv) \
+	(SvOOK(hv) && HvAUX(hv)->xhv_name ? HvNAME_HEK_NN(hv) : NULL)
 #define HvNAME_get(hv)	((SvOOK(hv) && (HvAUX(hv)->xhv_name)) \
-			 ? HEK_KEY(HvAUX(hv)->xhv_name) : NULL)
+			 ? HEK_KEY(HvNAME_HEK_NN(hv)) : NULL)
 #define HvNAMELEN_get(hv)	((SvOOK(hv) && (HvAUX(hv)->xhv_name)) \
-				 ? HEK_LEN(HvAUX(hv)->xhv_name) : 0)
+				 ? HEK_LEN(HvNAME_HEK_NN(hv)) : 0)
 
 /* the number of keys (including any placeholers) */
 #define XHvTOTALKEYS(xhv)	((xhv)->xhv_keys)

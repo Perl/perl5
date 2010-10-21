@@ -1621,6 +1621,7 @@ S_hfreeentries(pTHX_ HV *hv)
     /* This is the array that we're going to restore  */
     HE **const orig_array = HvARRAY(hv);
     HEK *name;
+    U32 name_count;
     int attempts = 100;
 
     PERL_ARGS_ASSERT_HFREEENTRIES;
@@ -1634,9 +1635,11 @@ S_hfreeentries(pTHX_ HV *hv)
 	struct xpvhv_aux *iter = HvAUX(hv);
 
 	name = iter->xhv_name;
+	name_count = iter->xhv_name_count;
 	iter->xhv_name = NULL;
     } else {
 	name = NULL;
+	name_count = 0;
     }
 
     /* orig_array remains unchanged throughout the loop. If after freeing all
@@ -1768,7 +1771,14 @@ S_hfreeentries(pTHX_ HV *hv)
 	    assert(HvARRAY(hv));
 
 	    if (HvAUX(hv)->xhv_name) {
-		unshare_hek_or_pvn(HvAUX(hv)->xhv_name, 0, 0, 0);
+		if(HvAUX(hv)->xhv_name_count) {
+		    HEK ** const name = (HEK **)HvAUX(hv)->xhv_name;
+		    HEK **hekp = name + HvAUX(hv)->xhv_name_count;
+		    while(hekp-- > name) 
+			unshare_hek_or_pvn(*hekp, 0, 0, 0);
+		    Safefree(name);
+		}
+		else unshare_hek_or_pvn(HvAUX(hv)->xhv_name, 0, 0, 0);
 	    }
 	}
 
@@ -1784,8 +1794,10 @@ S_hfreeentries(pTHX_ HV *hv)
 	/* We have restored the original array.  If name is non-NULL, then
 	   the original array had an aux structure at the end. So this is
 	   valid:  */
+	struct xpvhv_aux * const aux = HvAUX(hv);
 	SvFLAGS(hv) |= SVf_OOK;
-	HvAUX(hv)->xhv_name = name;
+	aux->xhv_name = name;
+	aux->xhv_name_count = name_count;
     }
 }
 
@@ -1883,6 +1895,7 @@ S_hv_auxinit(HV *hv) {
     iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
     iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
     iter->xhv_name = 0;
+    iter->xhv_name_count = 0;
     iter->xhv_backreferences = 0;
     iter->xhv_mro_meta = NULL;
     return iter;
@@ -2014,7 +2027,14 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
     if (SvOOK(hv)) {
 	iter = HvAUX(hv);
 	if (iter->xhv_name) {
-	    unshare_hek_or_pvn(iter->xhv_name, 0, 0, 0);
+	    if(iter->xhv_name_count) {
+		HEK ** const name = (HEK **)HvAUX(hv)->xhv_name;
+		HEK **hekp = name + HvAUX(hv)->xhv_name_count;
+		while(hekp-- > name) 
+		    unshare_hek_or_pvn(*hekp, 0, 0, 0);
+		Safefree(name);
+	    }
+	    else unshare_hek_or_pvn(iter->xhv_name, 0, 0, 0);
 	}
     } else {
 	if (name == 0)
@@ -2024,6 +2044,7 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
     }
     PERL_HASH(hash, name, len);
     iter->xhv_name = name ? share_hek(name, len, hash) : NULL;
+    iter->xhv_name_count = 0;
 }
 
 AV **

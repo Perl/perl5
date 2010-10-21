@@ -11732,7 +11732,20 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 			SvFLAGS(dstr) |= SVf_OOK;
 
 			hvname = saux->xhv_name;
-			daux->xhv_name = hek_dup(hvname, param);
+			if (saux->xhv_name_count) {
+			    HEK ** const sname = (HEK **)saux->xhv_name;
+			    const U32 count = saux->xhv_name_count;
+			    HEK **shekp = sname + count;
+			    HEK **dhekp;
+			    Newxc(daux->xhv_name, count, HEK *, HEK);
+			    dhekp = (HEK **)daux->xhv_name + count;
+			    while (shekp-- > sname) {
+				dhekp--;
+				*dhekp = hek_dup(*shekp, param);
+			    }
+			}
+			else daux->xhv_name = hek_dup(hvname, param);
+			daux->xhv_name_count = saux->xhv_name_count;
 
 			daux->xhv_riter = saux->xhv_riter;
 			daux->xhv_eiter = saux->xhv_eiter
