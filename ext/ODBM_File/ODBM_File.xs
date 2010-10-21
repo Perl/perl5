@@ -122,6 +122,14 @@ DESTROY(db)
 	CODE:
 	dbmrefcnt--;
 	dbmclose();
+	if (db->filter_fetch_key)
+	    SvREFCNT_dec(db->filter_fetch_key) ;
+	if (db->filter_store_key)
+	    SvREFCNT_dec(db->filter_store_key) ;
+	if (db->filter_fetch_value)
+	    SvREFCNT_dec(db->filter_fetch_value) ;
+	if (db->filter_store_value)
+	    SvREFCNT_dec(db->filter_store_value) ;
 	safefree(db);
 
 datum_value

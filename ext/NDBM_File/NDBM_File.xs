@@ -80,6 +80,14 @@ ndbm_DESTROY(db)
 	NDBM_File	db
 	CODE:
 	dbm_close(db->dbp);
+	if (db->filter_fetch_key)
+	    SvREFCNT_dec(db->filter_fetch_key) ;
+	if (db->filter_store_key)
+	    SvREFCNT_dec(db->filter_store_key) ;
+	if (db->filter_fetch_value)
+	    SvREFCNT_dec(db->filter_fetch_value) ;
+	if (db->filter_store_value)
+	    SvREFCNT_dec(db->filter_store_value) ;
 	safefree(db);
 
 #define ndbm_FETCH(db,key)			dbm_fetch(db->dbp,key)

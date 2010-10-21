@@ -94,6 +94,14 @@ gdbm_DESTROY(db)
 	GDBM_File	db
 	CODE:
 	gdbm_close(db);
+	if (db->filter_fetch_key)
+	    SvREFCNT_dec(db->filter_fetch_key) ;
+	if (db->filter_store_key)
+	    SvREFCNT_dec(db->filter_store_key) ;
+	if (db->filter_fetch_value)
+	    SvREFCNT_dec(db->filter_fetch_value) ;
+	if (db->filter_store_value)
+	    SvREFCNT_dec(db->filter_store_value) ;
 	safefree(db);
 
 #define gdbm_FETCH(db,key)			gdbm_fetch(db->dbp,key)
