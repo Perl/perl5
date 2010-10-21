@@ -34,6 +34,7 @@ use XS::APItest;
     my $closure_var;
     {
 	my $f = sub {
+	    no warnings 'void';
 	    $closure_var;
 	    my $sub = shift;
 	    if (defined $sub) {
