@@ -761,6 +761,13 @@ is the number of elements on the right-hand side of the assignment.
 The null list contains no elements, so when the password file is
 exhausted, the result is 0, not 2.
 
+Slices in scalar context return the last item of the slice.
+
+    @a = qw/first second third/;
+    %h = (first => 'A', second => 'B');
+    $t = @a[0, 1];                  # $t is now 'second'
+    $u = @h{'first', 'second'};     # $u is now 'second'
+
 If you're confused about why you use an '@' there on a hash slice
 instead of a '%', think of it like this.  The type of bracket (square
 or curly) governs whether it's an array or a hash being looked at.
