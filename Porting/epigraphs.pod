@@ -15,6 +15,25 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.13.6 - Haruki Murakami, "Kafka on the Shore"
+
+The boy called Crow softly rests a hand on my shoulder, and with that
+he storm vanishes.
+
+"From now on -- no matter what -- you've got to be the world's toughest
+fifteen-year-old. That's the only way you're going to survive. And in order
+to do that, you've got to figure out what it means to be tough. You following
+me?"
+
+I keep my eyes closed and don't reply. I just want to sink off into sleep
+like this, his hand on my shoulder. I hear the faint flutter of wings.
+
+"You're going to be the world's toughest fifteen-year-old," Crow whispers
+as I try to fall asleep. Like he was carving the words in a deep blue tattoo
+on my heart.
+
+(Translated from Japanese by Philip Gabriel)
+
 =head2 v5.13.5 - Joseph Sheridan Le Fanu, "The Room in the Dragon Volant"
 
 Candle in hand I stepped in.  I do not know whether the quality of
