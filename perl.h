@@ -2387,10 +2387,6 @@ int isnan(double d);
 
 #endif
 
-#ifdef MYMALLOC
-#  include "malloc_ctl.h"
-#endif
-
 struct RExC_state_t;
 struct _reg_trie_data;
 
@@ -4978,6 +4974,10 @@ struct tempsym; /* defined in pp_pack.c */
 #undef PERL_PPDEF
 #define PERL_CKDEF(s)	PERL_CALLCONV OP *s (pTHX_ OP *o);
 #define PERL_PPDEF(s)	PERL_CALLCONV OP *s (pTHX);
+
+#ifdef MYMALLOC
+#  include "malloc_ctl.h"
+#endif
 
 #include "proto.h"
 
