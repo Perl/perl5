@@ -44,6 +44,16 @@ should accept either a literal array or an array reference as the argument:
 When using the C<+> prototype, your function must check that the argument
 is of an acceptable type.
 
+=head2 C<use re '/flags';>
+
+The C<re> pragma now has the ability to turn on regular expression flags
+till the end of the lexical scope:
+
+    use re '/x';
+    "foo" =~ / (.+) /;  # /x implied
+
+See L<re/'/flags' mode> for details.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -112,7 +122,26 @@ XXX
 
 =item *
 
-XXX
+XXX What should the version be?
+
+C<B::Deparse> has been upgraded from 0.99 to ???.
+
+It fixes deparsing of C<our> followed by a variable with funny characters
+(as permitted under the C<utf8> pragma)
+L<[perl #33752]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=33752>.
+
+=item *
+
+C<charnames> has been upgraded from 1.16 to 1.17.
+
+The algorithm used by C<charnames::viacode> to look up names has been
+rewritten to run faster
+L<[perl #75448]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75448>.
+
+=item *
+
+C<re> has been upgraded from 0.13 to 0.14, for the sake of the new
+C<use re "/flags"> pragma.
 
 =back
 
@@ -305,7 +334,18 @@ be noted as well.
 
 =item *
 
-XXX
+C<lex_start> has been added to the API, but is considered experimental.
+
+=item *
+
+A new C<parse_block> function has been added to the API
+L<[perl #78222]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78222>.
+
+=item *
+
+A new, experimental API has been addied for accessing the internal
+structure that Perl uses for C<%^H>. See the functions beginning with
+C<cophh_> in L<perlapi>.
 
 =back
 
@@ -321,7 +361,34 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+The C<parse_stmt> C function added in earlier in the 5.13.x series has been
+fixed to work with statements ending with C<}>
+L<[perl #78222]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78222>.
+
+=item *
+
+The C<parse_fullstmt> C function added in 5.13.5 has been fixed to work
+when called while an expression is being parsed.
+
+=item *
+
+Characters in the Latin-1 non-ASCII range (0x80 to 0xFF) used not to match
+themselves if the string happened to be UTF8-encoded internally, the
+regular expression was not, and the character in the regular expression was
+inside a repeated group (e.g.,
+C<Encode::decode_utf8("\303\200") =~ /(\xc0)+/)
+L<[perl #78464]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78464>.
+
+=item *
+
+The C<(?d)> regular expression construct now overrides a previous C<(?u)>
+or C<use feature "unicode_string">
+L<[perl #78508]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78508>.
+
+=item *
+
+A memory leak in C<do "file">, introduced in perl 5.13.6, has been fixed
+L<[perl #78488]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78488>.
 
 =back
 
