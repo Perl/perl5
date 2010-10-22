@@ -350,9 +350,6 @@ BOOT:
     dTHX;
 #endif
     HV *symbol_table = get_hv("$symbol_table", GV_ADD);
-#ifndef SYMBIAN
-    HV *${c_subname}_missing;
-#endif
 EOBOOT
 
     my %iterator;
@@ -409,18 +406,12 @@ EOBOOT
     # Terminate the list with a NULL
 	print $struct_fh "        { NULL, 0", (", 0" x $number_of_args), " } };\n";
 
-	print $xs_fh <<"EOBOOT";
+	print $xs_fh <<"EOBOOT" if $type;
 	const struct $struct_type *$iterator{$type} = $array_name;
 EOBOOT
     }
 
     delete $found->{''};
-
-    print $xs_fh <<"EOBOOT";
-#ifndef SYMBIAN
-	${c_subname}_missing = get_missing_hash(aTHX);
-#endif
-EOBOOT
 
     my $add_symbol_subname = $c_subname . '_add_symbol';
     foreach my $type (sort keys %$found) {
@@ -430,67 +421,71 @@ EOBOOT
     }
 
     print $xs_fh <<"EOBOOT";
-	while (value_for_notfound->name) {
+	if (C_ARRAY_LENGTH(values_for_notfound) > 1) {
+#ifndef SYMBIAN
+	    HV *const ${c_subname}_missing = get_missing_hash(aTHX);
+#endif
+	    const struct notfound_s *value_for_notfound = values_for_notfound;
+	    do {
 EOBOOT
 
     print $xs_fh $explosives ? <<"EXPLODE" : << "DONT";
-	    SV *tripwire = newSV(0);
-	    
-	    sv_magicext(tripwire, 0, PERL_MAGIC_ext, &not_defined_vtbl, 0, 0);
-	    SvPV_set(tripwire, (char *)value_for_notfound->name);
-	    if(value_for_notfound->namelen >= 0) {
-		SvCUR_set(tripwire, value_for_notfound->namelen);
-	    } else {
-		SvCUR_set(tripwire, -value_for_notfound->namelen);
-		SvUTF8_on(tripwire);
-	    }
-	    SvPOKp_on(tripwire);
-	    SvREADONLY_on(tripwire);
-	    assert(SvLEN(tripwire) == 0);
+		SV *tripwire = newSV(0);
+		
+		sv_magicext(tripwire, 0, PERL_MAGIC_ext, &not_defined_vtbl, 0, 0);
+		SvPV_set(tripwire, (char *)value_for_notfound->name);
+		if(value_for_notfound->namelen >= 0) {
+		    SvCUR_set(tripwire, value_for_notfound->namelen);
+	    	} else {
+		    SvCUR_set(tripwire, -value_for_notfound->namelen);
+		    SvUTF8_on(tripwire);
+		}
+		SvPOKp_on(tripwire);
+		SvREADONLY_on(tripwire);
+		assert(SvLEN(tripwire) == 0);
 
-	    $add_symbol_subname($athx symbol_table, value_for_notfound->name,
-				value_for_notfound->namelen, tripwire);
+		$add_symbol_subname($athx symbol_table, value_for_notfound->name,
+				    value_for_notfound->namelen, tripwire);
 EXPLODE
 
-	    /* Need to add prototypes, else parsing will vary by platform.  */
-	    SV **sv = hv_fetch(symbol_table, value_for_notfound->name,
-			       value_for_notfound->namelen, TRUE);
-	    if (!sv) {
-		Perl_croak($athx
-			   "Couldn't add key '%s' to %%$package_sprintf_safe\::",
-			   value_for_notfound->name);
-	    }
-	    if (!SvOK(*sv) && SvTYPE(*sv) != SVt_PVGV) {
-		/* Nothing was here before, so mark a prototype of ""  */
-		sv_setpvn(*sv, "", 0);
-	    } else if (SvPOK(*sv) && SvCUR(*sv) == 0) {
-		/* There is already a prototype of "" - do nothing  */
-	    } else {
-		/* Someone has been here before us - have to make a real
-		   typeglob.  */
-		/* It turns out to be incredibly hard to deal with all the
-		   corner cases of sub foo (); and reporting errors correctly,
-		   so lets cheat a bit.  Start with a constant subroutine  */
-		CV *cv = newCONSTSUB(symbol_table,
-				     ${cast_CONSTSUB}value_for_notfound->name,
-				     &PL_sv_yes);
-		/* and then turn it into a non constant declaration only.  */
-		SvREFCNT_dec(CvXSUBANY(cv).any_ptr);
-		CvCONST_off(cv);
-		CvXSUB(cv) = NULL;
-		CvXSUBANY(cv).any_ptr = NULL;
-	    }
+		/* Need to add prototypes, else parsing will vary by platform.  */
+		SV **sv = hv_fetch(symbol_table, value_for_notfound->name,
+				   value_for_notfound->namelen, TRUE);
+		if (!sv) {
+		    Perl_croak($athx
+			       "Couldn't add key '%s' to %%$package_sprintf_safe\::",
+			       value_for_notfound->name);
+		}
+		if (!SvOK(*sv) && SvTYPE(*sv) != SVt_PVGV) {
+		    /* Nothing was here before, so mark a prototype of ""  */
+		    sv_setpvn(*sv, "", 0);
+		} else if (SvPOK(*sv) && SvCUR(*sv) == 0) {
+		    /* There is already a prototype of "" - do nothing  */
+		} else {
+		    /* Someone has been here before us - have to make a real
+		       typeglob.  */
+		    /* It turns out to be incredibly hard to deal with all the
+		       corner cases of sub foo (); and reporting errors correctly,
+		       so lets cheat a bit.  Start with a constant subroutine  */
+		    CV *cv = newCONSTSUB(symbol_table,
+					 ${cast_CONSTSUB}value_for_notfound->name,
+					 &PL_sv_yes);
+		    /* and then turn it into a non constant declaration only.  */
+		    SvREFCNT_dec(CvXSUBANY(cv).any_ptr);
+		    CvCONST_off(cv);
+		    CvXSUB(cv) = NULL;
+		    CvXSUBANY(cv).any_ptr = NULL;
+		}
 #ifndef SYMBIAN
-	    if (!hv_store(${c_subname}_missing, value_for_notfound->name,
-			  value_for_notfound->namelen, &PL_sv_yes, 0))
-		Perl_croak($athx "Couldn't add key '%s' to missing_hash",
-			   value_for_notfound->name);
+		if (!hv_store(${c_subname}_missing, value_for_notfound->name,
+			      value_for_notfound->namelen, &PL_sv_yes, 0))
+		    Perl_croak($athx "Couldn't add key '%s' to missing_hash",
+			       value_for_notfound->name);
 #endif
 DONT
 
     print $xs_fh <<"EOBOOT";
-
-	    ++value_for_notfound;
+	    } while ((++value_for_notfound)->name);
 	}
 EOBOOT
 
