@@ -367,10 +367,13 @@ EOBOOT
 	die "Can't find structure definition for type $type"
 	    unless defined $struct;
 
-	my $struct_type = $type ? lc($type) . '_s' : 'notfound_s';
+	my $lc_type = $type ? lc($type) : 'notfound';
+	my $struct_type = $lc_type . '_s';
+	my $array_name = 'values_for_' . $lc_type;
+	$iterator{$type} = 'value_for_' . $lc_type;
+
 	print $c_fh "struct $struct_type $struct;\n";
 
-	my $array_name = 'values_for_' . ($type ? lc $type : 'notfound');
 	print $xs_fh <<"EOBOOT";
 
     static const struct $struct_type $array_name\[] =
@@ -402,8 +405,6 @@ EOBOOT
 
     # Terminate the list with a NULL
 	print $xs_fh "        { NULL, 0", (", 0" x $number_of_args), " } };\n";
-
-	$iterator{$type} = "value_for_" . ($type ? lc $type : 'notfound');
 
 	print $xs_fh <<"EOBOOT";
 	const struct $struct_type *$iterator{$type} = $array_name;
