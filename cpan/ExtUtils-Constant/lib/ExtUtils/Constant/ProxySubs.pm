@@ -448,17 +448,24 @@ EOBOOT
 EXPLODE
 
 		/* Need to add prototypes, else parsing will vary by platform.  */
-		SV **sv = hv_fetch(symbol_table, value_for_notfound->name,
-				   value_for_notfound->namelen, TRUE);
-		if (!sv) {
+		HE *he = (HE*) hv_common_key_len(symbol_table,
+						 value_for_notfound->name,
+						 value_for_notfound->namelen,
+						 HV_FETCH_LVALUE, NULL, 0);
+		SV *sv;
+#ifndef SYMBIAN
+		HEK *hek;
+#endif
+		if (!he) {
 		    Perl_croak($athx
 			       "Couldn't add key '%s' to %%$package_sprintf_safe\::",
 			       value_for_notfound->name);
 		}
-		if (!SvOK(*sv) && SvTYPE(*sv) != SVt_PVGV) {
+		sv = HeVAL(he);
+		if (!SvOK(sv) && SvTYPE(sv) != SVt_PVGV) {
 		    /* Nothing was here before, so mark a prototype of ""  */
-		    sv_setpvn(*sv, "", 0);
-		} else if (SvPOK(*sv) && SvCUR(*sv) == 0) {
+		    sv_setpvn(sv, "", 0);
+		} else if (SvPOK(sv) && SvCUR(sv) == 0) {
 		    /* There is already a prototype of "" - do nothing  */
 		} else {
 		    /* Someone has been here before us - have to make a real
@@ -476,8 +483,10 @@ EXPLODE
 		    CvXSUBANY(cv).any_ptr = NULL;
 		}
 #ifndef SYMBIAN
-		if (!hv_store(${c_subname}_missing, value_for_notfound->name,
-			      value_for_notfound->namelen, &PL_sv_yes, 0))
+		hek = HeKEY_hek(he);
+		if (!hv_common(${c_subname}_missing, NULL, HEK_KEY(hek),
+ 			       HEK_LEN(hek), HEK_FLAGS(hek), HV_FETCH_ISSTORE,
+			       &PL_sv_yes, HEK_HASH(hek)))
 		    Perl_croak($athx "Couldn't add key '%s' to missing_hash",
 			       value_for_notfound->name);
 #endif
