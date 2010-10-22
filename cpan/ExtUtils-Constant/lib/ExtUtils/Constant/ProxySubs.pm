@@ -371,10 +371,13 @@ EOBOOT
 	my $struct_type = $lc_type . '_s';
 	my $array_name = 'values_for_' . $lc_type;
 	$iterator{$type} = 'value_for_' . $lc_type;
+	# Give the notfound struct file scope. The others are scoped within the
+	# BOOT block
+	my $struct_fh = $type ? $xs_fh : $c_fh;
 
 	print $c_fh "struct $struct_type $struct;\n";
 
-	print $xs_fh <<"EOBOOT";
+	print $struct_fh <<"EOBOOT";
 
     static const struct $struct_type $array_name\[] =
       {
@@ -391,20 +394,20 @@ EOBOOT
 		next;
 	    }
 	    if ($item->{invert_macro}) {
-		print $xs_fh $self->macro_to_ifndef($macro);
-		print $xs_fh
+		print $struct_fh $self->macro_to_ifndef($macro);
+		print $struct_fh
 			"        /* This is the default value: */\n" if $type;
 	    } else {
-		print $xs_fh $ifdef;
+		print $struct_fh $ifdef;
 	    }
-	    print $xs_fh "        { ", join (', ', "\"$name\"", $namelen,
-					     &$type_to_value($value)), " },\n",
+	    print $struct_fh "        { ", join (', ', "\"$name\"", $namelen,
+						 &$type_to_value($value)),
+						 " },\n",
 						 $self->macro_to_endif($macro);
 	}
 
-
     # Terminate the list with a NULL
-	print $xs_fh "        { NULL, 0", (", 0" x $number_of_args), " } };\n";
+	print $struct_fh "        { NULL, 0", (", 0" x $number_of_args), " } };\n";
 
 	print $xs_fh <<"EOBOOT";
 	const struct $struct_type *$iterator{$type} = $array_name;
