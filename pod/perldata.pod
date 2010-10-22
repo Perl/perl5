@@ -766,7 +766,7 @@ Slices in scalar context return the last item of the slice.
     @a = qw/first second third/;
     %h = (first => 'A', second => 'B');
     $t = @a[0, 1];                  # $t is now 'second'
-    $u = @h{'first', 'second'};     # $u is now 'second'
+    $u = @h{'first', 'second'};     # $u is now 'B'
 
 If you're confused about why you use an '@' there on a hash slice
 instead of a '%', think of it like this.  The type of bracket (square
