@@ -7,6 +7,7 @@ typedef SV *SVREF;
 typedef PTR_TBL_t *XS__APItest__PtrTable;
 
 #define croak_fail() croak("fail at " __FILE__ " line %d", __LINE__)
+#define croak_fail_ne(h, w) croak("fail %p!=%p at " __FILE__ " line %d", (h), (w), __LINE__)
 
 /* for my_cxt tests */
 
@@ -1839,7 +1840,8 @@ test_cv_getset_call_checker()
 #define check_cc(cv, xckfun, xckobj) \
     do { \
 	cv_get_call_checker((cv), &ckfun, &ckobj); \
-	if (ckfun != (xckfun) || ckobj != (xckobj)) croak_fail(); \
+	if (ckfun != (xckfun)) croak_fail_ne(FPTR2DPTR(void *, ckfun), xckfun); \
+	if (ckobj != (xckobj)) croak_fail_ne(FPTR2DPTR(void *, ckobj), xckobj); \
     } while(0)
 	troc_cv = get_cv("XS::APItest::test_rv2cv_op_cv", 0);
 	tsh_cv = get_cv("XS::APItest::test_savehints", 0);
