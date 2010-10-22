@@ -134,11 +134,10 @@ sub boottime_iterator {
     my $athx = $self->C_constant_prefix_param();
 
     return sprintf <<"EOBOOT", &$generator(&$extractor($iterator));
-        while ($iterator->name) {
+        do {
 	    $subname($athx $hash, $iterator->name,
 				$iterator->namelen, %s);
-	    ++$iterator;
-	}
+	} while ((++$iterator)->name);
 EOBOOT
 }
 
