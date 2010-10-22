@@ -2253,7 +2253,8 @@ S_tokeq(pTHX_ SV *sv)
     if (SvTYPE(sv) >= SVt_PVIV && SvIVX(sv) == -1)
 	goto finish;
     send = s + len;
-    while (s < send && *s != '\\')
+    /* This is relying on the SV being "well formed" with a trailing '\0'  */
+    while (s < send && !(*s == '\\' && s[1] == '\\'))
 	s++;
     if (s == send)
 	goto finish;
