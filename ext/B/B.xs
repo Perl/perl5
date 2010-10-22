@@ -1913,16 +1913,10 @@ CvSTASH(cv)
 B::OP
 CvSTART(cv)
 	B::CV	cv
+    ALIAS:
+	ROOT = 1
     CODE:
-	RETVAL = CvISXSUB(cv) ? NULL : CvSTART(cv);
-    OUTPUT:
-	RETVAL
-
-B::OP
-CvROOT(cv)
-	B::CV	cv
-    CODE:
-	RETVAL = CvISXSUB(cv) ? NULL : CvROOT(cv);
+	RETVAL = CvISXSUB(cv) ? NULL : ix ? CvROOT(cv) : CvSTART(cv);
     OUTPUT:
 	RETVAL
 
