@@ -343,7 +343,7 @@ L<[perl #78222]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78222>.
 
 =item *
 
-A new, experimental API has been addied for accessing the internal
+A new, experimental API has been added for accessing the internal
 structure that Perl uses for C<%^H>. See the functions beginning with
 C<cophh_> in L<perlapi>.
 
@@ -376,7 +376,7 @@ Characters in the Latin-1 non-ASCII range (0x80 to 0xFF) used not to match
 themselves if the string happened to be UTF8-encoded internally, the
 regular expression was not, and the character in the regular expression was
 inside a repeated group (e.g.,
-C<Encode::decode_utf8("\303\200") =~ /(\xc0)+/)
+C<Encode::decode_utf8("\303\200") =~ /(\xc0)+/>)
 L<[perl #78464]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78464>.
 
 =item *
