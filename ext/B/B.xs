@@ -589,7 +589,11 @@ typedef HE      *B__HE;
 typedef struct refcounted_he	*B__RHE;
 #endif
 
+#include "const-c.inc"
+
 MODULE = B	PACKAGE = B	PREFIX = B_
+
+INCLUDE: const-xs.inc
 
 PROTOTYPES: DISABLE
 
@@ -608,7 +612,6 @@ BOOT:
 #if PERL_VERSION <= 8
 #  define OPpPAD_STATE 0
 #endif
-#include "defsubs.h"
 }
 
 #define B_main_cv()	PL_main_cv
