@@ -741,12 +741,8 @@ static OP *THX_parse_keyword_swaptwostmts(pTHX)
 #define parse_keyword_looprest() THX_parse_keyword_looprest(aTHX)
 static OP *THX_parse_keyword_looprest(pTHX)
 {
-    I32 condline;
-    OP *body;
-    condline = CopLINE(PL_curcop);
-    body = parse_stmtseq(0);
-    return newWHILEOP(0, 1, NULL, condline, newSVOP(OP_CONST, 0, &PL_sv_yes),
-			body, NULL, 1);
+    return newWHILEOP(0, 1, NULL, newSVOP(OP_CONST, 0, &PL_sv_yes),
+			parse_stmtseq(0), NULL, 1);
 }
 
 #define parse_keyword_scopelessblock() THX_parse_keyword_scopelessblock(aTHX)
@@ -794,12 +790,8 @@ static OP *THX_parse_keyword_stmtsasexpr(pTHX)
 #define parse_keyword_loopblock() THX_parse_keyword_loopblock(aTHX)
 static OP *THX_parse_keyword_loopblock(pTHX)
 {
-    I32 condline;
-    OP *body;
-    condline = CopLINE(PL_curcop);
-    body = parse_block(0);
-    return newWHILEOP(0, 1, NULL, condline, newSVOP(OP_CONST, 0, &PL_sv_yes),
-			body, NULL, 1);
+    return newWHILEOP(0, 1, NULL, newSVOP(OP_CONST, 0, &PL_sv_yes),
+			parse_block(0), NULL, 1);
 }
 
 #define parse_keyword_blockasexpr() THX_parse_keyword_blockasexpr(aTHX)

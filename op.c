@@ -5301,7 +5301,7 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
 }
 
 /*
-=for apidoc Am|OP *|newWHILEOP|I32 flags|I32 debuggable|LOOP *loop|I32 whileline|OP *expr|OP *block|OP *cont|I32 has_my
+=for apidoc Am|OP *|newWHILEOP|I32 flags|I32 debuggable|LOOP *loop|OP *expr|OP *block|OP *cont|I32 has_my
 
 Constructs, checks, and returns an op tree expressing a C<while> loop.
 This is a heavyweight loop, with structure that allows exiting the loop
@@ -5318,16 +5318,15 @@ I<flags> gives the eight bits of C<op_flags> for the C<leaveloop>
 op and, shifted up eight bits, the eight bits of C<op_private> for
 the C<leaveloop> op, except that (in both cases) some bits will be set
 automatically.  I<debuggable> is currently unused and should always be 1.
-I<whileline> is the line number that should be attributed to the loop's
-controlling expression.  I<has_my> can be supplied as true to force the
+I<has_my> can be supplied as true to force the
 loop body to be enclosed in its own scope.
 
 =cut
 */
 
 OP *
-Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop, I32
-whileline, OP *expr, OP *block, OP *cont, I32 has_my)
+Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop,
+	OP *expr, OP *block, OP *cont, I32 has_my)
 {
     dVAR;
     OP *redo;
@@ -5389,7 +5388,6 @@ whileline, OP *expr, OP *block, OP *cont, I32 has_my)
     redo = LINKLIST(listop);
 
     if (expr) {
-	PL_parser->copline = (line_t)whileline;
 	scalar(listop);
 	o = new_logop(OP_AND, 0, &expr, &listop);
 	if (o == expr && o->op_type == OP_CONST && !SvTRUE(cSVOPo->op_sv)) {
@@ -5429,7 +5427,7 @@ whileline, OP *expr, OP *block, OP *cont, I32 has_my)
 }
 
 /*
-=for apidoc Am|OP *|newFOROP|I32 flags|line_t forline|OP *sv|OP *expr|OP *block|OP *cont
+=for apidoc Am|OP *|newFOROP|I32 flags|OP *sv|OP *expr|OP *block|OP *cont
 
 Constructs, checks, and returns an op tree expressing a C<foreach>
 loop (iteration through a list of values).  This is a heavyweight loop,
@@ -5446,14 +5444,13 @@ op tree.
 I<flags> gives the eight bits of C<op_flags> for the C<leaveloop>
 op and, shifted up eight bits, the eight bits of C<op_private> for
 the C<leaveloop> op, except that (in both cases) some bits will be set
-automatically.  I<forline> is the line number that should be attributed
-to the loop's list expression.
+automatically.
 
 =cut
 */
 
 OP *
-Perl_newFOROP(pTHX_ I32 flags, line_t forline, OP *sv, OP *expr, OP *block, OP *cont)
+Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 {
     dVAR;
     LOOP *loop;
@@ -5571,7 +5568,7 @@ Perl_newFOROP(pTHX_ I32 flags, line_t forline, OP *sv, OP *expr, OP *block, OP *
     loop = (LOOP*)PerlMemShared_realloc(loop, sizeof(LOOP));
 #endif
     loop->op_targ = padoff;
-    wop = newWHILEOP(flags, 1, loop, forline, newOP(OP_ITER, 0), block, cont, 0);
+    wop = newWHILEOP(flags, 1, loop, newOP(OP_ITER, 0), block, cont, 0);
     if (madsv)
 	op_getmad(madsv, (OP*)loop, 'v');
     return wop;

@@ -365,7 +365,7 @@ barestmt:	PLUGSTMT
 			{
 			  $$ = block_end($3,
 				  newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
-				      IVAL($1), $4, $7, $8, $6));
+				      $4, $7, $8, $6));
 			  TOKEN_GETMAD($1,$$,'W');
 			  TOKEN_GETMAD($2,$$,'(');
 			  TOKEN_GETMAD($5,$$,')');
@@ -374,8 +374,8 @@ barestmt:	PLUGSTMT
 	|	UNTIL lpar_or_qw remember iexpr ')' mintro mblock cont
 			{
 			  $$ = block_end($3,
-			 	  newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
-				      IVAL($1), $4, $7, $8, $6));
+				  newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
+				      $4, $7, $8, $6));
 			  TOKEN_GETMAD($1,$$,'W');
 			  TOKEN_GETMAD($2,$$,'(');
 			  TOKEN_GETMAD($5,$$,')');
@@ -386,7 +386,7 @@ barestmt:	PLUGSTMT
 			{
 			  OP *initop = IF_MAD($4 ? $4 : newOP(OP_NULL, 0), $4);
 			  OP *forop = newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
-				      IVAL($1), scalar($6), $11, $9, $8);
+				      scalar($6), $11, $9, $8);
 			  if (initop) {
 			      forop = op_prepend_elem(OP_LINESEQ, initop,
 				  op_append_elem(OP_LINESEQ,
@@ -404,9 +404,7 @@ barestmt:	PLUGSTMT
 			}
 	|	FOR MY remember my_scalar lpar_or_qw mexpr ')' mblock cont
 			{
-			  $$ = block_end($3,
-			 	  newFOROP(0, (line_t)IVAL($1),
-				      $4, $6, $8, $9));
+			  $$ = block_end($3, newFOROP(0, $4, $6, $8, $9));
 			  TOKEN_GETMAD($1,$$,'W');
 			  TOKEN_GETMAD($2,$$,'d');
 			  TOKEN_GETMAD($5,$$,'(');
@@ -415,8 +413,7 @@ barestmt:	PLUGSTMT
 			}
 	|	FOR scalar lpar_or_qw remember mexpr ')' mblock cont
 			{
-			  $$ = block_end($4,
-			 	  newFOROP(0, (line_t)IVAL($1),
+			  $$ = block_end($4, newFOROP(0,
 				      mod($2, OP_ENTERLOOP), $5, $7, $8));
 			  TOKEN_GETMAD($1,$$,'W');
 			  TOKEN_GETMAD($3,$$,'(');
@@ -426,8 +423,7 @@ barestmt:	PLUGSTMT
 	|	FOR lpar_or_qw remember mexpr ')' mblock cont
 			{
 			  $$ = block_end($3,
-			 	  newFOROP(0, (line_t)IVAL($1),
-				      (OP*)NULL, $4, $6, $7));
+				  newFOROP(0, (OP*)NULL, $4, $6, $7));
 			  TOKEN_GETMAD($1,$$,'W');
 			  TOKEN_GETMAD($2,$$,'(');
 			  TOKEN_GETMAD($5,$$,')');
@@ -437,7 +433,8 @@ barestmt:	PLUGSTMT
 			{
 			  /* a block is a loop that happens once */
 			  $$ = newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
-				  NOLINE, (OP*)NULL, $1, $2, 0);
+				  (OP*)NULL, $1, $2, 0);
+			  PL_parser->copline = NOLINE;
 			}
 	|	PACKAGE WORD WORD '{' remember
 			{
@@ -455,7 +452,7 @@ barestmt:	PLUGSTMT
 		stmtseq '}'
 			{
 			  /* a block is a loop that happens once */
-			  $$ = newWHILEOP(0, 1, (LOOP*)(OP*)NULL, NOLINE,
+			  $$ = newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
 				  (OP*)NULL, block_end($5, $7), (OP*)NULL, 0);
 			  op_free($3);
 			  if ($2)
@@ -502,9 +499,9 @@ sideff	:	error
 			  TOKEN_GETMAD($2,$$,'w');
 			}
 	|	expr FOR expr
-			{ $$ = newFOROP(0, (line_t)IVAL($2),
-					(OP*)NULL, $3, $1, (OP*)NULL);
+			{ $$ = newFOROP(0, (OP*)NULL, $3, $1, (OP*)NULL);
 			  TOKEN_GETMAD($2,$$,'w');
+			  PL_parser->copline = (line_t)IVAL($2);
 			}
 	|	expr WHEN expr
 			{ $$ = newWHENOP($3, scope($1)); }

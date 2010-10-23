@@ -780,8 +780,7 @@ Ap	|OP*	|newFORM	|I32 floor|NULLOK OP* o|NULLOK OP* block
 #else
 Ap	|void	|newFORM	|I32 floor|NULLOK OP* o|NULLOK OP* block
 #endif
-Apda	|OP*	|newFOROP	|I32 flags|line_t forline \
-				|NULLOK OP* sv|NN OP* expr|NULLOK OP* block|NULLOK OP* cont
+Apda	|OP*	|newFOROP	|I32 flags|NULLOK OP* sv|NN OP* expr|NULLOK OP* block|NULLOK OP* cont
 Apda	|OP*	|newGIVENOP	|NN OP* cond|NN OP* block|PADOFFSET defsv_off
 Apda	|OP*	|newLOGOP	|I32 optype|I32 flags|NN OP *first|NN OP *other
 Apda	|OP*	|newLOOPEX	|I32 type|NN OP* label
@@ -837,7 +836,7 @@ Apda	|SV*	|newSV_type	|const svtype type
 Apda	|OP*	|newUNOP	|I32 type|I32 flags|NULLOK OP* first
 Apda	|OP*	|newWHENOP	|NULLOK OP* cond|NN OP* block
 Apda	|OP*	|newWHILEOP	|I32 flags|I32 debuggable|NULLOK LOOP* loop \
-				|I32 whileline|NULLOK OP* expr|NULLOK OP* block|NULLOK OP* cont \
+				|NULLOK OP* expr|NULLOK OP* block|NULLOK OP* cont \
 				|I32 has_my
 Apd	|CV*	|rv2cv_op_cv	|NN OP *cvop|U32 flags
 Apd	|OP*	|ck_entersub_args_list|NN OP *entersubop

@@ -2378,10 +2378,10 @@ PERL_CALLCONV OP*	Perl_newCVREF(pTHX_ I32 flags, OP* o)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV OP*	Perl_newFOROP(pTHX_ I32 flags, line_t forline, OP* sv, OP* expr, OP* block, OP* cont)
+PERL_CALLCONV OP*	Perl_newFOROP(pTHX_ I32 flags, OP* sv, OP* expr, OP* block, OP* cont)
 			__attribute__malloc__
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_4);
+			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_NEWFOROP	\
 	assert(expr)
 
@@ -2595,7 +2595,7 @@ PERL_CALLCONV OP*	Perl_newWHENOP(pTHX_ OP* cond, OP* block)
 #define PERL_ARGS_ASSERT_NEWWHENOP	\
 	assert(block)
 
-PERL_CALLCONV OP*	Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP* loop, I32 whileline, OP* expr, OP* block, OP* cont, I32 has_my)
+PERL_CALLCONV OP*	Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP* loop, OP* expr, OP* block, OP* cont, I32 has_my)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
