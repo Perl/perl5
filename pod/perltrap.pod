@@ -960,14 +960,15 @@ being required.
 =item * Comma operator in scalar context gives scalar context to args
 
 The comma operator in a scalar context is now guaranteed to give a
-scalar context to its arguments.
+scalar context to its last argument. It gives scalar or void context
+to any preceding arguments, depending on circumstances.
 
     @y= ('a','b','c');
     $x = (1, 2, @y);
     print "x = $x\n";
 
-    # Perl4 prints:  x = c   # Thinks list context interpolates list
-    # Perl5 prints:  x = 3   # Knows scalar uses length of list
+    # Perl4 prints:  x = c   # Interpolates array @y into the list
+    # Perl5 prints:  x = 3   # Evaluates array @y in scalar context
 
 =item * C<sprintf()> prototyped as C<($;@)>
 
