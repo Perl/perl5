@@ -581,8 +581,14 @@ EOA
         print $xs_fh <<"EOC";
     PPCODE:
 #ifndef SYMBIAN
-	HV *${c_subname}_missing = get_missing_hash(aTHX);
-	if (hv_exists_ent(${c_subname}_missing, sv, 0)) {
+	/* It's not obvious how to calculate this at C pre-processor time.
+	   However, any compiler optimiser worth its salt should be able to
+	   remove the dead code, and hopefully the now-obviously-unused static
+	   function too.  */
+	HV *${c_subname}_missing = (C_ARRAY_LENGTH(values_for_notfound) > 1)
+	    ? get_missing_hash(aTHX) : NULL;
+	if ((C_ARRAY_LENGTH(values_for_notfound) > 1)
+	    ? hv_exists_ent(${c_subname}_missing, sv, 0) : 0) {
 	    sv = newSVpvf("Your vendor has not defined $package_sprintf_safe macro %" SVf
 			  ", used at %" COP_FILE_F " line %d\\n", sv,
 			  COP_FILE(cop), CopLINE(cop));
@@ -613,8 +619,14 @@ $xs_subname(sv)
 	SV *		sv;
     PPCODE:
 #ifndef SYMBIAN
-	HV *${c_subname}_missing = get_missing_hash(aTHX);
-	if (hv_exists_ent(${c_subname}_missing, sv, 0)) {
+	/* It's not obvious how to calculate this at C pre-processor time.
+	   However, any compiler optimiser worth its salt should be able to
+	   remove the dead code, and hopefully the now-obviously-unused static
+	   function too.  */
+	HV *${c_subname}_missing = (C_ARRAY_LENGTH(values_for_notfound) > 1)
+	    ? get_missing_hash(aTHX) : NULL;
+	if ((C_ARRAY_LENGTH(values_for_notfound) > 1)
+	    ? hv_exists_ent(${c_subname}_missing, sv, 0) : NULL) {
 	    sv = newSVpvf("Your vendor has not defined $package_sprintf_safe macro %" SVf
 			  ", used", sv);
 	} else
