@@ -123,7 +123,7 @@ sub partition_names {
 }
 
 sub boottime_iterator {
-    my ($self, $type, $iterator, $hash, $subname) = @_;
+    my ($self, $type, $iterator, $hash, $subname, $push) = @_;
     my $extractor = $type_from_struct{$type};
     die "Can't find extractor code for type $type"
 	unless defined $extractor;
@@ -133,12 +133,22 @@ sub boottime_iterator {
 
     my $athx = $self->C_constant_prefix_param();
 
-    return sprintf <<"EOBOOT", &$generator(&$extractor($iterator));
+    if ($push) {
+	return sprintf <<"EOBOOT", &$generator(&$extractor($iterator));
+        do {
+	    he = $subname($athx $hash, $iterator->name,
+				     $iterator->namelen, %s);
+	    av_push(push, newSVhek(HeKEY_hek(he)));
+	} while ((++$iterator)->name);
+EOBOOT
+    } else {
+	return sprintf <<"EOBOOT", &$generator(&$extractor($iterator));
         do {
 	    $subname($athx $hash, $iterator->name,
 				$iterator->namelen, %s);
 	} while ((++$iterator)->name);
 EOBOOT
+    }
 }
 
 sub name_len_value_macro {
@@ -171,6 +181,7 @@ sub WriteConstants {
 
     my $options = $ARGS->{PROXYSUBS};
     $options = {} unless ref $options;
+    my $push = $options->{push};
     my $explosives = $options->{croak_on_read};
     my $croak_on_error = $options->{croak_on_error};
     my $autoload = $options->{autoload};
@@ -185,8 +196,16 @@ sub WriteConstants {
 	    if $exclusive > 1;
     }
     # Strictly it requires Perl_caller_cx
-    carp ("PROXYSUBS options 'croak_on_error' requires v5.13.5 or later")
+    carp ("PROXYSUBS option 'croak_on_error' requires v5.13.5 or later")
 	if $croak_on_error && $^V < v5.13.5;
+    # Strictly this is actually 5.8.9, but it's not well tested there
+    my $can_do_pcs = $] >= 5.009;
+    # Until someone patches this (with test cases)
+    carp ("PROXYSUBS option 'push' requires v5.10 or later")
+	if $push && !$can_do_pcs;
+    # Until someone patches this (with test cases)
+    carp ("PROXYSUBS options 'push' and 'croak_on_read' cannot be used together")
+	if $explosives && $push;
 
     # If anyone is insane enough to suggest a package name containing %
     my $package_sprintf_safe = $package;
@@ -211,8 +230,7 @@ sub WriteConstants {
     my $pthx = $self->C_constant_prefix_param_defintion();
     my $athx = $self->C_constant_prefix_param();
     my $symbol_table = C_stringify($package) . '::';
-
-    my $can_do_pcs = $] >= 5.009;
+    $push = C_stringify($package . '::' . $push) if $push;
     my $cast_CONSTSUB = $] < 5.010 ? '(char *)' : '';
 
     print $c_fh $self->header();
@@ -230,9 +248,11 @@ sub WriteConstants {
 EOC
     }
 
+    my $return_type = $push ? 'HE *' : 'void';
+
     print $c_fh <<"EOADD";
 
-static void
+static $return_type
 ${c_subname}_add_symbol($pthx HV *hash, const char *name, I32 namelen, SV *value) {
 EOADD
     if (!$can_do_pcs) {
@@ -241,12 +261,16 @@ EOADD
 EO_NOPCS
     } else {
 	print $c_fh <<"EO_PCS";
-    SV **sv = hv_fetch(hash, name, namelen, TRUE);
-    if (!sv) {
+    HE *he = (HE*) hv_common_key_len(hash, name, namelen, HV_FETCH_LVALUE, NULL,
+				     0);
+    SV *sv;
+
+    if (!he) {
         Perl_croak($athx "Couldn't add key '%s' to %%$package_sprintf_safe\::",
 		   name);
     }
-    if (SvOK(*sv) || SvTYPE(*sv) == SVt_PVGV) {
+    sv = HeVAL(he);
+    if (SvOK(sv) || SvTYPE(sv) == SVt_PVGV) {
 	/* Someone has been here before us - have to make a real sub.  */
 EO_PCS
     }
@@ -257,9 +281,9 @@ EOADD
     if ($can_do_pcs) {
 	print $c_fh <<'EO_PCS';
     } else {
-	SvUPGRADE(*sv, SVt_RV);
-	SvRV_set(*sv, value);
-	SvROK_on(*sv);
+	SvUPGRADE(sv, SVt_RV);
+	SvRV_set(sv, value);
+	SvROK_on(sv);
 	SvREADONLY_on(value);
     }
 EO_PCS
@@ -268,6 +292,7 @@ EO_PCS
     }
 EO_NOPCS
     }
+    print $c_fh "    return he;\n" if $push;
     print $c_fh <<'EOADD';
 }
 
@@ -351,6 +376,12 @@ BOOT:
 #endif
     HV *symbol_table = get_hv("$symbol_table", GV_ADD);
 EOBOOT
+    if ($push) {
+	print $xs_fh <<"EOC";
+    AV *push = get_av(\"$push\", GV_ADD);
+    HE *he;
+EOC
+    }
 
     my %iterator;
 
@@ -417,7 +448,7 @@ EOBOOT
     foreach my $type (sort keys %$found) {
 	print $xs_fh $self->boottime_iterator($type, $iterator{$type}, 
 					      'symbol_table',
-					      $add_symbol_subname);
+					      $add_symbol_subname, $push);
     }
 
     print $xs_fh <<"EOBOOT";
@@ -492,6 +523,9 @@ EXPLODE
 			       value_for_notfound->name);
 #endif
 DONT
+
+    print $xs_fh "		av_push(push, newSVhek(hek));\n"
+	if $push;
 
     print $xs_fh <<"EOBOOT";
 	    } while ((++value_for_notfound)->name);
