@@ -2048,6 +2048,94 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
     iter->xhv_name_count = 0;
 }
 
+void
+Perl_hv_name_add(pTHX_ HV *hv, const char *name, U32 len)
+{
+    dVAR;
+    struct xpvhv_aux *aux = SvOOK(hv) ? HvAUX(hv) : hv_auxinit(hv);
+    U32 hash;
+
+    PERL_ARGS_ASSERT_HV_NAME_ADD;
+
+    if (len > I32_MAX)
+	Perl_croak(aTHX_ "panic: hv name too long (%"UVuf")", (UV) len);
+
+    PERL_HASH(hash, name, len);
+
+    if (!aux->xhv_name) {
+	aux->xhv_name = share_hek(name, len, hash);
+	return;
+    }
+
+    if (aux->xhv_name_count) {
+	HEK ** const xhv_name = (HEK **)aux->xhv_name;
+	HEK **hekp = xhv_name + aux->xhv_name_count;
+	U32 count = aux->xhv_name_count;
+	while (hekp-- > xhv_name)
+	    if (
+	     HEK_LEN(*hekp) == (I32)len && memEQ(HEK_KEY(*hekp), name, len)
+	    ) return;
+	Renewc(aux->xhv_name, ++aux->xhv_name_count, HEK *, HEK);
+	((HEK **)aux->xhv_name)[count] = share_hek(name, len, hash);
+    }
+    else {
+	HEK *existing_name = aux->xhv_name;
+	if (
+	    HEK_LEN(existing_name) == (I32)len
+	 && memEQ(HEK_KEY(existing_name), name, len)
+	) return;
+	Newxc(aux->xhv_name, 2, HEK *, HEK);
+	*(HEK **)aux->xhv_name = existing_name;
+	((HEK **)aux->xhv_name)[1] = share_hek(name, len, hash);
+    }
+}
+
+void
+Perl_hv_name_delete(pTHX_ HV *hv, const char *name, U32 len)
+{
+    dVAR;
+    struct xpvhv_aux *aux;
+
+    PERL_ARGS_ASSERT_HV_NAME_DELETE;
+
+    if (len > I32_MAX)
+	Perl_croak(aTHX_ "panic: hv name too long (%"UVuf")", (UV) len);
+
+    if (!SvOOK(hv)) return;
+
+    aux = HvAUX(hv);
+    if (!aux->xhv_name) return;
+
+    if (aux->xhv_name_count) {
+	HEK ** const namep = (HEK **)aux->xhv_name;
+	HEK **victim = namep + aux->xhv_name_count;
+	while (victim-- > namep)
+	    if (
+	        HEK_LEN(*victim) == (I32)len
+	     && memEQ(HEK_KEY(*victim), name, len)
+	    ) {
+		unshare_hek_or_pvn(*victim, 0, 0, 0);
+		if (!--aux->xhv_name_count) { /* none left */
+		    Safefree(namep);
+		    aux->xhv_name = NULL;
+		}
+		else {
+		    /* Move the last one back to fill the empty slot. It
+		       does not matter what order they are in. */
+		    *victim = *(namep + aux->xhv_name_count);
+		}
+		return;
+	    }
+    }
+    else if(
+        HEK_LEN(aux->xhv_name) == (I32)len
+     && memEQ(HEK_KEY(aux->xhv_name), name, len)
+    ) {
+	unshare_hek_or_pvn(aux->xhv_name, 0, 0, 0);
+	aux->xhv_name = NULL;
+    }
+}
+
 AV **
 Perl_hv_backreferences_p(pTHX_ HV *hv) {
     struct xpvhv_aux * const iter = SvOOK(hv) ? HvAUX(hv) : hv_auxinit(hv);

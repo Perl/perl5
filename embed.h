@@ -987,6 +987,8 @@
 #define get_no_modify()		Perl_get_no_modify(aTHX)
 #define get_opargs()		Perl_get_opargs(aTHX)
 #define gv_try_downgrade(a)	Perl_gv_try_downgrade(aTHX_ a)
+#define hv_name_add(a,b,c)	Perl_hv_name_add(aTHX_ a,b,c)
+#define hv_name_delete(a,b,c)	Perl_hv_name_delete(aTHX_ a,b,c)
 #define init_argv_symbols(a,b)	Perl_init_argv_symbols(aTHX_ a,b)
 #define init_debugger()		Perl_init_debugger(aTHX)
 #define intro_my()		Perl_intro_my(aTHX)

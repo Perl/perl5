@@ -1344,6 +1344,18 @@ PERL_CALLCONV void	Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 #define PERL_ARGS_ASSERT_HV_MAGIC	\
 	assert(hv)
 
+PERL_CALLCONV void	Perl_hv_name_add(pTHX_ HV *hv, const char *name, U32 len)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_HV_NAME_ADD	\
+	assert(hv); assert(name)
+
+PERL_CALLCONV void	Perl_hv_name_delete(pTHX_ HV *hv, const char *name, U32 len)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_HV_NAME_DELETE	\
+	assert(hv); assert(name)
+
 PERL_CALLCONV void	Perl_hv_name_set(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_HV_NAME_SET	\
