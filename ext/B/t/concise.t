@@ -392,14 +392,17 @@ like($out, qr/FUNC: \*B::Concise::concise_cv_obj/,
 like($out, qr/FUNC: \*B::Concise::walk_output/,
      "stash rendering includes Concise::walk_output");
 
-like($out, qr/FUNC: \*B::Concise::PAD_FAKELEX_MULTI/,
-     "stash rendering includes constant sub: PAD_FAKELEX_MULTI");
-
-like($out, qr/PAD_FAKELEX_MULTI is a constant sub, optimized to a IV/,
-     "stash rendering identifies it as constant");
-
 like($out, qr/\# 4\d\d: \s+ \$l->concise\(\$level\);/,
      "src-line rendering works");
+
+$out = runperl ( switches => ["-MStorable", "-MO=Concise,-stash=Storable,-src"],
+		 prog => '-e 1', stderr => 1 );
+
+like($out, qr/FUNC: \*Storable::BIN_MAJOR/,
+     "stash rendering includes constant sub: PAD_FAKELEX_MULTI");
+
+like($out, qr/BIN_MAJOR is a constant sub, optimized to a IV/,
+     "stash rendering identifies it as constant");
 
 $out = runperl ( switches => ["-MO=Concise,-stash=ExtUtils::Mksymlists,-src,-exec"],
 		 prog => '-e 1', stderr => 1 );
