@@ -82,7 +82,6 @@ use File::Glob qw(:case);
     'smccam'	=> 'Stephen McCamant <smccam@cpan.org>',
     'smpeters'	=> 'Steve Peters <steve@fisharerojo.org>',
     'smueller'	=> 'Steffen Mueller <smueller@cpan.org>',
-    'tels'	=> 'Tels <nospam-abuse@bloodgate.com>',
     'tomhughes'	=> 'Tom Hughes <tomhughes@cpan.org>',
     'tjenness'	=> 'Tim Jenness <tjenness@cpan.org>',
     'tyemq'	=> 'Tye McQueen <tyemq@cpan.org>',
@@ -290,7 +289,7 @@ use File::Glob qw(:case);
 
     'bignum' =>
 	{
-	'MAINTAINER'	=> 'tels',
+	'MAINTAINER'	=> 'rafl',
 	'DISTRIBUTION'	=> 'FLORA/bignum-0.25.tar.gz',
 	'FILES'		=> q[dist/bignum],
 	'EXCLUDED'	=> [ qr{^inc/Module/}, qw(t/pod.t t/pod_cov.t) ],
@@ -848,7 +847,7 @@ use File::Glob qw(:case);
 
     'Math::BigInt' =>
 	{
-	'MAINTAINER'	=> 'tels',
+	'MAINTAINER'	=> 'rafl',
 	'DISTRIBUTION'	=> 'FLORA/Math-BigInt-1.96.tar.gz',
 	'FILES'		=> q[dist/Math-BigInt],
 	'EXCLUDED'	=> [ qr{^inc/},
@@ -862,7 +861,7 @@ use File::Glob qw(:case);
 
     'Math::BigInt::FastCalc' =>
 	{
-	'MAINTAINER'	=> 'tels',
+	'MAINTAINER'	=> 'rafl',
 	'DISTRIBUTION'	=> 'FLORA/Math-BigInt-FastCalc-0.22.tar.gz',
 	'FILES'		=> q[dist/Math-BigInt-FastCalc],
 	'EXCLUDED'	=> [ qr{^inc/},
@@ -889,7 +888,7 @@ use File::Glob qw(:case);
 
     'Math::BigRat' =>
 	{
-	'MAINTAINER'	=> 'tels',
+	'MAINTAINER'	=> 'rafl',
 	'DISTRIBUTION'	=> 'FLORA/Math-BigRat-0.26.tar.gz',
 	'FILES'		=> q[cpan/Math-BigRat],
 	'EXCLUDED'	=> [ qr{^inc/},
