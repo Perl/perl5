@@ -3629,7 +3629,11 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
 
                 /* Set aside the old stash, so we can reset isa caches on
                    its subclasses. */
-                old_stash = GvHV(dstr);
+                if((old_stash = GvHV(dstr)))
+                    /* Make sure we do not lose it early. */
+                    SvREFCNT_inc_simple_void_NN(
+                     sv_2mortal((SV *)old_stash)
+                    );
             }
         }
     }
