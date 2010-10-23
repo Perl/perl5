@@ -704,7 +704,7 @@ tries to be more precise.  For example, on a Solaris Sparc:
 
     # Perl5 prints:
     7.373504
-    7.375039999999999614
+    7.373503999999999614
 
 Notice how the first result looks better in Perl 5.
 
