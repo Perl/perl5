@@ -21,6 +21,8 @@ running out of stack space, or hitting file size limit.
 
 For example, to trap an interrupt signal, set up a handler like this:
 
+    our $shucks;
+
     sub catch_zap {
 	my $signame = shift;
 	$shucks++;
