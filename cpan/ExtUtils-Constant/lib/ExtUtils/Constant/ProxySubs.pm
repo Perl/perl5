@@ -163,8 +163,11 @@ sub WriteConstants {
     my $self = shift;
     my $ARGS = {@_};
 
-    my ($c_fh, $xs_fh, $c_subname, $xs_subname, $default_type, $package)
-	= @{$ARGS}{qw(C_FH XS_FH C_SUBNAME XS_SUBNAME DEFAULT_TYPE NAME)};
+    my ($c_fh, $xs_fh, $c_subname, $default_type, $package)
+	= @{$ARGS}{qw(C_FH XS_FH C_SUBNAME DEFAULT_TYPE NAME)};
+
+    my $xs_subname
+	= exists $ARGS->{XS_SUBNAME} ? $ARGS->{XS_SUBNAME} : 'constant';
 
     my $options = $ARGS->{PROXYSUBS};
     $options = {} unless ref $options;
@@ -184,8 +187,6 @@ sub WriteConstants {
     # Strictly it requires Perl_caller_cx
     carp ("PROXYSUBS options 'croak_on_error' requires v5.13.5 or later")
 	if $croak_on_error && $^V < v5.13.5;
-
-    $xs_subname ||= 'constant';
 
     # If anyone is insane enough to suggest a package name containing %
     my $package_sprintf_safe = $package;
@@ -556,6 +557,8 @@ EOBOOT
   }
 EOBOOT
     }
+
+    return if !defined $xs_subname;
 
     if ($croak_on_error || $autoload) {
         print $xs_fh $croak_on_error ? <<"EOC" : <<'EOA';
