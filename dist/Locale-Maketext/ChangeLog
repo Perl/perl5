@@ -1,6 +1,14 @@
 Revision history for Perl suite Locale::Maketext
 
-<date here>
+2010-10-20
+    * Release 1.17
+
+    Test release of 1.16_01, versioning even deprecated Guts modules.
+    This prevents CPAN upgrade circular heck. Thanks BinGOs
+
+    Tested version fix for CPAN by BinGOs. Bump to stable version and release to public
+	
+2010-10-07
     * Release 1.16
 
     Blead commit bac7bf8 - Copy @_ to @_ to de-alias passed variables

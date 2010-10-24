@@ -807,7 +807,7 @@ use File::Glob qw(:case);
     'Locale::Maketext' =>
 	{
 	'MAINTAINER'	=> 'ferreira',
-	'DISTRIBUTION'	=> 'FERREIRA/Locale-Maketext-1.16.tar.gz',
+	'DISTRIBUTION'	=> 'TODDR/Locale-Maketext-1.17.tar.gz',
 	'FILES'		=> q[dist/Locale-Maketext],
 	'EXCLUDED'	=> [ qw{perlcriticrc t/00_load.t t/pod.t} ],
 	'UPSTREAM'	=> 'blead',

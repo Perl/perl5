@@ -2,6 +2,8 @@ package Locale::Maketext::Guts;
 
 use Locale::Maketext;
 
+our $VERSION = '1.17';
+
 =head1 NAME
 
 Locale::Maketext::Guts - Deprecated module to load Locale::Maketext utf8 code

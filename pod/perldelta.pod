@@ -140,6 +140,10 @@ L<[perl #75448]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75448>.
 
 =item *
 
+C<Locale::Maketext> has been upgraded from 1.16 to 1.17
+
+=item *
+
 C<re> has been upgraded from 0.13 to 0.14, for the sake of the new
 C<use re "/flags"> pragma.
 
