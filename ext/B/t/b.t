@@ -12,7 +12,7 @@ BEGIN {
 $|  = 1;
 use warnings;
 use strict;
-use Test::More tests => 57;
+use Test::More;
 
 BEGIN { use_ok( 'B' ); }
 
@@ -157,8 +157,31 @@ is(B::ppname(0), "pp_null", "Testing ppname (this might break if opnames.h is ch
 is(B::opnumber("null"), 0, "Testing opnumber with opname (null)");
 is(B::opnumber("pp_null"), 0, "Testing opnumber with opname (pp_null)");
 like(B::hash("wibble"), qr/0x[0-9a-f]*/, "Testing B::hash()");
-is(B::cstring("wibble"), '"wibble"', "Testing B::cstring()");
-is(B::perlstring("wibble"), '"wibble"', "Testing B::perlstring()");
+{
+    is(B::cstring(undef), '0', "Testing B::cstring(undef)");
+    is(B::perlstring(undef), '0', "Testing B::perlstring(undef)");
+
+    my @common = map {eval $_, $_}
+	'"wibble"', '"\""', '"\'"', '"\\\\"', '"\\n\\r\\t\\b\\a\\f"', '"\\177"';
+
+    my $oct = sprintf "\\%03o", ord '?';
+    my @tests = (@common, '$_', '"$_"', '@_', '"@_"', '??N', qq{"$oct?N"},
+		 ord 'N' == 78 ? (chr 11, '"\v"'): ());
+    while (my ($test, $expect) = splice @tests, 0, 2) {
+	is(B::cstring($test), $expect, "B::cstring($expect)");
+    }
+
+    @tests = (@common, '$_', '"\$_"', '@_', '"\@_"', '??N', '"??N"',
+	      chr 256, '"\x{100}"', chr 65536, '"\x{10000}"',
+	      ord 'N' == 78 ? (chr 11, '"\013"'): ());
+    while (my ($test, $expect) = splice @tests, 0, 2) {
+	is(B::perlstring($test), $expect, "B::perlstring($expect)");
+	utf8::upgrade $test;
+	$expect =~ s/\\b/\\x\{8\}/g;
+	$expect =~ s/\\([0-7]{3})/sprintf "\\x\{%x\}", oct $1/eg;
+	is(B::perlstring($test), $expect, "B::perlstring($expect) (Unicode)");
+    }
+}
 is(B::class(bless {}, "Wibble::Bibble"), "Bibble", "Testing B::class()");
 is(B::cast_I32(3.14), 3, "Testing B::cast_I32()");
 is(B::opnumber("chop"), 38, "Testing opnumber with opname (chop)");
@@ -180,3 +203,5 @@ is(B::opnumber("chop"), 38, "Testing opnumber with opname (chop)");
     }
     ok( $ag < B::amagic_generation, "amagic_generation increments" );
 }
+
+done_testing();
