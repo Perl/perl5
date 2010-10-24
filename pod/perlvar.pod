@@ -1692,7 +1692,7 @@ following Perl expression, which uses a single-quoted string:
 	close $pipe or die "bad pipe: $?, $!";
     };
 
-After execution of this statement all 4 variables may have been set.
+After execution of this statement all four variables may have been set.
 
 C<$@> is set if the string to be C<eval>-ed did not compile (this may
 happen if C<open> or C<close> were imported with bad prototypes), or
