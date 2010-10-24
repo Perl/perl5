@@ -631,7 +631,7 @@ Perl_mro_package_moved(pTHX_ HV * const stash, const HV * const oldstash,
     /* Skip the entire loop if the hash is empty.   */
     if(oldstash && HvUSEDKEYS(oldstash)) { 
 	xhv = (XPVHV*)SvANY(oldstash);
-	seen = newHV();
+	seen = (HV *) sv_2mortal((SV *)newHV());
 
 	/* Iterate through entries in the oldstash, calling
 	    mro_package_moved(
@@ -734,7 +734,6 @@ Perl_mro_package_moved(pTHX_ HV * const stash, const HV * const oldstash,
 	}
     }
 
-    if(seen) SvREFCNT_dec((SV *)seen);
 }
 
 /*
