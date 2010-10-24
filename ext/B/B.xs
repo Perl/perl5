@@ -377,9 +377,7 @@ cstring(pTHX_ SV *sv, bool perlstyle)
 		sv_catpvs(sstr, "\\\\");
             /* trigraphs - bleagh */
             else if (!perlstyle && *s == '?' && len>=3 && s[1] == '?') {
-		char escbuff[5]; /* to fit backslash, 3 octals + trailing \0 */
-		const STRLEN oct_len = my_sprintf(escbuff, "\\%03o", '?');
-                sv_catpvn(sstr, escbuff, oct_len);
+                Perl_sv_catpvf(aTHX_ sstr, "\\%03o", '?');
             }
 	    else if (perlstyle && *s == '$')
 		sv_catpvs(sstr, "\\$");
@@ -408,10 +406,8 @@ cstring(pTHX_ SV *sv, bool perlstyle)
 	    else
 	    {
 		/* Don't want promotion of a signed -1 char in sprintf args */
-		char escbuff[5]; /* to fit backslash, 3 octals + trailing \0 */
 		const unsigned char c = (unsigned char) *s;
-		const STRLEN oct_len = my_sprintf(escbuff, "\\%03o", c);
-		sv_catpvn(sstr, escbuff, oct_len);
+		Perl_sv_catpvf(aTHX_ sstr, "\\%03o", c);
 	    }
 	    /* XXX Add line breaks if string is long */
 	}
