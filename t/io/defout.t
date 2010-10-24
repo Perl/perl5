@@ -18,12 +18,13 @@ plan tests => 16;
 my $stderr = *STDERR;
 select($stderr);
 $stderr = 1; # whoops, PL_defoutgv no longer a GV!
+# XXX It is a GV as of 5.13.7. Is this test file needed any more?
 
 # note that in the tests below, the return values aren't as important
 # as the fact that they don't crash
 
-ok !print(""), 'print';
-ok !select(), 'select';
+ok print(""), 'print';
+ok select(), 'select';
 $a = 'fooo';
 format STDERR =
 #@<<
@@ -31,11 +32,11 @@ $a;
 .
 ok ! write(), 'write';
 
-is($^, "",     '$^');
-is($~, "",     '$~');
-is($=, undef,  '$=');
-is($-, undef,  '$-');
-is($%, undef,  '$%');
+ok($^, '$^');
+ok($~, '$~');
+ok($=, '$=');
+ok($-, '$-');
+is($%, 0,      '$%');
 is($|, 0,      '$|');
 $^ = 1; pass '$^ = 1';
 $~ = 1; pass '$~ = 1';
@@ -43,5 +44,5 @@ $= = 1; pass '$= = 1';
 $- = 1; pass '$- = 1';
 $% = 1; pass '$% = 1';
 $| = 1; pass '$| = 1';
-ok !close(), 'close';
+ok close(), 'close';
 

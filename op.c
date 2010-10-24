@@ -7290,6 +7290,8 @@ Perl_ck_rvconst(pTHX_ register OP *o)
 #endif
 	    kid->op_private = 0;
 	    kid->op_ppaddr = PL_ppaddr[OP_GV];
+	    /* FAKE globs in the symbol table cause weird bugs (#77810) */
+	    SvFAKE_off(gv);
 	}
     }
     return o;

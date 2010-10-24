@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 219 );
+plan( tests => 221 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -31,6 +31,34 @@ is(ref(\$foo), 'GLOB');
 
 is($foo, '*main::bar');
 is(ref(\$foo), 'GLOB');
+
+{
+ no warnings;
+ ${\*$foo} = undef;
+ is(ref(\$foo), 'GLOB', 'no type coersion when assigning to *{} retval');
+ $::{phake} = *bar;
+ is(
+   \$::{phake}, \*{"phake"},
+   'symbolic *{} returns symtab entry when FAKE'
+ );
+ ${\*{"phake"}} = undef;
+ is(
+   ref(\$::{phake}), 'GLOB',
+  'no type coersion when assigning to retval of symbolic *{}'
+ );
+ $::{phaque} = *bar;
+ eval '
+   is(
+     \$::{phaque}, \*phaque,
+     "compile-time *{} returns symtab entry when FAKE"
+   );
+   ${\*phaque} = undef;
+ ';
+ is(
+   ref(\$::{phaque}), 'GLOB',
+  'no type coersion when assigning to retval of compile-time *{}'
+ );
+}
 
 # type coersion on substitutions that match
 $a = *main::foo;
@@ -683,21 +711,13 @@ EOF
     'PVLV: assigning undef to the glob warns';
   }
 
-  # Neither should number assignment...
-  *$_ = 1;
-  is $_, "*main::1", "PVLV: integer-to-glob assignment assigns a glob";
-  *$_ = 2.0;
-  is $_, "*main::2", "PVLV: float-to-glob assignment assigns a glob";
-
-  # Nor reference assignment.
-  *$_ = \*thit;
-  is $_, "*main::thit", "PVLV: globref-to-glob assignment assigns a glob";
+  # Neither should reference assignment.
   *$_ = [];
-  is $_, "*main::thit", "PVLV: arrayref assignment assigns to the AV slot";
+  is $_, "*main::hon", "PVLV: arrayref assignment assigns to the AV slot";
 
   # Concatenation should still work.
   ok eval { $_ .= 'thlew' }, 'PVLV concatenation does not die' or diag $@;
-  is $_, '*main::thitthlew', 'PVLV concatenation works';
+  is $_, '*main::honthlew', 'PVLV concatenation works';
 
   # And we should be able to overwrite it with a string, number, or refer-
   # ence, too, if we omit the *.

@@ -213,11 +213,19 @@ PP(pp_rv2gv)
 		}
 		sv = MUTABLE_SV(gv_fetchsv(sv, GV_ADD, SVt_PVGV));
 	    }
+	    /* FAKE globs in the symbol table cause weird bugs (#77810) */
+	    if (sv) SvFAKE_off(sv);
 	}
     }
     if (PL_op->op_private & OPpLVAL_INTRO)
 	save_gp(MUTABLE_GV(sv), !(PL_op->op_flags & OPf_SPECIAL));
-    SETs(sv);
+    if (sv && SvFAKE(sv)) {
+	SV *newsv = sv_newmortal();
+	sv_setsv(newsv, sv);
+	SvFAKE_off(newsv);
+	SETs(newsv);
+    }
+    else SETs(sv);
     RETURN;
 }
 
