@@ -1973,18 +1973,20 @@ Deprecated in Perl 5.12.
 =item $]
 X<$]> X<$OLD_PERL_VERSION>
 
+See C<$^V> for a more modern representation of the Perl version that allows
+accurate string comparisons.
+
 The version + patchlevel / 1000 of the Perl interpreter. This variable
 can be used to determine whether the Perl interpreter executing a
 script is in the right range of versions:
 
     warn "No checksumming!\n" if $] < 3.019;
 
+The floating point representation can sometimes lead to inaccurate
+numeric comparisons.
+
 See also the documentation of C<use VERSION> and C<require VERSION>
 for a convenient way to fail if the running Perl interpreter is too old.
-
-The floating point representation can sometimes lead to inaccurate
-numeric comparisons. See C<$^V> for a more modern representation of
-the Perl version that allows accurate string comparisons.
 
 Mnemonic: Is this version of perl in the right bracket?
 
