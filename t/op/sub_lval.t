@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>74;
+plan tests=>76;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -527,8 +527,7 @@ TODO: {
     is($blah, 8, "yada");
 }
 
-TODO: {
-    local $TODO = "bug #23790";
+{ # bug #23790
     my @arr  = qw /one two three/;
     my $line = "zero";
     sub lval_array () : lvalue {@arr}
@@ -538,6 +537,13 @@ TODO: {
     }
 
     is($line, "zeroonetwothree");
+
+    sub trythislval { scalar(@_)."x".join "", @_ }
+    is(trythislval(lval_array()), "3xonetwothree");
+
+    sub changeme { $_[2] = "free" }
+    changeme(lval_array);
+    is("@arr", "one two free");
 }
 
 {
