@@ -1348,6 +1348,7 @@ PP(pp_leavewrite)
     SV **newsp;
     I32 gimme;
     register PERL_CONTEXT *cx;
+    OP *retop;
 
     if (!io || !(ofp = IoOFP(io)))
         goto forget_top;
@@ -1428,6 +1429,7 @@ PP(pp_leavewrite)
   forget_top:
     POPBLOCK(cx,PL_curpm);
     POPFORMAT(cx);
+    retop = cx->blk_sub.retop;
     LEAVE;
 
     fp = IoOFP(io);
@@ -1460,7 +1462,7 @@ PP(pp_leavewrite)
     PUTBACK;
     PERL_UNUSED_VAR(newsp);
     PERL_UNUSED_VAR(gimme);
-    return cx->blk_sub.retop;
+    return retop;
 }
 
 PP(pp_prtf)

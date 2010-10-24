@@ -509,6 +509,52 @@ test_op_linklist_describe(OP *start)
     return SvPVX(rv);
 }
 
+/** establish_cleanup operator, ripped off from Scope::Cleanup **/
+
+STATIC void
+THX_run_cleanup(pTHX_ void *cleanup_code_ref)
+{
+    dSP;
+    ENTER;
+    SAVETMPS;
+    PUSHMARK(SP);
+    call_sv((SV*)cleanup_code_ref, G_VOID|G_DISCARD);
+    FREETMPS;
+    LEAVE;
+}
+
+STATIC OP *
+THX_pp_establish_cleanup(pTHX)
+{
+    dSP;
+    SV *cleanup_code_ref;
+    cleanup_code_ref = newSVsv(POPs);
+    SAVEFREESV(cleanup_code_ref);
+    SAVEDESTRUCTOR_X(THX_run_cleanup, cleanup_code_ref);
+    if(GIMME_V != G_VOID) PUSHs(&PL_sv_undef);
+    RETURN;
+}
+
+STATIC OP *
+THX_ck_entersub_establish_cleanup(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
+{
+    OP *pushop, *argop, *estop;
+    ck_entersub_args_proto(entersubop, namegv, ckobj);
+    pushop = cUNOPx(entersubop)->op_first;
+    if(!pushop->op_sibling) pushop = cUNOPx(pushop)->op_first;
+    argop = pushop->op_sibling;
+    pushop->op_sibling = argop->op_sibling;
+    argop->op_sibling = NULL;
+    op_free(entersubop);
+    NewOpSz(0, estop, sizeof(UNOP));
+    estop->op_type = OP_RAND;
+    estop->op_ppaddr = THX_pp_establish_cleanup;
+    cUNOPx(estop)->op_flags = OPf_KIDS;
+    cUNOPx(estop)->op_first = argop;
+    PL_hints |= HINT_BLOCK_SCOPE;
+    return estop;
+}
+
 /** RPN keyword parser **/
 
 #define sv_is_glob(sv) (SvTYPE(sv) == SVt_PVGV)
@@ -2349,4 +2395,16 @@ BOOT:
     hintkey_blockasexpr_sv = newSVpvs_share("XS::APItest/blockasexpr");
     next_keyword_plugin = PL_keyword_plugin;
     PL_keyword_plugin = my_keyword_plugin;
+}
+
+void
+establish_cleanup(...)
+PROTOTYPE: $
+CODE:
+    croak("establish_cleanup called as a function");
+
+BOOT:
+{
+    CV *estcv = get_cv("XS::APItest::establish_cleanup", 0);
+    cv_set_call_checker(estcv, THX_ck_entersub_establish_cleanup, (SV*)estcv);
 }

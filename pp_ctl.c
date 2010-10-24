@@ -1653,6 +1653,9 @@ Perl_die_unwind(pTHX_ SV *msv)
 	    SV *namesv;
 	    register PERL_CONTEXT *cx;
 	    SV **newsp;
+	    COP *oldcop;
+	    JMPENV *restartjmpenv;
+	    OP *restartop;
 
 	    if (cxix < cxstack_ix)
 		dounwind(cxix);
@@ -1667,6 +1670,9 @@ Perl_die_unwind(pTHX_ SV *msv)
 	    }
 	    POPEVAL(cx);
 	    namesv = cx->blk_eval.old_namesv;
+	    oldcop = cx->blk_oldcop;
+	    restartjmpenv = cx->blk_eval.cur_top_env;
+	    restartop = cx->blk_eval.retop;
 
 	    if (gimme == G_SCALAR)
 		*++newsp = &PL_sv_undef;
@@ -1678,7 +1684,7 @@ Perl_die_unwind(pTHX_ SV *msv)
 	     * XXX it might be better to find a way to avoid messing with
 	     * PL_curcop in save_re_context() instead, but this is a more
 	     * minimal fix --GSAR */
-	    PL_curcop = cx->blk_oldcop;
+	    PL_curcop = oldcop;
 
 	    if (optype == OP_REQUIRE) {
                 const char* const msg = SvPVx_nolen_const(exceptsv);
@@ -1699,9 +1705,8 @@ Perl_die_unwind(pTHX_ SV *msv)
 	    else {
 		sv_setsv(ERRSV, exceptsv);
 	    }
-	    assert(CxTYPE(cx) == CXt_EVAL);
-	    PL_restartjmpenv = cx->blk_eval.cur_top_env;
-	    PL_restartop = cx->blk_eval.retop;
+	    PL_restartjmpenv = restartjmpenv;
+	    PL_restartop = restartop;
 	    JMPENV_JUMP(3);
 	    /* NOTREACHED */
 	}
