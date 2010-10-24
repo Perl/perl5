@@ -811,16 +811,10 @@ save_BEGINs()
 SV *
 cstring(sv)
 	SV *	sv
+    ALIAS:
+	perlstring = 1
     CODE:
-	RETVAL = cstring(aTHX_ sv, 0);
-    OUTPUT:
-	RETVAL
-
-SV *
-perlstring(sv)
-	SV *	sv
-    CODE:
-	RETVAL = cstring(aTHX_ sv, 1);
+	RETVAL = cstring(aTHX_ sv, ix);
     OUTPUT:
 	RETVAL
 
