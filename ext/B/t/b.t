@@ -156,7 +156,14 @@ is(ref B::sv_undef(), "B::SPECIAL", "B::sv_undef()");
 is(B::ppname(0), "pp_null", "Testing ppname (this might break if opnames.h is changed)");
 is(B::opnumber("null"), 0, "Testing opnumber with opname (null)");
 is(B::opnumber("pp_null"), 0, "Testing opnumber with opname (pp_null)");
-like(B::hash("wibble"), qr/0x[0-9a-f]*/, "Testing B::hash()");
+{
+    my $hash = B::hash("wibble");
+    like($hash, qr/\A0x[0-9a-f]+\z/, "Testing B::hash(\"wibble\")");
+    unlike($hash, qr/\A0x0+\z/, "Testing B::hash(\"wibble\")");
+
+    like(B::hash("\0" x $_), qr/\A0x0+\z/, "Testing B::hash(\"0\" x $_)")
+	 for 0..19;
+}
 {
     is(B::cstring(undef), '0', "Testing B::cstring(undef)");
     is(B::perlstring(undef), '0', "Testing B::perlstring(undef)");
