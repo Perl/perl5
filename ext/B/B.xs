@@ -320,7 +320,7 @@ make_cop_io_object(pTHX_ COP *cop)
     Perl_emulate_cop_io(aTHX_ cop, value);
 
     if(SvOK(value)) {
-	return make_temp_object(aTHX_ newSVsv(value));
+	return make_sv_object(aTHX_ NULL, value);
     } else {
 	SvREFCNT_dec(value);
 	return make_sv_object(aTHX_ NULL, NULL);
