@@ -406,7 +406,7 @@ C<$^D = 10> or C<$^D = "st">.
 Mnemonic: value of B<-D> switch.
 
 =item ${^ENCODING}
-X<$^ENCODING>
+X<${^ENCODING}>
 
 The I<object reference> to the C<Encode> object that is used to convert
 the source code to Unicode. Thanks to this variable your Perl script
@@ -445,6 +445,7 @@ is package-specific, and must be declared or given a full package name
 if not in package main when running under C<strict 'vars'>.
 
 =item $^H
+X<$^H>
 
 WARNING: This variable is strictly for internal use only. Its availability,
 behavior, and contents are subject to change without notice.
@@ -490,6 +491,7 @@ version of the same lexical pragma:
 This variable was added in Perl 5.003.
 
 =item %^H
+X<%^H>
 
 The C<%^H> hash provides the same scoping semantic as C<$^H>. This makes it
 useful for implementation of lexically scoped pragmas. See L<perlpragma>.
@@ -582,6 +584,7 @@ between the variants.
 This variable was added in Perl 5.003.
 
 =item ${^OPEN}
+X<${^OPEN}>
 
 An internal variable used by PerlIO. A string in two parts, separated
 by a C<\0> byte, the first part describes the input layers, the second
@@ -652,8 +655,6 @@ run-time only.  This is a new mechanism and the details may change.
 See also L<perldebguts>.
 
 =item %SIG
-
-=item $SIG{expr}
 X<%SIG>
 
 The hash C<%SIG> contains signal handlers for signals. For example:
@@ -760,6 +761,7 @@ epoch (beginning of 1970). The values returned by the B<-M>, B<-A>,
 and B<-C> filetests are based on this value.
 
 =item ${^TAINT}
+X<${^TAINT}>
 
 Reflects if taint mode is on or off. 1 for on (the program was run with
 B<-T>), 0 for off, -1 when only taint warnings are enabled (i.e. with
@@ -770,6 +772,7 @@ This variable is read-only.
 This variable was added in Perl 5.8.
 
 =item ${^UNICODE}
+X<${^UNICODE}>
 
 Reflects certain Unicode settings of Perl.  See L<perlrun>
 documentation for the C<-C> switch for more information about
@@ -780,6 +783,7 @@ This variable is set during Perl startup and is thereafter read-only.
 This variable was added in Perl 5.8.2.
 
 =item ${^UTF8CACHE}
+X<${^UTF8CACHE}>
 
 This variable controls the state of the internal UTF-8 offset caching code.
 1 for on (the default), 0 for off, -1 to debug the caching code by checking
@@ -788,6 +792,7 @@ all its results against linear scans, and panicking on any discrepancy.
 This variable was added in Perl 5.8.9.
 
 =item ${^UTF8LOCALE}
+X<${^UTF8LOCALE}>
 
 This variable indicates whether a UTF-8 locale was detected by perl at
 startup. This information is used by perl when it's in
@@ -828,7 +833,7 @@ This variable was added in Perl 5.6.
 Mnemonic: use ^V for Version Control.
 
 =item ${^WIN32_SLOPPY_STAT}
-X<sitecustomize> X<sitecustomize.pl>
+X<${^WIN32_SLOPPY_STAT}> X<sitecustomize> X<sitecustomize.pl>
 
 If this variable is set to a true value, then C<stat()> on Windows will
 not try to open the file. This means that the link count cannot be
@@ -1010,7 +1015,7 @@ This variable is read-only and dynamically-scoped.
 =item $PREMATCH
 
 =item $`
-X<$`> X<$PREMATCH>
+X<$`> X<$PREMATCH> X<${^PREMATCH}>
 
 The string preceding whatever was matched by the last successful
 pattern match, not counting any matches hidden within a BLOCK or C<eval>
@@ -1028,7 +1033,7 @@ This variable is read-only and dynamically-scoped.
 Mnemonic: C<`> often precedes a quoted string.
 
 =item ${^PREMATCH}
-X<${^PREMATCH}>
+X<$`> X<${^PREMATCH}>
 
 This is similar to C<$`> ($PREMATCH) except that it does not incur the
 performance penalty associated with that variable, and is only guaranteed
@@ -1042,7 +1047,7 @@ This variable is read-only and dynamically-scoped.
 =item $POSTMATCH
 
 =item $'
-X<$'> X<$POSTMATCH>
+X<$'> X<$POSTMATCH> X<${^POSTMATCH}> X<@->
 
 The string following whatever was matched by the last successful
 pattern match (not counting any matches hidden within a BLOCK or C<eval()>
@@ -1064,7 +1069,7 @@ This variable is read-only and dynamically-scoped.
 Mnemonic: C<'> often follows a quoted string.
 
 =item ${^POSTMATCH}
-X<${^POSTMATCH}>
+X<${^POSTMATCH}> X<$'> X<$POSTMATCH>
 
 This is similar to C<$'> (C<$POSTMATCH>) except that it does not incur the
 performance penalty associated with that variable, and is only guaranteed
@@ -1093,7 +1098,7 @@ Mnemonic: be positive and forward looking.
 =item $LAST_SUBMATCH_RESULT
 
 =item $^N
-X<$^N>
+X<$^N> X<$LAST_SUBMATCH_RESULT>
 
 The text matched by the used group most-recently closed (i.e. the group
 with the rightmost closing parenthesis) of the last successful search
@@ -1133,7 +1138,7 @@ This variable was added in Perl 5.6.
 =item %LAST_PAREN_MATCH
 
 =item %+
-X<%+>
+X<%+> X<%LAST_PAREN_MATCH>
 
 Similar to C<@+>, the C<%+> hash allows access to the named capture
 buffers, should they exist, in the last successful match in the
@@ -1203,8 +1208,10 @@ After a match against some variable C<$var>:
 
 This variable was added in Perl 5.6.
 
+=item %LAST_MATCH_START
+
 =item %-
-X<%->
+X<%-> X<%LAST_MATCH_START>
 
 Similar to C<%+>, this variable allows access to the named capture groups
 in the last successful match in the currently active dynamic scope. To
@@ -1415,7 +1422,7 @@ when doing edit-in-place processing with B<-i>. Useful when you have
 to do a lot of inserting and don't want to keep modifying C<$_>. See
 L<perlrun> for the B<-i> switch.
 
-=item Handle->output_field_separator EXPR
+=item Handle->output_field_separator( EXPR )
 
 =item $OUTPUT_FIELD_SEPARATOR
 
@@ -1429,7 +1436,7 @@ value is printed between each of print's arguments. Default is C<undef>.
 
 Mnemonic: what is printed when there is a "," in your print statement.
 
-=item HANDLE->input_line_number(EXPR)
+=item HANDLE->input_line_number( EXPR )
 
 =item $INPUT_LINE_NUMBER
 
@@ -1464,7 +1471,7 @@ which handle you last accessed.
 
 Mnemonic: many programs use "." to mean the current line number.
 
-=item HANDLE->input_record_separator(EXPR)
+=item HANDLE->input_record_separator( EXPR )
 
 =item $INPUT_RECORD_SEPARATOR
 
@@ -1510,7 +1517,7 @@ size to zero or less will cause reading in the (rest of the) whole file.
 
 On VMS, record reads are done with the equivalent of C<sysread>,
 so it's best not to mix record and non-record reads on the same
-file.  (This is unlikely to be a problem, because any file you'd
+file. (This is unlikely to be a problem, because any file you'd
 want to read in record mode is probably unusable in line mode.)
 Non-VMS systems do normal I/O, so it's safe to mix record and
 non-record reads of a file.
@@ -1519,11 +1526,7 @@ See also L<perlport/"Newlines">.  Also see C<$.>.
 
 Mnemonic: / delimits line boundaries when quoting poetry.
 
-=item HANDLE->autoflush(EXPR)
-
-=item $OUTPUT_AUTOFLUSH
-
-=item Handle->output_record_separator EXPR
+=item Handle->output_record_separator( EXPR )
 
 =item $OUTPUT_RECORD_SEPARATOR
 
@@ -1538,6 +1541,10 @@ value is printed after the last of print's arguments. Default is C<undef>.
 Mnemonic: you set C<$\> instead of adding "\n" at the end of the print.
 Also, it's just like C<$/>, but it's what you get "back" from Perl.
 
+=item HANDLE->autoflush( EXPR )
+
+=item $OUTPUT_AUTOFLUSH
+
 =item $|
 X<$|> X<autoflush> X<flush> X<$OUTPUT_AUTOFLUSH>
 
@@ -1546,11 +1553,11 @@ print on the currently selected output channel.  Default is 0
 (regardless of whether the channel is really buffered by the system or
 not; C<$|> tells you only whether you've asked Perl explicitly to
 flush after each write). STDOUT will typically be line buffered if
-output is to the terminal and block buffered otherwise.  Setting this
+output is to the terminal and block buffered otherwise. Setting this
 variable is useful primarily when you are outputting to a pipe or
 socket, such as when you are running a Perl program under B<rsh> and
-want to see the output as it's happening.  This has no effect on input
-buffering.  See L<perlfunc/getc> for that.  See L<perldoc/select> on
+want to see the output as it's happening. This has no effect on input
+buffering.  See L<perlfunc/getc> for that. See L<perldoc/select> on
 how to select the output channel. See also L<IO::Handle>.
 
 Mnemonic: when you want your pipes to be piping hot.
@@ -1566,10 +1573,6 @@ See L<perlform> for more information about Perl's formats.
 
 =over 8
 
-=item HANDLE->format_formfeed(EXPR)
-
-=item $FORMAT_FORMFEED
-
 =item $ACCUMULATOR
 
 =item $^A
@@ -1581,6 +1584,10 @@ C<$^A>.  After calling its format, C<write()> prints out the contents
 of C<$^A> and empties. So you never really see the contents of C<$^A>
 unless you call C<formline()> yourself and then look at it. See
 L<perlform> and L<perlfunc/formline()>.
+
+=item HANDLE->format_formfeed(EXPR)
+
+=item $FORMAT_FORMFEED
 
 =item $^L
 X<$^L> X<$FORMAT_FORMFEED>
@@ -1717,8 +1724,6 @@ C<$^E>, and C<$?>.
 
 =over 8
 
-=item $EXTENDED_OS_ERROR
-
 =item ${^CHILD_ERROR_NATIVE}
 X<$^CHILD_ERROR_NATIVE>
 
@@ -1732,6 +1737,8 @@ Under VMS this reflects the actual VMS exit status; i.e. it is the
 same as C<$?> when the pragma C<use vmsish 'status'> is in effect.
 
 This variable was added in Perl 5.8.9.
+
+=item $EXTENDED_OS_ERROR
 
 =item $^E
 X<$^E> X<$EXTENDED_OS_ERROR>
@@ -1838,7 +1845,7 @@ Mnemonic: What just went bang?
 =item %ERRNO
 
 =item %!
-X<%!>
+X<%!> X<%OS_ERROR> X<%ERRNO>
 
 Each element of C<%!> has a true value only if C<$!> is set to that
 value. For example, C<$!{ENOENT}> is true if and only if the current
@@ -1916,8 +1923,10 @@ See L<perldiag> for details about error messages.
 
 =over 8
 
+=item $OFMT
+
 =item $#
-X<$#>
+X<$#> X<$OFMT>
 
 C<$#> was a variable that you could be use to format printed numbers.
 After a deprecation cycle, its magic was removed in Perl 5.10 and
@@ -1943,8 +1952,10 @@ Deprecated in Perl 5.
 
 Removed in Perl 5.10.
 
+=item $ARRAY_BASE
+
 =item $[
-X<$[>
+X<$[> X<$ARRAY_BASE>
 
 This variable stores the index of the first element in an array, and
 of the first character in a substring. You use to be able to assign to
@@ -1957,8 +1968,10 @@ This variable is read-only.
 
 Deprecated in Perl 5.12.
 
+=item $OLD_PERL_VERSION
+
 =item $]
-X<$]>
+X<$]> X<$OLD_PERL_VERSION>
 
 The version + patchlevel / 1000 of the Perl interpreter. This variable
 can be used to determine whether the Perl interpreter executing a
