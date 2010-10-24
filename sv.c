@@ -4033,11 +4033,12 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 		if (len > 1 && name[len-2] == ':' && name[len-1] == ':') {
 		    /* Set aside the old stash, so we can reset isa caches
 		       on its subclasses. */
-		    if((old_stash = GvHV(dstr)));
+		    if((old_stash = GvHV(dstr))) {
 			/* Make sure we do not lose it early. */
 			SvREFCNT_inc_simple_void_NN(
 			 sv_2mortal((SV *)old_stash)
 			);
+		    }
 		    reset_isa = TRUE;
 		}
 
