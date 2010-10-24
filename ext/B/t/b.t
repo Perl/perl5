@@ -183,6 +183,16 @@ like(B::hash("wibble"), qr/0x[0-9a-f]*/, "Testing B::hash()");
 	is(B::perlstring($test), $expect, "B::perlstring($expect) (Unicode)");
     }
 }
+{
+    my @tests = (map {eval(qq{"$_"}), $_} '\\n', '\\r', '\\t',
+		 '\\b', '\\a', '\\f', '\\000', '\\\'', '?'), '"', '"',
+		 ord 'N' == 78 ? (chr 11, q{'\013"'}, "\177", "'\\177'") : ();
+
+    while (my ($test, $expect) = splice @tests, 0, 2) {
+	is(B::cchar($test), "'${expect}'", "B::cchar(qq{$expect})");
+    }
+}
+
 is(B::class(bless {}, "Wibble::Bibble"), "Bibble", "Testing B::class()");
 is(B::cast_I32(3.14), 3, "Testing B::cast_I32()");
 is(B::opnumber("chop"), 38, "Testing opnumber with opname (chop)");
