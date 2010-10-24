@@ -781,11 +781,9 @@ hash(sv)
     CODE:
 	STRLEN len;
 	U32 hash = 0;
-	char hexhash[19]; /* must fit "0xffffffffffffffff" plus trailing \0 */
 	const char *s = SvPV(sv, len);
 	PERL_HASH(hash, s, len);
-	len = my_sprintf(hexhash, "0x%"UVxf, (UV)hash);
-	ST(0) = newSVpvn_flags(hexhash, len, SVs_TEMP);
+	ST(0) = sv_2mortal(Perl_newSVpvf(aTHX_ "0x%"UVxf, (UV)hash));
 
 #define cast_I32(foo) (I32)foo
 IV
