@@ -418,42 +418,37 @@ cstring(pTHX_ SV *sv, bool perlstyle)
 static SV *
 cchar(pTHX_ SV *sv)
 {
-    SV *sstr = newSVpvs("'");
+    SV *sstr = newSVpvs_flags("'", SVs_TEMP);
     const char *s = SvPV_nolen(sv);
+    /* Don't want promotion of a signed -1 char in sprintf args */
+    const unsigned char c = (unsigned char) *s;
 
-    if (*s == '\'')
+    if (c == '\'')
 	sv_catpvs(sstr, "\\'");
-    else if (*s == '\\')
+    else if (c == '\\')
 	sv_catpvs(sstr, "\\\\");
 #ifdef EBCDIC
-    else if (isPRINT(*s))
+    else if (isPRINT(c))
 #else
-    else if (*s >= ' ' && *s < 127)
+    else if (c >= ' ' && c < 127)
 #endif /* EBCDIC */
 	sv_catpvn(sstr, s, 1);
-    else if (*s == '\n')
+    else if (c == '\n')
 	sv_catpvs(sstr, "\\n");
-    else if (*s == '\r')
+    else if (c == '\r')
 	sv_catpvs(sstr, "\\r");
-    else if (*s == '\t')
+    else if (c == '\t')
 	sv_catpvs(sstr, "\\t");
-    else if (*s == '\a')
+    else if (c == '\a')
 	sv_catpvs(sstr, "\\a");
-    else if (*s == '\b')
+    else if (c == '\b')
 	sv_catpvs(sstr, "\\b");
-    else if (*s == '\f')
+    else if (c == '\f')
 	sv_catpvs(sstr, "\\f");
-    else if (*s == '\v')
+    else if (c == '\v')
 	sv_catpvs(sstr, "\\v");
     else
-    {
-	/* no trigraph support */
-	char escbuff[5]; /* to fit backslash, 3 octals + trailing \0 */
-	/* Don't want promotion of a signed -1 char in sprintf args */
-	unsigned char c = (unsigned char) *s;
-	const STRLEN oct_len = my_sprintf(escbuff, "\\%03o", c);
-	sv_catpvn(sstr, escbuff, oct_len);
-    }
+	Perl_sv_catpvf(aTHX_ sstr, "\\%03o", c);
     sv_catpvs(sstr, "'");
     return sstr;
 }
@@ -818,10 +813,8 @@ cstring(sv)
 SV *
 cchar(sv)
 	SV *	sv
-    CODE:
-	RETVAL = cchar(aTHX_ sv);
-    OUTPUT:
-	RETVAL
+    PPCODE:
+	PUSHs(cchar(aTHX_ sv));
 
 void
 threadsv_names()
