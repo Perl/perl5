@@ -568,6 +568,7 @@ static SV *hintkey_swaptwostmts_sv, *hintkey_looprest_sv;
 static SV *hintkey_scopelessblock_sv;
 static SV *hintkey_stmtasexpr_sv, *hintkey_stmtsasexpr_sv;
 static SV *hintkey_loopblock_sv, *hintkey_blockasexpr_sv;
+static SV *hintkey_swaplabel_sv, *hintkey_labelconst_sv;
 static int (*next_keyword_plugin)(pTHX_ char *, STRLEN, OP **);
 
 /* low-level parser helpers */
@@ -804,6 +805,21 @@ static OP *THX_parse_keyword_blockasexpr(pTHX)
     return o;
 }
 
+#define parse_keyword_swaplabel() THX_parse_keyword_swaplabel(aTHX)
+static OP *THX_parse_keyword_swaplabel(pTHX)
+{
+    OP *sop = parse_barestmt(0);
+    SV *label = parse_label(PARSE_OPTIONAL);
+    if (label) sv_2mortal(label);
+    return newSTATEOP(0, label ? savepv(SvPVX(label)) : NULL, sop);
+}
+
+#define parse_keyword_labelconst() THX_parse_keyword_labelconst(aTHX)
+static OP *THX_parse_keyword_labelconst(pTHX)
+{
+    return newSVOP(OP_CONST, 0, parse_label(0));
+}
+
 /* plugin glue */
 
 #define keyword_active(hintkey_sv) THX_keyword_active(aTHX_ hintkey_sv)
@@ -859,6 +875,14 @@ static int my_keyword_plugin(pTHX_
     } else if(keyword_len == 11 && strnEQ(keyword_ptr, "blockasexpr", 11) &&
 		    keyword_active(hintkey_blockasexpr_sv)) {
 	*op_ptr = parse_keyword_blockasexpr();
+	return KEYWORD_PLUGIN_EXPR;
+    } else if(keyword_len == 9 && strnEQ(keyword_ptr, "swaplabel", 9) &&
+		    keyword_active(hintkey_swaplabel_sv)) {
+	*op_ptr = parse_keyword_swaplabel();
+	return KEYWORD_PLUGIN_STMT;
+    } else if(keyword_len == 10 && strnEQ(keyword_ptr, "labelconst", 10) &&
+		    keyword_active(hintkey_labelconst_sv)) {
+	*op_ptr = parse_keyword_labelconst();
 	return KEYWORD_PLUGIN_EXPR;
     } else {
 	return next_keyword_plugin(aTHX_ keyword_ptr, keyword_len, op_ptr);
@@ -2396,6 +2420,8 @@ BOOT:
     hintkey_stmtsasexpr_sv = newSVpvs_share("XS::APItest/stmtsasexpr");
     hintkey_loopblock_sv = newSVpvs_share("XS::APItest/loopblock");
     hintkey_blockasexpr_sv = newSVpvs_share("XS::APItest/blockasexpr");
+    hintkey_swaplabel_sv = newSVpvs_share("XS::APItest/swaplabel");
+    hintkey_labelconst_sv = newSVpvs_share("XS::APItest/labelconst");
     next_keyword_plugin = PL_keyword_plugin;
     PL_keyword_plugin = my_keyword_plugin;
 }

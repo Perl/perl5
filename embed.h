@@ -379,6 +379,7 @@
 #define parse_barestmt(a)	Perl_parse_barestmt(aTHX_ a)
 #define parse_block(a)		Perl_parse_block(aTHX_ a)
 #define parse_fullstmt(a)	Perl_parse_fullstmt(aTHX_ a)
+#define parse_label(a)		Perl_parse_label(aTHX_ a)
 #define parse_stmtseq(a)	Perl_parse_stmtseq(aTHX_ a)
 #define pmop_dump(a)		Perl_pmop_dump(aTHX_ a)
 #define pop_scope()		Perl_pop_scope(aTHX)

@@ -625,6 +625,7 @@ AMpd	|void	|lex_read_space	|U32 flags
 : Public parser API
 AMpd	|OP*	|parse_block	|U32 flags
 AMpd	|OP*	|parse_barestmt	|U32 flags
+AMpd	|SV*	|parse_label	|U32 flags
 AMpd	|OP*	|parse_fullstmt	|U32 flags
 AMpd	|OP*	|parse_stmtseq	|U32 flags
 : Used in various files

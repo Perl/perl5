@@ -4182,6 +4182,16 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
 	};
 #endif
 
+#define word_takes_any_delimeter(p,l) S_word_takes_any_delimeter(p,l)
+STATIC bool
+S_word_takes_any_delimeter(char *p, STRLEN len)
+{
+    return (len == 1 && strchr("msyq", p[0])) ||
+	   (len == 2 && (
+	    (p[0] == 't' && p[1] == 'r') ||
+	    (p[0] == 'q' && strchr("qwxr", p[1]))));
+}
+
 /*
   yylex
 
@@ -6149,10 +6159,7 @@ Perl_yylex(pTHX)
 	s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
 
 	/* Some keywords can be followed by any delimiter, including ':' */
-	anydelim = ((len == 1 && strchr("msyq", PL_tokenbuf[0])) ||
-	       (len == 2 && ((PL_tokenbuf[0] == 't' && PL_tokenbuf[1] == 'r') ||
-			     (PL_tokenbuf[0] == 'q' &&
-			      strchr("qwxr", PL_tokenbuf[1])))));
+	anydelim = word_takes_any_delimeter(PL_tokenbuf, len);
 
 	/* x::* is just a word, unless x is "CORE" */
 	if (!anydelim && *s == ':' && s[1] == ':' && strNE(PL_tokenbuf, "CORE"))
@@ -14071,6 +14078,86 @@ Perl_parse_barestmt(pTHX_ U32 flags)
     if (flags)
 	Perl_croak(aTHX_ "Parsing code internal error (%s)", "parse_barestmt");
     return parse_recdescent_for_op(GRAMBARESTMT);
+}
+
+/*
+=for apidoc Amx|SV *|parse_label|U32 flags
+
+Parse a single label, possibly optional, of the type that may prefix a
+Perl statement.  It is up to the caller to ensure that the dynamic parser
+state (L</PL_parser> et al) is correctly set to reflect the source of
+the code to be parsed.  If I<flags> includes C<PARSE_OPTIONAL> then the
+label is optional, otherwise it is mandatory.
+
+The name of the label is returned in the form of a fresh scalar.  If an
+optional label is absent, a null pointer is returned.
+
+If an error occurs in parsing, which can only occur if the label is
+mandatory, a valid label is returned anyway.  The error is reflected in
+the parser state, normally resulting in a single exception at the top
+level of parsing which covers all the compilation errors that occurred.
+
+=cut
+*/
+
+SV *
+Perl_parse_label(pTHX_ U32 flags)
+{
+    if (flags & ~PARSE_OPTIONAL)
+	Perl_croak(aTHX_ "Parsing code internal error (%s)", "parse_label");
+    if (PL_lex_state == LEX_KNOWNEXT) {
+	PL_parser->yychar = yylex();
+	if (PL_parser->yychar == LABEL) {
+	    char *lpv = pl_yylval.pval;
+	    STRLEN llen = strlen(lpv);
+	    SV *lsv;
+	    PL_parser->yychar = YYEMPTY;
+	    lsv = newSV_type(SVt_PV);
+	    SvPV_set(lsv, lpv);
+	    SvCUR_set(lsv, llen);
+	    SvLEN_set(lsv, llen+1);
+	    SvPOK_on(lsv);
+	    return lsv;
+	} else {
+	    yyunlex();
+	    goto no_label;
+	}
+    } else {
+	char *s, *t;
+	U8 c;
+	STRLEN wlen, bufptr_pos;
+	lex_read_space(0);
+	t = s = PL_bufptr;
+	c = (U8)*s;
+	if (!isIDFIRST_A(c))
+	    goto no_label;
+	do {
+	    c = (U8)*++t;
+	} while(isWORDCHAR_A(c));
+	wlen = t - s;
+	if (word_takes_any_delimeter(s, wlen))
+	    goto no_label;
+	bufptr_pos = s - SvPVX(PL_linestr);
+	PL_bufptr = t;
+	lex_read_space(LEX_KEEP_PREVIOUS);
+	t = PL_bufptr;
+	s = SvPVX(PL_linestr) + bufptr_pos;
+	if (t[0] == ':' && t[1] != ':') {
+	    PL_oldoldbufptr = PL_oldbufptr;
+	    PL_oldbufptr = s;
+	    PL_bufptr = t+1;
+	    return newSVpvn(s, wlen);
+	} else {
+	    PL_bufptr = s;
+	    no_label:
+	    if (flags & PARSE_OPTIONAL) {
+		return NULL;
+	    } else {
+		qerror(Perl_mess(aTHX_ "Parse error"));
+		return newSVpvs("x");
+	    }
+	}
+    }
 }
 
 /*

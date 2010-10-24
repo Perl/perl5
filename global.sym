@@ -424,6 +424,7 @@ Perl_pad_push
 Perl_parse_barestmt
 Perl_parse_block
 Perl_parse_fullstmt
+Perl_parse_label
 Perl_parse_stmtseq
 perl_alloc
 perl_construct
