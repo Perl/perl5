@@ -162,7 +162,8 @@ like(B::hash("wibble"), qr/0x[0-9a-f]*/, "Testing B::hash()");
     is(B::perlstring(undef), '0', "Testing B::perlstring(undef)");
 
     my @common = map {eval $_, $_}
-	'"wibble"', '"\""', '"\'"', '"\\\\"', '"\\n\\r\\t\\b\\a\\f"', '"\\177"';
+	'"wibble"', '"\""', '"\'"', '"\\\\"', '"\\n\\r\\t\\b\\a\\f"', '"\\177"',
+	    '"\000"', '"\000\000"', '"\000Bing\000"';
 
     my $oct = sprintf "\\%03o", ord '?';
     my @tests = (@common, '$_', '"$_"', '@_', '"@_"', '??N', qq{"$oct?N"},
