@@ -6,45 +6,45 @@ perlvar - Perl predefined variables
 
 =head2 The Syntax of Variable Names
 
-Variable names in Perl can have several formats.  Usually, they
+Variable names in Perl can have several formats. Usually, they
 must begin with a letter or underscore, in which case they can be
 arbitrarily long (up to an internal limit of 251 characters) and
 may contain letters, digits, underscores, or the special sequence
-C<::> or C<'>.  In this case, the part before the last C<::> or
+C<::> or C<'>. In this case, the part before the last C<::> or
 C<'> is taken to be a I<package qualifier>; see L<perlmod>.
 
 Perl variable names may also be a sequence of digits or a single
-punctuation or control character.  These names are all reserved for
+punctuation or control character. These names are all reserved for
 special uses by Perl; for example, the all-digits names are used
 to hold data captured by backreferences after a regular expression
-match.  Perl has a special syntax for the single-control-character
+match. Perl has a special syntax for the single-control-character
 names: It understands C<^X> (caret C<X>) to mean the control-C<X>
-character.  For example, the notation C<$^W> (dollar-sign caret
+character. For example, the notation C<$^W> (dollar-sign caret
 C<W>) is the scalar variable whose name is the single character
-control-C<W>.  This is better than typing a literal control-C<W>
+control-C<W>. This is better than typing a literal control-C<W>
 into your program.
 
 Since Perl 5.6, Perl variable names may be alphanumeric
 strings that begin with control characters (or better yet, a caret).
 These variables must be written in the form C<${^Foo}>; the braces
-are not optional.  C<${^Foo}> denotes the scalar variable whose
-name is a control-C<F> followed by two C<o>'s.  These variables are
+are not optional. C<${^Foo}> denotes the scalar variable whose
+name is a control-C<F> followed by two C<o>'s. These variables are
 reserved for future special uses by Perl, except for the ones that
-begin with C<^_> (control-underscore or caret-underscore).  No
+begin with C<^_> (control-underscore or caret-underscore). No
 control-character name that begins with C<^_> will acquire a special
 meaning in any future version of Perl; such names may therefore be
-used safely in programs.  C<$^_> itself, however, I<is> reserved.
+used safely in programs. C<$^_> itself, however, I<is> reserved.
 
 Perl identifiers that begin with digits, control characters, or
 punctuation characters are exempt from the effects of the C<package>
 declaration and are always forced to be in package C<main>; they are
-also exempt from C<strict 'vars'> errors.  A few other names are also
+also exempt from C<strict 'vars'> errors. A few other names are also
 exempt in these ways:
 
-	ENV		STDIN
-	INC		STDOUT
-	ARGV		STDERR
-	ARGVOUT		_
+	ENV      STDIN
+	INC      STDOUT
+	ARGV     STDERR
+	ARGVOUT
 	SIG
 
 In particular, the special C<${^_XYZ}> variables are always taken
@@ -53,12 +53,11 @@ presently in scope.
 
 =head1 SPECIAL VARIABLES
 
-The following names have special meaning to Perl.  Most punctuation
-names have reasonable mnemonics, or analogs in the shells. 
-Nevertheless, if you wish to use long variable names, you need only
-say
+The following names have special meaning to Perl. Most punctuation
+names have reasonable mnemonics, or analogs in the shells.
+Nevertheless, if you wish to use long variable names, you need only say:
 
-    use English;
+	use English;
 
 at the top of your program. This aliases all the short names to the long
 names in the current package. Some even have medium names, generally
@@ -66,13 +65,14 @@ borrowed from B<awk>. To avoid a performance hit, if you don't need the
 C<$PREMATCH>, C<$MATCH>, or C<$POSTMATCH> it's best to use the C<English>
 module without them:
 
-    use English '-no_match_vars';
+	use English '-no_match_vars';
 
-Before you continue, note the sort order for variables. In general, we first list
-the variables in order of their type, scalars first, then arrays and hashes, followed
-by the odd barewords (i.e. filehandles). Within each variable type, we sort the
-names in lexicographical order. However, C<$_> gets pride of place since its
-extra special.
+Before you continue, note the sort order for variables. In general, we
+first list the variables in case-insensitive, almost-lexigraphical
+order (ignoring the C<{> or C<^> preceding words, as in C<${^UNICODE}>
+or C<$^T>), although C<$_> and C<@_> move up to the top of the pile.
+For variables with the same identifier, we list it in order of scalar,
+array, hash, and bareword.
 
 =head2 General Variables
 
@@ -86,20 +86,19 @@ X<$_> X<$ARG>
 The default input and pattern-searching space. The following pairs are
 equivalent:
 
-    while (<>) {...}	# equivalent only in while!
-    while (defined($_ = <>)) {...}
+	while (<>) {...}    # equivalent only in while!
+	while (defined($_ = <>)) {...}
 
-    /^Subject:/
-    $_ =~ /^Subject:/
+	/^Subject:/
+	$_ =~ /^Subject:/
 
-    tr/a-z/A-Z/
-    $_ =~ tr/a-z/A-Z/
+	tr/a-z/A-Z/
+	$_ =~ tr/a-z/A-Z/
 
-    chomp
-    chomp($_)
+	chomp
+	chomp($_)
 
-Here are the places where Perl will assume C<$_> even if you
-don't use it:
+Here are the places where Perl will assume C<$_> even if you don't use it:
 
 =over 3
 
@@ -117,7 +116,6 @@ unlink, unpack.
 
 All file tests (C<-f>, C<-d>) except for C<-t>, which defaults to STDIN.
 See L<perlfunc/-X>
-
 
 =item *
 
@@ -152,48 +150,16 @@ declaring C<our $_> restores the global C<$_> in the current scope.
 
 Mnemonic: underline is understood in certain operations.
 
-=item $a
+=item @ARG
 
-=item $b
-X<$a> X<$b>
+=item @_
+X<@_> X<@ARG>
 
-Special package variables when using C<sort()>, see L<perlfunc/sort>.
-Because of this specialness C<$a> and C<$b> don't need to be declared
-(using C<use vars>, or C<our()>) even when using the C<strict 'vars'>
-pragma. Don't lexicalize them with C<my $a> or C<my $b> if you want to
-be able to use them in the C<sort()> comparison block or function.
+Within a subroutine the array C<@_> contains the parameters passed to
+that subroutine. Inside a subroutine, C<@_> is the default array for
+the array operators C<push>, C<pop>, C<shift>, and C<unshift>.
 
-=item $SUBSCRIPT_SEPARATOR
-
-=item $SUBSEP
-
-=item $;
-X<$;> X<$SUBSEP> X<SUBSCRIPT_SEPARATOR>
-
-The subscript separator for multidimensional array emulation. If you
-refer to a hash element as
-
-    $foo{$a,$b,$c}
-
-it really means
-
-    $foo{join($;, $a, $b, $c)}
-
-But don't put
-
-    @foo{$a,$b,$c}	# a slice--note the @
-
-which means
-
-    ($foo{$a},$foo{$b},$foo{$c})
-
-Default is "\034", the same as SUBSEP in B<awk>.  If your
-keys contain binary data there might not be any safe value for C<$;>.
-
-Consider using "real" multidimensional arrays as described
-in L<perllol>.
-
-Mnemonic: comma (the syntactic subscript separator) is a semi-semicolon. 
+See L<perlsub>.
 
 =item $LIST_SEPARATOR
 
@@ -204,23 +170,13 @@ When an array or an array slice is interpolated into a double-quoted
 string or a similar context such as C</.../>, its elements are
 separated by this value. Default is a space. For example, this:
 
-    print "The array is: @array\n";
+	print "The array is: @array\n";
 
 is equivalent to this:
 
-    print "The array is: " . join($", @array) . "\n";
+	print "The array is: " . join($", @array) . "\n";
 
 Mnemonic: works in double-quoted context.
-
-=item ${^ENCODING}
-X<$^ENCODING>
-
-The I<object reference> to the C<Encode> object that is used to convert
-the source code to Unicode. Thanks to this variable your Perl script
-does not have to be written in UTF-8. Default is I<undef>. The direct
-manipulation of this variable is highly discouraged.
-
-This variable was added in Perl 5.8.2.
 
 =item $PROCESS_ID
 
@@ -240,41 +196,6 @@ consistent across threads. If you want to call the underlying C<getpid()>,
 you may use the CPAN module C<Linux::Pid>.
 
 Mnemonic: same as shells.
-  
-=item $REAL_USER_ID
-
-=item $UID
-
-=item $<
-X<< $< >> X<$UID> X<$REAL_USER_ID>
-
-The real uid of this process. You can change both the real uid and the
-effective uid at the same time by using C<POSIX::setuid()>. Since
-changes to C<< $< >> require a system call, check C<$!> after a change
-attempt to detect any possible errors.
-
-Mnemonic: it's the uid you came I<from>, if you're running setuid.
-
-=item $EFFECTIVE_USER_ID
-
-=item $EUID
-
-=item $>
-X<< $> >> X<$EUID> X<$EFFECTIVE_USER_ID>
-
-The effective uid of this process. For example:
-
-    $< = $>;            # set real to effective uid
-    ($<,$>) = ($>,$<);  # swap real and effective uids
-
-You can change both the effective uid and the real uid at the same
-time by using C<POSIX::setuid()>. Changes to C<< $> >> require a check
-to C<$!> to detect any possible errors after an attempted change.
-
-C<< $< >> and C<< $> >> can be swapped only on machines
-supporting C<setreuid()>.
-
-Mnemonic: it's the uid you went I<to>, if you're running setuid.
 
 =item $REAL_GROUP_ID
 
@@ -374,14 +295,92 @@ If the program has been given to perl via the switches C<-e> or C<-E>,
 C<$0> will contain the string C<"-e">.
 
 On Linux as of perl 5.14 the legacy process name will be set with
-L<prctl(2)>, in addition to altering the POSIX name via C<argv[0]> as
+C<prctl(2)>, in addition to altering the POSIX name via C<argv[0]> as
 perl has done since version 4.000. Now system utilities that read the
 legacy process name such as ps, top and killall will recognize the
 name you set when assigning to C<$0>. The string you supply will be
 cut off at 16 bytes, this is a limitation imposed by Linux.
 
 Mnemonic: same as B<sh> and B<ksh>.
-  
+
+=item $SUBSCRIPT_SEPARATOR
+
+=item $SUBSEP
+
+=item $;
+X<$;> X<$SUBSEP> X<SUBSCRIPT_SEPARATOR>
+
+The subscript separator for multidimensional array emulation. If you
+refer to a hash element as
+
+	$foo{$a,$b,$c}
+
+it really means
+
+	$foo{join($;, $a, $b, $c)}
+
+But don't put
+
+	@foo{$a,$b,$c}	# a slice--note the @
+
+which means
+
+	($foo{$a},$foo{$b},$foo{$c})
+
+Default is "\034", the same as SUBSEP in B<awk>.  If your keys contain
+binary data there might not be any safe value for C<$;>.
+
+Consider using "real" multidimensional arrays as described
+in L<perllol>.
+
+Mnemonic: comma (the syntactic subscript separator) is a semi-semicolon.
+
+=item $REAL_USER_ID
+
+=item $UID
+
+=item $<
+X<< $< >> X<$UID> X<$REAL_USER_ID>
+
+The real uid of this process. You can change both the real uid and the
+effective uid at the same time by using C<POSIX::setuid()>. Since
+changes to C<< $< >> require a system call, check C<$!> after a change
+attempt to detect any possible errors.
+
+Mnemonic: it's the uid you came I<from>, if you're running setuid.
+
+=item $EFFECTIVE_USER_ID
+
+=item $EUID
+
+=item $>
+X<< $> >> X<$EUID> X<$EFFECTIVE_USER_ID>
+
+The effective uid of this process. For example:
+
+	$< = $>;            # set real to effective uid
+	($<,$>) = ($>,$<);  # swap real and effective uids
+
+You can change both the effective uid and the real uid at the same
+time by using C<POSIX::setuid()>. Changes to C<< $> >> require a check
+to C<$!> to detect any possible errors after an attempted change.
+
+C<< $< >> and C<< $> >> can be swapped only on machines
+supporting C<setreuid()>.
+
+Mnemonic: it's the uid you went I<to>, if you're running setuid.
+
+=item $a
+
+=item $b
+X<$a> X<$b>
+
+Special package variables when using C<sort()>, see L<perlfunc/sort>.
+Because of this specialness C<$a> and C<$b> don't need to be declared
+(using C<use vars>, or C<our()>) even when using the C<strict 'vars'>
+pragma. Don't lexicalize them with C<my $a> or C<my $b> if you want to
+be able to use them in the C<sort()> comparison block or function.
+
 =item $COMPILING
 
 =item $^C
@@ -406,6 +405,23 @@ C<$^D = 10> or C<$^D = "st">.
 
 Mnemonic: value of B<-D> switch.
 
+=item ${^ENCODING}
+X<$^ENCODING>
+
+The I<object reference> to the C<Encode> object that is used to convert
+the source code to Unicode. Thanks to this variable your Perl script
+does not have to be written in UTF-8. Default is I<undef>. The direct
+manipulation of this variable is highly discouraged.
+
+This variable was added in Perl 5.8.2.
+
+=item %ENV
+X<%ENV>
+
+The hash C<%ENV> contains your current environment. Setting a
+value in C<ENV> changes the environment for any child processes
+you subsequently C<fork()> off.
+
 =item $SYSTEM_FD_MAX
 
 =item $^F
@@ -419,6 +435,14 @@ closed before the C<open()> is attempted). The close-on-exec
 status of a file descriptor will be decided according to the value of
 C<$^F> when the corresponding file, pipe, or socket was opened, not the
 time of the C<exec()>.
+
+=item @F
+X<@F>
+
+The array C<@F> contains the fields of each line read in when autosplit
+mode is turned on. See L<perlrun> for the B<-a> switch.  This array
+is package-specific, and must be declared or given a full package name
+if not in package main when running under C<strict 'vars'>.
 
 =item $^H
 
@@ -442,12 +466,12 @@ for instance, the C<use strict> pragma.
 The contents should be an integer; different bits of it are used for
 different pragmatic flags. Here's an example:
 
-    sub add_100 { $^H |= 0x100 }
+	sub add_100 { $^H |= 0x100 }
 
-    sub foo {
-	BEGIN { add_100() }
-	bar->baz($boon);
-    }
+	sub foo {
+		BEGIN { add_100() }
+		bar->baz($boon);
+	}
 
 Consider what happens during execution of the BEGIN block. At this point
 the BEGIN block has already been compiled, but the body of C<foo()> is still
@@ -456,12 +480,12 @@ the body of C<foo()> is being compiled.
 
 Substitution of the above BEGIN block with:
 
-    BEGIN { require strict; strict->import('vars') }
+	BEGIN { require strict; strict->import('vars') }
 
 demonstrates how C<use strict 'vars'> is implemented.  Here's a conditional
 version of the same lexical pragma:
 
-    BEGIN { require strict; strict->import('vars') if $condition }
+	BEGIN { require strict; strict->import('vars') if $condition }
 
 This variable was added in Perl 5.003.
 
@@ -471,6 +495,42 @@ The C<%^H> hash provides the same scoping semantic as C<$^H>. This makes it
 useful for implementation of lexically scoped pragmas. See L<perlpragma>.
 
 This variable was added in Perl 5.6.
+
+=item @INC
+X<@INC>
+
+The array C<@INC> contains the list of places that the C<do EXPR>,
+C<require>, or C<use> constructs look for their library files.  It
+initially consists of the arguments to any B<-I> command-line
+switches, followed by the default Perl library, probably
+F</usr/local/lib/perl>, followed by ".", to represent the current
+directory.  ("." will not be appended if taint checks are enabled,
+either by C<-T> or by C<-t>.)  If you need to modify this at runtime,
+you should use the C<use lib> pragma to get the machine-dependent
+library properly loaded also:
+
+	use lib '/mypath/libdir/';
+	use SomeMod;
+
+You can also insert hooks into the file inclusion system by putting Perl
+code directly into C<@INC>. Those hooks may be subroutine references, array
+references or blessed objects. See L<perlfunc/require> for details.
+
+=item %INC
+X<%INC>
+
+The hash C<%INC> contains entries for each filename included via the
+C<do>, C<require>, or C<use> operators. The key is the filename
+you specified (with module names converted to pathnames), and the
+value is the location of the file found. The C<require>
+operator uses this hash to determine whether a particular file has
+already been included.
+
+If the file was loaded via a hook (e.g. a subroutine reference, see
+L<perlfunc/require> for a description of these hooks), this hook is
+by default inserted into C<%INC> in place of a filename. Note, however,
+that the hook may have set the C<%INC> entry by itself to provide some more
+specific info.
 
 =item $INPLACE_EDIT
 
@@ -491,7 +551,7 @@ as an emergency memory pool after C<die()>ing. Suppose that your Perl
 were compiled with C<-DPERL_EMERGENCY_SBRK> and used Perl's malloc.
 Then
 
-    $^M = 'a' x (1 << 16);
+	$^M = 'a' x (1 << 16);
 
 would allocate a 64K buffer for use in an emergency. See the
 F<INSTALL> file in the Perl distribution for information on how to
@@ -591,67 +651,6 @@ Some bits may be relevant at compile-time only, some at
 run-time only.  This is a new mechanism and the details may change.
 See also L<perldebguts>.
 
-=item @F
-X<@F>
-
-The array C<@F> contains the fields of each line read in when autosplit
-mode is turned on. See L<perlrun> for the B<-a> switch.  This array
-is package-specific, and must be declared or given a full package name
-if not in package main when running under C<strict 'vars'>.
-
-=item @INC
-X<@INC>
-
-The array C<@INC> contains the list of places that the C<do EXPR>,
-C<require>, or C<use> constructs look for their library files.  It
-initially consists of the arguments to any B<-I> command-line
-switches, followed by the default Perl library, probably
-F</usr/local/lib/perl>, followed by ".", to represent the current
-directory.  ("." will not be appended if taint checks are enabled,
-either by C<-T> or by C<-t>.)  If you need to modify this at runtime,
-you should use the C<use lib> pragma to get the machine-dependent
-library properly loaded also:
-
-    use lib '/mypath/libdir/';
-    use SomeMod;
-
-You can also insert hooks into the file inclusion system by putting Perl
-code directly into C<@INC>. Those hooks may be subroutine references, array
-references or blessed objects. See L<perlfunc/require> for details.
-
-=item @ARG
-
-=item @_
-X<@_> X<@ARG>
-
-Within a subroutine the array C<@_> contains the parameters passed to that
-subroutine. See L<perlsub>.
-
-=item %INC
-X<%INC>
-
-The hash C<%INC> contains entries for each filename included via the
-C<do>, C<require>, or C<use> operators. The key is the filename
-you specified (with module names converted to pathnames), and the
-value is the location of the file found. The C<require>
-operator uses this hash to determine whether a particular file has
-already been included.
-
-If the file was loaded via a hook (e.g. a subroutine reference, see
-L<perlfunc/require> for a description of these hooks), this hook is
-by default inserted into C<%INC> in place of a filename. Note, however,
-that the hook may have set the C<%INC> entry by itself to provide some more
-specific info.
-
-=item %ENV
-
-=item $ENV{expr}
-X<%ENV>
-
-The hash C<%ENV> contains your current environment. Setting a
-value in C<ENV> changes the environment for any child processes
-you subsequently C<fork()> off.
-
 =item %SIG
 
 =item $SIG{expr}
@@ -659,18 +658,18 @@ X<%SIG>
 
 The hash C<%SIG> contains signal handlers for signals. For example:
 
-    sub handler {	# 1st argument is signal name
-	my($sig) = @_;
-	print "Caught a SIG$sig--shutting down\n";
-	close(LOG);
-	exit(0);
-    }
+	sub handler {   # 1st argument is signal name
+		my($sig) = @_;
+		print "Caught a SIG$sig--shutting down\n";
+		close(LOG);
+		exit(0);
+		}
 
-    $SIG{'INT'}  = \&handler;
-    $SIG{'QUIT'} = \&handler;
-    ...
-    $SIG{'INT'}  = 'DEFAULT';	# restore default action
-    $SIG{'QUIT'} = 'IGNORE';	# ignore SIGQUIT
+	$SIG{'INT'}  = \&handler;
+	$SIG{'QUIT'} = \&handler;
+	...
+	$SIG{'INT'}  = 'DEFAULT';   # restore default action
+	$SIG{'QUIT'} = 'IGNORE';    # ignore SIGQUIT
 
 Using a value of C<'IGNORE'> usually has the effect of ignoring the
 signal, except for the C<CHLD> signal. See L<perlipc> for more about
@@ -678,10 +677,10 @@ this special case.
 
 Here are some other examples:
 
-    $SIG{"PIPE"} = "Plumber";   # assumes main::Plumber (not recommended)
-    $SIG{"PIPE"} = \&Plumber;   # just fine; assume current Plumber
-    $SIG{"PIPE"} = *Plumber;    # somewhat esoteric
-    $SIG{"PIPE"} = Plumber();   # oops, what did Plumber() return??
+	$SIG{"PIPE"} = "Plumber";   # assumes main::Plumber (not recommended)
+	$SIG{"PIPE"} = \&Plumber;   # just fine; assume current Plumber
+	$SIG{"PIPE"} = *Plumber;    # somewhat esoteric
+	$SIG{"PIPE"} = Plumber();   # oops, what did Plumber() return??
 
 Be sure not to use a bareword as the name of a signal handler,
 lest you inadvertently call it.
@@ -701,13 +700,13 @@ ordinary printing of warnings to C<STDERR> to be suppressed. You can
 use this to save warnings in a variable, or turn warnings into fatal
 errors, like this:
 
-    local $SIG{__WARN__} = sub { die $_[0] };
-    eval $proggie;
+	local $SIG{__WARN__} = sub { die $_[0] };
+	eval $proggie;
 
 As the C<'IGNORE'> hook is not supported by C<__WARN__>, you can
 disable warnings using the empty subroutine:
 
-    local $SIG{__WARN__} = sub {};
+	local $SIG{__WARN__} = sub {};
 
 The routine indicated by C<$SIG{__DIE__}> is called when a fatal
 exception is about to be thrown. The error message is passed as the
@@ -733,28 +732,23 @@ evaluate Perl code from such a handler will probably result in a
 segfault. This means that warnings or errors that result from parsing
 Perl should be used with extreme caution, like this:
 
-    require Carp if defined $^S;
-    Carp::confess("Something wrong") if defined &Carp::confess;
-    die "Something wrong, but could not load Carp to give backtrace...
-         To see backtrace try starting Perl with -MCarp switch";
+	require Carp if defined $^S;
+	Carp::confess("Something wrong") if defined &Carp::confess;
+	die "Something wrong, but could not load Carp to give backtrace...
+	   To see backtrace try starting Perl with -MCarp switch";
 
 Here the first line will load C<Carp> I<unless> it is the parser who
 called the handler. The second line will print backtrace and die if
 C<Carp> was available. The third line will be executed only if C<Carp> was
 not available.
 
+Having to even think about the C<$^S> variable in your exception
+handlers is simply wrong.  C<$SIG{__DIE__}> as currently implemented
+invites grievous and difficult to track down errors. Avoid it
+and use an C<END{}> or CORE::GLOBAL::die override instead.
+
 See L<perlfunc/die>, L<perlfunc/warn>, L<perlfunc/eval>, and
 L<warnings> for additional information.
-
-=back
-
-=head2 Names that are no longer special
-
-These variables had special meaning in prior versions of Perl but now
-have no effect and will cause warnings if used. They are included
-here for historical reference.
-
-=over 8
 
 =item $BASETIME
 
@@ -769,7 +763,7 @@ and B<-C> filetests are based on this value.
 
 Reflects if taint mode is on or off. 1 for on (the program was run with
 B<-T>), 0 for off, -1 when only taint warnings are enabled (i.e. with
-B<-t> or B<-TU>). 
+B<-t> or B<-TU>).
 
 This variable is read-only.
 
@@ -779,7 +773,7 @@ This variable was added in Perl 5.8.
 
 Reflects certain Unicode settings of Perl.  See L<perlrun>
 documentation for the C<-C> switch for more information about
-the possible values. 
+the possible values.
 
 This variable is set during Perl startup and is thereafter read-only.
 
@@ -817,12 +811,12 @@ as a v-string.
 C<$^V> can be used to determine whether the Perl interpreter executing
 a script is in the right range of versions. For example:
 
-    warn "Hashes not randomized!\n" if !$^V or $^V lt v5.8.1
+	warn "Hashes not randomized!\n" if !$^V or $^V lt v5.8.1
 
 To convert C<$^V> into its string representation use C<sprintf()>'s
 C<"%vd"> conversion:
 
-    printf "version is v%vd\n", $^V;  # Perl's version
+	printf "version is v%vd\n", $^V;  # Perl's version
 
 See the documentation of C<use VERSION> and C<require VERSION>
 for a convenient way to fail if the running Perl interpreter is too old.
@@ -869,7 +863,7 @@ value may or may not include a version number.
 You usually can use the value of C<$^X> to re-invoke an independent
 copy of the same perl that is currently running, e.g.,
 
-  @first_run = `$^X -le "print int rand 100 for 1..100"`;
+	@first_run = `$^X -le "print int rand 100 for 1..100"`;
 
 But recall that not all operating systems support forking or
 capturing of the output of commands, so this complex statement
@@ -881,12 +875,13 @@ executable files do not require use of the suffix when invoking
 a command. To convert the value of C<$^X> to a path name, use the
 following statements:
 
-  # Build up a set of file names (not command names).
-  use Config;
-  $this_perl = $^X;
-  if ($^O ne 'VMS')
-     {$this_perl .= $Config{_exe}
-          unless $this_perl =~ m/$Config{_exe}$/i;}
+	# Build up a set of file names (not command names).
+	use Config;
+	my $this_perl = $^X;
+	if ($^O ne 'VMS') {
+		$this_perl .= $Config{_exe}
+		  unless $this_perl =~ m/$Config{_exe}$/i;
+		}
 
 Because many operating systems permit anyone with read access to
 the Perl program file to make a copy of it, patch the copy, and
@@ -896,11 +891,12 @@ copy referenced by C<$^X>. The following statements accomplish
 this goal, and produce a pathname that can be invoked as a
 command or referenced as a file.
 
-  use Config;
-  $secure_perl_path = $Config{perlpath};
-  if ($^O ne 'VMS')
-     {$secure_perl_path .= $Config{_exe}
-          unless $secure_perl_path =~ m/$Config{_exe}$/i;}
+	use Config;
+	my $secure_perl_path = $Config{perlpath};
+	if ($^O ne 'VMS') {
+		$secure_perl_path .= $Config{_exe}
+			unless $secure_perl_path =~ m/$Config{_exe}$/i;
+		}
 
 =back
 
@@ -914,40 +910,58 @@ you should check the match result before using them. For instance:
 		print "I found $1 and $2\n";
 		}
 
-These variables are read-only and dynamically-scoped, unless we note 
+These variables are read-only and dynamically-scoped, unless we note
 otherwise.
 
-The dynamic nature of the regular expression variables means that their value
-is limited to the block that they are in, as demonstrated by this bit of code:
+The dynamic nature of the regular expression variables means that
+their value is limited to the block that they are in, as demonstrated
+by this bit of code:
 
 	my $outer = 'Wallace and Grommit';
 	my $inner = 'Mutt and Jeff';
-	
+
 	my $pattern = qr/(\S+) and (\S+)/;
-	
+
 	sub show_n { print "\$1 is $1; \$2 is $2\n" }
-	
+
 	{
 	OUTER:
 		show_n() if $outer =~ m/$pattern/;
-	
+
 		INNER: {
 			show_n() if $inner =~ m/$pattern/;
 			}
-		
+
 		show_n();
 	}
 
-The output shows that while in the C<OUTER> block, the values of C<$1> and C<$2>
-are from the match against C<$outer>. Inside the C<INNER> block, the values of 
-C<$1> and C<$2> are from the match against C<$inner>, but only until the end of the 
-block (i.e. the dynamic scope). After the C<INNER> block completes, the values of
-C<$1> and C<$2> return to the values for the match against C<$outer> even though
+The output shows that while in the C<OUTER> block, the values of C<$1>
+and C<$2> are from the match against C<$outer>. Inside the C<INNER>
+block, the values of C<$1> and C<$2> are from the match against
+C<$inner>, but only until the end of the block (i.e. the dynamic
+scope). After the C<INNER> block completes, the values of C<$1> and
+C<$2> return to the values for the match against C<$outer> even though
 we have not made another match:
 
 	$1 is Wallace; $2 is Grommit
 	$1 is Mutt; $2 is Jeff
 	$1 is Wallace; $2 is Grommit
+
+Due to an unfortunate accident of Perl's implementation, C<use
+English> imposes a considerable performance penalty on all regular
+expression matches in a program because it uses the C<$`>, C<$&>, and
+C<$'>, regardless of whether they occur in the scope of C<use
+English>. For that reason, saying C<use English> in libraries is
+strongly discouraged unless you import it without the match variables:
+
+	use English '-no_match_vars'
+
+The C<Devel::NYTProf> module can help you find uses of these
+problematic match variables in your code.
+
+Since Perl 5.10, you can use the C</p> match operator flag and the
+C<${^PREMATCH}>, C<${^MATCH}>, and C<${^POSTMATCH}> variables instead
+so you only suffer the performance penalties.
 
 =over 8
 
@@ -972,16 +986,15 @@ any matches hidden within a BLOCK or C<eval()> enclosed by the current
 BLOCK).
 
 The use of this variable anywhere in a program imposes a considerable
-performance penalty on all regular expression matches. See L</BUGS>.
-To avoid this penatly, you can extract the same substring by
-using L</@->. Starting with Perl 5.10, you can use the </p> match flag
-and the C<${^MATCH}> variable to do the same thing for particular 
-match operations.
+performance penalty on all regular expression matches. To avoid this
+penalty, you can extract the same substring by using L</@->. Starting
+with Perl 5.10, you can use the </p> match flag and the C<${^MATCH}>
+variable to do the same thing for particular match operations.
 
 This variable is read-only and dynamically-scoped.
 
 Mnemonic: like C<&> in some editors.
- 
+
 =item ${^MATCH}
 X<${^MATCH}>
 
@@ -1001,14 +1014,14 @@ X<$`> X<$PREMATCH>
 
 The string preceding whatever was matched by the last successful
 pattern match, not counting any matches hidden within a BLOCK or C<eval>
-enclosed by the current BLOCK.  
+enclosed by the current BLOCK.
 
 The use of this variable anywhere in a program imposes a considerable
-performance penalty on all regular expression matches. See L</BUGS>.
-To avoid this penatly, you can extract the same substring by
-using L</@->. Starting with Perl 5.10, you can use the </p> match flag
-and the C<${^PREMATCH}> variable to do the same thing for particular 
-match operations.
+performance penalty on all regular expression matches. To avoid this
+penalty, you can extract the same substring by using L</@->. Starting
+with Perl 5.10, you can use the </p> match flag and the
+C<${^PREMATCH}> variable to do the same thing for particular match
+operations.
 
 This variable is read-only and dynamically-scoped.
 
@@ -1035,15 +1048,15 @@ The string following whatever was matched by the last successful
 pattern match (not counting any matches hidden within a BLOCK or C<eval()>
 enclosed by the current BLOCK). Example:
 
-    local $_ = 'abcdefghi';
-    /def/;
-    print "$`:$&:$'\n";  	# prints abc:def:ghi
+	local $_ = 'abcdefghi';
+	/def/;
+	print "$`:$&:$'\n";  	# prints abc:def:ghi
 
 The use of this variable anywhere in a program imposes a considerable
-performance penalty on all regular expression matches. See L</BUGS>.
-To avoid this penatly, you can extract the same substring by
+performance penalty on all regular expression matches.
+To avoid this penalty, you can extract the same substring by
 using L</@->. Starting with Perl 5.10, you can use the </p> match flag
-and the C<${^POSTMATCH}> variable to do the same thing for particular 
+and the C<${^POSTMATCH}> variable to do the same thing for particular
 match operations.
 
 This variable is read-only and dynamically-scoped.
@@ -1071,7 +1084,7 @@ The text matched by the last bracket of the last successful search pattern.
 This is useful if you don't know which one of a set of alternative patterns
 matched. For example:
 
-    /Version: (.*)|Revision: (.*)/ && ($rev = $+);
+	/Version: (.*)|Revision: (.*)/ && ($rev = $+);
 
 This variable is read-only and dynamically-scoped.
 
@@ -1090,7 +1103,7 @@ This is primarily used inside C<(?{...})> blocks for examining text
 recently matched. For example, to effectively capture text to a variable
 (in addition to C<$1>, C<$2>, etc.), replace C<(...)> with
 
-     (?:(...)(?{ $var = $^N }))
+	(?:(...)(?{ $var = $^N }))
 
 By setting and then using C<$var> in this way relieves you from having to
 worry about exactly which numbered set of parentheses they are.
@@ -1128,7 +1141,7 @@ currently active dynamic scope.
 
 For example, C<$+{foo}> is equivalent to C<$1> after the following match:
 
-  'foo' =~ /(?<foo>foo)/;
+	'foo' =~ /(?<foo>foo)/;
 
 The keys of the C<%+> hash list only the names of buffers that have
 captured (and that are thus associated to defined values).
@@ -1215,10 +1228,10 @@ Here's an example:
 
 would print out:
 
-    $-{A}[0] : '1'
-    $-{A}[1] : '3'
-    $-{B}[0] : '2'
-    $-{B}[1] : '4'
+	$-{A}[0] : '1'
+	$-{A}[1] : '3'
+	$-{B}[0] : '2'
+	$-{B}[1] : '4'
 
 The keys of the C<%-> hash correspond to all buffer names found in
 the regular expression.
@@ -1275,15 +1288,15 @@ although this is less efficient than using the regular built-in
 variables. (Summary lines below for this contain the word HANDLE.)
 First you must say
 
-    use IO::Handle;
+	use IO::Handle;
 
 after which you may use either
 
-    method HANDLE EXPR
+	method HANDLE EXPR
 
 or more safely,
 
-    HANDLE->method(EXPR)
+	HANDLE->method(EXPR)
 
 Each method returns the old value of the C<IO::Handle> attribute. The
 methods each take an optional EXPR, which, if supplied, specifies the
@@ -1305,17 +1318,17 @@ the change may affect other modules which rely on the default values
 of the special variables that you have changed. This is one of the
 correct ways to read the whole file at once:
 
-    open my $fh, "<", "foo" or die $!;
-    local $/; # enable localized slurp mode
-    my $content = <$fh>;
-    close $fh;
+	open my $fh, "<", "foo" or die $!;
+	local $/; # enable localized slurp mode
+	my $content = <$fh>;
+	close $fh;
 
 But the following code is quite bad:
 
-    open my $fh, "<", "foo" or die $!;
-    undef $/; # enable slurp mode
-    my $content = <$fh>;
-    close $fh;
+	open my $fh, "<", "foo" or die $!;
+	undef $/; # enable slurp mode
+	my $content = <$fh>;
+	close $fh;
 
 since some other module, may want to read data from some file in the
 default "line mode", so if the code we have just presented has been
@@ -1327,37 +1340,41 @@ change affects the shortest scope possible. So unless you are already
 inside some short C<{}> block, you should create one yourself. For
 example:
 
-    my $content = '';
-    open my $fh, "<", "foo" or die $!;
-    {
-        local $/;
-        $content = <$fh>;
-    }
-    close $fh;
+	my $content = '';
+	open my $fh, "<", "foo" or die $!;
+	{
+		local $/;
+		$content = <$fh>;
+	}
+	close $fh;
 
 Here is an example of how your own code can go broken:
 
-    for (1..5){
-        nasty_break();
-        print "$_ ";
-    }
-    sub nasty_break {
-        $_ = 5;
-        # do something with $_
-    }
+	for ( 1..3 ){
+		$\ = "\r\n";
+		nasty_break();
+		print "$_";
+	}
 
-You probably expect this code to print:
+	sub nasty_break {
+	$\ = "\f";
+	# do something with $_
+	}
 
-    1 2 3 4 5
+You probably expect this code to print the equivalent of
+
+    "1\r\n2\r\n3\r\n"
 
 but instead you get:
 
-    5 5 5 5 5
+    "1\f2\f3\f"
 
-Why? Because C<nasty_break()> modifies C<$_> without localizing it
-first. The fix is to add C<local()>:
+Why? Because C<nasty_break()> modifies C<$\> without localizing it
+first. The value you set in  C<nasty_break()> is still there when you
+return. The fix is to add C<local()> so the value doesn't leak out of
+C<nasty_break()>:
 
-        local $_ = 5;
+        local $\ = "\f";
 
 It's easy to notice the problem in such a short example, but in more
 complicated code you are looking for trouble if you don't localize
@@ -1672,12 +1689,12 @@ After execution of this statement all 4 variables may have been set.
 
 C<$@> is set if the string to be C<eval>-ed did not compile (this may
 happen if C<open> or C<close> were imported with bad prototypes), or
-if Perl code executed during evaluation die()d . In these cases the
-value of $@ is the compile error, or the argument to C<die> (which
+if Perl code executed during evaluation C<die()>d . In these cases the
+value of C<$@> is the compile error, or the argument to C<die> (which
 will interpolate C<$!> and C<$?>). (See also L<Fatal>, though.)
 
-When the C<eval()> expression above is executed, C<open()>, C<< <PIPE>
->>, and C<close> are translated to calls in the C run-time library and
+When the C<eval()> expression above is executed, C<open()>, C<< <PIPE> >>,
+and C<close> are translated to calls in the C run-time library and
 thence to the operating system kernel. C<$!> is set to the C library's
 C<errno> if one of these calls fails.
 
@@ -1697,6 +1714,8 @@ C<eval()> is always set on failure and cleared on success.
 
 For more details, see the individual descriptions at C<$@>, C<$!>,
 C<$^E>, and C<$?>.
+
+=over 8
 
 =item $EXTENDED_OS_ERROR
 
@@ -1742,7 +1761,7 @@ C<$^E>, also.
 This variable was added in Perl 5.003.
 
 Mnemonic: Extra error explanation.
- 
+
 =item $EXCEPTIONS_BEING_CAUGHT
 
 =item $^S
@@ -1771,7 +1790,7 @@ used, false otherwise, but directly modifiable.
 
 See also L<warnings>.
 
-Mnemonic: related to the B<-w> switch.  
+Mnemonic: related to the B<-w> switch.
 
 =item ${^WARNING_BITS}
 
@@ -1870,8 +1889,8 @@ Mnemonic: similar to B<sh> and B<ksh>.
 =item $@
 X<$@> X<$EVAL_ERROR>
 
-The Perl syntax error message from the last eval() operator. If $@ is
-the null string, the last eval() parsed and executed correctly
+The Perl syntax error message from the last C<eval()> operator. If C<$@> is
+the null string, the last C<eval()> parsed and executed correctly
 (although the operations you invoked may have failed in the normal
 fashion).
 
@@ -1885,7 +1904,7 @@ Mnemonic: Where was the syntax error "at"?
 
 =head2 Deprecated and removed variables
 
-Deprecating a variable announces the intent of the perl maintainers to 
+Deprecating a variable announces the intent of the perl maintainers to
 eventually remove the variable from the langauge. It may still be
 available despite its status. Using a deprecated variable triggers
 a warning.
@@ -1930,13 +1949,13 @@ X<$[>
 This variable stores the index of the first element in an array, and
 of the first character in a substring. You use to be able to assign to
 this variable, but you can't do that anymore. It's now always 0, like
-God intended.
+it should be.
 
 Mnemonic: [ begins subscripts.
 
 This variable is read-only.
 
-Deprecated in Perl 5.12. 
+Deprecated in Perl 5.12.
 
 =item $]
 X<$]>
@@ -1960,19 +1979,4 @@ Deprecated in Perl 5.6.
 
 =back
 
-=head1 BUGS
-
-Due to an unfortunate accident of Perl's implementation, C<use
-English> imposes a considerable performance penalty on all regular
-expression matches in a program, regardless of whether they occur
-in the scope of C<use English>. For that reason, saying C<use
-English> in libraries is strongly discouraged. See the
-Devel::SawAmpersand module documentation from CPAN
-( http://www.cpan.org/modules/by-module/Devel/ )
-for more information. Writing C<use English '-no_match_vars';>
-avoids the performance penalty.
-
-Having to even think about the C<$^S> variable in your exception
-handlers is simply wrong.  C<$SIG{__DIE__}> as currently implemented
-invites grievous and difficult to track down errors. Avoid it
-and use an C<END{}> or CORE::GLOBAL::die override instead.
+=cut
