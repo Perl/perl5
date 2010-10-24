@@ -5517,7 +5517,8 @@ PP(pp_getlogin)
     EXTEND(SP, 1);
     if (!(tmps = PerlProc_getlogin()))
 	RETPUSHUNDEF;
-    PUSHp(tmps, strlen(tmps));
+    sv_setpv_mg(TARG, tmps);
+    PUSHs(TARG);
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "getlogin");
