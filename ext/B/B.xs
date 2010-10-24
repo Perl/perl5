@@ -807,14 +807,9 @@ cstring(sv)
 	SV *	sv
     ALIAS:
 	perlstring = 1
+	cchar = 2
     PPCODE:
-	PUSHs(cstring(aTHX_ sv, ix));
-
-SV *
-cchar(sv)
-	SV *	sv
-    PPCODE:
-	PUSHs(cchar(aTHX_ sv));
+	PUSHs(ix == 2 ? cchar(aTHX_ sv) : cstring(aTHX_ sv, ix));
 
 void
 threadsv_names()
