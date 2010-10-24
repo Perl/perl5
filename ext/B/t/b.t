@@ -231,4 +231,7 @@ is(B::opnumber("chop"), 38, "Testing opnumber with opname (chop)");
     ok( $ag < B::amagic_generation, "amagic_generation increments" );
 }
 
+is(B::svref_2object(sub {})->ROOT->ppaddr, 'PL_ppaddr[OP_LEAVESUB]',
+   'OP->ppaddr');
+
 done_testing();

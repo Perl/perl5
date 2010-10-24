@@ -877,9 +877,8 @@ OP_ppaddr(o)
 	B::OP		o
     PREINIT:
 	int i;
-	SV *sv = sv_newmortal();
+	SV *sv = newSVpvs_flags("PL_ppaddr[OP_", SVs_TEMP);
     CODE:
-	sv_setpvs(sv, "PL_ppaddr[OP_");
 	sv_catpv(sv, PL_op_name[o->op_type]);
 	for (i=13; (STRLEN)i < SvCUR(sv); ++i)
 	    SvPVX(sv)[i] = toUPPER(SvPVX(sv)[i]);
@@ -1439,23 +1438,22 @@ void
 SvPV(sv)
 	B::PV	sv
     CODE:
-        ST(0) = sv_newmortal();
         if( SvPOK(sv) ) {
+	    STRLEN len = SvCUR(sv);
+	    const char *p = SvPVX_const(sv);
 	    /* FIXME - we need a better way for B to identify PVs that are
 	       in the pads as variable names.  */
-	    if((SvLEN(sv) && SvCUR(sv) >= SvLEN(sv))) {
+	    if((SvLEN(sv) && len >= SvLEN(sv))) {
 		/* It claims to be longer than the space allocated for it -
 		   presuambly it's a variable name in the pad  */
-		sv_setpv(ST(0), SvPV_nolen_const(sv));
-	    } else {
-		sv_setpvn(ST(0), SvPVX_const(sv), SvCUR(sv));
+		len = strlen(p);
 	    }
-            SvFLAGS(ST(0)) |= SvUTF8(sv);
+	    ST(0) = newSVpvn_flags(p, len, SVs_TEMP | SvUTF8(sv));
         }
         else {
             /* XXX for backward compatibility, but should fail */
             /* croak( "argument is not SvPOK" ); */
-            sv_setpvn(ST(0), NULL, 0);
+            ST(0) = sv_newmortal();
         }
 
 # This used to read 257. I think that that was buggy - should have been 258.
@@ -1465,9 +1463,9 @@ void
 SvPVBM(sv)
 	B::PV	sv
     CODE:
-        ST(0) = sv_newmortal();
-	sv_setpvn(ST(0), SvPVX_const(sv),
-	    SvCUR(sv) + (SvVALID(sv) ? 256 + PERL_FBM_TABLE_OFFSET : 0));
+        ST(0) = newSVpvn_flags(SvPVX_const(sv),
+	    SvCUR(sv) + (SvVALID(sv) ? 256 + PERL_FBM_TABLE_OFFSET : 0),
+	    SVs_TEMP);
 
 
 STRLEN
@@ -1593,14 +1591,15 @@ void
 MgPTR(mg)
 	B::MAGIC	mg
     CODE:
-	ST(0) = sv_newmortal();
  	if (mg->mg_ptr){
 		if (mg->mg_len >= 0){
-	    		sv_setpvn(ST(0), mg->mg_ptr, mg->mg_len);
+	    		ST(0) = newSVpvn_flags(mg->mg_ptr, mg->mg_len, SVs_TEMP);
 		} else if (mg->mg_len == HEf_SVKEY) {
 			ST(0) = make_sv_object(aTHX_ NULL, (SV*)mg->mg_ptr);
-		}
-	}
+		} else
+		    ST(0) = sv_newmortal();
+	} else
+	    ST(0) = sv_newmortal();
 
 MODULE = B	PACKAGE = B::PVLV	PREFIX = Lv
 
