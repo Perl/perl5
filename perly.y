@@ -69,7 +69,7 @@
 #endif
 }
 
-%token <ival> GRAMPROG GRAMBLOCK GRAMFULLSTMT GRAMSTMTSEQ
+%token <ival> GRAMPROG GRAMBLOCK GRAMBARESTMT GRAMFULLSTMT GRAMSTMTSEQ
 
 %token <i_tkval> '{' '}' '[' ']' '-' '+' '$' '@' '%' '*' '&' ';'
 
@@ -146,6 +146,18 @@ grammar	:	GRAMPROG prog
 			  parser->expect = XBLOCK;
 			}
 		block
+			{
+			  PL_pad_reset_pending = TRUE;
+			  PL_eval_root = $3;
+			  $$ = 0;
+			  yyunlex();
+			  parser->yychar = YYEOF;
+			}
+	|	GRAMBARESTMT
+			{
+			  parser->expect = XSTATE;
+			}
+		barestmt
 			{
 			  PL_pad_reset_pending = TRUE;
 			  PL_eval_root = $3;

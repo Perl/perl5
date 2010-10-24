@@ -2765,6 +2765,7 @@ PERL_CALLCONV void	Perl_pad_undef(pTHX_ CV* cv)
 #define PERL_ARGS_ASSERT_PAD_UNDEF	\
 	assert(cv)
 
+PERL_CALLCONV OP*	Perl_parse_barestmt(pTHX_ U32 flags);
 PERL_CALLCONV OP*	Perl_parse_block(pTHX_ U32 flags);
 PERL_CALLCONV OP*	Perl_parse_fullstmt(pTHX_ U32 flags);
 PERL_CALLCONV OP*	Perl_parse_stmtseq(pTHX_ U32 flags);

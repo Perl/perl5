@@ -14036,11 +14036,49 @@ Perl_parse_block(pTHX_ U32 flags)
 }
 
 /*
+=for apidoc Amx|OP *|parse_barestmt|U32 flags
+
+Parse a single unadorned Perl statement.  This may be a normal imperative
+statement or a declaration that has compile-time effect.  It does not
+include any label or other affixture.  It is up to the caller to ensure
+that the dynamic parser state (L</PL_parser> et al) is correctly set to
+reflect the source of the code to be parsed and the lexical context for
+the statement.
+
+The op tree representing the statement is returned.  This may be a
+null pointer if the statement is null, for example if it was actually
+a subroutine definition (which has compile-time side effects).  If not
+null, it will be ops directly implementing the statement, suitable to
+pass to L</newSTATEOP>.  It will not normally include a C<nextstate> or
+equivalent op (except for those embedded in a scope contained entirely
+within the statement).
+
+If an error occurs in parsing or compilation, in most cases a valid op
+tree (most likely null) is returned anyway.  The error is reflected in
+the parser state, normally resulting in a single exception at the top
+level of parsing which covers all the compilation errors that occurred.
+Some compilation errors, however, will throw an exception immediately.
+
+The I<flags> parameter is reserved for future use, and must always
+be zero.
+
+=cut
+*/
+
+OP *
+Perl_parse_barestmt(pTHX_ U32 flags)
+{
+    if (flags)
+	Perl_croak(aTHX_ "Parsing code internal error (%s)", "parse_barestmt");
+    return parse_recdescent_for_op(GRAMBARESTMT);
+}
+
+/*
 =for apidoc Amx|OP *|parse_fullstmt|U32 flags
 
 Parse a single complete Perl statement.  This may be a normal imperative
-statement, including optional label, or a declaration that has
-compile-time effect.  It is up to the caller to ensure that the dynamic
+statement or a declaration that has compile-time effect, and may include
+an optional label.  It is up to the caller to ensure that the dynamic
 parser state (L</PL_parser> et al) is correctly set to reflect the source
 of the code to be parsed and the lexical context for the statement.
 

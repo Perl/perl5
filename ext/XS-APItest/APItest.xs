@@ -763,7 +763,7 @@ static OP *THX_parse_keyword_scopelessblock(pTHX)
 #define parse_keyword_stmtasexpr() THX_parse_keyword_stmtasexpr(aTHX)
 static OP *THX_parse_keyword_stmtasexpr(pTHX)
 {
-    OP *o = parse_fullstmt(0);
+    OP *o = parse_barestmt(0);
     o = op_prepend_elem(OP_LINESEQ, newOP(OP_ENTER, 0), o);
     o->op_type = OP_LEAVE;
     o->op_ppaddr = PL_ppaddr[OP_LEAVE];

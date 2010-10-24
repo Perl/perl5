@@ -1,7 +1,7 @@
 use warnings;
 use strict;
 
-use Test::More tests => 8;
+use Test::More tests => 10;
 
 BEGIN { $^H |= 0x20000; }
 
@@ -47,5 +47,15 @@ eval q{
 };
 is $@, "";
 is $t, "abcde";
+
+$t = "";
+eval q{
+	use XS::APItest qw(stmtasexpr);
+	$t .= "a";
+	$t .= "b" . stmtasexpr x: "c"; . "d";
+	$t .= "e";
+};
+isnt $@, "";
+is $t, "";
 
 1;

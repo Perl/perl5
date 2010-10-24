@@ -376,6 +376,7 @@
 #define pack_cat(a,b,c,d,e,f,g)	Perl_pack_cat(aTHX_ a,b,c,d,e,f,g)
 #define packlist(a,b,c,d,e)	Perl_packlist(aTHX_ a,b,c,d,e)
 #define pad_findmy(a,b,c)	Perl_pad_findmy(aTHX_ a,b,c)
+#define parse_barestmt(a)	Perl_parse_barestmt(aTHX_ a)
 #define parse_block(a)		Perl_parse_block(aTHX_ a)
 #define parse_fullstmt(a)	Perl_parse_fullstmt(aTHX_ a)
 #define parse_stmtseq(a)	Perl_parse_stmtseq(aTHX_ a)
