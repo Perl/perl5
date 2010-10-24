@@ -2084,7 +2084,7 @@ Perl_hv_name_add(pTHX_ HV *hv, const char *name, U32 len)
 	    HEK_LEN(existing_name) == (I32)len
 	 && memEQ(HEK_KEY(existing_name), name, len)
 	) return;
-	Newxc(aux->xhv_name, 2, HEK *, HEK);
+	Newxc(aux->xhv_name, aux->xhv_name_count = 2, HEK *, HEK);
 	*(HEK **)aux->xhv_name = existing_name;
 	((HEK **)aux->xhv_name)[1] = share_hek(name, len, hash);
     }
