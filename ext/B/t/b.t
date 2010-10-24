@@ -163,6 +163,15 @@ is(B::opnumber("pp_null"), 0, "Testing opnumber with opname (pp_null)");
 
     like(B::hash("\0" x $_), qr/\A0x0+\z/, "Testing B::hash(\"0\" x $_)")
 	 for 0..19;
+
+    $hash = eval {B::hash(chr 256)};
+    is($hash, undef, "B::hash() refuses non-octets");
+    like($@, qr/^Wide character in subroutine entry/);
+
+    $hash = B::hash(chr 163);
+    my $str = chr(163) . chr 256;
+    chop $str;
+    is(B::hash($str), $hash, 'B::hash() with chr 128-256 is well-behaved');
 }
 {
     is(B::cstring(undef), '0', "Testing B::cstring(undef)");

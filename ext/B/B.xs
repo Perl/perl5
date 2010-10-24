@@ -781,7 +781,7 @@ hash(sv)
     CODE:
 	STRLEN len;
 	U32 hash = 0;
-	const char *s = SvPV(sv, len);
+	const char *s = SvPVbyte(sv, len);
 	PERL_HASH(hash, s, len);
 	ST(0) = sv_2mortal(Perl_newSVpvf(aTHX_ "0x%"UVxf, (UV)hash));
 
