@@ -235,13 +235,19 @@ cc_opclassname(pTHX_ const OP *o)
     return (char *)opclassnames[cc_opclass(aTHX_ o)];
 }
 
+/* FIXME - figure out how to get the typemap to assign this to ST(0), rather
+   than creating a new mortal for ST(0) then passing it in as the first
+   argument.  */
 static SV *
 make_sv_object(pTHX_ SV *arg, SV *sv)
 {
     const char *type = 0;
     IV iv;
     dMY_CXT;
-    
+
+    if (!arg)
+	arg = sv_newmortal();
+
     for (iv = 0; iv < sizeof(specialsv_list)/sizeof(SV*); iv++) {
 	if (sv == specialsv_list[iv]) {
 	    type = "B::SPECIAL";
@@ -258,9 +264,10 @@ make_sv_object(pTHX_ SV *arg, SV *sv)
 
 #if PERL_VERSION >= 9
 static SV *
-make_temp_object(pTHX_ SV *arg, SV *temp)
+make_temp_object(pTHX_ SV *temp)
 {
     SV *target;
+    SV *arg = sv_newmortal();
     const char *const type = svclassnames[SvTYPE(temp)];
     const IV iv = PTR2IV(temp);
 
@@ -278,7 +285,7 @@ make_temp_object(pTHX_ SV *arg, SV *temp)
 }
 
 static SV *
-make_warnings_object(pTHX_ SV *arg, STRLEN *warnings)
+make_warnings_object(pTHX_ STRLEN *warnings)
 {
     const char *type = 0;
     dMY_CXT;
@@ -295,35 +302,36 @@ make_warnings_object(pTHX_ SV *arg, STRLEN *warnings)
 	}
     }
     if (type) {
+	SV *arg = sv_newmortal();
 	sv_setiv(newSVrv(arg, type), iv);
 	return arg;
     } else {
 	/* B assumes that warnings are a regular SV. Seems easier to keep it
 	   happy by making them into a regular SV.  */
-	return make_temp_object(aTHX_ arg,
-				newSVpvn((char *)(warnings + 1), *warnings));
+	return make_temp_object(aTHX_ newSVpvn((char *)(warnings + 1), *warnings));
     }
 }
 
 static SV *
-make_cop_io_object(pTHX_ SV *arg, COP *cop)
+make_cop_io_object(pTHX_ COP *cop)
 {
     SV *const value = newSV(0);
 
     Perl_emulate_cop_io(aTHX_ cop, value);
 
     if(SvOK(value)) {
-	return make_temp_object(aTHX_ arg, newSVsv(value));
+	return make_temp_object(aTHX_ newSVsv(value));
     } else {
 	SvREFCNT_dec(value);
-	return make_sv_object(aTHX_ arg, NULL);
+	return make_sv_object(aTHX_ NULL, NULL);
     }
 }
 #endif
 
 static SV *
-make_mg_object(pTHX_ SV *arg, MAGIC *mg)
+make_mg_object(pTHX_ MAGIC *mg)
 {
+    SV *arg = sv_newmortal();
     sv_setiv(newSVrv(arg, "B::MAGIC"), PTR2IV(mg));
     return arg;
 }
@@ -702,12 +710,12 @@ B_formfeed()
 void
 B_warnhook()
     CODE:
-	ST(0) = make_sv_object(aTHX_ sv_newmortal(), PL_warnhook);
+	ST(0) = make_sv_object(aTHX_ NULL, PL_warnhook);
 
 void
 B_diehook()
     CODE:
-	ST(0) = make_sv_object(aTHX_ sv_newmortal(), PL_diehook);
+	ST(0) = make_sv_object(aTHX_ NULL, PL_diehook);
 
 MODULE = B	PACKAGE = B
 
@@ -1236,14 +1244,14 @@ void
 COP_warnings(o)
 	B::COP	o
 	PPCODE:
-	ST(0) = make_warnings_object(aTHX_ sv_newmortal(), o->cop_warnings);
+	ST(0) = make_warnings_object(aTHX_ o->cop_warnings);
 	XSRETURN(1);
 
 void
 COP_io(o)
 	B::COP	o
 	PPCODE:
-	ST(0) = make_cop_io_object(aTHX_ sv_newmortal(), o);
+	ST(0) = make_cop_io_object(aTHX_ o);
 	XSRETURN(1);
 
 B::RHE
@@ -1478,7 +1486,7 @@ SvMAGIC(sv)
 	MAGIC *	mg = NO_INIT
     PPCODE:
 	for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic)
-	    XPUSHs(make_mg_object(aTHX_ sv_newmortal(), mg));
+	    XPUSHs(make_mg_object(aTHX_ mg));
 
 MODULE = B	PACKAGE = B::PVMG
 
@@ -1590,8 +1598,7 @@ MgPTR(mg)
 		if (mg->mg_len >= 0){
 	    		sv_setpvn(ST(0), mg->mg_ptr, mg->mg_len);
 		} else if (mg->mg_len == HEf_SVKEY) {
-			ST(0) = make_sv_object(aTHX_
-				    sv_newmortal(), (SV*)mg->mg_ptr);
+			ST(0) = make_sv_object(aTHX_ NULL, (SV*)mg->mg_ptr);
 		}
 	}
 
@@ -1847,7 +1854,7 @@ AvARRAY(av)
 	    SV **svp = AvARRAY(av);
 	    I32 i;
 	    for (i = 0; i <= AvFILL(av); i++)
-		XPUSHs(make_sv_object(aTHX_ sv_newmortal(), svp[i]));
+		XPUSHs(make_sv_object(aTHX_ NULL, svp[i]));
 	}
 
 void
@@ -1856,9 +1863,9 @@ AvARRAYelt(av, idx)
 	int	idx
     PPCODE:
     	if (idx >= 0 && AvFILL(av) >= 0 && idx <= AvFILL(av))
-	    XPUSHs(make_sv_object(aTHX_ sv_newmortal(), (AvARRAY(av)[idx])));
+	    XPUSHs(make_sv_object(aTHX_ NULL, (AvARRAY(av)[idx])));
 	else
-	    XPUSHs(make_sv_object(aTHX_ sv_newmortal(), NULL));
+	    XPUSHs(make_sv_object(aTHX_ NULL, NULL));
 
 #if PERL_VERSION < 9
 				   
@@ -1931,9 +1938,9 @@ void
 CvXSUBANY(cv)
 	B::CV	cv
     CODE:
-	ST(0) = CvCONST(cv) ?
-	    make_sv_object(aTHX_ sv_newmortal(),(SV *)CvXSUBANY(cv).any_ptr) :
-	    sv_2mortal(newSViv(CvISXSUB(cv) ? CvXSUBANY(cv).any_iv : 0));
+	ST(0) = CvCONST(cv)
+	    ? make_sv_object(aTHX_ NULL, (SV *)CvXSUBANY(cv).any_ptr)
+	    : sv_2mortal(newSViv(CvISXSUB(cv) ? CvXSUBANY(cv).any_iv : 0));
 
 MODULE = B    PACKAGE = B::CV
 
@@ -1990,7 +1997,7 @@ HvARRAY(hv)
 	    EXTEND(sp, HvKEYS(hv) * 2);
 	    while ((sv = hv_iternextsv(hv, &key, &len))) {
 		mPUSHp(key, len);
-		PUSHs(make_sv_object(aTHX_ sv_newmortal(), sv));
+		PUSHs(make_sv_object(aTHX_ NULL, sv));
 	    }
 	}
 
