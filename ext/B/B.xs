@@ -331,15 +331,17 @@ make_mg_object(pTHX_ SV *arg, MAGIC *mg)
 static SV *
 cstring(pTHX_ SV *sv, bool perlstyle)
 {
-    SV *sstr = newSVpvs("");
+    SV *sstr;
 
     if (!SvOK(sv))
-	sv_setpvs(sstr, "0");
-    else if (perlstyle && SvUTF8(sv)) {
+	return newSVpvs_flags("0", SVs_TEMP);
+
+    sstr = newSVpvs_flags("\"", SVs_TEMP);
+
+    if (perlstyle && SvUTF8(sv)) {
 	SV *tmpsv = sv_newmortal(); /* Temporary SV to feed sv_uni_display */
 	const STRLEN len = SvCUR(sv);
 	const char *s = sv_uni_display(tmpsv, sv, 8*len, UNI_DISPLAY_QQ);
-	sv_setpvs(sstr,"\"");
 	while (*s)
 	{
 	    if (*s == '"')
@@ -359,15 +361,12 @@ cstring(pTHX_ SV *sv, bool perlstyle)
 		sv_catpvn(sstr, s, 1);
 	    ++s;
 	}
-	sv_catpvs(sstr, "\"");
-	return sstr;
     }
     else
     {
 	/* XXX Optimise? */
 	STRLEN len;
 	const char *s = SvPV(sv, len);
-	sv_catpvs(sstr, "\"");
 	for (; len; len--, s++)
 	{
 	    /* At least try a little for readability */
@@ -411,8 +410,8 @@ cstring(pTHX_ SV *sv, bool perlstyle)
 	    }
 	    /* XXX Add line breaks if string is long */
 	}
-	sv_catpvs(sstr, "\"");
     }
+    sv_catpvs(sstr, "\"");
     return sstr;
 }
 
@@ -813,10 +812,8 @@ cstring(sv)
 	SV *	sv
     ALIAS:
 	perlstring = 1
-    CODE:
-	RETVAL = cstring(aTHX_ sv, ix);
-    OUTPUT:
-	RETVAL
+    PPCODE:
+	PUSHs(cstring(aTHX_ sv, ix));
 
 SV *
 cchar(sv)
