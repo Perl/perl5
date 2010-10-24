@@ -38,7 +38,7 @@ while (<DATA>)
         my $a = $args[1] || '';
         $try .= "\$x->binf('$a');";
       } elsif ($f eq "is_inf") {
-        $try .= "\$x->is_inf('$args[1]');"; 
+        $try .= "\$x->is_inf('$args[1]');";
       } elsif ($f eq "fone") {
         $try .= "\$x->bone('$args[1]');";
       } elsif ($f eq "fstr") {
@@ -59,7 +59,7 @@ while (<DATA>)
       # some unary ops (can't test the fxxx form, since no AUTOLOAD in BigRat)
       } elsif ($f =~ /^f(nan|sstr|neg|floor|ceil|abs)$/) {
         $try .= "\$x->b$1();";
-      # some is_xxx test function	
+      # some is_xxx test function
       } elsif ($f =~ /^is_(zero|one|pos|neg|negative|positive|odd|even|nan|int)\z/) {
         $try .= "\$x->$f();";
       } elsif ($f =~ /^(as_number|as_int)\z/){
@@ -150,7 +150,7 @@ while (<DATA>)
     }
   } # end while
 
-# check whether $class->new( Math::BigInt->new()) destroys it 
+# check whether $class->new( Math::BigInt->new()) destroys it
 # ($y == 12 in this case)
 $x = Math::BigInt->new(1200); $y = $class->new($x);
 is ($y,1200); is ($x,1200);

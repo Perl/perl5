@@ -6,7 +6,7 @@ use strict;
 use Exporter;
 use Math::BigRat;
 use Math::BigFloat;
-use vars qw($VERSION @ISA 
+use vars qw($VERSION @ISA
             $accuracy $precision $round_mode $div_scale);
 
 @ISA = qw(Math::BigRat Exporter);
@@ -36,7 +36,7 @@ my $class = 'Math::BigRat::Test';
 #        return $self;
 #}
 
-BEGIN 
+BEGIN
   {
   *fstr = \&bstr;
   *fsstr = \&bsstr;
@@ -88,7 +88,7 @@ sub bstr
   my $s = ''; $s = $x->{sign} if $x->{sign} ne '+';     # +3 vs 3
 
 #  print " bstr \$x ", $accuracy || $x->{_a} || 'notset', " ", $precision || $x->{_p} || 'notset', "\n";
-  return $s.$x->{_n} if $x->{_d}->is_one(); 
+  return $s.$x->{_n} if $x->{_d}->is_one();
   my $output = Math::BigFloat->new($x->{_n})->bdiv($x->{_d});
   local $Math::BigFloat::accuracy = $accuracy || $x->{_a};
   local $Math::BigFloat::precision = $precision || $x->{_p};

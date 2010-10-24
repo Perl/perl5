@@ -29,4 +29,3 @@ $x = $rat->new('1/3'); is ($x->bsqrt(),
 # all tests successfull
 
 1;
-

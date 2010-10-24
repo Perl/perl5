@@ -10,7 +10,7 @@ use Math::BigInt;
 use Math::BigFloat;
 
 # shortcuts
-my $cr = 'Math::BigRat';		
+my $cr = 'Math::BigRat';
 my $mbi = 'Math::BigInt';
 my $mbf = 'Math::BigFloat';
 
@@ -49,7 +49,7 @@ foreach my $func (qw/new bnorm/)
 
   # input ala '1+1/3' isn't parsed ok yet
   $x = $cr->$func('1+1/3');	is ($x,'NaN');
-  
+
   $x = $cr->$func('1/1.2');	is ($x,'5/6');
   $x = $cr->$func('1.3/1.2');	is ($x,'13/12');
   $x = $cr->$func('1.2/1');	is ($x,'6/5');
@@ -125,7 +125,7 @@ is ($x + $y, '7/12');
 is ($x * $y, '1/12');
 is ($x / $y, '3/4');
 
-$x = $cr->new('7/5'); $x *= '3/2'; 
+$x = $cr->new('7/5'); $x *= '3/2';
 is ($x,'21/10');
 $x -= '0.1';
 is ($x,'2');	# not 21/10
@@ -191,7 +191,7 @@ $x = $cr->new('1/2');  $z = $x->bpow('3/1'); is ($x,'1/8');
 $x = $cr->new('1/3');  $z = $x->bpow('4/1'); is ($x,'1/81');
 $x = $cr->new('2/3');  $z = $x->bpow('4/1'); is ($x,'16/81');
 
-$x = $cr->new('2/3');  $z = $x->bpow('5/3'); 
+$x = $cr->new('2/3');  $z = $x->bpow('5/3');
 is ($x, '31797617848703662994667839220546583581/62500000000000000000000000000000000000');
 
 ##############################################################################
@@ -322,4 +322,3 @@ is ($f, '0.66667', 'as_float(2/3,5)');
 # done
 
 1;
-

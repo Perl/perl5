@@ -890,14 +890,14 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'rafl',
 	'DISTRIBUTION'	=> 'FLORA/Math-BigRat-0.26.tar.gz',
-	'FILES'		=> q[cpan/Math-BigRat],
+	'FILES'		=> q[dist/Math-BigRat],
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qw{
 				t/pod.t
 				t/pod_cov.t
 			       },
 			   ],
-	'UPSTREAM'	=> 'cpan',
+	'UPSTREAM'	=> 'blead',
 	},
 
     'Math::Complex' =>

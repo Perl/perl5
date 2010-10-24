@@ -39,7 +39,7 @@ while (<DATA>)
       } elsif ($f eq "finf") {
         $try .= "\$x->finf('$args[1]');";
       } elsif ($f eq "is_inf") {
-        $try .= "\$x->is_inf('$args[1]');"; 
+        $try .= "\$x->is_inf('$args[1]');";
       } elsif ($f eq "fone") {
         $try .= "\$x->bone('$args[1]');";
       } elsif ($f eq "fstr") {
@@ -60,7 +60,7 @@ while (<DATA>)
       # some unary ops (test the fxxx form, since that is done by AUTOLOAD)
       } elsif ($f =~ /^f(nan|sstr|neg|floor|ceil|abs)$/) {
         $try .= "\$x->f$1();";
-      # some is_xxx test function	
+      # some is_xxx test function
       } elsif ($f =~ /^is_(zero|one|negative|positive|odd|even|nan|int)$/) {
         $try .= "\$x->$f();";
       } elsif ($f eq "finc") {
@@ -89,7 +89,7 @@ while (<DATA>)
     else
       {
       $try .= "\$y = $class->new(\"$args[1]\");";
-      
+
       if ($f eq "bgcd")
         {
         if (defined $args[2])
@@ -174,7 +174,7 @@ while (<DATA>)
     }
   } # end while
 
-# check whether $class->new( Math::BigInt->new()) destroys it 
+# check whether $class->new( Math::BigInt->new()) destroys it
 # ($y == 12 in this case)
 $x = Math::BigInt->new(1200); $y = $class->new($x);
 ok ($y,1200); ok ($x,1200);
@@ -191,21 +191,21 @@ ok ($y,1200); ok ($x,1200);
 my $monster = '1e1234567890123456789012345678901234567890';
 
 # new and exponent
-ok ($class->new($monster)->bsstr(), 
+ok ($class->new($monster)->bsstr(),
 		'1e+1234567890123456789012345678901234567890');
-ok ($class->new($monster)->exponent(), 
+ok ($class->new($monster)->exponent(),
 		'1234567890123456789012345678901234567890');
 # cmp
 ok ($class->new($monster) > 0,1);
 
-# sub/mul 
+# sub/mul
 ok ($class->new($monster)->bsub( $monster),0);
 ok ($class->new($monster)->bmul(2)->bsstr(),
                 '2e+1234567890123456789012345678901234567890');
 
 # mantissa
 $monster = '1234567890123456789012345678901234567890e2';
-ok ($class->new($monster)->mantissa(), 
+ok ($class->new($monster)->mantissa(),
 		'123456789012345678901234567890123456789');
 
 ###############################################################################
@@ -228,7 +228,7 @@ ok ($class->finf(),'inf');
 ok ($class->finf('+'),'inf');
 ok ($class->finf('-'),'-inf');
 ok ($class->finf('-inf'),'-inf');
-        
+
 $class->accuracy(undef); $class->precision(undef);	# reset
 
 ###############################################################################
@@ -265,7 +265,7 @@ $class->precision(-3); $x = $class->new(12); $x->fsqrt(); ok ($x,'3.464');
 
 {
   no strict;
-  $try = 
+  $try =
     '@args' . " = $class" . "::objectify(2,$class,4,5);".'join(" ",@args);';
   $ans = eval $try;
   ok ($ans,"$class 4 5");
@@ -322,7 +322,7 @@ ok ($x ** $y, 0, 'no warnings and zero result');
 #perl -MMath::BigFloat -lwe 'print Math::BigFloat->new(".222222222222222222222222222222222222222222")->bceil()'
 #Use of uninitialized value in numeric le (<=) at BigFloat.pm line 1851.
 
-$x = $class->new(".222222222222222222222222222222222222222222"); 
+$x = $class->new(".222222222222222222222222222222222222222222");
 ok ($x->bceil(), 1, 'no warnings and one as result');
 
 ###############################################################################

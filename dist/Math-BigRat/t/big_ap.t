@@ -92,4 +92,3 @@ is ($z,$proper2);
 
 $x = $proper->copy()->binc(); is ($x,$proper_inc);
 $x = $proper->copy()->bdec(); is ($x,$proper_dec);
-
