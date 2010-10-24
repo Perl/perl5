@@ -263,9 +263,9 @@ X<$0> X<$PROGRAM_NAME>
 Contains the name of the program being executed.
 
 On some (but not all) operating systems assigning to C<$0> modifies
-the argument area that the C<ps> program sees.  On some platforms you
+the argument area that the C<ps> program sees. On some platforms you
 may have to use special C<ps> options or a different C<ps> to see the
-changes.  Modifying the C<$0> is more useful as a way of indicating the
+changes. Modifying the C<$0> is more useful as a way of indicating the
 current program state than it is for hiding the program you're
 running.
 
@@ -327,7 +327,7 @@ which means
 
 	($foo{$a},$foo{$b},$foo{$c})
 
-Default is "\034", the same as SUBSEP in B<awk>.  If your keys contain
+Default is "\034", the same as SUBSEP in B<awk>. If your keys contain
 binary data there might not be any safe value for C<$;>.
 
 Consider using "real" multidimensional arrays as described
@@ -389,7 +389,7 @@ X<$^C> X<$COMPILING>
 The current value of the flag associated with the B<-c> switch.
 Mainly of use with B<-MO=...> to allow code to alter its behavior
 when being compiled, such as for example to C<AUTOLOAD> at compile
-time rather than normal, deferred loading.  Setting
+time rather than normal, deferred loading. Setting
 C<$^C = 1> is similar to calling C<B::minus_c>.
 
 This variable was added in Perl 5.6.
@@ -440,7 +440,7 @@ time of the C<exec()>.
 X<@F>
 
 The array C<@F> contains the fields of each line read in when autosplit
-mode is turned on. See L<perlrun> for the B<-a> switch.  This array
+mode is turned on. See L<perlrun> for the B<-a> switch. This array
 is package-specific, and must be declared or given a full package name
 if not in package main when running under C<strict 'vars'>.
 
@@ -479,11 +479,11 @@ the BEGIN block has already been compiled, but the body of C<foo()> is still
 being compiled. The new value of C<$^H> will therefore be visible only while
 the body of C<foo()> is being compiled.
 
-Substitution of the above BEGIN block with:
+Substitution of C<BEGIN { add_100() }> block with:
 
 	BEGIN { require strict; strict->import('vars') }
 
-demonstrates how C<use strict 'vars'> is implemented.  Here's a conditional
+demonstrates how C<use strict 'vars'> is implemented. Here's a conditional
 version of the same lexical pragma:
 
 	BEGIN { require strict; strict->import('vars') if $condition }
@@ -502,11 +502,11 @@ This variable was added in Perl 5.6.
 X<@INC>
 
 The array C<@INC> contains the list of places that the C<do EXPR>,
-C<require>, or C<use> constructs look for their library files.  It
+C<require>, or C<use> constructs look for their library files. It
 initially consists of the arguments to any B<-I> command-line
 switches, followed by the default Perl library, probably
 F</usr/local/lib/perl>, followed by ".", to represent the current
-directory.  ("." will not be appended if taint checks are enabled,
+directory. ("." will not be appended if taint checks are enabled,
 either by C<-T> or by C<-t>.)  If you need to modify this at runtime,
 you should use the C<use lib> pragma to get the machine-dependent
 library properly loaded also:
@@ -651,7 +651,7 @@ Save source code lines into C<@{"_<$filename"}>.
 =back
 
 Some bits may be relevant at compile-time only, some at
-run-time only.  This is a new mechanism and the details may change.
+run-time only. This is a new mechanism and the details may change.
 See also L<perldebguts>.
 
 =item %SIG
@@ -691,12 +691,12 @@ are installed using it. This means you get reliable signal handling.
 
 The default delivery policy of signals changed in Perl 5.8.0 from
 immediate (also known as "unsafe") to deferred, also known as "safe
-signals".  See L<perlipc> for more information.
+signals". See L<perlipc> for more information.
 
 Certain internal hooks can be also set using the C<%SIG> hash. The
 routine indicated by C<$SIG{__WARN__}> is called when a warning
-message is about to be printed.  The warning message is passed as the
-first argument.  The presence of a C<__WARN__> hook causes the
+message is about to be printed. The warning message is passed as the
+first argument. The presence of a C<__WARN__> hook causes the
 ordinary printing of warnings to C<STDERR> to be suppressed. You can
 use this to save warnings in a variable, or turn warnings into fatal
 errors, like this:
@@ -744,7 +744,7 @@ C<Carp> was available. The third line will be executed only if C<Carp> was
 not available.
 
 Having to even think about the C<$^S> variable in your exception
-handlers is simply wrong.  C<$SIG{__DIE__}> as currently implemented
+handlers is simply wrong. C<$SIG{__DIE__}> as currently implemented
 invites grievous and difficult to track down errors. Avoid it
 and use an C<END{}> or CORE::GLOBAL::die override instead.
 
@@ -774,7 +774,7 @@ This variable was added in Perl 5.8.
 =item ${^UNICODE}
 X<${^UNICODE}>
 
-Reflects certain Unicode settings of Perl.  See L<perlrun>
+Reflects certain Unicode settings of Perl. See L<perlrun>
 documentation for the C<-C> switch for more information about
 the possible values.
 
@@ -1129,7 +1129,7 @@ is the same value as what the C<pos> function returns when called
 on the variable that was matched against. The I<n>th element
 of this array holds the offset of the I<n>th submatch, so
 C<$+[1]> is the offset past where C<$1> ends, C<$+[2]> the offset
-past where C<$2> ends, and so on.  You can use C<$#+> to determine
+past where C<$2> ends, and so on. You can use C<$#+> to determine
 how many subgroups were in the last successful match. See the
 examples given for the C<@-> variable.
 
@@ -1184,7 +1184,7 @@ with C<@+>.
 This array holds the offsets of the beginnings of the last
 successful submatches in the currently active dynamic scope.
 C<$-[0]> is the offset into the string of the beginning of the
-entire match.  The I<n>th element of this array holds the offset
+entire match. The I<n>th element of this array holds the offset
 of the I<n>th submatch, so C<$-[1]> is the offset where C<$1>
 begins, C<$-[2]> the offset where C<$2> begins, and so on.
 
@@ -1448,7 +1448,7 @@ X<$.> X<$NR> X<$INPUT_LINE_NUMBER> X<line number>
 Current line number for the last filehandle accessed.
 
 Each filehandle in Perl counts the number of lines that have been read
-from it.  (Depending on the value of C<$/>, Perl's idea of what
+from it. (Depending on the value of C<$/>, Perl's idea of what
 constitutes a line may not match yours.)  When a line is read from a
 filehandle (via C<readline()> or C<< <> >>), or when C<tell()> or
 C<seek()> is called on it, C<$.> becomes an alias to the line counter
@@ -1481,7 +1481,7 @@ Mnemonic: many programs use "." to mean the current line number.
 X<$/> X<$RS> X<$INPUT_RECORD_SEPARATOR>
 
 The input record separator, newline by default. This influences Perl's
-idea of what a "line" is.  Works like B<awk>'s RS variable, including
+idea of what a "line" is. Works like B<awk>'s RS variable, including
 treating empty lines as a terminator if set to the null string (an
 empty line cannot contain any spaces or tabs). You may set it to a
 multi-character string to match a multi-character terminator, or to
@@ -1496,7 +1496,7 @@ the next paragraph, even if it's a newline.
     local $_ = <FH>;    # whole file now here
     s/\n[ \t]+/ /g;
 
-Remember: the value of C<$/> is a string, not a regex.  B<awk> has to
+Remember: the value of C<$/> is a string, not a regex. B<awk> has to
 be better for something. :-)
 
 Setting C<$/> to a reference to an integer, scalar containing an
@@ -1508,11 +1508,11 @@ referenced integer. So this:
     open my $fh, "<", $myfile or die $!;
     local $_ = <$fh>;
 
-will read a record of no more than 32768 bytes from FILE.  If you're
+will read a record of no more than 32768 bytes from FILE. If you're
 not reading from a record-oriented file (or your OS doesn't have
 record-oriented files), then you'll likely get a full chunk of data
-with every read.  If a record is larger than the record size you've
-set, you'll get the record back in pieces.  Trying to set the record
+with every read. If a record is larger than the record size you've
+set, you'll get the record back in pieces. Trying to set the record
 size to zero or less will cause reading in the (rest of the) whole file.
 
 On VMS, record reads are done with the equivalent of C<sysread>,
@@ -1522,7 +1522,7 @@ want to read in record mode is probably unusable in line mode.)
 Non-VMS systems do normal I/O, so it's safe to mix record and
 non-record reads of a file.
 
-See also L<perlport/"Newlines">.  Also see C<$.>.
+See also L<perlport/"Newlines">. Also see C<$.>.
 
 Mnemonic: / delimits line boundaries when quoting poetry.
 
@@ -1549,7 +1549,7 @@ Also, it's just like C<$/>, but it's what you get "back" from Perl.
 X<$|> X<autoflush> X<flush> X<$OUTPUT_AUTOFLUSH>
 
 If set to nonzero, forces a flush right away and after every write or
-print on the currently selected output channel.  Default is 0
+print on the currently selected output channel. Default is 0
 (regardless of whether the channel is really buffered by the system or
 not; C<$|> tells you only whether you've asked Perl explicitly to
 flush after each write). STDOUT will typically be line buffered if
@@ -1557,7 +1557,7 @@ output is to the terminal and block buffered otherwise. Setting this
 variable is useful primarily when you are outputting to a pipe or
 socket, such as when you are running a Perl program under B<rsh> and
 want to see the output as it's happening. This has no effect on input
-buffering.  See L<perlfunc/getc> for that. See L<perldoc/select> on
+buffering. See L<perlfunc/getc> for that. See L<perldoc/select> on
 how to select the output channel. See also L<IO::Handle>.
 
 Mnemonic: when you want your pipes to be piping hot.
@@ -1580,7 +1580,7 @@ X<$^A> X<$ACCUMULATOR>
 
 The current value of the C<write()> accumulator for C<format()> lines.
 A format contains C<formline()> calls that put their result into
-C<$^A>.  After calling its format, C<write()> prints out the contents
+C<$^A>. After calling its format, C<write()> prints out the contents
 of C<$^A> and empties. So you never really see the contents of C<$^A>
 unless you call C<formline()> yourself and then look at it. See
 L<perlform> and L<perlfunc/formline()>.
@@ -1684,26 +1684,26 @@ interpreter, C library, operating system, or an external program,
 respectively.
 
 To illustrate the differences between these variables, consider the
-following Perl expression, which uses a single-quoted string:
+following Perl expression, which uses a single-quoted string. After 
+execution of this statement, perl may have set all four special error 
+variables:
 
     eval q{
-	open my $pipe, "/cdrom/install |" or die $!;
-	my @res = <$pipe>;
-	close $pipe or die "bad pipe: $?, $!";
-    };
+		open my $pipe, "/cdrom/install |" or die $!;
+		my @res = <$pipe>;
+		close $pipe or die "bad pipe: $?, $!";
+	    };
 
-After execution of this statement all four variables may have been set.
+When perl executes the C<eval()> expression, it translates the
+C<open()>, C<< <PIPE> >>, and C<close> calls in the C run-time library
+and thence to the operating system kernel. perl sets C<$!> is set to
+the C library's C<errno> if one of these calls fails.
 
 C<$@> is set if the string to be C<eval>-ed did not compile (this may
 happen if C<open> or C<close> were imported with bad prototypes), or
-if Perl code executed during evaluation C<die()>d . In these cases the
+if Perl code executed during evaluation C<die()>d. In these cases the
 value of C<$@> is the compile error, or the argument to C<die> (which
 will interpolate C<$!> and C<$?>). (See also L<Fatal>, though.)
-
-When the C<eval()> expression above is executed, C<open()>, C<< <PIPE> >>,
-and C<close> are translated to calls in the C run-time library and
-thence to the operating system kernel. C<$!> is set to the C library's
-C<errno> if one of these calls fails.
 
 Under a few operating systems, C<$^E> may contain a more verbose error
 indicator, such as in this case, "CDROM tray not closed." Systems that
@@ -1829,7 +1829,7 @@ only I<immediately> after a B<failure>:
     # Since here we might have either success or failure,
     # here $! is meaningless.
 
-In the above I<meaningless> stands for anything: zero, non-zero,
+The I<meaningless> stands for anything: zero, non-zero,
 C<undef>. A successful system or library call does B<not> set the
 variable to zero.
 
@@ -1854,7 +1854,7 @@ such file or directory" (or its moral equivalent: not all operating
 systems give that exact error, and certainly not all languages). To
 check if a particular key is meaningful on your system, use C<exists
 $!{the_key}>; for a list of legal keys, use C<keys %!>. See L<Errno>
-for more information, and also see above for the validity of C<$!>.
+for more information, and also see L</$!>.
 
 This variable was added in Perl 5.005.
 
@@ -1903,7 +1903,7 @@ fashion).
 
 Warning messages are not collected in this variable. You can, however,
 set up a routine to process warnings by setting C<$SIG{__WARN__}> as
-described below.
+described in L</%SIG>.
 
 Mnemonic: Where was the syntax error "at"?
 
