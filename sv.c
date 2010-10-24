@@ -4924,7 +4924,7 @@ on the SVs if appropriate, else not.
 */
 
 void
-Perl_sv_catpv_flags(pTHX_ SV *dstr, const char *sstr, I32 flags)
+Perl_sv_catpv_flags(pTHX_ SV *dstr, const char *sstr, const I32 flags)
 {
     PERL_ARGS_ASSERT_SV_CATPV_FLAGS;
     sv_catpvn_flags(dstr, sstr, strlen(sstr), flags);
