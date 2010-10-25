@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 221 );
+plan( tests => 224 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -802,6 +802,13 @@ EOF
 
  }}->($h{k});
 }
+
+*aieee = 4;
+pass('Can assign integers to typeglobs');
+*aieee = 3.14;
+pass('Can assign floats to typeglobs');
+*aieee = 'pi';
+pass('Can assign strings to typeglobs');
 
 __END__
 Perl
