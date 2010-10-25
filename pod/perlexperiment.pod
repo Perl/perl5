@@ -4,6 +4,13 @@ perlexperiment - A listing of experimental features in Perl
 
 =head1 DESCRIPTION
 
+This document lists the current and past experimental features in the perl
+core. Although each of these are documented with their appropriate topics,
+this succinct listing gives you an overview and basic facts about their
+status.
+
+=head2 Current experiments
+
 =over 8
 
 =item The C<(?{code})>
@@ -34,9 +41,24 @@ Introduced in: Perl 5.11.2
 
 =back
 
-=head2 Removed experiments
+=head2 Accepted features
 
-=over 4
+These features were so wildly successful and played so well with others that
+we decided to remove their experimental status and admit them as full, stable
+features in the world of Perl, lavishing all the benefits and luxuries thereof. 
+They are also awarded +5 Stability and +3 Charisma.
+
+=over 8
+
+=back
+
+=head2 Removed features
+
+These features are no longer considered experimental and their functionality
+has disappeared. It's your own fault if you wrote production programs using
+these features after we explicitly told you not to (see L<pod/perlpolicy>).
+
+=over 8
 
 =item C<legacy>
 
