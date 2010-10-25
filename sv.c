@@ -5558,7 +5558,7 @@ Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
 			/* You lookin' at me?  */
 			assert(CvSTASH(referrer));
 			assert(CvSTASH(referrer) == (const HV *)sv);
-			CvSTASH(referrer) = 0;
+			SvANY(MUTABLE_CV(referrer))->xcv_stash = 0;
 		    }
 		    else {
 			assert(SvTYPE(sv) == SVt_PVGV);
@@ -11800,7 +11800,8 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		/*FALLTHROUGH*/
 	    case SVt_PVFM:
 		/* NOTE: not refcounted */
-		CvSTASH(dstr)	= hv_dup(CvSTASH(dstr), param);
+		SvANY(MUTABLE_CV(dstr))->xcv_stash =
+		    hv_dup(CvSTASH(dstr), param);
 		if ((param->flags & CLONEf_JOIN_IN) && CvSTASH(dstr))
 		    Perl_sv_add_backref(aTHX_ MUTABLE_SV(CvSTASH(dstr)), dstr);
 		OP_REFCNT_LOCK;

@@ -602,6 +602,11 @@ PERL_CALLCONV void	Perl_cvgv_set(pTHX_ CV* cv, GV* gv)
 #define PERL_ARGS_ASSERT_CVGV_SET	\
 	assert(cv)
 
+PERL_CALLCONV void	Perl_cvstash_set(pTHX_ CV* cv, HV* stash)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_CVSTASH_SET	\
+	assert(cv)
+
 PERL_CALLCONV void	Perl_cx_dump(pTHX_ PERL_CONTEXT* cx)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_CX_DUMP	\

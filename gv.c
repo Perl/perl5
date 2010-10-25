@@ -235,6 +235,21 @@ Perl_cvgv_set(pTHX_ CV* cv, GV* gv)
     }
 }
 
+/* Assign CvSTASH(cv) = st, handling weak references. */
+
+void
+Perl_cvstash_set(pTHX_ CV *cv, HV *st)
+{
+    HV *oldst = CvSTASH(cv);
+    PERL_ARGS_ASSERT_CVSTASH_SET;
+    if (oldst == st)
+	return;
+    if (oldst)
+	sv_del_backref(MUTABLE_SV(oldst), MUTABLE_SV(cv));
+    SvANY(cv)->xcv_stash = st;
+    if (st)
+	Perl_sv_add_backref(aTHX_ MUTABLE_SV(st), MUTABLE_SV(cv));
+}
 
 void
 Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
@@ -320,9 +335,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
         mro_method_changed_in(GvSTASH(gv)); /* sub Foo::bar($) { (shift) } sub ASDF::baz($); *ASDF::baz = \&Foo::bar */
 	CvGV_set(cv, gv);
 	CvFILE_set_from_cop(cv, PL_curcop);
-	CvSTASH(cv) = PL_curstash;
-	if (PL_curstash)
-	    Perl_sv_add_backref(aTHX_ MUTABLE_SV(PL_curstash), MUTABLE_SV(cv));
+	CvSTASH_set(cv, PL_curstash);
 	if (proto) {
 	    sv_usepvn_flags(MUTABLE_SV(cv), proto, protolen,
 			    SV_HAS_TRAILING_NUL);
@@ -795,11 +808,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
          * and split that value on the last '::',
          * pass along the same data via some unused fields in the CV
          */
-	if (CvSTASH(cv))
-	    sv_del_backref(MUTABLE_SV(CvSTASH(cv)), MUTABLE_SV(cv));
-        CvSTASH(cv) = stash;
-	if (stash)
-	    Perl_sv_add_backref(aTHX_ MUTABLE_SV(stash), MUTABLE_SV(cv));
+	CvSTASH_set(cv, stash);
         SvPV_set(cv, (char *)name); /* cast to lose constness warning */
         SvCUR_set(cv, len);
         return gv;

@@ -438,6 +438,7 @@ Ap	|void	|gv_fullname4	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix|bool
 : Used in scope.c
 pMox	|GP *	|newGP		|NN GV *const gv
 pX	|void	|cvgv_set	|NN CV* cv|NULLOK GV* gv
+pX	|void	|cvstash_set	|NN CV* cv|NULLOK HV* stash
 Ap	|void	|gv_init	|NN GV* gv|NULLOK HV* stash|NN const char* name|STRLEN len|int multi
 Ap	|void	|gv_name_set	|NN GV* gv|NN const char *name|U32 len|U32 flags
 XMpd	|void	|gv_try_downgrade|NN GV* gv

@@ -72,6 +72,7 @@ Perl_cv_get_call_checker
 Perl_cv_set_call_checker
 Perl_cv_undef
 Perl_cvgv_set
+Perl_cvstash_set
 Perl_cx_dump
 Perl_cxinc
 Perl_deb
