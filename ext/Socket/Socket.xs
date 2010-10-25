@@ -251,7 +251,6 @@ inet_ntoa(ip_address_sv)
 	{
 	STRLEN addrlen;
 	struct in_addr addr;
-	char * addr_str;
 	char * ip_address;
 	if (DO_UTF8(ip_address_sv) && !sv_utf8_downgrade(ip_address_sv, 1))
 	     croak("Wide character in %s", "Socket::inet_ntoa");
@@ -270,14 +269,11 @@ inet_ntoa(ip_address_sv)
 	 * in HP-UX + GCC + 64bitint (returns "0.0.0.0"),
 	 * so let's use this sprintf() workaround everywhere.
 	 * This is also more threadsafe than using inet_ntoa(). */
-	Newx(addr_str, 4 * 3 + 3 + 1, char); /* IPv6? */
-	sprintf(addr_str, "%d.%d.%d.%d",
-		((addr.s_addr >> 24) & 0xFF),
-		((addr.s_addr >> 16) & 0xFF),
-		((addr.s_addr >>  8) & 0xFF),
-		( addr.s_addr        & 0xFF));
-	ST(0) = newSVpvn_flags(addr_str, strlen(addr_str), SVs_TEMP);
-	Safefree(addr_str);
+	ST(0) = sv_2mortal(Perl_newSVpvf(aTHX_ "%d.%d.%d.%d", /* IPv6? */
+					 ((addr.s_addr >> 24) & 0xFF),
+					 ((addr.s_addr >> 16) & 0xFF),
+					 ((addr.s_addr >>  8) & 0xFF),
+					 ( addr.s_addr        & 0xFF)));
 	}
 
 void
