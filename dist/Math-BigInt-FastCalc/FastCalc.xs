@@ -46,22 +46,20 @@ _set_XS_BASE(BASE, BASE_LEN)
 ##############################################################################
 # _new
 
-AV *
+SV *
 _new(class, x)
   SV*	x
   INIT:
     STRLEN len;
     char* cur;
     STRLEN part_len;
+    AV *av = newAV();
 
   CODE:
-    /* create the array */
-    RETVAL = newAV();
-    sv_2mortal((SV*)RETVAL);
     if (SvUOK(x) && SvUV(x) < XS_BASE)
       {
       /* shortcut for integer arguments */
-      av_push (RETVAL, newSVuv( SvUV(x) ));
+      av_push (av, newSVuv( SvUV(x) ));
       }
     else
       {
@@ -87,10 +85,11 @@ _new(class, x)
         /* printf ("part '%s' (part_len: %i, len: %i, BASE_LEN: %i)\n", cur, part_len, len, XS_BASE_LEN); */
         if (part_len > 0)
 	  {
-	  av_push (RETVAL, newSVpvn(cur, part_len) );
+	  av_push (av, newSVpvn(cur, part_len) );
 	  }
         }
       }
+    RETVAL = newRV_noinc((SV *)av);
   OUTPUT:
     RETVAL
 
@@ -296,16 +295,17 @@ _num(class,x)
 
 ##############################################################################
 
-AV *
+SV *
 _zero(class)
   ALIAS:
     _one = 1
     _two = 2
     _ten = 10
+  PREINIT:
+    AV *av = newAV();
   CODE:
-    RETVAL = newAV();
-    sv_2mortal((SV*)RETVAL);
-    av_push (RETVAL, newSViv( ix ));
+    av_push (av, newSViv( ix ));
+    RETVAL = newRV_noinc((SV *)av);
   OUTPUT:
     RETVAL
 
