@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 225 );
+plan( tests => 226 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -816,6 +816,20 @@ pass('Can assign integers to typeglobs');
 pass('Can assign floats to typeglobs');
 *aieee = 'pi';
 pass('Can assign strings to typeglobs');
+
+{
+  package thrext;
+  sub TIESCALAR{bless[]}
+  sub STORE{ die "No!"}
+  sub FETCH{ no warnings 'once'; *thrit }
+  tie my $a, "thrext";
+  () = "$a"; # do a fetch; now $a holds a glob
+  eval { *$a = sub{} };
+  untie $a;
+  eval { $a = "bar" };
+  ::is $a, "bar",
+    "[perl #77812] Globs in tied scalars can be reified if STORE dies"
+}
 
 __END__
 Perl
