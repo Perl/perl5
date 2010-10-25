@@ -1710,6 +1710,17 @@ my_exit(int exitcode)
         PPCODE:
         my_exit(exitcode);
 
+U8
+first_byte(sv)
+	SV *sv
+   CODE:
+    char *s;
+    STRLEN len;
+	s = SvPVbyte(sv, len);
+	RETVAL = s[0];
+   OUTPUT:
+    RETVAL
+
 I32
 sv_count()
         CODE:
