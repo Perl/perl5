@@ -575,9 +575,9 @@ another spot in the stash hierarchy. C<stash> is the stash that has been
 assigned. C<oldstash> is the stash it replaces, if any. C<gv> is the glob
 that is actually being assigned to. C<newname> and C<newname_len> are the
 full name of the GV. If these last two arguments are omitted, they can be
-inferred from C<oldstash> or C<gv>.
+inferred from C<gv>. C<gv> can be omitted if C<newname> is given.
 
-This can also be called with a null first argument and a null C<gv>, to
+This can also be called with a null first argument to
 indicate that C<oldstash> has been deleted.
 
 This function invalidates isa caches on the old stash, on all subpackages
@@ -587,43 +587,56 @@ non-existent packages that have corresponding entries in C<stash>.
 =cut
 */
 void
-Perl_mro_package_moved(pTHX_ HV * const stash, const HV * const oldstash,
-                       const GV * const gv, const char *newname,
+Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
+                       const GV *gv, const char *newname,
                        I32 newname_len)
 {
     register XPVHV* xhv;
     register HE *entry;
     I32 riter = -1;
     HV *seen = NULL;
-    /* If newname_len is negative, it is actually the call depth (negated).
-     */
-    const I32 level = newname_len < 0 ? newname_len : 0;
+    HV *seen_stashes = NULL;
+
+    /* If newname_len is negative, then gv is actually the caller’s hash of
+       stashes that have been seen so far. */
 
     assert(stash || oldstash);
-    assert(oldstash || gv || newname);
+    assert((gv && newname_len >= 0) || newname);
 
-    if(level < -100) return;
+    if(newname_len < 0) seen_stashes = (HV *)gv, gv = NULL;
 
-    if(!newname && oldstash) {
-	newname = HvNAME_get(oldstash);
-	newname_len = HvNAMELEN_get(oldstash);
-    }
+    /* Determine the name of the location that stash was assigned to
+     * or from which oldstash was removed.
+     *
+     * We cannot reliable use the name in oldstash, because it may have
+     * been deleted from the location in the symbol table that its name
+     * suggests, as in this case:
+     *
+     *   $globref = \*foo::bar::;
+     *   Symbol::delete_package("foo");
+     *   *$globref = \%baz::;
+     *   *$globref = *frelp::;
+     *      # calls mro_package_moved(%frelp::, %baz::, *$globref, NULL, 0)
+     *
+     * If newname is not null, then we trust that the caller gave us the
+     * right name. Otherwise, we get it from the gv. But if the gv is not
+     * in the symbol table, then we just return.
+     */
     if(!newname && gv) {
 	SV * const namesv = sv_newmortal();
 	STRLEN len;
 	gv_fullname4(namesv, gv, NULL, 0);
+	if(gv_fetchsv(namesv, GV_NOADD_NOINIT, SVt_PVGV) != gv) return;
 	newname = SvPV_const(namesv, len);
 	newname_len = len - 2; /* skip trailing :: */
     }
-    /* XXX This relies on the fact that package names cannot contain nulls.
-     */
-    if(newname_len < 0) newname_len = strlen(newname);
+    if(newname_len < 0) newname_len = -newname_len;
 
     mro_isa_changed_in3((HV *)oldstash, newname, newname_len);
 
     if(
      (!stash || !HvARRAY(stash)) && (!oldstash || !HvARRAY(oldstash))
-    ) return;
+    ) goto set_names;
 
     /* This is partly based on code in hv_iternext_flags. We are not call-
        ing that here, as we want to avoid resetting the hash iterator. */
@@ -632,6 +645,7 @@ Perl_mro_package_moved(pTHX_ HV * const stash, const HV * const oldstash,
     if(oldstash && HvUSEDKEYS(oldstash)) { 
 	xhv = (XPVHV*)SvANY(oldstash);
 	seen = (HV *) sv_2mortal((SV *)newHV());
+	if(!seen_stashes) seen_stashes = (HV *) sv_2mortal((SV *)newHV());
 
 	/* Iterate through entries in the oldstash, calling
 	    mro_package_moved(
@@ -657,23 +671,44 @@ Perl_mro_package_moved(pTHX_ HV * const stash, const HV * const oldstash,
 		    HV * const oldsubstash = GvHV(HeVAL(entry));
 		    SV ** const stashentry
 		     = stash ? hv_fetch(stash, key, len, 0) : NULL;
-		    HV *substash;
+		    HV *substash = NULL;
 
 		    /* Avoid main::main::main::... */
 		    if(oldsubstash == oldstash) continue;
+		    if(oldsubstash) {
+			HE * const entry
+			 = (HE *)
+			    hv_common(
+			     seen_stashes, NULL,
+			     (const char *)&oldsubstash, sizeof(HV *), 0,
+			     HV_FETCH_LVALUE, NULL, 0
+			    );
+			if(HeVAL(entry) == &PL_sv_yes) continue;
+			HeVAL(entry) = &PL_sv_yes;
+		    }
 
 		    if(
-		        stashentry && *stashentry
-		     && (substash = GvHV(*stashentry))
-		     && HvNAME(substash)
+		        (
+		            stashentry && *stashentry
+		         && (substash = GvHV(*stashentry))
+		        )
+		     || (oldsubstash && HvNAME(oldsubstash))
 		    )
+		    {
+			/* Add :: and the key (minus the trailing ::)
+			   to newname. */
+			SV *namesv
+			 = newSVpvn_flags(newname, newname_len, SVs_TEMP);
+			const char *name;
+			STRLEN namlen;
+			sv_catpvs(namesv, "::");
+			sv_catpvn(namesv, key, len-2);
+			name = SvPV_const(namesv, namlen);
 			mro_package_moved(
-			 substash, oldsubstash, NULL, NULL, level-1
+			  substash, oldsubstash,
+			  (GV *)seen_stashes, name, -namlen
 			);
-		    else if(oldsubstash && HvNAME(oldsubstash))
-			mro_package_moved(
-			 NULL, oldsubstash, NULL, NULL, level-1
-			);
+		    }
 
 		    (void)hv_store(seen, key, len, &PL_sv_yes, 0);
 		}
@@ -684,6 +719,7 @@ Perl_mro_package_moved(pTHX_ HV * const stash, const HV * const oldstash,
     /* Skip the entire loop if the hash is empty.   */
     if (stash && HvUSEDKEYS(stash)) {
 	xhv = (XPVHV*)SvANY(stash);
+	if(!seen_stashes) seen_stashes = (HV *) sv_2mortal((SV *)newHV());
 
 	/* Iterate through the new stash, skipping $seen{$key} items,
 	   calling mro_package_moved(entry, NULL, ...). */
@@ -711,11 +747,23 @@ Perl_mro_package_moved(pTHX_ HV * const stash, const HV * const oldstash,
 		       entry in the stash being replaced. */
 
 		    substash = GvHV(HeVAL(entry));
-		    if(substash && HvNAME(substash)) {
+		    if(substash) {
 			SV *namesv;
+			const char *name;
+			STRLEN namlen;
+			HE *entry;
 
 			/* Avoid checking main::main::main::... */
 			if(substash == stash) continue;
+			entry
+			 = (HE *)
+			       hv_common(
+			        seen_stashes, NULL,
+			        (const char *)&substash, sizeof(HV *), 0,
+			        HV_FETCH_LVALUE, NULL, 0
+			       );
+			if(HeVAL(entry) == &PL_sv_yes) continue;
+			HeVAL(entry) = &PL_sv_yes;
 
 			/* Add :: and the key (minus the trailing ::)
 			   to newname. */
@@ -723,10 +771,9 @@ Perl_mro_package_moved(pTHX_ HV * const stash, const HV * const oldstash,
 			 = newSVpvn_flags(newname, newname_len, SVs_TEMP);
 			sv_catpvs(namesv, "::");
 			sv_catpvn(namesv, key, len-2);
+			name = SvPV_const(namesv, namlen);
 			mro_package_moved(
-			    substash, NULL, NULL,
-			    SvPV_nolen_const(namesv),
-			    level-1
+			  substash, NULL, (GV *)seen_stashes, name, -namlen
 			);
 		    }
 		}
@@ -734,6 +781,14 @@ Perl_mro_package_moved(pTHX_ HV * const stash, const HV * const oldstash,
 	}
     }
 
+   set_names:
+    if(oldstash && HvNAME(oldstash)) {
+	if(PL_stashcache)
+	    (void)
+	     hv_delete(PL_stashcache, newname, newname_len, G_DISCARD);
+	hv_name_delete(oldstash, newname, newname_len);
+    }
+    if(stash) hv_name_add(stash, newname, newname_len);
 }
 
 /*

@@ -1016,6 +1016,23 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
         if (k_flags & HVhek_FREEKEY)
             Safefree(key);
 
+	/* If this is a stash and the key ends with ::, then someone is 
+	   deleting a package. This must come before the entry is
+	   actually detached from the hash, as mro_package_moved checks
+	   whether the passed gv is still in the symbol table before
+	   doing anything. */
+	if (HeVAL(entry) && HvNAME(hv)) {
+		if (keysv) key = SvPV(keysv, klen);
+		if (klen > 1 && key[klen-2] == ':' && key[klen-1] == ':'
+		 && SvTYPE(HeVAL(entry)) == SVt_PVGV) {
+		    HV * const stash = GvHV((GV *)HeVAL(entry));
+		    if (stash && HvNAME(stash))
+			mro_package_moved(
+			 NULL, stash, (GV *)HeVAL(entry), NULL, 0
+			);
+		}
+	}
+
 	if (d_flags & G_DISCARD)
 	    sv = NULL;
 	else {
@@ -1037,19 +1054,6 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    HvPLACEHOLDERS(hv)++;
 	} else {
 	    *oentry = HeNEXT(entry);
-
-	    /* If this is a stash and the key ends with ::, then someone is 
-	       deleting a package. */
-	    if (sv && HvNAME(hv)) {
-		if (keysv) key = SvPV(keysv, klen);
-		if (klen > 1 && key[klen-2] == ':' && key[klen-1] == ':'
-		 && SvTYPE(sv) == SVt_PVGV) {
-		    const HV * const stash = GvHV((GV *)sv);
-		    if (stash && HvNAME(stash))
-			mro_package_moved(NULL, stash, NULL, NULL, 0);
-		}
-	    }
-
 	    if (SvOOK(hv) && entry == HvAUX(hv)->xhv_eiter /* HvEITER(hv) */)
 		HvLAZYDEL_on(hv);
 	    else

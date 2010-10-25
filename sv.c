@@ -3655,10 +3655,9 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
     if(mro_changes == 2) mro_isa_changed_in(GvSTASH(dstr));
     else if(mro_changes == 3) {
 	HV * const stash = GvHV(dstr);
-	if((stash && HvNAME(stash)) || (old_stash && HvNAME(old_stash)))
+	if(old_stash ? (HV *)HvNAME(old_stash) : stash)
 	    mro_package_moved(
-		stash && HvNAME(stash) ? stash : NULL,
-		old_stash && HvNAME(old_stash) ? old_stash : NULL,
+		stash, old_stash,
 		(GV *)dstr, NULL, 0
 	    );
     }
@@ -3773,11 +3772,10 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 	    const STRLEN len = GvNAMELEN(dstr);
 	    if (
 	        len > 1 && name[len-2] == ':' && name[len-1] == ':'
-	     && (HvNAME(dref) || HvNAME(sref))
+	     && (!dref || HvNAME(dref))
 	    ) {
 		mro_package_moved(
-		    HvNAME(sref) ? (HV *)sref : NULL,
-		    HvNAME(dref) ? (HV *)dref : NULL,
+		    (HV *)sref, (HV *)dref,
 		    (GV *)dstr, NULL, 0
 		);
 	    }
@@ -4049,12 +4047,10 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 		if (reset_isa) {
 		    HV * const stash = GvHV(dstr);
 		    if(
-		        (stash && HvNAME(stash))
-		     || (old_stash && HvNAME(old_stash))
+		        old_stash ? (HV *)HvNAME(old_stash) : stash
 		    )
 			mro_package_moved(
-			 stash && HvNAME(stash) ? stash : NULL,
-			 old_stash && HvNAME(old_stash) ? old_stash : NULL,
+			 stash, old_stash,
 			 (GV *)dstr, NULL, 0
 			);
 		}
