@@ -25,8 +25,5 @@ is(XS::APItest::first_byte("$1"), 0303,
 $a =~ s/(.)/$1/;      # $1 now has the utf8 flag set too
 $b =~ /(.)/;          # $1 shouldn't have the utf8 flag anymore
 
-TODO: {
-local $TODO = "SvPVbyte should handle get magic before checking the utf8 flag";
 is(eval { XS::APItest::first_byte($1) } || $@, 0303,
     "utf8 flag fetched correctly without stringification");
-}

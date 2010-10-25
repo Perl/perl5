@@ -1421,6 +1421,9 @@ Returns a pointer to the string in the SV, or a stringified form of
 the SV if the SV does not contain a string.  The SV may cache the
 stringified form becoming C<SvPOK>.  Handles 'get' magic.
 
+=for apidoc Am|char*|SvPV_nomg_nolen|SV* sv
+Like C<SvPV_nolen> but doesn't process magic.
+
 =for apidoc Am|IV|SvIV|SV* sv
 Coerces the given SV to an integer and returns it. See C<SvIVx> for a
 version which guarantees to evaluate sv only once.
@@ -1585,6 +1588,10 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>
 #define SvPV_nolen(sv) \
     ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
      ? SvPVX(sv) : sv_2pv_flags(sv, 0, SV_GMAGIC))
+
+#define SvPV_nomg_nolen(sv) \
+    ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
+     ? SvPVX(sv) : sv_2pv_flags(sv, 0, 0))
 
 #define SvPV_nolen_const(sv) \
     ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
