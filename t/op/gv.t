@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 224 );
+plan( tests => 225 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -657,6 +657,7 @@ is (scalar $::{fake}, "*main::sym",
 	"Localized FAKE glob's value was correctly restored");
 
 # [perl #1804] *$x assignment when $x is a copy of another glob
+# And [perl #77508] (same thing with list assignment)
 {
     no warnings 'once';
     my $x = *_random::glob_that_is_not_used_elsewhere;
@@ -665,6 +666,12 @@ is (scalar $::{fake}, "*main::sym",
       "$x", '*_random::glob_that_is_not_used_elsewhere',
       '[perl #1804] *$x assignment when $x is FAKE',
     );
+    $x = *_random::glob_that_is_not_used_elsewhere;
+    (my $dummy, *$x) = (undef,[]);
+    is(
+      "$x", '*_random::glob_that_is_not_used_elsewhere',
+      '[perl #77508] *$x list assignment when $x is FAKE',
+    ) or require Devel::Peek, Devel::Peek::Dump($x);
 }
 
 # [perl #76540]
