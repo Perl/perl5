@@ -953,3 +953,14 @@ print ref tied *$rin, "\n";
 EXPECT
 main
 f
+########
+
+# tie $glob_copy vs tie *$glob_copy
+sub TIESCALAR { print "TIESCALAR\n" }
+sub TIEHANDLE{ print "TIEHANDLE\n" }
+$f = *foo;
+tie *$f, "";
+tie $f, "";
+EXPECT
+TIEHANDLE
+TIESCALAR

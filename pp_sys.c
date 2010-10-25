@@ -826,7 +826,7 @@ PP(pp_tie)
 	    break;
 	case SVt_PVGV:
 	case SVt_PVLV:
-	    if (isGV_with_GP(varsv)) {
+	    if (isGV_with_GP(varsv) && !SvFAKE(varsv)) {
 		methname = "TIEHANDLE";
 		how = PERL_MAGIC_tiedscalar;
 		/* For tied filehandles, we apply tiedscalar magic to the IO
