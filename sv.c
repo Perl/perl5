@@ -3933,22 +3933,17 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 	/* case SVt_BIND: */
     case SVt_PVLV:
     case SVt_PVGV:
-	if (isGV_with_GP(sstr) && dtype <= SVt_PVLV) {
-	    glob_assign_glob(dstr, sstr, dtype);
-	    return;
-	}
 	/* SvVALID means that this PVGV is playing at being an FBM.  */
-	/*FALLTHROUGH*/
 
     case SVt_PVMG:
 	if (SvGMAGICAL(sstr) && (flags & SV_GMAGIC)) {
 	    mg_get(sstr);
 	    if (SvTYPE(sstr) != stype)
 		stype = SvTYPE(sstr);
-	    if (isGV_with_GP(sstr) && dtype <= SVt_PVLV) {
+	}
+	if (isGV_with_GP(sstr) && dtype <= SVt_PVLV) {
 		    glob_assign_glob(dstr, sstr, dtype);
 		    return;
-	    }
 	}
 	if (stype == SVt_PVLV)
 	    SvUPGRADE(dstr, SVt_PVNV);

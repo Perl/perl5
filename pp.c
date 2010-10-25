@@ -221,7 +221,7 @@ PP(pp_rv2gv)
 	save_gp(MUTABLE_GV(sv), !(PL_op->op_flags & OPf_SPECIAL));
     if (sv && SvFAKE(sv)) {
 	SV *newsv = sv_newmortal();
-	sv_setsv(newsv, sv);
+	sv_setsv_flags(newsv, sv, 0);
 	SvFAKE_off(newsv);
 	SETs(newsv);
     }
