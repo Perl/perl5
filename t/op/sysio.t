@@ -1,14 +1,14 @@
 #!./perl
 
 BEGIN {
-  chdir('op') || chdir('t/op') || die "sysio.t: cannot look for myself: $!";
-  @INC = '../../lib';
-  require '../test.pl';
+  chdir 't' if -d 't';
+  @INC = '../lib';
+  require './test.pl';
 }
 
 plan tests => 48;
 
-open(I, 'sysio.t') || die "sysio.t: cannot find myself: $!";
+open(I, 'op/sysio.t') || die "sysio.t: cannot find myself: $!";
 
 $reopen = ($^O eq 'VMS' ||
            $^O eq 'os2' ||
