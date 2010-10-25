@@ -135,18 +135,20 @@ sub boottime_iterator {
 
     if ($push) {
 	return sprintf <<"EOBOOT", &$generator(&$extractor($iterator));
-        do {
+        while ($iterator->name) {
 	    he = $subname($athx $hash, $iterator->name,
 				     $iterator->namelen, %s);
 	    av_push(push, newSVhek(HeKEY_hek(he)));
-	} while ((++$iterator)->name);
+            ++$iterator;
+	}
 EOBOOT
     } else {
 	return sprintf <<"EOBOOT", &$generator(&$extractor($iterator));
-        do {
+        while ($iterator->name) {
 	    $subname($athx $hash, $iterator->name,
 				$iterator->namelen, %s);
-	} while ((++$iterator)->name);
+            ++$iterator;
+	}
 EOBOOT
     }
 }
