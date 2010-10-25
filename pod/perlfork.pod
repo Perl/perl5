@@ -187,6 +187,19 @@ is suggested instead.  C<_exit()> is available in Perl through the
 C<POSIX> module.  Please consult your system's manpages for more information
 on this.
 
+=item Open directory handles
+
+Perl will completely read from all open directory handles until they
+reach the end of the stream.  It will then seekdir() back to the
+original location and all future readdir() requests will be fulfilled
+from the cache buffer.  That means that neither directory handle held
+by the parent process nor the one held by the child process will see
+any changes made to the directory after the fork() call.
+
+Note that rewinddir() has a similar limitation on Windows and will not
+force readdir() to read the directory again either.  Only a newly
+opened directory handle will reflect changes to the directory.
+
 =item Forking pipe open() not yet implemented
 
 The C<open(FOO, "|-")> and C<open(BAR, "-|")> constructs are not yet

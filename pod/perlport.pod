@@ -1868,6 +1868,12 @@ Not implemented. (Win32, VMS, S<RISC OS>)
 
 Can't move directories between directories on different logical volumes. (Win32)
 
+=item rewinddir
+
+Will not cause readdir() to re-read the directory stream.  The entries
+already read before the rewinddir() call will just be returned again
+from a cache buffer. (Win32)
+
 =item select
 
 Only implemented on sockets. (Win32, VMS)
