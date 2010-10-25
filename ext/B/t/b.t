@@ -178,8 +178,8 @@ is(B::opnumber("pp_null"), 0, "Testing opnumber with opname (pp_null)");
     is(B::perlstring(undef), '0', "Testing B::perlstring(undef)");
 
     my @common = map {eval $_, $_}
-	'"wibble"', '"\""', '"\'"', '"\\\\"', '"\\n\\r\\t\\b\\a\\f"', '"\\177"',
-	    '"\000"', '"\000\000"', '"\000Bing\000"';
+	'"wibble"', '"\""', '"\'"', '"\\\\"', '"\\n\\r\\t\\b\\a\\f"', '"\000"',
+	    '"\000\000"', '"\000Bing\000"', ord 'N' == 78 ? '"\\177"' : ();
 
     my $oct = sprintf "\\%03o", ord '?';
     my @tests = (@common, '$_', '"$_"', '@_', '"@_"', '??N', qq{"$oct?N"},
@@ -200,9 +200,9 @@ is(B::opnumber("pp_null"), 0, "Testing opnumber with opname (pp_null)");
     }
 }
 {
-    my @tests = (map {eval(qq{"$_"}), $_} '\\n', '\\r', '\\t',
-		 '\\b', '\\a', '\\f', '\\000', '\\\'', '?'), '"', '"',
-		 ord 'N' == 78 ? (chr 11, q{'\013"'}, "\177", "'\\177'") : ();
+    my @tests = ((map {eval(qq{"$_"}), $_} '\\n', '\\r', '\\t',
+		  '\\b', '\\a', '\\f', '\\000', '\\\'', '?'), '"', '"',
+		 ord 'N' == 78 ? (chr 11, '\v', "\177", '\\177') : ());
 
     while (my ($test, $expect) = splice @tests, 0, 2) {
 	is(B::cchar($test), "'${expect}'", "B::cchar(qq{$expect})");
