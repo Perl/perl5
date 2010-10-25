@@ -445,46 +445,19 @@ PPCODE:
 
 void
 _test_uvar_get(SV* svref, SV* countref)
+ALIAS:
+_test_uvar_get = 1
+_test_uvar_set = 2
+_test_uvar_same = 3
 CODE:
     if (SvROK(svref) && SvROK(countref)) {
         counter = SvRV(countref);
         sv_setiv(counter, 0);
         HUF_add_uvar_magic(
             SvRV(svref),
-            &HUF_inc_var,
-            NULL,
-            0,
+            ix & 1 ? &HUF_inc_var : 0,
+            ix & 2 ? &HUF_inc_var : 0,
+	    0,
             SvRV(countref)
         );
     }
-
-void
-_test_uvar_set(SV* svref, SV* countref)
-CODE:
-    if (SvROK(svref) && SvROK(countref)) {
-        counter = SvRV(countref);
-        sv_setiv(counter, 0);
-        HUF_add_uvar_magic(
-            SvRV(svref),
-            NULL,
-            &HUF_inc_var,
-            0,
-            SvRV(countref)
-        );
-    }
-
-void
-_test_uvar_same(SV* svref, SV* countref)
-CODE:
-    if (SvROK(svref) && SvROK(countref)) {
-        counter = SvRV(countref);
-        sv_setiv(counter, 0);
-        HUF_add_uvar_magic(
-            SvRV(svref),
-            &HUF_inc_var,
-            &HUF_inc_var,
-            0,
-            NULL
-        );
-    }
-
