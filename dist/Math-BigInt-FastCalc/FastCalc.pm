@@ -2,18 +2,16 @@ package Math::BigInt::FastCalc;
 
 use 5.006;
 use strict;
-# use warnings;	# dont use warnings for older Perls
+use warnings;
 
-use DynaLoader;
 use Math::BigInt::Calc;
 
-use vars qw/@ISA $VERSION $BASE $BASE_LEN/;
-
-@ISA = qw(DynaLoader);
+use vars qw/$VERSION $BASE $BASE_LEN/;
 
 $VERSION = '0.23';
 
-bootstrap Math::BigInt::FastCalc $VERSION;
+require XSLoader;
+XSLoader::load(__PACKAGE__);
 
 ##############################################################################
 # global constants, flags and accessory
