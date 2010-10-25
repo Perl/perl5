@@ -752,7 +752,7 @@
 #if defined(USE_ITHREADS)
 #define any_dup(a,b)		Perl_any_dup(aTHX_ a,b)
 #define cx_dup(a,b,c,d)		Perl_cx_dup(aTHX_ a,b,c,d)
-#define dirp_dup(a)		Perl_dirp_dup(aTHX_ a)
+#define dirp_dup(a,b)		Perl_dirp_dup(aTHX_ a,b)
 #define fp_dup(a,b,c)		Perl_fp_dup(aTHX_ a,b,c)
 #define gp_dup(a,b)		Perl_gp_dup(aTHX_ a,b)
 #define he_dup(a,b,c)		Perl_he_dup(aTHX_ a,b,c)

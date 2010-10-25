@@ -981,10 +981,13 @@ win32_readdir(DIR *dirp)
 	    char buffer[MAX_PATH*2];
             char *ptr;
 
+            if (dirp->handle == INVALID_HANDLE_VALUE) {
+                res = 0;
+            }
 	    /* finding the next file that matches the wildcard
 	     * (which should be all of them in this directory!).
 	     */
-	    if (IsWin2000()) {
+	    else if (IsWin2000()) {
                 WIN32_FIND_DATAW wFindData;
 		res = FindNextFileW(dirp->handle, &wFindData);
 		if (res) {
@@ -1019,8 +1022,13 @@ win32_readdir(DIR *dirp)
 		dirp->end = dirp->start + newsize;
 		dirp->nfiles++;
 	    }
-	    else
+	    else {
 		dirp->curr = NULL;
+                if (dirp->handle != INVALID_HANDLE_VALUE) {
+                    FindClose(dirp->handle);
+                    dirp->handle = INVALID_HANDLE_VALUE;
+                }
+            }
 	}
 	return &(dirp->dirstr);
     }
@@ -1032,7 +1040,7 @@ win32_readdir(DIR *dirp)
 DllExport long
 win32_telldir(DIR *dirp)
 {
-    return (dirp->curr - dirp->start);
+    return dirp->curr ? (dirp->curr - dirp->start) : -1;
 }
 
 
@@ -1042,7 +1050,7 @@ win32_telldir(DIR *dirp)
 DllExport void
 win32_seekdir(DIR *dirp, long loc)
 {
-    dirp->curr = dirp->start + loc;
+    dirp->curr = loc == -1 ? NULL : dirp->start + loc;
 }
 
 /* Rewinddir resets the string pointer to the start */
@@ -1064,6 +1072,50 @@ win32_closedir(DIR *dirp)
     return 1;
 }
 
+/* duplicate a open DIR* for interpreter cloning */
+DllExport DIR *
+win32_dirp_dup(DIR *const dirp, CLONE_PARAMS *const param)
+{
+    dVAR;
+    PerlInterpreter *const from = param->proto_perl;
+    PerlInterpreter *const to   = PERL_GET_THX;
+
+    long pos;
+    DIR *dup;
+
+    /* switch back to original interpreter because win32_readdir()
+     * might Renew(dirp->start).
+     */
+    if (from != to) {
+        PERL_SET_THX(from);
+    }
+
+    /* mark current position; read all remaining entries into the
+     * cache, and then restore to current position.
+     */
+    pos = win32_telldir(dirp);
+    while (win32_readdir(dirp)) {
+        /* read all entries into cache */
+    }
+    win32_seekdir(dirp, pos);
+
+    /* switch back to new interpreter to allocate new DIR structure */
+    if (from != to) {
+        PERL_SET_THX(to);
+    }
+
+    Newx(dup, 1, DIR);
+    memcpy(dup, dirp, sizeof(DIR));
+
+    Newx(dup->start, dirp->size, char);
+    memcpy(dup->start, dirp->start, dirp->size);
+
+    dup->end = dup->start + (dirp->end - dirp->start);
+    if (dirp->curr)
+        dup->curr = dup->start + (dirp->curr - dirp->start);
+
+    return dup;
+}
 
 /*
  * various stubs

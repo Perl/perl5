@@ -11009,10 +11009,11 @@ Perl_fp_dup(pTHX_ PerlIO *const fp, const char type, CLONE_PARAMS *const param)
 /* duplicate a directory handle */
 
 DIR *
-Perl_dirp_dup(pTHX_ DIR *const dp)
+Perl_dirp_dup(pTHX_ DIR *const dp, CLONE_PARAMS *const param)
 {
-#ifdef HAS_FCHDIR
     DIR *ret;
+
+#ifdef HAS_FCHDIR
     DIR *pwd;
     register const Direntry_t *dirent;
     char smallbuf[256];
@@ -11022,14 +11023,19 @@ Perl_dirp_dup(pTHX_ DIR *const dp)
 #endif
 
     PERL_UNUSED_CONTEXT;
+    PERL_ARGS_ASSERT_DIRP_DUP;
 
-#ifdef HAS_FCHDIR
     if (!dp)
 	return (DIR*)NULL;
+
     /* look for it in the table first */
     ret = (DIR*)ptr_table_fetch(PL_ptr_table, dp);
     if (ret)
 	return ret;
+
+#ifdef HAS_FCHDIR
+
+    PERL_UNUSED_ARG(param);
 
     /* create anew */
 
@@ -11098,14 +11104,17 @@ Perl_dirp_dup(pTHX_ DIR *const dp)
 
     if (name && name != smallbuf)
 	Safefree(name);
+#endif
+
+#ifdef WIN32
+    ret = win32_dirp_dup(dp, param);
+#endif
 
     /* pop it in the pointer table */
-    ptr_table_store(PL_ptr_table, dp, ret);
+    if (ret)
+	ptr_table_store(PL_ptr_table, dp, ret);
 
     return ret;
-#else
-    return (DIR*)NULL;
-#endif
 }
 
 /* duplicate a typeglob */
@@ -11661,7 +11670,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		    IoFMT_GV(dstr)      = gv_dup(IoFMT_GV(dstr), param);
 		    IoBOTTOM_GV(dstr)   = gv_dup(IoBOTTOM_GV(dstr), param);
 		    if (IoDIRP(dstr)) {
-			IoDIRP(dstr)	= dirp_dup(IoDIRP(dstr));
+			IoDIRP(dstr)	= dirp_dup(IoDIRP(dstr), param);
 		    } else {
 			NOOP;
 			/* IoDIRP(dstr) is already a copy of IoDIRP(sstr)  */

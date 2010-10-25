@@ -7162,8 +7162,11 @@ PERL_CALLCONV PERL_CONTEXT*	Perl_cx_dup(pTHX_ PERL_CONTEXT* cx, I32 ix, I32 max,
 #define PERL_ARGS_ASSERT_CX_DUP	\
 	assert(param)
 
-PERL_CALLCONV DIR*	Perl_dirp_dup(pTHX_ DIR *const dp)
-			__attribute__warn_unused_result__;
+PERL_CALLCONV DIR*	Perl_dirp_dup(pTHX_ DIR *const dp, CLONE_PARAMS *const param)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_DIRP_DUP	\
+	assert(param)
 
 PERL_CALLCONV PerlIO*	Perl_fp_dup(pTHX_ PerlIO *const fp, const char type, CLONE_PARAMS *const param)
 			__attribute__nonnull__(pTHX_3);

@@ -45,8 +45,8 @@ SKIP: {
    skip $_[0], 5
  };
 
- if(!$Config::Config{d_fchdir}) {
-  $::TODO = 'dir handle cloning currently requires fchdir';
+ if(!$Config::Config{d_fchdir} && $^O ne "MSWin32") {
+  $::TODO = 'dir handle cloning currently requires fchdir on non-Windows platforms';
  }
 
  my @w :shared; # warnings accumulator
