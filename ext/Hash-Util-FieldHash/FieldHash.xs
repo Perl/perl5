@@ -464,7 +464,6 @@ CODE:
     if (SvROK(svref) && SvROK(countref)) {
         counter = SvRV(countref);
         sv_setiv(counter, 0);
-        counter = SvRV(countref);
         HUF_add_uvar_magic(
             SvRV(svref),
             NULL,
