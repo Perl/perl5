@@ -34,14 +34,6 @@ PROTOTYPES: DISABLE
       ST(0) = sv_2mortal(newSViv(value));	\
       XSRETURN(1);
 
-#define RETURN_MORTAL_BOOL(temp, comp)			\
-      ST(0) = sv_2mortal(boolSV( SvIV(temp) == comp));
-
-#define CONSTANT_OBJ(int)			\
-    RETVAL = newAV();				\
-    sv_2mortal((SV*)RETVAL);			\
-    av_push (RETVAL, newSViv( int ));
-
 void 
 _set_XS_BASE(BASE, BASE_LEN)
   SV* BASE
@@ -311,7 +303,9 @@ _zero(class)
     _two = 2
     _ten = 10
   CODE:
-    CONSTANT_OBJ(ix)
+    RETVAL = newAV();
+    sv_2mortal((SV*)RETVAL);
+    av_push (RETVAL, newSViv( ix ));
   OUTPUT:
     RETVAL
 
@@ -342,17 +336,19 @@ _is_zero(class, x)
     _is_ten = 10
   INIT:
     AV*	a;
-    SV*	temp;
 
   CODE:
     a = (AV*)SvRV(x);			/* ref to aray, don't check ref */
     if ( av_len(a) != 0)
       {
-      ST(0) = &PL_sv_no;
-      XSRETURN(1);			/* len != 1, can't be '0' */
+      ST(0) = &PL_sv_no;		/* len != 1, can't be '0' */
       }
-    temp = *av_fetch(a, 0, 0);		/* fetch first element */
-    RETURN_MORTAL_BOOL(temp, ix);
+    else
+      {
+      SV *const temp = *av_fetch(a, 0, 0);	/* fetch first element */
+      ST(0) = boolSV(SvIV(temp) == ix);
+      }
+    XSRETURN(1);		
 
 ##############################################################################
 
