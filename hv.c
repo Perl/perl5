@@ -1024,6 +1024,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	if (HeVAL(entry) && HvNAME(hv)) {
 		if (keysv) key = SvPV(keysv, klen);
 		if (klen > 1 && key[klen-2] == ':' && key[klen-1] == ':'
+		 && (klen != 6 || hv!=PL_defstash || memNE(key,"main::",6))
 		 && SvTYPE(HeVAL(entry)) == SVt_PVGV) {
 		    HV * const stash = GvHV((GV *)HeVAL(entry));
 		    if (stash && HvNAME(stash))
