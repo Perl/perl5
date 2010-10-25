@@ -663,7 +663,7 @@ $xs_subname(sv)
 	HV *${c_subname}_missing = (C_ARRAY_LENGTH(values_for_notfound) > 1)
 	    ? get_missing_hash(aTHX) : NULL;
 	if ((C_ARRAY_LENGTH(values_for_notfound) > 1)
-	    ? hv_exists_ent(${c_subname}_missing, sv, 0) : NULL) {
+	    ? hv_exists_ent(${c_subname}_missing, sv, 0) : 0) {
 	    sv = newSVpvf("Your vendor has not defined $package_sprintf_safe macro %" SVf
 			  ", used", sv);
 	} else
