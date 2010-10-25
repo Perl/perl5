@@ -92,6 +92,7 @@ POD = perl.pod	\
 	perldtrace.pod	\
 	perlebcdic.pod	\
 	perlembed.pod	\
+	perlexperiment.pod	\
 	perlfilter.pod	\
 	perlfork.pod	\
 	perlform.pod	\
@@ -239,6 +240,7 @@ MAN = perl.man	\
 	perldtrace.man	\
 	perlebcdic.man	\
 	perlembed.man	\
+	perlexperiment.man	\
 	perlfilter.man	\
 	perlfork.man	\
 	perlform.man	\
@@ -386,6 +388,7 @@ HTML = perl.html	\
 	perldtrace.html	\
 	perlebcdic.html	\
 	perlembed.html	\
+	perlexperiment.html	\
 	perlfilter.html	\
 	perlfork.html	\
 	perlform.html	\
@@ -533,6 +536,7 @@ TEX = perl.tex	\
 	perldtrace.tex	\
 	perlebcdic.tex	\
 	perlembed.tex	\
+	perlexperiment.tex	\
 	perlfilter.tex	\
 	perlfork.tex	\
 	perlform.tex	\

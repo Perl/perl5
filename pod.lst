@@ -196,6 +196,8 @@ h Miscellaneous
   perl5005delta		Perl changes in version 5.005
   perl5004delta		Perl changes in version 5.004
 
+  perlexperiment	A listing of experimental features in Perl
+
   perlartistic		Perl Artistic License
   perlgpl		GNU General Public License
 

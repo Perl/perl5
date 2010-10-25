@@ -4428,6 +4428,7 @@ pod/perldsc.pod			Perl data structures intro
 pod/perldtrace.pod		Perl's support for DTrace
 pod/perlebcdic.pod		Considerations for running Perl on EBCDIC platforms
 pod/perlembed.pod		Perl ways to embed perl in your C or C++ application
+pod/perlexperiment.pod		A listing of experimental features in Perl
 pod/perlfilter.pod		Perl source filters
 pod/perlfork.pod		Perl fork() information
 pod/perlform.pod		Perl formats
