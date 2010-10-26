@@ -34,7 +34,9 @@ sub get_basic_credentials {
 sub get_proxy_credentials {
     my $self = shift;
     my ($user, $password);
-    if ( defined $CPAN::Config->{proxy_user} ) {
+    if ( defined $CPAN::Config->{proxy_user}
+            && $CPAN::Config->{proxy_user}
+    ) {
         $user = $CPAN::Config->{proxy_user};
         $password = $CPAN::Config->{proxy_pass} || "";
         return ($user, $password);
@@ -89,6 +91,12 @@ sub _get_username_and_password_from_user {
         }
         $CPAN::Frontend->myprint("\n\n");
     return ($username,$password);
+}
+
+
+sub no_proxy {
+    my ( $self, $no_proxy ) = @_;
+    return $self->SUPER::no_proxy( split(',',$no_proxy) );
 }
 
 # mirror(): Its purpose is to deal with proxy authentication. When we

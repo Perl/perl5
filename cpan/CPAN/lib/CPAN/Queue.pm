@@ -176,6 +176,27 @@ sub size {
     return scalar @All;
 }
 
+sub reqtype_of {
+    my($self,$mod) = @_;
+    my $best = "";
+    for my $item (grep { $_->{qmod} eq $mod } @All) {
+        my $c = $item->{reqtype};
+        if ($c eq "c") {
+            $best = $c;
+            last;
+        } elsif ($c eq "r") {
+            $best = $c;
+        } elsif ($c eq "b") {
+            if ($best eq "") {
+                $best = $c;
+            }
+        } else {
+            die "Panic: in reqtype_of: reqtype[$c] seen, should never happen";
+        }
+    }
+    return $best;
+}
+
 1;
 
 __END__

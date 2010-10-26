@@ -1,3 +1,16 @@
+2010-10-26  Andreas J. Koenig  <andk@cpan.org>
+
+	* release 1.94_62
+
+	* address RT #62064: build_requires_install_policy set to "no" did not
+	work correctly (reported by Xavier Bergade)
+
+	* address RT ##55091: don't ask the proxy credentials if proxy_user
+	empty (fixed by Robert Bohne)
+
+	* address RT #55093: no_proxy doesn't work with more then one entries
+	(fixed by Robert Bohne)
+
 2010-10-03  Andreas J. Koenig  <andk@cpan.org>
 
 	* release 1.94_61

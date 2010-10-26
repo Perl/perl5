@@ -140,6 +140,10 @@ L<[perl #75448]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75448>.
 
 =item *
 
+C<CPAN> has been upgraded from 1.94_61 to 1.94_62
+
+=item *
+
 C<Locale::Maketext> has been upgraded from 1.16 to 1.17
 
 =item *
