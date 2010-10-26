@@ -260,7 +260,7 @@ for my $num_chain (1..$max_chain) {
 }
 
 # Tests that use test.pl start here.
-BEGIN { $::additional_tests = 3 }
+BEGIN { $::additional_tests = 4 }
 
 curr_test($test);
 
@@ -268,3 +268,6 @@ ok(-0.0 eq "0", 'negative zero stringifies as 0');
 ok(!-0.0, "neg zero is boolean false");
 my $nz = -0.0; "$nz";
 ok(!$nz, 'previously stringified -0.0 is boolean false');
+$nz = -0.0;
+is sprintf("%+.f", - -$nz), sprintf("%+.f", - -$nz),
+  "negation does not coerce negative zeroes";

@@ -2457,7 +2457,7 @@ PP(pp_negate)
 	SV * const sv = TOPs;
 	const int flags = SvFLAGS(sv);
 
-        if( looks_like_number( sv ) ){
+        if( !SvNIOK( sv ) && looks_like_number( sv ) ){
            SvIV_please( sv );
         }   
 
