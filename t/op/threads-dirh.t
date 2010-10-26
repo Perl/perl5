@@ -92,10 +92,13 @@ SKIP: {
 
  seekdir $toberead, $start_pos;
  readdir $toberead for 1 .. @first_2+@from_thread;
- is
-   async { readdir $toberead // 'undef' } ->join, 'undef',
-  'cloned dir iterator that points to the end of the directory'
- ;
+ {
+  local $::TODO; # This always passes when dir handles are not cloned.
+  is
+    async { readdir $toberead // 'undef' } ->join, 'undef',
+   'cloned dir iterator that points to the end of the directory'
+  ;
+ }
 
  # Make sure the cloning code can handle file names longer than 255 chars
  SKIP: {
