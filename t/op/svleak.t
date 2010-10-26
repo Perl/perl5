@@ -13,7 +13,7 @@ BEGIN {
 	or skip_all("XS::APItest not available");
 }
 
-plan tests => 17;
+plan tests => 18;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -112,4 +112,19 @@ leak_expr(5, 0, q{"YYYYYa" =~ /.+?(a(.+?)|b)/ }, "trie leak");
     @a = map { qr/1/ && ($count[$_] = sv_count()) && 99 }  0..3;
     is(@count[3] - @count[0], 3, "list   map block: one new tmp per iter");
 
+}
+
+SKIP:
+{ # broken by 304474c3, fixed by cefd5c7c, but didn't seem to cause
+  # any other test failures
+  # base test case from ribasushi (Peter Rabbitson)
+  eval { require Scalar::Util; Scalar::Util->import("weaken"); 1; }
+    or skip "no weaken", 1;
+  my $weak;
+  {
+    $weak = my $in = {};
+    weaken($weak);
+    my $out = { in => $in, in => undef }
+  }
+  ok(!$weak, "hash referenced weakened SV released");
 }
