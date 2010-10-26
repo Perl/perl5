@@ -1116,7 +1116,7 @@ PP(pp_mapwhile)
 	     * if necessary), then clear the current temps stack frame
 	     * *except* for those items. We do this splicing the items
 	     * into the start of the tmps frame (so some items may be on
-	     * the tmps stack twice), then moving PL_stack_floor above
+	     * the tmps stack twice), then moving PL_tmps_floor above
 	     * them, then freeing the frame. That way, the only tmps that
 	     * accumulate over iterations are the return values for map.
 	     * We have to do to this way so that everything gets correctly
