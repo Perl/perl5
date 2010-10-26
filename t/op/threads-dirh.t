@@ -108,7 +108,7 @@ SKIP: {
    . "pneumonoultramicroscopicsilicovolcanoconiosis-"
    . "lopadotemachoselachogaleokranioleipsanodrimypotrimmatosilphiokarabo"
    . "melitokatakechymenokichlepikossyphophattoperisteralektryonoptokephal"
-   . "liokinklopeleiolagoiosiraibaphetraganopterygon"
+   . "liokinklopeleiolagoiosiraiobaphetraganopterygon"
     or
      chdir updir,
      skip("OS does not support long file names (and I mean *long*)", 1);
@@ -125,7 +125,7 @@ SKIP: {
     last;
    }
   }
-  is length async { scalar readdir $dirh } ->join, 257, $test_name;
+  is length async { scalar readdir $dirh } ->join, 258, $test_name;
  }
 
  is scalar @w, 0, 'no warnings during all that' or diag @w;
