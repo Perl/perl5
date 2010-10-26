@@ -89,7 +89,7 @@
 
 %type <i_tkval> lpar_or_qw
 
-%type <ival> grammar prog progstart remember mremember
+%type <ival> grammar remember mremember
 %type <ival>  startsub startanonsub startformsub
 /* FIXME for MAD - are these two ival? */
 %type <ival> mydefsv mintro
@@ -139,8 +139,15 @@
 %% /* RULES */
 
 /* Top-level choice of what kind of thing yyparse was called to parse */
-grammar	:	GRAMPROG prog
-			{ $$ = $2; }
+grammar	:	GRAMPROG
+			{
+			  PL_parser->expect = XSTATE;
+			}
+		remember stmtseq
+			{
+			  newPROG(block_end($3,$4));
+			  $$ = 0;
+			}
 	|	GRAMBLOCK
 			{
 			  parser->expect = XBLOCK;
@@ -188,12 +195,6 @@ grammar	:	GRAMPROG prog
 			}
 	;
 
-/* The whole program */
-prog	:	progstart
-	/*CONTINUED*/	stmtseq
-			{ $$ = $1; newPROG(block_end($1,$2)); }
-	;
-
 /* An ordinary block */
 block	:	'{' remember stmtseq '}'
 			{ if (PL_parser->copline > (line_t)IVAL($1))
@@ -211,13 +212,6 @@ remember:	/* NULL */	/* start a full lexical scope */
 mydefsv:	/* NULL */	/* lexicalize $_ */
 			{ $$ = (I32) Perl_allocmy(aTHX_ STR_WITH_LEN("$_"), 0); }
 	;
-
-progstart:
-		{
-		    PL_parser->expect = XSTATE; $$ = block_start(TRUE);
-		}
-	;
-
 
 mblock	:	'{' mremember stmtseq '}'
 			{ if (PL_parser->copline > (line_t)IVAL($1))
