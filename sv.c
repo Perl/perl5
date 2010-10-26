@@ -12530,7 +12530,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     param->proto_perl = proto_perl;
     /* Likely nothing will use this, but it is initialised to be consistent
        with Perl_clone_params_new().  */
-    param->proto_perl = my_perl;
+    param->new_perl = my_perl;
     param->unreferenced = NULL;
 
     INIT_TRACK_MEMPOOL(my_perl->Imemory_debug_header, my_perl);
