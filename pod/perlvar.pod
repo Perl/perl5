@@ -1267,6 +1267,7 @@ regular expression assertion (see L<perlre>). May be written to.
 This variable was added in Perl 5.005.
 
 =item ${^RE_DEBUG_FLAGS}
+X<${^RE_DEBUG_FLAGS}>
 
 The current value of the regex debugging flags. Set to 0 for no debug output
 even when the C<re 'debug'> module is loaded. See L<re> for details.
@@ -1274,6 +1275,7 @@ even when the C<re 'debug'> module is loaded. See L<re> for details.
 This variable was added in Perl 5.10.
 
 =item ${^RE_TRIE_MAXBUF}
+X<${^RE_TRIE_MAXBUF}>
 
 Controls how certain regex optimisations are applied and how much memory they
 utilize. This value by default is 65536 which corresponds to a 512kB temporary
@@ -1392,12 +1394,12 @@ changes to the special variables.
 =item $ARGV
 X<$ARGV>
 
-contains the name of the current file when reading from <>.
+Contains the name of the current file when reading from C<< <> >>.
 
 =item @ARGV
 X<@ARGV>
 
-The array @ARGV contains the command-line arguments intended for
+The array C<@ARGV> contains the command-line arguments intended for
 the script. C<$#ARGV> is generally the number of arguments minus
 one, because C<$ARGV[0]> is the first argument, I<not> the program's
 command name itself. See C<$0> for the command name.
@@ -1688,7 +1690,7 @@ following Perl expression, which uses a single-quoted string. After
 execution of this statement, perl may have set all four special error 
 variables:
 
-    eval q{
+	eval q{
 		open my $pipe, "/cdrom/install |" or die $!;
 		my @res = <$pipe>;
 		close $pipe or die "bad pipe: $?, $!";
@@ -1776,11 +1778,11 @@ X<$^S> X<$EXCEPTIONS_BEING_CAUGHT>
 
 Current state of the interpreter.
 
-    $^S         State
-    ---------   -------------------
-    undef       Parsing module/eval
-    true (1)    Executing an eval
-    false (0)   Otherwise
+	$^S         State
+	---------   -------------------
+	undef       Parsing module/eval
+	true (1)    Executing an eval
+	false (0)   Otherwise
 
 The first state may happen in C<$SIG{__DIE__}> and C<$SIG{__WARN__}>
 handlers.
@@ -1800,6 +1802,7 @@ See also L<warnings>.
 Mnemonic: related to the B<-w> switch.
 
 =item ${^WARNING_BITS}
+X<${^WARNING_BITS}>
 
 The current set of warning checks enabled by the C<use warnings> pragma.
 See the documentation of C<warnings> for more details.
@@ -1818,13 +1821,14 @@ variable, or in other words, if a system or library call fails, it
 sets this variable. This means that the value of C<$!> is meaningful
 only I<immediately> after a B<failure>:
 
-    if (open my $fh, "<", $filename) {
-	# Here $! is meaningless.
-	...
-    } else {
-	# ONLY here is $! meaningful.
-	...
-	# Already here $! might be meaningless.
+	if (open my $fh, "<", $filename) {
+		# Here $! is meaningless.
+		...
+    } 
+    else {
+		# ONLY here is $! meaningful.
+		...
+		# Already here $! might be meaningless.
     }
     # Since here we might have either success or failure,
     # here $! is meaningless.
