@@ -25,12 +25,13 @@ $stderr = 1; # whoops, PL_defoutgv no longer a GV!
 
 ok print(""), 'print';
 ok select(), 'select';
+
 $a = 'fooo';
 format STDERR =
-#@<<
-$a;
+@ @<<
+"#", $a
 .
-ok ! write(), 'write';
+ok((write())[0], 'write');
 
 ok($^, '$^');
 ok($~, '$~');
