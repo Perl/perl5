@@ -8177,7 +8177,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
 #ifdef EBCDIC
     UV literal_endpoint = 0;
 #endif
-    UV stored = 0;  /* number of chars stored in the class */
+    UV stored = 0;  /* 0, 1, or more than 1 chars stored in the class */
 
     regnode * const orig_emit = RExC_emit; /* Save the original RExC_emit in
         case we need to change the emitted regop to an EXACT. */
@@ -8415,10 +8415,23 @@ parseit:
 
 	if (namedclass > OOB_NAMEDCLASS) { /* this is a named class \blah */
 
-	    if (!SIZE_ONLY && !need_class)
-		ANYOF_CLASS_ZERO(ret);
-
-	    need_class = 1;
+	    /* What matches in a locale is not known until runtime, so need to
+	     * (one time per class) allocate extra space to pass to regexec.
+	     * The space will contain a bit for each named class that is to be
+	     * matched against.  This isn't needed for \p{} and pseudo-classes,
+	     * as they are not affected by locale, and hence are dealt with
+	     * separately */
+	    if (LOC && namedclass < ANYOF_MAX && ! need_class) {
+		need_class = 1;
+		if (SIZE_ONLY) {
+		    RExC_size += ANYOF_CLASS_ADD_SKIP;
+		}
+		else {
+		    RExC_emit += ANYOF_CLASS_ADD_SKIP;
+		    ANYOF_CLASS_ZERO(ret);
+		}
+		    ANYOF_FLAGS(ret) |= ANYOF_CLASS|ANYOF_LARGE;
+	    }
 
 	    /* a bad range like a-\d, a-[:digit:] ? */
 	    if (range) {
@@ -8549,8 +8562,7 @@ parseit:
 		    /* Strings such as "+utf8::isWord\n" */
 		    Perl_sv_catpvf(aTHX_ listsv, "%cutf8::Is%s\n", yesno, what);
 		}
-		if (LOC)
-		    ANYOF_FLAGS(ret) |= ANYOF_CLASS;
+		stored+=2; /* can't optimize this class */
 		continue;
 	    }
 	} /* end of namedclass \blah */
@@ -8709,13 +8721,6 @@ parseit:
 	range = 0; /* this range (if it was one) is done now */
     }
 
-    if (need_class) {
-	ANYOF_FLAGS(ret) |= ANYOF_LARGE;
-	if (SIZE_ONLY)
-	    RExC_size += ANYOF_CLASS_ADD_SKIP;
-	else
-	    RExC_emit += ANYOF_CLASS_ADD_SKIP;
-    }
 
 
     if (SIZE_ONLY)
