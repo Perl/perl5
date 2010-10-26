@@ -12,8 +12,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 16;
-
+plan tests => 17;
 
 my $stderr = *STDERR;
 select($stderr);
@@ -25,12 +24,12 @@ $stderr = 1; # whoops, PL_defoutgv no longer a GV!
 
 ok print(""), 'print';
 ok select(), 'select';
-$a = 'fooo';
+next_test();
 format STDERR =
 #@<<
-$a;
+ok 3
 .
-ok ! write(), 'write';
+ok ! write();
 
 ok($^, '$^');
 ok($~, '$~');
