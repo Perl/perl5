@@ -21,14 +21,7 @@ langinfo(code)
   PROTOTYPE: _
   CODE:
 #ifdef HAS_NL_LANGINFO
-	{
-	  char *s;
-
-	  if ((s = nl_langinfo(code)))
-	      RETVAL = newSVpvn(s, strlen(s));
-	  else
-	      RETVAL = &PL_sv_undef;
-	}
+	RETVAL = newSVpv(nl_langinfo(code), 0);
 #else
 	croak("nl_langinfo() not implemented on this architecture");
 #endif
