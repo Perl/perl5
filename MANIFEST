@@ -3413,6 +3413,7 @@ ext/XS-APItest/t/op_list.t	test OP list construction API
 ext/XS-APItest/t/op.t		XS::APItest: tests for OP related APIs
 ext/XS-APItest/t/peep.t		test PL_peepp/PL_rpeepp
 ext/XS-APItest/t/pmflag.t	Test removal of Perl_pmflag()
+ext/XS-APItest/t/postinc.t	test op_lvalue()
 ext/XS-APItest/t/printf.t	XS::APItest extension
 ext/XS-APItest/t/ptr_table.t	Test ptr_table_* APIs
 ext/XS-APItest/t/push.t		XS::APItest extension

@@ -349,7 +349,8 @@ barestmt:	PLUGSTMT
 			}
 	|	IF lpar_or_qw remember mexpr ')' mblock else
 			{
-			  $$ = block_end($3, newCONDOP(0, $4, scope($6), $7));
+			  $$ = block_end($3,
+			      newCONDOP(0, $4, op_scope($6), $7));
 			  TOKEN_GETMAD($1,$$,'I');
 			  TOKEN_GETMAD($2,$$,'(');
 			  TOKEN_GETMAD($5,$$,')');
@@ -357,7 +358,8 @@ barestmt:	PLUGSTMT
 			}
 	|	UNLESS lpar_or_qw remember miexpr ')' mblock else
 			{
-			  $$ = block_end($3, newCONDOP(0, $4, scope($6), $7));
+			  $$ = block_end($3,
+			      newCONDOP(0, $4, op_scope($6), $7));
 			  TOKEN_GETMAD($1,$$,'I');
 			  TOKEN_GETMAD($2,$$,'(');
 			  TOKEN_GETMAD($5,$$,')');
@@ -366,13 +368,13 @@ barestmt:	PLUGSTMT
 	|	GIVEN lpar_or_qw remember mydefsv mexpr ')' mblock
 			{
 			  $$ = block_end($3,
-				  newGIVENOP($5, scope($7), (PADOFFSET)$4));
+				  newGIVENOP($5, op_scope($7), (PADOFFSET)$4));
 			  PL_parser->copline = (line_t)IVAL($1);
 			}
 	|	WHEN lpar_or_qw remember mexpr ')' mblock
-			{ $$ = block_end($3, newWHENOP($4, scope($6))); }
+			{ $$ = block_end($3, newWHENOP($4, op_scope($6))); }
 	|	DEFAULT block
-			{ $$ = newWHENOP(0, scope($2)); }
+			{ $$ = newWHENOP(0, op_scope($2)); }
 	|	WHILE lpar_or_qw remember texpr ')' mintro mblock cont
 			{
 			  $$ = block_end($3,
@@ -426,7 +428,7 @@ barestmt:	PLUGSTMT
 	|	FOR scalar lpar_or_qw remember mexpr ')' mblock cont
 			{
 			  $$ = block_end($4, newFOROP(0,
-				      mod($2, OP_ENTERLOOP), $5, $7, $8));
+				      op_lvalue($2, OP_ENTERLOOP), $5, $7, $8));
 			  TOKEN_GETMAD($1,$$,'W');
 			  TOKEN_GETMAD($3,$$,'(');
 			  TOKEN_GETMAD($6,$$,')');
@@ -516,20 +518,24 @@ sideff	:	error
 			  PL_parser->copline = (line_t)IVAL($2);
 			}
 	|	expr WHEN expr
-			{ $$ = newWHENOP($3, scope($1)); }
+			{ $$ = newWHENOP($3, op_scope($1)); }
 	;
 
 /* else and elsif blocks */
 else	:	/* NULL */
 			{ $$ = (OP*)NULL; }
 	|	ELSE mblock
-			{ ($2)->op_flags |= OPf_PARENS; $$ = scope($2);
+			{
+			  ($2)->op_flags |= OPf_PARENS;
+			  $$ = op_scope($2);
 			  TOKEN_GETMAD($1,$$,'o');
 			}
 	|	ELSIF lpar_or_qw mexpr ')' mblock else
 			{ PL_parser->copline = (line_t)IVAL($1);
-			    $$ = newCONDOP(0, newSTATEOP(OPf_SPECIAL,NULL,$3), scope($5), $6);
-			    PL_hints |= HINT_BLOCK_SCOPE;
+			    $$ = newCONDOP(0,
+				newSTATEOP(OPf_SPECIAL,NULL,$3),
+				op_scope($5), $6);
+			  PL_hints |= HINT_BLOCK_SCOPE;
 			  TOKEN_GETMAD($1,$$,'I');
 			  TOKEN_GETMAD($2,$$,'(');
 			  TOKEN_GETMAD($4,$$,')');
@@ -540,7 +546,8 @@ else	:	/* NULL */
 cont	:	/* NULL */
 			{ $$ = (OP*)NULL; }
 	|	CONTINUE block
-			{ $$ = scope($2);
+			{
+			  $$ = op_scope($2);
 			  TOKEN_GETMAD($1,$$,'o');
 			}
 	;
@@ -979,22 +986,22 @@ termunop : '-' term %prec UMINUS                       /* -$x */
 			}
 	|	term POSTINC                           /* $x++ */
 			{ $$ = newUNOP(OP_POSTINC, 0,
-					mod(scalar($1), OP_POSTINC));
+					op_lvalue(scalar($1), OP_POSTINC));
 			  TOKEN_GETMAD($2,$$,'o');
 			}
 	|	term POSTDEC                           /* $x-- */
 			{ $$ = newUNOP(OP_POSTDEC, 0,
-					mod(scalar($1), OP_POSTDEC));
+					op_lvalue(scalar($1), OP_POSTDEC));
 			  TOKEN_GETMAD($2,$$,'o');
 			}
 	|	PREINC term                            /* ++$x */
 			{ $$ = newUNOP(OP_PREINC, 0,
-					mod(scalar($2), OP_PREINC));
+					op_lvalue(scalar($2), OP_PREINC));
 			  TOKEN_GETMAD($1,$$,'o');
 			}
 	|	PREDEC term                            /* --$x */
 			{ $$ = newUNOP(OP_PREDEC, 0,
-					mod(scalar($2), OP_PREDEC));
+					op_lvalue(scalar($2), OP_PREDEC));
 			  TOKEN_GETMAD($1,$$,'o');
 			}
 
@@ -1039,7 +1046,7 @@ termdo	:       DO term	%prec UNIOP                     /* do $filename */
 			  TOKEN_GETMAD($1,$$,'o');
 			}
 	|	DO block	%prec '('               /* do { code */
-			{ $$ = newUNOP(OP_NULL, OPf_SPECIAL, scope($2));
+			{ $$ = newUNOP(OP_NULL, OPf_SPECIAL, op_scope($2));
 			  TOKEN_GETMAD($1,$$,'D');
 			}
 	|	DO WORD lpar_or_qw ')'                  /* do somesub() */
@@ -1097,7 +1104,7 @@ term	:	termbinop
 			  TOKEN_GETMAD($4,$$,':');
 			}
 	|	REFGEN term                          /* \$x, \@y, \%z */
-			{ $$ = newUNOP(OP_REFGEN, 0, mod($2,OP_REFGEN));
+			{ $$ = newUNOP(OP_REFGEN, 0, op_lvalue($2,OP_REFGEN));
 			  TOKEN_GETMAD($1,$$,'o');
 			}
 	|	myattrterm	%prec UNIOP
@@ -1362,7 +1369,7 @@ indirob	:	WORD
 	|	scalar %prec PREC_LOW
 			{ $$ = scalar($1); }
 	|	block
-			{ $$ = scope($1); }
+			{ $$ = op_scope($1); }
 
 	|	PRIVATEREF
 			{ $$ = $1; }

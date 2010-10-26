@@ -555,6 +555,21 @@ THX_ck_entersub_establish_cleanup(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     return estop;
 }
 
+STATIC OP *
+THX_ck_entersub_postinc(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
+{
+    OP *pushop, *argop, *estop;
+    ck_entersub_args_proto(entersubop, namegv, ckobj);
+    pushop = cUNOPx(entersubop)->op_first;
+    if(!pushop->op_sibling) pushop = cUNOPx(pushop)->op_first;
+    argop = pushop->op_sibling;
+    pushop->op_sibling = argop->op_sibling;
+    argop->op_sibling = NULL;
+    op_free(entersubop);
+    return newUNOP(OP_POSTINC, 0,
+	op_lvalue(op_contextualize(argop, G_SCALAR), OP_POSTINC));
+}
+
 /** RPN keyword parser **/
 
 #define sv_is_glob(sv) (SvTYPE(sv) == SVt_PVGV)
@@ -765,10 +780,9 @@ static OP *THX_parse_keyword_scopelessblock(pTHX)
 static OP *THX_parse_keyword_stmtasexpr(pTHX)
 {
     OP *o = parse_barestmt(0);
-    o = op_prepend_elem(OP_LINESEQ, newOP(OP_ENTER, 0), o);
-    o->op_type = OP_LEAVE;
-    o->op_ppaddr = PL_ppaddr[OP_LEAVE];
-    return o;
+    if (!o) o = newOP(OP_STUB, 0);
+    if (PL_hints & HINT_BLOCK_SCOPE) o->op_flags |= OPf_PARENS;
+    return op_scope(o);
 }
 
 #define parse_keyword_stmtsasexpr() THX_parse_keyword_stmtsasexpr(aTHX)
@@ -782,10 +796,9 @@ static OP *THX_parse_keyword_stmtsasexpr(pTHX)
     lex_read_space(0);
     if(lex_peek_unichar(0) != /*{*/'}') croak("syntax error");
     lex_read_unichar(0);
-    o = op_prepend_elem(OP_LINESEQ, newOP(OP_ENTER, 0), o);
-    o->op_type = OP_LEAVE;
-    o->op_ppaddr = PL_ppaddr[OP_LEAVE];
-    return o;
+    if (!o) o = newOP(OP_STUB, 0);
+    if (PL_hints & HINT_BLOCK_SCOPE) o->op_flags |= OPf_PARENS;
+    return op_scope(o);
 }
 
 #define parse_keyword_loopblock() THX_parse_keyword_loopblock(aTHX)
@@ -799,10 +812,9 @@ static OP *THX_parse_keyword_loopblock(pTHX)
 static OP *THX_parse_keyword_blockasexpr(pTHX)
 {
     OP *o = parse_block(0);
-    o = op_prepend_elem(OP_LINESEQ, newOP(OP_ENTER, 0), o);
-    o->op_type = OP_LEAVE;
-    o->op_ppaddr = PL_ppaddr[OP_LEAVE];
-    return o;
+    if (!o) o = newOP(OP_STUB, 0);
+    if (PL_hints & HINT_BLOCK_SCOPE) o->op_flags |= OPf_PARENS;
+    return op_scope(o);
 }
 
 #define parse_keyword_swaplabel() THX_parse_keyword_swaplabel(aTHX)
@@ -2436,4 +2448,16 @@ BOOT:
 {
     CV *estcv = get_cv("XS::APItest::establish_cleanup", 0);
     cv_set_call_checker(estcv, THX_ck_entersub_establish_cleanup, (SV*)estcv);
+}
+
+void
+postinc(...)
+PROTOTYPE: $
+CODE:
+    croak("postinc called as a function");
+
+BOOT:
+{
+    CV *asscv = get_cv("XS::APItest::postinc", 0);
+    cv_set_call_checker(asscv, THX_ck_entersub_postinc, (SV*)asscv);
 }
