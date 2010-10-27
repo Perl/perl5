@@ -1125,7 +1125,7 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'mjd',
 	'FILES'		=> q[pod/perlreftut.pod],
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'blead',
 	},
 
     'perlthrtut' =>
@@ -1446,7 +1446,7 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'mjd',
 	'DISTRIBUTION'	=> 'MJD/Tie-File-0.96.tar.gz',
 	'FILES'		=> q[cpan/Tie-File],
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'first-come',
 	},
 
     'Tie::RefHash' =>
