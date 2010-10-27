@@ -786,9 +786,9 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
 	if(PL_stashcache)
 	    (void)
 	     hv_delete(PL_stashcache, newname, newname_len, G_DISCARD);
-	hv_name_delete(oldstash, newname, newname_len);
+	hv_ename_delete(oldstash, newname, newname_len);
     }
-    if(stash) hv_name_add(stash, newname, newname_len);
+    if(stash) hv_ename_add(stash, newname, newname_len);
 }
 
 /*

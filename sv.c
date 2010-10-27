@@ -3656,7 +3656,7 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
     if(mro_changes == 2) mro_isa_changed_in(GvSTASH(dstr));
     else if(mro_changes == 3) {
 	HV * const stash = GvHV(dstr);
-	if(old_stash ? (HV *)HvNAME(old_stash) : stash)
+	if(old_stash ? (HV *)HvENAME_get(old_stash) : stash)
 	    mro_package_moved(
 		stash, old_stash,
 		(GV *)dstr, NULL, 0
@@ -3773,7 +3773,7 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 	    const STRLEN len = GvNAMELEN(dstr);
 	    if (
 	        len > 1 && name[len-2] == ':' && name[len-1] == ':'
-	     && (!dref || HvNAME(dref))
+	     && (!dref || HvENAME_get(dref))
 	    ) {
 		mro_package_moved(
 		    (HV *)sref, (HV *)dref,
@@ -4043,7 +4043,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 		if (reset_isa) {
 		    HV * const stash = GvHV(dstr);
 		    if(
-		        old_stash ? (HV *)HvNAME(old_stash) : stash
+		        old_stash ? (HV *)HvENAME_get(old_stash) : stash
 		    )
 			mro_package_moved(
 			 stash, old_stash,
@@ -11744,7 +11744,10 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 			hvname = saux->xhv_name;
 			if (saux->xhv_name_count) {
 			    HEK ** const sname = (HEK **)saux->xhv_name;
-			    const U32 count = saux->xhv_name_count;
+			    const I32 count
+			     = saux->xhv_name_count < 0
+			        ? -saux->xhv_name_count
+			        :  saux->xhv_name_count;
 			    HEK **shekp = sname + count;
 			    HEK **dhekp;
 			    Newxc(daux->xhv_name, count, HEK *, HEK);

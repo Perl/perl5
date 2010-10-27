@@ -79,9 +79,14 @@ struct xpvhv_aux {
     HE		*xhv_eiter;	/* current entry of iterator */
     I32		xhv_riter;	/* current root of iterator */
     struct mro_meta *xhv_mro_meta;
-    U32		xhv_name_count;	/* When non-zero, xhv_name is actually */
-				/* a pointer to an array of HEKs, this */
-};				/* being the length. */
+/* Concerning xhv_name_count: When non-zero, xhv_name is actually a pointer 
+ * to an array of HEK pointers, this being the length. The first element is
+ * the name of the stash, which may be NULL. If xhv_name_count is positive,
+ * then *xhv_name is one of the effective names. If xhv_name_count is nega-
+ * tive, then xhv_name[1] is the first effective name.
+ */
+    I32		xhv_name_count;
+};
 
 /* hash structure: */
 /* This structure must match the beginning of struct xpvmg in sv.h. */
@@ -267,10 +272,27 @@ C<SV*>.
 /* This macro may go away without notice.  */
 #define HvNAME_HEK(hv) \
 	(SvOOK(hv) && HvAUX(hv)->xhv_name ? HvNAME_HEK_NN(hv) : NULL)
-#define HvNAME_get(hv)	((SvOOK(hv) && (HvAUX(hv)->xhv_name)) \
+#define HvNAME_get(hv) \
+	((SvOOK(hv) && (HvAUX(hv)->xhv_name) && HvNAME_HEK_NN(hv)) \
 			 ? HEK_KEY(HvNAME_HEK_NN(hv)) : NULL)
-#define HvNAMELEN_get(hv)	((SvOOK(hv) && (HvAUX(hv)->xhv_name)) \
+#define HvNAMELEN_get(hv) \
+	((SvOOK(hv) && (HvAUX(hv)->xhv_name) && HvNAME_HEK_NN(hv)) \
 				 ? HEK_LEN(HvNAME_HEK_NN(hv)) : 0)
+#ifdef PERL_CORE
+# define HvENAME_HEK_NN(hv)                                             \
+ (                                                                      \
+  HvAUX(hv)->xhv_name_count > 0   ? *(HEK **)HvAUX(hv)->xhv_name      : \
+  HvAUX(hv)->xhv_name_count < -1  ? ((HEK **)HvAUX(hv)->xhv_name)[1] : \
+  HvAUX(hv)->xhv_name_count == -1 ? NULL                              : \
+                                    HvAUX(hv)->xhv_name                 \
+ )
+# define HvENAME_get(hv) \
+	((SvOOK(hv) && (HvAUX(hv)->xhv_name) && HvENAME_HEK_NN(hv)) \
+			 ? HEK_KEY(HvENAME_HEK_NN(hv)) : NULL)
+# define HvENAMELEN_get(hv) \
+	((SvOOK(hv) && (HvAUX(hv)->xhv_name) && HvENAME_HEK_NN(hv)) \
+				 ? HEK_LEN(HvENAME_HEK_NN(hv)) : 0)
+#endif
 
 /* the number of keys (including any placeholers) */
 #define XHvTOTALKEYS(xhv)	((xhv)->xhv_keys)

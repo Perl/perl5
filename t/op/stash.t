@@ -7,7 +7,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan( tests => 38 );
+plan( tests => 46 );
 
 # Used to segfault (bug #15479)
 fresh_perl_like(
@@ -209,3 +209,39 @@ SKIP: {
     __ANON__();
     is ($c, 'main::__ANON__', '__ANON__ sub called ok');
 }
+
+# Stashes that are effectively renamed
+{
+    package rile;
+
+    my $obj  = bless [];
+    my $globref = \*tat;
+
+    # effectively rename a stash
+    *slin:: = *rile::; *rile:: = *zor::;
+    
+    ::is *$globref, "*rile::tat",
+     'globs stringify the same way when stashes are moved';
+    ::is ref $obj, "rile",
+     'ref() returns the same thing when an object’s stash is moved';
+    ::like "$obj", qr "^rile=ARRAY\(0x[\da-f]+\)\z",
+     'objects stringify the same way when their stashes are moved';
+    ::is eval '__PACKAGE__', 'rile',
+     '__PACKAGE__ returns the same thing when the current stash is moved';
+
+    # Now detach it completely from the symtab, making it effect-
+    # ively anonymous
+    my $life_raft = \%slin::;
+    *slin:: = *zor::;
+
+    ::is *$globref, "*rile::tat",
+     'globs stringify the same way when stashes are detached';
+    ::is ref $obj, "rile",
+     'ref() returns the same thing when an object’s stash is detached';
+    ::like "$obj", qr "^rile=ARRAY\(0x[\da-f]+\)\z",
+     'objects stringify the same way when their stashes are detached';
+    ::is eval '__PACKAGE__', 'rile',
+     '__PACKAGE__ returns the same when the current stash is detached';
+}
+
+

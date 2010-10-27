@@ -1021,13 +1021,13 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	   actually detached from the hash, as mro_package_moved checks
 	   whether the passed gv is still in the symbol table before
 	   doing anything. */
-	if (HeVAL(entry) && HvNAME(hv)) {
+	if (HeVAL(entry) && HvENAME_get(hv)) {
 		if (keysv) key = SvPV(keysv, klen);
 		if (klen > 1 && key[klen-2] == ':' && key[klen-1] == ':'
 		 && (klen != 6 || hv!=PL_defstash || memNE(key,"main::",6))
 		 && SvTYPE(HeVAL(entry)) == SVt_PVGV) {
 		    HV * const stash = GvHV((GV *)HeVAL(entry));
-		    if (stash && HvNAME(stash))
+		    if (stash && HvENAME_get(stash))
 			mro_package_moved(
 			 NULL, stash, (GV *)HeVAL(entry), NULL, 0
 			);
@@ -1627,7 +1627,7 @@ S_hfreeentries(pTHX_ HV *hv)
     /* This is the array that we're going to restore  */
     HE **const orig_array = HvARRAY(hv);
     HEK *name;
-    U32 name_count;
+    I32 name_count;
     int attempts = 100;
 
     PERL_ARGS_ASSERT_HFREEENTRIES;
@@ -1779,7 +1779,8 @@ S_hfreeentries(pTHX_ HV *hv)
 	    if (HvAUX(hv)->xhv_name) {
 		if(HvAUX(hv)->xhv_name_count) {
 		    HEK ** const name = (HEK **)HvAUX(hv)->xhv_name;
-		    HEK **hekp = name + HvAUX(hv)->xhv_name_count;
+		    I32 const count = HvAUX(hv)->xhv_name_count;
+		    HEK **hekp = name + (count < 0 ? -count : count);
 		    while(hekp-- > name) 
 			unshare_hek_or_pvn(*hekp, 0, 0, 0);
 		    Safefree(name);
@@ -2023,6 +2024,7 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
     dVAR;
     struct xpvhv_aux *iter;
     U32 hash;
+    HEK **spot;
 
     PERL_ARGS_ASSERT_HV_NAME_SET;
     PERL_UNUSED_ARG(flags);
@@ -2034,76 +2036,103 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 	iter = HvAUX(hv);
 	if (iter->xhv_name) {
 	    if(iter->xhv_name_count) {
+	      if(!name) {
 		HEK ** const name = (HEK **)HvAUX(hv)->xhv_name;
-		HEK **hekp = name + HvAUX(hv)->xhv_name_count;
-		while(hekp-- > name) 
+		HEK **hekp = name + (
+		    iter->xhv_name_count < 0
+		     ? -iter->xhv_name_count
+		     :  iter->xhv_name_count
+		   );
+		while(hekp-- > name+1) 
 		    unshare_hek_or_pvn(*hekp, 0, 0, 0);
+		/* The first elem may be null. */
+		if(*name) unshare_hek_or_pvn(*name, 0, 0, 0);
 		Safefree(name);
+		spot = &iter->xhv_name;
+		iter->xhv_name_count = 0;
+	      }
+	      else {
+		spot = (HEK **)iter->xhv_name;
+		if(iter->xhv_name_count > 0) {
+		    /* shift some things over */
+		    Renew(spot, iter->xhv_name_count, HEK *);
+		    spot[iter->xhv_name_count++] = spot[1];
+		    spot[1] = spot[0];
+		}
+		else if(*spot) {
+		    unshare_hek_or_pvn(*spot, 0, 0, 0);
+		}
+	      }
 	    }
-	    else unshare_hek_or_pvn(iter->xhv_name, 0, 0, 0);
+	    else {
+		unshare_hek_or_pvn(iter->xhv_name, 0, 0, 0);
+		spot = &iter->xhv_name;
+	    }
 	}
+	else spot = &iter->xhv_name;
     } else {
 	if (name == 0)
 	    return;
 
 	iter = hv_auxinit(hv);
+	spot = &iter->xhv_name;
     }
     PERL_HASH(hash, name, len);
-    iter->xhv_name = name ? share_hek(name, len, hash) : NULL;
+    *spot = name ? share_hek(name, len, hash) : NULL;
     iter->xhv_name_count = 0;
 }
 
 void
-Perl_hv_name_add(pTHX_ HV *hv, const char *name, U32 len)
+Perl_hv_ename_add(pTHX_ HV *hv, const char *name, U32 len)
 {
     dVAR;
     struct xpvhv_aux *aux = SvOOK(hv) ? HvAUX(hv) : hv_auxinit(hv);
     U32 hash;
 
-    PERL_ARGS_ASSERT_HV_NAME_ADD;
+    PERL_ARGS_ASSERT_HV_ENAME_ADD;
 
     if (len > I32_MAX)
 	Perl_croak(aTHX_ "panic: hv name too long (%"UVuf")", (UV) len);
 
     PERL_HASH(hash, name, len);
 
-    if (!aux->xhv_name) {
-	aux->xhv_name = share_hek(name, len, hash);
-	return;
-    }
-
     if (aux->xhv_name_count) {
 	HEK ** const xhv_name = (HEK **)aux->xhv_name;
-	HEK **hekp = xhv_name + aux->xhv_name_count;
-	U32 count = aux->xhv_name_count;
+	I32 count = aux->xhv_name_count;
+	HEK **hekp = xhv_name + (count < 0 ? -count : count);
 	while (hekp-- > xhv_name)
 	    if (
 	     HEK_LEN(*hekp) == (I32)len && memEQ(HEK_KEY(*hekp), name, len)
-	    ) return;
-	aux->xhv_name_count++;
-	Renewc(aux->xhv_name, aux->xhv_name_count, HEK *, HEK);
+	    ) {
+		if (hekp == xhv_name && count < 0)
+		    aux->xhv_name_count = -count;
+		return;
+	    }
+	if (count < 0) aux->xhv_name_count--, count = -count;
+	else aux->xhv_name_count++;
+	Renewc(aux->xhv_name, count + 1, HEK *, HEK);
 	((HEK **)aux->xhv_name)[count] = share_hek(name, len, hash);
     }
     else {
 	HEK *existing_name = aux->xhv_name;
 	if (
-	    HEK_LEN(existing_name) == (I32)len
+	    existing_name && HEK_LEN(existing_name) == (I32)len
 	 && memEQ(HEK_KEY(existing_name), name, len)
 	) return;
 	Newxc(aux->xhv_name, 2, HEK *, HEK);
-	aux->xhv_name_count = 2;
+	aux->xhv_name_count = existing_name ? 2 : -2;
 	*(HEK **)aux->xhv_name = existing_name;
 	((HEK **)aux->xhv_name)[1] = share_hek(name, len, hash);
     }
 }
 
 void
-Perl_hv_name_delete(pTHX_ HV *hv, const char *name, U32 len)
+Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len)
 {
     dVAR;
     struct xpvhv_aux *aux;
 
-    PERL_ARGS_ASSERT_HV_NAME_DELETE;
+    PERL_ARGS_ASSERT_HV_ENAME_DELETE;
 
     if (len > I32_MAX)
 	Perl_croak(aTHX_ "panic: hv name too long (%"UVuf")", (UV) len);
@@ -2115,24 +2144,37 @@ Perl_hv_name_delete(pTHX_ HV *hv, const char *name, U32 len)
 
     if (aux->xhv_name_count) {
 	HEK ** const namep = (HEK **)aux->xhv_name;
-	HEK **victim = namep + aux->xhv_name_count;
-	while (victim-- > namep)
+	I32 const count = aux->xhv_name_count;
+	HEK **victim = namep + (count < 0 ? -count : count);
+	while (victim-- > namep + 1)
 	    if (
 	        HEK_LEN(*victim) == (I32)len
 	     && memEQ(HEK_KEY(*victim), name, len)
 	    ) {
 		unshare_hek_or_pvn(*victim, 0, 0, 0);
-		if (!--aux->xhv_name_count) { /* none left */
+		if (count < 0) ++aux->xhv_name_count;
+		else --aux->xhv_name_count;
+		if (
+		    (aux->xhv_name_count == 1 || aux->xhv_name_count == -1)
+		 && !*namep
+		) {  /* if there are none left */
 		    Safefree(namep);
 		    aux->xhv_name = NULL;
+		    aux->xhv_name_count = 0;
 		}
 		else {
 		    /* Move the last one back to fill the empty slot. It
 		       does not matter what order they are in. */
-		    *victim = *(namep + aux->xhv_name_count);
+		    *victim = *(namep + (count < 0 ? -count : count) - 1);
 		}
 		return;
 	    }
+	if (
+	    count > 0 && HEK_LEN(*namep) == (I32)len
+	 && memEQ(HEK_KEY(*namep),name,len)
+	) {
+	    aux->xhv_name_count = -count;
+	}
     }
     else if(
         HEK_LEN(aux->xhv_name) == (I32)len
