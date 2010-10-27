@@ -17,7 +17,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 91;
+use Test::More tests => 92;
 use Config ();
 
 use B::Deparse;
@@ -667,3 +667,8 @@ pop @_;
 'foo' =~ ($_ =~ /foo/);
 'foo' =~ ($_ =~ tr/fo//);
 'foo' =~ ($_ =~ s/foo//);
+####
+# Test @threadsv_names under 5005threads
+foreach $' (1, 2) {
+    sleep $';
+}

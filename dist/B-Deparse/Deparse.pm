@@ -2851,15 +2851,7 @@ sub pp_padsv {
 sub pp_padav { pp_padsv(@_) }
 sub pp_padhv { pp_padsv(@_) }
 
-my @threadsv_names;
-
-BEGIN {
-    @threadsv_names = ("_", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-		       "&", "`", "'", "+", "/", ".", ",", "\\", '"', ";",
-		       "^", "-", "%", "=", "|", "~", ":", "^A", "^E",
-		       "!", "@");
-}
-
+my @threadsv_names = B::threadsv_names;
 sub pp_threadsv {
     my $self = shift;
     my($op, $cx) = @_;
