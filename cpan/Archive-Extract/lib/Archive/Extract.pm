@@ -15,6 +15,7 @@ use Locale::Maketext::Simple    Style => 'gettext';
 
 ### solaris has silly /bin/tar output ###
 use constant ON_SOLARIS     => $^O eq 'solaris' ? 1 : 0;
+use constant ON_NETBSD      => $^O eq 'netbsd' ? 1 : 0;
 use constant FILE_EXISTS    => sub { -e $_[0] ? 1 : 0 };
 
 ### VMS may require quoting upper case command options
@@ -43,7 +44,7 @@ use vars qw[$VERSION $PREFER_BIN $PROGRAMS $WARN $DEBUG
             $_ALLOW_BIN $_ALLOW_PURE_PERL $_ALLOW_TAR_ITER
          ];
 
-$VERSION            = '0.44';
+$VERSION            = '0.46';
 $PREFER_BIN         = 0;
 $WARN               = 1;
 $DEBUG              = 0;
@@ -125,6 +126,12 @@ See the C<HOW IT WORKS> section further down for details.
 ### see what /bin/programs are available ###
 $PROGRAMS = {};
 for my $pgm (qw[tar unzip gzip bunzip2 uncompress unlzma unxz]) {
+    if ( $pgm eq 'unzip' and ON_NETBSD ) {
+      local $IPC::Cmd::INSTANCES = 1;
+      my @possibles = can_run($pgm);
+      ($PROGRAMS->{$pgm}) = grep { m!/usr/pkg/! } can_run($pgm);
+      next;
+    }
     $PROGRAMS->{$pgm} = can_run($pgm);
 }
 
@@ -209,7 +216,7 @@ Corresponds to a C<.bz2> suffix.
 
 =item tbz
 
-Bzip2 compressed tar file, as produced by, for exmample C</bin/tar -j>.
+Bzip2 compressed tar file, as produced by, for example C</bin/tar -j>.
 Corresponds to a C<.tbz> or C<.tar.bz2> suffix.
 
 =item lzma
@@ -224,7 +231,7 @@ Corresponds to a C<.xz> suffix.
 
 =item txz
 
-Xz compressed tar file, as produced by, for exmample C</bin/tar -J>.
+Xz compressed tar file, as produced by, for example C</bin/tar -J>.
 Corresponds to a C<.txz> or C<.tar.xz> suffix.
 
 =back

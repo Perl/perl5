@@ -122,6 +122,13 @@ XXX
 
 =item *
 
+C<Archive::Extract> has been upgraded from 0.44 to 0.46
+
+Resolves an issue with NetBSD-current and its new unzip 
+executable.
+
+=item *
+
 XXX What should the version be?
 
 C<B::Deparse> has been upgraded from 0.99 to ???.
