@@ -29,7 +29,7 @@ our @EXPORT_OK  = qw(
                      hash_seed hv_store
 
                     );
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 require XSLoader;
 XSLoader::load();
 
