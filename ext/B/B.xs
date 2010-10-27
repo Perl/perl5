@@ -835,15 +835,8 @@ threadsv_names()
 #define OP_sibling(o)	o->op_sibling
 #define OP_desc(o)	(char *)PL_op_desc[o->op_type]
 #define OP_targ(o)	o->op_targ
-#define OP_type(o)	o->op_type
-#if PERL_VERSION >= 9
-#  define OP_opt(o)	o->op_opt
-#else
-#  define OP_seq(o)	o->op_seq
-#endif
 #define OP_flags(o)	o->op_flags
 #define OP_private(o)	o->op_private
-#define OP_spare(o)	o->op_spare
 
 MODULE = B	PACKAGE = B::OP		PREFIX = OP_
 
@@ -893,21 +886,45 @@ PADOFFSET
 OP_targ(o)
 	B::OP		o
 
-U16
+#if PERL_VERSION >= 9
+#  These 3 are all bitfields, so we can't take their addresses.
+UV
 OP_type(o)
 	B::OP		o
-
-#if PERL_VERSION >= 9
-
-U16
-OP_opt(o)
-	B::OP		o
+    ALIAS:
+	opt = 1
+	spare = 2
+    CODE:
+	switch(ix) {
+	  case 1:
+	    RETVAL = o->op_opt;
+	    break;
+	  case 2:
+	    RETVAL = o->op_spare;
+	    break;
+	  default:
+	    RETVAL = o->op_type;
+	}
+    OUTPUT:
+	RETVAL
 
 #else
 
-U16
-OP_seq(o)
+UV
+OP_type(o)
 	B::OP		o
+    ALIAS:
+	seq = 1
+    CODE:
+	switch(ix) {
+	  case 1:
+	    RETVAL = o->op_seq;
+	    break;
+	  default:
+	    RETVAL = o->op_type;
+	}
+    OUTPUT:
+	RETVAL
 
 #endif
 
@@ -918,14 +935,6 @@ OP_flags(o)
 U8
 OP_private(o)
 	B::OP		o
-
-#if PERL_VERSION >= 9
-
-U16
-OP_spare(o)
-	B::OP		o
-
-#endif
 
 void
 OP_oplist(o)
