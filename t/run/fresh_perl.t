@@ -565,42 +565,6 @@ EOT
 EXPECT
 ok
 ########
-# This test is here instead of lib/locale.t because
-# the bug depends on in the internal state of the locale
-# settings and pragma/locale messes up that state pretty badly.
-# We need a "fresh run".
-BEGIN {
-    eval { require POSIX };
-    if ($@) {
-	exit(0); # running minitest?
-    }
-}
-use Config;
-my $have_setlocale = $Config{d_setlocale} eq 'define';
-$have_setlocale = 0 if $@;
-# Visual C's CRT goes silly on strings of the form "en_US.ISO8859-1"
-# and mingw32 uses said silly CRT
-$have_setlocale = 0 if (($^O eq 'MSWin32' || $^O eq 'NetWare') && $Config{cc} =~ /^(cl|gcc)/i);
-exit(0) unless $have_setlocale;
-my @locales;
-if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a 2>/dev/null|")) {
-    while(<LOCALES>) {
-        chomp;
-        push(@locales, $_);
-    }
-    close(LOCALES);
-}
-exit(0) unless @locales;
-for (@locales) {
-    use POSIX qw(locale_h);
-    use locale;
-    setlocale(LC_NUMERIC, $_) or next;
-    my $s = sprintf "%g %g", 3.1, 3.1;
-    next if $s eq '3.1 3.1' || $s =~ /^(3.+1) \1$/;
-    print "$_ $s\n";
-}
-EXPECT
-########
 # [ID 20001202.002] and change #8066 added 'at -e line 1';
 # reversed again as a result of [perl #17763]
 die qr(x)
