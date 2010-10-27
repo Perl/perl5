@@ -831,11 +831,24 @@ threadsv_names()
 # endif
 #endif
 
-#define OP_next(o)	o->op_next
-#define OP_sibling(o)	o->op_sibling
 #define OP_targ(o)	o->op_targ
 #define OP_flags(o)	o->op_flags
 #define OP_private(o)	o->op_private
+
+#define OP_next_offset			offsetof(struct op, op_next)
+#define OP_sibling_offset		offsetof(struct op, op_sibling)
+#define UNOP_first_offset		offsetof(struct unop, op_first)
+#define BINOP_last_offset		offsetof(struct binop, op_last)
+#define LOGOP_other_offset		offsetof(struct logop, op_other)
+#if PERL_VERSION >= 9
+#  define PMOP_pmreplstart_offset \
+	offsetof(struct pmop, op_pmstashstartu.op_pmreplstart)
+#else
+#  define PMOP_pmreplstart_offset	offsetof(struct pmop, op_pmreplstart)
+#endif
+#define LOOP_redoop_offset		offsetof(struct loop, op_redoop)
+#define LOOP_nextop_offset		offsetof(struct loop, op_nextop)
+#define LOOP_lastop_offset		offsetof(struct loop, op_lastop)
 
 MODULE = B	PACKAGE = B::OP		PREFIX = OP_
 
@@ -847,13 +860,29 @@ OP_size(o)
     OUTPUT:
 	RETVAL
 
+# The type checking code in B has always been identical for all OP types,
+# irrespective of whether the action is actually defined on that OP.
+# We should fix this
 B::OP
-OP_next(o)
+next(o)
 	B::OP		o
-
-B::OP
-OP_sibling(o)
-	B::OP		o
+    ALIAS:
+	B::OP::next = OP_next_offset
+	B::OP::sibling = OP_sibling_offset
+	B::UNOP::first = UNOP_first_offset
+	B::BINOP::last = BINOP_last_offset
+	B::LOGOP::other = LOGOP_other_offset
+	B::PMOP::pmreplstart = PMOP_pmreplstart_offset
+	B::LOOP::redoop = LOOP_redoop_offset
+	B::LOOP::nextop = LOOP_nextop_offset
+	B::LOOP::lastop = LOOP_lastop_offset
+    PREINIT:
+	char *ptr;
+    CODE:
+	ptr = ix + (char *)o;
+	RETVAL = *((OP **)ptr);
+    OUTPUT:
+	RETVAL
 
 char *
 OP_name(o)
@@ -938,30 +967,6 @@ OP_oplist(o)
     PPCODE:
 	SP = oplist(aTHX_ o, SP);
 
-#define UNOP_first(o)	o->op_first
-
-MODULE = B	PACKAGE = B::UNOP		PREFIX = UNOP_
-
-B::OP 
-UNOP_first(o)
-	B::UNOP	o
-
-#define BINOP_last(o)	o->op_last
-
-MODULE = B	PACKAGE = B::BINOP		PREFIX = BINOP_
-
-B::OP
-BINOP_last(o)
-	B::BINOP	o
-
-#define LOGOP_other(o)	o->op_other
-
-MODULE = B	PACKAGE = B::LOGOP		PREFIX = LOGOP_
-
-B::OP
-LOGOP_other(o)
-	B::LOGOP	o
-
 MODULE = B	PACKAGE = B::LISTOP		PREFIX = LISTOP_
 
 U32
@@ -1034,10 +1039,6 @@ PMOP_pmreplroot(o)
 	}
 
 #endif
-
-B::OP
-PMOP_pmreplstart(o)
-	B::PMOP		o
 
 #if PERL_VERSION < 9
 #define PMOP_pmnext(o)		o->op_pmnext
@@ -1162,25 +1163,6 @@ PVOP_pv(o)
 	}
 	else
 	    ST(0) = newSVpvn_flags(o->op_pv, strlen(o->op_pv), SVs_TEMP);
-
-#define LOOP_redoop(o)	o->op_redoop
-#define LOOP_nextop(o)	o->op_nextop
-#define LOOP_lastop(o)	o->op_lastop
-
-MODULE = B	PACKAGE = B::LOOP		PREFIX = LOOP_
-
-
-B::OP
-LOOP_redoop(o)
-	B::LOOP	o
-
-B::OP
-LOOP_nextop(o)
-	B::LOOP	o
-
-B::OP
-LOOP_lastop(o)
-	B::LOOP	o
 
 #define COP_label(o)	CopLABEL(o)
 #define COP_stashpv(o)	CopSTASHPV(o)
