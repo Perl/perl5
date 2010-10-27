@@ -246,10 +246,14 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
+=over
+
 =item *
 
 Array, hash and list slices in scalar context are now documented in
 L<perldata>.
+
+=back
 
 =head3 L<XXX>
 
