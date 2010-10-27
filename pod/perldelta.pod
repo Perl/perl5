@@ -1,5 +1,8 @@
 =encoding utf8
 
+=for comment
+This has been completed up to 582b18310.
+
 =head1 NAME
 
 [ this is a template for a new perldelta file. Any text flagged as
@@ -151,7 +154,25 @@ C<CPAN> has been upgraded from 1.94_61 to 1.94_62
 
 =item *
 
+C<GDBM_File> has been upgraded from 1.11 to 1.12.
+
+This fixes a memory leak when DBM filters are used.
+
+=item *
+
 C<Locale::Maketext> has been upgraded from 1.16 to 1.17
+
+=item *
+
+C<NDBM_File> has been upgraded from 1.09 to 1.10.
+
+This fixes a memory leak when DBM filters are used.
+
+=item *
+
+C<ODBM_File> has been upgraded from 1.08 to 1.09.
+
+This fixes a memory leak when DBM filters are used.
 
 =item *
 
