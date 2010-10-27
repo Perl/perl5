@@ -1569,9 +1569,8 @@ Mnemonic: when you want your pipes to be piping hot.
 =head3 Variables related to formats
 
 The special variables for formats are a subset of those for
-filehandles so they have
-
-See L<perlform> for more information about Perl's formats.
+filehandles. See L<perlform> for more information about Perl's
+formats.
 
 =over 8
 
@@ -1698,7 +1697,7 @@ variables:
 
 When perl executes the C<eval()> expression, it translates the
 C<open()>, C<< <PIPE> >>, and C<close> calls in the C run-time library
-and thence to the operating system kernel. perl sets C<$!> is set to
+and thence to the operating system kernel. perl sets C<$!> to
 the C library's C<errno> if one of these calls fails.
 
 C<$@> is set if the string to be C<eval>-ed did not compile (this may
