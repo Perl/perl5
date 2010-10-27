@@ -1196,10 +1196,6 @@ LOOP_lastop(o)
 #define COP_arybase(o)	CopARYBASE_get(o)
 #define COP_line(o)	CopLINE(o)
 #define COP_hints(o)	CopHINTS_get(o)
-#if PERL_VERSION < 9
-#  define COP_warnings(o)  o->cop_warnings
-#  define COP_io(o)	o->cop_io
-#endif
 
 MODULE = B	PACKAGE = B::COP		PREFIX = COP_
 
@@ -1246,21 +1242,29 @@ U32
 COP_line(o)
 	B::COP	o
 
-#if PERL_VERSION >= 9
-
 void
 COP_warnings(o)
 	B::COP	o
 	PPCODE:
+#if PERL_VERSION >= 9
 	ST(0) = make_warnings_object(aTHX_ o->cop_warnings);
+#else
+	ST(0) = make_sv_object(aTHX_ NULL, o->cop_warnings);
+#endif
 	XSRETURN(1);
 
 void
 COP_io(o)
 	B::COP	o
 	PPCODE:
+#if PERL_VERSION >= 9
 	ST(0) = make_cop_io_object(aTHX_ o);
+#else
+	ST(0) = make_sv_object(aTHX_ NULL, o->cop_io);
+#endif
 	XSRETURN(1);
+
+#if PERL_VERSION >= 9
 
 B::RHE
 COP_hints_hash(o)
@@ -1269,16 +1273,6 @@ COP_hints_hash(o)
 	RETVAL = CopHINTHASH_get(o);
     OUTPUT:
 	RETVAL
-
-#else
-
-B::SV
-COP_warnings(o)
-	B::COP	o
-
-B::SV
-COP_io(o)
-	B::COP	o
 
 #endif
 
