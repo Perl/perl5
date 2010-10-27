@@ -4218,9 +4218,6 @@ typedef OP* (*PPADDR_t[]) (pTHX);
 typedef bool (*destroyable_proc_t) (pTHX_ SV *sv);
 typedef void (*despatch_signals_proc_t) (pTHX);
 
-/* _ (for $_) must be first in the following list (DEFSV requires it) */
-#define THREADSV_NAMES "_123456789&`'+/.,\\\";^-%=|~:\001\005!@"
-
 /* NeXT has problems with crt0.o globals */
 #if defined(__DYNAMIC__) && \
     (defined(NeXT) || defined(__NeXT__) || defined(PERL_DARWIN))

@@ -2692,7 +2692,8 @@ sub loop_common {
 	    $ary = $self->deparse($ary, 1);
 	}
 	if (null $var) {
-	    if ($enter->flags & OPf_SPECIAL) { # thread special var
+	    if (($enter->flags & OPf_SPECIAL) && ($] < 5.009)) {
+		# thread special var, under 5005threads
 		$var = $self->pp_threadsv($enter, 1);
 	    } else { # regular my() variable
 		$var = $self->pp_padsv($enter, 1);
