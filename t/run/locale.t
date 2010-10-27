@@ -128,6 +128,19 @@ EOF
 	    "too late to ignore the locale at write() time");
         }
     }
+
+    for ($different) {
+	local $ENV{LC_NUMERIC} = $_;
+	local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
+	fresh_perl_is(<<'EOF', "$difference "x4, {},
+	    use locale;
+	    use POSIX qw(locale_h);
+	    setlocale(LC_NUMERIC, "");
+	    my $in = 4.2;
+	    printf("%g %g %s %s ", $in, 4.2, sprintf("%g", $in), sprintf("%g", 4.2));
+EOF
+	"sprintf() and printf() look at LC_NUMERIC regardless of constant folding");
+    }
 } # SKIP
 
-sub last { 6 }
+sub last { 7 }
