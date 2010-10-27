@@ -11,27 +11,35 @@ package B::Deparse;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPf_WANT OPf_WANT_VOID OPf_WANT_SCALAR OPf_WANT_LIST
-	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL OPf_MOD OPpPAD_STATE
+	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL OPf_MOD
 	 OPpLVAL_INTRO OPpOUR_INTRO OPpENTERSUB_AMPER OPpSLICE OPpCONST_BARE
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
 	 OPpCONST_ARYBASE OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER
-	 OPpSORT_REVERSE OPpSORT_INPLACE OPpSORT_DESCEND OPpITER_REVERSED
-	 OPpREVERSE_INPLACE OPpCONST_NOVER
+	 OPpSORT_REVERSE
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
          CVf_METHOD CVf_LVALUE
-	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_NONDESTRUCT
+	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED),
-	 ($] < 5.009 ? 'PMf_SKIPWHITE' : 'RXf_SKIPWHITE'),
-	 ($] < 5.011 ? 'CVf_LOCKED' : ());
-$VERSION = 1.00;
+	 ($] < 5.008004 ? () : 'OPpSORT_INPLACE'),
+	 ($] < 5.008006 ? () : qw(OPpSORT_DESCEND OPpITER_REVERSED)),
+	 ($] < 5.008009 ? () : qw(OPpCONST_NOVER OPpPAD_STATE)),
+	 ($] < 5.009 ? 'PMf_SKIPWHITE' : qw(RXf_SKIPWHITE)),
+	 ($] < 5.011 ? 'CVf_LOCKED' : 'OPpREVERSE_INPLACE'),
+	 ($] < 5.013 ? () : 'PMf_NONDESTRUCT');
+$VERSION = 1.01;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
 
 BEGIN {
-    # Easiest way to keep this code portable between 5.12.x and 5.10.x looks to
-    # be to fake up a dummy CVf_LOCKED that will never actually be true.
-    *CVf_LOCKED = sub () {0} unless defined &CVf_LOCKED;
+    # Easiest way to keep this code portable between version looks to
+    # be to fake up a dummy constant that will never actually be true.
+    foreach (qw(OPpSORT_INPLACE OPpSORT_DESCEND OPpITER_REVERSED OPpCONST_NOVER
+		OPpPAD_STATE RXf_SKIPWHITE CVf_LOCKED OPpREVERSE_INPLACE
+		PMf_NONDESTRUCT)) {
+	no strict 'refs';
+	*{$_} = sub () {0} unless *{$_}{CODE};
+    }
 }
 
 # Changes between 0.50 and 0.51:
@@ -1420,9 +1428,10 @@ sub pp_nextstate {
 	$self->{'warnings'} = $warning_bits;
     }
 
-    if ($self->{'hints'} != $op->hints) {
-	push @text, declare_hints($self->{'hints'}, $op->hints);
-	$self->{'hints'} = $op->hints;
+    my $hints = $] < 5.008009 ? $op->private : $op->hints;
+    if ($self->{'hints'} != $hints) {
+	push @text, declare_hints($self->{'hints'}, $hints);
+	$self->{'hints'} = $hints;
     }
 
     # hack to check that the hint hash hasn't changed
