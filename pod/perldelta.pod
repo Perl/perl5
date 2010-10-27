@@ -1,7 +1,9 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 582b18310.
+This has been completed up to 157486ae134392, except for:
+04777d295957ad270188e4debf51b523e07cc5b0
+c565ab54dc649bb62cd4d57149d7b2abb21df5f3
 
 =head1 NAME
 
@@ -154,9 +156,31 @@ C<CPAN> has been upgraded from 1.94_61 to 1.94_62
 
 =item *
 
+C<ExtUtils::Constant> has been upgraded from 0.22 to 0.23.
+
+=item *
+
+C<Fcntl> has been upgraded from 1.09 to 1.10.
+
+=item *
+
+C<File::Glob> has been upgraded from 1.09 to 1.10.
+
+=item *
+
 C<GDBM_File> has been upgraded from 1.11 to 1.12.
 
 This fixes a memory leak when DBM filters are used.
+
+=item *
+
+C<Hash::Util> has been upgraded from 0.09 to 0.10.
+
+This fixes a memory leak when DBM filters are used.
+
+=item *
+
+C<I18N::Langinfo> has been upgraded from 0.06 to 0.07.
 
 =item *
 
@@ -176,8 +200,20 @@ This fixes a memory leak when DBM filters are used.
 
 =item *
 
+C<POSIX> has been upgraded from 1.21 to 1.22.
+
+=item *
+
 C<re> has been upgraded from 0.13 to 0.14, for the sake of the new
 C<use re "/flags"> pragma.
+
+=item *
+
+C<SDBM_File> has been upgraded from 1.07 to 1.08.
+
+=item *
+
+C<Socket> has been upgraded from 1.90 to 1.91.
 
 =back
 
@@ -209,6 +245,11 @@ XXX Description of the purpose of the new file here
 XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
+
+=item *
+
+Array, hash and list slices in scalar context are now documented in
+L<perldata>.
 
 =head3 L<XXX>
 
