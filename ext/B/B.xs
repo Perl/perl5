@@ -978,7 +978,6 @@ LISTOP_children(o)
         RETVAL
 
 #define PMOP_pmnext(o)		o->op_pmnext
-#define PMOP_pmregexp(o)	PM_GETRE(o)
 #ifdef USE_ITHREADS
 #define PMOP_pmoffset(o)	o->op_pmoffset
 #define PMOP_pmstashpv(o)	PmopSTASHPV(o);
