@@ -97,7 +97,7 @@ Many Perl operators did not distinguish between these two types of globs.
 This would result in strange behaviour in edge cases: C<untie $scalar>
 would do nothing if the last thing assigned to the scalar was a glob
 (because it treated it as C<untie *$scalar>, which unties a handle).
-Assignment to a glob slot (e.g., C<(*$glob) = \@some_array> would simply
+Assignment to a glob slot (e.g., C<(*$glob) = \@some_array>) would simply
 assign C<\@some_array> to C<$glob>.
 
 To fix this, the C<*{}> operator (including the C<*foo> and C<*$foo> forms)
@@ -124,9 +124,8 @@ and
 L<[perl #77812]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77812>,
 and maybe others, too, have been fixed.
 
-See
-L<[perl #77810]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77810>
-for even more detail.
+See L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=77810> for even
+more detail.
 
 =head1 Deprecations
 
