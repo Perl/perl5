@@ -831,24 +831,28 @@ threadsv_names()
 # endif
 #endif
 
-#define OP_targ(o)	o->op_targ
-#define OP_flags(o)	o->op_flags
-#define OP_private(o)	o->op_private
+#define OPp		0x00000
+#define PADOFFSETp	0x10000
+#define U8p		0x20000
 
-#define OP_next_offset			offsetof(struct op, op_next)
-#define OP_sibling_offset		offsetof(struct op, op_sibling)
-#define UNOP_first_offset		offsetof(struct unop, op_first)
-#define BINOP_last_offset		offsetof(struct binop, op_last)
-#define LOGOP_other_offset		offsetof(struct logop, op_other)
+#define OP_next_ix		OPp | offsetof(struct op, op_next)
+#define OP_sibling_ix		OPp | offsetof(struct op, op_sibling)
+#define UNOP_first_ix		OPp | offsetof(struct unop, op_first)
+#define BINOP_last_ix		OPp | offsetof(struct binop, op_last)
+#define LOGOP_other_ix		OPp | offsetof(struct logop, op_other)
 #if PERL_VERSION >= 9
-#  define PMOP_pmreplstart_offset \
-	offsetof(struct pmop, op_pmstashstartu.op_pmreplstart)
+#  define PMOP_pmreplstart_ix \
+		OPp | offsetof(struct pmop, op_pmstashstartu.op_pmreplstart)
 #else
-#  define PMOP_pmreplstart_offset	offsetof(struct pmop, op_pmreplstart)
+#  define PMOP_pmreplstart_ix	OPp | offsetof(struct pmop, op_pmreplstart)
 #endif
-#define LOOP_redoop_offset		offsetof(struct loop, op_redoop)
-#define LOOP_nextop_offset		offsetof(struct loop, op_nextop)
-#define LOOP_lastop_offset		offsetof(struct loop, op_lastop)
+#define LOOP_redoop_ix		OPp | offsetof(struct loop, op_redoop)
+#define LOOP_nextop_ix		OPp | offsetof(struct loop, op_nextop)
+#define LOOP_lastop_ix		OPp | offsetof(struct loop, op_lastop)
+
+#define OP_targ_ix		PADOFFSETp | offsetof(struct op, op_targ)
+#define OP_flags_ix		U8p | offsetof(struct op, op_flags)
+#define OP_private_ix		U8p | offsetof(struct op, op_private)
 
 MODULE = B	PACKAGE = B::OP		PREFIX = OP_
 
@@ -863,26 +867,44 @@ OP_size(o)
 # The type checking code in B has always been identical for all OP types,
 # irrespective of whether the action is actually defined on that OP.
 # We should fix this
-B::OP
+void
 next(o)
 	B::OP		o
     ALIAS:
-	B::OP::next = OP_next_offset
-	B::OP::sibling = OP_sibling_offset
-	B::UNOP::first = UNOP_first_offset
-	B::BINOP::last = BINOP_last_offset
-	B::LOGOP::other = LOGOP_other_offset
-	B::PMOP::pmreplstart = PMOP_pmreplstart_offset
-	B::LOOP::redoop = LOOP_redoop_offset
-	B::LOOP::nextop = LOOP_nextop_offset
-	B::LOOP::lastop = LOOP_lastop_offset
+	B::OP::next = OP_next_ix
+	B::OP::sibling = OP_sibling_ix
+	B::OP::targ = OP_targ_ix
+	B::OP::flags = OP_flags_ix
+	B::OP::private = OP_private_ix
+	B::UNOP::first = UNOP_first_ix
+	B::BINOP::last = BINOP_last_ix
+	B::LOGOP::other = LOGOP_other_ix
+	B::PMOP::pmreplstart = PMOP_pmreplstart_ix
+	B::LOOP::redoop = LOOP_redoop_ix
+	B::LOOP::nextop = LOOP_nextop_ix
+	B::LOOP::lastop = LOOP_lastop_ix
     PREINIT:
 	char *ptr;
-    CODE:
-	ptr = ix + (char *)o;
-	RETVAL = *((OP **)ptr);
-    OUTPUT:
-	RETVAL
+	SV *ret;
+    PPCODE:
+	ptr = (ix & 0xFFFF) + (char *)o;
+	switch ((U8)(ix >> 16)) {
+	case (U8)(OPp >> 16):
+	    {
+		OP *const o2 = *((OP **)ptr);
+		ret = sv_newmortal();
+		sv_setiv(newSVrv(ret, cc_opclassname(aTHX_ o2)), PTR2IV(o2));
+		break;
+	    }
+	case (U8)(PADOFFSETp >> 16):
+	    ret = sv_2mortal(newSVuv(*((PADOFFSET*)ptr)));
+	    break;
+	case (U8)(U8p >> 16):
+	    ret = sv_2mortal(newSVuv(*((U8*)ptr)));
+	    break;
+	}
+	ST(0) = ret;
+	XSRETURN(1);
 
 char *
 OP_name(o)
@@ -906,10 +928,6 @@ OP_ppaddr(o)
 	    SvPVX(sv)[i] = toUPPER(SvPVX(sv)[i]);
 	sv_catpvs(sv, "]");
 	ST(0) = sv;
-
-PADOFFSET
-OP_targ(o)
-	B::OP		o
 
 #if PERL_VERSION >= 9
 #  These 3 are all bitfields, so we can't take their addresses.
@@ -952,14 +970,6 @@ OP_type(o)
 	RETVAL
 
 #endif
-
-U8
-OP_flags(o)
-	B::OP		o
-
-U8
-OP_private(o)
-	B::OP		o
 
 void
 OP_oplist(o)
