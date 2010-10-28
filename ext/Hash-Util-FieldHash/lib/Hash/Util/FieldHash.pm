@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Scalar::Util qw( reftype);
 
-our $VERSION = '1.05';
+our $VERSION = '1.06';
 
 require Exporter;
 our @ISA = qw(Exporter);
