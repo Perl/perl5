@@ -34,14 +34,13 @@ PROTOTYPES: DISABLE
       ST(0) = sv_2mortal(newSViv(value));	\
       XSRETURN(1);
 
-void 
-_set_XS_BASE(BASE, BASE_LEN)
-  SV* BASE
-  SV* BASE_LEN
-
-  CODE:
-    XS_BASE = SvNV(BASE); 
-    XS_BASE_LEN = SvIV(BASE_LEN); 
+BOOT:
+{
+    if (items < 4)
+	S_croak_xs_usage(aTHX_ cv, "package, version, base_len, base");
+    XS_BASE_LEN = SvIV(ST(2)); 
+    XS_BASE = SvNV(ST(3)); 
+}
 
 ##############################################################################
 # _new

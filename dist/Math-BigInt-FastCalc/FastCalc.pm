@@ -10,9 +10,6 @@ use vars qw/$VERSION $BASE $BASE_LEN/;
 
 $VERSION = '0.24';
 
-require XSLoader;
-XSLoader::load(__PACKAGE__);
-
 ##############################################################################
 # global constants, flags and accessory
 
@@ -41,15 +38,11 @@ BEGIN
     *{'Math::BigInt::FastCalc::_' . $method} = \&{'Math::BigInt::Calc::_' . $method};
     }
 
-  # store BASE_LEN and BASE to later pass it to XS code 
   ($BASE_LEN, $BASE) = Math::BigInt::Calc::_base_len();
-
   }
 
-sub import
-  {
-  _set_XS_BASE($BASE, $BASE_LEN);
-  }
+require XSLoader;
+XSLoader::load(__PACKAGE__, $VERSION, $BASE_LEN, $BASE);
 
 ##############################################################################
 ##############################################################################
