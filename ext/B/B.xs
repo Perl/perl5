@@ -834,6 +834,7 @@ threadsv_names()
 #define OPp		0x00000
 #define PADOFFSETp	0x10000
 #define U8p		0x20000
+#define U32p		0x30000
 
 #define OP_next_ix		OPp | offsetof(struct op, op_next)
 #define OP_sibling_ix		OPp | offsetof(struct op, op_sibling)
@@ -853,6 +854,8 @@ threadsv_names()
 #define OP_targ_ix		PADOFFSETp | offsetof(struct op, op_targ)
 #define OP_flags_ix		U8p | offsetof(struct op, op_flags)
 #define OP_private_ix		U8p | offsetof(struct op, op_private)
+
+#define PMOP_pmflags_ix		U32p | offsetof(struct pmop, op_pmflags)
 
 MODULE = B	PACKAGE = B::OP		PREFIX = OP_
 
@@ -883,6 +886,7 @@ next(o)
 	B::LOOP::redoop = LOOP_redoop_ix
 	B::LOOP::nextop = LOOP_nextop_ix
 	B::LOOP::lastop = LOOP_lastop_ix
+	B::PMOP::pmflags = PMOP_pmflags_ix
     PREINIT:
 	char *ptr;
 	SV *ret;
@@ -901,6 +905,9 @@ next(o)
 	    break;
 	case (U8)(U8p >> 16):
 	    ret = sv_2mortal(newSVuv(*((U8*)ptr)));
+	    break;
+	case (U8)(U32p >> 16):
+	    ret = sv_2mortal(newSVuv(*((U32*)ptr)));
 	    break;
 	}
 	ST(0) = ret;
@@ -1076,10 +1083,6 @@ PMOP_pmstash(o)
 	B::PMOP		o
 
 #endif
-
-U32
-PMOP_pmflags(o)
-	B::PMOP		o
 
 #if PERL_VERSION < 9
 
