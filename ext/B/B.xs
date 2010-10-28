@@ -833,7 +833,6 @@ threadsv_names()
 
 #define OP_next(o)	o->op_next
 #define OP_sibling(o)	o->op_sibling
-#define OP_desc(o)	(char *)PL_op_desc[o->op_type]
 #define OP_targ(o)	o->op_targ
 #define OP_flags(o)	o->op_flags
 #define OP_private(o)	o->op_private
@@ -859,11 +858,12 @@ OP_sibling(o)
 char *
 OP_name(o)
 	B::OP		o
+    ALIAS:
+	desc = 1
     CODE:
-	RETVAL = (char *)PL_op_name[o->op_type];
+	RETVAL = (char *)(ix ? PL_op_desc : PL_op_name)[o->op_type];
     OUTPUT:
 	RETVAL
-
 
 void
 OP_ppaddr(o)
@@ -877,10 +877,6 @@ OP_ppaddr(o)
 	    SvPVX(sv)[i] = toUPPER(SvPVX(sv)[i]);
 	sv_catpvs(sv, "]");
 	ST(0) = sv;
-
-char *
-OP_desc(o)
-	B::OP		o
 
 PADOFFSET
 OP_targ(o)
