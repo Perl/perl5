@@ -977,7 +977,6 @@ LISTOP_children(o)
     OUTPUT:
         RETVAL
 
-#define PMOP_pmnext(o)		o->op_pmnext
 #ifdef USE_ITHREADS
 #define PMOP_pmoffset(o)	o->op_pmoffset
 #define PMOP_pmstashpv(o)	PmopSTASHPV(o);
@@ -1041,6 +1040,7 @@ PMOP_pmreplstart(o)
 	B::PMOP		o
 
 #if PERL_VERSION < 9
+#define PMOP_pmnext(o)		o->op_pmnext
 
 B::PMOP
 PMOP_pmnext(o)
