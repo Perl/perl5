@@ -2,23 +2,17 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
+
+    # We will shortly chdir .., so '../lib' will be wrong at that time, and
+    # 'lib' will be correct
+    @INC = ('../lib', 'lib');
 }
 
 use Test::More tests => 23;
 
 use strict;
 
-BEGIN {
-# Cwd::cwd does an implicit "require Win32", but
-# the ../lib directory in @INC will no longer work once
-# we chdir() out of the "t" directory.
-    if ($^O eq 'MSWin32') {
-	require Win32;
-	Win32->import();
-    }
-    require overload;
-}
+require overload;
 
 use File::CheckTree;
 use File::Spec;          # used to get absolute paths
