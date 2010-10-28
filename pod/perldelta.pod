@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to e1be28b42dd83, except for:
+This has been completed up to 2acc3314e31, except for:
 04777d295957ad270188e4debf51b523e07cc5b0
 c565ab54dc649bb62cd4d57149d7b2abb21df5f3
 1c8d11ca3d0ce8bc11562f159b94c2c7e62dea6c
@@ -81,6 +81,52 @@ XXX For a release on a stable branch, this section aspires to be:
     exist, they are bugs and reports are welcome.
 
 [ List each incompatible change as a =head2 entry ]
+
+=head2 Dereferencing typeglobs
+
+If you assign a typeglob to a scalar variable:
+
+    $glob = *foo;
+
+the glob that is copied to C<$glob> is marked with a special flag
+indicating that the glob is just a copy. This allows subsequent assignments
+to C<$glob> to overwrite the glob. The original glob, however, is
+immutable.
+
+Many Perl operators did not distinguish between these two types of globs.
+This would result in strange behaviour in edge cases: C<untie $scalar>
+would do nothing if the last thing assigned to the scalar was a glob
+(because it treated it as C<untie *$scalar>, which unties a handle).
+Assignment to a glob slot (e.g., C<(*$glob) = \@some_array> would simply
+assign C<\@some_array> to C<$glob>.
+
+To fix this, the C<*{}> operator (including the C<*foo> and C<*$foo> forms)
+has been modified to make a new immutable glob if its operand is a glob
+copy. Various operators that make a distinction between globs and scalars
+have been modified to treat only immutable globs as globs.
+
+This causes an incompatible change in code that assigns a glob to the
+return value of C<*{}> when that operator was passed a glob copy. Take the
+following code, for instance:
+
+    $glob = *foo;
+    *$glob = *bar;
+
+The C<*$glob> on the second line returns a new immutable glob. That new
+glob is made an alias to C<*bar>. Then it is discarded.
+
+The upside to this incompatible change is that bugs
+L<[perl #77496]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77496>,
+L<[perl #77502]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77502>,
+L<[perl #77508]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77508>,
+L<[perl #77688]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77688>,
+and
+L<[perl #77812]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77812>,
+and maybe others, too, have been fixed.
+
+See
+L<[perl #77810]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77810>
+for even more detail.
 
 =head1 Deprecations
 
