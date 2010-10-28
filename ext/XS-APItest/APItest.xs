@@ -2065,7 +2065,9 @@ test_cophh()
 	check_ph(cophh_fetch_pvs(a, "foo_\xc2\x8c", 0));
 	check_iv(cophh_fetch_pvs(a, "foo_\xd9\xa6", COPHH_KEY_UTF8), 666);
 	check_ph(cophh_fetch_pvs(a, "foo_\xd9\xa6", 0));
-	cophh_free(a);
+	ENTER;
+	SAVEFREECOPHH(a);
+	LEAVE;
 #undef check_ph
 #undef check_iv
 #undef msvpvs

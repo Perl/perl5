@@ -867,6 +867,10 @@ Perl_leave_scope(pTHX_ I32 base)
 	    ptr = SSPOPPTR;
 	    SvREFCNT_dec(MUTABLE_SV(ptr));
 	    break;
+	case SAVEt_FREECOPHH:
+	    ptr = SSPOPPTR;
+	    cophh_free((COPHH *)ptr);
+	    break;
 	case SAVEt_MORTALIZESV:
 	    ptr = SSPOPPTR;
 	    sv_2mortal(MUTABLE_SV(ptr));

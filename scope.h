@@ -58,6 +58,7 @@
 #define SAVEt_I32_SMALL		47
 #define SAVEt_INT_SMALL		48
 #define SAVEt_GVSV		49
+#define SAVEt_FREECOPHH		50
 
 #define SAVEf_SETMAGIC		1
 #define SAVEf_KEEPOLDELEM	2
@@ -184,6 +185,7 @@ scope has the given name. Name must be a literal string.
 #define SAVEGENERICPV(s)	save_generic_pvref((char**)&(s))
 #define SAVESHAREDPV(s)		save_shared_pvref((char**)&(s))
 #define SAVESETSVFLAGS(sv,mask,val)	save_set_svflags(sv,mask,val)
+#define SAVEFREECOPHH(h)	save_pushptr((void *)(h), SAVEt_FREECOPHH)
 #define SAVEDELETE(h,k,l) \
 	  save_delete(MUTABLE_HV(h), (char*)(k), (I32)(l))
 #define SAVEHDELETE(h,s) \
