@@ -2926,6 +2926,7 @@ dist/Safe/t/safewrap.t		Tests Safe::wrap_code_ref()
 dist/SelfLoader/lib/SelfLoader.pm	Load functions only on demand
 dist/SelfLoader/t/01SelfLoader.t	See if SelfLoader works
 dist/SelfLoader/t/02SelfLoader-buggy.t	See if SelfLoader works
+dist/SelfLoader/t/03taint.t		See if SelfLoader works under taint
 dist/Storable/ChangeLog			Storable extension
 dist/Storable/hints/gnukfreebsd.pl	Hint for Storable for named architecture
 dist/Storable/hints/gnuknetbsd.pl	Hint for Storable for named architecture
