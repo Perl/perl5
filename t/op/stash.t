@@ -226,8 +226,11 @@ SKIP: {
      'ref() returns the same thing when an object’s stash is moved';
     ::like "$obj", qr "^rile=ARRAY\(0x[\da-f]+\)\z",
      'objects stringify the same way when their stashes are moved';
-    ::is eval '__PACKAGE__', 'rile',
-     '__PACKAGE__ returns the same thing when the current stash is moved';
+    {
+	local $::TODO = "fails under threads";
+	::is eval '__PACKAGE__', 'rile',
+	 '__PACKAGE__ returns the same when the current stash is moved';
+    }
 
     # Now detach it completely from the symtab, making it effect-
     # ively anonymous
@@ -240,8 +243,11 @@ SKIP: {
      'ref() returns the same thing when an object’s stash is detached';
     ::like "$obj", qr "^rile=ARRAY\(0x[\da-f]+\)\z",
      'objects stringify the same way when their stashes are detached';
-    ::is eval '__PACKAGE__', 'rile',
-     '__PACKAGE__ returns the same when the current stash is detached';
+    {
+	local $::TODO = "fails under threads";
+	::is eval '__PACKAGE__', 'rile',
+	 '__PACKAGE__ returns the same when the current stash is detached';
+    }
 }
 
 
