@@ -16,11 +16,9 @@ $VERSION = '0.24';
 # announce that we are compatible with MBI v1.70 and up
 sub api_version () { 1; }
  
-BEGIN
-  {
-  # use Calc to override the methods that we do not provide in XS
+# use Calc to override the methods that we do not provide in XS
 
-  for my $method (qw/
+for my $method (qw/
     str
     add sub mul div
     rsft lsft
@@ -39,7 +37,6 @@ BEGIN
     }
 
   ($BASE_LEN, $BASE) = Math::BigInt::Calc::_base_len();
-  }
 
 require XSLoader;
 XSLoader::load(__PACKAGE__, $VERSION, $BASE_LEN, $BASE);
