@@ -1425,31 +1425,33 @@ $Etc.  The conditional is true if any variables were assigned, i.e., if
 the pattern matched.
 
 The C</g> modifier specifies global pattern matching--that is,
-matching as many times as possible within the string.  How it behaves
-depends on the context.  In list context, it returns a list of the
+matching as many times as possible within the string. How it behaves
+depends on the context. In list context, it returns a list of the
 substrings matched by any capturing parentheses in the regular
-expression.  If there are no parentheses, it returns a list of all
+expression. If there are no parentheses, it returns a list of all
 the matched strings, as if there were parentheses around the whole
 pattern.
 
 In scalar context, each execution of C<m//g> finds the next match,
 returning true if it matches, and false if there is no further match.
-The position after the last match can be read or set using the pos()
-function; see L<perlfunc/pos>.   A failed match normally resets the
+The position after the last match can be read or set using the C<pos()>
+function; see L<perlfunc/pos>. A failed match normally resets the
 search position to the beginning of the string, but you can avoid that
-by adding the C</c> modifier (e.g. C<m//gc>).  Modifying the target
+by adding the C</c> modifier (e.g. C<m//gc>). Modifying the target
 string also resets the search position.
 
 =item \G assertion
 
 You can intermix C<m//g> matches with C<m/\G.../g>, where C<\G> is a
-zero-width assertion that matches the exact position where the previous
-C<m//g>, if any, left off.  Without the C</g> modifier, the C<\G> assertion
-still anchors at pos(), but the match is of course only attempted once.
-Using C<\G> without C</g> on a target string that has not previously had a
-C</g> match applied to it is the same as using the C<\A> assertion to match
-the beginning of the string.  Note also that, currently, C<\G> is only
-properly supported when anchored at the very beginning of the pattern.
+zero-width assertion that matches the exact position where the
+previous C<m//g>, if any, left off. Without the C</g> modifier, the
+C<\G> assertion still anchors at C<pos()> as it was at the start of
+the operation (see L<perlfunc/pos>), but the match is of course only
+attempted once. Using C<\G> without C</g> on a target string that has
+not previously had a C</g> match applied to it is the same as using
+the C<\A> assertion to match the beginning of the string.  Note also
+that, currently, C<\G> is only properly supported when anchored at the
+very beginning of the pattern.
 
 Examples:
 
