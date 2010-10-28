@@ -1,9 +1,10 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 157486ae134392, except for:
+This has been completed up to e1be28b42dd83, except for:
 04777d295957ad270188e4debf51b523e07cc5b0
 c565ab54dc649bb62cd4d57149d7b2abb21df5f3
+1c8d11ca3d0ce8bc11562f159b94c2c7e62dea6c
 
 =head1 NAME
 
@@ -58,6 +59,11 @@ till the end of the lexical scope:
     "foo" =~ / (.+) /;  # /x implied
 
 See L<re/'/flags' mode> for details.
+
+=head2 Statement labels can appear in more places
+
+Statement labels can now occur before any type of statement or declaration,
+such as C<package>.
 
 =head1 Security
 
@@ -134,6 +140,10 @@ executable.
 
 =item *
 
+C<B> has been upgraded from 1.24 to 1.25.
+
+=item *
+
 XXX What should the version be?
 
 C<B::Deparse> has been upgraded from 0.99 to ???.
@@ -141,14 +151,6 @@ C<B::Deparse> has been upgraded from 0.99 to ???.
 It fixes deparsing of C<our> followed by a variable with funny characters
 (as permitted under the C<utf8> pragma)
 L<[perl #33752]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=33752>.
-
-=item *
-
-C<charnames> has been upgraded from 1.16 to 1.17.
-
-The algorithm used by C<charnames::viacode> to look up names has been
-rewritten to run faster
-L<[perl #75448]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75448>.
 
 =item *
 
@@ -213,7 +215,18 @@ C<SDBM_File> has been upgraded from 1.07 to 1.08.
 
 =item *
 
+C<SelfLoader> has been upgraded from 1.17 to 1.18.
+
+It now works in taint mode
+L<[perl #72062]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=72062>.
+
+=item *
+
 C<Socket> has been upgraded from 1.90 to 1.91.
+
+=item *
+
+C<Sys::Hostname> has been upgraded from 1.13 to 1.14.
 
 =back
 
@@ -250,8 +263,7 @@ section.
 
 =item *
 
-Array, hash and list slices in scalar context are now documented in
-L<perldata>.
+Array and hash slices in scalar context are now documented in L<perldata>.
 
 =back
 
@@ -427,6 +439,14 @@ L<[perl #78222]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78222>.
 A new, experimental API has been added for accessing the internal
 structure that Perl uses for C<%^H>. See the functions beginning with
 C<cophh_> in L<perlapi>.
+
+=item *
+
+A stash can now have a list of effective names in addition to its usual
+name. These can be added and deleted via C<hv_ename_add> and
+C<hv_ename_delete>. The first effective name can be accessed via the
+C<HvENAME*> macros defined in F<hv.h>. These new functions and macros are
+I<not> part of the API.
 
 =back
 
