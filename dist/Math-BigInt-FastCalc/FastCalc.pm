@@ -6,7 +6,7 @@ use warnings;
 
 use Math::BigInt::Calc 0.56;
 
-use vars qw/$VERSION $BASE $BASE_LEN/;
+use vars '$VERSION';
 
 $VERSION = '0.24';
 
@@ -36,10 +36,8 @@ for my $method (qw/
     *{'Math::BigInt::FastCalc::_' . $method} = \&{'Math::BigInt::Calc::_' . $method};
     }
 
-  ($BASE_LEN, $BASE) = Math::BigInt::Calc::_base_len();
-
 require XSLoader;
-XSLoader::load(__PACKAGE__, $VERSION, $BASE_LEN, $BASE);
+XSLoader::load(__PACKAGE__, $VERSION, Math::BigInt::Calc::_base_len());
 
 ##############################################################################
 ##############################################################################
