@@ -3199,8 +3199,8 @@ S_scan_const(pTHX_ char *start)
 
 			    /* Convert first code point to hex, including the
 			     * boiler plate before it */
-			    sprintf(hex_string, "\\N{U+%X", (unsigned int) uv);
-			    output_length = strlen(hex_string);
+			    output_length =
+				my_sprintf(hex_string, "\\N{U+%X", (unsigned int) uv);
 
 			    /* Make sure there is enough space to hold it */
 			    d = off + SvGROW(sv, off
@@ -3223,8 +3223,8 @@ S_scan_const(pTHX_ char *start)
 				    uv = UNICODE_REPLACEMENT;
 				}
 
-				sprintf(hex_string, ".%X", (unsigned int) uv);
-				output_length = strlen(hex_string);
+				output_length =
+				    my_sprintf(hex_string, ".%X", (unsigned int) uv);
 
 				d = off + SvGROW(sv, off
 						     + output_length
