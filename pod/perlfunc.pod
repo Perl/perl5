@@ -4323,15 +4323,21 @@ X<pos> X<match, position>
 
 =item pos
 
-Returns the offset of where the last C<m//g> search left off for the variable
-in question (C<$_> is used when the variable is not specified).  Note that
-0 is a valid match offset.  C<undef> indicates that the search position
-is reset (usually due to match failure, but can also be because no match has
-yet been run on the scalar). C<pos> directly accesses the location used
-by the regexp engine to store the offset, so assigning to C<pos> will change
-that offset, and so will also influence the C<\G> zero-width assertion in
-regular expressions. Because a failed C<m//gc> match doesn't reset the offset,
-the return from C<pos> won't change either in this case.  See L<perlre> and
+Returns the offset of where the last C<m//g> search left off for the
+variable in question (C<$_> is used when the variable is not
+specified). Note that 0 is a valid match offset. C<undef> indicates
+that the search position is reset (usually due to match failure, but
+can also be because no match has yet been run on the scalar).
+
+C<pos> directly accesses the location used by the regexp engine to
+store the offset, so assigning to C<pos> will change that offset, and
+so will also influence the C<\G> zero-width assertion in regular
+expressions. Both of these effects take place for the next match, so
+you can't affect the position with C<pos> during the current match,
+such as in C<(?{pos() = 5})> or C<s//pos() = 5/e>.
+
+Because a failed C<m//gc> match doesn't reset the offset, the return
+from C<pos> won't change either in this case.  See L<perlre> and
 L<perlop>.
 
 =item print FILEHANDLE LIST
