@@ -583,7 +583,7 @@ is ($x, 23456);
 
 # construct a number with a zero-hole of BASE_LEN_SMALL
 {
- my @bl = $CL->_base_len(); my $bl = $bl[4];
+ my @bl = $CL->_base_len(); my $bl = $bl[5];
 
  $x = '1' x $bl . '0' x $bl . '1' x $bl . '0' x $bl;
  $y = '1' x (2*$bl);

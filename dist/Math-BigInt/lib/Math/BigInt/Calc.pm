@@ -4,7 +4,7 @@ use 5.006002;
 use strict;
 # use warnings;	# dont use warnings for older Perls
 
-our $VERSION = '0.55';
+our $VERSION = '0.56';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -60,7 +60,7 @@ sub _base_len
       $BASE = int("1e".$BASE_LEN);
       $MAX_VAL = $BASE-1;
       return $BASE_LEN unless wantarray;
-      return ($BASE_LEN, $AND_BITS, $XOR_BITS, $OR_BITS, $BASE_LEN, $MAX_VAL, $BASE);
+      return ($BASE_LEN, $BASE, $AND_BITS, $XOR_BITS, $OR_BITS, $BASE_LEN, $MAX_VAL,);
       }
 
     # find whether we can use mul or div in mul()/div()
@@ -95,7 +95,7 @@ sub _base_len
       }
     }
   return $BASE_LEN unless wantarray;
-  return ($BASE_LEN, $AND_BITS, $XOR_BITS, $OR_BITS, $BASE_LEN, $MAX_VAL, $BASE);
+  return ($BASE_LEN, $BASE, $AND_BITS, $XOR_BITS, $OR_BITS, $BASE_LEN, $MAX_VAL);
   }
 
 sub _new

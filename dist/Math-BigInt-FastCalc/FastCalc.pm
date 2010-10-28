@@ -4,11 +4,11 @@ use 5.006;
 use strict;
 use warnings;
 
-use Math::BigInt::Calc;
+use Math::BigInt::Calc 0.56;
 
 use vars qw/$VERSION $BASE $BASE_LEN/;
 
-$VERSION = '0.23';
+$VERSION = '0.24';
 
 require XSLoader;
 XSLoader::load(__PACKAGE__);
@@ -40,11 +40,9 @@ BEGIN
     no strict 'refs';
     *{'Math::BigInt::FastCalc::_' . $method} = \&{'Math::BigInt::Calc::_' . $method};
     }
-  my ($AND_BITS, $XOR_BITS, $OR_BITS, $BASE_LEN_SMALL, $MAX_VAL);
- 
+
   # store BASE_LEN and BASE to later pass it to XS code 
-  ($BASE_LEN, $AND_BITS, $XOR_BITS, $OR_BITS, $BASE_LEN_SMALL, $MAX_VAL, $BASE) =
-    Math::BigInt::Calc::_base_len();
+  ($BASE_LEN, $BASE) = Math::BigInt::Calc::_base_len();
 
   }
 

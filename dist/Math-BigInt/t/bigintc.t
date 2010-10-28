@@ -5,7 +5,7 @@ use Test::More tests => 375;
 
 use Math::BigInt::Calc;
 
-my ($BASE_LEN, $AND_BITS, $XOR_BITS, $OR_BITS, $BASE_LEN_SMALL, $MAX_VAL) =
+my ($BASE_LEN, undef, $AND_BITS, $XOR_BITS, $OR_BITS, $BASE_LEN_SMALL, $MAX_VAL) =
   Math::BigInt::Calc->_base_len();
 
 print "# BASE_LEN = $BASE_LEN\n";
