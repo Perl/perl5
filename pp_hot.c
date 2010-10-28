@@ -275,6 +275,8 @@ PP(pp_concat)
 	rbyte = !DO_UTF8(right);
     }
     if (lbyte != rbyte) {
+	/* sv_utf8_upgrade_nomg() may reallocate the stack */
+	PUTBACK;
 	if (lbyte)
 	    sv_utf8_upgrade_nomg(TARG);
 	else {
@@ -283,6 +285,7 @@ PP(pp_concat)
 	    sv_utf8_upgrade_nomg(right);
 	    rpv = SvPV_nomg_const(right, rlen);
 	}
+	SPAGAIN;
     }
     sv_catpvn_nomg(TARG, rpv, rlen);
 
