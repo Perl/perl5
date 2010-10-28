@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 2acc3314e31, except for:
+This has been completed up to 0b6a3b5adbe83, except for:
 04777d295957ad270188e4debf51b523e07cc5b0
 c565ab54dc649bb62cd4d57149d7b2abb21df5f3
 1c8d11ca3d0ce8bc11562f159b94c2c7e62dea6c
@@ -191,7 +191,7 @@ C<B> has been upgraded from 1.24 to 1.25.
 
 XXX What should the version be?
 
-C<B::Deparse> has been upgraded from 0.99 to ???.
+C<B::Deparse> has been upgraded from 0.99 to 1.01.
 
 It fixes deparsing of C<our> followed by a variable with funny characters
 (as permitted under the C<utf8> pragma)
@@ -223,7 +223,9 @@ This fixes a memory leak when DBM filters are used.
 
 C<Hash::Util> has been upgraded from 0.09 to 0.10.
 
-This fixes a memory leak when DBM filters are used.
+=item *
+
+C<Hash::Util::FieldHash> has been upgraded from 1.05 to 1.06.
 
 =item *
 
@@ -232,6 +234,10 @@ C<I18N::Langinfo> has been upgraded from 0.06 to 0.07.
 =item *
 
 C<Locale::Maketext> has been upgraded from 1.16 to 1.17
+
+=item *
+
+C<Math::BigInt::FastCalc> has been upgraded from 0.22 to 0.23.
 
 =item *
 
@@ -309,6 +315,11 @@ section.
 =item *
 
 Array and hash slices in scalar context are now documented in L<perldata>.
+
+=item *
+
+L<perlform> and L<perllocale> have been corrected to state that
+C<use locale> affects formats.
 
 =back
 
@@ -454,9 +465,11 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+Directory handles are now properly cloned when threads are created. In perl
+5.13.6, child threads simply stopped inheriting directory handles. In
+previous versions, threads would share handles, resulting in crashes.
 
 =back
 
@@ -492,6 +505,39 @@ name. These can be added and deleted via C<hv_ename_add> and
 C<hv_ename_delete>. The first effective name can be accessed via the
 C<HvENAME*> macros defined in F<hv.h>. These new functions and macros are
 I<not> part of the API.
+
+=item *
+
+The way the parser handles labels has been cleaned up and refactored. As a
+result, the C<newFOROP()> constructor function no longer takes a parameter
+stating what label is to go in the state op.
+
+=item *
+
+The C<newWHILEOP()> and C<newFOROP()> functions no longer accept a line
+number as a parameter.
+
+=item *
+
+A new C<parse_barestmt()> function has been added, for parsing a statement
+without a label.
+
+=item *
+
+A new C<parse_label()> function has been added, that parses a statement
+labels, separate from statements.
+
+=item *
+
+The C<CvSTASH()> macro can now only be used as an rvalue. C<CvSTASH_set()>
+has been added to replace assignment to C<CvSTASH()>. This is to ensure
+that backreferences are handled properly. These macros are not part of the
+API.
+
+=item *
+
+The C<op_scope()> and C<op_lvalue()> functions have been added to the API,
+but are considered experimental.
 
 =back
 
@@ -535,6 +581,30 @@ L<[perl #78508]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78508>.
 
 A memory leak in C<do "file">, introduced in perl 5.13.6, has been fixed
 L<[perl #78488]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78488>.
+
+=item *
+
+Various bugs related to typeglob dereferencing have been fixed. See
+L</Dereferencing typeglobs>, above.
+
+=item *
+
+The C<SvPVbyte> function available to XS modules now calls magic before
+downgrading the SV, to avoid warnings about wide characters
+L<[perl #72398]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=72398>.
+
+=item *
+
+The C<=> operator used to ignore magic (e.g., tie methods) on its
+right-hand side if the scalar happened to hold a typeglob. This could
+happen if a typeglob was the last thing returned from or assigned to a tied
+scalar
+L<[perl #77498]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77498>.
+
+=item *
+
+C<sprintf> was ignoring locales when called with constant arguments
+L<[perl #78632]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78632>.
 
 =back
 
