@@ -923,14 +923,6 @@ next(o)
 	ST(0) = ret;
 	XSRETURN(1);
 
-BOOT:
-{
-#ifdef USE_ITHREADS
-        CV *const cv = newXS("B::PMOP::pmoffset", XS_B__OP_next, __FILE__);
-        XSANY.any_i32 = PMOP_pmoffset_ix;
-#endif
-}
-
 char *
 OP_name(o)
 	B::OP		o
@@ -1108,26 +1100,36 @@ PMOP_pmdynflags(o)
 void
 PMOP_precomp(o)
 	B::PMOP		o
-	REGEXP *	rx = NO_INIT
+    PREINIT:
+	dXSI32;
+	REGEXP *rx;
     CODE:
-	ST(0) = sv_newmortal();
 	rx = PM_GETRE(o);
-	if (rx)
-	    sv_setpvn(ST(0), RX_PRECOMP(rx), RX_PRELEN(rx));
-
+	ST(0) = sv_newmortal();
+	if (rx) {
 #if PERL_VERSION >= 9
-
-void
-PMOP_reflags(o)
-	B::PMOP		o
-	REGEXP *	rx = NO_INIT
-    CODE:
-	ST(0) = sv_newmortal();
-	rx = PM_GETRE(o);
-	if (rx)
-	    sv_setuv(ST(0), RX_EXTFLAGS(rx));
-
+	    if (ix) {
+		sv_setuv(ST(0), RX_EXTFLAGS(rx));
+	    } else
 #endif
+	    {
+		sv_setpvn(ST(0), RX_PRECOMP(rx), RX_PRELEN(rx));
+	    }
+	}
+
+BOOT:
+{
+	CV *cv;
+#ifdef USE_ITHREADS
+        cv = newXS("B::PMOP::pmoffset", XS_B__OP_next, __FILE__);
+        XSANY.any_i32 = PMOP_pmoffset_ix;
+#endif
+#if PERL_VERSION >= 9
+        cv = newXS("B::PMOP::reflags", XS_B__PMOP_precomp, __FILE__);
+        XSANY.any_i32 = 1;
+#endif
+}
+
 
 #define SVOP_sv(o)     cSVOPo->op_sv
 #define SVOP_gv(o)     ((GV*)cSVOPo->op_sv)
