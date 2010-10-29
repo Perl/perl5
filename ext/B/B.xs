@@ -1057,15 +1057,6 @@ PMOP_pmreplroot(o)
 
 #endif
 
-#if PERL_VERSION < 9
-#define PMOP_pmnext(o)		o->op_pmnext
-
-B::PMOP
-PMOP_pmnext(o)
-	B::PMOP		o
-
-#endif
-
 #ifdef USE_ITHREADS
 
 IV
@@ -1085,6 +1076,11 @@ PMOP_pmstash(o)
 #endif
 
 #if PERL_VERSION < 9
+#define PMOP_pmnext(o)		o->op_pmnext
+
+B::PMOP
+PMOP_pmnext(o)
+	B::PMOP		o
 
 U32
 PMOP_pmpermflags(o)
@@ -1189,19 +1185,9 @@ PVOP_pv(o)
 
 MODULE = B	PACKAGE = B::COP		PREFIX = COP_
 
-#if PERL_VERSION >= 11
-
 const char *
 COP_label(o)
 	B::COP	o
-
-#else
-
-char *
-COP_label(o)
-	B::COP	o
-
-#endif
 
 char *
 COP_stashpv(o)
@@ -1812,17 +1798,6 @@ SSize_t
 AvMAX(av)
 	B::AV	av
 
-#if PERL_VERSION < 9
-			   
-
-#define AvOFF(av) ((XPVAV*)SvANY(av))->xof_off
-
-IV
-AvOFF(av)
-	B::AV	av
-
-#endif
-
 void
 AvARRAY(av)
 	B::AV	av
@@ -1846,6 +1821,12 @@ AvARRAYelt(av, idx)
 
 #if PERL_VERSION < 9
 				   
+#define AvOFF(av) ((XPVAV*)SvANY(av))->xof_off
+
+IV
+AvOFF(av)
+	B::AV	av
+
 MODULE = B	PACKAGE = B::AV
 
 U8
