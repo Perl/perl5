@@ -1859,8 +1859,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    struct mro_meta * const meta = HvAUX(sv)->xhv_mro_meta;
 	    if (HvAUX(sv)->xhv_name_count)
 		Perl_dump_indent(aTHX_
-		 level, file, "  NAMECOUNT = \"%d\"\n",
-		 HvAUX(sv)->xhv_name_count
+		 level, file, "  NAMECOUNT = %"IVdf"\n",
+		 (IV)HvAUX(sv)->xhv_name_count
 		);
 	    if (HvAUX(sv)->xhv_name && HvENAME_HEK_NN(sv)) {
 		if (HvAUX(sv)->xhv_name_count) {
