@@ -1277,37 +1277,27 @@ COP_hints(o)
 
 MODULE = B	PACKAGE = B::SV
 
+#define MAGICAL_FLAG_BITS (SVs_GMG|SVs_SMG|SVs_RMG)
+
 U32
-SvTYPE(sv)
+REFCNT(sv)
 	B::SV	sv
+    ALIAS:
+	FLAGS = 0xFFFFFFFF
+	SvTYPE = SVTYPEMASK
+	POK = SVf_POK
+	ROK = SVf_ROK
+	MAGICAL = MAGICAL_FLAG_BITS
+    CODE:
+	RETVAL = ix ? (SvFLAGS(sv) & (U32)ix) : SvREFCNT(sv);
+    OUTPUT:
+	RETVAL
 
 #define object_2svref(sv)	sv
 #define SVREF SV *
 	
 SVREF
 object_2svref(sv)
-	B::SV	sv
-
-MODULE = B	PACKAGE = B::SV		PREFIX = Sv
-
-U32
-SvREFCNT(sv)
-	B::SV	sv
-
-U32
-SvFLAGS(sv)
-	B::SV	sv
-
-U32
-SvPOK(sv)
-	B::SV	sv
-
-U32
-SvROK(sv)
-	B::SV	sv
-
-U32
-SvMAGICAL(sv)
 	B::SV	sv
 
 MODULE = B	PACKAGE = B::IV		PREFIX = Sv

@@ -64,6 +64,45 @@ ok( B::svref_2object(\$.)->MAGIC->TYPE eq "\0", '$. has \0 magic' );
 	'$. has no more magic' );
 }
 
+{
+    my $pie = 'Good';
+    # This needs to be a package variable, as vars in the pad have some flags.
+    my $r = B::svref_2object(\$::data2);
+    is($r->FLAGS(), 0, "uninitialised package variable has flags of 0");
+    is($r->SvTYPE(), 0, "uninitialised package variable has type 0");
+    is($r->POK(), 0, "POK false");
+    is($r->ROK(), 0, "ROK false");
+    is($r->MAGICAL(), 0, "MAGICAL false");
+    $::data2 = $pie;
+    isnt($r->FLAGS(), 0, "initialised package variable has nonzero flags");
+    isnt($r->SvTYPE(), 0, "initialised package variable has nonzero type");
+    isnt($r->POK(), 0, "POK true");
+    is($r->ROK(), 0, "ROK false");
+    is($r->MAGICAL(), 0, "MAGICAL false");
+
+    $::data2 = substr $pie, 0, 1;
+    isnt($r->FLAGS(), 0, "initialised package variable has nonzero flags");
+    isnt($r->SvTYPE(), 0, "initialised package variable has nonzero type");
+    isnt($r->POK(), 0, "POK true");
+    is($r->ROK(), 0, "ROK false");
+    is($r->MAGICAL(), 0, "MAGICAL true");
+
+    $::data2 = \$pie;
+    isnt($r->FLAGS(), 0, "initialised package variable has nonzero flags");
+    isnt($r->SvTYPE(), 0, "initialised package variable has nonzero type");
+    is($r->POK(), 0, "POK false");
+    isnt($r->ROK(), 0, "ROK true");
+    is($r->MAGICAL(), 0, "MAGICAL false");
+
+    is($r->REFCNT(), 1, "Reference count is 1");
+    {
+	my $ref = \$::data2;
+	is($r->REFCNT(), 2, "Second reference");
+    }
+    is($r->REFCNT(), 1, "Reference count is 1");
+
+}
+
 my $r = qr/foo/;
 my $obj = B::svref_2object($r);
 my $regexp =  ($] < 5.011) ? $obj->MAGIC : $obj;
@@ -146,6 +185,8 @@ ok(! $gv_ref->is_empty(), "Test is_empty()");
 is($gv_ref->NAME(), "gv", "Test NAME()");
 is($gv_ref->SAFENAME(), "gv", "Test SAFENAME()");
 like($gv_ref->FILE(), qr/b\.t$/, "Testing FILE()");
+is($gv_ref->SvTYPE(), B::SVt_PVGV, "Test SvTYPE()");
+is($gv_ref->FLAGS() & B::SVTYPEMASK, B::SVt_PVGV, "Test SVTYPEMASK");
 
 # The following return B::SPECIALs.
 is(ref B::sv_yes(), "B::SPECIAL", "B::sv_yes()");
