@@ -144,7 +144,7 @@ SKIP: {
     ### lying around. This addresses bug #29716: 20_CPANPLUS-Dist-MM.t 
     ### fails (and leaves test files installed) when EUMM options 
     ### include INSTALL_BASE
-    {   local $ENV{'PERL5_MM_OPT'};
+    {   local $ENV{'PERL5_MM_OPT'}; local $ENV{'PERL_MM_OPT'};
     
         ### add the new dir to the configuration too, so eu::installed tests
         ### work as they should

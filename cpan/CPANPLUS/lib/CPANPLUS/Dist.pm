@@ -485,7 +485,7 @@ sub _resolve_prereqs {
     my @install_me;
     
     for my $mod ( @sorted_prereqs ) {
-        my $version = $prereqs->{$mod};
+        ( my $version = $prereqs->{$mod} ) =~ s#[^0-9\._]+##g;
         
         ### 'perl' is a special case, there's no mod object for it
         if( $mod eq PERL_CORE ) {

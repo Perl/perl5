@@ -203,6 +203,13 @@ C<CPAN> has been upgraded from 1.94_61 to 1.94_62
 
 =item *
 
+C<CPANPLUS> has been upgraded from 0.9007 to 0.9010
+
+Fixes for the SQLite source engine and resolving of issues with the
+testsuite when run under local::lib and/or cpanminus
+
+=item *
+
 C<CPANPLUS::Dist::Build> has been upgraded from 0.48 to 0.50
 
 =item *

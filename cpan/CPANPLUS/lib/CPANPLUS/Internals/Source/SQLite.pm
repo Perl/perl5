@@ -55,6 +55,13 @@ CPANPLUS::Internals::Source::SQLite - SQLite implementation
 
         return $Dbh;        
     };
+
+    sub __sqlite_disconnect {
+      return unless $Dbh;
+      $Dbh->disconnect;
+      $Dbh = undef;
+      return;
+    }
 }
 
 {   my $used_old_copy = 0;
@@ -80,6 +87,7 @@ CPANPLUS::Internals::Source::SQLite - SQLite implementation
             $used_old_copy = 0;
 
             ### chuck the file
+            $self->__sqlite_disconnect;
             1 while unlink $self->__sqlite_file;
         
             ### and create a new one
