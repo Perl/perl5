@@ -1125,8 +1125,20 @@ Note that because multiple extensions may be using C<PERL_MAGIC_ext>
 or C<PERL_MAGIC_uvar> magic, it is important for extensions to take
 extra care to avoid conflict.  Typically only using the magic on
 objects blessed into the same class as the extension is sufficient.
-For C<PERL_MAGIC_ext> magic, it may also be appropriate to add an I32
-'signature' at the top of the private data area and check that.
+For C<PERL_MAGIC_ext> magic, it is usually a good idea to define an
+C<MGVTBL>, even if all its fields will be C<0>, so that individual
+C<MAGIC> pointers can be identified as a particular kind of magic
+using their C<mg_virtual> field.
+
+    STATIC MGVTBL my_vtbl = { 0, 0, 0, 0, 0, 0, 0, 0 };
+
+    MAGIC *mg;
+    for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
+        if (mg->mg_type == PERL_MAGIC_ext && mg->mg_virtual == &my_vtbl) {
+            /* this is really ours, not another module's PERL_MAGIC_ext */
+            my_priv_data_t *priv = (my_priv_data_t *)mg->mg_ptr;
+        }
+    }
 
 Also note that the C<sv_set*()> and C<sv_cat*()> functions described
 earlier do B<not> invoke 'set' magic on their targets.  This must
