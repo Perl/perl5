@@ -1007,14 +1007,7 @@ LISTOP_children(o)
 	    i++;
 	RETVAL = i;
     OUTPUT:
-        RETVAL
-
-#ifdef USE_ITHREADS
-#define PMOP_pmstashpv(o)	PmopSTASHPV(o);
-#else
-#define PMOP_pmstash(o)		PmopSTASH(o);
-#endif
-#define PMOP_pmflags(o)		o->op_pmflags
+	RETVAL
 
 MODULE = B	PACKAGE = B::PMOP		PREFIX = PMOP_
 
@@ -1067,12 +1060,14 @@ PMOP_pmreplroot(o)
 #endif
 
 #ifdef USE_ITHREADS
+#define PMOP_pmstashpv(o)	PmopSTASHPV(o);
 
 char*
 PMOP_pmstashpv(o)
 	B::PMOP		o
 
 #else
+#define PMOP_pmstash(o)		PmopSTASH(o);
 
 B::HV
 PMOP_pmstash(o)
