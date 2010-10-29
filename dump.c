@@ -1851,6 +1851,37 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    AV * const backrefs
 		= *Perl_hv_backreferences_p(aTHX_ MUTABLE_HV(sv));
 	    struct mro_meta * const meta = HvAUX(sv)->xhv_mro_meta;
+	    if (HvAUX(sv)->xhv_name_count)
+		Perl_dump_indent(aTHX_
+		 level, file, "  NAMECOUNT = \"%d\"\n",
+		 HvAUX(sv)->xhv_name_count
+		);
+	    if (HvAUX(sv)->xhv_name && HvENAME_HEK_NN(sv)) {
+		if (HvAUX(sv)->xhv_name_count) {
+		    SV * const names = sv_newmortal();
+		    HEK ** const namep = (HEK **)HvAUX(sv)->xhv_name;
+		    const I32 count = HvAUX(sv)->xhv_name_count;
+		    HEK **hekp = namep - (count > 0);
+		    sv_setpv(names, "");
+		    while (++hekp < namep + (count < 0 ? -count : count))
+			if (*hekp) {
+			    sv_catpvs(names, ", \"");
+			    sv_catpvn(
+			     names, HEK_KEY(*hekp), HEK_LEN(*hekp)
+			    );
+			    sv_catpvs(names, "\"");
+			}
+			/* This should never happen. */
+			else sv_catpvs(names, ", (null)");
+		    Perl_dump_indent(aTHX_
+		     level, file, "  ENAME = %s\n", SvPV_nolen(names)+2
+		    );
+		}
+		else
+		    Perl_dump_indent(aTHX_
+		     level, file, "  ENAME = \"%s\"\n", HvENAME_get(sv)
+		    );
+	    }
 	    if (backrefs) {
 		Perl_dump_indent(aTHX_ level, file, "  BACKREFS = 0x%"UVxf"\n",
 				 PTR2UV(backrefs));
