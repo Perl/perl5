@@ -867,6 +867,8 @@ threadsv_names()
 #define SVOP_sv_ix		SVp | offsetof(struct svop, op_sv)
 #define SVOP_gv_ix		SVp | offsetof(struct svop, op_sv)
 
+#define PADOP_padix_ix		PADOFFSETp | offsetof(struct padop, op_padix)
+
 MODULE = B	PACKAGE = B::OP		PREFIX = OP_
 
 size_t
@@ -899,6 +901,7 @@ next(o)
 	B::PMOP::pmflags = PMOP_pmflags_ix
 	B::SVOP::sv = SVOP_sv_ix
 	B::SVOP::gv = SVOP_gv_ix
+	B::PADOP::padix = PADOP_padix_ix
     PREINIT:
 	char *ptr;
 	SV *ret;
@@ -1135,17 +1138,12 @@ BOOT:
 #endif
 }
 
-#define PADOP_padix(o)	o->op_padix
 #define PADOP_sv(o)	(o->op_padix ? PAD_SVl(o->op_padix) : Nullsv)
 #define PADOP_gv(o)	((o->op_padix \
 			  && SvTYPE(PAD_SVl(o->op_padix)) == SVt_PVGV) \
 			 ? (GV*)PAD_SVl(o->op_padix) : (GV *)NULL)
 
 MODULE = B	PACKAGE = B::PADOP		PREFIX = PADOP_
-
-PADOFFSET
-PADOP_padix(o)
-	B::PADOP o
 
 B::SV
 PADOP_sv(o)
