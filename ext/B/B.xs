@@ -1293,13 +1293,13 @@ REFCNT(sv)
     OUTPUT:
 	RETVAL
 
-#define object_2svref(sv)	sv
-#define SVREF SV *
-	
-SVREF
+void
 object_2svref(sv)
 	B::SV	sv
-
+    PPCODE:
+	ST(0) = sv_2mortal(newRV(sv));
+	XSRETURN(1);
+	
 MODULE = B	PACKAGE = B::IV		PREFIX = Sv
 
 IV
