@@ -2180,8 +2180,10 @@ Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len)
         HEK_LEN(aux->xhv_name) == (I32)len
      && memEQ(HEK_KEY(aux->xhv_name), name, len)
     ) {
-	unshare_hek_or_pvn(aux->xhv_name, 0, 0, 0);
-	aux->xhv_name = NULL;
+	const HEK * const namehek = aux->xhv_name;
+	Newxc(aux->xhv_name, 1, HEK *, HEK);
+	*(const HEK **)aux->xhv_name = namehek;
+	aux->xhv_name_count = -1;
     }
 }
 
