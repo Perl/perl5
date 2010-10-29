@@ -835,6 +835,7 @@ threadsv_names()
 #define PADOFFSETp	0x10000
 #define U8p		0x20000
 #define U32p		0x30000
+#define IVp		0x40000
 
 #define OP_next_ix		OPp | offsetof(struct op, op_next)
 #define OP_sibling_ix		OPp | offsetof(struct op, op_sibling)
@@ -856,6 +857,10 @@ threadsv_names()
 #define OP_private_ix		U8p | offsetof(struct op, op_private)
 
 #define PMOP_pmflags_ix		U32p | offsetof(struct pmop, op_pmflags)
+
+#ifdef USE_ITHREADS
+#define PMOP_pmoffset_ix	IVp | offsetof(struct pmop, op_pmoffset)
+#endif
 
 MODULE = B	PACKAGE = B::OP		PREFIX = OP_
 
@@ -909,9 +914,22 @@ next(o)
 	case (U8)(U32p >> 16):
 	    ret = sv_2mortal(newSVuv(*((U32*)ptr)));
 	    break;
+#ifdef USE_ITHREADS
+	case (U8)(IVp >> 16):
+	    ret = sv_2mortal(newSViv(*((IV*)ptr)));
+	    break;
+#endif
 	}
 	ST(0) = ret;
 	XSRETURN(1);
+
+BOOT:
+{
+#ifdef USE_ITHREADS
+        CV *const cv = newXS("B::PMOP::pmoffset", XS_B__OP_next, __FILE__);
+        XSANY.any_i32 = PMOP_pmoffset_ix;
+#endif
+}
 
 char *
 OP_name(o)
@@ -1000,7 +1018,6 @@ LISTOP_children(o)
         RETVAL
 
 #ifdef USE_ITHREADS
-#define PMOP_pmoffset(o)	o->op_pmoffset
 #define PMOP_pmstashpv(o)	PmopSTASHPV(o);
 #else
 #define PMOP_pmstash(o)		PmopSTASH(o);
@@ -1058,10 +1075,6 @@ PMOP_pmreplroot(o)
 #endif
 
 #ifdef USE_ITHREADS
-
-IV
-PMOP_pmoffset(o)
-	B::PMOP		o
 
 char*
 PMOP_pmstashpv(o)
