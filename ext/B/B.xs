@@ -1423,13 +1423,16 @@ SvPV(sv)
         if( SvPOK(sv) ) {
 	    STRLEN len = SvCUR(sv);
 	    const char *p = SvPVX_const(sv);
-	    /* FIXME - we need a better way for B to identify PVs that are
-	       in the pads as variable names.  */
+#if PERL_VERSION < 10
+	    /* Before 5.10 (well 931b58fb28fa5ca7), PAD_COMPNAME_GEN was stored
+	       in SvCUR(), which meant we had to attempt this special casing
+	       to avoid tripping up over variable names in the pads.  */
 	    if((SvLEN(sv) && len >= SvLEN(sv))) {
 		/* It claims to be longer than the space allocated for it -
 		   presuambly it's a variable name in the pad  */
 		len = strlen(p);
 	    }
+#endif
 	    ST(0) = newSVpvn_flags(p, len, SVs_TEMP | SvUTF8(sv));
         }
         else {
