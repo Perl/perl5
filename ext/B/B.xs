@@ -1643,22 +1643,20 @@ GvNAME(gv)
 bool
 is_empty(gv)
         B::GV   gv
+    ALIAS:
+	isGV_with_GP = 1
     CODE:
-        RETVAL = GvGP(gv) == Null(GP*);
+	if (ix) {
+#if PERL_VERSION >= 9
+	    RETVAL = isGV_with_GP(gv) ? TRUE : FALSE;
+#else
+	    RETVAL = TRUE; /* In 5.8 and earlier they all are.  */
+#endif
+	} else {
+            RETVAL = GvGP(gv) == Null(GP*);
+	}
     OUTPUT:
         RETVAL
-
-bool
-isGV_with_GP(gv)
-	B::GV	gv
-    CODE:
-#if PERL_VERSION >= 9
-	RETVAL = isGV_with_GP(gv) ? TRUE : FALSE;
-#else
-	RETVAL = TRUE; /* In 5.8 and earlier they all are.  */
-#endif
-    OUTPUT:
-	RETVAL
 
 void*
 GvGP(gv)

@@ -197,6 +197,7 @@ local *gv = *STDOUT;
 my $gv_ref = B::svref_2object(\*gv);
 is(ref $gv_ref, "B::GV", "Test B::GV return from svref_2object");
 ok(! $gv_ref->is_empty(), "Test is_empty()");
+ok($gv_ref->isGV_with_GP(), "Test isGV_with_GP()");
 is($gv_ref->NAME(), "gv", "Test NAME()");
 is($gv_ref->SAFENAME(), "gv", "Test SAFENAME()");
 like($gv_ref->FILE(), qr/b\.t$/, "Testing FILE()");
