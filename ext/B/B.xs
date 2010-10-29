@@ -836,7 +836,8 @@ threadsv_names()
 #define U8p		0x20000
 #define U32p		0x30000
 #define SVp		0x40000
-#define IVp		0x50000
+#define line_tp		0x50000
+#define IVp		0x60000
 
 #define OP_next_ix		OPp | offsetof(struct op, op_next)
 #define OP_sibling_ix		OPp | offsetof(struct op, op_sibling)
@@ -868,6 +869,14 @@ threadsv_names()
 #define SVOP_gv_ix		SVp | offsetof(struct svop, op_sv)
 
 #define PADOP_padix_ix		PADOFFSETp | offsetof(struct padop, op_padix)
+
+#define COP_seq_ix		U32p | offsetof(struct cop, cop_seq)
+#define COP_line_ix		line_tp | offsetof(struct cop, cop_line)
+#if PERL_VERSION >= 9
+#define COP_hints_ix		U32p | offsetof(struct cop, cop_hints)
+#else
+#define COP_hints_ix		U8p | offsetof(struct cop, op_private)
+#endif
 
 MODULE = B	PACKAGE = B::OP		PREFIX = OP_
 
@@ -902,6 +911,9 @@ next(o)
 	B::SVOP::sv = SVOP_sv_ix
 	B::SVOP::gv = SVOP_gv_ix
 	B::PADOP::padix = PADOP_padix_ix
+	B::COP::cop_seq = COP_seq_ix
+	B::COP::line = COP_line_ix
+	B::COP::hints = COP_hints_ix
     PREINIT:
 	char *ptr;
 	SV *ret;
@@ -926,6 +938,9 @@ next(o)
 	    break;
 	case (U8)(SVp >> 16):
 	    ret = make_sv_object(aTHX_ NULL, *((SV **)ptr));
+	    break;
+	case (U8)(line_tp >> 16):
+	    ret = sv_2mortal(newSVuv(*((line_t *)ptr)));
 	    break;
 #ifdef USE_ITHREADS
 	case (U8)(IVp >> 16):
@@ -1189,10 +1204,7 @@ PVOP_pv(o)
 #define COP_stash(o)	CopSTASH(o)
 #define COP_file(o)	CopFILE(o)
 #define COP_filegv(o)	CopFILEGV(o)
-#define COP_cop_seq(o)	o->cop_seq
 #define COP_arybase(o)	CopARYBASE_get(o)
-#define COP_line(o)	CopLINE(o)
-#define COP_hints(o)	CopHINTS_get(o)
 
 MODULE = B	PACKAGE = B::COP		PREFIX = COP_
 
@@ -1216,17 +1228,8 @@ B::GV
 COP_filegv(o)
        B::COP  o
 
-
-U32
-COP_cop_seq(o)
-	B::COP	o
-
 I32
 COP_arybase(o)
-	B::COP	o
-
-U32
-COP_line(o)
 	B::COP	o
 
 void
@@ -1262,10 +1265,6 @@ COP_hints_hash(o)
 	RETVAL
 
 #endif
-
-U32
-COP_hints(o)
-	B::COP	o
 
 MODULE = B	PACKAGE = B::SV
 
