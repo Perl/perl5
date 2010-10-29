@@ -1352,22 +1352,28 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
 	    if (mg->mg_type == PERL_MAGIC_envelem &&
 		mg->mg_flags & MGf_TAINTEDDIR)
 	        Perl_dump_indent(aTHX_ level, file, "      TAINTEDDIR\n");
+	    if (mg->mg_type == PERL_MAGIC_regex_global &&
+		mg->mg_flags & MGf_MINMATCH)
+	        Perl_dump_indent(aTHX_ level, file, "      MINMATCH\n");
 	    if (mg->mg_flags & MGf_REFCOUNTED)
 	        Perl_dump_indent(aTHX_ level, file, "      REFCOUNTED\n");
             if (mg->mg_flags & MGf_GSKIP)
 	        Perl_dump_indent(aTHX_ level, file, "      GSKIP\n");
-	    if (mg->mg_type == PERL_MAGIC_regex_global &&
-		mg->mg_flags & MGf_MINMATCH)
-	        Perl_dump_indent(aTHX_ level, file, "      MINMATCH\n");
+	    if (mg->mg_flags & MGf_COPY)
+	        Perl_dump_indent(aTHX_ level, file, "      COPY\n");
+	    if (mg->mg_flags & MGf_DUP)
+	        Perl_dump_indent(aTHX_ level, file, "      DUP\n");
+	    if (mg->mg_flags & MGf_LOCAL)
+	        Perl_dump_indent(aTHX_ level, file, "      LOCAL\n");
         }
 	if (mg->mg_obj) {
-	    Perl_dump_indent(aTHX_ level, file, "    MG_OBJ = 0x%"UVxf"\n", 
+	    Perl_dump_indent(aTHX_ level, file, "    MG_OBJ = 0x%"UVxf"\n",
 	        PTR2UV(mg->mg_obj));
             if (mg->mg_type == PERL_MAGIC_qr) {
 		REGEXP* const re = (REGEXP *)mg->mg_obj;
 		SV * const dsv = sv_newmortal();
                 const char * const s
-		    = pv_pretty(dsv, RX_WRAPPED(re), RX_WRAPLEN(re), 
+		    = pv_pretty(dsv, RX_WRAPPED(re), RX_WRAPLEN(re),
                     60, NULL, NULL,
                     ( PERL_PV_PRETTY_QUOTE | PERL_PV_ESCAPE_RE | PERL_PV_PRETTY_ELLIPSES |
                     (RX_UTF8(re) ? PERL_PV_ESCAPE_UNI : 0))
