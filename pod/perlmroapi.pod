@@ -54,11 +54,13 @@ function - the parameter is provided to allow your implementation to track
 depth if it needs to recurse.
 
 The function should return a reference to an array containing the parent
-classes in order. The caller is responsible for incrementing the reference
-count if it wants to keep the structure. Hence if you have created a
-temporary value that you keep no pointer to, C<sv_2mortal()> to ensure that
-it is disposed of correctly. If you have cached your return value, then
-return a pointer to it without changing the reference count.
+classes in order. The names of the classes should be the result of calling
+C<HvENAME()> on the stash. The caller is responsible for incrementing the
+reference count of the array returned if it wants to keep the structure.
+Hence, if you have created a temporary value that you keep no pointer to,
+C<sv_2mortal()> to ensure that it is disposed of correctly. If you have
+cached your return value, then return a pointer to it without changing the
+reference count.
 
 =head1 Caching
 

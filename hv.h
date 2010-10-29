@@ -179,6 +179,14 @@ Null HV pointer.
 Returns the package name of a stash, or NULL if C<stash> isn't a stash.
 See C<SvSTASH>, C<CvSTASH>.
 
+=for apidoc Am|char*|HvENAME|HV* stash
+Returns the effective name of a stash, or NULL if there is none. The
+effective name represents a location in the symbol table where this stash
+resides. It is updated automatically when packages are aliased or deleted.
+A stash that is no longer in the symbol table has no effective name. This
+name is preferable to C<HvNAME> for use in MRO linearisations and isa
+caches.
+
 =for apidoc Am|void*|HeKEY|HE* he
 Returns the actual pointer stored in the key slot of the hash entry. The
 pointer may be either C<char*> or C<SV*>, depending on the value of
@@ -254,6 +262,7 @@ C<SV*>.
 #define HvRITER_get(hv)	(SvOOK(hv) ? HvAUX(hv)->xhv_riter : -1)
 #define HvEITER_get(hv)	(SvOOK(hv) ? HvAUX(hv)->xhv_eiter : NULL)
 #define HvNAME(hv)	HvNAME_get(hv)
+#define HvENAME(hv)	HvENAME_get(hv)
 
 /* Checking that hv is a valid package stash is the
    caller's responsibility */
