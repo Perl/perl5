@@ -203,6 +203,10 @@ C<CPAN> has been upgraded from 1.94_61 to 1.94_62
 
 =item *
 
+C<CPANPLUS::Dist::Build> has been upgraded from 0.48 to 0.50
+
+=item *
+
 C<ExtUtils::Constant> has been upgraded from 0.22 to 0.23.
 
 =item *
