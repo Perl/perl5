@@ -835,7 +835,8 @@ threadsv_names()
 #define PADOFFSETp	0x10000
 #define U8p		0x20000
 #define U32p		0x30000
-#define IVp		0x40000
+#define SVp		0x40000
+#define IVp		0x50000
 
 #define OP_next_ix		OPp | offsetof(struct op, op_next)
 #define OP_sibling_ix		OPp | offsetof(struct op, op_sibling)
@@ -861,6 +862,10 @@ threadsv_names()
 #ifdef USE_ITHREADS
 #define PMOP_pmoffset_ix	IVp | offsetof(struct pmop, op_pmoffset)
 #endif
+
+#  Yes, B::SV::sv and B::SV::gv really do end up generating identical code.
+#define SVOP_sv_ix		SVp | offsetof(struct svop, op_sv)
+#define SVOP_gv_ix		SVp | offsetof(struct svop, op_sv)
 
 MODULE = B	PACKAGE = B::OP		PREFIX = OP_
 
@@ -892,6 +897,8 @@ next(o)
 	B::LOOP::nextop = LOOP_nextop_ix
 	B::LOOP::lastop = LOOP_lastop_ix
 	B::PMOP::pmflags = PMOP_pmflags_ix
+	B::SVOP::sv = SVOP_sv_ix
+	B::SVOP::gv = SVOP_gv_ix
     PREINIT:
 	char *ptr;
 	SV *ret;
@@ -913,6 +920,9 @@ next(o)
 	    break;
 	case (U8)(U32p >> 16):
 	    ret = sv_2mortal(newSVuv(*((U32*)ptr)));
+	    break;
+	case (U8)(SVp >> 16):
+	    ret = make_sv_object(aTHX_ NULL, *((SV **)ptr));
 	    break;
 #ifdef USE_ITHREADS
 	case (U8)(IVp >> 16):
@@ -1124,20 +1134,6 @@ BOOT:
         XSANY.any_i32 = 1;
 #endif
 }
-
-
-#define SVOP_sv(o)     cSVOPo->op_sv
-#define SVOP_gv(o)     ((GV*)cSVOPo->op_sv)
-
-MODULE = B	PACKAGE = B::SVOP		PREFIX = SVOP_
-
-B::SV
-SVOP_sv(o)
-	B::SVOP	o
-
-B::GV
-SVOP_gv(o)
-	B::SVOP	o
 
 #define PADOP_padix(o)	o->op_padix
 #define PADOP_sv(o)	(o->op_padix ? PAD_SVl(o->op_padix) : Nullsv)
