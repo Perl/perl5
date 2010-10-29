@@ -1138,20 +1138,27 @@ BOOT:
 #endif
 }
 
-#define PADOP_sv(o)	(o->op_padix ? PAD_SVl(o->op_padix) : Nullsv)
-#define PADOP_gv(o)	((o->op_padix \
-			  && SvTYPE(PAD_SVl(o->op_padix)) == SVt_PVGV) \
-			 ? (GV*)PAD_SVl(o->op_padix) : (GV *)NULL)
-
-MODULE = B	PACKAGE = B::PADOP		PREFIX = PADOP_
+MODULE = B	PACKAGE = B::PADOP
 
 B::SV
-PADOP_sv(o)
+sv(o)
 	B::PADOP o
-
-B::GV
-PADOP_gv(o)
-	B::PADOP o
+    ALIAS:
+	gv = 1
+    CODE:
+	/* It happens that the output typemaps for B::SV and B::GV are
+	   identical. The "smarts" are in make_sv_object(), which determines
+	   which class to use based on SvTYPE(), rather than anything baked in
+	   at compile time.  */	   
+	if (o->op_padix) {
+	    RETVAL = PAD_SVl(o->op_padix);
+	    if (ix && SvTYPE(RETVAL) != SVt_PVGV)
+		RETVAL = NULL;
+	} else {
+	    RETVAL = NULL;
+	}
+    OUTPUT:
+	RETVAL
 
 MODULE = B	PACKAGE = B::PVOP		PREFIX = PVOP_
 
