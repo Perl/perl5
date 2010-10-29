@@ -987,6 +987,11 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     entry = *oentry;
     for (; entry; oentry = &HeNEXT(entry), entry = *oentry) {
 	SV *sv;
+	bool mpm = FALSE;
+	const char *name = NULL;
+	STRLEN namlen;
+	HV *stash = NULL;
+
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
 	if (HeKLEN(entry) != (I32)klen)
@@ -1017,20 +1022,36 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
             Safefree(key);
 
 	/* If this is a stash and the key ends with ::, then someone is 
-	   deleting a package. This must come before the entry is
-	   actually detached from the hash, as mro_package_moved checks
-	   whether the passed gv is still in the symbol table before
-	   doing anything. */
+	 * deleting a package.
+	 * Check whether the gv (HeVAL(entry)) is still in the symbol
+	 * table and then save the name to pass to mro_package_moved after
+	 * the deletion.
+	 * We cannot pass the gv to mro_package_moved directly, as that
+	 * function also checks whether the gv is to be found at the loca-
+	 * tion its name indicates, which will no longer be the case once
+	 * this element is deleted. So we have to do that check here.
+	 */
 	if (HeVAL(entry) && HvENAME_get(hv)) {
+		sv = HeVAL(entry);
 		if (keysv) key = SvPV(keysv, klen);
 		if (klen > 1 && key[klen-2] == ':' && key[klen-1] == ':'
 		 && (klen != 6 || hv!=PL_defstash || memNE(key,"main::",6))
-		 && SvTYPE(HeVAL(entry)) == SVt_PVGV) {
-		    HV * const stash = GvHV((GV *)HeVAL(entry));
-		    if (stash && HvENAME_get(stash))
-			mro_package_moved(
-			 NULL, stash, (GV *)HeVAL(entry), NULL, 0
+		 && SvTYPE(sv) == SVt_PVGV && (stash = GvHV((GV *)sv))
+		 && HvENAME_get(stash)) {
+		    SV * const namesv = sv_newmortal();
+		    gv_fullname4(namesv, (GV *)sv, NULL, 0);
+		    if (
+		     gv_fetchsv(namesv, GV_NOADD_NOINIT, SVt_PVGV)
+		       == (GV *)sv
+		    ) {
+			mpm = TRUE;
+			name = SvPV_const(namesv, namlen);
+			namlen -= 2; /* skip trailing :: */
+			/* Hang on to it for a bit. */
+			SvREFCNT_inc_simple_void_NN(
+			 sv_2mortal((SV *)stash)
 			);
+		    }
 		}
 	}
 
@@ -1063,6 +1084,9 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    if (xhv->xhv_keys == 0)
 	        HvHASKFLAGS_off(hv);
 	}
+
+	if (mpm) mro_package_moved(NULL, stash, NULL, name, namlen);
+
 	return sv;
     }
     if (SvREADONLY(hv)) {
