@@ -121,6 +121,13 @@ is($iv_ref->int_value, $iv, "Test int_value()");
 is($iv_ref->IV, $iv, "Test IV()");
 is($iv_ref->IVX(), $iv, "Test IVX()");
 is($iv_ref->UVX(), $iv, "Test UVX()");
+is(eval { $iv_ref->RV() }, undef, 'Test RV() on IV');
+like($@, qr/argument is not SvROK/, 'Test RV() IV');
+$iv = \"Pie";
+my $val = eval { $iv_ref->RV() };
+is(ref $val, 'B::PV', 'Test RV() on a reference');
+is($val->PV(), 'Pie', 'Value expected');
+is($@, '', "Test RV()");
 
 my $pv = "Foo";
 my $pv_ref = B::svref_2object(\$pv);
@@ -132,9 +139,14 @@ my $pv_ret = $pv_ref->object_2svref();
 is(ref $pv_ret, "SCALAR", "Test object_2svref() return is SCALAR");
 is($$pv_ret, $pv, "Test object_2svref()");
 is($pv_ref->PV(), $pv, "Test PV()");
-eval { is($pv_ref->RV(), $pv, "Test RV()"); };
-ok($@, "Test RV()");
+is(eval { $pv_ref->RV() }, undef, 'Test RV() on PV');
+like($@, qr/argument is not SvROK/, 'Test RV() on PV');
 is($pv_ref->PVX(), $pv, "Test PVX()");
+$pv = \"Pie";
+$val = eval { $pv_ref->RV() };
+is(ref $val, 'B::PV', 'Test RV() on a reference');
+is($val->PV(), 'Pie', 'Value expected');
+is($@, '', "Test RV()");
 
 my $nv = 1.1;
 my $nv_ref = B::svref_2object(\$nv);
@@ -147,6 +159,9 @@ is(ref $nv_ret, "SCALAR", "Test object_2svref() return is SCALAR");
 is($$nv_ret, $nv, "Test object_2svref()");
 is($nv_ref->NV, $nv, "Test NV()");
 is($nv_ref->NVX(), $nv, "Test NVX()");
+is(eval { $nv_ref->RV() }, undef, 'Test RV() on NV');
+like($@, qr/Can't locate object method "RV" via package "B::NV"/,
+     'Test RV() on NV');
 
 my $null = undef;
 my $null_ref = B::svref_2object(\$null);

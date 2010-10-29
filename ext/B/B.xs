@@ -1349,21 +1349,15 @@ packiv(sv)
 	    ST(0) = newSVpvn_flags((char *)&w, 4, SVs_TEMP);
 	}
 
-
 #if PERL_VERSION >= 11
+#  The input typemap checking makes no distinction between different SV types,
+#  so the XS body will generate the same C code, despite the different XS
+#  "types". So there is no change in behaviour from doing newXS like this,
+#  compared with the old approach of having a (near) duplicate XS body.
+#  We should fix the typemap checking.
 
-B::SV
-RV(sv)
-        B::IV   sv
-    CODE:
-        if( SvROK(sv) ) {
-            RETVAL = SvRV(sv);
-        }
-        else {
-            croak( "argument is not SvROK" );
-        }
-    OUTPUT:
-        RETVAL
+BOOT:
+        newXS("B::IV::RV", XS_B__PV_RV, __FILE__);
 
 #endif
 
