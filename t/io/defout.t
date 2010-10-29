@@ -15,9 +15,9 @@ BEGIN {
 plan tests => 16;
 
 
-my $stderr = *STDERR;
-select($stderr);
-$stderr = 1; # whoops, PL_defoutgv no longer a GV!
+my $stdout = *STDOUT;
+select($stdout);
+$stdout = 1; # whoops, PL_defoutgv no longer a GV!
 # XXX It is a GV as of 5.13.7. Is this test file needed any more?
 
 # note that in the tests below, the return values aren't as important
@@ -27,7 +27,7 @@ ok print(""), 'print';
 ok select(), 'select';
 
 $a = 'fooo';
-format STDERR =
+format STDOUT =
 @ @<<
 "#", $a
 .
@@ -45,5 +45,9 @@ $= = 1; pass '$= = 1';
 $- = 1; pass '$- = 1';
 $% = 1; pass '$% = 1';
 $| = 1; pass '$| = 1';
-ok close(), 'close';
 
+# Switch to STDERR for this test, so we do not lose our test output
+my $stderr = *STDERR;
+select($stderr);
+$stderr = 1;
+ok close(), 'close';
