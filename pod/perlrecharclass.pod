@@ -113,14 +113,19 @@ Any character that isn't matched by C<\d> will be matched by C<\D>.
 =head3 Word characters
 
 A C<\w> matches a single alphanumeric character (an alphabetic character, or a
-decimal digit) or an underscore (C<_>), not a whole word.  To match a whole
+decimal digit) or a connecting punctuation character, such as an
+underscore ("_").  It does not match a whole word.  To match a whole
 word, use C<\w+>.  This isn't the same thing as matching an English word, but 
-is the same as a string of Perl-identifier characters.  What is considered a
+in the ASCII range is the same as a string of Perl-identifier
+characters.  What is considered a
 word character depends on several factors, detailed below in L</Locale,
 EBCDIC, Unicode and UTF-8>.  If those factors indicate a Unicode
 interpretation, C<\w> matches the characters that are considered word
 characters in the Unicode database. That is, it not only matches ASCII letters,
-but also Thai letters, Greek letters, etc.  If a Unicode interpretation
+but also Thai letters, Greek letters, etc.  This includes connector
+punctuation (like the underscore) which connect two words together, or
+marks, such as a C<COMBINING TILDE>, which are generally used to add
+diacritical marks to letters.   If a Unicode interpretation
 is not indicated, C<\w> matches those characters that are considered
 word characters by the current locale or EBCDIC code page.  Without a
 locale or EBCDIC code page, C<\w> matches the ASCII letters, digits and

@@ -359,9 +359,10 @@ the character classes are written as a backslash sequence. We will briefly
 discuss those here; full details of character classes can be found in
 L<perlrecharclass>.
 
-C<\w> is a character class that matches any single I<word> character (letters,
-digits, underscore). C<\d> is a character class that matches any decimal digit,
-while the character class C<\s> matches any whitespace character.
+C<\w> is a character class that matches any single I<word> character
+(letters, digits, Unicode marks, and connector punctuation (like the
+underscore)).  C<\d> is a character class that matches any decimal
+digit, while the character class C<\s> matches any whitespace character.
 New in perl 5.10.0 are the classes C<\h> and C<\v> which match horizontal
 and vertical whitespace characters.
 

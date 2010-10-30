@@ -256,7 +256,9 @@ X<\g> X<\k> X<\K> X<backreference>
                    character class "..." within the outer bracketed
                    character class.  Example: [[:upper:]] matches any
                    uppercase character.
-  \w        [3]  Match a "word" character (alphanumeric plus "_")
+  \w        [3]  Match a "word" character (alphanumeric plus "_", plus
+                   other connector punctuation chars plus Unicode
+                   marks
   \W        [3]  Match a non-"word" character
   \s        [3]  Match a whitespace character
   \S        [3]  Match a non-whitespace character

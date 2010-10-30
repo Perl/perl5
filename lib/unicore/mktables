@@ -11323,7 +11323,8 @@ sub compile_perl() {
                             );
 
     my $Word = $perl->add_match_table('Word',
-                                Description => '\w, including beyond ASCII',
+                                Description => '\w, including beyond ASCII;'
+                                            . ' = \p{Alnum} + \pM + \p{Pc}',
                                 Initialize => $Alnum + $gc->table('Mark'),
                                 );
     $Word->add_alias('XPosixWord');
