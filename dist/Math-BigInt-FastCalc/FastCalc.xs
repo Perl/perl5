@@ -37,7 +37,7 @@ PROTOTYPES: DISABLE
 BOOT:
 {
     if (items < 4)
-	S_croak_xs_usage(aTHX_ cv, "package, version, base_len, base");
+	croak_xs_usage(aTHX_ cv, "package, version, base_len, base");
     XS_BASE_LEN = SvIV(ST(2)); 
     XS_BASE = SvNV(ST(3)); 
 }
