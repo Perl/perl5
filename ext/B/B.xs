@@ -1329,16 +1329,190 @@ IV
 SvIV(sv)
 	B::IV	sv
 
-IV
-SvIVX(sv)
-	B::IV	sv
-
-UV 
-SvUVX(sv) 
-	B::IV   sv
-                      
-
 MODULE = B	PACKAGE = B::IV
+
+#define sv_SVp		0x00000
+#define sv_IVp		0x10000
+#define sv_UVp		0x20000
+#define sv_STRLENp	0x30000
+#define sv_U32p		0x40000
+#define sv_U8p		0x50000
+#define sv_char_pp	0x60000
+#define sv_NVp		0x70000
+#define sv_char_p	0x80000
+#define sv_SSize_tp	0x90000
+#define sv_I32p		0xA0000
+#define sv_U16p		0xB0000
+
+#define IV_ivx_ix	sv_IVp | offsetof(struct xpviv, xiv_iv)
+#define IV_uvx_ix	sv_UVp | offsetof(struct xpvuv, xuv_uv)
+#define NV_nvx_ix	sv_NVp | offsetof(struct xpvnv, xnv_u.xnv_nv)
+
+#if PERL_VERSION >= 10
+#define NV_cop_seq_range_low_ix \
+			sv_U32p | offsetof(struct xpvnv, xnv_u.xpad_cop_seq.xlow)
+#define NV_cop_seq_range_high_ix \
+			sv_U32p | offsetof(struct xpvnv, xnv_u.xpad_cop_seq.xhigh)
+#define NV_parent_pad_index_ix \
+			sv_U32p | offsetof(struct xpvnv, xnv_u.xpad_cop_seq.xlow)
+#define NV_parent_fakelex_flags_ix \
+			sv_U32p | offsetof(struct xpvnv, xnv_u.xpad_cop_seq.xhigh)
+#else
+#define NV_cop_seq_range_low_ix \
+			sv_NVp | offsetof(struct xpvnv, xnv_nv)
+#define NV_cop_seq_range_high_ix \
+			sv_UVp | offsetof(struct xpvnv, xuv_uv)
+#define NV_parent_pad_index_ix \
+			sv_NVp | offsetof(struct xpvnv, xnv_nv)
+#define NV_parent_fakelex_flags_ix \
+			sv_UVp | offsetof(struct xpvnv, xuv_uv)
+#endif
+
+#define PV_cur_ix	sv_STRLENp | offsetof(struct xpv, xpv_cur)
+#define PV_len_ix	sv_STRLENp | offsetof(struct xpv, xpv_len)
+
+#define PVMG_stash_ix	sv_SVp | offsetof(struct xpvmg, xmg_stash)
+
+#define PVLV_targoff_ix	sv_U32p | offsetof(struct xpvlv, xlv_targoff)
+#define PVLV_targlen_ix	sv_U32p | offsetof(struct xpvlv, xlv_targlen)
+#define PVLV_targ_ix	sv_SVp | offsetof(struct xpvlv, xlv_targ)
+#define PVLV_type_ix	sv_char_p | offsetof(struct xpvlv, xlv_type)
+
+#if PERL_VERSION >= 10
+#define PVGV_stash_ix	sv_SVp | offsetof(struct xpvgv, xnv_u.xgv_stash)
+#define PVGV_flags_ix	sv_STRLENp | offsetof(struct xpvgv, xpv_cur)
+#define PVIO_lines_ix	sv_IVp | offsetof(struct xpvio, xiv_iv)
+#else
+#define PVGV_stash_ix	sv_SVp | offsetof(struct xpvgv, xgv_stash)
+#define PVGV_flags_ix	sv_U8p | offsetof(struct xpvgv, xgv_flags)
+#define PVIO_lines_ix	sv_IVp | offsetof(struct xpvio, xio_lines)
+#endif
+
+#define PVIO_page_ix	    sv_IVp | offsetof(struct xpvio, xio_page)
+#define PVIO_page_len_ix    sv_IVp | offsetof(struct xpvio, xio_page_len)
+#define PVIO_lines_left_ix  sv_IVp | offsetof(struct xpvio, xio_lines_left)
+#define PVIO_top_name_ix    sv_char_pp | offsetof(struct xpvio, xio_top_name)
+#define PVIO_top_gv_ix	    sv_SVp | offsetof(struct xpvio, xio_top_gv)
+#define PVIO_fmt_name_ix    sv_char_pp | offsetof(struct xpvio, xio_fmt_name)
+#define PVIO_fmt_gv_ix	    sv_SVp | offsetof(struct xpvio, xio_fmt_gv)
+#define PVIO_bottom_name_ix sv_char_pp | offsetof(struct xpvio, xio_bottom_name)
+#define PVIO_bottom_gv_ix   sv_SVp | offsetof(struct xpvio, xio_bottom_gv)
+#define PVIO_type_ix	    sv_char_p | offsetof(struct xpvio, xio_type)
+#define PVIO_flags_ix	    sv_U8p | offsetof(struct xpvio, xio_flags)
+
+#define PVAV_max_ix	sv_SSize_tp | offsetof(struct xpvav, xav_max)
+
+#define PVFM_lines_ix	sv_IVp | offsetof(struct xpvfm, xfm_lines)
+
+#define PVCV_stash_ix	sv_SVp | offsetof(struct xpvcv, xcv_stash) 
+#define PVCV_gv_ix	sv_SVp | offsetof(struct xpvcv, xcv_gv)
+#define PVCV_file_ix	sv_char_pp | offsetof(struct xpvcv, xcv_file)
+#define PVCV_depth_ix	sv_I32p | offsetof(struct xpvcv, xcv_depth)
+#define PVCV_padlist_ix	sv_SVp | offsetof(struct xpvcv, xcv_padlist)
+#define PVCV_outside_ix	sv_SVp | offsetof(struct xpvcv, xcv_outside)
+#define PVCV_outside_seq_ix sv_U32p | offsetof(struct xpvcv, xcv_outside_seq)
+#define PVCV_flags_ix	sv_U16p | offsetof(struct xpvcv, xcv_flags)
+
+#define PVHV_max_ix	sv_STRLENp | offsetof(struct xpvhv, xhv_max)
+
+#if PERL_VERSION > 12
+#define PVHV_keys_ix	sv_STRLENp | offsetof(struct xpvhv, xhv_keys)
+#else
+#define PVHV_keys_ix	sv_IVp | offsetof(struct xpvhv, xhv_keys)
+#endif
+
+# The type checking code in B has always been identical for all SV types,
+# irrespective of whether the action is actually defined on that SV.
+# We should fix this
+void
+IVX(sv)
+	B::SV		sv
+    ALIAS:
+	B::IV::IVX = IV_ivx_ix
+	B::IV::UVX = IV_uvx_ix
+	B::NV::NVX = NV_nvx_ix
+	B::NV::COP_SEQ_RANGE_LOW = NV_cop_seq_range_low_ix
+	B::NV::COP_SEQ_RANGE_HIGH = NV_cop_seq_range_high_ix
+	B::NV::PARENT_PAD_INDEX = NV_parent_pad_index_ix
+	B::NV::PARENT_FAKELEX_FLAGS = NV_parent_fakelex_flags_ix
+	B::PV::CUR = PV_cur_ix
+	B::PV::LEN = PV_len_ix
+	B::PVMG::SvSTASH = PVMG_stash_ix
+	B::PVLV::TARGOFF = PVLV_targoff_ix
+	B::PVLV::TARGLEN = PVLV_targlen_ix
+	B::PVLV::TARG = PVLV_targ_ix
+	B::PVLV::TYPE = PVLV_type_ix
+	B::GV::STASH = PVGV_stash_ix
+	B::GV::GvFLAGS = PVGV_flags_ix
+	B::IO::LINES =  PVIO_lines_ix
+	B::IO::PAGE = PVIO_page_ix
+	B::IO::PAGE_LEN = PVIO_page_len_ix
+	B::IO::LINES_LEFT = PVIO_lines_left_ix
+	B::IO::TOP_NAME = PVIO_top_name_ix
+	B::IO::TOP_GV = PVIO_top_gv_ix
+	B::IO::FMT_NAME = PVIO_fmt_name_ix
+	B::IO::FMT_GV = PVIO_fmt_gv_ix
+	B::IO::BOTTOM_NAME = PVIO_bottom_name_ix
+	B::IO::BOTTOM_GV = PVIO_bottom_gv_ix
+	B::IO::IoTYPE = PVIO_type_ix
+	B::IO::IoFLAGS = PVIO_flags_ix
+	B::AV::MAX = PVAV_max_ix
+	B::FM::LINES = PVFM_lines_ix
+	B::CV::STASH = PVCV_stash_ix
+	B::CV::GV = PVCV_gv_ix
+	B::CV::FILE = PVCV_file_ix
+	B::CV::DEPTH = PVCV_depth_ix
+	B::CV::PADLIST = PVCV_padlist_ix
+	B::CV::OUTSIDE = PVCV_outside_ix
+	B::CV::OUTSIDE_SEQ = PVCV_outside_seq_ix
+	B::CV::CvFLAGS = PVCV_flags_ix
+	B::HV::MAX = PVHV_max_ix
+	B::HV::KEYS = PVHV_keys_ix
+    PREINIT:
+	char *ptr;
+	SV *ret;
+    PPCODE:
+	ptr = (ix & 0xFFFF) + (char *)SvANY(sv);
+	switch ((U8)(ix >> 16)) {
+	case (U8)(sv_SVp >> 16):
+	    ret = make_sv_object(aTHX_ NULL, *((SV **)ptr));
+	    break;
+	case (U8)(sv_IVp >> 16):
+	    ret = sv_2mortal(newSViv(*((IV *)ptr)));
+	    break;
+	case (U8)(sv_UVp >> 16):
+	    ret = sv_2mortal(newSVuv(*((UV *)ptr)));
+	    break;
+	case (U8)(sv_STRLENp >> 16):
+	    ret = sv_2mortal(newSVuv(*((STRLEN *)ptr)));
+	    break;
+	case (U8)(sv_U32p >> 16):
+	    ret = sv_2mortal(newSVuv(*((U32 *)ptr)));
+	    break;
+	case (U8)(sv_U8p >> 16):
+	    ret = sv_2mortal(newSVuv(*((U8 *)ptr)));
+	    break;
+	case (U8)(sv_char_pp >> 16):
+	    ret = sv_2mortal(newSVpv(*((char **)ptr), 0));
+	    break;
+	case (U8)(sv_NVp >> 16):
+	    ret = sv_2mortal(newSVnv(*((NV *)ptr)));
+	    break;
+	case (U8)(sv_char_p >> 16):
+	    ret = newSVpvn_flags((char *)ptr, 1, SVs_TEMP);
+	    break;
+	case (U8)(sv_SSize_tp >> 16):
+	    ret = sv_2mortal(newSViv(*((SSize_t *)ptr)));
+	    break;
+	case (U8)(sv_I32p >> 16):
+	    ret = sv_2mortal(newSVuv(*((I32 *)ptr)));
+	    break;
+	case (U8)(sv_U16p >> 16):
+	    ret = sv_2mortal(newSVuv(*((U16 *)ptr)));
+	    break;
+	}
+	ST(0) = ret;
+	XSRETURN(1);
 
 void
 packiv(sv)
@@ -1386,26 +1560,6 @@ MODULE = B	PACKAGE = B::NV		PREFIX = Sv
 
 NV
 SvNV(sv)
-	B::NV	sv
-
-NV
-SvNVX(sv)
-	B::NV	sv
-
-U32
-COP_SEQ_RANGE_LOW(sv)
-	B::NV	sv
-
-U32
-COP_SEQ_RANGE_HIGH(sv)
-	B::NV	sv
-
-U32
-PARENT_PAD_INDEX(sv)
-	B::NV	sv
-
-U32
-PARENT_FAKELEX_FLAGS(sv)
 	B::NV	sv
 
 #if PERL_VERSION < 11
@@ -1473,15 +1627,6 @@ SvPVBM(sv)
 	    SvCUR(sv) + (SvVALID(sv) ? 256 + PERL_FBM_TABLE_OFFSET : 0),
 	    SVs_TEMP);
 
-
-STRLEN
-SvLEN(sv)
-	B::PV	sv
-
-STRLEN
-SvCUR(sv)
-	B::PV	sv
-
 MODULE = B	PACKAGE = B::PVMG	PREFIX = Sv
 
 void
@@ -1491,12 +1636,6 @@ SvMAGIC(sv)
     PPCODE:
 	for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic)
 	    XPUSHs(make_mg_object(aTHX_ mg));
-
-MODULE = B	PACKAGE = B::PVMG
-
-B::HV
-SvSTASH(sv)
-	B::PVMG	sv
 
 MODULE = B	PACKAGE = B::REGEXP
 
@@ -1607,24 +1746,6 @@ MgPTR(mg)
 	} else
 	    ST(0) = sv_newmortal();
 
-MODULE = B	PACKAGE = B::PVLV	PREFIX = Lv
-
-U32
-LvTARGOFF(sv)
-	B::PVLV	sv
-
-U32
-LvTARGLEN(sv)
-	B::PVLV	sv
-
-char
-LvTYPE(sv)
-	B::PVLV	sv
-
-B::SV
-LvTARG(sv)
-	B::PVLV sv
-
 MODULE = B	PACKAGE = B::BM		PREFIX = Bm
 
 I32
@@ -1686,10 +1807,6 @@ void*
 GvGP(gv)
 	B::GV	gv
 
-B::HV
-GvSTASH(gv)
-	B::GV	gv
-
 #define GP_sv_ix	SVp | offsetof(struct gp, gp_sv)
 #define GP_io_ix	SVp | offsetof(struct gp, gp_io)
 #define GP_cv_ix	SVp | offsetof(struct gp, gp_cv)
@@ -1744,53 +1861,7 @@ B::GV
 GvFILEGV(gv)
 	B::GV	gv
 
-MODULE = B	PACKAGE = B::GV
-
-U8
-GvFLAGS(gv)
-	B::GV	gv
-
 MODULE = B	PACKAGE = B::IO		PREFIX = Io
-
-long
-IoLINES(io)
-	B::IO	io
-
-long
-IoPAGE(io)
-	B::IO	io
-
-long
-IoPAGE_LEN(io)
-	B::IO	io
-
-long
-IoLINES_LEFT(io)
-	B::IO	io
-
-char *
-IoTOP_NAME(io)
-	B::IO	io
-
-B::GV
-IoTOP_GV(io)
-	B::IO	io
-
-char *
-IoFMT_NAME(io)
-	B::IO	io
-
-B::GV
-IoFMT_GV(io)
-	B::IO	io
-
-char *
-IoBOTTOM_NAME(io)
-	B::IO	io
-
-B::GV
-IoBOTTOM_GV(io)
-	B::IO	io
 
 #if PERL_VERSION <= 8
 
@@ -1823,24 +1894,10 @@ IsSTD(io,name)
     OUTPUT:
 	RETVAL
 
-MODULE = B	PACKAGE = B::IO
-
-char
-IoTYPE(io)
-	B::IO	io
-
-U8
-IoFLAGS(io)
-	B::IO	io
-
 MODULE = B	PACKAGE = B::AV		PREFIX = Av
 
 SSize_t
 AvFILL(av)
-	B::AV	av
-
-SSize_t
-AvMAX(av)
 	B::AV	av
 
 void
@@ -1880,20 +1937,10 @@ AvFLAGS(av)
 
 #endif
 
-MODULE = B	PACKAGE = B::FM		PREFIX = Fm
-
-IV
-FmLINES(form)
-	B::FM	form
-
 MODULE = B	PACKAGE = B::CV		PREFIX = Cv
 
 U32
 CvCONST(cv)
-	B::CV	cv
-
-B::HV
-CvSTASH(cv)
 	B::CV	cv
 
 B::OP
@@ -1905,30 +1952,6 @@ CvSTART(cv)
 	RETVAL = CvISXSUB(cv) ? NULL : ix ? CvROOT(cv) : CvSTART(cv);
     OUTPUT:
 	RETVAL
-
-B::GV
-CvGV(cv)
-	B::CV	cv
-
-char *
-CvFILE(cv)
-	B::CV	cv
-
-long
-CvDEPTH(cv)
-	B::CV	cv
-
-B::AV
-CvPADLIST(cv)
-	B::CV	cv
-
-B::CV
-CvOUTSIDE(cv)
-	B::CV	cv
-
-U32
-CvOUTSIDE_SEQ(cv)
-	B::CV	cv
 
 void
 CvXSUB(cv)
@@ -1945,12 +1968,6 @@ CvXSUBANY(cv)
 	    ? make_sv_object(aTHX_ NULL, (SV *)CvXSUBANY(cv).any_ptr)
 	    : sv_2mortal(newSViv(CvISXSUB(cv) ? CvXSUBANY(cv).any_iv : 0));
 
-MODULE = B    PACKAGE = B::CV
-
-U16
-CvFLAGS(cv)
-      B::CV   cv
-
 MODULE = B	PACKAGE = B::CV		PREFIX = cv_
 
 B::SV
@@ -1962,14 +1979,6 @@ MODULE = B	PACKAGE = B::HV		PREFIX = Hv
 
 STRLEN
 HvFILL(hv)
-	B::HV	hv
-
-STRLEN
-HvMAX(hv)
-	B::HV	hv
-
-I32
-HvKEYS(hv)
 	B::HV	hv
 
 I32
