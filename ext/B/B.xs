@@ -1413,6 +1413,14 @@ MODULE = B	PACKAGE = B::IV
 #define PVCV_outside_seq_ix sv_U32p | offsetof(struct xpvcv, xcv_outside_seq)
 #define PVCV_flags_ix	sv_U16p | offsetof(struct xpvcv, xcv_flags)
 
+#define PVHV_max_ix	sv_STRLENp | offsetof(struct xpvhv, xhv_max)
+
+#if PERL_VERSION > 12
+#define PVHV_keys_ix	sv_STRLENp | offsetof(struct xpvhv, xhv_keys)
+#else
+#define PVHV_keys_ix	sv_IVp | offsetof(struct xpvhv, xhv_keys)
+#endif
+
 # The type checking code in B has always been identical for all SV types,
 # irrespective of whether the action is actually defined on that SV.
 # We should fix this
@@ -1458,6 +1466,8 @@ IVX(sv)
 	B::CV::OUTSIDE = PVCV_outside_ix
 	B::CV::OUTSIDE_SEQ = PVCV_outside_seq_ix
 	B::CV::CvFLAGS = PVCV_flags_ix
+	B::HV::MAX = PVHV_max_ix
+	B::HV::KEYS = PVHV_keys_ix
     PREINIT:
 	char *ptr;
 	SV *ret;
@@ -1969,14 +1979,6 @@ MODULE = B	PACKAGE = B::HV		PREFIX = Hv
 
 STRLEN
 HvFILL(hv)
-	B::HV	hv
-
-STRLEN
-HvMAX(hv)
-	B::HV	hv
-
-I32
-HvKEYS(hv)
 	B::HV	hv
 
 I32
