@@ -6560,12 +6560,21 @@ sub trace { return main::trace(@_); }
         my $addr = do { no overloading; pack 'J', $self; };
         my $current_leader = ($related) ? $parent{$addr} : $leader{$addr};
 
-        if ($related &&
-            ! $other->perl_extension
-            && ! $current_leader->perl_extension)
-        {
-            Carp::my_carp_bug("set_equivalent_to should have 'Related => 0 for equivalencing two Unicode properties.  Assuming $self is not related to $other");
-            $related = 0;
+        if ($related) {
+            if ($current_leader->perl_extension) {
+                if ($other->perl_extension) {
+                    Carp::my_carp_bug("Use add_alias() to set two Perl tables '$self' and '$other', equivalent.");
+                    return;
+                }
+            } elsif (! $other->perl_extension) {
+                Carp::my_carp_bug("set_equivalent_to should have 'Related => 0 for equivalencing two Unicode properties.  Assuming $self is not related to $other");
+                $related = 0;
+            }
+        }
+
+        if (! $self->is_empty && ! $self->matches_identically_to($other)) {
+            Carp::my_carp_bug("$self should be empty or match identically to $other.  Not setting equivalent");
+            return;
         }
 
         my $leader = do { no overloading; pack 'J', $current_leader; };
