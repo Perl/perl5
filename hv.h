@@ -287,23 +287,21 @@ C<SV*>.
 #define HvNAMELEN_get(hv) \
 	((SvOOK(hv) && (HvAUX(hv)->xhv_name) && HvNAME_HEK_NN(hv)) \
 				 ? HEK_LEN(HvNAME_HEK_NN(hv)) : 0)
-#ifdef PERL_CORE
-# define HvENAME_HEK_NN(hv)                                             \
+#define HvENAME_HEK_NN(hv)                                             \
  (                                                                      \
   HvAUX(hv)->xhv_name_count > 0   ? *(HEK **)HvAUX(hv)->xhv_name      : \
   HvAUX(hv)->xhv_name_count < -1  ? ((HEK **)HvAUX(hv)->xhv_name)[1] : \
   HvAUX(hv)->xhv_name_count == -1 ? NULL                              : \
                                     HvAUX(hv)->xhv_name                 \
  )
-# define HvENAME_HEK(hv) \
+#define HvENAME_HEK(hv) \
 	(SvOOK(hv) && HvAUX(hv)->xhv_name ? HvENAME_HEK_NN(hv) : NULL)
-# define HvENAME_get(hv) \
+#define HvENAME_get(hv) \
 	((SvOOK(hv) && (HvAUX(hv)->xhv_name) && HvENAME_HEK_NN(hv)) \
 			 ? HEK_KEY(HvENAME_HEK_NN(hv)) : NULL)
-# define HvENAMELEN_get(hv) \
+#define HvENAMELEN_get(hv) \
 	((SvOOK(hv) && (HvAUX(hv)->xhv_name) && HvENAME_HEK_NN(hv)) \
 				 ? HEK_LEN(HvENAME_HEK_NN(hv)) : 0)
-#endif
 
 /* the number of keys (including any placeholers) */
 #define XHvTOTALKEYS(xhv)	((xhv)->xhv_keys)
