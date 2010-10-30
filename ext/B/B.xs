@@ -1725,7 +1725,7 @@ SV(gv)
 	gp = GvGP(gv);
 	if (!gp) {
 	    const GV *const gv = CvGV(cv);
-	    croak(aTHX_ "NULL gp in B::GV::%s", gv ? GvNAME(gv) : "???");
+	    Perl_croak(aTHX_ "NULL gp in B::GV::%s", gv ? GvNAME(gv) : "???");
 	}
 	ptr = (ix & 0xFFFF) + (char *)gp;
 	switch ((U8)(ix >> 16)) {
