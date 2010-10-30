@@ -1375,6 +1375,14 @@ MODULE = B	PACKAGE = B::IV
 #define PVLV_targ_ix	sv_SVp | offsetof(struct xpvlv, xlv_targ)
 #define PVLV_type_ix	sv_char_p | offsetof(struct xpvlv, xlv_type)
 
+#if PERL_VERSION >= 10
+#define PVGV_stash_ix	sv_SVp | offsetof(struct xpvgv, xnv_u.xgv_stash)
+#define PVGV_flags_ix	sv_STRLENp | offsetof(struct xpvgv, xpv_cur)
+#else
+#define PVGV_stash_ix	sv_SVp | offsetof(struct xpvgv, xgv_stash)
+#define PVGV_flags_ix	sv_U8p | offsetof(struct xpvgv, xgv_flags)
+#endif
+
 # The type checking code in B has always been identical for all SV types,
 # irrespective of whether the action is actually defined on that SV.
 # We should fix this
@@ -1396,6 +1404,8 @@ IVX(sv)
 	B::PVLV::TARGLEN = PVLV_targlen_ix
 	B::PVLV::TARG = PVLV_targ_ix
 	B::PVLV::TYPE = PVLV_type_ix
+	B::GV::STASH = PVGV_stash_ix
+	B::GV::GvFLAGS = PVGV_flags_ix
     PREINIT:
 	char *ptr;
 	SV *ret;
@@ -1726,10 +1736,6 @@ void*
 GvGP(gv)
 	B::GV	gv
 
-B::HV
-GvSTASH(gv)
-	B::GV	gv
-
 #define GP_sv_ix	SVp | offsetof(struct gp, gp_sv)
 #define GP_io_ix	SVp | offsetof(struct gp, gp_io)
 #define GP_cv_ix	SVp | offsetof(struct gp, gp_cv)
@@ -1782,12 +1788,6 @@ SV(gv)
 
 B::GV
 GvFILEGV(gv)
-	B::GV	gv
-
-MODULE = B	PACKAGE = B::GV
-
-U8
-GvFLAGS(gv)
 	B::GV	gv
 
 MODULE = B	PACKAGE = B::IO		PREFIX = Io
