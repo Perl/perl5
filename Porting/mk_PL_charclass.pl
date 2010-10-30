@@ -90,7 +90,7 @@ for my $ord (0..255) {
             $re = qr/\w/;
         } elsif ($name eq 'ALNUMC') {
             # Like \w, but no underscore
-            $re = qr/[^_\W]/;
+            $re = qr/\p{Alnum}/;
         } elsif ($name eq 'OCTAL') {
             $re = qr/[0-7]/;
         } else {    # The remainder have the same name and values as Unicode
