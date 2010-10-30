@@ -1378,10 +1378,24 @@ MODULE = B	PACKAGE = B::IV
 #if PERL_VERSION >= 10
 #define PVGV_stash_ix	sv_SVp | offsetof(struct xpvgv, xnv_u.xgv_stash)
 #define PVGV_flags_ix	sv_STRLENp | offsetof(struct xpvgv, xpv_cur)
+#define PVIO_lines_ix	sv_IVp | offsetof(struct xpvio, xiv_iv)
 #else
 #define PVGV_stash_ix	sv_SVp | offsetof(struct xpvgv, xgv_stash)
 #define PVGV_flags_ix	sv_U8p | offsetof(struct xpvgv, xgv_flags)
+#define PVIO_lines_ix	sv_IVp | offsetof(struct xpvio, xio_lines)
 #endif
+
+#define PVIO_page_ix	    sv_IVp | offsetof(struct xpvio, xio_page)
+#define PVIO_page_len_ix    sv_IVp | offsetof(struct xpvio, xio_page_len)
+#define PVIO_lines_left_ix  sv_IVp | offsetof(struct xpvio, xio_lines_left)
+#define PVIO_top_name_ix    sv_char_pp | offsetof(struct xpvio, xio_top_name)
+#define PVIO_top_gv_ix	    sv_SVp | offsetof(struct xpvio, xio_top_gv)
+#define PVIO_fmt_name_ix    sv_char_pp | offsetof(struct xpvio, xio_fmt_name)
+#define PVIO_fmt_gv_ix	    sv_SVp | offsetof(struct xpvio, xio_fmt_gv)
+#define PVIO_bottom_name_ix sv_char_pp | offsetof(struct xpvio, xio_bottom_name)
+#define PVIO_bottom_gv_ix   sv_SVp | offsetof(struct xpvio, xio_bottom_gv)
+#define PVIO_type_ix	    sv_char_p | offsetof(struct xpvio, xio_type)
+#define PVIO_flags_ix	    sv_U8p | offsetof(struct xpvio, xio_flags)
 
 # The type checking code in B has always been identical for all SV types,
 # irrespective of whether the action is actually defined on that SV.
@@ -1406,6 +1420,18 @@ IVX(sv)
 	B::PVLV::TYPE = PVLV_type_ix
 	B::GV::STASH = PVGV_stash_ix
 	B::GV::GvFLAGS = PVGV_flags_ix
+	B::IO::LINES =  PVIO_lines_ix
+	B::IO::PAGE = PVIO_page_ix
+	B::IO::PAGE_LEN = PVIO_page_len_ix
+	B::IO::LINES_LEFT = PVIO_lines_left_ix
+	B::IO::TOP_NAME = PVIO_top_name_ix
+	B::IO::TOP_GV = PVIO_top_gv_ix
+	B::IO::FMT_NAME = PVIO_fmt_name_ix
+	B::IO::FMT_GV = PVIO_fmt_gv_ix
+	B::IO::BOTTOM_NAME = PVIO_bottom_name_ix
+	B::IO::BOTTOM_GV = PVIO_bottom_gv_ix
+	B::IO::IoTYPE = PVIO_type_ix
+	B::IO::IoFLAGS = PVIO_flags_ix
     PREINIT:
 	char *ptr;
 	SV *ret;
@@ -1792,46 +1818,6 @@ GvFILEGV(gv)
 
 MODULE = B	PACKAGE = B::IO		PREFIX = Io
 
-long
-IoLINES(io)
-	B::IO	io
-
-long
-IoPAGE(io)
-	B::IO	io
-
-long
-IoPAGE_LEN(io)
-	B::IO	io
-
-long
-IoLINES_LEFT(io)
-	B::IO	io
-
-char *
-IoTOP_NAME(io)
-	B::IO	io
-
-B::GV
-IoTOP_GV(io)
-	B::IO	io
-
-char *
-IoFMT_NAME(io)
-	B::IO	io
-
-B::GV
-IoFMT_GV(io)
-	B::IO	io
-
-char *
-IoBOTTOM_NAME(io)
-	B::IO	io
-
-B::GV
-IoBOTTOM_GV(io)
-	B::IO	io
-
 #if PERL_VERSION <= 8
 
 short
@@ -1862,16 +1848,6 @@ IsSTD(io,name)
 	RETVAL = handle == IoIFP(io);
     OUTPUT:
 	RETVAL
-
-MODULE = B	PACKAGE = B::IO
-
-char
-IoTYPE(io)
-	B::IO	io
-
-U8
-IoFLAGS(io)
-	B::IO	io
 
 MODULE = B	PACKAGE = B::AV		PREFIX = Av
 
