@@ -234,7 +234,7 @@ UTF-8 format, or the locale or EBCDIC code page that is in effect includes them.
 =back
 
 It is worth noting that C<\d>, C<\w>, etc, match single characters, not
-complete numbers or words. To match a number (that consists of integers),
+complete numbers or words. To match a number (that consists of digits),
 use C<\d+>; to match a word, use C<\w+>.
 
 =head3 \N

@@ -367,8 +367,9 @@ New in perl 5.10.0 are the classes C<\h> and C<\v> which match horizontal
 and vertical whitespace characters.
 
 The uppercase variants (C<\W>, C<\D>, C<\S>, C<\H>, and C<\V>) are
-character classes that match any character that isn't a word character,
-digit, whitespace, horizontal whitespace nor vertical whitespace.
+character classes that match, respectively, any character that isn't a
+word character, digit, whitespace, horizontal whitespace, or vertical
+whitespace.
 
 Mnemonics: I<w>ord, I<d>igit, I<s>pace, I<h>orizontal, I<v>ertical.
 
