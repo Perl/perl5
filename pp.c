@@ -854,11 +854,11 @@ PP(pp_undef)
             HV *stash;
 
             /* undef *Foo:: */
-            if((stash = GvHV((const GV *)sv)) && HvNAME_get(stash))
+            if((stash = GvHV((const GV *)sv)) && HvENAME_get(stash))
                 mro_isa_changed_in(stash);
             /* undef *Pkg::meth_name ... */
             else if(GvCVu((const GV *)sv) && (stash = GvSTASH((const GV *)sv))
-		    && HvNAME_get(stash))
+		    && HvENAME_get(stash))
                 mro_method_changed_in(stash);
 
 	    gp_free(MUTABLE_GV(sv));

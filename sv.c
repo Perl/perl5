@@ -3607,13 +3607,18 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
         }
         /* If source has a real method, then a method is
            going to change */
-        else if(GvCV((const GV *)sstr)) {
+        else if(
+         GvCV((const GV *)sstr) && GvSTASH(dstr) && HvENAME(GvSTASH(dstr))
+        ) {
             mro_changes = 1;
         }
     }
 
     /* If dest already had a real method, that's a change as well */
-    if(!mro_changes && GvGP(MUTABLE_GV(dstr)) && GvCVu((const GV *)dstr)) {
+    if(
+        !mro_changes && GvGP(MUTABLE_GV(dstr)) && GvCVu((const GV *)dstr)
+     && GvSTASH(dstr) && HvENAME(GvSTASH(dstr))
+    ) {
         mro_changes = 1;
     }
 
@@ -3621,7 +3626,12 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
        glob to begin with. */
     if(dtype == SVt_PVGV) {
         const char * const name = GvNAME((const GV *)dstr);
-        if(strEQ(name,"ISA"))
+        if(
+            strEQ(name,"ISA")
+         /* The stash may have been detached from the symbol table, so
+            check its name. */
+         && GvSTASH(dstr) && HvENAME(GvSTASH(dstr))
+        )
             mro_changes = 2;
         else {
             const STRLEN len = GvNAMELEN(dstr);
@@ -3781,7 +3791,12 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 		);
 	    }
 	}
-	else if (stype == SVt_PVAV && strEQ(GvNAME((GV*)dstr), "ISA")) {
+	else if (
+	    stype == SVt_PVAV && strEQ(GvNAME((GV*)dstr), "ISA")
+	 /* The stash may have been detached from the symbol table, so
+	    check its name before doing anything. */
+	 && GvSTASH(dstr) && HvENAME(GvSTASH(dstr))
+	) {
 	    sv_magic(sref, dstr, PERL_MAGIC_isa, NULL, 0);
 	    mro_isa_changed_in(GvSTASH(dstr));
 	}
@@ -5991,7 +6006,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 	case SVt_PVGV:
 	    if (isGV_with_GP(sv)) {
 		if(GvCVu((const GV *)sv) && (stash = GvSTASH(MUTABLE_GV(sv)))
-		   && HvNAME_get(stash))
+		   && HvENAME_get(stash))
 		    mro_method_changed_in(stash);
 		gp_free(MUTABLE_GV(sv));
 		if (GvNAME_HEK(sv))

@@ -1630,7 +1630,9 @@ Perl_magic_clearisa(pTHX_ SV *sv, MAGIC *mg)
             : (const GV *)mg_find(mg->mg_obj, PERL_MAGIC_isa)->mg_obj
     );
 
-    if (stash)
+    /* The stash may have been detached from the symbol table, so check its
+       name before doing anything. */
+    if (stash && HvENAME_get(stash))
 	mro_isa_changed_in(stash);
 
     return 0;

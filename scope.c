@@ -859,7 +859,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    if (SSPOPINT)
 		SvFAKE_on(gv);
             /* putting a method back into circulation ("local")*/
-	    if (GvCVu(gv) && (hv=GvSTASH(gv)) && HvNAME_get(hv))
+	    if (GvCVu(gv) && (hv=GvSTASH(gv)) && HvENAME_get(hv))
                 mro_method_changed_in(hv);
 	    SvREFCNT_dec(gv);
 	    break;

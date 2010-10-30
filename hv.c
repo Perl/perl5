@@ -1481,7 +1481,7 @@ Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
     if (!entry)
 	return;
     val = HeVAL(entry);
-    if (val && isGV(val) && isGV_with_GP(val) && GvCVu(val) && HvNAME_get(hv))
+    if (val && isGV(val) && isGV_with_GP(val) && GvCVu(val) && HvENAME(hv))
         mro_method_changed_in(hv);	/* deletion of method from stash */
     SvREFCNT_dec(val);
     if (HeKLEN(entry) == HEf_SVKEY) {
@@ -1568,7 +1568,7 @@ Perl_hv_clear(pTHX_ HV *hv)
     HvREHASH_off(hv);
     reset:
     if (SvOOK(hv)) {
-        if(HvNAME_get(hv))
+        if(HvENAME_get(hv))
             mro_isa_changed_in(hv);
 	HvEITER_set(hv, NULL);
     }
@@ -1852,11 +1852,11 @@ Perl_hv_undef(pTHX_ HV *hv)
     DEBUG_A(Perl_hv_assert(aTHX_ hv));
     xhv = (XPVHV*)SvANY(hv);
 
-    if ((name = HvNAME_get(hv)) && !PL_dirty)
+    if ((name = HvENAME_get(hv)) && !PL_dirty)
         mro_isa_changed_in(hv);
 
     hfreeentries(hv);
-    if (name) {
+    if (name || (name = HvNAME(hv))) {
         if (PL_stashcache)
 	    (void)hv_delete(PL_stashcache, name, HvNAMELEN_get(hv), G_DISCARD);
 	hv_name_set(hv, NULL, 0, 0);

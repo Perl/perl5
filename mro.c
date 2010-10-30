@@ -215,7 +215,11 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
     PERL_ARGS_ASSERT_MRO_GET_LINEAR_ISA_DFS;
     assert(HvAUX(stash));
 
-    stashhek = HvNAME_HEK(stash);
+    stashhek
+     = HvAUX(stash)->xhv_name && HvENAME_HEK_NN(stash)
+        ? HvENAME_HEK_NN(stash)
+        : HvNAME_HEK(stash);
+
     if (!stashhek)
       Perl_croak(aTHX_ "Can't linearize anonymous symbol table");
 
@@ -438,8 +442,8 @@ Perl_mro_isa_changed_in3(pTHX_ HV* stash, const char *stashname,
     struct mro_meta * meta = NULL;
 
     if(!stashname && stash) {
-        stashname = HvNAME_get(stash);
-        stashname_len = HvNAMELEN_get(stash);
+        stashname = HvENAME_get(stash);
+        stashname_len = HvENAMELEN_get(stash);
     }
     else if(!stash)
         stash = gv_stashpvn(stashname, stashname_len, 0 /* don't add */);
@@ -692,7 +696,7 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
 		            stashentry && *stashentry
 		         && (substash = GvHV(*stashentry))
 		        )
-		     || (oldsubstash && HvNAME(oldsubstash))
+		     || (oldsubstash && HvENAME_get(oldsubstash))
 		    )
 		    {
 			/* Add :: and the key (minus the trailing ::)
@@ -782,7 +786,7 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
     }
 
    set_names:
-    if(oldstash && HvNAME(oldstash)) {
+    if(oldstash && HvENAME_get(oldstash)) {
 	if(PL_stashcache)
 	    (void)
 	     hv_delete(PL_stashcache, newname, newname_len, G_DISCARD);
@@ -824,8 +828,8 @@ via, C<mro::method_changed_in(classname)>.
 void
 Perl_mro_method_changed_in(pTHX_ HV *stash)
 {
-    const char * const stashname = HvNAME_get(stash);
-    const STRLEN stashname_len = HvNAMELEN_get(stash);
+    const char * const stashname = HvENAME_get(stash);
+    const STRLEN stashname_len = HvENAMELEN_get(stash);
 
     SV ** const svp = hv_fetch(PL_isarev, stashname, stashname_len, 0);
     HV * const isarev = svp ? MUTABLE_HV(*svp) : NULL;
