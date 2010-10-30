@@ -295,6 +295,8 @@ C<SV*>.
   HvAUX(hv)->xhv_name_count == -1 ? NULL                              : \
                                     HvAUX(hv)->xhv_name                 \
  )
+# define HvENAME_HEK(hv) \
+	(SvOOK(hv) && HvAUX(hv)->xhv_name ? HvENAME_HEK_NN(hv) : NULL)
 # define HvENAME_get(hv) \
 	((SvOOK(hv) && (HvAUX(hv)->xhv_name) && HvENAME_HEK_NN(hv)) \
 			 ? HEK_KEY(HvENAME_HEK_NN(hv)) : NULL)
