@@ -2106,6 +2106,18 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
     iter->xhv_name_count = 0;
 }
 
+/*
+=for apidoc hv_ename_add
+
+Adds a name to a stash's internal list of effective names. See
+C<hv_ename_delete>.
+
+This is called when a stash is assigned to a new location in the symbol
+table.
+
+=cut
+*/
+
 void
 Perl_hv_ename_add(pTHX_ HV *hv, const char *name, U32 len)
 {
@@ -2149,6 +2161,18 @@ Perl_hv_ename_add(pTHX_ HV *hv, const char *name, U32 len)
 	((HEK **)aux->xhv_name)[1] = share_hek(name, len, hash);
     }
 }
+
+/*
+=for apidoc hv_ename_delete
+
+Removes a name from a stash's internal list of effective names. If this is
+the name returned by C<HvENAME>, then another name in the list will take
+its place (C<HvENAME> will use it).
+
+This is called when a stash is deleted from the symbol table.
+
+=cut
+*/
 
 void
 Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len)
