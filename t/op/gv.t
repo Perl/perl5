@@ -846,7 +846,7 @@ ok eval {
 # These two crashed in 5.13.6. They were likewise fixed in 5.13.7.
 ok eval {
   sub greck;
-  my $glob = \*phing::foo;
+  my $glob = do { no warnings "once"; \*phing::foo};
   delete $::{"phing::"};
   *$glob = *greck; 
 }, "Assigning a glob-with-sub to a glob that has lost its stash warks";
