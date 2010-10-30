@@ -1778,12 +1778,15 @@ GvNAME(gv)
 	B::GV	gv
     ALIAS:
 	FILE = 1
+	B::HV::NAME = 2
     CODE:
 #if PERL_VERSION >= 10
-	ST(0) = sv_2mortal(newSVhek(ix ? GvFILE_HEK(gv) : GvNAME_HEK(gv)));
+	ST(0) = sv_2mortal(newSVhek(!ix ? GvNAME_HEK(gv)
+					: (ix == 1 ? GvFILE_HEK(gv)
+						   : HvNAME_HEK((HV *)gv))));
 #else
-	ST(0) = ix ? sv_2mortal(newSVpv(GvFILE(gv), 0))
-	    : newSVpvn_flags(GvNAME(gv), GvNAMELEN(gv), SVs_TEMP);
+	ST(0) = !ix ? newSVpvn_flags(GvNAME(gv), GvNAMELEN(gv), SVs_TEMP)
+		    : sv_2mortal(newSVpv(ix == 1 ? GvFILE(gv) : HvNAME((HV *)gv), 0))
 #endif
 
 bool
@@ -1984,10 +1987,6 @@ HvFILL(hv)
 
 I32
 HvRITER(hv)
-	B::HV	hv
-
-char *
-HvNAME(hv)
 	B::HV	hv
 
 #if PERL_VERSION < 9
