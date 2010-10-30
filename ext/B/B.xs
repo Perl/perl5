@@ -1329,16 +1329,85 @@ IV
 SvIV(sv)
 	B::IV	sv
 
-IV
-SvIVX(sv)
-	B::IV	sv
-
-UV 
-SvUVX(sv) 
-	B::IV   sv
-                      
-
 MODULE = B	PACKAGE = B::IV
+
+#define sv_SVp		0x00000
+#define sv_IVp		0x10000
+#define sv_UVp		0x20000
+#define sv_STRLENp	0x30000
+#define sv_U32p		0x40000
+#define sv_U8p		0x50000
+#define sv_char_pp	0x60000
+#define sv_NVp		0x70000
+
+#define IV_ivx_ix	sv_IVp | offsetof(struct xpviv, xiv_iv)
+#define IV_uvx_ix	sv_UVp | offsetof(struct xpvuv, xuv_uv)
+#define NV_nvx_ix	sv_NVp | offsetof(struct xpvnv, xnv_u.xnv_nv)
+
+#if PERL_VERSION >= 10
+#define NV_cop_seq_range_low_ix \
+			sv_U32p | offsetof(struct xpvnv, xnv_u.xpad_cop_seq.xlow)
+#define NV_cop_seq_range_high_ix \
+			sv_U32p | offsetof(struct xpvnv, xnv_u.xpad_cop_seq.xhigh)
+#define NV_parent_pad_index_ix \
+			sv_U32p | offsetof(struct xpvnv, xnv_u.xpad_cop_seq.xlow)
+#define NV_parent_fakelex_flags_ix \
+			sv_U32p | offsetof(struct xpvnv, xnv_u.xpad_cop_seq.xhigh)
+#else
+#define NV_cop_seq_range_low_ix \
+			sv_NVp | offsetof(struct xpvnv, xnv_nv)
+#define NV_cop_seq_range_high_ix \
+			sv_UVp | offsetof(struct xpvnv, xuv_uv)
+#define NV_parent_pad_index_ix \
+			sv_NVp | offsetof(struct xpvnv, xnv_nv)
+#define NV_parent_fakelex_flags_ix \
+			sv_UVp | offsetof(struct xpvnv, xuv_uv)
+#endif
+
+# The type checking code in B has always been identical for all SV types,
+# irrespective of whether the action is actually defined on that SV.
+# We should fix this
+void
+IVX(sv)
+	B::SV		sv
+    ALIAS:
+	B::IV::IVX = IV_ivx_ix
+	B::IV::UVX = IV_uvx_ix
+	B::NV::NVX = NV_nvx_ix
+	B::NV::COP_SEQ_RANGE_LOW = NV_cop_seq_range_low_ix
+	B::NV::COP_SEQ_RANGE_HIGH = NV_cop_seq_range_high_ix
+	B::NV::PARENT_PAD_INDEX = NV_parent_pad_index_ix
+	B::NV::PARENT_FAKELEX_FLAGS = NV_parent_fakelex_flags_ix
+    PREINIT:
+	char *ptr;
+	SV *ret;
+    PPCODE:
+	ptr = (ix & 0xFFFF) + (char *)SvANY(sv);
+	switch ((U8)(ix >> 16)) {
+	case (U8)(sv_SVp >> 16):
+	    ret = make_sv_object(aTHX_ NULL, *((SV **)ptr));
+	    break;
+	case (U8)(sv_IVp >> 16):
+	    ret = sv_2mortal(newSViv(*((IV *)ptr)));
+	    break;
+	case (U8)(sv_UVp >> 16):
+	    ret = sv_2mortal(newSVuv(*((UV *)ptr)));
+	    break;
+	case (U8)(sv_U32p >> 16):
+	    ret = sv_2mortal(newSVuv(*((U32 *)ptr)));
+	    break;
+	case (U8)(sv_U8p >> 16):
+	    ret = sv_2mortal(newSVuv(*((U8 *)ptr)));
+	    break;
+	case (U8)(sv_char_pp >> 16):
+	    ret = sv_2mortal(newSVpv(*((char **)ptr), 0));
+	    break;
+	case (U8)(sv_NVp >> 16):
+	    ret = sv_2mortal(newSVnv(*((NV *)ptr)));
+	    break;
+	}
+	ST(0) = ret;
+	XSRETURN(1);
 
 void
 packiv(sv)
@@ -1386,26 +1455,6 @@ MODULE = B	PACKAGE = B::NV		PREFIX = Sv
 
 NV
 SvNV(sv)
-	B::NV	sv
-
-NV
-SvNVX(sv)
-	B::NV	sv
-
-U32
-COP_SEQ_RANGE_LOW(sv)
-	B::NV	sv
-
-U32
-COP_SEQ_RANGE_HIGH(sv)
-	B::NV	sv
-
-U32
-PARENT_PAD_INDEX(sv)
-	B::NV	sv
-
-U32
-PARENT_FAKELEX_FLAGS(sv)
 	B::NV	sv
 
 #if PERL_VERSION < 11
