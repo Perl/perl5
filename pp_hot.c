@@ -2764,6 +2764,8 @@ PP(pp_entersub)
 	if (sv == &PL_sv_yes) {		/* unfound import, ignore */
 	    if (hasargs)
 		SP = PL_stack_base + POPMARK;
+	    else
+		(void)POPMARK;
 	    RETURN;
 	}
 	SvGETMAGIC(sv);
