@@ -37,7 +37,8 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
 
     assert(HvAUX(stash));
 
-    stashhek = HvNAME_HEK(stash);
+    stashhek = HvENAME_HEK(stash);
+    if (!stashhek) stashhek = HvNAME_HEK(stash);
     if (!stashhek)
       Perl_croak(aTHX_ "Can't linearize anonymous symbol table");
 
