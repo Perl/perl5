@@ -11423,7 +11423,7 @@ sub compile_perl() {
         );
 
     my $Digit = $perl->add_match_table('Digit',
-                            Description => '\d, extended beyond just [0-9]');
+                            Description => '[0-9] + all other decimal digits');
     $Digit->set_equivalent_to($gc->table('Decimal_Number'), Related => 1);
     my $PosixDigit = $perl->add_match_table("PosixDigit",
                                             Description => '[0-9]',
