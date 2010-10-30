@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 226 );
+plan( tests => 230 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -830,6 +830,33 @@ pass('Can assign strings to typeglobs');
   ::is $a, "bar",
     "[perl #77812] Globs in tied scalars can be reified if STORE dies"
 }
+
+# These two crashed prior to 5.13.6. In 5.13.6 they were fatal errors. They
+# were fixed in 5.13.7.
+ok eval {
+  my $glob = \*heen::ISA;
+  delete $::{"heen::"};
+  *$glob = *bar; 
+}, "glob-to-*ISA assignment works when *ISA has lost its stash";
+ok eval {
+  my $glob = \*slare::ISA;
+  delete $::{"slare::"};
+  *$glob = []; 
+}, "array-to-*ISA assignment works when *ISA has lost its stash";
+# These two crashed in 5.13.6. They were likewise fixed in 5.13.7.
+ok eval {
+  sub greck;
+  my $glob = \*phing::foo;
+  delete $::{"phing::"};
+  *$glob = *greck; 
+}, "Assigning a glob-with-sub to a glob that has lost its stash warks";
+ok eval {
+  sub pon::foo;
+  my $glob = \*pon::foo;
+  delete $::{"pon::"};
+  *$glob = *foo; 
+}, "Assigning a glob to a glob-with-sub that has lost its stash warks";
+
 
 __END__
 Perl
