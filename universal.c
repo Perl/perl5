@@ -48,7 +48,8 @@ S_get_isa_hash(pTHX_ HV *const stash)
 	    /* Linearisation didn't build it for us, so do it here.  */
 	    SV *const *svp = AvARRAY(isa);
 	    SV *const *const svp_end = svp + AvFILLp(isa) + 1;
-	    const HEK *const canon_name = HvNAME_HEK(stash);
+	    const HEK *canon_name = HvENAME_HEK(stash);
+	    if (!canon_name) canon_name = HvNAME_HEK(stash);
 
 	    while (svp < svp_end) {
 		(void) hv_store_ent(isa_hash, *svp++, &PL_sv_undef, 0);
@@ -92,11 +93,13 @@ S_isa_lookup(pTHX_ HV *stash, const char * const name)
     }
 
     /* A stash/class can go by many names (ie. User == main::User), so 
-       we use the name in the stash itself, which is canonical.  */
+       we use the HvENAME in the stash itself, which is canonical, falling
+       back to HvNAME if necessary.  */
     our_stash = gv_stashpvn(name, len, 0);
 
     if (our_stash) {
-	HEK *const canon_name = HvNAME_HEK(our_stash);
+	HEK *canon_name = HvENAME_HEK(our_stash);
+	if (!canon_name) canon_name = HvNAME_HEK(our_stash);
 
 	if (hv_common(isa, NULL, HEK_KEY(canon_name), HEK_LEN(canon_name),
 		      HEK_FLAGS(canon_name),
