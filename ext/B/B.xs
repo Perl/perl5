@@ -1656,11 +1656,14 @@ MODULE = B	PACKAGE = B::GV		PREFIX = Gv
 void
 GvNAME(gv)
 	B::GV	gv
+    ALIAS:
+	FILE = 1
     CODE:
 #if PERL_VERSION >= 10
-	ST(0) = sv_2mortal(newSVhek(GvNAME_HEK(gv)));
+	ST(0) = sv_2mortal(newSVhek(ix ? GvFILE_HEK(gv) : GvNAME_HEK(gv)));
 #else
-	ST(0) = newSVpvn_flags(GvNAME(gv), GvNAMELEN(gv), SVs_TEMP);
+	ST(0) = ix ? sv_2mortal(newSVpv(GvFILE(gv), 0))
+	    : newSVpvn_flags(GvNAME(gv), GvNAMELEN(gv), SVs_TEMP);
 #endif
 
 bool
@@ -1738,10 +1741,6 @@ SV(gv)
 	}
 	ST(0) = ret;
 	XSRETURN(1);
-
-char *
-GvFILE(gv)
-	B::GV	gv
 
 B::GV
 GvFILEGV(gv)
