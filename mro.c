@@ -662,11 +662,19 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
     }
     if(newname_len < 0) newname_len = -newname_len;
 
+    if(oldstash && HvENAME_get(oldstash)) {
+	if(PL_stashcache)
+	    (void)
+	     hv_delete(PL_stashcache, newname, newname_len, G_DISCARD);
+	hv_ename_delete(oldstash, newname, newname_len);
+    }
+    if(stash) hv_ename_add(stash, newname, newname_len);
+
     mro_isa_changed_in3((HV *)oldstash, newname, newname_len);
 
     if(
      (!stash || !HvARRAY(stash)) && (!oldstash || !HvARRAY(oldstash))
-    ) goto set_names;
+    ) return;
 
     /* This is partly based on code in hv_iternext_flags. We are not call-
        ing that here, as we want to avoid resetting the hash iterator. */
@@ -810,15 +818,6 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
 	    }
 	}
     }
-
-   set_names:
-    if(oldstash && HvENAME_get(oldstash)) {
-	if(PL_stashcache)
-	    (void)
-	     hv_delete(PL_stashcache, newname, newname_len, G_DISCARD);
-	hv_ename_delete(oldstash, newname, newname_len);
-    }
-    if(stash) hv_ename_add(stash, newname, newname_len);
 }
 
 /*
