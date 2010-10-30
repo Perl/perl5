@@ -145,44 +145,39 @@ and L<perlunicode> for details.
 
 POSIX character classes and their Unicode and Perl equivalents:
 
-           ASCII-         Full-
-           range          range   backslash
- POSIX    \p{...}         \p{}    sequence       Description
- -----------------------------------------------------------------------
- alnum   PosixAlnum       Alnum               Alpha plus Digit
- alpha   PosixAlpha       Alpha               Alphabetic characters
- ascii   ASCII                                Any ASCII character
- blank   PosixBlank       Blank     \h        Horizontal whitespace;
-                                                full-range also written
-                                                as \p{HorizSpace} (GNU
-                                                extension)
- cntrl   PosixCntrl       Cntrl               Control characters
- digit   PosixDigit       Digit     \d        Decimal digits
- graph   PosixGraph       Graph               Alnum plus Punct
- lower   PosixLower       Lower               Lowercase characters
- print   PosixPrint       Print               Graph plus Print, but not
-                                                any Cntrls
- punct   PosixPunct       Punct               These aren't precisely
-                                                equivalent.  See NOTE,
-                                                below.
- space   PosixSpace       Space     [\s\cK]   Whitespace
-         PerlSpace        SpacePerl \s        Perl's whitespace
-                                                definition
- upper   PosixUpper       Upper               Uppercase characters
- word    PerlWord         Word      \w        Alnum plus '_' (Perl
-                                                extension)
- xdigit  ASCII_Hex_Digit  XDigit              Hexadecimal digit,
-                                                ASCII-range is
-                                                [0-9A-Fa-f]
+            ASCII-         Full-
+   POSIX    range          range    backslash
+ [[:...:]]  \p{...}        \p{...}   sequence    Description
 
-NOTE on C<[[:punct:]]>, C<\p{PosixPunct}> and C<\p{Punct}>:
-In the ASCII range, C<[[:punct:]]> and C<\p{PosixPunct}> match
-C<[-!"#$%&'()*+,./:;<=E<gt>?@[\\\]^_`{|}~]> (although if a locale is in
-effect, it could alter the behavior of C<[[:punct:]]>); and C<\p{Punct}>
-matches C<[-!"#%&'()*,./:;?@[\\\]_{}]>.  When matching a UTF-8 string,
-C<[[:punct:]]> matches what it does in the ASCII range, plus what
-C<\p{Punct}> matches.  C<\p{Punct}> matches, anything that isn't a
-control, an alphanumeric, a space, nor a symbol.
+ -----------------------------------------------------------------------
+ alnum   PosixAlnum       XPosixAlnum            Alpha plus Digit
+ alpha   PosixAlpha       XPosixAlpha            Alphabetic characters
+ ascii   ASCII                                   Any ASCII character
+ blank   PosixBlank       XPosixBlank   \h       Horizontal whitespace;
+                                                   full-range also
+                                                   written as
+                                                   \p{HorizSpace} (GNU
+                                                   extension)
+ cntrl   PosixCntrl       XPosixCntrl            Control characters
+ digit   PosixDigit       XPosixDigit   \d       Decimal digits
+ graph   PosixGraph       XPosixGraph            Alnum plus Punct
+ lower   PosixLower       XPosixLower            Lowercase characters
+ print   PosixPrint       XPosixPrint            Graph plus Print, but
+                                                   not any Cntrls
+ punct   PosixPunct       XPosixPunct            Punctuation and Symbols
+                                                   in ASCII-range; just
+                                                   punct outside it
+ space   PosixSpace       XPosixSpace   [\s\cK]  Whitespace
+         PerlSpace        XPerlSpace    \s       Perl's whitespace def'n
+ upper   PosixUpper       XPosixUpper            Uppercase characters
+ word    PerlWord         XPosixWord    \w       Alnum + '_' (Perl
+                                                   extension)
+ xdigit  ASCII_Hex_Digit  XPosixDigit            Hexadecimal digit,
+                                                    ASCII-range is
+                                                    [0-9A-Fa-f]
+
+Also, various synonyms like C<\p{Alpha}> for C<\p{XPosixAlpha}>; all listed
+in L<perluniprops/Properties accessible through \p{} and \P{}>
 
 Within a character class:
 

@@ -522,7 +522,8 @@ The other counterpart, in the column labelled "Full-range Unicode", matches any
 appropriate characters in the full Unicode character set.  For example,
 C<\p{Alpha}> will match not just the ASCII alphabetic characters, but any
 character in the entire Unicode character set that is considered to be
-alphabetic.
+alphabetic.  The backslash sequence column is a (short) synonym for
+the Full-range Unicode form.
 
 (Each of the counterparts has various synonyms as well.
 L<perluniprops/Properties accessible through \p{} and \P{}> lists all the
@@ -533,8 +534,8 @@ and any C<\p> property name can be prefixed with "Is" such as C<\p{IsAlpha}>.)
 Both the C<\p> forms are unaffected by any locale that is in effect, or whether
 the string is in UTF-8 format or not, or whether the platform is EBCDIC or not.
 In contrast, the POSIX character classes are affected.  If the source string is
-in UTF-8 format, the POSIX classes (with the exception of C<[[:punct:]]>, see
-Note [5] below) behave like their "Full-range" Unicode counterparts.  If the
+in UTF-8 format, the POSIX classes behave like their "Full-range"
+Unicode counterparts.  If the
 source string is not in UTF-8 format, and no locale is in effect, and the
 platform is not EBCDIC, all the POSIX classes behave like their ASCII-range
 counterparts.  Otherwise, they behave based on the rules of the locale or
@@ -548,25 +549,25 @@ EBCDIC code page is present, they will behave in accordance with those; if
 absent, the classes will match only their ASCII-range counterparts.  If you
 disagree with this proposal, send email to C<perl5-porters@perl.org>.
 
- [[:...:]]      ASCII-range        Full-range  backslash  Note
-                 Unicode            Unicode    sequence
+ [[:...:]]      ASCII-range          Full-range  backslash  Note
+                 Unicode              Unicode     sequence
  -----------------------------------------------------
-   alpha      \p{PosixAlpha}       \p{Alpha}
-   alnum      \p{PosixAlnum}       \p{Alnum}
+   alpha      \p{PosixAlpha}       \p{XPosixAlpha}
+   alnum      \p{PosixAlnum}       \p{XPosixAlnum}
    ascii      \p{ASCII}          
-   blank      \p{PosixBlank}       \p{Blank} =             [1]
-                                   \p{HorizSpace}  \h      [1]
-   cntrl      \p{PosixCntrl}       \p{Cntrl}               [2]
-   digit      \p{PosixDigit}       \p{Digit}       \d
-   graph      \p{PosixGraph}       \p{Graph}               [3]
-   lower      \p{PosixLower}       \p{Lower}
-   print      \p{PosixPrint}       \p{Print}               [4]
-   punct      \p{PosixPunct}       \p{Punct}               [5]
-              \p{PerlSpace}        \p{SpacePerl}   \s      [6]
-   space      \p{PosixSpace}       \p{Space}               [6]
-   upper      \p{PosixUpper}       \p{Upper}
-   word       \p{PerlWord}         \p{Word}        \w
-   xdigit     \p{ASCII_Hex_Digit}  \p{XDigit}
+   blank      \p{PosixBlank}       \p{XPosixBlank}  \h      [1]
+                                   or \p{HorizSpace}        [1]
+   cntrl      \p{PosixCntrl}       \p{XPosixCntrl}          [2]
+   digit      \p{PosixDigit}       \p{XPosixDigit}  \d
+   graph      \p{PosixGraph}       \p{XPosixGraph}          [3]
+   lower      \p{PosixLower}       \p{XPosixLower}
+   print      \p{PosixPrint}       \p{XPosixPrint}          [4]
+   punct      \p{PosixPunct}       \p{XPosixPunct}          [5]
+              \p{PerlSpace}        \p{XPerlSpace}   \s      [6]
+   space      \p{PosixSpace}       \p{XPosixSpace}          [6]
+   upper      \p{PosixUpper}       \p{XPosixUpper}
+   word       \p{PosixWord}        \p{XPosixWord}   \w
+   xdigit     \p{ASCII_Hex_Digit}  \p{XPosixXDigit}
 
 =over 4
 
@@ -602,13 +603,15 @@ non-controls, non-alphanumeric, non-space characters:
 C<[-!"#$%&'()*+,./:;<=E<gt>?@[\\\]^_`{|}~]> (although if a locale is in effect,
 it could alter the behavior of C<[[:punct:]]>).
 
-C<\p{Punct}> matches a somewhat different set in the ASCII range, namely
+The similarly named property, C<\p{Punct}>, matches a somewhat different
+set in the ASCII range, namely
 C<[-!"#%&'()*,./:;?@[\\\]_{}]>.  That is, it is missing C<[$+E<lt>=E<gt>^`|~]>.
 This is because Unicode splits what POSIX considers to be punctuation into two
 categories, Punctuation and Symbols.
 
-When the matching string is in UTF-8 format, C<[[:punct:]]> matches what it
-matches in the ASCII range, plus what C<\p{Punct}> matches.  This is different
+C<\p{PosixPunct>, and when the matching string is in UTF-8 format,
+C<[[:punct:]]>, match what they match in the ASCII range, plus what
+C<\p{Punct}> matches.  This is different
 than strictly matching according to C<\p{Punct}>.  Another way to say it is that
 for a UTF-8 string, C<[[:punct:]]> matches all the characters that Unicode
 considers to be punctuation, plus all the ASCII-range characters that Unicode
@@ -621,6 +624,11 @@ matches the vertical tab, C<\cK>.   Same for the two ASCII-only range forms.
 
 =back
 
+There are various other synonyms that can be used for these besides
+C<\p{HorizSpace}> and \C<\p{XPosixBlank}>.  For example
+C<\p{PosixAlpha}> can be written as C<\p{Alpha}>.  All are listed
+in L<perluniprops/Properties accessible through \p{} and \P{}>.
+
 =head4 Negation
 X<character class, negation>
 
@@ -631,10 +639,12 @@ Some examples:
      POSIX         ASCII-range     Full-range  backslash
                     Unicode         Unicode    sequence
  -----------------------------------------------------
- [[:^digit:]]   \P{PosixDigit}     \P{Digit}      \D
- [[:^space:]]   \P{PosixSpace}     \P{Space}
-                \P{PerlSpace}      \P{SpacePerl}  \S
- [[:^word:]]    \P{PerlWord}       \P{Word}       \W
+ [[:^digit:]]   \P{PosixDigit}  \P{XPosixDigit}   \D
+ [[:^space:]]   \P{PosixSpace}  \P{XPosixSpace}
+                \P{PerlSpace}   \P{XPerlSpace}    \S
+ [[:^word:]]    \P{PerlWord}    \P{XPosixWord}    \W
+
+Again, the backslash sequence means Full-range Unicode.
 
 =head4 [= =] and [. .]
 
