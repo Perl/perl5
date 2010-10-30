@@ -831,12 +831,12 @@ threadsv_names()
 # endif
 #endif
 
-#define OPp		0x00000
-#define PADOFFSETp	0x10000
-#define U8p		0x20000
-#define U32p		0x30000
-#define SVp		0x40000
-#define line_tp		0x50000
+#define SVp		0x00000
+#define U32p		0x10000
+#define line_tp		0x20000
+#define OPp		0x30000
+#define PADOFFSETp	0x40000
+#define U8p		0x50000
 #define IVp		0x60000
 #define char_pp		0x70000
 
@@ -1689,45 +1689,55 @@ B::HV
 GvSTASH(gv)
 	B::GV	gv
 
-B::SV
-GvSV(gv)
-	B::GV	gv
+#define GP_sv_ix	SVp | offsetof(struct gp, gp_sv)
+#define GP_io_ix	SVp | offsetof(struct gp, gp_io)
+#define GP_cv_ix	SVp | offsetof(struct gp, gp_cv)
+#define GP_cvgen_ix	U32p | offsetof(struct gp, gp_cvgen)
+#define GP_refcnt_ix	U32p | offsetof(struct gp, gp_refcnt)
+#define GP_hv_ix	SVp | offsetof(struct gp, gp_hv)
+#define GP_av_ix	SVp | offsetof(struct gp, gp_av)
+#define GP_form_ix	SVp | offsetof(struct gp, gp_form)
+#define GP_egv_ix	SVp | offsetof(struct gp, gp_egv)
+#define GP_line_ix	line_tp | offsetof(struct gp, gp_line)
 
-B::IO
-GvIO(gv)
+void
+SV(gv)
 	B::GV	gv
-
-B::FM
-GvFORM(gv)
-	B::GV	gv
-    CODE:
-	RETVAL = (SV*)GvFORM(gv);
-    OUTPUT:
-	RETVAL
-
-B::AV
-GvAV(gv)
-	B::GV	gv
-
-B::HV
-GvHV(gv)
-	B::GV	gv
-
-B::GV
-GvEGV(gv)
-	B::GV	gv
-
-B::CV
-GvCV(gv)
-	B::GV	gv
-
-U32
-GvCVGEN(gv)
-	B::GV	gv
-
-U32
-GvLINE(gv)
-	B::GV	gv
+    ALIAS:
+	SV = GP_sv_ix
+	IO = GP_io_ix
+	CV = GP_cv_ix
+	CVGEN = GP_cvgen_ix
+	GvREFCNT = GP_refcnt_ix
+	HV = GP_hv_ix
+	AV = GP_av_ix
+	FORM = GP_form_ix
+	EGV = GP_egv_ix
+	LINE = GP_line_ix
+    PREINIT:
+	GP *gp;
+	char *ptr;
+	SV *ret;
+    PPCODE:
+	gp = GvGP(gv);
+	if (!gp) {
+	    const GV *const gv = CvGV(cv);
+	    croak(aTHX_ "NULL gp in B::GV::%s", gv ? GvNAME(gv) : "???");
+	}
+	ptr = (ix & 0xFFFF) + (char *)gp;
+	switch ((U8)(ix >> 16)) {
+	case (U8)(SVp >> 16):
+	    ret = make_sv_object(aTHX_ NULL, *((SV **)ptr));
+	    break;
+	case (U8)(U32p >> 16):
+	    ret = sv_2mortal(newSVuv(*((U32*)ptr)));
+	    break;
+	case (U8)(line_tp >> 16):
+	    ret = sv_2mortal(newSVuv(*((line_t *)ptr)));
+	    break;
+	}
+	ST(0) = ret;
+	XSRETURN(1);
 
 char *
 GvFILE(gv)
@@ -1738,10 +1748,6 @@ GvFILEGV(gv)
 	B::GV	gv
 
 MODULE = B	PACKAGE = B::GV
-
-U32
-GvREFCNT(gv)
-	B::GV	gv
 
 U8
 GvFLAGS(gv)
