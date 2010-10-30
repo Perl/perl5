@@ -397,6 +397,7 @@ AV*
 Perl_mro_get_linear_isa(pTHX_ HV *stash)
 {
     struct mro_meta* meta;
+    AV *isa;
 
     PERL_ARGS_ASSERT_MRO_GET_LINEAR_ISA;
     if(!SvOOK(stash))
@@ -405,7 +406,32 @@ Perl_mro_get_linear_isa(pTHX_ HV *stash)
     meta = HvMROMETA(stash);
     if (!meta->mro_which)
         Perl_croak(aTHX_ "panic: invalid MRO!");
-    return meta->mro_which->resolve(aTHX_ stash, 0);
+    isa = meta->mro_which->resolve(aTHX_ stash, 0);
+
+    if (!meta->isa) {
+	    HV *const isa_hash = newHV();
+	    /* Linearisation didn't build it for us, so do it here.  */
+	    SV *const *svp = AvARRAY(isa);
+	    SV *const *const svp_end = svp + AvFILLp(isa) + 1;
+	    const HEK *canon_name = HvENAME_HEK(stash);
+	    if (!canon_name) canon_name = HvNAME_HEK(stash);
+
+	    while (svp < svp_end) {
+		(void) hv_store_ent(isa_hash, *svp++, &PL_sv_undef, 0);
+	    }
+
+	    (void) hv_common(isa_hash, NULL, HEK_KEY(canon_name),
+			     HEK_LEN(canon_name), HEK_FLAGS(canon_name),
+			     HV_FETCH_ISSTORE, &PL_sv_undef,
+			     HEK_HASH(canon_name));
+	    (void) hv_store(isa_hash, "UNIVERSAL", 9, &PL_sv_undef, 0);
+
+	    SvREADONLY_on(isa_hash);
+
+	    meta->isa = isa_hash;
+    }
+
+    return isa;
 }
 
 /*
