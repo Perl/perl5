@@ -160,7 +160,7 @@ you're looking at this list for the same reasons the
 core code does: as a performance optimization
 over having to search every class in existence.
 
-As with C<mro::get_mro> above, C<UNIVERSAL> is special.
+As with C<mro::get_linear_isa> above, C<UNIVERSAL> is special.
 C<UNIVERSAL> (and parents') isarev lists do not include
 every class in existence, even though all classes are
 effectively descendants for method inheritance purposes.
