@@ -1340,17 +1340,15 @@ SvUVX(sv)
 
 MODULE = B	PACKAGE = B::IV
 
-#define needs64bits(sv) ((I32)SvIVX(sv) != SvIVX(sv))
-
-int
-needs64bits(sv)
-	B::IV	sv
-
 void
 packiv(sv)
 	B::IV	sv
+    ALIAS:
+	needs64bits = 1
     CODE:
-	if (sizeof(IV) == 8) {
+	if (ix) {
+	    ST(0) = boolSV((I32)SvIVX(sv) != SvIVX(sv));
+	} else if (sizeof(IV) == 8) {
 	    U32 wp[2];
 	    const IV iv = SvIVX(sv);
 	    /*
