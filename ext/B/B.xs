@@ -838,6 +838,7 @@ threadsv_names()
 #define SVp		0x40000
 #define line_tp		0x50000
 #define IVp		0x60000
+#define char_pp		0x70000
 
 #define OP_next_ix		OPp | offsetof(struct op, op_next)
 #define OP_sibling_ix		OPp | offsetof(struct op, op_sibling)
@@ -876,6 +877,14 @@ threadsv_names()
 #define COP_hints_ix		U32p | offsetof(struct cop, cop_hints)
 #else
 #define COP_hints_ix		U8p | offsetof(struct cop, op_private)
+#endif
+
+#ifdef USE_ITHREADS
+#define COP_stashpv_ix		char_pp | offsetof(struct cop, cop_stashpv)
+#define COP_file_ix		char_pp | offsetof(struct cop, cop_file)
+#else
+#define COP_stash_ix		SVp | offsetof(struct cop, cop_stash)
+#define COP_filegv_ix		SVp | offsetof(struct cop, cop_filegv)
 #endif
 
 MODULE = B	PACKAGE = B::OP		PREFIX = OP_
@@ -945,6 +954,9 @@ next(o)
 #ifdef USE_ITHREADS
 	case (U8)(IVp >> 16):
 	    ret = sv_2mortal(newSViv(*((IV*)ptr)));
+	    break;
+	case (U8)(char_pp >> 16):
+	    ret = sv_2mortal(newSVpv(*((char **)ptr), 0));
 	    break;
 #endif
 	}
@@ -1146,6 +1158,15 @@ BOOT:
 #ifdef USE_ITHREADS
         cv = newXS("B::PMOP::pmoffset", XS_B__OP_next, __FILE__);
         XSANY.any_i32 = PMOP_pmoffset_ix;
+        cv = newXS("B::COP::stashpv", XS_B__OP_next, __FILE__);
+        XSANY.any_i32 = COP_stashpv_ix;
+        cv = newXS("B::COP::file", XS_B__OP_next, __FILE__);
+        XSANY.any_i32 = COP_file_ix;
+#else
+        cv = newXS("B::COP::stash", XS_B__OP_next, __FILE__);
+        XSANY.any_i32 = COP_stash_ix;
+        cv = newXS("B::COP::filegv", XS_B__OP_next, __FILE__);
+        XSANY.any_i32 = COP_filegv_ix;
 #endif
 #if PERL_VERSION >= 9
         cv = newXS("B::PMOP::reflags", XS_B__PMOP_precomp, __FILE__);
@@ -1200,10 +1221,6 @@ PVOP_pv(o)
 	    ST(0) = newSVpvn_flags(o->op_pv, strlen(o->op_pv), SVs_TEMP);
 
 #define COP_label(o)	CopLABEL(o)
-#define COP_stashpv(o)	CopSTASHPV(o)
-#define COP_stash(o)	CopSTASH(o)
-#define COP_file(o)	CopFILE(o)
-#define COP_filegv(o)	CopFILEGV(o)
 #define COP_arybase(o)	CopARYBASE_get(o)
 
 MODULE = B	PACKAGE = B::COP		PREFIX = COP_
@@ -1212,21 +1229,36 @@ const char *
 COP_label(o)
 	B::COP	o
 
-char *
-COP_stashpv(o)
-	B::COP	o
+# Both pairs of accessors are provided for both ithreads and not, but for each,
+# one pair is direct structure access, and 1 pair "faked up" with a more complex
+# macro. We implement the direct structure access pair using the common code
+# above (B::OP::next)
+ 
+#ifdef USE_ITHREADS
+#define COP_stash(o)	CopSTASH(o)
+#define COP_filegv(o)	CopFILEGV(o)
 
 B::HV
 COP_stash(o)
+	B::COP	o
+
+B::GV
+COP_filegv(o)
+       B::COP  o
+
+#else
+#define COP_stashpv(o)	CopSTASHPV(o)
+#define COP_file(o)	CopFILE(o)
+
+char *
+COP_stashpv(o)
 	B::COP	o
 
 char *
 COP_file(o)
 	B::COP	o
 
-B::GV
-COP_filegv(o)
-       B::COP  o
+#endif
 
 I32
 COP_arybase(o)
