@@ -1510,8 +1510,9 @@ support seamlessly.  The result wasn't seamless: these characters were
 orphaned.
 
 Work is being done to correct this, but only some of it is complete.
-What has been finished is the matching of C<\b>, C<\s>, C<\w> and their
-complements in regular expressions, and the important part of the case
+What has been finished is the matching of C<\b>, C<\s>, C<\w> and the Posix
+character classes and their complements in regular expressions, and the
+important part of the case
 changing component.  Due to concerns, and some evidence, that older code might
 have come to rely on the existing behavior, the new behavior must be explicitly
 enabled by the feature C<unicode_strings> in the L<feature> pragma, even though

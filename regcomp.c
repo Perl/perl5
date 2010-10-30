@@ -8471,16 +8471,16 @@ parseit:
 		 * --jhi */
 		switch ((I32)namedclass) {
 		
-		case _C_C_T_(ALNUMC, isALNUMC(value), POSIX_CC_UNI_NAME("Alnum"));
-		case _C_C_T_(ALPHA, isALPHA(value), POSIX_CC_UNI_NAME("Alpha"));
-		case _C_C_T_(BLANK, isBLANK(value), POSIX_CC_UNI_NAME("Blank"));
-		case _C_C_T_(CNTRL, isCNTRL(value), POSIX_CC_UNI_NAME("Cntrl"));
-		case _C_C_T_(GRAPH, isGRAPH(value), POSIX_CC_UNI_NAME("Graph"));
-		case _C_C_T_(LOWER, isLOWER(value), POSIX_CC_UNI_NAME("Lower"));
-		case _C_C_T_(PRINT, isPRINT(value), POSIX_CC_UNI_NAME("Print"));
-		case _C_C_T_(PSXSPC, isPSXSPC(value), POSIX_CC_UNI_NAME("Space"));
-		case _C_C_T_(PUNCT, isPUNCT(value), POSIX_CC_UNI_NAME("Punct"));
-		case _C_C_T_(UPPER, isUPPER(value), POSIX_CC_UNI_NAME("Upper"));
+		case _C_C_T_UNI_8_BIT(ALNUMC, isALNUMC_L1(value), isALNUMC(value), "XPosixAlnum");
+		case _C_C_T_UNI_8_BIT(ALPHA, isALPHA_L1(value), isALPHA(value), "XPosixAlpha");
+		case _C_C_T_UNI_8_BIT(BLANK, isBLANK_L1(value), isBLANK(value), "XPosixBlank");
+		case _C_C_T_UNI_8_BIT(CNTRL, isCNTRL_L1(value), isCNTRL(value), "XPosixCntrl");
+		case _C_C_T_UNI_8_BIT(GRAPH, isGRAPH_L1(value), isGRAPH(value), "XPosixGraph");
+		case _C_C_T_UNI_8_BIT(LOWER, isLOWER_L1(value), isLOWER(value), "XPosixLower");
+		case _C_C_T_UNI_8_BIT(PRINT, isPRINT_L1(value), isPRINT(value), "XPosixPrint");
+		case _C_C_T_UNI_8_BIT(PSXSPC, isPSXSPC_L1(value), isPSXSPC(value), "XPosixSpace");
+		case _C_C_T_UNI_8_BIT(PUNCT, isPUNCT_L1(value), isPUNCT(value), "XPosixPunct");
+		case _C_C_T_UNI_8_BIT(UPPER, isUPPER_L1(value), isUPPER(value), "XPosixUpper");
 #ifdef BROKEN_UNICODE_CHARCLASS_MAPPINGS
                 /* \s, \w match all unicode if utf8. */
                 case _C_C_T_UNI_8_BIT(SPACE, isSPACE_L1(value), isSPACE(value), "SpacePerl");
@@ -8490,7 +8490,7 @@ parseit:
                 case _C_C_T_UNI_8_BIT(SPACE, isSPACE_L1(value), isSPACE(value), "PerlSpace");
                 case _C_C_T_UNI_8_BIT(ALNUM, isWORDCHAR_L1(value), isALNUM(value), "PerlWord");
 #endif		
-		case _C_C_T_(XDIGIT, isXDIGIT(value), "XDigit");
+		case _C_C_T_UNI_8_BIT(XDIGIT, isXDIGIT_L1(value), isXDIGIT(value), "XPosixXDigit");
 		case _C_C_T_NOLOC_(VERTWS, is_VERTWS_latin1(&value), "VertSpace");
 		case _C_C_T_NOLOC_(HORIZWS, is_HORIZWS_latin1(&value), "HorizSpace");
 		case ANYOF_ASCII:

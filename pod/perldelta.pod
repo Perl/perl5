@@ -65,6 +65,18 @@ See L<re/'/flags' mode> for details.
 Statement labels can now occur before any type of statement or declaration,
 such as C<package>.
 
+=head2 C<use feature "unicode_strings"> now applies to more regex matching
+
+Another chunk of the L<perlunicode/The "Unicode Bug"> is fixed in this
+release.  Now, regular expressions compiled within the scope of the
+"unicode_strings" feature (or under the "u" regex modifier (specifiable
+currently only with infix notation C<(?u:...)> or via C<use re '/u'>)
+will match the same whether or not the target string is encoded in utf8,
+with regard to C<[[:posix:]]> character classes
+
+Work is underway to add the case sensitive matching to the control of
+this feature, but was not complete in time for this dot release.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -625,6 +637,14 @@ L<[perl #77498]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77498>.
 
 C<sprintf> was ignoring locales when called with constant arguments
 L<[perl #78632]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78632>.
+
+=item *
+
+A non-ASCII character in the Latin-1 range could match both a Posix
+class, such as C<[[:alnum:]]>, and its inverse C<[[:^alnum:]]>.  This is
+now fixed for regular expressions compiled under the C<"u"> modifier.
+See L</C<use feature "unicode_strings"> now applies to more regex matching>.
+L<[perl #18281]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=18281>.
 
 =back
 
