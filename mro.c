@@ -638,7 +638,7 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
     /* Determine the name of the location that stash was assigned to
      * or from which oldstash was removed.
      *
-     * We cannot reliable use the name in oldstash, because it may have
+     * We cannot reliably use the name in oldstash, because it may have
      * been deleted from the location in the symbol table that its name
      * suggests, as in this case:
      *
