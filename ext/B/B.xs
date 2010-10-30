@@ -1339,6 +1339,7 @@ MODULE = B	PACKAGE = B::IV
 #define sv_U8p		0x50000
 #define sv_char_pp	0x60000
 #define sv_NVp		0x70000
+#define sv_char_p	0x80000
 
 #define IV_ivx_ix	sv_IVp | offsetof(struct xpviv, xiv_iv)
 #define IV_uvx_ix	sv_UVp | offsetof(struct xpvuv, xuv_uv)
@@ -1364,6 +1365,16 @@ MODULE = B	PACKAGE = B::IV
 			sv_UVp | offsetof(struct xpvnv, xuv_uv)
 #endif
 
+#define PV_cur_ix	sv_STRLENp | offsetof(struct xpv, xpv_cur)
+#define PV_len_ix	sv_STRLENp | offsetof(struct xpv, xpv_len)
+
+#define PVMG_stash_ix	sv_SVp | offsetof(struct xpvmg, xmg_stash)
+
+#define PVLV_targoff_ix	sv_U32p | offsetof(struct xpvlv, xlv_targoff)
+#define PVLV_targlen_ix	sv_U32p | offsetof(struct xpvlv, xlv_targlen)
+#define PVLV_targ_ix	sv_SVp | offsetof(struct xpvlv, xlv_targ)
+#define PVLV_type_ix	sv_char_p | offsetof(struct xpvlv, xlv_type)
+
 # The type checking code in B has always been identical for all SV types,
 # irrespective of whether the action is actually defined on that SV.
 # We should fix this
@@ -1378,6 +1389,13 @@ IVX(sv)
 	B::NV::COP_SEQ_RANGE_HIGH = NV_cop_seq_range_high_ix
 	B::NV::PARENT_PAD_INDEX = NV_parent_pad_index_ix
 	B::NV::PARENT_FAKELEX_FLAGS = NV_parent_fakelex_flags_ix
+	B::PV::CUR = PV_cur_ix
+	B::PV::LEN = PV_len_ix
+	B::PVMG::SvSTASH = PVMG_stash_ix
+	B::PVLV::TARGOFF = PVLV_targoff_ix
+	B::PVLV::TARGLEN = PVLV_targlen_ix
+	B::PVLV::TARG = PVLV_targ_ix
+	B::PVLV::TYPE = PVLV_type_ix
     PREINIT:
 	char *ptr;
 	SV *ret;
@@ -1393,6 +1411,9 @@ IVX(sv)
 	case (U8)(sv_UVp >> 16):
 	    ret = sv_2mortal(newSVuv(*((UV *)ptr)));
 	    break;
+	case (U8)(sv_STRLENp >> 16):
+	    ret = sv_2mortal(newSVuv(*((STRLEN *)ptr)));
+	    break;
 	case (U8)(sv_U32p >> 16):
 	    ret = sv_2mortal(newSVuv(*((U32 *)ptr)));
 	    break;
@@ -1404,6 +1425,9 @@ IVX(sv)
 	    break;
 	case (U8)(sv_NVp >> 16):
 	    ret = sv_2mortal(newSVnv(*((NV *)ptr)));
+	    break;
+	case (U8)(sv_char_p >> 16):
+	    ret = newSVpvn_flags((char *)ptr, 1, SVs_TEMP);
 	    break;
 	}
 	ST(0) = ret;
@@ -1522,15 +1546,6 @@ SvPVBM(sv)
 	    SvCUR(sv) + (SvVALID(sv) ? 256 + PERL_FBM_TABLE_OFFSET : 0),
 	    SVs_TEMP);
 
-
-STRLEN
-SvLEN(sv)
-	B::PV	sv
-
-STRLEN
-SvCUR(sv)
-	B::PV	sv
-
 MODULE = B	PACKAGE = B::PVMG	PREFIX = Sv
 
 void
@@ -1540,12 +1555,6 @@ SvMAGIC(sv)
     PPCODE:
 	for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic)
 	    XPUSHs(make_mg_object(aTHX_ mg));
-
-MODULE = B	PACKAGE = B::PVMG
-
-B::HV
-SvSTASH(sv)
-	B::PVMG	sv
 
 MODULE = B	PACKAGE = B::REGEXP
 
@@ -1655,24 +1664,6 @@ MgPTR(mg)
 		    ST(0) = sv_newmortal();
 	} else
 	    ST(0) = sv_newmortal();
-
-MODULE = B	PACKAGE = B::PVLV	PREFIX = Lv
-
-U32
-LvTARGOFF(sv)
-	B::PVLV	sv
-
-U32
-LvTARGLEN(sv)
-	B::PVLV	sv
-
-char
-LvTYPE(sv)
-	B::PVLV	sv
-
-B::SV
-LvTARG(sv)
-	B::PVLV sv
 
 MODULE = B	PACKAGE = B::BM		PREFIX = Bm
 
