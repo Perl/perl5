@@ -1341,6 +1341,8 @@ MODULE = B	PACKAGE = B::IV
 #define sv_NVp		0x70000
 #define sv_char_p	0x80000
 #define sv_SSize_tp	0x90000
+#define sv_I32p		0xA0000
+#define sv_U16p		0xB0000
 
 #define IV_ivx_ix	sv_IVp | offsetof(struct xpviv, xiv_iv)
 #define IV_uvx_ix	sv_UVp | offsetof(struct xpvuv, xuv_uv)
@@ -1402,6 +1404,15 @@ MODULE = B	PACKAGE = B::IV
 
 #define PVFM_lines_ix	sv_IVp | offsetof(struct xpvfm, xfm_lines)
 
+#define PVCV_stash_ix	sv_SVp | offsetof(struct xpvcv, xcv_stash) 
+#define PVCV_gv_ix	sv_SVp | offsetof(struct xpvcv, xcv_gv)
+#define PVCV_file_ix	sv_char_pp | offsetof(struct xpvcv, xcv_file)
+#define PVCV_depth_ix	sv_I32p | offsetof(struct xpvcv, xcv_depth)
+#define PVCV_padlist_ix	sv_SVp | offsetof(struct xpvcv, xcv_padlist)
+#define PVCV_outside_ix	sv_SVp | offsetof(struct xpvcv, xcv_outside)
+#define PVCV_outside_seq_ix sv_U32p | offsetof(struct xpvcv, xcv_outside_seq)
+#define PVCV_flags_ix	sv_U16p | offsetof(struct xpvcv, xcv_flags)
+
 # The type checking code in B has always been identical for all SV types,
 # irrespective of whether the action is actually defined on that SV.
 # We should fix this
@@ -1439,6 +1450,14 @@ IVX(sv)
 	B::IO::IoFLAGS = PVIO_flags_ix
 	B::AV::MAX = PVAV_max_ix
 	B::FM::LINES = PVFM_lines_ix
+	B::CV::STASH = PVCV_stash_ix
+	B::CV::GV = PVCV_gv_ix
+	B::CV::FILE = PVCV_file_ix
+	B::CV::DEPTH = PVCV_depth_ix
+	B::CV::PADLIST = PVCV_padlist_ix
+	B::CV::OUTSIDE = PVCV_outside_ix
+	B::CV::OUTSIDE_SEQ = PVCV_outside_seq_ix
+	B::CV::CvFLAGS = PVCV_flags_ix
     PREINIT:
 	char *ptr;
 	SV *ret;
@@ -1474,6 +1493,12 @@ IVX(sv)
 	    break;
 	case (U8)(sv_SSize_tp >> 16):
 	    ret = sv_2mortal(newSViv(*((SSize_t *)ptr)));
+	    break;
+	case (U8)(sv_I32p >> 16):
+	    ret = sv_2mortal(newSVuv(*((I32 *)ptr)));
+	    break;
+	case (U8)(sv_U16p >> 16):
+	    ret = sv_2mortal(newSVuv(*((U16 *)ptr)));
 	    break;
 	}
 	ST(0) = ret;
@@ -1908,10 +1933,6 @@ U32
 CvCONST(cv)
 	B::CV	cv
 
-B::HV
-CvSTASH(cv)
-	B::CV	cv
-
 B::OP
 CvSTART(cv)
 	B::CV	cv
@@ -1921,30 +1942,6 @@ CvSTART(cv)
 	RETVAL = CvISXSUB(cv) ? NULL : ix ? CvROOT(cv) : CvSTART(cv);
     OUTPUT:
 	RETVAL
-
-B::GV
-CvGV(cv)
-	B::CV	cv
-
-char *
-CvFILE(cv)
-	B::CV	cv
-
-long
-CvDEPTH(cv)
-	B::CV	cv
-
-B::AV
-CvPADLIST(cv)
-	B::CV	cv
-
-B::CV
-CvOUTSIDE(cv)
-	B::CV	cv
-
-U32
-CvOUTSIDE_SEQ(cv)
-	B::CV	cv
 
 void
 CvXSUB(cv)
@@ -1960,12 +1957,6 @@ CvXSUBANY(cv)
 	ST(0) = CvCONST(cv)
 	    ? make_sv_object(aTHX_ NULL, (SV *)CvXSUBANY(cv).any_ptr)
 	    : sv_2mortal(newSViv(CvISXSUB(cv) ? CvXSUBANY(cv).any_iv : 0));
-
-MODULE = B    PACKAGE = B::CV
-
-U16
-CvFLAGS(cv)
-      B::CV   cv
 
 MODULE = B	PACKAGE = B::CV		PREFIX = cv_
 
