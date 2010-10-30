@@ -595,7 +595,7 @@ of all the alphanumerical characters and all punctuation characters.
 All printable characters, which is the set of all the graphical characters
 plus whitespace characters that are not also controls.
 
-=item [5] (punct)
+=item [5]
 
 C<\p{PosixPunct}> and C<[[:punct:]]> in the ASCII range match all the
 non-controls, non-alphanumeric, non-space characters:
@@ -683,7 +683,8 @@ A regular expression is marked for Unicode semantics if it is encoded in
 utf8 (usually as a result of including a literal character whose code
 point is above 255), or if it contains a C<\N{U+...}> or C<\N{I<name>}>
 construct, or (starting in Perl 5.14) if it was compiled in the scope of a
-C<S<use feature "unicode_strings">> pragma.
+C<S<use feature "unicode_strings">> pragma, or has the C<"u"> regular
+expression modifier.
 
 The differences in behavior between locale and non-locale semantics
 can affect any character whose code point is 255 or less.  The
