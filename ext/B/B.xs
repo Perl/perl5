@@ -1340,6 +1340,7 @@ MODULE = B	PACKAGE = B::IV
 #define sv_char_pp	0x60000
 #define sv_NVp		0x70000
 #define sv_char_p	0x80000
+#define sv_SSize_tp	0x90000
 
 #define IV_ivx_ix	sv_IVp | offsetof(struct xpviv, xiv_iv)
 #define IV_uvx_ix	sv_UVp | offsetof(struct xpvuv, xuv_uv)
@@ -1397,6 +1398,10 @@ MODULE = B	PACKAGE = B::IV
 #define PVIO_type_ix	    sv_char_p | offsetof(struct xpvio, xio_type)
 #define PVIO_flags_ix	    sv_U8p | offsetof(struct xpvio, xio_flags)
 
+#define PVAV_max_ix	sv_SSize_tp | offsetof(struct xpvav, xav_max)
+
+#define PVFM_lines_ix	sv_IVp | offsetof(struct xpvfm, xfm_lines)
+
 # The type checking code in B has always been identical for all SV types,
 # irrespective of whether the action is actually defined on that SV.
 # We should fix this
@@ -1432,6 +1437,8 @@ IVX(sv)
 	B::IO::BOTTOM_GV = PVIO_bottom_gv_ix
 	B::IO::IoTYPE = PVIO_type_ix
 	B::IO::IoFLAGS = PVIO_flags_ix
+	B::AV::MAX = PVAV_max_ix
+	B::FM::LINES = PVFM_lines_ix
     PREINIT:
 	char *ptr;
 	SV *ret;
@@ -1464,6 +1471,9 @@ IVX(sv)
 	    break;
 	case (U8)(sv_char_p >> 16):
 	    ret = newSVpvn_flags((char *)ptr, 1, SVs_TEMP);
+	    break;
+	case (U8)(sv_SSize_tp >> 16):
+	    ret = sv_2mortal(newSViv(*((SSize_t *)ptr)));
 	    break;
 	}
 	ST(0) = ret;
@@ -1855,10 +1865,6 @@ SSize_t
 AvFILL(av)
 	B::AV	av
 
-SSize_t
-AvMAX(av)
-	B::AV	av
-
 void
 AvARRAY(av)
 	B::AV	av
@@ -1895,12 +1901,6 @@ AvFLAGS(av)
 	B::AV	av
 
 #endif
-
-MODULE = B	PACKAGE = B::FM		PREFIX = Fm
-
-IV
-FmLINES(form)
-	B::FM	form
 
 MODULE = B	PACKAGE = B::CV		PREFIX = Cv
 
