@@ -1371,7 +1371,7 @@ for more discussion of the issues.
 =head2 Locales
 
 Usually locale settings and Unicode do not affect each other, but
-there are a couple of exceptions:
+there are exceptions:
 
 =over 4
 
@@ -1386,7 +1386,12 @@ variable, see L<perlrun> for the documentation of the C<-C> switch.
 
 Perl tries really hard to work both with Unicode and the old
 byte-oriented world. Most often this is nice, but sometimes Perl's
-straddling of the proverbial fence causes problems.
+straddling of the proverbial fence causes problems.  Here's an example
+of how things can go wrong.  A locale can define a code point to be
+anything it wants.  It could make 'A' into a control character, for example.
+But strings encoded in utf8 always have Unicode semantics, so an 'A' in
+such a string is always an uppercase letter, never a control, no matter
+what the locale says it should be.
 
 =back
 
