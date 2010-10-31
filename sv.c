@@ -7338,11 +7338,13 @@ Perl_sv_gets(pTHX_ register SV *const sv, register PerlIO *const fp, I32 append)
 	    }
 	} else if (SvUTF8(sv)) {
 	    SV * const tsv = newSV(0);
+	    ENTER;
+	    SAVEFREESV(tsv);
 	    sv_gets(tsv, fp, 0);
 	    sv_utf8_upgrade_nomg(tsv);
 	    SvCUR_set(sv,append);
 	    sv_catsv(sv,tsv);
-	    sv_free(tsv);
+	    LEAVE;
 	    goto return_string_or_null;
 	}
     }

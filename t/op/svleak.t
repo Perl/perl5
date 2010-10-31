@@ -1,7 +1,7 @@
 #!./perl
 
 # A place to put some simple leak tests. Uses XS::APItest to make
-# PL_sv_count available, allowing us to run a bit a code multiple times and
+# PL_sv_count available, allowing us to run a bit of code multiple times and
 # see if the count increases.
 
 BEGIN {
@@ -13,7 +13,7 @@ BEGIN {
 	or skip_all("XS::APItest not available");
 }
 
-plan tests => 18;
+plan tests => 19;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -128,3 +128,16 @@ SKIP:
   }
   ok(!$weak, "hash referenced weakened SV released");
 }
+
+# RT #72246: rcatline memory leak on bad $/
+
+leak(2, 0,
+    sub {
+	my $f;
+	open CATLINE, '<', \$f;
+	local $/ = "\x{262E}";
+	my $str = "\x{2622}";
+	eval { $str .= <CATLINE> };
+    },
+    "rcatline leak"
+);
