@@ -5473,7 +5473,6 @@ Perl_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
 {
     dVAR;
     SV **svp = NULL;
-    I32 i;
 
     PERL_ARGS_ASSERT_SV_DEL_BACKREF;
 
@@ -5490,30 +5489,54 @@ Perl_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
 	Perl_croak(aTHX_ "panic: del_backref");
 
     if (SvTYPE(*svp) == SVt_PVAV) {
-	int count = 0;
-	AV * const av = (AV*)*svp;
-	assert(!SvIS_FREED(av));
-	svp = AvARRAY(av);
-	for (i = AvFILLp(av); i >= 0; i--) {
-	    if (svp[i] == sv) {
-		const SSize_t fill = AvFILLp(av);
-		if (i != fill) {
-		    /* We weren't the last entry.
-		       An unordered list has this property that you can take the
-		       last element off the end to fill the hole, and it's still
-		       an unordered list :-)
-		    */
-		    svp[i] = svp[fill];
-		}
-		svp[fill] = NULL;
-		AvFILLp(av) = fill - 1;
-		count++;
-#ifndef DEBUGGING
-		break; /* should only be one */
+#ifdef DEBUGGING
+	int count = 1;
 #endif
+	AV * const av = (AV*)*svp;
+	SSize_t fill;
+	assert(!SvIS_FREED(av));
+	fill = AvFILLp(av);
+	assert(fill > -1);
+	svp = AvARRAY(av);
+	/* for an SV with N weak references to it, if all those
+	 * weak refs are deleted, then sv_del_backref will be called
+	 * N times and O(N^2) compares will be done within the backref
+	 * array. To ameliorate this potential slowness, we:
+	 * 1) make sure this code is as tight as possible;
+	 * 2) when looking for SV, look for it at both the head and tail of the
+	 *    array first before searching the rest, since some create/destroy
+	 *    patterns will cause the backrefs to be freed in order.
+	 */
+	if (*svp == sv) {
+	    AvARRAY(av)++;
+	    AvMAX(av)--;
+	}
+	else {
+	    SV **p = &svp[fill];
+	    SV *const topsv = *p;
+	    if (topsv != sv) {
+#ifdef DEBUGGING
+		count = 0;
+#endif
+		while (--p > svp) {
+		    if (*p == sv) {
+			/* We weren't the last entry.
+			   An unordered list has this property that you
+			   can take the last element off the end to fill
+			   the hole, and it's still an unordered list :-)
+			*/
+			*p = topsv;
+#ifdef DEBUGGING
+			count++;
+#else
+			break; /* should only be one */
+#endif
+		    }
+		}
 	    }
 	}
-	assert(count == 1);
+	assert(count ==1);
+	AvFILLp(av) = fill-1;
     }
     else {
 	/* optimisation: only a single backref, stored directly */
