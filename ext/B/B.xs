@@ -2015,13 +2015,15 @@ MODULE = B	PACKAGE = B::HE		PREFIX = He
 B::SV
 HeVAL(he)
 	B::HE he
+    ALIAS:
+	SVKEY_force = 1
+    CODE:
+	RETVAL = ix ? HeSVKEY_force(he) : HeVAL(he);
+    OUTPUT:
+	RETVAL
 
 U32
 HeHASH(he)
-	B::HE he
-
-B::SV
-HeSVKEY_force(he)
 	B::HE he
 
 MODULE = B	PACKAGE = B::RHE	PREFIX = RHE_
