@@ -6205,19 +6205,19 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
     const char flags = ANYOF_FLAGS(n);
     bool match = FALSE;
     UV c = *p;
-    STRLEN len = 0;
+    STRLEN c_len = 0;
     STRLEN maxlen;
 
     PERL_ARGS_ASSERT_REGINCLASS;
 
     /* If c is not already the code point, get it */
     if (utf8_target && !UTF8_IS_INVARIANT(c)) {
-	c = utf8n_to_uvchr(p, UTF8_MAXBYTES, &len,
+	c = utf8n_to_uvchr(p, UTF8_MAXBYTES, &c_len,
 		(UTF8_ALLOW_DEFAULT & UTF8_ALLOW_ANYUV)
 		| UTF8_ALLOW_FFFF | UTF8_CHECK_ONLY);
 		/* see [perl #37836] for UTF8_ALLOW_ANYUV; [perl #38293] for
 		 * UTF8_ALLOW_FFFF */
-	if (len == (STRLEN)-1) 
+	if (c_len == (STRLEN)-1)
 	    Perl_croak(aTHX_ "Malformed UTF-8 character (fatal)");
     }
 
@@ -6236,7 +6236,7 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 
     if (utf8_target || (flags & ANYOF_UNICODE)) {
 	if (utf8_target && !ANYOF_RUNTIME(n)) {
-	    if (len != (STRLEN)-1 && c < 256 && ANYOF_BITMAP_TEST(n, c))
+	    if (c_len != (STRLEN)-1 && c < 256 && ANYOF_BITMAP_TEST(n, c))
 		match = TRUE;
 	}
 	if (!match && utf8_target && (flags & ANYOF_UNICODE_ALL) && c >= 256)
