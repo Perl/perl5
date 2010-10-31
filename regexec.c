@@ -6296,13 +6296,10 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
     /* If the bitmap didn't (or couldn't) match, and something outside the
      * bitmap could match, try that */
     if (! match && utf8_target || (flags & ANYOF_UNICODE)) {
-	if (utf8_target && !ANYOF_RUNTIME(n)) {
-	    if (c < 256 && ANYOF_BITMAP_TEST(n, c))
-		match = TRUE;
-	}
-	if (!match && utf8_target && (flags & ANYOF_UNICODE_ALL) && c >= 256)
+	if (utf8_target && (flags & ANYOF_UNICODE_ALL) && c >= 256) {
 	    match = TRUE;
-	if (!match) {
+	}
+	else {
 	    AV *av;
 	    SV * const sw = regclass_swash(prog, n, TRUE, 0, (SV**)&av);
 
