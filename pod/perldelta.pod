@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 0b6a3b5adbe83, except for:
+This has been completed up to 7cb18e1b02, except for:
 04777d295957ad270188e4debf51b523e07cc5b0
 c565ab54dc649bb62cd4d57149d7b2abb21df5f3
 1c8d11ca3d0ce8bc11562f159b94c2c7e62dea6c
@@ -202,8 +202,6 @@ C<B> has been upgraded from 1.24 to 1.25.
 
 =item *
 
-XXX What should the version be?
-
 C<B::Deparse> has been upgraded from 0.99 to 1.01.
 
 It fixes deparsing of C<our> followed by a variable with funny characters
@@ -265,6 +263,10 @@ C<Math::BigInt::FastCalc> has been upgraded from 0.22 to 0.23.
 
 =item *
 
+C<mro> has been upgraded from 1.04 to 1.05.
+
+=item *
+
 C<NDBM_File> has been upgraded from 1.09 to 1.10.
 
 This fixes a memory leak when DBM filters are used.
@@ -283,6 +285,12 @@ C<POSIX> has been upgraded from 1.21 to 1.22.
 
 C<re> has been upgraded from 0.13 to 0.14, for the sake of the new
 C<use re "/flags"> pragma.
+
+=item *
+
+C<Safe> has been upgraded from 2.28 to 2.29.
+
+It adds C<&version::vxs::VCMP> to the default share.
 
 =item *
 
@@ -533,10 +541,12 @@ C<cophh_> in L<perlapi>.
 =item *
 
 A stash can now have a list of effective names in addition to its usual
-name. These can be added and deleted via C<hv_ename_add> and
-C<hv_ename_delete>. The first effective name can be accessed via the
-C<HvENAME*> macros defined in F<hv.h>. These new functions and macros are
-I<not> part of the API.
+name. The first effective name can be accessed via the C<HvENAME> macro,
+which is now the recommended name to use in MRO linearisations (C<HvNAME>
+being a fallback if there is no C<HvENAME>).
+
+These names are added and deleted via C<hv_ename_add> and
+C<hv_ename_delete>. These two functions are I<not> part of the API.
 
 =item *
 
@@ -645,6 +655,45 @@ class, such as C<[[:alnum:]]>, and its inverse C<[[:^alnum:]]>.  This is
 now fixed for regular expressions compiled under the C<"u"> modifier.
 See L</C<use feature "unicode_strings"> now applies to more regex matching>.
 L<[perl #18281]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=18281>.
+
+=item *
+
+Concatenating long strings under C<use encoding> no longer causes perl to
+crash
+L<[perl #78674]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78674>.
+
+=item *
+
+Typeglob assignments would crash if the glob's stash no longer existed, if
+the glob assigned to was named 'ISA' or the glob on either side of the
+assignment contained a subroutine.
+
+=item *
+
+Calling C<< ->import >> on a class lacking an import method could corrupt the stack result in strange behaviour. For instance,
+
+  push @a, "foo", $b = bar->import;
+
+would assign 'foo' to C<$b>
+L<[perl #63790]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=63790>.
+
+=item *
+
+Creating an alias to a package when that package had been detached from the
+symbol table would result in corrupted isa caches
+L<[perl #77358]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77358>.
+
+=item *
+
+C<.=> followed by C<< <> >> or C<readline> would leak memory if C<$/>
+contained characters beyond the octet range and the scalar assigned to
+happened to be encoded as UTF8 internally
+L<[perl #72246]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=72246>.
+
+=item *
+
+The C<recv> function could crash when called with the MSG_TRUNC flag
+L<[perl #75082]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75082>.
 
 =back
 
