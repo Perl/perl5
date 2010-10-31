@@ -94,7 +94,11 @@
 #define	STATIC	static
 #endif
 
-#define REGINCLASS(prog,p,c)  (ANYOF_FLAGS(p) ? reginclass(prog,p,c,0,0) : ANYOF_BITMAP_TEST(p,*(c)))
+/* Valid for non-utf8 strings only: avoids the reginclass call if there are no
+ * complications: i.e., if everything matchable is straight forward in the
+ * bitmap */
+#define REGINCLASS(prog,p,c)  (ANYOF_FLAGS(p) ? reginclass(prog,p,c,0,0)   \
+					      : ANYOF_BITMAP_TEST(p,*(c)))
 
 /*
  * Forwards.
