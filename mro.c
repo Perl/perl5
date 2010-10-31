@@ -626,6 +626,7 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
     I32 riter = -1;
     HV *seen = NULL;
     HV *seen_stashes = NULL;
+    const bool stash_had_name = stash && HvENAME(stash);
 
     /* If newname_len is negative, then gv is actually the caller’s hash of
        stashes that have been seen so far. */
@@ -668,7 +669,20 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
 	     hv_delete(PL_stashcache, newname, newname_len, G_DISCARD);
 	hv_ename_delete(oldstash, newname, newname_len);
     }
-    if(stash) hv_ename_add(stash, newname, newname_len);
+    if(stash) {
+	hv_ename_add(stash, newname, newname_len);
+
+       /* If this stash had been detached from the symbol table (so it
+	* had no HvENAME) before being assigned to spot whose name is in
+	* newname, then its isa cache would be stale (the effective name
+	* having changed), and subclasses of newname would then use that
+	* cache in the mro_isa_changed_in3(oldstash...) call below. (See
+	* [perl #77358].)
+	* If it did have a name, then its previous name is still
+	* used in isa caches, and there is no need for this call.
+	*/
+	if(!stash_had_name) mro_isa_changed_in(stash);
+    }
 
     mro_isa_changed_in3((HV *)oldstash, newname, newname_len);
 
