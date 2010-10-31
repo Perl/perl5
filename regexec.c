@@ -3632,11 +3632,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	case ANYOF:
 	    if (utf8_target) {
 	        STRLEN inclasslen = PL_regeol - locinput;
+		if (locinput >= PL_regeol)
+		    sayNO;
 
 	        if (!reginclass(rex, scan, (U8*)locinput, &inclasslen, utf8_target))
 		    goto anyof_fail;
-		if (locinput >= PL_regeol)
-		    sayNO;
 		locinput += inclasslen;
 		nextchr = UCHARAT(locinput);
 		break;
@@ -3644,10 +3644,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    else {
 		if (nextchr < 0)
 		    nextchr = UCHARAT(locinput);
-		if (!REGINCLASS(rex, scan, (U8*)locinput))
-		    goto anyof_fail;
 		if (!nextchr && locinput >= PL_regeol)
 		    sayNO;
+		if (!REGINCLASS(rex, scan, (U8*)locinput))
+		    goto anyof_fail;
 		nextchr = UCHARAT(++locinput);
 		break;
 	    }
