@@ -1,5 +1,13 @@
 Revision history for Perl module Unicode::Collate.
 
+0.64  Sun Oct 31 14:17:29 2010
+    - U::C::Locale newly supports locale: ja.
+    - added Unicode::Collate::CJK::JISX0208 for ja.
+    - a subroutine specified in 'overrideCJK' or 'overrideHangul' is allowed
+      to return an integer or undef value.
+    - fix: Ideographs Ext.A are assigned since UCA Version 9 (Unicode 3.1).
+           This fix should affect only the case of (UCA_Version => 8).
+
 0.63  Sun Oct 10 22:13:21 2010
     - supported suppress contractions (see 'suppress' in POD).
     - internal for hangul_terminator in getSortKey().

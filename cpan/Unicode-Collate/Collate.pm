@@ -14,7 +14,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '0.63';
+our $VERSION = '0.64';
 our $PACKAGE = __PACKAGE__;
 
 my @Path = qw(Unicode Collate);
@@ -101,10 +101,10 @@ use constant CJK_UidFin    => 0x9FA5;
 use constant CJK_UidF41    => 0x9FBB;
 use constant CJK_UidF51    => 0x9FC3;
 use constant CJK_UidF52    => 0x9FCB;
-use constant CJK_ExtAIni   => 0x3400;
-use constant CJK_ExtAFin   => 0x4DB5;
-use constant CJK_ExtBIni   => 0x20000;
-use constant CJK_ExtBFin   => 0x2A6D6;
+use constant CJK_ExtAIni   => 0x3400;  # Unicode 3.0.0
+use constant CJK_ExtAFin   => 0x4DB5;  # Unicode 3.0.0
+use constant CJK_ExtBIni   => 0x20000; # Unicode 3.1.0
+use constant CJK_ExtBFin   => 0x2A6D6; # Unicode 3.1.0
 use constant CJK_ExtCIni   => 0x2A700; # Unicode 5.2.0
 use constant CJK_ExtCFin   => 0x2B734; # Unicode 5.2.0
 
@@ -597,6 +597,22 @@ sub splitEnt
     return \@buf;
 }
 
+##
+## VCE = _pack_override(input, codepoint, derivCode)
+##
+sub _pack_override ($$$) {
+    my $r = shift;
+    my $u = shift;
+    my $der = shift;
+
+    if (ref $r) {
+	return pack(VCE_TEMPLATE, NON_VAR, @$r);
+    } elsif (defined $r) {
+	return pack(VCE_TEMPLATE, NON_VAR, $r, Min2Wt, Min3Wt, $u);
+    } else {
+	return $der->($u);
+    }
+}
 
 ##
 ## list of VCE = getWt(JCPS)
@@ -618,12 +634,10 @@ sub getWt
 	my $hang = $self->{overrideHangul};
 	my @hangulCE;
 	if ($hang) {
-	    @hangulCE = map(pack(VCE_TEMPLATE, NON_VAR, @$_), &$hang($u));
-	}
-	elsif (!defined $hang) {
+	    @hangulCE = map _pack_override($_, $u, $der), $hang->($u);
+	} elsif (!defined $hang) {
 	    @hangulCE = $der->($u);
-	}
-	else {
+	} else {
 	    my $max  = $self->{maxlength};
 	    my @decH = _decompHangul($u);
 
@@ -653,17 +667,13 @@ sub getWt
 		} @decH);
 	}
 	return map _varCE($vbl, $_), @hangulCE;
-    }
-    elsif (_isUIdeo($u, $self->{UCA_Version})) {
+    } elsif (_isUIdeo($u, $self->{UCA_Version})) {
 	my $cjk  = $self->{overrideCJK};
-	return map _varCE($vbl, $_),
-	    $cjk
-		? map(pack(VCE_TEMPLATE, NON_VAR, @$_), &$cjk($u))
-		: defined $cjk && $self->{UCA_Version} <= 8 && $u < 0x10000
-		    ? _uideoCE_8($u)
-		    : $der->($u);
-    }
-    else {
+	my @cjkCE = $cjk ? map(_pack_override($_, $u, $der), $cjk->($u))
+		: defined $cjk && $self->{UCA_Version} <= 8
+		    ? _uideoCE_8($u) : $der->($u);
+	return map _varCE($vbl, $_), @cjkCE;
+    } else {
 	return map _varCE($vbl, $_), $der->($u);
     }
 }
@@ -851,10 +861,9 @@ sub _isUIdeo {
 		||
 	(CJK_ExtAIni <= $u && $u <= CJK_ExtAFin)
 		||
-	(CJK_ExtBIni <= $u && $u <= CJK_ExtBFin)
+	($uca_vers >=  9 && CJK_ExtBIni <= $u && $u <= CJK_ExtBFin)
 		||
-	($uca_vers >= 20 &&
-	 CJK_ExtCIni <= $u && $u <= CJK_ExtCFin)
+	($uca_vers >= 20 && CJK_ExtCIni <= $u && $u <= CJK_ExtCFin)
     );
 }
 
@@ -1179,8 +1188,10 @@ Unicode::Collate - Unicode Collation Algorithm
   #compare
   $result = $Collator->cmp($a, $b); # returns 1, 0, or -1.
 
-  # If %tailoring is false (i.e. empty),
-  # $Collator should do the default collation.
+B<Note:> Strings in C<@not_sorted>, C<$a> and C<$b> are interpreted
+according to Perl's Unicode support. See L<perlunicode>,
+L<perluniintro>, L<perlunitut>, L<perlunifaq>, L<utf8>.
+Otherwise you can use C<preprocess> or should decode them before.
 
 =head1 DESCRIPTION
 
@@ -1189,7 +1200,8 @@ This module is an implementation of Unicode Technical Standard #10
 
 =head2 Constructor and Tailoring
 
-The C<new> method returns a collator object.
+The C<new> method returns a collator object. If new() is called
+with no parameters, the collator should do the default collation.
 
    $Collator = Unicode::Collate->new(
       UCA_Version => $UCA_Version,
@@ -1431,8 +1443,9 @@ C<CJK Unified Ideographs Extension>.
     U+4E00..U+9FCB if UCA_Version is 20.
 
     CJK Unified Ideographs Extension:
-    Ext.A (U+3400..U+4DB5) and Ext.B (U+20000..U+2A6D6) if UCA_Version < 20;
-    Ext.A, Ext.B and Ext.C (U+2A700..U+2B734) if UCA_Version is 20.
+    Ext.A (U+3400..U+4DB5)   if UCA_Version is 9 or greater;
+    Ext.B (U+20000..U+2A6D6) if UCA_Version is 9 or greater;
+    Ext.C (U+2A700..U+2B734) if UCA_Version is 20.
 
 Through C<overrideCJK>, ordering of CJK Unified Ideographs can be overrided.
 
@@ -1445,6 +1458,22 @@ ex. CJK Unified Ideographs in the JIS code point order.
       my $n = unpack('n', $s);   # convert sjis to short
       [ $n, 0x20, 0x2, $u ];     # return the collation element
   },
+
+The return value may be an arrayref of 1st to 4th weights as shown
+above. The return value may be an integer as the primary weight
+as shown below.  If C<undef> is returned, the default derived
+collation element will be used.
+
+  overrideCJK => sub {
+      my $u = shift;             # get a Unicode codepoint
+      my $b = pack('n', $u);     # to UTF-16BE
+      my $s = your_unicode_to_sjis_converter($b); # convert
+      my $n = unpack('n', $s);   # convert sjis to short
+      return $n;                 # return the primary weight
+  },
+
+The return value may be a list containing zero or more of
+an arrayref, an integer, or C<undef>.
 
 ex. ignores all CJK Unified Ideographs.
 
@@ -1496,6 +1525,17 @@ Then, "the pen" is before "a pencil".
 
 C<preprocess> is performed before C<normalization> (if defined).
 
+ex. decoding strings in a legacy encoding such as shift-jis:
+
+    $sjis_collator = Unicode::Collate->new(
+        preprocess => \&your_shiftjis_to_unicode_decoder,
+    );
+    @result = $sjis_collator->sort(@shiftjis_strings);
+
+B<Note:> Strings returned from the coderef will be interpreted
+according to Perl's Unicode support. See L<perlunicode>,
+L<perluniintro>, L<perlunitut>, L<perlunifaq>, L<utf8>.
+
 =item rearrange
 
 -- see 3.1.3 Rearrangement, UTS #10.
@@ -1519,7 +1559,7 @@ but it is not warned at present.>
 -- see suppress contractions in 5.14.11 Special-Purpose Commands,
 UTS #35 (LDML).
 
-Contractions begining with the specified characters are suppressed,
+Contractions beginning with the specified characters are suppressed,
 even if those contractions are defined in <table> or C<entry>.
 
 An example for Russian and some languages using the Cyrillic script:

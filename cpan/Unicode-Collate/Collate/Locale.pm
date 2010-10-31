@@ -4,7 +4,7 @@ use strict;
 use Carp;
 use base qw(Unicode::Collate);
 
-our $VERSION = '0.63';
+our $VERSION = '0.64';
 
 use File::Spec;
 
@@ -14,7 +14,7 @@ my $PL_EXT  = '.pl';
 
 my %LocaleFile = map { ($_, $_) } qw(
    af ar az ca cs cy da eo es et fi fil fo fr ha haw
-   hr hu hy ig is kk kl lt lv mt nb nn nso om pl ro ru
+   hr hu hy ig is ja kk kl lt lv mt nb nn nso om pl ro ru
    se sk sl sq sv sw tn to tr uk vi wo yo
 );
    $LocaleFile{'default'}         = '';
@@ -88,10 +88,21 @@ Unicode::Collate::Locale - Linguistic tailoring for DUCET via Unicode::Collate
 
   use Unicode::Collate::Locale;
 
+  #construct
   $Collator = Unicode::Collate::Locale->
       new(locale => $locale_name, %tailoring);
 
+  #sort
   @sorted = $Collator->sort(@not_sorted);
+
+  #compare
+  $result = $Collator->cmp($a, $b); # returns 1, 0, or -1.
+
+B<Note:> Strings in C<@not_sorted>, C<$a> and C<$b> are interpreted
+according to Perl's Unicode support. See L<perlunicode>,
+L<perluniintro>, L<perlunitut>, L<perlunifaq>, L<utf8>.
+Otherwise you can use C<preprocess> (cf. C<Unicode::Collate>)
+or should decode them before.
 
 =head1 DESCRIPTION
 
@@ -184,6 +195,7 @@ this method returns a string C<'default'> meaning no special tailoring.
       hy                Armenian
       ig                Igbo
       is                Icelandic
+      ja                Japanese [1]
       kk                Kazakh
       kl                Kalaallisut
       lt                Lithuanian
@@ -213,7 +225,7 @@ this method returns a string C<'default'> meaning no special tailoring.
       yo                Yoruba
     ----------------------------------------------------------
 
-Locales according to default UCA rules include:
+Locales according to the default UCA rules include
 de (German),
 en (English),
 ga (Irish),
@@ -228,12 +240,21 @@ st (Southern Sotho),
 xh (Xhosa),
 zu (Zulu).
 
+B<Note>
+
+[1] ja: Ideographs are sorted in JIS X 0208 order.
+Fullwidth and halfwidth forms are identical to their normal form.
+The difference between hiragana and katakana is at the 4th level,
+the comparison also requires C<(variable =E<gt> 'Non-ignorable')>,
+and then C<katakana_before_hiragana> has no effect.
+
 =head1 INSTALL
 
-Installation of Unicode::Collate::Locale requires F<Collate/Locale.pm>,
-F<Collate/Locale/*.pm> and F<Collate/allkeys.txt>.  On building,
-Unicode::Collate::Locale doesn't require F<data/*.txt> and F<mklocale>.
-Tests for Unicode::Collate::Locale are named F<t/loc_*.t>.
+Installation of C<Unicode::Collate::Locale> requires F<Collate/Locale.pm>,
+F<Collate/Locale/*.pm>, F<Collate/CJK/*.pm> and F<Collate/allkeys.txt>.
+On building, C<Unicode::Collate::Locale> doesn't require any of F<data/*.txt>,
+F<gendata/*>, and F<mklocale>.
+Tests for C<Unicode::Collate::Locale> are named F<t/loc_*.t>.
 
 =head1 CAVEAT
 
@@ -241,7 +262,7 @@ Tests for Unicode::Collate::Locale are named F<t/loc_*.t>.
 
 =item tailoring is not maximum
 
-If a certain letter is tailored, its equivalents are not always
+Even if a certain letter is tailored, its equivalent would not always
 tailored as well as it. For example, even though W is tailored,
 fullwidth W (C<U+FF37>), W with acute (C<U+1E82>), etc. are not
 tailored. The result may depend on whether source strings are

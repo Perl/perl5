@@ -168,7 +168,8 @@ cribbed.
 
 =item *
 
-XXX
+C<Unicode::Collate::CJK::JISX0208> module was added by the C<Unicode::Collate>
+upgrade from 0.63 to 0.64. See below.
 
 =back
 
@@ -289,6 +290,14 @@ C<Socket> has been upgraded from 1.90 to 1.91.
 =item *
 
 C<Sys::Hostname> has been upgraded from 1.13 to 1.14.
+
+=item *
+
+C<Unicode::Collate> has been upgraded from 0.63 to 0.64
+
+This release newly adds locale C<ja> and the module
+C<Unicode::Collate::CJK::JISX0208> which makes tailoring of 6355 kanji 
+(CJK Unified Ideographs) in the JIS X 0208 order.
 
 =back
 

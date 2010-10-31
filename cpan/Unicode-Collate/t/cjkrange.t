@@ -28,7 +28,9 @@ my $Collator = Unicode::Collate->new(
 # U+9FC4..U+9FCB are CJK UI since Unicode 5.2.0.
 # U+9FBC..U+9FC3 are CJK UI since Unicode 5.1.0.
 # U+9FA6..U+9FBB are CJK UI since Unicode 4.1.0.
-# U+3400 is CJK UI ExtA, then greater than any CJK UI.
+# CJK UI Ext are greater than any CJK UI.
+# U+3400 ..U+4DB5  are CJK UI ExtA since Unicode 3.0.0.
+# U+20000..U+2A6D6 are CJK UI ExtB since Unicode 3.1.0.
 # U+2A700..U+2B734 are CJK UI ExtC since Unicode 5.2.0.
 
 ##### 2..13

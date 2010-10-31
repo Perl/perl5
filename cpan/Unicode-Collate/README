@@ -1,4 +1,4 @@
-Unicode/Collate version 0.63
+Unicode/Collate version 0.64
 ===============================
 
 NAME
@@ -20,6 +20,11 @@ SYNOPSIS
   $result = $Collator->eq($a, $b);  # returns true/false
     (similarly ->ne, ->lt, ->le, ->gt, ->ge)
 
+Note: Strings in @not_sorted, $a and $b are interpreted
+according to Perl's Unicode support. See perlunicode,
+perluniintro, perlunitut, perlunifaq, utf8.
+Otherwise you can use "preprocess" or should decode them before.
+
 INSTALL
 
   Perl 5.6.1 or later is required.
@@ -30,8 +35,9 @@ INSTALL
   and practically useless for any other purpose.
 
   Installation of Unicode::Collate::Locale requires Collate/Locale.pm,
-  Collate/Locale/*.pm and Collate/allkeys.txt.  On building,
-  Unicode::Collate::Locale doesn't require data/*.txt and mklocale.
+  Collate/Locale/*.pm, Collate/CJK/*.pm and Collate/allkeys.txt.
+  On building, Unicode::Collate::Locale doesn't require any of data/*.txt,
+  gendata/*, and mklocale.
   Tests for Unicode::Collate::Locale are named t/loc_*.t.
 
 To install this module type the following:

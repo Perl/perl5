@@ -2381,6 +2381,7 @@ cpan/Time-Piece/t/06subclass.t	Test for Time::Piece
 cpan/Time-Piece/t/07arith.t	Test for Time::Piece
 cpan/Unicode-Collate/Changes			Unicode::Collate
 cpan/Unicode-Collate/Collate/allkeys.txt	Unicode::Collate
+cpan/Unicode-Collate/Collate/CJK/JISX0208.pm			Unicode::Collate
 cpan/Unicode-Collate/Collate/keys.txt		Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/af.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/ar.pl			Unicode::Collate
@@ -2405,6 +2406,7 @@ cpan/Unicode-Collate/Collate/Locale/hu.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/hy.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/ig.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/is.pl			Unicode::Collate
+cpan/Unicode-Collate/Collate/Locale/ja.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/kk.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/kl.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/lt.pl			Unicode::Collate
@@ -2470,6 +2472,9 @@ cpan/Unicode-Collate/t/loc_hu.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_hy.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_ig.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_is.t			Unicode::Collate
+cpan/Unicode-Collate/t/loc_jait.t			Unicode::Collate
+cpan/Unicode-Collate/t/loc_japr.t			Unicode::Collate
+cpan/Unicode-Collate/t/loc_ja.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_kk.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_kl.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_lt.t			Unicode::Collate
@@ -2499,6 +2504,8 @@ cpan/Unicode-Collate/t/loc_vi.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_wo.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_yo.t			Unicode::Collate
 cpan/Unicode-Collate/t/normal.t			Unicode::Collate
+cpan/Unicode-Collate/t/overcjk0.t		Unicode::Collate
+cpan/Unicode-Collate/t/overcjk1.t		Unicode::Collate
 cpan/Unicode-Collate/t/override.t		Unicode::Collate
 cpan/Unicode-Collate/t/rearrang.t		Unicode::Collate
 cpan/Unicode-Collate/t/test.t			Unicode::Collate
