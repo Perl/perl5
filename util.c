@@ -99,7 +99,6 @@ Perl_safesysmalloc(MEM_SIZE size)
 #endif
     ptr = (Malloc_t)PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
     PERL_ALLOC_CHECK(ptr);
-    DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) malloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
     if (ptr != NULL) {
 #ifdef PERL_TRACK_MEMPOOL
 	struct perl_memory_debug_header *const header
@@ -122,6 +121,7 @@ Perl_safesysmalloc(MEM_SIZE size)
 #  endif
         ptr = (Malloc_t)((char*)ptr+sTHX);
 #endif
+	DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) malloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
 	return ptr;
 }
     else {
