@@ -1655,6 +1655,9 @@ PP(pp_sysread)
 				  (struct sockaddr *)namebuf, &bufsize);
 	if (count < 0)
 	    RETPUSHUNDEF;
+	/* MSG_TRUNC can give oversized count; quietly lose it */
+	if (count > length)
+	    count = length;
 #ifdef EPOC
         /* Bogus return without padding */
 	bufsize = sizeof (struct sockaddr_in);
