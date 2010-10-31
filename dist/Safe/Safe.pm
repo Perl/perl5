@@ -134,6 +134,7 @@ my $default_share = [qw[
     &version::vxs::stringify
     &version::vxs::new
     &version::vxs::parse
+    &version::vxs::VCMP
 ]), ($] >= 5.011 && qw[
     &re::regexp_pattern
 ])];
