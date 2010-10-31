@@ -1670,91 +1670,70 @@ precomp(sv)
 
 #endif
 
-#define MgMOREMAGIC(mg) mg->mg_moremagic
-#define MgPRIVATE(mg) mg->mg_private
-#define MgTYPE(mg) mg->mg_type
-#define MgFLAGS(mg) mg->mg_flags
-#define MgOBJ(mg) mg->mg_obj
-#define MgLENGTH(mg) mg->mg_len
-#define MgREGEX(mg) PTR2IV(mg->mg_obj)
+MODULE = B	PACKAGE = B::MAGIC
 
-MODULE = B	PACKAGE = B::MAGIC	PREFIX = Mg	
-
-B::MAGIC
-MgMOREMAGIC(mg)
-	B::MAGIC	mg
-     CODE:
-	if( MgMOREMAGIC(mg) ) {
-	    RETVAL = MgMOREMAGIC(mg);
-	}
-	else {
-	    XSRETURN_UNDEF;
-	}
-     OUTPUT:
-	RETVAL
-
-U16
-MgPRIVATE(mg)
-	B::MAGIC	mg
-
-char
-MgTYPE(mg)
-	B::MAGIC	mg
-
-U8
-MgFLAGS(mg)
-	B::MAGIC	mg
-
-B::SV
-MgOBJ(mg)
-	B::MAGIC	mg
-
-IV
-MgREGEX(mg)
-	B::MAGIC	mg
-    CODE:
-        if(mg->mg_type == PERL_MAGIC_qr) {
-            RETVAL = MgREGEX(mg);
-        }
-        else {
-            croak( "REGEX is only meaningful on r-magic" );
-        }
-    OUTPUT:
-        RETVAL
-
-SV*
-precomp(mg)
-        B::MAGIC        mg
-    CODE:
-        if (mg->mg_type == PERL_MAGIC_qr) {
-            REGEXP* rx = (REGEXP*)mg->mg_obj;
-            RETVAL = Nullsv;
-            if( rx )
-                RETVAL = newSVpvn( RX_PRECOMP(rx), RX_PRELEN(rx) );
-        }
-        else {
-            croak( "precomp is only meaningful on r-magic" );
-        }
-    OUTPUT:
-        RETVAL
-
-I32 
-MgLENGTH(mg)
-	B::MAGIC	mg
- 
 void
-MgPTR(mg)
+MOREMAGIC(mg)
 	B::MAGIC	mg
-    CODE:
- 	if (mg->mg_ptr){
-		if (mg->mg_len >= 0){
-	    		ST(0) = newSVpvn_flags(mg->mg_ptr, mg->mg_len, SVs_TEMP);
+    ALIAS:
+	PRIVATE = 1
+	TYPE = 2
+	FLAGS = 3
+	LEN = 4
+	OBJ = 5
+	PTR = 6
+	REGEX = 7
+	precomp = 8
+    PPCODE:
+	switch (ix) {
+	case 0:
+	    XPUSHs(mg->mg_moremagic ? make_mg_object(aTHX_ mg->mg_moremagic)
+				    : &PL_sv_undef);
+	    break;
+	case 1:
+	    mPUSHu(mg->mg_private);
+	    break;
+	case 2:
+	    PUSHs(newSVpvn_flags(&(mg->mg_type), 1, SVs_TEMP));
+	    break;
+	case 3:
+	    mPUSHu(mg->mg_flags);
+	    break;
+	case 4:
+	    mPUSHi(mg->mg_len);
+	    break;
+	case 5:
+	    PUSHs(make_sv_object(aTHX_ NULL, mg->mg_obj));
+	    break;
+	case 6:
+	    if (mg->mg_ptr) {
+		if (mg->mg_len >= 0) {
+		    PUSHs(newSVpvn_flags(mg->mg_ptr, mg->mg_len, SVs_TEMP));
 		} else if (mg->mg_len == HEf_SVKEY) {
-			ST(0) = make_sv_object(aTHX_ NULL, (SV*)mg->mg_ptr);
+		    PUSHs(make_sv_object(aTHX_ NULL, (SV*)mg->mg_ptr));
 		} else
-		    ST(0) = sv_newmortal();
-	} else
-	    ST(0) = sv_newmortal();
+		    PUSHs(sv_newmortal());
+	    } else
+		PUSHs(sv_newmortal());
+	    break;
+	case 7:
+	    if(mg->mg_type == PERL_MAGIC_qr) {
+                mPUSHi(PTR2IV(mg->mg_obj));
+	    } else {
+		croak("REGEX is only meaningful on r-magic");
+	    }
+	    break;
+	case 8:
+	    if (mg->mg_type == PERL_MAGIC_qr) {
+		REGEXP *rx = (REGEXP *)mg->mg_obj;
+		PUSHs(make_sv_object(aTHX_ NULL,
+				     rx ? newSVpvn( RX_PRECOMP(rx), RX_PRELEN(rx))
+					: NULL));
+	    } else {
+		croak( "precomp is only meaningful on r-magic" );
+	    }
+	    break;
+	}
 
 MODULE = B	PACKAGE = B::BM		PREFIX = Bm
 
