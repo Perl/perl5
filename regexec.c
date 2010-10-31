@@ -6187,11 +6187,10 @@ Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool
     character's size)
   utf8_target tells whether p is in UTF-8.
 
-  Returns true if matched; false otherwise.  For utf8 strings, if lenp is not
-  NULL, on return from a successful match, the value it points to will be
-  updated to how many bytes in p were matched.  The value is undefined,
-  possibly changed from the input if there was no match.
-  For non-utf8 strings, *lenp is unchanged.
+  Returns true if matched; false otherwise.  If lenp is not NULL, on return
+  from a successful match, the value it points to will be updated to how many
+  bytes in p were matched.  If there was no match, the value is undefined,
+  possibly changed from the input.
 
  */
 
@@ -6207,6 +6206,7 @@ S_reginclass(pTHX_ const regexp *prog, register const regnode *n, register const
 
     PERL_ARGS_ASSERT_REGINCLASS;
 
+    /* If c is not already the code point, get it */
     if (utf8_target && !UTF8_IS_INVARIANT(c)) {
 	c = utf8n_to_uvchr(p, UTF8_MAXBYTES, &len,
 		(UTF8_ALLOW_DEFAULT & UTF8_ALLOW_ANYUV)
@@ -6217,10 +6217,20 @@ S_reginclass(pTHX_ const regexp *prog, register const regnode *n, register const
 	    Perl_croak(aTHX_ "Malformed UTF-8 character (fatal)");
     }
 
-    maxlen = lenp ? *lenp : UNISKIP(NATIVE_TO_UNI(c));
+    /* Use passed in max length, or one character if none passed in.  And
+     * assume will match just one character.  This is overwritten later if
+     * matched more.  (Note that the code makes an implicit assumption that any
+     * passed in max is at least one character) */
+    if (lenp) {
+	maxlen = *lenp;
+	*lenp = UNISKIP(NATIVE_TO_UNI(c));
+
+    }
+    else {
+	maxlen = UNISKIP(NATIVE_TO_UNI(c));
+    }
+
     if (utf8_target || (flags & ANYOF_UNICODE)) {
-        if (lenp)
-	    *lenp = 0;
 	if (utf8_target && !ANYOF_RUNTIME(n)) {
 	    if (len != (STRLEN)-1 && c < 256 && ANYOF_BITMAP_TEST(n, c))
 		match = TRUE;
@@ -6269,8 +6279,6 @@ S_reginclass(pTHX_ const regexp *prog, register const regnode *n, register const
 		if (! utf8_target) Safefree(utf8_p);
 	    }
 	}
-	if (match && lenp && *lenp == 0)
-	    *lenp = UNISKIP(NATIVE_TO_UNI(c));
     }
     if (!match && c < 256) {
 	if (ANYOF_BITMAP_TEST(n, c))
