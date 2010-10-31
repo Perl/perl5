@@ -1960,24 +1960,21 @@ CvSTART(cv)
 void
 CvXSUB(cv)
 	B::CV	cv
+    ALIAS:
+	XSUBANY = 1
     CODE:
-	ST(0) = sv_2mortal(newSViv(CvISXSUB(cv) ? PTR2IV(CvXSUB(cv)) : 0));
-
-
-void
-CvXSUBANY(cv)
-	B::CV	cv
-    CODE:
-	ST(0) = CvCONST(cv)
+	ST(0) = ix && CvCONST(cv)
 	    ? make_sv_object(aTHX_ NULL, (SV *)CvXSUBANY(cv).any_ptr)
-	    : sv_2mortal(newSViv(CvISXSUB(cv) ? CvXSUBANY(cv).any_iv : 0));
+	    : sv_2mortal(newSViv(CvISXSUB(cv)
+				 ? (ix ? CvXSUBANY(cv).any_iv
+				       : PTR2IV(CvXSUB(cv)))
+				 : 0));
 
 MODULE = B	PACKAGE = B::CV		PREFIX = cv_
 
 B::SV
 cv_const_sv(cv)
 	B::CV	cv
-
 
 MODULE = B	PACKAGE = B::HV		PREFIX = Hv
 
