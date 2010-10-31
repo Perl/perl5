@@ -6220,18 +6220,20 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 	if (c_len == (STRLEN)-1)
 	    Perl_croak(aTHX_ "Malformed UTF-8 character (fatal)");
     }
+    else {
+	c_len = 1;
+    }
 
-    /* Use passed in max length, or one character if none passed in.  And
-     * assume will match just one character.  This is overwritten later if
-     * matched more.  (Note that the code makes an implicit assumption that any
-     * passed in max is at least one character) */
+    /* Use passed in max length, or one character if none passed in or less
+     * than one character.  And assume will match just one character.  This is
+     * overwritten later if matched more. */
     if (lenp) {
-	maxlen = *lenp;
-	*lenp = UNISKIP(NATIVE_TO_UNI(c));
+	maxlen = (*lenp > c_len) ? *lenp : c_len;
+	*lenp = c_len;
 
     }
     else {
-	maxlen = UNISKIP(NATIVE_TO_UNI(c));
+	maxlen = c_len;
     }
 
     if (utf8_target || (flags & ANYOF_UNICODE)) {
