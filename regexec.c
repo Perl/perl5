@@ -3633,7 +3633,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    goto anyof_fail;
 		if (locinput >= PL_regeol)
 		    sayNO;
-		locinput += inclasslen ? inclasslen : UTF8SKIP(locinput);
+		locinput += inclasslen;
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
