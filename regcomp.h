@@ -313,7 +313,8 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 
 /* Flags for node->flags of ANYOF */
 
-#define ANYOF_CLASS		0x08	/* has [[:blah:]] classes */
+#define ANYOF_CLASS		0x08	/* has runtime \d, \w, [:posix:], ... */
+#define ANYOF_LARGE      ANYOF_CLASS    /* Same; name retained for back compat */
 #define ANYOF_INVERT		0x04
 #define ANYOF_FOLD		0x02
 #define ANYOF_LOCALE		0x01
@@ -324,9 +325,6 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 /* There is a character or a range past 0xff */
 #define ANYOF_UNICODE		0x20
 #define ANYOF_UNICODE_ALL	0x40	/* Can match any char past 0xff */
-
-/* size of node is large (includes class pointer) */
-#define ANYOF_LARGE 		0x80
 
 /* Are there any runtime flags on in this node? */
 #define ANYOF_RUNTIME(s)	(ANYOF_FLAGS(s) & 0x0f)
