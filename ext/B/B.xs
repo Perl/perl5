@@ -597,8 +597,6 @@ PROTOTYPES: DISABLE
 
 BOOT:
 {
-    HV *stash = gv_stashpvs("B", GV_ADD);
-    AV *export_ok = perl_get_av("B::EXPORT_OK", GV_ADD);
     MY_CXT_INIT;
     specialsv_list[0] = Nullsv;
     specialsv_list[1] = &PL_sv_undef;
