@@ -6238,7 +6238,7 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 
     if (utf8_target || (flags & ANYOF_UNICODE)) {
 	if (utf8_target && !ANYOF_RUNTIME(n)) {
-	    if (c_len != (STRLEN)-1 && c < 256 && ANYOF_BITMAP_TEST(n, c))
+	    if (c < 256 && ANYOF_BITMAP_TEST(n, c))
 		match = TRUE;
 	}
 	if (!match && utf8_target && (flags & ANYOF_UNICODE_ALL) && c >= 256)
