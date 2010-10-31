@@ -6417,23 +6417,23 @@ SV *	sv
  OUTPUT:
   RETVAL
 
-int
+bool
 last_op_in_netorder()
  CODE:
-  RETVAL = last_op_in_netorder(aTHX);
+  RETVAL = !!last_op_in_netorder(aTHX);
  OUTPUT:
   RETVAL
 
-int
+bool
 is_storing()
  CODE:
-  RETVAL = is_storing(aTHX);
+  RETVAL = !!is_storing(aTHX);
  OUTPUT:
   RETVAL
 
-int
+bool
 is_retrieving()
  CODE:
-  RETVAL = is_retrieving(aTHX);
+  RETVAL = !!is_retrieving(aTHX);
  OUTPUT:
   RETVAL
