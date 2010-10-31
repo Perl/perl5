@@ -6181,9 +6181,15 @@ Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool
  - reginclass - determine if a character falls into a character class
  
   The n is the ANYOF regnode, the p is the target string, lenp
-  is pointer to the maximum length of how far to go in the p
+  is pointer to the maximum number of bytes of how far to go in the p
   (if the lenp is zero, UTF8SKIP(p) is used),
   utf8_target tells whether the target string is in UTF-8.
+
+  Returns true if matched; false otherwise.  For utf8 strings, if lenp is not
+  NULL, on return from a successful match, the value it points to will be
+  updated to how many bytes in p were matched.  The value is undefined,
+  possibly changed from the input if there was no match.
+  For non-utf8 strings, *lenp is unchanged.
 
  */
 
