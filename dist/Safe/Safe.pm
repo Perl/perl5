@@ -4,7 +4,7 @@ use 5.003_11;
 use strict;
 use Scalar::Util qw(reftype refaddr);
 
-$Safe::VERSION = "2.28";
+$Safe::VERSION = "2.29";
 
 # *** Don't declare any lexicals above this point ***
 #
