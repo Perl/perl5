@@ -6180,10 +6180,12 @@ Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool
 /*
  - reginclass - determine if a character falls into a character class
  
-  The n is the ANYOF regnode, the p is the target string, lenp
-  is pointer to the maximum number of bytes of how far to go in the p
-  (if the lenp is zero, UTF8SKIP(p) is used),
-  utf8_target tells whether the target string is in UTF-8.
+  n is the ANYOF regnode
+  p is the target string
+  lenp is pointer to the maximum number of bytes of how far to go in p
+    (This is assumed wthout checking to always be at least the current
+    character's size)
+  utf8_target tells whether p is in UTF-8.
 
   Returns true if matched; false otherwise.  For utf8 strings, if lenp is not
   NULL, on return from a successful match, the value it points to will be
@@ -6201,7 +6203,7 @@ S_reginclass(pTHX_ const regexp *prog, register const regnode *n, register const
     bool match = FALSE;
     UV c = *p;
     STRLEN len = 0;
-    STRLEN plen;
+    STRLEN maxlen;
 
     PERL_ARGS_ASSERT_REGINCLASS;
 
@@ -6215,7 +6217,7 @@ S_reginclass(pTHX_ const regexp *prog, register const regnode *n, register const
 	    Perl_croak(aTHX_ "Malformed UTF-8 character (fatal)");
     }
 
-    plen = lenp ? *lenp : UNISKIP(NATIVE_TO_UNI(c));
+    maxlen = lenp ? *lenp : UNISKIP(NATIVE_TO_UNI(c));
     if (utf8_target || (flags & ANYOF_UNICODE)) {
         if (lenp)
 	    *lenp = 0;
@@ -6246,7 +6248,7 @@ S_reginclass(pTHX_ const regexp *prog, register const regnode *n, register const
 			    SV* const sv = *av_fetch(av, i, FALSE);
 			    STRLEN len;
 			    const char * const s = SvPV_const(sv, len);
-			    if (len <= plen && memEQ(s, (char*)utf8_p, len)) {
+			    if (len <= maxlen && memEQ(s, (char*)utf8_p, len)) {
 			        *lenp = len;
 				match = TRUE;
 				break;
