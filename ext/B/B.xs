@@ -605,9 +605,6 @@ BOOT:
     specialsv_list[4] = (SV *) pWARN_ALL;
     specialsv_list[5] = (SV *) pWARN_NONE;
     specialsv_list[6] = (SV *) pWARN_STD;
-#if PERL_VERSION <= 8
-#  define OPpPAD_STATE 0
-#endif
 }
 
 #define B_main_cv()	PL_main_cv

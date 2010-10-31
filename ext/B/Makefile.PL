@@ -36,7 +36,7 @@ if ($] >= 5.009) {
     push @names, 'AVf_REAL';
     # This is only present in 5.10, but it's useful to B::Deparse to be able
     # to import a dummy value from B
-    push @names, 'OPpPAD_STATE';
+    push @names, {name=>"OPpPAD_STATE", default=>["IV", "0"]};
 }  
 
 if ($] < 5.011) {
@@ -71,6 +71,6 @@ foreach my $tuple (['op_reg_common.h','(?:(?:RXf_)?PMf_)'],
 WriteConstants(
     PROXYSUBS => {push => 'EXPORT_OK'},
     NAME => 'B',
-    NAMES => [map {{name=>$_, macro=>1}} @names],
+    NAMES => [map {ref $_ ? $_ : {name=>$_, macro=>1}} @names],
     XS_SUBNAME => undef,
 );
