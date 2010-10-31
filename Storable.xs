@@ -6426,14 +6426,14 @@ last_op_in_netorder()
 
 bool
 is_storing()
+ ALIAS:
+ is_storing = ST_STORE
+ is_retrieving = ST_RETRIEVE
  CODE:
-  RETVAL = !!is_storing(aTHX);
- OUTPUT:
-  RETVAL
+ {
+  dSTCXT;
 
-bool
-is_retrieving()
- CODE:
-  RETVAL = !!is_retrieving(aTHX);
+  RETVAL = cxt->entry && (cxt->optype & ix) ? TRUE : FALSE;
+ }
  OUTPUT:
   RETVAL
