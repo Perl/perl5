@@ -326,9 +326,6 @@ struct regnode_charclass_class {
 #define ANYOF_UNICODE		0x20	/* Matches >= one thing past 0xff */
 #define ANYOF_UNICODE_ALL	0x40	/* Matches 0x100 - infinity */
 
-/* Are there any runtime flags on in this node? */
-#define ANYOF_RUNTIME(s)	(ANYOF_FLAGS(s) & 0x0f)
-
 #define ANYOF_FLAGS_ALL		0xff
 
 /* Character classes for node->classflags of ANYOF */
