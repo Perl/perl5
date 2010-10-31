@@ -6236,57 +6236,8 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 	maxlen = c_len;
     }
 
-    if (utf8_target || (flags & ANYOF_UNICODE)) {
-	if (utf8_target && !ANYOF_RUNTIME(n)) {
-	    if (c < 256 && ANYOF_BITMAP_TEST(n, c))
-		match = TRUE;
-	}
-	if (!match && utf8_target && (flags & ANYOF_UNICODE_ALL) && c >= 256)
-	    match = TRUE;
-	if (!match) {
-	    AV *av;
-	    SV * const sw = regclass_swash(prog, n, TRUE, 0, (SV**)&av);
-	
-	    if (sw) {
-		U8 * utf8_p;
-		if (utf8_target) {
-		    utf8_p = (U8 *) p;
-		} else {
-		    STRLEN len = 1;
-		    utf8_p = bytes_to_utf8(p, &len);
-		}
-		if (swash_fetch(sw, utf8_p, 1))
-		    match = TRUE;
-		else if (flags & ANYOF_FOLD) {
-		    if (!match && lenp && av) {
-		        I32 i;
-			for (i = 0; i <= av_len(av); i++) {
-			    SV* const sv = *av_fetch(av, i, FALSE);
-			    STRLEN len;
-			    const char * const s = SvPV_const(sv, len);
-			    if (len <= maxlen && memEQ(s, (char*)utf8_p, len)) {
-			        *lenp = len;
-				match = TRUE;
-				break;
-			    }
-			}
-		    }
-		    if (!match) {
-		        U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
-
-			STRLEN tmplen;
-			to_utf8_fold(utf8_p, tmpbuf, &tmplen);
-			if (swash_fetch(sw, tmpbuf, 1))
-			    match = TRUE;
-		    }
-		}
-
-		/* If we allocated a string above, free it */
-		if (! utf8_target) Safefree(utf8_p);
-	    }
-	}
-    }
-    if (!match && c < 256) {
+    /* If this character is potentially in the bitmap, check it */
+    if (c < 256) {
 	if (ANYOF_BITMAP_TEST(n, c))
 	    match = TRUE;
 	else if (flags & ANYOF_FOLD) {
@@ -6338,6 +6289,59 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 		) /* How's that for a conditional? */
 	    {
 		match = TRUE;
+	    }
+	}
+    }
+
+    /* If the bitmap didn't (or couldn't) match, and something outside the
+     * bitmap could match, try that */
+    if (! match && utf8_target || (flags & ANYOF_UNICODE)) {
+	if (utf8_target && !ANYOF_RUNTIME(n)) {
+	    if (c < 256 && ANYOF_BITMAP_TEST(n, c))
+		match = TRUE;
+	}
+	if (!match && utf8_target && (flags & ANYOF_UNICODE_ALL) && c >= 256)
+	    match = TRUE;
+	if (!match) {
+	    AV *av;
+	    SV * const sw = regclass_swash(prog, n, TRUE, 0, (SV**)&av);
+
+	    if (sw) {
+		U8 * utf8_p;
+		if (utf8_target) {
+		    utf8_p = (U8 *) p;
+		} else {
+		    STRLEN len = 1;
+		    utf8_p = bytes_to_utf8(p, &len);
+		}
+		if (swash_fetch(sw, utf8_p, 1))
+		    match = TRUE;
+		else if (flags & ANYOF_FOLD) {
+		    if (!match && lenp && av) {
+		        I32 i;
+			for (i = 0; i <= av_len(av); i++) {
+			    SV* const sv = *av_fetch(av, i, FALSE);
+			    STRLEN len;
+			    const char * const s = SvPV_const(sv, len);
+			    if (len <= maxlen && memEQ(s, (char*)utf8_p, len)) {
+			        *lenp = len;
+				match = TRUE;
+				break;
+			    }
+			}
+		    }
+		    if (!match) {
+		        U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
+
+			STRLEN tmplen;
+			to_utf8_fold(utf8_p, tmpbuf, &tmplen);
+			if (swash_fetch(sw, tmpbuf, 1))
+			    match = TRUE;
+		    }
+		}
+
+		/* If we allocated a string above, free it */
+		if (! utf8_target) Safefree(utf8_p);
 	    }
 	}
     }
