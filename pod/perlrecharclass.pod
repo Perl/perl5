@@ -522,8 +522,7 @@ The other counterpart, in the column labelled "Full-range Unicode", matches any
 appropriate characters in the full Unicode character set.  For example,
 C<\p{Alpha}> will match not just the ASCII alphabetic characters, but any
 character in the entire Unicode character set that is considered to be
-alphabetic.  The backslash sequence column is a (short) synonym for
-the Full-range Unicode form.
+alphabetic.
 
 (Each of the counterparts has various synonyms as well.
 L<perluniprops/Properties accessible through \p{} and \P{}> lists all the
@@ -549,25 +548,25 @@ EBCDIC code page is present, they will behave in accordance with those; if
 absent, the classes will match only their ASCII-range counterparts.  If you
 disagree with this proposal, send email to C<perl5-porters@perl.org>.
 
- [[:...:]]      ASCII-range          Full-range  backslash  Note
-                 Unicode              Unicode     sequence
+ [[:...:]]      ASCII-range        Full-range  backslash  Note
+                 Unicode            Unicode    sequence
  -----------------------------------------------------
-   alpha      \p{PosixAlpha}       \p{XPosixAlpha}
-   alnum      \p{PosixAlnum}       \p{XPosixAlnum}
+   alpha      \p{PosixAlpha}       \p{Alpha}
+   alnum      \p{PosixAlnum}       \p{Alnum}
    ascii      \p{ASCII}          
-   blank      \p{PosixBlank}       \p{XPosixBlank}  \h      [1]
-                                   or \p{HorizSpace}        [1]
-   cntrl      \p{PosixCntrl}       \p{XPosixCntrl}          [2]
-   digit      \p{PosixDigit}       \p{XPosixDigit}  \d
-   graph      \p{PosixGraph}       \p{XPosixGraph}          [3]
-   lower      \p{PosixLower}       \p{XPosixLower}
-   print      \p{PosixPrint}       \p{XPosixPrint}          [4]
-   punct      \p{PosixPunct}       \p{XPosixPunct}          [5]
-              \p{PerlSpace}        \p{XPerlSpace}   \s      [6]
-   space      \p{PosixSpace}       \p{XPosixSpace}          [6]
-   upper      \p{PosixUpper}       \p{XPosixUpper}
-   word       \p{PosixWord}        \p{XPosixWord}   \w
-   xdigit     \p{ASCII_Hex_Digit}  \p{XPosixXDigit}
+   blank      \p{PosixBlank}       \p{Blank} =             [1]
+                                   \p{HorizSpace}  \h      [1]
+   cntrl      \p{PosixCntrl}       \p{Cntrl}               [2]
+   digit      \p{PosixDigit}       \p{Digit}       \d
+   graph      \p{PosixGraph}       \p{Graph}               [3]
+   lower      \p{PosixLower}       \p{Lower}
+   print      \p{PosixPrint}       \p{Print}               [4]
+   punct      \p{PosixPunct}       \p{Punct}               [5]
+              \p{PerlSpace}        \p{SpacePerl}   \s      [6]
+   space      \p{PosixSpace}       \p{Space}               [6]
+   upper      \p{PosixUpper}       \p{Upper}
+   word       \p{PerlWord}         \p{Word}        \w
+   xdigit     \p{ASCII_Hex_Digit}  \p{XDigit}
 
 =over 4
 
@@ -622,11 +621,6 @@ matches the vertical tab, C<\cK>.   Same for the two ASCII-only range forms.
 
 =back
 
-There are various other synonyms that can be used for these besides
-C<\p{HorizSpace}> and \C<\p{XPosixBlank}>.  For example
-C<\p{PosixAlpha}> can be written as C<\p{Alpha}>.  All are listed
-in L<perluniprops/Properties accessible through \p{} and \P{}>.
-
 =head4 Negation
 X<character class, negation>
 
@@ -637,12 +631,10 @@ Some examples:
      POSIX         ASCII-range     Full-range  backslash
                     Unicode         Unicode    sequence
  -----------------------------------------------------
- [[:^digit:]]   \P{PosixDigit}  \P{XPosixDigit}   \D
- [[:^space:]]   \P{PosixSpace}  \P{XPosixSpace}
-                \P{PerlSpace}   \P{XPerlSpace}    \S
- [[:^word:]]    \P{PerlWord}    \P{XPosixWord}    \W
-
-Again, the backslash sequence means Full-range Unicode.
+ [[:^digit:]]   \P{PosixDigit}     \P{Digit}      \D
+ [[:^space:]]   \P{PosixSpace}     \P{Space}
+                \P{PerlSpace}      \P{SpacePerl}  \S
+ [[:^word:]]    \P{PerlWord}       \P{Word}       \W
 
 =head4 [= =] and [. .]
 

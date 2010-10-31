@@ -11130,8 +11130,7 @@ sub compile_perl() {
     # range, with their names prefaced by 'Posix', to signify that these match
     # what the Posix standard says they should match.  A couple are
     # effectively this, but the name doesn't have 'Posix' in it because there
-    # just isn't any Posix equivalent.  'XPosix' are the Posix tables extended
-    # to the full Unicode range, by our guesses as to what is appropriate.
+    # just isn't any Posix equivalent.
 
     # 'Any' is all code points.  As an error check, instead of just setting it
     # to be that, construct it to be the union of all the major categories
@@ -11196,7 +11195,6 @@ sub compile_perl() {
         $Lower->set_equivalent_to($gc->table('Lowercase_Letter'),
                                                                 Related => 1);
     }
-    $Lower->add_alias('XPosixLower');
     $perl->add_match_table("PosixLower",
                             Description => "[a-z]",
                             Initialize => $Lower & $ASCII,
@@ -11211,7 +11209,6 @@ sub compile_perl() {
         $Upper->set_equivalent_to($gc->table('Uppercase_Letter'),
                                                                 Related => 1);
     }
-    $Upper->add_alias('XPosixUpper');
     $perl->add_match_table("PosixUpper",
                             Description => "[A-Z]",
                             Initialize => $Upper & $ASCII,
@@ -11306,7 +11303,6 @@ sub compile_perl() {
         $Alpha += $gc->table('Nl') if defined $gc->table('Nl');
         $Alpha->add_description('Alphabetic');
     }
-    $Alpha->add_alias('XPosixAlpha');
     $perl->add_match_table("PosixAlpha",
                             Description => "[A-Za-z]",
                             Initialize => $Alpha & $ASCII,
@@ -11316,7 +11312,6 @@ sub compile_perl() {
                         Description => 'Alphabetic and (Decimal) Numeric',
                         Initialize => $Alpha + $gc->table('Decimal_Number'),
                         );
-    $Alnum->add_alias('XPosixAlnum');
     $perl->add_match_table("PosixAlnum",
                             Description => "[A-Za-z0-9]",
                             Initialize => $Alnum & $ASCII,
@@ -11326,16 +11321,14 @@ sub compile_perl() {
                                 Description => '\w, including beyond ASCII',
                                 Initialize => $Alnum + $gc->table('Mark'),
                                 );
-    $Word->add_alias('XPosixWord');
     my $Pc = $gc->table('Connector_Punctuation'); # 'Pc' Not in release 1
     $Word += $Pc if defined $Pc;
 
     # This is a Perl extension, so the name doesn't begin with Posix.
-    my $PerlWord = $perl->add_match_table('PerlWord',
+    $perl->add_match_table('PerlWord',
                     Description => '\w, restricted to ASCII = [A-Za-z0-9_]',
                     Initialize => $Word & $ASCII,
                     );
-    $PerlWord->add_alias('PosixWord');
 
     my $Blank = $perl->add_match_table('Blank',
                                 Description => '\h, Horizontal white space',
@@ -11348,7 +11341,6 @@ sub compile_perl() {
                                             -   0x200B, # ZWSP
                                 );
     $Blank->add_alias('HorizSpace');        # Another name for it.
-    $Blank->add_alias('XPosixBlank');
     $perl->add_match_table("PosixBlank",
                             Description => "\\t and ' '",
                             Initialize => $Blank & $ASCII,
@@ -11370,28 +11362,24 @@ sub compile_perl() {
                 Description => '\s including beyond ASCII plus vertical tab',
                 Initialize => $Blank + $VertSpace,
     );
-    $Space->add_alias('XPosixSpace');
     $perl->add_match_table("PosixSpace",
                             Description => "\\t, \\n, \\cK, \\f, \\r, and ' '.  (\\cK is vertical tab)",
                             Initialize => $Space & $ASCII,
                             );
 
     # Perl's traditional space doesn't include Vertical Tab
-    my $XPerlSpace = $perl->add_match_table('XPerlSpace',
+    my $SpacePerl = $perl->add_match_table('SpacePerl',
                                   Description => '\s, including beyond ASCII',
                                   Initialize => $Space - 0x000B,
                                 );
-    $XPerlSpace->add_alias('SpacePerl');    # A pre-existing synonym
-    my $PerlSpace = $perl->add_match_table('PerlSpace',
+    $perl->add_match_table('PerlSpace',
                             Description => '\s, restricted to ASCII',
-                            Initialize => $XPerlSpace & $ASCII,
+                            Initialize => $SpacePerl & $ASCII,
                             );
-
 
     my $Cntrl = $perl->add_match_table('Cntrl',
                                         Description => 'Control characters');
     $Cntrl->set_equivalent_to($gc->table('Cc'), Related => 1);
-    $Cntrl->add_alias('XPosixCntrl');
     $perl->add_match_table("PosixCntrl",
                             Description => "ASCII control characters: NUL, SOH, STX, ETX, EOT, ENQ, ACK, BEL, BS, HT, LF, VT, FF, CR, SO, SI, DLE, DC1, DC2, DC3, DC4, NAK, SYN, ETB, CAN, EOM, SUB, ESC, FS, GS, RS, US, and DEL",
                             Initialize => $Cntrl & $ASCII,
@@ -11408,7 +11396,6 @@ sub compile_perl() {
                         Description => 'Characters that are graphical',
                         Initialize => ~ ($Space + $controls),
                         );
-    $Graph->add_alias('XPosixGraph');
     $perl->add_match_table("PosixGraph",
                             Description =>
                                 '[-!"#$%&\'()*+,./:;<>?@[\\\]^_`{|}~0-9A-Za-z]',
@@ -11419,7 +11406,6 @@ sub compile_perl() {
                         Description => 'Characters that are graphical plus space characters (but no controls)',
                         Initialize => $Blank + $Graph - $gc->table('Control'),
                         );
-    $print->add_alias('XPosixPrint');
     $perl->add_match_table("PosixPrint",
                             Description =>
                               '[- 0-9A-Za-z!"#$%&\'()*+,./:;<>?@[\\\]^_`{|}~]',
@@ -11430,20 +11416,15 @@ sub compile_perl() {
     $Punct->set_equivalent_to($gc->table('Punctuation'), Related => 1);
 
     # \p{punct} doesn't include the symbols, which posix does
-    my $XPosixPunct = $perl->add_match_table('XPosixPunct',
-                    Description => '\p{Punct} + ASCII-range \p{Symbol}',
-                    Initialize => $gc->table('Punctuation')
-                                + ($ASCII & $gc->table('Symbol')),
-        );
     $perl->add_match_table('PosixPunct',
         Description => '[-!"#$%&\'()*+,./:;<>?@[\\\]^_`{|}~]',
-        Initialize => $ASCII & $XPosixPunct,
+        Initialize => $ASCII & ($gc->table('Punctuation')
+                                + $gc->table('Symbol')),
         );
 
     my $Digit = $perl->add_match_table('Digit',
                             Description => '[0-9] + all other decimal digits');
     $Digit->set_equivalent_to($gc->table('Decimal_Number'), Related => 1);
-    $Digit->add_alias('XPosixDigit');
     my $PosixDigit = $perl->add_match_table("PosixDigit",
                                             Description => '[0-9]',
                                             Initialize => $Digit & $ASCII,
@@ -11451,7 +11432,6 @@ sub compile_perl() {
 
     # Hex_Digit was not present in first release
     my $Xdigit = $perl->add_match_table('XDigit');
-    $Xdigit->add_alias('XPosixXDigit');
     my $Hex = property_ref('Hex_Digit');
     if (defined $Hex && ! $Hex->is_empty) {
         $Xdigit->set_equivalent_to($Hex->table('Y'), Related => 1);
@@ -11463,10 +11443,6 @@ sub compile_perl() {
                               0xFF10..0xFF19, 0xFF21..0xFF26, 0xFF41..0xFF46]);
         $Xdigit->add_description('[0-9A-Fa-f] and corresponding fullwidth versions, like U+FF10: FULLWIDTH DIGIT ZERO');
     }
-    $perl->add_match_table('PosixXDigit',
-                            Initialize => $ASCII & $Xdigit,
-                            Description => '[0-9A-Fa-f]',
-                        );
 
     my $dt = property_ref('Decomposition_Type');
     $dt->add_match_table('Non_Canon', Full_Name => 'Non_Canonical',
