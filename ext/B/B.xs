@@ -795,13 +795,13 @@ cast_I32(i)
 
 void
 minus_c()
+    ALIAS:
+	save_BEGINs = 1
     CODE:
-	PL_minus_c = TRUE;
-
-void
-save_BEGINs()
-    CODE:
-	PL_savebegin = TRUE;
+	if (ix)
+	    PL_savebegin = TRUE;
+	else
+	    PL_minus_c = TRUE;
 
 SV *
 cstring(sv)
