@@ -621,10 +621,8 @@ BOOT:
 #define B_main_root()	PL_main_root
 #define B_main_start()	PL_main_start
 #define B_amagic_generation()	PL_amagic_generation
-#define B_sub_generation()	PL_sub_generation
 #define B_defstash()	PL_defstash
 #define B_curstash()	PL_curstash
-#define B_dowarn()	PL_dowarn
 #define B_comppadlist()	(PL_main_cv ? CvPADLIST(PL_main_cv) : CvPADLIST(PL_compcv))
 #define B_sv_undef()	&PL_sv_undef
 #define B_sv_yes()	&PL_sv_yes
@@ -675,9 +673,6 @@ B_main_start()
 long 
 B_amagic_generation()
 
-long
-B_sub_generation()
-
 B::AV
 B_comppadlist()
 
@@ -696,9 +691,6 @@ B_curstash()
 B::HV
 B_defstash()
 
-U8
-B_dowarn()
-
 B::SV
 B_formfeed()
 
@@ -713,6 +705,15 @@ B_diehook()
 	ST(0) = make_sv_object(aTHX_ NULL, PL_diehook);
 
 MODULE = B	PACKAGE = B
+
+UV
+sub_generation()
+    ALIAS:
+	dowarn = 1
+    CODE:
+	RETVAL = ix ? PL_dowarn : PL_sub_generation;
+    OUTPUT:
+	RETVAL
 
 void
 walkoptree(opsv, method)
