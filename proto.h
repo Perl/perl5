@@ -6425,7 +6425,7 @@ STATIC U8*	S_reghopmaybe3(U8 *s, I32 off, const U8 *lim)
 #define PERL_ARGS_ASSERT_REGHOPMAYBE3	\
 	assert(s); assert(lim)
 
-STATIC bool	S_reginclass(pTHX_ const regexp *prog, const regnode *n, const U8 *p, STRLEN *lenp, bool do_utf8sv_is_utf8)
+STATIC bool	S_reginclass(pTHX_ const regexp * const prog, const regnode * const n, const U8 * const p, STRLEN *lenp, bool const do_utf8sv_is_utf8)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);

@@ -6195,7 +6195,7 @@ Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool
  */
 
 STATIC bool
-S_reginclass(pTHX_ const regexp *prog, register const regnode *n, register const U8* p, STRLEN* lenp, register bool utf8_target)
+S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, register const U8* const p, STRLEN* lenp, register const bool utf8_target)
 {
     dVAR;
     const char flags = ANYOF_FLAGS(n);
