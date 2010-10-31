@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 use warnings;
-plan(tests => 18);
+plan(tests => 19);
 
 {
     package New;
@@ -33,8 +33,6 @@ ok (New->isa (Old::), 'New inherits from Old');
 isa_ok (bless ({}, Old::), New::, 'Old object');
 isa_ok (bless ({}, New::), Old::, 'New object');
 
-
-no warnings; # temporary, until bug #77358 is fixed
 
 # Test that replacing a package by assigning to an existing glob
 # invalidates the isa caches
@@ -170,6 +168,9 @@ for(
   "replacing nonexistent nested packages by $$_{name} updates isa caches";
 }
 
+no warnings; # temporary; there seems to be a scoping bug, as this does not
+             # work when placed in the blocks below
+
 # Test that deleting stash elements containing
 # subpackages also invalidates the isa cache.
 # Maybe this does not belong in package_aliases.t, but it is closely
@@ -211,6 +212,29 @@ for(
  is $pet->speak, 'Woof!',
   'the deleted substash is gone completely when freed';
 }
+
+# [perl #77358]
+fresh_perl_is
+   q~#!perl -w
+     @Pet::ISA = "Tike";
+     @Tike::ISA = "Barker";
+     
+     sub Barker::speak { print "Woof!\n" }
+     sub Latrator::speak { print "Bow-wow!\n" }
+     
+     my $pet = bless [], "Pet";
+     
+     $pet->speak;
+     
+     sub Dog::speak { print "Hello.\n" } # strange dog!
+     @Dog::ISA = 'Latrator';
+     *Tike:: = delete $::{'Dog::'};
+     
+     $pet->speak;
+   ~,
+  "Woof!\nHello.\n",
+   { stderr => 1 },
+  "Assigning a nameless package over one w/subclasses updates isa caches";
 
 
 # mro_package_moved needs to check for self-referential packages.
