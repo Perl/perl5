@@ -6,7 +6,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..22\n";
+print "1..24\n";
 
 my $t = 1;
 tie my $c => 'Tie::Monitor';
@@ -59,6 +59,19 @@ ok_string($s, '0', 1, 1);
 $c = *strat;
 $s = $c;
 ok_string $s, *strat, 1, 1;
+
+# A plain *foo should not call get-magic on *foo.
+# This method of scalar-tying an immutable glob relies on details of the
+# current implementation that are subject to change. This test may need to
+# be rewritten if they do change.
+my $tyre = tie $::{gelp} => 'Tie::Monitor';
+# Compilation of this eval autovivifies the *gelp glob.
+eval '$tyre->init(0); () = \*gelp';
+my($rgot, $wgot) = $tyre->init(0);
+print "not " unless $rgot == 0;
+print "ok ", $t++, " - a plain *foo causes no get-magic\n";
+print "not " unless $wgot == 0;
+print "ok ", $t++, " - a plain *foo causes no set-magic\n";
 
 
 # adapted from Tie::Counter by Abigail

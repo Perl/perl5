@@ -139,7 +139,7 @@ PP(pp_rv2gv)
 {
     dVAR; dSP; dTOPss;
 
-    SvGETMAGIC(sv);
+    if (!isGV(sv) || SvFAKE(sv)) SvGETMAGIC(sv);
     if (SvROK(sv)) {
       wasref:
 	tryAMAGICunDEREF(to_gv);
