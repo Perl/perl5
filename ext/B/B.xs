@@ -587,6 +587,33 @@ typedef HE      *B__HE;
 typedef struct refcounted_he	*B__RHE;
 #endif
 
+#ifdef USE_ITHREADS
+#  define ASSIGN_COMMON_ALIAS(var) \
+    STMT_START { XSANY.any_i32 = offsetof(struct interpreter, var); } STMT_END
+#else
+#  define ASSIGN_COMMON_ALIAS(var) \
+    STMT_START { XSANY.any_ptr = (void *)&PL_##var; } STMT_END
+#endif
+
+/* This needs to be ALIASed in a custom way, hence can't easily be defined as
+   a regular XSUB.  */
+static XSPROTO(intrpvar_sv_common); /* prototype to pass -Wmissing-prototypes */
+static XSPROTO(intrpvar_sv_common)
+{
+    dVAR;
+    dXSARGS;
+    SV *ret;
+    if (items != 0)
+       croak_xs_usage(cv,  "");
+#ifdef USE_ITHREADS
+    ret = *(SV **)(XSANY.any_i32 + (char *)my_perl);
+#else
+    ret = *(SV **)(XSANY.any_ptr);
+#endif
+    ST(0) = make_sv_object(aTHX_ NULL, ret);
+    XSRETURN(1);
+}
+
 #include "const-c.inc"
 
 MODULE = B	PACKAGE = B	PREFIX = B_
@@ -607,57 +634,8 @@ BOOT:
     specialsv_list[6] = (SV *) pWARN_STD;
 }
 
-#define B_main_cv()	PL_main_cv
-#define B_init_av()	PL_initav
-#define B_inc_gv()	PL_incgv
-#define B_check_av()	PL_checkav_save
-#if PERL_VERSION > 8
-#  define B_unitcheck_av()	PL_unitcheckav_save
-#else
-#  define B_unitcheck_av()	NULL
-#endif
-#define B_begin_av()	PL_beginav_save
-#define B_end_av()	PL_endav
 #define B_amagic_generation()	PL_amagic_generation
-#define B_defstash()	PL_defstash
-#define B_curstash()	PL_curstash
 #define B_comppadlist()	(PL_main_cv ? CvPADLIST(PL_main_cv) : CvPADLIST(PL_compcv))
-#define B_formfeed()	PL_formfeed
-#ifdef USE_ITHREADS
-#define B_regex_padav()	PL_regex_padav
-#endif
-
-B::AV
-B_init_av()
-
-B::AV
-B_check_av()
-
-#if PERL_VERSION >= 9
-
-B::AV
-B_unitcheck_av()
-
-#endif
-
-B::AV
-B_begin_av()
-
-B::AV
-B_end_av()
-
-B::GV
-B_inc_gv()
-
-#ifdef USE_ITHREADS
-
-B::AV
-B_regex_padav()
-
-#endif
-
-B::CV
-B_main_cv()
 
 long 
 B_amagic_generation()
@@ -665,26 +643,44 @@ B_amagic_generation()
 B::AV
 B_comppadlist()
 
-B::HV
-B_curstash()
-
-B::HV
-B_defstash()
-
-B::SV
-B_formfeed()
-
-void
-B_warnhook()
-    CODE:
-	ST(0) = make_sv_object(aTHX_ NULL, PL_warnhook);
-
-void
-B_diehook()
-    CODE:
-	ST(0) = make_sv_object(aTHX_ NULL, PL_diehook);
-
 MODULE = B	PACKAGE = B
+
+BOOT:
+{
+    CV *cv;
+    const char *file = __FILE__;
+    
+    cv = newXS("B::init_av", intrpvar_sv_common, file);
+    ASSIGN_COMMON_ALIAS(Iinitav);
+    cv = newXS("B::check_av", intrpvar_sv_common, file);
+    ASSIGN_COMMON_ALIAS(Icheckav_save);
+#if PERL_VERSION >= 9
+    cv = newXS("B::unitcheck_av", intrpvar_sv_common, file);
+    ASSIGN_COMMON_ALIAS(Iunitcheckav_save);
+#endif
+    cv = newXS("B::begin_av", intrpvar_sv_common, file);
+    ASSIGN_COMMON_ALIAS(Ibeginav_save);
+    cv = newXS("B::end_av", intrpvar_sv_common, file);
+    ASSIGN_COMMON_ALIAS(Iendav);
+    cv = newXS("B::main_cv", intrpvar_sv_common, file);
+    ASSIGN_COMMON_ALIAS(Imain_cv);
+    cv = newXS("B::inc_gv", intrpvar_sv_common, file);
+    ASSIGN_COMMON_ALIAS(Iincgv);
+    cv = newXS("B::defstash", intrpvar_sv_common, file);
+    ASSIGN_COMMON_ALIAS(Idefstash);
+    cv = newXS("B::curstash", intrpvar_sv_common, file);
+    ASSIGN_COMMON_ALIAS(Icurstash);
+    cv = newXS("B::formfeed", intrpvar_sv_common, file);
+    ASSIGN_COMMON_ALIAS(Iformfeed);
+#ifdef USE_ITHREADS
+    cv = newXS("B::regex_padav", intrpvar_sv_common, file);
+    ASSIGN_COMMON_ALIAS(Iregex_padav);
+#endif
+    cv = newXS("B::warnhook", intrpvar_sv_common, file);
+    ASSIGN_COMMON_ALIAS(Iwarnhook);
+    cv = newXS("B::diehook", intrpvar_sv_common, file);
+    ASSIGN_COMMON_ALIAS(Idiehook);
+}
 
 B::SV
 sv_undef()
