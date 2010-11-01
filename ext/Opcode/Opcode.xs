@@ -55,16 +55,14 @@ op_names_init(pTHX)
 	hv_store(op_named_bits, op_names[i], strlen(op_names[i]), sv, 0);
     }
 
-    put_op_bitspec(aTHX_ ":none",0, sv_2mortal(new_opset(aTHX_ Nullsv)));
+    put_op_bitspec(aTHX_ STR_WITH_LEN(":none"), sv_2mortal(new_opset(aTHX_ Nullsv)));
 
     opset_all = new_opset(aTHX_ Nullsv);
     bitmap = SvPV(opset_all, len);
-    i = len-1; /* deal with last byte specially, see below */
-    while(i-- > 0)
-	bitmap[i] = (char)0xFF;
+    memset(bitmap, 0xFF, len-1); /* deal with last byte specially, see below */
     /* Take care to set the right number of bits in the last byte */
     bitmap[len-1] = (PL_maxo & 0x07) ? ~(0xFF << (PL_maxo & 0x07)) : 0xFF;
-    put_op_bitspec(aTHX_ ":all",0, opset_all); /* don't mortalise */
+    put_op_bitspec(aTHX_ STR_WITH_LEN(":all"), opset_all); /* don't mortalise */
 }
 
 
@@ -80,8 +78,6 @@ put_op_bitspec(pTHX_ const char *optag, STRLEN len, SV *mask)
     dMY_CXT;
 
     verify_opset(aTHX_ mask,1);
-    if (!len)
-	len = strlen(optag);
     svp = hv_fetch(op_named_bits, optag, len, 1);
     if (SvOK(*svp))
 	croak("Opcode tag \"%s\" already defined", optag);
