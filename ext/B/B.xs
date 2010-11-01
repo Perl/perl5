@@ -1719,9 +1719,8 @@ MOREMAGIC(mg)
 	case 8:
 	    if (mg->mg_type == PERL_MAGIC_qr) {
 		REGEXP *rx = (REGEXP *)mg->mg_obj;
-		PUSHs(make_sv_object(aTHX_ NULL,
-				     rx ? newSVpvn( RX_PRECOMP(rx), RX_PRELEN(rx))
-					: NULL));
+		PUSHs(newSVpvn_flags(rx ? RX_PRECOMP(rx) : NULL,
+				     rx ? RX_PRELEN(rx) : 0, SVs_TEMP));
 	    } else {
 		croak( "precomp is only meaningful on r-magic" );
 	    }
