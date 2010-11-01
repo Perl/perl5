@@ -2945,12 +2945,6 @@ Perl_sighandler(int sig)
     XPV * const tXpv = PL_Xpv;
     I32 old_ss_ix = PL_savestack_ix;
 
-    if (PL_savestack_ix + 15 <= PL_savestack_max)
-	flags |= 1;
-    if (PL_markstack_ptr < PL_markstack_max - 2)
-	flags |= 4;
-    if (PL_scopestack_ix < PL_scopestack_max - 3)
-	flags |= 16;
 
     if (!PL_psig_ptr[sig]) {
 		PerlIO_printf(Perl_error_log, "Signal SIG%s received, but no signal handler set.\n",
@@ -2960,14 +2954,19 @@ Perl_sighandler(int sig)
 
     /* Max number of items pushed there is 3*n or 4. We cannot fix
        infinity, so we fix 4 (in fact 5): */
-    if (flags & 1) {
+    if (PL_savestack_ix + 15 <= PL_savestack_max) {
+	flags |= 1;
 	PL_savestack_ix += 5;		/* Protect save in progress. */
 	SAVEDESTRUCTOR_X(S_unwind_handler_stack, NULL);
     }
-    if (flags & 4)
+    if (PL_markstack_ptr < PL_markstack_max - 2) {
+	flags |= 2;
 	PL_markstack_ptr++;		/* Protect mark. */
-    if (flags & 16)
-	PL_scopestack_ix += 1;
+    }
+    if (PL_scopestack_ix < PL_scopestack_max - 3) {
+	flags |= 4;
+	PL_scopestack_ix++;
+    }
     /* sv_2cv is too complicated, try a simpler variant first: */
     if (!SvROK(PL_psig_ptr[sig]) || !(cv = MUTABLE_CV(SvRV(PL_psig_ptr[sig])))
 	|| SvTYPE(cv) != SVt_PVCV) {
@@ -2987,7 +2986,7 @@ Perl_sighandler(int sig)
     sv = PL_psig_name[sig]
 	    ? SvREFCNT_inc_NN(PL_psig_name[sig])
 	    : newSVpv(PL_sig_name[sig],0);
-    flags |= 64;
+    flags |= 8;
     SAVEFREESV(sv);
 
     /* make sure our assumption about the size of the SAVEs are correct:
@@ -3052,11 +3051,11 @@ Perl_sighandler(int sig)
 cleanup:
     /* pop any of SAVEFREESV, SAVEDESTRUCTOR_X and "save in progress" */
     PL_savestack_ix = old_ss_ix;
-    if (flags & 4)
+    if (flags & 2)
 	PL_markstack_ptr--;
-    if (flags & 16)
+    if (flags & 4)
 	PL_scopestack_ix -= 1;
-    if (flags & 64)
+    if (flags & 8)
 	SvREFCNT_dec(sv);
     PL_op = myop;			/* Apparently not needed... */
 
