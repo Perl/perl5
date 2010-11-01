@@ -262,8 +262,15 @@ sub _store {
 	my $ret;
 	# Call C routine nstore or pstore, depending on network order
 	eval { $ret = &$xsptr(*FILE, $self) };
-	close(FILE) or $ret = undef;
-	unlink($file) or warn "Can't unlink $file: $!\n" if $@ || !defined $ret;
+	# close will return true on success, so the or short-circuits, the ()
+	# expression is true, and for that case the block will only be entered
+	# if $@ is true (ie eval failed)
+	# if close fails, it returns false, $ret is altered, *that* is (also)
+	# false, so the () expression is false, !() is true, and the block is
+	# entered.
+	if (!(close(FILE) or $ret = undef) || $@) {
+		unlink($file) or warn "Can't unlink $file: $!\n";
+	}
 	logcroak $@ if $@ =~ s/\.?\n$/,/;
 	$@ = $da;
 	return $ret ? $ret : undef;
