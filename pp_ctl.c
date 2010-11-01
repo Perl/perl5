@@ -504,7 +504,7 @@ PP(pp_formline)
     NV value;
     bool gotsome = FALSE;
     STRLEN len;
-    const STRLEN fudge = SvPOK(tmpForm)
+    const STRLEN fudge = SvPOKp(tmpForm)
 			? (SvCUR(tmpForm) * (IN_BYTES ? 1 : 3) + 1) : 0;
     bool item_is_utf8 = FALSE;
     bool targ_is_utf8 = FALSE;

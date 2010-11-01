@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 325;
+plan tests => 326;
 
 $| = 1;
 
@@ -1396,6 +1396,13 @@ foreach my $ord (78, 163, 256) {
     ok(!tainted($untainted), '$untainted should yet still be untainted');
 }
 
+{
+    fresh_perl_is(<<'end', "ok", { switches => [ '-T' ] },
+    $TAINT = substr($^X, 0, 0);
+    formline('@'.('<'x("21".$TAINT)).' | @*', 'hallo', 'welt'); print "ok";
+end
+    "formline survives a tainted dynamic picture");
+}
 
 # This may bomb out with the alarm signal so keep it last
 SKIP: {
