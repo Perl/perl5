@@ -279,6 +279,10 @@ This fixes a memory leak when DBM filters are used.
 
 =item *
 
+C<parent> has been upgraded from 0.223 to 0.224
+
+=item *
+
 C<POSIX> has been upgraded from 1.21 to 1.22.
 
 =item *
