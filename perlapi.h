@@ -177,8 +177,6 @@ END_EXTERN_C
 #define PL_sig_handlers_initted	(*Perl_Gsig_handlers_initted_ptr(NULL))
 #undef  PL_sig_ignoring
 #define PL_sig_ignoring		(*Perl_Gsig_ignoring_ptr(NULL))
-#undef  PL_sig_sv
-#define PL_sig_sv		(*Perl_Gsig_sv_ptr(NULL))
 #undef  PL_sig_trapped
 #define PL_sig_trapped		(*Perl_Gsig_trapped_ptr(NULL))
 #undef  PL_sigfpe_saved

@@ -1537,7 +1537,7 @@ s	|SV*	|magic_methcall1|NN SV *sv|NN const MAGIC *mg \
 				|NN const char *meth|U32 flags \
 				|int n|NULLOK SV *val
 s	|void	|restore_magic	|NULLOK const void *p
-s	|void	|unwind_handler_stack|NN const void *p
+s	|void	|unwind_handler_stack|NULLOK const void *p
 
 #endif
 

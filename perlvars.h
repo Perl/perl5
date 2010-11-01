@@ -102,10 +102,6 @@ PERLVARA(Gsig_ignoring, SIG_SIZE, int)	/* which signals we are ignoring */
 PERLVARA(Gsig_defaulting, SIG_SIZE, int)
 #endif
 
-#ifndef PERL_IMPLICIT_CONTEXT
-PERLVAR(Gsig_sv, SV*)
-#endif
-
 /* XXX signals are process-wide anyway, so we
  * ignore the implications of this for threading */
 #ifndef HAS_SIGACTION

@@ -5644,11 +5644,7 @@ STATIC void	S_save_magic(pTHX_ I32 mgs_ix, SV *sv)
 #define PERL_ARGS_ASSERT_SAVE_MAGIC	\
 	assert(sv)
 
-STATIC void	S_unwind_handler_stack(pTHX_ const void *p)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_UNWIND_HANDLER_STACK	\
-	assert(p)
-
+STATIC void	S_unwind_handler_stack(pTHX_ const void *p);
 #endif
 #if defined(PERL_IN_MRO_C)
 STATIC AV*	S_mro_get_linear_isa_dfs(pTHX_ HV* stash, U32 level)

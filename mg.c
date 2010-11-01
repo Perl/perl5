@@ -2943,6 +2943,7 @@ Perl_sighandler(int sig)
     OP *myop = PL_op;
     U32 flags = 0;
     XPV * const tXpv = PL_Xpv;
+    I32 old_ss_ix = PL_savestack_ix;
 
     if (PL_savestack_ix + 15 <= PL_savestack_max)
 	flags |= 1;
@@ -2961,7 +2962,7 @@ Perl_sighandler(int sig)
        infinity, so we fix 4 (in fact 5): */
     if (flags & 1) {
 	PL_savestack_ix += 5;		/* Protect save in progress. */
-	SAVEDESTRUCTOR_X(S_unwind_handler_stack, (void*)&flags);
+	SAVEDESTRUCTOR_X(S_unwind_handler_stack, NULL);
     }
     if (flags & 4)
 	PL_markstack_ptr++;		/* Protect mark. */
@@ -2983,16 +2984,15 @@ Perl_sighandler(int sig)
 	goto cleanup;
     }
 
-    if(PL_psig_name[sig]) {
-	sv = SvREFCNT_inc_NN(PL_psig_name[sig]);
-	flags |= 64;
-#if !defined(PERL_IMPLICIT_CONTEXT)
-	PL_sig_sv = sv;
-#endif
-    } else {
-	sv = sv_newmortal();
-	sv_setpv(sv,PL_sig_name[sig]);
-    }
+    sv = PL_psig_name[sig]
+	    ? SvREFCNT_inc_NN(PL_psig_name[sig])
+	    : newSVpv(PL_sig_name[sig],0);
+    flags |= 64;
+    SAVEFREESV(sv);
+
+    /* make sure our assumption about the size of the SAVEs are correct:
+     * 3 for SAVEDESTRUCTOR_X, 2 for SAVEFREESV */
+    assert(old_ss_ix + 2 + ((flags & 1) ? 3+5 : 0)  == PL_savestack_ix);
 
     PUSHSTACKi(PERLSI_SIGNAL);
     PUSHMARK(SP);
@@ -3050,8 +3050,8 @@ Perl_sighandler(int sig)
 	die_sv(ERRSV);
     }
 cleanup:
-    if (flags & 1)
-	PL_savestack_ix -= 8; /* Unprotect save in progress. */
+    /* pop any of SAVEFREESV, SAVEDESTRUCTOR_X and "save in progress" */
+    PL_savestack_ix = old_ss_ix;
     if (flags & 4)
 	PL_markstack_ptr--;
     if (flags & 16)
@@ -3124,20 +3124,19 @@ S_restore_magic(pTHX_ const void *p)
 
 }
 
+/* clean up the mess created by Perl_sighandler().
+ * Note that this is only called during an exit in a signal handler;
+ * a die is trapped by the call_sv() and the SAVEDESTRUCTOR_X manually
+ * skipped over. This is why we don't need to fix up the markstack and
+ * scopestack - they're going to be set to 0 anyway */
+
 static void
 S_unwind_handler_stack(pTHX_ const void *p)
 {
     dVAR;
-    const U32 flags = *(const U32*)p;
+    PERL_UNUSED_ARG(p);
 
-    PERL_ARGS_ASSERT_UNWIND_HANDLER_STACK;
-
-    if (flags & 1)
-	PL_savestack_ix -= 5; /* Unprotect save in progress. */
-#if !defined(PERL_IMPLICIT_CONTEXT)
-    if (flags & 64)
-	SvREFCNT_dec(PL_sig_sv);
-#endif
+    PL_savestack_ix -= 5; /* Unprotect save in progress. */
 }
 
 /*

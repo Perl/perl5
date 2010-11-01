@@ -771,8 +771,6 @@
 #define PL_Gsig_handlers_initted	(my_vars->Gsig_handlers_initted)
 #define PL_sig_ignoring		(my_vars->Gsig_ignoring)
 #define PL_Gsig_ignoring	(my_vars->Gsig_ignoring)
-#define PL_sig_sv		(my_vars->Gsig_sv)
-#define PL_Gsig_sv		(my_vars->Gsig_sv)
 #define PL_sig_trapped		(my_vars->Gsig_trapped)
 #define PL_Gsig_trapped		(my_vars->Gsig_trapped)
 #define PL_sigfpe_saved		(my_vars->Gsigfpe_saved)
@@ -832,7 +830,6 @@
 #define PL_Gsig_defaulting	PL_sig_defaulting
 #define PL_Gsig_handlers_initted	PL_sig_handlers_initted
 #define PL_Gsig_ignoring	PL_sig_ignoring
-#define PL_Gsig_sv		PL_sig_sv
 #define PL_Gsig_trapped		PL_sig_trapped
 #define PL_Gsigfpe_saved	PL_sigfpe_saved
 #define PL_Gsubversion		PL_subversion
