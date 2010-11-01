@@ -616,7 +616,7 @@ static XSPROTO(intrpvar_sv_common)
 
 #include "const-c.inc"
 
-MODULE = B	PACKAGE = B	PREFIX = B_
+MODULE = B	PACKAGE = B
 
 INCLUDE: const-xs.inc
 
@@ -624,6 +624,8 @@ PROTOTYPES: DISABLE
 
 BOOT:
 {
+    CV *cv;
+    const char *file = __FILE__;
     MY_CXT_INIT;
     specialsv_list[0] = Nullsv;
     specialsv_list[1] = &PL_sv_undef;
@@ -632,23 +634,6 @@ BOOT:
     specialsv_list[4] = (SV *) pWARN_ALL;
     specialsv_list[5] = (SV *) pWARN_NONE;
     specialsv_list[6] = (SV *) pWARN_STD;
-}
-
-#define B_amagic_generation()	PL_amagic_generation
-#define B_comppadlist()	(PL_main_cv ? CvPADLIST(PL_main_cv) : CvPADLIST(PL_compcv))
-
-long 
-B_amagic_generation()
-
-B::AV
-B_comppadlist()
-
-MODULE = B	PACKAGE = B
-
-BOOT:
-{
-    CV *cv;
-    const char *file = __FILE__;
     
     cv = newXS("B::init_av", intrpvar_sv_common, file);
     ASSIGN_COMMON_ALIAS(Iinitav);
@@ -681,6 +666,20 @@ BOOT:
     cv = newXS("B::diehook", intrpvar_sv_common, file);
     ASSIGN_COMMON_ALIAS(Idiehook);
 }
+
+long 
+amagic_generation()
+    CODE:
+	RETVAL = PL_amagic_generation;
+    OUTPUT:
+	RETVAL
+
+B::AV
+comppadlist()
+    CODE:
+	RETVAL = PL_main_cv ? CvPADLIST(PL_main_cv) : CvPADLIST(PL_compcv);
+    OUTPUT:
+	RETVAL
 
 B::SV
 sv_undef()
