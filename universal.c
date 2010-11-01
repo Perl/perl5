@@ -33,20 +33,6 @@
 #include "perliol.h" /* For the PERLIO_F_XXX */
 #endif
 
-static HV *
-S_get_isa_hash(pTHX_ HV *const stash)
-{
-    dVAR;
-    struct mro_meta *const meta = HvMROMETA(stash);
-
-    PERL_ARGS_ASSERT_GET_ISA_HASH;
-
-    if (!meta->isa) {
-	(void)mro_get_linear_isa(stash);
-    }
-    return meta->isa;
-}
-
 /*
  * Contributed by Graham Barr  <Graham.Barr@tiuk.ti.com>
  * The main guts of traverse_isa was actually copied from gv_fetchmeth
@@ -57,11 +43,16 @@ S_isa_lookup(pTHX_ HV *stash, const char * const name)
 {
     dVAR;
     const struct mro_meta *const meta = HvMROMETA(stash);
-    HV *const isa = meta->isa ? meta->isa : S_get_isa_hash(aTHX_ stash);
+    HV *isa = meta->isa;
     STRLEN len = strlen(name);
     const HV *our_stash;
 
     PERL_ARGS_ASSERT_ISA_LOOKUP;
+
+    if (!isa) {
+	(void)mro_get_linear_isa(stash);
+	isa = meta->isa;
+    }
 
     if (hv_common(isa, NULL, name, len, 0 /* No "UTF-8" flag possible with only
 					     a char * argument*/,

@@ -1953,7 +1953,6 @@ s	|void	|printbuf	|NN const char *const fmt|NN const char *const s
 
 #if defined(PERL_IN_UNIVERSAL_C)
 s	|bool|isa_lookup	|NN HV *stash|NN const char * const name
-so	|HV *	|get_isa_hash	|NN HV *const stash
 #endif
 
 #if defined(PERL_IN_LOCALE_C)
