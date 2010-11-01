@@ -622,9 +622,6 @@ BOOT:
 #define B_defstash()	PL_defstash
 #define B_curstash()	PL_curstash
 #define B_comppadlist()	(PL_main_cv ? CvPADLIST(PL_main_cv) : CvPADLIST(PL_compcv))
-#define B_sv_undef()	&PL_sv_undef
-#define B_sv_yes()	&PL_sv_yes
-#define B_sv_no()	&PL_sv_no
 #define B_formfeed()	PL_formfeed
 #ifdef USE_ITHREADS
 #define B_regex_padav()	PL_regex_padav
@@ -668,15 +665,6 @@ B_amagic_generation()
 B::AV
 B_comppadlist()
 
-B::SV
-B_sv_undef()
-
-B::SV
-B_sv_yes()
-
-B::SV
-B_sv_no()
-
 B::HV
 B_curstash()
 
@@ -697,6 +685,16 @@ B_diehook()
 	ST(0) = make_sv_object(aTHX_ NULL, PL_diehook);
 
 MODULE = B	PACKAGE = B
+
+B::SV
+sv_undef()
+    ALIAS:
+	sv_no = 1
+	sv_yes = 2
+    CODE:
+	RETVAL = ix > 1 ? &PL_sv_yes : ix < 1 ? &PL_sv_undef : &PL_sv_no;
+    OUTPUT:
+	RETVAL
 
 B::OP
 main_root()
