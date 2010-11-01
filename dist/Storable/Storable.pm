@@ -268,12 +268,12 @@ sub _store {
 	# if close fails, it returns false, $ret is altered, *that* is (also)
 	# false, so the () expression is false, !() is true, and the block is
 	# entered.
-	if (!(close(FILE) or $ret = undef) || $@) {
+	if (!(close(FILE) or undef $ret) || $@) {
 		unlink($file) or warn "Can't unlink $file: $!\n";
 	}
 	logcroak $@ if $@ =~ s/\.?\n$/,/;
 	$@ = $da;
-	return $ret ? $ret : undef;
+	return $ret;
 }
 
 #
@@ -312,7 +312,7 @@ sub _store_fd {
 	logcroak $@ if $@ =~ s/\.?\n$/,/;
 	local $\; print $file '';	# Autoflush the file if wanted
 	$@ = $da;
-	return $ret ? $ret : undef;
+	return $ret;
 }
 
 #

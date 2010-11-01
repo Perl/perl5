@@ -6354,23 +6354,22 @@ init_perinterp()
 # pstore
 #
 # Store the transitive data closure of given object to disk.
-# Returns 0 on error, a true value otherwise.
+# Returns undef on error, a true value otherwise.
 
 # net_pstore
 #
 # Same as pstore(), but network order is used for integers and doubles are
 # emitted as strings.
 
-int
+void
 pstore(f,obj)
 OutputStream	f
 SV *	obj
  ALIAS:
   net_pstore = 1
- CODE:
-  RETVAL = do_store(aTHX_ f, obj, 0, ix, (SV **)0);
- OUTPUT:
-  RETVAL
+ PPCODE:
+  ST(0) = do_store(aTHX_ f, obj, 0, ix, (SV **)0) ? &PL_sv_yes : &PL_sv_undef;
+  XSRETURN(1);
 
 # mstore
 #
