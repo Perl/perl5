@@ -98,8 +98,6 @@ get_op_bitspec(pTHX_ const char *opname, STRLEN len, int fatal)
     SV **svp;
     dMY_CXT;
 
-    if (!len)
-	len = strlen(opname);
     svp = hv_fetch(op_named_bits, opname, len, 0);
     if (!svp || !SvOK(*svp)) {
 	if (!fatal)
