@@ -425,10 +425,8 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 	    return NORMAL; \
     } STMT_END
 
-#define AMG_CALLun_var(sv,meth_enum) amagic_call(sv,&PL_sv_undef,  \
-					meth_enum,AMGf_noright | AMGf_unary)
-#define AMG_CALLun(sv,meth) AMG_CALLun_var(sv,CAT2(meth,_amg))
-
+#define AMG_CALLun(sv,meth) \
+    amagic_call(sv,&PL_sv_undef, CAT2(meth,_amg), AMGf_noright | AMGf_unary)
 
 #define tryAMAGICunTARGET(meth, shift)				\
     STMT_START {						\
@@ -440,7 +438,8 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 	    SV *tmpsv;						\
 	    SV *arg= sp[shift];					\
 	    if (SvAMAGIC(arg) &&				\
-		(tmpsv=AMG_CALLun_var(arg,CAT2(meth,_amg)))) {	\
+		(tmpsv = amagic_call(arg, &PL_sv_undef, CAT2(meth,_amg), \
+				     AMGf_noright | AMGf_unary))) {	\
 		SPAGAIN;					\
 		sp += shift;					\
 		sv_setsv(TARG, tmpsv);				\
@@ -456,7 +455,8 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 	SV *arg = *sp;							\
     am_again:								\
 	if (SvAMAGIC(arg) &&						\
-	    (tmpsv=AMG_CALLun_var(arg,(meth_enum)))) {			\
+	    (tmpsv = amagic_call(arg, &PL_sv_undef, meth_enum,		\
+				 AMGf_noright | AMGf_unary))) {		\
 	    SPAGAIN;							\
 	    sv = tmpsv;							\
 	    if (!SvROK(tmpsv))						\

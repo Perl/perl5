@@ -4651,8 +4651,8 @@ PP(pp_rkeys)
 	SvGETMAGIC(sv);
 	if (SvAMAGIC(sv)) {
 	    /* N.B.: AMG macros return sv if no overloading is found */
-	    SV *maybe_hv = AMG_CALLun_var(sv,to_hv_amg);
-	    SV *maybe_av = AMG_CALLun_var(sv,to_av_amg);
+	    SV *maybe_hv = AMG_CALLun(sv,to_hv);
+	    SV *maybe_av = AMG_CALLun(sv,to_av);
 	    if ( maybe_hv != sv && maybe_av != sv ) {
 		Perl_ck_warner(aTHX_ packWARN(WARN_AMBIGUOUS), "%s",
 		    Perl_form(aTHX_ "Ambiguous overloaded argument to %s resolved as %%{}",

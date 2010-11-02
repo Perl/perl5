@@ -1934,7 +1934,8 @@ Perl_try_amagic_un(pTHX_ int method, int flags) {
 
     SvGETMAGIC(arg);
 
-    if (SvAMAGIC(arg) && (tmpsv = AMG_CALLun_var(arg,method))) {
+    if (SvAMAGIC(arg) && (tmpsv = amagic_call(arg, &PL_sv_undef, method,
+					      AMGf_noright | AMGf_unary))) {
 	if (flags & AMGf_set) {
 	    SETs(tmpsv);
 	}
