@@ -482,18 +482,6 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 		   { sv_setsv(TARG, (sv)); SETTARG; }			\
 		else SETs(sv); } STMT_END
 
-/* newSVsv does not behave as advertised, so we copy missing
- * information by hand */
-
-/* SV* ref causes confusion with the member variable
-   changed SV* ref to SV* tmpRef */
-#define RvDEEPCP(rv) STMT_START { SV* tmpRef=SvRV(rv); SV* rv_copy;     \
-  if (SvREFCNT(tmpRef)>1 && (rv_copy = AMG_CALLun(rv,copy))) {          \
-    SvRV_set(rv, rv_copy);		    \
-    SvSETMAGIC(rv);			    \
-    SvREFCNT_dec(tmpRef);                   \
-  } } STMT_END
-
 /*
 =for apidoc mU||LVRET
 True if this op will be the return value of an lvalue subroutine

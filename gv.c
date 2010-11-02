@@ -2313,7 +2313,15 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	&& (assign || (method == inc_amg) || (method == dec_amg)))
       || force_cpy)
   {
-    RvDEEPCP(left);
+      /* newSVsv does not behave as advertised, so we copy missing
+       * information by hand */
+      SV *tmpRef = SvRV(left);
+      SV *rv_copy;
+      if (SvREFCNT(tmpRef) > 1 && (rv_copy = AMG_CALLun(left,copy))) {
+	  SvRV_set(left, rv_copy);
+	  SvSETMAGIC(left);
+	  SvREFCNT_dec(tmpRef);  
+      }
   }
 
   {
