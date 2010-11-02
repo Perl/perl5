@@ -294,6 +294,9 @@ value of the program.  Beware of changing C<$?> by accident (e.g. by
 running something via C<system>).
 X<$?>
 
+Inside of a C<END> block, the value of C<${^GLOBAL_PHASE}> will be
+C<"END">.
+
 C<UNITCHECK>, C<CHECK> and C<INIT> code blocks are useful to catch the
 transition between the compilation phase and the execution phase of
 the main program.
@@ -304,12 +307,20 @@ compilation units, as are string C<eval>s, code compiled using the
 C<(?{ })> construct in a regex, calls to C<do FILE>, C<require FILE>,
 and code after the C<-e> switch on the command line.
 
+C<BEGIN> and C<UNITCHECK> blocks are not directly related to the phase of
+the interpreter.  They can be created and executed during any phase.
+
 C<CHECK> code blocks are run just after the B<initial> Perl compile phase ends
 and before the run time begins, in LIFO order.  C<CHECK> code blocks are used
 in the Perl compiler suite to save the compiled state of the program.
 
+Inside of a C<CHECK> block, the value of C<${^GLOBAL_PHASE}> will be
+C<"CHECK">.
+
 C<INIT> blocks are run just before the Perl runtime begins execution, in
 "first in, first out" (FIFO) order.
+
+Inside of an C<INIT> block, the value of C<${^GLOBAL_PHASE}> will be C<"INIT">.
 
 The C<CHECK> and C<INIT> blocks in code compiled by C<require>, string C<do>,
 or string C<eval> will not be executed if they occur after the end of the
