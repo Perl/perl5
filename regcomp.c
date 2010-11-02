@@ -2129,9 +2129,15 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 	    if (trie->jump) 
 	        trie->jump[0] = (U16)(nextbranch - convert);
             
-            /* XXXX */
-            if ( !trie->states[trie->startstate].wordnum && trie->bitmap && 
-                 ( (char *)jumper - (char *)convert) >= (int)sizeof(struct regnode_charclass) )
+            /* If the start state is not accepting (meaning there is no empty string/NOTHING)
+	     *   and there is a bitmap
+	     *   and the first "jump target" node we found leaves enough room
+	     * then convert the TRIE node into a TRIEC node, with the bitmap
+	     * embedded inline in the opcode - this is hypothetically faster.
+	     */
+            if ( !trie->states[trie->startstate].wordnum
+		 && trie->bitmap
+		 && ( (char *)jumper - (char *)convert) >= (int)sizeof(struct regnode_charclass) )
             {
                 OP( convert ) = TRIEC;
                 Copy(trie->bitmap, ((struct regnode_charclass *)convert)->bitmap, ANYOF_BITMAP_SIZE, char);
