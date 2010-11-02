@@ -78,7 +78,6 @@ struct xpvhv_aux {
     AV		*xhv_backreferences; /* back references for weak references */
     HE		*xhv_eiter;	/* current entry of iterator */
     I32		xhv_riter;	/* current root of iterator */
-    struct mro_meta *xhv_mro_meta;
 /* Concerning xhv_name_count: When non-zero, xhv_name is actually a pointer 
  * to an array of HEK pointers, this being the length. The first element is
  * the name of the stash, which may be NULL. If xhv_name_count is positive,
@@ -86,6 +85,7 @@ struct xpvhv_aux {
  * tive, then xhv_name[1] is the first effective name.
  */
     I32		xhv_name_count;
+    struct mro_meta *xhv_mro_meta;
 };
 
 /* hash structure: */
