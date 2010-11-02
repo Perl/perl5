@@ -1482,4 +1482,5 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 [\0005]	5\000	y	$&	5
 [\_]	_	y	$&	_
 
+(?:(?:)foo|bar|zot|rt78356)	foo	y	$&	foo
 # vim: softtabstop=0 noexpandtab

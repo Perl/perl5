@@ -3223,7 +3223,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
                         	          "%*s  %smatched empty string...%s\n",
                         	          REPORT_CODE_OFF+depth*2, "", PL_colors[4], PL_colors[5])
                         );
-        	        break;
+			if (!trie->jump)
+			    break;
         	    } else {
         	        DEBUG_EXECUTE_r(
                             PerlIO_printf(Perl_debug_log,
