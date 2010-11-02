@@ -1,10 +1,12 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 7cb18e1b02, except for:
+This has been completed up to 7fd683ff3c3, except for:
 04777d295957ad270188e4debf51b523e07cc5b0
 c565ab54dc649bb62cd4d57149d7b2abb21df5f3
 1c8d11ca3d0ce8bc11562f159b94c2c7e62dea6c
+51698cb360d5bba06e12496ef9c7bf82e3352b71
+0c4d3b5ea916cf640ea163c5a6bcffefade55a1b
 
 =head1 NAME
 
@@ -268,6 +270,12 @@ testsuite when run under local::lib and/or cpanminus
 =item *
 
 C<CPANPLUS::Dist::Build> has been upgraded from 0.48 to 0.50
+
+=item *
+
+C<DynaLoader> has been upgraded from 1.10 to 1.11.
+
+It fixes a buffer overflow when passed a very long file name.
 
 =item *
 
@@ -749,6 +757,14 @@ L<[perl #72246]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=72246>.
 
 The C<recv> function could crash when called with the MSG_TRUNC flag
 L<[perl #75082]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75082>.
+
+=item *
+
+Evaluating a simple glob (like C<*a>) was calling get-magic on the glob,
+even when its contents were not being used
+L<[perl #78580]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78580>.
+
+This bug was introduced in 5.13.2 and did not affect earlier perl versions.
 
 =back
 
