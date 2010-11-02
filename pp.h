@@ -429,37 +429,45 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 					meth_enum,AMGf_noright | AMGf_unary)
 #define AMG_CALLun(sv,meth) AMG_CALLun_var(sv,CAT2(meth,_amg))
 
-#define tryAMAGICunW_var(meth_enum,set,shift,ret) STMT_START { \
-	    SV* tmpsv; \
-	    SV* arg= sp[shift]; \
-          if(0) goto am_again;  /* shut up unused warning */ \
-	  am_again: \
-	    if ((SvAMAGIC(arg))&&\
-		(tmpsv=AMG_CALLun_var(arg,(meth_enum)))) {\
-	       SPAGAIN; if (shift) sp += shift; \
-	       set(tmpsv); ret; } \
-	} STMT_END
 
-#define FORCE_SETs(sv) STMT_START { sv_setsv(TARG, (sv)); SETTARG; } STMT_END
-
-#define tryAMAGICunTARGET(meth, shift)					\
-	STMT_START { dSP; sp--; 	/* get TARGET from below PL_stack_sp */		\
-	    { dTARGETSTACKED; 						\
-		{ dSP; tryAMAGICunW_var(CAT2(meth,_amg),FORCE_SETs,shift,RETURN);}}} STMT_END
-
-#define setAGAIN(ref)	\
-    STMT_START {					\
-	sv = ref;					\
-	if (!SvROK(ref))				\
-	    Perl_croak(aTHX_ "Overloaded dereference did not return a reference");	\
-	if (ref != arg && SvRV(ref) != SvRV(arg)) {	\
-	    arg = ref;					\
-	    goto am_again;				\
-	}						\
+#define tryAMAGICunTARGET(meth, shift)				\
+    STMT_START {						\
+	dSP;							\
+	sp--; /* get TARGET from below PL_stack_sp */		\
+	{							\
+	    dTARGETSTACKED;					\
+	    dSP;						\
+	    SV *tmpsv;						\
+	    SV *arg= sp[shift];					\
+	    if (SvAMAGIC(arg) &&				\
+		(tmpsv=AMG_CALLun_var(arg,CAT2(meth,_amg)))) {	\
+		SPAGAIN;					\
+		sp += shift;					\
+		sv_setsv(TARG, tmpsv);				\
+		SETTARG;					\
+		RETURN;						\
+	    }							\
+	}							\
     } STMT_END
 
-#define tryAMAGICunDEREF_var(meth_enum) \
-	tryAMAGICunW_var(meth_enum,setAGAIN,0,(void)0)
+#define tryAMAGICunDEREF_var(meth_enum)					\
+    STMT_START {							\
+	SV *tmpsv;							\
+	SV *arg = *sp;							\
+    am_again:								\
+	if (SvAMAGIC(arg) &&						\
+	    (tmpsv=AMG_CALLun_var(arg,(meth_enum)))) {			\
+	    SPAGAIN;							\
+	    sv = tmpsv;							\
+	    if (!SvROK(tmpsv))						\
+		Perl_croak(aTHX_ "Overloaded dereference did not return a reference"); \
+	    if (tmpsv != arg && SvRV(tmpsv) != SvRV(arg)) {		\
+		arg = tmpsv;						\
+		goto am_again;						\
+	    }								\
+	}								\
+    } STMT_END
+
 #define tryAMAGICunDEREF(meth) tryAMAGICunDEREF_var(CAT2(meth,_amg))
 
 
