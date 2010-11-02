@@ -394,7 +394,7 @@ sub _tests_from_manifest {
 		my $extension = $2;
 		if (!$::core || $t =~ m!^lib/[a-z]!) {
 		    if (defined $extension) {
-			$extension =~ s!/t$!!;
+			$extension =~ s!/t(:?/\S+)*$!!;
 			# XXX Do I want to warn that I'm skipping these?
 			next if $skip{$extension};
 			my $flat_extension = $extension;
