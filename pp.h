@@ -439,15 +439,13 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 	       SPAGAIN; if (shift) sp += shift; \
 	       set(tmpsv); ret; } \
 	} STMT_END
-#define tryAMAGICunW(meth,set,shift,ret) \
-	tryAMAGICunW_var(CAT2(meth,_amg),set,shift,ret)
 
 #define FORCE_SETs(sv) STMT_START { sv_setsv(TARG, (sv)); SETTARG; } STMT_END
 
 #define tryAMAGICunTARGET(meth, shift)					\
 	STMT_START { dSP; sp--; 	/* get TARGET from below PL_stack_sp */		\
 	    { dTARGETSTACKED; 						\
-		{ dSP; tryAMAGICunW(meth,FORCE_SETs,shift,RETURN);}}} STMT_END
+		{ dSP; tryAMAGICunW_var(CAT2(meth,_amg),FORCE_SETs,shift,RETURN);}}} STMT_END
 
 #define setAGAIN(ref)	\
     STMT_START {					\
@@ -460,9 +458,9 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 	}						\
     } STMT_END
 
-#define tryAMAGICunDEREF(meth) tryAMAGICunW(meth,setAGAIN,0,(void)0)
 #define tryAMAGICunDEREF_var(meth_enum) \
 	tryAMAGICunW_var(meth_enum,setAGAIN,0,(void)0)
+#define tryAMAGICunDEREF(meth) tryAMAGICunDEREF_var(CAT2(meth,_amg))
 
 
 #define opASSIGN (PL_op->op_flags & OPf_STACKED)
