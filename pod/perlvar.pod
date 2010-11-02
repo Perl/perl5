@@ -444,6 +444,70 @@ mode is turned on. See L<perlrun> for the B<-a> switch. This array
 is package-specific, and must be declared or given a full package name
 if not in package main when running under C<strict 'vars'>.
 
+=item ${^GLOBAL_PHASE}
+
+The current phase of the perl interpreter.
+
+Possible values include:
+
+=over 8
+
+=item CONSTRUCT
+
+The C<PerlInterpreter*> is being constructed via C<perl_construct>. This
+value is mostly there for completeness and for use via the
+underlying C variable C<PL_phase>. It's not really possible for Perl
+code to be executed unless construction of the interpreter is
+finished.
+
+=item START
+
+This is the global compile-time. That includes, basically, every
+C<BEGIN> block executed directly or indirectly from during the
+compile-time of the top-level program.
+
+This phase is not called "BEGIN" to avoid confusion with
+C<BEGIN>-blocks, as those are executed during compile-time of any
+compilation unit, not just the top-level program. A new, localised
+compile-time entered at run-time, for example by constructs as
+C<eval "use SomeModule"> are not global interpreter phases, and
+therefore aren't reflected by C<${^GLOBAL_PHASE}>.
+
+=item CHECK
+
+Execution of any C<CHECK> blocks.
+
+=item INIT
+
+Similar to "CHECK", but for C<INIT>-blocks, not C<CHECK> blocks.
+
+=item RUN
+
+The main run-time, i.e. the execution of C<PL_main_root>.
+
+=item END
+
+Execution of any C<END> blocks.
+
+=item DESTRUCT
+
+Global destruction.
+
+=back
+
+Also note that there's no value for UNITCHECK-blocks. That's because
+those are run for each compilation unit individually, and therefore is
+not a global interpreter phase.
+
+Not every program has to go through each of the possible phases, but
+transition from one phase to another can only happen in the order
+described in the above list.
+
+The patch also includes some basic tests, if you prefer actual working
+examples of how C<${^GLOBAL_PHASE}> behaves.
+
+This variable was added in Perl 5.13.7.
+
 =item $^H
 X<$^H>
 
