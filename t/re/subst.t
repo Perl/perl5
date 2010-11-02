@@ -64,7 +64,7 @@ like( $@, qr{Using !~ with s///r doesn't make sense}, 's///r !~ operator gives e
         must_warn sub { $b = $a =~ s/left/right/r }, '^Use of uninitialized value', 's///r Uninitialized warning';
 
         $a = 'david';
-        must_warn 's/david/sucks/r; 1',    '^Useless use of Non-destructive substitution', 's///r void context warning';
+        must_warn 's/david/sucks/r; 1',    '^Useless use of non-destructive substitution', 's///r void context warning';
 }
 
 $a = '';

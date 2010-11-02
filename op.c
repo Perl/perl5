@@ -1152,7 +1152,7 @@ Perl_scalarvoid(pTHX_ OP *o)
 
     case OP_SUBST:
 	if (cPMOPo->op_pmflags & PMf_NONDESTRUCT)
-	    useless = "Non-destructive substitution (s///r)";
+	    useless = "non-destructive substitution (s///r)";
 	break;
 
     case OP_RV2GV:
