@@ -606,7 +606,7 @@ static const scan_data_t zero_scan_data =
 
 #if PERL_ENABLE_EXPERIMENTAL_REGEX_OPTIMISATIONS
 #define EXPERIMENTAL_INPLACESCAN
-#endif /*RE_TRACK_PATTERN_OFFSETS*/
+#endif /*PERL_ENABLE_EXPERIMENTAL_REGEX_OPTIMISATIONS*/
 
 #define DEBUG_STUDYDATA(str,data,depth)                              \
 DEBUG_OPTIMISE_MORE_r(if(data){                                      \
