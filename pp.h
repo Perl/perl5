@@ -453,18 +453,18 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
     STMT_START {							\
 	SV *tmpsv;							\
 	SV *arg = *sp;							\
-    am_again:								\
-	if (SvAMAGIC(arg) &&						\
-	    (tmpsv = amagic_call(arg, &PL_sv_undef, meth_enum,		\
-				 AMGf_noright | AMGf_unary))) {		\
+	while (SvAMAGIC(arg) &&						\
+	       (tmpsv = amagic_call(arg, &PL_sv_undef, meth_enum,	\
+				    AMGf_noright | AMGf_unary))) {	\
 	    SPAGAIN;							\
 	    sv = tmpsv;							\
 	    if (!SvROK(tmpsv))						\
 		Perl_croak(aTHX_ "Overloaded dereference did not return a reference"); \
-	    if (tmpsv != arg && SvRV(tmpsv) != SvRV(arg)) {		\
-		arg = tmpsv;						\
-		goto am_again;						\
+	    if (tmpsv == arg || SvRV(tmpsv) == SvRV(arg)) {		\
+		/* Bail out if it returns us the same reference.  */	\
+		break;							\
 	    }								\
+	    arg = tmpsv;						\
 	}								\
     } STMT_END
 
