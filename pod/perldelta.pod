@@ -386,6 +386,11 @@ XXX
 XXX Changes to files in F<pod/> go here.  Consider grouping entries by
 file and be sure to link to the appropriate page, e.g. L<perlfunc>.
 
+L<perlvar> reorders the variables and groups them by topic. Each variable
+introduced after Perl 5.000 notes the first version in which it is 
+available. L<perlvar> also has a new section for deprecated variables to
+note when they were removed.
+
 =head2 New Documentation
 
 XXX Changes which create B<new> files in F<pod/> go here.
