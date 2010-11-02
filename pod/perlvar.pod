@@ -1749,8 +1749,8 @@ interpreter, C library, operating system, or an external program,
 respectively.
 
 To illustrate the differences between these variables, consider the
-following Perl expression, which uses a single-quoted string. After 
-execution of this statement, perl may have set all four special error 
+following Perl expression, which uses a single-quoted string. After
+execution of this statement, perl may have set all four special error
 variables:
 
 	eval q{
@@ -1887,7 +1887,7 @@ only I<immediately> after a B<failure>:
 	if (open my $fh, "<", $filename) {
 		# Here $! is meaningless.
 		...
-    } 
+    }
     else {
 		# ONLY here is $! meaningful.
 		...
