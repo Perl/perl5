@@ -1780,10 +1780,16 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                         PerlIO_printf( Perl_debug_log,
                                             " Scanning for legal start char...\n");
                                     }
-                                );            
-                                while ( uc <= (U8*)last_start  && !BITMAP_TEST(bitmap,*uc) ) {
-                                    uc++;
-                                }
+                                );
+				if (utf8_target) {
+				    while ( uc <= (U8*)last_start && !BITMAP_TEST(bitmap,*uc) ) {
+					uc += UTF8SKIP(uc);
+				    }
+				} else {
+				    while ( uc <= (U8*)last_start  && !BITMAP_TEST(bitmap,*uc) ) {
+					uc++;
+				    }
+				}
                                 s= (char *)uc;
                             }
                             if (uc >(U8*)last_start) break;
