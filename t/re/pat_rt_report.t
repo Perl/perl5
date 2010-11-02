@@ -21,7 +21,7 @@ BEGIN {
 }
 
 
-plan tests => 2510;  # Update this when adding/deleting tests.
+plan tests => 2511;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1181,6 +1181,43 @@ sub run_tests {
 
         iseq($first, $second);
     }    
+
+    {
+       local $BugId = 70998;
+       local $Message
+        = 'utf8 =~ /trie/ where trie matches a continuation octet';
+
+       # Catch warnings:
+       my $w;
+       local $SIG{__WARN__} = sub { $w .= shift };
+
+       # This bug can be reduced to
+       qq{\x{30ab}} =~ /\xab|\xa9/;
+       # but it's nice to have a more 'real-world' test. The original test
+       # case from the RT ticket follows:
+
+       my %conv = (
+                   "\xab"     => "&lt;",
+                   "\xa9"     => "(c)",
+                  );
+       my $conv_rx = '(' . join('|', map { quotemeta } keys %conv) . ')';
+       $conv_rx = qr{$conv_rx};
+
+       my $x
+        = qq{\x{3042}\x{304b}\x{3055}\x{305f}\x{306a}\x{306f}\x{307e}}
+        . qq{\x{3084}\x{3089}\x{308f}\x{3093}\x{3042}\x{304b}\x{3055}}
+        . qq{\x{305f}\x{306a}\x{306f}\x{307e}\x{3084}\x{3089}\x{308f}}
+        . qq{\x{3093}\x{30a2}\x{30ab}\x{30b5}\x{30bf}\x{30ca}\x{30cf}}
+        . qq{\x{30de}\x{30e4}\x{30e9}\x{30ef}\x{30f3}\x{30a2}\x{30ab}}
+        . qq{\x{30b5}\x{30bf}\x{30ca}\x{30cf}\x{30de}\x{30e4}\x{30e9}}
+        . qq{\x{30ef}\x{30f3}\x{30a2}\x{30ab}\x{30b5}\x{30bf}\x{30ca}}
+        . qq{\x{30cf}\x{30de}\x{30e4}\x{30e9}\x{30ef}\x{30f3}};
+
+       $x =~ s{$conv_rx}{$conv{$1}}eg;
+
+       iseq($w,undef);
+    }
+
 } # End of sub run_tests
 
 1;
