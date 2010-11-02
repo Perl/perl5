@@ -4093,10 +4093,11 @@ sub pp_trans {
 	($from, $to) = tr_decode_utf8($op->sv->RV, $op->private);
     }
     my $flags = "";
-    $flags .= "c" if $op->private & OPpTRANS_COMPLEMENT;
-    $flags .= "d" if $op->private & OPpTRANS_DELETE;
+    my $priv_flags = $op->private;
+    $flags .= "c" if $priv_flags & OPpTRANS_COMPLEMENT;
+    $flags .= "d" if $priv_flags & OPpTRANS_DELETE;
     $to = "" if $from eq $to and $flags eq "";
-    $flags .= "s" if $op->private & OPpTRANS_SQUASH;
+    $flags .= "s" if $priv_flags & OPpTRANS_SQUASH;
     return "tr" . double_delim($from, $to) . $flags;
 }
 
