@@ -5143,6 +5143,13 @@ C<< @foo->[23] >> or C<< @$ref->[99] >>.  Versions of perl <= 5.6.1 used to
 allow this syntax, but shouldn't have. It is now deprecated, and will be
 removed in a future version.
 
+=item Using !~ with %s doesn't make sense
+
+(F) Using the C<!~> operator with C<s///r>, C<tr///r> or C<y///r> is
+currently reserved for future use, as the exact behaviour has not
+been decided. (Simply returning the boolean opposite of the
+modified string is usually not particularly useful.)
+
 =item Using just the first character returned by \N{} in character class
 
 (W) A charnames handler may return a sequence of more than one character.
