@@ -4347,8 +4347,13 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
     regnode *scan;
     I32 flags;
     I32 minlen = 0;
+
+    /* these are all flags - maybe they should be turned
+     * into a single int with different bit masks */
+    I32 sawlookahead = 0;
     I32 sawplus = 0;
     I32 sawopen = 0;
+
     U8 jump_ret = 0;
     dJMPENV;
     scan_data_t data;
@@ -4616,7 +4621,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
     }
 
 reStudy:
-    r->minlen = minlen = sawplus = sawopen = 0;
+    r->minlen = minlen = sawlookahead = sawplus = sawopen = 0;
     Zero(r->substrs, 1, struct reg_substr_data);
 
 #ifdef TRIE_STUDY_OPT
@@ -4664,7 +4669,6 @@ reStudy:
 	I32 last_close = 0; /* pointed to by data */
         regnode *first= scan;
         regnode *first_next= regnext(first);
-	
 	/*
 	 * Skip introductions and multiplicators >= 1
 	 * so that we can extract the 'meat' of the pattern that must 
@@ -4680,7 +4684,7 @@ reStudy:
 	       /* An OR of *one* alternative - should not happen now. */
 	    (OP(first) == BRANCH && OP(first_next) != BRANCH) ||
 	    /* for now we can't handle lookbehind IFMATCH*/
-	    (OP(first) == IFMATCH && !first->flags) || 
+	    (OP(first) == IFMATCH && !first->flags && (sawlookahead = 1)) ||
 	    (OP(first) == PLUS) ||
 	    (OP(first) == MINMOD) ||
 	       /* An {n,m} with n>0 */
@@ -4767,7 +4771,7 @@ reStudy:
 	    first = NEXTOPER(first);
 	    goto again;
 	}
-	if (sawplus && (!sawopen || !RExC_sawback)
+	if (sawplus && !sawlookahead && (!sawopen || !RExC_sawback)
 	    && !(RExC_seen & REG_SEEN_EVAL)) /* May examine pos and $& */
 	    /* x+ must match at the 1st pos of run of x's */
 	    r->intflags |= PREGf_SKIP;

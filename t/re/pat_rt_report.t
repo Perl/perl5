@@ -21,7 +21,7 @@ BEGIN {
 }
 
 
-plan tests => 2511;  # Update this when adding/deleting tests.
+plan tests => 2512;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1216,6 +1216,13 @@ sub run_tests {
        $x =~ s{$conv_rx}{$conv{$1}}eg;
 
        iseq($w,undef);
+    }
+
+    {
+        local $BugId = 68564;   # minimal CURLYM limited to 32767 matches
+        local $Message = "stclass optimisation does not break + inside (?=)";
+        iseq join("-", "   abc   def  " =~ /(?=(\S+))/g),
+             "abc-bc-c-def-ef-f",
     }
 
 } # End of sub run_tests
