@@ -449,13 +449,13 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 	}							\
     } STMT_END
 
-#define tryAMAGICunDEREF_var(meth_enum)					\
+/* This is no longer used anywhere in the core. You might wish to consider
+   calling amagic_deref_call() directly, as it has a cleaner interface.  */
+#define tryAMAGICunDEREF(meth)						\
     STMT_START {							\
-	sv = amagic_deref_call(aTHX_ *sp, meth_enum);			\
+	sv = amagic_deref_call(aTHX_ *sp, CAT2(meth,_amg));		\
 	SPAGAIN;							\
     } STMT_END
-
-#define tryAMAGICunDEREF(meth) tryAMAGICunDEREF_var(CAT2(meth,_amg))
 
 
 #define opASSIGN (PL_op->op_flags & OPf_STACKED)

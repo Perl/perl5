@@ -142,7 +142,8 @@ PP(pp_rv2gv)
     if (!isGV(sv) || SvFAKE(sv)) SvGETMAGIC(sv);
     if (SvROK(sv)) {
       wasref:
-	tryAMAGICunDEREF(to_gv);
+	sv = amagic_deref_call(sv, to_gv_amg);
+	SPAGAIN;
 
 	sv = SvRV(sv);
 	if (SvTYPE(sv) == SVt_PVIO) {
@@ -283,7 +284,8 @@ PP(pp_rv2sv)
     if (!(PL_op->op_private & OPpDEREFed))
 	SvGETMAGIC(sv);
     if (SvROK(sv)) {
-	tryAMAGICunDEREF(to_sv);
+	sv = amagic_deref_call(sv, to_sv_amg);
+	SPAGAIN;
 
 	sv = SvRV(sv);
 	switch (SvTYPE(sv)) {
