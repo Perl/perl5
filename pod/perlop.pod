@@ -236,9 +236,10 @@ of operation work on some other string.  The right argument is a search
 pattern, substitution, or transliteration.  The left argument is what is
 supposed to be searched, substituted, or transliterated instead of the default
 $_.  When used in scalar context, the return value generally indicates the
-success of the operation.  The exception is substitution with the C</r>
-(non-destructive) option, which causes the return value to be the result of
-the substition.  Behavior in list context depends on the particular operator.
+success of the operation.  The exceptions are substitution (s///)
+and transliteration (y///) with the C</r> (non-destructive) option,
+which cause the B<r>eturn value to be the result of the substitution.
+Behavior in list context depends on the particular operator.
 See L</"Regexp Quote-Like Operators"> for details and L<perlretut> for
 examples using these operators.
 
@@ -254,7 +255,8 @@ pattern C<\>, which it will consider a syntax error.
 Binary "!~" is just like "=~" except the return value is negated in
 the logical sense.
 
-Binary "!~" with a non-destructive substitution (s///r) is a syntax error.
+Binary "!~" with a non-destructive substitution (s///r) or transliteration
+(y///r) is a syntax error.
 
 =head2 Multiplicative Operators
 X<operator, multiplicative>
@@ -1817,10 +1819,10 @@ C<use warnings> pragma and the B<-w> switch (that is, the C<$^W> variable)
 produces warnings if the STRING contains the "," or the "#" character.
 
 
-=item tr/SEARCHLIST/REPLACEMENTLIST/cds
+=item tr/SEARCHLIST/REPLACEMENTLIST/cdsr
 X<tr> X<y> X<transliterate> X</c> X</d> X</s>
 
-=item y/SEARCHLIST/REPLACEMENTLIST/cds
+=item y/SEARCHLIST/REPLACEMENTLIST/cdsr
 
 Transliterates all occurrences of the characters found in the search list
 with the corresponding character in the replacement list.  It returns
@@ -1828,6 +1830,12 @@ the number of characters replaced or deleted.  If no string is
 specified via the =~ or !~ operator, the $_ string is transliterated.  (The
 string specified with =~ must be a scalar variable, an array element, a
 hash element, or an assignment to one of those, i.e., an lvalue.)
+
+If the C</r> (non-destructive) option is used then it will perform the
+replacement on a copy of the string and return the copy whether or not it
+was modified. The original string will always remain unchanged in
+this case. The copy will always be a plain string, even if the input is an
+object or a tied variable.
 
 A character range may be specified with a hyphen, so C<tr/A-J/0-9/>
 does the same replacement as C<tr/ACEGIBDFHJ/0246813579/>.
@@ -1854,6 +1862,8 @@ Options:
     c	Complement the SEARCHLIST.
     d	Delete found but unreplaced characters.
     s	Squash duplicate replaced characters.
+    r	Return the modified string and leave the original string
+	untouched.
 
 If the C</c> modifier is specified, the SEARCHLIST character set
 is complemented.  If the C</d> modifier is specified, any characters
@@ -1884,8 +1894,15 @@ Examples:
     tr/a-zA-Z//s;		# bookkeeper -> bokeper
 
     ($HOST = $host) =~ tr/a-z/A-Z/;
+    $HOST = $host =~ tr/a-z/A-Z/r;   # same thing
+
+    $HOST = $host =~ tr/a-z/A-Z/r    # chained with s///
+                  =~ s/:/ -p/r;
 
     tr/a-zA-Z/ /cs;		# change non-alphas to single space
+
+    @stripped = map tr/a-zA-Z/ /csr, @original;
+				# /r with map
 
     tr [\200-\377]
        [\000-\177];		# delete 8th bit
