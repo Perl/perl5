@@ -913,6 +913,20 @@ INCLUDE: const-xs.inc
 
 INCLUDE: numeric.xs
 
+MODULE = XS::APItest:Overload	PACKAGE = XS::APItest::Overload
+
+SV *
+tryAMAGICunDEREF_var(sv, what)
+	SV *sv
+	int what
+    PPCODE:
+	{
+	    SV **sp = &sv;
+	    tryAMAGICunDEREF_var(what);
+	}
+	/* The reference is owned by something else.  */
+	PUSHs(sv);
+
 MODULE = XS::APItest		PACKAGE = XS::APItest::XSUB
 
 BOOT:

@@ -16,18 +16,25 @@ WriteMakefile(
       (CCFLAGS => $Config{ccflags} . ' -Wno-deprecated-declarations') : ()),
 );
 
+my @names = (qw(HV_DELETE HV_DISABLE_UVAR_XKEY HV_FETCH_ISSTORE
+		HV_FETCH_ISEXISTS HV_FETCH_LVALUE HV_FETCH_JUST_SV
+		G_SCALAR G_ARRAY G_VOID G_DISCARD G_EVAL G_NOARGS
+		G_KEEPERR G_NODEBUG G_METHOD G_FAKINGEVAL
+		IS_NUMBER_IN_UV IS_NUMBER_GREATER_THAN_UV_MAX
+		IS_NUMBER_NOT_INT IS_NUMBER_NEG IS_NUMBER_INFINITY
+		IS_NUMBER_NAN
+		),
+	     {name=>"G_WANT", default=>["IV", "G_ARRAY|G_VOID"]});
+
+open my $fh, '../../overload.h' or die "Can't open ../../overload.h: $!";
+while (<$fh>) {
+    push @names, {name => $1, macro => 1} if /^\s+([A-Za-z_0-9]+_amg),/;
+}
+
 WriteConstants(
     PROXYSUBS => 1,
     NAME => 'XS::APItest',
-    NAMES => [qw(HV_DELETE HV_DISABLE_UVAR_XKEY HV_FETCH_ISSTORE
-		 HV_FETCH_ISEXISTS HV_FETCH_LVALUE HV_FETCH_JUST_SV
-		 G_SCALAR G_ARRAY G_VOID G_DISCARD G_EVAL G_NOARGS
-		 G_KEEPERR G_NODEBUG G_METHOD G_FAKINGEVAL
-		 IS_NUMBER_IN_UV IS_NUMBER_GREATER_THAN_UV_MAX
-		 IS_NUMBER_NOT_INT IS_NUMBER_NEG IS_NUMBER_INFINITY
-		 IS_NUMBER_NAN
-		),
-	      {name=>"G_WANT", default=>["IV", "G_ARRAY|G_VOID"]}],
+    NAMES => \@names,
 	       );
 
 sub MY::install { "install ::\n"  };
