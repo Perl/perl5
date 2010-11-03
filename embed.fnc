@@ -171,6 +171,7 @@ Anp	|void	|set_context	|NN void *t
 XEop	|bool	|try_amagic_bin	|int method|int flags
 XEop	|bool	|try_amagic_un	|int method|int flags
 Ap	|SV*	|amagic_call	|NN SV* left|NN SV* right|int method|int dir
+Ap	|SV *	|amagic_deref_call|NN SV *ref|int method
 Ap	|int	|Gv_AMupdate	|NN HV* stash|bool destructing
 ApR	|CV*	|gv_handler	|NULLOK HV* stash|I32 id
 Apd	|OP*	|op_append_elem	|I32 optype|NULLOK OP* first|NULLOK OP* last

@@ -60,13 +60,13 @@ while (my ($type, $enum) = each %types) {
     foreach (@non_ref, @ref,
 	    ) {
 	my ($desc, $input) = @$_;
-	my $got = tryAMAGICunDEREF_var($input, $enum);
+	my $got = amagic_deref_call($input, $enum);
 	is($got, $input, "Expect no change for to_$type $desc");
     }
     foreach (@non_ref) {
 	my ($desc, $sucker) = @$_;
 	my $input = bless [$sucker], 'Chain';
-	is(eval {tryAMAGICunDEREF_var($input, $enum)}, undef,
+	is(eval {amagic_deref_call($input, $enum)}, undef,
 	     "Chain to $desc for to_$type");
 	like($@, qr/Overloaded dereference did not return a reference/,
 	    'expected error');
@@ -75,10 +75,10 @@ while (my ($type, $enum) = each %types) {
 	    ) {
 	my ($desc, $sucker) = @$_;
 	my $input = bless [$sucker], 'Chain';
-	my $got = tryAMAGICunDEREF_var($input, $enum);
+	my $got = amagic_deref_call($input, $enum);
 	is($got, $sucker, "Chain to $desc for to_$type");
 	$input = bless [bless [$sucker], 'Chain'], 'Chain';
-	my $got = tryAMAGICunDEREF_var($input, $enum);
+	my $got = amagic_deref_call($input, $enum);
 	is($got, $sucker, "Chain to chain to $desc for to_$type");
     }
 }

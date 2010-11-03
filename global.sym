@@ -18,6 +18,7 @@
 Perl_Gv_AMupdate
 Perl_PerlIO_context_layers
 Perl_amagic_call
+Perl_amagic_deref_call
 Perl_apply_attrs_string
 Perl_atfork_lock
 Perl_atfork_unlock

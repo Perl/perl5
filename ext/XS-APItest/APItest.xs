@@ -916,16 +916,12 @@ INCLUDE: numeric.xs
 MODULE = XS::APItest:Overload	PACKAGE = XS::APItest::Overload
 
 SV *
-tryAMAGICunDEREF_var(sv, what)
+amagic_deref_call(sv, what)
 	SV *sv
 	int what
     PPCODE:
-	{
-	    SV **sp = &sv;
-	    tryAMAGICunDEREF_var(what);
-	}
 	/* The reference is owned by something else.  */
-	PUSHs(sv);
+	PUSHs(amagic_deref_call(sv, what));
 
 MODULE = XS::APItest		PACKAGE = XS::APItest::XSUB
 

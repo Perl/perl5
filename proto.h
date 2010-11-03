@@ -34,6 +34,11 @@ PERL_CALLCONV SV*	Perl_amagic_call(pTHX_ SV* left, SV* right, int method, int di
 #define PERL_ARGS_ASSERT_AMAGIC_CALL	\
 	assert(left); assert(right)
 
+PERL_CALLCONV SV *	Perl_amagic_deref_call(pTHX_ SV *ref, int method)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_AMAGIC_DEREF_CALL	\
+	assert(ref)
+
 PERL_CALLCONV I32	Perl_apply(pTHX_ I32 type, SV** mark, SV** sp)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);

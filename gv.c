@@ -2010,6 +2010,25 @@ Perl_try_amagic_bin(pTHX_ int method, int flags) {
     return FALSE;
 }
 
+SV *
+Perl_amagic_deref_call(pTHX_ SV *ref, int method) {
+    SV *tmpsv = NULL;
+
+    PERL_ARGS_ASSERT_AMAGIC_DEREF_CALL;
+
+    while (SvAMAGIC(ref) && 
+	   (tmpsv = amagic_call(ref, &PL_sv_undef, method,
+				AMGf_noright | AMGf_unary))) { 
+	if (!SvROK(tmpsv))
+	    Perl_croak(aTHX_ "Overloaded dereference did not return a reference");
+	if (tmpsv == ref || SvRV(tmpsv) == SvRV(ref)) {
+	    /* Bail out if it returns us the same reference.  */
+	    return tmpsv;
+	}
+	ref = tmpsv;
+    }
+    return tmpsv ? tmpsv : ref;
+}
 
 SV*
 Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)

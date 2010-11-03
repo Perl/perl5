@@ -451,21 +451,8 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 
 #define tryAMAGICunDEREF_var(meth_enum)					\
     STMT_START {							\
-	SV *tmpsv;							\
-	SV *arg = *sp;							\
-	while (SvAMAGIC(arg) &&						\
-	       (tmpsv = amagic_call(arg, &PL_sv_undef, meth_enum,	\
-				    AMGf_noright | AMGf_unary))) {	\
-	    SPAGAIN;							\
-	    sv = tmpsv;							\
-	    if (!SvROK(tmpsv))						\
-		Perl_croak(aTHX_ "Overloaded dereference did not return a reference"); \
-	    if (tmpsv == arg || SvRV(tmpsv) == SvRV(arg)) {		\
-		/* Bail out if it returns us the same reference.  */	\
-		break;							\
-	    }								\
-	    arg = tmpsv;						\
-	}								\
+	sv = amagic_deref_call(aTHX_ *sp, meth_enum);			\
+	SPAGAIN;							\
     } STMT_END
 
 #define tryAMAGICunDEREF(meth) tryAMAGICunDEREF_var(CAT2(meth,_amg))
