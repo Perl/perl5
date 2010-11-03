@@ -38,7 +38,8 @@ while (<DATA>) {
     my ($key, $desc, $check, $flags, $args) = split(/\t+/, $_, 5);
     $args = '' unless defined $args;
 
-    warn qq[Description "$desc" duplicates $seen{$desc}\n] if $seen{$desc};
+    warn qq[Description "$desc" duplicates $seen{$desc}\n]
+     if $seen{$desc} and $key ne "transr";
     die qq[Opcode "$key" duplicates $seen{$key}\n] if $seen{$key};
     $seen{$desc} = qq[description of opcode "$key"];
     $seen{$key} = qq[opcode "$key"];
@@ -106,6 +107,7 @@ my @raw_alias = (
 		 Perl_pp_rv2av => ['rv2hv'],
 		 Perl_pp_akeys => ['avalues'],
 		 Perl_pp_rkeys => [qw(rvalues reach)],
+		 Perl_pp_trans => [qw(trans transr)],
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {
@@ -653,6 +655,7 @@ qr		pattern quote (qr//)	ck_match	s/
 subst		substitution (s///)	ck_match	dis/	S
 substcont	substitution iterator	ck_null		dis|	
 trans		transliteration (tr///)	ck_match	is"	S
+# transr (the /r version) is further down.
 
 # Lvalue operators.
 # sassign is special-cased for op class
@@ -1105,3 +1108,6 @@ custom		unknown custom operator		ck_null		0
 reach		each on reference			ck_each		%	S
 rkeys		keys on reference			ck_each		t%	S
 rvalues		values on reference			ck_each		t%	S
+
+# y///r
+transr		transliteration (tr///)	ck_match	is"	S

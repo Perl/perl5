@@ -384,10 +384,11 @@ typedef enum opcode {
 	OP_REACH	 = 366,
 	OP_RKEYS	 = 367,
 	OP_RVALUES	 = 368,
+	OP_TRANSR	 = 369,
 	OP_max		
 } opcode;
 
-#define MAXO 369
+#define MAXO 370
 #define OP_phoney_INPUT_ONLY -1
 #define OP_phoney_OUTPUT_ONLY -2
 

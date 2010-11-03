@@ -1433,6 +1433,7 @@
 #define pp_time()		Perl_pp_time(aTHX)
 #define pp_tms()		Perl_pp_tms(aTHX)
 #define pp_trans()		Perl_pp_trans(aTHX)
+#define pp_transr()		Perl_pp_transr(aTHX)
 #define pp_truncate()		Perl_pp_truncate(aTHX)
 #define pp_uc()			Perl_pp_uc(aTHX)
 #define pp_ucfirst()		Perl_pp_ucfirst(aTHX)

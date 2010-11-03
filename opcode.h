@@ -402,6 +402,7 @@ EXTCONST char* const PL_op_name[] = {
 	"reach",
 	"rkeys",
 	"rvalues",
+	"transr",
 };
 #endif
 
@@ -778,6 +779,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"each on reference",
 	"keys on reference",
 	"values on reference",
+	"transliteration (tr///)",
 };
 #endif
 
@@ -834,7 +836,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_qr,
 	Perl_pp_subst,
 	Perl_pp_substcont,
-	Perl_pp_trans,
+	Perl_pp_trans,	/* Perl_pp_trans */
 	Perl_pp_sassign,
 	Perl_pp_aassign,
 	Perl_pp_chop,
@@ -1168,6 +1170,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_rkeys,	/* Perl_pp_reach */
 	Perl_pp_rkeys,
 	Perl_pp_rkeys,	/* Perl_pp_rvalues */
+	Perl_pp_trans,	/* Perl_pp_transr */
 }
 #endif
 #ifdef PERL_PPADDR_INITED
@@ -1555,6 +1558,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_each,		/* reach */
 	Perl_ck_each,		/* rkeys */
 	Perl_ck_each,		/* rvalues */
+	Perl_ck_match,		/* transr */
 }
 #endif
 #ifdef PERL_CHECK_INITED
@@ -1936,6 +1940,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00001b00,	/* reach */
 	0x00001b08,	/* rkeys */
 	0x00001b08,	/* rvalues */
+	0x00001804,	/* transr */
 };
 #endif
 

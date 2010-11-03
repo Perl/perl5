@@ -413,5 +413,6 @@ Perl_pp_once
 Perl_pp_reach
 Perl_pp_rkeys
 Perl_pp_rvalues
+Perl_pp_transr
 
 # ex: set ro:
