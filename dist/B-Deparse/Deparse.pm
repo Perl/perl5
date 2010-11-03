@@ -4101,6 +4101,8 @@ sub pp_trans {
     return "tr" . double_delim($from, $to) . $flags;
 }
 
+sub pp_transr { &pp_trans . 'r' }
+
 sub re_dq_disambiguate {
     my ($first, $last) = @_;
     # Disambiguate "${foo}bar", "${foo}{bar}", "${foo}[1]"

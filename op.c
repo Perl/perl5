@@ -651,6 +651,7 @@ Perl_op_clear(pTHX_ OP *o)
 	    break;
 	/* FALL THROUGH */
     case OP_TRANS:
+    case OP_TRANSR:
 	if (o->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF)) {
 #ifdef USE_ITHREADS
 	    if (cPADOPo->op_padix > 0) {
@@ -1144,7 +1145,7 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_NOT:
        kid = cUNOPo->op_first;
        if (kid->op_type != OP_MATCH && kid->op_type != OP_SUBST &&
-           kid->op_type != OP_TRANS) {
+           kid->op_type != OP_TRANS && kid->op_type != OP_TRANSR) {
 	        goto func_ops;
        }
        useless = "negative pattern binding (!~)";
@@ -1153,6 +1154,10 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_SUBST:
 	if (cPMOPo->op_pmflags & PMf_NONDESTRUCT)
 	    useless = "non-destructive substitution (s///r)";
+	break;
+
+    case OP_TRANSR:
+	useless = "non-destructive transliteration (tr///r)";
 	break;
 
     case OP_RV2GV:
@@ -1813,6 +1818,7 @@ S_scalar_mod_type(const OP *o, I32 type)
     case OP_CONCAT:
     case OP_SUBST:
     case OP_TRANS:
+    case OP_TRANSR:
     case OP_READ:
     case OP_SYSREAD:
     case OP_RECV:
@@ -2258,7 +2264,10 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
 	  || ltype == OP_PADHV) && ckWARN(WARN_MISC))
     {
       const char * const desc
-	  = PL_op_desc[(rtype == OP_SUBST || rtype == OP_TRANS)
+	  = PL_op_desc[(
+		          rtype == OP_SUBST || rtype == OP_TRANS
+		       || rtype == OP_TRANSR
+		       )
 		       ? (int)rtype : OP_MATCH];
       const char * const sample = ((ltype == OP_RV2AV || ltype == OP_PADAV)
 	     ? "@array" : "%hash");
@@ -2274,14 +2283,16 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
 	no_bareword_allowed(right);
     }
 
-    /* !~ doesn't make sense with s///r, so error on it for now */
+    /* !~ doesn't make sense with /r, so error on it for now */
     if (rtype == OP_SUBST && (cPMOPx(right)->op_pmflags & PMf_NONDESTRUCT) &&
 	type == OP_NOT)
 	yyerror("Using !~ with s///r doesn't make sense");
+    if (rtype == OP_TRANSR && type == OP_NOT)
+	yyerror("Using !~ with tr///r doesn't make sense");
 
     ismatchop = (rtype == OP_MATCH ||
 		 rtype == OP_SUBST ||
-		 rtype == OP_TRANS)
+		 rtype == OP_TRANS || rtype == OP_TRANSR)
 	     && !(right->op_flags & OPf_SPECIAL);
     if (ismatchop && right->op_private & OPpTARGET_MY) {
 	right->op_targ = 0;
@@ -2291,7 +2302,7 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
 	OP *newleft;
 
 	right->op_flags |= OPf_STACKED;
-	if (rtype != OP_MATCH &&
+	if (rtype != OP_MATCH && rtype != OP_TRANSR &&
             ! (rtype == OP_TRANS &&
                right->op_private & OPpTRANS_IDENTICAL) &&
 	    ! (rtype == OP_SUBST &&
@@ -2299,7 +2310,7 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
 	    newleft = op_lvalue(left, rtype);
 	else
 	    newleft = left;
-	if (right->op_type == OP_TRANS)
+	if (right->op_type == OP_TRANS || right->op_type == OP_TRANSR)
 	    o = newBINOP(OP_NULL, OPf_STACKED, scalar(newleft), right);
 	else
 	    o = op_prepend_elem(rtype, scalar(newleft), right);
@@ -3824,7 +3835,10 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 
     PERL_ARGS_ASSERT_PMRUNTIME;
 
-    if (o->op_type == OP_SUBST || o->op_type == OP_TRANS) {
+    if (
+        o->op_type == OP_SUBST
+     || o->op_type == OP_TRANS || o->op_type == OP_TRANSR
+    ) {
 	/* last element in list is the replacement; pop it */
 	OP* kid;
 	repl = cLISTOPx(expr)->op_last;
@@ -3846,7 +3860,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	op_free(oe);
     }
 
-    if (o->op_type == OP_TRANS) {
+    if (o->op_type == OP_TRANS || o->op_type == OP_TRANSR) {
 	return pmtrans(o, expr, repl);
     }
 
@@ -4996,6 +5010,7 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 		other = newUNOP(OP_NULL, OPf_SPECIAL, other);
 	    else if (other->op_type == OP_MATCH
 	          || other->op_type == OP_SUBST
+	          || other->op_type == OP_TRANSR
 	          || other->op_type == OP_TRANS)
 		/* Mark the op as being unbindable with =~ */
 		other->op_flags |= OPf_SPECIAL;
@@ -5152,7 +5167,7 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 	if (live->op_type == OP_LEAVE)
 	    live = newUNOP(OP_NULL, OPf_SPECIAL, live);
 	else if (live->op_type == OP_MATCH || live->op_type == OP_SUBST
-	      || live->op_type == OP_TRANS)
+	      || live->op_type == OP_TRANS || live->op_type == OP_TRANSR)
 	    /* Mark the op as being unbindable with =~ */
 	    live->op_flags |= OPf_SPECIAL;
 	return live;

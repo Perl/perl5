@@ -604,6 +604,7 @@ $priv{"sassign"}{64} = "BKWARD";
 $priv{$_}{64} = "RTIME" for ("match", "subst", "substcont", "qr");
 @{$priv{"trans"}}{1,2,4,8,16,64} = ("<UTF", ">UTF", "IDENT", "SQUASH", "DEL",
 				    "COMPL", "GROWS");
+$priv{transr} = $priv{trans};
 $priv{"repeat"}{64} = "DOLIST";
 $priv{"leaveloop"}{64} = "CONT";
 $priv{$_}{4} = "DREFed" for (qw(rv2sv rv2av rv2hv));
@@ -836,7 +837,7 @@ sub concise_op {
 	} else {
 	    $h{arg} = "($precomp)";
 	}
-    } elsif ($h{class} eq "PVOP" and $h{name} ne "trans") {
+    } elsif ($h{class} eq "PVOP" and $h{name} !~ '^transr?\z') {
 	$h{arg} = '("' . $op->pv . '")';
 	$h{svval} = '"' . $op->pv . '"';
     } elsif ($h{class} eq "COP") {

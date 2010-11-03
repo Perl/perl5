@@ -775,7 +775,12 @@ PP(pp_trans)
 	EXTEND(SP,1);
     }
     TARG = sv_newmortal();
-    PUSHi(do_trans(sv));
+    if(PL_op->op_type == OP_TRANSR) {
+	SV * const newsv = newSVsv(sv);
+	do_trans(newsv);
+	mPUSHs(newsv);
+    }
+    else PUSHi(do_trans(sv));
     RETURN;
 }
 

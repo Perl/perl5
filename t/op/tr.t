@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 119;
+plan tests => 128;
 
 my $Is_EBCDIC = (ord('i') == 0x89 & ord('J') == 0xd1);
 
@@ -44,6 +44,27 @@ is($_, "aBCDEFGHIJKLMNOPQRSTUVWXYz",    'partial uc');
 (my $g = 1.5) =~ tr/1/3/;
 is($x + $y + $f + $g, 71,   'tr cancels IOK and NOK');
 
+# /r
+$_ = 'adam';
+is y/dam/ve/rd, 'eve', '/r';
+is $_, 'adam', '/r leaves param alone';
+$g = 'ruby';
+is $g =~ y/bury/repl/r, 'perl', '/r with explicit param';
+is $g, 'ruby', '/r leaves explicit param alone';
+is "aaa" =~ y\a\b\r, 'bbb', '/r with constant param';
+ok !eval '$_ !~ y///r', "!~ y///r is forbidden";
+like $@, qr\^Using !~ with tr///r doesn't make sense\,
+  "!~ y///r error message";
+{
+  my $w;
+  my $wc;
+  local $SIG{__WARN__} = sub { $w = shift; ++$wc };
+  local $^W = 1;
+  eval 'y///r; 1';
+  like $w, qr '^Useless use of non-destructive transliteration \(tr///r\)',
+    '/r warns in void context';
+  is $wc, 1, '/r warns just once';
+}
 
 # perlbug [ID 20000511.005]
 $_ = 'fred';

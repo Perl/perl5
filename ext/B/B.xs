@@ -1196,7 +1196,7 @@ PVOP_pv(o)
 	 * OP_TRANS uses op_pv to point to a table of 256 or >=258 shorts
 	 * whereas other PVOPs point to a null terminated string.
 	 */
-	if (o->op_type == OP_TRANS &&
+	if ((o->op_type == OP_TRANS || o->op_type == OP_TRANSR) &&
 		(o->op_private & OPpTRANS_COMPLEMENT) &&
 		!(o->op_private & OPpTRANS_DELETE))
 	{
@@ -1204,7 +1204,7 @@ PVOP_pv(o)
 	    const short entries = 257 + tbl[256];
 	    ST(0) = newSVpvn_flags(o->op_pv, entries * sizeof(short), SVs_TEMP);
 	}
-	else if (o->op_type == OP_TRANS) {
+	else if (o->op_type == OP_TRANS || o->op_type == OP_TRANSR) {
 	    ST(0) = newSVpvn_flags(o->op_pv, 256 * sizeof(short), SVs_TEMP);
 	}
 	else

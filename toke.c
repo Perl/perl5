@@ -2416,6 +2416,7 @@ S_sublex_push(pTHX)
     CopLINE_set(PL_curcop, (line_t)PL_multi_start);
 
     PL_lex_inwhat = PL_sublex_info.sub_inwhat;
+    if (PL_lex_inwhat == OP_TRANSR) PL_lex_inwhat = OP_TRANS;
     if (PL_lex_inwhat == OP_MATCH || PL_lex_inwhat == OP_QR || PL_lex_inwhat == OP_SUBST)
 	PL_lex_inpat = PL_sublex_info.sub_op;
     else
@@ -2448,6 +2449,7 @@ S_sublex_done(pTHX)
     }
 
     /* Is there a right-hand side to take care of? (s//RHS/ or tr//RHS/) */
+    assert(PL_lex_inwhat != OP_TRANSR);
     if (PL_lex_repl && (PL_lex_inwhat == OP_SUBST || PL_lex_inwhat == OP_TRANS)) {
 	PL_linestr = PL_lex_repl;
 	PL_lex_inpat = 0;
@@ -2615,6 +2617,7 @@ S_scan_const(pTHX_ char *start)
 
     PERL_ARGS_ASSERT_SCAN_CONST;
 
+    assert(PL_lex_inwhat != OP_TRANSR);
     if (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op) {
 	/* If we are doing a trans and we know we want UTF8 set expectation */
 	has_utf8   = PL_sublex_info.sub_op->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF);
@@ -12100,6 +12103,7 @@ S_scan_trans(pTHX_ char *start)
     U8 squash;
     U8 del;
     U8 complement;
+    bool nondestruct = 0;
 #ifdef PERL_MAD
     char *modstart;
 #endif
@@ -12153,6 +12157,9 @@ S_scan_trans(pTHX_ char *start)
 	case 's':
 	    squash = OPpTRANS_SQUASH;
 	    break;
+	case 'r':
+	    nondestruct = 1;
+	    break;
 	default:
 	    goto no_more;
 	}
@@ -12161,14 +12168,14 @@ S_scan_trans(pTHX_ char *start)
   no_more:
 
     tbl = (short *)PerlMemShared_calloc(complement&&!del?258:256, sizeof(short));
-    o = newPVOP(OP_TRANS, 0, (char*)tbl);
+    o = newPVOP(nondestruct ? OP_TRANSR : OP_TRANS, 0, (char*)tbl);
     o->op_private &= ~OPpTRANS_ALL;
     o->op_private |= del|squash|complement|
       (DO_UTF8(PL_lex_stuff)? OPpTRANS_FROM_UTF : 0)|
       (DO_UTF8(PL_lex_repl) ? OPpTRANS_TO_UTF   : 0);
 
     PL_lex_op = o;
-    pl_yylval.ival = OP_TRANS;
+    pl_yylval.ival = nondestruct ? OP_TRANSR : OP_TRANS;
 
 #ifdef PERL_MAD
     if (PL_madskills) {
