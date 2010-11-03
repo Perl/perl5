@@ -1,5 +1,13 @@
 Revision history for Perl module Unicode::Collate.
 
+0.65  Wed Nov  3 13:10:20 2010
+    - U::C::Locale newly supports locale: zh and its some variants.
+             (zh__big5han, zh__gb2312han, zh__pinyin, zh__stroke)
+    - added Unicode::Collate::CJK::Big5   for zh__big5han.
+    - added Unicode::Collate::CJK::GB2312 for zh__gb2312han.
+    - added Unicode::Collate::CJK::Pinyin for zh__pinyin.
+    - added Unicode::Collate::CJK::Stroke for zh__stroke.
+
 0.64  Sun Oct 31 14:17:29 2010
     - U::C::Locale newly supports locale: ja.
     - added Unicode::Collate::CJK::JISX0208 for ja.
@@ -10,7 +18,7 @@ Revision history for Perl module Unicode::Collate.
 
 0.63  Sun Oct 10 22:13:21 2010
     - supported suppress contractions (see 'suppress' in POD).
-    - internal for hangul_terminator in getSortKey().
+    - internal for 'hangul_terminator' in getSortKey().
     - U::C::Locale newly supports locales: be, bg, kk, mk, ru, sr.
     - added tailoring with U+0340 or U+0341 instead of U+0300 or U+0301.
         (affected locales: hr, is, pl, se, to, wo)

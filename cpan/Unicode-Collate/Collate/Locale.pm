@@ -4,7 +4,7 @@ use strict;
 use Carp;
 use base qw(Unicode::Collate);
 
-our $VERSION = '0.64';
+our $VERSION = '0.65';
 
 use File::Spec;
 
@@ -15,15 +15,19 @@ my $PL_EXT  = '.pl';
 my %LocaleFile = map { ($_, $_) } qw(
    af ar az ca cs cy da eo es et fi fil fo fr ha haw
    hr hu hy ig is ja kk kl lt lv mt nb nn nso om pl ro ru
-   se sk sl sq sv sw tn to tr uk vi wo yo
+   se sk sl sq sv sw tn to tr uk vi wo yo zh
 );
    $LocaleFile{'default'}         = '';
    $LocaleFile{'de__phonebook'}   = 'de_phone';
    $LocaleFile{'es__traditional'} = 'es_trad';
-   $LocaleFile{'be'} = "ru";
-   $LocaleFile{'bg'} = "ru";
-   $LocaleFile{'mk'} = "ru";
-   $LocaleFile{'sr'} = "ru";
+   $LocaleFile{'be'} = 'ru';
+   $LocaleFile{'bg'} = 'ru';
+   $LocaleFile{'mk'} = 'ru';
+   $LocaleFile{'sr'} = 'ru';
+   $LocaleFile{'zh__big5han'}   = 'zh_big5';
+   $LocaleFile{'zh__gb2312han'} = 'zh_gb';
+   $LocaleFile{'zh__pinyin'}    = 'zh_pin';
+   $LocaleFile{'zh__stroke'}    = 'zh_strk';
 
 sub _locale {
     my $locale = shift;
@@ -32,6 +36,8 @@ sub _locale {
 	$locale =~ tr/\-\ \./_/;
 	$locale =~ s/_phone(?:bk)?\z/_phonebook/;
 	$locale =~ s/_trad\z/_traditional/;
+	$locale =~ s/_big5\z/_big5han/;
+	$locale =~ s/_gb2312\z/_gb2312han/;
 	$LocaleFile{$locale} and return $locale;
 
 	my ($l,$t,$v) = split(/_/, $locale.'__');
@@ -223,6 +229,11 @@ this method returns a string C<'default'> meaning no special tailoring.
       vi                Vietnamese
       wo                Wolof
       yo                Yoruba
+      zh                Chinese
+      zh__big5han       Chinese (ideographs: big5 order)
+      zh__gb2312han     Chinese (ideographs: GB-2312 order)
+      zh__pinyin        Chinese (ideographs: pinyin order)
+      zh__stroke        Chinese (ideographs: stroke order)
     ----------------------------------------------------------
 
 Locales according to the default UCA rules include

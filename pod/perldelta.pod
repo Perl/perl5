@@ -228,8 +228,18 @@ cribbed.
 
 =item *
 
-C<Unicode::Collate::CJK::JISX0208> module was added by the C<Unicode::Collate>
-upgrade from 0.63 to 0.64. See below.
+The following modules were added by the C<Unicode::Collate> 
+upgrade from 0.63 to 0.65. See below for details.
+
+C<Unicode::Collate::CJK::Big5> 
+
+C<Unicode::Collate::CJK::GB2312>
+
+C<Unicode::Collate::CJK::JISX0208> 
+
+C<Unicode::Collate::CJK::Pinyin>
+
+C<Unicode::Collate::CJK::Stroke>
 
 =back
 
@@ -371,11 +381,27 @@ C<Sys::Hostname> has been upgraded from 1.13 to 1.14.
 
 =item *
 
-C<Unicode::Collate> has been upgraded from 0.63 to 0.64
+C<Unicode::Collate> has been upgraded from 0.63 to 0.65
 
-This release newly adds locale C<ja> and the module
+This release newly adds locale C<ja> and C<zh> and its variants 
+( C<zh__big5han>, C<zh__gb2312han>, C<zh__pinyin>, C<zh__stroke> ).
+
+The following modules have been added:
+
 C<Unicode::Collate::CJK::JISX0208> which makes tailoring of 6355 kanji 
 (CJK Unified Ideographs) in the JIS X 0208 order.
+
+C<Unicode::Collate::CJK::Big5> for C<zh__big5han> which makes 
+tailoring of CJK Unified Ideographs in the order of CLDR's big5han ordering.
+
+C<Unicode::Collate::CJK::GB2312> for C<zh__gb2312han> which makes
+tailoring of CJK Unified Ideographs in the order of CLDR's gb2312han ordering.
+
+C<Unicode::Collate::CJK::Pinyin> for C<zh__pinyin> which makes
+tailoring of CJK Unified Ideographs in the order of CLDR's pinyin ordering.
+
+C<Unicode::Collate::CJK::Stroke> for C<zh__stroke> which makes
+tailoring of CJK Unified Ideographs in the order of CLDR's stroke ordering.
 
 =back
 

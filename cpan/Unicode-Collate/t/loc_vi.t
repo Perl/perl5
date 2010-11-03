@@ -4,7 +4,7 @@ use warnings;
 use Unicode::Collate::Locale;
 
 use Test;
-plan tests => 340;
+plan tests => 424;
 
 my $objVi = Unicode::Collate::Locale->
     new(locale => 'VI', normalization => undef);
@@ -101,6 +101,17 @@ ok($objVi->eq("u\x{31B}", "\x{1B0}"));
 ok($objVi->eq("U\x{31B}", "\x{1AF}"));
 
 # 66
+
+ok($objVi->eq("e\x{306}", "\x{115}"));
+ok($objVi->eq("E\x{306}", "\x{114}"));
+ok($objVi->eq("i\x{306}", "\x{12D}"));
+ok($objVi->eq("I\x{306}", "\x{12C}"));
+ok($objVi->eq("o\x{306}", "\x{14F}"));
+ok($objVi->eq("O\x{306}", "\x{14E}"));
+ok($objVi->eq("u\x{306}", "\x{16D}"));
+ok($objVi->eq("U\x{306}", "\x{16C}"));
+
+# 74
 
 ok($objVi->eq("a\x{300}", pack('U', 0xE0)));
 ok($objVi->eq("a\x{340}", pack('U', 0xE0)));
@@ -271,17 +282,6 @@ ok($objVi->eq("Y\x{301}", pack('U', 0xDD)));
 ok($objVi->eq("Y\x{341}", pack('U', 0xDD)));
 ok($objVi->eq("Y\x{323}", "\x{1EF4}"));
 
-# 234
-
-ok($objVi->eq("e\x{306}", "\x{115}"));
-ok($objVi->eq("E\x{306}", "\x{114}"));
-ok($objVi->eq("i\x{306}", "\x{12D}"));
-ok($objVi->eq("I\x{306}", "\x{12C}"));
-ok($objVi->eq("o\x{306}", "\x{14F}"));
-ok($objVi->eq("O\x{306}", "\x{14E}"));
-ok($objVi->eq("u\x{306}", "\x{16D}"));
-ok($objVi->eq("U\x{306}", "\x{16C}"));
-
 # 242
 
 ok($objVi->eq("a\x{306}\x{323}", "\x{1EA1}\x{306}"));
@@ -362,6 +362,93 @@ ok($objVi->eq("U\x{31B}\x{323}", "U\x{323}\x{31B}"));
 
 # 314
 
+ok($objVi->eq("a\x{306}\x{300}", "\x{103}\x{300}"));
+ok($objVi->eq("a\x{306}\x{340}", "\x{103}\x{340}"));
+ok($objVi->eq("a\x{306}\x{309}", "\x{103}\x{309}"));
+ok($objVi->eq("a\x{306}\x{303}", "\x{103}\x{303}"));
+ok($objVi->eq("a\x{306}\x{301}", "\x{103}\x{301}"));
+ok($objVi->eq("a\x{306}\x{341}", "\x{103}\x{341}"));
+ok($objVi->eq("a\x{306}\x{323}", "\x{103}\x{323}"));
+ok($objVi->eq("A\x{306}\x{300}", "\x{102}\x{300}"));
+ok($objVi->eq("A\x{306}\x{340}", "\x{102}\x{340}"));
+ok($objVi->eq("A\x{306}\x{309}", "\x{102}\x{309}"));
+ok($objVi->eq("A\x{306}\x{303}", "\x{102}\x{303}"));
+ok($objVi->eq("A\x{306}\x{301}", "\x{102}\x{301}"));
+ok($objVi->eq("A\x{306}\x{341}", "\x{102}\x{341}"));
+ok($objVi->eq("A\x{306}\x{323}", "\x{102}\x{323}"));
+ok($objVi->eq("a\x{302}\x{300}", pack('U*', 0xE2, 0x300)));
+ok($objVi->eq("a\x{302}\x{340}", pack('U*', 0xE2, 0x340)));
+ok($objVi->eq("a\x{302}\x{309}", pack('U*', 0xE2, 0x309)));
+ok($objVi->eq("a\x{302}\x{303}", pack('U*', 0xE2, 0x303)));
+ok($objVi->eq("a\x{302}\x{301}", pack('U*', 0xE2, 0x301)));
+ok($objVi->eq("a\x{302}\x{341}", pack('U*', 0xE2, 0x341)));
+ok($objVi->eq("a\x{302}\x{323}", pack('U*', 0xE2, 0x323)));
+ok($objVi->eq("A\x{302}\x{300}", pack('U*', 0xC2, 0x300)));
+ok($objVi->eq("A\x{302}\x{340}", pack('U*', 0xC2, 0x340)));
+ok($objVi->eq("A\x{302}\x{309}", pack('U*', 0xC2, 0x309)));
+ok($objVi->eq("A\x{302}\x{303}", pack('U*', 0xC2, 0x303)));
+ok($objVi->eq("A\x{302}\x{301}", pack('U*', 0xC2, 0x301)));
+ok($objVi->eq("A\x{302}\x{341}", pack('U*', 0xC2, 0x341)));
+ok($objVi->eq("A\x{302}\x{323}", pack('U*', 0xC2, 0x323)));
+ok($objVi->eq("e\x{302}\x{300}", pack('U*', 0xEA, 0x300)));
+ok($objVi->eq("e\x{302}\x{340}", pack('U*', 0xEA, 0x340)));
+ok($objVi->eq("e\x{302}\x{309}", pack('U*', 0xEA, 0x309)));
+ok($objVi->eq("e\x{302}\x{303}", pack('U*', 0xEA, 0x303)));
+ok($objVi->eq("e\x{302}\x{301}", pack('U*', 0xEA, 0x301)));
+ok($objVi->eq("e\x{302}\x{341}", pack('U*', 0xEA, 0x341)));
+ok($objVi->eq("e\x{302}\x{323}", pack('U*', 0xEA, 0x323)));
+ok($objVi->eq("E\x{302}\x{300}", pack('U*', 0xCA, 0x300)));
+ok($objVi->eq("E\x{302}\x{340}", pack('U*', 0xCA, 0x340)));
+ok($objVi->eq("E\x{302}\x{309}", pack('U*', 0xCA, 0x309)));
+ok($objVi->eq("E\x{302}\x{303}", pack('U*', 0xCA, 0x303)));
+ok($objVi->eq("E\x{302}\x{301}", pack('U*', 0xCA, 0x301)));
+ok($objVi->eq("E\x{302}\x{341}", pack('U*', 0xCA, 0x341)));
+ok($objVi->eq("E\x{302}\x{323}", pack('U*', 0xCA, 0x323)));
+ok($objVi->eq("o\x{302}\x{300}", pack('U*', 0xF4, 0x300)));
+ok($objVi->eq("o\x{302}\x{340}", pack('U*', 0xF4, 0x340)));
+ok($objVi->eq("o\x{302}\x{309}", pack('U*', 0xF4, 0x309)));
+ok($objVi->eq("o\x{302}\x{303}", pack('U*', 0xF4, 0x303)));
+ok($objVi->eq("o\x{302}\x{301}", pack('U*', 0xF4, 0x301)));
+ok($objVi->eq("o\x{302}\x{341}", pack('U*', 0xF4, 0x341)));
+ok($objVi->eq("o\x{302}\x{323}", pack('U*', 0xF4, 0x323)));
+ok($objVi->eq("O\x{302}\x{300}", pack('U*', 0xD4, 0x300)));
+ok($objVi->eq("O\x{302}\x{340}", pack('U*', 0xD4, 0x340)));
+ok($objVi->eq("O\x{302}\x{309}", pack('U*', 0xD4, 0x309)));
+ok($objVi->eq("O\x{302}\x{303}", pack('U*', 0xD4, 0x303)));
+ok($objVi->eq("O\x{302}\x{301}", pack('U*', 0xD4, 0x301)));
+ok($objVi->eq("O\x{302}\x{341}", pack('U*', 0xD4, 0x341)));
+ok($objVi->eq("O\x{302}\x{323}", pack('U*', 0xD4, 0x323)));
+ok($objVi->eq("o\x{31B}\x{300}", "\x{1A1}\x{300}"));
+ok($objVi->eq("o\x{31B}\x{340}", "\x{1A1}\x{340}"));
+ok($objVi->eq("o\x{31B}\x{309}", "\x{1A1}\x{309}"));
+ok($objVi->eq("o\x{31B}\x{303}", "\x{1A1}\x{303}"));
+ok($objVi->eq("o\x{31B}\x{301}", "\x{1A1}\x{301}"));
+ok($objVi->eq("o\x{31B}\x{341}", "\x{1A1}\x{341}"));
+ok($objVi->eq("o\x{31B}\x{323}", "\x{1A1}\x{323}"));
+ok($objVi->eq("O\x{31B}\x{300}", "\x{1A0}\x{300}"));
+ok($objVi->eq("O\x{31B}\x{340}", "\x{1A0}\x{340}"));
+ok($objVi->eq("O\x{31B}\x{309}", "\x{1A0}\x{309}"));
+ok($objVi->eq("O\x{31B}\x{303}", "\x{1A0}\x{303}"));
+ok($objVi->eq("O\x{31B}\x{301}", "\x{1A0}\x{301}"));
+ok($objVi->eq("O\x{31B}\x{341}", "\x{1A0}\x{341}"));
+ok($objVi->eq("O\x{31B}\x{323}", "\x{1A0}\x{323}"));
+ok($objVi->eq("u\x{31B}\x{300}", "\x{1B0}\x{300}"));
+ok($objVi->eq("u\x{31B}\x{340}", "\x{1B0}\x{340}"));
+ok($objVi->eq("u\x{31B}\x{309}", "\x{1B0}\x{309}"));
+ok($objVi->eq("u\x{31B}\x{303}", "\x{1B0}\x{303}"));
+ok($objVi->eq("u\x{31B}\x{301}", "\x{1B0}\x{301}"));
+ok($objVi->eq("u\x{31B}\x{341}", "\x{1B0}\x{341}"));
+ok($objVi->eq("u\x{31B}\x{323}", "\x{1B0}\x{323}"));
+ok($objVi->eq("U\x{31B}\x{300}", "\x{1AF}\x{300}"));
+ok($objVi->eq("U\x{31B}\x{340}", "\x{1AF}\x{340}"));
+ok($objVi->eq("U\x{31B}\x{309}", "\x{1AF}\x{309}"));
+ok($objVi->eq("U\x{31B}\x{303}", "\x{1AF}\x{303}"));
+ok($objVi->eq("U\x{31B}\x{301}", "\x{1AF}\x{301}"));
+ok($objVi->eq("U\x{31B}\x{341}", "\x{1AF}\x{341}"));
+ok($objVi->eq("U\x{31B}\x{323}", "\x{1AF}\x{323}"));
+
+# 398
+
 $objVi->change(normalization => undef);
 
 ok($objVi->index("a\x{306}\x{323}", "a\x{323}\x{306}"), 0);
@@ -377,7 +464,7 @@ ok($objVi->index("O\x{31B}\x{300}", "o\x{300}\x{31B}"), -1);
 ok($objVi->index("A\x{306}\x{323}", pack('U*', 0x1EA1, 0x306)), -1);
 ok($objVi->index("O\x{31B}\x{300}", pack('U*', 0x00F2, 0x31B)), -1);
 
-# 325
+# 409
 
 $objVi->change(level => 2);
 
@@ -394,7 +481,7 @@ ok($objVi->index("O\x{31B}", "o\x{300}\x{31B}"), -1);
 ok($objVi->index("A\x{306}", pack('U*', 0x1EA1, 0x306)), -1);
 ok($objVi->index("O\x{31B}", pack('U*', 0x00F2, 0x31B)), -1);
 
-# 336
+# 420
 
 $objVi->change(level => 1);
 
@@ -403,4 +490,4 @@ ok($objVi->index("O\x{31B}", "o\x{300}\x{31B}"), 0);
 ok($objVi->index("A\x{306}", pack('U*', 0x1EA1, 0x306)), 0);
 ok($objVi->index("O\x{31B}", pack('U*', 0x00F2, 0x31B)), 0);
 
-# 340
+# 424

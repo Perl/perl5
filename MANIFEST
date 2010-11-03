@@ -2381,7 +2381,11 @@ cpan/Time-Piece/t/06subclass.t	Test for Time::Piece
 cpan/Time-Piece/t/07arith.t	Test for Time::Piece
 cpan/Unicode-Collate/Changes			Unicode::Collate
 cpan/Unicode-Collate/Collate/allkeys.txt	Unicode::Collate
+cpan/Unicode-Collate/Collate/CJK/Big5.pm			Unicode::Collate
+cpan/Unicode-Collate/Collate/CJK/GB2312.pm			Unicode::Collate
 cpan/Unicode-Collate/Collate/CJK/JISX0208.pm			Unicode::Collate
+cpan/Unicode-Collate/Collate/CJK/Pinyin.pm			Unicode::Collate
+cpan/Unicode-Collate/Collate/CJK/Stroke.pm			Unicode::Collate
 cpan/Unicode-Collate/Collate/keys.txt		Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/af.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/ar.pl			Unicode::Collate
@@ -2433,6 +2437,11 @@ cpan/Unicode-Collate/Collate/Locale/uk.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/vi.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/wo.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/yo.pl			Unicode::Collate
+cpan/Unicode-Collate/Collate/Locale/zh_big5.pl			Unicode::Collate
+cpan/Unicode-Collate/Collate/Locale/zh_gb.pl			Unicode::Collate
+cpan/Unicode-Collate/Collate/Locale/zh_pin.pl			Unicode::Collate
+cpan/Unicode-Collate/Collate/Locale/zh.pl			Unicode::Collate
+cpan/Unicode-Collate/Collate/Locale/zh_strk.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate.pm			Unicode::Collate
 cpan/Unicode-Collate/README			Unicode::Collate
 cpan/Unicode-Collate/t/altern.t			Unicode::Collate
@@ -2503,6 +2512,11 @@ cpan/Unicode-Collate/t/loc_uk.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_vi.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_wo.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_yo.t			Unicode::Collate
+cpan/Unicode-Collate/t/loc_zhb5.t			Unicode::Collate
+cpan/Unicode-Collate/t/loc_zhgb.t			Unicode::Collate
+cpan/Unicode-Collate/t/loc_zhpy.t			Unicode::Collate
+cpan/Unicode-Collate/t/loc_zhst.t			Unicode::Collate
+cpan/Unicode-Collate/t/loc_zh.t			Unicode::Collate
 cpan/Unicode-Collate/t/normal.t			Unicode::Collate
 cpan/Unicode-Collate/t/overcjk0.t		Unicode::Collate
 cpan/Unicode-Collate/t/overcjk1.t		Unicode::Collate
