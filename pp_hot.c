@@ -2120,7 +2120,7 @@ PP(pp_subst)
     /* In non-destructive replacement mode, duplicate target scalar so it
      * remains unchanged. */
     if (rpm->op_pmflags & PMf_NONDESTRUCT)
-	TARG = newSVsv(TARG);
+	TARG = sv_2mortal(newSVsv(TARG));
 
 #ifdef PERL_OLD_COPY_ON_WRITE
     /* Awooga. Awooga. "bool" types that are actually char are dangerous,

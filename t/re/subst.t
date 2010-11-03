@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 172 );
+plan( tests => 174 );
 
 # Stolen from re/ReTest.pl. Can't just use the file since it doesn't support
 # like() and it conflicts with test.pl
@@ -87,6 +87,11 @@ ok( defined tied($m), 's///r magic isn\'t lost' );
 
 $b = $m =~ s/xxx/yyy/r;
 ok( ! defined tied($b), 's///r magic isn\'t contagious' );
+
+my $ref = \("aaa" =~ s/aaa/bbb/r);
+is (Internals::SvREFCNT($$ref), 1, 's///r does not leak');
+$ref = \("aaa" =~ s/aaa/bbb/rg);
+is (Internals::SvREFCNT($$ref), 1, 's///rg does not leak');
 
 $x = 'foo';
 $_ = "x";
