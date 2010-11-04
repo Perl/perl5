@@ -189,7 +189,7 @@ BEGIN
   $XOR_MASK = __PACKAGE__->_new( ( 2 ** $XOR_BITS ));
   $OR_MASK = __PACKAGE__->_new( ( 2 ** $OR_BITS ));
 
-  # We can compute the approximate lenght no faster than the real length:
+  # We can compute the approximate length no faster than the real length:
   *_alen = \&_len;
   }
 
@@ -595,7 +595,7 @@ sub _div_use_mul
 
   my ($c,$x,$yorg) = @_;
   
-  # the general div algorithmn here is about O(N*N) and thus quite slow, so
+  # the general div algorithm here is about O(N*N) and thus quite slow, so
   # we first check for some special cases and use shortcuts to handle them.
 
   # This works, because we store the numbers in a chunked format where each
@@ -785,7 +785,7 @@ sub _div_use_div_64
   my ($c,$x,$yorg) = @_;
 
   use integer;
-  # the general div algorithmn here is about O(N*N) and thus quite slow, so
+  # the general div algorithm here is about O(N*N) and thus quite slow, so
   # we first check for some special cases and use shortcuts to handle them.
 
   # This works, because we store the numbers in a chunked format where each
@@ -976,7 +976,7 @@ sub _div_use_div
   # in list context
   my ($c,$x,$yorg) = @_;
 
-  # the general div algorithmn here is about O(N*N) and thus quite slow, so
+  # the general div algorithm here is about O(N*N) and thus quite slow, so
   # we first check for some special cases and use shortcuts to handle them.
 
   # This works, because we store the numbers in a chunked format where each
@@ -2028,7 +2028,7 @@ sub _root
     # reset step to 2
     $step = _two();
     # add two, because $trial cannot be exactly the result (otherwise we would
-    # alrady have found it)
+    # already have found it)
     _add($c, $trial, $step);
  
     # and now add more and more (2,4,6,8,10 etc)

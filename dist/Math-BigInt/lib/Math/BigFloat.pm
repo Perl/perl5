@@ -149,7 +149,7 @@ sub new
     $self->{sign} = $wanted->sign();
     return $self->bnorm();
     }
-  # else: got a string or something maskerading as number (with overload)
+  # else: got a string or something masquerading as number (with overload)
 
   # handle '+inf', '-inf' first
   if ($wanted =~ /^[+-]?inf\z/)
@@ -353,7 +353,7 @@ sub config
   }
 
 ##############################################################################
-# string conversation
+# string conversion
 
 sub bstr 
   {
@@ -1141,7 +1141,7 @@ sub _log
   # in case of $x == 1, result is 0
   return $x->bzero() if $x->is_one();
 
-  # XXX TODO: rewrite this in a similiar manner to bexp()
+  # XXX TODO: rewrite this in a similar manner to bexp()
 
   # http://www.efunda.com/math/taylor_series/logarithmic.cfm?search_string=log
 
@@ -2128,7 +2128,7 @@ sub bsqrt
     }
  
   # sqrt(2) = 1.4 because sqrt(2*100) = 1.4*10; so we can increase the accuracy
-  # of the result by multipyling the input by 100 and then divide the integer
+  # of the result by multiplying the input by 100 and then divide the integer
   # result of sqrt(input) by 10. Rounding afterwards returns the real result.
 
   # The following steps will transform 123.456 (in $x) into 123456 (in $y1)
@@ -3946,7 +3946,7 @@ Since things like C<sqrt(2)> or C<1 / 3> must presented with a limited
 accuracy lest a operation consumes all resources, each operation produces
 no more than the requested number of digits.
 
-If there is no gloabl precision or accuracy set, B<and> the operation in
+If there is no global precision or accuracy set, B<and> the operation in
 question was not called with a requested precision or accuracy, B<and> the
 input $x has no accuracy or precision set, then a fallback parameter will
 be used. For historical reasons, it is called C<div_scale> and can be accessed

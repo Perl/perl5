@@ -18,7 +18,7 @@ $mbf = 'Math::BigFloat';
 require 't/mbimbf.inc';
 
 # some tests that won't work with subclasses, since the things are only
-# garantied in the Math::BigInt/BigFloat (unless subclass chooses to support
+# guaranteed in the Math::BigInt/BigFloat (unless subclass chooses to support
 # this)
 
 Math::BigInt->round_mode('even');	# reset for tests

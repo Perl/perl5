@@ -303,7 +303,7 @@ foreach (qw/
   }
 
 #############################################################################
-# overloaded comparisations
+# overloaded comparisons
 
 # these are disabled for now, since Perl itself can't seem to make up it's
 # mind what NaN actually is, see [perl #33106].

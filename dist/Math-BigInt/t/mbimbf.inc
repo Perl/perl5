@@ -280,8 +280,8 @@ foreach my $c ($mbi,$mbf)
 
 $x = $mbf->new('123.456');
 $y = $mbf->new('654.321');
-$x->{_a} = 5;		# $x->accuracy(5) would round $x straightaway
-$y->{_a} = 4;		# $y->accuracy(4) would round $x straightaway
+$x->{_a} = 5;		# $x->accuracy(5) would round $x straight away
+$y->{_a} = 4;		# $y->accuracy(4) would round $x straight away
 
 $z = $x + $y;		is ($z,'777.8');
 $z = $y - $x;		is ($z,'530.9');
@@ -296,8 +296,8 @@ $z = $x->copy; $z++;	is ($z,123500);
 
 $x = $mbi->new(123456);
 $y = $mbi->new(654321);
-$x->{_a} = 5;		# $x->accuracy(5) would round $x straightaway
-$y->{_a} = 4;		# $y->accuracy(4) would round $x straightaway
+$x->{_a} = 5;		# $x->accuracy(5) would round $x straight away
+$y->{_a} = 4;		# $y->accuracy(4) would round $x straight away
 
 $z = $x + $y; 		is ($z,777800);
 $z = $y - $x; 		is ($z,530900);
@@ -590,7 +590,7 @@ is ($x->{_a}, undef); is ($x->{_p}, undef);
 is ($y->{_a}, undef); is ($y->{_p}, undef);
 
 ###############################################################################
-# math with two numbers with differen A and P
+# math with two numbers with different A and P
 
 $x = $mbf->new(12345); $x->accuracy(4);		# '12340'
 $y = $mbf->new(12345); $y->accuracy(2);		# '12000'
