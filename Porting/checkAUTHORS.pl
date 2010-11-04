@@ -653,6 +653,7 @@ mab\100wdl.loral.com                    markb\100rdcf.sm.unisys.com
 marcel\100codewerk.com                  gr\100univie.ac.at
 mark.p.lutz\100boeing.com               tecmpl1\100triton.ca.boeing.com
 marnix\100gmail.com                     pttesac!marnix!vanam
+marty+p5p\100kasei.com                  marty\100martian.org
 mats\100sm6sxl.net                      mats\100sm5sxl.net
 mbarbon\100dsi.unive.it                 mattia.barbon\100libero.it
 mcmahon\100ibiblio.org                  mcmahon\100metalab.unc.edu
