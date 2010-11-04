@@ -1645,6 +1645,7 @@ use File::Glob qw(:case);
 				ext/B/t/xref.t
 				ext/B/t/f_map.t
 				ext/B/t/optree_misc.t
+				ext/B/t/walkoptree.t
 				ext/B/hints/openbsd.pl
 				ext/B/hints/darwin.pl
 
