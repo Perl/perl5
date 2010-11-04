@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Test::More tests => 375;
+use Test::More tests => 379;
 
 use Math::BigInt::Calc;
 
@@ -129,9 +129,13 @@ $x = $C->_new("123456789");
 is ($C->_digit($x,0),9);
 is ($C->_digit($x,1),8);
 is ($C->_digit($x,2),7);
+is ($C->_digit($x,8),1);
+is ($C->_digit($x,9),0);
 is ($C->_digit($x,-1),1);
 is ($C->_digit($x,-2),2);
 is ($C->_digit($x,-3),3);
+is ($C->_digit($x,-9),9);
+is ($C->_digit($x,-10),0);
 
 # _copy
 foreach (qw/ 1 12 123 1234 12345 123456 1234567 12345678 123456789/)

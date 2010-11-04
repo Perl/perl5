@@ -1206,20 +1206,18 @@ sub _len
 
 sub _digit
   {
-  # return the nth digit, negative values count backward
-  # zero is rightmost, so _digit(123,0) will give 3
+  # Return the nth digit. Zero is rightmost, so _digit(123,0) gives 3.
+  # Negative values count from the left, so _digit(123, -1) gives 1.
   my ($c,$x,$n) = @_;
 
   my $len = _len('',$x);
 
-  $n = $len+$n if $n < 0;		# -1 last, -2 second-to-last
-  $n = abs($n);				# if negative was too big
-  $len--; $n = $len if $n > $len;	# n to big?
-  
-  my $elem = int($n / $BASE_LEN);	# which array element
-  my $digit = $n % $BASE_LEN;		# which digit in this element
-  $elem = '0' x $BASE_LEN . @$x[$elem];	# get element padded with 0's
-  substr($elem,-$digit-1,1);
+  $n += $len if $n < 0;                 # -1 last, -2 second-to-last
+  return "0" if $n < 0 || $n >= $len;   # return 0 for digits out of range
+
+  my $elem = int($n / $BASE_LEN);       # which array element
+  my $digit = $n % $BASE_LEN;           # which digit in this element
+  substr("$x->[$elem]", -$digit-1, 1);
   }
 
 sub _zeros
