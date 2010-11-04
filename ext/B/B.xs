@@ -169,11 +169,17 @@ cc_opclass(pTHX_ const OP *o)
          * Character translations (tr///) are usually a PVOP, keeping a 
          * pointer to a table of shorts used to look up translations.
          * Under utf8, however, a simple table isn't practical; instead,
-         * the OP is an SVOP, and the SV is a reference to a swash
+         * the OP is an SVOP (or, under threads, a PADOP),
+         * and the SV is a reference to a swash
          * (i.e., an RV pointing to an HV).
          */
 	return (o->op_private & (OPpTRANS_TO_UTF|OPpTRANS_FROM_UTF))
+#if  defined(USE_ITHREADS) \
+  && (PERL_VERSION > 8 || (PERL_VERSION == 8 && PERL_SUBVERSION >= 9))
+		? OPc_PADOP : OPc_PVOP;
+#else
 		? OPc_SVOP : OPc_PVOP;
+#endif
 
     case OA_LOOP:
 	return OPc_LOOP;

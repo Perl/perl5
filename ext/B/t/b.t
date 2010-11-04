@@ -291,4 +291,8 @@ is(B::opnumber("chop"), 38, "Testing opnumber with opname (chop)");
 is(B::svref_2object(sub {})->ROOT->ppaddr, 'PL_ppaddr[OP_LEAVESUB]',
    'OP->ppaddr');
 
+# This one crashes from perl 5.8.9 to B 1.24 (perl 5.13.6):
+B::svref_2object(sub{y/\x{100}//})->ROOT->first->first->sibling->sv;
+ok 1, 'B knows that UTF trans is a padop in 5.8.9, not an svop';
+
 done_testing();
