@@ -6,28 +6,36 @@
 #      License or the Artistic License, as specified in the README file.
 #
 package B;
+use strict;
 
-our $VERSION = '1.25';
-
-require XSLoader;
 require Exporter;
-@ISA = qw(Exporter);
+@B::ISA = qw(Exporter);
 
 # walkoptree_slow comes from B.pm (you are there),
 # walkoptree comes from B.xs
-@EXPORT_OK = qw(minus_c ppname save_BEGINs
-		class peekop cast_I32 cstring cchar hash threadsv_names
-		main_root main_start main_cv svref_2object opnumber
-		sub_generation amagic_generation perlstring
-		walkoptree_slow walkoptree walkoptree_exec walksymtable
-		parents comppadlist sv_undef compile_stats timing_info
-		begin_av init_av check_av end_av regex_padav dowarn defstash
-		curstash warnhook diehook inc_gv @optype @specialsv_name
-		);
-push @EXPORT_OK, qw(unitcheck_av) if $] > 5.009;
 
-sub OPf_KIDS ();
-use strict;
+BEGIN {
+    $B::VERSION = '1.25';
+
+    @B::EXPORT_OK = qw(minus_c ppname save_BEGINs
+		       class peekop cast_I32 cstring cchar hash threadsv_names
+		       main_root main_start main_cv svref_2object opnumber
+		       sub_generation amagic_generation perlstring
+		       walkoptree_slow walkoptree walkoptree_exec walksymtable
+		       parents comppadlist sv_undef compile_stats timing_info
+		       begin_av init_av check_av end_av regex_padav dowarn
+		       defstash curstash warnhook diehook inc_gv @optype
+		       @specialsv_name
+		   );
+    push @B::EXPORT_OK, qw(unitcheck_av) if $] > 5.009;
+
+    # All the above in this BEGIN, because our BOOT code needs $VERSION set,
+    # and will append to @EXPORT_OK. And we need to run the BOOT code before
+    # we see OPf_KIDS below.
+    require XSLoader;
+    XSLoader::load();
+}
+
 @B::SV::ISA = 'B::OBJECT';
 @B::NULL::ISA = 'B::SV';
 @B::PV::ISA = 'B::SV';
@@ -314,8 +322,6 @@ sub walksymtable {
 	}
     }
 }
-
-XSLoader::load();
 
 1;
 
