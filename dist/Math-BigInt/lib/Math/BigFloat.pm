@@ -3696,7 +3696,7 @@ sub as_number
     {
     $MBI->_lsft( $z, $x->{_e},10);
     }
-  $z = Math::BigInt->new( $x->{sign} . $MBI->_num($z));
+  $z = Math::BigInt->new( $x->{sign} . $MBI->_str($z));
   $z;
   }
 
