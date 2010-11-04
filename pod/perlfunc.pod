@@ -3484,7 +3484,7 @@ piped open when you want to exercise more control over just how the
 pipe command gets executed, such as when running setuid and
 you don't want to have to scan shell commands for metacharacters.
 
-The following triples are more or less equivalent:
+The following blocks are more or less equivalent:
 
     open(FOO, "|tr '[a-z]' '[A-Z]'");
     open(FOO, '|-', "tr '[a-z]' '[A-Z]'");
@@ -3496,7 +3496,7 @@ The following triples are more or less equivalent:
     open(FOO, '-|') || exec 'cat', '-n', $file;
     open(FOO, '-|', "cat", '-n', $file);
 
-The last example in each block shows the pipe as "list form", which is
+The last two examples in each block shows the pipe as "list form", which is
 not yet supported on all platforms.  A good rule of thumb is that if
 your platform has true C<fork()> (in other words, if your platform is
 Unix) you can use the list form.
