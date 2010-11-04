@@ -136,6 +136,22 @@ print "\$rtlopt: \\$rtlopt\\\n" if $debug;
 
 my (%vars, %cvars, %fcns);
 
+# These are symbols that we should not export.  They may merely
+# look like exportable symbols but aren't, or they may be declared
+# as exportable symbols but there is no function implementing them
+# (possibly due to an alias).
+
+my %symbols_to_exclude = (
+  '__attribute__format__'  => 1,
+  'main'                   => 1,
+  'Perl_pp_avalues'        => 1,
+  'Perl_pp_reach'          => 1,
+  'Perl_pp_rvalues'        => 1,
+  'Perl_pp_say'            => 1,
+  'Perl_pp_transr'         => 1,
+  'sizeof'                 => 1,
+);
+
 sub scan_var {
   my($line) = @_;
   my($const) = $line =~ /^EXTCONST/;
@@ -163,9 +179,8 @@ sub scan_func {
     $line =~ s/\b(IV|Off_t|Size_t|SSize_t|void|int)\b//i;
     if ( $line =~ /(\w+)\s*\(/ ) {
       print "\troutine name is \\$1\\\n" if $debug > 1;
-      if ($1 eq 'main' || $1 eq 'perl_init_ext' || $1 eq '__attribute__format__'
-          || $1 eq 'sizeof' || (($1 eq 'Perl_stashpv_hvname_match') && ! $use_threads)
-          || $1 eq 'Perl_pp_avalues' || $1 eq 'Perl_pp_say') {
+      if (exists($symbols_to_exclude{$1})
+          || ($1 eq 'Perl_stashpv_hvname_match' && ! $use_threads)) {
         print "\tskipped\n" if $debug > 1;
       }
       else { $fcns{$1}++ }
