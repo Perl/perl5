@@ -31,7 +31,6 @@ hidden_ref_keys(hash)
     ALIAS:
 	Hash::Util::legal_ref_keys = 1
     PREINIT:
-	dXSI32;
         SV *key;
         HE *he;
     PPCODE:

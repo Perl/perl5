@@ -108,8 +108,6 @@ sdbm_error(db)
 	SDBM_File	db
 	ALIAS:
 	sdbm_clearerr = 1
-	PREINIT:
-	dXSI32;
 	CODE:
 	RETVAL = ix ? sdbm_clearerr(db->dbp) : sdbm_error(db->dbp);
 	OUTPUT:
