@@ -105,8 +105,8 @@ sub B::IV::int_value {
 }
 
 sub B::NULL::as_string() {""}
-sub B::IV::as_string()   {goto &B::IV::int_value}
-sub B::PV::as_string()   {goto &B::PV::PV}
+*B::IV::as_string = \&B::IV::int_value;
+*B::PV::as_string = \&B::PV::PV;
 
 my $debug;
 my $op_count = 0;
