@@ -25,7 +25,7 @@ sub croak { require Carp; Carp::croak(@_) }
         my ($class, $type, $list, $minbits, $none) = @_;
         local $^D = 0 if $^D;
 
-        print STDERR __LINE__, ": ", join(", ", @_), "\n" if DEBUG;
+        print STDERR __LINE__, ": class=$class, type=$type, list=$list, minbits=$minbits, none=$none\n" if DEBUG;
 
         ##
         ## Get the list of codepoints for the type.
@@ -78,7 +78,8 @@ sub croak { require Carp; Carp::croak(@_) }
         GETFILE:
             {
                 ##
-                ## It could be a user-defined property.
+                ## It could be a user-defined property.  Look in current
+                ## package if no package given
                 ##
 
                 my $caller1 = $type =~ s/(.+)::// ? $1 : caller(1);
@@ -93,7 +94,19 @@ sub croak { require Carp; Carp::croak(@_) }
                     }
                 }
 
-                require "$unicore_dir/Heavy.pl";
+                # During Perl's compilation, this routine may be called before
+                # the tables are constructed.  If so, we have a chicken/egg
+                # problem.  If we die, the tables never get constructed, so
+                # keep going, but return an empty table so only what the code
+                # has compiled in internally (currently ASCII/Latin1 range
+                # matching) will work.
+                if (! defined &DynaLoader::boot_DynaLoader) {
+                    eval "require '$unicore_dir/Heavy.pl'";
+                    last GETFILE if $@;
+                }
+                else {
+                    require "$unicore_dir/Heavy.pl";
+                }
 
                 # Everything is caseless matching
                 my $property_and_table = lc $type;
