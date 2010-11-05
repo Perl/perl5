@@ -57,4 +57,29 @@ foreach (qw(substcont pushre split leavesub)) {
 }
 is_deeply (\%debug, \%seen, 'walkoptree_debug was called correctly');
 
+my %seen2;
+
+# Now try to exercise the code in walkoptree that decides that it can't re-use
+# the object and reference.
+sub B::OP::fiddle {
+    my $name = $_[0]->name;
+    ++$seen2{$name};
+    if ($name =~ /^s/) {
+	# Take another reference to the reference
+	push @::junk, \$_[0];
+    } elsif ($name =~ /^p/) {
+	# Take another reference to the object
+	push @::junk, \${$_[0]};
+    } elsif ($name =~ /^l/) {
+	undef $_[0];
+    } elsif ($name =~ /g/) {
+	${$_[0]} = "Muhahahahaha!";
+    } elsif ($name =~ /^c/) {
+	bless \$_[0];
+    }
+}
+
+B::walkoptree(B::svref_2object($victim)->ROOT, "fiddle");
+is_deeply (\%seen2, \%seen, 'everything still seen');
+
 done_testing();

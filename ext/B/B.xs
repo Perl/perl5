@@ -477,40 +477,51 @@ cchar(pTHX_ SV *sv)
 #  define PMOP_pmdynflags(o)      o->op_pmdynflags
 #endif
 
-static void
-walkoptree(pTHX_ SV *opsv, const char *method)
+static SV *
+walkoptree(pTHX_ OP *o, const char *method, SV *ref)
 {
     dSP;
-    OP *o, *kid;
+    OP *kid;
+    SV *object;
+    const char *const classname = cc_opclassname(aTHX_ o);
     dMY_CXT;
 
-    if (!SvROK(opsv))
-	croak("opsv is not a reference");
-    opsv = sv_mortalcopy(opsv);
-    o = INT2PTR(OP*,SvIV((SV*)SvRV(opsv)));
+    /* Check that no-one has changed our reference, or is holding a reference
+       to it.  */
+    if (SvREFCNT(ref) == 1 && SvROK(ref) && SvTYPE(ref) == SVt_RV
+	&& (object = SvRV(ref)) && SvREFCNT(object) == 1
+	&& SvTYPE(object) == SVt_PVMG && SvIOK_only(object)
+	&& !SvMAGICAL(object) && !SvMAGIC(object) && SvSTASH(object)) {
+	/* Looks good, so rebless it for the class we need:  */
+	sv_bless(ref, gv_stashpv(classname, GV_ADD));
+    } else {
+	/* Need to make a new one. */
+	ref = sv_newmortal();
+	object = newSVrv(ref, classname);
+    }
+    sv_setiv(object, PTR2IV(o));
+
     if (walkoptree_debug) {
 	PUSHMARK(sp);
-	XPUSHs(opsv);
+	XPUSHs(ref);
 	PUTBACK;
 	perl_call_method("walkoptree_debug", G_DISCARD);
     }
     PUSHMARK(sp);
-    XPUSHs(opsv);
+    XPUSHs(ref);
     PUTBACK;
     perl_call_method(method, G_DISCARD);
     if (o && (o->op_flags & OPf_KIDS)) {
 	for (kid = ((UNOP*)o)->op_first; kid; kid = kid->op_sibling) {
-	    /* Use the same opsv. Rely on methods not to mess it up. */
-	    sv_setiv(newSVrv(opsv, cc_opclassname(aTHX_ kid)), PTR2IV(kid));
-	    walkoptree(aTHX_ opsv, method);
+	    ref = walkoptree(aTHX_ kid, method, ref);
 	}
     }
     if (o && (cc_opclass(aTHX_ o) == OPc_PMOP) && o->op_type != OP_PUSHRE
            && (kid = PMOP_pmreplroot(cPMOPo)))
     {
-	sv_setiv(newSVrv(opsv, cc_opclassname(aTHX_ kid)), PTR2IV(kid));
-	walkoptree(aTHX_ opsv, method);
+	ref = walkoptree(aTHX_ kid, method, ref);
     }
+    return ref;
 }
 
 static SV **
@@ -716,11 +727,11 @@ sub_generation()
 	RETVAL
 
 void
-walkoptree(opsv, method)
-	SV *	opsv
+walkoptree(op, method)
+	B::OP op
 	const char *	method
     CODE:
-	walkoptree(aTHX_ opsv, method);
+	(void) walkoptree(aTHX_ op, method, &PL_sv_undef);
 
 int
 walkoptree_debug(...)
