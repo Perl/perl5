@@ -104,7 +104,7 @@ checkOptree ( name	=> 'PMOP children',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 6  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->6
-# 1        <;> nextstate(main 1 -e:1) v:{ ->2
+# 1        <;> nextstate(main 1 -e:1) v:>,<,%,{ ->2
 # 3        </> subst(/"(a)"/ replstart->4) KS ->6
 # -           <1> ex-rv2sv sKRM/1 ->3
 # 2              <#> gvsv[*foo] s ->3
@@ -114,7 +114,7 @@ checkOptree ( name	=> 'PMOP children',
 EOT_EOT
 # 6  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->6
-# 1        <;> nextstate(main 1 -e:1) v:{ ->2
+# 1        <;> nextstate(main 1 -e:1) v:>,<,%,{ ->2
 # 3        </> subst(/"(a)"/ replstart->4) KS ->6
 # -           <1> ex-rv2sv sKRM/1 ->3
 # 2              <$> gvsv(*foo) s ->3
