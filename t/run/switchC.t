@@ -18,11 +18,12 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan(tests => 11);
+plan(tests => 13);
 
 my $r;
 
 my $tmpfile = tempfile();
+my $scriptfile = tempfile();
 
 my $b = pack("C*", unpack("U0C*", pack("U",256)));
 
@@ -57,6 +58,20 @@ $r = runperl( switches => [ '-Ci', '-w' ],
 	      prog     => "open(F, q(<$tmpfile)); print ord(<F>); close F",
               stderr   => 1 );
 like( $r, qr/^256(?:\r?\n)?$/s, '-Ci: auto-UTF-8 open for input' );
+
+open(S, ">$scriptfile") or die("open $scriptfile: $!");
+print S "open(F, q(<$tmpfile)); print ord(<F>); close F";
+close S;
+
+$r = runperl( switches => [ '-Ci', '-w' ],
+	      progfile => $scriptfile,
+              stderr   => 1 );
+like( $r, qr/^256(?:\r?\n)?$/s, '-Ci: auto-UTF-8 open for input affects the current file' );
+
+$r = runperl( switches => [ '-Ci', '-w' ],
+	      prog     => "do q($scriptfile)",
+              stderr   => 1 );
+unlike( $r, qr/^256(?:\r?\n)?$/s, '-Ci: auto-UTF-8 open for input has file scope' );
 
 $r = runperl( switches => [ '-CA', '-w' ],
 	      prog     => 'print ord shift',
