@@ -587,6 +587,9 @@ fnormNaN:NaN
 -2:-2
 -123.456:-123
 -200:-200
+-inf:-inf
+inf:inf
+NaN:NaN
 # test for bug in brsft() not handling cases that return 0
 0.000641:0
 0.0006412:0

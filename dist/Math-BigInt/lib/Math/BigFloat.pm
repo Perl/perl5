@@ -3684,6 +3684,9 @@ sub as_number
     $x = $x->can('as_float') ? $x->as_float() : $self->new(0+"$x");
     }
 
+  return Math::BigInt->binf($x->sign()) if $x->is_inf();
+  return Math::BigInt->bnan()           if $x->is_nan();
+
   my $z = $MBI->_copy($x->{_m});
   if ($x->{_es} eq '-')			# < 0
     {
