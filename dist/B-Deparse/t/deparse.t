@@ -17,7 +17,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 92;
+use Test::More tests => 93;
 use Config ();
 
 use B::Deparse;
@@ -672,3 +672,6 @@ pop @_;
 foreach $' (1, 2) {
     sleep $';
 }
+####
+# y///r
+tr/a/b/r;
