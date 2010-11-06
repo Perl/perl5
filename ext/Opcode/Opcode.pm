@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.16";
+$VERSION = "1.17";
 
 use Carp;
 use Exporter ();
@@ -311,7 +311,7 @@ invert_opset function.
     rv2av aassign aelem aelemfast aslice av2arylen
 
     rv2hv helem hslice each values keys exists delete aeach akeys avalues
-    boolkeys
+    boolkeys reach rvalues rkeys
 
     preinc i_preinc predec i_predec postinc i_postinc postdec i_postdec
     int hex oct abs pow multiply i_multiply divide i_divide
@@ -325,7 +325,7 @@ invert_opset function.
 
     substr vec stringify study pos length index rindex ord chr
 
-    ucfirst lcfirst uc lc quotemeta trans chop schop chomp schomp
+    ucfirst lcfirst uc lc quotemeta trans transr chop schop chomp schomp
 
     match split qr
 
