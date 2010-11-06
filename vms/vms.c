@@ -655,8 +655,8 @@ int scnt;
 	    if (scnt == 4) {
 		unsigned int c1, c2;
 		scnt = sscanf(inspec, "%2x%2x", &c1, &c2);
-		outspec[0] == c1 & 0xff;
-		outspec[1] == c2 & 0xff;
+		outspec[0] = c1 & 0xff;
+		outspec[1] = c2 & 0xff;
 		if (scnt > 1) {
 		    (*output_cnt) += 2;
 		    count += 4;
