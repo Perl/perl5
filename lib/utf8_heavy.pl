@@ -100,13 +100,19 @@ sub croak { require Carp; Carp::croak(@_) }
                 # keep going, but return an empty table so only what the code
                 # has compiled in internally (currently ASCII/Latin1 range
                 # matching) will work.
-                if (! defined &DynaLoader::boot_DynaLoader) {
+                BEGIN {
+                    # Poor man's constant, to avoid a run-time check.
+                    $utf8::{miniperl}
+                        = \! defined &DynaLoader::boot_DynaLoader;
+                }
+                if (miniperl) {
                     eval "require '$unicore_dir/Heavy.pl'";
                     last GETFILE if $@;
                 }
                 else {
                     require "$unicore_dir/Heavy.pl";
                 }
+                BEGIN { delete $utf8::{miniperl} }
 
                 # Everything is caseless matching
                 my $property_and_table = lc $type;
