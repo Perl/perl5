@@ -17,7 +17,7 @@ BEGIN {
     require feature;
     feature->import(':5.10');
 }
-use Test::More tests => 93;
+use Test::More tests => 94;
 use Config ();
 
 use B::Deparse;
@@ -675,3 +675,6 @@ foreach $' (1, 2) {
 ####
 # y///r
 tr/a/b/r;
+####
+# y/uni/code/
+tr/\x{345}/\x{370}/;

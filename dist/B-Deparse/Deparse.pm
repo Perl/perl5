@@ -4087,8 +4087,12 @@ sub pp_trans {
     my $self = shift;
     my($op, $cx) = @_;
     my($from, $to);
-    if (class($op) eq "PVOP") {
+    my $class = class($op);
+    if ($class eq "PVOP") {
 	($from, $to) = tr_decode_byte($op->pv, $op->private);
+    } elsif ($class eq "PADOP") {
+	($from, $to)
+	  = tr_decode_utf8($self->padval($op->padix)->RV, $op->private);
     } else { # class($op) eq "SVOP"
 	($from, $to) = tr_decode_utf8($op->sv->RV, $op->private);
     }
