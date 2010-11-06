@@ -1340,6 +1340,8 @@ int
 PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
 {
     int code = 0;
+    ENTER;
+    save_scalar(PL_errgv);
     if (f && names) {
 	PerlIO_list_t * const layers = PerlIO_list_alloc(aTHX);
 	code = PerlIO_parse_layers(aTHX_ layers, names);
@@ -1348,6 +1350,7 @@ PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
 	}
 	PerlIO_list_free(aTHX_ layers);
     }
+    LEAVE;
     return code;
 }
 

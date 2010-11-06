@@ -197,7 +197,6 @@ SKIP: {
 
     # RT78844
     {
-        local $TODO = "RT#78844";
         local $@ = "foo";
         binmode(F, ":encoding(utf8)");
         is( $@, "foo", '$@ not clobbered by binmode and :encoding');
