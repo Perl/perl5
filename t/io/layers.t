@@ -43,7 +43,7 @@ if (${^UNICODE} & 1) {
 } else {
     $UTF8_STDIN = 0;
 }
-my $NTEST = 44 - (($DOSISH || !$FASTSTDIO) ? 7 : 0) - ($DOSISH ? 5 : 0)
+my $NTEST = 45 - (($DOSISH || !$FASTSTDIO) ? 7 : 0) - ($DOSISH ? 5 : 0)
     + $UTF8_STDIN;
 
 sub PerlIO::F_UTF8 () { 0x00008000 } # from perliol.h
@@ -194,6 +194,14 @@ SKIP: {
     check([ PerlIO::get_layers(F) ],
 	  [ "stdio" ],
 	  "binmode");
+
+    # RT78844
+    {
+        local $TODO = "RT#78844";
+        local $@ = "foo";
+        binmode(F, ":encoding(utf8)");
+        is( $@, "foo", '$@ not clobbered by binmode and :encoding');
+    }
 
     close F;
 
