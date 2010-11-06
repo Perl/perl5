@@ -2682,6 +2682,61 @@ CODE:
     XSRETURN_UNDEF;
 }
 
+#ifdef USE_ITHREADS
+
+void
+clone_with_stack()
+CODE:
+{
+    PerlInterpreter *interp = aTHX; /* The original interpreter */
+    PerlInterpreter *interp_dup;    /* The duplicate interpreter */
+    int oldscope = 1; /* We are responsible for all scopes */
+
+    interp_dup = perl_clone(interp, CLONEf_COPY_STACKS | CLONEf_CLONE_HOST );
+
+    /* destroy old perl */
+    PERL_SET_CONTEXT(interp);
+
+    POPSTACK_TO(PL_mainstack);
+    dounwind(-1);
+    LEAVE_SCOPE(0);
+
+    while (interp->Iscopestack_ix > 1)
+        LEAVE;
+    FREETMPS;
+
+    perl_destruct(interp);
+    perl_free(interp);
+
+    /* switch to new perl */
+    PERL_SET_CONTEXT(interp_dup);
+
+    /* continue after 'clone_with_stack' */
+    interp_dup->Iop = interp_dup->Iop->op_next;
+
+    /* run with new perl */
+    Perl_runops_standard(interp_dup);
+
+    /* We may have additional unclosed scopes if fork() was called
+     * from within a BEGIN block.  See perlfork.pod for more details.
+     * We cannot clean up these other scopes because they belong to a
+     * different interpreter, but we also cannot leave PL_scopestack_ix
+     * dangling because that can trigger an assertion in perl_destruct().
+     */
+    if (PL_scopestack_ix > oldscope) {
+        PL_scopestack[oldscope-1] = PL_scopestack[PL_scopestack_ix-1];
+        PL_scopestack_ix = oldscope;
+    }
+
+    perl_destruct(interp_dup);
+    perl_free(interp_dup);
+
+    /* call the real 'exit' not PerlProc_exit */
+#undef exit
+    exit(0);
+}
+
+#endif /* USE_ITHREDS */
 
 SV*
 take_svref(SVREF sv)
