@@ -142,10 +142,14 @@ esc_q_utf8(pTHX_ SV* sv, register const char *src, register STRLEN slen)
     STRLEN single_quotes = 0;
     STRLEN qq_escapables = 0;	/* " $ @ will need a \ in "" strings.  */
     STRLEN normal = 0;
+    int increment;
 
     /* this will need EBCDICification */
-    for (s = src; s < send; s += UTF8SKIP(s)) {
+    for (s = src; s < send; s += increment) {
         const UV k = utf8_to_uvchr((U8*)s, NULL);
+
+        /* check for invalid utf8 */
+        increment = (k == 0 && *s != '\0') ? 1 : UTF8SKIP(s);
 
 #ifdef EBCDIC
 	if (!isprint(k) || k > 256) {

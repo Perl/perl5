@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 6;
+use Test::More tests => 7;
 use Data::Dumper;
 
 {
@@ -84,5 +84,17 @@ ok(1, "[perl #56766]"); # Still no core dump? We are fine.
 Data::Dumper->Dump([*{*STDERR{IO}}]);
 ok("ok", #ok
    "empty-string glob [perl #72332]");
+
+# writing out of bounds with malformed utf8
+SKIP: {
+    eval { require Encode };
+    skip("Encode not available", 1) if $@;
+    local $^W=1;
+    local $SIG{__WARN__} = sub {};
+    my $a="\x{fc}'" x 50;
+    Encode::_utf8_on($a);
+    Dumper $a;
+    ok("ok", "no crash dumping malformed utf8 with the utf8 flag on");
+}
 
 # EOF
