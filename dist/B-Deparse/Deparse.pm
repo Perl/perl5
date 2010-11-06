@@ -4088,16 +4088,16 @@ sub pp_trans {
     my($op, $cx) = @_;
     my($from, $to);
     my $class = class($op);
+    my $priv_flags = $op->private;
     if ($class eq "PVOP") {
-	($from, $to) = tr_decode_byte($op->pv, $op->private);
+	($from, $to) = tr_decode_byte($op->pv, $priv_flags);
     } elsif ($class eq "PADOP") {
 	($from, $to)
-	  = tr_decode_utf8($self->padval($op->padix)->RV, $op->private);
+	  = tr_decode_utf8($self->padval($op->padix)->RV, $priv_flags);
     } else { # class($op) eq "SVOP"
-	($from, $to) = tr_decode_utf8($op->sv->RV, $op->private);
+	($from, $to) = tr_decode_utf8($op->sv->RV, $priv_flags);
     }
     my $flags = "";
-    my $priv_flags = $op->private;
     $flags .= "c" if $priv_flags & OPpTRANS_COMPLEMENT;
     $flags .= "d" if $priv_flags & OPpTRANS_DELETE;
     $to = "" if $from eq $to and $flags eq "";
