@@ -2022,6 +2022,105 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
     NORETURN_FUNCTION_END;
 }
 
+/* Read a single line of the main body of the swash input text.  These are of
+ * the form:
+ * 0053	0056	0073
+ * where each number is hex.  The first two numbers form the minimum and
+ * maximum of a range, and the third is the value associated with the range.
+ * Not all swashes should have a third number
+ *
+ * On input: l	  points to the beginning of the line to be examined; it points
+ *		  to somewhere in the string of the whole input text, and is
+ *		  terminated by a \n or the null string terminator.
+ *	     lend   points to the null terminator of that string
+ *	     wants_value    is non-zero if the swash expects a third number
+ *	     typestr is the name of the swash's mapping, like 'ToLower'
+ * On output: *min, *max, and *val are set to the values read from the line.
+ *	      returns a pointer just beyond the line examined.  If there was no
+ *	      valid min number on the line, returns lend+1
+ */
+
+STATIC U8*
+S_swash_scan_list_line(pTHX_ U8* l, U8* const lend, UV* min, UV* max, UV* val,
+			     const bool wants_value, const U8* const typestr)
+{
+    const int  typeto  = typestr[0] == 'T' && typestr[1] == 'o';
+    STRLEN numlen;	    /* Length of the number */
+    I32 flags = PERL_SCAN_SILENT_ILLDIGIT | PERL_SCAN_DISALLOW_PREFIX;
+
+    /* nl points to the next \n in the scan */
+    U8* const nl = (U8*)memchr(l, '\n', lend - l);
+
+    /* Get the first number on the line: the range minimum */
+    numlen = lend - l;
+    *min = grok_hex((char *)l, &numlen, &flags, NULL);
+    if (numlen)	    /* If found a hex number, position past it */
+	l += numlen;
+    else if (nl) {	    /* Else, go handle next line, if any */
+	return nl + 1;	/* 1 is length of "\n" */
+    }
+    else {		/* Else, no next line */
+	return lend + 1;	/* to LIST's end at which \n is not found */
+    }
+
+    /* The max range value follows, separated by a BLANK */
+    if (isBLANK(*l)) {
+	++l;
+	flags = PERL_SCAN_SILENT_ILLDIGIT | PERL_SCAN_DISALLOW_PREFIX;
+	numlen = lend - l;
+	*max = grok_hex((char *)l, &numlen, &flags, NULL);
+	if (numlen)
+	    l += numlen;
+	else    /* If no value here, it is a single element range */
+	    *max = *min;
+
+	/* Non-binary tables have a third entry: what the first element of the
+	 * range maps to */
+	if (wants_value) {
+	    if (isBLANK(*l)) {
+		++l;
+		flags = PERL_SCAN_SILENT_ILLDIGIT |
+			PERL_SCAN_DISALLOW_PREFIX;
+		numlen = lend - l;
+		*val = grok_hex((char *)l, &numlen, &flags, NULL);
+		if (numlen)
+		    l += numlen;
+		else
+		    *val = 0;
+	    }
+	    else {
+		*val = 0;
+		if (typeto) {
+		    Perl_croak(aTHX_ "%s: illegal mapping '%s'",
+				     typestr, l);
+		}
+	    }
+	}
+	else
+	    *val = 0; /* bits == 1, then any val should be ignored */
+    }
+    else { /* Nothing following range min, should be single element with no
+	      mapping expected */
+	*max = *min;
+	if (wants_value) {
+	    *val = 0;
+	    if (typeto) {
+		Perl_croak(aTHX_ "%s: illegal mapping '%s'", typestr, l);
+	    }
+	}
+	else
+	    *val = 0; /* bits == 1, then val should be ignored */
+    }
+
+    /* Position to next line if any, or EOF */
+    if (nl)
+	l = nl + 1;
+    else
+	l = lend;
+
+    return l;
+}
+
 /* Note:
  * Returns a swatch (a bit vector string) for a code point sequence
  * that starts from the value C<start> and comprises the number C<span>.
@@ -2044,7 +2143,6 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
     SV** const nonesvp = hv_fetchs(hv, "NONE", FALSE);
     SV** const extssvp = hv_fetchs(hv, "EXTRAS", FALSE);
     const U8* const typestr = (U8*)SvPV_nolen(*typesvp);
-    const int  typeto  = typestr[0] == 'T' && typestr[1] == 'o';
     const STRLEN bits  = SvUV(*bitssvp);
     const STRLEN octets = bits >> 3; /* if bits == 1, then octets == 0 */
     const UV     none  = SvUV(*nonesvp);
@@ -2091,79 +2189,11 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
     lend = l + lcur;
     while (l < lend) {
 	UV min, max, val;
-	STRLEN numlen;	    /* Length of the number */
-	I32 flags = PERL_SCAN_SILENT_ILLDIGIT | PERL_SCAN_DISALLOW_PREFIX;
-
-	/* nl points to the next \n in the scan */
-	U8* const nl = (U8*)memchr(l, '\n', lend - l);
-
-	/* Get the first number on the line: the range minimum */
-	numlen = lend - l;
-	min = grok_hex((char *)l, &numlen, &flags, NULL);
-	if (numlen)	    /* If found a hex number, position past it */
-	    l += numlen;
-	else if (nl) {	    /* Else, go handle next line, if any */
-	    l = nl + 1; /* 1 is length of "\n" */
-	    continue;
-	}
-	else {		    /* Else, no next line */
-	    l = lend; /* to LIST's end at which \n is not found */
+	l = S_swash_scan_list_line(aTHX_ l, lend, &min, &max, &val,
+					 cBOOL(octets), typestr);
+	if (l > lend) {
 	    break;
 	}
-
-	/* The max range value follows, separated by a BLANK */
-	if (isBLANK(*l)) {
-	    ++l;
-	    flags = PERL_SCAN_SILENT_ILLDIGIT | PERL_SCAN_DISALLOW_PREFIX;
-	    numlen = lend - l;
-	    max = grok_hex((char *)l, &numlen, &flags, NULL);
-	    if (numlen)
-		l += numlen;
-	    else    /* If no value here, it is a single element range */
-		max = min;
-
-	    /* Non-binary tables have a third entry: what the range maps to */
-	    if (octets) {
-		if (isBLANK(*l)) {
-		    ++l;
-		    flags = PERL_SCAN_SILENT_ILLDIGIT |
-			    PERL_SCAN_DISALLOW_PREFIX;
-		    numlen = lend - l;
-		    val = grok_hex((char *)l, &numlen, &flags, NULL);
-		    if (numlen)
-			l += numlen;
-		    else
-			val = 0;
-		}
-		else {
-		    val = 0;
-		    if (typeto) {
-			Perl_croak(aTHX_ "%s: illegal mapping '%s'",
-					 typestr, l);
-		    }
-		}
-	    }
-	    else
-		val = 0; /* bits == 1, then any val should be ignored */
-	}
-	else { /* Nothing following range min, should be single element with no
-		  mapping expected */
-	    max = min;
-	    if (octets) {
-		val = 0;
-		if (typeto) {
-		    Perl_croak(aTHX_ "%s: illegal mapping '%s'", typestr, l);
-		}
-	    }
-	    else
-		val = 0; /* bits == 1, then val should be ignored */
-	}
-
-	/* Position to next line if any, or EOF */
-	if (nl)
-	    l = nl + 1;
-	else
-	    l = lend;
 
 	/* If looking for something beyond this range, go try the next one */
 	if (max < start)
