@@ -121,10 +121,9 @@ been warned.
 
 =head1 FLAG VALUES
 
-The C<flags> parameter in all the I<call_*> functions is a bit mask
-which can consist of any combination of the symbols defined below,
-OR'ed together.
-
+The C<flags> parameter in all the I<call_*> functions is one of G_VOID,
+G_SCALAR, or G_ARRAY, which indicate the call context, OR'ed together
+with a bit mask of any combination of the other G_* symbols defined below.
 
 =head2  G_VOID
 

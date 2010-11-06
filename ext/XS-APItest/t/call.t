@@ -11,7 +11,7 @@ use strict;
 
 BEGIN {
     require '../../t/test.pl';
-    plan(435);
+    plan(436);
     use_ok('XS::APItest')
 };
 
@@ -148,6 +148,15 @@ for my $test (
 	[ "its_dead_jim\n" ]), "$description eval { call_method('d') }");
 
 };
+
+{
+	# these are the ones documented in perlcall.pod
+	my @flags = (G_DISCARD, G_NOARGS, G_EVAL, G_KEEPERR);
+	my $mask = 0;
+	$mask |= $_ for (@flags);
+	is(unpack('%32b*', pack('l', $mask)), @flags,
+	  "G_DISCARD and the rest are separate bits");
+}
 
 foreach my $inx ("", "aabbcc\n", [qw(aa bb cc)]) {
     foreach my $outx ("", "xxyyzz\n", [qw(xx yy zz)]) {
