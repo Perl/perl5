@@ -2035,7 +2035,10 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
     U8 *l, *lend, *x, *xend, *s;
     STRLEN lcur, xcur, scur;
     HV *const hv = MUTABLE_HV(SvRV(swash));
+
+    /* The string containing the main body of the table */
     SV** const listsvp = hv_fetchs(hv, "LIST", FALSE);
+
     SV** const typesvp = hv_fetchs(hv, "TYPE", FALSE);
     SV** const bitssvp = hv_fetchs(hv, "BITS", FALSE);
     SV** const nonesvp = hv_fetchs(hv, "NONE", FALSE);
@@ -2088,24 +2091,27 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
     lend = l + lcur;
     while (l < lend) {
 	UV min, max, val;
-	STRLEN numlen;
+	STRLEN numlen;	    /* Length of the number */
 	I32 flags = PERL_SCAN_SILENT_ILLDIGIT | PERL_SCAN_DISALLOW_PREFIX;
 
+	/* nl points to the next \n in the scan */
 	U8* const nl = (U8*)memchr(l, '\n', lend - l);
 
+	/* Get the first number on the line: the range minimum */
 	numlen = lend - l;
 	min = grok_hex((char *)l, &numlen, &flags, NULL);
-	if (numlen)
+	if (numlen)	    /* If found a hex number, position past it */
 	    l += numlen;
-	else if (nl) {
+	else if (nl) {	    /* Else, go handle next line, if any */
 	    l = nl + 1; /* 1 is length of "\n" */
 	    continue;
 	}
-	else {
+	else {		    /* Else, no next line */
 	    l = lend; /* to LIST's end at which \n is not found */
 	    break;
 	}
 
+	/* The max range value follows, separated by a BLANK */
 	if (isBLANK(*l)) {
 	    ++l;
 	    flags = PERL_SCAN_SILENT_ILLDIGIT | PERL_SCAN_DISALLOW_PREFIX;
@@ -2113,9 +2119,10 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 	    max = grok_hex((char *)l, &numlen, &flags, NULL);
 	    if (numlen)
 		l += numlen;
-	    else
+	    else    /* If no value here, it is a single element range */
 		max = min;
 
+	    /* Non-binary tables have a third entry: what the range maps to */
 	    if (octets) {
 		if (isBLANK(*l)) {
 		    ++l;
@@ -2137,9 +2144,10 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 		}
 	    }
 	    else
-		val = 0; /* bits == 1, then val should be ignored */
+		val = 0; /* bits == 1, then any val should be ignored */
 	}
-	else {
+	else { /* Nothing following range min, should be single element with no
+		  mapping expected */
 	    max = min;
 	    if (octets) {
 		val = 0;
@@ -2151,11 +2159,13 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 		val = 0; /* bits == 1, then val should be ignored */
 	}
 
+	/* Position to next line if any, or EOF */
 	if (nl)
 	    l = nl + 1;
 	else
 	    l = lend;
 
+	/* If looking for something beyond this range, go try the next one */
 	if (max < start)
 	    continue;
 
