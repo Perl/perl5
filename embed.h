@@ -810,6 +810,7 @@
 #define do_spawn_nowait(a)	Perl_do_spawn_nowait(aTHX_ a)
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
+#define _swash_inversion_hash(a)	Perl__swash_inversion_hash(aTHX_ a)
 #define av_reify(a)		Perl_av_reify(aTHX_ a)
 #define grok_bslash_c(a,b)	Perl_grok_bslash_c(aTHX_ a,b)
 #define grok_bslash_o(a,b,c,d,e)	Perl_grok_bslash_o(aTHX_ a,b,c,d,e)

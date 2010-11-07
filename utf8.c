@@ -2377,6 +2377,138 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
     return swatch;
 }
 
+HV*
+Perl__swash_inversion_hash(pTHX_ SV* swash)
+{
+
+   /* Subject to change or removal.  For use only in one place in regexec.c
+    *
+    * Returns a hash which is the inversion and closure of a swash mapping.
+    * For example, consider the input lines:
+    * 004B		006B
+    * 004C		006C
+    * 212A		006B
+    *
+    * The returned hash would have two keys, the utf8 for 006B and the utf8 for
+    * 006C.  The value for each key is an array.  For 006C, the array would
+    * have a two elements, the utf8 for itself, and for 004C.  For 006B, there
+    * would be three elements in its array, the utf8 for 006B, 004B and 212A.
+    *
+    * Essentially, for any code point, it gives all the code points that map to
+    * it, or the list of 'froms' for that point.
+    *
+    * Currently it only looks at the main body of the swash, and ignores any
+    * additions or deletions from other swashes */
+
+    U8 *l, *lend;
+    STRLEN lcur;
+    HV *const hv = MUTABLE_HV(SvRV(swash));
+
+    /* The string containing the main body of the table */
+    SV** const listsvp = hv_fetchs(hv, "LIST", FALSE);
+
+    SV** const typesvp = hv_fetchs(hv, "TYPE", FALSE);
+    SV** const bitssvp = hv_fetchs(hv, "BITS", FALSE);
+    SV** const nonesvp = hv_fetchs(hv, "NONE", FALSE);
+    /*SV** const extssvp = hv_fetchs(hv, "EXTRAS", FALSE);*/
+    const U8* const typestr = (U8*)SvPV_nolen(*typesvp);
+    const STRLEN bits  = SvUV(*bitssvp);
+    const STRLEN octets = bits >> 3; /* if bits == 1, then octets == 0 */
+    const UV     none  = SvUV(*nonesvp);
+
+    HV* ret = newHV();
+
+    PERL_ARGS_ASSERT__SWASH_INVERSION_HASH;
+
+    /* Must have at least 8 bits to get the mappings */
+    if (bits != 8 && bits != 16 && bits != 32) {
+	Perl_croak(aTHX_ "panic: swash_inversion_hash doesn't expect bits %"UVuf,
+						 (UV)bits);
+    }
+
+    /* read $swash->{LIST} */
+    l = (U8*)SvPV(*listsvp, lcur);
+    lend = l + lcur;
+
+    /* Go through each input line */
+    while (l < lend) {
+	UV min, max, val;
+	UV inverse;
+	l = S_swash_scan_list_line(aTHX_ l, lend, &min, &max, &val,
+					 cBOOL(octets), typestr);
+	if (l > lend) {
+	    break;
+	}
+
+	/* Each element in the range is to be inverted */
+	for (inverse = min; inverse <= max; inverse++) {
+	    AV* list;
+	    SV* element;
+	    SV** listp;
+	    IV i;
+	    bool found_key = FALSE;
+
+	    /* The key is the inverse mapping */
+	    char key[UTF8_MAXBYTES+1];
+	    char* key_end = (char *) uvuni_to_utf8((U8*) key, val);
+	    STRLEN key_len = key_end - key;
+
+	    /* And the value is what the forward mapping is from. */
+	    char utf8_inverse[UTF8_MAXBYTES+1];
+	    char *utf8_inverse_end = (char *) uvuni_to_utf8((U8*) utf8_inverse, inverse);
+
+	    /* Get the list for the map */
+	    if ((listp = hv_fetch(ret, key, key_len, FALSE))) {
+		list = (AV*) *listp;
+	    }
+	    else { /* No entry yet for it: create one */
+		list = newAV();
+		if (! hv_store(ret, key, key_len, (SV*) list, FALSE)) {
+		    Perl_croak(aTHX_ "panic: hv_store() unexpectedly failed");
+		}
+	    }
+
+	    for (i = 0; i < av_len(list); i++) {
+		SV** entryp = av_fetch(list, i, FALSE);
+		SV* entry;
+		if (entryp == NULL) {
+		    Perl_croak(aTHX_ "panic: av_fetch() unexpectedly failed");
+		}
+		entry = *entryp;
+		if (SvCUR(entry) != key_len) {
+		    continue;
+		}
+		if (memEQ(key, SvPVX(entry), key_len)) {
+		    found_key = TRUE;
+		    break;
+		}
+	    }
+	    if (! found_key) {
+		element = newSVpvn_flags(key, key_len, SVf_UTF8);
+		av_push(list, element);
+	    }
+
+
+	    /* Simply add the value to the list */
+	    element = newSVpvn_flags(utf8_inverse, utf8_inverse_end - utf8_inverse, SVf_UTF8);
+	    av_push(list, element);
+
+	    /* swash_get() increments the value of val for each element in the
+	     * range.  That makes more compact tables possible.  You can
+	     * express the capitalization, for example, of all consecutive
+	     * letters with a single line: 0061\t007A\t0041 This maps 0061 to
+	     * 0041, 0062 to 0042, etc.  I (khw) have never understood 'none',
+	     * and it's not documented, and perhaps not even currently used,
+	     * but I copied the semantics from swash_get(), just in case */
+	    if (!none || val < none) {
+		++val;
+	    }
+	}
+    }
+
+    return ret;
+}
+
 /*
 =for apidoc uvchr_to_utf8
 
