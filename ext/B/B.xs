@@ -894,10 +894,10 @@ threadsv_names()
 #define COP_filegv_ix		SVp | offsetof(struct cop, cop_filegv)
 #endif
 
-MODULE = B	PACKAGE = B::OP		PREFIX = OP_
+MODULE = B	PACKAGE = B::OP
 
 size_t
-OP_size(o)
+size(o)
 	B::OP		o
     CODE:
 	RETVAL = opsizes[cc_opclass(aTHX_ o)];
@@ -971,7 +971,7 @@ next(o)
 	XSRETURN(1);
 
 char *
-OP_name(o)
+name(o)
 	B::OP		o
     ALIAS:
 	desc = 1
@@ -981,7 +981,7 @@ OP_name(o)
 	RETVAL
 
 void
-OP_ppaddr(o)
+ppaddr(o)
 	B::OP		o
     PREINIT:
 	int i;
@@ -996,7 +996,7 @@ OP_ppaddr(o)
 #if PERL_VERSION >= 9
 #  These 3 are all bitfields, so we can't take their addresses.
 UV
-OP_type(o)
+type(o)
 	B::OP		o
     ALIAS:
 	opt = 1
@@ -1018,7 +1018,7 @@ OP_type(o)
 #else
 
 UV
-OP_type(o)
+type(o)
 	B::OP		o
     ALIAS:
 	seq = 1
@@ -1036,15 +1036,15 @@ OP_type(o)
 #endif
 
 void
-OP_oplist(o)
+oplist(o)
 	B::OP		o
     PPCODE:
 	SP = oplist(aTHX_ o, SP);
 
-MODULE = B	PACKAGE = B::LISTOP		PREFIX = LISTOP_
+MODULE = B	PACKAGE = B::LISTOP
 
 U32
-LISTOP_children(o)
+children(o)
 	B::LISTOP	o
 	OP *		kid = NO_INIT
 	int		i = NO_INIT
@@ -1203,10 +1203,10 @@ sv(o)
     OUTPUT:
 	RETVAL
 
-MODULE = B	PACKAGE = B::PVOP		PREFIX = PVOP_
+MODULE = B	PACKAGE = B::PVOP
 
 void
-PVOP_pv(o)
+pv(o)
 	B::PVOP	o
     CODE:
 	/*
@@ -1598,10 +1598,10 @@ REGEX(sv)
 
 #endif
 
-MODULE = B	PACKAGE = B::PV		PREFIX = Sv
+MODULE = B	PACKAGE = B::PV
 
 B::SV
-SvRV(sv)
+RV(sv)
         B::PV   sv
     CODE:
         if( SvROK(sv) ) {
@@ -1614,7 +1614,7 @@ SvRV(sv)
         RETVAL
 
 void
-SvPV(sv)
+PV(sv)
 	B::PV	sv
     ALIAS:
 	PVX = 1
@@ -1659,10 +1659,10 @@ SvPV(sv)
         }
 	ST(0) = newSVpvn_flags(p, len, SVs_TEMP | utf8);
 
-MODULE = B	PACKAGE = B::PVMG	PREFIX = Sv
+MODULE = B	PACKAGE = B::PVMG
 
 void
-SvMAGIC(sv)
+MAGIC(sv)
 	B::PVMG	sv
 	MAGIC *	mg = NO_INIT
     PPCODE:
@@ -1733,10 +1733,10 @@ MOREMAGIC(mg)
 	    break;
 	}
 
-MODULE = B	PACKAGE = B::BM		PREFIX = Bm
+MODULE = B	PACKAGE = B::BM
 
 void
-BmTABLE(sv)
+TABLE(sv)
 	B::BM	sv
 	STRLEN	len = NO_INIT
 	char *	str = NO_INIT
@@ -2000,12 +2000,12 @@ U32
 HeHASH(he)
 	B::HE he
 
-MODULE = B	PACKAGE = B::RHE	PREFIX = RHE_
+MODULE = B	PACKAGE = B::RHE
 
 #if PERL_VERSION >= 9
 
 SV*
-RHE_HASH(h)
+HASH(h)
 	B::RHE h
     CODE:
 	RETVAL = newRV( (SV*)cophh_2hv(h, 0) );
