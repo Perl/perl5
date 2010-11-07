@@ -6335,12 +6335,14 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 			}
 		    }
 		    if (!match) {
-		        U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
+		        U8 folded[UTF8_MAXBYTES_CASE+1];
 
-			STRLEN tmplen;
-			to_utf8_fold(utf8_p, tmpbuf, &tmplen);
-			if (swash_fetch(sw, tmpbuf, 1))
+			/* See if the folded version matches */
+			STRLEN foldlen;
+			to_utf8_fold(utf8_p, folded, &foldlen);
+			if (swash_fetch(sw, folded, 1)) {   /* 1 => is utf8 */
 			    match = TRUE;
+			}
 		    }
 		}
 
