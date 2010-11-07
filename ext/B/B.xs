@@ -1620,10 +1620,15 @@ SvRV(sv)
 void
 SvPV(sv)
 	B::PV	sv
+    PREINIT:
+	const char *p;
+	STRLEN len = 0;
+	U32 utf8 = 0;
     CODE:
         if( SvPOK(sv) ) {
-	    STRLEN len = SvCUR(sv);
-	    const char *p = SvPVX_const(sv);
+	    len = SvCUR(sv);
+	    p = SvPVX_const(sv);
+	    utf8 = SvUTF8(sv);
 #if PERL_VERSION < 10
 	    /* Before 5.10 (well 931b58fb28fa5ca7), PAD_COMPNAME_GEN was stored
 	       in SvCUR(), which meant we had to attempt this special casing
@@ -1634,13 +1639,13 @@ SvPV(sv)
 		len = strlen(p);
 	    }
 #endif
-	    ST(0) = newSVpvn_flags(p, len, SVs_TEMP | SvUTF8(sv));
         }
         else {
             /* XXX for backward compatibility, but should fail */
             /* croak( "argument is not SvPOK" ); */
-            ST(0) = sv_newmortal();
+	    p = NULL;
         }
+	ST(0) = newSVpvn_flags(p, len, SVs_TEMP | utf8);
 
 # This used to read 257. I think that that was buggy - should have been 258.
 # (The "\0", the flags byte, and 256 for the table.  Not that anything
