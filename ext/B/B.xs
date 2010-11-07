@@ -1600,10 +1600,6 @@ REGEX(sv)
 
 MODULE = B	PACKAGE = B::PV		PREFIX = Sv
 
-char*
-SvPVX(sv)
-	B::PV	sv
-
 B::SV
 SvRV(sv)
         B::PV   sv
@@ -1620,12 +1616,17 @@ SvRV(sv)
 void
 SvPV(sv)
 	B::PV	sv
+    ALIAS:
+	PVX = 1
     PREINIT:
 	const char *p;
 	STRLEN len = 0;
 	U32 utf8 = 0;
     CODE:
-        if( SvPOK(sv) ) {
+	if (ix) {
+	    p = SvPVX(sv);
+	    len = strlen(p);
+	} else if (SvPOK(sv)) {
 	    len = SvCUR(sv);
 	    p = SvPVX_const(sv);
 	    utf8 = SvUTF8(sv);
