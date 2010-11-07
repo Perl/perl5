@@ -1618,12 +1618,23 @@ SvPV(sv)
 	B::PV	sv
     ALIAS:
 	PVX = 1
+	PVBM = 2
     PREINIT:
 	const char *p;
 	STRLEN len = 0;
 	U32 utf8 = 0;
     CODE:
-	if (ix) {
+	if (ix == 2) {
+	    /* This used to read 257. I think that that was buggy - should have
+	       been 258. (The "\0", the flags byte, and 256 for the table.  Not
+	       that anything anywhere calls this method.  NWC.  */
+	    /* Also, the start pointer has always been SvPVX(sv). Surely it
+	       should be SvPVX(sv) + SvCUR(sv)?  The code has faithfully been
+	       refactored with this behaviour, since PVBM was added in
+	       651aa52ea1faa806.  */
+	    p = SvPVX_const(sv);
+	    len = SvCUR(sv) + (SvVALID(sv) ? 256 + PERL_FBM_TABLE_OFFSET : 0);
+	} else if (ix) {
 	    p = SvPVX(sv);
 	    len = strlen(p);
 	} else if (SvPOK(sv)) {
@@ -1647,17 +1658,6 @@ SvPV(sv)
 	    p = NULL;
         }
 	ST(0) = newSVpvn_flags(p, len, SVs_TEMP | utf8);
-
-# This used to read 257. I think that that was buggy - should have been 258.
-# (The "\0", the flags byte, and 256 for the table.  Not that anything
-# anywhere calls this method.  NWC.
-void
-SvPVBM(sv)
-	B::PV	sv
-    CODE:
-        ST(0) = newSVpvn_flags(SvPVX_const(sv),
-	    SvCUR(sv) + (SvVALID(sv) ? 256 + PERL_FBM_TABLE_OFFSET : 0),
-	    SVs_TEMP);
 
 MODULE = B	PACKAGE = B::PVMG	PREFIX = Sv
 
