@@ -879,10 +879,6 @@ use File::Glob qw(:case);
 				t/mbimbf.t
 			       },
 			   ],
-	'MAP'		=> { '' => 'dist/Math-BigInt-FastCalc/',
-			     'lib/Math/BigInt/FastCalc.pm'
-				    => 'dist/Math-BigInt-FastCalc/FastCalc.pm',
-			   },
 	'UPSTREAM'	=> 'blead',
 	},
 

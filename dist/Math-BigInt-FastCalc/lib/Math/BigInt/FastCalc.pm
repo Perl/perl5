@@ -15,7 +15,7 @@ $VERSION = '0.24';
 
 # announce that we are compatible with MBI v1.70 and up
 sub api_version () { 1; }
- 
+
 # use Calc to override the methods that we do not provide in XS
 
 for my $method (qw/
@@ -89,9 +89,9 @@ The following functions are now implemented in FastCalc.xs:
 	__strip_zeros	_copy
 
 =head1 LICENSE
- 
+
 This program is free software; you may redistribute it and/or modify it under
-the same terms as Perl itself. 
+the same terms as Perl itself.
 
 =head1 AUTHORS
 

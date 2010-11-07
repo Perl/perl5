@@ -2809,8 +2809,8 @@ dist/Locale-Maketext/t/50_super.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/60_super.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/70_fail_auto.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/90_utf8.t			See if Locale::Maketext works
-dist/Math-BigInt-FastCalc/FastCalc.pm	Math::BigInt::FastCalc extension
 dist/Math-BigInt-FastCalc/FastCalc.xs	Math::BigInt::FastCalc extension
+dist/Math-BigInt-FastCalc/lib/Math/BigInt/FastCalc.pm	Math::BigInt::FastCalc extension
 dist/Math-BigInt-FastCalc/t/bigintfc.t	Math::BigInt::FastCalc extension
 dist/Math-BigInt-FastCalc/t/bootstrap.t	Math::BigInt::FastCalc extension
 dist/Math-BigInt-FastCalc/t/leak.t	test for memory leaks in Math::BigInt::FastCalc
