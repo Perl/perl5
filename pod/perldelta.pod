@@ -297,6 +297,12 @@ C<Fcntl> has been upgraded from 1.09 to 1.10.
 
 =item *
 
+C<File::Fetch> has been upgraded from 0.24 to 0.26
+
+C<HTTP::Lite> is now supported for 'http' scheme.
+
+=item *
+
 C<File::Glob> has been upgraded from 1.09 to 1.10.
 
 =item *

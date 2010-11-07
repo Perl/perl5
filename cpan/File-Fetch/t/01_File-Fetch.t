@@ -179,7 +179,7 @@ for my $entry (@map) {
                   'http://www.cpan.org/index.html?q=1',
                   'http://www.cpan.org/index.html?q=1&y=2',
     ) {
-        for (qw[lwp wget curl lftp lynx iosock]) {
+        for (qw[lwp httplite wget curl lftp lynx iosock]) {
             _fetch_uri( http => $uri, $_ );
         }
     }

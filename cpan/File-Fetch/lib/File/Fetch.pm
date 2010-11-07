@@ -22,7 +22,7 @@ use vars    qw[ $VERBOSE $PREFER_BIN $FROM_EMAIL $USER_AGENT
                 $FTP_PASSIVE $TIMEOUT $DEBUG $WARN
             ];
 
-$VERSION        = '0.24';
+$VERSION        = '0.26';
 $VERSION        = eval $VERSION;    # avoid warnings with development releases
 $PREFER_BIN     = 0;                # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';
@@ -36,7 +36,7 @@ $WARN           = 1;
 
 ### methods available to fetch the file depending on the scheme
 $METHODS = {
-    http    => [ qw|lwp wget curl lftp lynx iosock| ],
+    http    => [ qw|lwp httplite wget curl lftp lynx iosock| ],
     ftp     => [ qw|lwp netftp wget curl lftp ncftp ftp| ],
     file    => [ qw|lwp lftp file| ],
     rsync   => [ qw|rsync| ]
@@ -498,7 +498,7 @@ sub fetch {
                 if( ref $target and UNIVERSAL::isa( $target, 'SCALAR' ) ) {
                     
                     ### open the file
-                    open my $fh, $file or do {
+                    open my $fh, "<$file" or do {
                         $self->_error(
                             loc("Could not open '%1': %2", $file, $!));
                         return;                            
@@ -584,6 +584,85 @@ sub _lwp_fetch {
     }
 }
 
+### HTTP::Lite fetching ###
+sub _httplite_fetch {
+    my $self = shift;
+    my %hash = @_;
+
+    my ($to);
+    my $tmpl = {
+        to  => { required => 1, store => \$to }
+    };
+    check( $tmpl, \%hash ) or return;
+
+    ### modules required to download with lwp ###
+    my $use_list = {
+        'HTTP::Lite'    => '2.2',
+
+    };
+
+    # https://github.com/dagolden/cpanpm/compare/master...private%2Fuse-http-lite
+
+    if( can_load(modules => $use_list) ) {
+
+        my $uri = $self->uri;
+        my $retries = 0;
+
+        RETRIES: while ( $retries++ < 5 ) {
+
+          my $http = HTTP::Lite->new();
+          # Naughty naughty but there isn't any accessor/setter
+          $http->{timeout} = $TIMEOUT if $TIMEOUT;
+          $http->http11_mode(1);
+
+          my $fh = FileHandle->new;
+
+          unless ( $fh->open($to,'>') ) {
+            return $self->_error(loc(
+                 "Could not open '%1' for writing: %2",$to,$!));
+          }
+
+          $fh->autoflush(1);
+
+          binmode $fh;
+
+          my $rc = $http->request( $uri, sub { my ($self,$dref,$cbargs) = @_; local $\; print {$cbargs} $$dref }, $fh );
+
+          close $fh;
+
+          if ( $rc == 301 || $rc == 302 ) {
+              my $loc;
+              HEADERS: for ($http->headers_array) {
+                /Location: (\S+)/ and $loc = $1, last HEADERS;
+              }
+              #$loc or last; # Think we should squeal here.
+              if ($loc =~ m!^/!) {
+                $uri =~ s{^(\w+?://[^/]+)/.*$}{$1};
+                $uri .= $loc;
+              } 
+              else {
+                $uri = $loc;
+              }
+              next RETRIES;
+          }
+          elsif ( $rc == 200 ) {
+              return $to;
+          }
+          else {
+            return $self->_error(loc("Fetch failed! HTTP response: %1 [%2]",
+                        $rc, $http->status_message));
+          }
+
+        } # Loop for 5 retries.
+
+        return $self->_error("Fetch failed! Gave up after 5 tries");
+
+    } else {
+        $METHOD_FAIL->{'httplite'} = 1;
+        return;
+    }
+}
+
 ### Simple IO::Socket::INET fetching ###
 sub _iosock_fetch {
     my $self = shift;
@@ -618,6 +697,9 @@ sub _iosock_fetch {
             return $self->_error(loc(
                  "Could not open '%1' for writing: %2",$to,$!));
         }
+
+        $fh->autoflush(1);
+        binmode $fh;
 
         my $path = File::Spec::Unix->catfile( $self->path, $self->file );
         my $req = "GET $path HTTP/1.0\x0d\x0aHost: " . $self->host . "\x0d\x0a\x0d\x0a";
@@ -654,7 +736,10 @@ sub _iosock_fetch {
             return $self->_error(loc("Got a '%1' from '%2' expected '200'",$code,$self->host));
         }
 
-        print $fh +($resp =~ m/\x0d\x0a\x0d\x0a(.*)$/s )[0];
+        {
+          local $\;
+          print $fh +($resp =~ m/\x0d\x0a\x0d\x0a(.*)$/s )[0];
+        }
         close $fh;
         return $to;
 
@@ -1266,7 +1351,7 @@ Below is a mapping of what utilities will be used in what order
 for what schemes, if available:
 
     file    => LWP, lftp, file
-    http    => LWP, wget, curl, lftp, lynx, iosock
+    http    => LWP, HTTP::Lite, wget, curl, lftp, lynx, iosock
     ftp     => LWP, Net::FTP, wget, curl, lftp, ncftp, ftp
     rsync   => rsync
 
@@ -1379,6 +1464,7 @@ Here's a quick mapping for the utilities/modules, and their names for
 the $BLACKLIST, $METHOD_FAIL and other internal functions.
 
     LWP         => lwp
+    HTTP::Lite  => httplite
     Net::FTP    => netftp
     wget        => wget
     lynx        => lynx
