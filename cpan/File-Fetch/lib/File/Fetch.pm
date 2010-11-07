@@ -22,7 +22,7 @@ use vars    qw[ $VERBOSE $PREFER_BIN $FROM_EMAIL $USER_AGENT
                 $FTP_PASSIVE $TIMEOUT $DEBUG $WARN
             ];
 
-$VERSION        = '0.26';
+$VERSION        = '0.28';
 $VERSION        = eval $VERSION;    # avoid warnings with development releases
 $PREFER_BIN     = 0;                # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';
@@ -36,8 +36,8 @@ $WARN           = 1;
 
 ### methods available to fetch the file depending on the scheme
 $METHODS = {
-    http    => [ qw|lwp httplite wget curl lftp lynx iosock| ],
-    ftp     => [ qw|lwp netftp wget curl lftp ncftp ftp| ],
+    http    => [ qw|lwp httplite wget curl lftp fetch lynx iosock| ],
+    ftp     => [ qw|lwp netftp wget curl lftp fetch ncftp ftp| ],
     file    => [ qw|lwp lftp file| ],
     rsync   => [ qw|rsync| ]
 };
@@ -54,7 +54,7 @@ use constant ON_VMS     => ($^O eq 'VMS');
 use constant ON_UNIX    => (!ON_WIN);
 use constant HAS_VOL    => (ON_WIN);
 use constant HAS_SHARE  => (ON_WIN);
-
+use constant HAS_FETCH  => ( $^O =~ m!^(freebsd|netbsd|dragonfly)$! );
 
 =pod
 
@@ -1180,6 +1180,60 @@ sub _curl_fetch {
     }
 }
 
+### /usr/bin/fetch fetch! ###
+sub _fetch_fetch {
+    my $self = shift;
+    my %hash = @_;
+
+    my ($to);
+    my $tmpl = {
+        to  => { required => 1, store => \$to }
+    };
+    check( $tmpl, \%hash ) or return;
+
+    ### see if we have a wget binary ###
+    if( HAS_FETCH and my $fetch = can_run('fetch') ) {
+
+        ### no verboseness, thanks ###
+        my $cmd = [ $fetch, '-q' ];
+
+        ### if a timeout is set, add it ###
+        push(@$cmd, '-T', $TIMEOUT) if $TIMEOUT;
+
+        ### run passive if specified ###
+        #push @$cmd, '-p' if $FTP_PASSIVE;
+        local $ENV{'FTP_PASSIVE_MODE'} = 1 if $FTP_PASSIVE;
+
+        ### set the output document, add the uri ###
+        push @$cmd, '-o', $to, $self->uri;
+
+        ### with IPC::Cmd > 0.41, this is fixed in teh library,
+        ### and there's no need for special casing any more.
+        ### DO NOT quote things for IPC::Run, it breaks stuff.
+        # $IPC::Cmd::USE_IPC_RUN
+        #    ? ($to, $self->uri)
+        #    : (QUOTE. $to .QUOTE, QUOTE. $self->uri .QUOTE);
+
+        ### shell out ###
+        my $captured;
+        unless(run( command => $cmd, 
+                    buffer  => \$captured, 
+                    verbose => $DEBUG  
+        )) {
+            ### wget creates the output document always, even if the fetch
+            ### fails.. so unlink it in that case
+            1 while unlink $to;
+            
+            return $self->_error(loc( "Command failed: %1", $captured || '' ));
+        }
+
+        return $to;
+
+    } else {
+        $METHOD_FAIL->{'wget'} = 1;
+        return;
+    }
+}
 
 ### use File::Copy for fetching file:// urls ###
 ###
@@ -1351,8 +1405,8 @@ Below is a mapping of what utilities will be used in what order
 for what schemes, if available:
 
     file    => LWP, lftp, file
-    http    => LWP, HTTP::Lite, wget, curl, lftp, lynx, iosock
-    ftp     => LWP, Net::FTP, wget, curl, lftp, ncftp, ftp
+    http    => LWP, HTTP::Lite, wget, curl, lftp, fetch, lynx, iosock
+    ftp     => LWP, Net::FTP, wget, curl, lftp, fetch, ncftp, ftp
     rsync   => rsync
 
 If you'd like to disable the use of one or more of these utilities
@@ -1362,6 +1416,10 @@ If a utility or module isn't available, it will be marked in a cache
 (see the C<$METHOD_FAIL> variable further down), so it will not be
 tried again. The C<fetch> method will only fail when all options are
 exhausted, and it was not able to retrieve the file.
+
+The C<fetch> utility is available on FreeBSD. NetBSD and Dragonfly BSD
+may also have it from C<pkgsrc>. We only check for C<fetch> on those 
+three platforms.
 
 C<iosock> is a very limited L<IO::Socket::INET> based mechanism for
 retrieving C<http> schemed urls. It doesn't follow redirects for instance.
@@ -1473,6 +1531,7 @@ the $BLACKLIST, $METHOD_FAIL and other internal functions.
     curl        => curl
     rsync       => rsync
     lftp        => lftp
+    fetch       => fetch
     IO::Socket  => iosock
 
 =head1 FREQUENTLY ASKED QUESTIONS

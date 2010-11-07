@@ -299,9 +299,12 @@ C<Fcntl> has been upgraded from 1.09 to 1.10.
 
 =item *
 
-C<File::Fetch> has been upgraded from 0.24 to 0.26
+C<File::Fetch> has been upgraded from 0.24 to 0.28
 
 C<HTTP::Lite> is now supported for 'http' scheme.
+
+The C<fetch> utility is supported on FreeBSD, NetBSD and
+Dragonfly BSD for the C<http> and C<ftp> schemes.
 
 =item *
 
