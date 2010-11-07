@@ -49,8 +49,8 @@ ok($ignoreCJK->eq("\x{9FC3}", "")); # UI since Unicode 5.1.0
 ok($ignoreCJK->eq("\x{9FC4}", "")); # UI since Unicode 5.2.0
 ok($ignoreCJK->eq("\x{9FCB}", "")); # UI since Unicode 5.2.0
 ok($ignoreCJK->gt("\x{9FCC}", "Perl"));
-ok($ignoreCJK->eq("\x{20000}", ""));
-ok($ignoreCJK->eq("\x{2A6D6}", ""));
+ok($ignoreCJK->eq("\x{20000}", "")); # ExtB since Unicode 3.1.0
+ok($ignoreCJK->eq("\x{2A6D6}", "")); # ExtB since Unicode 3.1.0
 ok($ignoreCJK->eq("\x{2A700}", "")); # ExtC since Unicode 5.2.0
 ok($ignoreCJK->eq("\x{2B734}", "")); # ExtC since Unicode 5.2.0
 
@@ -64,8 +64,8 @@ ok($ignoreCJK->gt("\x{9FBB}", "Perl"));
 ok($ignoreCJK->gt("\x{9FBC}", "Perl"));
 ok($ignoreCJK->gt("\x{9FC3}", "Perl"));
 ok($ignoreCJK->gt("\x{9FC4}", "Perl"));
-ok($ignoreCJK->gt("\x{20000}","Perl"));
-ok($ignoreCJK->gt("\x{2A6D6}","Perl"));
+ok($ignoreCJK->eq("\x{20000}", "")); # ExtB since Unicode 3.1.0
+ok($ignoreCJK->eq("\x{2A6D6}", "")); # ExtB since Unicode 3.1.0
 
 ##### 31..40
 $ignoreCJK->change(UCA_Version => 9);
@@ -90,8 +90,8 @@ ok($ignoreCJK->eq("\x{9FBB}", "")); # UI since Unicode 4.1.0
 ok($ignoreCJK->gt("\x{9FBC}", "Perl"));
 ok($ignoreCJK->gt("\x{9FC3}", "Perl"));
 ok($ignoreCJK->gt("\x{9FC4}", "Perl"));
-ok($ignoreCJK->eq("\x{20000}", ""));
-ok($ignoreCJK->eq("\x{2A6D6}", ""));
+ok($ignoreCJK->eq("\x{20000}", "")); # ExtB since Unicode 3.1.0
+ok($ignoreCJK->eq("\x{2A6D6}", "")); # ExtB since Unicode 3.1.0
 ok($ignoreCJK->gt("\x{2A700}", "Perl"));
 ok($ignoreCJK->gt("\x{2B734}", "Perl"));
 
@@ -107,8 +107,8 @@ ok($ignoreCJK->eq("\x{9FC3}", "")); # UI since Unicode 5.1.0
 ok($ignoreCJK->gt("\x{9FC4}", "Perl"));
 ok($ignoreCJK->gt("\x{9FCB}", "Perl"));
 ok($ignoreCJK->gt("\x{9FCC}", "Perl"));
-ok($ignoreCJK->eq("\x{20000}", ""));
-ok($ignoreCJK->eq("\x{2A6D6}", ""));
+ok($ignoreCJK->eq("\x{20000}", "")); # ExtB since Unicode 3.1.0
+ok($ignoreCJK->eq("\x{2A6D6}", "")); # ExtB since Unicode 3.1.0
 ok($ignoreCJK->gt("\x{2A700}", "Perl"));
 ok($ignoreCJK->gt("\x{2B734}", "Perl"));
 

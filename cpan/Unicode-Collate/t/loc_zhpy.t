@@ -4,7 +4,7 @@ use warnings;
 use Unicode::Collate::Locale;
 
 use Test;
-plan tests => 300;
+plan tests => 302;
 
 my $objZhP = Unicode::Collate::Locale->
     new(locale => 'ZH__pinyin', normalization => undef);
@@ -325,6 +325,9 @@ ok($objZhP->lt("\x{54CE}", "\x{54C0}"));
 ok($objZhP->lt("\x{54C0}", "\x{5509}"));
 ok($objZhP->lt("\x{5509}", "\x{57C3}"));
 
+ok($objZhP->lt("\x{6FED}", "\x{FA1F}"));
+ok($objZhP->lt("\x{FA1F}", "\x{85F9}"));
+
 ok($objZhP->lt("\x{57C3}", "\x{4E00}"));
 ok($objZhP->lt("\x{4E00}", "\x{8331}"));
 
@@ -341,4 +344,4 @@ ok($objZhP->lt("\x{84D9}", "\x{98F5}"));
 ok($objZhP->lt("\x{98F5}", "\x{7CF3}"));
 ok($objZhP->lt("\x{7CF3}", "\x{5497}"));
 
-# 300
+# 302

@@ -14,7 +14,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '0.65';
+our $VERSION = '0.66';
 our $PACKAGE = __PACKAGE__;
 
 my @Path = qw(Unicode Collate);
@@ -107,6 +107,11 @@ use constant CJK_ExtBIni   => 0x20000; # Unicode 3.1.0
 use constant CJK_ExtBFin   => 0x2A6D6; # Unicode 3.1.0
 use constant CJK_ExtCIni   => 0x2A700; # Unicode 5.2.0
 use constant CJK_ExtCFin   => 0x2B734; # Unicode 5.2.0
+
+my %CompatUI = map +($_ => 1), (
+    0xFA0E, 0xFA0F, 0xFA11, 0xFA13, 0xFA14, 0xFA1F,
+    0xFA21, 0xFA23, 0xFA24, 0xFA27, 0xFA28, 0xFA29,
+);
 
 # Logical_Order_Exception in PropList.txt
 my $DefaultRearrange = [ 0x0E40..0x0E44, 0x0EC0..0x0EC4 ];
@@ -667,13 +672,16 @@ sub getWt
 		} @decH);
 	}
 	return map _varCE($vbl, $_), @hangulCE;
-    } elsif (_isUIdeo($u, $self->{UCA_Version})) {
-	my $cjk  = $self->{overrideCJK};
-	my @cjkCE = $cjk ? map(_pack_override($_, $u, $der), $cjk->($u))
-		: defined $cjk && $self->{UCA_Version} <= 8
-		    ? _uideoCE_8($u) : $der->($u);
-	return map _varCE($vbl, $_), @cjkCE;
     } else {
+	my $cjk  = $self->{overrideCJK};
+	my $vers = $self->{UCA_Version};
+	if ($cjk && _isUIdeo($u, $vers)) {
+	    my @cjkCE = map _pack_override($_, $u, $der), $cjk->($u);
+	    return map _varCE($vbl, $_), @cjkCE;
+	}
+	if ($vers == 8 && defined $cjk && _isUIdeo($u, 0)) {
+	    return map _varCE($vbl, $_), _uideoCE_8($u);
+	}
 	return map _varCE($vbl, $_), $der->($u);
     }
 }
@@ -790,11 +798,13 @@ sub sort {
 
 sub _derivCE_20 {
     my $u = shift;
-    my $base = (CJK_UidIni  <= $u && $u <= CJK_UidF52) ? 0xFB40 : # CJK
+    my $base = (CJK_UidIni  <= $u && $u <= CJK_UidF52 || $CompatUI{$u})
+		? 0xFB40 : # CJK
 	       (CJK_ExtAIni <= $u && $u <= CJK_ExtAFin ||
 		CJK_ExtBIni <= $u && $u <= CJK_ExtBFin ||
-		CJK_ExtCIni <= $u && $u <= CJK_ExtCFin) ? 0xFB80  # CJK ext.
-							: 0xFBC0; # others
+		CJK_ExtCIni <= $u && $u <= CJK_ExtCFin)
+		? 0xFB80  # CJK ext.
+		: 0xFBC0; # others
     my $aaaa = $base + ($u >> 15);
     my $bbbb = ($u & 0x7FFF) | 0x8000;
     return pack(VCE_TEMPLATE, NON_VAR, $aaaa, Min2Wt, Min3Wt, $u),
@@ -803,10 +813,12 @@ sub _derivCE_20 {
 
 sub _derivCE_18 {
     my $u = shift;
-    my $base = (CJK_UidIni  <= $u && $u <= CJK_UidF51) ? 0xFB40 : # CJK
+    my $base = (CJK_UidIni  <= $u && $u <= CJK_UidF51 || $CompatUI{$u})
+		? 0xFB40 : # CJK
 	       (CJK_ExtAIni <= $u && $u <= CJK_ExtAFin ||
-		CJK_ExtBIni <= $u && $u <= CJK_ExtBFin) ? 0xFB80  # CJK ext.
-							: 0xFBC0; # others
+		CJK_ExtBIni <= $u && $u <= CJK_ExtBFin)
+		? 0xFB80  # CJK ext.
+		: 0xFBC0; # others
     my $aaaa = $base + ($u >> 15);
     my $bbbb = ($u & 0x7FFF) | 0x8000;
     return pack(VCE_TEMPLATE, NON_VAR, $aaaa, Min2Wt, Min3Wt, $u),
@@ -815,10 +827,12 @@ sub _derivCE_18 {
 
 sub _derivCE_14 {
     my $u = shift;
-    my $base = (CJK_UidIni  <= $u && $u <= CJK_UidF41) ? 0xFB40 : # CJK
+    my $base = (CJK_UidIni  <= $u && $u <= CJK_UidF41 || $CompatUI{$u})
+		? 0xFB40 : # CJK
 	       (CJK_ExtAIni <= $u && $u <= CJK_ExtAFin ||
-		CJK_ExtBIni <= $u && $u <= CJK_ExtBFin) ? 0xFB80  # CJK ext.
-							: 0xFBC0; # others
+		CJK_ExtBIni <= $u && $u <= CJK_ExtBFin)
+		? 0xFB80  # CJK ext.
+		: 0xFBC0; # others
     my $aaaa = $base + ($u >> 15);
     my $bbbb = ($u & 0x7FFF) | 0x8000;
     return pack(VCE_TEMPLATE, NON_VAR, $aaaa, Min2Wt, Min3Wt, $u),
@@ -827,10 +841,12 @@ sub _derivCE_14 {
 
 sub _derivCE_9 {
     my $u = shift;
-    my $base = (CJK_UidIni  <= $u && $u <= CJK_UidFin) ? 0xFB40 : # CJK
+    my $base = (CJK_UidIni  <= $u && $u <= CJK_UidFin || $CompatUI{$u})
+		? 0xFB40 : # CJK
 	       (CJK_ExtAIni <= $u && $u <= CJK_ExtAFin ||
-		CJK_ExtBIni <= $u && $u <= CJK_ExtBFin) ? 0xFB80  # CJK ext.
-							: 0xFBC0; # others
+		CJK_ExtBIni <= $u && $u <= CJK_ExtBFin)
+		? 0xFB80  # CJK ext.
+		: 0xFBC0; # others
     my $aaaa = $base + ($u >> 15);
     my $bbbb = ($u & 0x7FFF) | 0x8000;
     return pack(VCE_TEMPLATE, NON_VAR, $aaaa, Min2Wt, Min3Wt, $u),
@@ -841,9 +857,8 @@ sub _derivCE_8 {
     my $code = shift;
     my $aaaa =  0xFF80 + ($code >> 15);
     my $bbbb = ($code & 0x7FFF) | 0x8000;
-    return
-	pack(VCE_TEMPLATE, NON_VAR, $aaaa, 2, 1, $code),
-	pack(VCE_TEMPLATE, NON_VAR, $bbbb, 0, 0, $code);
+    return pack(VCE_TEMPLATE, NON_VAR, $aaaa, 2, 1, $code),
+	   pack(VCE_TEMPLATE, NON_VAR, $bbbb, 0, 0, $code);
 }
 
 sub _uideoCE_8 {
@@ -852,16 +867,17 @@ sub _uideoCE_8 {
 }
 
 sub _isUIdeo {
+    # $uca_vers = 0 for _uideoCE_8()
     my ($u, $uca_vers) = @_;
     return((CJK_UidIni <= $u && (
 	    $uca_vers >= 20 ? ($u <= CJK_UidF52) :
 	    $uca_vers >= 18 ? ($u <= CJK_UidF51) :
 	    $uca_vers >= 14 ? ($u <= CJK_UidF41) :
-			      ($u <= CJK_UidFin)))
+			      ($u <= CJK_UidFin))) || $CompatUI{$u}
 		||
 	(CJK_ExtAIni <= $u && $u <= CJK_ExtAFin)
 		||
-	($uca_vers >=  9 && CJK_ExtBIni <= $u && $u <= CJK_ExtBFin)
+	($uca_vers >=  8 && CJK_ExtBIni <= $u && $u <= CJK_ExtBFin)
 		||
 	($uca_vers >= 20 && CJK_ExtCIni <= $u && $u <= CJK_ExtCFin)
     );
@@ -1432,24 +1448,24 @@ B<Unicode::Normalize> is required (see also B<CAVEAT>).
 
 -- see 7.1 Derived Collation Elements, UTS #10.
 
-By default, CJK Unified Ideographs are ordered in Unicode codepoint
-order but C<CJK Unified Ideographs> are lesser than
-C<CJK Unified Ideographs Extension>.
+By default, CJK unified ideographs are ordered in Unicode codepoint
+order, but those in the CJK Unified Ideographs block are lesser than
+those in the CJK Unified Ideographs Extension A etc.
 
-    CJK Unified Ideographs:
+    In CJK Unified Ideographs block:
     U+4E00..U+9FA5 if UCA_Version is 8 to 11;
     U+4E00..U+9FBB if UCA_Version is 14 to 16;
     U+4E00..U+9FC3 if UCA_Version is 18;
     U+4E00..U+9FCB if UCA_Version is 20.
 
-    CJK Unified Ideographs Extension:
-    Ext.A (U+3400..U+4DB5)   if UCA_Version is 9 or greater;
-    Ext.B (U+20000..U+2A6D6) if UCA_Version is 9 or greater;
+    In CJK Unified Ideographs Extension blocks:
+    Ext.A (U+3400..U+4DB5) and Ext.B (U+20000..U+2A6D6) in any UCA_Version;
     Ext.C (U+2A700..U+2B734) if UCA_Version is 20.
 
-Through C<overrideCJK>, ordering of CJK Unified Ideographs can be overrided.
+Through C<overrideCJK>, ordering of CJK unified ideographs (including
+extensions) can be overrided.
 
-ex. CJK Unified Ideographs in the JIS code point order.
+ex. CJK unified ideographs in the JIS code point order.
 
   overrideCJK => sub {
       my $u = shift;             # get a Unicode codepoint
@@ -1475,37 +1491,45 @@ collation element will be used.
 The return value may be a list containing zero or more of
 an arrayref, an integer, or C<undef>.
 
-ex. ignores all CJK Unified Ideographs.
+ex. ignores all CJK unified ideographs.
 
   overrideCJK => sub {()}, # CODEREF returning empty list
 
    # where ->eq("Pe\x{4E00}rl", "Perl") is true
-   # as U+4E00 is a CJK Unified Ideograph and to be ignorable.
+   # as U+4E00 is a CJK unified ideograph and to be ignorable.
 
 If C<undef> is passed explicitly as the value for this key,
-weights for CJK Unified Ideographs are treated as undefined.
-But assignment of weight for CJK Unified Ideographs
-in <table> or C<entry> is still valid.
+weights for CJK unified ideographs are treated as undefined.
+But assignment of weight for CJK unified ideographs
+in C<table> or C<entry> is still valid.
+
+B<Note:> In addition to them, 12 CJK compatibility ideographs (C<U+FA0E>,
+C<U+FA0F>, C<U+FA11>, C<U+FA13>, C<U+FA14>, C<U+FA1F>, C<U+FA21>, C<U+FA23>,
+C<U+FA24>, C<U+FA27>, C<U+FA28>, C<U+FA29>) are also treated as CJK unified
+ideographs. But they can't be overrided via C<overrideCJK> when you use
+DUCET, as the table includes weights for them. C<table> or C<entry> has
+priority over C<overrideCJK>.
 
 =item overrideHangul
 
 -- see 7.1 Derived Collation Elements, UTS #10.
 
-By default, Hangul Syllables are decomposed into Hangul Jamo,
+By default, Hangul syllables are decomposed into Hangul Jamo,
 even if C<(normalization =E<gt> undef)>.
-But the mapping of Hangul Syllables may be overrided.
+But the mapping of Hangul syllables may be overrided.
 
 This parameter works like C<overrideCJK>, so see there for examples.
 
-If you want to override the mapping of Hangul Syllables,
-NFD, NFKD, and FCD are not appropriate,
-since they will decompose Hangul Syllables before overriding.
+If you want to override the mapping of Hangul syllables,
+NFD and NFKD are not appropriate, since NFD and NFKD will decompose
+Hangul syllables before overriding. FCD may decompose Hangul syllables
+as the case may be.
 
 If C<undef> is passed explicitly as the value for this key,
-weight for Hangul Syllables is treated as undefined
+weight for Hangul syllables is treated as undefined
 without decomposition into Hangul Jamo.
-But definition of weight for Hangul Syllables
-in <table> or C<entry> is still valid.
+But definition of weight for Hangul syllables
+in C<table> or C<entry> is still valid.
 
 =item preprocess
 
@@ -1560,7 +1584,7 @@ but it is not warned at present.>
 UTS #35 (LDML).
 
 Contractions beginning with the specified characters are suppressed,
-even if those contractions are defined in <table> or C<entry>.
+even if those contractions are defined in C<table> or C<entry>.
 
 An example for Russian and some languages using the Cyrillic script:
 
@@ -1615,7 +1639,7 @@ specified as a comment (following C<#>) on each line.
 
 -- see 6.3.4 Reducing the Repertoire, UTS #10.
 
-Undefines the collation element as if it were unassigned in the <table>.
+Undefines the collation element as if it were unassigned in the C<table>.
 This reduces the size of the table.
 If an unassigned character appears in the string to be collated,
 the sort key is made from its codepoint

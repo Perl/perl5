@@ -4,7 +4,7 @@ use strict;
 use Carp;
 use base qw(Unicode::Collate);
 
-our $VERSION = '0.65';
+our $VERSION = '0.66';
 
 use File::Spec;
 
@@ -14,7 +14,7 @@ my $PL_EXT  = '.pl';
 
 my %LocaleFile = map { ($_, $_) } qw(
    af ar az ca cs cy da eo es et fi fil fo fr ha haw
-   hr hu hy ig is ja kk kl lt lv mt nb nn nso om pl ro ru
+   hr hu hy ig is ja kk kl ko lt lv mt nb nn nso om pl ro ru
    se sk sl sq sv sw tn to tr uk vi wo yo zh
 );
    $LocaleFile{'default'}         = '';
@@ -204,6 +204,7 @@ this method returns a string C<'default'> meaning no special tailoring.
       ja                Japanese [1]
       kk                Kazakh
       kl                Kalaallisut
+      ko                Korean [2]
       lt                Lithuanian
       lv                Latvian
       mk                Macedonian
@@ -258,6 +259,10 @@ Fullwidth and halfwidth forms are identical to their normal form.
 The difference between hiragana and katakana is at the 4th level,
 the comparison also requires C<(variable =E<gt> 'Non-ignorable')>,
 and then C<katakana_before_hiragana> has no effect.
+
+[2] ko: Plenty of ideographs are sorted by their reading. Such
+an ideograph is primary (level 1) equal to, and secondary (level 2)
+greater than, the corresponding hangul syllable.
 
 =head1 INSTALL
 

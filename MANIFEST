@@ -2384,6 +2384,7 @@ cpan/Unicode-Collate/Collate/allkeys.txt	Unicode::Collate
 cpan/Unicode-Collate/Collate/CJK/Big5.pm			Unicode::Collate
 cpan/Unicode-Collate/Collate/CJK/GB2312.pm			Unicode::Collate
 cpan/Unicode-Collate/Collate/CJK/JISX0208.pm			Unicode::Collate
+cpan/Unicode-Collate/Collate/CJK/Korean.pm			Unicode::Collate
 cpan/Unicode-Collate/Collate/CJK/Pinyin.pm			Unicode::Collate
 cpan/Unicode-Collate/Collate/CJK/Stroke.pm			Unicode::Collate
 cpan/Unicode-Collate/Collate/keys.txt		Unicode::Collate
@@ -2413,6 +2414,7 @@ cpan/Unicode-Collate/Collate/Locale/is.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/ja.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/kk.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/kl.pl			Unicode::Collate
+cpan/Unicode-Collate/Collate/Locale/ko.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/lt.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/lv.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/mt.pl			Unicode::Collate
@@ -2446,6 +2448,7 @@ cpan/Unicode-Collate/Collate.pm			Unicode::Collate
 cpan/Unicode-Collate/README			Unicode::Collate
 cpan/Unicode-Collate/t/altern.t			Unicode::Collate
 cpan/Unicode-Collate/t/cjkrange.t		Unicode::Collate
+cpan/Unicode-Collate/t/compatui.t		Unicode::Collate
 cpan/Unicode-Collate/t/contract.t		Unicode::Collate
 cpan/Unicode-Collate/t/default.t		Unicode::Collate
 cpan/Unicode-Collate/t/hangtype.t		Unicode::Collate
@@ -2486,6 +2489,7 @@ cpan/Unicode-Collate/t/loc_japr.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_ja.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_kk.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_kl.t			Unicode::Collate
+cpan/Unicode-Collate/t/loc_ko.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_lt.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_lv.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_mk.t			Unicode::Collate

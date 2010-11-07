@@ -191,7 +191,7 @@ ok($objJa->eq("\x{FF3B}", "\["));
 ok($objJa->eq("\x{FF3C}", "\'"));
 ok($objJa->eq("\x{FF3D}", "\]"));
 ok($objJa->eq("\x{FF3E}", "\^"));
-ok($objJa->eq("\x{FF3F}", "\_"));
+ok($objJa->eq("\x{FF3F}", "_"));
 ok($objJa->eq("\x{FF40}", "\`"));
 ok($objJa->eq("\x{FF41}", "a"));
 ok($objJa->eq("\x{FF42}", "b"));
