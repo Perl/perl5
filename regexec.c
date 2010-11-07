@@ -6343,6 +6343,51 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 			if (swash_fetch(sw, folded, 1)) {   /* 1 => is utf8 */
 			    match = TRUE;
 			}
+			else {
+			    SV** listp;
+
+                            /* Consider "k" =~ /[K]/i.  The line above would
+                             * have just folded the 'k' to itself, and that
+                             * isn't going to match 'K'.  So we look through
+                             * the closure of everything that folds to 'k'.
+                             * That will find the 'K'.  Initialize the list, if
+                             * necessary */
+			    if (! PL_utf8_foldclosures) {
+
+				/* If the folds haven't been read in, call a fold
+			     * function to force that */
+				if (! PL_utf8_tofold) {
+				    U8 dummy[UTF8_MAXBYTES+1];
+				    STRLEN dummy_len;
+				    to_utf8_fold((U8*) "A", dummy, &dummy_len);
+				}
+				PL_utf8_foldclosures =
+					_swash_inversion_hash(PL_utf8_tofold);
+			    }
+
+                            /* The data structure is a hash with the keys every
+                             * character that is folded to, like 'k', and the
+                             * values each an array of everything that folds to
+                             * its key.  e.g. [ 'k', 'K', KELVIN_SIGN ] */
+			    if ((listp = hv_fetch(PL_utf8_foldclosures,
+					    (char *) folded, foldlen, FALSE)))
+			    {
+				AV* list = (AV*) *listp;
+				IV i;
+				for (i = 0; i <= av_len(list); i++) {
+				    SV** try_p = av_fetch(list, i, FALSE);
+				    if (try_p == NULL) {
+					Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
+				    }
+				    /* Don't have to worry about embeded nulls
+				     * since NULL isn't folded or foldable */
+				    if (swash_fetch(sw, (U8*) SvPVX(*try_p),1)) {
+					match = TRUE;
+					break;
+				    }
+				}
+			    }
+			}
 		    }
 		}
 

@@ -341,6 +341,7 @@
 #define PL_utf8_ascii		(vTHX->Iutf8_ascii)
 #define PL_utf8_cntrl		(vTHX->Iutf8_cntrl)
 #define PL_utf8_digit		(vTHX->Iutf8_digit)
+#define PL_utf8_foldclosures	(vTHX->Iutf8_foldclosures)
 #define PL_utf8_graph		(vTHX->Iutf8_graph)
 #define PL_utf8_idcont		(vTHX->Iutf8_idcont)
 #define PL_utf8_idstart		(vTHX->Iutf8_idstart)
@@ -670,6 +671,7 @@
 #define PL_Iutf8_ascii		PL_utf8_ascii
 #define PL_Iutf8_cntrl		PL_utf8_cntrl
 #define PL_Iutf8_digit		PL_utf8_digit
+#define PL_Iutf8_foldclosures	PL_utf8_foldclosures
 #define PL_Iutf8_graph		PL_utf8_graph
 #define PL_Iutf8_idcont		PL_utf8_idcont
 #define PL_Iutf8_idstart	PL_utf8_idstart

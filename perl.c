@@ -1003,6 +1003,7 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_utf8_tofold);
     SvREFCNT_dec(PL_utf8_idstart);
     SvREFCNT_dec(PL_utf8_idcont);
+    SvREFCNT_dec(PL_utf8_foldclosures);
     PL_utf8_alnum	= NULL;
     PL_utf8_ascii	= NULL;
     PL_utf8_alpha	= NULL;
@@ -1022,6 +1023,7 @@ perl_destruct(pTHXx)
     PL_utf8_tofold	= NULL;
     PL_utf8_idstart	= NULL;
     PL_utf8_idcont	= NULL;
+    PL_utf8_foldclosures = NULL;
 
     if (!specialWARN(PL_compiling.cop_warnings))
 	PerlMemShared_free(PL_compiling.cop_warnings);

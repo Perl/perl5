@@ -72,6 +72,12 @@ while (<$fh>) {
         }
     }
 }
+
+push @tests, qq[like chr(0x0430), qr/[=\x{0410}-\x{0411}]/i, 'Bug #71752 Unicode /i char in a range'];
+$count++;
+push @tests, qq[like 'a', qr/\\p{Upper}/i, "'a' =~ /\\\\p{Upper}/i"];
+$count++;
+
 eval join ";\n","plan tests=>".($count-1),@tests,"1"
     or die $@;
 __DATA__
