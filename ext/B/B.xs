@@ -1578,6 +1578,27 @@ B::SV
 SvRV(sv)
 	B::RV	sv
 
+#else
+
+MODULE = B	PACKAGE = B::REGEXP
+
+IV
+REGEX(sv)
+	B::REGEXP	sv
+    CODE:
+	/* FIXME - can we code this method more efficiently?  */
+	RETVAL = PTR2IV(sv);
+    OUTPUT:
+        RETVAL
+
+SV*
+precomp(sv)
+	B::REGEXP	sv
+    CODE:
+	RETVAL = newSVpvn( RX_PRECOMP(sv), RX_PRELEN(sv) );
+    OUTPUT:
+        RETVAL
+
 #endif
 
 MODULE = B	PACKAGE = B::PV		PREFIX = Sv
@@ -1644,29 +1665,6 @@ SvMAGIC(sv)
     PPCODE:
 	for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic)
 	    XPUSHs(make_mg_object(aTHX_ mg));
-
-MODULE = B	PACKAGE = B::REGEXP
-
-#if PERL_VERSION >= 11
-
-IV
-REGEX(sv)
-	B::REGEXP	sv
-    CODE:
-	/* FIXME - can we code this method more efficiently?  */
-	RETVAL = PTR2IV(sv);
-    OUTPUT:
-        RETVAL
-
-SV*
-precomp(sv)
-	B::REGEXP	sv
-    CODE:
-	RETVAL = newSVpvn( RX_PRECOMP(sv), RX_PRELEN(sv) );
-    OUTPUT:
-        RETVAL
-
-#endif
 
 MODULE = B	PACKAGE = B::MAGIC
 
