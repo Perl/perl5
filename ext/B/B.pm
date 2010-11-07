@@ -108,6 +108,13 @@ sub B::NULL::as_string() {""}
 *B::IV::as_string = \&B::IV::int_value;
 *B::PV::as_string = \&B::PV::PV;
 
+#  The input typemap checking makes no distinction between different SV types,
+#  so the XS body will generate the same C code, despite the different XS
+#  "types". So there is no change in behaviour from doing "newXS" like this,
+#  compared with the old approach of having a (near) duplicate XS body.
+#  We should fix the typemap checking.
+*B::IV::RV = \&B::PV::RV if $] > 5.012;
+
 my $debug;
 my $op_count = 0;
 my @parents = ();
