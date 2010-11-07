@@ -1582,20 +1582,19 @@ SvRV(sv)
 
 MODULE = B	PACKAGE = B::REGEXP
 
-IV
+void
 REGEX(sv)
 	B::REGEXP	sv
-    CODE:
-	/* FIXME - can we code this method more efficiently?  */
-	RETVAL = PTR2IV(sv);
-    OUTPUT:
-        RETVAL
-
-void
-precomp(sv)
-	B::REGEXP	sv
+    ALIAS:
+	precomp = 1
     PPCODE:
-	PUSHs(newSVpvn_flags(RX_PRECOMP(sv), RX_PRELEN(sv), SVs_TEMP));
+	if (ix) {
+	    PUSHs(newSVpvn_flags(RX_PRECOMP(sv), RX_PRELEN(sv), SVs_TEMP));
+	} else {
+	    dXSTARG;
+	    /* FIXME - can we code this method more efficiently?  */
+	    PUSHi(PTR2IV(sv));
+	}
 
 #endif
 
