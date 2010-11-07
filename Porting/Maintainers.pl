@@ -848,7 +848,7 @@ use File::Glob qw(:case);
     'Math::BigInt' =>
 	{
 	'MAINTAINER'	=> 'rafl',
-	'DISTRIBUTION'	=> 'FLORA/Math-BigInt-1.96.tar.gz',
+	'DISTRIBUTION'	=> 'FLORA/Math-BigInt-1.97.tar.gz',
 	'FILES'		=> q[dist/Math-BigInt],
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qr{^examples/},
@@ -862,7 +862,7 @@ use File::Glob qw(:case);
     'Math::BigInt::FastCalc' =>
 	{
 	'MAINTAINER'	=> 'rafl',
-	'DISTRIBUTION'	=> 'FLORA/Math-BigInt-FastCalc-0.22.tar.gz',
+	'DISTRIBUTION'	=> 'FLORA/Math-BigInt-FastCalc-0.24.tar.gz',
 	'FILES'		=> q[dist/Math-BigInt-FastCalc],
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qw{
