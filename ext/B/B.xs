@@ -1619,12 +1619,18 @@ PV(sv)
     ALIAS:
 	PVX = 1
 	PVBM = 2
+	B::BM::TABLE = 3
     PREINIT:
 	const char *p;
 	STRLEN len = 0;
 	U32 utf8 = 0;
     CODE:
-	if (ix == 2) {
+	if (ix == 3) {
+	    p = SvPV(sv, len);
+	    /* Boyer-Moore table is just after string and its safety-margin \0 */
+	    p += len + PERL_FBM_TABLE_OFFSET;
+	    len = 256;
+	} else if (ix == 2) {
 	    /* This used to read 257. I think that that was buggy - should have
 	       been 258. (The "\0", the flags byte, and 256 for the table.  Not
 	       that anything anywhere calls this method.  NWC.  */
@@ -1732,18 +1738,6 @@ MOREMAGIC(mg)
 	    }
 	    break;
 	}
-
-MODULE = B	PACKAGE = B::BM
-
-void
-TABLE(sv)
-	B::BM	sv
-	STRLEN	len = NO_INIT
-	char *	str = NO_INIT
-    CODE:
-	str = SvPV(sv, len);
-	/* Boyer-Moore table is just after string and its safety-margin \0 */
-	ST(0) = newSVpvn_flags(str + len + PERL_FBM_TABLE_OFFSET, 256, SVs_TEMP);
 
 MODULE = B	PACKAGE = B::GV		PREFIX = Gv
 
