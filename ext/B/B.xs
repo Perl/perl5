@@ -1591,13 +1591,11 @@ REGEX(sv)
     OUTPUT:
         RETVAL
 
-SV*
+void
 precomp(sv)
 	B::REGEXP	sv
-    CODE:
-	RETVAL = newSVpvn( RX_PRECOMP(sv), RX_PRELEN(sv) );
-    OUTPUT:
-        RETVAL
+    PPCODE:
+	PUSHs(newSVpvn_flags(RX_PRECOMP(sv), RX_PRELEN(sv), SVs_TEMP));
 
 #endif
 
