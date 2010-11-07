@@ -1254,16 +1254,16 @@ COP_filegv(o)
        B::COP  o
 
 #else
-#define COP_stashpv(o)	CopSTASHPV(o)
-#define COP_file(o)	CopFILE(o)
 
 char *
 COP_stashpv(o)
 	B::COP	o
-
-char *
-COP_file(o)
-	B::COP	o
+    ALIAS:
+	file = 1
+    CODE:
+	RETVAL = ix ? CopFILE(o) : CopSTASHPV(o);
+    OUTPUT:
+	RETVAL
 
 #endif
 
