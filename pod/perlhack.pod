@@ -2999,7 +2999,7 @@ each SV allocation is also logged.
 
 =head2 Profiling
 
-Depending on your platform there are various of profiling Perl.
+Depending on your platform there are various ways of profiling Perl.
 
 There are two commonly used techniques of profiling executables:
 I<statistical time-sampling> and I<basic-block counting>.

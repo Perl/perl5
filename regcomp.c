@@ -27,7 +27,7 @@
  */
 
 /* The names of the functions have been changed from regcomp and
- * regexec to  pregcomp and pregexec in order to avoid conflicts
+ * regexec to pregcomp and pregexec in order to avoid conflicts
  * with the POSIX routines of the same names.
 */
 
@@ -235,7 +235,7 @@ typedef struct RExC_state_t {
   various inplace (keyhole style) optimisations. In addition study_chunk
   and scan_commit populate this data structure with information about
   what strings MUST appear in the pattern. We look for the longest 
-  string that must appear for at a fixed location, and we look for the
+  string that must appear at a fixed location, and we look for the
   longest string that may appear at a floating location. So for instance
   in the pattern:
   
@@ -256,14 +256,14 @@ typedef struct RExC_state_t {
   - offset or min_offset
     This is the position the string must appear at, or not before.
     It also implicitly (when combined with minlenp) tells us how many
-    character must match before the string we are searching.
-    Likewise when combined with minlenp and the length of the string
+    characters must match before the string we are searching for.
+    Likewise when combined with minlenp and the length of the string it
     tells us how many characters must appear after the string we have 
     found.
   
   - max_offset
     Only used for floating strings. This is the rightmost point that
-    the string can appear at. Ifset to I32 max it indicates that the
+    the string can appear at. If set to I32 max it indicates that the
     string can occur infinitely far to the right.
   
   - minlenp
@@ -1424,7 +1424,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 
        *TODO* If we keep track of how many times each character is used we can
        remap the columns so that the table compression later on is more
-       efficient in terms of memory by ensuring most common value is in the
+       efficient in terms of memory by ensuring the most common value is in the
        middle and the least common are on the outside.  IMO this would be better
        than a most to least common mapping as theres a decent chance the most
        common letter will share a node with the least common, meaning the node
@@ -1726,7 +1726,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
            We then construct the trie using only the .next slots of the entry
            structs.
 
-           We use the .check field of the first entry of the node  temporarily to
+           We use the .check field of the first entry of the node temporarily to
            make compression both faster and easier by keeping track of how many non
            zero fields are in the node.
 
@@ -1831,7 +1831,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
            - Each states[] entry contains a .base field which indicates the
            index in the state[] array wheres its transition data is stored.
 
-           - If .base is 0 there are no  valid transitions from that node.
+           - If .base is 0 there are no valid transitions from that node.
 
            - If .base is nonzero then charid is added to it to find an entry in
            the trans array.
@@ -1845,11 +1845,11 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 
            XXX - wrong maybe?
            The following process inplace converts the table to the compressed
-           table: We first do not compress the root node 1,and mark its all its
+           table: We first do not compress the root node 1,and mark all its
            .check pointers as 1 and set its .base pointer as 1 as well. This
-           allows to do a DFA construction from the compressed table later, and
-           ensures that any .base pointers we calculate later are greater than
-           0.
+           allows us to do a DFA construction from the compressed table later,
+           and ensures that any .base pointers we calculate later are greater
+           than 0.
 
            - We set 'pos' to indicate the first entry of the second node.
 
@@ -1945,7 +1945,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 	PerlMemShared_realloc( trie->trans, trie->lasttrans
 			       * sizeof(reg_trie_trans) );
 
-    {   /* Modify the program and insert the new TRIE node*/ 
+    {   /* Modify the program and insert the new TRIE node */ 
         U8 nodetype =(U8)(flags & 0xFF);
         char *str=NULL;
         
@@ -1962,7 +1962,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
            depending on whether the thing following (in 'last') is a branch
            or not and whther first is the startbranch (ie is it a sub part of
            the alternation or is it the whole thing.)
-           Assuming its a sub part we conver the EXACT otherwise we convert
+           Assuming its a sub part we convert the EXACT otherwise we convert
            the whole branch sequence, including the first.
          */
         /* Find the node we are going to overwrite */
@@ -2182,8 +2182,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
      *  so, point the first word's .prev field at the second word. If the
      *  second already has a .prev field set, stop now. This will be the
      *  case either if we've already processed that word's accept state,
-     *  or that that state had multiple words, and the overspill words
-     *  were already linked up earlier.
+     *  or that state had multiple words, and the overspill words were
+     *  already linked up earlier.
      */
     {
 	U16 word;
@@ -2229,22 +2229,22 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 STATIC void
 S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode *stclass, U32 depth)
 {
-/* The Trie is constructed and compressed now so we can build a fail array now if its needed
+/* The Trie is constructed and compressed now so we can build a fail array if it's needed
 
    This is basically the Aho-Corasick algorithm. Its from exercise 3.31 and 3.32 in the
    "Red Dragon" -- Compilers, principles, techniques, and tools. Aho, Sethi, Ullman 1985/88
    ISBN 0-201-10088-6
 
    We find the fail state for each state in the trie, this state is the longest proper
-   suffix of the current states 'word' that is also a proper prefix of another word in our
-   trie. State 1 represents the word '' and is the thus the default fail state. This allows
+   suffix of the current state's 'word' that is also a proper prefix of another word in our
+   trie. State 1 represents the word '' and is thus the default fail state. This allows
    the DFA not to have to restart after its tried and failed a word at a given point, it
    simply continues as though it had been matching the other word in the first place.
    Consider
       'abcdgu'=~/abcdefg|cdgu/
    When we get to 'd' we are still matching the first word, we would encounter 'g' which would
-   fail, which would bring use to the state representing 'd' in the second word where we would
-   try 'g' and succeed, prodceding to match 'cdgu'.
+   fail, which would bring us to the state representing 'd' in the second word where we would
+   try 'g' and succeed, proceeding to match 'cdgu'.
  */
  /* add a fail transition */
     const U32 trie_offset = ARG(source);
@@ -2768,13 +2768,13 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
 		   We have two cases
 
-		     1. patterns where the whole set of branch can be converted. 
+		     1. patterns where the whole set of branches can be converted. 
 
 		     2. patterns where only a subset can be converted.
 
 		   In case 1 we can replace the whole set with a single regop
 		   for the trie. In case 2 we need to keep the start and end
-		   branchs so
+		   branches so
 
 		     'BRANCH EXACT; BRANCH EXACT; BRANCH X'
 		     becomes BRANCH TRIE; BRANCH X;
@@ -3375,7 +3375,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		else if ((OP(oscan) == CURLYX)
 			 && (flags & SCF_WHILEM_VISITED_POS)
 			 /* See the comment on a similar expression above.
-			    However, this time it not a subexpression
+			    However, this time it's not a subexpression
 			    we care about, but the expression itself. */
 			 && (maxcount == REG_INFTY)
 			 && data && ++data->whilem_c < 16) {
@@ -3899,7 +3899,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                 int f = 0;
                 /* We use SAVEFREEPV so that when the full compile 
                     is finished perl will clean up the allocated 
-                    minlens when its all done. This was we don't
+                    minlens when it's all done. This way we don't
                     have to worry about freeing them when we know
                     they wont be used, which would be a pain.
                  */
@@ -5981,7 +5981,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     /*
                     Diagram of capture buffer numbering.
                     Top line is the normal capture buffer numbers
-                    Botton line is the negative indexing as from
+                    Bottom line is the negative indexing as from
                     the X (the (?-2))
 
                     +   1 2    3 4 5 X          6 7
@@ -6310,7 +6310,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         }
 	                break;
                     case '-':
-                        /* A flag is a default iff it is following a minus,  so
+                        /* A flag is a default iff it is following a minus, so
                          * if there is a minus, it means will be trying to
                          * re-specify a default which is an error */
                         if (has_use_defaults || flagsp == &negflags) {
@@ -8809,7 +8809,7 @@ S_reg_skipcomment(pTHX_ RExC_state_t *pRExC_state)
 
 /* nextchar()
 
-   Advance that parse position, and optionally absorbs
+   Advances the parse position, and optionally absorbs
    "whitespace" from the inputstream.
 
    Without /x "whitespace" means (?#...) style comments only,
@@ -9638,7 +9638,7 @@ Perl_re_intuit_string(pTHX_ REGEXP * const r)
    
    handles refcounting and freeing the perl core regexp structure. When 
    it is necessary to actually free the structure the first thing it 
-   does is call the 'free' method of the regexp_engine associated to to 
+   does is call the 'free' method of the regexp_engine associated to
    the regexp, allowing the handling of the void *pprivate; member 
    first. (This routine is not overridable by extensions, which is why 
    the extensions free is called first.)
@@ -9751,7 +9751,7 @@ Perl_reg_temp_copy (pTHX_ REGEXP *ret_x, REGEXP *rx)
 
    Free the private data in a regexp. This is overloadable by 
    extensions. Perl takes care of the regexp structure in pregfree(), 
-   this covers the *pprivate pointer which technically perldoesnt 
+   this covers the *pprivate pointer which technically perl doesn't 
    know about, however of course we have to handle the 
    regexp_internal structure when no extension is in use. 
    
