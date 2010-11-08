@@ -1074,11 +1074,12 @@ PMOP_pmreplroot(o)
 	B::PMOP		o
     CODE:
 	if (o->op_type == OP_PUSHRE) {
-	    ST(0) = sv_newmortal();
 #  ifdef USE_ITHREADS
+	    ST(0) = sv_newmortal();
             sv_setiv(ST(0), o->op_pmreplrootu.op_pmtargetoff);
 #  else
 	    GV *const target = o->op_pmreplrootu.op_pmtargetgv;
+	    ST(0) = sv_newmortal();
 	    sv_setiv(newSVrv(ST(0), target ?
 			     svclassnames[SvTYPE((SV*)target)] : "B::SV"),
 		     PTR2IV(target));
