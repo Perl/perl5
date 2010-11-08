@@ -291,8 +291,9 @@ make_temp_object(pTHX_ SV *temp)
 }
 
 static SV *
-make_warnings_object(pTHX_ STRLEN *warnings)
+make_warnings_object(pTHX_ const COP *const cop)
 {
+    const STRLEN *const warnings = cop->cop_warnings;
     const char *type = 0;
     dMY_CXT;
     IV iv = sizeof(specialsv_list)/sizeof(SV*);
@@ -1276,7 +1277,7 @@ COP_warnings(o)
 	B::COP	o
 	PPCODE:
 #if PERL_VERSION >= 9
-	ST(0) = make_warnings_object(aTHX_ o->cop_warnings);
+	ST(0) = make_warnings_object(aTHX_ o);
 #else
 	ST(0) = make_sv_object(aTHX_ NULL, o->cop_warnings);
 #endif
