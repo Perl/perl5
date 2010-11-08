@@ -1242,16 +1242,16 @@ COP_label(o)
 # above (B::OP::next)
  
 #ifdef USE_ITHREADS
-#define COP_stash(o)	CopSTASH(o)
-#define COP_filegv(o)	CopFILEGV(o)
 
-B::HV
+B::SV
 COP_stash(o)
 	B::COP	o
-
-B::GV
-COP_filegv(o)
-       B::COP  o
+    ALIAS:
+	filegv = 1
+    CODE:
+	RETVAL = ix ? (SV *)CopFILEGV(o) : (SV *)CopSTASH(o);
+    OUTPUT:
+	RETVAL
 
 #else
 
