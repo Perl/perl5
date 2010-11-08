@@ -223,6 +223,13 @@ fix crashing or security issues (as above).
 
 =item *
 
+Minimal patches that fix platform-specific test failures or
+installation issues are acceptable. When these changes are made
+to dual-life modules for which CPAN is canonical, any changes
+should be coordinated with the upstream author.
+
+=item *
+
 New versions of dual-life modules should NOT be imported into maint.
 Those belong in the next stable series.
 
