@@ -243,18 +243,13 @@ make_op_object(pTHX_ const OP *o)
     return opsv;
 }
 
-/* FIXME - figure out how to get the typemap to assign this to ST(0), rather
-   than creating a new mortal for ST(0) then passing it in as the first
-   argument.  */
 static SV *
-make_sv_object(pTHX_ SV *arg, SV *sv)
+make_sv_object(pTHX_ SV *sv)
 {
+    SV *const arg = sv_newmortal();
     const char *type = 0;
     IV iv;
     dMY_CXT;
-
-    if (!arg)
-	arg = sv_newmortal();
 
     for (iv = 0; iv < sizeof(specialsv_list)/sizeof(SV*); iv++) {
 	if (sv == specialsv_list[iv]) {
@@ -329,10 +324,10 @@ make_cop_io_object(pTHX_ COP *cop)
     Perl_emulate_cop_io(aTHX_ cop, value);
 
     if(SvOK(value)) {
-	return make_sv_object(aTHX_ NULL, value);
+	return make_sv_object(aTHX_ value);
     } else {
 	SvREFCNT_dec(value);
-	return make_sv_object(aTHX_ NULL, NULL);
+	return make_sv_object(aTHX_ NULL);
     }
 }
 #endif
@@ -627,7 +622,7 @@ static XSPROTO(intrpvar_sv_common)
 #else
     ret = *(SV **)(XSANY.any_ptr);
 #endif
-    ST(0) = make_sv_object(aTHX_ NULL, ret);
+    ST(0) = make_sv_object(aTHX_ ret);
     XSRETURN(1);
 }
 
@@ -694,8 +689,8 @@ amagic_generation()
 void
 comppadlist()
     PPCODE:
-	PUSHs(make_sv_object(aTHX_ NULL, (SV *)(PL_main_cv ? CvPADLIST(PL_main_cv)
-						: CvPADLIST(PL_compcv))));
+	PUSHs(make_sv_object(aTHX_ (SV *)(PL_main_cv ? CvPADLIST(PL_main_cv)
+						     : CvPADLIST(PL_compcv))));
 
 void
 sv_undef()
@@ -703,9 +698,9 @@ sv_undef()
 	sv_no = 1
 	sv_yes = 2
     PPCODE:
-	PUSHs(make_sv_object(aTHX_ NULL, ix > 1 ? &PL_sv_yes
-						: ix < 1 ? &PL_sv_undef
-							 : &PL_sv_no));
+	PUSHs(make_sv_object(aTHX_ ix > 1 ? &PL_sv_yes
+					  : ix < 1 ? &PL_sv_undef
+						   : &PL_sv_no));
 
 void
 main_root()
@@ -752,7 +747,7 @@ svref_2object(sv)
     PPCODE:
 	if (!SvROK(sv))
 	    croak("argument is not a reference");
-	PUSHs(make_sv_object(aTHX_ NULL, SvRV(sv)));
+	PUSHs(make_sv_object(aTHX_ SvRV(sv)));
 
 void
 opnumber(name)
@@ -944,7 +939,7 @@ next(o)
 	    ret = sv_2mortal(newSVuv(*((U32*)ptr)));
 	    break;
 	case (U8)(SVp >> 16):
-	    ret = make_sv_object(aTHX_ NULL, *((SV **)ptr));
+	    ret = make_sv_object(aTHX_ *((SV **)ptr));
 	    break;
 	case (U8)(line_tp >> 16):
 	    ret = sv_2mortal(newSVuv(*((line_t *)ptr)));
@@ -1109,7 +1104,7 @@ void
 PMOP_pmstash(o)
 	B::PMOP		o
     PPCODE:
-	PUSHs(make_sv_object(aTHX_ NULL, (SV *) PmopSTASH(o)));
+	PUSHs(make_sv_object(aTHX_ (SV *) PmopSTASH(o)));
 
 #endif
 
@@ -1194,7 +1189,7 @@ sv(o)
 	} else {
 	    ret = NULL;
 	}
-	PUSHs(make_sv_object(aTHX_ NULL, ret));
+	PUSHs(make_sv_object(aTHX_ ret));
 
 MODULE = B	PACKAGE = B::PVOP
 
@@ -1242,7 +1237,7 @@ COP_stash(o)
     ALIAS:
 	filegv = 1
     PPCODE:
-	PUSHs(make_sv_object(aTHX_ NULL,
+	PUSHs(make_sv_object(aTHX_
 			     ix ? (SV *)CopFILEGV(o) : (SV *)CopSTASH(o)));
 
 #else
@@ -1272,7 +1267,7 @@ COP_warnings(o)
 #if PERL_VERSION >= 9
 	ST(0) = ix ? make_cop_io_object(aTHX_ o) : make_warnings_object(aTHX_ o);
 #else
-	ST(0) = make_sv_object(aTHX_ NULL, ix ? o->cop_io : o->cop_warnings);
+	ST(0) = make_sv_object(aTHX_ ix ? o->cop_io : o->cop_warnings);
 #endif
 	XSRETURN(1);
 
@@ -1478,7 +1473,7 @@ IVX(sv)
 	ptr = (ix & 0xFFFF) + (char *)SvANY(sv);
 	switch ((U8)(ix >> 16)) {
 	case (U8)(sv_SVp >> 16):
-	    ret = make_sv_object(aTHX_ NULL, *((SV **)ptr));
+	    ret = make_sv_object(aTHX_ *((SV **)ptr));
 	    break;
 	case (U8)(sv_IVp >> 16):
 	    ret = sv_2mortal(newSViv(*((IV *)ptr)));
@@ -1561,7 +1556,7 @@ void
 SvRV(sv)
 	B::RV	sv
     PPCODE:
-	PUSHs(make_sv_object(aTHX_ NULL, SvRV(sv)));
+	PUSHs(make_sv_object(aTHX_ SvRV(sv)));
 
 #else
 
@@ -1591,7 +1586,7 @@ RV(sv)
     PPCODE:
         if (!SvROK(sv))
             croak( "argument is not SvROK" );
-	PUSHs(make_sv_object(aTHX_ NULL, SvRV(sv)));
+	PUSHs(make_sv_object(aTHX_ SvRV(sv)));
 
 void
 PV(sv)
@@ -1688,14 +1683,14 @@ MOREMAGIC(mg)
 	    mPUSHi(mg->mg_len);
 	    break;
 	case 5:
-	    PUSHs(make_sv_object(aTHX_ NULL, mg->mg_obj));
+	    PUSHs(make_sv_object(aTHX_ mg->mg_obj));
 	    break;
 	case 6:
 	    if (mg->mg_ptr) {
 		if (mg->mg_len >= 0) {
 		    PUSHs(newSVpvn_flags(mg->mg_ptr, mg->mg_len, SVs_TEMP));
 		} else if (mg->mg_len == HEf_SVKEY) {
-		    PUSHs(make_sv_object(aTHX_ NULL, (SV*)mg->mg_ptr));
+		    PUSHs(make_sv_object(aTHX_ (SV*)mg->mg_ptr));
 		} else
 		    PUSHs(sv_newmortal());
 	    } else
@@ -1797,7 +1792,7 @@ SV(gv)
 	ptr = (ix & 0xFFFF) + (char *)gp;
 	switch ((U8)(ix >> 16)) {
 	case (U8)(SVp >> 16):
-	    ret = make_sv_object(aTHX_ NULL, *((SV **)ptr));
+	    ret = make_sv_object(aTHX_ *((SV **)ptr));
 	    break;
 	case (U8)(U32p >> 16):
 	    ret = sv_2mortal(newSVuv(*((U32*)ptr)));
@@ -1813,7 +1808,7 @@ void
 FILEGV(gv)
 	B::GV	gv
     PPCODE:
-	PUSHs(make_sv_object(aTHX_ NULL, (SV *)GvFILEGV(gv)));
+	PUSHs(make_sv_object(aTHX_ (SV *)GvFILEGV(gv)));
 
 MODULE = B	PACKAGE = B::IO		PREFIX = Io
 
@@ -1862,7 +1857,7 @@ AvARRAY(av)
 	    SV **svp = AvARRAY(av);
 	    I32 i;
 	    for (i = 0; i <= AvFILL(av); i++)
-		XPUSHs(make_sv_object(aTHX_ NULL, svp[i]));
+		XPUSHs(make_sv_object(aTHX_ svp[i]));
 	}
 
 void
@@ -1871,9 +1866,9 @@ AvARRAYelt(av, idx)
 	int	idx
     PPCODE:
     	if (idx >= 0 && AvFILL(av) >= 0 && idx <= AvFILL(av))
-	    XPUSHs(make_sv_object(aTHX_ NULL, (AvARRAY(av)[idx])));
+	    XPUSHs(make_sv_object(aTHX_ (AvARRAY(av)[idx])));
 	else
-	    XPUSHs(make_sv_object(aTHX_ NULL, NULL));
+	    XPUSHs(make_sv_object(aTHX_ NULL));
 
 #if PERL_VERSION < 9
 				   
@@ -1913,7 +1908,7 @@ CvXSUB(cv)
 	XSUBANY = 1
     CODE:
 	ST(0) = ix && CvCONST(cv)
-	    ? make_sv_object(aTHX_ NULL, (SV *)CvXSUBANY(cv).any_ptr)
+	    ? make_sv_object(aTHX_ (SV *)CvXSUBANY(cv).any_ptr)
 	    : sv_2mortal(newSViv(CvISXSUB(cv)
 				 ? (ix ? CvXSUBANY(cv).any_iv
 				       : PTR2IV(CvXSUB(cv)))
@@ -1923,7 +1918,7 @@ void
 const_sv(cv)
 	B::CV	cv
     PPCODE:
-	PUSHs(make_sv_object(aTHX_ NULL, (SV *)cv_const_sv(cv)));
+	PUSHs(make_sv_object(aTHX_ (SV *)cv_const_sv(cv)));
 
 MODULE = B	PACKAGE = B::HV		PREFIX = Hv
 
@@ -1957,7 +1952,7 @@ HvARRAY(hv)
 	    EXTEND(sp, HvKEYS(hv) * 2);
 	    while ((sv = hv_iternextsv(hv, &key, &len))) {
 		mPUSHp(key, len);
-		PUSHs(make_sv_object(aTHX_ NULL, sv));
+		PUSHs(make_sv_object(aTHX_ sv));
 	    }
 	}
 
@@ -1969,7 +1964,7 @@ HeVAL(he)
     ALIAS:
 	SVKEY_force = 1
     PPCODE:
-	PUSHs(make_sv_object(aTHX_ NULL, ix ? HeSVKEY_force(he) : HeVAL(he)));
+	PUSHs(make_sv_object(aTHX_ ix ? HeSVKEY_force(he) : HeVAL(he)));
 
 U32
 HeHASH(he)
