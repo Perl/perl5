@@ -1669,7 +1669,7 @@ MOREMAGIC(mg)
 	PRIVATE = 1
 	TYPE = 2
 	FLAGS = 3
-	LEN = 4
+	LENGTH = 4
 	OBJ = 5
 	PTR = 6
 	REGEX = 7
