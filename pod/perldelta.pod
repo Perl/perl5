@@ -330,7 +330,11 @@ C<I18N::Langinfo> has been upgraded from 0.06 to 0.07.
 
 =item *
 
-C<Locale::Maketext> has been upgraded from 1.16 to 1.17
+C<Locale::Maketext> has been upgraded from 1.16 to 1.17.
+
+=item *
+
+C<Math::BigInt> has been upgraded from 1.97 to 1.98.
 
 =item *
 
