@@ -691,22 +691,21 @@ amagic_generation()
     OUTPUT:
 	RETVAL
 
-B::AV
+void
 comppadlist()
-    CODE:
-	RETVAL = PL_main_cv ? CvPADLIST(PL_main_cv) : CvPADLIST(PL_compcv);
-    OUTPUT:
-	RETVAL
+    PPCODE:
+	PUSHs(make_sv_object(aTHX_ NULL, (SV *)(PL_main_cv ? CvPADLIST(PL_main_cv)
+						: CvPADLIST(PL_compcv))));
 
-B::SV
+void
 sv_undef()
     ALIAS:
 	sv_no = 1
 	sv_yes = 2
-    CODE:
-	RETVAL = ix > 1 ? &PL_sv_yes : ix < 1 ? &PL_sv_undef : &PL_sv_no;
-    OUTPUT:
-	RETVAL
+    PPCODE:
+	PUSHs(make_sv_object(aTHX_ NULL, ix > 1 ? &PL_sv_yes
+						: ix < 1 ? &PL_sv_undef
+							 : &PL_sv_no));
 
 void
 main_root()
@@ -747,15 +746,13 @@ IV
 address(sv)
 	SV *	sv
 
-B::SV
+void
 svref_2object(sv)
 	SV *	sv
-    CODE:
+    PPCODE:
 	if (!SvROK(sv))
 	    croak("argument is not a reference");
-	RETVAL = (SV*)SvRV(sv);
-    OUTPUT:
-	RETVAL              
+	PUSHs(make_sv_object(aTHX_ NULL, SvRV(sv)));
 
 void
 opnumber(name)
@@ -1107,11 +1104,12 @@ PMOP_pmstashpv(o)
 	B::PMOP		o
 
 #else
-#define PMOP_pmstash(o)		PmopSTASH(o);
 
-B::HV
+void
 PMOP_pmstash(o)
 	B::PMOP		o
+    PPCODE:
+	PUSHs(make_sv_object(aTHX_ NULL, (SV *) PmopSTASH(o)));
 
 #endif
 
@@ -1177,25 +1175,26 @@ BOOT:
 
 MODULE = B	PACKAGE = B::PADOP
 
-B::SV
+void
 sv(o)
 	B::PADOP o
+    PREINIT:
+	SV *ret;
     ALIAS:
 	gv = 1
-    CODE:
+    PPCODE:
 	/* It happens that the output typemaps for B::SV and B::GV are
 	   identical. The "smarts" are in make_sv_object(), which determines
 	   which class to use based on SvTYPE(), rather than anything baked in
 	   at compile time.  */	   
 	if (o->op_padix) {
-	    RETVAL = PAD_SVl(o->op_padix);
-	    if (ix && SvTYPE(RETVAL) != SVt_PVGV)
-		RETVAL = NULL;
+	    ret = PAD_SVl(o->op_padix);
+	    if (ix && SvTYPE(ret) != SVt_PVGV)
+		ret = NULL;
 	} else {
-	    RETVAL = NULL;
+	    ret = NULL;
 	}
-    OUTPUT:
-	RETVAL
+	PUSHs(make_sv_object(aTHX_ NULL, ret));
 
 MODULE = B	PACKAGE = B::PVOP
 
@@ -1237,15 +1236,14 @@ COP_label(o)
  
 #ifdef USE_ITHREADS
 
-B::SV
+void
 COP_stash(o)
 	B::COP	o
     ALIAS:
 	filegv = 1
-    CODE:
-	RETVAL = ix ? (SV *)CopFILEGV(o) : (SV *)CopSTASH(o);
-    OUTPUT:
-	RETVAL
+    PPCODE:
+	PUSHs(make_sv_object(aTHX_ NULL,
+			     ix ? (SV *)CopFILEGV(o) : (SV *)CopSTASH(o)));
 
 #else
 
@@ -1559,9 +1557,11 @@ SvNV(sv)
 
 MODULE = B	PACKAGE = B::RV		PREFIX = Sv
 
-B::SV
+void
 SvRV(sv)
 	B::RV	sv
+    PPCODE:
+	PUSHs(make_sv_object(aTHX_ NULL, SvRV(sv)));
 
 #else
 
@@ -1585,18 +1585,13 @@ REGEX(sv)
 
 MODULE = B	PACKAGE = B::PV
 
-B::SV
+void
 RV(sv)
         B::PV   sv
-    CODE:
-        if( SvROK(sv) ) {
-            RETVAL = SvRV(sv);
-        }
-        else {
+    PPCODE:
+        if (!SvROK(sv))
             croak( "argument is not SvROK" );
-        }
-    OUTPUT:
-        RETVAL
+	PUSHs(make_sv_object(aTHX_ NULL, SvRV(sv)));
 
 void
 PV(sv)
@@ -1814,9 +1809,11 @@ SV(gv)
 	ST(0) = ret;
 	XSRETURN(1);
 
-B::GV
-GvFILEGV(gv)
+void
+FILEGV(gv)
 	B::GV	gv
+    PPCODE:
+	PUSHs(make_sv_object(aTHX_ NULL, (SV *)GvFILEGV(gv)));
 
 MODULE = B	PACKAGE = B::IO		PREFIX = Io
 
@@ -1922,11 +1919,11 @@ CvXSUB(cv)
 				       : PTR2IV(CvXSUB(cv)))
 				 : 0));
 
-MODULE = B	PACKAGE = B::CV		PREFIX = cv_
-
-B::SV
-cv_const_sv(cv)
+void
+const_sv(cv)
 	B::CV	cv
+    PPCODE:
+	PUSHs(make_sv_object(aTHX_ NULL, (SV *)cv_const_sv(cv)));
 
 MODULE = B	PACKAGE = B::HV		PREFIX = Hv
 
@@ -1944,7 +1941,7 @@ B::PMOP
 HvPMROOT(hv)
 	B::HV	hv
     PPCODE:
-	PUSHs(make_op_object(aTHX_ HvPMROOT(hv));
+	PUSHs(make_op_object(aTHX_ HvPMROOT(hv)));
 
 #endif
 
@@ -1966,15 +1963,13 @@ HvARRAY(hv)
 
 MODULE = B	PACKAGE = B::HE		PREFIX = He
 
-B::SV
+void
 HeVAL(he)
 	B::HE he
     ALIAS:
 	SVKEY_force = 1
-    CODE:
-	RETVAL = ix ? HeSVKEY_force(he) : HeVAL(he);
-    OUTPUT:
-	RETVAL
+    PPCODE:
+	PUSHs(make_sv_object(aTHX_ NULL, ix ? HeSVKEY_force(he) : HeVAL(he)));
 
 U32
 HeHASH(he)
