@@ -338,7 +338,7 @@ C<Math::BigInt> has been upgraded from 1.97 to 1.98.
 
 =item *
 
-C<Math::BigInt::FastCalc> has been upgraded from 0.22 to 0.23.
+C<Math::BigInt::FastCalc> has been upgraded from 0.22 to 0.24.
 
 =item *
 
