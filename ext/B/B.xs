@@ -1275,22 +1275,13 @@ COP_arybase(o)
 void
 COP_warnings(o)
 	B::COP	o
-	PPCODE:
+    ALIAS:
+	io = 1
+    PPCODE:
 #if PERL_VERSION >= 9
-	ST(0) = make_warnings_object(aTHX_ o);
+	ST(0) = ix ? make_cop_io_object(aTHX_ o) : make_warnings_object(aTHX_ o);
 #else
-	ST(0) = make_sv_object(aTHX_ NULL, o->cop_warnings);
-#endif
-	XSRETURN(1);
-
-void
-COP_io(o)
-	B::COP	o
-	PPCODE:
-#if PERL_VERSION >= 9
-	ST(0) = make_cop_io_object(aTHX_ o);
-#else
-	ST(0) = make_sv_object(aTHX_ NULL, o->cop_io);
+	ST(0) = make_sv_object(aTHX_ NULL, ix ? o->cop_io : o->cop_warnings);
 #endif
 	XSRETURN(1);
 
