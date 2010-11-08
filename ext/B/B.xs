@@ -235,10 +235,12 @@ cc_opclass(pTHX_ const OP *o)
     return OPc_BASEOP;
 }
 
-static char *
-cc_opclassname(pTHX_ const OP *o)
+static SV *
+make_op_object(pTHX_ const OP *o)
 {
-    return (char *)opclassnames[cc_opclass(aTHX_ o)];
+    SV *opsv = sv_newmortal();
+    sv_setiv(newSVrv(opsv, opclassnames[cc_opclass(aTHX_ o)]), PTR2IV(o));
+    return opsv;
 }
 
 /* FIXME - figure out how to get the typemap to assign this to ST(0), rather
@@ -484,7 +486,7 @@ walkoptree(pTHX_ OP *o, const char *method, SV *ref)
     dSP;
     OP *kid;
     SV *object;
-    const char *const classname = cc_opclassname(aTHX_ o);
+    const char *const classname = opclassnames[cc_opclass(aTHX_ o)];
     dMY_CXT;
 
     /* Check that no-one has changed our reference, or is holding a reference
@@ -529,7 +531,6 @@ static SV **
 oplist(pTHX_ OP *o, SV **SP)
 {
     for(; o; o = o->op_next) {
-	SV *opsv;
 #if PERL_VERSION >= 9
 	if (o->op_opt == 0)
 	    break;
@@ -539,9 +540,7 @@ oplist(pTHX_ OP *o, SV **SP)
 	    break;
 	o->op_seq = 0;
 #endif
-	opsv = sv_newmortal();
-	sv_setiv(newSVrv(opsv, cc_opclassname(aTHX_ (OP*)o)), PTR2IV(o));
-	XPUSHs(opsv);
+	XPUSHs(make_op_object(aTHX_ o));
         switch (o->op_type) {
 	case OP_SUBST:
             SP = oplist(aTHX_ PMOP_pmreplstart(cPMOPo), SP);
@@ -709,14 +708,12 @@ sv_undef()
     OUTPUT:
 	RETVAL
 
-B::OP
+void
 main_root()
     ALIAS:
 	main_start = 1
-    CODE:
-	RETVAL = ix ? PL_main_start : PL_main_root;
-    OUTPUT:
-	RETVAL
+    PPCODE:
+	PUSHs(make_op_object(aTHX_ ix ? PL_main_start : PL_main_root));
 
 UV
 sub_generation()
@@ -938,12 +935,8 @@ next(o)
 	ptr = (ix & 0xFFFF) + (char *)o;
 	switch ((U8)(ix >> 16)) {
 	case (U8)(OPp >> 16):
-	    {
-		OP *const o2 = *((OP **)ptr);
-		ret = sv_newmortal();
-		sv_setiv(newSVrv(ret, cc_opclassname(aTHX_ o2)), PTR2IV(o2));
-		break;
-	    }
+	    ret = make_op_object(aTHX_ *((OP **)ptr));
+	    break;
 	case (U8)(PADOFFSETp >> 16):
 	    ret = sv_2mortal(newSVuv(*((PADOFFSET*)ptr)));
 	    break;
@@ -1066,10 +1059,10 @@ PMOP_pmreplroot(o)
 	B::PMOP		o
 	OP *		root = NO_INIT
     CODE:
-	ST(0) = sv_newmortal();
 	root = o->op_pmreplroot;
 	/* OP_PUSHRE stores an SV* instead of an OP* in op_pmreplroot */
 	if (o->op_type == OP_PUSHRE) {
+	    ST(0) = sv_newmortal();
 #  ifdef USE_ITHREADS
             sv_setiv(ST(0), INT2PTR(PADOFFSET,root) );
 #  else
@@ -1079,7 +1072,7 @@ PMOP_pmreplroot(o)
 #  endif
 	}
 	else {
-	    sv_setiv(newSVrv(ST(0), cc_opclassname(aTHX_ root)), PTR2IV(root));
+	    ST(0) = make_op_object(aTHX_ root);
 	}
 
 #else
@@ -1088,8 +1081,8 @@ void
 PMOP_pmreplroot(o)
 	B::PMOP		o
     CODE:
-	ST(0) = sv_newmortal();
 	if (o->op_type == OP_PUSHRE) {
+	    ST(0) = sv_newmortal();
 #  ifdef USE_ITHREADS
             sv_setiv(ST(0), o->op_pmreplrootu.op_pmtargetoff);
 #  else
@@ -1101,8 +1094,7 @@ PMOP_pmreplroot(o)
 	}
 	else {
 	    OP *const root = o->op_pmreplrootu.op_pmreplroot; 
-	    sv_setiv(newSVrv(ST(0), cc_opclassname(aTHX_ root)),
-		     PTR2IV(root));
+	    ST(0) = make_op_object(aTHX_ root);
 	}
 
 #endif
@@ -1124,11 +1116,12 @@ PMOP_pmstash(o)
 #endif
 
 #if PERL_VERSION < 9
-#define PMOP_pmnext(o)		o->op_pmnext
 
-B::PMOP
+void
 PMOP_pmnext(o)
 	B::PMOP		o
+    PPCODE:
+	PUSHs(make_op_object(aTHX_ o->op_pmnext));
 
 U32
 PMOP_pmpermflags(o)
@@ -1907,15 +1900,14 @@ U32
 CvCONST(cv)
 	B::CV	cv
 
-B::OP
+void
 CvSTART(cv)
 	B::CV	cv
     ALIAS:
 	ROOT = 1
-    CODE:
-	RETVAL = CvISXSUB(cv) ? NULL : ix ? CvROOT(cv) : CvSTART(cv);
-    OUTPUT:
-	RETVAL
+    PPCODE:
+	PUSHs(make_op_object(aTHX_ CvISXSUB(cv) ? NULL
+			     : ix ? CvROOT(cv) : CvSTART(cv)));
 
 void
 CvXSUB(cv)
@@ -1951,6 +1943,8 @@ HvRITER(hv)
 B::PMOP
 HvPMROOT(hv)
 	B::HV	hv
+    PPCODE:
+	PUSHs(make_op_object(aTHX_ HvPMROOT(hv));
 
 #endif
 

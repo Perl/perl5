@@ -78,9 +78,6 @@ T_RHE_OBJ
 	    croak(\"$var is not a reference\")
 
 OUTPUT
-T_OP_OBJ
-	sv_setiv(newSVrv($arg, cc_opclassname(aTHX_ (OP*)$var)), PTR2IV($var));
-
 T_SV_OBJ
 	make_sv_object(aTHX_ ($arg), (SV*)($var));
 
