@@ -148,18 +148,6 @@ the given class name, even if the isa relationship is
 indirect.  This is used internally by the MRO code to
 keep track of method/MRO cache invalidations.
 
-Currently, this list only grows, it never shrinks.  This
-was a performance consideration (properly tracking and
-deleting isarev entries when someone removes an entry
-from an C<@ISA> is costly, and it doesn't happen often
-anyways).  The fact that a class which no longer truly
-"isa" this class at runtime remains on the list should be
-considered a quirky implementation detail which is subject
-to future change.  It shouldn't be an issue as long as
-you're looking at this list for the same reasons the
-core code does: as a performance optimization
-over having to search every class in existence.
-
 As with C<mro::get_linear_isa> above, C<UNIVERSAL> is special.
 C<UNIVERSAL> (and parents') isarev lists do not include
 every class in existence, even though all classes are
@@ -174,10 +162,6 @@ or one of C<UNIVERSAL>'s parents by C<@ISA> inheritance.
 Any class for which this function returns true is
 "universal" in the sense that all classes potentially
 inherit methods from it.
-
-For similar reasons to C<isarev> above, this flag is
-permanent.  Once it is set, it does not go away, even
-if the class in question really isn't universal anymore.
 
 =head2 mro::invalidate_all_method_caches()
 
