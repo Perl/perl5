@@ -57,7 +57,7 @@ ok(!mro::is_universal('MRO_B'));
 ok(mro::is_universal('MRO_B'));
 
 @UNIVERSAL::ISA = ();
-ok(mro::is_universal('MRO_B'));
+ok(!mro::is_universal('MRO_B'));
 
 # is_universal, get_mro, and get_linear_isa should
 # handle non-existant packages sanely

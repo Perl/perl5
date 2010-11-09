@@ -5659,6 +5659,18 @@ STATIC void	S_save_magic(pTHX_ I32 mgs_ix, SV *sv)
 STATIC void	S_unwind_handler_stack(pTHX_ const void *p);
 #endif
 #if defined(PERL_IN_MRO_C)
+STATIC void	S_mro_clean_isarev(pTHX_ HV * const isa, const char * const name, const STRLEN len, HV * const exceptions)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_MRO_CLEAN_ISAREV	\
+	assert(isa); assert(name)
+
+STATIC void	S_mro_gather_and_rename(pTHX_ HV * const stashes, HV *stash, HV *oldstash, const char *name, I32 namlen)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_4);
+#define PERL_ARGS_ASSERT_MRO_GATHER_AND_RENAME	\
+	assert(stashes); assert(name)
+
 STATIC AV*	S_mro_get_linear_isa_dfs(pTHX_ HV* stash, U32 level)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_MRO_GET_LINEAR_ISA_DFS	\

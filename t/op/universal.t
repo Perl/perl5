@@ -298,7 +298,7 @@ use warnings "deprecated";
     @RT66112::B::ISA = qw//;
     @RT66112::C::ISA = qw/RT66112::B/;
     @RT66112::T3::ISA = qw/RT66112::C/;
-    ok(RT66112::T3->isa('RT66112::A'), "modify \@ISA in isa (RT66112::T3 isa RT66112::A)");
+    ok(RT66112::T3->isa('RT66112::A'), "modify \@ISA in isa (RT66112::T3 isa RT66112::A)") or require mro, diag "@{mro::get_linear_isa('RT66112::T3')}";
 
     @RT66112::E::ISA = qw/RT66112::D/;
     @RT66112::T4::ISA = qw/RT66112::E/;

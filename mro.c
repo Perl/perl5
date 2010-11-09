@@ -466,6 +466,7 @@ Perl_mro_isa_changed_in3(pTHX_ HV* stash, const char *stashname,
     I32 items;
     bool is_universal;
     struct mro_meta * meta = NULL;
+    HV *isa = NULL;
 
     if(!stashname && stash) {
         stashname = HvENAME_get(stash);
@@ -491,7 +492,8 @@ Perl_mro_isa_changed_in3(pTHX_ HV* stash, const char *stashname,
 	meta->mro_linear_current = NULL;
       }
       if (meta->isa) {
-	SvREFCNT_dec(meta->isa);
+	/* Steal it for our own purposes. */
+	isa = (HV *)sv_2mortal((SV *)meta->isa);
 	meta->isa = NULL;
       }
 
@@ -519,9 +521,25 @@ Perl_mro_isa_changed_in3(pTHX_ HV* stash, const char *stashname,
     if(meta && meta->mro_nextmethod) hv_clear(meta->mro_nextmethod);
 
     /* Iterate the isarev (classes that are our children),
-       wiping out their linearization, method and isa caches */
+       wiping out their linearization, method and isa caches
+       and upating PL_isarev. */
     if(isarev) {
-        hv_iterinit(isarev);
+        HV *isa_hashes = NULL;
+
+       /* We have to iterate through isarev twice to avoid a chicken and
+        * egg problem: if A inherits from B and both are in isarev, A might
+        * be processed before B and use B’s previous linearisation.
+        */
+
+       /* First iteration: Wipe everything, but stash away the isa hashes
+        * since we still need them for updating PL_isarev.
+        */
+
+        if(hv_iterinit(isarev)) {
+            /* Only create the hash if we need it; i.e., if isarev has
+               any elements. */
+            isa_hashes = (HV *)sv_2mortal((SV *)newHV());
+        }
         while((iter = hv_iternext(isarev))) {
 	    I32 len;
             const char* const revkey = hv_iterkey(iter, &len);
@@ -544,21 +562,85 @@ Perl_mro_isa_changed_in3(pTHX_ HV* stash, const char *stashname,
                 revmeta->cache_gen++;
             if(revmeta->mro_nextmethod)
                 hv_clear(revmeta->mro_nextmethod);
-	    if (revmeta->isa) {
-		SvREFCNT_dec(revmeta->isa);
-		revmeta->isa = NULL;
-	    }
+
+	    (void)
+	      hv_store(
+	       isa_hashes, (const char*)&revstash, sizeof(HV *),
+	       revmeta->isa ? (SV *)revmeta->isa : &PL_sv_undef, 0
+	      );
+	    revmeta->isa = NULL;
+        }
+
+       /* Second pass: Update PL_isarev. We can just use isa_hashes to
+        * avoid another round of stash lookups. */
+
+       /* isarev might be deleted from PL_isarev during this loop, so hang
+        * on to it. */
+        SvREFCNT_inc_simple_void_NN(sv_2mortal((SV *)isarev));
+
+        if(isa_hashes) {
+            hv_iterinit(isa_hashes);
+            while((iter = hv_iternext(isa_hashes))) {
+                HV* const revstash = *(HV **)HEK_KEY(HeKEY_hek(iter));
+                HV * const isa = (HV *)HeVAL(iter);
+                const HEK *namehek;
+
+                /* Re-calculate the linearisation, unless a previous iter-
+                   ation was for a subclass of this class. */
+                if(!HvMROMETA(revstash)->isa)
+                    (void)mro_get_linear_isa(revstash);
+
+                /* We're starting at the 2nd element, skipping revstash */
+                linear_mro = mro_get_linear_isa(revstash);
+                svp = AvARRAY(linear_mro) + 1;
+                items = AvFILLp(linear_mro);
+
+                namehek = HvENAME_HEK(revstash);
+                if (!namehek) namehek = HvNAME_HEK(revstash);
+
+                while (items--) {
+                    SV* const sv = *svp++;
+                    HV* mroisarev;
+
+                    HE *he = hv_fetch_ent(PL_isarev, sv, TRUE, 0);
+
+                    /* That fetch should not fail.  But if it had to create
+                       a new SV for us, then will need to upgrade it to an
+                       HV (which sv_upgrade() can now do for us). */
+
+                    mroisarev = MUTABLE_HV(HeVAL(he));
+
+                    SvUPGRADE(MUTABLE_SV(mroisarev), SVt_PVHV);
+
+                    /* This hash only ever contains PL_sv_yes. Storing it
+                       over itself is almost as cheap as calling hv_exists,
+                       so on aggregate we expect to save time by not making
+                       two calls to the common HV code for the case where
+                       it doesn't exist.  */
+	   
+                    (void)
+                      hv_store(
+                       mroisarev, HEK_KEY(namehek), HEK_LEN(namehek),
+                       &PL_sv_yes, 0
+                      );
+                }
+
+                if((SV *)isa != &PL_sv_undef)
+                    mro_clean_isarev(
+                     isa, HEK_KEY(namehek), HEK_LEN(namehek),
+                     HvMROMETA(revstash)->isa
+                    );
+            }
         }
     }
 
-    /* Now iterate our MRO (parents), and do a few things:
-         1) instantiate with the "fake" flag if they don't exist
-         2) flag them as universal if we are universal
-         3) Add everything from our isarev to their isarev
+    /* Now iterate our MRO (parents), and:
+         1) Add ourselves and everything from our isarev to their isarev
+         2) Delete the parent’s entry from the (now temporary) isa hash
     */
 
     /* This only applies if the stash exists. */
-    if(!stash) return;
+    if(!stash) goto clean_up_isarev;
 
     /* We're starting at the 2nd element, skipping ourselves here */
     linear_mro = mro_get_linear_isa(stash);
@@ -585,13 +667,36 @@ Perl_mro_isa_changed_in3(pTHX_ HV* stash, const char *stashname,
 	   case where it doesn't exist.  */
 	   
 	(void)hv_store(mroisarev, stashname, stashname_len, &PL_sv_yes, 0);
+    }
 
-        if(isarev) {
-            hv_iterinit(isarev);
-            while((iter = hv_iternext(isarev))) {
-                I32 revkeylen;
-                char* const revkey = hv_iterkey(iter, &revkeylen);
-		(void)hv_store(mroisarev, revkey, revkeylen, &PL_sv_yes, 0);
+   clean_up_isarev:
+    /* Delete our name from our former parents’ isarevs. */
+    if(isa && HvARRAY(isa))
+        mro_clean_isarev(isa, stashname, stashname_len, meta->isa);
+}
+
+/* Deletes name from all the isarev entries listed in isa */
+STATIC void
+S_mro_clean_isarev(pTHX_ HV * const isa, const char * const name,
+                         const STRLEN len, HV * const exceptions)
+{
+    HE* iter;
+
+    PERL_ARGS_ASSERT_MRO_CLEAN_ISAREV;
+
+    /* Delete our name from our former parents’ isarevs. */
+    if(isa && HvARRAY(isa) && hv_iterinit(isa)) {
+        SV **svp;
+        while((iter = hv_iternext(isa))) {
+            I32 klen;
+            const char * const key = hv_iterkey(iter, &klen);
+            if(exceptions && hv_exists(exceptions, key, klen)) continue;
+            svp = hv_fetch(PL_isarev, key, klen, 0);
+            if(svp) {
+                HV * const isarev = (HV *)*svp;
+                (void)hv_delete(isarev, name, len, G_DISCARD);
+                if(!HvARRAY(isarev) || !HvKEYS(isarev))
+                    (void)hv_delete(PL_isarev, key, klen, G_DISCARD);
             }
         }
     }
@@ -614,6 +719,9 @@ This function invalidates isa caches on the old stash, on all subpackages
 nested inside it, and on the subclasses of all those, including
 non-existent packages that have corresponding entries in C<stash>.
 
+It also sets the effective names (C<HvENAME>) on all the stashes as
+appropriate.
+
 =cut
 */
 void
@@ -621,20 +729,11 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
                        const GV *gv, const char *newname,
                        I32 newname_len)
 {
-    register XPVHV* xhv;
-    register HE *entry;
-    I32 riter = -1;
-    HV *seen = NULL;
-    HV *seen_stashes = NULL;
-    const bool stash_had_name = stash && HvENAME(stash);
-
-    /* If newname_len is negative, then gv is actually the caller’s hash of
-       stashes that have been seen so far. */
+    HV *stashes;
+    HE* iter;
 
     assert(stash || oldstash);
-    assert((gv && newname_len >= 0) || newname);
-
-    if(newname_len < 0) seen_stashes = (HV *)gv, gv = NULL;
+    assert(gv || newname);
 
     /* Determine the name of the location that stash was assigned to
      * or from which oldstash was removed.
@@ -663,28 +762,168 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
     }
     if(newname_len < 0) newname_len = -newname_len;
 
-    if(oldstash && HvENAME_get(oldstash)) {
-	if(PL_stashcache)
+    /* Get a list of all the affected classes. */
+    /* We cannot simply pass them all to mro_isa_changed_in to avoid
+       the list, as that function assumes that only one package has
+       changed. It does not work with:
+
+          @foo::ISA = qw( B B::B );
+          *B:: = delete $::{"A::"};
+
+       as neither B nor B::B can be updated before the other, since they
+       will reset caches on foo, which will see either B or B::B with the
+       wrong name. The names must be set on *all* affected stashes before
+       we do anything else.
+     */
+    stashes = (HV *) sv_2mortal((SV *)newHV());
+    mro_gather_and_rename(stashes, stash, oldstash, newname, newname_len);
+
+    /* Iterate through the stashes, wiping isa linearisations, but leaving
+       the isa hash (which mro_isa_changed_in needs for adjusting the
+       isarev hashes belonging to parent classes). */
+    hv_iterinit(stashes);
+    while((iter = hv_iternext(stashes))) {
+	if(HeVAL(iter) != &PL_sv_yes && HvENAME(HeVAL(iter))) {
+	    struct mro_meta* meta;
+	    meta = HvMROMETA((HV *)HeVAL(iter));
+	    if (meta->mro_linear_all) {
+		SvREFCNT_dec(MUTABLE_SV(meta->mro_linear_all));
+		meta->mro_linear_all = NULL;
+		/* This is just acting as a shortcut pointer.  */
+		meta->mro_linear_current = NULL;
+	    } else if (meta->mro_linear_current) {
+		/* Only the current MRO is stored, so this owns the data.  */
+		SvREFCNT_dec(meta->mro_linear_current);
+		meta->mro_linear_current = NULL;
+	    }
+        }
+    }
+
+    /* Once the caches have been wiped on all the classes, call
+       mro_isa_changed_in on each. */
+    hv_iterinit(stashes);
+    while((iter = hv_iternext(stashes))) {
+	if(HeVAL(iter) != &PL_sv_yes && HvENAME(HeVAL(iter)))
+	    mro_isa_changed_in((HV *)HeVAL(iter));
+	/* We are not holding a refcount, so eliminate the pointer before
+	 * stashes is freed. */
+	HeVAL(iter) = NULL;
+    }
+}
+
+void
+S_mro_gather_and_rename(pTHX_ HV * const stashes, HV *stash, HV *oldstash,
+                              const char *name, I32 namlen)
+{
+    register XPVHV* xhv;
+    register HE *entry;
+    I32 riter = -1;
+    const bool stash_had_name = stash && HvENAME(stash);
+    HV *seen = NULL;
+    HV *isarev = NULL;
+    SV **svp;
+
+    PERL_ARGS_ASSERT_MRO_GATHER_AND_RENAME;
+
+    if(oldstash) {
+	/* Add to the big list. */
+	HE * const entry
+	 = (HE *)
+	     hv_common(
+	      stashes, NULL, (const char *)&oldstash, sizeof(HV *), 0,
+	      HV_FETCH_LVALUE, NULL, 0
+	     );
+	if(HeVAL(entry) == (SV *)oldstash) {
+	    oldstash = NULL;
+	    goto check_stash;
+	}
+	HeVAL(entry) = (SV *)oldstash;
+
+	/* Update the effective name. */
+	if(HvENAME_get(oldstash)) {
+	  const HEK * const enamehek = HvENAME_HEK(oldstash);
+	  if(PL_stashcache)
 	    (void)
-	     hv_delete(PL_stashcache, newname, newname_len, G_DISCARD);
-	hv_ename_delete(oldstash, newname, newname_len);
+	     hv_delete(PL_stashcache, name, namlen, G_DISCARD);
+	  hv_ename_delete(oldstash, name, namlen);
+
+	 /* If the name deletion caused a name change, then we are not
+	  * going to call mro_isa_changed_in with this name (and not at all
+	  * if it has become anonymous) so we need to delete old isarev
+	  * entries here, both those in the superclasses and this class’s
+	  * own list of subclasses. We simply delete the latter from
+	  * from PL_isarev, since we still need it. hv_delete mortifies it
+	  * for us, so sv_2mortal is not necessary. */
+	  if(HvENAME_HEK(oldstash) != enamehek) {
+	    const struct mro_meta * meta = HvMROMETA(oldstash);
+	    if(meta->isa && HvARRAY(meta->isa))
+		mro_clean_isarev(meta->isa, name, namlen, NULL);
+	    isarev = (HV *)hv_delete(PL_isarev, name, namlen, 0);
+	  }
+	}
     }
+   check_stash:
     if(stash) {
-	hv_ename_add(stash, newname, newname_len);
+	hv_ename_add(stash, name, namlen);
 
-       /* If this stash had been detached from the symbol table (so it
-	* had no HvENAME) before being assigned to spot whose name is in
-	* newname, then its isa cache would be stale (the effective name
-	* having changed), and subclasses of newname would then use that
-	* cache in the mro_isa_changed_in3(oldstash...) call below. (See
+       /* Add it to the big list. We use the stash itself as the value if
+	* it needs mro_isa_changed_in called on it. Otherwise we just use
+	* &PL_sv_yes to indicate that we have seen it. */
+
+       /* The stash needs mro_isa_changed_in called on it if it was
+	* detached from the symbol table (so it had no HvENAME) before
+	* being assigned to the spot named by the ‘name’ variable, because
+	* its cached isa linerisation is now stale (the effective name
+	* having changed), and subclasses will then use that cache when
+	* mro_package_moved calls mro_isa_changed_in. (See
 	* [perl #77358].)
+	*
 	* If it did have a name, then its previous name is still
-	* used in isa caches, and there is no need for this call.
+	* used in isa caches, and there is no need for
+	* mro_package_moved to call mro_isa_changed_in.
 	*/
-	if(!stash_had_name) mro_isa_changed_in(stash);
+
+	entry
+	 = (HE *)
+	     hv_common(
+	      stashes, NULL, (const char *)&stash, sizeof(HV *), 0,
+	      HV_FETCH_LVALUE, NULL, 0
+	     );
+	if(HeVAL(entry) == &PL_sv_yes || HeVAL(entry) == (SV *)stash)
+	    stash = NULL;
+	else HeVAL(entry) = stash_had_name ? &PL_sv_yes : (SV *)stash;
     }
 
-    mro_isa_changed_in3((HV *)oldstash, newname, newname_len);
+    if(!stash && !oldstash)
+	/* Both stashes have been encountered already. */
+	return;
+
+    /* Add all the subclasses to the big list. */
+    if(
+        isarev
+     || (
+           (svp = hv_fetch(PL_isarev, name, namlen, 0))
+        && (isarev = MUTABLE_HV(*svp))
+        )
+    ) {
+	HE *iter;
+	hv_iterinit(isarev);
+	while((iter = hv_iternext(isarev))) {
+	    I32 len;
+	    const char* const revkey = hv_iterkey(iter, &len);
+	    HV* revstash = gv_stashpvn(revkey, len, 0);
+
+	    if(!revstash) continue;
+	    entry
+	     = (HE *)
+	         hv_common(
+	          stashes, NULL, (const char *)&revstash, sizeof(HV *), 0,
+	          HV_FETCH_LVALUE, NULL, 0
+	         );
+	    HeVAL(entry) = (SV *)revstash;
+	    
+        }
+    }
 
     if(
      (!stash || !HvARRAY(stash)) && (!oldstash || !HvARRAY(oldstash))
@@ -697,13 +936,9 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
     if(oldstash && HvUSEDKEYS(oldstash)) { 
 	xhv = (XPVHV*)SvANY(oldstash);
 	seen = (HV *) sv_2mortal((SV *)newHV());
-	if(!seen_stashes) seen_stashes = (HV *) sv_2mortal((SV *)newHV());
 
-	/* Iterate through entries in the oldstash, calling
-	    mro_package_moved(
-	     corresponding_entry_in_new_stash, current_entry, ...
-	    )
-	   meanwhile doing the equivalent of $seen{$key} = 1.
+	/* Iterate through entries in the oldstash, adding them to the
+	   list, meanwhile doing the equivalent of $seen{$key} = 1.
 	 */
 
 	while (++riter <= (I32)xhv->xhv_max) {
@@ -727,17 +962,6 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
 
 		    /* Avoid main::main::main::... */
 		    if(oldsubstash == oldstash) continue;
-		    if(oldsubstash) {
-			HE * const entry
-			 = (HE *)
-			    hv_common(
-			     seen_stashes, NULL,
-			     (const char *)&oldsubstash, sizeof(HV *), 0,
-			     HV_FETCH_LVALUE, NULL, 0
-			    );
-			if(HeVAL(entry) == &PL_sv_yes) continue;
-			HeVAL(entry) = &PL_sv_yes;
-		    }
 
 		    if(
 		        (
@@ -750,16 +974,17 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
 			/* Add :: and the key (minus the trailing ::)
 			   to newname. */
 			SV *namesv
-			 = newSVpvn_flags(newname, newname_len, SVs_TEMP);
-			const char *name;
-			STRLEN namlen;
-			sv_catpvs(namesv, "::");
-			sv_catpvn(namesv, key, len-2);
-			name = SvPV_const(namesv, namlen);
-			mro_package_moved(
-			  substash, oldsubstash,
-			  (GV *)seen_stashes, name, -namlen
-			);
+			 = newSVpvn_flags(name, namlen, SVs_TEMP);
+			{
+			    const char *name;
+			    STRLEN namlen;
+			    sv_catpvs(namesv, "::");
+			    sv_catpvn(namesv, key, len-2);
+			    name = SvPV_const(namesv, namlen);
+			    mro_gather_and_rename(
+			     stashes, substash, oldsubstash, name, namlen
+			    );
+			}
 		    }
 
 		    (void)hv_store(seen, key, len, &PL_sv_yes, 0);
@@ -771,10 +996,9 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
     /* Skip the entire loop if the hash is empty.   */
     if (stash && HvUSEDKEYS(stash)) {
 	xhv = (XPVHV*)SvANY(stash);
-	if(!seen_stashes) seen_stashes = (HV *) sv_2mortal((SV *)newHV());
 
 	/* Iterate through the new stash, skipping $seen{$key} items,
-	   calling mro_package_moved(entry, NULL, ...). */
+	   calling mro_gather_and_rename(stashes, entry, NULL, ...). */
 	while (++riter <= (I32)xhv->xhv_max) {
 	    entry = (HvARRAY(stash))[riter];
 
@@ -801,31 +1025,21 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
 		    substash = GvHV(HeVAL(entry));
 		    if(substash) {
 			SV *namesv;
-			const char *name;
-			STRLEN namlen;
-			HE *entry;
+			const char *subname;
+			STRLEN subnamlen;
 
 			/* Avoid checking main::main::main::... */
 			if(substash == stash) continue;
-			entry
-			 = (HE *)
-			       hv_common(
-			        seen_stashes, NULL,
-			        (const char *)&substash, sizeof(HV *), 0,
-			        HV_FETCH_LVALUE, NULL, 0
-			       );
-			if(HeVAL(entry) == &PL_sv_yes) continue;
-			HeVAL(entry) = &PL_sv_yes;
 
 			/* Add :: and the key (minus the trailing ::)
 			   to newname. */
 			namesv
-			 = newSVpvn_flags(newname, newname_len, SVs_TEMP);
+			 = newSVpvn_flags(name, namlen, SVs_TEMP);
 			sv_catpvs(namesv, "::");
 			sv_catpvn(namesv, key, len-2);
-			name = SvPV_const(namesv, namlen);
-			mro_package_moved(
-			  substash, NULL, (GV *)seen_stashes, name, -namlen
+			subname = SvPV_const(namesv, subnamlen);
+			mro_gather_and_rename(
+			  stashes, substash, NULL, subname, subnamlen
 			);
 		    }
 		}

@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 use warnings;
-plan(tests => 15);
+plan(tests => 20);
 
 use mro;
 
@@ -25,7 +25,21 @@ sub i {
  goto &is;
 }
 
-$::TODO = "[perl #75176] isarev leeks (and onions)";
+# Basic isarev updating, when @ISA changes
+@Pastern::ISA = "BodyPart::Ungulate";
+@Scur::ISA    = "BodyPart::Ungulate";
+@BodyPart::Ungulate::ISA = "BodyPart";
+i BodyPart => qw [ BodyPart::Ungulate Pastern Scur ],
+ 'subclasses and subsubclasses are added to isarev';
+@Pastern::ISA = ();
+i BodyPart => qw [ BodyPart::Ungulate Scur ],
+ 'single deletion from isarev';
+@BodyPart::Ungulate::ISA = ();
+i BodyPart => qw [ ], 'recursive deletion from isarev';
+                      # except underneath it is not actually recursive
+
+
+# More complicated tests that move packages around
 
 @Huskey::ISA = "Dog";
 @Dog::ISA = "Canid";
@@ -70,17 +84,18 @@ i g => qw [ Weird::Thing ],
 *Caprine:: = *Chevre::;
 i"Hoofed::Mammal" => qw[ Caprid ],
  "replacing a stash updates isarev entries";
-i Caprine => qw[ Whatever ],
+i Chevre => qw[ Caprid::Dairy Whatever ],
  "replacing nested stashes updates isarev entries";
 
 @Disease::Eye::ISA = "Disease";
 @Disease::Eye::Infectious::ISA = "Disease::Eye";
 @Keratoconjunctivitis::ISA = "Disease::Ophthalmic::Infectious";
 *Disease::Ophthalmic:: = *Disease::Eye::;
+{package some_random_new_symbol::Infectious} # autovivify
 *Disease::Ophthalmic:: = *some_random_new_symbol::;
-i Disease => qw[ Disease::Eye ],
+i Disease => qw[ Disease::Eye Disease::Eye::Infectious ],
  "replacing an alias of a stash updates isarev entries";
-i Caprine => qw[ Disease::Eye ],
+i"Disease::Eye" => qw[ Disease::Eye::Infectious ],
  "replacing an alias of a stash containing another updates isarev entries";
 i"some_random_new_symbol::Infectious" => qw[ Keratoconjunctivitis ],
  "replacing an alias updates isarev of stashes nested in the replacement";
@@ -93,5 +108,17 @@ undef *Empty::;
 {package Zilch::Empty} # autovivify it
 *Empty:: = *Zilch::;
 i Zilch => qw[ Null ], "assigning to an empty spot updates isarev";
-i"Zilch::Empty" => qw[ Null::Empty ],
+i"Zilch::Empty" => qw[ Null::Null ],
  "assigning to an empty spot updates isarev of nested packages";
+
+# Classes inheriting from multiple classes that get moved in a single
+# assignment.
+@foo::ISA = ("B", "B::B");
+{package A::B}
+my $A = \%A::;     # keep a ref
+*A:: = 'whatever'; # clobber it
+*B:: = $A;         # assign to two superclasses of foo at the same time
+# There should be no A::B isarev entry.
+i"A::B" => qw [], 'assigning to two superclasses at the same time';
+ok !foo->isa("A::B"),
+ "A class must not inherit from its superclass’s former name";
