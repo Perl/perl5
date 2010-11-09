@@ -13,12 +13,22 @@ BEGIN {
 use strict;
 use Test::More;
 
-BEGIN {
-    use_ok('Opcode', qw(
+{
+    my @warnings;
+
+    BEGIN {
+	local $SIG{__WARN__} = sub {
+	    push @warnings, "@_";
+	};
+
+	use_ok('Opcode', qw(
 	opcodes opdesc opmask verify_opset
 	opset opset_to_ops opset_to_hex invert_opset
 	opmask_add full_opset empty_opset define_optag
-		       ));
+			   ));
+    }
+
+    is_deeply(\@warnings, [], "No warnings loading Opcode");
 }
 
 # --- opset_to_ops and opset
