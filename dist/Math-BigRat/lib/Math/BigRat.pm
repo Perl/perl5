@@ -16,6 +16,7 @@ package Math::BigRat;
 # anythig older is untested, and unlikely to work
 use 5.006;
 use strict;
+use Carp ();
 
 use Math::BigFloat;
 use vars qw($VERSION @ISA $upgrade $downgrade
@@ -26,7 +27,16 @@ use vars qw($VERSION @ISA $upgrade $downgrade
 $VERSION = '0.26';
 $VERSION = eval $VERSION;
 
-use overload;			# inherit overload from Math::BigFloat
+# inherit overload from Math::BigFloat, but disable the bitwise ops that don't
+# make much sense for rationals unless they're truncated or something first
+
+use overload
+    map {
+	my $op = $_;
+	($op => sub {
+	    Carp::croak("bitwise operation $op not supported in Math::BigRat");
+	});
+    } qw(& | ^ ~ << >> &= |= ^= <<= >>=);
 
 BEGIN
   {
