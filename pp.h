@@ -453,7 +453,7 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
    calling amagic_deref_call() directly, as it has a cleaner interface.  */
 #define tryAMAGICunDEREF(meth)						\
     STMT_START {							\
-	sv = amagic_deref_call(aTHX_ *sp, CAT2(meth,_amg));		\
+	sv = amagic_deref_call(*sp, CAT2(meth,_amg));			\
 	SPAGAIN;							\
     } STMT_END
 

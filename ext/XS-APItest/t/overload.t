@@ -57,29 +57,34 @@ my @ref = (['unblessed SV', do {\my $whap}],
 	  );
 
 while (my ($type, $enum) = each %types) {
-    foreach (@non_ref, @ref,
+    foreach ([amagic_deref_call => \&amagic_deref_call],
+	     [tryAMAGICunDEREF_var => \&tryAMAGICunDEREF_var],
 	    ) {
-	my ($desc, $input) = @$_;
-	my $got = amagic_deref_call($input, $enum);
-	is($got, $input, "Expect no change for to_$type $desc");
-    }
-    foreach (@non_ref) {
-	my ($desc, $sucker) = @$_;
-	my $input = bless [$sucker], 'Chain';
-	is(eval {amagic_deref_call($input, $enum)}, undef,
-	     "Chain to $desc for to_$type");
-	like($@, qr/Overloaded dereference did not return a reference/,
-	    'expected error');
-    }
-    foreach (@ref,
-	    ) {
-	my ($desc, $sucker) = @$_;
-	my $input = bless [$sucker], 'Chain';
-	my $got = amagic_deref_call($input, $enum);
-	is($got, $sucker, "Chain to $desc for to_$type");
-	$input = bless [bless [$sucker], 'Chain'], 'Chain';
-	my $got = amagic_deref_call($input, $enum);
-	is($got, $sucker, "Chain to chain to $desc for to_$type");
+	my ($name, $func) = @$_;
+	foreach (@non_ref, @ref,
+		) {
+	    my ($desc, $input) = @$_;
+	    my $got = &$func($input, $enum);
+	    is($got, $input, "$name: expect no change for to_$type $desc");
+	}
+	foreach (@non_ref) {
+	    my ($desc, $sucker) = @$_;
+	    my $input = bless [$sucker], 'Chain';
+	    is(eval {&$func($input, $enum)}, undef,
+	       "$name: chain to $desc for to_$type");
+	    like($@, qr/Overloaded dereference did not return a reference/,
+		 'expected error');
+	}
+	foreach (@ref,
+		) {
+	    my ($desc, $sucker) = @$_;
+	    my $input = bless [$sucker], 'Chain';
+	    my $got = &$func($input, $enum);
+	    is($got, $sucker, "$name: chain to $desc for to_$type");
+	    $input = bless [bless [$sucker], 'Chain'], 'Chain';
+	    my $got = &$func($input, $enum);
+	    is($got, $sucker, "$name: chain to chain to $desc for to_$type");
+	}
     }
 }
 
