@@ -876,10 +876,6 @@ cpan/ExtUtils-CBuilder/t/00-have-compiler.t			ExtUtils::CBuilder tests
 cpan/ExtUtils-CBuilder/t/01-basic.t				tests for ExtUtils::CBuilder
 cpan/ExtUtils-CBuilder/t/02-link.t				tests for ExtUtils::CBuilder
 cpan/ExtUtils-CBuilder/t/03-cplusplus.t				tests for ExtUtils::CBuilder
-cpan/ExtUtils-Command/lib/ExtUtils/Command.pm	Utilities for Make on non-UNIX platforms
-cpan/ExtUtils-Command/t/cp.t			See if ExtUtils::Command works
-cpan/ExtUtils-Command/t/eu_command.t		See if ExtUtils::Command works
-cpan/ExtUtils-Command/t/lib/TieOut.pm		Testing library to capture prints
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant/Base.pm		generate XS code to import C header constants
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant.pm			generate XS code to import C header constants
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant/ProxySubs.pm	generate XS code for proxy constants
@@ -2697,6 +2693,10 @@ dist/Data-Dumper/t/overload.t	See if Data::Dumper works for overloaded data
 dist/Data-Dumper/t/pair.t	See if Data::Dumper pair separator works
 dist/Data-Dumper/t/perl-74170.t	Regression test for stack reallocation
 dist/Data-Dumper/t/terse.t	See if Data::Dumper terse option works
+dist/ExtUtils-Command/lib/ExtUtils/Command.pm	Utilities for Make on non-UNIX platforms
+dist/ExtUtils-Command/t/cp.t			See if ExtUtils::Command works
+dist/ExtUtils-Command/t/eu_command.t		See if ExtUtils::Command works
+dist/ExtUtils-Command/t/lib/TieOut.pm		Testing library to capture prints
 dist/ExtUtils-Install/Changes				ExtUtils-Install change log
 dist/ExtUtils-Install/lib/ExtUtils/Installed.pm		Information on installed extensions
 dist/ExtUtils-Install/lib/ExtUtils/Install.pm		Handles 'make install' on extensions

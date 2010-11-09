@@ -29,7 +29,7 @@ my $is_Unix = !$is_Win32 && !$is_VMS;
 # environment variables on VMS
 my @toolchain = qw(cpan/AutoLoader/lib
 		   dist/Cwd dist/Cwd/lib
-		   cpan/ExtUtils-Command/lib
+		   dist/ExtUtils-Command/lib
 		   dist/ExtUtils-Install/lib
 		   cpan/ExtUtils-MakeMaker/lib
 		   dist/ExtUtils-Manifest/lib

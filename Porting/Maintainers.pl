@@ -534,15 +534,15 @@ use File::Glob qw(:case);
 
     'ExtUtils::Command' =>
 	{
-	'MAINTAINER'	=> 'rkobes',
+	'MAINTAINER'	=> 'p5p',
 	'DISTRIBUTION'	=> 'RKOBES/ExtUtils-Command-1.16.tar.gz',
-	'FILES'		=> q[cpan/ExtUtils-Command],
+	'FILES'		=> q[dist/ExtUtils-Command],
 	'EXCLUDED'	=> [ qw{ t/shell_command.t
 				 t/shell_exit.t
 				 lib/Shell/Command.pm
 			       },
 			   ],
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'blead',
 	},
 
     'ExtUtils::Constant' =>
