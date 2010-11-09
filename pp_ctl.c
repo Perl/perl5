@@ -3354,7 +3354,6 @@ S_check_type_and_open(pTHX_ SV *name)
 STATIC PerlIO *
 S_doopen_pm(pTHX_ SV *name)
 {
-    PerlIO *fp;
     STRLEN namelen;
     const char *p = SvPV_const(name, namelen);
 
