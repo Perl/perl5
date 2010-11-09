@@ -38,7 +38,6 @@ my %abs = (
 	   '../cpan/ExtUtils-Command' => 1,
 	   '../cpan/ExtUtils-Constant' => 1,
 	   '../cpan/ExtUtils-MakeMaker' => 1,
-	   '../cpan/ExtUtils-Manifest' => 1,
 	   '../cpan/File-Fetch' => 1,
 	   '../cpan/IPC-Cmd' => 1,
 	   '../cpan/IPC-SysV' => 1,
@@ -58,6 +57,7 @@ my %abs = (
 	   '../cpan/podlators' => 1,
 	   '../dist/Cwd' => 1,
 	   '../dist/ExtUtils-Install' => 1,
+	   '../dist/ExtUtils-Manifest' => 1,
 	   '../dist/ExtUtils-ParseXS' => 1,
 	  );
 

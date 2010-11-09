@@ -590,10 +590,10 @@ use File::Glob qw(:case);
 
     'ExtUtils::Manifest' =>
 	{
-	'MAINTAINER'	=> 'rkobes',
+	'MAINTAINER'	=> 'p5p',
 	'DISTRIBUTION'	=> 'RKOBES/ExtUtils-Manifest-1.58.tar.gz',
-	'FILES'		=> q[cpan/ExtUtils-Manifest],
-	'UPSTREAM'	=> 'cpan',
+	'FILES'		=> q[dist/ExtUtils-Manifest],
+	'UPSTREAM'	=> 'blead',
 	},
 
     'ExtUtils::ParseXS' =>

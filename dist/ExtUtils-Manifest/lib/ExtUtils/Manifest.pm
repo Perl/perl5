@@ -9,7 +9,7 @@ use File::Spec;
 use Carp;
 use strict;
 
-use vars qw($VERSION @ISA @EXPORT_OK 
+use vars qw($VERSION @ISA @EXPORT_OK
           $Is_MacOS $Is_VMS $Is_VMS_mode $Is_VMS_lc $Is_VMS_nodot
           $Debug $Verbose $Quiet $MANIFEST $DEFAULT_MSKIP);
 
@@ -44,7 +44,7 @@ if ($Is_VMS) {
         my $unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
         my $efs_charset = $ENV{'DECC$EFS_CHARSET'} || '';
         my $efs_case = $ENV{'DECC$EFS_CASE_PRESERVE'} || '';
-        $vms_unix_rpt = $unix_rpt =~ /^[ET1]/i; 
+        $vms_unix_rpt = $unix_rpt =~ /^[ET1]/i;
         $vms_efs = $efs_charset =~ /^[ET1]/i;
         $vms_case = $efs_case =~ /^[ET1]/i;
     }
@@ -155,7 +155,7 @@ sub mkmanifest {
     close M;
 }
 
-# Geez, shouldn't this use File::Spec or File::Basename or something?  
+# Geez, shouldn't this use File::Spec or File::Basename or something?
 # Why so careful about dependencies?
 sub clean_up_filename {
   my $filename = shift;
@@ -190,9 +190,9 @@ sub manifind {
 	$found->{$name} = "";
     };
 
-    # We have to use "$File::Find::dir/$_" in preprocess, because 
+    # We have to use "$File::Find::dir/$_" in preprocess, because
     # $File::Find::name is unavailable.
-    # Also, it's okay to use / here, because MANIFEST files use Unix-style 
+    # Also, it's okay to use / here, because MANIFEST files use Unix-style
     # paths.
     find({wanted => $wanted},
 	 $Is_MacOS ? ":" : ".");
@@ -377,7 +377,7 @@ sub maniread {
                 my $okfile = "$dir$base";
                 warn "Debug: Illegal name $file changed to $okfile\n" if $Debug;
                 $file = $okfile;
-            } 
+            }
             $file = lc($file)
                 unless $Is_VMS_lc &&($file =~ /^MANIFEST(\.SKIP)?$/);
         }
@@ -414,8 +414,8 @@ sub maniskip {
       $_ =~ qr{^\s*(?:(?:'([^\\']*(?:\\.[^\\']*)*)')|([^#\s]\S*))?(?:(?:\s*)|(?:\s+(.*?)\s*))$};
       #my $comment = $3;
       my $filename = $2;
-      if ( defined($1) ) { 
-        $filename = $1; 
+      if ( defined($1) ) {
+        $filename = $1;
         $filename =~ s/\\(['\\])/$1/g;
       }
       next if (not defined($filename) or not $filename);
@@ -514,13 +514,13 @@ typically returned by the maniread() function.
 
     manicopy( maniread(), $dest_dir );
 
-This function is useful for producing a directory tree identical to the 
-intended distribution tree. 
+This function is useful for producing a directory tree identical to the
+intended distribution tree.
 
 $how can be used to specify a different methods of "copying".  Valid
 values are C<cp>, which actually copies the files, C<ln> which creates
 hard links, and C<best> which mostly links the files but copies any
-symbolic link to make a tree without any symbolic link.  C<cp> is the 
+symbolic link to make a tree without any symbolic link.  C<cp> is the
 default.
 
 =cut
@@ -535,11 +535,11 @@ sub manicopy {
     $target = VMS::Filespec::unixify($target) if $Is_VMS_mode;
     File::Path::mkpath([ $target ],! $Quiet,$Is_VMS ? undef : 0755);
     foreach my $file (keys %$read){
-    	if ($Is_MacOS) {
-	    if ($file =~ m!:!) { 
-	   	my $dir = _maccat($target, $file);
+	if ($Is_MacOS) {
+	    if ($file =~ m!:!) {
+		my $dir = _maccat($target, $file);
 		$dir =~ s/[^:]+$//;
-	    	File::Path::mkpath($dir,1,0755);
+		File::Path::mkpath($dir,1,0755);
 	    }
 	    cp_if_diff($file, _maccat($target, $file), $how);
 	} else {
@@ -689,7 +689,7 @@ sub maniadd {
     my @needed = grep { !exists $manifest->{$_} } keys %$additions;
     return 1 unless @needed;
 
-    open(MANIFEST, ">>$MANIFEST") or 
+    open(MANIFEST, ">>$MANIFEST") or
       die "maniadd() could not open $MANIFEST: $!";
 
     foreach my $file (_sort @needed) {

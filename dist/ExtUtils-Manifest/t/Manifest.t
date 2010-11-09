@@ -29,7 +29,7 @@ if ($Is_VMS) {
         $vms_efs = VMS::Feature::current("efs_charset");
     } else {
         my $efs_charset = $ENV{'DECC$EFS_CHARSET'} || '';
-        $vms_efs = $efs_charset =~ /^[ET1]/i; 
+        $vms_efs = $efs_charset =~ /^[ET1]/i;
     }
     $Is_VMS_noefs = 0 if $vms_efs;
 }
@@ -70,10 +70,10 @@ sub remove_dir {
 }
 
 # use module, import functions
-BEGIN { 
-    use_ok( 'ExtUtils::Manifest', 
-            qw( mkmanifest manicheck filecheck fullcheck 
-                maniread manicopy skipcheck maniadd maniskip) ); 
+BEGIN {
+    use_ok( 'ExtUtils::Manifest',
+            qw( mkmanifest manicheck filecheck fullcheck
+                maniread manicopy skipcheck maniadd maniskip) );
 }
 
 my $cwd = Cwd::getcwd();
@@ -94,7 +94,7 @@ chmod( 0744, 'foo') if $Config{'chmod'};
 # there shouldn't be a MANIFEST there
 my ($res, $warn) = catch_warning( \&mkmanifest );
 # Canonize the order.
-$warn = join("", map { "$_|" } 
+$warn = join("", map { "$_|" }
                  sort { lc($a) cmp lc($b) } split /\r?\n/, $warn);
 is( $warn, "Added to MANIFEST: foo|Added to MANIFEST: MANIFEST|",
     "mkmanifest() displayed its additions" );
@@ -144,14 +144,14 @@ is( join( ' ', @skipped ), 'MANIFEST.SKIP', 'listed skipped files' );
 # add a subdirectory and a file there that should be found
 ok( mkdir( 'moretest', 0777 ), 'created moretest directory' );
 add_file( File::Spec->catfile('moretest', 'quux'), 'quux' );
-ok( exists( ExtUtils::Manifest::manifind()->{'moretest/quux'} ), 
+ok( exists( ExtUtils::Manifest::manifind()->{'moretest/quux'} ),
                                         "manifind found moretest/quux" );
 
 # only MANIFEST and foo are in the manifest
 $_ = 'foo';
 my $files = maniread();
 is( keys %$files, 2, 'two files found' );
-is( join(' ', sort { lc($a) cmp lc($b) } keys %$files), 'foo MANIFEST', 
+is( join(' ', sort { lc($a) cmp lc($b) } keys %$files), 'foo MANIFEST',
                                         'both files found' );
 is( $_, 'foo', q{maniread() doesn't clobber $_} );
 
@@ -178,13 +178,13 @@ rmtree('copy');
 
 # poison the manifest, and add a comment that should be reported
 add_file( 'MANIFEST', 'none #none' );
-is( ExtUtils::Manifest::maniread()->{none}, '#none', 
+is( ExtUtils::Manifest::maniread()->{none}, '#none',
                                         'maniread found comment' );
 
 ok( mkdir( 'copy', 0777 ), 'made copy directory' );
 $files = maniread();
 eval { (undef, $warn) = catch_warning( sub {
- 		manicopy( $files, 'copy', 'cp' ) })
+		manicopy( $files, 'copy', 'cp' ) })
 };
 
 # a newline comes through, so get rid of it
@@ -196,7 +196,7 @@ like($warn, qr/^Skipping MANIFEST.SKIP/i, 'warned about MANIFEST.SKIP' );
 
 # tell ExtUtils::Manifest to use a different file
 {
-	local $ExtUtils::Manifest::MANIFEST = 'albatross'; 
+	local $ExtUtils::Manifest::MANIFEST = 'albatross';
 	($res, $warn) = catch_warning( \&mkmanifest );
 	like( $warn, qr/Added to albatross: /, 'using a new manifest file' );
 
@@ -399,7 +399,7 @@ SKIP: {
     eval {
         maniadd({ 'grrrwoof' => 'yippie' });
     };
-    like( $@, qr/^\Qmaniadd() could not open MANIFEST:\E/,  
+    like( $@, qr/^\Qmaniadd() could not open MANIFEST:\E/,
                  "maniadd() dies if it can't open the MANIFEST" );
 
     chmod( 0600, 'MANIFEST' );
@@ -414,4 +414,3 @@ END {
 	ok( chdir( $cwd ), 'return to parent directory' );
 	remove_dir( 'mantest' );
 }
-
