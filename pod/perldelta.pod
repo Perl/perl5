@@ -848,7 +848,7 @@ here.
 
 Randy Kobes, creator of the kobesearch alternative to search.cpan.org and
 contributor/maintainer to several core Perl toolchain modules, passed away
-on September 19, 2010 after a battle with lung cancer.  His contributions
+on September 18, 2010 after a battle with lung cancer.  His contributions
 to the Perl community will be missed.
 
 =head1 Acknowledgements
