@@ -573,7 +573,7 @@ output doesn't wind up on the user's terminal.
         open(STDIN,  "< /dev/null")     || die "can't read /dev/null: $!";
         open(STDOUT, "> /dev/null")     || die "can't write to /dev/null: $!";
         defined(my $pid = fork())       || die "can't fork: $!";
-        exit if $pid;                   # non-zero now mean I am the paren 
+        exit if $pid;                   # non-zero now means I am the paren 
         (setsid() != -1)                || die "Can't start a new session: $!" 
         open(STDERR, ">&STDOUT")        || die "can't dup stdout: $!";
     }
@@ -764,7 +764,7 @@ pipes is to use C<"|-"> in place of C<"-|">.
 
 This was admittedly a rather silly example, because you're using string
 literals whose content is perfectly safe.  There is therefore no cause to
-resort to the harder-to-readm, multi-argument form of pipe open().  However,
+resort to the harder-to-read, multi-argument form of pipe open().  However,
 whenever you cannot be assured that the program arguments are free of shell
 metacharacters, the fancier form of open() should be used.  For example:
 
@@ -1604,7 +1604,7 @@ you'll have to use the C<sysread> variant of the interactive client above.
 This server accepts one of five different commands, sending output back to
 the client.  Unlike most network servers, this one handles only one
 incoming client at a time.  Multithreaded servers are covered in 
-Chapter 6 of the Camel.
+Chapter 16 of the Camel.
 
 Here's the code.  We'll
 
