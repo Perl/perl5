@@ -21,9 +21,6 @@ BEGIN {
 		       ));
 }
 
-my($s1, $s2, $s3);
-my(@o1, @o2, @o3);
-
 # --- opset_to_ops and opset
 
 my @empty_l = opset_to_ops(empty_opset);
@@ -45,9 +42,9 @@ is_deeply(\@empty_l, []);
 my @full_l3 = opset_to_ops(opset(':all'));
 is_deeply(\@full_l1, \@full_l3);
 
-$s1 = opset(      'padsv');
-$s2 = opset($s1,  'padav');
-$s3 = opset($s2, '!padav');
+my $s1 = opset(      'padsv');
+my $s2 = opset($s1,  'padav');
+my $s3 = opset($s2, '!padav');
 isnt($s1, $s2);
 is($s1, $s3);
 
@@ -69,8 +66,8 @@ isnt(opcodes(), 0);
 # --- invert_opset
 
 $s1 = opset(qw(fileno padsv padav));
-@o2 = opset_to_ops(invert_opset($s1));
-is(scalar @o2, opcodes-3);
+my @o1 = opset_to_ops(invert_opset($s1));
+is(scalar @o1, opcodes-3);
 
 # --- opmask
 
@@ -103,11 +100,14 @@ is(($s2 ^ $s3), opset('padsv','padhv'));
 # The extra bits mean we can't just say ~mask eq invert_opset(mask).
 
 @o1 = opset_to_ops(           ~ $s3);
-@o2 = opset_to_ops(invert_opset $s3);
+my @o2 = opset_to_ops(invert_opset $s3);
 is_deeply(\@o1, \@o2);
 
 # --- finally, check some opname assertions
 
-foreach(@full_l1) { die "bad opname: $_" if /\W/ or /^\d/ }
+foreach my $opname (@full_l1) {
+    unlike($opname, qr/\W/, "opname $opname has no non-'word' characters");
+    unlike($opname, qr/^\d/, "opname $opname does not start with a digit");
+}
 
 done_testing();
