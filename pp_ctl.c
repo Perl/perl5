@@ -3331,10 +3331,11 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 }
 
 STATIC PerlIO *
-S_check_type_and_open(pTHX_ const char *name)
+S_check_type_and_open(pTHX_ SV *name)
 {
     Stat_t st;
-    const int st_rc = PerlLIO_stat(name, &st);
+    const char *p = SvPV_nolen_const(name);
+    const int st_rc = PerlLIO_stat(p, &st);
 
     PERL_ARGS_ASSERT_CHECK_TYPE_AND_OPEN;
 
@@ -3342,41 +3343,32 @@ S_check_type_and_open(pTHX_ const char *name)
 	return NULL;
     }
 
-    return PerlIO_open(name, PERL_SCRIPT_MODE);
+    return PerlIO_open(p, PERL_SCRIPT_MODE);
 }
 
 #ifndef PERL_DISABLE_PMC
 STATIC PerlIO *
-S_doopen_pm(pTHX_ const char *name, const STRLEN namelen)
+S_doopen_pm(pTHX_ SV *name)
 {
     PerlIO *fp;
+    STRLEN namelen;
+    const char *p = SvPV_const(name, namelen);
 
     PERL_ARGS_ASSERT_DOOPEN_PM;
 
-    if (namelen > 3 && memEQs(name + namelen - 3, 3, ".pm")) {
-	SV *const pmcsv = newSV(namelen + 2);
-	char *const pmc = SvPVX(pmcsv);
+    if (namelen > 3 && memEQs(p + namelen - 3, 3, ".pm")) {
+	SV *const pmcsv = sv_mortalcopy(name);
 	Stat_t pmcstat;
 
-	memcpy(pmc, name, namelen);
-	pmc[namelen] = 'c';
-	pmc[namelen + 1] = '\0';
+	sv_catpvn(pmcsv, "c", 1);
 
-	if (PerlLIO_stat(pmc, &pmcstat) < 0) {
-	    fp = check_type_and_open(name);
-	}
-	else {
-	    fp = check_type_and_open(pmc);
-	}
-	SvREFCNT_dec(pmcsv);
+	if (PerlLIO_stat(SvPV_nolen_const(pmcsv), &pmcstat) >= 0)
+	    return check_type_and_open(pmcsv);
     }
-    else {
-	fp = check_type_and_open(name);
-    }
-    return fp;
+    return check_type_and_open(name);
 }
 #else
-#  define doopen_pm(name, namelen) check_type_and_open(name)
+#  define doopen_pm(name) check_type_and_open(name)
 #endif /* !PERL_DISABLE_PMC */
 
 PP(pp_require)
@@ -3514,8 +3506,9 @@ PP(pp_require)
     /* prepare to compile file */
 
     if (path_is_absolute(name)) {
+	/* At this point, name is SvPVX(sv)  */
 	tryname = name;
-	tryrsfp = doopen_pm(name, len);
+	tryrsfp = doopen_pm(sv);
     }
     if (!tryrsfp) {
 	AV * const ar = GvAVn(PL_incgv);
@@ -3695,15 +3688,13 @@ PP(pp_require)
 			memcpy(tmp, name, len + 1);
 
 			SvCUR_set(namesv, dirlen + len + 1);
-
-			/* Don't even actually have to turn SvPOK_on() as we
-			   access it directly with SvPVX() below.  */
+			SvPOK_on(namesv);
 		    }
 #  endif
 #endif
 		    TAINT_PROPER("require");
 		    tryname = SvPVX_const(namesv);
-		    tryrsfp = doopen_pm(tryname, SvCUR(namesv));
+		    tryrsfp = doopen_pm(namesv);
 		    if (tryrsfp) {
 			if (tryname[0] == '.' && tryname[1] == '/') {
 			    ++tryname;

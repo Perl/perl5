@@ -4960,7 +4960,7 @@ STATIC int	S_sv_2iuv_non_preserve(pTHX_ SV *const sv, I32 numtype)
 #endif
 #if !defined(PERL_DISABLE_PMC)
 #  if defined(PERL_IN_PP_CTL_C)
-STATIC PerlIO *	S_doopen_pm(pTHX_ const char *name, const STRLEN namelen)
+STATIC PerlIO *	S_doopen_pm(pTHX_ SV *name)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_DOOPEN_PM	\
@@ -5944,7 +5944,7 @@ PERL_CALLCONV GV*	Perl_softref2xv(pTHX_ SV *const sv, const char *const what, co
 
 #endif
 #if defined(PERL_IN_PP_CTL_C)
-STATIC PerlIO *	S_check_type_and_open(pTHX_ const char *name)
+STATIC PerlIO *	S_check_type_and_open(pTHX_ SV *name)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_CHECK_TYPE_AND_OPEN	\
