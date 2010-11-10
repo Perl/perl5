@@ -710,6 +710,7 @@ S_cl_anything(const RExC_state_t *pRExC_state, struct regnode_charclass_class *c
     cl->flags = ANYOF_EOS|ANYOF_UNICODE_ALL;
     if (LOC)
 	cl->flags |= ANYOF_LOCALE;
+    cl->flags |= ANYOF_FOLD;
 }
 
 /* Can match anything (initialization) */
@@ -779,6 +780,9 @@ S_cl_and(struct regnode_charclass_class *cl,
     if (!(and_with->flags & ANYOF_EOS))
 	cl->flags &= ~ANYOF_EOS;
 
+    if (!(and_with->flags & ANYOF_FOLD))
+	cl->flags &= ~ANYOF_FOLD;
+
     if (cl->flags & ANYOF_UNICODE_ALL && and_with->flags & ANYOF_UNICODE &&
 	!(and_with->flags & ANYOF_INVERT)) {
 	cl->flags &= ~ANYOF_UNICODE_ALL;
@@ -843,6 +847,9 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
     }
     if (or_with->flags & ANYOF_EOS)
 	cl->flags |= ANYOF_EOS;
+
+    if (or_with->flags & ANYOF_FOLD)
+	cl->flags |= ANYOF_FOLD;
 
     if (cl->flags & ANYOF_UNICODE && or_with->flags & ANYOF_UNICODE &&
 	ARG(cl) != ARG(or_with)) {

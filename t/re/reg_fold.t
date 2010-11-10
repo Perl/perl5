@@ -77,6 +77,8 @@ push @tests, qq[like chr(0x0430), qr/[=\x{0410}-\x{0411}]/i, 'Bug #71752 Unicode
 $count++;
 push @tests, qq[like 'a', qr/\\p{Upper}/i, "'a' =~ /\\\\p{Upper}/i"];
 $count++;
+push @tests, q[my $c = "\x{212A}"; my $p = qr/(?:^[\x{004B}_]+$)/i; utf8::upgrade($p); like $c, $p, 'Bug #78994: my $c = "\x{212A}"; my $p = qr/(?:^[\x{004B}_]+$)/i; utf8::upgrade($p); $c =~ $p'];
+$count++;
 
 eval join ";\n","plan tests=>".($count-1),@tests,"1"
     or die $@;
