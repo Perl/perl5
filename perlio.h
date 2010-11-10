@@ -189,6 +189,10 @@ PERL_EXPORT_C void PerlIO_clone(pTHX_ PerlInterpreter *proto,
 #define BUFSIZ 1024
 #endif
 
+#ifndef PERLIO_BUFSIZ
+#define PERLIO_BUFSIZ 4096
+#endif
+
 #ifndef SEEK_SET
 #define SEEK_SET 0
 #endif
