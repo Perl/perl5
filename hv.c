@@ -735,7 +735,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	return NULL;
     }
     if (action & HV_FETCH_LVALUE) {
-	val = newSV(0);
+	val = action & HV_FETCH_EMPTY_HE ? NULL : newSV(0);
 	if (SvMAGICAL(hv)) {
 	    /* At this point the old hv_fetch code would call to hv_store,
 	       which in turn might do some tied magic. So we need to make that

@@ -831,7 +831,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV *stash, HV *oldstash,
 	 = (HE *)
 	     hv_common(
 	      stashes, NULL, (const char *)&oldstash, sizeof(HV *), 0,
-	      HV_FETCH_LVALUE, NULL, 0
+	      HV_FETCH_LVALUE|HV_FETCH_EMPTY_HE, NULL, 0
 	     );
 	if(HeVAL(entry) == (SV *)oldstash) {
 	    oldstash = NULL;
@@ -887,7 +887,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV *stash, HV *oldstash,
 	 = (HE *)
 	     hv_common(
 	      stashes, NULL, (const char *)&stash, sizeof(HV *), 0,
-	      HV_FETCH_LVALUE, NULL, 0
+	      HV_FETCH_LVALUE|HV_FETCH_EMPTY_HE, NULL, 0
 	     );
 	if(HeVAL(entry) == &PL_sv_yes || HeVAL(entry) == (SV *)stash)
 	    stash = NULL;
@@ -918,7 +918,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV *stash, HV *oldstash,
 	     = (HE *)
 	         hv_common(
 	          stashes, NULL, (const char *)&revstash, sizeof(HV *), 0,
-	          HV_FETCH_LVALUE, NULL, 0
+	          HV_FETCH_LVALUE|HV_FETCH_EMPTY_HE, NULL, 0
 	         );
 	    HeVAL(entry) = (SV *)revstash;
 	    

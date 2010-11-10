@@ -590,6 +590,7 @@ a string/length pair, and no precomputed hash.
 #define HV_FETCH_LVALUE		0x10
 #define HV_FETCH_JUST_SV	0x20
 #define HV_DELETE		0x40
+#define HV_FETCH_EMPTY_HE	0x80 /* Leave HeVAL null. */
 
 /*
 =for apidoc newHV
