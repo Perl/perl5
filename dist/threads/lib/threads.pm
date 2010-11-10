@@ -1007,8 +1007,8 @@ discouraged.
 
 =item Open directory handles
 
-In perl 5.13.6 and higher, if your system does not support the C<fchdir> C
-function, directory handles (see
+In perl 5.14 and higher, on systems other than Windows that do
+not support the C<fchdir> C function, directory handles (see
 L<opendir|perlfunc/"opendir DIRHANDLE,EXPR">) will not be copied to new
 threads. You can use the C<d_fchdir> variable in L<Config.pm|Config> to
 determine whether your system supports it.
