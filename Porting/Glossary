@@ -5018,6 +5018,10 @@ use64bitint (use64bits.U):
 	This may mean using for example "long longs", while your memory
 	may still be limited to 2 gigabytes.
 
+use_versioned_archname (archname.U):
+	This variable indicates whether to include the $api_versionstring
+	as a component of the $archname.
+
 usecrosscompile (Cross.U):
 	This variable conditionally defines the USE_CROSS_COMPILE symbol,
 	and indicates that Perl has been cross-compiled.

@@ -330,6 +330,7 @@ archlib=''
 archlibexp=''
 d_archlib=''
 installarchlib=''
+use_versioned_archname=''
 archname=''
 myarchname=''
 d_atolf=''
@@ -6017,6 +6018,34 @@ esac
 rp='What is your architecture name'
 . ./myread
 archname="$ans"
+
+: optionally add api version to the architecture for versioned archlibs
+case "$use_versioned_archname" in
+$define|true|[yY]*)     dflt='y';;
+*)                      dflt='n';;
+esac
+rp='Add the Perl API version to your archname?'
+. ./myread
+case "$ans" in
+y|Y)	val="$define" ;;
+*)      val="$undef" ;;
+esac
+set use_versioned_archname
+eval $setvar
+case "$use_versioned_archname" in
+$define)
+        case "$archname" in
+        *-$api_versionstring)
+                echo "...and architecture name already has -$api_versionstring" >&4
+                ;;
+        *)
+                archname="$archname-$api_versionstring"
+                echo "...setting architecture name to $archname." >&4
+                ;;
+        esac
+        ;;
+esac
+
 case "$usethreads" in
 $define)
 	echo "Threads selected." >&4
@@ -23859,6 +23888,7 @@ usesitecustomize='$usesitecustomize'
 usesocks='$usesocks'
 usethreads='$usethreads'
 usevendorprefix='$usevendorprefix'
+use_versioned_archname='$use_versioned_archname'
 usevfork='$usevfork'
 usrinc='$usrinc'
 uuname='$uuname'
