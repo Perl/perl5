@@ -8214,11 +8214,11 @@ Perl_newSVhek(pTHX_ const HEK *const hek)
 	       Andreas would like keys he put in as utf8 to come back as utf8
 	    */
 	    STRLEN utf8_len = HEK_LEN(hek);
-	    const U8 *as_utf8 = bytes_to_utf8 ((U8*)HEK_KEY(hek), &utf8_len);
-	    SV * const sv = newSVpvn ((const char*)as_utf8, utf8_len);
-
+	    SV * const sv = newSV_type(SVt_PV);
+	    char *as_utf8 = (char *)bytes_to_utf8 ((U8*)HEK_KEY(hek), &utf8_len);
+	    /* bytes_to_utf8() allocates a new string, which we can repurpose: */
+	    sv_usepvn_flags(sv, as_utf8, utf8_len, SV_HAS_TRAILING_NUL);
 	    SvUTF8_on (sv);
-	    Safefree (as_utf8); /* bytes_to_utf8() allocates a new string */
 	    return sv;
 	} else if (flags & (HVhek_REHASH|HVhek_UNSHARED)) {
 	    /* We don't have a pointer to the hv, so we have to replicate the
