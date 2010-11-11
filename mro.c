@@ -634,9 +634,8 @@ Perl_mro_isa_changed_in3(pTHX_ HV* stash, const char *stashname,
         }
     }
 
-    /* Now iterate our MRO (parents), and:
-         1) Add ourselves and everything from our isarev to their isarev
-         2) Delete the parent’s entry from the (now temporary) isa hash
+    /* Now iterate our MRO (parents), adding ourselves and everything from
+       our isarev to their isarev.
     */
 
     /* This only applies if the stash exists. */
