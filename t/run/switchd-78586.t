@@ -1,6 +1,12 @@
 #!perl -Ilib -d:switchd_empty
 
-BEGIN { $^P = 0x122; chdir 't'; require './test.pl'; }
+BEGIN {
+    $^P = 0x122;
+    chdir 't';
+    @INC = ('../lib', 'lib');
+    require './test.pl';
+}
+
 use strict;
 use warnings;
 no warnings 'redefine';
