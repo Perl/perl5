@@ -42,7 +42,7 @@ print "1..$expect\n";
 sub nok ($$$$$$$$) {
   my ($test, $left, $threeway, $right, $result, $i, $j, $boolean) = @_;
   $result = defined $result ? "'$result'" : 'undef';
-  print "not ok $test # ($left <=> $right) gives: $result \$i=$i \$j=$j, $boolean disagrees\n";
+  print "not ok $test # ($left $threeway $right) gives: $result \$i=$i \$j=$j, $boolean disagrees\n";
 }
 
 my $ok = 0;
@@ -212,7 +212,7 @@ for my $i (0..$#FOO) {
 	    print "ok $ok\n";
 	}
 	else {
-	    nok ($ok, $i3, '<=>', $j3, $cmp, $i, $j, 'cmp transposed');
+	    nok ($ok, $i3, 'cmp', $j3, $cmp, $i, $j, 'cmp transposed');
 	}
     }
 }
