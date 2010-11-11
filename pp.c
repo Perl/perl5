@@ -901,7 +901,7 @@ PP(pp_undef)
                 mro_isa_changed_in(stash);
             else if(method_changed)
                 mro_method_changed_in(
-                 stash ? stash : GvSTASH((const GV *)sv)
+                 GvSTASH((const GV *)sv)
                 );
 
 	    break;
