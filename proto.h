@@ -3997,9 +3997,9 @@ PERL_CALLCONV void	Perl_sv_clear(pTHX_ SV *const orig_sv)
 	assert(orig_sv)
 
 PERL_CALLCONV I32	Perl_sv_cmp(pTHX_ SV *const sv1, SV *const sv2);
-PERL_CALLCONV I32	Perl_sv_cmp_flags(pTHX_ SV *const sv1, SV *const sv2, const I32 flags);
+PERL_CALLCONV I32	Perl_sv_cmp_flags(pTHX_ SV *const sv1, SV *const sv2, const U32 flags);
 PERL_CALLCONV I32	Perl_sv_cmp_locale(pTHX_ SV *const sv1, SV *const sv2);
-PERL_CALLCONV I32	Perl_sv_cmp_locale_flags(pTHX_ SV *const sv1, SV *const sv2, const I32 flags);
+PERL_CALLCONV I32	Perl_sv_cmp_locale_flags(pTHX_ SV *const sv1, SV *const sv2, const U32 flags);
 PERL_CALLCONV OP*	Perl_sv_compile_2op(pTHX_ SV *sv, OP **startop, const char *code, PAD **padp)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
@@ -4043,7 +4043,7 @@ PERL_CALLCONV void	Perl_sv_dump(pTHX_ SV* sv)
 	assert(sv)
 
 /* PERL_CALLCONV I32	sv_eq(pTHX_ SV* sv1, SV* sv2); */
-PERL_CALLCONV I32	Perl_sv_eq_flags(pTHX_ SV* sv1, SV* sv2, const I32 flags);
+PERL_CALLCONV I32	Perl_sv_eq_flags(pTHX_ SV* sv1, SV* sv2, const U32 flags);
 /* PERL_CALLCONV void	Perl_sv_force_normal(pTHX_ SV *sv)
 			__attribute__nonnull__(pTHX_1); */
 #define PERL_ARGS_ASSERT_SV_FORCE_NORMAL	\

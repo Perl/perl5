@@ -6989,7 +6989,7 @@ if necessary. If the flags include SV_GMAGIC, it handles get-magic, too.
 */
 
 I32
-Perl_sv_eq_flags(pTHX_ register SV *sv1, register SV *sv2, const I32 flags)
+Perl_sv_eq_flags(pTHX_ register SV *sv1, register SV *sv2, const U32 flags)
 {
     dVAR;
     const char *pv1;
@@ -7106,7 +7106,8 @@ Perl_sv_cmp(pTHX_ register SV *const sv1, register SV *const sv2)
 }
 
 I32
-Perl_sv_cmp_flags(pTHX_ register SV *const sv1, register SV *const sv2, const I32 flags)
+Perl_sv_cmp_flags(pTHX_ register SV *const sv1, register SV *const sv2,
+		  const U32 flags)
 {
     dVAR;
     STRLEN cur1, cur2;
@@ -7200,7 +7201,8 @@ Perl_sv_cmp_locale(pTHX_ register SV *const sv1, register SV *const sv2)
 }
 
 I32
-Perl_sv_cmp_locale_flags(pTHX_ register SV *const sv1, register SV *const sv2, const I32 flags)
+Perl_sv_cmp_locale_flags(pTHX_ register SV *const sv1, register SV *const sv2,
+			 const U32 flags)
 {
     dVAR;
 #ifdef USE_LOCALE_COLLATE
