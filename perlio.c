@@ -4120,7 +4120,7 @@ PerlIOBuf_get_base(pTHX_ PerlIO *f)
 
     if (!b->buf) {
 	if (!b->bufsiz)
-	    b->bufsiz = PERLIO_BUFSIZ;
+	    b->bufsiz = PERLIOBUF_DEFAULT_BUFSIZ;
 	Newxz(b->buf,b->bufsiz, STDCHAR);
 	if (!b->buf) {
 	    b->buf = (STDCHAR *) & b->oneword;
