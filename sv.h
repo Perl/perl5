@@ -1848,6 +1848,8 @@ mg.c:1024: warning: left-hand operand of comma expression has no effect
 #define sv_2uv(sv) sv_2uv_flags(sv, SV_GMAGIC)
 #define sv_2nv(sv) sv_2nv_flags(sv, SV_GMAGIC)
 #define sv_eq(sv1, sv2) sv_eq_flags(sv1, sv2, SV_GMAGIC)
+#define sv_cmp(sv1, sv2) sv_cmp_flags(sv1, sv2, SV_GMAGIC)
+#define sv_cmp_locale(sv1, sv2) sv_cmp_locale_flags(sv1, sv2, SV_GMAGIC)
 #define sv_collxfrm(sv, nxp) sv_cmp_flags(sv, nxp, SV_GMAGIC)
 #define sv_2bool(sv) sv_2bool_flags(sv, SV_GMAGIC)
 #define sv_insert(bigstr, offset, len, little, littlelen)		\
