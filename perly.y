@@ -442,7 +442,6 @@ barestmt:	PLUGSTMT
 			  /* a block is a loop that happens once */
 			  $$ = newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
 				  (OP*)NULL, $1, $2, 0);
-			  PL_parser->copline = NOLINE;
 			}
 	|	PACKAGE WORD WORD '{' remember
 			{
