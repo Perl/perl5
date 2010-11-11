@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 7fd683ff3c3, except for:
+This has been completed up to 8ff3250783, except for:
 04777d295957ad270188e4debf51b523e07cc5b0
 c565ab54dc649bb62cd4d57149d7b2abb21df5f3
 1c8d11ca3d0ce8bc11562f159b94c2c7e62dea6c
@@ -125,6 +125,14 @@ following three ambiguous cases:
   (b) If %{} overloading exists on a blessed arrayref, %{} is used
   (c) If @{} overloading exists on a blessed hashref, @{} is used
 
+=head2 y///r
+
+The C</r> flag, which was added to C<s///> in 5.13.2, has been extended to
+the C<y///> operator.
+
+It causes it to perform the substitution on a I<copy> of its operand,
+returning that copy instead of a character count.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -173,7 +181,8 @@ following code, for instance:
     *$glob = *bar;
 
 The C<*$glob> on the second line returns a new immutable glob. That new
-glob is made an alias to C<*bar>. Then it is discarded.
+glob is made an alias to C<*bar>. Then it is discarded. So the second
+assignment has no effect.
 
 The upside to this incompatible change is that bugs
 L<[perl #77496]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77496>,
@@ -509,7 +518,9 @@ XXX Newly added diagnostic messages go here
 
 =item *
 
-XXX
+"Using !~ with %s doesn't make sense": This message was actually added in
+5.13.2, but was omitted from perldelta. It now applies also to the C<y///>
+operator, and has been documented.
 
 =back
 
@@ -575,7 +586,14 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+F<t/mro/isarev.t> has been added, which tests that C<PL_isarev> (accessible
+at the Perl level via C<mro::get_isarev>) is updated properly.
+
+=item
+
+F<t/run/switchd-78586.t> has been added, which tests that
+L<[perl #78586]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78586>
+has been fixed (related to line numbers in the debbuger).
 
 =back
 
@@ -819,6 +837,18 @@ even when its contents were not being used
 L<[perl #78580]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78580>.
 
 This bug was introduced in 5.13.2 and did not affect earlier perl versions.
+
+=item *
+
+Matching a Unicode character against an alternation containing characters
+that happened to match continuation bytes in the former's UTF8
+representation (C<qq{\x{30ab}} =~ /\xab|\xa9/>) would cause erroneous
+warnings
+L<[perl #70998]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=70998>.
+
+=item *
+
+C<s///r> (added in 5.13.2) no longer leaks.
 
 =back
 
