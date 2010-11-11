@@ -1219,6 +1219,10 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		else if (*name == '-' || *name == '+')
 		    require_tie_mod(gv, name, newSVpvs("Tie::Hash::NamedCapture"), "TIEHASH", 0);
 	    }
+	    else if (len == 3 && sv_type == SVt_PVAV
+	          && strnEQ(name, "ISA", 3)
+	          && (!GvAV(gv) || !SvSMAGICAL(GvAV(gv))))
+		gv_magicalize_isa(gv);
 	}
 	return gv;
     } else if (no_init) {

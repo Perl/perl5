@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-BEGIN { require q(./test.pl); } plan(tests => 49);
+BEGIN { require q(./test.pl); } plan(tests => 50);
 
 require mro;
 
@@ -299,4 +299,16 @@ is(eval { MRO_N->testfunc() }, 123);
     @main::ISA = 'parent2';
     main->do;
     is $output, 'parentparent2', '@main::ISA is magical';
+}
+
+{
+    # Undefining *ISA, then modifying @ISA
+    # This broke Class::Trait. See [perl #79024].
+    {package Class::Trait::Base}
+    no strict 'refs';
+    undef   *{"Extra::TSpouse::ISA"};
+    'Extra::TSpouse'->isa('Class::Trait::Base'); # cache the mro
+    unshift @{"Extra::TSpouse::ISA"}, 'Class::Trait::Base';
+    ok 'Extra::TSpouse'->isa('Class::Trait::Base'),
+     'a isa b after undef *a::ISA and @a::ISA modification';
 }
