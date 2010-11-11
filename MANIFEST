@@ -4841,6 +4841,7 @@ t/run/script.t			See if script invocation works
 t/run/switch0.t			Test the -0 switch
 t/run/switcha.t			Test the -a switch
 t/run/switchC.t			Test the -C switch
+t/run/switchd-78586.t		See whether bug 78586 is fixed
 t/run/switchd.t			Test the -d switch
 t/run/switches.t		Tests for the other switches (-0, -l, -c, -s, -M, -m, -V, -v, -h, -z, -i)
 t/run/switchF1.t		Pathological tests for the -F switch
