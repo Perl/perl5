@@ -913,6 +913,24 @@ INCLUDE: const-xs.inc
 
 INCLUDE: numeric.xs
 
+MODULE = XS::APItest::utf8	PACKAGE = XS::APItest::utf8
+
+int
+bytes_cmp_utf8(bytes, utf8)
+	SV *bytes
+	SV *utf8
+    PREINIT:
+	const U8 *b;
+	STRLEN blen;
+	const U8 *u;
+	STRLEN ulen;
+    CODE:
+	b = (const U8 *)SvPVbyte(bytes, blen);
+	u = (const U8 *)SvPVbyte(utf8, ulen);
+	RETVAL = bytes_cmp_utf8(b, blen, u, ulen);
+    OUTPUT:
+	RETVAL
+
 MODULE = XS::APItest:Overload	PACKAGE = XS::APItest::Overload
 
 SV *

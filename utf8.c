@@ -805,6 +805,75 @@ Perl_utf8_hop(pTHX_ const U8 *s, I32 off)
 }
 
 /*
+=for apidoc bytes_cmp_utf8
+
+Compares the sequence of characters (stored as octets) in b, blen with the
+sequence of characters (stored as UTF-8) in u, ulen. Returns 0 if they are
+equal, -1 or -2 if the first string is less than the second string, +1 or +2
+if the first string is greater than the second string.
+
+-1 or +1 is returned if the shorter string was identical to the start of the
+longer string. -2 or +2 is returned if the was a difference between characters
+within the strings.
+
+=cut
+*/
+
+int
+Perl_bytes_cmp_utf8(pTHX_ const U8 *b, STRLEN blen, const U8 *u, STRLEN ulen)
+{
+    const U8 *const bend = b + blen;
+    const U8 *const uend = u + ulen;
+
+    PERL_ARGS_ASSERT_BYTES_CMP_UTF8;
+
+    PERL_UNUSED_CONTEXT;
+
+    while (b < bend && u < uend) {
+        U8 c = *u++;
+	if (!UTF8_IS_INVARIANT(c)) {
+	    if (UTF8_IS_DOWNGRADEABLE_START(c)) {
+		if (u < uend) {
+		    U8 c1 = *u++;
+		    if (UTF8_IS_CONTINUATION(c1)) {
+			c = UTF8_ACCUMULATE(NATIVE_TO_UTF(c), c1);
+			c = ASCII_TO_NATIVE(c);
+		    } else {
+			Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8),
+					 "Malformed UTF-8 character "
+					 "(unexpected non-continuation byte 0x%02x"
+					 ", immediately after start byte 0x%02x)"
+					 /* Dear diag.t, it's in the pod.  */
+					 "%s%s", c1, c,
+					 PL_op ? " in " : "",
+					 PL_op ? OP_DESC(PL_op) : "");
+			return -2;
+		    }
+		} else {
+		    if (PL_op)
+			Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8),
+					 "%s in %s", unees, OP_DESC(PL_op));
+		    else
+			Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8), unees);
+		    return -2; /* Really want to return undef :-)  */
+		}
+	    } else {
+		return -2;
+	    }
+	}
+	if (*b != c) {
+	    return *b < c ? -2 : +2;
+	}
+	++b;
+    }
+
+    if (b == bend && u == uend)
+	return 0;
+
+    return b < bend ? +1 : -1;
+}
+
+/*
 =for apidoc utf8_to_bytes
 
 Converts a string C<s> of length C<len> from UTF-8 into native byte encoding.
