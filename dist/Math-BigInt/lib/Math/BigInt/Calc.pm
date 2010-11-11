@@ -2383,11 +2383,17 @@ sub _modpow
     splice @$num,0,1; $num->[0] = 0;
     return $num;
     }
-  if ((scalar @$num == 1) && (($num->[0] == 0) || ($num->[0] == 1)))
-    {
-    $num->[0] = 1;
-    return $num;
-    }
+
+  # 0^a (mod m) = 0 if m != 0, a != 0
+  # 0^0 (mod m) = 1 if m != 0
+  if (_is_one($c, $num)) {
+      if (_is_zero($c, $exp)) {
+          @$num = 1;
+      } else {
+          @$num = 0;
+      }
+      return $num;
+  }
 
 #  $num = _mod($c,$num,$mod);	# this does not make it faster
 
