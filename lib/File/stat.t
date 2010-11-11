@@ -21,7 +21,7 @@ BEGIN {
     our $file = '../lib/File/stat.t';
     if ( $Dmksymlinks ) {
         $file = readlink $file;
-        die "Can't readlink(TEST): $!" if ! defined $file;
+        die "Can't readlink(../lib/File/stat.t): $!" if ! defined $file;
     }
 
     our $hasst;
@@ -42,7 +42,7 @@ BEGIN {
 our @stat = stat $file; # This is the function stat.
 unless (@stat) { plan skip_all => "1..0 # Skip: no file $file"; exit 0 }
 
-plan tests => 19 + 24*2 + 3;
+plan tests => 19 + 24*2 + 4 + 3;
 
 use_ok( 'File::stat' );
 
@@ -90,6 +90,21 @@ for (split //, "rwxoRWXOezsfdlpSbcugkMCA") {
         is( $rv, eval "-$_ \$file",         "correct -$_ overload" );
     }
 }
+
+SKIP: {
+    my $file = '../perl';
+    -e $file && -x $file or skip "$file is not present and exectable", 4;
+    $^O eq "VMS" and skip "File::stat ignores VMS ACLs", 4;
+
+    my $stat = File::stat::stat( $file ); # This is the OO stat.
+    foreach (qw/x X/) {
+    my $rv = eval "-$_ \$stat";
+    ok( !$@,                            "-$_ overload succeeds" )
+      or diag( $@ );
+    is( $rv, eval "-$_ \$file",         "correct -$_ overload" );
+  }
+}
+
 
 for (split //, "tTB") {
     eval "-$_ \$stat";

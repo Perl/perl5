@@ -84,7 +84,9 @@ else {
         my ($s, $mode, $eff) = @_;
         my $uid = $eff ? $> : $<;
 
-        $^O ne "VMS" and $uid == 0  and return 1;
+        # If we're root on unix and we are not testing for exectable
+        # status, then all file tests are true.
+        $^O ne "VMS" and $uid == 0 and !($mode & 0111) and return 1;
 
         my ($stmode, $stuid, $stgid) = @$s[2,4,5];
 
