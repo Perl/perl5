@@ -82,7 +82,7 @@ while (my ($type, $enum) = each %types) {
 	    my $got = &$func($input, $enum);
 	    is($got, $sucker, "$name: chain to $desc for to_$type");
 	    $input = bless [bless [$sucker], 'Chain'], 'Chain';
-	    my $got = &$func($input, $enum);
+	    $got = &$func($input, $enum);
 	    is($got, $sucker, "$name: chain to chain to $desc for to_$type");
 	}
     }
