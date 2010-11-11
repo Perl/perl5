@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 use warnings;
-plan(tests => 20);
+plan(tests => 22);
 
 use mro;
 
@@ -122,3 +122,13 @@ my $A = \%A::;     # keep a ref
 i"A::B" => qw [], 'assigning to two superclasses at the same time';
 ok !foo->isa("A::B"),
  "A class must not inherit from its superclass’s former name";
+
+# undeffing globs
+@alpha::ISA = 'beta';
+$_ = \*alpha::ISA;    # hang on to the glob
+undef *alpha::ISA;
+i beta => qw [], "undeffing an ISA glob deletes isarev entries";
+@az::ISA = 'buki';
+$_ = \*az::ISA;
+undef *az::;
+i buki => qw [], "undeffing a package glob deletes isarev entries";

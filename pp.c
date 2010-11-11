@@ -872,13 +872,16 @@ PP(pp_undef)
 	    GP *gp;
             HV *stash;
 
-            /* undef *Foo:: */
-            if((stash = GvHV((const GV *)sv)) && HvENAME_get(stash))
-                mro_isa_changed_in(stash);
             /* undef *Pkg::meth_name ... */
-            else if(GvCVu((const GV *)sv) && (stash = GvSTASH((const GV *)sv))
-		    && HvENAME_get(stash))
-                mro_method_changed_in(stash);
+            bool method_changed
+             =   GvCVu((const GV *)sv) && (stash = GvSTASH((const GV *)sv))
+	      && HvENAME_get(stash);
+            /* undef *Foo:: */
+            if((stash = GvHV((const GV *)sv))) {
+                if(HvENAME_get(stash))
+                    SvREFCNT_inc_simple_void_NN(sv_2mortal((SV *)stash));
+                else stash = NULL;
+            }
 
 	    gp_free(MUTABLE_GV(sv));
 	    Newxz(gp, 1, GP);
@@ -887,6 +890,20 @@ PP(pp_undef)
 	    GvLINE(sv) = CopLINE(PL_curcop);
 	    GvEGV(sv) = MUTABLE_GV(sv);
 	    GvMULTI_on(sv);
+
+            if(stash)
+                mro_package_moved(NULL, stash, (const GV *)sv, NULL, 0);
+            stash = NULL;
+            /* undef *Foo::ISA */
+            if( strEQ(GvNAME((const GV *)sv), "ISA")
+             && (stash = GvSTASH((const GV *)sv))
+             && (method_changed || HvENAME(stash)) )
+                mro_isa_changed_in(stash);
+            else if(method_changed)
+                mro_method_changed_in(
+                 stash ? stash : GvSTASH((const GV *)sv)
+                );
+
 	    break;
 	}
 	/* FALL THROUGH */
