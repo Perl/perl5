@@ -314,11 +314,13 @@ struct regnode_charclass_class {
 
 /* Flags for node->flags of ANYOF */
 
-#define ANYOF_CLASS		0x08	/* has runtime \d, \w, [:posix:], ... */
-#define ANYOF_LARGE      ANYOF_CLASS    /* Same; name retained for back compat */
-#define ANYOF_INVERT		0x04
-#define ANYOF_FOLD		0x02
 #define ANYOF_LOCALE		0x01
+#define ANYOF_FOLD		0x02
+#define ANYOF_INVERT		0x04
+
+/* CLASS is never set unless LOCALE is too: has runtime \d, \w, [:posix:], ... */
+#define ANYOF_CLASS		0x08
+#define ANYOF_LARGE      ANYOF_CLASS    /* Same; name retained for back compat */
 
 /* EOS used for regstclass only */
 #define ANYOF_EOS		0x10	/* Can match an empty string too */
