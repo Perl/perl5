@@ -30,13 +30,26 @@ $uv_bigi |= 0x0;
 
 my @array = qw(perl rules);
 
+my @raw, @upgraded, @utf8;
+foreach ("\x{1F4A9}", chr(163), 'N') {
+    push @raw, $_;
+    my $temp = $_ . chr 256;
+    chop $temp;
+    push @upgraded, $temp;
+    my $utf8 = $_;
+    next if utf8::upgrade($utf8) == length $_;
+    utf8::encode($utf8);
+    push @utf8, $utf8;
+}
+
 # Seems one needs to perform the maths on 'Inf' to get the NV correctly primed.
 @FOO = ('s', 'N/A', 'a', 'NaN', -1, undef, 0, 1, 3.14, 1e37, 0.632120558, -.5,
 	'Inf'+1, '-Inf'-1, 0x0, 0x1, 0x5, 0xFFFFFFFF, $uv_max, $uv_maxm1,
 	$uv_big, $uv_bigi, $iv0, $iv1, $ivm1, $iv_min, $iv_max, $iv_big,
-	$iv_small, \$array[0], \$array[0], \$array[1], \$^X);
+	$iv_small, \$array[0], \$array[0], \$array[1], \$^X, @raw, @upgraded,
+	@utf8);
 
-$expect = 7 * ($#FOO+2) * ($#FOO+1);
+$expect = 7 * ($#FOO+2) * ($#FOO+1) + 6 * @raw + 6 * @utf8;
 print "1..$expect\n";
 
 sub nok ($$$$$$$$) {
@@ -215,4 +228,77 @@ for my $i (0..$#FOO) {
 	    nok ($ok, $i3, 'cmp', $j3, $cmp, $i, $j, 'cmp transposed');
 	}
     }
+}
+
+# We know the answers for these. We can rely on the consistency checks above
+# to test the other string comparisons.
+
+while (my ($i, $v) = each @raw) {
+    # Copy, to avoid any inadvertent conversion
+    my ($raw, $cooked, $not);
+    $raw = $v;
+    $cooked = $upgraded[$i];
+    $not = $raw eq $cooked ? '' : 'not ';
+    printf "%sok %d # eq, chr %d\n", $not, ++$ok, ord $raw;
+
+    $raw = $v;
+    $cooked = $upgraded[$i];
+    $not = $raw ne $cooked ? 'not ' : '';
+    printf "%sok %d # ne, chr %d\n", $not, ++$ok, ord $raw;
+
+    $raw = $v;
+    $cooked = $upgraded[$i];
+    $not = (($raw cmp $cooked) == 0) ? '' : 'not ';
+    printf "%sok %d # cmp, chr %d\n", $not, ++$ok, ord $raw;
+
+    # And now, transposed.
+    $raw = $v;
+    $cooked = $upgraded[$i];
+    $not = $cooked eq $raw ? '' : 'not ';
+    printf "%sok %d # eq, chr %d\n", $not, ++$ok, ord $raw;
+
+    $raw = $v;
+    $cooked = $upgraded[$i];
+    $not = $cooked ne $raw ? 'not ' : '';
+    printf "%sok %d # ne, chr %d\n", $not, ++$ok, ord $raw;
+
+    $raw = $v;
+    $cooked = $upgraded[$i];
+    $not = (($cooked cmp $raw) == 0) ? '' : 'not ';
+    printf "%sok %d # cmp, chr %d\n", $not, ++$ok, ord $raw;
+}
+
+while (my ($i, $v) = each @utf8) {
+    # Copy, to avoid any inadvertent conversion
+    my ($raw, $cooked, $not);
+    $raw = $raw[$i];
+    $cooked = $v;
+    $not = $raw eq $cooked ? 'not ' : '';
+    printf "%sok %d # eq vs octets, chr %d\n", $not, ++$ok, ord $raw;
+
+    $raw = $raw[$i];
+    $cooked = $v;
+    $not = $raw ne $cooked ? '' : 'not ';
+    printf "%sok %d # ne vs octets, chr %d\n", $not, ++$ok, ord $raw;
+
+    $raw = $raw[$i];
+    $cooked = $v;
+    $not = (($raw cmp $cooked) == 0) ? 'not ' : '';
+    printf "%sok %d # cmp vs octects, chr %d\n", $not, ++$ok, ord $raw;
+
+    # And now, transposed.
+    $raw = $raw[$i];
+    $cooked = $v;
+    $not = $cooked eq $raw ? 'not ' : '';
+    printf "%sok %d # eq vs octets, chr %d\n", $not, ++$ok, ord $raw;
+
+    $raw = $raw[$i];
+    $cooked = $v;
+    $not = $cooked ne $raw? '' : 'not ';
+    printf "%sok %d # ne vs octets, chr %d\n", $not, ++$ok, ord $raw;
+
+    $raw = $raw[$i];
+    $cooked = $v;
+    $not = (($cooked cmp $raw) == 0) ? 'not ' : '';
+    printf "%sok %d # cmp vs octects, chr %d\n", $not, ++$ok, ord $raw;
 }
