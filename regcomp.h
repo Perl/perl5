@@ -319,7 +319,8 @@ struct regnode_charclass_class {
 #define ANYOF_INVERT		0x04
 
 /* CLASS is never set unless LOCALE is too: has runtime \d, \w, [:posix:], ... */
-#define ANYOF_CLASS		0x08
+/* For now, set it always when LOCALE is set, to save a bit for other uses. */
+#define ANYOF_CLASS	 ANYOF_LOCALE
 #define ANYOF_LARGE      ANYOF_CLASS    /* Same; name retained for back compat */
 
 /* EOS used for regstclass only */
@@ -395,6 +396,12 @@ struct regnode_charclass_class {
 #define ANYOF_CLASS_SET(p, c)	(ANYOF_CLASS_BYTE(p, c) |=  ANYOF_BIT(c))
 #define ANYOF_CLASS_CLEAR(p, c)	(ANYOF_CLASS_BYTE(p, c) &= ~ANYOF_BIT(c))
 #define ANYOF_CLASS_TEST(p, c)	(ANYOF_CLASS_BYTE(p, c) &   ANYOF_BIT(c))
+
+/* Quicker way to see if there are actually any tests.  This is because
+ * currently the set of tests can be empty even when the class bitmap is
+ * allocated */
+#define ANYOF_CLASS_TEST_ANY_SET(p)	/* assumes sizeof(p) = 4 */       \
+	memNE (((struct regnode_charclass_class*)(p))->classflags, "0000", ANYOF_CLASS_SIZE)
 
 #define ANYOF_CLASS_ZERO(ret)	Zero(((struct regnode_charclass_class*)(ret))->classflags, ANYOF_CLASSBITMAP_SIZE, char)
 #define ANYOF_BITMAP_ZERO(ret)	Zero(((struct regnode_charclass*)(ret))->bitmap, ANYOF_BITMAP_SIZE, char)

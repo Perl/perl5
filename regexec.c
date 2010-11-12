@@ -6260,7 +6260,7 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 		match = TRUE;
 	}
 	
-	if (!match && (flags & ANYOF_CLASS)) {
+	if (!match && (flags & ANYOF_CLASS) && ANYOF_CLASS_TEST_ANY_SET(n)) {
 	    PL_reg_flags |= RF_tainted;
 	    if (
 		(ANYOF_CLASS_TEST(n, ANYOF_ALNUM)   &&  isALNUM_LC(c))  ||
