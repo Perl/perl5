@@ -450,6 +450,12 @@ C<Socket> has been upgraded from 1.90 to 1.91.
 
 =item *
 
+C<Storable> has been upgraded from 2.22 to 2.24
+
+Includes performance improvement for overloaded classes.
+
+=item *
+
 C<Sys::Hostname> has been upgraded from 1.13 to 1.14.
 
 =item *
