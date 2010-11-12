@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 use warnings;
-plan(tests => 19);
+plan(tests => 20);
 
 {
     package New;
@@ -236,6 +236,34 @@ fresh_perl_is
    { stderr => 1 },
   "Assigning a nameless package over one w/subclasses updates isa caches";
 
+# mro_package_moved needs to make a distinction between replaced and
+# assigned stashes when keeping track of what it has seen so far.
+no warnings; {
+    no strict 'refs';
+
+    sub bar::blonk::blonk::phoo { "bbb" }
+    sub veclum::phoo { "lasrevinu" }
+    @feedlebomp::ISA = qw 'phoo::blonk::blonk veclum';
+    *phoo::baz:: = *bar::blonk::;   # now bar::blonk:: is on both sides
+    *phoo:: = *bar::;         # here bar::blonk:: is both deleted and added
+    *bar:: = *boo::;          # now it is only known as phoo::blonk::
+
+    # At this point, before the bug was fixed, %phoo::blonk::blonk:: ended
+    # up with no effective name, allowing it to be deleted without updating
+    # its subclasses’ caches.
+
+    my $accum = '';
+
+    $accum .= 'feedlebomp'->phoo;          # bbb
+    delete ${"phoo::blonk::"}{"blonk::"};
+    $accum .= 'feedlebomp'->phoo;          # bbb (Oops!)
+    @feedlebomp::ISA = @feedlebomp::ISA;
+    $accum .= 'feedlebomp'->phoo;          # lasrevinu
+
+    is $accum, 'bbblasrevinulasrevinu',
+      'nested classes deleted & added simultaneously';
+}
+use warnings;
 
 # mro_package_moved needs to check for self-referential packages.
 # This broke Text::Template [perl #78362].

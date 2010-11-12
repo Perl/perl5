@@ -2363,6 +2363,7 @@ s	|void	|mro_clean_isarev|NN HV * const isa   \
 				 |const STRLEN len \
 				 |NULLOK HV * const exceptions
 s	|void	|mro_gather_and_rename|NN HV * const stashes \
+				      |NN HV * const seen_stashes \
 				      |NULLOK HV *stash \
 				      |NULLOK HV *oldstash \
 				      |NN const char *name|I32 namlen
