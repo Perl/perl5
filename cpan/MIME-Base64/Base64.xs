@@ -255,6 +255,64 @@ decode_base64(sv)
 	OUTPUT:
 	RETVAL
 
+int
+encoded_base64_length(sv,...)
+	SV* sv
+	PROTOTYPE: $;$
+
+	PREINIT:
+	SSize_t len;   /* length of the string */
+	STRLEN eollen; /* length of the EOL sequence */
+
+	CODE:
+#if PERL_REVISION == 5 && PERL_VERSION >= 6
+	sv_utf8_downgrade(sv, FALSE);
+#endif
+	len = SvCUR(sv);
+
+	if (items > 1 && SvOK(ST(1))) {
+	    eollen = SvCUR(ST(1));
+	} else {
+	    eollen = 1;
+	}
+
+	RETVAL = (len+2) / 3 * 4;	 /* encoded bytes */
+	if (RETVAL) {
+	    RETVAL += ((RETVAL-1) / MAX_LINE + 1) * eollen;
+	}
+
+	OUTPUT:
+	RETVAL
+
+int
+decoded_base64_length(sv)
+	SV* sv
+	PROTOTYPE: $
+
+	PREINIT:
+	STRLEN len;
+	register unsigned char *str = (unsigned char*)SvPVbyte(sv, len);
+	unsigned char const* end = str + len;
+	int i = 0;
+
+	CODE:
+	RETVAL = 0;
+	while (str < end) {
+	    unsigned char uc = index_64[NATIVE_TO_ASCII(*str++)];
+	    if (uc == INVALID)
+		continue;
+	    if (uc == EQ)
+	        break;
+	    if (i++) {
+		RETVAL++;
+		if (i == 4)
+		    i = 0;
+	    }
+	}
+
+	OUTPUT:
+	RETVAL
+
 
 MODULE = MIME::Base64		PACKAGE = MIME::QuotedPrint
 

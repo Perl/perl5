@@ -361,6 +361,13 @@ C<Math::BigInt::FastCalc> has been upgraded from 0.22 to 0.24.
 
 =item *
 
+C<MIME::Base64> has been upgraded from 3.09 to 3.10
+
+Includes new functions to calculate the length of encoded and decoded
+base64 strings.
+
+=item *
+
 C<mro> has been upgraded from 1.04 to 1.05.
 
 =item *

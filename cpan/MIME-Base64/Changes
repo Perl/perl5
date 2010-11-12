@@ -1,3 +1,12 @@
+2010-10-11   Gisle Aas <gisle@ActiveState.com>
+
+   Release 3.10
+
+   Provide functions to calculate the length of encoded and decoded
+   base64 strings [RT#62404]
+
+
+
 2010-01-25   Gisle Aas <gisle@ActiveState.com>
 
    Release 3.09
