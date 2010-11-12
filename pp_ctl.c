@@ -524,6 +524,8 @@ PP(pp_formline)
 	    return parseres;
     }
     SvPV_force(PL_formtarget, len);
+    if (SvTAINTED(tmpForm))
+	SvTAINTED_on(PL_formtarget);
     if (DO_UTF8(PL_formtarget))
 	targ_is_utf8 = TRUE;
     t = SvGROW(PL_formtarget, len + fudge + 1);  /* XXX SvCUR bad */
@@ -605,6 +607,8 @@ PP(pp_formline)
 		sv = &PL_sv_no;
 		Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX), "Not enough format arguments");
 	    }
+	    if (SvTAINTED(sv))
+		SvTAINTED_on(PL_formtarget);
 	    break;
 
 	case FF_CHECKNL:

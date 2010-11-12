@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 335;
+plan tests => 336;
 
 $| = 1;
 
@@ -1405,8 +1405,7 @@ end
     "formline survives a tainted dynamic picture");
 }
 
-TODO: {
-    local $::TODO = '$^A tainting unimplemented';
+{
     ok(!tainted($^A), "format accumulator not tainted yet");
     formline('@ | @*', 'hallo' . $TAINT, 'welt');
     ok(tainted($^A), "tainted formline argument makes a tainted accumulator");
@@ -1423,6 +1422,10 @@ TODO: {
     formline('@' .('<'*5) . ' | @*', 'hallo', 'welt');
     ok(!tainted($^A), "accumulator still untainted");
     formline('@' .('<'*(5+$TAINT0)) . ' | @*', 'hallo', 'welt');
+    TODO: {
+        local $::TODO = "get magic handled too late?";
+        ok(tainted($^A), "the accumulator should be tainted already");
+    }
     ok(tainted($^A), "tainted formline picture makes a tainted accumulator");
 }
 

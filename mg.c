@@ -809,6 +809,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     switch (*mg->mg_ptr) {
     case '\001':		/* ^A */
 	sv_setsv(sv, PL_bodytarget);
+	if (SvTAINTED(PL_bodytarget))
+	    SvTAINTED_on(sv);
 	break;
     case '\003':		/* ^C, ^CHILD_ERROR_NATIVE */
 	if (nextchar == '\0') {
@@ -2395,6 +2397,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     const char * const remaining = mg->mg_ptr + 1;
     I32 i;
     STRLEN len;
+    MAGIC *tmg;
 
     PERL_ARGS_ASSERT_MAGIC_SET;
 
@@ -2431,6 +2434,13 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
         break;
     case '\001':	/* ^A */
 	sv_setsv(PL_bodytarget, sv);
+	/* mg_set() has temporarily made sv non-magical */
+	if (PL_tainting) {
+	    if ((tmg = mg_find(sv,PERL_MAGIC_taint)) && tmg->mg_len & 1)
+		SvTAINTED_on(PL_bodytarget);
+	    else
+		SvTAINTED_off(PL_bodytarget);
+	}
 	break;
     case '\003':	/* ^C */
 	PL_minus_c = cBOOL(SvIV(sv));
