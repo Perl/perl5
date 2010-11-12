@@ -1072,8 +1072,11 @@ sub run_tests {
 
     }
 
-    {   # Some constructs with Latin1 characters cause a utf8 string not to
-        # match itself in non-utf8
+    SKIP: {   # Some constructs with Latin1 characters cause a utf8 string not
+              # to match itself in non-utf8
+        if ($IS_EBCDIC) {
+            skip "Needs to be customized to run on EBCDIC", 6;
+        }
         my $c = "\xc0";
         my $pattern = my $utf8_pattern = qr/((\xc0)+,?)/;
         utf8::upgrade($utf8_pattern);
