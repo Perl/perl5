@@ -23,7 +23,7 @@ use AutoLoader;
 use FileHandle;
 use vars qw($canonical $forgive_me $VERSION);
 
-$VERSION = '2.23';
+$VERSION = '2.24';
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;		# Grrr...
 
 #
@@ -1154,7 +1154,7 @@ Thank you to (in chronological order):
 
 	Jarkko Hietaniemi <jhi@iki.fi>
 	Ulrich Pfeifer <pfeifer@charly.informatik.uni-dortmund.de>
-	Benjamin A. Holzman <bah@ecnvantage.com>
+	Benjamin A. Holzman <bholzman@earthlink.net>
 	Andrew Ford <A.Ford@ford-mason.co.uk>
 	Gisle Aas <gisle@aas.no>
 	Jeff Gresham <gresham_jeffrey@jpmorgan.com>
@@ -1165,6 +1165,7 @@ Thank you to (in chronological order):
 	Salvador Ortiz Garcia <sog@msg.com.mx>
 	Dominic Dunlop <domo@computer.org>
 	Erik Haugan <erik@solbors.no>
+    Benjamin A. Holzman <ben.holzman@grantstreet.com>
 
 for their bug reports, suggestions and contributions.
 
@@ -1176,7 +1177,9 @@ simply counting the objects instead of tagging them (leading to
 a binary incompatibility for the Storable image starting at version
 0.6--older images are, of course, still properly understood).
 Murray Nesbitt made Storable thread-safe.  Marc Lehmann added overloading
-and references to tied items support.
+and references to tied items support.  Benjamin Holzman added a performance
+improvement for overloaded classes; thanks to Grant Street Group for footing
+the bill.
 
 =head1 AUTHOR
 
