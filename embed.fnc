@@ -2369,8 +2369,7 @@ s	|void	|mro_gather_and_rename|NN HV * const stashes \
 				      |NN const char *name|I32 namlen
 #endif
 : Used in hv.c, mg.c, pp.c, sv.c
-md	|void   |mro_isa_changed_in|NN HV* stash
-pd	|void   |mro_isa_changed_in3|NULLOK HV* stash|NULLOK const char *stashname|STRLEN stashname_len
+pd	|void   |mro_isa_changed_in|NN HV* stash
 Apd	|void	|mro_method_changed_in	|NN HV* stash
 pdx	|void	|mro_package_moved	|NULLOK HV * const stash|NULLOK HV * const oldstash|NULLOK const GV *gv|NULLOK const char *newname|I32 newname_len
 : Only used in perl.c
