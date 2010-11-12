@@ -1646,9 +1646,10 @@ output more readable.
 
 =item *
 
-C<ibcmp_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2)> can be used to
+C<foldEQ_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2)> can be used to
 compare two strings case-insensitively in Unicode.  For case-sensitive
-comparisons you can just use C<memEQ()> and C<memNE()> as usual.
+comparisons you can just use C<memEQ()> and C<memNE()> as usual, except
+if one string is in utf8 and the other isn't.
 
 =back
 
