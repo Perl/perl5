@@ -414,6 +414,12 @@ C<parent> has been upgraded from 0.223 to 0.224
 
 =item *
 
+C<Pod::Simple> has been upgraded from 3.14 to 3.15
+
+Includes various fixes to C<HTML> and C<XHTML> handling.
+
+=item *
+
 C<POSIX> has been upgraded from 1.21 to 1.22.
 
 =item *

@@ -77,9 +77,9 @@ if( $testmod ) {
   print "# Comparing \"$x[0]\" to \"$x[1]\"\n";
   for(@x) { s{[/\\]}{/}g; }
   print "#        => \"$x[0]\" to \"$x[1]\"\n";
-  skip $^O eq 'VMS' ? '-- case may or may not be preserved' : 0,
-       $x[0], 
-       $x[1], 
+  ok
+       lc $x[0], 
+       lc $x[1], 
        " find('$testmod') should match survey's name2where{$testmod}";
 } else {
   ok 0;  # no 'thatpath/<name>.pm' means can't test find()

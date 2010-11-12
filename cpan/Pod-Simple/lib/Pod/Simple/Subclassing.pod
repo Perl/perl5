@@ -887,6 +887,8 @@ L<Pod::Simple::Text> -- a simple plaintext formatter for Pod
 L<Pod::Simple::TextContent> -- like Pod::Simple::Text, but
 makes no effort for indent or wrap the text being formatted
 
+L<Pod::Simple::HTML> -- a simple HTML formatter for Pod
+
 L<perlpod|perlpod>
 
 L<perlpodspec|perlpodspec>

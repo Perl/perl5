@@ -1,6 +1,36 @@
 # ChangeLog for Pod::Simple dist
 #---------------------------------------------------------------------------
 
+2010-11-11   David E. Wheeler <david@justatheory.org>
+	* Release 3.15
+
+	Removed "perlpod.pod" and "perlpodspec.pod". These now just live
+	in the Perl core.
+
+	Fixed stylesheet names output by HTMLBatch to match the names of
+	the actual stylesheet files (broken in 3.09). Thanks to Kevin Ryde
+	for the report (RT #56725).
+
+	Added missing closing slash to the CSS links in the XHTML output.
+	Thanks to HarleyPig for the patch!
+
+	Added parens around bar "qw(...)" in t/xhtml05.t. Thanks to Jerry
+	D. Hedden for the patch.
+
+	Improved the Pod::Simple::HTML docs. Thanks to Gabor Szabo for the
+	patch.
+
+	Pod::Simple::XHTML now properly encodes entities in URLs in the
+	anchor tag. Thanks to John McNamara for the report (RT-60249).
+
+	Pod::Simple::HTML and XHTML now strip whitespace from the end of
+	section names that appear as anchor names for headers (in HTML)
+	and IDs (in XHTML). Such whitespace appeared when "X<>" entities
+	were stripped out but not the space between them (RT-56572).
+
+	Make test "t/search50.t" always pass on case-insensitive file
+	systems rather than just skip VMS.
+
 2009-04-27
 	* Release 3.14
 

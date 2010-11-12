@@ -8,7 +8,7 @@ BEGIN {
 
 use strict;
 use lib '../lib';
-use Test::More tests => 48;
+use Test::More tests => 50;
 #use Test::More 'no_plan';
 
 use_ok('Pod::Simple::XHTML') or exit;
@@ -24,6 +24,11 @@ my $MANURL = "http://man.he.net/man";
 initialize($parser, $results);
 $parser->parse_string_document( "=head1 Poit!" );
 is($results, qq{<h1 id="Poit-">Poit!</h1>\n\n}, "head1 level output");
+
+initialize($parser, $results);
+$parser->parse_string_document( "=head2 Yada Yada Operator
+X<...> X<... operator> X<yada yada operator>" );
+is($results, qq{<h2 id="Yada-Yada-Operator">Yada Yada Operator   </h2>\n\n}, "head ID with X<>");
 
 initialize($parser, $results);
 $parser->html_h_level(2);
@@ -76,13 +81,13 @@ B: Now, Pinky, if by any chance you are captured during this mission,
 remember you are Gunther Heindriksen from Appenzell. You moved to
 Grindelwald to drive the cog train to Murren. Can you repeat that?
 
-P: Mmmm, no, Brain, don't think I can.
+P: Mmmm, no, Brain, dont think I can.
 EOPOD
 
 is($results, <<'EOHTML', "multiple paragraphs");
 <p>B: Now, Pinky, if by any chance you are captured during this mission, remember you are Gunther Heindriksen from Appenzell. You moved to Grindelwald to drive the cog train to Murren. Can you repeat that?</p>
 
-<p>P: Mmmm, no, Brain, don&#39;t think I can.</p>
+<p>P: Mmmm, no, Brain, dont think I can.</p>
 
 EOHTML
 
@@ -400,7 +405,7 @@ $parser->parse_string_document(<<'EOPOD');
 
 A plain paragraph with body tags and css tags turned on.
 EOPOD
-like($results, qr/<link rel='stylesheet' href='style.css' type='text\/css'>/,
+like($results, qr/<link rel='stylesheet' href='style.css' type='text\/css' \/>/,
 "adding html body tags and css tags");
 
 
@@ -456,6 +461,17 @@ A plain paragraph with a L<http://link.included.here>.
 EOPOD
 is($results, <<"EOHTML", "A link in a paragraph");
 <p>A plain paragraph with a <a href="http://link.included.here">http://link.included.here</a>.</p>
+
+EOHTML
+
+initialize($parser, $results);
+$parser->parse_string_document(<<'EOPOD');
+=pod
+
+A plain paragraph with a L<http://link.included.here?o=1&p=2>.
+EOPOD
+is($results, <<"EOHTML", "A link in a paragraph");
+<p>A plain paragraph with a <a href="http://link.included.here?o=1&amp;p=2">http://link.included.here?o=1&amp;p=2</a>.</p>
 
 EOHTML
 
@@ -540,12 +556,12 @@ SKIP: for my $use_html_entities (0, 1) {
 =pod
 
   # this header is very important & dont you forget it
-  B<my $file = <FILEE<gt> || 'Blank!';>
+  B<my $file = <FILEE<gt> || Blank!;>
   my $text = "File is: " . <FILE>;
 EOPOD
 is($results, <<"EOHTML", "Verbatim text with markup and embedded formatting");
 <pre><code>  # this header is very important &amp; dont you forget it
-  <b>my \$file = &lt;FILE&gt; || &#39;Blank!&#39;;</b>
+  <b>my \$file = &lt;FILE&gt; || Blank!;</b>
   my \$text = &quot;File is: &quot; . &lt;FILE&gt;;</code></pre>
 
 EOHTML

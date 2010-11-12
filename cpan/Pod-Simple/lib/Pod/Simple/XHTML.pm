@@ -28,7 +28,7 @@ L<Pod::Simple::HTML>, but it largely preserves the same interface.
 package Pod::Simple::XHTML;
 use strict;
 use vars qw( $VERSION @ISA $HAS_HTML_ENTITIES );
-$VERSION = '3.14';
+$VERSION = '3.15';
 use Carp ();
 use Pod::Simple::Methody ();
 @ISA = ('Pod::Simple::Methody');
@@ -165,7 +165,7 @@ __PACKAGE__->_accessorize(
  'man_url_prefix',
  'man_url_postfix',
  'title_prefix',  'title_postfix',
- 'html_css', 
+ 'html_css',
  'html_javascript',
  'html_doctype',
  'html_header_tags',
@@ -372,7 +372,7 @@ sub end_item_text   {
 }
 
 # This handles =begin and =for blocks of all kinds.
-sub start_for { 
+sub start_for {
   my ($self, $flags) = @_;
 
   push @{ $self->{__region_targets} }, $flags->{target_matching};
@@ -386,7 +386,7 @@ sub start_for {
   $self->emit;
 
 }
-sub end_for { 
+sub end_for {
   my ($self) = @_;
 
   $self->{'scratch'} .= '</div>' unless $self->__in_literal_xhtml_region;
@@ -395,7 +395,7 @@ sub end_for {
   $self->emit;
 }
 
-sub start_Document { 
+sub start_Document {
   my ($self) = @_;
   if (defined $self->html_header) {
     $self->{'scratch'} .= $self->html_header;
@@ -407,7 +407,7 @@ sub start_Document {
     $metatags = $self->html_header_tags || '';
     if ($self->html_css) {
       $metatags .= "\n<link rel='stylesheet' href='" .
-             $self->html_css . "' type='text/css'>";
+             $self->html_css . "' type='text/css' />";
     }
     if ($self->html_javascript) {
       $metatags .= "\n<script type='text/javascript' src='" .
@@ -500,10 +500,12 @@ sub end_I   { $_[0]{'scratch'} .= '</i>' }
 sub start_L {
   my ($self, $flags) = @_;
     my ($type, $to, $section) = @{$flags}{'type', 'to', 'section'};
-    my $url = $type eq 'url' ? $to
+    my $url = encode_entities(
+        $type eq 'url' ? $to
             : $type eq 'pod' ? $self->resolve_pod_page_link($to, $section)
             : $type eq 'man' ? $self->resolve_man_page_link($to, $section)
-            :                  undef;
+            :                  undef
+    );
 
     # If it's an unknown type, use an attribute-less <a> like HTML.pm.
     $self->{'scratch'} .= '<a' . ($url ? ' href="'. $url . '">' : '>');
@@ -627,6 +629,7 @@ sub idify {
     for ($t) {
         s/<[^>]+>//g;            # Strip HTML.
         s/&[^;]+;//g;            # Strip entities.
+        s/^\s+//; s/\s+$//;      # Strip white space.
         s/^([^a-zA-Z]+)$/pod$1/; # Prepend "pod" if no valid chars.
         s/^[^a-zA-Z]+//;         # First char must be a letter.
         s/[^-a-zA-Z0-9_:.]+/-/g; # All other chars must be valid.
