@@ -1,12 +1,16 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 8ff3250783, except for:
+This has been completed up to 4df35a07ff9, except for:
 04777d295957ad270188e4debf51b523e07cc5b0
 c565ab54dc649bb62cd4d57149d7b2abb21df5f3
 1c8d11ca3d0ce8bc11562f159b94c2c7e62dea6c
 51698cb360d5bba06e12496ef9c7bf82e3352b71
 0c4d3b5ea916cf640ea163c5a6bcffefade55a1b
+9960802c2b6f4b61c0c7ce718f3ce247a3a13bf1
+2726813d9af5d50f1451663cd931317e7172da50
+8951c461a5079d86be33a432491eda98c24dc397
+I may have missed a few module version bumps.
 
 =head1 NAME
 
@@ -269,6 +273,9 @@ executable.
 
 C<B> has been upgraded from 1.24 to 1.25.
 
+It no longer crashes when taking apart a C<y///> containing characters
+outside the octet range or compiled in a C<use utf8> scope.
+
 =item *
 
 C<B::Deparse> has been upgraded from 0.99 to 1.01.
@@ -304,6 +311,10 @@ C<CPANPLUS::Dist::Build> has been upgraded from 0.48 to 0.50
 
 =item *
 
+C<Data::Dumper> has been upgraded from 2.129 to 2.130.
+
+=item *
+
 C<DynaLoader> has been upgraded from 1.10 to 1.11.
 
 It fixes a buffer overflow when passed a very long file name.
@@ -331,6 +342,13 @@ C<File::Glob> has been upgraded from 1.09 to 1.10.
 
 =item *
 
+C<File::stat> has been upgraded from 1.03 to 1.04.
+
+The C<-x> and C<-X> file test operators now work correctly under the root
+user.
+
+=item *
+
 C<GDBM_File> has been upgraded from 1.11 to 1.12.
 
 This fixes a memory leak when DBM filters are used.
@@ -355,9 +373,13 @@ C<Locale::Maketext> has been upgraded from 1.16 to 1.17.
 
 C<Math::BigInt> has been upgraded from 1.97 to 1.98.
 
+XXX Should the changes be listed here?
+
 =item *
 
 C<Math::BigInt::FastCalc> has been upgraded from 0.22 to 0.24.
+
+XXX Should the changes be listed here?
 
 =item *
 
@@ -381,6 +403,10 @@ This fixes a memory leak when DBM filters are used.
 C<ODBM_File> has been upgraded from 1.08 to 1.09.
 
 This fixes a memory leak when DBM filters are used.
+
+=item *
+
+C<Opcode> has been upgraded from 1.16 to 1.17.
 
 =item *
 
@@ -856,6 +882,45 @@ L<[perl #70998]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=70998>.
 =item *
 
 C<s///r> (added in 5.13.2) no longer leaks.
+
+=item *
+
+The trie optimisation was not taking empty groups into account, preventing
+'foo' from matching C</\A(?:(?:)foo|bar|zot)\z/>
+L<[perl #78356]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78356>.
+
+=item *
+
+A pattern containing a C<+> inside a lookahead would sometimes cause an
+incorrect match failure in a global match (e.g., C</(?=(\S+))/g>)
+L<[perl #68564]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=68564>.
+
+=item *
+
+Iterating with C<foreach> over an array returned by an lvalue sub now works
+L<[perl #23790]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=23790>.
+
+=item *
+
+C<$@> is now localised during calls to C<binmode> to prevent action at a
+distance
+L<[perl #78844]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78844>.
+
+=item *
+
+C<PL_isarev>, which is accessible to Perl via C<mro::get_isarev> is now
+updated properly when packages are deleted or removed from the C<@ISA> of
+other classes. This allows many packages to be created and deleted without
+causing a memory leak
+L<[perl #75176]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75176>.
+
+=item *
+
+C<undef *Foo::> and C<undef *Foo::ISA> used not to update the internal isa
+caches if the stash or array (respectively) had a reference elsewhere. In
+fact, C<undef *Foo::ISA> would stop a new C<@Foo::ISA> array from updating
+caches
+L<[perl #79024]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=79024>.
 
 =back
 
