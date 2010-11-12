@@ -26,7 +26,7 @@
 #define	REG_ANY               	14	/* 0x0e Match any one character (except newline). */
 #define	SANY                  	15	/* 0x0f Match any one character. */
 #define	CANY                  	16	/* 0x10 Match any one byte. */
-#define	ANYOF                 	17	/* 0x11 Match character in (or not in) this class. */
+#define	ANYOF                 	17	/* 0x11 Match character in (or not in) this class, folding is native charset for non-utf8. */
 #define	ALNUM                 	18	/* 0x12 Match any alphanumeric character */
 #define	ALNUML                	19	/* 0x13 Match any alphanumeric char in locale */
 #define	NALNUM                	20	/* 0x14 Match any non-alphanumeric character */
