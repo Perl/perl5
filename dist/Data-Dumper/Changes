@@ -6,7 +6,11 @@ HISTORY - public release history for Data::Dumper
 
 =over 8
 
-=item 2.129 (date here)
+=item 2.130 (date here)
+
+C<Dumpxs> can now handle malformed UTF-8.
+
+=item 2.129 (Oct 20 2010)
 
 C<Dumpxs> no longer crashes with globs returned by C<*$io_ref>
 [perl #72332].
