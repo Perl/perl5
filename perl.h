@@ -4313,7 +4313,9 @@ EXTCONST char* const PL_sig_name[];
 EXTCONST int         PL_sig_num[];
 #endif
 
-/* fast conversion and case folding tables */
+/* fast conversion and case folding tables.  The folding tables complement the
+ * fold, so that 'a' maps to 'A' and 'A' maps to 'a', ignoring more complicated
+ * folds such as outside the range or to multiple characters. */
 
 #ifdef DOINIT
 #ifdef EBCDIC
