@@ -1,3 +1,16 @@
+Fri Nov 12 10:52:19 IST 2010   Abhijit Menon-Sen <ams@toroid.org>
+
+    Version 2.24
+
+	Performance improvement for overloaded classes from Benjamin
+	Holzman.
+
+Fri Nov 12 10:36:22 IST 2010   Abhijit Menon-Sen <ams@toroid.org>
+
+    Version 2.23
+
+	Release the latest version from the Perl repository.
+
 Thu Aug  6 10:55:50 IST 2009   Abhijit Menon-Sen <ams@toroid.org>
 
     Version 2.21

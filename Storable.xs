@@ -386,6 +386,7 @@ typedef struct stcxt {
 	SV *(**retrieve_vtbl)(pTHX_ struct stcxt *, const char *);	/* retrieve dispatch table */
 	SV *prev;		/* contexts chained backwards in real recursion */
 	SV *my_sv;		/* the blessed scalar who's SvPVX() I am */
+	int in_retrieve_overloaded; /* performance hack for retrieving overloaded objects */
 } stcxt_t;
 
 #define NEW_STORABLE_CXT_OBJ(cxt)					\
@@ -1045,6 +1046,8 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 
 /*
  * Bless `s' in `p', via a temporary reference, required by sv_bless().
+ * "A" magic is added before the sv_bless for overloaded classes, this avoids
+ * an expensive call to S_reset_amagic in sv_bless.
  */
 #define BLESS(s,p) 							\
   STMT_START {								\
@@ -1053,6 +1056,11 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 	TRACEME(("blessing 0x%"UVxf" in %s", PTR2UV(s), (p))); \
 	stash = gv_stashpv((p), GV_ADD);			\
 	ref = newRV_noinc(s);					\
+	if (cxt->in_retrieve_overloaded && Gv_AMG(stash)) \
+	{ \
+	    cxt->in_retrieve_overloaded = 0; \
+		SvAMAGIC_on(ref);                            \
+	} \
 	(void) sv_bless(ref, stash);			\
 	SvRV_set(ref, NULL);						\
 	SvREFCNT_dec(ref);						\
@@ -1500,6 +1508,7 @@ static void init_retrieve_context(pTHX_ stcxt_t *cxt, int optype, int is_tainted
         cxt->use_bytes = -1;		/* Fetched from perl if needed */
 #endif
         cxt->accept_future_minor = -1;	/* Fetched from perl if needed */
+	cxt->in_retrieve_overloaded = 0;
 }
 
 /*
@@ -1550,6 +1559,7 @@ static void clean_retrieve_context(pTHX_ stcxt_t *cxt)
 #endif
         cxt->accept_future_minor = -1;	/* Fetched from perl if needed */
 
+	cxt->in_retrieve_overloaded = 0;
 	reset_context(cxt);
 }
 
@@ -4499,7 +4509,9 @@ static SV *retrieve_overloaded(pTHX_ stcxt_t *cxt, const char *cname)
 
 	rv = NEWSV(10002, 0);
 	SEEN(rv, cname, 0);		/* Will return if rv is null */
+	cxt->in_retrieve_overloaded = 1; /* so sv_bless doesn't call S_reset_amagic */
 	sv = retrieve(aTHX_ cxt, 0);	/* Retrieve <object> */
+	cxt->in_retrieve_overloaded = 0;
 	if (!sv)
 		return (SV *) 0;	/* Failed */
 
