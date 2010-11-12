@@ -8422,7 +8422,7 @@ parseit:
 		    RExC_emit += ANYOF_CLASS_ADD_SKIP;
 		    ANYOF_CLASS_ZERO(ret);
 		}
-		    ANYOF_FLAGS(ret) |= ANYOF_CLASS|ANYOF_LARGE;
+		    ANYOF_FLAGS(ret) |= ANYOF_CLASS;
 	    }
 
 	    /* a bad range like a-\d, a-[:digit:] ? */
@@ -10387,7 +10387,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 	}
 	else if (op == ANYOF) {
 	    /* arglen 1 + class block */
-	    node += 1 + ((ANYOF_FLAGS(node) & ANYOF_LARGE)
+	    node += 1 + ((ANYOF_FLAGS(node) & ANYOF_CLASS)
 		    ? ANYOF_CLASS_SKIP : ANYOF_SKIP);
 	    node = NEXTOPER(node);
 	}
