@@ -5761,33 +5761,85 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
     case CANY:
 	scan = loceol;
 	break;
-    case EXACTFL:
-	PL_reg_flags |= RF_tainted;
-	/* FALL THROUGH */
     case EXACT:
-    case EXACTF:
-	/* To get here, EXACTish nodes must have *byte* length == 1.  That means
-	 * they match only characters in the string that can be expressed as a
-	 * single byte.  For non-utf8 strings, that means a simple match.  For
-	 * utf8 strings, the character matched must be an invariant, or
+	/* To get here, EXACTish nodes must have *byte* length == 1.  That
+	 * means they match only characters in the string that can be expressed
+	 * as a single byte.  For non-utf8 strings, that means a simple match.
+	 * For utf8 strings, the character matched must be an invariant, or
 	 * downgradable to a single byte.  The pattern's utf8ness is
-	 * irrelevant, as it must be a single byte, so either it isn't utf8, or
-	 * if it is it's an invariant */
+	 * irrelevant, as since it's a single byte, it either isn't utf8, or if
+	 * it is, it's an invariant */
 
 	c = (U8)*STRING(p);
 	assert(! UTF_PATTERN || UNI_IS_INVARIANT(c));
 
-	if ((! utf8_target) || UNI_IS_INVARIANT(c)) {
+	if (! utf8_target || UNI_IS_INVARIANT(c)) {
+	    while (scan < loceol && UCHARAT(scan) == c) {
+		scan++;
+	    }
+	}
+	else {
 
-	    /* Here, the string isn't utf8, or the character in the EXACT
-	     * node is the same in utf8 as not, so can just do equality.
-	     * Each matching char must be 1 byte long */
+	    /* Here, the string is utf8, and the pattern char is different
+	     * in utf8 than not, so can't compare them directly.  Outside the
+	     * loop, find find the two utf8 bytes that represent c, and then
+	     * look for those in sequence in the utf8 string */
+	    U8 high = UTF8_TWO_BYTE_HI(c);
+	    U8 low = UTF8_TWO_BYTE_LO(c);
+	    loceol = PL_regeol;
+
+	    while (hardcount < max
+		    && scan + 1 < loceol
+		    && UCHARAT(scan) == high
+		    && UCHARAT(scan + 1) == low)
+	    {
+		scan += 2;
+		hardcount++;
+	    }
+	}
+	break;
+    case EXACTFL:
+	PL_reg_flags |= RF_tainted;
+	/* FALL THROUGH */
+    case EXACTF:
+
+	/* The comments for the EXACT case apply as well to these fold ones */
+
+	c = (U8)*STRING(p);
+	assert(! UTF_PATTERN || UNI_IS_INVARIANT(c));
+
+	if (utf8_target) { /* Use full Unicode fold matching */
+
+	    /* For the EXACTFL case, It doesn't really make sense to compare
+	     * locale and utf8, but it is best we can do.  The documents warn
+	     * against mixing them */
+
+	    char *tmpeol = loceol;
+	    while (hardcount < max
+		    && foldEQ_utf8(scan, &tmpeol, 0, utf8_target,
+				    STRING(p), NULL, 1, UTF_PATTERN))
+	    {
+		scan = tmpeol;
+		tmpeol = loceol;
+		hardcount++;
+	    }
+
+	    /* XXX Note that the above handles properly the German sharp s in
+	     * the pattern matching ss in the string.  But it doesn't handle
+	     * properly cases where the string contains say 'LIGATURE ff' and
+	     * the pattern is 'f+'.  This would require, say, a new function or
+	     * revised interface to foldEQ_utf8(), in which the maximum number
+	     * of characters to match could be passed and it would return how
+	     * many actually did.  This is just one of many cases where
+	     * multi-char folds don't work properly, and so the fix is being
+	     * deferred */
+	}
+	else {
+
+	    /* Here, the string isn't utf8; and either the pattern isn't utf8
+	     * or c is an invariant, so its utf8ness doesn't affect c.  Can
+	     * just do simple comparisons for exact or fold matching. */
 	    switch (OP(p)) {
-	    case EXACT:
-		while (scan < loceol && UCHARAT(scan) == c) {
-		    scan++;
-		}
-		break;
 	    case EXACTF:
 		while (scan < loceol &&
 		    (UCHARAT(scan) == c || UCHARAT(scan) == PL_fold[c]))
@@ -5800,61 +5852,6 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 		    (UCHARAT(scan) == c || UCHARAT(scan) == PL_fold_locale[c]))
 		{
 		    scan++;
-		}
-		break;
-	    default:
-		Perl_croak(aTHX_ "panic: Unexpected op %u", OP(p));
-	    }
-	}
-	else {
-
-	    /* Here, the string is utf8, and the pattern char is different
-	     * in utf8 than not.  */
-
-	    switch (OP(p)) {
-	    case EXACT:
-		{
-		    /* Fastest to find the two utf8 bytes that represent c, and
-		     * then look for those in sequence in the utf8 string */
-		    U8 high = UTF8_TWO_BYTE_HI(c);
-		    U8 low = UTF8_TWO_BYTE_LO(c);
-		    loceol = PL_regeol;
-
-		    while (hardcount < max
-			   && scan + 1 < loceol
-			   && UCHARAT(scan) == high
-			   && UCHARAT(scan + 1) == low)
-		    {
-			scan += 2;
-			hardcount++;
-		    }
-		}
-		break;
-	    case EXACTFL:   /* Doesn't really make sense, but is best we can
-			       do.  The documents warn against mixing locale
-			       and utf8 */
-	    case EXACTF:
-		{   /* utf8 string, so use utf8 foldEQ */
-		    char *tmpeol = loceol;
-		    while (hardcount < max
-			   && foldEQ_utf8(scan, &tmpeol, 0, utf8_target,
-				          STRING(p), NULL, 1, UTF_PATTERN))
-		    {
-			scan = tmpeol;
-			tmpeol = loceol;
-			hardcount++;
-		    }
-
-		    /* XXX Note that the above handles properly the German
-		     * sharp ss in the pattern matching ss in the string.  But
-		     * it doesn't handle properly cases where the string
-		     * contains say 'LIGATURE ff' and the pattern is 'f+'.
-		     * This would require, say, a new function or revised
-		     * interface to foldEQ_utf8(), in which the maximum number
-		     * of characters to match could be passed and it would
-		     * return how many actually did.  This is just one of many
-		     * cases where multi-char folds don't work properly, and so
-		     * the fix is being deferred */
 		}
 		break;
 	    default:
