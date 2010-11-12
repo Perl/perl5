@@ -410,7 +410,7 @@ struct regnode_charclass_class {
 #define ANYOF_BITMAP_CLEARALL(p)	\
 	Zero (ANYOF_BITMAP(p), ANYOF_BITMAP_SIZE)
 /* Check that all 256 bits are all set.  Used in S_cl_is_anything()  */
-#define ANYOF_BITMAP_TESTALLSET(p)	\
+#define ANYOF_BITMAP_TESTALLSET(p)	/* Assumes sizeof(p) == 32 */     \
 	memEQ (ANYOF_BITMAP(p), "\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377", ANYOF_BITMAP_SIZE)
 
 #define ANYOF_SKIP		((ANYOF_SIZE - 1)/sizeof(regnode))
