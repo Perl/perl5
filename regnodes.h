@@ -39,11 +39,11 @@
 #define	DIGITL                	27	/* 0x1b Match any numeric character in locale */
 #define	NDIGIT                	28	/* 0x1c Match any non-numeric character */
 #define	NDIGITL               	29	/* 0x1d Match any non-numeric character in locale */
-#define	CLUMP                 	30	/* 0x1e Match any combining character sequence */
+#define	CLUMP                 	30	/* 0x1e Match any extended grapheme cluster sequence */
 #define	BRANCH                	31	/* 0x1f Match this alternative, or the next... */
 #define	BACK                  	32	/* 0x20 Match "", "next" ptr points backward. */
 #define	EXACT                 	33	/* 0x21 Match this string (preceded by length). */
-#define	EXACTF                	34	/* 0x22 Match this string, folded (prec. by length). */
+#define	EXACTF                	34	/* 0x22 Match this string, folded, native charset semantics for non-utf8 (prec. by length). */
 #define	EXACTFL               	35	/* 0x23 Match this string, folded in locale (w/len). */
 #define	NOTHING               	36	/* 0x24 Match empty string. */
 #define	TAIL                  	37	/* 0x25 Match empty string. Can jump here from outside. */
@@ -57,7 +57,7 @@
 #define	OPEN                  	45	/* 0x2d Mark this point in input as start of */
 #define	CLOSE                 	46	/* 0x2e Analogous to OPEN. */
 #define	REF                   	47	/* 0x2f Match some already matched string */
-#define	REFF                  	48	/* 0x30 Match already matched string, folded */
+#define	REFF                  	48	/* 0x30 Match already matched string, folded using native charset semantics for non-utf8 */
 #define	REFFL                 	49	/* 0x31 Match already matched string, folded in loc. */
 #define	IFMATCH               	50	/* 0x32 Succeeds if the following matches. */
 #define	UNLESSM               	51	/* 0x33 Fails if the following matches. */
@@ -77,7 +77,7 @@
 #define	GOSUB                 	65	/* 0x41 recurse to paren arg1 at (signed) ofs arg2 */
 #define	GOSTART               	66	/* 0x42 recurse to start of pattern */
 #define	NREF                  	67	/* 0x43 Match some already matched string */
-#define	NREFF                 	68	/* 0x44 Match already matched string, folded */
+#define	NREFF                 	68	/* 0x44 Match already matched string, folded using native charset semantics for non-utf8 */
 #define	NREFFL                	69	/* 0x45 Match already matched string, folded in loc. */
 #define	NGROUPP               	70	/* 0x46 Whether the group matched. */
 #define	INSUBP                	71	/* 0x47 Whether we are in a specific recurse. */

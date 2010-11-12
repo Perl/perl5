@@ -54,7 +54,7 @@ DIGIT       DIGIT,      no 0 S    ; Match any numeric character
 DIGITL      DIGIT,      no        ; Match any numeric character in locale
 NDIGIT      NDIGIT,     no 0 S    ; Match any non-numeric character
 NDIGITL     NDIGIT,     no        ; Match any non-numeric character in locale
-CLUMP       CLUMP,      no 0 V    ; Match any combining character sequence
+CLUMP       CLUMP,      no 0 V    ; Match any extended grapheme cluster sequence
 
 #* Alternation (31)
 
@@ -78,7 +78,7 @@ BACK        BACK,       no 0 V    ; Match "", "next" ptr points backward.
 #*Literals (33..35)
 
 EXACT       EXACT,      str       ; Match this string (preceded by length).
-EXACTF      EXACT,      str       ; Match this string, folded (prec. by length).
+EXACTF      EXACT,      str       ; Match this string, folded, native charset semantics for non-utf8 (prec. by length).
 EXACTFL     EXACT,      str       ; Match this string, folded in locale (w/len).
 
 #*Do nothing types (36..37)
@@ -112,7 +112,7 @@ OPEN        OPEN,       num 1     ; Mark this point in input as start of #n.
 CLOSE       CLOSE,      num 1     ; Analogous to OPEN.
 
 REF         REF,        num 1 V   ; Match some already matched string
-REFF        REF,        num 1 V   ; Match already matched string, folded
+REFF        REF,        num 1 V   ; Match already matched string, folded using native charset semantics for non-utf8
 REFFL       REF,        num 1 V   ; Match already matched string, folded in loc.
 
 
@@ -158,7 +158,7 @@ GOSTART     GOSTART,    no        ; recurse to start of pattern
 
 #*Named references (67..69)
 NREF        REF,        no-sv 1 V ; Match some already matched string
-NREFF       REF,        no-sv 1 V ; Match already matched string, folded
+NREFF       REF,        no-sv 1 V ; Match already matched string, folded using native charset semantics for non-utf8
 NREFFL      REF,        no-sv 1 V ; Match already matched string, folded in loc.
 
 
