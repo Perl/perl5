@@ -610,7 +610,11 @@ close STDOUT_DUP;
 *CmT =  *{$::{Comment}}{FORMAT};
 ok  defined *{$::{CmT}}{FORMAT}, "glob assign";
 
-{   my $buf = "";
+if ($ENV{PERL_CORE_MINITEST}) {
+    ok 1, "Skip test for miniperl, as it does not support scalario";
+}
+else {
+    my $buf = "";
     open my $fh, ">", \$buf;
     my $old_fh = select $fh;
     local $~ = "CmT";
