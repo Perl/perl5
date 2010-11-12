@@ -4357,6 +4357,49 @@ EXTCONST  unsigned char PL_fold[] = {
 	240,	241,	242,	243,	244,	245,	246,	247,
 	248,	249,	250,	251,	252,	253,	254,	255
 };
+EXTCONST  unsigned char PL_fold_latin1[] = {
+    /* Full latin1 complement folding, except for three problematic code points:
+     *	Micro sign (181 = 0xB5) and y with diearesis (255 = 0xFF) have their
+     *	fold complements outside the Latin1 range, so can't match something
+     *	that isn't in utf8.
+     *	German lower case sharp s (223 = 0xDF) folds to two characters, 'ss',
+     *	not one, so can't be represented in this table.
+     *
+     * All have to be specially handled */
+	0,	1,	2,	3,	4,	5,	6,	7,
+	8,	9,	10,	11,	12,	13,	14,	15,
+	16,	17,	18,	19,	20,	21,	22,	23,
+	24,	25,	26,	27,	28,	29,	30,	31,
+	32,	33,	34,	35,	36,	37,	38,	39,
+	40,	41,	42,	43,	44,	45,	46,	47,
+	48,	49,	50,	51,	52,	53,	54,	55,
+	56,	57,	58,	59,	60,	61,	62,	63,
+	64,	'a',	'b',	'c',	'd',	'e',	'f',	'g',
+	'h',	'i',	'j',	'k',	'l',	'm',	'n',	'o',
+	'p',	'q',	'r',	's',	't',	'u',	'v',	'w',
+	'x',	'y',	'z',	91,	92,	93,	94,	95,
+	96,	'A',	'B',	'C',	'D',	'E',	'F',	'G',
+	'H',	'I',	'J',	'K',	'L',	'M',	'N',	'O',
+	'P',	'Q',	'R',	'S',	'T',	'U',	'V',	'W',
+	'X',	'Y',	'Z',	123,	124,	125,	126,	127,
+	128,	129,	130,	131,	132,	133,	134,	135,
+	136,	137,	138,	139,	140,	141,	142,	143,
+	144,	145,	146,	147,	148,	149,	150,	151,
+	152,	153,	154,	155,	156,	157,	158,	159,
+	160,	161,	162,	163,	164,	165,	166,	167,
+	168,	169,	170,	171,	172,	173,	174,	175,
+	176,	177,	178,	179,	180,	181 /*micro */,	182,	183,
+	184,	185,	186,	187,	188,	189,	190,	191,
+	192+32,	193+32,	194+32,	195+32,	196+32,	197+32,	198+32,	199+32,
+	200+32,	201+32,	202+32,	203+32,	204+32,	205+32,	206+32,	207+32,
+	208+32,	209+32,	210+32,	211+32,	212+32,	213+32,	214+32,	215,
+	216+32,	217+32,	218+32,	219+32,	220+32,	221+32,	222+32,	223 /* ss */,
+	224-32,	225-32,	226-32,	227-32,	228-32,	229-32,	230-32,	231-32,
+	232-32,	233-32,	234-32,	235-32,	236-32,	237-32,	238-32,	239-32,
+	240-32,	241-32,	242-32,	243-32,	244-32,	245-32,	246-32,	247,
+	248-32,	249-32,	250-32,	251-32,	252-32,	253-32,	254-32,
+	255 /* y with diaeresis */
+};
 #endif  /* !EBCDIC, but still in DOINIT */
 
 /* If these tables are accessed through ebcdic, the access will be converted to
@@ -4434,6 +4477,7 @@ EXTCONST  unsigned char PL_mod_latin1_uc[] = {
 };
 #else	/* ! DOINIT */
 EXTCONST unsigned char PL_fold[];
+EXTCONST unsigned char PL_fold_latin1[];
 EXTCONST unsigned char PL_mod_latin1_uc[];
 EXTCONST unsigned char PL_latin1_lc[];
 #endif
