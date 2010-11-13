@@ -570,11 +570,6 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
                 HV * const isa = (HV *)HeVAL(iter);
                 const HEK *namehek;
 
-                /* Re-calculate the linearisation, unless a previous iter-
-                   ation was for a subclass of this class. */
-                if(!HvMROMETA(revstash)->isa)
-                    (void)mro_get_linear_isa(revstash);
-
                 /* We're starting at the 2nd element, skipping revstash */
                 linear_mro = mro_get_linear_isa(revstash);
                 svp = AvARRAY(linear_mro) + 1;
