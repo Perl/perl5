@@ -445,6 +445,7 @@ is package-specific, and must be declared or given a full package name
 if not in package main when running under C<strict 'vars'>.
 
 =item ${^GLOBAL_PHASE}
+X<${^GLOBAL_PHASE}>
 
 The current phase of the perl interpreter.
 
