@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-BEGIN { require q(./test.pl); } plan(tests => 51);
+BEGIN { require q(./test.pl); } plan(tests => 52);
 
 require mro;
 
@@ -319,4 +319,12 @@ is(eval { MRO_N->testfunc() }, 123);
     @Blength::ISA = 'Bladd';
     delete $Blength::{ISA};
     ok !Blength->isa("Bladd"), 'delete $package::{ISA}';
+}
+
+{
+    # Undefining stashes
+    @Thrext::ISA = "Thwit";
+    @Thwit::ISA = "Sile";
+    undef %Thwit::;
+    ok !Thrext->isa('Sile'), 'undef %package:: updates subclasses';
 }

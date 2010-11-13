@@ -1857,7 +1857,12 @@ Perl_hv_undef(pTHX_ HV *hv)
     xhv = (XPVHV*)SvANY(hv);
 
     if ((name = HvENAME_get(hv)) && !PL_dirty)
-        mro_isa_changed_in(hv);
+    {
+        /* Delete the @ISA element before calling mro_package_moved, so it
+           does not see it. */
+        (void)hv_delete(hv, "ISA", 3, G_DISCARD);
+        mro_package_moved(NULL, hv, NULL, name, HvENAMELEN_get(hv));
+    }
 
     hfreeentries(hv);
     if (name || (name = HvNAME(hv))) {
