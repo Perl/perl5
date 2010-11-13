@@ -547,7 +547,7 @@ This will print out
     end-time: END
     package variables are garbage collected after END: DESTRUCT
 
-This variable was added in Perl 5.13.7.
+This variable was added in Perl 5.14.0.
 
 =item $^H
 X<$^H>
