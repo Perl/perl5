@@ -443,6 +443,20 @@ by the C<setisa> magic, should not need to invoke directly.
 
 =cut
 */
+
+/* Macro to avoid repeating the code three times. */
+#define CLEAR_LINEAR(mEta)                                     \
+    if (mEta->mro_linear_all) {                                 \
+	SvREFCNT_dec(MUTABLE_SV(mEta->mro_linear_all));          \
+	mEta->mro_linear_all = NULL;                              \
+	/* This is just acting as a shortcut pointer.  */          \
+	mEta->mro_linear_current = NULL;                            \
+    } else if (mEta->mro_linear_current) {                           \
+	/* Only the current MRO is stored, so this owns the data.  */ \
+	SvREFCNT_dec(mEta->mro_linear_current);                        \
+	mEta->mro_linear_current = NULL;                                \
+    }
+
 void
 Perl_mro_isa_changed_in(pTHX_ HV* stash)
 {
@@ -467,16 +481,7 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
 
     /* wipe out the cached linearizations for this stash */
     meta = HvMROMETA(stash);
-    if (meta->mro_linear_all) {
-	SvREFCNT_dec(MUTABLE_SV(meta->mro_linear_all));
-	meta->mro_linear_all = NULL;
-	/* This is just acting as a shortcut pointer.  */
-	meta->mro_linear_current = NULL;
-    } else if (meta->mro_linear_current) {
-	/* Only the current MRO is stored, so this owns the data.  */
-	SvREFCNT_dec(meta->mro_linear_current);
-	meta->mro_linear_current = NULL;
-    }
+    CLEAR_LINEAR(meta);
     if (meta->isa) {
 	/* Steal it for our own purposes. */
 	isa = (HV *)sv_2mortal((SV *)meta->isa);
@@ -533,16 +538,7 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
 
             if(!revstash) continue;
             revmeta = HvMROMETA(revstash);
-	    if (revmeta->mro_linear_all) {
-		SvREFCNT_dec(MUTABLE_SV(revmeta->mro_linear_all));
-		revmeta->mro_linear_all = NULL;
-		/* This is just acting as a shortcut pointer.  */
-		revmeta->mro_linear_current = NULL;
-	    } else if (revmeta->mro_linear_current) {
-		/* Only the current MRO is stored, so this owns the data.  */
-		SvREFCNT_dec(revmeta->mro_linear_current);
-		revmeta->mro_linear_current = NULL;
-	    }
+	    CLEAR_LINEAR(revmeta);
             if(!is_universal)
                 revmeta->cache_gen++;
             if(revmeta->mro_nextmethod)
@@ -765,16 +761,7 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
 	if(HvENAME(stash)) {
 	    struct mro_meta* meta;
 	    meta = HvMROMETA(stash);
-	    if (meta->mro_linear_all) {
-		SvREFCNT_dec(MUTABLE_SV(meta->mro_linear_all));
-		meta->mro_linear_all = NULL;
-		/* This is just acting as a shortcut pointer.  */
-		meta->mro_linear_current = NULL;
-	    } else if (meta->mro_linear_current) {
-		/* Only the current MRO is stored, so this owns the data.  */
-		SvREFCNT_dec(meta->mro_linear_current);
-		meta->mro_linear_current = NULL;
-	    }
+	    CLEAR_LINEAR(meta);
         }
     }
 
