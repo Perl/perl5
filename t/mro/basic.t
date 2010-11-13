@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-BEGIN { require q(./test.pl); } plan(tests => 50);
+BEGIN { require q(./test.pl); } plan(tests => 51);
 
 require mro;
 
@@ -311,4 +311,12 @@ is(eval { MRO_N->testfunc() }, 123);
     unshift @{"Extra::TSpouse::ISA"}, 'Class::Trait::Base';
     ok 'Extra::TSpouse'->isa('Class::Trait::Base'),
      'a isa b after undef *a::ISA and @a::ISA modification';
+}
+
+{
+    # Deleting $package::{ISA}
+    # Broken in 5.10.0; fixed in 5.13.7
+    @Blength::ISA = 'Bladd';
+    delete $Blength::{ISA};
+    ok !Blength->isa("Bladd"), 'delete $package::{ISA}';
 }

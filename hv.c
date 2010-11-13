@@ -987,7 +987,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     entry = *oentry;
     for (; entry; oentry = &HeNEXT(entry), entry = *oentry) {
 	SV *sv;
-	bool mpm = FALSE;
+	U8 mro_changes = 0; /* 1 = isa; 2 = package moved */
 	const char *name = NULL;
 	STRLEN namlen;
 	HV *stash = NULL;
@@ -1044,7 +1044,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		     gv_fetchsv(namesv, GV_NOADD_NOINIT, SVt_PVGV)
 		       == (GV *)sv
 		    ) {
-			mpm = TRUE;
+			mro_changes = 2;
 			name = SvPV_const(namesv, namlen);
 			namlen -= 2; /* skip trailing :: */
 			/* Hang on to it for a bit. */
@@ -1053,6 +1053,8 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 			);
 		    }
 		}
+		else if (klen == 3 && strnEQ(key, "ISA", 3))
+		    mro_changes = 1;
 	}
 
 	if (d_flags & G_DISCARD)
@@ -1085,7 +1087,9 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	        HvHASKFLAGS_off(hv);
 	}
 
-	if (mpm) mro_package_moved(NULL, stash, NULL, name, namlen);
+	if (mro_changes == 1) mro_isa_changed_in(hv);
+	else if (mro_changes == 2)
+	    mro_package_moved(NULL, stash, NULL, name, namlen);
 
 	return sv;
     }
