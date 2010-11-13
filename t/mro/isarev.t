@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 use warnings;
-plan(tests => 22);
+plan(tests => 23);
 
 use mro;
 
@@ -132,3 +132,12 @@ i beta => qw [], "undeffing an ISA glob deletes isarev entries";
 $_ = \*az::ISA;
 undef *az::;
 i buki => qw [], "undeffing a package glob deletes isarev entries";
+
+# Package aliasing/clobbering when the clobbered package has grandchildren
+# by inheritance.
+@bar::ISA = 'phoo';
+@subclassA::ISA = "subclassB";
+@subclassB::ISA = "bar";
+*bar:: = *baz::;
+i phoo => qw [],
+ 'clobbering a class w/multiple layers of subclasses updates its parent';

@@ -766,9 +766,10 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
        isarev hashes belonging to parent classes). */
     hv_iterinit(stashes);
     while((iter = hv_iternext(stashes))) {
-	if(HeVAL(iter) != &PL_sv_yes && HvENAME(HeVAL(iter))) {
+	HV * const stash = *(HV **)HEK_KEY(HeKEY_hek(iter));
+	if(HvENAME(stash)) {
 	    struct mro_meta* meta;
-	    meta = HvMROMETA((HV *)HeVAL(iter));
+	    meta = HvMROMETA(stash);
 	    if (meta->mro_linear_all) {
 		SvREFCNT_dec(MUTABLE_SV(meta->mro_linear_all));
 		meta->mro_linear_all = NULL;
@@ -786,8 +787,25 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
        mro_isa_changed_in on each. */
     hv_iterinit(stashes);
     while((iter = hv_iternext(stashes))) {
-	if(HvENAME(HeVAL(iter)))
-	    mro_isa_changed_in((HV *)HeVAL(iter));
+	HV * const stash = *(HV **)HEK_KEY(HeKEY_hek(iter));
+	if(HvENAME(stash)) {
+	    /* We have to restore the original meta->isa (that
+	       mro_gather_and_rename set aside for us) this way, in case
+	       one class in this list is a superclass of a another class
+	       that we have already encountered. In such a case, meta->isa
+	       will have been overwritten without old entries being deleted 
+	       from PL_isarev. */
+	    struct mro_meta * const meta = HvMROMETA(stash);
+	    if(meta->isa != (HV *)HeVAL(iter)){
+		SvREFCNT_dec(meta->isa);
+		meta->isa
+		 = HeVAL(iter) == &PL_sv_yes
+		    ? NULL
+		    : (HV *)HeVAL(iter);
+		HeVAL(iter) = NULL; /* We donated our reference count. */
+	    }
+	    mro_isa_changed_in(stash);
+	}
     }
 }
 
@@ -825,6 +843,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 
     if(oldstash) {
 	/* Add to the big list. */
+	struct mro_meta * meta;
 	HE * const entry
 	 = (HE *)
 	     hv_common(
@@ -837,10 +856,14 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 	}
 	HeVAL(entry)
 	 = HeVAL(entry) == &PL_sv_no ? &PL_sv_yes : &PL_sv_undef;
+	meta = HvMROMETA(oldstash);
 	(void)
 	  hv_store(
 	   stashes, (const char *)&oldstash, sizeof(HV *),
-	   SvREFCNT_inc_simple_NN((SV*)oldstash), 0
+	   meta->isa
+	    ? SvREFCNT_inc_simple_NN((SV *)meta->isa)
+	    : &PL_sv_yes,
+	   0
 	  );
 
 	/* Update the effective name. */
@@ -859,7 +882,6 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 	  * from PL_isarev, since we still need it. hv_delete mortifies it
 	  * for us, so sv_2mortal is not necessary. */
 	  if(HvENAME_HEK(oldstash) != enamehek) {
-	    const struct mro_meta * meta = HvMROMETA(oldstash);
 	    if(meta->isa && HvARRAY(meta->isa))
 		mro_clean_isarev(meta->isa, name, namlen, NULL);
 	    isarev = (HV *)hv_delete(PL_isarev, name, namlen, 0);
@@ -896,11 +918,17 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 	    HeVAL(entry)
 	     = HeVAL(entry) == &PL_sv_undef ? &PL_sv_yes : &PL_sv_no;
 	    if(!stash_had_name)
+	    {
+		struct mro_meta * const meta = HvMROMETA(stash);
 		(void)
 		  hv_store(
 		   stashes, (const char *)&stash, sizeof(HV *),
-		   SvREFCNT_inc_simple_NN((SV *)stash), 0
+		   meta->isa
+		    ? SvREFCNT_inc_simple_NN((SV *)meta->isa)
+		    : &PL_sv_yes,
+		   0
 		  );
+	    }
 	}
     }
 
@@ -922,12 +950,17 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 	    I32 len;
 	    const char* const revkey = hv_iterkey(iter, &len);
 	    HV* revstash = gv_stashpvn(revkey, len, 0);
+	    struct mro_meta * meta;
 
 	    if(!revstash) continue;
+	    meta = HvMROMETA(revstash);
 	    (void)
 	      hv_store(
 	       stashes, (const char *)&revstash, sizeof(HV *),
-	       SvREFCNT_inc_simple_NN((SV *)revstash), 0
+	       meta->isa
+	        ? SvREFCNT_inc_simple_NN((SV *)meta->isa)
+	        : &PL_sv_yes,
+	       0
 	      );
         }
     }
