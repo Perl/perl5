@@ -444,7 +444,7 @@ by the C<setisa> magic, should not need to invoke directly.
 =cut
 */
 
-/* Macro to avoid repeating the code three times. */
+/* Macro to avoid repeating the code five times. */
 #define CLEAR_LINEAR(mEta)                                     \
     if (mEta->mro_linear_all) {                                 \
 	SvREFCNT_dec(MUTABLE_SV(mEta->mro_linear_all));          \
@@ -744,26 +744,13 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
        as neither B nor B::B can be updated before the other, since they
        will reset caches on foo, which will see either B or B::B with the
        wrong name. The names must be set on *all* affected stashes before
-       we do anything else.
+       we do anything else. (And linearisations must be cleared, too.)
      */
     stashes = (HV *) sv_2mortal((SV *)newHV());
     mro_gather_and_rename(
      stashes, (HV *) sv_2mortal((SV *)newHV()),
      stash, oldstash, newname, newname_len
     );
-
-    /* Iterate through the stashes, wiping isa linearisations, but leaving
-       the isa hash (which mro_isa_changed_in needs for adjusting the
-       isarev hashes belonging to parent classes). */
-    hv_iterinit(stashes);
-    while((iter = hv_iternext(stashes))) {
-	HV * const stash = *(HV **)HEK_KEY(HeKEY_hek(iter));
-	if(HvENAME(stash)) {
-	    struct mro_meta* meta;
-	    meta = HvMROMETA(stash);
-	    CLEAR_LINEAR(meta);
-        }
-    }
 
     /* Once the caches have been wiped on all the classes, call
        mro_isa_changed_in on each. */
@@ -847,6 +834,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 	    : &PL_sv_yes,
 	   0
 	  );
+	CLEAR_LINEAR(meta);
 
 	/* Update the effective name. */
 	if(HvENAME_get(oldstash)) {
@@ -910,6 +898,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 		    : &PL_sv_yes,
 		   0
 		  );
+		CLEAR_LINEAR(meta);
 	    }
 	}
     }
@@ -944,6 +933,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 	        : &PL_sv_yes,
 	       0
 	      );
+	    CLEAR_LINEAR(meta);
         }
     }
 
