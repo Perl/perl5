@@ -448,7 +448,7 @@ if not in package main when running under C<strict 'vars'>.
 
 The current phase of the perl interpreter.
 
-Possible values include:
+Possible values are:
 
 =over 8
 
