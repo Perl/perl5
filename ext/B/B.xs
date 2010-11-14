@@ -599,7 +599,7 @@ typedef HE      *B__HE;
 typedef struct refcounted_he	*B__RHE;
 #endif
 
-#ifdef USE_ITHREADS
+#ifdef MULTIPLICITY
 #  define ASSIGN_COMMON_ALIAS(var) \
     STMT_START { XSANY.any_i32 = offsetof(struct interpreter, var); } STMT_END
 #else
@@ -617,7 +617,7 @@ static XSPROTO(intrpvar_sv_common)
     SV *ret;
     if (items != 0)
        croak_xs_usage(cv,  "");
-#ifdef USE_ITHREADS
+#ifdef MULTIPLICITY
     ret = *(SV **)(XSANY.any_i32 + (char *)my_perl);
 #else
     ret = *(SV **)(XSANY.any_ptr);
