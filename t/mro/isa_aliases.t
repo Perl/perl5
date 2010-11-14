@@ -2,7 +2,7 @@
 
 BEGIN { chdir 't'; @INC = '../lib'; require './test.pl' }
 
-plan 8;
+plan 12;
 
 @Foogh::ISA = "Bar";
 *Phoogh::ISA = *Foogh::ISA;
@@ -16,6 +16,18 @@ ok !Foogh->isa("Bar"),
  '!isa when another stash has claimed the @ISA via glob assignment';
 ok !Phoogh->isa("Bar"),
  '!isa on the stash that claimed the @ISA via glob assignment';
+
+@Foogh::ISA = "Bar";
+*Foogh::ISA = ["Baz"];
+
+ok 'Foogh'->isa("Baz"),
+ 'isa after glob-to-ref assignment when *ISA is shared';
+ok 'Phoogh'->isa("Baz"),
+ 'isa after glob-to-ref assignment on another stash when *ISA is shared';
+ok !Foogh->isa("Bar"),
+ '!isa after glob-to-ref assignment when *ISA is shared';
+ok !Phoogh->isa("Bar"),
+ '!isa after glob-to-ref assignment on another stash when *ISA is shared';
 
 @Foo::ISA = "Bar";
 *Phoo::ISA = \@Foo::ISA;

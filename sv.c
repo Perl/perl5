@@ -3810,18 +3810,46 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 	 /* The stash may have been detached from the symbol table, so
 	    check its name before doing anything. */
 	 && GvSTASH(dstr) && HvENAME(GvSTASH(dstr))
+	 && sref != dref
 	) {
 	    MAGIC *mg;
+	    MAGIC * const omg = dref && SvSMAGICAL(dref)
+	                         ? mg_find(dref, PERL_MAGIC_isa)
+	                         : NULL;
 	    if (SvSMAGICAL(sref) && (mg = mg_find(sref, PERL_MAGIC_isa))) {
 		if (SvTYPE(mg->mg_obj) != SVt_PVAV) {
 		    AV * const ary = newAV();
 		    av_push(ary, mg->mg_obj); /* takes the refcount */
 		    mg->mg_obj = (SV *)ary;
 		}
-		av_push((AV *)mg->mg_obj, SvREFCNT_inc_simple_NN(dstr));
+		if (omg) {
+		    if (SvTYPE(omg->mg_obj) == SVt_PVAV) {
+			SV **svp = AvARRAY((AV *)omg->mg_obj);
+			I32 items = AvFILLp((AV *)omg->mg_obj) + 1;
+			while (items--)
+			    av_push(
+			     (AV *)mg->mg_obj,
+			     SvREFCNT_inc_simple_NN(*svp++)
+			    );
+		    }
+		    else
+			av_push(
+			 (AV *)mg->mg_obj,
+			 SvREFCNT_inc_simple_NN(omg->mg_obj)
+			);
+		}
+		else
+		    av_push((AV *)mg->mg_obj,SvREFCNT_inc_simple_NN(dstr));
 	    }
-	    else sv_magic(sref, dstr, PERL_MAGIC_isa, NULL, 0);
-	    mro_isa_changed_in(GvSTASH(dstr));
+	    else
+		sv_magic(
+		 sref, omg ? omg->mg_obj : dstr, PERL_MAGIC_isa, NULL, 0
+		);
+	    /* Since the *ISA assignment could have affected more than
+	       one stash, don’t call mro_isa_changed_in directly, but let
+	       magic_setisa do it for us, as it already has the logic for
+	       dealing with globs vs arrays of globs. */
+	    SvSETMAGIC(sref);
 	}
 	break;
     }
