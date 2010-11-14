@@ -3806,11 +3806,11 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 	    }
 	}
 	else if (
-	    stype == SVt_PVAV && strEQ(GvNAME((GV*)dstr), "ISA")
+	    stype == SVt_PVAV && sref != dref
+	 && strEQ(GvNAME((GV*)dstr), "ISA")
 	 /* The stash may have been detached from the symbol table, so
 	    check its name before doing anything. */
 	 && GvSTASH(dstr) && HvENAME(GvSTASH(dstr))
-	 && sref != dref
 	) {
 	    MAGIC *mg;
 	    MAGIC * const omg = dref && SvSMAGICAL(dref)
