@@ -5,11 +5,11 @@ use warnings;
 
 # This program outputs the 256 lines that form the guts of the PL_charclass
 # table.  The output should be used to manually replace the table contents in
-# perl.h.  Each line is a bit map of properties that the Unicode code point at
-# the corresponding position in the table array has.  The first line
-# corresponds to code point U+0000, NULL, the last line to U=00FF.  For an
-# application to see if the code point "i" has a particular property, it just
-# does
+# l1_charclass_tab.h.  Each line is a bit map of properties that the Unicode
+# code point at the corresponding position in the table array has.  The first
+# line corresponds to code point U+0000, NULL, the last line to U=00FF.  For
+# an application to see if the code point "i" has a particular property, it
+# just does
 #    'PL_charclass[i] & BIT'
 # The bit names are of the form '_CC_property_suffix', where 'CC' stands for
 # character class, and 'property' is the corresponding property, and 'suffix'
