@@ -851,11 +851,15 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
     if (or_with->flags & ANYOF_FOLD)
 	cl->flags |= ANYOF_FOLD;
 
+    /* If both nodes match something outside the bitmap, but what they match
+     * outside is not the same pointer, and hence not easily compared, give up
+     * and allow the start class to match everything outside the bitmap */
     if (cl->flags & ANYOF_NONBITMAP && or_with->flags & ANYOF_NONBITMAP &&
 	ARG(cl) != ARG(or_with)) {
 	cl->flags |= ANYOF_UNICODE_ALL;
 	cl->flags &= ~ANYOF_NONBITMAP;
     }
+
     if (or_with->flags & ANYOF_UNICODE_ALL) {
 	cl->flags |= ANYOF_UNICODE_ALL;
 	cl->flags &= ~ANYOF_NONBITMAP;
