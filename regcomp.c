@@ -857,12 +857,10 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
     if (cl->flags & ANYOF_NONBITMAP && or_with->flags & ANYOF_NONBITMAP &&
 	ARG(cl) != ARG(or_with)) {
 	cl->flags |= ANYOF_UNICODE_ALL;
-	cl->flags &= ~ANYOF_NONBITMAP;
     }
 
     if (or_with->flags & ANYOF_UNICODE_ALL) {
 	cl->flags |= ANYOF_UNICODE_ALL;
-	cl->flags &= ~ANYOF_NONBITMAP;
     }
 }
 
