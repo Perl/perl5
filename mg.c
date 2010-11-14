@@ -1616,18 +1616,24 @@ Perl_magic_clearisa(pTHX_ SV *sv, MAGIC *mg)
     if (sv)
 	av_clear(MUTABLE_AV(sv));
 
-    /* XXX Once it's possible, we need to
-       detect that our @ISA is aliased in
-       other stashes, and act on the stashes
-       of all of the aliases */
+    if (SvTYPE(mg->mg_obj) != SVt_PVGV && SvSMAGICAL(mg->mg_obj))
+	/* This occurs with setisa_elem magic, which calls this
+	   same function. */
+	mg = mg_find(mg->mg_obj, PERL_MAGIC_isa);
 
-    /* The first case occurs via setisa,
-       the second via setisa_elem, which
-       calls this same magic */
+    if (SvTYPE(mg->mg_obj) == SVt_PVAV) { /* multiple stashes */
+	SV **svp = AvARRAY((AV *)mg->mg_obj);
+	I32 items = AvFILLp((AV *)mg->mg_obj) + 1;
+	while (items--) {
+	    stash = GvSTASH((GV *)*svp++);
+	    if (stash && HvENAME(stash)) mro_isa_changed_in(stash);
+	}
+
+	return 0;
+    }
+
     stash = GvSTASH(
-        SvTYPE(mg->mg_obj) == SVt_PVGV
-            ? (const GV *)mg->mg_obj
-            : (const GV *)mg_find(mg->mg_obj, PERL_MAGIC_isa)->mg_obj
+        (const GV *)mg->mg_obj
     );
 
     /* The stash may have been detached from the symbol table, so check its

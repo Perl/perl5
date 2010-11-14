@@ -3631,6 +3631,7 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
          /* The stash may have been detached from the symbol table, so
             check its name. */
          && GvSTASH(dstr) && HvENAME(GvSTASH(dstr))
+         && GvAV((const GV *)sstr)
         )
             mro_changes = 2;
         else {
@@ -3663,7 +3664,20 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
 	    GvIMPORTED_on(dstr);
 	}
     GvMULTI_on(dstr);
-    if(mro_changes == 2) mro_isa_changed_in(GvSTASH(dstr));
+    if(mro_changes == 2) {
+	MAGIC *mg;
+	SV * const sref = (SV *)GvAV((const GV *)dstr);
+	if (SvSMAGICAL(sref) && (mg = mg_find(sref, PERL_MAGIC_isa))) {
+	    if (SvTYPE(mg->mg_obj) != SVt_PVAV) {
+		AV * const ary = newAV();
+		av_push(ary, mg->mg_obj); /* takes the refcount */
+		mg->mg_obj = (SV *)ary;
+	    }
+	    av_push((AV *)mg->mg_obj, SvREFCNT_inc_simple_NN(dstr));
+	}
+	else sv_magic(sref, dstr, PERL_MAGIC_isa, NULL, 0);
+	mro_isa_changed_in(GvSTASH(dstr));
+    }
     else if(mro_changes == 3) {
 	HV * const stash = GvHV(dstr);
 	if(old_stash ? (HV *)HvENAME_get(old_stash) : stash)
@@ -3797,7 +3811,16 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 	    check its name before doing anything. */
 	 && GvSTASH(dstr) && HvENAME(GvSTASH(dstr))
 	) {
-	    sv_magic(sref, dstr, PERL_MAGIC_isa, NULL, 0);
+	    MAGIC *mg;
+	    if (SvSMAGICAL(sref) && (mg = mg_find(sref, PERL_MAGIC_isa))) {
+		if (SvTYPE(mg->mg_obj) != SVt_PVAV) {
+		    AV * const ary = newAV();
+		    av_push(ary, mg->mg_obj); /* takes the refcount */
+		    mg->mg_obj = (SV *)ary;
+		}
+		av_push((AV *)mg->mg_obj, SvREFCNT_inc_simple_NN(dstr));
+	    }
+	    else sv_magic(sref, dstr, PERL_MAGIC_isa, NULL, 0);
 	    mro_isa_changed_in(GvSTASH(dstr));
 	}
 	break;
