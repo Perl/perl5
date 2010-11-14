@@ -15,7 +15,7 @@ require Exporter;
 # walkoptree comes from B.xs
 
 BEGIN {
-    $B::VERSION = '1.25';
+    $B::VERSION = '1.26';
 
     @B::EXPORT_OK = qw(minus_c ppname save_BEGINs
 		       class peekop cast_I32 cstring cchar hash threadsv_names
