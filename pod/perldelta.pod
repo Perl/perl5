@@ -242,7 +242,7 @@ cribbed.
 =item *
 
 The following modules were added by the C<Unicode::Collate> 
-upgrade from 0.63 to 0.65. See below for details.
+upgrade from 0.63 to 0.66. See below for details.
 
 C<Unicode::Collate::CJK::Big5>
 
