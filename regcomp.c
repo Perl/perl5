@@ -786,7 +786,9 @@ S_cl_and(struct regnode_charclass_class *cl,
     if (cl->flags & ANYOF_UNICODE_ALL && and_with->flags & ANYOF_NONBITMAP &&
 	!(and_with->flags & ANYOF_INVERT)) {
 	cl->flags &= ~ANYOF_UNICODE_ALL;
-	cl->flags |= ANYOF_NONBITMAP;
+	cl->flags |= and_with->flags & ANYOF_NONBITMAP;	/* field is 2 bits; use
+							   only the one(s)
+							   actually set */
 	ARG_SET(cl, ARG(and_with));
     }
     if (!(and_with->flags & ANYOF_UNICODE_ALL) &&
@@ -8443,7 +8445,7 @@ parseit:
 			ANYOF_BITMAP_SET(ret, '-');
 		    }
 		    else {
-			ANYOF_FLAGS(ret) |= ANYOF_NONBITMAP;
+			ANYOF_FLAGS(ret) |= ANYOF_UTF8;
 			Perl_sv_catpvf(aTHX_ listsv,
 				       "%04"UVxf"\n%04"UVxf"\n", (UV)prevvalue, (UV) '-');
 		    }
@@ -8558,6 +8560,12 @@ parseit:
 		    Perl_sv_catpvf(aTHX_ listsv, "%cutf8::Is%s\n", yesno, what);
 		}
 		stored+=2; /* can't optimize this class */
+
+		/* All but ASCII can match Unicode characters, but all the ones
+		 * that aren't in utf8 are in the bitmap */
+		if (namedclass != ANYOF_ASCII) {
+		    ANYOF_FLAGS(ret) |= ANYOF_UTF8;
+		}
 		continue;
 	    }
 	} /* end of namedclass \blah */
@@ -8633,7 +8641,15 @@ parseit:
 	        const UV prevnatvalue  = NATIVE_TO_UNI(prevvalue);
 		const UV natvalue      = NATIVE_TO_UNI(value);
                 stored+=2; /* can't optimize this class */
-		ANYOF_FLAGS(ret) |= ANYOF_NONBITMAP;
+
+		/* If the code point requires utf8 to represent, and we are not
+		 * folding, it can't match unless the target is in utf8.  Only
+		 * a few code points above 255 fold to below it, so XXX an
+		 * optimization would be to know which ones and set the flag
+		 * appropriately. */
+		ANYOF_FLAGS(ret) |= (FOLD || value < 256)
+				    ? ANYOF_NONBITMAP
+				    : ANYOF_UTF8;
 		if (prevnatvalue < natvalue) { /* what about > ? */
 		    Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\t%04"UVxf"\n",
 				   prevnatvalue, natvalue);
@@ -9532,10 +9548,12 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
         EMIT_ANYOF_TEST_SEPARATOR(do_sep,sv,flags);
         
         /* output information about the unicode matching */
-	if (flags & ANYOF_NONBITMAP)
-	    sv_catpvs(sv, "{unicode}");
-	else if (flags & ANYOF_UNICODE_ALL)
+	if (flags & ANYOF_UNICODE_ALL)
 	    sv_catpvs(sv, "{unicode_all}");
+	else if (flags & ANYOF_UTF8)
+	    sv_catpvs(sv, "{unicode}");
+	else if (flags & ANYOF_NONBITMAP)
+	    sv_catpvs(sv, "{outside bitmap}");
 
 	{
 	    SV *lv;

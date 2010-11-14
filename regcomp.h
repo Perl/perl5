@@ -323,8 +323,14 @@ struct regnode_charclass_class {
 #define ANYOF_CLASS	 ANYOF_LOCALE
 #define ANYOF_LARGE      ANYOF_CLASS    /* Same; name retained for back compat */
 
+/* Can match something outside the bitmap that is expressible only in utf8 */
+#define ANYOF_UTF8		0x10
+
+/* Can match something outside the bitmap that isn't in utf8 */
+#define ANYOF_NONBITMAP_NON_UTF8 0x20
+
 /* Set if the bitmap doesn't fully represent what this node can match */
-#define ANYOF_NONBITMAP		0x20
+#define ANYOF_NONBITMAP		(ANYOF_UTF8|ANYOF_NONBITMAP_NON_UTF8)
 #define ANYOF_UNICODE		ANYOF_NONBITMAP	/* old name, for back compat */
 
 /* Matches every code point 0x100 and above*/
