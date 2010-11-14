@@ -8423,7 +8423,7 @@ parseit:
 		    RExC_emit += ANYOF_CLASS_ADD_SKIP;
 		    ANYOF_CLASS_ZERO(ret);
 		}
-		    ANYOF_FLAGS(ret) |= ANYOF_CLASS;
+		ANYOF_FLAGS(ret) |= ANYOF_CLASS;
 	    }
 
 	    /* a bad range like a-\d, a-[:digit:] ? */
