@@ -2515,6 +2515,7 @@ cpan/Unicode-Collate/t/loc_zhgb.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_zhpy.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_zhst.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_zh.t			Unicode::Collate
+cpan/Unicode-Collate/t/nonchar.t			Unicode::Collate
 cpan/Unicode-Collate/t/normal.t			Unicode::Collate
 cpan/Unicode-Collate/t/overcjk0.t		Unicode::Collate
 cpan/Unicode-Collate/t/overcjk1.t		Unicode::Collate

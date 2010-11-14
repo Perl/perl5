@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 491 };
+BEGIN { plan tests => 561 }; # 1 + 70 x @Versions
 
 use strict;
 use warnings;
@@ -20,7 +20,7 @@ use Unicode::Collate;
 
 ok(1);
 
-my @Versions = (8, 9, 11, 14, 16, 18, 20);
+my @Versions = (8, 9, 11, 14, 16, 18, 20, 22);
 
 # 12 compatibility ideographs are treated as unified ideographs:
 # FA0E, FA0F, FA11, FA13, FA14, FA1F, FA21, FA23, FA24, FA27, FA28, FA29.

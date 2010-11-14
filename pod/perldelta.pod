@@ -242,7 +242,7 @@ cribbed.
 =item *
 
 The following modules were added by the C<Unicode::Collate> 
-upgrade from 0.63 to 0.66. See below for details.
+upgrade from 0.63 to 0.67. See below for details.
 
 C<Unicode::Collate::CJK::Big5>
 
@@ -460,10 +460,12 @@ C<Sys::Hostname> has been upgraded from 1.13 to 1.14.
 
 =item *
 
-C<Unicode::Collate> has been upgraded from 0.63 to 0.66
+C<Unicode::Collate> has been upgraded from 0.63 to 0.67
 
 This release newly adds locales C<ja> C<ko> and C<zh> and its variants 
 ( C<zh__big5han>, C<zh__gb2312han>, C<zh__pinyin>, C<zh__stroke> ).
+
+Supported UCA_Version 22 for Unicode 6.0.0.
 
 The following modules have been added:
 

@@ -14,7 +14,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '0.66';
+our $VERSION = '0.67';
 our $PACKAGE = __PACKAGE__;
 
 my @Path = qw(Unicode Collate);
@@ -80,33 +80,35 @@ use constant Hangul_LBase  => 0x1100;
 use constant Hangul_LIni   => 0x1100;
 use constant Hangul_LFin   => 0x1159;
 use constant Hangul_LFill  => 0x115F;
-use constant Hangul_LEnd   => 0x115F; # Unicode 5.2.0
+use constant Hangul_LEnd   => 0x115F; # Unicode 5.2
 use constant Hangul_VBase  => 0x1161;
 use constant Hangul_VIni   => 0x1160; # from Vowel Filler
 use constant Hangul_VFin   => 0x11A2;
-use constant Hangul_VEnd   => 0x11A7; # Unicode 5.2.0
+use constant Hangul_VEnd   => 0x11A7; # Unicode 5.2
 use constant Hangul_TBase  => 0x11A7; # from "no-final" codepoint
 use constant Hangul_TIni   => 0x11A8;
 use constant Hangul_TFin   => 0x11F9;
-use constant Hangul_TEnd   => 0x11FF; # Unicode 5.2.0
-use constant HangulL2Ini   => 0xA960; # Unicode 5.2.0
-use constant HangulL2Fin   => 0xA97C; # Unicode 5.2.0
-use constant HangulV2Ini   => 0xD7B0; # Unicode 5.2.0
-use constant HangulV2Fin   => 0xD7C6; # Unicode 5.2.0
-use constant HangulT2Ini   => 0xD7CB; # Unicode 5.2.0
-use constant HangulT2Fin   => 0xD7FB; # Unicode 5.2.0
+use constant Hangul_TEnd   => 0x11FF; # Unicode 5.2
+use constant HangulL2Ini   => 0xA960; # Unicode 5.2
+use constant HangulL2Fin   => 0xA97C; # Unicode 5.2
+use constant HangulV2Ini   => 0xD7B0; # Unicode 5.2
+use constant HangulV2Fin   => 0xD7C6; # Unicode 5.2
+use constant HangulT2Ini   => 0xD7CB; # Unicode 5.2
+use constant HangulT2Fin   => 0xD7FB; # Unicode 5.2
 
-use constant CJK_UidIni    => 0x4E00;
-use constant CJK_UidFin    => 0x9FA5;
-use constant CJK_UidF41    => 0x9FBB;
-use constant CJK_UidF51    => 0x9FC3;
-use constant CJK_UidF52    => 0x9FCB;
-use constant CJK_ExtAIni   => 0x3400;  # Unicode 3.0.0
-use constant CJK_ExtAFin   => 0x4DB5;  # Unicode 3.0.0
-use constant CJK_ExtBIni   => 0x20000; # Unicode 3.1.0
-use constant CJK_ExtBFin   => 0x2A6D6; # Unicode 3.1.0
-use constant CJK_ExtCIni   => 0x2A700; # Unicode 5.2.0
-use constant CJK_ExtCFin   => 0x2B734; # Unicode 5.2.0
+use constant CJK_UidIni   =>  0x4E00;
+use constant CJK_UidFin   =>  0x9FA5;
+use constant CJK_UidF41   =>  0x9FBB;
+use constant CJK_UidF51   =>  0x9FC3;
+use constant CJK_UidF52   =>  0x9FCB;
+use constant CJK_ExtAIni  =>  0x3400; # Unicode 3.0
+use constant CJK_ExtAFin  =>  0x4DB5; # Unicode 3.0
+use constant CJK_ExtBIni  => 0x20000; # Unicode 3.1
+use constant CJK_ExtBFin  => 0x2A6D6; # Unicode 3.1
+use constant CJK_ExtCIni  => 0x2A700; # Unicode 5.2
+use constant CJK_ExtCFin  => 0x2B734; # Unicode 5.2
+use constant CJK_ExtDIni  => 0x2B740; # Unicode 6.0
+use constant CJK_ExtDFin  => 0x2B81D; # Unicode 6.0
 
 my %CompatUI = map +($_ => 1), (
     0xFA0E, 0xFA0F, 0xFA11, 0xFA13, 0xFA14, 0xFA1F,
@@ -145,7 +147,7 @@ our @ChangeOK = qw/
   /;
 
 our @ChangeNG = qw/
-    entry mapping table maxlength
+    entry mapping table maxlength contraction
     ignoreChar ignoreName undefChar undefName variableTable
     versionTable alternateTable backwardsTable forwardsTable rearrangeTable
     derivCode normCode rearrangeHash backwardsFlag
@@ -209,6 +211,7 @@ my %DerivCode = (
    16 => \&_derivCE_14, # 16 == 14
    18 => \&_derivCE_18,
    20 => \&_derivCE_20,
+   22 => \&_derivCE_22,
 );
 
 sub checkCollator {
@@ -428,8 +431,16 @@ sub parseEntry
     $self->{mapping}{$entry} = $is_L3_ignorable ? [] : \@key;
 
     if (@uv > 1) {
-	(!$self->{maxlength}{$uv[0]} || $self->{maxlength}{$uv[0]} < @uv)
-	    and $self->{maxlength}{$uv[0]} = @uv;
+	if (!$self->{maxlength}{$uv[0]} || $self->{maxlength}{$uv[0]} < @uv) {
+	    $self->{maxlength}{$uv[0]} = @uv;
+	}
+    }
+    if (@uv > 2) {
+	while (@uv) {
+	    pop @uv;
+	    my $fake_entry = join(CODE_SEP, @uv); # in JCPS
+	    $self->{contraction}{$fake_entry} = 1;
+	}
     }
 }
 
@@ -493,7 +504,8 @@ sub splitEnt
     my $map  = $self->{mapping};
     my $max  = $self->{maxlength};
     my $reH  = $self->{rearrangeHash};
-    my $ver9 = $self->{UCA_Version} >= 9 && $self->{UCA_Version} <= 11;
+    my $vers = $self->{UCA_Version};
+    my $ver9 = $vers >= 9 && $vers <= 11;
 
     my ($str, @buf);
 
@@ -527,9 +539,12 @@ sub splitEnt
 
     # remove a code point marked as a completely ignorable.
     for (my $i = 0; $i < @src; $i++) {
-	$src[$i] = undef
-	    if _isIllegal($src[$i]) || ($ver9 &&
-		$map->{ $src[$i] } && @{ $map->{ $src[$i] } } == 0);
+	if (_isIllegal($src[$i]) || $vers <= 20 && _isNonchar($src[$i])) {
+	    $src[$i] = undef;
+	} elsif ($ver9) {
+	    $src[$i] = undef if $map->{ $src[$i] } &&
+			     @{ $map->{ $src[$i] } } == 0;
+	}
     }
 
     for (my $i = 0; $i < @src; $i++) {
@@ -561,30 +576,48 @@ sub splitEnt
 		}
 	    }
 
-	# not-contiguous contraction with Combining Char (cf. UTS#10, S2.1).
+	# discontiguous contraction with Combining Char (cf. UTS#10, S2.1).
 	# This process requires Unicode::Normalize.
 	# If "normalization" is undef, here should be skipped *always*
 	# (in spite of bool value of $CVgetCombinClass),
 	# since canonical ordering cannot be expected.
 	# Blocked combining character should not be contracted.
 
-	    if ($self->{normalization})
 	    # $self->{normCode} is false in the case of "prenormalized".
-	    {
+	    if ($self->{normalization}) {
+		my $cont = $self->{contraction};
 		my $preCC = 0;
-		my $curCC = 0;
+		my $preCC_uc = 0;
+		my $jcps_uc = $jcps;
+		my(@out, @out_uc);
 
 		for (my $p = $i + 1; $p < @src; $p++) {
 		    next if ! defined $src[$p];
-		    $curCC = $CVgetCombinClass->($src[$p]);
+		    my $curCC = $CVgetCombinClass->($src[$p]);
 		    last unless $curCC;
 		    my $tail = CODE_SEP . $src[$p];
+
+		    if ($preCC_uc != $curCC && ($map->{$jcps_uc.$tail} ||
+					       $cont->{$jcps_uc.$tail})) {
+			$jcps_uc .= $tail;
+			push @out_uc, $p;
+		    } else {
+			$preCC_uc = $curCC;
+		    }
+
 		    if ($preCC != $curCC && $map->{$jcps.$tail}) {
 			$jcps .= $tail;
-			$src[$p] = undef;
+			push @out, $p;
 		    } else {
 			$preCC = $curCC;
 		    }
+		}
+
+		if ($map->{$jcps_uc}) {
+		    $jcps = $jcps_uc;
+		    $src[$_] = undef for @out_uc;
+		} else {
+		    $src[$_] = undef for @out;
 		}
 	    }
 	}
@@ -796,6 +829,22 @@ sub sort {
 }
 
 
+sub _derivCE_22 {
+    my $u = shift;
+    my $base = (CJK_UidIni  <= $u && $u <= CJK_UidF52 || $CompatUI{$u})
+		? 0xFB40 : # CJK
+	       (CJK_ExtAIni <= $u && $u <= CJK_ExtAFin ||
+		CJK_ExtBIni <= $u && $u <= CJK_ExtBFin ||
+		CJK_ExtCIni <= $u && $u <= CJK_ExtCFin ||
+		CJK_ExtDIni <= $u && $u <= CJK_ExtDFin)
+		? 0xFB80  # CJK ext.
+		: 0xFBC0; # others
+    my $aaaa = $base + ($u >> 15);
+    my $bbbb = ($u & 0x7FFF) | 0x8000;
+    return pack(VCE_TEMPLATE, NON_VAR, $aaaa, Min2Wt, Min3Wt, $u),
+	   pack(VCE_TEMPLATE, NON_VAR, $bbbb,      0,      0, $u);
+}
+
 sub _derivCE_20 {
     my $u = shift;
     my $base = (CJK_UidIni  <= $u && $u <= CJK_UidF52 || $CompatUI{$u})
@@ -880,6 +929,8 @@ sub _isUIdeo {
 	($uca_vers >=  8 && CJK_ExtBIni <= $u && $u <= CJK_ExtBFin)
 		||
 	($uca_vers >= 20 && CJK_ExtCIni <= $u && $u <= CJK_ExtCFin)
+		||
+	($uca_vers >= 22 && CJK_ExtDIni <= $u && $u <= CJK_ExtDFin)
     );
 }
 
@@ -908,12 +959,17 @@ sub _decompHangul {
 
 sub _isIllegal {
     my $code = shift;
-    return ! defined $code                      # removed
+    return((! defined $code)                    # removed
 	|| ($code < 0 || 0x10FFFF < $code)      # out of range
-	|| (($code & 0xFFFE) == 0xFFFE)         # ??FFF[EF] (cf. utf8.c)
+    );
+}
+
+sub _isNonchar {
+    my $code = shift;
+    return((($code & 0xFFFE) == 0xFFFE)         # ??FFF[EF] (cf. utf8.c)
 	|| (0xD800 <= $code && $code <= 0xDFFF) # unpaired surrogates
 	|| (0xFDD0 <= $code && $code <= 0xFDEF) # other non-characters
-    ;
+    );
 }
 
 # Hangul Syllable Type
@@ -1249,12 +1305,11 @@ with no parameters, the collator should do the default collation.
 If the tracking version number of UCA is given,
 behavior of that tracking version is emulated on collating.
 If omitted, the return value of C<UCA_Version()> is used.
-C<UCA_Version()> should return the latest tracking version supported.
 
-The supported tracking version: 8, 9, 11, 14, 16, 18 or 20.
+The following tracking versions are supported.  The default is 20.
 
      UCA       Unicode Standard         DUCET (@version)
-     ---------------------------------------------------
+   -------------------------------------------------------
       8              3.1                3.0.1 (3.0.1d9)
       9     3.1 with Corrigendum 3      3.1.1 (3.1.1)
      11              4.0                4.0.0 (4.0.0)
@@ -1262,8 +1317,24 @@ The supported tracking version: 8, 9, 11, 14, 16, 18 or 20.
      16              5.0                5.0.0 (5.0.0)
      18             5.1.0               5.1.0 (5.1.0)
      20             5.2.0               5.2.0 (5.2.0)
+     22             6.0.0               6.0.0 (6.0.0)
 
 Note: Recent UTS #10 renames "Tracking Version" to "Revision."
+
+* Noncharacters (e.g. U+FFFF) are not ignored, and can be overrided
+since C<UCA_Version> 22.
+
+* Fully ignorable characters were ignored, and would not interrupt
+contractions with C<UCA_Version> 9 and 11.
+
+* Treatment of ignorables after variables and some behaviors
+were changed at C<UCA_Version> 9.
+
+* Characters regarded as CJK unified ideographs (cf. C<overrideCJK>)
+depend on C<UCA_Version>.
+
+* Many hangul jamo are assigned at C<UCA_Version> 20, that will affect
+C<hangul_terminator>.
 
 =item alternate
 
@@ -1434,7 +1505,7 @@ B<is not> equivalent to C<(normalization =E<gt> 'NFD')>.
 
 In the case of C<(normalization =E<gt> "prenormalized")>,
 any normalization is not performed, but
-non-contiguous contractions with combining characters are performed.
+discontiguous contractions with combining characters are performed.
 Therefore
 C<(normalization =E<gt> 'prenormalized', preprocess =E<gt> sub { NFD(shift) })>
 B<is> equivalent to C<(normalization =E<gt> 'NFD')>.
@@ -1452,15 +1523,16 @@ By default, CJK unified ideographs are ordered in Unicode codepoint
 order, but those in the CJK Unified Ideographs block are lesser than
 those in the CJK Unified Ideographs Extension A etc.
 
-    In CJK Unified Ideographs block:
-    U+4E00..U+9FA5 if UCA_Version is 8 to 11;
-    U+4E00..U+9FBB if UCA_Version is 14 to 16;
-    U+4E00..U+9FC3 if UCA_Version is 18;
-    U+4E00..U+9FCB if UCA_Version is 20.
+    In the CJK Unified Ideographs block:
+    U+4E00..U+9FA5 if UCA_Version is 8 to 11.
+    U+4E00..U+9FBB if UCA_Version is 14 to 16.
+    U+4E00..U+9FC3 if UCA_Version is 18.
+    U+4E00..U+9FCB if UCA_Version is 20 or greater.
 
-    In CJK Unified Ideographs Extension blocks:
-    Ext.A (U+3400..U+4DB5) and Ext.B (U+20000..U+2A6D6) in any UCA_Version;
-    Ext.C (U+2A700..U+2B734) if UCA_Version is 20.
+    In the CJK Unified Ideographs Extension blocks:
+    Ext.A (U+3400..U+4DB5) and Ext.B (U+20000..U+2A6D6) in any UCA_Version.
+    Ext.C (U+2A700..U+2B734) if UCA_Version is 20 or greater.
+    Ext.D (U+2B740..U+2B81D) if UCA_Version is 22 or greater.
 
 Through C<overrideCJK>, ordering of CJK unified ideographs (including
 extensions) can be overrided.
@@ -1919,6 +1991,8 @@ returns C<"unknown">.
 =item C<UCA_Version()>
 
 Returns the tracking version number of UTS #10 this module consults.
+C<UCA_Version()> should return the tracking version corresponding
+with the DUCET incorporated.
 
 =item C<Base_Unicode_Version()>
 

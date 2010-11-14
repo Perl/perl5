@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 83 };
+BEGIN { plan tests => 321 }; # 1 + 40 x @Versions
 
 use strict;
 use warnings;
@@ -25,112 +25,75 @@ my $Collator = Unicode::Collate->new(
   normalization => undef,
 );
 
-# U+9FC4..U+9FCB are CJK UI since Unicode 5.2.0.
-# U+9FBC..U+9FC3 are CJK UI since Unicode 5.1.0.
-# U+9FA6..U+9FBB are CJK UI since Unicode 4.1.0.
-# CJK UI Ext are greater than any CJK UI.
-# U+3400 ..U+4DB5  are CJK UI Ext.A since Unicode 3.0.0.
-# U+20000..U+2A6D6 are CJK UI Ext.B since Unicode 3.1.0.
-# U+2A700..U+2B734 are CJK UI Ext.C since Unicode 5.2.0.
+# CJK UI Ext > CJK UI.
+# [ UCA_Version 8: Ext.A < UI and BMP < Ext.B (code point order) ]
 
-##### 2..13
-$Collator->change(UCA_Version => 8);
-ok($Collator->gt("\x{9FA5}", "\x{3400}")); # UI > ExtA
-ok($Collator->gt("\x{9FA6}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->gt("\x{9FBB}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->gt("\x{9FBC}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->gt("\x{9FC3}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->gt("\x{9FC4}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->gt("\x{9FFF}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->lt("\x{9FA6}", "\x{9FBB}")); # new UI > new UI
-ok($Collator->lt("\x{3400}","\x{20000}")); # ExtA < Unassigned(ExtB)
-ok($Collator->lt("\x{3400}","\x{2A6D6}")); # ExtA < Unassigned(ExtB)
-ok($Collator->lt("\x{9FFF}","\x{20000}")); # Unassigned < Unassigned(ExtB)
-ok($Collator->lt("\x{9FFF}","\x{2A6D6}")); # Unassigned < Unassigned(ExtB)
+# 4E00..9FA5 are CJK UI.
+# 9FA6..9FBB are CJK UI since UCA_Version 14 (Unicode 4.1).
+# 9FBC..9FC3 are CJK UI since UCA_Version 18 (Unicode 5.1).
+# 9FC4..9FCB are CJK UI since UCA_Version 20 (Unicode 5.2).
 
-##### 14..25
-$Collator->change(UCA_Version => 9);
-ok($Collator->lt("\x{9FA5}", "\x{3400}")); # UI < ExtA
-ok($Collator->gt("\x{9FA6}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->gt("\x{9FBB}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->gt("\x{9FBC}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->gt("\x{9FC3}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->gt("\x{9FC4}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->gt("\x{9FFF}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->lt("\x{9FA6}", "\x{9FBB}")); # Unassigned > Unassigned
-ok($Collator->lt("\x{3400}","\x{20000}")); # ExtA < ExtB
-ok($Collator->lt("\x{3400}","\x{2A6D6}")); # ExtA < ExtB
-ok($Collator->gt("\x{9FFF}","\x{20000}")); # Unassigned > ExtB
-ok($Collator->gt("\x{9FFF}","\x{2A6D6}")); # Unassigned > ExtB
+# 3400..4DB5   are CJK UI Ext.A since UCA_Version 8  (Unicode 3.0).
+# 20000..2A6D6 are CJK UI Ext.B since UCA_Version 8  (Unicode 3.1).
+# 2A700..2B734 are CJK UI Ext.C since UCA_Version 20 (Unicode 5.2).
+# 2B740..2B81D are CJK UI Ext.D since UCA_Version 22 (Unicode 6.0).
 
-##### 26..37
-$Collator->change(UCA_Version => 11);
-ok($Collator->lt("\x{9FA5}", "\x{3400}")); # UI < ExtA
-ok($Collator->gt("\x{9FA6}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->gt("\x{9FBB}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->gt("\x{9FBC}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->gt("\x{9FC3}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->gt("\x{9FC4}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->gt("\x{9FFF}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->lt("\x{9FA6}", "\x{9FBB}")); # Unassigned > Unassigned
-ok($Collator->lt("\x{3400}","\x{20000}")); # ExtA < ExtB
-ok($Collator->lt("\x{3400}","\x{2A6D6}")); # ExtA < ExtB
-ok($Collator->gt("\x{9FFF}","\x{20000}")); # Unassigned > ExtB
-ok($Collator->gt("\x{9FFF}","\x{2A6D6}")); # Unassigned > ExtB
+my @Versions = (8, 9, 11, 14, 16, 18, 20, 22);
 
+for my $v (@Versions) {
+$Collator->change(UCA_Version => $v);
 
-##### 38..49
-$Collator->change(UCA_Version => 14);
-ok($Collator->lt("\x{9FA5}", "\x{3400}")); # UI < ExtA
-ok($Collator->lt("\x{9FA6}", "\x{3400}")); # new UI < ExtA
-ok($Collator->lt("\x{9FBB}", "\x{3400}")); # new UI < ExtA
-ok($Collator->gt("\x{9FBC}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->gt("\x{9FC3}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->gt("\x{9FC4}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->gt("\x{9FFF}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->lt("\x{9FA6}", "\x{9FBB}")); # new UI > new UI
-ok($Collator->lt("\x{3400}","\x{20000}")); # ExtA < ExtB
-ok($Collator->lt("\x{3400}","\x{2A6D6}")); # ExtA < ExtB
-ok($Collator->gt("\x{9FFF}","\x{20000}")); # Unassigned > ExtB
-ok($Collator->gt("\x{9FFF}","\x{2A6D6}")); # Unassigned > ExtB
+# Ext.A > UI
+ok($Collator->cmp("\x{3400}", "\x{4E00}") == ($v >=  9 ? 1 : -1)); # UI
+ok($Collator->cmp("\x{3400}", "\x{9FA5}") == ($v >=  9 ? 1 : -1)); # UI
+ok($Collator->cmp("\x{3400}", "\x{9FA6}") == ($v >= 14 ? 1 : -1)); # new
+ok($Collator->cmp("\x{3400}", "\x{9FBB}") == ($v >= 14 ? 1 : -1)); # new
+ok($Collator->cmp("\x{3400}", "\x{9FBC}") == ($v >= 18 ? 1 : -1)); # new
+ok($Collator->cmp("\x{3400}", "\x{9FC3}") == ($v >= 18 ? 1 : -1)); # new
+ok($Collator->cmp("\x{3400}", "\x{9FC4}") == ($v >= 20 ? 1 : -1)); # new
+ok($Collator->cmp("\x{3400}", "\x{9FCB}") == ($v >= 20 ? 1 : -1)); # new
+ok($Collator->cmp("\x{3400}", "\x{9FCC}") == -1); # na
+ok($Collator->cmp("\x{3400}", "\x{9FFF}") == -1); # na
 
-##### 50..65
-$Collator->change(UCA_Version => 18);
-ok($Collator->lt("\x{9FA5}", "\x{3400}")); # UI < ExtA
-ok($Collator->lt("\x{9FA6}", "\x{3400}")); # new UI < ExtA
-ok($Collator->lt("\x{9FBB}", "\x{3400}")); # new UI < ExtA
-ok($Collator->lt("\x{9FBC}", "\x{3400}")); # new UI < ExtA
-ok($Collator->lt("\x{9FC3}", "\x{3400}")); # new UI < ExtA
-ok($Collator->gt("\x{9FC4}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->gt("\x{9FCB}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->gt("\x{9FCC}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->gt("\x{9FFF}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->lt("\x{9FA6}", "\x{9FBB}")); # new UI > new UI
-ok($Collator->lt("\x{3400}","\x{20000}")); # ExtA < ExtB
-ok($Collator->lt("\x{3400}","\x{2A6D6}")); # ExtA < ExtB
-ok($Collator->gt("\x{9FFF}","\x{20000}")); # Unassigned > ExtB
-ok($Collator->gt("\x{9FFF}","\x{2A6D6}")); # Unassigned > ExtB
-ok($Collator->lt("\x{9FFF}","\x{2A700}")); # Unassigned < Unassigned(ExtC)
-ok($Collator->lt("\x{9FFF}","\x{2B734}")); # Unassigned < Unassigned(ExtC)
+# UI < UI
+ok($Collator->cmp("\x{4E00}", "\x{9FA5}") == -1); # UI < UI
+ok($Collator->cmp("\x{9FA5}", "\x{9FA6}") == -1); # UI < new
+ok($Collator->cmp("\x{9FA6}", "\x{9FBB}") == -1); # new < new
+ok($Collator->cmp("\x{9FBB}", "\x{9FBC}") == -1); # new < new
+ok($Collator->cmp("\x{9FBC}", "\x{9FC3}") == -1); # new < new
+ok($Collator->cmp("\x{9FC3}", "\x{9FC4}") == -1); # new < new
+ok($Collator->cmp("\x{9FC4}", "\x{9FCB}") == -1); # new < new
+ok($Collator->cmp("\x{9FCB}", "\x{9FCC}") == -1); # new < na
+ok($Collator->cmp("\x{9FCC}", "\x{9FFF}") == -1); # na < na
 
-##### 65..81
-$Collator->change(UCA_Version => 20);
-ok($Collator->lt("\x{9FA5}", "\x{3400}")); # UI < ExtA
-ok($Collator->lt("\x{9FA6}", "\x{3400}")); # new UI < ExtA
-ok($Collator->lt("\x{9FBB}", "\x{3400}")); # new UI < ExtA
-ok($Collator->lt("\x{9FBC}", "\x{3400}")); # new UI < ExtA
-ok($Collator->lt("\x{9FC3}", "\x{3400}")); # new UI < ExtA
-ok($Collator->lt("\x{9FC4}", "\x{3400}")); # new UI < ExtA
-ok($Collator->lt("\x{9FCB}", "\x{3400}")); # new UI < ExtA
-ok($Collator->gt("\x{9FCC}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->gt("\x{9FFF}", "\x{3400}")); # Unassigned > ExtA
-ok($Collator->lt("\x{9FA6}", "\x{9FBB}")); # new UI > new UI
-ok($Collator->lt("\x{3400}","\x{20000}")); # ExtA < ExtB
-ok($Collator->lt("\x{3400}","\x{2A6D6}")); # ExtA < ExtB
-ok($Collator->gt("\x{9FFF}","\x{20000}")); # Unassigned > ExtB
-ok($Collator->gt("\x{9FFF}","\x{2A6D6}")); # Unassigned > ExtB
-ok($Collator->gt("\x{9FFF}","\x{2A700}")); # Unassigned > ExtC
-ok($Collator->gt("\x{9FFF}","\x{2B734}")); # Unassigned > ExtC
-ok($Collator->lt("\x{9FFF}","\x{2B735}")); # Unassigned < Unassigned
-ok($Collator->lt("\x{9FFF}","\x{2B73F}")); # Unassigned < Unassigned
+# Ext.A < Ext.B
+ok($Collator->cmp("\x{3400}", "\x{20000}") == -1);
 
+# Ext.A
+ok($Collator->cmp("\x{3400}", "\x{4DB5}") == -1); # A < A
+ok($Collator->cmp("\x{2FFF}", "\x{3400}") == ($v >= 8 ? 1 : -1)); # na > A
+ok($Collator->cmp("\x{2FFF}", "\x{4DB5}") == ($v >= 8 ? 1 : -1)); # na > A
+ok($Collator->cmp("\x{2FFF}", "\x{4DB6}") == -1); # na < na
+ok($Collator->cmp("\x{2FFF}", "\x{4DBF}") == -1); # na < na
+
+# Ext.B
+ok($Collator->cmp("\x{20000}","\x{2A6D6}") == -1); # B < B
+ok($Collator->cmp("\x{2FFF}", "\x{20000}") == ($v >= 9 ? 1 : -1)); # na > B
+ok($Collator->cmp("\x{2FFF}", "\x{2A6D6}") == ($v >= 9 ? 1 : -1)); # na > B
+ok($Collator->cmp("\x{2FFF}", "\x{2A6D7}") == -1); # na < na
+ok($Collator->cmp("\x{2FFF}", "\x{2A6DF}") == -1); # na < na
+
+# Ext.C
+ok($Collator->cmp("\x{2A700}","\x{2B734}") == -1); # C < C
+ok($Collator->cmp("\x{2FFF}", "\x{2A700}") == ($v >= 20 ? 1 : -1)); # na > C
+ok($Collator->cmp("\x{2FFF}", "\x{2B734}") == ($v >= 20 ? 1 : -1)); # na > C
+ok($Collator->cmp("\x{2FFF}", "\x{2B735}") == -1); # na < na
+ok($Collator->cmp("\x{2FFF}", "\x{2B73F}") == -1); # na < na
+
+# Ext.D
+ok($Collator->cmp("\x{2B740}","\x{2B81D}") == -1); # D < D
+ok($Collator->cmp("\x{2FFF}", "\x{2B740}") == ($v >= 22 ? 1 : -1)); # na > D
+ok($Collator->cmp("\x{2FFF}", "\x{2B81D}") == ($v >= 22 ? 1 : -1)); # na > D
+ok($Collator->cmp("\x{2FFF}", "\x{2B81E}") == -1); # na < na
+ok($Collator->cmp("\x{2FFF}", "\x{2B81F}") == -1); # na < na
+}

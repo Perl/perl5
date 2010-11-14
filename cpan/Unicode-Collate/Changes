@@ -1,5 +1,16 @@
 Revision history for Perl module Unicode::Collate.
 
+0.67  Sun Nov 14 11:38:59 2010
+    - supported UCA_Version 22 for Unicode 6.0.0.
+      * 2B740..2B81D are new CJK unified ideographs.
+      * noncharacters (e.g. U+FFFF) should be overridable, not be ignored.
+    ! DUCET is NOT updated, as no maint perl supports Unicode 6.0.0.
+      Thus the default UCA_Version is still 20.
+    - added t/nonchar.t.
+    - improved discontiguous contractions of 3 or more characters.
+      (e.g. 0FB2 0F71 0F80 and 0FB3 0F71 0F80)
+    - auxiliary: now 'mklocale' also copes with Korean.pm according to DUCET.
+
 0.66  Sun Nov  7 10:47:30 2010
     - U::C::Locale newly supports locale: ko.
     - added Unicode::Collate::CJK::Korean for ko.
@@ -93,6 +104,7 @@ Revision history for Perl module Unicode::Collate.
     - supported locales: cs, es, es__traditional, fr, nn, pl.
     ! added t/locale*.t that uses DUCET.
      (locale_cs.t, locale_fr.t, locale_nn.t, locale_pl.t, locale_test.t)
+    - data/*.txt and mklocale for preparation of Locale/*.pl from DUCET.
 
 0.54  Sun Jul 25 21:37:04 2010
     - Now UCA Revision 20 (based on Unicode 5.2.0).
@@ -100,7 +112,7 @@ Revision history for Perl module Unicode::Collate.
       which *is required* to test this module.
     ! Please notice that allkeys.txt will be overwritten if you have had
       other allkeys.txt already.
-    - U+9FC4..U+9FCB and U+2A700..U+2B734 are new CJK Unified Ideographs.
+    - U+9FC4..U+9FCB and U+2A700..U+2B734 are new CJK unified ideographs.
     - Many hangul jamo are assigned (affecting hangul_terminator).
 
     ! DUCET will be compiled when XS is used. Explicit saying
@@ -115,7 +127,7 @@ Revision history for Perl module Unicode::Collate.
       which is not required to test this module.
     ! Please notice that allkeys.txt will be overwritten if you have had
       other allkeys.txt already.
-    - U+9FBC..U+9FC3 are new CJK Unified Ideographs.
+    - U+9FBC..U+9FC3 are new CJK unified ideographs.
 
 0.52  Thu Oct 13 21:51:09 2005
     - The Unicode::Collate->new method does not destroy user's $_ any longer.

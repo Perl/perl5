@@ -1,4 +1,4 @@
-Unicode/Collate version 0.66
+Unicode/Collate version 0.67
 ===============================
 
 NAME
@@ -92,6 +92,17 @@ ABOUT DUCET
   If DUCET is not installed, it is recommended to copy the file
   from http://www.unicode.org/Public/UCA/latest/allkeys.txt
   to <a place in @INC>/Unicode/Collate/allkeys.txt manually.
+
+HOW TO CHANGE DUCET (NOT WARRANTED)
+
+  0. rewriting UCA_Version and Base_Unicode_Version in Collate.pm
+     and t/version.t is preferred.
+  1. replace Collate/allkeys.txt with a new DUCET.
+  2. run mklocale to generate new Locale/*.pl and Korean.pm.
+  3. replace Collate/Locale/*.pl with the new Locale/*.pl,
+     and Collate/CJK/Korean.pm with the new Korean.pm.
+  4. make test.
+     IF FAIL, it may require more changes, not be easy.
 
 AUTHOR, COPYRIGHT AND LICENSE
 

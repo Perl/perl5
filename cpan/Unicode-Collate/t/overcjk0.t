@@ -1,3 +1,4 @@
+
 BEGIN {
     unless ("A" eq pack('U', 0x41)) {
 	print "1..0 # Unicode::Collate " .
@@ -11,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 66 };
+BEGIN { plan tests => 246 }; # 6 + 30 x @Versions
 
 use strict;
 use warnings;
@@ -38,77 +39,60 @@ ok($ignoreCJK->eq("Pe\x{4E00}rl", "Perl")); # U+4E00 is a CJK.
 ok($ignoreCJK->gt("\x{4DFF}", "\x{4E00}")); # U+4DFF is not CJK.
 ok($ignoreCJK->lt("Pe\x{5B57}rl", "Perl")); # 'r' is unassigned.
 
-##### 7..20
-ok($ignoreCJK->eq("\x{3400}", ""));
-ok($ignoreCJK->eq("\x{4DB5}", ""));
-ok($ignoreCJK->eq("\x{9FA5}", ""));
-ok($ignoreCJK->eq("\x{9FA6}", "")); # UI since Unicode 4.1.0
-ok($ignoreCJK->eq("\x{9FBB}", "")); # UI since Unicode 4.1.0
-ok($ignoreCJK->eq("\x{9FBC}", "")); # UI since Unicode 5.1.0
-ok($ignoreCJK->eq("\x{9FC3}", "")); # UI since Unicode 5.1.0
-ok($ignoreCJK->eq("\x{9FC4}", "")); # UI since Unicode 5.2.0
-ok($ignoreCJK->eq("\x{9FCB}", "")); # UI since Unicode 5.2.0
-ok($ignoreCJK->gt("\x{9FCC}", "Perl"));
-ok($ignoreCJK->eq("\x{20000}", "")); # ExtB since Unicode 3.1.0
-ok($ignoreCJK->eq("\x{2A6D6}", "")); # ExtB since Unicode 3.1.0
-ok($ignoreCJK->eq("\x{2A700}", "")); # ExtC since Unicode 5.2.0
-ok($ignoreCJK->eq("\x{2B734}", "")); # ExtC since Unicode 5.2.0
+#####
 
-##### 21..30
-$ignoreCJK->change(UCA_Version => 8);
-ok($ignoreCJK->eq("\x{3400}", ""));
-ok($ignoreCJK->eq("\x{4DB5}", ""));
-ok($ignoreCJK->eq("\x{9FA5}", ""));
-ok($ignoreCJK->gt("\x{9FA6}", "Perl"));
-ok($ignoreCJK->gt("\x{9FBB}", "Perl"));
-ok($ignoreCJK->gt("\x{9FBC}", "Perl"));
-ok($ignoreCJK->gt("\x{9FC3}", "Perl"));
-ok($ignoreCJK->gt("\x{9FC4}", "Perl"));
-ok($ignoreCJK->eq("\x{20000}", "")); # ExtB since Unicode 3.1.0
-ok($ignoreCJK->eq("\x{2A6D6}", "")); # ExtB since Unicode 3.1.0
+# 4E00..9FA5 are CJK UI.
+# 9FA6..9FBB are CJK UI since UCA_Version 14 (Unicode 4.1).
+# 9FBC..9FC3 are CJK UI since UCA_Version 18 (Unicode 5.1).
+# 9FC4..9FCB are CJK UI since UCA_Version 20 (Unicode 5.2).
 
-##### 31..40
-$ignoreCJK->change(UCA_Version => 9);
-ok($ignoreCJK->eq("\x{3400}", ""));
-ok($ignoreCJK->eq("\x{4DB5}", ""));
-ok($ignoreCJK->eq("\x{9FA5}", ""));
-ok($ignoreCJK->gt("\x{9FA6}", "Perl"));
-ok($ignoreCJK->gt("\x{9FBB}", "Perl"));
-ok($ignoreCJK->gt("\x{9FBC}", "Perl"));
-ok($ignoreCJK->gt("\x{9FC3}", "Perl"));
-ok($ignoreCJK->gt("\x{9FC4}", "Perl"));
-ok($ignoreCJK->eq("\x{20000}", "")); # ExtB since Unicode 3.1.0
-ok($ignoreCJK->eq("\x{2A6D6}", "")); # ExtB since Unicode 3.1.0
+# 3400..4DB5   are CJK UI Ext.A since UCA_Version 8  (Unicode 3.0).
+# 20000..2A6D6 are CJK UI Ext.B since UCA_Version 8  (Unicode 3.1).
+# 2A700..2B734 are CJK UI Ext.C since UCA_Version 20 (Unicode 5.2).
+# 2B740..2B81D are CJK UI Ext.D since UCA_Version 22 (Unicode 6.0).
 
-##### 41..52
-$ignoreCJK->change(UCA_Version => 14);
-ok($ignoreCJK->eq("\x{3400}", ""));
-ok($ignoreCJK->eq("\x{4DB5}", ""));
-ok($ignoreCJK->eq("\x{9FA5}", ""));
-ok($ignoreCJK->eq("\x{9FA6}", "")); # UI since Unicode 4.1.0
-ok($ignoreCJK->eq("\x{9FBB}", "")); # UI since Unicode 4.1.0
-ok($ignoreCJK->gt("\x{9FBC}", "Perl"));
-ok($ignoreCJK->gt("\x{9FC3}", "Perl"));
-ok($ignoreCJK->gt("\x{9FC4}", "Perl"));
-ok($ignoreCJK->eq("\x{20000}", "")); # ExtB since Unicode 3.1.0
-ok($ignoreCJK->eq("\x{2A6D6}", "")); # ExtB since Unicode 3.1.0
-ok($ignoreCJK->gt("\x{2A700}", "Perl"));
-ok($ignoreCJK->gt("\x{2B734}", "Perl"));
+my @Versions = (8, 9, 11, 14, 16, 18, 20, 22);
 
-##### 53..66
-$ignoreCJK->change(UCA_Version => 18);
-ok($ignoreCJK->eq("\x{3400}", ""));
-ok($ignoreCJK->eq("\x{4DB5}", ""));
-ok($ignoreCJK->eq("\x{9FA5}", ""));
-ok($ignoreCJK->eq("\x{9FA6}", "")); # UI since Unicode 4.1.0
-ok($ignoreCJK->eq("\x{9FBB}", "")); # UI since Unicode 4.1.0
-ok($ignoreCJK->eq("\x{9FBC}", "")); # UI since Unicode 5.1.0
-ok($ignoreCJK->eq("\x{9FC3}", "")); # UI since Unicode 5.1.0
-ok($ignoreCJK->gt("\x{9FC4}", "Perl"));
-ok($ignoreCJK->gt("\x{9FCB}", "Perl"));
-ok($ignoreCJK->gt("\x{9FCC}", "Perl"));
-ok($ignoreCJK->eq("\x{20000}", "")); # ExtB since Unicode 3.1.0
-ok($ignoreCJK->eq("\x{2A6D6}", "")); # ExtB since Unicode 3.1.0
-ok($ignoreCJK->gt("\x{2A700}", "Perl"));
-ok($ignoreCJK->gt("\x{2B734}", "Perl"));
+for my $v (@Versions) {
+$ignoreCJK->change(UCA_Version => $v);
 
+# UI
+ok($ignoreCJK->cmp("\x{4E00}", "") == 0);
+ok($ignoreCJK->cmp("\x{9FA5}", "") == 0);
+ok($ignoreCJK->cmp("\x{9FA6}", "") == ($v >= 14 ? 0 : 1));
+ok($ignoreCJK->cmp("\x{9FAF}", "") == ($v >= 14 ? 0 : 1));
+ok($ignoreCJK->cmp("\x{9FB0}", "") == ($v >= 14 ? 0 : 1));
+ok($ignoreCJK->cmp("\x{9FBB}", "") == ($v >= 14 ? 0 : 1));
+ok($ignoreCJK->cmp("\x{9FBC}", "") == ($v >= 18 ? 0 : 1));
+ok($ignoreCJK->cmp("\x{9FBF}", "") == ($v >= 18 ? 0 : 1));
+ok($ignoreCJK->cmp("\x{9FC0}", "") == ($v >= 18 ? 0 : 1));
+ok($ignoreCJK->cmp("\x{9FC3}", "") == ($v >= 18 ? 0 : 1));
+ok($ignoreCJK->cmp("\x{9FC4}", "") == ($v >= 20 ? 0 : 1));
+ok($ignoreCJK->cmp("\x{9FCB}", "") == ($v >= 20 ? 0 : 1));
+ok($ignoreCJK->cmp("\x{9FCC}", "") == 1);
+ok($ignoreCJK->cmp("\x{9FCF}", "") == 1);
+
+# Ext.A
+ok($ignoreCJK->cmp("\x{3400}", "") == 0);
+ok($ignoreCJK->cmp("\x{4DB5}", "") == 0);
+ok($ignoreCJK->cmp("\x{4DB6}", "") == 1);
+ok($ignoreCJK->cmp("\x{4DBF}", "") == 1);
+
+# Ext.B
+ok($ignoreCJK->cmp("\x{20000}","") == 0);
+ok($ignoreCJK->cmp("\x{2A6D6}","") == 0);
+ok($ignoreCJK->cmp("\x{2A6D7}","") == 1);
+ok($ignoreCJK->cmp("\x{2A6DF}","") == 1);
+
+# Ext.C
+ok($ignoreCJK->cmp("\x{2A700}","") == ($v >= 20 ? 0 : 1));
+ok($ignoreCJK->cmp("\x{2B734}","") == ($v >= 20 ? 0 : 1));
+ok($ignoreCJK->cmp("\x{2B735}","") == 1);
+ok($ignoreCJK->cmp("\x{2B73F}","") == 1);
+
+# Ext.D
+ok($ignoreCJK->cmp("\x{2B740}","") == ($v >= 22 ? 0 : 1));
+ok($ignoreCJK->cmp("\x{2B81D}","") == ($v >= 22 ? 0 : 1));
+ok($ignoreCJK->cmp("\x{2B81E}","") == 1);
+ok($ignoreCJK->cmp("\x{2B81F}","") == 1);
+}
