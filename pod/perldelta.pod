@@ -137,6 +137,13 @@ the C<y///> operator.
 It causes it to perform the substitution on a I<copy> of its operand,
 returning that copy instead of a character count.
 
+=head2 New global variable C<${^GLOBAL_PHASE}>
+
+A new global variable, C<${^GLOBAL_PHASE}>, has been added to allow
+introspection of the current phase of the perl interpreter. It's explained in
+detail in L<perlvar/"${^GLOBAL_PHASE}"> and
+L<perlmod/"BEGIN, UNITCHECK, CHECK, INIT and END">.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
