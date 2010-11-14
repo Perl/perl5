@@ -849,10 +849,16 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #define isBLANK_LC_uni(c)	isBLANK(c) /* could be wrong */
 
 #define isALNUM_utf8(p)		is_utf8_alnum(p)
-/* The ID_Start of Unicode is quite limiting: it assumes a L-class
- * character (meaning that you cannot have, say, a CJK character).
- * Instead, let's allow ID_Continue but not digits. */
-#define isIDFIRST_utf8(p)	(is_utf8_idcont(p) && !is_utf8_digit(p))
+/* The ID_Start of Unicode was originally quite limiting: it assumed an
+ * L-class character (meaning that you could not have, say, a CJK charac-
+ * ter). So, instead, perl has for a long time allowed ID_Continue but
+ * not digits.
+ * We still preserve that for backward compatibility. But we also make sure
+ * that it is alphanumeric, so S_scan_word in toke.c will not hang. See
+ *    http://rt.perl.org/rt3/Ticket/Display.html?id=74022
+ * for more detail than you ever wanted to know about. */
+#define isIDFIRST_utf8(p) \
+    (is_utf8_idcont(p) && !is_utf8_digit(p) && is_utf8_alnum(p))
 #define isALPHA_utf8(p)		is_utf8_alpha(p)
 #define isSPACE_utf8(p)		is_utf8_space(p)
 #define isDIGIT_utf8(p)		is_utf8_digit(p)
