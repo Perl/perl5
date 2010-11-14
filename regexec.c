@@ -6353,8 +6353,8 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
                              * necessary */
 			    if (! PL_utf8_foldclosures) {
 
-				/* If the folds haven't been read in, call a fold
-			     * function to force that */
+                                /* If the folds haven't been read in, call a
+                                 * fold function to force that */
 				if (! PL_utf8_tofold) {
 				    U8 dummy[UTF8_MAXBYTES+1];
 				    STRLEN dummy_len;
