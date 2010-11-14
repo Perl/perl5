@@ -2377,11 +2377,11 @@ sub _modpow
   # modulus of power ($x ** $y) % $z
   my ($c,$num,$exp,$mod) = @_;
 
-  # in the trivial case,
+  # a^b (mod 1) = 0 for all a and b
   if (_is_one($c,$mod))
     {
-    splice @$num,0,1; $num->[0] = 0;
-    return $num;
+        @$num = 0;
+        return $num;
     }
 
   # 0^a (mod m) = 0 if m != 0, a != 0
