@@ -1359,7 +1359,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	switch (OP(c)) {
 	case ANYOF:
 	    if (utf8_target) {
-		 REXEC_FBC_UTF8_CLASS_SCAN((ANYOF_FLAGS(c) & ANYOF_UNICODE) ||
+		 REXEC_FBC_UTF8_CLASS_SCAN((ANYOF_FLAGS(c) & ANYOF_NONBITMAP) ||
 			  !UTF8_IS_INVARIANT((U8)s[0]) ?
 			  reginclass(prog, c, (U8*)s, 0, utf8_target) :
 			  REGINCLASS(prog, c, (U8*)s));
@@ -6299,7 +6299,7 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 
     /* If the bitmap didn't (or couldn't) match, and something outside the
      * bitmap could match, try that */
-    if (!match && (utf8_target || (flags & ANYOF_UNICODE))) {
+    if (!match && (utf8_target || (flags & ANYOF_NONBITMAP))) {
 	if (utf8_target && (flags & ANYOF_UNICODE_ALL) && c >= 256) {
 	    match = TRUE;
 	}

@@ -280,7 +280,7 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 
 #define ANYOF_FOLD_SHARP_S(node, input, end)	\
 	(ANYOF_BITMAP_TEST(node, LATIN_SMALL_LETTER_SHARP_S) && \
-	 (ANYOF_FLAGS(node) & ANYOF_UNICODE) && \
+	 (ANYOF_FLAGS(node) & ANYOF_NONBITMAP) && \
 	 (ANYOF_FLAGS(node) & ANYOF_FOLD) && \
 	 ((end) > (input) + 1) && \
 	 toLOWER((input)[0]) == 's' && \

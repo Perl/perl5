@@ -783,18 +783,18 @@ S_cl_and(struct regnode_charclass_class *cl,
     if (!(and_with->flags & ANYOF_FOLD))
 	cl->flags &= ~ANYOF_FOLD;
 
-    if (cl->flags & ANYOF_UNICODE_ALL && and_with->flags & ANYOF_UNICODE &&
+    if (cl->flags & ANYOF_UNICODE_ALL && and_with->flags & ANYOF_NONBITMAP &&
 	!(and_with->flags & ANYOF_INVERT)) {
 	cl->flags &= ~ANYOF_UNICODE_ALL;
-	cl->flags |= ANYOF_UNICODE;
+	cl->flags |= ANYOF_NONBITMAP;
 	ARG_SET(cl, ARG(and_with));
     }
     if (!(and_with->flags & ANYOF_UNICODE_ALL) &&
 	!(and_with->flags & ANYOF_INVERT))
 	cl->flags &= ~ANYOF_UNICODE_ALL;
-    if (!(and_with->flags & (ANYOF_UNICODE|ANYOF_UNICODE_ALL)) &&
+    if (!(and_with->flags & (ANYOF_NONBITMAP|ANYOF_UNICODE_ALL)) &&
 	!(and_with->flags & ANYOF_INVERT))
-	cl->flags &= ~ANYOF_UNICODE;
+	cl->flags &= ~ANYOF_NONBITMAP;
 }
 
 /* 'OR' a given class with another one.  Can create false positives */
@@ -851,14 +851,14 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
     if (or_with->flags & ANYOF_FOLD)
 	cl->flags |= ANYOF_FOLD;
 
-    if (cl->flags & ANYOF_UNICODE && or_with->flags & ANYOF_UNICODE &&
+    if (cl->flags & ANYOF_NONBITMAP && or_with->flags & ANYOF_NONBITMAP &&
 	ARG(cl) != ARG(or_with)) {
 	cl->flags |= ANYOF_UNICODE_ALL;
-	cl->flags &= ~ANYOF_UNICODE;
+	cl->flags &= ~ANYOF_NONBITMAP;
     }
     if (or_with->flags & ANYOF_UNICODE_ALL) {
 	cl->flags |= ANYOF_UNICODE_ALL;
-	cl->flags &= ~ANYOF_UNICODE;
+	cl->flags &= ~ANYOF_NONBITMAP;
     }
 }
 
@@ -8317,7 +8317,7 @@ parseit:
 			(value=='p' ? '+' : '!'), (int)n, RExC_parse);
 		}
 		RExC_parse = e + 1;
-		ANYOF_FLAGS(ret) |= ANYOF_UNICODE;
+		ANYOF_FLAGS(ret) |= ANYOF_NONBITMAP;
 		namedclass = ANYOF_MAX;  /* no official name, but it's named */
 		}
 		break;
@@ -8441,7 +8441,7 @@ parseit:
 			ANYOF_BITMAP_SET(ret, '-');
 		    }
 		    else {
-			ANYOF_FLAGS(ret) |= ANYOF_UNICODE;
+			ANYOF_FLAGS(ret) |= ANYOF_NONBITMAP;
 			Perl_sv_catpvf(aTHX_ listsv,
 				       "%04"UVxf"\n%04"UVxf"\n", (UV)prevvalue, (UV) '-');
 		    }
@@ -8631,7 +8631,7 @@ parseit:
 	        const UV prevnatvalue  = NATIVE_TO_UNI(prevvalue);
 		const UV natvalue      = NATIVE_TO_UNI(value);
                 stored+=2; /* can't optimize this class */
-		ANYOF_FLAGS(ret) |= ANYOF_UNICODE;
+		ANYOF_FLAGS(ret) |= ANYOF_NONBITMAP;
 		if (prevnatvalue < natvalue) { /* what about > ? */
 		    Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\t%04"UVxf"\n",
 				   prevnatvalue, natvalue);
@@ -9530,7 +9530,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
         EMIT_ANYOF_TEST_SEPARATOR(do_sep,sv,flags);
         
         /* output information about the unicode matching */
-	if (flags & ANYOF_UNICODE)
+	if (flags & ANYOF_NONBITMAP)
 	    sv_catpvs(sv, "{unicode}");
 	else if (flags & ANYOF_UNICODE_ALL)
 	    sv_catpvs(sv, "{unicode_all}");
