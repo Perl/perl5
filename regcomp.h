@@ -327,7 +327,8 @@ struct regnode_charclass_class {
 #define ANYOF_NONBITMAP		0x20
 #define ANYOF_UNICODE		ANYOF_NONBITMAP	/* old name, for back compat */
 
-#define ANYOF_UNICODE_ALL	0x40	/* Matches 0x100 - infinity */
+/* Matches every code point 0x100 and above*/
+#define ANYOF_UNICODE_ALL	0x40
 
 /* EOS used for regstclass only */
 #define ANYOF_EOS		0x80	/* Can match an empty string too */
