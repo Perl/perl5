@@ -925,8 +925,8 @@ X<comment> X<line> X<#> X<preprocessor> X<eval>
 Perl can process line directives, much like the C preprocessor.  Using
 this, one can control Perl's idea of filenames and line numbers in
 error or warning messages (especially for strings that are processed
-with C<eval()>).  The syntax for this mechanism is the same as for most
-C preprocessors: it matches the regular expression
+with C<eval()>).  The syntax for this mechanism is almost the same as for
+most C preprocessors: it matches the regular expression
 
     # example: '# line 42 "new_filename.plx"'
     /^\#   \s*
@@ -935,7 +935,8 @@ C preprocessors: it matches the regular expression
      $/x
 
 with C<$1> being the line number for the next line, and C<$3> being
-the optional filename (specified with or without quotes).
+the optional filename (specified with or without quotes). Note that
+no whitespace may preceed the C<< # >>, unlike modern C preprocessors.
 
 There is a fairly obvious gotcha included with the line directive:
 Debuggers and profilers will only show the last source line to appear
