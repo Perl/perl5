@@ -3677,7 +3677,7 @@ sub trace { return main::trace(@_); }
             $extends_above = ($j+1 < $range_list_size
                             && $r->[$j+1]->start == $end +1
                             && $r->[$j+1]->standard_form eq $standard_form
-                            && $r->[$j-1]->type == $type);
+                            && $r->[$j+1]->type == $type);
         }
         if ($extends_below && $extends_above) { # Adds to both
             $splice_start--;     # start replace at element below
