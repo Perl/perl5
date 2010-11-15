@@ -6343,6 +6343,26 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 			    match = TRUE;
 			}
 			else {
+			    /* The fold in a few cases  of an above Latin1 char
+			     * is in the Latin1 range, and hence may be in the
+			     * bitmap */
+			    if (UTF8_IS_INVARIANT(*folded)
+				&& ANYOF_BITMAP_TEST(n, UNI_TO_NATIVE(*folded)))
+			    {
+				match = TRUE;
+			    }
+			    else if (UTF8_IS_DOWNGRADEABLE_START(*folded)
+				     && ANYOF_BITMAP_TEST(n,
+					  UNI_TO_NATIVE(
+					     TWO_BYTE_UTF8_TO_UNI(folded[0],
+							           folded[1]))))
+			    { /* Since the fold comes from internally
+			       * generated data, we can safely assume it is
+			       * valid utf8 in the test above */
+
+				match = TRUE;
+			    }
+                            if (! match) {
 			    SV** listp;
 
                             /* Consider "k" =~ /[K]/i.  The line above would
@@ -6375,18 +6395,36 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 				IV i;
 				for (i = 0; i <= av_len(list); i++) {
 				    SV** try_p = av_fetch(list, i, FALSE);
+                                    char* try;
 				    if (try_p == NULL) {
 					Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
 				    }
 				    /* Don't have to worry about embeded nulls
 				     * since NULL isn't folded or foldable */
-				    if (swash_fetch(sw, (U8*) SvPVX(*try_p),1)) {
+                                    try = SvPVX(*try_p);
+                                    if (UTF8_IS_INVARIANT(*try)
+                                        && ANYOF_BITMAP_TEST(n,
+							   UNI_TO_NATIVE(*try)))
+                                    {
+                                        match = TRUE;
+                                        break;
+                                    }
+                                    else if (UTF8_IS_DOWNGRADEABLE_START(*try)
+                                                && ANYOF_BITMAP_TEST(n,
+                                                   UNI_TO_NATIVE(
+                                                   TWO_BYTE_UTF8_TO_UNI(try[0],
+                                                                       try[1]))))
+                                    {
+                                        match = TRUE;
+                                        break;
+                                    } else if (swash_fetch(sw, (U8*) try, 1)) {
 					match = TRUE;
 					break;
 				    }
 				}
 			    }
 			}
+                        }
 		    }
 		}
 
