@@ -378,13 +378,9 @@ C<Locale::Maketext> has been upgraded from 1.16 to 1.17.
 
 C<Math::BigInt> has been upgraded from 1.97 to 1.99.
 
-XXX Should the changes be listed here?
-
 =item *
 
 C<Math::BigInt::FastCalc> has been upgraded from 0.22 to 0.24.
-
-XXX Should the changes be listed here?
 
 =item *
 
