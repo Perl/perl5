@@ -8741,8 +8741,14 @@ parseit:
     if( stored == 1 && (value < 128 || (value < 256 && !UTF))
         && !( ANYOF_FLAGS(ret) & ( ANYOF_FLAGS_ALL ^ ANYOF_FOLD ) )
     ) {
-        /* optimize single char class to an EXACT node
-           but *only* when its not a UTF/high char  */
+	/* optimize single char class to an EXACT node but *only* when its not
+	 * a UTF/high char.  Note that the information needed to decide to do
+	 * this optimization is not currently available until the 2nd pass, and
+	 * that the actually used EXACT node takes less space than the
+	 * calculated ANYOF node, and hence the amount of space calculated in
+         * the first pass is larger than actually used.  Currently we don't
+         * keep track of enough information to do this for nodes which contain
+         * matches outside the bitmap */
         const char * cur_parse= RExC_parse;
         RExC_emit = (regnode *)orig_emit;
         RExC_parse = (char *)orig_parse;
