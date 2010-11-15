@@ -7,7 +7,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan( tests => 46 );
+plan( tests => 47 );
 
 # Used to segfault (bug #15479)
 fresh_perl_like(
@@ -96,7 +96,7 @@ SKIP: {
     isa_ok( $gv, "B::GV", "cleared stash leaves CV with valid GV");
     is( b($sub)->CvFLAGS & $CVf_ANON, $CVf_ANON, "...and CVf_ANON set");
     is( eval { $gv->NAME }, "__ANON__", "...and an __ANON__ name");
-    is( eval { $gv->STASH->NAME }, "__ANON__", "...and an __ANON__ stash");
+    is( eval { $gv->STASH->NAME }, "two", "...but leaves stash intact");
 
     $sub = do {
         package three;
@@ -250,4 +250,14 @@ SKIP: {
     }
 }
 
+# Setting the name during undef %stash:: should have no effect.
+{
+    my $glob = \*Phoo::glob;
+    sub o::DESTROY { eval '++$Phoo::bar' }
+    no strict 'refs';
+    ${"Phoo::thing1"} = bless [], "o";
+    undef %Phoo::;
+    is "$$glob", "*__ANON__::glob",
+      "setting stash name during undef has no effect";
+}
 
