@@ -4153,10 +4153,10 @@ PP(pp_uc)
 
 		/* Likewise, if it fits in a byte, its case change is in our
 		 * table */
-		U8 orig = TWO_BYTE_UTF8_TO_UNI(*s, *(s+1));
+		U8 orig = TWO_BYTE_UTF8_TO_UNI(*s, *s++);
 		U8 upper = toUPPER_LATIN1_MOD(orig);
 		CAT_TWO_BYTE_UNI_UPPER_MOD(d, orig, upper);
-		s += 2;
+		s++;
 	    }
 	    else {
 #else
@@ -4391,9 +4391,9 @@ PP(pp_lc)
 	    else if (UTF8_IS_DOWNGRADEABLE_START(*s)) {
 
 		/* As do the ones in the Latin1 range */
-		U8 lower = toLOWER_LATIN1(TWO_BYTE_UTF8_TO_UNI(*s, *(s+1)));
+		U8 lower = toLOWER_LATIN1(TWO_BYTE_UTF8_TO_UNI(*s, *s++));
 		CAT_UNI_TO_UTF8_TWO_BYTE(d, lower);
-		s += 2;
+		s++;
 	    }
 	    else {
 #endif
