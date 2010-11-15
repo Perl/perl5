@@ -754,7 +754,7 @@ without a label.
 =item *
 
 A new C<parse_label()> function has been added, that parses a statement
-labels, separate from statements.
+label, separate from statements.
 
 =item *
 
