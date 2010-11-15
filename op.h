@@ -760,6 +760,31 @@ preprocessing token; the type of I<arg> depends on I<which>.
 #define RV2CVOPCV_MARK_EARLY     0x00000001
 #define RV2CVOPCV_RETURN_NAME_GV 0x00000002
 
+/*
+=head1 Custom Operators
+
+=for apidoc Am|U32|XopFLAGS|XOP *xop
+Return the XOP's flags.
+
+=for apidoc Am||XopENTRY|XOP *xop|which
+Return a member of the XOP structure. I<which> is a cpp token indicating
+which entry to return. If the member is not set this will return a
+default value. The return type depends on I<which>.
+
+=for apidoc Am|void|XopENTRY_set|XOP *xop|which|value
+Set a member of the XOP structure. I<which> is a cpp token indicating
+which entry to set. See L<perlguts/"Custom Operators"> for details about
+the available members and how they are used.
+
+=for apidoc Am|void|XopDISABLE|XOP *xop|which
+Temporarily disable a member of the XOP, by clearing the appropriate flag.
+
+=for apidoc Am|void|XopENABLE|XOP *xop|which
+Reenable a member of the XOP which has been disabled.
+
+=cut
+*/
+
 struct custom_op {
     U32		    xop_flags;    
     const char	   *xop_name;
@@ -795,6 +820,27 @@ struct custom_op {
 	(xop)->xop_flags |= XOPf_ ## which; \
 	assert(XopENTRY(xop, which)); \
     } STMT_END
+
+/*
+=head1 Optree Manipulation Functions
+
+=for apidoc Am|const char *|OP_NAME|OP *o
+Return the name of the provided OP. For core ops this looks up the name
+from the op_type; for custom ops from the op_ppaddr.
+
+=for apidoc Am|const char *|OP_DESC|OP *o
+Return a short description of the provided OP.
+
+=for apidoc Am|U32|OP_CLASS|OP *o
+Return the class of the provided OP: that is, which of the *OP
+structures it uses. For core ops this currently gets the information out
+of PL_opargs, which does not always accurately reflect the type used.
+For custom ops the type is returned from the registration, and it is up
+to the registree to ensure it is accurate. The value returned will be
+one of the OA_* constants from op.h.
+
+=cut
+*/
 
 #define OP_NAME(o) ((o)->op_type == OP_CUSTOM \
 		    ? XopENTRY(Perl_custom_op_xop(aTHX_ o), xop_name) \

@@ -10041,6 +10041,16 @@ Perl_peep(pTHX_ register OP *o)
     CALL_RPEEP(o);
 }
 
+/*
+=head1 Custom Operators
+
+=for apidoc Ao||custom_op_xop
+Return the XOP structure for a given custom op. This function should be
+considered internal to OP_NAME and the other access macros: use them instead.
+
+=cut
+*/
+
 const XOP *
 Perl_custom_op_xop(pTHX_ const OP *o)
 {
@@ -10091,7 +10101,12 @@ Perl_custom_op_xop(pTHX_ const OP *o)
     return xop;
 }
 
+/*
+=for apidoc Ao||custom_op_register
+Register a custom op. See L<perlguts/"Custom Operators">.
 
+=cut
+*/
 
 void
 Perl_custom_op_register(pTHX_ Perl_ppaddr_t ppaddr, const XOP *xop)

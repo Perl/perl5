@@ -2765,10 +2765,79 @@ responsible for adding stack marks if necessary.
 You should also "register" your op with the Perl interpreter so that it
 can produce sensible error and warning messages. Since it is possible to
 have multiple custom ops within the one "logical" op type C<OP_CUSTOM>,
-Perl uses the value of C<< o->op_ppaddr >> as a key into the
-C<PL_custom_op_descs> and C<PL_custom_op_names> hashes. This means you
-need to enter a name and description for your op at the appropriate
-place in the C<PL_custom_op_names> and C<PL_custom_op_descs> hashes.
+Perl uses the value of C<< o->op_ppaddr >> to determine which custom op
+it is dealing with. You should create an C<XOP> structure for each
+ppaddr you use, set the properties of the custom op with
+C<XopENTRY_set>, and register the structure against the ppaddr using
+C<Perl_custom_op_register>. A trivial example might look like:
+
+    static XOP my_xop;
+    static OP *my_pp(pTHX);
+
+    BOOT:
+        XopENTRY_set(&my_xop, xop_name, "myxop");
+        XopENTRY_set(&my_xop, xop_desc, "Useless custom op");
+        Perl_custom_op_register(aTHX_ my_pp, &my_xop);
+
+The available fields in the structure are:
+
+=over 4
+
+=item xop_name
+
+A short name for your op. This will be included in some error messages,
+and will also be returned as C<< $op->name >> by the L<B|B> module, so
+it will appear in the output of module like L<B::Concise|B::Concise>.
+
+=item xop_desc
+
+A short description of the function of the op.
+
+=item xop_class
+
+Which of the various C<*OP> structures this op uses. This should be one of
+the C<OA_*> constants from F<op.h>, namely
+
+=over 4
+
+=item OA_BASEOP
+
+=item OA_UNOP
+
+=item OA_BINOP
+
+=item OA_LOGOP
+
+=item OA_LISTOP
+
+=item OA_PMOP
+
+=item OA_SVOP
+
+=item OA_PADOP
+
+=item OA_PVOP_OR_SVOP
+
+This should be interpreted as 'C<PVOP>' only. The C<_OR_SVOP> is because
+the only core C<PVOP>, C<OP_TRANS>, can sometimes be a C<SVOP> instead.
+
+=item OA_LOOP
+
+=item OA_COP
+
+=back
+
+The other C<OA_*> constants should not be used.
+
+=item xop_peep
+
+This member is of type C<Perl_cpeep_t>, which expands to C<void
+(*Perl_cpeep_t)(aTHX_ OP *o, OP *oldop)>. If it is set, this function
+will be called from C<Perl_rpeep> when ops of this type are encountered
+by the peephole optimizer. I<o> is the OP that needs optimizing;
+I<oldop> is the previous OP optimized, whose C<op_next> points to I<o>.
+
+=back
 
 C<B::Generate> directly supports the creation of custom ops by name.
 

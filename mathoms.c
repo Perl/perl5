@@ -1555,6 +1555,20 @@ Perl_sv_2bool(pTHX_ register SV *const sv)
 }
 
 
+/*
+=for apidoc custom_op_name
+Return the name for a given custom op. This was once used by the OP_NAME
+macro, but is no longer: it has only been kept for compatibility, and
+should not be used.
+
+=for apidoc custom_op_desc
+Return the description of a given custom op. This was once used by the
+OP_DESC macro, but is no longer: it has only been kept for
+compatibility, and should not be used.
+
+=cut
+*/
+
 const char*
 Perl_custom_op_name(pTHX_ const OP* o)
 {
