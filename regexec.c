@@ -6363,67 +6363,73 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 				match = TRUE;
 			    }
                             if (! match) {
-			    SV** listp;
+				SV** listp;
 
-                            /* Consider "k" =~ /[K]/i.  The line above would
-                             * have just folded the 'k' to itself, and that
-                             * isn't going to match 'K'.  So we look through
-                             * the closure of everything that folds to 'k'.
-                             * That will find the 'K'.  Initialize the list, if
-                             * necessary */
-			    if (! PL_utf8_foldclosures) {
+				/* Consider "k" =~ /[K]/i.  The line above
+				 * would have just folded the 'k' to itself,
+				 * and that isn't going to match 'K'.  So we
+				 * look through the closure of everything that
+				 * folds to 'k'.  That will find the 'K'.
+				 * Initialize the list, if necessary */
+				if (! PL_utf8_foldclosures) {
 
-                                /* If the folds haven't been read in, call a
-                                 * fold function to force that */
-				if (! PL_utf8_tofold) {
-				    U8 dummy[UTF8_MAXBYTES+1];
-				    STRLEN dummy_len;
-				    to_utf8_fold((U8*) "A", dummy, &dummy_len);
-				}
-				PL_utf8_foldclosures =
-					_swash_inversion_hash(PL_utf8_tofold);
-			    }
-
-                            /* The data structure is a hash with the keys every
-                             * character that is folded to, like 'k', and the
-                             * values each an array of everything that folds to
-                             * its key.  e.g. [ 'k', 'K', KELVIN_SIGN ] */
-			    if ((listp = hv_fetch(PL_utf8_foldclosures,
-					    (char *) folded, foldlen, FALSE)))
-			    {
-				AV* list = (AV*) *listp;
-				IV i;
-				for (i = 0; i <= av_len(list); i++) {
-				    SV** try_p = av_fetch(list, i, FALSE);
-                                    char* try;
-				    if (try_p == NULL) {
-					Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
+				    /* If the folds haven't been read in, call a
+				    * fold function to force that */
+				    if (! PL_utf8_tofold) {
+					U8 dummy[UTF8_MAXBYTES+1];
+					STRLEN dummy_len;
+					to_utf8_fold((U8*) "A",
+							    dummy, &dummy_len);
 				    }
-				    /* Don't have to worry about embeded nulls
-				     * since NULL isn't folded or foldable */
-                                    try = SvPVX(*try_p);
-                                    if (UTF8_IS_INVARIANT(*try)
-                                        && ANYOF_BITMAP_TEST(n,
-							   UNI_TO_NATIVE(*try)))
-                                    {
-                                        match = TRUE;
-                                        break;
-                                    }
-                                    else if (UTF8_IS_DOWNGRADEABLE_START(*try)
-                                                && ANYOF_BITMAP_TEST(n,
-                                                   UNI_TO_NATIVE(
-                                                   TWO_BYTE_UTF8_TO_UNI(try[0],
-                                                                       try[1]))))
-                                    {
-                                        match = TRUE;
-                                        break;
-                                    } else if (swash_fetch(sw, (U8*) try, 1)) {
-					match = TRUE;
-					break;
+				    PL_utf8_foldclosures =
+					  _swash_inversion_hash(PL_utf8_tofold);
+				}
+
+				/* The data structure is a hash with the keys
+				 * every character that is folded to, like 'k',
+				 * and the values each an array of everything
+				 * that folds to its key.  e.g. [ 'k', 'K',
+				 * KELVIN_SIGN ] */
+				if ((listp = hv_fetch(PL_utf8_foldclosures,
+					      (char *) folded, foldlen, FALSE)))
+				{
+				    AV* list = (AV*) *listp;
+				    IV i;
+				    for (i = 0; i <= av_len(list); i++) {
+					SV** try_p = av_fetch(list, i, FALSE);
+					char* try;
+					if (try_p == NULL) {
+					    Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
+					}
+					/* Don't have to worry about embeded
+					 * nulls since NULL isn't folded or
+					 * foldable */
+					try = SvPVX(*try_p);
+					if (UTF8_IS_INVARIANT(*try)
+					    && ANYOF_BITMAP_TEST(n,
+							    UNI_TO_NATIVE(*try)))
+					{
+					    match = TRUE;
+					    break;
+					}
+					else if
+					    (UTF8_IS_DOWNGRADEABLE_START(*try)
+					     && ANYOF_BITMAP_TEST(n,
+					     UNI_TO_NATIVE(
+						TWO_BYTE_UTF8_TO_UNI(try[0],
+								     try[1]))))
+					{
+					    match = TRUE;
+					    break;
+					} else if (swash_fetch(sw,
+								(U8*) try, 1))
+					{
+					    match = TRUE;
+					    break;
+					}
 				    }
 				}
 			    }
-			}
                         }
 		    }
 		}
