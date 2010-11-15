@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 4df35a07ff9, except for:
+This has been completed up to 578895fb, except for:
 04777d295957ad270188e4debf51b523e07cc5b0
 c565ab54dc649bb62cd4d57149d7b2abb21df5f3
 1c8d11ca3d0ce8bc11562f159b94c2c7e62dea6c
@@ -935,8 +935,9 @@ L<[perl #75176]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75176>.
 
 =item *
 
-C<undef *Foo::> and C<undef *Foo::ISA> used not to update the internal isa
-caches if the stash or array (respectively) had a reference elsewhere. In
+C<undef *Foo::> and C<undef *Foo::ISA> and C<delete $package::{ISA}>
+used not to update the internal isa caches if the
+stash or C<@ISA> array had a reference elsewhere. In
 fact, C<undef *Foo::ISA> would stop a new C<@Foo::ISA> array from updating
 caches
 L<[perl #79024]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=79024>.
