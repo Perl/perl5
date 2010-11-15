@@ -2,6 +2,7 @@
 use 5.012;
 use strict;
 use warnings;
+use Config;
 
 # This program outputs the 256 lines that form the guts of the PL_charclass
 # table.  The output should be used to manually replace the table contents in
@@ -54,7 +55,49 @@ my @properties = qw(
     XDIGIT_A
 );
 
+# Read in the case fold mappings.
+my %folded_closure;
+my $file="$Config{privlib}/unicore/CaseFolding.txt";
+open my $fh, "<", $file or die "Failed to read '$file': $!";
+while (<$fh>) {
+    chomp;
+
+    # Lines look like (without the initial '#'
+    #0130; F; 0069 0307; # LATIN CAPITAL LETTER I WITH DOT ABOVE
+    my ($line, $comment) = split / \s+ \# \s+ /x, $_;
+    next if $line eq "" || substr($line, 0, 1) eq '#';
+    my ($hex_from, $fold_type, @folded) = split /[\s;]+/, $line;
+
+    my $from = hex $hex_from;
+
+    # Perl only deals with C and F folds
+    next if $fold_type ne 'C' and $fold_type ne 'F';
+    next if $fold_type ne 'C';  # And for now, just single-char folds. XXX
+
+    # Get each code point in the range that participates in this line's fold.
+    # The hash has keys of each code point in the range, and values of what it
+    # folds to and what folds to it
+    foreach my $hex_fold (@folded) {
+        my $fold = hex $hex_fold;
+        push @{$folded_closure{$fold}}, $from if $fold < 256;
+        push @{$folded_closure{$from}}, $fold if $from < 256;
+    }
+}
+
+# Now having read all the lines, combine them into the full closure of each
+# code point in the range by adding lists together that share a common element
+foreach my $folded (keys %folded_closure) {
+    foreach my $from (grep { $_ < 256 } @{$folded_closure{$folded}}) {
+        push @{$folded_closure{$from}}, @{$folded_closure{$folded}};
+    }
+}
+
 my @bits;   # Bit map for each code point
+
+foreach my $folded (keys %folded_closure) {
+    $bits[$folded] = "_CC_NONLATIN1_FOLD" if grep { $_ > 255 }
+                                                @{$folded_closure{$folded}};
+}
 
 for my $ord (0..255) {
     my $char = chr($ord);
