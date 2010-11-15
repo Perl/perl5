@@ -23,6 +23,7 @@ utils/pl2pm
 utils/prove
 utils/ptar
 utils/ptardiff
+utils/ptargrep
 utils/cpanp-run-perl
 utils/cpanp
 utils/cpan2dist

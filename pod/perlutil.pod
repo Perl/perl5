@@ -253,6 +253,11 @@ archive and an unextracted one. (Note that this utility requires the
 C<Text::Diff> module to function properly; this module isn't distributed
 with perl, but is available from the CPAN.)
 
+=item L<ptargrep>
+
+F<ptargrep> is a utility to apply pattern matching to the contents of files 
+in a tar archive.
+
 =item L<shasum>
 
 This utility, that comes with the C<Digest::SHA> module, is used to print

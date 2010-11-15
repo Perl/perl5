@@ -2118,6 +2118,7 @@ make install will install the following:
 	psed		A Perl implementation of sed
 	ptar		A Perl implementation of tar
 	ptardiff	A diff for tar archives
+	ptargrep	A grep for tar archives
 	s2p		sed-to-perl translator
 	shasum		A tool to print or check SHA checksums
 	splain		Describe Perl warnings and errors

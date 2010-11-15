@@ -277,6 +277,13 @@ executable.
 
 =item *
 
+C<Archive::Tar> has been upgraded from 1.68 to 1.70
+
+This adds the ptargrep utility for using regular expressions against 
+the contents of files in a tar archive.
+
+=item *
+
 C<B> has been upgraded from 1.24 to 1.26.
 
 It no longer crashes when taking apart a C<y///> containing characters
@@ -594,13 +601,14 @@ here. Most of these are built within the directories F<utils> and F<x2p>.
 entries for each change
 Use L<XXX> with program names to get proper documentation linking. ]
 
-=head3 L<XXX>
+=head3 L<ptargrep>
 
 =over 4
 
 =item *
 
-XXX
+L<ptargrep> is a utility to apply pattern matching to the contents of files 
+in a tar archive. It comes with C<Archive::Tar>.
 
 =back
 

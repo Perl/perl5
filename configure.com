@@ -7280,6 +7280,7 @@ $ WRITE CONFIG "$ pstruct    == """ + perl_setup_perl + " ''vms_prefix':[utils]p
 $ WRITE CONFIG "$ s2p        == """ + perl_setup_perl + " ''vms_prefix':[utils]s2p.com"""
 $ WRITE CONFIG "$ ptar       == """ + perl_setup_perl + " ''vms_prefix':[utils]ptar.com"""
 $ WRITE CONFIG "$ ptardiff   == """ + perl_setup_perl + " ''vms_prefix':[utils]ptardiff.com"""
+$ WRITE CONFIG "$ ptargrep   == """ + perl_setup_perl + " ''vms_prefix':[utils]ptargrep.com"""
 $ WRITE CONFIG "$ shasum     == """ + perl_setup_perl + " ''vms_prefix':[utils]shasum.com"""
 $ WRITE CONFIG "$ splain     == """ + perl_setup_perl + " ''vms_prefix':[utils]splain.com"""
 $ WRITE CONFIG "$ xsubpp     == """ + perl_setup_perl + " ''vms_prefix':[utils]xsubpp.com"""
