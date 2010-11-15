@@ -81,7 +81,7 @@ START_EXTERN_C
 #ifdef DOINIT
 /* Indexed by encoded byte this table gives the length of the sequence.
    Adapted from the shadow flags table in tr16.
-   The entries marked 9 in tr6 are continuation bytes and are marked
+   The entries marked 9 in tr16 are continuation bytes and are marked
    as length 1 here so that we can recover.
 */
 #if '^' == 95   /* if defined(__MVS__) || defined(??) (VM/ESA?) 1047 */
@@ -536,9 +536,9 @@ END_EXTERN_C
 /* Native to iso-8859-1 */
 #define NATIVE_TO_ASCII(ch)      PL_e2a[(U8)(ch)]
 #define ASCII_TO_NATIVE(ch)      PL_a2e[(U8)(ch)]
-/* Transform after encoding */
-#define NATIVE_TO_UTF(ch)        PL_e2utf[(U8)(ch)]
-#define UTF_TO_NATIVE(ch)        PL_utf2e[(U8)(ch)]
+/* Transform after encoding, essentially converts to/from I8 */
+#define NATIVE_TO_UTF(ch)        PL_e2utf[(U8)(ch)]	/* to I8 */
+#define UTF_TO_NATIVE(ch)        PL_utf2e[(U8)(ch)]	/* from I8 */
 /* Transform in wide UV char space */
 #define NATIVE_TO_UNI(ch)        (((ch) > 255) ? (ch) : NATIVE_TO_ASCII(ch))
 #define UNI_TO_NATIVE(ch)        (((ch) > 255) ? (ch) : ASCII_TO_NATIVE(ch))
