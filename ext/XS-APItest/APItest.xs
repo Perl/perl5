@@ -25,6 +25,7 @@ typedef struct {
     int peep_recording;
     AV *peep_recorder;
     AV *rpeep_recorder;
+    AV *xop_record;
 } my_cxt_t;
 
 START_MY_CXT
@@ -901,6 +902,22 @@ static int my_keyword_plugin(pTHX_
     }
 }
 
+static XOP my_xop;
+
+static OP *
+pp_xop(pTHX)
+{
+    return PL_op->op_next;
+}
+
+static void
+peep_xop(pTHX_ OP *o, OP *oldop)
+{
+    dMY_CXT;
+    av_push(MY_CXT.xop_record, newSVpvf("peep:%x", o));
+    av_push(MY_CXT.xop_record, newSVpvf("oldop:%x", oldop));
+}
+
 XS(XS_XS__APItest__XSUB_XS_VERSION_undef);
 XS(XS_XS__APItest__XSUB_XS_VERSION_empty);
 XS(XS_XS__APItest__XSUB_XS_APIVERSION_invalid);
@@ -1357,6 +1374,104 @@ XS::APItest::PtrTable table
 MODULE = XS::APItest		PACKAGE = XS::APItest
 
 PROTOTYPES: DISABLE
+
+HV *
+xop_custom_ops ()
+    CODE:
+        RETVAL = PL_custom_ops;
+    OUTPUT:
+        RETVAL
+
+HV *
+xop_custom_op_names ()
+    CODE:
+        PL_custom_op_names = newHV();
+        RETVAL = PL_custom_op_names;
+    OUTPUT:
+        RETVAL
+
+HV *
+xop_custom_op_descs ()
+    CODE:
+        PL_custom_op_descs = newHV();
+        RETVAL = PL_custom_op_descs;
+    OUTPUT:
+        RETVAL
+
+void
+xop_register ()
+    CODE:
+        XopENTRY_set(&my_xop, xop_name, "my_xop");
+        XopENTRY_set(&my_xop, xop_desc, "XOP for testing");
+        XopENTRY_set(&my_xop, xop_class, OA_UNOP);
+        XopENTRY_set(&my_xop, xop_peep, peep_xop);
+        Perl_custom_op_register(aTHX_ pp_xop, &my_xop);
+
+void
+xop_clear ()
+    CODE:
+        XopDISABLE(&my_xop, xop_name);
+        XopDISABLE(&my_xop, xop_desc);
+        XopDISABLE(&my_xop, xop_class);
+        XopDISABLE(&my_xop, xop_peep);
+
+IV
+xop_my_xop ()
+    CODE:
+        RETVAL = PTR2IV(&my_xop);
+    OUTPUT:
+        RETVAL
+
+IV
+xop_ppaddr ()
+    CODE:
+        RETVAL = PTR2IV(pp_xop);
+    OUTPUT:
+        RETVAL
+
+IV
+xop_OA_UNOP ()
+    CODE:
+        RETVAL = OA_UNOP;
+    OUTPUT:
+        RETVAL
+
+AV *
+xop_build_optree ()
+    CODE:
+        dMY_CXT;
+        UNOP *unop;
+        OP *kid;
+
+        MY_CXT.xop_record = newAV();
+
+        kid = newSVOP(OP_CONST, 0, newSViv(42));
+        
+        NewOp(1102, unop, 1, UNOP);
+        unop->op_type       = OP_CUSTOM;
+        unop->op_ppaddr     = pp_xop;
+        unop->op_flags      = OPf_KIDS;
+        unop->op_private    = 0;
+        unop->op_first      = kid;
+        unop->op_next       = NULL;
+        kid->op_next        = (OP*)unop;
+
+        av_push(MY_CXT.xop_record, newSVpvf("unop:%x", unop));
+        av_push(MY_CXT.xop_record, newSVpvf("kid:%x", kid));
+
+        av_push(MY_CXT.xop_record, newSVpvf("NAME:%s", OP_NAME((OP*)unop)));
+        av_push(MY_CXT.xop_record, newSVpvf("DESC:%s", OP_DESC((OP*)unop)));
+        av_push(MY_CXT.xop_record, newSVpvf("CLASS:%d", OP_CLASS((OP*)unop)));
+
+        PL_rpeepp(aTHX_ kid);
+
+        FreeOp(kid);
+        FreeOp(unop);
+
+        RETVAL = MY_CXT.xop_record;
+        MY_CXT.xop_record = NULL;
+    OUTPUT:
+        RETVAL
 
 BOOT:
 {
