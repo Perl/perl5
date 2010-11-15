@@ -836,8 +836,7 @@ Perl_bytes_cmp_utf8(pTHX_ const U8 *b, STRLEN blen, const U8 *u, STRLEN ulen)
 		if (u < uend) {
 		    U8 c1 = *u++;
 		    if (UTF8_IS_CONTINUATION(c1)) {
-			c = UTF8_ACCUMULATE(NATIVE_TO_UTF(c), c1);
-			c = ASCII_TO_NATIVE(c);
+			c = UNI_TO_NATIVE(TWO_BYTE_UTF8_TO_UNI(c, c1));
 		    } else {
 			Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8),
 					 "Malformed UTF-8 character "
@@ -966,8 +965,7 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *len, bool *is_utf8)
 	U8 c = *s++;
 	if (!UTF8_IS_INVARIANT(c)) {
 	    /* Then it is two-byte encoded */
-	    c = UTF8_ACCUMULATE(NATIVE_TO_UTF(c), *s++);
-	    c = ASCII_TO_NATIVE(c);
+	    c = UNI_TO_NATIVE(TWO_BYTE_UTF8_TO_UNI(c, *s++));
 	}
 	*d++ = c;
     }
