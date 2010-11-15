@@ -324,7 +324,9 @@ from either 5.XXX.XXX or 5.XXX.XXX.
 
 =item *
 
-XXX
+A number of bugs with regular expression bracketed character classes
+have been fixed, mostly having to do with matching characters in the
+non-ASCII Latin-1 range.
 
 =back
 
