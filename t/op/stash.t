@@ -120,9 +120,7 @@ SKIP: {
     ok($gv->isa(q/B::GV/), "cleared stash leaves anon CV with valid GV");
 
     my $st = eval { $gv->STASH->NAME };
-    { local $TODO = 'STASHES not anonymized';
-	is($st, q/__ANON__/, "...and an __ANON__ stash");
-    }
+    is($st, q/four/, "...but leaves the stash intact");
 
     my $sub = do {
 	package five;
