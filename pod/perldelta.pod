@@ -224,7 +224,10 @@ may well be none in a stable release.
 
 =item *
 
-XXX
+When an object has many weak references to it, freeing that object
+can under some some circumstances take O(N^2) time to free (where N is the
+number of references). The number of circumstances has been reduced.
+L<[perl #75254]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75254>.
 
 =back
 
@@ -954,6 +957,12 @@ L<[perl #74022]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=74022>.
 
 C<formline> no longer crashes when passed a tainted format picture
 L<[perl #79138]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=79138>.
+
+=item *
+
+A signal handler called within a signal handler could cause leaks or
+double-frees. Now fixed.
+L<[perl #76248]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=76248>.
 
 =back
 
