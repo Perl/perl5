@@ -1399,7 +1399,8 @@ foreach my $ord (78, 163, 256) {
 {
     fresh_perl_is(<<'end', "ok", { switches => [ '-T' ] },
     $TAINT = substr($^X, 0, 0);
-    formline('@'.('<'x("21".$TAINT)).' | @*', 'hallo', 'welt'); print "ok";
+    formline('@'.('<'x("2000".$TAINT)).' | @*', 'hallo', 'welt');
+    print "ok";
 end
     "formline survives a tainted dynamic picture");
 }
