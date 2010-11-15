@@ -8321,6 +8321,9 @@ parseit:
 			(value=='p' ? '+' : '!'), (int)n, RExC_parse);
 		}
 		RExC_parse = e + 1;
+
+		/* The \p could match something in the Latin1 range, hence
+		 * something that isn't utf8 */
 		ANYOF_FLAGS(ret) |= ANYOF_NONBITMAP;
 		namedclass = ANYOF_MAX;  /* no official name, but it's named */
 		}
