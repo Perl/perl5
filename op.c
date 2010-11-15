@@ -10082,7 +10082,7 @@ Perl_custom_op_xop(pTHX_ const OP *o)
 	STRLEN l;
 
 	/* XXX does all this need to be shared mem? */
-	Newx(xop, 1, XOP);
+	Newxz(xop, 1, XOP);
 	pv = SvPV(HeVAL(he), l);
 	XopENTRY_set(xop, xop_name, savepvn(pv, l));
 	if (PL_custom_op_descs &&
