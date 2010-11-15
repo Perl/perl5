@@ -258,7 +258,7 @@ foreach my $test (sort { numerically } keys %tests) {
           my @rhs = @x_pattern;
           #print "$lhs: ", "/@rhs/\n";
 
-          foreach my $bracketed (0, 1) {   # Put rhs in [...], or not
+          foreach my $bracketed (1) {   # Put rhs in [...], or not
             foreach my $inverted (0,1) {
                 next if $inverted && ! $bracketed;
 
