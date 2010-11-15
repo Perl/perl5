@@ -27,7 +27,7 @@ while (<$fh>) {
     my $chr="\\x{$cp}";
     my @str;
     foreach my $swap (0, 1) {   # swap lhs and rhs, or not.
-        foreach my $charclass (0, 1) {   # Put rhs in [...], or not
+        foreach my $charclass (0) {   # Put rhs in [...], or not
             my $lhs;
             my $rhs;
             if ($swap) {
