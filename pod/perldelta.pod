@@ -851,9 +851,9 @@ L<[perl #78674]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78674>.
 
 =item *
 
-Typeglob assignments would crash if the glob's stash no longer existed, if
-the glob assigned to was named 'ISA' or the glob on either side of the
-assignment contained a subroutine.
+Typeglob assignments would crash if the glob's stash no longer existed, so
+long as the glob assigned to was named 'ISA' or the glob on either side of
+the assignment contained a subroutine.
 
 =item *
 
