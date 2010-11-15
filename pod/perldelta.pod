@@ -376,7 +376,7 @@ C<Locale::Maketext> has been upgraded from 1.16 to 1.17.
 
 =item *
 
-C<Math::BigInt> has been upgraded from 1.97 to 1.98.
+C<Math::BigInt> has been upgraded from 1.97 to 1.99.
 
 XXX Should the changes be listed here?
 
