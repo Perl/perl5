@@ -588,6 +588,18 @@ PERL_CALLCONV const char *	Perl_custom_op_name(pTHX_ const OP *o)
 #define PERL_ARGS_ASSERT_CUSTOM_OP_NAME	\
 	assert(o)
 
+PERL_CALLCONV void	Perl_custom_op_register(pTHX_ Perl_ppaddr_t ppaddr, const XOP *xop)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_CUSTOM_OP_REGISTER	\
+	assert(ppaddr); assert(xop)
+
+PERL_CALLCONV const XOP *	Perl_custom_op_xop(pTHX_ const OP *o)
+			__attribute__pure__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_CUSTOM_OP_XOP	\
+	assert(o)
+
 PERL_CALLCONV void	Perl_cv_ckproto_len(pTHX_ const CV* cv, const GV* gv, const char* p, const STRLEN len)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_CV_CKPROTO_LEN	\

@@ -760,6 +760,52 @@ preprocessing token; the type of I<arg> depends on I<which>.
 #define RV2CVOPCV_MARK_EARLY     0x00000001
 #define RV2CVOPCV_RETURN_NAME_GV 0x00000002
 
+struct custom_op {
+    U32		    xop_flags;    
+    const char	   *xop_name;
+    const char	   *xop_desc;
+    U32		    xop_class;
+    void	  (*xop_peep)(pTHX_ OP *o, OP *oldop);
+};
+
+#define XopFLAGS(xop) ((xop)->xop_flags)
+
+#define XOPf_xop_name	0x01
+#define XOPf_xop_desc	0x02
+#define XOPf_xop_class	0x04
+#define XOPf_xop_peep	0x08
+
+#define XOPd_xop_name	PL_op_name[OP_CUSTOM]
+#define XOPd_xop_desc	PL_op_desc[OP_CUSTOM]
+#define XOPd_xop_class	OA_BASEOP
+#define XOPd_xop_peep	((Perl_cpeep_t)0)
+
+#define XopENTRY_set(xop, which, to) \
+    STMT_START { \
+	(xop)->which = (to); \
+	(xop)->xop_flags |= XOPf_ ## which; \
+    } STMT_END
+
+#define XopENTRY(xop, which) \
+    ((XopFLAGS(xop) & XOPf_ ## which) ? (xop)->which : XOPd_ ## which)
+
+#define XopDISABLE(xop, which) ((xop)->xop_flags &= ~XOPf_ ## which)
+#define XopENABLE(xop, which) \
+    STMT_START { \
+	(xop)->xop_flags |= XOPf_ ## which; \
+	assert(XopENTRY(xop, which)); \
+    } STMT_END
+
+#define OP_NAME(o) ((o)->op_type == OP_CUSTOM \
+		    ? XopENTRY(Perl_custom_op_xop(aTHX_ o), xop_name) \
+		    : PL_op_name[(o)->op_type])
+#define OP_DESC(o) ((o)->op_type == OP_CUSTOM \
+		    ? XopENTRY(Perl_custom_op_xop(aTHX_ o), xop_desc) \
+		    : PL_op_desc[(o)->op_type])
+#define OP_CLASS(o) ((o)->op_type == OP_CUSTOM \
+		     ? XopENTRY(Perl_custom_op_xop(aTHX_ o), xop_class) \
+		     : (PL_opargs[(o)->op_type] & OA_CLASS_MASK))
+
 #ifdef PERL_MAD
 #  define MAD_NULL 1
 #  define MAD_PV 2

@@ -70,6 +70,8 @@ Perl_croak_sv
 Perl_croak_xs_usage
 Perl_custom_op_desc
 Perl_custom_op_name
+Perl_custom_op_register
+Perl_custom_op_xop
 Perl_cv_const_sv
 Perl_cv_get_call_checker
 Perl_cv_set_call_checker

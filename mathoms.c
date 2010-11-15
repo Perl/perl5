@@ -1554,6 +1554,20 @@ Perl_sv_2bool(pTHX_ register SV *const sv)
     return sv_2bool_flags(sv, SV_GMAGIC);
 }
 
+
+const char*
+Perl_custom_op_name(pTHX_ const OP* o)
+{
+    PERL_ARGS_ASSERT_CUSTOM_OP_NAME;
+    return XopENTRY(Perl_custom_op_xop(aTHX_ o), xop_name);
+}
+
+const char*
+Perl_custom_op_desc(pTHX_ const OP* o)
+{
+    PERL_ARGS_ASSERT_CUSTOM_OP_DESC;
+    return XopENTRY(Perl_custom_op_xop(aTHX_ o), xop_desc);
+}
 #endif /* NO_MATHOMS */
 
 /*

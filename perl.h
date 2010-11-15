@@ -2410,6 +2410,7 @@ typedef struct pvop PVOP;
 typedef struct loop LOOP;
 
 typedef struct block_hooks BHK;
+typedef struct custom_op XOP;
 
 typedef struct interpreter PerlInterpreter;
 
@@ -4909,6 +4910,7 @@ typedef OP* (*Perl_ppaddr_t)(pTHX);
 typedef OP* (*Perl_check_t) (pTHX_ OP*);
 typedef void(*Perl_ophook_t)(pTHX_ OP*);
 typedef int (*Perl_keyword_plugin_t)(pTHX_ char*, STRLEN, OP**);
+typedef void(*Perl_cpeep_t)(pTHX_ OP *, OP *);
 
 #define KEYWORD_PLUGIN_DECLINE 0
 #define KEYWORD_PLUGIN_STMT    1

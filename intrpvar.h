@@ -770,6 +770,8 @@ PERLVAR(Iblockhooks, AV *)
 /* Everything that folds to a character, for case insensitivity regex matching */
 PERLVARI(Iutf8_foldclosures,	HV *, NULL)
 
+PERLVAR(Icustom_ops, HV *)      /* custom op registrations */
+
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */
 

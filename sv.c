@@ -12901,6 +12901,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_modglobal	= hv_dup_inc(proto_perl->Imodglobal, param);
     PL_custom_op_names  = hv_dup_inc(proto_perl->Icustom_op_names,param);
     PL_custom_op_descs  = hv_dup_inc(proto_perl->Icustom_op_descs,param);
+    PL_custom_ops	= hv_dup_inc(proto_perl->Icustom_ops, param);
 
     PL_profiledata	= NULL;
 

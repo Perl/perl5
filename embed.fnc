@@ -1489,8 +1489,11 @@ Ap	|void	|sys_intern_clear
 Ap	|void	|sys_intern_init
 #endif
 
+AopP	|const XOP *	|custom_op_xop	|NN const OP *o
 ApR	|const char *	|custom_op_name	|NN const OP *o
 ApR	|const char *	|custom_op_desc	|NN const OP *o
+Aop	|void	|custom_op_register	|NN Perl_ppaddr_t ppaddr \
+			|NN const XOP *xop
 
 Adp	|void	|sv_nosharing	|NULLOK SV *sv
 Adpbm	|void	|sv_nolocking	|NULLOK SV *sv

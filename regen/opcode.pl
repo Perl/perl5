@@ -181,11 +181,6 @@ print $on "#define OP_phoney_OUTPUT_ONLY -2\n\n";
 print <<END;
 START_EXTERN_C
 
-#define OP_NAME(o) ((o)->op_type == OP_CUSTOM ? custom_op_name(o) : \\
-                    PL_op_name[(o)->op_type])
-#define OP_DESC(o) ((o)->op_type == OP_CUSTOM ? custom_op_desc(o) : \\
-                    PL_op_desc[(o)->op_type])
-
 #ifndef DOINIT
 EXTCONST char* const PL_op_name[];
 #else

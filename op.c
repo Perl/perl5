@@ -10020,6 +10020,15 @@ Perl_rpeep(pTHX_ register OP *o)
 		assert (!cPMOP->op_pmstashstartu.op_pmreplstart);
 	    }
 	    break;
+
+	case OP_CUSTOM: {
+	    Perl_cpeep_t cpeep = 
+		XopENTRY(Perl_custom_op_xop(aTHX_ o), xop_peep);
+	    if (cpeep)
+		cpeep(aTHX_ o, oldop);
+	    break;
+	}
+	    
 	}
 	oldop = o;
     }
@@ -10032,48 +10041,73 @@ Perl_peep(pTHX_ register OP *o)
     CALL_RPEEP(o);
 }
 
-const char*
-Perl_custom_op_name(pTHX_ const OP* o)
+const XOP *
+Perl_custom_op_xop(pTHX_ const OP *o)
 {
-    dVAR;
-    const IV index = PTR2IV(o->op_ppaddr);
-    SV* keysv;
-    HE* he;
+    SV *keysv;
+    HE *he = NULL;
+    XOP *xop;
 
-    PERL_ARGS_ASSERT_CUSTOM_OP_NAME;
+    static const XOP xop_null = { 0, 0, 0, 0, 0 };
 
-    if (!PL_custom_op_names) /* This probably shouldn't happen */
-        return (char *)PL_op_name[OP_CUSTOM];
+    PERL_ARGS_ASSERT_CUSTOM_OP_XOP;
+    assert(o->op_type == OP_CUSTOM);
 
-    keysv = sv_2mortal(newSViv(index));
+    /* This is wrong. It assumes a function pointer can be cast to IV,
+     * which isn't guaranteed, but this is what the old custom OP code
+     * did. In principle it should be safer to Copy the bytes of the
+     * pointer into a PV: since the new interface is hidden behind
+     * functions, this can be changed later if necessary.  */
+    /* Change custom_op_xop if this ever happens */
+    keysv = sv_2mortal(newSViv(PTR2IV(o->op_ppaddr)));
 
-    he = hv_fetch_ent(PL_custom_op_names, keysv, 0, 0);
-    if (!he)
-        return (char *)PL_op_name[OP_CUSTOM]; /* Don't know who you are */
+    if (PL_custom_ops)
+	he = hv_fetch_ent(PL_custom_ops, keysv, 0, 0);
 
-    return SvPV_nolen(HeVAL(he));
+    /* assume noone will have just registered a desc */
+    if (!he && PL_custom_op_names &&
+	(he = hv_fetch_ent(PL_custom_op_names, keysv, 0, 0))
+    ) {
+	const char *pv;
+	STRLEN l;
+
+	/* XXX does all this need to be shared mem? */
+	Newx(xop, 1, XOP);
+	pv = SvPV(HeVAL(he), l);
+	XopENTRY_set(xop, xop_name, savepvn(pv, l));
+	if (PL_custom_op_descs &&
+	    (he = hv_fetch_ent(PL_custom_op_descs, keysv, 0, 0))
+	) {
+	    pv = SvPV(HeVAL(he), l);
+	    XopENTRY_set(xop, xop_desc, savepvn(pv, l));
+	}
+	Perl_custom_op_register(aTHX_ o->op_ppaddr, xop);
+	return xop;
+    }
+
+    if (!he) return &xop_null;
+
+    xop = INT2PTR(XOP *, SvIV(HeVAL(he)));
+    return xop;
 }
 
-const char*
-Perl_custom_op_desc(pTHX_ const OP* o)
+
+
+void
+Perl_custom_op_register(pTHX_ Perl_ppaddr_t ppaddr, const XOP *xop)
 {
-    dVAR;
-    const IV index = PTR2IV(o->op_ppaddr);
-    SV* keysv;
-    HE* he;
+    SV *keysv;
 
-    PERL_ARGS_ASSERT_CUSTOM_OP_DESC;
+    PERL_ARGS_ASSERT_CUSTOM_OP_REGISTER;
 
-    if (!PL_custom_op_descs)
-        return (char *)PL_op_desc[OP_CUSTOM];
+    /* see the comment in custom_op_xop */
+    keysv = sv_2mortal(newSViv(PTR2IV(ppaddr)));
 
-    keysv = sv_2mortal(newSViv(index));
+    if (!PL_custom_ops)
+	PL_custom_ops = newHV();
 
-    he = hv_fetch_ent(PL_custom_op_descs, keysv, 0, 0);
-    if (!he)
-        return (char *)PL_op_desc[OP_CUSTOM];
-
-    return SvPV_nolen(HeVAL(he));
+    if (!hv_store_ent(PL_custom_ops, keysv, newSViv(PTR2IV(xop)), 0))
+	Perl_croak(aTHX_ "panic: can't register custom OP %s", xop->xop_name);
 }
 
 #include "XSUB.h"

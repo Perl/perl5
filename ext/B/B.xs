@@ -113,6 +113,8 @@ START_MY_CXT
 static opclass
 cc_opclass(pTHX_ const OP *o)
 {
+    bool custom = 0;
+
     if (!o)
 	return OPc_NULL;
 
@@ -139,7 +141,10 @@ cc_opclass(pTHX_ const OP *o)
 	return OPc_PADOP;
 #endif
 
-    switch (PL_opargs[o->op_type] & OA_CLASS_MASK) {
+    if (o->op_type == OP_CUSTOM)
+        custom = 1;
+
+    switch (OP_CLASS(o)) {
     case OA_BASEOP:
 	return OPc_BASEOP;
 
@@ -173,7 +178,9 @@ cc_opclass(pTHX_ const OP *o)
          * and the SV is a reference to a swash
          * (i.e., an RV pointing to an HV).
          */
-	return (o->op_private & (OPpTRANS_TO_UTF|OPpTRANS_FROM_UTF))
+	return (!custom &&
+		   (o->op_private & (OPpTRANS_TO_UTF|OPpTRANS_FROM_UTF))
+	       )
 #if  defined(USE_ITHREADS) \
   && (PERL_VERSION > 8 || (PERL_VERSION == 8 && PERL_SUBVERSION >= 9))
 		? OPc_PADOP : OPc_PVOP;
@@ -231,7 +238,7 @@ cc_opclass(pTHX_ const OP *o)
 	    return OPc_PVOP;
     }
     warn("can't determine class of operator %s, assuming BASEOP\n",
-	 PL_op_name[o->op_type]);
+	 OP_NAME(o));
     return OPc_BASEOP;
 }
 
@@ -962,7 +969,7 @@ name(o)
     ALIAS:
 	desc = 1
     CODE:
-	RETVAL = (char *)(ix ? PL_op_desc : PL_op_name)[o->op_type];
+	RETVAL = (char *)(ix ? OP_DESC(o) : OP_NAME(o));
     OUTPUT:
 	RETVAL
 
