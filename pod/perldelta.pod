@@ -276,7 +276,7 @@ executable.
 
 =item *
 
-C<B> has been upgraded from 1.24 to 1.25.
+C<B> has been upgraded from 1.24 to 1.26.
 
 It no longer crashes when taking apart a C<y///> containing characters
 outside the octet range or compiled in a C<use utf8> scope.
