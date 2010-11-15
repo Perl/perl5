@@ -539,24 +539,28 @@ PerlIO_allocate(pTHX)
     /*
      * Find a free slot in the table, allocating new table as necessary
      */
-    PerlIO **last;
-    PerlIO *f;
+    PerlIOl **last;
+    PerlIOl *f;
     last = &PL_perlio;
     while ((f = *last)) {
 	int i;
-	last = (PerlIO **) (f);
+	last = (PerlIOl **) (f);
 	for (i = 1; i < PERLIO_TABLE_SIZE; i++) {
-	    if (!*++f) {
-		return f;
+	    if (!((++f)->next)) {
+		f->flags = 0;
+		f->tab = NULL;
+		return (PerlIO *)f;
 	    }
 	}
     }
-    Newxz(f,PERLIO_TABLE_SIZE,PerlIO);
+    Newxz(f,PERLIO_TABLE_SIZE,PerlIOl);
     if (!f) {
 	return NULL;
     }
-    *last = f;
-    return f + 1;
+    *last = (PerlIOl*) f++;
+    f->flags = 0;
+    f->tab = NULL;
+    return (PerlIO*) f;
 }
 
 #undef PerlIO_fdupopen
@@ -579,16 +583,16 @@ PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
 }
 
 void
-PerlIO_cleantable(pTHX_ PerlIO **tablep)
+PerlIO_cleantable(pTHX_ PerlIOl **tablep)
 {
-    PerlIO * const table = *tablep;
+    PerlIOl * const table = *tablep;
     if (table) {
 	int i;
-	PerlIO_cleantable(aTHX_(PerlIO **) & (table[0]));
+	PerlIO_cleantable(aTHX_(PerlIOl **) & (table[0]));
 	for (i = PERLIO_TABLE_SIZE - 1; i > 0; i--) {
-	    PerlIO * const f = table + i;
-	    if (*f) {
-		PerlIO_close(f);
+	    PerlIOl * const f = table + i;
+	    if (f->next) {
+		PerlIO_close(&(f->next));
 	    }
 	}
 	Safefree(table);
@@ -669,8 +673,8 @@ void
 PerlIO_clone(pTHX_ PerlInterpreter *proto, CLONE_PARAMS *param)
 {
 #ifdef USE_ITHREADS
-    PerlIO **table = &proto->Iperlio;
-    PerlIO *f;
+    PerlIOl **table = &proto->Iperlio;
+    PerlIOl *f;
     PL_perlio = NULL;
     PL_known_layers = PerlIO_clone_list(aTHX_ proto->Iknown_layers, param);
     PL_def_layerlist = PerlIO_clone_list(aTHX_ proto->Idef_layerlist, param);
@@ -678,10 +682,10 @@ PerlIO_clone(pTHX_ PerlInterpreter *proto, CLONE_PARAMS *param)
     PerlIO_debug("Clone %p from %p\n",(void*)aTHX,(void*)proto);
     while ((f = *table)) {
 	    int i;
-	    table = (PerlIO **) (f++);
+	    table = (PerlIOl **) (f++);
 	    for (i = 1; i < PERLIO_TABLE_SIZE; i++) {
-		if (*f) {
-		    (void) fp_dup(f, 0, param);
+		if (f->next) {
+		    (void) fp_dup(&(f->next), 0, param);
 		}
 		f++;
 	    }
@@ -697,16 +701,16 @@ void
 PerlIO_destruct(pTHX)
 {
     dVAR;
-    PerlIO **table = &PL_perlio;
-    PerlIO *f;
+    PerlIOl **table = &PL_perlio;
+    PerlIOl *f;
 #ifdef USE_ITHREADS
     PerlIO_debug("Destruct %p\n",(void*)aTHX);
 #endif
     while ((f = *table)) {
 	int i;
-	table = (PerlIO **) (f++);
+	table = (PerlIOl **) (f++);
 	for (i = 1; i < PERLIO_TABLE_SIZE; i++) {
-	    PerlIO *x = f;
+	    PerlIO *x = &(f->next);
 	    const PerlIOl *l;
 	    while ((l = *x)) {
 		if (l->tab->kind & PERLIO_K_DESTRUCT) {
@@ -1689,15 +1693,16 @@ Perl_PerlIO_flush(pTHX_ PerlIO *f)
 	 * things on fflush(NULL), but should we be bound by their design
 	 * decisions? --jhi
 	 */
-	PerlIO **table = &PL_perlio;
+	PerlIOl **table = &PL_perlio;
+	PerlIOl *ff;
 	int code = 0;
-	while ((f = *table)) {
+	while ((ff = *table)) {
 	    int i;
-	    table = (PerlIO **) (f++);
+	    table = (PerlIOl **) (ff++);
 	    for (i = 1; i < PERLIO_TABLE_SIZE; i++) {
-		if (*f && PerlIO_flush(f) != 0)
+		if (ff->next && PerlIO_flush(&(ff->next)) != 0)
 		    code = -1;
-		f++;
+		ff++;
 	    }
 	}
 	return code;
@@ -1708,17 +1713,17 @@ void
 PerlIOBase_flush_linebuf(pTHX)
 {
     dVAR;
-    PerlIO **table = &PL_perlio;
-    PerlIO *f;
+    PerlIOl **table = &PL_perlio;
+    PerlIOl *f;
     while ((f = *table)) {
 	int i;
-	table = (PerlIO **) (f++);
+	table = (PerlIOl **) (f++);
 	for (i = 1; i < PERLIO_TABLE_SIZE; i++) {
-	    if (*f
-		&& (PerlIOBase(f)->
+	    if (f->next
+		&& (PerlIOBase(&(f->next))->
 		    flags & (PERLIO_F_LINEBUF | PERLIO_F_CANWRITE))
 		== (PERLIO_F_LINEBUF | PERLIO_F_CANWRITE))
-		PerlIO_flush(f);
+		PerlIO_flush(&(f->next));
 	    f++;
 	}
     }
@@ -4988,7 +4993,7 @@ Perl_PerlIO_stdin(pTHX)
     if (!PL_perlio) {
 	PerlIO_stdstreams(aTHX);
     }
-    return &PL_perlio[1];
+    return (PerlIO*)&PL_perlio[1];
 }
 
 PerlIO *
@@ -4998,7 +5003,7 @@ Perl_PerlIO_stdout(pTHX)
     if (!PL_perlio) {
 	PerlIO_stdstreams(aTHX);
     }
-    return &PL_perlio[2];
+    return (PerlIO*)&PL_perlio[2];
 }
 
 PerlIO *
@@ -5008,7 +5013,7 @@ Perl_PerlIO_stderr(pTHX)
     if (!PL_perlio) {
 	PerlIO_stdstreams(aTHX);
     }
-    return &PL_perlio[3];
+    return (PerlIO*)&PL_perlio[3];
 }
 
 /*--------------------------------------------------------------------------------------*/

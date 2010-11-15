@@ -150,7 +150,7 @@ PERL_EXPORT_C PerlIO_funcs *PerlIO_layer_fetch(pTHX_ PerlIO_list_t *av, IV n, Pe
 
 
 PERL_EXPORT_C SV *PerlIO_sv_dup(pTHX_ SV *arg, CLONE_PARAMS *param);
-PERL_EXPORT_C void PerlIO_cleantable(pTHX_ PerlIO **tablep);
+PERL_EXPORT_C void PerlIO_cleantable(pTHX_ PerlIOl **tablep);
 PERL_EXPORT_C SV * PerlIO_tab_sv(pTHX_ PerlIO_funcs *tab);
 PERL_EXPORT_C void PerlIO_default_buffer(pTHX_ PerlIO_list_t *av);
 PERL_EXPORT_C void PerlIO_stdstreams(pTHX);
