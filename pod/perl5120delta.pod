@@ -497,7 +497,8 @@ longer be used as an attribute.
 =item *
 
 Perl's command-line switch "-P", which was deprecated in version 5.10.0, has
-now been removed.
+now been removed. The CPAN module C<< Filter::cpp >> can be used as an 
+alternative.
 
 =back
 
