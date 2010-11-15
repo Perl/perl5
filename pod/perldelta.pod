@@ -5,8 +5,6 @@ This has been completed up to 518a985, except for:
 04777d295957ad270188e4debf51b523e07cc5b0
 c565ab54dc649bb62cd4d57149d7b2abb21df5f3
 1c8d11ca3d0ce8bc11562f159b94c2c7e62dea6c
-51698cb360d5bba06e12496ef9c7bf82e3352b71
-0c4d3b5ea916cf640ea163c5a6bcffefade55a1b
 1830b3d9c87f8b1473b0a80759846f7a5dccae5a
 I may have missed a few module version bumps.
 
@@ -955,7 +953,8 @@ L<[perl #74022]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=74022>.
 
 =item *
 
-C<formline> no longer crashes when passed a tainted format picture
+C<formline> no longer crashes when passed a tainted format picture. It also
+taints C<$^A> now if its arguments are tainted
 L<[perl #79138]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=79138>.
 
 =item *
