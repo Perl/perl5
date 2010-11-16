@@ -203,6 +203,15 @@ and maybe others, too, have been fixed.
 See L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=77810> for even
 more detail.
 
+=head2 Clearing stashes
+
+Stash list assignment C<%foo:: = ()> used to make the stash anonymous
+temporarily while it was being emptied. Consequently, any of its
+subroutines referenced elsewhere would become anonymous (showing up as
+"(unknown)" in C<caller>). Now they retain their package names, such that
+C<caller> will return the original sub name if there is still a reference
+to its typeglob, or "foo::__ANON__" otherwise.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
