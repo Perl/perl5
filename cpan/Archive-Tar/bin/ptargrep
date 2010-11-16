@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 ##############################################################################
 # Tool for using regular expressions against the contents of files in a tar
-# archive.  See 'targrep --help' for more documentation.
+# archive.  See 'ptargrep --help' for more documentation.
 #
 
 use strict;
@@ -118,11 +118,11 @@ __END__
 
 =head1 NAME
 
-targrep - Apply pattern matching to the contents of files in a tar archive
+ptargrep - Apply pattern matching to the contents of files in a tar archive
 
 =head1 SYNOPSIS
 
-  targrep [options] <pattern> <tar file> ...
+  ptargrep [options] <pattern> <tar file> ...
 
   Options:
 
