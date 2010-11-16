@@ -13695,7 +13695,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 
     case OP_GVSV:
 	gv = cGVOPx_gv(obase);
-	if (!gv || (match && GvSV(gv) != uninit_sv))
+	if (!gv || (match && GvSV(gv) != uninit_sv) || !GvSTASH(gv))
 	    break;
 	return varname(gv, '$', 0, NULL, 0, FUV_SUBSCRIPT_NONE);
 

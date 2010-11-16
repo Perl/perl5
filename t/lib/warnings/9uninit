@@ -1938,3 +1938,10 @@ my $v;
 __END__
 EXPECT
 Use of uninitialized value in addition (+) at - line 3.
+########
+use warnings 'uninitialized';
+delete $::{'Foo::'};
+my $moo = $Foo::BAR + 42;
+__END__
+EXPECT
+Use of uninitialized value in addition (+) at - line 3.
