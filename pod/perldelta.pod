@@ -959,8 +959,7 @@ C<undef *Foo::> and C<undef *Foo::ISA> and C<delete $package::{ISA}>
 used not to update the internal isa caches if the
 stash or C<@ISA> array had a reference elsewhere. In
 fact, C<undef *Foo::ISA> would stop a new C<@Foo::ISA> array from updating
-caches
-L<[perl #79024]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=79024>.
+caches.
 
 =item *
 
