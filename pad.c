@@ -160,6 +160,7 @@ Perl_pad_new(pTHX_ int flags)
 {
     dVAR;
     AV *padlist, *padname, *pad;
+    SV **ary;
 
     ASSERT_CURPAD_LEGAL("pad_new");
 
@@ -209,8 +210,17 @@ Perl_pad_new(pTHX_ int flags)
     }
 
     AvREAL_off(padlist);
-    av_store(padlist, 0, MUTABLE_SV(padname));
-    av_store(padlist, 1, MUTABLE_SV(pad));
+    /* Most subroutines never recurse, hence only need 2 entries in the padlist
+       array - names, and depth=1.  The default for av_store() is to allocate
+       0..3, and even an explicit call to av_extend() with <3 will be rounded
+       up, so we inline the allocation of the array here.  */
+    Newx(ary, 2, SV*);
+    AvFILLp(padlist) = 1;
+    AvMAX(padlist) = 1;
+    AvALLOC(padlist) = ary;
+    AvARRAY(padlist) = ary;
+    ary[0] = MUTABLE_SV(padname);
+    ary[1] = MUTABLE_SV(pad);
 
     /* ... then update state variables */
 
