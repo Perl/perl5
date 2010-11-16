@@ -67,6 +67,7 @@ struct _PerlIO {
     PerlIOl *next;		/* Lower layer */
     PerlIO_funcs *tab;		/* Functions for this layer */
     U32 flags;			/* Various flags for state */
+    PerlIOl *head;		/* our ultimate parent pointer */
 };
 
 /*--------------------------------------------------------------------------------------*/

@@ -527,6 +527,32 @@ PerlIO_debug(const char *fmt, ...)
  * Inner level routines
  */
 
+/* check that the head field of each layer points back to the head */
+
+#ifdef DEBUGGING
+#  define VERIFY_HEAD(f) PerlIO_verify_head(aTHX_ f)
+static void
+PerlIO_verify_head(pTHX_ PerlIO *f)
+{
+    PerlIOl *head, *p;
+    int seen = 0;
+    if (!PerlIOValid(f))
+	return;
+    p = head = PerlIOBase(f)->head;
+    assert(p);
+    do {
+	assert(p->head == head);
+	if (p == (PerlIOl*)f)
+	    seen = 1;
+	p = p->next;
+    } while (p);
+    assert(seen);
+}
+#else
+#  define VERIFY_HEAD(f)
+#endif
+
+
 /*
  * Table of pointers to the PerlIO structs (malloc'ed)
  */
@@ -549,6 +575,7 @@ PerlIO_allocate(pTHX)
 	    if (!((++f)->next)) {
 		f->flags = 0;
 		f->tab = NULL;
+		f->head = f;
 		return (PerlIO *)f;
 	    }
 	}
@@ -560,6 +587,7 @@ PerlIO_allocate(pTHX)
     *last = (PerlIOl*) f++;
     f->flags = 0;
     f->tab = NULL;
+    f->head = f;
     return (PerlIO*) f;
 }
 
@@ -731,6 +759,7 @@ void
 PerlIO_pop(pTHX_ PerlIO *f)
 {
     const PerlIOl *l = *f;
+    VERIFY_HEAD(f);
     if (l) {
 	PerlIO_debug("PerlIO_pop f=%p %s\n", (void*)f, l->tab->name);
 	if (l->tab->Popped) {
@@ -1214,6 +1243,7 @@ PerlIO_stdstreams(pTHX)
 PerlIO *
 PerlIO_push(pTHX_ PerlIO *f, PERLIO_FUNCS_DECL(*tab), const char *mode, SV *arg)
 {
+    VERIFY_HEAD(f);
     if (tab->fsize != sizeof(PerlIO_funcs)) {
 	Perl_croak( aTHX_
 	    "%s (%d) does not match %s (%d)",
@@ -1236,6 +1266,7 @@ PerlIO_push(pTHX_ PerlIO *f, PERLIO_FUNCS_DECL(*tab), const char *mode, SV *arg)
 	    if (l) {
 		l->next = *f;
 		l->tab = (PerlIO_funcs*) tab;
+		l->head = ((PerlIOl*)f)->head;
 		*f = l;
 		PerlIO_debug("PerlIO_push f=%p %s %s %p\n",
 			     (void*)f, tab->name,
