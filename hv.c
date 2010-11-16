@@ -1684,23 +1684,26 @@ S_hfreeentries(pTHX_ HV *hv)
 
 	if (SvOOK(hv)) {
 	    HE *entry;
-            struct mro_meta *meta;
 
 	    SvFLAGS(hv) &= ~SVf_OOK; /* Goodbye, aux structure.  */
 	    /* What aux structure?  */
 	    /* (But we still have a pointer to it in iter.) */
 
-	    /* Copy the name to a new aux structure if there is a name. */
-	    if (iter->xhv_name) {
+	    /* Copy the name and MRO stuff to a new aux structure
+	       if present. */
+	    if (iter->xhv_name || iter->xhv_mro_meta) {
 		struct xpvhv_aux * const newaux = hv_auxinit(hv);
 		newaux->xhv_name = iter->xhv_name;
 		newaux->xhv_name_count = iter->xhv_name_count;
 		iter->xhv_name = NULL;
+		newaux->xhv_mro_meta = iter->xhv_mro_meta;
+		iter->xhv_mro_meta = NULL;
 	    }
 
-	    /* Because we have taken xhv_name out, the only allocated
+	    /* Because we have taken xhv_name and
+	       xhv_mro_meta out, the only allocated
 	       pointers in the aux structure that might exist are the back-
-	       reference array, xhv_eiter and the MRO stuff.
+	       reference array and xhv_eiter.
 	     */
 
 	    /* weak references: if called from sv_clear(), the backrefs
@@ -1752,24 +1755,6 @@ S_hfreeentries(pTHX_ HV *hv)
 	    iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
 	    iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
 
-            if((meta = iter->xhv_mro_meta)) {
-		if (meta->mro_linear_all) {
-		    SvREFCNT_dec(MUTABLE_SV(meta->mro_linear_all));
-		    meta->mro_linear_all = NULL;
-		    /* This is just acting as a shortcut pointer.  */
-		    meta->mro_linear_current = NULL;
-		} else if (meta->mro_linear_current) {
-		    /* Only the current MRO is stored, so this owns the data.
-		     */
-		    SvREFCNT_dec(meta->mro_linear_current);
-		    meta->mro_linear_current = NULL;
-		}
-                if(meta->mro_nextmethod) SvREFCNT_dec(meta->mro_nextmethod);
-                SvREFCNT_dec(meta->isa);
-                Safefree(meta);
-                iter->xhv_mro_meta = NULL;
-            }
-
 	    /* There are now no allocated pointers in the aux structure.  */
 	}
 
@@ -1820,12 +1805,14 @@ S_hfreeentries(pTHX_ HV *hv)
     else
 	SvFLAGS(hv) &=~SVf_OOK;
 
-    /* If the hash was actually a symbol table, put the name back.  */
+    /* If the hash was actually a symbol table, put the name and MRO
+       caches back.  */
     if (current_aux) {
 	struct xpvhv_aux * const aux
 	 = SvOOK(hv) ? HvAUX(hv) : hv_auxinit(hv);
 	aux->xhv_name = current_aux->xhv_name;
 	aux->xhv_name_count = current_aux->xhv_name_count;
+	aux->xhv_mro_meta   = current_aux->xhv_mro_meta;
     }
 
     if (tmp_array) Safefree(tmp_array);
@@ -1865,10 +1852,31 @@ Perl_hv_undef(pTHX_ HV *hv)
 	hv_name_set(hv, NULL, 0, 0);
     }
     hfreeentries(hv);
-    if ((name = HvNAME(hv))) {
+    if (SvOOK(hv)) {
+      struct xpvhv_aux * const aux = HvAUX(hv);
+      struct mro_meta *meta;
+      if ((name = HvNAME(hv))) {
         if (PL_stashcache)
 	    (void)hv_delete(PL_stashcache, name, HvNAMELEN_get(hv), G_DISCARD);
 	hv_name_set(hv, NULL, 0, 0);
+      }
+      if((meta = aux->xhv_mro_meta)) {
+	if (meta->mro_linear_all) {
+	    SvREFCNT_dec(MUTABLE_SV(meta->mro_linear_all));
+	    meta->mro_linear_all = NULL;
+	    /* This is just acting as a shortcut pointer.  */
+	    meta->mro_linear_current = NULL;
+	} else if (meta->mro_linear_current) {
+	    /* Only the current MRO is stored, so this owns the data.
+	     */
+	    SvREFCNT_dec(meta->mro_linear_current);
+	    meta->mro_linear_current = NULL;
+	}
+	if(meta->mro_nextmethod) SvREFCNT_dec(meta->mro_nextmethod);
+	SvREFCNT_dec(meta->isa);
+	Safefree(meta);
+	aux->xhv_mro_meta = NULL;
+      }
     }
     SvFLAGS(hv) &= ~SVf_OOK;
     Safefree(HvARRAY(hv));

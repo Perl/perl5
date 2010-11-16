@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 use warnings;
-plan(tests => 23);
+plan(tests => 24);
 
 use mro;
 
@@ -141,3 +141,7 @@ i buki => qw [], "undeffing a package glob deletes isarev entries";
 *bar:: = *baz::;
 i phoo => qw [],
  'clobbering a class w/multiple layers of subclasses updates its parent';
+
+@Thrat::ISA = 'Smin';
+%Thrat:: = ();
+i Smin => qw [], '%Package:: list assignment';
