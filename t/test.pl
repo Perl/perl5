@@ -558,8 +558,12 @@ sub runperl {
 	    join $sep, grep { $_ ne "" and $_ ne "." and -d $_ and
 		($is_mswin or $is_vms or !(stat && (stat _)[2]&0022)) }
 		    split quotemeta ($sep), $1;
-	$ENV{PATH} = $ENV{PATH} . "$sep/bin" if $is_cygwin;  # Must have /bin under Cygwin
-
+	if ($is_cygwin) {   # Must have /bin under Cygwin
+	    if (length $ENV{PATH}) {
+		$ENV{PATH} = $ENV{PATH} . $sep;
+	    }
+	    $ENV{PATH} = $ENV{PATH} . '/bin';
+	}
 	$runperl =~ /(.*)/s;
 	$runperl = $1;
 
