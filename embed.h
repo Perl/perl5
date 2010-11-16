@@ -1083,7 +1083,6 @@
 #define pad_push(a,b)		Perl_pad_push(aTHX_ a,b)
 #define pad_swipe(a,b)		Perl_pad_swipe(aTHX_ a,b)
 #define pad_tidy(a)		Perl_pad_tidy(aTHX_ a)
-#define pad_undef(a)		Perl_pad_undef(aTHX_ a)
 #define parse_unicode_opts(a)	Perl_parse_unicode_opts(aTHX_ a)
 #define parser_free(a)		Perl_parser_free(aTHX_ a)
 #define peep(a)			Perl_peep(aTHX_ a)

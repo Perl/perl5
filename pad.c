@@ -246,106 +246,6 @@ Perl_pad_new(pTHX_ int flags)
     return (PADLIST*)padlist;
 }
 
-/*
-=for apidoc pad_undef
-
-Free the padlist associated with a CV.
-If parts of it happen to be current, we null the relevant
-PL_*pad* global vars so that we don't have any dangling references left.
-We also repoint the CvOUTSIDE of any about-to-be-orphaned
-inner subs to the outer of this cv.
-
-(This function should really be called pad_free, but the name was already
-taken)
-
-=cut
-*/
-
-void
-Perl_pad_undef(pTHX_ CV* cv)
-{
-    dVAR;
-    I32 ix;
-    const PADLIST * const padlist = CvPADLIST(cv);
-
-    PERL_ARGS_ASSERT_PAD_UNDEF;
-
-    pad_peg("pad_undef");
-    if (!padlist)
-	return;
-    if (SvIS_FREED(padlist)) /* may be during global destruction */
-	return;
-
-    DEBUG_X(PerlIO_printf(Perl_debug_log,
-	  "Pad undef: cv=0x%"UVxf" padlist=0x%"UVxf" comppad=0x%"UVxf"\n",
-	    PTR2UV(cv), PTR2UV(padlist), PTR2UV(PL_comppad))
-    );
-
-    /* detach any '&' anon children in the pad; if afterwards they
-     * are still live, fix up their CvOUTSIDEs to point to our outside,
-     * bypassing us. */
-    /* XXX DAPM for efficiency, we should only do this if we know we have
-     * children, or integrate this loop with general cleanup */
-
-    if (PL_phase != PERL_PHASE_DESTRUCT) { /* don't bother during global destruction */
-	CV * const outercv = CvOUTSIDE(cv);
-        const U32 seq = CvOUTSIDE_SEQ(cv);
-	AV *  const comppad_name = MUTABLE_AV(AvARRAY(padlist)[0]);
-	SV ** const namepad = AvARRAY(comppad_name);
-	AV *  const comppad = MUTABLE_AV(AvARRAY(padlist)[1]);
-	SV ** const curpad = AvARRAY(comppad);
-	for (ix = AvFILLp(comppad_name); ix > 0; ix--) {
-	    SV * const namesv = namepad[ix];
-	    if (namesv && namesv != &PL_sv_undef
-		&& *SvPVX_const(namesv) == '&')
-	    {
-		CV * const innercv = MUTABLE_CV(curpad[ix]);
-		U32 inner_rc = SvREFCNT(innercv);
-		assert(inner_rc);
-		namepad[ix] = NULL;
-		SvREFCNT_dec(namesv);
-
-		if (SvREFCNT(comppad) < 2) { /* allow for /(?{ sub{} })/  */
-		    curpad[ix] = NULL;
-		    SvREFCNT_dec(innercv);
-		    inner_rc--;
-		}
-
-		/* in use, not just a prototype */
-		if (inner_rc && (CvOUTSIDE(innercv) == cv)) {
-		    assert(CvWEAKOUTSIDE(innercv));
-		    /* don't relink to grandfather if he's being freed */
-		    if (outercv && SvREFCNT(outercv)) {
-			CvWEAKOUTSIDE_off(innercv);
-			CvOUTSIDE(innercv) = outercv;
-			CvOUTSIDE_SEQ(innercv) = seq;
-			SvREFCNT_inc_simple_void_NN(outercv);
-		    }
-		    else {
-			CvOUTSIDE(innercv) = NULL;
-		    }
-		}
-	    }
-	}
-    }
-
-    ix = AvFILLp(padlist);
-    while (ix >= 0) {
-	SV* const sv = AvARRAY(padlist)[ix--];
-	if (sv) {
-	    if (sv == (const SV *)PL_comppad_name)
-		PL_comppad_name = NULL;
-	    else if (sv == (const SV *)PL_comppad) {
-		PL_comppad = NULL;
-		PL_curpad = NULL;
-	    }
-	}
-	SvREFCNT_dec(sv);
-    }
-    SvREFCNT_dec(MUTABLE_SV(CvPADLIST(cv)));
-    CvPADLIST(cv) = NULL;
-}
-
 
 /*
 =head1 Embedding Functions
@@ -364,6 +264,7 @@ void
 Perl_cv_undef(pTHX_ CV *cv)
 {
     dVAR;
+    const PADLIST *padlist = CvPADLIST(cv);
 
     PERL_ARGS_ASSERT_CV_UNDEF;
 
@@ -395,7 +296,89 @@ Perl_cv_undef(pTHX_ CV *cv)
     SvPOK_off(MUTABLE_SV(cv));		/* forget prototype */
     CvGV_set(cv, NULL);
 
-    pad_undef(cv);
+    /* This statement and the subsequence if block was pad_undef().  */
+    pad_peg("pad_undef");
+
+    if (padlist && !SvIS_FREED(padlist) /* may be during global destruction */
+	) {
+	I32 ix;
+
+	/* Free the padlist associated with a CV.
+	   If parts of it happen to be current, we null the relevant PL_*pad*
+	   global vars so that we don't have any dangling references left.
+	   We also repoint the CvOUTSIDE of any about-to-be-orphaned inner
+	   subs to the outer of this cv.  */
+
+	DEBUG_X(PerlIO_printf(Perl_debug_log,
+			      "Pad undef: cv=0x%"UVxf" padlist=0x%"UVxf" comppad=0x%"UVxf"\n",
+			      PTR2UV(cv), PTR2UV(padlist), PTR2UV(PL_comppad))
+		);
+
+	/* detach any '&' anon children in the pad; if afterwards they
+	 * are still live, fix up their CvOUTSIDEs to point to our outside,
+	 * bypassing us. */
+	/* XXX DAPM for efficiency, we should only do this if we know we have
+	 * children, or integrate this loop with general cleanup */
+
+	if (PL_phase != PERL_PHASE_DESTRUCT) { /* don't bother during global destruction */
+	    CV * const outercv = CvOUTSIDE(cv);
+	    const U32 seq = CvOUTSIDE_SEQ(cv);
+	    AV *  const comppad_name = MUTABLE_AV(AvARRAY(padlist)[0]);
+	    SV ** const namepad = AvARRAY(comppad_name);
+	    AV *  const comppad = MUTABLE_AV(AvARRAY(padlist)[1]);
+	    SV ** const curpad = AvARRAY(comppad);
+	    for (ix = AvFILLp(comppad_name); ix > 0; ix--) {
+		SV * const namesv = namepad[ix];
+		if (namesv && namesv != &PL_sv_undef
+		    && *SvPVX_const(namesv) == '&')
+		    {
+			CV * const innercv = MUTABLE_CV(curpad[ix]);
+			U32 inner_rc = SvREFCNT(innercv);
+			assert(inner_rc);
+			namepad[ix] = NULL;
+			SvREFCNT_dec(namesv);
+
+			if (SvREFCNT(comppad) < 2) { /* allow for /(?{ sub{} })/  */
+			    curpad[ix] = NULL;
+			    SvREFCNT_dec(innercv);
+			    inner_rc--;
+			}
+
+			/* in use, not just a prototype */
+			if (inner_rc && (CvOUTSIDE(innercv) == cv)) {
+			    assert(CvWEAKOUTSIDE(innercv));
+			    /* don't relink to grandfather if he's being freed */
+			    if (outercv && SvREFCNT(outercv)) {
+				CvWEAKOUTSIDE_off(innercv);
+				CvOUTSIDE(innercv) = outercv;
+				CvOUTSIDE_SEQ(innercv) = seq;
+				SvREFCNT_inc_simple_void_NN(outercv);
+			    }
+			    else {
+				CvOUTSIDE(innercv) = NULL;
+			    }
+			}
+		    }
+	    }
+	}
+
+	ix = AvFILLp(padlist);
+	while (ix >= 0) {
+	    SV* const sv = AvARRAY(padlist)[ix--];
+	    if (sv) {
+		if (sv == (const SV *)PL_comppad_name)
+		    PL_comppad_name = NULL;
+		else if (sv == (const SV *)PL_comppad) {
+		    PL_comppad = NULL;
+		    PL_curpad = NULL;
+		}
+	    }
+	    SvREFCNT_dec(sv);
+	}
+	SvREFCNT_dec(MUTABLE_SV(CvPADLIST(cv)));
+	CvPADLIST(cv) = NULL;
+    }
+
 
     /* remove CvOUTSIDE unless this is an undef rather than a free */
     if (!SvREFCNT(cv) && CvOUTSIDE(cv)) {

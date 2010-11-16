@@ -2056,8 +2056,6 @@ s	|void	|deb_stack_n	|NN SV** stack_base|I32 stack_min \
 : Used in perl.c, pp_ctl.c, toke.c
 pda	|PADLIST*|pad_new	|int flags
 : Only used in op.c
-pd	|void	|pad_undef	|NN CV* cv
-: Only used in op.c
 Mpd	|PADOFFSET|pad_add_name	|NN const char *name|const STRLEN len\
 				|const U32 flags|NULLOK HV *typestash\
 				|NULLOK HV *ourstash
