@@ -335,30 +335,32 @@ module documentation too.
 
 =head2 What is perl.com? Perl Mongers? pm.org? perl.org? cpan.org?
 
-Perl.com at http://www.perl.com/ is part of the O'Reilly Network, a
-subsidiary of O'Reilly Media.
+Perl.com ( http://www.perl.com/ ) used to be part of the O'Reilly
+Network, a subsidiary of O'Reilly Media. Although it retains most of
+the original content from its O'Reilly Network, it is now hosted by
+The Perl Foundation.
 
 The Perl Foundation is an advocacy organization for the Perl language
-which maintains the web site http://www.perl.org/ as a general
+which maintains the web site ( http://www.perl.org/ ) as a general
 advocacy site for the Perl language. It uses the domain to provide
 general support services to the Perl community, including the hosting
 of mailing lists, web sites, and other services. There are also many
-other sub-domains for special topics like learning Perl, Perl news, jobs
-in Perl, such as:
+other sub-domains for special topics like learning Perl, Perl news,
+jobs in Perl, such as:
 
+	http://www.perl.org/
 	http://learn.perl.org/
-	http://use.perl.org/
 	http://jobs.perl.org/
 	http://lists.perl.org/
 
 Perl Mongers uses the pm.org domain for services related to Perl user
 groups, including the hosting of mailing lists and web sites. See the
-Perl user group web site at http://www.pm.org/ for more information about
+Perl Mongers website ( http://www.pm.org/ ) for more information about
 joining, starting, or requesting services for a Perl user group.
 
-http://www.cpan.org/ is the Comprehensive Perl Archive Network,
-a replicated worldwide repository of Perl software, see
-the I<What is CPAN?> question earlier in this document.
+CPAN, or the Comprehensive Perl Archive Network (
+http://www.cpan.org/ ), is a replicated, worldwide repository of Perl
+software. See I<What is CPAN?> in L<perlfaq2>.
 
 =head1 AUTHOR AND COPYRIGHT
 
