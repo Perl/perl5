@@ -214,9 +214,9 @@ Perl_pad_new(pTHX_ int flags)
 
     /* ... then update state variables */
 
-    PL_comppad_name	= MUTABLE_AV((*av_fetch(padlist, 0, FALSE)));
-    PL_comppad		= MUTABLE_AV((*av_fetch(padlist, 1, FALSE)));
-    PL_curpad		= AvARRAY(PL_comppad);
+    PL_comppad_name	= padname;
+    PL_comppad		= pad;
+    PL_curpad		= AvARRAY(pad);
 
     if (! (flags & padnew_CLONE)) {
 	PL_comppad_name_fill = 0;
