@@ -1855,8 +1855,8 @@ Perl_hv_undef(pTHX_ HV *hv)
     if (SvOOK(hv)) {
       struct xpvhv_aux * const aux = HvAUX(hv);
       struct mro_meta *meta;
-      if ((name = HvNAME(hv))) {
-        if (PL_stashcache)
+      if (aux->xhv_name) {
+        if (PL_stashcache && (name = HvNAME(hv)))
 	    (void)hv_delete(PL_stashcache, name, HvNAMELEN_get(hv), G_DISCARD);
 	hv_name_set(hv, NULL, 0, 0);
       }
