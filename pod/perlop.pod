@@ -510,7 +510,7 @@ Although it has no direct equivalent in C, Perl's C<//> operator is related
 to its C-style or.  In fact, it's exactly the same as C<||>, except that it
 tests the left hand side's definedness instead of its truth.  Thus, C<$a // $b>
 is similar to C<defined($a) || $b> (except that it returns the value of C<$a>
-rather than the value of C<defined($a)>) and yields the same result than
+rather than the value of C<defined($a)>) and yields the same result as
 C<defined($a) ? $a : $b> (except that the ternary-operator form can be
 used as a lvalue, while C<$a // $b> cannot).  This is very useful for
 providing default values for variables.  If you actually want to test if
@@ -1142,7 +1142,7 @@ example, see L<perlrebackslash/Octal escapes>.)  Starting in Perl 5.14, you may
 use C<\o{}> instead which avoids all these problems.  Otherwise, it is best to
 use this construct only for ordinals C<\077> and below, remembering to pad to
 the left with zeros to make three digits.  For larger ordinals, either use
-C<\o{}> , or convert to someething else, such as to hex and use C<\x{}>
+C<\o{}> , or convert to something else, such as to hex and use C<\x{}>
 instead.
 
 Having fewer than 3 digits may lead to a misleading warning message that says
