@@ -662,7 +662,7 @@ S_pad_check_dup(pTHX_ SV *name, const U32 flags, const HV *ourstash)
     }
     /* check the rest of the pad */
     if (is_our) {
-	do {
+	while (off > 0) {
 	    SV * const sv = svp[off];
 	    if (sv
 		&& sv != &PL_sv_undef
@@ -678,7 +678,8 @@ S_pad_check_dup(pTHX_ SV *name, const U32 flags, const HV *ourstash)
 			"\t(Did you mean \"local\" instead of \"our\"?)\n");
 		break;
 	    }
-	} while ( off-- > 0 );
+	    --off;
+	}
     }
 }
 
