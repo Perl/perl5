@@ -363,16 +363,20 @@ Perl_cv_undef(pTHX_ CV *cv)
 	}
 
 	ix = AvFILLp(padlist);
-	while (ix >= 0) {
+	while (ix > 0) {
 	    SV* const sv = AvARRAY(padlist)[ix--];
 	    if (sv) {
-		if (sv == (const SV *)PL_comppad_name)
-		    PL_comppad_name = NULL;
-		else if (sv == (const SV *)PL_comppad) {
+		if (sv == (const SV *)PL_comppad) {
 		    PL_comppad = NULL;
 		    PL_curpad = NULL;
 		}
+		SvREFCNT_dec(sv);
 	    }
+	}
+	{
+	    SV *const sv = AvARRAY(padlist)[0];
+	    if (sv == (const SV *)PL_comppad_name)
+		PL_comppad_name = NULL;
 	    SvREFCNT_dec(sv);
 	}
 	SvREFCNT_dec(MUTABLE_SV(CvPADLIST(cv)));
