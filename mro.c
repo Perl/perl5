@@ -737,7 +737,6 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
 	newname = SvPV_const(namesv, len);
 	newname_len = len - 2; /* skip trailing :: */
     }
-    if(newname_len < 0) newname_len = -newname_len;
 
     /* Get a list of all the affected classes. */
     /* We cannot simply pass them all to mro_isa_changed_in to avoid
