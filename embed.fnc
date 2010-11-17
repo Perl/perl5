@@ -794,7 +794,8 @@ Ap	|void	|newPROG	|NN OP* o
 Apda	|OP*	|newRANGE	|I32 flags|NN OP* left|NN OP* right
 Apda	|OP*	|newSLICEOP	|I32 flags|NULLOK OP* subscript|NULLOK OP* listop
 Apda	|OP*	|newSTATEOP	|I32 flags|NULLOK char* label|NULLOK OP* o
-Ap	|CV*	|newSUB		|I32 floor|NULLOK OP* o|NULLOK OP* proto|NULLOK OP* block
+Abm	|CV*	|newSUB		|I32 floor|NULLOK OP* o|NULLOK OP* proto \
+				|NULLOK OP* block
 ApM	|CV *	|newXS_flags	|NULLOK const char *name|NN XSUBADDR_t subaddr\
 				|NN const char *const filename \
 				|NULLOK const char *const proto|U32 flags

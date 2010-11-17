@@ -334,7 +334,6 @@
 #define newRV_noinc(a)		Perl_newRV_noinc(aTHX_ a)
 #define newSLICEOP(a,b,c)	Perl_newSLICEOP(aTHX_ a,b,c)
 #define newSTATEOP(a,b,c)	Perl_newSTATEOP(aTHX_ a,b,c)
-#define newSUB(a,b,c,d)		Perl_newSUB(aTHX_ a,b,c,d)
 #define newSV(a)		Perl_newSV(aTHX_ a)
 #define newSVOP(a,b,c)		Perl_newSVOP(aTHX_ a,b,c)
 #define newSVREF(a)		Perl_newSVREF(aTHX_ a)

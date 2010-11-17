@@ -852,6 +852,8 @@ one of the OA_* constants from op.h.
 		     ? XopENTRY(Perl_custom_op_xop(aTHX_ o), xop_class) \
 		     : (PL_opargs[(o)->op_type] & OA_CLASS_MASK))
 
+#define newSUB(f, o, p, b)	Perl_newATTRSUB(aTHX_ (f), (o), (p), NULL, (b))
+
 #ifdef PERL_MAD
 #  define MAD_NULL 1
 #  define MAD_PV 2

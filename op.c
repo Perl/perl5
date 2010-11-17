@@ -6056,12 +6056,6 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 }
 
 CV *
-Perl_newSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *block)
-{
-    return Perl_newATTRSUB(aTHX_ floor, o, proto, NULL, block);
-}
-
-CV *
 Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 {
     dVAR;

@@ -83,6 +83,7 @@ PERL_CALLCONV I32 Perl_my_lstat(pTHX);
 PERL_CALLCONV I32 Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2);
 PERL_CALLCONV char * Perl_sv_collxfrm(pTHX_ SV *const sv, STRLEN *const nxp);
 PERL_CALLCONV bool Perl_sv_2bool(pTHX_ register SV *const sv);
+PERL_CALLCONV CV * Perl_newSUB(pTHX_ I32 floor, OP* o, OP* proto, OP* block);
 
 /* ref() is now a macro using Perl_doref;
  * this version provided for binary compatibility only.
@@ -1581,6 +1582,12 @@ Perl_custom_op_desc(pTHX_ const OP* o)
 {
     PERL_ARGS_ASSERT_CUSTOM_OP_DESC;
     return XopENTRY(Perl_custom_op_xop(aTHX_ o), xop_desc);
+}
+
+CV *
+Perl_newSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *block)
+{
+    return Perl_newATTRSUB(aTHX_ floor, o, proto, NULL, block);
 }
 #endif /* NO_MATHOMS */
 
