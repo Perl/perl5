@@ -1,6 +1,16 @@
 #!./perl
 use strict;
 
+# Test charnames.pm.  If $ENV{PERL_RUN_SLOW_TESTS} is unset or 0, a  random
+# selection of names is tested, a higher percentage of regular names is tested
+# than algorithmically-determined names.
+
+my $RUN_SLOW_TESTS_EVERY_CODE_POINT = 100;
+
+# If $ENV{PERL_RUN_SLOW_TESTS} is at least 1 and less than the number above,
+# all code points with names are tested.  If it is at least that number, all
+# 1,114,112 Unicode code points are tested.
+
 # Because \N{} is compile time, any warnings will get generated before
 # execution, so have to have an array, and arrange things so no warning
 # is generated twice to verify that in fact a warning did happen
@@ -848,6 +858,8 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
         $seed = srand;
     }
 
+    my $run_slow_tests = $ENV{PERL_RUN_SLOW_TESTS} || 0;
+
     # We will look at the data grouped in "blocks" of the following
     # size.
     my $block_size_bits = 7;   # above 16 is not sensible
@@ -859,7 +871,7 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
     # of the character.  The percentage of each type to test is
     # fuzzily independently settable.  This breaks down when the block size is
     # 1 or is large enough that both types of names occur in the same block
-    my $percentage_of_regular_names = 25;
+    my $percentage_of_regular_names = ($run_slow_tests) ? 100 : 25;
     my $percentage_of_algorithmic_names = (100 / $block_size); # 1 test/block
 
     # If wants everything tested, do so by changing the block size to 1 so
@@ -1002,6 +1014,7 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
         my $end_block = $block;
         if ($test_count == 0) {
             $test_count = 1;
+            if ($run_slow_tests < $RUN_SLOW_TESTS_EVERY_CODE_POINT) {
             $end_block++;
 
             # Keep coalescing until find a block that has something in
@@ -1015,6 +1028,7 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
                 $end_block++;
             }
             $end_block--;   # Back-off to a block that has no defined names
+            }
         }
 
         # Calculated how many tests.  Do them
