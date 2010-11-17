@@ -140,13 +140,28 @@ introspection of the current phase of the perl interpreter. It's explained in
 detail in L<perlvar/"${^GLOBAL_PHASE}"> and
 L<perlmod/"BEGIN, UNITCHECK, CHECK, INIT and END">.
 
-=head2 Unicode Version 6.0 is now supported.
+=head2 Unicode Version 6.0 is now supported (mostly)
 
-Perl comes with the Unicode 6.0 data base.
+Perl comes with the Unicode 6.0 data base, with one exception noted
+below.
 See L<http://unicode.org/versions/Unicode6.0.0> for details on the new
 release.  Perl does not support any Unicode provisional properties,
 including the new ones for this release, but their database files are
 packaged with Perl.
+
+Unicode 6.0 has chosen to use the name C<BELL> for the character at U+1F514,
+which is a symbol that looks like a bell, and used in Japanese cell
+phones.  This conflicts with the long-standing Perl usage of having
+C<BELL> mean the ASCII C<BEL> character, U+0007.  In Perl 5.14,
+C<\N{BELL}> will continue to mean U+0007, but its use will generate a
+deprecated warning message, unless such warnings are turned off.  The
+new name for U+0007 in Perl will be C<ALERT>, which corresponds nicely
+with the existing shorthand sequence for it, C<"\a">.  C<\N{BEL}> will
+mean U+0007, with no warning given.  The character at U+1F514 will not
+have a name in 5.14, but can be referred to by C<\N{U+1F514}>.  The plan
+is that in Perl 5.16, C<\N{BELL}> will refer to U+1F514, and so all code
+that uses C<\N{BELL}> should convert by then to using C<\N{ALERT}>,
+C<\N{BEL}>, or C<"\a"> instead.
 
 =head1 Security
 
@@ -228,6 +243,12 @@ In particular, deprecated modules should be listed here even if they are
 listed as an updated module in the L</Modules and Pragmata> section.
 
 [ List each deprecation as a =head2 entry ]
+
+=head2 C<\N{BELL}> is deprecated
+
+This is because Unicode is using that name for a different character.
+See L</Unicode Version 6.0 is now supported (mostly)> for more
+explanation.
 
 =head1 Performance Enhancements
 

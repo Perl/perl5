@@ -2,7 +2,7 @@ package charnames;
 use strict;
 use warnings;
 use File::Spec;
-our $VERSION = '1.16';
+our $VERSION = '1.17';
 
 use bytes ();          # for $bytes::hint_bits
 
@@ -35,7 +35,7 @@ my %system_aliases = (
     'EOT'           => pack("U", 0x04), # END OF TRANSMISSION
     'ENQ'           => pack("U", 0x05), # ENQUIRY
     'ACK'           => pack("U", 0x06), # ACKNOWLEDGE
-    'BEL'           => pack("U", 0x07), # BELL
+    'BEL'           => pack("U", 0x07), # ALERT; formerly BELL
     'BS'            => pack("U", 0x08), # BACKSPACE
     'HT'            => pack("U", 0x09), # HORIZONTAL TABULATION
     'LF'            => pack("U", 0x0A), # LINE FEED (LF)
@@ -401,6 +401,9 @@ my %deprecated_aliases = (
     'PARTIAL LINE UP'         => pack("U", 0x8C), # PARTIAL LINE BACKWARD
     'VERTICAL TABULATION SET' => pack("U", 0x8A), # LINE TABULATION SET
     'REVERSE INDEX'           => pack("U", 0x8D), # REVERSE LINE FEED
+
+    # Unicode 6.0 co-opted this for U+1F514, so deprecate it for now.
+    'BELL'                    => pack("U", 0x07),
 );
 
 

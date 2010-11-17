@@ -249,6 +249,11 @@ is("\N{BOM}", chr(0xFEFF));
 
     ok(grep { /"HORIZONTAL TABULATION" is deprecated.*CHARACTER TABULATION/ } @WARN);
 
+    # XXX These tests should be changed for 5.16, when we convert BELL to the
+    # Unicode version.
+    is("\N{BELL}", "\a");
+    ok((grep{ /"BELL" is deprecated.*ALERT/ } @WARN), 'BELL is deprecated');
+
     no warnings 'deprecated';
 
     is("\N{VERTICAL TABULATION}", "\013");
@@ -913,6 +918,12 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
         # The Unicode version 1 name is used instead of any that are
         # marked <control>
         $name = $u1name if $name eq "<control>";
+
+        $name = 'ALERT' if $decimal == 7;
+
+        # XXX This test should be changed for 5.16 when we convert to use
+        # Unicode's BELL
+        $name = "" if $decimal == 0x1F514;
 
         # Some don't have names, leave those array elements undefined
         next unless $name;

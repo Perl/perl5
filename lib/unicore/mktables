@@ -10145,6 +10145,28 @@ END
         }
         return;
     }
+
+    sub filter_v6_ucd {
+
+        # Unicode 6.0 co-opted the name BELL for U+1F514, so change the input
+        # to pretend that U+0007 is ALERT instead, and for Perl 5.14, don't
+        # allow the BELL name for U+1F514, so that the old usage can be
+        # deprecated for one cycle.
+
+        return if $_ !~ /^(?:0007|1F514);/;
+
+        my ($code_point, @fields) = split /\s*;\s*/, $_, -1;
+        if ($code_point eq '0007') {
+            $fields[$UNICODE_1_NAME] = "ALERT";
+        }
+        elsif ($^V lt v5.15.0) { # For 5.16 will convert to use Unicode's name
+            $fields[$CHARNAME] = "";
+        }
+
+        $_ = join ';', $code_point, @fields;
+
+        return;
+    }
 } # End closure for UnicodeData
 
 sub process_GCB_test {
@@ -14072,7 +14094,12 @@ my @input_file_objects = (
                                             ? \&filter_v1_ucd
                                             : ($v_version eq v2.1.5)
                                                 ? \&filter_v2_1_5_ucd
-                                                : undef),
+
+                                                # And for 5.14 Perls with 6.0,
+                                                # have to also make changes
+                                                : ($v_version ge v6.0.0)
+                                                    ? \&filter_v6_ucd
+                                                    : undef),
 
                                             # And the main filter
                                             \&filter_UnicodeData_line,
