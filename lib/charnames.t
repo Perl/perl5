@@ -1015,19 +1015,20 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
         if ($test_count == 0) {
             $test_count = 1;
             if ($run_slow_tests < $RUN_SLOW_TESTS_EVERY_CODE_POINT) {
-            $end_block++;
-
-            # Keep coalescing until find a block that has something in
-            # it.  But don't cross plane boundaries (the 16 bits below),
-            # so there is at least one test for every plane.
-            while ($end_block < $block_count
-                   && $end_block >> (16 - $block_size_bits) == $block >> (16 - $block_size_bits)
-                   && ! $algorithmic_names_count[$end_block]
-                   && ! $regular_names_count[$end_block])
-            {
                 $end_block++;
-            }
-            $end_block--;   # Back-off to a block that has no defined names
+
+                # Keep coalescing until find a block that has something in
+                # it.  But don't cross plane boundaries (the 16 bits below),
+                # so there is at least one test for every plane.
+                while ($end_block < $block_count
+                       && $end_block >> (16 - $block_size_bits)
+                                        == $block >> (16 - $block_size_bits)
+                       && ! $algorithmic_names_count[$end_block]
+                       && ! $regular_names_count[$end_block])
+                {
+                    $end_block++;
+                }
+                $end_block--;   # Back-off to a block that has no defined names
             }
         }
 
