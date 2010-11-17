@@ -693,6 +693,10 @@ non-existent packages that have corresponding entries in C<stash>.
 It also sets the effective names (C<HvENAME>) on all the stashes as
 appropriate.
 
+If the C<gv> is present and is not in the symbol table, then this function
+simply returns. This checked will be skipped if C<newname_len> is set to 1
+and C<newname> is null.
+
 =cut
 */
 void
@@ -721,13 +725,15 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
      *
      * If newname is not null, then we trust that the caller gave us the
      * right name. Otherwise, we get it from the gv. But if the gv is not
-     * in the symbol table, then we just return.
+     * in the symbol table, then we just return. We skip that check,
+     * however, if newname_len is 1 and newname is null.
      */
     if(!newname && gv) {
 	SV * const namesv = sv_newmortal();
 	STRLEN len;
 	gv_fullname4(namesv, gv, NULL, 0);
-	if(gv_fetchsv(namesv, GV_NOADD_NOINIT, SVt_PVGV) != gv) return;
+	if( newname_len != 1
+	 && gv_fetchsv(namesv, GV_NOADD_NOINIT, SVt_PVGV) != gv ) return;
 	newname = SvPV_const(namesv, len);
 	newname_len = len - 2; /* skip trailing :: */
     }

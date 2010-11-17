@@ -988,8 +988,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     for (; entry; oentry = &HeNEXT(entry), entry = *oentry) {
 	SV *sv;
 	U8 mro_changes = 0; /* 1 = isa; 2 = package moved */
-	const char *name = NULL;
-	STRLEN namlen;
+	GV *gv = NULL;
 	HV *stash = NULL;
 
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
@@ -1023,35 +1022,24 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
 	/* If this is a stash and the key ends with ::, then someone is 
 	 * deleting a package.
-	 * Check whether the gv (HeVAL(entry)) is still in the symbol
-	 * table and then save the name to pass to mro_package_moved after
-	 * the deletion.
-	 * We cannot pass the gv to mro_package_moved directly, as that
-	 * function also checks whether the gv is to be found at the loca-
-	 * tion its name indicates, which will no longer be the case once
-	 * this element is deleted. So we have to do that check here.
 	 */
 	if (HeVAL(entry) && HvENAME_get(hv)) {
-		sv = HeVAL(entry);
+		gv = (GV *)HeVAL(entry);
 		if (keysv) key = SvPV(keysv, klen);
 		if (klen > 1 && key[klen-2] == ':' && key[klen-1] == ':'
 		 && (klen != 6 || hv!=PL_defstash || memNE(key,"main::",6))
-		 && SvTYPE(sv) == SVt_PVGV && (stash = GvHV((GV *)sv))
+		 && SvTYPE(gv) == SVt_PVGV && (stash = GvHV((GV *)gv))
 		 && HvENAME_get(stash)) {
-		    SV * const namesv = sv_newmortal();
-		    gv_fullname4(namesv, (GV *)sv, NULL, 0);
-		    if (
-		     gv_fetchsv(namesv, GV_NOADD_NOINIT, SVt_PVGV)
-		       == (GV *)sv
-		    ) {
+			/* A previous version of this code checked that the
+			 * GV was still in the symbol table by fetching the
+			 * GV with its name. That is not necessary (and
+			 * sometimes incorrect), as HvENAME cannot be set
+			 * on hv if it is not in the symtab. */
 			mro_changes = 2;
-			name = SvPV_const(namesv, namlen);
-			namlen -= 2; /* skip trailing :: */
 			/* Hang on to it for a bit. */
 			SvREFCNT_inc_simple_void_NN(
-			 sv_2mortal((SV *)stash)
+			 sv_2mortal((SV *)gv)
 			);
-		    }
 		}
 		else if (klen == 3 && strnEQ(key, "ISA", 3))
 		    mro_changes = 1;
@@ -1089,7 +1077,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
 	if (mro_changes == 1) mro_isa_changed_in(hv);
 	else if (mro_changes == 2)
-	    mro_package_moved(NULL, stash, NULL, name, namlen);
+	    mro_package_moved(NULL, stash, gv, NULL, 1);
 
 	return sv;
     }

@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 use warnings;
-plan(tests => 20);
+plan(tests => 21);
 
 {
     package New;
@@ -271,3 +271,20 @@ watchdog 3;
 *foo:: = \%::;
 *Acme::META::Acme:: = \*Acme::; # indirect self-reference
 pass("mro_package_moved and self-referential packages");
+
+# Deleting a glob whose name does not indicate its location in the symbol
+# table but which nonetheless *is* in the symbol table.
+{
+    no strict refs=>;
+    no warnings;
+    @one::more::ISA = "four";
+    sub four::womp { "aoeaa" }
+    *two:: = *one::;
+    delete $::{"one::"};
+    @Childclass::ISA = 'two::more';
+    my $accum = 'Childclass'->womp . '-';
+    my $life_raft = delete ${"two::"}{"more::"};
+    $accum .= eval { 'Childclass'->womp } // '<undef>';
+    is $accum, 'aoeaa-<undef>',
+     'Deleting globs whose loc in the symtab differs from gv_fullname'
+}
