@@ -558,6 +558,16 @@ PerlIO_verify_head(pTHX_ PerlIO *f)
  */
 #define PERLIO_TABLE_SIZE 64
 
+static void
+PerlIO_init_table(pTHX)
+{
+    if (PL_perlio)
+	return;
+    Newxz(PL_perlio, PERLIO_TABLE_SIZE, PerlIOl);
+}
+
+
+
 PerlIO *
 PerlIO_allocate(pTHX)
 {
@@ -706,7 +716,7 @@ PerlIO_clone(pTHX_ PerlInterpreter *proto, CLONE_PARAMS *param)
     PL_perlio = NULL;
     PL_known_layers = PerlIO_clone_list(aTHX_ proto->Iknown_layers, param);
     PL_def_layerlist = PerlIO_clone_list(aTHX_ proto->Idef_layerlist, param);
-    PerlIO_allocate(aTHX); /* root slot is never used */
+    PerlIO_init_table(aTHX);
     PerlIO_debug("Clone %p from %p\n",(void*)aTHX,(void*)proto);
     while ((f = *table)) {
 	    int i;
@@ -1233,7 +1243,7 @@ PerlIO_stdstreams(pTHX)
 {
     dVAR;
     if (!PL_perlio) {
-	PerlIO_allocate(aTHX);
+	PerlIO_init_table(aTHX);
 	PerlIO_fdopen(0, "Ir" PERLIO_STDTEXT);
 	PerlIO_fdopen(1, "Iw" PERLIO_STDTEXT);
 	PerlIO_fdopen(2, "Iw" PERLIO_STDTEXT);
