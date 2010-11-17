@@ -716,6 +716,19 @@ sub installlib {
     return if $name =~ m{\b(?:APItest|Typemap)\.pm$};
     # ignore the demo files
     return if $dir =~ /\b(?:demos?|eg)\b/;
+    # ignore unneeded unicore files
+    if ( $dir =~ /^unicore/ ) {
+      if ( $name =~ /\.txt\z/ ) {
+        # We can ignore most, but not all .txt files
+        return unless $name =~ /\A(?:UnicodeData|Blocks|Scripts|CompositionExclusions|CaseFolding|SpecialCasing|NamedSequences)\.txt\z/;
+      }
+      else {
+        # TestProp only needed during testing
+        return if $name =~ /\ATestProp.pl\z/;
+        # we need version and *.pl files and can skip the rest
+        return unless $name =~ /\A(?:version|\w+\.pl)\z/;
+      }
+    }
 
     # ignore READMEs, MANIFESTs, INSTALL docs, META.ymls and change logs.
     # Changes.e2x and README.e2x are needed by enc2xs.
