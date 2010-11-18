@@ -193,7 +193,7 @@ if ($PLATFORM =~ /^win(?:32|ce)$/) {
     print "LIBRARY $dll\n";
     # The DESCRIPTION module definition file statement is not supported
     # by VC7 onwards.
-    if ($CCTYPE !~ /^MSVC7/ && $CCTYPE !~ /^MSVC8/ && $CCTYPE !~ /^MSVC9/) {
+    if ($CCTYPE =~ /^(?:MSVC60|GCC|BORLAND)$/) {
 	print "DESCRIPTION 'Perl interpreter'\n";
     }
     print "EXPORTS\n";

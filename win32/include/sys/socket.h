@@ -29,7 +29,9 @@ extern "C" {
 
 #include "win32.h"
 
-#define  ENOTSOCK	WSAENOTSOCK
+#ifndef ENOTSOCK
+#define ENOTSOCK	WSAENOTSOCK
+#endif
 
 #ifdef USE_SOCKETS_AS_HANDLES
 

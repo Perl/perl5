@@ -4,7 +4,7 @@
 #	Microsoft Visual C++ 6.0 or later
 #	Borland C++ 5.02 or later
 #	MinGW with gcc-3.2 or later
-#	Windows SDK 64-bit compiler and tools **experimental**
+#	Windows SDK 64-bit compiler and tools
 #
 # This is set up to build a perl.exe that runs off a shared library
 # (perl513.dll).  Also makes individual DLLs for the XS extensions.
@@ -103,6 +103,8 @@ USE_LARGE_FILES	*= define
 #CCTYPE		*= MSVC70FREE
 # Visual C++ .NET 2003 (aka Visual C++ 7.x) (full version)
 #CCTYPE		*= MSVC70
+# Windows Server 2003 SP1 Platform SDK (April 2005)
+#CCTYPE		= SDK2003SP1
 # Visual C++ 2005 Express Edition (aka Visual C++ 8.x) (free version)
 #CCTYPE		*= MSVC80FREE
 # Visual C++ 2005 (aka Visual C++ 8.x) (full version)
@@ -111,6 +113,10 @@ USE_LARGE_FILES	*= define
 #CCTYPE		*= MSVC90FREE
 # Visual C++ 2008 (aka Visual C++ 9.x) (full version)
 #CCTYPE		*= MSVC90
+# Visual C++ 2010 Express Edition (aka Visual C++ 10.x) (free version)
+#CCTYPE		= MSVC100FREE
+# Visual C++ 2010 (aka Visual C++ 10.x) (full version)
+#CCTYPE		= MSVC100
 # Borland 5.02 or later
 #CCTYPE		*= BORLAND
 # MinGW or mingw-w64 with gcc-3.2 or later
@@ -360,6 +366,13 @@ WIN64			= undef
 .ENDIF
 .ENDIF
 
+# Treat 64-bit MSVC60 (doesn't really exist) as SDK2003SP1 because
+# both link against MSVCRT.dll (which is part of Windows itself) and
+# not against a compiler specific versioned runtime.
+.IF "$(WIN64)" == "define" && "$(CCTYPE)" == "MSVC60"
+CCTYPE		= SDK2003SP1
+.ENDIF
+
 ARCHITECTURE = $(PROCESSOR_ARCHITECTURE)
 .IF "$(ARCHITECTURE)" == "AMD64"
 ARCHITECTURE	= x64
@@ -382,13 +395,14 @@ ARCHNAME	= MSWin32-$(ARCHITECTURE)
 ARCHNAME	!:= $(ARCHNAME)-thread
 .ENDIF
 
-# Visual C++ 98, .NET 2003, 2005 and 2008 specific.
-# VC++ 6.x, 7.x, 8.x and 9.x can load DLL's on demand.  Makes the test suite run
+# Visual C++ 98, .NET 2003, 2005/2008/2010 specific.
+# VC++ 6/7/8/9/10.x can load DLLs on demand.  Makes the test suite run
 # in about 10% less time.  (The free version of 7.x can't do this, but the free
-# versions of 8.x and 9.x can.)
+# versions of 8/9/10.x can.)
 .IF "$(CCTYPE)" == "MSVC60" || "$(CCTYPE)" == "MSVC70"     || \
-    "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE" ||
-    "$(CCTYPE)" == "MSVC90" || "$(CCTYPE)" == "MSVC90FREE"
+    "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE" || \
+    "$(CCTYPE)" == "MSVC90" || "$(CCTYPE)" == "MSVC90FREE" || \
+    "$(CCTYPE)" == "MSVC100" || "$(CCTYPE)" == "MSVC100FREE"
 DELAYLOAD	*= -DELAYLOAD:ws2_32.dll delayimp.lib
 .ENDIF
 
@@ -566,7 +580,7 @@ CXX_FLAG	= -TP -EHsc
 LIBC	= msvcrt.lib
 
 .IF  "$(CFG)" == "Debug"
-OPTIMIZE	= -O1 -MD -Zi -DDEBUGGING
+OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
 LINK_DBG	= -debug
 .ELSE
 OPTIMIZE	= -MD -Zi -DNDEBUG
@@ -591,14 +605,30 @@ OPTIMIZE	+= -O1
 
 .IF "$(WIN64)" == "define"
 DEFINES		+= -DWIN64 -DCONSERVATIVE
-OPTIMIZE	+= -Wp64 -fp:precise
+OPTIMIZE	+= -fp:precise
 .ENDIF
 
-# For now, silence VC++ 8.x's and 9.x's warnings about "unsafe" CRT functions
+# For now, silence VC++ 8/9/10.x's warnings about "unsafe" CRT functions
 # and POSIX CRT function names being deprecated.
 .IF "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE" || \
-    "$(CCTYPE)" == "MSVC90" || "$(CCTYPE)" == "MSVC90FREE"
+    "$(CCTYPE)" == "MSVC90" || "$(CCTYPE)" == "MSVC90FREE" || \
+    "$(CCTYPE)" == "MSVC100" || "$(CCTYPE)" == "MSVC100FREE"
 DEFINES		+= -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
+.ENDIF
+
+# In VS 2005 (VC++ 8.0) Microsoft changes time_t from 32-bit to
+# 64-bit, even in 32-bit mode.  It also provides the _USE_32BIT_TIME_T
+# preprocessor option to revert back to the old functionality for
+# backward compatibility.  We define this symbol here for older 32-bit
+# compilers only (which aren't using it at all) for the sole purpose
+# of getting it into $Config{ccflags}.  That way if someone builds
+# Perl itself with e.g. VC6 but later installs an XS module using VC8
+# the time_t types will still be compatible.
+.IF "$(WIN64)" == "undef"
+.IF "$(CCTYPE)" == "MSVC60" || \
+    "$(CCTYPE)" == "MSVC70" || "$(CCTYPE)" == "MSVC70FREE"
+BUILDOPT	+= -D_USE_32BIT_TIME_T
+.ENDIF
 .ENDIF
 
 # Use the MSVCRT read() fix only when using VC++ 6.x or earlier. Later
@@ -614,11 +644,11 @@ LIBBASEFILES	= $(CRYPT_LIB) \
 		netapi32.lib uuid.lib ws2_32.lib mpr.lib winmm.lib \
 		version.lib odbc32.lib odbccp32.lib comctl32.lib
 
-# The 64 bit Platform SDK compilers contain a runtime library that doesn't
-# include the buffer overrun verification code used by the /GS switch.
+# The 64 bit Windows Server 2003 SP1 SDK compilers link against MSVCRT.dll, which
+# doesn't include the buffer overrun verification code used by the /GS switch.
 # Since the code links against libraries that are compiled with /GS, this
-# "security cookie verification" must be included via bufferoverlow.lib.
-.IF "$(WIN64)" == "define"
+# "security cookie verification" code must be included via bufferoverflow.lib.
+.IF "$(WIN64)" == "define" && "$(CCTYPE)" == "SDK2003SP1"
 LIBBASEFILES    += bufferoverflowU.lib
 .ENDIF
 
@@ -640,7 +670,8 @@ LIBOUT_FLAG	= /out:
 CFLAGS_O	= $(CFLAGS) $(BUILDOPT)
 
 .IF "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE" || \
-    "$(CCTYPE)" == "MSVC90" || "$(CCTYPE)" == "MSVC90FREE"
+    "$(CCTYPE)" == "MSVC90" || "$(CCTYPE)" == "MSVC90FREE" || \
+    "$(CCTYPE)" == "MSVC100" || "$(CCTYPE)" == "MSVC100FREE"
 LINK_FLAGS	+= "/manifestdependency:type='Win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'"
 .ELSE
 RSC_FLAGS	= -DINCLUDE_MANIFEST

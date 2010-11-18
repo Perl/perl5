@@ -59,10 +59,10 @@ The Borland C++ and Microsoft Visual C++ compilers are also now being given
 away free.  The Borland compiler is available as "Borland C++ Compiler Free
 Command Line Tools" and is the same compiler that ships with the full
 "Borland C++ Builder" product.  The Microsoft compiler is available as
-"Visual C++ Toolkit 2003" or "Visual C++ 2005/2008 Express Edition" (and also
-as part of the ".NET Framework SDK") and is the same compiler that ships with
-"Visual C++ .NET 2003 Professional" or "Visual C++ 2005/2008 Professional"
-respectively.
+"Visual C++ Toolkit 2003" or "Visual C++ 2005/2008/2010 Express Edition" (and
+also as part of the ".NET Framework SDK") and is the same compiler that ships
+with "Visual C++ .NET 2003 Professional" or "Visual C++ 2005/2008/2010
+Professional" respectively.
 
 This port can also be built on IA64/AMD64 using:
 
@@ -146,31 +146,26 @@ and edit win32/config.vc to change "make=nmake" into "make=dmake".  The
 latter step is only essential if you want to use dmake as your default
 make for building extensions using MakeMaker.
 
-=item Microsoft Visual C++ 2008 Express Edition
+=item Microsoft Visual C++ 2008/2010 Express Edition
 
-This free version of Visual C++ 2008 Professional contains the same compiler
-and linker that ship with the full version, and also contains everything
-necessary to build Perl, rather than requiring a separate download of the
-Windows SDK like previous versions did.
+These free versions of Visual C++ 2008/2010 Professional contain the same
+compilers and linkers that ship with the full versions, and also contain
+everything necessary to build Perl, rather than requiring a separate download
+of the Windows SDK like previous versions did.
 
-This package can be downloaded by searching for "Visual Studio 2008 Express
-Edition" in the Download Center at
+These packages can be downloaded by searching in the Download Center at
 http://www.microsoft.com/downloads/search.aspx?displaylang=en.  (Providing exact
 links to these packages has proven a pointless task because the links keep on
 changing so often.)
 
-Install Visual C++ 2008, then setup your environment using
+Install Visual C++ 2008/2010 Express, then setup your environment using, e.g.
 
-	C:\Program Files\Microsoft Visual Studio 9.0\Common7\Tools\vsvars32.bat
+	C:\Program Files\Microsoft Visual Studio 10.0\Common7\Tools\vsvars32.bat
 
 (assuming the default installation location was chosen).
 
 Perl should now build using the win32/Makefile.  You will need to edit that
-file to set
-
-	CCTYPE = MSVC90FREE
-
-first.
+file to set CCTYPE to MSVC90FREE or MSVC100FREE first.
 
 =item Microsoft Visual C++ 2005 Express Edition
 
@@ -914,7 +909,7 @@ of O'Reilly and Associates, Inc. Used with permission.
 
 =item Jan Dubois E<lt>jand@activestate.comE<gt>
 
-=item Steve Hay E<lt>steve.hay@uk.radan.comE<gt>
+=item Steve Hay E<lt>steve.m.hay@googlemail.comE<gt>
 
 =back
 
@@ -943,6 +938,6 @@ Win9x support was added in 5.6 (Benjamin Stuhl).
 
 Support for 64-bit Windows added in 5.8 (ActiveState Corp).
 
-Last updated: 6 August 2010
+Last updated: 18 November 2010
 
 =cut
