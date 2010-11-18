@@ -231,6 +231,9 @@ The C<*$glob> on the second line returns a new immutable glob. That new
 glob is made an alias to C<*bar>. Then it is discarded. So the second
 assignment has no effect.
 
+It also means that C<tie $handle> will now tie C<$handle> as a scalar, even
+if it has had a glob assigned to it.
+
 The upside to this incompatible change is that bugs
 L<[perl #77496]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77496>,
 L<[perl #77502]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77502>,
