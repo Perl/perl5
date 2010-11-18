@@ -6232,15 +6232,30 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 #endif
 	) {
 	    cv_flags_t existing_builtin_attrs = CvFLAGS(cv) & CVf_BUILTIN_ATTRS;
-	    cv_undef(cv);
+	    AV *const temp_av = CvPADLIST(cv);
+	    CV *const temp_cv = CvOUTSIDE(cv);
+
+	    assert(!CvWEAKOUTSIDE(cv));
+	    assert(!CvCVGV_RC(cv));
+	    assert(CvGV(cv) == gv);
+
+	    SvPOK_off(cv);
 	    CvFLAGS(cv) = CvFLAGS(PL_compcv) | existing_builtin_attrs;
-	    if (!CvWEAKOUTSIDE(cv))
-		SvREFCNT_dec(CvOUTSIDE(cv));
 	    CvOUTSIDE(cv) = CvOUTSIDE(PL_compcv);
 	    CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(PL_compcv);
-	    CvOUTSIDE(PL_compcv) = 0;
 	    CvPADLIST(cv) = CvPADLIST(PL_compcv);
-	    CvPADLIST(PL_compcv) = 0;
+	    CvOUTSIDE(PL_compcv) = temp_cv;
+	    CvPADLIST(PL_compcv) = temp_av;
+
+#ifdef USE_ITHREADS
+	    if (CvFILE(cv) && !CvISXSUB(cv)) {
+		/* for XSUBs CvFILE point directly to static memory; __FILE__ */
+		Safefree(CvFILE(cv));
+    }
+#endif
+	    CvFILE_set_from_cop(cv, PL_curcop);
+	    CvSTASH_set(cv, PL_curstash);
+
 	    /* inner references to PL_compcv must be fixed up ... */
 	    pad_fixup_inner_anons(CvPADLIST(cv), PL_compcv, cv);
 	    if (PERLDB_INTER)/* Advice debugger on the new sub. */
