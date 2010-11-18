@@ -1,10 +1,11 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 518a985, except for:
+This has been completed up to f869c5854, except for:
 04777d295957ad270188e4debf51b523e07cc5b0
 c565ab54dc649bb62cd4d57149d7b2abb21df5f3
 1c8d11ca3d0ce8bc11562f159b94c2c7e62dea6c
+249534c343ab758089ce40786709465e328c8b2d
 I may have missed a few module version bumps.
 
 =head1 NAME
