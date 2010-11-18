@@ -5,7 +5,6 @@ This has been completed up to 518a985, except for:
 04777d295957ad270188e4debf51b523e07cc5b0
 c565ab54dc649bb62cd4d57149d7b2abb21df5f3
 1c8d11ca3d0ce8bc11562f159b94c2c7e62dea6c
-1830b3d9c87f8b1473b0a80759846f7a5dccae5a
 I may have missed a few module version bumps.
 
 =head1 NAME
@@ -162,6 +161,24 @@ have a name in 5.14, but can be referred to by C<\N{U+1F514}>.  The plan
 is that in Perl 5.16, C<\N{BELL}> will refer to U+1F514, and so all code
 that uses C<\N{BELL}> should convert by then to using C<\N{ALERT}>,
 C<\N{BEL}>, or C<"\a"> instead.
+
+=head2 Improved support for custom OPs
+
+Custom ops can now be registered with the new C<custom_op_register> C
+function and the C<XOP> structure. This will make it easier to add new
+properties of custom ops in the future. Two new properties have been added
+already, C<xop_class> and C<xop_peep>.
+
+C<xop_class> is one of the OA_*OP constants, and allows L<B> and other
+introspection mechanisms to work with custom ops that aren't BASEOPs.
+C<xop_peep> is a pointer to a function that will be called for ops of this
+type from C<Perl_rpeep>.
+
+See L<perlguts/Custom Operators> and L<perlapi/Custom Operators> for more
+detail.
+
+The old C<PL_custom_op_names>/C<PL_custom_op_descs> interface is still
+supported but discouraged.
 
 =head1 Security
 
