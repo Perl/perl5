@@ -718,7 +718,8 @@ Directory handles are now properly cloned when threads are created. In perl
 5.13.6, child threads simply stopped inheriting directory handles. In
 previous versions, threads would share handles, resulting in crashes.
 
-Building with Visual C++ 2010 is now supported.
+Support for building with Visual C++ 2010 is now underway, but is not yet
+complete. See F<README.win32> for more details.
 
 =item VMS
 
