@@ -720,6 +720,12 @@ previous versions, threads would share handles, resulting in crashes.
 
 Building with Visual C++ 2010 is now supported.
 
+=item VMS
+
+Record-oriented files (record format variable or variable wih fixed control)
+opened for write by the perlio layer will now be line buffered to prevent the
+introduction of spurious line breaks whenever the perlio buffer fills up.
+
 =back
 
 =head1 Internal Changes
