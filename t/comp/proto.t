@@ -18,7 +18,7 @@ BEGIN {
 # strict
 use strict;
 
-print "1..168\n";
+print "1..172\n";
 
 my $i = 1;
 
@@ -701,3 +701,43 @@ print "ok ", $i++, "\n";
 print "not "
  unless eval 'sub uniproto9 (;+) {} uniproto9 $_, 1' or warn $@;
 print "ok ", $i++, "\n";
+
+{
+  # Lack of prototype on a subroutine definition should override any prototype
+  # on the declaration.
+  sub z_zwap (&);
+
+  local $SIG{__WARN__} = sub {
+    my $thiswarn = join "",@_;
+    if ($thiswarn =~ /^Prototype mismatch: sub main::z_zwap/) {
+      print 'ok ', $i++, "\n";
+    } else {
+      print 'not ok ', $i++, "\n";
+      print STDERR $thiswarn;
+    }
+  };
+
+  eval q{sub z_zwap {return @_}};
+
+  if ($@) {
+    print "not ok ", $i++, "# $@";
+  } else {
+    print "ok ", $i++, "\n";
+  }
+
+
+  my @a = (6,4,2);
+  my @got  = eval q{z_zwap(@a)};
+
+  if ($@) {
+    print "not ok ", $i++, " # $@";
+  } else {
+    print "ok ", $i++, "\n";
+  }
+
+  if ("@got" eq "@a") {
+    print "ok ", $i++, "\n";
+  } else {
+    print "not ok ", $i++, " # >@got<\n";
+  }
+}
