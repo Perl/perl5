@@ -7,7 +7,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan( tests => 47 );
+plan( tests => 51 );
 
 # Used to segfault (bug #15479)
 fresh_perl_like(
@@ -69,7 +69,7 @@ ok( eval q{ no warnings 'deprecated'; defined %schoenmaker:: }, 'works in eval("
 }
 
 SKIP: {
-    eval { require B; 1 } or skip "no B", 23;
+    eval { require B; 1 } or skip "no B", 27;
 
     *b = \&B::svref_2object;
     my $CVf_ANON = B::CVf_ANON();
@@ -187,6 +187,35 @@ SKIP: {
 	$gv = $cv->GV;
 	ok($gv->isa(q/B::GV/), "anon CV has valid GV");
 	is($gv->NAME, '__ANON__', "anon CV has anon GV");
+    }
+
+    {
+	my $r;
+	{
+	    package bloop;
+
+	    BEGIN {
+		$r = \&main::whack;
+	    }
+	}
+
+	my $br = B::svref_2object($r);
+	is ($br->STASH->NAME, 'bloop',
+	    'stub records the package it was compiled in');
+	# Arguably this shouldn't quite be here, but it's easy to add it
+	# here, and tricky to figure out a different good place for it.
+	like ($br->FILE, qr/stash/i,
+	      'stub records the file it was compiled in');
+
+	# We need to take this reference "late", after the subroutine is
+	# defined.
+	$br = B::svref_2object(eval 'sub whack {}; \&whack');
+	die $@ if $@;
+
+	is ($br->STASH->NAME, 'main',
+	    'definition overrides the package it was compiled in');
+	like ($br->FILE, qr/eval/,
+	      'definition overrides the file it was compiled in');
     }
 }
 
