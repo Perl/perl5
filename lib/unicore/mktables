@@ -10157,7 +10157,7 @@ END
 
         my ($code_point, @fields) = split /\s*;\s*/, $_, -1;
         if ($code_point eq '0007') {
-            $fields[$UNICODE_1_NAME] = "ALERT";
+            $fields[$CHARNAME] = "ALERT";
         }
         elsif ($^V lt v5.15.0) { # For 5.16 will convert to use Unicode's name
             $fields[$CHARNAME] = "";
