@@ -435,6 +435,7 @@ C<SV*>.
 
 #define hv_iternext(hv)	hv_iternext_flags(hv, 0)
 #define hv_magic(hv, gv, how) sv_magic(MUTABLE_SV(hv), MUTABLE_SV(gv), how, NULL, 0)
+#define hv_undef(hv) Perl_hv_undef_flags(aTHX_ hv, 0)
 
 /* available as a function in hv.c */
 #define Perl_sharepvn(sv, len, hash) HEK_KEY(share_hek(sv, len, hash))

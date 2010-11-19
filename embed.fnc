@@ -505,7 +505,8 @@ Abmd	|HE*	|hv_store_ent	|NULLOK HV *hv|NULLOK SV *key|NULLOK SV *val\
 				|U32 hash
 AbmM	|SV**	|hv_store_flags	|NULLOK HV *hv|NULLOK const char *key \
 				|I32 klen|NULLOK SV *val|U32 hash|int flags
-Apd	|void	|hv_undef	|NULLOK HV *hv
+Amd	|void	|hv_undef	|NULLOK HV *hv
+poX	|void	|hv_undef_flags	|NULLOK HV *hv|U32 flags
 Am	|I32	|ibcmp		|NN const char* a|NN const char* b|I32 len
 AnpP	|I32	|foldEQ		|NN const char* a|NN const char* b|I32 len
 Am	|I32	|ibcmp_locale	|NN const char* a|NN const char* b|I32 len

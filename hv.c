@@ -1815,7 +1815,7 @@ Undefines the hash.
 */
 
 void
-Perl_hv_undef(pTHX_ HV *hv)
+Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 {
     dVAR;
     register XPVHV* xhv;
