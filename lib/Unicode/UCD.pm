@@ -1122,6 +1122,12 @@ on the context.
 This function only operates on officially approved (not provisional) named
 sequences.
 
+Note that as of Perl 5.14, C<\N{KATAKANA LETTER AINU P}> will insert the named
+sequence into double-quoted strings, and C<charnames::string_vianame("KATAKANA
+LETTER AINU P")> will return the same string this function does, but will also
+operate on character names that aren't named sequences, without you having to
+know which are which.  See L<charnames>.
+
 =cut
 
 my %NAMEDSEQ;
