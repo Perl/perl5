@@ -29,7 +29,8 @@ Ing-Simmons, Chip Salzenberg, Tim Bunce, Malcolm Beattie, Gurusamy
 Sarathy, Graham Barr, Jarkko Hietaniemi, Hugo van der Sanden,
 Michael Schwern, Rafael Garcia-Suarez, Nicholas Clark, Richard Clamp,
 Leon Brocard, Dave Mitchell, Jesse Vincent, Ricardo Signes, Steve Hay,
-Matt S Trout, David Golden, and Florian Ragwitz.
+Matt S Trout, David Golden, Florian Ragwitz, Tatsuhiko Miyagawa
+and Chris C<BinGOs> Williams.
 
 =head2 PUMPKIN?
 
@@ -432,6 +433,7 @@ the strings?).
  Florian  5.13.4        2010-Aug-20
  Steve    5.13.5        2010-Sep-19
  Miyagawa 5.13.6        2010-Oct-20
+ BinGOs   5.13.7        2010-Nov-20
 
 =head2 SELECTED RELEASE SIZES
 
