@@ -946,7 +946,8 @@ the assignment contained a subroutine.
 
 =item *
 
-Calling C<< ->import >> on a class lacking an import method could corrupt the stack result in strange behaviour. For instance,
+Calling C<< ->import >> on a class lacking an import method could corrupt
+the stack, resulting in strange behaviour. For instance,
 
   push @a, "foo", $b = bar->import;
 
