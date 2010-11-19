@@ -147,6 +147,21 @@ representing the IP address (you can use inet_ntoa() to convert the
 address to the four-dotted numeric format).  Will croak if the
 structure does not have AF_INET in the right place.
 
+=item pack_sockaddr_in6 PORT, IP6_ADDRESS, [ SCOPE_ID, [ FLOWINFO ] ]
+
+Takes two to four arguments, a port number, an opaque string (as returned by
+inet_pton()), optionally a scope ID number, and optionally a flow label
+number. Returns the sockaddr_in6 structure with those arguments packed in
+with AF_INET6 filled in. IPv6 equivalent of pack_sockaddr_in().
+
+=item unpack_sockaddr_in6 SOCKADDR_IN6
+
+Takes a sockaddr_in6 structure (as returned by pack_sockaddr_in6()) and
+returns an array of four elements: the port number, an opaque string
+representing the IPv6 address, the scope ID, and the flow label. (You can
+use inet_ntop() to convert the address to the usual string format). Will
+croak if the structure does not have AF_INET6 in the right place.
+
 =item sockaddr_un PATHNAME
 
 =item sockaddr_un SOCKADDR_UN
@@ -205,6 +220,7 @@ require XSLoader;
 	sockaddr_family
 	pack_sockaddr_in unpack_sockaddr_in
 	pack_sockaddr_un unpack_sockaddr_un
+	pack_sockaddr_in6 unpack_sockaddr_in6
 	sockaddr_in sockaddr_un
 	INADDR_ANY INADDR_BROADCAST INADDR_LOOPBACK INADDR_NONE
 	AF_802

@@ -455,6 +455,64 @@ unpack_sockaddr_in(sin_sv)
 	}
 
 void
+pack_sockaddr_in6(port, sin6_addr, scope_id=0, flowinfo=0)
+	unsigned short	port
+	SV *	sin6_addr
+	unsigned long	scope_id
+	unsigned long	flowinfo
+	CODE:
+	{
+#ifdef AF_INET6
+	struct sockaddr_in6 sin6;
+	char * addrbytes;
+	STRLEN addrlen;
+	if (DO_UTF8(sin6_addr) && !sv_utf8_downgrade(sin6_addr, 1))
+	    croak("Wide character in %s", "Socket::pack_sockaddr_in6");
+	addrbytes = SvPVbyte(sin6_addr, addrlen);
+	if(addrlen != sizeof(sin6.sin6_addr))
+	    croak("Bad arg length %s, length is %d, should be %d",
+		  "Socket::pack_sockaddr_in6", addrlen, sizeof(sin6.sin6_addr));
+	Zero(&sin6, sizeof(sin6), char);
+	sin6.sin6_family = AF_INET6;
+	sin6.sin6_port = htons(port);
+	sin6.sin6_flowinfo = htonl(flowinfo);
+	Copy(addrbytes, &sin6.sin6_addr, sizeof(sin6.sin6_addr), char);
+	sin6.sin6_scope_id = scope_id;
+	ST(0) = newSVpvn_flags((char *)&sin6, sizeof(sin6), SVs_TEMP);
+#else
+	ST(0) = (SV*)not_here("pack_sockaddr_in6");
+#endif
+	}
+
+void
+unpack_sockaddr_in6(sin6_sv)
+	SV *	sin6_sv
+	PPCODE:
+	{
+#ifdef AF_INET6
+	STRLEN addrlen;
+	struct sockaddr_in6 sin6;
+	char * addrbytes = SvPVbyte(sin6_sv, addrlen);
+	if (addrlen != sizeof(sin6))
+	    croak("Bad arg length for %s, length is %d, should be %d",
+		    "Socket::unpack_sockaddr_in6",
+		    addrlen, sizeof(sin6));
+	Copy(addrbytes, &sin6, sizeof(sin6), char);
+	if(sin6.sin6_family != AF_INET6)
+	    croak("Bad address family for %s, got %d, should be %d",
+		    "Socket::unpack_sockaddr_in6",
+		    sin6.sin6_family, AF_INET6);
+	EXTEND(SP, 4);
+	mPUSHi(ntohs(sin6.sin6_port));
+	mPUSHp((char *)&sin6.sin6_addr, sizeof(sin6.sin6_addr));
+	mPUSHi(sin6.sin6_scope_id);
+	mPUSHi(ntohl(sin6.sin6_flowinfo));
+#else
+	ST(0) = (SV*)not_here("pack_sockaddr_in6");
+#endif
+	}
+
+void
 inet_ntop(af, ip_address_sv)
         int     af
         SV *    ip_address_sv
