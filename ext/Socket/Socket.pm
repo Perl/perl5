@@ -147,6 +147,14 @@ representing the IP address (you can use inet_ntoa() to convert the
 address to the four-dotted numeric format).  Will croak if the
 structure does not have AF_INET in the right place.
 
+=item sockaddr_in6 PORT, IP6_ADDRESS, [ SCOPE_ID, [ FLOWINFO ] ]
+
+=item sockaddr_in6 SOCKADDR_IN6
+
+In list context, unpacks its SOCKADDR_IN6 argument according to
+unpack_sockaddr_in6(). In scalar context, packs its arguments according to
+pack_sockaddr_in6().
+
 =item pack_sockaddr_in6 PORT, IP6_ADDRESS, [ SCOPE_ID, [ FLOWINFO ] ]
 
 Takes two to four arguments, a port number, an opaque string (as returned by
@@ -221,7 +229,7 @@ require XSLoader;
 	pack_sockaddr_in unpack_sockaddr_in
 	pack_sockaddr_un unpack_sockaddr_un
 	pack_sockaddr_in6 unpack_sockaddr_in6
-	sockaddr_in sockaddr_un
+	sockaddr_in sockaddr_in6 sockaddr_un
 	INADDR_ANY INADDR_BROADCAST INADDR_LOOPBACK INADDR_NONE
 	AF_802
 	AF_AAL
@@ -434,6 +442,17 @@ sub sockaddr_in {
     } else {
 	croak "usage:   sin_sv = sockaddr_in(port,iaddr))" unless @_ == 2;
         pack_sockaddr_in(@_);
+    }
+}
+
+sub sockaddr_in6 {
+    if (wantarray) {
+	croak "usage:   (port,in6addr,scope_id,flowinfo) = sockaddr_in6(sin6_sv)" unless @_ == 1;
+	unpack_sockaddr_in6(@_);
+    }
+    else {
+	croak "usage:   sin6_sv = sockaddr_in6(port,in6addr,[scope_id,[flowinfo]])" unless @_ >= 2 and @_ <= 4;
+	pack_sockaddr_in6(@_);
     }
 }
 
