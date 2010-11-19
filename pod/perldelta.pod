@@ -139,8 +139,9 @@ L<perlmod/"BEGIN, UNITCHECK, CHECK, INIT and END">.
 
 =head2 Unicode Version 6.0 is now supported (mostly)
 
-Perl comes with the Unicode 6.0 data base, with one exception noted
-below.
+Perl comes with the Unicode 6.0 data base updated with
+L<Corrigendum #8|http://www.unicode.org/versions/corrigendum8.html>,
+with one exception noted below.
 See L<http://unicode.org/versions/Unicode6.0.0> for details on the new
 release.  Perl does not support any Unicode provisional properties,
 including the new ones for this release, but their database files are

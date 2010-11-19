@@ -65,12 +65,14 @@ is(($str =~ /(\p{Other::Class}+)/)[0], '@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_');
 # make sure it finds class in other OTHER package
 is(($str =~ /(\p{A::B::Intersection}+)/)[0], '@ABCDEFGHIJKLMNO');
 
-# lib/unicore/Bc/AL.pl
-$str = "\x{070D}\x{070E}\x{070F}\x{0710}\x{0711}";
-is(($str =~ /(\P{BidiClass: ArabicLetter}+)/)[0], "\x{070F}");
-is(($str =~ /(\P{BidiClass: AL}+)/)[0], "\x{070F}");
-is(($str =~ /(\P{BC :ArabicLetter}+)/)[0], "\x{070F}");
-is(($str =~ /(\P{bc=AL}+)/)[0], "\x{070F}");
+# lib/unicore/lib/Bc/AL.pl.  U+070E is unassigned, currently, but still has
+# bidi class AL.  The first one in the sequence that doesn't is 0711, which is
+# BC=NSM.
+$str = "\x{070D}\x{070E}\x{070F}\x{0710}\x{0711}\x{0712}";
+is(($str =~ /(\P{BidiClass: ArabicLetter}+)/)[0], "\x{0711}");
+is(($str =~ /(\P{BidiClass: AL}+)/)[0], "\x{0711}");
+is(($str =~ /(\P{BC :ArabicLetter}+)/)[0], "\x{0711}");
+is(($str =~ /(\P{bc=AL}+)/)[0], "\x{0711}");
 
 # make sure InGreek works
 $str = "[\x{038B}\x{038C}\x{038D}]";

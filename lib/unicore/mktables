@@ -10153,11 +10153,15 @@ END
         # allow the BELL name for U+1F514, so that the old usage can be
         # deprecated for one cycle.
 
-        return if $_ !~ /^(?:0007|1F514);/;
+        return if $_ !~ /^(?:0007|1F514|070F);/;
 
         my ($code_point, @fields) = split /\s*;\s*/, $_, -1;
         if ($code_point eq '0007') {
             $fields[$CHARNAME] = "ALERT";
+        }
+        elsif ($code_point eq '070F') { # Unicode Corrigendum #8; see
+                            # http://www.unicode.org/versions/corrigendum8.html
+            $fields[$BIDI] = "AL";
         }
         elsif ($^V lt v5.15.0) { # For 5.16 will convert to use Unicode's name
             $fields[$CHARNAME] = "";
