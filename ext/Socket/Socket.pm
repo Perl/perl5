@@ -112,6 +112,16 @@ Note - does not return a number.
 Returns the 4-byte 'invalid' ip address.  Normally equivalent
 to inet_aton('255.255.255.255').
 
+=item IN6ADDR_ANY
+
+Returns the 16-byte wildcard IPv6 address. Normally equivalent
+to inet_pton(AF_INET6, "::")
+
+=item IN6ADDR_LOOPBACK
+
+Returns the 16-byte loopback IPv6 address. Normally equivalent
+to inet_pton(AF_INET6, "::1")
+
 =item sockaddr_family SOCKADDR
 
 Takes a sockaddr structure (as returned by pack_sockaddr_in(),
@@ -231,6 +241,7 @@ require XSLoader;
 	pack_sockaddr_in6 unpack_sockaddr_in6
 	sockaddr_in sockaddr_in6 sockaddr_un
 	INADDR_ANY INADDR_BROADCAST INADDR_LOOPBACK INADDR_NONE
+	IN6ADDR_ANY IN6ADDR_LOOPBACK
 	AF_802
 	AF_AAL
 	AF_APPLETALK
