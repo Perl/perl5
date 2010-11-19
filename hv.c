@@ -2081,14 +2081,17 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 		iter->xhv_name_count = 0;
 	      }
 	      else {
-		spot = (HEK **)iter->xhv_name;
 		if(iter->xhv_name_count > 0) {
 		    /* shift some things over */
-		    Renew(spot, iter->xhv_name_count, HEK *);
-		    spot[iter->xhv_name_count++] = spot[1];
+		    Renewc(
+		     iter->xhv_name, iter->xhv_name_count + 1, HEK *, HEK
+		    );
+		    spot = (HEK **)iter->xhv_name;
+		    spot[iter->xhv_name_count] = spot[1];
 		    spot[1] = spot[0];
+		    iter->xhv_name_count = -(iter->xhv_name_count + 1);
 		}
-		else if(*spot) {
+		else if(*(spot = (HEK **)iter->xhv_name)) {
 		    unshare_hek_or_pvn(*spot, 0, 0, 0);
 		}
 	      }
