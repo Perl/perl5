@@ -2,6 +2,7 @@ package Unicode::UCD;
 
 use strict;
 use warnings;
+use charnames ();
 
 our $VERSION = '0.29';
 
@@ -1129,13 +1130,14 @@ my %NAMEDSEQ;
 
 sub _namedseq {
     unless (%NAMEDSEQ) {
-	if (openunicode(\$NAMEDSEQFH, "NamedSequences.txt")) {
+	if (openunicode(\$NAMEDSEQFH, "Name.pl")) {
 	    local $_;
 	    while (<$NAMEDSEQFH>) {
-		if (/^(.+)\s*;\s*([0-9A-F]+(?: [0-9A-F]+)*)$/) {
-		    my ($n, $s) = ($1, $2);
-		    my @s = map { chr(hex($_)) } split(' ', $s);
-		    $NAMEDSEQ{$n} = join("", @s);
+		if (/^ [0-9A-F]+ \  /x) {
+                    chomp;
+                    my ($sequence, $name) = split /\t/;
+		    my @s = map { chr(hex($_)) } split(' ', $sequence);
+		    $NAMEDSEQ{$name} = join("", @s);
 		}
 	    }
 	    close($NAMEDSEQFH);
@@ -1144,18 +1146,30 @@ sub _namedseq {
 }
 
 sub namedseq {
-    _namedseq() unless %NAMEDSEQ;
+
+    # Use charnames::string_vianame() which now returns this information,
+    # unless the caller wants the hash returned, in which case we read it in,
+    # and thereafter use it instead of calling charnames, as it is faster.
+
     my $wantarray = wantarray();
     if (defined $wantarray) {
 	if ($wantarray) {
 	    if (@_ == 0) {
+                _namedseq() unless %NAMEDSEQ;
 		return %NAMEDSEQ;
 	    } elsif (@_ == 1) {
-		my $s = $NAMEDSEQ{ $_[0] };
+		my $s;
+                if (%NAMEDSEQ) {
+                    $s = $NAMEDSEQ{ $_[0] };
+                }
+                else {
+                    $s = charnames::string_vianame($_[0]);
+                }
 		return defined $s ? map { ord($_) } split('', $s) : ();
 	    }
 	} elsif (@_ == 1) {
-	    return $NAMEDSEQ{ $_[0] };
+            return $NAMEDSEQ{ $_[0] } if %NAMEDSEQ;
+            return charnames::string_vianame($_[0]);
 	}
     }
     return;
