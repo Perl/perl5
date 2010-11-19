@@ -751,7 +751,7 @@ PerlIO_destruct(pTHX)
 	    PerlIO *x = &(f->next);
 	    const PerlIOl *l;
 	    while ((l = *x)) {
-		if (l->tab->kind & PERLIO_K_DESTRUCT) {
+		if (l->tab && l->tab->kind & PERLIO_K_DESTRUCT) {
 		    PerlIO_debug("Destruct popping %s\n", l->tab->name);
 		    PerlIO_flush(x);
 		    PerlIO_pop(aTHX_ x);
@@ -771,8 +771,9 @@ PerlIO_pop(pTHX_ PerlIO *f)
     const PerlIOl *l = *f;
     VERIFY_HEAD(f);
     if (l) {
-	PerlIO_debug("PerlIO_pop f=%p %s\n", (void*)f, l->tab->name);
-	if (l->tab->Popped) {
+	PerlIO_debug("PerlIO_pop f=%p %s\n", (void*)f,
+			    l->tab ? l->tab->name : "(Null)");
+	if (l->tab && l->tab->Popped) {
 	    /*
 	     * If popped returns non-zero do not free its layer structure
 	     * it has either done so itself, or it is shared and still in
@@ -1309,7 +1310,7 @@ PerlIOBase_binmode(pTHX_ PerlIO *f)
 {
    if (PerlIOValid(f)) {
 	/* Is layer suitable for raw stream ? */
-	if (PerlIOBase(f)->tab->kind & PERLIO_K_RAW) {
+	if (PerlIOBase(f)->tab && PerlIOBase(f)->tab->kind & PERLIO_K_RAW) {
 	    /* Yes - turn off UTF-8-ness, to undo UTF-8 locale effects */
 	    PerlIOBase(f)->flags &= ~PERLIO_F_UTF8;
 	}
@@ -1338,7 +1339,7 @@ PerlIORaw_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 	 */
 	t = f;
 	while (t && (l = *t)) {
-	    if (l->tab->Binmode) {
+	    if (l->tab && l->tab->Binmode) {
 		/* Has a handler - normal case */
 		if ((*l->tab->Binmode)(aTHX_ t) == 0) {
 		    if (*t == l) {
@@ -1356,7 +1357,8 @@ PerlIORaw_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 	    }
 	}
 	if (PerlIOValid(f)) {
-	    PerlIO_debug(":raw f=%p :%s\n", (void*)f, PerlIOBase(f)->tab->name);
+	    PerlIO_debug(":raw f=%p :%s\n", (void*)f,
+		PerlIOBase(f)->tab ? PerlIOBase(f)->tab->name : "(Null)");
 	    return 0;
 	}
     }
@@ -1409,7 +1411,8 @@ int
 PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
 {
     PerlIO_debug("PerlIO_binmode f=%p %s %c %x %s\n", (void*)f,
-                 (PerlIOBase(f)) ? PerlIOBase(f)->tab->name : "(Null)",
+                 (PerlIOBase(f) && PerlIOBase(f)->tab) ?
+		       	PerlIOBase(f)->tab->name : "(Null)",
                  iotype, mode, (names) ? names : "(Null)");
 
     if (names) {
@@ -1436,7 +1439,9 @@ PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
 		/* Perhaps we should turn on bottom-most aware layer
 		   e.g. Ilya's idea that UNIX TTY could serve
 		 */
-		if (PerlIOBase(f)->tab->kind & PERLIO_K_CANCRLF) {
+		if (PerlIOBase(f)->tab &&
+		    PerlIOBase(f)->tab->kind & PERLIO_K_CANCRLF)
+		{
 		    if (!(PerlIOBase(f)->flags & PERLIO_F_CRLF)) {
 			/* Not in text mode - flush any pending stuff and flip it */
 			PerlIO_flush(f);
@@ -1608,7 +1613,7 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 	    layera = PerlIO_list_alloc(aTHX);
 	    while (l) {
 		SV *arg = NULL;
-		if (l->tab->Getarg)
+		if (l->tab && l->tab->Getarg)
 		    arg = (*l->tab->Getarg) (aTHX_ &l, NULL, 0);
 		PerlIO_list_push(aTHX_ layera, l->tab,
 				 (arg) ? arg : &PL_sv_undef);
@@ -1914,7 +1919,7 @@ PerlIOUtf8_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
     PERL_UNUSED_ARG(mode);
     PERL_UNUSED_ARG(arg);
     if (PerlIOValid(f)) {
-	if (tab->kind & PERLIO_K_UTF8)
+	if (tab && tab->kind & PERLIO_K_UTF8)
 	    PerlIOBase(f)->flags |= PERLIO_F_UTF8;
 	else
 	    PerlIOBase(f)->flags &= ~PERLIO_F_UTF8;
@@ -2083,7 +2088,7 @@ PerlIOBase_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 
     l->flags &= ~(PERLIO_F_CANREAD | PERLIO_F_CANWRITE |
 		  PERLIO_F_TRUNCATE | PERLIO_F_APPEND);
-    if (tab->Set_ptrcnt != NULL)
+    if (tab && tab->Set_ptrcnt != NULL)
 	l->flags |= PERLIO_F_FASTGETS;
     if (mode) {
 	if (*mode == IoTYPE_NUMERIC || *mode == IoTYPE_IMPLICIT)
@@ -2312,8 +2317,9 @@ PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 	SV *arg = NULL;
 	char buf[8];
 	PerlIO_debug("PerlIOBase_dup %s f=%p o=%p param=%p\n",
-		     self->name, (void*)f, (void*)o, (void*)param);
-	if (self->Getarg)
+		     self ? self->name : "(Null)",
+		     (void*)f, (void*)o, (void*)param);
+	if (self && self->Getarg)
 	    arg = (*self->Getarg)(aTHX_ o, param, flags);
 	f = PerlIO_push(aTHX_ f, self, PerlIO_modestr(o,buf), arg);
 	if (PerlIOBase(o)->flags & PERLIO_F_UTF8)
@@ -2644,7 +2650,7 @@ PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 		int perm, PerlIO *f, int narg, SV **args)
 {
     if (PerlIOValid(f)) {
-	if (PerlIOBase(f)->flags & PERLIO_F_OPEN)
+	if (PerlIOBase(f)->tab && PerlIOBase(f)->flags & PERLIO_F_OPEN)
 	    (*PerlIOBase(f)->tab->Close)(aTHX_ f);
     }
     if (narg > 0) {
