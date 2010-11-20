@@ -20,7 +20,9 @@ no_index:
     - dist/constant
     - dist/Cwd
     - dist/Data-Dumper
+    - dist/ExtUtils-Command
     - dist/ExtUtils-Install
+    - dist/ExtUtils-Manifest
     - dist/ExtUtils-ParseXS
     - dist/Filter-Simple
     - dist/I18N-LangTags
@@ -30,6 +32,7 @@ no_index:
     - dist/Locale-Maketext
     - dist/Math-BigInt
     - dist/Math-BigInt-FastCalc
+    - dist/Math-BigRat
     - dist/Module-CoreList
     - dist/Net-Ping
     - dist/Pod-Perldoc
