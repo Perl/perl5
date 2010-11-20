@@ -784,7 +784,7 @@ complete. See F<README.win32> for more details.
 
 =item VMS
 
-Record-oriented files (record format variable or variable wih fixed control)
+Record-oriented files (record format variable or variable with fixed control)
 opened for write by the perlio layer will now be line buffered to prevent the
 introduction of spurious line breaks whenever the perlio buffer fills up.
 
