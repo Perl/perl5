@@ -1382,10 +1382,11 @@ sub populate_char_info ($) {
             $end = min($block->containing_range($i)->end,
                        $unassigned_sans_noncharacters-> containing_range($i)->
                                                                          end);
-        } else {
-            my_carp_bug("Can't figure out how to annotate"
-                        . sprintf("U+%04X", $i)
-                        . "Proceeding anyway.");
+        }
+        else {
+            Carp::my_carp_bug("Can't figure out how to annotate "
+                              . sprintf("U+%04X", $i)
+                              . ".  Proceeding anyway.");
             $viacode[$i] = 'UNKNOWN';
             $annotate_char_type[$i] = $UNKNOWN_TYPE;
             $printable[$i] = 0;
