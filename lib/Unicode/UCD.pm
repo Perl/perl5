@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use charnames ();
 
-our $VERSION = '0.29';
+our $VERSION = '0.30';
 
 use Storable qw(dclone);
 
