@@ -18,7 +18,7 @@ use strict;
 use Unicode::UCD;
 use Test::More;
 
-BEGIN { plan tests => 256 };
+BEGIN { plan tests => 258 };
 
 use Unicode::UCD 'charinfo';
 
