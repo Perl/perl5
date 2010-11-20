@@ -1077,7 +1077,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
 	if (mro_changes == 1) mro_isa_changed_in(hv);
 	else if (mro_changes == 2)
-	    mro_package_moved(NULL, stash, gv, NULL, 1);
+	    mro_package_moved(NULL, stash, gv, 1);
 
 	return sv;
     }
@@ -1771,7 +1771,7 @@ S_hfreeentries(pTHX_ HV *hv)
 		    if (klen > 1 && key[klen-1]==':' && key[klen-2]==':') {
 			mro_package_moved(
 			 NULL, GvHV(HeVAL(oentry)),
-			 (GV *)HeVAL(oentry), NULL, 0
+			 (GV *)HeVAL(oentry), 0
  			);
 		    }
 		}

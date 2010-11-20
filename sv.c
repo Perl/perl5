@@ -3683,7 +3683,7 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
 	if(old_stash ? (HV *)HvENAME_get(old_stash) : stash)
 	    mro_package_moved(
 		stash, old_stash,
-		(GV *)dstr, NULL, 0
+		(GV *)dstr, 0
 	    );
     }
     else if(mro_changes) mro_method_changed_in(GvSTASH(dstr));
@@ -3801,7 +3801,7 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 	    ) {
 		mro_package_moved(
 		    (HV *)sref, (HV *)dref,
-		    (GV *)dstr, NULL, 0
+		    (GV *)dstr, 0
 		);
 	    }
 	}
@@ -4113,7 +4113,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 		    )
 			mro_package_moved(
 			 stash, old_stash,
-			 (GV *)dstr, NULL, 0
+			 (GV *)dstr, 0
 			);
 		}
 	    }

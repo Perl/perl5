@@ -679,9 +679,7 @@ S_mro_clean_isarev(pTHX_ HV * const isa, const char * const name,
 Call this function to signal to a stash that it has been assigned to
 another spot in the stash hierarchy. C<stash> is the stash that has been
 assigned. C<oldstash> is the stash it replaces, if any. C<gv> is the glob
-that is actually being assigned to. C<newname> and C<newname_len> are the
-full name of the GV. If these last two arguments are omitted, they can be
-inferred from C<gv>. C<gv> can be omitted if C<newname> is given.
+that is actually being assigned to.
 
 This can also be called with a null first argument to
 indicate that C<oldstash> has been deleted.
@@ -694,21 +692,22 @@ It also sets the effective names (C<HvENAME>) on all the stashes as
 appropriate.
 
 If the C<gv> is present and is not in the symbol table, then this function
-simply returns. This checked will be skipped if C<newname_len> is set to 1
-and C<newname> is null.
+simply returns. This checked will be skipped if C<flags & 1>.
 
 =cut
 */
 void
 Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
-                       const GV *gv, const char *newname,
-                       I32 newname_len)
+                       const GV * const gv, U32 flags)
 {
+    SV * const namesv = sv_newmortal();
+    const char * newname;
+    STRLEN newname_len;
     HV *stashes;
     HE* iter;
 
+    PERL_ARGS_ASSERT_MRO_PACKAGE_MOVED;
     assert(stash || oldstash);
-    assert(gv || newname);
 
     /* Determine the name of the location that stash was assigned to
      * or from which oldstash was removed.
@@ -723,20 +722,15 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
      *   *$globref = *frelp::;
      *      # calls mro_package_moved(%frelp::, %baz::, *$globref, NULL, 0)
      *
-     * If newname is not null, then we trust that the caller gave us the
-     * right name. Otherwise, we get it from the gv. But if the gv is not
+     * So we get it from the gv. But if the gv is not
      * in the symbol table, then we just return. We skip that check,
-     * however, if newname_len is 1 and newname is null.
+     * however, if flags & 1.
      */
-    if(!newname && gv) {
-	SV * const namesv = sv_newmortal();
-	STRLEN len;
-	gv_fullname4(namesv, gv, NULL, 0);
-	if( newname_len != 1
+    gv_fullname4(namesv, gv, NULL, 0);
+    if( !(flags & 1)
 	 && gv_fetchsv(namesv, GV_NOADD_NOINIT, SVt_PVGV) != gv ) return;
-	newname = SvPV_const(namesv, len);
-	newname_len = len - 2; /* skip trailing :: */
-    }
+    newname = SvPV_const(namesv, newname_len);
+    newname_len -= 2; /* skip trailing :: */
 
     /* Get a list of all the affected classes. */
     /* We cannot simply pass them all to mro_isa_changed_in to avoid

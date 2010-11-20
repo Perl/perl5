@@ -892,7 +892,7 @@ PP(pp_undef)
 	    GvMULTI_on(sv);
 
             if(stash)
-                mro_package_moved(NULL, stash, (const GV *)sv, NULL, 0);
+                mro_package_moved(NULL, stash, (const GV *)sv, 0);
             stash = NULL;
             /* undef *Foo::ISA */
             if( strEQ(GvNAME((const GV *)sv), "ISA")
