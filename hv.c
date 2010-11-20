@@ -1803,7 +1803,7 @@ S_hfreeentries(pTHX_ HV *hv)
 
     HvARRAY(hv) = orig_array;
 
-    if (has_aux)
+    if (has_aux && current_aux)
 	SvFLAGS(hv) |= SVf_OOK;
     else
 	SvFLAGS(hv) &=~SVf_OOK;
