@@ -245,16 +245,6 @@ L<[perl #75254]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75254>.
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>, which prints stub
-entries to STDOUT.  Results can be pasted in place of the '=head2' entries
-below.  A paragraph summary for important changes should then be added by hand.
-In an ideal world, dual-life modules would have a F<Changes> file that could be
-cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
 =head2 New Modules and Pragmata
 
 =over 4
