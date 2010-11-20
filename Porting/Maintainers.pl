@@ -241,7 +241,7 @@ use File::Glob qw(:case);
     'AutoLoader' =>
 	{
 	'MAINTAINER'	=> 'smueller',
-	'DISTRIBUTION'	=> 'SMUELLER/AutoLoader-5.70.tar.gz',
+	'DISTRIBUTION'	=> 'SMUELLER/AutoLoader-5.71.tar.gz',
 	'FILES'		=> q[cpan/AutoLoader],
 	'EXCLUDED'	=> [ qw( t/00pod.t ) ],
 	'UPSTREAM'	=> 'cpan',
@@ -1227,7 +1227,7 @@ use File::Glob qw(:case);
     'SelfLoader' =>
 	{
 	'MAINTAINER'	=> 'smueller',
-	'DISTRIBUTION'	=> 'SMUELLER/SelfLoader-1.17.tar.gz',
+	'DISTRIBUTION'	=> 'SMUELLER/SelfLoader-1.18.tar.gz',
 	'FILES'		=> q[dist/SelfLoader],
 	'EXCLUDED'	=> [ qw{ t/00pod.t } ],
 	'UPSTREAM'	=> 'blead',
