@@ -164,7 +164,10 @@ my $map_directory = 'To';        # Where map files go.
 # out.  But all the ones which can be used in regular expression \p{} and \P{}
 # constructs will.  Generally a property will have either its map table or its
 # match tables written but not both.  Again, what gets written is controlled
-# by lists which can easily be changed.
+# by lists which can easily be changed.  Properties have a 'Type', like
+# binary, or string, or enum depending on how many match tables there are and
+# the content of the maps.  This 'Type' is different than a range 'Type', so
+# don't get confused by the two concepts having the same name.
 #
 # For information about the Unicode properties, see Unicode's UAX44 document:
 
@@ -189,7 +192,7 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # files for some are suppressed from apparent lack of demand for them.  You
 # can change which are output by changing lists in this program.
 #
-# The old version of mktables emphasized the term "Fuzzy" to mean Unocde's
+# The old version of mktables emphasized the term "Fuzzy" to mean Unicode's
 # loose matchings rules (from Unicode TR18):
 #
 #    The recommended names for UCD properties and property values are in
