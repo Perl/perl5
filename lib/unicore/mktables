@@ -27,12 +27,14 @@ require 5.010_001;
 use strict;
 use warnings;
 use Carp;
+use Config;
 use File::Find;
 use File::Path;
 use File::Spec;
 use Text::Tabs;
 
 sub DEBUG () { 0 }  # Set to 0 for production; 1 for development
+my $debugging_build = $Config{"ccflags"} =~ /-DDEBUGGING/;
 
 ##########################################################################
 #
@@ -633,8 +635,9 @@ my $make_list = 1;             # ? Should we write $file_list.  Set to always
                                # special things
 my $glob_list = 0;             # ? Should we try to include unknown .txt files
                                # in the input.
-my $output_range_counts = 1;   # ? Should we include the number of code points
-                               # in ranges in the output
+my $output_range_counts = $debugging_build;   # ? Should we include the number
+                                              # of code points in ranges in
+                                              # the output
 my $annotate = 0;              # ? Should character names be in the output
 
 # Verbosity levels; 0 is quiet
@@ -694,6 +697,8 @@ while (@ARGV) {
     }
     elsif ($arg eq '-annotate') {
         $annotate = 1;
+        $debugging_build = 1;
+        $output_range_counts = 1;
     }
     else {
         my $with_c = 'with';
@@ -4800,6 +4805,8 @@ sub trace { return main::trace(@_); }
 
     sub add_comment { # Adds the parameter as a comment.
 
+        return unless $debugging_build;
+
         my $self = shift;
         my $comment = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
@@ -4959,7 +4966,8 @@ sub trace { return main::trace(@_); }
                 # If there is a range and doesn't need a single point range
                 # output
                 if ($start != $end && ! $range_size_1) {
-                    push @OUT, sprintf "%04X\t%04X\t%s", $start, $end, $value;
+                    push @OUT, sprintf "%04X\t%04X", $start, $end;
+                    $OUT[-1] .= "\t$value" if $value ne "";
 
                     # Add a comment with the size of the range, if requested.
                     # Expand Tabs to make sure they all start in the same
@@ -5566,6 +5574,8 @@ sub trace { return main::trace(@_); }
     sub set_final_comment {
         # Just before output, create the comment that heads the file
         # containing this table.
+
+        return unless $debugging_build;
 
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
@@ -6649,6 +6659,8 @@ sub trace { return main::trace(@_); }
         # This should be called only with the leader match table of all the
         # ones that share the same file.  It lists all such tables, ordered so
         # that related ones are together.
+
+        return unless $debugging_build;
 
         my $leader = shift;   # Should only be called on the leader table of
                               # an equivalent group
