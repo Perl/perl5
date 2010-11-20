@@ -1,8 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to f869c5854, except for:
-249534c343ab758089ce40786709465e328c8b2d
+This has been completed up to f869c5854
 I may have missed a few module version bumps.
 
 =head1 NAME
@@ -890,6 +889,14 @@ L<[perl #79138]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=79138>.
 A signal handler called within a signal handler could cause leaks or
 double-frees. Now fixed.
 L<[perl #76248]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=76248>.
+
+=item *
+
+When trying to report C<Use of uninitialized value $Foo::BAR>, crashes could
+occur if the GLOB of the global variable causing the warning has been detached
+from its original stash by, for example C<delete $::{'Foo::'}>. This has been
+fixed by disabling the reporting of variable names in the warning in those
+cases.
 
 =back
 
