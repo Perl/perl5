@@ -771,11 +771,11 @@ Also see:
 
 =item *
 
-Mailing list: cpan-testers@perl.org
+Mailing list: cpan-testers-discuss@perl.org
 
 =item *
 
-Testing results: http://testers.cpan.org/
+Testing results: http://www.cpantesters.org/
 
 =back
 
