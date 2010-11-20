@@ -218,15 +218,15 @@ PP(pp_rv2gv)
 	    if (sv) SvFAKE_off(sv);
 	}
     }
-    if (PL_op->op_private & OPpLVAL_INTRO)
-	save_gp(MUTABLE_GV(sv), !(PL_op->op_flags & OPf_SPECIAL));
     if (sv && SvFAKE(sv)) {
 	SV *newsv = sv_newmortal();
 	sv_setsv_flags(newsv, sv, 0);
 	SvFAKE_off(newsv);
-	SETs(newsv);
+	sv = newsv;
     }
-    else SETs(sv);
+    if (PL_op->op_private & OPpLVAL_INTRO)
+	save_gp(MUTABLE_GV(sv), !(PL_op->op_flags & OPf_SPECIAL));
+    SETs(sv);
     RETURN;
 }
 
