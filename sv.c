@@ -6048,7 +6048,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		PL_last_swash_hv = NULL;
 	    }
 	    Perl_hv_kill_backrefs(aTHX_ MUTABLE_HV(sv));
-	    hv_undef(MUTABLE_HV(sv));
+	    Perl_hv_undef_flags(aTHX_ MUTABLE_HV(sv), HV_NAME_SETALL);
 	    break;
 	case SVt_PVAV:
 	    {

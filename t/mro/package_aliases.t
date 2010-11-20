@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 use warnings;
-plan(tests => 21);
+plan(tests => 23);
 
 {
     package New;
@@ -288,3 +288,22 @@ pass("mro_package_moved and self-referential packages");
     is $accum, 'aoeaa-<undef>',
      'Deleting globs whose loc in the symtab differs from gv_fullname'
 }
+
+# Pathological test for undeffing a stash that has an alias.
+*Ghelp:: = *Neen::;
+@Subclass::ISA = 'Ghelp';
+undef %Ghelp::;
+sub Frelp::womp { "clumpren" }
+eval '
+  $Neen::whatever++;
+  @Neen::ISA = "Frelp";
+';
+is eval { 'Subclass'->womp }, 'clumpren',
+ 'Changes to @ISA after undef via original name';
+undef %Ghelp::;
+eval '
+  $Ghelp::whatever++;
+  @Ghelp::ISA = "Frelp";
+';
+is eval { 'Subclass'->womp }, 'clumpren',
+ 'Changes to @ISA after undef via alias';

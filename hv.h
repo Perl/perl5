@@ -592,6 +592,9 @@ a string/length pair, and no precomputed hash.
 #define HV_DELETE		0x40
 #define HV_FETCH_EMPTY_HE	0x80 /* Leave HeVAL null. */
 
+/* Must not conflict with HVhek_UTF8 */
+#define HV_NAME_SETALL		0x02
+
 /*
 =for apidoc newHV
 
