@@ -896,7 +896,7 @@ to the Perl community will be missed.
 =head1 Acknowledgements
 
 Perl 5.13.7 represents approximately one month of development since Perl 5.13.6
-and contains 72427 lines of changes across 516 files from 39 authors and committers:
+and contains 73100 lines of changes across 518 files from 39 authors and committers:
 
 Abhijit Menon-Sen, Abigail, Ben Morrow, Chas. J. Owens IV, Chris 'BinGOs' Williams, Craig A. Berry,
 David Golden, David Mitchell, Father Chrysostomos, Fingle Nark, Florian Ragwitz, George Greer,
