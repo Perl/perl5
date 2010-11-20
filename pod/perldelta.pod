@@ -1,9 +1,5 @@
 =encoding utf8
 
-=for comment
-This has been completed up to f869c5854
-I may have missed a few module version bumps.
-
 =head1 NAME
 
 perldelta - what is new for perl v5.13.7
@@ -909,7 +905,18 @@ to the Perl community will be missed.
 
 =head1 Acknowledgements
 
-XXX The list of people to thank goes here.
+Perl 5.13.7 represents approximately one month of development since Perl 5.13.6
+and contains 72427 lines of changes across 516 files from 39 authors and committers:
+
+Abhijit Menon-Sen, Abigail, Ben Morrow, Chas. J. Owens IV, Chris 'BinGOs' Williams, Craig A. Berry,
+David Golden, David Mitchell, Father Chrysostomos, Fingle Nark, Florian Ragwitz, George Greer,
+Grant McLean, H.Merijn Brand, Ian Goodacre, Jan Dubois, Jerry D. Hedden, Jesse Vincent, Karl Williamson,
+Lubomir Rintel, Marty Pauley, Moritz Lenz, Nicholas Clark, Nicolas Kaiser, Niko Tyni, Peter John Acklam,
+Rafael Garcia-Suarez, Shlomi Fish, Steffen Mueller, Steve Hay, Tatsuhiko Miyagawa, Tim Bunce, Todd Rinaldo,
+Tom Christiansen, Tom Hukins, Tony Cook, Yves Orton, Zefram and brian d foy
+
+Many of the changes included in this version originated in the CPAN modules included in
+Perl's core. We're grateful to the entire CPAN community for helping Perl to flourish.
 
 =head1 Reporting Bugs
 
