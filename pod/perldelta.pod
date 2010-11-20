@@ -609,7 +609,7 @@ at the Perl level via C<mro::get_isarev>) is updated properly.
 
 F<t/run/switchd-78586.t> has been added, which tests that
 L<[perl #78586]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78586>
-has been fixed (related to line numbers in the debbuger).
+has been fixed (related to line numbers in the debugger).
 
 =back
 
