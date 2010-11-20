@@ -778,7 +778,7 @@ use File::Glob qw(:case);
     'lib' =>
 	{
 	'MAINTAINER'	=> 'smueller',
-	'DISTRIBUTION'	=> 'SMUELLER/lib-0.62.tar.gz',
+	'DISTRIBUTION'	=> 'SMUELLER/lib-0.63.tar.gz',
 	'FILES'		=> q[dist/lib/],
 	'EXCLUDED'	=> [ qw{forPAUSE/lib.pm t/00pod.t} ],
 	'UPSTREAM'	=> 'blead',
