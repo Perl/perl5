@@ -12260,13 +12260,11 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    TOPPTR(nss,ix) = pv_dup(c);
 	    break;
 	case SAVEt_GP:				/* scalar reference */
-	    gv = (const GV *)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = gv_dup_inc(gv, param);
 	    gp = (GP*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = gp = gp_dup(gp, param);
 	    (void)GpREFCNT_inc(gp);
-	    i = POPINT(ss,ix);
-	    TOPINT(nss,ix) = i;
+	    gv = (const GV *)POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = gv_dup_inc(gv, param);
 	    break;
 	case SAVEt_FREEOP:
 	    ptr = POPPTR(ss,ix);
