@@ -12,7 +12,7 @@ perldelta - what is new for perl v5.13.8
 This document describes differences between the 5.13.8 release and
 the 5.13.7 release.
 
-If you are upgrading from an earlier release such as 5.13.7, first read
+If you are upgrading from an earlier release such as 5.13.6, first read
 L<perl5137delta>, which describes differences between 5.13.6 and
 5.13.7.
 
