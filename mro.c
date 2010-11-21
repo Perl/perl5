@@ -841,7 +841,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 	  if(PL_stashcache)
 	    (void)
 	     hv_delete(PL_stashcache, name, namlen, G_DISCARD);
-	  hv_ename_delete(oldstash, name, namlen);
+	  hv_ename_delete(oldstash, name, namlen, 0);
 
 	 /* If the name deletion caused a name change, then we are not
 	  * going to call mro_isa_changed_in with this name (and not at all
@@ -859,7 +859,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
     }
    check_stash:
     if(stash) {
-	hv_ename_add(stash, name, namlen);
+	hv_ename_add(stash, name, namlen, 0);
 
        /* Add it to the big list if it needs
 	* mro_isa_changed_in called on it. That happens if it was

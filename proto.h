@@ -1297,13 +1297,13 @@ PERL_CALLCONV void	Perl_hv_eiter_set(pTHX_ HV *hv, HE *eiter)
 #define PERL_ARGS_ASSERT_HV_EITER_SET	\
 	assert(hv)
 
-PERL_CALLCONV void	Perl_hv_ename_add(pTHX_ HV *hv, const char *name, U32 len)
+PERL_CALLCONV void	Perl_hv_ename_add(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_HV_ENAME_ADD	\
 	assert(hv); assert(name)
 
-PERL_CALLCONV void	Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len)
+PERL_CALLCONV void	Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_HV_ENAME_DELETE	\

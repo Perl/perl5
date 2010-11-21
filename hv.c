@@ -2173,13 +2173,14 @@ table.
 */
 
 void
-Perl_hv_ename_add(pTHX_ HV *hv, const char *name, U32 len)
+Perl_hv_ename_add(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 {
     dVAR;
     struct xpvhv_aux *aux = SvOOK(hv) ? HvAUX(hv) : hv_auxinit(hv);
     U32 hash;
 
     PERL_ARGS_ASSERT_HV_ENAME_ADD;
+    PERL_UNUSED_ARG(flags);
 
     if (len > I32_MAX)
 	Perl_croak(aTHX_ "panic: hv name too long (%"UVuf")", (UV) len);
@@ -2229,12 +2230,13 @@ This is called when a stash is deleted from the symbol table.
 */
 
 void
-Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len)
+Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 {
     dVAR;
     struct xpvhv_aux *aux;
 
     PERL_ARGS_ASSERT_HV_ENAME_DELETE;
+    PERL_UNUSED_ARG(flags);
 
     if (len > I32_MAX)
 	Perl_croak(aTHX_ "panic: hv name too long (%"UVuf")", (UV) len);
