@@ -2,14 +2,22 @@
 
 BEGIN {
     @INC = qw(../win32 ../lib);
+    require './test.pl';
 }
 use strict;
 
-use Test::More tests => 10;
+# Test that Win32/FindExt.pm is consistent with Configure in determining the
+# types of extensions.
+# It's not possible to check the list of built dynamic extensions, as that
+# varies based on which headers are present, and which options ./Configure was
+# invoked with.
+
+plan tests => 10;
 use FindExt;
 use Config;
 
 FindExt::scan_ext('../cpan');
+FindExt::scan_ext('../dist');
 FindExt::scan_ext('../ext');
 
 # Config.pm and FindExt.pm make different choices about what should be built
@@ -39,5 +47,5 @@ foreach (['static_ext',
     my @config = sort split ' ', $config;
     is (scalar @$found, scalar @config,
 	"We find the same number of $type");
-    is_deeply($found, \@config, "We find the same");
+    is ("@$found", "@config", "We find the same list of $type");
 }
