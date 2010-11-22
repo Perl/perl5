@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 use warnings;
-plan(tests => 23);
+plan(tests => 24);
 
 {
     package New;
@@ -307,3 +307,25 @@ eval '
 ';
 is eval { 'Subclass'->womp }, 'clumpren',
  'Changes to @ISA after undef via alias';
+
+
+# Packages whose containing stashes have aliases must lose all names cor-
+# responding to that container when detached.
+{
+ {package smare::baz} # autovivify
+ *phring:: = *smare::;  # smare::baz now also named phring::baz
+ *bonk:: = delete $smare::{"baz::"};
+ # In 5.13.7, it has now lost its smare::baz name (reverting to phring::baz
+ # as the effective name), and gained bonk as an alias.
+ # In 5.13.8, both smare::baz *and* phring::baz names are deleted.
+
+ # Make some methods
+ no strict 'refs';
+ *{"phring::baz::frump"} = sub { "hello" };
+ sub frumper::frump { "good bye" };
+
+ @brumkin::ISA = qw "bonk frumper"; # now wrongly inherits from phring::baz
+
+ is frump brumkin, "good bye",
+  'detached stashes lose all names corresponding to the containing stash';
+}

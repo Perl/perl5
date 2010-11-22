@@ -5684,12 +5684,12 @@ STATIC void	S_mro_clean_isarev(pTHX_ HV * const isa, const char * const name, co
 #define PERL_ARGS_ASSERT_MRO_CLEAN_ISAREV	\
 	assert(isa); assert(name)
 
-STATIC void	S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes, HV *stash, HV *oldstash, const char *name, I32 namlen)
+STATIC void	S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes, HV *stash, HV *oldstash, SV *namesv)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_5);
 #define PERL_ARGS_ASSERT_MRO_GATHER_AND_RENAME	\
-	assert(stashes); assert(seen_stashes); assert(name)
+	assert(stashes); assert(seen_stashes); assert(namesv)
 
 STATIC AV*	S_mro_get_linear_isa_dfs(pTHX_ HV* stash, U32 level)
 			__attribute__nonnull__(pTHX_1);
