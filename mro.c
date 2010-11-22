@@ -1040,10 +1040,6 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
       }
     }
 
-    if(
-     (!stash || !HvARRAY(stash)) && (!oldstash || !HvARRAY(oldstash))
-    ) return;
-
     /* This is partly based on code in hv_iternext_flags. We are not call-
        ing that here, as we want to avoid resetting the hash iterator. */
 
