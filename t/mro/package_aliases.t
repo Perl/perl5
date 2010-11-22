@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 use warnings;
-plan(tests => 24);
+plan(tests => 27);
 
 {
     package New;
@@ -138,6 +138,8 @@ for(
 #
 # This test assigns outer:: to clone::, making clone::inner an alias to
 # outer::inner.
+#
+# Then we also run the test again, but without outer::inner
 for(
  {
    name => 'assigning a glob to a glob',
@@ -166,6 +168,23 @@ for(
   "ok 1\nok 2\n",
    {},
   "replacing nonexistent nested packages by $$_{name} updates isa caches";
+
+ # Same test but with the subpackage autovivified after the assignment
+ fresh_perl_is
+   q~
+     @left::ISA = 'outer::inner';
+     @right::ISA = 'clone::inner';
+
+    __code__;
+
+     eval q{package outer::inner};
+
+     print "ok 1", "\n" if left->isa("clone::inner");
+     print "ok 2", "\n" if right->isa("outer::inner");
+   ~ =~ s\__code__\$$_{code}\r,
+  "ok 1\nok 2\n",
+   {},
+  "Giving nonexistent packages multiple effective names by $$_{name}";
 }
 
 no warnings; # temporary; there seems to be a scoping bug, as this does not
