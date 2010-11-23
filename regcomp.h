@@ -319,8 +319,7 @@ struct regnode_charclass_class {
 #define ANYOF_INVERT		0x04
 
 /* CLASS is never set unless LOCALE is too: has runtime \d, \w, [:posix:], ... */
-/* For now, set it always when LOCALE is set, to save a bit for other uses. */
-#define ANYOF_CLASS	 ANYOF_LOCALE
+#define ANYOF_CLASS	 0x08
 #define ANYOF_LARGE      ANYOF_CLASS    /* Same; name retained for back compat */
 
 /* Can match something outside the bitmap that is expressible only in utf8 */
