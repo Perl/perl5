@@ -1867,6 +1867,13 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		    SV * const names = sv_newmortal();
 		    HEK ** const namep = (HEK **)HvAUX(sv)->xhv_name;
 		    const I32 count = HvAUX(sv)->xhv_name_count;
+		    /* This line sets hekp to one element before the first
+		       name, so the ++hekp below will put us at the start-
+		       ing point.
+		       That starting point is the first element if count
+		       is positive and the second element if count
+		       is negative.
+		     */
 		    HEK **hekp = namep - (count > 0);
 		    sv_setpv(names, "");
 		    while (++hekp < namep + (count < 0 ? -count : count))
