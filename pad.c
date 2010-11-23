@@ -1651,7 +1651,7 @@ Perl_cv_clone(pTHX_ CV *proto)
     CvPADLIST(cv) = pad_new(padnew_CLONE|padnew_SAVE);
 
     av_fill(PL_comppad, fpad);
-    for (ix = fname; ix >= 0; ix--)
+    for (ix = fname; ix > 0; ix--)
 	av_store(PL_comppad_name, ix, SvREFCNT_inc(pname[ix]));
 
     PL_curpad = AvARRAY(PL_comppad);
