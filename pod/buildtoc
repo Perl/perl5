@@ -695,7 +695,7 @@ sub do_vms {
 
 # Looking for rules like this:
 #	- If F$Search("[.pod]perldelta.pod").nes."" Then Delete/NoConfirm/Log [.pod]perldelta.pod;*
-  $makefile =~ s!(?:\t- If F\$Search\("\[\.pod\]perl[a-z]+\Q.pod").nes."" Then Delete/NoConfirm/Log [.pod]perl\E[a-z]+\.pod;\*\n)+!\0!sg;
+  $makefile =~ s!(?:\t- If F\$Search\("\[\.pod\]perl\d*[a-z]+\Q.pod").nes."" Then Delete/NoConfirm/Log [.pod]perl\E\d*[a-z]+\.pod;\*\n)+!\0!sg;
   verify_contiguous($name, $makefile, 'delete rules');
   $makefile =~ s/\0+/join "\n", &generate_descrip_mms_3, ''/se;
 
