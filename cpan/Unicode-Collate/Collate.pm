@@ -14,7 +14,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '0.67';
+our $VERSION = '0.68';
 our $PACKAGE = __PACKAGE__;
 
 my @Path = qw(Unicode Collate);
@@ -1350,7 +1350,8 @@ as an alias for C<variable>.
      backwards => $levelNumber or \@levelNumbers
 
 Weights in reverse order; ex. level 2 (diacritic ordering) in French.
-If omitted, forwards at all the levels.
+If omitted (or C<$levelNumber> is C<undef> or C<\@levelNumbers> is C<[]>),
+forwards at all the levels.
 
 =item entry
 
@@ -1954,6 +1955,8 @@ e.g.
 =over 4
 
 =item C<%old_tailoring = $Collator-E<gt>change(%new_tailoring)>
+
+=item C<$modified_collator = $Collator-E<gt>change(%new_tailoring)>
 
 Change the value of specified keys and returns the changed part.
 

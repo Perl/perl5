@@ -1,5 +1,11 @@
 Revision history for Perl module Unicode::Collate.
 
+0.68  Tue Nov 23 20:17:22 2010
+    - doc: clarified about (backwards => [ ]) and (backwards => undef).
+    - separated t/backwds.t from t/test.t.
+    - added cjk_b5.t, cjk_gb.t, cjk_ja.t, cjk_ko.t, cjk_py.t, cjk_st.t in t
+      for CJK/*.pm without Locale.pm.
+
 0.67  Sun Nov 14 11:38:59 2010
     - supported UCA_Version 22 for Unicode 6.0.0.
       * 2B740..2B81D are new CJK unified ideographs.

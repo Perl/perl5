@@ -20,7 +20,9 @@ use Unicode::Collate;
 
 ok(1);
 
-##### 2..11
+#########################
+
+# 2..11
 
 my $overCJK = Unicode::Collate->new(
   table => 'keys.txt',
@@ -54,20 +56,21 @@ ok($overCJK->lt("a\x{4E03}", "A\x{4E01}"));
 my @Versions = (8, 9, 11, 14, 16, 18, 20, 22);
 
 for my $v (@Versions) {
-$overCJK->change(UCA_Version => $v);
-ok($overCJK->cmp("a\x{3400}", "A\x{4DB5}") == 1);
-ok($overCJK->cmp("a\x{4DB5}", "A\x{4E00}") == 1);
-ok($overCJK->cmp("a\x{4E00}", "A\x{9FA5}") == 1);
-ok($overCJK->cmp("a\x{9FA5}", "A\x{9FA6}") == ($v >= 14 ? 1 : -1));
-ok($overCJK->cmp("a\x{9FA6}", "A\x{9FAF}") == ($v >= 14 ? 1 : -1));
-ok($overCJK->cmp("a\x{9FAF}", "A\x{9FB0}") == ($v >= 14 ? 1 : -1));
-ok($overCJK->cmp("a\x{9FB0}", "A\x{9FBB}") == ($v >= 14 ? 1 : -1));
-ok($overCJK->cmp("a\x{9FBB}", "A\x{9FBC}") == ($v >= 18 ? 1 : -1));
-ok($overCJK->cmp("a\x{9FBC}", "A\x{9FBF}") == ($v >= 18 ? 1 : -1));
-ok($overCJK->cmp("a\x{9FBF}", "A\x{9FC3}") == ($v >= 18 ? 1 : -1));
-ok($overCJK->cmp("a\x{9FC3}", "A\x{9FC4}") == ($v >= 20 ? 1 : -1));
-ok($overCJK->cmp("a\x{9FC4}", "A\x{9FCA}") == ($v >= 20 ? 1 : -1));
-ok($overCJK->cmp("a\x{9FCA}", "A\x{9FCB}") == ($v >= 20 ? 1 : -1));
-ok($overCJK->cmp("a\x{9FCB}", "A\x{9FCC}") == -1);
-ok($overCJK->cmp("a\x{9FCC}", "A\x{9FCF}") == -1);
+    $overCJK->change(UCA_Version => $v);
+    ok($overCJK->cmp("a\x{3400}", "A\x{4DB5}") == 1);
+    ok($overCJK->cmp("a\x{4DB5}", "A\x{4E00}") == 1);
+    ok($overCJK->cmp("a\x{4E00}", "A\x{9FA5}") == 1);
+    ok($overCJK->cmp("a\x{9FA5}", "A\x{9FA6}") == ($v >= 14 ? 1 : -1));
+    ok($overCJK->cmp("a\x{9FA6}", "A\x{9FAF}") == ($v >= 14 ? 1 : -1));
+    ok($overCJK->cmp("a\x{9FAF}", "A\x{9FB0}") == ($v >= 14 ? 1 : -1));
+    ok($overCJK->cmp("a\x{9FB0}", "A\x{9FBB}") == ($v >= 14 ? 1 : -1));
+    ok($overCJK->cmp("a\x{9FBB}", "A\x{9FBC}") == ($v >= 18 ? 1 : -1));
+    ok($overCJK->cmp("a\x{9FBC}", "A\x{9FBF}") == ($v >= 18 ? 1 : -1));
+    ok($overCJK->cmp("a\x{9FBF}", "A\x{9FC3}") == ($v >= 18 ? 1 : -1));
+    ok($overCJK->cmp("a\x{9FC3}", "A\x{9FC4}") == ($v >= 20 ? 1 : -1));
+    ok($overCJK->cmp("a\x{9FC4}", "A\x{9FCA}") == ($v >= 20 ? 1 : -1));
+    ok($overCJK->cmp("a\x{9FCA}", "A\x{9FCB}") == ($v >= 20 ? 1 : -1));
+    ok($overCJK->cmp("a\x{9FCB}", "A\x{9FCC}") == -1);
+    ok($overCJK->cmp("a\x{9FCC}", "A\x{9FCF}") == -1);
 }
+

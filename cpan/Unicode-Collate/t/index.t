@@ -18,11 +18,11 @@ use strict;
 use warnings;
 use Unicode::Collate;
 
-our $IsEBCDIC = ord("A") != 0x41;
+ok(1);
 
 #########################
 
-ok(1);
+our $IsEBCDIC = ord("A") != 0x41;
 
 my $Collator = Unicode::Collate->new(
   table => 'keys.txt',

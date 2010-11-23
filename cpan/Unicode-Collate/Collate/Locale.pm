@@ -4,7 +4,7 @@ use strict;
 use Carp;
 use base qw(Unicode::Collate);
 
-our $VERSION = '0.67';
+our $VERSION = '0.68';
 
 use File::Spec;
 
@@ -120,7 +120,7 @@ taking advantage of C<Unicode::Collate>.
 The C<new> method returns a collator object.
 
 A parameter list for the constructor is a hash, which can include
-a special key C<'locale'> and its value (case-insensitive) standing
+a special key C<locale> and its value (case-insensitive) standing
 for a two-letter language code (ISO-639) like C<'en'> for English.
 For example, C<Unicode::Collate::Locale-E<gt>new(locale =E<gt> 'FR')>
 returns a collator tailored for French.
@@ -139,10 +139,9 @@ fallback is selected in the following order:
     4. language
     5. default
 
-Tailoring tags provided by C<Unicode::Collate> are allowed
-as long as they are not used for C<'locale'> support.
-Esp. the C<table> tag is always untailorable
-since it is reserved for DUCET.
+Tailoring tags provided by C<Unicode::Collate> are allowed as long as
+they are not used for C<locale> support.  Esp. the C<table> tag
+is always untailorable since it is reserved for DUCET.
 
 E.g. a collator for French, which ignores diacritics and case difference
 (i.e. level 1), with reversed case ordering and no normalization.
@@ -153,6 +152,21 @@ E.g. a collator for French, which ignores diacritics and case difference
         upper_before_lower => 1,
         normalization => undef
     )
+
+Overriding a behavior already tailored by C<locale> is disallowed
+if such a tailoring is passed to C<new()>.
+
+    Unicode::Collate::Locale->new(
+        locale => 'da',
+        upper_before_lower => 0, # causes error as reserved by 'da'
+    )
+
+However C<change()> inherited from C<Unicode::Collate> allows
+such a tailoring that is reserved by C<locale>. Examples:
+
+    new(locale => 'ca')->change(backwards => undef)
+    new(locale => 'da')->change(upper_before_lower => 0)
+    new(locale => 'ja')->change(overrideCJK => undef)
 
 =head2 Methods
 

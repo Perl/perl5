@@ -1,3 +1,4 @@
+
 BEGIN {
     unless ("A" eq pack('U', 0x41)) {
 	print "1..0 # Unicode::Collate " .
@@ -17,9 +18,9 @@ use strict;
 use warnings;
 use Unicode::Collate;
 
-#########################
-
 ok(1);
+
+#########################
 
 # a standard collator (3.1.1)
 my $Collator = Unicode::Collate->new(

@@ -1,15 +1,30 @@
-#!perl
+
+BEGIN {
+    unless ("A" eq pack('U', 0x41)) {
+	print "1..0 # Unicode::Collate " .
+	    "cannot stringify a Unicode code point\n";
+	exit 0;
+    }
+    if ($ENV{PERL_CORE}) {
+	chdir('t') if -d 't';
+	@INC = $^O eq 'MacOS' ? qw(::lib) : qw(../lib);
+    }
+}
+
+use Test;
+BEGIN { plan tests => 52 };
+
 use strict;
 use warnings;
 use Unicode::Collate::Locale;
 
-use Test;
-plan tests => 42;
+ok(1);
+
+#########################
 
 my $objKo = Unicode::Collate::Locale->
     new(locale => 'KO', normalization => undef);
 
-ok(1);
 ok($objKo->getlocale, 'ko');
 
 $objKo->change(level => 1);
@@ -40,6 +55,15 @@ ok($objKo->eq("\x{9821}", "\x{9EE0}"));
 
 # 22
 
+# Ext.B
+ok($objKo->lt("\x{20000}", "\x{20001}"));
+ok($objKo->lt("\x{20001}", "\x{20002}"));
+ok($objKo->lt("\x{20002}", "\x{20003}"));
+ok($objKo->lt("\x{20003}", "\x{20004}"));
+ok($objKo->lt("\x{20004}", "\x{20005}"));
+
+# 27
+
 $objKo->change(level => 2);
 
 ok($objKo->lt("\x{AC00}", "\x{4F3D}"));
@@ -66,4 +90,13 @@ ok($objKo->lt("\x{7E88}", "\x{896D}"));
 ok($objKo->lt("\x{896D}", "\x{9821}"));
 ok($objKo->lt("\x{9821}", "\x{9EE0}"));
 
-#42
+# 47
+
+# Ext.B
+ok($objKo->lt("\x{20000}", "\x{20001}"));
+ok($objKo->lt("\x{20001}", "\x{20002}"));
+ok($objKo->lt("\x{20002}", "\x{20003}"));
+ok($objKo->lt("\x{20003}", "\x{20004}"));
+ok($objKo->lt("\x{20004}", "\x{20005}"));
+
+# 52

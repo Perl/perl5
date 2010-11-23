@@ -2442,7 +2442,14 @@ cpan/Unicode-Collate/Collate/Locale/zh_strk.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate.pm			Unicode::Collate
 cpan/Unicode-Collate/README			Unicode::Collate
 cpan/Unicode-Collate/t/altern.t			Unicode::Collate
+cpan/Unicode-Collate/t/backwds.t			Unicode::Collate
+cpan/Unicode-Collate/t/cjk_b5.t		Unicode::Collate
+cpan/Unicode-Collate/t/cjk_gb.t		Unicode::Collate
+cpan/Unicode-Collate/t/cjk_ja.t		Unicode::Collate
+cpan/Unicode-Collate/t/cjk_ko.t		Unicode::Collate
+cpan/Unicode-Collate/t/cjk_py.t		Unicode::Collate
 cpan/Unicode-Collate/t/cjkrange.t		Unicode::Collate
+cpan/Unicode-Collate/t/cjk_st.t		Unicode::Collate
 cpan/Unicode-Collate/t/compatui.t		Unicode::Collate
 cpan/Unicode-Collate/t/contract.t		Unicode::Collate
 cpan/Unicode-Collate/t/default.t		Unicode::Collate

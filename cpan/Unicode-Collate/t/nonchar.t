@@ -26,7 +26,7 @@ BEGIN {
     }
 }
 
-BEGIN { plan tests => 27 };
+BEGIN { plan tests => 61 }; # 1 + 30 * 2
 
 ok(1);
 
@@ -45,76 +45,70 @@ no warnings 'utf8';
 # 2. A special noncharacter <LOW> (U+FFFE) for merged database fields,
 #    allowing "Disi\x{301}lva<LOW>John" to sort next to "Disilva<LOW>John".
 
-my $Collator = Unicode::Collate->new(
-  table => 'keys.txt',
-  level => 1,
-  normalization => undef,
-  UCA_Version => 22,
-  entry => <<'ENTRIES',
+my $entry = <<'ENTRIES';
 FFFE  ; [*0001.0020.0005.FFFE] # <noncharacter-FFFE>
 FFFF  ; [.FFFE.0020.0005.FFFF] # <noncharacter-FFFF>
 ENTRIES
-);
 
-# 2..16
+my @disilva = ("di Silva", "diSilva", "di Si\x{301}lva", "diSi\x{301}lva");
+my @dsf = map "$_\x{FFFE}Fred", @disilva;
+my @dsj = map "$_\x{FFFE}John", @disilva;
+my @dsJ = map        "$_ John", @disilva;
 
-ok($Collator->lt("\x{FFFD}",   "\x{FFFF}"));
-ok($Collator->lt("\x{1FFFD}",  "\x{1FFFF}"));
-ok($Collator->lt("\x{2FFFD}",  "\x{2FFFF}"));
-ok($Collator->lt("\x{10FFFD}", "\x{10FFFF}"));
+for my $norm (undef, 'NFD') {
+    if (defined $norm) {
+	eval { require Unicode::Normalize };
+	if ($@) {
+	    ok(1) for 1..30; # silent skip
+	    next;
+	}
+    }
 
-ok($Collator->lt("perl\x{FFFD}",   "perl\x{FFFF}"));
-ok($Collator->lt("perl\x{1FFFD}",  "perl\x{FFFF}"));
-ok($Collator->lt("perl\x{1FFFE}",  "perl\x{FFFF}"));
-ok($Collator->lt("perl\x{1FFFF}",  "perl\x{FFFF}"));
-ok($Collator->lt("perl\x{2FFFD}",  "perl\x{FFFF}"));
-ok($Collator->lt("perl\x{2FFFE}",  "perl\x{FFFF}"));
-ok($Collator->lt("perl\x{2FFFF}",  "perl\x{FFFF}"));
-ok($Collator->lt("perl\x{10FFFD}", "perl\x{FFFF}"));
-ok($Collator->lt("perl\x{10FFFE}", "perl\x{FFFF}"));
-ok($Collator->lt("perl\x{10FFFF}", "perl\x{FFFF}"));
+    my $coll = Unicode::Collate->new(
+	table => 'keys.txt',
+	level => 1,
+	normalization => $norm,
+	UCA_Version => 22,
+	entry => $entry,
+    );
 
-ok($Collator->gt("perl\x{FFFF}AB", "perl\x{FFFF}"));
+    # 1..4
+    ok($coll->lt("\x{FFFD}",   "\x{FFFF}"));
+    ok($coll->lt("\x{1FFFD}",  "\x{1FFFF}"));
+    ok($coll->lt("\x{2FFFD}",  "\x{2FFFF}"));
+    ok($coll->lt("\x{10FFFD}", "\x{10FFFF}"));
 
-$Collator->change(level => 4);
+    # 5..14
+    ok($coll->lt("perl\x{FFFD}",   "perl\x{FFFF}"));
+    ok($coll->lt("perl\x{1FFFD}",  "perl\x{FFFF}"));
+    ok($coll->lt("perl\x{1FFFE}",  "perl\x{FFFF}"));
+    ok($coll->lt("perl\x{1FFFF}",  "perl\x{FFFF}"));
+    ok($coll->lt("perl\x{2FFFD}",  "perl\x{FFFF}"));
+    ok($coll->lt("perl\x{2FFFE}",  "perl\x{FFFF}"));
+    ok($coll->lt("perl\x{2FFFF}",  "perl\x{FFFF}"));
+    ok($coll->lt("perl\x{10FFFD}", "perl\x{FFFF}"));
+    ok($coll->lt("perl\x{10FFFE}", "perl\x{FFFF}"));
+    ok($coll->lt("perl\x{10FFFF}", "perl\x{FFFF}"));
 
-# 17..23
+    # 15..16
+    ok($coll->gt("perl\x{FFFF}AB", "perl\x{FFFF}"));
+    ok($coll->lt("perl\x{FFFF}\x{10FFFF}", "perl\x{FFFF}\x{FFFF}"));
 
-my @dsf = (
-    "di Silva\x{FFFE}Fred",
-    "diSilva\x{FFFE}Fred",
-    "di Si\x{301}lva\x{FFFE}Fred",
-    "diSi\x{301}lva\x{FFFE}Fred",
-);
-my @dsj = (
-    "di Silva\x{FFFE}John",
-    "diSilva\x{FFFE}John",
-    "di Si\x{301}lva\x{FFFE}John",
-    "diSi\x{301}lva\x{FFFE}John",
-);
+    $coll->change(level => 4);
 
-ok($Collator->lt($dsf[0], $dsf[1]));
-ok($Collator->lt($dsf[1], $dsf[2]));
-ok($Collator->lt($dsf[2], $dsf[3]));
+    # 17..25
+    for my $i (0 .. $#disilva - 1) {
+	ok($coll->lt($dsf[$i], $dsf[$i+1]));
+	ok($coll->lt($dsj[$i], $dsj[$i+1]));
+	ok($coll->lt($dsJ[$i], $dsJ[$i+1]));
+    }
 
-ok($Collator->lt($dsf[3], $dsj[0]));
+    # 26
+    ok($coll->lt($dsf[-1], $dsj[0]));
 
-ok($Collator->lt($dsj[0], $dsj[1]));
-ok($Collator->lt($dsj[1], $dsj[2]));
-ok($Collator->lt($dsj[2], $dsj[3]));
-
-# 24..27
-
-my @ds_j = (
-    "di Silva John",
-    "diSilva John",
-    "di Si\x{301}lva John",
-    "diSi\x{301}lva John",
-);
-
-ok($Collator->lt($ds_j[0], $ds_j[1]));
-ok($Collator->lt($ds_j[1], $ds_j[2]));
-ok($Collator->lt($ds_j[2], $ds_j[3]));
-
-ok($Collator->lt($dsj[0], $ds_j[0]));
+    # 27..30
+    for my $i (0 .. $#disilva) {
+	ok($coll->lt($dsj[$i], $dsJ[$i]));
+    }
+}
 

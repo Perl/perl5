@@ -103,6 +103,10 @@ and documentation enhancements.
 
 =item *
 
+C<Unicode::Collate> has been upgraded from 0.67 to 0.68
+
+=item *
+
 XXX
 
 =back

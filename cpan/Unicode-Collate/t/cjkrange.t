@@ -20,9 +20,11 @@ use Unicode::Collate;
 
 ok(1);
 
-my $Collator = Unicode::Collate->new(
-  table => 'keys.txt',
-  normalization => undef,
+#########################
+
+my $coll = Unicode::Collate->new(
+    table => 'keys.txt',
+    normalization => undef,
 );
 
 # CJK UI Ext > CJK UI.
@@ -41,59 +43,60 @@ my $Collator = Unicode::Collate->new(
 my @Versions = (8, 9, 11, 14, 16, 18, 20, 22);
 
 for my $v (@Versions) {
-$Collator->change(UCA_Version => $v);
+    $coll->change(UCA_Version => $v);
 
-# Ext.A > UI
-ok($Collator->cmp("\x{3400}", "\x{4E00}") == ($v >=  9 ? 1 : -1)); # UI
-ok($Collator->cmp("\x{3400}", "\x{9FA5}") == ($v >=  9 ? 1 : -1)); # UI
-ok($Collator->cmp("\x{3400}", "\x{9FA6}") == ($v >= 14 ? 1 : -1)); # new
-ok($Collator->cmp("\x{3400}", "\x{9FBB}") == ($v >= 14 ? 1 : -1)); # new
-ok($Collator->cmp("\x{3400}", "\x{9FBC}") == ($v >= 18 ? 1 : -1)); # new
-ok($Collator->cmp("\x{3400}", "\x{9FC3}") == ($v >= 18 ? 1 : -1)); # new
-ok($Collator->cmp("\x{3400}", "\x{9FC4}") == ($v >= 20 ? 1 : -1)); # new
-ok($Collator->cmp("\x{3400}", "\x{9FCB}") == ($v >= 20 ? 1 : -1)); # new
-ok($Collator->cmp("\x{3400}", "\x{9FCC}") == -1); # na
-ok($Collator->cmp("\x{3400}", "\x{9FFF}") == -1); # na
+    # Ext.A > UI
+    ok($coll->cmp("\x{3400}", "\x{4E00}") == ($v >=  9 ? 1 : -1)); # UI
+    ok($coll->cmp("\x{3400}", "\x{9FA5}") == ($v >=  9 ? 1 : -1)); # UI
+    ok($coll->cmp("\x{3400}", "\x{9FA6}") == ($v >= 14 ? 1 : -1)); # new
+    ok($coll->cmp("\x{3400}", "\x{9FBB}") == ($v >= 14 ? 1 : -1)); # new
+    ok($coll->cmp("\x{3400}", "\x{9FBC}") == ($v >= 18 ? 1 : -1)); # new
+    ok($coll->cmp("\x{3400}", "\x{9FC3}") == ($v >= 18 ? 1 : -1)); # new
+    ok($coll->cmp("\x{3400}", "\x{9FC4}") == ($v >= 20 ? 1 : -1)); # new
+    ok($coll->cmp("\x{3400}", "\x{9FCB}") == ($v >= 20 ? 1 : -1)); # new
+    ok($coll->cmp("\x{3400}", "\x{9FCC}") == -1); # na
+    ok($coll->cmp("\x{3400}", "\x{9FFF}") == -1); # na
 
-# UI < UI
-ok($Collator->cmp("\x{4E00}", "\x{9FA5}") == -1); # UI < UI
-ok($Collator->cmp("\x{9FA5}", "\x{9FA6}") == -1); # UI < new
-ok($Collator->cmp("\x{9FA6}", "\x{9FBB}") == -1); # new < new
-ok($Collator->cmp("\x{9FBB}", "\x{9FBC}") == -1); # new < new
-ok($Collator->cmp("\x{9FBC}", "\x{9FC3}") == -1); # new < new
-ok($Collator->cmp("\x{9FC3}", "\x{9FC4}") == -1); # new < new
-ok($Collator->cmp("\x{9FC4}", "\x{9FCB}") == -1); # new < new
-ok($Collator->cmp("\x{9FCB}", "\x{9FCC}") == -1); # new < na
-ok($Collator->cmp("\x{9FCC}", "\x{9FFF}") == -1); # na < na
+    # UI < UI
+    ok($coll->cmp("\x{4E00}", "\x{9FA5}") == -1); # UI < UI
+    ok($coll->cmp("\x{9FA5}", "\x{9FA6}") == -1); # UI < new
+    ok($coll->cmp("\x{9FA6}", "\x{9FBB}") == -1); # new < new
+    ok($coll->cmp("\x{9FBB}", "\x{9FBC}") == -1); # new < new
+    ok($coll->cmp("\x{9FBC}", "\x{9FC3}") == -1); # new < new
+    ok($coll->cmp("\x{9FC3}", "\x{9FC4}") == -1); # new < new
+    ok($coll->cmp("\x{9FC4}", "\x{9FCB}") == -1); # new < new
+    ok($coll->cmp("\x{9FCB}", "\x{9FCC}") == -1); # new < na
+    ok($coll->cmp("\x{9FCC}", "\x{9FFF}") == -1); # na < na
 
-# Ext.A < Ext.B
-ok($Collator->cmp("\x{3400}", "\x{20000}") == -1);
+    # Ext.A < Ext.B
+    ok($coll->cmp("\x{3400}", "\x{20000}") == -1);
 
-# Ext.A
-ok($Collator->cmp("\x{3400}", "\x{4DB5}") == -1); # A < A
-ok($Collator->cmp("\x{2FFF}", "\x{3400}") == ($v >= 8 ? 1 : -1)); # na > A
-ok($Collator->cmp("\x{2FFF}", "\x{4DB5}") == ($v >= 8 ? 1 : -1)); # na > A
-ok($Collator->cmp("\x{2FFF}", "\x{4DB6}") == -1); # na < na
-ok($Collator->cmp("\x{2FFF}", "\x{4DBF}") == -1); # na < na
+    # Ext.A
+    ok($coll->cmp("\x{3400}", "\x{4DB5}") == -1); # A < A
+    ok($coll->cmp("\x{2FFF}", "\x{3400}") == ($v >= 8 ? 1 : -1)); # na > A
+    ok($coll->cmp("\x{2FFF}", "\x{4DB5}") == ($v >= 8 ? 1 : -1)); # na > A
+    ok($coll->cmp("\x{2FFF}", "\x{4DB6}") == -1); # na < na
+    ok($coll->cmp("\x{2FFF}", "\x{4DBF}") == -1); # na < na
 
-# Ext.B
-ok($Collator->cmp("\x{20000}","\x{2A6D6}") == -1); # B < B
-ok($Collator->cmp("\x{2FFF}", "\x{20000}") == ($v >= 9 ? 1 : -1)); # na > B
-ok($Collator->cmp("\x{2FFF}", "\x{2A6D6}") == ($v >= 9 ? 1 : -1)); # na > B
-ok($Collator->cmp("\x{2FFF}", "\x{2A6D7}") == -1); # na < na
-ok($Collator->cmp("\x{2FFF}", "\x{2A6DF}") == -1); # na < na
+    # Ext.B
+    ok($coll->cmp("\x{20000}","\x{2A6D6}") == -1); # B < B
+    ok($coll->cmp("\x{2FFF}", "\x{20000}") == ($v >= 9 ? 1 : -1)); # na > B
+    ok($coll->cmp("\x{2FFF}", "\x{2A6D6}") == ($v >= 9 ? 1 : -1)); # na > B
+    ok($coll->cmp("\x{2FFF}", "\x{2A6D7}") == -1); # na < na
+    ok($coll->cmp("\x{2FFF}", "\x{2A6DF}") == -1); # na < na
 
-# Ext.C
-ok($Collator->cmp("\x{2A700}","\x{2B734}") == -1); # C < C
-ok($Collator->cmp("\x{2FFF}", "\x{2A700}") == ($v >= 20 ? 1 : -1)); # na > C
-ok($Collator->cmp("\x{2FFF}", "\x{2B734}") == ($v >= 20 ? 1 : -1)); # na > C
-ok($Collator->cmp("\x{2FFF}", "\x{2B735}") == -1); # na < na
-ok($Collator->cmp("\x{2FFF}", "\x{2B73F}") == -1); # na < na
+    # Ext.C
+    ok($coll->cmp("\x{2A700}","\x{2B734}") == -1); # C < C
+    ok($coll->cmp("\x{2FFF}", "\x{2A700}") == ($v >= 20 ? 1 : -1)); # na > C
+    ok($coll->cmp("\x{2FFF}", "\x{2B734}") == ($v >= 20 ? 1 : -1)); # na > C
+    ok($coll->cmp("\x{2FFF}", "\x{2B735}") == -1); # na < na
+    ok($coll->cmp("\x{2FFF}", "\x{2B73F}") == -1); # na < na
 
-# Ext.D
-ok($Collator->cmp("\x{2B740}","\x{2B81D}") == -1); # D < D
-ok($Collator->cmp("\x{2FFF}", "\x{2B740}") == ($v >= 22 ? 1 : -1)); # na > D
-ok($Collator->cmp("\x{2FFF}", "\x{2B81D}") == ($v >= 22 ? 1 : -1)); # na > D
-ok($Collator->cmp("\x{2FFF}", "\x{2B81E}") == -1); # na < na
-ok($Collator->cmp("\x{2FFF}", "\x{2B81F}") == -1); # na < na
+    # Ext.D
+    ok($coll->cmp("\x{2B740}","\x{2B81D}") == -1); # D < D
+    ok($coll->cmp("\x{2FFF}", "\x{2B740}") == ($v >= 22 ? 1 : -1)); # na > D
+    ok($coll->cmp("\x{2FFF}", "\x{2B81D}") == ($v >= 22 ? 1 : -1)); # na > D
+    ok($coll->cmp("\x{2FFF}", "\x{2B81E}") == -1); # na < na
+    ok($coll->cmp("\x{2FFF}", "\x{2B81F}") == -1); # na < na
 }
+

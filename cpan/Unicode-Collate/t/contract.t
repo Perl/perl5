@@ -18,6 +18,10 @@ use strict;
 use warnings;
 use Unicode::Collate;
 
+ok(1);
+
+#########################
+
 our $kjeEntry = <<'ENTRIES';
 0301  ; [.0000.0032.0002.0301] # COMBINING ACUTE ACCENT
 0334  ; [.0000.008B.0002.0334] # COMBINING TILDE OVERLAY
@@ -45,8 +49,6 @@ our $aaEntry = <<'ENTRIES';
 ENTRIES
 
 #########################
-
-ok(1);
 
 my $kjeNoN = Unicode::Collate->new(
     level => 1,

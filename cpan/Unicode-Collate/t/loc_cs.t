@@ -1,15 +1,30 @@
-#!perl
+
+BEGIN {
+    unless ("A" eq pack('U', 0x41)) {
+	print "1..0 # Unicode::Collate " .
+	    "cannot stringify a Unicode code point\n";
+	exit 0;
+    }
+    if ($ENV{PERL_CORE}) {
+	chdir('t') if -d 't';
+	@INC = $^O eq 'MacOS' ? qw(::lib) : qw(../lib);
+    }
+}
+
+use Test;
+BEGIN { plan tests => 34 };
+
 use strict;
 use warnings;
 use Unicode::Collate::Locale;
 
-use Test;
-plan tests => 34;
+ok(1);
+
+#########################
 
 my $objCs = Unicode::Collate::Locale->
     new(locale => 'CS', normalization => undef);
 
-ok(1);
 ok($objCs->getlocale, 'cs');
 
 $objCs->change(level => 1);

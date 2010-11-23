@@ -1,15 +1,30 @@
-#!perl
+
+BEGIN {
+    unless ("A" eq pack('U', 0x41)) {
+	print "1..0 # Unicode::Collate " .
+	    "cannot stringify a Unicode code point\n";
+	exit 0;
+    }
+    if ($ENV{PERL_CORE}) {
+	chdir('t') if -d 't';
+	@INC = $^O eq 'MacOS' ? qw(::lib) : qw(../lib);
+    }
+}
+
+use Test;
+BEGIN { plan tests => 490 };
+
 use strict;
 use warnings;
 use Unicode::Collate::Locale;
 
-use Test;
-plan tests => 475;
+ok(1);
+
+#########################
 
 my $objJa = Unicode::Collate::Locale->
     new(locale => 'JA', normalization => undef);
 
-ok(1);
 ok($objJa->getlocale, 'ja');
 
 $objJa->change(level => 1);
@@ -34,6 +49,31 @@ ok($objJa->lt("\x{7199}", "\x{4E02}")); # 4E02: UIdeo undef in JIS X 0208
 ok($objJa->lt("\x{4E02}", "\x{3400}")); # 3400: Ext.A undef in JIS X 0208
 
 # 17
+
+# Ext.B
+ok($objJa->lt("\x{20000}", "\x{20001}"));
+ok($objJa->lt("\x{20001}", "\x{20002}"));
+ok($objJa->lt("\x{20002}", "\x{20003}"));
+ok($objJa->lt("\x{20003}", "\x{20004}"));
+ok($objJa->lt("\x{20004}", "\x{20005}"));
+
+# 22
+
+$objJa->change(overrideCJK => undef);
+
+ok($objJa->lt("\x{4E00}", "\x{4E01}"));
+ok($objJa->lt("\x{4E01}", "\x{4E02}"));
+ok($objJa->lt("\x{4E02}", "\x{4E03}"));
+ok($objJa->lt("\x{4E03}", "\x{4E04}"));
+ok($objJa->lt("\x{4E04}", "\x{4E05}"));
+
+ok($objJa->lt("\x{9F9B}", "\x{9F9C}"));
+ok($objJa->lt("\x{9F9C}", "\x{9F9D}"));
+ok($objJa->lt("\x{9F9D}", "\x{9F9E}"));
+ok($objJa->lt("\x{9F9E}", "\x{9F9F}"));
+ok($objJa->lt("\x{9F9F}", "\x{9FA0}"));
+
+# 32
 
 $objJa->change(level => 3);
 
@@ -124,7 +164,7 @@ ok($objJa->eq("\x{3094}", "\x{30F4}"));
 ok($objJa->eq("\x{3095}", "\x{30F5}"));
 ok($objJa->eq("\x{3096}", "\x{30F6}"));
 
-# 103
+# 118
 
 $objJa->change(variable => 'Non-ignorable');
 
@@ -303,7 +343,7 @@ ok($objJa->eq("\x{FFEC}", "\x{2193}"));
 ok($objJa->eq("\x{FFED}", "\x{25A0}"));
 ok($objJa->eq("\x{FFEE}", "\x{25CB}"));
 
-# 277
+# 292
 
 $objJa->change(level => 4);
 
@@ -394,7 +434,7 @@ ok($objJa->lt("\x{3094}", "\x{30F4}"));
 ok($objJa->lt("\x{3095}", "\x{30F5}"));
 ok($objJa->lt("\x{3096}", "\x{30F6}"));
 
-# 363
+# 378
 
 ok($objJa->eq("\x{304C}", "\x{304B}\x{3099}"));
 ok($objJa->eq("\x{304E}", "\x{304D}\x{3099}"));
@@ -423,7 +463,7 @@ ok($objJa->eq("\x{307C}", "\x{307B}\x{3099}"));
 ok($objJa->eq("\x{307D}", "\x{307B}\x{309A}"));
 ok($objJa->eq("\x{3094}", "\x{3046}\x{3099}"));
 
-# 389
+# 404
 
 $objJa->change(katakana_before_hiragana => 1);
 
@@ -514,4 +554,4 @@ ok($objJa->lt("\x{3094}", "\x{30F4}"));
 ok($objJa->lt("\x{3095}", "\x{30F5}"));
 ok($objJa->lt("\x{3096}", "\x{30F6}"));
 
-# 475
+# 490

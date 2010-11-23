@@ -1,10 +1,26 @@
-#!perl
+
+BEGIN {
+    unless ("A" eq pack('U', 0x41)) {
+	print "1..0 # Unicode::Collate " .
+	    "cannot stringify a Unicode code point\n";
+	exit 0;
+    }
+    if ($ENV{PERL_CORE}) {
+	chdir('t') if -d 't';
+	@INC = $^O eq 'MacOS' ? qw(::lib) : qw(../lib);
+    }
+}
+
+use Test;
+BEGIN { plan tests => 42 };
+
 use strict;
 use warnings;
 use Unicode::Collate::Locale;
 
-use Test;
-plan tests => 42;
+ok(1);
+
+#########################
 
 my $auml = pack 'U', 0xE4;
 my $Auml = pack 'U', 0xC4;
@@ -16,7 +32,6 @@ my $Uuml = pack 'U', 0xDC;
 my $objDePhone = Unicode::Collate::Locale->
     new(locale => 'DE-PHONE', normalization => undef);
 
-ok(1);
 ok($objDePhone->getlocale, 'de__phonebook');
 
 $objDePhone->change(level => 1);

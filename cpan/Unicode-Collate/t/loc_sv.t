@@ -1,10 +1,26 @@
-#!perl
+
+BEGIN {
+    unless ("A" eq pack('U', 0x41)) {
+	print "1..0 # Unicode::Collate " .
+	    "cannot stringify a Unicode code point\n";
+	exit 0;
+    }
+    if ($ENV{PERL_CORE}) {
+	chdir('t') if -d 't';
+	@INC = $^O eq 'MacOS' ? qw(::lib) : qw(../lib);
+    }
+}
+
+use Test;
+BEGIN { plan tests => 117 };
+
 use strict;
 use warnings;
 use Unicode::Collate::Locale;
 
-use Test;
-plan tests => 117;
+ok(1);
+
+#########################
 
 my $eth  = pack 'U', 0xF0;
 my $ETH  = pack 'U', 0xD0;
@@ -28,7 +44,6 @@ my $Ocrc = pack 'U', 0xD4;
 my $objSv = Unicode::Collate::Locale->
     new(locale => 'SV', normalization => undef);
 
-ok(1);
 ok($objSv->getlocale, 'sv');
 
 $objSv->change(level => 1);

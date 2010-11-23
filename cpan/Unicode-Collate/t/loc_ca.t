@@ -1,17 +1,32 @@
-#!perl
+
+BEGIN {
+    unless ("A" eq pack('U', 0x41)) {
+	print "1..0 # Unicode::Collate " .
+	    "cannot stringify a Unicode code point\n";
+	exit 0;
+    }
+    if ($ENV{PERL_CORE}) {
+	chdir('t') if -d 't';
+	@INC = $^O eq 'MacOS' ? qw(::lib) : qw(../lib);
+    }
+}
+
+use Test;
+BEGIN { plan tests => 41 };
+
 use strict;
 use warnings;
 use Unicode::Collate::Locale;
 
-use Test;
-plan tests => 38;
+ok(1);
+
+#########################
 
 my $dot  = pack 'U', 0xB7;
 
 my $objCa = Unicode::Collate::Locale->
     new(locale => 'CA', normalization => undef);
 
-ok(1);
 ok($objCa->getlocale, 'ca');
 
 $objCa->change(level => 1);
@@ -70,3 +85,11 @@ ok($objCa->lt("Ll","L${dot}l"));
 ok($objCa->lt("LL","L${dot}L"));
 
 # 38
+
+$objCa->change(backwards => undef, level => 2);
+
+ok($objCa->gt("a\x{300}a", "aa\x{300}"));
+ok($objCa->lt("Ca\x{300}ca\x{302}", "ca\x{302}ca\x{300}"));
+ok($objCa->lt("ca\x{300}ca\x{302}", "Ca\x{302}ca\x{300}"));
+
+# 41

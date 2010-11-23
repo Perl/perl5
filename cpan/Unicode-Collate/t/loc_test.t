@@ -1,11 +1,28 @@
-#!perl
+
+BEGIN {
+    unless ("A" eq pack('U', 0x41)) {
+	print "1..0 # Unicode::Collate " .
+	    "cannot stringify a Unicode code point\n";
+	exit 0;
+    }
+    if ($ENV{PERL_CORE}) {
+	chdir('t') if -d 't';
+	@INC = $^O eq 'MacOS' ? qw(::lib) : qw(../lib);
+    }
+}
+
+use Test;
+BEGIN { plan tests => 116 };
+
 use strict;
 use warnings;
 use Unicode::Collate::Locale;
 
-our (@listEs, @listEsT, @listFr);
+ok(1);
 
-BEGIN {
+#########################
+
+our (@listEs, @listEsT, @listFr);
 
 @listEs = qw(
     cambio camella camello camelo Camerún 
@@ -33,14 +50,14 @@ BEGIN {
   "vice versa", "vice-versa",
 );
 
-use Test;
-plan tests => 10 + $#listEs + 2 + $#listEsT + 2 + $#listFr + 2;
+ok(@listEs,  27);
+ok(@listEsT, 27);
+ok(@listFr,  46);
 
-}
-
-ok(1);
 ok(Unicode::Collate::Locale::_locale('es_MX'), 'es');
 ok(Unicode::Collate::Locale::_locale('en_CA'), 'default');
+
+# 6
 
 my $Collator = Unicode::Collate::Locale->
     new(normalization => undef);
@@ -60,6 +77,8 @@ ok($Collator->eq("", ""));
 ok($Collator->cmp("", "perl"), -1);
 ok($Collator->gt("PERL", "perl"));
 
+# 12
+
 $Collator->change(level => 2);
 
 ok($Collator->eq("PERL", "perl"));
@@ -76,19 +95,24 @@ my $objFr  = Unicode::Collate::Locale->new
     (normalization => undef, locale => 'FR');
 ok($objFr->getlocale, 'fr');
 
+# 16
+
 sub randomize { my %hash; @hash{@_} = (); keys %hash; } # ?!
 
 for (my $i = 0; $i < $#listEs; $i++) {
     ok($objEs->lt($listEs[$i], $listEs[$i+1]));
 }
+# 42
 
 for (my $i = 0; $i < $#listEsT; $i++) {
     ok($objEsT->lt($listEsT[$i], $listEsT[$i+1]));
 }
+# 68
 
 for (my $i = 0; $i < $#listFr; $i++) {
     ok($objFr->lt($listFr[$i], $listFr[$i+1]));
 }
+# 113
 
 our @randEs = randomize(@listEs);
 our @sortEs = $objEs->sort(@randEs);
@@ -102,5 +126,4 @@ our @randFr = randomize(@listFr);
 our @sortFr = $objFr->sort(@randFr);
 ok("@sortFr" eq "@listFr");
 
-__END__
-
+# 116

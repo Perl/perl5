@@ -18,9 +18,9 @@ use strict;
 use warnings;
 use Unicode::Collate;
 
-#########################
-
 ok(1);
+
+#########################
 
 my $Collator = Unicode::Collate->new(
   table => 'keys.txt',

@@ -1,3 +1,4 @@
+
 BEGIN {
     unless ("A" eq pack('U', 0x41)) {
 	print "1..0 # Unicode::Collate " .
@@ -18,6 +19,8 @@ use warnings;
 use Unicode::Collate;
 
 ok(1);
+
+#########################
 
 my $trad = Unicode::Collate->new(
   table => 'keys.txt',

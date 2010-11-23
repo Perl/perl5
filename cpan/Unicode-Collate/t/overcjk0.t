@@ -20,7 +20,9 @@ use Unicode::Collate;
 
 ok(1);
 
-##### 2..6
+#########################
+
+# 2..6
 
 my $ignoreCJK = Unicode::Collate->new(
   table => undef,
@@ -54,45 +56,46 @@ ok($ignoreCJK->lt("Pe\x{5B57}rl", "Perl")); # 'r' is unassigned.
 my @Versions = (8, 9, 11, 14, 16, 18, 20, 22);
 
 for my $v (@Versions) {
-$ignoreCJK->change(UCA_Version => $v);
+    $ignoreCJK->change(UCA_Version => $v);
 
-# UI
-ok($ignoreCJK->cmp("\x{4E00}", "") == 0);
-ok($ignoreCJK->cmp("\x{9FA5}", "") == 0);
-ok($ignoreCJK->cmp("\x{9FA6}", "") == ($v >= 14 ? 0 : 1));
-ok($ignoreCJK->cmp("\x{9FAF}", "") == ($v >= 14 ? 0 : 1));
-ok($ignoreCJK->cmp("\x{9FB0}", "") == ($v >= 14 ? 0 : 1));
-ok($ignoreCJK->cmp("\x{9FBB}", "") == ($v >= 14 ? 0 : 1));
-ok($ignoreCJK->cmp("\x{9FBC}", "") == ($v >= 18 ? 0 : 1));
-ok($ignoreCJK->cmp("\x{9FBF}", "") == ($v >= 18 ? 0 : 1));
-ok($ignoreCJK->cmp("\x{9FC0}", "") == ($v >= 18 ? 0 : 1));
-ok($ignoreCJK->cmp("\x{9FC3}", "") == ($v >= 18 ? 0 : 1));
-ok($ignoreCJK->cmp("\x{9FC4}", "") == ($v >= 20 ? 0 : 1));
-ok($ignoreCJK->cmp("\x{9FCB}", "") == ($v >= 20 ? 0 : 1));
-ok($ignoreCJK->cmp("\x{9FCC}", "") == 1);
-ok($ignoreCJK->cmp("\x{9FCF}", "") == 1);
+    # UI
+    ok($ignoreCJK->cmp("\x{4E00}", "") == 0);
+    ok($ignoreCJK->cmp("\x{9FA5}", "") == 0);
+    ok($ignoreCJK->cmp("\x{9FA6}", "") == ($v >= 14 ? 0 : 1));
+    ok($ignoreCJK->cmp("\x{9FAF}", "") == ($v >= 14 ? 0 : 1));
+    ok($ignoreCJK->cmp("\x{9FB0}", "") == ($v >= 14 ? 0 : 1));
+    ok($ignoreCJK->cmp("\x{9FBB}", "") == ($v >= 14 ? 0 : 1));
+    ok($ignoreCJK->cmp("\x{9FBC}", "") == ($v >= 18 ? 0 : 1));
+    ok($ignoreCJK->cmp("\x{9FBF}", "") == ($v >= 18 ? 0 : 1));
+    ok($ignoreCJK->cmp("\x{9FC0}", "") == ($v >= 18 ? 0 : 1));
+    ok($ignoreCJK->cmp("\x{9FC3}", "") == ($v >= 18 ? 0 : 1));
+    ok($ignoreCJK->cmp("\x{9FC4}", "") == ($v >= 20 ? 0 : 1));
+    ok($ignoreCJK->cmp("\x{9FCB}", "") == ($v >= 20 ? 0 : 1));
+    ok($ignoreCJK->cmp("\x{9FCC}", "") == 1);
+    ok($ignoreCJK->cmp("\x{9FCF}", "") == 1);
 
-# Ext.A
-ok($ignoreCJK->cmp("\x{3400}", "") == 0);
-ok($ignoreCJK->cmp("\x{4DB5}", "") == 0);
-ok($ignoreCJK->cmp("\x{4DB6}", "") == 1);
-ok($ignoreCJK->cmp("\x{4DBF}", "") == 1);
+    # Ext.A
+    ok($ignoreCJK->cmp("\x{3400}", "") == 0);
+    ok($ignoreCJK->cmp("\x{4DB5}", "") == 0);
+    ok($ignoreCJK->cmp("\x{4DB6}", "") == 1);
+    ok($ignoreCJK->cmp("\x{4DBF}", "") == 1);
 
-# Ext.B
-ok($ignoreCJK->cmp("\x{20000}","") == 0);
-ok($ignoreCJK->cmp("\x{2A6D6}","") == 0);
-ok($ignoreCJK->cmp("\x{2A6D7}","") == 1);
-ok($ignoreCJK->cmp("\x{2A6DF}","") == 1);
+    # Ext.B
+    ok($ignoreCJK->cmp("\x{20000}","") == 0);
+    ok($ignoreCJK->cmp("\x{2A6D6}","") == 0);
+    ok($ignoreCJK->cmp("\x{2A6D7}","") == 1);
+    ok($ignoreCJK->cmp("\x{2A6DF}","") == 1);
 
-# Ext.C
-ok($ignoreCJK->cmp("\x{2A700}","") == ($v >= 20 ? 0 : 1));
-ok($ignoreCJK->cmp("\x{2B734}","") == ($v >= 20 ? 0 : 1));
-ok($ignoreCJK->cmp("\x{2B735}","") == 1);
-ok($ignoreCJK->cmp("\x{2B73F}","") == 1);
+    # Ext.C
+    ok($ignoreCJK->cmp("\x{2A700}","") == ($v >= 20 ? 0 : 1));
+    ok($ignoreCJK->cmp("\x{2B734}","") == ($v >= 20 ? 0 : 1));
+    ok($ignoreCJK->cmp("\x{2B735}","") == 1);
+    ok($ignoreCJK->cmp("\x{2B73F}","") == 1);
 
-# Ext.D
-ok($ignoreCJK->cmp("\x{2B740}","") == ($v >= 22 ? 0 : 1));
-ok($ignoreCJK->cmp("\x{2B81D}","") == ($v >= 22 ? 0 : 1));
-ok($ignoreCJK->cmp("\x{2B81E}","") == 1);
-ok($ignoreCJK->cmp("\x{2B81F}","") == 1);
+    # Ext.D
+    ok($ignoreCJK->cmp("\x{2B740}","") == ($v >= 22 ? 0 : 1));
+    ok($ignoreCJK->cmp("\x{2B81D}","") == ($v >= 22 ? 0 : 1));
+    ok($ignoreCJK->cmp("\x{2B81E}","") == 1);
+    ok($ignoreCJK->cmp("\x{2B81F}","") == 1);
 }
+

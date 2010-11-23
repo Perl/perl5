@@ -1,15 +1,30 @@
-#!perl
+
+BEGIN {
+    unless ("A" eq pack('U', 0x41)) {
+	print "1..0 # Unicode::Collate " .
+	    "cannot stringify a Unicode code point\n";
+	exit 0;
+    }
+    if ($ENV{PERL_CORE}) {
+	chdir('t') if -d 't';
+	@INC = $^O eq 'MacOS' ? qw(::lib) : qw(../lib);
+    }
+}
+
+use Test;
+BEGIN { plan tests => 50 };
+
 use strict;
 use warnings;
 use Unicode::Collate::Locale;
 
-use Test;
-plan tests => 44;
+ok(1);
+
+#########################
 
 my $objMt = Unicode::Collate::Locale->
     new(locale => 'MT', normalization => undef);
 
-ok(1);
 ok($objMt->getlocale, 'mt');
 
 $objMt->change(level => 1);
@@ -74,3 +89,14 @@ ok($objMt->gt("y", "Y"));
 ok($objMt->gt("z", "Z"));
 
 # 44
+
+$objMt->change(upper_before_lower => 0);
+
+ok($objMt->lt("a", "A"));
+ok($objMt->lt("b", "B"));
+ok($objMt->lt("c", "C"));
+ok($objMt->lt("x", "X"));
+ok($objMt->lt("y", "Y"));
+ok($objMt->lt("z", "Z"));
+
+# 50

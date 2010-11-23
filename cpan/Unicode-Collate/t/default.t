@@ -20,6 +20,8 @@ use Unicode::Collate;
 
 ok(1);
 
+#########################
+
 sub _pack_U   { Unicode::Collate::pack_U(@_) }
 sub _unpack_U { Unicode::Collate::unpack_U(@_) }
 
@@ -134,3 +136,4 @@ ok( $Collator->cmp("abc", "ABC"), -1);
 ok( $Collator->le("abc", "ABC") );
 ok( $Collator->cmp($hiragana, $katakana), -1);
 ok( $Collator->lt($hiragana, $katakana) );
+
