@@ -11874,7 +11874,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
                             : 0;
 
 			/* Record stashes for possible cloning in Perl_clone(). */
-			if (hvname)
+			if (HvNAME(sstr))
 			    av_push(param->stashes, dstr);
 		    }
 		}
