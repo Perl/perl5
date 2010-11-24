@@ -6397,32 +6397,32 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 				    IV i;
 				    for (i = 0; i <= av_len(list); i++) {
 					SV** try_p = av_fetch(list, i, FALSE);
-					char* try;
+					char* try_c;
 					if (try_p == NULL) {
 					    Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
 					}
 					/* Don't have to worry about embeded
 					 * nulls since NULL isn't folded or
 					 * foldable */
-					try = SvPVX(*try_p);
-					if (UTF8_IS_INVARIANT(*try)
+					try_c = SvPVX(*try_p);
+					if (UTF8_IS_INVARIANT(*try_c)
 					    && ANYOF_BITMAP_TEST(n,
-							    UNI_TO_NATIVE(*try)))
+							    UNI_TO_NATIVE(*try_c)))
 					{
 					    match = TRUE;
 					    break;
 					}
 					else if
-					    (UTF8_IS_DOWNGRADEABLE_START(*try)
+					    (UTF8_IS_DOWNGRADEABLE_START(*try_c)
 					     && ANYOF_BITMAP_TEST(n,
 					     UNI_TO_NATIVE(
-						TWO_BYTE_UTF8_TO_UNI(try[0],
-								     try[1]))))
+						TWO_BYTE_UTF8_TO_UNI(try_c[0],
+								     try_c[1]))))
 					{
 					    match = TRUE;
 					    break;
 					} else if (swash_fetch(sw,
-								(U8*) try, 1))
+								(U8*) try_c, 1))
 					{
 					    match = TRUE;
 					    break;
