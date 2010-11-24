@@ -8167,7 +8167,6 @@ S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8
      * actually changed from 0 to 1 */
 
     U8 stored = 0;
-    SV *sv;
     U8 fold;
 
     fold = (UNI_SEMANTICS) ? PL_fold_latin1[value]
