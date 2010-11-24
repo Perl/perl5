@@ -11826,7 +11826,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 			SvFLAGS(dstr) |= SVf_OOK;
 
 			if (saux->xhv_name_count) {
-			    HEK ** const sname = saux->xhv_name_u.xhvnameu_name;
+			    HEK ** const sname = saux->xhv_name_u.xhvnameu_names;
 			    const I32 count
 			     = saux->xhv_name_count < 0
 			        ? -saux->xhv_name_count
