@@ -1529,6 +1529,8 @@ Here is the output (split into several lines):
 =item m?PATTERN?
 X<?> X<operator, match-once>
 
+=item ?PATTERN?
+
 This is just like the C<m/PATTERN/> search, except that it matches
 only once between calls to the reset() operator.  This is a useful
 optimization when you want to see only the first occurrence of
@@ -1549,7 +1551,7 @@ C<?>; with any other delimiter this is the normal C<m//> operator.
 For historical reasons, the leading C<m> in C<m?PATTERN?> is optional,
 but the resulting C<?PATTERN?> syntax is deprecated, will warn on
 usage and may be removed from a future stable release of Perl without
-notice.
+further notice.
 
 =item s/PATTERN/REPLACEMENT/msixpogcer
 X<substitute> X<substitution> X<replace> X<regexp, replace>
