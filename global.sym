@@ -613,6 +613,7 @@ Perl_sv_cmp_flags
 Perl_sv_cmp_locale
 Perl_sv_cmp_locale_flags
 Perl_sv_compile_2op
+Perl_sv_compile_2op_is_broken
 Perl_sv_copypv
 Perl_sv_dec
 Perl_sv_dec_nomg
