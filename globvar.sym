@@ -7,6 +7,7 @@ bincompat_options
 block_type
 check
 fold
+fold_latin1
 fold_locale
 freq
 keyword_plugin
