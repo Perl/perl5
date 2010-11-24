@@ -11819,30 +11819,32 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 			++i;
 		    }
 		    if (SvOOK(sstr)) {
-			HEK *hvname;
 			const struct xpvhv_aux * const saux = HvAUX(sstr);
 			struct xpvhv_aux * const daux = HvAUX(dstr);
 			/* This flag isn't copied.  */
 			/* SvOOK_on(hv) attacks the IV flags.  */
 			SvFLAGS(dstr) |= SVf_OOK;
 
-			hvname = saux->xhv_name;
 			if (saux->xhv_name_count) {
-			    HEK ** const sname = (HEK **)saux->xhv_name;
+			    HEK ** const sname = saux->xhv_name_u.xhvnameu_name;
 			    const I32 count
 			     = saux->xhv_name_count < 0
 			        ? -saux->xhv_name_count
 			        :  saux->xhv_name_count;
 			    HEK **shekp = sname + count;
 			    HEK **dhekp;
-			    Newxc(daux->xhv_name, count, HEK *, HEK);
-			    dhekp = (HEK **)daux->xhv_name + count;
+			    Newx(daux->xhv_name_u.xhvnameu_names, count, HEK *);
+			    dhekp = daux->xhv_name_u.xhvnameu_names + count;
 			    while (shekp-- > sname) {
 				dhekp--;
 				*dhekp = hek_dup(*shekp, param);
 			    }
 			}
-			else daux->xhv_name = hek_dup(hvname, param);
+			else {
+			    daux->xhv_name_u.xhvnameu_name
+				= hek_dup(saux->xhv_name_u.xhvnameu_name,
+					  param);
+			}
 			daux->xhv_name_count = saux->xhv_name_count;
 
 			daux->xhv_riter = saux->xhv_riter;

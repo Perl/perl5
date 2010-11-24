@@ -72,16 +72,21 @@ struct mro_meta {
    Don't access this directly.
 */
 
+union _xhvnameu {
+    HEK *xhvnameu_name;		/* When xhv_name_count is 0 */
+    HEK **xhvnameu_names;	/* When xhv_name_count is non-0 */
+};
+
 struct xpvhv_aux {
-    HEK		*xhv_name;	/* name, if a symbol table */
+    union _xhvnameu xhv_name_u;	/* name, if a symbol table */
     AV		*xhv_backreferences; /* back references for weak references */
     HE		*xhv_eiter;	/* current entry of iterator */
     I32		xhv_riter;	/* current root of iterator */
-/* Concerning xhv_name_count: When non-zero, xhv_name is actually a pointer 
+/* Concerning xhv_name_count: When non-zero, xhv_name_u contains a pointer 
  * to an array of HEK pointers, this being the length. The first element is
  * the name of the stash, which may be NULL. If xhv_name_count is positive,
  * then *xhv_name is one of the effective names. If xhv_name_count is nega-
- * tive, then xhv_name[1] is the first effective name.
+ * tive, then xhv_name_u.xhvnameu_names[1] is the first effective name.
  */
     I32		xhv_name_count;
     struct mro_meta *xhv_mro_meta;
@@ -271,35 +276,35 @@ C<SV*>.
 
 /* FIXME - all of these should use a UTF8 aware API, which should also involve
    getting the length. */
-#define HvNAME_HEK_NN(hv)      \
- (                              \
-  HvAUX(hv)->xhv_name_count      \
-   ? *(HEK **)HvAUX(hv)->xhv_name \
-   : HvAUX(hv)->xhv_name           \
+#define HvNAME_HEK_NN(hv)			  \
+ (						  \
+  HvAUX(hv)->xhv_name_count			  \
+  ? *HvAUX(hv)->xhv_name_u.xhvnameu_names	  \
+  : HvAUX(hv)->xhv_name_u.xhvnameu_name		  \
  )
 /* This macro may go away without notice.  */
 #define HvNAME_HEK(hv) \
-	(SvOOK(hv) && HvAUX(hv)->xhv_name ? HvNAME_HEK_NN(hv) : NULL)
+	(SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name ? HvNAME_HEK_NN(hv) : NULL)
 #define HvNAME_get(hv) \
-	((SvOOK(hv) && (HvAUX(hv)->xhv_name) && HvNAME_HEK_NN(hv)) \
+	((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvNAME_HEK_NN(hv)) \
 			 ? HEK_KEY(HvNAME_HEK_NN(hv)) : NULL)
 #define HvNAMELEN_get(hv) \
-	((SvOOK(hv) && (HvAUX(hv)->xhv_name) && HvNAME_HEK_NN(hv)) \
+	((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvNAME_HEK_NN(hv)) \
 				 ? HEK_LEN(HvNAME_HEK_NN(hv)) : 0)
 #define HvENAME_HEK_NN(hv)                                             \
  (                                                                      \
-  HvAUX(hv)->xhv_name_count > 0   ? *(HEK **)HvAUX(hv)->xhv_name      : \
-  HvAUX(hv)->xhv_name_count < -1  ? ((HEK **)HvAUX(hv)->xhv_name)[1] : \
+  HvAUX(hv)->xhv_name_count > 0   ? HvAUX(hv)->xhv_name_u.xhvnameu_names[0] : \
+  HvAUX(hv)->xhv_name_count < -1  ? HvAUX(hv)->xhv_name_u.xhvnameu_names[1] : \
   HvAUX(hv)->xhv_name_count == -1 ? NULL                              : \
-                                    HvAUX(hv)->xhv_name                 \
+                                    HvAUX(hv)->xhv_name_u.xhvnameu_name \
  )
 #define HvENAME_HEK(hv) \
-	(SvOOK(hv) && HvAUX(hv)->xhv_name ? HvENAME_HEK_NN(hv) : NULL)
+	(SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name ? HvENAME_HEK_NN(hv) : NULL)
 #define HvENAME_get(hv) \
-	((SvOOK(hv) && (HvAUX(hv)->xhv_name) && HvENAME_HEK_NN(hv)) \
+	((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvENAME_HEK_NN(hv)) \
 			 ? HEK_KEY(HvENAME_HEK_NN(hv)) : NULL)
 #define HvENAMELEN_get(hv) \
-	((SvOOK(hv) && (HvAUX(hv)->xhv_name) && HvENAME_HEK_NN(hv)) \
+	((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvENAME_HEK_NN(hv)) \
 				 ? HEK_LEN(HvENAME_HEK_NN(hv)) : 0)
 
 /* the number of keys (including any placeholers) */

@@ -216,7 +216,7 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
     assert(HvAUX(stash));
 
     stashhek
-     = HvAUX(stash)->xhv_name && HvENAME_HEK_NN(stash)
+     = HvAUX(stash)->xhv_name_u.xhvnameu_name && HvENAME_HEK_NN(stash)
         ? HvENAME_HEK_NN(stash)
         : HvNAME_HEK(stash);
 
@@ -744,10 +744,10 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
     name_count = HvAUX(GvSTASH(gv))->xhv_name_count;
     if (!name_count) {
 	name_count = 1;
-	namep = &HvAUX(GvSTASH(gv))->xhv_name;
+	namep = &HvAUX(GvSTASH(gv))->xhv_name_u.xhvnameu_name;
     }
     else {
-	namep = (HEK **)HvAUX(GvSTASH(gv))->xhv_name;
+	namep = HvAUX(GvSTASH(gv))->xhv_name_u.xhvnameu_names;
 	if (name_count < 0) ++namep, name_count = -name_count - 1;
     }
     if (name_count == 1) {

@@ -1862,10 +1862,10 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		 level, file, "  NAMECOUNT = %"IVdf"\n",
 		 (IV)HvAUX(sv)->xhv_name_count
 		);
-	    if (HvAUX(sv)->xhv_name && HvENAME_HEK_NN(sv)) {
+	    if (HvAUX(sv)->xhv_name_u.xhvnameu_name && HvENAME_HEK_NN(sv)) {
 		if (HvAUX(sv)->xhv_name_count) {
 		    SV * const names = sv_newmortal();
-		    HEK ** const namep = (HEK **)HvAUX(sv)->xhv_name;
+		    HEK ** const namep = HvAUX(sv)->xhv_name_u.xhvnameu_names;
 		    const I32 count = HvAUX(sv)->xhv_name_count;
 		    /* This line sets hekp to one element before the first
 		       name, so the ++hekp below will put us at the start-
