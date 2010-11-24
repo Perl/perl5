@@ -1357,11 +1357,11 @@ process modifiers are available:
  g  Match globally, i.e., find all occurrences.
  c  Do not reset search position on a failed match when /g is in effect.
 
-If "/" is the delimiter then the initial C<m> is optional.  With the C<m>
-you can use any pair of non-whitespace characters
-as delimiters.  This is particularly useful for matching path names
-that contain "/", to avoid LTS (leaning toothpick syndrome).  If "?" is
-the delimiter, then the match-only-once rule of C<?PATTERN?> applies.
+If "/" is the delimiter then the initial C<m> is optional.  With the
+C<m> you can use any pair of non-whitespace characters as delimiters.
+This is particularly useful for matching path names that contain "/",
+to avoid LTS (leaning toothpick syndrome).  If "?" is the delimiter,
+then the match-only-once rule of C<m?PATTERN?> applies (see below).
 If "'" is the delimiter, no interpolation is performed on the PATTERN.
 When using a character valid in an identifier, whitespace is required
 after the C<m>.
@@ -1525,26 +1525,26 @@ Here is the output (split into several lines):
 	lowercase line-noise lowercase lowercase line-noise lowercase
 	lowercase line-noise MiXeD line-noise. That's all!
 
-=item ?PATTERN?
+=item m?PATTERN?
 X<?>
 
-This is just like the C</pattern/> search, except that it matches only
+This is just like the C<m/pattern/> search, except that it matches only
 once between calls to the reset() operator.  This is a useful
 optimization when you want to see only the first occurrence of
-something in each file of a set of files, for instance.  Only C<??>
+something in each file of a set of files, for instance.  Only C<m??>
 patterns local to the current package are reset.
 
     while (<>) {
-	if (?^$?) {
+	if (m?^$?) {
 			    # blank line between header and body
 	}
     } continue {
 	reset if eof;	    # clear ?? status for next file
     }
 
-This usage is vaguely deprecated, which means it just might possibly
-be removed in some distant future version of Perl, perhaps somewhere
-around the year 2168.
+The use of C<?PATTERN?> without a leading "m" is vaguely deprecated,
+which means it just might possibly be removed in some distant future
+version of Perl, perhaps somewhere around the year 2168.
 
 =item s/PATTERN/REPLACEMENT/msixpogcer
 X<substitute> X<substitution> X<replace> X<regexp, replace>
