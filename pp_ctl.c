@@ -2982,12 +2982,24 @@ S_docatch(pTHX_ OP *o)
    called more than once, and is only used by regcomp.c, for (?{}) blocks.
 
    Currently it is not used outside the core code. Best if it stays that way.
+
+   Hence it's now deprecated, and will be removed.
 */
 OP *
 Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, const char *code, PAD** padp)
 /* sv Text to convert to OP tree. */
 /* startop op_free() this to undo. */
 /* code Short string id of the caller. */
+{
+    PERL_ARGS_ASSERT_SV_COMPILE_2OP;
+    return Perl_sv_compile_2op_is_broken(aTHX_ sv, startop, code, padp);
+}
+
+/* Don't use this. It will go away without warning once the regexp engine is
+   refactored not to use it.  */
+OP *
+Perl_sv_compile_2op_is_broken(pTHX_ SV *sv, OP **startop, const char *code,
+			      PAD **padp)
 {
     dVAR; dSP;				/* Make POPBLOCK work. */
     PERL_CONTEXT *cx;
@@ -3003,7 +3015,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, const char *code, PAD** padp)
     STRLEN len;
     bool need_catch;
 
-    PERL_ARGS_ASSERT_SV_COMPILE_2OP;
+    PERL_ARGS_ASSERT_SV_COMPILE_2OP_IS_BROKEN;
 
     ENTER_with_name("eval");
     lex_start(sv, NULL, 0);

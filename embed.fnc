@@ -1174,7 +1174,9 @@ Apd	|I32	|sv_cmp_locale_flags	|NULLOK SV *const sv1 \
 Amd	|char*	|sv_collxfrm	|NN SV *const sv|NN STRLEN *const nxp
 Apd	|char*	|sv_collxfrm_flags	|NN SV *const sv|NN STRLEN *const nxp|I32 const flags
 #endif
-Ap	|OP*	|sv_compile_2op	|NN SV *sv|NN OP **startop \
+po	|OP*	|sv_compile_2op_is_broken|NN SV *sv|NN OP **startop \
+				|NN const char *code|NN PAD **padp
+ApD	|OP*	|sv_compile_2op	|NN SV *sv|NN OP **startop \
 				|NN const char *code|NN PAD **padp
 Apd	|int	|getcwd_sv	|NN SV* sv
 Apd	|void	|sv_dec		|NULLOK SV *const sv

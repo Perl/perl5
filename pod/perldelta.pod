@@ -53,6 +53,15 @@ listed as an updated module in the L</Modules and Pragmata> section.
 
 [ List each deprecation as a =head2 entry ]
 
+=head2 C<sv_compile_2op> is now deprecated
+
+The C<sv_compile_2op> is now deprecated, and will be removed. Searches suggest
+that nothing on CPAN is using it, so this should have zero impact.
+
+It attempted to provide an API to compile code down to an optree, but failed
+to bind correctly to lexicals in the enclosing scope. It's not possible to
+fix this problem within the constraints of its parameters and return value.
+
 =head1 Performance Enhancements
 
 XXX Changes which enhance performance without changing behaviour go here. There
