@@ -989,3 +989,13 @@ no warnings 'digit' ;
 my $a = "\o{1238456}";
 EXPECT
 Non-octal character '8'.  Resolved as "\o{123}" at - line 3.
+########
+# toke.c
+use warnings;
+my $a = "foo";
+print $a =~ ?f? ? "yes\n" : "no\n" foreach 0..2;
+EXPECT
+Use of ?PATTERN? without explicit operator is deprecated at - line 4.
+yes
+no
+no

@@ -4999,6 +4999,15 @@ parses correctly in perl, being equivalent to C<my $x : = 42>
 construct is now deprecated, so C<:=> can be reclaimed as a new
 operator in the future.
 
+=item Use of ?PATTERN? without explicit operator is deprecated
+
+(D deprecated) You have written something like C<?\w?>, for a regular
+expression that matches only once.  Starting this term directly with
+the question mark delimiter is now deprecated, so that the question mark
+will be available for use in new operators in the future.  Write C<m?\w?>
+instead, explicitly using the C<m> operator: the question mark delimiter
+still invokes match-once behaviour.
+
 =item Use of freed value in iteration
 
 (F) Perhaps you modified the iterated array within the loop?

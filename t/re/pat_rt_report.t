@@ -228,7 +228,7 @@ sub run_tests {
         my $num = 123;
         $num =~ /\d/;
         for (0 .. 1) {
-            my $match = ?? + 0;
+            my $match = m?? + 0;
             ok $match != $_, $Message, 
                 sprintf "'match one' %s on %s iteration" =>
                                $match ? 'succeeded' : 'failed',

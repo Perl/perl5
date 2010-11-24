@@ -5993,6 +5993,8 @@ Perl_yylex(pTHX)
 	          || isALNUM_lazy_if(PL_last_uni+5,UTF)
 	      ))
 	         check_uni();
+	     if (*s == '?')
+		 deprecate("?PATTERN? without explicit operator");
 	     s = scan_pat(s,OP_MATCH);
 	     TERM(sublex_start());
 	 }

@@ -93,7 +93,7 @@ sub run_tests {
         our @XXX = ('ok 1','not ok 1', 'ok 2','not ok 2','not ok 3');
         while ($_ = shift(@XXX)) {
             my $f = index ($_, 'not') >= 0 ? \&nok : \&ok;
-            my $r = ?(.*)?;
+            my $r = m?(.*)?;
             &$f ($r, "?(.*)?");
             /not/ && reset;
             if (/not ok 2/) {
