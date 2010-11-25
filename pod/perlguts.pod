@@ -958,7 +958,7 @@ This simply calls C<sv_magic> and coerces the C<gv> argument into an C<SV>.
 
 To remove the magic from an SV, call the function sv_unmagic:
 
-    void sv_unmagic(SV *sv, int type);
+    int sv_unmagic(SV *sv, int type);
 
 The C<type> argument should be equal to the C<how> value when the C<SV>
 was initially made magical.
