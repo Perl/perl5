@@ -213,12 +213,13 @@ my $testpkgs = {
 			     register_domain recv protocol peername
 			     new listen import getsockopt croak
 			     connected connect configure confess close
-			     carp bind atmark accept
+			     carp bind atmark accept sockaddr_in6
 			     /, $] > 5.009 ? ('blocking') : () ],
 
 		    XS => [qw/ unpack_sockaddr_un unpack_sockaddr_in
 			   sockatmark sockaddr_family pack_sockaddr_un
 			   pack_sockaddr_in inet_ntoa inet_aton
+			   unpack_sockaddr_in6 pack_sockaddr_in6
 			   /],
             # skip inet_ntop and inet_pton as they're not exported by default
 		},
