@@ -463,7 +463,7 @@ Natively 64-bit systems need neither -Duse64bitint nor -Duse64bitall.
 On these systems, it might be the default compilation mode, and there
 is currently no guarantee that passing no use64bitall option to the
 Configure process will build a 32bit perl. Implementing -Duse32bit*
-options would be nice for perl 5.12.
+options would be nice for perl 5.14.
 
 =head2 Profile Perl - am I hot or not?
 
@@ -1241,7 +1241,7 @@ C<0xddddd>
 =head1 Big projects
 
 Tasks that will get your name mentioned in the description of the "Highlights
-of 5.12"
+of 5.14"
 
 =head2 make ithreads more robust
 
