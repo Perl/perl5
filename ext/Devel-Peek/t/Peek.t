@@ -681,4 +681,72 @@ do_test('blessing to a class with embeded NUL characters',
 	$] > 5.009 ? 'The hash iterator used in dump.c sets the OOK flag'
 	: "Something causes the HV's array to become allocated");
 
+do_test('ENAME on a stash',
+        \%RWOM::,
+'SV = $RV\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(ROK\\)
+  RV = $ADDR
+  SV = PVHV\\($ADDR\\) at $ADDR
+    REFCNT = 2
+    FLAGS = \\(OOK,SHAREKEYS\\)
+    IV = 1					# $] < 5.009
+    NV = $FLOAT					# $] < 5.009
+    ARRAY = $ADDR
+    KEYS = 0
+    FILL = 0
+    MAX = 7
+    RITER = -1
+    EITER = 0x0
+    NAME = "RWOM"
+    ENAME = "RWOM"				# $] > 5.012
+');
+
+*KLANK:: = \%RWOM::;
+
+do_test('ENAMEs on a stash',
+        \%RWOM::,
+'SV = $RV\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(ROK\\)
+  RV = $ADDR
+  SV = PVHV\\($ADDR\\) at $ADDR
+    REFCNT = 3
+    FLAGS = \\(OOK,SHAREKEYS\\)
+    IV = 1					# $] < 5.009
+    NV = $FLOAT					# $] < 5.009
+    ARRAY = $ADDR
+    KEYS = 0
+    FILL = 0
+    MAX = 7
+    RITER = -1
+    EITER = 0x0
+    NAME = "RWOM"
+    NAMECOUNT = 2				# $] > 5.012
+    ENAME = "RWOM", "KLANK"			# $] > 5.012
+');
+
+undef %RWOM::;
+
+do_test('ENAMEs on a stash with no NAME',
+        \%RWOM::,
+'SV = $RV\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(ROK\\)
+  RV = $ADDR
+  SV = PVHV\\($ADDR\\) at $ADDR
+    REFCNT = 3
+    FLAGS = \\(OOK,SHAREKEYS\\)
+    IV = 1					# $] < 5.009
+    NV = $FLOAT					# $] < 5.009
+    ARRAY = $ADDR
+    KEYS = 0
+    FILL = 0
+    MAX = 7
+    RITER = -1
+    EITER = 0x0
+    NAMECOUNT = -3				# $] > 5.012
+    ENAME = "RWOM", "KLANK"			# $] > 5.012
+');
+
 done_testing();
