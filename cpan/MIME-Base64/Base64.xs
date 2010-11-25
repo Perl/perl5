@@ -36,24 +36,6 @@ extern "C" {
 }
 #endif
 
-#ifndef PATCHLEVEL
-#    include <patchlevel.h>
-#    if !(defined(PERL_VERSION) || (SUBVERSION > 0 && defined(PATCHLEVEL)))
-#        include <could_not_find_Perl_patchlevel.h>
-#    endif
-#endif
-
-#if PATCHLEVEL <= 4 && !defined(PL_dowarn)
-   #define PL_dowarn dowarn
-#endif
-
-#ifdef G_WARN_ON
-   #define DOWARN (PL_dowarn & G_WARN_ON)
-#else
-   #define DOWARN PL_dowarn
-#endif
-
-
 #define MAX_LINE  76 /* size of encoded lines */
 
 static const char basis_64[] =
@@ -198,7 +180,7 @@ decode_base64(sv)
 
 	PREINIT:
 	STRLEN len;
-	register unsigned char *str = (unsigned char*)SvPVbyte(sv, len);
+	register unsigned char *str = (unsigned char*)SvPV(sv, len);
 	unsigned char const* end = str + len;
 	char *r;
 	unsigned char c[4];
@@ -221,8 +203,6 @@ decode_base64(sv)
 
 		if (str == end) {
 		    if (i < 4) {
-			if (i && DOWARN)
-			    warn("Premature end of base64 data");
 			if (i < 2) goto thats_it;
 			if (i == 2) c[2] = EQ;
 			c[3] = EQ;
@@ -232,7 +212,6 @@ decode_base64(sv)
             } while (i < 4);
 	
 	    if (c[0] == EQ || c[1] == EQ) {
-		if (DOWARN) warn("Premature padding of base64 data");
 		break;
             }
 	    /* printf("c0=%d,c1=%d,c2=%d,c3=%d\n", c[0],c[1],c[2],c[3]);*/
@@ -291,7 +270,7 @@ decoded_base64_length(sv)
 
 	PREINIT:
 	STRLEN len;
-	register unsigned char *str = (unsigned char*)SvPVbyte(sv, len);
+	register unsigned char *str = (unsigned char*)SvPV(sv, len);
 	unsigned char const* end = str + len;
 	int i = 0;
 

@@ -6,15 +6,29 @@ use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(encode_base64 decode_base64);
-@EXPORT_OK = qw(encoded_base64_length decoded_base64_length);
+@EXPORT_OK = qw(encode_base64url decode_base64url encoded_base64_length decoded_base64_length);
 
-$VERSION = '3.10';
+$VERSION = '3.11';
 
 require XSLoader;
 XSLoader::load('MIME::Base64', $VERSION);
 
 *encode = \&encode_base64;
 *decode = \&decode_base64;
+
+sub encode_base64url {
+    my $e = encode_base64(shift, "");
+    $e =~ s/=+\z//;
+    $e =~ tr[+/][-_];
+    return $e;
+}
+
+sub decode_base64url {
+    my $s = shift;
+    $s =~ tr[-_][+/];
+    $s .= '=' while length($s) % 4;
+    return decode_base64($s);
+}
 
 1;
 
@@ -56,6 +70,11 @@ characters each and it will end with $eol unless it is empty.  Pass an
 empty string as second argument if you do not want the encoded string
 to be broken into lines.
 
+The function will croak with "Wide character in subroutine entry" if $str
+contains characters with code above 255.  The base64 encoding is only defined
+for single-byte characters.  Use the Encode module to select the byte encoding
+you want.
+
 =item decode_base64($str)
 
 Decode a base64 string by calling the decode_base64() function.  This
@@ -83,6 +102,15 @@ Additional functions not exported by default:
 
 =over 4
 
+=item encode_base64url($str)
+
+=item decode_base64url($str)
+
+Encode and decode according to the base64 scheme for "URL applications" [1].
+This is a variant of the base64 encoding which does not use padding, does not
+break the string into multiple lines and use the characters "-" and "_" instead
+of "+" and "/" to avoid using reserved URL characters.
+
 =item encoded_base64_length($str)
 
 =item encoded_base64_length($str, $eol)
@@ -96,40 +124,6 @@ but should be more efficient.
 Returns the length that the decoded string would have without actually
 decoding it.  This will return the same value as C<< length(decode_base64($str)) >>,
 but should be more efficient.
-
-=back
-
-=head1 DIAGNOSTICS
-
-The following warnings can be generated if perl is invoked with the
-C<-w> switch:
-
-=over 4
-
-=item Premature end of base64 data
-
-The number of characters to decode is not a multiple of 4.  Legal
-base64 data should be padded with one or two "=" characters to make
-its length a multiple of 4.  The decoded result will be the same
-whether the padding is present or not.
-
-=item Premature padding of base64 data
-
-The '=' padding character occurs as the first or second character
-in a base64 quartet.
-
-=back
-
-The following exception can be raised:
-
-=over 4
-
-=item Wide character in subroutine entry
-
-The string passed to encode_base64() contains characters with code
-above 255.  The base64 encoding is only defined for single-byte
-characters.  Use the Encode module to select the byte encoding you
-want.
 
 =back
 
@@ -192,5 +186,7 @@ Communications Research, Inc. (Bellcore)
 =head1 SEE ALSO
 
 L<MIME::QuotedPrint>
+
+[1] L<http://en.wikipedia.org/wiki/Base64#URL_applications>
 
 =cut
