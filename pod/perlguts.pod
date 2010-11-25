@@ -963,6 +963,12 @@ To remove the magic from an SV, call the function sv_unmagic:
 The C<type> argument should be equal to the C<how> value when the C<SV>
 was initially made magical.
 
+However, note that C<sv_unmagic> removes all magic of a certain C<type> from the
+C<SV>. If you want to remove only certain magic of a C<type> based on the magic
+virtual table, use C<sv_unmagicext> instead:
+
+    int sv_unmagicext(SV *sv, int type, MGVTBL *vtbl);
+
 =head2 Magic Virtual Tables
 
 The C<mg_virtual> field in the C<MAGIC> structure is a pointer to an
@@ -1128,16 +1134,16 @@ objects blessed into the same class as the extension is sufficient.
 For C<PERL_MAGIC_ext> magic, it is usually a good idea to define an
 C<MGVTBL>, even if all its fields will be C<0>, so that individual
 C<MAGIC> pointers can be identified as a particular kind of magic
-using their C<mg_virtual> field.
+using their magic virtual table. C<mg_findext> provides an easy way
+to do that:
 
     STATIC MGVTBL my_vtbl = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
     MAGIC *mg;
-    for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
-        if (mg->mg_type == PERL_MAGIC_ext && mg->mg_virtual == &my_vtbl) {
-            /* this is really ours, not another module's PERL_MAGIC_ext */
-            my_priv_data_t *priv = (my_priv_data_t *)mg->mg_ptr;
-        }
+    if ((mg = mg_findext(sv, PERL_MAGIC_ext, &my_vtbl))) {
+        /* this is really ours, not another module's PERL_MAGIC_ext */
+        my_priv_data_t *priv = (my_priv_data_t *)mg->mg_ptr;
+        ...
     }
 
 Also note that the C<sv_set*()> and C<sv_cat*()> functions described
@@ -1154,11 +1160,18 @@ since their implementation handles 'get' magic.
 
 =head2 Finding Magic
 
-    MAGIC* mg_find(SV*, int type); /* Finds the magic pointer of that type */
+    MAGIC *mg_find(SV *sv, int type); /* Finds the magic pointer of that type */
 
-This routine returns a pointer to the C<MAGIC> structure stored in the SV.
-If the SV does not have that magical feature, C<NULL> is returned.  Also,
-if the SV is not of type SVt_PVMG, Perl may core dump.
+This routine returns a pointer to a C<MAGIC> structure stored in the SV.
+If the SV does not have that magical feature, C<NULL> is returned. If the
+SV has multiple instances of that magical feature, the first one will be
+returned. C<mg_findext> can be used to find a C<MAGIC> structure of an SV
+based on both it's magic type and it's magic virtual table:
+
+    MAGIC *mg_findext(SV *sv, int type, MGVTBL *vtbl);
+
+Also, if the SV passed to C<mg_find> or C<mg_findext> is not of type
+SVt_PVMG, Perl may core dump.
 
     int mg_copy(SV* sv, SV* nsv, const char* key, STRLEN klen);
 
