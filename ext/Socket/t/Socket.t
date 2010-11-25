@@ -12,7 +12,7 @@ BEGIN {
 	
 use Socket qw(:all);
 
-print "1..21\n";
+print "1..26\n";
 
 $has_echo = $^O ne 'MSWin32';
 $alarmed = 0;
@@ -183,4 +183,26 @@ if($Config{d_inetntop} && $Config{d_inetaton}){
 } else {
     # no IPv6 
     print "ok $_ - skipped on this platform\n" for 19 .. 21;
+}
+
+if(defined eval { AF_INET6() } ) {
+   my $sin6 = pack_sockaddr_in6(0x1234, "0123456789abcdef", 567, 89);
+
+   print "not " unless sockaddr_family($sin6) == AF_INET6;
+   print "ok 22\n";
+
+   print "not " unless (unpack_sockaddr_in6($sin6))[0] == 0x1234;
+   print "ok 23\n";
+
+   print "not " unless (unpack_sockaddr_in6($sin6))[1] == "0123456789abcdef";
+   print "ok 24\n";
+
+   print "not " unless (unpack_sockaddr_in6($sin6))[2] == 567;
+   print "ok 25\n";
+
+   print "not " unless (unpack_sockaddr_in6($sin6))[3] == 89;
+   print "ok 26\n";
+}
+else {
+   print "ok $_ - skipped - no AF_INET6\n" for 22 .. 26;
 }
