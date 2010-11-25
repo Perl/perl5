@@ -1450,6 +1450,8 @@ L</Reference Counts and Mortality>):
     PUSHs(sv_2mortal(newSVuv(an_unsigned_integer)))
     PUSHs(sv_2mortal(newSVnv(a_double)))
     PUSHs(sv_2mortal(newSVpv("Some String",0)))
+    /* Although the last example is better written as the more efficient: */
+    PUSHs(newSVpvs_flags("Some String", SVs_TEMP))
 
 And now the Perl program calling C<tzname>, the two values will be assigned
 as in:

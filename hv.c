@@ -3428,7 +3428,7 @@ Perl_store_cop_label(pTHX_ COP *const cop, const char *label, STRLEN len,
     if (flags & ~(SVf_UTF8))
 	Perl_croak(aTHX_ "panic: store_cop_label illegal flag bits 0x%" UVxf,
 		   (UV)flags);
-    labelsv = sv_2mortal(newSVpvn(label, len));
+    labelsv = newSVpvn_flags(label, len, SVs_TEMP);
     if (flags & SVf_UTF8)
 	SvUTF8_on(labelsv);
     cop->cop_hints_hash

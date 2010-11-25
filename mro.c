@@ -752,7 +752,7 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
     }
     if (name_count == 1) {
 	if (HEK_LEN(*namep) == 4 && strnEQ(HEK_KEY(*namep), "main", 4)) {
-	    namesv = sv_2mortal(newSVpvs(""));
+	    namesv = newSVpvs_flags("", SVs_TEMP);
 	}
 	else {
 	    namesv = sv_2mortal(newSVhek(*namep));
