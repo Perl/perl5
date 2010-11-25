@@ -1663,7 +1663,8 @@ test-prep : all utils
 .ENDIF
 
 test : $(RIGHTMAKE) test-prep
-	cd ..\t && $(PERLEXE) -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
+	set PERL_STATIC_EXT=$(STATIC_EXT) && \
+	    cd ..\t && $(PERLEXE) -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
 
 test-reonly : reonly utils
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
@@ -1677,7 +1678,8 @@ regen :
 	cd .. && regen.pl && cd win32
 
 test-notty : test-prep
-	set PERL_SKIP_TTY_TEST=1 && \
+	set PERL_STATIC_EXT=$(STATIC_EXT) && \
+	    set PERL_SKIP_TTY_TEST=1 && \
 	    cd ..\t && $(PERLEXE) -I.\lib harness $(TEST_SWITCHES) $(TEST_FILES)
 
 _test : $(RIGHTMAKE)
@@ -1688,7 +1690,8 @@ _test : $(RIGHTMAKE)
 .ELSE
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
 .ENDIF
-	cd ..\t && $(PERLEXE) -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
+	set PERL_STATIC_EXT=$(STATIC_EXT) && \
+	    cd ..\t && $(PERLEXE) -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
 
 _clean :
 	-@erase miniperlmain$(o)

@@ -1260,6 +1260,7 @@ test-prep : all utils
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
 	$(XCOPY) $(PERLDLL) ..\t\$(NULL)
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
+	set PERL_STATIC_EXT=$(STATIC_EXT)
 
 test : test-prep
 	cd ..\t

@@ -12,6 +12,10 @@ use strict;
 # varies based on which headers are present, and which options ./Configure was
 # invoked with.
 
+if ($^O eq "MSWin32" && !defined $ENV{PERL_STATIC_EXT}) {
+    skip_all "PERL_STATIC_EXT must be set to the list of static extensions";
+}
+
 plan tests => 10;
 use FindExt;
 use Config;
@@ -19,6 +23,7 @@ use Config;
 FindExt::scan_ext('../cpan');
 FindExt::scan_ext('../dist');
 FindExt::scan_ext('../ext');
+FindExt::set_static_extensions(split ' ', $ENV{PERL_STATIC_EXT}) if $^O eq "MSWin32";
 
 # Config.pm and FindExt.pm make different choices about what should be built
 my @config_built;
