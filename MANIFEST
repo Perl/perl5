@@ -3440,6 +3440,7 @@ ext/XS-APItest/t/labelconst.t	test recursive descent label parsing
 ext/XS-APItest/t/loopblock.t	test recursive descent block parsing
 ext/XS-APItest/t/looprest.t	test recursive descent statement-sequence parsing
 ext/XS-APItest/t/magic_chain.t	test low-level MAGIC chain handling
+ext/XS-APItest/t/magic.t	test attaching, finding, and removing magic
 ext/XS-APItest/t/Markers.pm	Helper for ./blockhooks.t
 ext/XS-APItest/t/multicall.t	XS::APItest: test MULTICALL macros
 ext/XS-APItest/t/my_cxt.t	XS::APItest: test MY_CXT interface
