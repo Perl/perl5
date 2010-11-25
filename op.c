@@ -4222,6 +4222,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 #ifdef PERL_MAD
     OP *pegop = newOP(OP_NULL,0);
 #endif
+    SV *use_version = NULL;
 
     PERL_ARGS_ASSERT_UTILIZE;
 
@@ -4268,7 +4269,9 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
     }
     else if (SvNIOKp(((SVOP*)idop)->op_sv)) {
 	imop = NULL;		/* use 5.0; */
-	if (!aver)
+	if (aver)
+	    use_version = ((SVOP*)idop)->op_sv;
+	else
 	    idop->op_private |= OPpCONST_NOVER;
     }
     else {
@@ -4299,6 +4302,26 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	        newSTATEOP(0, NULL, newUNOP(OP_REQUIRE, 0, idop)),
 	        newSTATEOP(0, NULL, veop)),
 	    newSTATEOP(0, NULL, imop) ));
+
+    if (use_version) {
+	/* If we request a version >= 5.9.5, load feature.pm with the
+	 * feature bundle that corresponds to the required version. */
+	use_version = sv_2mortal(new_version(use_version));
+
+	if (vcmp(use_version,
+		 sv_2mortal(upg_version(newSVnv(5.009005), FALSE))) >= 0) {
+	    SV *const importsv = vnormal(use_version);
+	    *SvPVX_mutable(importsv) = ':';
+	    ENTER_with_name("load_feature");
+	    Perl_load_module(aTHX_ 0, newSVpvs("feature"), NULL, importsv, NULL);
+	    LEAVE_with_name("load_feature");
+	}
+	/* If a version >= 5.11.0 is requested, strictures are on by default! */
+	if (vcmp(use_version,
+		 sv_2mortal(upg_version(newSVnv(5.011000), FALSE))) >= 0) {
+	    PL_hints |= (HINT_STRICT_REFS | HINT_STRICT_SUBS | HINT_STRICT_VARS);
+	}
+    }
 
     /* The "did you use incorrect case?" warning used to be here.
      * The problem is that on case-insensitive filesystems one

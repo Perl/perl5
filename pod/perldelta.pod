@@ -356,7 +356,11 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+C<BEGIN {require 5.12.0}> now behaves as documented, rather than behaving
+identically to C<use 5.12.0;>. Previously, C<require> in a C<BEGIN> block
+was erroneously executing the C<use feature ':5.12.0'> and
+C<use strict; use warnings;> behaviour, which only C<use> was documented to
+provide.
 
 =back
 

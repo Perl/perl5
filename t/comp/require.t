@@ -22,7 +22,7 @@ krunch.pm krunch.pmc whap.pm whap.pmc);
 
 my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
 my $Is_UTF8   = (${^OPEN} || "") =~ /:utf8/;
-my $total_tests = 49;
+my $total_tests = 50;
 if ($Is_EBCDIC || $Is_UTF8) { $total_tests -= 3; }
 print "1..$total_tests\n";
 
@@ -96,6 +96,9 @@ print "ok ",$i++,"\n";
 # "use 5.11.0" (and higher) loads strictures.
 # check that this doesn't happen with require
 eval 'require 5.11.0; ${"foo"} = "bar";';
+print "# $@\nnot " if $@;
+print "ok ",$i++,"\n";
+eval 'BEGIN {require 5.11.0} ${"foo"} = "bar";';
 print "# $@\nnot " if $@;
 print "ok ",$i++,"\n";
 

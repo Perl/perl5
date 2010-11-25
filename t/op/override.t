@@ -37,8 +37,8 @@ is( $r, join($dirsep, "Foo", "Bar.pm") );
 require 'Foo';
 is( $r, "Foo" );
 
-require 5.6;
-is( $r, "5.6" );
+require 5.006;
+is( $r, "5.006" );
 
 require v5.6;
 ok( abs($r - 5.006) < 0.001 && $r eq "\x05\x06" );
@@ -49,8 +49,8 @@ is( $r, "Foo.pm" );
 eval "use Foo::Bar";
 is( $r, join($dirsep, "Foo", "Bar.pm") );
 
-eval "use 5.6";
-is( $r, "5.6" );
+eval "use 5.006";
+is( $r, "5.006" );
 
 # localizing *CORE::GLOBAL::foo should revert to finding CORE::foo
 {
