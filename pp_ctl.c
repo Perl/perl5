@@ -3422,7 +3422,9 @@ PP(pp_require)
 	if (cUNOP->op_first->op_type == OP_CONST && cUNOP->op_first->op_private & OPpCONST_NOVER) {
 	    if ( vcmp(sv,PL_patchlevel) <= 0 )
 		DIE(aTHX_ "Perls since %"SVf" too modern--this is %"SVf", stopped",
-		    SVfARG(vnormal(sv)), SVfARG(vnormal(PL_patchlevel)));
+		    SVfARG(sv_2mortal(vnormal(sv))),
+		    SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
+		);
 	}
 	else {
 	    if ( vcmp(sv,PL_patchlevel) > 0 ) {
