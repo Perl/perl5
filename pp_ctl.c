@@ -3443,8 +3443,10 @@ PP(pp_require)
 		    || strstr(SvPVX(pv),".0")        /* FP with leading 0 */
 		   ) {
 		    DIE(aTHX_ "Perl %"SVf" required--this is only "
-		    	"%"SVf", stopped", SVfARG(vnormal(req)),
-			SVfARG(vnormal(PL_patchlevel)));
+		    	"%"SVf", stopped",
+			SVfARG(sv_2mortal(vnormal(req))),
+			SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
+		    );
 		}
 		else { /* probably 'use 5.10' or 'use 5.8' */
 		    SV *hintsv;
