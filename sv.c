@@ -5330,31 +5330,23 @@ Perl_sv_magic(pTHX_ register SV *const sv, SV *const obj, const int how,
     }
 }
 
-/*
-=for apidoc sv_unmagic
-
-Removes all magic of type C<type> from an SV.
-
-=cut
-*/
-
 int
-Perl_sv_unmagic(pTHX_ SV *const sv, const int type)
+S_sv_unmagicext_flags(pTHX_ SV *const sv, const int type, MGVTBL *vtbl, const U32 flags)
 {
     MAGIC* mg;
     MAGIC** mgp;
 
-    PERL_ARGS_ASSERT_SV_UNMAGIC;
+    assert(flags <= 1);
 
     if (SvTYPE(sv) < SVt_PVMG || !SvMAGIC(sv))
 	return 0;
     mgp = &(((XPVMG*) SvANY(sv))->xmg_u.xmg_magic);
     for (mg = *mgp; mg; mg = *mgp) {
-	if (mg->mg_type == type) {
-            const MGVTBL* const vtbl = mg->mg_virtual;
+	const MGVTBL* const virt = mg->mg_virtual;
+	if (mg->mg_type == type && (!flags || virt == vtbl)) {
 	    *mgp = mg->mg_moremagic;
-	    if (vtbl && vtbl->svt_free)
-		vtbl->svt_free(aTHX_ sv, mg);
+	    if (virt && virt->svt_free)
+		virt->svt_free(aTHX_ sv, mg);
 	    if (mg->mg_ptr && mg->mg_type != PERL_MAGIC_regex_global) {
 		if (mg->mg_len > 0)
 		    Safefree(mg->mg_ptr);
@@ -5379,6 +5371,36 @@ Perl_sv_unmagic(pTHX_ SV *const sv, const int type)
 	SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
     }
     return 0;
+}
+
+/*
+=for apidoc sv_unmagic
+
+Removes all magic of type C<type> from an SV.
+
+=cut
+*/
+
+int
+Perl_sv_unmagic(pTHX_ SV *const sv, const int type)
+{
+    PERL_ARGS_ASSERT_SV_UNMAGIC;
+    return S_sv_unmagicext_flags(aTHX_ sv, type, NULL, 0);
+}
+
+/*
+=for apidoc sv_unmagicext
+
+Removes all magic of type C<type> with the specified C<vtbl> from an SV.
+
+=cut
+*/
+
+int
+Perl_sv_unmagicext(pTHX_ SV *const sv, const int type, MGVTBL *vtbl)
+{
+    PERL_ARGS_ASSERT_SV_UNMAGICEXT;
+    return S_sv_unmagicext_flags(aTHX_ sv, type, vtbl, 1);
 }
 
 /*

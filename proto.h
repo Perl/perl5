@@ -4406,6 +4406,11 @@ PERL_CALLCONV int	Perl_sv_unmagic(pTHX_ SV *const sv, const int type)
 #define PERL_ARGS_ASSERT_SV_UNMAGIC	\
 	assert(sv)
 
+PERL_CALLCONV int	Perl_sv_unmagicext(pTHX_ SV *const sv, const int type, MGVTBL *vtbl)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_SV_UNMAGICEXT	\
+	assert(sv)
+
 /* PERL_CALLCONV void	Perl_sv_unref(pTHX_ SV* sv)
 			__attribute__nonnull__(pTHX_1); */
 #define PERL_ARGS_ASSERT_SV_UNREF	\

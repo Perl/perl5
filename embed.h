@@ -595,6 +595,7 @@
 #define sv_true(a)		Perl_sv_true(aTHX_ a)
 #define sv_uni_display(a,b,c,d)	Perl_sv_uni_display(aTHX_ a,b,c,d)
 #define sv_unmagic(a,b)		Perl_sv_unmagic(aTHX_ a,b)
+#define sv_unmagicext(a,b,c)	Perl_sv_unmagicext(aTHX_ a,b,c)
 #define sv_unref_flags(a,b)	Perl_sv_unref_flags(aTHX_ a,b)
 #define sv_untaint(a)		Perl_sv_untaint(aTHX_ a)
 #define sv_upgrade(a,b)		Perl_sv_upgrade(aTHX_ a,b)

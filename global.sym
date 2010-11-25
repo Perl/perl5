@@ -696,6 +696,7 @@ Perl_sv_tainted
 Perl_sv_true
 Perl_sv_uni_display
 Perl_sv_unmagic
+Perl_sv_unmagicext
 Perl_sv_unref
 Perl_sv_unref_flags
 Perl_sv_untaint
