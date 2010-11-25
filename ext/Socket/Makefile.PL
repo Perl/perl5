@@ -71,6 +71,14 @@ push @names,
  value => "newSVpvn_flags((char *)&ip_address,sizeof(ip_address), SVs_TEMP)",}
          foreach qw(INADDR_ANY INADDR_LOOPBACK INADDR_NONE INADDR_BROADCAST);
 
+push @names,
+{name => $_, type => "SV",
+ macro=>["#ifdef ${_}_INIT\n",
+         "#endif\n"],
+ pre=>"struct in6_addr ip6_address = ${_}_INIT;",
+ value => "newSVpvn_flags((char *)&ip6_address,sizeof(ip6_address), SVs_TEMP)",}
+	 foreach qw(IN6ADDR_ANY IN6ADDR_LOOPBACK);
+
 WriteConstants(
     PROXYSUBS => {autoload => 1},
     NAME => 'Socket',
