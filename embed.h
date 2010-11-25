@@ -278,6 +278,7 @@
 #define mg_clear(a)		Perl_mg_clear(aTHX_ a)
 #define mg_copy(a,b,c,d)	Perl_mg_copy(aTHX_ a,b,c,d)
 #define mg_find(a,b)		Perl_mg_find(aTHX_ a,b)
+#define mg_findext(a,b,c)	Perl_mg_findext(aTHX_ a,b,c)
 #define mg_free(a)		Perl_mg_free(aTHX_ a)
 #define mg_free_type(a,b)	Perl_mg_free_type(aTHX_ a,b)
 #define mg_get(a)		Perl_mg_get(aTHX_ a)

@@ -311,6 +311,7 @@ Perl_mfree
 Perl_mg_clear
 Perl_mg_copy
 Perl_mg_find
+Perl_mg_findext
 Perl_mg_free
 Perl_mg_free_type
 Perl_mg_get
