@@ -1863,29 +1863,26 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		 (IV)HvAUX(sv)->xhv_name_count
 		);
 	    if (HvAUX(sv)->xhv_name_u.xhvnameu_name && HvENAME_HEK_NN(sv)) {
-		if (HvAUX(sv)->xhv_name_count) {
-		    SV * const names = sv_newmortal();
-		    HEK ** const namep = HvAUX(sv)->xhv_name_u.xhvnameu_names;
-		    const I32 count = HvAUX(sv)->xhv_name_count;
-		    /* This line sets hekp to one element before the first
-		       name, so the ++hekp below will put us at the start-
-		       ing point.
-		       That starting point is the first element if count
-		       is positive and the second element if count
-		       is negative.
-		     */
-		    HEK **hekp = namep - (count > 0);
-		    sv_setpv(names, "");
-		    while (++hekp < namep + (count < 0 ? -count : count))
+		const I32 count = HvAUX(sv)->xhv_name_count;
+		if (count) {
+		    SV * const names = newSVpvs_flags("", SVs_TEMP);
+		    /* The starting point is the first element if count is
+		       positive and the second element if count is negative. */
+		    HEK *const *hekp = HvAUX(sv)->xhv_name_u.xhvnameu_names
+			+ (count < 0 ? 1 : 0);
+		    HEK *const *const endp = HvAUX(sv)->xhv_name_u.xhvnameu_names
+			+ (count < 0 ? -count : count);
+		    while (hekp < endp) {
 			if (*hekp) {
 			    sv_catpvs(names, ", \"");
-			    sv_catpvn(
-			     names, HEK_KEY(*hekp), HEK_LEN(*hekp)
-			    );
+			    sv_catpvn(names, HEK_KEY(*hekp), HEK_LEN(*hekp));
 			    sv_catpvs(names, "\"");
+			} else {
+			    /* This should never happen. */
+			    sv_catpvs(names, ", (null)");
 			}
-			/* This should never happen. */
-			else sv_catpvs(names, ", (null)");
+			++hekp;
+		    }
 		    Perl_dump_indent(aTHX_
 		     level, file, "  ENAME = %s\n", SvPV_nolen(names)+2
 		    );
