@@ -361,6 +361,7 @@ tracing module installed as Devel::foo. E.g., B<-d:DProf> executes
 the program using the Devel::DProf profiler.  As with the B<-M>
 flag, options may be passed to the Devel::foo package where they
 will be received and interpreted by the Devel::foo::import routine.
+Again, like B<-M>, use -d:-foo to call Devel::foo::unimport instead of import.
 The comma-separated list of options must follow a C<=> character.
 If B<t> is specified, it indicates to the debugger that threads
 will be used in the code being debugged.

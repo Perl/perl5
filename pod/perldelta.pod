@@ -28,6 +28,30 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 C<-d:-foo> calls C<Devel::foo::unimport>
+
+The syntax C<-dI<B<:>foo>> was extended in 5.6.1 to make C<-dI<:fooB<=bar>>>
+equivalent to C<-Mfoo=bar>, which expands internally to C<use foo 'bar';>.
+F<perl> now allows prefixing the module name with C<->, with the same
+semantics as C<-M>, I<i.e.>
+
+=over 4
+
+=item C<-d:-foo>
+
+Equivalent to C<-M-foo>, expands to C<no foo;>, calls C<< foo->unimport() >>
+if the method exists.
+
+=item C<-d:-foo=bar>
+
+Equivalent to C<-M-foo=bar>, expands to C<no foo 'bar';>, calls
+C<< foo->unimport('bar') >> if the method exists.
+
+=back
+
+This is particularly useful to suppresses the default actions of a
+C<Devel::*> module's C<import> method whilst still loading it for debugging.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

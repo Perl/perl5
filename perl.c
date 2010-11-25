@@ -3048,11 +3048,21 @@ Perl_moreswitches(pTHX_ const char *s)
 	/* The following permits -d:Mod to accepts arguments following an =
 	   in the fashion that -MSome::Mod does. */
 	if (*s == ':' || *s == '=') {
-	    const char *start = ++s;
-	    const char *const end = s + strlen(s);
-	    SV * const sv = newSVpvs("use Devel::");
+	    const char *start;
+	    const char *end;
+	    SV *sv;
 
-	    /* We now allow -d:Module=Foo,Bar */
+	    if (*++s == '-') {
+		++s;
+		sv = newSVpvs("no Devel::");
+	    } else {
+		sv = newSVpvs("use Devel::");
+	    }
+
+	    start = s;
+	    end = s + strlen(s);
+
+	    /* We now allow -d:Module=Foo,Bar and -d:-Module */
 	    while(isALNUM(*s) || *s==':') ++s;
 	    if (*s != '=')
 		sv_catpvn(sv, start, end - start);

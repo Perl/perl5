@@ -9,7 +9,7 @@ BEGIN { require "./test.pl"; }
 
 # This test depends on t/lib/Devel/switchd*.pm.
 
-plan(tests => 4);
+plan(tests => 5);
 
 my $r;
 
@@ -42,6 +42,12 @@ __SWDTEST__
 		 args => ['4'],
 		);
     like($r, qr/^sub<Devel::switchd::import>;import<Devel::switchd a 42>;DB<main,$::tempfile_regexp,9>;sub<Foo::foo>;DB<Foo,$::tempfile_regexp,5>;DB<Foo,$::tempfile_regexp,6>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;$/);
+    $r = runperl(
+		 switches => [ '-Ilib', '-f', '-d:-switchd=a,42' ],
+		 progfile => $filename,
+		 args => ['4'],
+		);
+    like($r, qr/^sub<Devel::switchd::unimport>;unimport<Devel::switchd a 42>;DB<main,$::tempfile_regexp,9>;sub<Foo::foo>;DB<Foo,$::tempfile_regexp,5>;DB<Foo,$::tempfile_regexp,6>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;sub<Bar::bar>;DB<Bar,$::tempfile_regexp,2>;$/);
 }
 
 # [perl #71806]
