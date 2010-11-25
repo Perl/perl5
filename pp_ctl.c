@@ -3462,9 +3462,10 @@ PP(pp_require)
 
 		    DIE(aTHX_ "Perl %"SVf" required (did you mean %"SVf"?)"
 		    	"--this is only %"SVf", stopped",
-			SVfARG(vnormal(req)),
-			SVfARG(vnormal(sv_2mortal(hintsv))),
-			SVfARG(vnormal(PL_patchlevel)));
+			SVfARG(sv_2mortal(vnormal(req))),
+			SVfARG(sv_2mortal(vnormal(sv_2mortal(hintsv)))),
+			SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
+		    );
 		}
 	    }
 	}
