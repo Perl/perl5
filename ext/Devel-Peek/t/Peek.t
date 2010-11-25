@@ -8,7 +8,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 54;
+use Test::More;
 
 use Devel::Peek;
 
@@ -76,12 +76,12 @@ sub do_test {
 	    print $pattern, "\n" if $DEBUG;
 	    my ($dump, $dump2) = split m/\*\*\*\*\*\n/, scalar <IN>;
 	    print $dump, "\n"    if $DEBUG;
-	    like( $dump, qr/\A$pattern\Z/ms,
-		"test id $_[0], line " . (caller)[2]);
-
+	    like( $dump, qr/\A$pattern\Z/ms, $_[0])
+	      or note("line " . (caller)[2]);
 
             local $TODO = $repeat_todo;
-            is($dump2, $dump);
+            is($dump2, $dump, "$_[0] (unchanged by dump)")
+	      or note("line " . (caller)[2]);
 
 	    close(IN);
 
@@ -103,7 +103,7 @@ END {
     1 while unlink("peek$$");
 }
 
-do_test( 1,
+do_test('assignment of immediate constant (string)',
 	$a = "foo",
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -113,7 +113,7 @@ do_test( 1,
   LEN = \\d+'
        );
 
-do_test( 2,
+do_test('immediate constant (string)',
         "bar",
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -122,21 +122,21 @@ do_test( 2,
   CUR = 3
   LEN = \\d+');
 
-do_test( 3,
+do_test('assigment of immediate constant (integer)',
         $b = 123,
 'SV = IV\\($ADDR\\) at $ADDR
   REFCNT = 1
   FLAGS = \\(IOK,pIOK\\)
   IV = 123');
 
-do_test( 4,
+do_test('immediate constant (integer)',
         456,
 'SV = IV\\($ADDR\\) at $ADDR
   REFCNT = 1
   FLAGS = \\(.*IOK,READONLY,pIOK\\)
   IV = 456');
 
-do_test( 5,
+do_test('assignment of immediate constant (integer)',
         $c = 456,
 'SV = IV\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -148,7 +148,7 @@ do_test( 5,
 # maths is done in floating point always, and this scalar will be an NV.
 # ([NI]) captures the type, referred to by \1 in this regexp and $type for
 # building subsequent regexps.
-my $type = do_test( 6,
+my $type = do_test('result of addition',
         $c + $d,
 'SV = ([NI])V\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -157,7 +157,7 @@ my $type = do_test( 6,
 
 ($d = "789") += 0.1;
 
-do_test( 7,
+do_test('floating point value',
        $d,
 'SV = PVNV\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -168,20 +168,20 @@ do_test( 7,
   CUR = 3
   LEN = \\d+');
 
-do_test( 8,
+do_test('integer constant',
         0xabcd,
 'SV = IV\\($ADDR\\) at $ADDR
   REFCNT = 1
   FLAGS = \\(.*IOK,READONLY,pIOK\\)
   IV = 43981');
 
-do_test( 9,
+do_test('undef',
         undef,
 'SV = NULL\\(0x0\\) at $ADDR
   REFCNT = 1
   FLAGS = \\(\\)');
 
-do_test(10,
+do_test('reference to scalar',
         \$a,
 'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -210,7 +210,7 @@ if ($type eq 'N') {
       FLAGS = \\(IOK,pIOK\\)
       IV = 456';
 }
-do_test(11,
+do_test('reference to array',
        [$b,$c],
 'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -233,7 +233,7 @@ do_test(11,
       IV = 123
     Elt No. 1' . $c_pattern);
 
-do_test(12,
+do_test('reference to hash',
        {$b=>$c},
 'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -255,7 +255,7 @@ do_test(12,
 	'',
 	$] > 5.009 && 'The hash iterator used in dump.c sets the OOK flag');
 
-do_test(13,
+do_test('reference to anon sub with empty prototype',
         sub(){@_},
 'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -284,7 +284,7 @@ do_test(13,
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
     OUTSIDE = $ADDR \\(MAIN\\)');
 
-do_test(14,
+do_test('reference to named subroutine without prototype',
         \&do_test,
 'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -320,7 +320,7 @@ do_test(14,
     OUTSIDE = $ADDR \\(MAIN\\)');
 
 if ($] >= 5.011) {
-do_test(15,
+do_test('reference to regexp',
         qr(tic),
 'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -334,7 +334,7 @@ do_test(15,
     LEN = 0
     STASH = $ADDR\\t"Regexp"');
 } else {
-do_test(15,
+do_test('reference to regexp',
         qr(tic),
 'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -355,7 +355,7 @@ do_test(15,
     STASH = $ADDR\\t"Regexp"');
 }
 
-do_test(16,
+do_test('reference to blessed hash',
         (bless {}, "Tac"),
 'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -376,7 +376,7 @@ do_test(16,
 	$] > 5.009 ? 'The hash iterator used in dump.c sets the OOK flag'
 	: "Something causes the HV's array to become allocated");
 
-do_test(17,
+do_test('typeglob',
 	*a,
 'SV = PVGV\\($ADDR\\) at $ADDR
   REFCNT = 5
@@ -408,7 +408,7 @@ do_test(17,
     EGV = $ADDR\\t"a"');
 
 if (ord('A') == 193) {
-do_test(18,
+do_test('string with Unicode',
 	chr(256).chr(0).chr(512),
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -417,7 +417,7 @@ do_test(18,
   CUR = 5
   LEN = \\d+');
 } else {
-do_test(18,
+do_test('string with Unicode',
 	chr(256).chr(0).chr(512),
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -428,7 +428,7 @@ do_test(18,
 }
 
 if (ord('A') == 193) {
-do_test(19,
+do_test('reference to hash containing Unicode',
 	{chr(256)=>chr(512)},
 'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -456,7 +456,7 @@ do_test(19,
 	$] > 5.009 ? 'The hash iterator used in dump.c sets the OOK flag'
 	: 'sv_length has been called on the element, and cached the result in MAGIC');
 } else {
-do_test(19,
+do_test('reference to hash containing Unicode',
 	{chr(256)=>chr(512)},
 'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -487,7 +487,7 @@ do_test(19,
 
 my $x="";
 $x=~/.??/g;
-do_test(20,
+do_test('scalar with pos magic',
         $x,
 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -510,7 +510,7 @@ do_test(20,
 # VMS is setting FAKE and READONLY flags.  What VMS uses for storing
 # ENV hashes is also not always null terminated.
 #
-do_test(21,
+do_test('tainted value in %ENV',
         $ENV{PATH}=@ARGV,  # scalar(@ARGV) is a handy known tainted value
 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -538,8 +538,7 @@ do_test(21,
     MG_VIRTUAL = &PL_vtbl_taint
     MG_TYPE = PERL_MAGIC_taint\\(t\\)');
 
-# blessed refs
-do_test(22,
+do_test('blessed reference',
 	bless(\\undef, 'Foobar'),
 'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -559,13 +558,11 @@ do_test(22,
     LEN = 0
     STASH = $ADDR\s+"Foobar"');
 
-# Constant subroutines
-
 sub const () {
     "Perl rules";
 }
 
-do_test(23,
+do_test('constant subroutine',
 	\&const,
 'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -599,8 +596,7 @@ do_test(23,
     PADLIST = 0x0
     OUTSIDE = 0x0 \\(null\\)');	
 
-# isUV should show on PVMG
-do_test(24,
+do_test('isUV should show on PVMG',
 	do { my $v = $1; $v = ~0; $v },
 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -609,7 +605,7 @@ do_test(24,
   NV = 0
   PV = 0');
 
-do_test(25,
+do_test('IO',
 	*STDOUT{IO},
 'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -635,7 +631,7 @@ do_test(25,
     TYPE = \'>\'
     FLAGS = 0x4');
 
-do_test(26,
+do_test('FORMAT',
 	*PIE{FORMAT},
 'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -664,7 +660,7 @@ do_test(26,
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
     OUTSIDE = $ADDR \\(MAIN\\)');
 
-do_test(27,
+do_test('blessing to a class with embeded NUL characters',
         (bless {}, "\0::foo::\n::baz::\t::\0"),
 'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -685,3 +681,4 @@ do_test(27,
 	$] > 5.009 ? 'The hash iterator used in dump.c sets the OOK flag'
 	: "Something causes the HV's array to become allocated");
 
+done_testing();
