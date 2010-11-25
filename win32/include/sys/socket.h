@@ -6,16 +6,11 @@
 #ifndef  _INC_SYS_SOCKET
 #define  _INC_SYS_SOCKET
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define WIN32_LEAN_AND_MEAN
 #ifdef __GNUC__
 #  define Win32_Winsock
 #endif
 #include <windows.h>
-
 
 /* Too late to include winsock2.h if winsock.h has already been loaded */
 #ifndef _WINSOCKAPI_
@@ -23,11 +18,24 @@ extern "C" {
      /* winsock2 only for 4.00+ */
 #    include <winsock.h>
 #  else
-#  include <winsock2.h>
-#endif
+#    include <winsock2.h>
+     /* We need to include ws2tcpip.h to get the IPv6 definitions.
+      * It will in turn include wspiapi.h.  Later versions of that
+      * header in the Windows SDK generate C++ template code that
+      * can't be compiled with VC6 anymore.  The _WSPIAPI_COUNTOF
+      * definition below prevents wspiapi.h from generating this
+      * incompatible code.
+      */
+#    define _WSPIAPI_COUNTOF(_Array) (sizeof(_Array) / sizeof(_Array[0]))
+#    include <ws2tcpip.h>
+#  endif
 #endif
 
 #include "win32.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifndef ENOTSOCK
 #define ENOTSOCK	WSAENOTSOCK
