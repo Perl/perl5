@@ -4712,8 +4712,8 @@ PP(pp_rkeys)
     }
 
     if ( SvTYPE(sv) != SVt_PVHV && SvTYPE(sv) != SVt_PVAV ) {
-	DIE(aTHX_ Perl_form(aTHX_ "Type of argument to %s must be hashref or arrayref",
-	    PL_op_desc[PL_op->op_type] ));
+	DIE(aTHX_ "Type of argument to %s must be hashref or arrayref",
+	    PL_op_desc[PL_op->op_type] );
     }
 
     /* Delegate to correct function for op type */

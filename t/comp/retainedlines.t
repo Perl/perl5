@@ -6,7 +6,7 @@
 # we've not yet verified that use works.
 # use strict;
 
-print "1..65\n";
+print "1..72\n";
 my $test = 0;
 
 sub failed {
@@ -130,4 +130,21 @@ foreach my $flags (0x0, 0x800, 0x1000, 0x1800) {
 	is (scalar @after, 0 + keys %seen,
 	    "evals that fail are correctly cleaned up");
     }
+}
+
+# BEGIN blocks that die
+for (0xA, 0) {
+  local $^P = $_;
+
+  eval (my $prog = "BEGIN{die}\n");
+
+  if ($_) {
+    check_retained_lines($prog, 'eval that defines BEGIN that dies');
+  }
+  else {
+    my @after = grep { /eval/ } keys %::;
+
+    is (scalar @after, 0 + keys %seen,
+       "evals with BEGIN{die} are correctly cleaned up");
+  }
 }

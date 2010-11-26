@@ -1,3 +1,13 @@
+2010-10-25   Gisle Aas <gisle@ActiveState.com>
+
+   Release 3.12
+
+   Don't change SvUTF8 flag on the strings encoded [RT#60105]
+
+   Documentation tweaks
+
+
+
 2010-10-24   Gisle Aas <gisle@ActiveState.com>
 
    Release 3.11

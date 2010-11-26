@@ -70,6 +70,8 @@
 int mkstemp(char*);
 #endif
 
+#define PerlIO_lockcnt(f) (((PerlIOl*)(f))->head->flags)
+
 /* Call the callback or PerlIOBase, and return failure. */
 #define Perl_PerlIO_or_Base(f, callback, base, failure, args) 	\
 	if (PerlIOValid(f)) {					\
@@ -527,10 +529,46 @@ PerlIO_debug(const char *fmt, ...)
  * Inner level routines
  */
 
+/* check that the head field of each layer points back to the head */
+
+#ifdef DEBUGGING
+#  define VERIFY_HEAD(f) PerlIO_verify_head(aTHX_ f)
+static void
+PerlIO_verify_head(pTHX_ PerlIO *f)
+{
+    PerlIOl *head, *p;
+    int seen = 0;
+    if (!PerlIOValid(f))
+	return;
+    p = head = PerlIOBase(f)->head;
+    assert(p);
+    do {
+	assert(p->head == head);
+	if (p == (PerlIOl*)f)
+	    seen = 1;
+	p = p->next;
+    } while (p);
+    assert(seen);
+}
+#else
+#  define VERIFY_HEAD(f)
+#endif
+
+
 /*
  * Table of pointers to the PerlIO structs (malloc'ed)
  */
 #define PERLIO_TABLE_SIZE 64
+
+static void
+PerlIO_init_table(pTHX)
+{
+    if (PL_perlio)
+	return;
+    Newxz(PL_perlio, PERLIO_TABLE_SIZE, PerlIOl);
+}
+
+
 
 PerlIO *
 PerlIO_allocate(pTHX)
@@ -539,24 +577,30 @@ PerlIO_allocate(pTHX)
     /*
      * Find a free slot in the table, allocating new table as necessary
      */
-    PerlIO **last;
-    PerlIO *f;
+    PerlIOl **last;
+    PerlIOl *f;
     last = &PL_perlio;
     while ((f = *last)) {
 	int i;
-	last = (PerlIO **) (f);
+	last = (PerlIOl **) (f);
 	for (i = 1; i < PERLIO_TABLE_SIZE; i++) {
-	    if (!*++f) {
-		return f;
+	    if (!((++f)->next)) {
+		f->flags = 0; /* lockcnt */
+		f->tab = NULL;
+		f->head = f;
+		return (PerlIO *)f;
 	    }
 	}
     }
-    Newxz(f,PERLIO_TABLE_SIZE,PerlIO);
+    Newxz(f,PERLIO_TABLE_SIZE,PerlIOl);
     if (!f) {
 	return NULL;
     }
-    *last = f;
-    return f + 1;
+    *last = (PerlIOl*) f++;
+    f->flags = 0; /* lockcnt */
+    f->tab = NULL;
+    f->head = f;
+    return (PerlIO*) f;
 }
 
 #undef PerlIO_fdupopen
@@ -579,16 +623,16 @@ PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
 }
 
 void
-PerlIO_cleantable(pTHX_ PerlIO **tablep)
+PerlIO_cleantable(pTHX_ PerlIOl **tablep)
 {
-    PerlIO * const table = *tablep;
+    PerlIOl * const table = *tablep;
     if (table) {
 	int i;
-	PerlIO_cleantable(aTHX_(PerlIO **) & (table[0]));
+	PerlIO_cleantable(aTHX_(PerlIOl **) & (table[0]));
 	for (i = PERLIO_TABLE_SIZE - 1; i > 0; i--) {
-	    PerlIO * const f = table + i;
-	    if (*f) {
-		PerlIO_close(f);
+	    PerlIOl * const f = table + i;
+	    if (f->next) {
+		PerlIO_close(&(f->next));
 	    }
 	}
 	Safefree(table);
@@ -669,19 +713,19 @@ void
 PerlIO_clone(pTHX_ PerlInterpreter *proto, CLONE_PARAMS *param)
 {
 #ifdef USE_ITHREADS
-    PerlIO **table = &proto->Iperlio;
-    PerlIO *f;
+    PerlIOl **table = &proto->Iperlio;
+    PerlIOl *f;
     PL_perlio = NULL;
     PL_known_layers = PerlIO_clone_list(aTHX_ proto->Iknown_layers, param);
     PL_def_layerlist = PerlIO_clone_list(aTHX_ proto->Idef_layerlist, param);
-    PerlIO_allocate(aTHX); /* root slot is never used */
+    PerlIO_init_table(aTHX);
     PerlIO_debug("Clone %p from %p\n",(void*)aTHX,(void*)proto);
     while ((f = *table)) {
 	    int i;
-	    table = (PerlIO **) (f++);
+	    table = (PerlIOl **) (f++);
 	    for (i = 1; i < PERLIO_TABLE_SIZE; i++) {
-		if (*f) {
-		    (void) fp_dup(f, 0, param);
+		if (f->next) {
+		    (void) fp_dup(&(f->next), 0, param);
 		}
 		f++;
 	    }
@@ -697,19 +741,19 @@ void
 PerlIO_destruct(pTHX)
 {
     dVAR;
-    PerlIO **table = &PL_perlio;
-    PerlIO *f;
+    PerlIOl **table = &PL_perlio;
+    PerlIOl *f;
 #ifdef USE_ITHREADS
     PerlIO_debug("Destruct %p\n",(void*)aTHX);
 #endif
     while ((f = *table)) {
 	int i;
-	table = (PerlIO **) (f++);
+	table = (PerlIOl **) (f++);
 	for (i = 1; i < PERLIO_TABLE_SIZE; i++) {
-	    PerlIO *x = f;
+	    PerlIO *x = &(f->next);
 	    const PerlIOl *l;
 	    while ((l = *x)) {
-		if (l->tab->kind & PERLIO_K_DESTRUCT) {
+		if (l->tab && l->tab->kind & PERLIO_K_DESTRUCT) {
 		    PerlIO_debug("Destruct popping %s\n", l->tab->name);
 		    PerlIO_flush(x);
 		    PerlIO_pop(aTHX_ x);
@@ -727,9 +771,11 @@ void
 PerlIO_pop(pTHX_ PerlIO *f)
 {
     const PerlIOl *l = *f;
+    VERIFY_HEAD(f);
     if (l) {
-	PerlIO_debug("PerlIO_pop f=%p %s\n", (void*)f, l->tab->name);
-	if (l->tab->Popped) {
+	PerlIO_debug("PerlIO_pop f=%p %s\n", (void*)f,
+			    l->tab ? l->tab->name : "(Null)");
+	if (l->tab && l->tab->Popped) {
 	    /*
 	     * If popped returns non-zero do not free its layer structure
 	     * it has either done so itself, or it is shared and still in
@@ -738,8 +784,16 @@ PerlIO_pop(pTHX_ PerlIO *f)
 	    if ((*l->tab->Popped) (aTHX_ f) != 0)
 		return;
 	}
-	*f = l->next;
-	Safefree(l);
+	if (PerlIO_lockcnt(f)) {
+	    /* we're in use; defer freeing the structure */
+	    PerlIOBase(f)->flags = PERLIO_F_CLEARED;
+	    PerlIOBase(f)->tab = NULL;
+	}
+	else {
+	    *f = l->next;
+	    Safefree(l);
+	}
+
     }
 }
 
@@ -1200,7 +1254,7 @@ PerlIO_stdstreams(pTHX)
 {
     dVAR;
     if (!PL_perlio) {
-	PerlIO_allocate(aTHX);
+	PerlIO_init_table(aTHX);
 	PerlIO_fdopen(0, "Ir" PERLIO_STDTEXT);
 	PerlIO_fdopen(1, "Iw" PERLIO_STDTEXT);
 	PerlIO_fdopen(2, "Iw" PERLIO_STDTEXT);
@@ -1210,6 +1264,7 @@ PerlIO_stdstreams(pTHX)
 PerlIO *
 PerlIO_push(pTHX_ PerlIO *f, PERLIO_FUNCS_DECL(*tab), const char *mode, SV *arg)
 {
+    VERIFY_HEAD(f);
     if (tab->fsize != sizeof(PerlIO_funcs)) {
 	Perl_croak( aTHX_
 	    "%s (%d) does not match %s (%d)",
@@ -1232,6 +1287,7 @@ PerlIO_push(pTHX_ PerlIO *f, PERLIO_FUNCS_DECL(*tab), const char *mode, SV *arg)
 	    if (l) {
 		l->next = *f;
 		l->tab = (PerlIO_funcs*) tab;
+		l->head = ((PerlIOl*)f)->head;
 		*f = l;
 		PerlIO_debug("PerlIO_push f=%p %s %s %p\n",
 			     (void*)f, tab->name,
@@ -1264,7 +1320,7 @@ PerlIOBase_binmode(pTHX_ PerlIO *f)
 {
    if (PerlIOValid(f)) {
 	/* Is layer suitable for raw stream ? */
-	if (PerlIOBase(f)->tab->kind & PERLIO_K_RAW) {
+	if (PerlIOBase(f)->tab && PerlIOBase(f)->tab->kind & PERLIO_K_RAW) {
 	    /* Yes - turn off UTF-8-ness, to undo UTF-8 locale effects */
 	    PerlIOBase(f)->flags &= ~PERLIO_F_UTF8;
 	}
@@ -1293,7 +1349,7 @@ PerlIORaw_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 	 */
 	t = f;
 	while (t && (l = *t)) {
-	    if (l->tab->Binmode) {
+	    if (l->tab && l->tab->Binmode) {
 		/* Has a handler - normal case */
 		if ((*l->tab->Binmode)(aTHX_ t) == 0) {
 		    if (*t == l) {
@@ -1311,7 +1367,8 @@ PerlIORaw_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 	    }
 	}
 	if (PerlIOValid(f)) {
-	    PerlIO_debug(":raw f=%p :%s\n", (void*)f, PerlIOBase(f)->tab->name);
+	    PerlIO_debug(":raw f=%p :%s\n", (void*)f,
+		PerlIOBase(f)->tab ? PerlIOBase(f)->tab->name : "(Null)");
 	    return 0;
 	}
     }
@@ -1364,7 +1421,8 @@ int
 PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
 {
     PerlIO_debug("PerlIO_binmode f=%p %s %c %x %s\n", (void*)f,
-                 (PerlIOBase(f)) ? PerlIOBase(f)->tab->name : "(Null)",
+                 (PerlIOBase(f) && PerlIOBase(f)->tab) ?
+		       	PerlIOBase(f)->tab->name : "(Null)",
                  iotype, mode, (names) ? names : "(Null)");
 
     if (names) {
@@ -1391,7 +1449,9 @@ PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
 		/* Perhaps we should turn on bottom-most aware layer
 		   e.g. Ilya's idea that UNIX TTY could serve
 		 */
-		if (PerlIOBase(f)->tab->kind & PERLIO_K_CANCRLF) {
+		if (PerlIOBase(f)->tab &&
+		    PerlIOBase(f)->tab->kind & PERLIO_K_CANCRLF)
+		{
 		    if (!(PerlIOBase(f)->flags & PERLIO_F_CRLF)) {
 			/* Not in text mode - flush any pending stuff and flip it */
 			PerlIO_flush(f);
@@ -1438,6 +1498,9 @@ Perl_PerlIO_close(pTHX_ PerlIO *f)
     const int code = PerlIO__close(aTHX_ f);
     while (PerlIOValid(f)) {
 	PerlIO_pop(aTHX_ f);
+	if (PerlIO_lockcnt(f))
+	    /* we're in use; the 'pop' deferred freeing the structure */
+	    f = PerlIONext(f);
     }
     return code;
 }
@@ -1563,7 +1626,7 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 	    layera = PerlIO_list_alloc(aTHX);
 	    while (l) {
 		SV *arg = NULL;
-		if (l->tab->Getarg)
+		if (l->tab && l->tab->Getarg)
 		    arg = (*l->tab->Getarg) (aTHX_ &l, NULL, 0);
 		PerlIO_list_push(aTHX_ layera, l->tab,
 				 (arg) ? arg : &PL_sv_undef);
@@ -1689,15 +1752,16 @@ Perl_PerlIO_flush(pTHX_ PerlIO *f)
 	 * things on fflush(NULL), but should we be bound by their design
 	 * decisions? --jhi
 	 */
-	PerlIO **table = &PL_perlio;
+	PerlIOl **table = &PL_perlio;
+	PerlIOl *ff;
 	int code = 0;
-	while ((f = *table)) {
+	while ((ff = *table)) {
 	    int i;
-	    table = (PerlIO **) (f++);
+	    table = (PerlIOl **) (ff++);
 	    for (i = 1; i < PERLIO_TABLE_SIZE; i++) {
-		if (*f && PerlIO_flush(f) != 0)
+		if (ff->next && PerlIO_flush(&(ff->next)) != 0)
 		    code = -1;
-		f++;
+		ff++;
 	    }
 	}
 	return code;
@@ -1708,17 +1772,17 @@ void
 PerlIOBase_flush_linebuf(pTHX)
 {
     dVAR;
-    PerlIO **table = &PL_perlio;
-    PerlIO *f;
+    PerlIOl **table = &PL_perlio;
+    PerlIOl *f;
     while ((f = *table)) {
 	int i;
-	table = (PerlIO **) (f++);
+	table = (PerlIOl **) (f++);
 	for (i = 1; i < PERLIO_TABLE_SIZE; i++) {
-	    if (*f
-		&& (PerlIOBase(f)->
+	    if (f->next
+		&& (PerlIOBase(&(f->next))->
 		    flags & (PERLIO_F_LINEBUF | PERLIO_F_CANWRITE))
 		== (PERLIO_F_LINEBUF | PERLIO_F_CANWRITE))
-		PerlIO_flush(f);
+		PerlIO_flush(&(f->next));
 	    f++;
 	}
     }
@@ -1868,7 +1932,7 @@ PerlIOUtf8_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
     PERL_UNUSED_ARG(mode);
     PERL_UNUSED_ARG(arg);
     if (PerlIOValid(f)) {
-	if (tab->kind & PERLIO_K_UTF8)
+	if (tab && tab->kind & PERLIO_K_UTF8)
 	    PerlIOBase(f)->flags |= PERLIO_F_UTF8;
 	else
 	    PerlIOBase(f)->flags &= ~PERLIO_F_UTF8;
@@ -2037,7 +2101,7 @@ PerlIOBase_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 
     l->flags &= ~(PERLIO_F_CANREAD | PERLIO_F_CANWRITE |
 		  PERLIO_F_TRUNCATE | PERLIO_F_APPEND);
-    if (tab->Set_ptrcnt != NULL)
+    if (tab && tab->Set_ptrcnt != NULL)
 	l->flags |= PERLIO_F_FASTGETS;
     if (mode) {
 	if (*mode == IoTYPE_NUMERIC || *mode == IoTYPE_IMPLICIT)
@@ -2266,8 +2330,9 @@ PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 	SV *arg = NULL;
 	char buf[8];
 	PerlIO_debug("PerlIOBase_dup %s f=%p o=%p param=%p\n",
-		     self->name, (void*)f, (void*)o, (void*)param);
-	if (self->Getarg)
+		     self ? self->name : "(Null)",
+		     (void*)f, (void*)o, (void*)param);
+	if (self && self->Getarg)
 	    arg = (*self->Getarg)(aTHX_ o, param, flags);
 	f = PerlIO_push(aTHX_ f, self, PerlIO_modestr(o,buf), arg);
 	if (PerlIOBase(o)->flags & PERLIO_F_UTF8)
@@ -2466,6 +2531,38 @@ typedef struct {
     int oflags;                 /* open/fcntl flags */
 } PerlIOUnix;
 
+static void
+S_lockcnt_dec(pTHX_ const void* f)
+{
+    PerlIO_lockcnt((PerlIO*)f)--;
+}
+
+
+/* call the signal handler, and if that handler happens to clear
+ * this handle, free what we can and return true */
+
+static bool
+S_perlio_async_run(pTHX_ PerlIO* f) {
+    ENTER;
+    SAVEDESTRUCTOR_X(S_lockcnt_dec, (void*)f);
+    PerlIO_lockcnt(f)++;
+    PERL_ASYNC_CHECK();
+    if ( !(PerlIOBase(f)->flags & PERLIO_F_CLEARED) )
+	return 0;
+    /* we've just run some perl-level code that could have done
+     * anything, including closing the file or clearing this layer.
+     * If so, free any lower layers that have already been
+     * cleared, then return an error. */
+    while (PerlIOValid(f) &&
+	    (PerlIOBase(f)->flags & PERLIO_F_CLEARED))
+    {
+	const PerlIOl *l = *f;
+	*f = l->next;
+	Safefree(l);
+    }
+    return 1;
+}
+
 int
 PerlIOUnix_oflags(const char *mode)
 {
@@ -2598,7 +2695,7 @@ PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 		int perm, PerlIO *f, int narg, SV **args)
 {
     if (PerlIOValid(f)) {
-	if (PerlIOBase(f)->flags & PERLIO_F_OPEN)
+	if (PerlIOBase(f)->tab && PerlIOBase(f)->flags & PERLIO_F_OPEN)
 	    (*PerlIOBase(f)->tab->Close)(aTHX_ f);
     }
     if (narg > 0) {
@@ -2669,7 +2766,10 @@ SSize_t
 PerlIOUnix_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 {
     dVAR;
-    const int fd = PerlIOSelf(f, PerlIOUnix)->fd;
+    int fd;
+    if (PerlIO_lockcnt(f)) /* in use: abort ungracefully */
+	return -1;
+    fd = PerlIOSelf(f, PerlIOUnix)->fd;
 #ifdef PERLIO_STD_SPECIAL
     if (fd == 0)
         return PERLIO_STD_IN(fd, vbuf, count);
@@ -2692,7 +2792,9 @@ PerlIOUnix_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	    }
 	    return len;
 	}
-	PERL_ASYNC_CHECK();
+	/* EINTR */
+	if (PL_sig_pending && S_perlio_async_run(aTHX_ f))
+	    return -1;
     }
     /*NOTREACHED*/
 }
@@ -2701,7 +2803,10 @@ SSize_t
 PerlIOUnix_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
     dVAR;
-    const int fd = PerlIOSelf(f, PerlIOUnix)->fd;
+    int fd;
+    if (PerlIO_lockcnt(f)) /* in use: abort ungracefully */
+	return -1;
+    fd = PerlIOSelf(f, PerlIOUnix)->fd;
 #ifdef PERLIO_STD_SPECIAL
     if (fd == 1 || fd == 2)
         return PERLIO_STD_OUT(fd, vbuf, count);
@@ -2716,7 +2821,9 @@ PerlIOUnix_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 	    }
 	    return len;
 	}
-	PERL_ASYNC_CHECK();
+	/* EINTR */
+	if (PL_sig_pending && S_perlio_async_run(aTHX_ f))
+	    return -1;
     }
     /*NOTREACHED*/
 }
@@ -2751,7 +2858,9 @@ PerlIOUnix_close(pTHX_ PerlIO *f)
 	    code = -1;
 	    break;
 	}
-	PERL_ASYNC_CHECK();
+	/* EINTR */
+	if (PL_sig_pending && S_perlio_async_run(aTHX_ f))
+	    return -1;
     }
     if (code == 0) {
 	PerlIOBase(f)->flags &= ~PERLIO_F_OPEN;
@@ -3224,8 +3333,11 @@ SSize_t
 PerlIOStdio_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 {
     dVAR;
-    FILE * const s = PerlIOSelf(f, PerlIOStdio)->stdio;
+    FILE * s;
     SSize_t got = 0;
+    if (PerlIO_lockcnt(f)) /* in use: abort ungracefully */
+	return -1;
+    s = PerlIOSelf(f, PerlIOStdio)->stdio;
     for (;;) {
 	if (count == 1) {
 	    STDCHAR *buf = (STDCHAR *) vbuf;
@@ -3245,7 +3357,8 @@ PerlIOStdio_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	    got = -1;
 	if (got >= 0 || errno != EINTR)
 	    break;
-	PERL_ASYNC_CHECK();
+	if (PL_sig_pending && S_perlio_async_run(aTHX_ f))
+	    return -1;
 	SETERRNO(0,0);	/* just in case */
     }
     return got;
@@ -3314,12 +3427,15 @@ PerlIOStdio_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
     dVAR;
     SSize_t got;
+    if (PerlIO_lockcnt(f)) /* in use: abort ungracefully */
+	return -1;
     for (;;) {
 	got = PerlSIO_fwrite(vbuf, 1, count,
 			      PerlIOSelf(f, PerlIOStdio)->stdio);
 	if (got >= 0 || errno != EINTR)
 	    break;
-	PERL_ASYNC_CHECK();
+	if (PL_sig_pending && S_perlio_async_run(aTHX_ f))
+	    return -1;
 	SETERRNO(0,0);	/* just in case */
     }
     return got;
@@ -3481,9 +3597,12 @@ PerlIOStdio_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 IV
 PerlIOStdio_fill(pTHX_ PerlIO *f)
 {
-    FILE * const stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
+    FILE * stdio;
     int c;
     PERL_UNUSED_CONTEXT;
+    if (PerlIO_lockcnt(f)) /* in use: abort ungracefully */
+	return -1;
+    stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
 
     /*
      * fflush()ing read-only streams can cause trouble on some stdio-s
@@ -3498,7 +3617,8 @@ PerlIOStdio_fill(pTHX_ PerlIO *f)
 	    break;
 	if (! PerlSIO_ferror(stdio) || errno != EINTR)
 	    return EOF;
-	PERL_ASYNC_CHECK();
+	if (PL_sig_pending && S_perlio_async_run(aTHX_ f))
+	    return -1;
 	SETERRNO(0,0);
     }
 
@@ -4030,7 +4150,8 @@ PerlIOBuf_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 		PerlIO_flush(f);
 	}
 	if (b->ptr >= (b->buf + b->bufsiz))
-	    PerlIO_flush(f);
+	    if (PerlIO_flush(f) == -1)
+		return -1;
     }
     if (PerlIOBase(f)->flags & PERLIO_F_UNBUF)
 	PerlIO_flush(f);
@@ -4988,7 +5109,7 @@ Perl_PerlIO_stdin(pTHX)
     if (!PL_perlio) {
 	PerlIO_stdstreams(aTHX);
     }
-    return &PL_perlio[1];
+    return (PerlIO*)&PL_perlio[1];
 }
 
 PerlIO *
@@ -4998,7 +5119,7 @@ Perl_PerlIO_stdout(pTHX)
     if (!PL_perlio) {
 	PerlIO_stdstreams(aTHX);
     }
-    return &PL_perlio[2];
+    return (PerlIO*)&PL_perlio[2];
 }
 
 PerlIO *
@@ -5008,7 +5129,7 @@ Perl_PerlIO_stderr(pTHX)
     if (!PL_perlio) {
 	PerlIO_stdstreams(aTHX);
     }
-    return &PL_perlio[3];
+    return (PerlIO*)&PL_perlio[3];
 }
 
 /*--------------------------------------------------------------------------------------*/

@@ -408,6 +408,12 @@ operation.)
 The default in Perl 5.7.3 and later is to automatically use
 the C<:perlio> layer.
 
+Note that it is not advisable to access a file handle within a signal
+handler where that signal has interrupted an I/O operation on that same
+handle. While perl will at least try hard not to crash, there are no
+guarantees of data integrity; for example, some data might get dropped or
+written twice.
+
 Some networking library functions like gethostbyname() are known to have
 their own implementations of timeouts which may conflict with your
 timeouts.  If you have problems with such functions, try using the POSIX

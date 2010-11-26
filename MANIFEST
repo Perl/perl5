@@ -4481,6 +4481,7 @@ t/io/crlf.t			See if :crlf works
 t/io/crlf_through.t		See if pipe passes data intact with :crlf
 t/io/defout.t			See if PL_defoutgv works
 t/io/dup.t			See if >& works right
+t/io/eintr.t			See if code called during EINTR is safe
 t/io/errnosig.t			Test case for restoration $! when leaving signal handlers
 t/io/errno.t			See if $! is correctly set
 t/io/fflush.t			See if auto-flush on fork/exec/system/qx works

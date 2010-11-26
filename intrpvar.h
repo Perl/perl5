@@ -658,7 +658,7 @@ PERLVAR(Icustom_op_names, HV*)  /* Names of user defined ops */
 PERLVAR(Icustom_op_descs, HV*)  /* Descriptions of user defined ops */
 
 #ifdef PERLIO_LAYERS
-PERLVARI(Iperlio, PerlIO *,NULL)
+PERLVARI(Iperlio, PerlIOl *,NULL)
 PERLVARI(Iknown_layers, PerlIO_list_t *,NULL)
 PERLVARI(Idef_layerlist, PerlIO_list_t *,NULL)
 #endif

@@ -9317,7 +9317,7 @@ Perl_rpeep(pTHX_ register OP *o)
 	    /* Two NEXTSTATEs in a row serve no purpose. Except if they happen
 	       to carry two labels. For now, take the easier option, and skip
 	       this optimisation if the first NEXTSTATE has a label.  */
-	    if (!CopLABEL((COP*)o)) {
+	    if (!CopLABEL((COP*)o) && !PERLDB_NOOPT) {
 		OP *nextop = o->op_next;
 		while (nextop && nextop->op_type == OP_NULL)
 		    nextop = nextop->op_next;

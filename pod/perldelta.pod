@@ -136,7 +136,7 @@ and documentation enhancements.
 
 =item *
 
-C<MIME::Base64> has been upgraded from 3.10 to 3.11
+C<MIME::Base64> has been upgraded from 3.10 to 3.12
 
 Now provides encode_base64url and decode_base64url functions to process
 the base64 scheme for "URL applications".

@@ -67,6 +67,7 @@ struct _PerlIO {
     PerlIOl *next;		/* Lower layer */
     PerlIO_funcs *tab;		/* Functions for this layer */
     U32 flags;			/* Various flags for state */
+    PerlIOl *head;		/* our ultimate parent pointer */
 };
 
 /*--------------------------------------------------------------------------------------*/
@@ -89,6 +90,7 @@ struct _PerlIO {
 #define PERLIO_F_FASTGETS	0x00400000
 #define PERLIO_F_TTY		0x00800000
 #define PERLIO_F_NOTREG         0x01000000   
+#define PERLIO_F_CLEARED        0x02000000 /* layer cleared but not freed */
 
 #define PerlIOBase(f)      (*(f))
 #define PerlIOSelf(f,type) ((type *)PerlIOBase(f))
@@ -150,7 +152,7 @@ PERL_EXPORT_C PerlIO_funcs *PerlIO_layer_fetch(pTHX_ PerlIO_list_t *av, IV n, Pe
 
 
 PERL_EXPORT_C SV *PerlIO_sv_dup(pTHX_ SV *arg, CLONE_PARAMS *param);
-PERL_EXPORT_C void PerlIO_cleantable(pTHX_ PerlIO **tablep);
+PERL_EXPORT_C void PerlIO_cleantable(pTHX_ PerlIOl **tablep);
 PERL_EXPORT_C SV * PerlIO_tab_sv(pTHX_ PerlIO_funcs *tab);
 PERL_EXPORT_C void PerlIO_default_buffer(pTHX_ PerlIO_list_t *av);
 PERL_EXPORT_C void PerlIO_stdstreams(pTHX);

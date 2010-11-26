@@ -1397,6 +1397,14 @@ foreach my $ord (78, 163, 256) {
 }
 
 {
+    # On Windows we can't spawn a fresh Perl interpreter unless at
+    # least the Windows system directory (usually C:\Windows\System32)
+    # is still on the PATH.  There is however no way to determine the
+    # actual path on the current system without loading the Win32
+    # module, so we just restore the original $ENV{PATH} here.
+    local $ENV{PATH} = $ENV{PATH};
+    $ENV{PATH} = $old_env_path if $Is_MSWin32;
+
     fresh_perl_is(<<'end', "ok", { switches => [ '-T' ] },
     $TAINT = substr($^X, 0, 0);
     formline('@'.('<'x("2000".$TAINT)).' | @*', 'hallo', 'welt');
