@@ -3953,7 +3953,7 @@ PP(pp_entereval)
 	    ? (PERLDB_LINE || PERLDB_SAVESRC)
 	    :  PERLDB_SAVESRC_INVALID) {
 	    /* Retain the filegv we created.  */
-	} else {
+	} else if (!saved_delete) {
 	    (void)hv_delete(PL_defstash, tmpbuf, len, G_DISCARD);
 	}
 	return PL_op->op_next;
