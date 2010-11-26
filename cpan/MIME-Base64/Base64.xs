@@ -107,11 +107,12 @@ encode_base64(sv,...)
 	STRLEN rlen;   /* length of result string */
 	unsigned char c1, c2, c3;
 	int chunk;
-	bool utf8_downgraded;
+	U32 had_utf8;
 
 	CODE:
 #if PERL_REVISION == 5 && PERL_VERSION >= 6
-	utf8_downgraded = sv_utf8_downgrade(sv, FALSE);
+	had_utf8 = SvUTF8(sv);
+	sv_utf8_downgrade(sv, FALSE);
 #endif
 	str = SvPV(sv, rlen); /* SvPV(sv, len) gives warning for signed len */
 	len = (SSize_t)rlen;
@@ -171,7 +172,7 @@ encode_base64(sv,...)
 	}
 	*r = '\0';  /* every SV in perl should be NUL-terminated */
 #if PERL_REVISION == 5 && PERL_VERSION >= 6
-	if (utf8_downgraded)
+	if (had_utf8)
 	    sv_utf8_upgrade(sv);
 #endif
 
@@ -247,12 +248,18 @@ encoded_base64_length(sv,...)
 	PREINIT:
 	SSize_t len;   /* length of the string */
 	STRLEN eollen; /* length of the EOL sequence */
+	U32 had_utf8;
 
 	CODE:
 #if PERL_REVISION == 5 && PERL_VERSION >= 6
+	had_utf8 = SvUTF8(sv);
 	sv_utf8_downgrade(sv, FALSE);
 #endif
 	len = SvCUR(sv);
+#if PERL_REVISION == 5 && PERL_VERSION >= 6
+	if (had_utf8)
+	    sv_utf8_upgrade(sv);
+#endif
 
 	if (items > 1 && SvOK(ST(1))) {
 	    eollen = SvCUR(ST(1));
@@ -322,11 +329,12 @@ encode_qp(sv,...)
 	char *p;
 	char *p_beg;
 	STRLEN p_len;
-	bool utf8_downgraded;
+	U32 had_utf8;
 
 	CODE:
 #if PERL_REVISION == 5 && PERL_VERSION >= 6
-	utf8_downgraded = sv_utf8_downgrade(sv, FALSE);
+        had_utf8 = SvUTF8(sv);
+	sv_utf8_downgrade(sv, FALSE);
 #endif
 	/* set up EOL from the second argument if present, default to "\n" */
 	if (items > 1 && SvOK(ST(1))) {
@@ -419,7 +427,7 @@ encode_qp(sv,...)
 	    sv_catpvn(RETVAL, eol, eol_len);
 	}
 #if PERL_REVISION == 5 && PERL_VERSION >= 6
-	if (utf8_downgraded)
+	if (had_utf8)
 	    sv_utf8_upgrade(sv);
 #endif
 

@@ -1,3 +1,13 @@
+2010-10-26   Gisle Aas <gisle@ActiveState.com>
+
+   Release 3.13
+
+   The fix in v3.12 to try to preserve the SvUTF8 flag was buggy
+   and actually managed to set the flag on strings that did not
+   have it originally.
+
+
+
 2010-10-25   Gisle Aas <gisle@ActiveState.com>
 
    Release 3.12
