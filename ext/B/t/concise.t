@@ -10,7 +10,7 @@ BEGIN {
     require 'test.pl';		# we use runperl from 'test.pl', so can't use Test::More
 }
 
-plan tests => 157;
+plan tests => 158;
 
 require_ok("B::Concise");
 
@@ -424,5 +424,15 @@ $out = runperl ( switches => ["-MO=Concise,-src,-stash=FOO,-main"],
 
 like($out, qr/FUNC: \*FOO::bar/,
      "stash rendering works on inlined package");
+
+# Test that consecutive nextstate ops are not nulled out when PERLDBf_NOOPT
+# is set.
+# XXX Does this test belong here?
+
+$out = runperl ( switches => ["-MO=Concise"],
+		 prog => 'BEGIN{$^P = 0x04} 1 if 0; print',
+		 stderr => 1 );
+like $out, qr/nextstate.*nextstate/s,
+  'nulling of nextstate-nextstate happeneth not when $^P | PERLDBf_NOOPT';
 
 __END__
