@@ -319,7 +319,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 	    cv = newCONSTSUB(stash, (name0 ? name0 : name), has_constant);
 	    /* In case op.c:S_process_special_blocks stole it: */
 	    if (!GvCV(gv))
-		GvCV(gv) = SvREFCNT_inc_simple_NN(cv);
+		GvCV(gv) = (CV *)SvREFCNT_inc_simple_NN(cv);
 	    assert(GvCV(gv) == cv); /* newCONSTSUB should have set this */
 	    if (name0)
 		Safefree(name0);
