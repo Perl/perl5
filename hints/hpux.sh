@@ -220,7 +220,7 @@ case "$archname" in
 	;;
     esac
 
-case "$use64bitint" in
+case "$use64bitall" in
     $define|true|[Yy])
 
 	if [ "$xxOsRevMajor" -lt 11 ]; then
