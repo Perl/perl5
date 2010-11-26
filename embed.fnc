@@ -735,6 +735,8 @@ Apd	|int	|mg_set		|NN SV* sv
 Ap	|I32	|mg_size	|NN SV* sv
 Ap	|void	|mini_mktime	|NN struct tm *ptm
 AMpd	|OP*	|op_lvalue	|NULLOK OP* o|I32 type
+: To be removed after 5.14 (see [perl #78908]):
+EXp	|OP*	|mod		|NULLOK OP* o|I32 type
 : Used in op.c and pp_sys.c
 p	|int	|mode_from_discipline|NULLOK const char* s|STRLEN len
 Ap	|const char*	|moreswitches	|NN const char* s

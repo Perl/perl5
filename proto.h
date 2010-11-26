@@ -2247,6 +2247,7 @@ PERL_CALLCONV void	Perl_mini_mktime(pTHX_ struct tm *ptm)
 #define PERL_ARGS_ASSERT_MINI_MKTIME	\
 	assert(ptm)
 
+PERL_CALLCONV OP*	Perl_mod(pTHX_ OP* o, I32 type);
 PERL_CALLCONV int	Perl_mode_from_discipline(pTHX_ const char* s, STRLEN len);
 PERL_CALLCONV void *	Perl_more_bodies(pTHX_ const svtype sv_type, const size_t body_size, const size_t arena_size);
 PERL_CALLCONV const char*	Perl_moreswitches(pTHX_ const char* s)
