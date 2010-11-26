@@ -3843,6 +3843,7 @@ PP(pp_entereval)
     const I32 gimme = GIMME_V;
     const U32 was = PL_breakable_sub_gen;
     char tbuf[TYPE_DIGITS(long) + 12];
+    bool saved_delete = FALSE;
     char *tmpbuf = tbuf;
     STRLEN len;
     CV* runcv;
@@ -3927,6 +3928,12 @@ PP(pp_entereval)
 
     if ((PERLDB_LINE || PERLDB_SAVESRC) && PL_curstash != PL_debstash)
 	save_lines(CopFILEAV(&PL_compiling), PL_parser->linestr);
+    else {
+	char *const safestr = savepvn(tmpbuf, len);
+	SAVEDELETE(PL_defstash, safestr, len);
+	saved_delete = TRUE;
+    }
+    
     PUTBACK;
 
     if (doeval(gimme, NULL, runcv, seq)) {
@@ -3934,7 +3941,7 @@ PP(pp_entereval)
 	    ? (PERLDB_LINE || PERLDB_SAVESRC)
 	    :  PERLDB_SAVESRC_NOSUBS) {
 	    /* Retain the filegv we created.  */
-	} else {
+	} else if (!saved_delete) {
 	    char *const safestr = savepvn(tmpbuf, len);
 	    SAVEDELETE(PL_defstash, safestr, len);
 	}
