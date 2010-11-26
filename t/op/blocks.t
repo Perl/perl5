@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 4;
+plan tests => 5;
 
 my @expect = qw(
 b1
@@ -109,3 +109,7 @@ SCRIPT3
 fresh_perl_is(<<'SCRIPT70614', "still here",{switches => [''], stdin => '', stderr => 1 },'eval-UNITCHECK-eval (bug 70614)');
 eval "UNITCHECK { eval 0 }"; print "still here";
 SCRIPT70614
+
+# [perl #78634] Make sure block names can be used as constants.
+use constant INIT => 5;
+::is INIT, 5, 'constant named after a special block';
