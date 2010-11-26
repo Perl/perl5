@@ -14,8 +14,6 @@ BEGIN {
 
 use warnings;
 
-plan 92;
-
 $SIG{__WARN__} = sub { die @_ };
 
 sub eval_ok ($;$) {
@@ -243,3 +241,58 @@ ok !defined(attributes::get(\PVBM)),
 	$c=undef; eval 'sub t5 :Foo { }';
 	main::ok $c == \&{"t5"} && $c == $t5b && $c == $t5a;
 }
+
+my @tests = grep {/^[^#]/} split /\n/, <<'EOT';
+# This one is fine as an empty attribute list
+my $holy_Einstein : = '';
+# This one is deprecated
+my $krunch := 4;
+our $FWISK_FWISK_FWIZZACH_FWACH_ZACHITTY_ZICH_SHAZZATZ_FWISK := '';
+state $thump := 'Trumpets';
+# Lather rinse repeat in my usual obsessive style
+my @holy_perfect_pitch : = ();
+my @zok := ();
+our @GUKGUK := ();
+# state @widget_mark := ();
+my %holy_seditives : = ();
+my %bang := ();
+our %GIGAZING := ();
+# state %hex := ();
+my $holy_giveaways : = '';
+my $eee_yow := [];
+our $TWOYYOYYOING_THUK_UGH := 1 == 1;
+state $octothorn := 'Tinky Winky';
+my @holy_Taj_Mahal : = ();
+my @touche := ();
+our @PLAK_DAK_THUK_FRIT := ();
+# state @hash_mark := ();
+my %holy_priceless_collection_of_Etruscan_snoods : = ();
+my %wham_eth := ();
+our %THWUK := ();
+# state %octalthorpe := ();
+my $holy_sewer_pipe : = '';
+my $thunk := undef;
+our $BLIT := time;
+state $crunch := 'Laa Laa';
+my @glurpp := ();
+my @holy_harem : = ();
+our @FABADAP := ();
+# state @square := ();
+my %holy_pin_cushions : = ();
+my %swoosh := ();
+our %RRRRR := ();
+# state %scratchmark := ();
+EOT
+
+foreach my $test (@tests) {
+    use feature 'state';
+    eval $test;
+    if ($test =~ /:=/) {
+	like $@, qr/Use of := for an empty attribute list is not allowed/,
+	    "Parse error for q{$test}";
+    } else {
+	is $@, '', "No error for q{$test}";
+    }
+}
+
+done_testing();

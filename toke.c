@@ -5228,7 +5228,8 @@ Perl_yylex(pTHX)
 		break;
 	    PL_bufptr = s;	/* update in case we back off */
 	    if (*s == '=') {
-		deprecate(":= for an empty attribute list");
+		Perl_croak(aTHX_
+			   "Use of := for an empty attribute list is not allowed");
 	    }
 	    goto grabattrs;
 	case XATTRBLOCK:

@@ -67,12 +67,20 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
+=head2 Attempting to use C<:=> as an empty attribute list is now a syntax error
 
-    There are no changes intentionally incompatible with 5.XXX.XXX. If any
-    exist, they are bugs and reports are welcome.
+Previously C<my $pi := 4;> was exactly equivalent to C<my $pi : = 4;>,
+with the C<:> being treated as the start of an attribute list, ending before
+the C<=>. The use of C<:=> to mean C<: => was deprecated in 5.12.0, and is now
+a syntax error. This will allow the future use of C<:=> as a new token.
 
-[ List each incompatible change as a =head2 entry ]
+We find no Perl 5 code on CPAN using this construction, outside the core's
+tests for it, so we believe that this change will have very little impact on
+real-world codebases.
+
+If it is absolutely necessary to have empty attribute lists (for example,
+because of a code generator) then avoid the warning by adding a space
+before the C<=>.
 
 =head1 Deprecations
 
