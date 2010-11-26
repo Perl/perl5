@@ -1420,10 +1420,14 @@ Propagate lvalue ("modifiable") context to an op and its children.
 I<type> represents the context type, roughly based on the type of op that
 would do the modifying, although C<local()> is represented by OP_NULL,
 because it has no op type of its own (it is signalled by a flag on
-the lvalue op).  This function detects things that can't be modified,
-such as C<$x+1>, and generates errors for them.  It also flags things
-that need to behave specially in an lvalue context, such as C<$$x>
-which might have to vivify a reference in C<$x>.
+the lvalue op).
+
+This function detects things that can't be modified, such as C<$x+1>, and
+generates errors for them. For example, C<$x+1 = 2> would cause it to be
+called with an op of type OP_ADD and a C<type> argument of OP_SASSIGN.
+
+It also flags things that need to behave specially in an lvalue context,
+such as C<$$x = 5> which might have to vivify a reference in C<$x>.
 
 =cut
 */
