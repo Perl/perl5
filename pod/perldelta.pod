@@ -34,7 +34,8 @@ here, but most should go in the L</Performance Enhancements> section.
 =head2 C<-d:-foo> calls C<Devel::foo::unimport>
 
 The syntax C<-dI<B<:>foo>> was extended in 5.6.1 to make C<-dI<:fooB<=bar>>>
-equivalent to C<-Mfoo=bar>, which expands internally to C<use foo 'bar';>.
+equivalent to C<-MDevel::foo=bar>, which expands
+internally to C<use Devel::foo 'bar';>.
 F<perl> now allows prefixing the module name with C<->, with the same
 semantics as C<-M>, I<i.e.>
 
@@ -42,13 +43,14 @@ semantics as C<-M>, I<i.e.>
 
 =item C<-d:-foo>
 
-Equivalent to C<-M-foo>, expands to C<no foo;>, calls C<< foo->unimport() >>
+Equivalent to C<-M-Devel::foo>, expands to
+C<no Devel::foo;>, calls C<< Devel::foo->unimport() >>
 if the method exists.
 
 =item C<-d:-foo=bar>
 
-Equivalent to C<-M-foo=bar>, expands to C<no foo 'bar';>, calls
-C<< foo->unimport('bar') >> if the method exists.
+Equivalent to C<-M-Devel::foo=bar>, expands to C<no Devel::foo 'bar';>,
+calls C<< Devel::foo->unimport('bar') >> if the method exists.
 
 =back
 
