@@ -985,15 +985,14 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 	/* If oldstash is not null, then we can use its HvENAME to look up
 	   the isarev hash, since all its subclasses will be listed there.
 
-	   If oldstash is null, then this is an empty spot with no stash in
-	   it, so subclasses could be listed in isarev hashes belonging to
-	   any of the names, so we have to check all of them. */
-	if(oldstash) {
+	   If oldstash is null or is no longer in the symbol table, then
+	   this is an empty spot with no stash in it, so subclasses could
+	   be listed in isarev hashes belonging to any of the names, so we
+	   have to check all of them. */
+	char *hvename = oldstash ? HvENAME(oldstash) : NULL;
+	if (hvename) {
 	    fetched_isarev = TRUE;
-	    svp
-	     = hv_fetch(
-	         PL_isarev, HvENAME(oldstash), HvENAMELEN_get(oldstash), 0
-	       );
+	    svp = hv_fetch(PL_isarev, hvename, HvENAMELEN_get(oldstash), 0);
 	    if (svp) isarev = MUTABLE_HV(*svp);
 	}
 	else if(SvTYPE(namesv) == SVt_PVAV) {
