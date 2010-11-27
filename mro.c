@@ -992,6 +992,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 	   it, so subclasses could be listed in isarev hashes belonging to
 	   any of the names, so we have to check all of them.
 	 */
+	assert(!oldstash || HvENAME(oldstash));
 	if (oldstash) {
 	    /* Extra variable to avoid a compiler warning */
 	    char * const hvename = HvENAME(oldstash);
