@@ -5836,28 +5836,21 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	     * deferred */
 	}
 	else {
+	    U8 folded;
 
 	    /* Here, the string isn't utf8 and c is a single byte; and either
 	     * the pattern isn't utf8 or c is an invariant, so its utf8ness
 	     * doesn't affect c.  Can just do simple comparisons for exact or
 	     * fold matching. */
 	    switch (OP(p)) {
-	    case EXACTF:
-		while (scan < loceol &&
-		    (UCHARAT(scan) == c || UCHARAT(scan) == PL_fold[c]))
-		{
-		    scan++;
-		}
-		break;
-	    case EXACTFL:
-		while (scan < loceol &&
-		    (UCHARAT(scan) == c || UCHARAT(scan) == PL_fold_locale[c]))
-		{
-		    scan++;
-		}
-		break;
-	    default:
-		Perl_croak(aTHX_ "panic: Unexpected op %u", OP(p));
+		case EXACTF: folded = PL_fold[c]; break;
+		case EXACTFL: folded = PL_fold_locale[c]; break;
+		default: Perl_croak(aTHX_ "panic: Unexpected op %u", OP(p));
+	    }
+	    while (scan < loceol &&
+		   (UCHARAT(scan) == c || UCHARAT(scan) == folded))
+	    {
+		scan++;
 	    }
 	}
 	break;
