@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to a3179684.
+This has been completed up to 2a25d7b6.
 
 =head1 NAME
 
@@ -150,6 +150,12 @@ C<MIME::Base64> has been upgraded from 3.10 to 3.13
 
 Now provides encode_base64url and decode_base64url functions to process
 the base64 scheme for "URL applications".
+
+=item *
+
+C<Socket> has been upgraded from XXX to XXX.
+
+It has several new functions for handling IPv6 addresses.
 
 =item *
 
@@ -370,7 +376,18 @@ C<BEGIN {require 5.12.0}> now behaves as documented, rather than behaving
 identically to C<use 5.12.0;>. Previously, C<require> in a C<BEGIN> block
 was erroneously executing the C<use feature ':5.12.0'> and
 C<use strict; use warnings;> behaviour, which only C<use> was documented to
-provide.
+provide
+L<[perl #69050]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=69050>.
+
+=item *
+
+C<use 5.42>
+L<[perl #69050]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=69050>,
+C<use 6> and C<no 5> no longer leak memory.
+
+=item *
+
+C<eval "BEGIN{die}"> no longer leaks memory on non-threaded builds.
 
 =back
 
