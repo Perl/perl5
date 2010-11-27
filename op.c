@@ -9661,7 +9661,8 @@ Perl_rpeep(pTHX_ register OP *o)
 
 	    /* Make the CONST have a shared SV */
 	    svp = cSVOPx_svp(((BINOP*)o)->op_last);
-	    if (!SvFAKE(sv = *svp) || !SvREADONLY(sv)) {
+	    if ((!SvFAKE(sv = *svp) || !SvREADONLY(sv))
+	     && SvTYPE(sv) < SVt_PVMG && !SvROK(sv)) {
 		key = SvPV_const(sv, keylen);
 		lexname = newSVpvn_share(key,
 					 SvUTF8(sv) ? -(I32)keylen : (I32)keylen,
