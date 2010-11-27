@@ -8184,7 +8184,7 @@ S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8
     if (UNI_SEMANTICS && value == LATIN_SMALL_LETTER_SHARP_S) {
 	ANYOF_FLAGS(node) |= ANYOF_NONBITMAP_NON_UTF8;
     }
-    else if (_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C(value)
+    else if (_HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(value)
 	     || (! UNI_SEMANTICS
                  && ! isASCII(value)
                  && PL_fold_latin1[value] != value))

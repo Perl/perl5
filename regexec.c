@@ -6300,11 +6300,17 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
     /* If the bitmap didn't (or couldn't) match, and something outside the
      * bitmap could match, try that */
     if (!match) {
-	if (utf8_target && (flags & ANYOF_UNICODE_ALL) && c >= 256) {
-	    match = TRUE;
+	if (utf8_target && (flags & ANYOF_UNICODE_ALL)) {
+	    if (c >= 256
+		|| ((flags & ANYOF_FOLD) /* Latin1 1 that has a non-Latin1 fold
+					    should match */
+		    && _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c)))
+	    {
+		match = TRUE;
+	    }
 	}
-	else if ((flags & ANYOF_NONBITMAP_NON_UTF8)
-		 || (utf8_target && flags & ANYOF_UTF8))
+	if (!match && ((flags & ANYOF_NONBITMAP_NON_UTF8)
+		       || (utf8_target && flags & ANYOF_UTF8)))
 	{
 	    AV *av;
 	    SV * const sw = regclass_swash(prog, n, TRUE, 0, (SV**)&av);
