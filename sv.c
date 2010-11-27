@@ -3842,14 +3842,18 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 		    av_push((AV *)mg->mg_obj,SvREFCNT_inc_simple_NN(dstr));
 	    }
 	    else
+	    {
 		sv_magic(
 		 sref, omg ? omg->mg_obj : dstr, PERL_MAGIC_isa, NULL, 0
 		);
+		mg = mg_find(sref, PERL_MAGIC_isa);
+	    }
 	    /* Since the *ISA assignment could have affected more than
 	       one stash, don’t call mro_isa_changed_in directly, but let
-	       magic_setisa do it for us, as it already has the logic for
+	       magic_clearisa do it for us, as it already has the logic for
 	       dealing with globs vs arrays of globs. */
-	    SvSETMAGIC(sref);
+	    assert(mg);
+	    Perl_magic_clearisa(aTHX_ NULL, mg);
 	}
 	break;
     }
