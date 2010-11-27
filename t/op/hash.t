@@ -142,7 +142,7 @@ is($destroyed, 1, 'Timely hash destruction with lvalue keys');
     sub FETCH { $key = $_[1] }
     package main;
     tie my %h, "bar";
-    $h{\'foo'};
+    () = $h{\'foo'};
     is ref $key, SCALAR =>
      'hash keys are not stringified during compilation';
 }
