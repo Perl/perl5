@@ -5803,7 +5803,8 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	/* FALL THROUGH */
     case EXACTF:
 
-	/* The comments for the EXACT case apply as well to these fold ones */
+	/* The comments for the EXACT case above apply as well to these fold
+	 * ones */
 
 	c = (U8)*STRING(p);
 	assert(! UTF_PATTERN || UNI_IS_INVARIANT(c));
@@ -5836,9 +5837,10 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	}
 	else {
 
-	    /* Here, the string isn't utf8; and either the pattern isn't utf8
-	     * or c is an invariant, so its utf8ness doesn't affect c.  Can
-	     * just do simple comparisons for exact or fold matching. */
+	    /* Here, the string isn't utf8 and c is a single byte; and either
+	     * the pattern isn't utf8 or c is an invariant, so its utf8ness
+	     * doesn't affect c.  Can just do simple comparisons for exact or
+	     * fold matching. */
 	    switch (OP(p)) {
 	    case EXACTF:
 		while (scan < loceol &&
