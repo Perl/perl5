@@ -249,10 +249,10 @@ foreach my $test (sort { numerically } keys %tests) {
         next if $target_above_latin1 && ! $utf8_target;
         $upgrade_target = '; utf8::upgrade($c)' if ! $target_above_latin1 && $utf8_target;
 
-        foreach my $utf8_pattern (0, 1) {
-          next if $pattern_above_latin1 && ! $utf8_pattern;
+        foreach my $uni_pattern (0, 1) {
+          next if $pattern_above_latin1 && ! $uni_pattern;
           my $upgrade_pattern = "";
-          $upgrade_pattern = '; utf8::upgrade($p)' if ! $pattern_above_latin1 && $utf8_pattern;
+          $upgrade_pattern = '; use re "/u"' if ! $pattern_above_latin1 && $uni_pattern;
 
           my $lhs = join "", @x_target;
           my @rhs = @x_pattern;
@@ -316,7 +316,7 @@ foreach my $test (sort { numerically } keys %tests) {
                           #next unless $must_match;
                           my $quantified = "(?$uni_semantics:$l_anchor$prepend$interior${quantifier}$append$r_anchor)";
                           my $op;
-                          if ($must_match && ! $utf8_target && ! $utf8_pattern && ! $uni_semantics && $ord >= 128 && $ord < 256 && ! $is_self)  {
+                          if ($must_match && ! $utf8_target && ! $uni_pattern && ! $uni_semantics && $ord >= 128 && $ord < 256 && ! $is_self)  {
                               $op = 0;
                           } else {
                               $op = 1;
@@ -324,8 +324,8 @@ foreach my $test (sort { numerically } keys %tests) {
                           $op = ! $op if $must_match && $inverted;
                           $op = ($op) ? '=~' : '!~';
 
-                          my $stuff .= " utf8_target=$utf8_target, uni_semantics=$uni_semantics, utf8_pattern=$utf8_pattern, bracketed=$bracketed, prepend=$prepend, append=$append, parend=$parend, quantifier=$quantifier, l_anchor=$l_anchor, r_anchor=$r_anchor";
-                          my $eval = "my \$c = \"$prepend$lhs$append\"$upgrade_target; my \$p = qr/$quantified/i$upgrade_pattern; \$c $op \$p";
+                          my $stuff .= " utf8_target=$utf8_target, uni_semantics=$uni_semantics, uni_pattern=$uni_pattern, bracketed=$bracketed, prepend=$prepend, append=$append, parend=$parend, quantifier=$quantifier, l_anchor=$l_anchor, r_anchor=$r_anchor";
+                          my $eval = "my \$c = \"$prepend$lhs$append\"$upgrade_target; $upgrade_pattern; \$c $op /$quantified/i;";
 
                           # XXX Doesn't currently test multi-char folds
                           next if @pattern != 1;
