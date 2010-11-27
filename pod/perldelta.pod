@@ -1,5 +1,8 @@
 =encoding utf8
 
+=for comment
+This has been completed up to a3179684.
+
 =head1 NAME
 
 [ this is a template for a new perldelta file. Any text flagged as
@@ -77,6 +80,11 @@ listed as an updated module in the L</Modules and Pragmata> section.
 
 [ List each deprecation as a =head2 entry ]
 
+=head2 C<?PATTERN?> is deprecated
+
+C<?PATTERN?> (without the initial m) has been deprecated and now produces
+a warning.
+
 =head2 C<sv_compile_2op> is now deprecated
 
 The C<sv_compile_2op> is now deprecated, and will be removed. Searches suggest
@@ -147,7 +155,7 @@ C<Unicode::Collate> has been upgraded from 0.67 to 0.68
 
 =item *
 
-XXX
+C<Unicode::UCD> has been upgraded from 0.29 to 0.30.
 
 =back
 
