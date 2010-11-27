@@ -16,7 +16,7 @@ use Fcntl qw(SEEK_SET SEEK_CUR SEEK_END); # Not 0, 1, 2 everywhere.
 
 $| = 1;
 
-use Test::More tests => 69;
+use Test::More tests => 70;
 
 my $fh;
 my $var = "aaa\n";
@@ -276,4 +276,11 @@ EOF
     is($s, ':F:S(GHI):O:F:R:F:R:F:R', 'tied actions - read');
 }
 
-
+# [perl #78716] Seeking beyond the end of the string, then reading
+{
+    my $str = '1234567890';
+    open my $strIn, '<', \$str;
+    seek $strIn, 15, 1;
+    is read($strIn, my $buffer, 5), 0,
+     'seek beyond end end of string followed by read';
+}
