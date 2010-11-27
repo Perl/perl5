@@ -132,6 +132,7 @@
 #define find_rundefsv()		Perl_find_rundefsv(aTHX)
 #define find_rundefsvoffset()	Perl_find_rundefsvoffset(aTHX)
 #define foldEQ			Perl_foldEQ
+#define foldEQ_latin1		Perl_foldEQ_latin1
 #define foldEQ_locale		Perl_foldEQ_locale
 #define foldEQ_utf8(a,b,c,d,e,f,g,h)	Perl_foldEQ_utf8(aTHX_ a,b,c,d,e,f,g,h)
 #ifndef PERL_IMPLICIT_CONTEXT

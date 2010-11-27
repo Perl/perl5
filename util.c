@@ -930,6 +930,27 @@ Perl_foldEQ(const char *s1, const char *s2, register I32 len)
     }
     return 1;
 }
+I32
+Perl_foldEQ_latin1(const char *s1, const char *s2, register I32 len)
+{
+    /* Compare non-utf8 using Unicode (Latin1) semantics.  Does not work on
+     * MICRO_SIGN, LATIN_SMALL_LETTER_SHARP_S, nor
+     * LATIN_SMALL_LETTER_Y_WITH_DIAERESIS, and does not check for these.  Nor
+     * does it check that the strings each have at least 'len' characters */
+
+    register const U8 *a = (const U8 *)s1;
+    register const U8 *b = (const U8 *)s2;
+
+    PERL_ARGS_ASSERT_FOLDEQ_LATIN1;
+
+    while (len--) {
+	if (*a != *b && *a != PL_fold_latin1[*b]) {
+	    return 0;
+	}
+	a++, b++;
+    }
+    return 1;
+}
 
 /*
 =for apidoc foldEQ_locale

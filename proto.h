@@ -968,6 +968,13 @@ PERL_CALLCONV I32	Perl_foldEQ(const char* a, const char* b, I32 len)
 #define PERL_ARGS_ASSERT_FOLDEQ	\
 	assert(a); assert(b)
 
+PERL_CALLCONV I32	Perl_foldEQ_latin1(const char* a, const char* b, I32 len)
+			__attribute__pure__
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2);
+#define PERL_ARGS_ASSERT_FOLDEQ_LATIN1	\
+	assert(a); assert(b)
+
 PERL_CALLCONV I32	Perl_foldEQ_locale(const char* a, const char* b, I32 len)
 			__attribute__pure__
 			__attribute__nonnull__(1)
