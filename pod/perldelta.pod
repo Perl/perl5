@@ -153,7 +153,7 @@ the base64 scheme for "URL applications".
 
 =item *
 
-C<Socket> has been upgraded from XXX to XXX.
+C<Socket> has been upgraded from 1.91 to 1.92.
 
 It has several new functions for handling IPv6 addresses.
 
