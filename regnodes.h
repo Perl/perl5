@@ -6,8 +6,8 @@
 
 /* Regops and State definitions */
 
-#define REGNODE_MAX           	90
-#define REGMATCH_STATE_MAX    	130
+#define REGNODE_MAX           	91
+#define REGMATCH_STATE_MAX    	131
 
 #define	END                   	0	/* 0000 End of program. */
 #define	SUCCEED               	1	/* 0x01 Return from a subroutine, basically. */
@@ -98,8 +98,9 @@
 #define	HORIZWS               	86	/* 0x56 horizontal whitespace       (Perl 6) */
 #define	NHORIZWS              	87	/* 0x57 not horizontal whitespace   (Perl 6) */
 #define	FOLDCHAR              	88	/* 0x58 codepoint with tricky case folding properties. */
-#define	OPTIMIZED             	89	/* 0x59 Placeholder for dump. */
-#define	PSEUDO                	90	/* 0x5a Pseudo opcode for internal use. */
+#define	EXACTFU               	89	/* 0x59 Match this string, folded, Unicode semantics for non-utf8 (prec. by length). */
+#define	OPTIMIZED             	90	/* 0x5a Placeholder for dump. */
+#define	PSEUDO                	91	/* 0x5b Pseudo opcode for internal use. */
 	/* ------------ States ------------- */
 #define	TRIE_next             	(REGNODE_MAX + 1)	/* state for TRIE */
 #define	TRIE_next_fail        	(REGNODE_MAX + 2)	/* state for TRIE */
@@ -237,6 +238,7 @@ EXTCONST U8 PL_regkind[] = {
 	HORIZWS,  	/* HORIZWS                */
 	NHORIZWS, 	/* NHORIZWS               */
 	FOLDCHAR, 	/* FOLDCHAR               */
+	EXACT,    	/* EXACTFU                */
 	NOTHING,  	/* OPTIMIZED              */
 	PSEUDO,   	/* PSEUDO                 */
 	/* ------------ States ------------- */
@@ -376,6 +378,7 @@ static const U8 regarglen[] = {
 	0,                                   	/* HORIZWS      */
 	0,                                   	/* NHORIZWS     */
 	EXTRA_SIZE(struct regnode_1),        	/* FOLDCHAR     */
+	0,                                   	/* EXACTFU      */
 	0,                                   	/* OPTIMIZED    */
 	0,                                   	/* PSEUDO       */
 };
@@ -472,6 +475,7 @@ static const char reg_off_by_arg[] = {
 	0,	/* HORIZWS      */
 	0,	/* NHORIZWS     */
 	0,	/* FOLDCHAR     */
+	0,	/* EXACTFU      */
 	0,	/* OPTIMIZED    */
 	0,	/* PSEUDO       */
 };
@@ -573,8 +577,9 @@ EXTCONST char * const PL_reg_name[] = {
 	"HORIZWS",               	/* 0x56 */
 	"NHORIZWS",              	/* 0x57 */
 	"FOLDCHAR",              	/* 0x58 */
-	"OPTIMIZED",             	/* 0x59 */
-	"PSEUDO",                	/* 0x5a */
+	"EXACTFU",               	/* 0x59 */
+	"OPTIMIZED",             	/* 0x5a */
+	"PSEUDO",                	/* 0x5b */
 	/* ------------ States ------------- */
 	"TRIE_next",             	/* REGNODE_MAX +0x01 */
 	"TRIE_next_fail",        	/* REGNODE_MAX +0x02 */

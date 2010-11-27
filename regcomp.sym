@@ -192,6 +192,7 @@ HORIZWS     HORIZWS,    none 0 S  ; horizontal whitespace       (Perl 6)
 NHORIZWS    NHORIZWS,   none 0 S  ; not horizontal whitespace   (Perl 6)
 
 FOLDCHAR    FOLDCHAR,   codepoint 1 ; codepoint with tricky case folding properties.
+EXACTFU     EXACT,      str	    ; Match this string, folded, Unicode semantics for non-utf8 (prec. by length).
 
 # NEW STUFF ABOVE THIS LINE  
 
