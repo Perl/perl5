@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to a51ee39b.
+This has been completed up to 04698ff.
 
 =head1 NAME
 
@@ -400,6 +400,12 @@ L<[perl #75556]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75556>.
 Defining a constant with the same name as one of perl's special blocks
 (e.g., INIT) stopped working in 5.12.0, but has now been fixed
 L<[perl #78634]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78634>.
+
+=item *
+
+A reference to a literal value used as a hash key (C<$hash{\"foo"}>) used
+to be stringified, even if the hash was tied
+L<[perl #79178]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=79178>.
 
 =back
 
