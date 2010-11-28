@@ -40,7 +40,7 @@ if (exists $ENV{PERLIO} && $ENV{PERLIO} =~ /stdio/  ) {
 	exit 0;
 }
 
-if ($^O eq 'VMS') {
+if ($^O eq 'VMS' || $^O eq 'MSWin32') {
 	skip_all('various portability issues');
 	exit 0;
 }
