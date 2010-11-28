@@ -326,7 +326,7 @@ CONFIGPM = xlib/$(CROSS_NAME)/Config.pm
 
 private = preplibrary $(CONFIGPM) $(CROSS_LIB)/Config.pod
 
-shextract = Makefile cflags config.h makeaperl makedepend \
+shextract = Makefile cflags config.h makedepend \
 	makedir myconfig writemain pod/Makefile
 
 addedbyconf = UU $(shextract) lib/lib.pm pstruct
