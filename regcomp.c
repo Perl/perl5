@@ -2451,8 +2451,11 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, I32 *min, U32 flags
 	}
 #endif
     }
-    
-    if (UTF && ( OP(scan) == EXACTF ) && ( STR_LEN(scan) >= 6 ) ) {
+
+    if (UTF
+	&& ( OP(scan) == EXACTF || OP(scan) == EXACTFU)
+	&& ( STR_LEN(scan) >= 6 ) )
+    {
     /*
     Two problematic code points in Unicode casefolding of EXACT nodes:
     
@@ -6978,8 +6981,12 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
 	char *endchar;	    /* Points to '.' or '}' ending cur char in the input
 			       stream */
 
-	ret = reg_node(pRExC_state,
-			(U8)(FOLD ? (LOC ? EXACTFL : EXACTF) : EXACT));
+	ret = reg_node(pRExC_state, (U8) ((! FOLD) ? EXACT
+						   : (LOC)
+						      ? EXACTFL
+						      : UNI_SEMANTICS
+						        ? EXACTFU
+						        : EXACTF));
 	s= STRING(ret);
 
 	/* Exact nodes can hold only a U8 length's of text = 255.  Loop through
@@ -7585,7 +7592,13 @@ tryagain:
 	defchar:
 	    ender = 0;
 	    ret = reg_node(pRExC_state,
-			   (U8)(FOLD ? (LOC ? EXACTFL : EXACTF) : EXACT));
+			   (U8) ((! FOLD) ? EXACT
+					  : (LOC)
+					     ? EXACTFL
+					     : (UNI_SEMANTICS)
+					       ? EXACTFU
+					       : EXACTF)
+		    );
 	    s = STRING(ret);
 	    for (len = 0, p = RExC_parse - 1;
 	      len < 127 && p < RExC_end;
@@ -9264,6 +9277,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p, const regnode *val,
             switch (OP(scan)) {
                 case EXACT:
                 case EXACTF:
+                case EXACTFU:
                 case EXACTFL:
                         if( exact == PSEUDO )
                             exact= OP(scan);
