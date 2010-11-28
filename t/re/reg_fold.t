@@ -21,6 +21,7 @@ while (<$fh>) {
     my ($line,$comment)= split/\s+#\s+/, $_;
     my ($cp,$type,@folded)=split/[\s;]+/,$line||'';
     next unless $type and ($type eq 'F' or $type eq 'C');
+    next if $type eq 'C';   # 'C' tests now done by fold_grind.t
     my $fold_above_latin1 = grep { hex("0x$_") > 255 } @folded;
     $_="\\x{$_}" for @folded;
     my $cpv=hex("0x$cp");
