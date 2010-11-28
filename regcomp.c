@@ -3077,7 +3077,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    (!(data->start_class->flags & (ANYOF_CLASS | ANYOF_LOCALE))
 		    && !ANYOF_BITMAP_TEST(data->start_class, uc)
 		    && (!(data->start_class->flags & ANYOF_FOLD)
-			|| !ANYOF_BITMAP_TEST(data->start_class, PL_fold[uc])))
+			|| !ANYOF_BITMAP_TEST(data->start_class, (UNI_SEMANTICS) ? PL_fold_latin1[uc] : PL_fold[uc])))
                     )
 		    compat = 0;
 		ANYOF_CLASS_ZERO(data->start_class);
@@ -3123,7 +3123,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		if (uc >= 0x100 ||
 		    (!(data->start_class->flags & (ANYOF_CLASS | ANYOF_LOCALE))
 		    && !ANYOF_BITMAP_TEST(data->start_class, uc)
-		     && !ANYOF_BITMAP_TEST(data->start_class, PL_fold[uc])))
+		     && !ANYOF_BITMAP_TEST(data->start_class, (UNI_SEMANTICS) ? PL_fold_latin1[uc] : PL_fold[uc])))
 		    compat = 0;
 		ANYOF_CLASS_ZERO(data->start_class);
 		ANYOF_BITMAP_ZERO(data->start_class);
@@ -3131,16 +3131,38 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    ANYOF_BITMAP_SET(data->start_class, uc);
 		    data->start_class->flags &= ~ANYOF_EOS;
 		    data->start_class->flags |= ANYOF_FOLD;
-		    if (OP(scan) == EXACTFL)
+		    if (OP(scan) == EXACTFL) {
 			data->start_class->flags |= ANYOF_LOCALE;
+		    }
+		    else {
+
+			/* Also set the other member of the fold pair.  Can't
+			 * do this for locale, because not known until runtime
+			 */
+			ANYOF_BITMAP_SET(data->start_class,
+					 (OP(scan) == EXACTFU)
+						    ? PL_fold_latin1[uc]
+						    : PL_fold[uc]);
+		    }
 		}
 	    }
 	    else if (flags & SCF_DO_STCLASS_OR) {
 		if (data->start_class->flags & ANYOF_FOLD) {
 		    /* false positive possible if the class is case-folded.
 		       Assume that the locale settings are the same... */
-		    if (uc < 0x100)
+		    if (uc < 0x100) {
 			ANYOF_BITMAP_SET(data->start_class, uc);
+                        if (OP(scan) != EXACTFL) {
+
+                            /* And set the other member of the fold pair, but
+                             * can't do that in locale because not known until
+                             * run-time */
+                            ANYOF_BITMAP_SET(data->start_class,
+                                            (OP(scan) == EXACTFU)
+                                                        ? PL_fold_latin1[uc]
+                                                        : PL_fold[uc]);
+                        }
+		    }
 		    data->start_class->flags &= ~ANYOF_EOS;
 		}
 		cl_and(data->start_class, and_withp);
