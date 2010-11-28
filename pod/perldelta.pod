@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 2a25d7b6.
+This has been completed up to abf9167d.
 
 =head1 NAME
 
@@ -388,6 +388,12 @@ C<use 6> and C<no 5> no longer leak memory.
 =item *
 
 C<eval "BEGIN{die}"> no longer leaks memory on non-threaded builds.
+
+=item *
+
+PerlIO no longer crashes when called recursively, e.g., from a signal
+handler. Now it just leaks memory
+L<[perl #75556]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75556>.
 
 =back
 
