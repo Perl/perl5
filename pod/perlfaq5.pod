@@ -448,12 +448,12 @@ temporary files in one process, use a counter:
 	my $base_name = sprintf "%s/%d-%d-0000", $temp_dir, $$, time;
 
 	sub temp_file {
-		local *FH;
+		my $fh;
 		my $count = 0;
-		until( defined(fileno(FH)) || $count++ > 100 ) {
+		until( defined(fileno($fh)) || $count++ > 100 ) {
 			$base_name =~ s/-(\d+)$/"-" . (1 + $1)/e;
 			# O_EXCL is required for security reasons.
-			sysopen my($fh), $base_name, O_WRONLY|O_EXCL|O_CREAT;
+			sysopen $fh, $base_name, O_WRONLY|O_EXCL|O_CREAT;
 			}
 
 		if( defined fileno($fh) ) {
