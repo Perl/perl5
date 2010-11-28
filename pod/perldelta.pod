@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 8e747b69.
+This has been completed up to 75f5d3312.
 
 =head1 NAME
 
@@ -168,6 +168,10 @@ L<[perl #78716]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78716>.
 C<Socket> has been upgraded from 1.91 to 1.92.
 
 It has several new functions for handling IPv6 addresses.
+
+=item *
+
+C<Time::HiRes> has been upgraded from 1.9721 to 1.9721_01.
 
 =item *
 
