@@ -7620,12 +7620,6 @@ C<$fixed_less> so we don't have to go through doing the stats again.
 
 sub fix_less {
 
-    my $config_less = eval {
-       require Config;
-       $Config::Config{less};
-    };
-    return $config_less if $config_less;
-
     # We already know if this is set.
     return if $fixed_less;
 
