@@ -1475,8 +1475,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                     TRIE_STORE_REVCHAR;
                 }
                 if ( set_bit ) {
-                    /* store the codepoint in the bitmap, and if its ascii
-                       also store its folded equivelent. */
+		    /* store the codepoint in the bitmap, and its folded
+		     * equivalent. */
                     TRIE_BITMAP_SET(trie,uvc);
 
 		    /* store the folded codepoint */
