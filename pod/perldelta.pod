@@ -79,8 +79,8 @@ tests for it, so we believe that this change will have very little impact on
 real-world codebases.
 
 If it is absolutely necessary to have empty attribute lists (for example,
-because of a code generator) then avoid the warning by adding a space
-before the C<=>.
+because of a code generator) then avoid the error by adding a space before
+the C<=>.
 
 =head1 Deprecations
 
