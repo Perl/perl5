@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to abf9167d.
+This has been completed up to a51ee39b.
 
 =head1 NAME
 
@@ -394,6 +394,12 @@ C<eval "BEGIN{die}"> no longer leaks memory on non-threaded builds.
 PerlIO no longer crashes when called recursively, e.g., from a signal
 handler. Now it just leaks memory
 L<[perl #75556]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75556>.
+
+=item *
+
+Defining a constant with the same name as one of perl's special blocks
+(e.g., INIT) stopped working in 5.12.0, but has now been fixed
+L<[perl #78634]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78634>.
 
 =back
 
