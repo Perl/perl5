@@ -40,6 +40,11 @@ if (exists $ENV{PERLIO} && $ENV{PERLIO} =~ /stdio/  ) {
 	exit 0;
 }
 
+if ($^O eq 'VMS') {
+	skip_all('various portability issues');
+	exit 0;
+}
+
 my ($in, $out, $st, $sigst, $buf);
 
 plan(tests => 10);
