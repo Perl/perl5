@@ -10365,8 +10365,14 @@ S_put_byte(pTHX_ SV *sv, int c)
        ones (binary 1111 1111, hexadecimal FF). It is similar, but not
        identical, to the ASCII delete (DEL) or rubout control character.
        ) So the old condition can be simplified to !isPRINT(c)  */
-    if (!isPRINT(c))
-	Perl_sv_catpvf(aTHX_ sv, "\\%o", c);
+    if (!isPRINT(c)) {
+	if (c < 256) {
+	    Perl_sv_catpvf(aTHX_ sv, "\\x%02x", c);
+	}
+	else {
+	    Perl_sv_catpvf(aTHX_ sv, "\\x{%x}", c);
+	}
+    }
     else {
 	const char string = c;
 	if (c == '-' || c == ']' || c == '\\' || c == '^')
