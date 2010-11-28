@@ -479,7 +479,7 @@ by C<qr//>, false if it is not.
 
 This function will not be confused by overloading or blessing. In
 internals terms, this extracts the regexp pointer out of the
-PERL_MAGIC_qr structure so it it cannot be fooled.
+PERL_MAGIC_qr structure so it cannot be fooled.
 
 =item regexp_pattern($ref)
 
