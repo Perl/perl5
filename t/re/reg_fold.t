@@ -74,6 +74,54 @@ while (<$fh>) {
     }
 }
 
+# Now verify the case folding tables.  First compute the mappings without
+# resorting to the functions we're testing.
+
+# Initialize the array so each $i maps to itself.
+my @fold_ascii;
+for my $i (0 .. 255) {
+    $fold_ascii[$i] = $i;
+}
+my @fold_latin1 = @fold_ascii;
+
+# Override the uppercase elements to fold to their lower case equivalents,
+# using the fact that 'A' in ASCII is 0x41, 'a' is 0x41+32, 'B' is 0x42, and
+# so on.  The same paradigm applies for most of the Latin1 range cased
+# characters, but in posix anything outside ASCII maps to itself, as we've
+# already set up.
+for my $i (0x41 .. 0x5A, 0xC0 .. 0xD6, 0xD8 .. 0xDE) {
+    my $upper_ord = ord_latin1_to_native($i);
+    my $lower_ord = ord_latin1_to_native($i + 32);
+
+    $fold_latin1[$upper_ord] = $lower_ord;
+
+    next if $i > 127;
+    $fold_ascii[$upper_ord] = $lower_ord;
+}
+
+# Same for folding lower to the upper equivalents
+for my $i (0x61 .. 0x7A, 0xE0 .. 0xF6, 0xF8 .. 0xFE) {
+    my $lower_ord = ord_latin1_to_native($i);
+    my $upper_ord = ord_latin1_to_native($i - 32);
+
+    $fold_latin1[$lower_ord] = $upper_ord;
+
+    next if $i > 127;
+    $fold_ascii[$lower_ord] = $upper_ord;
+}
+
+# Test every latin1 character that the correct values in both /u and /d
+for my $i (0 .. 255) {
+    my $chr = sprintf "\\x%02X", $i;
+    my $hex_fold_ascii = sprintf "0x%02X", $fold_ascii[$i];
+    my $hex_fold_latin1 = sprintf "0x%02X", $fold_latin1[$i];
+    push @tests, qq[like chr($hex_fold_ascii), qr/(?d:$chr)/i, 'chr($hex_fold_ascii) =~ qr/(?d:$chr)/i'];
+    $count++;
+    push @tests, qq[like chr($hex_fold_latin1), qr/(?u:$chr)/i, 'chr($hex_fold_latin1) =~ qr/(?u:$chr)/i'];
+    $count++;
+}
+
+
 push @tests, qq[like chr(0x0430), qr/[=\x{0410}-\x{0411}]/i, 'Bug #71752 Unicode /i char in a range'];
 $count++;
 push @tests, qq[like 'a', qr/\\p{Upper}/i, "'a' =~ /\\\\p{Upper}/i"];
