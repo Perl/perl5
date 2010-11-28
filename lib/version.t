@@ -201,15 +201,15 @@ sub BaseTests {
     
     # test illegal formats
     diag "test illegal formats" unless $ENV{PERL_CORE};
-    eval {$version = $CLASS->$method("1.2_3_4")};
+    eval {my $version = $CLASS->$method("1.2_3_4")};
     like($@, qr/multiple underscores/,
 	"Invalid version format (multiple underscores)");
     
-    eval {$version = $CLASS->$method("1.2_3.4")};
+    eval {my $version = $CLASS->$method("1.2_3.4")};
     like($@, qr/underscores before decimal/,
 	"Invalid version format (underscores before decimal)");
     
-    eval {$version = $CLASS->$method("1_2")};
+    eval {my $version = $CLASS->$method("1_2")};
     like($@, qr/alpha without decimal/,
 	"Invalid version format (alpha without decimal)");
     
@@ -353,7 +353,7 @@ SKIP: {
     ok (eval {$new_version = $CLASS->$method($version)},
 	    "new from existing object");
     ok ($new_version == $version, "class->$method($version) identical");
-    $new_version = $version->$method();
+    $new_version = $version->$method(0);
     isa_ok ($new_version, $CLASS );
     is ($new_version, "0", "version->$method() doesn't clone");
     $new_version = $version->$method("1.2.3");
@@ -480,14 +480,24 @@ SKIP: 	{
 		if $] < 5.006_000; 
 	diag "Tests with v-strings" unless $ENV{PERL_CORE};
 	$version = $CLASS->$method(1.2.3);
-	ok("$version" == "v1.2.3", '"$version" == 1.2.3');
+	ok("$version" eq "v1.2.3", '"$version" eq 1.2.3');
 	$version = $CLASS->$method(1.0.0);
 	$new_version = $CLASS->$method(1);
 	ok($version == $new_version, '$version == $new_version');
 	skip "version require'd instead of use'd, cannot test declare", 1
 	    unless defined $qv_declare;
 	$version = &$qv_declare(1.2.3);
-	ok("$version" == "v1.2.3", 'v-string initialized $qv_declare()');
+	ok("$version" eq "v1.2.3", 'v-string initialized $qv_declare()');
+    }
+
+SKIP: 	{
+	skip 'Cannot test bare alpha v-strings with Perl < 5.8.1', 2
+		if $] lt 5.008_001; 
+	diag "Tests with bare alpha v-strings" unless $ENV{PERL_CORE};
+	$version = $CLASS->$method(v1.2.3_4);
+	is($version, "v1.2.3_4", '"$version" eq "v1.2.3_4"');
+	$version = $CLASS->$method(eval "v1.2.3_4");
+	is($version, "v1.2.3_4", '"$version" eq "v1.2.3_4" (from eval)');
     }
 
     diag "Tests with real-world (malformed) data" unless $ENV{PERL_CORE};
@@ -689,6 +699,28 @@ EOF
 	is $badv, '1.002003', "Deal with badly serialized versions from YAML";	
 	my $badv2 = bless { qv => 1, version => [1,2,3] }, "version";
 	is $badv2, 'v1.2.3', "Deal with badly serialized versions from YAML ";	
+    }
+SKIP: {
+	if ( $] < 5.006_000 ) {
+	    skip 'No v-string support at all < 5.6.0', 2; 
+	}
+	# https://rt.cpan.org/Ticket/Display.html?id=49348
+	my $v = $CLASS->$method("420");
+	is "$v", "420", 'Correctly guesses this is not a v-string';
+	$v = $CLASS->$method(4.2.0);
+	is "$v", 'v4.2.0', 'Correctly guess that this is a v-string';
+    }
+SKIP: {
+	if ( $] < 5.006_000 ) {
+	    skip 'No v-string support at all < 5.6.0', 4; 
+	}
+	# https://rt.cpan.org/Ticket/Display.html?id=50347
+	# Check that the qv() implementation does not change
+
+	ok $CLASS->$method(1.2.3) < $CLASS->$method(1.2.3.1), 'Compare 3 and 4 digit v-strings' ;
+	ok $CLASS->$method(v1.2.3) < $CLASS->$method(v1.2.3.1), 'Compare 3 and 4 digit v-strings, leaving v';
+	ok $CLASS->$method("1.2.3") < $CLASS->$method("1.2.3.1"), 'Compare 3 and 4 digit v-strings, quoted';
+	ok $CLASS->$method("v1.2.3") < $CLASS->$method("v1.2.3.1"), 'Compare 3 and 4 digit v-strings, quoted leading v';
     }
 }
 
