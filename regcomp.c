@@ -4724,7 +4724,7 @@ reStudy:
 	if (PL_regkind[OP(first)] == EXACT) {
 	    if (OP(first) == EXACT)
 		NOOP;	/* Empty, get anchored substr later. */
-	    else if ((OP(first) == EXACTF || OP(first) == EXACTFL))
+	    else
 		ri->regstclass = first;
 	}
 #ifdef TRIE_STCLASS	
