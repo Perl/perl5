@@ -1,7 +1,8 @@
 =encoding utf8
 
 =for comment
-This has been completed up to d54f8cf785.
+This has been completed up to 94a75ecf, except for 1b9f127-fad448f, which
+Karl Williamson says he will do.
 
 =head1 NAME
 
@@ -170,6 +171,10 @@ C<PerlIO::scalar> has been upgraded from 0.10 to 0.11.
 A C<read> after a C<seek> beyond the end of the string no longer thinks it
 has data to read
 L<[perl #78716]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78716>.
+
+=item *
+
+C<re> has been upgraded from 0.14 to 0.15.
 
 =item *
 
