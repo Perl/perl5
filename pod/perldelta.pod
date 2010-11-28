@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 75f5d3312.
+This has been completed up to d54f8cf785.
 
 =head1 NAME
 
@@ -188,6 +188,10 @@ C<Unicode::Collate> has been upgraded from 0.67 to 0.68
 =item *
 
 C<Unicode::UCD> has been upgraded from 0.29 to 0.30.
+
+=item *
+
+C<version> has been upgraded from 0.82 to 0.86.
 
 =back
 
