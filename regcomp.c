@@ -9659,7 +9659,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	    sv_catpvs(sv, "{unicode_all}");
 	else if (flags & ANYOF_UTF8)
 	    sv_catpvs(sv, "{unicode}");
-	else if (flags & ANYOF_NONBITMAP)
+	if (flags & ANYOF_NONBITMAP_NON_UTF8)
 	    sv_catpvs(sv, "{outside bitmap}");
 
 	{
