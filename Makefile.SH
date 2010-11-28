@@ -581,6 +581,9 @@ $spitshell >>$Makefile <<!GROK!THIS!
 translators:	$x2p_deps
 	@echo " "; echo "	Making x2p stuff"; cd x2p; \$(LDLIBPTH) \$(MAKE) all
 
+x2p/s2p: $x2p_deps
+	cd x2p; \$(LDLIBPTH) \$(MAKE) s2p
+
 utilities:	$util_deps
 	@echo " "; echo "	Making utilities"; cd utils; \$(LDLIBPTH) \$(MAKE) all
 
@@ -1004,9 +1007,6 @@ lib/ExtUtils/Miniperl.pm: miniperlmain.c $(MINIPERL_EXE) minimod.pl $(CONFIGPM)
 lib/re.pm: ext/re/re.pm
 	@-rm -f $@
 	cp ext/re/re.pm lib/re.pm
-
-x2p/s2p: $(MINIPERL_EXE) $(CONFIGPM) $(dynamic_ext) x2p/s2p.PL
-	cd x2p; $(LDLIBPTH) $(MAKE) s2p
 
 unidatafiles $(unidatafiles) pod/perluniprops.pod: uni.data
 
