@@ -461,7 +461,7 @@ c3 = taint.c toke.c util.c deb.c run.c universal.c pad.c globals.c
 c4 = perlio.c perlapi.c numeric.c mathoms.c locale.c pp_pack.c pp_sort.c
 c5 = $(madlysrc) $(mallocsrc)
 
-c = $(c1) $(c2) $(c3) $(c4) $(c5) miniperlmain.c perlmain.c opmini.c perlmini.c
+c = $(c1) $(c2) $(c3) $(c4) $(c5) miniperlmain.c opmini.c perlmini.c
 
 obj0 = op$(OBJ_EXT) perl$(OBJ_EXT)
 obj1 = $(madlyobj) $(mallocobj) gv$(OBJ_EXT) toke$(OBJ_EXT) perly$(OBJ_EXT) pad$(OBJ_EXT) regcomp$(OBJ_EXT) dump$(OBJ_EXT) util$(OBJ_EXT) mg$(OBJ_EXT) reentr$(OBJ_EXT) mro$(OBJ_EXT)
