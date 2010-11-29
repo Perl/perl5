@@ -1665,7 +1665,7 @@ output is to the terminal and block buffered otherwise. Setting this
 variable is useful primarily when you are outputting to a pipe or
 socket, such as when you are running a Perl program under B<rsh> and
 want to see the output as it's happening. This has no effect on input
-buffering. See L<perlfunc/getc> for that. See L<perldoc/select> on
+buffering. See L<perlfunc/getc> for that. See L<perlfunc/select> on
 how to select the output channel. See also L<IO::Handle>.
 
 Mnemonic: when you want your pipes to be piping hot.
