@@ -1759,7 +1759,7 @@ sub bdiv
     $y->{sign} =~ tr/+-/-+/;
     # continue with normal div code:
 
-    # make copy of $x in case of list context for later reminder calculation
+    # make copy of $x in case of list context for later remainder calculation
     if (wantarray && $y_not_one)
       {
       $rem = $x->copy();
@@ -1821,7 +1821,7 @@ sub bdiv
 
 sub bmod 
   {
-  # (dividend: BFLOAT or num_str, divisor: BFLOAT or num_str) return reminder 
+  # (dividend: BFLOAT or num_str, divisor: BFLOAT or num_str) return remainder
 
   # set up parameters
   my ($self,$x,$y,$a,$p,$r) = (ref($_[0]),@_);
@@ -3372,7 +3372,7 @@ sub brsft
   # negative amount?
   return $x->blsft($y->copy()->babs(),$n) if $y->{sign} =~ /^-/;
 
-  # the following call to bdiv() will return either quo or (quo,reminder):
+  # the following call to bdiv() will return either quo or (quo,remainder):
   $x->bdiv($n->bpow($y),$a,$p,$r,$y);
   }
 
@@ -4287,7 +4287,7 @@ The following will probably not print what you expect:
 
 	print $c->bdiv(123.456),"\n";
 
-It prints both quotient and reminder since print works in list context. Also,
+It prints both quotient and remainder since print works in list context. Also,
 bdiv() will modify $c, so be careful. You probably want to use
 	
 	print $c / 123.456,"\n";

@@ -584,7 +584,7 @@ is ($x,'12350'); is ($x->{_a},4); is ($x->{_p}, undef);
 $x = $mbf->new(100) / 3;
 is ($x->{_a}, undef); is ($x->{_p}, undef);
 
-# result & reminder
+# result & remainder
 $x = $mbf->new(100) / 3; ($x,$y) = $x->bdiv(3);
 is ($x->{_a}, undef); is ($x->{_p}, undef);
 is ($y->{_a}, undef); is ($y->{_p}, undef);
