@@ -281,60 +281,6 @@ info to show that it works; it should be replaced with the real code.
   }
 
 
-=head1 Named Pipes
-
-A named pipe (often referred to as a FIFO) is an old Unix IPC
-mechanism for processes communicating on the same machine.  It works
-just like regular anonymous pipes, except that the
-processes rendezvous using a filename and need not be related.
-
-To create a named pipe, use the C<POSIX::mkfifo()> function.
-
-    use POSIX qw(mkfifo);
-    mkfifo($path, 0700)     ||  die "mkfifo $path failed: $!";
-
-You can also use the Unix command mknod(1), or on some
-systems, mkfifo(1).  These may not be in your normal path, though.
-
-    # system return val is backwards, so && not ||
-    #
-    $ENV{PATH} .= ":/etc:/usr/etc";
-    if  (      system("mknod",  $path, "p")
-            && system("mkfifo", $path) )
-    {
-        die "mk{nod,fifo} $path failed";
-    }
-
-
-A fifo is convenient when you want to connect a process to an unrelated
-one.  When you open a fifo, the program will block until there's something
-on the other end.
-
-For example, let's say you'd like to have your F<.signature> file be a
-named pipe that has a Perl program on the other end.  Now every time any
-program (like a mailer, news reader, finger program, etc.) tries to read
-from that file, the reading program will read the new signature from your
-program.  We'll use the pipe-checking file-test operator, B<-p>, to find
-out whether anyone (or anything) has accidentally removed our fifo.
-
-    chdir();    # go home
-    my $FIFO = ".signature";
-
-    while (1) {
-        unless (-p $FIFO) {
-            unlink $FIFO;   # discard any failure, will catch later
-            require POSIX;  # delayed loading of heavy module
-            POSIX::mkfifo($FIFO, 0700)
-                                || die "can't mkfifo $FIFO: $!";
-        }
-
-        # next line blocks till there's a reader
-        open (FIFO, "> $FIFO")  || die "can't open $FIFO: $!";
-        print FIFO "John Smith (smith\@host.org)\n", `fortune -s`;
-        close(FIFO)             || die "can't close $FIFO: $!";
-        sleep 2;                # to avoid dup signals
-    }
-
 =head2 Deferred Signals (Safe Signals)
 
 Before Perl 5.7.3, installing Perl code to deal with signals exposed you to
@@ -472,6 +418,60 @@ there are completed child processes that have not yet been C<wait>ed for.
 If you want the old signal behavior back despite possible
 memory corruption, set the environment variable C<PERL_SIGNALS> to
 C<"unsafe">.  This feature first appeared in Perl 5.8.1.
+
+=head1 Named Pipes
+
+A named pipe (often referred to as a FIFO) is an old Unix IPC
+mechanism for processes communicating on the same machine.  It works
+just like regular anonymous pipes, except that the
+processes rendezvous using a filename and need not be related.
+
+To create a named pipe, use the C<POSIX::mkfifo()> function.
+
+    use POSIX qw(mkfifo);
+    mkfifo($path, 0700)     ||  die "mkfifo $path failed: $!";
+
+You can also use the Unix command mknod(1), or on some
+systems, mkfifo(1).  These may not be in your normal path, though.
+
+    # system return val is backwards, so && not ||
+    #
+    $ENV{PATH} .= ":/etc:/usr/etc";
+    if  (      system("mknod",  $path, "p")
+            && system("mkfifo", $path) )
+    {
+        die "mk{nod,fifo} $path failed";
+    }
+
+
+A fifo is convenient when you want to connect a process to an unrelated
+one.  When you open a fifo, the program will block until there's something
+on the other end.
+
+For example, let's say you'd like to have your F<.signature> file be a
+named pipe that has a Perl program on the other end.  Now every time any
+program (like a mailer, news reader, finger program, etc.) tries to read
+from that file, the reading program will read the new signature from your
+program.  We'll use the pipe-checking file-test operator, B<-p>, to find
+out whether anyone (or anything) has accidentally removed our fifo.
+
+    chdir();    # go home
+    my $FIFO = ".signature";
+
+    while (1) {
+        unless (-p $FIFO) {
+            unlink $FIFO;   # discard any failure, will catch later
+            require POSIX;  # delayed loading of heavy module
+            POSIX::mkfifo($FIFO, 0700)
+                                || die "can't mkfifo $FIFO: $!";
+        }
+
+        # next line blocks till there's a reader
+        open (FIFO, "> $FIFO")  || die "can't open $FIFO: $!";
+        print FIFO "John Smith (smith\@host.org)\n", `fortune -s`;
+        close(FIFO)             || die "can't close $FIFO: $!";
+        sleep 2;                # to avoid dup signals
+    }
 
 =head1 Using open() for IPC
 
