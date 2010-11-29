@@ -913,14 +913,9 @@ use File::Glob qw(:case);
     'Memoize' =>
 	{
 	'MAINTAINER'	=> 'mjd',
-	'DISTRIBUTION'	=> 'MJD/Memoize-1.01.tar.gz',
+	'DISTRIBUTION'	=> 'FLORA/Memoize-1.02.tar.gz',
 	'FILES'		=> q[cpan/Memoize],
-	'EXCLUDED'	=> [
-			     qw{
-				article.html
-				Memoize/Saves.pm
-			       },
-			   ],
+	'EXCLUDED'	=> [ qw{ article.html } ],
 	'UPSTREAM'	=> 'cpan',
 	},
 

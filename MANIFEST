@@ -1352,7 +1352,6 @@ cpan/Memoize/Memoize/NDBM_File.pm	Memoize glue layer for NDBM_File
 cpan/Memoize/Memoize.pm			Memoize
 cpan/Memoize/Memoize/SDBM_File.pm	Memoize glue layer for SDBM_File
 cpan/Memoize/Memoize/Storable.pm	Memoize glue layer for Storable
-cpan/Memoize/README			Memoize release notes
 cpan/Memoize/t/array_confusion.t	Memoize ambiguous array return tests
 cpan/Memoize/t/array.t			Memoize array context return tests
 cpan/Memoize/t/correctness.t		Memoize basic correctness tests

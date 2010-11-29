@@ -155,6 +155,10 @@ and documentation enhancements.
 
 =item *
 
+C<Memoize> has been upgraded from version 1.01_03 to 1.02.
+
+=item *
+
 C<MIME::Base64> has been upgraded from 3.10 to 3.13
 
 Now provides encode_base64url and decode_base64url functions to process
