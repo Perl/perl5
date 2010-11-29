@@ -1245,7 +1245,7 @@ s += len
 
 #define REXEC_FBC_EXACTISH_SCAN(CoNd)                     \
 STMT_START {                                              \
-    I32 (*folder)();                                      \
+    re_fold_t folder;                                   \
     switch (OP(c)) {                                      \
 	case EXACTFU: folder = foldEQ_latin1; break;      \
 	case EXACTFL: folder = foldEQ_locale; break;      \
@@ -3558,7 +3558,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    break;
 	    }
 	case EXACTFL: {
-	    I32 (*folder)();                                      \
+	    re_fold_t folder;
 	    const U8 * fold_array;
 	    const char * s;
 
