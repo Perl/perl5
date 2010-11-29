@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to baed7a7, except for 1b9f127-fad448f, which
+This has been completed up to dbe92b04c, except for 1b9f127-fad448f, which
 Karl Williamson says he will do.
 
 =head1 NAME
@@ -440,6 +440,18 @@ A reference to a literal value used as a hash key (C<$hash{\"foo"}>) used
 to be stringified, even if the hash was tied
 L<[perl #79178]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=79178>.
 
+=item *
+
+A number of bugs with regular expression bracketed character classes
+have been fixed, mostly having to do with matching characters in the
+non-ASCII Latin-1 range.
+
+=item *
+
+A closure containing an C<if> statement followed by a constant or variable
+is no longer treated as a constant
+L<[perl #63540]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=63540>.
+
 =back
 
 =head1 Known Problems
@@ -457,9 +469,7 @@ from either 5.XXX.XXX or 5.XXX.XXX.
 
 =item *
 
-A number of bugs with regular expression bracketed character classes
-have been fixed, mostly having to do with matching characters in the
-non-ASCII Latin-1 range.
+XXX
 
 =back
 
