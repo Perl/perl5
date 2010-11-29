@@ -10,7 +10,7 @@ $|  = 1;
 use warnings;
 use Config;
 
-plan tests => 111;
+plan tests => 114;
 
 my $Perl = which_perl();
 
@@ -346,4 +346,14 @@ fresh_perl_is(
     is $var, "hello", '[perl #77684]: open $fh, ">", \$glob_copy'
         # when this fails, it leaves an extra file:
         or unlink \*STDOUT;
+}
+
+# check that we can call methods on filehandles auto-magically
+# and have IO::File loaded for us
+{
+    is( $INC{'IO/File.pm'}, undef, "IO::File not loaded" );
+    my $var = "";
+    open my $fh, ">", \$var;
+    ok( eval { $fh->autoflush(1); 1 }, '$fh->autoflush(1) lives' );
+    ok( $INC{'IO/File.pm'}, "IO::File now loaded" );
 }

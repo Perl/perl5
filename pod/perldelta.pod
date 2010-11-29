@@ -58,6 +58,27 @@ calls C<< Devel::foo->unimport('bar') >> if the method exists.
 This is particularly useful to suppresses the default actions of a
 C<Devel::*> module's C<import> method whilst still loading it for debugging.
 
+=head2 Filehandle method calls load IO::File on demand
+
+When a method call on a filehandle would die because the method can not
+be resolved and L<IO::File> has not been loaded, Perl now loads IO::File
+via C<require> and attempts method resolution again:
+
+  open my $fh, ">", $file;
+  $fh->binmode(":raw");     # loads IO::File and succeeds
+
+This also works for globs like STDOUT, STDERR and STDIN:
+
+  STDOUT->autoflush(1);
+
+Because this on-demand load only happens if method resolution fails, the
+legacy approach of manually loading an IO::File parent class for partial
+method support still works as expected:
+
+  use IO::Handle;
+  open my $fh, ">", $file;
+  $fh->autoflush(1);        # IO::File not loaded
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
