@@ -587,7 +587,7 @@ For example: if in the parent there are two references to a single blessed
 hash, then in the child there will be two references to a single undefined
 scalar value instead.
 This provides a simple mechanism for making a module threadsafe; just add
-C<sub CLONE_SKIP { 1 }> at the top of the class, and C<DESTROY()> will be
+C<sub CLONE_SKIP { 1 }> at the top of the class, and C<DESTROY()> will
 now only be called once per object. Of course, if the child thread needs
 to make use of the objects, then a more sophisticated approach is
 needed.
