@@ -6023,7 +6023,9 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
 	if (sv && o->op_next == o)
 	    return sv;
 	if (o->op_next != o) {
-	    if (type == OP_NEXTSTATE || type == OP_NULL || type == OP_PUSHMARK)
+	    if (type == OP_NEXTSTATE
+	     || (type == OP_NULL && !(o->op_flags & OPf_KIDS))
+	     || type == OP_PUSHMARK)
 		continue;
 	    if (type == OP_DBSTATE)
 		continue;
