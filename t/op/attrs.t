@@ -300,10 +300,10 @@ foreach my $test (@tests) {
   package brength;
   my $proto;
   sub MODIFY_CODE_ATTRIBUTES { $proto = $_[1]; _: }
-  {
+  eval q{
      my $x;
      () = sub :a0 { $x };
-  }
+  };
   package main;
   eval { $proto->() };               # used to crash in pp_entersub
   like $@, qr/^Closure prototype called/,
