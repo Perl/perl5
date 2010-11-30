@@ -1004,14 +1004,14 @@ perlmainst$(o) : perlmainst.c
 	$(CC) $(CFLAGS_O) $(OBJOUT_FLAG)$@ -c perlmainst.c
 
 $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
-	$(LINK32) -subsystem:console -out:$@ -stack:0x1000000 $(LINK_FLAGS) \
+	$(LINK32) -subsystem:console -out:$@ $(LINK_FLAGS) \
 	    $(LIBFILES) $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) $(PERLEXE_RES)
 	$(EMBED_EXE_MANI)
 	copy $(PERLEXE) $(WPERLEXE)
 	$(MINIPERL) -I..\lib bin\exetype.pl $(WPERLEXE) WINDOWS
 
 $(PERLEXESTATIC): $(PERLSTATICLIB) $(CONFIGPM) $(PERLEXEST_OBJ) $(PERLEXE_RES)
-	$(LINK32) -subsystem:console -out:$@ -stack:0x1000000 $(LINK_FLAGS) \
+	$(LINK32) -subsystem:console -out:$@ $(LINK_FLAGS) \
 	    @Extensions_static $(PERLSTATICLIB) /PDB:NONE \
 	    $(LIBFILES) $(PERLEXEST_OBJ) $(SETARGV_OBJ) $(PERLEXE_RES)
 	$(EMBED_EXE_MANI)
