@@ -297,7 +297,6 @@ PP(pp_concat)
 PP(pp_padsv)
 {
     dVAR; dSP; dTARGET;
-    if(!TARG) TARG = PAD_SVl(PL_op->op_targ) = newSV(0);
     XPUSHs(TARG);
     if (PL_op->op_flags & OPf_MOD) {
 	if (PL_op->op_private & OPpLVAL_INTRO)
