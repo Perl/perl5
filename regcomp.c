@@ -6268,7 +6268,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 				       that follow */
                 has_use_defaults = TRUE;
                 STD_PMMOD_FLAGS_CLEAR(&RExC_flags);
-                RExC_flags &= ~(RXf_PMf_LOCALE|RXf_PMf_UNICODE);
                 goto parse_flags;
 	    default:
 	        --RExC_parse;
