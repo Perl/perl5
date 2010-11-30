@@ -145,6 +145,7 @@ Deprecated.  Use C<GIMME_V> instead.
 				    operand of a logical or conditional
 				    that was optimised away, so it should
 				    not be bound via =~ */
+				/*  On OP_CONST, from a constant CV */
 
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	OPf_WANT_LIST

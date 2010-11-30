@@ -110,12 +110,12 @@ for $func (sort keys %$want) {
 3  <1> leavesub[2 refs] K/REFC,1 ->(end)
 -     <\@> lineseq KP ->3
 1        <;> dbstate(main 833 (eval 44):1) v ->2
-2        <\$> const[$want->{$func}[0] $want->{$func}[1]] s ->3
+2        <\$> const[$want->{$func}[0] $want->{$func}[1]] s* ->3
 EOT_EOT
 3  <1> leavesub[2 refs] K/REFC,1 ->(end)
 -     <\@> lineseq KP ->3
 1        <;> dbstate(main 833 (eval 44):1) v ->2
-2        <\$> const($want->{$func}[0] $want->{$func}[1]) s ->3
+2        <\$> const($want->{$func}[0] $want->{$func}[1]) s* ->3
 EONT_EONT
 
 }
@@ -143,14 +143,14 @@ checkOptree ( name	=> 'myyes() as coderef',
 # 2     <;> nextstate(main 2 -e:1) v:>,<,%,{ ->3
 # 5     <@> print vK ->6
 # 3        <0> pushmark s ->4
-# 4        <$> const[SPECIAL sv_yes] s ->5
+# 4        <$> const[SPECIAL sv_yes] s* ->5
 EOT_EOT
 # 6  <@> leave[1 ref] vKP/REFC ->(end)
 # 1     <0> enter ->2
 # 2     <;> nextstate(main 2 -e:1) v:>,<,%,{ ->3
 # 5     <@> print vK ->6
 # 3        <0> pushmark s ->4
-# 4        <$> const(SPECIAL sv_yes) s ->5
+# 4        <$> const(SPECIAL sv_yes) s* ->5
 EONT_EONT
 
 
@@ -167,14 +167,14 @@ checkOptree ( name	=> 'myno() as coderef',
 # 2     <;> nextstate(main 2 -e:1) v:>,<,%,{ ->3
 # 5     <@> print vK ->6
 # 3        <0> pushmark s ->4
-# 4        <$> const[SPECIAL sv_no] s ->5
+# 4        <$> const[SPECIAL sv_no] s* ->5
 EOT_EOT
 # 6  <@> leave[1 ref] vKP/REFC ->(end)
 # 1     <0> enter ->2
 # 2     <;> nextstate(main 2 -e:1) v:>,<,%,{ ->3
 # 5     <@> print vK ->6
 # 3        <0> pushmark s ->4
-# 4        <$> const(SPECIAL sv_no) s ->5
+# 4        <$> const(SPECIAL sv_no) s* ->5
 EONT_EONT
 
 
@@ -224,10 +224,10 @@ EOT_EOT
 # 8        <@> prtf sK ->9
 # 2           <0> pushmark s ->3
 # 3           <$> const(PV "myint %d mystr %s myfl %f pi %f\n") s ->4
-# 4           <$> const(IV 42) s ->5
-# 5           <$> const(PV "hithere") s ->6
-# 6           <$> const(NV 1.414213) s ->7
-# 7           <$> const(NV 3.14159) s ->8
+# 4           <$> const(IV 42) s* ->5
+# 5           <$> const(PV "hithere") s* ->6
+# 6           <$> const(NV 1.414213) s* ->7
+# 7           <$> const(NV 3.14159) s* ->8
 EONT_EONT
 
 if($] < 5.009) {
