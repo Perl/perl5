@@ -414,7 +414,13 @@ be noted as well.
 
 =item *
 
-XXX
+C<mg_findext> and C<sv_unmagicext> have been added.
+
+These new functions allow extension authors to find and remove magic attached to
+scalars based on both the magic type and the magic virtual table, similar to how
+C<sv_magicext> attaches magic of a certain type and with a given virtual table
+to a scalar. This eliminates the need for extensions to walk the list of
+C<MAGIC> pointers of an C<SV> to find the magic that belongs to them.
 
 =back
 
