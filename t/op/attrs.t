@@ -295,4 +295,22 @@ foreach my $test (@tests) {
     }
 }
 
+# [perl #68560] Calling closure prototypes (only accessible via :attr)
+{
+  package brength;
+  my $proto;
+  sub MODIFY_CODE_ATTRIBUTES { $proto = $_[1]; _: }
+  {
+     my $x;
+     () = sub :a0 { $x };
+  }
+  package main;
+  eval { $proto->() };               # used to crash in pp_entersub
+  like $@, qr/^Closure prototype called/,
+     "Calling closure proto with (no) args";
+  eval { () = &$proto };             # used to crash in pp_leavesub
+  like $@, qr/^Closure prototype called/,
+     "Calling closure proto with no @_ that returns a lexical";
+}
+
 done_testing();

@@ -1347,6 +1347,12 @@ uses the character values modulus 256 instead, as if you had provided:
 (W io) The dirhandle you tried to close is either closed or not really
 a dirhandle.  Check your control flow.
 
+=item Closure prototype called
+
+(F) If a closure has attributes, the subroutine passed to an attribute
+handler is the prototype that is cloned when a new closure is created.
+This subroutine cannot be called.
+
 =item Code missing after '/'
 
 (F) You had a (sub-)template that ends with a '/'. There must be another

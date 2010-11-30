@@ -297,6 +297,7 @@ PP(pp_concat)
 PP(pp_padsv)
 {
     dVAR; dSP; dTARGET;
+    if(!TARG) TARG = PAD_SVl(PL_op->op_targ) = newSV(0);
     XPUSHs(TARG);
     if (PL_op->op_flags & OPf_MOD) {
 	if (PL_op->op_private & OPpLVAL_INTRO)
@@ -2825,6 +2826,8 @@ PP(pp_entersub)
     SAVETMPS;
 
   retry:
+    if (CvCLONE(cv) && ! CvCLONED(cv))
+	DIE(aTHX_ "Closure prototype called");
     if (!CvROOT(cv) && !CvXSUB(cv)) {
 	GV* autogv;
 	SV* sub_name;
@@ -2896,7 +2899,9 @@ try_autoload:
 	SAVECOMPPAD();
 	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
 	if (hasargs) {
-	    AV *const av = MUTABLE_AV(PAD_SVl(0));
+	    AV *av = MUTABLE_AV(PAD_SVl(0));
+	    if ((SV *)av == &PL_sv_undef)
+		PAD_SVl(0) = (SV *)(av = newAV());
 	    if (AvREAL(av)) {
 		/* @_ is normally not REAL--this should only ever
 		 * happen when DB::sub() calls things that modify @_ */
