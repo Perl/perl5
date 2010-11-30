@@ -2898,9 +2898,7 @@ try_autoload:
 	SAVECOMPPAD();
 	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
 	if (hasargs) {
-	    AV *av = MUTABLE_AV(PAD_SVl(0));
-	    if ((SV *)av == &PL_sv_undef)
-		PAD_SVl(0) = (SV *)(av = newAV());
+	    AV *const av = MUTABLE_AV(PAD_SVl(0));
 	    if (AvREAL(av)) {
 		/* @_ is normally not REAL--this should only ever
 		 * happen when DB::sub() calls things that modify @_ */
