@@ -1482,5 +1482,10 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 [\0005]	5\000	y	$&	5
 [\_]	_	y	$&	_
 
+# RT #79152
+(q1|.)*(q2|.)*(x(a|bc)*y){2,}	xayxay	y	$&	xayxay
+(q1|.)*(q2|.)*(x(a|bc)*y){2,3}	xayxay	y	$&	xayxay
+(q1|z)*(q2|z)*z{15}-.*?(x(a|bc)*y){2,3}Z	zzzzzzzzzzzzzzzz-xayxayxayxayZ	y	$&	zzzzzzzzzzzzzzzz-xayxayxayxayZ
+
 (?:(?:)foo|bar|zot|rt78356)	foo	y	$&	foo
 # vim: softtabstop=0 noexpandtab

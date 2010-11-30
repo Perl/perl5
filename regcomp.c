@@ -3246,13 +3246,16 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    f |= SCF_DO_STCLASS_AND;
 		    f &= ~SCF_DO_STCLASS_OR;
 		}
-		/* These are the cases when once a subexpression
-		   fails at a particular position, it cannot succeed
-		   even after backtracking at the enclosing scope.
+	        /* Exclude from super-linear cache processing any {n,m}
+		   regops for which the combination of input pos and regex
+		   pos is not enough information to determine if a match
+		   will be possible.
 
-		   XXXX what if minimal match and we are at the
-		        initial run of {n,m}? */
-		if ((mincount != maxcount - 1) && (maxcount != REG_INFTY))
+		   For example, in the regex /foo(bar\s*){4,8}baz/ with the
+		   regex pos at the \s*, the prospects for a match depend not
+		   only on the input position but also on how many (bar\s*)
+		   repeats into the {4,8} we are. */
+               if ((mincount > 1) || (maxcount > 1 && maxcount != REG_INFTY))
 		    f &= ~SCF_WHILEM_VISITED_POS;
 
 		/* This will finish on WHILEM, setting scan, or on NULL: */
