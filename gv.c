@@ -722,11 +722,12 @@ Perl_gv_fetchmethod_flags(pTHX_ HV *stash, const char *name, U32 flags)
 		 * a filehandle. If IO:File has not been loaded, try to
 		 * require it first instead of croaking */
 		const char *stash_name = HvNAME_get(stash);
-		const char *io_file = "IO/File.pm";
-		if (stash_name && strEQ(stash_name,"IO::File")
-		    && ! hv_exists(GvHVn(PL_incgv),io_file, strlen(io_file))
+		if (stash_name && memEQs(stash_name, HvNAMELEN_get(stash), "IO::File")
+		    && !Perl_hv_common(aTHX_ GvHVn(PL_incgv), NULL,
+				       STR_WITH_LEN("IO/File.pm"), 0,
+				       HV_FETCH_ISEXISTS, NULL, 0)
 		) {
-		    require_pv(io_file);
+		    require_pv("IO/File.pm");
 		    gv = gv_fetchmeth(stash, name, nend - name, 0);
 		    if (gv)
 			return gv;
