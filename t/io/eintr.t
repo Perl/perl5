@@ -43,7 +43,7 @@ if (exists $ENV{PERLIO} && $ENV{PERLIO} =~ /stdio/  ) {
 # on Win32, alarm() won't interrupt the read/write call.
 # Similar issues with VMS.
 
-if ($^O eq 'VMS' || $^O eq 'MSWin32') {
+if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'cygwin') {
 	skip_all('various portability issues');
 	exit 0;
 }
