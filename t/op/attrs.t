@@ -310,7 +310,7 @@ foreach my $test (@tests) {
      "Calling closure proto with (no) args";
   eval { () = &$proto };             # used to crash in pp_leavesub
   like $@, qr/^Closure prototype called/,
-     "Calling closure proto with no @_ that returns a lexical";
+     'Calling closure proto with no @_ that returns a lexical';
 }
 
 done_testing();
