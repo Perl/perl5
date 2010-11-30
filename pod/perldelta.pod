@@ -283,7 +283,7 @@ XXX Newly added diagnostic messages go here
 
 =item *
 
-XXX
+There is a new "Closure prototype called" error.
 
 =back
 
@@ -476,6 +476,12 @@ non-ASCII Latin-1 range.
 A closure containing an C<if> statement followed by a constant or variable
 is no longer treated as a constant
 L<[perl #63540]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=63540>.
+
+=item *
+
+Calling a closure prototype (what is passed to an attribute handler for a
+closure) now results in a "Closure prototype called" error message
+L<[perl #68560]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=68560>.
 
 =back
 
