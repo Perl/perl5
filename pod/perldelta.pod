@@ -188,6 +188,14 @@ the base64 scheme for "URL applications".
 
 =item *
 
+C<mro> has been upgraded from version 1.05 to 1.06.
+
+C<next::method> I<et al.> now take into account that every class inherits
+from UNIVERSAL
+L<[perl #68654]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=68654>.
+
+=item *
+
 C<overload> has been upgraded from 1.11 to 1.12.
 
 =item *
