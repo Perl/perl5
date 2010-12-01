@@ -145,7 +145,7 @@ RENUM       BRANCHJ,    off 1 . 1 ; Group with independently numbered parens.
 # inline charclass data (ascii only), the 'C' store it in the structure.
 # NOTE: the relative order of the TRIE-like regops  is signifigant
 
-TRIE        TRIE,       trie 1    ; Match many EXACT(FL?)? at once. flags==type
+TRIE        TRIE,       trie 1    ; Match many EXACT(F[LU]?)? at once. flags==type
 TRIEC       TRIE,trie charclass   ; Same as TRIE, but with embedded charclass data
 
 # For start classes, contains an added fail table.
