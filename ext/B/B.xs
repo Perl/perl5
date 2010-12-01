@@ -812,14 +812,14 @@ minus_c()
 	else
 	    PL_minus_c = TRUE;
 
-SV *
+void
 cstring(sv)
 	SV *	sv
     ALIAS:
 	perlstring = 1
 	cchar = 2
     PPCODE:
-	PUSHs(ix == 2 ? cchar(aTHX_ sv) : cstring(aTHX_ sv, ix));
+	PUSHs(ix == 2 ? cchar(aTHX_ sv) : cstring(aTHX_ sv, (bool)ix));
 
 void
 threadsv_names()
