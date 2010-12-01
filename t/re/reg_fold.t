@@ -8,7 +8,6 @@ BEGIN {
 
 use strict;
 use warnings;
-my $count=1;
 my @tests;
 
 my %todo_pass = map { $_ => 1 }
@@ -68,7 +67,6 @@ while (<$fh>) {
                     # There are a few of these that pass; most fail.
                     $tests[-1]="TODO: { local \$::TODO='Some multi-char, f8 folded inside character class [ ] doesnt work';\n$tests[-1] }"
                 }
-                $count++;
             }
         }
     }
@@ -116,19 +114,14 @@ for my $i (0 .. 255) {
     my $hex_fold_ascii = sprintf "0x%02X", $fold_ascii[$i];
     my $hex_fold_latin1 = sprintf "0x%02X", $fold_latin1[$i];
     push @tests, qq[like chr($hex_fold_ascii), qr/(?d:$chr)/i, 'chr($hex_fold_ascii) =~ qr/(?d:$chr)/i'];
-    $count++;
     push @tests, qq[like chr($hex_fold_latin1), qr/(?u:$chr)/i, 'chr($hex_fold_latin1) =~ qr/(?u:$chr)/i'];
-    $count++;
 }
 
 
 push @tests, qq[like chr(0x0430), qr/[=\x{0410}-\x{0411}]/i, 'Bug #71752 Unicode /i char in a range'];
-$count++;
 push @tests, qq[like 'a', qr/\\p{Upper}/i, "'a' =~ /\\\\p{Upper}/i"];
-$count++;
 push @tests, q[my $c = "\x{212A}"; my $p = qr/(?:^[\x{004B}_]+$)/i; utf8::upgrade($p); like $c, $p, 'Bug #78994: my $c = "\x{212A}"; my $p = qr/(?:^[\x{004B}_]+$)/i; utf8::upgrade($p); $c =~ $p'];
-$count++;
 
-eval join ";\n","plan tests=>".($count-1),@tests,"1"
+eval join ";\n","plan tests=>". (scalar @tests), @tests, "1"
     or die $@;
 __DATA__
