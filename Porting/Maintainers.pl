@@ -727,7 +727,7 @@ use File::Glob qw(:case);
     'if' =>
 	{
 	'MAINTAINER'	=> 'ilyaz',
-	'DISTRIBUTION'	=> 'ILYAZ/modules/if-0.06.tar.gz',
+	'DISTRIBUTION'	=> 'ILYAZ/modules/if-0.0601.tar.gz',
 	'FILES'		=> q[dist/if],
 	'UPSTREAM'	=> 'blead',
 	},
