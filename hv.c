@@ -1643,7 +1643,7 @@ S_hfreeentries(pTHX_ HV *hv)
     /* This is the array that we're going to restore  */
     HE **const orig_array = HvARRAY(hv);
     HE **tmp_array = NULL;
-    const bool has_aux = SvOOK(hv);
+    const bool has_aux = (SvOOK(hv) == SVf_OOK);
     struct xpvhv_aux * current_aux = NULL;
     int attempts = 100;
     
