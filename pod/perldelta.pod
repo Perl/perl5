@@ -1,8 +1,9 @@
 =encoding utf8
 
 =for comment
-This has been completed up to dbe92b04c, except for 1b9f127-fad448f, which
-Karl Williamson says he will do.
+This has been completed up to 779bcb7d, except for:
+1b9f127-fad448f (Karl Williamson says he will do this)
+ad9e76a8629ed1ac483f0a7ed0e4da40ac5a1a00
 
 =head1 NAME
 
@@ -396,9 +397,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item NetBSD
 
-XXX
+The NetBSD hints file has been changed to make the system's malloc the
+default.
 
 =back
 
@@ -488,6 +490,12 @@ L<[perl #63540]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=63540>.
 Calling a closure prototype (what is passed to an attribute handler for a
 closure) now results in a "Closure prototype called" error message
 L<[perl #68560]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=68560>.
+
+=item *
+
+A regular expression optimisation would sometimes cause a match with a
+C<{n,m}> quantifier to fail when it should match
+L<[perl #79152]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=79152>.
 
 =back
 
