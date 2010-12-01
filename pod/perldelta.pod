@@ -2,7 +2,6 @@
 
 =for comment
 This has been completed up to 779bcb7d, except for:
-1b9f127-fad448f (Karl Williamson says he will do this)
 ad9e76a8629ed1ac483f0a7ed0e4da40ac5a1a00
 d9a4b459f94297889956ac3adc42707365f274c2
 
@@ -80,6 +79,18 @@ method support still works as expected:
   use IO::Handle;
   open my $fh, ">", $file;
   $fh->autoflush(1);        # IO::File not loaded
+
+=head2 Full functionality for C<use feature 'unicode_strings'>
+
+This release provides full functionality for C<use feature
+'unicode_strings'>.  Under its scope, all string operations executed and
+regular expressions compiled (even if executed outside its scope) have
+Unicode semantics.   See L<feature>.
+
+This feature avoids the "Unicode Bug" (See
+L<perlunicode/The "Unicode Bug"> for details.)  If their is a
+possibility that your code will process Unicode strings, you are
+B<strongly> encouraged to use this subpragma to avoid nasty surprises.
 
 =head1 Security
 
@@ -492,12 +503,6 @@ L<[perl #79178]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=79178>.
 
 =item *
 
-A number of bugs with regular expression bracketed character classes
-have been fixed, mostly having to do with matching characters in the
-non-ASCII Latin-1 range.
-
-=item *
-
 A closure containing an C<if> statement followed by a constant or variable
 is no longer treated as a constant
 L<[perl #63540]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=63540>.
@@ -513,6 +518,20 @@ L<[perl #68560]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=68560>.
 A regular expression optimisation would sometimes cause a match with a
 C<{n,m}> quantifier to fail when it should match
 L<[perl #79152]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=79152>.
+
+=item *
+
+What has become known as the "Unicode Bug" is resolved in this release.
+Under C<use feature 'unicode_strings'>, the internal storage format of a
+string no longer affects the external semantics.  There are two known
+exceptions.  User-defined case changing functions, which are planned to
+be deprecated in 5.14, require utf8-encoded strings to function; and the
+character C<LATIN SMALL LETTER SHARP S> in regular expression
+case-insensitive matching has a somewhat different set of bugs depending
+on the internal storage format.  Case-insensitive matching of all
+characters that have multi-character matches, as this one does, is
+problematical in Perl.
+L<[perl #58182]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=58182>.
 
 =back
 

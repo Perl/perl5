@@ -105,11 +105,22 @@ See L<perlsub/"Persistent Private Variables"> for details.
 
 =head2 the 'unicode_strings' feature
 
-C<use feature 'unicode_strings'> tells the compiler to treat
-all strings outside of C<use locale> and C<use bytes> as Unicode. It is
-available starting with Perl 5.11.3, but is not fully implemented.
+C<use feature 'unicode_strings'> tells the compiler to use Unicode semantics
+in all string operations executed within its scope (unless they are also
+within the scope of either C<use locale> or C<use bytes>).  The same applies
+to all regular expressions compiled within the scope, even if executed outside
+it.
 
-See L<perlunicode/The "Unicode Bug"> for details.
+C<no feature 'unicode_strings'> tells the compiler to use the traditional
+Perl semantics wherein the native character set semantics is used unless it is
+clear to Perl that Unicode is desired.  This can lead to some surprises
+when the behavior suddenly changes.  (See
+L<perlunicode/The "Unicode Bug"> for details.)  For this reason, if you are
+potentially using Unicode in your program, the
+C<use feature 'unicode_strings'> subpragma is B<strongly> recommended.
+
+This subpragma is available starting with Perl 5.11.3, but was not fully
+implemented until 5.13.8.
 
 =head1 FEATURE BUNDLES
 

@@ -1450,7 +1450,8 @@ The term, the "Unicode bug" has been applied to an inconsistency with the
 Unicode characters whose ordinals are in the Latin-1 Supplement block, that
 is, between 128 and 255.  Without a locale specified, unlike all other
 characters or code points, these characters have very different semantics in
-byte semantics versus character semantics.
+byte semantics versus character semantics, unless
+C<use feature 'unicode_strings'> is specified.
 
 In character semantics they are interpreted as Unicode code points, which means
 they have the same semantics as Latin-1 (ISO-8859-1).
@@ -1514,45 +1515,21 @@ ASCII range (except in a locale), along with Perl's desire to add Unicode
 support seamlessly.  The result wasn't seamless: these characters were
 orphaned.
 
-Work is being done to correct this, but only some of it is complete.
-What has been finished is:
+Starting in Perl 5.14, C<use feature 'unicode_strings'> can be used to
+cause Perl to use Unicode semantics on all string operations within the
+scope of the feature subpragma.  Regular expressions compiled in its
+scope retain that behavior even when executed or compiled into larger
+regular expressions outside the scope.  (The pragma does not, however,
+affect user-defined case changing operations.  These still require a
+UTF-8 encoded string to operate.)
 
-=over
+In Perl 5.12, the subpragma affected casing changes, but not regular
+expressions.  See L<perlfunc/lc> for details on how this pragma works in
+combination with various others for casing.
 
-=item *
-
-the matching of C<\b>, C<\s>, C<\w> and the Posix
-character classes and their complements in regular expressions
-
-=item *
-
-case changing (but not user-defined casing)
-
-=item *
-
-case-insensitive (C</i>) regular expression matching for [bracketed
-character classes] only, except for some bugs with C<LATIN SMALL
-LETTER SHARP S> (which is supposed to match the two character sequence
-"ss" (or "Ss" or "sS" or "SS"), but Perl has a number of bugs for all
-such multi-character case insensitive characters, of which this is just
-one example.
-
-=back
-
-Due to concerns, and some evidence, that older code might
-have come to rely on the existing behavior, the new behavior must be explicitly
-enabled by the feature C<unicode_strings> in the L<feature> pragma, even though
-no new syntax is involved.
-
-See L<perlfunc/lc> for details on how this pragma works in combination with
-various others for casing.
-
-Even though the implementation is incomplete, it is planned to have this
-pragma affect all the problematic behaviors in later releases: you can't
-have one without them all.
-
-In the meantime, a workaround is to always call utf8::upgrade($string), or to
-use the standard module L<Encode>.   Also, a scalar that has any characters
+For earlier Perls, or when a string is passed to a function outside the
+subpragma's scope, a workaround is to always call C<utf8::upgrade($string)>,
+or to use the standard module L<Encode>.   Also, a scalar that has any characters
 whose ordinal is above 0x100, or which were specified using either of the
 C<\N{...}> notations will automatically have character semantics.
 
