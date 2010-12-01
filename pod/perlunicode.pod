@@ -23,7 +23,7 @@ Read L<Unicode Security Considerations|http://www.unicode.org/reports/tr36>.
 
 Perl knows when a filehandle uses Perl's internal Unicode encodings
 (UTF-8, or UTF-EBCDIC if in EBCDIC) if the filehandle is opened with
-the ":utf8" layer.  Other encodings can be converted to Perl's
+the ":encoding(utf8)" layer.  Other encodings can be converted to Perl's
 encoding on input or from Perl's encoding on output by use of the
 ":encoding(...)"  layer.  See L<open>.
 
