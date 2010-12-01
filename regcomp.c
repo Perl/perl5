@@ -4461,6 +4461,12 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
     restudied = 0;
 #endif
 
+    /* Set to use unicode semantics if the pattern is in utf8 and has the
+     * 'dual' charset specified, as it means unicode when utf8  */
+    if (RExC_utf8  && ! (pm_flags & (RXf_PMf_LOCALE|RXf_PMf_UNICODE))) {
+	pm_flags |= RXf_PMf_UNICODE;
+    }
+
     RExC_precomp = exp;
     RExC_flags = pm_flags;
     RExC_sawback = 0;
@@ -6268,6 +6274,10 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 				       that follow */
                 has_use_defaults = TRUE;
                 STD_PMMOD_FLAGS_CLEAR(&RExC_flags);
+		if (RExC_utf8) {    /* But the default for a utf8 pattern is
+				       unicode semantics */
+		    RExC_flags |= RXf_PMf_UNICODE;
+		}
                 goto parse_flags;
 	    default:
 	        --RExC_parse;
@@ -6306,7 +6316,17 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         {
                             goto fail_modifiers;
                         }
-                        negflags |= (RXf_PMf_LOCALE|RXf_PMf_UNICODE);
+
+			/* The dual charset means unicode semantics if the
+			 * pattern (or target, not known until runtime) are
+			 * utf8 */
+			if (RExC_utf8) {
+			    posflags |= RXf_PMf_UNICODE;
+			    negflags |= RXf_PMf_LOCALE;
+			}
+			else {
+			    negflags |= (RXf_PMf_LOCALE|RXf_PMf_UNICODE);
+			}
                         has_charset_modifier = 1;
                         break;
                     case ONCE_PAT_MOD: /* 'o' */
