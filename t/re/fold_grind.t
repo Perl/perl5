@@ -13,6 +13,7 @@ BEGIN {
 
 use strict;
 use warnings;
+use Encode;
 
 # Tests both unicode and not, so make sure not implicitly testing unicode
 no feature 'unicode_strings';
@@ -238,7 +239,8 @@ foreach my $test (sort { numerically } keys %tests) {
     #diag $progress;
 
     # Now grind out tests, using various combinations.
-    foreach my $uni_semantics ("", 'u') {   # Both non- and uni semantics
+    # XXX foreach my $charset ('d', 'u', 'l') {
+    foreach my $charset ('d', 'u') {
       foreach my $utf8_target (0, 1) {    # Both utf8 and not, for
                                           # code points < 256
         my $upgrade_target = "";
@@ -247,17 +249,17 @@ foreach my $test (sort { numerically } keys %tests) {
         # something above latin1.  So impossible to test if to not to be in
         # utf8; and otherwise, no upgrade is needed.
         next if $target_above_latin1 && ! $utf8_target;
-        $upgrade_target = '; utf8::upgrade($c)' if ! $target_above_latin1 && $utf8_target;
+        $upgrade_target = ' utf8::upgrade($c);' if ! $target_above_latin1 && $utf8_target;
 
-        foreach my $uni_pattern (0, 1) {
-          next if $pattern_above_latin1 && ! $uni_pattern;
+        foreach my $utf8_pattern (0, 1) {
+          next if $pattern_above_latin1 && ! $utf8_pattern;
+          my $uni_semantics = $utf8_target || $charset eq 'u' || ($charset eq 'd' && $utf8_pattern);
           my $upgrade_pattern = "";
-          $upgrade_pattern = '; use re "/u"' if ! $pattern_above_latin1 && $uni_pattern;
+          $upgrade_pattern = ' utf8::upgrade($p);' if ! $pattern_above_latin1 && $utf8_pattern;
 
           my $lhs = join "", @x_target;
           my @rhs = @x_pattern;
-          #print "$lhs: ", "/@rhs/\n";
-
+          my $should_fail = ! $uni_semantics && $ord >= 128 && $ord < 256 && ! $is_self;
           foreach my $bracketed (0, 1) {   # Put rhs in [...], or not
             foreach my $inverted (0,1) {
                 next if $inverted && ! $bracketed;
@@ -314,9 +316,9 @@ foreach my $test (sort { numerically } keys %tests) {
                           # something on one or both sides that force it to.
                           my $must_match = ! $can_match_null || ($l_anchor && $r_anchor) || ($l_anchor && $append) || ($r_anchor && $prepend) || ($prepend && $append);
                           #next unless $must_match;
-                          my $quantified = "(?$uni_semantics:$l_anchor$prepend$interior${quantifier}$append$r_anchor)";
+                          my $quantified = "(?$charset:$l_anchor$prepend$interior${quantifier}$append$r_anchor)";
                           my $op;
-                          if ($must_match && ! $utf8_target && ! $uni_pattern && ! $uni_semantics && $ord >= 128 && $ord < 256 && ! $is_self)  {
+                          if ($must_match && $should_fail)  {
                               $op = 0;
                           } else {
                               $op = 1;
@@ -324,8 +326,9 @@ foreach my $test (sort { numerically } keys %tests) {
                           $op = ! $op if $must_match && $inverted;
                           $op = ($op) ? '=~' : '!~';
 
-                          my $stuff .= " utf8_target=$utf8_target, uni_semantics=$uni_semantics, uni_pattern=$uni_pattern, bracketed=$bracketed, prepend=$prepend, append=$append, parend=$parend, quantifier=$quantifier, l_anchor=$l_anchor, r_anchor=$r_anchor";
-                          my $eval = "my \$c = \"$prepend$lhs$append\"$upgrade_target; $upgrade_pattern; \$c $op /$quantified/i;";
+                          my $stuff .= " uni_semantics=$uni_semantics, should_fail=$should_fail, bracketed=$bracketed, prepend=$prepend, append=$append, parend=$parend, quantifier=$quantifier, l_anchor=$l_anchor, r_anchor=$r_anchor";
+                          $stuff .= "; pattern_above_latin1=$pattern_above_latin1; utf8_pattern=$utf8_pattern";
+                          my $eval = "my \$c = \"$prepend$lhs$append\"; my \$p = qr/$quantified/i;$upgrade_target$upgrade_pattern \$c $op \$p;";
 
                           # XXX Doesn't currently test multi-char folds
                           next if @pattern != 1;
