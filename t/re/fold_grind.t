@@ -1,5 +1,4 @@
-# Grind out a lot of combinatoric tests for folding.  Still missing are
-# testing backreferences and tries.
+# Grind out a lot of combinatoric tests for folding.
 
 use charnames ":full";
 
@@ -259,7 +258,28 @@ foreach my $test (sort { numerically } keys %tests) {
 
           my $lhs = join "", @x_target;
           my @rhs = @x_pattern;
+          my $rhs = join "", @rhs;
           my $should_fail = ! $uni_semantics && $ord >= 128 && $ord < 256 && ! $is_self;
+
+          # Do simple tests of referencing capture buffers, named and
+          # numbered.
+          my $op = '=~';
+          $op = '!~' if $should_fail;
+          my $eval = "my \$c = \"$lhs$rhs\"; my \$p = qr/(?$charset:^($rhs)\\1\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
+          push @eval_tests, qq[ok(eval '$eval', '$eval')];
+          $eval = "my \$c = \"$lhs$rhs\"; my \$p = qr/(?$charset:^(?<grind>$rhs)\\k<grind>\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
+          push @eval_tests, qq[ok(eval '$eval', '$eval')];
+          $count += 2;
+          if ($lhs ne $rhs) {
+            $eval = "my \$c = \"$rhs$lhs\"; my \$p = qr/(?$charset:^($rhs)\\1\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
+            push @eval_tests, qq[ok(eval '$eval', '$eval')];
+            $eval = "my \$c = \"$rhs$lhs\"; my \$p = qr/(?$charset:^(?<grind>$rhs)\\k<grind>\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
+            push @eval_tests, qq[ok(eval '$eval', '$eval')];
+            $count += 2;
+          }
+          #diag $eval_tests[-1];
+          #next;
+
           foreach my $bracketed (0, 1) {   # Put rhs in [...], or not
             foreach my $inverted (0,1) {
                 next if $inverted && ! $bracketed;
