@@ -1358,13 +1358,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     regnode *convert = NULL;
     U32 *prev_states; /* temp array mapping each state to previous one */
     /* we just use folder as a flag in utf8 */
-    const U8 * const folder = ( flags == EXACTF
-                       ? PL_fold
-                       : ( flags == EXACTFL
-                           ? PL_fold_locale
-                           : NULL
-                         )
-                     );
+    const U8 * folder = NULL;
 
 #ifdef DEBUGGING
     const U32 data_slot = add_data( pRExC_state, 4, "tuuu" );
@@ -1383,6 +1377,12 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 #ifndef DEBUGGING
     PERL_UNUSED_ARG(depth);
 #endif
+
+    switch (flags) {
+	case EXACTFU: folder = PL_fold_latin1; break;
+	case EXACTF:  folder = PL_fold; break;
+	case EXACTFL: folder = PL_fold_locale; break;
+    }
 
     trie = (reg_trie_data *) PerlMemShared_calloc( 1, sizeof(reg_trie_data) );
     trie->refcount = 1;
