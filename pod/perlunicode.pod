@@ -101,9 +101,9 @@ or from literals and constants in the source text.
 The C<bytes> pragma will always, regardless of platform, force byte
 semantics in a particular lexical scope.  See L<bytes>.
 
-The C<use feature 'unicode_strings'> pragma is intended to always, regardless
-of platform, force character (Unicode) semantics in a particular lexical scope.
-In release 5.12, it is partially implemented, applying only to case changes.
+The C<use feature 'unicode_strings'> pragma is intended always,
+regardless of platform, to force character (Unicode) semantics in a
+particular lexical scope.
 See L</The "Unicode Bug"> below.
 
 The C<utf8> pragma is primarily a compatibility device that enables
