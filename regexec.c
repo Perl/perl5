@@ -3927,31 +3927,69 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    break;
             
 	case NREFFL:
-	{
+	{   /* The capture buffer cases.  The ones beginning with N for the
+	       named buffers just convert to the equivalent numbered and
+	       pretend they were called as the corresponding numbered buffer
+	       op.  */
 	    char *s;
 	    char type;
+	    I32 (*folder)() = NULL;	/* NULL assumes will be NREF, REF: no
+					   folding */
+	    const U8 * fold_array = NULL;
+
 	    PL_reg_flags |= RF_tainted;
-	    /* FALL THROUGH */
-	case NREF:
+	    folder = foldEQ_locale;
+	    fold_array = PL_fold_locale;
+	    type = REFFL;
+	    goto do_nref;
+
+	case NREFFU:
+	    folder = foldEQ_latin1;
+	    fold_array = PL_fold_latin1;
+	    type = REFFU;
+	    goto do_nref;
+
 	case NREFF:
-	    type = OP(scan);
+	    folder = foldEQ;
+	    fold_array = PL_fold;
+	    type = REFF;
+	    goto do_nref;
+
+	case NREF:
+	    type = REF;
+	  do_nref:
+
+	    /* For the named back references, find the corresponding buffer
+	     * number */
 	    n = reg_check_named_buff_matched(rex,scan);
 
-            if ( n ) {
-                type = REF + ( type - NREF );
-                goto do_ref;
-            } else {
+            if ( ! n ) {
                 sayNO;
-            }
-            /* unreached */
+	    }
+	    goto do_nref_ref_common;
+
 	case REFFL:
 	    PL_reg_flags |= RF_tainted;
+	    folder = foldEQ_locale;
+	    fold_array = PL_fold_locale;
+	    goto do_ref;
+
+	case REFFU:
+	    folder = foldEQ_latin1;
+	    fold_array = PL_fold_latin1;
+	    goto do_ref;
+
+	case REFF:
+	    folder = foldEQ;
+	    fold_array = PL_fold;
 	    /* FALL THROUGH */
+
         case REF:
-	case REFF: 
-	    n = ARG(scan);  /* which paren pair */
+	  do_ref:
 	    type = OP(scan);
-	  do_ref:  
+	    n = ARG(scan);  /* which paren pair */
+
+	  do_nref_ref_common:
 	    ln = PL_regoffs[n].start;
 	    PL_reg_leftiter = PL_reg_maxiter;		/* Void cache */
 	    if (*PL_reglastparen < n || ln == -1)
@@ -3960,49 +3998,40 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		break;
 
 	    s = PL_bostr + ln;
-	    if (utf8_target && type != REF) {	/* REF can do byte comparison */
-		char *l = locinput;
-		const char *e = PL_bostr + PL_regoffs[n].end;
-		/*
-		 * Note that we can't do the "other character" lookup trick as
-		 * in the 8-bit case (no pun intended) because in Unicode we
-		 * have to map both upper and title case to lower case.
-		 */
-		if (type == REFF) {
-		    while (s < e) {
-			STRLEN ulen1, ulen2;
-			U8 tmpbuf1[UTF8_MAXBYTES_CASE+1];
-			U8 tmpbuf2[UTF8_MAXBYTES_CASE+1];
+	    if (type != REF	/* REF can do byte comparison */
+		&& (utf8_target
+                    || (type == REFFU
+                        && (*s == (char) LATIN_SMALL_LETTER_SHARP_S
+                            || *locinput == (char) LATIN_SMALL_LETTER_SHARP_S))))
+	    { /* XXX handle REFFL better */
+		char * limit = PL_regeol;
 
-			if (l >= PL_regeol)
-			    sayNO;
-			toLOWER_utf8((U8*)s, tmpbuf1, &ulen1);
-			toLOWER_utf8((U8*)l, tmpbuf2, &ulen2);
-			if (ulen1 != ulen2 || memNE((char *)tmpbuf1, (char *)tmpbuf2, ulen1))
-			    sayNO;
-			s += ulen1;
-			l += ulen2;
-		    }
+		/* This call case insensitively compares the entire buffer
+		    * at s, with the current input starting at locinput, but
+		    * not going off the end given by PL_regeol, and returns in
+		    * limit upon success, how much of the current input was
+		    * matched */
+		if (! foldEQ_utf8(s, NULL, PL_regoffs[n].end - ln, utf8_target,
+				    locinput, &limit, 0, utf8_target))
+		{
+		    sayNO;
 		}
-		locinput = l;
+		locinput = limit;
 		nextchr = UCHARAT(locinput);
 		break;
 	    }
 
-	    /* Inline the first character, for speed. */
+	    /* Not utf8:  Inline the first character, for speed. */
 	    if (UCHARAT(s) != nextchr &&
 		(type == REF ||
-		 (UCHARAT(s) != (type == REFF
-				  ? PL_fold : PL_fold_locale)[nextchr])))
+		 UCHARAT(s) != fold_array[nextchr]))
 		sayNO;
 	    ln = PL_regoffs[n].end - ln;
 	    if (locinput + ln > PL_regeol)
 		sayNO;
 	    if (ln > 1 && (type == REF
 			   ? memNE(s, locinput, ln)
-			   : (type == REFF
-			      ? ! foldEQ(s, locinput, ln)
-			      : ! foldEQ_locale(s, locinput, ln))))
+			   : ! folder(s, locinput, ln)))
 		sayNO;
 	    locinput += ln;
 	    nextchr = UCHARAT(locinput);
