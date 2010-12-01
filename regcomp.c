@@ -3073,11 +3073,18 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		/* Check whether it is compatible with what we know already! */
 		int compat = 1;
 
+
+		/* If compatibile, we or it in below.  It is compatible if is
+		 * in the bitmp and either 1) its bit or its fold is set, or 2)
+		 * it's for a locale.  Even if there isn't unicode semantics
+		 * here, at runtime there may be because of matching against a
+		 * utf8 string, so accept a possible false positive for
+		 * latin1-range folds */
 		if (uc >= 0x100 ||
 		    (!(data->start_class->flags & (ANYOF_CLASS | ANYOF_LOCALE))
 		    && !ANYOF_BITMAP_TEST(data->start_class, uc)
 		    && (!(data->start_class->flags & ANYOF_FOLD)
-			|| !ANYOF_BITMAP_TEST(data->start_class, (UNI_SEMANTICS) ? PL_fold_latin1[uc] : PL_fold[uc])))
+			|| !ANYOF_BITMAP_TEST(data->start_class, PL_fold_latin1[uc])))
                     )
 		    compat = 0;
 		ANYOF_CLASS_ZERO(data->start_class);
@@ -3119,12 +3126,13 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    if (flags & SCF_DO_STCLASS_AND) {
 		/* Check whether it is compatible with what we know already! */
 		int compat = 1;
-
 		if (uc >= 0x100 ||
-		    (!(data->start_class->flags & (ANYOF_CLASS | ANYOF_LOCALE))
-		    && !ANYOF_BITMAP_TEST(data->start_class, uc)
-		     && !ANYOF_BITMAP_TEST(data->start_class, (UNI_SEMANTICS) ? PL_fold_latin1[uc] : PL_fold[uc])))
+		 (!(data->start_class->flags & (ANYOF_CLASS | ANYOF_LOCALE))
+		  && !ANYOF_BITMAP_TEST(data->start_class, uc)
+		  && !ANYOF_BITMAP_TEST(data->start_class, PL_fold_latin1[uc])))
+		{
 		    compat = 0;
+		}
 		ANYOF_CLASS_ZERO(data->start_class);
 		ANYOF_BITMAP_ZERO(data->start_class);
 		if (compat) {
@@ -3136,13 +3144,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    }
 		    else {
 
-			/* Also set the other member of the fold pair.  Can't
-			 * do this for locale, because not known until runtime
-			 */
-			ANYOF_BITMAP_SET(data->start_class,
-					 (OP(scan) == EXACTFU)
-						    ? PL_fold_latin1[uc]
-						    : PL_fold[uc]);
+			/* Also set the other member of the fold pair.  In case
+			 * that unicode semantics is called for at runtime, use
+			 * the full latin1 fold.  (Can't do this for locale,
+			 * because not known until runtime */
+			ANYOF_BITMAP_SET(data->start_class, PL_fold_latin1[uc]);
 		    }
 		}
 	    }
@@ -3158,9 +3164,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                              * can't do that in locale because not known until
                              * run-time */
                             ANYOF_BITMAP_SET(data->start_class,
-                                            (OP(scan) == EXACTFU)
-                                                        ? PL_fold_latin1[uc]
-                                                        : PL_fold[uc]);
+					     PL_fold_latin1[uc]);
                         }
 		    }
 		    data->start_class->flags &= ~ANYOF_EOS;
