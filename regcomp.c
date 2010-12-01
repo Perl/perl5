@@ -1156,7 +1156,7 @@ the silent ignoring of duplicate alternations which are of the form:
 
  / (DUPE|DUPE) X? (?{ ... }) Y /x
 
-Thus EVAL blocks follwing a trie may be called a different number of times with
+Thus EVAL blocks following a trie may be called a different number of times with
 and without the optimisation. With the optimisations dupes will be silently
 ignored. This inconsistant behaviour of EVAL type nodes is well established as
 the following demonstrates:
