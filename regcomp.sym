@@ -194,6 +194,13 @@ NHORIZWS    NHORIZWS,   none 0 S  ; not horizontal whitespace   (Perl 6)
 FOLDCHAR    FOLDCHAR,   codepoint 1 ; codepoint with tricky case folding properties.
 EXACTFU     EXACT,      str	    ; Match this string, folded, Unicode semantics for non-utf8 (prec. by length).
 
+# These could have been implemented using the FLAGS field of the regnode, but
+# by having a separate node type, we can use the existing switch statement to
+# avoid some tests
+REFFU       REF,        num 1 V   ; Match already matched string, folded using unicode semantics for non-utf8
+NREFFU       REF,        num 1 V   ; Match already matched string, folded using unicode semantics for non-utf8
+
+
 # NEW STUFF ABOVE THIS LINE  
 
 ################################################################################
