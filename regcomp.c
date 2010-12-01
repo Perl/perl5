@@ -5849,9 +5849,15 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         SvREFCNT_inc_simple_void(sv_dat);
                     }
                     RExC_sawback = 1;
-                    ret = reganode(pRExC_state,
-                    	   (U8)(FOLD ? (LOC ? NREFFL : NREFF) : NREF),
-                    	   num);
+		    ret = reganode(pRExC_state,
+				   ((! FOLD)
+				     ? NREF
+				     : (UNI_SEMANTICS)
+				       ? NREFFU
+				       : (LOC)
+				         ? NREFFL
+					 : NREFF),
+				    num);
                     *flagp |= HASWIDTH;
 
                     Set_Node_Offset(ret, parse_start+1);
@@ -7531,8 +7537,14 @@ tryagain:
 
                 RExC_sawback = 1;
                 ret = reganode(pRExC_state,
-                	   (U8)(FOLD ? (LOC ? NREFFL : NREFF) : NREF),
-                	   num);
+                               ((! FOLD)
+                                 ? NREF
+                                 : (UNI_SEMANTICS)
+                                   ? NREFFU
+                                   : (LOC)
+                                     ? NREFFL
+                                     : NREFF),
+                                num);
                 *flagp |= HASWIDTH;
 
                 /* override incorrect value set in reganode MJD */
@@ -7593,8 +7605,14 @@ tryagain:
 		    }
 		    RExC_sawback = 1;
 		    ret = reganode(pRExC_state,
-				   (U8)(FOLD ? (LOC ? REFFL : REFF) : REF),
-				   num);
+				   ((! FOLD)
+				     ? REF
+				     : (UNI_SEMANTICS)
+				       ? REFFU
+				       : (LOC)
+				         ? REFFL
+					 : REFF),
+				    num);
 		    *flagp |= HASWIDTH;
 
                     /* override incorrect value set in reganode MJD */
@@ -9594,7 +9612,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
     else if (k == REF || k == OPEN || k == CLOSE || k == GROUPP || OP(o)==ACCEPT) {
 	Perl_sv_catpvf(aTHX_ sv, "%d", (int)ARG(o));	/* Parenth number */
 	if ( RXp_PAREN_NAMES(prog) ) {
-            if ( k != REF || OP(o) < NREF) {	    
+            if ( k != REF || (OP(o) != NREF && OP(o) != NREFF && OP(o) != NREFFL && OP(o) != NREFFU)) {
 	        AV *list= MUTABLE_AV(progi->data->data[progi->name_list_idx]);
 	        SV **name= av_fetch(list, ARG(o), 0 );
 	        if (name)
