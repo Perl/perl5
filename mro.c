@@ -830,7 +830,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
     register XPVHV* xhv;
     register HE *entry;
     I32 riter = -1;
-    I32 items;
+    I32 items = 0;
     const bool stash_had_name = stash && HvENAME(stash);
     bool fetched_isarev = FALSE;
     HV *seen = NULL;
