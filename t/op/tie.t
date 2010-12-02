@@ -939,17 +939,3 @@ sub IO::File::TIEARRAY {
 fileno FOO; tie @a, "FOO"
 EXPECT
 Can't locate object method "TIEARRAY" via package "FOO" at - line 5.
-########
-
-# tied() should still work on tied scalars after glob assignment
-sub TIESCALAR {bless[]}
-sub FETCH {*foo}
-sub f::TIEHANDLE{bless[],f}
-tie *foo, "f";
-tie $rin, "";
-[$rin]; # call FETCH
-print ref tied $rin, "\n";
-print ref tied *$rin, "\n";
-EXPECT
-main
-f
