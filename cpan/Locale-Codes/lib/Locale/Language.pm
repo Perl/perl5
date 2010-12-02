@@ -19,9 +19,9 @@ use Locale::Codes::Language;
 #       Public Global Variables
 #=======================================================================
 
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
+our($VERSION,@ISA,@EXPORT,@EXPORT_OK);
 
-$VERSION='3.14';
+$VERSION='3.15';
 @ISA       = qw(Exporter);
 @EXPORT    = qw(code2language
                 language2code

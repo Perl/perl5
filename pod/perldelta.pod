@@ -193,6 +193,10 @@ and documentation enhancements.
 
 =item *
 
+C<Locale::Codes> has been upgraded from version 3.14 to 3.15
+
+=item *
+
 C<Memoize> has been upgraded from version 1.01_03 to 1.02.
 
 =item *
