@@ -3931,11 +3931,15 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	       named buffers just convert to the equivalent numbered and
 	       pretend they were called as the corresponding numbered buffer
 	       op.  */
+	    /* don't initialize these, it makes C++ unhappy */
 	    char *s;
 	    char type;
-	    I32 (*folder)() = NULL;	/* NULL assumes will be NREF, REF: no
-					   folding */
-	    const U8 * fold_array = NULL;
+	    re_fold_t folder;
+	    const U8 *fold_array;
+
+	    folder = NULL;	/* NULL assumes will be NREF, REF: no
+				   folding */
+	    fold_array = NULL;
 
 	    PL_reg_flags |= RF_tainted;
 	    folder = foldEQ_locale;
