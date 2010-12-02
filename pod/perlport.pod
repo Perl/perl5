@@ -1641,8 +1641,6 @@ Some functions available based on the version of VMS. (VMS)
 
 Not implemented (VMS, S<RISC OS>, VOS).
 
-Available only on Windows NT (not on Windows 95). (Win32)
-
 =item fork
 
 Not implemented. (AmigaOS, S<RISC OS>, VM/ESA, VMS)
@@ -2140,7 +2138,7 @@ Caveats:
 
 =back
 
-=head1 EOL Platforms (Perl 5.12)
+=head1 EOL Platforms (Perl 5.14)
 
 The following platforms were supported by a previous version of
 Perl but have been officially removed from Perl's source code
@@ -2158,9 +2156,8 @@ as of 5.12:
 
 =back
 
-The following platforms may still work as of Perl 5.12, but Perl's
-developers have made an explicit decision to discontinue support for
-them:
+The following platforms were supported up to 5.10.  They may still
+have worked in 5.12, but supporting code has been removed for 5.14:
 
 =over
 

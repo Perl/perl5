@@ -1727,11 +1727,6 @@ win32_start_child(LPVOID arg)
     w32_pseudo_id = id;
 #else
     w32_pseudo_id = GetCurrentThreadId();
-    if (IsWin95()) {
-	int pid = (int)w32_pseudo_id;
-	if (pid < 0)
-	    w32_pseudo_id = -pid;
-    }
 #endif
     if (tmpgv = gv_fetchpv("$", TRUE, SVt_PV)) {
 	SV *sv = GvSV(tmpgv);
@@ -1879,11 +1874,6 @@ PerlProcFork(struct IPerlProc* piPerl)
     if (!handle) {
 	errno = EAGAIN;
 	return -1;
-    }
-    if (IsWin95()) {
-	int pid = (int)id;
-	if (pid < 0)
-	    id = -pid;
     }
     w32_pseudo_child_handles[w32_num_pseudo_children] = handle;
     w32_pseudo_child_pids[w32_num_pseudo_children] = id;
