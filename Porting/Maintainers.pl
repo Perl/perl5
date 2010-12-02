@@ -453,6 +453,14 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> undef,
 	},
 
+    'Devel::SelfStubber' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'DISTRIBUTION'	=> 'FLORA/Devel-SelfStubber-1.03.tar.gz',
+	'FILES'		=> q[dist/Devel-SelfStubber],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Devel::PPPort' =>
 	{
 	'MAINTAINER'	=> 'mhx',
@@ -1643,7 +1651,6 @@ use File::Glob qw(:case);
 
 				ext/Devel-DProf/
 				ext/Devel-Peek/
-				ext/Devel-SelfStubber/
 				ext/DynaLoader/
 				ext/Errno
 				ext/Fcntl/
