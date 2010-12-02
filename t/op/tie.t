@@ -955,20 +955,12 @@ main
 f
 ########
 
-# (un)tie $glob_copy vs (un)tie *$glob_copy
-sub TIESCALAR { print "TIESCALAR\n"; bless [] }
-sub TIEHANDLE{ print "TIEHANDLE\n"; bless [] }
-sub FETCH { print "never called\n" }
+# tie $glob_copy vs tie *$glob_copy
+sub TIESCALAR { print "TIESCALAR\n" }
+sub TIEHANDLE{ print "TIEHANDLE\n" }
 $f = *foo;
 tie *$f, "";
 tie $f, "";
-untie $f;
-print "ok 1\n" if !tied $f;
-() = $f; # should not call FETCH
-untie *$f;
-print "ok 2\n" if !tied *foo;
 EXPECT
 TIEHANDLE
 TIESCALAR
-ok 1
-ok 2
