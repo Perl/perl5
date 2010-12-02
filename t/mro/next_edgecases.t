@@ -5,7 +5,7 @@ use warnings;
 
 BEGIN { chdir 't'; require q(./test.pl); @INC = qw "../lib lib" }
 
-plan(tests => 14);
+plan(tests => 17);
 
 {
 
@@ -94,13 +94,15 @@ plan(tests => 14);
 
 }
 
-# Test next::method with UNIVERSAL methods
+# Test next::method/can with UNIVERSAL methods
 {
     package UNIVERSAL;
     sub foo { "foo" }
+    sub kan { shift->next::can }
     our @ISA = "a";
     package a;
     sub bar { "bar" }
+    sub baz { shift->next::can }
     package M;
     sub foo { shift->next::method }
     sub bar { shift->next::method }
@@ -108,4 +110,14 @@ plan(tests => 14);
 
     is eval { M->foo }, "foo", 'next::method with implicit UNIVERSAL';
     is eval { M->bar }, "bar", 'n::m w/superclass of implicit UNIVERSAL';
+
+    is baz a, undef,
+     'univ superclasses next::cannot their own methods';
+    is kan UNIVERSAL, undef,
+     'UNIVERSAL next::cannot its own methods';
+
+    @a::ISA = 'b';
+    sub b::cnadd { shift->next::can }
+    is baz b, \&a::baz,
+      'univ supersuperclass noxt::can method in its immediate subclasses';
 }
