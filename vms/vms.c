@@ -744,7 +744,6 @@ const int verspec = 7;
     *root = NULL;
     *root_len = 0;
     *dir = NULL;
-    *dir_len;
     *name = NULL;
     *name_len = 0;
     *ext = NULL;
@@ -4077,7 +4076,7 @@ static PerlIO * create_forked_xterm(pTHX_ const char *cmd, const char *mode)
 	    title[n] = *cptr;
 	    n++;
 	    if (n == 39) {
-		title[39] == 0;
+		title[39] = 0;
 		break;
 	    }
 	    cptr++;
@@ -7169,7 +7168,7 @@ static char *int_tounixspec(const char *spec, char *rslt, int * utf8_fl)
     cp1 = cp1 + 9;
     cp2 = cp2 + 5;
     if (spec[6] != '\0') {
-      cp1[9] == '/';
+      cp1[9] = '/';
       cp1++;
       cp2++;
     }
@@ -7194,7 +7193,7 @@ static char *int_tounixspec(const char *spec, char *rslt, int * utf8_fl)
       cp1 = cp1 + 4;
       cp2 = cp2 + 12;
       if (spec[12] != '\0') {
-	cp1[4] == '/';
+	cp1[4] = '/';
 	cp1++;
 	cp2++;
       }
@@ -8041,7 +8040,7 @@ int sts, v_len, r_len, d_len, n_len, e_len, vs_len;
 	cmp = strncmp(vmspath, "dev", 4);
 	if (cmp == 0) {
 	    sts = slash_dev_special_to_vms(unixptr, vmspath, vmspath_len);
-	    if (sts = SS$_NORMAL)
+	    if (sts == SS$_NORMAL)
 		return SS$_NORMAL;
 	}
       }
