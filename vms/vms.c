@@ -2792,8 +2792,6 @@ int test_unix_status;
     default:
 	return SS$_ABORT; /* punt */
     }
-
-  return SS$_ABORT; /* Should not get here */
 } 
 
 
@@ -7699,6 +7697,7 @@ int islnm;
 	    return SS$_NORMAL;
 	}
     }
+    return 0;
 }
 
 
@@ -10133,7 +10132,6 @@ Perl_trim_unixpath(pTHX_ char *fspec, const char *wildspec, int opts)
     PerlMem_free(unixwild);
     PerlMem_free(lcres);
     return 1;
-    ellipsis = nextell;
   }
 
 }  /* end of trim_unixpath() */
