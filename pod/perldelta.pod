@@ -2,7 +2,6 @@
 
 =for comment
 This has been completed up to 7c7df81, except for:
-ad9e76a8629ed1ac483f0a7ed0e4da40ac5a1a00
 d9a4b459f94297889956ac3adc42707365f274c2
 
 =head1 NAME
