@@ -5544,7 +5544,7 @@ NULL
             n = ARG(scan);
             if ( n == (U32)what_len_TRICKYFOLD(locinput,utf8_target,ln) ) {
                 locinput += ln;
-            } else if ( 0xDF == n && !utf8_target && !UTF_PATTERN ) {
+            } else if ( LATIN_SMALL_LETTER_SHARP_S == n && !utf8_target && !UTF_PATTERN ) {
                 sayNO;
             } else  {
                 U8 folded[UTF8_MAXBYTES_CASE+1];

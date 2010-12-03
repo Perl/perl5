@@ -2451,6 +2451,10 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, I32 *min, U32 flags
 	}
 #endif
     }
+#define GREEK_SMALL_LETTER_IOTA_WITH_DIALYTIKA_AND_TONOS   0x0390
+#define IOTA_D_T	GREEK_SMALL_LETTER_IOTA_WITH_DIALYTIKA_AND_TONOS
+#define GREEK_SMALL_LETTER_UPSILON_WITH_DIALYTIKA_AND_TONOS	0x03B0
+#define UPSILON_D_T	GREEK_SMALL_LETTER_UPSILON_WITH_DIALYTIKA_AND_TONOS
 
     if (UTF
 	&& ( OP(scan) == EXACTF || OP(scan) == EXACTFU)
@@ -3571,7 +3575,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
     	    }
 	}
 	else if (OP(scan) == FOLDCHAR) {
-	    int d = ARG(scan)==0xDF ? 1 : 2;
+	    int d = ARG(scan) == LATIN_SMALL_LETTER_SHARP_S ? 1 : 2;
 	    flags &= ~SCF_DO_STCLASS;
             min += 1;
             delta += d;
@@ -7302,9 +7306,13 @@ tryagain:
 	RExC_parse++;
 	vFAIL("Quantifier follows nothing");
 	break;
-    case 0xDF:
-    case 0xC3:
-    case 0xCE:
+    case LATIN_SMALL_LETTER_SHARP_S:
+    case UTF8_TWO_BYTE_HI_nocast(LATIN_SMALL_LETTER_SHARP_S):
+    case UTF8_TWO_BYTE_HI_nocast(IOTA_D_T):
+#if UTF8_TWO_BYTE_HI_nocast(UPSILON_D_T) != UTF8_TWO_BYTE_HI_nocast(IOTA_D_T)
+#error The beginning utf8 byte of IOTA_D_T and UPSILON_D_T unexpectedly differ.  Other instances in this code should have the case statement below.
+    case UTF8_TWO_BYTE_HI_nocast(UPSILON_D_T):
+#endif
         do_foldchar:
         if (!LOC && FOLD) {
             U32 len,cp;
@@ -7333,9 +7341,9 @@ tryagain:
 	   literal text handling code.
 	*/
 	switch ((U8)*++RExC_parse) {
-	case 0xDF:
-	case 0xC3:
-	case 0xCE:
+	case LATIN_SMALL_LETTER_SHARP_S:
+	case UTF8_TWO_BYTE_HI_nocast(LATIN_SMALL_LETTER_SHARP_S):
+	case UTF8_TWO_BYTE_HI_nocast(IOTA_D_T):
 	           goto do_foldchar;	    
 	/* Special Escapes */
 	case 'A':
@@ -7675,9 +7683,9 @@ tryagain:
 		if (RExC_flags & RXf_PMf_EXTENDED)
 		    p = regwhite( pRExC_state, p );
 		switch ((U8)*p) {
-		case 0xDF:
-		case 0xC3:
-		case 0xCE:
+		case LATIN_SMALL_LETTER_SHARP_S:
+		case UTF8_TWO_BYTE_HI_nocast(LATIN_SMALL_LETTER_SHARP_S):
+		case UTF8_TWO_BYTE_HI_nocast(IOTA_D_T):
 		           if (LOC || !FOLD || !is_TRICKYFOLD_safe(p,RExC_end,UTF))
 		                goto normal_default;
 		case '^':
@@ -7704,9 +7712,9 @@ tryagain:
 
 		    switch ((U8)*++p) {
 		    /* These are all the special escapes. */
-    		    case 0xDF:
-    		    case 0xC3:
-    		    case 0xCE:
+                    case LATIN_SMALL_LETTER_SHARP_S:
+                    case UTF8_TWO_BYTE_HI_nocast(LATIN_SMALL_LETTER_SHARP_S):
+                    case UTF8_TWO_BYTE_HI_nocast(IOTA_D_T):
     		           if (LOC || !FOLD || !is_TRICKYFOLD_safe(p,RExC_end,UTF))
     		                goto normal_default;		    
 		    case 'A':             /* Start assertion */
