@@ -727,7 +727,7 @@ use File::Glob qw(:case);
     'if' =>
 	{
 	'MAINTAINER'	=> 'ilyaz',
-	'DISTRIBUTION'	=> 'ILYAZ/modules/if-0.06.tar.gz',
+	'DISTRIBUTION'	=> 'ILYAZ/modules/if-0.0601.tar.gz',
 	'FILES'		=> q[dist/if],
 	'UPSTREAM'	=> 'blead',
 	},
@@ -797,7 +797,7 @@ use File::Glob qw(:case);
     'Locale-Codes' =>
 	{
 	'MAINTAINER'	=> 'sbeck',
-	'DISTRIBUTION'	=> 'SBECK/Locale-Codes-3.14.tar.gz',
+	'DISTRIBUTION'	=> 'SBECK/Locale-Codes-3.15.tar.gz',
 	'FILES'		=> q[cpan/Locale-Codes],
 	'EXCLUDED'	=> [ qw{t/pod_coverage.t t/pod.t}, qr{^t/runtests},
 			     qr{^internal/}, qr{^examples/} ],
@@ -913,21 +913,16 @@ use File::Glob qw(:case);
     'Memoize' =>
 	{
 	'MAINTAINER'	=> 'mjd',
-	'DISTRIBUTION'	=> 'MJD/Memoize-1.01.tar.gz',
+	'DISTRIBUTION'	=> 'FLORA/Memoize-1.02.tar.gz',
 	'FILES'		=> q[cpan/Memoize],
-	'EXCLUDED'	=> [
-			     qw{
-				article.html
-				Memoize/Saves.pm
-			       },
-			   ],
+	'EXCLUDED'	=> [ qw{ article.html } ],
 	'UPSTREAM'	=> 'cpan',
 	},
 
     'MIME::Base64' =>
 	{
 	'MAINTAINER'	=> 'gaas',
-	'DISTRIBUTION'	=> 'GAAS/MIME-Base64-3.12.tar.gz',
+	'DISTRIBUTION'	=> 'GAAS/MIME-Base64-3.13.tar.gz',
 	'FILES'		=> q[cpan/MIME-Base64],
 	'EXCLUDED'	=> [ qw{ t/bad-sv.t }, ],
 	'UPSTREAM'	=> 'cpan',
@@ -951,7 +946,7 @@ use File::Glob qw(:case);
     'Module::CoreList' =>
 	{
 	'MAINTAINER'	=> 'rgarcia',
-	'DISTRIBUTION'	=> 'BINGOS/Module-CoreList-2.40.tar.gz',
+	'DISTRIBUTION'	=> 'BINGOS/Module-CoreList-2.41.tar.gz',
 	'FILES'		=> q[dist/Module-CoreList],
 	'UPSTREAM'	=> 'blead',
 	},

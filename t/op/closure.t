@@ -14,7 +14,7 @@ BEGIN {
 use Config;
 require './test.pl'; # for runperl()
 
-print "1..188\n";
+print "1..190\n";
 
 my $test = 1;
 sub test (&) {
@@ -701,6 +701,18 @@ sub f {
     test { $r1 != $r2 };
 }
 
+# [perl #63540] Don’t treat sub { if(){.....}; "constant" } as a constant
 
+BEGIN {
+  my $x = 7;
+  *baz = sub() { if($x){ () = "tralala"; blonk() }; 0 }
+}
+{
+  my $blonk_was_called;
+  *blonk = sub { ++$blonk_was_called };
+  my $ret = baz();
+  test { $ret == 0 or diag("got $ret at line ".__LINE__),0 };
+  test { $blonk_was_called };
+}
 
 

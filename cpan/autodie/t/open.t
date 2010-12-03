@@ -56,7 +56,7 @@ unlike($@, qr/at \S+ line \d+\s+at \S+ line \d+/, "...but not too mentions");
 eval {
     use autodie;
 
-    die "Windows does not support multi-arg pipe" if $^O eq "MSWin32";
+    die "Windows and VMS do not support multi-arg pipe" if $^O eq "MSWin32" or $^O eq 'VMS';
 
     open(my $fh, '-|', "true");
 };

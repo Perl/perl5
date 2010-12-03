@@ -132,6 +132,7 @@
 #define find_rundefsv()		Perl_find_rundefsv(aTHX)
 #define find_rundefsvoffset()	Perl_find_rundefsvoffset(aTHX)
 #define foldEQ			Perl_foldEQ
+#define foldEQ_latin1		Perl_foldEQ_latin1
 #define foldEQ_locale		Perl_foldEQ_locale
 #define foldEQ_utf8(a,b,c,d,e,f,g,h)	Perl_foldEQ_utf8(aTHX_ a,b,c,d,e,f,g,h)
 #ifndef PERL_IMPLICIT_CONTEXT
@@ -277,6 +278,7 @@
 #define mg_clear(a)		Perl_mg_clear(aTHX_ a)
 #define mg_copy(a,b,c,d)	Perl_mg_copy(aTHX_ a,b,c,d)
 #define mg_find(a,b)		Perl_mg_find(aTHX_ a,b)
+#define mg_findext(a,b,c)	Perl_mg_findext(aTHX_ a,b,c)
 #define mg_free(a)		Perl_mg_free(aTHX_ a)
 #define mg_free_type(a,b)	Perl_mg_free_type(aTHX_ a,b)
 #define mg_get(a)		Perl_mg_get(aTHX_ a)
@@ -594,6 +596,7 @@
 #define sv_true(a)		Perl_sv_true(aTHX_ a)
 #define sv_uni_display(a,b,c,d)	Perl_sv_uni_display(aTHX_ a,b,c,d)
 #define sv_unmagic(a,b)		Perl_sv_unmagic(aTHX_ a,b)
+#define sv_unmagicext(a,b,c)	Perl_sv_unmagicext(aTHX_ a,b,c)
 #define sv_unref_flags(a,b)	Perl_sv_unref_flags(aTHX_ a,b)
 #define sv_untaint(a)		Perl_sv_untaint(aTHX_ a)
 #define sv_upgrade(a,b)		Perl_sv_upgrade(aTHX_ a,b)
@@ -821,6 +824,7 @@
 #define is_utf8_X_extend(a)	Perl_is_utf8_X_extend(aTHX_ a)
 #define is_utf8_X_non_hangul(a)	Perl_is_utf8_X_non_hangul(aTHX_ a)
 #define is_utf8_X_prepend(a)	Perl_is_utf8_X_prepend(aTHX_ a)
+#define mod(a,b)		Perl_mod(aTHX_ a,b)
 #define op_clear(a)		Perl_op_clear(aTHX_ a)
 #define qerror(a)		Perl_qerror(aTHX_ a)
 #define reg_named_buff(a,b,c,d)	Perl_reg_named_buff(aTHX_ a,b,c,d)

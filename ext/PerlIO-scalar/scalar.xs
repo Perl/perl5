@@ -150,7 +150,8 @@ PerlIOScalar_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	PerlIOScalar *s = PerlIOSelf(f, PerlIOScalar);
 	SV *sv = s->var;
 	char *p;
-	STRLEN len, got;
+	STRLEN len;
+	I32 got;
 	p = SvPV(sv, len);
 	got = len - (STRLEN)(s->posn);
 	if (got <= 0)

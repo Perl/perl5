@@ -1653,7 +1653,7 @@ sub _div_inf
    if (($x->is_nan() || $y->is_nan())   ||
        ($x->is_zero() && $y->is_zero()));
  
-  # +-inf / +-inf == NaN, reminder also NaN
+  # +-inf / +-inf == NaN, remainder also NaN
   if (($x->{sign} =~ /^[+-]inf$/) && ($y->{sign} =~ /^[+-]inf$/))
     {
     return wantarray ? ($x->bnan(),$self->bnan()) : $x->bnan();

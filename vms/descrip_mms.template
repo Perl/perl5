@@ -477,8 +477,8 @@ $(DBG)libperlmini$(OLB) : $(mini_obj)
 	@ If F$Search("$(MMS$TARGET)").eqs."" Then Library/Object/Create $(MMS$TARGET)
 	Library/Object/Replace $(MMS$TARGET) $(MMS$SOURCE_LIST)
 
-perlmain.c : miniperlmain.c $(MINIPERL_EXE) [.vms]writemain.pl
-	$(MINIPERL) [.vms]Writemain.pl "$(EXT)"
+perlmain.c : miniperlmain.c $(MINIPERL_EXE) [.lib.ExtUtils]Miniperl.pm
+	$(MINIPERL) -"MExtUtils::Miniperl" -e "writemain(@ARGV)" "$(EXT)" > perlmain.c
 
 .ifdef __DEBUG__
 # Link an extra perl that doesn't invoke the debugger

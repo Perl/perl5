@@ -118,15 +118,7 @@ __EOD__
 	my $ccflags = $Config{'ccflags'} . ' ' . "-I$COREincdir";
 
 	if ($^O eq 'VMS') {
-	    if ($ENV{PERL_CORE}) {
-		# Fragile if the extensions change hierarchy within
-		# the Perl core but this should do for now.
-                $cccmd = "$Config{'cc'} /include=([---]) $tmp.c";
-	    } else {
-		my $perl_core = $Config{'installarchlib'};
-		$perl_core =~ s/\]$/.CORE]/;
-                $cccmd = "$Config{'cc'} /include=(perl_root:[000000],$perl_core) $tmp.c";
-	    }
+            $cccmd = "$Config{'cc'} /include=($COREincdir) $tmp.c";
         }
 
         if ($args{silent} || !$VERBOSE) {

@@ -1643,7 +1643,7 @@ S_hfreeentries(pTHX_ HV *hv)
     /* This is the array that we're going to restore  */
     HE **const orig_array = HvARRAY(hv);
     HE **tmp_array = NULL;
-    const bool has_aux = SvOOK(hv);
+    const bool has_aux = (SvOOK(hv) == SVf_OOK);
     struct xpvhv_aux * current_aux = NULL;
     int attempts = 100;
     
@@ -1668,20 +1668,25 @@ S_hfreeentries(pTHX_ HV *hv)
 
 	struct xpvhv_aux *iter = SvOOK(hv) ? HvAUX(hv) : NULL;
 
+	/* If there are no keys, we only need to free items in the aux
+	   structure and then exit the loop. */
+	const bool empty = !((XPVHV*) SvANY(hv))->xhv_keys;
+
 	/* make everyone else think the array is empty, so that the destructors
 	 * called for freed entries can't recursively mess with us */
-	HvARRAY(hv) = NULL;
+	if (!empty) HvARRAY(hv) = NULL;
 
 	if (SvOOK(hv)) {
 	    HE *entry;
 
-	    SvFLAGS(hv) &= ~SVf_OOK; /* Goodbye, aux structure.  */
-	    /* What aux structure?  */
-	    /* (But we still have a pointer to it in iter.) */
+	    if (!empty) {
+	      SvFLAGS(hv) &= ~SVf_OOK; /* Goodbye, aux structure.  */
+	      /* What aux structure?  */
+	      /* (But we still have a pointer to it in iter.) */
 
-	    /* Copy the name and MRO stuff to a new aux structure
-	       if present. */
-	    if (iter->xhv_name_u.xhvnameu_name || iter->xhv_mro_meta) {
+	      /* Copy the name and MRO stuff to a new aux structure
+	         if present. */
+	      if (iter->xhv_name_u.xhvnameu_name || iter->xhv_mro_meta) {
 		struct xpvhv_aux * const newaux = hv_auxinit(hv);
 		newaux->xhv_name_count = iter->xhv_name_count;
 		if (newaux->xhv_name_count)
@@ -1694,13 +1699,13 @@ S_hfreeentries(pTHX_ HV *hv)
 		iter->xhv_name_u.xhvnameu_name = NULL;
 		newaux->xhv_mro_meta = iter->xhv_mro_meta;
 		iter->xhv_mro_meta = NULL;
-	    }
+	      }
 
-	    /* Because we have taken xhv_name and
-	       xhv_mro_meta out, the only allocated
-	       pointers in the aux structure that might exist are the back-
-	       reference array and xhv_eiter.
-	     */
+	      /* Because we have taken xhv_name and xhv_mro_meta out, the
+	         only allocated pointers in the aux structure that might
+	         exist are the back-reference array and xhv_eiter.
+	       */
+	    }
 
 	    /* weak references: if called from sv_clear(), the backrefs
 	     * should already have been killed; if there are any left, its
@@ -1751,11 +1756,12 @@ S_hfreeentries(pTHX_ HV *hv)
 	    iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
 	    iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
 
-	    /* There are now no allocated pointers in the aux structure.  */
+	    /* There are now no allocated pointers in the aux structure
+	       unless the hash is empty. */
 	}
 
 	/* If there are no keys, there is nothing left to free. */
-	if (!((XPVHV*) SvANY(hv))->xhv_keys) break;
+	if (empty) break;
 
 	/* Since we have removed the HvARRAY (and possibly replaced it by
 	   calling hv_auxinit), set the number of keys accordingly. */
@@ -1801,10 +1807,13 @@ S_hfreeentries(pTHX_ HV *hv)
 	    Perl_die(aTHX_ "panic: hfreeentries failed to free hash - something is repeatedly re-creating entries");
 	}
     }
+
+    /* If the array was not replaced, the rest does not apply. */
+    if (HvARRAY(hv) == orig_array) return;
 	
     /* Set aside the current array for now, in case we still need it. */
     if (SvOOK(hv)) current_aux = HvAUX(hv);
-    if (HvARRAY(hv) && HvARRAY(hv) != orig_array)
+    if (HvARRAY(hv))
 	tmp_array = HvARRAY(hv);
 
     HvARRAY(hv) = orig_array;

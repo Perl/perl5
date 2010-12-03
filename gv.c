@@ -718,6 +718,20 @@ Perl_gv_fetchmethod_flags(pTHX_ HV *stash, const char *name, U32 flags)
 	    /* Right now this is exclusively for the benefit of S_method_common
 	       in pp_hot.c  */
 	    if (stash) {
+		/* If we can't find an IO::File method, it might be a call on
+		 * a filehandle. If IO:File has not been loaded, try to
+		 * require it first instead of croaking */
+		const char *stash_name = HvNAME_get(stash);
+		if (stash_name && memEQs(stash_name, HvNAMELEN_get(stash), "IO::File")
+		    && !Perl_hv_common(aTHX_ GvHVn(PL_incgv), NULL,
+				       STR_WITH_LEN("IO/File.pm"), 0,
+				       HV_FETCH_ISEXISTS, NULL, 0)
+		) {
+		    require_pv("IO/File.pm");
+		    gv = gv_fetchmeth(stash, name, nend - name, 0);
+		    if (gv)
+			return gv;
+		}
 		Perl_croak(aTHX_
 			   "Can't locate object method \"%s\" via package \"%.*s\"",
 			   name, (int)HvNAMELEN_get(stash), HvNAME_get(stash));

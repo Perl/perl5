@@ -1129,4 +1129,17 @@ sub latin1_to_native($) {
     return $string;
 }
 
+sub ord_latin1_to_native {
+    # given an input latin1 code point, return the platform's native
+    # equivalent value
+
+    return ord latin1_to_native(chr $_[0]);
+}
+
+sub ord_native_to_latin1 {
+    # given an input platform code point, return the latin1 equivalent value
+
+    return ord native_to_latin1(chr $_[0]);
+}
+
 1;

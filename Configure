@@ -22234,7 +22234,7 @@ esac
 # the appropriate Makefile.PL.
 case " $static_ext " in
 	*" Encode "*) # Add the subextensions of Encode
-	cd "$rsrc/ext"
+	cd "$rsrc/cpan"
 	for xxx in `ls Encode/*/Makefile.PL|awk -F/ '{print $2}'`; do
 		static_ext="$static_ext Encode/$xxx"
 	done

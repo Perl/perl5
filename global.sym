@@ -128,6 +128,7 @@ Perl_find_runcv
 Perl_find_rundefsv
 Perl_find_rundefsvoffset
 Perl_foldEQ
+Perl_foldEQ_latin1
 Perl_foldEQ_locale
 Perl_foldEQ_utf8
 Perl_form
@@ -310,6 +311,7 @@ Perl_mfree
 Perl_mg_clear
 Perl_mg_copy
 Perl_mg_find
+Perl_mg_findext
 Perl_mg_free
 Perl_mg_free_type
 Perl_mg_get
@@ -318,6 +320,7 @@ Perl_mg_magical
 Perl_mg_set
 Perl_mg_size
 Perl_mini_mktime
+Perl_mod
 Perl_moreswitches
 Perl_mro_get_from_name
 Perl_mro_get_linear_isa
@@ -694,6 +697,7 @@ Perl_sv_tainted
 Perl_sv_true
 Perl_sv_uni_display
 Perl_sv_unmagic
+Perl_sv_unmagicext
 Perl_sv_unref
 Perl_sv_unref_flags
 Perl_sv_untaint

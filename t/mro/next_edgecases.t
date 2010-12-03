@@ -3,7 +3,9 @@
 use strict;
 use warnings;
 
-require q(./test.pl); plan(tests => 12);
+BEGIN { chdir 't'; require q(./test.pl); @INC = qw "../lib lib" }
+
+plan(tests => 17);
 
 {
 
@@ -90,4 +92,32 @@ require q(./test.pl); plan(tests => 12);
     eval { Qux->foo() };
     is($@, '', "->next::can on non-existing package name");
 
+}
+
+# Test next::method/can with UNIVERSAL methods
+{
+    package UNIVERSAL;
+    sub foo { "foo" }
+    sub kan { shift->next::can }
+    our @ISA = "a";
+    package a;
+    sub bar { "bar" }
+    sub baz { shift->next::can }
+    package M;
+    sub foo { shift->next::method }
+    sub bar { shift->next::method }
+    package main;
+
+    is eval { M->foo }, "foo", 'next::method with implicit UNIVERSAL';
+    is eval { M->bar }, "bar", 'n::m w/superclass of implicit UNIVERSAL';
+
+    is baz a, undef,
+     'univ superclasses next::cannot their own methods';
+    is kan UNIVERSAL, undef,
+     'UNIVERSAL next::cannot its own methods';
+
+    @a::ISA = 'b';
+    sub b::cnadd { shift->next::can }
+    is baz b, \&a::baz,
+      'univ supersuperclass noxt::can method in its immediate subclasses';
 }

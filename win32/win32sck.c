@@ -522,62 +522,6 @@ my_fclose (FILE *pf)
     return fclose(pf);
 }
 
-#undef fstat
-int
-my_fstat(int fd, Stat_t *sbufptr)
-{
-    /* This fixes a bug in fstat() on Windows 9x.  fstat() uses the
-     * GetFileType() win32 syscall, which will fail on Windows 9x.
-     * So if we recognize a socket on Windows 9x, we return the
-     * same results as on Windows NT/2000.
-     * XXX this should be extended further to set S_IFSOCK on
-     * sbufptr->st_mode.
-     */
-    int osf;
-    if (!wsock_started || IsWinNT()) {
-#if defined(WIN64) || defined(USE_LARGE_FILES)
-#if defined(__BORLANDC__) /* buk */
-	return win32_fstat(fd, sbufptr );
-#else
-	return _fstati64(fd, sbufptr);
-#endif
-#else
-	return fstat(fd, sbufptr);
-#endif
-    }
-
-    osf = TO_SOCKET(fd);
-    if (osf != -1) {
-	char sockbuf[256];
-	int optlen = sizeof(sockbuf);
-	int retval;
-
-	retval = getsockopt((SOCKET)osf, SOL_SOCKET, SO_TYPE, sockbuf, &optlen);
-	if (retval != SOCKET_ERROR || WSAGetLastError() != WSAENOTSOCK) {
-#if defined(__BORLANDC__)&&(__BORLANDC__<=0x520)
-	    sbufptr->st_mode = S_IFIFO;
-#else
-	    sbufptr->st_mode = _S_IFIFO;
-#endif
-	    sbufptr->st_rdev = sbufptr->st_dev = (dev_t)fd;
-	    sbufptr->st_nlink = 1;
-	    sbufptr->st_uid = sbufptr->st_gid = sbufptr->st_ino = 0;
-	    sbufptr->st_atime = sbufptr->st_mtime = sbufptr->st_ctime = 0;
-	    sbufptr->st_size = (Off_t)0;
-	    return 0;
-	}
-    }
-#if defined(WIN64) || defined(USE_LARGE_FILES)
-#if defined(__BORLANDC__) /* buk */
-    return win32_fstat(fd, sbufptr );
-#else
-    return _fstati64(fd, sbufptr);
-#endif
-#else
-    return fstat(fd, sbufptr);
-#endif
-}
-
 struct hostent *
 win32_gethostbyaddr(const char *addr, int len, int type)
 {
@@ -800,8 +744,8 @@ win32_savecopyservent(struct servent*d, struct servent*s, const char *proto)
     d->s_name = s->s_name;
     d->s_aliases = s->s_aliases;
     d->s_port = s->s_port;
-#ifndef __BORLANDC__	/* Buggy on Win95 and WinNT-with-Borland-WSOCK */
-    if (!IsWin95() && s->s_proto && strlen(s->s_proto))
+#ifndef __BORLANDC__	/* Buggy on WinNT-with-Borland-WSOCK */
+    if (s->s_proto && strlen(s->s_proto))
 	d->s_proto = s->s_proto;
     else
 #endif

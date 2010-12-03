@@ -1,10 +1,10 @@
 
 			Locale-Codes Distribution
 
-For changes in this release, please refer to the Locale::Changes
-man-page.
-
 For changes prior to 3.00, please see the ChangeLog file.
+
+For majore changes in this release, please refer to the Locale::Changes
+man-page (small changes are still listed in the ChangeLog file).
 
 This distribution contains Perl modules which can be used to process
 ISO codes for identifying languages, countries, scripts,

@@ -30,6 +30,8 @@ typedef struct {
 
 START_MY_CXT
 
+MGVTBL vtbl_foo, vtbl_bar;
+
 /* indirect functions to test the [pa]MY_CXT macros */
 
 int
@@ -2639,3 +2641,31 @@ BOOT:
     CV *asscv = get_cv("XS::APItest::postinc", 0);
     cv_set_call_checker(asscv, THX_ck_entersub_postinc, (SV*)asscv);
 }
+
+MODULE = XS::APItest		PACKAGE = XS::APItest::Magic
+
+PROTOTYPES: DISABLE
+
+void
+sv_magic_foo(SV *sv, SV *thingy)
+ALIAS:
+    sv_magic_bar = 1
+CODE:
+    sv_magicext(SvRV(sv), NULL, PERL_MAGIC_ext, ix ? &vtbl_bar : &vtbl_foo, (const char *)thingy, 0);
+
+SV *
+mg_find_foo(SV *sv)
+ALIAS:
+    mg_find_bar = 1
+CODE:
+    MAGIC *mg = mg_findext(SvRV(sv), PERL_MAGIC_ext, ix ? &vtbl_bar : &vtbl_foo);
+    RETVAL = mg ? SvREFCNT_inc((SV *)mg->mg_ptr) : &PL_sv_undef;
+OUTPUT:
+    RETVAL
+
+void
+sv_unmagic_foo(SV *sv)
+ALIAS:
+    sv_unmagic_bar = 1
+CODE:
+    sv_unmagicext(SvRV(sv), PERL_MAGIC_ext, ix ? &vtbl_bar : &vtbl_foo);

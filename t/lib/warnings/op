@@ -106,6 +106,14 @@ EXPECT
 Found = in conditional, should be == at - line 3.
 ########
 # op.c
+use warnings 'syntax' ;
+use constant foo => 1;
+1 if $a = foo ;
+no warnings 'syntax' ;
+1 if $a = foo ;
+EXPECT
+########
+# op.c
 my (@foo, %foo);
 %main::foo->{"bar"};
 %foo->{"bar"};

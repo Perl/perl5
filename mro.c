@@ -830,7 +830,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
     register XPVHV* xhv;
     register HE *entry;
     I32 riter = -1;
-    I32 items;
+    I32 items = 0;
     const bool stash_had_name = stash && HvENAME(stash);
     bool fetched_isarev = FALSE;
     HV *seen = NULL;
@@ -984,16 +984,20 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
     if(!fetched_isarev) {
 	/* If oldstash is not null, then we can use its HvENAME to look up
 	   the isarev hash, since all its subclasses will be listed there.
+	   It will always have an HvENAME. It the HvENAME was removed
+	   above, then fetch_isarev will be true, and this code will not be
+	   reached.
 
 	   If oldstash is null, then this is an empty spot with no stash in
 	   it, so subclasses could be listed in isarev hashes belonging to
-	   any of the names, so we have to check all of them. */
-	if(oldstash) {
+	   any of the names, so we have to check all of them.
+	 */
+	assert(!oldstash || HvENAME(oldstash));
+	if (oldstash) {
+	    /* Extra variable to avoid a compiler warning */
+	    char * const hvename = HvENAME(oldstash);
 	    fetched_isarev = TRUE;
-	    svp
-	     = hv_fetch(
-	         PL_isarev, HvENAME(oldstash), HvENAMELEN_get(oldstash), 0
-	       );
+	    svp = hv_fetch(PL_isarev, hvename, HvENAMELEN_get(oldstash), 0);
 	    if (svp) isarev = MUTABLE_HV(*svp);
 	}
 	else if(SvTYPE(namesv) == SVt_PVAV) {

@@ -619,7 +619,8 @@ foreach (0..3) {
 # no attribute list
 my $pi = 4;
 ####
-# := empty attribute list
+# SKIP ?$] > 5.013006 && ":= is now a syntax error"
+# := treated as an empty attribute list
 no warnings;
 my $pi := 4;
 >>>>

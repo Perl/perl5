@@ -1,5 +1,10 @@
 =encoding utf8
 
+=for comment
+This has been completed up to 779bcb7d, except for:
+ad9e76a8629ed1ac483f0a7ed0e4da40ac5a1a00
+d9a4b459f94297889956ac3adc42707365f274c2
+
 =head1 NAME
 
 [ this is a template for a new perldelta file. Any text flagged as
@@ -31,7 +36,8 @@ here, but most should go in the L</Performance Enhancements> section.
 =head2 C<-d:-foo> calls C<Devel::foo::unimport>
 
 The syntax C<-dI<B<:>foo>> was extended in 5.6.1 to make C<-dI<:fooB<=bar>>>
-equivalent to C<-Mfoo=bar>, which expands internally to C<use foo 'bar';>.
+equivalent to C<-MDevel::foo=bar>, which expands
+internally to C<use Devel::foo 'bar';>.
 F<perl> now allows prefixing the module name with C<->, with the same
 semantics as C<-M>, I<i.e.>
 
@@ -39,18 +45,52 @@ semantics as C<-M>, I<i.e.>
 
 =item C<-d:-foo>
 
-Equivalent to C<-M-foo>, expands to C<no foo;>, calls C<< foo->unimport() >>
+Equivalent to C<-M-Devel::foo>, expands to
+C<no Devel::foo;>, calls C<< Devel::foo->unimport() >>
 if the method exists.
 
 =item C<-d:-foo=bar>
 
-Equivalent to C<-M-foo=bar>, expands to C<no foo 'bar';>, calls
-C<< foo->unimport('bar') >> if the method exists.
+Equivalent to C<-M-Devel::foo=bar>, expands to C<no Devel::foo 'bar';>,
+calls C<< Devel::foo->unimport('bar') >> if the method exists.
 
 =back
 
 This is particularly useful to suppresses the default actions of a
 C<Devel::*> module's C<import> method whilst still loading it for debugging.
+
+=head2 Filehandle method calls load IO::File on demand
+
+When a method call on a filehandle would die because the method can not
+be resolved and L<IO::File> has not been loaded, Perl now loads IO::File
+via C<require> and attempts method resolution again:
+
+  open my $fh, ">", $file;
+  $fh->binmode(":raw");     # loads IO::File and succeeds
+
+This also works for globs like STDOUT, STDERR and STDIN:
+
+  STDOUT->autoflush(1);
+
+Because this on-demand load only happens if method resolution fails, the
+legacy approach of manually loading an IO::File parent class for partial
+method support still works as expected:
+
+  use IO::Handle;
+  open my $fh, ">", $file;
+  $fh->autoflush(1);        # IO::File not loaded
+
+=head2 Full functionality for C<use feature 'unicode_strings'>
+
+This release provides full functionality for C<use feature
+'unicode_strings'>.  Under its scope, all string operations executed and
+regular expressions compiled (even if executed outside its scope) have
+Unicode semantics.   See L<feature>.
+
+This feature avoids the "Unicode Bug" (See
+L<perlunicode/The "Unicode Bug"> for details.)  If their is a
+possibility that your code will process Unicode strings, you are
+B<strongly> encouraged to use this subpragma to avoid nasty surprises.
 
 =head1 Security
 
@@ -62,12 +102,20 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
+=head2 Attempting to use C<:=> as an empty attribute list is now a syntax error
 
-    There are no changes intentionally incompatible with 5.XXX.XXX. If any
-    exist, they are bugs and reports are welcome.
+Previously C<my $pi := 4;> was exactly equivalent to C<my $pi : = 4;>,
+with the C<:> being treated as the start of an attribute list, ending before
+the C<=>. The use of C<:=> to mean C<: => was deprecated in 5.12.0, and is now
+a syntax error. This will allow the future use of C<:=> as a new token.
 
-[ List each incompatible change as a =head2 entry ]
+We find no Perl 5 code on CPAN using this construction, outside the core's
+tests for it, so we believe that this change will have very little impact on
+real-world codebases.
+
+If it is absolutely necessary to have empty attribute lists (for example,
+because of a code generator) then avoid the error by adding a space before
+the C<=>.
 
 =head1 Deprecations
 
@@ -76,6 +124,11 @@ In particular, deprecated modules should be listed here even if they are
 listed as an updated module in the L</Modules and Pragmata> section.
 
 [ List each deprecation as a =head2 entry ]
+
+=head2 C<?PATTERN?> is deprecated
+
+C<?PATTERN?> (without the initial m) has been deprecated and now produces
+a warning.
 
 =head2 C<sv_compile_2op> is now deprecated
 
@@ -129,6 +182,10 @@ XXX
 
 =item *
 
+C<if> has been upgraded from 0.06 to 0.0601.
+
+=item *
+
 C<IPC::Cmd> has been upgraded from 0.64 to 0.66
 
 Resolves an issue with splitting Win32 command lines
@@ -136,10 +193,52 @@ and documentation enhancements.
 
 =item *
 
-C<MIME::Base64> has been upgraded from 3.10 to 3.12
+C<Locale::Codes> has been upgraded from version 3.14 to 3.15
+
+=item *
+
+C<Memoize> has been upgraded from version 1.01_03 to 1.02.
+
+=item *
+
+C<MIME::Base64> has been upgraded from 3.10 to 3.13
 
 Now provides encode_base64url and decode_base64url functions to process
 the base64 scheme for "URL applications".
+
+=item *
+
+C<mro> has been upgraded from version 1.05 to 1.06.
+
+C<next::method> I<et al.> now take into account that every class inherits
+from UNIVERSAL
+L<[perl #68654]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=68654>.
+
+=item *
+
+C<overload> has been upgraded from 1.11 to 1.12.
+
+=item *
+
+C<PerlIO::scalar> has been upgraded from 0.10 to 0.11.
+
+A C<read> after a C<seek> beyond the end of the string no longer thinks it
+has data to read
+L<[perl #78716]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78716>.
+
+=item *
+
+C<re> has been upgraded from 0.14 to 0.15.
+
+=item *
+
+C<Socket> has been upgraded from 1.91 to 1.92.
+
+It has several new functions for handling IPv6 addresses.
+
+=item *
+
+C<Time::HiRes> has been upgraded from 1.9721 to 1.9721_01.
 
 =item *
 
@@ -147,7 +246,11 @@ C<Unicode::Collate> has been upgraded from 0.67 to 0.68
 
 =item *
 
-XXX
+C<Unicode::UCD> has been upgraded from 0.29 to 0.30.
+
+=item *
+
+C<version> has been upgraded from 0.82 to 0.86.
 
 =back
 
@@ -209,7 +312,7 @@ XXX Newly added diagnostic messages go here
 
 =item *
 
-XXX
+There is a new "Closure prototype called" error.
 
 =back
 
@@ -221,7 +324,11 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX
+The "Found = in conditional" warning that is emitted when a constant is
+assigned to a variable in a condition is now withheld if the constant is
+actually a subroutine or one generated by C<use constant>, since the value
+of the constant may not be known at the time the program is written
+L<[perl #77762]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77762>.
 
 =back
 
@@ -322,9 +429,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item NetBSD
 
-XXX
+The NetBSD hints file has been changed to make the system's malloc the
+default.
 
 =back
 
@@ -340,7 +448,13 @@ be noted as well.
 
 =item *
 
-XXX
+C<mg_findext> and C<sv_unmagicext> have been added.
+
+These new functions allow extension authors to find and remove magic attached to
+scalars based on both the magic type and the magic virtual table, similar to how
+C<sv_magicext> attaches magic of a certain type and with a given virtual table
+to a scalar. This eliminates the need for extensions to walk the list of
+C<MAGIC> pointers of an C<SV> to find the magic that belongs to them.
 
 =back
 
@@ -360,7 +474,68 @@ C<BEGIN {require 5.12.0}> now behaves as documented, rather than behaving
 identically to C<use 5.12.0;>. Previously, C<require> in a C<BEGIN> block
 was erroneously executing the C<use feature ':5.12.0'> and
 C<use strict; use warnings;> behaviour, which only C<use> was documented to
-provide.
+provide
+L<[perl #69050]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=69050>.
+
+=item *
+
+C<use 5.42>
+L<[perl #69050]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=69050>,
+C<use 6> and C<no 5> no longer leak memory.
+
+=item *
+
+C<eval "BEGIN{die}"> no longer leaks memory on non-threaded builds.
+
+=item *
+
+PerlIO no longer crashes when called recursively, e.g., from a signal
+handler. Now it just leaks memory
+L<[perl #75556]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75556>.
+
+=item *
+
+Defining a constant with the same name as one of perl's special blocks
+(e.g., INIT) stopped working in 5.12.0, but has now been fixed
+L<[perl #78634]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78634>.
+
+=item *
+
+A reference to a literal value used as a hash key (C<$hash{\"foo"}>) used
+to be stringified, even if the hash was tied
+L<[perl #79178]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=79178>.
+
+=item *
+
+A closure containing an C<if> statement followed by a constant or variable
+is no longer treated as a constant
+L<[perl #63540]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=63540>.
+
+=item *
+
+Calling a closure prototype (what is passed to an attribute handler for a
+closure) now results in a "Closure prototype called" error message
+L<[perl #68560]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=68560>.
+
+=item *
+
+A regular expression optimisation would sometimes cause a match with a
+C<{n,m}> quantifier to fail when it should match
+L<[perl #79152]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=79152>.
+
+=item *
+
+What has become known as the "Unicode Bug" is resolved in this release.
+Under C<use feature 'unicode_strings'>, the internal storage format of a
+string no longer affects the external semantics.  There are two known
+exceptions.  User-defined case changing functions, which are planned to
+be deprecated in 5.14, require utf8-encoded strings to function; and the
+character C<LATIN SMALL LETTER SHARP S> in regular expression
+case-insensitive matching has a somewhat different set of bugs depending
+on the internal storage format.  Case-insensitive matching of all
+characters that have multi-character matches, as this one does, is
+problematical in Perl.
+L<[perl #58182]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=58182>.
 
 =back
 
@@ -379,9 +554,7 @@ from either 5.XXX.XXX or 5.XXX.XXX.
 
 =item *
 
-A number of bugs with regular expression bracketed character classes
-have been fixed, mostly having to do with matching characters in the
-non-ASCII Latin-1 range.
+XXX
 
 =back
 

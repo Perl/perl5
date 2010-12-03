@@ -910,7 +910,8 @@ S_scalarboolean(pTHX_ OP *o)
 
     PERL_ARGS_ASSERT_SCALARBOOLEAN;
 
-    if (o->op_type == OP_SASSIGN && cBINOPo->op_first->op_type == OP_CONST) {
+    if (o->op_type == OP_SASSIGN && cBINOPo->op_first->op_type == OP_CONST
+     && !(cBINOPo->op_first->op_flags & OPf_SPECIAL)) {
 	if (ckWARN(WARN_SYNTAX)) {
 	    const line_t oldline = CopLINE(PL_curcop);
 
@@ -1420,10 +1421,14 @@ Propagate lvalue ("modifiable") context to an op and its children.
 I<type> represents the context type, roughly based on the type of op that
 would do the modifying, although C<local()> is represented by OP_NULL,
 because it has no op type of its own (it is signalled by a flag on
-the lvalue op).  This function detects things that can't be modified,
-such as C<$x+1>, and generates errors for them.  It also flags things
-that need to behave specially in an lvalue context, such as C<$$x>
-which might have to vivify a reference in C<$x>.
+the lvalue op).
+
+This function detects things that can't be modified, such as C<$x+1>, and
+generates errors for them. For example, C<$x+1 = 2> would cause it to be
+called with an op of type OP_ADD and a C<type> argument of OP_SASSIGN.
+
+It also flags things that need to behave specially in an lvalue context,
+such as C<$$x = 5> which might have to vivify a reference in C<$x>.
 
 =cut
 */
@@ -1779,6 +1784,14 @@ Perl_op_lvalue(pTHX_ OP *o, I32 type)
 	o->op_flags |= OPf_REF;
     return o;
 }
+
+/* Do not use this. It will be removed after 5.14. */
+OP *
+Perl_mod(pTHX_ OP *o, I32 type)
+{
+    return op_lvalue(o,type);
+}
+
 
 STATIC bool
 S_scalar_mod_type(const OP *o, I32 type)
@@ -6011,7 +6024,9 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
 	if (sv && o->op_next == o)
 	    return sv;
 	if (o->op_next != o) {
-	    if (type == OP_NEXTSTATE || type == OP_NULL || type == OP_PUSHMARK)
+	    if (type == OP_NEXTSTATE
+	     || (type == OP_NULL && !(o->op_flags & OPf_KIDS))
+	     || type == OP_PUSHMARK)
 		continue;
 	    if (type == OP_DBSTATE)
 		continue;
@@ -9649,7 +9664,8 @@ Perl_rpeep(pTHX_ register OP *o)
 
 	    /* Make the CONST have a shared SV */
 	    svp = cSVOPx_svp(((BINOP*)o)->op_last);
-	    if (!SvFAKE(sv = *svp) || !SvREADONLY(sv)) {
+	    if ((!SvFAKE(sv = *svp) || !SvREADONLY(sv))
+	     && SvTYPE(sv) < SVt_PVMG && !SvROK(sv)) {
 		key = SvPV_const(sv, keylen);
 		lexname = newSVpvn_share(key,
 					 SvUTF8(sv) ? -(I32)keylen : (I32)keylen,

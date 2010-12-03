@@ -221,3 +221,12 @@ case `uname -m` in
 sparc) d_semctl_semid_ds=undef ;;
 esac
 
+# malloc wrap works
+case "$usemallocwrap" in
+'') usemallocwrap='define' ;;
+esac
+
+# don't use perl malloc by default
+case "$usemymalloc" in
+'') usemymalloc=n ;;
+esac

@@ -10,7 +10,7 @@ BEGIN {
 }
 
 use Test;
-plan tests => 8;
+plan tests => 11;
 
 require MIME::Base64;
 require MIME::QuotedPrint;
@@ -38,7 +38,12 @@ if (defined &utf8::is_utf8) {
     ok(utf8::is_utf8($str));
     ok(MIME::QuotedPrint::encode($str), "aaa=\n");
     ok(utf8::is_utf8($str));
+
+    utf8::downgrade($str);
+    ok(!utf8::is_utf8($str));
+    ok(MIME::Base64::encode($str, ""), "YWFh");
+    ok(!utf8::is_utf8($str));
 }
 else {
-    skip("Missing is_utf8") for 1..6;
+    skip("Missing is_utf8") for 1..9;
 }

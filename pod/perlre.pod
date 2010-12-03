@@ -646,31 +646,37 @@ locale, and can differ from one match to another if there is an
 intervening call of the
 L<setlocale() function|perllocale/The setlocale function>.
 This modifier is automatically set if the regular expression is compiled
-within the scope of a C<"use locale"> pragma.
+within the scope of a C<"use locale"> pragma.  Results are not
+well-defined when using this and matching against a utf8-encoded string.
 
 C<"u"> means to use Unicode semantics when pattern matching.  It is
-automatically set if the regular expression is compiled within the scope
-of a L<C<"use feature 'unicode_strings">|feature> pragma (and isn't
-also in the scope of L<C<"use locale">|locale> nor
-L<C<"use bytes">|bytes> pragmas.  It is not fully implemented at the
-time of this writing, but work is being done to complete the job.  On
-EBCDIC platforms this currently has no effect, but on ASCII platforms,
-it effectively turns them into Latin-1 platforms.  That is, the ASCII
-characters remain as ASCII characters (since ASCII is a subset of
-Latin-1), but the non-ASCII code points are treated as Latin-1
-characters.  Right now, this only applies to the C<"\b">, C<"\s">, and
-C<"\w"> pattern matching operators, plus their complements.  For
-example, when this option is not on, C<"\w"> matches precisely
-C<[A-Za-z0-9_]> (on a non-utf8 string).  When the option is on, it
-matches not just those, but all the Latin-1 word characters (such as an
-"n" with a tilde).  It thus matches exactly the same set of code points
-from 0 to 255 as it would if the string were encoded in utf8.
+automatically set if the regular expression is encoded in utf8, or is
+compiled within the scope of a
+L<C<"use feature 'unicode_strings">|feature> pragma (and isn't also in
+the scope of L<C<"use locale">|locale> nor L<C<"use bytes">|bytes>
+pragmas.  On ASCII platforms, the code points between 128 and 255 take on their
+Latin-1 (ISO-8859-1) meanings (which are the same as Unicode's), whereas
+in strict ASCII their meanings are undefined.  Thus the platform
+effectively becomes a Unicode platform.  The ASCII characters remain as
+ASCII characters (since ASCII is a subset of Latin-1 and Unicode).  For
+example, when this option is not on, on a non-utf8 string, C<"\w">
+matches precisely C<[A-Za-z0-9_]>.  When the option is on, it matches
+not just those, but all the Latin-1 word characters (such as an "n" with
+a tilde).  On EBCDIC platforms, which already are equivalent to Latin-1,
+this modifier changes behavior only when the C<"/i"> modifier is also
+specified, and affects only two characters, giving them full Unicode
+semantics: the C<MICRO SIGN> will match the Greek capital and
+small letters C<MU>; otherwise not; and the C<LATIN CAPITAL LETTER SHARP
+S> will match any of C<SS>, C<Ss>, C<sS>, and C<ss>, otherwise not.
+(This last case is buggy, however.)
 
 C<"d"> means to use the traditional Perl pattern matching behavior.
 This is dualistic (hence the name C<"d">, which also could stand for
-"default").  When this is in effect, Perl matches utf8-encoded strings
+"depends").  When this is in effect, Perl matches utf8-encoded strings
 using Unicode rules, and matches non-utf8-encoded strings using the
-platform's native character set rules.
+platform's native character set rules.  (If the regular expression
+itself is encoded in utf8, Unicode rules are used regardless of the
+target string's encoding.)
 See L<perlunicode/The "Unicode Bug">.  It is automatically selected by
 default if the regular expression is compiled neither within the scope
 of a C<"use locale"> pragma nor a <C<"use feature 'unicode_strings">
@@ -680,7 +686,7 @@ Note that the C<d>, C<l>, C<p>, and C<u> modifiers are special in that
 they can only be enabled, not disabled, and the C<d>, C<l>, and C<u>
 modifiers are mutually exclusive: specifying one de-specifies the
 others, and a maximum of one may appear in the construct.  Thus, for
-example, C<(?-p)>, C<(?-d:...)>, and C<(?-dl:...)> will warn when
+example, C<(?-p)>, C<(?-d:...)>, and C<(?dl:...)> will warn when
 compiled under C<use warnings>.
 
 Note also that the C<p> modifier is special in that its presence

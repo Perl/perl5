@@ -124,7 +124,7 @@ available in the win32 subdirectory of the Perl source distribution.
 
 =item Command Shell
 
-Use the default "cmd" shell that comes with NT.  Some versions of the
+Use the default "cmd" shell that comes with Windows.  Some versions of the
 popular 4DOS/NT shell have incompatibilities that may cause you trouble.
 If the build fails under that shell, try building again with the cmd
 shell.
@@ -429,7 +429,7 @@ If you're using the Borland compiler, you may see a failure in op/taint.t
 arising from the inability to find the Borland Runtime DLLs on the system
 default path.  You will need to copy the DLLs reported by the messages
 from where Borland chose to install it, into the Windows system directory
-(usually somewhere like C:\WINNT\SYSTEM32) and rerun the test.
+(usually somewhere like C:\WINDOWS\SYSTEM32) and rerun the test.
 
 If you're using Borland compiler versions 5.2 and below, you may run into
 problems finding the correct header files when building extensions.  For
@@ -525,12 +525,11 @@ with what Windows offers by way of a command shell.
 
 The crucial thing to understand about the Windows environment is that
 the command line you type in is processed twice before Perl sees it.
-First, your command shell (usually CMD.EXE on Windows NT, and
-COMMAND.COM on Windows 9x) preprocesses the command line, to handle
-redirection, environment variable expansion, and location of the
-executable to run. Then, the perl executable splits the remaining
-command line into individual arguments, using the C runtime library
-upon which Perl was built.
+First, your command shell (usually CMD.EXE) preprocesses the command
+line, to handle redirection, environment variable expansion, and
+location of the executable to run. Then, the perl executable splits
+the remaining command line into individual arguments, using the
+C runtime library upon which Perl was built.
 
 It is particularly important to note that neither the shell nor the C
 runtime do any wildcard expansions of command-line arguments (so
@@ -540,7 +539,7 @@ using a non-standard shell, be inconsistent).  The only (useful) quote
 character is the double quote (").  It can be used to protect spaces
 and other special characters in arguments.
 
-The Windows NT documentation has almost no description of how the
+The Windows documentation has almost no description of how the
 quoting rules are implemented, but here are some general observations
 based on experiments: The C runtime breaks arguments at spaces and
 passes them to programs in argc/argv.  Double quotes can be used to
@@ -599,7 +598,7 @@ Discovering the usefulness of the "command.com" shell on Windows 9x
 is left as an exercise to the reader :)
 
 One particularly pernicious problem with the 4NT command shell for
-Windows NT is that it (nearly) always treats a % character as indicating
+Windows is that it (nearly) always treats a % character as indicating
 that environment variable expansion is needed.  Under this shell, it is
 therefore important to always double any % characters which you want
 Perl to see (for example, for hash variables), even when they are
@@ -776,12 +775,11 @@ to use this to execute perl scripts:
 
 =item 1
 
-There is a facility called "file extension associations" that will
-work in Windows NT 4.0.  This can be manipulated via the two
-commands "assoc" and "ftype" that come standard with Windows NT
-4.0.  Type "ftype /?" for a complete example of how to set this
-up for perl scripts (Say what?  You thought Windows NT wasn't
-perl-ready? :).
+There is a facility called "file extension associations".  This can be
+manipulated via the two commands "assoc" and "ftype" that come
+standard with Windows.  Type "ftype /?" for a complete example of how
+to set this up for perl scripts (Say what?  You thought Windows
+wasn't perl-ready? :).
 
 =item 2
 
@@ -884,12 +882,6 @@ in the Windows environment.  See L</"Building Extensions">.
 
 Most C<socket()> related calls are supported, but they may not
 behave as on Unix platforms.  See L<perlport> for the full list.
-Perl requires Winsock2 to be installed on the system. If you're
-running Win95, you can download Winsock upgrade from here:
-
-http://www.microsoft.com/windows95/downloads/contents/WUAdminTools/S_WUNetworkingTools/W95Sockets2/Default.asp
-
-Later OS versions already include Winsock2 support.
 
 Signal handling may not behave as on Unix platforms (where it
 doesn't exactly "behave", either :).  For instance, calling C<die()>

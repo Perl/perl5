@@ -14,14 +14,12 @@ cpan/Test-Harness/t/source_tests/source.sh
 cpan/Test-Harness/t/source_tests/source_args.sh
 installperl
 installman
-makeaperl.SH
 makedepend.SH
 myconfig.SH
 regen/embed.pl
 regen/keywords.pl
 regen/opcode.pl
 runtests.SH
-writemain.SH
 t/TEST
 vms/ext/filespec.t
 x2p/Makefile.SH

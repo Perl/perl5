@@ -10,7 +10,7 @@
 #define  _INC_WIN32_PERL5
 
 #ifndef _WIN32_WINNT
-#  define _WIN32_WINNT 0x0400     /* needed for TryEnterCriticalSection() etc. */
+#  define _WIN32_WINNT 0x0500     /* needed for CreateHardlink() etc. */
 #endif
 
 #if defined(PERL_IMPLICIT_SYS)
@@ -41,14 +41,13 @@
 
 
 /* Define DllExport akin to perl's EXT,
- * If we are in the DLL or mimicing the DLL for Win95 work round
- * then Export the symbol,
+ * If we are in the DLL then Export the symbol,
  * otherwise import it.
  */
 
 /* now even GCC supports __declspec() */
 
-#if defined(PERLDLL) || defined(WIN95FIX)
+#if defined(PERLDLL)
 #define DllExport
 /*#define DllExport __declspec(dllexport)*/	/* noises with VC5+sp3 */
 #else
@@ -157,17 +156,6 @@ struct utsname {
 #define PERL_SOCK_SYSWRITE_IS_SEND
 
 #define PERL_NO_FORCE_LINK		/* no need for PL_force_link_funcs */
-
-/* Define USE_FIXED_OSFHANDLE to fix MSVCRT's _open_osfhandle() on W95.
-   It now uses some black magic to work seamlessly with the DLL CRT and
-   works with MSVC++ 4.0+ or GCC/Mingw32
-	-- BKS 1-24-2000
-   Only use this fix for VC++ 6.x or earlier (and for GCC, which we assume
-   uses MSVCRT.DLL). Later versions use MSVCR70.dll, MSVCR71.dll, etc, which
-   do not require the fix. */
-#if (defined(_M_IX86) && _MSC_VER >= 1000 && _MSC_VER <= 1200) || defined(__MINGW32__)
-#define USE_FIXED_OSFHANDLE
-#endif
 
 /* Define PERL_WIN32_SOCK_DLOAD to have Perl dynamically load the winsock
    DLL when needed. Don't use if your compiler supports delayloading (ie, VC++ 6.0)
@@ -380,12 +368,9 @@ DllExport HWND		win32_create_message_window(void);
 extern FILE *		my_fdopen(int, char *);
 #endif
 extern int		my_fclose(FILE *);
-extern int		my_fstat(int fd, Stat_t *sbufptr);
 extern char *		win32_get_privlib(const char *pl, STRLEN *const len);
 extern char *		win32_get_sitelib(const char *pl, STRLEN *const len);
 extern char *		win32_get_vendorlib(const char *pl, STRLEN *const len);
-extern int		IsWin95(void);
-extern int		IsWinNT(void);
 
 #ifdef PERL_IMPLICIT_SYS
 extern void		win32_delete_internal_host(void *h);

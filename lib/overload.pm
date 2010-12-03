@@ -1,6 +1,6 @@
 package overload;
 
-our $VERSION = '1.11';
+our $VERSION = '1.12';
 
 sub nil {}
 
@@ -99,7 +99,7 @@ sub AddrRef {
   my $class_prefix = defined($class) ? "$class=" : "";
   my $type = Scalar::Util::reftype($_[0]);
   my $addr = Scalar::Util::refaddr($_[0]);
-  return sprintf("$class_prefix$type(0x%x)", $addr);
+  return sprintf("%s%s(0x%x)", $class_prefix, $type, $addr);
 }
 
 *StrVal = *AddrRef;

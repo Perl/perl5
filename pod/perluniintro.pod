@@ -83,7 +83,7 @@ Because of backward compatibility with legacy encodings, the "a unique
 number for every character" idea breaks down a bit: instead, there is
 "at least one number for every character".  The same character could
 be represented differently in several legacy encodings.  The
-converse is also not true: some code points do not have an assigned
+converse is not also true: some code points do not have an assigned
 character.  Firstly, there are unallocated code points within
 otherwise used blocks.  Secondly, there are special Unicode control
 characters that do not represent true characters.

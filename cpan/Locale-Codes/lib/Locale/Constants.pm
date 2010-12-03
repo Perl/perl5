@@ -14,9 +14,9 @@ require Exporter;
 #	Public Global Variables
 #-----------------------------------------------------------------------
 
-use vars qw($VERSION @ISA @EXPORT);
+our($VERSION,@ISA,@EXPORT);
 
-$VERSION='3.14';
+$VERSION='3.15';
 @ISA     = qw(Exporter);
 @EXPORT  = qw(LOCALE_CODE_ALPHA_2
               LOCALE_CODE_ALPHA_3

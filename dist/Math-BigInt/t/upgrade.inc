@@ -862,7 +862,7 @@ inf:inf:NaN,NaN
 inf:-inf:NaN,NaN
 8:0:inf,8
 inf:0:inf,inf
-# exceptions to reminder rule
+# exceptions to remainder rule
 -8:0:-inf,-8
 -inf:0:-inf,-inf
 0:0:NaN,NaN
@@ -965,7 +965,7 @@ inf:inf:NaN
 inf:-inf:NaN
 8:0:8
 inf:0:inf
-# exceptions to reminder rule
+# exceptions to remainder rule
 -inf:0:-inf
 -8:0:-8
 0:0:NaN

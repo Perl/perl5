@@ -6,8 +6,8 @@
 
 /* Regops and State definitions */
 
-#define REGNODE_MAX           	90
-#define REGMATCH_STATE_MAX    	130
+#define REGNODE_MAX           	93
+#define REGMATCH_STATE_MAX    	133
 
 #define	END                   	0	/* 0000 End of program. */
 #define	SUCCEED               	1	/* 0x01 Return from a subroutine, basically. */
@@ -70,7 +70,7 @@
 #define	MINMOD                	58	/* 0x3a Next operator is not greedy. */
 #define	LOGICAL               	59	/* 0x3b Next opcode should set the flag only. */
 #define	RENUM                 	60	/* 0x3c Group with independently numbered parens. */
-#define	TRIE                  	61	/* 0x3d Match many EXACT(FL?)? at once. flags==type */
+#define	TRIE                  	61	/* 0x3d Match many EXACT(F[LU]?)? at once. flags==type */
 #define	TRIEC                 	62	/* 0x3e Same as TRIE, but with embedded charclass data */
 #define	AHOCORASICK           	63	/* 0x3f Aho Corasick stclass. flags==type */
 #define	AHOCORASICKC          	64	/* 0x40 Same as AHOCORASICK, but with embedded charclass data */
@@ -98,8 +98,11 @@
 #define	HORIZWS               	86	/* 0x56 horizontal whitespace       (Perl 6) */
 #define	NHORIZWS              	87	/* 0x57 not horizontal whitespace   (Perl 6) */
 #define	FOLDCHAR              	88	/* 0x58 codepoint with tricky case folding properties. */
-#define	OPTIMIZED             	89	/* 0x59 Placeholder for dump. */
-#define	PSEUDO                	90	/* 0x5a Pseudo opcode for internal use. */
+#define	EXACTFU               	89	/* 0x59 Match this string, folded, Unicode semantics for non-utf8 (prec. by length). */
+#define	REFFU                 	90	/* 0x5a Match already matched string, folded using unicode semantics for non-utf8 */
+#define	NREFFU                	91	/* 0x5b Match already matched string, folded using unicode semantics for non-utf8 */
+#define	OPTIMIZED             	92	/* 0x5c Placeholder for dump. */
+#define	PSEUDO                	93	/* 0x5d Pseudo opcode for internal use. */
 	/* ------------ States ------------- */
 #define	TRIE_next             	(REGNODE_MAX + 1)	/* state for TRIE */
 #define	TRIE_next_fail        	(REGNODE_MAX + 2)	/* state for TRIE */
@@ -237,6 +240,9 @@ EXTCONST U8 PL_regkind[] = {
 	HORIZWS,  	/* HORIZWS                */
 	NHORIZWS, 	/* NHORIZWS               */
 	FOLDCHAR, 	/* FOLDCHAR               */
+	EXACT,    	/* EXACTFU                */
+	REF,      	/* REFFU                  */
+	REF,      	/* NREFFU                 */
 	NOTHING,  	/* OPTIMIZED              */
 	PSEUDO,   	/* PSEUDO                 */
 	/* ------------ States ------------- */
@@ -376,6 +382,9 @@ static const U8 regarglen[] = {
 	0,                                   	/* HORIZWS      */
 	0,                                   	/* NHORIZWS     */
 	EXTRA_SIZE(struct regnode_1),        	/* FOLDCHAR     */
+	0,                                   	/* EXACTFU      */
+	EXTRA_SIZE(struct regnode_1),        	/* REFFU        */
+	EXTRA_SIZE(struct regnode_1),        	/* NREFFU       */
 	0,                                   	/* OPTIMIZED    */
 	0,                                   	/* PSEUDO       */
 };
@@ -472,6 +481,9 @@ static const char reg_off_by_arg[] = {
 	0,	/* HORIZWS      */
 	0,	/* NHORIZWS     */
 	0,	/* FOLDCHAR     */
+	0,	/* EXACTFU      */
+	0,	/* REFFU        */
+	0,	/* NREFFU       */
 	0,	/* OPTIMIZED    */
 	0,	/* PSEUDO       */
 };
@@ -573,8 +585,11 @@ EXTCONST char * const PL_reg_name[] = {
 	"HORIZWS",               	/* 0x56 */
 	"NHORIZWS",              	/* 0x57 */
 	"FOLDCHAR",              	/* 0x58 */
-	"OPTIMIZED",             	/* 0x59 */
-	"PSEUDO",                	/* 0x5a */
+	"EXACTFU",               	/* 0x59 */
+	"REFFU",                 	/* 0x5a */
+	"NREFFU",                	/* 0x5b */
+	"OPTIMIZED",             	/* 0x5c */
+	"PSEUDO",                	/* 0x5d */
 	/* ------------ States ------------- */
 	"TRIE_next",             	/* REGNODE_MAX +0x01 */
 	"TRIE_next_fail",        	/* REGNODE_MAX +0x02 */
@@ -669,7 +684,8 @@ EXTCONST U8 PL_varies[] __attribute__deprecated__;
 #else
 EXTCONST U8 PL_varies[] __attribute__deprecated__ = {
     CLUMP, BRANCH, BACK, STAR, PLUS, CURLY, CURLYN, CURLYM, CURLYX, WHILEM,
-    REF, REFF, REFFL, SUSPEND, IFTHEN, BRANCHJ, NREF, NREFF, NREFFL,
+    REF, REFF, REFFL, SUSPEND, IFTHEN, BRANCHJ, NREF, NREFF, NREFFL, REFFU,
+    NREFFU,
     0
 };
 #endif /* DOINIT */
@@ -678,7 +694,7 @@ EXTCONST U8 PL_varies[] __attribute__deprecated__ = {
 EXTCONST U8 PL_varies_bitmask[];
 #else
 EXTCONST U8 PL_varies_bitmask[] = {
-    0x00, 0x00, 0x00, 0xC0, 0xC1, 0x9F, 0x33, 0x01, 0x38, 0x00, 0x00, 0x00
+    0x00, 0x00, 0x00, 0xC0, 0xC1, 0x9F, 0x33, 0x01, 0x38, 0x00, 0x00, 0x0C
 };
 #endif /* DOINIT */
 

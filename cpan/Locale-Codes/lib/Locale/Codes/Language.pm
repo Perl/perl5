@@ -2,7 +2,7 @@ package Locale::Codes::Language;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Tue Sep 28 11:39:09 EDT 2010
+#    Generated on: Thu Dec  2 08:49:52 EST 2010
 
 =pod
 
@@ -36,8 +36,8 @@ use strict;
 use warnings;
 require 5.002;
 
-use vars qw($VERSION);
-$VERSION='3.14';
+our($VERSION);
+$VERSION='3.15';
 
 $Locale::Codes::Data{'language'}{'id'} = '0486';
 

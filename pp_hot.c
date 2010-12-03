@@ -2825,6 +2825,8 @@ PP(pp_entersub)
     SAVETMPS;
 
   retry:
+    if (CvCLONE(cv) && ! CvCLONED(cv))
+	DIE(aTHX_ "Closure prototype called");
     if (!CvROOT(cv) && !CvXSUB(cv)) {
 	GV* autogv;
 	SV* sub_name;

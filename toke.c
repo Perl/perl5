@@ -3203,7 +3203,8 @@ S_scan_const(pTHX_ char *start)
 			    /* Convert first code point to hex, including the
 			     * boiler plate before it */
 			    output_length =
-				my_sprintf(hex_string, "\\N{U+%X", (unsigned int) uv);
+				my_snprintf(hex_string, sizeof(hex_string),
+					    "\\N{U+%X", (unsigned int) uv);
 
 			    /* Make sure there is enough space to hold it */
 			    d = off + SvGROW(sv, off
@@ -3227,7 +3228,8 @@ S_scan_const(pTHX_ char *start)
 				}
 
 				output_length =
-				    my_sprintf(hex_string, ".%X", (unsigned int) uv);
+				    my_snprintf(hex_string, sizeof(hex_string),
+						".%X", (unsigned int) uv);
 
 				d = off + SvGROW(sv, off
 						     + output_length
@@ -5228,7 +5230,8 @@ Perl_yylex(pTHX)
 		break;
 	    PL_bufptr = s;	/* update in case we back off */
 	    if (*s == '=') {
-		deprecate(":= for an empty attribute list");
+		Perl_croak(aTHX_
+			   "Use of := for an empty attribute list is not allowed");
 	    }
 	    goto grabattrs;
 	case XATTRBLOCK:
@@ -6511,6 +6514,7 @@ Perl_yylex(pTHX)
 			SvREFCNT_dec(((SVOP*)pl_yylval.opval)->op_sv);
 			((SVOP*)pl_yylval.opval)->op_sv = SvREFCNT_inc_simple(sv);
 			pl_yylval.opval->op_private = 0;
+			pl_yylval.opval->op_flags |= OPf_SPECIAL;
 			TOKEN(WORD);
 		    }
 

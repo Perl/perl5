@@ -1347,6 +1347,12 @@ uses the character values modulus 256 instead, as if you had provided:
 (W io) The dirhandle you tried to close is either closed or not really
 a dirhandle.  Check your control flow.
 
+=item Closure prototype called
+
+(F) If a closure has attributes, the subroutine passed to an attribute
+handler is the prototype that is cloned when a new closure is created.
+This subroutine cannot be called.
+
 =item Code missing after '/'
 
 (F) You had a (sub-)template that ends with a '/'. There must be another
@@ -4991,13 +4997,15 @@ modifier is not presently meaningful in substitutions.
 use the /g modifier.  Currently, /c is meaningful only when /g is
 used.  (This may change in the future.)
 
-=item Use of := for an empty attribute list is deprecated
+=item Use of := for an empty attribute list is not allowed
 
-(D deprecated) The construction C<my $x := 42> currently
-parses correctly in perl, being equivalent to C<my $x : = 42>
-(applying an empty attribute list to C<$x>). This useless
-construct is now deprecated, so C<:=> can be reclaimed as a new
-operator in the future.
+(F) The construction C<my $x := 42> used to parse as equivalent to
+C<my $x : = 42> (applying an empty attribute list to C<$x>).
+This construct was deprecated in 5.12.0, and has now been made a syntax
+error, so C<:=> can be reclaimed as a new operator in the future.
+
+If you need an empty attribute list, for example in a code generator, add
+a space before the C<=>.
 
 =item Use of ?PATTERN? without explicit operator is deprecated
 

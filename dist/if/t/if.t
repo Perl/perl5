@@ -1,10 +1,14 @@
 #!./perl
 
+BEGIN {
+    chdir 't' and @INC = '../lib' if -f 't/TEST';
+}
+
 my $t = 1;
 print "1..5\n";
 sub ok {
   print "not " unless shift;
-  print "ok $t # ", shift, "\n";
+  print "ok $t\n ", shift, "\n";
   $t++;
 }
 

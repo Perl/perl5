@@ -416,6 +416,26 @@ Perl_mg_clear(pTHX_ SV *sv)
     return 0;
 }
 
+MAGIC*
+S_mg_findext_flags(pTHX_ const SV *sv, int type, const MGVTBL *vtbl, U32 flags)
+{
+    PERL_UNUSED_CONTEXT;
+
+    assert(flags <= 1);
+
+    if (sv) {
+	MAGIC *mg;
+
+	for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
+	    if (mg->mg_type == type && (!flags || mg->mg_virtual == vtbl)) {
+		return mg;
+	    }
+	}
+    }
+
+    return NULL;
+}
+
 /*
 =for apidoc mg_find
 
@@ -427,15 +447,22 @@ Finds the magic pointer for type matching the SV.  See C<sv_magic>.
 MAGIC*
 Perl_mg_find(pTHX_ const SV *sv, int type)
 {
-    PERL_UNUSED_CONTEXT;
-    if (sv) {
-        MAGIC *mg;
-        for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
-            if (mg->mg_type == type)
-                return mg;
-        }
-    }
-    return NULL;
+    return S_mg_findext_flags(aTHX_ sv, type, NULL, 0);
+}
+
+/*
+=for apidoc mg_findext
+
+Finds the magic pointer of C<type> with the given C<vtbl> for the C<SV>.  See
+C<sv_magicext>.
+
+=cut
+*/
+
+MAGIC*
+Perl_mg_findext(pTHX_ const SV *sv, int type, const MGVTBL *vtbl)
+{
+    return S_mg_findext_flags(aTHX_ sv, type, vtbl, 1);
 }
 
 /*

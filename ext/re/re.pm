@@ -4,7 +4,7 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.14";
+our $VERSION     = "0.15";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = ('regmust',
                     qw(is_regexp regexp_pattern
@@ -479,7 +479,7 @@ by C<qr//>, false if it is not.
 
 This function will not be confused by overloading or blessing. In
 internals terms, this extracts the regexp pointer out of the
-PERL_MAGIC_qr structure so it it cannot be fooled.
+PERL_MAGIC_qr structure so it cannot be fooled.
 
 =item regexp_pattern($ref)
 

@@ -18,7 +18,7 @@ use Carp;
 # This module is not called directly... %Data is filled in by the
 # calling modules.
 
-use vars qw($VERSION %Data);
+our($VERSION,%Data);
 
 # $Data{ TYPE }{ code2id   }{ CODESET } { CODE }  = [ ID, I ]
 #              { id2code   }{ CODESET } { ID }    = CODE
@@ -27,7 +27,7 @@ use vars qw($VERSION %Data);
 #              { id        }                      = FIRST_UNUSED_ID
 #              { codealias }{ CODESET } { ALIAS } = CODE
 
-$VERSION='3.14';
+$VERSION='3.15';
 
 #=======================================================================
 #
