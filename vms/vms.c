@@ -424,7 +424,6 @@ static int copy_expand_unix_filename_escape
   (char *outspec, const char *inspec, int *output_cnt, const int * utf8_fl)
 {
 int count;
-int scnt;
 int utf8_flag;
 
     utf8_flag = 0;
@@ -962,7 +961,7 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
     for (curtab = 0; tabvec[curtab]; curtab++) {
       if (!str$case_blind_compare(tabvec[curtab],&crtlenv)) {
         if (!ivenv && !secure) {
-          char *eq, *end;
+          char *eq;
           int i;
           if (!environ) {
             ivenv = 1; 
@@ -1107,7 +1106,7 @@ Perl_my_getenv(pTHX_ const char *lnm, bool sys)
     static char *__my_getenv_eqv = NULL;
     char uplnm[LNM$C_NAMLENGTH+1], *cp2, *eqv;
     unsigned long int idx = 0;
-    int trnsuccess, success, secure, saverr, savvmserr;
+    int success, secure, saverr, savvmserr;
     int midx, flags;
     SV *tmpsv;
 
@@ -1326,7 +1325,7 @@ prime_env_iter(void)
 #  define CLI$M_TRUSTED 0x40  /* Missing from VAXC headers */
 #endif
   unsigned long int defflags = CLI$M_NOWAIT | CLI$M_NOKEYPAD | CLI$M_TRUSTED;
-  unsigned long int mbxbufsiz, flags, retsts, subpid = 0, substs = 0, wakect = 0;
+  unsigned long int mbxbufsiz, flags, retsts, subpid = 0, substs = 0;
   long int i;
   bool have_sym = FALSE, have_lnm = FALSE;
   struct dsc$descriptor_s tmpdsc = {6,DSC$K_DTYPE_T,DSC$K_CLASS_S,0};
@@ -2392,7 +2391,6 @@ Perl_sig_to_vmscondition(int sig)
 int
 Perl_my_kill(int pid, int sig)
 {
-    dTHX;
     int iss;
     unsigned int code;
 #define sys$sigprc SYS$SIGPRC
@@ -2962,7 +2960,7 @@ pipe_exit_routine()
 {
     pInfo info;
     unsigned long int retsts = SS$_NORMAL, abort = SS$_TIMEOUT;
-    int sts, did_stuff, need_eof, j;
+    int sts, did_stuff, j;
 
    /* 
     * Flush any pending i/o, but since we are in process run-down, be
@@ -3006,7 +3004,6 @@ pipe_exit_routine()
     info = open_pipes;
 
     while (info) {
-      int need_eof;
       _ckvmssts_noperl(sys$setast(0));
       if (info->in && !info->in->shut_on_empty) {
         _ckvmssts_noperl(sys$qio(0,info->in->chan_in,IO$_WRITEOF,0,0,0,
@@ -3111,8 +3108,6 @@ popen_completion_ast(pInfo info)
 {
   pInfo i = open_pipes;
   int iss;
-  int sts;
-  pXpipe x;
 
   info->completion &= 0x0FFFFFFF; /* strip off "control" field */
   closed_list[closed_index].pid = info->pid;
@@ -3539,7 +3534,7 @@ pipe_mbxtofd_setup(pTHX_ int fd, char *out)
 
     /* things like terminals and mbx's don't need this filter */
     if (fd && fstat(fd,&s) == 0) {
-        unsigned long dviitm = DVI$_DEVCHAR, devchar;
+        unsigned long devchar;
 	char device[65];
 	unsigned short dev_len;
 	struct dsc$descriptor_s d_dev;
@@ -3673,7 +3668,6 @@ store_pipelocs(pTHX)
     pPLOC  p;
     AV    *av = 0;
     SV    *dirsv;
-    GV    *gv;
     char  *dir, *x;
     char  *unixdir;
     char  temp[NAM$C_MAXRSS+1];
@@ -3992,7 +3986,6 @@ static PerlIO * create_forked_xterm(pTHX_ const char *cmd, const char *mode)
     struct dsc$descriptor_s customization_dsc;
     struct dsc$descriptor_s device_name_dsc;
     const char * cptr;
-    char * tptr;
     char customization[200];
     char title[40];
     pInfo info = NULL;
@@ -4000,7 +3993,6 @@ static PerlIO * create_forked_xterm(pTHX_ const char *cmd, const char *mode)
     unsigned short p_chan;
     int n;
     unsigned short iosb[4];
-    struct item_list_3 items[2];
     const char * cust_str =
         "DECW$TERMINAL.iconName:\tPerl Dbg\nDECW$TERMINAL.title:\t%40s\n";
     struct dsc$descriptor_s d_mbx1 = {sizeof mbx1, DSC$K_DTYPE_T,
@@ -4582,8 +4574,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 static I32 my_pclose_pinfo(pTHX_ pInfo info) {
 
     unsigned long int retsts;
-    int done, iss, n;
-    int status;
+    int done, n;
     pInfo next, last;
 
     /* If we were writing to a subprocess, insure that someone reading from
@@ -5032,7 +5023,7 @@ const unsigned int access_mode = 0;
 $DESCRIPTOR(obj_file_dsc,"FILE");
 char *vmsname;
 char *rslt;
-unsigned long int jpicode = JPI$_UIC, type = ACL$C_FILE;
+unsigned long int jpicode = JPI$_UIC;
 int aclsts, fndsts, rnsts = -1;
 unsigned int ctx = 0;
 struct dsc$descriptor_s fildsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
@@ -6007,7 +5998,7 @@ char *Perl_rmsexpand_utf8_ts
 static char *
 int_fileify_dirspec(const char *dir, char *buf, int *utf8_fl)
 {
-    unsigned long int dirlen, retlen, addmfd = 0, hasfilename = 0;
+    unsigned long int dirlen, retlen, hasfilename = 0;
     char *cp1, *cp2, *lastdir;
     char *trndir, *vmsdir;
     unsigned short int trnlnm_iter_count;
@@ -6301,9 +6292,7 @@ int_fileify_dirspec(const char *dir, char *buf, int *utf8_fl)
       char *esa, *esal, term, *cp;
       char *my_esa;
       int my_esa_len;
-      unsigned long int sts, cmplen, haslower = 0;
-      unsigned int nam_fnb;
-      char * nam_type;
+      unsigned long int cmplen, haslower = 0;
       struct FAB dirfab = cc$rms_fab;
       rms_setup_nam(savnam);
       rms_setup_nam(dirnam);
@@ -7024,8 +7013,7 @@ static char *int_tounixspec(const char *spec, char *rslt, int * utf8_fl)
 {
   char *dirend, *cp1, *cp3, *tmp;
   const char *cp2;
-  int devlen, dirlen, retlen = VMS_MAXRSS;
-  int expand = 1; /* guarantee room for leading and trailing slashes */
+  int dirlen;
   unsigned short int trnlnm_iter_count;
   int cmp_rslt;
   if (utf8_fl != NULL)
@@ -7475,7 +7463,6 @@ rms_setup_nam(mynam);
 struct dsc$descriptor_s dvidsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
 struct dsc$descriptor_s specdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
 char * esa, * esal, * rsa, * rsal;
-char *vms_delim;
 int dir_flag;
 int unixlen;
 
@@ -7682,7 +7669,6 @@ slash_dev_special_to_vms
 char * nextslash;
 int len;
 int cmp;
-int islnm;
 
     unixptr += 4;
     nextslash = strchr(unixptr, '/');
@@ -7848,7 +7834,6 @@ int sts, v_len, r_len, d_len, n_len, e_len, vs_len;
 		   &vs_len);
 
 	    while (sts == 0) {
-	    char * strt;
 	    int cmp;
 
 		/* A logical name must be a directory  or the full
@@ -8454,7 +8439,6 @@ static char *int_tovmsspec
    (const char *path, char *rslt, int dir_flag, int * utf8_flag) {
   char *dirend;
   char *lastdot;
-  char *vms_delim;
   register char *cp1;
   const char *cp2;
   unsigned long int infront = 0, hasdir = 1;
@@ -11440,7 +11424,7 @@ struct passwd *Perl_my_getpwnam(pTHX_ const char *name)
 {
     struct dsc$descriptor_s name_desc;
     union uicdef uic;
-    unsigned long int status, sts;
+    unsigned long int sts;
                                   
     __pwdcache = __passwd_empty;
     if (!fillpasswd(aTHX_ name, &__pwdcache)) {
@@ -12015,7 +11999,6 @@ time_t Perl_my_time(pTHX_ time_t *timep)
   struct tm *tm_p;
 
   if (gmtime_emulation_type == 0) {
-    int dstnow;
     time_t base = 15 * 86400; /* 15jan71; to avoid month/year ends between    */
                               /* results of calls to gmtime() and localtime() */
                               /* for same &base */
@@ -12064,7 +12047,6 @@ time_t Perl_my_time(pTHX_ time_t *timep)
 struct tm *
 Perl_my_gmtime(pTHX_ const time_t *timep)
 {
-  char *p;
   time_t when;
   struct tm *rsltmp;
 
@@ -12967,7 +12949,7 @@ Perl_rmscopy(pTHX_ const char *spec_in, const char *spec_out, int preserve_dates
 {
     char *vmsin, * vmsout, *esa, *esal, *esa_out, *esal_out,
          *rsa, *rsal, *rsa_out, *rsal_out, *ubf;
-    unsigned long int i, sts, sts2;
+    unsigned long int sts;
     int dna_len;
     struct FAB fab_in, fab_out;
     struct RAB rab_in, rab_out;
@@ -13476,9 +13458,6 @@ rmscopy_fromperl(pTHX_ CV *cv)
   dXSARGS;
   char *inspec, *outspec, *inp, *outp;
   int date_flag;
-  struct dsc$descriptor indsc  = { 0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0},
-                        outdsc = { 0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
-  unsigned long int sts;
   SV *mysv;
   IO *io;
   STRLEN n_a;
@@ -13543,7 +13522,7 @@ mod2fname(pTHX_ CV *cv)
   dXSARGS;
   char ultimate_name[NAM$C_MAXRSS+1], work_name[NAM$C_MAXRSS*8 + 1],
        workbuff[NAM$C_MAXRSS*1 + 1];
-  int total_namelen = 3, counter, num_entries;
+  int counter, num_entries;
   /* ODS-5 ups this, but we want to be consistent, so... */
   int max_name_len = 39;
   AV *in_array = (AV *)SvRV(ST(0));
@@ -14252,7 +14231,6 @@ mp_do_vms_realpath(pTHX_ const char *filespec, char *outbuf,
         char * vms_spec;
         char * v_spec, * r_spec, * d_spec, * n_spec, * e_spec, * vs_spec;
         int sts, v_len, r_len, d_len, n_len, e_len, vs_len;
-        int file_len;
         mode_t my_mode;
 
 	/* Fall back to fid_to_name */
@@ -14421,7 +14399,6 @@ mp_do_vms_realname(pTHX_ const char *filespec, char *outbuf,
 {
     char * v_spec, * r_spec, * d_spec, * n_spec, * e_spec, * vs_spec;
     int sts, v_len, r_len, d_len, n_len, e_len, vs_len;
-    int file_len;
 
     /* Fall back to fid_to_name */
 
@@ -14580,7 +14557,6 @@ static int set_features
 {
     int status;
     int s;
-    char* str;
     char val_str[10];
 #if defined(JPI$_CASE_LOOKUP_PERM) && !defined(__VAX)
     const unsigned long int jpicode1 = JPI$_CASE_LOOKUP_PERM;
