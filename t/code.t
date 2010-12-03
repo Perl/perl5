@@ -33,7 +33,7 @@ BEGIN {
     }
 }
 
-BEGIN { plan tests => 59 }
+BEGIN { plan tests => 63 }
 
 use Storable qw(retrieve store nstore freeze nfreeze thaw dclone);
 use Safe;
@@ -305,3 +305,13 @@ is(prototype($thawed->[4]), prototype($obj[0]->[4]));
     }
 
 }
+
+{
+    my @text = ("hello", "\x{a3}", "\x{a3} \x{2234}", "\x{2234}\x{2234}");
+
+    for my $text(@text) {
+        my $res = (thaw freeze eval "sub {'" . $text . "'}")->();
+        ok($res eq $text);
+    }
+}
+
