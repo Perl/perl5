@@ -4418,6 +4418,12 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
     /* ignore the utf8ness if the string is 0 length */
     RExC_utf8 = RExC_orig_utf8 = plen > 0 && SvUTF8(pattern);
 
+    /* Set to use unicode semantics if the pattern is in utf8 and has the
+     * 'dual' charset specified, as it means unicode when utf8  */
+    if (RExC_utf8  && ! (pm_flags & (RXf_PMf_LOCALE|RXf_PMf_UNICODE))) {
+	pm_flags |= RXf_PMf_UNICODE;
+    }
+
     /****************** LONG JUMP TARGET HERE***********************/
     /* Longjmp back to here if have to switch in midstream to utf8 */
     if (! RExC_orig_utf8) {
@@ -4464,12 +4470,6 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
 #ifdef TRIE_STUDY_OPT
     restudied = 0;
 #endif
-
-    /* Set to use unicode semantics if the pattern is in utf8 and has the
-     * 'dual' charset specified, as it means unicode when utf8  */
-    if (RExC_utf8  && ! (pm_flags & (RXf_PMf_LOCALE|RXf_PMf_UNICODE))) {
-	pm_flags |= RXf_PMf_UNICODE;
-    }
 
     RExC_precomp = exp;
     RExC_flags = pm_flags;
