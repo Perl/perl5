@@ -62,7 +62,6 @@
 #include <uicdef.h>
 #include <stsdef.h>
 #include <rmsdef.h>
-#include <smgdef.h>
 #if __CRTL_VER >= 70000000 /* FIXME to earliest version */
 #include <efndef.h>
 #define NO_EFN EFN$C_ENF
