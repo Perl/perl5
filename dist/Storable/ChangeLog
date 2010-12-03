@@ -1,3 +1,8 @@
+Fri  3 Dec 14:12:32 GMT 2010   David Leadbeater <dgl@dgl.cx>
+    Version 2.25
+
+	Support for serializing coderefs containing UTF-8.
+
 Fri Nov 12 10:52:19 IST 2010   Abhijit Menon-Sen <ams@toroid.org>
 
     Version 2.24
