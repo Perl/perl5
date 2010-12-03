@@ -1352,11 +1352,9 @@ $(FIRSTMAKEFILE):	README $(MAKEDEPEND)
 config.h: config_h.SH config.sh
 	$(SHELL) config_h.SH
 
-# When done, touch perlmain.c so that it doesn't get remade each time.
 .PHONY: depend
 depend: makedepend
 	sh ./makedepend MAKE=$(MAKE)
-	- test -s perlmain.c && touch perlmain.c
 	cd x2p; $(MAKE) depend
 
 # Cannot postpone this until $firstmakefile is ready ;-)
