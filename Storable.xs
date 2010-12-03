@@ -847,7 +847,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 #endif
 
 #define STORABLE_BIN_MAJOR	2		/* Binary major "version" */
-#define STORABLE_BIN_MINOR	7		/* Binary minor "version" */
+#define STORABLE_BIN_MINOR	8		/* Binary minor "version" */
 
 #if (PATCHLEVEL <= 5)
 #define STORABLE_BIN_WRITE_MINOR	4
@@ -855,7 +855,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 /*
  * Perl 5.6.0 onwards can do weak references.
 */
-#define STORABLE_BIN_WRITE_MINOR	7
+#define STORABLE_BIN_WRITE_MINOR	8
 #endif /* (PATCHLEVEL <= 5) */
 
 #if (PATCHLEVEL < 8 || (PATCHLEVEL == 8 && SUBVERSION < 1))
