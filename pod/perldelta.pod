@@ -251,6 +251,15 @@ It has several new functions for handling IPv6 addresses.
 
 =item *
 
+C<Storable> has been upgraded from 2.24 to 2.25.
+
+This adds support for serialising code references that contain UTF-8 strings
+correctly. The Storable minor version number changed as a result -- this means
+Storable users that set C<$Storable::accept_future_minor> to a C<FALSE> value
+will see errors (see L<Storable/FORWARD COMPATIBILITY> for more details).
+
+=item *
+
 C<Time::HiRes> has been upgraded from 1.9721 to 1.9721_01.
 
 =item *
