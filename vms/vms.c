@@ -12446,8 +12446,7 @@ static mydev_t encode_dev (pTHX_ const char *dev)
 #endif
 
 static int
-is_null_device(name)
-    const char *name;
+is_null_device(const char *name)
 {
   if (decc_bug_devnull != 0) {
     if (strncmp("/dev/null", name, 9) == 0)
