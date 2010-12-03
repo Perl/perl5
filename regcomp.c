@@ -8794,10 +8794,7 @@ parseit:
 		else
 #endif
 		      for (i = prevvalue; i <= ceilvalue; i++) {
-		        if (!ANYOF_BITMAP_TEST(ret,i)) {
-			    stored +=
-                                S_set_regclass_bit(aTHX_ pRExC_state, ret, i);
-		        }
+			stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, i);
 	              }
 	  }
 	  if (value > 255 || UTF) {
