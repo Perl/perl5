@@ -8196,9 +8196,9 @@ ANYOF_##NAME:                                           \
         }                                               \
     }                                                   \
     else {                                              \
-        for (value = 0; value < 256; value++) {         \
+        for (value = 0; value < 128; value++) {         \
             if (TEST_7) stored +=                       \
-                       S_set_regclass_bit(aTHX_ pRExC_state, ret, value); \
+                       S_set_regclass_bit(aTHX_ pRExC_state, ret, UNI_TO_NATIVE(value)); \
         }                                               \
     }                                                   \
     yesno = '+';                                        \
@@ -8213,8 +8213,11 @@ case ANYOF_N##NAME:                                     \
         }                                               \
     }                                                   \
     else {                                              \
-        for (value = 0; value < 256; value++) {         \
+        for (value = 0; value < 128; value++) {         \
             if (! TEST_7) stored +=                     \
+                        S_set_regclass_bit(aTHX_ pRExC_state, ret, value); \
+        }                                               \
+        for (value = 128; value < 256; value++) {         \
                         S_set_regclass_bit(aTHX_ pRExC_state, ret, value); \
         }                                               \
     }                                                   \
@@ -8662,16 +8665,9 @@ parseit:
 		    if (LOC)
 			ANYOF_CLASS_SET(ret, ANYOF_ASCII);
 		    else {
-#ifndef EBCDIC
 			for (value = 0; value < 128; value++)
 			    stored +=
-                              S_set_regclass_bit(aTHX_ pRExC_state, ret, value);
-#else  /* EBCDIC */
-			for (value = 0; value < 256; value++) {
-			    if (isASCII(value))
-			        stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, value);
-			}
-#endif /* EBCDIC */
+                              S_set_regclass_bit(aTHX_ pRExC_state, ret, ASCII_TO_NATIVE(value));
 		    }
 		    yesno = '+';
 		    what = "ASCII";
@@ -8680,16 +8676,9 @@ parseit:
 		    if (LOC)
 			ANYOF_CLASS_SET(ret, ANYOF_NASCII);
 		    else {
-#ifndef EBCDIC
 			for (value = 128; value < 256; value++)
 			    stored +=
-                              S_set_regclass_bit(aTHX_ pRExC_state, ret, value);
-#else  /* EBCDIC */
-			for (value = 0; value < 256; value++) {
-			    if (!isASCII(value))
-			        stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, value);
-			}
-#endif /* EBCDIC */
+                              S_set_regclass_bit(aTHX_ pRExC_state, ret, ASCII_TO_NATIVE(value));
 		    }
 		    yesno = '!';
 		    what = "ASCII";
