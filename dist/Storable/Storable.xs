@@ -2698,7 +2698,10 @@ static int store_code(pTHX_ stcxt_t *cxt, CV *cv)
 	 * Now store the source code.
 	 */
 
-	STORE_SCALAR(SvPV_nolen(text), len);
+	if(SvUTF8 (text))
+		STORE_UTF8STR(SvPV_nolen(text), len);
+	else
+		STORE_SCALAR(SvPV_nolen(text), len);
 
 	FREETMPS;
 	LEAVE;
@@ -5350,7 +5353,7 @@ static SV *retrieve_code(pTHX_ stcxt_t *cxt, const char *cname)
 	dSP;
 	int type, count, tagnum;
 	SV *cv;
-	SV *sv, *text, *sub;
+	SV *sv, *text, *sub, *errsv;
 
 	TRACEME(("retrieve_code (#%d)", cxt->tagnum));
 
@@ -5378,6 +5381,12 @@ static SV *retrieve_code(pTHX_ stcxt_t *cxt, const char *cname)
 	case SX_LSCALAR:
 		text = retrieve_lscalar(aTHX_ cxt, cname);
 		break;
+	case SX_UTF8STR:
+		text = retrieve_utf8str(aTHX_ cxt, cname);
+		break;
+	case SX_LUTF8STR:
+		text = retrieve_lutf8str(aTHX_ cxt, cname);
+		break;
 	default:
 		CROAK(("Unexpected type %d in retrieve_code\n", type));
 	}
@@ -5387,6 +5396,8 @@ static SV *retrieve_code(pTHX_ stcxt_t *cxt, const char *cname)
 	 */
 
 	sub = newSVpvn("sub ", 4);
+	if (SvUTF8(text))
+		SvUTF8_on(sub);
 	sv_catpv(sub, SvPV_nolen(text)); /* XXX no sv_catsv! */
 	SvREFCNT_dec(text);
 
@@ -5416,25 +5427,27 @@ static SV *retrieve_code(pTHX_ stcxt_t *cxt, const char *cname)
 	ENTER;
 	SAVETMPS;
 
+	errsv = get_sv("@", GV_ADD);
+	sv_setpvn(errsv, "", 0);	/* clear $@ */
 	if (SvROK(cxt->eval) && SvTYPE(SvRV(cxt->eval)) == SVt_PVCV) {
-		SV* errsv = get_sv("@", GV_ADD);
-		sv_setpvn(errsv, "", 0);	/* clear $@ */
 		PUSHMARK(sp);
 		XPUSHs(sv_2mortal(newSVsv(sub)));
 		PUTBACK;
 		count = call_sv(cxt->eval, G_SCALAR);
-		SPAGAIN;
 		if (count != 1)
 			CROAK(("Unexpected return value from $Storable::Eval callback\n"));
-		cv = POPs;
-		if (SvTRUE(errsv)) {
-			CROAK(("code %s caused an error: %s",
-				SvPV_nolen(sub), SvPV_nolen(errsv)));
-		}
-		PUTBACK;
 	} else {
-		cv = eval_pv(SvPV_nolen(sub), TRUE);
+		eval_sv(sub, G_SCALAR);
 	}
+	SPAGAIN;
+	cv = POPs;
+	PUTBACK;
+
+	if (SvTRUE(errsv)) {
+		CROAK(("code %s caused an error: %s",
+			SvPV_nolen(sub), SvPV_nolen(errsv)));
+	}
+
 	if (cv && SvROK(cv) && SvTYPE(SvRV(cv)) == SVt_PVCV) {
 	    sv = SvRV(cv);
 	} else {
