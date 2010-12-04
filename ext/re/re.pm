@@ -142,10 +142,19 @@ sub bits {
 	    re->export_to_level(2, 're', $s);
 	} elsif ($s =~ s/^\///) {
 	    my $reflags = $^H{reflags} || 0;
+	    my $seen_dul;
 	    for(split//, $s) {
 		if (/[dul]/) {
 		    if ($on) {
+			if ($seen_dul && $seen_dul ne $_) {
+			    require Carp;
+			    Carp::carp(
+			      qq 'The "$seen_dul" and "$_" flags '
+			     .qq 'are exclusive'
+			    );
+			}
 			$^H{reflags_dul} = $reflags{$_};
+			$seen_dul = $_;
 		    }
 		    else {
 			delete $^H{reflags_dul}

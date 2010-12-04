@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 32;
+use Test::More tests => 38;
 
 use re '/i';
 ok "Foo" =~ /foo/, 'use re "/i"';
@@ -113,4 +113,26 @@ ok "A\n\n" =~ / a.$/sm, 'use re "/xi" in combination with explicit /sm';
   is eval 'qr//d', '(?^:)', 'explicit /d in re "/u" scope';
   use re '/d';
   is eval 'qr//u', '(?^u:)', 'explicit /u in re "/d" scope';
+}
+no re '/x';
+
+# use re "/dul" combinations
+{
+  my $w = '';
+  local $SIG{__WARN__} = sub { $w = shift };
+  eval "use re '/dd'";
+  is $w, "", 'no warning with eval "use re "/dd"';
+  eval "use re '/uu'";
+  is $w, "", 'no warning with eval "use re "/uu"';
+  eval "use re '/ll'";
+  is $w, "", 'no warning with eval "use re "/ll"';
+  eval "use re '/dl'";
+  like $w, qr/The "d" and "l" flags are exclusive/,
+    'warning with eval "use re "/dl"';
+  eval "use re '/du'";
+  like $w, qr/The "d" and "u" flags are exclusive/,
+   'warning with eval "use re "/du"';
+  eval "use re '/ul'";
+  like $w, qr/The "u" and "l" flags are exclusive/,
+   'warning with use re "/ul"';
 }
