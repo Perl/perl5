@@ -2625,7 +2625,7 @@ The keys of a hash are returned in an apparently random order.  The actual
 random order is subject to change in future versions of Perl, but it
 is guaranteed to be the same order as either the C<values> or C<each>
 function produces (given that the hash has not been modified).  Since
-Perl 5.8.1 the ordering is different even between different runs of
+Perl 5.8.1 the ordering can be different even between different runs of
 Perl for security reasons (see L<perlsec/"Algorithmic Complexity
 Attacks">).
 
