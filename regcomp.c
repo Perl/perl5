@@ -4413,8 +4413,10 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
 
     DEBUG_r(if (!PL_colorset) reginitcolors());
 
-    RExC_utf8 = RExC_orig_utf8 = SvUTF8(pattern);
-
+    exp = SvPV(pattern, plen);
+    xend = exp + plen;
+    /* ignore the utf8ness if the string is 0 length */
+    RExC_utf8 = RExC_orig_utf8 = plen > 0 && SvUTF8(pattern);
 
     /****************** LONG JUMP TARGET HERE***********************/
     /* Longjmp back to here if have to switch in midstream to utf8 */
@@ -4423,9 +4425,6 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
     }
 
     if (jump_ret == 0) {    /* First time through */
-        exp = SvPV(pattern, plen);
-        xend = exp + plen;
-
         DEBUG_COMPILE_r({
             SV *dsv= sv_newmortal();
             RE_PV_QUOTED_DECL(s, RExC_utf8,
