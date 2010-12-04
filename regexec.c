@@ -3961,6 +3961,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 
 	case NREF:
 	    type = REF;
+	    folder = NULL;
+	    fold_array = NULL;
 	  do_nref:
 
 	    /* For the named back references, find the corresponding buffer
@@ -3986,9 +3988,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	case REFF:
 	    folder = foldEQ;
 	    fold_array = PL_fold;
-	    /* FALL THROUGH */
+	    goto do_ref;
 
         case REF:
+	    folder = NULL;
+	    fold_array = NULL;
+
 	  do_ref:
 	    type = OP(scan);
 	    n = ARG(scan);  /* which paren pair */
