@@ -4416,6 +4416,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
     RExC_utf8 = RExC_orig_utf8 = SvUTF8(pattern);
 
 
+    /****************** LONG JUMP TARGET HERE***********************/
     /* Longjmp back to here if have to switch in midstream to utf8 */
     if (! RExC_orig_utf8) {
 	JMPENV_PUSH(jump_ret);
