@@ -3298,7 +3298,7 @@ S_scan_const(pTHX_ char *start)
 			    if (UTF8_IS_INVARIANT(*i)) {
 				if (! isALPHAU(*i)) problematic = TRUE;
 			    } else if (UTF8_IS_DOWNGRADEABLE_START(*i)) {
-				if (! isALPHAU(UNI_TO_NATIVE(UTF8_ACCUMULATE(*i,
+				if (! isALPHAU(UNI_TO_NATIVE(TWO_BYTE_UTF8_TO_UNI(*i,
 									    *(i+1)))))
 				{
 				    problematic = TRUE;
@@ -3314,7 +3314,7 @@ S_scan_const(pTHX_ char *start)
 				    continue;
 				} else if (isCHARNAME_CONT(
 					    UNI_TO_NATIVE(
-					    UTF8_ACCUMULATE(*i, *(i+1)))))
+					    TWO_BYTE_UTF8_TO_UNI(*i, *(i+1)))))
 				{
 				    continue;
 				}
