@@ -16,12 +16,12 @@
 
 
 
-#* Exit points (0,1)
+#* Exit points
 
 END         END,        no        ; End of program.
 SUCCEED     END,        no        ; Return from a subroutine, basically.
 
-#* Anchors: (2..13)
+#* Anchors:
 
 BOL         BOL,        no        ; Match "" at beginning of line.
 MBOL        BOL,        no        ; Same, assuming multiline.
@@ -36,7 +36,7 @@ NBOUND      NBOUND,     no        ; Match "" at any word non-boundary
 NBOUNDL     NBOUND,     no        ; Match "" at any word non-boundary
 GPOS        GPOS,       no        ; Matches where last m//g left off.
 
-#* [Special] alternatives: (14..30)
+#* [Special] alternatives:
 
 REG_ANY     REG_ANY,    no 0 S    ; Match any one character (except newline).
 SANY        REG_ANY,    no 0 S    ; Match any one character.
@@ -56,7 +56,7 @@ NDIGIT      NDIGIT,     no 0 S    ; Match any non-numeric character
 NDIGITL     NDIGIT,     no        ; Match any non-numeric character in locale
 CLUMP       CLUMP,      no 0 V    ; Match any extended grapheme cluster sequence
 
-#* Alternation (31)
+#* Alternation
 
 # BRANCH        The set of branches constituting a single choice are hooked
 #               together with their "next" pointers, since precedence prevents
@@ -68,26 +68,26 @@ CLUMP       CLUMP,      no 0 V    ; Match any extended grapheme cluster sequence
 #
 BRANCH      BRANCH,     node 0 V  ; Match this alternative, or the next...
 
-#*Back pointer (32)
+#*Back pointer
 
 # BACK          Normal "next" pointers all implicitly point forward; BACK
 #               exists to make loop structures possible.
 # not used
 BACK        BACK,       no 0 V    ; Match "", "next" ptr points backward.
 
-#*Literals (33..35)
+#*Literals
 
 EXACT       EXACT,      str       ; Match this string (preceded by length).
 EXACTF      EXACT,      str       ; Match this string, folded, native charset semantics for non-utf8 (prec. by length).
 EXACTFL     EXACT,      str       ; Match this string, folded in locale (w/len).
 
-#*Do nothing types (36..37)
+#*Do nothing types
 
 NOTHING     NOTHING,    no        ; Match empty string.
 # A variant of above which delimits a group, thus stops optimizations
 TAIL        NOTHING,    no        ; Match empty string. Can jump here from outside.
 
-#*Loops (38..44)
+#*Loops
 
 # STAR,PLUS    '?', and complex '*' and '+', are implemented as circular
 #               BRANCH structures using BACK.  Simple cases (one character
@@ -105,7 +105,7 @@ CURLYX      CURLY,      sv 2 V    ; Match this complex thing {n,m} times.
 # This terminator creates a loop structure for CURLYX
 WHILEM      WHILEM,     no 0 V    ; Do curly processing and see if rest matches.
 
-#*Buffer related (45..49)
+#*Buffer related
 
 # OPEN,CLOSE,GROUPP     ...are numbered at compile time.
 OPEN        OPEN,       num 1     ; Mark this point in input as start of #n.
@@ -122,24 +122,24 @@ SUSPEND     BRANCHJ,    off 1 V 1 ; "Independent" sub-RE.
 IFTHEN      BRANCHJ,    off 1 V 1 ; Switch, should be preceeded by switcher .
 GROUPP      GROUPP,     num 1     ; Whether the group matched.
 
-#*Support for long RE (55..56)
+#*Support for long RE
 
 LONGJMP     LONGJMP,    off 1 . 1 ; Jump far away.
 BRANCHJ     BRANCHJ,    off 1 V 1 ; BRANCH with long offset.
 
-#*The heavy worker (57)
+#*The heavy worker
 
 EVAL        EVAL,       evl 1     ; Execute some Perl code.
 
-#*Modifiers (58..59)
+#*Modifiers
 
 MINMOD      MINMOD,     no        ; Next operator is not greedy.
 LOGICAL     LOGICAL,    no        ; Next opcode should set the flag only.
 
-# This is not used yet (60)
+# This is not used yet
 RENUM       BRANCHJ,    off 1 . 1 ; Group with independently numbered parens.
 
-#*Trie Related (61..62)
+#*Trie Related
 
 # Behave the same as A|LIST|OF|WORDS would. The '..C' variants have  
 # inline charclass data (ascii only), the 'C' store it in the structure.
@@ -152,17 +152,17 @@ TRIEC       TRIE,trie charclass   ; Same as TRIE, but with embedded charclass da
 AHOCORASICK     TRIE,   trie 1    ; Aho Corasick stclass. flags==type
 AHOCORASICKC    TRIE,trie charclass   ; Same as AHOCORASICK, but with embedded charclass data
 
-#*Regex Subroutines (65..66) 
+#*Regex Subroutines
 GOSUB       GOSUB,      num/ofs 2L    ; recurse to paren arg1 at (signed) ofs arg2
 GOSTART     GOSTART,    no        ; recurse to start of pattern
 
-#*Named references (67..69)
+#*Named references
 NREF        REF,        no-sv 1 V ; Match some already matched string
 NREFF       REF,        no-sv 1 V ; Match already matched string, folded using native charset semantics for non-utf8
 NREFFL      REF,        no-sv 1 V ; Match already matched string, folded in loc.
 
 
-#*Special conditionals  (70..72)
+#*Special conditionals
 NGROUPP     NGROUPP,    no-sv 1   ; Whether the group matched.            
 INSUBP      INSUBP,     num 1     ; Whether we are in a specific recurse.  
 DEFINEP     DEFINEP,    none 1    ; Never execute directly.               
@@ -201,7 +201,7 @@ REFFU       REF,        num 1 V   ; Match already matched string, folded using u
 NREFFU       REF,        num 1 V   ; Match already matched string, folded using unicode semantics for non-utf8
 
 
-# NEW STUFF ABOVE THIS LINE  
+# NEW STUFF SOMEWHERE ABOVE THIS LINE
 
 ################################################################################
 
