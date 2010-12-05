@@ -80,6 +80,7 @@ BACK        BACK,       no 0 V    ; Match "", "next" ptr points backward.
 EXACT       EXACT,      str       ; Match this string (preceded by length).
 EXACTF      EXACT,      str       ; Match this string, folded, native charset semantics for non-utf8 (prec. by length).
 EXACTFL     EXACT,      str       ; Match this string, folded in locale (w/len).
+EXACTFU     EXACT,      str	  ; Match this string, folded, Unicode semantics for non-utf8 (prec. by length).
 
 #*Do nothing types
 
@@ -114,7 +115,16 @@ CLOSE       CLOSE,      num 1     ; Analogous to OPEN.
 REF         REF,        num 1 V   ; Match some already matched string
 REFF        REF,        num 1 V   ; Match already matched string, folded using native charset semantics for non-utf8
 REFFL       REF,        num 1 V   ; Match already matched string, folded in loc.
+# REFFU and NREFFU could have been implemented using the FLAGS field of the
+# regnode, but by having a separate node type, we can use the existing switch
+# statement to avoid some tests
+REFFU       REF,        num 1 V   ; Match already matched string, folded using unicode semantics for non-utf8
 
+#*Named references.  Code in regcomp.c assumes that these all are after the numbered references
+NREF        REF,        no-sv 1 V ; Match some already matched string
+NREFF       REF,        no-sv 1 V ; Match already matched string, folded using native charset semantics for non-utf8
+NREFFL      REF,        no-sv 1 V ; Match already matched string, folded in loc.
+NREFFU      REF,        num   1 V ; Match already matched string, folded using unicode semantics for non-utf8
 
 IFMATCH     BRANCHJ,    off 1 . 2 ; Succeeds if the following matches.
 UNLESSM     BRANCHJ,    off 1 . 2 ; Fails if the following matches.
@@ -156,12 +166,6 @@ AHOCORASICKC    TRIE,trie charclass   ; Same as AHOCORASICK, but with embedded c
 GOSUB       GOSUB,      num/ofs 2L    ; recurse to paren arg1 at (signed) ofs arg2
 GOSTART     GOSTART,    no        ; recurse to start of pattern
 
-#*Named references
-NREF        REF,        no-sv 1 V ; Match some already matched string
-NREFF       REF,        no-sv 1 V ; Match already matched string, folded using native charset semantics for non-utf8
-NREFFL      REF,        no-sv 1 V ; Match already matched string, folded in loc.
-
-
 #*Special conditionals
 NGROUPP     NGROUPP,    no-sv 1   ; Whether the group matched.            
 INSUBP      INSUBP,     num 1     ; Whether we are in a specific recurse.  
@@ -192,13 +196,6 @@ HORIZWS     HORIZWS,    none 0 S  ; horizontal whitespace       (Perl 6)
 NHORIZWS    NHORIZWS,   none 0 S  ; not horizontal whitespace   (Perl 6)
 
 FOLDCHAR    FOLDCHAR,   codepoint 1 ; codepoint with tricky case folding properties.
-EXACTFU     EXACT,      str	    ; Match this string, folded, Unicode semantics for non-utf8 (prec. by length).
-
-# These could have been implemented using the FLAGS field of the regnode, but
-# by having a separate node type, we can use the existing switch statement to
-# avoid some tests
-REFFU       REF,        num 1 V   ; Match already matched string, folded using unicode semantics for non-utf8
-NREFFU       REF,        num 1 V   ; Match already matched string, folded using unicode semantics for non-utf8
 
 
 # NEW STUFF SOMEWHERE ABOVE THIS LINE
