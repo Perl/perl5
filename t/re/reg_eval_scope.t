@@ -4,7 +4,7 @@
 
 BEGIN { chdir 't'; @INC = qw "lib ../lib"; require './test.pl' }
 
-plan 12;
+plan 17;
 
 # Functions for turning to-do-ness on and off (as there are so many
 # to-do tests) 
@@ -110,3 +110,19 @@ on;
   "ba" =~ /${\'(?{ $::re = qr -- })a'}/;
 }
 is $re, '(?^m:)', '/$text/ containing (?{}) inherits pragmata';
+
+fresh_perl_is <<'CODE', 'ok', { stderr => 1 }, '(?{die})';
+ eval { "a" =~ /(?{die})a/ }; print "ok"
+CODE
+fresh_perl_is <<'CODE', 'ok', { stderr => 1 }, '(?{last})';
+ { "a" =~ /(?{last})a/ }; print "ok"
+CODE
+fresh_perl_is <<'CODE', 'ok', { stderr => 1 }, '(?{next})';
+ { "a" =~ /(?{last})a/ }; print "ok"
+CODE
+fresh_perl_is <<'CODE', 'ok', { stderr => 1 }, '(?{return})';
+ print sub { "a" =~ /(?{return "ok"})a/ }->();
+CODE
+fresh_perl_is <<'CODE', 'ok', { stderr => 1 }, '(?{goto})';
+ "a" =~ /(?{goto _})a/; die; _: print "ok"
+CODE
