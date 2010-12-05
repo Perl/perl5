@@ -4380,7 +4380,7 @@ Perl_pregcomp(pTHX_ SV * const pattern, const U32 flags)
 #endif
 
 REGEXP *
-Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
+Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
 {
     dVAR;
     REGEXP *rx;
@@ -4392,12 +4392,14 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
     regnode *scan;
     I32 flags;
     I32 minlen = 0;
+    U32 pm_flags;
 
     /* these are all flags - maybe they should be turned
      * into a single int with different bit masks */
     I32 sawlookahead = 0;
     I32 sawplus = 0;
     I32 sawopen = 0;
+    bool used_setjump = FALSE;
 
     U8 jump_ret = 0;
     dJMPENV;
@@ -4414,24 +4416,23 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
 
     DEBUG_r(if (!PL_colorset) reginitcolors());
 
-    exp = SvPV(pattern, plen);
-    xend = exp + plen;
-    /* ignore the utf8ness if the string is 0 length */
-    RExC_utf8 = RExC_orig_utf8 = plen > 0 && SvUTF8(pattern);
-
-    /* Set to use unicode semantics if the pattern is in utf8 and has the
-     * 'dual' charset specified, as it means unicode when utf8  */
-    if (RExC_utf8  && ! (pm_flags & (RXf_PMf_LOCALE|RXf_PMf_UNICODE))) {
-	pm_flags |= RXf_PMf_UNICODE;
-    }
+    RExC_utf8 = RExC_orig_utf8 = SvUTF8(pattern);
 
     /****************** LONG JUMP TARGET HERE***********************/
     /* Longjmp back to here if have to switch in midstream to utf8 */
     if (! RExC_orig_utf8) {
 	JMPENV_PUSH(jump_ret);
+	used_setjump = TRUE;
     }
 
     if (jump_ret == 0) {    /* First time through */
+	exp = SvPV(pattern, plen);
+	xend = exp + plen;
+	/* ignore the utf8ness if the pattern is 0 length */
+	if (plen == 0) {
+	    RExC_utf8 = RExC_orig_utf8 = 0;
+	}
+
         DEBUG_COMPILE_r({
             SV *dsv= sv_newmortal();
             RE_PV_QUOTED_DECL(s, RExC_utf8,
@@ -4472,6 +4473,13 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
     restudied = 0;
 #endif
 
+    /* Set to use unicode semantics if the pattern is in utf8 and has the
+     * 'dual' charset specified, as it means unicode when utf8  */
+    pm_flags = orig_pm_flags;
+    if (RExC_utf8  && ! (pm_flags & (RXf_PMf_LOCALE|RXf_PMf_UNICODE))) {
+	pm_flags |= RXf_PMf_UNICODE;
+    }
+
     RExC_precomp = exp;
     RExC_flags = pm_flags;
     RExC_sawback = 0;
@@ -4511,12 +4519,8 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
 	return(NULL);
     }
 
-    /* Here, finished first pass.  Get rid of our setjmp, which we added for
-     * efficiency only if the passed-in string wasn't in utf8, as shown by
-     * RExC_orig_utf8.  But if the first pass was redone, that variable will be
-     * 1 here even though the original string wasn't utf8, but in this case
-     * there will have been a long jump */
-    if (jump_ret == UTF8_LONGJMP || ! RExC_orig_utf8) {
+    /* Here, finished first pass.  Get rid of any added setjmp */
+    if (used_setjump) {
 	JMPENV_POP;
     }
     DEBUG_PARSE_r({
