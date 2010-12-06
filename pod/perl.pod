@@ -1,6 +1,6 @@
 =head1 NAME
 
-perl - The Perl language interpreter
+perl - The Perl 5 language interpreter
 
 =head1 SYNOPSIS
 
