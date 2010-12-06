@@ -6094,6 +6094,20 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 		scan++;
 	}
 	break;
+    case DIGITL:
+	PL_reg_flags |= RF_tainted;
+	if (utf8_target) {
+	    loceol = PL_regeol;
+	    while (hardcount < max && scan < loceol &&
+		   isDIGIT_LC_utf8((U8*)scan)) {
+		scan += UTF8SKIP(scan);
+		hardcount++;
+	    }
+	} else {
+	    while (scan < loceol && isDIGIT_LC(*scan))
+		scan++;
+	}
+	break;
     case NDIGIT:
 	if (utf8_target) {
 	    loceol = PL_regeol;
@@ -6107,6 +6121,20 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	    while (scan < loceol && !isDIGIT(*scan))
 		scan++;
 	}
+    case NDIGITL:
+	PL_reg_flags |= RF_tainted;
+	if (utf8_target) {
+	    loceol = PL_regeol;
+	    while (hardcount < max && scan < loceol &&
+		   !isDIGIT_LC_utf8((U8*)scan)) {
+		scan += UTF8SKIP(scan);
+		hardcount++;
+	    }
+	} else {
+	    while (scan < loceol && !isDIGIT_LC(*scan))
+		scan++;
+	}
+	break;
     case LNBREAK:
         if (utf8_target) {
 	    loceol = PL_regeol;
