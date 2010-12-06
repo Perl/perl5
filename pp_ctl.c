@@ -1645,6 +1645,40 @@ Perl_die_unwind(pTHX_ SV *msv)
 	I32 cxix;
 	I32 gimme;
 
+	/*
+	 * Historically, perl used to set ERRSV ($@) early in the die
+	 * process and rely on it not getting clobbered during unwinding.
+	 * That sucked, because it was liable to get clobbered, so the
+	 * setting of ERRSV used to emit the exception from eval{} has
+	 * been moved to much later, after unwinding (see just before
+	 * JMPENV_JUMP below).	However, some modules were relying on the
+	 * early setting, by examining $@ during unwinding to use it as
+	 * a flag indicating whether the current unwinding was caused by
+	 * an exception.  It was never a reliable flag for that purpose,
+	 * being totally open to false positives even without actual
+	 * clobberage, but was useful enough for production code to
+	 * semantically rely on it.
+	 *
+	 * We'd like to have a proper introspective interface that
+	 * explicitly describes the reason for whatever unwinding
+	 * operations are currently in progress, so that those modules
+	 * work reliably and $@ isn't further overloaded.  But we don't
+	 * have one yet.  In its absence, as a stopgap measure, ERRSV is
+	 * now *additionally* set here, before unwinding, to serve as the
+	 * (unreliable) flag that it used to.
+	 *
+	 * This behaviour is temporary, and should be removed when a
+	 * proper way to detect exceptional unwinding has been developed.
+	 * As of 2010-12, the authors of modules relying on the hack
+	 * are aware of the issue, because the modules failed on
+	 * perls 5.13.{1..7} which had late setting of $@ without this
+	 * early-setting hack.
+	 */
+	if (!(in_eval & EVAL_KEEPERR)) {
+	    SvTEMP_off(exceptsv);
+	    sv_setsv(ERRSV, exceptsv);
+	}
+
 	while ((cxix = dopoptoeval(cxstack_ix)) < 0
 	       && PL_curstackinfo->si_prev)
 	{
