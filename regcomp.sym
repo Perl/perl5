@@ -51,9 +51,9 @@ SPACEL      SPACE,      no 0 S    ; Match any whitespace char in locale
 NSPACE      NSPACE,     no 0 S    ; Match any non-whitespace character
 NSPACEL     NSPACE,     no 0 S    ; Match any non-whitespace char in locale
 DIGIT       DIGIT,      no 0 S    ; Match any numeric character
-DIGITL      DIGIT,      no        ; Match any numeric character in locale
+DIGITL      DIGIT,      no 0 S    ; Match any numeric character in locale
 NDIGIT      NDIGIT,     no 0 S    ; Match any non-numeric character
-NDIGITL     NDIGIT,     no        ; Match any non-numeric character in locale
+NDIGITL     NDIGIT,     no 0 S    ; Match any non-numeric character in locale
 CLUMP       CLUMP,      no 0 V    ; Match any extended grapheme cluster sequence
 
 #* Alternation

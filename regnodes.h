@@ -707,8 +707,8 @@ EXTCONST U8 PL_simple[] __attribute__deprecated__;
 #else
 EXTCONST U8 PL_simple[] __attribute__deprecated__ = {
     REG_ANY, SANY, CANY, ANYOF, ALNUM, ALNUML, NALNUM, NALNUML, SPACE,
-    SPACEL, NSPACE, NSPACEL, DIGIT, NDIGIT, VERTWS, NVERTWS, HORIZWS,
-    NHORIZWS,
+    SPACEL, NSPACE, NSPACEL, DIGIT, DIGITL, NDIGIT, NDIGITL, VERTWS,
+    NVERTWS, HORIZWS, NHORIZWS,
     0
 };
 #endif /* DOINIT */
@@ -717,7 +717,7 @@ EXTCONST U8 PL_simple[] __attribute__deprecated__ = {
 EXTCONST U8 PL_simple_bitmask[];
 #else
 EXTCONST U8 PL_simple_bitmask[] = {
-    0x00, 0xC0, 0xFF, 0x17, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x07
+    0x00, 0xC0, 0xFF, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x07
 };
 #endif /* DOINIT */
 
