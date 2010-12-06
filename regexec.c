@@ -1645,7 +1645,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    );
 	case SPACEL:
 	    REXEC_FBC_CSCAN_TAINT(
-		*s == ' ' || isSPACE_LC_utf8((U8*)s),
+		isSPACE_LC_utf8((U8*)s),
 		isSPACE_LC(*s)
 	    );
 	case NSPACE:
@@ -1656,7 +1656,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    );
 	case NSPACEL:
 	    REXEC_FBC_CSCAN_TAINT(
-		!(*s == ' ' || isSPACE_LC_utf8((U8*)s)),
+		!isSPACE_LC_utf8((U8*)s),
 		!isSPACE_LC(*s)
 	    );
 	case DIGIT:
@@ -6036,7 +6036,7 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	if (utf8_target) {
 	    loceol = PL_regeol;
 	    while (hardcount < max && scan < loceol &&
-		   (*scan == ' ' || isSPACE_LC_utf8((U8*)scan))) {
+		   isSPACE_LC_utf8((U8*)scan)) {
 		scan += UTF8SKIP(scan);
 		hardcount++;
 	    }
@@ -6071,7 +6071,7 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	if (utf8_target) {
 	    loceol = PL_regeol;
 	    while (hardcount < max && scan < loceol &&
-		   !(*scan == ' ' || isSPACE_LC_utf8((U8*)scan))) {
+		   !isSPACE_LC_utf8((U8*)scan)) {
 		scan += UTF8SKIP(scan);
 		hardcount++;
 	    }
