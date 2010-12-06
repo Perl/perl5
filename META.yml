@@ -1,6 +1,6 @@
 name: perl
 version: 5.013007
-abstract: The Perl language interpreter
+abstract: The Perl 5 language interpreter
 author: perl5-porters@perl.org
 license: perl
 resources:

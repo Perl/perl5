@@ -10,10 +10,11 @@ print "1..24\n";
 
 my $t = 1;
 tie my $c => 'Tie::Monitor';
+my $tied_to;
 
 sub ok {
     my($ok, $got, $exp, $rexp, $wexp) = @_;
-    my($rgot, $wgot) = (tied $c)->init(0);
+    my($rgot, $wgot) = ($tied_to || tied $c)->init(0);
     print $ok ? "ok $t\n" : "# expected $exp, got $got\nnot ok $t\n";
     ++$t;
     if ($rexp == $rgot && $wexp == $wgot) {
@@ -56,9 +57,11 @@ ok_string($s, '0', 1, 1);
 
 # Assignment should not ignore magic when the last thing assigned
 # was a glob
+$tied_to = tied $c;
 $c = *strat;
 $s = $c;
 ok_string $s, *strat, 1, 1;
+$tied_to = undef;
 
 # A plain *foo should not call get-magic on *foo.
 # This method of scalar-tying an immutable glob relies on details of the

@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 4882;
+plan tests => 4936;
 
 use Scalar::Util qw(tainted);
 
@@ -2006,5 +2006,151 @@ fresh_perl_is
     eval { overload::Method __PACKAGE__,'+' };
     ::is($@, '', 'overload::Method and blessed overload methods');
 }
+
+{
+    # fallback to 'cmp' and '<=>' with heterogeneous operands
+    # [perl #71286]
+    my $not_found = 'no method found';
+    my $used = 0;
+    package CmpBase;
+    sub new {
+        my $n = $_[1] || 0;
+        bless \$n, ref $_[0] || $_[0];
+    }
+    sub cmp {
+        $used = \$_[0];
+        (${$_[0]} <=> ${$_[1]}) * ($_[2] ? -1 : 1);
+    }
+
+    package NCmp;
+    use base 'CmpBase';
+    use overload '<=>' => 'cmp';
+
+    package SCmp;
+    use base 'CmpBase';
+    use overload 'cmp' => 'cmp';
+
+    package main;
+    my $n = NCmp->new(5);
+    my $s = SCmp->new(3);
+    my $res;
+
+    eval { $res = $n > $s; };
+    $res = $not_found if $@ =~ /$not_found/;
+    is($res, 1, 'A>B using A<=> when B overloaded, no B<=>');
+
+    eval { $res = $s < $n; };
+    $res = $not_found if $@ =~ /$not_found/;
+    is($res, 1, 'A<B using B<=> when A overloaded, no A<=>');
+
+    eval { $res = $s lt $n; };
+    $res = $not_found if $@ =~ /$not_found/;
+    is($res, 1, 'A lt B using A:cmp when B overloaded, no B:cmp');
+
+    eval { $res = $n gt $s; };
+    $res = $not_found if $@ =~ /$not_found/;
+    is($res, 1, 'A gt B using B:cmp when A overloaded, no A:cmp');
+
+    my $o = NCmp->new(9);
+    $res = $n < $o;
+    is($used, \$n, 'A < B uses <=> from A in preference to B');
+
+    my $t = SCmp->new(7);
+    $res = $s lt $t;
+    is($used, \$s, 'A lt B uses cmp from A in preference to B');
+}
+
+{
+    # Combinatorial testing of 'fallback' and 'nomethod'
+    # [perl #71286]
+    package NuMB;
+    use overload '0+' => sub { ${$_[0]}; },
+        '""' => 'str';
+    sub new {
+        my $self = shift;
+        my $n = @_ ? shift : 0;
+        bless my $obj = \$n, ref $self || $self;
+    }
+    sub str {
+        no strict qw/refs/;
+        my $s = "(${$_[0]} ";
+        $s .= "nomethod, " if defined ${ref($_[0]).'::(nomethod'};
+        my $fb = ${ref($_[0]).'::()'};
+        $s .= "fb=" . (defined $fb ? 0 + $fb : 'undef') . ")";
+    }
+    sub nomethod { "${$_[0]}.nomethod"; }
+
+    # create classes for tests
+    package main;
+    my @falls = (0, 'undef', 1);
+    my @nomethods = ('', 'nomethod');
+    my $not_found = 'no method found';
+    for my $fall (@falls) {
+        for my $nomethod (@nomethods) {
+            my $nomethod_decl = $nomethod
+                ? $nomethod . "=>'nomethod'," : '';
+            eval qq{
+                    package NuMB$fall$nomethod;
+                    use base qw/NuMB/;
+                    use overload $nomethod_decl
+                    fallback => $fall;
+                };
+        }
+    }
+
+    # operation and precedence of 'fallback' and 'nomethod'
+    # for all combinations with 2 overloaded operands
+    for my $nomethod2 (@nomethods) {
+        for my $nomethod1 (@nomethods) {
+            for my $fall2 (@falls) {
+                my $pack2 = "NuMB$fall2$nomethod2";
+                for my $fall1 (@falls) {
+                    my $pack1 = "NuMB$fall1$nomethod1";
+                    my ($test, $out, $exp);
+                    eval qq{
+                            my \$x = $pack1->new(2);
+                            my \$y = $pack2->new(3);
+                            \$test = "\$x" . ' * ' . "\$y";
+                            \$out = \$x * \$y;
+                        };
+                    $out = $not_found if $@ =~ /$not_found/;
+                    $exp = $nomethod1 ? '2.nomethod' :
+                         $nomethod2 ? '3.nomethod' :
+                         $fall1 eq '1' && $fall2 eq '1' ? 6
+                         : $not_found;
+                    is($out, $exp, "$test --> $exp");
+                }
+            }
+        }
+    }
+
+    # operation of 'fallback' and 'nomethod'
+    # where the other operand is not overloaded
+    for my $nomethod (@nomethods) {
+        for my $fall (@falls) {
+            my ($test, $out, $exp);
+            eval qq{
+                    my \$x = NuMB$fall$nomethod->new(2);
+                    \$test = "\$x" . ' * 3';
+                    \$out = \$x * 3;
+                };
+            $out = $not_found if $@ =~ /$not_found/;
+            $exp = $nomethod ? '2.nomethod' :
+                $fall eq '1' ? 6
+                : $not_found;
+            is($out, $exp, "$test --> $exp");
+
+            eval qq{
+                    my \$x = NuMB$fall$nomethod->new(2);
+                    \$test = '3 * ' . "\$x";
+                    \$out = 3 * \$x;
+                };
+            $out = $not_found if $@ =~ /$not_found/;
+            is($out, $exp, "$test --> $exp");
+        }
+    }
+}
+
+
 
 # EOF

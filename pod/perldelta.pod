@@ -1,8 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 779bcb7d, except for:
-ad9e76a8629ed1ac483f0a7ed0e4da40ac5a1a00
+This has been completed up to 7c7df81, except for:
 d9a4b459f94297889956ac3adc42707365f274c2
 
 =head1 NAME
@@ -139,6 +138,20 @@ It attempted to provide an API to compile code down to an optree, but failed
 to bind correctly to lexicals in the enclosing scope. It's not possible to
 fix this problem within the constraints of its parameters and return value.
 
+=head2 Tie functions on scalars holding typeglobs
+
+Calling a tie function (C<tie>, C<tied>, C<untie>) with a scalar argument
+acts on a file handle if the scalar happens to hold a typeglob.
+
+This is a long-standing bug that will be removed in Perl 5.16, as
+there is currently no way to tie the scalar itself when it holds
+a typeglob, and no way to untie a scalar that has had a typeglob
+assigned to it.
+
+This bug was fixed in 5.13.7 but, because of the breakage it caused, the
+fix has been reverted. Now there is a deprecation warning whenever a tie
+function is used on a handle without an explicit C<*>.
+
 =head1 Performance Enhancements
 
 XXX Changes which enhance performance without changing behaviour go here. There
@@ -235,6 +248,15 @@ C<re> has been upgraded from 0.14 to 0.15.
 C<Socket> has been upgraded from 1.91 to 1.92.
 
 It has several new functions for handling IPv6 addresses.
+
+=item *
+
+C<Storable> has been upgraded from 2.24 to 2.25.
+
+This adds support for serialising code references that contain UTF-8 strings
+correctly. The Storable minor version number changed as a result -- this means
+Storable users that set C<$Storable::accept_future_minor> to a C<FALSE> value
+will see errors (see L<Storable/FORWARD COMPATIBILITY> for more details).
 
 =item *
 

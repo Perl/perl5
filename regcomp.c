@@ -1484,12 +1484,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 
 		    if ( !UTF ) {
 			/* store first byte of utf8 representation of
-			   codepoints in the 127 < uvc < 256 range */
-			if (127 < uvc && uvc < 192) {
-			    TRIE_BITMAP_SET(trie,194);
-			} else if (191 < uvc ) {
-			    TRIE_BITMAP_SET(trie,195);
-			/* && uvc < 256 -- we know uvc is < 256 already */
+			   variant codepoints */
+			if (! UNI_IS_INVARIANT(uvc)) {
+			    TRIE_BITMAP_SET(trie, UTF8_TWO_BYTE_HI(uvc));
 			}
 		    }
                     set_bit = 0; /* We've done our bit :-) */
@@ -2451,6 +2448,10 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, I32 *min, U32 flags
 	}
 #endif
     }
+#define GREEK_SMALL_LETTER_IOTA_WITH_DIALYTIKA_AND_TONOS   0x0390
+#define IOTA_D_T	GREEK_SMALL_LETTER_IOTA_WITH_DIALYTIKA_AND_TONOS
+#define GREEK_SMALL_LETTER_UPSILON_WITH_DIALYTIKA_AND_TONOS	0x03B0
+#define UPSILON_D_T	GREEK_SMALL_LETTER_UPSILON_WITH_DIALYTIKA_AND_TONOS
 
     if (UTF
 	&& ( OP(scan) == EXACTF || OP(scan) == EXACTFU)
@@ -3571,7 +3572,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
     	    }
 	}
 	else if (OP(scan) == FOLDCHAR) {
-	    int d = ARG(scan)==0xDF ? 1 : 2;
+	    int d = ARG(scan) == LATIN_SMALL_LETTER_SHARP_S ? 1 : 2;
 	    flags &= ~SCF_DO_STCLASS;
             min += 1;
             delta += d;
@@ -4379,7 +4380,7 @@ Perl_pregcomp(pTHX_ SV * const pattern, const U32 flags)
 #endif
 
 REGEXP *
-Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
+Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
 {
     dVAR;
     REGEXP *rx;
@@ -4391,12 +4392,14 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
     regnode *scan;
     I32 flags;
     I32 minlen = 0;
+    U32 pm_flags;
 
     /* these are all flags - maybe they should be turned
      * into a single int with different bit masks */
     I32 sawlookahead = 0;
     I32 sawplus = 0;
     I32 sawopen = 0;
+    bool used_setjump = FALSE;
 
     U8 jump_ret = 0;
     dJMPENV;
@@ -4415,15 +4418,20 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
 
     RExC_utf8 = RExC_orig_utf8 = SvUTF8(pattern);
 
-
+    /****************** LONG JUMP TARGET HERE***********************/
     /* Longjmp back to here if have to switch in midstream to utf8 */
     if (! RExC_orig_utf8) {
 	JMPENV_PUSH(jump_ret);
+	used_setjump = TRUE;
     }
 
     if (jump_ret == 0) {    /* First time through */
-        exp = SvPV(pattern, plen);
-        xend = exp + plen;
+	exp = SvPV(pattern, plen);
+	xend = exp + plen;
+	/* ignore the utf8ness if the pattern is 0 length */
+	if (plen == 0) {
+	    RExC_utf8 = RExC_orig_utf8 = 0;
+	}
 
         DEBUG_COMPILE_r({
             SV *dsv= sv_newmortal();
@@ -4467,6 +4475,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
 
     /* Set to use unicode semantics if the pattern is in utf8 and has the
      * 'dual' charset specified, as it means unicode when utf8  */
+    pm_flags = orig_pm_flags;
     if (RExC_utf8  && ! (pm_flags & (RXf_PMf_LOCALE|RXf_PMf_UNICODE))) {
 	pm_flags |= RXf_PMf_UNICODE;
     }
@@ -4510,12 +4519,8 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 pm_flags)
 	return(NULL);
     }
 
-    /* Here, finished first pass.  Get rid of our setjmp, which we added for
-     * efficiency only if the passed-in string wasn't in utf8, as shown by
-     * RExC_orig_utf8.  But if the first pass was redone, that variable will be
-     * 1 here even though the original string wasn't utf8, but in this case
-     * there will have been a long jump */
-    if (jump_ret == UTF8_LONGJMP || ! RExC_orig_utf8) {
+    /* Here, finished first pass.  Get rid of any added setjmp */
+    if (used_setjump) {
 	JMPENV_POP;
     }
     DEBUG_PARSE_r({
@@ -7302,9 +7307,13 @@ tryagain:
 	RExC_parse++;
 	vFAIL("Quantifier follows nothing");
 	break;
-    case 0xDF:
-    case 0xC3:
-    case 0xCE:
+    case LATIN_SMALL_LETTER_SHARP_S:
+    case UTF8_TWO_BYTE_HI_nocast(LATIN_SMALL_LETTER_SHARP_S):
+    case UTF8_TWO_BYTE_HI_nocast(IOTA_D_T):
+#if UTF8_TWO_BYTE_HI_nocast(UPSILON_D_T) != UTF8_TWO_BYTE_HI_nocast(IOTA_D_T)
+#error The beginning utf8 byte of IOTA_D_T and UPSILON_D_T unexpectedly differ.  Other instances in this code should have the case statement below.
+    case UTF8_TWO_BYTE_HI_nocast(UPSILON_D_T):
+#endif
         do_foldchar:
         if (!LOC && FOLD) {
             U32 len,cp;
@@ -7333,9 +7342,9 @@ tryagain:
 	   literal text handling code.
 	*/
 	switch ((U8)*++RExC_parse) {
-	case 0xDF:
-	case 0xC3:
-	case 0xCE:
+	case LATIN_SMALL_LETTER_SHARP_S:
+	case UTF8_TWO_BYTE_HI_nocast(LATIN_SMALL_LETTER_SHARP_S):
+	case UTF8_TWO_BYTE_HI_nocast(IOTA_D_T):
 	           goto do_foldchar;	    
 	/* Special Escapes */
 	case 'A':
@@ -7675,9 +7684,9 @@ tryagain:
 		if (RExC_flags & RXf_PMf_EXTENDED)
 		    p = regwhite( pRExC_state, p );
 		switch ((U8)*p) {
-		case 0xDF:
-		case 0xC3:
-		case 0xCE:
+		case LATIN_SMALL_LETTER_SHARP_S:
+		case UTF8_TWO_BYTE_HI_nocast(LATIN_SMALL_LETTER_SHARP_S):
+		case UTF8_TWO_BYTE_HI_nocast(IOTA_D_T):
 		           if (LOC || !FOLD || !is_TRICKYFOLD_safe(p,RExC_end,UTF))
 		                goto normal_default;
 		case '^':
@@ -7704,9 +7713,9 @@ tryagain:
 
 		    switch ((U8)*++p) {
 		    /* These are all the special escapes. */
-    		    case 0xDF:
-    		    case 0xC3:
-    		    case 0xCE:
+                    case LATIN_SMALL_LETTER_SHARP_S:
+                    case UTF8_TWO_BYTE_HI_nocast(LATIN_SMALL_LETTER_SHARP_S):
+                    case UTF8_TWO_BYTE_HI_nocast(IOTA_D_T):
     		           if (LOC || !FOLD || !is_TRICKYFOLD_safe(p,RExC_end,UTF))
     		                goto normal_default;		    
 		    case 'A':             /* Start assertion */
@@ -8188,9 +8197,9 @@ ANYOF_##NAME:                                           \
         }                                               \
     }                                                   \
     else {                                              \
-        for (value = 0; value < 256; value++) {         \
+        for (value = 0; value < 128; value++) {         \
             if (TEST_7) stored +=                       \
-                       S_set_regclass_bit(aTHX_ pRExC_state, ret, value); \
+                       S_set_regclass_bit(aTHX_ pRExC_state, ret, UNI_TO_NATIVE(value)); \
         }                                               \
     }                                                   \
     yesno = '+';                                        \
@@ -8205,8 +8214,11 @@ case ANYOF_N##NAME:                                     \
         }                                               \
     }                                                   \
     else {                                              \
-        for (value = 0; value < 256; value++) {         \
+        for (value = 0; value < 128; value++) {         \
             if (! TEST_7) stored +=                     \
+                        S_set_regclass_bit(aTHX_ pRExC_state, ret, value); \
+        }                                               \
+        for (value = 128; value < 256; value++) {         \
                         S_set_regclass_bit(aTHX_ pRExC_state, ret, value); \
         }                                               \
     }                                                   \
@@ -8654,16 +8666,9 @@ parseit:
 		    if (LOC)
 			ANYOF_CLASS_SET(ret, ANYOF_ASCII);
 		    else {
-#ifndef EBCDIC
 			for (value = 0; value < 128; value++)
 			    stored +=
-                              S_set_regclass_bit(aTHX_ pRExC_state, ret, value);
-#else  /* EBCDIC */
-			for (value = 0; value < 256; value++) {
-			    if (isASCII(value))
-			        stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, value);
-			}
-#endif /* EBCDIC */
+                              S_set_regclass_bit(aTHX_ pRExC_state, ret, ASCII_TO_NATIVE(value));
 		    }
 		    yesno = '+';
 		    what = "ASCII";
@@ -8672,16 +8677,9 @@ parseit:
 		    if (LOC)
 			ANYOF_CLASS_SET(ret, ANYOF_NASCII);
 		    else {
-#ifndef EBCDIC
 			for (value = 128; value < 256; value++)
 			    stored +=
-                              S_set_regclass_bit(aTHX_ pRExC_state, ret, value);
-#else  /* EBCDIC */
-			for (value = 0; value < 256; value++) {
-			    if (!isASCII(value))
-			        stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, value);
-			}
-#endif /* EBCDIC */
+                              S_set_regclass_bit(aTHX_ pRExC_state, ret, ASCII_TO_NATIVE(value));
 		    }
 		    yesno = '!';
 		    what = "ASCII";
@@ -8797,10 +8795,7 @@ parseit:
 		else
 #endif
 		      for (i = prevvalue; i <= ceilvalue; i++) {
-		        if (!ANYOF_BITMAP_TEST(ret,i)) {
-			    stored +=
-                                S_set_regclass_bit(aTHX_ pRExC_state, ret, i);
-		        }
+			stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, i);
 	              }
 	  }
 	  if (value > 255 || UTF) {

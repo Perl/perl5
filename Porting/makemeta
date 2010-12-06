@@ -52,7 +52,7 @@ my $fh = safer_open($new_file);
 print $fh <<"EOI";
 name: perl
 version: $]
-abstract: The Perl language interpreter
+abstract: The Perl 5 language interpreter
 author: perl5-porters\@perl.org
 license: perl
 resources:

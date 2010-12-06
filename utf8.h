@@ -183,8 +183,8 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * bytes from an ordinal that is known to fit into two bytes; it must be less
  * than 0x3FF to work across both encodings. */
 /* Nocast allows these to be used in the case label of a switch statement */
-#define UTF8_TWO_BYTE_HI_nocast(c)	UTF_TO_NATIVE(((c)>>UTF_ACCUMULATION_SHIFT)|UTF_START_MARK(2))
-#define UTF8_TWO_BYTE_LO_nocast(c)	UTF_TO_NATIVE(((c)&UTF_CONTINUATION_MASK)|UTF_CONTINUATION_MARK)
+#define UTF8_TWO_BYTE_HI_nocast(c)	UTF_TO_NATIVE(((c) >> UTF_ACCUMULATION_SHIFT) | (0xFF & UTF_START_MARK(2)))
+#define UTF8_TWO_BYTE_LO_nocast(c)	UTF_TO_NATIVE(((c) & UTF_CONTINUATION_MASK) | UTF_CONTINUATION_MARK)
 
 #define UTF8_TWO_BYTE_HI(c)	((U8) (UTF8_TWO_BYTE_HI_nocast(c)))
 #define UTF8_TWO_BYTE_LO(c)	((U8) (UTF8_TWO_BYTE_LO_nocast(c)))

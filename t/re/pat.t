@@ -23,7 +23,7 @@ BEGIN {
 }
 
 
-plan tests => 408;  # Update this when adding/deleting tests.
+plan tests => 410;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1133,6 +1133,17 @@ sub run_tests {
         iseq( eval q#my $c = 0; my $r; my $t = "a"; $r = $t =~ s/a//until $c++;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by until");
         iseq( eval q#my $r; my $t = "a"; $r = $t =~ s/a//for 1;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by for");
         iseq( eval q#my $r; my $t = "a"; $r = $t =~ s/a//for 1;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by foreach");
+    }
+
+    {
+        my $str= "\x{100}";
+        chop $str;
+        my $qr= qr/$str/;
+        iseq( "$qr", "(?^:)", "Empty pattern qr// stringifies to (?^:) with unicode flag enabled - Bug #80212" );
+        $str= "";
+        $qr= qr/$str/;
+        iseq( "$qr", "(?^:)", "Empty pattern qr// stringifies to (?^:) with unicode flag disabled - Bug #80212" )
+
     }
 
 } # End of sub run_tests

@@ -825,6 +825,7 @@ pass('Can assign strings to typeglobs');
   tie my $a, "thrext";
   () = "$a"; # do a fetch; now $a holds a glob
   eval { *$a = sub{} };
+  eval { $a = undef }; # workaround for untie($handle) bug
   untie $a;
   eval { $a = "bar" };
   ::is $a, "bar",
