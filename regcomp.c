@@ -8382,8 +8382,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
     }
     else {
  	RExC_emit += ANYOF_SKIP;
-	if (FOLD)
-	    ANYOF_FLAGS(ret) |= ANYOF_FOLD;
 	if (LOC)
 	    ANYOF_FLAGS(ret) |= ANYOF_LOCALE;
 	ANYOF_BITMAP_ZERO(ret);
@@ -8903,6 +8901,12 @@ parseit:
         return ret;
     /****** !SIZE_ONLY AFTER HERE *********/
 
+    /* Folding in the bitmap is taken care of above, but not for locale, for
+     * which we have to wait to see what folding is in effect at runtime, and
+     * for things not in the bitmap */
+    if (FOLD && (LOC || ANYOF_FLAGS(ret) & ANYOF_NONBITMAP)) {
+        ANYOF_FLAGS(ret) |= ANYOF_FOLD;
+    }
     if( stored == 1 && (value < 128 || (value < 256 && !UTF))
         && !( ANYOF_FLAGS(ret) & ( ANYOF_FLAGS_ALL ^ ANYOF_FOLD ) )
     ) {
@@ -8925,20 +8929,6 @@ parseit:
         RExC_emit += STR_SZ(1);
 	SvREFCNT_dec(listsv);
         return ret;
-    }
-    /* optimize case-insensitive simple patterns (e.g. /[a-z]/i) */
-    if ( /* If the only flag is folding (plus possibly inversion). */
-	((ANYOF_FLAGS(ret) & (ANYOF_FLAGS_ALL ^ ANYOF_INVERT)) == ANYOF_FOLD)
-       ) {
-	for (value = 0; value < 256; ++value) {
-	    if (ANYOF_BITMAP_TEST(ret, value)) {
-		UV fold = PL_fold[value];
-
-		if (fold != value)
-		    ANYOF_BITMAP_SET(ret, fold);
-	    }
-	}
-	ANYOF_FLAGS(ret) &= ~ANYOF_FOLD;
     }
 
     /* optimize inverted simple patterns (e.g. [^a-z]) */
