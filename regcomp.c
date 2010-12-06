@@ -7445,11 +7445,19 @@ tryagain:
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'd':
-	    ret = reg_node(pRExC_state, DIGIT);
+            if (LOC) {
+                ret = reg_node(pRExC_state, (U8)(DIGITL));
+            } else {
+                ret = reg_node(pRExC_state, (U8)(DIGIT));
+            }
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'D':
-	    ret = reg_node(pRExC_state, NDIGIT);
+            if (LOC) {
+                ret = reg_node(pRExC_state, (U8)(NDIGITL));
+            } else {
+                ret = reg_node(pRExC_state, (U8)(NDIGIT));
+            }
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'R':
