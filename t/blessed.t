@@ -27,7 +27,7 @@ use Storable qw(freeze thaw);
 );
 
 my $test = 12;
-my $tests = $test + 6 + 2 * 6 * keys %::immortals;
+my $tests = $test + 10 + 2 * 6 * keys %::immortals;
 print "1..$tests\n";
 
 package SHORT_NAME;
@@ -183,13 +183,11 @@ ok ++$test, $HAS_HOOK::thawed_count == 1;
 ok ++$test, $t;
 ok ++$test, ref $t eq 'HAS_HOOK';
 
-# Can't do this because the method is still cached by UNIVERSAL::can
-# delete $INC{"HAS_HOOK.pm"};
-# undef &HAS_HOOK::STORABLE_thaw;
-# 
-# warn HAS_HOOK->can('STORABLE_thaw');
-# $t = thaw $f;
-# ok ++$test, $HAS_HOOK::loaded_count == 2;
-# ok ++$test, $HAS_HOOK::thawed_count == 2;
-# ok ++$test, $t;
-# ok ++$test, ref $t eq 'HAS_HOOK';
+delete $INC{"HAS_HOOK.pm"};
+delete $HAS_HOOK::{STORABLE_thaw};
+
+$t = thaw $f;
+ok ++$test, $HAS_HOOK::loaded_count == 2;
+ok ++$test, $HAS_HOOK::thawed_count == 2;
+ok ++$test, $t;
+ok ++$test, ref $t eq 'HAS_HOOK';
