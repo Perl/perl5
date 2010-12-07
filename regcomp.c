@@ -8624,7 +8624,7 @@ parseit:
 		    else {
 			ANYOF_FLAGS(ret) |= ANYOF_UTF8;
 			Perl_sv_catpvf(aTHX_ listsv,
-				       "%04"UVxf"\n%04"UVxf"\n", (UV)prevvalue, (UV) '-');
+			   "%04"UVxf"\n%04"UVxf"\n", (UV)prevvalue, (UV) '-');
 		    }
 		}
 
