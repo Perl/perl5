@@ -8344,7 +8344,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
     bool need_class = 0;
     SV *listsv = NULL;
     UV n;
-    bool optimize_invert   = TRUE;
     AV* unicode_alternate  = NULL;
 #ifdef EBCDIC
     UV literal_endpoint = 0;
@@ -8638,8 +8637,6 @@ parseit:
 		const char *what = NULL;
 		char yesno = 0;
 
-	        if (namedclass > OOB_NAMEDCLASS)
-		    optimize_invert = FALSE;
 		/* Possible truncation here but in some 64-bit environments
 		 * the compiler gets heartburn about switch on 64-bit values.
 		 * A similar issue a little earlier when switching on value.
@@ -8929,14 +8926,16 @@ parseit:
         return ret;
     }
 
-    /* optimize inverted simple patterns (e.g. [^a-z]) */
-    if (optimize_invert &&
-	/* If the only flag is inversion. */
-	(ANYOF_FLAGS(ret) & ANYOF_FLAGS_ALL) ==	ANYOF_INVERT) {
+    /* Optimize inverted simple patterns (e.g. [^a-z]).  Note that this doesn't
+     * optimize locale.  Doing so perhaps could be done as long as there is
+     * nothing like \w in it; some thought also would have to be given to the
+     * interaction with above 0x100 chars */
+    if ((ANYOF_FLAGS(ret) & ANYOF_FLAGS_ALL) == ANYOF_INVERT) {
 	for (value = 0; value < ANYOF_BITMAP_SIZE; ++value)
 	    ANYOF_BITMAP(ret)[value] ^= ANYOF_FLAGS_ALL;
 	ANYOF_FLAGS(ret) = ANYOF_UNICODE_ALL;
     }
+
     {
 	AV * const av = newAV();
 	SV *rv;
