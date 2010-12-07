@@ -231,7 +231,7 @@ close $f;
 
 $r = runperl(prog => 'use Op_goto01; print qq[DONE\n]');
 is($r, "OK\nDONE\n", "goto within use-d file"); 
-unlink "Op_goto01.pm";
+unlink_all "Op_goto01.pm";
 
 # test for [perl #24108]
 $ok = 1;
