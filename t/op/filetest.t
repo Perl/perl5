@@ -87,7 +87,7 @@ ok( -f $tempfile );
 is( -s $tempfile, 0 );
 is( -f -s $tempfile, 0 );
 is( -s -f $tempfile, 0 );
-unlink $tempfile;
+unlink_all $tempfile;
 
 # test that _ is a bareword after filetest operators
 
