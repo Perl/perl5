@@ -42,7 +42,7 @@ if ($Is_MSWin32)  { like `set FOO`, qr/^(?:FOO=)?hi there$/; }
 elsif ($Is_VMS)   { is `write sys\$output f\$trnlnm("FOO")`, "hi there\n"; }
 else              { is `echo \$FOO`, "hi there\n"; }
 
-unlink 'ajslkdfpqjsjfk';
+unlink_all 'ajslkdfpqjsjfk';
 $! = 0;
 open(FOO,'ajslkdfpqjsjfk');
 isnt($!, 0);
@@ -264,6 +264,9 @@ EOF
 	is $_, $s1;
     }
     ok unlink($script) or diag $!;
+    # CHECK
+    # Could this be replaced with:
+    # unlink_all($script);
 }
 
 # $], $^O, $^T
