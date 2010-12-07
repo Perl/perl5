@@ -8933,7 +8933,7 @@ parseit:
     if ((ANYOF_FLAGS(ret) & ANYOF_FLAGS_ALL) == ANYOF_INVERT) {
 	for (value = 0; value < ANYOF_BITMAP_SIZE; ++value)
 	    ANYOF_BITMAP(ret)[value] ^= 0xFF;
-	ANYOF_FLAGS(ret) = ANYOF_UNICODE_ALL;
+	ANYOF_FLAGS(ret) = ANYOF_UTF8|ANYOF_UNICODE_ALL;
     }
 
     {
