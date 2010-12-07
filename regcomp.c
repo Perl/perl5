@@ -8677,7 +8677,8 @@ parseit:
                               S_set_regclass_bit(aTHX_ pRExC_state, ret, ASCII_TO_NATIVE(value));
 		    }
 		    yesno = '+';
-		    what = "ASCII";
+		    what = NULL;	/* Doesn't match outside ascii, so
+					   don't want to add +utf8:: */
 		    break;
 		case ANYOF_NASCII:
 		    if (LOC)
@@ -8727,12 +8728,9 @@ parseit:
 		if (what) {
 		    /* Strings such as "+utf8::isWord\n" */
 		    Perl_sv_catpvf(aTHX_ listsv, "%cutf8::Is%s\n", yesno, what);
-		}
-
-		/* All but ASCII can match characters storable only in utf8 */
-		if (namedclass != ANYOF_ASCII) {
 		    ANYOF_FLAGS(ret) |= ANYOF_UTF8;
 		}
+
 		continue;
 	    }
 	} /* end of namedclass \blah */
