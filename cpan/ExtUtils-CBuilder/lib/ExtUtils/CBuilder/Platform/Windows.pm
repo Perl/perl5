@@ -10,7 +10,7 @@ use ExtUtils::CBuilder::Base;
 use IO::File;
 
 use vars qw($VERSION @ISA);
-$VERSION = '0.2703';
+$VERSION = '0.2800';
 @ISA = qw(ExtUtils::CBuilder::Base);
 
 =begin comment
@@ -101,7 +101,7 @@ sub compile {
     builddir    => $srcdir,
     basename    => $basename,
     source      => $args{source},
-    output      => File::Spec->catfile($srcdir, $basename) . $cf->{obj_ext},
+    output      => $args{object_file} || File::Spec->catfile($srcdir, $basename) . $cf->{obj_ext},
     cc          => $cf->{cc},
     cflags      => [
                      $self->split_like_shell($cf->{ccflags}),

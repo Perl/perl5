@@ -16,7 +16,7 @@ BEGIN {
   }
 }
 
-plan tests => 6;
+plan tests => 7;
 
 require_ok "ExtUtils::CBuilder";
 
@@ -29,17 +29,29 @@ my $run_perl = "$perl -e1 --";
 $b->{config}{cc} = $bogus_path;
 $b->{config}{ld} = $bogus_path;
 
-$b->{have_compiler} = undef;
+$b->{have_cc} = undef;
 is( $b->have_compiler, 0, "have_compiler: fake missing cc" );
-$b->{have_compiler} = undef;
+$b->{have_cxx} = undef;
 is( $b->have_cplusplus, 0, "have_cplusplus: fake missing c++" );
 
 # test found compiler
 $b->{config}{cc} = $run_perl;
 $b->{config}{ld} = $run_perl;
-$b->{have_compiler} = undef;
+$b->{config}{cxx} = $run_perl;
+$b->{have_cc} = undef;
 is( $b->have_compiler, 1, "have_compiler: fake present cc" );
-$b->{have_compiler} = undef;
+$b->{have_cxx} = undef;
 is( $b->have_cplusplus, 1, "have_cpp_compiler: fake present c++" );
 
 # test missing cpp compiler
+
+# test one non-exported subroutine
+{
+    my $type = ExtUtils::CBuilder::os_type();
+    if ($type) {
+        pass( "OS type $type located for $^O" );
+    }
+    else {
+        pass( "OS type not yet listed for $^O" );
+    }
+}
