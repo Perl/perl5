@@ -630,10 +630,16 @@ sub which_perl {
 }
 
 sub unlink_all {
+    my $count = 0;
     foreach my $file (@_) {
         1 while unlink $file;
-        _print_stderr "# Couldn't unlink '$file': $!\n" if -f $file;
+	if( -f $file ){
+	    _print_stderr "# Couldn't unlink '$file': $!\n";
+	}else{
+	    ++$count;
+	}
     }
+    $count;
 }
 
 my %tmpfiles;
