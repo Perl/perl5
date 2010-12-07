@@ -422,9 +422,7 @@ struct thread_intern {
 #    ifdef USE_SOCKETS_AS_HANDLES
     int			Winit_socktype;
 #    endif
-#    ifdef HAVE_DES_FCRYPT
     char		Wcrypt_buffer[30];
-#    endif
 #    ifdef USE_RTL_THREAD_API
     void *		retv;	/* slot for thread return value */
 #    endif

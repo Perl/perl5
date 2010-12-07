@@ -2264,20 +2264,13 @@ win32_alarm(unsigned int sec)
     return 0;
 }
 
-#ifdef HAVE_DES_FCRYPT
 extern char *	des_fcrypt(const char *txt, const char *salt, char *cbuf);
-#endif
 
 DllExport char *
 win32_crypt(const char *txt, const char *salt)
 {
     dTHX;
-#ifdef HAVE_DES_FCRYPT
     return des_fcrypt(txt, salt, w32_crypt_buffer);
-#else
-    Perl_croak(aTHX_ "The crypt() function is unimplemented due to excessive paranoia.");
-    return NULL;
-#endif
 }
 
 /* simulate flock by locking a range on the file */

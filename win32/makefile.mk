@@ -151,20 +151,6 @@ CCTYPE		*= GCC
 #USE_SETARGV	*= define
 
 #
-# if you want to have the crypt() builtin function implemented, leave this or
-# CRYPT_LIB uncommented.  The fcrypt.c file named here contains a suitable
-# version of des_fcrypt().
-#
-CRYPT_SRC	*= fcrypt.c
-
-#
-# if you didn't set CRYPT_SRC and if you have des_fcrypt() available in a
-# library, uncomment this, and make sure the library exists (see README.win32)
-# Specify the full pathname of the library.
-#
-#CRYPT_LIB	*= fcrypt.lib
-
-#
 # set this if you wish to use perl's malloc
 # WARNING: Turning this on/off WILL break binary compatibility with extensions
 # you may have compiled with/without it.  Be prepared to recompile all
@@ -298,13 +284,6 @@ EXTRALIBDIRS	*=
 ##
 
 ##################### CHANGE THESE ONLY IF YOU MUST #####################
-
-.IF "$(CRYPT_SRC)$(CRYPT_LIB)" == ""
-D_CRYPT		= undef
-.ELSE
-D_CRYPT		= define
-CRYPT_FLAG	= -DHAVE_DES_FCRYPT
-.ENDIF
 
 PERL_MALLOC	*= undef
 DEBUG_MSTATS	*= undef
@@ -458,7 +437,7 @@ RSC		= brcc32
 #
 INCLUDES	= -I$(COREDIR) -I.\include -I. -I.. -I"$(CCINCDIR)"
 #PCHFLAGS	= -H -Hc -H=c:\temp\bcmoduls.pch
-DEFINES		= -DWIN32 $(CRYPT_FLAG)
+DEFINES		= -DWIN32
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
 CXX_FLAG	= -P
@@ -466,7 +445,7 @@ CXX_FLAG	= -P
 LIBC		= cw32mti.lib
 
 # same libs as MSVC, except Borland doesn't have oldnames.lib
-LIBFILES	= $(CRYPT_LIB) \
+LIBFILES	= \
 		kernel32.lib user32.lib gdi32.lib winspool.lib \
 		comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib \
 		netapi32.lib uuid.lib ws2_32.lib mpr.lib winmm.lib \
@@ -520,7 +499,7 @@ a = .a
 #
 
 INCLUDES	= -I.\include -I. -I.. -I$(COREDIR)
-DEFINES		= -DWIN32 $(CRYPT_FLAG)
+DEFINES		= -DWIN32
 .IF "$(WIN64)" == "define"
 DEFINES		+= -DWIN64 -DCONSERVATIVE
 .ENDIF
@@ -534,7 +513,7 @@ LIBC		=
 #LIBC		= -lmsvcrt
 
 # same libs as MSVC
-LIBFILES	= $(CRYPT_LIB) $(LIBC) \
+LIBFILES	= $(LIBC) \
 		  -lmoldname -lkernel32 -luser32 -lgdi32 \
 		  -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 \
 		  -loleaut32 -lnetapi32 -luuid -lws2_32 -lmpr \
@@ -570,7 +549,7 @@ RSC		= rc
 
 INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
 #PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX
-DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT $(CRYPT_FLAG)
+DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
 CXX_FLAG	= -TP -EHsc
@@ -629,7 +608,7 @@ BUILDOPT	+= -D_USE_32BIT_TIME_T
 .ENDIF
 .ENDIF
 
-LIBBASEFILES	= $(CRYPT_LIB) \
+LIBBASEFILES	= \
 		oldnames.lib kernel32.lib user32.lib gdi32.lib winspool.lib \
 		comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib \
 		netapi32.lib uuid.lib ws2_32.lib mpr.lib winmm.lib \
@@ -900,17 +879,14 @@ EXTRACORE_SRC	+= ..\perlio.c
 WIN32_SRC	=		\
 		.\win32.c	\
 		.\win32sck.c	\
-		.\win32thread.c
+		.\win32thread.c	\
+		.\fcrypt.c
 
 # We need this for miniperl build unless we override canned 
 # config.h #define building mini\*
 #.IF "$(USE_PERLIO)" == "define"
 WIN32_SRC	+= .\win32io.c
 #.ENDIF
-
-.IF "$(CRYPT_SRC)" != ""
-WIN32_SRC	+= .\$(CRYPT_SRC)
-.ENDIF
 
 X2P_SRC		=		\
 		..\x2p\a2p.c	\
@@ -1012,7 +988,6 @@ CFG_VARS	=					\
 		ld=$(LINK32)			~	\
 		ccflags=$(EXTRACFLAGS) $(OPTIMIZE) $(DEFINES) $(BUILDOPT)	~	\
 		cf_email=$(EMAIL)		~	\
-		d_crypt=$(D_CRYPT)		~	\
 		d_mymalloc=$(PERL_MALLOC)	~	\
 		libs=$(LIBFILES:f)		~	\
 		incpath=$(CCINCDIR)	~	\
