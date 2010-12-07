@@ -184,16 +184,6 @@ CCLIBDIR	= $(CCHOME)\lib
 BUILDOPT	= $(BUILDOPTEXTRA)
 
 #
-# Adding -DPERL_HASH_SEED_EXPLICIT will disable randomization of Perl's
-# internal hash function unless the PERL_HASH_SEED environment variable is set.
-# Alternatively, adding -DNO_HASH_SEED will completely disable the
-# randomization feature. 
-# The latter is required to maintain binary compatibility with Perl 5.8.0.
-#
-#BUILDOPT	= $(BUILDOPT) -DPERL_HASH_SEED_EXPLICIT
-#BUILDOPT	= $(BUILDOPT) -DNO_HASH_SEED
-
-#
 # This should normally be disabled.  Enabling it will disable the File::Glob
 # implementation of CORE::glob.
 #
