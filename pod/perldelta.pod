@@ -91,6 +91,17 @@ L<perlunicode/The "Unicode Bug"> for details.)  If their is a
 possibility that your code will process Unicode strings, you are
 B<strongly> encouraged to use this subpragma to avoid nasty surprises.
 
+=head2 Exception Handling Backcompat Hack
+
+When an exception is thrown in an C<eval BLOCK>, C<$@> is now set before
+unwinding, as well as being set after unwinding as the eval block exits.  This
+early setting supports code that has historically treated C<$@> during unwinding
+as an indicator of whether the unwinding was due to an exception.  These modules
+had been broken by 5.13.1's change from setting C<$@> early to setting it late.
+This double setting arrangement is a stopgap until the reason for unwinding can
+be made properly introspectable.  C<$@> has never been a reliable indicator of
+this.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
