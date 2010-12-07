@@ -101,4 +101,4 @@ $ulite1
 $bmulti$blite2
 EOEXPECT
 
-1 while unlink 'Uni_write.tmp';
+unlink_all 'Uni_write.tmp';
