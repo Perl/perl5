@@ -8902,6 +8902,20 @@ parseit:
     if (FOLD && (LOC || ANYOF_FLAGS(ret) & ANYOF_NONBITMAP)) {
         ANYOF_FLAGS(ret) |= ANYOF_FOLD;
     }
+
+    /* Optimize inverted simple patterns (e.g. [^a-z]).  Note that this doesn't
+     * optimize locale.  Doing so perhaps could be done as long as there is
+     * nothing like \w in it; some thought also would have to be given to the
+     * interaction with above 0x100 chars */
+    if ((ANYOF_FLAGS(ret) & ANYOF_FLAGS_ALL) == ANYOF_INVERT) {
+	for (value = 0; value < ANYOF_BITMAP_SIZE; ++value)
+	    ANYOF_BITMAP(ret)[value] ^= 0xFF;
+	stored = 256 - stored;
+
+	/* The inversion means that everything above 255 is matched */
+	ANYOF_FLAGS(ret) = ANYOF_UTF8|ANYOF_UNICODE_ALL;
+    }
+
     if( stored == 1 && (value < 128 || (value < 256 && !UTF))
         && !( ANYOF_FLAGS(ret) & ( ANYOF_FLAGS_ALL ^ ANYOF_FOLD ) )
     ) {
@@ -8924,19 +8938,6 @@ parseit:
         RExC_emit += STR_SZ(1);
 	SvREFCNT_dec(listsv);
         return ret;
-    }
-
-    /* Optimize inverted simple patterns (e.g. [^a-z]).  Note that this doesn't
-     * optimize locale.  Doing so perhaps could be done as long as there is
-     * nothing like \w in it; some thought also would have to be given to the
-     * interaction with above 0x100 chars */
-    if ((ANYOF_FLAGS(ret) & ANYOF_FLAGS_ALL) == ANYOF_INVERT) {
-	for (value = 0; value < ANYOF_BITMAP_SIZE; ++value)
-	    ANYOF_BITMAP(ret)[value] ^= 0xFF;
-	stored = 256 - stored;
-
-	/* The inversion means that everything above 255 is matched */
-	ANYOF_FLAGS(ret) = ANYOF_UTF8|ANYOF_UNICODE_ALL;
     }
 
     {
