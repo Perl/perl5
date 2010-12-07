@@ -22,14 +22,6 @@
 
 #include <windows.h>
 
-#ifndef HWND_MESSAGE
-#  define HWND_MESSAGE     ((HWND)-3)
-#endif
-
-#ifndef WC_NO_BEST_FIT_CHARS
-#  define WC_NO_BEST_FIT_CHARS 0x00000400 /* requires Windows 2000 or later */
-#endif
-
 #include <winnt.h>
 #include <commctrl.h>
 #include <tlhelp32.h>
@@ -473,22 +465,6 @@ has_shell_metachars(const char *ptr)
 PerlIO *
 Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 {
-#ifdef FIXCMD
-#define fixcmd(x)   {					\
-			char *pspace = strchr((x),' ');	\
-			if (pspace) {			\
-			    char *p = (x);		\
-			    while (p < pspace) {	\
-				if (*p == '/')		\
-				    *p = '\\';		\
-				p++;			\
-			    }				\
-			}				\
-		    }
-#else
-#define fixcmd(x)
-#endif
-    fixcmd(cmd);
     PERL_FLUSHALL_FOR_CHILD;
     return win32_popen(cmd, mode);
 }
@@ -820,16 +796,6 @@ win32_opendir(const char *filename)
 	errno = ENAMETOOLONG;
 	return NULL;
     }
-
-#if 0 /* This call to stat is unnecessary. The FindFirstFile() below will
-       * fail with ERROR_PATH_NOT_FOUND if filename is not a directory. */
-    {
-	/* check to see if filename is a directory */
-	Stat_t sbuf;
-	if (win32_stat(filename, &sbuf) < 0 || !S_ISDIR(sbuf.st_mode))
-	    return NULL;
-    }
-#endif
 
     /* Get us a DIR structure */
     Newxz(dirp, 1, DIR);
@@ -1961,44 +1927,12 @@ win32_uname(struct utsname *name)
 	switch (procarch) {
 	case PROCESSOR_ARCHITECTURE_INTEL:
 	    arch = "x86"; break;
-	case PROCESSOR_ARCHITECTURE_MIPS:
-	    arch = "mips"; break;
-	case PROCESSOR_ARCHITECTURE_ALPHA:
-	    arch = "alpha"; break;
-	case PROCESSOR_ARCHITECTURE_PPC:
-	    arch = "ppc"; break;
-#ifdef PROCESSOR_ARCHITECTURE_SHX
-	case PROCESSOR_ARCHITECTURE_SHX:
-	    arch = "shx"; break;
-#endif
-#ifdef PROCESSOR_ARCHITECTURE_ARM
-	case PROCESSOR_ARCHITECTURE_ARM:
-	    arch = "arm"; break;
-#endif
-#ifdef PROCESSOR_ARCHITECTURE_IA64
 	case PROCESSOR_ARCHITECTURE_IA64:
 	    arch = "ia64"; break;
-#endif
-#ifdef PROCESSOR_ARCHITECTURE_ALPHA64
-	case PROCESSOR_ARCHITECTURE_ALPHA64:
-	    arch = "alpha64"; break;
-#endif
-#ifdef PROCESSOR_ARCHITECTURE_MSIL
-	case PROCESSOR_ARCHITECTURE_MSIL:
-	    arch = "msil"; break;
-#endif
-#ifdef PROCESSOR_ARCHITECTURE_AMD64
 	case PROCESSOR_ARCHITECTURE_AMD64:
 	    arch = "amd64"; break;
-#endif
-#ifdef PROCESSOR_ARCHITECTURE_IA32_ON_WIN64
-	case PROCESSOR_ARCHITECTURE_IA32_ON_WIN64:
-	    arch = "ia32-64"; break;
-#endif
-#ifdef PROCESSOR_ARCHITECTURE_UNKNOWN
 	case PROCESSOR_ARCHITECTURE_UNKNOWN:
 	    arch = "unknown"; break;
-#endif
 	default:
 	    sprintf(name->machine, "unknown(0x%x)", procarch);
 	    arch = name->machine;
@@ -4517,7 +4451,7 @@ Perl_win32_init(int *argcp, char ***argvp)
      * want to be at the vendor's whim on the default, we set
      * it explicitly here.
      */
-#if !defined(_ALPHA_) && !defined(__GNUC__)
+#if !defined(__GNUC__)
     _control87(MCW_EM, MCW_EM);
 #endif
     MALLOC_INIT;
