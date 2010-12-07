@@ -8300,7 +8300,7 @@ S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8
 
 
 PERL_STATIC_INLINE U8
-S_set_regclass_bit(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U32 value)
+S_set_regclass_bit(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8 value)
 {
     /* This inline function sets a bit in the bitmap if not already set, and if
      * appropriate, its fold, returning the number of bits that actually
