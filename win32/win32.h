@@ -518,59 +518,6 @@ DllExport int win32_async_check(pTHX);
     } STMT_END
 #endif
 
-#if defined(USE_FIXED_OSFHANDLE) || defined(PERL_MSVCRT_READFIX)
-#ifdef PERL_CORE
-
-/* C doesn't like repeat struct definitions */
-#if defined(__MINGW32__) && (__MINGW32_MAJOR_VERSION>=3)
-#undef _CRTIMP
-#endif
-#ifndef _CRTIMP
-#define _CRTIMP __declspec(dllimport)
-#endif
-
-/*
- * Control structure for lowio file handles
- */
-typedef struct {
-    intptr_t osfhnd;/* underlying OS file HANDLE */
-    char osfile;    /* attributes of file (e.g., open in text mode?) */
-    char pipech;    /* one char buffer for handles opened on pipes */
-    int lockinitflag;
-    CRITICAL_SECTION lock;
-} ioinfo;
-
-
-/*
- * Array of arrays of control structures for lowio files.
- */
-EXTERN_C _CRTIMP ioinfo* __pioinfo[];
-
-/*
- * Definition of IOINFO_L2E, the log base 2 of the number of elements in each
- * array of ioinfo structs.
- */
-#define IOINFO_L2E	    5
-
-/*
- * Definition of IOINFO_ARRAY_ELTS, the number of elements in ioinfo array
- */
-#define IOINFO_ARRAY_ELTS   (1 << IOINFO_L2E)
-
-/*
- * Access macros for getting at an ioinfo struct and its fields from a
- * file handle
- */
-#define _pioinfo(i) (__pioinfo[(i) >> IOINFO_L2E] + ((i) & (IOINFO_ARRAY_ELTS - 1)))
-#define _osfhnd(i)  (_pioinfo(i)->osfhnd)
-#define _osfile(i)  (_pioinfo(i)->osfile)
-#define _pipech(i)  (_pioinfo(i)->pipech)
-
-/* since we are not doing a dup2(), this works fine */
-#define _set_osfhnd(fh, osfh) (void)(_osfhnd(fh) = (intptr_t)osfh)
-#endif
-#endif
-
 /* IO.xs and POSIX.xs define PERLIO_NOT_STDIO to 1 */
 #if defined(PERL_EXT_IO) || defined(PERL_EXT_POSIX)
 #undef  PERLIO_NOT_STDIO

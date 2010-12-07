@@ -473,13 +473,6 @@ BUILDOPT	= $(BUILDOPT) -D_USE_32BIT_TIME_T
 !  ENDIF
 !ENDIF
 
-# Use the MSVCRT read() fix only when using VC++ 6.x or earlier. Later
-# versions use MSVCR70.dll, MSVCR71.dll, etc, which do not require the
-# fix.
-!IF "$(CCTYPE)" == "MSVC60" 
-BUILDOPT	= $(BUILDOPT) -DPERL_MSVCRT_READFIX
-!ENDIF
-
 LIBBASEFILES	= $(CRYPT_LIB) \
 		oldnames.lib kernel32.lib user32.lib gdi32.lib winspool.lib \
 		comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib \

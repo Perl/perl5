@@ -555,9 +555,7 @@ OBJOUT_FLAG	= -o
 EXEOUT_FLAG	= -o
 LIBOUT_FLAG	=
 
-# NOTE: we assume that GCC uses MSVCRT.DLL
-# See comments about PERL_MSVCRT_READFIX in the "cl" compiler section below.
-BUILDOPT	+= -fno-strict-aliasing -mms-bitfields -DPERL_MSVCRT_READFIX
+BUILDOPT	+= -fno-strict-aliasing -mms-bitfields
 
 .ELSE
 
@@ -629,13 +627,6 @@ DEFINES		+= -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
     "$(CCTYPE)" == "MSVC70" || "$(CCTYPE)" == "MSVC70FREE"
 BUILDOPT	+= -D_USE_32BIT_TIME_T
 .ENDIF
-.ENDIF
-
-# Use the MSVCRT read() fix only when using VC++ 6.x or earlier. Later
-# versions use MSVCR70.dll, MSVCR71.dll, etc, which do not require the
-# fix.
-.IF "$(CCTYPE)" == "MSVC60" 
-BUILDOPT	+= -DPERL_MSVCRT_READFIX
 .ENDIF
 
 LIBBASEFILES	= $(CRYPT_LIB) \
