@@ -104,12 +104,13 @@ off;
   "ba" =~ /${\'(?{ $::pack = __PACKAGE__ })a'}/;
 }
 is $pack, 'bar', '/$text/ containing (?{}) inherits package';
-on;
 {
   use re 'eval', "/m";
   "ba" =~ /${\'(?{ $::re = qr -- })a'}/;
 }
 is $re, '(?^m:)', '/$text/ containing (?{}) inherits pragmata';
+
+on;
 
 fresh_perl_is <<'CODE', 'ok', { stderr => 1 }, '(?{die})';
  eval { "a" =~ /(?{die})a/ }; print "ok"

@@ -3092,7 +3092,26 @@ Perl_sv_compile_2op_is_broken(pTHX_ SV *sv, OP **startop, const char *code,
     /* we get here either during compilation, or via pp_regcomp at runtime */
     runtime = IN_PERL_RUNTIME;
     if (runtime)
+    {
 	runcv = find_runcv(NULL);
+
+	/* At run time, we have to fetch the hints from PL_curcop. */
+	PL_hints = PL_curcop->cop_hints;
+	if (PL_hints & HINT_LOCALIZE_HH) {
+	    /* SAVEHINTS created a new HV in PL_hintgv, which we
+	       need to GC */
+	    SvREFCNT_dec(GvHV(PL_hintgv));
+	    GvHV(PL_hintgv) =
+	     refcounted_he_chain_2hv(PL_curcop->cop_hints_hash, 0);
+	    hv_magic(GvHV(PL_hintgv), NULL, PERL_MAGIC_hints);
+	}
+	SAVECOMPILEWARNINGS();
+	PL_compiling.cop_warnings = DUP_WARNINGS(PL_curcop->cop_warnings);
+	cophh_free(CopHINTHASH_get(&PL_compiling));
+	/* XXX Does this need to avoid copying a label? */
+	PL_compiling.cop_hints_hash
+	 = cophh_copy(PL_curcop->cop_hints_hash);
+    }
 
     PL_op = &dummy;
     PL_op->op_type = OP_ENTEREVAL;
