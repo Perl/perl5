@@ -1556,7 +1556,7 @@ use File::Glob qw(:case);
     'Win32' =>
 	{
 	'MAINTAINER'	=> 'jand',
-	'DISTRIBUTION'	=> "JDB/Win32-0.39.tar.gz",
+	'DISTRIBUTION'	=> "JDB/Win32-0.40.tar.gz",
 	'FILES'		=> q[cpan/Win32],
 	'UPSTREAM'	=> 'cpan',
 	},
