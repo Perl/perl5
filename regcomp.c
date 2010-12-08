@@ -7445,11 +7445,19 @@ tryagain:
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'd':
-	    ret = reg_node(pRExC_state, DIGIT);
+            if (LOC) {
+                ret = reg_node(pRExC_state, (U8)(DIGITL));
+            } else {
+                ret = reg_node(pRExC_state, (U8)(DIGIT));
+            }
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'D':
-	    ret = reg_node(pRExC_state, NDIGIT);
+            if (LOC) {
+                ret = reg_node(pRExC_state, (U8)(NDIGITL));
+            } else {
+                ret = reg_node(pRExC_state, (U8)(NDIGIT));
+            }
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'R':
@@ -9607,7 +9615,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
     else if (k == REF || k == OPEN || k == CLOSE || k == GROUPP || OP(o)==ACCEPT) {
 	Perl_sv_catpvf(aTHX_ sv, "%d", (int)ARG(o));	/* Parenth number */
 	if ( RXp_PAREN_NAMES(prog) ) {
-            if ( k != REF || (OP(o) != NREF && OP(o) != NREFF && OP(o) != NREFFL && OP(o) != NREFFU)) {
+            if ( k != REF || (OP(o) < NREF)) {
 	        AV *list= MUTABLE_AV(progi->data->data[progi->name_list_idx]);
 	        SV **name= av_fetch(list, ARG(o), 0 );
 	        if (name)

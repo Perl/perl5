@@ -12,7 +12,7 @@ BEGIN {
 use ExtUtils::CBuilder;
 use File::Spec;
 
-# TEST doesn't like extraneous output
+# TEST does not like extraneous output
 my $quiet = $ENV{PERL_CORE} && !$ENV{HARNESS_ACTIVE};
 my ($source_file, $object_file, $exe_file);
 
@@ -33,10 +33,9 @@ ok $b, "created EU::CB object";
 
 $source_file = File::Spec->catfile('t', 'compilet.c');
 {
-  local *FH;
-  open FH, "> $source_file" or die "Can't create $source_file: $!";
-  print FH "int main(void) { return 11; }\n";
-  close FH;
+  open my $FH, "> $source_file" or die "Can't create $source_file: $!";
+  print $FH "int main(void) { return 11; }\n";
+  close $FH;
 }
 ok -e $source_file, "generated '$source_file'";
 
@@ -86,11 +85,13 @@ sub my_system {
   my $cmd = shift;
   my $ec;
   if ($^O eq 'VMS') {
-    # Preserve non-posixified status and don't bit shift the result.
-    use vmsish 'status';
+    # Preserve non-posixified status and don't bit shift the result
+    # because we're running under "use vmsish";
     $ec = system("mcr $cmd");
     return $ec;
   }
-  $ec = system($cmd);
-  return $ec == -1 ? -1 : $ec >> 8;
+  else {
+    $ec = system($cmd);
+    return $ec == -1 ? -1 : $ec >> 8;
+  }
 }

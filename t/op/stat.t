@@ -46,7 +46,7 @@ my $tmpfile = tempfile();
 my $tmpfile_link = tempfile();
 
 chmod 0666, $tmpfile;
-1 while unlink $tmpfile;
+unlink_all $tmpfile;
 open(FOO, ">$tmpfile") || DIE("Can't open temp test file: $!");
 close FOO;
 
@@ -551,5 +551,5 @@ SKIP: {
 
 END {
     chmod 0666, $tmpfile;
-    1 while unlink $tmpfile;
+    unlink_all $tmpfile;
 }

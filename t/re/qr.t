@@ -121,7 +121,7 @@ EOTEST
     close $fh;
 
     my $out = runperl(stderr => 1, progfile => $prog);
-    unlink $prog;
+    unlink_all $prog;
 
     my $expected = <<'EOOUT';
 ok 1 - weak copy equals original

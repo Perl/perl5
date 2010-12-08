@@ -1,8 +1,10 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 7c7df81, except for:
+This has been completed up to 558b442, except for:
 d9a4b459f94297889956ac3adc42707365f274c2
+bf5522a13a381257966e7ed6b731195a873b153e
+9cef83062267e94311e1fd8744396e440642738e
 
 =head1 NAME
 
@@ -91,6 +93,17 @@ L<perlunicode/The "Unicode Bug"> for details.)  If their is a
 possibility that your code will process Unicode strings, you are
 B<strongly> encouraged to use this subpragma to avoid nasty surprises.
 
+=head2 Exception Handling Backcompat Hack
+
+When an exception is thrown in an C<eval BLOCK>, C<$@> is now set before
+unwinding, as well as being set after unwinding as the eval block exits.  This
+early setting supports code that has historically treated C<$@> during unwinding
+as an indicator of whether the unwinding was due to an exception.  These modules
+had been broken by 5.13.1's change from setting C<$@> early to setting it late.
+This double setting arrangement is a stopgap until the reason for unwinding can
+be made properly introspectable.  C<$@> has never been a reliable indicator of
+this.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -115,6 +128,19 @@ real-world codebases.
 If it is absolutely necessary to have empty attribute lists (for example,
 because of a code generator) then avoid the error by adding a space before
 the C<=>.
+
+=head2 Run-time code block in regular expressions
+
+Code blocks in regular expressions (C<(?{...})> and C<(??{...})>) used not
+to inherit any pragmata (strict, warnings, etc.) if the regular expression
+was compiled at run time as happens in cases like these two:
+
+  use re 'eval';
+  $foo =~ $bar; # when $bar contains (?{...})
+  $foo =~ /$bar(?{ $finished = 1 })/;
+
+This was a bug, which has now been fixed. But it has the potential to break
+any code that was relying on this bug.
 
 =head1 Deprecations
 
@@ -192,6 +218,10 @@ XXX
 =head2 Updated Modules and Pragmata
 
 =over 4
+
+=item *
+
+C<ExtUtils::CBuilder> has been upgraded from 0.2703 to 0.2800
 
 =item *
 

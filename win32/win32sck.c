@@ -473,9 +473,6 @@ int my_close(int fd)
 	int err;
 	err = closesocket(osf);
 	if (err == 0) {
-#if defined(USE_FIXED_OSFHANDLE) || defined(PERL_MSVCRT_READFIX)
-            _set_osfhnd(fd, INVALID_HANDLE_VALUE);
-#endif
 	    (void)close(fd);	/* handle already closed, ignore error */
 	    return 0;
 	}
@@ -504,9 +501,6 @@ my_fclose (FILE *pf)
 	win32_fflush(pf);
 	err = closesocket(osf);
 	if (err == 0) {
-#if defined(USE_FIXED_OSFHANDLE) || defined(PERL_MSVCRT_READFIX)
-            _set_osfhnd(win32_fileno(pf), INVALID_HANDLE_VALUE);
-#endif
 	    (void)fclose(pf);	/* handle already closed, ignore error */
 	    return 0;
 	}

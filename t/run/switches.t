@@ -22,7 +22,7 @@ $TODO = "runperl() unable to emulate echo -n due to pipe bug" if $^O eq 'VMS';
 
 my $r;
 my @tmpfiles = ();
-END { unlink @tmpfiles }
+END { unlink_all @tmpfiles }
 
 # Tests for -0
 
@@ -304,7 +304,7 @@ foreach my $switch (split //, "ABbGgHJjKkLNOoPQqRrYyZz123456789_")
 {
     local $TODO = '';   # these ones should work on VMS
 
-    sub do_i_unlink { 1 while unlink("file", "file.bak") }
+    sub do_i_unlink { unlink_all("file", "file.bak") }
 
     open(FILE, ">file") or die "$0: Failed to create 'file': $!";
     print FILE <<__EOF__;

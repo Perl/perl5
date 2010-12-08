@@ -12,7 +12,7 @@ BEGIN {
 use ExtUtils::CBuilder;
 use File::Spec;
 
-# TEST doesn't like extraneous output
+# TEST does not like extraneous output
 my $quiet = $ENV{PERL_CORE} && !$ENV{HARNESS_ACTIVE};
 my ($source_file, $object_file, $lib_file);
 
@@ -32,10 +32,9 @@ ok $b->have_cplusplus, "have_cplusplus";
 
 $source_file = File::Spec->catfile('t', 'compilet.cc');
 {
-  local *FH;
-  open FH, "> $source_file" or die "Can't create $source_file: $!";
-  print FH "class Bogus { public: int boot_compilet() { return 1; } };\n";
-  close FH;
+  open my $FH, "> $source_file" or die "Can't create $source_file: $!";
+  print $FH "class Bogus { public: int boot_compilet() { return 1; } };\n";
+  close $FH;
 }
 ok -e $source_file, "source file '$source_file' created";
 

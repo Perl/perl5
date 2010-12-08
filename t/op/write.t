@@ -95,7 +95,7 @@ now @<<the@>>>> for all@|||||men to come @<<<<
 .
 
 open(OUT, '>Op_write.tmp') || die "Can't create Op_write.tmp";
-END { 1 while unlink 'Op_write.tmp' }
+END { unlink_all 'Op_write.tmp' }
 
 $fox = 'foxiness';
 $good = 'good';
@@ -115,7 +115,7 @@ the course
 of huma...
 now is the time for all good men to come to\n";
 
-is cat('Op_write.tmp'), $right and do { 1 while unlink 'Op_write.tmp'; };
+is cat('Op_write.tmp'), $right and unlink_all 'Op_write.tmp';
 
 $fox = 'wolfishness';
 my $fox = 'foxiness';		# Test a lexical variable.
@@ -154,7 +154,7 @@ becomes
 necessary
 now is the time for all good men to come to\n";
 
-is cat('Op_write.tmp'), $right and do { 1 while unlink 'Op_write.tmp'; };
+is cat('Op_write.tmp'), $right and unlink_all 'Op_write.tmp';
 
 eval <<'EOFORMAT';
 format OUT2 =
@@ -195,7 +195,7 @@ becomes
 necessary
 now is the time for all good men to come to\n";
 
-is cat('Op_write.tmp'), $right and do { 1 while unlink 'Op_write.tmp' };
+is cat('Op_write.tmp'), $right and unlink_all 'Op_write.tmp';
 
 # formline tests
 
@@ -248,7 +248,7 @@ close OUT3 or die "Could not close: $!";
 $right =
 "fit\n";
 
-is cat('Op_write.tmp'), $right and do { 1 while unlink 'Op_write.tmp' };
+is cat('Op_write.tmp'), $right and unlink_all 'Op_write.tmp';
 
 
 # test lexicals and globals
@@ -276,7 +276,7 @@ format OUT4 =
 open   OUT4, ">Op_write.tmp" or die "Can't create Op_write.tmp";
 write (OUT4);
 close  OUT4 or die "Could not close: $!";
-is cat('Op_write.tmp'), "1\n" and do { 1 while unlink "Op_write.tmp" };
+is cat('Op_write.tmp'), "1\n" and unlink_all "Op_write.tmp";
 
 eval <<'EOFORMAT';
 format OUT10 =
@@ -293,7 +293,7 @@ write(OUT10);
 close OUT10 or die "Could not close: $!";
 
 $right = "   12.95 00012.95\n";
-is cat('Op_write.tmp'), $right and do { 1 while unlink 'Op_write.tmp' };
+is cat('Op_write.tmp'), $right and unlink_all 'Op_write.tmp';
 
 eval <<'EOFORMAT';
 format OUT11 =
@@ -316,7 +316,7 @@ $right =
 "00012.95
 1 0#
 10 #\n";
-is cat('Op_write.tmp'), $right and do { 1 while unlink 'Op_write.tmp' };
+is cat('Op_write.tmp'), $right and unlink_all 'Op_write.tmp';
 
 {
     my $test = curr_test();

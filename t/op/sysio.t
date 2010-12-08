@@ -209,7 +209,7 @@ ok(not defined sysseek(I, -1, 1));
 
 close(I);
 
-unlink $outfile;
+unlink_all $outfile;
 
 # Check that utf8 IO doesn't upgrade the scalar
 open(I, ">$outfile") || die "sysio.t: cannot write $outfile: $!";
@@ -232,7 +232,7 @@ eval {syswrite I, 2;};
 is($@, '');
 
 close(I);
-unlink $outfile;
+unlink_all $outfile;
 
 chdir('..');
 

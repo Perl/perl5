@@ -133,20 +133,6 @@ CCTYPE		= MSVC60
 #USE_SETARGV	= define
 
 #
-# if you want to have the crypt() builtin function implemented, leave this or
-# CRYPT_LIB uncommented.  The fcrypt.c file named here contains a suitable
-# version of des_fcrypt().
-#
-CRYPT_SRC	= fcrypt.c
-
-#
-# if you didn't set CRYPT_SRC and if you have des_fcrypt() available in a
-# library, uncomment this, and make sure the library exists (see README.win32)
-# Specify the full pathname of the library.
-#
-#CRYPT_LIB	= fcrypt.lib
-
-#
 # set this if you wish to use perl's malloc
 # WARNING: Turning this on/off WILL break binary compatibility with extensions
 # you may have compiled with/without it.  Be prepared to recompile all
@@ -198,16 +184,6 @@ CCLIBDIR	= $(CCHOME)\lib
 BUILDOPT	= $(BUILDOPTEXTRA)
 
 #
-# Adding -DPERL_HASH_SEED_EXPLICIT will disable randomization of Perl's
-# internal hash function unless the PERL_HASH_SEED environment variable is set.
-# Alternatively, adding -DNO_HASH_SEED will completely disable the
-# randomization feature. 
-# The latter is required to maintain binary compatibility with Perl 5.8.0.
-#
-#BUILDOPT	= $(BUILDOPT) -DPERL_HASH_SEED_EXPLICIT
-#BUILDOPT	= $(BUILDOPT) -DNO_HASH_SEED
-
-#
 # This should normally be disabled.  Enabling it will disable the File::Glob
 # implementation of CORE::glob.
 #
@@ -236,13 +212,6 @@ EXTRALIBDIRS	=
 ##
 
 ##################### CHANGE THESE ONLY IF YOU MUST #####################
-
-!IF "$(CRYPT_SRC)$(CRYPT_LIB)" == ""
-D_CRYPT		= undef
-!ELSE
-D_CRYPT		= define
-CRYPT_FLAG	= -DHAVE_DES_FCRYPT
-!ENDIF
 
 !IF "$(USE_IMP_SYS)" == "define"
 PERL_MALLOC	= undef
@@ -414,7 +383,7 @@ RSC		= rc
 
 INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
 #PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX
-DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT $(CRYPT_FLAG)
+DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
 CXX_FLAG	= -TP -EHsc
@@ -473,14 +442,7 @@ BUILDOPT	= $(BUILDOPT) -D_USE_32BIT_TIME_T
 !  ENDIF
 !ENDIF
 
-# Use the MSVCRT read() fix only when using VC++ 6.x or earlier. Later
-# versions use MSVCR70.dll, MSVCR71.dll, etc, which do not require the
-# fix.
-!IF "$(CCTYPE)" == "MSVC60" 
-BUILDOPT	= $(BUILDOPT) -DPERL_MSVCRT_READFIX
-!ENDIF
-
-LIBBASEFILES	= $(CRYPT_LIB) \
+LIBBASEFILES	= \
 		oldnames.lib kernel32.lib user32.lib gdi32.lib winspool.lib \
 		comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib \
 		netapi32.lib uuid.lib ws2_32.lib mpr.lib winmm.lib \
@@ -695,7 +657,8 @@ EXTRACORE_SRC	= $(EXTRACORE_SRC) ..\perlio.c
 WIN32_SRC	=		\
 		.\win32.c	\
 		.\win32sck.c	\
-		.\win32thread.c
+		.\win32thread.c	\
+		.\fcrypt.c
 
 # We need this for miniperl build unless we override canned 
 # config.h #define building mini\*
@@ -703,9 +666,6 @@ WIN32_SRC	=		\
 WIN32_SRC	= $(WIN32_SRC) .\win32io.c
 #!ENDIF
 
-!IF "$(CRYPT_SRC)" != ""
-WIN32_SRC	= $(WIN32_SRC) .\$(CRYPT_SRC)
-!ENDIF
 
 X2P_SRC		=		\
 		..\x2p\a2p.c	\
@@ -805,7 +765,6 @@ CFG_VARS	=					\
 		"ld=$(LINK32)"				\
 		"ccflags=$(EXTRACFLAGS) $(OPTIMIZE:"=\") $(DEFINES) $(BUILDOPT)"	\
 		"cf_email=$(EMAIL)"	 		\
-		"d_crypt=$(D_CRYPT)"			\
 		"d_mymalloc=$(PERL_MALLOC)"		\
 		"libs=$(LIBFILES)"			\
 		"incpath=$(CCINCDIR:"=\")"		\

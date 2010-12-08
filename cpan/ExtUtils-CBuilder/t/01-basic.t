@@ -12,7 +12,7 @@ BEGIN {
 use ExtUtils::CBuilder;
 use File::Spec;
 
-# TEST doesn't like extraneous output
+# TEST does not like extraneous output
 my $quiet = $ENV{PERL_CORE} && !$ENV{HARNESS_ACTIVE};
 my ($source_file, $object_file, $lib_file);
 

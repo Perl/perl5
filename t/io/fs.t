@@ -424,7 +424,7 @@ SKIP: {
     # this works on win32 only, because fs isn't casesensitive
     ok(-e 'X', "rename working");
 
-    1 while unlink 'X';
+    unlink_all 'X';
     chdir $wd || die "Can't cd back to $wd";
 }
 

@@ -6386,14 +6386,17 @@ init_perinterp()
 # Same as pstore(), but network order is used for integers and doubles are
 # emitted as strings.
 
-void
+SV *
 pstore(f,obj)
 OutputStream	f
 SV *	obj
  ALIAS:
   net_pstore = 1
  PPCODE:
-  ST(0) = do_store(aTHX_ f, obj, 0, ix, (SV **)0) ? &PL_sv_yes : &PL_sv_undef;
+  RETVAL = do_store(aTHX_ f, obj, 0, ix, (SV **)0) ? &PL_sv_yes : &PL_sv_undef;
+  /* do_store() can reallocate the stack, so need a sequence point to ensure
+     that ST(0) knows about it. Hence using two statements.  */
+  ST(0) = RETVAL;
   XSRETURN(1);
 
 # mstore

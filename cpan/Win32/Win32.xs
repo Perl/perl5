@@ -38,6 +38,7 @@ typedef BOOL (__stdcall *PFNAllocateAndInitializeSid)(PSID_IDENTIFIER_AUTHORITY,
 typedef BOOL (__stdcall *PFNEqualSid)(PSID, PSID);
 typedef void* (__stdcall *PFNFreeSid)(PSID);
 typedef BOOL (__stdcall *PFNIsUserAnAdmin)(void);
+typedef BOOL (WINAPI *PFNGetProductInfo)(DWORD, DWORD, DWORD, DWORD, DWORD*);
 
 #ifndef CSIDL_MYMUSIC
 #   define CSIDL_MYMUSIC              0x000D
@@ -1651,6 +1652,39 @@ XS(w32_CreateFile)
     XSRETURN(1);
 }
 
+XS(w32_GetSystemMetrics)
+{
+    dXSARGS;
+
+    if (items != 1)
+	Perl_croak(aTHX_ "usage: Win32::GetSystemMetrics($index)");
+
+    XSRETURN_IV(GetSystemMetrics(SvIV(ST(0))));
+}
+
+XS(w32_GetProductInfo)
+{
+    dXSARGS;
+    DWORD type;
+    HMODULE module;
+    PFNGetProductInfo pfnGetProductInfo;
+
+    if (items != 4)
+	Perl_croak(aTHX_ "usage: Win32::GetProductInfo($major,$minor,$spmajor,$spminor)");
+
+    module = GetModuleHandle("kernel32.dll");
+    GETPROC(GetProductInfo);
+    if (pfnGetProductInfo &&
+        pfnGetProductInfo((DWORD)SvIV(ST(0)), (DWORD)SvIV(ST(1)),
+                          (DWORD)SvIV(ST(2)), (DWORD)SvIV(ST(3)), &type))
+    {
+        XSRETURN_IV(type);
+    }
+
+    /* PRODUCT_UNDEFINED */
+    XSRETURN_IV(0);
+}
+
 MODULE = Win32            PACKAGE = Win32
 
 PROTOTYPES: DISABLE
@@ -1712,6 +1746,8 @@ BOOT:
     newXS("Win32::GetCurrentThreadId", w32_GetCurrentThreadId, file);
     newXS("Win32::CreateDirectory", w32_CreateDirectory, file);
     newXS("Win32::CreateFile", w32_CreateFile, file);
+    newXS("Win32::GetSystemMetrics", w32_GetSystemMetrics, file);
+    newXS("Win32::GetProductInfo", w32_GetProductInfo, file);
 #ifdef __CYGWIN__
     newXS("Win32::SetChildShowWindow", w32_SetChildShowWindow, file);
 #endif

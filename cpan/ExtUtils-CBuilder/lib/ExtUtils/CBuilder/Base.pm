@@ -7,9 +7,27 @@ use Cwd ();
 use Config;
 use Text::ParseWords;
 use IO::File;
+use Data::Dumper;$Data::Dumper::Indent=1;
+use IPC::Cmd qw(can_run);
+use File::Temp qw(tempfile);
 
 use vars qw($VERSION);
-$VERSION = '0.2703_01';
+$VERSION = '0.2800';
+
+# More details about C/C++ compilers:
+# http://developers.sun.com/sunstudio/documentation/product/compiler.jsp
+# http://gcc.gnu.org/
+# http://publib.boulder.ibm.com/infocenter/comphelp/v101v121/index.jsp
+# http://msdn.microsoft.com/en-us/vstudio/default.aspx
+
+my %cc2cxx = (
+    # first line order is important to support wrappers like in pkgsrc
+    cc => [ 'c++', 'CC', 'aCC', 'cxx', ], # Sun Studio, HP ANSI C/C++ Compilers
+    gcc => [ 'g++' ], # GNU Compiler Collection
+    xlc => [ 'xlC' ], # IBM C/C++ Set, xlc without thread-safety
+    xlc_r => [ 'xlC_r' ], # IBM C/C++ Set, xlc with thread-safety
+    cl    => [ 'cl' ], # Microsoft Visual Studio
+);
 
 sub new {
   my $class = shift;
@@ -21,7 +39,37 @@ sub new {
   while (my ($k,$v) = each %Config) {
     $self->{config}{$k} = $v unless exists $self->{config}{$k};
   }
-  $self->{config}{cc} = $ENV{CC} if exists $ENV{CC};
+  $self->{config}{cc} = $ENV{CC} if defined $ENV{CC};
+  $self->{config}{ccflags} = $ENV{CFLAGS} if defined $ENV{CFLAGS};
+  $self->{config}{cxx} = $ENV{CXX} if defined $ENV{CXX};
+  $self->{config}{cxxflags} = $ENV{CXXFLAGS} if defined $ENV{CXXFLAGS};
+  $self->{config}{ld} = $ENV{LD} if defined $ENV{LD};
+  $self->{config}{ldflags} = $ENV{LDFLAGS} if defined $ENV{LDFLAGS};
+
+  unless ( exists $self->{config}{cxx} ) {
+    my ($ccpath, $ccbase, $ccsfx ) = fileparse($self->{config}{cc}, qr/\.[^.]*/);
+    foreach my $cxx (@{$cc2cxx{$ccbase}}) {
+      if( can_run( File::Spec->catfile( $ccpath, $cxx, $ccsfx ) ) ) {
+        $self->{config}{cxx} = File::Spec->catfile( $ccpath, $cxx, $ccsfx );
+	last;
+      }
+      if( can_run( File::Spec->catfile( $cxx, $ccsfx ) ) ) {
+        $self->{config}{cxx} = File::Spec->catfile( $cxx, $ccsfx );
+	last;
+      }
+      if( can_run( $cxx ) ) {
+        $self->{config}{cxx} = $cxx;
+	last;
+      }
+    }
+    unless ( exists $self->{config}{cxx} ) {
+      $self->{config}{cxx} = $self->{config}{cc};
+      my $cflags = $self->{config}{cflags};
+      $self->{config}{cxxflags} = '-x c++';
+      $self->{config}{cxxflags} .= " $cflags" if defined $cflags;
+    }
+  }
+
   return $self;
 }
 
@@ -29,7 +77,7 @@ sub find_perl_interpreter {
   my $perl;
   File::Spec->file_name_is_absolute($perl = $^X)
     or -f ($perl = $Config::Config{perlpath})
-    or ($perl = $^X);
+    or ($perl = $^X); # XXX how about using IPC::Cmd::can_run here?
   return $perl;
 }
 
@@ -45,6 +93,10 @@ sub cleanup {
   foreach my $file (keys %{$self->{files_to_clean}}) {
     unlink $file;
   }
+}
+
+sub get_config {
+    return %{ $_[0]->{config} };
 }
 
 sub object_file {
@@ -87,81 +139,80 @@ sub compile {
   die "Missing 'source' argument to compile()" unless defined $args{source};
   
   my $cf = $self->{config}; # For convenience
+  
+  my $object_file = $args{object_file}
+    ? $args{object_file}
+    : $self->object_file($args{source});
 
-  $args{object_file} ||= $self->object_file($args{source});
-
-  $args{include_dirs} = [ $args{include_dirs} ]
-    if exists($args{include_dirs}) && ref($args{include_dirs}) ne "ARRAY";
-
-  my @include_dirs = $self->arg_include_dirs
-    (@{$args{include_dirs} || []},
-     $self->perl_inc());
+  my $include_dirs_ref = 
+    (exists($args{include_dirs}) && ref($args{include_dirs}) ne "ARRAY")
+      ? [ $args{include_dirs} ]
+      : $args{include_dirs};
+  my @include_dirs = $self->arg_include_dirs(
+    @{ $include_dirs_ref || [] },
+    $self->perl_inc(),
+  );
   
   my @defines = $self->arg_defines( %{$args{defines} || {}} );
   
-  my @extra_compiler_flags = $self->split_like_shell($args{extra_compiler_flags});
+  my @extra_compiler_flags =
+    $self->split_like_shell($args{extra_compiler_flags});
   my @cccdlflags = $self->split_like_shell($cf->{cccdlflags});
-  my @ccflags = $self->split_like_shell($cf->{ccflags});
-  push @ccflags, qw/-x c++/ if $args{'C++'};
+  my @ccflags = $self->split_like_shell($args{'C++'} ? $cf->{cxxflags} : $cf->{ccflags});
   my @optimize = $self->split_like_shell($cf->{optimize});
-  my @flags = (@include_dirs, @defines, @cccdlflags, @extra_compiler_flags,
-	       $self->arg_nolink,
-	       @ccflags, @optimize,
-	       $self->arg_object_file($args{object_file}),
-	      );
-  
-  my @cc = $self->split_like_shell($cf->{cc});
+  my @flags = (
+    @include_dirs,
+    @defines,
+    @cccdlflags,
+    @extra_compiler_flags,
+    $self->arg_nolink,
+    @ccflags,
+    @optimize,
+    $self->arg_object_file($object_file),
+  );
+  my @cc = $self->split_like_shell($args{'C++'} ? $cf->{cxx} : $cf->{cc});
   
   $self->do_system(@cc, @flags, $args{source})
-    or die "error building $args{object_file} from '$args{source}'";
+    or die "error building $object_file from '$args{source}'";
 
-  return $args{object_file};
+  return $object_file;
 }
 
 sub have_compiler {
   my ($self, $is_cplusplus) = @_;
-  return $self->{have_compiler} if defined $self->{have_compiler};
+  my $have_compiler_flag = $is_cplusplus ? "have_cxx" : "have_cc";
+  my $suffix = $is_cplusplus ? ".cc" : ".c";
+  return $self->{$have_compiler_flag} if defined $self->{$have_compiler_flag};
 
   my $result;
   my $attempts = 3;
   # tmpdir has issues for some people so fall back to current dir
-  DIR: for my $dir ( File::Spec->tmpdir, '.' ) {
 
-    # don't clobber existing files (rare, but possible)
-    my $rand = int(rand(2**31));
-    my $tmpfile = File::Spec->catfile($dir, "compilet-$rand.c");
-    $tmpfile .= "c" if $is_cplusplus;
-    if ( -e $tmpfile ) {
-      redo DIR if $attempts--;
-      next DIR;
-    }
+  # don't clobber existing files (rare, but possible)
+  my ( $FH, $tmpfile ) = tempfile( "compilet-XXXXX", SUFFIX => $suffix );
+  binmode $FH;
 
-    {
-      my $FH = IO::File->new("> $tmpfile") or die "Can't create $tmpfile: $!";
-      if ( $is_cplusplus ) {
-        print $FH "class Bogus { public: int boot_compilet() { return 1; } };\n";
-      }
-      else {
-        print $FH "int boot_compilet() { return 1; }\n";
-      }
-    }
-
-    my ($obj_file, @lib_files);
-    eval {
-      local $^W = 0;
-      local $self->{quiet} = 1;
-      $obj_file = $self->compile('C++' => $is_cplusplus, source => $tmpfile);
-      @lib_files = $self->link(objects => $obj_file, module_name => 'compilet');
-    };
-    $result = $@ ? 0 : 1;
-
-    foreach (grep defined, $tmpfile, $obj_file, @lib_files) {
-      1 while unlink;
-    }
-    last DIR if $result;
+  if ( $is_cplusplus ) {
+    print $FH "class Bogus { public: int boot_compilet() { return 1; } };\n";
+  }
+  else {
+    print $FH "int boot_compilet() { return 1; }\n";
   }
 
-  return $self->{have_compiler} = $result;
+  my ($obj_file, @lib_files);
+  eval {
+    local $^W = 0;
+    local $self->{quiet} = 1;
+    $obj_file = $self->compile('C++' => $is_cplusplus, source => $tmpfile);
+    @lib_files = $self->link(objects => $obj_file, module_name => 'compilet');
+  };
+  $result = $@ ? 0 : 1;
+
+  foreach (grep defined, $tmpfile, $obj_file, @lib_files) {
+    1 while unlink;
+  }
+
+  return $self->{$have_compiler_flag} = $result;
 }
 
 sub have_cplusplus {
@@ -190,23 +241,32 @@ sub extra_link_args_after_prelink { return }
 
 sub prelink {
   my ($self, %args) = @_;
-  
-  ($args{dl_file} = $args{dl_name}) =~ s/.*::// unless $args{dl_file};
-  
+
+  my ($dl_file_out, $mksymlists_args) = _prepare_mksymlists_args(\%args);
+
   require ExtUtils::Mksymlists;
-  ExtUtils::Mksymlists::Mksymlists( # dl. abbrev for dynamic library
-    DL_VARS  => $args{dl_vars}      || [],
-    DL_FUNCS => $args{dl_funcs}     || {},
-    FUNCLIST => $args{dl_func_list} || [],
-    IMPORTS  => $args{dl_imports}   || {},
-    NAME     => $args{dl_name},		# Name of the Perl module
-    DLBASE   => $args{dl_base},		# Basename of DLL file
-    FILE     => $args{dl_file},		# Dir + Basename of symlist file
-    VERSION  => (defined $args{dl_version} ? $args{dl_version} : '0.0'),
-  );
-  
+  # dl. abbrev for dynamic library
+  ExtUtils::Mksymlists::Mksymlists( %{ $mksymlists_args } );
+
   # Mksymlists will create one of these files
-  return grep -e, map "$args{dl_file}.$_", qw(ext def opt);
+  return grep -e, map "$dl_file_out.$_", qw(ext def opt);
+}
+
+sub _prepare_mksymlists_args {
+  my $args = shift;
+  ($args->{dl_file} = $args->{dl_name}) =~ s/.*::// unless $args->{dl_file};
+  
+  my %mksymlists_args = (
+    DL_VARS  => $args->{dl_vars}      || [],
+    DL_FUNCS => $args->{dl_funcs}     || {},
+    FUNCLIST => $args->{dl_func_list} || [],
+    IMPORTS  => $args->{dl_imports}   || {},
+    NAME     => $args->{dl_name},    # Name of the Perl module
+    DLBASE   => $args->{dl_base},    # Basename of DLL file
+    FILE     => $args->{dl_file},    # Dir + Basename of symlist file
+    VERSION  => (defined $args->{dl_version} ? $args->{dl_version} : '0.0'),
+  );
+  return ($args->{dl_file}, \%mksymlists_args);
 }
 
 sub link {
@@ -230,14 +290,19 @@ sub _do_link {
   
   my @temp_files;
   @temp_files =
-    $self->prelink(%args,
-		   dl_name => $args{module_name}) if $args{lddl} && $self->need_prelink;
+    $self->prelink(%args, dl_name => $args{module_name})
+      if $args{lddl} && $self->need_prelink;
   
-  my @linker_flags = ($self->split_like_shell($args{extra_linker_flags}),
-		      $self->extra_link_args_after_prelink(%args, dl_name => $args{module_name},
-							   prelink_res => \@temp_files));
+  my @linker_flags = (
+    $self->split_like_shell($args{extra_linker_flags}),
+    $self->extra_link_args_after_prelink(
+       %args, dl_name => $args{module_name}, prelink_res => \@temp_files
+    )
+  );
 
-  my @output = $args{lddl} ? $self->arg_share_object_file($out) : $self->arg_exec_file($out);
+  my @output = $args{lddl}
+    ? $self->arg_share_object_file($out)
+    : $self->arg_exec_file($out);
   my @shrp = $self->split_like_shell($cf->{shrpenv});
   my @ld = $self->split_like_shell($cf->{ld});
   
@@ -262,6 +327,11 @@ sub split_like_shell {
   $string =~ s/^\s+|\s+$//g;
   return () unless length($string);
   
+  # Text::ParseWords replaces all 'escaped' characters with themselves, which completely
+  # breaks paths under windows. As such, we forcibly replace backwards slashes with forward
+  # slashes on windows.
+  $string =~ s@\\@/@g if $^O eq 'MSWin32';
+  
   return Text::ParseWords::shellwords($string);
 }
 
@@ -278,12 +348,12 @@ sub perl_src {
   # Try up to 5 levels upwards
   for (0..10) {
     if (
-	-f File::Spec->catfile($dir,"config_h.SH")
-	&&
-	-f File::Spec->catfile($dir,"perl.h")
-	&&
-	-f File::Spec->catfile($dir,"lib","Exporter.pm")
-       ) {
+      -f File::Spec->catfile($dir,"config_h.SH")
+      &&
+      -f File::Spec->catfile($dir,"perl.h")
+      &&
+      -f File::Spec->catfile($dir,"lib","Exporter.pm")
+    ) {
       return Cwd::realpath( $dir );
     }
 
@@ -308,3 +378,5 @@ sub DESTROY {
 }
 
 1;
+
+# vim: ts=2 sw=2 et:

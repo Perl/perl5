@@ -22,14 +22,6 @@
 
 #include <windows.h>
 
-#ifndef HWND_MESSAGE
-#  define HWND_MESSAGE     ((HWND)-3)
-#endif
-
-#ifndef WC_NO_BEST_FIT_CHARS
-#  define WC_NO_BEST_FIT_CHARS 0x00000400 /* requires Windows 2000 or later */
-#endif
-
 #include <winnt.h>
 #include <commctrl.h>
 #include <tlhelp32.h>
@@ -473,22 +465,6 @@ has_shell_metachars(const char *ptr)
 PerlIO *
 Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 {
-#ifdef FIXCMD
-#define fixcmd(x)   {					\
-			char *pspace = strchr((x),' ');	\
-			if (pspace) {			\
-			    char *p = (x);		\
-			    while (p < pspace) {	\
-				if (*p == '/')		\
-				    *p = '\\';		\
-				p++;			\
-			    }				\
-			}				\
-		    }
-#else
-#define fixcmd(x)
-#endif
-    fixcmd(cmd);
     PERL_FLUSHALL_FOR_CHILD;
     return win32_popen(cmd, mode);
 }
@@ -820,16 +796,6 @@ win32_opendir(const char *filename)
 	errno = ENAMETOOLONG;
 	return NULL;
     }
-
-#if 0 /* This call to stat is unnecessary. The FindFirstFile() below will
-       * fail with ERROR_PATH_NOT_FOUND if filename is not a directory. */
-    {
-	/* check to see if filename is a directory */
-	Stat_t sbuf;
-	if (win32_stat(filename, &sbuf) < 0 || !S_ISDIR(sbuf.st_mode))
-	    return NULL;
-    }
-#endif
 
     /* Get us a DIR structure */
     Newxz(dirp, 1, DIR);
@@ -1961,44 +1927,12 @@ win32_uname(struct utsname *name)
 	switch (procarch) {
 	case PROCESSOR_ARCHITECTURE_INTEL:
 	    arch = "x86"; break;
-	case PROCESSOR_ARCHITECTURE_MIPS:
-	    arch = "mips"; break;
-	case PROCESSOR_ARCHITECTURE_ALPHA:
-	    arch = "alpha"; break;
-	case PROCESSOR_ARCHITECTURE_PPC:
-	    arch = "ppc"; break;
-#ifdef PROCESSOR_ARCHITECTURE_SHX
-	case PROCESSOR_ARCHITECTURE_SHX:
-	    arch = "shx"; break;
-#endif
-#ifdef PROCESSOR_ARCHITECTURE_ARM
-	case PROCESSOR_ARCHITECTURE_ARM:
-	    arch = "arm"; break;
-#endif
-#ifdef PROCESSOR_ARCHITECTURE_IA64
 	case PROCESSOR_ARCHITECTURE_IA64:
 	    arch = "ia64"; break;
-#endif
-#ifdef PROCESSOR_ARCHITECTURE_ALPHA64
-	case PROCESSOR_ARCHITECTURE_ALPHA64:
-	    arch = "alpha64"; break;
-#endif
-#ifdef PROCESSOR_ARCHITECTURE_MSIL
-	case PROCESSOR_ARCHITECTURE_MSIL:
-	    arch = "msil"; break;
-#endif
-#ifdef PROCESSOR_ARCHITECTURE_AMD64
 	case PROCESSOR_ARCHITECTURE_AMD64:
 	    arch = "amd64"; break;
-#endif
-#ifdef PROCESSOR_ARCHITECTURE_IA32_ON_WIN64
-	case PROCESSOR_ARCHITECTURE_IA32_ON_WIN64:
-	    arch = "ia32-64"; break;
-#endif
-#ifdef PROCESSOR_ARCHITECTURE_UNKNOWN
 	case PROCESSOR_ARCHITECTURE_UNKNOWN:
 	    arch = "unknown"; break;
-#endif
 	default:
 	    sprintf(name->machine, "unknown(0x%x)", procarch);
 	    arch = name->machine;
@@ -2330,20 +2264,13 @@ win32_alarm(unsigned int sec)
     return 0;
 }
 
-#ifdef HAVE_DES_FCRYPT
 extern char *	des_fcrypt(const char *txt, const char *salt, char *cbuf);
-#endif
 
 DllExport char *
 win32_crypt(const char *txt, const char *salt)
 {
     dTHX;
-#ifdef HAVE_DES_FCRYPT
     return des_fcrypt(txt, salt, w32_crypt_buffer);
-#else
-    Perl_croak(aTHX_ "The crypt() function is unimplemented due to excessive paranoia.");
-    return NULL;
-#endif
 }
 
 /* simulate flock by locking a range on the file */
@@ -3237,210 +3164,10 @@ win32_dup2(int fd1,int fd2)
     return dup2(fd1,fd2);
 }
 
-#ifdef PERL_MSVCRT_READFIX
-
-#define LF		10	/* line feed */
-#define CR		13	/* carriage return */
-#define CTRLZ		26      /* ctrl-z means eof for text */
-#define FOPEN		0x01	/* file handle open */
-#define FEOFLAG		0x02	/* end of file has been encountered */
-#define FCRLF		0x04	/* CR-LF across read buffer (in text mode) */
-#define FPIPE		0x08	/* file handle refers to a pipe */
-#define FAPPEND		0x20	/* file handle opened O_APPEND */
-#define FDEV		0x40	/* file handle refers to device */
-#define FTEXT		0x80	/* file handle is in text mode */
-#define MAX_DESCRIPTOR_COUNT	(64*32) /* this is the maximun that MSVCRT can handle */
-
-int __cdecl
-_fixed_read(int fh, void *buf, unsigned cnt)
-{
-    int bytes_read;                 /* number of bytes read */
-    char *buffer;                   /* buffer to read to */
-    int os_read;                    /* bytes read on OS call */
-    char *p, *q;                    /* pointers into buffer */
-    char peekchr;                   /* peek-ahead character */
-    ULONG filepos;                  /* file position after seek */
-    ULONG dosretval;                /* o.s. return value */
-
-    /* validate handle */
-    if (((unsigned)fh >= (unsigned)MAX_DESCRIPTOR_COUNT) ||
-         !(_osfile(fh) & FOPEN))
-    {
-	/* out of range -- return error */
-	errno = EBADF;
-	_doserrno = 0;  /* not o.s. error */
-	return -1;
-    }
-
-    /*
-     * If lockinitflag is FALSE, assume fd is device
-     * lockinitflag is set to TRUE by open.
-     */
-    if (_pioinfo(fh)->lockinitflag)
-	EnterCriticalSection(&(_pioinfo(fh)->lock));  /* lock file */
-
-    bytes_read = 0;                 /* nothing read yet */
-    buffer = (char*)buf;
-
-    if (cnt == 0 || (_osfile(fh) & FEOFLAG)) {
-        /* nothing to read or at EOF, so return 0 read */
-        goto functionexit;
-    }
-
-    if ((_osfile(fh) & (FPIPE|FDEV)) && _pipech(fh) != LF) {
-        /* a pipe/device and pipe lookahead non-empty: read the lookahead
-         * char */
-        *buffer++ = _pipech(fh);
-        ++bytes_read;
-        --cnt;
-        _pipech(fh) = LF;           /* mark as empty */
-    }
-
-    /* read the data */
-
-    if (!ReadFile((HANDLE)_osfhnd(fh), buffer, cnt, (LPDWORD)&os_read, NULL))
-    {
-        /* ReadFile has reported an error. recognize two special cases.
-         *
-         *      1. map ERROR_ACCESS_DENIED to EBADF
-         *
-         *      2. just return 0 if ERROR_BROKEN_PIPE has occurred. it
-         *         means the handle is a read-handle on a pipe for which
-         *         all write-handles have been closed and all data has been
-         *         read. */
-
-        if ((dosretval = GetLastError()) == ERROR_ACCESS_DENIED) {
-            /* wrong read/write mode should return EBADF, not EACCES */
-            errno = EBADF;
-            _doserrno = dosretval;
-            bytes_read = -1;
-	    goto functionexit;
-        }
-        else if (dosretval == ERROR_BROKEN_PIPE) {
-            bytes_read = 0;
-	    goto functionexit;
-        }
-        else {
-            bytes_read = -1;
-	    goto functionexit;
-        }
-    }
-
-    bytes_read += os_read;          /* update bytes read */
-
-    if (_osfile(fh) & FTEXT) {
-        /* now must translate CR-LFs to LFs in the buffer */
-
-        /* set CRLF flag to indicate LF at beginning of buffer */
-        /* if ((os_read != 0) && (*(char *)buf == LF))   */
-        /*    _osfile(fh) |= FCRLF;                      */
-        /* else                                          */
-        /*    _osfile(fh) &= ~FCRLF;                     */
-
-        _osfile(fh) &= ~FCRLF;
-
-        /* convert chars in the buffer: p is src, q is dest */
-        p = q = (char*)buf;
-        while (p < (char *)buf + bytes_read) {
-            if (*p == CTRLZ) {
-                /* if fh is not a device, set ctrl-z flag */
-                if (!(_osfile(fh) & FDEV))
-                    _osfile(fh) |= FEOFLAG;
-                break;              /* stop translating */
-            }
-            else if (*p != CR)
-                *q++ = *p++;
-            else {
-                /* *p is CR, so must check next char for LF */
-                if (p < (char *)buf + bytes_read - 1) {
-                    if (*(p+1) == LF) {
-                        p += 2;
-                        *q++ = LF;  /* convert CR-LF to LF */
-                    }
-                    else
-                        *q++ = *p++;    /* store char normally */
-                }
-                else {
-                    /* This is the hard part.  We found a CR at end of
-                       buffer.  We must peek ahead to see if next char
-                       is an LF. */
-                    ++p;
-
-                    dosretval = 0;
-                    if (!ReadFile((HANDLE)_osfhnd(fh), &peekchr, 1,
-                                    (LPDWORD)&os_read, NULL))
-                        dosretval = GetLastError();
-
-                    if (dosretval != 0 || os_read == 0) {
-                        /* couldn't read ahead, store CR */
-                        *q++ = CR;
-                    }
-                    else {
-                        /* peekchr now has the extra character -- we now
-                           have several possibilities:
-                           1. disk file and char is not LF; just seek back
-                              and copy CR
-                           2. disk file and char is LF; store LF, don't seek back
-                           3. pipe/device and char is LF; store LF.
-                           4. pipe/device and char isn't LF, store CR and
-                              put char in pipe lookahead buffer. */
-                        if (_osfile(fh) & (FDEV|FPIPE)) {
-                            /* non-seekable device */
-                            if (peekchr == LF)
-                                *q++ = LF;
-                            else {
-                                *q++ = CR;
-                                _pipech(fh) = peekchr;
-                            }
-                        }
-                        else {
-                            /* disk file */
-                            if (peekchr == LF) {
-                                /* nothing read yet; must make some
-                                   progress */
-                                *q++ = LF;
-                                /* turn on this flag for tell routine */
-                                _osfile(fh) |= FCRLF;
-                            }
-                            else {
-				HANDLE osHandle;        /* o.s. handle value */
-                                /* seek back */
-				if ((osHandle = (HANDLE)_get_osfhandle(fh)) != (HANDLE)-1)
-				{
-				    if ((filepos = SetFilePointer(osHandle, -1, NULL, FILE_CURRENT)) == -1)
-					dosretval = GetLastError();
-				}
-                                if (peekchr != LF)
-                                    *q++ = CR;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        /* we now change bytes_read to reflect the true number of chars
-           in the buffer */
-        bytes_read = q - (char *)buf;
-    }
-
-functionexit:
-    if (_pioinfo(fh)->lockinitflag)
-	LeaveCriticalSection(&(_pioinfo(fh)->lock));    /* unlock file */
-
-    return bytes_read;
-}
-
-#endif	/* PERL_MSVCRT_READFIX */
-
 DllExport int
 win32_read(int fd, void *buf, unsigned int cnt)
 {
-#ifdef PERL_MSVCRT_READFIX
-    return _fixed_read(fd, buf, cnt);
-#else
     return read(fd, buf, cnt);
-#endif
 }
 
 DllExport int
@@ -4517,7 +4244,7 @@ Perl_win32_init(int *argcp, char ***argvp)
      * want to be at the vendor's whim on the default, we set
      * it explicitly here.
      */
-#if !defined(_ALPHA_) && !defined(__GNUC__)
+#if !defined(__GNUC__)
     _control87(MCW_EM, MCW_EM);
 #endif
     MALLOC_INIT;

@@ -382,16 +382,6 @@ You may also need to comment out the C<DELAYLOAD = ...> line in the
 Makefile if you're using VC++ 6.0 without the latest service pack and
 the linker reports an internal error.
 
-If you have either the source or a library that contains des_fcrypt(),
-enable the appropriate option in the makefile.  A ready-to-use version
-of fcrypt.c, based on the version originally written by Eric Young at
-ftp://ftp.funet.fi/pub/crypt/mirrors/dsi/libdes/, is bundled with the
-distribution and CRYPT_SRC is set to use it.
-Alternatively, if you have built a library that contains des_fcrypt(),
-you can set CRYPT_LIB to point to the library name.
-Perl will also build without des_fcrypt(), but the crypt() builtin will
-fail at run time.
-
 If you want build some core extensions statically into perl's dll, specify
 them in the STATIC_EXT macro.
 
