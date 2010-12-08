@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-print "1..107\n";
+print "1..108\n";
 
 eval 'print "ok 1\n";';
 
@@ -611,3 +611,9 @@ eval $ov;
 print "ok\n";
 EOP
 
+for my $k (!0) {
+  eval 'my $do_something_with = $k';
+  eval { $k = 'mon' };
+  is "a" =~ /a/, "1",
+    "string eval leaves readonly lexicals readonly [perl #19135]";
+}
