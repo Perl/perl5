@@ -1,8 +1,10 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 7c7df81, except for:
+This has been completed up to 558b442, except for:
 d9a4b459f94297889956ac3adc42707365f274c2
+bf5522a13a381257966e7ed6b731195a873b153e
+9cef83062267e94311e1fd8744396e440642738e
 
 =head1 NAME
 
@@ -126,6 +128,19 @@ real-world codebases.
 If it is absolutely necessary to have empty attribute lists (for example,
 because of a code generator) then avoid the error by adding a space before
 the C<=>.
+
+=head2 Run-time code block in regular expressions
+
+Code blocks in regular expressions (C<(?{...})> and C<(??{...})>) used not
+to inherit any pragmata (strict, warnings, etc.) if the regular expression
+was compiled at run time as happens in cases like these two:
+
+  use re 'eval';
+  $foo =~ $bar; # when $bar contains (?{...})
+  $foo =~ /$bar(?{ $finished = 1 })/;
+
+This was a bug, which has now been fixed. But it has the potential to break
+any code that was relying on this bug.
 
 =head1 Deprecations
 
