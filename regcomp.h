@@ -406,12 +406,6 @@ struct regnode_charclass_class {
 #define ANYOF_CLASS_CLEAR(p, c)	(ANYOF_CLASS_BYTE(p, c) &= ~ANYOF_BIT(c))
 #define ANYOF_CLASS_TEST(p, c)	(ANYOF_CLASS_BYTE(p, c) &   ANYOF_BIT(c))
 
-/* Quicker way to see if there are actually any tests.  This is because
- * currently the set of tests can be empty even when the class bitmap is
- * allocated */
-#define ANYOF_CLASS_TEST_ANY_SET(p)	/* assumes sizeof(p) = 4 */       \
-	memNE (((struct regnode_charclass_class*)(p))->classflags, "0000", ANYOF_CLASS_SIZE)
-
 #define ANYOF_CLASS_ZERO(ret)	Zero(((struct regnode_charclass_class*)(ret))->classflags, ANYOF_CLASSBITMAP_SIZE, char)
 #define ANYOF_BITMAP_ZERO(ret)	Zero(((struct regnode_charclass*)(ret))->bitmap, ANYOF_BITMAP_SIZE, char)
 
@@ -431,7 +425,29 @@ struct regnode_charclass_class {
 
 #define ANYOF_SKIP		((ANYOF_SIZE - 1)/sizeof(regnode))
 #define ANYOF_CLASS_SKIP	((ANYOF_CLASS_SIZE - 1)/sizeof(regnode))
-#define ANYOF_CLASS_ADD_SKIP	(ANYOF_CLASS_SKIP - ANYOF_SKIP)
+
+/* The class bit can be set to the locale one if necessary to save bits at the
+ * expense of having locale ANYOF nodes always have a class bit map, and hence
+ * take up extra space.  This allows convenient changing it as development
+ * proceeds on this */
+#if ANYOF_CLASS == ANYOF_LOCALE
+#   undef ANYOF_CLASS_ADD_SKIP
+#   define ANYOF_ADD_LOC_SKIP	(ANYOF_CLASS_SKIP - ANYOF_SKIP)
+
+    /* Quicker way to see if there are actually any tests.  This is because
+     * currently the set of tests can be empty even when the class bitmap is
+     * allocated */
+#   if ANYOF_CLASSBITMAP_SIZE != 4
+#	error ANYOF_CLASSBITMAP_SIZE is expected to be 4
+#   endif
+#   define ANYOF_CLASS_TEST_ANY_SET(p)	/* assumes sizeof(p) = 4 */       \
+	memNE (((struct regnode_charclass_class*)(p))->classflags,	  \
+		"\0\0\0\0", ANYOF_CLASSBITMAP_SIZE)
+#else
+#   define ANYOF_CLASS_ADD_SKIP	(ANYOF_CLASS_SKIP - ANYOF_SKIP)
+#   undef ANYOF_ADD_LOC_SKIP
+#   define ANYOF_CLASS_TEST_ANY_SET(p) (ANYOF_FLAGS(p) & ANYOF_CLASS)
+#endif
 
 
 /*

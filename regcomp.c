@@ -3609,8 +3609,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			goto do_default;
 		    if (flags & SCF_DO_STCLASS_OR) { /* Everything but \n */
 			value = (ANYOF_BITMAP_TEST(data->start_class,'\n')
-				 || ((data->start_class->flags & ANYOF_CLASS)
-                                     && ANYOF_CLASS_TEST_ANY_SET(data->start_class)));
+				 || ANYOF_CLASS_TEST_ANY_SET(data->start_class));
 			cl_anything(pRExC_state, data->start_class);
 		    }
 		    if (flags & SCF_DO_STCLASS_AND || !value)
@@ -8377,12 +8376,21 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
 
     if (SIZE_ONLY) {
 	RExC_size += ANYOF_SKIP;
+#ifdef ANYOF_ADD_LOC_SKIP
+	if (LOC) {
+	    RExC_size += ANYOF_ADD_LOC_SKIP;
+	}
+#endif
 	listsv = &PL_sv_undef; /* For code scanners: listsv always non-NULL. */
     }
     else {
  	RExC_emit += ANYOF_SKIP;
-	if (LOC)
+	if (LOC) {
 	    ANYOF_FLAGS(ret) |= ANYOF_LOCALE;
+#ifdef ANYOF_ADD_LOC_SKIP
+	    RExC_emit += ANYOF_ADD_LOC_SKIP;
+#endif
+	}
 	ANYOF_BITMAP_ZERO(ret);
 	listsv = newSVpvs("# comment\n");
     }
@@ -8596,10 +8604,14 @@ parseit:
 	    if (LOC && namedclass < ANYOF_MAX && ! need_class) {
 		need_class = 1;
 		if (SIZE_ONLY) {
+#ifdef ANYOF_CLASS_ADD_SKIP
 		    RExC_size += ANYOF_CLASS_ADD_SKIP;
+#endif
 		}
 		else {
+#ifdef ANYOF_CLASS_ADD_SKIP
 		    RExC_emit += ANYOF_CLASS_ADD_SKIP;
+#endif
 		    ANYOF_CLASS_ZERO(ret);
 		}
 		ANYOF_FLAGS(ret) |= ANYOF_CLASS;
@@ -9700,8 +9712,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	}
         
         EMIT_ANYOF_TEST_SEPARATOR(do_sep,sv,flags);
-        /* output any special charclass tests (used mostly under use locale) */
-	if (o->flags & ANYOF_CLASS && ANYOF_CLASS_TEST_ANY_SET(o))
+        /* output any special charclass tests (used entirely under use locale) */
+	if (ANYOF_CLASS_TEST_ANY_SET(o))
 	    for (i = 0; i < (int)(sizeof(anyofs)/sizeof(char*)); i++)
 		if (ANYOF_CLASS_TEST(o,i)) {
 		    sv_catpv(sv, anyofs[i]);
