@@ -8928,28 +8928,59 @@ parseit:
 	ANYOF_FLAGS(ret) = ANYOF_UTF8|ANYOF_UNICODE_ALL;
     }
 
-    if( stored == 1 && (value < 128 || (value < 256 && !UTF))
-        && !( ANYOF_FLAGS(ret) & ( ANYOF_FLAGS_ALL ^ ANYOF_FOLD ) )
-    ) {
-	/* optimize single char class to an EXACT node but *only* when its not
-	 * a UTF/high char.  Note that the information needed to decide to do
-	 * this optimization is not currently available until the 2nd pass, and
-	 * that the actually used EXACT node takes less space than the
-	 * calculated ANYOF node, and hence the amount of space calculated in
-         * the first pass is larger than actually used.  Currently we don't
-         * keep track of enough information to do this for nodes which contain
-         * matches outside the bitmap */
+    /* A single character class can be "optimized" into an EXACTish node.
+     * Note that since we don't currently count how many characters there are
+     * outside the bitmap, we are XXX missing optimization possibilities for
+     * them.  This optimization can't happen unless this is a truly single
+     * character class, which means that it can't be an inversion into a
+     * many-character class, and there must be no possibility of there being
+     * things outside the bitmap.  'stored' (only) for locales doesn't include
+     * \w, etc, so have to make a special test that they aren't present */
+    if (! (ANYOF_FLAGS(ret) & (ANYOF_NONBITMAP|ANYOF_INVERT|ANYOF_UNICODE_ALL))
+        && ((stored == 1 && ((! (ANYOF_FLAGS(ret) & ANYOF_LOCALE))
+                              || (! ANYOF_CLASS_TEST_ANY_SET(ret))))))
+    {
+        /* Note that the information needed to decide to do this optimization
+         * is not currently available until the 2nd pass, and that the actually
+         * used EXACT node takes less space than the calculated ANYOF node, and
+         * hence the amount of space calculated in the first pass is larger
+         * than actually used, so this optimization doesn't gain us any space.
+	 * But an EXACT node is faster than an ANYOF node, and can be combined
+	 * with any adjacent EXACT nodes later by the optimizer for further
+	 * gains. */
+
         const char * cur_parse= RExC_parse;
         RExC_emit = (regnode *)orig_emit;
         RExC_parse = (char *)orig_parse;
-        ret = reg_node(pRExC_state,
-                       (U8)((ANYOF_FLAGS(ret) & ANYOF_FOLD) ? EXACTF : EXACT));
+
+	/* (A locale node can have 1 point and be folded; all the other folds
+	 * will include the fold, hence will have 2 points, so we won't get
+	 * here with FOLD set unless it is also locale) */
+	ret = reg_node(pRExC_state, (U8) (! FOLD)
+					 ? EXACT
+					 : EXACTFL
+		    );
         RExC_parse = (char *)cur_parse;
-        *STRING(ret)= (char)value;
-        STR_LEN(ret)= 1;
-        RExC_emit += STR_SZ(1);
+	if (UTF && ! NATIVE_IS_INVARIANT(value)) {
+	    *STRING(ret)= UTF8_EIGHT_BIT_HI((U8) value);
+	    *(STRING(ret) + 1)= UTF8_EIGHT_BIT_LO((U8) value);
+	    STR_LEN(ret)= 2;
+	    RExC_emit += STR_SZ(2);
+	}
+	else {
+	    *STRING(ret)= (char)value;
+	    STR_LEN(ret)= 1;
+	    RExC_emit += STR_SZ(1);
+	}
 	SvREFCNT_dec(listsv);
         return ret;
+
+	/* (A 2-character class of the very special form like [aA] could be
+	 * optimized into an EXACTFish node, but only for non-locales, and for
+	 * characters which only have the two folds; so things like 'fF' and
+	 * 'Ii' wouldn't work because of the fold of 'LATIN SMALL LIGATURE FI'.
+	 * Since we don't have that information currently conveniently
+	 * available, skip the optimization) */
     }
 
     {
