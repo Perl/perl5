@@ -190,20 +190,17 @@ equivalent to the following snippet:
 
     if (SvMAGICAL(sv))
         mg_get(sv);
-    if (SvROK(sv) &&
-        (tmpsv = (SV*)SvRV(sv)) &&
-        SvTYPE(tmpsv) == SVt_PVMG &&
-        (tmpmg = mg_find(tmpsv, PERL_MAGIC_qr)))
-    {
-        return (REGEXP *)tmpmg->mg_obj;
-    }
+    if (SvROK(sv))
+        sv = MUTABLE_SV(SvRV(sv));
+    if (SvTYPE(sv) == SVt_REGEXP)
+        return (REGEXP*) sv;
 
 NULL will be returned if a REGEXP* is not found.
 
 =for apidoc Am|bool|SvRXOK|SV* sv
 
-Returns a boolean indicating whether the SV contains qr magic
-(PERL_MAGIC_qr).
+Returns a boolean indicating whether the SV (or the one it references)
+is a REGEXP.
 
 If you want to do something with the REGEXP* later use SvRX instead
 and check for NULL.
