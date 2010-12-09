@@ -283,9 +283,7 @@ unlimited depth.  And the tables used by hashes (sometimes called
 performance.  Perl can use sophisticated pattern matching techniques to
 scan large amounts of data quickly.  Although optimized for
 scanning text, Perl can also deal with binary data, and can make dbm
-files look like hashes.  Setuid Perl scripts are safer than C programs
-through a dataflow tracing mechanism that prevents many stupid
-security holes.
+files look like hashes.
 
 But wait, there's more...
 
