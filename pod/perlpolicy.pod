@@ -395,7 +395,7 @@ language feature works is with a small program the reader can
 run without modification.  More often, examples will consist
 of a snippet of code containing only the "important" bits.
 The definition of "important" varies from snippet to snippet.
-Sometimes it's important to declare C<use strict;> and C<use warnings;>,
+Sometimes it's important to declare C<use strict> and C<use warnings>,
 initialize all variables and fully catch every error condition.
 More often than not, though, those things obscure the lesson
 the example was intended to teach.
