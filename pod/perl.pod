@@ -287,12 +287,6 @@ files look like hashes.  Setuid Perl scripts are safer than C programs
 through a dataflow tracing mechanism that prevents many stupid
 security holes.
 
-If you have a problem that would ordinarily use B<sed> or B<awk> or
-B<sh>, but it exceeds their capabilities or must run a little faster,
-and you don't want to write the silly thing in C, then Perl may be for
-you.  There are also translators to turn your B<sed> and B<awk>
-scripts into Perl scripts.
-
 But wait, there's more...
 
 Begun in 1993 (see L<perlhist>), Perl version 5 is nearly a complete
