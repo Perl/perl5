@@ -2143,6 +2143,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 {
     dVAR;
     I32 type;
+    const bool stately = PL_parser && PL_parser->in_my == KEY_state;
 
     PERL_ARGS_ASSERT_MY_KID;
 
@@ -2213,7 +2214,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
     }
     o->op_flags |= OPf_MOD;
     o->op_private |= OPpLVAL_INTRO;
-    if (PL_parser->in_my == KEY_state)
+    if (stately)
 	o->op_private |= OPpPAD_STATE;
     return o;
 }
@@ -7937,7 +7938,13 @@ Perl_ck_sassign(pTHX_ OP *o)
     }
     if (kid->op_sibling) {
 	OP *kkid = kid->op_sibling;
-	if (kkid->op_type == OP_PADSV
+	/* For state variable assignment, kkid is a list op whose op_last
+	   is a padsv. */
+	if ((kkid->op_type == OP_PADSV ||
+	     (kkid->op_type == OP_LIST &&
+	      (kkid = cLISTOPx(kkid)->op_last)->op_type == OP_PADSV
+	     )
+	    )
 		&& (kkid->op_private & OPpLVAL_INTRO)
 		&& SvPAD_STATE(*av_fetch(PL_comppad_name, kkid->op_targ, FALSE))) {
 	    const PADOFFSET target = kkid->op_targ;

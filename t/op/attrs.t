@@ -313,4 +313,16 @@ foreach my $test (@tests) {
      'Calling closure proto with no @_ that returns a lexical';
 }
 
+# [perl #68658] Attributes on stately variables
+{
+  package thwext;
+  sub MODIFY_SCALAR_ATTRIBUTES { () }
+  my $i = 0;
+  my $x_values = '';
+  eval 'sub foo { use 5.01; state $x :A0 = $i++; $x_values .= $x }';
+  foo(); foo();
+  package main;
+  is $x_values, '00', 'state with attributes';
+}
+
 done_testing();
