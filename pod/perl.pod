@@ -263,12 +263,15 @@ often point out exactly where the trouble is.
 Perl officially stands for Practical Extraction and Report Language,
 except when it doesn't.
 
-Perl is a language optimized for scanning arbitrary
+Perl was originally a language optimized for scanning arbitrary
 text files, extracting information from those text files, and printing
-reports based on that information.  It's also a good language for many
-system management tasks.  The language is intended to be practical
-(easy to use, efficient, complete) rather than beautiful (tiny,
-elegant, minimal).
+reports based on that information.  It quickly became a good language
+for many system management tasks. Over the years, Perl has grown into
+a general-purpose progammming language. It's widely used for everything
+from quick "one-liners" to full-scale application development.
+
+The language is intended to be practical (easy to use, efficient,
+complete) rather than beautiful (tiny, elegant, minimal).
 
 Perl combines (in the author's opinion, anyway) some of the best
 features of C, B<sed>, B<awk>, and B<sh>, so people familiar with
