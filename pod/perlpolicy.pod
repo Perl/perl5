@@ -86,7 +86,7 @@ nearly impossible.
 Lately, ignoring or actively opposing compatibility with earlier versions
 of Perl has come into vogue.  Sometimes, a change is proposed which
 wants to usurp syntax which previously had another meaning.  Sometimes,
-a change wants to improve previously-crazy semaintics.
+a change wants to improve previously-crazy semantics.
 
 Down this road lies madness.
 
