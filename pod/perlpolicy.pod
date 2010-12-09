@@ -411,7 +411,7 @@ prose.
 In general, documentation should describe what Perl does "now" rather
 than what it used to do.  It's perfectly reasonable to include notes
 in documentation about how behaviour has changed from previous releases,
-but, with the exception of perlfaq, documentation isn't "dual-life" --
+but, with very few exceptions, documentation isn't "dual-life" --
 it doesn't need to fully describe how all old versions used to work.
 
 
