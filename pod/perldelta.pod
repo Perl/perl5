@@ -94,6 +94,10 @@ L<perlunicode/The "Unicode Bug"> for details.)  If their is a
 possibility that your code will process Unicode strings, you are
 B<strongly> encouraged to use this subpragma to avoid nasty surprises.
 
+This availability of this should strongly affect the whole tone of
+various documents, such as L<perlunicode> and L<perluniintro>, but this
+work has not been done yet.
+
 =head2 Exception Handling Backcompat Hack
 
 When an exception is thrown in an C<eval BLOCK>, C<$@> is now set before
