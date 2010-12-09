@@ -151,14 +151,14 @@ sub read_magic {
 	$net_order = 0;
     }
     else {
-	$net_order = ord(substr($buf, 0, 1, ""));
-	my $major = $net_order >> 1;
+	$buf =~ s/(.)//s;
+	my $major = (ord $1) >> 1;
 	return undef if $major > 4; # sanity (assuming we never go that high)
 	$info{major} = $major;
-	$net_order &= 0x01;
+	$net_order = (ord $1) & 0x01;
 	if ($major > 1) {
-	    return undef unless length($buf);
-	    my $minor = ord(substr($buf, 0, 1, ""));
+	    return undef unless $buf =~ s/(.)//s;
+	    my $minor = ord $1;
 	    $info{minor} = $minor;
 	    $info{version} = "$major.$minor";
 	    $info{version_nv} = sprintf "%d.%03d", $major, $minor;
@@ -171,17 +171,16 @@ sub read_magic {
     $info{netorder} = $net_order;
 
     unless ($net_order) {
-	return undef unless length($buf);
-	my $len = ord(substr($buf, 0, 1, ""));
+	return undef unless $buf =~ s/(.)//s;
+	my $len = ord $1;
 	return undef unless length($buf) >= $len;
 	return undef unless $len == 4 || $len == 8;  # sanity
-	$info{byteorder} = substr($buf, 0, $len, "");
-	$info{intsize} = ord(substr($buf, 0, 1, ""));
-	$info{longsize} = ord(substr($buf, 0, 1, ""));
-	$info{ptrsize} = ord(substr($buf, 0, 1, ""));
+	@info{qw(byteorder intsize longsize ptrsize)}
+	    = unpack "a${len}CCC", $buf;
+	(substr $buf, 0, $len + 3) = '';
 	if ($info{version_nv} >= 2.002) {
-	    return undef unless length($buf);
-	    $info{nvsize} = ord(substr($buf, 0, 1, ""));
+	    return undef unless $buf =~ s/(.)//s;
+	    $info{nvsize} = ord $1;
 	}
     }
     $info{hdrsize} = $buflen - length($buf);
