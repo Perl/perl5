@@ -27,37 +27,40 @@ my @posix_to_lower
 = my @latin1_to_title
 = @posix_to_upper;
 
-# Override the elements in the to_lower arrays that have different lower case
-# mappings
-for my $i (0x41 .. 0x5A) {
-    $posix_to_lower[$i] = chr(ord($posix_to_lower[$i]) + 32);
-    $latin1_to_lower[$i] = chr(ord($latin1_to_lower[$i]) + 32);
+# Override the elements in the to_lower arrays that have different standard
+# lower case mappings.  (standard meaning they are 32 numbers apart)
+for my $i (0x41 .. 0x5A, 0xC0 .. 0xD6, 0xD8 .. 0xDE) {
+    my $upper_ord = ord_latin1_to_native $i;
+    my $lower_ord = ord_latin1_to_native($i + 32);
+
+    $latin1_to_lower[$upper_ord] = chr($lower_ord);
+
+    next if $i > 127;
+
+    $posix_to_lower[$upper_ord] = chr($lower_ord);
 }
 
 # Same for upper and title
-for my $i (0x61 .. 0x7A) {
-    $posix_to_upper[$i] = chr(ord($posix_to_upper[$i]) - 32);
-    $latin1_to_upper[$i] = chr(ord($latin1_to_upper[$i]) - 32);
-    $posix_to_title[$i] = chr(ord($posix_to_title[$i]) - 32);
-    $latin1_to_title[$i] = chr(ord($latin1_to_title[$i]) - 32);
-}
+for my $i (0x61 .. 0x7A, 0xE0 .. 0xF6, 0xF8 .. 0xFE) {
+    my $lower_ord = ord_latin1_to_native $i;
+    my $upper_ord = ord_latin1_to_native($i - 32);
 
-# And the same for those in the latin1 range
-for my $i (0xC0 .. 0xD6, 0xD8 .. 0xDE) {
-    $latin1_to_lower[$i] = chr(ord($latin1_to_lower[$i]) + 32);
-}
-for my $i (0xE0 .. 0xF6, 0xF8 .. 0xFE) {
-    $latin1_to_upper[$i] = chr(ord($latin1_to_upper[$i]) - 32);
-    $latin1_to_title[$i] = chr(ord($latin1_to_title[$i]) - 32);
+    $latin1_to_upper[$lower_ord] = chr($upper_ord);
+    $latin1_to_title[$lower_ord] = chr($upper_ord);
+
+    next if $i > 127;
+
+    $posix_to_upper[$lower_ord] = chr($upper_ord);
+    $posix_to_title[$lower_ord] = chr($upper_ord);
 }
 
 # Override the abnormal cases.
-$latin1_to_upper[0xB5] = chr(0x39C);
-$latin1_to_title[0xB5] = chr(0x39C);
-$latin1_to_upper[0xDF] = 'SS';
-$latin1_to_title[0xDF] = 'Ss';
-$latin1_to_upper[0xFF] = chr(0x178);
-$latin1_to_title[0xFF] = chr(0x178);
+$latin1_to_upper[ord_latin1_to_native 0xB5] = chr(0x39C);
+$latin1_to_title[ord_latin1_to_native 0xB5] = chr(0x39C);
+$latin1_to_upper[ord_latin1_to_native 0xDF] = 'SS';
+$latin1_to_title[ord_latin1_to_native 0xDF] = 'Ss';
+$latin1_to_upper[ord_latin1_to_native 0xFF] = chr(0x178);
+$latin1_to_title[ord_latin1_to_native 0xFF] = chr(0x178);
 
 my $repeat = 25;    # Length to make strings.
 
@@ -71,8 +74,8 @@ $cyrillic{'uc'} = chr(0x42F) x $repeat;
 $cyrillic{'lc'} = chr(0x44F) x $repeat;
 
 my %latin1;
-$latin1{'uc'} = chr(0xD8) x $repeat;
-$latin1{'lc'} = chr(0xF8) x $repeat;
+$latin1{'uc'} = chr(ord_latin1_to_native 0xD8) x $repeat;
+$latin1{'lc'} = chr(ord_latin1_to_native 0xF8) x $repeat;
 
 my %empty;
 $empty{'lc'} = $empty{'uc'} = "";
@@ -142,31 +145,38 @@ for my  $prefix (\%empty, \%posix, \%cyrillic, \%latin1) {
     }
 }
 
-# In this section test that \w, \s, and \b work correctly.  These are the only
-# character classes affected by this pragma.
+# In this section test that \w, \s, and \b (and complements) work correctly.
+# These are the only character classes affected by this pragma.  Above ASCII
+# range Latin-1 characters are in \w and \s iff the pragma is on.
 
-# Boolean if w[$i] is a \w character
+# Construct the expected full Latin1 values without using anything we're
+# testing.  All these were determined manually by looking in the manual.
+# Boolean: is w[$i] a \w character?
 my @w = (0) x 256;
-@w[0x30 .. 0x39] = (1) x 10;     # 0-9
-@w[0x41 .. 0x5a] = (1) x 26;     # A-Z
-@w[0x61 .. 0x7a] = (1) x 26;     # a-z
-$w[0x5F] = 1;                    # _
-$w[0xAA] = 1;                    # FEMININE ORDINAL INDICATOR
-$w[0xB5] = 1;                    # MICRO SIGN
-$w[0xBA] = 1;                    # MASCULINE ORDINAL INDICATOR
-@w[0xC0 .. 0xD6] = (1) x 23;     # various
-@w[0xD8 .. 0xF6] = (1) x 31;     # various
-@w[0xF8 .. 0xFF] = (1) x 8;      # various
+for my $i ( 0x30 .. 0x39,   # 0-9
+            0x41 .. 0x5a,   # A-Z
+            0x61 .. 0x7a,   # a-z
+            0x5F,           # _
+            0xAA,           # FEMININE ORDINAL INDICATOR
+            0xB5,           # MICRO SIGN
+            0xBA,           # MASCULINE ORDINAL INDICATOR
+            0xC0 .. 0xD6,   # various
+            0xD8 .. 0xF6,   # various
+            0xF8 .. 0xFF,   # various
+        )
+{
+    $w[ord_latin1_to_native $i] = 1;
+}
 
-# Boolean if s[$i] is a \s character
+# Boolean: is s[$i] a \s character?
 my @s = (0) x 256;
-$s[0x09] = 1;   # Tab
-$s[0x0A] = 1;   # LF
-$s[0x0C] = 1;   # FF
-$s[0x0D] = 1;   # CR
-$s[0x20] = 1;   # SPACE
-$s[0x85] = 1;   # NEL
-$s[0xA0] = 1;   # NO BREAK SPACE
+$s[ord_latin1_to_native 0x09] = 1;   # Tab
+$s[ord_latin1_to_native 0x0A] = 1;   # LF
+$s[ord_latin1_to_native 0x0C] = 1;   # FF
+$s[ord_latin1_to_native 0x0D] = 1;   # CR
+$s[ord_latin1_to_native 0x20] = 1;   # SPACE
+$s[ord_latin1_to_native 0x85] = 1;   # NEL
+$s[ord_latin1_to_native 0xA0] = 1;   # NO BREAK SPACE
 
 for my $i (0 .. 255) {
     my $char = chr($i);
