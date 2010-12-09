@@ -20,7 +20,7 @@ As a volunteer organization, the commitments we make are heavily dependent
 on the goodwill and hard work of individuals who have no obligation to
 contribute to Perl.
 
-That being said, we value Perl's stabilty and security and have long
+That being said, we value Perl's stability and security and have long
 had an unwritten covenant with the broader Perl community to support
 and maintain releases of Perl.
 
@@ -86,7 +86,7 @@ nearly impossible.
 Lately, ignoring or actively opposing compatibility with earlier versions
 of Perl has come into vogue.  Sometimes, a change is proposed which
 wants to usurp syntax which previously had another meaning.  Sometimes,
-a change wants to improve previously-crazy semantics.
+a change wants to improve previously-crazy semaintics.
 
 Down this road lies madness.
 
@@ -154,7 +154,7 @@ an experimental feature useful and want to help shape its future.
 =item deprecated
 
 If something in the Perl core is marked as B<deprecated>, we may remove it
-from thecore in the next stable release series, though we may not. As of
+from the core in the next stable release series, though we may not. As of
 Perl 5.12, deprecated features and modules warn the user as they're used.
 If you use a deprecated feature and believe that its removal from the Perl
 core would be a mistake, please contact the perl5-porters mailinglist and
@@ -377,7 +377,45 @@ necessary, and certainly no more drastic measure should be used until
 every avenue of communication and discussion has failed.
 
 
+=head1 DOCUMENTATION
+
+Perl's documentation is an important resource for our users. It's
+incredibly important for Perl's documentation to be reasonably coherent
+and to accurately reflect the current implementation.
+
+Just as P5P collectively maintains the codebase, we collectively
+maintain the documentation.  Writing a particular bit of documentation
+doesn't give an author control of the future of that documentation.
+At the same time, just as source code changes should match the style
+of their surrounding blocks, so should documentation changes.
+
+Examples in documentation should be illustrative of the concept
+they're explaining.  Sometimes, the best way to show how a
+language feature works is with a small program the reader can
+run without modification.  More often, examples will consist
+of a snippet of code containing only the "important" bits.
+The definition of "important" varies from snippet to snippet.
+Sometimes it's important to declare C<use strict;> and C<use warnings;>,
+initialize all variables and fully catch every error condition.
+More often than not, though, those things obscure the lesson
+the example was intended to teach.
+
+As Perl is developed by a global team of volunteers, our
+documentation often contains spellings which look funny
+to I<somebody>.  Choice of American/British/Other spellings
+is left as an exercise for the author of each bit of
+documentation.  When patching documentation, try to emulate
+the documentation around you, rather than changing the existing
+prose.
+
+In general, documentation should describe what Perl does "now" rather
+than what it used to do.  It's perfectly reasonable to include notes
+in documentation about how behaviour has changed from previous releases,
+but, with the exception of perlfaq, documentation isn't "dual-life" --
+it doesn't need to fully describe how all old versions used to work.
+
+
 =head1 CREDITS
 
-Social Contract about Contributed Modules originally by Russ Allbery E<lt>rra@stanford.eduE<gt> and the perl5-porters.
+"Social Contract about Contributed Modules" originally by Russ Allbery E<lt>rra@stanford.eduE<gt> and the perl5-porters.
 
