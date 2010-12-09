@@ -70,6 +70,7 @@ isa_ok( $base, 'ExtUtils::CBuilder::Base' );
         );
     }
     else {
+        local $^X = $path_to_perl = File::Spec->rel2abs($path_to_perl);
         is(
             ExtUtils::CBuilder::Base::find_perl_interpreter(),
             $path_to_perl,
