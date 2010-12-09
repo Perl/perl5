@@ -1,13 +1,5 @@
 #!./perl -w
 
-BEGIN {
-    chdir 't' if -d 't';
-
-    # We will shortly chdir .., so '../lib' will be wrong at that time, and
-    # 'lib' will be correct
-    @INC = ('../lib', 'lib');
-}
-
 use Test::More tests => 23;
 
 use strict;
@@ -17,19 +9,18 @@ require overload;
 use File::CheckTree;
 use File::Spec;          # used to get absolute paths
 
-# We assume that we start from the perl "t" directory.
-# Will move up one level to make it easier to generate
-# reliable pathnames for testing File::CheckTree
-
-chdir(File::Spec->updir) or die "cannot change to parent of t/ directory: $!";
+# We assume that we start from the dist/File-CheckTree in the perl repository,
+# or the dist root directory for the CPAN version.
 
 
 #### TEST 1 -- No warnings ####
 # usings both relative and full paths, indented comments
 
 {
-    my ($num_warnings, $path_to_README);
-    $path_to_README = File::Spec->rel2abs('README');
+    my ($num_warnings, $path_to_libFileCheckTree);
+    $path_to_libFileCheckTree = File::Spec->rel2abs(
+        File::Spec->catfile('lib', 'File', 'CheckTree.pm'),
+    );
 
     my @warnings;
     local $SIG{__WARN__} = sub { push @warnings, "@_" };
@@ -38,11 +29,11 @@ chdir(File::Spec->updir) or die "cannot change to parent of t/ directory: $!";
         $num_warnings = validate qq{
             lib  -d
 # comment, followed "blank" line (w/ whitespace):
-           
+
             # indented comment, followed blank line (w/o whitespace):
 
-            README -f
-            '$path_to_README' -e || warn
+            lib/File/CheckTree.pm -f
+            '$path_to_libFileCheckTree' -e || warn
         };
     };
 
@@ -63,7 +54,7 @@ chdir(File::Spec->updir) or die "cannot change to parent of t/ directory: $!";
     eval {
         $num_warnings = validate qq{
             lib    -f
-            README -f
+            lib/File/CheckTree.pm -f
         };
     };
 
@@ -86,8 +77,8 @@ chdir(File::Spec->updir) or die "cannot change to parent of t/ directory: $!";
     eval {
         $num_warnings = validate q{
             lib     -effd
-            README -f || die
-            README -d || warn
+            lib/File/CheckTree.pm -f || die
+            lib/File/CheckTree.pm -d || warn
             lib    -f || warn "my warning: $file\n"
         };
     };
@@ -95,7 +86,7 @@ chdir(File::Spec->updir) or die "cannot change to parent of t/ directory: $!";
     is( $@, '' );
     is( scalar @warnings, 3 );
     like( $warnings[0], qr/lib is not a plain file/);
-    like( $warnings[1], qr/README is not a directory/);
+    like( $warnings[1], qr{lib/File/CheckTree.pm is not a directory});
     like( $warnings[2], qr/my warning: lib/);
     is( $num_warnings, 3 );
 }
@@ -104,29 +95,29 @@ chdir(File::Spec->updir) or die "cannot change to parent of t/ directory: $!";
 #### TEST 4 -- cd directive ####
 # cd directive followed by relative paths, followed by full paths
 {
-    my ($num_warnings, @warnings, $path_to_libFile, $path_to_dist);
-    $path_to_libFile = File::Spec->rel2abs(File::Spec->catdir('lib','File'));
-    $path_to_dist    = File::Spec->rel2abs(File::Spec->curdir);
+    my ($num_warnings, @warnings, $path_to_lib, $path_to_dist);
+    $path_to_lib  = File::Spec->rel2abs(File::Spec->catdir('lib'));
+    $path_to_dist = File::Spec->rel2abs(File::Spec->curdir);
 
     local $SIG{__WARN__} = sub { push @warnings, "@_" };
 
     eval {
         $num_warnings = validate qq{
-            lib                -d || die
-            '$path_to_libFile' cd
-            Spec               -e
-            Spec               -f
-            '$path_to_dist'    cd
-            README             -ef
-            INSTALL            -d || warn
-            '$path_to_libFile' -d || die
+            lib                   -d || die
+            '$path_to_lib'        cd
+            File                  -e
+            File                  -f
+            '$path_to_dist'       cd
+            lib/File/CheckTree.pm -ef
+            lib/File/CheckTree.pm -d || warn
+            '$path_to_lib'        -d || die
         };
     };
 
     is( $@, '' );
     is( scalar @warnings, 2 );
-    like( $warnings[0], qr/Spec is not a plain file/);
-    like( $warnings[1], qr/INSTALL is not a directory/);
+    like( $warnings[0], qr/File is not a plain file/);
+    like( $warnings[1], qr/CheckTree\.pm is not a directory/);
     is( $num_warnings, 2 );
 }
 
@@ -138,8 +129,8 @@ chdir(File::Spec->updir) or die "cannot change to parent of t/ directory: $!";
 
     eval {
         $num_warnings = validate q{
-            lib       -ef || die
-            README    -d
+            lib                    -ef || die
+            lib/File/CheckTree.pm  -d
         };
     };
 
@@ -154,8 +145,8 @@ chdir(File::Spec->updir) or die "cannot change to parent of t/ directory: $!";
 
     eval {
         $num_warnings = validate q{
-            lib       -ef || die "yadda $file yadda...\n"
-            README    -d
+            lib                    -ef || die "yadda $file yadda...\n"
+            lib/File/CheckTree.pm  -d
         };
     };
 
@@ -185,6 +176,6 @@ chdir(File::Spec->updir) or die "cannot change to parent of t/ directory: $!";
         };
     };
 
-    like( $@, qr/syntax error/, 
-	  'We got a syntax error for a malformed file query' );
+    like( $@, qr/syntax error/,
+          'We got a syntax error for a malformed file query' );
 }

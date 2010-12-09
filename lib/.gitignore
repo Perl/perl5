@@ -172,6 +172,7 @@
 /ExtUtils/xsubpp
 /Fatal.pm
 /Fcntl.pm
+/File/CheckTree.pm
 /File/Fetch.pm
 /File/Glob.pm
 /File/GlobMapper.pm

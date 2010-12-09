@@ -641,6 +641,14 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> undef,
 	},
 
+    'File::CheckTree' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'DISTRIBUTION'	=> 'FLORA/File-CheckTree-4.4.tar.gz',
+	'FILES'		=> q[dist/File-CheckTree],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'File::Fetch' =>
 	{
 	'MAINTAINER'	=> 'kane',
@@ -1722,7 +1730,6 @@ use File::Glob qw(:case);
 				lib/ExtUtils/t/Embed.t
 				lib/ExtUtils/typemap
 				lib/File/Basename.{pm,t}
-				lib/File/CheckTree.{pm,t}
 				lib/File/Compare.{pm,t}
 				lib/File/Copy.{pm,t}
 				lib/File/DosGlob.{pm,t}

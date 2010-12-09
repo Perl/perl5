@@ -2744,6 +2744,8 @@ dist/ExtUtils-ParseXS/t/XSTest.pm		Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSTest.xs		Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSUsage.pm		ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSUsage.xs		ExtUtils::ParseXS tests
+dist/File-CheckTree/lib/File/CheckTree.pm	Perl module supporting wholesale file mode validation
+dist/File-CheckTree/t/CheckTree.t		See if File::CheckTree works
 dist/Filter-Simple/lib/Filter/Simple.pm				Simple frontend to Filter::Util::Call
 dist/Filter-Simple/t/data.t					See if Filter::Simple works
 dist/Filter-Simple/t/export.t					See if Filter::Simple works
@@ -3700,8 +3702,6 @@ lib/feature.t			See if features work
 lib/feature/unicode_strings.t	See if feature "unicode_strings" work
 lib/File/Basename.pm		Emulate the basename program
 lib/File/Basename.t		See if File::Basename works
-lib/File/CheckTree.pm		Perl module supporting wholesale file mode validation
-lib/File/CheckTree.t		See if File::CheckTree works
 lib/File/Compare.pm		Emulation of cmp command
 lib/File/Compare.t		See if File::Compare works
 lib/File/Copy.pm		Emulation of cp command

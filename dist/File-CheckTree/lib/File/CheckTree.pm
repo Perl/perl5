@@ -119,7 +119,7 @@ sub validate {
             my $this = $test;
 
             # expand relative $file to full pathname if preceded by cd directive
-            $file = File::Spec->catfile($cwd, $file) 
+            $file = File::Spec->catfile($cwd, $file)
                     if $cwd && !File::Spec->file_name_is_absolute($file);
 
             # put filename in after the test operator
@@ -137,7 +137,7 @@ sub validate {
             }
             else {
                 # add "|| warn" as a default disposition
-                $this .= ' || warn' unless $this =~ /\|\|/; 
+                $this .= ' || warn' unless $this =~ /\|\|/;
 
                 # change a generic ".. || die" or ".. || warn"
                 # to call valmess instead of die/warn directly
@@ -163,7 +163,7 @@ sub validate {
                 # do the test
                 eval $this;
 
-                # re-raise an exception caused by a "... || die" test 
+                # re-raise an exception caused by a "... || die" test
                 if (my $err = $@) {
                     # in case of any cd directives, return from whence we came
                     if ($starting_dir ne cwd) {
