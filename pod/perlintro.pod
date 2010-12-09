@@ -22,6 +22,24 @@ Throughout this document you'll see references to other parts of the
 Perl documentation.  You can read that documentation using the C<perldoc>
 command or whatever method you're using to read this document.
 
+Many of the examples in the documentation are code fragments,
+not complete programs, intended to help understand the discussed
+features. They may reflect the style and preference of the author of
+that piece of the documentation, and may be brever than a corresponding
+line of code in a real program. It's usually taken for granted that
+strict and warnings have been enabled, and that used variables have
+been declared without explicitely stating this in each fragment.
+
+Do note that the examples have been written over a period of more than a
+dozen years, and that a large range of authors have contributed. Styles
+and techniques will therefore differ, although some effort has been made
+to not vary styles too widely in the same sections. Do not consider one
+style to be better than others - "There Is More Than One Way Of Doing
+It" is one of Perls mottos. After all, in your journey as a programmer,
+you are likely to encounter different styles.
+
+
+
 =head2 What is Perl?
 
 Perl is a general-purpose programming language originally developed for
