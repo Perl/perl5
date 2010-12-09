@@ -282,8 +282,8 @@ unlimited depth.  And the tables used by hashes (sometimes called
 "associative arrays") grow as necessary to prevent degraded
 performance.  Perl can use sophisticated pattern matching techniques to
 scan large amounts of data quickly.  Although optimized for
-scanning text, Perl can also deal with binary data, and can make dbm
-files look like hashes.
+scanning text, Perl also has many excellent tools for slicing
+and dicing binary data.
 
 But wait, there's more...
 
