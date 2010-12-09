@@ -110,6 +110,7 @@ sub test_corrupt {
   my ($data, $sub, $what, $name) = @_;
 
   my $clone = &$sub($data);
+  local $Test::Builder::Level = $Test::Builder::Level + 1;
   is (defined ($clone), '', "$name $what should fail");
   like ($@, $what, $name);
 }
@@ -146,14 +147,15 @@ sub test_things {
   # number on writes (2.5, 2.4). May increase to 2 if we figure we can do 2.3
   # on 5.005_03 (No utf8).
   # 4 allows for a small safety margin
+  # Which we've now exhausted given that Storable 2.25 is writing 2.8
   # (Joke:
   # Question: What is the value of pi?
   # Mathematician answers "It's pi, isn't it"
   # Physicist answers "3.1, within experimental error"
   # Engineer answers "Well, allowing for a small safety margin,   18"
   # )
-  my $minor4 = $header->{minor} + 4;
-  substr ($copy, $file_magic + 1, 1) = chr $minor4;
+  my $minor6 = $header->{minor} + 6;
+  substr ($copy, $file_magic + 1, 1) = chr $minor6;
   {
     # Now by default newer minor version numbers are not a pain.
     $clone = &$sub($copy);
@@ -162,7 +164,7 @@ sub test_things {
 
     local $Storable::accept_future_minor = 0;
     test_corrupt ($copy, $sub,
-                  "/^Storable binary image v$header->{major}\.$minor4 more recent than I am \\(v$header->{major}\.$minor\\)/",
+                  "/^Storable binary image v$header->{major}\.$minor6 more recent than I am \\(v$header->{major}\.$minor\\)/",
                   "higher minor");
   }
 
@@ -220,19 +222,19 @@ sub test_things {
                 "/^Corrupted storable $what \\(binary v$header->{major}.$minor1\\)/",
                 "bogus tag, minor less 1");
   # Now increase the minor version number
-  substr ($copy, $file_magic + 1, 1) = chr $minor4;
+  substr ($copy, $file_magic + 1, 1) = chr $minor6;
 
   # local $Storable::DEBUGME = 1;
   # This is the delayed croak
   test_corrupt ($copy, $sub,
-                "/^Storable binary image v$header->{major}.$minor4 contains data of type 255. This Storable is v$header->{major}.$minor and can only handle data types up to 28/",
+                "/^Storable binary image v$header->{major}.$minor6 contains data of type 255. This Storable is v$header->{major}.$minor and can only handle data types up to 28/",
                 "bogus tag, minor plus 4");
   # And check again that this croak is not delayed:
   {
     # local $Storable::DEBUGME = 1;
     local $Storable::accept_future_minor = 0;
     test_corrupt ($copy, $sub,
-                  "/^Storable binary image v$header->{major}\.$minor4 more recent than I am \\(v$header->{major}\.$minor\\)/",
+                  "/^Storable binary image v$header->{major}\.$minor6 more recent than I am \\(v$header->{major}\.$minor\\)/",
                   "higher minor");
   }
 }
