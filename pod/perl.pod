@@ -397,9 +397,6 @@ Perl developers, please write to perl-thanks@perl.org .
 
 =head1 SEE ALSO
 
- a2p	awk to perl translator
- s2p	sed to perl translator
-
  http://www.perl.org/       the Perl homepage
  http://www.perl.com/       Perl articles (O'Reilly)
  http://www.cpan.org/       the Comprehensive Perl Archive
