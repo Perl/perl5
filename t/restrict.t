@@ -8,6 +8,7 @@
 
 sub BEGIN {
     unshift @INC, 't';
+    unshift @INC, 't/compat' if $] < 5.006002;
     if ($ENV{PERL_CORE}){
         require Config;
         if ($Config::Config{'extensions'} !~ /\bStorable\b/) {
