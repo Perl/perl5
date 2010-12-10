@@ -13,21 +13,21 @@
 
 #  include "perldtrace.h"
 
-#  define ENTRY_PROBE(func, file, line) 	\
-    if (PERL_SUB_ENTRY_ENABLED()) {		\
-	PERL_SUB_ENTRY(func, file, line); 	\
+#  define ENTRY_PROBE(func, file, line, stash)  	\
+    if (PERL_SUB_ENTRY_ENABLED()) {	        	\
+	PERL_SUB_ENTRY(func, file, line, stash); 	\
     }
 
-#  define RETURN_PROBE(func, file, line)	\
-    if (PERL_SUB_RETURN_ENABLED()) {		\
-	PERL_SUB_RETURN(func, file, line); 	\
+#  define RETURN_PROBE(func, file, line, stash) 	\
+    if (PERL_SUB_RETURN_ENABLED()) {    		\
+	PERL_SUB_RETURN(func, file, line, stash); 	\
     }
 
 #else
 
 /* NOPs */
-#  define ENTRY_PROBE(func, file, line)
-#  define RETURN_PROBE(func, file, line)
+#  define ENTRY_PROBE(func, file, line, stash)
+#  define RETURN_PROBE(func, file, line, stash)
 
 #endif
 

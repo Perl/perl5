@@ -617,7 +617,8 @@ struct block_format {
 #define PUSHSUB_BASE(cx)						\
 	ENTRY_PROBE(GvENAME(CvGV(cv)),		       			\
 		CopFILE((const COP *)CvSTART(cv)),			\
-		CopLINE((const COP *)CvSTART(cv)));			\
+		CopLINE((const COP *)CvSTART(cv)),			\
+		CopSTASHPV((const COP *)CvSTART(cv)));			\
 									\
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.olddepth = CvDEPTH(cv);				\
@@ -667,7 +668,8 @@ struct block_format {
     STMT_START {							\
 	RETURN_PROBE(GvENAME(CvGV((const CV*)cx->blk_sub.cv)),		\
 		CopFILE((COP*)CvSTART((const CV*)cx->blk_sub.cv)),	\
-		CopLINE((COP*)CvSTART((const CV*)cx->blk_sub.cv)));	\
+		CopLINE((COP*)CvSTART((const CV*)cx->blk_sub.cv)),	\
+		CopSTASHPV((COP*)CvSTART((const CV*)cx->blk_sub.cv)));	\
 									\
 	if (CxHASARGS(cx)) {						\
 	    POP_SAVEARRAY();						\

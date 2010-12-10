@@ -4,8 +4,8 @@
  */
 
 provider perl {
-    probe sub__entry(char *, char *, int);
-    probe sub__return(char *, char *, int);
+    probe sub__entry(char *, char *, int, char *);
+    probe sub__return(char *, char *, int, char *);
 };
 
 /*
