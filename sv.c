@@ -14031,6 +14031,12 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 		if ( (type == OP_CONST && SvOK(cSVOPx_sv(kid)))
 		  || (type == OP_NULL  && ! (kid->op_flags & OPf_KIDS))
 		  || (type == OP_PUSHMARK)
+		  || (
+		      /* @$a and %$a, but not @a or %a */
+		        (type == OP_RV2AV || type == OP_RV2HV)
+		     && cUNOPx(kid)->op_first
+		     && cUNOPx(kid)->op_first->op_type != OP_GV
+		     )
 		)
 		continue;
 	    }
