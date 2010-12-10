@@ -19,14 +19,7 @@ sub BEGIN {
 use Storable qw(freeze thaw dclone);
 use vars qw($debugging $verbose);
 
-print "1..8\n";
-
-sub ok {
-    my($testno, $ok) = @_;
-    print "not " unless $ok;
-    print "ok $testno\n";
-}
-
+use Test::More tests => 8;
 
 # Uncomment the folowing line to get a dump of the constructed data structure
 # (you may want to reduce the size of the hashes too)
@@ -106,10 +99,10 @@ $x1 = freeze(\%a1);
 $x2 = freeze(\%a2);
 $x3 = freeze($a3);
 
-ok 1, (length($x1) > $hashsize);	# sanity check
-ok 2, length($x1) == length($x2);	# idem
-ok 3, $x1 eq $x2;
-ok 4, $x1 eq $x3;
+cmp_ok(length $x1, '>', $hashsize);	# sanity check
+is(length $x1, length $x2);		# idem
+is($x1, $x2);
+is($x1, $x3);
 
 # In normal mode it is exceedingly unlikely that the frozen
 # representaions of all the hashes will be the same (normally the hash
@@ -127,7 +120,7 @@ $x3 = freeze($a3);
 # is much, much more unlikely.  Still it could happen, so this test
 # may report a false negative.
 
-ok 5, ($x1 ne $x2) || ($x1 ne $x3);    
+ok(($x1 ne $x2) || ($x1 ne $x3));
 
 
 # Ensure refs to "undef" values are properly shared
@@ -135,10 +128,10 @@ ok 5, ($x1 ne $x2) || ($x1 ne $x3);
 
 my $hash;
 push @{$$hash{''}}, \$$hash{a};
-ok 6, $$hash{''}[0] == \$$hash{a};
+is($$hash{''}[0], \$$hash{a});
 
 my $cloned = dclone(dclone($hash));
-ok 7, $$cloned{''}[0] == \$$cloned{a};
+is($$cloned{''}[0], \$$cloned{a});
 
 $$cloned{a} = "blah";
-ok 8, $$cloned{''}[0] == \$$cloned{a};
+is($$cloned{''}[0], \$$cloned{a});
