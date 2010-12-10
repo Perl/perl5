@@ -721,6 +721,14 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
+    'I18N::Collate' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'DISTRIBUTION'	=> 'FLORA/I18N-Collate-1.01.tar.gz',
+	'FILES'		=> q[dist/I18N-Collate],
+	'UPSTREAM'	=> 'blead',
+	},
+
     # Sean has donated it to us.
     # Nothing has changed since his last CPAN release.
     # (not strictly true: there have been some trivial typo fixes; DAPM 6/2009)
@@ -1712,7 +1720,6 @@ use File::Glob qw(:case);
 				lib/FileHandle.{pm,t}
 				lib/FindBin.{pm,t}
 				lib/Getopt/Std.{pm,t}
-				lib/I18N/Collate.{pm,t}
 				lib/Internals.t
 				lib/Module/Build/ConfigData.pm
 				lib/Net/hostent.{pm,t}

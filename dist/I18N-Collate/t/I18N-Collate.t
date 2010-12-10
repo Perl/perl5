@@ -1,8 +1,11 @@
 #!./perl
 
+# at least in the CPAN version we're sometimes called with -w, for example
+# during 'make test', so disable them explicitly and only turn them on again for
+# the deprecation test.
+no warnings;
+
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
     require Config; import Config;
     if (!$Config{d_setlocale} || $Config{ccflags} =~ /\bD?NO_LOCALE\b/) {
 	print "1..0\n";
@@ -41,4 +44,3 @@ print "ok 6\n";
 
 print "not " if $a lt $b == $a gt $b;
 print "ok 7\n";
-

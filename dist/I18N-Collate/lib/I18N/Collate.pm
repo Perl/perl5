@@ -10,7 +10,7 @@ I18N::Collate - compare 8-bit scalar data according to the current locale
 =head1 SYNOPSIS
 
     use I18N::Collate;
-    setlocale(LC_COLLATE, 'locale-of-your-choice'); 
+    setlocale(LC_COLLATE, 'locale-of-your-choice');
     $s1 = I18N::Collate->new("scalar_data_1");
     $s2 = I18N::Collate->new("scalar_data_2");
 
@@ -33,8 +33,8 @@ I18N::Collate - compare 8-bit scalar data according to the current locale
 
   ***
 
-This module provides you with objects that will collate 
-according to your national character set, provided that the 
+This module provides you with objects that will collate
+according to your national character set, provided that the
 POSIX setlocale() function is supported on your system.
 
 You can compare $s1 and $s2 above with
@@ -83,11 +83,11 @@ European character set.
 #	        setlocale(LC_COLLATE, 'locale-of-your-choice'); # 4)
 #		$s1 = I18N::Collate->("scalar_data_1");
 #		$s2 = I18N::Collate->("scalar_data_2");
-#		
+#
 #		now you can compare $s1 and $s2: $s1 le $s2
 #		to extract the data itself, you need to deref: $$s1
-#		
-# Notes:	
+#
+# Notes:
 #		1) this uses POSIX::setlocale
 #		2) the basic collation conversion is done by strxfrm() which
 #		   terminates at NUL characters being a decent C routine.
@@ -161,7 +161,7 @@ sub setlocale {
  my ($category, $locale) = @_[0,1];
 
  POSIX::setlocale($category, $locale) if (defined $category);
- # the current $LOCALE 
+ # the current $LOCALE
  $LOCALE = $locale || $ENV{'LC_COLLATE'} || $ENV{'LC_ALL'} || '';
 }
 
@@ -177,7 +177,7 @@ sub C {
 sub collate_xfrm {
   my $s = $_[0];
   my $x = '';
-  
+
   for (split(/(\000+)/, $s)) {
     $x .= (/^\000/) ? $_ : strxfrm("$_\000");
   }
