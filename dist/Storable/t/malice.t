@@ -35,7 +35,7 @@ $other_magic = 7 + length $byteorder;
 $network_magic = 2;
 $major = 2;
 $minor = 8;
-$minor_write = $] > 5.005_50 ? $] >= 5.008 ? 8 : 7 : 4;
+$minor_write = $] > 5.005_50 ? 8 : 4;
 
 use Test::More;
 
