@@ -2704,6 +2704,9 @@ dist/Data-Dumper/t/perl-74170.t	Regression test for stack reallocation
 dist/Data-Dumper/t/terse.t	See if Data::Dumper terse option works
 dist/Devel-SelfStubber/lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm
 dist/Devel-SelfStubber/t/Devel-SelfStubber.t	See if Devel::SelfStubber works
+dist/Env/lib/Env.pm		Map environment into ordinary variables
+dist/Env/t/array.t		See if Env works for arrays
+dist/Env/t/env.t		See if Env works
 dist/ExtUtils-Command/lib/ExtUtils/Command.pm	Utilities for Make on non-UNIX platforms
 dist/ExtUtils-Command/t/cp.t			See if ExtUtils::Command works
 dist/ExtUtils-Command/t/eu_command.t		See if ExtUtils::Command works
@@ -3682,9 +3685,6 @@ lib/dumpvar.pl			A variable dumper
 lib/dumpvar.t			A variable dumper tester
 lib/English.pm			Readable aliases for short variables
 lib/English.t			See if English works
-lib/Env.pm			Map environment into ordinary variables
-lib/Env/t/array.t		See if Env works for arrays
-lib/Env/t/env.t			See if Env works
 lib/exceptions.pl		catch and throw routines
 lib/Exporter/Heavy.pm		Complicated routines for Exporter
 lib/Exporter.pm			Exporter base class

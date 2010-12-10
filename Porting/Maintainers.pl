@@ -517,6 +517,14 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> undef,
 	},
 
+    'Env' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'DISTRIBUTION'	=> 'FLORA/Env-1.01.tar.gz',
+	'FILES'		=> q[dist/Env],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Exporter' =>
 	{
 	'MAINTAINER'	=> 'ferreira',
@@ -1703,8 +1711,6 @@ use File::Glob qw(:case);
 				lib/DirHandle.{pm,t}
 				lib/Dumpvalue.{pm,t}
 				lib/English.{pm,t}
-				lib/Env.pm
-				lib/Env/t/
 				lib/ExtUtils/Embed.pm
 				lib/ExtUtils/XSSymSet.pm
 				lib/ExtUtils/t/Embed.t

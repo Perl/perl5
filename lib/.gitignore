@@ -126,6 +126,7 @@
 /DynaLoader.pm
 /Encode
 /Encode.pm
+/Env.pm
 /Errno.pm
 /ExtUtils/CBuilder.pm
 /ExtUtils/CBuilder/

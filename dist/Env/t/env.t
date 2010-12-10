@@ -2,11 +2,6 @@
 
 $| = 1;
 
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-}
-
 if ($^O eq 'VMS') {
     print "1..11\n";
     foreach (1..11) { print "ok $_ # skipped for VMS\n"; }
