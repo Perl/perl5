@@ -2081,6 +2081,11 @@ d_snprintf (d_snprintf.U):
 	indicates to the C program that the snprintf () library function
 	is available.
 
+d_sockaddr_sa_len (d_socket.U):
+	This variable conditionally defines the HAS_SOCKADDR_SA_LEN symbol,
+	which indicates that a struct sockaddr structure has the sa_len
+	member.
+
 d_sockatmark (d_sockatmark.U):
 	This variable conditionally defines the HAS_SOCKATMARK symbol, which
 	indicates to the C program that the sockatmark() routine is available.
@@ -4067,8 +4072,9 @@ path_sep (Unix.U):
 	used to separate elements in the command shell search PATH.
 
 perl (Loc.U):
-	This variable is defined but not used by Configure.
-	The value is the empty string and is not useful.
+	This variable is used internally by Configure to determine the
+	full pathname (if any) of the perl program.  After Configure runs,
+	the value is reset to a plain "perl" and is not useful.
 
 perl5 (perl5.U):
 	This variable contains the full path (if any) to a previously

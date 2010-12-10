@@ -30,7 +30,7 @@
 
 # $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
 #
-# Generated on Thu Aug 12 11:38:08 CEST 2010 [metaconfig 3.5 PL0]
+# Generated on Fri Dec 10 12:04:58 CET 2010 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -731,6 +731,7 @@ d_msg_peek=''
 d_msg_proxy=''
 d_oldsock=''
 d_scm_rights=''
+d_sockaddr_sa_len=''
 d_socket=''
 d_sockpair=''
 sockethdr=''
@@ -1308,10 +1309,24 @@ fi
 
 groupstype=''
 i_whoami=''
+archname=''
+: Possible local include directories to search.
+: Set locincpth to "" in a hint file to defeat local include searches.
+locincpth="/usr/local/include /opt/local/include /usr/gnu/include"
+locincpth="$locincpth /opt/gnu/include /usr/GNU/include /opt/GNU/include"
+:
+: no include file wanted by default
+inclwanted=''
+
+: Enable -DEBUGGING and -DDEBUGGING from the command line
+EBUGGING=''
+DEBUGGING=old
+
+: set usethreads on the Configure command line to enable threads.
+usereentrant='undef'
 : Trailing extension.  Override this in a hint file, if needed.
 : Extra object files, if any, needed on this platform.
 archobjs=''
-archname=''
 libnames=''
 : change the next line if compiling for Xenix/286 on Xenix/386
 xlibpth='/usr/lib/386 /lib/386'
@@ -1335,22 +1350,8 @@ plibpth=''
 libswanted=''
 : some systems want to use only the non-versioned libso:s
 ignore_versioned_solibs=''
-: set usethreads on the Configure command line to enable threads.
-usereentrant='undef'
 : full support for void wanted by default
 defvoidused=15
-
-: Possible local include directories to search.
-: Set locincpth to "" in a hint file to defeat local include searches.
-locincpth="/usr/local/include /opt/local/include /usr/gnu/include"
-locincpth="$locincpth /opt/gnu/include /usr/GNU/include /opt/GNU/include"
-:
-: no include file wanted by default
-inclwanted=''
-
-: Enable -DEBUGGING and -DDEBUGGING from the command line
-EBUGGING=''
-DEBUGGING=old
 
 ccname=''
 ccversion=''
@@ -2373,6 +2374,7 @@ make
 more
 nm
 nroff
+perl
 pg
 test
 uname
@@ -11348,6 +11350,23 @@ fi
 set socketpair d_sockpair
 eval $inlibc
 
+
+echo " "
+echo "Checking the availability sa_len in the sock struct ..." >&4
+$cat >try.c <<EOF
+#include <sys/types.h>
+#include <sys/socket.h>
+int main() {
+struct sockaddr sa;
+return (sa.sa_len);
+}
+EOF
+val="$undef"
+set try; if eval $compile; then
+	val="$define"
+fi
+set d_sockaddr_sa_len; eval $setvar
+$rm_try
 
 echo " "
 echo "Checking the availability of certain socket constants..." >&4
@@ -22797,6 +22816,7 @@ d_sigprocmask='$d_sigprocmask'
 d_sigsetjmp='$d_sigsetjmp'
 d_sitearch='$d_sitearch'
 d_snprintf='$d_snprintf'
+d_sockaddr_sa_len='$d_sockaddr_sa_len'
 d_sockatmark='$d_sockatmark'
 d_sockatmarkproto='$d_sockatmarkproto'
 d_socket='$d_socket'
