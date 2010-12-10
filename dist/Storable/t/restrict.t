@@ -91,7 +91,7 @@ sub testit {
 
 for $Storable::canonical (0, 1) {
   for my $cloner (\&dclone, \&freeze_thaw) {
-    note("\$Storable::canonical = $Storable::canonical");
+    print "# \$Storable::canonical = $Storable::canonical\n";
     testit (\%hash, $cloner);
     my $object = \%hash;
     # bless {}, "Restrict_Test";
