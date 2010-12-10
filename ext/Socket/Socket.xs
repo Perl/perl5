@@ -343,6 +343,9 @@ pack_sockaddr_un(pathname)
 	} else {
 		addr_len = sizeof sun_ad;
 	}
+#  ifdef HAS_SOCKADDR_SA_LEN
+	sun_ad.sun_len = addr_len;
+#  endif
 	ST(0) = newSVpvn_flags((char *)&sun_ad, addr_len, SVs_TEMP);
 #else
 	ST(0) = (SV *) not_here("pack_sockaddr_un");
@@ -421,6 +424,9 @@ pack_sockaddr_in(port, ip_address_sv)
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(port);
 	sin.sin_addr.s_addr = htonl(addr.s_addr);
+#  ifdef HAS_SOCKADDR_SA_LEN
+	sin.sin_len = sizeof (sin);
+#  endif
 	ST(0) = newSVpvn_flags((char *)&sin, sizeof (sin), SVs_TEMP);
 	}
 
@@ -480,6 +486,9 @@ pack_sockaddr_in6(port, sin6_addr, scope_id=0, flowinfo=0)
 #if !defined(__GLIBC__) || (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)
 	sin6.sin6_scope_id = scope_id;
 #endif
+#  ifdef HAS_SOCKADDR_SA_LEN
+	sin6.sin6_len = sizeof(sin6);
+#  endif
 	ST(0) = newSVpvn_flags((char *)&sin6, sizeof(sin6), SVs_TEMP);
 #else
 	ST(0) = (SV*)not_here("pack_sockaddr_in6");
