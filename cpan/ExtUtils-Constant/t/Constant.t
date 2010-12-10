@@ -369,6 +369,9 @@ sub write_and_run_extension {
   my ($name, $items, $export_names, $package, $header, $testfile, $num_tests,
       $wc_args) = @_;
 
+  local *C;
+  local *XS;
+
   my $c = tie *C, 'TieOut';
   my $xs = tie *XS, 'TieOut';
 
