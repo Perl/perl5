@@ -30,14 +30,12 @@ sub BEGIN {
         }
 	unshift @INC, 't';
     }
-    require 'st-dump.pl';
 }
 
 
 use Storable qw(dclone freeze thaw);
 use Hash::Util qw(lock_hash unlock_value);
-
-print "1..100\n";
+use Test::More tests => 100;
 
 my %hash = (question => '?', answer => 42, extra => 'junk', undef => undef);
 lock_hash %hash;
@@ -67,42 +65,32 @@ sub testit {
 
   my @in_keys = sort keys %$hash;
   my @out_keys = sort keys %$copy;
-  unless (ok ++$test, "@in_keys" eq "@out_keys") {
-    print "# Failed: keys mis-match after deep clone.\n";
-    print "# Original keys: @in_keys\n";
-    print "# Copy's keys: @out_keys\n";
-  }
+  is("@in_keys", "@out_keys", "keys match after deep clone");
 
   # $copy = $hash;	# used in initial debug of the tests
 
-  ok ++$test, Internals::SvREADONLY(%$copy), "cloned hash restricted?";
+  is(Internals::SvREADONLY(%$copy), 1, "cloned hash restricted?");
 
-  ok ++$test, Internals::SvREADONLY($copy->{question}),
-    "key 'question' not locked in copy?";
+  is(Internals::SvREADONLY($copy->{question}), 1,
+     "key 'question' not locked in copy?");
 
-  ok ++$test, !Internals::SvREADONLY($copy->{answer}),
-    "key 'answer' not locked in copy?";
+  is(Internals::SvREADONLY($copy->{answer}), '',
+     "key 'answer' not locked in copy?");
 
   eval { $copy->{extra} = 15 } ;
-  unless (ok ++$test, !$@, "Can assign to reserved key 'extra'?") {
-    my $diag = $@;
-    $diag =~ s/\n.*\z//s;
-    print "# \$\@: $diag\n";
-  }
+  is($@, '', "Can assign to reserved key 'extra'?");
 
   eval { $copy->{nono} = 7 } ;
-  ok ++$test, $@, "Can not assign to invalid key 'nono'?";
+  isnt($@, '', "Can not assign to invalid key 'nono'?");
 
-  ok ++$test, exists $copy->{undef},
-    "key 'undef' exists";
+  is(exists $copy->{undef}, 1, "key 'undef' exists");
 
-  ok ++$test, !defined $copy->{undef},
-    "value for key 'undef' is undefined";
+  is($copy->{undef}, undef, "value for key 'undef' is undefined");
 }
 
 for $Storable::canonical (0, 1) {
   for my $cloner (\&dclone, \&freeze_thaw) {
-    print "# \$Storable::canonical = $Storable::canonical\n";
+    note("\$Storable::canonical = $Storable::canonical");
     testit (\%hash, $cloner);
     my $object = \%hash;
     # bless {}, "Restrict_Test";
@@ -119,11 +107,7 @@ for $Storable::canonical (0, 1) {
     for (0..16) {
       my $k = "k$_";
       eval { $copy->{$k} = undef } ;
-      unless (ok ++$test, !$@, "Can assign to reserved key '$k'?") {
-	my $diag = $@;
-	$diag =~ s/\n.*\z//s;
-	print "# \$\@: $diag\n";
-      }
+      is($@, '', "Can assign to reserved key '$k'?");
     }
   }
 }

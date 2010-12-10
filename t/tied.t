@@ -16,11 +16,8 @@ sub BEGIN {
     require 'st-dump.pl';
 }
 
-sub ok;
-
 use Storable qw(freeze thaw);
-
-print "1..23\n";
+use Test::More tests => 23;
 
 ($scalar_fetch, $array_fetch, $hash_fetch) = (0, 0, 0);
 
@@ -147,16 +144,17 @@ $array[2] = \@array;
 @a = ('first', 3, -4, -3.14159, 456, 4.5, $d, \$d,
 	$b, \$a, $a, $c, \$c, \%a, \@array, \%hash, \@tied);
 
-ok 1, defined($f = freeze(\@a));
+my $f = freeze(\@a);
+isnt($f, undef);
 
 $dumped = &dump(\@a);
-ok 2, 1;
+isnt($dumped, undef);
 
 $root = thaw($f);
-ok 3, defined $root;
+isnt($root, undef);
 
 $got = &dump($root);
-ok 4, 1;
+isnt($got, undef);
 
 ### Used to see the manifestation of the bug documented above.
 ### print "original: $dumped";
@@ -164,44 +162,42 @@ ok 4, 1;
 ### print "got: $got";
 ### print "--------\n";
 
-ok 5, $got eq $dumped; 
+is($got, $dumped);
 
 $g = freeze($root);
-ok 6, length($f) == length($g);
+is(length $f, length $g);
 
 # Ensure the tied items in the retrieved image work
 @old = ($scalar_fetch, $array_fetch, $hash_fetch);
 @tied = ($tscalar, $tarray, $thash) = @{$root->[$#{$root}]};
 @type = qw(SCALAR  ARRAY  HASH);
 
-ok 7, tied $$tscalar;
-ok 8, tied @{$tarray};
-ok 9, tied %{$thash};
+is(ref tied $$tscalar, 'TIED_SCALAR');
+is(ref tied @$tarray, 'TIED_ARRAY');
+is(ref tied %$thash, 'TIED_HASH');
 
 @new = ($$tscalar, $tarray->[0], $thash->{'attribute'});
 @new = ($scalar_fetch, $array_fetch, $hash_fetch);
 
 # Tests 10..15
 for ($i = 0; $i < @new; $i++) {
-	print "not " unless $new[$i] == $old[$i] + 1;
-	printf "ok %d\n", 10 + 2*$i;	# Tests 10,12,14
-	print "not " unless ref $tied[$i] eq $type[$i];
-	printf "ok %d\n", 11 + 2*$i;	# Tests 11,13,15
+	is($new[$i], $old[$i] + 1);
+	is(ref $tied[$i], $type[$i]);
 }
 
 # Check undef ties
 my $h = {};
 tie $h->{'x'}, 'FAULT', $h, 'x';
 my $hf = freeze($h);
-ok 16, defined $hf;
-ok 17, $FAULT::fault == 0;
-ok 18, $h->{'x'} == 1;
-ok 19, $FAULT::fault == 1;
+isnt($hf, undef);
+is($FAULT::fault, 0);
+is($h->{'x'}, 1);
+is($FAULT::fault, 1);
 
 my $ht = thaw($hf);
-ok 20, defined $ht;
-ok 21, $ht->{'x'} == 1;
-ok 22, $FAULT::fault == 2;
+isnt($ht, undef);
+is($ht->{'x'}, 1);
+is($FAULT::fault, 2);
 
 {
     package P;
@@ -210,6 +206,6 @@ ok 22, $FAULT::fault == 2;
     $b = "not ok ";
     sub TIESCALAR { bless \$a } sub FETCH { "ok " }
     tie $a, P; my $r = thaw freeze \$a; $b = $$r;
-    print $b , 23, "\n";
+    main::is($b, "ok ");
 }
 
