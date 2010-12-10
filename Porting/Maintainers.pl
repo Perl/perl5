@@ -247,6 +247,14 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
+    'autouse' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'DISTRIBUTION'	=> 'FLORA/autouse-1.06.tar.gz',
+	'FILES'		=> q[dist/autouse],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'B::Concise' =>
 	{
 	'MAINTAINER'	=> 'smccam',
@@ -1630,8 +1638,6 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
-				ext/autouse/lib
-				ext/autouse/t
 				ext/B/B.pm
 				ext/B/typemap
 				ext/B/Makefile.PL

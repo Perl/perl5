@@ -2620,6 +2620,9 @@ dist/Attribute-Handlers/t/constants.t			Test constants and Attribute::Handlers
 dist/Attribute-Handlers/t/data_convert.t		Test attribute data conversion
 dist/Attribute-Handlers/t/linerep.t			See if Attribute::Handlers works
 dist/Attribute-Handlers/t/multi.t			See if Attribute::Handlers works
+dist/autouse/lib/autouse.pm		Load and call a function only when it's used
+dist/autouse/t/autouse.t		See if autouse works
+dist/autouse/t/lib/MyTestModule.pm	Test module for autouse
 dist/base/Changes		base.pm changelog
 dist/base/lib/base.pm		Establish IS-A relationship at compile time
 dist/base/lib/fields.pm		Set up object field names for pseudo-hash-using classes
@@ -3106,9 +3109,6 @@ epoc/epoc_stubs.c	EPOC port
 epoc/link.pl		EPOC port link a exe
 ext/attributes/attributes.pm		For "sub foo : attrlist"
 ext/attributes/attributes.xs		For "sub foo : attrlist"
-ext/autouse/lib/autouse.pm	Load and call a function only when it's used
-ext/autouse/t/autouse.t		See if autouse works
-ext/autouse/t/lib/MyTestModule.pm	Test module for autouse
 ext/B/B/Concise.pm	Compiler Concise backend
 ext/B/B.pm		Compiler backend support functions and methods
 ext/B/B/Showlex.pm	Compiler Showlex backend
