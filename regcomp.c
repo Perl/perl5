@@ -8349,7 +8349,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
 #ifdef EBCDIC
     UV literal_endpoint = 0;
 #endif
-    UV stored = 0;  /* 0, 1, or more than 1 chars stored in the class */
+    UV stored = 0;  /* how many chars stored in the bitmap */
 
     regnode * const orig_emit = RExC_emit; /* Save the original RExC_emit in
         case we need to change the emitted regop to an EXACT. */
@@ -8730,7 +8730,6 @@ parseit:
 		    /* Strings such as "+utf8::isWord\n" */
 		    Perl_sv_catpvf(aTHX_ listsv, "%cutf8::Is%s\n", yesno, what);
 		}
-		stored+=2; /* can't optimize this class */
 
 		/* All but ASCII can match characters storable only in utf8 */
 		if (namedclass != ANYOF_ASCII) {
@@ -8773,7 +8772,6 @@ parseit:
 	}
 
 	/* now is the next time */
-        /*stored += (value - prevvalue + 1);*/
 	if (!SIZE_ONLY) {
 	    if (prevvalue < 256) {
 	        const IV ceilvalue = value < 256 ? value : 255;
@@ -8808,7 +8806,6 @@ parseit:
 	  if (value > 255 || UTF) {
 	        const UV prevnatvalue  = NATIVE_TO_UNI(prevvalue);
 		const UV natvalue      = NATIVE_TO_UNI(value);
-                stored+=2; /* can't optimize this class */
 
 		/* If the code point requires utf8 to represent, and we are not
 		 * folding, it can't match unless the target is in utf8.  Only
