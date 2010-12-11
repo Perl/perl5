@@ -3,6 +3,7 @@ use strict;
 
 use Pod::Usage;
 use Getopt::Std;
+use Config;
 $Getopt::Std::STANDARD_HELP_VERSION = 1;
 
 my $trysource = "try.c";
@@ -80,8 +81,10 @@ EOF
 
 close $out or die "Can't close $trysource: $!";
 
-print "doing: make $tryout\n" if $opt{v};
-system "make $tryout" and die;
+print "doing: $Config{make} $tryout\n" if $opt{v};
+my $cmd = "$Config{make} $tryout";
+system( $cmd ) == 0
+    or die "Couldn't launch [$cmd]: $! / $?";
 
 # if user wants 'indent' formatting ..
 my $out_fh;
