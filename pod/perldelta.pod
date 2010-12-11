@@ -606,6 +606,14 @@ C<state> can now be used with attributes. It used to mean the same thing as
 C<my> if attributes were present
 L<[perl #68658]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=68658>.
 
+=item *
+
+Expressions like C<< @$a > 3 >> no longer cause C<$a> to be mentioned in
+the "Use of uninitialized value in numeric gt" warning when C<$a> is
+undefined (since it is not part of the C<E<gt>> expression, but the operand
+of the C<@>)
+L<[perl #72090]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=72090>.
+
 =back
 
 =head1 Known Problems
