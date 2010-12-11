@@ -8732,8 +8732,7 @@ parseit:
 		}
 		stored+=2; /* can't optimize this class */
 
-		/* All but ASCII can match Unicode characters, but all the ones
-		 * that aren't in utf8 are in the bitmap */
+		/* All but ASCII can match characters storable only in utf8 */
 		if (namedclass != ANYOF_ASCII) {
 		    ANYOF_FLAGS(ret) |= ANYOF_UTF8;
 		}
