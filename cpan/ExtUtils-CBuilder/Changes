@@ -1,5 +1,12 @@
 Revision history for Perl extension ExtUtils::CBuilder.
 
+0.2801 - Wed Dec  8 21:36:56 EST 2010
+
+  Fixed:
+
+  - Fixed spurious t/04-base.t failure when run from Perl core
+    [David Golden]
+
 0.2800 - Mon Dec  6 16:05:46 EST 2010
 
   - No changes from 0.27_07
