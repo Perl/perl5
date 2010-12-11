@@ -510,7 +510,7 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'dankogai',
 	'DISTRIBUTION'	=> 'DANKOGAI/Encode-2.40.tar.gz',
 	'FILES'		=> q[cpan/Encode],
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'encoding::warnings' =>
