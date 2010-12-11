@@ -3462,6 +3462,7 @@ ext/XS-APItest/t/postinc.t	test op_lvalue()
 ext/XS-APItest/t/printf.t	XS::APItest extension
 ext/XS-APItest/t/ptr_table.t	Test ptr_table_* APIs
 ext/XS-APItest/t/push.t		XS::APItest extension
+ext/XS-APItest/t/refs.t		Test typemap ref handling
 ext/XS-APItest/t/rmagical.t	XS::APItest extension
 ext/XS-APItest/t/rv2cv_op_cv.t	test rv2cv_op_cv() API
 ext/XS-APItest/t/savehints.t	test SAVEHINTS() API
