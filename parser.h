@@ -39,7 +39,7 @@ typedef struct yy_parser {
 
     /* lexer state */
 
-    I32		lex_brackets;	/* bracket count */
+    I32		lex_brackets;	/* square and curly bracket count */
     I32		lex_casemods;	/* casemod count */
     char	*lex_brackstack;/* what kind of brackets to pop */
     char	*lex_casestack;	/* what kind of case mods in effect */
@@ -61,7 +61,7 @@ typedef struct yy_parser {
     char	multi_close;	/* delimiter of said string */
     char	pending_ident;	/* pending identifier lookup */
     bool	preambled;
-    /* XXX I32 space */
+    I32		lex_allbrackets;/* (), [], {}, ?: bracket count */
     SUBLEXINFO	sublex_info;
     SV		*linestr;	/* current chunk of src text */
     char	*bufptr;	
@@ -106,6 +106,7 @@ typedef struct yy_parser {
     char	tokenbuf[256];
 
     bool	in_pod;		/* lexer is within a =pod section */
+    U8		lex_fakeeof;	/* precedence at which to fake EOF */
 } yy_parser;
 
 /* flags for lexer API */
@@ -114,6 +115,22 @@ typedef struct yy_parser {
 
 /* flags for parser API */
 #define PARSE_OPTIONAL          0x00000001
+
+/* values for lex_fakeeof */
+enum {
+    LEX_FAKEEOF_NEVER,      /* don't fake EOF */
+    LEX_FAKEEOF_CLOSING,    /* fake EOF at unmatched closing punctuation */
+    LEX_FAKEEOF_NONEXPR,    /* ... and at token that can't be in expression */
+    LEX_FAKEEOF_LOWLOGIC,   /* ... and at low-precedence logic operator */
+    LEX_FAKEEOF_COMMA,      /* ... and at comma */
+    LEX_FAKEEOF_ASSIGN,     /* ... and at assignment operator */
+    LEX_FAKEEOF_IFELSE,     /* ... and at ?: operator */
+    LEX_FAKEEOF_RANGE,      /* ... and at range operator */
+    LEX_FAKEEOF_LOGIC,      /* ... and at logic operator */
+    LEX_FAKEEOF_BITWISE,    /* ... and at bitwise operator */
+    LEX_FAKEEOF_COMPARE,    /* ... and at comparison operator */
+    LEX_FAKEEOF_MAX
+};
 
 /*
  * Local variables:

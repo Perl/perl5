@@ -69,7 +69,7 @@
 #endif
 }
 
-%token <ival> GRAMPROG GRAMBLOCK GRAMBARESTMT GRAMFULLSTMT GRAMSTMTSEQ
+%token <ival> GRAMPROG GRAMEXPR GRAMBLOCK GRAMBARESTMT GRAMFULLSTMT GRAMSTMTSEQ
 
 %token <i_tkval> '{' '}' '[' ']' '-' '+' '$' '@' '%' '*' '&' ';'
 
@@ -146,6 +146,15 @@ grammar	:	GRAMPROG
 		remember stmtseq
 			{
 			  newPROG(block_end($3,$4));
+			  $$ = 0;
+			}
+	|	GRAMEXPR
+			{
+			  parser->expect = XTERM;
+			}
+		listexprcom
+			{
+			  PL_eval_root = $3;
 			  $$ = 0;
 			}
 	|	GRAMBLOCK

@@ -431,11 +431,15 @@ Perl_pack_cat
 Perl_packlist
 Perl_pad_findmy
 Perl_pad_push
+Perl_parse_arithexpr
 Perl_parse_barestmt
 Perl_parse_block
+Perl_parse_fullexpr
 Perl_parse_fullstmt
 Perl_parse_label
+Perl_parse_listexpr
 Perl_parse_stmtseq
+Perl_parse_termexpr
 perl_alloc
 perl_construct
 perl_destruct

@@ -601,6 +601,9 @@ static SV *hintkey_scopelessblock_sv;
 static SV *hintkey_stmtasexpr_sv, *hintkey_stmtsasexpr_sv;
 static SV *hintkey_loopblock_sv, *hintkey_blockasexpr_sv;
 static SV *hintkey_swaplabel_sv, *hintkey_labelconst_sv;
+static SV *hintkey_arrayfullexpr_sv, *hintkey_arraylistexpr_sv;
+static SV *hintkey_arraytermexpr_sv, *hintkey_arrayarithexpr_sv;
+static SV *hintkey_arrayexprflags_sv;
 static int (*next_keyword_plugin)(pTHX_ char *, STRLEN, OP **);
 
 /* low-level parser helpers */
@@ -849,6 +852,45 @@ static OP *THX_parse_keyword_labelconst(pTHX)
     return newSVOP(OP_CONST, 0, parse_label(0));
 }
 
+#define parse_keyword_arrayfullexpr() THX_parse_keyword_arrayfullexpr(aTHX)
+static OP *THX_parse_keyword_arrayfullexpr(pTHX)
+{
+    return newANONLIST(parse_fullexpr(0));
+}
+
+#define parse_keyword_arraylistexpr() THX_parse_keyword_arraylistexpr(aTHX)
+static OP *THX_parse_keyword_arraylistexpr(pTHX)
+{
+    return newANONLIST(parse_listexpr(0));
+}
+
+#define parse_keyword_arraytermexpr() THX_parse_keyword_arraytermexpr(aTHX)
+static OP *THX_parse_keyword_arraytermexpr(pTHX)
+{
+    return newANONLIST(parse_termexpr(0));
+}
+
+#define parse_keyword_arrayarithexpr() THX_parse_keyword_arrayarithexpr(aTHX)
+static OP *THX_parse_keyword_arrayarithexpr(pTHX)
+{
+    return newANONLIST(parse_arithexpr(0));
+}
+
+#define parse_keyword_arrayexprflags() THX_parse_keyword_arrayexprflags(aTHX)
+static OP *THX_parse_keyword_arrayexprflags(pTHX)
+{
+    U32 flags = 0;
+    I32 c;
+    OP *o;
+    lex_read_space(0);
+    c = lex_peek_unichar(0);
+    if (c != '!' && c != '?') croak("syntax error");
+    lex_read_unichar(0);
+    if (c == '?') flags |= PARSE_OPTIONAL;
+    o = parse_listexpr(flags);
+    return o ? newANONLIST(o) : newANONHASH(newOP(OP_STUB, 0));
+}
+
 /* plugin glue */
 
 #define keyword_active(hintkey_sv) THX_keyword_active(aTHX_ hintkey_sv)
@@ -912,6 +954,26 @@ static int my_keyword_plugin(pTHX_
     } else if(keyword_len == 10 && strnEQ(keyword_ptr, "labelconst", 10) &&
 		    keyword_active(hintkey_labelconst_sv)) {
 	*op_ptr = parse_keyword_labelconst();
+	return KEYWORD_PLUGIN_EXPR;
+    } else if(keyword_len == 13 && strnEQ(keyword_ptr, "arrayfullexpr", 13) &&
+		    keyword_active(hintkey_arrayfullexpr_sv)) {
+	*op_ptr = parse_keyword_arrayfullexpr();
+	return KEYWORD_PLUGIN_EXPR;
+    } else if(keyword_len == 13 && strnEQ(keyword_ptr, "arraylistexpr", 13) &&
+		    keyword_active(hintkey_arraylistexpr_sv)) {
+	*op_ptr = parse_keyword_arraylistexpr();
+	return KEYWORD_PLUGIN_EXPR;
+    } else if(keyword_len == 13 && strnEQ(keyword_ptr, "arraytermexpr", 13) &&
+		    keyword_active(hintkey_arraytermexpr_sv)) {
+	*op_ptr = parse_keyword_arraytermexpr();
+	return KEYWORD_PLUGIN_EXPR;
+    } else if(keyword_len == 14 && strnEQ(keyword_ptr, "arrayarithexpr", 14) &&
+		    keyword_active(hintkey_arrayarithexpr_sv)) {
+	*op_ptr = parse_keyword_arrayarithexpr();
+	return KEYWORD_PLUGIN_EXPR;
+    } else if(keyword_len == 14 && strnEQ(keyword_ptr, "arrayexprflags", 14) &&
+		    keyword_active(hintkey_arrayexprflags_sv)) {
+	*op_ptr = parse_keyword_arrayexprflags();
 	return KEYWORD_PLUGIN_EXPR;
     } else {
 	return next_keyword_plugin(aTHX_ keyword_ptr, keyword_len, op_ptr);
@@ -2659,6 +2721,11 @@ BOOT:
     hintkey_blockasexpr_sv = newSVpvs_share("XS::APItest/blockasexpr");
     hintkey_swaplabel_sv = newSVpvs_share("XS::APItest/swaplabel");
     hintkey_labelconst_sv = newSVpvs_share("XS::APItest/labelconst");
+    hintkey_arrayfullexpr_sv = newSVpvs_share("XS::APItest/arrayfullexpr");
+    hintkey_arraylistexpr_sv = newSVpvs_share("XS::APItest/arraylistexpr");
+    hintkey_arraytermexpr_sv = newSVpvs_share("XS::APItest/arraytermexpr");
+    hintkey_arrayarithexpr_sv = newSVpvs_share("XS::APItest/arrayarithexpr");
+    hintkey_arrayexprflags_sv = newSVpvs_share("XS::APItest/arrayexprflags");
     next_keyword_plugin = PL_keyword_plugin;
     PL_keyword_plugin = my_keyword_plugin;
 }

@@ -627,6 +627,10 @@ AMpd	|I32	|lex_peek_unichar|U32 flags
 AMpd	|I32	|lex_read_unichar|U32 flags
 AMpd	|void	|lex_read_space	|U32 flags
 : Public parser API
+AMpd	|OP*	|parse_arithexpr|U32 flags
+AMpd	|OP*	|parse_termexpr	|U32 flags
+AMpd	|OP*	|parse_listexpr	|U32 flags
+AMpd	|OP*	|parse_fullexpr	|U32 flags
 AMpd	|OP*	|parse_block	|U32 flags
 AMpd	|OP*	|parse_barestmt	|U32 flags
 AMpd	|SV*	|parse_label	|U32 flags

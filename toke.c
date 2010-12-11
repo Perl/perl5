@@ -48,6 +48,8 @@ Individual members of C<PL_parser> have their own documentation.
 
 /* XXX temporary backwards compatibility */
 #define PL_lex_brackets		(PL_parser->lex_brackets)
+#define PL_lex_allbrackets	(PL_parser->lex_allbrackets)
+#define PL_lex_fakeeof		(PL_parser->lex_fakeeof)
 #define PL_lex_brackstack	(PL_parser->lex_brackstack)
 #define PL_lex_casemods		(PL_parser->lex_casemods)
 #define PL_lex_casestack        (PL_parser->lex_casestack)
@@ -293,7 +295,15 @@ static const char* const lex_state_names[] = {
 	}
 
 /* grandfather return to old style */
-#define OLDLOP(f) return(pl_yylval.ival=f,PL_expect = XTERM,PL_bufptr = s,(int)LSTOP)
+#define OLDLOP(f) \
+	do { \
+	    if (!PL_lex_allbrackets && PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC) \
+		PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC; \
+	    pl_yylval.ival = (f); \
+	    PL_expect = XTERM; \
+	    PL_bufptr = s; \
+	    return (int)LSTOP; \
+	} while(0)
 
 #ifdef DEBUGGING
 
@@ -1822,18 +1832,22 @@ S_lop(pTHX_ I32 f, int x, char *s)
     PL_last_lop_op = (OPCODE)f;
 #ifdef PERL_MAD
     if (PL_lasttoke)
- 	return REPORT(LSTOP);
+	goto lstop;
 #else
     if (PL_nexttoke)
-	return REPORT(LSTOP);
+	goto lstop;
 #endif
     if (*s == '(')
 	return REPORT(FUNC);
     s = PEEKSPACE(s);
     if (*s == '(')
 	return REPORT(FUNC);
-    else
+    else {
+	lstop:
+	if (!PL_lex_allbrackets && PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
+	    PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
 	return REPORT(LSTOP);
+    }
 }
 
 #ifdef PERL_MAD
@@ -1954,8 +1968,12 @@ Perl_yyunlex(pTHX)
 	    start_force(-1);
 	    NEXTVAL_NEXTTOKE = PL_parser->yylval;
 	    if (yyc == '{'/*}*/ || yyc == HASHBRACK || yyc == '['/*]*/) {
+		PL_lex_allbrackets--;
 		PL_lex_brackets--;
-		yyc |= (1<<24) | (PL_lex_brackstack[PL_lex_brackets] << 16);
+		yyc |= (3<<24) | (PL_lex_brackstack[PL_lex_brackets] << 16);
+	    } else if (yyc == '('/*)*/) {
+		PL_lex_allbrackets--;
+		yyc |= (2<<24);
 	    }
 	    force_next(yyc);
 	}
@@ -2379,6 +2397,8 @@ S_sublex_push(pTHX)
     PL_lex_state = PL_sublex_info.super_state;
     SAVEBOOL(PL_lex_dojoin);
     SAVEI32(PL_lex_brackets);
+    SAVEI32(PL_lex_allbrackets);
+    SAVEI8(PL_lex_fakeeof);
     SAVEI32(PL_lex_casemods);
     SAVEI32(PL_lex_starts);
     SAVEI8(PL_lex_state);
@@ -2407,6 +2427,8 @@ S_sublex_push(pTHX)
 
     PL_lex_dojoin = FALSE;
     PL_lex_brackets = 0;
+    PL_lex_allbrackets = 0;
+    PL_lex_fakeeof = LEX_FAKEEOF_NEVER;
     Newx(PL_lex_brackstack, 120, char);
     Newx(PL_lex_casestack, 12, char);
     PL_lex_casemods = 0;
@@ -2459,6 +2481,8 @@ S_sublex_done(pTHX)
 	SAVEFREESV(PL_linestr);
 	PL_lex_dojoin = FALSE;
 	PL_lex_brackets = 0;
+	PL_lex_allbrackets = 0;
+	PL_lex_fakeeof = LEX_FAKEEOF_NEVER;
 	PL_lex_casemods = 0;
 	*PL_lex_casestack = '\0';
 	PL_lex_starts = 0;
@@ -4303,10 +4327,17 @@ Perl_yylex(pTHX)
 #else
 	    next_type = PL_nexttype[PL_nexttoke];
 #endif
-	    if (next_type & (1<<24)) {
-		if (PL_lex_brackets > 100)
-		    Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
-		PL_lex_brackstack[PL_lex_brackets++] = (next_type >> 16) & 0xff;
+	    if (next_type & (7<<24)) {
+		if (next_type & (1<<24)) {
+		    if (PL_lex_brackets > 100)
+			Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
+		    PL_lex_brackstack[PL_lex_brackets++] =
+			(next_type >> 16) & 0xff;
+		}
+		if (next_type & (2<<24))
+		    PL_lex_allbrackets++;
+		if (next_type & (4<<24))
+		    PL_lex_allbrackets--;
 		next_type &= 0xffff;
 	    }
 #ifdef PERL_MAD
@@ -4341,6 +4372,7 @@ Perl_yylex(pTHX)
 			PL_thistoken = newSVpvs("\\E");
 #endif
 		}
+		PL_lex_allbrackets--;
 		return REPORT(')');
 	    }
 #ifdef PERL_MAD
@@ -4380,6 +4412,7 @@ Perl_yylex(pTHX)
 		if ((*s == 'L' || *s == 'U') &&
 		    (strchr(PL_lex_casestack, 'L') || strchr(PL_lex_casestack, 'U'))) {
 		    PL_lex_casestack[--PL_lex_casemods] = '\0';
+		    PL_lex_allbrackets--;
 		    return REPORT(')');
 		}
 		if (PL_lex_casemods > 10)
@@ -4389,7 +4422,7 @@ Perl_yylex(pTHX)
 		PL_lex_state = LEX_INTERPCONCAT;
 		start_force(PL_curforce);
 		NEXTVAL_NEXTTOKE.ival = 0;
-		force_next('(');
+		force_next((2<<24)|'(');
 		start_force(PL_curforce);
 		if (*s == 'l')
 		    NEXTVAL_NEXTTOKE.ival = OP_LCFIRST;
@@ -4455,7 +4488,7 @@ Perl_yylex(pTHX)
 	    force_next('$');
 	    start_force(PL_curforce);
 	    NEXTVAL_NEXTTOKE.ival = 0;
-	    force_next('(');
+	    force_next((2<<24)|'(');
 	    start_force(PL_curforce);
 	    NEXTVAL_NEXTTOKE.ival = OP_JOIN;	/* emulate join($", ...) */
 	    force_next(FUNC);
@@ -4495,6 +4528,7 @@ Perl_yylex(pTHX)
 		PL_thistoken = newSVpvs("");
 	    }
 #endif
+	    PL_lex_allbrackets--;
 	    return REPORT(')');
 	}
 	if (PL_lex_inwhat == OP_SUBST && PL_linestr == PL_lex_repl
@@ -5133,8 +5167,14 @@ Perl_yylex(pTHX)
 		else
 		    TERM(ARROW);
 	    }
-	    if (PL_expect == XOPERATOR)
+	    if (PL_expect == XOPERATOR) {
+		if (*s == '=' && !PL_lex_allbrackets &&
+			PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN) {
+		    s--;
+		    TOKEN(0);
+		}
 		Aop(OP_SUBTRACT);
+	    }
 	    else {
 		if (isSPACE(*s) || !isSPACE(*PL_bufptr))
 		    check_uni();
@@ -5152,8 +5192,14 @@ Perl_yylex(pTHX)
 		else
 		    OPERATOR(PREINC);
 	    }
-	    if (PL_expect == XOPERATOR)
+	    if (PL_expect == XOPERATOR) {
+		if (*s == '=' && !PL_lex_allbrackets &&
+			PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN) {
+		    s--;
+		    TOKEN(0);
+		}
 		Aop(OP_ADD);
+	    }
 	    else {
 		if (isSPACE(*s) || !isSPACE(*PL_bufptr))
 		    check_uni();
@@ -5173,12 +5219,25 @@ Perl_yylex(pTHX)
 	s++;
 	if (*s == '*') {
 	    s++;
+	    if (*s == '=' && !PL_lex_allbrackets &&
+		    PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN) {
+		s -= 2;
+		TOKEN(0);
+	    }
 	    PWop(OP_POW);
+	}
+	if (*s == '=' && !PL_lex_allbrackets &&
+		PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN) {
+	    s--;
+	    TOKEN(0);
 	}
 	Mop(OP_MULTIPLY);
 
     case '%':
 	if (PL_expect == XOPERATOR) {
+	    if (s[1] == '=' && !PL_lex_allbrackets &&
+		    PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN)
+		TOKEN(0);
 	    ++s;
 	    Mop(OP_MODULO);
 	}
@@ -5192,12 +5251,16 @@ Perl_yylex(pTHX)
 	TERM('%');
 
     case '^':
+	if (!PL_lex_allbrackets && PL_lex_fakeeof >=
+		(s[1] == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_BITWISE))
+	    TOKEN(0);
 	s++;
 	BOop(OP_BIT_XOR);
     case '[':
 	if (PL_lex_brackets > 100)
 	    Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
 	PL_lex_brackstack[PL_lex_brackets++] = 0;
+	PL_lex_allbrackets++;
 	{
 	    const char tmp = *s++;
 	    OPERATOR(tmp);
@@ -5206,14 +5269,18 @@ Perl_yylex(pTHX)
 	if (s[1] == '~'
 	    && (PL_expect == XOPERATOR || PL_expect == XTERMORDORDOR))
 	{
+	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
+		TOKEN(0);
 	    s += 2;
 	    Eop(OP_SMARTMATCH);
 	}
+	s++;
+	OPERATOR('~');
     case ',':
-	{
-	    const char tmp = *s++;
-	    OPERATOR(tmp);
-	}
+	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMMA)
+	    TOKEN(0);
+	s++;
+	OPERATOR(',');
     case ':':
 	if (s[1] == ':') {
 	    len = 0;
@@ -5374,6 +5441,11 @@ Perl_yylex(pTHX)
 #endif
 	    TOKEN(COLONATTR);
 	}
+	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_CLOSING) {
+	    s--;
+	    TOKEN(0);
+	}
+	PL_lex_allbrackets--;
 	OPERATOR(':');
     case '(':
 	s++;
@@ -5382,21 +5454,23 @@ Perl_yylex(pTHX)
 	else
 	    PL_expect = XTERM;
 	s = SKIPSPACE1(s);
+	PL_lex_allbrackets++;
 	TOKEN('(');
     case ';':
+	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
+	    TOKEN(0);
 	CLINE;
-	{
-	    const char tmp = *s++;
-	    OPERATOR(tmp);
-	}
+	s++;
+	OPERATOR(';');
     case ')':
-	{
-	    const char tmp = *s++;
-	    s = SKIPSPACE1(s);
-	    if (*s == '{')
-		PREBLOCK(tmp);
-	    TERM(tmp);
-	}
+	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_CLOSING)
+	    TOKEN(0);
+	s++;
+	PL_lex_allbrackets--;
+	s = SKIPSPACE1(s);
+	if (*s == '{')
+	    PREBLOCK(')');
+	TERM(')');
     case ']':
 	if (PL_lex_brackets && PL_lex_brackstack[PL_lex_brackets-1] == XFAKEEOF)
 	    TOKEN(0);
@@ -5405,6 +5479,7 @@ Perl_yylex(pTHX)
 	    yyerror("Unmatched right square bracket");
 	else
 	    --PL_lex_brackets;
+	PL_lex_allbrackets--;
 	if (PL_lex_state == LEX_INTERPNORMAL) {
 	    if (PL_lex_brackets == 0) {
 		if (*s == '-' && s[1] == '>')
@@ -5430,6 +5505,7 @@ Perl_yylex(pTHX)
 		PL_lex_brackstack[PL_lex_brackets++] = XTERM;
 	    else
 		PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
+	    PL_lex_allbrackets++;
 	    OPERATOR(HASHBRACK);
 	case XOPERATOR:
 	    while (s < PL_bufend && SPACE_OR_TAB(*s))
@@ -5458,11 +5534,13 @@ Perl_yylex(pTHX)
 	case XATTRBLOCK:
 	case XBLOCK:
 	    PL_lex_brackstack[PL_lex_brackets++] = XSTATE;
+	    PL_lex_allbrackets++;
 	    PL_expect = XSTATE;
 	    break;
 	case XATTRTERM:
 	case XTERMBLOCK:
 	    PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
+	    PL_lex_allbrackets++;
 	    PL_expect = XSTATE;
 	    break;
 	default: {
@@ -5471,6 +5549,7 @@ Perl_yylex(pTHX)
 		    PL_lex_brackstack[PL_lex_brackets++] = XTERM;
 		else
 		    PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
+		PL_lex_allbrackets++;
 		s = SKIPSPACE1(s);
 		if (*s == '}') {
 		    if (PL_expect == XREF && PL_lex_state == LEX_INTERPNORMAL) {
@@ -5585,6 +5664,7 @@ Perl_yylex(pTHX)
 	    yyerror("Unmatched right curly bracket");
 	else
 	    PL_expect = (expectation)PL_lex_brackstack[--PL_lex_brackets];
+	PL_lex_allbrackets--;
 	if (PL_lex_brackets < PL_lex_formbrack && PL_lex_state != LEX_INTERPNORMAL)
 	    PL_lex_formbrack = 0;
 	if (PL_lex_state == LEX_INTERPNORMAL) {
@@ -5626,8 +5706,14 @@ Perl_yylex(pTHX)
 	TOKEN(';');
     case '&':
 	s++;
-	if (*s++ == '&')
+	if (*s++ == '&') {
+	    if (!PL_lex_allbrackets && PL_lex_fakeeof >=
+		    (*s == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_LOGIC)) {
+		s -= 2;
+		TOKEN(0);
+	    }
 	    AOPERATOR(ANDAND);
+	}
 	s--;
 	if (PL_expect == XOPERATOR) {
 	    if (PL_bufptr == PL_linestart && ckWARN(WARN_SEMICOLON)
@@ -5636,6 +5722,11 @@ Perl_yylex(pTHX)
 		CopLINE_dec(PL_curcop);
 		Perl_warner(aTHX_ packWARN(WARN_SEMICOLON), "%s", PL_warn_nosemi);
 		CopLINE_inc(PL_curcop);
+	    }
+	    if (!PL_lex_allbrackets && PL_lex_fakeeof >=
+		    (*s == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_BITWISE)) {
+		s--;
+		TOKEN(0);
 	    }
 	    BAop(OP_BIT_AND);
 	}
@@ -5652,18 +5743,41 @@ Perl_yylex(pTHX)
 
     case '|':
 	s++;
-	if (*s++ == '|')
+	if (*s++ == '|') {
+	    if (!PL_lex_allbrackets && PL_lex_fakeeof >=
+		    (*s == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_LOGIC)) {
+		s -= 2;
+		TOKEN(0);
+	    }
 	    AOPERATOR(OROR);
+	}
 	s--;
+	if (!PL_lex_allbrackets && PL_lex_fakeeof >=
+		(*s == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_BITWISE)) {
+	    s--;
+	    TOKEN(0);
+	}
 	BOop(OP_BIT_OR);
     case '=':
 	s++;
 	{
 	    const char tmp = *s++;
-	    if (tmp == '=')
+	    if (tmp == '=') {
+		if (!PL_lex_allbrackets &&
+			PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE) {
+		    s -= 2;
+		    TOKEN(0);
+		}
 		Eop(OP_EQ);
-	    if (tmp == '>')
+	    }
+	    if (tmp == '>') {
+		if (!PL_lex_allbrackets &&
+			PL_lex_fakeeof >= LEX_FAKEEOF_COMMA) {
+		    s -= 2;
+		    TOKEN(0);
+		}
 		OPERATOR(',');
+	    }
 	    if (tmp == '~')
 		PMop(OP_MATCH);
 	    if (tmp && isSPACE(*s) && ckWARN(WARN_SYNTAX)
@@ -5719,6 +5833,10 @@ Perl_yylex(pTHX)
 		goto leftbracket;
 	    }
 	}
+	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN) {
+	    s--;
+	    TOKEN(0);
+	}
 	pl_yylval.ival = 0;
 	OPERATOR(ASSIGNOP);
     case '!':
@@ -5742,6 +5860,11 @@ Perl_yylex(pTHX)
 			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 				    "!=~ should be !~");
 		}
+		if (!PL_lex_allbrackets &&
+			PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE) {
+		    s -= 2;
+		    TOKEN(0);
+		}
 		Eop(OP_NE);
 	    }
 	    if (tmp == '~')
@@ -5762,28 +5885,65 @@ Perl_yylex(pTHX)
 	s++;
 	{
 	    char tmp = *s++;
-	    if (tmp == '<')
+	    if (tmp == '<') {
+		if (*s == '=' && !PL_lex_allbrackets &&
+			PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN) {
+		    s -= 2;
+		    TOKEN(0);
+		}
 		SHop(OP_LEFT_SHIFT);
+	    }
 	    if (tmp == '=') {
 		tmp = *s++;
-		if (tmp == '>')
+		if (tmp == '>') {
+		    if (!PL_lex_allbrackets &&
+			    PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE) {
+			s -= 3;
+			TOKEN(0);
+		    }
 		    Eop(OP_NCMP);
+		}
 		s--;
+		if (!PL_lex_allbrackets &&
+			PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE) {
+		    s -= 2;
+		    TOKEN(0);
+		}
 		Rop(OP_LE);
 	    }
 	}
 	s--;
+	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE) {
+	    s--;
+	    TOKEN(0);
+	}
 	Rop(OP_LT);
     case '>':
 	s++;
 	{
 	    const char tmp = *s++;
-	    if (tmp == '>')
+	    if (tmp == '>') {
+		if (*s == '=' && !PL_lex_allbrackets &&
+			PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN) {
+		    s -= 2;
+		    TOKEN(0);
+		}
 		SHop(OP_RIGHT_SHIFT);
-	    else if (tmp == '=')
+	    }
+	    else if (tmp == '=') {
+		if (!PL_lex_allbrackets &&
+			PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE) {
+		    s -= 2;
+		    TOKEN(0);
+		}
 		Rop(OP_GE);
+	    }
 	}
 	s--;
+	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE) {
+	    s--;
+	    TOKEN(0);
+	}
 	Rop(OP_GT);
 
     case '$':
@@ -5967,6 +6127,9 @@ Perl_yylex(pTHX)
 
      case '/':			/* may be division, defined-or, or pattern */
 	if (PL_expect == XTERMORDORDOR && s[1] == '/') {
+	    if (!PL_lex_allbrackets && PL_lex_fakeeof >=
+		    (s[2] == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_LOGIC))
+		TOKEN(0);
 	    s += 2;
 	    AOPERATOR(DORDOR);
 	}
@@ -5974,16 +6137,33 @@ Perl_yylex(pTHX)
 	if (PL_expect == XOPERATOR) {
 	     char tmp = *s++;
 	     if(tmp == '?') {
+		if (!PL_lex_allbrackets &&
+			PL_lex_fakeeof >= LEX_FAKEEOF_IFELSE) {
+		    s--;
+		    TOKEN(0);
+		}
+		PL_lex_allbrackets++;
 		OPERATOR('?');
 	     }
              else {
 	         tmp = *s++;
 	         if(tmp == '/') {
 	             /* A // operator. */
+		    if (!PL_lex_allbrackets && PL_lex_fakeeof >=
+			    (*s == '=' ? LEX_FAKEEOF_ASSIGN :
+					    LEX_FAKEEOF_LOGIC)) {
+			s -= 2;
+			TOKEN(0);
+		    }
 	            AOPERATOR(DORDOR);
 	         }
 	         else {
 	             s--;
+		     if (*s == '=' && !PL_lex_allbrackets &&
+			     PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN) {
+			 s--;
+			 TOKEN(0);
+		     }
 	             Mop(OP_DIVIDE);
 	         }
 	     }
@@ -6022,6 +6202,11 @@ Perl_yylex(pTHX)
 	if (PL_expect == XOPERATOR || !isDIGIT(s[1])) {
 	    char tmp = *s++;
 	    if (*s == tmp) {
+		if (!PL_lex_allbrackets &&
+			PL_lex_fakeeof >= LEX_FAKEEOF_RANGE) {
+		    s--;
+		    TOKEN(0);
+		}
 		s++;
 		if (*s == tmp) {
 		    s++;
@@ -6030,6 +6215,11 @@ Perl_yylex(pTHX)
 		else
 		    pl_yylval.ival = 0;
 		OPERATOR(DOTDOT);
+	    }
+	    if (*s == '=' && !PL_lex_allbrackets &&
+		    PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN) {
+		s--;
+		TOKEN(0);
 	    }
 	    Aop(OP_CONCAT);
 	}
@@ -6408,6 +6598,9 @@ Perl_yylex(pTHX)
 		    if ((isIDFIRST_lazy_if(s,UTF) || *s == '$') &&
 			(tmp = intuit_method(s, gv, cv))) {
 			op_free(rv2cv_op);
+			if (tmp == METHOD && !PL_lex_allbrackets &&
+				PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
+			    PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
 			return REPORT(tmp);
 		    }
 
@@ -6488,6 +6681,9 @@ Perl_yylex(pTHX)
 		    op_free(rv2cv_op);
 		    PL_last_lop = PL_oldbufptr;
 		    PL_last_lop_op = OP_METHOD;
+		    if (!PL_lex_allbrackets &&
+			    PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
+			PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
 		    PREBLOCK(METHOD);
 		}
 
@@ -6497,6 +6693,9 @@ Perl_yylex(pTHX)
 			&& (isIDFIRST_lazy_if(s,UTF) || *s == '$')
 			&& (tmp = intuit_method(s, gv, cv))) {
 		    op_free(rv2cv_op);
+		    if (tmp == METHOD && !PL_lex_allbrackets &&
+			    PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
+			PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
 		    return REPORT(tmp);
 		}
 
@@ -6560,6 +6759,9 @@ Perl_yylex(pTHX)
 				sv_setpvs(PL_subname, "__ANON__");
 			    else
 				sv_setpvs(PL_subname, "__ANON__::__ANON__");
+			    if (!PL_lex_allbrackets &&
+				    PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
+				PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
 			    PREBLOCK(LSTOPSUB);
 			}
 		    }
@@ -6578,6 +6780,9 @@ Perl_yylex(pTHX)
 			    PL_thistoken = newSVpvs("");
 			}
 			force_next(WORD);
+			if (!PL_lex_allbrackets &&
+				PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
+			    PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
 			TOKEN(NOAMP);
 		    }
 		}
@@ -6617,12 +6822,18 @@ Perl_yylex(pTHX)
 			curmad('X', PL_thistoken);
 			PL_thistoken = newSVpvs("");
 			force_next(WORD);
+			if (!PL_lex_allbrackets &&
+				PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
+			    PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
 			TOKEN(NOAMP);
 		    }
 #else
 		    NEXTVAL_NEXTTOKE.opval = pl_yylval.opval;
 		    PL_expect = XTERM;
 		    force_next(WORD);
+		    if (!PL_lex_allbrackets &&
+			    PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
+			PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
 		    TOKEN(NOAMP);
 #endif
 		}
@@ -6824,6 +7035,8 @@ Perl_yylex(pTHX)
 	    LOP(OP_ACCEPT,XTERM);
 
 	case KEY_and:
+	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_LOWLOGIC)
+		return REPORT(0);
 	    OPERATOR(ANDOP);
 
 	case KEY_atan2:
@@ -6876,6 +7089,8 @@ Perl_yylex(pTHX)
 	    UNI(OP_CLOSEDIR);
 
 	case KEY_cmp:
+	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
+		return REPORT(0);
 	    Eop(OP_SCMP);
 
 	case KEY_caller:
@@ -6960,6 +7175,8 @@ Perl_yylex(pTHX)
 	    OPERATOR(ELSIF);
 
 	case KEY_eq:
+	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
+		return REPORT(0);
 	    Eop(OP_SEQ);
 
 	case KEY_exists:
@@ -7013,6 +7230,8 @@ Perl_yylex(pTHX)
 
 	case KEY_for:
 	case KEY_foreach:
+	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
+		return REPORT(0);
 	    pl_yylval.ival = CopLINE(PL_curcop);
 	    s = SKIPSPACE1(s);
 	    if (PL_expect == XSTATE && isIDFIRST_lazy_if(s,UTF)) {
@@ -7057,9 +7276,13 @@ Perl_yylex(pTHX)
 	    LOP(OP_FLOCK,XTERM);
 
 	case KEY_gt:
+	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
+		return REPORT(0);
 	    Rop(OP_SGT);
 
 	case KEY_ge:
+	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
+		return REPORT(0);
 	    Rop(OP_SGE);
 
 	case KEY_grep:
@@ -7161,6 +7384,8 @@ Perl_yylex(pTHX)
 	    UNI(OP_HEX);
 
 	case KEY_if:
+	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
+		return REPORT(0);
 	    pl_yylval.ival = CopLINE(PL_curcop);
 	    OPERATOR(IF);
 
@@ -7200,9 +7425,13 @@ Perl_yylex(pTHX)
 	    UNI(OP_LENGTH);
 
 	case KEY_lt:
+	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
+		return REPORT(0);
 	    Rop(OP_SLT);
 
 	case KEY_le:
+	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
+		return REPORT(0);
 	    Rop(OP_SLE);
 
 	case KEY_localtime:
@@ -7280,6 +7509,8 @@ Perl_yylex(pTHX)
 	    LOOPX(OP_NEXT);
 
 	case KEY_ne:
+	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
+		return REPORT(0);
 	    Eop(OP_SNE);
 
 	case KEY_no:
@@ -7289,8 +7520,12 @@ Perl_yylex(pTHX)
 	case KEY_not:
 	    if (*s == '(' || (s = SKIPSPACE1(s), *s == '('))
 		FUN1(OP_NOT);
-	    else
+	    else {
+		if (!PL_lex_allbrackets &&
+			PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
+		    PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
 		OPERATOR(NOTOP);
+	    }
 
 	case KEY_open:
 	    s = SKIPSPACE1(s);
@@ -7313,6 +7548,8 @@ Perl_yylex(pTHX)
 	    LOP(OP_OPEN,XTERM);
 
 	case KEY_or:
+	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_LOWLOGIC)
+		return REPORT(0);
 	    pl_yylval.ival = OP_OR;
 	    OPERATOR(OROP);
 
@@ -7911,10 +8148,14 @@ Perl_yylex(pTHX)
 	    UNI(OP_UNTIE);
 
 	case KEY_until:
+	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
+		return REPORT(0);
 	    pl_yylval.ival = CopLINE(PL_curcop);
 	    OPERATOR(UNTIL);
 
 	case KEY_unless:
+	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
+		return REPORT(0);
 	    pl_yylval.ival = CopLINE(PL_curcop);
 	    OPERATOR(UNLESS);
 
@@ -7947,10 +8188,14 @@ Perl_yylex(pTHX)
 	    LOP(OP_VEC,XTERM);
 
 	case KEY_when:
+	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
+		return REPORT(0);
 	    pl_yylval.ival = CopLINE(PL_curcop);
 	    OPERATOR(WHEN);
 
 	case KEY_while:
+	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
+		return REPORT(0);
 	    pl_yylval.ival = CopLINE(PL_curcop);
 	    OPERATOR(WHILE);
 
@@ -7982,12 +8227,18 @@ Perl_yylex(pTHX)
 	    UNI(OP_ENTERWRITE);
 
 	case KEY_x:
-	    if (PL_expect == XOPERATOR)
+	    if (PL_expect == XOPERATOR) {
+		if (*s == '=' && !PL_lex_allbrackets &&
+			PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN)
+		    return REPORT(0);
 		Mop(OP_REPEAT);
+	    }
 	    check_uni();
 	    goto just_a_word;
 
 	case KEY_xor:
+	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_LOWLOGIC)
+		return REPORT(0);
 	    pl_yylval.ival = OP_XOR;
 	    OPERATOR(OROP);
 
@@ -11854,6 +12105,7 @@ S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRL
 		}
 		bracket++;
 		PL_lex_brackstack[PL_lex_brackets++] = (char)(XOPERATOR | XFAKEBRACK);
+		PL_lex_allbrackets++;
 		return s;
 	    }
 	}
@@ -13993,30 +14245,179 @@ Perl_keyword_plugin_standard(pTHX_
     return KEYWORD_PLUGIN_DECLINE;
 }
 
-#define parse_recdescent(g) S_parse_recdescent(aTHX_ g)
+#define parse_recdescent(g,p) S_parse_recdescent(aTHX_ g,p)
 static void
-S_parse_recdescent(pTHX_ int gramtype)
+S_parse_recdescent(pTHX_ int gramtype, I32 fakeeof)
 {
     SAVEI32(PL_lex_brackets);
     if (PL_lex_brackets > 100)
 	Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
     PL_lex_brackstack[PL_lex_brackets++] = XFAKEEOF;
+    SAVEI32(PL_lex_allbrackets);
+    PL_lex_allbrackets = 0;
+    SAVEI8(PL_lex_fakeeof);
+    PL_lex_fakeeof = fakeeof;
     if(yyparse(gramtype) && !PL_parser->error_count)
 	qerror(Perl_mess(aTHX_ "Parse error"));
 }
 
-#define parse_recdescent_for_op(g) S_parse_recdescent_for_op(aTHX_ g)
+#define parse_recdescent_for_op(g,p) S_parse_recdescent_for_op(aTHX_ g,p)
 static OP *
-S_parse_recdescent_for_op(pTHX_ int gramtype)
+S_parse_recdescent_for_op(pTHX_ int gramtype, I32 fakeeof)
 {
     OP *o;
     ENTER;
     SAVEVPTR(PL_eval_root);
     PL_eval_root = NULL;
-    parse_recdescent(gramtype);
+    parse_recdescent(gramtype, fakeeof);
     o = PL_eval_root;
     LEAVE;
     return o;
+}
+
+#define parse_expr(p,f) S_parse_expr(aTHX_ p,f)
+static OP *
+S_parse_expr(pTHX_ I32 fakeeof, U32 flags)
+{
+    OP *exprop;
+    if (flags & ~PARSE_OPTIONAL)
+	Perl_croak(aTHX_ "Parsing code internal error (%s)", "parse_expr");
+    exprop = parse_recdescent_for_op(GRAMEXPR, fakeeof);
+    if (!exprop && !(flags & PARSE_OPTIONAL)) {
+	if (!PL_parser->error_count)
+	    qerror(Perl_mess(aTHX_ "Parse error"));
+	exprop = newOP(OP_NULL, 0);
+    }
+    return exprop;
+}
+
+/*
+=for apidoc Amx|OP *|parse_arithexpr|U32 flags
+
+Parse a Perl arithmetic expression.  This may contain operators of precedence
+down to the bit shift operators.  The expression must be followed (and thus
+terminated) either by a comparison or lower-precedence operator or by
+something that would normally terminate an expression such as semicolon.
+If I<flags> includes C<PARSE_OPTIONAL> then the expression is optional,
+otherwise it is mandatory.  It is up to the caller to ensure that the
+dynamic parser state (L</PL_parser> et al) is correctly set to reflect
+the source of the code to be parsed and the lexical context for the
+expression.
+
+The op tree representing the expression is returned.  If an optional
+expression is absent, a null pointer is returned, otherwise the pointer
+will be non-null.
+
+If an error occurs in parsing or compilation, in most cases a valid op
+tree is returned anyway.  The error is reflected in the parser state,
+normally resulting in a single exception at the top level of parsing
+which covers all the compilation errors that occurred.  Some compilation
+errors, however, will throw an exception immediately.
+
+=cut
+*/
+
+OP *
+Perl_parse_arithexpr(pTHX_ U32 flags)
+{
+    return parse_expr(LEX_FAKEEOF_COMPARE, flags);
+}
+
+/*
+=for apidoc Amx|OP *|parse_termexpr|U32 flags
+
+Parse a Perl term expression.  This may contain operators of precedence
+down to the assignment operators.  The expression must be followed (and thus
+terminated) either by a comma or lower-precedence operator or by
+something that would normally terminate an expression such as semicolon.
+If I<flags> includes C<PARSE_OPTIONAL> then the expression is optional,
+otherwise it is mandatory.  It is up to the caller to ensure that the
+dynamic parser state (L</PL_parser> et al) is correctly set to reflect
+the source of the code to be parsed and the lexical context for the
+expression.
+
+The op tree representing the expression is returned.  If an optional
+expression is absent, a null pointer is returned, otherwise the pointer
+will be non-null.
+
+If an error occurs in parsing or compilation, in most cases a valid op
+tree is returned anyway.  The error is reflected in the parser state,
+normally resulting in a single exception at the top level of parsing
+which covers all the compilation errors that occurred.  Some compilation
+errors, however, will throw an exception immediately.
+
+=cut
+*/
+
+OP *
+Perl_parse_termexpr(pTHX_ U32 flags)
+{
+    return parse_expr(LEX_FAKEEOF_COMMA, flags);
+}
+
+/*
+=for apidoc Amx|OP *|parse_listexpr|U32 flags
+
+Parse a Perl list expression.  This may contain operators of precedence
+down to the comma operator.  The expression must be followed (and thus
+terminated) either by a low-precedence logic operator such as C<or> or by
+something that would normally terminate an expression such as semicolon.
+If I<flags> includes C<PARSE_OPTIONAL> then the expression is optional,
+otherwise it is mandatory.  It is up to the caller to ensure that the
+dynamic parser state (L</PL_parser> et al) is correctly set to reflect
+the source of the code to be parsed and the lexical context for the
+expression.
+
+The op tree representing the expression is returned.  If an optional
+expression is absent, a null pointer is returned, otherwise the pointer
+will be non-null.
+
+If an error occurs in parsing or compilation, in most cases a valid op
+tree is returned anyway.  The error is reflected in the parser state,
+normally resulting in a single exception at the top level of parsing
+which covers all the compilation errors that occurred.  Some compilation
+errors, however, will throw an exception immediately.
+
+=cut
+*/
+
+OP *
+Perl_parse_listexpr(pTHX_ U32 flags)
+{
+    return parse_expr(LEX_FAKEEOF_LOWLOGIC, flags);
+}
+
+/*
+=for apidoc Amx|OP *|parse_fullexpr|U32 flags
+
+Parse a single complete Perl expression.  This allows the full
+expression grammar, including the lowest-precedence operators such
+as C<or>.  The expression must be followed (and thus terminated) by a
+token that an expression would normally be terminated by: end-of-file,
+closing bracketing punctuation, semicolon, or one of the keywords that
+signals a postfix expression-statement modifier.  If I<flags> includes
+C<PARSE_OPTIONAL> then the expression is optional, otherwise it is
+mandatory.  It is up to the caller to ensure that the dynamic parser
+state (L</PL_parser> et al) is correctly set to reflect the source of
+the code to be parsed and the lexical context for the expression.
+
+The op tree representing the expression is returned.  If an optional
+expression is absent, a null pointer is returned, otherwise the pointer
+will be non-null.
+
+If an error occurs in parsing or compilation, in most cases a valid op
+tree is returned anyway.  The error is reflected in the parser state,
+normally resulting in a single exception at the top level of parsing
+which covers all the compilation errors that occurred.  Some compilation
+errors, however, will throw an exception immediately.
+
+=cut
+*/
+
+OP *
+Perl_parse_fullexpr(pTHX_ U32 flags)
+{
+    return parse_expr(LEX_FAKEEOF_NONEXPR, flags);
 }
 
 /*
@@ -14052,7 +14453,7 @@ Perl_parse_block(pTHX_ U32 flags)
 {
     if (flags)
 	Perl_croak(aTHX_ "Parsing code internal error (%s)", "parse_block");
-    return parse_recdescent_for_op(GRAMBLOCK);
+    return parse_recdescent_for_op(GRAMBLOCK, LEX_FAKEEOF_NEVER);
 }
 
 /*
@@ -14090,7 +14491,7 @@ Perl_parse_barestmt(pTHX_ U32 flags)
 {
     if (flags)
 	Perl_croak(aTHX_ "Parsing code internal error (%s)", "parse_barestmt");
-    return parse_recdescent_for_op(GRAMBARESTMT);
+    return parse_recdescent_for_op(GRAMBARESTMT, LEX_FAKEEOF_NEVER);
 }
 
 /*
@@ -14205,7 +14606,7 @@ Perl_parse_fullstmt(pTHX_ U32 flags)
 {
     if (flags)
 	Perl_croak(aTHX_ "Parsing code internal error (%s)", "parse_fullstmt");
-    return parse_recdescent_for_op(GRAMFULLSTMT);
+    return parse_recdescent_for_op(GRAMFULLSTMT, LEX_FAKEEOF_NEVER);
 }
 
 /*
@@ -14244,8 +14645,8 @@ Perl_parse_stmtseq(pTHX_ U32 flags)
     OP *stmtseqop;
     I32 c;
     if (flags)
-	Perl_croak(aTHX_ "Parsing code internal error (%s)", "parse_fullstmt");
-    stmtseqop = parse_recdescent_for_op(GRAMSTMTSEQ);
+	Perl_croak(aTHX_ "Parsing code internal error (%s)", "parse_stmtseq");
+    stmtseqop = parse_recdescent_for_op(GRAMSTMTSEQ, LEX_FAKEEOF_CLOSING);
     c = lex_peek_unichar(0);
     if (c != -1 && c != /*{*/'}')
 	qerror(Perl_mess(aTHX_ "Parse error"));
@@ -14257,7 +14658,7 @@ Perl_munge_qwlist_to_paren_list(pTHX_ OP *qwlist)
 {
     PERL_ARGS_ASSERT_MUNGE_QWLIST_TO_PAREN_LIST;
     deprecate("qw(...) as parentheses");
-    force_next(')');
+    force_next((4<<24)|')');
     if (qwlist->op_type == OP_STUB) {
 	op_free(qwlist);
     }
@@ -14266,7 +14667,7 @@ Perl_munge_qwlist_to_paren_list(pTHX_ OP *qwlist)
 	NEXTVAL_NEXTTOKE.opval = qwlist;
 	force_next(THING);
     }
-    force_next('(');
+    force_next((2<<24)|'(');
 }
 
 /*

@@ -3426,6 +3426,7 @@ ext/XS-APItest/MANIFEST		XS::APItest extension
 ext/XS-APItest/notcore.c	Test API functions when PERL_CORE is not defined
 ext/XS-APItest/numeric.xs	XS::APItest wrappers for numeric.c
 ext/XS-APItest/README		XS::APItest extension
+ext/XS-APItest/t/arrayexpr.t	test recursive descent expression parsing
 ext/XS-APItest/t/BHK.pm		Helper for ./blockhooks.t
 ext/XS-APItest/t/blockasexpr.t	test recursive descent block parsing
 ext/XS-APItest/t/blockhooks-csc.t	XS::APItest: more tests for PL_blockhooks
