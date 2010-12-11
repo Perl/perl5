@@ -230,6 +230,10 @@ C<if> has been upgraded from 0.06 to 0.0601.
 
 =item *
 
+C<Devel::SelfStubber> has been upgraded from version 1.03 to 1.04.
+
+=item *
+
 C<IPC::Cmd> has been upgraded from 0.64 to 0.66
 
 Resolves an issue with splitting Win32 command lines

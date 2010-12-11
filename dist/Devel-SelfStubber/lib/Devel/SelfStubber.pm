@@ -4,7 +4,7 @@ require SelfLoader;
 @ISA = qw(SelfLoader);
 @EXPORT = 'AUTOLOAD';
 $JUST_STUBS = 1;
-$VERSION = 1.03;
+$VERSION = 1.04;
 sub Version {$VERSION}
 
 # Use as

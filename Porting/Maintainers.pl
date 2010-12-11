@@ -464,7 +464,7 @@ use File::Glob qw(:case);
     'Devel::SelfStubber' =>
 	{
 	'MAINTAINER'	=> 'p5p',
-	'DISTRIBUTION'	=> 'FLORA/Devel-SelfStubber-1.03.tar.gz',
+	'DISTRIBUTION'	=> 'FLORA/Devel-SelfStubber-1.04.tar.gz',
 	'FILES'		=> q[dist/Devel-SelfStubber],
 	'UPSTREAM'	=> 'blead',
 	},
