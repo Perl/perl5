@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 0e5d25b, except for:
+This has been completed up to a1fba7e, except for:
 d9a4b459f94297889956ac3adc42707365f274c2
 bf5522a13a381257966e7ed6b731195a873b153e
 9cef83062267e94311e1fd8744396e440642738e
@@ -599,6 +599,12 @@ L<[perl #58182]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=58182>.
 Mentioning a read-only lexical variable from the enclosing scope in a
 string C<eval> would cause the variable to become writable
 L<[perl #19135]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=19135>.
+
+=item *
+
+C<state> can now be used with attributes. It used to mean the same thing as
+C<my> if attributes were present
+L<[perl #68658]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=68658>.
 
 =back
 
