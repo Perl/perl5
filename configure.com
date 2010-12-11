@@ -4872,6 +4872,43 @@ $ ELSE
 $   d_getsent="undef"
 $ ENDIF
 $!
+$!
+$! Check for sa_len
+$!
+$ echo4 "Checking the availability of sa_len in the sockaddr struct ..."
+$ IF Has_Dec_C_Sockets .OR. Has_Socketshr
+$ THEN
+$   OS
+$   WS "#if defined(__DECC) || defined(__DECCXX)"
+$   WS "#include <stdlib.h>"
+$   WS "#endif"
+$   WS "#define _SOCKADDR_LEN"
+$   WS "#include <types.h>"
+$   IF Has_Socketshr
+$   THEN
+$     WS "#include <socketshr.h>"
+$   ELSE
+$     WS "#include <socket.h>"
+$   ENDIF
+$   WS "int main() {"
+$   WS "struct sockaddr sa;"
+$   WS "return (sa.sa_len);"
+$   WS "}"
+$   CS
+$   GOSUB compile_ok
+$   IF compile_status .EQ. good_compile
+$   THEN
+$     d_sockaddr_sa_len="define"
+$     echo "You have sa_len in the sockaddr struct."
+$   ELSE
+$     d_sockaddr_sa_len="undef"
+$     echo "You do not have sa_len in the sockaddr struct."
+$   ENDIF
+$ ELSE
+$   d_sockaddr_sa_len="undef"
+$   echo "You do not have sa_len in the sockaddr struct."
+$ ENDIF
+$!
 $! Check for nanosleep
 $!
 $ OS
@@ -6228,7 +6265,7 @@ $ WC "d_signbit='" + d_signbit + "'"
 $ WC "d_sigprocmask='" + d_sigprocmask + "'"
 $ WC "d_sigsetjmp='" + d_sigsetjmp + "'"
 $ WC "d_sitearch='define'"
-$ WC "d_sockaddr_sa_len='undef'"
+$ WC "d_sockaddr_sa_len='" + d_sockaddr_sa_len + "'"
 $ WC "d_sockatmark='undef'"
 $ WC "d_sockatmarkproto='undef'"
 $ WC "d_socket='" + d_socket + "'"
@@ -6926,6 +6963,7 @@ $ ENDIF
 $ IF kill_by_sigprc .EQS. "define" then WC "#define KILL_BY_SIGPRC"
 $ IF unlink_all_versions .OR. unlink_all_versions .EQS. "define" THEN -
     WC "#define UNLINK_ALL_VERSIONS"
+$ IF d_sockaddr_sa_len .EQS. "define" then WC "#define _SOCKADDR_LEN 1"
 $ CLOSE CONFIG
 $!
 $ echo4 "Doing variable substitutions on .SH files..."
