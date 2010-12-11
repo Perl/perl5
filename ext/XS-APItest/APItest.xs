@@ -95,8 +95,8 @@ test_freeent(freeent_function *f) {
 #else
     /* Storing then deleting something should ensure that a hash entry is
        available.  */
-    hv_store(test_hash, "", 0, &PL_sv_yes, 0);
-    hv_delete(test_hash, "", 0, 0);
+    (void) hv_store(test_hash, "", 0, &PL_sv_yes, 0);
+    (void) hv_delete(test_hash, "", 0, 0);
 
     /* We need to "inline" new_he here as it's static, and the functions we
        test expect to be able to call del_HE on the HE  */
@@ -124,7 +124,7 @@ test_freeent(freeent_function *f) {
     i = 0;
     do {
 	mPUSHu(results[i]);
-    } while (++i < sizeof(results)/sizeof(results[0]));
+    } while (++i < (int)(sizeof(results)/sizeof(results[0])));
 
     /* Goodbye to our extra reference.  */
     SvREFCNT_dec(test_scalar);
@@ -135,6 +135,7 @@ static I32
 bitflip_key(pTHX_ IV action, SV *field) {
     MAGIC *mg = mg_find(field, PERL_MAGIC_uvar);
     SV *keysv;
+    PERL_UNUSED_ARG(action);
     if (mg && (keysv = mg->mg_obj)) {
 	STRLEN len;
 	const char *p = SvPV(keysv, len);
@@ -170,6 +171,7 @@ static I32
 rot13_key(pTHX_ IV action, SV *field) {
     MAGIC *mg = mg_find(field, PERL_MAGIC_uvar);
     SV *keysv;
+    PERL_UNUSED_ARG(action);
     if (mg && (keysv = mg->mg_obj)) {
 	STRLEN len;
 	const char *p = SvPV(keysv, len);
@@ -252,6 +254,8 @@ rot13_key(pTHX_ IV action, SV *field) {
 
 STATIC I32
 rmagical_a_dummy(pTHX_ IV idx, SV *sv) {
+    PERL_UNUSED_ARG(idx);
+    PERL_UNUSED_ARG(sv);
     return 0;
 }
 
@@ -263,6 +267,7 @@ blockhook_csc_start(pTHX_ int full)
     dMY_CXT;
     AV *const cur = GvAV(MY_CXT.cscgv);
 
+    PERL_UNUSED_ARG(full);
     SAVEGENERICSV(GvAV(MY_CXT.cscgv));
 
     if (cur) {
@@ -282,6 +287,7 @@ blockhook_csc_pre_end(pTHX_ OP **o)
 {
     dMY_CXT;
 
+    PERL_UNUSED_ARG(o);
     /* if we hit the end of a scope we missed the start of, we need to
      * unconditionally clear @CSC */
     if (GvAV(MY_CXT.cscgv) == MY_CXT.cscav && MY_CXT.cscav) {
@@ -309,6 +315,7 @@ blockhook_test_pre_end(pTHX_ OP **o)
 {
     dMY_CXT;
 
+    PERL_UNUSED_ARG(o);
     if (MY_CXT.bhk_record)
         av_push(MY_CXT.bhkav, newSVpvs("pre_end"));
 }
@@ -318,6 +325,7 @@ blockhook_test_post_end(pTHX_ OP **o)
 {
     dMY_CXT;
 
+    PERL_UNUSED_ARG(o);
     if (MY_CXT.bhk_record)
         av_push(MY_CXT.bhkav, newSVpvs("post_end"));
 }
@@ -381,6 +389,8 @@ my_rpeep (pTHX_ OP *o)
 STATIC OP *
 THX_ck_entersub_args_lists(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 {
+    PERL_UNUSED_ARG(namegv);
+    PERL_UNUSED_ARG(ckobj);
     return ck_entersub_args_list(entersubop);
 }
 
@@ -388,6 +398,8 @@ STATIC OP *
 THX_ck_entersub_args_scalars(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 {
     OP *aop = cUNOPx(entersubop)->op_first;
+    PERL_UNUSED_ARG(namegv);
+    PERL_UNUSED_ARG(ckobj);
     if (!aop->op_sibling)
 	aop = cUNOPx(aop)->op_first;
     for (aop = aop->op_sibling; aop->op_sibling; aop = aop->op_sibling) {
@@ -401,6 +413,8 @@ THX_ck_entersub_multi_sum(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 {
     OP *sumop = NULL;
     OP *pushop = cUNOPx(entersubop)->op_first;
+    PERL_UNUSED_ARG(namegv);
+    PERL_UNUSED_ARG(ckobj);
     if (!pushop->op_sibling)
 	pushop = cUNOPx(pushop)->op_first;
     while (1) {
@@ -561,7 +575,7 @@ THX_ck_entersub_establish_cleanup(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 STATIC OP *
 THX_ck_entersub_postinc(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 {
-    OP *pushop, *argop, *estop;
+    OP *pushop, *argop;
     ck_entersub_args_proto(entersubop, namegv, ckobj);
     pushop = cUNOPx(entersubop)->op_first;
     if(!pushop->op_sibling) pushop = cUNOPx(pushop)->op_first;
@@ -952,7 +966,7 @@ bytes_cmp_utf8(bytes, utf8)
 
 MODULE = XS::APItest:Overload	PACKAGE = XS::APItest::Overload
 
-SV *
+void
 amagic_deref_call(sv, what)
 	SV *sv
 	int what
@@ -963,7 +977,7 @@ amagic_deref_call(sv, what)
 # I'd certainly like to discourage the use of this macro, given that we now
 # have amagic_deref_call
 
-SV *
+void
 tryAMAGICunDEREF_var(sv, what)
 	SV *sv
 	int what
@@ -1463,7 +1477,7 @@ xop_build_optree ()
 
         av_push(MY_CXT.xop_record, newSVpvf("NAME:%s", OP_NAME((OP*)unop)));
         av_push(MY_CXT.xop_record, newSVpvf("DESC:%s", OP_DESC((OP*)unop)));
-        av_push(MY_CXT.xop_record, newSVpvf("CLASS:%d", OP_CLASS((OP*)unop)));
+        av_push(MY_CXT.xop_record, newSVpvf("CLASS:%d", (int)OP_CLASS((OP*)unop)));
 
         PL_rpeepp(aTHX_ kid);
 
@@ -1512,6 +1526,7 @@ void
 CLONE(...)
     CODE:
     MY_CXT_CLONE;
+    PERL_UNUSED_VAR(items);
     MY_CXT.sv = newSVpv("initial_clone",0);
     MY_CXT.cscgv = gv_fetchpvs("XS::APItest::COMPILE_SCOPE_CONTAINER",
         GV_ADDMULTI, SVt_PVAV);
@@ -2652,6 +2667,7 @@ void
 establish_cleanup(...)
 PROTOTYPE: $
 CODE:
+    PERL_UNUSED_VAR(items);
     croak("establish_cleanup called as a function");
 
 BOOT:
@@ -2664,6 +2680,7 @@ void
 postinc(...)
 PROTOTYPE: $
 CODE:
+    PERL_UNUSED_VAR(items);
     croak("postinc called as a function");
 
 BOOT:

@@ -210,6 +210,8 @@ recursive_lock_release(pTHX_ recursive_lock_t *lock)
 void
 recursive_lock_acquire(pTHX_ recursive_lock_t *lock, char *file, int line)
 {
+    PERL_UNUSED_ARG(file);
+    PERL_UNUSED_ARG(line);
     assert(aTHX);
     MUTEX_LOCK(&lock->mutex);
     if (lock->owner == aTHX) {
@@ -278,6 +280,7 @@ int
 sharedsv_userlock_free(pTHX_ SV *sv, MAGIC *mg)
 {
     user_lock *ul = (user_lock *) mg->mg_ptr;
+    PERL_UNUSED_ARG(sv);
     assert(aTHX == PL_sharedsv_space);
     if (ul) {
         recursive_lock_destroy(aTHX_ &ul->lock);
@@ -805,6 +808,7 @@ sharedsv_scalar_mg_set(pTHX_ SV *sv, MAGIC *mg)
 int
 sharedsv_scalar_mg_free(pTHX_ SV *sv, MAGIC *mg)
 {
+    PERL_UNUSED_ARG(sv);
     S_sharedsv_dec(aTHX_ (SV*)mg->mg_ptr);
     return (0);
 }
@@ -815,6 +819,7 @@ sharedsv_scalar_mg_free(pTHX_ SV *sv, MAGIC *mg)
 int
 sharedsv_scalar_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
 {
+    PERL_UNUSED_ARG(param);
     SvREFCNT_inc_void(mg->mg_ptr);
     return (0);
 }
@@ -986,7 +991,7 @@ sharedsv_elem_mg_DELETE(pTHX_ SV *sv, MAGIC *mg)
             }
         }
         SHARED_CONTEXT;
-        hv_delete((HV*) saggregate, key, len, G_DISCARD);
+        (void) hv_delete((HV*) saggregate, key, len, G_DISCARD);
     }
     CALLER_CONTEXT;
     LEAVE_LOCK;
@@ -999,6 +1004,7 @@ sharedsv_elem_mg_DELETE(pTHX_ SV *sv, MAGIC *mg)
 int
 sharedsv_elem_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
 {
+    PERL_UNUSED_ARG(param);
     SvREFCNT_inc_void(S_sharedsv_from_obj(aTHX_ mg->mg_obj));
     assert(mg->mg_flags & MGf_DUP);
     return (0);
@@ -1027,6 +1033,7 @@ sharedsv_array_mg_FETCHSIZE(pTHX_ SV *sv, MAGIC *mg)
     dTHXc;
     SV *ssv = (SV *) mg->mg_ptr;
     U32 val;
+    PERL_UNUSED_ARG(sv);
     SHARED_EDIT;
     if (SvTYPE(ssv) == SVt_PVAV) {
         val = av_len((AV*) ssv);
@@ -1045,6 +1052,7 @@ sharedsv_array_mg_CLEAR(pTHX_ SV *sv, MAGIC *mg)
 {
     dTHXc;
     SV *ssv = (SV *) mg->mg_ptr;
+    PERL_UNUSED_ARG(sv);
     SHARED_EDIT;
     if (SvTYPE(ssv) == SVt_PVAV) {
         av_clear((AV*) ssv);
@@ -1060,6 +1068,7 @@ sharedsv_array_mg_CLEAR(pTHX_ SV *sv, MAGIC *mg)
 int
 sharedsv_array_mg_free(pTHX_ SV *sv, MAGIC *mg)
 {
+    PERL_UNUSED_ARG(sv);
     S_sharedsv_dec(aTHX_ (SV*)mg->mg_ptr);
     return (0);
 }
@@ -1082,6 +1091,7 @@ sharedsv_array_mg_copy(pTHX_ SV *sv, MAGIC* mg,
     MAGIC *nmg = sv_magicext(nsv,mg->mg_obj,
                             toLOWER(mg->mg_type),&sharedsv_elem_vtbl,
                             name, namlen);
+    PERL_UNUSED_ARG(sv);
     nmg->mg_flags |= MGf_DUP;
     return (1);
 }
@@ -1091,6 +1101,7 @@ sharedsv_array_mg_copy(pTHX_ SV *sv, MAGIC* mg,
 int
 sharedsv_array_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
 {
+    PERL_UNUSED_ARG(param);
     SvREFCNT_inc_void((SV*)mg->mg_ptr);
     assert(mg->mg_flags & MGf_DUP);
     return (0);

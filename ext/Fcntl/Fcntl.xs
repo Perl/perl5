@@ -53,7 +53,7 @@ XS_Fcntl_S_ISREG(pTHX_ CV* cv)
 	mode = &PL_sv_undef;
 	EXTEND(SP, 1);
     }
-    PUSHs(((SvUV(mode) & S_IFMT) == ix) ? &PL_sv_yes : &PL_sv_no);
+    PUSHs(((SvUV(mode) & S_IFMT) == (UV)ix) ? &PL_sv_yes : &PL_sv_no);
     PUTBACK;
 }
 

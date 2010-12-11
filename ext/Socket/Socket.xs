@@ -385,7 +385,7 @@ unpack_sockaddr_un(sun_sv)
 		addr_len = (char *)&addr - (char *)&(addr.sun_path) + sockaddrlen;
 	} else {
 		for (addr_len = 0; addr.sun_path[addr_len]
-		     && addr_len < sizeof addr.sun_path; addr_len++);
+		     && addr_len < (int)sizeof(addr.sun_path); addr_len++);
 	}
 
 	ST(0) = newSVpvn_flags(addr.sun_path, addr_len, SVs_TEMP);

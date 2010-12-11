@@ -226,7 +226,7 @@ new_tmpfile(packname = "IO::File")
 #endif
 	gv = (GV*)SvREFCNT_inc(newGVgen(packname));
 	if (gv)
-	    hv_delete(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv), G_DISCARD);
+	    (void) hv_delete(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv), G_DISCARD);
 	if (gv && do_open(gv, "+>&", 3, FALSE, 0, 0, fp)) {
 	    ST(0) = sv_2mortal(newRV((SV*)gv));
 	    sv_bless(ST(0), gv_stashpv(packname, TRUE));

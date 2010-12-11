@@ -106,7 +106,7 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
 		 */
 		p = strchr(left, '/');
 		s = p ? p : left + left_len;
-		if (s - left >= sizeof(next_token)) {
+		if ((STRLEN)(s - left) >= (STRLEN)sizeof(next_token)) {
 			errno = ENAMETOOLONG;
 			return (NULL);
 			}
@@ -190,7 +190,7 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
 	 */
 				if (p != NULL) {
 					if (symlink[slen - 1] != '/') {
-						if (slen + 1 >= sizeof(symlink)) {
+						if ((STRLEN)(slen + 1) >= (STRLEN)sizeof(symlink)) {
 			errno = ENAMETOOLONG;
 							return (NULL);
 		}

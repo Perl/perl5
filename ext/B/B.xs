@@ -258,7 +258,7 @@ make_sv_object(pTHX_ SV *sv)
     IV iv;
     dMY_CXT;
 
-    for (iv = 0; iv < sizeof(specialsv_list)/sizeof(SV*); iv++) {
+    for (iv = 0; iv < (IV)(sizeof(specialsv_list)/sizeof(SV*)); iv++) {
 	if (sv == specialsv_list[iv]) {
 	    type = "B::SPECIAL";
 	    break;
@@ -959,6 +959,9 @@ next(o)
 	    ret = sv_2mortal(newSVpv(*((char **)ptr), 0));
 	    break;
 #endif
+	default:
+	    croak("Illegal alias 0x%08x for B::*next", (unsigned)ix);
+
 	}
 	ST(0) = ret;
 	XSRETURN(1);
@@ -1516,6 +1519,8 @@ IVX(sv)
 	case (U8)(sv_U16p >> 16):
 	    ret = sv_2mortal(newSVuv(*((U16 *)ptr)));
 	    break;
+	default:
+	    croak("Illegal alias 0x%08x for B::*IVX", (unsigned)ix);
 	}
 	ST(0) = ret;
 	XSRETURN(1);
@@ -1808,6 +1813,8 @@ SV(gv)
 	case (U8)(line_tp >> 16):
 	    ret = sv_2mortal(newSVuv(*((line_t *)ptr)));
 	    break;
+	default:
+	    croak("Illegal alias 0x%08x for B::*SV", (unsigned)ix);
 	}
 	ST(0) = ret;
 	XSRETURN(1);

@@ -380,8 +380,8 @@ U8* pv_utf8_compose(U8* s, STRLEN slen, U8* d, STRLEN dlen, bool iscontig)
 	    bool composed;
 
 	    /* blocked */
-	    if (iscontig && cc_pos || /* discontiguous combination */
-		 curCC != 0 && preCC == curCC || /* blocked by same CC */
+	    if ((iscontig && cc_pos) || /* discontiguous combination */
+		 (curCC != 0 && preCC == curCC) || /* blocked by same CC */
 		 preCC > curCC) /* blocked by higher CC: revised D2 */
 		composed = FALSE;
 

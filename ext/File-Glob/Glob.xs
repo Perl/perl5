@@ -21,6 +21,7 @@ START_MY_CXT
 #else
 static int
 errfunc(const char *foo, int bar) {
+  PERL_UNUSED_ARG(foo);
   return !(bar == EACCES || bar == ENOENT || bar == ENOTDIR);
 }
 #endif

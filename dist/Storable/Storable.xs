@@ -1736,6 +1736,7 @@ static void pkg_hide(
 	const char *method)
 {
 	const char *hvname = HvNAME_get(pkg);
+	PERL_UNUSED_ARG(method);
 	(void) hv_store(cache,
 		hvname, strlen(hvname), newSVsv(&PL_sv_undef), 0);
 }
@@ -1752,6 +1753,7 @@ static void pkg_uncache(
 	const char *method)
 {
 	const char *hvname = HvNAME_get(pkg);
+	PERL_UNUSED_ARG(method);
 	(void) hv_delete(cache, hvname, strlen(hvname), G_DISCARD);
 }
 
@@ -2367,7 +2369,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 			SV *key;
 
 			if (!he)
-				CROAK(("Hash %p inconsistent - expected %d keys, %dth is NULL", hv, len, i));
+				CROAK(("Hash %p inconsistent - expected %d keys, %dth is NULL", hv, (int)len, (int)i));
 			key = hv_iterkeysv(he);
 			av_store(av, AvFILLp(av)+1, key);	/* av_push(), really */
 		}
@@ -3882,6 +3884,7 @@ static SV *mbuf2sv(pTHX)
  */
 static SV *retrieve_other(pTHX_ stcxt_t *cxt, const char *cname)
 {
+	PERL_UNUSED_ARG(cname);
 	if (
 		cxt->ver_major != STORABLE_BIN_MAJOR &&
 		cxt->ver_minor != STORABLE_BIN_MINOR
@@ -3912,6 +3915,7 @@ static SV *retrieve_idx_blessed(pTHX_ stcxt_t *cxt, const char *cname)
 	SV **sva;
 	SV *sv;
 
+	PERL_UNUSED_ARG(cname);
 	TRACEME(("retrieve_idx_blessed (#%d)", cxt->tagnum));
 	ASSERT(!cname, ("no bless-into class given here, got %s", cname));
 
@@ -3954,6 +3958,7 @@ static SV *retrieve_blessed(pTHX_ stcxt_t *cxt, const char *cname)
 	char *classname = buf;
 	char *malloced_classname = NULL;
 
+	PERL_UNUSED_ARG(cname);
 	TRACEME(("retrieve_blessed (#%d)", cxt->tagnum));
 	ASSERT(!cname, ("no bless-into class given here, got %s", cname));
 
@@ -4035,6 +4040,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 	char mtype = '\0';
 	unsigned int extra_type = 0;
 
+	PERL_UNUSED_ARG(cname);
 	TRACEME(("retrieve_hook (#%d)", cxt->tagnum));
 	ASSERT(!cname, ("no bless-into class given here, got %s", cname));
 
@@ -5484,6 +5490,7 @@ static SV *old_retrieve_array(pTHX_ stcxt_t *cxt, const char *cname)
 	SV *sv;
 	int c;
 
+	PERL_UNUSED_ARG(cname);
 	TRACEME(("old_retrieve_array (#%d)", cxt->tagnum));
 
 	/*
@@ -5546,6 +5553,7 @@ static SV *old_retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 	int c;
 	SV *sv_h_undef = (SV *) 0;		/* hv_store() bug */
 
+	PERL_UNUSED_ARG(cname);
 	TRACEME(("old_retrieve_hash (#%d)", cxt->tagnum));
 
 	/*

@@ -936,7 +936,7 @@ WEXITSTATUS(status)
 #endif
 	    break;
 	default:
-	    Perl_croak(aTHX_ "Illegal alias %d for POSIX::W*", ix);
+	    Perl_croak(aTHX_ "Illegal alias %d for POSIX::W*", (int)ix);
 	}
     OUTPUT:
 	RETVAL
@@ -1118,65 +1118,65 @@ localeconv()
 	if ((lcbuf = localeconv())) {
 	    /* the strings */
 	    if (lcbuf->decimal_point && *lcbuf->decimal_point)
-		hv_store(RETVAL, "decimal_point", 13,
+		(void) hv_store(RETVAL, "decimal_point", 13,
 		    newSVpv(lcbuf->decimal_point, 0), 0);
 	    if (lcbuf->thousands_sep && *lcbuf->thousands_sep)
-		hv_store(RETVAL, "thousands_sep", 13,
+		(void) hv_store(RETVAL, "thousands_sep", 13,
 		    newSVpv(lcbuf->thousands_sep, 0), 0);
 #ifndef NO_LOCALECONV_GROUPING
 	    if (lcbuf->grouping && *lcbuf->grouping)
-		hv_store(RETVAL, "grouping", 8,
+		(void) hv_store(RETVAL, "grouping", 8,
 		    newSVpv(lcbuf->grouping, 0), 0);
 #endif
 	    if (lcbuf->int_curr_symbol && *lcbuf->int_curr_symbol)
-		hv_store(RETVAL, "int_curr_symbol", 15,
+		(void) hv_store(RETVAL, "int_curr_symbol", 15,
 		    newSVpv(lcbuf->int_curr_symbol, 0), 0);
 	    if (lcbuf->currency_symbol && *lcbuf->currency_symbol)
-		hv_store(RETVAL, "currency_symbol", 15,
+		(void) hv_store(RETVAL, "currency_symbol", 15,
 		    newSVpv(lcbuf->currency_symbol, 0), 0);
 	    if (lcbuf->mon_decimal_point && *lcbuf->mon_decimal_point)
-		hv_store(RETVAL, "mon_decimal_point", 17,
+		(void) hv_store(RETVAL, "mon_decimal_point", 17,
 		    newSVpv(lcbuf->mon_decimal_point, 0), 0);
 #ifndef NO_LOCALECONV_MON_THOUSANDS_SEP
 	    if (lcbuf->mon_thousands_sep && *lcbuf->mon_thousands_sep)
-		hv_store(RETVAL, "mon_thousands_sep", 17,
+		(void) hv_store(RETVAL, "mon_thousands_sep", 17,
 		    newSVpv(lcbuf->mon_thousands_sep, 0), 0);
 #endif
 #ifndef NO_LOCALECONV_MON_GROUPING
 	    if (lcbuf->mon_grouping && *lcbuf->mon_grouping)
-		hv_store(RETVAL, "mon_grouping", 12,
+		(void) hv_store(RETVAL, "mon_grouping", 12,
 		    newSVpv(lcbuf->mon_grouping, 0), 0);
 #endif
 	    if (lcbuf->positive_sign && *lcbuf->positive_sign)
-		hv_store(RETVAL, "positive_sign", 13,
+		(void) hv_store(RETVAL, "positive_sign", 13,
 		    newSVpv(lcbuf->positive_sign, 0), 0);
 	    if (lcbuf->negative_sign && *lcbuf->negative_sign)
-		hv_store(RETVAL, "negative_sign", 13,
+		(void) hv_store(RETVAL, "negative_sign", 13,
 		    newSVpv(lcbuf->negative_sign, 0), 0);
 	    /* the integers */
 	    if (lcbuf->int_frac_digits != CHAR_MAX)
-		hv_store(RETVAL, "int_frac_digits", 15,
+		(void) hv_store(RETVAL, "int_frac_digits", 15,
 		    newSViv(lcbuf->int_frac_digits), 0);
 	    if (lcbuf->frac_digits != CHAR_MAX)
-		hv_store(RETVAL, "frac_digits", 11,
+		(void) hv_store(RETVAL, "frac_digits", 11,
 		    newSViv(lcbuf->frac_digits), 0);
 	    if (lcbuf->p_cs_precedes != CHAR_MAX)
-		hv_store(RETVAL, "p_cs_precedes", 13,
+		(void) hv_store(RETVAL, "p_cs_precedes", 13,
 		    newSViv(lcbuf->p_cs_precedes), 0);
 	    if (lcbuf->p_sep_by_space != CHAR_MAX)
-		hv_store(RETVAL, "p_sep_by_space", 14,
+		(void) hv_store(RETVAL, "p_sep_by_space", 14,
 		    newSViv(lcbuf->p_sep_by_space), 0);
 	    if (lcbuf->n_cs_precedes != CHAR_MAX)
-		hv_store(RETVAL, "n_cs_precedes", 13,
+		(void) hv_store(RETVAL, "n_cs_precedes", 13,
 		    newSViv(lcbuf->n_cs_precedes), 0);
 	    if (lcbuf->n_sep_by_space != CHAR_MAX)
-		hv_store(RETVAL, "n_sep_by_space", 14,
+		(void) hv_store(RETVAL, "n_sep_by_space", 14,
 		    newSViv(lcbuf->n_sep_by_space), 0);
 	    if (lcbuf->p_sign_posn != CHAR_MAX)
-		hv_store(RETVAL, "p_sign_posn", 11,
+		(void) hv_store(RETVAL, "p_sign_posn", 11,
 		    newSViv(lcbuf->p_sign_posn), 0);
 	    if (lcbuf->n_sign_posn != CHAR_MAX)
-		hv_store(RETVAL, "n_sign_posn", 11,
+		(void) hv_store(RETVAL, "n_sign_posn", 11,
 		    newSViv(lcbuf->n_sign_posn), 0);
 	}
 #else

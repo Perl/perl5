@@ -52,7 +52,7 @@ op_names_init(pTHX)
     for(i=0; i < PL_maxo; ++i) {
 	SV * const sv = newSViv(i);
 	SvREADONLY_on(sv);
-	hv_store(op_named_bits, op_names[i], strlen(op_names[i]), sv, 0);
+	(void) hv_store(op_named_bits, op_names[i], strlen(op_names[i]), sv, 0);
     }
 
     put_op_bitspec(aTHX_ STR_WITH_LEN(":none"), sv_2mortal(new_opset(aTHX_ Nullsv)));
@@ -264,7 +264,7 @@ PPCODE:
     if (strNE(HvNAME_get(hv),"main")) {
         /* make it think it's in main:: */
 	hv_name_set(hv, "main", 4, 0);
-        hv_store(hv,"_",1,(SV *)PL_defgv,0);  /* connect _ to global */
+        (void) hv_store(hv,"_",1,(SV *)PL_defgv,0);  /* connect _ to global */
         SvREFCNT_inc((SV *)PL_defgv);  /* want to keep _ around! */
     }
     LEAVE;

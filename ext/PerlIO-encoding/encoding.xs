@@ -58,6 +58,8 @@ PerlIOEncode_getarg(pTHX_ PerlIO * f, CLONE_PARAMS * param, int flags)
 {
     PerlIOEncode *e = PerlIOSelf(f, PerlIOEncode);
     SV *sv = &PL_sv_undef;
+    PERL_UNUSED_ARG(param);
+    PERL_UNUSED_ARG(flags);
     if (e->enc) {
 	dSP;
 	/* Not 100% sure stack swap is right thing to do during dup ... */

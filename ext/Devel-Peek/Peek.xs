@@ -294,18 +294,25 @@ mstats2hash(SV *sv, SV *rv, int level)
 static void
 fill_mstats(SV *sv, int level)
 {
+    PERL_UNUSED_ARG(sv);
+    PERL_UNUSED_ARG(level);
     croak("Cannot report mstats without Perl malloc");
 }
 
 static void
 mstats_fillhash(SV *sv, int level)
 {
+    PERL_UNUSED_ARG(sv);
+    PERL_UNUSED_ARG(level);
     croak("Cannot report mstats without Perl malloc");
 }
 
 static void
 mstats2hash(SV *sv, SV *rv, int level)
 {
+    PERL_UNUSED_ARG(sv);
+    PERL_UNUSED_ARG(rv);
+    PERL_UNUSED_ARG(level);
     croak("Cannot report mstats without Perl malloc");
 }
 #endif	/* defined(MYMALLOC) */ 

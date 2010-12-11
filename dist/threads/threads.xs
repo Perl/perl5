@@ -363,6 +363,7 @@ int
 ithread_mg_free(pTHX_ SV *sv, MAGIC *mg)
 {
     ithread *thread = (ithread *)mg->mg_ptr;
+    PERL_UNUSED_ARG(sv);
     MUTEX_LOCK(&thread->mutex);
     S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
     return (0);
@@ -371,6 +372,7 @@ ithread_mg_free(pTHX_ SV *sv, MAGIC *mg)
 int
 ithread_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
 {
+    PERL_UNUSED_ARG(param);
     S_ithread_count_inc(aTHX_ (ithread *)mg->mg_ptr);
     return (0);
 }

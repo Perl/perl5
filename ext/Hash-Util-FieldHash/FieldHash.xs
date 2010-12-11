@@ -116,6 +116,7 @@ AV* HUF_get_trigger_content(SV* trigger) {
  * the uf_set field of the uvar magic of a trigger.
  */
 I32 HUF_destroy_obj(pTHX_ IV index, SV* trigger) {
+    PERL_UNUSED_ARG(index);
     /* Do nothing if the weakref wasn't undef'd.  Also don't bother
      * during global destruction.  (MY_CXT.ob_reg is sometimes funny there) */
     if (!SvROK(trigger) && (!PL_in_clean_all)) {
@@ -125,15 +126,15 @@ I32 HUF_destroy_obj(pTHX_ IV index, SV* trigger) {
         HV* field_tab = (HV*) *av_fetch(cont, 1, 0);
         HE* ent;
         hv_iterinit(field_tab);
-        while (ent = hv_iternext(field_tab)) {
+        while ((ent = hv_iternext(field_tab))) {
             SV* field_ref = HeVAL(ent);
             SV* field = SvRV(field_ref);
-            hv_delete_ent((HV*)field, ob_id, 0, 0);
+            (void) hv_delete_ent((HV*)field, ob_id, 0, 0);
         }
         /* make it safe in case we must run in global clenaup, after all */
         if (PL_in_clean_all)
             HUF_global(HUF_RESET); /* shoudn't be needed */
-        hv_delete_ent(MY_CXT.ob_reg, ob_id, 0, 0);
+        (void) hv_delete_ent(MY_CXT.ob_reg, ob_id, 0, 0);
     }
     return 0;
 }
@@ -154,7 +155,7 @@ SV* HUF_new_trigger(SV* obj, SV* ob_id) {
     av_store(cont, 0, SvREFCNT_inc(ob_id));
     av_store(cont, 1, (SV*)newHV());
     HUF_add_uvar_magic(trigger, NULL, &HUF_destroy_obj, 0, (SV*)cont);
-    hv_store_ent(MY_CXT.ob_reg, ob_id, trigger, 0);
+    (void) hv_store_ent(MY_CXT.ob_reg, ob_id, trigger, 0);
     return trigger;
 }
 
@@ -162,7 +163,7 @@ SV* HUF_new_trigger(SV* obj, SV* ob_id) {
 SV* HUF_ask_trigger(SV* ob_id) {
     dMY_CXT;
     HE* ent;
-    if (ent = hv_fetch_ent(MY_CXT.ob_reg, ob_id, 0, 0))
+    if ((ent = hv_fetch_ent(MY_CXT.ob_reg, ob_id, 0, 0)))
         return HeVAL(ent);
     return NULL;
 }
@@ -190,7 +191,7 @@ void HUF_mark_field(SV* trigger, SV* field) {
     HV* field_tab = (HV*) *av_fetch(cont, 1, 0);
     SV* field_ref = newRV_inc(field);
     UV field_addr = PTR2UV(field);
-    hv_store(field_tab, (char *)&field_addr, sizeof(field_addr), field_ref, 0);
+    (void) hv_store(field_tab, (char *)&field_addr, sizeof(field_addr), field_ref, 0);
 }
 
 /* Determine, from the value of action, whether this call may create a new
@@ -213,7 +214,7 @@ I32 HUF_watch_key_safe(pTHX_ IV action, SV* field) {
         } else if (HUF_WOULD_CREATE_KEY(action)) { /* string key */
             /* registered as object id? */
             SV* trigger;
-            if ( trigger = HUF_ask_trigger(keysv))
+            if (( trigger = HUF_ask_trigger(keysv)))
                 HUF_mark_field( trigger, field);
         }
     } else {
@@ -225,6 +226,7 @@ I32 HUF_watch_key_safe(pTHX_ IV action, SV* field) {
 I32 HUF_watch_key_id(pTHX_ IV action, SV* field) {
     MAGIC* mg = mg_find(field, PERL_MAGIC_uvar);
     SV* keysv;
+    PERL_UNUSED_ARG(action);
     if (mg && (keysv = mg->mg_obj)) {
         if (SvROK(keysv)) /* ref key */
             mg->mg_obj = HUF_obj_id(keysv); /* key replacement */
@@ -282,16 +284,16 @@ void HUF_fix_trigger(SV* trigger, SV* new_id) {
     HE* ent;
     SV* old_id = *av_fetch(cont, 0, 0);
     hv_iterinit(field_tab);
-    while (ent = hv_iternext(field_tab)) {
+    while ((ent = hv_iternext(field_tab))) {
         SV* field_ref = HeVAL(ent);
         HV* field = (HV*)SvRV(field_ref);
         UV field_addr = PTR2UV(field);
         SV* val;
         /* recreate field tab entry */
-        hv_store(new_tab, (char *)&field_addr, sizeof(field_addr), SvREFCNT_inc(field_ref), 0);
+        (void) hv_store(new_tab, (char *)&field_addr, sizeof(field_addr), SvREFCNT_inc(field_ref), 0);
         /* recreate field entry, if any */
-        if (val = hv_delete_ent(field, old_id, 0, 0))
-            hv_store_ent(field, new_id, SvREFCNT_inc(val), 0);
+        if ((val = hv_delete_ent(field, old_id, 0, 0)))
+            (void) hv_store_ent(field, new_id, SvREFCNT_inc(val), 0);
     }
     /* update the trigger */
     av_store(cont, 0, SvREFCNT_inc(new_id));
@@ -307,7 +309,7 @@ void HUF_fix_objects(void) {
     HE* ent;
     AV* oblist = (AV*)sv_2mortal((SV*)newAV());
     hv_iterinit(MY_CXT.ob_reg);
-    while(ent = hv_iternext(MY_CXT.ob_reg))
+    while((ent = hv_iternext(MY_CXT.ob_reg)))
         av_push(oblist, SvREFCNT_inc(hv_iterkeysv(ent)));
     len = av_len(oblist);
     for (i = 0; i <= len; ++i) {
@@ -328,7 +330,7 @@ void HUF_fix_objects(void) {
         }
 
         HUF_fix_trigger(trigger, new_id);
-        hv_store_ent(MY_CXT.ob_reg, new_id, SvREFCNT_inc(trigger), 0);
+        (void) hv_store_ent(MY_CXT.ob_reg, new_id, SvREFCNT_inc(trigger), 0);
     }
 }
 
@@ -336,6 +338,8 @@ void HUF_fix_objects(void) {
 
 static SV* counter;
 I32 HUF_inc_var(pTHX_ IV index, SV* which) {
+    PERL_UNUSED_ARG(index);
+    PERL_UNUSED_ARG(which);
     sv_setiv(counter, 1 + SvIV(counter));
     return 0;
 }
@@ -435,7 +439,7 @@ PPCODE:
             HV* field_tab = (HV*) *av_fetch(cont, 1, 0);
             HE* ent;
             hv_iterinit(field_tab);
-            while (ent = hv_iternext(field_tab)) {
+            while ((ent = hv_iternext(field_tab))) {
                 HV* field = (HV*)SvRV(HeVAL(ent));
                 if (hv_exists_ent(field, ob_id, 0))
                     XPUSHs(sv_2mortal(newRV_inc((SV*)field)));

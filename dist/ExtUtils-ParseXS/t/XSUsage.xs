@@ -6,8 +6,8 @@ int xsusage_one()       { return 1; }
 int xsusage_two()       { return 2; }
 int xsusage_three()     { return 3; }
 int xsusage_four()      { return 4; }
-int xsusage_five(int i) { return 5; }
-int xsusage_six(int i)  { return 6; }
+int xsusage_five(int i) { PERL_UNUSED_ARG(i); return 5; }
+int xsusage_six(int i)  { PERL_UNUSED_ARG(i); return 6; }
 
 MODULE = XSUsage         PACKAGE = XSUsage	PREFIX = xsusage_
 
