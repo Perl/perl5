@@ -8,7 +8,7 @@ package Win32;
     require DynaLoader;
 
     @ISA = qw|Exporter DynaLoader|;
-    $VERSION = '0.40';
+    $VERSION = '0.41';
     $XS_VERSION = $VERSION;
     $VERSION = eval $VERSION;
 
@@ -275,11 +275,12 @@ sub GetOSDisplayName {
     # Calling GetOSDisplayName() with arguments is for the test suite only!
     my($name,$desc) = @_ ? @_ : GetOSName();
     $name =~ s/^Win//;
-    if ($desc eq "Windows Home Server" || $desc eq "Windows XP Professional x64 Edition") {
+    if ($desc =~ /^Windows Home Server\b/ || $desc =~ /^Windows XP Professional x64 Edition\b/) {
 	($name, $desc) = ($desc, "");
     }
-    elsif ($desc =~ s/\s*(Windows (.*) Server( \d+)?)$//) {
-       ($name, $desc) = ("$1 $name", $desc);
+    elsif ($desc =~ s/\s*(Windows (.*) Server( \d+)?)//) {
+	$name = "$1 $name";
+	$desc =~ s/^\s+//;
     }
     else {
 	for ($name) {
@@ -300,9 +301,10 @@ sub GetOSDisplayName {
 
 sub _GetSystemMetrics {
     my($index,$metrics) = @_;
+    return Win32::GetSystemMetrics($index) unless ref $metrics;
     return $metrics->{$index} if ref $metrics eq "HASH" && defined $metrics->{$index};
     return 1 if ref $metrics eq "ARRAY" && grep $_ == $index, @$metrics;
-    return Win32::GetSystemMetrics($index);
+    return 0;
 }
 
 sub _GetOSName {
@@ -472,7 +474,8 @@ sub _GetOSName {
                $desc .= " Enterprise";
             }
             elsif ($productinfo == PRODUCT_BUSINESS) {
-               $desc .= " Business";
+	       # "Windows 7 Business" had a name change to "Windows 7 Professional"
+               $desc .= $minor == 0 ? " Business" : "Professional";
             }
             elsif ($productinfo == PRODUCT_STARTER) {
                $desc .= " Starter";
@@ -704,8 +707,10 @@ $ENV{PROCESSOR_ARCHITECTURE}.  This might not work on Win9X.
 
 =item Win32::GetChipName()
 
-Returns the processor type: 386, 486 or 586 for x86 processors,
-8664 for the x64 processor and 2200 for the Itanium.
+Returns the processor type: 386, 486 or 586 for x86 processors, 8664
+for the x64 processor and 2200 for the Itanium.  Since it returns the
+native processor type it will return a 64-bit processor type even when
+called from a 32-bit Perl running on 64-bit Windows.
 
 =item Win32::GetCwd()
 
@@ -855,6 +860,10 @@ being used.  It returns names like these (random samples):
    Windows Server 2003 Enterprise Edition for Itanium-based Systems
    Windows Vista Ultimate (32-bit)
    Windows Small Business Server 2008 R2 (64-bit)
+
+The display name describes the native Windows version, so even on a
+32-bit Perl this function may return a "Windows ... (64-bit)" name
+when running on a 64-bit Windows.
 
 This function should only be used to display the actual OS name to the
 user; it should not be used to determine the class of operating systems

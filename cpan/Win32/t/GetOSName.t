@@ -11,7 +11,7 @@ use Win32;
 # The "display name" value is the same as the $pretty field,
 # prefixed by "Windows ", with all "[]{}" characters removed.
 
-# $pretty, $os $id, $major, $minor, $sm, $pt, $metric, $tag
+# $pretty, $os $id, $major, $minor, $sm, $pt, $metric
 
 my @intel_tests = (
 ["Win32s",                          "Win32s",  0                     ],
@@ -94,6 +94,7 @@ my @dual_tests = (
 ["7 [Starter]",                     "7",       2, 6, 1, 0x0b         ],
 ["7 [Home Basic]",                  "7",       2, 6, 1, 0x02         ],
 ["7 [Home Premium]",                "7",       2, 6, 1, 0x03         ],
+["7 [Professional]",                "7",       2, 6, 1, 0x06         ],
 ["7 [Professional]",                "7",       2, 6, 1, 0x30         ],
 ["7 [Enterprise]",                  "7",       2, 6, 1, 0x04         ],
 ["7 [Ultimate]",                    "7",       2, 6, 1, 0x01         ],
@@ -109,20 +110,18 @@ my @ia64_tests = (
 ["2003 [Enterprise Edition for Itanium-based Systems]", "2003", 2, 5, 2, 0x0002, 2, 0],
 );
 
-plan tests => 3 * (@intel_tests + @amd64_tests + 2*@dual_tests + @ia64_tests);
+plan tests => 6 * (@intel_tests + @amd64_tests + 2*@dual_tests + @ia64_tests);
 
 # Test internal implementation function
 sub check {
     my($test, $arch) = @_;
-    my($pretty, $expect, $id, $major, $minor, $sm, $pt, $metrics, $tag) = @$test;
+    my($pretty, $expect, $id, $major, $minor, $sm, $pt, $metrics) = @$test;
     $metrics = [$metrics] if defined($metrics) && not ref $metrics;
-    $tag ||= "";
 
-    unless ($tag) {
-	($pretty, $tag) = ("$1$2$3", "$2") if $pretty =~ /^(.*)\[(.*)\](.*)$/;
-	($pretty, $tag) = ("$1$2$3", "Windows $2") if $pretty =~ /^(.*)\{(.*)\}(.*)$/;
-	$tag = "R2 $tag" if $tag !~ /R2/ && $pretty =~ /R2$/;
-    }
+    my $tag = "";
+    ($pretty, $tag) = ("$1$2$3", "$2") if $pretty =~ /^(.*)\[(.*)\](.*)$/;
+    ($pretty, $tag) = ("$1$2$3", "Windows $2") if $pretty =~ /^(.*)\{(.*)\}(.*)$/;
+    $tag = "R2 $tag" if $tag !~ /R2/ && $pretty =~ /R2$/;
 
     # All display names start with "Windows";
     # and 2003/2008 start with "Windows Server"
@@ -150,7 +149,17 @@ sub check {
     note($pretty);
     is($display, $pretty);
     is($os, "Win$expect", "os:   $os");
-    is($desc, $tag,       "desc: $desc");
+    is($desc, $tag, "desc: $desc");
+
+    my $sp = "Service Pack 42";
+    ($os, $desc) = Win32::_GetOSName($sp, $major||0, $minor||0, 0,
+				     $id, $sm||0, $pt||1, $sm||0, $arch, $metrics);
+    $display = Win32::GetOSDisplayName($os, $desc);
+
+    is($display, "$pretty $sp", "display: $display");
+    is($os,      "Win$expect",  "os:      $os");
+    $expect = length($tag) ? "$tag $sp" : $sp;
+    is($desc,    $expect,       "desc:    $desc");
 }
 
 check($_, Win32::PROCESSOR_ARCHITECTURE_INTEL) for @intel_tests, @dual_tests;
