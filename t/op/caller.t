@@ -5,12 +5,12 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan( tests => 80 );
+    plan( tests => 81 );
 }
 
 my @c;
 
-print "# Tests with caller(0)\n";
+BEGIN { print "# Tests with caller(0)\n"; }
 
 @c = caller(0);
 ok( (!@c), "caller(0) in main program" );
@@ -33,6 +33,12 @@ my $fooref = delete $::{foo};
 $fooref -> ();
 is( $c[3], "main::__ANON__", "deleted subroutine name" );
 ok( $c[4], "hasargs true with deleted sub" );
+
+BEGIN {
+ require strict;
+ is +(caller 0)[1], __FILE__,
+  "[perl #68712] filenames after require in a BEGIN block"
+}
 
 print "# Tests with caller(1)\n";
 

@@ -3770,11 +3770,7 @@ PP(pp_require)
 	    }
 	}
     }
-    if (tryrsfp) {
-	SAVECOPFILE_FREE(&PL_compiling);
-	CopFILE_set(&PL_compiling, tryname);
-    }
-    SvREFCNT_dec(namesv);
+    sv_2mortal(namesv);
     if (!tryrsfp) {
 	if (PL_op->op_type == OP_REQUIRE) {
 	    if(errno == EMFILE) {
@@ -3815,7 +3811,7 @@ PP(pp_require)
     /* Check whether a hook in @INC has already filled %INC */
     if (!hook_sv) {
 	(void)hv_store(GvHVn(PL_incgv),
-		       unixname, unixlen, newSVpv(CopFILE(&PL_compiling),0),0);
+		       unixname, unixlen, newSVpv(tryname,0),0);
     } else {
 	SV** const svp = hv_fetch(GvHVn(PL_incgv), unixname, unixlen, 0);
 	if (!svp)
@@ -3825,6 +3821,8 @@ PP(pp_require)
 
     ENTER_with_name("eval");
     SAVETMPS;
+    SAVECOPFILE_FREE(&PL_compiling);
+    CopFILE_set(&PL_compiling, tryname);
     lex_start(NULL, tryrsfp, 0);
 
     SAVEHINTS();
