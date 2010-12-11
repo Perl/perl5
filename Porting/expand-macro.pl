@@ -51,6 +51,13 @@ while (<>) {
 }
 die "$macro not found\n" unless defined $header;
 
+if ($^O =~ /MSWin(32|64)/) {
+    # The Win32 (and Win64) build process expects to be run from
+    # bleadperl/Win32
+    chdir "Win32"
+	or die "Couldn't chdir to win32: $!";
+};
+
 open my $out, '>', $trysource or die "Can't open $trysource: $!";
 
 my $sentinel = "$macro expands to";
@@ -107,15 +114,17 @@ if ($opt{f} || $opt{F}) {
     $out_fh = \*STDOUT;
 }
 
-open my $fh, '<', $tryout or die "Can't open $tryout: $!";
+{
+    open my $fh, '<', $tryout or die "Can't open $tryout: $!";
 
-while (<$fh>) {
-    print $out_fh $_ if /$sentinel/o .. 1;
-}
+    while (<$fh>) {
+	print $out_fh $_ if /$sentinel/o .. 1;
+    }
+};
 
 unless ($opt{k}) {
     foreach($trysource, $tryout) {
-	die "Can't unlink $_" unless unlink $_;
+	die "Can't unlink $_: $!" unless unlink $_;
     }
 }
 
