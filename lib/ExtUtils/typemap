@@ -88,7 +88,7 @@ T_HVREF
 		SV* const xsub_tmp_sv = $arg;
 		SvGETMAGIC(xsub_tmp_sv);
 		if (SvROK(xsub_tmp_sv) && SvTYPE(SvRV(xsub_tmp_sv)) == SVt_PVHV){
-		    $var = (AV*)SvRV(xsub_tmp_sv);
+		    $var = (HV*)SvRV(xsub_tmp_sv);
 		}
 		else{
 		    Perl_croak(aTHX_ \"%s: %s is not a HASH reference\",
@@ -101,7 +101,7 @@ T_CVREF
 		SV* const xsub_tmp_sv = $arg;
 		SvGETMAGIC(xsub_tmp_sv);
 		if (SvROK(xsub_tmp_sv) && SvTYPE(SvRV(xsub_tmp_sv)) == SVt_PVCV){
-		    $var = (AV*)SvRV(xsub_tmp_sv);
+		    $var = (CV*)SvRV(xsub_tmp_sv);
 		}
 		else{
 		    Perl_croak(aTHX_ \"%s: %s is not a CODE reference\",
