@@ -2586,6 +2586,36 @@ CODE:
 }
 
 
+SV*
+take_svref(SVREF sv)
+CODE:
+    RETVAL = newRV_inc(sv);
+OUTPUT:
+    RETVAL
+
+SV*
+take_avref(AV* av)
+CODE:
+    RETVAL = newRV_inc((SV*)av);
+OUTPUT:
+    RETVAL
+
+SV*
+take_hvref(HV* hv)
+CODE:
+    RETVAL = newRV_inc((SV*)hv);
+OUTPUT:
+    RETVAL
+
+
+SV*
+take_cvref(CV* cv)
+CODE:
+    RETVAL = newRV_inc((SV*)cv);
+OUTPUT:
+    RETVAL
+
+
 BOOT:
 	{
 	HV* stash;
