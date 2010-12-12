@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to a1fba7e, except for:
+This has been completed up to b2ef6d44, except for:
 d9a4b459f94297889956ac3adc42707365f274c2
 bf5522a13a381257966e7ed6b731195a873b153e
 9cef83062267e94311e1fd8744396e440642738e
@@ -621,6 +621,13 @@ the "Use of uninitialized value in numeric gt" warning when C<$a> is
 undefined (since it is not part of the C<E<gt>> expression, but the operand
 of the C<@>)
 L<[perl #72090]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=72090>.
+
+=item *
+
+C<require> no longer causes C<caller> to return the wrong file name for
+the scope that called C<require> and other scopes higher up that had the
+same file name
+L<[perl #68712]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=68712>.
 
 =back
 
