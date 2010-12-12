@@ -233,7 +233,7 @@ accepts all POSIX filenames.
 
 =item *
 
-C<ExtUtils::CBuilder> has been upgraded from 0.2703 to 0.2801
+C<ExtUtils::CBuilder> has been upgraded from 0.2703 to 0.2802
 
 =item *
 

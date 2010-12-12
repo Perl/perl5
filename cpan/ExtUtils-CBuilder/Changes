@@ -1,5 +1,12 @@
 Revision history for Perl extension ExtUtils::CBuilder.
 
+0.2802 - Sun Dec 12 07:22:43 EST 2010
+
+  Fixed:
+
+  - Incorporated another t/04-base.t fix from bleadperl
+    [Chris Williams]
+
 0.2801 - Wed Dec  8 21:36:56 EST 2010
 
   Fixed:
