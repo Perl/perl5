@@ -2861,6 +2861,20 @@ CODE:
 OUTPUT:
     RETVAL
 
+STRLEN
+underscore_length()
+PROTOTYPE:
+PREINIT:
+    SV *u;
+    U8 *pv;
+    STRLEN bytelen;
+CODE:
+    u = find_rundefsv();
+    pv = (U8*)SvPV(u, bytelen);
+    RETVAL = SvUTF8(u) ? utf8_length(pv, pv+bytelen) : bytelen;
+OUTPUT:
+    RETVAL
+
 MODULE = XS::APItest		PACKAGE = XS::APItest::Magic
 
 PROTOTYPES: DISABLE
