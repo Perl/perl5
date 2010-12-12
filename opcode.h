@@ -1895,7 +1895,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000604,	/* hintseval */
 	0x00001b40,	/* entereval */
 	0x00001100,	/* leaveeval */
-	0x00000b40,	/* entertry */
+	0x00000340,	/* entertry */
 	0x00000400,	/* leavetry */
 	0x00001b00,	/* ghbyname */
 	0x00011400,	/* ghbyaddr */
