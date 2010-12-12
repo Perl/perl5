@@ -587,6 +587,58 @@ THX_ck_entersub_postinc(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 	op_lvalue(op_contextualize(argop, G_SCALAR), OP_POSTINC));
 }
 
+STATIC OP *
+THX_ck_entersub_pad_scalar(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
+{
+    OP *pushop, *argop;
+    PADOFFSET padoff = NOT_IN_PAD;
+    SV *a0, *a1;
+    ck_entersub_args_proto(entersubop, namegv, ckobj);
+    pushop = cUNOPx(entersubop)->op_first;
+    if(!pushop->op_sibling) pushop = cUNOPx(pushop)->op_first;
+    argop = pushop->op_sibling;
+    if(argop->op_type != OP_CONST || argop->op_sibling->op_type != OP_CONST)
+	croak("bad argument expression type for pad_scalar()");
+    a0 = cSVOPx_sv(argop);
+    a1 = cSVOPx_sv(argop->op_sibling);
+    switch(SvIV(a0)) {
+	case 1: {
+	    SV *namesv = sv_2mortal(newSVpvs("$"));
+	    sv_catsv(namesv, a1);
+	    padoff = pad_findmy_sv(namesv, 0);
+	} break;
+	case 2: {
+	    char *namepv;
+	    STRLEN namelen;
+	    SV *namesv = sv_2mortal(newSVpvs("$"));
+	    sv_catsv(namesv, a1);
+	    namepv = SvPV(namesv, namelen);
+	    padoff = pad_findmy_pvn(namepv, namelen, 0);
+	} break;
+	case 3: {
+	    char *namepv;
+	    SV *namesv = sv_2mortal(newSVpvs("$"));
+	    sv_catsv(namesv, a1);
+	    namepv = SvPV_nolen(namesv);
+	    padoff = pad_findmy_pv(namepv, 0);
+	} break;
+	case 4: {
+	    padoff = pad_findmy_pvs("$foo", 0);
+	} break;
+	default: croak("bad type value for pad_scalar()");
+    }
+    op_free(entersubop);
+    if(padoff == NOT_IN_PAD) {
+	return newSVOP(OP_CONST, 0, newSVpvs("NOT_IN_PAD"));
+    } else if(PAD_COMPNAME_FLAGS_isOUR(padoff)) {
+	return newSVOP(OP_CONST, 0, newSVpvs("NOT_MY"));
+    } else {
+	OP *padop = newOP(OP_PADSV, 0);
+	padop->op_targ = padoff;
+	return padop;
+    }
+}
+
 /** RPN keyword parser **/
 
 #define sv_is_glob(sv) (SvTYPE(sv) == SVt_PVGV)
@@ -2860,6 +2912,19 @@ CODE:
     RETVAL = SvIsCOW(sv);
 OUTPUT:
     RETVAL
+
+void
+pad_scalar(...)
+PROTOTYPE: $$
+CODE:
+    PERL_UNUSED_VAR(items);
+    croak("pad_scalar called as a function");
+
+BOOT:
+{
+    CV *pscv = get_cv("XS::APItest::pad_scalar", 0);
+    cv_set_call_checker(pscv, THX_ck_entersub_pad_scalar, (SV*)pscv);
+}
 
 STRLEN
 underscore_length()
