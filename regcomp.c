@@ -8955,8 +8955,8 @@ parseit:
 
 	/* (A locale node can have 1 point and be folded; all the other folds
 	 * will include the fold, hence will have 2 points, so we won't get
-	 * here with FOLD set unless it is also locale) */
-	ret = reg_node(pRExC_state, (U8) (! FOLD)
+	 * here with ANYOF_FOLD set unless it is also locale) */
+	ret = reg_node(pRExC_state, (U8) (! (ANYOF_FLAGS(ret) & ANYOF_FOLD))
 					 ? EXACT
 					 : EXACTFL
 		    );

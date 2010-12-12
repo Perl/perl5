@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 336;
+plan tests => 338;
 
 $| = 1;
 
@@ -1435,6 +1435,14 @@ end
         ok(tainted($^A), "the accumulator should be tainted already");
     }
     ok(tainted($^A), "tainted formline picture makes a tainted accumulator");
+}
+
+{   # Bug #80610
+    "Constant(1)" =~ / ^ ([a-z_]\w*) (?: [(] (.*) [)] )? $ /xi;
+    my $a = $1;
+    my $b = $2;
+    ok(! tainted($a), "regex optimization of single char /[]/i doesn't taint");
+    ok(! tainted($b), "regex optimization of single char /[]/i doesn't taint");
 }
 
 # This may bomb out with the alarm signal so keep it last
