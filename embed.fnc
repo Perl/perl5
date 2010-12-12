@@ -267,7 +267,6 @@ Afnp	|int	|printf_nocontext|NN const char *format|...
 p	|void	|cv_ckproto_len	|NN const CV* cv|NULLOK const GV* gv\
 				|NULLOK const char* p|const STRLEN len
 : Used in pp.c and pp_sys.c
-pd	|CV*	|cv_clone	|NN CV* proto
 ApdR	|SV*	|gv_const_sv	|NN GV* gv
 ApdR	|SV*	|cv_const_sv	|NULLOK const CV *const cv
 : Used in pad.c
@@ -538,7 +537,6 @@ p	|void	|init_debugger
 Ap	|void	|init_stacks
 Ap	|void	|init_tm	|NN struct tm *ptm
 : Used in perly.y
-pd	|U32	|intro_my
 AnpPR	|char*	|instr		|NN const char* big|NN const char* little
 : Used in sv.c
 p	|bool	|io_close	|NN IO* io|bool not_implicit
@@ -900,32 +898,14 @@ p	|void	|package	|NN OP* o
 #endif
 : Used in perly.y
 p	|void	|package_version|NN OP* v
-: Used in op.c
-pd	|PADOFFSET|pad_alloc	|I32 optype|U32 tmptype
 : Used in toke.c and perly.y
 p	|PADOFFSET|allocmy	|NN const char *const name|const STRLEN len\
 				|const U32 flags
-: Used in op.c and toke.c
-AMpdR	|PADOFFSET|pad_findmy	|NN const char* name|STRLEN len|U32 flags
-ApD	|PADOFFSET|find_rundefsvoffset	|
-: Used in pp.c
-Ap	|SV*	|find_rundefsv	|
 : Used in perly.y
 pR	|OP*	|oopsAV		|NN OP* o
 : Used in perly.y
 pR	|OP*	|oopsHV		|NN OP* o
-: Defined in pad.c, used only in op.c
-pd	|void	|pad_leavemy
-#ifdef DEBUGGING
-Apd	|SV*	|pad_sv		|PADOFFSET po
-#endif
-: Defined in pad.c, used only in op.c
-pd	|void	|pad_free	|PADOFFSET po
-#if defined(PERL_IN_PAD_C)
-sd	|void	|pad_reset
-#endif
-: Used in op.c
-pd	|void	|pad_swipe	|PADOFFSET po|bool refadjust
+
 : peephole optimiser
 p	|void	|peep		|NULLOK OP* o
 p	|void	|rpeep		|NULLOK OP* o
@@ -2132,51 +2112,67 @@ s	|void	|deb_stack_n	|NN SV** stack_base|I32 stack_min \
 				|I32 stack_max|I32 mark_min|I32 mark_max
 #endif
 
-: Used in perl.c, pp_ctl.c, toke.c
-pda	|PADLIST*|pad_new	|int flags
-: Only used in op.c
-Mpd	|PADOFFSET|pad_add_name	|NN const char *name|const STRLEN len\
+: pad API
+#ifdef PERL_MAD
+Mnpd	|void	|pad_peg	|NN const char* s
+#endif
+Apda	|PADLIST*|pad_new	|int flags
+#if defined(PERL_IN_PAD_C)
+s	|PADOFFSET|pad_alloc_name|NN SV *namesv|U32 flags \
+				|NULLOK HV *typestash|NULLOK HV *ourstash
+#endif
+Apd	|PADOFFSET|pad_add_name_pvn|NN const char *namepv|STRLEN namelen\
 				|const U32 flags|NULLOK HV *typestash\
 				|NULLOK HV *ourstash
-: Only used in op.c
-pd	|PADOFFSET|pad_add_anon	|NN SV* sv|OPCODE op_type
+Apd	|PADOFFSET|pad_add_name_pv|NN const char *name\
+				|const U32 flags|NULLOK HV *typestash\
+				|NULLOK HV *ourstash
+Apd	|PADOFFSET|pad_add_name_sv|NN SV *name\
+				|const U32 flags|NULLOK HV *typestash\
+				|NULLOK HV *ourstash
+AMpd	|PADOFFSET|pad_alloc	|I32 optype|U32 tmptype
+Apd	|PADOFFSET|pad_add_anon	|NN CV* func|I32 optype
 #if defined(PERL_IN_PAD_C)
-sd	|void	|pad_check_dup	|NN SV *name|const U32 flags \
-				|NULLOK const HV *ourstash
+sd	|void	|pad_check_dup	|NN SV *name|U32 flags|NULLOK const HV *ourstash
 #endif
-#ifdef DEBUGGING
-: Only used PAD_SETSV() in op.c
-pd	|void	|pad_setsv	|PADOFFSET po|NN SV* sv
-#endif
-: Only used in op.c
-pd	|void	|pad_block_start|int full
-: Only used in op.c
-pd	|void	|pad_tidy	|padtidy_type type
-: Used in dump.c
-pd 	|void	|do_dump_pad	|I32 level|NN PerlIO *file|NULLOK PADLIST *padlist|int full
-: Only used in op.c
-pd	|void	|pad_fixup_inner_anons|NN PADLIST *padlist|NN CV *old_cv|NN CV *new_cv
-
-: Used in pp_ctl.c, pp_hot.c, pp_sort.c
-pdX	|void	|pad_push	|NN PADLIST *padlist|int depth
-: Only used in PAD_COMPNAME_TYPE() in op.c
-pR	|HV*	|pad_compname_type|const PADOFFSET po
-: Used in sv.c
-#if defined(USE_ITHREADS)
-pR	|AV*	|padlist_dup	|NULLOK AV *const srcpad \
-				|NN CLONE_PARAMS *const param
-#endif
-
+ApdR	|PADOFFSET|pad_findmy_pvn|NN const char* namepv|STRLEN namelen|U32 flags
+ApdR	|PADOFFSET|pad_findmy_pv|NN const char* name|U32 flags
+ApdR	|PADOFFSET|pad_findmy_sv|NN SV* name|U32 flags
+ApdD	|PADOFFSET|find_rundefsvoffset	|
+Apd	|SV*	|find_rundefsv	|
 #if defined(PERL_IN_PAD_C)
-sd	|PADOFFSET|pad_findlex	|NN const char *name|NN const CV* cv|U32 seq|int warn \
+sd	|PADOFFSET|pad_findlex	|NN const char *namepv|STRLEN namelen\
+				|NN const CV* cv|U32 seq|int warn \
 				|NULLOK SV** out_capture|NN SV** out_name_sv \
 				|NN int *out_flags
-s	|PADOFFSET|pad_add_name_sv|NN SV *namesv|const U32 flags \
-				|NULLOK HV *typestash|NULLOK HV *ourstash
+#endif
+#ifdef DEBUGGING
+Apd	|SV*	|pad_sv		|PADOFFSET po
+Apd	|void	|pad_setsv	|PADOFFSET po|NN SV* sv
+#endif
+pd	|void	|pad_block_start|int full
+pd	|U32	|intro_my
+pd	|void	|pad_leavemy
+pd	|void	|pad_swipe	|PADOFFSET po|bool refadjust
+#if defined(PERL_IN_PAD_C)
+sd	|void	|pad_reset
+#endif
+AMpd	|void	|pad_tidy	|padtidy_type type
+pd	|void	|pad_free	|PADOFFSET po
+pd 	|void	|do_dump_pad	|I32 level|NN PerlIO *file|NULLOK PADLIST *padlist|int full
+#if defined(PERL_IN_PAD_C)
 #  if defined(DEBUGGING)
 sd	|void	|cv_dump	|NN const CV *cv|NN const char *title
 #  endif
 #endif
+Apd	|CV*	|cv_clone	|NN CV* proto
+pd	|void	|pad_fixup_inner_anons|NN PADLIST *padlist|NN CV *old_cv|NN CV *new_cv
+pdX	|void	|pad_push	|NN PADLIST *padlist|int depth
+ApdR	|HV*	|pad_compname_type|const PADOFFSET po
+#if defined(USE_ITHREADS)
+pdR	|AV*	|padlist_dup	|NULLOK AV *srcpad|NN CLONE_PARAMS *param
+#endif
+
 ApdR	|CV*	|find_runcv	|NULLOK U32 *db_seqp
 : Only used in perl.c
 p	|void	|free_tied_hv_pool
@@ -2361,7 +2357,6 @@ Apno     |Size_t |my_strlcpy     |NULLOK char *dst|NULLOK const char *src|Size_t
 #endif
 
 #ifdef PERL_MAD
-Mnp	|void	|pad_peg	|NN const char* s
 #if defined(PERL_IN_DUMP_C)
 sf	|void	|xmldump_attr	|I32 level|NN PerlIO *file|NN const char* pat \
 				|...

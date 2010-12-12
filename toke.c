@@ -8342,7 +8342,7 @@ S_pending_ident(pTHX)
 
     if (!has_colon) {
 	if (!PL_in_my)
-	    tmp = pad_findmy(PL_tokenbuf, tokenbuf_len, 0);
+	    tmp = pad_findmy_pvn(PL_tokenbuf, tokenbuf_len, 0);
         if (tmp != NOT_IN_PAD) {
             /* might be an "our" variable" */
             if (PAD_COMPNAME_FLAGS_isOUR(tmp)) {
@@ -9562,7 +9562,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 	    /* try to find it in the pad for this block, otherwise find
 	       add symbol table ops
 	    */
-	    const PADOFFSET tmp = pad_findmy(d, len, 0);
+	    const PADOFFSET tmp = pad_findmy_pvn(d, len, 0);
 	    if (tmp != NOT_IN_PAD) {
 		if (PAD_COMPNAME_FLAGS_isOUR(tmp)) {
 		    HV * const stash = PAD_COMPNAME_OURSTASH(tmp);

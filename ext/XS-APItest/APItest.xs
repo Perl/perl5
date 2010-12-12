@@ -627,11 +627,7 @@ static OP *THX_parse_var(pTHX)
     }
     if(s-start < 2) croak("RPN syntax error");
     lex_read_to(s);
-    {
-	/* because pad_findmy() doesn't really use length yet */
-	SV *namesv = sv_2mortal(newSVpvn(start, s-start));
-	varpos = pad_findmy(SvPVX(namesv), s-start, 0);
-    }
+    varpos = pad_findmy_pvn(start, s-start, 0);
     if(varpos == NOT_IN_PAD || PAD_COMPNAME_FLAGS_isOUR(varpos))
 	croak("RPN only supports \"my\" variables");
     padop = newOP(OP_PADSV, 0);
