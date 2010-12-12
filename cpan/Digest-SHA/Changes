@@ -1,5 +1,14 @@
 Revision history for Perl extension Digest::SHA.
 
+5.49  Sun Dec 12 07:22:04 MST 2010
+	- modified Addfile to accept all POSIX filenames
+		-- standard allows all characters except NUL and '/'
+	- updated shasum to more closely mimic sha1sum/md5sum
+		-- added "backslash processing" to handle newlines
+			and backslashes in filenames
+		-- now accepts all POSIX filenames via Addfile
+		-- thanks to Sean Burke for identifying edge cases
+
 5.48  Mon Jan  4 16:32:52 MST 2010
 	- fixed "shasum -a0" option (ref. rt.cpan.org #53319)
 		-- incorrectly accepted 0 as a valid algorithm

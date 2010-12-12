@@ -226,6 +226,13 @@ XXX
 
 =item *
 
+C<Digest::SHA> has been upgraded from 5.48 to 5.49
+
+shasum now more closely mimics sha1sum/md5sum and Addfile
+accepts all POSIX filenames.
+
+=item *
+
 C<ExtUtils::CBuilder> has been upgraded from 0.2703 to 0.2801
 
 =item *
