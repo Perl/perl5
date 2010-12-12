@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 74;
+plan tests => 77;
 our $TODO;
 
 my $deprecated = 0;
@@ -563,3 +563,33 @@ stepney:
 use integer;
 $foo .= "{B:".(1.5+1.5)."}";
 is($foo, "{A:3}{B:2}", "label before use decl");
+
+$foo = "<0>";
+if($foo eq $foo) {
+    goto tom;
+}
+$foo .= "<9>";
+tom: dick: harry:
+$foo .= "<1>";
+$foo .= "<2>";
+is($foo, "<0><1><2>", "first of three stacked labels");
+
+$foo = "<A>";
+if($foo eq $foo) {
+    goto beta;
+}
+$foo .= "<Z>";
+alpha: beta: gamma:
+$foo .= "<B>";
+$foo .= "<C>";
+is($foo, "<A><B><C>", "second of three stacked labels");
+
+$foo = ",0.";
+if($foo eq $foo) {
+    goto gimel;
+}
+$foo .= ",9.";
+alef: bet: gimel:
+$foo .= ",1.";
+$foo .= ",2.";
+is($foo, ",0.,1.,2.", "third of three stacked labels");

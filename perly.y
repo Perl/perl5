@@ -94,14 +94,13 @@
 /* FIXME for MAD - are these two ival? */
 %type <ival> mydefsv mintro
 
-%type <opval> stmtseq fullstmt barestmt block mblock else
+%type <opval> stmtseq fullstmt labfullstmt barestmt block mblock else
 %type <opval> expr term subscripted scalar ary hsh arylen star amper sideff
 %type <opval> listexpr nexpr texpr iexpr mexpr mnexpr miexpr
 %type <opval> optlistexpr optexpr indirob listop method
 %type <opval> formname subname proto subbody cont my_scalar
 %type <opval> subattrlist myattrlist myattrterm myterm
 %type <opval> termbinop termunop anonymous termdo
-%type <p_tkval> label
 
 %nonassoc <i_tkval> PREC_LOW
 %nonassoc LOOPEX
@@ -246,16 +245,29 @@ stmtseq	:	/* NULL */
 			}
 	;
 
-/* A statement in the program, including optional label */
-fullstmt:	label barestmt
+/* A statement in the program, including optional labels */
+fullstmt:	barestmt
 			{
-			  if (PVAL($1) || $2) {
-			      $$ = newSTATEOP(0, PVAL($1), $2);
-			      TOKEN_GETMAD($1,
-				  $2 ? cLISTOPx($$)->op_first : $$, 'L');
+			  if($1) {
+			      $$ = newSTATEOP(0, NULL, $1);
 			  } else {
-			      $$ = IF_MAD(newOP(OP_NULL, 0), $2);
+			      $$ = IF_MAD(newOP(OP_NULL, 0), NULL);
 			  }
+			}
+	|	labfullstmt
+			{ $$ = $1; }
+	;
+
+labfullstmt:	LABEL barestmt
+			{
+			  $$ = newSTATEOP(0, PVAL($1), $2);
+			  TOKEN_GETMAD($1,
+			      $2 ? cLISTOPx($$)->op_first : $$, 'L');
+			}
+	|	LABEL labfullstmt
+			{
+			  $$ = newSTATEOP(0, PVAL($1), $2);
+			  TOKEN_GETMAD($1, cLISTOPx($$)->op_first, 'L');
 			}
 	;
 
@@ -590,20 +602,6 @@ mnexpr	:	nexpr
 
 miexpr	:	iexpr
 			{ $$ = $1; intro_my(); }
-	;
-
-/* Optional "MAIN:"-style loop labels */
-label	:	/* empty */
-			{
-#ifdef MAD
-			  YYSTYPE tmplval;
-			  tmplval.pval = NULL;
-			  $$ = newTOKEN(OP_NULL, tmplval, 0);
-#else
-			  $$ = NULL;
-#endif
-			}
-	|	LABEL
 	;
 
 formname:	WORD		{ $$ = $1; }
