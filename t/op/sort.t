@@ -6,7 +6,7 @@ BEGIN {
     require 'test.pl';
 }
 use warnings;
-plan( tests => 160 );
+plan( tests => 162 );
 
 # these shouldn't hang
 {
@@ -908,3 +908,33 @@ fresh_perl_is
   {},
  '[perl #77930] cx_stack reallocation during sort'
 ;
+
+# [perl #76026]
+# Match vars should not leak from one sort sub call to the next
+{
+  my $output = '';
+  sub soarter {
+    $output .= $1;
+    "Leakage" =~ /(.*)/;
+    1
+  }
+  sub soarterdd($$) {
+    $output .= $1;
+    "Leakage" =~ /(.*)/;
+    1
+  }
+
+  "Win" =~ /(.*)/;
+  my @b = sort soarter 0..2;
+
+  like $output, qr/^(?:Win)+\z/,
+   "Match vars do not leak from one plain sort sub to the next";
+
+  $output = '';
+
+  "Win" =~ /(.*)/;
+  @b = sort soarterdd 0..2;
+
+  like $output, qr/^(?:Win)+\z/,
+   'Match vars do not leak from one $$ sort sub to the next';
+}

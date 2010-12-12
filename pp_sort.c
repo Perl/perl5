@@ -1745,6 +1745,7 @@ S_sortcv(pTHX_ SV *const a, SV *const b)
     const I32 oldsaveix = PL_savestack_ix;
     const I32 oldscopeix = PL_scopestack_ix;
     I32 result;
+    PMOP * const pm = PL_curpm;
  
     PERL_ARGS_ASSERT_SORTCV;
 
@@ -1760,6 +1761,7 @@ S_sortcv(pTHX_ SV *const a, SV *const b)
 	LEAVE;
     }
     leave_scope(oldsaveix);
+    PL_curpm = pm;
     return result;
 }
 
@@ -1771,6 +1773,7 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
     const I32 oldscopeix = PL_scopestack_ix;
     I32 result;
     AV * const av = GvAV(PL_defgv);
+    PMOP * const pm = PL_curpm;
 
     PERL_ARGS_ASSERT_SORTCV_STACKED;
 
@@ -1806,6 +1809,7 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
 	LEAVE;
     }
     leave_scope(oldsaveix);
+    PL_curpm = pm;
     return result;
 }
 
@@ -1817,6 +1821,7 @@ S_sortcv_xsub(pTHX_ SV *const a, SV *const b)
     const I32 oldscopeix = PL_scopestack_ix;
     CV * const cv=MUTABLE_CV(PL_sortcop);
     I32 result;
+    PMOP * const pm = PL_curpm;
 
     PERL_ARGS_ASSERT_SORTCV_XSUB;
 
@@ -1834,6 +1839,7 @@ S_sortcv_xsub(pTHX_ SV *const a, SV *const b)
 	LEAVE;
     }
     leave_scope(oldsaveix);
+    PL_curpm = pm;
     return result;
 }
 
