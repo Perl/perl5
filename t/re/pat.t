@@ -1146,6 +1146,18 @@ sub run_tests {
 
     }
 
+    {
+        local $TODO = "[perl #38133]";
+
+        "A" =~ /(((?:A))?)+/;
+        my $first = $2;
+
+        "A" =~ /(((A))?)+/;
+        my $second = $2;
+
+        iseq($first, $second);
+    }
+
 } # End of sub run_tests
 
 1;
