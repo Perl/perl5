@@ -223,6 +223,83 @@ translates it to an IPv4 or IPv6 address string.
 
 This function is not exported by default.
 
+=item getaddrinfo HOST, SERVICE, [ HINTS ]
+
+Given at least one of a hostname and a service name, returns a list of address
+structures to listen on or connect to. HOST and SERVICE should be plain
+strings (or a numerical port number for SERVICE). If present, HINTS should be
+a reference to a HASH, where the following keys are recognised:
+
+=over 8
+
+=item flags => INT
+
+A bitfield containing C<AI_*> constants
+
+=item family => INT
+
+Restrict to only generating addresses in this address family
+
+=item socktype => INT
+
+Restrict to only generating addresses of this socket type
+
+=item protocol => INT
+
+Restrict to only generating addresses for this protocol
+
+=back
+
+The return value will be a list; the first value being an error indication,
+followed by a list of address structures (if no error occured).
+
+ my ( $err, @results ) = getaddrinfo( ... );
+
+The error value will be a dualvar; comparable to the C<EI_*> error constants,
+or printable as a human-readable error message string. Each value in the
+results list will be a HASH reference containing the following fields:
+
+=over 8
+
+=item family => INT
+
+The address family (e.g. AF_INET)
+
+=item socktype => INT
+
+The socket type (e.g. SOCK_STREAM)
+
+=item protocol => INT
+
+The protocol (e.g. IPPROTO_TCP)
+
+=item addr => STRING
+
+The address in a packed string (such as would be returned by pack_sockaddr_in)
+
+=item canonname => STRING
+
+The canonical name for the host if the C<AI_CANONNAME> flag was provided, or
+C<undef> otherwise.
+
+=back
+
+=item getnameinfo ADDR, FLAGS
+
+Given a packed socket address (such as from C<getsockname>, C<getpeername>, or
+returned by C<getaddrinfo> in a C<addr> field), returns the hostname and
+symbolic service name it represents. FLAGS may be a bitmask of C<NI_*>
+constants, or defaults to 0 if unspecified.
+
+The return value will be a list; the first value being an error condition,
+followed by the hostname and service name.
+
+ my ( $err, $host, $service ) = getnameinfo( ... );
+
+The error value will be a dualvar; comparable to the C<EI_*> error constants,
+or printable as a human-readable error message string. The host and service
+names will be plain strings.
+
 =back
 
 =cut
