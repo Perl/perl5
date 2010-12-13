@@ -127,9 +127,10 @@ unless (-x $perl) {
 }
 my $r = system $perl, '-I../lib', '-e', <<'EOF';
 use Fcntl qw(/^O_/ /^SEEK_/);
-sysopen(BIG, "big", O_WRONLY|O_CREAT|O_TRUNC) or die $!;
-my $sysseek = sysseek(BIG, 5_000_000_000, SEEK_SET);
-my $syswrite = syswrite(BIG, "big");
+sysopen $big, "big", O_WRONLY|O_CREAT|O_TRUNC or die qq{sysopen big $!};
+sysseek $big, 5_000_000_000, SEEK_SET or die qq{sysseek big $!};
+syswrite $big, "big" or die qq{syswrite big $!};
+close $big or die qq{close big: $!};
 exit 0;
 EOF
 

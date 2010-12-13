@@ -131,10 +131,11 @@ print "# we seem to have sparse files...\n";
 
 $ENV{LC_ALL} = "C";
 
-my $r = system '../perl', '-e', <<'EOF';
-open(BIG, ">$big0");
-seek(BIG, 5_000_000_000, 0);
-print BIG $big0;
+my $r = system '../perl', '-e', <<"EOF";
+open my \$big, '>', q{$big0} or die qq{open $big0: $!};
+seek \$big, 5_000_000_000, 0 or die qq{seek $big0: $!};
+print \$big "big" or die qq{print $big0: $!};
+close \$big or die qq{close $big0: $!};
 exit 0;
 EOF
 
