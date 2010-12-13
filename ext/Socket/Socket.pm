@@ -401,12 +401,35 @@ require XSLoader;
 	       inet_pton
 	       inet_ntop
 
+	       getaddrinfo
+	       getnameinfo
+
+	       AI_CANONNAME
+	       AI_NUMERICHOST
+	       AI_NUMERICSERV
+	       AI_PASSIVE
+
+	       EAI_ADDRFAMILY
+	       EAI_AGAIN
+	       EAI_BADFLAGS
+	       EAI_FAIL
+	       EAI_FAMILY
+	       EAI_NODATA
+	       EAI_NONAME
+	       EAI_SERVICE
+	       EAI_SOCKTYPE
+
 	       IPPROTO_IP
 	       IPPROTO_IPV6
 	       IPPROTO_RAW
 	       IPPROTO_ICMP
 	       IPPROTO_TCP
 	       IPPROTO_UDP
+
+	       NI_DGRAM
+	       NI_NAMEREQD
+	       NI_NUMERICHOST
+	       NI_NUMERICSERV
 
 	       TCP_KEEPALIVE
 	       TCP_MAXRT
