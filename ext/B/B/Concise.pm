@@ -586,7 +586,7 @@ sub fmt_line {    # generate text-line for op.
     $text = "# $hr->{src}\n$text" if $show_src and $hr->{src};
 
     chomp $text;
-    return "$text\n" if $text ne "";
+    return "$text\n" if $text ne "" and $order ne "tree";
     return $text; # suppress empty lines
 }
 
