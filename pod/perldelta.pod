@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to a4256772, except for:
+This has been completed up to 26de4ac8, except for:
 d9a4b459f94297889956ac3adc42707365f274c2
 bf5522a13a381257966e7ed6b731195a873b153e
 9cef83062267e94311e1fd8744396e440642738e
@@ -593,7 +593,8 @@ L<[perl #63540]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=63540>.
 =item *
 
 Calling a closure prototype (what is passed to an attribute handler for a
-closure) now results in a "Closure prototype called" error message
+closure) now results in a "Closure prototype called" error message instead
+of a crash
 L<[perl #68560]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=68560>.
 
 =item *
@@ -645,7 +646,7 @@ L<[perl #68712]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=68712>.
 
 =item *
 
-The ref types in typemap for XS bindings now support magical variables
+The ref types in the typemap for XS bindings now support magical variables
 L<[perl #72684]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=72684>.
 
 =item *
