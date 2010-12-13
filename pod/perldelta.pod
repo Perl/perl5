@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to b2ef6d44, except for:
+This has been completed up to 88b5a87, except for:
 d9a4b459f94297889956ac3adc42707365f274c2
 bf5522a13a381257966e7ed6b731195a873b153e
 9cef83062267e94311e1fd8744396e440642738e
@@ -635,6 +635,11 @@ C<require> no longer causes C<caller> to return the wrong file name for
 the scope that called C<require> and other scopes higher up that had the
 same file name
 L<[perl #68712]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=68712>.
+
+=item *
+
+The ref types in typemap for XS bindings now support magical variables
+L<[perl #72684]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=72684>.
 
 =back
 
