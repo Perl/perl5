@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 88b5a87, except for:
+This has been completed up to 78cdf10, except for:
 d9a4b459f94297889956ac3adc42707365f274c2
 bf5522a13a381257966e7ed6b731195a873b153e
 9cef83062267e94311e1fd8744396e440642738e
@@ -527,6 +527,13 @@ scalars based on both the magic type and the magic virtual table, similar to how
 C<sv_magicext> attaches magic of a certain type and with a given virtual table
 to a scalar. This eliminates the need for extensions to walk the list of
 C<MAGIC> pointers of an C<SV> to find the magic that belongs to them.
+
+=item *
+
+The C<parse_fullexpr()>, C<parse_listexpr(), C<parse_termexpr()> and
+C<parse_arithexpr()> functions have been added.
+
+These are for parsing expressions at various precedence levels.
 
 =back
 
