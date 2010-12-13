@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to ad021bf, except for:
+This has been completed up to a4256772, except for:
 d9a4b459f94297889956ac3adc42707365f274c2
 bf5522a13a381257966e7ed6b731195a873b153e
 9cef83062267e94311e1fd8744396e440642738e
@@ -653,6 +653,13 @@ L<[perl #72684]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=72684>.
 Match variables (e.g., C<$1>) no longer persist between calls to a sort
 subroutine
 L<[perl #76026]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=76026>.
+
+=item *
+
+The C<B> module was returning B::OPs instead of B::LOGOPs for C<entertry>
+L<[perl #80622]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=80622>.
+
+This was due to a bug in the perl core, not in C<B> itself.
 
 =back
 
