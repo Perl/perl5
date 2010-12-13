@@ -13,15 +13,17 @@ BEGIN {
 }
 
 use strict;
+use File::Temp 'tempfile';
 
 our @s;
 our $fail;
 
+(undef, my $big0) = tempfile(UNLINK => 1);
+(undef, my $big1) = tempfile(UNLINK => 1);
+(undef, my $big2) = tempfile(UNLINK => 1);
+
 sub zap {
     close(BIG);
-    unlink("big");
-    unlink("big1");
-    unlink("big2");
 }
 
 sub bye {
@@ -77,29 +79,29 @@ if ($^O eq 'unicos') {
 # consume less blocks than one megabyte (assuming nobody has
 # one megabyte blocks...)
 
-sysopen(BIG, "big1", O_WRONLY|O_CREAT|O_TRUNC) or
-    do { warn "sysopen big1 failed: $!\n"; bye };
+sysopen(BIG, $big1, O_WRONLY|O_CREAT|O_TRUNC) or
+    do { warn "sysopen $big1 failed: $!\n"; bye };
 sysseek(BIG, 1_000_000, SEEK_SET) or
-    do { warn "sysseek big1 failed: $!\n"; bye };
+    do { warn "sysseek $big1 failed: $!\n"; bye };
 syswrite(BIG, "big") or
-    do { warn "syswrite big1 failed: $!\n"; bye };
+    do { warn "syswrite $big1 failed: $!\n"; bye };
 close(BIG) or
-    do { warn "close big1 failed: $!\n"; bye };
+    do { warn "close $big1 failed: $!\n"; bye };
 
-my @s1 = stat("big1");
+my @s1 = stat($big1);
 
 print "# s1 = @s1\n";
 
-sysopen(BIG, "big2", O_WRONLY|O_CREAT|O_TRUNC) or
-    do { warn "sysopen big2 failed: $!\n"; bye };
+sysopen(BIG, $big2, O_WRONLY|O_CREAT|O_TRUNC) or
+    do { warn "sysopen $big2 failed: $!\n"; bye };
 sysseek(BIG, 2_000_000, SEEK_SET) or
-    do { warn "sysseek big2 failed: $!\n"; bye };
+    do { warn "sysseek $big2 failed: $!\n"; bye };
 syswrite(BIG, "big") or
-    do { warn "syswrite big2 failed: $!\n"; bye };
+    do { warn "syswrite $big2 failed: $!\n"; bye };
 close(BIG) or
-    do { warn "close big2 failed: $!\n"; bye };
+    do { warn "close $big2 failed: $!\n"; bye };
 
-my @s2 = stat("big2");
+my @s2 = stat($big2);
 
 print "# s2 = @s2\n";
 
@@ -125,18 +127,18 @@ unless (-x $perl) {
     print "1..1\nnot ok 1 - can't find perl: expected $perl\n";
     exit 0;
 }
-my $r = system $perl, '-I../lib', '-e', <<'EOF';
+my $r = system $perl, '-I../lib', '-e', <<"EOF";
 use Fcntl qw(/^O_/ /^SEEK_/);
-sysopen $big, "big", O_WRONLY|O_CREAT|O_TRUNC or die qq{sysopen big $!};
-sysseek $big, 5_000_000_000, SEEK_SET or die qq{sysseek big $!};
-syswrite $big, "big" or die qq{syswrite big $!};
-close $big or die qq{close big: $!};
+sysopen \$big, q{$big0}, O_WRONLY|O_CREAT|O_TRUNC or die qq{sysopen $big0 $!};
+sysseek \$big, 5_000_000_000, SEEK_SET or die qq{sysseek $big0 $!};
+syswrite \$big, "big" or die qq{syswrite $big0 $!};
+close \$big or die qq{close $big0: $!};
 exit 0;
 EOF
 
 
-sysopen(BIG, "big", O_WRONLY|O_CREAT|O_TRUNC) or
-	do { warn "sysopen 'big' failed: $!\n"; bye };
+sysopen(BIG, $big0, O_WRONLY|O_CREAT|O_TRUNC) or
+	do { warn "sysopen $big0 failed: $!\n"; bye };
 my $sysseek = sysseek(BIG, 5_000_000_000, SEEK_SET);
 unless (! $r && defined $sysseek && $sysseek == 5_000_000_000) {
     $sysseek = 'undef' unless defined $sysseek;
@@ -163,7 +165,7 @@ unless($syswrite && $close) {
     bye();
 }
 
-@s = stat("big");
+@s = stat($big0);
 
 print "# @s\n";
 
@@ -205,16 +207,16 @@ $fail = 0;
 fail unless $s[7] == 5_000_000_003;	# exercizes pp_stat
 print "ok 1\n";
 
-fail unless -s "big" == 5_000_000_003;	# exercizes pp_ftsize
+fail unless -s $big0 == 5_000_000_003;	# exercizes pp_ftsize
 print "ok 2\n";
 
-fail unless -e "big";
+fail unless -e $big0;
 print "ok 3\n";
 
-fail unless -f "big";
+fail unless -f $big0;
 print "ok 4\n";
 
-sysopen(BIG, "big", O_RDONLY) or do { warn "sysopen failed: $!\n"; bye };
+sysopen(BIG, $big0, O_RDONLY) or do { warn "sysopen failed: $!\n"; bye };
 
 offset('sysseek(BIG, 4_500_000_000, SEEK_SET)', 4_500_000_000);
 print "ok 5\n";
@@ -272,9 +274,8 @@ bye(); # does the necessary cleanup
 END {
     # unlink may fail if applied directly to a large file
     # be paranoid about leaving 5 gig files lying around
-    open(BIG, ">big"); # truncate
+    open(BIG, ">$big0"); # truncate
     close(BIG);
-    1 while unlink "big"; # standard portable idiom
 }
 
 # eof
