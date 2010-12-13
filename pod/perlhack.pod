@@ -8,6 +8,10 @@ This document attempts to explain how Perl development takes place,
 and ends with some suggestions for people wanting to become bona fide
 porters.
 
+=head1 HOW PERL DEVELOPMENT HAPPENS
+
+=head2 Perl 5 Porters
+
 The perl5-porters mailing list is where the Perl standard distribution
 is maintained and developed.  The list can get anywhere from 10 to 150
 messages a day, depending on the heatedness of the debate.  Most days
@@ -75,6 +79,8 @@ regardless of whether he previously invoked Rule 1.
 
 Got that?  Larry is always right, even when he was wrong.  It's rare
 to see either Rule exercised, but they are often alluded to.
+
+=head2 What makes for a good patch?
 
 New features and extensions to the language are contentious, because
 the criteria used by the pumpkings, Larry, and other porters to decide
@@ -204,7 +210,7 @@ around.  It refers to the standard distribution.  "Hacking on the
 core" means you're changing the C source code to the Perl
 interpreter.  "A core module" is one that ships with Perl.
 
-=head2 Keeping in sync
+=head2 Getting the Perl source
 
 The source code to the Perl interpreter, in its different versions, is
 kept in a repository managed by the git revision control system. The
@@ -244,7 +250,7 @@ Needless to say, the source code in perl-current is usually in a perpetual
 state of evolution.  You should expect it to be very buggy.  Do B<not> use
 it for any purpose other than testing and development.
 
-=head2 Perlbug administration
+=head2 Bug tracking with Perlbug
 
 There is a single remote administrative interface for modifying bug status,
 category, open issues etc. using the B<RT> bugtracker system, maintained
@@ -314,6 +320,78 @@ If after all this you still think you want to join the perl5-porters
 mailing list, send mail to I<perl5-porters-subscribe@perl.org>.  To
 unsubscribe, send mail to I<perl5-porters-unsubscribe@perl.org>.
 
+=head2 Patching a core module
+
+This works just like patching anything else, with an extra
+consideration.  Many core modules also live on CPAN.  If this is so,
+patch the CPAN version instead of the core and send the patch off to
+the module maintainer (with a copy to p5p).  This will help the module
+maintainer keep the CPAN version in sync with the core version without
+constantly scanning p5p.
+
+The list of maintainers of core modules is usefully documented in
+F<Porting/Maintainers.pl>.
+
+=head2 Adding a new function to the core
+
+If, as part of a patch to fix a bug, or just because you have an
+especially good idea, you decide to add a new function to the core,
+discuss your ideas on p5p well before you start work.  It may be that
+someone else has already attempted to do what you are considering and
+can give lots of good advice or even provide you with bits of code
+that they already started (but never finished).
+
+You have to follow all of the advice given above for patching.  It is
+extremely important to test any addition thoroughly and add new tests
+to explore all boundary conditions that your new function is expected
+to handle.  If your new function is used only by one module (e.g. toke),
+then it should probably be named S_your_function (for static); on the
+other hand, if you expect it to accessible from other functions in
+Perl, you should name it Perl_your_function.  See L<perlguts/Internal Functions>
+for more details.
+
+The location of any new code is also an important consideration.  Don't
+just create a new top level .c file and put your code there; you would
+have to make changes to Configure (so the Makefile is created properly),
+as well as possibly lots of include files.  This is strictly pumpking
+business.
+
+It is better to add your function to one of the existing top level
+source code files, but your choice is complicated by the nature of
+the Perl distribution.  Only the files that are marked as compiled
+static are located in the perl executable.  Everything else is located
+in the shared library (or DLL if you are running under WIN32).  So,
+for example, if a function was only used by functions located in
+toke.c, then your code can go in toke.c.  If, however, you want to call
+the function from universal.c, then you should put your code in another
+location, for example util.c.
+
+In addition to writing your c-code, you will need to create an
+appropriate entry in embed.pl describing your function, then run
+'make regen_headers' to create the entries in the numerous header
+files that perl needs to compile correctly.  See L<perlguts/Internal Functions>
+for information on the various options that you can set in embed.pl.
+You will forget to do this a few (or many) times and you will get
+warnings during the compilation phase.  Make sure that you mention
+this when you post your patch to P5P; the pumpking needs to know this.
+
+When you write your new code, please be conscious of existing code
+conventions used in the perl source files.  See L<perlstyle> for
+details.  Although most of the guidelines discussed seem to focus on
+Perl code, rather than c, they all apply (except when they don't ;).
+Also see L<perlrepository> for lots of details about both formatting and
+submitting patches of your changes.
+
+Lastly, TEST TEST TEST TEST TEST any code before posting to p5p.
+Test on as many platforms as you can find.  Test as many perl
+Configure options as you can (e.g. MULTIPLICITY).  If you have
+profiling or memory tools, see L<EXTERNAL TOOLS FOR DEBUGGING PERL>
+below for how to use them to further test your code.  Remember that
+most of the people on P5P are doing this on their own time and
+don't have the time to debug your code.
+
+=head2 Background reading
+
 To hack on the Perl guts, you'll need to read the following things:
 
 =over 3
@@ -358,7 +436,9 @@ perl5-porters works and how Perl development in general works.
 
 =back
 
-=head2 Finding Your Way Around
+=head1 UNDERSTANDING THE SOURCE
+
+=head2 Finding your way around
 
 Perl maintenance can be split into a number of areas, and certain people
 (pumpkins) will have responsibility for each area. These areas sometimes
@@ -1170,582 +1250,7 @@ You can expand the macros in a F<foo.c> file by saying
 
 which will expand the macros using cpp.  Don't be scared by the results.
 
-=head1 SOURCE CODE STATIC ANALYSIS
-
-Various tools exist for analysing C source code B<statically>, as
-opposed to B<dynamically>, that is, without executing the code.
-It is possible to detect resource leaks, undefined behaviour, type
-mismatches, portability problems, code paths that would cause illegal
-memory accesses, and other similar problems by just parsing the C code
-and looking at the resulting graph, what does it tell about the
-execution and data flows.  As a matter of fact, this is exactly
-how C compilers know to give warnings about dubious code.
-
-=head2 lint, splint
-
-The good old C code quality inspector, C<lint>, is available in
-several platforms, but please be aware that there are several
-different implementations of it by different vendors, which means that
-the flags are not identical across different platforms.
-
-There is a lint variant called C<splint> (Secure Programming Lint)
-available from http://www.splint.org/ that should compile on any
-Unix-like platform.
-
-There are C<lint> and <splint> targets in Makefile, but you may have
-to diddle with the flags (see above).
-
-=head2 Coverity
-
-Coverity (http://www.coverity.com/) is a product similar to lint and
-as a testbed for their product they periodically check several open
-source projects, and they give out accounts to open source developers
-to the defect databases.
-
-=head2 cpd (cut-and-paste detector)
-
-The cpd tool detects cut-and-paste coding.  If one instance of the
-cut-and-pasted code changes, all the other spots should probably be
-changed, too.  Therefore such code should probably be turned into a
-subroutine or a macro.
-
-cpd (http://pmd.sourceforge.net/cpd.html) is part of the pmd project
-(http://pmd.sourceforge.net/).  pmd was originally written for static
-analysis of Java code, but later the cpd part of it was extended to
-parse also C and C++.
-
-Download the pmd-bin-X.Y.zip () from the SourceForge site, extract the
-pmd-X.Y.jar from it, and then run that on source code thusly:
-
-  java -cp pmd-X.Y.jar net.sourceforge.pmd.cpd.CPD --minimum-tokens 100 --files /some/where/src --language c > cpd.txt
-
-You may run into memory limits, in which case you should use the -Xmx option:
-
-  java -Xmx512M ...
-
-=head2 gcc warnings
-
-Though much can be written about the inconsistency and coverage
-problems of gcc warnings (like C<-Wall> not meaning "all the
-warnings", or some common portability problems not being covered by
-C<-Wall>, or C<-ansi> and C<-pedantic> both being a poorly defined
-collection of warnings, and so forth), gcc is still a useful tool in
-keeping our coding nose clean.
-
-The C<-Wall> is by default on.
-
-The C<-ansi> (and its sidekick, C<-pedantic>) would be nice to be on
-always, but unfortunately they are not safe on all platforms, they can
-for example cause fatal conflicts with the system headers (Solaris
-being a prime example).  If Configure C<-Dgccansipedantic> is used,
-the C<cflags> frontend selects C<-ansi -pedantic> for the platforms
-where they are known to be safe.
-
-Starting from Perl 5.9.4 the following extra flags are added:
-
-=over 4
-
-=item *
-
-C<-Wendif-labels>
-
-=item *
-
-C<-Wextra>
-
-=item *
-
-C<-Wdeclaration-after-statement>
-
-=back
-
-The following flags would be nice to have but they would first need
-their own Augean stablemaster:
-
-=over 4
-
-=item *
-
-C<-Wpointer-arith>
-
-=item *
-
-C<-Wshadow>
-
-=item *
-
-C<-Wstrict-prototypes>
-
-=back
-
-The C<-Wtraditional> is another example of the annoying tendency of
-gcc to bundle a lot of warnings under one switch (it would be
-impossible to deploy in practice because it would complain a lot) but
-it does contain some warnings that would be beneficial to have available
-on their own, such as the warning about string constants inside macros
-containing the macro arguments: this behaved differently pre-ANSI
-than it does in ANSI, and some C compilers are still in transition,
-AIX being an example.
-
-=head2 Warnings of other C compilers
-
-Other C compilers (yes, there B<are> other C compilers than gcc) often
-have their "strict ANSI" or "strict ANSI with some portability extensions"
-modes on, like for example the Sun Workshop has its C<-Xa> mode on
-(though implicitly), or the DEC (these days, HP...) has its C<-std1>
-mode on.
-
-=head2 DEBUGGING
-
-You can compile a special debugging version of Perl, which allows you
-to use the C<-D> option of Perl to tell more about what Perl is doing.
-But sometimes there is no alternative than to dive in with a debugger,
-either to see the stack trace of a core dump (very useful in a bug
-report), or trying to figure out what went wrong before the core dump
-happened, or how did we end up having wrong or unexpected results.
-
-=head2 Poking at Perl
-
-To really poke around with Perl, you'll probably want to build Perl for
-debugging, like this:
-
-    ./Configure -d -D optimize=-g
-    make
-
-C<-g> is a flag to the C compiler to have it produce debugging
-information which will allow us to step through a running program,
-and to see in which C function we are at (without the debugging
-information we might see only the numerical addresses of the functions,
-which is not very helpful).
-
-F<Configure> will also turn on the C<DEBUGGING> compilation symbol which
-enables all the internal debugging code in Perl. There are a whole bunch
-of things you can debug with this: L<perlrun> lists them all, and the
-best way to find out about them is to play about with them. The most
-useful options are probably
-
-    l  Context (loop) stack processing
-    t  Trace execution
-    o  Method and overloading resolution
-    c  String/numeric conversions
-
-Some of the functionality of the debugging code can be achieved using XS
-modules.
-
-    -Dr => use re 'debug'
-    -Dx => use O 'Debug'
-
-=head2 Using a source-level debugger
-
-If the debugging output of C<-D> doesn't help you, it's time to step
-through perl's execution with a source-level debugger.
-
-=over 3
-
-=item *
-
-We'll use C<gdb> for our examples here; the principles will apply to
-any debugger (many vendors call their debugger C<dbx>), but check the
-manual of the one you're using.
-
-=back
-
-To fire up the debugger, type
-
-    gdb ./perl
-
-Or if you have a core dump:
-
-    gdb ./perl core
-
-You'll want to do that in your Perl source tree so the debugger can read
-the source code. You should see the copyright message, followed by the
-prompt.
-
-    (gdb)
-
-C<help> will get you into the documentation, but here are the most
-useful commands:
-
-=over 3
-
-=item run [args]
-
-Run the program with the given arguments.
-
-=item break function_name
-
-=item break source.c:xxx
-
-Tells the debugger that we'll want to pause execution when we reach
-either the named function (but see L<perlguts/Internal Functions>!) or the given
-line in the named source file.
-
-=item step
-
-Steps through the program a line at a time.
-
-=item next
-
-Steps through the program a line at a time, without descending into
-functions.
-
-=item continue
-
-Run until the next breakpoint.
-
-=item finish
-
-Run until the end of the current function, then stop again.
-
-=item 'enter'
-
-Just pressing Enter will do the most recent operation again - it's a
-blessing when stepping through miles of source code.
-
-=item print
-
-Execute the given C code and print its results. B<WARNING>: Perl makes
-heavy use of macros, and F<gdb> does not necessarily support macros
-(see later L</"gdb macro support">).  You'll have to substitute them
-yourself, or to invoke cpp on the source code files
-(see L</"The .i Targets">)
-So, for instance, you can't say
-
-    print SvPV_nolen(sv)
-
-but you have to say
-
-    print Perl_sv_2pv_nolen(sv)
-
-=back
-
-You may find it helpful to have a "macro dictionary", which you can
-produce by saying C<cpp -dM perl.c | sort>. Even then, F<cpp> won't
-recursively apply those macros for you.
-
-=head2 gdb macro support
-
-Recent versions of F<gdb> have fairly good macro support, but
-in order to use it you'll need to compile perl with macro definitions
-included in the debugging information.  Using F<gcc> version 3.1, this
-means configuring with C<-Doptimize=-g3>.  Other compilers might use a
-different switch (if they support debugging macros at all).
-
-=head2 Dumping Perl Data Structures
-
-One way to get around this macro hell is to use the dumping functions in
-F<dump.c>; these work a little like an internal
-L<Devel::Peek|Devel::Peek>, but they also cover OPs and other structures
-that you can't get at from Perl. Let's take an example. We'll use the
-C<$a = $b + $c> we used before, but give it a bit of context:
-C<$b = "6XXXX"; $c = 2.3;>. Where's a good place to stop and poke around?
-
-What about C<pp_add>, the function we examined earlier to implement the
-C<+> operator:
-
-    (gdb) break Perl_pp_add
-    Breakpoint 1 at 0x46249f: file pp_hot.c, line 309.
-
-Notice we use C<Perl_pp_add> and not C<pp_add> - see L<perlguts/Internal Functions>.
-With the breakpoint in place, we can run our program:
-
-    (gdb) run -e '$b = "6XXXX"; $c = 2.3; $a = $b + $c'
-
-Lots of junk will go past as gdb reads in the relevant source files and
-libraries, and then:
-
-    Breakpoint 1, Perl_pp_add () at pp_hot.c:309
-    309         dSP; dATARGET; tryAMAGICbin(add,opASSIGN);
-    (gdb) step
-    311           dPOPTOPnnrl_ul;
-    (gdb)
-
-We looked at this bit of code before, and we said that C<dPOPTOPnnrl_ul>
-arranges for two C<NV>s to be placed into C<left> and C<right> - let's
-slightly expand it:
-
- #define dPOPTOPnnrl_ul  NV right = POPn; \
-                         SV *leftsv = TOPs; \
-                         NV left = USE_LEFT(leftsv) ? SvNV(leftsv) : 0.0
-
-C<POPn> takes the SV from the top of the stack and obtains its NV either
-directly (if C<SvNOK> is set) or by calling the C<sv_2nv> function.
-C<TOPs> takes the next SV from the top of the stack - yes, C<POPn> uses
-C<TOPs> - but doesn't remove it. We then use C<SvNV> to get the NV from
-C<leftsv> in the same way as before - yes, C<POPn> uses C<SvNV>.
-
-Since we don't have an NV for C<$b>, we'll have to use C<sv_2nv> to
-convert it. If we step again, we'll find ourselves there:
-
-    Perl_sv_2nv (sv=0xa0675d0) at sv.c:1669
-    1669        if (!sv)
-    (gdb)
-
-We can now use C<Perl_sv_dump> to investigate the SV:
-
-    SV = PV(0xa057cc0) at 0xa0675d0
-    REFCNT = 1
-    FLAGS = (POK,pPOK)
-    PV = 0xa06a510 "6XXXX"\0
-    CUR = 5
-    LEN = 6
-    $1 = void
-
-We know we're going to get C<6> from this, so let's finish the
-subroutine:
-
-    (gdb) finish
-    Run till exit from #0  Perl_sv_2nv (sv=0xa0675d0) at sv.c:1671
-    0x462669 in Perl_pp_add () at pp_hot.c:311
-    311           dPOPTOPnnrl_ul;
-
-We can also dump out this op: the current op is always stored in
-C<PL_op>, and we can dump it with C<Perl_op_dump>. This'll give us
-similar output to L<B::Debug|B::Debug>.
-
-    {
-    13  TYPE = add  ===> 14
-        TARG = 1
-        FLAGS = (SCALAR,KIDS)
-        {
-            TYPE = null  ===> (12)
-              (was rv2sv)
-            FLAGS = (SCALAR,KIDS)
-            {
-    11          TYPE = gvsv  ===> 12
-                FLAGS = (SCALAR)
-                GV = main::b
-            }
-        }
-
-# finish this later #
-
-=head2 Patching
-
-All right, we've now had a look at how to navigate the Perl sources and
-some things you'll need to know when fiddling with them. Let's now get
-on and create a simple patch. Here's something Larry suggested: if a
-C<U> is the first active format during a C<pack>, (for example,
-C<pack "U3C8", @stuff>) then the resulting string should be treated as
-UTF-8 encoded.
-
-If you are working with a git clone of the Perl repository, you will want to
-create a branch for your changes. This will make creating a proper patch much
-simpler. See the L<perlrepository> for details on how to do this.
-
-How do we prepare to fix this up? First we locate the code in question -
-the C<pack> happens at runtime, so it's going to be in one of the F<pp>
-files. Sure enough, C<pp_pack> is in F<pp.c>. Since we're going to be
-altering this file, let's copy it to F<pp.c~>.
-
-[Well, it was in F<pp.c> when this tutorial was written. It has now been
-split off with C<pp_unpack> to its own file, F<pp_pack.c>]
-
-Now let's look over C<pp_pack>: we take a pattern into C<pat>, and then
-loop over the pattern, taking each format character in turn into
-C<datum_type>. Then for each possible format character, we swallow up
-the other arguments in the pattern (a field width, an asterisk, and so
-on) and convert the next chunk input into the specified format, adding
-it onto the output SV C<cat>.
-
-How do we know if the C<U> is the first format in the C<pat>? Well, if
-we have a pointer to the start of C<pat> then, if we see a C<U> we can
-test whether we're still at the start of the string. So, here's where
-C<pat> is set up:
-
-    STRLEN fromlen;
-    register char *pat = SvPVx(*++MARK, fromlen);
-    register char *patend = pat + fromlen;
-    register I32 len;
-    I32 datumtype;
-    SV *fromstr;
-
-We'll have another string pointer in there:
-
-    STRLEN fromlen;
-    register char *pat = SvPVx(*++MARK, fromlen);
-    register char *patend = pat + fromlen;
- +  char *patcopy;
-    register I32 len;
-    I32 datumtype;
-    SV *fromstr;
-
-And just before we start the loop, we'll set C<patcopy> to be the start
-of C<pat>:
-
-    items = SP - MARK;
-    MARK++;
-    sv_setpvn(cat, "", 0);
- +  patcopy = pat;
-    while (pat < patend) {
-
-Now if we see a C<U> which was at the start of the string, we turn on
-the C<UTF8> flag for the output SV, C<cat>:
-
- +  if (datumtype == 'U' && pat==patcopy+1)
- +      SvUTF8_on(cat);
-    if (datumtype == '#') {
-        while (pat < patend && *pat != '\n')
-            pat++;
-
-Remember that it has to be C<patcopy+1> because the first character of
-the string is the C<U> which has been swallowed into C<datumtype!>
-
-Oops, we forgot one thing: what if there are spaces at the start of the
-pattern? C<pack("  U*", @stuff)> will have C<U> as the first active
-character, even though it's not the first thing in the pattern. In this
-case, we have to advance C<patcopy> along with C<pat> when we see spaces:
-
-    if (isSPACE(datumtype))
-        continue;
-
-needs to become
-
-    if (isSPACE(datumtype)) {
-        patcopy++;
-        continue;
-    }
-
-OK. That's the C part done. Now we must do two additional things before
-this patch is ready to go: we've changed the behaviour of Perl, and so
-we must document that change. We must also provide some more regression
-tests to make sure our patch works and doesn't create a bug somewhere
-else along the line.
-
-The regression tests for each operator live in F<t/op/>, and so we
-make a copy of F<t/op/pack.t> to F<t/op/pack.t~>. Now we can add our
-tests to the end. First, we'll test that the C<U> does indeed create
-Unicode strings.
-
-t/op/pack.t has a sensible ok() function, but if it didn't we could
-use the one from t/test.pl.
-
- require './test.pl';
- plan( tests => 159 );
-
-so instead of this:
-
- print 'not ' unless "1.20.300.4000" eq sprintf "%vd",
-                                               pack("U*",1,20,300,4000);
- print "ok $test\n"; $test++;
-
-we can write the more sensible (see L<Test::More> for a full
-explanation of is() and other testing functions).
-
- is( "1.20.300.4000", sprintf "%vd", pack("U*",1,20,300,4000),
-                                       "U* produces Unicode" );
-
-Now we'll test that we got that space-at-the-beginning business right:
-
- is( "1.20.300.4000", sprintf "%vd", pack("  U*",1,20,300,4000),
-                                     "  with spaces at the beginning" );
-
-And finally we'll test that we don't make Unicode strings if C<U> is B<not>
-the first active format:
-
- isnt( v1.20.300.4000, sprintf "%vd", pack("C0U*",1,20,300,4000),
-                                       "U* not first isn't Unicode" );
-
-Mustn't forget to change the number of tests which appears at the top,
-or else the automated tester will get confused.  This will either look
-like this:
-
- print "1..156\n";
-
-or this:
-
- plan( tests => 156 );
-
-We now compile up Perl, and run it through the test suite. Our new
-tests pass, hooray!
-
-Finally, the documentation. The job is never done until the paperwork is
-over, so let's describe the change we've just made. The relevant place
-is F<pod/perlfunc.pod>; again, we make a copy, and then we'll insert
-this text in the description of C<pack>:
-
- =item *
-
- If the pattern begins with a C<U>, the resulting string will be treated
- as UTF-8-encoded Unicode. You can force UTF-8 encoding on in a string
- with an initial C<U0>, and the bytes that follow will be interpreted as
- Unicode characters. If you don't want this to happen, you can begin
- your pattern with C<C0> (or anything else) to force Perl not to UTF-8
- encode your string, and then follow this with a C<U*> somewhere in your
- pattern.
-
-=head2 Patching a core module
-
-This works just like patching anything else, with an extra
-consideration.  Many core modules also live on CPAN.  If this is so,
-patch the CPAN version instead of the core and send the patch off to
-the module maintainer (with a copy to p5p).  This will help the module
-maintainer keep the CPAN version in sync with the core version without
-constantly scanning p5p.
-
-The list of maintainers of core modules is usefully documented in
-F<Porting/Maintainers.pl>.
-
-=head2 Adding a new function to the core
-
-If, as part of a patch to fix a bug, or just because you have an
-especially good idea, you decide to add a new function to the core,
-discuss your ideas on p5p well before you start work.  It may be that
-someone else has already attempted to do what you are considering and
-can give lots of good advice or even provide you with bits of code
-that they already started (but never finished).
-
-You have to follow all of the advice given above for patching.  It is
-extremely important to test any addition thoroughly and add new tests
-to explore all boundary conditions that your new function is expected
-to handle.  If your new function is used only by one module (e.g. toke),
-then it should probably be named S_your_function (for static); on the
-other hand, if you expect it to accessible from other functions in
-Perl, you should name it Perl_your_function.  See L<perlguts/Internal Functions>
-for more details.
-
-The location of any new code is also an important consideration.  Don't
-just create a new top level .c file and put your code there; you would
-have to make changes to Configure (so the Makefile is created properly),
-as well as possibly lots of include files.  This is strictly pumpking
-business.
-
-It is better to add your function to one of the existing top level
-source code files, but your choice is complicated by the nature of
-the Perl distribution.  Only the files that are marked as compiled
-static are located in the perl executable.  Everything else is located
-in the shared library (or DLL if you are running under WIN32).  So,
-for example, if a function was only used by functions located in
-toke.c, then your code can go in toke.c.  If, however, you want to call
-the function from universal.c, then you should put your code in another
-location, for example util.c.
-
-In addition to writing your c-code, you will need to create an
-appropriate entry in embed.pl describing your function, then run
-'make regen_headers' to create the entries in the numerous header
-files that perl needs to compile correctly.  See L<perlguts/Internal Functions>
-for information on the various options that you can set in embed.pl.
-You will forget to do this a few (or many) times and you will get
-warnings during the compilation phase.  Make sure that you mention
-this when you post your patch to P5P; the pumpking needs to know this.
-
-When you write your new code, please be conscious of existing code
-conventions used in the perl source files.  See L<perlstyle> for
-details.  Although most of the guidelines discussed seem to focus on
-Perl code, rather than c, they all apply (except when they don't ;).
-Also see L<perlrepository> for lots of details about both formatting and
-submitting patches of your changes.
-
-Lastly, TEST TEST TEST TEST TEST any code before posting to p5p.
-Test on as many platforms as you can find.  Test as many perl
-Configure options as you can (e.g. MULTIPLICITY).  If you have
-profiling or memory tools, see L<EXTERNAL TOOLS FOR DEBUGGING PERL>
-below for how to use them to further test your code.  Remember that
-most of the people on P5P are doing this on their own time and
-don't have the time to debug your code.
-
-=head2 Writing a test
+=head1 TESTING
 
 Every module and built-in function has an associated test file (or
 should...).  If you add or change functionality, you have to write a
@@ -1755,6 +1260,8 @@ new documentation says.
 
 In short, if you submit a patch you probably also have to patch the
 tests.
+
+=head2 Where to find test files
 
 For modules, the test file is right next to the module itself.
 F<lib/strict.t> tests F<lib/strict.pm>.  This is a recent innovation,
@@ -2094,7 +1601,167 @@ This sets a variable in op/numconvert.t.
 See also the documentation for the Test and Test::Harness modules,
 for more environment variables that affect testing.
 
-=head2 Common problems when patching Perl source code
+=head1 EXAMPLE OF A SIMPLE PATCH
+
+All right, we've now had a look at how to navigate the Perl sources and
+some things you'll need to know when fiddling with them. Let's now get
+on and create a simple patch. Here's something Larry suggested: if a
+C<U> is the first active format during a C<pack>, (for example,
+C<pack "U3C8", @stuff>) then the resulting string should be treated as
+UTF-8 encoded.
+
+If you are working with a git clone of the Perl repository, you will want to
+create a branch for your changes. This will make creating a proper patch much
+simpler. See the L<perlrepository> for details on how to do this.
+
+=head2 Writing the patch
+
+How do we prepare to fix this up? First we locate the code in question -
+the C<pack> happens at runtime, so it's going to be in one of the F<pp>
+files. Sure enough, C<pp_pack> is in F<pp.c>. Since we're going to be
+altering this file, let's copy it to F<pp.c~>.
+
+[Well, it was in F<pp.c> when this tutorial was written. It has now been
+split off with C<pp_unpack> to its own file, F<pp_pack.c>]
+
+Now let's look over C<pp_pack>: we take a pattern into C<pat>, and then
+loop over the pattern, taking each format character in turn into
+C<datum_type>. Then for each possible format character, we swallow up
+the other arguments in the pattern (a field width, an asterisk, and so
+on) and convert the next chunk input into the specified format, adding
+it onto the output SV C<cat>.
+
+How do we know if the C<U> is the first format in the C<pat>? Well, if
+we have a pointer to the start of C<pat> then, if we see a C<U> we can
+test whether we're still at the start of the string. So, here's where
+C<pat> is set up:
+
+    STRLEN fromlen;
+    register char *pat = SvPVx(*++MARK, fromlen);
+    register char *patend = pat + fromlen;
+    register I32 len;
+    I32 datumtype;
+    SV *fromstr;
+
+We'll have another string pointer in there:
+
+    STRLEN fromlen;
+    register char *pat = SvPVx(*++MARK, fromlen);
+    register char *patend = pat + fromlen;
+ +  char *patcopy;
+    register I32 len;
+    I32 datumtype;
+    SV *fromstr;
+
+And just before we start the loop, we'll set C<patcopy> to be the start
+of C<pat>:
+
+    items = SP - MARK;
+    MARK++;
+    sv_setpvn(cat, "", 0);
+ +  patcopy = pat;
+    while (pat < patend) {
+
+Now if we see a C<U> which was at the start of the string, we turn on
+the C<UTF8> flag for the output SV, C<cat>:
+
+ +  if (datumtype == 'U' && pat==patcopy+1)
+ +      SvUTF8_on(cat);
+    if (datumtype == '#') {
+        while (pat < patend && *pat != '\n')
+            pat++;
+
+Remember that it has to be C<patcopy+1> because the first character of
+the string is the C<U> which has been swallowed into C<datumtype!>
+
+Oops, we forgot one thing: what if there are spaces at the start of the
+pattern? C<pack("  U*", @stuff)> will have C<U> as the first active
+character, even though it's not the first thing in the pattern. In this
+case, we have to advance C<patcopy> along with C<pat> when we see spaces:
+
+    if (isSPACE(datumtype))
+        continue;
+
+needs to become
+
+    if (isSPACE(datumtype)) {
+        patcopy++;
+        continue;
+    }
+
+OK. That's the C part done. Now we must do two additional things before
+this patch is ready to go: we've changed the behaviour of Perl, and so
+we must document that change. We must also provide some more regression
+tests to make sure our patch works and doesn't create a bug somewhere
+else along the line.
+
+=head2 Testing the patch
+
+The regression tests for each operator live in F<t/op/>, and so we
+make a copy of F<t/op/pack.t> to F<t/op/pack.t~>. Now we can add our
+tests to the end. First, we'll test that the C<U> does indeed create
+Unicode strings.
+
+t/op/pack.t has a sensible ok() function, but if it didn't we could
+use the one from t/test.pl.
+
+ require './test.pl';
+ plan( tests => 159 );
+
+so instead of this:
+
+ print 'not ' unless "1.20.300.4000" eq sprintf "%vd",
+                                               pack("U*",1,20,300,4000);
+ print "ok $test\n"; $test++;
+
+we can write the more sensible (see L<Test::More> for a full
+explanation of is() and other testing functions).
+
+ is( "1.20.300.4000", sprintf "%vd", pack("U*",1,20,300,4000),
+                                       "U* produces Unicode" );
+
+Now we'll test that we got that space-at-the-beginning business right:
+
+ is( "1.20.300.4000", sprintf "%vd", pack("  U*",1,20,300,4000),
+                                     "  with spaces at the beginning" );
+
+And finally we'll test that we don't make Unicode strings if C<U> is B<not>
+the first active format:
+
+ isnt( v1.20.300.4000, sprintf "%vd", pack("C0U*",1,20,300,4000),
+                                       "U* not first isn't Unicode" );
+
+Mustn't forget to change the number of tests which appears at the top,
+or else the automated tester will get confused.  This will either look
+like this:
+
+ print "1..156\n";
+
+or this:
+
+ plan( tests => 156 );
+
+We now compile up Perl, and run it through the test suite. Our new
+tests pass, hooray!
+
+=head2 Documenting the patch
+
+Finally, the documentation. The job is never done until the paperwork is
+over, so let's describe the change we've just made. The relevant place
+is F<pod/perlfunc.pod>; again, we make a copy, and then we'll insert
+this text in the description of C<pack>:
+
+ =item *
+
+ If the pattern begins with a C<U>, the resulting string will be treated
+ as UTF-8-encoded Unicode. You can force UTF-8 encoding on in a string
+ with an initial C<U0>, and the bytes that follow will be interpreted as
+ Unicode characters. If you don't want this to happen, you can begin
+ your pattern with C<C0> (or anything else) to force Perl not to UTF-8
+ encode your string, and then follow this with a C<U*> somewhere in your
+ pattern.
+
+=head1 COMMON PROBLEMS
 
 Perl source plays by ANSI C89 rules: no C99 (or C++) extensions.  In
 some cases we have to take pre-ANSI requirements into consideration.
@@ -2687,13 +2354,359 @@ fancier than a plain byte string, use SVs and Perl_sv_catpvf().
 
 =back
 
-=head1 EXTERNAL TOOLS FOR DEBUGGING PERL
 
-Sometimes it helps to use external tools while debugging and
-testing Perl.  This section tries to guide you through using
-some common testing and debugging tools with Perl.  This is
-meant as a guide to interfacing these tools with Perl, not
-as any kind of guide to the use of the tools themselves.
+=head1 DEBUGGING
+
+You can compile a special debugging version of Perl, which allows you
+to use the C<-D> option of Perl to tell more about what Perl is doing.
+But sometimes there is no alternative than to dive in with a debugger,
+either to see the stack trace of a core dump (very useful in a bug
+report), or trying to figure out what went wrong before the core dump
+happened, or how did we end up having wrong or unexpected results.
+
+=head2 Poking at Perl
+
+To really poke around with Perl, you'll probably want to build Perl for
+debugging, like this:
+
+    ./Configure -d -D optimize=-g
+    make
+
+C<-g> is a flag to the C compiler to have it produce debugging
+information which will allow us to step through a running program,
+and to see in which C function we are at (without the debugging
+information we might see only the numerical addresses of the functions,
+which is not very helpful).
+
+F<Configure> will also turn on the C<DEBUGGING> compilation symbol which
+enables all the internal debugging code in Perl. There are a whole bunch
+of things you can debug with this: L<perlrun> lists them all, and the
+best way to find out about them is to play about with them. The most
+useful options are probably
+
+    l  Context (loop) stack processing
+    t  Trace execution
+    o  Method and overloading resolution
+    c  String/numeric conversions
+
+Some of the functionality of the debugging code can be achieved using XS
+modules.
+
+    -Dr => use re 'debug'
+    -Dx => use O 'Debug'
+
+=head2 Using a source-level debugger
+
+If the debugging output of C<-D> doesn't help you, it's time to step
+through perl's execution with a source-level debugger.
+
+=over 3
+
+=item *
+
+We'll use C<gdb> for our examples here; the principles will apply to
+any debugger (many vendors call their debugger C<dbx>), but check the
+manual of the one you're using.
+
+=back
+
+To fire up the debugger, type
+
+    gdb ./perl
+
+Or if you have a core dump:
+
+    gdb ./perl core
+
+You'll want to do that in your Perl source tree so the debugger can read
+the source code. You should see the copyright message, followed by the
+prompt.
+
+    (gdb)
+
+C<help> will get you into the documentation, but here are the most
+useful commands:
+
+=over 3
+
+=item run [args]
+
+Run the program with the given arguments.
+
+=item break function_name
+
+=item break source.c:xxx
+
+Tells the debugger that we'll want to pause execution when we reach
+either the named function (but see L<perlguts/Internal Functions>!) or the given
+line in the named source file.
+
+=item step
+
+Steps through the program a line at a time.
+
+=item next
+
+Steps through the program a line at a time, without descending into
+functions.
+
+=item continue
+
+Run until the next breakpoint.
+
+=item finish
+
+Run until the end of the current function, then stop again.
+
+=item 'enter'
+
+Just pressing Enter will do the most recent operation again - it's a
+blessing when stepping through miles of source code.
+
+=item print
+
+Execute the given C code and print its results. B<WARNING>: Perl makes
+heavy use of macros, and F<gdb> does not necessarily support macros
+(see later L</"gdb macro support">).  You'll have to substitute them
+yourself, or to invoke cpp on the source code files
+(see L</"The .i Targets">)
+So, for instance, you can't say
+
+    print SvPV_nolen(sv)
+
+but you have to say
+
+    print Perl_sv_2pv_nolen(sv)
+
+=back
+
+You may find it helpful to have a "macro dictionary", which you can
+produce by saying C<cpp -dM perl.c | sort>. Even then, F<cpp> won't
+recursively apply those macros for you.
+
+=head2 gdb macro support
+
+Recent versions of F<gdb> have fairly good macro support, but
+in order to use it you'll need to compile perl with macro definitions
+included in the debugging information.  Using F<gcc> version 3.1, this
+means configuring with C<-Doptimize=-g3>.  Other compilers might use a
+different switch (if they support debugging macros at all).
+
+=head2 Dumping Perl Data Structures
+
+One way to get around this macro hell is to use the dumping functions in
+F<dump.c>; these work a little like an internal
+L<Devel::Peek|Devel::Peek>, but they also cover OPs and other structures
+that you can't get at from Perl. Let's take an example. We'll use the
+C<$a = $b + $c> we used before, but give it a bit of context:
+C<$b = "6XXXX"; $c = 2.3;>. Where's a good place to stop and poke around?
+
+What about C<pp_add>, the function we examined earlier to implement the
+C<+> operator:
+
+    (gdb) break Perl_pp_add
+    Breakpoint 1 at 0x46249f: file pp_hot.c, line 309.
+
+Notice we use C<Perl_pp_add> and not C<pp_add> - see L<perlguts/Internal Functions>.
+With the breakpoint in place, we can run our program:
+
+    (gdb) run -e '$b = "6XXXX"; $c = 2.3; $a = $b + $c'
+
+Lots of junk will go past as gdb reads in the relevant source files and
+libraries, and then:
+
+    Breakpoint 1, Perl_pp_add () at pp_hot.c:309
+    309         dSP; dATARGET; tryAMAGICbin(add,opASSIGN);
+    (gdb) step
+    311           dPOPTOPnnrl_ul;
+    (gdb)
+
+We looked at this bit of code before, and we said that C<dPOPTOPnnrl_ul>
+arranges for two C<NV>s to be placed into C<left> and C<right> - let's
+slightly expand it:
+
+ #define dPOPTOPnnrl_ul  NV right = POPn; \
+                         SV *leftsv = TOPs; \
+                         NV left = USE_LEFT(leftsv) ? SvNV(leftsv) : 0.0
+
+C<POPn> takes the SV from the top of the stack and obtains its NV either
+directly (if C<SvNOK> is set) or by calling the C<sv_2nv> function.
+C<TOPs> takes the next SV from the top of the stack - yes, C<POPn> uses
+C<TOPs> - but doesn't remove it. We then use C<SvNV> to get the NV from
+C<leftsv> in the same way as before - yes, C<POPn> uses C<SvNV>.
+
+Since we don't have an NV for C<$b>, we'll have to use C<sv_2nv> to
+convert it. If we step again, we'll find ourselves there:
+
+    Perl_sv_2nv (sv=0xa0675d0) at sv.c:1669
+    1669        if (!sv)
+    (gdb)
+
+We can now use C<Perl_sv_dump> to investigate the SV:
+
+    SV = PV(0xa057cc0) at 0xa0675d0
+    REFCNT = 1
+    FLAGS = (POK,pPOK)
+    PV = 0xa06a510 "6XXXX"\0
+    CUR = 5
+    LEN = 6
+    $1 = void
+
+We know we're going to get C<6> from this, so let's finish the
+subroutine:
+
+    (gdb) finish
+    Run till exit from #0  Perl_sv_2nv (sv=0xa0675d0) at sv.c:1671
+    0x462669 in Perl_pp_add () at pp_hot.c:311
+    311           dPOPTOPnnrl_ul;
+
+We can also dump out this op: the current op is always stored in
+C<PL_op>, and we can dump it with C<Perl_op_dump>. This'll give us
+similar output to L<B::Debug|B::Debug>.
+
+    {
+    13  TYPE = add  ===> 14
+        TARG = 1
+        FLAGS = (SCALAR,KIDS)
+        {
+            TYPE = null  ===> (12)
+              (was rv2sv)
+            FLAGS = (SCALAR,KIDS)
+            {
+    11          TYPE = gvsv  ===> 12
+                FLAGS = (SCALAR)
+                GV = main::b
+            }
+        }
+
+# finish this later #
+
+=head1 SOURCE CODE STATIC ANALYSIS
+
+Various tools exist for analysing C source code B<statically>, as
+opposed to B<dynamically>, that is, without executing the code.
+It is possible to detect resource leaks, undefined behaviour, type
+mismatches, portability problems, code paths that would cause illegal
+memory accesses, and other similar problems by just parsing the C code
+and looking at the resulting graph, what does it tell about the
+execution and data flows.  As a matter of fact, this is exactly
+how C compilers know to give warnings about dubious code.
+
+=head2 lint, splint
+
+The good old C code quality inspector, C<lint>, is available in
+several platforms, but please be aware that there are several
+different implementations of it by different vendors, which means that
+the flags are not identical across different platforms.
+
+There is a lint variant called C<splint> (Secure Programming Lint)
+available from http://www.splint.org/ that should compile on any
+Unix-like platform.
+
+There are C<lint> and <splint> targets in Makefile, but you may have
+to diddle with the flags (see above).
+
+=head2 Coverity
+
+Coverity (http://www.coverity.com/) is a product similar to lint and
+as a testbed for their product they periodically check several open
+source projects, and they give out accounts to open source developers
+to the defect databases.
+
+=head2 cpd (cut-and-paste detector)
+
+The cpd tool detects cut-and-paste coding.  If one instance of the
+cut-and-pasted code changes, all the other spots should probably be
+changed, too.  Therefore such code should probably be turned into a
+subroutine or a macro.
+
+cpd (http://pmd.sourceforge.net/cpd.html) is part of the pmd project
+(http://pmd.sourceforge.net/).  pmd was originally written for static
+analysis of Java code, but later the cpd part of it was extended to
+parse also C and C++.
+
+Download the pmd-bin-X.Y.zip () from the SourceForge site, extract the
+pmd-X.Y.jar from it, and then run that on source code thusly:
+
+  java -cp pmd-X.Y.jar net.sourceforge.pmd.cpd.CPD --minimum-tokens 100 --files /some/where/src --language c > cpd.txt
+
+You may run into memory limits, in which case you should use the -Xmx option:
+
+  java -Xmx512M ...
+
+=head2 gcc warnings
+
+Though much can be written about the inconsistency and coverage
+problems of gcc warnings (like C<-Wall> not meaning "all the
+warnings", or some common portability problems not being covered by
+C<-Wall>, or C<-ansi> and C<-pedantic> both being a poorly defined
+collection of warnings, and so forth), gcc is still a useful tool in
+keeping our coding nose clean.
+
+The C<-Wall> is by default on.
+
+The C<-ansi> (and its sidekick, C<-pedantic>) would be nice to be on
+always, but unfortunately they are not safe on all platforms, they can
+for example cause fatal conflicts with the system headers (Solaris
+being a prime example).  If Configure C<-Dgccansipedantic> is used,
+the C<cflags> frontend selects C<-ansi -pedantic> for the platforms
+where they are known to be safe.
+
+Starting from Perl 5.9.4 the following extra flags are added:
+
+=over 4
+
+=item *
+
+C<-Wendif-labels>
+
+=item *
+
+C<-Wextra>
+
+=item *
+
+C<-Wdeclaration-after-statement>
+
+=back
+
+The following flags would be nice to have but they would first need
+their own Augean stablemaster:
+
+=over 4
+
+=item *
+
+C<-Wpointer-arith>
+
+=item *
+
+C<-Wshadow>
+
+=item *
+
+C<-Wstrict-prototypes>
+
+=back
+
+The C<-Wtraditional> is another example of the annoying tendency of
+gcc to bundle a lot of warnings under one switch (it would be
+impossible to deploy in practice because it would complain a lot) but
+it does contain some warnings that would be beneficial to have available
+on their own, such as the warning about string constants inside macros
+containing the macro arguments: this behaved differently pre-ANSI
+than it does in ANSI, and some C compilers are still in transition,
+AIX being an example.
+
+=head2 Warnings of other C compilers
+
+Other C compilers (yes, there B<are> other C compilers than gcc) often
+have their "strict ANSI" or "strict ANSI with some portability extensions"
+modes on, like for example the Sun Workshop has its C<-Xa> mode on
+(though implicitly), or the DEC (these days, HP...) has its C<-std1>
+mode on.
+
+=head1 MEMORY DEBUGGERS
 
 B<NOTE 1>: Running under memory debuggers such as Purify, valgrind, or
 Third Degree greatly slows down the execution: seconds become minutes,
@@ -2739,7 +2752,7 @@ badness.  Perl must be compiled in a specific way for
 optimal testing with Purify.  Purify is available under
 Windows NT, Solaris, HP-UX, SGI, and Siemens Unix.
 
-=head2 Purify on Unix
+=head3 Purify on Unix
 
 On Unix, Purify creates a new Perl binary.  To get the most
 benefit out of Purify, you should create the perl to Purify
@@ -2819,7 +2832,7 @@ or if you have the "env" utility:
 
     env PURIFYOPTIONS="..." ../pureperl ...
 
-=head2 Purify on NT
+=head3 Purify on NT
 
 Purify on Windows NT instruments the Perl binary 'perl.exe'
 on the fly.  There are several options in the makefile you
@@ -2919,85 +2932,7 @@ the F<*.3log> files.
 There are also leaks that for given certain definition of a leak,
 aren't.  See L</PERL_DESTRUCT_LEVEL> for more information.
 
-=head2 PERL_DESTRUCT_LEVEL
-
-If you want to run any of the tests yourself manually using e.g.
-valgrind, or the pureperl or perl.third executables, please note that
-by default perl B<does not> explicitly cleanup all the memory it has
-allocated (such as global memory arenas) but instead lets the exit()
-of the whole program "take care" of such allocations, also known as
-"global destruction of objects".
-
-There is a way to tell perl to do complete cleanup: set the
-environment variable PERL_DESTRUCT_LEVEL to a non-zero value.
-The t/TEST wrapper does set this to 2, and this is what you
-need to do too, if you don't want to see the "global leaks":
-For example, for "third-degreed" Perl:
-
-	env PERL_DESTRUCT_LEVEL=2 ./perl.third -Ilib t/foo/bar.t
-
-(Note: the mod_perl apache module uses also this environment variable
-for its own purposes and extended its semantics. Refer to the mod_perl
-documentation for more information. Also, spawned threads do the
-equivalent of setting this variable to the value 1.)
-
-If, at the end of a run you get the message I<N scalars leaked>, you can
-recompile with C<-DDEBUG_LEAKING_SCALARS>, which will cause the addresses
-of all those leaked SVs to be dumped along with details as to where each
-SV was originally allocated. This information is also displayed by
-Devel::Peek. Note that the extra details recorded with each SV increases
-memory usage, so it shouldn't be used in production environments. It also
-converts C<new_SV()> from a macro into a real function, so you can use
-your favourite debugger to discover where those pesky SVs were allocated.
-
-If you see that you're leaking memory at runtime, but neither valgrind
-nor C<-DDEBUG_LEAKING_SCALARS> will find anything, you're probably
-leaking SVs that are still reachable and will be properly cleaned up
-during destruction of the interpreter. In such cases, using the C<-Dm>
-switch can point you to the source of the leak. If the executable was
-built with C<-DDEBUG_LEAKING_SCALARS>, C<-Dm> will output SV allocations
-in addition to memory allocations. Each SV allocation has a distinct
-serial number that will be written on creation and destruction of the SV. 
-So if you're executing the leaking code in a loop, you need to look for
-SVs that are created, but never destroyed between each cycle. If such an
-SV is found, set a conditional breakpoint within C<new_SV()> and make it
-break only when C<PL_sv_serial> is equal to the serial number of the
-leaking SV. Then you will catch the interpreter in exactly the state
-where the leaking SV is allocated, which is sufficient in many cases to
-find the source of the leak.
-
-As C<-Dm> is using the PerlIO layer for output, it will by itself
-allocate quite a bunch of SVs, which are hidden to avoid recursion.
-You can bypass the PerlIO layer if you use the SV logging provided
-by C<-DPERL_MEM_LOG> instead.
-
-=head2 PERL_MEM_LOG
-
-If compiled with C<-DPERL_MEM_LOG>, both memory and SV allocations go
-through logging functions, which is handy for breakpoint setting.
-
-Unless C<-DPERL_MEM_LOG_NOIMPL> is also compiled, the logging
-functions read $ENV{PERL_MEM_LOG} to determine whether to log the
-event, and if so how:
-
-    $ENV{PERL_MEM_LOG} =~ /m/		Log all memory ops
-    $ENV{PERL_MEM_LOG} =~ /s/		Log all SV ops
-    $ENV{PERL_MEM_LOG} =~ /t/		include timestamp in Log
-    $ENV{PERL_MEM_LOG} =~ /^(\d+)/	write to FD given (default is 2)
-
-Memory logging is somewhat similar to C<-Dm> but is independent of
-C<-DDEBUGGING>, and at a higher level; all uses of Newx(), Renew(),
-and Safefree() are logged with the caller's source code file and line
-number (and C function name, if supported by the C compiler).  In
-contrast, C<-Dm> is directly at the point of C<malloc()>.  SV logging
-is similar.
-
-Since the logging doesn't use PerlIO, all SV allocations are logged
-and no extra SV allocations are introduced by enabling the logging.
-If compiled with C<-DDEBUG_LEAKING_SCALARS>, the serial number for
-each SV allocation is also logged.
-
-=head2 Profiling
+=head1 PROFILING
 
 Depending on your platform there are various ways of profiling Perl.
 
@@ -3201,11 +3136,87 @@ Unexecuted procedures.
 
 For further information, see your system's manual pages for pixie and prof.
 
-=head2 Miscellaneous tricks
+=head1 MISCELLANEOUS TRICKS
 
-=over 4
+=head2 PERL_DESTRUCT_LEVEL
 
-=item *
+If you want to run any of the tests yourself manually using e.g.
+valgrind, or the pureperl or perl.third executables, please note that
+by default perl B<does not> explicitly cleanup all the memory it has
+allocated (such as global memory arenas) but instead lets the exit()
+of the whole program "take care" of such allocations, also known as
+"global destruction of objects".
+
+There is a way to tell perl to do complete cleanup: set the
+environment variable PERL_DESTRUCT_LEVEL to a non-zero value.
+The t/TEST wrapper does set this to 2, and this is what you
+need to do too, if you don't want to see the "global leaks":
+For example, for "third-degreed" Perl:
+
+	env PERL_DESTRUCT_LEVEL=2 ./perl.third -Ilib t/foo/bar.t
+
+(Note: the mod_perl apache module uses also this environment variable
+for its own purposes and extended its semantics. Refer to the mod_perl
+documentation for more information. Also, spawned threads do the
+equivalent of setting this variable to the value 1.)
+
+If, at the end of a run you get the message I<N scalars leaked>, you can
+recompile with C<-DDEBUG_LEAKING_SCALARS>, which will cause the addresses
+of all those leaked SVs to be dumped along with details as to where each
+SV was originally allocated. This information is also displayed by
+Devel::Peek. Note that the extra details recorded with each SV increases
+memory usage, so it shouldn't be used in production environments. It also
+converts C<new_SV()> from a macro into a real function, so you can use
+your favourite debugger to discover where those pesky SVs were allocated.
+
+If you see that you're leaking memory at runtime, but neither valgrind
+nor C<-DDEBUG_LEAKING_SCALARS> will find anything, you're probably
+leaking SVs that are still reachable and will be properly cleaned up
+during destruction of the interpreter. In such cases, using the C<-Dm>
+switch can point you to the source of the leak. If the executable was
+built with C<-DDEBUG_LEAKING_SCALARS>, C<-Dm> will output SV allocations
+in addition to memory allocations. Each SV allocation has a distinct
+serial number that will be written on creation and destruction of the SV.
+So if you're executing the leaking code in a loop, you need to look for
+SVs that are created, but never destroyed between each cycle. If such an
+SV is found, set a conditional breakpoint within C<new_SV()> and make it
+break only when C<PL_sv_serial> is equal to the serial number of the
+leaking SV. Then you will catch the interpreter in exactly the state
+where the leaking SV is allocated, which is sufficient in many cases to
+find the source of the leak.
+
+As C<-Dm> is using the PerlIO layer for output, it will by itself
+allocate quite a bunch of SVs, which are hidden to avoid recursion.
+You can bypass the PerlIO layer if you use the SV logging provided
+by C<-DPERL_MEM_LOG> instead.
+
+=head2 PERL_MEM_LOG
+
+If compiled with C<-DPERL_MEM_LOG>, both memory and SV allocations go
+through logging functions, which is handy for breakpoint setting.
+
+Unless C<-DPERL_MEM_LOG_NOIMPL> is also compiled, the logging
+functions read $ENV{PERL_MEM_LOG} to determine whether to log the
+event, and if so how:
+
+    $ENV{PERL_MEM_LOG} =~ /m/		Log all memory ops
+    $ENV{PERL_MEM_LOG} =~ /s/		Log all SV ops
+    $ENV{PERL_MEM_LOG} =~ /t/		include timestamp in Log
+    $ENV{PERL_MEM_LOG} =~ /^(\d+)/	write to FD given (default is 2)
+
+Memory logging is somewhat similar to C<-Dm> but is independent of
+C<-DDEBUGGING>, and at a higher level; all uses of Newx(), Renew(),
+and Safefree() are logged with the caller's source code file and line
+number (and C function name, if supported by the C compiler).  In
+contrast, C<-Dm> is directly at the point of C<malloc()>.  SV logging
+is similar.
+
+Since the logging doesn't use PerlIO, all SV allocations are logged
+and no extra SV allocations are introduced by enabling the logging.
+If compiled with C<-DDEBUG_LEAKING_SCALARS>, the serial number for
+each SV allocation is also logged.
+
+=head2 DDD over gdb
 
 Those debugging perl with the DDD frontend over gdb may find the
 following useful:
@@ -3240,13 +3251,13 @@ Alternatively edit the init file interactively via:
 Note: you can define up to 20 conversion shortcuts in the gdb
 section.
 
-=item *
+=head2 Poison
 
 If you see in a debugger a memory area mysteriously full of 0xABABABAB
 or 0xEFEFEFEF, you may be seeing the effect of the Poison() macros,
 see L<perlclib>.
 
-=item *
+=head2 Read-only optrees
 
 Under ithreads the optree is read only. If you want to enforce this, to check
 for write accesses from buggy code, compile with C<-DPL_OP_SLAB_ALLOC> to
@@ -3283,9 +3294,6 @@ there may still be legitimate write access.
 However, as an 80% solution it is still effective, as currently it catches
 a write access during the generation of F<Config.pm>, which means that we
 can't yet build F<perl> with this enabled.
-
-=back
-
 
 =head1 CONCLUSION
 
