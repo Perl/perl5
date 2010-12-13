@@ -52,7 +52,10 @@ sub explain {
 #
 EOM
     }
-    print "1..0 # Skip: @_\n" if @_;
+    if (@_) {
+	print "1..0 # Skip: @_\n";
+	bye();
+    }
 }
 
 $| = 1;
@@ -144,7 +147,6 @@ unless (! $r && defined $sysseek && $sysseek == 5_000_000_000) {
     $sysseek = 'undef' unless defined $sysseek;
     explain("seeking past 2GB failed: ",
 	    $r ? 'signal '.($r & 0x7f) : "$! (sysseek returned $sysseek)");
-    bye();
 }
 
 # The syswrite will fail if there are are filesize limitations (process or fs).
@@ -162,7 +164,6 @@ unless($syswrite && $close) {
     } else {
 	explain("error: $!");
     }
-    bye();
 }
 
 @s = stat($big0);
@@ -171,7 +172,6 @@ print "# @s\n";
 
 unless ($s[7] == 5_000_000_003) {
     explain("kernel/fs not configured to use large files?");
-    bye();
 }
 
 sub fail {

@@ -53,7 +53,10 @@ sub explain {
 #
 EOM
     }
-    print "1..0 # Skip: @_\n" if @_;
+    if(@_) {
+	print "1..0 # Skip: @_\n";
+	bye();
+    }
 }
 
 $| = 1;
@@ -146,7 +149,6 @@ binmode BIG;
 if ($r or not seek(BIG, 5_000_000_000, SEEK_SET)) {
     my $err = $r ? 'signal '.($r & 0x7f) : $!;
     explain("seeking past 2GB failed: $err");
-    bye();
 }
 
 # Either the print or (more likely, thanks to buffering) the close will
@@ -163,7 +165,6 @@ unless ($print && $close) {
     } else {
 	explain("error: $!");
     }
-    bye();
 }
 
 @s = stat($big0);
@@ -172,7 +173,6 @@ print "# @s\n";
 
 unless ($s[7] == 5_000_000_003) {
     explain("kernel/fs not configured to use large files?");
-    bye();
 }
 
 sub fail {
