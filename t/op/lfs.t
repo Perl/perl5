@@ -28,7 +28,7 @@ sub zap {
 }
 
 sub bye {
-    zap();	
+    zap(); 
     exit(0);
 }
 
@@ -73,11 +73,13 @@ if ($^O eq 'unicos') {
     bye();
 }
 
-# Then try to heuristically deduce whether we have sparse files.
+# Then try heuristically to deduce whether we have sparse files.
 
 # Let's not depend on Fcntl or any other extension.
 
-my ($SEEK_SET, $SEEK_CUR, $SEEK_END) = (0, 1, 2);
+sub SEEK_SET () {0}
+sub SEEK_CUR () {1}
+sub SEEK_END () {2}
 
 # We'll start off by creating a one megabyte file which has
 # only three "true" bytes.  If we have sparseness, we should
@@ -88,7 +90,7 @@ open(BIG, ">$big1") or
     do { warn "open $big1 failed: $!\n"; bye };
 binmode(BIG) or
     do { warn "binmode $big1 failed: $!\n"; bye };
-seek(BIG, 1_000_000, $SEEK_SET) or
+seek(BIG, 1_000_000, SEEK_SET) or
     do { warn "seek $big1 failed: $!\n"; bye };
 print BIG "big" or
     do { warn "print $big1 failed: $!\n"; bye };
@@ -103,12 +105,12 @@ open(BIG, ">$big2") or
     do { warn "open $big2 failed: $!\n"; bye };
 binmode(BIG) or
     do { warn "binmode $big2 failed: $!\n"; bye };
-seek(BIG, 2_000_000, $SEEK_SET) or
-    do { warn "seek $big2 failed; $!\n"; bye };
+seek(BIG, 2_000_000, SEEK_SET) or
+    do { warn "seek $big2 failed: $!\n"; bye };
 print BIG "big" or
-    do { warn "print $big2 failed; $!\n"; bye };
+    do { warn "print $big2 failed: $!\n"; bye };
 close(BIG) or
-    do { warn "close $big2 failed; $!\n"; bye };
+    do { warn "close $big2 failed: $!\n"; bye };
 
 my @s2 = stat($big2);
 
@@ -141,7 +143,7 @@ EOF
 
 open(BIG, ">$big0") or do { warn "open failed: $!\n"; bye };
 binmode BIG;
-if ($r or not seek(BIG, 5_000_000_000, $SEEK_SET)) {
+if ($r or not seek(BIG, 5_000_000_000, SEEK_SET)) {
     my $err = $r ? 'signal '.($r & 0x7f) : $!;
     explain("seeking past 2GB failed: $err");
     bye();
@@ -218,13 +220,13 @@ print "ok 4\n";
 open(BIG, $big0) or do { warn "open failed: $!\n"; bye };
 binmode BIG;
 
-fail unless seek(BIG, 4_500_000_000, $SEEK_SET);
+fail unless seek(BIG, 4_500_000_000, SEEK_SET);
 print "ok 5\n";
 
 offset('tell(BIG)', 4_500_000_000);
 print "ok 6\n";
 
-fail unless seek(BIG, 1, $SEEK_CUR);
+fail unless seek(BIG, 1, SEEK_CUR);
 print "ok 7\n";
 
 # If you get 205_032_705 from here it means that
@@ -233,13 +235,13 @@ print "ok 7\n";
 offset('tell(BIG)', 4_500_000_001);
 print "ok 8\n";
 
-fail unless seek(BIG, -1, $SEEK_CUR);
+fail unless seek(BIG, -1, SEEK_CUR);
 print "ok 9\n";
 
 offset('tell(BIG)', 4_500_000_000);
 print "ok 10\n";
 
-fail unless seek(BIG, -3, $SEEK_END);
+fail unless seek(BIG, -3, SEEK_END);
 print "ok 11\n";
 
 offset('tell(BIG)', 5_000_000_000);
@@ -256,7 +258,7 @@ print "ok 14\n";
 # 705_032_704 = (I32)5_000_000_000
 # See that we don't have "big" in the 705_... spot:
 # that would mean that we have a wraparound.
-fail unless seek(BIG, 705_032_704, $SEEK_SET);
+fail unless seek(BIG, 705_032_704, SEEK_SET);
 print "ok 15\n";
 
 my $zero;

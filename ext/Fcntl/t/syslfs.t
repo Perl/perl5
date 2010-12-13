@@ -14,8 +14,6 @@ BEGIN {
 
 use strict;
 
-$| = 1;
-
 our @s;
 our $fail;
 
@@ -55,6 +53,8 @@ EOM
     print "1..0 # Skip: @_\n" if @_;
 }
 
+$| = 1;
+
 print "# checking whether we have sparse files...\n";
 
 # Known have-nots.
@@ -66,7 +66,7 @@ if ($^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS') {
 # Known haves that have problems running this test
 # (for example because they do not support sparse files, like UNICOS)
 if ($^O eq 'unicos') {
-    print "1..0 # Skip: no sparse files in $^0, unable to test large files\n";
+    print "1..0 # Skip: no sparse files in $^O, unable to test large files\n";
     bye();
 }
 
@@ -82,7 +82,7 @@ sysopen(BIG, "big1", O_WRONLY|O_CREAT|O_TRUNC) or
 sysseek(BIG, 1_000_000, SEEK_SET) or
     do { warn "sysseek big1 failed: $!\n"; bye };
 syswrite(BIG, "big") or
-    do { warn "syswrite big1 failed; $!\n"; bye };
+    do { warn "syswrite big1 failed: $!\n"; bye };
 close(BIG) or
     do { warn "close big1 failed: $!\n"; bye };
 
@@ -95,7 +95,7 @@ sysopen(BIG, "big2", O_WRONLY|O_CREAT|O_TRUNC) or
 sysseek(BIG, 2_000_000, SEEK_SET) or
     do { warn "sysseek big2 failed: $!\n"; bye };
 syswrite(BIG, "big") or
-    do { warn "syswrite big2 failed; $!\n"; bye };
+    do { warn "syswrite big2 failed: $!\n"; bye };
 close(BIG) or
     do { warn "close big2 failed: $!\n"; bye };
 
@@ -172,7 +172,7 @@ unless ($s[7] == 5_000_000_003) {
     bye();
 }
 
-sub fail () {
+sub fail {
     print "not ";
     $fail++;
 }
@@ -222,6 +222,9 @@ print "ok 5\n";
 offset('sysseek(BIG, 0, SEEK_CUR)', 4_500_000_000);
 print "ok 6\n";
 
+# If you get 205_032_705 from here it means that
+# your tell() is returning 32-bit values since (I32)4_500_000_001
+# is exactly 205_032_705.
 offset('sysseek(BIG, 1, SEEK_CUR)', 4_500_000_001);
 print "ok 7\n";
 
