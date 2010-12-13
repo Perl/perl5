@@ -198,6 +198,7 @@ sub have_compiler {
   else {
     print $FH "int boot_compilet() { return 1; }\n";
   }
+  close $FH;
 
   my ($obj_file, @lib_files);
   eval {
