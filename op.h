@@ -677,32 +677,32 @@ struct block_hooks {
 /*
 =head1 Compile-time scope hooks
 
-=for apidoc m|U32|BhkFLAGS|BHK *hk
+=for apidoc mx|U32|BhkFLAGS|BHK *hk
 Return the BHK's flags.
 
-=for apidoc m|void *|BhkENTRY|BHK *hk|which
+=for apidoc mx|void *|BhkENTRY|BHK *hk|which
 Return an entry from the BHK structure. I<which> is a preprocessor token
 indicating which entry to return. If the appropriate flag is not set
 this will return NULL. The type of the return value depends on which
 entry you ask for.
 
-=for apidoc Am|void|BhkENTRY_set|BHK *hk|which|void *ptr
+=for apidoc Amx|void|BhkENTRY_set|BHK *hk|which|void *ptr
 Set an entry in the BHK structure, and set the flags to indicate it is
 valid. I<which> is a preprocessing token indicating which entry to set.
 The type of I<ptr> depends on the entry.
 
-=for apidoc Am|void|BhkDISABLE|BHK *hk|which
+=for apidoc Amx|void|BhkDISABLE|BHK *hk|which
 Temporarily disable an entry in this BHK structure, by clearing the
 appropriate flag. I<which> is a preprocessor token indicating which
 entry to disable.
 
-=for apidoc Am|void|BhkENABLE|BHK *hk|which
+=for apidoc Amx|void|BhkENABLE|BHK *hk|which
 Re-enable an entry in this BHK structure, by setting the appropriate
 flag. I<which> is a preprocessor token indicating which entry to enable.
 This will assert (under -DDEBUGGING) if the entry doesn't contain a valid
 pointer.
 
-=for apidoc m|void|CALL_BLOCK_HOOKS|which|arg
+=for apidoc mx|void|CALL_BLOCK_HOOKS|which|arg
 Call all the registered block hooks for type I<which>. I<which> is a
 preprocessing token; the type of I<arg> depends on I<which>.
 
