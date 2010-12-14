@@ -26,6 +26,7 @@ my $Perl;       # Safer version of $^X set by which_perl()
 
 $TODO = 0;
 $NO_ENDING = 0;
+$Tests_Are_Passing = 1;
 
 # Use this instead of print to avoid interference while testing globals.
 sub _print {
@@ -122,7 +123,12 @@ sub _ok {
 	$out = $pass ? "ok $test" : "not ok $test";
     }
 
-    $out = $out . " # TODO $TODO" if $TODO;
+    if ($TODO) {
+	$out = $out . " # TODO $TODO";
+    } else {
+	$Tests_Are_Passing = 0 unless $pass;
+    }
+
     _print "$out\n";
 
     unless ($pass) {
