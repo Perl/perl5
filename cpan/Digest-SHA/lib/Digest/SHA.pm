@@ -7,7 +7,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 use Fcntl;
 use integer;
 
-$VERSION = '5.49';
+$VERSION = '5.50';
 
 require Exporter;
 require DynaLoader;
@@ -114,14 +114,12 @@ sub Addfile {
 	my ($binary, $portable) = map { $_ eq $mode } ("b", "p");
 	my $text = -T $file;
 
-		## Use sysopen to accommodate full range of POSIX
-		## file names; fall back to open for magic (-)
+		## Always interpret "-" to mean STDIN; otherwise use
+		## sysopen to handle full range of POSIX file names
 	local *FH;
-	unless (sysopen(FH, $file, O_RDONLY)) {
-		unless ($file eq '-' && open(FH, '<&STDIN')) {
-			_bail("Open failed");
-		}
-	}
+	$file eq '-' and open(FH, '< -') 
+		or sysopen(FH, $file, O_RDONLY)
+			or _bail('Open failed');
 	binmode(FH) if $binary || $portable;
 
 	unless ($portable && $text) {
@@ -140,8 +138,8 @@ sub Addfile {
 			last unless $n2;
 			$buf1 .= $buf2;
 		}
-		$buf1 =~ s/\015?\015\012/\012/g; 	# DOS/Windows
-		$buf1 =~ s/\015/\012/g;          	# early MacOS
+		$buf1 =~ s/\015?\015\012/\012/g;	# DOS/Windows
+		$buf1 =~ s/\015/\012/g;			# early MacOS
 		$self->add($buf1);
 	}
 	_bail("Read failed") unless defined $n1;

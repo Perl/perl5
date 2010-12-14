@@ -4,8 +4,8 @@
 	##
 	## Copyright (C) 2003-2010 Mark Shelor, All Rights Reserved
 	##
-	## Version: 5.49
-	## Sun Dec 12 07:22:04 MST 2010
+	## Version: 5.50
+	## Tue Dec 14 06:20:08 MST 2010
 
 =head1 NAME
 
@@ -74,7 +74,7 @@ use strict;
 use FileHandle;
 use Getopt::Long;
 
-my $VERSION = "5.49";
+my $VERSION = "5.50";
 
 
 	## Try to use Digest::SHA, since it's faster.  If not installed,
@@ -237,12 +237,10 @@ sub verify {
 	my ($bslash, $sum, $fname, $rsp, $digest);
 
 	local *FH;
-	unless (sysopen(FH, $checkfile, O_RDONLY)) {
-		unless ($checkfile eq '-' && open(FH, '<&STDIN')) {
-			_bail("Open failed");
-		}
-		$checkfile = 'standard input';
-	}
+	$checkfile eq '-' and open(FH, '< -') 
+		and $checkfile = 'standard input'
+	or sysopen(FH, $checkfile, O_RDONLY)
+		or die "shasum: $checkfile: $!\n";
 	while (<FH>) {
 		next if /^#/; s/\n$//; s/^[ \t]+//; $num_lines++;
 		$bslash = s/^\\//;

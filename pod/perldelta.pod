@@ -226,7 +226,7 @@ XXX
 
 =item *
 
-C<Digest::SHA> has been upgraded from 5.48 to 5.49
+C<Digest::SHA> has been upgraded from 5.48 to 5.50
 
 shasum now more closely mimics sha1sum/md5sum and Addfile
 accepts all POSIX filenames.

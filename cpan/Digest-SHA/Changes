@@ -1,5 +1,12 @@
 Revision history for Perl extension Digest::SHA.
 
+5.50  Tue Dec 14 06:20:08 MST 2010
+	- adopted convention that '-' always means STDIN
+		-- actual filename '-' accessed as './-'
+		-- accords with behavior of sha1sum/md5sum
+	- corrected undefined subroutine oversight in shasum
+		-- inadvertent migration of _bail() from SHA.pm
+
 5.49  Sun Dec 12 07:22:04 MST 2010
 	- modified Addfile to accept all POSIX filenames
 		-- standard allows all characters except NUL and '/'
