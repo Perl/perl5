@@ -8,6 +8,7 @@ BEGIN {
 
 use strict;
 use warnings;
+use POSIX;
 
 use re qw(is_regexp regexp_pattern
           regname regnames regnames_count);
@@ -66,6 +67,48 @@ if ('1234'=~/(?:(?<A>\d)|(?<C>!))(?<B>\d)(?<A>\d)(?<B>\d)/){
         pass("qr/\18/ didn't loop");
     }
 
+{
+    # tests for new regexp flags
+    my $text = 'ä';
+    my $check;
+
+    {
+        # check u/d-flag without setting a locale
+        $check = $text =~ /(?u)\w/;
+        ok( $check );
+        $check = $text =~ /(?d)\w/;
+        ok( !$check );
+    }
+
+    SKIP: {
+        my $current_locale = POSIX::setlocale( &POSIX::LC_CTYPE, 'de_DE.ISO-8859-1' );
+        if ( !$current_locale || $current_locale ne 'de_DE.ISO-8859-1' ) {
+            skip( 'cannot use locale de_DE.ISO-8859-1', 3 );
+        }
+
+        $check = $text =~ /(?u)\w/;
+        ok( $check );
+        $check = $text =~ /(?d)\w/;
+        ok( !$check );
+        $check = $text =~ /(?l)\w/;
+        ok( $check );
+    }
+
+    SKIP: {
+        my $current_locale = POSIX::setlocale( &POSIX::LC_CTYPE, 'en_US.UTF-8' );
+        if ( !$current_locale || $current_locale ne 'en_US.UTF-8' ) {
+            skip( 'cannot use locale en_US.UTF-8', 3 );
+        }
+
+        $check = $text =~ /(?u)\w/;
+        ok( $check );
+        $check = $text =~ /(?d)\w/;
+        ok( !$check );
+        $check = $text =~ /(?l)\w/;
+        ok( !$check );
+    }
+}
+
 # New tests above this line, don't forget to update the test count below!
-BEGIN { plan tests => 20 }
+BEGIN { plan tests => 28 }
 # No tests here!
