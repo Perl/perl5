@@ -14,9 +14,9 @@ BEGIN {
 
 use strict;
 use File::Temp 'tempfile';
+use Test::More;
 
 our @s;
-our $fail;
 
 (undef, my $big0) = tempfile(UNLINK => 1);
 (undef, my $big1) = tempfile(UNLINK => 1);
@@ -44,8 +44,7 @@ sub explain {
 EOM
     }
     if (@_) {
-	print "1..0 # Skip: @_\n";
-	exit 0;
+	plan(skip_all => "@_");
     }
 }
 
@@ -55,15 +54,13 @@ print "# checking whether we have sparse files...\n";
 
 # Known have-nots.
 if ($^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS') {
-    print "1..0 # Skip: no sparse files in $^O\n";
-    exit 0;
+    plan(skip_all => "no sparse files in $^O");
 }
 
 # Known haves that have problems running this test
 # (for example because they do not support sparse files, like UNICOS)
 if ($^O eq 'unicos') {
-    print "1..0 # Skip: no sparse files in $^O, unable to test large files\n";
-    exit 0;
+    plan(skip_all => "no sparse files in $^O, unable to test large files");
 }
 
 # Then try heuristically to deduce whether we have sparse files.
@@ -102,8 +99,7 @@ print "# s2 = @s2\n";
 unless ($s1[7] == 1_000_003 && $s2[7] == 2_000_003 &&
 	$s1[11] == $s2[11] && $s1[12] == $s2[12] &&
 	$s1[12] > 0) {
-	print "1..0 # Skip: no sparse files?\n";
-	exit 0;
+    plan(skip_all => "no sparse files?");
 }
 
 print "# we seem to have sparse files...\n";
@@ -116,8 +112,8 @@ $ENV{LC_ALL} = "C";
 
 my $perl = '../../perl';
 unless (-x $perl) {
-    print "1..1\nnot ok 1 - can't find perl: expected $perl\n";
-    exit 0;
+    plan(tests => 1);
+    fail("can't find perl: expected $perl");
 }
 my $r = system $perl, '-I../lib', '-e', <<"EOF";
 use Fcntl qw(/^O_/ /^SEEK_/);
@@ -163,12 +159,8 @@ unless ($s[7] == 5_000_000_003) {
     explain("kernel/fs not configured to use large files?");
 }
 
-sub fail {
-    print "not ";
-    $fail++;
-}
-
 sub offset ($$) {
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
     my ($offset_will_be, $offset_want) = @_;
     my $offset_is = eval $offset_will_be;
     unless ($offset_is == $offset_want) {
@@ -185,78 +177,59 @@ sub offset ($$) {
 	        $offset_want,
 	        $offset_is;
         }
-        fail;
+        fail($offset_will_be);
+    } else {
+	pass($offset_will_be);
     }
 }
 
-print "1..17\n";
+plan(tests => 17);
 
-$fail = 0;
+is($s[7], 5_000_000_003, 'exercises pp_stat');
+is(-s $big0, 5_000_000_003, 'exercises pp_ftsize');
 
-fail unless $s[7] == 5_000_000_003;	# exercizes pp_stat
-print "ok 1\n";
-
-fail unless -s $big0 == 5_000_000_003;	# exercizes pp_ftsize
-print "ok 2\n";
-
-fail unless -e $big0;
-print "ok 3\n";
-
-fail unless -f $big0;
-print "ok 4\n";
+is(-e $big0, 1);
+is(-f $big0, 1);
 
 sysopen(BIG, $big0, O_RDONLY) or die "sysopen failed: $!";
 
 offset('sysseek(BIG, 4_500_000_000, SEEK_SET)', 4_500_000_000);
-print "ok 5\n";
 
 offset('sysseek(BIG, 0, SEEK_CUR)', 4_500_000_000);
-print "ok 6\n";
 
 # If you get 205_032_705 from here it means that
 # your tell() is returning 32-bit values since (I32)4_500_000_001
 # is exactly 205_032_705.
 offset('sysseek(BIG, 1, SEEK_CUR)', 4_500_000_001);
-print "ok 7\n";
 
 offset('sysseek(BIG, 0, SEEK_CUR)', 4_500_000_001);
-print "ok 8\n";
 
 offset('sysseek(BIG, -1, SEEK_CUR)', 4_500_000_000);
-print "ok 9\n";
 
 offset('sysseek(BIG, 0, SEEK_CUR)', 4_500_000_000);
-print "ok 10\n";
 
 offset('sysseek(BIG, -3, SEEK_END)', 5_000_000_000);
-print "ok 11\n";
 
 offset('sysseek(BIG, 0, SEEK_CUR)', 5_000_000_000);
-print "ok 12\n";
 
 my $big;
 
-fail unless sysread(BIG, $big, 3) == 3;
-print "ok 13\n";
+is(sysread(BIG, $big, 3), 3);
 
-fail unless $big eq "big";
-print "ok 14\n";
+is($big, "big");
 
 # 705_032_704 = (I32)5_000_000_000
 # See that we don't have "big" in the 705_... spot:
 # that would mean that we have a wraparound.
-fail unless sysseek(BIG, 705_032_704, SEEK_SET);
-print "ok 15\n";
+isnt(sysseek(BIG, 705_032_704, SEEK_SET), undef);
 
 my $zero;
 
-fail unless read(BIG, $zero, 3) == 3;
-print "ok 16\n";
+is(read(BIG, $zero, 3), 3);
 
-fail unless $zero eq "\0\0\0";
-print "ok 17\n";
+is($zero, "\0\0\0");
 
-explain() if $fail;
+explain() unless Test::Builder->new()->is_passing();
 
 END {
     # unlink may fail if applied directly to a large file
