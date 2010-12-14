@@ -28,6 +28,51 @@
       */
 #    define _WSPIAPI_COUNTOF(_Array) (sizeof(_Array) / sizeof(_Array[0]))
 #    include <ws2tcpip.h>
+
+#    ifndef SIO_GET_INTERFACE_LIST_EX
+       /* The ws2tcpip.h header included in VC6 doesn't define the
+        * sin6_scope_id member of sockaddr_in6.  We define our own
+        * version and redefine sockaddr_in6 to point to this one
+        * instead for compiling e.g. Socket.xs.
+        */
+       struct my_sockaddr_in6 {
+           short   sin6_family;        /* AF_INET6 */
+           u_short sin6_port;          /* Transport level port number */
+           u_long  sin6_flowinfo;      /* IPv6 flow information */
+           struct in_addr6 sin6_addr;  /* IPv6 address */
+           u_long sin6_scope_id;       /* set of interfaces for a scope */
+       };
+#      define sockaddr_in6 my_sockaddr_in6
+
+       /* Provide implementations of IN6ADDR_SETANY() and IN6ADDR_SETLOOPBACK
+        * that also initialize the sin6_scope_id field.
+        */
+#      undef IN6ADDR_SETANY
+#      define IN6ADDR_SETANY(x) {\
+(x)->sin6_family = AF_INET6; \
+(x)->sin6_port = 0; \
+(x)->sin6_flowinfo = 0; \
+*((u_long *)((x)->sin6_addr.s6_addr)    ) = 0; \
+*((u_long *)((x)->sin6_addr.s6_addr) + 1) = 0; \
+*((u_long *)((x)->sin6_addr.s6_addr) + 2) = 0; \
+*((u_long *)((x)->sin6_addr.s6_addr) + 3) = 0; \
+(x)->sin6_scope_id = 0; \
+}
+
+#      undef IN6ADDR_SETLOOPBACK
+#      define IN6ADDR_SETLOOPBACK(x) {\
+(x)->sin6_family = AF_INET6; \
+(x)->sin6_port = 0; \
+(x)->sin6_flowinfo = 0; \
+*((u_long *)((x)->sin6_addr.s6_addr)    ) = 0; \
+*((u_long *)((x)->sin6_addr.s6_addr) + 1) = 0; \
+*((u_long *)((x)->sin6_addr.s6_addr) + 2) = 0; \
+*((u_long *)((x)->sin6_addr.s6_addr) + 3) = 1; \
+(x)->sin6_scope_id = 0; \
+}
+
+#    endif
+
 #  endif
 #endif
 
