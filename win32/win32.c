@@ -22,6 +22,18 @@
 
 #include <windows.h>
 
+#ifndef HWND_MESSAGE
+#  define HWND_MESSAGE ((HWND)-3)
+#endif
+
+#ifndef PROCESSOR_ARCHITECTURE_AMD64
+#  define PROCESSOR_ARCHITECTURE_AMD64 9
+#endif
+
+#ifndef WC_NO_BEST_FIT_CHARS
+#  define WC_NO_BEST_FIT_CHARS 0x00000400
+#endif
+
 #include <winnt.h>
 #include <commctrl.h>
 #include <tlhelp32.h>
