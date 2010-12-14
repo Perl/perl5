@@ -22,12 +22,8 @@ our $fail;
 (undef, my $big1) = tempfile(UNLINK => 1);
 (undef, my $big2) = tempfile(UNLINK => 1);
 
-sub zap {
-    close(BIG);
-}
-
 sub bye {
-    zap(); 
+    close(BIG);
     exit(0);
 }
 
@@ -107,8 +103,6 @@ close(BIG) or
 my @s2 = stat($big2);
 
 print "# s2 = @s2\n";
-
-zap();
 
 unless ($s1[7] == 1_000_003 && $s2[7] == 2_000_003 &&
 	$s1[11] == $s2[11] && $s1[12] == $s2[12] &&
