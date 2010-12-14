@@ -23,11 +23,6 @@ my $big0 = tempfile();
 my $big1 = tempfile();
 my $big2 = tempfile();
 
-sub bye {
-    close(BIG);
-    exit(0);
-}
-
 my $explained;
 
 sub explain {
@@ -51,7 +46,7 @@ EOM
     }
     if(@_) {
 	print "1..0 # Skip: @_\n";
-	bye();
+	exit 0;
     }
 }
 
@@ -62,14 +57,14 @@ print "# checking whether we have sparse files...\n";
 # Known have-nots.
 if ($^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS') {
     print "1..0 # Skip: no sparse files in $^O\n";
-    bye();
+    exit 0;
 }
 
 # Known haves that have problems running this test
 # (for example because they do not support sparse files, like UNICOS)
 if ($^O eq 'unicos') {
     print "1..0 # Skip: no sparse files in $^O, unable to test large files\n";
-    bye();
+    exit 0;
 }
 
 # Then try heuristically to deduce whether we have sparse files.
@@ -86,30 +81,30 @@ sub SEEK_END () {2}
 # one megabyte blocks...)
 
 open(BIG, ">$big1") or
-    do { warn "open $big1 failed: $!\n"; bye };
+    die "open $big1 failed: $!";
 binmode(BIG) or
-    do { warn "binmode $big1 failed: $!\n"; bye };
+    die "binmode $big1 failed: $!";
 seek(BIG, 1_000_000, SEEK_SET) or
-    do { warn "seek $big1 failed: $!\n"; bye };
+    die "seek $big1 failed: $!";
 print BIG "big" or
-    do { warn "print $big1 failed: $!\n"; bye };
+    die "print $big1 failed: $!";
 close(BIG) or
-    do { warn "close $big1 failed: $!\n"; bye };
+    die "close $big1 failed: $!";
 
 my @s1 = stat($big1);
 
 print "# s1 = @s1\n";
 
 open(BIG, ">$big2") or
-    do { warn "open $big2 failed: $!\n"; bye };
+    die "open $big2 failed: $!";
 binmode(BIG) or
-    do { warn "binmode $big2 failed: $!\n"; bye };
+    die "binmode $big2 failed: $!";
 seek(BIG, 2_000_000, SEEK_SET) or
-    do { warn "seek $big2 failed: $!\n"; bye };
+    die "seek $big2 failed: $!";
 print BIG "big" or
-    do { warn "print $big2 failed: $!\n"; bye };
+    die "print $big2 failed: $!";
 close(BIG) or
-    do { warn "close $big2 failed: $!\n"; bye };
+    die "close $big2 failed: $!";
 
 my @s2 = stat($big2);
 
@@ -119,7 +114,7 @@ unless ($s1[7] == 1_000_003 && $s2[7] == 2_000_003 &&
 	$s1[11] == $s2[11] && $s1[12] == $s2[12] &&
 	$s1[12] > 0) {
 	print "1..0 # Skip: no sparse files?\n";
-	bye;
+	exit 0;
 }
 
 print "# we seem to have sparse files...\n";
@@ -138,7 +133,7 @@ close \$big or die qq{close $big0: $!};
 exit 0;
 EOF
 
-open(BIG, ">$big0") or do { warn "open failed: $!\n"; bye };
+open(BIG, ">$big0") or die "open failed: $!";
 binmode BIG;
 if ($r or not seek(BIG, 5_000_000_000, SEEK_SET)) {
     my $err = $r ? 'signal '.($r & 0x7f) : $!;
@@ -211,7 +206,7 @@ print "ok 3\n";
 fail unless -f $big0;
 print "ok 4\n";
 
-open(BIG, $big0) or do { warn "open failed: $!\n"; bye };
+open(BIG, $big0) or die "open failed: $!";
 binmode BIG;
 
 fail unless seek(BIG, 4_500_000_000, SEEK_SET);
@@ -264,8 +259,6 @@ fail unless $zero eq "\0\0\0";
 print "ok 17\n";
 
 explain() if $fail;
-
-bye(); # does the necessary cleanup
 
 END {
     # unlink may fail if applied directly to a large file

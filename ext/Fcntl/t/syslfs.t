@@ -22,11 +22,6 @@ our $fail;
 (undef, my $big1) = tempfile(UNLINK => 1);
 (undef, my $big2) = tempfile(UNLINK => 1);
 
-sub bye {
-    close(BIG);
-    exit(0);
-}
-
 my $explained;
 
 sub explain {
@@ -50,7 +45,7 @@ EOM
     }
     if (@_) {
 	print "1..0 # Skip: @_\n";
-	bye();
+	exit 0;
     }
 }
 
@@ -61,14 +56,14 @@ print "# checking whether we have sparse files...\n";
 # Known have-nots.
 if ($^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS') {
     print "1..0 # Skip: no sparse files in $^O\n";
-    bye();
+    exit 0;
 }
 
 # Known haves that have problems running this test
 # (for example because they do not support sparse files, like UNICOS)
 if ($^O eq 'unicos') {
     print "1..0 # Skip: no sparse files in $^O, unable to test large files\n";
-    bye();
+    exit 0;
 }
 
 # Then try heuristically to deduce whether we have sparse files.
@@ -79,26 +74,26 @@ if ($^O eq 'unicos') {
 # one megabyte blocks...)
 
 sysopen(BIG, $big1, O_WRONLY|O_CREAT|O_TRUNC) or
-    do { warn "sysopen $big1 failed: $!\n"; bye };
+    die "sysopen $big1 failed: $!";
 sysseek(BIG, 1_000_000, SEEK_SET) or
-    do { warn "sysseek $big1 failed: $!\n"; bye };
+    die "sysseek $big1 failed: $!";
 syswrite(BIG, "big") or
-    do { warn "syswrite $big1 failed: $!\n"; bye };
+    die "syswrite $big1 failed: $!";
 close(BIG) or
-    do { warn "close $big1 failed: $!\n"; bye };
+    die "close $big1 failed: $!";
 
 my @s1 = stat($big1);
 
 print "# s1 = @s1\n";
 
 sysopen(BIG, $big2, O_WRONLY|O_CREAT|O_TRUNC) or
-    do { warn "sysopen $big2 failed: $!\n"; bye };
+    die "sysopen $big2 failed: $!";
 sysseek(BIG, 2_000_000, SEEK_SET) or
-    do { warn "sysseek $big2 failed: $!\n"; bye };
+    die "sysseek $big2 failed: $!";
 syswrite(BIG, "big") or
-    do { warn "syswrite $big2 failed: $!\n"; bye };
+    die "syswrite $big2 failed: $!";
 close(BIG) or
-    do { warn "close $big2 failed: $!\n"; bye };
+    die "close $big2 failed: $!";
 
 my @s2 = stat($big2);
 
@@ -108,7 +103,7 @@ unless ($s1[7] == 1_000_003 && $s2[7] == 2_000_003 &&
 	$s1[11] == $s2[11] && $s1[12] == $s2[12] &&
 	$s1[12] > 0) {
 	print "1..0 # Skip: no sparse files?\n";
-	bye;
+	exit 0;
 }
 
 print "# we seem to have sparse files...\n";
@@ -135,7 +130,7 @@ EOF
 
 
 sysopen(BIG, $big0, O_WRONLY|O_CREAT|O_TRUNC) or
-	do { warn "sysopen $big0 failed: $!\n"; bye };
+    die "sysopen $big0 failed: $!";
 my $sysseek = sysseek(BIG, 5_000_000_000, SEEK_SET);
 unless (! $r && defined $sysseek && $sysseek == 5_000_000_000) {
     $sysseek = 'undef' unless defined $sysseek;
@@ -210,7 +205,7 @@ print "ok 3\n";
 fail unless -f $big0;
 print "ok 4\n";
 
-sysopen(BIG, $big0, O_RDONLY) or do { warn "sysopen failed: $!\n"; bye };
+sysopen(BIG, $big0, O_RDONLY) or die "sysopen failed: $!";
 
 offset('sysseek(BIG, 4_500_000_000, SEEK_SET)', 4_500_000_000);
 print "ok 5\n";
@@ -262,8 +257,6 @@ fail unless $zero eq "\0\0\0";
 print "ok 17\n";
 
 explain() if $fail;
-
-bye(); # does the necessary cleanup
 
 END {
     # unlink may fail if applied directly to a large file
