@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlpolicy - Various and sundry policies and commitments related to the perl core
+perlpolicy - Various and sundry policies and commitments related to the Perl core
 
 =head1 DESCRIPTION
 
@@ -168,12 +168,12 @@ From time to time, we may mark language constructs and features which we
 consider to have been mistakes as B<discouraged>.  Discouraged features
 aren't candidates for removal in the next major release series, but
 we may later deprecate them if they're found to stand in the way of a
-significant improvement to the core.
+significant improvement to the Perl core.
 
 =item removed
 
 Once a feature, construct or module has been marked as deprecated for a
-stable release cycle, we may remove it from the core.  Unsurprisingly,
+stable release cycle, we may remove it from the Perl core.  Unsurprisingly,
 we say we've B<removed> these things.
 
 =back
@@ -284,7 +284,7 @@ the heart of Perl itself, is a joint project on the part of all of us.
 From time to time, a script, module, or set of modules (hereafter referred
 to simply as a "module") will prove so widely useful and/or so integral to
 the correct functioning of Perl itself that it should be distributed with
-Perl core.  This should never be done without the author's explicit
+the Perl core.  This should never be done without the author's explicit
 consent, and a clear recognition on all parts that this means the module
 is being distributed under the same terms as Perl itself.  A module author
 should realize that inclusion of a module into the Perl core will
@@ -301,7 +301,7 @@ gives up their ownership of it.  In particular:
 
 =item *
 
-The version of the module in the core should still be considered the
+The version of the module in the Perl core should still be considered the
 work of the original author.  All patches, bug reports, and so
 forth should be fed back to them.  Their development directions
 should be respected whenever possible.
@@ -340,11 +340,11 @@ As a last resort, however:
 If the author's vision of the future of their module is sufficiently
 different from the vision of the pumpkin holder and perl5-porters as a
 whole so as to cause serious problems for Perl, the pumpkin holder may
-choose to formally fork the version of the module in the core from the
+choose to formally fork the version of the module in the Perl core from the
 one maintained by the author.  This should not be done lightly and
 should B<always> if at all possible be done only after direct input
 from Larry.  If this is done, it must then be made explicit in the
-module as distributed with Perl core that it is a forked version and
+module as distributed with the Perl core that it is a forked version and
 that while it is based on the original author's work, it is no longer
 maintained by them.  This must be noted in both the documentation and
 in the comments in the source of the module.
