@@ -763,8 +763,9 @@ S_cl_and(struct regnode_charclass_class *cl,
     PERL_ARGS_ASSERT_CL_AND;
 
     assert(and_with->type == ANYOF);
-    if (!(and_with->flags & ANYOF_CLASS)
-	&& !(cl->flags & ANYOF_CLASS)
+
+    if (!(ANYOF_CLASS_TEST_ANY_SET(and_with))
+	&& !(ANYOF_CLASS_TEST_ANY_SET(cl))
 	&& (and_with->flags & ANYOF_LOCALE) == (cl->flags & ANYOF_LOCALE)
 	&& !(and_with->flags & ANYOF_FOLD)
 	&& !(cl->flags & ANYOF_FOLD)) {
@@ -837,7 +838,7 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
 	    /* OR char bitmap and class bitmap separately */
 	    for (i = 0; i < ANYOF_BITMAP_SIZE; i++)
 		cl->bitmap[i] |= or_with->bitmap[i];
-	    if (or_with->flags & ANYOF_CLASS) {
+	    if (ANYOF_CLASS_TEST_ANY_SET(or_with)) {
 		for (i = 0; i < ANYOF_CLASSBITMAP_SIZE; i++)
 		    cl->classflags[i] |= or_with->classflags[i];
 		cl->flags |= ANYOF_CLASS;
