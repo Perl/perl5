@@ -3460,6 +3460,8 @@ ext/SDBM_File/typemap		SDBM extension interface types
 ext/Socket/Makefile.PL		Socket extension makefile writer
 ext/Socket/Socket.pm		Socket extension Perl module
 ext/Socket/Socket.xs		Socket extension external subroutines
+ext/Socket/t/getaddrinfo.t	See if Socket::getaddrinfo works
+ext/Socket/t/getnameinfo.t	See if Socket::getnameinfo works
 ext/Socket/t/socketpair.t	See if socketpair works
 ext/Socket/t/Socket.t		See if Socket works
 ext/Sys-Hostname/Hostname.pm	Sys::Hostname extension Perl module
