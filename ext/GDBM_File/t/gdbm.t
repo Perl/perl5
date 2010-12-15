@@ -13,34 +13,32 @@ BEGIN {
 use strict;
 use warnings;
 
-
+use Test::More tests => 81;
 use GDBM_File;
-
-print "1..80\n";
 
 unlink <Op.dbmx*>;
 
 umask(0);
 my %h ;
-print (tie(%h,'GDBM_File','Op.dbmx', &GDBM_WRCREAT, 0640) ? "ok 1\n" : "not ok 1\n");
+isa_ok(tie(%h, 'GDBM_File', 'Op.dbmx', GDBM_WRCREAT, 0640), 'GDBM_File');
 
 my $Dfile = "Op.dbmx.pag";
 if (! -e $Dfile) {
 	($Dfile) = <Op.dbmx*>;
 }
-if ($^O eq 'amigaos' || $^O eq 'os2' || $^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'dos' || $^O eq 'cygwin') {
-    print "ok 2 # Skipped: different file permission semantics\n";
-}
-else {
+SKIP: {
+    skip " different file permission semantics on $^O", 1
+	if $^O eq 'amigaos' || $^O eq 'os2' || $^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'dos' || $^O eq 'cygwin';
+
     my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
      $blksize,$blocks) = stat($Dfile);
-    print (($mode & 0777) == 0640 ? "ok 2\n" : "not ok 2\n");
+    is($mode & 0777, 0640);
 }
 my $i = 0;
 while (my ($key,$value) = each(%h)) {
     $i++;
 }
-print (!$i ? "ok 3\n" : "not ok 3\n");
+is($i, 0);
 
 $h{'goner1'} = 'snork';
 
@@ -62,7 +60,7 @@ $h{'goner2'} = 'snork';
 delete $h{'goner2'};
 
 untie(%h);
-print (tie(%h,'GDBM_File','Op.dbmx', &GDBM_WRCREAT, 0640) ? "ok 4\n" : "not ok 4\n");
+isa_ok(tie(%h, 'GDBM_File', 'Op.dbmx', GDBM_WRCREAT, 0640), 'GDBM_File');
 
 $h{'j'} = 'J';
 $h{'k'} = 'K';
@@ -90,7 +88,8 @@ delete $h{'goner3'};
 my @keys = keys(%h);
 my @values = values(%h);
 
-if ($#keys == 29 && $#values == 29) {print "ok 5\n";} else {print "not ok 5\n";}
+is($#keys, 29);
+is($#values, 29);
 
 while (my ($key,$value) = each(%h)) {
     if ($key eq $keys[$i] && $value eq $values[$i] && $key eq lc($value)) {
@@ -99,42 +98,32 @@ while (my ($key,$value) = each(%h)) {
     }
 }
 
-if ($i == 30) {print "ok 6\n";} else {print "not ok 6\n";}
+is($i, 30);
 
 @keys = ('blurfl', keys(%h), 'dyick');
-if ($#keys == 31) {print "ok 7\n";} else {print "not ok 7\n";}
+is($#keys, 31);
 
 $h{'foo'} = '';
 $h{''} = 'bar';
 
-# check cache overflow and numeric keys and contents
 my $ok = 1;
 for ($i = 1; $i < 200; $i++) { $h{$i + 0} = $i + 0; }
 for ($i = 1; $i < 200; $i++) { $ok = 0 unless $h{$i} == $i; }
-print ($ok ? "ok 8\n" : "not ok 8\n");
+is($ok, 1, 'check cache overflow and numeric keys and contents');
 
 my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
    $blksize,$blocks) = stat($Dfile);
-print ($size > 0 ? "ok 9\n" : "not ok 9\n");
+cmp_ok($size, '>', 0);
 
 @h{0..200} = 200..400;
 my @foo = @h{0..200};
-print join(':',200..400) eq join(':',@foo) ? "ok 10\n" : "not ok 10\n";
+is(join(':',200..400), join(':',@foo));
 
-print ($h{'foo'} eq '' ? "ok 11\n" : "not ok 11\n");
-print ($h{''} eq 'bar' ? "ok 12\n" : "not ok 12\n");
+is($h{'foo'}, '');
+is($h{''}, 'bar');
 
 untie %h;
 unlink 'Op.dbmx.dir', $Dfile;
-
-sub ok
-{
-    my $no = shift ;
-    my $result = shift ;
-
-    print "not " unless $result ;
-    print "ok $no\n" ;
-}
 
 {
    # sub-class test
@@ -184,26 +173,26 @@ EOM
     unlink <dbhash.tmp*> ;
 
     eval 'use SubDB ; ';
-    main::ok(13, $@ eq "") ;
+    main::is($@, "");
     my %h ;
     my $X ;
     eval '
 	$X = tie(%h, "SubDB","dbhash.tmp", &GDBM_WRCREAT, 0640 );
 	' ;
 
-    main::ok(14, $@ eq "") ;
+    main::is($@, "");
 
     my $ret = eval '$h{"fred"} = 3 ; return $h{"fred"} ' ;
-    main::ok(15, $@ eq "") ;
-    main::ok(16, $ret == 5) ;
+    main::is($@, "");
+    main::is($ret, 5);
 
     $ret = eval ' &GDBM_WRCREAT eq &main::GDBM_WRCREAT ' ;
-    main::ok(17, $@ eq "" ) ;
-    main::ok(18, $ret == 1) ;
+    main::is($@, "");
+    main::is($ret, 1);
 
     $ret = eval '$X->A_new_method("fred") ' ;
-    main::ok(19, $@ eq "") ;
-    main::ok(20, $ret eq "[[5]]") ;
+    main::is($@, "");
+    main::is($ret, "[[5]]");
 
     undef $X;
     untie(%h);
@@ -226,7 +215,8 @@ EOM
    }
    
    unlink <Op.dbmx*>;
-   ok(21, $db = tie(%h, 'GDBM_File','Op.dbmx', &GDBM_WRCREAT, 0640)) ;
+   $db = tie %h, 'GDBM_File', 'Op.dbmx', GDBM_WRCREAT, 0640;
+   isa_ok($db, 'GDBM_File');
 
    $db->filter_fetch_key   (sub { $fetch_key = $_ }) ;
    $db->filter_store_key   (sub { $store_key = $_ }) ;
@@ -237,17 +227,17 @@ EOM
 
    $h{"fred"} = "joe" ;
    #                   fk   sk     fv   sv
-   ok(22, checkOutput( "", "fred", "", "joe")) ;
+   ok(checkOutput("", "fred", "", "joe"));
 
    ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4 ;
-   ok(23, $h{"fred"} eq "joe");
+   is($h{"fred"}, "joe");
    #                   fk    sk     fv    sv
-   ok(24, checkOutput( "", "fred", "joe", "")) ;
+   ok(checkOutput("", "fred", "joe", ""));
 
    ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4 ;
-   ok(25, $db->FIRSTKEY() eq "fred") ;
+   is($db->FIRSTKEY(), "fred");
    #                    fk     sk  fv  sv
-   ok(26, checkOutput( "fred", "", "", "")) ;
+   ok(checkOutput("fred", "", "", ""));
 
    # replace the filters, but remember the previous set
    my ($old_fk) = $db->filter_fetch_key   
@@ -262,17 +252,17 @@ EOM
    ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4 ;
    $h{"Fred"} = "Joe" ;
    #                   fk   sk     fv    sv
-   ok(27, checkOutput( "", "fred", "", "Jxe")) ;
+   ok(checkOutput("", "fred", "", "Jxe"));
 
    ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4 ;
-   ok(28, $h{"Fred"} eq "[Jxe]");
+   is($h{"Fred"}, "[Jxe]");
    #                   fk   sk     fv    sv
-   ok(29, checkOutput( "", "fred", "[Jxe]", "")) ;
+   ok(checkOutput("", "fred", "[Jxe]", ""));
 
    ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4 ;
-   ok(30, $db->FIRSTKEY() eq "FRED") ;
+   is($db->FIRSTKEY(), "FRED");
    #                   fk   sk     fv    sv
-   ok(31, checkOutput( "FRED", "", "", "")) ;
+   ok(checkOutput("FRED", "", "", ""));
 
    # put the original filters back
    $db->filter_fetch_key   ($old_fk);
@@ -282,15 +272,15 @@ EOM
 
    ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4 ;
    $h{"fred"} = "joe" ;
-   ok(32, checkOutput( "", "fred", "", "joe")) ;
+   ok(checkOutput("", "fred", "", "joe"));
 
    ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4 ;
-   ok(33, $h{"fred"} eq "joe");
-   ok(34, checkOutput( "", "fred", "joe", "")) ;
+   is($h{"fred"}, "joe");
+   ok(checkOutput("", "fred", "joe", ""));
 
    ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4 ;
-   ok(35, $db->FIRSTKEY() eq "fred") ;
-   ok(36, checkOutput( "fred", "", "", "")) ;
+   is($db->FIRSTKEY(), "fred");
+   ok(checkOutput("fred", "", "", ""));
 
    # delete the filters
    $db->filter_fetch_key   (undef);
@@ -300,15 +290,15 @@ EOM
 
    ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4 ;
    $h{"fred"} = "joe" ;
-   ok(37, checkOutput( "", "", "", "")) ;
+   ok(checkOutput("", "", "", ""));
 
    ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4 ;
-   ok(38, $h{"fred"} eq "joe");
-   ok(39, checkOutput( "", "", "", "")) ;
+   is($h{"fred"}, "joe");
+   ok(checkOutput("", "", "", ""));
 
    ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4 ;
-   ok(40, $db->FIRSTKEY() eq "fred") ;
-   ok(41, checkOutput( "", "", "", "")) ;
+   is($db->FIRSTKEY(), "fred");
+   ok(checkOutput("", "", "", ""));
 
    undef $db ;
    untie %h;
@@ -321,7 +311,8 @@ EOM
     my (%h, $db) ;
 
     unlink <Op.dbmx*>;
-    ok(42, $db = tie(%h, 'GDBM_File','Op.dbmx', &GDBM_WRCREAT, 0640)) ;
+    $db = tie %h, 'GDBM_File','Op.dbmx', GDBM_WRCREAT, 0640;
+    isa_ok($db, 'GDBM_File');
 
     my %result = () ;
 
@@ -345,32 +336,32 @@ EOM
     $_ = "original" ;
 
     $h{"fred"} = "joe" ;
-    ok(43, $result{"store key"} eq "store key - 1: [fred]");
-    ok(44, $result{"store value"} eq "store value - 1: [joe]");
-    ok(45, !defined $result{"fetch key"} );
-    ok(46, !defined $result{"fetch value"} );
-    ok(47, $_ eq "original") ;
+    is($result{"store key"}, "store key - 1: [fred]");
+    is($result{"store value"}, "store value - 1: [joe]");
+    is($result{"fetch key"}, undef);
+    is($result{"fetch value"}, undef);
+    is($_, "original");
 
-    ok(48, $db->FIRSTKEY() eq "fred") ;
-    ok(49, $result{"store key"} eq "store key - 1: [fred]");
-    ok(50, $result{"store value"} eq "store value - 1: [joe]");
-    ok(51, $result{"fetch key"} eq "fetch key - 1: [fred]");
-    ok(52, ! defined $result{"fetch value"} );
-    ok(53, $_ eq "original") ;
+    is($db->FIRSTKEY(), "fred");
+    is($result{"store key"}, "store key - 1: [fred]");
+    is($result{"store value"}, "store value - 1: [joe]");
+    is($result{"fetch key"}, "fetch key - 1: [fred]");
+    is($result{"fetch value"}, undef);
+    is($_, "original");
 
     $h{"jim"}  = "john" ;
-    ok(54, $result{"store key"} eq "store key - 2: [fred jim]");
-    ok(55, $result{"store value"} eq "store value - 2: [joe john]");
-    ok(56, $result{"fetch key"} eq "fetch key - 1: [fred]");
-    ok(57, ! defined $result{"fetch value"} );
-    ok(58, $_ eq "original") ;
+    is($result{"store key"}, "store key - 2: [fred jim]");
+    is($result{"store value"}, "store value - 2: [joe john]");
+    is($result{"fetch key"}, "fetch key - 1: [fred]");
+    is($result{"fetch value"}, undef);
+    is($_, "original");
 
-    ok(59, $h{"fred"} eq "joe");
-    ok(60, $result{"store key"} eq "store key - 3: [fred jim fred]");
-    ok(61, $result{"store value"} eq "store value - 2: [joe john]");
-    ok(62, $result{"fetch key"} eq "fetch key - 1: [fred]");
-    ok(63, $result{"fetch value"} eq "fetch value - 1: [joe]");
-    ok(64, $_ eq "original") ;
+    is($h{"fred"}, "joe");
+    is($result{"store key"}, "store key - 3: [fred jim fred]");
+    is($result{"store value"}, "store value - 2: [joe john]");
+    is($result{"fetch key"}, "fetch key - 1: [fred]");
+    is($result{"fetch value"}, "fetch value - 1: [joe]");
+    is($_, "original");
 
     undef $db ;
     untie %h;
@@ -382,12 +373,13 @@ EOM
    my (%h, $db) ;
    unlink <Op.dbmx*>;
 
-   ok(65, $db = tie(%h, 'GDBM_File','Op.dbmx', &GDBM_WRCREAT, 0640)) ;
+   $db = tie %h, 'GDBM_File','Op.dbmx', GDBM_WRCREAT, 0640;
+   isa_ok($db, 'GDBM_File');
 
    $db->filter_store_key (sub { $_ = $h{$_} }) ;
 
    eval '$h{1} = 1234' ;
-   ok(66, $@ =~ /^recursion detected in filter_store_key at/ );
+   like($@, qr/^recursion detected in filter_store_key at/);
    
    undef $db ;
    untie %h;
@@ -404,10 +396,10 @@ EOM
     my %h ;
     my $a = "";
     local $SIG{__WARN__} = sub {$a = $_[0]} ;
-    
-    ok(67, tie(%h, 'GDBM_File','Op.dbmx', &GDBM_WRCREAT, 0640));
+
+    isa_ok(tie(%h, 'GDBM_File', 'Op.dbmx', GDBM_WRCREAT, 0640), 'GDBM_File');
     $h{ABC} = undef;
-    ok(68, $a eq "") ;
+    is($a, "");
     untie %h;
     unlink <Op.dbmx*>;
 }
@@ -422,27 +414,28 @@ EOM
     unlink <Op.dbmx*>;
     my $bad_key = 0 ;
     my %h = () ;
-    ok(69, my $db = tie(%h, 'GDBM_File','Op.dbmx', &GDBM_WRCREAT, 0640));
+    my $db = tie %h, 'GDBM_File', 'Op.dbmx', GDBM_WRCREAT, 0640;
+    isa_ok($db, 'GDBM_File');
     $db->filter_fetch_key (sub { $_ =~ s/^Beta_/Alpha_/ if defined $_}) ;
     $db->filter_store_key (sub { $bad_key = 1 if /^Beta_/ ; $_ =~ s/^Alpha_/Beta_/}) ;
 
     $h{'Alpha_ABC'} = 2 ;
     $h{'Alpha_DEF'} = 5 ;
 
-    ok(70, $h{'Alpha_ABC'} == 2);
-    ok(71, $h{'Alpha_DEF'} == 5);
+    is($h{'Alpha_ABC'}, 2);
+    is($h{'Alpha_DEF'}, 5);
 
     my ($k, $v) = ("","");
     while (($k, $v) = each %h) {}
-    ok(72, $bad_key == 0);
+    is($bad_key, 0);
 
     $bad_key = 0 ;
     foreach $k (keys %h) {}
-    ok(73, $bad_key == 0);
+    is($bad_key, 0);
 
     $bad_key = 0 ;
     foreach $v (values %h) {}
-    ok(74, $bad_key == 0);
+    is($bad_key, 0);
 
     undef $db ;
     untie %h ;
@@ -455,7 +448,9 @@ EOM
    my %h ;
    unlink <Op.dbmx*>;
 
-   ok(75, my $db = tie(%h, 'GDBM_File','Op.dbmx', &GDBM_WRCREAT, 0640));
+   my $db = tie %h, 'GDBM_File', 'Op.dbmx', GDBM_WRCREAT, 0640;
+   isa_ok($db, 'GDBM_File');
+
 
    $db->filter_fetch_key   (sub { }) ;
    $db->filter_store_key   (sub { }) ;
@@ -465,10 +460,10 @@ EOM
    $_ = "original" ;
 
    $h{"fred"} = "joe" ;
-   ok(76, $h{"fred"} eq "joe");
+   is($h{"fred"}, "joe");
 
    eval { my @r= grep { $h{$_} } (1, 2, 3) };
-   ok (77, ! $@);
+   is($@, '');
 
 
    # delete the filters
@@ -479,15 +474,14 @@ EOM
 
    $h{"fred"} = "joe" ;
 
-   ok(78, $h{"fred"} eq "joe");
+   is($h{"fred"}, "joe");
 
-   ok(79, $db->FIRSTKEY() eq "fred") ;
+   is($db->FIRSTKEY(), "fred");
    
    eval { my @r= grep { $h{$_} } (1, 2, 3) };
-   ok (80, ! $@);
+   is($@, '');
 
    undef $db ;
    untie %h;
    unlink <Op.dbmx*>;
 }
-exit ;
