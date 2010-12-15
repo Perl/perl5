@@ -8,11 +8,9 @@ BEGIN {
         print "1..0\n";
         exit 0;
     }
-    print "1..10\n";
 }
-END {
-    print "not ok 1\n" unless $loaded;
-}
+
+use Test::More tests => 11;
 
 BEGIN {
     *CORE::GLOBAL::glob = sub { "Just another Perl hacker," };
@@ -27,62 +25,49 @@ EOMessage
     }
 }
 
-use File::Glob ':globally';
-$loaded = 1;
-print "ok 1\n";
+BEGIN {
+    use_ok('File::Glob', ':globally');
+}
 
 $_ = "op/*.t";
 my @r = glob;
-print "not " if $_ ne ("op/*.t");
-print "ok 2\n";
+is($_, "op/*.t");
 
-print "# |@r|\nnot " if @r < 3;
-print "ok 3\n";
+cmp_ok(scalar @r, '>=', 3);
 
-# check if <*/*> works
 @r = <*/*.t>;
 # at least t/global.t t/basic.t, t/taint.t
-print "not " if @r < 3;
-print "ok 4\n";
+cmp_ok(scalar @r, '>=', 3, 'check if <*/*> works');
 my $r = scalar @r;
 
-# check if scalar context works
 @r = ();
 while (defined($_ = <*/*.t>)) {
   #print "# $_\n";
   push @r, $_;
 }
-print "not " if @r != $r;
-print "ok 5\n";
+is(scalar @r, $r, 'check if scalar context works');
 
-# check if list context works
 @r = ();
 for (<*/*.t>) {
   #print "# $_\n";
   push @r, $_;
 }
-print "not " if @r != $r;
-print "ok 6\n";
+is(scalar @r, $r, 'check if list context works');
 
-# test if implicit assign to $_ in while() works
 @r = ();
 while (<*/*.t>) {
   #print "# $_\n";
   push @r, $_;
 }
-print "not " if @r != $r;
-print "ok 7\n";
+is(scalar @r, $r, 'implicit assign to $_ in while()');
 
-# test if explicit glob() gets assign magic too
 my @s = ();
 while (glob('*/*.t')) {
     #print "# $_\n";
     push @s, $_;
 }
-print "not " if "@r" ne "@s";
-print "ok 8\n";
+is("@r", "@s", 'explicit glob() gets assign magic too');
 
-# how about in a different package, like?
 package Foo;
 use File::Glob ':globally';
 @s = ();
@@ -90,8 +75,7 @@ while (glob('*/*.t')) {
     #print "# $_\n";
     push @s, $_;
 }
-print "not " if "@r" ne "@s";
-print "ok 9\n";
+main::is("@r", "@s", 'in a different package');
 
 # test if different glob ops maintain independent contexts
 @s = ();
@@ -105,5 +89,6 @@ while (<*/*.t>) {
   }
   #print " >\n";
 }
-print "not " if "@r" ne "@s" or not $i;
-print "ok 10\n";
+
+main::is("@r", "@s", 'different glob ops maintain independent contexts');
+main::isnt($i, 0, 'different glob ops maintain independent contexts');
