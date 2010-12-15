@@ -859,25 +859,6 @@ cpan/encoding-warnings/t/1-warning.t	tests for encoding::warnings
 cpan/encoding-warnings/t/2-fatal.t	tests for encoding::warnings
 cpan/encoding-warnings/t/3-normal.t	tests for encoding::warnings
 cpan/encoding-warnings/t/4-lexical.t	tests for encoding::warnings
-cpan/ExtUtils-CBuilder/Changes					Changes for ExtUtils::CBuilder
-cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Base.pm		Base class for ExtUtils::CBuilder methods
-cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/aix.pm	CBuilder methods for AIX
-cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/cygwin.pm	CBuilder methods for cygwin
-cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/darwin.pm	CBuilder methods for darwin
-cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/dec_osf.pm	CBuilder methods for OSF
-cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/os2.pm	CBuilder methods for OS/2
-cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/Unix.pm	CBuilder methods for Unix
-cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/VMS.pm	CBuilder methods for VMS
-cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/Windows/BCC.pm	CBuilder methods for Windows
-cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/Windows/GCC.pm	CBuilder methods for Windows
-cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/Windows/MSVC.pm	CBuilder methods for Windows
-cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/Windows.pm	CBuilder methods for Windows
-cpan/ExtUtils-CBuilder/lib/ExtUtils/CBuilder.pm			Compile and link C code for Perl modules
-cpan/ExtUtils-CBuilder/t/00-have-compiler.t			ExtUtils::CBuilder tests
-cpan/ExtUtils-CBuilder/t/01-basic.t				tests for ExtUtils::CBuilder
-cpan/ExtUtils-CBuilder/t/02-link.t				tests for ExtUtils::CBuilder
-cpan/ExtUtils-CBuilder/t/03-cplusplus.t				tests for ExtUtils::CBuilder
-cpan/ExtUtils-CBuilder/t/04-base.t				tests for ExtUtils::CBuilder
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant/Base.pm		generate XS code to import C header constants
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant.pm			generate XS code to import C header constants
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant/ProxySubs.pm	generate XS code for proxy constants
@@ -2712,6 +2693,25 @@ dist/Dumpvalue/t/Dumpvalue.t	See if Dumpvalue works
 dist/Env/lib/Env.pm		Map environment into ordinary variables
 dist/Env/t/array.t		See if Env works for arrays
 dist/Env/t/env.t		See if Env works
+dist/ExtUtils-CBuilder/Changes					Changes for ExtUtils::CBuilder
+dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Base.pm		Base class for ExtUtils::CBuilder methods
+dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/aix.pm	CBuilder methods for AIX
+dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/cygwin.pm	CBuilder methods for cygwin
+dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/darwin.pm	CBuilder methods for darwin
+dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/dec_osf.pm	CBuilder methods for OSF
+dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/os2.pm	CBuilder methods for OS/2
+dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/Unix.pm	CBuilder methods for Unix
+dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/VMS.pm	CBuilder methods for VMS
+dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/Windows/BCC.pm	CBuilder methods for Windows
+dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/Windows/GCC.pm	CBuilder methods for Windows
+dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/Windows/MSVC.pm	CBuilder methods for Windows
+dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/Windows.pm	CBuilder methods for Windows
+dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder.pm			Compile and link C code for Perl modules
+dist/ExtUtils-CBuilder/t/00-have-compiler.t			ExtUtils::CBuilder tests
+dist/ExtUtils-CBuilder/t/01-basic.t				tests for ExtUtils::CBuilder
+dist/ExtUtils-CBuilder/t/02-link.t				tests for ExtUtils::CBuilder
+dist/ExtUtils-CBuilder/t/03-cplusplus.t				tests for ExtUtils::CBuilder
+dist/ExtUtils-CBuilder/t/04-base.t				tests for ExtUtils::CBuilder
 dist/ExtUtils-Command/lib/ExtUtils/Command.pm	Utilities for Make on non-UNIX platforms
 dist/ExtUtils-Command/t/cp.t			See if ExtUtils::Command works
 dist/ExtUtils-Command/t/eu_command.t		See if ExtUtils::Command works
