@@ -8200,13 +8200,13 @@ ANYOF_##NAME:                                           \
     else if (UNI_SEMANTICS) {                           \
         for (value = 0; value < 256; value++) {         \
             if (TEST_8) stored +=                       \
-                      S_set_regclass_bit(aTHX_ pRExC_state, ret, value); \
+                      S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value); \
         }                                               \
     }                                                   \
     else {                                              \
         for (value = 0; value < 128; value++) {         \
             if (TEST_7) stored +=                       \
-                       S_set_regclass_bit(aTHX_ pRExC_state, ret, UNI_TO_NATIVE(value)); \
+                       S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) UNI_TO_NATIVE(value)); \
         }                                               \
     }                                                   \
     yesno = '+';                                        \
@@ -8217,16 +8217,16 @@ case ANYOF_N##NAME:                                     \
     else if (UNI_SEMANTICS) {                           \
         for (value = 0; value < 256; value++) {         \
             if (! TEST_8) stored +=                     \
-                        S_set_regclass_bit(aTHX_ pRExC_state, ret, value); \
+                        S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value); \
         }                                               \
     }                                                   \
     else {                                              \
         for (value = 0; value < 128; value++) {         \
             if (! TEST_7) stored +=                     \
-                        S_set_regclass_bit(aTHX_ pRExC_state, ret, value); \
+                        S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value); \
         }                                               \
         for (value = 128; value < 256; value++) {         \
-                        S_set_regclass_bit(aTHX_ pRExC_state, ret, value); \
+                        S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value); \
         }                                               \
     }                                                   \
     yesno = '!';                                        \
@@ -8629,7 +8629,7 @@ parseit:
 
 		    if (prevvalue < 256) {
 			stored +=
-                         S_set_regclass_bit(aTHX_ pRExC_state, ret, prevvalue);
+                         S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) prevvalue);
 			stored +=
                          S_set_regclass_bit(aTHX_ pRExC_state, ret, '-');
 		    }
@@ -8683,7 +8683,7 @@ parseit:
 		    else {
 			for (value = 0; value < 128; value++)
 			    stored +=
-                              S_set_regclass_bit(aTHX_ pRExC_state, ret, ASCII_TO_NATIVE(value));
+                              S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) ASCII_TO_NATIVE(value));
 		    }
 		    yesno = '+';
 		    what = NULL;	/* Doesn't match outside ascii, so
@@ -8695,7 +8695,7 @@ parseit:
 		    else {
 			for (value = 128; value < 256; value++)
 			    stored +=
-                              S_set_regclass_bit(aTHX_ pRExC_state, ret, ASCII_TO_NATIVE(value));
+                              S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) ASCII_TO_NATIVE(value));
 		    }
 		    yesno = '!';
 		    what = "ASCII";
@@ -8707,7 +8707,7 @@ parseit:
 			/* consecutive digits assumed */
 			for (value = '0'; value <= '9'; value++)
 			    stored +=
-                              S_set_regclass_bit(aTHX_ pRExC_state, ret, value);
+                              S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value);
 		    }
 		    yesno = '+';
 		    what = POSIX_CC_UNI_NAME("Digit");
@@ -8719,10 +8719,10 @@ parseit:
 			/* consecutive digits assumed */
 			for (value = 0; value < '0'; value++)
 			    stored +=
-                              S_set_regclass_bit(aTHX_ pRExC_state, ret, value);
+                              S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value);
 			for (value = '9' + 1; value < 256; value++)
 			    stored +=
-                              S_set_regclass_bit(aTHX_ pRExC_state, ret, value);
+                              S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value);
 		    }
 		    yesno = '!';
 		    what = POSIX_CC_UNI_NAME("Digit");
@@ -8792,20 +8792,20 @@ parseit:
 			for (i = prevvalue; i <= ceilvalue; i++)
 			    if (isLOWER(i) && !ANYOF_BITMAP_TEST(ret,i)) {
 				stored +=
-                                  S_set_regclass_bit(aTHX_ pRExC_state, ret, i);
+                                  S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) i);
 			    }
 		    } else {
 			for (i = prevvalue; i <= ceilvalue; i++)
 			    if (isUPPER(i) && !ANYOF_BITMAP_TEST(ret,i)) {
 				stored +=
-                                  S_set_regclass_bit(aTHX_ pRExC_state, ret, i);
+                                  S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) i);
 			    }
 		    }
 		}
 		else
 #endif
 		      for (i = prevvalue; i <= ceilvalue; i++) {
-			stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, i);
+			stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) i);
 	              }
 	  }
 	  if (value > 255 || UTF) {
