@@ -72,7 +72,6 @@ while (<$fh>) {
 
     # Perl only deals with C and F folds
     next if $fold_type ne 'C' and $fold_type ne 'F';
-    next if $fold_type ne 'C';  # And for now, just single-char folds. XXX
 
     # Get each code point in the range that participates in this line's fold.
     # The hash has keys of each code point in the range, and values of what it
