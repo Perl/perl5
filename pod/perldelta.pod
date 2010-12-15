@@ -233,6 +233,10 @@ accepts all POSIX filenames.
 
 =item *
 
+C<Env> has been upgraded from version 1.01 to 1.02.
+
+=item *
+
 C<ExtUtils::CBuilder> has been upgraded from 0.2703 to 0.2802
 
 =item *
