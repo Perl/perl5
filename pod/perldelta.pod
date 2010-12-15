@@ -226,6 +226,10 @@ XXX
 
 =item *
 
+C<Devel::SelfStubber> has been upgraded from version 1.04 to 1.05.
+
+=item *
+
 C<Digest::SHA> has been upgraded from 5.48 to 5.50
 
 shasum now more closely mimics sha1sum/md5sum and Addfile
