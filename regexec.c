@@ -6438,88 +6438,77 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 			    }
 			}
 		    }
-		    if (!match) {
+		    if (!match) { /* See if the folded version matches */
 		        U8 folded[UTF8_MAXBYTES_CASE+1];
-
-			/* See if the folded version matches */
+			SV** listp;
 			STRLEN foldlen;
+
 			to_utf8_fold(utf8_p, folded, &foldlen);
-			    {
 
-				SV** listp;
+			/* Consider "k" =~ /[K]/i.  The line above would have
+			 * just folded the 'k' to itself, and that isn't going
+			 * to match 'K'.  So we look through the closure of
+			 * everything that folds to 'k'.  That will find the
+			 * 'K'.  Initialize the list, if necessary */
+			if (! PL_utf8_foldclosures) {
 
-				/* Consider "k" =~ /[K]/i.  The line above
-				 * would have just folded the 'k' to itself,
-				 * and that isn't going to match 'K'.  So we
-				 * look through the closure of everything that
-				 * folds to 'k'.  That will find the 'K'.
-				 * Initialize the list, if necessary */
-				if (! PL_utf8_foldclosures) {
+			    /* If the folds haven't been read in, call a fold
+			     * function to force that */
+			    if (! PL_utf8_tofold) {
+				U8 dummy[UTF8_MAXBYTES+1];
+				STRLEN dummy_len;
+				to_utf8_fold((U8*) "A", dummy, &dummy_len);
+			    }
+			    PL_utf8_foldclosures =
+				  _swash_inversion_hash(PL_utf8_tofold);
+			}
 
-				    /* If the folds haven't been read in, call a
-				    * fold function to force that */
-				    if (! PL_utf8_tofold) {
-					U8 dummy[UTF8_MAXBYTES+1];
-					STRLEN dummy_len;
-					to_utf8_fold((U8*) "A",
-							    dummy, &dummy_len);
-				    }
-				    PL_utf8_foldclosures =
-					  _swash_inversion_hash(PL_utf8_tofold);
+			/* The data structure is a hash with the keys every
+			 * character that is folded to, like 'k', and the
+			 * values each an array of everything that folds to its
+			 * key.  e.g. [ 'k', 'K', KELVIN_SIGN ] */
+			if ((listp = hv_fetch(PL_utf8_foldclosures,
+				      (char *) folded, foldlen, FALSE)))
+			{
+			    AV* list = (AV*) *listp;
+			    IV i;
+			    for (i = 0; i <= av_len(list); i++) {
+				SV** try_p = av_fetch(list, i, FALSE);
+				char* try_c;
+				if (try_p == NULL) {
+				    Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
 				}
+				/* Don't have to worry about embeded nulls
+				 * since NULL isn't folded or foldable */
+				try_c = SvPVX(*try_p);
 
-				/* The data structure is a hash with the keys
-				 * every character that is folded to, like 'k',
-				 * and the values each an array of everything
-				 * that folds to its key.  e.g. [ 'k', 'K',
-				 * KELVIN_SIGN ] */
-				if ((listp = hv_fetch(PL_utf8_foldclosures,
-					      (char *) folded, foldlen, FALSE)))
+				/* The fold in a few cases  of an above Latin1
+				 * char is in the Latin1 range, and hence may
+				 * be in the bitmap */
+				if (UTF8_IS_INVARIANT(*try_c)
+				    && ANYOF_BITMAP_TEST(n,
+						    UNI_TO_NATIVE(*try_c)))
 				{
-				    AV* list = (AV*) *listp;
-				    IV i;
-				    for (i = 0; i <= av_len(list); i++) {
-					SV** try_p = av_fetch(list, i, FALSE);
-					char* try_c;
-					if (try_p == NULL) {
-					    Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
-					}
-					/* Don't have to worry about embeded
-					 * nulls since NULL isn't folded or
-					 * foldable */
-					try_c = SvPVX(*try_p);
-
-					/* The fold in a few cases  of an above Latin1 char
-					 * is in the Latin1 range, and hence may be in the
-					 * bitmap */
-					if (UTF8_IS_INVARIANT(*try_c)
-					    && ANYOF_BITMAP_TEST(n,
-							    UNI_TO_NATIVE(*try_c)))
-					{
-					    match = TRUE;
-					    break;
-					}
-					else if
-					    (UTF8_IS_DOWNGRADEABLE_START(*try_c)
-					     && ANYOF_BITMAP_TEST(n,
-					     UNI_TO_NATIVE(
-						TWO_BYTE_UTF8_TO_UNI(try_c[0],
-								     try_c[1]))))
-					{
-					   /* Since the fold comes from internally
-					    * generated data, we can safely assume it is
-					    * valid utf8 in the test above */
-					    match = TRUE;
-					    break;
-					} else if (swash_fetch(sw,
-								(U8*) try_c, 1))
-					{
-					    match = TRUE;
-					    break;
-					}
-				    }
+				    match = TRUE;
+				    break;
 				}
-                        }
+				else if
+				    (UTF8_IS_DOWNGRADEABLE_START(*try_c)
+				     && ANYOF_BITMAP_TEST(n, UNI_TO_NATIVE(
+						TWO_BYTE_UTF8_TO_UNI(try_c[0],
+								    try_c[1]))))
+				{
+				   /* Since the fold comes from internally
+				    * generated data, we can safely assume it
+				    * is valid utf8 in the test above */
+				    match = TRUE;
+				    break;
+				} else if (swash_fetch(sw, (U8*) try_c, 1)) {
+				    match = TRUE;
+				    break;
+				}
+			    }
+			}
 		    }
 		}
 
