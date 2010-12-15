@@ -1,54 +1,122 @@
+use strict;
+use warnings;
+
+# re/fold_grind.t has more complex tests, but doesn't test every fold
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require './test.pl';
 }
 
-use File::Spec;
+binmode *STDOUT, ":utf8";
 
+use File::Spec;
+our $TODO;
+
+plan("no_plan");
+
+# Read in the official case folding definitions.
 my $CF = File::Spec->catfile(File::Spec->catdir(File::Spec->updir,
 					       "lib", "unicore"),
 			    "CaseFolding.txt");
 
-use constant EBCDIC => ord 'A' == 193;
+die qq[$0: failed to open "$CF": $!\n] if ! open(my $fh, "<", $CF);
 
-if (open(CF, $CF)) {
-    my @CF;
+my @CF;
+my %reverse_fold;
+while (<$fh>) {
+    # Skip S since we are going for 'F'ull case folding.  I is obsolete starting
+    # with Unicode 3.2, but leaving it in does no harm, and allows backward
+    # compatibility
+    next unless my ($code, $type, $mapping, $name) = $_ =~
+            /^([0-9A-F]+); ([CFI]); ((?:[0-9A-F]+)(?: [0-9A-F]+)*); \# (.+)/;
 
-    while (<CF>) {
-	# Skip S since we are going for 'F'ull case folding.  I is obsolete starting
-	# with Unicode 3.2, but leaving it in does no harm, and allows backward
-	# compatibility
-        if (/^([0-9A-F]+); ([CFI]); ((?:[0-9A-F]+)(?: [0-9A-F]+)*); \# (.+)/) {
-	    next if EBCDIC && hex $1 < 0x100;
-	    push @CF, [$1, $2, $3, $4];
-	}
-    }
+    # Convert any 0-255 range chars to native.
+    $code = sprintf("%04X", ord_latin1_to_native(hex $code)) if hex $code < 0x100;
+    $mapping = join " ", map { $_ =
+                                sprintf("%04X", ord_latin1_to_native(hex $_)) }
+                                                            split / /, $mapping;
 
-    close(CF);
+    push @CF, [$code, $mapping, $type, $name];
 
-    die qq[$0: failed to find casefoldings from "$CF"\n] unless @CF;
-
-    print "1..", scalar @CF, "\n";
-
-    my $i = 0;
-    for my $cf (@CF) {
-	my ($code, $status, $mapping, $name) = @$cf;
-	$i++;
-	my $a = pack("U0U*", hex $code);
-	my $b = pack("U0U*", map { hex } split " ", $mapping);
-	my $t0 = ":$a:" =~ /:$a:/    ? 1 : 0;
-	my $t1 = ":$a:" =~ /:$a:/i   ? 1 : 0;
-	my $t2 = ":$a:" =~ /:[_$a]:/  ? 1 : 0; # Two chars in [] so doesn't get
-                                               # optimized to a non-charclass
-	my $t3 = ":$a:" =~ /:[_$a]:/i ? 1 : 0;
-	my $t4 = ":$a:" =~ /:$b:/i   ? 1 : 0;
-	my $t5 = ":$a:" =~ /:[_$b]:/i ? 1 : 0;
-	my $t6 = ":$b:" =~ /:$a:/i   ? 1 : 0;
-	my $t7 = ":$b:" =~ /:[_$a]:/i ? 1 : 0;
-	print $t0 && $t1 && $t2 && $t3 && $t4 && $t5 && $t6 && $t7 ?
-	    "ok $i \# - $code - $name - $mapping - $status\n" :
-	    "not ok $i \# - $code - $name - $mapping - $status - $t0 $t1 $t2 $t3 $t4 $t5 $t6 $t7\n";
-    }
-} else {
-    die qq[$0: failed to open "$CF": $!\n];
+    # Get the inverse fold for single-char mappings.
+    $reverse_fold{pack "U0U*", hex $mapping} = pack "U0U*", hex $code if $type ne 'F';
 }
+
+close($fh) or die "$0 Couldn't close $CF";
+
+foreach my $test_ref (@CF) {
+    my ($code, $mapping, $type, $name) = @$test_ref;
+    my $c = pack("U0U*", hex $code);
+    my $f = pack("U0U*", map { hex } split " ", $mapping);
+    my $f_length = length $f;
+    foreach my $test (
+            qq[":$c:" =~ /:$c:/],
+            qq[":$c:" =~ /:$c:/i],
+            qq[":$c:" =~ /:[_$c]:/], # Place two chars in [] so doesn't get
+                                     # optimized to a non-charclass
+            qq[":$c:" =~ /:[_$c]:/i],
+            qq[":$c:" =~ /:$f:/i],
+            qq[":$f:" =~ /:$c:/i],
+    ) {
+        ok eval $test, "$code - $name - $mapping - $type - $test";
+    }
+
+    # Certain tests weren't convenient to put in the list above since they are
+    # TODO's in multi-character folds.
+    if ($f_length == 1) {
+
+        # The qq loses the utf8ness of ":$f:".  These tests are not about
+        # finding bugs in utf8ness, so make sure it's utf8.
+        my $test = qq[my \$s = ":$f:"; utf8::upgrade(\$s); \$s =~ /:[_$c]:/i];
+        ok eval $test, "$code - $name - $mapping - $type - $test";
+        $test = qq[":$c:" =~ /:[_$f]:/i];
+        ok eval $test, "$code - $name - $mapping - $type - $test";
+    }
+    else {
+
+        # There are two classes of multi-char folds that don't pass.  For
+        # example,
+        #   ":ß:" =~ /:[_s]{2}:/i
+        #   ":ss:" =~ /:[_ß]:/i
+        #
+        # Some of the old tests for the second case happened to pass somewhat
+        # coincidentally.  But none would pass if changed to this.
+        #   ":SS:" =~ /:[_ß]:/i
+        #
+        # As the capital SS doesn't get folded.  When those pass, it means
+        # that the code has been changed to take into account folding in the
+        # string, and all should pass, capitalized or not.  So, what is done
+        # is to essentially upper-case the string for this class (but use the
+        # reverse fold not uc(), as that is more correct)
+        my $u;
+        for my $i (0 .. $f_length - 1) {
+            my $cur_char = substr($f, $i, 1);
+            $u .= $reverse_fold{$cur_char} || $cur_char;
+        }
+        my $test;
+
+        local $TODO = 'Multi-char fold in [character class]';
+
+        TODO: { # e.g., ":ß:" !~ /:[_s]:/i  # A multi-char fold should not
+                                            # match just one char
+            $test = qq[":$c:" !~ /:[_$f]:/i];
+            ok eval $test, "$code - $name - $mapping - $type - $test";
+        }
+        TODO: { # e.g., ":ß:" =~ /:[_s]{2}:/i
+            $test = qq[":$c:" =~ /:[_$f]{$f_length}:/i];
+            ok eval $test, "$code - $name - $mapping - $type - $test";
+        }
+        TODO: { # e.g., ":SS:" =~ /:[_ß]:/i
+            $test = qq[ my \$s = ":$u:"; utf8::upgrade(\$s); \$s =~ /:[_$c]:/i];
+            ok eval $test, "$code - $name - $mapping - $type - $test";
+        }
+    }
+}
+
+my $num_tests = curr_test() - 1;
+
+die qq[$0: failed to find casefoldings from "$CF"\n] unless $num_tests > 0;
+
+plan($num_tests);
