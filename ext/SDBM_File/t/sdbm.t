@@ -140,9 +140,6 @@ print ($h{''} eq 'bar' ? "ok 12\n" : "not ok 12\n");
 
    package Another ;
 
-   use strict ;
-   use warnings ;
-
    open(FILE, ">SubDB.pm") or die "Cannot open SubDB.pm: $!\n" ;
    print FILE <<'EOM' ;
 
@@ -217,8 +214,6 @@ unlink <Op_dbmx*>, $Dfile;
 
 {
    # DBM Filter tests
-   use strict ;
-   use warnings ;
    my (%h, $db) ;
    my ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4 ;
 
@@ -324,8 +319,6 @@ unlink <Op_dbmx*>, $Dfile;
 {    
     # DBM Filter with a closure
 
-    use strict ;
-     use warnings ;
     my (%h, $db) ;
 
     unlink <Op_dbmx*>;
@@ -387,8 +380,6 @@ unlink <Op_dbmx*>, $Dfile;
 
 {
    # DBM Filter recursion detection
-   use strict ;
-   use warnings ;
    my (%h, $db) ;
    unlink <Op_dbmx*>;
 
@@ -409,9 +400,6 @@ unlink <Op_dbmx*>, $Dfile;
     #
     # test that $hash{KEY} = undef doesn't produce the warning
     #     Use of uninitialized value in null operation 
-    use warnings ;
-    use strict ;
-    use SDBM_File ;
 
     unlink <Op_dbmx*>;
     my %h ;
@@ -432,10 +420,6 @@ unlink <Op_dbmx*>, $Dfile;
     # key in FETCH via a filter_fetch_key method we need to check that the
     # modified key doesn't get passed to NEXTKEY.
     # Also Test "keys" & "values" while we are at it.
-
-    use warnings ;
-    use strict ;
-    use SDBM_File ;
 
     unlink <Op_dbmx*>;
     my $bad_key = 0 ;
@@ -471,8 +455,6 @@ unlink <Op_dbmx*>, $Dfile;
 {
    # Check that DBM Filter can cope with read-only $_
 
-   use warnings ;
-   use strict ;
    my %h ;
    unlink <Op1_dbmx*>;
 
