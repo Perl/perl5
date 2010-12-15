@@ -123,6 +123,7 @@
 /Digest/SHA.pm
 /Digest/base.pm
 /Digest/file.pm
+/Dumpvalue.pm
 /DynaLoader.pm
 /Encode
 /Encode.pm

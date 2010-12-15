@@ -2707,6 +2707,8 @@ dist/Data-Dumper/t/perl-74170.t	Regression test for stack reallocation
 dist/Data-Dumper/t/terse.t	See if Data::Dumper terse option works
 dist/Devel-SelfStubber/lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm
 dist/Devel-SelfStubber/t/Devel-SelfStubber.t	See if Devel::SelfStubber works
+dist/Dumpvalue/lib/Dumpvalue.pm	Screen dump of perl values
+dist/Dumpvalue/t/Dumpvalue.t	See if Dumpvalue works
 dist/Env/lib/Env.pm		Map environment into ordinary variables
 dist/Env/t/array.t		See if Env works for arrays
 dist/Env/t/env.t		See if Env works
@@ -3683,8 +3685,6 @@ lib/diagnostics.t		See if diagnostics.pm works
 lib/DirHandle.pm		like FileHandle only for directories
 lib/DirHandle.t			See if DirHandle works
 lib/dotsh.pl			Code to "dot" in a shell script
-lib/Dumpvalue.pm		Screen dump of perl values
-lib/Dumpvalue.t			See if Dumpvalue works
 lib/dumpvar.pl			A variable dumper
 lib/dumpvar.t			A variable dumper tester
 lib/English.pm			Readable aliases for short variables

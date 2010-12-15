@@ -1,8 +1,6 @@
 #!./perl
 
 BEGIN {
-	chdir 't' if -d 't';
-	@INC = '../lib';
 	if (ord('A') == 193) {
 	    print "1..0 # skip: EBCDIC\n";
 	    exit 0;
@@ -12,6 +10,12 @@ BEGIN {
 	    print "1..0 # Skip -- Perl configured without List::Util module\n";
 	    exit 0;
 	}
+
+	# `make test` in the CPAN version of this module runs us with -w, but
+	# Dumpvalue.pm relies on all sorts of things that can cause warnings. I
+	# don't think that's worth fixing, so we just turn off all warnings
+	# during testing.
+	$^W = 0;
 }
 
 use vars qw( $foo @bar %baz );
@@ -130,7 +134,10 @@ is( $out->read, '', 'unwrap ignored glob on first try');
 $d->unwrap(*FOO);
 is( $out->read, "*DUMPED_GLOB*\n", 'unwrap worked on glob');
 $d->unwrap(qr/foo(.+)/);
-is( $out->read, "-> qr/(?^:foo(.+))/\n", 'unwrap worked on Regexp' );
+
+my $modifiers = (qr// =~ /\Q(?^/) ? '^' : '-xism';
+is( $out->read, "-> qr/(?${modifiers}:foo(.+))/\n", 'unwrap worked on Regexp' );
+
 $d->unwrap( sub {} );
 like( $out->read, qr/^-> &CODE/, 'unwrap worked on sub ref' );
 

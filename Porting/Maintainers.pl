@@ -505,6 +505,14 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
+    'Dumpvalue' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'DISTRIBUTION'	=> 'FLORA/Dumpvalue-1.14.tar.gz',
+	'FILES'		=> q[dist/Dumpvalue],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Encode' =>
 	{
 	'MAINTAINER'	=> 'dankogai',
@@ -1723,7 +1731,6 @@ use File::Glob qw(:case);
 				lib/DBM_Filter.pm
 				lib/DBM_Filter/
 				lib/DirHandle.{pm,t}
-				lib/Dumpvalue.{pm,t}
 				lib/English.{pm,t}
 				lib/ExtUtils/Embed.pm
 				lib/ExtUtils/XSSymSet.pm
