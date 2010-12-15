@@ -1,5 +1,7 @@
 package Socket;
 
+use strict;
+
 our($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 $VERSION = "1.92";
 
@@ -609,6 +611,8 @@ if( !defined &getaddrinfo ) {
 
    foreach my $name ( keys %constants ) {
       my $value = $constants{$_};
+
+      no strict 'refs';
       defined &$name or *$name = sub () { $value };
    }
 
@@ -625,8 +629,6 @@ if( !defined &getaddrinfo ) {
 # The following functions are used if the system does not have a
 # getaddrinfo(3) function in libc; and are used to emulate it for the AF_INET
 # family
-
-use strict;
 
 # Borrowed from Regexp::Common::net
 my $REGEXP_IPv4_DECIMAL = qr/25[0-5]|2[0-4][0-9]|1?[0-9][0-9]{1,2}/;
