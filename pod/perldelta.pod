@@ -233,6 +233,10 @@ accepts all POSIX filenames.
 
 =item *
 
+C<Dumpvalue> has been upgraded from version 1.14 to 1.15.
+
+=item *
+
 C<Env> has been upgraded from version 1.01 to 1.02.
 
 =item *
