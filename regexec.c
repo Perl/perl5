@@ -6444,30 +6444,8 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 			/* See if the folded version matches */
 			STRLEN foldlen;
 			to_utf8_fold(utf8_p, folded, &foldlen);
-			if (swash_fetch(sw, folded, 1)) {   /* 1 => is utf8 */
-			    match = TRUE;
-			}
-			else {
-			    /* The fold in a few cases  of an above Latin1 char
-			     * is in the Latin1 range, and hence may be in the
-			     * bitmap */
-			    if (UTF8_IS_INVARIANT(*folded)
-				&& ANYOF_BITMAP_TEST(n, UNI_TO_NATIVE(*folded)))
 			    {
-				match = TRUE;
-			    }
-			    else if (UTF8_IS_DOWNGRADEABLE_START(*folded)
-				     && ANYOF_BITMAP_TEST(n,
-					  UNI_TO_NATIVE(
-					     TWO_BYTE_UTF8_TO_UNI(folded[0],
-							           folded[1]))))
-			    { /* Since the fold comes from internally
-			       * generated data, we can safely assume it is
-			       * valid utf8 in the test above */
 
-				match = TRUE;
-			    }
-                            if (! match) {
 				SV** listp;
 
 				/* Consider "k" =~ /[K]/i.  The line above
@@ -6510,6 +6488,10 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 					 * nulls since NULL isn't folded or
 					 * foldable */
 					try_c = SvPVX(*try_p);
+
+					/* The fold in a few cases  of an above Latin1 char
+					 * is in the Latin1 range, and hence may be in the
+					 * bitmap */
 					if (UTF8_IS_INVARIANT(*try_c)
 					    && ANYOF_BITMAP_TEST(n,
 							    UNI_TO_NATIVE(*try_c)))
@@ -6524,6 +6506,9 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 						TWO_BYTE_UTF8_TO_UNI(try_c[0],
 								     try_c[1]))))
 					{
+					   /* Since the fold comes from internally
+					    * generated data, we can safely assume it is
+					    * valid utf8 in the test above */
 					    match = TRUE;
 					    break;
 					} else if (swash_fetch(sw,
@@ -6534,7 +6519,6 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 					}
 				    }
 				}
-			    }
                         }
 		    }
 		}

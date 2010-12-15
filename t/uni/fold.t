@@ -97,13 +97,13 @@ foreach my $test_ref (@CF) {
         }
         my $test;
 
+        # A multi-char fold should not match just one char;
+        # e.g., ":ß:" !~ /:[_s]:/i
+        $test = qq[":$c:" !~ /:[_$f]:/i];
+        ok eval $test, "$code - $name - $mapping - $type - $test";
+
         local $TODO = 'Multi-char fold in [character class]';
 
-        TODO: { # e.g., ":ß:" !~ /:[_s]:/i  # A multi-char fold should not
-                                            # match just one char
-            $test = qq[":$c:" !~ /:[_$f]:/i];
-            ok eval $test, "$code - $name - $mapping - $type - $test";
-        }
         TODO: { # e.g., ":ß:" =~ /:[_s]{2}:/i
             $test = qq[":$c:" =~ /:[_$f]{$f_length}:/i];
             ok eval $test, "$code - $name - $mapping - $type - $test";
