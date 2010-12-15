@@ -44,7 +44,7 @@ sub explain {
 EOM
     }
     if (@_) {
-	plan(skip_all => "@_");
+	skip_all(@_);
     }
 }
 
@@ -54,13 +54,13 @@ print "# checking whether we have sparse files...\n";
 
 # Known have-nots.
 if ($^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS') {
-    plan(skip_all => "no sparse files in $^O");
+    skip_all("no sparse files in $^O");
 }
 
 # Known haves that have problems running this test
 # (for example because they do not support sparse files, like UNICOS)
 if ($^O eq 'unicos') {
-    plan(skip_all => "no sparse files in $^O, unable to test large files");
+    skip_all("no sparse files in $^O, unable to test large files");
 }
 
 # Then try heuristically to deduce whether we have sparse files.
@@ -109,7 +109,7 @@ print "# s2 = @s2\n";
 unless ($s1[7] == 1_000_003 && $s2[7] == 2_000_003 &&
 	$s1[11] == $s2[11] && $s1[12] == $s2[12] &&
 	$s1[12] > 0) {
-    plan(skip_all => "no sparse files?");
+    skip_all("no sparse files?");
 }
 
 print "# we seem to have sparse files...\n";
