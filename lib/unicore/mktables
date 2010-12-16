@@ -12604,7 +12604,7 @@ sub make_table_pod_entries($) {
             if ($table_property != $perl && $table->perl_extension) {
                 push @info, '(Perl extension)';
             }
-            push @info, "($string_count)" if $output_range_counts;
+            push @info, "($string_count)";
 
             # Now, we have both the entry and info so add them to the
             # list of all the properties.
