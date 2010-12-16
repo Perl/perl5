@@ -1142,16 +1142,21 @@ sub latin1_to_native($) {
 }
 
 sub ord_latin1_to_native {
-    # given an input latin1 code point, return the platform's native
-    # equivalent value
+    # given an input code point, return the platform's native
+    # equivalent value.  Anything above latin1 is itself.
 
-    return ord latin1_to_native(chr $_[0]);
+    my $ord = shift;
+    return $ord if $ord > 255;
+    return ord latin1_to_native(chr $ord);
 }
 
 sub ord_native_to_latin1 {
-    # given an input platform code point, return the latin1 equivalent value
+    # given an input platform code point, return the latin1 equivalent value.
+    # Anything above latin1 is itself.
 
-    return ord native_to_latin1(chr $_[0]);
+    my $ord = shift;
+    return $ord if $ord > 255;
+    return ord native_to_latin1(chr $ord);
 }
 
 1;
