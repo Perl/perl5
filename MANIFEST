@@ -4516,6 +4516,7 @@ t/lib/commonsense.t		See if configuration meets basic needs
 t/lib/compmod.pl		Helper for 1_compile.t
 t/lib/croak.t			Test calls to Perl_croak() in the C source.
 t/lib/cygwin.t			Builtin cygwin function tests
+t/lib/dbmt_common.pl		Common functionality for ?DBM_File tests
 t/lib/deprecate/Deprecated.pm	Deprecated module to test deprecate.pm
 t/lib/deprecate/Optionally.pm	Optionally deprecated module to test deprecate.pm
 t/lib/deprecate.t		Test deprecate.pm
