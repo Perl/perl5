@@ -60,7 +60,7 @@ $h{'goner2'} = 'snork';
 delete $h{'goner2'};
 
 untie(%h);
-isa_ok(tie(%h, 'GDBM_File', 'Op.dbmx', GDBM_WRCREAT, 0640), 'GDBM_File');
+isa_ok(tie(%h, 'GDBM_File', 'Op.dbmx', GDBM_WRITER, 0640), 'GDBM_File');
 
 $h{'j'} = 'J';
 $h{'k'} = 'K';
