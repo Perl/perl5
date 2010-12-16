@@ -8179,14 +8179,14 @@ S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
 ANYOF_##NAME:                                           \
 	for (value = 0; value < 256; value++)           \
 	    if (TEST)                                   \
-		stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, value); \
+		stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value); \
     yesno = '+';                                        \
     what = WORD;                                        \
     break;                                              \
 case ANYOF_N##NAME:                                     \
 	for (value = 0; value < 256; value++)           \
 	    if (!TEST)                                  \
-		stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, value); \
+		stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value); \
     yesno = '!';                                        \
     what = WORD;                                        \
     break
@@ -8950,7 +8950,7 @@ parseit:
 				 && (! _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(value))
 				 /* If the latest code point has a fold whose
 				  * bit is set, it must be the only other one */
-				 && ((prevvalue = PL_fold_latin1[value]) != value)
+				&& ((prevvalue = PL_fold_latin1[value]) != (IV)value)
 				 && ANYOF_BITMAP_TEST(ret, prevvalue)))))
     {
         /* Note that the information needed to decide to do this optimization

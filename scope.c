@@ -187,7 +187,7 @@ S_save_scalar_at(pTHX_ SV **sptr, const U32 flags)
 	       (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
 	}
 	if (!(flags & SAVEf_KEEPOLDELEM))
-	    mg_localize(osv, sv, (flags & SAVEf_SETMAGIC) != 0);
+	    mg_localize(osv, sv, cBOOL(flags & SAVEf_SETMAGIC));
     }
 
     return sv;

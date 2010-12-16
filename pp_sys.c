@@ -3059,7 +3059,7 @@ PP(pp_ftrread)
        conditional compiling below much clearer.  */
     I32 use_access = 0;
 #endif
-    int stat_mode = S_IRUSR;
+    Mode_t stat_mode = S_IRUSR;
 
     bool effective = FALSE;
     char opchar = '?';

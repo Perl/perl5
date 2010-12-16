@@ -1914,7 +1914,7 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
       do_update:
 	/* If we're looking up a destructor to invoke, we must avoid
 	 * that Gv_AMupdate croaks, because we might be dying already */
-	if (Gv_AMupdate(stash, id == DESTROY_amg) == -1) {
+	if (Gv_AMupdate(stash, cBOOL(id == DESTROY_amg)) == -1) {
 	    /* and if it didn't found a destructor, we fall back
 	     * to a simpler method that will only look for the
 	     * destructor instead of the whole magic */

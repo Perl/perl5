@@ -5893,7 +5893,7 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	    char *tmpeol = loceol;
 	    while (hardcount < max
 		    && foldEQ_utf8(scan, &tmpeol, 0, utf8_target,
-				    STRING(p), NULL, 1, UTF_PATTERN))
+				   STRING(p), NULL, 1, cBOOL(UTF_PATTERN)))
 	    {
 		scan = tmpeol;
 		tmpeol = loceol;
