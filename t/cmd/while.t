@@ -4,7 +4,7 @@ BEGIN {
     require "test.pl";
 }
 
-plan(20);
+plan(25);
 
 my $tmpfile = tempfile();
 open (tmp,'>', $tmpfile) || die "Can't create Cmd_while.tmp.";
@@ -174,4 +174,41 @@ is($` . $& . $', "abc");
         ++$i;
     }
     ok($ok);
+}
+
+sub save_context { $_[0] = wantarray; $_[1] }
+
+{
+    my $context = -1;
+    my $p = sub {
+        my $x = 1;
+        while ($x--) {
+            save_context($context, "foo");
+        }
+    };
+    is(scalar($p->()), 0);
+    is($context, undef, "last statement in while block has 'void' context");
+}
+
+{
+    my $context = -1;
+    my $p = sub {
+        my $x = 1;
+        {
+            save_context($context, "foo");
+        }
+    };
+    is(scalar($p->()), "foo");
+    is($context, "", "last statement in block has 'scalar' context");
+}
+
+{
+    # test scope is cleaned
+    my $i = 0;
+    my @a;
+    while ($i++ < 2) {
+        my $x;
+        push @a, \$x;
+    }
+    ok($a[0] ne $a[1]);
 }
