@@ -6339,23 +6339,17 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
     if (c < 256) {
 	if (ANYOF_BITMAP_TEST(n, c))
 	    match = TRUE;
-	else if (flags & ANYOF_LOC_NONBITMAP_FOLD) {
-	    U8 f;
 
-	    if (flags & ANYOF_LOCALE) {
-		PL_reg_flags |= RF_tainted;
-		f = PL_fold_locale[c];
-	    }
-	    else
-		f = PL_fold[c];
-	    if (f != c && ANYOF_BITMAP_TEST(n, f))
+	else if (flags & ANYOF_LOCALE) {
+	    PL_reg_flags |= RF_tainted;
+
+	    if ((flags & ANYOF_LOC_NONBITMAP_FOLD)
+		 && ANYOF_BITMAP_TEST(n, PL_fold_locale[c]))
+	    {
 		match = TRUE;
-	}
-	
-	if (!match && ANYOF_CLASS_TEST_ANY_SET(n)) {
-	    PL_reg_flags |= RF_tainted;	    /* CLASS implies LOCALE */
-	    if (
-		(ANYOF_CLASS_TEST(n, ANYOF_ALNUM)   &&  isALNUM_LC(c))  ||
+	    }
+	    else if (ANYOF_CLASS_TEST_ANY_SET(n)
+	    && ((ANYOF_CLASS_TEST(n, ANYOF_ALNUM)   &&  isALNUM_LC(c))  ||
 		(ANYOF_CLASS_TEST(n, ANYOF_NALNUM)  && !isALNUM_LC(c))  ||
 		(ANYOF_CLASS_TEST(n, ANYOF_SPACE)   &&  isSPACE_LC(c))  ||
 		(ANYOF_CLASS_TEST(n, ANYOF_NSPACE)  && !isSPACE_LC(c))  ||
@@ -6386,7 +6380,7 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 		(ANYOF_CLASS_TEST(n, ANYOF_BLANK)   &&  isBLANK(c))     ||
 		(ANYOF_CLASS_TEST(n, ANYOF_NBLANK)  && !isBLANK(c))
 		) /* How's that for a conditional? */
-	    {
+	    ) {
 		match = TRUE;
 	    }
 	}
@@ -6397,8 +6391,9 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
     if (!match) {
 	if (utf8_target && (flags & ANYOF_UNICODE_ALL)) {
 	    if (c >= 256
-		|| ((flags & ANYOF_LOC_NONBITMAP_FOLD) /* Latin1 1 that has a non-Latin1 fold
-					    should match */
+		|| ((flags & ANYOF_LOC_NONBITMAP_FOLD) /* Latin1 1 that has a
+							  non-Latin1 fold
+							  should match */
 		    && _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c)))
 	    {
 		match = TRUE;
