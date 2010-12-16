@@ -610,7 +610,7 @@ if( !defined &getaddrinfo ) {
    );
 
    foreach my $name ( keys %constants ) {
-      my $value = $constants{$_};
+      my $value = $constants{$name};
 
       no strict 'refs';
       defined &$name or *$name = sub () { $value };
