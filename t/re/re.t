@@ -95,9 +95,9 @@ if ('1234'=~/(?:(?<A>\d)|(?<C>!))(?<B>\d)(?<A>\d)(?<B>\d)/){
     }
 
     SKIP: {
-        my $current_locale = POSIX::setlocale( &POSIX::LC_CTYPE, 'en_US.UTF-8' );
-        if ( !$current_locale || $current_locale ne 'en_US.UTF-8' ) {
-            skip( 'cannot use locale en_US.UTF-8', 3 );
+        my $current_locale = POSIX::setlocale( &POSIX::LC_CTYPE, 'C' );
+        if ( !$current_locale || $current_locale ne 'C' ) {
+            skip( 'cannot set locale C', 3 );
         }
 
         $check = $text =~ /(?u)\w/;
