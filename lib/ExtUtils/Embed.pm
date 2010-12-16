@@ -18,7 +18,7 @@ use vars qw(@ISA @EXPORT $VERSION
 use strict;
 
 # This is not a dual-life module, so no need for development version numbers
-$VERSION = '1.29';
+$VERSION = '1.30';
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&xsinit &ldopts 
