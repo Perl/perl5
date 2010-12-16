@@ -2391,7 +2391,7 @@ sub _modpow
 
   # 0^a (mod m) = 0 if m != 0, a != 0
   # 0^0 (mod m) = 1 if m != 0
-  if (_is_one($c, $num)) {
+  if (_is_zero($c, $num)) {
       if (_is_zero($c, $exp)) {
           @$num = 1;
       } else {
