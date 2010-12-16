@@ -8936,31 +8936,64 @@ parseit:
      * character class, which means that it can't be an inversion into a
      * many-character class, and there must be no possibility of there being
      * things outside the bitmap.  'stored' (only) for locales doesn't include
-     * \w, etc, so have to make a special test that they aren't present */
+     * \w, etc, so have to make a special test that they aren't present
+     *
+     * Similarly A 2-character class of the very special form like [bB] can be
+     * optimized into an EXACTFish node, but only for non-locales, and for
+     * characters which only have the two folds; so things like 'fF' and 'Ii'
+     * wouldn't work because they are part of the fold of 'LATIN SMALL LIGATURE
+     * FI'. */
     if (! (ANYOF_FLAGS(ret) & (ANYOF_NONBITMAP|ANYOF_INVERT|ANYOF_UNICODE_ALL))
-        && ((stored == 1 && ((! (ANYOF_FLAGS(ret) & ANYOF_LOCALE))
-                              || (! ANYOF_CLASS_TEST_ANY_SET(ret))))))
+        && (((stored == 1 && ((! (ANYOF_FLAGS(ret) & ANYOF_LOCALE))
+                              || (! ANYOF_CLASS_TEST_ANY_SET(ret)))))
+	    || (stored == 2 && ((! (ANYOF_FLAGS(ret) & ANYOF_LOCALE))
+				 && (! _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(value))
+				 /* If the latest code point has a fold whose
+				  * bit is set, it must be the only other one */
+				 && ((prevvalue = PL_fold_latin1[value]) != value)
+				 && ANYOF_BITMAP_TEST(ret, prevvalue)))))
     {
         /* Note that the information needed to decide to do this optimization
          * is not currently available until the 2nd pass, and that the actually
-         * used EXACT node takes less space than the calculated ANYOF node, and
-         * hence the amount of space calculated in the first pass is larger
+	 * used EXACTish node takes less space than the calculated ANYOF node,
+	 * and hence the amount of space calculated in the first pass is larger
          * than actually used, so this optimization doesn't gain us any space.
 	 * But an EXACT node is faster than an ANYOF node, and can be combined
 	 * with any adjacent EXACT nodes later by the optimizer for further
-	 * gains. */
+	 * gains.  The speed of executing an EXACTF is similar to an ANYOF
+	 * node, so the optimization advantage comes from the ability to join
+	 * it to adjacent EXACT nodes */
 
         const char * cur_parse= RExC_parse;
+	U8 op;
         RExC_emit = (regnode *)orig_emit;
         RExC_parse = (char *)orig_parse;
 
-	/* (A locale node can have 1 point and be folded; all the other folds
-	 * will include the fold, hence will have 2 points, so we won't get
-	 * here with ANYOF_FOLD set unless it is also locale) */
-	ret = reg_node(pRExC_state, (U8) (! (ANYOF_FLAGS(ret) & ANYOF_FOLD))
-					 ? EXACT
-					 : EXACTFL
-		    );
+	if (stored == 1) {
+
+	    /* A locale node with one point can be folded; all the other cases
+	     * with folding will have two points, since we calculate them above
+	     */
+	    if (ANYOF_FLAGS(ret) & ANYOF_FOLD) {
+		 op = EXACTFL;
+	    }
+	    else {
+		op = EXACT;
+	    }
+	}   /* else 2 chars in the bit map: the folds of each other */
+	else if (UNI_SEMANTICS || !isASCII(value)) {
+
+	    /* To join adjacent nodes, they must be the exact EXACTish type.
+	     * Try to use the most likely type, by using EXACTFU if the regex
+	     * calls for them, or is required because the character is
+	     * non-ASCII */
+	    op = EXACTFU;
+	}
+	else {    /* Otherwise, more likely to be EXACTF type */
+	    op = EXACTF;
+	}
+
+	ret = reg_node(pRExC_state, op);
         RExC_parse = (char *)cur_parse;
 	if (UTF && ! NATIVE_IS_INVARIANT(value)) {
 	    *STRING(ret)= UTF8_EIGHT_BIT_HI((U8) value);
@@ -8975,13 +9008,6 @@ parseit:
 	}
 	SvREFCNT_dec(listsv);
         return ret;
-
-	/* (A 2-character class of the very special form like [aA] could be
-	 * optimized into an EXACTFish node, but only for non-locales, and for
-	 * characters which only have the two folds; so things like 'fF' and
-	 * 'Ii' wouldn't work because of the fold of 'LATIN SMALL LIGATURE FI'.
-	 * Since we don't have that information currently conveniently
-	 * available, skip the optimization) */
     }
 
     {
