@@ -2,10 +2,16 @@
 
 # $RCSfile: dbm.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:43 $
 
+our $DBM_Class;
+
+BEGIN {
+    $DBM_Class = 'GDBM_File';
+}
+
 BEGIN {
     require Config; import Config;
-    if ($Config{'extensions'} !~ /\bGDBM_File\b/) {
-	print "1..0 # Skip: GDBM_File was not built\n";
+    if ($Config{'extensions'} !~ /\b$DBM_Class\b/) {
+	print "1..0 # Skip: $DBM_Class was not built\n";
 	exit 0;
     }
 }
@@ -13,14 +19,14 @@ BEGIN {
 use strict;
 use warnings;
 
-use Test::More tests => 83;
-use GDBM_File;
+use Test::More tests => 84;
+BEGIN {use_ok($DBM_Class)};
 
 unlink <Op_dbmx.*>;
 
 umask(0);
 my %h ;
-isa_ok(tie(%h, 'GDBM_File', 'Op_dbmx', GDBM_WRCREAT, 0640), 'GDBM_File');
+isa_ok(tie(%h, $DBM_Class, 'Op_dbmx', GDBM_WRCREAT, 0640), $DBM_Class);
 
 my $Dfile = "Op_dbmx.pag";
 if (! -e $Dfile) {
@@ -59,7 +65,7 @@ $h{'goner2'} = 'snork';
 delete $h{'goner2'};
 
 untie(%h);
-isa_ok(tie(%h, 'GDBM_File', 'Op_dbmx', GDBM_WRITER, 0640), 'GDBM_File');
+isa_ok(tie(%h, $DBM_Class, 'Op_dbmx', GDBM_WRITER, 0640), $DBM_Class);
 
 $h{'j'} = 'J';
 $h{'k'} = 'K';
@@ -130,7 +136,7 @@ unlink <Op_dbmx*>, $Dfile;
    package Another ;
 
    open(FILE, ">SubDB.pm") or die "Cannot open SubDB.pm: $!\n" ;
-   print FILE <<'EOM' ;
+   printf FILE <<'EOM', $DBM_Class, $DBM_Class, $DBM_Class;
 
    package SubDB ;
 
@@ -139,9 +145,9 @@ unlink <Op_dbmx*>, $Dfile;
    use vars qw(@ISA @EXPORT) ;
 
    require Exporter ;
-   use GDBM_File;
-   @ISA=qw(GDBM_File);
-   @EXPORT = @GDBM_File::EXPORT ;
+   use %s;
+   @ISA=qw(%s);
+   @EXPORT = @%s::EXPORT ;
 
    sub STORE { 
 	my $self = shift ;
@@ -218,8 +224,8 @@ unlink <Op_dbmx*>, $Dfile;
    }
    
    unlink <Op_dbmx*>;
-   $db = tie %h, 'GDBM_File', 'Op_dbmx', GDBM_WRCREAT, 0640;
-   isa_ok($db, 'GDBM_File');
+   $db = tie %h, $DBM_Class, 'Op_dbmx', GDBM_WRCREAT, 0640;
+   isa_ok($db, $DBM_Class);
 
    $db->filter_fetch_key   (sub { $fetch_key = $_ }) ;
    $db->filter_store_key   (sub { $store_key = $_ }) ;
@@ -314,8 +320,8 @@ unlink <Op_dbmx*>, $Dfile;
     my (%h, $db) ;
 
     unlink <Op_dbmx*>;
-    $db = tie %h, 'GDBM_File','Op_dbmx', GDBM_WRCREAT, 0640;
-    isa_ok($db, 'GDBM_File');
+    $db = tie %h, $DBM_Class, 'Op_dbmx', GDBM_WRCREAT, 0640;
+    isa_ok($db, $DBM_Class);
 
     my %result = () ;
 
@@ -376,8 +382,8 @@ unlink <Op_dbmx*>, $Dfile;
    my (%h, $db) ;
    unlink <Op_dbmx*>;
 
-   $db = tie %h, 'GDBM_File','Op_dbmx', GDBM_WRCREAT, 0640;
-   isa_ok($db, 'GDBM_File');
+   $db = tie %h, $DBM_Class, 'Op_dbmx', GDBM_WRCREAT, 0640;
+   isa_ok($db, $DBM_Class);
 
    $db->filter_store_key (sub { $_ = $h{$_} }) ;
 
@@ -400,7 +406,7 @@ unlink <Op_dbmx*>, $Dfile;
     my $a = "";
     local $SIG{__WARN__} = sub {$a = $_[0]} ;
 
-    isa_ok(tie(%h, 'GDBM_File', 'Op_dbmx', GDBM_WRCREAT, 0640), 'GDBM_File');
+    isa_ok(tie(%h, $DBM_Class, 'Op_dbmx', GDBM_WRCREAT, 0640), $DBM_Class);
     $h{ABC} = undef;
     is($a, "");
     untie %h;
@@ -417,8 +423,8 @@ unlink <Op_dbmx*>, $Dfile;
     unlink <Op_dbmx*>;
     my $bad_key = 0 ;
     my %h = () ;
-    my $db = tie %h, 'GDBM_File', 'Op_dbmx', GDBM_WRCREAT, 0640;
-    isa_ok($db, 'GDBM_File');
+    my $db = tie %h, $DBM_Class, 'Op_dbmx', GDBM_WRCREAT, 0640;
+    isa_ok($db, $DBM_Class);
     $db->filter_fetch_key (sub { $_ =~ s/^Beta_/Alpha_/ if defined $_}) ;
     $db->filter_store_key (sub { $bad_key = 1 if /^Beta_/ ; $_ =~ s/^Alpha_/Beta_/}) ;
 
@@ -451,8 +457,8 @@ unlink <Op_dbmx*>, $Dfile;
    my %h ;
    unlink <Op1_dbmx*>;
 
-   my $db = tie %h, 'GDBM_File', 'Op1_dbmx', GDBM_WRCREAT, 0640;
-   isa_ok($db, 'GDBM_File');
+   my $db = tie %h, $DBM_Class, 'Op1_dbmx', GDBM_WRCREAT, 0640;
+   isa_ok($db, $DBM_Class);
 
    $db->filter_fetch_key   (sub { }) ;
    $db->filter_store_key   (sub { }) ;
