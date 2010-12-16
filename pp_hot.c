@@ -827,9 +827,10 @@ PP(pp_rv2av)
     if (!(PL_op->op_private & OPpDEREFed))
 	SvGETMAGIC(sv);
     if (SvROK(sv)) {
-	sv = amagic_deref_call(sv, is_pp_rv2av ? to_av_amg : to_hv_amg);
-	SPAGAIN;
-
+	if (SvAMAGIC(sv)) {
+	    sv = amagic_deref_call(sv, is_pp_rv2av ? to_av_amg : to_hv_amg);
+	    SPAGAIN;
+	}
 	sv = SvRV(sv);
 	if (SvTYPE(sv) != type)
 	    DIE(aTHX_ "Not %s reference", is_pp_rv2av ? an_array : a_hash);
@@ -2794,8 +2795,10 @@ PP(pp_entersub)
 	}
 	SvGETMAGIC(sv);
 	if (SvROK(sv)) {
-	    sv = amagic_deref_call(sv, to_cv_amg);
-	    /* Don't SPAGAIN here.  */
+	    if (SvAMAGIC(sv)) {
+		sv = amagic_deref_call(sv, to_cv_amg);
+		/* Don't SPAGAIN here.  */
+	    }
 	}
 	else {
 	    const char *sym;
