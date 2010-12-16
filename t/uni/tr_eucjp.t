@@ -1,7 +1,5 @@
 #! perl -w
 #
-# $Id$
-#
 # This script is written intentionally in EUC-JP
 # -- dankogai
 

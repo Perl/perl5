@@ -1,7 +1,5 @@
 warn "Legacy library @{[(caller(0))[6]]} will be removed from the Perl core distribution in the next major release. Please install it from the CPAN distribution Perl4::CoreLibs. It is being used at @{[(caller)[1]]}, line @{[(caller)[2]]}.\n";
 
-# $Id: newgetopt.pl,v 1.18 2001/09/21 13:34:59 jv Exp $
-
 # This library is no longer being maintained, and is included for backward
 # compatibility with Perl 4 programs which may require it.
 # It is now just a wrapper around the Getopt::Long module.

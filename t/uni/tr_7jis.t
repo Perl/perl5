@@ -1,7 +1,5 @@
 #! perl -w
 #
-# $Id$
-#
 # This script is written intentionally in ISO-2022-JP
 # requires Encode 1.83 or better to work
 # -- dankogai

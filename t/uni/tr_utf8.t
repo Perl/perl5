@@ -1,7 +1,5 @@
 #!perl -w
 #
-# $Id$
-#
 # This script is written intentionally in UTF-8
 # Requires Encode 1.83 or better
 # -- dankogai

@@ -1,7 +1,3 @@
-/*
- * $Id: encoding.xs,v 0.3 2002/04/21 22:14:41 dankogai Exp $
- */
-
 #define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #include "perl.h"
