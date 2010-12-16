@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 use warnings;
 
-use Test::More tests => 81;
+use Test::More tests => 83;
 use GDBM_File;
 
 unlink <Op_dbmx.*>;
@@ -26,11 +26,9 @@ my $Dfile = "Op_dbmx.pag";
 if (! -e $Dfile) {
 	($Dfile) = <Op_dbmx*>;
 }
-
 SKIP: {
-    skip " different file permission semantics on $^O", 1
+    skip "different file permission semantics on $^O", 1
 	if $^O eq 'amigaos' || $^O eq 'os2' || $^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'dos' || $^O eq 'cygwin';
-
     my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
      $blksize,$blocks) = stat($Dfile);
     is($mode & 0777, 0640);
@@ -137,6 +135,7 @@ unlink <Op_dbmx*>, $Dfile;
    package SubDB ;
 
    use strict ;
+   use warnings ;
    use vars qw(@ISA @EXPORT) ;
 
    require Exporter ;
@@ -168,7 +167,7 @@ unlink <Op_dbmx*>, $Dfile;
    1 ;
 EOM
 
-    close FILE ;
+    close FILE  or die "Could not close: $!";
 
     BEGIN { push @INC, '.'; }
     unlink <dbhash_tmp*> ;
@@ -455,7 +454,6 @@ unlink <Op_dbmx*>, $Dfile;
    my $db = tie %h, 'GDBM_File', 'Op1_dbmx', GDBM_WRCREAT, 0640;
    isa_ok($db, 'GDBM_File');
 
-
    $db->filter_fetch_key   (sub { }) ;
    $db->filter_store_key   (sub { }) ;
    $db->filter_fetch_value (sub { }) ;
@@ -466,7 +464,7 @@ unlink <Op_dbmx*>, $Dfile;
    $h{"fred"} = "joe" ;
    is($h{"fred"}, "joe");
 
-   eval { my @r= grep { $h{$_} } (1, 2, 3) };
+   is_deeply([eval { map { $h{$_} } (1, 2, 3) }], [undef, undef, undef]);
    is($@, '');
 
 
@@ -482,7 +480,7 @@ unlink <Op_dbmx*>, $Dfile;
 
    is($db->FIRSTKEY(), "fred");
    
-   eval { my @r= grep { $h{$_} } (1, 2, 3) };
+   is_deeply([eval { map { $h{$_} } (1, 2, 3) }], [undef, undef, undef]);
    is($@, '');
 
    undef $db ;

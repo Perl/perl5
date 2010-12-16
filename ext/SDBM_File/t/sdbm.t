@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 use warnings;
 
-use Test::More tests => 81;
+use Test::More tests => 83;
 
 require SDBM_File;
 #If Fcntl is not available, try 0x202 or 0x102 for O_RDWR|O_CREAT
@@ -142,12 +142,12 @@ unlink <Op_dbmx*>, $Dfile;
 
    use strict ;
    use warnings ;
-   use vars qw( @ISA @EXPORT) ;
+   use vars qw(@ISA @EXPORT) ;
 
    require Exporter ;
    use SDBM_File;
    @ISA=qw(SDBM_File);
-   @EXPORT = @SDBM_File::EXPORT if @SDBM_File::EXPORT ;
+   @EXPORT = @SDBM_File::EXPORT ;
 
    sub STORE { 
 	my $self = shift ;
@@ -447,7 +447,6 @@ unlink <Op_dbmx*>, $Dfile;
     unlink <Op_dbmx*>;
 }
 
-
 {
    # Check that DBM Filter can cope with read-only $_
 
@@ -467,7 +466,7 @@ unlink <Op_dbmx*>, $Dfile;
    $h{"fred"} = "joe" ;
    is($h{"fred"}, "joe");
 
-   eval { grep { $h{$_} } (1, 2, 3) };
+   is_deeply([eval { map { $h{$_} } (1, 2, 3) }], [undef, undef, undef]);
    is($@, '');
 
 
@@ -483,7 +482,7 @@ unlink <Op_dbmx*>, $Dfile;
 
    is($db->FIRSTKEY(), "fred");
    
-   eval { map { $h{$_} } (1, 2, 3) };
+   is_deeply([eval { map { $h{$_} } (1, 2, 3) }], [undef, undef, undef]);
    is($@, '');
 
    undef $db ;

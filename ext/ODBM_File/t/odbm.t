@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 use warnings;
 
-use Test::More tests => 79;
+use Test::More tests => 81;
 
 require ODBM_File;
 #If Fcntl is not available, try 0x202 or 0x102 for O_RDWR|O_CREAT
@@ -31,7 +31,7 @@ if (! -e $Dfile) {
 }
 SKIP: {
     skip "different file permission semantics on $^O", 1
-	if $^O eq 'amigaos' || $^O eq 'os2' || $^O eq 'MSWin32' || $^O eq 'NetWare';
+	if $^O eq 'amigaos' || $^O eq 'os2' || $^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'dos' || $^O eq 'cygwin';
     my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
      $blksize,$blocks) = stat($Dfile);
     is($mode & 0777, 0640);
@@ -170,7 +170,7 @@ unlink <Op_dbmx*>, $Dfile;
    1 ;
 EOM
 
-    close FILE ;
+    close FILE  or die "Could not close: $!";
 
     BEGIN { push @INC, '.'; }
     unlink <dbhash_tmp*> ;
@@ -210,8 +210,6 @@ unlink <Op_dbmx*>, $Dfile;
    sub checkOutput
    {
        my($fk, $sk, $fv, $sv) = @_ ;
-       print "# ", join('|', $fetch_key, $fk, $store_key, $sk,
-			$fetch_value, $fv, $store_value, $sv, $_), "\n";
        return
            $fetch_key eq $fk && $store_key eq $sk && 
 	   $fetch_value eq $fv && $store_value eq $sv &&
@@ -446,7 +444,6 @@ unlink <Op_dbmx*>, $Dfile;
     unlink <Op_dbmx*>;
 }
 
-
 {
    # Check that DBM Filter can cope with read-only $_
 
@@ -466,7 +463,7 @@ unlink <Op_dbmx*>, $Dfile;
    $h{"fred"} = "joe" ;
    is($h{"fred"}, "joe");
 
-   eval { grep { $h{$_} } (1, 2, 3) };
+   is_deeply([eval { map { $h{$_} } (1, 2, 3) }], [undef, undef, undef]);
    is($@, '');
 
 
@@ -482,7 +479,7 @@ unlink <Op_dbmx*>, $Dfile;
 
    is($db->FIRSTKEY(), "fred");
    
-   eval { grep { $h{$_} } (1, 2, 3) };
+   is_deeply([eval { map { $h{$_} } (1, 2, 3) }], [undef, undef, undef]);
    is($@, '');
 
    undef $db ;
