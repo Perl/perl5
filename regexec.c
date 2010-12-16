@@ -6339,7 +6339,7 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
     if (c < 256) {
 	if (ANYOF_BITMAP_TEST(n, c))
 	    match = TRUE;
-	else if (flags & ANYOF_FOLD) {
+	else if (flags & ANYOF_LOC_NONBITMAP_FOLD) {
 	    U8 f;
 
 	    if (flags & ANYOF_LOCALE) {
@@ -6397,7 +6397,7 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
     if (!match) {
 	if (utf8_target && (flags & ANYOF_UNICODE_ALL)) {
 	    if (c >= 256
-		|| ((flags & ANYOF_FOLD) /* Latin1 1 that has a non-Latin1 fold
+		|| ((flags & ANYOF_LOC_NONBITMAP_FOLD) /* Latin1 1 that has a non-Latin1 fold
 					    should match */
 		    && _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c)))
 	    {
@@ -6420,7 +6420,7 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 		}
 		if (swash_fetch(sw, utf8_p, 1))
 		    match = TRUE;
-		else if (flags & ANYOF_FOLD) {
+		else if (flags & ANYOF_LOC_NONBITMAP_FOLD) {
 		    if (!match && lenp && av) {
 		        I32 i;
 			for (i = 0; i <= av_len(av); i++) {

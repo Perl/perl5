@@ -710,7 +710,7 @@ S_cl_anything(const RExC_state_t *pRExC_state, struct regnode_charclass_class *c
     cl->flags = ANYOF_EOS|ANYOF_UNICODE_ALL;
     if (LOC)
 	cl->flags |= ANYOF_LOCALE;
-    cl->flags |= ANYOF_FOLD;
+    cl->flags |= ANYOF_LOC_NONBITMAP_FOLD;
 }
 
 /* Can match anything (initialization) */
@@ -767,8 +767,8 @@ S_cl_and(struct regnode_charclass_class *cl,
     if (!(ANYOF_CLASS_TEST_ANY_SET(and_with))
 	&& !(ANYOF_CLASS_TEST_ANY_SET(cl))
 	&& (and_with->flags & ANYOF_LOCALE) == (cl->flags & ANYOF_LOCALE)
-	&& !(and_with->flags & ANYOF_FOLD)
-	&& !(cl->flags & ANYOF_FOLD)) {
+	&& !(and_with->flags & ANYOF_LOC_NONBITMAP_FOLD)
+	&& !(cl->flags & ANYOF_LOC_NONBITMAP_FOLD)) {
 	int i;
 
 	if (and_with->flags & ANYOF_INVERT)
@@ -781,8 +781,8 @@ S_cl_and(struct regnode_charclass_class *cl,
     if (!(and_with->flags & ANYOF_EOS))
 	cl->flags &= ~ANYOF_EOS;
 
-    if (!(and_with->flags & ANYOF_FOLD))
-	cl->flags &= ~ANYOF_FOLD;
+    if (!(and_with->flags & ANYOF_LOC_NONBITMAP_FOLD))
+	cl->flags &= ~ANYOF_LOC_NONBITMAP_FOLD;
 
     if (cl->flags & ANYOF_UNICODE_ALL && and_with->flags & ANYOF_NONBITMAP &&
 	!(and_with->flags & ANYOF_INVERT)) {
@@ -818,8 +818,8 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
 	 *   (OK1(i) | OK1(i')) | (!OK1(i) & !OK1(i'))
 	 */
 	if ( (or_with->flags & ANYOF_LOCALE) == (cl->flags & ANYOF_LOCALE)
-	     && !(or_with->flags & ANYOF_FOLD)
-	     && !(cl->flags & ANYOF_FOLD) ) {
+	     && !(or_with->flags & ANYOF_LOC_NONBITMAP_FOLD)
+	     && !(cl->flags & ANYOF_LOC_NONBITMAP_FOLD) ) {
 	    int i;
 
 	    for (i = 0; i < ANYOF_BITMAP_SIZE; i++)
@@ -831,8 +831,8 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
     } else {
 	/* (B1 | CL1) | (B2 | CL2) = (B1 | B2) | (CL1 | CL2)) */
 	if ( (or_with->flags & ANYOF_LOCALE) == (cl->flags & ANYOF_LOCALE)
-	     && (!(or_with->flags & ANYOF_FOLD)
-		 || (cl->flags & ANYOF_FOLD)) ) {
+	     && (!(or_with->flags & ANYOF_LOC_NONBITMAP_FOLD)
+		 || (cl->flags & ANYOF_LOC_NONBITMAP_FOLD)) ) {
 	    int i;
 
 	    /* OR char bitmap and class bitmap separately */
@@ -851,8 +851,8 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
     if (or_with->flags & ANYOF_EOS)
 	cl->flags |= ANYOF_EOS;
 
-    if (or_with->flags & ANYOF_FOLD)
-	cl->flags |= ANYOF_FOLD;
+    if (or_with->flags & ANYOF_LOC_NONBITMAP_FOLD)
+	cl->flags |= ANYOF_LOC_NONBITMAP_FOLD;
 
     /* If both nodes match something outside the bitmap, but what they match
      * outside is not the same pointer, and hence not easily compared, give up
@@ -3085,7 +3085,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		if (uc >= 0x100 ||
 		    (!(data->start_class->flags & (ANYOF_CLASS | ANYOF_LOCALE))
 		    && !ANYOF_BITMAP_TEST(data->start_class, uc)
-		    && (!(data->start_class->flags & ANYOF_FOLD)
+		    && (!(data->start_class->flags & ANYOF_LOC_NONBITMAP_FOLD)
 			|| !ANYOF_BITMAP_TEST(data->start_class, PL_fold_latin1[uc])))
                     )
 		    compat = 0;
@@ -3140,7 +3140,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		if (compat) {
 		    ANYOF_BITMAP_SET(data->start_class, uc);
 		    data->start_class->flags &= ~ANYOF_EOS;
-		    data->start_class->flags |= ANYOF_FOLD;
+		    data->start_class->flags |= ANYOF_LOC_NONBITMAP_FOLD;
 		    if (OP(scan) == EXACTFL) {
 			data->start_class->flags |= ANYOF_LOCALE;
 		    }
@@ -3155,7 +3155,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		}
 	    }
 	    else if (flags & SCF_DO_STCLASS_OR) {
-		if (data->start_class->flags & ANYOF_FOLD) {
+		if (data->start_class->flags & ANYOF_LOC_NONBITMAP_FOLD) {
 		    /* false positive possible if the class is case-folded.
 		       Assume that the locale settings are the same... */
 		    if (uc < 0x100) {
@@ -8913,7 +8913,7 @@ parseit:
      * which we have to wait to see what folding is in effect at runtime, and
      * for things not in the bitmap */
     if (FOLD && (LOC || ANYOF_FLAGS(ret) & ANYOF_NONBITMAP)) {
-        ANYOF_FLAGS(ret) |= ANYOF_FOLD;
+        ANYOF_FLAGS(ret) |= ANYOF_LOC_NONBITMAP_FOLD;
     }
 
     /* Optimize inverted simple patterns (e.g. [^a-z]).  Note that this doesn't
@@ -8974,7 +8974,7 @@ parseit:
 	    /* A locale node with one point can be folded; all the other cases
 	     * with folding will have two points, since we calculate them above
 	     */
-	    if (ANYOF_FLAGS(ret) & ANYOF_FOLD) {
+	    if (ANYOF_FLAGS(ret) & ANYOF_LOC_NONBITMAP_FOLD) {
 		 op = EXACTFL;
 	    }
 	    else {
@@ -9745,7 +9745,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 
 	if (flags & ANYOF_LOCALE)
 	    sv_catpvs(sv, "{loc}");
-	if (flags & ANYOF_FOLD)
+	if (flags & ANYOF_LOC_NONBITMAP_FOLD)
 	    sv_catpvs(sv, "{i}");
 	Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
 	if (flags & ANYOF_INVERT)
