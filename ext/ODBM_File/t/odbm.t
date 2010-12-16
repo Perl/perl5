@@ -19,15 +19,15 @@ require ODBM_File;
 #If Fcntl is not available, try 0x202 or 0x102 for O_RDWR|O_CREAT
 use Fcntl;
 
-unlink <Op.dbmx*>;
+unlink <Op_dbmx.*>;
 
 umask(0);
 my %h;
-isa_ok(tie(%h, 'ODBM_File', 'Op.dbmx', O_RDWR|O_CREAT, 0640), 'ODBM_File');
+isa_ok(tie(%h, 'ODBM_File', 'Op_dbmx', O_RDWR|O_CREAT, 0640), 'ODBM_File');
 
-my $Dfile = "Op.dbmx.pag";
+my $Dfile = "Op_dbmx.pag";
 if (! -e $Dfile) {
-	($Dfile) = <Op.dbmx*>;
+	($Dfile) = <Op_dbmx*>;
 }
 SKIP: {
     skip "different file permission semantics on $^O", 1
@@ -62,7 +62,7 @@ $h{'goner2'} = 'snork';
 delete $h{'goner2'};
 
 untie(%h);
-isa_ok(tie(%h, 'ODBM_File', 'Op.dbmx', O_RDWR, 0640), 'ODBM_File');
+isa_ok(tie(%h, 'ODBM_File', 'Op_dbmx', O_RDWR, 0640), 'ODBM_File');
 
 $h{'j'} = 'J';
 $h{'k'} = 'K';
@@ -125,7 +125,7 @@ is($h{'foo'}, '');
 is($h{''}, 'bar');
 
 untie %h;
-unlink 'Op.dbmx.dir', $Dfile;
+unlink <Op_dbmx*>, $Dfile;
 
 {
    # sub-class test
@@ -173,13 +173,14 @@ EOM
     close FILE ;
 
     BEGIN { push @INC, '.'; }
+    unlink <dbhash_tmp*> ;
 
     eval 'use SubDB ; use Fcntl ;';
     main::is($@, "");
     my %h ;
     my $X ;
     eval '
-	$X = tie(%h, "SubDB","dbhash.tmp", O_RDWR|O_CREAT, 0640 );
+	$X = tie(%h, "SubDB","dbhash_tmp", O_RDWR|O_CREAT, 0640 );
 	' ;
 
     main::is($@, "");
@@ -194,9 +195,12 @@ EOM
 
     undef $X;
     untie(%h);
-    unlink "SubDB.pm", <dbhash.tmp*> ;
+    unlink "SubDB.pm", <dbhash_tmp.*> ;
 
 }
+
+untie %h;
+unlink <Op_dbmx*>, $Dfile;
 
 {
    # DBM Filter tests
@@ -214,8 +218,8 @@ EOM
 	   $_ eq 'original' ;
    }
    
-   unlink <Op.dbmx*>;
-   $db = tie %h, 'ODBM_File', 'Op.dbmx', O_RDWR|O_CREAT, 0640;
+   unlink <Op_dbmx*>;
+   $db = tie %h, 'ODBM_File', 'Op_dbmx', O_RDWR|O_CREAT, 0640;
    isa_ok($db, 'ODBM_File');
 
    $db->filter_fetch_key   (sub { $fetch_key = $_ }) ;
@@ -302,7 +306,7 @@ EOM
 
    undef $db ;
    untie %h;
-   unlink <Op.dbmx*>;
+   unlink <Op_dbmx*>;
 }
 
 {    
@@ -310,8 +314,8 @@ EOM
 
     my (%h, $db) ;
 
-    unlink <Op.dbmx*>;
-    $db = tie %h, 'ODBM_File', 'Op.dbmx', O_RDWR|O_CREAT, 0640;
+    unlink <Op_dbmx*>;
+    $db = tie %h, 'ODBM_File', 'Op_dbmx', O_RDWR|O_CREAT, 0640;
     isa_ok($db, 'ODBM_File');
 
     my %result = () ;
@@ -365,15 +369,15 @@ EOM
 
     undef $db ;
     untie %h;
-    unlink <Op.dbmx*>;
+    unlink <Op_dbmx*>;
 }		
 
 {
    # DBM Filter recursion detection
    my (%h, $db) ;
-   unlink <Op.dbmx*>;
+   unlink <Op_dbmx*>;
 
-   $db = tie %h, 'ODBM_File', 'Op.dbmx', O_RDWR|O_CREAT, 0640;
+   $db = tie %h, 'ODBM_File', 'Op_dbmx', O_RDWR|O_CREAT, 0640;
    isa_ok($db, 'ODBM_File');
 
    $db->filter_store_key (sub { $_ = $h{$_} }) ;
@@ -383,7 +387,7 @@ EOM
    
    undef $db ;
    untie %h;
-   unlink <Op.dbmx*>;
+   unlink <Op_dbmx*>;
 }
 
 {
@@ -392,16 +396,16 @@ EOM
     # test that $hash{KEY} = undef doesn't produce the warning
     #     Use of uninitialized value in null operation 
 
-    unlink <Op.dbmx*>;
+    unlink <Op_dbmx*>;
     my %h ;
     my $a = "";
     local $SIG{__WARN__} = sub {$a = $_[0]} ;
-    
-    isa_ok(tie(%h, 'ODBM_File', 'Op.dbmx', O_RDWR|O_CREAT, 0640), 'ODBM_File');
+
+    isa_ok(tie(%h, 'ODBM_File', 'Op_dbmx', O_RDWR|O_CREAT, 0640), 'ODBM_File');
     $h{ABC} = undef;
     is($a, "");
     untie %h;
-    unlink <Op.dbmx*>;
+    unlink <Op_dbmx*>;
 }
 
 {
@@ -411,10 +415,10 @@ EOM
     # modified key doesn't get passed to NEXTKEY.
     # Also Test "keys" & "values" while we are at it.
 
-    unlink <Op.dbmx*>;
+    unlink <Op_dbmx*>;
     my $bad_key = 0 ;
     my %h = () ;
-    my $db = tie %h, 'ODBM_File','Op.dbmx', O_RDWR|O_CREAT, 0640;
+    my $db = tie %h, 'ODBM_File','Op_dbmx', O_RDWR|O_CREAT, 0640;
     isa_ok($db, 'ODBM_File');
     $db->filter_fetch_key (sub { $_ =~ s/^Beta_/Alpha_/ if defined $_}) ;
     $db->filter_store_key (sub { $bad_key = 1 if /^Beta_/ ; $_ =~ s/^Alpha_/Beta_/}) ;
@@ -439,7 +443,7 @@ EOM
 
     undef $db ;
     untie %h ;
-    unlink <Op.dbmx*>;
+    unlink <Op_dbmx*>;
 }
 
 
@@ -447,9 +451,9 @@ EOM
    # Check that DBM Filter can cope with read-only $_
 
    my %h ;
-   unlink <Op.dbmx*>;
+   unlink <Op1_dbmx*>;
 
-   my $db = tie %h, 'ODBM_File','Op.dbmx', O_RDWR|O_CREAT, 0640;
+   my $db = tie %h, 'ODBM_File','Op1_dbmx', O_RDWR|O_CREAT, 0640;
    isa_ok($db, 'ODBM_File');
 
    $db->filter_fetch_key   (sub { }) ;
@@ -483,7 +487,7 @@ EOM
 
    undef $db ;
    untie %h;
-   unlink <Op.dbmx*>;
+   unlink <Op1_dbmx*>;
 }
 
 if ($^O eq 'hpux') {

@@ -27,7 +27,7 @@ isa_ok(tie(%h, 'SDBM_File', 'Op_dbmx', O_RDWR|O_CREAT, 0640), 'SDBM_File');
 
 my $Dfile = "Op_dbmx.pag";
 if (! -e $Dfile) {
-	($Dfile) = <Op_dbmx.*>;
+	($Dfile) = <Op_dbmx*>;
 }
 SKIP: {
     skip "different file permission semantics on $^O", 1
@@ -124,6 +124,11 @@ is(join(':',200..400), join(':',@foo));
 is($h{'foo'}, '');
 is($h{''}, 'bar');
 
+is(exists $h{goner1}, '');
+is(exists $h{foo}, 1);
+
+untie %h;
+unlink <Op_dbmx*>, $Dfile;
 
 {
    # sub-class test
@@ -171,6 +176,7 @@ EOM
     close FILE  or die "Could not close: $!";
 
     BEGIN { push @INC, '.'; }
+    unlink <dbhash_tmp*> ;
 
     eval 'use SubDB ; use Fcntl ;';
     main::is($@, "");
@@ -195,9 +201,6 @@ EOM
     unlink "SubDB.pm", <dbhash_tmp.*> ;
 
 }
-
-is(exists $h{goner1}, '');
-is(exists $h{foo}, 1);
 
 untie %h;
 unlink <Op_dbmx*>, $Dfile;
@@ -398,7 +401,7 @@ unlink <Op_dbmx*>, $Dfile;
     my %h ;
     my $a = "";
     local $SIG{__WARN__} = sub {$a = $_[0]} ;
-    
+
     isa_ok(tie(%h, 'SDBM_File', 'Op_dbmx', O_RDWR|O_CREAT, 0640), 'SDBM_File');
     $h{ABC} = undef;
     is($a, "");
