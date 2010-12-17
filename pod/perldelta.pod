@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 20f15c4, except for:
+This has been completed up to 91fad77, except for:
 d9a4b459f94297889956ac3adc42707365f274c2
 bf5522a13a381257966e7ed6b731195a873b153e
 9cef83062267e94311e1fd8744396e440642738e
@@ -247,6 +247,13 @@ XXX
 =head2 Updated Modules and Pragmata
 
 =over 4
+
+=item *
+
+C<B::Concise> has been upgraded from version 0.81 to 0.82.
+
+It no longer produces mangled output with the C<-tree> option
+L<[perl #80632]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=80632>.
 
 =item *
 
