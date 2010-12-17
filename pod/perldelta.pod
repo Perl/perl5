@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 26de4ac8, except for:
+This has been completed up to 8e720305, except for:
 d9a4b459f94297889956ac3adc42707365f274c2
 bf5522a13a381257966e7ed6b731195a873b153e
 9cef83062267e94311e1fd8744396e440642738e
@@ -128,6 +128,10 @@ and then running:
 DTrace will print:
 
   main::test
+
+=head2 Stacked labels
+
+Multiple statement labels can now appear before a single statement.
 
 =head1 Security
 
