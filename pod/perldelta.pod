@@ -109,6 +109,26 @@ This double setting arrangement is a stopgap until the reason for unwinding can
 be made properly introspectable.  C<$@> has never been a reliable indicator of
 this.
 
+=head2 DTrace probes now include package name
+
+The DTrace probes now include an additional argument (C<arg3>) which contains
+the package the subroutine being entered or left was compiled in.
+
+For example using the following DTrace script:
+
+  perl$target:::sub-entry
+  {
+      printf("%s::%s\n", copyinstr(arg0), copyinstr(arg3));
+  }
+
+and then running:
+
+  perl -e'sub test { }; test'
+
+DTrace will print:
+
+  main::test
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
