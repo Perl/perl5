@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 8e720305, except for:
+This has been completed up to a42d024, except for:
 d9a4b459f94297889956ac3adc42707365f274c2
 bf5522a13a381257966e7ed6b731195a873b153e
 9cef83062267e94311e1fd8744396e440642738e
@@ -697,6 +697,12 @@ The C<B> module was returning B::OPs instead of B::LOGOPs for C<entertry>
 L<[perl #80622]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=80622>.
 
 This was due to a bug in the perl core, not in C<B> itself.
+
+=item *
+
+Some numeric operators were converting integers to floating point,
+resulting in loss of precision on 64-bit platforms
+L<[perl #77456]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77456>.
 
 =back
 
