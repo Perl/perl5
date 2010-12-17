@@ -232,10 +232,12 @@ unlink <Op_dbmx*>, $Dfile;
    sub checkOutput
    {
        my($fk, $sk, $fv, $sv) = @_;
-       return
-           $fetch_key eq $fk && $store_key eq $sk &&
-	   $fetch_value eq $fv && $store_value eq $sv &&
-	   $_ eq 'original';
+       local $Test::Builder::Level = $Test::Builder::Level + 1;
+       is($fetch_key, $fk);
+       is($store_key, $sk);
+       is($fetch_value, $fv);
+       is($store_value, $sv);
+       is($_, 'original');
    }
 
    unlink <Op_dbmx*>;
@@ -251,17 +253,17 @@ unlink <Op_dbmx*>, $Dfile;
 
    $h{"fred"} = "joe";
    #                   fk   sk     fv   sv
-   ok(checkOutput("", "fred", "", "joe"));
+   checkOutput("", "fred", "", "joe");
 
    ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4;
    is($h{"fred"}, "joe");
    #                   fk    sk     fv    sv
-   ok(checkOutput("", "fred", "joe", ""));
+   checkOutput("", "fred", "joe", "");
 
    ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4;
    is($db->FIRSTKEY(), "fred");
    #                    fk     sk  fv  sv
-   ok(checkOutput("fred", "", "", ""));
+   checkOutput("fred", "", "", "");
 
    # replace the filters, but remember the previous set
    my ($old_fk) = $db->filter_fetch_key
@@ -276,17 +278,17 @@ unlink <Op_dbmx*>, $Dfile;
    ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4;
    $h{"Fred"} = "Joe";
    #                   fk   sk     fv    sv
-   ok(checkOutput("", "fred", "", "Jxe"));
+   checkOutput("", "fred", "", "Jxe");
 
    ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4;
    is($h{"Fred"}, "[Jxe]");
    #                   fk   sk     fv    sv
-   ok(checkOutput("", "fred", "[Jxe]", ""));
+   checkOutput("", "fred", "[Jxe]", "");
 
    ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4;
    is($db->FIRSTKEY(), "FRED");
    #                   fk   sk     fv    sv
-   ok(checkOutput("FRED", "", "", ""));
+   checkOutput("FRED", "", "", "");
 
    # put the original filters back
    $db->filter_fetch_key   ($old_fk);
@@ -296,15 +298,15 @@ unlink <Op_dbmx*>, $Dfile;
 
    ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4;
    $h{"fred"} = "joe";
-   ok(checkOutput("", "fred", "", "joe"));
+   checkOutput("", "fred", "", "joe");
 
    ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4;
    is($h{"fred"}, "joe");
-   ok(checkOutput("", "fred", "joe", ""));
+   checkOutput("", "fred", "joe", "");
 
    ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4;
    is($db->FIRSTKEY(), "fred");
-   ok(checkOutput("fred", "", "", ""));
+   checkOutput("fred", "", "", "");
 
    # delete the filters
    $db->filter_fetch_key   (undef);
@@ -314,15 +316,15 @@ unlink <Op_dbmx*>, $Dfile;
 
    ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4;
    $h{"fred"} = "joe";
-   ok(checkOutput("", "", "", ""));
+   checkOutput("", "", "", "");
 
    ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4;
    is($h{"fred"}, "joe");
-   ok(checkOutput("", "", "", ""));
+   checkOutput("", "", "", "");
 
    ($fetch_key, $store_key, $fetch_value, $store_value) = ("") x 4;
    is($db->FIRSTKEY(), "fred");
-   ok(checkOutput("", "", "", ""));
+   checkOutput("", "", "", "");
 
    undef $db;
    untie %h;
