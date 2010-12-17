@@ -14,22 +14,12 @@ BEGIN {
 }
 
 use strict;
+use Test::More tests => 23;
+
 use IO::Handle;
 use IPC::Open3;
-#require 'open3.pl'; use subs 'open3';
 
 my $perl = $^X;
-
-sub ok {
-    my ($n, $result, $info) = @_;
-    if ($result) {
-	print "ok $n\n";
-    }
-    else {
-	print "not ok $n\n";
-	print "# $info\n" if $info;
-    }
-}
 
 sub cmd_line {
 	if ($^O eq 'MSWin32' || $^O eq 'NetWare') {
@@ -47,62 +37,63 @@ my ($pid, $reaped_pid);
 STDOUT->autoflush;
 STDERR->autoflush;
 
-print "1..23\n";
-
 # basic
-ok 1, $pid = open3 'WRITE', 'READ', 'ERROR', $perl, '-e', cmd_line(<<'EOF');
+$pid = open3 'WRITE', 'READ', 'ERROR', $perl, '-e', cmd_line(<<'EOF');
     $| = 1;
     print scalar <STDIN>;
     print STDERR "hi error\n";
 EOF
-ok 2, print WRITE "hi kid\n";
-ok 3, <READ> =~ /^hi kid\r?\n$/;
-ok 4, <ERROR> =~ /^hi error\r?\n$/;
-ok 5, close(WRITE), $!;
-ok 6, close(READ), $!;
-ok 7, close(ERROR), $!;
+cmp_ok($pid, '!=', 0);
+isnt((print WRITE "hi kid\n"), 0);
+like(scalar <READ>, qr/^hi kid\r?\n$/);
+like(scalar <ERROR>, qr/^hi error\r?\n$/);
+is(close(WRITE), 1) or diag($!);
+is(close(READ), 1) or diag($!);
+is(close(ERROR), 1) or diag($!);
 $reaped_pid = waitpid $pid, 0;
-ok 8, $reaped_pid == $pid, $reaped_pid;
-ok 9, $? == 0, $?;
+is($reaped_pid, $pid);
+is($?, 0);
 
-# read and error together, both named
+my $desc = "read and error together, both named";
 $pid = open3 'WRITE', 'READ', 'READ', $perl, '-e', cmd_line(<<'EOF');
     $| = 1;
     print scalar <STDIN>;
     print STDERR scalar <STDIN>;
 EOF
-print WRITE "ok 10\n";
-print scalar <READ>;
-print WRITE "ok 11\n";
-print scalar <READ>;
+print WRITE "$desc\n";
+is(scalar <READ>, "$desc\n");
+print WRITE "$desc [again]\n";
+is(scalar <READ>, "$desc [again]\n");
 waitpid $pid, 0;
 
-# read and error together, error empty
+$desc = "read and error together, error empty";
 $pid = open3 'WRITE', 'READ', '', $perl, '-e', cmd_line(<<'EOF');
     $| = 1;
     print scalar <STDIN>;
     print STDERR scalar <STDIN>;
 EOF
-print WRITE "ok 12\n";
-print scalar <READ>;
-print WRITE "ok 13\n";
-print scalar <READ>;
+print WRITE "$desc\n";
+is(scalar <READ>, "$desc\n");
+print WRITE "$desc [again]\n";
+is(scalar <READ>, "$desc [again]\n");
 waitpid $pid, 0;
 
-# dup writer
-ok 14, pipe PIPE_READ, PIPE_WRITE;
+is(pipe(PIPE_READ, PIPE_WRITE), 1);
 $pid = open3 '<&PIPE_READ', 'READ', '',
 		    $perl, '-e', cmd_line('print scalar <STDIN>');
 close PIPE_READ;
-print PIPE_WRITE "ok 15\n";
+print PIPE_WRITE "dup writer\n";
 close PIPE_WRITE;
-print scalar <READ>;
+is(scalar <READ>, "dup writer\n");
 waitpid $pid, 0;
 
+my $TB = Test::Builder->new();
+my $test = $TB->current_test;
 # dup reader
 $pid = open3 'WRITE', '>&STDOUT', 'ERROR',
 		    $perl, '-e', cmd_line('print scalar <STDIN>');
-print WRITE "ok 16\n";
+++$test;
+print WRITE "ok $test\n";
 waitpid $pid, 0;
 
 # dup error:  This particular case, duping stderr onto the existing
@@ -110,7 +101,8 @@ waitpid $pid, 0;
 # used not to work.
 $pid = open3 'WRITE', 'READ', '>&STDOUT',
 		    $perl, '-e', cmd_line('print STDERR scalar <STDIN>');
-print WRITE "ok 17\n";
+++$test;
+print WRITE "ok $test\n";
 waitpid $pid, 0;
 
 # dup reader and error together, both named
@@ -119,8 +111,10 @@ $pid = open3 'WRITE', '>&STDOUT', '>&STDOUT', $perl, '-e', cmd_line(<<'EOF');
     print STDOUT scalar <STDIN>;
     print STDERR scalar <STDIN>;
 EOF
-print WRITE "ok 18\n";
-print WRITE "ok 19\n";
+++$test;
+print WRITE "ok $test\n";
+++$test;
+print WRITE "ok $test\n";
 waitpid $pid, 0;
 
 # dup reader and error together, error empty
@@ -129,8 +123,10 @@ $pid = open3 'WRITE', '>&STDOUT', '', $perl, '-e', cmd_line(<<'EOF');
     print STDOUT scalar <STDIN>;
     print STDERR scalar <STDIN>;
 EOF
-print WRITE "ok 20\n";
-print WRITE "ok 21\n";
+++$test;
+print WRITE "ok $test\n";
+++$test;
+print WRITE "ok $test\n";
 waitpid $pid, 0;
 
 # command line in single parameter variant of open3
@@ -140,26 +136,24 @@ $cmd = $Config{'sh'} =~ /sh/ ? "'$cmd'" : cmd_line($cmd);
 eval{$pid = open3 'WRITE', '>&STDOUT', 'ERROR', "$perl -e " . $cmd; };
 if ($@) {
 	print "error $@\n";
-	print "not ok 22\n";
+	++$test;
+	print WRITE "not ok $test\n";
 }
 else {
-	print WRITE "ok 22\n";
+	++$test;
+	print WRITE "ok $test\n";
 	waitpid $pid, 0;
 }
+$TB->current_test($test);
 
 # RT 72016
 eval{$pid = open3 'WRITE', 'READ', 'ERROR', '/non/existant/program'; };
 if (IPC::Open3::DO_SPAWN) {
-    if ($@ || waitpid($pid, 0) > 0) {
-	print "ok 23\n";
+    if ($@) {
+	cmp_ok(waitpid($pid, 0), '>', 0);
     } else {
-	print "not ok 23\n";
+	pass();
     }
 } else {
-    if ($@) {
-	print "ok 23\n";
-    } else {
-	waitpid($pid, 0);
-	print "not ok 23\n";
-    }
+    isnt($@, '') or do {waitpid $pid, 0};
 }
