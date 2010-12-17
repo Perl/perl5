@@ -109,6 +109,15 @@ This double setting arrangement is a stopgap until the reason for unwinding can
 be made properly introspectable.  C<$@> has never been a reliable indicator of
 this.
 
+=head2 printf-like functions understand size modifiers "hh", "z", "t", and sometimes "j"
+
+Perl's printf and sprintf operators, and Perl's internal printf replacement
+function, now understand the C90 size modifiers "hh" (C<char>), "z"
+(C<size_t>), and "t" (C<ptrdiff_t>).  Also, when compiled with a C99
+compiler, Perl now understands the size modifier "j" (C<intmax_t>).
+
+So, for example, on any modern machine, C<sprintf('%hhd', 257)> returns '1'.
+
 =head2 DTrace probes now include package name
 
 The DTrace probes now include an additional argument (C<arg3>) which contains
