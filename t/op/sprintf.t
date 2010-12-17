@@ -301,8 +301,11 @@ __END__
 >% 3d<      >-1<          > -1<
 >%03d<      >-1<          >-01<
 >%hd<       >1<           >1<              >More extensive testing of<
->%ld<       >1<           >1<              >length modifiers would be<
->%Vd<       >1<           >1<              >platform-specific<
+>%hhd<      >1<           >1<              >length modifiers would be<
+>%ld<       >1<           >1<              >platform-specific<
+>%Vd<       >1<           >1<
+>%zd<       >1<           >1<
+>%td<       >1<           >1<
 >%vd<       >chr(1)<      >1<
 >%+vd<      >chr(1)<      >+1<
 >%#vd<      >chr(1)<      >1<
