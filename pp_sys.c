@@ -4473,7 +4473,7 @@ PP(pp_setpgrp)
 #endif
 }
 
-#ifdef __GLIBC__
+#if defined(__GLIBC__) && ((__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3) || (__GLIBC__ > 2))
 #  define PRIORITY_WHICH_T(which) (__priority_which_t)which
 #else
 #  define PRIORITY_WHICH_T(which) which

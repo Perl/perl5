@@ -477,7 +477,9 @@ pack_sockaddr_in6(port, sin6_addr, scope_id=0, flowinfo=0)
 	sin6.sin6_port = htons(port);
 	sin6.sin6_flowinfo = htonl(flowinfo);
 	Copy(addrbytes, &sin6.sin6_addr, sizeof(sin6.sin6_addr), char);
+#if !defined(__GLIBC__) || (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)
 	sin6.sin6_scope_id = scope_id;
+#endif
 	ST(0) = newSVpvn_flags((char *)&sin6, sizeof(sin6), SVs_TEMP);
 #else
 	ST(0) = (SV*)not_here("pack_sockaddr_in6");
@@ -505,7 +507,11 @@ unpack_sockaddr_in6(sin6_sv)
 	EXTEND(SP, 4);
 	mPUSHi(ntohs(sin6.sin6_port));
 	mPUSHp((char *)&sin6.sin6_addr, sizeof(sin6.sin6_addr));
+#if !defined(__GLIBC__) || (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)
 	mPUSHi(sin6.sin6_scope_id);
+#else
+	mPUSHi(0);
+#endif
 	mPUSHi(ntohl(sin6.sin6_flowinfo));
 #else
 	ST(0) = (SV*)not_here("pack_sockaddr_in6");
