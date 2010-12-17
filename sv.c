@@ -32,6 +32,15 @@
 #include "perl.h"
 #include "regcomp.h"
 
+#ifndef HAS_C99
+# if __STDC_VERSION__ >= 199901L
+#  define HAS_C99 1
+# endif
+#endif
+#if HAS_C99
+# include <stdint.h>
+#endif
+
 #define FCALL *f
 
 #ifdef __Lynx__
@@ -10270,16 +10279,28 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 #endif
 	case 'l':
 #if defined(HAS_QUAD) || defined(HAS_LONG_DOUBLE)
-	    if (*(q + 1) == 'l') {	/* lld, llf */
+	    if (*++q == 'l') {	/* lld, llf */
 		intsize = 'q';
-		q += 2;
-		break;
-	     }
+		++q;
+	    }
+	    else
 #endif
-	    /*FALLTHROUGH*/
+		intsize = 'l';
+	    break;
 	case 'h':
-	    /*FALLTHROUGH*/
+	    if (*++q == 'h') {	/* hhd, hhu */
+		intsize = 'c';
+		++q;
+	    }
+	    else
+		intsize = 'h';
+	    break;
 	case 'V':
+	case 'z':
+	case 't':
+#if HAS_C99
+        case 'j':
+#endif
 	    intsize = *q++;
 	    break;
 	}
@@ -10405,10 +10426,16 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 	    }
 	    else if (args) {
 		switch (intsize) {
+		case 'c':	iv = (char)va_arg(*args, int); break;
 		case 'h':	iv = (short)va_arg(*args, int); break;
 		case 'l':	iv = va_arg(*args, long); break;
 		case 'V':	iv = va_arg(*args, IV); break;
+		case 'z':	iv = va_arg(*args, SSize_t); break;
+		case 't':	iv = va_arg(*args, ptrdiff_t); break;
 		default:	iv = va_arg(*args, int); break;
+#if HAS_C99
+		case 'j':	iv = va_arg(*args, intmax_t); break;
+#endif
 		case 'q':
 #ifdef HAS_QUAD
 				iv = va_arg(*args, Quad_t); break;
@@ -10420,6 +10447,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 	    else {
 		IV tiv = SvIV(argsv); /* work around GCC bug #13488 */
 		switch (intsize) {
+		case 'c':	iv = (char)tiv; break;
 		case 'h':	iv = (short)tiv; break;
 		case 'l':	iv = (long)tiv; break;
 		case 'V':
@@ -10496,9 +10524,15 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 	    }
 	    else if (args) {
 		switch (intsize) {
+		case 'c':  uv = (unsigned char)va_arg(*args, unsigned); break;
 		case 'h':  uv = (unsigned short)va_arg(*args, unsigned); break;
 		case 'l':  uv = va_arg(*args, unsigned long); break;
 		case 'V':  uv = va_arg(*args, UV); break;
+		case 'z':  uv = va_arg(*args, Size_t); break;
+	        case 't':  uv = va_arg(*args, ptrdiff_t); break; /* will sign extend, but there is no uptrdiff_t, so oh well */
+#if HAS_C99
+		case 'j':  uv = va_arg(*args, uintmax_t); break;
+#endif
 		default:   uv = va_arg(*args, unsigned); break;
 		case 'q':
 #ifdef HAS_QUAD
@@ -10511,6 +10545,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 	    else {
 		UV tuv = SvUV(argsv); /* work around GCC bug #13488 */
 		switch (intsize) {
+		case 'c':	uv = (unsigned char)tuv; break;
 		case 'h':	uv = (unsigned short)tuv; break;
 		case 'l':	uv = (unsigned long)tuv; break;
 		case 'V':
@@ -10621,7 +10656,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 #else
 		/*FALLTHROUGH*/
 #endif
+	    case 'c':
 	    case 'h':
+	    case 'z':
+	    case 't':
+	    case 'j':
 		goto unknown;
 	    }
 
@@ -10801,10 +10840,16 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 	    i = SvCUR(sv) - origlen;
 	    if (args) {
 		switch (intsize) {
+		case 'c':	*(va_arg(*args, char*)) = i; break;
 		case 'h':	*(va_arg(*args, short*)) = i; break;
 		default:	*(va_arg(*args, int*)) = i; break;
 		case 'l':	*(va_arg(*args, long*)) = i; break;
 		case 'V':	*(va_arg(*args, IV*)) = i; break;
+		case 'z':	*(va_arg(*args, SSize_t*)) = i; break;
+		case 't':	*(va_arg(*args, ptrdiff_t*)) = i; break;
+#if HAS_C99
+		case 'j':	*(va_arg(*args, intmax_t*)) = i; break;
+#endif
 		case 'q':
 #ifdef HAS_QUAD
 				*(va_arg(*args, Quad_t*)) = i; break;
