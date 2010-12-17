@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to a42d024, except for:
+This has been completed up to 20f15c4, except for:
 d9a4b459f94297889956ac3adc42707365f274c2
 bf5522a13a381257966e7ed6b731195a873b153e
 9cef83062267e94311e1fd8744396e440642738e
@@ -273,6 +273,10 @@ C<ExtUtils::CBuilder> has been upgraded from 0.2703 to 0.2802
 
 =item *
 
+C<ExtUtils::Embed> has been upgraded from 1.29 to 1.30.
+
+=item *
+
 C<if> has been upgraded from 0.06 to 0.0601.
 
 =item *
@@ -285,6 +289,10 @@ C<IPC::Cmd> has been upgraded from 0.64 to 0.66
 
 Resolves an issue with splitting Win32 command lines
 and documentation enhancements.
+
+=item *
+
+C<IPC::Open3> has been upgraded from 1.07 to 1.08.
 
 =item *
 
@@ -311,7 +319,15 @@ L<[perl #68654]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=68654>.
 
 =item *
 
+C<Net::Ping> has been upgraded from 2.36 to 2.37.
+
+=item *
+
 C<overload> has been upgraded from 1.11 to 1.12.
+
+=item *
+
+C<PerlIO::encoding> has been upgraded from 0.13 to 0.14.
 
 =item *
 
