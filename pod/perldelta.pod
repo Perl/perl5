@@ -259,6 +259,10 @@ XXX
 
 =item *
 
+C<Archive::Tar> has been upgraded from version 1.72 to 1.74
+
+=item *
+
 C<B::Concise> has been upgraded from version 0.81 to 0.82.
 
 It no longer produces mangled output with the C<-tree> option
