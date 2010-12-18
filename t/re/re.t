@@ -54,19 +54,6 @@ if ('1234'=~/(?:(?<A>\d)|(?<C>!))(?<B>\d)(?<A>\d)(?<B>\d)/){
     is(regnames_count(),3);
 }
 
-    { # Keep these tests last, as whole script will be interrupted if times out
-        # Bug #72998; this can loop 
-        watchdog(2);
-        eval '"\x{100}\x{FB00}" =~ /\x{100}\N{U+66}+/i';
-        pass("Didn't loop");
-
-        # Bug #78058; this can loop
-        watchdog(2);
-        no warnings;    # Because the 8 may be warned on
-        eval 'qr/\18/';
-        pass("qr/\18/ didn't loop");
-    }
-
 {
     # tests for new regexp flags
     my $text = "\xE4";
@@ -108,6 +95,20 @@ if ('1234'=~/(?:(?<A>\d)|(?<C>!))(?<B>\d)(?<A>\d)(?<B>\d)/){
         ok( !$check );
     }
 }
+
+
+    { # Keep these tests last, as whole script will be interrupted if times out
+        # Bug #72998; this can loop 
+        watchdog(2);
+        eval '"\x{100}\x{FB00}" =~ /\x{100}\N{U+66}+/i';
+        pass("Didn't loop");
+
+        # Bug #78058; this can loop
+        watchdog(2);
+        no warnings;    # Because the 8 may be warned on
+        eval 'qr/\18/';
+        pass("qr/\18/ didn't loop");
+    }
 
 # New tests above this line, don't forget to update the test count below!
 BEGIN { plan tests => 28 }
