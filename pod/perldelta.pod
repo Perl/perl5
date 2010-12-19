@@ -1,8 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 91fad77, except for:
-8e88cfee26d866223a6b3bfffce6270271de00db
+This has been completed up to 91fad77.
 
 =head1 NAME
 
@@ -372,6 +371,10 @@ This adds support for serialising code references that contain UTF-8 strings
 correctly. The Storable minor version number changed as a result -- this means
 Storable users that set C<$Storable::accept_future_minor> to a C<FALSE> value
 will see errors (see L<Storable/FORWARD COMPATIBILITY> for more details).
+
+Freezing no longer gets confused if the Perl stack gets reallocated
+during freezing
+L<[perl #80074]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=80074>.
 
 =item *
 
