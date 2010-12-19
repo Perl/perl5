@@ -9610,6 +9610,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	 * --jhi */
 	pv_pretty(sv, STRING(o), STR_LEN(o), 60, PL_colors[0], PL_colors[1],
 		  PERL_PV_ESCAPE_UNI_DETECT |
+		  PERL_PV_ESCAPE_NONASCII   |
 		  PERL_PV_PRETTY_ELLIPSES   |
 		  PERL_PV_PRETTY_LTGT       |
 		  PERL_PV_PRETTY_NOCLEAR

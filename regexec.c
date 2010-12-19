@@ -3493,7 +3493,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    ST.nextword,
 		    tmp ? pv_pretty(sv, SvPV_nolen_const(*tmp), SvCUR(*tmp), 0,
 			    PL_colors[0], PL_colors[1],
-			    (SvUTF8(*tmp) ? PERL_PV_ESCAPE_UNI : 0)
+			    (SvUTF8(*tmp) ? PERL_PV_ESCAPE_UNI : 0)|PERL_PV_ESCAPE_NONASCII
 			) 
 		    : "not compiled under -Dr",
 		    PL_colors[5] );
