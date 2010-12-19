@@ -3937,10 +3937,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    re_fold_t folder;
 	    const U8 *fold_array;
 
-	    folder = NULL;	/* NULL assumes will be NREF, REF: no
-				   folding */
-	    fold_array = NULL;
-
 	    PL_reg_flags |= RF_tainted;
 	    folder = foldEQ_locale;
 	    fold_array = PL_fold_locale;
