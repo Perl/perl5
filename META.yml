@@ -14,17 +14,24 @@ no_index:
   directory:
     - cpan
     - dist/Attribute-Handlers
+    - dist/autouse
     - dist/B-Lint
     - dist/base
     - dist/bignum
     - dist/constant
     - dist/Cwd
     - dist/Data-Dumper
+    - dist/Devel-SelfStubber
+    - dist/Dumpvalue
+    - dist/Env
+    - dist/ExtUtils-CBuilder
     - dist/ExtUtils-Command
     - dist/ExtUtils-Install
     - dist/ExtUtils-Manifest
     - dist/ExtUtils-ParseXS
+    - dist/File-CheckTree
     - dist/Filter-Simple
+    - dist/I18N-Collate
     - dist/I18N-LangTags
     - dist/if
     - dist/IO/
