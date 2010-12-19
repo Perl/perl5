@@ -1,8 +1,5 @@
 =encoding utf8
 
-=for comment XXX
-This has been completed up to e57c1822.
-
 =head1 NAME
 
 perldelta - what is new for perl v5.13.8
@@ -863,7 +860,20 @@ L<[perl #71286]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=71286>.
 
 =head1 Acknowledgements
 
-XXX The list of people to thank goes here.
+Perl 5.13.8 represents approximately one month of development since
+Perl 5.13.7 and contains 38714 lines of changes across 546 files from
+38 authors and committers.
+
+Thank you to the following for contributing to this release:
+
+Abhijit Menon-Sen, Abigail, Andreas KE<0xf6>nig, Ben Morrow, Brad Gilbert,
+brian d foy, Chip Salzenberg, Chris 'BinGOs' Williams, Craig A. Berry,
+David Golden, David Leadbeater, David Mitchell, Father Chrysostomos,
+Florian Ragwitz, Goro Fuji, H.Merijn Brand, Jan Dubois, Jerry D. Hedden,
+Jesse Vincent, John Peacock, Karl Williamson, Lukas Mai, Marvin Humphrey,
+Max Maischein, Michael Breen, Michael Fig, Nicholas Clark, Nick Cleaton,
+Paul Evans, Peter J. Holzer, Peter John Acklam, Rafael Garcia-Suarez,
+Reini Urban, Renee Baecker, Ricardo Signes, Tony Cook, Yves Orton, Zefram
 
 =head1 Reporting Bugs
 
