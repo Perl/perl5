@@ -239,11 +239,10 @@ then all chars below 255 will be treated as printable and
 will be output as literals.
 
 If PERL_PV_ESCAPE_FIRSTCHAR is set then only the first char of the
-string will be escaped, regardles of max. If the string is utf8 and 
-the chars value is >255 then it will be returned as a plain hex 
-sequence. Thus the output will either be a single char, 
-an octal escape sequence, a special escape like C<\n> or a 3 or 
-more digit hex value. 
+string will be escaped, regardless of max. If the output is to be in hex,
+then it will be returned as a plain hex
+sequence. Thus the output will either be a single char,
+an octal escape sequence, a special escape like C<\n> or a hex value.
 
 If PERL_PV_ESCAPE_RE is set then the escape char used will be a '%' and
 not a '\\'. This is because regexes very often contain backslashed
