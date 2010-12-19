@@ -234,7 +234,7 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #define UTF8_ALLOW_CONTINUATION		0x0002
 #define UTF8_ALLOW_NON_CONTINUATION	0x0004
 #define UTF8_ALLOW_FE_FF		0x0008 /* Allow FE or FF start bytes, \
-						  yields above 0x7fffFFFF */
+						  yields above 0x7fffFFFF = 31 bits */
 #define UTF8_ALLOW_SHORT		0x0010 /* expecting more bytes */
 #define UTF8_ALLOW_SURROGATE		0x0020
 #define UTF8_ALLOW_FFFF			0x0040 /* Allow UNICODE_ILLEGAL */
