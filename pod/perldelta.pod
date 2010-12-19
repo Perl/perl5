@@ -708,7 +708,9 @@ this part of the distribution to sometimes be omitted is long gone.
 
 =item *
 
-The C<mg_findext()> and C<sv_unmagicext()> functions have been added to the API.
+The L<C<mg_findext()>|perlapi/mg_findext> and
+L<C<sv_unmagicext()>|perlapi/sv_unmagicext>
+functions have been added to the API.
 They allow extension authors to find and remove magic attached to
 scalars based on both the magic type and the magic virtual table, similar to how
 C<sv_magicext()> attaches magic of a certain type and with a given virtual table
@@ -717,8 +719,12 @@ C<MAGIC> pointers of an C<SV> to find the magic that belongs to them.
 
 =item *
 
-The C<parse_fullexpr()>, C<parse_listexpr()>, C<parse_termexpr()> and
-C<parse_arithexpr()> functions have been added to the API.  They perform
+The
+L<C<parse_fullexpr()>|perlapi/parse_fullexpr>,
+L<C<parse_listexpr()>|perlapi/parse_listexpr>,
+L<C<parse_termexpr()>|perlapi/parse_termexpr>, and
+L<C<parse_arithexpr()>|perlapi/parse_arithexpr>
+functions have been added to the API.  They perform
 recursive-descent parsing of expressions at various precedence levels.
 They are expected to be used by syntax plugins.
 
