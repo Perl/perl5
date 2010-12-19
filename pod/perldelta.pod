@@ -77,7 +77,7 @@ L<perlunicode/The "Unicode Bug"> for details.)  If there is a
 possibility that your code will process Unicode strings, you are
 B<strongly> encouraged to use this subpragma to avoid nasty surprises.
 
-This availability of this should strongly affect the whole tone of
+The availability of this should strongly affect the whole tone of
 various documents, such as L<perlunicode> and L<perluniintro>, but this
 work has not been done yet.
 
