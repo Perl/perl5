@@ -14,7 +14,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '0.68';
+our $VERSION = '0.6801';
 our $PACKAGE = __PACKAGE__;
 
 my @Path = qw(Unicode Collate);
