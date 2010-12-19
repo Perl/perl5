@@ -1,0 +1,912 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5138delta - what is new for perl v5.13.8
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.13.7 release and
+the 5.13.8 release.
+
+If you are upgrading from an earlier release such as 5.13.6, first read
+L<perl5137delta>, which describes differences between 5.13.6 and
+5.13.7.
+
+=head1 Core Enhancements
+
+=head2 C<-d:-foo> calls C<Devel::foo::unimport>
+
+The syntax C<-dI<B<:>foo>> was extended in 5.6.1 to make C<-dI<:fooB<=bar>>>
+equivalent to C<-MDevel::foo=bar>, which expands
+internally to C<use Devel::foo 'bar';>.
+F<perl> now allows prefixing the module name with C<->, with the same
+semantics as C<-M>, I<i.e.>
+
+=over 4
+
+=item C<-d:-foo>
+
+Equivalent to C<-M-Devel::foo>, expands to
+C<no Devel::foo;>, calls C<< Devel::foo->unimport() >>
+if the method exists.
+
+=item C<-d:-foo=bar>
+
+Equivalent to C<-M-Devel::foo=bar>, expands to C<no Devel::foo 'bar';>,
+calls C<< Devel::foo->unimport('bar') >> if the method exists.
+
+=back
+
+This is particularly useful to suppresses the default actions of a
+C<Devel::*> module's C<import> method whilst still loading it for debugging.
+
+=head2 Filehandle method calls load L<IO::File> on demand
+
+When a method call on a filehandle would die because the method cannot
+be resolved, and L<IO::File> has not been loaded, Perl now loads L<IO::File>
+via C<require> and attempts method resolution again:
+
+  open my $fh, ">", $file;
+  $fh->binmode(":raw");     # loads IO::File and succeeds
+
+This also works for globs like STDOUT, STDERR and STDIN:
+
+  STDOUT->autoflush(1);
+
+Because this on-demand load only happens if method resolution fails, the
+legacy approach of manually loading an L<IO::File> parent class for partial
+method support still works as expected:
+
+  use IO::Handle;
+  open my $fh, ">", $file;
+  $fh->autoflush(1);        # IO::File not loaded
+
+=head2 Full functionality for C<use feature 'unicode_strings'>
+
+This release provides full functionality for C<use feature
+'unicode_strings'>.  Under its scope, all string operations executed and
+regular expressions compiled (even if executed outside its scope) have
+Unicode semantics.  See L<feature>.
+
+This feature avoids most forms of the "Unicode Bug" (See
+L<perlunicode/The "Unicode Bug"> for details.)  If there is a
+possibility that your code will process Unicode strings, you are
+B<strongly> encouraged to use this subpragma to avoid nasty surprises.
+
+The availability of this should strongly affect the whole tone of
+various documents, such as L<perlunicode> and L<perluniintro>, but this
+work has not been done yet.
+
+=head2 Exception Handling Backcompat Hack
+
+When an exception is thrown in an C<eval BLOCK>, C<$@> is now set before
+unwinding, as well as being set after unwinding as the eval block exits.  This
+early setting supports code that has historically treated C<$@> during unwinding
+as an indicator of whether the unwinding was due to an exception.  These modules
+had been broken by 5.13.1's change from setting C<$@> early to setting it late.
+This double setting arrangement is a stopgap until the reason for unwinding can
+be made properly introspectable.  C<$@> has never been a reliable indicator of
+the reason for unwinding.
+
+=head2 printf-like functions understand post-1980 size modifiers
+
+Perl's printf and sprintf operators, and Perl's internal printf replacement
+function, now understand the C90 size modifiers "hh" (C<char>), "z"
+(C<size_t>), and "t" (C<ptrdiff_t>).  Also, when compiled with a C99
+compiler, Perl now understands the size modifier "j" (C<intmax_t>).
+
+So, for example, on any modern machine, C<sprintf('%hhd', 257)> returns '1'.
+
+=head2 DTrace probes now include package name
+
+The DTrace probes now include an additional argument (C<arg3>) which contains
+the package the subroutine being entered or left was compiled in.
+
+For example using the following DTrace script:
+
+  perl$target:::sub-entry
+  {
+      printf("%s::%s\n", copyinstr(arg0), copyinstr(arg3));
+  }
+
+and then running:
+
+  perl -e'sub test { }; test'
+
+DTrace will print:
+
+  main::test
+
+=head2 Stacked labels
+
+Multiple statement labels can now appear before a single statement.
+
+=head1 Incompatible Changes
+
+=head2 C<:=> is now a syntax error
+
+Previously C<my $pi := 4;> was exactly equivalent to C<my $pi : = 4;>,
+with the C<:> being treated as the start of an attribute list, ending before
+the C<=>. The use of C<:=> to mean C<: => was deprecated in 5.12.0, and is now
+a syntax error. This will allow the future use of C<:=> as a new token.
+
+We find no Perl 5 code on CPAN using this construction, outside the core's
+tests for it, so we believe that this change will have very little impact on
+real-world codebases.
+
+If it is absolutely necessary to have empty attribute lists (for example,
+because of a code generator) then avoid the error by adding a space before
+the C<=>.
+
+=head2 Run-time code block in regular expressions
+
+Code blocks in regular expressions (C<(?{...})> and C<(??{...})>) used not
+to inherit any pragmata (strict, warnings, etc.) if the regular expression
+was compiled at run time as happens in cases like these two:
+
+  use re 'eval';
+  $foo =~ $bar; # when $bar contains (?{...})
+  $foo =~ /$bar(?{ $finished = 1 })/;
+
+This was a bug, which has now been fixed. But it has the potential to break
+any code that was relying on this bug.
+
+=head1 Deprecations
+
+=head2 C<?PATTERN?> is deprecated
+
+C<?PATTERN?> (without the initial m) has been deprecated and now produces
+a warning.  This is to allow future use of C<?> in new operators.
+The match-once functionality is still available in the form of C<m?PATTERN?>.
+
+=head2 C<sv_compile_2op()> is now deprecated
+
+The C<sv_compile_2op()> API function is now deprecated. Searches suggest
+that nothing on CPAN is using it, so this should have zero impact.
+
+It attempted to provide an API to compile code down to an optree, but failed
+to bind correctly to lexicals in the enclosing scope. It's not possible to
+fix this problem within the constraints of its parameters and return value.
+
+=head2 Tie functions on scalars holding typeglobs
+
+Calling a tie function (C<tie>, C<tied>, C<untie>) with a scalar argument
+acts on a file handle if the scalar happens to hold a typeglob.
+
+This is a long-standing bug that will be removed in Perl 5.16, as
+there is currently no way to tie the scalar itself when it holds
+a typeglob, and no way to untie a scalar that has had a typeglob
+assigned to it.
+
+This bug was fixed in 5.13.7 but, because of the breakage it caused, the
+fix has been reverted. Now there is a deprecation warning whenever a tie
+function is used on a handle without an explicit C<*>.
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+C<Archive::Tar> has been upgraded from version 1.72 to 1.74.
+
+Skip extracting pax extended headers.
+
+=item *
+
+C<autodie> has been upgraded from version 2.10 to 2.1001.
+
+Test fix in blead for VMS.
+
+=item *
+
+C<B> has been upgraded from version 1.26 to 1.27.
+
+Avoid compiler warnings.
+
+=item *
+
+C<B::Concise> has been upgraded from version 0.81 to 0.82.
+
+It no longer produces mangled output with the C<-tree> option
+L<[perl #80632]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=80632>.
+
+=item *
+
+C<B::Deparse> has been upgraded from version 1.01 to 1.02.
+
+Test improvements.
+
+=item *
+
+C<Cwd> has been upgraded from version 3.34 to 3.35.
+
+Avoid compiler warnings.
+
+=item *
+
+C<Data::Dumper> has been upgraded from version 2.130_01 to 2.130_02.
+
+Avoid compiler warnings.
+
+=item *
+
+C<Devel::Peek> has been upgraded from version 1.05 to 1.06.
+
+Avoid compiler warnings.
+
+Test improvements.
+
+=item *
+
+C<Devel::SelfStubber> has been upgraded from version 1.03 to 1.05.
+
+Whitespace changes.
+
+=item *
+
+C<Digest::SHA> has been upgraded from 5.48 to 5.50.
+
+C<shasum> now more closely mimics C<sha1sum>/C<md5sum>.
+
+C<Addfile> accepts all POSIX filenames.
+
+=item *
+
+C<Dumpvalue> has been upgraded from version 1.14 to 1.15.
+
+Test improvements.
+
+=item *
+
+C<DynaLoader> has been upgraded from version 1.11 to 1.12.
+
+Remove obsolete RCS keywords.
+
+=item *
+
+C<Env> has been upgraded from version 1.01 to 1.02.
+
+Test improvements.
+
+=item *
+
+C<ExtUtils::CBuilder> has been upgraded from 0.2703 to 0.280201.
+
+Handle C and C++ compilers separately.
+
+Preserves exit status on VMS.
+
+Test improvements.
+
+=item *
+
+C<ExtUtils::Constant::Utils> has been upgraded from 0.02 to 0.03.
+
+Refactoring and fixing of backcompat code, preparing for resynchronisation
+with CPAN.
+
+=item *
+
+C<ExtUtils::Embed> has been upgraded from 1.29 to 1.30.
+
+Remove obsolete RCS keywords.
+
+=item *
+
+C<ExtUtils::ParseXS> has been upgraded from 2.2207 to 2.2208.
+
+Avoid compiler warnings.
+
+=item *
+
+C<Fcntl> has been upgraded from 1.10 to 1.11.
+
+Avoid compiler warnings.
+
+Test improvements.
+
+=item *
+
+C<feature> has been upgraded from 1.18 to 1.19.
+
+Documentation and test updates for the C<unicode_strings> feature.
+See L</Full functionality for C<use feature 'unicode_strings'>>.
+
+=item *
+
+C<File::CheckTree> has been upgraded from 4.4 to 4.41.
+
+Whitespace changes.
+
+=item *
+
+C<File::Glob> has been upgraded from 1.10 to 1.11.
+
+Avoid compiler warnings.
+
+Test improvements.
+
+=item *
+
+C<GDBM_File> has been upgraded from 1.12 to 1.13.
+
+Test improvements.
+
+Remove obsolete RCS keywords.
+
+=item *
+
+C<Hash::Util::FieldHash> has been upgraded from 1.06 to 1.07.
+
+Avoid compiler warnings.
+
+=item *
+
+C<I18N::Collate> has been upgraded from 1.01 to 1.02.
+
+Whitespace changes.
+
+Test improvements.
+
+=item *
+
+C<if> has been upgraded from 0.06 to 0.0601.
+
+Test improvements.
+
+=item *
+
+C<IO> has been upgraded from 1.25_02 to 1.25_03.
+
+Avoid compiler warnings.
+
+=item *
+
+C<IPC::Cmd> has been upgraded from 0.64 to 0.66.
+
+Resolves an issue with splitting Win32 command lines.
+
+Documentation enhancements.
+
+=item *
+
+C<IPC::Open3> has been upgraded from 1.07 to 1.08.
+
+Remove obsolete RCS keywords.
+
+Test improvements.
+
+=item *
+
+C<Locale::Codes> has been upgraded from version 3.14 to 3.15.
+
+Adds some codes.
+
+=item *
+
+C<Math::BigInt> has been upgraded from 1.99_01 to 1.99_02.
+
+Documentation and comment spelling fixes.
+
+=item *
+
+C<Memoize> has been upgraded from version 1.01_03 to 1.02.
+
+Remove obsolete RCS keywords.
+
+Whitespace changes.
+
+=item *
+
+C<MIME::Base64> has been upgraded from 3.10 to 3.13.
+
+Now provides C<encode_base64url> and C<decode_base64url> functions to process
+the base64 scheme for "URL applications".
+
+=item *
+
+C<mro> has been upgraded from version 1.05 to 1.06.
+
+C<next::method> I<et al.> now take into account that every class inherits
+from UNIVERSAL
+L<[perl #68654]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=68654>.
+
+=item *
+
+C<NDBM_File> has been upgraded from 1.10 to 1.11.
+
+Remove obsolete RCS keywords.
+
+Test improvements.
+
+=item *
+
+C<Net::Ping> has been upgraded from 2.36 to 2.37.
+
+Remove obsolete RCS keywords.
+
+=item *
+
+C<ODBM_File> has been upgraded from 1.09 to 1.10.
+
+Remove obsolete RCS keywords.
+
+Test improvements.
+
+=item *
+
+C<Opcode> has been upgraded from 1.17 to 1.18.
+
+Avoid compiler warnings.
+
+Test improvements.
+
+=item *
+
+C<overload> has been upgraded from 1.11 to 1.12.
+
+Avoid a taint problem in use of sprintf.
+
+Test asymmetric fallback cases
+L<[perl #71286]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=71286>.
+
+=item *
+
+C<PerlIO::encoding> has been upgraded from 0.13 to 0.14.
+
+Avoid compiler warnings.
+
+Remove obsolete RCS keywords.
+
+Test improvements.
+
+=item *
+
+C<PerlIO::scalar> has been upgraded from 0.10 to 0.11.
+
+A C<read> after a C<seek> beyond the end of the string no longer thinks it
+has data to read
+L<[perl #78716]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78716>.
+
+Avoid compiler warnings.
+
+=item *
+
+C<PerlIO::via> has been upgraded from 0.10 to 0.11.
+
+Avoid compiler warnings.
+
+=item *
+
+C<POSIX> has been upgraded from 1.22 to 1.23.
+
+Avoid compiler warnings.
+
+=item *
+
+C<re> has been upgraded from 0.14 to 0.15.
+
+Enforce that C</d>, C</u>, and C</l> are mutually exclusive.
+
+=item *
+
+C<SDBM_File> has been upgraded from 1.08 to 1.09.
+
+Avoid compiler warnings.
+
+Remove obsolete RCS keywords.
+
+Test improvements.
+
+=item *
+
+C<Socket> has been upgraded from 1.91 to 1.92.
+
+It has several new functions for handling IPv6 addresses.
+
+=item *
+
+C<Storable> has been upgraded from 2.24 to 2.25.
+
+This adds support for serialising code references that contain UTF-8 strings
+correctly. The Storable minor version number changed as a result, meaning that
+Storable users who set C<$Storable::accept_future_minor> to a C<FALSE> value
+will see errors (see L<Storable/FORWARD COMPATIBILITY> for more details).
+
+Freezing no longer gets confused if the Perl stack gets reallocated
+during freezing
+L<[perl #80074]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=80074>.
+
+Avoid compiler warnings.
+
+=item *
+
+C<threads> has been upgraded from 1.81_02 to 1.81_03.
+
+Avoid compiler warnings.
+
+=item *
+
+C<threads::shared> has been upgraded from 1.34 to 1.35.
+
+Avoid compiler warnings.
+
+=item *
+
+C<Time::HiRes> has been upgraded from 1.9721 to 1.9721_01.
+
+Build fix in blead for VMS.
+
+=item *
+
+C<Unicode::Collate> has been upgraded from 0.67 to 0.6801.
+
+Documentation clarification.
+
+Test improvements.
+
+=item *
+
+C<Unicode::Normalize> has been upgraded from 1.07 to 1.08.
+
+Avoid compiler warnings.
+
+=item *
+
+C<Unicode::UCD> has been upgraded from 0.29 to 0.30.
+
+Add info about named sequence alternatives.
+
+Don't use C<CompositionExclusions.txt>.
+
+=item *
+
+C<version> has been upgraded from 0.82 to 0.86.
+
+Modify export logic for C<is_strict> and C<is_lax>.
+
+Various backcompat fixes.
+
+=item *
+
+C<Win32> has been upgraded from 0.39 to 0.41.
+
+Add several functions.
+
+Corrections to names returned by C<Win32::GetOSName> and
+C<Win32::GetOSDisplayName>.
+
+=item *
+
+C<XS::APItest> has been upgraded from 0.26 to 0.27.
+
+Test new API functions.
+
+Avoid compiler warnings.
+
+=back
+
+=head2 Dual-life Modules and Pragmata
+
+These modules were formerly distributed only in the Perl core
+distribution, and are now dual-lifed (meaning they are now also available
+separately on CPAN):
+
+=over 4
+
+=item *
+
+C<autouse>
+
+=item *
+
+C<Devel::SelfStubber>
+
+=item *
+
+C<Dumpvalue>
+
+=item *
+
+C<Env>
+
+=item *
+
+C<File::CheckTree>
+
+=item *
+
+C<I18N::Collate>
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=over 4
+
+=item *
+
+There is a new "Closure prototype called" error
+L<[perl #68560]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=68560>.
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+The "Found = in conditional" warning that is emitted when a constant is
+assigned to a variable in a condition is now withheld if the constant is
+actually a subroutine or one generated by C<use constant>, since the value
+of the constant may not be known at the time the program is written
+L<[perl #77762]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77762>.
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+The C<Encode> module can now (once again) be included in a static Perl
+build.  The special-case handling for this situation got broken in Perl
+5.11.0, and has now been repaired.
+
+=back
+
+=head1 Testing
+
+=over 4
+
+=item *
+
+Tests for C<Fcntl>, C<File::Glob>, C<GDBM_File>, C<IPC::Open3>,
+C<NDBM_File>, C<ODBM_File>, C<Opcode>, C<PerlIO::encoding>, C<SDBM_File>,
+and C<Storable> now use the L<Test::More> framework.
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item NetBSD
+
+The NetBSD hints file has been changed to make the system's malloc the
+default.
+
+=item Windows
+
+The option to use an externally-supplied C<crypt()>, or to build with no
+C<crypt()> at all, has been removed.  Perl supplies its own C<crypt()>
+implementation for Windows, and the political situation that required
+this part of the distribution to sometimes be omitted is long gone.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+The L<C<mg_findext()>|perlapi/mg_findext> and
+L<C<sv_unmagicext()>|perlapi/sv_unmagicext>
+functions have been added to the API.
+They allow extension authors to find and remove magic attached to
+scalars based on both the magic type and the magic virtual table, similar to how
+C<sv_magicext()> attaches magic of a certain type and with a given virtual table
+to a scalar. This eliminates the need for extensions to walk the list of
+C<MAGIC> pointers of an C<SV> to find the magic that belongs to them.
+
+=item *
+
+The
+L<C<parse_fullexpr()>|perlapi/parse_fullexpr>,
+L<C<parse_listexpr()>|perlapi/parse_listexpr>,
+L<C<parse_termexpr()>|perlapi/parse_termexpr>, and
+L<C<parse_arithexpr()>|perlapi/parse_arithexpr>
+functions have been added to the API.  They perform
+recursive-descent parsing of expressions at various precedence levels.
+They are expected to be used by syntax plugins.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+C<BEGIN {require 5.12.0}> now behaves as documented, rather than behaving
+identically to C<use 5.12.0;>. Previously, C<require> in a C<BEGIN> block
+was erroneously executing the C<use feature ':5.12.0'> and
+C<use strict; use warnings;> behaviour, which only C<use> was documented to
+provide
+L<[perl #69050]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=69050>.
+
+=item *
+
+C<use 5.42>
+L<[perl #69050]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=69050>,
+C<use 6> and C<no 5> no longer leak memory.
+
+=item *
+
+C<eval "BEGIN{die}"> no longer leaks memory on non-threaded builds.
+
+=item *
+
+PerlIO no longer crashes when called recursively, e.g., from a signal
+handler. Now it just leaks memory
+L<[perl #75556]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=75556>.
+
+=item *
+
+Defining a constant with the same name as one of perl's special blocks
+(e.g., INIT) stopped working in 5.12.0, but has now been fixed
+L<[perl #78634]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78634>.
+
+=item *
+
+A reference to a literal value used as a hash key (C<$hash{\"foo"}>) used
+to be stringified, even if the hash was tied
+L<[perl #79178]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=79178>.
+
+=item *
+
+A closure containing an C<if> statement followed by a constant or variable
+is no longer treated as a constant
+L<[perl #63540]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=63540>.
+
+=item *
+
+Calling a closure prototype (what is passed to an attribute handler for a
+closure) now results in a "Closure prototype called" error message instead
+of a crash
+L<[perl #68560]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=68560>.
+
+=item *
+
+A regular expression optimisation would sometimes cause a match with a
+C<{n,m}> quantifier to fail when it should match
+L<[perl #79152]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=79152>.
+
+=item *
+
+What has become known as the "Unicode Bug" is mostly resolved in this release.
+Under C<use feature 'unicode_strings'>, the internal storage format of a
+string no longer affects the external semantics.  There are two known
+exceptions.  User-defined case changing functions, which are planned to
+be deprecated in 5.14, require utf8-encoded strings to function; and the
+character C<LATIN SMALL LETTER SHARP S> in regular expression
+case-insensitive matching has a somewhat different set of bugs depending
+on the internal storage format.  Case-insensitive matching of all
+characters that have multi-character matches, as this one does, is
+problematical in Perl.
+L<[perl #58182]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=58182>.
+
+=item *
+
+Mentioning a read-only lexical variable from the enclosing scope in a
+string C<eval> no longer causes the variable to become writable
+L<[perl #19135]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=19135>.
+
+=item *
+
+C<state> can now be used with attributes. It used to mean the same thing as
+C<my> if attributes were present
+L<[perl #68658]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=68658>.
+
+=item *
+
+Expressions like C<< @$a > 3 >> no longer cause C<$a> to be mentioned in
+the "Use of uninitialized value in numeric gt" warning when C<$a> is
+undefined (since it is not part of the C<E<gt>> expression, but the operand
+of the C<@>)
+L<[perl #72090]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=72090>.
+
+=item *
+
+C<require> no longer causes C<caller> to return the wrong file name for
+the scope that called C<require> and other scopes higher up that had the
+same file name
+L<[perl #68712]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=68712>.
+
+=item *
+
+The ref types in the typemap for XS bindings now support magical variables
+L<[perl #72684]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=72684>.
+
+=item *
+
+Match variables (e.g., C<$1>) no longer persist between calls to a sort
+subroutine
+L<[perl #76026]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=76026>.
+
+=item *
+
+The C<B> module was returning C<B::OP>s instead of C<B::LOGOP>s for C<entertry>
+L<[perl #80622]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=80622>.
+This was due to a bug in the perl core, not in C<B> itself.
+
+=item *
+
+Some numeric operators were converting integers to floating point,
+resulting in loss of precision on 64-bit platforms
+L<[perl #77456]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77456>.
+
+=item *
+
+The fallback behaviour of overloading on binary operators was asymmetric
+L<[perl #71286]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=71286>.
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.13.8 represents approximately one month of development since
+Perl 5.13.7 and contains 38715 lines of changes across 546 files from
+38 authors and committers.
+
+Thank you to the following for contributing to this release:
+
+Abhijit Menon-Sen, Abigail, Andreas KE<0xf6>nig, Ben Morrow, Brad Gilbert,
+brian d foy, Chip Salzenberg, Chris 'BinGOs' Williams, Craig A. Berry,
+David Golden, David Leadbeater, David Mitchell, Father Chrysostomos,
+Florian Ragwitz, Goro Fuji, H.Merijn Brand, Jan Dubois, Jerry D. Hedden,
+Jesse Vincent, John Peacock, Karl Williamson, Lukas Mai, Marvin Humphrey,
+Max Maischein, Michael Breen, Michael Fig, Nicholas Clark, Nick Cleaton,
+Paul Evans, Peter J. Holzer, Peter John Acklam, Rafael Garcia-Suarez,
+Reini Urban, Renee Baecker, Ricardo Signes, Tony Cook, Yves Orton, Zefram
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles
+recently posted to the comp.lang.perl.misc newsgroup and the perl
+bug database at http://rt.perl.org/perlbug/ .  There may also be
+information at http://www.perl.org/ , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug>
+program included with your release.  Be sure to trim your bug down
+to a tiny but sufficient test case.  Your bug report, along with the
+output of C<perl -V>, will be sent off to perlbug@perl.org to be
+analysed by the Perl porting team.
+
+If the bug you are reporting has security implications, which make it
+inappropriate to send to a publicly archived mailing list, then please send
+it to perl5-security-report@perl.org. This points to a closed subscription
+unarchived mailing list, which includes all the core committers, who be able
+to help assess the impact of issues, figure out a resolution, and help
+co-ordinate the release of patches to mitigate or fix the problem across all
+platforms on which Perl is supported. Please only use this address for
+security issues in the Perl core, not for modules independently
+distributed on CPAN.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details
+on what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
