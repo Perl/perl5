@@ -50,7 +50,7 @@ sub import {
     }
 }
 
-our $VERSION = '0.26';
+our $VERSION = '0.27';
 
 use vars '$WARNINGS_ON_BOOTSTRAP';
 use vars map "\$${_}_called_PP", qw(BEGIN UNITCHECK CHECK INIT END);
