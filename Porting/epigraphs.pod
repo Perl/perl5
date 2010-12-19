@@ -173,13 +173,13 @@ volcano were once more to set to work."
 
 "Now suppose," chortled Dr. Breed, enjoying himself, "that there were
 many possible ways in which water could crystallize, could freeze.
-Suppose that the sort of ice we skate upon and put into highballs—
-what we might call ice-one—is only one of several types of ice.
+Suppose that the sort of ice we skate upon and put into highballs --
+what we might call ice-one -- is only one of several types of ice.
 Suppose water always froze as ice-one on Earth because it had never
 had a seed to teach it how to form ice-two, ice-three, ice-four
 ...? And suppose," he rapped on his desk with his old hand again,
-"that there were one form, which we will call ice-nine—a crystal as
-hard as this desk—with a melting point of, let us say, one-hundred
+"that there were one form, which we will call ice-nine -- a crystal as
+hard as this desk -- with a melting point of, let us say, one-hundred
 degrees Fahrenheit, or, better still, a melting point of one-hundred-
 and-thirty degrees."
 
@@ -256,7 +256,7 @@ is the driest thing I know. Silence all round, if you please! "William
 the Conqueror, whose cause was favoured by the pope, was soon submitted
 to by the English, who wanted leaders, and had been of late much
 accustomed to usurpation and conquest. Edwin and Morcar, the earls of
-Mercia and Northumbria—"'
+Mercia and Northumbria --"'
 
 =head2 v5.12.0-RC2 - no epigraph
 
@@ -329,7 +329,7 @@ done it or not, I felt clearly of course that I wasn't Napoleon.
 =head2 v5.11.3 - Mark Twain, "The Adventures of Tom Sawyer"
 
 "Say -- I'm going in a swimming, I am. Don't you wish you could? But of
-course you'd druther work—wouldn't you? Course you would!"
+course you'd druther work -- wouldn't you? Course you would!"
 
 Tom contemplated the boy a bit, and said: "What do you call work?"
 
