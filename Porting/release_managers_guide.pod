@@ -113,7 +113,7 @@ If you don't have a PAUSE account, then request one:
 Check that your account is allowed to upload perl distros: goto
 L<https://pause.perl.org/>, login, then select 'upload file to CPAN'; there
 should be a "For pumpkings only: Send a CC" tickbox.  If not, ask Andreas
-König to add your ID to the list of people allowed to upload something
+KE<0xf6>nig to add your ID to the list of people allowed to upload something
 called perl.  You can find Andreas' email address at:
 
     https://pause.perl.org/pause/query?ACTION=pause_04imprint
@@ -308,7 +308,11 @@ which will update all the files shown.
 
 Be particularly careful with F<INSTALL>, which contains a mixture of
 C<5.10.0>-type strings, some of which need bumping on every release, and
-some of which need to be left unchanged. Also note that this tool
+some of which need to be left unchanged.
+The line in F<INSTALL> about "is binary incompatible with" requires a
+correct choice of earlier version to declare incompatibility with.
+
+Also note that this tool
 currently only detects a single substitution per line: so in particular,
 this line in README.vms needs special handling:
 
