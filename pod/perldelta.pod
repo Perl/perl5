@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to ca88a729.
+This has been completed up to e57c1822.
 
 =head1 NAME
 
@@ -255,7 +255,15 @@ XXX
 
 =item *
 
-C<Archive::Tar> has been upgraded from version 1.72 to 1.74
+C<Archive::Tar> has been upgraded from version 1.72 to 1.74.
+
+=item *
+
+C<autodie> has been upgraded from version 2.10 to 2.1001.
+
+=item *
+
+C<B> has been upgraded from version 1.26 to 1.27.
 
 =item *
 
@@ -266,13 +274,29 @@ L<[perl #80632]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=80632>.
 
 =item *
 
-C<Devel::SelfStubber> has been upgraded from version 1.04 to 1.05.
+C<B::Deparse> has been upgraded from version 1.01 to 1.02.
 
 =item *
 
-C<Digest::SHA> has been upgraded from 5.48 to 5.50
+C<Cwd> has been upgraded from version 3.34 to 3.35.
 
-shasum now more closely mimics sha1sum/md5sum and Addfile
+=item *
+
+C<Data::Dumper> has been upgraded from version 2.130_01 to 2.130_02.
+
+=item *
+
+C<Devel::Peek> has been upgraded from version 1.05 to 1.06.
+
+=item *
+
+C<Devel::SelfStubber> has been upgraded from version 1.03 to 1.05.
+
+=item *
+
+C<Digest::SHA> has been upgraded from 5.48 to 5.50.
+
+C<shasum> now more closely mimics C<sha1sum>/C<md5sum> and C<Addfile>
 accepts all POSIX filenames.
 
 =item *
@@ -281,11 +305,19 @@ C<Dumpvalue> has been upgraded from version 1.14 to 1.15.
 
 =item *
 
+C<DynaLoader> has been upgraded from version 1.11 to 1.12.
+
+=item *
+
 C<Env> has been upgraded from version 1.01 to 1.02.
 
 =item *
 
-C<ExtUtils::CBuilder> has been upgraded from 0.2703 to 0.2802
+C<ExtUtils::CBuilder> has been upgraded from 0.2703 to 0.280201.
+
+=item *
+
+C<ExtUtils::Constant> has been upgraded from 0.02 to 0.03.
 
 =item *
 
@@ -293,15 +325,47 @@ C<ExtUtils::Embed> has been upgraded from 1.29 to 1.30.
 
 =item *
 
+C<ExtUtils::ParseXS> has been upgraded from 2.2207 to 2.2208.
+
+=item *
+
+C<Fcntl> has been upgraded from 1.10 to 1.11.
+
+=item *
+
+C<feature> has been upgraded from 1.18 to 1.19.
+
+=item *
+
+C<File::CheckTree> has been upgraded from 4.4 to 4.41.
+
+=item *
+
+C<File::Glob> has been upgraded from 1.10 to 1.11.
+
+=item *
+
+C<GDBM_File> has been upgraded from 1.12 to 1.13.
+
+=item *
+
+C<Hash::Util::FieldHash> has been upgraded from 1.06 to 1.07.
+
+=item *
+
+C<I18N::Collate> has been upgraded from 1.01 to 1.02.
+
+=item *
+
 C<if> has been upgraded from 0.06 to 0.0601.
 
 =item *
 
-C<Devel::SelfStubber> has been upgraded from version 1.03 to 1.04.
+C<IO> has been upgraded from 1.25_02 to 1.25_03.
 
 =item *
 
-C<IPC::Cmd> has been upgraded from 0.64 to 0.66
+C<IPC::Cmd> has been upgraded from 0.64 to 0.66.
 
 Resolves an issue with splitting Win32 command lines
 and documentation enhancements.
@@ -312,7 +376,11 @@ C<IPC::Open3> has been upgraded from 1.07 to 1.08.
 
 =item *
 
-C<Locale::Codes> has been upgraded from version 3.14 to 3.15
+C<Locale::Codes> has been upgraded from version 3.14 to 3.15.
+
+=item *
+
+C<Math::BigInt> has been upgraded from 1.99_01 to 1.99_02.
 
 =item *
 
@@ -320,7 +388,7 @@ C<Memoize> has been upgraded from version 1.01_03 to 1.02.
 
 =item *
 
-C<MIME::Base64> has been upgraded from 3.10 to 3.13
+C<MIME::Base64> has been upgraded from 3.10 to 3.13.
 
 Now provides encode_base64url and decode_base64url functions to process
 the base64 scheme for "URL applications".
@@ -335,7 +403,19 @@ L<[perl #68654]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=68654>.
 
 =item *
 
+C<NDBM_File> has been upgraded from 1.10 to 1.11.
+
+=item *
+
 C<Net::Ping> has been upgraded from 2.36 to 2.37.
+
+=item *
+
+C<ODBM_File> has been upgraded from 1.09 to 1.10.
+
+=item *
+
+C<Opcode> has been upgraded from 1.17 to 1.18.
 
 =item *
 
@@ -355,7 +435,19 @@ L<[perl #78716]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=78716>.
 
 =item *
 
+C<PerlIO::via> has been upgraded from 0.10 to 0.11.
+
+=item *
+
+C<POSIX> has been upgraded from 1.22 to 1.23.
+
+=item *
+
 C<re> has been upgraded from 0.14 to 0.15.
+
+=item *
+
+C<SDBM_File> has been upgraded from 1.08 to 1.09.
 
 =item *
 
@@ -378,11 +470,23 @@ L<[perl #80074]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=80074>.
 
 =item *
 
+C<threads> has been upgraded from 1.81_02 to 1.81_03.
+
+=item *
+
+C<threads::shared> has been upgraded from 1.34 to 1.35.
+
+=item *
+
 C<Time::HiRes> has been upgraded from 1.9721 to 1.9721_01.
 
 =item *
 
-C<Unicode::Collate> has been upgraded from 0.67 to 0.68
+C<Unicode::Collate> has been upgraded from 0.67 to 0.6801.
+
+=item *
+
+C<Unicode::Normalize> has been upgraded from 1.07 to 1.08.
 
 =item *
 
@@ -394,7 +498,11 @@ C<version> has been upgraded from 0.82 to 0.86.
 
 =item *
 
-C<Win32> has been upgraded from 0.039 to 0.040.
+C<Win32> has been upgraded from 0.39 to 0.41.
+
+=item *
+
+C<XS::APItest> has been upgraded from 0.26 to 0.27.
 
 =back
 
@@ -405,6 +513,39 @@ C<Win32> has been upgraded from 0.039 to 0.040.
 =item *
 
 XXX
+
+=back
+
+=head2 Dual-life Modules and Pragmata
+
+These modules were formerly distributed only in the Perl core
+distribution, and are now dual-lifed (are also available on CPAN):
+
+=over 4
+
+=item *
+
+C<autouse>
+
+=item *
+
+C<Devel-SelfStubber>
+
+=item *
+
+C<Dumpvalue>
+
+=item *
+
+C<Env>
+
+=item *
+
+C<File-CheckTree>
+
+=item *
+
+C<I18N-Collate>
 
 =back
 
