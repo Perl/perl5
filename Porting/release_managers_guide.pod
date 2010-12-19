@@ -846,12 +846,12 @@ Upload both the .gz and .bz2 versions of the tarball.
 
 Wait until you receive notification emails from the PAUSE indexer
 confirming that your uploads have been received.  IMPORTANT -- you will
-probably get an email that indexing has failed (due to dual-life modules,
-apparently).  This is considered normal.
+probably get an email that indexing has failed, due to module permissions.
+This is considered normal.
 
 Do not proceed any further until you are sure that your tarballs are on
 CPAN.  Check your authors directory on one of the "fast" CPAN mirrors
-(e.g.  cpan.shadowcatprojects.net, cpan.dagolden.com, cpan.hexten.net
+(e.g., cpan.hexten.net
 or cpan.cpantesters.org) to confirm that your uploads have been successful.
 
 =item *
@@ -883,26 +883,6 @@ Mail p5p to announce your new release, with a quote you prepared earlier.
 =item *
 
 Add your quote to F<Porting/epigraphs.pod> and commit it.
-
-=item *
-
-Wait 24 hours or so, then post the announcement to use.perl.org.
-(if you don't have access rights to post news, ask someone like Rafael to
-do it for you.)
-
-=item *
-
-Check http://www.cpan.org/src/ to see if the new tarballs have appeared.
-They should appear automatically, but if they don't then ask Jarkko to look
-into it, since his scripts must have broken.
-
-=item *
-
-I<You MUST SKIP this step for RC, BLEAD>
-
-Ask Jarkko to update the descriptions of which tarballs are current in
-http://www.cpan.org/src/README.html, and Rafael to update
-http://dev.perl.org/perl5/
 
 =item *
 
@@ -1044,6 +1024,38 @@ I<You MUST RETIRE to your preferred PUB, CAFE or SEASIDE VILLA for some
 much-needed rest and relaxation>.
 
 Thanks for releasing perl!
+
+=back
+
+=head2 Building a release - the day after
+
+=over 4
+
+=item *
+
+Check L<http://www.cpan.org/src/> to see if the new tarballs have appeared.
+They should appear automatically, some hours after upload,
+but if they don't then ask Jarkko to look
+into it, since his scripts must have broken.
+
+=item *
+
+Check L<http://search.cpan.org> to see if it has indexed the distribution.
+It should be visible at a URL like C<http://search.cpan.org/dist/perl-5.10.1/>.
+
+=item *
+
+I<This step ONLY for STABLE>
+
+Ask Jarkko to update the descriptions of which tarballs are current in
+L<http://www.cpan.org/src/README.html>, and Rafael to update
+L<http://dev.perl.org/perl5/>
+
+=item *
+
+Post the release announcement to use.perl.org.
+(if you don't have access rights to post news, ask someone like Rafael to
+do it for you.)
 
 =back
 
