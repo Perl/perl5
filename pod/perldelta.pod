@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 91fad77.
+This has been completed up to ca88a729.
 
 =head1 NAME
 
@@ -529,6 +529,11 @@ that they represent may be covered elsewhere.
 [ List each test improvement as a =item entry ]
 
 =over 4
+
+=item *
+
+Tests for C<IPC-Open3>, C<Opcode>, and C<PerlIO-encoding> now use the
+L<Test::More> framework.
 
 =item *
 
