@@ -441,7 +441,7 @@ $out =
  runperl(
   switches => ["-MO=Concise,-tree"], prog => 'print', stderr => 1
  );
-ok index $out=~s/\r\n/\n/gr, <<'end'=~s/\r\n/\n/gr =>>= 0, '-tree output';
+ok index $out=~s/\r\n/\n/gr=~s/gvsv\(\*_\)/gvsv[*_]/r, <<'end'=~s/\r\n/\n/gr =>>= 0, '-tree output';
 <6>leave[1 ref]-+-<1>enter
                 |-<2>nextstate(main 1 -e:1)
                 `-<5>print-+-<3>pushmark
