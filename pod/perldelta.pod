@@ -2,7 +2,6 @@
 
 =for comment
 This has been completed up to 91fad77, except for:
-d9a4b459f94297889956ac3adc42707365f274c2
 bf5522a13a381257966e7ed6b731195a873b153e
 9cef83062267e94311e1fd8744396e440642738e
 8e88cfee26d866223a6b3bfffce6270271de00db
@@ -505,6 +504,12 @@ L</Platform Support> section, instead.
 [ List changes as a =item entry ].
 
 =over 4
+
+=item *
+
+The C<Encode> module can now (once again) be included in a static Perl
+build.  The special-case handling for this situation got broken in Perl
+5.11.0, and has now been repaired.
 
 =item *
 
