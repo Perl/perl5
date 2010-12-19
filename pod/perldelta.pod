@@ -1,35 +1,22 @@
 =encoding utf8
 
-=for comment
+=for comment XXX
 This has been completed up to e57c1822.
 
 =head1 NAME
-
-[ this is a template for a new perldelta file. Any text flagged as
-XXX needs to be processed before release. ]
 
 perldelta - what is new for perl v5.13.8
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.13.8 release and
-the 5.13.7 release.
+This document describes differences between the 5.13.7 release and
+the 5.13.8 release.
 
 If you are upgrading from an earlier release such as 5.13.6, first read
 L<perl5137delta>, which describes differences between 5.13.6 and
 5.13.7.
 
-=head1 Notice
-
-XXX Any important notices here
-
 =head1 Core Enhancements
-
-XXX New core language features go here. Summarise user-visible core language
-enhancements. Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
-
-[ List each enhancement as a =head2 entry ]
 
 =head2 C<-d:-foo> calls C<Devel::foo::unimport>
 
@@ -57,10 +44,10 @@ calls C<< Devel::foo->unimport('bar') >> if the method exists.
 This is particularly useful to suppresses the default actions of a
 C<Devel::*> module's C<import> method whilst still loading it for debugging.
 
-=head2 Filehandle method calls load IO::File on demand
+=head2 Filehandle method calls load L<IO::File> on demand
 
-When a method call on a filehandle would die because the method can not
-be resolved and L<IO::File> has not been loaded, Perl now loads IO::File
+When a method call on a filehandle would die because the method cannot
+be resolved, and L<IO::File> has not been loaded, Perl now loads L<IO::File>
 via C<require> and attempts method resolution again:
 
   open my $fh, ">", $file;
@@ -71,7 +58,7 @@ This also works for globs like STDOUT, STDERR and STDIN:
   STDOUT->autoflush(1);
 
 Because this on-demand load only happens if method resolution fails, the
-legacy approach of manually loading an IO::File parent class for partial
+legacy approach of manually loading an L<IO::File> parent class for partial
 method support still works as expected:
 
   use IO::Handle;
@@ -83,9 +70,9 @@ method support still works as expected:
 This release provides full functionality for C<use feature
 'unicode_strings'>.  Under its scope, all string operations executed and
 regular expressions compiled (even if executed outside its scope) have
-Unicode semantics.   See L<feature>.
+Unicode semantics.  See L<feature>.
 
-This feature avoids the "Unicode Bug" (See
+This feature avoids most forms of the "Unicode Bug" (See
 L<perlunicode/The "Unicode Bug"> for details.)  If their is a
 possibility that your code will process Unicode strings, you are
 B<strongly> encouraged to use this subpragma to avoid nasty surprises.
@@ -103,9 +90,9 @@ as an indicator of whether the unwinding was due to an exception.  These modules
 had been broken by 5.13.1's change from setting C<$@> early to setting it late.
 This double setting arrangement is a stopgap until the reason for unwinding can
 be made properly introspectable.  C<$@> has never been a reliable indicator of
-this.
+the reason for unwinding.
 
-=head2 printf-like functions understand size modifiers "hh", "z", "t", and sometimes "j"
+=head2 printf-like functions understand post-1980 size modifiers
 
 Perl's printf and sprintf operators, and Perl's internal printf replacement
 function, now understand the C90 size modifiers "hh" (C<char>), "z"
@@ -138,17 +125,9 @@ DTrace will print:
 
 Multiple statement labels can now appear before a single statement.
 
-=head1 Security
-
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
-
-[ List each security issue as a =head2 entry ]
-
 =head1 Incompatible Changes
 
-=head2 Attempting to use C<:=> as an empty attribute list is now a syntax error
+=head2 C<:=> is now a syntax error
 
 Previously C<my $pi := 4;> was exactly equivalent to C<my $pi : = 4;>,
 with the C<:> being treated as the start of an attribute list, ending before
@@ -178,20 +157,15 @@ any code that was relying on this bug.
 
 =head1 Deprecations
 
-XXX Any deprecated features, syntax, modules etc. should be listed here.
-In particular, deprecated modules should be listed here even if they are
-listed as an updated module in the L</Modules and Pragmata> section.
-
-[ List each deprecation as a =head2 entry ]
-
 =head2 C<?PATTERN?> is deprecated
 
 C<?PATTERN?> (without the initial m) has been deprecated and now produces
-a warning.
+a warning.  This is to allow future use of C<?> in new operators.
+The match-once functionality is still available in the form of C<m?PATTERN?>.
 
-=head2 C<sv_compile_2op> is now deprecated
+=head2 C<sv_compile_2op()> is now deprecated
 
-The C<sv_compile_2op> is now deprecated, and will be removed. Searches suggest
+The C<sv_compile_2op()> API function is now deprecated. Searches suggest
 that nothing on CPAN is using it, so this should have zero impact.
 
 It attempted to provide an API to compile code down to an optree, but failed
@@ -212,42 +186,7 @@ This bug was fixed in 5.13.7 but, because of the breakage it caused, the
 fix has been reverted. Now there is a deprecation warning whenever a tie
 function is used on a handle without an explicit C<*>.
 
-=head1 Performance Enhancements
-
-XXX Changes which enhance performance without changing behaviour go here. There
-may well be none in a stable release.
-
-[ List each enhancement as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Modules and Pragmata
-
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>, which prints stub
-entries to STDOUT.  Results can be pasted in place of the '=head2' entries
-below.  A paragraph summary for important changes should then be added by hand.
-In an ideal world, dual-life modules would have a F<Changes> file that could be
-cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
 
 =head2 Updated Modules and Pragmata
 
@@ -296,7 +235,7 @@ C<Devel::SelfStubber> has been upgraded from version 1.03 to 1.05.
 
 C<Digest::SHA> has been upgraded from 5.48 to 5.50.
 
-C<shasum> now more closely mimics C<sha1sum>/C<md5sum> and C<Addfile>
+C<shasum> now more closely mimics C<sha1sum>/C<md5sum>, and C<Addfile>
 accepts all POSIX filenames.
 
 =item *
@@ -390,7 +329,7 @@ C<Memoize> has been upgraded from version 1.01_03 to 1.02.
 
 C<MIME::Base64> has been upgraded from 3.10 to 3.13.
 
-Now provides encode_base64url and decode_base64url functions to process
+Now provides C<encode_base64url> and C<decode_base64url> functions to process
 the base64 scheme for "URL applications".
 
 =item *
@@ -460,8 +399,8 @@ It has several new functions for handling IPv6 addresses.
 C<Storable> has been upgraded from 2.24 to 2.25.
 
 This adds support for serialising code references that contain UTF-8 strings
-correctly. The Storable minor version number changed as a result -- this means
-Storable users that set C<$Storable::accept_future_minor> to a C<FALSE> value
+correctly. The Storable minor version number changed as a result, meaning that
+Storable users who set C<$Storable::accept_future_minor> to a C<FALSE> value
 will see errors (see L<Storable/FORWARD COMPATIBILITY> for more details).
 
 Freezing no longer gets confused if the Perl stack gets reallocated
@@ -506,20 +445,11 @@ C<XS::APItest> has been upgraded from 0.26 to 0.27.
 
 =back
 
-=head2 Removed Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head2 Dual-life Modules and Pragmata
 
 These modules were formerly distributed only in the Perl core
-distribution, and are now dual-lifed (are also available on CPAN):
+distribution, and are now dual-lifed (meaning they are now also available
+separately on CPAN):
 
 =over 4
 
@@ -529,7 +459,7 @@ C<autouse>
 
 =item *
 
-C<Devel-SelfStubber>
+C<Devel::SelfStubber>
 
 =item *
 
@@ -541,40 +471,11 @@ C<Env>
 
 =item *
 
-C<File-CheckTree>
+C<File::CheckTree>
 
 =item *
 
-C<I18N-Collate>
-
-=back
-
-=head1 Documentation
-
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
-=head2 New Documentation
-
-XXX Changes which create B<new> files in F<pod/> go here.
-
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
-
-=head2 Changes to Existing Documentation
-
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
-
-=head3 L<XXX>
-
-=over 4
-
-=item *
-
-XXX Description of the change here
+C<I18N::Collate>
 
 =back
 
@@ -584,26 +485,18 @@ The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
-XXX New or changed warnings emitted by the core's C<C> code go here. Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
-[ Within each section, list entries as a =item entry ]
-
 =head2 New Diagnostics
-
-XXX Newly added diagnostic messages go here
 
 =over 4
 
 =item *
 
-There is a new "Closure prototype called" error.
+There is a new "Closure prototype called" error
+L<[perl #68560]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=68560>.
 
 =back
 
 =head2 Changes to Existing Diagnostics
-
-XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =over 4
 
@@ -617,33 +510,7 @@ L<[perl #77762]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77762>.
 
 =back
 
-=head1 Utility Changes
-
-XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go
-here. Most of these are built within the directories F<utils> and F<x2p>.
-
-[ List utility changes as a =head3 entry for each utility and =item
-entries for each change
-Use L<XXX> with program names to get proper documentation linking. ]
-
-=head3 L<XXX>
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Configuration and Compilation
-
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.  Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as a =item entry ].
 
 =over 4
 
@@ -653,75 +520,23 @@ The C<Encode> module can now (once again) be included in a static Perl
 build.  The special-case handling for this situation got broken in Perl
 5.11.0, and has now been repaired.
 
-=item *
-
-XXX
-
 =back
 
 =head1 Testing
-
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarising, although the bugs
-that they represent may be covered elsewhere.
-
-[ List each test improvement as a =item entry ]
 
 =over 4
 
 =item *
 
-Tests for C<IPC-Open3>, C<Opcode>, and C<PerlIO-encoding> now use the
-L<Test::More> framework.
-
-=item *
-
-XXX
+Tests for C<Fcntl>, C<File::Glob>, C<GDBM_File>, C<IPC::Open3>,
+C<NDBM_File>, C<ODBM_File>, C<Opcode>, C<PerlIO::encoding>, C<SDBM_File>,
+and C<Storable> now use the L<Test::More> framework.
 
 =back
 
 =head1 Platform Support
 
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
-
-=head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not. These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-=head2 Discontinued Platforms
-
-XXX List any platforms that this version of perl no longer compiles on.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
 =head2 Platform-Specific Notes
-
-XXX List any changes for specific platforms. This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
 
 =over 4
 
@@ -741,40 +556,27 @@ this part of the distribution to sometimes be omitted is long gone.
 
 =head1 Internal Changes
 
-XXX Changes which affect the interface available to C<XS> code go here.
-Other significant internal changes for future core maintainers should
-be noted as well.
-
-[ List each test improvement as a =item entry ]
-
 =over 4
 
 =item *
 
-C<mg_findext> and C<sv_unmagicext> have been added.
-
-These new functions allow extension authors to find and remove magic attached to
+The C<mg_findext()> and C<sv_unmagicext()> functions have been added to the API.
+They allow extension authors to find and remove magic attached to
 scalars based on both the magic type and the magic virtual table, similar to how
-C<sv_magicext> attaches magic of a certain type and with a given virtual table
+C<sv_magicext()> attaches magic of a certain type and with a given virtual table
 to a scalar. This eliminates the need for extensions to walk the list of
 C<MAGIC> pointers of an C<SV> to find the magic that belongs to them.
 
 =item *
 
-The C<parse_fullexpr()>, C<parse_listexpr(), C<parse_termexpr()> and
-C<parse_arithexpr()> functions have been added.
-
-These are for parsing expressions at various precedence levels.
+The C<parse_fullexpr()>, C<parse_listexpr()>, C<parse_termexpr()> and
+C<parse_arithexpr()> functions have been added to the API.  They perform
+recursive-descent parsing of expressions at various precedence levels.
+They are expected to be used by syntax plugins.
 
 =back
 
 =head1 Selected Bug Fixes
-
-XXX Important bug fixes in the core language are summarised here.
-Bug fixes in files in F<ext/> and F<lib/> are best summarised in
-L</Modules and Pragmata>.
-
-[ List each fix as a =item entry ]
 
 =over 4
 
@@ -836,7 +638,7 @@ L<[perl #79152]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=79152>.
 
 =item *
 
-What has become known as the "Unicode Bug" is resolved in this release.
+What has become known as the "Unicode Bug" is mostly resolved in this release.
 Under C<use feature 'unicode_strings'>, the internal storage format of a
 string no longer affects the external semantics.  There are two known
 exceptions.  User-defined case changing functions, which are planned to
@@ -851,7 +653,7 @@ L<[perl #58182]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=58182>.
 =item *
 
 Mentioning a read-only lexical variable from the enclosing scope in a
-string C<eval> would cause the variable to become writable
+string C<eval> no longer causes the variable to become writable
 L<[perl #19135]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=19135>.
 
 =item *
@@ -888,9 +690,8 @@ L<[perl #76026]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=76026>.
 
 =item *
 
-The C<B> module was returning B::OPs instead of B::LOGOPs for C<entertry>
+The C<B> module was returning C<B::OP>s instead of C<B::LOGOP>s for C<entertry>
 L<[perl #80622]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=80622>.
-
 This was due to a bug in the perl core, not in C<B> itself.
 
 =item *
@@ -905,30 +706,6 @@ The fallback behaviour of overloading on binary operators was asymmetric
 L<[perl #71286]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=71286>.
 
 =back
-
-=head1 Known Problems
-
-XXX Descriptions of platform agnostic bugs we know we can't fix go here. Any
-tests that had to be C<TODO>ed for the release would be noted here, unless
-they were specific to a particular platform (see below).
-
-This is a list of some significant unfixed bugs, which are regressions
-from either 5.XXX.XXX or 5.XXX.XXX.
-
-[ List each fix as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
 
 =head1 Acknowledgements
 
