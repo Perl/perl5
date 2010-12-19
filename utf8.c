@@ -1969,7 +1969,8 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
  * return several Unicode characters for a single Unicode character
  * (see lib/unicore/SpecCase.txt) The SWASHGET in lib/utf8_heavy.pl is
  * the lower-level routine, and it is similarly broken for returning
- * multiple values.  --jhi */
+ * multiple values.  --jhi
+ * For those, you should use to_utf8_case() instead */
 /* Now SWASHGET is recasted into S_swash_get in this file. */
 
 /* Note:
