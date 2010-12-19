@@ -15,6 +15,27 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.13.8 - Roger Williams, L<"The Fifth Gift"|http://www.kuro5hin.org/story/2005/8/19/21304/8493>
+
+The aliens called the box a "matter generator," but we'd be more inclined
+to call it a matter duplicator.  By connecting switches and potentiometers
+between the copper posts it was possible to make the box mark off two
+cubic rectangular areas of volume.  Make a certain contact, and these
+areas would be isolated within perfectly reflective fields.  They could
+be expanded or contracted by altering resistances between other posts.
+As I worked out the user interface I built a little control panel for
+the device.  It was actually a clever way for the aliens to do things;
+instead of trying to build controls we could use, they built us an
+interface we could attach to controls that made sense to us.  It could
+also be automated.
+
+Once you had made the contact that established the shielded volumes,
+if you made another certain contact the contents of the first volume
+were copied to the second.  The machine copied metal, plastic, steel,
+and diamond with equal ease.  Copies of copies of copies of copies were
+indistinguishable from the originals at any magnification, even using
+techniques like X-ray crystallography.
+
 =head2 v5.13.7 - Andy Wachowski and Lana Wachowski, 'The Matrix'
 
 [Neo sees a black cat walk by them, and then a similar black cat walk by them just like the first one]
