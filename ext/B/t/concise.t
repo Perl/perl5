@@ -10,7 +10,7 @@ BEGIN {
     require 'test.pl';		# we use runperl from 'test.pl', so can't use Test::More
 }
 
-plan tests => 158;
+plan tests => 159;
 
 require_ok("B::Concise");
 
@@ -434,5 +434,18 @@ $out = runperl ( switches => ["-MO=Concise"],
 		 stderr => 1 );
 like $out, qr/nextstate.*nextstate/s,
   'nulling of nextstate-nextstate happeneth not when $^P | PERLDBf_NOOPT';
+
+
+# A very basic test for -tree output
+$out =
+ runperl(
+  switches => ["-MO=Concise,-tree"], prog => 'print', stderr => 1
+ );
+ok index $out=~s/\r\n/\n/gr, <<'end'=~s/\r\n/\n/gr =>>= 0, '-tree output';
+<6>leave[1 ref]-+-<1>enter
+                |-<2>nextstate(main 1 -e:1)
+                `-<5>print-+-<3>pushmark
+                           `-ex-rv2sv---<4>gvsv[*_]
+end
 
 __END__
