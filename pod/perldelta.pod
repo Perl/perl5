@@ -2,7 +2,6 @@
 
 =for comment
 This has been completed up to 91fad77, except for:
-9cef83062267e94311e1fd8744396e440642738e
 8e88cfee26d866223a6b3bfffce6270271de00db
 
 =head1 NAME
@@ -581,6 +580,13 @@ L</Modules and Pragmata> section.
 
 The NetBSD hints file has been changed to make the system's malloc the
 default.
+
+=item Windows
+
+The option to use an externally-supplied C<crypt()>, or to build with no
+C<crypt()> at all, has been removed.  Perl supplies its own C<crypt()>
+implementation for Windows, and the political situation that required
+this part of the distribution to sometimes be omitted is long gone.
 
 =back
 
