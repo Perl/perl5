@@ -478,7 +478,7 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 #
 # Here are some observations about some of the issues in early versions:
 #
-# The number of code points in \p{alpha} halve in 2.1.9.  It turns out that
+# The number of code points in \p{alpha} halved in 2.1.9.  It turns out that
 # the reason is that the CJK block starting at 4E00 was removed from PropList,
 # and was not put back in until 3.1.0
 #
