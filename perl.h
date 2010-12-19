@@ -6159,6 +6159,7 @@ extern void moncontrol(int);
 
 #define PERL_PV_ESCAPE_UNI          0x0100
 #define PERL_PV_ESCAPE_UNI_DETECT   0x0200
+#define PERL_PV_ESCAPE_NONASCII     0x0400
 
 #define PERL_PV_ESCAPE_ALL	    0x1000
 #define PERL_PV_ESCAPE_NOBACKSLASH  0x2000

@@ -232,10 +232,11 @@ if PERL_PV_ESCAPE_UNI_DETECT is set then the input string is scanned
 using C<is_utf8_string()> to determine if it is Unicode.
 
 If PERL_PV_ESCAPE_ALL is set then all input chars will be output
-using C<\x01F1> style escapes, otherwise only chars above 255 will be
-escaped using this style, other non printable chars will use octal or
-common escaped patterns like C<\n>. If PERL_PV_ESCAPE_NOBACKSLASH
-then all chars below 255 will be treated as printable and 
+using C<\x01F1> style escapes, otherwise if PERL_PV_ESCAPE_NONASCII is set, only
+chars above 127 will be escaped using this style; otherwise, only chars above
+255 will be so escaped; other non printable chars will use octal or
+common escaped patterns like C<\n>. Otherwise, if PERL_PV_ESCAPE_NOBACKSLASH
+then all chars below 255 will be treated as printable and
 will be output as literals.
 
 If PERL_PV_ESCAPE_FIRSTCHAR is set then only the first char of the
@@ -284,7 +285,10 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
         const UV u= (isuni) ? utf8_to_uvchr((U8*)pv, &readsize) : (U8)*pv;            
         const U8 c = (U8)u & 0xFF;
         
-        if ( ( u > 255 ) || (flags & PERL_PV_ESCAPE_ALL)) {
+        if ( ( u > 255 )
+	  || (flags & PERL_PV_ESCAPE_ALL)
+	  || (( u > 127 ) && (flags & PERL_PV_ESCAPE_NONASCII)))
+	{
             if (flags & PERL_PV_ESCAPE_FIRSTCHAR) 
                 chsize = my_snprintf( octbuf, PV_ESCAPE_OCTBUFSIZE, 
                                       "%"UVxf, u);
