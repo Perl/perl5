@@ -2,7 +2,6 @@
 
 =for comment
 This has been completed up to 91fad77, except for:
-bf5522a13a381257966e7ed6b731195a873b153e
 9cef83062267e94311e1fd8744396e440642738e
 8e88cfee26d866223a6b3bfffce6270271de00db
 
@@ -744,6 +743,11 @@ This was due to a bug in the perl core, not in C<B> itself.
 Some numeric operators were converting integers to floating point,
 resulting in loss of precision on 64-bit platforms
 L<[perl #77456]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77456>.
+
+=item *
+
+The fallback behaviour of overloading on binary operators was asymmetric
+L<[perl #71286]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=71286>.
 
 =back
 
