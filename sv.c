@@ -33,7 +33,7 @@
 #include "regcomp.h"
 
 #ifndef HAS_C99
-# if __STDC_VERSION__ >= 199901L
+# if __STDC_VERSION__ >= 199901L && !defined(VMS)
 #  define HAS_C99 1
 # endif
 #endif
