@@ -61,9 +61,9 @@ $pid = open3 'WRITE', 'READ', 'READ', $perl, '-e', cmd_line(<<'EOF');
     print STDERR scalar <STDIN>;
 EOF
 print WRITE "$desc\n";
-is(scalar <READ>, "$desc\n");
+like(scalar <READ>, qr/\A$desc\r?\n\z/);
 print WRITE "$desc [again]\n";
-is(scalar <READ>, "$desc [again]\n");
+like(scalar <READ>, qr/\A$desc \[again\]\r?\n\z/);
 waitpid $pid, 0;
 
 $desc = "read and error together, error empty";
@@ -73,9 +73,9 @@ $pid = open3 'WRITE', 'READ', '', $perl, '-e', cmd_line(<<'EOF');
     print STDERR scalar <STDIN>;
 EOF
 print WRITE "$desc\n";
-is(scalar <READ>, "$desc\n");
+like(scalar <READ>, qr/\A$desc\r?\n\z/);
 print WRITE "$desc [again]\n";
-is(scalar <READ>, "$desc [again]\n");
+like(scalar <READ>, qr/\A$desc \[again\]\r?\n\z/);
 waitpid $pid, 0;
 
 is(pipe(PIPE_READ, PIPE_WRITE), 1);
@@ -84,7 +84,7 @@ $pid = open3 '<&PIPE_READ', 'READ', '',
 close PIPE_READ;
 print PIPE_WRITE "dup writer\n";
 close PIPE_WRITE;
-is(scalar <READ>, "dup writer\n");
+like(scalar <READ>, qr/\Adup writer\r?\n\z/);
 waitpid $pid, 0;
 
 my $TB = Test::Builder->new();
