@@ -2071,6 +2071,11 @@ d_sigsetjmp (d_sigsetjmp.U):
 	which indicates that the sigsetjmp() routine is available to
 	call setjmp() and optionally save the process's signal mask.
 
+d_sin6_scope_id (d_socket.U):
+	This variable conditionally defines the HAS_SIN6_SCOPE_ID symbol, which
+	indicates that a struct sockaddr_in6 structure has the sin6_scope_id
+	member.
+
 d_sitearch (sitearch.U):
 	This variable conditionally defines SITEARCH to hold the pathname
 	of architecture-dependent library files for $package.  If
@@ -4149,17 +4154,6 @@ perladmin (perladmin.U):
 perllibs (End.U):
 	The list of libraries needed by Perl only (any libraries needed
 	by extensions only will by dropped, if using dynamic loading).
-
-perlpath (perlpath.U):
-	This variable contains the eventual value of the PERLPATH symbol,
-	which contains the name of the perl interpreter to be used in
-	shell scripts and in the "eval 'exec'" idiom.  This variable is
-	not necessarily the pathname of the file containing the perl
-	interpreter; you must append the executable extension (_exe) if
-	it is not already present.  Note that Perl code that runs during
-	the Perl build process cannot reference this variable, as Perl
-	may not have been installed, or even if installed, may be a
-	different version of Perl.
 
 pg (Loc.U):
 	This variable is used internally by Configure to determine the
