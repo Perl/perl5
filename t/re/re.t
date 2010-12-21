@@ -106,7 +106,7 @@ if ('1234'=~/(?:(?<A>\d)|(?<C>!))(?<B>\d)(?<A>\d)(?<B>\d)/){
         # Bug #78058; this can loop
         no warnings;    # Because the 8 may be warned on
         eval 'qr/\18/';
-        pass("qr/\18/ didn't loop");
+        pass(q"qr/\18/ didn't loop");
     }
 
 # New tests above this line, don't forget to update the test count below!
