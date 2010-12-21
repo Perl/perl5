@@ -4155,6 +4155,17 @@ perllibs (End.U):
 	The list of libraries needed by Perl only (any libraries needed
 	by extensions only will by dropped, if using dynamic loading).
 
+perlpath (perlpath.U):
+	This variable contains the eventual value of the PERLPATH symbol,
+	which contains the name of the perl interpreter to be used in
+	shell scripts and in the "eval 'exec'" idiom.  This variable is
+	not necessarily the pathname of the file containing the perl
+	interpreter; you must append the executable extension (_exe) if
+	it is not already present.  Note that Perl code that runs during
+	the Perl build process cannot reference this variable, as Perl
+	may not have been installed, or even if installed, may be a
+	different version of Perl.
+
 pg (Loc.U):
 	This variable is used internally by Configure to determine the
 	full pathname (if any) of the pg program.  After Configure runs,

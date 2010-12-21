@@ -34,6 +34,9 @@ esac
 # Mentioned for the same reason for future reference
 # #23434 $d_strlcat $d_strlcpy
 
+# H.Merijn Brand [21 Dec 2010]
+# cbeaa1895 removed the reference to $perlpath
+
 : This forces SH files to create target in same directory as SH file.
 : This is so that make depend always knows where to find SH derivatives.
 case "$0" in
