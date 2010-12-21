@@ -4909,6 +4909,40 @@ $   d_sockaddr_sa_len="undef"
 $   echo "You do not have sa_len in the sockaddr struct."
 $ ENDIF
 $!
+$!
+$! Check for sin6_scope_id
+$!
+$ echo4 "Checking the availability of sin6_scope_id in the struct sockaddr_in6 ..."
+$ IF Has_Dec_C_Sockets .OR. Has_Socketshr
+$ THEN
+$   OS
+$   WS "#include <types.h>"
+$   IF Has_Socketshr
+$   THEN
+$     WS "#include <socketshr.h>"
+$   ELSE
+$     WS "#include <socket.h>"
+$   ENDIF
+$   WS "#include <in.h>"
+$   WS "int main() {"
+$   WS "struct sockaddr_in6 sin6;"
+$   WS "return (sin6.sin6_scope_id);"
+$   WS "}"
+$   CS
+$   GOSUB compile_ok
+$   IF compile_status .EQ. good_compile
+$   THEN
+$     d_sin6_scope_id="define"
+$     echo "You have sin6_scope_id in the sockaddr_in6 struct."
+$   ELSE
+$     d_sin6_scope_id="undef"
+$     echo "You do not have sin6_scope_id in the sockaddr_in6 struct."
+$   ENDIF
+$ ELSE
+$   d_sin6_scope_id="undef"
+$   echo "You do not have sin6_scope_id in the sockaddr_in6 struct."
+$ ENDIF
+$!
 $! Check for nanosleep
 $!
 $ OS
@@ -6264,7 +6298,7 @@ $ WC "d_sigaction='" + d_sigaction + "'"
 $ WC "d_signbit='" + d_signbit + "'"
 $ WC "d_sigprocmask='" + d_sigprocmask + "'"
 $ WC "d_sigsetjmp='" + d_sigsetjmp + "'"
-$ WC "d_sin6_scope_id='undef'"
+$ WC "d_sin6_scope_id='" + d_sin6_scope_id + "'"
 $ WC "d_sitearch='define'"
 $ WC "d_sockaddr_sa_len='" + d_sockaddr_sa_len + "'"
 $ WC "d_sockatmark='undef'"
