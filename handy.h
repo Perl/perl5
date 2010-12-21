@@ -208,20 +208,6 @@ typedef U64TYPE U64;
 #   endif
 #endif
 
-/* HMB H.Merijn Brand - a placeholder for preparing Configure patches:
- * 
- * USE_DTRACE	HAS_PSEUDOFORK	HAS_TIMEGM	LOCALTIME_R_NEEDS_TZSET	
- * GMTIME_MAX	GMTIME_MIN	LOCALTIME_MAX	LOCALTIME_MIN
- * HAS_CTIME64	HAS_LOCALTIME64	HAS_GMTIME64	HAS_DIFFTIME64
- * HAS_MKTIME64	HAS_ASCTIME64	HAS_GETADDRINFO	HAS_GETNAMEINFO
- * HAS_INETNTOP	HAS_INETPTON	CHARBITS	HAS_PRCTL
- * HAS_SOCKADDR_SA_LEN HAS_SIN6_SCOPE_ID
- * Not (yet) used at top level, but mention them for metaconfig
- */
-
-/* Mention I8SIZE, U8SIZE, I16SIZE, U16SIZE, I32SIZE, U32SIZE,
-   I64SIZE, and U64SIZE here so that metaconfig pulls them in. */
-
 #if defined(UINT8_MAX) && defined(INT16_MAX) && defined(INT32_MAX)
 
 /* I8_MAX and I8_MIN constants are not defined, as I8 is an ambiguous type.
