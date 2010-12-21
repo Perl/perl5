@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 251;
+plan tests => 252;
 
 $FS = ':';
 
@@ -72,6 +72,11 @@ is($_ , '1:2:3:4:5:6:::');
 @ary = split(/:/,'1:2:3:4:5:6:::', 999);
 $cnt = split(/:/,'1:2:3:4:5:6:::', 999);
 is($cnt, scalar(@ary));
+
+# Splitting without pattern
+$_ = "1 2 3 4";
+$_ = join(':', split);
+is($_ , '1:2:3:4');
 
 # Does assignment to a list imply split to one more field than that?
 $foo = runperl( switches => ['-Dt'], stderr => 1, prog => '($a,$b)=split;' );
