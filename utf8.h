@@ -343,7 +343,7 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * UTF-8, anyway).  The "slow path" in Perl_is_utf8_char()
  * will take care of the "extended UTF-8". */
 #define IS_UTF8_CHAR_4c(p)	\
-	((p)[0] == 0xF4 && (p)[0] <= 0xF7 && \
+	((p)[0] >= 0xF4 && (p)[0] <= 0xF7 && \
 	 (p)[1] >= 0x80 && (p)[1] <= 0xBF && \
 	 (p)[2] >= 0x80 && (p)[2] <= 0xBF && \
 	 (p)[3] >= 0x80 && (p)[3] <= 0xBF)
