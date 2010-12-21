@@ -13,6 +13,8 @@ EOF
     }
 }
 
+use strict;
+use warnings;
 no utf8; # Ironic, no?
 
 # NOTE!
@@ -111,9 +113,6 @@ plan tests => 157;
 }
 
 {
-    use warnings;
-    use strict;
-
     my $show = q(
                  sub show {
                    my $result;
@@ -459,7 +458,10 @@ SKIP: {
    ok( !utf8::is_utf8( 'asd'         ), "Wasteful format - q{}" );
    ok( !utf8::is_utf8( qw(asd)       ), "Wasteful format - qw{}" );
    ok( !utf8::is_utf8( (asd => 1)[0] ), "Wasteful format - =>" );
-   ok( !utf8::is_utf8( asd           ), "Wasteful format - bareword" );
    ok( !utf8::is_utf8( -asd          ), "Wasteful format - -word" );
+   no warnings 'bareword';
    ok( !utf8::is_utf8( asd::         ), "Wasteful format - word::" );
+   no warnings 'reserved';
+   no strict 'subs';
+   ok( !utf8::is_utf8( asd           ), "Wasteful format - bareword" );
 }
