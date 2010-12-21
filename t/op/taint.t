@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 339;
+plan tests => 340;
 
 $| = 1;
 
@@ -1470,7 +1470,14 @@ end
     ::is($w, "", "RT 81230");
 }
 
-
+{
+    # Compiling a subroutine inside a tainted expression does not make the
+    # constant folded values tainted.
+    my $x = sub { "x" . "y" };
+    my $y = $ENV{PATH} . $x->(); # Compile $x inside a tainted expression
+    my $z = $x->();
+    ok( ! tainted($z), "Constants folded value not tainted");
+}
 
 # This may bomb out with the alarm signal so keep it last
 SKIP: {
