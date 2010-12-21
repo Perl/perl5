@@ -1,17 +1,13 @@
-/*
- * This file was produced by running the config_h.SH script, which
+/* This file was produced by running the config_h.SH script, which
  * gets its values from uconfig.sh, which is generally produced by
  * running Configure.
  *
  * Feel free to modify any of this as the need arises.  Note, however,
  * that running config_h.SH again will wipe out any changes you've made.
  * For a more permanent change edit uconfig.sh and rerun config_h.SH.
- *
- * $Id: Config_h.U 1 2006-08-24 12:32:52Z rmanfredi $
  */
 
-/*
- * Package name      : perl5
+/* Package name      : perl5
  * Source directory  : .
  * Configuration time: Thu Jan  1 00:00:00 GMT 1970
  * Configured by     : root@localhost

@@ -28,9 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
-#
-# Generated on Tue Dec 21 12:45:44 CET 2010 [metaconfig 3.5 PL0]
+# Generated on Tue Dec 21 14:30:17 CET 2010 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
