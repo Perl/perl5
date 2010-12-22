@@ -1033,10 +1033,26 @@ Thanks for releasing perl!
 
 =item *
 
-Check L<http://www.cpan.org/src/> to see if the new tarballs have appeared.
-They should appear automatically, some hours after upload,
-but if they don't then ask Jarkko to look
-into it, since his scripts must have broken.
+Check your author directory under L<http://www.cpan.org/authors/id/>
+to ensure that the tarballs are available on the website.
+
+=item *
+
+Check C</src> on CPAN (on a fast mirror) to ensure that links to
+the new tarballs have appeared.  There should be links in C</src/5.0>
+(which is accumulating all new versions), links in C</src> (which shows
+only the latest version on each branch), and an appropriate mention in
+C</src/README.html> (which describes the latest versions).
+
+These links should appear automatically, some hours after upload.
+If they don't, or the C<README.html> description is inadequate,
+ask Ask <ask@perl.org>.
+
+=item *
+
+Check L<http://www.cpan.org/src/> to ensure that the C</src> updates
+have been correctly mirrored to the website.
+If they haven't, ask Ask <ask@perl.org>.
 
 =item *
 
@@ -1047,15 +1063,7 @@ It should be visible at a URL like C<http://search.cpan.org/dist/perl-5.10.1/>.
 
 I<This step ONLY for STABLE>
 
-Ask Jarkko to update the descriptions of which tarballs are current in
-L<http://www.cpan.org/src/README.html>, and Rafael to update
-L<http://dev.perl.org/perl5/>
-
-=item *
-
-Post the release announcement to use.perl.org.
-(if you don't have access rights to post news, ask someone like Rafael to
-do it for you.)
+Ask Rafael to update L<http://dev.perl.org/perl5/>.
 
 =back
 
