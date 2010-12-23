@@ -2,7 +2,7 @@ package Encode::Alias;
 use strict;
 use warnings;
 no warnings 'redefine';
-our $VERSION = do { my @r = ( q$Revision: 2.12 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.13 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 sub DEBUG () { 0 }
 
 use base qw(Exporter);
@@ -90,9 +90,9 @@ sub define_alias {
                     DEBUG and warn "delete \$Alias\{$k\}";
                     delete $Alias{$k};
                 }
-                elsif ( ref($alias) eq 'CODE' ) {
+                elsif ( ref($alias) eq 'CODE' && $alias->($k) ) {
                     DEBUG and warn "delete \$Alias\{$k\}";
-                    delete $Alias{ $alias->($name) };
+                    delete $Alias{$k};
                 }
             }
         }
@@ -286,7 +286,9 @@ Encode::Alias - alias definitions to encodings
 
   use Encode;
   use Encode::Alias;
-  define_alias( newName => ENCODING);
+  define_alias( "newName" => ENCODING);
+  define_alias( qr/.../ => ENCODING);
+  define_alias( sub { return ENCODING if ...; } );
 
 =head1 DESCRIPTION
 
@@ -294,7 +296,8 @@ Allows newName to be used as an alias for ENCODING. ENCODING may be
 either the name of an encoding or an encoding object (as described 
 in L<Encode>).
 
-Currently I<newName> can be specified in the following ways:
+Currently the first argument to define_alias() can be specified in the
+following ways:
 
 =over 4
 
@@ -321,7 +324,7 @@ experienced.  Use this feature with caution.
 
 The same effect as the example above in a different way.  The coderef
 takes the alias name as an argument and returns a canonical name on
-success or undef if not.  Note the second argument is not required.
+success or undef if not.  Note the second argument is ignored if provided.
 Use this with even more caution than the regex version.
 
 =back
@@ -368,6 +371,10 @@ to do so.  And
   Encode::Alias->init_aliases;
 
 gets the factory settings back.
+
+Note that define_alias() will not be able to override the canonical name
+of encodings. Encodings are first looked up by canonical name before
+potential aliases are tried.
 
 =head1 SEE ALSO
 
