@@ -100,6 +100,14 @@ C<Encode> has been upgraded from version 2.40 to 2.41
 
 =item *
 
+C<threads> has been upgraded from version 1.81_03 to 1.82
+
+=item *
+
+C<threads::shared> has been upgraded from version 1.35 to 1.36
+
+=item *
+
 XXX
 
 =back
