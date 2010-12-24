@@ -3,7 +3,7 @@ package Thread::Semaphore;
 use strict;
 use warnings;
 
-our $VERSION = '2.11';
+our $VERSION = '2.12';
 $VERSION = eval $VERSION;
 
 use threads::shared;
@@ -102,7 +102,7 @@ Thread::Semaphore - Thread-safe semaphores
 
 =head1 VERSION
 
-This document describes Thread::Semaphore version 2.11
+This document describes Thread::Semaphore version 2.12
 
 =head1 SYNOPSIS
 
@@ -122,7 +122,7 @@ This document describes Thread::Semaphore version 2.11
     $s->down_force();
 
     # The default value for semaphore operations is 1
-    my $s = Thread::Semaphore-new($initial_value);
+    my $s = Thread::Semaphore->new($initial_value);
     $s->down($down_value);
     $s->up($up_value);
     if ($s->down_nb($down_value)) {
@@ -220,12 +220,6 @@ environment.
 
 Thread::Semaphore Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/Thread-Semaphore>
-
-Annotated POD for Thread::Semaphore:
-L<http://annocpan.org/~JDHEDDEN/Thread-Semaphore-2.11/lib/Thread/Semaphore.pm>
-
-Source repository:
-L<http://code.google.com/p/thread-semaphore/>
 
 L<threads>, L<threads::shared>
 
