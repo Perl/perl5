@@ -291,10 +291,32 @@ foreach my $file ("op_reg_common.h", "regexp.h") {
 my %vrxf=reverse %rxfv;
 printf $out "\t/* Bits in extflags defined: %s */\n", unpack 'B*', pack 'N', $val;
 for (0..31) {
-    my $n=$vrxf{2**$_}||"UNUSED_BIT_$_";
+    my $power_of_2 = 2**$_;
+    my $n=$vrxf{$power_of_2};
+    if (! $n) {
+
+        # Here, there was no name that matched exactly the bit.  It could be
+        # either that it is unused, or the name matches multiple bits.
+        if (! ($val & $power_of_2)) {
+            $n = "UNUSED_BIT_$_";
+        }
+        else {
+
+            # Here, must be because it matches multiple bits.  Look through
+            # all possibilities until find one that matches this one.  Use
+            # that name, and all the bits it matches
+            foreach my $name (keys %rxfv) {
+                if ($rxfv{$name} & $power_of_2) {
+                    $n = $name;
+                    $power_of_2 = $rxfv{$name};
+                    last;
+                }
+            }
+        }
+    }
     $n=~s/^RXf_(PMf_)?//;
     printf $out qq(\t%-20s/* 0x%08x */\n), 
-        qq("$n",),2**$_;
+        qq("$n",),$power_of_2;
 }  
  
 print $out <<EOP;
