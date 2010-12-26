@@ -272,8 +272,9 @@ struct regnode_charclass_class {
 #undef STRING
 
 #define	OP(p)		((p)->type)
-#define FLAGS(p)	((p)->flags)	/* Caution: Doesn't apply to all \
-					   regnode types */
+#define FLAGS(p)	((p)->flags)	/* Caution: Doesn't apply to all      \
+					   regnode types.  For some, it's the \
+					   character set of the regnode */
 #define	OPERAND(p)	(((struct regnode_string *)p)->string)
 #define MASK(p)		((char*)OPERAND(p))
 #define	STR_LEN(p)	(((struct regnode_string *)p)->str_len)

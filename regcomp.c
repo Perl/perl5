@@ -3632,7 +3632,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    if (flags & SCF_DO_STCLASS_AND) {
 			if (!(data->start_class->flags & ANYOF_LOCALE)) {
 			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_NALNUM);
-                            if (FLAGS(scan) & USE_UNI) {
+                            if (FLAGS(scan) == REGEX_UNICODE_CHARSET) {
                                 for (value = 0; value < 256; value++) {
                                     if (!isWORDCHAR_L1(value)) {
                                         ANYOF_BITMAP_CLEAR(data->start_class, value);
@@ -3650,7 +3650,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    else {
 			if (data->start_class->flags & ANYOF_LOCALE)
 			    ANYOF_CLASS_SET(data->start_class,ANYOF_ALNUM);
-                        else if (FLAGS(scan) & USE_UNI) {
+                        else if (FLAGS(scan) == REGEX_UNICODE_CHARSET) {
                             for (value = 0; value < 256; value++) {
                                 if (isWORDCHAR_L1(value)) {
                                     ANYOF_BITMAP_SET(data->start_class, value);
@@ -3679,7 +3679,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    if (flags & SCF_DO_STCLASS_AND) {
 			if (!(data->start_class->flags & ANYOF_LOCALE)) {
 			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_ALNUM);
-                            if (FLAGS(scan) & USE_UNI) {
+                            if (FLAGS(scan) == REGEX_UNICODE_CHARSET) {
                                 for (value = 0; value < 256; value++) {
                                     if (isWORDCHAR_L1(value)) {
                                         ANYOF_BITMAP_CLEAR(data->start_class, value);
@@ -3718,7 +3718,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    if (flags & SCF_DO_STCLASS_AND) {
 			if (!(data->start_class->flags & ANYOF_LOCALE)) {
 			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_NSPACE);
-			    if (FLAGS(scan) & USE_UNI) {
+			    if (FLAGS(scan) == REGEX_UNICODE_CHARSET) {
                                 for (value = 0; value < 256; value++) {
                                     if (!isSPACE_L1(value)) {
                                         ANYOF_BITMAP_CLEAR(data->start_class, value);
@@ -3737,7 +3737,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         if (data->start_class->flags & ANYOF_LOCALE) {
 			    ANYOF_CLASS_SET(data->start_class,ANYOF_SPACE);
                         }
-                        else if (FLAGS(scan) & USE_UNI) {
+                        else if (FLAGS(scan) == REGEX_UNICODE_CHARSET) {
                             for (value = 0; value < 256; value++) {
                                 if (isSPACE_L1(value)) {
                                     ANYOF_BITMAP_SET(data->start_class, value);
@@ -3766,7 +3766,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    if (flags & SCF_DO_STCLASS_AND) {
 			if (!(data->start_class->flags & ANYOF_LOCALE)) {
 			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_SPACE);
-                            if (FLAGS(scan) & USE_UNI) {
+                            if (FLAGS(scan) == REGEX_UNICODE_CHARSET) {
                                 for (value = 0; value < 256; value++) {
                                     if (isSPACE_L1(value)) {
                                         ANYOF_BITMAP_CLEAR(data->start_class, value);
@@ -3784,7 +3784,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    else {
 			if (data->start_class->flags & ANYOF_LOCALE)
 			    ANYOF_CLASS_SET(data->start_class,ANYOF_NSPACE);
-                        else if (FLAGS(scan) & USE_UNI) {
+                        else if (FLAGS(scan) == REGEX_UNICODE_CHARSET) {
                             for (value = 0; value < 256; value++) {
                                 if (!isSPACE_L1(value)) {
                                     ANYOF_BITMAP_SET(data->start_class, value);
@@ -7400,8 +7400,8 @@ tryagain:
                 ret = reg_node(pRExC_state, (U8)(ALNUML));
             } else {
                 ret = reg_node(pRExC_state, (U8)(ALNUM));
-                FLAGS(ret) = (UNI_SEMANTICS) ? USE_UNI : 0;
             }
+	    FLAGS(ret) = get_regex_charset(RExC_flags);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'W':
@@ -7409,8 +7409,8 @@ tryagain:
                 ret = reg_node(pRExC_state, (U8)(NALNUML));
             } else {
                 ret = reg_node(pRExC_state, (U8)(NALNUM));
-                FLAGS(ret) = (UNI_SEMANTICS) ? USE_UNI : 0;
             }
+	    FLAGS(ret) = get_regex_charset(RExC_flags);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'b':
@@ -7420,8 +7420,8 @@ tryagain:
                 ret = reg_node(pRExC_state, (U8)(BOUNDL));
             } else {
                 ret = reg_node(pRExC_state, (U8)(BOUND));
-                FLAGS(ret) = (UNI_SEMANTICS) ? USE_UNI : 0;
             }
+	    FLAGS(ret) = get_regex_charset(RExC_flags);
 	    *flagp |= SIMPLE;
 	    goto finish_meta_pat;
 	case 'B':
@@ -7431,8 +7431,8 @@ tryagain:
                 ret = reg_node(pRExC_state, (U8)(NBOUNDL));
             } else {
                 ret = reg_node(pRExC_state, (U8)(NBOUND));
-                FLAGS(ret) = (UNI_SEMANTICS) ? USE_UNI : 0;
             }
+	    FLAGS(ret) = get_regex_charset(RExC_flags);
 	    *flagp |= SIMPLE;
 	    goto finish_meta_pat;
 	case 's':
@@ -7440,8 +7440,8 @@ tryagain:
                 ret = reg_node(pRExC_state, (U8)(SPACEL));
             } else {
                 ret = reg_node(pRExC_state, (U8)(SPACE));
-                FLAGS(ret) = (UNI_SEMANTICS) ? USE_UNI : 0;
             }
+	    FLAGS(ret) = get_regex_charset(RExC_flags);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'S':
@@ -7449,8 +7449,8 @@ tryagain:
                 ret = reg_node(pRExC_state, (U8)(NSPACEL));
             } else {
                 ret = reg_node(pRExC_state, (U8)(NSPACE));
-                FLAGS(ret) = (UNI_SEMANTICS) ? USE_UNI : 0;
             }
+	    FLAGS(ret) = get_regex_charset(RExC_flags);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'd':

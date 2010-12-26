@@ -219,7 +219,7 @@
  * between 128 and 255 using Unicode (latin1) semantics. */
 #define CCC_TRY_AFF_U(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNCU,LCFUNC)         \
     _CCC_TRY_AFF_COMMON(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNC)               \
-            if (!(OP(scan) == NAMEL ? LCFUNC(nextchr) : (FUNCU(nextchr) && (isASCII(nextchr) || (FLAGS(scan) & USE_UNI))))) \
+            if (!(OP(scan) == NAMEL ? LCFUNC(nextchr) : (FUNCU(nextchr) && (isASCII(nextchr) || (FLAGS(scan) == REGEX_UNICODE_CHARSET))))) \
                 sayNO;                                                       \
             nextchr = UCHARAT(++locinput);                                   \
             break
@@ -261,7 +261,7 @@
 
 #define CCC_TRY_NEG_U(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNCU,LCFUNC)         \
     _CCC_TRY_NEG_COMMON(NAME,NAMEL,CLASS,STR,LCFUNC_utf8,FUNCU)              \
-            if ((OP(scan) == NAMEL ? LCFUNC(nextchr) : (FUNCU(nextchr) && (isASCII(nextchr) || (FLAGS(scan) & USE_UNI))))) \
+            if ((OP(scan) == NAMEL ? LCFUNC(nextchr) : (FUNCU(nextchr) && (isASCII(nextchr) || (FLAGS(scan) == REGEX_UNICODE_CHARSET))))) \
                 sayNO;                                                       \
             nextchr = UCHARAT(++locinput);                                   \
             break
@@ -1557,13 +1557,13 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 tmp = cBOOL((OP(c) == BOUNDL)
                             ? isALNUM_LC(tmp)
                             : (isWORDCHAR_L1(tmp)
-                               && (isASCII(tmp) || (FLAGS(c) & USE_UNI))));
+                               && (isASCII(tmp) || (FLAGS(c) == REGEX_UNICODE_CHARSET))));
 		REXEC_FBC_SCAN(
 		    if (tmp ==
                         !((OP(c) == BOUNDL)
                           ? isALNUM_LC(*s)
                           : (isWORDCHAR_L1((U8) *s)
-                             && (isASCII((U8) *s) || (FLAGS(c) & USE_UNI)))))
+                             && (isASCII((U8) *s) || (FLAGS(c) == REGEX_UNICODE_CHARSET)))))
 		    {
 			tmp = !tmp;
 			REXEC_FBC_TRYIT;
@@ -1600,13 +1600,13 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 tmp = cBOOL((OP(c) == NBOUNDL)
                             ? isALNUM_LC(tmp)
                             : (isWORDCHAR_L1(tmp)
-                               && (isASCII(tmp) || (FLAGS(c) & USE_UNI))));
+                               && (isASCII(tmp) || (FLAGS(c) == REGEX_UNICODE_CHARSET))));
 		REXEC_FBC_SCAN(
 		    if (tmp == ! cBOOL(
                             (OP(c) == NBOUNDL)
                             ? isALNUM_LC(*s)
                             : (isWORDCHAR_L1((U8) *s)
-                               && (isASCII((U8) *s) || (FLAGS(c) & USE_UNI)))))
+                               && (isASCII((U8) *s) || (FLAGS(c) == REGEX_UNICODE_CHARSET)))))
                     {
 			tmp = !tmp;
                     }
@@ -1620,7 +1620,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    REXEC_FBC_CSCAN_PRELOAD(
 		LOAD_UTF8_CHARCLASS_PERL_WORD(),
 		swash_fetch(RE_utf8_perl_word, (U8*)s, utf8_target),
-                (FLAGS(c) & USE_UNI) ? isWORDCHAR_L1((U8) *s) : isALNUM(*s)
+                (FLAGS(c) == REGEX_UNICODE_CHARSET) ? isWORDCHAR_L1((U8) *s) : isALNUM(*s)
 	    );
 	case ALNUML:
 	    REXEC_FBC_CSCAN_TAINT(
@@ -1631,7 +1631,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    REXEC_FBC_CSCAN_PRELOAD(
 		LOAD_UTF8_CHARCLASS_PERL_WORD(),
 		!swash_fetch(RE_utf8_perl_word, (U8*)s, utf8_target),
-                ! ((FLAGS(c) & USE_UNI) ? isWORDCHAR_L1((U8) *s) : isALNUM(*s))
+                ! ((FLAGS(c) == REGEX_UNICODE_CHARSET) ? isWORDCHAR_L1((U8) *s) : isALNUM(*s))
 	    );
 	case NALNUML:
 	    REXEC_FBC_CSCAN_TAINT(
@@ -1642,7 +1642,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    REXEC_FBC_CSCAN_PRELOAD(
 		LOAD_UTF8_CHARCLASS_PERL_SPACE(),
 		*s == ' ' || swash_fetch(RE_utf8_perl_space,(U8*)s, utf8_target),
-                isSPACE_L1((U8) *s) && (isASCII((U8) *s) || (FLAGS(c) & USE_UNI))
+                isSPACE_L1((U8) *s) && (isASCII((U8) *s) || (FLAGS(c) == REGEX_UNICODE_CHARSET))
 	    );
 	case SPACEL:
 	    REXEC_FBC_CSCAN_TAINT(
@@ -1653,7 +1653,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    REXEC_FBC_CSCAN_PRELOAD(
 		LOAD_UTF8_CHARCLASS_PERL_SPACE(),
 		!(*s == ' ' || swash_fetch(RE_utf8_perl_space,(U8*)s, utf8_target)),
-                !(isSPACE_L1((U8) *s) && (isASCII((U8) *s) || (FLAGS(c) & USE_UNI)))
+                !(isSPACE_L1((U8) *s) && (isASCII((U8) *s) || (FLAGS(c) == REGEX_UNICODE_CHARSET)))
 	    );
 	case NSPACEL:
 	    REXEC_FBC_CSCAN_TAINT(
@@ -3651,10 +3651,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    else {
 		ln = (locinput != PL_bostr) ?
 		    UCHARAT(locinput - 1) : '\n';
-		if (FLAGS(scan) & USE_UNI) {
+		if (FLAGS(scan) == REGEX_UNICODE_CHARSET) {
 
                     /* Here, can't be BOUNDL or NBOUNDL because they never set
-                     * the flags to USE_UNI */
+                     * the flags to REGEX_UNICODE_CHARSET */
                     ln = isWORDCHAR_L1(ln);
                     n = isWORDCHAR_L1(nextchr);
                 }
@@ -5942,7 +5942,7 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 		scan += UTF8SKIP(scan);
 		hardcount++;
 	    }
-        } else if (FLAGS(p) & USE_UNI) {
+        } else if (FLAGS(p) == REGEX_UNICODE_CHARSET) {
             while (scan < loceol && isWORDCHAR_L1((U8) *scan)) {
                 scan++;
             }
@@ -5976,7 +5976,7 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 		scan += UTF8SKIP(scan);
 		hardcount++;
 	    }
-        } else if (FLAGS(p) & USE_UNI) {
+        } else if (FLAGS(p) == REGEX_UNICODE_CHARSET) {
             while (scan < loceol && ! isWORDCHAR_L1((U8) *scan)) {
                 scan++;
             }
@@ -6011,7 +6011,7 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 		scan += UTF8SKIP(scan);
 		hardcount++;
 	    }
-        } else if (FLAGS(p) & USE_UNI) {
+        } else if (FLAGS(p) == REGEX_UNICODE_CHARSET) {
             while (scan < loceol && isSPACE_L1((U8) *scan)) {
                 scan++;
             }
@@ -6045,7 +6045,7 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 		scan += UTF8SKIP(scan);
 		hardcount++;
 	    }
-        } else if (FLAGS(p) & USE_UNI) {
+        } else if (FLAGS(p) == REGEX_UNICODE_CHARSET) {
             while (scan < loceol && ! isSPACE_L1((U8) *scan)) {
                 scan++;
             }
