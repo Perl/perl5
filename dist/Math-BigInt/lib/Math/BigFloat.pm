@@ -473,6 +473,7 @@ sub bcmp
 
   # set up parameters
   my ($self,$x,$y) = (ref($_[0]),@_);
+
   # objectify is costly, so avoid it
   if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
     {
@@ -482,58 +483,150 @@ sub bcmp
   return $upgrade->bcmp($x,$y) if defined $upgrade &&
     ((!$x->isa($self)) || (!$y->isa($self)));
 
-  if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/))
-    {
-    # handle +-inf and NaN
-    return undef if (($x->{sign} eq $nan) || ($y->{sign} eq $nan));
-    return 0 if ($x->{sign} eq $y->{sign}) && ($x->{sign} =~ /^[+-]inf$/);
-    return +1 if $x->{sign} eq '+inf';
-    return -1 if $x->{sign} eq '-inf';
-    return -1 if $y->{sign} eq '+inf';
-    return +1;
-    }
+  # Handle all 'nan' cases.
 
-  # check sign for speed first
-  return 1 if $x->{sign} eq '+' && $y->{sign} eq '-';	# does also 0 <=> -y
-  return -1 if $x->{sign} eq '-' && $y->{sign} eq '+';	# does also -x <=> 0
+  return undef if ($x->{sign} eq $nan) || ($y->{sign} eq $nan);
 
-  # shortcut 
+  # Handle all '+inf' and '-inf' cases.
+
+  return  0 if ($x->{sign} eq '+inf' && $y->{sign} eq '+inf' ||
+                $x->{sign} eq '-inf' && $y->{sign} eq '-inf');
+  return +1 if $x->{sign} eq '+inf';    # x = +inf and y < +inf
+  return -1 if $x->{sign} eq '-inf';    # x = -inf and y > -inf
+  return -1 if $y->{sign} eq '+inf';    # x < +inf and y = +inf
+  return +1 if $y->{sign} eq '-inf';    # x > -inf and y = -inf
+
+  # Handle all cases with opposite signs.
+
+  return +1 if $x->{sign} eq '+' && $y->{sign} eq '-';  # also does 0 <=> -y
+  return -1 if $x->{sign} eq '-' && $y->{sign} eq '+';  # also does -x <=> 0
+
+  # Handle all remaining zero cases.
+
   my $xz = $x->is_zero();
   my $yz = $y->is_zero();
-  return 0 if $xz && $yz;				# 0 <=> 0
-  return -1 if $xz && $y->{sign} eq '+';		# 0 <=> +y
-  return 1 if $yz && $x->{sign} eq '+';			# +x <=> 0
+  return  0 if $xz && $yz;                              # 0 <=> 0
+  return -1 if $xz && $y->{sign} eq '+';                # 0 <=> +y
+  return +1 if $yz && $x->{sign} eq '+';                # +x <=> 0
 
-  # adjust so that exponents are equal
-  my $lxm = $MBI->_len($x->{_m});
-  my $lym = $MBI->_len($y->{_m});
-  # the numify somewhat limits our length, but makes it much faster
-  my ($xes,$yes) = (1,1);
-  $xes = -1 if $x->{_es} ne '+';
-  $yes = -1 if $y->{_es} ne '+';
-  my $lx = $lxm + $xes * $MBI->_num($x->{_e});
-  my $ly = $lym + $yes * $MBI->_num($y->{_e});
-  my $l = $lx - $ly; $l = -$l if $x->{sign} eq '-';
-  return $l <=> 0 if $l != 0;
-  
-  # lengths (corrected by exponent) are equal
-  # so make mantissa equal length by padding with zero (shift left)
-  my $diff = $lxm - $lym;
-  my $xm = $x->{_m};		# not yet copy it
-  my $ym = $y->{_m};
-  if ($diff > 0)
-    {
-    $ym = $MBI->_copy($y->{_m});
-    $ym = $MBI->_lsft($ym, $MBI->_new($diff), 10);
-    }
-  elsif ($diff < 0)
-    {
-    $xm = $MBI->_copy($x->{_m});
-    $xm = $MBI->_lsft($xm, $MBI->_new(-$diff), 10);
-    }
-  my $rc = $MBI->_acmp($xm,$ym);
-  $rc = -$rc if $x->{sign} eq '-';		# -124 < -123
-  $rc <=> 0;
+  # Both arguments are now finite, non-zero numbers with the same sign.
+
+  my $cmp;
+
+  # The next step is to compare the exponents, but since each mantissa is an
+  # integer of arbitrary value, the exponents must be normalized by the length
+  # of the mantissas before we can compare them.
+
+  my $mxl = $MBI->_len($x->{_m});
+  my $myl = $MBI->_len($y->{_m});
+
+  # If the mantissas have the same length, there is no point in normalizing the
+  # exponents by the length of the mantissas, so treat that as a special case.
+
+  if ($mxl == $myl) {
+
+      # First handle the two cases where the exponents have different signs.
+
+      if ($x->{_es} eq '+' && $y->{_es} eq '-') {
+          $cmp = +1;
+      }
+
+      elsif ($x->{_es} eq '-' && $y->{_es} eq '+') {
+          $cmp = -1;
+      }
+
+      # Then handle the case where the exponents have the same sign.
+
+      else {
+          $cmp = $MBI->_acmp($x->{_e}, $y->{_e});
+          $cmp = -$cmp if $x->{_es} eq '-';
+      }
+
+      # Adjust for the sign, which is the same for x and y, and bail out if
+      # we're done.
+
+      $cmp = -$cmp if $x->{sign} eq '-';        # 124 > 123, but -124 < -123
+      return $cmp if $cmp;
+
+  }
+
+  # We must normalize each exponent by the length of the corresponding
+  # mantissa. Life is a lot easier if we first make both exponents
+  # non-negative. We do this by adding the same positive value to both
+  # exponent. This is safe, because when comparing the exponents, only the
+  # relative difference is important.
+
+  my $ex;
+  my $ey;
+
+  if ($x->{_es} eq '+') {
+
+      # If the exponent of x is >= 0 and the exponent of y is >= 0, there is no
+      # need to do anything special.
+
+      if ($y->{_es} eq '+') {
+          $ex = $MBI->_copy($x->{_e});
+          $ey = $MBI->_copy($y->{_e});
+      }
+
+      # If the exponent of x is >= 0 and the exponent of y is < 0, add the
+      # absolute value of the exponent of y to both.
+
+      else {
+          $ex = $MBI->_copy($x->{_e});
+          $ex = $MBI->_add($ex, $y->{_e});      # ex + |ey|
+          $ey = $MBI->_zero();                  # -ex + |ey| = 0
+      }
+
+  } else {
+
+      # If the exponent of x is < 0 and the exponent of y is >= 0, add the
+      # absolute value of the exponent of x to both.
+
+      if ($y->{_es} eq '+') {
+          $ex = $MBI->_zero();                  # -ex + |ex| = 0
+          $ey = $MBI->_copy($y->{_e});
+          $ey = $MBI->_add($ey, $x->{_e});      # ey + |ex|
+      }
+
+      # If the exponent of x is < 0 and the exponent of y is < 0, add the
+      # absolute values of both exponents to both exponents.
+
+      else {
+          $ex = $MBI->_copy($y->{_e});          # -ex + |ey| + |ex| = |ey|
+          $ey = $MBI->_copy($x->{_e});          # -ey + |ex| + |ey| = |ex|
+      }
+
+  }
+
+  # Now we can normalize the exponents by adding lengths of the mantissas.
+
+  $MBI->_add($ex, $MBI->_new($mxl));
+  $MBI->_add($ey, $MBI->_new($myl));
+
+  # We're done if the exponents are different.
+
+  $cmp = $MBI->_acmp($ex, $ey);
+  $cmp = -$cmp if $x->{sign} eq '-';            # 124 > 123, but -124 < -123
+  return $cmp if $cmp;
+
+  # Compare the mantissas, but first normalize them by padding the shorter
+  # mantissa with zeros (shift left) until it has the same length as the longer
+  # mantissa.
+
+  my $mx = $x->{_m};
+  my $my = $y->{_m};
+
+  if ($mxl > $myl) {
+      $my = $MBI->_lsft($MBI->_copy($my), $MBI->_new($mxl - $myl), 10);
+  } elsif ($mxl < $myl) {
+      $mx = $MBI->_lsft($MBI->_copy($mx), $MBI->_new($myl - $mxl), 10);
+  }
+
+  $cmp = $MBI->_acmp($mx, $my);
+  $cmp = -$cmp if $x->{sign} eq '-';            # 124 > 123, but -124 < -123
+  return $cmp;
+
   }
 
 sub bacmp 
