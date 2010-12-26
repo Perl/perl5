@@ -388,6 +388,7 @@ struct pmop {
 
 /* keep 1st runtime pattern forever */
 #define PMf_KEEP	(1<<(PMf_BASE_SHIFT+5))
+
 #define PMf_GLOBAL	(1<<(PMf_BASE_SHIFT+6))	/* pattern had a g modifier */
 
 /* don't reset pos() if //g fails */
