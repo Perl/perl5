@@ -19,6 +19,8 @@
  * and memory.  I (khw) think the code will work if changed back, but haven't
  * tested it */
 /* Make sure to update lib/re.pm when changing this! */
+#ifndef RXf_PMf_STD_PMMOD_SHIFT /* Only expand #include of this file once */
+
 #define RXf_PMf_STD_PMMOD_SHIFT 0
 
 /* The bits need to be ordered so that the msix are contiguous starting at bit
@@ -63,3 +65,5 @@
                             & (~((1 << RXf_PMf_STD_PMMOD_SHIFT)-1)))
 #   error RXf_PMf_COMPILETIME is invalid
 #endif
+
+#endif /* Include only once */
