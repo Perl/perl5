@@ -291,7 +291,7 @@ default, simply put
 
 at the top of your code.
 
-The /dul flags cancel each other out. So, in this example,
+The character set /dul flags cancel each other out. So, in this example,
 
     use re "/u";
     "ss" =~ /\xdf/;
@@ -300,7 +300,7 @@ The /dul flags cancel each other out. So, in this example,
 
 the second C<use re> does an implicit C<no re '/u'>.
 
-Turning on the /l and /u flags with C<use re> takes precedence over the
+Turning on one of the character set flags with C<use re> takes precedence over the
 C<locale> pragma and the 'unicode_strings' C<feature>, for regular
 expressions. Turning off one of these flags when it is active reverts to
 the behaviour specified by whatever other pragmata are in scope. For
