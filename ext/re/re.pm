@@ -142,24 +142,24 @@ sub bits {
 	    re->export_to_level(2, 're', $s);
 	} elsif ($s =~ s/^\///) {
 	    my $reflags = $^H{reflags} || 0;
-	    my $seen_dul;
+	    my $seen_charset;
 	    for(split//, $s) {
 		if (/[dul]/) {
 		    if ($on) {
-			if ($seen_dul && $seen_dul ne $_) {
+			if ($seen_charset && $seen_charset ne $_) {
 			    require Carp;
 			    Carp::carp(
-			      qq 'The "$seen_dul" and "$_" flags '
+			      qq 'The "$seen_charset" and "$_" flags '
 			     .qq 'are exclusive'
 			    );
 			}
-			$^H{reflags_dul} = $reflags{$_};
-			$seen_dul = $_;
+			$^H{reflags_charset} = $reflags{$_};
+			$seen_charset = $_;
 		    }
 		    else {
-			delete $^H{reflags_dul}
-			 if  defined $^H{reflags_dul}
-			  && $^H{reflags_dul} == $reflags{$_};
+			delete $^H{reflags_charset}
+			 if  defined $^H{reflags_charset}
+			  && $^H{reflags_charset} == $reflags{$_};
 		    }
 		} elsif (exists $reflags{$_}) {
 		    $on
@@ -173,7 +173,7 @@ sub bits {
 		    next ARG;
 		}
 	    }
-	    ($^H{reflags} = $reflags or defined $^H{reflags_dul})
+	    ($^H{reflags} = $reflags or defined $^H{reflags_charset})
 	     ? $^H |= $flags_hint
 	     : ($^H &= ~$flags_hint);
 	} else {

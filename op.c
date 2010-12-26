@@ -3789,7 +3789,7 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
         );
         if (reflags && SvOK(reflags)) pmop->op_pmflags |= SvIV(reflags);
         reflags = Perl_refcounted_he_fetch_pvn(aTHX_
-         PL_compiling.cop_hints_hash, STR_WITH_LEN("reflags_dul"), 0, 0
+         PL_compiling.cop_hints_hash, STR_WITH_LEN("reflags_charset"), 0, 0
         );
         if (reflags && SvOK(reflags)) {
             pmop->op_pmflags &= ~(RXf_PMf_LOCALE|RXf_PMf_UNICODE);
