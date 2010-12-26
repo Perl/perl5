@@ -19,9 +19,9 @@
 #define	MEOL                  	7	/* 0x07 Same, assuming multiline. */
 #define	SEOL                  	8	/* 0x08 Same, assuming singleline. */
 #define	BOUND                 	9	/* 0x09 Match "" at any word boundary */
-#define	BOUNDL                	10	/* 0x0a Match "" at any word boundary */
+#define	BOUNDL                	10	/* 0x0a Match "" at any locale word boundary */
 #define	NBOUND                	11	/* 0x0b Match "" at any word non-boundary */
-#define	NBOUNDL               	12	/* 0x0c Match "" at any word non-boundary */
+#define	NBOUNDL               	12	/* 0x0c Match "" at any locale word non-boundary */
 #define	GPOS                  	13	/* 0x0d Matches where last m//g left off. */
 #define	REG_ANY               	14	/* 0x0e Match any one character (except newline). */
 #define	SANY                  	15	/* 0x0f Match any one character. */

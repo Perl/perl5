@@ -31,9 +31,9 @@ EOL         EOL,        no        ; Match "" at end of line.
 MEOL        EOL,        no        ; Same, assuming multiline.
 SEOL        EOL,        no        ; Same, assuming singleline.
 BOUND       BOUND,      no        ; Match "" at any word boundary
-BOUNDL      BOUND,      no        ; Match "" at any word boundary
+BOUNDL      BOUND,      no        ; Match "" at any locale word boundary
 NBOUND      NBOUND,     no        ; Match "" at any word non-boundary
-NBOUNDL     NBOUND,     no        ; Match "" at any word non-boundary
+NBOUNDL     NBOUND,     no        ; Match "" at any locale word non-boundary
 GPOS        GPOS,       no        ; Matches where last m//g left off.
 
 #* [Special] alternatives:
