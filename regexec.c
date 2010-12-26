@@ -189,12 +189,7 @@
                 sayNO;                                                      \
             if (utf8_target && UTF8_IS_CONTINUED(nextchr)) {                \
                 if (!CAT2(PL_utf8_,CLASS)) {                                \
-                    bool ok;                                                \
-                    ENTER;                                                  \
-                    save_re_context();                                      \
-                    ok=CAT2(is_utf8_,CLASS)((const U8*)STR);                \
-                    assert(ok);                                             \
-                    LEAVE;                                                  \
+                    LOAD_UTF8_CHARCLASS(CLASS, STR);                        \
                 }                                                           \
                 if (!(OP(scan) == NAME                                      \
                     ? cBOOL(swash_fetch(CAT2(PL_utf8_,CLASS), (U8*)locinput, utf8_target))  \
@@ -233,12 +228,7 @@
                 sayNO;                                                       \
             if (utf8_target && UTF8_IS_CONTINUED(nextchr)) {                 \
                 if (!CAT2(PL_utf8_,CLASS)) {                                 \
-                    bool ok;                                                 \
-                    ENTER;                                                   \
-                    save_re_context();                                       \
-                    ok=CAT2(is_utf8_,CLASS)((const U8*)STR);                 \
-                    assert(ok);                                              \
-                    LEAVE;                                                   \
+                    LOAD_UTF8_CHARCLASS(CLASS, STR);                         \
                 }                                                            \
                 if ((OP(scan) == NAME                                        \
                     ? cBOOL(swash_fetch(CAT2(PL_utf8_,CLASS), (U8*)locinput, utf8_target))  \
