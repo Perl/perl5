@@ -298,7 +298,7 @@ The /dul flags cancel each other out. So, in this example,
     use re "/d";
     "ss" =~ /\xdf/;
 
-The second C<use re> does an implicit C<no re '/u'>.
+the second C<use re> does an implicit C<no re '/u'>.
 
 Turning on the /l and /u flags with C<use re> takes precedence over the
 C<locale> pragma and the 'unicode_strings' C<feature>, for regular
