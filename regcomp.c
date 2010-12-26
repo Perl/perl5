@@ -369,8 +369,9 @@ static const scan_data_t zero_scan_data =
 #define SCF_SEEN_ACCEPT         0x8000 
 
 #define UTF cBOOL(RExC_utf8)
-#define LOC cBOOL(RExC_flags & RXf_PMf_LOCALE)
-#define UNI_SEMANTICS cBOOL(RExC_flags & RXf_PMf_UNICODE)
+#define LOC (get_regex_charset(RExC_flags) == REGEX_LOCALE_CHARSET)
+#define UNI_SEMANTICS (get_regex_charset(RExC_flags) == REGEX_UNICODE_CHARSET)
+
 #define FOLD cBOOL(RExC_flags & RXf_PMf_FOLD)
 
 #define OOB_UNICODE		12345678
@@ -4479,8 +4480,9 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
     /* Set to use unicode semantics if the pattern is in utf8 and has the
      * 'dual' charset specified, as it means unicode when utf8  */
     pm_flags = orig_pm_flags;
-    if (RExC_utf8  && ! (pm_flags & (RXf_PMf_LOCALE|RXf_PMf_UNICODE))) {
-	pm_flags |= RXf_PMf_UNICODE;
+
+    if (RExC_utf8 && get_regex_charset(pm_flags) == REGEX_DEPENDS_CHARSET) {
+	set_regex_charset(&pm_flags, REGEX_UNICODE_CHARSET);
     }
 
     RExC_precomp = exp;
@@ -4566,7 +4568,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
     r->extflags = pm_flags;
     {
         bool has_p     = ((r->extflags & RXf_PMf_KEEPCOPY) == RXf_PMf_KEEPCOPY);
-        bool has_charset = cBOOL(r->extflags & (RXf_PMf_LOCALE|RXf_PMf_UNICODE));
+        bool has_charset = (get_regex_charset(r->extflags) != REGEX_DEPENDS_CHARSET);
 
         /* The caret is output if there are any defaults: if not all the STD
          * flags are set, or if no character set specifier is needed */
@@ -4587,7 +4589,9 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
          * covered by the caret */
 	const STRLEN wraplen = plen + has_p + has_runon
             + has_default       /* If needs a caret */
-            + has_charset       /* If needs a character set specifier */
+
+		/* If needs a character set specifier */
+	    + ((has_charset) ? MAX_CHARSET_NAME_LENGTH : 0)
             + (sizeof(STD_PAT_MODS) - 1)
             + (sizeof("(?:)") - 1);
 
@@ -4601,11 +4605,10 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
             *p++= DEFAULT_PAT_MOD;
         }
         if (has_charset) {
-            if (r->extflags & RXf_PMf_LOCALE) {
-                *p++ = LOCALE_PAT_MOD;
-            } else {
-                *p++ = UNICODE_PAT_MOD;
-            }
+	    STRLEN len;
+	    const char* const name = get_regex_charset_name(r->extflags, &len);
+	    Copy(name, p, len, char);
+	    p += len;
         }
         if (has_p)
             *p++ = KEEPCOPY_PAT_MOD; /*'p'*/
@@ -6300,7 +6303,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 STD_PMMOD_FLAGS_CLEAR(&RExC_flags);
 		if (RExC_utf8) {    /* But the default for a utf8 pattern is
 				       unicode semantics */
-		    RExC_flags |= RXf_PMf_UNICODE;
+		    set_regex_charset(&RExC_flags, REGEX_UNICODE_CHARSET);
 		}
                 goto parse_flags;
 	    default:
@@ -6310,6 +6313,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 U32 posflags = 0, negflags = 0;
 	        U32 *flagsp = &posflags;
                 bool has_charset_modifier = 0;
+		regex_charset cs = REGEX_DEPENDS_CHARSET;
 
 		while (*RExC_parse) {
 		    /* && strchr("iogcmsx", *RExC_parse) */
@@ -6321,16 +6325,14 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         if (has_charset_modifier || flagsp == &negflags) {
                             goto fail_modifiers;
                         }
-                        posflags |= RXf_PMf_LOCALE;
-                        negflags |= RXf_PMf_UNICODE;
+			cs = REGEX_LOCALE_CHARSET;
                         has_charset_modifier = 1;
                         break;
                     case UNICODE_PAT_MOD:
                         if (has_charset_modifier || flagsp == &negflags) {
                             goto fail_modifiers;
                         }
-                        posflags |= RXf_PMf_UNICODE;
-                        negflags |= RXf_PMf_LOCALE;
+			cs = REGEX_UNICODE_CHARSET;
                         has_charset_modifier = 1;
                         break;
                     case DUAL_PAT_MOD:
@@ -6344,13 +6346,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			/* The dual charset means unicode semantics if the
 			 * pattern (or target, not known until runtime) are
 			 * utf8 */
-			if (RExC_utf8) {
-			    posflags |= RXf_PMf_UNICODE;
-			    negflags |= RXf_PMf_LOCALE;
-			}
-			else {
-			    negflags |= (RXf_PMf_LOCALE|RXf_PMf_UNICODE);
-			}
+			cs = (RExC_utf8)
+			     ? REGEX_UNICODE_CHARSET
+			     : REGEX_DEPENDS_CHARSET;
                         has_charset_modifier = 1;
                         break;
                     case ONCE_PAT_MOD: /* 'o' */
@@ -6411,9 +6409,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     case ')':
                         RExC_flags |= posflags;
                         RExC_flags &= ~negflags;
+			set_regex_charset(&RExC_flags, cs);
                         if (paren != ':') {
                             oregflags |= posflags;
                             oregflags &= ~negflags;
+			    set_regex_charset(&oregflags, cs);
                         }
                         nextchar(pRExC_state);
 		        if (paren != ':') {
@@ -9508,14 +9508,34 @@ S_regdump_extflags(pTHX_ const char *lead, const U32 flags)
 {
     int bit;
     int set=0;
+    regex_charset cs;
 
     for (bit=0; bit<32; bit++) {
         if (flags & (1<<bit)) {
+	    if ((1<<bit) & RXf_PMf_CHARSET) {	/* Output separately, below */
+		continue;
+	    }
             if (!set++ && lead) 
                 PerlIO_printf(Perl_debug_log, "%s",lead);
             PerlIO_printf(Perl_debug_log, "%s ",PL_reg_extflags_name[bit]);
         }	        
     }	   
+    if ((cs = get_regex_charset(flags)) != REGEX_DEPENDS_CHARSET) {
+            if (!set++ && lead) {
+                PerlIO_printf(Perl_debug_log, "%s",lead);
+            }
+            switch (cs) {
+                case REGEX_UNICODE_CHARSET:
+                    PerlIO_printf(Perl_debug_log, "UNICODE");
+                    break;
+                case REGEX_LOCALE_CHARSET:
+                    PerlIO_printf(Perl_debug_log, "LOCALE");
+                    break;
+                default:
+                    PerlIO_printf(Perl_debug_log, "UNKNOWN CHARACTER SET");
+                    break;
+            }
+    }
     if (lead)  {
         if (set) 
             PerlIO_printf(Perl_debug_log, "\n");

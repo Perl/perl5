@@ -25,9 +25,9 @@ my %reflags = (
     x => 1 << ($PMMOD_SHIFT + 3),
     p => 1 << ($PMMOD_SHIFT + 4),
 # special cases:
-    l => 1 << ($PMMOD_SHIFT + 5),
-    u => 1 << ($PMMOD_SHIFT + 6),
     d => 0,
+    l => 1,
+    u => 2,
 );
 
 sub setcolor {

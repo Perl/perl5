@@ -435,6 +435,15 @@ fundamentally broken model of how the Unicode non-character code points
 should be handled, which is now described in
 L<perlunicode/Non-character code points>.  See also L</Selected Bug Fixes>.
 
+=item *
+
+Certain shared flags in the C<pmop.op_pmflags> and C<regexp.extflags>
+structures have been removed.  These are: C<Rxf_Pmf_LOCALE>,
+C<Rxf_Pmf_UNICODE>, and C<PMf_LOCALE>.  Instead there are encodes and
+three static in-line functions for accessing the information:
+C<get_regex_charset()>, C<set_regex_charset()>, and C<get_regex_charset_name()>,
+which are defined in the places where the orginal flags were.
+
 =back
 
 =head1 Selected Bug Fixes

@@ -3778,10 +3778,10 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
     if (PL_hints & HINT_RE_TAINT)
 	pmop->op_pmflags |= PMf_RETAINT;
     if (PL_hints & HINT_LOCALE) {
-	pmop->op_pmflags |= PMf_LOCALE;
+	set_regex_charset(&(pmop->op_pmflags), REGEX_LOCALE_CHARSET);
     }
     else if ((! (PL_hints & HINT_BYTES)) && (PL_hints & HINT_UNI_8_BIT)) {
-        pmop->op_pmflags |= RXf_PMf_UNICODE;
+	set_regex_charset(&(pmop->op_pmflags), REGEX_UNICODE_CHARSET);
     }
     if (PL_hints & HINT_RE_FLAGS) {
         SV *reflags = Perl_refcounted_he_fetch_pvn(aTHX_
@@ -3792,8 +3792,7 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
          PL_compiling.cop_hints_hash, STR_WITH_LEN("reflags_charset"), 0, 0
         );
         if (reflags && SvOK(reflags)) {
-            pmop->op_pmflags &= ~(RXf_PMf_LOCALE|RXf_PMf_UNICODE);
-            pmop->op_pmflags |= SvIV(reflags);
+            set_regex_charset(&(pmop->op_pmflags), SvIV(reflags));
         }
     }
 

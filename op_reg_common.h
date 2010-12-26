@@ -32,8 +32,47 @@
 #define RXf_PMf_FOLD           (1 << (RXf_PMf_STD_PMMOD_SHIFT+2))    /* /i */
 #define RXf_PMf_EXTENDED       (1 << (RXf_PMf_STD_PMMOD_SHIFT+3))    /* /x */
 #define RXf_PMf_KEEPCOPY       (1 << (RXf_PMf_STD_PMMOD_SHIFT+4))    /* /p */
-#define RXf_PMf_LOCALE         (1 << (RXf_PMf_STD_PMMOD_SHIFT+5))
-#define RXf_PMf_UNICODE        (1 << (RXf_PMf_STD_PMMOD_SHIFT+6))
+
+/* The character set for the regex is stored in a field of more than one bit
+ * using an enum, for reasons of compactness and to ensure that the options are
+ * mutually exclusive */
+typedef enum {
+    REGEX_DEPENDS_CHARSET = 0,
+    REGEX_LOCALE_CHARSET,
+    REGEX_UNICODE_CHARSET
+} regex_charset;
+
+#define _RXf_PMf_CHARSET_SHIFT ((RXf_PMf_STD_PMMOD_SHIFT)+5)
+#define RXf_PMf_CHARSET (3 << (_RXf_PMf_CHARSET_SHIFT)) /* 2 bits */
+
+/* embed.pl doesn't yet know how to handle static inline functions, so
+   manually decorate them here with gcc-style attributes.
+*/
+PERL_STATIC_INLINE void
+set_regex_charset(U32 * const flags, const regex_charset cs)
+    __attribute__nonnull__(1);
+
+PERL_STATIC_INLINE void
+set_regex_charset(U32 * const flags, const regex_charset cs)
+{
+    /* Sets the character set portion of 'flags' to 'cs', which is a member of
+     * the above enum */
+
+    *flags &= ~RXf_PMf_CHARSET;
+    *flags |= (cs << _RXf_PMf_CHARSET_SHIFT);
+}
+
+PERL_STATIC_INLINE regex_charset
+get_regex_charset(const U32 flags)
+    __attribute__warn_unused_result__;
+
+PERL_STATIC_INLINE regex_charset
+get_regex_charset(const U32 flags)
+{
+    /* Returns the enum corresponding to the character set in 'flags' */
+
+    return (flags & RXf_PMf_CHARSET) >> _RXf_PMf_CHARSET_SHIFT;
+}
 
 /* Next available bit after the above.  Name begins with '_' so won't be
  * exported by B */
@@ -41,7 +80,7 @@
 
 /* Mask of the above bits.  These need to be transferred from op_pmflags to
  * re->extflags during compilation */
-#define RXf_PMf_COMPILETIME    (RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_LOCALE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_KEEPCOPY|RXf_PMf_UNICODE)
+#define RXf_PMf_COMPILETIME    (RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_CHARSET|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_KEEPCOPY)
 
 /* These copies need to be numerical or defsubs_h.PL won't know about them. */
 #define PMf_MULTILINE    1<<0
@@ -49,9 +88,8 @@
 #define PMf_FOLD         1<<2
 #define PMf_EXTENDED     1<<3
 #define PMf_KEEPCOPY     1<<4
-#define PMf_LOCALE       1<<5
 
-#if PMf_MULTILINE != RXf_PMf_MULTILINE || PMf_SINGLELINE != RXf_PMf_SINGLELINE || PMf_FOLD != RXf_PMf_FOLD || PMf_EXTENDED != RXf_PMf_EXTENDED || PMf_KEEPCOPY != RXf_PMf_KEEPCOPY || PMf_LOCALE != RXf_PMf_LOCALE
+#if PMf_MULTILINE != RXf_PMf_MULTILINE || PMf_SINGLELINE != RXf_PMf_SINGLELINE || PMf_FOLD != RXf_PMf_FOLD || PMf_EXTENDED != RXf_PMf_EXTENDED || PMf_KEEPCOPY != RXf_PMf_KEEPCOPY
 #   error RXf_PMf defines are wrong
 #endif
 

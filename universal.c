@@ -1155,8 +1155,7 @@ XS(XS_re_regexp_pattern)
 
         if ( GIMME_V == G_ARRAY ) {
 	    STRLEN left = 0;
-	    char reflags[sizeof(INT_PAT_MODS) + 1]; /* The +1 is for the charset
-						        modifier */
+	    char reflags[sizeof(INT_PAT_MODS) + MAX_CHARSET_NAME_LENGTH];
             const char *fptr;
             char ch;
             U16 match_flags;
@@ -1164,14 +1163,15 @@ XS(XS_re_regexp_pattern)
             /*
                we are in list context so stringify
                the modifiers that apply. We ignore "negative
-               modifiers" in this scenario.
+               modifiers" in this scenario, and the default character set
             */
 
-            if (RX_EXTFLAGS(re) & RXf_PMf_LOCALE) {
-		reflags[left++] = LOCALE_PAT_MOD;
-	    }
-	    else if (RX_EXTFLAGS(re) & RXf_PMf_UNICODE) {
-		reflags[left++] = UNICODE_PAT_MOD;
+	    if (get_regex_charset(RX_EXTFLAGS(re)) != REGEX_DEPENDS_CHARSET) {
+		STRLEN len;
+		const char* const name = get_regex_charset_name(RX_EXTFLAGS(re),
+								&len);
+		Copy(name, reflags + left, len, char);
+		left += len;
 	    }
             fptr = INT_PAT_MODS;
             match_flags = (U16)((RX_EXTFLAGS(re) & PMf_COMPILETIME)

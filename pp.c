@@ -5870,7 +5870,7 @@ PP(pp_split)
 	DIE(aTHX_ "panic: pp_split");
     rx = PM_GETRE(pm);
 
-    TAINT_IF((RX_EXTFLAGS(rx) & RXf_PMf_LOCALE) &&
+    TAINT_IF(get_regex_charset(RX_EXTFLAGS(rx)) == REGEX_LOCALE_CHARSET &&
 	     (RX_EXTFLAGS(rx) & (RXf_WHITE | RXf_SKIPWHITE)));
 
     RX_MATCH_UTF8_set(rx, do_utf8);
@@ -5916,7 +5916,7 @@ PP(pp_split)
 	    while (*s == ' ' || is_utf8_space((U8*)s))
 		s += UTF8SKIP(s);
 	}
-	else if (RX_EXTFLAGS(rx) & RXf_PMf_LOCALE) {
+	else if (get_regex_charset(RX_EXTFLAGS(rx)) == REGEX_LOCALE_CHARSET) {
 	    while (isSPACE_LC(*s))
 		s++;
 	}
@@ -5946,7 +5946,8 @@ PP(pp_split)
 		    else
 			m += t;
 		}
-            } else if (RX_EXTFLAGS(rx) & RXf_PMf_LOCALE) {
+	    }
+	    else if (get_regex_charset(RX_EXTFLAGS(rx)) == REGEX_LOCALE_CHARSET) {
 	        while (m < strend && !isSPACE_LC(*m))
 		    ++m;
             } else {
@@ -5978,7 +5979,8 @@ PP(pp_split)
 	    if (do_utf8) {
 		while (s < strend && ( *s == ' ' || is_utf8_space((U8*)s) ))
 	            s +=  UTF8SKIP(s);
-            } else if (RX_EXTFLAGS(rx) & RXf_PMf_LOCALE) {
+	    }
+	    else if (get_regex_charset(RX_EXTFLAGS(rx)) == REGEX_LOCALE_CHARSET) {
 	        while (s < strend && isSPACE_LC(*s))
 		    ++s;
             } else {
