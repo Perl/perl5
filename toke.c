@@ -2834,7 +2834,7 @@ S_scan_const(pTHX_ char *start)
 
 	/* likewise skip #-initiated comments in //x patterns */
 	else if (*s == '#' && PL_lex_inpat &&
-	  ((PMOP*)PL_lex_inpat)->op_pmflags & PMf_EXTENDED) {
+	  ((PMOP*)PL_lex_inpat)->op_pmflags & RXf_PMf_EXTENDED) {
 	    while (s+1 < send && *s != '\n')
 		*d++ = NATIVE_TO_NEED(has_utf8,*s++);
 	}
@@ -12158,7 +12158,7 @@ S_pmflag(U32 pmfl, const char ch) {
     case GLOBAL_PAT_MOD:      pmfl |= PMf_GLOBAL; break;
     case CONTINUE_PAT_MOD:    pmfl |= PMf_CONTINUE; break;
     case ONCE_PAT_MOD:        pmfl |= PMf_KEEP; break;
-    case KEEPCOPY_PAT_MOD:    pmfl |= PMf_KEEPCOPY; break;
+    case KEEPCOPY_PAT_MOD:    pmfl |= RXf_PMf_KEEPCOPY; break;
     case NONDESTRUCT_PAT_MOD: pmfl |= PMf_NONDESTRUCT; break;
     }
     return pmfl;

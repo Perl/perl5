@@ -5925,7 +5925,7 @@ PP(pp_split)
 		s++;
 	}
     }
-    if (RX_EXTFLAGS(rx) & PMf_MULTILINE) {
+    if (RX_EXTFLAGS(rx) & RXf_PMf_MULTILINE) {
 	multiline = 1;
     }
 

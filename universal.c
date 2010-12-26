@@ -1174,7 +1174,7 @@ XS(XS_re_regexp_pattern)
 		left += len;
 	    }
             fptr = INT_PAT_MODS;
-            match_flags = (U16)((RX_EXTFLAGS(re) & PMf_COMPILETIME)
+            match_flags = (U16)((RX_EXTFLAGS(re) & RXf_PMf_COMPILETIME)
                                     >> RXf_PMf_STD_PMMOD_SHIFT);
 
             while((ch = *fptr++)) {
