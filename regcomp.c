@@ -4478,7 +4478,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
 #endif
 
     /* Set to use unicode semantics if the pattern is in utf8 and has the
-     * 'dual' charset specified, as it means unicode when utf8  */
+     * 'depends' charset specified, as it means unicode when utf8  */
     pm_flags = orig_pm_flags;
 
     if (RExC_utf8 && get_regex_charset(pm_flags) == REGEX_DEPENDS_CHARSET) {
@@ -6335,7 +6335,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			cs = REGEX_UNICODE_CHARSET;
                         has_charset_modifier = 1;
                         break;
-                    case DUAL_PAT_MOD:
+                    case DEPENDS_PAT_MOD:
                         if (has_use_defaults
                             || has_charset_modifier
                             || flagsp == &negflags)
