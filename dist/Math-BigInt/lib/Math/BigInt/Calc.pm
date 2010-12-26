@@ -272,17 +272,22 @@ sub _str
 
 sub _num
   {
-  # Make a number (scalar int/float) from a BigInt object 
-  my $x = $_[1];
+    # Make a Perl scalar number (int/float) from a BigInt object.
+    my $x = $_[1];
 
-  return 0+$x->[0] if scalar @$x == 1;  # below $BASE
-  my $fac = 1;
-  my $num = 0;
-  foreach (@$x)
-    {
-    $num += $fac*$_; $fac *= $BASE;
+    return 0 + $x->[0] if scalar @$x == 1;      # below $BASE
+
+    # Start with the most significant element and work towards the least
+    # significant element. Avoid multiplying "inf" (which happens if the number
+    # overflows) with "0" (if there are zero elements in $x) since this gives
+    # "nan" which propagates to the output.
+
+    my $num = 0;
+    for (my $i = $#$x ; $i >= 0 ; --$i) {
+        $num *= $BASE;
+        $num += $x -> [$i];
     }
-  $num; 
+    return $num;
   }
 
 ##############################################################################
