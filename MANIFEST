@@ -305,6 +305,34 @@ cpan/CPAN/lib/CPAN/Shell.pm
 cpan/CPAN/lib/CPAN/Tarzip.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/URL.pm
 cpan/CPAN/lib/CPAN/Version.pm		Simple math with different flavors of version strings
+cpan/CPAN-Meta-YAML/lib/CPAN/Meta/YAML.pm		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/01_compile.t		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/02_basic.t		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/03_regression.t		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/05_export.t		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/11_meta_yml.t		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/12_plagger.t		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/13_perl_smith.t		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/14_yaml_org.t		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/15_multibyte.t		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/16_nullrefs.t		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/17_toolbar.t		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/18_tap.t		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/19_errors.t		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/20_subclass.t		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/21_bom.t		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/22_comments.t		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/data/HTML-WebDAO.yml		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/data/multibyte.yml		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/data/one.yml		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/data/sample.yml		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/data/Spreadsheet-Read.yml		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/data/Template-Provider-Unicode-Japanese.yml		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/data/toolbar.yml		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/data/two.yml		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/data/utf_16_le_bom.yml		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/data/vanilla.yml		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/lib/Test.pm		CPAN-Meta-YAML files
 cpan/CPAN/PAUSE2003.pub		CPAN public key
 cpan/CPAN/PAUSE2005.pub		CPAN public key
 cpan/CPAN/PAUSE2007.pub		CPAN public key
