@@ -974,7 +974,7 @@
 #define delete_eval_scope()	Perl_delete_eval_scope(aTHX)
 #define die_unwind(a)		Perl_die_unwind(aTHX_ a)
 #define do_aexec5(a,b,c,d,e)	Perl_do_aexec5(aTHX_ a,b,c,d,e)
-#define do_chomp(a)		Perl_do_chomp(aTHX_ a)
+#define do_chomp(a,b)		Perl_do_chomp(aTHX_ a,b)
 #define do_chop(a,b)		Perl_do_chop(aTHX_ a,b)
 #define do_dump_pad(a,b,c,d)	Perl_do_dump_pad(aTHX_ a,b,c,d)
 #define do_eof(a)		Perl_do_eof(aTHX_ a)

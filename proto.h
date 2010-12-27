@@ -707,10 +707,11 @@ PERL_CALLCONV int	Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode)
 #define PERL_ARGS_ASSERT_DO_BINMODE	\
 	assert(fp)
 
-PERL_CALLCONV I32	Perl_do_chomp(pTHX_ SV* sv)
-			__attribute__nonnull__(pTHX_1);
+PERL_CALLCONV void	Perl_do_chomp(pTHX_ SV *count, SV *sv)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_DO_CHOMP	\
-	assert(sv)
+	assert(count); assert(sv)
 
 PERL_CALLCONV void	Perl_do_chop(pTHX_ SV *astr, SV *sv)
 			__attribute__nonnull__(pTHX_1)

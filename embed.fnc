@@ -355,7 +355,7 @@ p	|bool	|do_print	|NULLOK SV* sv|NN PerlIO* fp
 : Used in pp_sys.c
 pR	|OP*	|do_readline
 : Used in pp.c
-p	|I32	|do_chomp	|NN SV* sv
+p	|void	|do_chomp	|NN SV *count|NN SV *sv
 : Defined in doio.c, used only in pp_sys.c
 p	|bool	|do_seek	|NULLOK GV* gv|Off_t pos|int whence
 Ap	|void	|do_sprintf	|NN SV* sv|I32 len|NN SV** sarg

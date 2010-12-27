@@ -812,17 +812,19 @@ PP(pp_chop)
 PP(pp_schomp)
 {
     dVAR; dSP; dTARGET;
-    SETi(do_chomp(TOPs));
+    sv_setiv(TARG, 0);
+    do_chomp(TARG, TOPs);
+    SETs(TARG);
     RETURN;
 }
 
 PP(pp_chomp)
 {
     dVAR; dSP; dMARK; dTARGET; dORIGMARK;
-    register I32 count = 0;
 
+    sv_setiv(TARG, 0);
     while (MARK < SP)
-	count += do_chomp(*++MARK);
+	do_chomp(TARG, *++MARK);
     SP = ORIGMARK;
     XPUSHTARG;
     RETURN;

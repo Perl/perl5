@@ -1060,11 +1060,10 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
     SvSETMAGIC(sv);
 }
 
-I32
-Perl_do_chomp(pTHX_ register SV *sv)
+void
+Perl_do_chomp(pTHX_ SV *count, SV *sv)
 {
     dVAR;
-    register I32 count;
     STRLEN len;
     char *s;
     char *temp_buffer = NULL;
@@ -1073,10 +1072,9 @@ Perl_do_chomp(pTHX_ register SV *sv)
     PERL_ARGS_ASSERT_DO_CHOMP;
 
     if (RsSNARF(PL_rs))
-	return 0;
+	return;
     if (RsRECORD(PL_rs))
-      return 0;
-    count = 0;
+	return;
     if (SvTYPE(sv) == SVt_PVAV) {
 	register I32 i;
 	AV *const av = MUTABLE_AV(sv);
@@ -1085,17 +1083,17 @@ Perl_do_chomp(pTHX_ register SV *sv)
 	for (i = 0; i <= max; i++) {
 	    sv = MUTABLE_SV(av_fetch(av, i, FALSE));
 	    if (sv && ((sv = *(SV**)sv), sv != &PL_sv_undef))
-		count += do_chomp(sv);
+		do_chomp(count, sv);
 	}
-        return count;
+        return;
     }
     else if (SvTYPE(sv) == SVt_PVHV) {
 	HV* const hv = MUTABLE_HV(sv);
 	HE* entry;
         (void)hv_iterinit(hv);
         while ((entry = hv_iternext(hv)))
-            count += do_chomp(hv_iterval(hv,entry));
-        return count;
+            do_chomp(count, hv_iterval(hv,entry));
+	return;
     }
     else if (SvREADONLY(sv)) {
         if (SvFAKE(sv)) {
@@ -1123,11 +1121,11 @@ Perl_do_chomp(pTHX_ register SV *sv)
 	if (RsPARA(PL_rs)) {
 	    if (*s != '\n')
 		goto nope;
-	    ++count;
+	    ++SvIVX(count);
 	    while (len && s[-1] == '\n') {
 		--len;
 		--s;
-		++count;
+		++SvIVX(count);
 	    }
 	}
 	else {
@@ -1171,7 +1169,7 @@ Perl_do_chomp(pTHX_ register SV *sv)
 	    if (rslen == 1) {
 		if (*s != *rsptr)
 		    goto nope;
-		++count;
+		++SvIVX(count);
 	    }
 	    else {
 		if (len < rslen - 1)
@@ -1180,7 +1178,7 @@ Perl_do_chomp(pTHX_ register SV *sv)
 		s -= rslen - 1;
 		if (memNE(s, rsptr, rslen))
 		    goto nope;
-		count += rs_charlen;
+		SvIVX(count) += rs_charlen;
 	    }
 	}
 	s = SvPV_force_nolen(sv);
@@ -1194,7 +1192,6 @@ Perl_do_chomp(pTHX_ register SV *sv)
     SvREFCNT_dec(svrecode);
 
     Safefree(temp_buffer);
-    return count;
 }
 
 void
