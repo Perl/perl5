@@ -301,7 +301,6 @@ pmb	|bool	|do_aexec	|NULLOK SV* really|NN SV** mark|NN SV** sp
 p	|bool	|do_aexec5	|NULLOK SV* really|NN SV** mark|NN SV** sp|int fd|int do_report
 Ap	|int	|do_binmode	|NN PerlIO *fp|int iotype|int mode
 : Used in pp.c
-p	|void	|do_chop	|NN SV *astr|NN SV *sv
 Ap	|bool	|do_close	|NULLOK GV* gv|bool not_implicit
 : Defined in doio.c, used only in pp_sys.c
 p	|bool	|do_eof		|NN GV* gv
@@ -355,7 +354,7 @@ p	|bool	|do_print	|NULLOK SV* sv|NN PerlIO* fp
 : Used in pp_sys.c
 pR	|OP*	|do_readline
 : Used in pp.c
-p	|void	|do_chomp	|NN SV *count|NN SV *sv
+p	|void	|do_chomp	|NN SV *retval|NN SV *sv|bool chomping
 : Defined in doio.c, used only in pp_sys.c
 p	|bool	|do_seek	|NULLOK GV* gv|Off_t pos|int whence
 Ap	|void	|do_sprintf	|NN SV* sv|I32 len|NN SV** sarg

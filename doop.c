@@ -983,97 +983,15 @@ Perl_do_vecset(pTHX_ SV *sv)
 }
 
 void
-Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
+Perl_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
 {
     dVAR;
     STRLEN len;
     char *s;
-
-    PERL_ARGS_ASSERT_DO_CHOP;
-
-    if (SvTYPE(sv) == SVt_PVAV) {
-	register I32 i;
-	AV *const av = MUTABLE_AV(sv);
-	const I32 max = AvFILL(av);
-
-	for (i = 0; i <= max; i++) {
-	    sv = MUTABLE_SV(av_fetch(av, i, FALSE));
-	    if (sv && ((sv = *(SV**)sv), sv != &PL_sv_undef))
-		do_chop(astr, sv);
-	}
-        return;
-    }
-    else if (SvTYPE(sv) == SVt_PVHV) {
-	HV* const hv = MUTABLE_HV(sv);
-	HE* entry;
-        (void)hv_iterinit(hv);
-        while ((entry = hv_iternext(hv)))
-            do_chop(astr,hv_iterval(hv,entry));
-        return;
-    }
-    else if (SvREADONLY(sv)) {
-        if (SvFAKE(sv)) {
-            /* SV is copy-on-write */
-	    sv_force_normal_flags(sv, 0);
-        }
-        if (SvREADONLY(sv))
-            Perl_croak_no_modify(aTHX);
-    }
-
-    if (PL_encoding && !SvUTF8(sv)) {
-	/* like in do_chomp(), utf8-ize the sv as a side-effect
-	 * if we're using encoding. */
-	sv_recode_to_utf8(sv, PL_encoding);
-    }
-
-    s = SvPV(sv, len);
-    if (len && !SvPOK(sv))
-	s = SvPV_force_nomg(sv, len);
-    if (DO_UTF8(sv)) {
-	if (s && len) {
-	    char * const send = s + len;
-	    char * const start = s;
-	    s = send - 1;
-	    while (s > start && UTF8_IS_CONTINUATION(*s))
-		s--;
-	    if (is_utf8_string((U8*)s, send - s)) {
-		sv_setpvn(astr, s, send - s);
-		*s = '\0';
-		SvCUR_set(sv, s - start);
-		SvNIOK_off(sv);
-		SvUTF8_on(astr);
-	    }
-	}
-	else
-	    sv_setpvs(astr, "");
-    }
-    else if (s && len) {
-	s += --len;
-	sv_setpvn(astr, s, 1);
-	*s = '\0';
-	SvCUR_set(sv, len);
-	SvUTF8_off(sv);
-	SvNIOK_off(sv);
-    }
-    else
-	sv_setpvs(astr, "");
-    SvSETMAGIC(sv);
-}
-
-void
-Perl_do_chomp(pTHX_ SV *count, SV *sv)
-{
-    dVAR;
-    STRLEN len;
-    char *s;
-    char *temp_buffer = NULL;
-    SV* svrecode = NULL;
 
     PERL_ARGS_ASSERT_DO_CHOMP;
 
-    if (RsSNARF(PL_rs))
-	return;
-    if (RsRECORD(PL_rs))
+    if (chomping && (RsSNARF(PL_rs) || RsRECORD(PL_rs)))
 	return;
     if (SvTYPE(sv) == SVt_PVAV) {
 	register I32 i;
@@ -1083,7 +1001,7 @@ Perl_do_chomp(pTHX_ SV *count, SV *sv)
 	for (i = 0; i <= max; i++) {
 	    sv = MUTABLE_SV(av_fetch(av, i, FALSE));
 	    if (sv && ((sv = *(SV**)sv), sv != &PL_sv_undef))
-		do_chomp(count, sv);
+		do_chomp(retval, sv, chomping);
 	}
         return;
     }
@@ -1092,7 +1010,7 @@ Perl_do_chomp(pTHX_ SV *count, SV *sv)
 	HE* entry;
         (void)hv_iterinit(hv);
         while ((entry = hv_iternext(hv)))
-            do_chomp(count, hv_iterval(hv,entry));
+            do_chomp(retval, hv_iterval(hv,entry), chomping);
 	return;
     }
     else if (SvREADONLY(sv)) {
@@ -1116,16 +1034,20 @@ Perl_do_chomp(pTHX_ SV *count, SV *sv)
     }
 
     s = SvPV(sv, len);
+    if (chomping) {
+	char *temp_buffer = NULL;
+	SV* svrecode = NULL;
+
     if (s && len) {
 	s += --len;
 	if (RsPARA(PL_rs)) {
 	    if (*s != '\n')
 		goto nope;
-	    ++SvIVX(count);
+	    ++SvIVX(retval);
 	    while (len && s[-1] == '\n') {
 		--len;
 		--s;
-		++SvIVX(count);
+		++SvIVX(retval);
 	    }
 	}
 	else {
@@ -1169,7 +1091,7 @@ Perl_do_chomp(pTHX_ SV *count, SV *sv)
 	    if (rslen == 1) {
 		if (*s != *rsptr)
 		    goto nope;
-		++SvIVX(count);
+		++SvIVX(retval);
 	    }
 	    else {
 		if (len < rslen - 1)
@@ -1178,7 +1100,7 @@ Perl_do_chomp(pTHX_ SV *count, SV *sv)
 		s -= rslen - 1;
 		if (memNE(s, rsptr, rslen))
 		    goto nope;
-		SvIVX(count) += rs_charlen;
+		SvIVX(retval) += rs_charlen;
 	    }
 	}
 	s = SvPV_force_nolen(sv);
@@ -1192,6 +1114,39 @@ Perl_do_chomp(pTHX_ SV *count, SV *sv)
     SvREFCNT_dec(svrecode);
 
     Safefree(temp_buffer);
+    } else {
+	if (len && !SvPOK(sv))
+	    s = SvPV_force_nomg(sv, len);
+	if (DO_UTF8(sv)) {
+	    if (s && len) {
+		char * const send = s + len;
+		char * const start = s;
+		s = send - 1;
+		while (s > start && UTF8_IS_CONTINUATION(*s))
+		    s--;
+		if (is_utf8_string((U8*)s, send - s)) {
+		    sv_setpvn(retval, s, send - s);
+		    *s = '\0';
+		    SvCUR_set(sv, s - start);
+		    SvNIOK_off(sv);
+		    SvUTF8_on(retval);
+		}
+	    }
+	    else
+		sv_setpvs(retval, "");
+	}
+	else if (s && len) {
+	    s += --len;
+	    sv_setpvn(retval, s, 1);
+	    *s = '\0';
+	    SvCUR_set(sv, len);
+	    SvUTF8_off(sv);
+	    SvNIOK_off(sv);
+	}
+	else
+	    sv_setpvs(retval, "");
+	SvSETMAGIC(sv);
+    }
 }
 
 void

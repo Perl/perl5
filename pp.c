@@ -794,7 +794,7 @@ PP(pp_trans)
 PP(pp_schop)
 {
     dVAR; dSP; dTARGET;
-    do_chop(TARG, TOPs);
+    do_chomp(TARG, TOPs, FALSE);
     SETTARG;
     RETURN;
 }
@@ -803,7 +803,7 @@ PP(pp_chop)
 {
     dVAR; dSP; dMARK; dTARGET; dORIGMARK;
     while (MARK < SP)
-	do_chop(TARG, *++MARK);
+	do_chomp(TARG, *++MARK, FALSE);
     SP = ORIGMARK;
     XPUSHTARG;
     RETURN;
@@ -813,7 +813,7 @@ PP(pp_schomp)
 {
     dVAR; dSP; dTARGET;
     sv_setiv(TARG, 0);
-    do_chomp(TARG, TOPs);
+    do_chomp(TARG, TOPs, TRUE);
     SETs(TARG);
     RETURN;
 }
@@ -824,7 +824,7 @@ PP(pp_chomp)
 
     sv_setiv(TARG, 0);
     while (MARK < SP)
-	do_chomp(TARG, *++MARK);
+	do_chomp(TARG, *++MARK, TRUE);
     SP = ORIGMARK;
     XPUSHTARG;
     RETURN;
