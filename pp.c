@@ -818,12 +818,13 @@ PP(pp_schomp)
 
 PP(pp_chomp)
 {
-    dVAR; dSP; dMARK; dTARGET;
+    dVAR; dSP; dMARK; dTARGET; dORIGMARK;
     register I32 count = 0;
 
-    while (SP > MARK)
-	count += do_chomp(POPs);
-    XPUSHi(count);
+    while (MARK < SP)
+	count += do_chomp(*++MARK);
+    SP = ORIGMARK;
+    XPUSHTARG;
     RETURN;
 }
 

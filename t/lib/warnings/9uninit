@@ -380,8 +380,8 @@ my ($s5,$s6); chop  ($s5,$s6);
 EXPECT
 Use of uninitialized value $s1 in scalar chomp at - line 3.
 Use of uninitialized value $s2 in scalar chop at - line 4.
-Use of uninitialized value $s4 in chomp at - line 5.
 Use of uninitialized value $s3 in chomp at - line 5.
+Use of uninitialized value $s4 in chomp at - line 5.
 Use of uninitialized value $s5 in chop at - line 6.
 Use of uninitialized value $s6 in chop at - line 6.
 ########
@@ -396,8 +396,8 @@ chomp ($x, $y); chop ($x, $y);
 EXPECT
 Use of uninitialized value ${$/} in scalar chomp at - line 6.
 Use of uninitialized value ${$/} in chomp at - line 8.
-Use of uninitialized value $y in chomp at - line 8.
 Use of uninitialized value ${$/} in chomp at - line 8.
+Use of uninitialized value $y in chomp at - line 8.
 Use of uninitialized value $y in chop at - line 8.
 ########
 use warnings 'uninitialized';
