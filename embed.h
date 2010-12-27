@@ -974,7 +974,6 @@
 #define delete_eval_scope()	Perl_delete_eval_scope(aTHX)
 #define die_unwind(a)		Perl_die_unwind(aTHX_ a)
 #define do_aexec5(a,b,c,d,e)	Perl_do_aexec5(aTHX_ a,b,c,d,e)
-#define do_chomp(a,b,c)		Perl_do_chomp(aTHX_ a,b,c)
 #define do_dump_pad(a,b,c,d)	Perl_do_dump_pad(aTHX_ a,b,c,d)
 #define do_eof(a)		Perl_do_eof(aTHX_ a)
 #define do_execfree()		Perl_do_execfree(aTHX)
@@ -1712,6 +1711,7 @@
 #define usage(a)		S_usage(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_PP_C)
+#define do_chomp(a,b,c)		S_do_chomp(aTHX_ a,b,c)
 #define do_delete_local()	S_do_delete_local(aTHX)
 #define refto(a)		S_refto(aTHX_ a)
 #  endif

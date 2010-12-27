@@ -353,8 +353,6 @@ Ap	|bool	|do_openn	|NN GV *gv|NN const char *oname|I32 len \
 p	|bool	|do_print	|NULLOK SV* sv|NN PerlIO* fp
 : Used in pp_sys.c
 pR	|OP*	|do_readline
-: Used in pp.c
-p	|void	|do_chomp	|NN SV *retval|NN SV *sv|bool chomping
 : Defined in doio.c, used only in pp_sys.c
 p	|bool	|do_seek	|NULLOK GV* gv|Off_t pos|int whence
 Ap	|void	|do_sprintf	|NN SV* sv|I32 len|NN SV** sarg
@@ -1643,6 +1641,7 @@ s	|SV *	|incpush_if_exists|NN AV *const av|NN SV *dir|NN SV *const stem
 #endif
 
 #if defined(PERL_IN_PP_C)
+s	|void	|do_chomp	|NN SV *retval|NN SV *sv|bool chomping
 s	|OP*	|do_delete_local
 sR	|SV*	|refto		|NN SV* sv
 #endif

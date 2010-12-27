@@ -707,12 +707,6 @@ PERL_CALLCONV int	Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode)
 #define PERL_ARGS_ASSERT_DO_BINMODE	\
 	assert(fp)
 
-PERL_CALLCONV void	Perl_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_DO_CHOMP	\
-	assert(retval); assert(sv)
-
 PERL_CALLCONV bool	Perl_do_close(pTHX_ GV* gv, bool not_implicit);
 PERL_CALLCONV void	Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
 			__attribute__nonnull__(pTHX_2);
@@ -5969,6 +5963,12 @@ STATIC void	S_usage(pTHX_ const char *name)
 
 #endif
 #if defined(PERL_IN_PP_C)
+STATIC void	S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_DO_CHOMP	\
+	assert(retval); assert(sv)
+
 STATIC OP*	S_do_delete_local(pTHX);
 STATIC SV*	S_refto(pTHX_ SV* sv)
 			__attribute__warn_unused_result__
