@@ -43,18 +43,24 @@ SANY        REG_ANY,    no 0 S    ; Match any one character.
 CANY        REG_ANY,    no 0 S    ; Match any one byte.
 ANYOF       ANYOF,      sv 0 S    ; Match character in (or not in) this class, single char match only
 ANYOFV      ANYOF,      sv 0 V    ; Match character in (or not in) this class, can match-multiple chars
-ALNUM       ALNUM,      no 0 S    ; Match any alphanumeric character
+ALNUM       ALNUM,      no 0 S    ; Match any alphanumeric character using native charset semantics for non-utf8
 ALNUML      ALNUM,      no 0 S    ; Match any alphanumeric char in locale
-NALNUM      NALNUM,     no 0 S    ; Match any non-alphanumeric character
+ALNUMU      ALNUM,      no 0 S    ; Match any alphanumeric char using Unicode semantics
+NALNUM      NALNUM,     no 0 S    ; Match any non-alphanumeric character using native charset semantics for non-utf8
 NALNUML     NALNUM,     no 0 S    ; Match any non-alphanumeric char in locale
-SPACE       SPACE,      no 0 S    ; Match any whitespace character
+NALNUMU     NALNUM,     no 0 S    ; Match any non-alphanumeric char using Unicode semantics
+SPACE       SPACE,      no 0 S    ; Match any whitespace character using native charset semantics for non-utf8
 SPACEL      SPACE,      no 0 S    ; Match any whitespace char in locale
-NSPACE      NSPACE,     no 0 S    ; Match any non-whitespace character
+SPACEU      SPACE,      no 0 S    ; Match any whitespace char using Unicode semantics
+NSPACE      NSPACE,     no 0 S    ; Match any non-whitespace character using native charset semantics for non-utf8
 NSPACEL     NSPACE,     no 0 S    ; Match any non-whitespace char in locale
-DIGIT       DIGIT,      no 0 S    ; Match any numeric character
+NSPACEU     NSPACE,     no 0 S    ; Match any non-whitespace char using Unicode semantics
+DIGIT       DIGIT,      no 0 S    ; Match any numeric character using native charset semantics for non-utf8
 DIGITL      DIGIT,      no 0 S    ; Match any numeric character in locale
-NDIGIT      NDIGIT,     no 0 S    ; Match any non-numeric character
+DIGITU      DIGIT,      no 0 S    ; Match any numeric character using Unicode semantics
+NDIGIT      NDIGIT,     no 0 S    ; Match any non-numeric character using native charset semantics for non-utf8
 NDIGITL     NDIGIT,     no 0 S    ; Match any non-numeric character in locale
+NDIGITU     NDIGIT,     no 0 S    ; Match any non-numeric character using Unicode semantics
 CLUMP       CLUMP,      no 0 V    ; Match any extended grapheme cluster sequence
 
 #* Alternation
