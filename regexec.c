@@ -180,55 +180,87 @@
 #endif
 
 
-#define _CCC_TRY_CODE(LOAD, CLASS, STR, FUNC, TEST, POS_OR_NEG)     \
-    if (locinput >= PL_regeol) {                                    \
-	sayNO;                                                      \
-    }                                                               \
-    if (utf8_target && UTF8_IS_CONTINUED(nextchr)) {                \
-	LOAD(CLASS, STR);                                           \
-	if (POS_OR_NEG (TEST)) {                                    \
-	    sayNO;                                                  \
-	}                                                           \
-	locinput += PL_utf8skip[nextchr];                           \
-	nextchr = UCHARAT(locinput);                                \
-	break;                                                      \
-    }                                                               \
-    if (POS_OR_NEG (FUNC(nextchr))) {                               \
-	sayNO;                                                      \
-    }                                                               \
-    nextchr = UCHARAT(++locinput);                                  \
+/* The actual code for CCC_TRY, which uses several variables from the routine
+ * it's callable from.  It is designed to be the bulk of a case statement.
+ * FUNC is the macro or function to call on non-utf8 targets that indicate if
+ *      nextchr matches the class.
+ * UTF8_TEST is the whole test string to use for utf8 targets
+ * LOAD is what to use to test, and if not present to load in the swash for the
+ *	class
+ * POS_OR_NEG is either empty or ! to complement the results of FUNC or
+ *	UTF8_TEST test.
+ * The logic is: Fail if we're at the end-of-string; otherwise if the target is
+ * utf8 and a variant, load the swash if necessary and test using the utf8
+ * test.  Advance to the next character if test is ok, otherwise fail; If not
+ * utf8 or an invariant under utf8, use the non-utf8 test, and fail if it
+ * fails, or advance to the next character */
+
+#define _CCC_TRY_CODE(POS_OR_NEG, FUNC, UTF8_TEST, CLASS, STR)                \
+    if (locinput >= PL_regeol) {                                              \
+	sayNO;                                                                \
+    }                                                                         \
+    if (utf8_target && UTF8_IS_CONTINUED(nextchr)) {                          \
+	LOAD_UTF8_CHARCLASS(CLASS, STR);                                      \
+	if (POS_OR_NEG (UTF8_TEST)) {                                         \
+	    sayNO;                                                            \
+	}                                                                     \
+	locinput += PL_utf8skip[nextchr];                                     \
+	nextchr = UCHARAT(locinput);                                          \
+	break;                                                                \
+    }                                                                         \
+    if (POS_OR_NEG (FUNC(nextchr))) {                                         \
+	sayNO;                                                                \
+    }                                                                         \
+    nextchr = UCHARAT(++locinput);                                            \
     break;
 
-# define _CCC_TRY_AFF_INTERIOR(LOAD, CLASS, STR, FUNC, TEST)      \
-    _CCC_TRY_CODE(LOAD, CLASS, STR, FUNC, TEST, ! )
+/* Handle the non-locale cases for a character class and its complement.  It
+ * calls _CCC_TRY_CODE with a ! to complement the test for the character class.
+ * This is because that code fails when the test succeeds, so we want to have
+ * the test fail so that the code succeeds.  The swash is stored in a
+ * predictable PL_ place */
+#define _CCC_TRY_NONLOCALE(NAME, NNAME, FUNC, CLASS, STR)                     \
+    case NAME:                                                                \
+	_CCC_TRY_CODE( !, FUNC,                                               \
+		          cBOOL(swash_fetch(CAT2(PL_utf8_,CLASS),             \
+			                    (U8*)locinput, TRUE)),            \
+		          CLASS, STR)                                         \
+    case NNAME:                                                               \
+	_CCC_TRY_CODE(  , FUNC,                                               \
+		          cBOOL(swash_fetch(CAT2(PL_utf8_,CLASS),             \
+			                    (U8*)locinput, TRUE)),            \
+		          CLASS, STR)                                         \
 
-# define _CCC_TRY_NEG_INTERIOR(LOAD, CLASS, STR, FUNC, TEST)      \
-    _CCC_TRY_CODE(LOAD, CLASS, STR, FUNC, TEST, )
+/* Generate the case statements for both locale and non-locale character
+ * classes in regmatch for classes that don't have special unicode semantics.
+ * Locales don't use an immediate swash, but an intermediary special locale
+ * function that is called on the pointer to the current place in the input
+ * string.  That function will resolve to needing the same swash.  One might
+ * think that because we don't know what the locale will match, we shouldn't
+ * check with the swash loading function that it loaded properly; ie, that we
+ * should use LOAD_UTF8_CHARCLASS_NO_CHECK for those, but what is passed to the
+ * regular LOAD_UTF8_CHARCLASS is in non-locale terms, and so locale is
+ * irrelevant here */
+#define CCC_TRY(NAME,  NNAME,  FUNC,                                          \
+	        NAMEL, NNAMEL, LCFUNC, LCFUNC_utf8,                           \
+		CLASS, STR)                                                   \
+    case NAMEL:                                                               \
+	PL_reg_flags |= RF_tainted;                                           \
+	_CCC_TRY_CODE( !, LCFUNC, LCFUNC_utf8((U8*)locinput), CLASS, STR)     \
+    case NNAMEL:                                                              \
+	PL_reg_flags |= RF_tainted;                                           \
+	_CCC_TRY_CODE(  , LCFUNC, LCFUNC_utf8((U8*)locinput), CLASS, STR)     \
+    /* Generate the non-locale cases */                                       \
+    _CCC_TRY_NONLOCALE(NAME, NNAME, FUNC, CLASS, STR)
 
-#define CCC_TRY_AFF(NAME, NAMEL, CLASS, STR, LCFUNC_utf8, FUNC, LCFUNC)           \
-    case NAMEL:                                                         \
-	PL_reg_flags |= RF_tainted;                                     \
-	_CCC_TRY_AFF_INTERIOR(LOAD_UTF8_CHARCLASS, CLASS, STR, LCFUNC, LCFUNC_utf8((U8*)locinput))      \
-    case NAME:                                                          \
-	_CCC_TRY_AFF_INTERIOR(LOAD_UTF8_CHARCLASS, CLASS, STR, FUNC, cBOOL(swash_fetch(CAT2(PL_utf8_,CLASS), (U8*)locinput, utf8_target)))        \
-
-#define CCC_TRY_AFF_U(NAME, NAMEL, NAMEU, CLASS, STR, LCFUNC_utf8, FUNC, FUNCU, LCFUNC)         \
-    CCC_TRY_AFF(NAME, NAMEL, CLASS, STR, LCFUNC_utf8, FUNC, LCFUNC)           \
-    case NAMEU:                                                         \
-	_CCC_TRY_AFF_INTERIOR(LOAD_UTF8_CHARCLASS, CLASS, STR, FUNCU, cBOOL(swash_fetch(CAT2(PL_utf8_,CLASS), (U8*)locinput, utf8_target)))
-
-#define CCC_TRY_NEG(NAME, NAMEL, CLASS, STR, LCFUNC_utf8, FUNC, LCFUNC)        \
-    case NAMEL:                                                                \
-	PL_reg_flags |= RF_tainted;                                            \
-	_CCC_TRY_NEG_INTERIOR(LOAD_UTF8_CHARCLASS, CLASS, STR, LCFUNC, LCFUNC_utf8((U8*)locinput))      \
-    case NAME:                                                          \
-	_CCC_TRY_NEG_INTERIOR(LOAD_UTF8_CHARCLASS, CLASS, STR, FUNC, cBOOL(swash_fetch(CAT2(PL_utf8_,CLASS), (U8*)locinput, utf8_target)))
-
-#define CCC_TRY_NEG_U(NAME, NAMEL, NAMEU, CLASS, STR, LCFUNC_utf8, FUNC, FUNCU, LCFUNC)         \
-    CCC_TRY_NEG(NAME, NAMEL, CLASS, STR, LCFUNC_utf8, FUNC, LCFUNC)           \
-    case NAMEU:                                                         \
-	_CCC_TRY_NEG_INTERIOR(LOAD_UTF8_CHARCLASS, CLASS, STR, FUNCU, cBOOL(swash_fetch(CAT2(PL_utf8_,CLASS), (U8*)locinput, utf8_target)))
-
+/* This is like CCC_TRY, but has an extra set of parameters for generating case
+ * statements to handle separate Unicode semantics nodes */
+#define CCC_TRY_U(NAME,  NNAME,  FUNC,                                         \
+		  NAMEL, NNAMEL, LCFUNC, LCFUNC_utf8,                          \
+	          NAMEU, NNAMEU, FUNCU,                                        \
+	          CLASS, STR)                                                  \
+    CCC_TRY(NAME, NNAME, FUNC, NAMEL, NNAMEL, LCFUNC, LCFUNC_utf8, CLASS, STR) \
+    _CCC_TRY_NONLOCALE(NAMEU, NNAMEU, FUNCU, CLASS, STR)
 
 /* TODO: Combine JUMPABLE and HAS_TEXT to cache OP(rn) */
 
@@ -3682,14 +3714,19 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    }
 	    break;
 	/* Special char classes - The defines start on line 129 or so */
-        CCC_TRY_AFF_U( ALNUM,  ALNUML,  ALNUMU, perl_word,   "a", isALNUM_LC_utf8, isWORDCHAR, isWORDCHAR_L1, isALNUM_LC);
-        CCC_TRY_NEG_U(NALNUM, NALNUML, NALNUMU, perl_word,   "a", isALNUM_LC_utf8, isWORDCHAR, isWORDCHAR_L1, isALNUM_LC);
+        CCC_TRY_U(ALNUM,  NALNUM,  isWORDCHAR,
+		  ALNUML, NALNUML, isALNUM_LC, isALNUM_LC_utf8,
+		  ALNUMU, NALNUMU, isWORDCHAR_L1,
+		  perl_word, "a");
 
-        CCC_TRY_AFF_U( SPACE,  SPACEL,  SPACEU, perl_space,  " ", isSPACE_LC_utf8, isSPACE, isSPACE_L1, isSPACE_LC);
-        CCC_TRY_NEG_U(NSPACE, NSPACEL, NSPACEU, perl_space,  " ", isSPACE_LC_utf8, isSPACE, isSPACE_L1, isSPACE_LC);
+        CCC_TRY_U(SPACE,  NSPACE,  isSPACE,
+		  SPACEL, NSPACEL, isSPACE_LC, isSPACE_LC_utf8,
+		  SPACEU, NSPACEU, isSPACE_L1,
+		  perl_space, " ");
 
-	CCC_TRY_AFF( DIGIT,  DIGITL, posix_digit, "0", isDIGIT_LC_utf8, isDIGIT, isDIGIT_LC);
-	CCC_TRY_NEG(NDIGIT, NDIGITL, posix_digit, "0", isDIGIT_LC_utf8, isDIGIT, isDIGIT_LC);
+        CCC_TRY(DIGIT,  NDIGIT,  isDIGIT,
+		DIGITL, NDIGITL, isDIGIT_LC, isDIGIT_LC_utf8,
+		posix_digit, "0");
 
 	case CLUMP: /* Match \X: logical Unicode character.  This is defined as
 		       a Unicode extended Grapheme Cluster */
