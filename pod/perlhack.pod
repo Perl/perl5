@@ -279,7 +279,7 @@ backported to the maint branch.  Only patches that survive the heat of the
 development branch get applied to maintenance versions.
 
 Your patch should update the documentation and test suite.  See
-L<Writing a test>.  If you have added or removed files in the distribution,
+L<TESTING>.  If you have added or removed files in the distribution,
 edit the MANIFEST file accordingly, sort the MANIFEST file using
 C<make manisort>, and include those changes as part of your patch.
 
@@ -385,7 +385,7 @@ submitting patches of your changes.
 Lastly, TEST TEST TEST TEST TEST any code before posting to p5p.
 Test on as many platforms as you can find.  Test as many perl
 Configure options as you can (e.g. MULTIPLICITY).  If you have
-profiling or memory tools, see L<EXTERNAL TOOLS FOR DEBUGGING PERL>
+profiling or memory tools, see L<MEMORY DEBUGGERS> and L<PROFILING>
 below for how to use them to further test your code.  Remember that
 most of the people on P5P are doing this on their own time and
 don't have the time to debug your code.
@@ -473,7 +473,7 @@ F<cpan/>.
 There are tests for nearly all the modules, built-ins and major bits
 of functionality.  Test files all have a .t suffix.  Module tests live
 in the F<lib/> and F<ext/> directories next to the module being
-tested.  Others live in F<t/>.  See L<Writing a test>
+tested.  Others live in F<t/>.  See L<TESTING>
 
 =item Documentation
 
