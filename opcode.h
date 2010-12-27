@@ -834,10 +834,10 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_trans,	/* Perl_pp_trans */
 	Perl_pp_sassign,
 	Perl_pp_aassign,
-	Perl_pp_chop,
-	Perl_pp_schop,
-	Perl_pp_chomp,
-	Perl_pp_schomp,
+	Perl_pp_chop,	/* Perl_pp_chop */
+	Perl_pp_schop,	/* Perl_pp_schop */
+	Perl_pp_chop,	/* Perl_pp_chomp */
+	Perl_pp_schop,	/* Perl_pp_schomp */
 	Perl_pp_defined,
 	Perl_pp_undef,
 	Perl_pp_study,

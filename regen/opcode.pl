@@ -108,6 +108,8 @@ my @raw_alias = (
 		 Perl_pp_akeys => ['avalues'],
 		 Perl_pp_rkeys => [qw(rvalues reach)],
 		 Perl_pp_trans => [qw(trans transr)],
+		 Perl_pp_chop => [qw(chop chomp)],
+		 Perl_pp_schop => [qw(schop schomp)],
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {

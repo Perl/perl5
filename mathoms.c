@@ -1123,6 +1123,16 @@ PP(pp_rv2hv)
     return Perl_pp_rv2av(aTHX);
 }
 
+PP(pp_schomp)
+{
+    return Perl_pp_chomp(aTHX);
+}
+
+PP(pp_chomp)
+{
+    return Perl_pp_chop(aTHX);
+}
+
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {
