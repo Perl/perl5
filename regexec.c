@@ -6483,7 +6483,7 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 		    utf8_p = bytes_to_utf8(p, &len);
 		}
 
-		if (swash_fetch(sw, utf8_p, 1)) /* See if in the swash */
+		if (swash_fetch(sw, utf8_p, TRUE))
 		    match = TRUE;
 		else if (flags & ANYOF_LOC_NONBITMAP_FOLD) {
 
@@ -6680,7 +6680,7 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 				    * is valid utf8 in the test above */
 				    match = TRUE;
 				    break;
-				} else if (swash_fetch(sw, (U8*) try_c, 1)) {
+				} else if (swash_fetch(sw, (U8*) try_c, TRUE)) {
 				    match = TRUE;
 				    break;
 				}
