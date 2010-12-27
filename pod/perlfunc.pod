@@ -3602,8 +3602,8 @@ X<ord> X<encoding>
 =item ord
 
 Returns the numeric (the native 8-bit encoding, like ASCII or EBCDIC,
-or Unicode) value of the first character of EXPR.  If EXPR is omitted,
-uses C<$_>.
+or Unicode) value of the first character of EXPR.  If EXPR is an empty
+string, returns 0.  If EXPR is omitted, uses C<$_>.
 
 For the reverse, see L</chr>.
 See L<perlunicode> for more about Unicode.
