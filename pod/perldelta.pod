@@ -301,7 +301,12 @@ be noted as well.
 
 =item *
 
-XXX
+The opcode bodies for C<chop> and C<chomp> and for C<schop> and C<schomp> have
+been merged. The implementation functions C<Perl_do_chop()> and
+C<Perl_do_chomp()>, never part of the public API, have been merged and moved to
+a static function in F<pp.c>. This shrinks the perl binary slightly, and should
+not affect any code outside the core (unless it is relying on the order of side
+effects when C<chomp> is passed a I<list> of values).
 
 =back
 
