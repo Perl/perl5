@@ -3632,7 +3632,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    if (flags & SCF_DO_STCLASS_AND) {
 			if (!(data->start_class->flags & ANYOF_LOCALE)) {
 			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_NALNUM);
-                            if (FLAGS(scan) == REGEX_UNICODE_CHARSET) {
+                            if (OP(scan) == ALNUMU) {
                                 for (value = 0; value < 256; value++) {
                                     if (!isWORDCHAR_L1(value)) {
                                         ANYOF_BITMAP_CLEAR(data->start_class, value);
@@ -3650,7 +3650,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    else {
 			if (data->start_class->flags & ANYOF_LOCALE)
 			    ANYOF_CLASS_SET(data->start_class,ANYOF_ALNUM);
-                        else if (FLAGS(scan) == REGEX_UNICODE_CHARSET) {
+                        else if (OP(scan) == ALNUMU) {
                             for (value = 0; value < 256; value++) {
                                 if (isWORDCHAR_L1(value)) {
                                     ANYOF_BITMAP_SET(data->start_class, value);
@@ -3669,7 +3669,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    if (flags & SCF_DO_STCLASS_AND) {
 			if (!(data->start_class->flags & ANYOF_LOCALE)) {
 			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_ALNUM);
-                            if (FLAGS(scan) == REGEX_UNICODE_CHARSET) {
+                            if (OP(scan) == NALNUMU) {
                                 for (value = 0; value < 256; value++) {
                                     if (isWORDCHAR_L1(value)) {
                                         ANYOF_BITMAP_CLEAR(data->start_class, value);
@@ -3688,7 +3688,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			if (data->start_class->flags & ANYOF_LOCALE)
 			    ANYOF_CLASS_SET(data->start_class,ANYOF_NALNUM);
 			else {
-			    if (FLAGS(scan) == REGEX_UNICODE_CHARSET) {
+                            if (OP(scan) == NALNUMU) {
                                 for (value = 0; value < 256; value++) {
                                     if (! isWORDCHAR_L1(value)) {
                                         ANYOF_BITMAP_SET(data->start_class, value);
@@ -3708,7 +3708,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    if (flags & SCF_DO_STCLASS_AND) {
 			if (!(data->start_class->flags & ANYOF_LOCALE)) {
 			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_NSPACE);
-			    if (FLAGS(scan) == REGEX_UNICODE_CHARSET) {
+			    if (OP(scan) == SPACEU) {
                                 for (value = 0; value < 256; value++) {
                                     if (!isSPACE_L1(value)) {
                                         ANYOF_BITMAP_CLEAR(data->start_class, value);
@@ -3727,7 +3727,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         if (data->start_class->flags & ANYOF_LOCALE) {
 			    ANYOF_CLASS_SET(data->start_class,ANYOF_SPACE);
                         }
-                        else if (FLAGS(scan) == REGEX_UNICODE_CHARSET) {
+                        else if (OP(scan) == SPACEU) {
                             for (value = 0; value < 256; value++) {
                                 if (isSPACE_L1(value)) {
                                     ANYOF_BITMAP_SET(data->start_class, value);
@@ -3746,7 +3746,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    if (flags & SCF_DO_STCLASS_AND) {
 			if (!(data->start_class->flags & ANYOF_LOCALE)) {
 			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_SPACE);
-                            if (FLAGS(scan) == REGEX_UNICODE_CHARSET) {
+                            if (OP(scan) == NSPACEU) {
                                 for (value = 0; value < 256; value++) {
                                     if (isSPACE_L1(value)) {
                                         ANYOF_BITMAP_CLEAR(data->start_class, value);
@@ -3764,7 +3764,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    else {
 			if (data->start_class->flags & ANYOF_LOCALE)
 			    ANYOF_CLASS_SET(data->start_class,ANYOF_NSPACE);
-                        else if (FLAGS(scan) == REGEX_UNICODE_CHARSET) {
+                        else if (OP(scan) == NSPACEU) {
                             for (value = 0; value < 256; value++) {
                                 if (!isSPACE_L1(value)) {
                                     ANYOF_BITMAP_SET(data->start_class, value);
@@ -7191,6 +7191,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     register regnode *ret = NULL;
     I32 flags;
     char *parse_start = RExC_parse;
+    U8 op;
     GET_RE_DEBUG_FLAGS_DECL;
     DEBUG_PARSE("atom");
     *flagp = WORST;		/* Tentatively. */
@@ -7362,21 +7363,37 @@ tryagain:
 	    *flagp |= HASWIDTH;
 	    goto finish_meta_pat;
 	case 'w':
-	    if (LOC) {
-                ret = reg_node(pRExC_state, (U8)(ALNUML));
-            } else {
-                ret = reg_node(pRExC_state, (U8)(ALNUM));
+	    switch (get_regex_charset(RExC_flags)) {
+		case REGEX_LOCALE_CHARSET:
+		    op = ALNUML;
+		    break;
+		case REGEX_UNICODE_CHARSET:
+		    op = ALNUMU;
+		    break;
+		case REGEX_DEPENDS_CHARSET:
+		    op = ALNUM;
+		    break;
+		default:
+		    goto bad_charset;
             }
-	    FLAGS(ret) = get_regex_charset(RExC_flags);
+	    ret = reg_node(pRExC_state, op);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'W':
-            if (LOC) {
-                ret = reg_node(pRExC_state, (U8)(NALNUML));
-            } else {
-                ret = reg_node(pRExC_state, (U8)(NALNUM));
+	    switch (get_regex_charset(RExC_flags)) {
+		case REGEX_LOCALE_CHARSET:
+		    op = NALNUML;
+		    break;
+		case REGEX_UNICODE_CHARSET:
+		    op = NALNUMU;
+		    break;
+		case REGEX_DEPENDS_CHARSET:
+		    op = NALNUM;
+		    break;
+		default:
+		    goto bad_charset;
             }
-	    FLAGS(ret) = get_regex_charset(RExC_flags);
+	    ret = reg_node(pRExC_state, op);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'b':
@@ -7402,21 +7419,37 @@ tryagain:
 	    *flagp |= SIMPLE;
 	    goto finish_meta_pat;
 	case 's':
-            if (LOC) {
-                ret = reg_node(pRExC_state, (U8)(SPACEL));
-            } else {
-                ret = reg_node(pRExC_state, (U8)(SPACE));
+	    switch (get_regex_charset(RExC_flags)) {
+		case REGEX_LOCALE_CHARSET:
+		    op = SPACEL;
+		    break;
+		case REGEX_UNICODE_CHARSET:
+		    op = SPACEU;
+		    break;
+		case REGEX_DEPENDS_CHARSET:
+		    op = SPACE;
+		    break;
+		default:
+		    goto bad_charset;
             }
-	    FLAGS(ret) = get_regex_charset(RExC_flags);
+	    ret = reg_node(pRExC_state, op);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'S':
-            if (LOC) {
-                ret = reg_node(pRExC_state, (U8)(NSPACEL));
-            } else {
-                ret = reg_node(pRExC_state, (U8)(NSPACE));
+	    switch (get_regex_charset(RExC_flags)) {
+		case REGEX_LOCALE_CHARSET:
+		    op = NSPACEL;
+		    break;
+		case REGEX_UNICODE_CHARSET:
+		    op = NSPACEU;
+		    break;
+		case REGEX_DEPENDS_CHARSET:
+		    op = NSPACE;
+		    break;
+		default:
+		    goto bad_charset;
             }
-	    FLAGS(ret) = get_regex_charset(RExC_flags);
+	    ret = reg_node(pRExC_state, op);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'd':
@@ -7962,6 +7995,11 @@ tryagain:
     }
 
     return(ret);
+
+/* Jumped to when an unrecognized character set is encountered */
+bad_charset:
+    Perl_croak(aTHX_ "panic: Unknown regex character set encoding: %u", get_regex_charset(RExC_flags));
+    return(NULL);
 }
 
 STATIC char *
