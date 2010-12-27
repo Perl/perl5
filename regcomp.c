@@ -3688,9 +3688,19 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			if (data->start_class->flags & ANYOF_LOCALE)
 			    ANYOF_CLASS_SET(data->start_class,ANYOF_NALNUM);
 			else {
-			    for (value = 0; value < 256; value++)
-				if (!isALNUM(value))
-				    ANYOF_BITMAP_SET(data->start_class, value);
+			    if (FLAGS(scan) == REGEX_UNICODE_CHARSET) {
+                                for (value = 0; value < 256; value++) {
+                                    if (! isWORDCHAR_L1(value)) {
+                                        ANYOF_BITMAP_SET(data->start_class, value);
+                                    }
+                                }
+                            } else {
+                                for (value = 0; value < 256; value++) {
+                                    if (! isALNUM(value)) {
+                                        ANYOF_BITMAP_SET(data->start_class, value);
+                                    }
+                                }
+			    }
 			}
 		    }
 		    break;
