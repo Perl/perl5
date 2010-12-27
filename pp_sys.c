@@ -527,8 +527,7 @@ PP(pp_open)
 	    ENTER_with_name("call_OPEN");
 	    call_method("OPEN", G_SCALAR);
 	    LEAVE_with_name("call_OPEN");
-	    SPAGAIN;
-	    RETURN;
+	    return NORMAL;
 	}
     }
 
@@ -1506,11 +1505,7 @@ PP(pp_prtf)
 	    ENTER;
 	    call_method("PRINTF", G_SCALAR);
 	    LEAVE;
-	    SPAGAIN;
-	    MARK = ORIGMARK + 1;
-	    *MARK = *SP;
-	    SP = MARK;
-	    RETURN;
+	    return NORMAL;
 	}
     }
 
@@ -1603,17 +1598,12 @@ PP(pp_sysread)
     {
 	const MAGIC * mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
-	    SV *sv;
 	    PUSHMARK(MARK-1);
 	    *MARK = SvTIED_obj(MUTABLE_SV(io), mg);
 	    ENTER;
 	    call_method("READ", G_SCALAR);
 	    LEAVE;
-	    SPAGAIN;
-	    sv = POPs;
-	    SP = ORIGMARK;
-	    PUSHs(sv);
-	    RETURN;
+	    return NORMAL;
 	}
     }
 
@@ -1851,11 +1841,8 @@ PP(pp_send)
 	&& gv && (io = GvIO(gv))) {
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
-	    SV *sv;
-
 	    if (MARK == SP - 1) {
-		sv = *SP;
-		mXPUSHi(sv_len(sv));
+		mXPUSHi(sv_len(*SP));
 		PUTBACK;
 	    }
 
@@ -1864,11 +1851,7 @@ PP(pp_send)
 	    ENTER;
 	    call_method("WRITE", G_SCALAR);
 	    LEAVE;
-	    SPAGAIN;
-	    sv = POPs;
-	    SP = ORIGMARK;
-	    PUSHs(sv);
-	    RETURN;
+	    return NORMAL;
 	}
     }
     if (!gv)
