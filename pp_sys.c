@@ -699,8 +699,8 @@ PP(pp_fileno)
     if (!gv || !(io = GvIO(gv)) || !(fp = IoIFP(io))) {
 	/* Can't do this because people seem to do things like
 	   defined(fileno($foo)) to check whether $foo is a valid fh.
-	  if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-	      report_evil_fh(gv);
+
+	   report_evil_fh(gv);
 	    */
 	RETPUSHUNDEF;
     }
@@ -772,8 +772,7 @@ PP(pp_binmode)
     }
 
     if (!(io = GvIO(gv)) || !(fp = IoIFP(io))) {
-	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-	    report_evil_fh(gv);
+	report_evil_fh(gv);
 	SETERRNO(EBADF,RMS_IFI);
         RETPUSHUNDEF;
     }
@@ -1259,8 +1258,7 @@ PP(pp_getc)
 	}
     }
     if (!gv || do_eof(gv)) { /* make sure we have fp with something */
-	if ((!io || (!IoIFP(io) && IoTYPE(io) != IoTYPE_WRONLY))
-	  && ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	if (!io || (!IoIFP(io) && IoTYPE(io) != IoTYPE_WRONLY))
 	    report_evil_fh(gv);
 	SETERRNO(EBADF,RMS_IFI);
 	RETPUSHUNDEF;
@@ -1509,8 +1507,7 @@ PP(pp_prtf)
 
     sv = newSV(0);
     if (!(io = GvIO(gv))) {
-	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-	    report_evil_fh(gv);
+	report_evil_fh(gv);
 	SETERRNO(EBADF,RMS_IFI);
 	goto just_say_no;
     }
@@ -1616,8 +1613,7 @@ PP(pp_sysread)
 	offset = 0;
     io = GvIO(gv);
     if (!io || !IoIFP(io)) {
-	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-	    report_evil_fh(gv);
+	report_evil_fh(gv);
 	SETERRNO(EBADF,RMS_IFI);
 	goto say_undef;
     }
@@ -1860,12 +1856,10 @@ PP(pp_send)
     io = GvIO(gv);
     if (!io || !IoIFP(io) || IoTYPE(io) == IoTYPE_RDONLY) {
 	retval = -1;
-	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED)) {
-	    if (io && IoIFP(io))
-		report_wrongway_fh(gv, '<');
-	    else
-		report_evil_fh(gv);
-	}
+	if (io && IoIFP(io))
+	    report_wrongway_fh(gv, '<');
+	else
+	    report_evil_fh(gv);
 	SETERRNO(EBADF,RMS_IFI);
 	goto say_undef;
     }
@@ -2281,8 +2275,7 @@ PP(pp_ioctl)
     IV retval;
 
     if (!io || !argsv || !IoIFP(io)) {
-	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-	    report_evil_fh(gv);
+	report_evil_fh(gv);
 	SETERRNO(EBADF,RMS_IFI);	/* well, sort of... */
 	RETPUSHUNDEF;
     }
@@ -2366,8 +2359,7 @@ PP(pp_flock)
 	value = (I32)(PerlLIO_flock(PerlIO_fileno(fp), argtype) >= 0);
     }
     else {
-	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-	    report_evil_fh(gv);
+	report_evil_fh(gv);
 	value = 0;
 	SETERRNO(EBADF,RMS_IFI);
     }
@@ -2392,8 +2384,7 @@ PP(pp_socket)
     int fd;
 
     if (!gv || !io) {
-	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-	    report_evil_fh(gv);
+	report_evil_fh(gv);
 	if (io && IoIFP(io))
 	    do_close(gv, FALSE);
 	SETERRNO(EBADF,LIB_INVARG);
@@ -2444,12 +2435,10 @@ PP(pp_sockpair)
     int fd[2];
 
     if (!gv1 || !gv2 || !io1 || !io2) {
-	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED)) {
-	    if (!gv1 || !io1)
-		report_evil_fh(gv1);
-	    if (!gv2 || !io2)
-		report_evil_fh(gv2);
-	}
+	if (!gv1 || !io1)
+	    report_evil_fh(gv1);
+	if (!gv2 || !io2)
+	    report_evil_fh(gv2);
     }
 
     if (io1 && IoIFP(io1))
@@ -2865,8 +2854,7 @@ PP(pp_stat)
         }
 
 	if (PL_laststatval < 0) {
-	    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-		report_evil_fh(gv);
+	    report_evil_fh(gv);
 	    max = 0;
 	}
     }
@@ -3438,10 +3426,7 @@ PP(pp_fttext)
 		len = 512;
 	}
 	else {
-	    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED)) {
-		gv = cGVOP_gv;
-		report_evil_fh(gv);
-	    }
+	    report_evil_fh(cGVOP_gv);
 	    SETERRNO(EBADF,RMS_IFI);
 	    RETPUSHUNDEF;
 	}
@@ -3585,15 +3570,13 @@ PP(pp_chdir)
                 PUSHi(fchdir(PerlIO_fileno(IoIFP(io))) >= 0);
 	    }
 	    else {
-		if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-		    report_evil_fh(gv);
+		report_evil_fh(gv);
 		SETERRNO(EBADF, RMS_IFI);
 		PUSHi(0);
 	    }
         }
 	else {
-	    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-		report_evil_fh(gv);
+	    report_evil_fh(gv);
 	    SETERRNO(EBADF,RMS_IFI);
 	    PUSHi(0);
 	}

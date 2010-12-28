@@ -750,15 +750,14 @@ PP(pp_print)
         if ( gv && GvEGVx(gv) && (io = GvIO(GvEGV(gv)))
 	    && (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar)))
             goto had_magic;
-	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-	    report_evil_fh(gv);
+	report_evil_fh(gv);
 	SETERRNO(EBADF,RMS_IFI);
 	goto just_say_no;
     }
     else if (!(fp = IoOFP(io))) {
 	if (IoIFP(io))
 	    report_wrongway_fh(gv, '<');
-	else if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+	else
 	    report_evil_fh(gv);
 	SETERRNO(EBADF,IoIFP(io)?RMS_FAC:RMS_IFI);
 	goto just_say_no;
