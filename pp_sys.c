@@ -2452,7 +2452,7 @@ PP(pp_sockpair)
 	    if (!gv1 || !io1)
 		report_evil_fh(gv1, io1, PL_op->op_type);
 	    if (!gv2 || !io2)
-		report_evil_fh(gv1, io2, PL_op->op_type);
+		report_evil_fh(gv2, io2, PL_op->op_type);
 	}
 	if (io1 && IoIFP(io1))
 	    do_close(gv1, FALSE);
