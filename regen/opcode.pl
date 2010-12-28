@@ -175,8 +175,6 @@ for (@ops) {
 print $on "\t", &tab(3,"OP_max"), "\n";
 print $on "} opcode;\n";
 print $on "\n#define MAXO ", scalar @ops, "\n";
-print $on "#define OP_phoney_INPUT_ONLY -1\n";
-print $on "#define OP_phoney_OUTPUT_ONLY -2\n\n";
 
 # Emit op names and descriptions.
 
