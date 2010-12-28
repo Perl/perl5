@@ -2454,17 +2454,15 @@ PP(pp_sockpair)
 	    if (!gv2 || !io2)
 		report_evil_fh(gv2, io2, PL_op->op_type);
 	}
-	if (io1 && IoIFP(io1))
-	    do_close(gv1, FALSE);
-	if (io2 && IoIFP(io2))
-	    do_close(gv2, FALSE);
-	RETPUSHUNDEF;
     }
 
-    if (IoIFP(io1))
+    if (io1 && IoIFP(io1))
 	do_close(gv1, FALSE);
-    if (IoIFP(io2))
+    if (io2 && IoIFP(io2))
 	do_close(gv2, FALSE);
+
+    if (!io1 || !io2)
+	RETPUSHUNDEF;
 
     TAINT_PROPER("socketpair");
     if (PerlSock_socketpair(domain, type, protocol, fd) < 0)
