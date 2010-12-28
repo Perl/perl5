@@ -3479,7 +3479,7 @@ PERL_CALLCONV void	Perl_repeatcpy(char* to, const char* from, I32 len, I32 count
 #define PERL_ARGS_ASSERT_REPEATCPY	\
 	assert(to); assert(from)
 
-PERL_CALLCONV void	Perl_report_evil_fh(pTHX_ const GV *gv, I32 op);
+PERL_CALLCONV void	Perl_report_evil_fh(pTHX_ const GV *gv);
 PERL_CALLCONV void	Perl_report_uninit(pTHX_ const SV *uninit_sv);
 PERL_CALLCONV void	Perl_report_wrongway_fh(pTHX_ const GV *gv, const char have);
 PERL_CALLCONV void	Perl_require_pv(pTHX_ const char* pv)

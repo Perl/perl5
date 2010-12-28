@@ -1343,7 +1343,7 @@ Ap	|U32	|seed
 : Only used in perl.c
 pR	|UV	|get_hash_seed
 : Used in doio.c, pp_hot.c, pp_sys.c
-p	|void	|report_evil_fh	|NULLOK const GV *gv|I32 op
+p	|void	|report_evil_fh	|NULLOK const GV *gv
 : Used in doio.c, pp_hot.c, pp_sys.c
 p	|void	|report_wrongway_fh|NULLOK const GV *gv|const char have
 : Used in mg.c, pp.c, pp_hot.c, regcomp.c

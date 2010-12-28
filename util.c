@@ -3882,9 +3882,10 @@ Perl_report_wrongway_fh(pTHX_ const GV *gv, char have)
 }
 
 void
-Perl_report_evil_fh(pTHX_ const GV *gv, I32 op)
+Perl_report_evil_fh(pTHX_ const GV *gv)
 {
     const IO *io = gv ? GvIO(gv) : NULL;
+    const PERL_BITFIELD16 op = PL_op->op_type;
     const char *vile;
     I32 warn_type;
 
@@ -3906,7 +3907,6 @@ Perl_report_evil_fh(pTHX_ const GV *gv, I32 op)
 	    (const char *)
 	    (op == OP_READLINE   ? "readline"  :	/* "<HANDLE>" not nice */
 	     op == OP_LEAVEWRITE ? "write" :		/* "write exit" not nice */
-	     op < 0              ? "" :              /* handle phoney cases */
 	     PL_op_desc[op]);
 	const char * const type =
 	    (const char *)

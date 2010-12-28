@@ -751,7 +751,7 @@ PP(pp_print)
 	    && (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar)))
             goto had_magic;
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-	    report_evil_fh(gv, PL_op->op_type);
+	    report_evil_fh(gv);
 	SETERRNO(EBADF,RMS_IFI);
 	goto just_say_no;
     }
@@ -760,7 +760,7 @@ PP(pp_print)
 	    if (IoIFP(io))
 		report_wrongway_fh(gv, '<');
 	    else if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-		report_evil_fh(gv, PL_op->op_type);
+		report_evil_fh(gv);
 	}
 	SETERRNO(EBADF,IoIFP(io)?RMS_FAC:RMS_IFI);
 	goto just_say_no;
@@ -1637,7 +1637,7 @@ Perl_do_readline(pTHX)
 			    "glob failed (can't start child: %s)",
 			    Strerror(errno));
 	    else
-		report_evil_fh(PL_last_in_gv, PL_op->op_type);
+		report_evil_fh(PL_last_in_gv);
 	}
 	if (gimme == G_SCALAR) {
 	    /* undef TARG, and push that undefined value */
