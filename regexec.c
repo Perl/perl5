@@ -1332,6 +1332,63 @@ if ((!reginfo || regtry(reginfo, &s))) \
 #define DUMP_EXEC_POS(li,s,doutf8) \
     dump_exec_pos(li,s,(PL_regeol),(PL_bostr),(PL_reg_starttry),doutf8)
 
+/* The only difference between the BOUND and NBOUND cases is that
+ * REXEC_FBC_TRYIT is called when matched in BOUND, and when non-matched in
+ * NBOUND.  This is accomplished by passing it in either the if or else clause,
+ * with the other one being empty */
+#define FBC_BOUND(TEST_NON_UTF8, TEST1_UTF8, TEST2_UTF8) \
+    FBC_BOUND_COMMON(TEST_NON_UTF8, TEST1_UTF8, TEST2_UTF8, REXEC_FBC_TRYIT, )
+
+#define FBC_NBOUND(TEST_NON_UTF8, TEST1_UTF8, TEST2_UTF8) \
+    FBC_BOUND_COMMON(TEST_NON_UTF8, TEST1_UTF8, TEST2_UTF8, , REXEC_FBC_TRYIT)
+
+/* Common to the BOUND and NBOUND cases.  Unfortunately the UTF8 tests need to
+ * be passed in completely with the variable name being tested, which isn't
+ * such a clean interface, but this is easier to read than it was before.  We
+ * are looking for the boundary (or non-boundary between a word and non-word
+ * character.  The utf8 and non-utf8 cases have the same logic, but the details
+ * must be different.  Find the "wordness" of the character just prior to this
+ * one, and compare it with the wordness of this one.  If they differ, we have
+ * a boundary.  At the beginning of the string, pretend that the previous
+ * character was a new-line */
+#define FBC_BOUND_COMMON(TEST_NON_UTF8, TEST1_UTF8, TEST2_UTF8,                \
+	                                                  IF_SUCCESS, IF_FAIL) \
+    if (utf8_target) {                                                         \
+	if (s == PL_bostr) {                                                   \
+	    tmp = '\n';                                                        \
+	}                                                                      \
+	else {                                                                 \
+	    U8 * const r = reghop3((U8*)s, -1, (U8*)PL_bostr);                 \
+	    tmp = utf8n_to_uvchr(r, UTF8SKIP(r), 0, UTF8_ALLOW_DEFAULT);       \
+	}                                                                      \
+	tmp = TEST1_UTF8;                                                      \
+	LOAD_UTF8_CHARCLASS_ALNUM();                                           \
+	REXEC_FBC_UTF8_SCAN(                                                   \
+	    if (tmp == ! (TEST2_UTF8)) {                                       \
+		tmp = !tmp;                                                    \
+		IF_SUCCESS;                                                    \
+	    }                                                                  \
+	    else {                                                             \
+		IF_FAIL;                                                       \
+	    }                                                                  \
+	);                                                                     \
+    }                                                                          \
+    else {  /* Not utf8 */                                                     \
+	tmp = (s != PL_bostr) ? UCHARAT(s - 1) : '\n';                         \
+	tmp = TEST_NON_UTF8(tmp);                                              \
+	REXEC_FBC_SCAN(                                                        \
+	    if (tmp == ! TEST_NON_UTF8((U8) *s)) {                             \
+		tmp = !tmp;                                                    \
+		IF_SUCCESS;                                                    \
+	    }                                                                  \
+	    else {                                                             \
+		IF_FAIL;                                                       \
+	    }                                                                  \
+	);                                                                     \
+    }                                                                          \
+    if ((!prog->minlen && tmp) && (!reginfo || regtry(reginfo, &s)))           \
+	goto got_it;
+
 /* We know what class REx starts with.  Try to find this position... */
 /* if reginfo is NULL, its a dryrun */
 /* annoyingly all the vars in this routine have different names from their counterparts
@@ -1524,91 +1581,35 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    break;
 	case BOUNDL:
 	    PL_reg_flags |= RF_tainted;
-	    /* FALL THROUGH */
-	case BOUND:
-	    if (utf8_target) {
-		if (s == PL_bostr)
-		    tmp = '\n';
-		else {
-		    U8 * const r = reghop3((U8*)s, -1, (U8*)PL_bostr);
-		    tmp = utf8n_to_uvchr(r, UTF8SKIP(r), 0, UTF8_ALLOW_DEFAULT);
-		}
-		tmp = (FLAGS(c) != REGEX_LOCALE_CHARSET ?
-			isALNUM_uni(tmp) : isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp)));
-		LOAD_UTF8_CHARCLASS_ALNUM();
-		REXEC_FBC_UTF8_SCAN(
-		    if (tmp == !(FLAGS(c) != REGEX_LOCALE_CHARSET ?
-				 cBOOL(swash_fetch(PL_utf8_alnum, (U8*)s, utf8_target)) :
-				 isALNUM_LC_utf8((U8*)s)))
-		    {
-			tmp = !tmp;
-			REXEC_FBC_TRYIT;
-		}
-		);
-	    }
-            else {  /* Not utf8 */
-		tmp = (s != PL_bostr) ? UCHARAT(s - 1) : '\n';
-                tmp = ((FLAGS(c) == REGEX_LOCALE_CHARSET)
-                            ? isALNUM_LC(tmp)
-                            : (isWORDCHAR_L1(tmp)
-                               && (isASCII(tmp) || (FLAGS(c) == REGEX_UNICODE_CHARSET))));
-		REXEC_FBC_SCAN(
-		    if (tmp ==
-                        !((FLAGS(c) == REGEX_LOCALE_CHARSET)
-                          ? isALNUM_LC(*s)
-                          : (isWORDCHAR_L1((U8) *s)
-                             && (isASCII((U8) *s) || (FLAGS(c) == REGEX_UNICODE_CHARSET)))))
-		    {
-			tmp = !tmp;
-			REXEC_FBC_TRYIT;
-		}
-		);
-	    }
-	    if ((!prog->minlen && tmp) && (!reginfo || regtry(reginfo, &s)))
-		goto got_it;
+	    FBC_BOUND(isALNUM_LC,
+		      isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp)),
+		      isALNUM_LC_utf8((U8*)s));
 	    break;
 	case NBOUNDL:
 	    PL_reg_flags |= RF_tainted;
-	    /* FALL THROUGH */
+	    FBC_NBOUND(isALNUM_LC,
+		       isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp)),
+		       isALNUM_LC_utf8((U8*)s));
+	    break;
+	case BOUND:
+	    FBC_BOUND(isWORDCHAR,
+		      isALNUM_uni(tmp),
+		      cBOOL(swash_fetch(PL_utf8_alnum, (U8*)s, utf8_target)));
+	    break;
 	case NBOUND:
-	    if (utf8_target) {
-		if (s == PL_bostr)
-		    tmp = '\n';
-		else {
-		    U8 * const r = reghop3((U8*)s, -1, (U8*)PL_bostr);
-		    tmp = utf8n_to_uvchr(r, UTF8SKIP(r), 0, UTF8_ALLOW_DEFAULT);
-		}
-		tmp = (FLAGS(c) != REGEX_LOCALE_CHARSET ?
-			isALNUM_uni(tmp) : isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp)));
-		LOAD_UTF8_CHARCLASS_ALNUM();
-		REXEC_FBC_UTF8_SCAN(
-		    if (tmp == !(FLAGS(c) != REGEX_LOCALE_CHARSET ?
-				 cBOOL(swash_fetch(PL_utf8_alnum, (U8*)s, utf8_target)) :
-				 isALNUM_LC_utf8((U8*)s)))
-			tmp = !tmp;
-		    else REXEC_FBC_TRYIT;
-		);
-	    }
-	    else {
-		tmp = (s != PL_bostr) ? UCHARAT(s - 1) : '\n';
-                tmp = ((FLAGS(c) == REGEX_LOCALE_CHARSET)
-                            ? isALNUM_LC(tmp)
-                            : (isWORDCHAR_L1(tmp)
-                               && (isASCII(tmp) || (FLAGS(c) == REGEX_UNICODE_CHARSET))));
-		REXEC_FBC_SCAN(
-		    if (tmp == ! (
-                            (FLAGS(c) == REGEX_LOCALE_CHARSET)
-                            ? isALNUM_LC(*s)
-                            : (isWORDCHAR_L1((U8) *s)
-                               && (isASCII((U8) *s) || (FLAGS(c) == REGEX_UNICODE_CHARSET)))))
-                    {
-			tmp = !tmp;
-                    }
-		    else REXEC_FBC_TRYIT;
-		);
-	    }
-	    if ((!prog->minlen && !tmp) && (!reginfo || regtry(reginfo, &s)))
-		goto got_it;
+	    FBC_NBOUND(isWORDCHAR,
+		       isALNUM_uni(tmp),
+		       cBOOL(swash_fetch(PL_utf8_alnum, (U8*)s, utf8_target)));
+	    break;
+	case BOUNDU:
+	    FBC_BOUND(isWORDCHAR_L1,
+		      isALNUM_uni(tmp),
+		      cBOOL(swash_fetch(PL_utf8_alnum, (U8*)s, utf8_target)));
+	    break;
+	case NBOUNDU:
+	    FBC_NBOUND(isWORDCHAR_L1,
+		       isALNUM_uni(tmp),
+		       cBOOL(swash_fetch(PL_utf8_alnum, (U8*)s, utf8_target)));
 	    break;
 	case ALNUML:
 	    REXEC_FBC_CSCAN_TAINT(
@@ -3641,12 +3642,18 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    nextchr = UCHARAT(locinput);
 	    break;
 	}
+
+	/* XXX Could improve efficiency by separating these all out using a
+	 * macro or in-line function.  At that point regcomp.c would no longer
+	 * have to set the FLAGS fields of these */
 	case BOUNDL:
 	case NBOUNDL:
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case BOUND:
+	case BOUNDU:
 	case NBOUND:
+	case NBOUNDU:
 	    /* was last char in word? */
 	    if (utf8_target) {
 		if (locinput == PL_bostr)
@@ -3656,7 +3663,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 
 		    ln = utf8n_to_uvchr(r, UTF8SKIP(r), 0, uniflags);
 		}
-		if (OP(scan) == BOUND || OP(scan) == NBOUND) {
+		if (FLAGS(scan) != REGEX_LOCALE_CHARSET) {
 		    ln = isALNUM_uni(ln);
 		    LOAD_UTF8_CHARCLASS_ALNUM();
 		    n = swash_fetch(PL_utf8_alnum, (U8*)locinput, utf8_target);
@@ -3669,24 +3676,27 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    else {
 		ln = (locinput != PL_bostr) ?
 		    UCHARAT(locinput - 1) : '\n';
-		if (FLAGS(scan) == REGEX_UNICODE_CHARSET) {
-
-                    /* Here, can't be BOUNDL or NBOUNDL because they never set
-                     * the flags to REGEX_UNICODE_CHARSET */
-                    ln = isWORDCHAR_L1(ln);
-                    n = isWORDCHAR_L1(nextchr);
-                }
-                else if (OP(scan) == BOUND || OP(scan) == NBOUND) {
-		    ln = isALNUM(ln);
-		    n = isALNUM(nextchr);
-		}
-		else {
-		    ln = isALNUM_LC(ln);
-		    n = isALNUM_LC(nextchr);
+		switch (FLAGS(scan)) {
+		    case REGEX_UNICODE_CHARSET:
+			ln = isWORDCHAR_L1(ln);
+			n = isWORDCHAR_L1(nextchr);
+			break;
+		    case REGEX_LOCALE_CHARSET:
+			ln = isALNUM_LC(ln);
+			n = isALNUM_LC(nextchr);
+			break;
+		    case REGEX_DEPENDS_CHARSET:
+			ln = isALNUM(ln);
+			n = isALNUM(nextchr);
+			break;
+		    default:
+			Perl_croak(aTHX_ "panic: Unexpected FLAGS %u in op %u", FLAGS(scan), OP(scan));
+			break;
 		}
 	    }
-	    if (((!ln) == (!n)) == (OP(scan) == BOUND ||
-				    OP(scan) == BOUNDL))
+	    /* Note requires that all BOUNDs be lower than all NBOUNDs in
+	     * regcomp.sym */
+	    if (((!ln) == (!n)) == (OP(scan) < NBOUND))
 		    sayNO;
 	    break;
 	case ANYOFV:

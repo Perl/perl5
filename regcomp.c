@@ -7399,22 +7399,40 @@ tryagain:
 	case 'b':
 	    RExC_seen_zerolen++;
 	    RExC_seen |= REG_SEEN_LOOKBEHIND;
-            if (LOC) {
-                ret = reg_node(pRExC_state, (U8)(BOUNDL));
-            } else {
-                ret = reg_node(pRExC_state, (U8)(BOUND));
+	    switch (get_regex_charset(RExC_flags)) {
+		case REGEX_LOCALE_CHARSET:
+		    op = BOUNDL;
+		    break;
+		case REGEX_UNICODE_CHARSET:
+		    op = BOUNDU;
+		    break;
+		case REGEX_DEPENDS_CHARSET:
+		    op = BOUND;
+		    break;
+		default:
+		    goto bad_charset;
             }
+	    ret = reg_node(pRExC_state, op);
 	    FLAGS(ret) = get_regex_charset(RExC_flags);
 	    *flagp |= SIMPLE;
 	    goto finish_meta_pat;
 	case 'B':
 	    RExC_seen_zerolen++;
 	    RExC_seen |= REG_SEEN_LOOKBEHIND;
-            if (LOC) {
-                ret = reg_node(pRExC_state, (U8)(NBOUNDL));
-            } else {
-                ret = reg_node(pRExC_state, (U8)(NBOUND));
+	    switch (get_regex_charset(RExC_flags)) {
+		case REGEX_LOCALE_CHARSET:
+		    op = NBOUNDL;
+		    break;
+		case REGEX_UNICODE_CHARSET:
+		    op = NBOUNDU;
+		    break;
+		case REGEX_DEPENDS_CHARSET:
+		    op = NBOUND;
+		    break;
+		default:
+		    goto bad_charset;
             }
+	    ret = reg_node(pRExC_state, op);
 	    FLAGS(ret) = get_regex_charset(RExC_flags);
 	    *flagp |= SIMPLE;
 	    goto finish_meta_pat;

@@ -33,6 +33,7 @@ SEOL        EOL,        no        ; Same, assuming singleline.
 BOUND       BOUND,      no        ; Match "" at any word boundary using native charset semantics for non-utf8
 BOUNDL      BOUND,      no        ; Match "" at any locale word boundary
 BOUNDU      BOUND,      no        ; Match "" at any word boundary using Unicode semantics
+# All NBOUND nodes are required by a line regexec.c to be greater than all BOUND ones
 NBOUND      NBOUND,     no        ; Match "" at any word non-boundary using native charset semantics for non-utf8
 NBOUNDL     NBOUND,     no        ; Match "" at any locale word non-boundary
 NBOUNDU     NBOUND,     no        ; Match "" at any word non-boundary using Unicode semantics
