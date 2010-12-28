@@ -758,7 +758,7 @@ PP(pp_print)
     else if (!(fp = IoOFP(io))) {
 	if (ckWARN2(WARN_CLOSED, WARN_IO))  {
 	    if (IoIFP(io))
-		report_evil_fh(gv, io, OP_phoney_INPUT_ONLY);
+		report_wrongway_fh(gv, '<');
 	    else if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 		report_evil_fh(gv, io, PL_op->op_type);
 	}
@@ -1625,7 +1625,7 @@ Perl_do_readline(pTHX)
 	else if (type == OP_GLOB)
 	    SP--;
 	else if (ckWARN(WARN_IO) && IoTYPE(io) == IoTYPE_WRONLY) {
-	    report_evil_fh(PL_last_in_gv, io, OP_phoney_OUTPUT_ONLY);
+	    report_wrongway_fh(PL_last_in_gv, '>');
 	}
     }
     if (!fp) {

@@ -3864,71 +3864,72 @@ Perl_my_fflush_all(pTHX)
 }
 
 void
+Perl_report_wrongway_fh(pTHX_ const GV *gv, char have)
+{
+    if (ckWARN(WARN_IO)) {
+	const char * const name
+	    = gv && (isGV(gv) || isGV_with_GP(gv)) ? GvENAME(gv) : NULL;
+	const char * const direction = have == '>' ? "out" : "in";
+
+	if (name && *name)
+	    Perl_warner(aTHX_ packWARN(WARN_IO),
+			"Filehandle %s opened only for %sput",
+			name, direction);
+	else
+	    Perl_warner(aTHX_ packWARN(WARN_IO),
+			"Filehandle opened only for %sput", direction);
+    }
+}
+
+void
 Perl_report_evil_fh(pTHX_ const GV *gv, const IO *io, I32 op)
 {
-    const char * const name
-     = gv && (isGV(gv) || isGV_with_GP(gv)) ? GvENAME(gv) : NULL;
+    const char *vile;
+    I32 warn_type;
 
-    if (op == OP_phoney_OUTPUT_ONLY || op == OP_phoney_INPUT_ONLY) {
-	if (ckWARN(WARN_IO)) {
-	    const char * const direction =
-		(const char *)((op == OP_phoney_INPUT_ONLY) ? "in" : "out");
-	    if (name && *name)
-		Perl_warner(aTHX_ packWARN(WARN_IO),
-			    "Filehandle %s opened only for %sput",
-			    name, direction);
-	    else
-		Perl_warner(aTHX_ packWARN(WARN_IO),
-			    "Filehandle opened only for %sput", direction);
-	}
+    if (gv && io && IoTYPE(io) == IoTYPE_CLOSED) {
+	vile = "closed";
+	warn_type = WARN_CLOSED;
     }
     else {
-        const char *vile;
-	I32   warn_type;
+	vile = "unopened";
+	warn_type = WARN_UNOPENED;
+    }
 
-	if (gv && io && IoTYPE(io) == IoTYPE_CLOSED) {
-	    vile = "closed";
-	    warn_type = WARN_CLOSED;
+    if (ckWARN(warn_type)) {
+	const char * const name
+	    = gv && (isGV(gv) || isGV_with_GP(gv)) ? GvENAME(gv) : NULL;
+	const char * const pars =
+	    (const char *)(OP_IS_FILETEST(op) ? "" : "()");
+	const char * const func =
+	    (const char *)
+	    (op == OP_READLINE   ? "readline"  :	/* "<HANDLE>" not nice */
+	     op == OP_LEAVEWRITE ? "write" :		/* "write exit" not nice */
+	     op < 0              ? "" :              /* handle phoney cases */
+	     PL_op_desc[op]);
+	const char * const type =
+	    (const char *)
+	    (OP_IS_SOCKET(op) || (gv && io && IoTYPE(io) == IoTYPE_SOCKET)
+	     ? "socket" : "filehandle");
+	if (name && *name) {
+	    Perl_warner(aTHX_ packWARN(warn_type),
+			"%s%s on %s %s %s", func, pars, vile, type, name);
+	    if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
+		Perl_warner(
+			    aTHX_ packWARN(warn_type),
+			    "\t(Are you trying to call %s%s on dirhandle %s?)\n",
+			    func, pars, name
+			    );
 	}
 	else {
-	    vile = "unopened";
-	    warn_type = WARN_UNOPENED;
-	}
-
-	if (ckWARN(warn_type)) {
-	    const char * const pars =
-		(const char *)(OP_IS_FILETEST(op) ? "" : "()");
-	    const char * const func =
-		(const char *)
-		(op == OP_READLINE   ? "readline"  :	/* "<HANDLE>" not nice */
-		 op == OP_LEAVEWRITE ? "write" :		/* "write exit" not nice */
-		 op < 0              ? "" :              /* handle phoney cases */
-		 PL_op_desc[op]);
-	    const char * const type =
-		(const char *)
-		(OP_IS_SOCKET(op) ||
-		 (gv && io && IoTYPE(io) == IoTYPE_SOCKET) ?
-		 "socket" : "filehandle");
-	    if (name && *name) {
-		Perl_warner(aTHX_ packWARN(warn_type),
-			    "%s%s on %s %s %s", func, pars, vile, type, name);
-		if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
-		    Perl_warner(
-			aTHX_ packWARN(warn_type),
-			"\t(Are you trying to call %s%s on dirhandle %s?)\n",
-			func, pars, name
-		    );
-	    }
-	    else {
-		Perl_warner(aTHX_ packWARN(warn_type),
-			    "%s%s on %s %s", func, pars, vile, type);
-		if (gv && io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
-		    Perl_warner(
-			aTHX_ packWARN(warn_type),
-			"\t(Are you trying to call %s%s on dirhandle?)\n",
-			func, pars
-		    );
-	    }
+	    Perl_warner(aTHX_ packWARN(warn_type),
+			"%s%s on %s %s", func, pars, vile, type);
+	    if (gv && io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
+		Perl_warner(
+			    aTHX_ packWARN(warn_type),
+			    "\t(Are you trying to call %s%s on dirhandle?)\n",
+			    func, pars
+			    );
 	}
     }
 }

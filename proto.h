@@ -3481,6 +3481,7 @@ PERL_CALLCONV void	Perl_repeatcpy(char* to, const char* from, I32 len, I32 count
 
 PERL_CALLCONV void	Perl_report_evil_fh(pTHX_ const GV *gv, const IO *io, I32 op);
 PERL_CALLCONV void	Perl_report_uninit(pTHX_ const SV *uninit_sv);
+PERL_CALLCONV void	Perl_report_wrongway_fh(pTHX_ const GV *gv, const char have);
 PERL_CALLCONV void	Perl_require_pv(pTHX_ const char* pv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_REQUIRE_PV	\

@@ -1451,7 +1451,7 @@ PP(pp_leavewrite)
     if (!fp) {
 	if (ckWARN2(WARN_CLOSED,WARN_IO)) {
 	    if (IoIFP(io))
-		report_evil_fh(gv, io, OP_phoney_INPUT_ONLY);
+		report_wrongway_fh(gv, '<');
 	    else if (ckWARN(WARN_CLOSED))
 		report_evil_fh(gv, io, PL_op->op_type);
 	}
@@ -1519,7 +1519,7 @@ PP(pp_prtf)
     else if (!(fp = IoOFP(io))) {
 	if (ckWARN2(WARN_CLOSED,WARN_IO))  {
 	    if (IoIFP(io))
-		report_evil_fh(gv, io, OP_phoney_INPUT_ONLY);
+		report_wrongway_fh(gv, '<');
 	    else if (ckWARN(WARN_CLOSED))
 		report_evil_fh(gv, io, PL_op->op_type);
 	}
@@ -1764,7 +1764,7 @@ PP(pp_sysread)
     }
     if (count < 0) {
 	if ((IoTYPE(io) == IoTYPE_WRONLY) && ckWARN(WARN_IO))
-		report_evil_fh(gv, io, OP_phoney_OUTPUT_ONLY);
+	    report_wrongway_fh(gv, '>');
 	goto say_undef;
     }
     SvCUR_set(read_target, count+(buffer - SvPVX_const(read_target)));
@@ -1866,7 +1866,7 @@ PP(pp_send)
 	retval = -1;
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED)) {
 	    if (io && IoIFP(io))
-		report_evil_fh(gv, io, OP_phoney_INPUT_ONLY);
+		report_wrongway_fh(gv, '<');
 	    else
 		report_evil_fh(gv, io, PL_op->op_type);
 	}

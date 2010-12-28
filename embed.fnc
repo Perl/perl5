@@ -1344,6 +1344,8 @@ Ap	|U32	|seed
 pR	|UV	|get_hash_seed
 : Used in doio.c, pp_hot.c, pp_sys.c
 p	|void	|report_evil_fh	|NULLOK const GV *gv|NULLOK const IO *io|I32 op
+: Used in doio.c, pp_hot.c, pp_sys.c
+p	|void	|report_wrongway_fh|NULLOK const GV *gv|const char have
 : Used in mg.c, pp.c, pp_hot.c, regcomp.c
 XEpd	|void	|report_uninit	|NULLOK const SV *uninit_sv
 Apd	|void	|warn_sv	|NN SV *baseex
