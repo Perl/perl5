@@ -30,10 +30,12 @@ EOS         EOL,        no        ; Match "" at end of string.
 EOL         EOL,        no        ; Match "" at end of line.
 MEOL        EOL,        no        ; Same, assuming multiline.
 SEOL        EOL,        no        ; Same, assuming singleline.
-BOUND       BOUND,      no        ; Match "" at any word boundary
+BOUND       BOUND,      no        ; Match "" at any word boundary using native charset semantics for non-utf8
 BOUNDL      BOUND,      no        ; Match "" at any locale word boundary
-NBOUND      NBOUND,     no        ; Match "" at any word non-boundary
+BOUNDU      BOUND,      no        ; Match "" at any word boundary using Unicode semantics
+NBOUND      NBOUND,     no        ; Match "" at any word non-boundary using native charset semantics for non-utf8
 NBOUNDL     NBOUND,     no        ; Match "" at any locale word non-boundary
+NBOUNDU     NBOUND,     no        ; Match "" at any word non-boundary using Unicode semantics
 GPOS        GPOS,       no        ; Matches where last m//g left off.
 
 #* [Special] alternatives:
