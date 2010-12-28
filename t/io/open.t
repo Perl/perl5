@@ -333,6 +333,7 @@ fresh_perl_is(
       print $fh "hello";
      "".*STDOUT;
       print "ok";
+      close $fh;
       unlink \*STDOUT;
     ',
     'ok', { stderr => 1 },
