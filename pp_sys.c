@@ -1449,12 +1449,10 @@ PP(pp_leavewrite)
 
     fp = IoOFP(io);
     if (!fp) {
-	if (ckWARN2(WARN_CLOSED,WARN_IO)) {
-	    if (IoIFP(io))
-		report_wrongway_fh(gv, '<');
-	    else if (ckWARN(WARN_CLOSED))
-		report_evil_fh(gv);
-	}
+	if (IoIFP(io))
+	    report_wrongway_fh(gv, '<');
+	else if (ckWARN(WARN_CLOSED))
+	    report_evil_fh(gv);
 	PUSHs(&PL_sv_no);
     }
     else {
@@ -1517,12 +1515,10 @@ PP(pp_prtf)
 	goto just_say_no;
     }
     else if (!(fp = IoOFP(io))) {
-	if (ckWARN2(WARN_CLOSED,WARN_IO))  {
-	    if (IoIFP(io))
-		report_wrongway_fh(gv, '<');
-	    else if (ckWARN(WARN_CLOSED))
-		report_evil_fh(gv);
-	}
+	if (IoIFP(io))
+	    report_wrongway_fh(gv, '<');
+	else if (ckWARN(WARN_CLOSED))
+	    report_evil_fh(gv);
 	SETERRNO(EBADF,IoIFP(io)?RMS_FAC:RMS_IFI);
 	goto just_say_no;
     }
@@ -1763,7 +1759,7 @@ PP(pp_sysread)
 	    count = -1;
     }
     if (count < 0) {
-	if ((IoTYPE(io) == IoTYPE_WRONLY) && ckWARN(WARN_IO))
+	if (IoTYPE(io) == IoTYPE_WRONLY)
 	    report_wrongway_fh(gv, '>');
 	goto say_undef;
     }

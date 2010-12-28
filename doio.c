@@ -996,7 +996,7 @@ Perl_do_eof(pTHX_ GV *gv)
 
     if (!io)
 	return TRUE;
-    else if ((IoTYPE(io) == IoTYPE_WRONLY) && ckWARN(WARN_IO))
+    else if (IoTYPE(io) == IoTYPE_WRONLY)
 	report_wrongway_fh(gv, '>');
 
     while (IoIFP(io)) {
