@@ -152,34 +152,40 @@ $lib_file = $base->lib_file($object_file);
 ok( $lib_file, "lib_file() returned true value" );
 
 my ($lib, @temps);
-($lib, @temps) = $base->link(
-    objects     => $object_file,
-    module_name => 'compilet',
-);
-$lib =~ tr/"'//d; #"
-is($lib_file, $lib, "lib_file(): got expected value for $lib");
+SKIP:
+{
+    skip "Base can't link on Win32", 4
+	if $^O eq "MSWin32";
+    ($lib, @temps) = $base->link(
+	objects     => $object_file,
+	module_name => 'compilet',
+	);
+    $lib =~ tr/"'//d; #"
+    is($lib_file, $lib, "lib_file(): got expected value for $lib");
 
-($lib, @temps) = $base->link(
-    objects     => [ $object_file ],
-    module_name => 'compilet',
-);
-$lib =~ tr/"'//d; #"
-is($lib_file, $lib, "lib_file(): got expected value for $lib");
+    ($lib, @temps) = $base->link(
+	objects     => [ $object_file ],
+	module_name => 'compilet',
+    );
+    $lib =~ tr/"'//d; #"
+    is($lib_file, $lib, "lib_file(): got expected value for $lib");
 
-($lib, @temps) = $base->link(
-    lib_file    => $lib_file,
-    objects     => [ $object_file ],
-    module_name => 'compilet',
-);
-$lib =~ tr/"'//d; #"
-is($lib_file, $lib, "lib_file(): got expected value for $lib");
+    ($lib, @temps) = $base->link(
+	lib_file    => $lib_file,
+	objects     => [ $object_file ],
+	module_name => 'compilet',
+    );
+    $lib =~ tr/"'//d; #"
+    is($lib_file, $lib, "lib_file(): got expected value for $lib");
 
-$lib = $base->link(
-    objects     => $object_file,
-    module_name => 'compilet',
-);
-$lib =~ tr/"'//d; #"
-is($lib_file, $lib, "lib_file(): got expected value for $lib");
+    $lib = $base->link(
+	objects     => $object_file,
+	module_name => 'compilet',
+    );
+    $lib =~ tr/"'//d; #"
+    is($lib_file, $lib, "lib_file(): got expected value for $lib");
+}
+
 
 {
     local $ENV{PERL_CORE} = '' unless $ENV{PERL_CORE};
