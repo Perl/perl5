@@ -700,7 +700,7 @@ PP(pp_fileno)
 	/* Can't do this because people seem to do things like
 	   defined(fileno($foo)) to check whether $foo is a valid fh.
 	  if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-	      report_evil_fh(gv, io, PL_op->op_type);
+	      report_evil_fh(gv, PL_op->op_type);
 	    */
 	RETPUSHUNDEF;
     }
@@ -773,7 +773,7 @@ PP(pp_binmode)
 
     if (!(io = GvIO(gv)) || !(fp = IoIFP(io))) {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-	    report_evil_fh(gv, io, PL_op->op_type);
+	    report_evil_fh(gv, PL_op->op_type);
 	SETERRNO(EBADF,RMS_IFI);
         RETPUSHUNDEF;
     }
@@ -1261,7 +1261,7 @@ PP(pp_getc)
     if (!gv || do_eof(gv)) { /* make sure we have fp with something */
 	if ((!io || (!IoIFP(io) && IoTYPE(io) != IoTYPE_WRONLY))
 	  && ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-	    report_evil_fh(gv, io, PL_op->op_type);
+	    report_evil_fh(gv, PL_op->op_type);
 	SETERRNO(EBADF,RMS_IFI);
 	RETPUSHUNDEF;
     }
@@ -1453,7 +1453,7 @@ PP(pp_leavewrite)
 	    if (IoIFP(io))
 		report_wrongway_fh(gv, '<');
 	    else if (ckWARN(WARN_CLOSED))
-		report_evil_fh(gv, io, PL_op->op_type);
+		report_evil_fh(gv, PL_op->op_type);
 	}
 	PUSHs(&PL_sv_no);
     }
@@ -1512,7 +1512,7 @@ PP(pp_prtf)
     sv = newSV(0);
     if (!(io = GvIO(gv))) {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-	    report_evil_fh(gv, io, PL_op->op_type);
+	    report_evil_fh(gv, PL_op->op_type);
 	SETERRNO(EBADF,RMS_IFI);
 	goto just_say_no;
     }
@@ -1521,7 +1521,7 @@ PP(pp_prtf)
 	    if (IoIFP(io))
 		report_wrongway_fh(gv, '<');
 	    else if (ckWARN(WARN_CLOSED))
-		report_evil_fh(gv, io, PL_op->op_type);
+		report_evil_fh(gv, PL_op->op_type);
 	}
 	SETERRNO(EBADF,IoIFP(io)?RMS_FAC:RMS_IFI);
 	goto just_say_no;
@@ -1621,7 +1621,7 @@ PP(pp_sysread)
     io = GvIO(gv);
     if (!io || !IoIFP(io)) {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-	    report_evil_fh(gv, io, PL_op->op_type);
+	    report_evil_fh(gv, PL_op->op_type);
 	SETERRNO(EBADF,RMS_IFI);
 	goto say_undef;
     }
@@ -1868,7 +1868,7 @@ PP(pp_send)
 	    if (io && IoIFP(io))
 		report_wrongway_fh(gv, '<');
 	    else
-		report_evil_fh(gv, io, PL_op->op_type);
+		report_evil_fh(gv, PL_op->op_type);
 	}
 	SETERRNO(EBADF,RMS_IFI);
 	goto say_undef;
@@ -2286,7 +2286,7 @@ PP(pp_ioctl)
 
     if (!io || !argsv || !IoIFP(io)) {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-	    report_evil_fh(gv, io, PL_op->op_type);
+	    report_evil_fh(gv, PL_op->op_type);
 	SETERRNO(EBADF,RMS_IFI);	/* well, sort of... */
 	RETPUSHUNDEF;
     }
@@ -2371,7 +2371,7 @@ PP(pp_flock)
     }
     else {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-	    report_evil_fh(gv, io, PL_op->op_type);
+	    report_evil_fh(gv, PL_op->op_type);
 	value = 0;
 	SETERRNO(EBADF,RMS_IFI);
     }
@@ -2397,7 +2397,7 @@ PP(pp_socket)
 
     if (!gv || !io) {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-	    report_evil_fh(gv, io, PL_op->op_type);
+	    report_evil_fh(gv, PL_op->op_type);
 	if (io && IoIFP(io))
 	    do_close(gv, FALSE);
 	SETERRNO(EBADF,LIB_INVARG);
@@ -2450,9 +2450,9 @@ PP(pp_sockpair)
     if (!gv1 || !gv2 || !io1 || !io2) {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED)) {
 	    if (!gv1 || !io1)
-		report_evil_fh(gv1, io1, PL_op->op_type);
+		report_evil_fh(gv1, PL_op->op_type);
 	    if (!gv2 || !io2)
-		report_evil_fh(gv2, io2, PL_op->op_type);
+		report_evil_fh(gv2, PL_op->op_type);
 	}
     }
 
@@ -2516,7 +2516,7 @@ PP(pp_bind)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	report_evil_fh(gv, io, PL_op->op_type);
+	report_evil_fh(gv, PL_op->op_type);
     SETERRNO(EBADF,SS_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2546,7 +2546,7 @@ PP(pp_connect)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	report_evil_fh(gv, io, PL_op->op_type);
+	report_evil_fh(gv, PL_op->op_type);
     SETERRNO(EBADF,SS_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2572,7 +2572,7 @@ PP(pp_listen)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	report_evil_fh(gv, io, PL_op->op_type);
+	report_evil_fh(gv, PL_op->op_type);
     SETERRNO(EBADF,SS_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2648,7 +2648,7 @@ PP(pp_accept)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	report_evil_fh(ggv, ggv ? GvIO(ggv) : 0, PL_op->op_type);
+	report_evil_fh(ggv, PL_op->op_type);
     SETERRNO(EBADF,SS_IVCHAN);
 
 badexit:
@@ -2675,7 +2675,7 @@ PP(pp_shutdown)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	report_evil_fh(gv, io, PL_op->op_type);
+	report_evil_fh(gv, PL_op->op_type);
     SETERRNO(EBADF,SS_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2750,7 +2750,7 @@ PP(pp_ssockopt)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	report_evil_fh(gv, io, optype);
+	report_evil_fh(gv, optype);
     SETERRNO(EBADF,SS_IVCHAN);
 nuts2:
     RETPUSHUNDEF;
@@ -2814,7 +2814,7 @@ PP(pp_getpeername)
 
 nuts:
     if (ckWARN(WARN_CLOSED))
-	report_evil_fh(gv, io, optype);
+	report_evil_fh(gv, optype);
     SETERRNO(EBADF,SS_IVCHAN);
 nuts2:
     RETPUSHUNDEF;
@@ -2870,7 +2870,7 @@ PP(pp_stat)
 
 	if (PL_laststatval < 0) {
 	    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-		report_evil_fh(gv, GvIO(gv), PL_op->op_type);
+		report_evil_fh(gv, PL_op->op_type);
 	    max = 0;
 	}
     }
@@ -3444,7 +3444,7 @@ PP(pp_fttext)
 	else {
 	    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED)) {
 		gv = cGVOP_gv;
-		report_evil_fh(gv, GvIO(gv), PL_op->op_type);
+		report_evil_fh(gv, PL_op->op_type);
 	    }
 	    SETERRNO(EBADF,RMS_IFI);
 	    RETPUSHUNDEF;
@@ -3590,14 +3590,14 @@ PP(pp_chdir)
 	    }
 	    else {
 		if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-		    report_evil_fh(gv, io, PL_op->op_type);
+		    report_evil_fh(gv, PL_op->op_type);
 		SETERRNO(EBADF, RMS_IFI);
 		PUSHi(0);
 	    }
         }
 	else {
 	    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-		report_evil_fh(gv, io, PL_op->op_type);
+		report_evil_fh(gv, PL_op->op_type);
 	    SETERRNO(EBADF,RMS_IFI);
 	    PUSHi(0);
 	}

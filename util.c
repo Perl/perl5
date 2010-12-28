@@ -3882,12 +3882,13 @@ Perl_report_wrongway_fh(pTHX_ const GV *gv, char have)
 }
 
 void
-Perl_report_evil_fh(pTHX_ const GV *gv, const IO *io, I32 op)
+Perl_report_evil_fh(pTHX_ const GV *gv, I32 op)
 {
+    const IO *io = gv ? GvIO(gv) : NULL;
     const char *vile;
     I32 warn_type;
 
-    if (gv && io && IoTYPE(io) == IoTYPE_CLOSED) {
+    if (io && IoTYPE(io) == IoTYPE_CLOSED) {
 	vile = "closed";
 	warn_type = WARN_CLOSED;
     }
@@ -3909,7 +3910,7 @@ Perl_report_evil_fh(pTHX_ const GV *gv, const IO *io, I32 op)
 	     PL_op_desc[op]);
 	const char * const type =
 	    (const char *)
-	    (OP_IS_SOCKET(op) || (gv && io && IoTYPE(io) == IoTYPE_SOCKET)
+	    (OP_IS_SOCKET(op) || (io && IoTYPE(io) == IoTYPE_SOCKET)
 	     ? "socket" : "filehandle");
 	if (name && *name) {
 	    Perl_warner(aTHX_ packWARN(warn_type),
@@ -3924,7 +3925,7 @@ Perl_report_evil_fh(pTHX_ const GV *gv, const IO *io, I32 op)
 	else {
 	    Perl_warner(aTHX_ packWARN(warn_type),
 			"%s%s on %s %s", func, pars, vile, type);
-	    if (gv && io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
+	    if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
 		Perl_warner(
 			    aTHX_ packWARN(warn_type),
 			    "\t(Are you trying to call %s%s on dirhandle?)\n",
