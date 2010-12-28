@@ -18,7 +18,7 @@
 /* This tells where the first of these bits is.  Setting it to 0 saved cycles
  * and memory.  I (khw) think the code will work if changed back, but haven't
  * tested it */
-/* Make sure to update lib/re.pm when changing this! */
+/* Make sure to update ext/re/re.pm when changing this! */
 #ifndef RXf_PMf_STD_PMMOD_SHIFT /* Only expand #include of this file once */
 
 #define RXf_PMf_STD_PMMOD_SHIFT 0
@@ -36,6 +36,7 @@
 /* The character set for the regex is stored in a field of more than one bit
  * using an enum, for reasons of compactness and to ensure that the options are
  * mutually exclusive */
+/* Make sure to update ext/re/re.pm when changing this! */
 typedef enum {
     REGEX_DEPENDS_CHARSET = 0,
     REGEX_LOCALE_CHARSET,
