@@ -1533,11 +1533,11 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		    U8 * const r = reghop3((U8*)s, -1, (U8*)PL_bostr);
 		    tmp = utf8n_to_uvchr(r, UTF8SKIP(r), 0, UTF8_ALLOW_DEFAULT);
 		}
-		tmp = cBOOL(OP(c) == BOUND ?
+		tmp = cBOOL(FLAGS(c) != REGEX_LOCALE_CHARSET ?
 			isALNUM_uni(tmp) : isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp)));
 		LOAD_UTF8_CHARCLASS_ALNUM();
 		REXEC_FBC_UTF8_SCAN(
-		    if (tmp == !(OP(c) == BOUND ?
+		    if (tmp == !(FLAGS(c) != REGEX_LOCALE_CHARSET ?
 				 cBOOL(swash_fetch(PL_utf8_alnum, (U8*)s, utf8_target)) :
 				 isALNUM_LC_utf8((U8*)s)))
 		    {
@@ -1548,13 +1548,13 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    }
             else {  /* Not utf8 */
 		tmp = (s != PL_bostr) ? UCHARAT(s - 1) : '\n';
-                tmp = cBOOL((OP(c) == BOUNDL)
+                tmp = cBOOL((FLAGS(c) == REGEX_LOCALE_CHARSET)
                             ? isALNUM_LC(tmp)
                             : (isWORDCHAR_L1(tmp)
                                && (isASCII(tmp) || (FLAGS(c) == REGEX_UNICODE_CHARSET))));
 		REXEC_FBC_SCAN(
 		    if (tmp ==
-                        !((OP(c) == BOUNDL)
+                        !((FLAGS(c) == REGEX_LOCALE_CHARSET)
                           ? isALNUM_LC(*s)
                           : (isWORDCHAR_L1((U8) *s)
                              && (isASCII((U8) *s) || (FLAGS(c) == REGEX_UNICODE_CHARSET)))))
@@ -1578,11 +1578,11 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		    U8 * const r = reghop3((U8*)s, -1, (U8*)PL_bostr);
 		    tmp = utf8n_to_uvchr(r, UTF8SKIP(r), 0, UTF8_ALLOW_DEFAULT);
 		}
-		tmp = cBOOL(OP(c) == NBOUND ?
+		tmp = cBOOL(FLAGS(c) != REGEX_LOCALE_CHARSET ?
 			isALNUM_uni(tmp) : isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp)));
 		LOAD_UTF8_CHARCLASS_ALNUM();
 		REXEC_FBC_UTF8_SCAN(
-		    if (tmp == !(OP(c) == NBOUND ?
+		    if (tmp == !(FLAGS(c) != REGEX_LOCALE_CHARSET ?
 				 cBOOL(swash_fetch(PL_utf8_alnum, (U8*)s, utf8_target)) :
 				 isALNUM_LC_utf8((U8*)s)))
 			tmp = !tmp;
@@ -1591,13 +1591,13 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    }
 	    else {
 		tmp = (s != PL_bostr) ? UCHARAT(s - 1) : '\n';
-                tmp = cBOOL((OP(c) == NBOUNDL)
+                tmp = cBOOL((FLAGS(c) == REGEX_LOCALE_CHARSET)
                             ? isALNUM_LC(tmp)
                             : (isWORDCHAR_L1(tmp)
                                && (isASCII(tmp) || (FLAGS(c) == REGEX_UNICODE_CHARSET))));
 		REXEC_FBC_SCAN(
 		    if (tmp == ! cBOOL(
-                            (OP(c) == NBOUNDL)
+                            (FLAGS(c) == REGEX_LOCALE_CHARSET)
                             ? isALNUM_LC(*s)
                             : (isWORDCHAR_L1((U8) *s)
                                && (isASCII((U8) *s) || (FLAGS(c) == REGEX_UNICODE_CHARSET)))))
