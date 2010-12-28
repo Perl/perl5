@@ -1842,7 +1842,8 @@ PP(pp_send)
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    if (MARK == SP - 1) {
-		mXPUSHi(sv_len(*SP));
+		SV *sv = *SP;
+		mXPUSHi(sv_len(sv));
 		PUTBACK;
 	    }
 
