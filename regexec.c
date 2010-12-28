@@ -1533,8 +1533,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		    U8 * const r = reghop3((U8*)s, -1, (U8*)PL_bostr);
 		    tmp = utf8n_to_uvchr(r, UTF8SKIP(r), 0, UTF8_ALLOW_DEFAULT);
 		}
-		tmp = ((OP(c) == BOUND ?
-			isALNUM_uni(tmp) : isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp))) != 0);
+		tmp = cBOOL(OP(c) == BOUND ?
+			isALNUM_uni(tmp) : isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp)));
 		LOAD_UTF8_CHARCLASS_ALNUM();
 		REXEC_FBC_UTF8_SCAN(
 		    if (tmp == !(OP(c) == BOUND ?
@@ -1578,8 +1578,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		    U8 * const r = reghop3((U8*)s, -1, (U8*)PL_bostr);
 		    tmp = utf8n_to_uvchr(r, UTF8SKIP(r), 0, UTF8_ALLOW_DEFAULT);
 		}
-		tmp = ((OP(c) == NBOUND ?
-			isALNUM_uni(tmp) : isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp))) != 0);
+		tmp = cBOOL(OP(c) == NBOUND ?
+			isALNUM_uni(tmp) : isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp)));
 		LOAD_UTF8_CHARCLASS_ALNUM();
 		REXEC_FBC_UTF8_SCAN(
 		    if (tmp == !(OP(c) == NBOUND ?
