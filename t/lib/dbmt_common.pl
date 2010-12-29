@@ -217,7 +217,7 @@ EOM
 
     undef $X;
     untie(%h);
-    unlink "SubDB.pm", <dbhash_tmp.*>;
+    unlink "SubDB.pm", <dbhash_tmp*>;
 
 }
 
