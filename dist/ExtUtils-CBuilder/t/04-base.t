@@ -56,7 +56,11 @@ isa_ok( $base, 'ExtUtils::CBuilder::Base' );
     );
 }
 
+SKIP:
 {
+    skip "Base doesn't know about override on VMS", 1
+	if $^O eq 'VMS';
+
     my $path_to_perl = 'foobar';
     local $^X = $path_to_perl;
     # %Config is read-only.  We cannot assign to it and we therefore cannot
@@ -138,24 +142,30 @@ is( $base->object_file($source_file),
     "object_file(): got expected automatically assigned name for object file"
 );
 
-# object filename explicitly assigned
-$object_file = File::Spec->catfile('t', 'my_special_compilet.o' );
-is( $object_file,
-    $base->compile(
-        source      => $source_file,
-        object_file => $object_file,
-    ),
-    "compile(): returned object file with specified name"
-);
+SKIP:
+{
+    skip "Base can't do real compile and link on VMS", 2
+	if $^O eq 'VMS';
 
-$lib_file = $base->lib_file($object_file);
-ok( $lib_file, "lib_file() returned true value" );
+    # object filename explicitly assigned
+    $object_file = File::Spec->catfile('t', 'my_special_compilet.o' );
+    is( $object_file,
+        $base->compile(
+            source      => $source_file,
+            object_file => $object_file,
+        ),
+        "compile(): returned object file with specified name"
+    );
+
+    $lib_file = $base->lib_file($object_file);
+    ok( $lib_file, "lib_file() returned true value" );
+}
 
 my ($lib, @temps);
 SKIP:
 {
-    skip "Base can't link on Win32", 4
-	if $^O eq "MSWin32";
+    skip "Base can't link on Win32 or VMS", 4
+	if $^O eq "MSWin32" || $^O eq "VMS";
     ($lib, @temps) = $base->link(
 	objects     => $object_file,
 	module_name => 'compilet',
@@ -202,24 +212,30 @@ isa_ok( $base, 'ExtUtils::CBuilder::Base' );
 $source_file = File::Spec->catfile('t', 'compilet.c');
 create_c_source_file($source_file);
 ok(-e $source_file, "source file '$source_file' created");
-$object_file = File::Spec->catfile('t', 'my_special_compilet.o' );
-is( $object_file,
-    $base->compile(
-        source      => $source_file,
-        object_file => $object_file,
-        defines     => { alpha => 'beta', gamma => 'delta' },
-    ),
-    "compile() completed when 'defines' provided; returned object file with specified name"
-);
+SKIP:
+{
+    skip "Base can't do real compile and link on VMS", 2
+	if $^O eq 'VMS';
 
-my $exe_file = $base->exe_file($object_file);
-my $ext = $base->{config}{_exe};
-my $expected = File::Spec->catfile('t', qq|my_special_compilet$ext| );
-is(
-    $exe_file,
-    $expected,
-    "exe_file(): returned expected name of executable"
-);
+    $object_file = File::Spec->catfile('t', 'my_special_compilet.o' );
+    is( $object_file,
+        $base->compile(
+            source      => $source_file,
+            object_file => $object_file,
+            defines     => { alpha => 'beta', gamma => 'delta' },
+        ),
+        "compile() completed when 'defines' provided; returned object file with specified name"
+    );
+
+    my $exe_file = $base->exe_file($object_file);
+    my $ext = $base->{config}{_exe};
+    my $expected = File::Spec->catfile('t', qq|my_special_compilet$ext| );
+    is(
+        $exe_file,
+        $expected,
+        "exe_file(): returned expected name of executable"
+    );
+}
 
 my %args = ();
 my @defines = $base->arg_defines( %args );
@@ -324,7 +340,7 @@ is_deeply( \%split_seen, \%exp,
     touch_file($exporter);
     $rv = $base->perl_src();
     ok( -d $rv, "perl_src(): returned a directory" );
-    is( $rv, Cwd::realpath($subdir), "perl_src(): identified directory" );
+    is( uc($rv), uc(Cwd::realpath($subdir)), "perl_src(): identified directory" );
     is( $capture, q{}, "perl_src(): no warning, as expected" );
 
     chdir $cwd
@@ -391,6 +407,7 @@ is_deeply( $mksymlists_args,
 #####
 
 for ($source_file, $object_file, $lib_file) {
+  next unless defined $_;
   tr/"'//d; #"
   1 while unlink;
 }
