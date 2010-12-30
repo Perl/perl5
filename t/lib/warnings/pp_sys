@@ -131,19 +131,56 @@ Filehandle STDIN opened only for input at - line 5.
 use warnings 'closed' ;
 format STDIN =
 .
+format FOO =
+.
 close STDIN;
 write STDIN;
+write FOO;
 opendir STDIN, ".";
 write STDIN;
 closedir STDIN;
+opendir FOO, ".";
+write FOO;
+closedir FOO;
 no warnings 'closed' ;
 write STDIN;
+write FOO;
+opendir STDIN, ".";
+opendir FOO, ".";
+write STDIN;
+write FOO;
+EXPECT
+write() on closed filehandle STDIN at - line 8.
+write() on closed filehandle STDIN at - line 11.
+	(Are you trying to call write() on dirhandle STDIN?)
+########
+########
+# pp_sys.c [pp_leavewrite]
+use warnings 'unopened';
+format STDIN =
+.
+format FOO =
+.
+close STDIN;
+write STDIN;
+write FOO;
 opendir STDIN, ".";
 write STDIN;
+closedir STDIN;
+opendir FOO, ".";
+write FOO;
+closedir FOO;
+no warnings 'unopened';
+write STDIN;
+write FOO;
+opendir STDIN, ".";
+opendir FOO, ".";
+write STDIN;
+write FOO;
 EXPECT
-write() on closed filehandle STDIN at - line 6.
-write() on closed filehandle STDIN at - line 8.
-	(Are you trying to call write() on dirhandle STDIN?)
+write() on unopened filehandle FOO at - line 10.
+write() on unopened filehandle FOO at - line 15.
+	(Are you trying to call write() on dirhandle FOO?)
 ########
 # pp_sys.c [pp_leavewrite]
 use warnings 'io' ;

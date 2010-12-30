@@ -1449,7 +1449,7 @@ PP(pp_leavewrite)
     if (!fp) {
 	if (IoIFP(io))
 	    report_wrongway_fh(gv, '<');
-	else if (ckWARN(WARN_CLOSED))
+	else
 	    report_evil_fh(gv);
 	PUSHs(&PL_sv_no);
     }
