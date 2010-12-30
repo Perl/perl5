@@ -98,7 +98,7 @@ PP(pp_regcomp)
     STMT_START {				\
 	SvGETMAGIC(rx);				\
 	if (SvROK(rx) && SvAMAGIC(rx)) {	\
-	    SV *sv = AMG_CALLun(rx, regexp);	\
+	    SV *sv = AMG_CALLunary(rx, regexp_amg); \
 	    if (sv) {				\
 		if (SvROK(sv))			\
 		    sv = SvRV(sv);		\

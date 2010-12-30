@@ -2383,7 +2383,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
        * information by hand */
       SV *tmpRef = SvRV(left);
       SV *rv_copy;
-      if (SvREFCNT(tmpRef) > 1 && (rv_copy = AMG_CALLun(left,copy))) {
+      if (SvREFCNT(tmpRef) > 1 && (rv_copy = AMG_CALLunary(left,copy_amg))) {
 	  SvRV_set(left, rv_copy);
 	  SvSETMAGIC(left);
 	  SvREFCNT_dec(tmpRef);  

@@ -2299,7 +2299,7 @@ Perl_sv_2iv_flags(pTHX_ register SV *const sv, const I32 flags)
 		SV * tmpstr;
 		if (flags & SV_SKIP_OVERLOAD)
 		    return 0;
-		tmpstr=AMG_CALLun(sv,numer);
+		tmpstr = AMG_CALLunary(sv, numer_amg);
 		if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
 		    return SvIV(tmpstr);
 		}
@@ -2378,7 +2378,7 @@ Perl_sv_2uv_flags(pTHX_ register SV *const sv, const I32 flags)
 		SV *tmpstr;
 		if (flags & SV_SKIP_OVERLOAD)
 		    return 0;
-		tmpstr = AMG_CALLun(sv,numer);
+		tmpstr = AMG_CALLunary(sv, numer_amg);
 		if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
 		    return SvUV(tmpstr);
 		}
@@ -2452,7 +2452,7 @@ Perl_sv_2nv_flags(pTHX_ register SV *const sv, const I32 flags)
 		SV *tmpstr;
 		if (flags & SV_SKIP_OVERLOAD)
 		    return 0;
-		tmpstr = AMG_CALLun(sv,numer);
+		tmpstr = AMG_CALLunary(sv, numer_amg);
                 if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
 		    return SvNV(tmpstr);
 		}
@@ -2651,7 +2651,7 @@ Perl_sv_2num(pTHX_ register SV *const sv)
     if (!SvROK(sv))
 	return sv;
     if (SvAMAGIC(sv)) {
-	SV * const tmpsv = AMG_CALLun(sv,numer);
+	SV * const tmpsv = AMG_CALLunary(sv, numer_amg);
 	TAINT_IF(tmpsv && SvTAINTED(tmpsv));
 	if (tmpsv && (!SvROK(tmpsv) || (SvRV(tmpsv) != SvRV(sv))))
 	    return sv_2num(tmpsv);
@@ -2770,7 +2770,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 		SV *tmpstr;
 		if (flags & SV_SKIP_OVERLOAD)
 		    return NULL;
-		tmpstr = AMG_CALLun(sv,string);
+		tmpstr = AMG_CALLunary(sv, string_amg);
 		TAINT_IF(tmpstr && SvTAINTED(tmpstr));
 		if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
 		    /* Unwrap this:  */
@@ -3093,7 +3093,7 @@ Perl_sv_2bool_flags(pTHX_ register SV *const sv, const I32 flags)
 	return 0;
     if (SvROK(sv)) {
 	if (SvAMAGIC(sv)) {
-	    SV * const tmpsv = AMG_CALLun(sv,bool_);
+	    SV * const tmpsv = AMG_CALLunary(sv, bool__amg);
 	    if (tmpsv && (!SvROK(tmpsv) || (SvRV(tmpsv) != SvRV(sv))))
 		return cBOOL(SvTRUE(tmpsv));
 	}
@@ -7827,7 +7827,7 @@ Perl_sv_inc_nomg(pTHX_ register SV *const sv)
 	}
 	if (SvROK(sv)) {
 	    IV i;
-	    if (SvAMAGIC(sv) && AMG_CALLun(sv,inc))
+	    if (SvAMAGIC(sv) && AMG_CALLunary(sv, inc_amg))
 		return;
 	    i = PTR2IV(SvRV(sv));
 	    sv_unref(sv);
@@ -8008,7 +8008,7 @@ Perl_sv_dec_nomg(pTHX_ register SV *const sv)
 	}
 	if (SvROK(sv)) {
 	    IV i;
-	    if (SvAMAGIC(sv) && AMG_CALLun(sv,dec))
+	    if (SvAMAGIC(sv) && AMG_CALLunary(sv, dec_amg))
 		return;
 	    i = PTR2IV(SvRV(sv));
 	    sv_unref(sv);

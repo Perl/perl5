@@ -1868,7 +1868,7 @@ S_sv_i_ncmp(pTHX_ SV *const a, SV *const b)
 
 #define tryCALL_AMAGICbin(left,right,meth) \
     (SvAMAGIC(left)||SvAMAGIC(right)) \
-	? amagic_call(left, right, CAT2(meth,_amg), 0) \
+	? amagic_call(left, right, meth, 0) \
 	: NULL;
 
 #define SORT_NORMAL_RETURN_VALUE(val)  (((val) > 0) ? 1 : ((val) ? -1 : 0))
@@ -1877,7 +1877,7 @@ static I32
 S_amagic_ncmp(pTHX_ register SV *const a, register SV *const b)
 {
     dVAR;
-    SV * const tmpsv = tryCALL_AMAGICbin(a,b,ncmp);
+    SV * const tmpsv = tryCALL_AMAGICbin(a,b,ncmp_amg);
 
     PERL_ARGS_ASSERT_AMAGIC_NCMP;
 
@@ -1898,7 +1898,7 @@ static I32
 S_amagic_i_ncmp(pTHX_ register SV *const a, register SV *const b)
 {
     dVAR;
-    SV * const tmpsv = tryCALL_AMAGICbin(a,b,ncmp);
+    SV * const tmpsv = tryCALL_AMAGICbin(a,b,ncmp_amg);
 
     PERL_ARGS_ASSERT_AMAGIC_I_NCMP;
 
@@ -1919,7 +1919,7 @@ static I32
 S_amagic_cmp(pTHX_ register SV *const str1, register SV *const str2)
 {
     dVAR;
-    SV * const tmpsv = tryCALL_AMAGICbin(str1,str2,scmp);
+    SV * const tmpsv = tryCALL_AMAGICbin(str1,str2,scmp_amg);
 
     PERL_ARGS_ASSERT_AMAGIC_CMP;
 
@@ -1940,7 +1940,7 @@ static I32
 S_amagic_cmp_locale(pTHX_ register SV *const str1, register SV *const str2)
 {
     dVAR;
-    SV * const tmpsv = tryCALL_AMAGICbin(str1,str2,scmp);
+    SV * const tmpsv = tryCALL_AMAGICbin(str1,str2,scmp_amg);
 
     PERL_ARGS_ASSERT_AMAGIC_CMP_LOCALE;
 

@@ -425,8 +425,11 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 	    return NORMAL; \
     } STMT_END
 
-#define AMG_CALLun(sv,meth) \
-    amagic_call(sv,&PL_sv_undef, CAT2(meth,_amg), AMGf_noright | AMGf_unary)
+#define AMG_CALLunary(sv,meth) \
+    amagic_call(sv,&PL_sv_undef, meth, AMGf_noright | AMGf_unary)
+
+/* No longer used in core. Use AMG_CALLunary instead */
+#define AMG_CALLun(sv,meth) AMG_CALLunary(sv, CAT2(meth,_amg))
 
 #define tryAMAGICunTARGET(meth, shift)				\
     STMT_START {						\
@@ -438,7 +441,7 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 	    SV *tmpsv;						\
 	    SV *arg= sp[shift];					\
 	    if (SvAMAGIC(arg) &&				\
-		(tmpsv = amagic_call(arg, &PL_sv_undef, CAT2(meth,_amg), \
+		(tmpsv = amagic_call(arg, &PL_sv_undef, meth,   \
 				     AMGf_noright | AMGf_unary))) {	\
 		SPAGAIN;					\
 		sp += shift;					\

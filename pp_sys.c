@@ -358,7 +358,7 @@ PP(pp_glob)
 {
     dVAR;
     OP *result;
-    tryAMAGICunTARGET(iter, -1);
+    tryAMAGICunTARGET(iter_amg, -1);
 
     /* Note that we only ever get here if File::Glob fails to load
      * without at the same time croaking, for some reason, or if
