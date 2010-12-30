@@ -2500,8 +2500,7 @@ PP(pp_bind)
 	RETPUSHUNDEF;
 
 nuts:
-    if (ckWARN(WARN_CLOSED))
-	report_evil_fh(gv);
+    report_evil_fh(gv);
     SETERRNO(EBADF,SS_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2530,8 +2529,7 @@ PP(pp_connect)
 	RETPUSHUNDEF;
 
 nuts:
-    if (ckWARN(WARN_CLOSED))
-	report_evil_fh(gv);
+    report_evil_fh(gv);
     SETERRNO(EBADF,SS_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2556,8 +2554,7 @@ PP(pp_listen)
 	RETPUSHUNDEF;
 
 nuts:
-    if (ckWARN(WARN_CLOSED))
-	report_evil_fh(gv);
+    report_evil_fh(gv);
     SETERRNO(EBADF,SS_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2632,8 +2629,7 @@ PP(pp_accept)
     RETURN;
 
 nuts:
-    if (ckWARN(WARN_CLOSED))
-	report_evil_fh(ggv);
+    report_evil_fh(ggv);
     SETERRNO(EBADF,SS_IVCHAN);
 
 badexit:
@@ -2659,8 +2655,7 @@ PP(pp_shutdown)
     RETURN;
 
 nuts:
-    if (ckWARN(WARN_CLOSED))
-	report_evil_fh(gv);
+    report_evil_fh(gv);
     SETERRNO(EBADF,SS_IVCHAN);
     RETPUSHUNDEF;
 #else
@@ -2734,8 +2729,7 @@ PP(pp_ssockopt)
     RETURN;
 
 nuts:
-    if (ckWARN(WARN_CLOSED))
-	report_evil_fh(gv);
+    report_evil_fh(gv);
     SETERRNO(EBADF,SS_IVCHAN);
 nuts2:
     RETPUSHUNDEF;
@@ -2798,8 +2792,7 @@ PP(pp_getpeername)
     RETURN;
 
 nuts:
-    if (ckWARN(WARN_CLOSED))
-	report_evil_fh(gv);
+    report_evil_fh(gv);
     SETERRNO(EBADF,SS_IVCHAN);
 nuts2:
     RETPUSHUNDEF;

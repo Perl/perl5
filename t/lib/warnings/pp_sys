@@ -333,6 +333,28 @@ getsockopt STDIN, 1,2;
 getsockname STDIN;
 getpeername STDIN;
 closedir STDIN;
+send FOO, "fred", 1;
+bind FOO, "fred" ;
+connect FOO, "fred" ;
+listen FOO, 2;
+accept "fred", FOO;
+shutdown FOO, 0;
+setsockopt FOO, 1,2,3;
+getsockopt FOO, 1,2;
+getsockname FOO;
+getpeername FOO;
+opendir FOO, ".";
+send FOO, "fred", 1;
+bind FOO, "fred" ;
+connect FOO, "fred" ;
+listen FOO, 2;
+accept "fred", FOO;
+shutdown FOO, 0;
+setsockopt FOO, 1,2,3;
+getsockopt FOO, 1,2;
+getsockname FOO;
+getpeername FOO;
+closedir FOO;
 no warnings 'closed';
 send STDIN, "fred", 1;
 bind STDIN, "fred" ;
@@ -355,6 +377,27 @@ setsockopt STDIN, 1,2,3;
 getsockopt STDIN, 1,2;
 getsockname STDIN;
 getpeername STDIN;
+send FOO, "fred", 1;
+bind FOO, "fred" ;
+connect FOO, "fred" ;
+listen FOO, 2;
+accept FOO, "fred" ;
+shutdown FOO, 0;
+setsockopt FOO, 1,2,3;
+getsockopt FOO, 1,2;
+getsockname FOO;
+getpeername FOO;
+opendir FOO, ".";
+send FOO, "fred", 1;
+bind FOO, "fred" ;
+connect FOO, "fred" ;
+listen FOO, 2;
+accept "fred", FOO;
+shutdown FOO, 0;
+setsockopt FOO, 1,2,3;
+getsockopt FOO, 1,2;
+getsockname FOO;
+getpeername FOO;
 EXPECT
 send() on closed socket STDIN at - line 22.
 bind() on closed socket STDIN at - line 23.
@@ -386,6 +429,146 @@ getsockname() on closed socket STDIN at - line 41.
 	(Are you trying to call getsockname() on dirhandle STDIN?)
 getpeername() on closed socket STDIN at - line 42.
 	(Are you trying to call getpeername() on dirhandle STDIN?)
+########
+# pp_sys.c [pp_prtf pp_send pp_bind pp_connect pp_listen pp_accept pp_shutdown pp_ssockopt ppp_getpeername]
+use warnings 'unopened';
+use Config; 
+BEGIN { 
+  if ( $^O ne 'VMS' and ! $Config{d_socket}) {
+    print <<EOM ;
+SKIPPED
+# send not present
+# bind not present
+# connect not present
+# accept not present
+# shutdown not present
+# setsockopt not present
+# getsockopt not present
+# getsockname not present
+# getpeername not present
+EOM
+    exit ;
+  } 
+}
+close STDIN; 
+send STDIN, "fred", 1;
+bind STDIN, "fred" ;
+connect STDIN, "fred" ;
+listen STDIN, 2;
+accept "fred", STDIN;
+shutdown STDIN, 0;
+setsockopt STDIN, 1,2,3;
+getsockopt STDIN, 1,2;
+getsockname STDIN;
+getpeername STDIN;
+opendir STDIN, ".";
+send STDIN, "fred", 1;
+bind STDIN, "fred" ;
+connect STDIN, "fred" ;
+listen STDIN, 2;
+accept "fred", STDIN;
+shutdown STDIN, 0;
+setsockopt STDIN, 1,2,3;
+getsockopt STDIN, 1,2;
+getsockname STDIN;
+getpeername STDIN;
+closedir STDIN;
+send FOO, "fred", 1;
+bind FOO, "fred" ;
+connect FOO, "fred" ;
+listen FOO, 2;
+accept "fred", FOO;
+shutdown FOO, 0;
+setsockopt FOO, 1,2,3;
+getsockopt FOO, 1,2;
+getsockname FOO;
+getpeername FOO;
+opendir FOO, ".";
+send FOO, "fred", 1;
+bind FOO, "fred" ;
+connect FOO, "fred" ;
+listen FOO, 2;
+accept "fred", FOO;
+shutdown FOO, 0;
+setsockopt FOO, 1,2,3;
+getsockopt FOO, 1,2;
+getsockname FOO;
+getpeername FOO;
+closedir FOO;
+no warnings 'unopened';
+send STDIN, "fred", 1;
+bind STDIN, "fred" ;
+connect STDIN, "fred" ;
+listen STDIN, 2;
+accept STDIN, "fred" ;
+shutdown STDIN, 0;
+setsockopt STDIN, 1,2,3;
+getsockopt STDIN, 1,2;
+getsockname STDIN;
+getpeername STDIN;
+opendir STDIN, ".";
+send STDIN, "fred", 1;
+bind STDIN, "fred" ;
+connect STDIN, "fred" ;
+listen STDIN, 2;
+accept "fred", STDIN;
+shutdown STDIN, 0;
+setsockopt STDIN, 1,2,3;
+getsockopt STDIN, 1,2;
+getsockname STDIN;
+getpeername STDIN;
+send FOO, "fred", 1;
+bind FOO, "fred" ;
+connect FOO, "fred" ;
+listen FOO, 2;
+accept FOO, "fred" ;
+shutdown FOO, 0;
+setsockopt FOO, 1,2,3;
+getsockopt FOO, 1,2;
+getsockname FOO;
+getpeername FOO;
+opendir FOO, ".";
+send FOO, "fred", 1;
+bind FOO, "fred" ;
+connect FOO, "fred" ;
+listen FOO, 2;
+accept "fred", FOO;
+shutdown FOO, 0;
+setsockopt FOO, 1,2,3;
+getsockopt FOO, 1,2;
+getsockname FOO;
+getpeername FOO;
+EXPECT
+send() on unopened socket FOO at - line 44.
+bind() on unopened socket FOO at - line 45.
+connect() on unopened socket FOO at - line 46.
+listen() on unopened socket FOO at - line 47.
+accept() on unopened socket FOO at - line 48.
+shutdown() on unopened socket FOO at - line 49.
+setsockopt() on unopened socket FOO at - line 50.
+getsockopt() on unopened socket FOO at - line 51.
+getsockname() on unopened socket FOO at - line 52.
+getpeername() on unopened socket FOO at - line 53.
+send() on unopened socket FOO at - line 55.
+	(Are you trying to call send() on dirhandle FOO?)
+bind() on unopened socket FOO at - line 56.
+	(Are you trying to call bind() on dirhandle FOO?)
+connect() on unopened socket FOO at - line 57.
+	(Are you trying to call connect() on dirhandle FOO?)
+listen() on unopened socket FOO at - line 58.
+	(Are you trying to call listen() on dirhandle FOO?)
+accept() on unopened socket FOO at - line 59.
+	(Are you trying to call accept() on dirhandle FOO?)
+shutdown() on unopened socket FOO at - line 60.
+	(Are you trying to call shutdown() on dirhandle FOO?)
+setsockopt() on unopened socket FOO at - line 61.
+	(Are you trying to call setsockopt() on dirhandle FOO?)
+getsockopt() on unopened socket FOO at - line 62.
+	(Are you trying to call getsockopt() on dirhandle FOO?)
+getsockname() on unopened socket FOO at - line 63.
+	(Are you trying to call getsockname() on dirhandle FOO?)
+getpeername() on unopened socket FOO at - line 64.
+	(Are you trying to call getpeername() on dirhandle FOO?)
 ########
 # pp_sys.c [pp_stat]
 use warnings 'newline' ;
