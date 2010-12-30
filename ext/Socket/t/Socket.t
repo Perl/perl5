@@ -186,7 +186,7 @@ if($Config{d_inetntop} && $Config{d_inetaton}){
 }
 
 if(defined eval { AF_INET6() } ) {
-   my $sin6 = pack_sockaddr_in6(0x1234, "0123456789abcdef", 567, 89);
+   my $sin6 = pack_sockaddr_in6(0x1234, "0123456789abcdef", 0, 89);
 
    print "not " unless sockaddr_family($sin6) == AF_INET6;
    print "ok 22\n";
@@ -197,7 +197,7 @@ if(defined eval { AF_INET6() } ) {
    print "not " unless (unpack_sockaddr_in6($sin6))[1] == "0123456789abcdef";
    print "ok 24\n";
 
-   print "not " unless (unpack_sockaddr_in6($sin6))[2] == 567;
+   print "not " unless (unpack_sockaddr_in6($sin6))[2] == 0;
    print "ok 25\n";
 
    print "not " unless (unpack_sockaddr_in6($sin6))[3] == 89;
