@@ -674,6 +674,10 @@ pack_sockaddr_in6(port, sin6_addr, scope_id=0, flowinfo=0)
 	Copy(addrbytes, &sin6.sin6_addr, sizeof(sin6.sin6_addr), char);
 #  ifdef HAS_SIN6_SCOPE_ID
 	sin6.sin6_scope_id = scope_id;
+#  else
+	if(scope_id != 0)
+	    warn("%s cannot represent non-zero scope_id %d",
+	         "Socket::pack_sockaddr_in6", scope_id);
 #  endif
 #  ifdef HAS_SOCKADDR_SA_LEN
 	sin6.sin6_len = sizeof(sin6);
