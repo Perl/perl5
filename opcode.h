@@ -1037,7 +1037,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_socket,
 	Perl_pp_sockpair,
 	Perl_pp_bind,
-	Perl_pp_connect,
+	Perl_pp_bind,	/* Perl_pp_connect */
 	Perl_pp_listen,
 	Perl_pp_accept,
 	Perl_pp_shutdown,

@@ -110,6 +110,7 @@ my @raw_alias = (
 		 Perl_pp_trans => [qw(trans transr)],
 		 Perl_pp_chop => [qw(chop chomp)],
 		 Perl_pp_schop => [qw(schop schomp)],
+		 Perl_pp_bind => ['connect'],
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {

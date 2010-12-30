@@ -1133,6 +1133,11 @@ PP(pp_chomp)
     return Perl_pp_chop(aTHX);
 }
 
+PP(pp_connect)
+{
+    return Perl_pp_bind(aTHX);
+}
+
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {

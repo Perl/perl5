@@ -2488,13 +2488,17 @@ PP(pp_bind)
     GV * const gv = MUTABLE_GV(POPs);
     register IO * const io = GvIOn(gv);
     STRLEN len;
+    const int op_type = PL_op->op_type;
 
     if (!io || !IoIFP(io))
 	goto nuts;
 
     addr = SvPV_const(addrsv, len);
-    TAINT_PROPER("bind");
-    if (PerlSock_bind(PerlIO_fileno(IoIFP(io)), (struct sockaddr *)addr, len) >= 0)
+    TAINT_PROPER(PL_op_desc[op_type]);
+    if ((op_type == OP_BIND
+	 ? PerlSock_bind(PerlIO_fileno(IoIFP(io)), (struct sockaddr *)addr, len)
+	 : PerlSock_connect(PerlIO_fileno(IoIFP(io)), (struct sockaddr *)addr, len))
+	>= 0)
 	RETPUSHYES;
     else
 	RETPUSHUNDEF;
@@ -2504,36 +2508,7 @@ nuts:
     SETERRNO(EBADF,SS_IVCHAN);
     RETPUSHUNDEF;
 #else
-    DIE(aTHX_ PL_no_sock_func, "bind");
-#endif
-}
-
-PP(pp_connect)
-{
-#ifdef HAS_SOCKET
-    dVAR; dSP;
-    SV * const addrsv = POPs;
-    GV * const gv = MUTABLE_GV(POPs);
-    register IO * const io = GvIOn(gv);
-    const char *addr;
-    STRLEN len;
-
-    if (!io || !IoIFP(io))
-	goto nuts;
-
-    addr = SvPV_const(addrsv, len);
-    TAINT_PROPER("connect");
-    if (PerlSock_connect(PerlIO_fileno(IoIFP(io)), (struct sockaddr *)addr, len) >= 0)
-	RETPUSHYES;
-    else
-	RETPUSHUNDEF;
-
-nuts:
-    report_evil_fh(gv);
-    SETERRNO(EBADF,SS_IVCHAN);
-    RETPUSHUNDEF;
-#else
-    DIE(aTHX_ PL_no_sock_func, "connect");
+    DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
 #endif
 }
 
