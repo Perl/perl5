@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 338;
+plan tests => 339;
 
 $| = 1;
 
@@ -1444,6 +1444,32 @@ end
     ok(! tainted($a), "regex optimization of single char /[]/i doesn't taint");
     ok(! tainted($b), "regex optimization of single char /[]/i doesn't taint");
 }
+
+{
+    # RT 81230: tainted value during FETCH created extra ref to tied obj
+
+    package P81230;
+    use warnings;
+
+    my %h;
+
+    sub TIEHASH {
+	my $x = $^X; # tainted
+	bless  \$x;
+    }
+    sub FETCH { my $x = $_[0]; $$x . "" }
+
+    tie %h, 'P81230';
+
+    my $w = "";
+    local $SIG{__WARN__} = sub { $w .= "@_" };
+
+    untie %h if $h{"k"};
+
+    ::is($w, "", "RT 81230");
+}
+
+
 
 # This may bomb out with the alarm signal so keep it last
 SKIP: {

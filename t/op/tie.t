@@ -962,3 +962,36 @@ EXPECT
 ok tie
 ok tied
 ok untie
+########
+#
+# STORE freeing tie'd AV
+sub TIEARRAY  { bless [] }
+sub STORE     { *a = []; 1 }
+sub STORESIZE { }
+sub EXTEND    { }
+tie @a, 'main';
+$a[0] = 1;
+EXPECT
+########
+#
+# CLEAR freeing tie'd AV
+sub TIEARRAY  { bless [] }
+sub CLEAR     { *a = []; 1 }
+sub STORESIZE { }
+sub EXTEND    { }
+sub STORE     { }
+tie @a, 'main';
+@a = (1,2,3);
+EXPECT
+########
+#
+# FETCHSIZE freeing tie'd AV
+sub TIEARRAY  { bless [] }
+sub FETCHSIZE { *a = []; 100 }
+sub STORESIZE { }
+sub EXTEND    { }
+sub STORE     { }
+tie @a, 'main';
+print $#a,"\n"
+EXPECT
+99

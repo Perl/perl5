@@ -95,6 +95,10 @@ S_save_magic(pTHX_ I32 mgs_ix, SV *sv)
 
     PERL_ARGS_ASSERT_SAVE_MAGIC;
 
+    /* guard against sv having being freed midway by holding a private
+       reference. */
+    SvREFCNT_inc_simple_void_NN(sv);
+
     assert(SvMAGICAL(sv));
     /* Turning READONLY off for a copy-on-write scalar (including shared
        hash keys) is a bad idea.  */
@@ -199,22 +203,10 @@ Perl_mg_get(pTHX_ SV *sv)
 {
     dVAR;
     const I32 mgs_ix = SSNEW(sizeof(MGS));
-    const bool was_temp = cBOOL(SvTEMP(sv));
     bool have_new = 0;
     MAGIC *newmg, *head, *cur, *mg;
-    /* guard against sv having being freed midway by holding a private
-       reference. */
 
     PERL_ARGS_ASSERT_MG_GET;
-
-    /* sv_2mortal has this side effect of turning on the TEMP flag, which can
-       cause the SV's buffer to get stolen (and maybe other stuff).
-       So restore it.
-    */
-    sv_2mortal(SvREFCNT_inc_simple_NN(sv));
-    if (!was_temp) {
-	SvTEMP_off(sv);
-    }
 
     save_magic(mgs_ix, sv);
 
@@ -264,12 +256,6 @@ Perl_mg_get(pTHX_ SV *sv)
     }
 
     restore_magic(INT2PTR(void *, (IV)mgs_ix));
-
-    if (SvREFCNT(sv) == 1) {
-	/* We hold the last reference to this SV, which implies that the
-	   SV was deleted as a side effect of the routines we called.  */
-	SvOK_off(sv);
-    }
     return 0;
 }
 
@@ -3168,7 +3154,21 @@ S_restore_magic(pTHX_ const void *p)
         assert((popval & SAVE_MASK) == SAVEt_ALLOC);
         PL_savestack_ix -= popval >> SAVE_TIGHT_SHIFT;
     }
-
+    if (SvREFCNT(sv) == 1) {
+	/* We hold the last reference to this SV, which implies that the
+	   SV was deleted as a side effect of the routines we called.
+	   So artificially keep it alive a bit longer.
+	   We avoid turning on the TEMP flag, which can cause the SV's
+	   buffer to get stolen (and maybe other stuff). */
+	int was_temp = SvTEMP(sv);
+	sv_2mortal(sv);
+	if (!was_temp) {
+	    SvTEMP_off(sv);
+	}
+	SvOK_off(sv);
+    }
+    else
+	SvREFCNT_dec(sv); /* undo the inc in S_save_magic() */
 }
 
 /* clean up the mess created by Perl_sighandler().
