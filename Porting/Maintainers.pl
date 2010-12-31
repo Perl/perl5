@@ -48,6 +48,7 @@ use File::Glob qw(:case);
     'laun'	=> 'Wolfgang Laun <Wolfgang.Laun@alcatel.at>',
     'lstein'	=> 'Lincoln D. Stein <lds@cpan.org>',
     'lwall'	=> 'Larry Wall <lwall@cpan.org>',
+    'makamaka'	=> 'Makamaka Hannyaharamitu <makamaka@cpan.org>',
     'marekr'	=> 'Marek Rouchal <marekr@cpan.org>',
     'markm'	=> 'Mark Mielke <markm@cpan.org>',
     'mhx'	=> 'Marcus Holland-Moritz <mhx@cpan.org>',
@@ -831,6 +832,17 @@ use File::Glob qw(:case);
 	'DISTRIBUTION'	=> 'MHX/IPC-SysV-2.03.tar.gz',
 	'FILES'		=> q[cpan/IPC-SysV],
 	'EXCLUDED'	=> [ qw{const-c.inc const-xs.inc} ],
+	'UPSTREAM'	=> 'cpan',
+	},
+
+    'JSON::PP' =>
+	{
+	'MAINTAINER'	=> 'makamaka',
+	'DISTRIBUTION'	=> 'MAKAMAKA/JSON-PP-2.27103.tar.gz',
+	'FILES'		=> q[cpan/JSON-PP],
+	'EXCLUDED'	=> [
+		't/900_pod.t',    # Pod testing
+	],
 	'UPSTREAM'	=> 'cpan',
 	},
 

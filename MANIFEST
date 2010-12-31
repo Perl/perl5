@@ -1208,6 +1208,43 @@ cpan/IPC-SysV/t/pod.t			IPC::SysV test file
 cpan/IPC-SysV/t/sem.t			IPC::SysV test file
 cpan/IPC-SysV/t/shm.t			IPC::SysV test file
 cpan/IPC-SysV/typemap			IPC::SysV typemap
+cpan/JSON-PP/bin/json_pp
+cpan/JSON-PP/lib/JSON/PP/Boolean.pm
+cpan/JSON-PP/lib/JSON/PP.pm
+cpan/JSON-PP/t/000_load.t
+cpan/JSON-PP/t/001_utf8.t
+cpan/JSON-PP/t/002_error.t
+cpan/JSON-PP/t/003_types.t
+cpan/JSON-PP/t/006_pc_pretty.t
+cpan/JSON-PP/t/007_pc_esc.t
+cpan/JSON-PP/t/008_pc_base.t
+cpan/JSON-PP/t/009_pc_extra_number.t
+cpan/JSON-PP/t/010_pc_keysort.t
+cpan/JSON-PP/t/011_pc_expo.t
+cpan/JSON-PP/t/012_blessed.t
+cpan/JSON-PP/t/013_limit.t
+cpan/JSON-PP/t/014_latin1.t
+cpan/JSON-PP/t/015_prefix.t
+cpan/JSON-PP/t/016_tied.t
+cpan/JSON-PP/t/017_relaxed.t
+cpan/JSON-PP/t/018_json_checker.t
+cpan/JSON-PP/t/019_incr.t
+cpan/JSON-PP/t/020_unknown.t
+cpan/JSON-PP/t/021_evans_bugrep.t
+cpan/JSON-PP/t/022_comment_at_eof.t
+cpan/JSON-PP/t/099_binary.t
+cpan/JSON-PP/t/104_sortby.t
+cpan/JSON-PP/t/105_esc_slash.t
+cpan/JSON-PP/t/106_allow_barekey.t
+cpan/JSON-PP/t/107_allow_singlequote.t
+cpan/JSON-PP/t/108_decode.t
+cpan/JSON-PP/t/109_encode.t
+cpan/JSON-PP/t/110_bignum.t
+cpan/JSON-PP/t/112_upgrade.t
+cpan/JSON-PP/t/113_overloaded_eq.t
+cpan/JSON-PP/t/114_decode_prefix.t
+cpan/JSON-PP/t/115_tie_ixhash.t
+cpan/JSON-PP/t/_unicode_handling.pm
 cpan/libnet/Changes		libnet
 cpan/libnet/Config.eg		libnet
 cpan/libnet/demos/ftp		libnet
@@ -4958,6 +4995,7 @@ utils/enc2xs.PL			Encode module generator
 utils/h2ph.PL			A thing to turn C .h files into perl .ph files
 utils/h2xs.PL			Program to make .xs files from C header files
 utils/instmodsh.PL		Give information about installed extensions
+utils/json_pp.PL		JSON::PP command line utility
 utils/libnetcfg.PL		libnet
 utils.lst			Lists utilities bundled with Perl
 utils/Makefile			Pregenerated from utils/Makefile.SH

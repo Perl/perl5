@@ -210,6 +210,8 @@
 /IPC/Semaphore.pm
 /IPC/SharedMem.pm
 /IPC/SysV.pm
+/JSON/PP.pm
+/JSON/PP/Boolean.pm
 /Getopt/Long.pm
 /List
 /Locale
