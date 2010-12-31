@@ -6300,8 +6300,18 @@ PP(pp_lock)
 PP(unimplemented_op)
 {
     dVAR;
-    DIE(aTHX_ "panic: unimplemented op %s (#%d) called", OP_NAME(PL_op),
-	PL_op->op_type);
+    const Optype op_type = PL_op->op_type;
+    /* Using OP_NAME() isn't going to be helpful here. Firstly, it doesn't cope
+       with out of range op numbers - it only "special" cases op_custom.
+       Secondly, as the three ops we "panic" on are padmy, mapstart and custom,
+       if we get here for a custom op then that means that the custom op didn't
+       have an implementation. Given that OP_NAME() looks up the custom op
+       by its pp_addr, likely it will return NULL, unless someone (unhelpfully)
+       registers &PL_unimplemented_op as the address of their custom op.
+       NULL doesn't generate a useful error message. "custom" does. */
+    const char *const name = op_type >= OP_max
+	? "[out of range]" : PL_op_name[PL_op->op_type];
+    DIE(aTHX_ "panic: unimplemented op %s (#%d) called", name,	op_type);
 }
 
 PP(pp_boolkeys)
