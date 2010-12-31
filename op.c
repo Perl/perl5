@@ -7663,20 +7663,30 @@ Perl_ck_glob(pTHX_ OP *o)
     }
 #endif /* PERL_EXTERNAL_GLOB */
 
+    assert(!(o->op_flags & OPf_SPECIAL));
     if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) {
+	/* convert
+	 *     glob
+	 *       \ null - const(wildcard)
+	 * into
+	 *     null
+	 *       \ enter
+	 *            \ list
+	 *                 \ mark - glob - rv2cv
+	 *                             |        \ gv(CORE::GLOBAL::glob)
+	 *                             |
+	 *                              \ null - const(wildcard) - const(ix)
+	 */
+	o->op_flags |= OPf_SPECIAL;
 	op_append_elem(OP_GLOB, o,
 		    newSVOP(OP_CONST, 0, newSViv(PL_glob_index++)));
-	o->op_type = OP_LIST;
-	o->op_ppaddr = PL_ppaddr[OP_LIST];
-	cLISTOPo->op_first->op_type = OP_PUSHMARK;
-	cLISTOPo->op_first->op_ppaddr = PL_ppaddr[OP_PUSHMARK];
-	cLISTOPo->op_first->op_targ = 0;
+	o = newLISTOP(OP_LIST, 0, o, NULL);
 	o = newUNOP(OP_ENTERSUB, OPf_STACKED,
 		    op_append_elem(OP_LIST, o,
 				scalar(newUNOP(OP_RV2CV, 0,
 					       newGVOP(OP_GV, 0, gv)))));
 	o = newUNOP(OP_NULL, 0, ck_subr(o));
-	o->op_targ = OP_GLOB;		/* hint at what it used to be */
+	o->op_targ = OP_GLOB; /* hint at what it used to be: eg in newWHILEOP */
 	return o;
     }
     gv = newGVgen("main");

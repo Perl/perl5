@@ -358,6 +358,16 @@ PP(pp_glob)
 {
     dVAR;
     OP *result;
+
+    if (PL_op->op_flags & OPf_SPECIAL) {
+	/* call Perl-level glob function instead. Stack args are:
+	 * MARK, wildcard, csh_glob context index
+	 * and following OPs should be: gv(CORE::GLOBAL::glob), entersub
+	 * */
+	return NORMAL;
+    }
+    /* stack args are: wildcard, gv(_GEN_n) */
+
     tryAMAGICunTARGET(iter_amg, -1);
 
     /* Note that we only ever get here if File::Glob fails to load
