@@ -915,6 +915,35 @@ deleted or modified. Think long and hard about whether you want to push
 a local tag to perl.git before doing so. (Pushing unannotated tags is
 not allowed.)
 
+=head1 Committing to blead
+
+If you are a committer, you have the right to commit changes directly to
+the 'blead' branch, which will become the next production release of Perl.
+
+Before pushing I<any> local change to blead, it's incredibly important
+that you do a few things, lest other committers come after you with
+pitchforks and torches:
+
+=over
+
+=item *
+
+Make sure you have a good commit message. See </Commit message> elsewhere in
+this document
+
+=item *
+
+Run the test suite.  You might not think that one typo fix would break
+a test file. You'd be wrong
+
+=item *
+
+If you don't run the full test suite, at least C<make test_porting>.
+This will run basic sanity checks. To see which sanity checks, have a
+look in F<t/porting>.
+
+=back
+
 =head1 Committing to maintenance versions
 
 Maintenance versions should only be altered to add critical bug fixes,
@@ -933,6 +962,9 @@ You can also cherry-pick commits from blead and another branch, by
 using the C<git cherry-pick> command. It is recommended to use the
 B<-x> option to C<git cherry-pick> in order to record the SHA1 of the
 original commit in the new commit message.
+
+Before pushing any change to a maint version, make sure you've satisfied
+the steps in L</Committing to blead> above.
 
 =head1 Grafts
 
