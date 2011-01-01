@@ -100,7 +100,7 @@ generation task.
 
 =item *
 
-C<Encode> has been upgraded from version 2.40 to 2.41
+C<Encode> has been upgraded from version 2.40 to 2.42
 
 =item *
 

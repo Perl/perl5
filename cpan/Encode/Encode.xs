@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.19 2010/09/18 18:39:51 dankogai Exp $
+ $Id: Encode.xs,v 2.20 2010/12/31 22:48:48 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -29,7 +29,12 @@
 UNIMPLEMENTED(_encoded_utf8_to_bytes, I32)
 UNIMPLEMENTED(_encoded_bytes_to_utf8, I32)
 
-#define UTF8_ALLOW_STRICT 0
+#ifdef UTF8_DISALLOW_ILLEGAL_INTERCHANGE
+#   define UTF8_ALLOW_STRICT UTF8_DISALLOW_ILLEGAL_INTERCHANGE
+#else
+#   define UTF8_ALLOW_STRICT 0
+#endif
+
 #define UTF8_ALLOW_NONSTRICT (UTF8_ALLOW_ANY &                    \
                               ~(UTF8_ALLOW_CONTINUATION |         \
                                 UTF8_ALLOW_NON_CONTINUATION |     \
