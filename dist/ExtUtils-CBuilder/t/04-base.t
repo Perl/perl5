@@ -85,7 +85,7 @@ SKIP:
 
 {
     $cwd = cwd();
-    my $tdir = tempdir();
+    my $tdir = tempdir(CLEANUP => 1);
     chdir $tdir;
     $base = ExtUtils::CBuilder::Base->new();
     ok( $base, "ExtUtils::CBuilder::Base->new() returned true value" );
@@ -297,7 +297,7 @@ is_deeply( \%split_seen, \%exp,
 
 {
     $cwd = cwd();
-    my $tdir = tempdir();
+    my $tdir = tempdir(CLEANUP => 1);
     my $subdir = File::Spec->catdir(
         $tdir, qw| alpha beta gamma delta epsilon 
             zeta eta theta iota kappa lambda |
