@@ -1521,12 +1521,9 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'drolsky',
 	'DISTRIBUTION'	=> 'FLORA/Time-Local-1.2000.tar.gz',
-	'FILES'		=> q[ext/Time-Local],
+	'FILES'		=> q[cpan/Time-Local],
 	'EXCLUDED'	=> [ qw(t/pod-coverage.t t/pod.t) ],
-	'UPSTREAM'	=> 'blead',
-	# Currently Time::Local is no longer backwards compatible with Pre-5.11 perls
-	# the version in core has now deviated from the CPAN version. To re-dual-life
-	# this module, we'll need to rewrite a hybrid version
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'Time::Piece' =>

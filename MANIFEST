@@ -2369,6 +2369,8 @@ cpan/Time-HiRes/HiRes.xs		Time::HiRes extension
 cpan/Time-HiRes/Makefile.PL		Time::HiRes extension
 cpan/Time-HiRes/t/HiRes.t		Test for Time::HiRes
 cpan/Time-HiRes/typemap			Time::HiRes extension
+cpan/Time-Local/lib/Time/Local.pm	Reverse translation of localtime, gmtime
+cpan/Time-Local/t/Local.t		See if Time::Local works
 cpan/Time-Piece/Changes		Time::Piece extension
 cpan/Time-Piece/Makefile.PL	Time::Piece extension
 cpan/Time-Piece/Piece.pm	Time::Piece extension
@@ -3430,8 +3432,6 @@ ext/Tie-Hash-NamedCapture/NamedCapture.pm	Implements %- and %+ behaviour
 ext/Tie-Hash-NamedCapture/NamedCapture.xs	Implements %- and %+ behaviour
 ext/Tie-Memoize/lib/Tie/Memoize.pm	Base class for memoized tied hashes
 ext/Tie-Memoize/t/Tie-Memoize.t		Test for Tie::Memoize
-ext/Time-Local/lib/Time/Local.pm	Reverse translation of localtime, gmtime
-ext/Time-Local/t/Local.t		See if Time::Local works
 ext/VMS-DCLsym/0README.txt	ReadMe file for VMS::DCLsym
 ext/VMS-DCLsym/DCLsym.pm	Perl access to CLI symbols
 ext/VMS-DCLsym/DCLsym.xs	Perl access to CLI symbols
