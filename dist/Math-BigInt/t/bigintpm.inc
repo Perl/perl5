@@ -1704,13 +1704,13 @@ abc:5:NaN
 # bmodinv Expected Results from normal use
 1:5:1
 3:5:2
+3:-5:-3
 -2:5:2
 8:5033:4404
 1234567891:13:6
 -1234567891:13:7
 324958749843759385732954874325984357439658735983745:2348249874968739:1741662881064902
 ## bmodinv Error cases / useless use of function
-3:-5:NaN
 inf:5:NaN
 5:inf:NaN
 -inf:5:NaN

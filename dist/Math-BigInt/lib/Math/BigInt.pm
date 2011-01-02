@@ -1785,10 +1785,12 @@ sub bmod
 
 sub bmodinv
   {
-  # Modular inverse.  given a number which is (hopefully) relatively
-  # prime to the modulus, calculate its inverse using Euclid's
-  # algorithm.  If the number is not relatively prime to the modulus
-  # (i.e. their gcd is not one) then NaN is returned.
+  # Return modular multiplicative inverse: z is the modular inverse of x (mod
+  # y) if and only if x*z (mod y) = 1 (mod y). If the modulus y is larger than
+  # one, x and z are relative primes (i.e., their greatest common divisor is
+  # one).
+  #
+  # If no modular multiplicative inverse exists, NaN is returned.
 
   # set up parameters
   my ($self,$x,$y,@r) = (undef,@_);
@@ -1800,22 +1802,58 @@ sub bmodinv
 
   return $x if $x->modify('bmodinv');
 
-  return $x->bnan()
-        if ($y->{sign} ne '+'                           # -, NaN, +inf, -inf
-         || $x->is_zero()                               # or num == 0
-         || $x->{sign} !~ /^[+-]$/                      # or num NaN, inf, -inf
-        );
+  # Return NaN if one or both arguments is +inf, -inf, or nan.
 
-  # put least residue into $x if $x was negative, and thus make it positive
-  $x->bmod($y) if $x->{sign} eq '-';
+  return $x->bnan() if ($y->{sign} !~ /^[+-]$/ ||
+                        $x->{sign} !~ /^[+-]$/);
 
-  my $sign;
-  ($x->{value},$sign) = $CALC->_modinv($x->{value},$y->{value});
-  return $x->bnan() if !defined $x->{value};		# in case no GCD found
-  return $x if !defined $sign;			# already real result
-  $x->{sign} = $sign;				# flip/flop see below
-  $x->bmod($y);					# calc real result
-  $x;
+  # Return NaN if $y is zero; 1 % 0 makes no sense.
+
+  return $x->bnan() if $y->is_zero();
+
+  # Return 0 in the trivial case. $x % 1 or $x % -1 is zero for all finite
+  # integers $x.
+
+  return $x->bzero() if ($y->is_one() ||
+                         $y->is_one('-'));
+
+  # Return NaN if $x = 0, or $x modulo $y is zero. The only valid case when
+  # $x = 0 is when $y = 1 or $y = -1, but that was covered above.
+  #
+  # Note that computing $x modulo $y here affects the value we'll feed to
+  # $CALC->_modinv() below when $x and $y have opposite signs. E.g., if $x =
+  # 5 and $y = 7, those two values are fed to _modinv(), but if $x = -5 and
+  # $y = 7, the values fed to _modinv() are $x = 2 (= -5 % 7) and $y = 7.
+  # The value if $x is affected only when $x and $y have opposite signs.
+
+  $x->bmod($y);
+  return $x->bnan() if $x->is_zero();
+
+  # Compute the modular multiplicative inverse of the absolute values. We'll
+  # correct for the signs of $x and $y later. Return NaN if no GCD is found.
+
+  ($x->{value}, $x->{sign}) = $CALC->_modinv($x->{value}, $y->{value});
+  return $x->bnan() if !defined $x->{value};
+
+  # When one or both arguments are negative, we have the following
+  # relations.  If x and y are positive:
+  #
+  #   modinv(-x, -y) = -modinv(x, y)
+  #   modinv(-x,  y) = y - modinv(x, y)  = -modinv(x, y) (mod y)
+  #   modinv( x, -y) = modinv(x, y) - y  =  modinv(x, y) (mod -y)
+
+  # We must swap the sign of the result if the original $x is negative.
+  # However, we must compensate for ignoring the signs when computing the
+  # inverse modulo. The net effect is that we must swap the sign of the
+  # result if $y is negative.
+
+  $x -> bneg() if $y->{sign} eq '-';
+
+  # Compute $x modulo $y again after correcting the sign.
+
+  $x -> bmod($y) if $x->{sign} ne $y->{sign};
+
+  return $x;
   }
 
 sub bmodpow
@@ -3175,7 +3213,7 @@ Math::BigInt - Arbitrary size integer/float math package
 
   $x->bmod($y);		   # modulus (x % y)
   $x->bmodpow($exp,$mod);  # modular exponentation (($num**$exp) % $mod))
-  $x->bmodinv($mod);	   # the inverse of $x in the given modulus $mod
+  $x->bmodinv($mod);	   # the multiplicative inverse of $x modulo $mod
 
   $x->bpow($y);		   # power of arguments (x ** y)
   $x->blsft($y);	   # left shift in base 2
@@ -3694,11 +3732,20 @@ This method was added in v1.87 of Math::BigInt (June 2007).
 
 =head2 bmodinv()
 
-	num->bmodinv($mod);		# modular inverse
+	$x->bmodinv($mod);		# modular multiplicative inverse
 
-Returns the inverse of C<$num> in the given modulus C<$mod>.  'C<NaN>' is
-returned unless C<$num> is relatively prime to C<$mod>, i.e. unless
-C<bgcd($num, $mod)==1>.
+Returns the multiplicative inverse of C<$x> modulo C<$mod>. If
+
+        $y = $x -> copy() -> bmodinv($mod)
+
+then C<$y> is the number closest to zero, and with the same sign as C<$mod>,
+satisfying
+
+        ($x * $y) % $mod = 1 % $mod
+
+If C<$x> and C<$y> are non-zero, they must be relative primes, i.e.,
+C<bgcd($y, $mod)==1>. 'C<NaN>' is returned when no modular multiplicative
+inverse exists.
 
 =head2 bmodpow()
 
