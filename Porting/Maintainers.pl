@@ -442,10 +442,9 @@ use File::Glob qw(:case);
     'CPAN::Meta::YAML' =>
 	{
 	'MAINTAINER'	=> 'dagolden',
-	'DISTRIBUTION'	=> 'DAGOLDEN/CPAN-Meta-YAML-0.002.tar.gz',
+	'DISTRIBUTION'	=> 'DAGOLDEN/CPAN-Meta-YAML-0.003.tar.gz',
 	'FILES'		=> q[cpan/CPAN-Meta-YAML],
 	'EXCLUDED'	=> [
-		't/00-compile.t',   # dzil boilerplate
 		't/04_scalar.t',    # requires YAML.pm
 	],
 	'UPSTREAM'	=> 'cpan',

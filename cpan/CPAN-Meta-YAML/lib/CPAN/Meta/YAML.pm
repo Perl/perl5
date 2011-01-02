@@ -1,6 +1,6 @@
 package CPAN::Meta::YAML;
 BEGIN {
-  $CPAN::Meta::YAML::VERSION = '0.002';
+  $CPAN::Meta::YAML::VERSION = '0.003';
 }
 
 use strict;
@@ -644,7 +644,7 @@ CPAN::Meta::YAML - Read and write a subset of YAML for CPAN Meta files
 
 =head1 VERSION
 
-version 0.002
+version 0.003
 
 =head1 SYNOPSIS
 
@@ -680,7 +680,7 @@ L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=YAML-Tiny>
 
 =head1 SEE ALSO
 
-L<YAML>, L<YAML::Syck>, L<YAML::LibYAML>, L<YAML::XS>
+L<YAML::Tiny>, L<YAML>, L<YAML::XS>
 
 =head1 AUTHORS
 
