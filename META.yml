@@ -51,7 +51,6 @@ no_index:
     - dist/threads
     - dist/threads-shared
     - dist/XSLoader
-    - ext/Time-Local
     - lib/version
     - win32
 
