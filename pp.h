@@ -446,6 +446,8 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 		SPAGAIN;					\
 		sp += shift;					\
 		sv_setsv(TARG, tmpsv);				\
+		if (opASSIGN)					\
+		    sp--;					\
 		SETTARG;					\
 		RETURN;						\
 	    }							\

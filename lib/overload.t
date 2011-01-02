@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 4936;
+plan tests => 4942;
 
 use Scalar::Util qw(tainted);
 
@@ -2151,6 +2151,23 @@ fresh_perl_is
     }
 }
 
+# since 5.6 overloaded <> was leaving an extra arg on the stack!
+
+{
+    package Iter1;
+    use overload '<>' => sub { 11 };
+    package main;
+    my $a = bless [], 'Iter1';
+    my $x;
+    my @a = (10, ($x = <$a>), 12);
+    is ($a[0], 10, 'Iter1: a[0]');
+    is ($a[1], 11, 'Iter1: a[1]');
+    is ($a[2], 12, 'Iter1: a[2]');
+    @a = (10, ($x .= <$a>), 12);
+    is ($a[0],   10, 'Iter1: a[0] concat');
+    is ($a[1], 1111, 'Iter1: a[1] concat');
+    is ($a[2],   12, 'Iter1: a[2] concat');
+}
 
 
 # EOF
