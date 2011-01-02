@@ -1034,12 +1034,12 @@ Off_t
 Perl_do_tell(pTHX_ GV *gv)
 {
     dVAR;
-    register IO *io = NULL;
+    IO *const io = GvIO(gv);
     register PerlIO *fp;
 
     PERL_ARGS_ASSERT_DO_TELL;
 
-    if (gv && (io = GvIO(gv)) && (fp = IoIFP(io))) {
+    if (io && (fp = IoIFP(io))) {
 #ifdef ULTRIX_STDIO_BOTCH
 	if (PerlIO_eof(fp))
 	    (void)PerlIO_seek(fp, 0L, 2);	/* ultrix 1.2 workaround */
@@ -1055,10 +1055,10 @@ bool
 Perl_do_seek(pTHX_ GV *gv, Off_t pos, int whence)
 {
     dVAR;
-    register IO *io = NULL;
+    IO *const io = GvIO(gv);
     register PerlIO *fp;
 
-    if (gv && (io = GvIO(gv)) && (fp = IoIFP(io))) {
+    if (io && (fp = IoIFP(io))) {
 #ifdef ULTRIX_STDIO_BOTCH
 	if (PerlIO_eof(fp))
 	    (void)PerlIO_seek(fp, 0L, 2);	/* ultrix 1.2 workaround */
@@ -1074,12 +1074,12 @@ Off_t
 Perl_do_sysseek(pTHX_ GV *gv, Off_t pos, int whence)
 {
     dVAR;
-    register IO *io = NULL;
+    IO *const io = GvIO(gv);
     register PerlIO *fp;
 
     PERL_ARGS_ASSERT_DO_SYSSEEK;
 
-    if (gv && (io = GvIO(gv)) && (fp = IoIFP(io)))
+    if (io && (fp = IoIFP(io)))
 	return PerlLIO_lseek(PerlIO_fileno(fp), pos, whence);
     report_evil_fh(gv);
     SETERRNO(EBADF,RMS_IFI);

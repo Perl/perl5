@@ -704,14 +704,15 @@ PP(pp_fileno)
     if (MAXARG < 1)
 	RETPUSHUNDEF;
     gv = MUTABLE_GV(POPs);
+    io = GvIO(gv);
 
-    if (gv && (io = GvIO(gv))
+    if (io
 	&& (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar)))
     {
 	return tied_handle_method("FILENO", SP, io, mg);
     }
 
-    if (!gv || !(io = GvIO(gv)) || !(fp = IoIFP(io))) {
+    if (!io || !(fp = IoIFP(io))) {
 	/* Can't do this because people seem to do things like
 	   defined(fileno($foo)) to check whether $foo is a valid fh.
 
@@ -770,8 +771,9 @@ PP(pp_binmode)
     }
 
     gv = MUTABLE_GV(POPs);
+    io = GvIO(gv);
 
-    if (gv && (io = GvIO(gv))) {
+    if (io) {
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    /* This takes advantage of the implementation of the varargs
@@ -786,7 +788,7 @@ PP(pp_binmode)
 	}
     }
 
-    if (!(io = GvIO(gv)) || !(fp = IoIFP(io))) {
+    if (!io || !(fp = IoIFP(io))) {
 	report_evil_fh(gv);
 	SETERRNO(EBADF,RMS_IFI);
         RETPUSHUNDEF;
@@ -1254,13 +1256,13 @@ PP(pp_select)
 PP(pp_getc)
 {
     dVAR; dSP; dTARGET;
-    IO *io = NULL;
     GV * const gv = (MAXARG==0) ? PL_stdingv : MUTABLE_GV(POPs);
+    IO *const io = GvIO(gv);
 
     if (MAXARG == 0)
 	EXTEND(SP, 1);
 
-    if (gv && (io = GvIO(gv))) {
+    if (io) {
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    const U32 gimme = GIMME_V;
@@ -1494,14 +1496,14 @@ PP(pp_leavewrite)
 PP(pp_prtf)
 {
     dVAR; dSP; dMARK; dORIGMARK;
-    IO *io;
     PerlIO *fp;
     SV *sv;
 
     GV * const gv
 	= (PL_op->op_flags & OPf_STACKED) ? MUTABLE_GV(*++MARK) : PL_defoutgv;
+    IO *const io = GvIO(gv);
 
-    if (gv && (io = GvIO(gv))) {
+    if (io) {
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    if (MARK == ORIGMARK) {
@@ -1521,7 +1523,7 @@ PP(pp_prtf)
     }
 
     sv = newSV(0);
-    if (!(io = GvIO(gv))) {
+    if (!io) {
 	report_evil_fh(gv);
 	SETERRNO(EBADF,RMS_IFI);
 	goto just_say_no;
@@ -2115,7 +2117,8 @@ PP(pp_tell)
 	EXTEND(SP, 1);
     gv = PL_last_in_gv;
 
-    if (gv && (io = GvIO(gv))) {
+    io = GvIO(gv);
+    if (io) {
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    return tied_handle_method("TELL", SP, io, mg);
@@ -2147,9 +2150,9 @@ PP(pp_sysseek)
 #endif
 
     GV * const gv = PL_last_in_gv = MUTABLE_GV(POPs);
-    IO *io;
+    IO *const io = GvIO(gv);
 
-    if (gv && (io = GvIO(gv))) {
+    if (io) {
 	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 #if LSEEKSIZE > IVSIZE
@@ -2212,11 +2215,11 @@ PP(pp_truncate)
 	    tmpgv = gv_fetchsv(POPs, 0, SVt_PVIO);
 
 	do_ftruncate_gv:
-	    if (!GvIO(tmpgv))
+	    io = GvIO(tmpgv);
+	    if (!io)
 		result = 0;
 	    else {
 		PerlIO *fp;
-		io = GvIOp(tmpgv);
 	    do_ftruncate_io:
 		TAINT_PROPER("truncate");
 		if (!(fp = IoIFP(io))) {
@@ -2357,17 +2360,11 @@ PP(pp_flock)
 #ifdef FLOCK
     dVAR; dSP; dTARGET;
     I32 value;
-    IO *io = NULL;
-    PerlIO *fp;
     const int argtype = POPi;
     GV * const gv = (MAXARG == 0) ? PL_last_in_gv : MUTABLE_GV(POPs);
+    IO *const io = GvIO(gv);
+    PerlIO *const fp = io ? IoIFP(io) : NULL;
 
-    if (gv && (io = GvIO(gv)))
-	fp = IoIFP(io);
-    else {
-	fp = NULL;
-	io = NULL;
-    }
     /* XXX Looks to me like io is always NULL at this point */
     if (fp) {
 	(void)PerlIO_flush(fp);
@@ -2398,7 +2395,7 @@ PP(pp_socket)
     register IO * const io = gv ? GvIOn(gv) : NULL;
     int fd;
 
-    if (!gv || !io) {
+    if (!io) {
 	report_evil_fh(gv);
 	if (io && IoIFP(io))
 	    do_close(gv, FALSE);
@@ -2449,12 +2446,10 @@ PP(pp_sockpair)
     register IO * const io2 = gv2 ? GvIOn(gv2) : NULL;
     int fd[2];
 
-    if (!gv1 || !gv2 || !io1 || !io2) {
-	if (!gv1 || !io1)
-	    report_evil_fh(gv1);
-	if (!gv2 || !io2)
-	    report_evil_fh(gv2);
-    }
+    if (!io1)
+	report_evil_fh(gv1);
+    if (!io2)
+	report_evil_fh(gv2);
 
     if (io1 && IoIFP(io1))
 	do_close(gv1, FALSE);
@@ -2535,7 +2530,7 @@ PP(pp_listen)
     GV * const gv = MUTABLE_GV(POPs);
     register IO * const io = gv ? GvIOn(gv) : NULL;
 
-    if (!gv || !io || !IoIFP(io))
+    if (!io || !IoIFP(io))
 	goto nuts;
 
     if (PerlSock_listen(PerlIO_fileno(IoIFP(io)), backlog) >= 0)

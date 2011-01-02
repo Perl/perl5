@@ -710,13 +710,13 @@ PP(pp_pushre)
 PP(pp_print)
 {
     dVAR; dSP; dMARK; dORIGMARK;
-    IO *io;
     register PerlIO *fp;
     MAGIC *mg;
     GV * const gv
 	= (PL_op->op_flags & OPf_STACKED) ? MUTABLE_GV(*++MARK) : PL_defoutgv;
+    IO *io = GvIO(gv);
 
-    if (gv && (io = GvIO(gv))
+    if (io
 	&& (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar)))
     {
       had_magic:
@@ -746,7 +746,7 @@ PP(pp_print)
 	SP = MARK;
 	RETURN;
     }
-    if (!(io = GvIO(gv))) {
+    if (!io) {
         if ( gv && GvEGVx(gv) && (io = GvIO(GvEGV(gv)))
 	    && (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar)))
             goto had_magic;
