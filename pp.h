@@ -431,7 +431,7 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 /* No longer used in core. Use AMG_CALLunary instead */
 #define AMG_CALLun(sv,meth) AMG_CALLunary(sv, CAT2(meth,_amg))
 
-#define tryAMAGICunTARGET(meth, shift)				\
+#define tryAMAGICunTARGET(meth, shift, jump)				\
     STMT_START {						\
 	dSP;							\
 	sp--; /* get TARGET from below PL_stack_sp */		\
@@ -449,7 +449,12 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 		if (opASSIGN)					\
 		    sp--;					\
 		SETTARG;					\
-		RETURN;						\
+		PUTBACK;					\
+		if (jump) {					\
+		    PL_markstack_ptr--;				\
+		    return NORMAL->op_next->op_next;		\
+		}						\
+		return NORMAL;					\
 	    }							\
 	}							\
     } STMT_END

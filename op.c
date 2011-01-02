@@ -7678,6 +7678,7 @@ Perl_ck_glob(pTHX_ OP *o)
 	 *                              \ null - const(wildcard) - const(ix)
 	 */
 	o->op_flags |= OPf_SPECIAL;
+	o->op_targ = pad_alloc(OP_GLOB, SVs_PADTMP);
 	op_append_elem(OP_GLOB, o,
 		    newSVOP(OP_CONST, 0, newSViv(PL_glob_index++)));
 	o = newLISTOP(OP_LIST, 0, o, NULL);

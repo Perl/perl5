@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 4942;
+plan tests => 4980;
 
 use Scalar::Util qw(tainted);
 
@@ -707,13 +707,7 @@ is($c, "bareword");
   sub iter { my ($x) = @_; return undef if $$x < 0; return $$x--; }
 }
 
-# XXX iterator overload not intended to work with CORE::GLOBAL?
-if (defined &CORE::GLOBAL::glob) {
-  is('1', '1');
-  is('1', '1');
-  is('1', '1');
-}
-else {
+{
   my $iter = iterator->new(5);
   my $acc = '';
   my $out;
@@ -1839,7 +1833,11 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 	push @tests, [ \*RT57012A, '*RT57012B = *{%s}; our $RT57012B',
 		'(*{})', undef, [ 1, 1, 0 ], 0 ];
 
-	# XXX TODO: '<>'
+	my $iter_text = ("some random text\n" x 100) . $^X;
+	open my $iter_fh, '<', \$iter_text
+	    or die "open of \$iter_text gave ($!)\n";
+	$subs{'<>'} = '<$iter_fh>';
+	push @tests, [ $iter_fh, '<%s>', '(<>)', undef, [ 1, 1, 0 ], 1 ];
 
 	# eval should do tie, overload on its arg before checking taint */
 	push @tests, [ '1;', 'eval q(eval %s); $@ =~ /Insecure/',
@@ -1940,7 +1938,6 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 			"<$plain_term> taint of expected return");
 
 	    for my $ov_pkg (qw(RT57012_OV RT57012_OV_FB)) {
-		# the deref ops don't support fallback
 		next if $ov_pkg eq 'RT57012_OV_FB'
 			and  not defined $exp_fb_funcs;
 		my ($exp_fetch_a, $exp_fetch_s, $exp_store) =
@@ -1953,7 +1950,9 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 		$ta[0]    = bless [ $tainted_val ], $ov_pkg;
 		my $oload = bless [ $tainted_val ], $ov_pkg;
 
-		for my $var ('$ta[0]', '$ts', '$oload') {
+		for my $var ('$ta[0]', '$ts', '$oload',
+			    ($sub_term eq '<%s>' ? '${ts}' : ())
+		) {
 
 		    $funcs = '';
 		    $fetches = 0;

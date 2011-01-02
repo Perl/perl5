@@ -358,6 +358,12 @@ PP(pp_glob)
 {
     dVAR;
     OP *result;
+    dSP;
+    /* make a copy of the pattern, to ensure that magic is called once
+     * and only once */
+    TOPm1s = sv_2mortal(newSVsv(TOPm1s));
+
+    tryAMAGICunTARGET(iter_amg, -1, (PL_op->op_flags & OPf_SPECIAL));
 
     if (PL_op->op_flags & OPf_SPECIAL) {
 	/* call Perl-level glob function instead. Stack args are:
@@ -368,7 +374,6 @@ PP(pp_glob)
     }
     /* stack args are: wildcard, gv(_GEN_n) */
 
-    tryAMAGICunTARGET(iter_amg, -1);
 
     /* Note that we only ever get here if File::Glob fails to load
      * without at the same time croaking, for some reason, or if
