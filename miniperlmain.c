@@ -74,7 +74,9 @@ main(int argc, char **argv, char **env)
     my_vars = my_plvarsp = plvarsp;
 #  endif
 #endif /* PERL_GLOBAL_STRUCT */
-    (void)env;
+#ifndef NO_ENV_ARRAY_IN_MAIN
+    PERL_UNUSED_ARG(env);
+#endif
 #ifndef PERL_USE_SAFE_PUTENV
     PL_use_safe_putenv = 0;
 #endif /* PERL_USE_SAFE_PUTENV */
