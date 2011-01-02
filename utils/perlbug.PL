@@ -291,7 +291,7 @@ sub Init {
     $address = $::opt_a || ($::opt_t ? $testaddress
 			    : $thanks ? $thanksaddress : $bugaddress);
 
-    # Users address, used in message and in Reply-To header
+    # Users address, used in message and in From and Reply-To headers
     $from = $::opt_r || "";
 
     # Include verbose configuration information
@@ -1089,6 +1089,7 @@ sub _message_headers {
     $headers{'Cc'}         = $cc        if ($cc);
     $headers{'Message-Id'} = $messageid if ($messageid);
     $headers{'Reply-To'}   = $from      if ($from);
+    $headers{'From'}       = $from      if ($from);
     return \%headers;
 }
 
