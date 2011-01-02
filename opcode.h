@@ -15,10 +15,102 @@
 
 #ifndef PERL_GLOBAL_STRUCT_INIT
 
+#define Perl_pp_scalar Perl_pp_null
+#define Perl_pp_padany Perl_unimplemented_op
+#define Perl_pp_regcmaybe Perl_pp_null
+#define Perl_pp_chomp Perl_pp_chop
+#define Perl_pp_schomp Perl_pp_schop
 #define Perl_pp_i_preinc Perl_pp_preinc
 #define Perl_pp_i_predec Perl_pp_predec
 #define Perl_pp_i_postinc Perl_pp_postinc
 #define Perl_pp_i_postdec Perl_pp_postdec
+#define Perl_pp_slt Perl_pp_sle
+#define Perl_pp_sgt Perl_pp_sle
+#define Perl_pp_sge Perl_pp_sle
+#define Perl_pp_bit_xor Perl_pp_bit_or
+#define Perl_pp_cos Perl_pp_sin
+#define Perl_pp_exp Perl_pp_sin
+#define Perl_pp_log Perl_pp_sin
+#define Perl_pp_sqrt Perl_pp_sin
+#define Perl_pp_hex Perl_pp_oct
+#define Perl_pp_rindex Perl_pp_index
+#define Perl_pp_lcfirst Perl_pp_ucfirst
+#define Perl_pp_avalues Perl_pp_akeys
+#define Perl_pp_values Perl_do_kv
+#define Perl_pp_keys Perl_do_kv
+#define Perl_pp_rv2hv Perl_pp_rv2av
+#define Perl_pp_pop Perl_pp_shift
+#define Perl_pp_mapstart Perl_unimplemented_op
+#define Perl_pp_dor Perl_pp_defined
+#define Perl_pp_andassign Perl_pp_and
+#define Perl_pp_orassign Perl_pp_or
+#define Perl_pp_dorassign Perl_pp_defined
+#define Perl_pp_lineseq Perl_pp_null
+#define Perl_pp_scope Perl_pp_null
+#define Perl_pp_dump Perl_pp_goto
+#define Perl_pp_dbmclose Perl_pp_untie
+#define Perl_pp_read Perl_pp_sysread
+#define Perl_pp_say Perl_pp_print
+#define Perl_pp_syswrite Perl_pp_send
+#define Perl_pp_seek Perl_pp_sysseek
+#define Perl_pp_fcntl Perl_pp_ioctl
+#define Perl_pp_recv Perl_pp_sysread
+#define Perl_pp_connect Perl_pp_bind
+#define Perl_pp_gsockopt Perl_pp_ssockopt
+#define Perl_pp_getsockname Perl_pp_getpeername
+#define Perl_pp_lstat Perl_pp_stat
+#define Perl_pp_ftrwrite Perl_pp_ftrread
+#define Perl_pp_ftrexec Perl_pp_ftrread
+#define Perl_pp_fteread Perl_pp_ftrread
+#define Perl_pp_ftewrite Perl_pp_ftrread
+#define Perl_pp_fteexec Perl_pp_ftrread
+#define Perl_pp_ftsize Perl_pp_ftis
+#define Perl_pp_ftmtime Perl_pp_ftis
+#define Perl_pp_ftatime Perl_pp_ftis
+#define Perl_pp_ftctime Perl_pp_ftis
+#define Perl_pp_fteowned Perl_pp_ftrowned
+#define Perl_pp_ftzero Perl_pp_ftrowned
+#define Perl_pp_ftsock Perl_pp_ftrowned
+#define Perl_pp_ftchr Perl_pp_ftrowned
+#define Perl_pp_ftblk Perl_pp_ftrowned
+#define Perl_pp_ftfile Perl_pp_ftrowned
+#define Perl_pp_ftdir Perl_pp_ftrowned
+#define Perl_pp_ftpipe Perl_pp_ftrowned
+#define Perl_pp_ftsuid Perl_pp_ftrowned
+#define Perl_pp_ftsgid Perl_pp_ftrowned
+#define Perl_pp_ftsvtx Perl_pp_ftrowned
+#define Perl_pp_ftbinary Perl_pp_fttext
+#define Perl_pp_unlink Perl_pp_chown
+#define Perl_pp_chmod Perl_pp_chown
+#define Perl_pp_utime Perl_pp_chown
+#define Perl_pp_symlink Perl_pp_link
+#define Perl_pp_kill Perl_pp_chown
+#define Perl_pp_localtime Perl_pp_gmtime
+#define Perl_pp_shmget Perl_pp_semget
+#define Perl_pp_shmctl Perl_pp_semctl
+#define Perl_pp_shmread Perl_pp_shmwrite
+#define Perl_pp_msgget Perl_pp_semget
+#define Perl_pp_msgctl Perl_pp_semctl
+#define Perl_pp_msgsnd Perl_pp_shmwrite
+#define Perl_pp_msgrcv Perl_pp_shmwrite
+#define Perl_pp_semop Perl_pp_shmwrite
+#define Perl_pp_dofile Perl_pp_require
+#define Perl_pp_ghbyname Perl_pp_ghostent
+#define Perl_pp_ghbyaddr Perl_pp_ghostent
+#define Perl_pp_gnbyname Perl_pp_gnetent
+#define Perl_pp_gnbyaddr Perl_pp_gnetent
+#define Perl_pp_gpbyname Perl_pp_gprotoent
+#define Perl_pp_gpbynumber Perl_pp_gprotoent
+#define Perl_pp_gsbyname Perl_pp_gservent
+#define Perl_pp_gsbyport Perl_pp_gservent
+#define Perl_pp_gpwnam Perl_pp_gpwent
+#define Perl_pp_gpwuid Perl_pp_gpwent
+#define Perl_pp_ggrnam Perl_pp_ggrent
+#define Perl_pp_ggrgid Perl_pp_ggrent
+#define Perl_pp_custom Perl_unimplemented_op
+#define Perl_pp_reach Perl_pp_rkeys
+#define Perl_pp_rvalues Perl_pp_rkeys
+#define Perl_pp_transr Perl_pp_trans
 
 PERL_PPDEF(Perl_unimplemented_op)
 
@@ -831,11 +923,11 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_qr,
 	Perl_pp_subst,
 	Perl_pp_substcont,
-	Perl_pp_trans,	/* Perl_pp_trans */
+	Perl_pp_trans,
 	Perl_pp_sassign,
 	Perl_pp_aassign,
-	Perl_pp_chop,	/* Perl_pp_chop */
-	Perl_pp_schop,	/* Perl_pp_schop */
+	Perl_pp_chop,
+	Perl_pp_schop,
 	Perl_pp_chop,	/* Perl_pp_chomp */
 	Perl_pp_schop,	/* Perl_pp_schomp */
 	Perl_pp_defined,
@@ -843,13 +935,13 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_study,
 	Perl_pp_pos,
 	Perl_pp_preinc,
-	Perl_pp_i_preinc,
+	Perl_pp_preinc,	/* Perl_pp_i_preinc */
 	Perl_pp_predec,
-	Perl_pp_i_predec,
+	Perl_pp_predec,	/* Perl_pp_i_predec */
 	Perl_pp_postinc,
-	Perl_pp_i_postinc,
+	Perl_pp_postinc,	/* Perl_pp_i_postinc */
 	Perl_pp_postdec,
-	Perl_pp_i_postdec,
+	Perl_pp_postdec,	/* Perl_pp_i_postdec */
 	Perl_pp_pow,
 	Perl_pp_multiply,
 	Perl_pp_i_multiply,

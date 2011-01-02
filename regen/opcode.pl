@@ -107,10 +107,14 @@ my @raw_alias = (
 		 Perl_pp_rv2av => ['rv2hv'],
 		 Perl_pp_akeys => ['avalues'],
 		 Perl_pp_rkeys => [qw(rvalues reach)],
-		 Perl_pp_trans => [qw(trans transr)],
-		 Perl_pp_chop => [qw(chop chomp)],
-		 Perl_pp_schop => [qw(schop schomp)],
+		 Perl_pp_trans => ['transr'],
+		 Perl_pp_chop => ['chomp'],
+		 Perl_pp_schop => ['schomp'],
 		 Perl_pp_bind => ['connect'],
+		 Perl_pp_preinc => ['i_preinc'],
+		 Perl_pp_predec => ['i_predec'],
+		 Perl_pp_postinc => ['i_postinc'],
+		 Perl_pp_postdec => ['i_postdec'],
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {
@@ -139,10 +143,13 @@ print <<"END";
 
 #ifndef PERL_GLOBAL_STRUCT_INIT
 
-#define Perl_pp_i_preinc Perl_pp_preinc
-#define Perl_pp_i_predec Perl_pp_predec
-#define Perl_pp_i_postinc Perl_pp_postinc
-#define Perl_pp_i_postdec Perl_pp_postdec
+END
+
+for (@ops) {
+    print "#define Perl_pp_$_ $alias{$_}\n" if $alias{$_};
+}
+
+print <<'END';
 
 PERL_PPDEF(Perl_unimplemented_op)
 
