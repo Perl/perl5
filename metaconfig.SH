@@ -29,4 +29,4 @@
 # H.Merijn Brand [21 Dec 2010]
 # cbeaa1895 removed the reference to $perlpath
 
-1;
+true # eof - does nothing.
