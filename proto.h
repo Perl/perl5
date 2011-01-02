@@ -6575,6 +6575,11 @@ STATIC void	S_assert_uft8_cache_coherent(pTHX_ const char *const func, STRLEN fr
 #define PERL_ARGS_ASSERT_ASSERT_UFT8_CACHE_COHERENT	\
 	assert(func); assert(sv)
 
+STATIC bool	S_curse(pTHX_ SV * const sv, const bool check_refcnt)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_CURSE	\
+	assert(sv)
+
 STATIC I32	S_expect_number(pTHX_ char **const pattern)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);

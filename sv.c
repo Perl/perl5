@@ -551,6 +551,15 @@ do_clean_named_io_objs(pTHX_ SV *const sv)
     SvREFCNT_dec(sv); /* undo the inc above */
 }
 
+/* Void wrapper to pass to visit() */
+static void
+do_curse(pTHX_ SV * const sv) {
+    if ((PL_stderrgv && GvGP(PL_stderrgv) && GvIO(PL_stderrgv) == sv)
+     || (PL_defoutgv && GvGP(PL_defoutgv) && GvIO(PL_defoutgv) == sv))
+	return;
+    (void)curse(sv, 0);
+}
+
 /*
 =for apidoc sv_clean_objs
 
@@ -571,6 +580,9 @@ Perl_sv_clean_objs(pTHX)
      * error messages, close files etc */
     visit(do_clean_named_objs, SVt_PVGV|SVpgv_GP, SVTYPEMASK|SVp_POK|SVpgv_GP);
     visit(do_clean_named_io_objs, SVt_PVGV|SVpgv_GP, SVTYPEMASK|SVp_POK|SVpgv_GP);
+    /* And if there are some very tenacious barnacles clinging to arrays,
+       closures, or what have you.... */
+    visit(do_curse, SVs_OBJECT, SVs_OBJECT);
     olddef = PL_defoutgv;
     PL_defoutgv = NULL; /* disable skip of PL_defoutgv */
     if (olddef && isGV_with_GP(olddef))
@@ -5979,65 +5991,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 	}
 
 	if (SvOBJECT(sv)) {
-	    if (PL_defstash &&	/* Still have a symbol table? */
-		SvDESTROYABLE(sv))
-	    {
-		dSP;
-		HV* stash;
-		do {
-		    CV* destructor;
-		    stash = SvSTASH(sv);
-		    destructor = StashHANDLER(stash,DESTROY);
-		    if (destructor
-			/* A constant subroutine can have no side effects, so
-			   don't bother calling it.  */
-			&& !CvCONST(destructor)
-			/* Don't bother calling an empty destructor */
-			&& (CvISXSUB(destructor)
-			|| (CvSTART(destructor)
-			    && (CvSTART(destructor)->op_next->op_type
-						!= OP_LEAVESUB))))
-		    {
-			SV* const tmpref = newRV(sv);
-			SvREADONLY_on(tmpref); /* DESTROY() could be naughty */
-			ENTER;
-			PUSHSTACKi(PERLSI_DESTROY);
-			EXTEND(SP, 2);
-			PUSHMARK(SP);
-			PUSHs(tmpref);
-			PUTBACK;
-			call_sv(MUTABLE_SV(destructor),
-				    G_DISCARD|G_EVAL|G_KEEPERR|G_VOID);
-			POPSTACK;
-			SPAGAIN;
-			LEAVE;
-			if(SvREFCNT(tmpref) < 2) {
-			    /* tmpref is not kept alive! */
-			    SvREFCNT(sv)--;
-			    SvRV_set(tmpref, NULL);
-			    SvROK_off(tmpref);
-			}
-			SvREFCNT_dec(tmpref);
-		    }
-		} while (SvOBJECT(sv) && SvSTASH(sv) != stash);
-
-
-		if (SvREFCNT(sv)) {
-		    if (PL_in_clean_objs)
-			Perl_croak(aTHX_
-			    "DESTROY created new reference to dead object '%s'",
-			    HvNAME_get(stash));
-		    /* DESTROY gave object new lease on life */
-		    goto get_next_sv;
-		}
-	    }
-
-	    if (SvOBJECT(sv)) {
-		SvREFCNT_dec(SvSTASH(sv)); /* possibly of changed persuasion */
-		SvOBJECT_off(sv);	/* Curse the object. */
-		if (type != SVt_PVIO)
-		    --PL_sv_objcount;/* XXX Might want something more general */
-	    }
+	    if (!curse(sv, 1)) goto get_next_sv;
 	}
 	if (type >= SVt_PVMG) {
 	    if (type == SVt_PVMG && SvPAD_OUR(sv)) {
@@ -6261,6 +6215,78 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 	} /* while 1 */
 
     } /* while sv */
+}
+
+/* This routine curses the sv itself, not the object referenced by sv. So
+   sv does not have to be ROK. */
+
+static bool
+S_curse(pTHX_ SV * const sv, const bool check_refcnt) {
+    dVAR;
+
+    PERL_ARGS_ASSERT_CURSE;
+    assert(SvOBJECT(sv));
+
+    if (PL_defstash &&	/* Still have a symbol table? */
+	SvDESTROYABLE(sv))
+    {
+	dSP;
+	HV* stash;
+	do {
+	    CV* destructor;
+	    stash = SvSTASH(sv);
+	    destructor = StashHANDLER(stash,DESTROY);
+	    if (destructor
+		/* A constant subroutine can have no side effects, so
+		   don't bother calling it.  */
+		&& !CvCONST(destructor)
+		/* Don't bother calling an empty destructor */
+		&& (CvISXSUB(destructor)
+		|| (CvSTART(destructor)
+		    && (CvSTART(destructor)->op_next->op_type
+					!= OP_LEAVESUB))))
+	    {
+		SV* const tmpref = newRV(sv);
+		SvREADONLY_on(tmpref); /* DESTROY() could be naughty */
+		ENTER;
+		PUSHSTACKi(PERLSI_DESTROY);
+		EXTEND(SP, 2);
+		PUSHMARK(SP);
+		PUSHs(tmpref);
+		PUTBACK;
+		call_sv(MUTABLE_SV(destructor),
+			    G_DISCARD|G_EVAL|G_KEEPERR|G_VOID);
+		POPSTACK;
+		SPAGAIN;
+		LEAVE;
+		if(SvREFCNT(tmpref) < 2) {
+		    /* tmpref is not kept alive! */
+		    SvREFCNT(sv)--;
+		    SvRV_set(tmpref, NULL);
+		    SvROK_off(tmpref);
+		}
+		SvREFCNT_dec(tmpref);
+	    }
+	} while (SvOBJECT(sv) && SvSTASH(sv) != stash);
+
+
+	if (check_refcnt && SvREFCNT(sv)) {
+	    if (PL_in_clean_objs)
+		Perl_croak(aTHX_
+		    "DESTROY created new reference to dead object '%s'",
+		    HvNAME_get(stash));
+	    /* DESTROY gave object new lease on life */
+	    return FALSE;
+	}
+    }
+
+    if (SvOBJECT(sv)) {
+	SvREFCNT_dec(SvSTASH(sv)); /* possibly of changed persuasion */
+	SvOBJECT_off(sv);	/* Curse the object. */
+	if (SvTYPE(sv) != SVt_PVIO)
+	    --PL_sv_objcount;/* XXX Might want something more general */
+    }
+    return TRUE;
 }
 
 /*
