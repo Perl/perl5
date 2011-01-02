@@ -15,6 +15,7 @@ cpan/Test-Harness/t/source_tests/source_args.sh
 installperl
 installman
 makedepend.SH
+metaconfig.SH
 myconfig.SH
 regen/embed.pl
 regen/keywords.pl
