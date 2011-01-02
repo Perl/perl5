@@ -1034,6 +1034,7 @@ TODO: {
     test !tainted($^O);
     if (!$^X) { } elsif ($^O eq 'bar') { }
     test !tainted($^O);
+    local $^O;  # We're going to clobber something test infrastructure depends on.
     eval '$^O = $^X';
     test $@ =~ /Insecure dependency in/;
 }
