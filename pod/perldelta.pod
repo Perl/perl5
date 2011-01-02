@@ -112,7 +112,7 @@ C<threads::shared> has been upgraded from version 1.35 to 1.36
 
 =item *
 
-XXX
+C<Time::Local> has been upgraded from version 1.1901_01 to 1.2000.
 
 =back
 

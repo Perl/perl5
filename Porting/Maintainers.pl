@@ -1520,7 +1520,7 @@ use File::Glob qw(:case);
     'Time::Local' =>
 	{
 	'MAINTAINER'	=> 'drolsky',
-	'DISTRIBUTION'	=> 'DROLSKY/Time-Local-1.1901.tar.gz',
+	'DISTRIBUTION'	=> 'FLORA/Time-Local-1.2000.tar.gz',
 	'FILES'		=> q[ext/Time-Local],
 	'EXCLUDED'	=> [ qw(t/pod-coverage.t t/pod.t) ],
 	'UPSTREAM'	=> 'blead',
