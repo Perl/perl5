@@ -891,42 +891,42 @@ PP(pp_rv2av)
 	/* The guts of pp_rv2av, with no intenting change to preserve history
 	   (until such time as we get tools that can do blame annotation across
 	   whitespace changes.  */
-    if (gimme == G_ARRAY) {
-	const I32 maxarg = AvFILL(av) + 1;
-	(void)POPs;			/* XXXX May be optimized away? */
-	EXTEND(SP, maxarg);
-	if (SvRMAGICAL(av)) {
-	    U32 i;
-	    for (i=0; i < (U32)maxarg; i++) {
-		SV ** const svp = av_fetch(av, i, FALSE);
-		/* See note in pp_helem, and bug id #27839 */
-		SP[i+1] = svp
-		    ? SvGMAGICAL(*svp) ? (mg_get(*svp), *svp) : *svp
-		    : &PL_sv_undef;
+	if (gimme == G_ARRAY) {
+	    const I32 maxarg = AvFILL(av) + 1;
+	    (void)POPs;			/* XXXX May be optimized away? */
+	    EXTEND(SP, maxarg);
+	    if (SvRMAGICAL(av)) {
+		U32 i;
+		for (i=0; i < (U32)maxarg; i++) {
+		    SV ** const svp = av_fetch(av, i, FALSE);
+		    /* See note in pp_helem, and bug id #27839 */
+		    SP[i+1] = svp
+			? SvGMAGICAL(*svp) ? (mg_get(*svp), *svp) : *svp
+			: &PL_sv_undef;
+		}
 	    }
+	    else {
+		Copy(AvARRAY(av), SP+1, maxarg, SV*);
+	    }
+	    SP += maxarg;
 	}
-	else {
-	    Copy(AvARRAY(av), SP+1, maxarg, SV*);
+	else if (gimme == G_SCALAR) {
+	    dTARGET;
+	    const I32 maxarg = AvFILL(av) + 1;
+	    SETi(maxarg);
 	}
-	SP += maxarg;
-    }
-    else if (gimme == G_SCALAR) {
-	dTARGET;
-	const I32 maxarg = AvFILL(av) + 1;
-	SETi(maxarg);
-    }
     } else {
 	/* The guts of pp_rv2hv  */
-    if (gimme == G_ARRAY) { /* array wanted */
-	*PL_stack_sp = sv;
-	return do_kv();
-    }
-    else if (gimme == G_SCALAR) {
-	dTARGET;
-    TARG = Perl_hv_scalar(aTHX_ MUTABLE_HV(sv));
-	SPAGAIN;
-	SETTARG;
-    }
+	if (gimme == G_ARRAY) { /* array wanted */
+	    *PL_stack_sp = sv;
+	    return do_kv();
+	}
+	else if (gimme == G_SCALAR) {
+	    dTARGET;
+	    TARG = Perl_hv_scalar(aTHX_ MUTABLE_HV(sv));
+	    SPAGAIN;
+	    SETTARG;
+	}
     }
     RETURN;
 
