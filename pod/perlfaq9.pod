@@ -341,11 +341,12 @@ a DBI compatible driver.  C<HTTPD::UserAdmin> supports files used by the
 
 (contributed by brian d foy)
 
-You can't really prevent people from sending your script bad data, at
-least not with Perl, which works on the server side. If you want to
-prevent data that try to use SQL injection or other sorts of attacks
-(and you should want to), you have to not trust any data that enter
-your program.
+You can't prevent people from sending your script bad data. Even if
+you add some client-side checks, people may disable them or bypass
+them completely. For instance, someone might use a module such as
+C<LWP> to access your CGI program. If you want to prevent data that
+try to use SQL injection or other sorts of attacks (and you should
+want to), you have to not trust any data that enter your program.
 
 The L<perlsec> documentation has general advice about data security.
 If you are using the C<DBI> module, use placeholder to fill in data.
