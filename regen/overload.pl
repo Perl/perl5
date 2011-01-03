@@ -80,8 +80,8 @@ sub print_header {
  *
  *    $file
  *
- *    Copyright (C) 1997, 1998, 2000, 2001, 2005, 2006, 2007 by Larry Wall
- *    and others
+ *    Copyright (C) 1997, 1998, 2000, 2001, 2005, 2006, 2007, 2011
+ *    by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -102,7 +102,15 @@ print <<'EOF';
 enum {
 EOF
 
-print map "    ${_}_amg,\n", @enums;
+for (0..$#enums) {
+    my $op = $names[$_];
+    $op = 'fallback' if $op eq '()';
+    $op =~ s/^\(//;
+    die if $op =~ m{\*/};
+    my $l =   3 - int((length($enums[$_]) + 9) / 8);
+    $l = 1 if $l < 1;
+    printf "    %s_amg,%s/* %-8s */\n", $enums[$_], ("\t" x $l), $op;
+}
 
 print <<'EOF';
     max_amg_code
@@ -138,7 +146,13 @@ static const char * const PL_AMG_names[NofAMmeth] = {
      overload.pm.  */
 EOT
 
-print $c map { s/(["\\"])/\\$1/g; "    \"$_\",\n" } @names;
+for (0..$#names) {
+    my $n = $names[$_];
+    $n =~ s/(["\\])/\\$1/g;
+    my $l =   3 - int((length($n) + 7) / 8);
+    $l = 1 if $l < 1;
+    printf $c "    \"%s\",%s/* %-10s */\n", $n, ("\t" x $l), $enums[$_];
+}
 
 print $c <<"EOT";
     "$last"
