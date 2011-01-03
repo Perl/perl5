@@ -2,7 +2,7 @@
 
 perlfaq1 - General Questions About Perl
 
-=head1 DESCRIPTION
+=head1 DESCRIPTION 
 
 This section of the FAQ answers very general, high-level questions
 about Perl.
@@ -101,15 +101,17 @@ for a while, although not at the same level as the current releases.
 
 =item *
 
-No one is actively supporting Perl 4. Five years ago it was a dead
+No one is actively supporting Perl 4. Ten years ago it was a dead
 camel carcass (according to this document). Now it's barely a skeleton
 as its whitewashed bones have fractured or eroded.
 
 =item *
 
 There is no Perl 6 release scheduled, but it will be available when
-it's ready. Stay tuned, but don't worry that you'll have to change
-major versions of Perl; no one is going to take Perl 5 away from you.
+it's ready. The joke is that it's scheduled for Christmas, but that we
+just don't know which one. Stay tuned, but don't worry that you'll
+have to change major versions of Perl; no one is going to take Perl 5
+away from you.
 
 =item *
 
@@ -130,23 +132,24 @@ minor release (i.e. perl5.9.x, where 9 is the minor release).
 In short, Perl 4 is the past, Perl 5 is the present, and Perl 6 is the
 future.
 
-The number after perl (i.e. the 5 after Perl 5) is the major release
+The number after Perl (i.e. the 5 after Perl 5) is the major release
 of the perl interpreter as well as the version of the language. Each
 major version has significant differences that earlier versions cannot
 support.
 
-The current major release of Perl is Perl 5, and was released in 1994.
-It can run scripts from the previous major release, Perl 4 (March 1991),
-but has significant differences. It introduced the concept of references,
-complex data structures, and modules. The Perl 5 interpreter was a
-complete re-write of the previous perl sources.
+The current major release of Perl is Perl 5, and was first released in
+1994. It can run scripts from the previous major release, Perl 4
+(March 1991), but has significant differences. It introduced the
+concept of references, complex data structures, and modules. The Perl
+5 interpreter was a complete re-write of the previous perl sources.
 
-Perl 6 is the next major version of Perl, but it's still in development
-in both its syntax and design. The work started in 2002 and is still
-ongoing. Many of the most interesting features have shown up in the
-latest versions of Perl 5, and some Perl 5 modules allow you to use some
-Perl 6 syntax in your programs. You can learn more about Perl 6 at
-http://dev.perl.org/perl6/ .
+Perl 6 is the next major version of Perl, although it's not intended to
+replace Perl 5. It's still in development in both its syntax and
+design. The work started in 2002 and is still ongoing. Some of the
+most interesting features have shown up in the latest versions of Perl
+5, and some Perl 5 modules allow you to use some Perl 6 syntax in your
+programs. The current leading implementation of Perl 6 is Rakudo (
+http://rakudo.org ).
 
 See L<perlhist> for a history of Perl revisions.
 
