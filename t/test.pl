@@ -595,7 +595,7 @@ sub which_perl {
 	$Perl = $^X;
 
 	# VMS should have 'perl' aliased properly
-	return $Perl if $^O eq 'VMS';
+	return $Perl if $is_vms;
 
 	my $exe;
 	if (! eval 'require Config; 1') {
@@ -705,7 +705,7 @@ sub _fresh_perl {
     open TEST, ">$tmpfile" or die "Cannot open $tmpfile: $!";
 
     # VMS adjustments
-    if( $^O eq 'VMS' ) {
+    if( $is_vms ) {
         $prog =~ s#/dev/null#NL:#;
 
         # VMS file locking
@@ -728,7 +728,7 @@ sub _fresh_perl {
     # various yaccs may or may not capitalize 'syntax'.
     $results =~ s/^(syntax|parse) error/syntax error/mig;
 
-    if ($^O eq 'VMS') {
+    if ($is_vms) {
         # some tests will trigger VMS messages that won't be expected
         $results =~ s/\n?%[A-Z]+-[SIWEF]-[A-Z]+,.*//;
 
@@ -902,9 +902,9 @@ sub watchdog ($;$)
 
         # On Windows and VMS, try launching a watchdog process
         #   using system(1, ...) (see perlport.pod)
-        if (($^O eq 'MSWin32') || ($^O eq 'VMS')) {
+        if ($is_mswin || $is_vms) {
             # On Windows, try to get the 'real' PID
-            if ($^O eq 'MSWin32') {
+            if ($is_mswin) {
                 eval { require Win32; };
                 if (defined(&Win32::GetCurrentProcessId)) {
                     $pid_to_kill = Win32::GetCurrentProcessId();
@@ -920,7 +920,7 @@ sub watchdog ($;$)
                 local $SIG{'__WARN__'} = sub {
                     _diag("Watchdog warning: $_[0]");
                 };
-                my $sig = $^O eq 'VMS' ? 'TERM' : 'KILL';
+                my $sig = $is_vms ? 'TERM' : 'KILL';
                 my $cmd = _create_runperl( prog =>  "sleep($timeout);" .
                                                     "warn qq/# $timeout_msg" . '\n/;' .
                                                     "kill($sig, $pid_to_kill);");
@@ -995,7 +995,7 @@ sub watchdog ($;$)
                 select(STDERR); $| = 1;
                 _diag($timeout_msg);
                 POSIX::_exit(1) if (defined(&POSIX::_exit));
-                my $sig = $^O eq 'VMS' ? 'TERM' : 'KILL';
+                my $sig = $is_vms ? 'TERM' : 'KILL';
                 kill($sig, $pid_to_kill);
             })->detach();
         return;
@@ -1012,7 +1012,7 @@ WATCHDOG_VIA_ALARM:
             select(STDERR); $| = 1;
             _diag($timeout_msg);
             POSIX::_exit(1) if (defined(&POSIX::_exit));
-            my $sig = $^O eq 'VMS' ? 'TERM' : 'KILL';
+            my $sig = $is_vms ? 'TERM' : 'KILL';
             kill($sig, $pid_to_kill);
         };
     }
