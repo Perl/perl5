@@ -9,7 +9,7 @@ BEGIN {
 use strict qw(refs subs);
 use re ();
 
-plan(198);
+plan(200);
 
 # Test glob operations.
 
@@ -375,6 +375,25 @@ curr_test($test + 2);
     }
     print "# good, didn't recurse\n";
 }
+
+# test that DESTROY is called on all objects during global destruction,
+# even those without hard references [perl #36347]
+
+is(
+  runperl(
+   stderr => 1, prog => 'sub DESTROY { print q-aaa- } bless \$a[0]'
+  ),
+ "aaa", 'DESTROY called on array elem'
+);
+is(
+  runperl(
+   stderr => 1,
+   prog => '{ bless \my@x; *a=sub{@x}}sub DESTROY { print q-aaa- }'
+  ),
+ "aaa",
+ 'DESTROY called on closure variable'
+);
+
 
 # test if refgen behaves with autoviv magic
 {
