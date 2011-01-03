@@ -920,7 +920,7 @@ Caledonia and South America.
 
 =head2 v5.8.5-RC1 - wikipedia, "Pedunculate Oak" (abridged)
 
-Announced on 2004-07-07 by Nicholas Clark
+L<Announced on 2004-07-07 by Nicholas Clark|http://groups.google.com/group/perl.perl5.porters/msg/ca6ce4a7ed9f219c?pli=1>
 
 The Pedunculate Oak is called the Common Oak  in Britain, and is also
 often called the English Oak in other English speaking countries It is a
