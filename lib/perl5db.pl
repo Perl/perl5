@@ -8130,7 +8130,6 @@ my @pods = qw(
     amiga
     apio
     api
-    apollo
     artistic
     beos
     book

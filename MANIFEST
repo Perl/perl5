@@ -1,4 +1,3 @@
-apollo/netinet/in.h	Apollo DomainOS port: C header file frontend
 Artistic		The "Artistic License"
 AUTHORS			Contact info for contributors
 autodoc.pl		Creates pod/perlintern.pod and pod/perlapi.pod
@@ -3598,7 +3597,6 @@ hints/aix_4.sh			Hints for named architecture
 hints/aix.sh			Hints for named architecture
 hints/altos486.sh		Hints for named architecture
 hints/amigaos.sh		Hints for named architecture
-hints/apollo.sh			Hints for named architecture
 hints/atheos.sh			Hints for named architecture
 hints/aux_3.sh			Hints for named architecture
 hints/beos.sh			Hints for named architecture
@@ -4388,7 +4386,6 @@ qnx/qnx.c			QNX silent matherr callback
 README				The Instructions
 README.aix			Perl notes for AIX
 README.amiga			Perl notes for AmigaOS
-README.apollo			Perl notes for Apollo DomainOS
 README.beos			Perl notes for BeOS
 README.bs2000			Perl notes for POSIX-BC BS2000
 README.ce			Perl notes for WinCE

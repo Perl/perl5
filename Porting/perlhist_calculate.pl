@@ -133,7 +133,7 @@ sub calc_longtable {
 
 	print "\n\nTable\n";
 
-	foreach my $dir (qw(apollo beos)) {
+	foreach my $dir (qw(beos)) {
 		calc_dir($dir);
 	}
 

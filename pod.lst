@@ -197,7 +197,6 @@ h Platform-Specific
 
 r perlaix		Perl notes for AIX
 r perlamiga		Perl notes for AmigaOS
-r perlapollo		Perl notes for Apollo DomainOS
 r perlbeos		Perl notes for BeOS
 r perlbs2000		Perl notes for POSIX-BC BS2000
 r perlce		Perl notes for WinCE

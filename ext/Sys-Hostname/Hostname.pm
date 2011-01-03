@@ -113,13 +113,6 @@ sub hostname {
 	$host = `uname -n 2>/dev/null`; ## sysVish
     }
 
-    # method 6 - Apollo pre-SR10
-    || eval {
-	local $SIG{__DIE__};
-        my($a,$b,$c,$d);
-	($host,$a,$b,$c,$d)=split(/[:\. ]/,`/com/host`,6);
-    }
-
     # bummer
     || croak "Cannot get host name of local machine";  
 
