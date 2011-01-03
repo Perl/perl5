@@ -23,7 +23,7 @@ BEGIN {
 }
 
 
-plan tests => 411;  # Update this when adding/deleting tests.
+plan tests => 423;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -640,6 +640,19 @@ sub run_tests {
         ok !defined $+ [3] && !defined $- [3] &&
            !defined $+ [4] && !defined $- [4];
 
+        # Exists has a special check for @-/@+ - bug 45147
+        ok exists $-[0];
+        ok exists $+[0];
+        ok exists $-[2];
+        ok exists $+[2];
+        ok !exists $-[3];
+        ok !exists $+[3];
+        ok exists $-[-1];
+        ok exists $+[-1];
+        ok exists $-[-3];
+        ok exists $+[-3];
+        ok !exists $-[-4];
+        ok !exists $+[-4];
 
         /.(a)(b)?(a)/;
         iseq $#+, 3;
