@@ -52,6 +52,21 @@ sub validate_file_name {
     my $path = shift;
     my $filename = basename $path;
 
+
+    my @path_components = split('/',$path);
+    pop @path_components; # throw away the filename
+    for my $component (@path_components) {
+        if ($component =~ /\..*?\./) {
+            fail("$path has a directory component containing more than one '.'");
+            return;
+        }
+
+        if (length($component) > 32) {
+            fail("$path has a directory with a name over 32 characters. This fails on VOS");
+        }
+    }
+
+
     if ($filename =~ m/^\-/) {
         fail("starts with -: $path");
         return;
@@ -81,7 +96,7 @@ sub validate_file_name {
         }
     }
 
-    ok($filename, $filename);
+    ok($filename, $path);
 }
 
 # EOF
