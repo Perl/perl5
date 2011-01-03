@@ -290,6 +290,6 @@ limit this list to books published in the past five years.
 
 =head2 Get your book listed
 
-If you're Perl book isn't listed and you think it should be, let us know.
+If your Perl book isn't listed and you think it should be, let us know.
 
 =cut
