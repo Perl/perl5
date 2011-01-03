@@ -1676,7 +1676,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 	# how many times FETCH/STORE is called:
 	#
 	# Mutating ops (+=, ++ etc) trigger a copy ('='), since
-	# the code can't distingish between something that's been copied:
+	# the code can't distinguish between something that's been copied:
 	#    $a = foo->new(0); $b = $a; refcnt($$b) == 2
 	# and overloaded objects stored in ties which will have extra
 	# refcounts due to the tied_obj magic and entries on the tmps
@@ -1685,7 +1685,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 	# This accounts for a '=', and an extra STORE.
 	# We also have a FETCH returning the final value from the eval,
 	# plus a FETCH in the overload subs themselves: ($_[0][0])
-	# triggers one. However, tied agregates have a mechanism to prevent
+	# triggers one. However, tied aggregates have a mechanism to prevent
 	# multiple fetches between STOREs, which means that the tied
 	# hash skips doing a FETCH during '='.
 
@@ -1806,7 +1806,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 		    . '$_[1] eq "l" ? (-l ($f)) :'
 		    . '$_[1] eq "t" ? (-t ($f)) :'
 		    . '$_[1] eq "T" ? (-T ($f)) : 0;}';
-	# Note - we don't care what these filetests return, as
+	# Note - we don't care what these file tests return, as
 	# long as the tied and untied versions return the same value.
 	# The flags below are chosen to test all uses of tryAMAGICftest_MG
 	for (qw(r e f l t T)) {
@@ -1962,7 +1962,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 		    my $desc =  "<$res_term> $ov_pkg" ;
 		    my $res = eval $res_term;
 		    diag("eval of res_term $desc gave <$@>") if $@;
-		    # uniquely, the inc/dec ops return tthe original
+		    # uniquely, the inc/dec ops return the original
 		    # ref rather than a copy, so stringify it to
 		    # find out if its tainted
 		    $res = "$res" if $res_term =~ /\+\+|--/;
