@@ -934,7 +934,13 @@ this document
 =item *
 
 Run the test suite.  You might not think that one typo fix would break
-a test file. You'd be wrong
+a test file. You'd be wrong.  Here's an example of where not running the
+suite caused problems.  A patch was submitted that added a couple of
+tests to an existing .t.  It couldn't possibly affect anything else, so
+no need to test beyond the single affected .t, right?  But, the
+submitter's email address had changed since the last of their
+submissions, and this caused other tests to fail.  Running the test
+target given in the next item would have caught this problem.
 
 =item *
 
