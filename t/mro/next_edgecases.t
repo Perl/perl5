@@ -5,7 +5,7 @@ use warnings;
 
 BEGIN { chdir 't'; require q(./test.pl); @INC = qw "../lib lib" }
 
-plan(tests => 14);
+plan(tests => 12);
 
 {
 
@@ -92,20 +92,4 @@ plan(tests => 14);
     eval { Qux->foo() };
     is($@, '', "->next::can on non-existing package name");
 
-}
-
-# Test next::method with UNIVERSAL methods
-{
-    package UNIVERSAL;
-    sub foo { "foo" }
-    our @ISA = "a";
-    package a;
-    sub bar { "bar" }
-    package M;
-    sub foo { shift->next::method }
-    sub bar { shift->next::method }
-    package main;
-
-    is eval { M->foo }, "foo", 'next::method with implicit UNIVERSAL';
-    is eval { M->bar }, "bar", 'n::m w/superclass of implicit UNIVERSAL';
 }

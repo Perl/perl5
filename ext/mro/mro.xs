@@ -482,7 +482,6 @@ mro__nextcan(...)
     const char *hvname;
     I32 entries;
     struct mro_meta* selfmeta;
-    bool seen_univ = FALSE;
     HV* nmcache;
     I32 i;
   PPCODE:
@@ -613,7 +612,6 @@ mro__nextcan(...)
     /* Now search the remainder of the MRO for the
        same method name as the contextually enclosing
        method */
-   retry:
     if(entries > 0) {
         while (entries--) {
             SV * const linear_sv = *linear_svp++;
@@ -632,10 +630,6 @@ mro__nextcan(...)
             }
 
             assert(curstash);
-
-	    if (!seen_univ && SvCUR(linear_sv) == 9
-	     && strnEQ(SvPV_nolen_const(linear_sv), "UNIVERSAL", 9))
-		seen_univ = TRUE;
 
             gvp = (GV**)hv_fetch(curstash, subname, subname_len, 0);
             if (!gvp) continue;
@@ -656,14 +650,6 @@ mro__nextcan(...)
                 XSRETURN(1);
             }
         }
-    }
-
-    if (!seen_univ && (selfstash = gv_stashpvn("UNIVERSAL", 9, 0))) {
-	linear_av = S_mro_get_linear_isa_c3(aTHX_ selfstash, 0);
-	linear_svp = AvARRAY(linear_av);
-	entries = AvFILLp(linear_av) + 1;
-	seen_univ = TRUE;
-	goto retry;
     }
 
     (void)hv_store_ent(nmcache, sv, &PL_sv_undef, 0);
