@@ -554,8 +554,8 @@ do_clean_named_io_objs(pTHX_ SV *const sv)
 /* Void wrapper to pass to visit() */
 static void
 do_curse(pTHX_ SV * const sv) {
-    if ((PL_stderrgv && GvGP(PL_stderrgv) && GvIO(PL_stderrgv) == sv)
-     || (PL_defoutgv && GvGP(PL_defoutgv) && GvIO(PL_defoutgv) == sv))
+    if ((PL_stderrgv && GvGP(PL_stderrgv) && (SV*)GvIO(PL_stderrgv) == sv)
+     || (PL_defoutgv && GvGP(PL_defoutgv) && (SV*)GvIO(PL_defoutgv) == sv))
 	return;
     (void)curse(sv, 0);
 }
