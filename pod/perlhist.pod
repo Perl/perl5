@@ -72,7 +72,7 @@ the strings?).
           1.001..10     1988-Jan-30
           1.011..14     1988-Feb-02
  Schwern  1.0.15        2002-Dec-18     Modernization
- Richard  1.0.16        2003-Dec-18
+ Richard  1.0_16        2003-Dec-18
 
  Larry   2.000          1988-Jun-05
 
@@ -328,6 +328,7 @@ the strings?).
  Leon     5.005_04-RC1  2004-Feb-05
           5.005_04-RC2  2004-Feb-18
           5.005_04      2004-Feb-23
+          5.005_05-RC1  2009-Feb-16
 
  Sarathy  5.005_50      1998-Jul-26     The 5.6 development track.
           5.005_51      1998-Aug-10
@@ -419,12 +420,20 @@ the strings?).
  Jesse    5.11.3        2009-Dec-20
  Ricardo  5.11.4        2010-Jan-20
  Steve    5.11.5        2010-Feb-20
- Jesse    5.12.0-RC1    2010-Mar-29
+ Jesse    5.12.0-RC0    2010-Mar-21
+          5.12.0-RC1    2010-Mar-29
+          5.12.0-RC2    2010-Apr-01
+          5.12.0-RC3    2010-Apr-02
+          5.12.0-RC4    2010-Apr-06
+          5.12.0-RC5    2010-Apr-09
 
  Jesse    5.12.0        2010-Apr-12
 
- Jesse    5.12.1        2010-May-16     The 5.12 maintenance track
- Jesse    5.12.2        2010-Sep-06
+ Jesse    5.12.1-RC2    2010-May-13     The 5.12 maintenance track
+          5.12.1-RC1    2010-May-09
+          5.12.1        2010-May-16     
+          5.12.2-RC2    2010-Aug-31
+          5.12.2        2010-Sep-06
 
  Leon     5.13.0        2010-Apr-20     The 5.13 development track
  Ricardo  5.13.1        2010-May-20
