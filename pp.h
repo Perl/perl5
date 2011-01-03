@@ -433,10 +433,7 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 
 #define tryAMAGICunTARGET(meth, shift, jump)				\
     STMT_START {						\
-	dSP;							\
-	sp--; /* get TARGET from below PL_stack_sp */		\
-	{							\
-	    dTARGETSTACKED;					\
+	    dATARGET;						\
 	    dSP;						\
 	    SV *tmpsv;						\
 	    SV *arg= sp[shift];					\
@@ -456,7 +453,6 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 		}						\
 		return NORMAL;					\
 	    }							\
-	}							\
     } STMT_END
 
 /* This is no longer used anywhere in the core. You might wish to consider
