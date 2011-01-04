@@ -507,6 +507,54 @@ PP(pp_die)
 
 /* I/O. */
 
+/* These are private to this function, which is private to this file.
+   Use 0x04 rather than the next available bit, to help the compiler if the
+   architecture can generate more efficient instructions.  */
+#define MORTALIZE_NOT_NEEDED	0x04
+#define TIED_HANDLE_ARGC_SHIFT	3
+
+static OP *
+S_tied_handle_method(pTHX_ const char *const methname, SV **sp,
+		     IO *const io, MAGIC *const mg, const U32 flags, ...)
+{
+    U32 argc = flags >> TIED_HANDLE_ARGC_SHIFT;
+
+    PERL_ARGS_ASSERT_TIED_HANDLE_METHOD;
+
+    /* Ensure that our flag bits do not overlap.  */
+    assert((MORTALIZE_NOT_NEEDED & G_WANT) == 0);
+    assert((G_WANT >> TIED_HANDLE_ARGC_SHIFT) == 0);
+
+    PUSHMARK(sp);
+    PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
+    if (argc) {
+	const U32 mortalize_not_needed = flags & MORTALIZE_NOT_NEEDED;
+	va_list args;
+	va_start(args, flags);
+	do {
+	    SV *const arg = va_arg(args, SV *);
+	    if(mortalize_not_needed)
+		PUSHs(arg);
+	    else
+		mPUSHs(arg);
+	} while (--argc);
+	va_end(args);
+    }
+
+    PUTBACK;
+    ENTER_with_name("call_tied_handle_method");
+    call_method(methname, flags & G_WANT);
+    LEAVE_with_name("call_tied_handle_method");
+    return NORMAL;
+}
+
+#define tied_handle_method(a,b,c,d)		\
+    S_tied_handle_method(aTHX_ a,b,c,d,G_SCALAR)
+#define tied_handle_method1(a,b,c,d,e)		\
+    S_tied_handle_method(aTHX_ a,b,c,d,G_SCALAR | (1 << TIED_HANDLE_ARGC_SHIFT),e)
+#define tied_handle_method2(a,b,c,d,e,f)	\
+    S_tied_handle_method(aTHX_ a,b,c,d,G_SCALAR | (2 << TIED_HANDLE_ARGC_SHIFT), e,f)
+
 PP(pp_open)
 {
     dVAR; dSP;
@@ -563,54 +611,6 @@ PP(pp_open)
 	RETPUSHUNDEF;
     RETURN;
 }
-
-/* These are private to this function, which is private to this file.
-   Use 0x04 rather than the next available bit, to help the compiler if the
-   architecture can generate more efficient instructions.  */
-#define MORTALIZE_NOT_NEEDED	0x04
-#define TIED_HANDLE_ARGC_SHIFT	3
-
-static OP *
-S_tied_handle_method(pTHX_ const char *const methname, SV **sp,
-		     IO *const io, MAGIC *const mg, const U32 flags, ...)
-{
-    U32 argc = flags >> TIED_HANDLE_ARGC_SHIFT;
-
-    PERL_ARGS_ASSERT_TIED_HANDLE_METHOD;
-
-    /* Ensure that our flag bits do not overlap.  */
-    assert((MORTALIZE_NOT_NEEDED & G_WANT) == 0);
-    assert((G_WANT >> TIED_HANDLE_ARGC_SHIFT) == 0);
-
-    PUSHMARK(sp);
-    PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
-    if (argc) {
-	const U32 mortalize_not_needed = flags & MORTALIZE_NOT_NEEDED;
-	va_list args;
-	va_start(args, flags);
-	do {
-	    SV *const arg = va_arg(args, SV *);
-	    if(mortalize_not_needed)
-		PUSHs(arg);
-	    else
-		mPUSHs(arg);
-	} while (--argc);
-	va_end(args);
-    }
-
-    PUTBACK;
-    ENTER_with_name("call_tied_handle_method");
-    call_method(methname, flags & G_WANT);
-    LEAVE_with_name("call_tied_handle_method");
-    return NORMAL;
-}
-
-#define tied_handle_method(a,b,c,d)		\
-    S_tied_handle_method(aTHX_ a,b,c,d,G_SCALAR)
-#define tied_handle_method1(a,b,c,d,e)	\
-    S_tied_handle_method(aTHX_ a,b,c,d,G_SCALAR | (1 << TIED_HANDLE_ARGC_SHIFT),e)
-#define tied_handle_method2(a,b,c,d,e,f)	\
-    S_tied_handle_method(aTHX_ a,b,c,d,G_SCALAR | (2 << TIED_HANDLE_ARGC_SHIFT), e,f)
 
 PP(pp_close)
 {
