@@ -1511,13 +1511,9 @@ PP(pp_prtf)
 		Move(MARK, MARK + 1, (SP - MARK) + 1, SV*);
 		++SP;
 	    }
-	    PUSHMARK(MARK - 1);
-	    *MARK = SvTIED_obj(MUTABLE_SV(io), mg);
-	    PUTBACK;
-	    ENTER;
-	    call_method("PRINTF", G_SCALAR);
-	    LEAVE;
-	    return NORMAL;
+	    return S_tied_handle_method(aTHX_ "PRINTF", mark - 1, io, mg,
+					G_SCALAR | ARGUMENTS_ON_STACK
+					| (sp - mark) << TIED_HANDLE_ARGC_SHIFT);
 	}
     }
 
