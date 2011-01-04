@@ -536,8 +536,8 @@ PP(pp_open)
 	if (mg) {
 	    /* Method's args are same as ours ... */
 	    /* ... except handle is replaced by the object */
-	    *MARK-- = SvTIED_obj(MUTABLE_SV(io), mg);
-	    PUSHMARK(MARK);
+	    PUSHMARK(MARK - 1);
+	    *MARK = SvTIED_obj(MUTABLE_SV(io), mg);
 	    PUTBACK;
 	    ENTER_with_name("call_OPEN");
 	    call_method("OPEN", G_SCALAR);
