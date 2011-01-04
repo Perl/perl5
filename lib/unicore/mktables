@@ -1136,6 +1136,7 @@ my $IF_NOT_EQUIVALENT = 1; # Replace only under certain conditions; details in
 my $UNCONDITIONALLY = 2;   # Replace without conditions.
 my $MULTIPLE = 4;          # Don't replace, but add a duplicate record if
                            # already there
+my $CROAK = 5;             # Die with an error if is already there
 
 # Flags to give property statuses.  The phrases are to remind maintainers that
 # if the flag is changed, the indefinite article referring to it in the
@@ -3523,6 +3524,13 @@ sub trace { return main::trace(@_); }
             if ($clean_insert) {
                 if ($r->[$j]->standard_form ne $standard_form) {
                     $clean_insert = 0;
+                    if ($replace == $CROAK) {
+                        main::croak("The range to add "
+                        . sprintf("%04X", $start)
+                        . '-'
+                        . sprintf("%04X", $end)
+                        . " with value '$value' overlaps an existing range $r->[$j]");
+                    }
                 }
                 else {
 
@@ -10995,7 +11003,8 @@ sub finish_Unicode() {
 
                 # Add mappings to the property for each code point in the list
                 foreach my $range ($list->ranges) {
-                    $property->add_map($range->start, $range->end, $default);
+                    $property->add_map($range->start, $range->end, $default,
+                    Replace => $CROAK);
                 }
             }
 
