@@ -9346,19 +9346,19 @@ END
 
                 # If the map begins with a special command to us (enclosed in
                 # delimiters), extract the command(s).
-                    while ($map =~ s/ ^ $CMD_DELIM (.*?) $CMD_DELIM //x) {
-                        my $command = $1;
-                        if ($command =~  / ^ $REPLACE_CMD= (.*) /x) {
-                            $replace = $1;
-                        }
-                        elsif ($command =~  / ^ $MAP_TYPE_CMD= (.*) /x) {
-                            $map_type = $1;
-                        }
-                        else {
-                           $file->carp_bad_line("Unknown command line: '$1'");
-                           next LINE;
-                        }
+                while ($map =~ s/ ^ $CMD_DELIM (.*?) $CMD_DELIM //x) {
+                    my $command = $1;
+                    if ($command =~  / ^ $REPLACE_CMD= (.*) /x) {
+                        $replace = $1;
                     }
+                    elsif ($command =~  / ^ $MAP_TYPE_CMD= (.*) /x) {
+                        $map_type = $1;
+                    }
+                    else {
+                        $file->carp_bad_line("Unknown command line: '$1'");
+                        next LINE;
+                    }
+                }
             }
 
             if ($default_map eq $CODE_POINT && $map =~ / ^ $code_point_re $/x)
