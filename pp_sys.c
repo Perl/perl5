@@ -1601,14 +1601,11 @@ PP(pp_sysread)
     if ((PL_op->op_type == OP_READ || PL_op->op_type == OP_SYSREAD)
 	&& gv && (io = GvIO(gv)) )
     {
-	const MAGIC * mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
+	MAGIC *const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
-	    PUSHMARK(MARK-1);
-	    *MARK = SvTIED_obj(MUTABLE_SV(io), mg);
-	    ENTER;
-	    call_method("READ", G_SCALAR);
-	    LEAVE;
-	    return NORMAL;
+	    return S_tied_handle_method(aTHX_ "READ", mark - 1, io, mg,
+					G_SCALAR | ARGUMENTS_ON_STACK
+					| (sp - mark) << TIED_HANDLE_ARGC_SHIFT);
 	}
     }
 
