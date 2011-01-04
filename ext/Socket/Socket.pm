@@ -596,6 +596,9 @@ if( !defined &getaddrinfo ) {
        AI_PASSIVE     => 1,
        AI_CANONNAME   => 2,
        AI_NUMERICHOST => 4,
+       # RFC 2553 doesn't define this but Linux does - lets be nice and
+       # provide it since we can
+       AI_NUMERICSERV => 1024,
 
        EAI_BADFLAGS   => -1,
        EAI_NONAME     => -2,
@@ -663,6 +666,7 @@ sub fake_getaddrinfo
    my $flag_passive     = $flags & AI_PASSIVE();     $flags &= ~AI_PASSIVE();
    my $flag_canonname   = $flags & AI_CANONNAME();   $flags &= ~AI_CANONNAME();
    my $flag_numerichost = $flags & AI_NUMERICHOST(); $flags &= ~AI_NUMERICHOST();
+   my $flag_numericserv = $flags & AI_NUMERICSERV(); $flags &= ~AI_NUMERICSERV();
 
    $flags == 0 or return fake_makeerr( EAI_BADFLAGS() );
 
@@ -689,6 +693,7 @@ sub fake_getaddrinfo
    }
 
    if( $service ne "" and $service !~ m/^\d+$/ ) {
+      return fake_makeerr( EAI_NONAME() ) if( $flag_numericserv );
       getservbyname( $service, $protname ) or return fake_makeerr( EAI_SERVICE() );
    }
 
