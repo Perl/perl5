@@ -9346,7 +9346,6 @@ END
 
                 # If the map begins with a special command to us (enclosed in
                 # delimiters), extract the command(s).
-                if (substr($map, 0, 1) eq $CMD_DELIM) {
                     while ($map =~ s/ ^ $CMD_DELIM (.*?) $CMD_DELIM //x) {
                         my $command = $1;
                         if ($command =~  / ^ $REPLACE_CMD= (.*) /x) {
@@ -9360,7 +9359,6 @@ END
                            next LINE;
                         }
                     }
-                }
             }
 
             if ($default_map eq $CODE_POINT && $map =~ / ^ $code_point_re $/x)
