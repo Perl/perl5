@@ -1848,12 +1848,9 @@ PP(pp_send)
 		PUTBACK;
 	    }
 
-	    PUSHMARK(ORIGMARK);
-	    *(ORIGMARK+1) = SvTIED_obj(MUTABLE_SV(io), mg);
-	    ENTER;
-	    call_method("WRITE", G_SCALAR);
-	    LEAVE;
-	    return NORMAL;
+	    return S_tied_handle_method(aTHX_ "WRITE", mark - 1, io, mg,
+					G_SCALAR | ARGUMENTS_ON_STACK
+					| (sp - mark) << TIED_HANDLE_ARGC_SHIFT);
 	}
     }
     if (!gv)
