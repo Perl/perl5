@@ -9036,8 +9036,8 @@ sub output_perl_charnames_line ($$) {
         # file, in any order, interspersed in any way.  The first time a
         # property is seen, it gets information about that property and
         # caches it for quick retrieval later.  It also normalizes the maps
-        # so that only one of many synonym is stored.  The Unicode input files
-        # do use some multiple synonyms.
+        # so that only one of many synonyms is stored.  The Unicode input
+        # files do use some multiple synonyms.
 
         my $file = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
@@ -11031,7 +11031,7 @@ sub finish_Unicode() {
         }
 
         # Add any remaining code points to the mapping, using the default for
-        # missing code points
+        # missing code points.
         if (defined (my $default_map = $property->default_map)) {
             foreach my $range ($property->inverse_list->ranges) {
                 $property->add_map($range->start, $range->end, $default_map);
