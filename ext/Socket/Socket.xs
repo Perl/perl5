@@ -251,7 +251,7 @@ static void xs_getaddrinfo(pTHX_ CV *cv)
     char *hostname = NULL;
     char *servicename = NULL;
     STRLEN len;
-    struct addrinfo hints_s = {};
+    struct addrinfo hints_s;
     struct addrinfo *res;
     struct addrinfo *res_iter;
     int err;
@@ -290,6 +290,8 @@ static void xs_getaddrinfo(pTHX_ CV *cv)
       if (!len)
         servicename = NULL;
     }
+
+    Zero(&hints_s, sizeof hints_s, char);
 
     if(hints && SvOK(hints)) {
       HV *hintshash;
