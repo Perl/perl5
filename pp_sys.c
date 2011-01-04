@@ -538,7 +538,6 @@ PP(pp_open)
 	    /* ... except handle is replaced by the object */
 	    PUSHMARK(MARK - 1);
 	    *MARK = SvTIED_obj(MUTABLE_SV(io), mg);
-	    PUTBACK;
 	    ENTER_with_name("call_OPEN");
 	    call_method("OPEN", G_SCALAR);
 	    LEAVE_with_name("call_OPEN");
