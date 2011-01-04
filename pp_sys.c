@@ -511,7 +511,8 @@ PP(pp_die)
    Use 0x04 rather than the next available bit, to help the compiler if the
    architecture can generate more efficient instructions.  */
 #define MORTALIZE_NOT_NEEDED	0x04
-#define TIED_HANDLE_ARGC_SHIFT	3
+#define ARGUMENTS_ON_STACK	0x08
+#define TIED_HANDLE_ARGC_SHIFT	4
 
 static OP *
 S_tied_handle_method(pTHX_ const char *const methname, SV **sp,
@@ -527,7 +528,9 @@ S_tied_handle_method(pTHX_ const char *const methname, SV **sp,
 
     PUSHMARK(sp);
     PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
-    if (argc) {
+    if (flags & ARGUMENTS_ON_STACK)
+	sp += argc;
+    else if (argc) {
 	const U32 mortalize_not_needed = flags & MORTALIZE_NOT_NEEDED;
 	va_list args;
 	va_start(args, flags);
@@ -584,12 +587,9 @@ PP(pp_open)
 	if (mg) {
 	    /* Method's args are same as ours ... */
 	    /* ... except handle is replaced by the object */
-	    PUSHMARK(MARK - 1);
-	    *MARK = SvTIED_obj(MUTABLE_SV(io), mg);
-	    ENTER_with_name("call_OPEN");
-	    call_method("OPEN", G_SCALAR);
-	    LEAVE_with_name("call_OPEN");
-	    return NORMAL;
+	    return S_tied_handle_method(aTHX_ "OPEN", mark - 1, io, mg,
+					G_SCALAR | ARGUMENTS_ON_STACK
+					| (sp - mark) << TIED_HANDLE_ARGC_SHIFT);
 	}
     }
 
