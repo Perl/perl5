@@ -3823,7 +3823,7 @@ sub trace { return main::trace(@_); }
             trace "i  =[", $i, "]", $r->[$i];
             trace 'i+1=[', $i+1, ']', $r->[$i+1] if $i < @$r - 1;
             trace 'i+2=[', $i+2, ']', $r->[$i+2] if $i < @$r - 2;
-            trace "removed @return";
+            trace "removed ", @return if @return;
         }
 
         # An actual deletion could have changed the maximum in the list.
