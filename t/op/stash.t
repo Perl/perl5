@@ -237,9 +237,12 @@ fresh_perl_is(
     is ($c, 'main::__ANON__', '__ANON__ sub called ok');
 }
 
+
 # Stashes that are effectively renamed
 {
     package rile;
+
+    use Config;
 
     my $obj  = bless [];
     my $globref = \*tat;
@@ -254,7 +257,7 @@ fresh_perl_is(
     ::like "$obj", qr "^rile=ARRAY\(0x[\da-f]+\)\z",
      'objects stringify the same way when their stashes are moved';
     {
-	local $::TODO = "fails under threads";
+	local $::TODO =  $Config{useithreads} ? "fails under threads" : undef;
 	::is eval '__PACKAGE__', 'rile',
 	 '__PACKAGE__ returns the same when the current stash is moved';
     }
@@ -271,7 +274,7 @@ fresh_perl_is(
     ::like "$obj", qr "^rile=ARRAY\(0x[\da-f]+\)\z",
      'objects stringify the same way when their stashes are detached';
     {
-	local $::TODO = "fails under threads";
+	local $::TODO =  $Config{useithreads} ? "fails under threads" : undef;
 	::is eval '__PACKAGE__', 'rile',
 	 '__PACKAGE__ returns the same when the current stash is detached';
     }
