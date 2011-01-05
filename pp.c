@@ -5431,14 +5431,9 @@ PP(pp_splice)
     const MAGIC * const mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied);
 
     if (mg) {
-	*MARK-- = SvTIED_obj(MUTABLE_SV(ary), mg);
-	PUSHMARK(MARK);
-	PUTBACK;
-	ENTER_with_name("call_SPLICE");
-	call_method("SPLICE",GIMME_V);
-	LEAVE_with_name("call_SPLICE");
-	SPAGAIN;
-	RETURN;
+	return Perl_tied_method(aTHX_ "SPLICE", mark - 1, MUTABLE_SV(ary), mg,
+				    GIMME_V | TIED_METHOD_ARGUMENTS_ON_STACK,
+				    sp - mark);
     }
 
     SP++;
