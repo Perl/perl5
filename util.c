@@ -1427,7 +1427,7 @@ Perl_write_to_stderr(pTHX_ SV* msv)
 	PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
 	PUSHs(msv);
 	PUTBACK;
-	call_method("PRINT", G_SCALAR);
+	call_method("PRINT", G_SCALAR | G_DISCARD);
 
 	POPSTACK;
 	FREETMPS;
