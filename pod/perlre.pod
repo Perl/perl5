@@ -317,10 +317,23 @@ See L</Extended Patterns> below for details.
 
 =item [7]
 
-Note that C<\N> has two meanings.  When of the form C<\N{NAME}>, it matches the
-character or character sequence whose name is C<NAME>; and similarly
-when of the form C<\N{U+I<hex>}>, it matches the character whose Unicode
-code point is I<hex>.  Otherwise it matches any character but C<\n>.
+Note that C<\N> has two meanings.  When of the form C<\N{NAME}>, it
+matches the character or character sequence whose name is C<NAME>; and
+similarly when of the form C<\N{U+I<hex>}>, it matches the character
+whose Unicode code point is I<hex>. Otherwise it matches any character
+but C<\n>. C<\N{3}> means to match 3 non-newlines; C<\N{5,}> means to
+match at least 5. C<\N{NAME}> still means the character or sequence
+named C<NAME>, but C<NAME> cannot be things like C<3>, or C<5,>. This
+will break a L<custom charnames translator|charnames/CUSTOM
+TRANSLATORS> which allows numbers for character names, as C<\N{3}> in
+a pattern always means to match 3 non-newline characters, and not the
+character whose name is C<3>.
+
+Perl's developers are somewhat concerned about possible user confusion
+with the existing C<\N{...}> construct which matches characters by
+their Unicode name. Consequently, this feature is experimental. We may
+remove it or change it in a backwards-incompatible way if it turns out
+to be a problem.
 
 =back
 
