@@ -11031,9 +11031,10 @@ sub finish_Unicode() {
         # Add any remaining code points to the mapping, using the default for
         # missing code points.
         if (defined (my $default_map = $property->default_map)) {
-            foreach my $range ($property->inverse_list->ranges) {
-                $property->add_map($range->start, $range->end, $default_map);
-            }
+
+            # This fills in any missing values with the default.
+            $property->add_map(0, $LAST_UNICODE_CODEPOINT,
+                               $default_map, Replace => $NO);
 
             # Make sure there is a match table for the default
             if (! defined $property->table($default_map)) {
