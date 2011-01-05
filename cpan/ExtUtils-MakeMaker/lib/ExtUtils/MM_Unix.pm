@@ -2754,7 +2754,6 @@ PERL_HDRS = \
 	$(PERL_INC)/INTERN.h		\
 	$(PERL_INC)/XSUB.h		\
 	$(PERL_INC)/av.h		\
-	$(PERL_INC)/cc_runtime.h	\
 	$(PERL_INC)/config.h		\
 	$(PERL_INC)/cop.h		\
 	$(PERL_INC)/cv.h		\

@@ -6,7 +6,6 @@ av.h			Array value header
 beos/beos.c		BeOS port
 beos/beosish.h		BeOS port
 beos/nm.c		BeOS port
-cc_runtime.h		Macros need by runtime of compiler-generated code
 cflags.SH		A script that emits C compilation flags per file
 Changes			Describe how to peruse changes between releases
 config_h.SH		Produces config.h
