@@ -491,6 +491,14 @@ True if this op will be the return value of an lvalue subroutine
      )                       \
   )
 
+#ifdef PERL_CORE
+/* These are just for Perl_tied_method(), which is not part of the public API.
+   Use 0x04 rather than the next available bit, to help the compiler if the
+   architecture can generate more efficient instructions.  */
+#  define TIED_METHOD_MORTALIZE_NOT_NEEDED	0x04
+#  define TIED_METHOD_ARGUMENTS_ON_STACK	0x08
+#endif
+
 /*
  * Local variables:
  * c-indentation-style: bsd

@@ -1723,10 +1723,10 @@ s	|OP*	|doform		|NN CV *cv|NN GV *gv|NN OP *retop
 sR	|int	|dooneliner	|NN const char *cmd|NN const char *filename
 #  endif
 s	|SV *	|space_join_names_mortal|NN char *const *array
-so	|OP *	|tied_handle_method|NN const char *const methname|NN SV **sp \
-				|NN IO *const io|NN const MAGIC *const mg \
-				|const U32 flags|U32 argc|...
 #endif
+p	|OP *	|tied_method|NN const char *const methname|NN SV **sp \
+				|NN SV *const sv|NN const MAGIC *const mg \
+				|const U32 flags|U32 argc|...
 
 #if defined(PERL_IN_REGCOMP_C)
 Es	|regnode*|reg		|NN struct RExC_state_t *pRExC_state \

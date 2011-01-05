@@ -4548,6 +4548,14 @@ PERL_CALLCONV void	Perl_taint_proper(pTHX_ const char* f, const char *const s)
 #define PERL_ARGS_ASSERT_TAINT_PROPER	\
 	assert(s)
 
+PERL_CALLCONV OP *	Perl_tied_method(pTHX_ const char *const methname, SV **sp, SV *const sv, const MAGIC *const mg, const U32 flags, U32 argc, ...)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3)
+			__attribute__nonnull__(pTHX_4);
+#define PERL_ARGS_ASSERT_TIED_METHOD	\
+	assert(methname); assert(sp); assert(sv); assert(mg)
+
 PERL_CALLCONV void	Perl_tmps_grow(pTHX_ I32 n);
 PERL_CALLCONV UV	Perl_to_uni_fold(pTHX_ UV c, U8 *p, STRLEN *lenp)
 			__attribute__nonnull__(pTHX_2)
@@ -6260,14 +6268,6 @@ STATIC SV *	S_space_join_names_mortal(pTHX_ char *const *array)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SPACE_JOIN_NAMES_MORTAL	\
 	assert(array)
-
-STATIC OP *	S_tied_handle_method(pTHX_ const char *const methname, SV **sp, IO *const io, const MAGIC *const mg, const U32 flags, U32 argc, ...)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3)
-			__attribute__nonnull__(pTHX_4);
-#define PERL_ARGS_ASSERT_TIED_HANDLE_METHOD	\
-	assert(methname); assert(sp); assert(io); assert(mg)
 
 #endif
 #if defined(PERL_IN_REGCOMP_C)
