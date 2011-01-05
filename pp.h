@@ -497,6 +497,7 @@ True if this op will be the return value of an lvalue subroutine
    architecture can generate more efficient instructions.  */
 #  define TIED_METHOD_MORTALIZE_NOT_NEEDED	0x04
 #  define TIED_METHOD_ARGUMENTS_ON_STACK	0x08
+#  define TIED_METHOD_SAY			0x10
 #endif
 
 /*

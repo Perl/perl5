@@ -729,22 +729,11 @@ PP(pp_print)
 	    Move(MARK, MARK + 1, (SP - MARK) + 1, SV*);
 	    ++SP;
 	}
-	PUSHMARK(MARK - 1);
-	*MARK = SvTIED_obj(MUTABLE_SV(io), mg);
-	PUTBACK;
-	ENTER_with_name("call_PRINT");
-	if( PL_op->op_type == OP_SAY ) {
-		/* local $\ = "\n" */
-		SAVEGENERICSV(PL_ors_sv);
-		PL_ors_sv = newSVpvs("\n");
-	}
-	call_method("PRINT", G_SCALAR);
-	LEAVE_with_name("call_PRINT");
-	SPAGAIN;
-	MARK = ORIGMARK + 1;
-	*MARK = *SP;
-	SP = MARK;
-	RETURN;
+	return Perl_tied_method(aTHX_ "PRINT", mark - 1, MUTABLE_SV(io),
+				mg,
+				(G_SCALAR | TIED_METHOD_ARGUMENTS_ON_STACK
+				 | (PL_op->op_type == OP_SAY
+				    ? TIED_METHOD_SAY : 0)), sp - mark);
     }
     if (!io) {
         if ( gv && GvEGVx(gv) && (io = GvIO(GvEGV(gv)))

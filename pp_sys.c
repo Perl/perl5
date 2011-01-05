@@ -516,6 +516,7 @@ Perl_tied_method(pTHX_ const char *const methname, SV **sp, SV *const sv,
     /* Ensure that our flag bits do not overlap.  */
     assert((TIED_METHOD_MORTALIZE_NOT_NEEDED & G_WANT) == 0);
     assert((TIED_METHOD_ARGUMENTS_ON_STACK & G_WANT) == 0);
+    assert((TIED_METHOD_SAY & G_WANT) == 0);
 
     PUSHMARK(sp);
     PUSHs(SvTIED_obj(sv, mg));
@@ -538,6 +539,11 @@ Perl_tied_method(pTHX_ const char *const methname, SV **sp, SV *const sv,
 
     PUTBACK;
     ENTER_with_name("call_tied_method");
+    if (flags & TIED_METHOD_SAY) {
+	/* local $\ = "\n" */
+	SAVEGENERICSV(PL_ors_sv);
+	PL_ors_sv = newSVpvs("\n");
+    }
     call_method(methname, flags & G_WANT);
     LEAVE_with_name("call_tied_method");
     return NORMAL;
