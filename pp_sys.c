@@ -549,7 +549,7 @@ S_tied_handle_method(pTHX_ const char *const methname, SV **sp,
     return NORMAL;
 }
 
-#define tied_handle_method(a,b,c,d)		\
+#define tied_handle_method0(a,b,c,d)		\
     S_tied_handle_method(aTHX_ a,b,c,d,G_SCALAR,0)
 #define tied_handle_method1(a,b,c,d,e)		\
     S_tied_handle_method(aTHX_ a,b,c,d,G_SCALAR,1,e)
@@ -623,7 +623,7 @@ PP(pp_close)
 	if (io) {
 	    const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	    if (mg) {
-		return tied_handle_method("CLOSE", SP, io, mg);
+		return tied_handle_method0("CLOSE", SP, io, mg);
 	    }
 	}
     }
@@ -706,7 +706,7 @@ PP(pp_fileno)
     if (io
 	&& (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar)))
     {
-	return tied_handle_method("FILENO", SP, io, mg);
+	return tied_handle_method0("FILENO", SP, io, mg);
     }
 
     if (!io || !(fp = IoIFP(io))) {
@@ -2106,7 +2106,7 @@ PP(pp_tell)
     if (io) {
 	const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
-	    return tied_handle_method("TELL", SP, io, mg);
+	    return tied_handle_method0("TELL", SP, io, mg);
 	}
     }
     else if (!gv) {
