@@ -515,8 +515,8 @@ PP(pp_die)
 
 static OP *
 S_tied_handle_method(pTHX_ const char *const methname, SV **sp,
-		     IO *const io, MAGIC *const mg, const U32 flags, U32 argc,
-		     ...)
+		     IO *const io, const MAGIC *const mg, const U32 flags,
+		     U32 argc, ...)
 {
     PERL_ARGS_ASSERT_TIED_HANDLE_METHOD;
 
@@ -573,7 +573,7 @@ PP(pp_open)
 	DIE(aTHX_ PL_no_usym, "filehandle");
 
     if ((io = GvIOp(gv))) {
-	MAGIC *mg;
+	const MAGIC *mg;
 	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
 
 	if (IoDIRP(io))
@@ -621,7 +621,7 @@ PP(pp_close)
     if (gv) {
 	IO * const io = GvIO(gv);
 	if (io) {
-	    MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
+	    const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	    if (mg) {
 		return tied_handle_method("CLOSE", SP, io, mg);
 	    }
@@ -696,7 +696,7 @@ PP(pp_fileno)
     GV *gv;
     IO *io;
     PerlIO *fp;
-    MAGIC  *mg;
+    const MAGIC *mg;
 
     if (MAXARG < 1)
 	RETPUSHUNDEF;
@@ -771,7 +771,7 @@ PP(pp_binmode)
     io = GvIO(gv);
 
     if (io) {
-	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
+	const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    /* This takes advantage of the implementation of the varargs
 	       function, which I don't think that the optimiser will be able to
@@ -1258,7 +1258,7 @@ PP(pp_getc)
 	EXTEND(SP, 1);
 
     if (io) {
-	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
+	const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    const U32 gimme = GIMME_V;
 	    S_tied_handle_method(aTHX_ "GETC", SP, io, mg, gimme, 0);
@@ -1499,7 +1499,7 @@ PP(pp_prtf)
     IO *const io = GvIO(gv);
 
     if (io) {
-	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
+	const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    if (MARK == ORIGMARK) {
 		MEXTEND(SP, 1);
@@ -1597,7 +1597,7 @@ PP(pp_sysread)
     if ((PL_op->op_type == OP_READ || PL_op->op_type == OP_SYSREAD)
 	&& gv && (io = GvIO(gv)) )
     {
-	MAGIC *const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
+	const MAGIC *const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    return S_tied_handle_method(aTHX_ "READ", mark - 1, io, mg,
 					G_SCALAR | ARGUMENTS_ON_STACK,
@@ -1836,7 +1836,7 @@ PP(pp_send)
     GV *const gv = MUTABLE_GV(*++MARK);
     if (PL_op->op_type == OP_SYSWRITE
 	&& gv && (io = GvIO(gv))) {
-	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
+	const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    if (MARK == SP - 1) {
 		SV *sv = *SP;
@@ -2032,7 +2032,7 @@ PP(pp_eof)
     dVAR; dSP;
     GV *gv;
     IO *io;
-    MAGIC *mg;
+    const MAGIC *mg;
     /*
      * in Perl 5.12 and later, the additional parameter is a bitmask:
      * 0 = eof
@@ -2104,7 +2104,7 @@ PP(pp_tell)
 
     io = GvIO(gv);
     if (io) {
-	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
+	const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    return tied_handle_method("TELL", SP, io, mg);
 	}
@@ -2138,7 +2138,7 @@ PP(pp_sysseek)
     IO *const io = GvIO(gv);
 
     if (io) {
-	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
+	const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 #if LSEEKSIZE > IVSIZE
 	    SV *const offset_sv = newSVnv((NV) offset);
