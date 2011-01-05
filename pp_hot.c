@@ -1567,21 +1567,15 @@ Perl_do_readline(pTHX)
     const I32 gimme = GIMME_V;
 
     if (io) {
-	MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
+	const MAGIC *const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
-	    PUSHMARK(SP);
-	    XPUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
-	    PUTBACK;
-	    ENTER_with_name("call_READLINE");
-	    call_method("READLINE", gimme);
-	    LEAVE_with_name("call_READLINE");
-	    SPAGAIN;
+	    Perl_tied_method(aTHX_ "READLINE", SP, MUTABLE_SV(io), mg, gimme, 0);
 	    if (gimme == G_SCALAR) {
-		SV* const result = POPs;
-		SvSetSV_nosteal(TARG, result);
-		PUSHTARG;
+		SPAGAIN;
+		SvSetSV_nosteal(TARG, TOPs);
+		SETTARG;
 	    }
-	    RETURN;
+	    return NORMAL;
 	}
     }
     fp = NULL;
