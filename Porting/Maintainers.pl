@@ -308,7 +308,7 @@ use File::Glob qw(:case);
     'CGI' =>
 	{
 	'MAINTAINER'	=> 'lstein',
-	'DISTRIBUTION'	=> 'LDS/CGI.pm-3.50.tar.gz',
+	'DISTRIBUTION'	=> 'MARKSTOS/CGI.pm-3.51.tar.gz',
 	'FILES'		=> q[cpan/CGI],
 	'EXCLUDED'	=> [ qr{^t/lib/Test},
 				qw( cgi-lib_porting.html
