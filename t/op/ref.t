@@ -381,16 +381,16 @@ curr_test($test + 2);
 
 is(
   runperl(
-   stderr => 1, prog => 'sub DESTROY { print q-aaa- } bless \$a[0]'
+   stderr => 1, prog => 'sub DESTROY { print qq-aaa\n- } bless \$a[0]'
   ),
- "aaa", 'DESTROY called on array elem'
+ "aaa\n", 'DESTROY called on array elem'
 );
 is(
   runperl(
    stderr => 1,
-   prog => '{ bless \my@x; *a=sub{@x}}sub DESTROY { print q-aaa- }'
+   prog => '{ bless \my@x; *a=sub{@x}}sub DESTROY { print qq-aaa\n- }'
   ),
- "aaa",
+ "aaa\n",
  'DESTROY called on closure variable'
 );
 
