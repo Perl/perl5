@@ -118,7 +118,6 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 
 */
 
-
 #define UNI_IS_INVARIANT(c)		(((UV)c) <  0x80)
 /* Note that C0 and C1 are invalid in legal UTF8, so the lower bound of the
  * below might ought to be C2 */
@@ -230,8 +229,12 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #define IN_UNI_8_BIT ( (CopHINTS_get(PL_curcop) & HINT_UNI_8_BIT) \
 			&& ! IN_LOCALE_RUNTIME && ! IN_BYTES)
 
-#define UTF8_ALLOW_EMPTY		0x0001
+#define UTF8_ALLOW_EMPTY		0x0001	/* Allow a zero length string */
+
+/* Allow first byte to be a continuation byte */
 #define UTF8_ALLOW_CONTINUATION		0x0002
+
+/* Allow second... bytes to be non-continuation bytes */
 #define UTF8_ALLOW_NON_CONTINUATION	0x0004
 #define UTF8_ALLOW_FE_FF		0x0008 /* Allow FE or FF start bytes, \
 						  yields above 0x7fffFFFF = 31 bits */
@@ -344,7 +347,7 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #define UNICODE_ILLEGAL			0xFFFF
 
 /* Though our UTF-8 encoding can go beyond this,
- * let's be conservative and do as Unicode 5.1 says. */
+ * let's be conservative and do as Unicode says. */
 #define PERL_UNICODE_MAX	0x10FFFF
 
 #define UNICODE_ALLOW_SURROGATE 0x0001	/* Allow UTF-16 surrogates (EVIL) */
