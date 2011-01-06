@@ -217,7 +217,6 @@ For ease of access, the Perl manual has been split up into several sections.
 
     perlaix		Perl notes for AIX
     perlamiga		Perl notes for AmigaOS
-    perlapollo		Perl notes for Apollo DomainOS
     perlbeos		Perl notes for BeOS
     perlbs2000		Perl notes for POSIX-BC BS2000
     perlce		Perl notes for WinCE
