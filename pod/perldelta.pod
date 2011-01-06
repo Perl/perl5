@@ -94,6 +94,14 @@ generation task.
 
 =item *
 
+L<Module::Metadata> 1.000002 has been added as a dual-life module.  It gathers
+package and POD information from Perl module files.  It is a standalone module
+based on Module::Build::ModuleInfo for use by other module installation
+toolchain components.  Module::Build::ModuleInfo has been deprecated in
+favor of this module instead.
+
+=item *
+
 L<Perl::OSType> 1.002 has been added as a dual-life module.  It maps Perl
 operating system names (e.g. 'dragonfly' or 'MSWin32') to more generic types
 with standardized names (e.g.  "Unix" or "Windows").  It has been refactored

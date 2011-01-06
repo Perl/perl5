@@ -267,6 +267,7 @@
 /Module/Load.pm
 /Module/Load/Conditional.pm
 /Module/Loaded.pm
+/Module/Metadata.pm
 /Module/Pluggable
 /Module/Pluggable.pm
 /NDBM_File.pm

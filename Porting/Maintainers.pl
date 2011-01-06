@@ -1046,6 +1046,15 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
+    'Module::Metadata' =>
+	{
+	'MAINTAINER'	=> 'dagolden',
+	'DISTRIBUTION'	=> 'DAGOLDEN/Module-Metadata-1.000002.tar.gz',
+	'FILES'		=> q[cpan/Module-Metadata],
+	'EXCLUDED'	=> [ ],
+	'UPSTREAM'	=> 'cpan',
+	},
+
     'Module::Pluggable' =>
 	{
 	'MAINTAINER'	=> 'simonw',

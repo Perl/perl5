@@ -1529,6 +1529,11 @@ cpan/Module-Load/t/to_load/LoadMe.pl		Module::Load tests
 cpan/Module-Load/t/to_load/Must/Be/Loaded.pm	Module::Load tests
 cpan/Module-Load/t/to_load/TestModule.pm	Module::Load tests
 cpan/Module-Load/t/to_load/ToBeLoaded		Module::Load tests
+cpan/Module-Metadata/lib/Module/Metadata.pm
+cpan/Module-Metadata/t/lib/DistGen.pm
+cpan/Module-Metadata/t/lib/MBTest.pm
+cpan/Module-Metadata/t/lib/Tie/CPHash.pm
+cpan/Module-Metadata/t/metadata.t
 cpan/Module-Pluggable/lib/Devel/InnerPackage.pm		Find inner packages
 cpan/Module-Pluggable/lib/Module/Pluggable/Object.pm	Module::Pluggable
 cpan/Module-Pluggable/lib/Module/Pluggable.pm		Module::Pluggable
