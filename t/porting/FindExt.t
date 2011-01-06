@@ -28,6 +28,7 @@ unless (defined $Config{usedl}) {
 plan tests => 10;
 use FindExt;
 
+FindExt::apply_config(\%Config);
 FindExt::scan_ext('../cpan');
 FindExt::scan_ext('../dist');
 FindExt::scan_ext('../ext');
