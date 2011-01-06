@@ -1153,6 +1153,15 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> undef,
 	},
 
+    'Perl::OSType' =>
+	{
+	'MAINTAINER'	=> 'dagolden',
+	'DISTRIBUTION'	=> 'DAGOLDEN/Perl-OSType-1.002.tar.gz',
+	'FILES'		=> q[cpan/Perl-OSType],
+	'EXCLUDED'	=> [ ],
+	'UPSTREAM'	=> 'cpan',
+	},
+
     'perlpacktut' =>
 	{
 	'MAINTAINER'	=> 'laun',

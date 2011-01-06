@@ -298,6 +298,7 @@
 /Package/Constants.pm
 /Params/Check.pm
 /Parse/CPAN/
+/Perl/OSType.pm
 /PerlIO/encoding.pm
 /PerlIO/scalar.pm
 /PerlIO/via.pm

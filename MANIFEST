@@ -1655,6 +1655,9 @@ cpan/Parse-CPAN-Meta/t/lib/Parse/CPAN/Meta/Test.pm	Parse::CPAN::Meta testing lib
 cpan/Parse-CPAN-Meta/uupacktool.pl			Parse::CPAN::Meta
 cpan/PerlIO-via-QuotedPrint/lib/PerlIO/via/QuotedPrint.pm	PerlIO::via::QuotedPrint
 cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t			PerlIO::via::QuotedPrint
+cpan/Perl-OSType/lib/Perl/OSType.pm			Perl::OSType
+cpan/Perl-OSType/t/00-compile.t			Perl::OSType
+cpan/Perl-OSType/t/OSType.t			Perl::OSType
 cpan/Pod-Escapes/ChangeLog		ChangeLog for Pod::Escapes
 cpan/Pod-Escapes/lib/Pod/Escapes.pm	Pod::Escapes
 cpan/Pod-Escapes/README			README for Pod::Escapes
