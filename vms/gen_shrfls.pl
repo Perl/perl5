@@ -13,7 +13,7 @@
 #        must be linked
 #
 # Output:
-#    PerlShr_Attr.Opt - linker options file which speficies that global vars
+#    PerlShr_Attr.Opt - linker options file which specifies that global vars
 #        be placed in NOSHR,WRT psects.  Use when linking any object files
 #        against PerlShr.Exe, since cc places global vars in SHR,WRT psects
 #        by default.

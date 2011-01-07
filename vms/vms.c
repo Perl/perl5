@@ -773,7 +773,7 @@ const int verspec = 7;
     item_list[devspec].component = NULL;
 
     /* root is a special case,  adding it to either the directory or
-     * the device components will probalby complicate things for the
+     * the device components will probably complicate things for the
      * callers of this routine, so leave it separate.
      */
     item_list[rootspec].itmcode = FSCN$_ROOT;
@@ -994,7 +994,7 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
         if (!ivsym && !secure) {
           unsigned short int deflen = LNM$C_NAMLENGTH;
           struct dsc$descriptor_d eqvdsc = {0,DSC$K_DTYPE_T,DSC$K_CLASS_D,0};
-          /* dynamic dsc to accomodate possible long value */
+          /* dynamic dsc to accommodate possible long value */
           _ckvmssts_noperl(lib$sget1_dd(&deflen,&eqvdsc));
           retsts = lib$get_symbol(&lnmdsc,&eqvdsc,&eqvlen,0);
           if (retsts & 1) { 
@@ -1836,7 +1836,7 @@ static char *mp_do_tovmsspec(pTHX_ const char *, char *, int, int, int *);
 /* fixup barenames that are directories for internal use.
  * There have been problems with the consistent handling of UNIX
  * style directory names when routines are presented with a name that
- * has no directory delimitors at all.  So this routine will eventually
+ * has no directory delimiters at all.  So this routine will eventually
  * fix the issue.
  */
 static char * fixup_bare_dirnames(const char * name)
@@ -1852,7 +1852,7 @@ static int rms_erase(const char * vmsname);
 
 
 /* mp_do_kill_file
- * A little hack to get around a bug in some implemenation of remove()
+ * A little hack to get around a bug in some implementation of remove()
  * that do not know how to delete a directory
  *
  * Delete any file to which user has control access, regardless of whether
@@ -5281,7 +5281,7 @@ Stat_t dst_st;
     {
 	/* Is the source and dest both in VMS format */
 	/* if the source is a directory, then need to fileify */
-	/*  and dest must be a directory or non-existant. */
+	/*  and dest must be a directory or non-existent. */
 
 	char * vms_dst;
 	int sts;
@@ -6848,7 +6848,7 @@ static char *int_pathify_dirspec(const char *dir, char *buf)
         /* then pathify is simple */
 
         if (!decc_efs_charset) {
-            /* Have to deal with traiing '.dir' or extra '.' */
+            /* Have to deal with trailing '.dir' or extra '.' */
             /* that should not be there in legacy mode, but is */
 
             char * lastdot;
@@ -7763,7 +7763,7 @@ int sts, v_len, r_len, d_len, n_len, e_len, vs_len;
       lastslash = unixptr + unixlen;
     }
 
-    /* Watch out for traiing ".." after last slash, still a directory */
+    /* Watch out for trailing ".." after last slash, still a directory */
     if ((lastslash[1] == '.')&&(lastslash[2] == '.')&&(lastslash[3] == '\0')) {
       lastslash = unixptr + unixlen;
     }
@@ -7966,7 +7966,7 @@ int sts, v_len, r_len, d_len, n_len, e_len, vs_len;
        else {
 	 if (dotdir_seen) {
 	   /* Perl wants an empty directory here to tell the difference
-	    * between a DCL commmand and a filename
+	    * between a DCL command and a filename
 	    */
 	  *vmsptr++ = '[';
 	  *vmsptr++ = ']';
@@ -8959,7 +8959,7 @@ char *Perl_tovmsspec_utf8_ts(pTHX_ const char *path, char *buf, int * utf8_fl)
   { return do_tovmsspec(path,buf,1,utf8_fl); }
 
 /*{{{ char *int_tovmspath(char *path, char *buf, const int *)*/
-/* Internal routine for use with out an explict context present */
+/* Internal routine for use with out an explicit context present */
 static char * int_tovmspath(const char *path, char *buf, int * utf8_fl) {
 
     char * ret_spec, *pathified;
@@ -9465,7 +9465,7 @@ int rms_sts;
      */
     had_version = strchr(item, ';');
     /*
-     * Only return device and directory specs, if the caller specifed either.
+     * Only return device and directory specs, if the caller specified either.
      */
     had_device = strchr(item, ':');
     had_directory = (isunix || NULL != strchr(item, '[')) || (NULL != strchr(item, '<'));
@@ -13697,7 +13697,7 @@ Perl_vms_start_glob
 
             /* Test to see if SvPVX_const(tmpglob) ends with a VMS */
             /* path delimiter of ':>]', if so, then the old behavior has */
-            /* obviously been specificially requested */
+            /* obviously been specifically requested */
 
             fname = SvPVX_const(tmpglob);
             fname_len = strlen(fname);
@@ -14296,7 +14296,7 @@ mp_do_vms_realpath(pTHX_ const char *filespec, char *outbuf,
 	} else {
 
 	    /* Now for some hacks to deal with backwards and forward */
-	    /* compatibilty */
+	    /* compatibility */
 	    if (!decc_efs_charset) {
 
 		/* 1. ODS-2 mode wants to do a syntax only translation */
@@ -14810,7 +14810,7 @@ static int set_features
 #endif
 
     /* USE POSIX/DCL Exit codes - Recommended, but needs to default to  */
-    /* for strict backward compatibilty */
+    /* for strict backward compatibility */
     status = sys_trnlnm
 	("PERL_VMS_POSIX_EXIT", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
