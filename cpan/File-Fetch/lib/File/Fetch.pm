@@ -723,7 +723,7 @@ sub _iosock_fetch {
         }
 
         # Check the "response"
-        # Strip preceeding blank lines apparently they are allowed (RFC 2616 4.1)
+        # Strip preceding blank lines apparently they are allowed (RFC 2616 4.1)
         $resp =~ s/^(\x0d?\x0a)+//;
         # Check it is an HTTP response
         unless ( $resp =~ m!^HTTP/(\d+)\.(\d+)!i ) {
@@ -1087,7 +1087,7 @@ sub _ncftp_fetch {
     };
     check( $tmpl, \%hash ) or return;
 
-    ### we can only set passive mode in interactive sesssions, so bail out
+    ### we can only set passive mode in interactive sessions, so bail out
     ### if $FTP_PASSIVE is set
     return if $FTP_PASSIVE;
 
@@ -1256,7 +1256,7 @@ sub _file_fetch {
     ### prefix a / on unix systems with a file uri, since it would
     ### look somewhat like this:
     ###     file:///home/kane/file
-    ### wheras windows file uris for 'c:\some\dir\file' might look like:
+    ### whereas windows file uris for 'c:\some\dir\file' might look like:
     ###     file:///C:/some/dir/file
     ###     file:///C|/some/dir/file
     ### or for a network share '\\host\share\some\dir\file':
@@ -1554,7 +1554,7 @@ which we in turn capture. If that content is a 'custom' error file
 
 Sadly, C<lynx> doesn't support any options to return a different exit
 code on non-C<200 OK> status, giving us no way to tell the difference
-between a 'successfull' fetch and a custom error page.
+between a 'successful' fetch and a custom error page.
 
 Therefor, we recommend to only use C<lynx> as a last resort. This is 
 why it is at the back of our list of methods to try as well.
