@@ -192,7 +192,7 @@ The variable C<PERL5_CPANPLUS_IS_EXECUTING> will be set to the full path
 of the C<Build.PL> that is being executed. This enables any code inside
 the C<Build.PL> to know that it is being installed via CPANPLUS.
 
-After a succcesfull C<prepare> you may call C<create> to create the
+After a successful C<prepare> you may call C<create> to create the
 distribution, followed by C<install> to actually install it.
 
 Returns true on success and false on failure.
@@ -275,9 +275,9 @@ sub prepare {
         ### we resolve 'configure requires' here, so we can run the 'perl
         ### Makefile.PL' command
         ### XXX for tests: mock f_c_r to something that *can* resolve and
-        ### something that *doesnt* resolve. Check the error log for ok
+        ### something that *doesn't* resolve. Check the error log for ok
         ### on this step or failure
-        ### XXX make a seperate tarball to test for this scenario: simply
+        ### XXX make a separate tarball to test for this scenario: simply
         ### containing a makefile.pl/build.pl for test purposes?
         my $safe_ver = version->new('0.85_01');
         if ( version->new($CPANPLUS::Internals::VERSION) >= $safe_ver )
