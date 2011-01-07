@@ -1948,7 +1948,7 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
     /* If we already have a pointer to the method, no need to use call_method()
        to repeat the lookup.  */
     if (method ? call_sv(MUTABLE_SV(method), G_SCALAR)
-	: call_method("SWASHNEW", G_SCALAR))
+	: call_sv(newSVpvs_flags("SWASHNEW", SVs_TEMP), G_SCALAR | G_METHOD))
 	retval = newSVsv(*PL_stack_sp--);
     else
 	retval = &PL_sv_undef;
