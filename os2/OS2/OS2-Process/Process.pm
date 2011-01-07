@@ -332,7 +332,7 @@ my $swentry_size = swentry_size();
 sub sw_entries () {
   my $s = swentries_list();
   my ($c, $s1) = unpack 'La*', $s;
-  die "Unconsistent size in swentries_list()" unless 4+$c*$swentry_size == length $s;
+  die "Inconsistent size in swentries_list()" unless 4+$c*$swentry_size == length $s;
   my (@l, $e);
   push @l, $e while $e = substr $s1, 0, $swentry_size, '';
   @l;
@@ -1234,7 +1234,7 @@ One tree is given by the I<parent/child> relationship.  This
 relationship affects drawing (child is drawn relative to its parent
 (lower-left corner), and the drawing is clipped by the parent's
 boundary; parent may request that I<it's> drawing is clipped to be
-confined to the outsize of the childs and/or siblings' windows);
+confined to the outsize of the child's and/or siblings' windows);
 hiding; minimizing/restoring; and destroying windows.
 
 Another tree (not necessarily connected?) is given by I<ownership>
@@ -1388,7 +1388,7 @@ state" do not change the appearance of the window.  Default: $update is TRUE.
 Set the window enabled state.  Default: $enable is TRUE.
 
 Results in C<WM_ENABLED> message sent to the window.  Typically, this
-would change the appearence of the window.  If at the moment of disabling
+would change the appearance of the window.  If at the moment of disabling
 focus is in the window (or a descendant), focus is lost (no focus anywhere).
 If focus is needed, it can be reassigned explicitly later.
 
@@ -1737,12 +1737,12 @@ $addr should be a memory address (encoded as integer).  This call finds
 the largest continuous region of memory belonging to the same memory object
 as $addr, and having the same memory flags as $addr. $flags is the value of
 the memory flag of $addr (see docs of DosQueryMem(3) for details).  If
-optional argumetn $size_lim is given, the search is restricted to the region
+optional argument $size_lim is given, the search is restricted to the region
 this many bytes long (after $addr).
 
 ($addr and $size are rounded so that all the memory pages containing
 the region are inspected.)  Optional argument $interrupt (defaults to 1)
-specifies whether region scan should be interruptable by signals.
+specifies whether region scan should be interruptible by signals.
 
 =back
 
