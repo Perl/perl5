@@ -591,7 +591,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #  endif
 #endif
 
-/* HP-UX 10.X CMA (Common Multithreaded Architecure) insists that
+/* HP-UX 10.X CMA (Common Multithreaded Architecture) insists that
    pthread.h must be included before all other header files.
 */
 #if defined(USE_ITHREADS) && defined(PTHREAD_H_FIRST) && defined(I_PTHREAD)
@@ -2226,7 +2226,7 @@ int isnan(double d);
 #  include <limits.h>
 #endif
 /* Included values.h above if necessary; still including limits.h down here,
- * despite doing above, because math.h might have overriden... XXX - Allen */
+ * despite doing above, because math.h might have overridden... XXX - Allen */
 
 /*
  * Try to figure out max and min values for the integral types.  THE CORRECT
@@ -3177,7 +3177,7 @@ typedef pthread_key_t	perl_key;
     All that is required is that the perl source does not
     use "%-p" or "%-<number>p" or "%<number>p" formats.
     These formats will still work in perl code.
-    See comments in sv.c for futher details.
+    See comments in sv.c for further details.
 
     Robin Barker 2005-07-14
 
@@ -3203,7 +3203,7 @@ typedef pthread_key_t	perl_key;
 #define SVfARG(p) ((void*)(p))
 
 #ifdef PERL_CORE
-/* not used; but needed for backward compatibilty with XS code? - RMB */
+/* not used; but needed for backward compatibility with XS code? - RMB */
 #  undef VDf
 #else
 #  ifndef VDf
@@ -3212,7 +3212,7 @@ typedef pthread_key_t	perl_key;
 #endif
 
 #ifdef PERL_CORE
-/* not used; but needed for backward compatibilty with XS code? - RMB */
+/* not used; but needed for backward compatibility with XS code? - RMB */
 #  undef UVf
 #else
 #  ifndef UVf
@@ -5627,7 +5627,7 @@ typedef struct am_table_short AMTS;
 #define PERLDBf_NAMEEVAL	0x100	/* Informative names for evals */
 #define PERLDBf_NAMEANON	0x200	/* Informative names for anon subs */
 #define PERLDBf_SAVESRC  	0x400	/* Save source lines into @{"_<$filename"} */
-#define PERLDBf_SAVESRC_NOSUBS	0x800	/* Including evals that generate no subrouties */
+#define PERLDBf_SAVESRC_NOSUBS	0x800	/* Including evals that generate no subroutines */
 #define PERLDBf_SAVESRC_INVALID	0x1000	/* Save source that did not compile */
 
 #define PERLDB_SUB	(PL_perldb && (PL_perldb & PERLDBf_SUB))

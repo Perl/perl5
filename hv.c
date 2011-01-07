@@ -682,7 +682,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 			   much back at this point (in hv_store's code).  */
 			break;
 		    }
-		    /* LVAL fetch which actaully needs a store.  */
+		    /* LVAL fetch which actually needs a store.  */
 		    val = newSV(0);
 		    HvPLACEHOLDERS(hv)--;
 		} else {

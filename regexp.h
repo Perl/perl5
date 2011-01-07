@@ -238,7 +238,7 @@ and check for NULL.
     *(pmfl) &= ~(RXf_PMf_FOLD|RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_EXTENDED|RXf_PMf_LOCALE|RXf_PMf_UNICODE)
 
 /* chars and strings used as regex pattern modifiers
- * Singlular is a 'c'har, plural is a "string"
+ * Singular is a 'c'har, plural is a "string"
  *
  * NOTE, KEEPCOPY was originally 'k', but was changed to 'p' for preserve
  * for compatibility reasons with Regexp::Common which highjacked (?k:...)
@@ -433,7 +433,7 @@ and check for NULL.
 
 #endif /* PLUGGABLE_RE_EXTENSION */
 
-/* Stuff that needs to be included in the plugable extension goes below here */
+/* Stuff that needs to be included in the pluggable extension goes below here */
 
 #ifdef PERL_OLD_COPY_ON_WRITE
 #define RX_MATCH_COPY_FREE(rx) \

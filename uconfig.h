@@ -904,7 +904,7 @@
 
 /* HAS_QUAD:
  *	This symbol, if defined, tells that there's a 64-bit integer type,
- *	Quad_t, and its unsigned counterpar, Uquad_t. QUADKIND will be one
+ *	Quad_t, and its unsigned counterpart, Uquad_t. QUADKIND will be one
  *	of QUAD_IS_INT, QUAD_IS_LONG, QUAD_IS_LONG_LONG, or QUAD_IS_INT64_T.
  */
 /*#define HAS_QUAD	/ **/
@@ -2742,7 +2742,7 @@
  *	unsigned long, int, etc.  It may be necessary to include
  *	<sys/types.h> to get any typedef'ed information.
  */
-#define Size_t size_t	 /* length paramater for string functions */
+#define Size_t size_t	 /* length parameter for string functions */
 
 /* Sock_size_t:
  *	This symbol holds the type used for the size argument of
@@ -2843,7 +2843,7 @@
  *	    2 = supports arrays of pointers to functions returning void
  *	    4 = supports comparisons between pointers to void functions and
  *		    addresses of void functions
- *	    8 = suports declaration of generic void pointers
+ *	    8 = supports declaration of generic void pointers
  *
  *	The package designer should define VOIDUSED to indicate the requirements
  *	of the package.  This can be done either by #defining VOIDUSED before
@@ -3545,7 +3545,7 @@
 
 /* HAS_GETESPWNAM:
  *	This symbol, if defined, indicates that the getespwnam system call is
- *	available to retrieve enchanced (shadow) password entries by name.
+ *	available to retrieve enhanced (shadow) password entries by name.
  */
 /*#define HAS_GETESPWNAM		/ **/
 
@@ -3668,7 +3668,7 @@
 
 /* HAS_MKSTEMPS:
  *	This symbol, if defined, indicates that the mkstemps routine is
- *	available to excluslvely create and open a uniquely named
+ *	available to exclusively create and open a uniquely named
  *	(with a suffix) temporary file.
  */
 /*#define HAS_MKSTEMPS		/ **/
@@ -4357,7 +4357,7 @@
 /* NV_OVERFLOWS_INTEGERS_AT:
  *	This symbol gives the largest integer value that NVs can hold. This
  *	value + 1.0 cannot be stored accurately. It is expressed as constant
- *	floating point expression to reduce the chance of decimale/binary
+ *	floating point expression to reduce the chance of decimal/binary
  *	conversion issues. If it can not be determined, the value 0 is given.
  */
 /* NV_ZERO_IS_ALLBITS_ZERO:

@@ -25,7 +25,7 @@
                    then there are two modes determined by USE_SFIO:
 
    USE_SFIO    - If set causes PerlIO_xxx() to be #define-d onto sfio functions.
-                 A backward compatability mode for some specialist applications.
+                 A backward compatibility mode for some specialist applications.
 
                  If USE_SFIO is not set then PerlIO_xxx() are real functions
                  defined in perlio.c which implement extra functionality

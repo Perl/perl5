@@ -528,7 +528,7 @@ Perl_pregexec(pTHX_ REGEXP * const prog, char* stringarg, register char *strend,
 	a) Anchored substring;
 	b) Fixed substring;
 	c) Whether we are anchored (beginning-of-line or \G);
-	d) First node (of those at offset 0) which may distingush positions;
+	d) First node (of those at offset 0) which may distinguish positions;
    We use a)b)d) and multiline-part of c), and try to find a position in the
    string which does not contradict any of them.
  */
@@ -1029,7 +1029,7 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
 	    prog->float_substr = prog->float_utf8 = NULL;	/* clear */
 	    check = NULL;			/* abort */
 	    s = strpos;
-	    /* XXXX If the check string was an implicit check MBOL, then we need to unset the relevent flag
+	    /* XXXX If the check string was an implicit check MBOL, then we need to unset the relevant flag
 		    see http://bugs.activestate.com/show_bug.cgi?id=87173 */
 	    if (prog->intflags & PREGf_IMPLICIT)
 		prog->extflags &= ~RXf_ANCH_MBOL;
@@ -1130,7 +1130,7 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
 	    }
 	    if (!(utf8_target ? prog->float_utf8 : prog->float_substr))	/* Could have been deleted */
 		goto fail;
-	    /* Check is floating subtring. */
+	    /* Check is floating substring. */
 	  retry_floating_check:
 	    t = check_at - start_shift;
 	    DEBUG_EXECUTE_r( what = "floating" );
@@ -2156,7 +2156,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 	goto phooey;
     } else if (RXf_GPOS_CHECK == (prog->extflags & RXf_GPOS_CHECK)) 
     {
-        /* the warning about reginfo.ganch being used without intialization
+        /* the warning about reginfo.ganch being used without initialization
            is bogus -- we set it above, when prog->extflags & RXf_GPOS_SEEN 
            and we only enter this block when the same bit is set. */
         char *tmp_s = reginfo.ganch - prog->gofs;
@@ -2783,7 +2783,7 @@ The only exceptions to this are lookahead/behind assertions and the cut,
 (?>A), which pop all the backtrack states associated with A before
 continuing.
  
-Bascktrack state structs are allocated in slabs of about 4K in size.
+Backtrack state structs are allocated in slabs of about 4K in size.
 PL_regmatch_state and st always point to the currently active state,
 and PL_regmatch_slab points to the slab currently containing
 PL_regmatch_state.  The first time regmatch() is called, the first slab is
@@ -3002,7 +3002,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
     SV *popmark = NULL;     /* are we looking for a mark? */
     SV *sv_commit = NULL;   /* last mark name seen in failure */
     SV *sv_yes_mark = NULL; /* last mark name we have seen 
-                               during a successfull match */
+                               during a successful match */
     U32 lastopen = 0;       /* last open we saw */
     bool has_cutgroup = RX_HAS_CUTGROUP(rex) ? 1 : 0;   
     SV* const oreplsv = GvSV(PL_replgv);
@@ -6469,7 +6469,7 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 				if (try_p == NULL) {
 				    Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
 				}
-				/* Don't have to worry about embeded nulls
+				/* Don't have to worry about embedded nulls
 				 * since NULL isn't folded or foldable */
 				try_c = SvPVX(*try_p);
 

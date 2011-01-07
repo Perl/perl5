@@ -6000,7 +6000,7 @@ Perl_cv_const_sv(pTHX_ const CV *const cv)
  * cv && CvCONST(cv)
  *
  *	We have just cloned an anon prototype that was marked as a const
- *	candidiate. Try to grab the current value, and in the case of
+ *	candidate. Try to grab the current value, and in the case of
  *	PADSV, ignore it if it has multiple references. Return the value.
  */
 
@@ -7974,7 +7974,7 @@ Perl_ck_sassign(pTHX_ OP *o)
 	    other->op_targ = target;
 
 	    /* Because we change the type of the op here, we will skip the
-	       assinment binop->op_last = binop->op_first->op_sibling; at the
+	       assignment binop->op_last = binop->op_first->op_sibling; at the
 	       end of Perl_newBINOP(). So need to do it here. */
 	    cBINOPo->op_last = cBINOPo->op_first->op_sibling;
 

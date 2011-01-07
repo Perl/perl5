@@ -219,7 +219,7 @@ p	|void	|boot_core_PerlIO
 Ap	|void	|call_list	|I32 oldscope|NN AV *paramList
 Apd	|const PERL_CONTEXT *	|caller_cx|I32 level \
 				|NULLOK const PERL_CONTEXT **dbcxp
-: Used in serveral source files
+: Used in several source files
 pR	|bool	|cando		|Mode_t mode|bool effective|NN const Stat_t* statbufp
 ApR	|U32	|cast_ulong	|NV f
 ApR	|I32	|cast_i32	|NV f

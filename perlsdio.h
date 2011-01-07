@@ -38,7 +38,7 @@
 #define PerlIO_putc(f,c)		PerlSIO_fputc(c,f)
 #if defined(VMS)
 #  if defined(__DECC)
-     /* Unusual definition of ungetc() here to accomodate fast_sv_gets()'
+     /* Unusual definition of ungetc() here to accommodate fast_sv_gets()'
       * belief that it can mix getc/ungetc with reads from stdio buffer */
      int decc$ungetc(int __c, FILE *__stream);
 #    define PerlIO_ungetc(f,c) ((c) == EOF ? EOF : \

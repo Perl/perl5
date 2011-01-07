@@ -857,7 +857,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 
 
 /* require_tie_mod() internal routine for requiring a module
- * that implements the logic of automatical ties like %! and %-
+ * that implements the logic of automatic ties like %! and %-
  *
  * The "gv" parameter should be the glob.
  * "varpv" holds the name of the var, used for error messages.

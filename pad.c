@@ -868,7 +868,7 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 		 * instances. For now, we just test !CvUNIQUE(cv), but
 		 * ideally, we should detect my's declared within loops
 		 * etc - this would allow a wider range of 'not stayed
-		 * shared' warnings. We also treated alreadly-compiled
+		 * shared' warnings. We also treated already-compiled
 		 * lexes as not multi as viewed from evals. */
 
 		*out_flags = CvANON(cv) ?
@@ -993,7 +993,7 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 
     {
 	/* This relies on sv_setsv_flags() upgrading the destination to the same
-	   type as the source, independant of the flags set, and on it being
+	   type as the source, independent of the flags set, and on it being
 	   "good" and only copying flag bits and pointers that it understands.
 	*/
 	SV *new_namesv = newSVsv(*out_name_sv);
@@ -1339,7 +1339,7 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
      * so that for example the eval's CV in C<< sub { eval '$x' } >> gets
      * the right CvOUTSIDE.
      * If running with -d, *any* sub may potentially have an eval
-     * excuted within it.
+     * executed within it.
      */
 
     if (PL_cv_has_eval || PL_perldb) {

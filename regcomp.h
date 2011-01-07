@@ -15,7 +15,7 @@ typedef OP OP_4tree;			/* Will be redefined later. */
 /* Convert branch sequences to more efficient trie ops? */
 #define PERL_ENABLE_TRIE_OPTIMISATION 1
 
-/* Be really agressive about optimising patterns with trie sequences? */
+/* Be really aggressive about optimising patterns with trie sequences? */
 #define PERL_ENABLE_EXTENDED_TRIE_OPTIMISATION 1
 
 /* Use old style unicode mappings for perl and posix character classes
@@ -26,8 +26,8 @@ typedef OP OP_4tree;			/* Will be redefined later. */
  * both match or neither match.
  * NOTE: Disabling this will cause various backwards compatibility issues to rear 
  * their head, and tests to fail. However it will make the charclass behaviour 
- * consistant regardless of internal string type, and make character class inversions
- * consistant. The tests that fail in the regex engine are basically broken tests.
+ * consistent regardless of internal string type, and make character class inversions
+ * consistent. The tests that fail in the regex engine are basically broken tests.
  *
  * Personally I think 5.12 should disable this for sure. Its a bit more debatable for
  * 5.10, so for now im leaving it enabled.
@@ -664,7 +664,7 @@ struct _reg_ac_data {
 };
 typedef struct _reg_ac_data reg_ac_data;
 
-/* ANY_BIT doesnt use the structure, so we can borrow it here.
+/* ANY_BIT doesn't use the structure, so we can borrow it here.
    This is simpler than refactoring all of it as wed end up with
    three different sets... */
 

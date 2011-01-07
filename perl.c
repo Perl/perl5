@@ -1469,7 +1469,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 #if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT)
     /* [perl #22371] Algorimic Complexity Attack on Perl 5.6.1, 5.8.0
      * This MUST be done before any hash stores or fetches take place.
-     * If you set PL_rehash_seed (and assumedly also PL_rehash_seed_set)
+     * If you set PL_rehash_seed (and presumably also PL_rehash_seed_set)
      * yourself, it is your responsibility to provide a good random seed!
      * You can also define PERL_HASH_SEED in compile time, see hv.h. */
     if (!PL_rehash_seed_set)
@@ -4501,7 +4501,7 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 		    libdir = tempsv;
 		    if (PL_tainting &&
 			(PL_uid != PL_euid || PL_gid != PL_egid)) {
-			/* Need to taint reloccated paths if running set ID  */
+			/* Need to taint relocated paths if running set ID  */
 			SvTAINTED_on(libdir);
 		    }
 		}

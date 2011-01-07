@@ -280,7 +280,7 @@ typedef struct RExC_state_t {
     minimum length for the F is 1. This is important as the minimum length
     is used to determine offsets in front of and behind the string being 
     looked for.  Since strings can be composites this is the length of the
-    pattern at the time it was commited with a scan_commit. Note that
+    pattern at the time it was committed with a scan_commit. Note that
     the length is calculated by study_chunk, so that the minimum lengths
     are not known until the full pattern has been compiled, thus the 
     pointer to the value.
@@ -316,12 +316,12 @@ typedef struct scan_data_t {
     SV **longest;	    /* Either &l_fixed, or &l_float. */
     SV *longest_fixed;      /* longest fixed string found in pattern */
     I32 offset_fixed;       /* offset where it starts */
-    I32 *minlen_fixed;      /* pointer to the minlen relevent to the string */
+    I32 *minlen_fixed;      /* pointer to the minlen relevant to the string */
     I32 lookbehind_fixed;   /* is the position of the string modfied by LB */
     SV *longest_float;      /* longest floating string found in pattern */
     I32 offset_float_min;   /* earliest point in string it can appear */
     I32 offset_float_max;   /* latest point in string it can appear */
-    I32 *minlen_float;      /* pointer to the minlen relevent to the string */
+    I32 *minlen_float;      /* pointer to the minlen relevant to the string */
     I32 lookbehind_float;   /* is the position of the string modified by LB */
     I32 flags;
     I32 whilem_c;
@@ -884,7 +884,7 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
    tables that are used to generate the final compressed
    representation which is what dump_trie expects.
 
-   Part of the reason for their existance is to provide a form
+   Part of the reason for their existence is to provide a form
    of documentation as to how the different representations function.
 
 */
@@ -1159,7 +1159,7 @@ the silent ignoring of duplicate alternations which are of the form:
 
 Thus EVAL blocks following a trie may be called a different number of times with
 and without the optimisation. With the optimisations dupes will be silently
-ignored. This inconsistant behaviour of EVAL type nodes is well established as
+ignored. This inconsistent behaviour of EVAL type nodes is well established as
 the following demonstrates:
 
  'words'=~/(word|word|word)(?{ print $1 })[xyz]/
@@ -1172,7 +1172,7 @@ which doesnt print it out at all. This is due to other optimisations kicking in.
 
 Example of what happens on a structural level:
 
-The regexp /(ac|ad|ab)+/ will produce the folowing debug output:
+The regexp /(ac|ad|ab)+/ will produce the following debug output:
 
    1: CURLYM[1] {1,32767}(18)
    5:   BRANCH(8)
@@ -1440,7 +1440,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
        middle and the least common are on the outside.  IMO this would be better
        than a most to least common mapping as theres a decent chance the most
        common letter will share a node with the least common, meaning the node
-       will not be compressable. With a middle is most common approach the worst
+       will not be compressible. With a middle is most common approach the worst
        case is when we have the least common nodes twice.
 
      */
@@ -2525,7 +2525,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, I32 *min, U32 flags
     return stopnow;
 }
 
-/* REx optimizer.  Converts nodes into quickier variants "in place".
+/* REx optimizer.  Converts nodes into quicker variants "in place".
    Finds fixed substrings.  */
 
 /* Stops at toplevel WHILEM as well as at "last". At end *scanp is set
@@ -2537,7 +2537,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, I32 *min, U32 flags
     SAVEFREEPV(and_withp)
 
 /* this is a chain of data about sub patterns we are processing that
-   need to be handled seperately/specially in study_chunk. Its so
+   need to be handled separately/specially in study_chunk. Its so
    we can simulate recursion without losing state.  */
 struct scan_frame;
 typedef struct scan_frame {
@@ -2778,7 +2778,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
 		   which would be constructed from a pattern like /A|LIST|OF|WORDS/
 
-		   If we can find such a subseqence we need to turn the first
+		   If we can find such a subsequence we need to turn the first
 		   element into a trie and then add the subsequent branch exact
 		   strings to the trie.
 
@@ -2801,7 +2801,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
 		  If x(1..n)==tail then we can do a simple trie, if not we make
 		  a "jump" trie, such that when we match the appropriate word
-		  we "jump" to the appopriate tail node. Essentailly we turn
+		  we "jump" to the appropriate tail node. Essentially we turn
 		  a nested if into a case structure of sorts.
 
 		*/
@@ -2855,7 +2855,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                            and noper_next is the same as scan (our current
                            position in the regex) then the EXACT branch is
                            a possible optimization target. Once we have
-                           two or more consequetive such branches we can
+                           two or more consecutive such branches we can
                            create a trie of the EXACT's contents and stich
                            it in place. If the sequence represents all of
                            the branches we eliminate the whole thing and
@@ -3076,7 +3076,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		int compat = 1;
 
 
-		/* If compatibile, we or it in below.  It is compatible if is
+		/* If compatible, we or it in below.  It is compatible if is
 		 * in the bitmp and either 1) its bit or its fold is set, or 2)
 		 * it's for a locale.  Even if there isn't unicode semantics
 		 * here, at runtime there may be because of matching against a
@@ -3393,8 +3393,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 #ifdef DEBUGGING
 			OP(nxt1 + 1) = OPTIMIZED; /* was count. */
 			OP(nxt + 1) = OPTIMIZED; /* was count. */
-			NEXT_OFF(nxt1 + 1) = 0; /* just for consistancy. */
-			NEXT_OFF(nxt + 1) = 0; /* just for consistancy. */
+			NEXT_OFF(nxt1 + 1) = 0; /* just for consistency. */
+			NEXT_OFF(nxt + 1) = 0; /* just for consistency. */
 #endif
 #if 0
 			while ( nxt1 && (OP(nxt1) != WHILEM)) {
@@ -5900,7 +5900,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    if (SIZE_ONLY) {
 			HE *he_str;
 			SV *sv_dat = NULL;
-                        if (!svname) /* shouldnt happen */
+                        if (!svname) /* shouldn't happen */
                             Perl_croak(aTHX_
                                 "panic: reg_scan_name returned NULL");
                         if (!RExC_paren_names) {
@@ -7203,7 +7203,7 @@ S_reg_recode(pTHX_ const char value, SV **encp)
 
    Note: we have to be careful with escapes, as they can be both literal
    and special, and in the case of \10 and friends can either, depending
-   on context. Specifically there are two seperate switches for handling
+   on context. Specifically there are two separate switches for handling
    escape sequences, with the one for handling literal escapes requiring
    a dummy entry for all of the special escapes that are actually handled
    by the other.
@@ -9361,7 +9361,7 @@ S_regtail(pTHX_ RExC_state_t *pRExC_state, regnode *p, const regnode *val,U32 de
 - Look for optimizable sequences at the same time.
 - currently only looks for EXACT chains.
 
-This is expermental code. The idea is to use this routine to perform 
+This is experimental code. The idea is to use this routine to perform 
 in place optimizations on branches and groups as they are constructed,
 with the long term intention of removing optimization from study_chunk so
 that it is purely analytical.
@@ -9954,7 +9954,7 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
     
     The solution is to make a lightweight copy of the regexp structure 
     when a qr// is returned from the code executed by (??{$qr}) this
-    lightweight copy doesnt actually own any of its data except for
+    lightweight copy doesn't actually own any of its data except for
     the starp/end and the actual regexp structure itself. 
     
 */    

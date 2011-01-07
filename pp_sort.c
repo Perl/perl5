@@ -105,7 +105,7 @@ typedef SV * gptr;		/* pointers in our lists */
 #define FROMTOUPTO(src, dst, lim) do *dst++ = *src++; while(src<lim)
 
 
-/* Runs are identified by a pointer in the auxilliary list.
+/* Runs are identified by a pointer in the auxiliary list.
 ** The pointer is at the start of the list,
 ** and it points to the start of the next list.
 ** NEXT is used as an lvalue, too.
@@ -372,7 +372,7 @@ S_mergesortsv(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
     }
 
     if (nmemb <= SMALLSORT) aux = small;	/* use stack for aux array */
-    else { Newx(aux,nmemb,gptr); }		/* allocate auxilliary array */
+    else { Newx(aux,nmemb,gptr); }		/* allocate auxiliary array */
     level = 0;
     stackp = stack;
     stackp->runs = dynprep(aTHX_ base, aux, nmemb, cmp);
@@ -549,7 +549,7 @@ S_mergesortsv(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 		t = NEXT(t);			/* where second run will end */
 		t = PINDEX(base, PNELEM(aux, t)); /* where it now ends */
 		FROMTOUPTO(f1, f2, t);		/* copy both runs */
-		NEXT(b) = p;			/* paralled pointer for 1st */
+		NEXT(b) = p;			/* paralleled pointer for 1st */
 		NEXT(p) = t;			/* ... and for second */
 	    }
 	}
@@ -781,7 +781,7 @@ S_qsortsvu(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t compare)
       return;
    }
 
-   /* Innoculate large partitions against quadratic behavior */
+   /* Inoculate large partitions against quadratic behavior */
    if (num_elts > QSORT_PLAY_SAFE) {
       register size_t n;
       register SV ** const q = array;
@@ -1376,7 +1376,7 @@ S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 	 q = list1;
 	 for (n = nmemb; n--; ) {
 	      /* Assert A: all elements of q with index > n are already
-	       * in place.  This is vacuosly true at the start, and we
+	       * in place.  This is vacuously true at the start, and we
 	       * put element n where it belongs below (if it wasn't
 	       * already where it belonged). Assert B: we only move
 	       * elements that aren't where they belong,

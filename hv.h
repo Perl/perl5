@@ -307,13 +307,13 @@ C<SV*>.
 	((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvENAME_HEK_NN(hv)) \
 				 ? HEK_LEN(HvENAME_HEK_NN(hv)) : 0)
 
-/* the number of keys (including any placeholers) */
+/* the number of keys (including any placeholders) */
 #define XHvTOTALKEYS(xhv)	((xhv)->xhv_keys)
 
 /*
  * HvKEYS gets the number of keys that actually exist(), and is provided
  * for backwards compatibility with old XS code. The core uses HvUSEDKEYS
- * (keys, excluding placeholdes) and HvTOTALKEYS (including placeholders)
+ * (keys, excluding placeholders) and HvTOTALKEYS (including placeholders)
  */
 #define HvKEYS(hv)		HvUSEDKEYS(hv)
 #define HvUSEDKEYS(hv)		(HvTOTALKEYS(hv) - HvPLACEHOLDERS_get(hv))

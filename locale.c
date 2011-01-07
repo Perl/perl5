@@ -46,7 +46,7 @@
  * (1) "xx_YY" if the first argument of setlocale() is not LC_ALL
  * (2) "xa_YY xb_YY ..." if the first argument of setlocale() is LC_ALL
  *     (the space-separated values represent the various sublocales,
- *      in some unspecificed order)
+ *      in some unspecified order)
  *
  * In some platforms it has a form like "LC_SOMETHING=Lang_Country.866\n",
  * which is harmful for further use of the string in setlocale().

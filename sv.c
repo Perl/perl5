@@ -80,7 +80,7 @@ many types, a pointer to the body (struct xrv, xpv, xpviv...), which
 contains fields specific to each type.  Some types store all they need
 in the head, so don't have a body.
 
-In all but the most memory-paranoid configuations (ex: PURIFY), heads
+In all but the most memory-paranoid configurations (ex: PURIFY), heads
 and bodies are allocated out of arenas, which by default are
 approximately 4K chunks of memory parcelled up into N heads or bodies.
 Sv-bodies are allocated by their sv-type, guaranteeing size
@@ -1068,7 +1068,7 @@ Perl_more_bodies (pTHX_ const svtype sv_type, const size_t body_size,
        Remember, this is integer division:  */
     end = start + good_arena_size / body_size * body_size;
 
-    /* computed count doesnt reflect the 1st slot reservation */
+    /* computed count doesn't reflect the 1st slot reservation */
 #if defined(MYMALLOC) || defined(HAS_MALLOC_GOOD_SIZE)
     DEBUG_m(PerlIO_printf(Perl_debug_log,
 			  "arena %p end %p arena-size %d (from %d) type %d "
@@ -2890,7 +2890,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 			retval -= stashnamelen;
 			memcpy(retval, stashname, stashnamelen);
 		    }
-		    /* retval may not neccesarily have reached the start of the
+		    /* retval may not necessarily have reached the start of the
 		       buffer here.  */
 		    assert (retval >= buffer);
 
@@ -4578,7 +4578,7 @@ Perl_sv_usepvn_flags(pTHX_ SV *const sv, char *ptr, const STRLEN len, const U32 
 #endif
     if (flags & SV_HAS_TRAILING_NUL) {
 	/* It's long enough - do nothing.
-	   Specfically Perl_newCONSTSUB is relying on this.  */
+	   Specifically Perl_newCONSTSUB is relying on this.  */
     } else {
 #ifdef DEBUGGING
 	/* Force a move to shake out bugs in callers.  */
@@ -4734,7 +4734,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *const sv, const U32 flags)
     else if (SvFAKE(sv) && isGV_with_GP(sv))
 	sv_unglob(sv);
     else if (SvFAKE(sv) && SvTYPE(sv) == SVt_REGEXP) {
-	/* Need to downgrade the REGEXP to a simple(r) scalar. This is analagous
+	/* Need to downgrade the REGEXP to a simple(r) scalar. This is analogous
 	   to sv_unglob. We only need it here, so inline it.  */
 	const svtype new_type = SvMAGIC(sv) || SvSTASH(sv) ? SVt_PVMG : SVt_PV;
 	SV *const temp = newSV_type(new_type);
@@ -5139,7 +5139,7 @@ Perl_sv_magicext(pTHX_ SV *const sv, SV *const obj, const int how,
 	    mg->mg_ptr = savepvn(name, namlen);
 	else if (namlen == HEf_SVKEY) {
 	    /* Yes, this is casting away const. This is only for the case of
-	       HEf_SVKEY. I think we need to document this abberation of the
+	       HEf_SVKEY. I think we need to document this aberation of the
 	       constness of the API, rather than making name non-const, as
 	       that change propagating outwards a long way.  */
 	    mg->mg_ptr = (char*)SvREFCNT_inc_simple_NN((SV *)name);
@@ -6860,7 +6860,7 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *const sv, MAGIC **const mgp, const STRLEN b
 
 	/* Cache has 2 slots in use, and we know three potential pairs.
 	   Keep the two that give the lowest RMS distance. Do the
-	   calcualation in bytes simply because we always know the byte
+	   calculation in bytes simply because we always know the byte
 	   length.  squareroot has the same ordering as the positive value,
 	   so don't bother with the actual square root.  */
 	const float existing = THREEWAY_SQUARE(0, cache[3], cache[1], blen);
@@ -7753,7 +7753,7 @@ screamer2:
 	}
 	else {
 	    cnt = PerlIO_read(fp,(char*)buf, sizeof(buf));
-	    /* Accomodate broken VAXC compiler, which applies U8 cast to
+	    /* Accommodate broken VAXC compiler, which applies U8 cast to
 	     * both args of ?: operator, causing EOF to change into 255
 	     */
 	    if (cnt > 0)
@@ -8224,11 +8224,11 @@ Perl_newSVpvn_flags(pTHX_ const char *const s, const STRLEN len, const U32 flags
     sv_setpvn(sv,s,len);
 
     /* This code used to a sv_2mortal(), however we now unroll the call to sv_2mortal()
-     * and do what it does outselves here.
+     * and do what it does ourselves here.
      * Since we have asserted that flags can only have the SVf_UTF8 and/or SVs_TEMP flags
      * set above we can use it to enable the sv flags directly (bypassing SvTEMP_on), which
      * in turn means we dont need to mask out the SVf_UTF8 flag below, which means that we
-     * eleminate quite a few steps than it looks - Yves (explaining patch by gfx)
+     * eliminate quite a few steps than it looks - Yves (explaining patch by gfx)
      */
 
     SvFLAGS(sv) |= flags;
@@ -9085,7 +9085,7 @@ Perl_sv_reftype(pTHX_ const SV *const sv, const int ob)
 
 	case SVt_PVLV:		return (char *)  (SvROK(sv) ? "REF"
 				/* tied lvalues should appear to be
-				 * scalars for backwards compatitbility */
+				 * scalars for backwards compatibility */
 				: (LvTYPE(sv) == 't' || LvTYPE(sv) == 'T')
 				    ? "SCALAR" : "LVALUE");
 	case SVt_PVAV:		return "ARRAY";
@@ -11621,7 +11621,7 @@ Perl_rvpv_dup(pTHX_ SV *const dstr, const SV *const sstr, CLONE_PARAMS *const pa
 	    SvPV_set(dstr, SAVEPVN(SvPVX_const(sstr), SvLEN(sstr)-1));
 	    if (SvREADONLY(sstr) && SvFAKE(sstr)) {
 		/* Not that normal - actually sstr is copy on write.
-		   But we are a true, independant SV, so:  */
+		   But we are a true, independent SV, so:  */
 		SvREADONLY_off(dstr);
 		SvFAKE_off(dstr);
 	    }
@@ -12124,7 +12124,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 		ncx->blk_loop.state_u.lazysv.end
 		    = sv_dup_inc(ncx->blk_loop.state_u.lazysv.end, param);
 		/* We are taking advantage of av_dup_inc and sv_dup_inc
-		   actually being the same function, and order equivalance of
+		   actually being the same function, and order equivalence of
 		   the two unions.
 		   We can assert the later [but only at run time :-(]  */
 		assert ((void *) &ncx->blk_loop.state_u.ary.ary ==

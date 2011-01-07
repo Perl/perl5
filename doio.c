@@ -1899,7 +1899,7 @@ Perl_cando(pTHX_ Mode_t mode, bool effective, register const Stat_t *statbufp)
     /* [Comments and code from Len Reed]
      * MS-DOS "user" is similar to UNIX's "superuser," but can't write
      * to write-protected files.  The execute permission bit is set
-     * by the Miscrosoft C library stat() function for the following:
+     * by the Microsoft C library stat() function for the following:
      *		.exe files
      *		.com files
      *		.bat files

@@ -1495,7 +1495,7 @@ PP(pp_divide)
                warning before dieing, hence this test goes here.
                If it were immediately before the second SvIV_please, then
                DIE() would be invoked before left was even inspected, so
-               no inpsection would give no warning.  */
+               no inspection would give no warning.  */
             if (right == 0)
                 DIE(aTHX_ "Illegal division by zero");
 
@@ -5500,7 +5500,7 @@ PP(pp_splice)
 	    if (AvREAL(ary)) {
 		EXTEND_MORTAL(length);
 		for (i = length, dst = MARK; i; i--) {
-		    sv_2mortal(*dst);	/* free them eventualy */
+		    sv_2mortal(*dst);	/* free them eventually */
 		    dst++;
 		}
 	    }
@@ -5592,7 +5592,7 @@ PP(pp_splice)
 		if (AvREAL(ary)) {
 		    EXTEND_MORTAL(length);
 		    for (i = length, dst = MARK; i; i--) {
-			sv_2mortal(*dst);	/* free them eventualy */
+			sv_2mortal(*dst);	/* free them eventually */
 			dst++;
 		    }
 		}

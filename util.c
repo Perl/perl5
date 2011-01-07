@@ -4175,7 +4175,7 @@ Perl_mini_mktime(pTHX_ struct tm *ptm)
  * outside the scope for this routine.  Since we convert back based on the
  * same rules we used to build the yearday, you'll only get strange results
  * for input which needed normalising, or for the 'odd' century years which
- * were leap years in the Julian calander but not in the Gregorian one.
+ * were leap years in the Julian calendar but not in the Gregorian one.
  * I can live with that.
  *
  * This algorithm also fails to handle years before A.D. 1 gracefully, but
@@ -6178,7 +6178,7 @@ S_mem_log_common(enum mem_log_type mlt, const UV n,
     mem_log_common   (alty, num, tysz, tynm, sv, oal, nal, flnm, ln, fnnm)
 #else
 /* this is suboptimal, but bug compatible.  User is providing their
-   own implemenation, but is getting these functions anyway, and they
+   own implementation, but is getting these functions anyway, and they
    do nothing. But _NOIMPL users should be able to cope or fix */
 # define \
     mem_log_common_if(alty, num, tysz, tynm, u, oal, nal, flnm, ln, fnnm) \

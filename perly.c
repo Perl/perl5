@@ -241,7 +241,7 @@ S_clear_yystack(pTHX_  const yy_parser *parser)
      * that we can safely call op_free() multiple times on each stack op.
      * So, when clearing the stack, we first, for each op that was being
      * reduced, call op_free with op_latefree=1. This ensures that all ops
-     * hanging off these op are freed, but the reducing ops themselces are
+     * hanging off these op are freed, but the reducing ops themselves are
      * just undefed. Then we set op_latefreed=0 on *all* ops on the stack
      * and free them. A little thought should convince you that this
      * two-part approach to the reducing ops should handle the first three

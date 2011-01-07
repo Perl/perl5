@@ -5247,7 +5247,7 @@ PP(pp_gpwent)
 	    const struct spwd * const spwent = getspnam(pwent->pw_name);
 			  /* Save and restore errno so that
 			   * underprivileged attempts seem
-			   * to have never made the unsccessful
+			   * to have never made the unsuccessful
 			   * attempt to retrieve the shadow password. */
 	    RESTORE_ERRNO;
 	    if (spwent && spwent->sp_pwdp)

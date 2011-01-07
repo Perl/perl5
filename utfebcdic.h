@@ -7,7 +7,7 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * Macros to implement UTF-EBCDIC as perl's internal encoding
- * Taken from version 7.1 of Unicode Techical Report #16:
+ * Taken from version 7.1 of Unicode Technical Report #16:
  *  http://www.unicode.org/unicode/reports/tr16
  *
  * To summarize, the way it works is:
@@ -36,7 +36,7 @@
  *	ordinal value of 'A' is 193 in EBCDIC, and also is 193 in UTF-EBCDIC.
  *	Step 1) converts it to 65, Step 2 leaves it at 65, and Step 3 converts
  *	it back to 193.  As an example of how a variant character works, take
- *	LATIN SMALL LETTER Y WITH DIAERESIS, which is typicially 0xDF in
+ *	LATIN SMALL LETTER Y WITH DIAERESIS, which is typically 0xDF in
  *	EBCDIC.  Step 1 converts it to the Unicode value, 0xFF.  Step 2
  *	converts that to two bytes = 11000111 10111111 = C7 BF, and Step 3
  *	converts those to 0x8B 0x73.  The table is constructed so that the
@@ -272,7 +272,7 @@ unsigned char PL_e2utf[] = { /* EBCDIC (IBM-037) to I8 */
 #endif          /* 037 */
 
 /* These tables moved from perl.h and converted to hex.
-   They map platfrom code page from/to bottom 256 codes of Unicode (i.e. iso-8859-1).
+   They map platform code page from/to bottom 256 codes of Unicode (i.e. iso-8859-1).
 */
 
 #if '^' == 95   /* if defined(__MVS__) || defined(??) (VM/ESA?) 1047 */

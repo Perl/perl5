@@ -130,7 +130,7 @@ Deprecated.  Use C<GIMME_V> instead.
 				    defined()*/
 				/*  On OP_DBSTATE, indicates breakpoint
 				 *    (runtime property) */
-				/*  On OP_AELEMFAST, indiciates pad var */
+				/*  On OP_AELEMFAST, indicates pad var */
 				/*  On OP_REQUIRE, was seen as CORE::require */
 				/*  On OP_ENTERWHEN, there's no condition */
 				/*  On OP_BREAK, an implicit break */
@@ -238,7 +238,7 @@ Deprecated.  Use C<GIMME_V> instead.
 /* Private for OP_CONST */
 #define	OPpCONST_NOVER		2	/* no 6; */
 #define	OPpCONST_SHORTCIRCUIT	4	/* eg the constant 5 in (5 || foo) */
-#define	OPpCONST_STRICT		8	/* bearword subject to strict 'subs' */
+#define	OPpCONST_STRICT		8	/* bareword subject to strict 'subs' */
 #define OPpCONST_ENTERED	16	/* Has been entered as symbol. */
 #define OPpCONST_ARYBASE	32	/* Was a $[ translated to constant. */
 #define OPpCONST_BARE		64	/* Was a bare word (filehandle?). */

@@ -21,7 +21,7 @@
  *
  * It is also used to store XS functions that need to be present in
  * miniperl for a lack of a better place to put them. It might be
- * clever to move them to seperate XS files which would then be pulled
+ * clever to move them to separate XS files which would then be pulled
  * in by some to-be-written build process.
  */
 
@@ -290,7 +290,7 @@ XS(XS_UNIVERSAL_DOES)
     PERL_UNUSED_ARG(cv);
 
     if (items != 2)
-	Perl_croak(aTHX_ "Usage: invocant->DOES(kind)");
+	Perl_croak(aTHX_ "Usage: invocand->DOES(kind)");
     else {
 	SV * const sv = ST(0);
 	const char *name;
@@ -1144,7 +1144,7 @@ XS(XS_re_regexp_pattern)
        Otherwise in list context it returns the pattern and the
        modifiers, in scalar context it returns the pattern just as it
        would if the qr// was stringified normally, regardless as
-       to the class of the variable and any strigification overloads
+       to the class of the variable and any stringification overloads
        on the object.
     */
 

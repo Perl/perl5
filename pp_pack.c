@@ -645,7 +645,7 @@ uni_to_byte(pTHX_ const char **s, const char *end, I32 datumtype)
     STRLEN retlen;
     UV val = utf8n_to_uvchr((U8 *) *s, end-*s, &retlen,
 			 ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
-    /* We try to process malformed UTF-8 as much as possible (preferrably with
+    /* We try to process malformed UTF-8 as much as possible (preferably with
        warnings), but these two mean we make no progress in the string and
        might enter an infinite loop */
     if (retlen == (STRLEN) -1 || retlen == 0)
@@ -1759,7 +1759,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    }
 	    break;
 #else
-            /* Fallhrough! */
+            /* Fallthrough! */
 #endif
 	case 'v':
 	case 'n':
@@ -3353,7 +3353,7 @@ extern const double _double_constants[];
 		    goto w_string;
 		else if (SvNOKp(fromstr)) {
 		    /* 10**NV_MAX_10_EXP is the largest power of 10
-		       so 10**(NV_MAX_10_EXP+1) is definately unrepresentable
+		       so 10**(NV_MAX_10_EXP+1) is definitely unrepresentable
 		       given 10**(NV_MAX_10_EXP+1) == 128 ** x solve for x:
 		       x = (NV_MAX_10_EXP+1) * log (10) / log (128)
 		       And with that many bytes only Inf can overflow.

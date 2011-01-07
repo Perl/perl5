@@ -555,7 +555,7 @@ be zero.
 
 /* If $[ is non-zero, it's stored in cop_hints under the key "$[", and
    HINT_ARYBASE is set to indicate this.
-   Setting it is ineficient due to the need to create 2 mortal SVs, but as
+   Setting it is inefficient due to the need to create 2 mortal SVs, but as
    using $[ is highly discouraged, no sane Perl code will be using it.  */
 #define CopARYBASE_get(c)	\
 	((CopHINTS_get(c) & HINT_ARYBASE)				\

@@ -111,7 +111,7 @@ PP(pp_regcomp)
 	    
 
     if (PL_op->op_flags & OPf_STACKED) {
-	/* multiple args; concatentate them */
+	/* multiple args; concatenate them */
 	dMARK; dORIGMARK;
 	tmpstr = PAD_SV(ARGTARG);
 	sv_setpvs(tmpstr, "");
@@ -3998,7 +3998,7 @@ PP(pp_entereval)
 	}
 	return DOCATCH(PL_eval_start);
     } else {
-	/* We have already left the scope set up earler thanks to the LEAVE
+	/* We have already left the scope set up earlier thanks to the LEAVE
 	   in doeval().  */
 	if (was != PL_breakable_sub_gen /* Some subs defined here. */
 	    ? (PERLDB_LINE || PERLDB_SAVESRC)
@@ -5174,7 +5174,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	    if (take) {
 		sv_catpvn(buf_sv, cache_p, take);
 		sv_chop(cache, cache_p + take);
-		/* Definately not EOF  */
+		/* Definitely not EOF  */
 		return 1;
 	    }
 

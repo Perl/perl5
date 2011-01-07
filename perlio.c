@@ -971,7 +971,7 @@ PerlIO_tab_sv(pTHX_ PerlIO_funcs *tab)
 
 XS(XS_PerlIO__Layer__NoWarnings)
 {
-    /* This is used as a %SIG{__WARN__} handler to supress warnings
+    /* This is used as a %SIG{__WARN__} handler to suppress warnings
        during loading of layers.
      */
     dVAR;
@@ -1747,7 +1747,7 @@ Perl_PerlIO_flush(pTHX_ PerlIO *f)
     else {
 	/*
 	 * Is it good API design to do flush-all on NULL, a potentially
-	 * errorneous input? Maybe some magical value (PerlIO*
+	 * erroneous input? Maybe some magical value (PerlIO*
 	 * PERLIO_FLUSH_ALL = (PerlIO*)-1;)? Yes, stdio does similar
 	 * things on fflush(NULL), but should we be bound by their design
 	 * decisions? --jhi
@@ -3766,7 +3766,7 @@ PerlIO_findFILE(PerlIO *f)
     /* Uses fallback "mode" via PerlIO_modestr() in PerlIO_exportFILE */
     /* However, we're not really exporting a FILE * to someone else (who
        becomes responsible for closing it, or calling PerlIO_releaseFILE())
-       So we need to undo its refernce count increase on the underlying file
+       So we need to undo its reference count increase on the underlying file
        descriptor. We have to do this, because if the loop above returns you
        the FILE *, then *it* didn't increase any reference count. So there's
        only one way to be consistent. */
@@ -4661,7 +4661,7 @@ PerlIOCrlf_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 	if (c->nl) {
 	    ptr = c->nl + 1;
 	    if (ptr == b->end && *c->nl == 0xd) {
-		/* Defered CR at end of buffer case - we lied about count */
+		/* Deferred CR at end of buffer case - we lied about count */
 		ptr--;
 	    }
 	}
@@ -4679,7 +4679,7 @@ PerlIOCrlf_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 	IV flags = PerlIOBase(f)->flags;
 	STDCHAR *chk = (c->nl) ? (c->nl+1) : b->end;
 	if (ptr+cnt == c->nl && c->nl+1 == b->end && *c->nl == 0xd) {
-	  /* Defered CR at end of buffer case - we lied about count */
+	  /* Deferred CR at end of buffer case - we lied about count */
 	  chk--;
 	}
 	chk -= cnt;
