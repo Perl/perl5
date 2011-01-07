@@ -22,7 +22,7 @@ use vars qw($debugging $verbose);
 
 use Test::More tests => 8;
 
-# Uncomment the folowing line to get a dump of the constructed data structure
+# Uncomment the following line to get a dump of the constructed data structure
 # (you may want to reduce the size of the hashes too)
 # $debugging = 1;
 
@@ -106,7 +106,7 @@ is($x1, $x2);
 is($x1, $x3);
 
 # In normal mode it is exceedingly unlikely that the frozen
-# representaions of all the hashes will be the same (normally the hash
+# representations of all the hashes will be the same (normally the hash
 # elements are frozen in the order they are stored internally,
 # i.e. pseudo-randomly).
 
