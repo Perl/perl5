@@ -88,7 +88,7 @@ Log::Message::Item  - Message objects for Log::Message
     $item->remove;  # delete the item from the stack it was on
 
     # Besides these methods, you can also call the handlers on
-    # the object specificallly.
+    # the object specifically.
     # See the Log::Message::Handlers manpage for documentation on what
     # handlers are available by default and how to add your own
 
