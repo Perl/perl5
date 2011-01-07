@@ -13,7 +13,7 @@
  *                  Watcom's hash table is used to store memory pointers.
  *                  All malloc's, realloc's, free's go through this.
  * Author		:	HYAK, SGP
- * Date			:	Januray 2001.
+ * Date			:	January 2001.
  *
  */
 
