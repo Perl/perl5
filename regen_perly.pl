@@ -66,7 +66,7 @@ die "$0: must be run on an ASCII system\n" unless ord 'A' == 65;
 #    this; 1.35+ does
 #  * Must produce output which is extractable by the regexes below
 #  * Must produce the right values.
-# These last two contstraints  may well be met by earlier versions, but
+# These last two constraints  may well be met by earlier versions, but
 # I simply haven't tested them yet. If it works for you, then modify
 # the test below to allow that version too. DAPM Feb 04.
 

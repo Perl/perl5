@@ -47,7 +47,7 @@ my $ext_dirs_re = '(?:' . join('|', @ext_dirs) . ')';
 # It's actually a cut and shut of the Unix version ext/utils/makeext and the
 # Windows version win32/build_ext.pl hence the two invocation styles.
 
-# On Unix, it primarily used by the perl Makefile one extention at a time:
+# On Unix, it primarily used by the perl Makefile one extension at a time:
 #
 # d_dummy $(dynamic_ext): miniperl preplibrary FORCE
 # 	@$(RUN) ./miniperl make_ext.pl --target=dynamic $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
@@ -56,7 +56,7 @@ my $ext_dirs_re = '(?:' . join('|', @ext_dirs) . ')';
 # If '--static' is specified, static extensions will be built.
 # If '--dynamic' is specified, dynamic extensions will be built.
 # If '--nonxs' is specified, nonxs extensions will be built.
-# If '--dynaloader' is specificied, DynaLoader will be built.
+# If '--dynaloader' is specified, DynaLoader will be built.
 # If '--all' is specified, all extensions will be built.
 #
 #    make_ext.pl "MAKE=make [-make_opts]" --dir=directory [--target=target] [--static|--dynamic|--all] +ext2 !ext1
@@ -370,7 +370,7 @@ use ExtUtils::MakeMaker;
 # hash.
 my @temps = 'Makefile.PL';
 foreach (glob('scripts/pod*.PL')) {
-    # The various pod*.PL extrators change directory. Doing that with relative
+    # The various pod*.PL extractors change directory. Doing that with relative
     # paths in @INC breaks. It seems the lesser of two evils to copy (to avoid)
     # the chdir doing anything, than to attempt to convert lib paths to
     # absolute, and potentially run into problems with quoting special
