@@ -198,7 +198,9 @@ acceptable.
 
 =item *
 
-Documentation updates are acceptable.
+Documentation updates that correct factual errors, explain significant
+bugs or deficiences in the current implementation or fix broken markup
+are acceptable.
 
 =item *
 
