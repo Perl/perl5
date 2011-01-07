@@ -1,5 +1,10 @@
 Revision history for the Perl extension Win32.
 
+0.42	[2011-01-06]
+	- remove brittle test for Win32::GetLongPathName($ENV{SYSTEMROOT})
+	  which will fail if the case of the environment value doesn't
+	  exactly match the case of the directory name on the filesystem.
+
 0.41	[2010-12-10]
 	- Fix Win32::GetChipName() to return the native processor type when
 	  running 32-bit Perl on 64-bit Windows (WOW64).  This will also
