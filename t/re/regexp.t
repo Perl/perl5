@@ -123,7 +123,7 @@ foreach (@tests) {
 
     for my $study ('', 'study $subject', 'utf8::upgrade($subject)',
 		   'utf8::upgrade($subject); study $subject') {
-	# Need to make a copy, else the utf8::upgrade of an alreay studied
+	# Need to make a copy, else the utf8::upgrade of an already studied
 	# scalar confuses things.
 	my $subject = $subject;
 	my $c = $iters;

@@ -499,7 +499,7 @@ SKIP: {
     ok(-d -r _ , "chained -x's on dirhandle"); 
     ok(-d DIR, "-d on a dirhandle works");
 
-    # And now for the ambigious bareword case
+    # And now for the ambiguous bareword case
     {
 	no warnings 'deprecated';
 	ok(open(DIR, "TEST"), 'Can open "TEST" dir')
@@ -532,7 +532,7 @@ SKIP: {
 	ok(-d _ , "The special file handle _ is set correctly"); 
         ok(-d -r *DIR{IO} , "chained -x's on *DIR{IO}");
 
-	# And now for the ambigious bareword case
+	# And now for the ambiguous bareword case
 	{
 	    no warnings 'deprecated';
 	    ok(open(DIR, "TEST"), 'Can open "TEST" dir')

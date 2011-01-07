@@ -943,7 +943,7 @@ sub run_tests {
     {   # TRIE related
         our @got = ();
         "words" =~ /(word|word|word)(?{push @got, $1})s$/;
-        iseq @got, 1, "TRIE optimation";
+        iseq @got, 1, "TRIE optimisation";
 
         @got = ();
         "words" =~ /(word|word|word)(?{push @got,$1})s$/i;
@@ -1758,7 +1758,7 @@ sub run_tests {
         my @notIsPunct = grep {/[[:punct:]]/ and not /\p{IsPunct}/}
                                 map {chr} 0x20 .. 0x7f;
         iseq join ('', @notIsPunct), '$+<=>^`|~',
-            '[:punct:] disagress with IsPunct on Symbols';
+            '[:punct:] disagrees with IsPunct on Symbols';
 
         my @isPrint = grep {not /[[:print:]]/ and /\p{IsPrint}/}
                             map {chr} 0 .. 0x1f, 0x7f .. 0x9f;

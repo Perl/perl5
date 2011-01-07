@@ -659,7 +659,7 @@ is( runperl(stderr => 1, prog => 'my $i;for $i (1) { for $i (2) { } }'), "");
 #    GV => blessed(AV) => RV => GV => blessed(SV)
 # all with a refcnt of 1, and hope that the second GV gets processed first
 # by do_clean_named_objs.  Then when the first GV is processed, it mustn't
-# find anything nastly left by the previous GV processing.
+# find anything nasty left by the previous GV processing.
 # The eval is stop things in the main body of the code holding a reference
 # to a GV, and the print at the end seems to bee necessary to ensure
 # the correct freeing order of *x and *y (no, I don't know why - DAPM).

@@ -42,7 +42,7 @@ EOC
 
 $prog =~ s/\@\@\@\@/$filename/;
 
-fresh_perl_is("require AnyDBM_File;\n$prog", 'ok', {}, 'explict require');
+fresh_perl_is("require AnyDBM_File;\n$prog", 'ok', {}, 'explicit require');
 fresh_perl_is($prog, 'ok', {}, 'implicit require');
 
 $prog = <<'EOC';

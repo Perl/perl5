@@ -104,7 +104,7 @@ sub skip {
     safe_globals();
     $why =~ s/\n.*//s;
     $why .= "; Bug $BugId" if defined $BugId;
-    # seems like the new harness code doesnt like todo and skip to be mixed.
+    # seems like the new harness code doesn't like todo and skip to be mixed.
     # which seems like a bug in the harness to me. -- dmq
     #$why .= " # TODO $TODO" if defined $TODO;
     

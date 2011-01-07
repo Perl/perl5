@@ -201,7 +201,7 @@ do [$fh, sub {$_ .= $_ . $_; return;}] or die;
 do \"pass\n(\n'Scalar references are treated as initial file contents'\n)\n"
 or die;
 
-open $fh, "<", \"ss('The file is concatentated');";
+open $fh, "<", \"ss('The file is concatenated');";
 
 do [\'pa', $fh] or die;
 

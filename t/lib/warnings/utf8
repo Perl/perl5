@@ -11,7 +11,7 @@
 
      [utf16_to_utf8]
      Malformed UTF-16 surrogate		
-     <<<<<< Add a test when somethig actually calls utf16_to_utf8
+     <<<<<< Add a test when something actually calls utf16_to_utf8
 
 __END__
 # utf8.c [utf8_to_uv] -W

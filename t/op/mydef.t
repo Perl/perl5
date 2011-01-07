@@ -71,7 +71,7 @@ $_ = "global";
     for ("implicit foo") { # implicit "my $_"
 	ok( $_ eq "implicit foo", 'for implicit my $_' );
 	/(.)/;
-	ok( $1 eq "i", '...m// in for implicity my $_' );
+	ok( $1 eq "i", '...m// in for implicit my $_' );
 	ok( our $_ eq 'global', '...our $_ inside for implicit my $_' );
     }
     ok( $_ eq 'local', '...my $_ restored outside for implicit my $_' );

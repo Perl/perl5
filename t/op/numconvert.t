@@ -105,7 +105,7 @@ my $max_uv_p1 = "$max_uv"; $max_uv_p1+=0; $max_uv_p1++;
 
 # Also need to cope with %g notation for max_uv_p1 that actually gives an
 # integer less than max_uv because of correct rounding for the limited
-# precisision. This bites for 12 byte long doubles and 8 byte UVs
+# precision. This bites for 12 byte long doubles and 8 byte UVs
 
 my $temp = $max_uv_p1;
 my $max_uv_p1_as_iv;

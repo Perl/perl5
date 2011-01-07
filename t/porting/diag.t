@@ -270,7 +270,7 @@ sub check_file {
     }
   }
 }
-# Lists all missing things as of the inaguration of this script, so we
+# Lists all missing things as of the inauguration of this script, so we
 # don't have to go from "meh" to perfect all at once.
 # 
 # PLEASE DO NOT ADD TO THIS LIST.  Instead, write an entry in

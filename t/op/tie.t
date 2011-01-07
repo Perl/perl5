@@ -370,7 +370,7 @@ EXPECT
 # Test case from perlmonks by runrig
 # http://www.perlmonks.org/index.pl?node_id=273490
 # "Here is what I tried. I think its similar to what you've tried
-#  above. Its odd but convienient that after untie'ing you are left with
+#  above. Its odd but convenient that after untie'ing you are left with
 #  a variable that has the same value as was last returned from
 #  FETCH. (At least on my perl v5.6.1). So you don't need to pass a
 #  reference to the variable in order to set it after the untie (here it

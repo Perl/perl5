@@ -671,7 +671,7 @@ numbers ('d', -(2**34), -1, 0, 1, 2**34);
 numbers_with_total ('q', -1,
                     -9223372036854775808, -1, 0, 1,9223372036854775807);
 # This total is icky, but the true total is 2**65-1, and need a way to generate
-# the epxected checksum on any system including those where NVs can preserve
+# the expected checksum on any system including those where NVs can preserve
 # 65 bits. (long double is 128 bits on sparc, so they certainly can)
 # or where rounding is down not up on binary conversion (crays)
 numbers_with_total ('Q', sub {

@@ -3,7 +3,7 @@
 print "1..53\n";
 
 # First test whether the number stringification works okay.
-# (Testing with == would exercize the IV/NV part, not the PV.)
+# (Testing with == would exercise the IV/NV part, not the PV.)
 
 $a = 1; "$a";
 print $a eq "1"       ? "ok 1\n"  : "not ok 1 # $a\n";

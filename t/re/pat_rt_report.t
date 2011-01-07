@@ -34,7 +34,7 @@ sub run_tests {
     {
         local $BugId = '20000731.001';
         ok "A \x{263a} B z C" =~ /A . B (??{ "z" }) C/,
-           "Match UTF-8 char in presense of (??{ })";
+           "Match UTF-8 char in presence of (??{ })";
     }
 
 
@@ -928,7 +928,7 @@ sub run_tests {
         my @words = ('word1', 'word3', 'word5');
         my $count;
         foreach my $word (@words) {
-            $text =~ s/$word\s//gi; # Leave a space to seperate words
+            $text =~ s/$word\s//gi; # Leave a space to separate words
                                     # in the resultant str.
             # The following block is not working.
             if ($&) {

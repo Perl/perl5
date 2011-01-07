@@ -500,7 +500,7 @@ print "ok $test # length of \$@ after eval\n"; $test++;
 print "not " if (length $@ != 0);
 print "ok $test # length of \$@ after eval\n"; $test++;
 
-# Check if eval { 1 }; compeltly resets $@
+# Check if eval { 1 }; completely resets $@
 if (eval "use Devel::Peek; 1;") {
   $tempfile = tempfile();
   $outfile = tempfile();
@@ -540,10 +540,10 @@ END_EVAL_TEST
 
    my $ok = runperl(progfile => $tempfile);
    print "not " unless $ok;
-   print "ok $test # eval { 1 } completly resets \$@\n";
+   print "ok $test # eval { 1 } completely resets \$@\n";
 }
 else {
-  print "ok $test # skipped - eval { 1 } completly resets \$@\n";
+  print "ok $test # skipped - eval { 1 } completely resets \$@\n";
 }
 $test++;
 

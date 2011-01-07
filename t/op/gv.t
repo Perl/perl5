@@ -366,7 +366,7 @@ is (ref $::{ga_shloip}, 'SCALAR', "Export of proxy constant as is");
 is (ref $::{oonk}, 'SCALAR', "Export doesn't affect original");
 is (eval 'ga_shloip', "Value", "Constant has correct value");
 is (ref $::{ga_shloip}, 'SCALAR',
-    "Inlining of constant doesn't change represenatation");
+    "Inlining of constant doesn't change representation");
 
 delete $::{ga_shloip};
 
@@ -566,7 +566,7 @@ foreach my $value ([1,2,3], {1=>2}, *STDOUT{IO}, \&ok, *STDOUT{FORMAT}) {
     $::{BONK} = \"powie";
     *{"BONK"} = \&{"BONK"};
     eval 'is(BONK(), "powie",
-             "Assigment works when glob created midway (bug 45607)"); 1'
+             "Assignment works when glob created midway (bug 45607)"); 1'
 	or die $@;
 }
 
@@ -610,7 +610,7 @@ foreach my $type (qw(integer number string)) {
     local $SIG{__WARN__} = sub { $warn = $_[0] };
     use warnings;
     my $str = "$glob";
-    is($warn, '', "RT #60954 anon glob stringification shouln't warn");
+    is($warn, '', "RT #60954 anon glob stringification shouldn't warn");
     is($str,  '', "RT #60954 anon glob stringification should be empty");
 }
 

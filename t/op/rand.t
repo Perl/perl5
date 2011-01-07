@@ -174,7 +174,7 @@ DIAG
     # to find out what's wrong with your rand. Or with this
     # algorithm. :-)
     #
-    # Calculating absoulute standard deviation for number of bits set
+    # Calculating absolute standard deviation for number of bits set
     # (eight bits per rep)
     $dev = abs ($bits - $reps * 4) / sqrt($reps * 2);
 

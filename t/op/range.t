@@ -341,7 +341,7 @@ foreach my $ii (~0, ~0+1, ~0+(~0>>4)) {
     ok($@, 'Lower bound rejected: ' . -$ii);
 }
 
-# double/tripple magic tests
+# double/triple magic tests
 sub TIESCALAR { bless { value => $_[1], orig => $_[1] } }
 sub STORE { $_[0]{store}++; $_[0]{value} = $_[1] }
 sub FETCH { $_[0]{fetch}++; $_[0]{value} }

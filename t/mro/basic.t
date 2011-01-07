@@ -60,7 +60,7 @@ ok(mro::is_universal('MRO_B'));
 ok(!mro::is_universal('MRO_B'));
 
 # is_universal, get_mro, and get_linear_isa should
-# handle non-existant packages sanely
+# handle non-existent packages sanely
 ok(!mro::is_universal('Does_Not_Exist'));
 is(mro::get_mro('Also_Does_Not_Exist'), 'dfs');
 ok(eq_array(

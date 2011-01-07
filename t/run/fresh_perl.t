@@ -755,7 +755,7 @@ if ($name =~ /(\p{IsUpper}) (\p{IsUpper})/){
 }
 EXPECT
 It's good! >A< >B<
-######## [perl #8760] strangness with utf8 and warn
+######## [perl #8760] strangeness with utf8 and warn
 $_="foo";utf8::upgrade($_);/bar/i,warn$_;
 EXPECT
 foo at - line 1.

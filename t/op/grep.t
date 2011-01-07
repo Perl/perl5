@@ -203,7 +203,7 @@ plan( tests => 61 );
 }
 
 {
-    # This shouldn't loop indefinitively.
+    # This shouldn't loop indefinitely.
     my @empty = map { while (1) {} } ();
     cmp_ok("@empty", 'eq', '', 'staying alive');
 }

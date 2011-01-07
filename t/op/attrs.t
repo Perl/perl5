@@ -201,7 +201,7 @@ ok !defined(attributes::get(\PVBM)),
     'PVBMs don\'t segfault attributes::get';
 
 {
-    #  [perl #49472] Attributes + Unkown Error
+    #  [perl #49472] Attributes + Unknown Error
     eval '
 	use strict;
 	sub MODIFY_CODE_ATTRIBUTE{}

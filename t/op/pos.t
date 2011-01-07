@@ -29,7 +29,7 @@ is(pos($x), 4);
 { local $x }
 is(pos($x), 4);
 
-# Explict test that triggers the utf8_mg_len_cache_update() code path in
+# Explicit test that triggers the utf8_mg_len_cache_update() code path in
 # Perl_sv_pos_b2u().
 
 $x = "\x{100}BC";

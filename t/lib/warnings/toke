@@ -739,10 +739,10 @@ dump() better written as CORE::dump() at - line 4.
 # toke.c
 use warnings 'misc';
 use subs qw/dump/;
-sub dump { print "no warning for overriden dump\n"; }
+sub dump { print "no warning for overridden dump\n"; }
 dump;
 EXPECT
-no warning for overriden dump
+no warning for overridden dump
 ########
 # toke.c
 use warnings 'ambiguous';

@@ -7,8 +7,8 @@ BEGIN {
 }
 print "1..1\n";
 
-# there is an equivelent test in t/re/pat.t which does NOT fail
-# its not clear why it doesnt fail, so this todo gets its own test
+# there is an equivalent test in t/re/pat.t which does NOT fail
+# its not clear why it doesn't fail, so this todo gets its own test
 # file until we can work it out.
 
 my $x; 
