@@ -499,7 +499,7 @@ Swap the contents of the pattern space and the hold space.
 $ComTab{'y'}=[ 2, 'tra', \&Emit,       ''                                ]; #ok
 =item [2addr]B<y>B</>I<string1>B</>I<string2>B</>
 
-In the pattern space, replace all characters occuring in I<string1> by the
+In the pattern space, replace all characters occurring in I<string1> by the
 character at the corresponding position in I<string2>. It is possible
 to use any character (other than a backslash or newline) instead of a
 slash to delimit the strings.  Within I<string1> and I<string2>, a
@@ -1887,7 +1887,7 @@ A `\' in a BRE is used to make the subsequent character literal.
 
 =item `\' cannot be last in substitution
 
-A `\' in a subsitution string is used to make the subsequent character literal.
+A `\' in a substitution string is used to make the subsequent character literal.
 
 =item conflicting flags `%s'
 
