@@ -554,7 +554,7 @@ sub splainthis {
     s/, <.*?> (?:line|chunk).*$//;
 
     # Discard 1st " at <file> line <no>" and all text beyond
-    # but be aware of messsages containing " at this-or-that"
+    # but be aware of messages containing " at this-or-that"
     my $real = 0;
     my @secs = split( / at / );
     return unless @secs;

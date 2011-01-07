@@ -890,7 +890,7 @@ sub eval {
 #   + Forgot a my() declaration (Ilya Zakharevich in 11085)
 # Changes: 1.15: Nov  6, 2001 Michael G Schwern <schwern@pobox.com>
 #   + Updated 1.14 change log
-#   + Added *dbline explainatory comments
+#   + Added *dbline explanatory comments
 #   + Mentioning perldebguts man page
 # Changes: 1.16: Feb 15, 2002 Mark-Jason Dominus <mjd@plover.com>
 #   + $onetimeDump improvements
@@ -984,7 +984,7 @@ terminates, and defaulting to printing return values for the C<r> command.
 # Needed for the statement after exec():
 #
 # This BEGIN block is simply used to switch off warnings during debugger
-# compiliation. Probably it would be better practice to fix the warnings,
+# compilation. Probably it would be better practice to fix the warnings,
 # but this is how it's done at the moment.
 
 BEGIN {
@@ -2809,7 +2809,7 @@ appropriately, and force us out of the command loop.
                 # r - return from the current subroutine.
                 $cmd =~ /^r$/ && do {
 
-                    # Can't do anythign if the program's over.
+                    # Can't do anything if the program's over.
                     end_report(), next CMD if $finished and $level <= 1;
 
                     # Turn on stack trace.
@@ -3225,7 +3225,7 @@ Manipulates C<%alias> to add or list command aliases.
                     # List aliases.
                     for my $k (@keys) {
 
-                        # Messy metaquoting: Trim the substiution code off.
+                        # Messy metaquoting: Trim the substitution code off.
                         # We use control-G as the delimiter because it's not
                         # likely to appear in the alias.
                         if ( ( my $v = $alias{$k} ) =~ ss\a$k\a(.*)\a$1 ) {
@@ -3684,7 +3684,7 @@ sub sub {
       )
       if $frame;
 
-    # Determine the sub's return type,and capture approppriately.
+    # Determine the sub's return type, and capture appropriately.
     if (wantarray) {
 
         # Called in array context. call sub and capture output.
@@ -3748,7 +3748,7 @@ sub sub {
 
         # If we're doing exit messages...
         (
-            $frame & 4    # Extended messsages
+            $frame & 4    # Extended messages
             ? (
                 print_lineinfo( ' ' x $stack_depth, "out " ),
                 print_trace( $LINEINFO, -1, 1, 1, "$sub$al" )
@@ -5512,7 +5512,7 @@ sub postponed {
     # Yes. Mark this file as having breakpoints.
     $had_breakpoints{$filename} |= 1;
 
-    # "Cannot be done: unsufficient magic" - we can't just put the
+    # "Cannot be done: insufficient magic" - we can't just put the
     # breakpoints saved in %postponed_file into %dbline by assigning
     # the whole hash; we have to do it one item at a time for the
     # breakpoints to be set properly.
@@ -6488,7 +6488,7 @@ sub readline {
     # Nothing on the filehandle stack. Socket?
     if ( ref $OUT and UNIVERSAL::isa( $OUT, 'IO::Socket::INET' ) ) {
 
-        # Send anyting we have to send.
+        # Send anything we have to send.
         $OUT->write( join( '', @_ ) );
 
         # Receive anything there is to receive.
@@ -7289,7 +7289,7 @@ B<H> I<-number>    Display last number commands (default all).
 B<H> I<*>          Delete complete history.
 B<p> I<expr>        Same as \"I<print {DB::OUT} expr>\" in current package.
 B<|>I<dbcmd>        Run debugger command, piping DB::OUT to current pager.
-B<||>I<dbcmd>        Same as B<|>I<dbcmd> but DB::OUT is temporarilly select()ed as well.
+B<||>I<dbcmd>        Same as B<|>I<dbcmd> but DB::OUT is temporarily select()ed as well.
 B<\=> [I<alias> I<value>]    Define a command alias, or list current aliases.
 I<command>        Execute as a perl statement in current package.
 B<R>        Pure-man-restart of debugger, some of debugger state
@@ -7774,7 +7774,7 @@ sub dbdie {
         die @_ if $^S;    # in eval propagate
     }
 
-    # The code used to check $^S to see if compiliation of the current thing
+    # The code used to check $^S to see if compilation of the current thing
     # hadn't finished. We don't do it anymore, figuring eval is pretty stable.
     eval { require Carp };
 
@@ -8880,7 +8880,7 @@ Rerun the current session to:
     rerun -4     current command minus 4 (go back 4 steps)
 
 Whether this always makes sense, in the current context is unknowable, and is
-in part left as a useful exersize for the reader.  This sub returns the
+in part left as a useful exercise for the reader.  This sub returns the
 appropriate arguments to rerun the current session.
 
 =cut
@@ -9074,7 +9074,7 @@ variable via C<DB::set_list>.
     set_list( "PERLDB_POST",      @$post );
     set_list( "PERLDB_TYPEAHEAD", @typeahead );
 
-    # We are oficially restarting.
+    # We are officially restarting.
     $ENV{PERLDB_RESTART} = 1;
 
     # We are junking all child debuggers.

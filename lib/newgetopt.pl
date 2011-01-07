@@ -18,7 +18,7 @@ warn "Legacy library @{[(caller(0))[6]]} will be removed from the Perl core dist
     $PERMUTE = 1;
     $RETURN_IN_ORDER = 2;
 
-    # Handle POSIX compliancy.
+    # Handle POSIX compliance.
     if ( defined $ENV{"POSIXLY_CORRECT"} ) {
 	$autoabbrev = 0;	# no automatic abbrev of options (???)
 	$getopt_compat = 0;	# disallow '+' to start options

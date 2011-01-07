@@ -84,7 +84,7 @@ else {
         my ($s, $mode, $eff) = @_;
         my $uid = $eff ? $> : $<;
 
-        # If we're root on unix and we are not testing for exectable
+        # If we're root on unix and we are not testing for executable
         # status, then all file tests are true.
         $^O ne "VMS" and $uid == 0 and !($mode & 0111) and return 1;
 

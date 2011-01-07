@@ -166,7 +166,7 @@ sub fileparse {
     }
   }
 
-  # Ensure taint is propgated from the path to its pieces.
+  # Ensure taint is propagated from the path to its pieces.
   $tail .= $taint;
   wantarray ? ($basename .= $taint, $dirpath .= $taint, $tail)
             : ($basename .= $taint);

@@ -8,7 +8,7 @@ require Exporter;
 require Cwd;
 
 #
-# Modified to ensure sub-directory traversal order is not inverded by stack
+# Modified to ensure sub-directory traversal order is not inverted by stack
 # push and pops.  That is remains in the same order as in the directory file,
 # or user pre-processing (EG:sorted).
 #
@@ -847,7 +847,7 @@ sub _find_dir($$$) {
 	@filenames = $pre_process->(@filenames) if $pre_process;
 	push @Stack,[$CdLvl,$dir_name,"",-2]   if $post_process;
 
-	# default: use whatever was specifid
+	# default: use whatever was specified
         # (if $nlink >= 2, and $avoid_nlink == 0, this will switch back)
         $no_nlink = $avoid_nlink;
         # if dir has wrong nlink count, force switch to slower stat method

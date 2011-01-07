@@ -27,7 +27,7 @@
 # Loose matching should be applied to all property names and property values, with
 # the exception of String Property values. With loose matching of property names and
 # values, the case distinctions, whitespace, and '_' are ignored. For Numeric Property
-# values, numeric equivalencies are applied: thus "01.00" is equivalent to "1".
+# values, numeric equivalences are applied: thus "01.00" is equivalent to "1".
 #
 # NOTE: Property value names are NOT unique across properties. For example:
 #

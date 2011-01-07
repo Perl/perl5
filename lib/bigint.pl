@@ -167,7 +167,7 @@ sub main'bsub { #(num_str, num_str) return num_str
     &'badd($_[0],&'bneg($_[1]));    
 }
 
-# GCD -- Euclids algorithm Knuth Vol 2 pg 296
+# GCD -- Euclid's algorithm Knuth Vol 2 pg 296
 sub main'bgcd { #(num_str, num_str) return num_str
     local($x,$y) = (&'bnorm($_[0]),&'bnorm($_[1]));
     if ($x eq 'NaN' || $y eq 'NaN') {

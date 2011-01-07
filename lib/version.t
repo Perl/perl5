@@ -27,7 +27,7 @@ BaseTests("version","new","declare");
 BaseTests("version","parse", "qv");
 BaseTests("version","parse", "declare");
 
-# dummy up a redundant call to satify David Wheeler
+# dummy up a redundant call to satisfy David Wheeler
 local $SIG{__WARN__} = sub { die $_[0] };
 eval 'use version;';
 unlike ($@, qr/^Subroutine main::declare redefined/,

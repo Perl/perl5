@@ -626,7 +626,7 @@ sub lookup_name ($$$) {
         }
         else {
 
-          # Not algorthmically determinable; look up in the table.
+          # Not algorithmically determinable; look up in the table.
           if ($txt =~ /\t\Q$name\E$/m) {
             @off = ($-[0] + 1, $+[0]);    # The 1 is for the tab
             $found_full_in_table = 1;
@@ -669,9 +669,9 @@ sub lookup_name ($$$) {
 
         # Here, we haven't set up the output, but we know where in the string
         # the name starts.  The string is set up so that for single characters
-        # (and not named sequences), the name is preceeded immediately by a
+        # (and not named sequences), the name is preceded immediately by a
         # tab and 5 hex digits for its code, with a \n before those.  Named
-        # sequences won't have the 7th preceeding character be a \n.
+        # sequences won't have the 7th preceding character be a \n.
         # (Actually, for the very first entry in the table this isn't strictly
         # true: subtracting 7 will yield -1, and the substr below will
         # therefore yield the very last character in the table, which should

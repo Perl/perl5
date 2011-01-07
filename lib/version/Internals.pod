@@ -510,7 +510,7 @@ point interpretation.  For example:
   $v2 = qv("1.2");       # also v1.2.0
 
 As you can see, either a bare number or a quoted string can usually
-be used interchangably, except in the case of a trailing zero, which
+be used interchangeably, except in the case of a trailing zero, which
 must be quoted to be converted properly.  For this reason, it is strongly
 recommended that all initializers to qv() be quoted strings instead of
 bare numbers.

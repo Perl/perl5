@@ -258,7 +258,7 @@ debug "# Scanning for locales...\n";
 # Note that it's okay that some languages have their native names
 # capitalized here even though that's not "right".  They are lowercased
 # anyway later during the scanning process (and besides, some clueless
-# vendor might have them capitalized errorneously anyway).
+# vendor might have them capitalized erroneously anyway).
 
 my $locales = <<EOF;
 Afrikaans:af:za:1 15

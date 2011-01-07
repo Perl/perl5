@@ -28,7 +28,7 @@ my $Noc_Pattern =
     qr/(\d+) +wallclock secs? +\( *(-?\d+\.\d\d) +usr +\+ +(-?\d+\.\d\d) +sys += +(-?\d+\.\d\d) +CPU\)/;
 my $Nop_Pattern =
     qr/(\d+) +wallclock secs? +\( *(-?\d+\.\d\d) +cusr +\+ +(-?\d+\.\d\d) +csys += +\d+\.\d\d +CPU\)/;
-# Please don't trust the matching parenthises to be useful in this :-)
+# Please don't trust the matching parentheses to be useful in this :-)
 my $Default_Pattern = qr/$All_Pattern|$Noc_Pattern/;
 
 my $t0 = new Benchmark;
@@ -111,7 +111,7 @@ is ($auto, $default, 'timestr ($diff, "auto") matches timestr ($diff)');
 
     my ($wallclock, $usr, $sys, $cusr, $csys, $cpu) = $all =~ $All_Pattern;
 
-    is (timestr ($diff, 'none'), '', "none supresses output");
+    is (timestr ($diff, 'none'), '', "none suppresses output");
 
     my $noc = timestr ($diff, 'noc');
     like ($noc, qr/$wallclock +wallclock secs? +\( *$usr +usr +\+ +$sys +sys += +$cpu +CPU\)/, 'timestr ($diff, "noc")');
@@ -529,7 +529,7 @@ undef $debug;
 untie *STDERR;
 
 # To check the cache we are poking where we don't belong, inside the namespace.
-# The way benchmark is written We can't actually check whehter the cache is
+# The way benchmark is written we can't actually check whether the cache is
 # being used, merely what's become cached.
 
 clearallcache();

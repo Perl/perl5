@@ -17,7 +17,7 @@
 # changed 0+$self to pack 'J', $self.)
 
 my $start_time;
-BEGIN { # Get the time the script started running; do it at compiliation to
+BEGIN { # Get the time the script started running; do it at compilation to
         # get it as close as possible
     $start_time= time;
 }
@@ -1296,7 +1296,7 @@ my @printable;          # boolean: And are those characters printable?
 my @annotate_char_type; # Contains a type of those characters, specifically
                         # for the purposes of annotation.
 my $annotate_ranges;    # A map of ranges of code points that have the same
-                        # name for the purposes of annoation.  They map to the
+                        # name for the purposes of annotation.  They map to the
                         # upper edge of the range, so that the end point can
                         # be immediately found.  This is used to skip ahead to
                         # the end of a range, and avoid processing each
@@ -4499,7 +4499,7 @@ sub trace { return main::trace(@_); }
             # not, is normal.  The lists are prioritized so the most serious
             # ones are checked first
             if (exists $why_suppressed{$complete_name}
-                # Don't suppress if overriden
+                # Don't suppress if overridden
                 && ! grep { $_ eq $complete_name{$addr} }
                                                     @output_mapped_properties)
             {
@@ -5823,7 +5823,7 @@ END
 
                 # The pack() below can't cope with surrogates.
                 if ($code_point >= 0xD800 && $code_point <= 0xDFFF) {
-                    Carp::my_carp("Surrogage code point '$code_point' in mapping to '$map' in $self.  No map created");
+                    Carp::my_carp("Surrogate code point '$code_point' in mapping to '$map' in $self.  No map created");
                     next;
                 }
 
@@ -6563,7 +6563,7 @@ sub trace { return main::trace(@_); }
         # not quite so many.
         # If they are related, one must be a perl extension.  This is because
         # we can't guarantee that Unicode won't change one or the other in a
-        # later release even if they are idential now.
+        # later release even if they are identical now.
 
         my $self = shift;
         my $other = shift;
@@ -7070,7 +7070,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         # each of them is stored in %alias_to_property_of as they are defined.
         # But it's possible that this subroutine will be called with some
         # variant, so if the initial lookup fails, it is repeated with the
-        # standarized form of the input name.  If found, besides returning the
+        # standardized form of the input name.  If found, besides returning the
         # result, the input name is added to the list so future calls won't
         # have to do the conversion again.
 
@@ -7224,7 +7224,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
                         . " argument to '-='.  Subtraction ignored.");
             return $self;
         }
-        elsif ($reversed) {   # Shouldnt happen in a -=, but just in case
+        elsif ($reversed) {   # Shouldn't happen in a -=, but just in case
             Carp::my_carp_bug("Can't cope with a "
             .  __PACKAGE__
             . " being the first parameter in a '-='.  Subtraction ignored.");
@@ -7647,7 +7647,7 @@ sub join_lines($) {
     # A blank separates the joined lines except if there is a break; an extra
     # blank is inserted after a period ending a line.
 
-    # Intialize the return with the first line.
+    # Initialize the return with the first line.
     my ($return, @lines) = split "\n", shift;
 
     # If the first line is null, it was an empty line, add the \n back in
@@ -7949,7 +7949,7 @@ sub Standardize($) {
     $name =~ s/^\s+//g;
     $name =~ s/\s+$//g;
 
-    # Convert interior white space and hypens into underscores.
+    # Convert interior white space and hyphens into underscores.
     $name =~ s/ (?<= .) [ -]+ (.) /_$1/xg;
 
     # Capitalize the letter following an underscore, and convert a sequence of
@@ -9016,7 +9016,7 @@ sub output_perl_charnames_line ($$) {
         #
         # meaning the codepoints in the range all have the value 'map' under
         # 'property'.
-        # Beginning and trailing white space in each field are not signficant.
+        # Beginning and trailing white space in each field are not significant.
         # Note there is not a trailing semi-colon in the above.  A trailing
         # semi-colon means the map is a null-string.  An omitted map, as
         # opposed to a null-string, is assumed to be 'Y', based on Unicode
@@ -9548,7 +9548,7 @@ END
     # the code point and name on each line.  This was actually the hardest
     # thing to design around.  The code points in those ranges may actually
     # have real maps not given by these two lines.  These maps will either
-    # be algorthimically determinable, or in the extracted files furnished
+    # be algorithmically determinable, or in the extracted files furnished
     # with the UCD.  In the event of conflicts between these extracted files,
     # and this one, Unicode says that this one prevails.  But it shouldn't
     # prevail for conflicts that occur in these ranges.  The data from the
@@ -10860,7 +10860,7 @@ sub filter_blocks_lines {
         #                                one.
         #   Titlecase                    duplicates UnicodeData.txt: gc=lt
         #   Unassigned Code Value        duplicates UnicodeData.txt: gc=cc
-        #   Zero-width                   never made into offical property;
+        #   Zero-width                   never made into official property;
         #                                subset of gc=cf
         # Most of the properties have the same names in this file as in later
         # versions, but a couple do not.
@@ -11740,7 +11740,7 @@ END
         my $description_start = "Code point's usage introduced in version ";
         $first_age->add_description($description_start . $first_age->name);
 
-        # To construct the accumlated values, for each of the age tables
+        # To construct the accumulated values, for each of the age tables
         # starting with the 2nd earliest, merge the earliest with it, to get
         # all those code points existing in the 2nd earliest.  Repeat merging
         # the new 2nd earliest with the 3rd earliest to get all those existing
@@ -12077,7 +12077,7 @@ END
 
 sub register_file_for_name($$$) {
     # Given info about a table and a datafile that it should be associated
-    # with, register that assocation
+    # with, register that association
 
     my $table = shift;
     my $directory_ref = shift;   # Array of the directory path for the file
@@ -12975,7 +12975,7 @@ adjacent to (but within) the braces and the colon or equal sign.
 =back
 
 Some properties are considered obsolete, but still available.  There are
-several varieties of obsolesence:
+several varieties of obsolescence:
 
 =over 4
 
@@ -13019,7 +13019,7 @@ flags each such entry in the table.
 @block_warning
 
 The table below has two columns.  The left column contains the \\p{}
-constructs to look up, possibly preceeded by the flags mentioned above; and
+constructs to look up, possibly preceded by the flags mentioned above; and
 the right column contains information about them, like a description, or
 synonyms.  It shows both the single and compound forms for each property that
 has them.  If the left column is a short name for a property, the right column
@@ -13572,7 +13572,7 @@ sub write_all_tables() {
             $filename = $table->file;
         }
 
-        # Use specified filename if avaliable, or default to property's
+        # Use specified filename if available, or default to property's
         # shortest name.  We need an 8.3 safe filename (which means "an 8
         # safe" filename, since after the dot is only 'pl', which is < 3)
         # The 2nd parameter is if the filename shouldn't be changed, and
@@ -14540,7 +14540,7 @@ if ( $file_list and $make_list ) {
 #
 # - First section is input files
 #   ($0 itself is not listed but is automatically considered an input)
-# - Section seperator is /^=+\$/
+# - Section separator is /^=+\$/
 # - Second section is a list of output files.
 # - Lines matching /^\\s*#/ are treated as comments
 #   which along with blank lines are ignored.

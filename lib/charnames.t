@@ -661,7 +661,7 @@ is($_, 'foobar');
 
 # Unicode slowdown noted by Phil Pennock, traced to a bug fix in index
 # SADAHIRO Tomoyuki's suggestion is to ensure that the UTF-8ness of both
-# arguments are indentical before calling index.
+# arguments are identical before calling index.
 # To do this can take advantage of the fact that unicore/Name.pl is 7 bit
 # (or at least should be). So assert that that it's true here.  EBCDIC
 # may be a problem (khw).

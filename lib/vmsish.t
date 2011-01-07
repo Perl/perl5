@@ -29,7 +29,7 @@ SKIP: {
 
 #========== vmsish status ==========
 `$Invoke_Perl -e 1`;  # Avoid system() from a pipe from harness.  Mutter.
-is($?,0,"simple Perl invokation: POSIX success status");
+is($?,0,"simple Perl invocation: POSIX success status");
 {
   use vmsish qw(status);
   is(($? & 1),1, "importing vmsish [vmsish status]");
