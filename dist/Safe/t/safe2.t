@@ -18,7 +18,7 @@ use Opcode 1.00, qw(opdesc opset opset_to_ops opset_to_hex
 
 use Safe 1.00;
 
-my $last_test; # initalised at end
+my $last_test; # initialised at end
 print "1..$last_test\n";
 
 # Set up a package namespace of things to be visible to the unsafe code
@@ -120,7 +120,7 @@ print $@ =~ /foo bar/ ? "ok 29\n" : "not ok 29\n";
   
 my $t = 30;
 $! = 0;
-my $nosuch = '/non/existant/file.name';
+my $nosuch = '/non/existent/file.name';
 open(NOSUCH, $nosuch);
 if ($@) {
     my $errno  = $!;

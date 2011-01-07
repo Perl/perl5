@@ -401,7 +401,7 @@ _acmp(class, cx, cy);
       RETURN_MORTAL_INT(-1);		/* len differs: X < Y */
       }
     /* both have same number of elements, so check length of last element
-       and see if it differes */
+       and see if it differs */
     tempx = *av_fetch(array_x, elemsx, 0);	/* fetch last element */
     tempy = *av_fetch(array_y, elemsx, 0);	/* fetch last element */
     SvPV(tempx, lenx);			/* convert to string & store length */

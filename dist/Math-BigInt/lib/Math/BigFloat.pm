@@ -2501,7 +2501,7 @@ sub bpow
 sub bmodpow
   {
   # takes a very large number to a very large exponent in a given very
-  # large modulus, quickly, thanks to binary exponentation. Supports
+  # large modulus, quickly, thanks to binary exponentiation. Supports
   # negative exponents.
   my ($self,$num,$exp,$mod,@r) = objectify(3,@_);
 
@@ -3888,7 +3888,7 @@ Math::BigFloat - Arbitrary size floating point math package
 
   $x->bmod($y);			# modulus ($x % $y)
   $x->bpow($y);			# power of arguments ($x ** $y)
-  $x->bmodpow($exp,$mod);	# modular exponentation (($num**$exp) % $mod))
+  $x->bmodpow($exp,$mod);	# modular exponentiation (($num**$exp) % $mod))
   $x->blsft($y, $n);		# left shift by $y places in base $n
   $x->brsft($y, $n);		# right shift by $y places in base $n
 				# returns (quo,rem) or quo if in scalar context

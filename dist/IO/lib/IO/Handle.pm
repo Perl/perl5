@@ -603,8 +603,8 @@ sub ioctl {
     return ioctl($io, $op, $_[2]);
 }
 
-# this sub is for compatability with older releases of IO that used
-# a sub called constant to detemine if a constant existed -- GMB
+# this sub is for compatibility with older releases of IO that used
+# a sub called constant to determine if a constant existed -- GMB
 #
 # The SEEK_* and _IO?BF constants were the only constants at that time
 # any new code should just chech defined(&CONSTANT_NAME)

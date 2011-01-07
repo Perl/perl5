@@ -64,7 +64,7 @@ like (ref(4.5+4.5), qr/^Math::BigInt/);
 
 
 ###############################################################################
-# accurarcy and precision
+# accuracy and precision
 
 is (bigint->accuracy(), undef);
 is (bigint->accuracy(12),12);

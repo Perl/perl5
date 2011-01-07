@@ -31,7 +31,7 @@ sub main'dump {
 # This is the root recursive dumping routine that may indirectly be
 # called by one of the routine it calls...
 # The link parameter is set to false when the reference passed to
-# the routine is an internal temporay variable, implying the object's
+# the routine is an internal temporary variable, implying the object's
 # address is not to be dumped in the %dumped table since it's not a
 # user-visible object.
 sub recursive_dump {

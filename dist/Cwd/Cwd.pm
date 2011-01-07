@@ -129,7 +129,7 @@ it from Cwd.
 
 =item *
 
-Since the path seperators are different on some operating systems ('/'
+Since the path separators are different on some operating systems ('/'
 on Unix, ':' on MacPerl, etc...) we recommend you use the File::Spec
 modules wherever portability is a concern.
 

@@ -40,7 +40,7 @@ is (3/7 / 1,'3/7');
 is (3/7 / 1.5,'2/7');
 
 ###############################################################################
-# accurarcy and precision
+# accuracy and precision
 
 is (bigrat->accuracy(), undef);
 is (bigrat->accuracy(12),12);

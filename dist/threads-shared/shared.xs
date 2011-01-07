@@ -134,7 +134,7 @@
 #define UL_MAGIC_SIG 0x554C  /* UL = user lock */
 
 /*
- * The shared things need an intepreter to live in ...
+ * The shared things need an interpreter to live in ...
  */
 PerlInterpreter *PL_sharedsv_space;             /* The shared sv space */
 /* To access shared space we fake aTHX in this scope and thread's context */
@@ -1163,7 +1163,7 @@ Perl_sharedsv_locksv(pTHX_ SV *sv)
 
 /* Can a shared object be destroyed?
  * True if not a shared,
- * or if detroying last proxy on a shared object
+ * or if destroying last proxy on a shared object
  */
 #ifdef PL_destroyhook
 bool
@@ -1178,7 +1178,7 @@ Perl_shared_object_destroy(pTHX_ SV *sv)
 }
 #endif
 
-/* veto signal despatch if we have the lock */
+/* veto signal dispatch if we have the lock */
 
 #ifdef PL_signalhook
 

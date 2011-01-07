@@ -49,7 +49,7 @@ Revision history for Perl extension ExtUtils::CBuilder.
     get unique file name for checking for compiler
     [Jens Rehsack]
 
-  - Code base modernization and substantial code coverage improvments
+  - Code base modernization and substantial code coverage improvements
     [Jim Keenan]
 
 0.2703 - Tue Mar 16 17:10:55 EDT 2010
@@ -261,7 +261,7 @@ Revision history for Perl extension ExtUtils::CBuilder.
    somehow never got into this copy. [Steve Hay]
 
  - Added a new 'defines' parameter to compile(), which gives a
-   platform-independant way to specify various -Dfoo=bar (or the
+   platform-independent way to specify various -Dfoo=bar (or the
    equivalent) compiler defines. [Randy W. Sims]
 
 0.14  Mon Sep 19 13:40:37 CDT 2005

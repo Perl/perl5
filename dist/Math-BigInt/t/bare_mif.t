@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# test rounding, accuracy, precicion and fallback, round_mode and mixing
+# test rounding, accuracy, precision and fallback, round_mode and mixing
 # of classes under BareCalc
 
 use strict;

@@ -83,7 +83,7 @@ $try .= ' $x = 2**150; bgcd($x); $x = "$x";';
 $ans = eval $try;
 is ( $ans, "1427247692705959881058285969449495136382746624");
 
-# test wether Math::BigInt::Scalar via use works (w/ dff. spellings of calc)
+# test whether Math::BigInt::Scalar via use works (w/ dff. spellings of calc)
 $try = "use $class ($version,'lib','Scalar');";
 $try .= ' $x = 2**10; $x = "$x";';
 $ans = eval $try; is ( $ans, "1024");

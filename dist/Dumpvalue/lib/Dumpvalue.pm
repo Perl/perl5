@@ -541,7 +541,7 @@ I<as is>.  If C<quoteHighBit> is set, they will be quoted.
 
 =item C<usageOnly>
 
-rudimentally per-package memory usage dump.  If set,
+rudimentary per-package memory usage dump.  If set,
 C<dumpvars> calculates total size of strings in variables in the package.
 
 =item unctrl

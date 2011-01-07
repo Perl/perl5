@@ -914,7 +914,7 @@ version of Storable fully support (but see discussion of
 C<$Storable::accept_future_minor> above).  The constant
 C<Storable::BIN_WRITE_VERSION_NV> function returns what file version
 is written and might be less than C<Storable::BIN_VERSION_NV> in some
-configuations.
+configurations.
 
 =item C<major>, C<minor>
 

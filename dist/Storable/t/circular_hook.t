@@ -34,7 +34,7 @@ my $array = [ $ddd ];
 my $string = Storable::freeze( $array );
 my $thawed = Storable::thaw( $string );
 
-# is_deeply infinite loops in ciculars, so do it manually
+# is_deeply infinite loops in circulars, so do it manually
 # is_deeply( $array, $thawed, 'Circular hooked objects work' );
 is( ref($thawed), 'ARRAY', 'Top level ARRAY' );
 is( scalar(@$thawed), 1, 'ARRAY contains one element' );

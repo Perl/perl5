@@ -1545,7 +1545,7 @@ be 1 if the host is reachable and 0 if it is not.  For most practical
 purposes, undef and 0 and can be treated as the same case.  In array
 context, the elapsed time as well as the string form of the ip the
 host resolved to are also returned.  The elapsed time value will
-be a float, as retuned by the Time::HiRes::time() function, if hires()
+be a float, as returned by the Time::HiRes::time() function, if hires()
 has been previously called, otherwise it is returned as an integer.
 
 =item $p->source_verify( { 0 | 1 } );

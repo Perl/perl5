@@ -1492,7 +1492,7 @@ sub _lsft
     }
   # set lowest parts to 0
   while ($dst >= 0) { $x->[$dst--] = 0; }
-  # fix spurios last zero element
+  # fix spurious last zero element
   splice @$x,-1 if $x->[-1] == 0;
   $x;
   }

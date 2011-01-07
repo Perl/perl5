@@ -46,7 +46,7 @@ BEGIN {
 # - fixed nulled leave with live enter in sort { }
 # - fixed reference constants (\"str")
 # - handle empty programs gracefully
-# - handle infinte loops (for (;;) {}, while (1) {})
+# - handle infinite loops (for (;;) {}, while (1) {})
 # - differentiate between `for my $x ...' and `my $x; for $x ...'
 # - various minor cleanups
 # - moved globals into an object
@@ -106,10 +106,10 @@ BEGIN {
 # - added support for Ilya's OPpTARGET_MY optimization
 # - elided arrows before `()' subscripts when possible
 # Changes between 0.59 and 0.60
-# - support for method attribues was added
+# - support for method attributes was added
 # - some warnings fixed
 # - separate recognition of constant subs
-# - rewrote continue block handling, now recoginizing for loops
+# - rewrote continue block handling, now recognizing for loops
 # - added more control of expanding control structures
 # Changes between 0.60 and 0.61 (mostly by Robin Houston)
 # - many bug-fixes
@@ -167,7 +167,7 @@ BEGIN {
 #    'use warnings; BEGIN {${^WARNING_BITS} eq "U"x12;} use warnings::register'
 # op/getpid 2 - can't assign to shared my() declaration (threads only)
 #    'my $x : shared = 5'
-# op/override 7 - parens on overriden require change v-string interpretation
+# op/override 7 - parens on overridden require change v-string interpretation
 #    'BEGIN{*CORE::GLOBAL::require=sub {}} require v5.6'
 #    c.f. 'BEGIN { *f = sub {0} }; f 2'
 # op/pat 774 - losing Unicode-ness of Latin1-only strings
@@ -4885,7 +4885,7 @@ which is not, consequently, deparsed correctly.
 
 Lexical (my) variables declared in scopes external to a subroutine
 appear in code2ref output text as package variables. This is a tricky
-problem, as perl has no native facility for refering to a lexical variable
+problem, as perl has no native facility for referring to a lexical variable
 defined within a different scope, although L<PadWalker> is a good start.
 
 =item *

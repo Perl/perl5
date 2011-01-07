@@ -302,7 +302,7 @@ $x = $C->_new("11"); is ($C->_str($C->_fac($x)),'39916800');
 $x = $C->_new("12"); is ($C->_str($C->_fac($x)),'479001600');
 $x = $C->_new("13"); is ($C->_str($C->_fac($x)),'6227020800');
 
-# test that _fac modifes $x in place for small arguments
+# test that _fac modifies $x in place for small arguments
 $x = $C->_new("3"); $C->_fac($x); is ($C->_str($x),'6');
 $x = $C->_new("13"); $C->_fac($x); is ($C->_str($x),'6227020800');
 

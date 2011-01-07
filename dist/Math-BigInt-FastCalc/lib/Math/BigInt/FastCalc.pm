@@ -97,7 +97,7 @@ the same terms as Perl itself.
 
 Original math code by Mark Biggar, rewritten by Tels L<http://bloodgate.com/>
 in late 2000.
-Seperated from BigInt and shaped API with the help of John Peacock.
+Separated from BigInt and shaped API with the help of John Peacock.
 Fixed, sped-up and enhanced by Tels http://bloodgate.com 2001-2003.
 Further streamlining (api_version 1 etc.) by Tels 2004-2007.
 

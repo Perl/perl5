@@ -106,7 +106,7 @@ Minor release to fix Makefile.PL not accepting MakeMaker args.
 
 =item 2.08  (7 December 1997)
 
-Glob dumps don't output superflous 'undef' anymore.
+Glob dumps don't output superfluous 'undef' anymore.
 
 Fixes from Gisle Aas <gisle@aas.no> to make Dumper() work with
 overloaded strings in recent perls, and his new testsuite.

@@ -499,7 +499,7 @@ sub find_good_formatter_class {
       } else {
         $^W = 0;
         # The average user just has no reason to be seeing
-        #  $^W-suppressable warnings from the the require!
+        #  $^W-suppressible warnings from the the require!
       }
 
       eval "require $c";
@@ -1128,7 +1128,7 @@ sub render_findings {
     } else {
       $^W = 0;
       # The average user just has no reason to be seeing
-      #  $^W-suppressable warnings from the formatting!
+      #  $^W-suppressible warnings from the formatting!
     }
           
     eval {  $formatter->parse_from_file( $file, $out_fh )  };

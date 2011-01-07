@@ -740,7 +740,7 @@ sub rel2abs {
 
 	# Split up paths
 
-	# igonore $path's volume
+	# ignore $path's volume
         my ( $path_dirs, $path_file ) = ($self->splitpath($path))[1,2] ;
 
         # ignore $base's file part

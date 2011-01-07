@@ -21,7 +21,7 @@ use Opcode 1.00, qw(opdesc opset opset_to_ops opset_to_hex
 
 use Safe 1.00;
 
-my $last_test; # initalised at end
+my $last_test; # initialised at end
 print "1..$last_test\n";
 
 my $t = 1;

@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 use strict;
 BEGIN {
-    # BEGIN block is acutally a subroutine :-)
+    # BEGIN block is actually a subroutine :-)
     return unless $] > 5.009;
     require feature;
     feature->import(':5.10');
@@ -389,7 +389,7 @@ state $x = 42;
 }
 ####
 # SKIP ?$] < 5.010 && "state vars not implemented on this Perl version"
-# state vars in anoymous subroutines
+# state vars in anonymous subroutines
 $a = sub {
     state $x;
     return $x++;

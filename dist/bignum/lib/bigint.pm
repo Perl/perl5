@@ -180,19 +180,19 @@ sub import
       # this causes a different low lib to take care...
       $lib_kind = $1; $lib_kind = 'lib' if $lib_kind eq 'l';
       $lib = $_[$i+1] || '';
-      my $s = 2; $s = 1 if @a-$j < 2;	# avoid "can not modify non-existant..."
+      my $s = 2; $s = 1 if @a-$j < 2;	# avoid "can not modify non-existent..."
       splice @a, $j, $s; $j -= $s; $i++;
       }
     elsif ($_[$i] =~ /^(a|accuracy)$/)
       {
       $a = $_[$i+1];
-      my $s = 2; $s = 1 if @a-$j < 2;	# avoid "can not modify non-existant..."
+      my $s = 2; $s = 1 if @a-$j < 2;	# avoid "can not modify non-existent..."
       splice @a, $j, $s; $j -= $s; $i++;
       }
     elsif ($_[$i] =~ /^(p|precision)$/)
       {
       $p = $_[$i+1];
-      my $s = 2; $s = 1 if @a-$j < 2;	# avoid "can not modify non-existant..."
+      my $s = 2; $s = 1 if @a-$j < 2;	# avoid "can not modify non-existent..."
       splice @a, $j, $s; $j -= $s; $i++;
       }
     elsif ($_[$i] =~ /^(v|version)$/)
@@ -373,7 +373,7 @@ than or equal to zero. See Math::BigInt's bround() function for details.
 
 	perl -Mbigint=a,2 -le 'print 12345+1'
 
-Note that setting precision and accurary at the same time is not possible.
+Note that setting precision and accuracy at the same time is not possible.
 
 =item p or precision
 
@@ -387,7 +387,7 @@ See Math::BigInt's bfround() function for details.
 
 	perl -Mbignum=p,5 -le 'print 123456789+123'
 
-Note that setting precision and accurary at the same time is not possible.
+Note that setting precision and accuracy at the same time is not possible.
 
 =item t or trace
 
@@ -447,7 +447,7 @@ Math::BigInt::Bar, and when this also fails, revert to Math::BigInt::Calc:
 
 Using C<lib> warns if none of the specified libraries can be found and
 L<Math::BigInt> did fall back to one of the default libraries.
-To supress this warning, use C<try> instead:
+To suppress this warning, use C<try> instead:
 
         use bignum try => 'GMP';
 

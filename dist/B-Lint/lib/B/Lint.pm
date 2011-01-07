@@ -584,7 +584,7 @@ PRIVATE_NAMES: {
 DOLLAR_UNDERSCORE: {
 
         # Warn on uses of $_ with a few exceptions. I'm not warning on
-        # $_ inside grep, map, or statement modifer foreach because
+        # $_ inside grep, map, or statement modifier foreach because
         # they localize $_ and it'd be impossible to use these
         # features without getting warnings.
 

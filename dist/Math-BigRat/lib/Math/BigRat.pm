@@ -6,14 +6,14 @@
 # The following hash values are used:
 #   sign : +,-,NaN,+inf,-inf
 #   _d   : denominator
-#   _n   : numeraotr (value = _n/_d)
+#   _n   : numerator (value = _n/_d)
 #   _a   : accuracy
 #   _p   : precision
 # You should not look at the innards of a BigRat - use the methods for this.
 
 package Math::BigRat;
 
-# anythig older is untested, and unlikely to work
+# anything older is untested, and unlikely to work
 use 5.006;
 use strict;
 use Carp ();
@@ -1756,7 +1756,7 @@ in string form.
 
 	$len = $x->length();
 
-Return the length of $x in digitis for integer values.
+Return the length of $x in digits for integer values.
 
 =head2 digit()
 
@@ -1894,7 +1894,7 @@ Please see the documentation in L<Math::BigInt> for further details.
 	print $x->bstr(),"\n";			# prints 1/2
 	print $x->bsstr(),"\n";			# prints 1/2
 
-Return a string representating this object.
+Return a string representing this object.
 
 =head2 bacmp()/bcmp()
 

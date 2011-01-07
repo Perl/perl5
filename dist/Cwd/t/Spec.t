@@ -32,7 +32,7 @@ if ($^O eq 'VMS') {
 my $skip_exception = "Install VMS::Filespec (from vms/ext)" ;
 
 if ( $@ ) {
-   # Not pretty, but it allows testing of things not implemented soley
+   # Not pretty, but it allows testing of things not implemented solely
    # on VMS.  It might be better to change File::Spec::VMS to do this,
    # making it more usable when running on (say) Unix but working with
    # VMS paths.

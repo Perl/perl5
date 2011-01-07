@@ -931,7 +931,7 @@ sub round
   # Round $self according to given parameters, or given second argument's
   # parameters or global defaults 
 
-  # for speed reasons, _find_round_parameters is embeded here:
+  # for speed reasons, _find_round_parameters is embedded here:
 
   my ($self,$a,$p,$r,@args) = @_;
   # $a accuracy, if given by caller
@@ -989,7 +989,7 @@ sub round
     {
     $self->bfround(int($p),$r) if !defined $self->{_p} || $self->{_p} <= $p;
     }
-  # bround() or bfround() already callled bnorm() if nec.
+  # bround() or bfround() already called bnorm() if nec.
   $self;
   }
 
@@ -1402,7 +1402,7 @@ sub bgcd
   { 
   # (BINT or num_str, BINT or num_str) return BINT
   # does not modify arguments, but returns new object
-  # GCD -- Euclids algorithm, variant C (Knuth Vol 3, pg 341 ff)
+  # GCD -- Euclid's algorithm, variant C (Knuth Vol 3, pg 341 ff)
 
   my $y = shift;
   $y = $class->new($y) if !ref($y);
@@ -1859,7 +1859,7 @@ sub bmodinv
 sub bmodpow
   {
   # takes a very large number to a very large exponent in a given very
-  # large modulus, quickly, thanks to binary exponentation. Supports
+  # large modulus, quickly, thanks to binary exponentiation. Supports
   # negative exponents.
   my ($self,$num,$exp,$mod,@r) = objectify(3,@_);
 
@@ -2886,7 +2886,7 @@ sub _split
   # invalid input.
   my $x = shift;
 
-  # strip white space at front, also extranous leading zeros
+  # strip white space at front, also extraneous leading zeros
   $x =~ s/^\s*([-]?)0*([0-9])/$1$2/g;   # will not strip '  .2'
   $x =~ s/^\s+//;                       # but this will
   $x =~ s/\s+$//g;                      # strip white space at end
@@ -3212,8 +3212,8 @@ Math::BigInt - Arbitrary size integer/float math package
   $x->bmuladd($y,$z);	# $x = $x * $y + $z
 
   $x->bmod($y);		   # modulus (x % y)
-  $x->bmodpow($exp,$mod);  # modular exponentation (($num**$exp) % $mod))
-  $x->bmodinv($mod);	   # the multiplicative inverse of $x modulo $mod
+  $x->bmodpow($exp,$mod);  # modular exponentiation (($num**$exp) % $mod)
+  $x->bmodinv($mod);	   # the inverse of $x in the given modulus $mod
 
   $x->bpow($y);		   # power of arguments (x ** y)
   $x->blsft($y);	   # left shift in base 2
@@ -3749,11 +3749,11 @@ inverse exists.
 
 =head2 bmodpow()
 
-	$num->bmodpow($exp,$mod);	# modular exponentation
+	$num->bmodpow($exp,$mod);	# modular exponentiation
 					# ($num**$exp % $mod)
 
 Returns the value of C<$num> taken to the power C<$exp> in the modulus
-C<$mod> using binary exponentation.  C<bmodpow> is far superior to
+C<$mod> using binary exponentiation.  C<bmodpow> is far superior to
 writing
 
 	$num ** $exp % $mod
@@ -4085,7 +4085,7 @@ the decimal point. For example, 123.45 has a precision of -2. 0 means an
 integer like 123 (or 120). A precision of 2 means two digits to the left
 of the decimal point are zero, so 123 with P = 1 becomes 120. Note that
 numbers with zeros before the decimal point may have different precisions,
-because 1200 can have p = 0, 1 or 2 (depending on what the inital value
+because 1200 can have p = 0, 1 or 2 (depending on what the initial value
 was). It could also have p < 0, when the digits after the decimal point
 are zero.
 
@@ -4232,7 +4232,7 @@ versions <= 5.7.2) is like this:
     assumption that 124 has 3 significant digits, while 120/7 will get you
     '17', not '17.1' since 120 is thought to have 2 significant digits.
     The rounding after the division then uses the remainder and $y to determine
-    wether it must round up or down.
+    whether it must round up or down.
  ?  I have no idea which is the right way. That's why I used a slightly more
  ?  simple scheme and tweaked the few failing testcases to match it.
 

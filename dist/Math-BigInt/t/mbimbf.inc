@@ -1,4 +1,4 @@
-# test rounding, accuracy, precicion and fallback, round_mode and mixing
+# test rounding, accuracy, precision and fallback, round_mode and mixing
 # of classes
 
 # Make sure you always quote any bare floating-point values, lest 123.46 will
@@ -274,8 +274,8 @@ foreach my $c ($mbi,$mbf)
   }
 
 ###############################################################################
-# test wether operations round properly afterwards
-# These tests are not complete, since they do not excercise every "return"
+# test whether operations round properly afterwards
+# These tests are not complete, since they do not exercise every "return"
 # statement in the op's. But heh, it's better than nothing...
 
 $x = $mbf->new('123.456');
