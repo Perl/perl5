@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Tue Dec 21 14:30:17 CET 2010 [metaconfig 3.5 PL0]
+# Generated on Fri Jan  7 14:18:56 CET 2011 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -2253,7 +2253,7 @@ in the default answer, as if the default line was a set of arguments given to a
 script shell.  This means you may also use $* to repeat the whole default line,
 so you do not have to re-type everything to add something to the default.
 
-Everytime there is a substitution, you will have to confirm.  If there is an
+Every time there is a substitution, you will have to confirm.  If there is an
 error (e.g. an unmatched backtick), the default answer will remain unchanged
 and you will be prompted again.
 
@@ -9897,7 +9897,7 @@ done
 
 case "$d_longdbl$uselongdouble" in
 "$define$define")
-    : again, add prefered functions to our list first
+    : again, add preferred functions to our list first
     xxx_ld_list=""
     for xxx_convert in $gconvert_ld_preference; do
         case $xxx_convert in
@@ -10058,7 +10058,7 @@ eval $inlibc
 set pthread.h i_pthread
 eval $inhdr
 
-: define a fucntion to check prototypes
+: define a function to check prototypes
 $cat > protochk <<EOSH
 $startsh
 cc="$cc"
@@ -18723,7 +18723,7 @@ EOM
 	;;
 esac
 
-: Checking 32bit aligndness
+: Checking 32bit alignedness
 $cat <<EOM
 
 Checking to see whether you can access character data unalignedly...
@@ -22100,7 +22100,7 @@ avail_ext="$*"
 case "$onlyextensions" in
 '') ;;
 *)  keepextensions=''
-    echo "You have requested that only certains extensions be included..." >&4
+    echo "You have requested that only certain extensions be included..." >&4
     for i in $onlyextensions; do
         case " $avail_ext " in
         *" $i "*)
