@@ -2,8 +2,8 @@
 # vim:ts=8:sw=2:et:sta:sts=2
 package Module::Metadata;
 
-# stolen from Module::Build::Version and ::Base - this is perl licensed code,
-# copyright them.
+# Adapted from Perl-licensed code originally distributed with
+# Module-Build by Ken Williams
 
 # This module provides routines to gather information about
 # perl modules (assuming this may be expanded in the distant
@@ -11,7 +11,7 @@ package Module::Metadata;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '1.000002';
+$VERSION = '1.000003';
 $VERSION = eval $VERSION;
 
 use File::Spec;
@@ -747,14 +747,10 @@ assistance from David Golden (xdg) <dagolden@cpan.org>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2001-2006 Ken Williams.  All rights reserved.
+Copyright (c) 2001-2011 Ken Williams.  All rights reserved.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
-
-=head1 SEE ALSO
-
-perl(1), L<Module::Build::ModuleInfo>(3)
 
 =cut
 
