@@ -359,7 +359,7 @@ sub check {
     ### we have the fatal flag toggled.
     croak(__PACKAGE__->last_error) if ($wrong || $warned) && $WARNINGS_FATAL;
 
-    ### done with our loop... if $wrong is set, somethign went wrong
+    ### done with our loop... if $wrong is set, something went wrong
     ### and the user is already informed, just return...
     return if $wrong;
 
@@ -435,7 +435,7 @@ sub allow {
 
         ### loop over the elements, see if one of them says the
         ### value is OK
-        ### also, short-cicruit when possible
+        ### also, short-circuit when possible
         for ( @{$_[1]} ) {
             return 1 if allow( $_[0], $_ );
         }
@@ -629,7 +629,7 @@ the user input to lowercase, but instead expect them to be in the
 case the template provided. This is useful when you want to use
 similar keys with different casing in your templates.
 
-Understand that this removes the case-insensitivy feature of this
+Understand that this removes the case-insensitivity feature of this
 module.
 
 Default is 0;
