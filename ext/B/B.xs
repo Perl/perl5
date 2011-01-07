@@ -1641,7 +1641,7 @@ PV(sv)
 	       to avoid tripping up over variable names in the pads.  */
 	    if((SvLEN(sv) && len >= SvLEN(sv))) {
 		/* It claims to be longer than the space allocated for it -
-		   presuambly it's a variable name in the pad  */
+		   presumably it's a variable name in the pad  */
 		len = strlen(p);
 	    }
 #endif

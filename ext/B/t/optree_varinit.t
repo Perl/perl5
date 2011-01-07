@@ -240,7 +240,7 @@ EONT_EONT
 checkOptree ( name	=> 'local $a=undef',
 	      prog	=> 'local $a=undef',
 	      errs      => ['Name "main::a" used only once: possible typo at -e line 1.'],
-	      note	=> 'locals are rare, probly not worth doing',
+	      note	=> 'locals are rare, probably not worth doing',
 	      bcopts	=> '-basic',
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');

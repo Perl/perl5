@@ -353,7 +353,7 @@ sub set_up_relative_test {
 		$h->{arg} .= ' RELATIVE' if $h->{name} eq 'leavesub';
 	    }
 	    elsif ($style eq 'scope') {
-		# supress printout entirely
+		# suppress printout entirely
 		$$format="" unless grep { $h->{name} eq $_ } @scopeops;
 	    }
 	});

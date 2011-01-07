@@ -586,7 +586,7 @@ restore_sigmask(pTHX_ SV *osset_sv)
  *
  * Note that we don't free() the malloc()ed memory unless and until we call
  * malloc() again ourselves because the CRT putenv() function simply puts its
- * pointer argument into the environ[] arrary (it doesn't make a copy of it)
+ * pointer argument into the environ[] array (it doesn't make a copy of it)
  * so this memory must otherwise be leaked.
  */
 

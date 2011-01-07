@@ -89,7 +89,7 @@ put_op_bitspec(pTHX_ const char *optag, STRLEN len, SV *mask)
 
 /* Fetch a 'bits' entry for an opname or optag (IV/PV).
  * Note that we return the actual entry for speed.
- * Always sv_mortalcopy() if returing it to user code.
+ * Always sv_mortalcopy() if returning it to user code.
  */
 
 static SV *

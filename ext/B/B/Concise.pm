@@ -306,7 +306,7 @@ sub compileOpts {
 		if (!$Config::Config{usedl}
 		    && keys %{$pkg.'::'} == 1
 		    && $pkg->can('bootstrap')) {
-		    # It is something that we're staticly linked to, but hasn't
+		    # It is something that we're statically linked to, but hasn't
 		    # yet been used.
 		    eval "require $pkg";
 		}

@@ -466,7 +466,7 @@ test_op_list_describe(OP *o)
     return SvPVX(res);
 }
 
-/* the real new*OP functions have a tendancy to call fold_constants, and
+/* the real new*OP functions have a tendency to call fold_constants, and
  * other such unhelpful things, so we need our own versions for testing */
 
 #define mkUNOP(t, f) THX_mkUNOP(aTHX_ (t), (f))

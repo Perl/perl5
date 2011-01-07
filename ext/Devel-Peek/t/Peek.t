@@ -48,7 +48,7 @@ sub do_test {
 	    # things like $IVNV gave the illusion that the string passed in was
 	    # a regexp into which variables were interpolated, but this wasn't
 	    # actually true as those 'variables' actually also ate the
-	    # whitspace on the line. So it seems better to mark lines that
+	    # whitespace on the line. So it seems better to mark lines that
 	    # need to be eliminated. I considered (?# ... ) and (?{ ... }),
 	    # but whilst embedded code or comment syntax would keep it as a
 	    # legitimate regexp, it still isn't true. Seems easier and clearer
@@ -122,7 +122,7 @@ do_test('immediate constant (string)',
   CUR = 3
   LEN = \\d+');
 
-do_test('assigment of immediate constant (integer)',
+do_test('assignment of immediate constant (integer)',
         $b = 123,
 'SV = IV\\($ADDR\\) at $ADDR
   REFCNT = 1
@@ -660,7 +660,7 @@ do_test('FORMAT',
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
     OUTSIDE = $ADDR \\(MAIN\\)');
 
-do_test('blessing to a class with embeded NUL characters',
+do_test('blessing to a class with embedded NUL characters',
         (bless {}, "\0::foo::\n::baz::\t::\0"),
 'SV = $RV\\($ADDR\\) at $ADDR
   REFCNT = 1

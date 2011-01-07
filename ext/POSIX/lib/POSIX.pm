@@ -907,7 +907,7 @@ sub load_imports {
   my %export;
   @export{map {@$_} values %EXPORT_TAGS} = ();
   # Doing the de-dup with a temporary hash has the advantage that the SVs in
-  # @EXPORT are actually shared hash key sacalars, which will save some memory.
+  # @EXPORT are actually shared hash key scalars, which will save some memory.
   push @EXPORT, keys %export;
 }
 

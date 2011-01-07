@@ -213,7 +213,7 @@ the name of a host, and translates that to an opaque string
 (if programming in C, struct in_addr or struct in6_addr depending on the 
 address family passed in).  The host string may be a string hostname, such
 as 'www.perl.org', or an IP address.  If using an IP address, the type of
-IP address must be consistant with the address family passed into the function.
+IP address must be consistent with the address family passed into the function.
 
 This function is not exported by default.
 

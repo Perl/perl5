@@ -147,7 +147,7 @@ else {
 $TB->current_test($test);
 
 # RT 72016
-eval{$pid = open3 'WRITE', 'READ', 'ERROR', '/non/existant/program'; };
+eval{$pid = open3 'WRITE', 'READ', 'ERROR', '/non/existent/program'; };
 if (IPC::Open3::DO_SPAWN) {
     if ($@) {
 	cmp_ok(waitpid($pid, 0), '>', 0);

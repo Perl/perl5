@@ -10,7 +10,7 @@
  * 9th August 1994    - Changed to use IV
  * 10th August 1994   - Tim Bunce: Added RTLD_LAZY, switchable debugging,
  *                      basic FreeBSD support, removed ClearError
- * 29th Feburary 2000 - Alan Burlison: Added functionality to close dlopen'd
+ * 29th February 2000 - Alan Burlison: Added functionality to close dlopen'd
  *                      files when the interpreter exits
  *
  */
