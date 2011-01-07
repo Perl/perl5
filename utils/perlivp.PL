@@ -235,7 +235,7 @@ if (defined($Config{'extensions'})) {
 
     # A silly name for a module (that hopefully won't ever exist).
     # Note that this test serves more as a check of the validity of the
-    # actuall required module tests above.
+    # actual required module tests above.
     my $unnecessary = 'bLuRfle';
 
     if (!grep(/$unnecessary/, @extensions)) {

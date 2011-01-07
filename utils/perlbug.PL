@@ -1292,7 +1292,7 @@ release of Perl, are likely to receive less attention from the
 volunteers who build and maintain Perl than reports about bugs in
 the current release.
 
-This tool isn't apropriate for reporting bugs in any version
+This tool isn't appropriate for reporting bugs in any version
 prior to Perl 5.0.
 
 =item Are you sure what you have is a bug?

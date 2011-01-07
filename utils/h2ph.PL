@@ -426,7 +426,7 @@ sub expr {
 		       # Croak if nv_preserves_uv_bits < 64 ?
 		       $new .=         hex(substr($hex, -8)) +
 			       2**32 * hex(substr($hex,  0, -8));
-		       # The above will produce "errorneus" code
+		       # The above will produce "erroneous" code
 		       # if the hex constant was e.g. inside UINT64_C
 		       # macro, but then again, h2ph is an approximation.
 		   } else {
