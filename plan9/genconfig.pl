@@ -205,7 +205,7 @@ while (<IN>) {  # roll through the comment header in config.h
 
 while (<IN>) {
   chop;
-  while (/\\\s*$/) {  # pick up contination lines
+  while (/\\\s*$/) {  # pick up continuation lines
     my $line = $_;
     $line =~ s/\\\s*$//;
     $_ = <IN>;
