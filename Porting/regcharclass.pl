@@ -51,7 +51,7 @@ Do a lookup assuming the string is encoded in latin-1 (aka plan octets).
 
 =item is_WHATEVER_cp(cp)
 
-Check to see if the string matches a given codepoint (hypotethically a
+Check to see if the string matches a given codepoint (hypothetically a
 U32). The condition is constructed as as to "break out" as early as
 possible if the codepoint is out of range of the condition.
 
@@ -100,7 +100,7 @@ License or the Artistic License, as specified in the README file.
 #
 # ($cp,$n,$l,$u)=__uni_latin($str);
 #
-# Return a list of arrays, each of which when interepreted correctly
+# Return a list of arrays, each of which when interpreted correctly
 # represent the string in some given encoding with specific conditions.
 #
 # $cp - list of codepoints that make up the string.
@@ -247,7 +247,7 @@ sub new {
         } elsif ( $str =~ /^0x/ ) {
             $str= chr eval $str;
         } elsif ( /\S/ ) {
-            die "Unparseable line: $txt\n";
+            die "Unparsable line: $txt\n";
         } else {
             next;
         }
@@ -276,12 +276,12 @@ sub new {
 
 # my $trie = make_trie($type,$maxlen);
 #
-# using the data stored in the object build a trie of a specifc type,
+# using the data stored in the object build a trie of a specific type,
 # and with specific maximum depth. The trie is made up the elements of
 # the given types array for each string in the object (assuming it is
 # not too long.)
 #
-# returns the trie, or undef if there was no relevent data in the object.
+# returns the trie, or undef if there was no relevant data in the object.
 #
 
 sub make_trie {

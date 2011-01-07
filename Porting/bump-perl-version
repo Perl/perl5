@@ -71,7 +71,7 @@ EOF
 my %opts;
 getopts('csu', \%opts) or usage;
 if ($opts{u}) {
-    @ARGV == 0 or usage('no version version numbers should be speciied');
+    @ARGV == 0 or usage('no version version numbers should be specified');
     # fake to stop warnings when calculating $oldx etc
     @ARGV = qw(99.99.99 99.99.99);
 }
@@ -216,7 +216,7 @@ elsif ($opts{u}) {
     do_update();
 }
 else {
-    usage('one of -c, -s or -u must be specifcied');
+    usage('one of -c, -s or -u must be specified');
 }
 exit 0;
 
@@ -279,7 +279,7 @@ sub do_update {
 	elsif (/^\s+(\d+): -(.*)/) {
 	    my $old;
 	    ($line, $old) = ($1,$2);
-	    die "$.: old line without preceeding filename\n"
+	    die "$.: old line without preceding filename\n"
 			    unless defined $file;
 	    die "Dup line number: $line\n" if exists $changes{$file}{$line};
 	    $changes{$file}{$line}[0] = $old;

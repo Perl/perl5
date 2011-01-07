@@ -70,7 +70,7 @@ Modifiers:
    --reverse                      # show rankings in reverse
 
 Generate git-log-output-file with git log --pretty=fuller rev1..rev2
-(or pipe by specifing '-' for stdin).  For example:
+(or pipe by specifying '-' for stdin).  For example:
   \$ git log --pretty=fuller v5.12.0..v5.12.1 > gitlog
   \$ perl Porting/checkAUTHORS.pl --rank --percentage gitlog
 EOS

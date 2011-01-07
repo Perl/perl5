@@ -313,8 +313,8 @@ information on obtaining the metaconfig units.
 This section has now been expanded and moved into its own file,
 F<Porting/release_managers_guide.pod>.
 
-I've kept some of the subsections here for now, as they don't  direclty
-eleate to building a release any more, but still contain what might be
+I've kept some of the subsections here for now, as they don't directly
+relate to building a release any more, but still contain what might be
 useful information - DAPM 7/2009.
 
 =head2 run metaconfig
@@ -1124,7 +1124,7 @@ were to install /usr/lib/libperl.so.4.5.  Now, when you try to run
 perl5.004_04, ld.so might try to load libperl.so.4.5, since it has
 the right "major version" number.  If this works at all, it almost
 certainly defeats the reason for keeping perl5.004_04 around.  Worse,
-with development subversions, you certaily can't guarantee that
+with development subversions, you certainly can't guarantee that
 libperl.so.4.4 and libperl.so.4.55 will be compatible.
 
 Anyway, all this leads to quite obscure failures that are sure to drive

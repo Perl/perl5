@@ -82,7 +82,7 @@ sub expand_glob {
 		    @files;
 		}
 	    # The rest are globbable patterns; expand the glob, then
-	    # recurively perform directory expansion on any results
+	    # recursively perform directory expansion on any results
 	    : expand_glob(grep -e $_,glob($_))
 	    } @_;
 }

@@ -158,7 +158,7 @@ use File::Glob qw(:case);
 #
 
 # MAP is a hash that maps CPAN paths to their core equivalents.
-# Each key reprepresents a string prefix, with longest prefixes checked
+# Each key represents a string prefix, with longest prefixes checked
 # first. The first match causes that prefix to be replaced with the
 # corresponding key. For example, with the following MAP:
 #   {

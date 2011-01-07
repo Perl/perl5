@@ -44,7 +44,7 @@ our $opt_h and usage;
 our $opt_t;
 
 my @sources = @ARGV ? @ARGV : '.';
-die "Too many directories speficied without -t option\n"
+die "Too many directories specified without -t option\n"
     if @sources != 1 and ! $opt_t;
 
 @sources = map {
