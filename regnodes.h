@@ -68,7 +68,7 @@
 #define	IFMATCH               	56	/* 0x38 Succeeds if the following matches. */
 #define	UNLESSM               	57	/* 0x39 Fails if the following matches. */
 #define	SUSPEND               	58	/* 0x3a "Independent" sub-RE. */
-#define	IFTHEN                	59	/* 0x3b Switch, should be preceeded by switcher . */
+#define	IFTHEN                	59	/* 0x3b Switch, should be preceded by switcher . */
 #define	GROUPP                	60	/* 0x3c Whether the group matched. */
 #define	LONGJMP               	61	/* 0x3d Jump far away. */
 #define	BRANCHJ               	62	/* 0x3e BRANCH with long offset. */
