@@ -362,7 +362,7 @@ sub install_layered_signal {
   my $sig_handler = sub {
     my ($called_sig_name, @sig_param) = @_;
     
-    # $s is a closure refering to real signal name
+    # $s is a closure referring to real signal name
     # for which this handler is being installed.
     # it is used to distinguish between
     # real signal handlers and aliased signal handlers
@@ -376,7 +376,7 @@ sub install_layered_signal {
     # ABRT and IOT)
     #
     # initial signal handler for aliased signal
-    # calles some other signal handler which
+    # calls some other signal handler which
     # should not execute the same handler_code again
     if ($called_sig_name eq $signal_name) {
       $handler_code->($signal_name);
@@ -883,7 +883,7 @@ sub run_forked {
       #
       # defined $child_pid_pid means child's child
       # has not died but nobody is waiting for it,
-      # killing it brutaly.
+      # killing it brutally.
       #
       if ($child_child_pid) {
         kill_gently($child_child_pid);
@@ -1201,7 +1201,7 @@ sub _open3_run {
     $kidout->autoflush(1)   if UNIVERSAL::can($kidout,   'autoflush');
     $kiderror->autoflush(1) if UNIVERSAL::can($kiderror, 'autoflush');
 
-    ### add an epxlicit break statement
+    ### add an explicit break statement
     ### code courtesy of theorbtwo from #london.pm
     my $stdout_done = 0;
     my $stderr_done = 0;
@@ -1536,7 +1536,7 @@ sub _split_like_shell_win32 {
                 Carp::carp(loc("No such FD: '%1'", $name)), next );
             
             ### MUST use the 2-arg version of open for dup'ing for 
-            ### 5.6.x compatibilty. 5.8.x can use 3-arg open
+            ### 5.6.x compatibility. 5.8.x can use 3-arg open
             ### see perldoc5.6.2 -f open for details            
             open $glob, $redir . fileno($fh) or (
                         Carp::carp(loc("Could not dup '$name': %1", $!)),
@@ -1570,7 +1570,7 @@ sub _split_like_shell_win32 {
                 Carp::carp(loc("No such FD: '%1'", $name)), next );
 
             ### MUST use the 2-arg version of open for dup'ing for 
-            ### 5.6.x compatibilty. 5.8.x can use 3-arg open
+            ### 5.6.x compatibility. 5.8.x can use 3-arg open
             ### see perldoc5.6.2 -f open for details
             open( $fh, $redir . fileno($glob) ) or (
                     Carp::carp(loc("Could not restore '$name': %1", $!)),

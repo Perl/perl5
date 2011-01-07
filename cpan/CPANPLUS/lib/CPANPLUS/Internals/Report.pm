@@ -332,7 +332,7 @@ sub _send_report {
     my $grade;
     ### check if this is a platform specific module ###
     ### if we failed the test, there may be reasons why 
-    ### an 'NA' might have to be insted
+    ### an 'NA' might have to be instead
     GRADE: { if ( $failed ) {
         
 
@@ -529,7 +529,7 @@ sub _send_report {
     $reporter->from( $conf->get_conf('email') )
         if $conf->get_conf('email') !~ /\@example\.\w+$/i;
 
-    ### give the user a chance to programattically alter the message
+    ### give the user a chance to programatically alter the message
     $message = $self->_callbacks->munge_test_report->($mod, $message, $grade);
 
     ### add the body if we have any ###

@@ -96,7 +96,7 @@ The optional argument C<format> is used to indicate what type of dist
 you would like to create (like C<CPANPLUS::Dist::MM> or 
 C<CPANPLUS::Dist::Build> and so on ).
 
-C<< CPANPLUS::Dist->new >> is exlusively meant as a method to be
+C<< CPANPLUS::Dist->new >> is exclusively meant as a method to be
 inherited by C<CPANPLUS::Dist::MM|Build>.
 
 Returns a C<CPANPLUS::Dist::YOUR_DIST_TYPE_HERE> object on success 
@@ -301,7 +301,7 @@ sub find_configure_requires {
         keys     => [ $meth ],
     );
 
-    ### the default file to use, which may be overriden
+    ### the default file to use, which may be overridden
     push @args, ( file => META_YML->( $mod->status->extract ) )
         if defined $mod->status->extract;
         
@@ -324,7 +324,7 @@ sub find_mymeta_requires {
         keys     => [qw|requires build_requires|],
     );
 
-    ### the default file to use, which may be overriden
+    ### the default file to use, which may be overridden
     push @args, ( file => MYMETA_YML->( $mod->status->extract ) )
         if defined $mod->status->extract;
         

@@ -492,7 +492,7 @@ sub parse_module {
         return $maybe if IS_MODOBJ->( module => $maybe );
     }
 
-    ### Special case arbitary file paths such as '.' etc.
+    ### Special case arbitrary file paths such as '.' etc.
     if ( $mod and -d File::Spec->rel2abs($mod) ) {
         my $dir    = File::Spec->rel2abs($mod);
         my $parent = File::Spec->rel2abs( File::Spec->catdir( $dir, '..' ) );
@@ -1162,7 +1162,8 @@ sub save_state {
 
 
 ### XXX these wrappers are not individually tested! only the underlying
-### code through source.t and indirectly trought he CustomSource plugin.
+### code through source.t and indirectly through he CustomSource plugin.
+
 =pod
 
 =head1 CUSTOM MODULE SOURCES

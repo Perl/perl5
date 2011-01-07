@@ -339,7 +339,7 @@ sub _parse_version {
     ### the following regexp & eval statement comes from the 
     ### ExtUtils::MakeMaker source (EU::MM_Unix->parse_version) 
     ### Following #18892, which tells us the original
-    ### regex breaks under -T, we must modifiy it so
+    ### regex breaks under -T, we must modify it so
     ### it captures the entire expression, and eval /that/
     ### rather than $_, which is insecure.
     my $taint_safe_str = do { $str =~ /(^.*$)/sm; $1 };
@@ -607,7 +607,7 @@ The default is 1;
 This controls whether C<Module::Load::Conditional> checks your
 C<%INC> hash to see if a module is available. By default, only
 C<@INC> is scanned to see if a module is physically on your
-filesystem, or avialable via an C<@INC-hook>. Setting this variable
+filesystem, or available via an C<@INC-hook>. Setting this variable
 to C<true> will trust any entries in C<%INC> and return them for
 you.
 

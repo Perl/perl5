@@ -99,7 +99,7 @@ sub usage {
     t   List the contents of ARCHIVE_FILE or STDIN (-)
     f   Name of the ARCHIVE_FILE to use. Default is './default.tar'
     z   Read/Write zlib compressed ARCHIVE_FILE (not always available)
-    v   Print filenames as they are added or extraced from ARCHIVE_FILE
+    v   Print filenames as they are added or extracted from ARCHIVE_FILE
     h   Prints this help message
     C   CPAN mode - drop 022 from permissions
 

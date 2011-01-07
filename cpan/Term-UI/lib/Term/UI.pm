@@ -137,7 +137,7 @@ sub get_reply {
     my $prompt_add;
     
     ### if you supplied several choices to pick from,
-    ### we'll print them seperately before the prompt
+    ### we'll print them separately before the prompt
     if( @{$args->{choices}} ) {
         my $i;
 

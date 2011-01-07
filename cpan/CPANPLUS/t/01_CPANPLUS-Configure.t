@@ -94,7 +94,7 @@ for my $cat ( $r->ls_accessors ) {
     }
     
     ### make sure this file is now loaded
-    ### XXX can't trust bloody dir seperators on Win32 in %INC,
+    ### XXX can't trust bloody dir separators on Win32 in %INC,
     ### so rather than an exact match, do a grep...
     my ($found) = grep /\bTest$$/, values %INC; 
     ok( $found,                 "   Found $file in \%INC" );

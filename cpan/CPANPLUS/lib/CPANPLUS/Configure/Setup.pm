@@ -1203,7 +1203,7 @@ are done.
                 #$self->_pager_open;     # host lists might be long
             
                 print loc("
-You can enter multiple sites by seperating them by a space.
+You can enter multiple sites by separating them by a space.
 For example:
     1 4 2 5
                 ");    
@@ -1373,7 +1373,7 @@ This may take a while...
 
 ");
 
-    ### use the enew configuratoin ###
+    ### use the new configuration ###
     $cpan->configure_object( $conf );
 
     load CPANPLUS::Module::Fake;

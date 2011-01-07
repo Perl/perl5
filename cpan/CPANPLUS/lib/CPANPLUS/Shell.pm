@@ -299,7 +299,7 @@ sub _pager_close {
         my $self = shift;
         my $fmt  = shift;
         
-        ### MUST specify $fmt as a seperate param, and not as part
+        ### MUST specify $fmt as a separate param, and not as part
         ### of @_, as it will then miss the $fmt and return the 
         ### number of elements in the list... =/ --kane
         $self->__print( sprintf( $fmt, @_ ) );

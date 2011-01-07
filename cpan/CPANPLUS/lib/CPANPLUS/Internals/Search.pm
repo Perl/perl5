@@ -337,7 +337,7 @@ sub _all_installed {
 
                     my $modobj = $self->module_tree($mod);
                     
-                    ### seperate return, a list context return with one ''
+                    ### separate return, a list context return with one ''
                     ### in it, is also true!
                     return unless $modobj;
 

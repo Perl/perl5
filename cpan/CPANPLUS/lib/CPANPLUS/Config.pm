@@ -57,7 +57,7 @@ their meaning.
 =cut
 
 ### BAH! you can't have POD interleaved with a hash
-### declaration.. so declare every entry seperatedly :(
+### declaration.. so declare every entry separately :(
 my $Conf = {
     '_fetch' => {
         'blacklist' => [ 'ftp' ],
@@ -225,7 +225,7 @@ Defaults to C<true>
 
 =cut
 
-        ### this addresses #32248 which requests a possibillity to
+        ### this addresses #32248 which requests a possibility to
         ### turn off custom sources
         $Conf->{'conf'}->{'enable_custom_sources'} = 1;
 
@@ -637,7 +637,7 @@ with CPANPLUS, which is used to enable autoflushing in spawned processes.
                 $path = $maybe and last BIN if -f $maybe;
                          
                 ### you installed CPANPLUS in a custom prefix,
-                ### so go paralel to /that/. PREFIX=/tmp/cp
+                ### so go parallel to /that/. PREFIX=/tmp/cp
                 ### would put cpanp-run-perl in /tmp/cp/bin and
                 ### CPANPLUS.pm in
                 ### /tmp/cp/lib/perl5/site_perl/5.8.8
