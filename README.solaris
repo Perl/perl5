@@ -39,7 +39,7 @@ these modules is available on CPAN under the Sun::Solaris:: namespace.
 Solaris may include two versions of perl, e.g. Solaris 9 includes
 both 5.005_03 and 5.6.1.  This is to provide stability across Solaris
 releases, in cases where a later perl version has incompatibilities
-with the version included in the preceeding Solaris release.  The
+with the version included in the preceding Solaris release.  The
 default perl version will always be the most recent, and in general
 the old version will only be retained for one Solaris release.  Note
 also that the default perl will NOT be configured to search for modules
@@ -213,7 +213,7 @@ details.
 =head3 GNU as and GNU ld
 
 The following information applies to gcc version 2.  Volunteers to
-update it as appropropriate for gcc version 3 would be appreciated.
+update it as appropriately for gcc version 3 would be appreciated.
 
 The versions of as and ld supplied with Solaris work fine for building
 perl.  There is normally no need to install the GNU versions to

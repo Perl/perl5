@@ -487,7 +487,7 @@ DPMI is required for RSX.
 
 The whole idea of the "standard C API to start applications" is that
 the forms C<foo> and C<"foo"> of program arguments are completely
-interchangable.  F<find> breaks this paradigm;
+interchangeable.  F<find> breaks this paradigm;
 
   find "pattern" file
   find pattern file
@@ -1649,7 +1649,7 @@ leaves drive as it is.
 
 =item  C<Cwd::change_drive(name)>
 
-chanes the "current" drive.
+changes the "current" drive.
 
 =item  C<Cwd::sys_is_absolute(name)>
 
@@ -1896,7 +1896,7 @@ _DLLInitTerm() (e.g., F<TCP32IP>).  This means that even if you do not I<call>
 any function in the DLL, just the act of loading this DLL will reset your
 flags.  What is worse, the same compiler was used to compile some HOOK DLLs.
 Given that HOOK dlls are executed in the context of I<all> the applications
-in the system, this means a complete unpredictablity of floating point
+in the system, this means a complete unpredictability of floating point
 flags on systems using such HOOK DLLs.  E.g., F<GAMESRVR.DLL> of B<DIVE>
 origin changes the floating point flags on each write to the TTY of a VIO
 (windowed text-mode) applications.

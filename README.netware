@@ -64,7 +64,7 @@ Example:
 The make process runs only under WinNT shell.  The NetWare makefile is
 located under the NetWare folder.  This makes use of miniperl.exe to
 run some of the Perl scripts. To create miniperl.exe, first set the
-required paths for Visual c++ compilier (specify vcvars32 location) at
+required paths for Visual c++ compiler (specify vcvars32 location) at
 the command prompt.  Then run nmake from win32 folder through WinNT
 command prompt.  The build process can be stopped after miniperl.exe
 is created. Then run nmake from NetWare folder through WinNT command

@@ -93,7 +93,7 @@ omitted or buggy. Note the messages output by F<Configure> for further
 information. Please use C<perlbug> to submit a problem report in the
 event that you encounter difficulties.
 
-When building 64-bit modules, it is your responsiblity to ensure that linked
+When building 64-bit modules, it is your responsibility to ensure that linked
 external libraries and frameworks provide 64-bit support: if they do not,
 module building may appear to succeed, but attempts to use the module will
 result in run-time dynamic linking errors, and subsequent test failures.
@@ -179,7 +179,7 @@ but remember that there's a startup cost to pay in that case (see above
 
 Starting with Tiger (Mac OS X 10.4), Apple shipped broken locale files for
 the eu_ES locale (Basque-Spain).  In previous releases of Perl, this resulted in
-failures in the C<lib/locale> test. These failures have been supressed
+failures in the C<lib/locale> test. These failures have been suppressed
 in the current release of Perl by making the test ignore the broken locale.
 If you need to use the eu_ES locale, you should contact Apple support.
 

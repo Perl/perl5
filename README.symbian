@@ -243,7 +243,7 @@ the "Oneliner" allows one to type in Perl code, and the "Run"
 opens a file chooser for selecting a Perl file to run.
 
 The PerlApp also is started when the "Perl recognizer" (also included
-and installed) detects a Perl file being activated througg the GUI,
+and installed) detects a Perl file being activated through the GUI,
 and offers either to install it under \Perl (if the Perl file is in
 the inbox of the messaging application) or to run it (if the Perl file
 is under \Perl).

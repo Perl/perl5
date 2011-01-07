@@ -673,7 +673,7 @@ be kept as clean as possible.
   lib/CPANPLUS/Internals/Constants/Report.pm
                         - OS classifications
   lib/CPANPLUS/Internals/Constants.pm
-                        - Contants for Cygwin
+                        - Constants for Cygwin
   lib/CPANPLUS/Internals/Report.pm
                         - Example of Cygwin report
   lib/CPANPLUS/Module.pm
