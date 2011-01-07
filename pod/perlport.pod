@@ -1187,7 +1187,7 @@ feature known as extended names.  On these releases, file names
 can contain up to 255 characters, are prohibited from starting
 with a C<-> character, and the set of prohibited characters is
 reduced to any character matching C<< tr/#%*<>?// >>.  There are
-restrictions involving spaces and apostrophies:  these characters
+restrictions involving spaces and apostrophes:  these characters
 must not begin or end a name, nor can they immediately precede or
 follow a period.  Additionally, a space must not immediately
 precede another space or hyphen.  Specifically, the following

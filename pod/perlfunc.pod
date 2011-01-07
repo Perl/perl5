@@ -7675,7 +7675,7 @@ and C<${^CHILD_ERROR_NATIVE}>.
 Note that a return value of C<-1> could mean that child processes are
 being automatically reaped, as described in L<perlipc>.
 
-If you use wait in your handler for $SIG{CHLD} it may accidently wait for the
+If you use wait in your handler for $SIG{CHLD} it may accidentally for the
 child created by qx() or system(). See L<perlipc> for details.
 
 =item waitpid PID,FLAGS

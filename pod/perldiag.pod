@@ -84,7 +84,7 @@ dereferenced according to its overloading, not its underlying reference type.
 The warning is issued when C<%{}> overloading exists on a blessed arrayref,
 when C<@{}> overloading exists on a blessed hashref, or when both overloadings
 are defined (in which case C<%{}> is used).  You can force the interpretation
-of the object by explictly dereferencing it as an array or hash instead of
+of the object by explicitly dereferencing it as an array or hash instead of
 passing the object itself to C<keys>, C<values> or C<each>.
 
 =item Ambiguous range in transliteration operator
@@ -5125,7 +5125,7 @@ to be huge numbers, and so usually indicates programmer error.
 If you really do mean it, explicitly numify your reference, like so:
 C<$array[0+$ref]>.  This warning is not given for overloaded objects,
 either, because you can overload the numification and stringification
-operators and then you assumably know what you are doing.
+operators and then you presumably know what you are doing.
 
 =item Use of reserved word "%s" is deprecated
 

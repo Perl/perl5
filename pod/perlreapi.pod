@@ -317,7 +317,7 @@ behave in the same situation:
 
     package main;
 
-    tie my $sv => "CatptureVar";
+    tie my $sv => "CaptureVar";
     $sv =~ y/a/b/;
 
 Because C<$sv> is C<undef> when the C<y///> operator is applied to it

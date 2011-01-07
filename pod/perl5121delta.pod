@@ -60,7 +60,7 @@ We made a small fix to the L<CPANPLUS> test suite to fix an occasional spurious 
 
 =item *
 
-We upgraded L<Safe> to version 2.27 to wrap coderefs retured by C<reval()> and C<rdo()>.
+We upgraded L<Safe> to version 2.27 to wrap coderefs returned by C<reval()> and C<rdo()>.
 
 =back
 

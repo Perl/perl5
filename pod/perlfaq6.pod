@@ -770,7 +770,7 @@ though.
 		}
 
 For more details on regular expression efficiency, see I<Mastering
-Regular Expressions> by Jeffrey Freidl. He explains how regular
+Regular Expressions> by Jeffrey Friedl. He explains how regular
 expressions engine work and why some patterns are surprisingly
 inefficient. Once you understand how perl applies regular expressions,
 you can tune them for individual situations.

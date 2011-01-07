@@ -659,7 +659,7 @@ This can make tasks like fetching the newsgroup list as simple as
 
 (contributed by brian d foy)
 
-The C<LWP> family of modules (available on CPAN as the libwww-perl distibution)
+The C<LWP> family of modules (available on CPAN as the libwww-perl distribution)
 can work with FTP just like it can with many other protocols. C<LWP::Simple>
 makes it quite easy to fetch a file:
 

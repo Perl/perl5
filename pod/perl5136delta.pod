@@ -17,7 +17,7 @@ L<perl5135delta>, which describes differences between 5.13.4 and
 
 =head2  C<(?^...)> regex construct added to signify default modifiers
 
-A caret (also called a "cirumflex accent") C<"^"> immediately following
+A caret (also called a "circumflex accent") C<"^"> immediately following
 a C<"(?"> in a regular expression now means that the subexpression is to
 not inherit the surrounding modifiers such as C</i>, but to revert to the
 Perl defaults.  Any modifiers following the caret override the defaults.
@@ -290,7 +290,7 @@ working with tainted values
 (L<CPAN RT #40727|https://rt.cpan.org/Public/Bug/Display.html?id=40727>).
 
 C<< ->maketext >> calls will now backup and restore C<$@> so that error
-messages are not supressed
+messages are not suppressed
 (L<CPAN RT #34182|https://rt.cpan.org/Public/Bug/Display.html?id=34182>).
 
 =item *
@@ -666,7 +666,7 @@ fixed.
 =item *
 
 C<sort> with a custom sort routine could crash if too many nested
-subroutine calls occurrred from within the sort routine
+subroutine calls occurred from within the sort routine
 L<[perl #77930]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=77930>.
 
 This bug was introduced in an earlier 5.13 release, and did not affect

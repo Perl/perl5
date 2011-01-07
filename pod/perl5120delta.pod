@@ -287,7 +287,7 @@ those installed in C<ARCHLIB> and C<PRIVLIB>.
 
 =head2 REGEXPs are now first class
 
-Internally, Perl now treates compiled regular expressions (such as
+Internally, Perl now treats compiled regular expressions (such as
 those created with C<qr//>) as first class entities. Perl modules which
 serialize, deserialize or otherwise have deep interaction with Perl's
 internal data structures need to be updated for this change.  Most
@@ -589,7 +589,7 @@ on CPAN which require these should add them to their prerequisites. The
 core versions of these modules warnings will issue a deprecation warning.
 
 If you ship a packaged version of Perl, either alone or as part of a
-larger system, then you should carefully consider the reprecussions of
+larger system, then you should carefully consider the repercussions of
 core module deprecations. You may want to consider shipping your default
 build of Perl with packages for some or all deprecated modules which
 install into C<vendor> or C<site> perl library directories. This will
@@ -1667,7 +1667,7 @@ C<\N{...}> now compiles better, always forces UTF-8 internal representation
 Perl's developers have fixed several problems with the recognition of
 C<\N{...}> constructs.  As part of this, perl will store any scalar
 or regex containing C<\N{I<name>}> or C<\N{U+I<wide hex char>}> in its
-definition in UTF-8 format. (This was true previously for all occurences
+definition in UTF-8 format. (This was true previously for all occurrences
 of C<\N{I<name>}> that did not use a custom translator, but now it's
 always true.)
 

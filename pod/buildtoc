@@ -526,7 +526,7 @@ sub generate_perlpod {
 
 
 sub generate_manifest {
-  # Annyoingly unexpand doesn't consider it good form to replace a single
+  # Annoyingly, unexpand doesn't consider it good form to replace a single
   # space before a tab with a tab
   # Annoyingly (2) it returns read only values.
   my @temp = unexpand (map {sprintf "%-32s%s\n", @$_} @_);

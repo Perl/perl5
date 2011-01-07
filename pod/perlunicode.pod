@@ -456,7 +456,7 @@ written right to left.
 
 The world's languages are written in a number of scripts.  This sentence
 (unless you're reading it in translation) is written in Latin, while Russian is
-written in Cyrllic, and Greek is written in, well, Greek; Japanese mainly in
+written in Cyrillic, and Greek is written in, well, Greek; Japanese mainly in
 Hiragana or Katakana.  There are many more.
 
 The Unicode Script property gives what script a given character is in,

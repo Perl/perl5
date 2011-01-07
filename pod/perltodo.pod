@@ -189,7 +189,7 @@ The F<installman> script is slow. All it is doing text processing, which we're
 told is something Perl is good at. So it would be nice to know what it is doing
 that is taking so much CPU, and where possible address it.
 
-=head2 enable lexical enabling/disabling of inidvidual warnings
+=head2 enable lexical enabling/disabling of individual warnings
 
 Currently, warnings can only be enabled or disabled by category. There
 are times when it would be useful to quash a single warning, not a
@@ -929,7 +929,7 @@ be C<*$> instead. (This is changed in F<opcode.pl>)
 
 Currently C<$foo ~~ $object> will die with the message "Smart matching a
 non-overloaded object breaks encapsulation". It would be nice to allow
-to bypass this by using explictly the syntax C<$foo ~~ %$object> or
+to bypass this by using explicitly the syntax C<$foo ~~ %$object> or
 C<$foo ~~ @$object>.
 
 =head2 error reporting of [$a ; $b]

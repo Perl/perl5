@@ -1221,7 +1221,7 @@ for list operations, so list operations also work on arrays:
 	wash_animals( qw( dog cat bird ) );
 	wash_animals( @animals );
 
-Array operations, which change the scalars, reaaranges them, or adds
+Array operations, which change the scalars, rearranges them, or adds
 or subtracts some scalars, only work on arrays. These can't work on a
 list, which is fixed. Array operations include C<shift>, C<unshift>,
 C<push>, C<pop>, and C<splice>.
@@ -1268,7 +1268,7 @@ context. The comma operator (yes, it's an operator!) in scalar
 context evaluates its lefthand side, throws away the result, and
 evaluates it's righthand side and returns the result. In effect,
 that list-lookalike assigns to C<$scalar> it's rightmost value. Many
-people mess this up becuase they choose a list-lookalike whose
+people mess this up because they choose a list-lookalike whose
 last element is also the count they expect:
 
 	my $scalar = ( 1, 2, 3 );  # $scalar gets 3, accidentally
@@ -1714,7 +1714,7 @@ Or, simply:
 	my $element = $array[ rand @array ];
 
 =head2 How do I permute N elements of a list?
-X<List::Permuter> X<permute> X<Algorithm::Loops> X<Knuth>
+X<List::Permutor> X<permute> X<Algorithm::Loops> X<Knuth>
 X<The Art of Computer Programming> X<Fischer-Krause>
 
 Use the C<List::Permutor> module on CPAN. If the list is actually an

@@ -267,7 +267,7 @@ Ctags uses an index to quickly find things in source code, and many
 popular editors support ctags for several different languages,
 including Perl.
 
-Exuberent ctags supports Perl: http://ctags.sourceforge.net/
+Exuberant ctags supports Perl: http://ctags.sourceforge.net/
 
 You might also try pltags: http://www.mscha.com/pltags.zip
 
@@ -583,7 +583,7 @@ These are Perl bindings for the Gtk toolkit ( http://www.gtk.org ). The
 interface changed significantly between versions 1 and 2 so they have
 separate Perl modules. It runs under Unix, Win32 and Mac OS X (currently
 it requires an X server on Mac OS, but a 'native' port is underway), and
-the widgets look the same on every plaform: i.e., they don't match the
+the widgets look the same on every platform: i.e., they don't match the
 native widgets. As with Wx, the Perl bindings follow the C API closely,
 and the documentation requires you to read the C documentation to
 understand it.

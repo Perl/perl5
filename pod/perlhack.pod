@@ -244,7 +244,7 @@ If you are a member of the perl5-porters mailing list, it is a good
 thing to keep in touch with the most recent changes. If not only to
 verify if what you would have posted as a bug report isn't already
 solved in the most recent available perl development branch, also
-known as perl-current, bleading edge perl, bleedperl or bleadperl.
+known as perl-current, bleeding edge perl, bleedperl or bleadperl.
 
 Needless to say, the source code in perl-current is usually in a perpetual
 state of evolution.  You should expect it to be very buggy.  Do B<not> use

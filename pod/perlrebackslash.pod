@@ -227,7 +227,7 @@ form.
 In some contexts, a backslash followed by two or even one octal digits may be
 interpreted as an octal escape, sometimes with a warning, and because of some
 bugs, sometimes with surprising results.  Also, if you are creating a regex
-out of smaller snippets concatentated together, and you use fewer than three
+out of smaller snippets concatenated together, and you use fewer than three
 digits, the beginning of one snippet may be interpreted as adding digits to the
 ending of the snippet before it.  See L</Absolute referencing> for more
 discussion and examples of the snippet problem.

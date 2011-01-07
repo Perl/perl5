@@ -1272,7 +1272,7 @@ omitted for brevity):
     $string =~ s/=([0-9A-Fa-f][0-9A-Fa-f])/chr $a2e[hex $1]/ge;
     $string =~ s/=[\n\r]+$//;
 
-=head2 Caesarian ciphers
+=head2 Caesarean ciphers
 
 The practice of shifting an alphabet one or more characters for encipherment
 dates back thousands of years and was explicitly detailed by Gaius Julius

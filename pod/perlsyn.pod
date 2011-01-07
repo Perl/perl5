@@ -936,7 +936,7 @@ most C preprocessors: it matches the regular expression
 
 with C<$1> being the line number for the next line, and C<$3> being
 the optional filename (specified with or without quotes). Note that
-no whitespace may preceed the C<< # >>, unlike modern C preprocessors.
+no whitespace may precede the C<< # >>, unlike modern C preprocessors.
 
 There is a fairly obvious gotcha included with the line directive:
 Debuggers and profilers will only show the last source line to appear

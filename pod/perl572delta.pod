@@ -760,10 +760,10 @@ hard-to-fix ways.  As a stop-gap measure to avoid people from getting
 frustrated at the mysterious results (core dumps, most often) it is
 for now forbidden (you will get a fatal error even from an attempt).
 
-=head2 Variable Attributes are not Currently Usable for Tieing
+=head2 Variable Attributes are not Currently Usable for Tying
 
 This limitation will hopefully be fixed in future.  (Subroutine
-attributes work fine for tieing, see L<Attribute::Handlers>).
+attributes work fine for tying, see L<Attribute::Handlers>).
 
 =head2 Building Extensions Can Fail Because Of Largefiles
 
