@@ -273,7 +273,7 @@ sub __sqlite_create_db {
     my $self = shift;
     my $dbh  = $self->__sqlite_dbh;
     
-    ### we can ignore the result/error; not all sqlite implemantation
+    ### we can ignore the result/error; not all sqlite implementations
     ### support this    
     $dbh->query( qq[
         DROP TABLE IF EXISTS author;

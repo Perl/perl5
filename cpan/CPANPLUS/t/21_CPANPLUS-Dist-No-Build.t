@@ -88,7 +88,7 @@ ok( not grep { $_ eq $Inst } CPANPLUS::Dist->dist_types,
                                 "   Dependency on $Inst recorded" );
     like( $diag, qr/Bootstrapping installer.*$Inst/,
                                 "       Bootstrap notice recorded" );
-    like( $diag, qr/Installer '$Inst' succesfully bootstrapped/,
+    like( $diag, qr/Installer '$Inst' successfully bootstrapped/,
                                 "       Successful bootstrap recorded" );
 }
 

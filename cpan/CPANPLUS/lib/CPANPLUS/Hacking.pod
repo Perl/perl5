@@ -49,7 +49,7 @@ from there.
 =head1 RUNNING CPANPLUS TESTS
 
 Tests are what tells us if CPANPLUS is working. If a test is not working,
-try to run it explicilty like this:
+try to run it explicitly like this:
 
     perl -I/path/to/cpanplus/lib t/XX_name_of_test.t 1
 

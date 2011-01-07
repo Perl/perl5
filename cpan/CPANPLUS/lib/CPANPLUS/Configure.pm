@@ -336,7 +336,7 @@ sub save {
     }       
     return unless $self->can_save($file);
 
-    ### find only accesors that are not private
+    ### find only accessors that are not private
     my @acc = sort grep { $_ !~ /^_/ } $self->conf->ls_accessors;
 
     ### for dumping the values

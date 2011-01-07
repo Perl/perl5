@@ -258,9 +258,9 @@ sub prepare {
         ### we resolve 'configure requires' here, so we can run the 'perl
         ### Makefile.PL' command
         ### XXX for tests: mock f_c_r to something that *can* resolve and
-        ### something that *doesnt* resolve. Check the error log for ok
+        ### something that *doesn't* resolve. Check the error log for ok
         ### on this step or failure
-        ### XXX make a seperate tarball to test for this scenario: simply
+        ### XXX make a separate tarball to test for this scenario: simply
         ### containing a makefile.pl/build.pl for test purposes?
         {   my $configure_requires = $dist->find_configure_requires;     
             my $ok = $dist->_resolve_prereqs(

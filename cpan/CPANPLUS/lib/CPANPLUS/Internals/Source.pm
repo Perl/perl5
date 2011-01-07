@@ -204,7 +204,7 @@ sub _build_trees {
     ### XXX unpleasant hack. since custom sources uses ->parse_module, we
     ### already have a special module object with extra meta data. that 
     ### doesn't gelwell with the sqlite storage engine. So, we check 'normal'
-    ### trees from seperate trees, so the engine can treat them differently.
+    ### trees from separate trees, so the engine can treat them differently.
     ### Effectively this means that with the SQLite engine, for now, custom
     ### sources are continuously reparsed =/ -kane
     if( not $self->_custom_trees_completed ) {
@@ -890,7 +890,7 @@ sub _dslip_defs {
             d   => loc('Developer'),
             u   => loc('Usenet newsgroup comp.lang.perl.modules'),
             n   => loc('None known, try comp.lang.perl.modules'),
-            a   => loc('Abandoned; volunteers welcome to take over maintainance'),
+            a   => loc('Abandoned; volunteers welcome to take over maintenance'),
         }],
 
         # L
@@ -1340,7 +1340,7 @@ Returns true on success, false on failure.
 
 =cut 
 
-### use $auth_obj as a persistant version, so we don't have to recreate
+### use $auth_obj as a persistent version, so we don't have to recreate
 ### modules all the time
 {   my $auth_obj; 
 
@@ -1391,7 +1391,7 @@ Returns true on success, false on failure.
                 
                 $mod->author( $auth_obj );
                 
-                ### and now add it to the modlue tree -- this MAY
+                ### and now add it to the module tree -- this MAY
                 ### override things of course
                 if( my $old_mod = $self->module_tree( $mod->module ) ) {
 

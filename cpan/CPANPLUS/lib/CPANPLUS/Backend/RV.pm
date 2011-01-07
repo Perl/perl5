@@ -34,7 +34,7 @@ CPANPLUS::Backend::RV
     $passed_args    = $backend_rv->args;    # args passed to function
     $ok             = $backend_rv->ok;      # boolean indication overall
                                             # result of the call
-    $function       = $backend_rv->fucntion # name of the calling
+    $function       = $backend_rv->function # name of the calling
                                             # function
     $rv             = $backend_rv->rv       # the actual return value
                                             # of the calling function

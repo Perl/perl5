@@ -135,7 +135,7 @@ isa_ok( $Shell, $Default,       "   Object" );
 
 __END__
 
-#### test seperately, they have side effects     
+#### test separately, they have side effects     
 'q'                     => qr/^$/,          # no output!
 's save boxed'          => do { my $re = CONFIG_BOXED;       qr/$re/ },        
 ### this doens't write any output 

@@ -582,7 +582,7 @@ if you like, or supply your own if need be.
 =pod 
 
 You can use this list of regexes to ignore modules matching
-to be listed as prerequisites of a package. Particulaly useful
+to be listed as prerequisites of a package. Particularly useful
 if they are bundled with core-perl anyway and they have known
 issues building.
 

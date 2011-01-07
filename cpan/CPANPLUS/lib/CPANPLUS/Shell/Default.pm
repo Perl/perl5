@@ -142,7 +142,7 @@ CPANPLUS::Shell::Default
 
     cpanp> q                 # quit the shell
 
-    cpanp> /plugins          # list avialable plugins
+    cpanp> /plugins          # list available plugins
     cpanp> /? PLUGIN         # list help test of <PLUGIN>                  
 
     ### common options:
