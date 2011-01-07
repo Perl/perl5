@@ -69,7 +69,7 @@ cpan/Archive-Tar/t/src/short/foo.tgz			Archive::Tar tests
 cpan/autodie/lib/autodie/exception.pm		Exception class for autodie
 cpan/autodie/lib/autodie/exception/system.pm	Exception class for autodying system()
 cpan/autodie/lib/autodie/hints.pm	Hinting interface for autodie
-cpan/autodie/lib/autodie.pm		Functions suceed or die with lexical scope
+cpan/autodie/lib/autodie.pm		Functions succeed or die with lexical scope
 cpan/autodie/lib/Fatal.pm		Make errors in functions/builtins fatal
 cpan/autodie/t/00-load.t		autodie - basic load
 cpan/autodie/t/autodie.t		autodie - Basic functionality
@@ -102,7 +102,7 @@ cpan/autodie/t/internal-backcompat.t	autodie - Back-compatibility tests
 cpan/autodie/t/internal.t		autodie - internal interface tests
 cpan/autodie/t/lethal.t			autodie - lethal is the one true name
 cpan/autodie/t/lib/autodie/test/au/exception.pm	autodie - Australian helper
-cpan/autodie/t/lib/autodie/test/au.pm		autodie - Austrlaian helper
+cpan/autodie/t/lib/autodie/test/au.pm		autodie - Australian helper
 cpan/autodie/t/lib/autodie/test/badname.pm	autodie - Bad exception class
 cpan/autodie/t/lib/autodie/test/missing.pm	autodie - Missing exception class
 cpan/autodie/t/lib/Caller_helper.pm		autodie - Caller helper
@@ -1940,7 +1940,7 @@ cpan/Pod-Simple/t/xhtml10.t				Pod::Simple test file
 cpan/Pod-Simple/t/x_nixer.t				Pod::Simple test file
 cpan/Shell/Shell.pm		Make AUTOLOADed system() calls
 cpan/Shell/t/Shell.t		Tests for above
-cpan/Sys-Syslog/Changes			Changlog for Sys::Syslog
+cpan/Sys-Syslog/Changes			Changelog for Sys::Syslog
 cpan/Sys-Syslog/fallback/const-c.inc	Sys::Syslog constants fallback file
 cpan/Sys-Syslog/fallback/const-xs.inc	Sys::Syslog constants fallback file
 cpan/Sys-Syslog/fallback/syslog.h	Sys::Syslog header fallback file
@@ -2949,7 +2949,7 @@ dist/Math-BigInt/t/mbi_ali.t		Tests for BigInt
 dist/Math-BigInt/t/mbimbf.inc		Actual BigInt/BigFloat accuracy, precision and fallback, round_mode tests
 dist/Math-BigInt/t/mbimbf.t		BigInt/BigFloat accuracy, precision and fallback, round_mode
 dist/Math-BigInt/t/mbi_rand.t		Test Math::BigInt randomly
-dist/Math-BigInt/t/nan_cmp.t		overloaded comparision involving *NaN*
+dist/Math-BigInt/t/nan_cmp.t		overloaded comparison involving *NaN*
 dist/Math-BigInt/t/new_overloaded.t	test overloaded numbers in BigFloat's new()
 dist/Math-BigInt/t/req_mbf0.t		test: require Math::BigFloat; ->bzero();
 dist/Math-BigInt/t/req_mbf1.t		test: require Math::BigFloat; ->bone();
@@ -4463,7 +4463,7 @@ symbian/config.pl		Configuration script for Symbian
 symbian/config.sh		Configuration data for Symbian
 symbian/cwd.pl			Helper code for config.pl
 symbian/demo_pl			"Archive" of demo code
-symbian/ext/Moped/Msg/bld.inf	Demo extension build configuraion
+symbian/ext/Moped/Msg/bld.inf	Demo extension build configuration
 symbian/ext/Moped/Msg/location.pl	Demo extension script
 symbian/ext/Moped/Msg/Msg.mmp	Demo extension building
 symbian/ext/Moped/Msg/Msg.pkg	Demo extension packaging
@@ -4530,7 +4530,7 @@ t/comp/decl.t			See if declarations work
 t/comp/final_line_num.t		See if line numbers are correct at EOF
 t/comp/fold.t			See if constant folding works
 t/comp/form_scope.t		See if format scoping works
-t/comp/hints.aux		Auxillary file for %^H test
+t/comp/hints.aux		Auxiliary file for %^H test
 t/comp/hints.t			See if %^H works
 t/comp/line_debug_0.aux		Auxiliary file for @{"_<$file"} test
 t/comp/line_debug.t		See if @{"_<$file"} works
@@ -4881,7 +4881,7 @@ t/porting/dual-life.t		Check that dual-life bins are in utils/
 t/porting/exec-bit.t		Check that exec-bit bins are identified
 t/porting/filenames.t		Check the MANIFEST for filename portability.
 t/porting/FindExt.t		Test win32/FindExt.pm
-t/porting/maintainers.t		Test that Porting/Maintaners.pl is up to date
+t/porting/maintainers.t		Test that Porting/Maintainers.pl is up to date
 t/porting/manifest.t		Test that this MANIFEST file is well formed
 t/porting/podcheck.t		Test the POD of shipped modules is well formed
 t/porting/regen.t		Check that regen.pl doesn't need running
@@ -4923,7 +4923,7 @@ t/re/reg_mesg.t			See if one can get regular expression errors
 t/re/reg_namedcapture.t		Make sure glob assignment doesn't break named capture
 t/re/reg_nc_tie.t		Test the tied methods of Tie::Hash::NamedCapture
 t/re/reg_pmod.t			See if regexp /p modifier works as expected
-t/re/reg_posixcc.t		See if posix character classes behave consistantly
+t/re/reg_posixcc.t		See if posix character classes behave consistently
 t/re/reg_unsafe.t		Check for unsafe match vars
 t/re/re.t			See if exportable 're' funcs in universal.c work
 t/re/ReTest.pl			Test utilities for the t/re/pat*.t tests (used by do)
