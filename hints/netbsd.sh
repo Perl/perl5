@@ -154,7 +154,7 @@ $define|true|[yY]*)
 	fi
 	unset lpthread
 
-	# several reentrant functions are embeded in libc, but haven't
+	# several reentrant functions are embedded in libc, but haven't
 	# been added to the header files yet.  Let's hold off on using
 	# them until they are a valid part of the API
 	case "$osvers" in

@@ -200,7 +200,7 @@ dont_use_nlink=define
 
 # Configure comes up with the wrong type for these for some reason.  The
 # pointers shouldn't have const in them. (And it looks like I have to
-# provide netdb_hlen_type as well becuase when I predefine the others it
+# provide netdb_hlen_type as well because when I predefine the others it
 # comes up empty :-).
 #
 netdb_host_type='char *'

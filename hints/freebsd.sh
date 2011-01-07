@@ -62,7 +62,7 @@ case "$osvers" in
 #
 # Even though seteuid/setegid are available, they've been turned off
 # because perl isn't coded with saved set[ug]id variables in mind.
-# In addition, a small patch is requried to suidperl to avoid a security
+# In addition, a small patch is required to suidperl to avoid a security
 # problem with FreeBSD.
 #
 2.0.5*|2.0-built*|2.1*)

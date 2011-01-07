@@ -22,7 +22,7 @@
 
 ##########################################
 # Modified by Takis Psarogiannakopoulos
-# Universirty of Cambridge
+# University of Cambridge
 # Centre for Mathematical Sciences
 # Department of Pure Mathematics
 # Wilberforce road
