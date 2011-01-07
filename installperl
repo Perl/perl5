@@ -165,7 +165,7 @@ foreach my $ext_dir (@ext_dirs) {
 	{
 	    my($path, $modname) = ($1,$2);
 
-	    # Change hypenated name like Filter-Util-Call to nested
+	    # Change hyphenated name like Filter-Util-Call to nested
 	    # directory name Filter/Util/Call
 	    $path =~ s{-}{/}g;
 

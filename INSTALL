@@ -984,7 +984,7 @@ Perl comes with interfaces to number of libraries, including threads,
 dbm, ndbm, gdbm, and Berkeley db.  For the *db* extension, if
 Configure can find the appropriate header files and libraries, it will
 automatically include that extension.  The threading extension needs
-to be specified explicitely (see L<Threads>).
+to be specified explicitly (see L<Threads>).
 
 Those libraries are not distributed with perl. If your header (.h) files
 for those libraries are not in a directory normally searched by your C
