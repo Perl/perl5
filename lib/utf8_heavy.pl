@@ -430,7 +430,6 @@ sub croak { require Carp; Carp::croak(@_) }
         my $extras;
         my $bits = $minbits;
 
-        my $ORIG = $list;
         if ($list) {
             my @tmp = split(/^/m, $list);
             my %seen;
