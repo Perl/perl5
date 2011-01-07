@@ -46,7 +46,7 @@ push @Prefs, [ 0,             0 ],  [ 0,             0 ];
 ### can_run tests
 {
     ok( can_run("$^X"),                q[Found 'perl' in your path] );
-    ok( !can_run('10283lkjfdalskfjaf'), q[Not found non-existant binary] );
+    ok( !can_run('10283lkjfdalskfjaf'), q[Not found non-existent binary] );
 }
 
 {   ### list of commands and regexes matching output 
@@ -91,7 +91,7 @@ push @Prefs, [ 0,             0 ],  [ 0,             0 ];
         }
     }        
 
-    ### for each configuarion
+    ### for each configuration
     for my $pref ( @Prefs ) {
 
         local $IPC::Cmd::USE_IPC_RUN    = !!$pref->[0];
@@ -114,7 +114,7 @@ push @Prefs, [ 0,             0 ],  [ 0,             0 ];
             {   my $buffer;
                 my $ok = run( command => $cmd, buffer => \$buffer );
 
-                ok( $ok,        "Ran '$pp_cmd' command succesfully" );
+                ok( $ok,        "Ran '$pp_cmd' command successfully" );
                 
                 SKIP: {
                     skip "No buffers available", 1 
@@ -195,7 +195,7 @@ __END__
 ### special call to check that output is interleaved properly
 {   my $cmd     = [$^X, File::Spec->catfile( qw[src output.pl] ) ];
 
-    ### for each configuarion
+    ### for each configuration
     for my $pref ( @Prefs ) {
         diag( "Running config: IPC::Run: $pref->[0] IPC::Open3: $pref->[1]" )
             if $Verbose;
@@ -224,7 +224,7 @@ __END__
 
 
 ### test failures
-{   ### for each configuarion
+{   ### for each configuration
     for my $pref ( @Prefs ) {
         diag( "Running config: IPC::Run: $pref->[0] IPC::Open3: $pref->[1]" )
             if $Verbose;
