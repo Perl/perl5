@@ -3374,7 +3374,7 @@ inc_version_list_init (inc_version_list.U):
 	suitable for use in the PERL_INC_VERSION_LIST initialization.
 
 incpath (usrinc.U):
-	This variable must precede the normal include path to get hte
+	This variable must precede the normal include path to get the
 	right one, as in "$incpath/usr/include" or "$incpath/usr/lib".
 	Value can be "" or "/bsd43" on mips.
 
