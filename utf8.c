@@ -1909,6 +1909,7 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
     const size_t name_len = strlen(name);
     HV * const stash = gv_stashpvn(pkg, pkg_len, 0);
     SV* errsv_save;
+    GV *method;
 
     PERL_ARGS_ASSERT_SWASH_INIT;
 
@@ -1916,7 +1917,8 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
     ENTER;
     SAVEHINTS();
     save_re_context();
-    if (!gv_fetchmeth(stash, "SWASHNEW", 8, -1)) {	/* demand load utf8 */
+    method = gv_fetchmeth(stash, "SWASHNEW", 8, -1);
+    if (!method) {	/* demand load utf8 */
 	ENTER;
 	errsv_save = newSVsv(ERRSV);
 	/* It is assumed that callers of this routine are not passing in any
@@ -1943,7 +1945,10 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
     mPUSHi(none);
     PUTBACK;
     errsv_save = newSVsv(ERRSV);
-    if (call_method("SWASHNEW", G_SCALAR))
+    /* If we already have a pointer to the method, no need to use call_method()
+       to repeat the lookup.  */
+    if (method ? call_sv(MUTABLE_SV(method), G_SCALAR)
+	: call_method("SWASHNEW", G_SCALAR))
 	retval = newSVsv(*PL_stack_sp--);
     else
 	retval = &PL_sv_undef;
