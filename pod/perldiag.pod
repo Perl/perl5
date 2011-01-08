@@ -2203,12 +2203,12 @@ L<perlop/Terms and List Operators (Leftward)>.
 
 =item Invalid %s attribute: %s
 
-The indicated attribute for a subroutine or variable was not recognized
+(F) The indicated attribute for a subroutine or variable was not recognized
 by Perl or by a user-supplied handler.  See L<attributes>.
 
 =item Invalid %s attributes: %s
 
-The indicated attributes for a subroutine or variable were not
+(F) The indicated attributes for a subroutine or variable were not
 recognized by Perl or by a user-supplied handler.  See L<attributes>.
 
 =item Invalid conversion in %s: "%s"
@@ -3133,7 +3133,7 @@ which is odd, because hashes come in key/value pairs.
 
 =item Offset outside string
 
-(F, W layer) You tried to do a read/write/send/recv/seek operation
+(F|W layer) You tried to do a read/write/send/recv/seek operation
 with an offset pointing outside the buffer.  This is difficult to
 imagine.  The sole exceptions to this are that zero padding will
 take place when going past the end of the string when either
@@ -3162,14 +3162,14 @@ that isn't open.  Check your control flow.  See also L<perlfunc/-X>.
 
 =item Opening dirhandle %s also as a file
 
-(W io deprecated) You used open() to associate a filehandle to
+(W io, deprecated) You used open() to associate a filehandle to
 a symbol (glob or scalar) that already holds a dirhandle.
 Although legal, this idiom might render your code confusing
 and is deprecated.
 
 =item Opening filehandle %s also as a directory
 
-(W io deprecated) You used opendir() to associate a dirhandle to
+(W io, deprecated) You used opendir() to associate a dirhandle to
 a symbol (glob or scalar) that already holds a filehandle.
 Although legal, this idiom might render your code confusing
 and is deprecated.
@@ -4082,7 +4082,7 @@ See Server error.
 
 =item Server error
 
-This is the error message generally seen in a browser window when trying
+(A) This is the error message generally seen in a browser window when trying
 to run a CGI program (including SSI) over the web. The actual error text
 varies widely from server to server. The most frequently-seen variants
 are "500 Server error", "Method (something) not permitted", "Document
@@ -4398,7 +4398,7 @@ will deny it.
 
 =item The %s function is unimplemented
 
-The function indicated isn't implemented on this architecture, according
+(F) The function indicated isn't implemented on this architecture, according
 to the probings of Configure.
 
 =item The stat preceding %s wasn't an lstat
@@ -4657,7 +4657,7 @@ subvert Perl's population of %ENV for nefarious purposes.
 
 =item Unknown "re" subpragma '%s' (known ones are: %s)
 
-You tried to use an unknown subpragma of the "re" pragma.
+(W) You tried to use an unknown subpragma of the "re" pragma.
 
 =item Unknown switch condition (?(%.2s in regex; marked by <-- HERE in m/%s/
 
@@ -4673,12 +4673,12 @@ discovered.  See L<perlre>.
 
 =item Unknown Unicode option letter '%c'
 
-You specified an unknown Unicode option.  See L<perlrun> documentation
+(F) You specified an unknown Unicode option.  See L<perlrun> documentation
 of the C<-C> switch for the list of known options.
 
 =item Unknown Unicode option value %x
 
-You specified an unknown Unicode option.  See L<perlrun> documentation
+(F) You specified an unknown Unicode option.  See L<perlrun> documentation
 of the C<-C> switch for the list of known options.
 
 =item Unknown warnings category '%s'
@@ -5368,7 +5368,7 @@ before now.  Check your control flow.
 
 =item %s "\x%s" does not map to Unicode
 
-When reading in different encodings Perl tries to map everything
+(F) When reading in different encodings Perl tries to map everything
 into Unicode characters.  The bytes you read in are not legal in
 this encoding, for example
 
