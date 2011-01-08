@@ -102,7 +102,6 @@ my $config_h    = "config.h";
 my $intrpvar_h  = "intrpvar.h";
 my $perlvars_h  = "perlvars.h";
 my $global_sym  = "global.sym";
-my $pp_sym      = "pp.sym";
 my $globvar_sym = "globvar.sym";
 my $perlio_sym  = "perlio.sym";
 my $static_ext = "";
@@ -112,8 +111,7 @@ if ($PLATFORM eq 'aix') {
 }
 elsif ($PLATFORM =~ /^win(?:32|ce)$/ || $PLATFORM eq 'netware') {
     $CCTYPE = "MSVC" unless defined $CCTYPE;
-    foreach ($intrpvar_h, $perlvars_h, $global_sym,
-	     $pp_sym, $globvar_sym, $perlio_sym) {
+    foreach ($intrpvar_h, $perlvars_h, $global_sym, $globvar_sym, $perlio_sym) {
 	s!^!..\\!;
     }
 }
@@ -966,7 +964,7 @@ if ($define{'PERL_GLOBAL_STRUCT'}) {
 
 # functions from *.sym files
 
-my @syms = ($global_sym, $globvar_sym); # $pp_sym is not part of the API
+my @syms = ($global_sym, $globvar_sym);
 
 # Symbols that are the public face of the PerlIO layers implementation
 # These are in _addition to_ the public face of the abstraction
