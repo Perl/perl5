@@ -144,6 +144,10 @@ C<Log::Message> has been upgraded from version 0.02 to 0.04
 
 =item *
 
+C<Module::Load::Conditional> has been upgraded from 0.38 to 0.40
+
+=item *
+
 C<threads> has been upgraded from version 1.81_03 to 1.82
 
 =item *
