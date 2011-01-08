@@ -18,7 +18,7 @@ BEGIN {
     @ISA        =   qw[ Exporter ];
     @EXPORT_OK  =   qw[check allow last_error];
 
-    $VERSION                = '0.26';
+    $VERSION                = '0.28';
     $VERBOSE                = $^W ? 1 : 0;
     $NO_DUPLICATES          = 0;
     $STRIP_LEADING_DASHES   = 0;
@@ -683,24 +683,23 @@ Example wrapper function, using a custom stacktrace:
 
 Default is 0;
 
-=head1 AUTHOR
-
-This module by
-Jos Boumans E<lt>kane@cpan.orgE<gt>.
-
 =head1 Acknowledgements
 
 Thanks to Richard Soderberg for his performance improvements.
 
+=head1 BUG REPORTS
+
+Please report bugs or other issues to E<lt>bug-params-check@rt.cpan.orgE<gt>.
+
+=head1 AUTHOR
+
+This module by Jos Boumans E<lt>kane@cpan.orgE<gt>.
+
 =head1 COPYRIGHT
 
-This module is
-copyright (c) 2003,2004 Jos Boumans E<lt>kane@cpan.orgE<gt>.
-All rights reserved.
+This library is free software; you may redistribute and/or modify it
+under the same terms as Perl itself.
 
-This library is free software;
-you may redistribute and/or modify it under the same
-terms as Perl itself.
 
 =cut
 

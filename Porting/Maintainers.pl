@@ -1099,9 +1099,7 @@ use File::Glob qw(:case);
     'Params::Check' =>
 	{
 	'MAINTAINER'	=> 'kane',
-	'DISTRIBUTION'	=> 'KANE/Params-Check-0.26.tar.gz',
-	# For some reason a file of this name appears within
-	# the tarball. Russell's Paradox eat your heart out.
+	'DISTRIBUTION'	=> 'BINGOS/Params-Check-0.28.tar.gz',
 	'EXCLUDED'	=> [ qw( Params-Check-0.26.tar.gz ) ],
 	'FILES'		=> q[cpan/Params-Check],
 	'UPSTREAM'	=> 'cpan',

@@ -152,6 +152,10 @@ C<Object::Accessor> has been upgraded from 0.36 to 0.38
 
 =item *
 
+C<Params::Check> has been upgraded from 0.26 to 0.28
+
+=item *
+
 C<threads> has been upgraded from version 1.81_03 to 1.82
 
 =item *
