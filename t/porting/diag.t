@@ -64,16 +64,58 @@ my $cur_entry;
 open my $diagfh, "<", $pod
   or die "Can't open $pod: $!";
 
+my $category_re = qr/ [a-z0-9]+?/;      # Note: requires an initial space
+my $severity_re = qr/ . (?: \| . )* /x; # A severity is a single char, but can
+                                        # be of the form 'S|P|W'
 while (<$diagfh>) {
   if (m/^=item (.*)/) {
     $cur_entry = $1;
-  } elsif (m/^\((.)(?: ([a-z]+?))?\)/ and !$entries{$cur_entry}{severity}) {
-    # Make sure to init this here, so an actual entry in perldiag overwrites
-    # one in DATA.
+
+    # Make sure to init this here, so an actual entry in perldiag
+    # overwrites one in DATA.
     $entries{$cur_entry}{todo} = 0;
-    $entries{$cur_entry}{severity} = $1;
-    $entries{$cur_entry}{category} = $2;
+    $entries{$cur_entry}{line_number} = $.;
+    next;
   }
+
+  next if ! defined $cur_entry;
+
+  if (! $entries{$cur_entry}{severity}) {
+    if (/^ \( ( $severity_re )
+
+        # Can have multiple categories separated by commas
+        (?: ( $category_re ) (?: , $category_re)* )? \) /x)
+    {
+      $entries{$cur_entry}{severity} = $1;
+      $entries{$cur_entry}{category} = $2;
+    }
+    elsif (! $entries{$cur_entry}{first_line} && $_ =~ /\S/) {
+
+      # Keep track of first line of text if doesn't contain a severity, so
+      # that can later examine it to determine if that is ok or not
+      $entries{$cur_entry}{first_line} = $_;
+    }
+  }
+}
+
+foreach my $cur_entry ( keys %entries) {
+    next if $entries{$cur_entry}{todo}; # If in this file, won't have a severity
+    if (! exists $entries{$cur_entry}{severity}
+
+            # If there is no first line, it was two =items in a row, so the
+            # second one is the one with with text, not this one.
+        && exists $entries{$cur_entry}{first_line}
+
+            # If the first line refers to another message, no need for severity
+        && $entries{$cur_entry}{first_line} !~ /^See/)
+    {
+        fail($cur_entry);
+        diag(
+            "   $pod entry at line $entries{$cur_entry}{line_number}\n"
+          . "       \"$cur_entry\"\n"
+          . "   is missing a severity and/or category"
+        );
+    }
 }
 
 # Recursively descend looking for source files.
