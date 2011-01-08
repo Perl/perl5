@@ -51,9 +51,9 @@
 #define Perl_pp_dbmclose Perl_pp_untie
 #define Perl_pp_read Perl_pp_sysread
 #define Perl_pp_say Perl_pp_print
-#define Perl_pp_syswrite Perl_pp_send
 #define Perl_pp_seek Perl_pp_sysseek
 #define Perl_pp_fcntl Perl_pp_ioctl
+#define Perl_pp_send Perl_pp_syswrite
 #define Perl_pp_recv Perl_pp_sysread
 #define Perl_pp_connect Perl_pp_bind
 #define Perl_pp_gsockopt Perl_pp_ssockopt
@@ -1113,7 +1113,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_sysopen,
 	Perl_pp_sysseek,
 	Perl_pp_sysread,
-	Perl_pp_syswrite,	/* implemented by Perl_pp_send */
+	Perl_pp_syswrite,
 	Perl_pp_eof,
 	Perl_pp_tell,
 	Perl_pp_seek,	/* implemented by Perl_pp_sysseek */
@@ -1121,7 +1121,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_fcntl,	/* implemented by Perl_pp_ioctl */
 	Perl_pp_ioctl,
 	Perl_pp_flock,
-	Perl_pp_send,
+	Perl_pp_send,	/* implemented by Perl_pp_syswrite */
 	Perl_pp_recv,	/* implemented by Perl_pp_sysread */
 	Perl_pp_socket,
 	Perl_pp_sockpair,

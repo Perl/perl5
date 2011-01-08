@@ -1821,7 +1821,7 @@ PP(pp_sysread)
     RETPUSHUNDEF;
 }
 
-PP(pp_send)
+PP(pp_syswrite)
 {
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
     SV *bufsv;
