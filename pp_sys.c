@@ -1680,9 +1680,6 @@ PP(pp_sysread)
 	PUSHs(TARG);
 	RETURN;
     }
-#else
-    if (PL_op->op_type == OP_RECV)
-	DIE(aTHX_ PL_no_sock_func, "recv");
 #endif
     if (DO_UTF8(bufsv)) {
 	/* offset adjust in characters not bytes */
@@ -1892,8 +1889,8 @@ PP(pp_syswrite)
 	}
     }
 
-    if (op_type == OP_SEND) {
 #ifdef HAS_SOCKET
+    if (op_type == OP_SEND) {
 	const int flags = SvIVx(*++MARK);
 	if (SP > MARK) {
 	    STRLEN mlen;
@@ -1905,10 +1902,10 @@ PP(pp_syswrite)
 	    retval
 		= PerlSock_send(PerlIO_fileno(IoIFP(io)), buffer, blen, flags);
 	}
-#else
-	DIE(aTHX_ PL_no_sock_func, "send");
+    }
+    else
 #endif
-    } else {
+    {
 	Size_t length = 0; /* This length is in characters.  */
 	STRLEN blen_chars;
 	IV offset;
@@ -2366,9 +2363,10 @@ PP(pp_flock)
 
 /* Sockets. */
 
+#ifdef HAS_SOCKET
+
 PP(pp_socket)
 {
-#ifdef HAS_SOCKET
     dVAR; dSP;
     const int protocol = POPi;
     const int type = POPi;
@@ -2410,10 +2408,8 @@ PP(pp_socket)
 #endif
 
     RETPUSHYES;
-#else
-    DIE(aTHX_ PL_no_sock_func, "socket");
-#endif
 }
+#endif
 
 PP(pp_sockpair)
 {
@@ -2470,9 +2466,10 @@ PP(pp_sockpair)
 #endif
 }
 
+#ifdef HAS_SOCKET
+
 PP(pp_bind)
 {
-#ifdef HAS_SOCKET
     dVAR; dSP;
     SV * const addrsv = POPs;
     /* OK, so on what platform does bind modify addr?  */
@@ -2499,14 +2496,10 @@ nuts:
     report_evil_fh(gv);
     SETERRNO(EBADF,SS_IVCHAN);
     RETPUSHUNDEF;
-#else
-    DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
-#endif
 }
 
 PP(pp_listen)
 {
-#ifdef HAS_SOCKET
     dVAR; dSP;
     const int backlog = POPi;
     GV * const gv = MUTABLE_GV(POPs);
@@ -2524,14 +2517,10 @@ nuts:
     report_evil_fh(gv);
     SETERRNO(EBADF,SS_IVCHAN);
     RETPUSHUNDEF;
-#else
-    DIE(aTHX_ PL_no_sock_func, "listen");
-#endif
 }
 
 PP(pp_accept)
 {
-#ifdef HAS_SOCKET
     dVAR; dSP; dTARGET;
     register IO *nstio;
     register IO *gstio;
@@ -2602,14 +2591,10 @@ nuts:
 badexit:
     RETPUSHUNDEF;
 
-#else
-    DIE(aTHX_ PL_no_sock_func, "accept");
-#endif
 }
 
 PP(pp_shutdown)
 {
-#ifdef HAS_SOCKET
     dVAR; dSP; dTARGET;
     const int how = POPi;
     GV * const gv = MUTABLE_GV(POPs);
@@ -2625,14 +2610,10 @@ nuts:
     report_evil_fh(gv);
     SETERRNO(EBADF,SS_IVCHAN);
     RETPUSHUNDEF;
-#else
-    DIE(aTHX_ PL_no_sock_func, "shutdown");
-#endif
 }
 
 PP(pp_ssockopt)
 {
-#ifdef HAS_SOCKET
     dVAR; dSP;
     const int optype = PL_op->op_type;
     SV * const sv = (optype == OP_GSOCKOPT) ? sv_2mortal(newSV(257)) : POPs;
@@ -2701,14 +2682,10 @@ nuts:
 nuts2:
     RETPUSHUNDEF;
 
-#else
-    DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
-#endif
 }
 
 PP(pp_getpeername)
 {
-#ifdef HAS_SOCKET
     dVAR; dSP;
     const int optype = PL_op->op_type;
     GV * const gv = MUTABLE_GV(POPs);
@@ -2763,11 +2740,9 @@ nuts:
     SETERRNO(EBADF,SS_IVCHAN);
 nuts2:
     RETPUSHUNDEF;
-
-#else
-    DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
-#endif
 }
+
+#endif
 
 /* Stat calls. */
 

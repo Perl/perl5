@@ -69,11 +69,11 @@ my @raw_alias = (
 		 Perl_pp_goto => ['dump'],
 		 Perl_pp_require => ['dofile'],
 		 Perl_pp_untie => ['dbmclose'],
-		 Perl_pp_sysread => [qw(read recv)],
+		 Perl_pp_sysread => {read => '', recv => '#ifdef HAS_SOCKET'},
 		 Perl_pp_sysseek => ['seek'],
 		 Perl_pp_ioctl => ['fcntl'],
-		 Perl_pp_ssockopt => ['gsockopt'],
-		 Perl_pp_getpeername => ['getsockname'],
+		 Perl_pp_ssockopt => {gsockopt => '#ifdef HAS_SOCKET'},
+		 Perl_pp_getpeername => {getsockname => '#ifdef HAS_SOCKET'},
 		 Perl_pp_stat => ['lstat'],
 		 Perl_pp_ftrowned => [qw(fteowned ftzero ftsock ftchr ftblk
 					 ftfile ftdir ftpipe ftsuid ftsgid
@@ -94,7 +94,7 @@ my @raw_alias = (
 		 Perl_pp_ftrread => [qw(ftrwrite ftrexec fteread ftewrite
  					fteexec)],
 		 Perl_pp_shmwrite => [qw(shmread msgsnd msgrcv semop)],
-		 Perl_pp_syswrite => ['send'],
+		 Perl_pp_syswrite => {send => '#ifdef HAS_SOCKET'},
 		 Perl_pp_defined => [qw(dor dorassign)],
                  Perl_pp_and => ['andassign'],
 		 Perl_pp_or => ['orassign'],
@@ -109,10 +109,10 @@ my @raw_alias = (
 		 Perl_pp_rv2av => ['rv2hv'],
 		 Perl_pp_akeys => ['avalues'],
 		 Perl_pp_rkeys => [qw(rvalues reach)],
-		 Perl_pp_trans => ['transr'],
-		 Perl_pp_chop => ['chomp'],
-		 Perl_pp_schop => ['schomp'],
-		 Perl_pp_bind => ['connect'],
+		 Perl_pp_trans => [qw(trans transr)],
+		 Perl_pp_chop => [qw(chop chomp)],
+		 Perl_pp_schop => [qw(schop schomp)],
+		 Perl_pp_bind => {connect => '#ifdef HAS_SOCKET'},
 		 Perl_pp_preinc => ['i_preinc'],
 		 Perl_pp_predec => ['i_predec'],
 		 Perl_pp_postinc => ['i_postinc'],
@@ -120,9 +120,20 @@ my @raw_alias = (
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {
-    foreach (@$names) {
-	$alias{$_} = $func;
+    if (ref $names eq 'ARRAY') {
+	foreach (@$names) {
+	    $alias{$_} = [$func, ''];
+	}
+    } else {
+	while (my ($opname, $cond) = each %$names) {
+	    $alias{$opname} = [$func, $cond];
+	}
     }
+}
+
+foreach my $sock_func (qw(socket bind listen accept shutdown
+			  ssockopt getpeername)) {
+    $alias{$sock_func} = ["Perl_pp_$sock_func", '#ifdef HAS_SOCKET'],
 }
 
 # Emit defines.
@@ -147,8 +158,39 @@ print <<"END";
 
 END
 
-for (@ops) {
-    print "#define Perl_pp_$_ $alias{$_}\n" if $alias{$_};
+{
+    my $last_cond = '';
+    my @unimplemented;
+
+    sub unimplemented {
+	if (@unimplemented) {
+	    print "#else\n";
+	    foreach (@unimplemented) {
+		print "#define $_ Perl_unimplemented_op\n";
+	    }
+	    print "#endif\n";
+	    @unimplemented = ();
+	}
+
+    }
+
+    for (@ops) {
+	my ($impl, $cond) = @{$alias{$_} || ["Perl_pp_$_", '']};
+	my $op_func = "Perl_pp_$_";
+
+	if ($cond ne $last_cond) {
+	    # A change in condition. (including to or from no condition)
+	    unimplemented();
+	    $last_cond = $cond;
+	    if ($last_cond) {
+		print "$last_cond\n";
+	    }
+	}
+	push @unimplemented, $op_func if $last_cond;
+	print "#define $op_func $impl\n" if $impl ne $op_func;
+    }
+    # If the last op was conditional, we need to close it out:
+    unimplemented();
 }
 
 print $on <<"END";
@@ -246,11 +288,13 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 END
 
 for (@ops) {
-    if (my $name = $alias{$_}) {
-	print "\tPerl_pp_$_,\t/* implemented by $name */\n";
+    my $op_func = "Perl_pp_$_";
+    my $name = $alias{$_};
+    if ($name && $name->[0] ne $op_func) {
+	print "\t$op_func,\t/* implemented by $name->[0] */\n";
     }
     else {
-	print "\tPerl_pp_$_,\n";
+	print "\t$op_func,\n";
     }
 }
 
@@ -465,7 +509,7 @@ END
 {
     my %funcs;
     for (@ops) {
-	my $name = $alias{$_} || "Perl_pp_$_";
+	my $name = $alias{$_} ? $alias{$_}[0] : "Perl_pp_$_";
 	++$funcs{$name};
     }
     print $pp "PERL_CALLCONV OP *$_(pTHX);\n" foreach sort keys %funcs;

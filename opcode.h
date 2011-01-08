@@ -53,11 +53,29 @@
 #define Perl_pp_say Perl_pp_print
 #define Perl_pp_seek Perl_pp_sysseek
 #define Perl_pp_fcntl Perl_pp_ioctl
+#ifdef HAS_SOCKET
 #define Perl_pp_send Perl_pp_syswrite
 #define Perl_pp_recv Perl_pp_sysread
+#else
+#define Perl_pp_send Perl_unimplemented_op
+#define Perl_pp_recv Perl_unimplemented_op
+#define Perl_pp_socket Perl_unimplemented_op
+#endif
+#ifdef HAS_SOCKET
 #define Perl_pp_connect Perl_pp_bind
 #define Perl_pp_gsockopt Perl_pp_ssockopt
 #define Perl_pp_getsockname Perl_pp_getpeername
+#else
+#define Perl_pp_bind Perl_unimplemented_op
+#define Perl_pp_connect Perl_unimplemented_op
+#define Perl_pp_listen Perl_unimplemented_op
+#define Perl_pp_accept Perl_unimplemented_op
+#define Perl_pp_shutdown Perl_unimplemented_op
+#define Perl_pp_gsockopt Perl_unimplemented_op
+#define Perl_pp_ssockopt Perl_unimplemented_op
+#define Perl_pp_getsockname Perl_unimplemented_op
+#define Perl_pp_getpeername Perl_unimplemented_op
+#endif
 #define Perl_pp_lstat Perl_pp_stat
 #define Perl_pp_ftrwrite Perl_pp_ftrread
 #define Perl_pp_ftrexec Perl_pp_ftrread

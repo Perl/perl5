@@ -6306,6 +6306,8 @@ PP(unimplemented_op)
        NULL doesn't generate a useful error message. "custom" does. */
     const char *const name = op_type >= OP_max
 	? "[out of range]" : PL_op_name[PL_op->op_type];
+    if(OP_IS_SOCKET(op_type))
+	DIE(aTHX_ PL_no_sock_func, name);
     DIE(aTHX_ "panic: unimplemented op %s (#%d) called", name,	op_type);
 }
 
