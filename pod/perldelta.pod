@@ -132,6 +132,9 @@ C<Encode> has been upgraded from version 2.40 to 2.42
 
 =item *
 
+C<File::Fetch> has been upgraded from version 0.28 to 0.30
+=item *
+
 C<threads> has been upgraded from version 1.81_03 to 1.82
 
 =item *
