@@ -375,7 +375,6 @@ Can't %s `%s' with ARGV[0] being `%s' (looking for executables only, not found)
 Can't take %s of %f
 Can't use '%c' after -mname
 Can't use string ("%s"%s) as a subroutine ref while "strict refs" in use
-Can't use \%c to mean $%c in expression
 Can't use when() outside a topicalizer
 \%c better written as $%c
 Character(s) in '%c' format wrapped in %s
@@ -383,7 +382,6 @@ $%c is no longer supported
 Cloning substitution context is unimplemented
 Code missing after '/' in pack
 Code missing after '/' in unpack
-Compilation failed in require
 Corrupted regexp opcode %d > %d
 '%c' outside of string in pack
 Debug leaking scalars child failed%s%s with errno %d: %s
@@ -433,7 +431,6 @@ List form of piped open not implemented
 Lost precision when decrementing %f by 1
 Lost precision when incrementing %f by 1
 %lx
-Malformed UTF-16 surrogate
 Malformed UTF-8 character (fatal)
 '\%' may not be used in pack
 Missing (suid) fd script name
@@ -446,15 +443,10 @@ No directory specified for -I
 No such class field "%s"
 Not an XSUB reference
 Not %s reference
-Offset outside string
-Opening dirhandle %s also as a file
-Opening filehandle %s also as a directory
 Operator or semicolon missing before %c%s
-PERL_SIGNALS illegal: "%s"
 Perl %s required (did you mean %s?)--this is only %s, stopped
 Perl %s required--this is only %s, stopped
 Perls since %s too modern--this is %s, stopped
-Possible unintended interpolation of $\ in regex
 ptr wrong %p != %p fl=%x nl=%p e=%p for %d
 Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)
 Recursive call to Perl_load_module in PerlIO_find_layer
@@ -508,7 +500,6 @@ Undefined top format called
 Unexpected constant lvalue entersub entry via type/targ %d:%d
 Unicode non-character 0x%X
 Unknown PerlIO layer "scalar"
-Unknown Unicode option letter '%c'
 Unstable directory path, current directory changed unexpectedly
 Unsupported script encoding UTF-16BE
 Unsupported script encoding UTF-16LE
@@ -530,7 +521,6 @@ vector argument not supported with alpha versions
 Wide character
 Wide character in $/
 Wide character in print
-Wide character in %s
 Within []-length '%c' not allowed in %s
 Wrong syntax (suid) fd script name "%s"
 'X' outside of string in unpack
