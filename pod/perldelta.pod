@@ -140,6 +140,10 @@ C<IPC::Cmd> has been upgraded from version 0.66 to 0.68
 
 =item *
 
+C<Log::Message> has been upgraded from version 0.02 to 0.04
+
+=item *
+
 C<threads> has been upgraded from version 1.81_03 to 1.82
 
 =item *

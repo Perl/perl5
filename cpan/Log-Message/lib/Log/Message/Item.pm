@@ -1,6 +1,7 @@
 package Log::Message::Item;
 
 use strict;
+use vars qw[$VERSION];
 use Params::Check qw[check];
 use Log::Message::Handlers;
 
@@ -10,7 +11,7 @@ use Carp ();
 BEGIN {
     use vars qw[$AUTOLOAD $VERSION];
 
-    $VERSION    =   $Log::Message::VERSION;
+    $VERSION    =   '0.04';
 }
 
 ### create a new item.

@@ -1,5 +1,8 @@
 package Log::Message::Handlers;
 use strict;
+use vars qw[$VERSION];
+
+$VERSION = '0.04';
 
 =pod
 
