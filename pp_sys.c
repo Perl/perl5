@@ -1824,7 +1824,6 @@ PP(pp_sysread)
 PP(pp_send)
 {
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
-    IO *io;
     SV *bufsv;
     const char *buffer;
     SSize_t retval;
@@ -1833,10 +1832,10 @@ PP(pp_send)
     const int op_type = PL_op->op_type;
     bool doing_utf8;
     U8 *tmpbuf = NULL;
-    
     GV *const gv = MUTABLE_GV(*++MARK);
-    if (PL_op->op_type == OP_SYSWRITE
-	&& gv && (io = GvIO(gv))) {
+    IO *const io = GvIO(gv);
+
+    if (op_type == OP_SYSWRITE && io) {
 	const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    if (MARK == SP - 1) {
@@ -1856,7 +1855,6 @@ PP(pp_send)
     bufsv = *++MARK;
 
     SETERRNO(0,0);
-    io = GvIO(gv);
     if (!io || !IoIFP(io) || IoTYPE(io) == IoTYPE_RDONLY) {
 	retval = -1;
 	if (io && IoIFP(io))
