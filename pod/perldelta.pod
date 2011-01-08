@@ -116,6 +116,10 @@ a single location for easier maintenance.
 
 =item *
 
+C<Archive::Extract> has been upgraded from version 0.46 to 0.48
+
+=item *
+
 C<CGI> has been upgraded from version 3.50 to 3.51
 
 =item *
