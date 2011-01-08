@@ -1894,7 +1894,23 @@ PP(pp_send)
 	}
     }
 
-    if (op_type == OP_SYSWRITE) {
+    if (op_type == OP_SEND) {
+#ifdef HAS_SOCKET
+	const int flags = SvIVx(*++MARK);
+	if (SP > MARK) {
+	    STRLEN mlen;
+	    char * const sockbuf = SvPVx(*++MARK, mlen);
+	    retval = PerlSock_sendto(PerlIO_fileno(IoIFP(io)), buffer, blen,
+				     flags, (struct sockaddr *)sockbuf, mlen);
+	}
+	else {
+	    retval
+		= PerlSock_send(PerlIO_fileno(IoIFP(io)), buffer, blen, flags);
+	}
+#else
+	DIE(aTHX_ PL_no_sock_func, "send");
+#endif
+    } else {
 	Size_t length = 0; /* This length is in characters.  */
 	STRLEN blen_chars;
 	IV offset;
@@ -1989,24 +2005,6 @@ PP(pp_send)
 				   buffer, length);
 	}
     }
-#ifdef HAS_SOCKET
-    else {
-	const int flags = SvIVx(*++MARK);
-	if (SP > MARK) {
-	    STRLEN mlen;
-	    char * const sockbuf = SvPVx(*++MARK, mlen);
-	    retval = PerlSock_sendto(PerlIO_fileno(IoIFP(io)), buffer, blen,
-				     flags, (struct sockaddr *)sockbuf, mlen);
-	}
-	else {
-	    retval
-		= PerlSock_send(PerlIO_fileno(IoIFP(io)), buffer, blen, flags);
-	}
-    }
-#else
-    else
-	DIE(aTHX_ PL_no_sock_func, "send");
-#endif
 
     if (retval < 0)
 	goto say_undef;
