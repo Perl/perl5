@@ -235,7 +235,9 @@ sub check_file {
                           SVf  => 's');
     my $format_modifiers = qr/ [#0\ +-]*              # optional flags
                               (?: [1-9][0-9]* | \* )? # optional field width
-                              (?: \. \d* )? /x;       # optional precision
+                              (?: \. \d* )?           # optional precision
+                              (?: h|l )?              # optional length modifier
+                            /x;
     for my $from (keys %specialformats) {
       s/%$format_modifiers"\s*$from\s*"/\%$specialformats{$from}/g;
       s/%$format_modifiers"\s*$from/\%$specialformats{$from}"/g;
@@ -344,7 +346,6 @@ Malformed UTF-8 character (unexpected non-continuation byte 0x%x, immediately af
 Argument "%s" isn't numeric
 Argument "%s" isn't numeric in %s
 Attempt to clear deleted array
-Attempt to free non-arena SV: 0x%x
 Attempt to free non-existent shared string '%s'%s
 Attempt to free temp prematurely: SV 0x%x
 Attempt to free unreferenced scalar: SV 0x%x
@@ -441,8 +442,8 @@ Malformed UTF-8 character (fatal)
 Missing (suid) fd script name
 More than one argument to open
 More than one argument to open(,':%s')
-mprotect for %p %d failed with %d
-mprotect RW for %p %d failed with %d
+mprotect for %p %u failed with %d
+mprotect RW for %p %u failed with %d
 No code specified for -%c
 No directory specified for -I
 No such class field "%s"

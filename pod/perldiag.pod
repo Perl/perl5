@@ -50,7 +50,7 @@ letter.
 to check the return value of your socket() call?  See
 L<perlfunc/accept>.
 
-=item Allocation too large: %lx
+=item Allocation too large: %x
 
 (X) You can't allocate more than 64K on an MS-DOS machine.
 
@@ -279,7 +279,7 @@ which is not in its key set.
 (F) The failing code attempted to delete a key whose value has been
 declared readonly from a restricted hash.
 
-=item Attempt to free non-arena SV: 0x%lx
+=item Attempt to free non-arena SV: 0x%x
 
 (P internal) All SV objects are supposed to be allocated from arenas
 that will be garbage collected on exit.  An SV was discovered to be
@@ -365,7 +365,7 @@ attribute on an array, hash or scalar reference. The :unique attribute has
 had no effect since Perl 5.8.8, and will be removed in the next major
 release of Perl 5.
 
-=item Bad arg length for %s, is %d, should be %d
+=item Bad arg length for %s, is %u, should be %d
 
 (F) You passed a buffer of the wrong size to one of msgctl(), semctl()
 or shmctl().  In C parlance, the correct sizes are, respectively,
@@ -1464,7 +1464,7 @@ expression compiler gave it.
 (P) The regular expression engine got passed a regexp program without a
 valid magic number.
 
-=item Corrupt malloc ptr 0x%lx at 0x%lx
+=item Corrupt malloc ptr 0x%x at 0x%x
 
 (P) The malloc package that comes with Perl had an internal failure.
 
@@ -2513,7 +2513,7 @@ rules and perl was unable to guess how to make more progress.
 (F) You tried to unpack something that didn't comply with UTF-8 encoding
 rules and perl was unable to guess how to make more progress.
 
-=item Maximal count of pending signals (%d) exceeded
+=item Maximal count of pending signals (%u) exceeded
 
 (F) Perl aborted due to a too high number of signals pending. This
 usually indicates that your operating system tried to deliver signals
@@ -3812,7 +3812,7 @@ before now.  Check your control flow.
 
 (W unopened) You tried to read from a filehandle that was never opened.
 
-=item Reallocation too large: %lx
+=item Reallocation too large: %x
 
 (F) You can't allocate more than 64K on an MS-DOS machine.
 
