@@ -1373,7 +1373,7 @@ use File::Glob qw(:case);
     'Term::UI' =>
 	{
 	'MAINTAINER'	=> 'kane',
-	'DISTRIBUTION'	=> 'KANE/Term-UI-0.20.tar.gz',
+	'DISTRIBUTION'	=> 'BINGOS/Term-UI-0.22.tar.gz',
 	'FILES'		=> q[cpan/Term-UI],
 	'UPSTREAM'	=> 'cpan',
 	},

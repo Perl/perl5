@@ -156,6 +156,10 @@ C<Params::Check> has been upgraded from 0.26 to 0.28
 
 =item *
 
+C<Term::UI> has been upgraded from 0.20 to 0.22
+
+=item *
+
 C<threads> has been upgraded from version 1.81_03 to 1.82
 
 =item *
