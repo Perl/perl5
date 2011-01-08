@@ -27,9 +27,22 @@ You can now use the C<keys>, C<values>, C<each> builtin functions on arrays
 This is actually a change introduced in perl 5.12.0, but it was missed from
 that release's perldelta.
 
+=head1 Bug Fixes
+
+"no VERSION" will now correctly deparse with B::Deparse.
+
+Module::Build should be more reliably pass its tests under cygwin.
+
+lvalue sub return values are now COW.
+
 =head1 Platform Specific Notes
 
 =over 4
+
+=item Solaris
+
+A separate DTrace is now build for miniperl, which means that perl can be
+compiled with -Dusedtrace on Solaris again.
 
 =item VMS
 
