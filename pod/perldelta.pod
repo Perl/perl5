@@ -120,6 +120,10 @@ C<Archive::Extract> has been upgraded from version 0.46 to 0.48
 
 =item *
 
+C<Archive::Tar> has been upgraded from version 1.74 to 1.76
+
+=item *
+
 C<CGI> has been upgraded from version 3.50 to 3.51
 
 =item *
