@@ -887,7 +887,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 = {
 	Perl_pp_null,
 	Perl_pp_stub,
-	Perl_pp_null,	/* Perl_pp_scalar */
+	Perl_pp_scalar,	/* implemented by Perl_pp_null */
 	Perl_pp_pushmark,
 	Perl_pp_wantarray,
 	Perl_pp_const,
@@ -897,7 +897,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_padsv,
 	Perl_pp_padav,
 	Perl_pp_padhv,
-	Perl_unimplemented_op,	/* Perl_pp_padany */
+	Perl_pp_padany,	/* implemented by Perl_unimplemented_op */
 	Perl_pp_pushre,
 	Perl_pp_rv2gv,
 	Perl_pp_rv2sv,
@@ -913,7 +913,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_glob,
 	Perl_pp_readline,
 	Perl_pp_rcatline,
-	Perl_pp_null,	/* Perl_pp_regcmaybe */
+	Perl_pp_regcmaybe,	/* implemented by Perl_pp_null */
 	Perl_pp_regcreset,
 	Perl_pp_regcomp,
 	Perl_pp_match,
@@ -925,20 +925,20 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_aassign,
 	Perl_pp_chop,
 	Perl_pp_schop,
-	Perl_pp_chop,	/* Perl_pp_chomp */
-	Perl_pp_schop,	/* Perl_pp_schomp */
+	Perl_pp_chomp,	/* implemented by Perl_pp_chop */
+	Perl_pp_schomp,	/* implemented by Perl_pp_schop */
 	Perl_pp_defined,
 	Perl_pp_undef,
 	Perl_pp_study,
 	Perl_pp_pos,
 	Perl_pp_preinc,
-	Perl_pp_preinc,	/* Perl_pp_i_preinc */
+	Perl_pp_i_preinc,	/* implemented by Perl_pp_preinc */
 	Perl_pp_predec,
-	Perl_pp_predec,	/* Perl_pp_i_predec */
+	Perl_pp_i_predec,	/* implemented by Perl_pp_predec */
 	Perl_pp_postinc,
-	Perl_pp_postinc,	/* Perl_pp_i_postinc */
+	Perl_pp_i_postinc,	/* implemented by Perl_pp_postinc */
 	Perl_pp_postdec,
-	Perl_pp_postdec,	/* Perl_pp_i_postdec */
+	Perl_pp_i_postdec,	/* implemented by Perl_pp_postdec */
 	Perl_pp_pow,
 	Perl_pp_multiply,
 	Perl_pp_i_multiply,
@@ -969,15 +969,15 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_i_ne,
 	Perl_pp_ncmp,
 	Perl_pp_i_ncmp,
-	Perl_pp_sle,	/* Perl_pp_slt */
-	Perl_pp_sle,	/* Perl_pp_sgt */
+	Perl_pp_slt,	/* implemented by Perl_pp_sle */
+	Perl_pp_sgt,	/* implemented by Perl_pp_sle */
 	Perl_pp_sle,
-	Perl_pp_sle,	/* Perl_pp_sge */
+	Perl_pp_sge,	/* implemented by Perl_pp_sle */
 	Perl_pp_seq,
 	Perl_pp_sne,
 	Perl_pp_scmp,
 	Perl_pp_bit_and,
-	Perl_pp_bit_or,	/* Perl_pp_bit_xor */
+	Perl_pp_bit_xor,	/* implemented by Perl_pp_bit_or */
 	Perl_pp_bit_or,
 	Perl_pp_negate,
 	Perl_pp_i_negate,
@@ -986,28 +986,28 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_smartmatch,
 	Perl_pp_atan2,
 	Perl_pp_sin,
-	Perl_pp_sin,	/* Perl_pp_cos */
+	Perl_pp_cos,	/* implemented by Perl_pp_sin */
 	Perl_pp_rand,
 	Perl_pp_srand,
-	Perl_pp_sin,	/* Perl_pp_exp */
-	Perl_pp_sin,	/* Perl_pp_log */
-	Perl_pp_sin,	/* Perl_pp_sqrt */
+	Perl_pp_exp,	/* implemented by Perl_pp_sin */
+	Perl_pp_log,	/* implemented by Perl_pp_sin */
+	Perl_pp_sqrt,	/* implemented by Perl_pp_sin */
 	Perl_pp_int,
-	Perl_pp_oct,	/* Perl_pp_hex */
+	Perl_pp_hex,	/* implemented by Perl_pp_oct */
 	Perl_pp_oct,
 	Perl_pp_abs,
 	Perl_pp_length,
 	Perl_pp_substr,
 	Perl_pp_vec,
 	Perl_pp_index,
-	Perl_pp_index,	/* Perl_pp_rindex */
+	Perl_pp_rindex,	/* implemented by Perl_pp_index */
 	Perl_pp_sprintf,
 	Perl_pp_formline,
 	Perl_pp_ord,
 	Perl_pp_chr,
 	Perl_pp_crypt,
 	Perl_pp_ucfirst,
-	Perl_pp_ucfirst,	/* Perl_pp_lcfirst */
+	Perl_pp_lcfirst,	/* implemented by Perl_pp_ucfirst */
 	Perl_pp_uc,
 	Perl_pp_lc,
 	Perl_pp_quotemeta,
@@ -1017,13 +1017,13 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_aslice,
 	Perl_pp_aeach,
 	Perl_pp_akeys,
-	Perl_pp_akeys,	/* Perl_pp_avalues */
+	Perl_pp_avalues,	/* implemented by Perl_pp_akeys */
 	Perl_pp_each,
-	Perl_do_kv,	/* Perl_pp_values */
-	Perl_do_kv,	/* Perl_pp_keys */
+	Perl_pp_values,	/* implemented by Perl_do_kv */
+	Perl_pp_keys,	/* implemented by Perl_do_kv */
 	Perl_pp_delete,
 	Perl_pp_exists,
-	Perl_pp_rv2av,	/* Perl_pp_rv2hv */
+	Perl_pp_rv2hv,	/* implemented by Perl_pp_rv2av */
 	Perl_pp_helem,
 	Perl_pp_hslice,
 	Perl_pp_boolkeys,
@@ -1037,14 +1037,14 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_anonhash,
 	Perl_pp_splice,
 	Perl_pp_push,
-	Perl_pp_shift,	/* Perl_pp_pop */
+	Perl_pp_pop,	/* implemented by Perl_pp_shift */
 	Perl_pp_shift,
 	Perl_pp_unshift,
 	Perl_pp_sort,
 	Perl_pp_reverse,
 	Perl_pp_grepstart,
 	Perl_pp_grepwhile,
-	Perl_unimplemented_op,	/* Perl_pp_mapstart */
+	Perl_pp_mapstart,	/* implemented by Perl_unimplemented_op */
 	Perl_pp_mapwhile,
 	Perl_pp_range,
 	Perl_pp_flip,
@@ -1052,11 +1052,11 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_and,
 	Perl_pp_or,
 	Perl_pp_xor,
-	Perl_pp_defined,	/* Perl_pp_dor */
+	Perl_pp_dor,	/* implemented by Perl_pp_defined */
 	Perl_pp_cond_expr,
-	Perl_pp_and,	/* Perl_pp_andassign */
-	Perl_pp_or,	/* Perl_pp_orassign */
-	Perl_pp_defined,	/* Perl_pp_dorassign */
+	Perl_pp_andassign,	/* implemented by Perl_pp_and */
+	Perl_pp_orassign,	/* implemented by Perl_pp_or */
+	Perl_pp_dorassign,	/* implemented by Perl_pp_defined */
 	Perl_pp_method,
 	Perl_pp_entersub,
 	Perl_pp_leavesub,
@@ -1065,13 +1065,13 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_warn,
 	Perl_pp_die,
 	Perl_pp_reset,
-	Perl_pp_null,	/* Perl_pp_lineseq */
+	Perl_pp_lineseq,	/* implemented by Perl_pp_null */
 	Perl_pp_nextstate,
 	Perl_pp_dbstate,
 	Perl_pp_unstack,
 	Perl_pp_enter,
 	Perl_pp_leave,
-	Perl_pp_null,	/* Perl_pp_scope */
+	Perl_pp_scope,	/* implemented by Perl_pp_null */
 	Perl_pp_enteriter,
 	Perl_pp_iter,
 	Perl_pp_enterloop,
@@ -1080,7 +1080,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_last,
 	Perl_pp_next,
 	Perl_pp_redo,
-	Perl_pp_goto,	/* Perl_pp_dump */
+	Perl_pp_dump,	/* implemented by Perl_pp_goto */
 	Perl_pp_goto,
 	Perl_pp_exit,
 	Perl_pp_method_named,
@@ -1100,78 +1100,78 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_untie,
 	Perl_pp_tied,
 	Perl_pp_dbmopen,
-	Perl_pp_untie,	/* Perl_pp_dbmclose */
+	Perl_pp_dbmclose,	/* implemented by Perl_pp_untie */
 	Perl_pp_sselect,
 	Perl_pp_select,
 	Perl_pp_getc,
-	Perl_pp_sysread,	/* Perl_pp_read */
+	Perl_pp_read,	/* implemented by Perl_pp_sysread */
 	Perl_pp_enterwrite,
 	Perl_pp_leavewrite,
 	Perl_pp_prtf,
 	Perl_pp_print,
-	Perl_pp_print,	/* Perl_pp_say */
+	Perl_pp_say,	/* implemented by Perl_pp_print */
 	Perl_pp_sysopen,
 	Perl_pp_sysseek,
 	Perl_pp_sysread,
-	Perl_pp_send,	/* Perl_pp_syswrite */
+	Perl_pp_syswrite,	/* implemented by Perl_pp_send */
 	Perl_pp_eof,
 	Perl_pp_tell,
-	Perl_pp_sysseek,	/* Perl_pp_seek */
+	Perl_pp_seek,	/* implemented by Perl_pp_sysseek */
 	Perl_pp_truncate,
-	Perl_pp_ioctl,	/* Perl_pp_fcntl */
+	Perl_pp_fcntl,	/* implemented by Perl_pp_ioctl */
 	Perl_pp_ioctl,
 	Perl_pp_flock,
 	Perl_pp_send,
-	Perl_pp_sysread,	/* Perl_pp_recv */
+	Perl_pp_recv,	/* implemented by Perl_pp_sysread */
 	Perl_pp_socket,
 	Perl_pp_sockpair,
 	Perl_pp_bind,
-	Perl_pp_bind,	/* Perl_pp_connect */
+	Perl_pp_connect,	/* implemented by Perl_pp_bind */
 	Perl_pp_listen,
 	Perl_pp_accept,
 	Perl_pp_shutdown,
-	Perl_pp_ssockopt,	/* Perl_pp_gsockopt */
+	Perl_pp_gsockopt,	/* implemented by Perl_pp_ssockopt */
 	Perl_pp_ssockopt,
-	Perl_pp_getpeername,	/* Perl_pp_getsockname */
+	Perl_pp_getsockname,	/* implemented by Perl_pp_getpeername */
 	Perl_pp_getpeername,
-	Perl_pp_stat,	/* Perl_pp_lstat */
+	Perl_pp_lstat,	/* implemented by Perl_pp_stat */
 	Perl_pp_stat,
 	Perl_pp_ftrread,
-	Perl_pp_ftrread,	/* Perl_pp_ftrwrite */
-	Perl_pp_ftrread,	/* Perl_pp_ftrexec */
-	Perl_pp_ftrread,	/* Perl_pp_fteread */
-	Perl_pp_ftrread,	/* Perl_pp_ftewrite */
-	Perl_pp_ftrread,	/* Perl_pp_fteexec */
+	Perl_pp_ftrwrite,	/* implemented by Perl_pp_ftrread */
+	Perl_pp_ftrexec,	/* implemented by Perl_pp_ftrread */
+	Perl_pp_fteread,	/* implemented by Perl_pp_ftrread */
+	Perl_pp_ftewrite,	/* implemented by Perl_pp_ftrread */
+	Perl_pp_fteexec,	/* implemented by Perl_pp_ftrread */
 	Perl_pp_ftis,
-	Perl_pp_ftis,	/* Perl_pp_ftsize */
-	Perl_pp_ftis,	/* Perl_pp_ftmtime */
-	Perl_pp_ftis,	/* Perl_pp_ftatime */
-	Perl_pp_ftis,	/* Perl_pp_ftctime */
+	Perl_pp_ftsize,	/* implemented by Perl_pp_ftis */
+	Perl_pp_ftmtime,	/* implemented by Perl_pp_ftis */
+	Perl_pp_ftatime,	/* implemented by Perl_pp_ftis */
+	Perl_pp_ftctime,	/* implemented by Perl_pp_ftis */
 	Perl_pp_ftrowned,
-	Perl_pp_ftrowned,	/* Perl_pp_fteowned */
-	Perl_pp_ftrowned,	/* Perl_pp_ftzero */
-	Perl_pp_ftrowned,	/* Perl_pp_ftsock */
-	Perl_pp_ftrowned,	/* Perl_pp_ftchr */
-	Perl_pp_ftrowned,	/* Perl_pp_ftblk */
-	Perl_pp_ftrowned,	/* Perl_pp_ftfile */
-	Perl_pp_ftrowned,	/* Perl_pp_ftdir */
-	Perl_pp_ftrowned,	/* Perl_pp_ftpipe */
-	Perl_pp_ftrowned,	/* Perl_pp_ftsuid */
-	Perl_pp_ftrowned,	/* Perl_pp_ftsgid */
-	Perl_pp_ftrowned,	/* Perl_pp_ftsvtx */
+	Perl_pp_fteowned,	/* implemented by Perl_pp_ftrowned */
+	Perl_pp_ftzero,	/* implemented by Perl_pp_ftrowned */
+	Perl_pp_ftsock,	/* implemented by Perl_pp_ftrowned */
+	Perl_pp_ftchr,	/* implemented by Perl_pp_ftrowned */
+	Perl_pp_ftblk,	/* implemented by Perl_pp_ftrowned */
+	Perl_pp_ftfile,	/* implemented by Perl_pp_ftrowned */
+	Perl_pp_ftdir,	/* implemented by Perl_pp_ftrowned */
+	Perl_pp_ftpipe,	/* implemented by Perl_pp_ftrowned */
+	Perl_pp_ftsuid,	/* implemented by Perl_pp_ftrowned */
+	Perl_pp_ftsgid,	/* implemented by Perl_pp_ftrowned */
+	Perl_pp_ftsvtx,	/* implemented by Perl_pp_ftrowned */
 	Perl_pp_ftlink,
 	Perl_pp_fttty,
 	Perl_pp_fttext,
-	Perl_pp_fttext,	/* Perl_pp_ftbinary */
+	Perl_pp_ftbinary,	/* implemented by Perl_pp_fttext */
 	Perl_pp_chdir,
 	Perl_pp_chown,
 	Perl_pp_chroot,
-	Perl_pp_chown,	/* Perl_pp_unlink */
-	Perl_pp_chown,	/* Perl_pp_chmod */
-	Perl_pp_chown,	/* Perl_pp_utime */
+	Perl_pp_unlink,	/* implemented by Perl_pp_chown */
+	Perl_pp_chmod,	/* implemented by Perl_pp_chown */
+	Perl_pp_utime,	/* implemented by Perl_pp_chown */
 	Perl_pp_rename,
 	Perl_pp_link,
-	Perl_pp_link,	/* Perl_pp_symlink */
+	Perl_pp_symlink,	/* implemented by Perl_pp_link */
 	Perl_pp_readlink,
 	Perl_pp_mkdir,
 	Perl_pp_rmdir,
@@ -1186,7 +1186,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_waitpid,
 	Perl_pp_system,
 	Perl_pp_exec,
-	Perl_pp_chown,	/* Perl_pp_kill */
+	Perl_pp_kill,	/* implemented by Perl_pp_chown */
 	Perl_pp_getppid,
 	Perl_pp_getpgrp,
 	Perl_pp_setpgrp,
@@ -1194,39 +1194,39 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_setpriority,
 	Perl_pp_time,
 	Perl_pp_tms,
-	Perl_pp_gmtime,	/* Perl_pp_localtime */
+	Perl_pp_localtime,	/* implemented by Perl_pp_gmtime */
 	Perl_pp_gmtime,
 	Perl_pp_alarm,
 	Perl_pp_sleep,
-	Perl_pp_semget,	/* Perl_pp_shmget */
-	Perl_pp_semctl,	/* Perl_pp_shmctl */
-	Perl_pp_shmwrite,	/* Perl_pp_shmread */
+	Perl_pp_shmget,	/* implemented by Perl_pp_semget */
+	Perl_pp_shmctl,	/* implemented by Perl_pp_semctl */
+	Perl_pp_shmread,	/* implemented by Perl_pp_shmwrite */
 	Perl_pp_shmwrite,
-	Perl_pp_semget,	/* Perl_pp_msgget */
-	Perl_pp_semctl,	/* Perl_pp_msgctl */
-	Perl_pp_shmwrite,	/* Perl_pp_msgsnd */
-	Perl_pp_shmwrite,	/* Perl_pp_msgrcv */
-	Perl_pp_shmwrite,	/* Perl_pp_semop */
+	Perl_pp_msgget,	/* implemented by Perl_pp_semget */
+	Perl_pp_msgctl,	/* implemented by Perl_pp_semctl */
+	Perl_pp_msgsnd,	/* implemented by Perl_pp_shmwrite */
+	Perl_pp_msgrcv,	/* implemented by Perl_pp_shmwrite */
+	Perl_pp_semop,	/* implemented by Perl_pp_shmwrite */
 	Perl_pp_semget,
 	Perl_pp_semctl,
 	Perl_pp_require,
-	Perl_pp_require,	/* Perl_pp_dofile */
+	Perl_pp_dofile,	/* implemented by Perl_pp_require */
 	Perl_pp_hintseval,
 	Perl_pp_entereval,
 	Perl_pp_leaveeval,
 	Perl_pp_entertry,
 	Perl_pp_leavetry,
-	Perl_pp_ghostent,	/* Perl_pp_ghbyname */
-	Perl_pp_ghostent,	/* Perl_pp_ghbyaddr */
+	Perl_pp_ghbyname,	/* implemented by Perl_pp_ghostent */
+	Perl_pp_ghbyaddr,	/* implemented by Perl_pp_ghostent */
 	Perl_pp_ghostent,
-	Perl_pp_gnetent,	/* Perl_pp_gnbyname */
-	Perl_pp_gnetent,	/* Perl_pp_gnbyaddr */
+	Perl_pp_gnbyname,	/* implemented by Perl_pp_gnetent */
+	Perl_pp_gnbyaddr,	/* implemented by Perl_pp_gnetent */
 	Perl_pp_gnetent,
-	Perl_pp_gprotoent,	/* Perl_pp_gpbyname */
-	Perl_pp_gprotoent,	/* Perl_pp_gpbynumber */
+	Perl_pp_gpbyname,	/* implemented by Perl_pp_gprotoent */
+	Perl_pp_gpbynumber,	/* implemented by Perl_pp_gprotoent */
 	Perl_pp_gprotoent,
-	Perl_pp_gservent,	/* Perl_pp_gsbyname */
-	Perl_pp_gservent,	/* Perl_pp_gsbyport */
+	Perl_pp_gsbyname,	/* implemented by Perl_pp_gservent */
+	Perl_pp_gsbyport,	/* implemented by Perl_pp_gservent */
 	Perl_pp_gservent,
 	Perl_pp_shostent,
 	Perl_pp_snetent,
@@ -1236,13 +1236,13 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_enetent,
 	Perl_pp_eprotoent,
 	Perl_pp_eservent,
-	Perl_pp_gpwent,	/* Perl_pp_gpwnam */
-	Perl_pp_gpwent,	/* Perl_pp_gpwuid */
+	Perl_pp_gpwnam,	/* implemented by Perl_pp_gpwent */
+	Perl_pp_gpwuid,	/* implemented by Perl_pp_gpwent */
 	Perl_pp_gpwent,
 	Perl_pp_spwent,
 	Perl_pp_epwent,
-	Perl_pp_ggrent,	/* Perl_pp_ggrnam */
-	Perl_pp_ggrent,	/* Perl_pp_ggrgid */
+	Perl_pp_ggrnam,	/* implemented by Perl_pp_ggrent */
+	Perl_pp_ggrgid,	/* implemented by Perl_pp_ggrent */
 	Perl_pp_ggrent,
 	Perl_pp_sgrent,
 	Perl_pp_egrent,
@@ -1250,11 +1250,11 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_syscall,
 	Perl_pp_lock,
 	Perl_pp_once,
-	Perl_unimplemented_op,	/* Perl_pp_custom */
-	Perl_pp_rkeys,	/* Perl_pp_reach */
+	Perl_pp_custom,	/* implemented by Perl_unimplemented_op */
+	Perl_pp_reach,	/* implemented by Perl_pp_rkeys */
 	Perl_pp_rkeys,
-	Perl_pp_rkeys,	/* Perl_pp_rvalues */
-	Perl_pp_trans,	/* Perl_pp_transr */
+	Perl_pp_rvalues,	/* implemented by Perl_pp_rkeys */
+	Perl_pp_transr,	/* implemented by Perl_pp_trans */
 }
 #endif
 #ifdef PERL_PPADDR_INITED

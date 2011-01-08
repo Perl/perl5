@@ -247,7 +247,7 @@ END
 
 for (@ops) {
     if (my $name = $alias{$_}) {
-	print "\t$name,\t/* Perl_pp_$_ */\n";
+	print "\tPerl_pp_$_,\t/* implemented by $name */\n";
     }
     else {
 	print "\tPerl_pp_$_,\n";
