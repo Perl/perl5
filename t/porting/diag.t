@@ -59,9 +59,10 @@ while (<DATA>) {
   $entries{$_}{todo}=1;
 }
 
+my $pod = "pod/perldiag.pod";
 my $cur_entry;
-open my $diagfh, "<", "pod/perldiag.pod"
-  or die "Can't open pod/perldiag.pod: $!";
+open my $diagfh, "<", $pod
+  or die "Can't open $pod: $!";
 
 while (<$diagfh>) {
   if (m/^=item (.*)/) {
@@ -239,7 +240,7 @@ sub check_file {
             # There is no listing, but it is in the list of exceptions.  TODO FAIL.
             fail($name);
             diag(
-              "    Message '$name'\n    from $codefn line $. is not listed in pod/perldiag.pod\n".
+              "    Message '$name'\n    from $codefn line $. is not listed in $pod\n".
               "    (but it wasn't documented in 5.10 either, so marking it TODO)."
             );
           }
@@ -260,7 +261,7 @@ sub check_file {
           # No listing found, and no excuse either.
           # Find the correct place in perldiag.pod, and add a stanza beginning =item $name.
           fail($name);
-          diag("    Message '$name'\n    from $codefn line $. is not listed in pod/perldiag.pod");
+          diag("    Message '$name'\n    from $codefn line $. is not listed in $pod");
         }
         # seen it, so only fail once for this message
         $entries{$name}{seen}++;
