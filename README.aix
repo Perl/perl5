@@ -77,18 +77,18 @@ at least gdbm-devel-1.8.3-5 (or higher).
 
     Perl   | AIX Level           | Compiler Level          | w th | w/o th
     -------+---------------------+-------------------------+------+-------
-    5.12.2 |5.1 TL9 32 bit       | XL C/C++ V7             | OK   | OK
-    5.12.2 |5.1 TL9 64 bit       | XL C/C++ V7             | OK   | OK
-    5.12.2 |5.2 TL10 SP8 32 bit  | XL C/C++ V8             | OK   | OK
-    5.12.2 |5.2 TL10 SP8 32 bit  | gcc 3.2.2               | OK   | OK
-    5.12.2 |5.2 TL10 SP8 64 bit  | XL C/C++ V8             | OK   | OK
-    5.12.2 |5.3 TL8 SP8 32 bit   | XL C/C++ V9 + IZ35785   | OK   | OK
-    5.12.2 |5.3 TL8 SP8 32 bit   | gcc 4.2.4               | OK   | OK
-    5.12.2 |5.3 TL8 SP8 64 bit   | XL C/C++ V9 + IZ35785   | OK   | OK
-    5.12.2 |5.3 TL10 SP3 32 bit  | XL C/C++ V11 + Apr 2010 | OK   | OK
-    5.12.2 |5.3 TL10 SP3 64 bit  | XL C/C++ V11 + Apr 2010 | OK   | OK
-    5.12.2 |6.1 TL1 SP7 32 bit   | XL C/C++ V10            | OK   | OK
-    5.12.2 |6.1 TL1 SP7 64 bit   | XL C/C++ V10            | OK   | OK
+    5.12.3 |5.1 TL9 32 bit       | XL C/C++ V7             | OK   | OK
+    5.12.3 |5.1 TL9 64 bit       | XL C/C++ V7             | OK   | OK
+    5.12.3 |5.2 TL10 SP8 32 bit  | XL C/C++ V8             | OK   | OK
+    5.12.3 |5.2 TL10 SP8 32 bit  | gcc 3.2.2               | OK   | OK
+    5.12.3 |5.2 TL10 SP8 64 bit  | XL C/C++ V8             | OK   | OK
+    5.12.3 |5.3 TL8 SP8 32 bit   | XL C/C++ V9 + IZ35785   | OK   | OK
+    5.12.3 |5.3 TL8 SP8 32 bit   | gcc 4.2.4               | OK   | OK
+    5.12.3 |5.3 TL8 SP8 64 bit   | XL C/C++ V9 + IZ35785   | OK   | OK
+    5.12.3 |5.3 TL10 SP3 32 bit  | XL C/C++ V11 + Apr 2010 | OK   | OK
+    5.12.3 |5.3 TL10 SP3 64 bit  | XL C/C++ V11 + Apr 2010 | OK   | OK
+    5.12.3 |6.1 TL1 SP7 32 bit   | XL C/C++ V10            | OK   | OK
+    5.12.3 |6.1 TL1 SP7 64 bit   | XL C/C++ V10            | OK   | OK
     5.13   |7.1 TL0 SP1 32 bit   | XL C/C++ V11 + Jul 2010 | OK   | OK
     5.13   |7.1 TL0 SP1 64 bit   | XL C/C++ V11 + Jul 2010 | OK   | OK
 
