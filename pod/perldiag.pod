@@ -2011,7 +2011,7 @@ been used, and the correct charname handler is in scope.
 binary number.  Interpretation of the binary number stopped before the
 offending digit.
 
-=item Illegal character %s (carriage return)
+=item Illegal character \%o (carriage return)
 
 (F) Perl normally treats carriage returns in the program text as it
 would any other whitespace, which means you should never see this error
@@ -4617,7 +4617,7 @@ Check the #! line, or manually feed your script into Perl yourself.
 (F) The unexec() routine failed for some reason.  See your local FSF
 representative, who probably put it there in the first place.
 
-=item Unicode non-character %s is illegal for interchange
+=item Unicode non-character 0x%x is illegal for interchange
 
 (W utf8) Certain codepoints, such as U+FFFE and U+FFFF, are defined by the
 Unicode standard to be non-characters. Those are legal codepoints, but are
@@ -5193,7 +5193,7 @@ exceeded.  In the message, the characters in the sequence are separated by
 dots, and each is shown by its ordinal in hex.  Anything to the left of the
 C<HERE> was retained; anything to the right was discarded.
 
-=item UTF-16 surrogate %s
+=item UTF-16 surrogate 0x%x
 
 (W utf8) You tried to generate half of a UTF-16 surrogate by
 requesting a Unicode character between the code points 0xD800 and

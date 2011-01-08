@@ -216,6 +216,9 @@ sub check_file {
     # This should happen *after* unwrapping, or we don't reformat the things
     # in later lines.
     # List from perlguts.pod "Formatted Printing of IVs, UVs, and NVs"
+    # Convert from internal formats to ones that the readers will be familiar
+    # with, while removing any format modifiers, such as precision, the
+    # presence of which would just confuse the pod's explanation
     my %specialformats = (IVdf => 'd',
                           UVuf => 'd',
                           UVof => 'o',
@@ -225,10 +228,17 @@ sub check_file {
                           NVff => 'f',
                           NVgf => 'f',
                           SVf  => 's');
+    my $format_modifiers = qr/ [#0\ +-]*              # optional flags
+                              (?: [1-9][0-9]* | \* )? # optional field width
+                              (?: \. \d* )? /x;       # optional precision
     for my $from (keys %specialformats) {
-      s/%"\s*$from\s*"/\%$specialformats{$from}/g;
-      s/%"\s*$from/\%$specialformats{$from}"/g;
+      s/%$format_modifiers"\s*$from\s*"/\%$specialformats{$from}/g;
+      s/%$format_modifiers"\s*$from/\%$specialformats{$from}"/g;
     }
+
+    # Remove any remaining format modifiers, but not in %%
+    s/ (?<!%) % $format_modifiers ( [dioxXucsfeEgGp] ) /%$1/xg;
+
     # The %"foo" thing needs to happen *before* this regex.
     if ( my $found = find_message($_) ) {
     # diag($_);
@@ -322,7 +332,7 @@ sub check_file {
 # Also FIXME this test, as the first entry in TODO *is* covered by the
 # description: Malformed UTF-8 character (%s)
 __DATA__
-Malformed UTF-8 character (unexpected non-continuation byte 0x%02x, immediately after start byte 0x%02x)
+Malformed UTF-8 character (unexpected non-continuation byte 0x%x, immediately after start byte 0x%x)
 
 %s (%d) does not match %s (%d),
 %s (%d) smaller than %s (%d),
@@ -397,7 +407,6 @@ glob failed (child exited with status %d%s)
 Goto undefined subroutine
 Goto undefined subroutine &%s
 Hash \%%s missing the \% in argument %d of %s()
-Illegal character \%03o (carriage return)
 Illegal character %sin prototype for %s : %s
 Integer overflow in binary number
 Integer overflow in decimal number
@@ -405,7 +414,7 @@ Integer overflow in hexadecimal number
 Integer overflow in octal number
 Integer overflow in version %d
 internal \%<num>p might conflict with future printf extensions
-invalid control request: '\%03o'
+invalid control request: '\%o'
 Invalid module name %s with -%c option: contains single ':'
 invalid option -D%c, use -D'' to see choices
 Invalid range "%c-%c" in transliteration operator
@@ -446,7 +455,7 @@ Perl %s required (did you mean %s?)--this is only %s, stopped
 Perl %s required--this is only %s, stopped
 Perls since %s too modern--this is %s, stopped
 Possible unintended interpolation of $\ in regex
-ptr wrong %p != %p fl=%08
+ptr wrong %p != %p fl=%x nl=%p e=%p for %d
 Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)
 Recursive call to Perl_load_module in PerlIO_find_layer
 refcnt_dec: fd %d < 0
@@ -457,8 +466,9 @@ refcnt_inc: fd %d: %d <= 0
 Reversed %c= operator
 Runaway prototype
 %s(%.0
-%s(%.0f) failed
-%s(%.0f) too large
+%s(%f) failed
+%s(%f) too large
+%s(%f) too small
 Scalar value %s better written as $%s
 %sCompilation failed in regexp
 %sCompilation failed in require
@@ -496,7 +506,7 @@ U0 mode on a byte string
 Unbalanced string table refcount: (%d) for "%s"
 Undefined top format called
 Unexpected constant lvalue entersub entry via type/targ %d:%d
-Unicode non-character 0x%04
+Unicode non-character 0x%X
 Unknown PerlIO layer "scalar"
 Unknown Unicode option letter '%c'
 Unstable directory path, current directory changed unexpectedly
@@ -511,8 +521,7 @@ Usage: %s::%s(%s)
 Usage: VMS::Filespec::unixrealpath(spec)
 Usage: VMS::Filespec::vmsrealpath(spec)
 Use of inherited AUTOLOAD for non-method %s::%s() is deprecated
-UTF-16 surrogate 0x%04
-utf8 "\x%02X" does not map to Unicode
+utf8 "\x%X" does not map to Unicode
 Value of logical "%s" too long. Truncating to %i bytes
 value of node is %d in Offset macro
 Value of %s%s can be "0"; test with defined()
