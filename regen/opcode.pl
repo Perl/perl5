@@ -173,7 +173,6 @@ END
 
 my $i = 0;
 for (@ops) {
-    # print $on "\t", &tab(3,"OP_\U$_,"), "/* ", $i++, " */\n";
       print $on "\t", &tab(3,"OP_\U$_"), " = ", $i++, ",\n";
 }
 print $on "\t", &tab(3,"OP_max"), "\n";
@@ -225,18 +224,6 @@ END_EXTERN_C
 
 #endif /* !PERL_GLOBAL_STRUCT_INIT */
 END
-
-# Emit function declarations.
-
-#for (sort keys %ckname) {
-#    print "OP *\t", &tab(3,$_),"(pTHX_ OP* o);\n";
-#}
-#
-#print "\n";
-#
-#for (@ops) {
-#    print "OP *\t", &tab(3, "pp_$_"), "(pTHX);\n";
-#}
 
 # Emit ppcode switch array.
 
