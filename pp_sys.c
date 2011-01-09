@@ -4644,7 +4644,7 @@ PP(pp_shmwrite)
     PUSHi(value);
     RETURN;
 #else
-    return pp_semget();
+    return Perl_pp_semget(aTHX);
 #endif
 }
 
@@ -4681,7 +4681,7 @@ PP(pp_semctl)
     }
     RETURN;
 #else
-    return pp_semget();
+    return Perl_pp_semget(aTHX);
 #endif
 }
 

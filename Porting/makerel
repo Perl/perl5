@@ -135,7 +135,6 @@ my @writables = qw(
     opcode.h
     opnames.h
     pp_proto.h
-    pp.sym
     proto.h
     embed.h
     embedvar.h
