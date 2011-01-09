@@ -54,7 +54,9 @@ my $timeout     = exists $opts->{'timeout'}
                     : 300;
 
 ### use default answers?
-$ENV{'PERL_MM_USE_DEFAULT'} = $opts->{'defaults'} ? 1 : 0;
+unless ( $ENV{'PERL_MM_USE_DEFAULT'} ) {
+  $ENV{'PERL_MM_USE_DEFAULT'} = $opts->{'defaults'} ? 1 : 0;
+}
 
 my $format;
 ### if provided, we go with the command line option, fall back to conf setting

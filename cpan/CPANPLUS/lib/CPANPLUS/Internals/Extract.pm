@@ -178,7 +178,7 @@ sub _extract {
     ### set them all to be +w for the owner, so we don't get permission
     ### denied for overwriting files that are just +r
     
-    ### this is too rigorous -- just change to +w for the owner [cpan #13358] 
+    ### this is too rigorous -- just change to +w for the owner [cpan #13358]
     #chmod 0755, map { File::Spec->rel2abs( File::Spec->catdir($to, $_) ) }
     #            @{$ae->files};
     

@@ -694,7 +694,7 @@ sub create {
             
                 $dist->status->test(1);
             } else {
-                error( loc( "MAKE TEST failed: %1 %2", $!, $captured ) );
+                error( loc( "MAKE TEST failed: %1", $captured ) );
             
                 ### send out error report here? or do so at a higher level?
                 ### --higher level --kane.
