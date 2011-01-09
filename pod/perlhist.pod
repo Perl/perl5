@@ -420,6 +420,7 @@ the strings?).
  Jesse    5.12.0        2010-Apr-12
  Jesse    5.12.1        2010-May-16
  Jesse    5.12.2        2010-Sep-06
+ Ricardo  5.12.3-RC1    2011-Jan-09
 
 =head2 SELECTED RELEASE SIZES
 
