@@ -1914,14 +1914,14 @@ a term, so it's looking for the corresponding right angle bracket, and
 not finding it.  Chances are you left some needed parentheses out
 earlier in the line, and you really meant a "less than".
 
-=item gmtime(%.0f) too large
+=item gmtime(%f) too large
 
 (W overflow) You called C<gmtime> with an number that was larger than
 it can reliably handle and C<gmtime> probably returned the wrong
 date. This warning is also triggered with nan (the special
 not-a-number value).
 
-=item gmtime(%.0f) too small
+=item gmtime(%f) too small
 
 (W overflow) You called C<gmtime> with an number that was smaller than
 it can reliably handle and C<gmtime> probably returned the wrong
@@ -2394,14 +2394,14 @@ detectable way.
 to check the return value of your socket() call?  See
 L<perlfunc/listen>.
 
-=item localtime(%.0f) too large
+=item localtime(%f) too large
 
 (W overflow) You called C<localtime> with an number that was larger
 than it can reliably handle and C<localtime> probably returned the
 wrong date. This warning is also triggered with nan (the special
 not-a-number value).
 
-=item localtime(%.0f) too small
+=item localtime(%f) too small
 
 (W overflow) You called C<localtime> with an number that was smaller
 than it can reliably handle and C<localtime> probably returned the
@@ -4659,7 +4659,7 @@ subvert Perl's population of %ENV for nefarious purposes.
 
 (W) You tried to use an unknown subpragma of the "re" pragma.
 
-=item Unknown switch condition (?(%.2s in regex; marked by <-- HERE in m/%s/
+=item Unknown switch condition (?(%s in regex; marked by <-- HERE in m/%s/
 
 (F) The condition part of a (?(condition)if-clause|else-clause) construct
 is not known. The condition may be lookahead or lookbehind (the condition
