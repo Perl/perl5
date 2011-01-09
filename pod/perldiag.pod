@@ -5208,15 +5208,16 @@ C<HERE> was retained; anything to the right was discarded.
 
 =item Unicode surrogate U+%X is illegal in UTF-8
 
-=item UTF-16 surrogate 0x%x
+=item UTF-16 surrogate U+%X
 
-(W utf8) You tried to generate half of a UTF-16 surrogate by
-requesting a Unicode character between the code points 0xD800 and
-0xDFFF (inclusive).  That range is reserved exclusively for the use of
-UTF-16 encoding (by having two 16-bit UCS-2 characters); but Perl
-encodes its characters in UTF-8, so what you got is a very illegal
-character.  If you really really know what you are doing you can turn off
-this warning by C<no warnings 'utf8';>.
+(W utf8) You had a UTF-16 surrogate in a context where they are
+not considered acceptable.  These code points, between U+D800 and
+U+DFFF (inclusive), are used by Unicode only for UTF-16.  However, Perl
+internally allows all unsigned integer code points (up to the size limit
+available on your platform), including surrogates.  But these can cause
+problems when being input or output, which is likely where this message
+came from.  If you really really know what you are doing you can turn
+off this warning by C<no warnings 'utf8';>.
 
 =item Value of %s can be "0"; test with defined()
 

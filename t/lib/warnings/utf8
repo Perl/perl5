@@ -60,12 +60,6 @@ my $hex5  = chr(0x100000);
 my $maxm1 = chr(0x10FFFE);
 my $max   = chr(0x10FFFF);
 EXPECT
-UTF-16 surrogate 0xd800 at - line 3.
-UTF-16 surrogate 0xdfff at - line 4.
-Unicode non-character 0xfffe is illegal for interchange at - line 8.
-Unicode non-character 0xffff is illegal for interchange at - line 9.
-Unicode non-character 0x10fffe is illegal for interchange at - line 12.
-Unicode non-character 0x10ffff is illegal for interchange at - line 13.
 ########
 use warnings 'utf8';
 my $d7ff  = pack("U", 0xD7FF);
@@ -94,12 +88,6 @@ my $hex5  = pack("U", 0x100000);
 my $maxm1 = pack("U", 0x10FFFE);
 my $max   = pack("U", 0x10FFFF);
 EXPECT
-UTF-16 surrogate 0xd800 at - line 3.
-UTF-16 surrogate 0xdfff at - line 4.
-Unicode non-character 0xfffe is illegal for interchange at - line 8.
-Unicode non-character 0xffff is illegal for interchange at - line 9.
-Unicode non-character 0x10fffe is illegal for interchange at - line 12.
-Unicode non-character 0x10ffff is illegal for interchange at - line 13.
 ########
 use warnings 'utf8';
 my $d7ff  = "\x{D7FF}";
@@ -130,10 +118,3 @@ my $maxm1 = "\x{10FFFE}";
 my $max   = "\x{10FFFF}";
 uc($ffff);
 EXPECT
-UTF-16 surrogate 0xd800 at - line 3.
-UTF-16 surrogate 0xdfff at - line 4.
-Unicode non-character 0xfffe is illegal for interchange at - line 8.
-Unicode non-character 0xffff is illegal for interchange at - line 9.
-Unicode non-character 0x10fffe is illegal for interchange at - line 12.
-Unicode non-character 0x10ffff is illegal for interchange at - line 13.
-Unicode non-character 0xffff is illegal for interchange in uc at - line 14.

@@ -236,16 +236,44 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 
 /* Allow second... bytes to be non-continuation bytes */
 #define UTF8_ALLOW_NON_CONTINUATION	0x0004
-#define UTF8_ALLOW_FE_FF		0x0008 /* Allow FE or FF start bytes, \
-						  yields above 0x7fffFFFF = 31 bits */
-#define UTF8_ALLOW_SHORT		0x0010 /* expecting more bytes */
-#define UTF8_ALLOW_SURROGATE		0x0020
-#define UTF8_ALLOW_FFFF			0x0040 /* Allow UNICODE_ILLEGAL */
-#define UTF8_ALLOW_LONG			0x0080 /* expecting fewer bytes */
-#define UTF8_ALLOW_ANYUV		(UTF8_ALLOW_EMPTY|UTF8_ALLOW_FE_FF|\
-					 UTF8_ALLOW_SURROGATE|UTF8_ALLOW_FFFF)
-#define UTF8_ALLOW_ANY			0x00FF
-#define UTF8_CHECK_ONLY			0x0200
+
+/* expecting more bytes than were available in the string */
+#define UTF8_ALLOW_SHORT		0x0008
+
+/* Overlong sequence; i.e., the code point can be specified in fewer bytes. */
+#define UTF8_ALLOW_LONG                 0x0010
+
+#define UTF8_DISALLOW_SURROGATE		0x0020	/* Unicode surrogates */
+#define UTF8_WARN_SURROGATE		0x0040
+
+#define UTF8_DISALLOW_NONCHAR           0x0080	/* Unicode non-character */
+#define UTF8_WARN_NONCHAR               0x0100	/*  code points */
+
+#define UTF8_DISALLOW_SUPER		0x0200	/* Super-set of Unicode: code */
+#define UTF8_WARN_SUPER		        0x0400	/* points above the legal max */
+
+/* Code points which never were part of the original UTF-8 standard, the first
+ * byte of which is a FE or FF on ASCII platforms. */
+#define UTF8_DISALLOW_FE_FF		0x0800
+#define UTF8_WARN_FE_FF		        0x1000
+
+#define UTF8_CHECK_ONLY			0x2000
+
+/* For backwards source compatibility.  They do nothing, as the default now
+ * includes what they used to mean.  The first one's meaning was to allow the
+ * just the single non-character 0xFFFF */
+#define UTF8_ALLOW_FFFF 0
+#define UTF8_ALLOW_SURROGATE 0
+
+#define UTF8_DISALLOW_ILLEGAL_INTERCHANGE \
+	    (UTF8_DISALLOW_SUPER|UTF8_DISALLOW_NONCHAR|UTF8_DISALLOW_SURROGATE)
+#define UTF8_WARN_ILLEGAL_INTERCHANGE \
+			(UTF8_WARN_SUPER|UTF8_WARN_NONCHAR|UTF8_WARN_SURROGATE)
+#define UTF8_ALLOW_ANY \
+	    (~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE|UTF8_WARN_ILLEGAL_INTERCHANGE))
+#define UTF8_ALLOW_ANYUV                                                        \
+         (UTF8_ALLOW_EMPTY                                                      \
+	  & ~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE|UTF8_WARN_ILLEGAL_INTERCHANGE))
 #define UTF8_ALLOW_DEFAULT		(ckWARN(WARN_UTF8) ? 0 : \
 					 UTF8_ALLOW_ANYUV)
 
@@ -350,11 +378,23 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * let's be conservative and do as Unicode says. */
 #define PERL_UNICODE_MAX	0x10FFFF
 
-#define UNICODE_ALLOW_SURROGATE 0x0001	/* Allow UTF-16 surrogates (EVIL) */
-#define UNICODE_ALLOW_FDD0	0x0002	/* Allow the U+FDD0...U+FDEF */
-#define UNICODE_ALLOW_FFFF	0x0004	/* Allow U+FFF[EF], U+1FFF[EF], ... */
-#define UNICODE_ALLOW_SUPER	0x0008	/* Allow past 0x10FFFF */
-#define UNICODE_ALLOW_ANY	0x000F
+#define UNICODE_WARN_SURROGATE     0x0001	/* UTF-16 surrogates */
+#define UNICODE_WARN_NONCHAR       0x0002	/* Non-char code points */
+#define UNICODE_WARN_SUPER         0x0004	/* Above 0x10FFFF */
+#define UNICODE_WARN_FE_FF         0x0008	/* Above 0x10FFFF */
+#define UNICODE_DISALLOW_SURROGATE 0x0010
+#define UNICODE_DISALLOW_NONCHAR   0x0020
+#define UNICODE_DISALLOW_SUPER     0x0040
+#define UNICODE_DISALLOW_FE_FF     0x0080
+#define UNICODE_WARN_ILLEGAL_INTERCHANGE \
+    (UNICODE_WARN_SURROGATE|UNICODE_WARN_NONCHAR|UNICODE_WARN_SUPER)
+#define UNICODE_DISALLOW_ILLEGAL_INTERCHANGE \
+    (UNICODE_DISALLOW_SURROGATE|UNICODE_DISALLOW_NONCHAR|UNICODE_DISALLOW_SUPER)
+
+/* For backward source compatibility, as are now the default */
+#define UNICODE_ALLOW_SURROGATE 0
+#define UNICODE_ALLOW_SUPER	0
+#define UNICODE_ALLOW_ANY	0
 
 #define UNICODE_IS_SURROGATE(c)		((c) >= UNICODE_SURROGATE_FIRST && \
 					 (c) <= UNICODE_SURROGATE_LAST)
