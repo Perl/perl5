@@ -88,8 +88,8 @@ Perl_is_ascii_string(const U8 *s, STRLEN len)
 /*
 =for apidoc uvuni_to_utf8_flags
 
-Adds the UTF-8 representation of the Unicode codepoint C<uv> to the end
-of the string C<d>; C<d> should be have at least C<UTF8_MAXBYTES+1> free
+Adds the UTF-8 representation of the code point C<uv> to the end
+of the string C<d>; C<d> should have at least C<UTF8_MAXBYTES+1> free
 bytes available. The return value is the pointer to the byte after the
 end of the new character. In other words,
 
@@ -660,7 +660,7 @@ malformed:
 /*
 =for apidoc utf8_to_uvchr
 
-Returns the native character value of the first character in the string C<s>
+Returns the native code point of the first character in the string C<s>
 which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
 length, in bytes, of that character.
 
@@ -2589,7 +2589,7 @@ Perl__swash_inversion_hash(pTHX_ SV* swash)
 /*
 =for apidoc uvchr_to_utf8
 
-Adds the UTF-8 representation of the Native codepoint C<uv> to the end
+Adds the UTF-8 representation of the Native code point C<uv> to the end
 of the string C<d>; C<d> should be have at least C<UTF8_MAXBYTES+1> free
 bytes available. The return value is the pointer to the byte after the
 end of the new character. In other words,
@@ -2624,14 +2624,13 @@ Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 
 /*
 =for apidoc utf8n_to_uvchr
-flags
 
 Returns the native character value of the first character in the string
 C<s>
 which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
 length, in bytes, of that character.
 
-Allows length and flags to be passed to low level routine.
+length and flags are the same as utf8n_to_uvuni().
 
 =cut
 */
