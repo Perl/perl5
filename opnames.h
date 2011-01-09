@@ -392,7 +392,7 @@ typedef enum opcode {
 
 /* the OP_IS_(SOCKET|FILETEST) macros are optimized to a simple range
     check because all the member OPs are contiguous in opcode.pl
-    <DATA> table.  opcode.pl verifies the range contiguity.  */
+    <OPS> table.  opcode.pl verifies the range contiguity.  */
 
 #define OP_IS_SOCKET(op)	\
 	((op) >= OP_SEND && (op) <= OP_GETPEERNAME)

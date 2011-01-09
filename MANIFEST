@@ -4442,6 +4442,7 @@ regcomp.sym			Data for regnodes.h
 regen/embed.pl			Produces {embed,embedvar,proto}.h, global.sym
 regen/keywords.pl		Program to write keywords.h
 regen/opcode.pl			Opcode header generator
+regen/opcodes			Opcode data
 regen/overload.pl		generate overload.h
 regen_perly.pl			generate perly.{act,h,tab} from perly.y
 regen.pl			Run all scripts that (re)generate files
