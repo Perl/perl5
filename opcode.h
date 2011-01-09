@@ -111,9 +111,6 @@
 #define Perl_pp_reach Perl_pp_rkeys
 #define Perl_pp_rvalues Perl_pp_rkeys
 #define Perl_pp_transr Perl_pp_trans
-
-PERL_PPDEF(Perl_unimplemented_op)
-
 START_EXTERN_C
 
 #ifndef DOINIT

@@ -745,7 +745,6 @@ PERL_CALLCONV void	Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
 #define PERL_ARGS_ASSERT_DO_JOIN	\
 	assert(sv); assert(delim); assert(mark); assert(sp)
 
-PERL_CALLCONV OP*	Perl_do_kv(pTHX);
 PERL_CALLCONV void	Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);

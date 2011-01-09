@@ -908,7 +908,7 @@ PP(pp_rv2av)
 	/* The guts of pp_rv2hv  */
 	if (gimme == G_ARRAY) { /* array wanted */
 	    *PL_stack_sp = sv;
-	    return do_kv();
+	    return Perl_do_kv(aTHX);
 	}
 	else if (gimme == G_SCALAR) {
 	    dTARGET;

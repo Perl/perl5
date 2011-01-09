@@ -151,12 +151,6 @@ for (@ops) {
     print "#define Perl_pp_$_ $alias{$_}\n" if $alias{$_};
 }
 
-print <<'END';
-
-PERL_PPDEF(Perl_unimplemented_op)
-
-END
-
 print $on <<"END";
 /* -*- buffer-read-only: t -*-
  *
@@ -481,10 +475,13 @@ print $pp <<"END";
 
 END
 
-for (sort @ops) {
-    next if /^i_(pre|post)(inc|dec)$/;
-    next if /^custom$/;
-    print $pp "PERL_CALLCONV OP *Perl_pp_$_(pTHX);\n";
+{
+    my %funcs;
+    for (@ops) {
+	my $name = $alias{$_} || "Perl_pp_$_";
+	++$funcs{$name};
+    }
+    print $pp "PERL_CALLCONV OP *$_(pTHX);\n" foreach sort keys %funcs;
 }
 print $pp "\n/* ex: set ro: */\n";
 

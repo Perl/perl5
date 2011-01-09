@@ -977,7 +977,6 @@
 #define do_dump_pad(a,b,c,d)	Perl_do_dump_pad(aTHX_ a,b,c,d)
 #define do_eof(a)		Perl_do_eof(aTHX_ a)
 #define do_execfree()		Perl_do_execfree(aTHX)
-#define do_kv()			Perl_do_kv(aTHX)
 #define do_print(a,b)		Perl_do_print(aTHX_ a,b)
 #define do_readline()		Perl_do_readline(aTHX)
 #define do_seek(a,b,c)		Perl_do_seek(aTHX_ a,b,c)

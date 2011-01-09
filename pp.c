@@ -121,7 +121,7 @@ PP(pp_padhv)
     }
     gimme = GIMME_V;
     if (gimme == G_ARRAY) {
-	RETURNOP(do_kv());
+	RETURNOP(Perl_do_kv(aTHX));
     }
     else if (gimme == G_SCALAR) {
 	SV* const sv = Perl_hv_scalar(aTHX_ MUTABLE_HV(TARG));
