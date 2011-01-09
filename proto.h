@@ -255,6 +255,11 @@ PERL_CALLCONV U32	Perl_cast_ulong(pTHX_ NV f)
 PERL_CALLCONV UV	Perl_cast_uv(pTHX_ NV f)
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV bool	Perl_check_utf8_print(pTHX_ const U8 *s, const STRLEN len)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_CHECK_UTF8_PRINT	\
+	assert(s)
+
 PERL_CALLCONV OP *	Perl_ck_anoncode(pTHX_ OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);

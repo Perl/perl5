@@ -2649,6 +2649,54 @@ U32 flags)
     return UNI_TO_NATIVE(uv);
 }
 
+bool
+Perl_check_utf8_print(pTHX_ register const U8* s, const STRLEN len)
+{
+    /* May change: warns if surrogates, non-character code points, or
+     * non-Unicode code points are in s which has length len.  Returns TRUE if
+     * none found; FALSE otherwise.  The only other validity check is to make
+     * sure that this won't exceed the string's length */
+
+    const U8* const e = s + len;
+    bool ok = TRUE;
+
+    PERL_ARGS_ASSERT_CHECK_UTF8_PRINT;
+
+    while (s < e) {
+	if (UTF8SKIP(s) > len) {
+	    Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8),
+			   "%s in %s", unees, PL_op ? OP_DESC(PL_op) : "print");
+	    return FALSE;
+	}
+	if (*s >= UTF8_FIRST_PROBLEMATIC_CODE_POINT_FIRST_BYTE) {
+	    STRLEN char_len;
+	    if (UTF8_IS_SUPER(s)) {
+		UV uv = utf8_to_uvchr(s, &char_len);
+		Perl_warner(aTHX_ packWARN(WARN_UTF8),
+		    "Code point 0x%04"UVXf" is not Unicode, may not be portable", uv);
+		ok = FALSE;
+	    }
+	    else if (UTF8_IS_SURROGATE(s)) {
+		UV uv = utf8_to_uvchr(s, &char_len);
+		Perl_warner(aTHX_ packWARN(WARN_UTF8),
+		    "Unicode surrogate U+%04"UVXf" is illegal in UTF-8", uv);
+		ok = FALSE;
+	    }
+	    else if
+		(UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_PROBLEMATIC(s))
+	    {
+		UV uv = utf8_to_uvchr(s, &char_len);
+		Perl_warner(aTHX_ packWARN(WARN_UTF8),
+		    "Unicode non-character U+%04"UVXf" is illegal for open interchange", uv);
+		ok = FALSE;
+	    }
+	}
+	s += UTF8SKIP(s);
+    }
+
+    return ok;
+}
+
 /*
 =for apidoc pv_uni_display
 

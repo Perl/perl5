@@ -1358,6 +1358,17 @@ This subroutine cannot be called.
 (F) You had a (sub-)template that ends with a '/'. There must be another
 template code following the slash. See L<perlfunc/pack>.
 
+=item Code point 0x%X is not Unicode, may not be portable
+
+(W utf8) You had a code point above the Unicode maximum of U+10FFFF.
+
+Perl allows strings to contain a superset of Unicode code
+points, up to the limit of what is storable in an unsigned integer on
+your system, but these may not be accepted by other languages/systems.
+At one time, it was legal in some standards to have code points up to
+0x7FFF_FFFF, but not higher.  Code points above 0xFFFF_FFFF require
+larger than a 32 bit word.
+
 =item %s: Command not found
 
 (A) You've accidentally run your script through B<csh> instead of Perl.
@@ -4619,6 +4630,8 @@ representative, who probably put it there in the first place.
 
 =item Unicode non-character 0x%x is illegal for interchange
 
+=item Unicode non-character U+%X is illegal for open interchange
+
 (W utf8) Certain codepoints, such as U+FFFE and U+FFFF, are defined by the
 Unicode standard to be non-characters. Those are legal codepoints, but are
 reserved for internal use; so, applications shouldn't attempt to exchange
@@ -5192,6 +5205,8 @@ limit as to the number of characters that can be used, which this sequence
 exceeded.  In the message, the characters in the sequence are separated by
 dots, and each is shown by its ordinal in hex.  Anything to the left of the
 C<HERE> was retained; anything to the right was discarded.
+
+=item Unicode surrogate U+%X is illegal in UTF-8
 
 =item UTF-16 surrogate 0x%x
 

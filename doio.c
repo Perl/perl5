@@ -1224,6 +1224,9 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 		tmpbuf = bytes_to_utf8((const U8*) tmps, &len);
 		tmps = (char *) tmpbuf;
 	    }
+	    else if (ckWARN_d(WARN_UTF8)) {
+		(void) check_utf8_print((const U8*) tmps, len);
+	    }
 	}
 	else if (DO_UTF8(sv)) {
 	    STRLEN tmplen = len;
@@ -1240,6 +1243,9 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 				 "Wide character in %s",
 				   PL_op ? OP_DESC(PL_op) : "print"
 				);
+		    /* Could also check that isn't one of the things to avoid
+		     * in utf8 by using check_utf8_print(), but not doing so,
+		     * since the stream isn't a UTF8 stream */
 	    }
 	}
 	/* To detect whether the process is about to overstep its
