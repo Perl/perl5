@@ -123,6 +123,25 @@ while (<IN>) {
     push @embed, \@args;
 }
 
+open IN, 'regen/opcodes' or die $!;
+{
+    my %syms;
+
+    while (<IN>) {
+	chop;
+	next unless $_;
+	next if /^#/;
+	my (undef, undef, $check) = split /\t+/, $_;
+	++$syms{$check};
+    }
+
+    foreach (keys %syms) {
+	# These are all indirectly referenced by globals.c.
+	push @embed, ['pR', 'OP *', $_, 'NN OP *o'];
+    }
+}
+close IN;
+
 open IN, 'pp.sym' or die $!;
 {
     my %syms;
@@ -138,12 +157,7 @@ open IN, 'pp.sym' or die $!;
 
     foreach (sort keys %syms) {
 	s/^Perl_//;
-	if (/^ck_/) {
-	    # These are all indirectly referenced by globals.c.
-	    # This is somewhat annoying.
-	    push @embed, ['pR', 'OP *', $_, 'NN OP *o'];
-	}
-	elsif (/^pp_/) {
+	if (/^pp_/) {
 	    push @embed, ['p', 'OP *', $_];
 	}
 	else {

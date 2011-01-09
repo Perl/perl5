@@ -482,11 +482,6 @@ print $ppsym <<"END";
 END
 
 
-for (sort keys %ckname) {
-    print $ppsym "Perl_$_\n";
-#OP *\t", &tab(3,$_),"(OP* o);\n";
-}
-
 for (@ops) {
     next if /^i_(pre|post)(inc|dec)$/;
     next if /^custom$/;
