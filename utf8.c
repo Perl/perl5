@@ -1801,6 +1801,24 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
 
     PERL_ARGS_ASSERT_TO_UTF8_CASE;
 
+    /* Note that swash_fetch() doesn't output warnings for these because it
+     * assumes we will */
+    if (uv1 >= UNICODE_SURROGATE_FIRST && ckWARN_d(WARN_UTF8)) {
+	if (uv1 <= UNICODE_SURROGATE_LAST) {
+	    const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;
+	    Perl_warner(aTHX_ packWARN(WARN_UTF8),
+		"Operation \"%s\" returns its argument for UTF-16 surrogate U+%04"UVXf"", desc, uv1);
+	}
+	else if (UNICODE_IS_SUPER(uv1)) {
+	    const char* desc = (PL_op) ? OP_DESC(PL_op) : normal;
+	    Perl_warner(aTHX_ packWARN(WARN_UTF8),
+		"Operation \"%s\" returns its argument for non-Unicode code point 0x%04"UVXf"", desc, uv1);
+	}
+
+	/* Note that non-characters are perfectly legal, so no warning should
+	 * be given */
+    }
+
     uvuni_to_utf8(tmpbuf, uv1);
 
     if (!*swashp) /* load on-demand */
@@ -2121,6 +2139,18 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
       /* If char is encoded then swatch is for the prefix */
 	needents = (1 << UTF_ACCUMULATION_SHIFT);
 	off      = NATIVE_TO_UTF(ptr[klen]) & UTF_CONTINUATION_MASK;
+	if (UTF8_IS_SUPER(ptr) && ckWARN_d(WARN_UTF8)) {
+	    const UV code_point = utf8n_to_uvuni(ptr, UTF8_MAXBYTES, 0, 0);
+
+	    /* This outputs warnings for binary properties only, assuming that
+	     * to_utf8_case() will output any.  Also, surrogates aren't checked
+	     * for, as that would warn on things like /\p{Gc=Cs}/ */
+	    SV** const bitssvp = hv_fetchs(hv, "BITS", FALSE);
+	    if (SvUV(*bitssvp) == 1) {
+		Perl_warner(aTHX_ packWARN(WARN_UTF8),
+		    "Code point 0x%04"UVXf" is not Unicode, no properties match it; all inverse properties do", code_point);
+	    }
+	}
     }
 
     /*
