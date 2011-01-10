@@ -407,18 +407,13 @@ Here are the short and long forms of the General Category properties:
     C           Other
     Cc          Control (also Cntrl)
     Cf          Format
-    Cs          Surrogate   (not usable)
+    Cs          Surrogate
     Co          Private_Use
     Cn          Unassigned
 
 Single-letter properties match all characters in any of the
 two-letter sub-properties starting with the same letter.
 C<LC> and C<L&> are special cases, which are both aliases for the set consisting of everything matched by C<Ll>, C<Lu>, and C<Lt>.
-
-Because Perl hides the need for the user to understand the internal
-representation of Unicode characters, there is no need to implement
-the somewhat messy concept of surrogates. C<Cs> is therefore not
-supported.
 
 =head3 B<Bidirectional Character Types>
 
@@ -1178,10 +1173,9 @@ numbers.  To use these numbers, various encodings are needed.
 
 UTF-8
 
-UTF-8 is a variable-length (1 to 6 bytes, current character allocations
-require 4 bytes), byte-order independent encoding. For ASCII (and we
-really do mean 7-bit ASCII, not another 8-bit encoding), UTF-8 is
-transparent.
+UTF-8 is a variable-length (1 to 4 bytes), byte-order independent
+encoding. For ASCII (and we really do mean 7-bit ASCII, not another
+8-bit encoding), UTF-8 is transparent.
 
 The following table is from Unicode 3.2.
 
@@ -1217,6 +1211,16 @@ As you can see, the continuation bytes all begin with "10", and the
 leading bits of the start byte tell how many bytes there are in the
 encoded character.
 
+The original UTF-8 specification allowed up to 6 bytes, to allow
+encoding of numbers up to 0x7FFF_FFFF.  Perl continues to allow those,
+and has extended that up to 13 bytes to encode code points up to what
+can fit in a 64-bit word.  However, Perl will warn if you output any of
+these, as being non-portable; and under strict UTF-8 input protocols,
+they are forbidden.
+
+The Unicode non-character code points are also disallowed in UTF-8 in
+"open interchange".  See L</Non-character code points>.
+
 =item *
 
 UTF-EBCDIC
@@ -1248,10 +1252,6 @@ and the decoding is
 
     $uni = 0x10000 + ($hi - 0xD800) * 0x400 + ($lo - 0xDC00);
 
-If you try to generate surrogates (for example by using chr()), you
-will get a warning, if warnings are turned on, because those code
-points are not valid for a Unicode character.
-
 Because of the 16-bitness, UTF-16 is byte-order dependent.  UTF-16
 itself can be used for in-memory computations, but if storage or
 transfer is required either UTF-16BE (big-endian) or UTF-16LE
@@ -1270,12 +1270,21 @@ you will read the bytes C<0xFF 0xFE>.  (And if the originating platform
 was writing in UTF-8, you will read the bytes C<0xEF 0xBB 0xBF>.)
 
 The way this trick works is that the character with the code point
-C<U+FFFE> is guaranteed not to be a valid Unicode character, so the
+C<U+FFFE> is not supposed to be in input streams, so the
 sequence of bytes C<0xFF 0xFE> is unambiguously "BOM, represented in
 little-endian format" and cannot be C<U+FFFE>, represented in big-endian
-format".  (Actually, C<U+FFFE> is legal for use by your program, even for
-input/output, but better not use it if you need a BOM.  But it is "illegal for
-interchange", so that an unsuspecting program won't get confused.)
+format".
+
+Surrogates have no meaning in Unicode outside their use in pairs to
+represent other code points.  However, Perl allows them to be
+represented individually internally, for example by saying
+C<chr(0xD801)>, so that the all code points, not just Unicode ones, are
+representable.  Unicode does define semantics for them, such as their
+General Category is "Cs".  But because their use is somewhat dangerous,
+Perl will warn (using the warning category UTF8) if an attempt is made
+to do things like take the lower case of one, or match
+case-insensitively, or to output them.  (But don't try this on Perls
+before 5.14.)
 
 =item *
 
@@ -1303,6 +1312,22 @@ A seven-bit safe (non-eight-bit) encoding, which is useful if the
 transport or storage is not eight-bit safe.  Defined by RFC 2152.
 
 =back
+
+=head2 Non-character code points
+
+66 code points are set aside in Unicode as "non-character code points".
+These all have the Unassigned (Cn) General Category, and they never will
+be assigned.  These are never supposed to be in legal Unicode input
+streams, so that code can use them as sentinels that can be mixed in
+with character data, and they always will be distinguishable from that data.
+To keep them out of Perl input streams, strict UTF-8 should be
+specified, such as by using the layer C<:encoding('UTF-8')>.  The
+non-character code points are the 32 between U+FDD0 and U+FDEF, and the
+34 code points U+FFFE, U+FFFF, U+1FFFE, U+1FFFF, ... U+10FFFE, U+10FFFF.
+Some people are under the mistaken impression that these are "illegal",
+but that is not true.  An application or cooperating set of applications
+can legally use them at will internally; but these code points are
+"illegal for open interchange".
 
 =head2 Security Implications of Unicode
 

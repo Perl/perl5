@@ -26,6 +26,21 @@ XXX New core language features go here. Summarise user-visible core language
 enhancements. Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
+With this release, Perl is adopting a model that any unsigned value can
+be encoded internally as utf8 without warnings -- not just the ones that
+are legal in Unicode.
+However, unless UTF8 warnings have been
+explicitly lexically turned off, outputting or performing a
+Unicode-defined operation (such as upper-casing) on such a code point
+will generate a warning.  Attempting to input these using strict rules
+(such as with the C<:encoding('UTF-8')> layer) will continue to fail.
+Prior to this release the handling was very inconsistent, and incorrect
+in places.  Also, the Unicode non-characters, some of which previously were
+erroneously considered illegal in places by Perl, contrary to the Unicode
+standard, are now always legal internally.  But inputting or outputting
+them will work the same as for the non-legal Unicode code points, as the
+Unicode standard says they are illegal for "open interchange".
+
 [ List each enhancement as a =head2 entry ]
 
 =head1 Security
@@ -136,7 +151,10 @@ C<CPANPLUS::Dist::Build> has been upgraded from 0.50 to 0.52
 
 =item *
 
-C<Encode> has been upgraded from version 2.40 to 2.42
+C<Encode> has been upgraded from version 2.40 to 2.42.
+Now, all 66 Unicode non-characters are treated the same way U+FFFF has
+always been treated; if it was disallowed, all 66 are disallowed; if it
+warned, all 66 warn.
 
 =item *
 
@@ -376,6 +394,23 @@ a static function in F<pp.c>. This shrinks the perl binary slightly, and should
 not affect any code outside the core (unless it is relying on the order of side
 effects when C<chomp> is passed a I<list> of values).
 
+=item *
+
+Some of the flags parameters to the uvuni_to_utf8_flags() and
+utf8n_to_uvuni() have changed.  This is a result of Perl now allowing
+internal storage and manipulation of code points that are problematic
+in some situations.  Hence, the default actions for these functions has
+been complemented to allow these code points.  The new flags are
+documented in L<perlapi>.  Code that requires the problematic code
+points to be rejected needs to change to use these flags.  Some flag
+names are retained for backward source compatibility, though they do
+nothing, as they are now the default.  However the flags
+C<UNICODE_ALLOW_FDD0>, C<UNICODE_ALLOW_FFFF>, C<UNICODE_ILLEGAL>, and
+C<UNICODE_IS_ILLEGAL> have been removed, as they stem from a
+fundamentally broken model of how the Unicode non-character code points
+should be handled, which is now described in
+L<perlunicode/Non-character code points>.  See also L</Selected Bug Fixes>.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -390,7 +425,16 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+The handling of Unicode non-characters has changed.
+Previously they were mostly considered illegal, except that only one of
+the 66 of them was known about in places.  The Unicode standard
+considers them legal, but forbids the "open interchange" of them.
+This is part of the change to allow the internal use of any code point
+(see L</Core Enhancements>).  Together, these changes resolve
+L<# 38722|https://rt.perl.org/rt3/Ticket/Display.html?id=38722>,
+L<# 51918|http://rt.perl.org/rt3/Ticket/Display.html?id=51918>,
+L<# 51936|http://rt.perl.org/rt3/Ticket/Display.html?id=51936>,
+L<# 63446|http://rt.perl.org/rt3/Ticket/Display.html?id=63446>
 
 =back
 
