@@ -5052,6 +5052,34 @@ PP(pp_ehostent)
 	DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
 #endif
 	break;
+    case OP_SGRENT:
+#if defined(HAS_GROUP) && defined(HAS_SETGRENT)
+	setgrent();
+#else
+	DIE(aTHX_ PL_no_func, PL_op_desc[PL_op->op_type]);
+#endif
+	break;
+    case OP_EGRENT:
+#if defined(HAS_GROUP) && defined(HAS_ENDGRENT)
+	endgrent();
+#else
+	DIE(aTHX_ PL_no_func, PL_op_desc[PL_op->op_type]);
+#endif
+	break;
+    case OP_SPWENT:
+#if defined(HAS_PASSWD) && defined(HAS_SETPWENT)
+	setpwent();
+#else
+	DIE(aTHX_ PL_no_func, PL_op_desc[PL_op->op_type]);
+#endif
+	break;
+    case OP_EPWENT:
+#if defined(HAS_PASSWD) && defined(HAS_ENDPWENT)
+	endpwent();
+#else
+	DIE(aTHX_ PL_no_func, PL_op_desc[PL_op->op_type]);
+#endif
+	break;
     }
     EXTEND(SP,1);
     RETPUSHYES;
@@ -5290,28 +5318,6 @@ PP(pp_gpwent)
 #endif
 }
 
-PP(pp_spwent)
-{
-#if defined(HAS_PASSWD) && defined(HAS_SETPWENT)
-    dVAR; dSP;
-    setpwent();
-    RETPUSHYES;
-#else
-    DIE(aTHX_ PL_no_func, "setpwent");
-#endif
-}
-
-PP(pp_epwent)
-{
-#if defined(HAS_PASSWD) && defined(HAS_ENDPWENT)
-    dVAR; dSP;
-    endpwent();
-    RETPUSHYES;
-#else
-    DIE(aTHX_ PL_no_func, "endpwent");
-#endif
-}
-
 PP(pp_ggrent)
 {
 #ifdef HAS_GROUP
@@ -5383,28 +5389,6 @@ PP(pp_ggrent)
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, PL_op_desc[PL_op->op_type]);
-#endif
-}
-
-PP(pp_sgrent)
-{
-#if defined(HAS_GROUP) && defined(HAS_SETGRENT)
-    dVAR; dSP;
-    setgrent();
-    RETPUSHYES;
-#else
-    DIE(aTHX_ PL_no_func, "setgrent");
-#endif
-}
-
-PP(pp_egrent)
-{
-#if defined(HAS_GROUP) && defined(HAS_ENDGRENT)
-    dVAR; dSP;
-    endgrent();
-    RETPUSHYES;
-#else
-    DIE(aTHX_ PL_no_func, "endgrent");
 #endif
 }
 

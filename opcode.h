@@ -129,8 +129,12 @@
 #define Perl_pp_eservent Perl_pp_ehostent
 #define Perl_pp_gpwnam Perl_pp_gpwent
 #define Perl_pp_gpwuid Perl_pp_gpwent
+#define Perl_pp_spwent Perl_pp_ehostent
+#define Perl_pp_epwent Perl_pp_ehostent
 #define Perl_pp_ggrnam Perl_pp_ggrent
 #define Perl_pp_ggrgid Perl_pp_ggrent
+#define Perl_pp_sgrent Perl_pp_ehostent
+#define Perl_pp_egrent Perl_pp_ehostent
 #define Perl_pp_custom Perl_unimplemented_op
 #define Perl_pp_reach Perl_pp_rkeys
 #define Perl_pp_rvalues Perl_pp_rkeys
@@ -1263,13 +1267,13 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_gpwnam,	/* implemented by Perl_pp_gpwent */
 	Perl_pp_gpwuid,	/* implemented by Perl_pp_gpwent */
 	Perl_pp_gpwent,
-	Perl_pp_spwent,
-	Perl_pp_epwent,
+	Perl_pp_spwent,	/* implemented by Perl_pp_ehostent */
+	Perl_pp_epwent,	/* implemented by Perl_pp_ehostent */
 	Perl_pp_ggrnam,	/* implemented by Perl_pp_ggrent */
 	Perl_pp_ggrgid,	/* implemented by Perl_pp_ggrent */
 	Perl_pp_ggrent,
-	Perl_pp_sgrent,
-	Perl_pp_egrent,
+	Perl_pp_sgrent,	/* implemented by Perl_pp_ehostent */
+	Perl_pp_egrent,	/* implemented by Perl_pp_ehostent */
 	Perl_pp_getlogin,
 	Perl_pp_syscall,
 	Perl_pp_lock,
