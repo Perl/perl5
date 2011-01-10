@@ -580,7 +580,7 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 #else
     if (uv == 0xfe || uv == 0xff) {
 	if (flags & (UTF8_WARN_SUPER|UTF8_WARN_FE_FF)) {
-	    sv = sv_2mortal(newSVpvf_nocontext("Code point beginning with byte 0x%02"UVXf" is not Unicode, and not portable", uv));
+	    sv = sv_2mortal(Perl_newSVpvf(aTHX_ "Code point beginning with byte 0x%02"UVXf" is not Unicode, and not portable", uv));
 	    flags &= ~UTF8_WARN_SUPER;	/* Only warn once on this problem */
 	}
 	if (flags & (UTF8_DISALLOW_SUPER|UTF8_DISALLOW_FE_FF)) {
@@ -651,7 +651,7 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
     } else if (flags & (UTF8_DISALLOW_ILLEGAL_INTERCHANGE|UTF8_WARN_ILLEGAL_INTERCHANGE)) {
 	if (UNICODE_IS_SURROGATE(uv)) {
 	    if ((flags & (UTF8_WARN_SURROGATE|UTF8_CHECK_ONLY)) == UTF8_WARN_SURROGATE) {
-		sv = sv_2mortal(newSVpvf_nocontext("UTF-16 surrogate U+%04"UVXf"", uv));
+		sv = sv_2mortal(Perl_newSVpvf(aTHX_ "UTF-16 surrogate U+%04"UVXf"", uv));
 	    }
 	    if (flags & UTF8_DISALLOW_SURROGATE) {
 		goto disallowed;
@@ -659,7 +659,7 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	}
 	else if (UNICODE_IS_NONCHAR(uv)) {
 	    if ((flags & (UTF8_WARN_NONCHAR|UTF8_CHECK_ONLY)) == UTF8_WARN_NONCHAR ) {
-		sv = sv_2mortal(newSVpvf_nocontext("Unicode non-character U+%04"UVXf" is illegal for open interchange", uv));
+		sv = sv_2mortal(Perl_newSVpvf(aTHX_ "Unicode non-character U+%04"UVXf" is illegal for open interchange", uv));
 	    }
 	    if (flags & UTF8_DISALLOW_NONCHAR) {
 		goto disallowed;
@@ -667,7 +667,7 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	}
 	else if ((uv > PERL_UNICODE_MAX)) {
 	    if ((flags & (UTF8_WARN_SUPER|UTF8_CHECK_ONLY)) == UTF8_WARN_SUPER) {
-		sv = sv_2mortal(newSVpvf_nocontext("Code point 0x%04"UVXf" is not Unicode, may not be portable", uv));
+		sv = sv_2mortal(Perl_newSVpvf(aTHX_ "Code point 0x%04"UVXf" is not Unicode, may not be portable", uv));
 	    }
 	    if (flags & UTF8_DISALLOW_SUPER) {
 		goto disallowed;
