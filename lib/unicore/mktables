@@ -4222,8 +4222,6 @@ sub trace { return main::trace(@_); }
         # the character very frequently used.
         return $try_hard if $code == 0x0000;
 
-        return 0 if $try_hard;  # XXX Temporary until fix utf8.c
-
         # shun non-character code points.
         return $try_hard if $code >= 0xFDD0 && $code <= 0xFDEF;
         return $try_hard if ($code & 0xFFFE) == 0xFFFE; # includes FFFF
