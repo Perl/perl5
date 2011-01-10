@@ -5029,50 +5029,39 @@ PP(pp_sservent)
 
 PP(pp_ehostent)
 {
+    dVAR; dSP;
+    switch(PL_op->op_type) {
+    case OP_EHOSTENT:
 #ifdef HAS_ENDHOSTENT
-    dVAR; dSP;
-    PerlSock_endhostent();
-    EXTEND(SP,1);
-    RETPUSHYES;
+	PerlSock_endhostent();
 #else
-    DIE(aTHX_ PL_no_sock_func, "endhostent");
+	DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
 #endif
-}
-
-PP(pp_enetent)
-{
+	break;
+    case OP_ENETENT:
 #ifdef HAS_ENDNETENT
-    dVAR; dSP;
-    PerlSock_endnetent();
-    EXTEND(SP,1);
-    RETPUSHYES;
+	PerlSock_endnetent();
 #else
-    DIE(aTHX_ PL_no_sock_func, "endnetent");
+	DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
 #endif
-}
-
-PP(pp_eprotoent)
-{
+	break;
+    case OP_EPROTOENT:
 #ifdef HAS_ENDPROTOENT
-    dVAR; dSP;
-    PerlSock_endprotoent();
-    EXTEND(SP,1);
-    RETPUSHYES;
+	PerlSock_endprotoent();
 #else
-    DIE(aTHX_ PL_no_sock_func, "endprotoent");
+	DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
 #endif
-}
-
-PP(pp_eservent)
-{
+	break;
+    case OP_ESERVENT:
 #ifdef HAS_ENDSERVENT
-    dVAR; dSP;
-    PerlSock_endservent();
+	PerlSock_endservent();
+#else
+	DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
+#endif
+	break;
+    }
     EXTEND(SP,1);
     RETPUSHYES;
-#else
-    DIE(aTHX_ PL_no_sock_func, "endservent");
-#endif
 }
 
 PP(pp_gpwent)
