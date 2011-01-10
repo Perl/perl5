@@ -372,7 +372,6 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #define UNICODE_SURROGATE_LAST		0xDFFF
 #define UNICODE_REPLACEMENT		0xFFFD
 #define UNICODE_BYTE_ORDER_MARK		0xFEFF
-#define UNICODE_ILLEGAL			0xFFFF
 
 /* Though our UTF-8 encoding can go beyond this,
  * let's be conservative and do as Unicode says. */
@@ -400,7 +399,6 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 					 (c) <= UNICODE_SURROGATE_LAST)
 #define UNICODE_IS_REPLACEMENT(c)	((c) == UNICODE_REPLACEMENT)
 #define UNICODE_IS_BYTE_ORDER_MARK(c)	((c) == UNICODE_BYTE_ORDER_MARK)
-#define UNICODE_IS_ILLEGAL(c)		((c) == UNICODE_ILLEGAL)
 #define UNICODE_IS_NONCHAR(c)		((c >= 0xFDD0 && c <= 0xFDEF) \
 			/* The other noncharacters end in FFFE or FFFF, which  \
 			 * the mask below catches both of, but beyond the last \
