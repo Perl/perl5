@@ -766,13 +766,14 @@ returned and retlen is set, if possible, to -1.
 =cut
 */
 
+
 UV
 Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
 {
     PERL_ARGS_ASSERT_UTF8_TO_UVCHR;
 
     return utf8n_to_uvchr(s, UTF8_MAXBYTES, retlen,
-			  ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
+			  ckWARN_d(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
 }
 
 /*
@@ -798,7 +799,7 @@ Perl_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
 
     /* Call the low level routine asking for checks */
     return Perl_utf8n_to_uvuni(aTHX_ s, UTF8_MAXBYTES, retlen,
-			       ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
+			       ckWARN_d(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
 }
 
 /*
