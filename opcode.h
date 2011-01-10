@@ -121,6 +121,9 @@
 #define Perl_pp_gpbynumber Perl_pp_gprotoent
 #define Perl_pp_gsbyname Perl_pp_gservent
 #define Perl_pp_gsbyport Perl_pp_gservent
+#define Perl_pp_snetent Perl_pp_shostent
+#define Perl_pp_sprotoent Perl_pp_shostent
+#define Perl_pp_sservent Perl_pp_shostent
 #define Perl_pp_enetent Perl_pp_ehostent
 #define Perl_pp_eprotoent Perl_pp_ehostent
 #define Perl_pp_eservent Perl_pp_ehostent
@@ -1250,9 +1253,9 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_gsbyport,	/* implemented by Perl_pp_gservent */
 	Perl_pp_gservent,
 	Perl_pp_shostent,
-	Perl_pp_snetent,
-	Perl_pp_sprotoent,
-	Perl_pp_sservent,
+	Perl_pp_snetent,	/* implemented by Perl_pp_shostent */
+	Perl_pp_sprotoent,	/* implemented by Perl_pp_shostent */
+	Perl_pp_sservent,	/* implemented by Perl_pp_shostent */
 	Perl_pp_ehostent,
 	Perl_pp_enetent,	/* implemented by Perl_pp_ehostent */
 	Perl_pp_eprotoent,	/* implemented by Perl_pp_ehostent */

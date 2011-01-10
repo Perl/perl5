@@ -4985,46 +4985,39 @@ PP(pp_gservent)
 
 PP(pp_shostent)
 {
+    dVAR; dSP;
+    const int stayopen = TOPi;
+    switch(PL_op->op_type) {
+    case OP_SHOSTENT:
 #ifdef HAS_SETHOSTENT
-    dVAR; dSP;
-    PerlSock_sethostent(TOPi);
-    RETSETYES;
+	PerlSock_sethostent(stayopen);
 #else
-    DIE(aTHX_ PL_no_sock_func, "sethostent");
+	DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
 #endif
-}
-
-PP(pp_snetent)
-{
+	break;
 #ifdef HAS_SETNETENT
-    dVAR; dSP;
-    (void)PerlSock_setnetent(TOPi);
-    RETSETYES;
+    case OP_SNETENT:
+	PerlSock_setnetent(stayopen);
 #else
-    DIE(aTHX_ PL_no_sock_func, "setnetent");
+	DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
 #endif
-}
-
-PP(pp_sprotoent)
-{
+	break;
+    case OP_SPROTOENT:
 #ifdef HAS_SETPROTOENT
-    dVAR; dSP;
-    (void)PerlSock_setprotoent(TOPi);
-    RETSETYES;
+	PerlSock_setprotoent(stayopen);
 #else
-    DIE(aTHX_ PL_no_sock_func, "setprotoent");
+	DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
 #endif
-}
-
-PP(pp_sservent)
-{
+	break;
+    case OP_SSERVENT:
 #ifdef HAS_SETSERVENT
-    dVAR; dSP;
-    (void)PerlSock_setservent(TOPi);
-    RETSETYES;
+	PerlSock_setservent(stayopen);
 #else
-    DIE(aTHX_ PL_no_sock_func, "setservent");
+	DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
 #endif
+	break;
+    }
+    RETSETYES;
 }
 
 PP(pp_ehostent)
