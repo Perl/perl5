@@ -4771,7 +4771,7 @@ PP(pp_ghostent)
     }
     RETURN;
 #else
-    DIE(aTHX_ PL_no_sock_func, "gethostent");
+    DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
 #endif
 }
 
@@ -4844,7 +4844,7 @@ PP(pp_gnetent)
 
     RETURN;
 #else
-    DIE(aTHX_ PL_no_sock_func, "getnetent");
+    DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
 #endif
 }
 
@@ -4904,7 +4904,7 @@ PP(pp_gprotoent)
 
     RETURN;
 #else
-    DIE(aTHX_ PL_no_sock_func, "getprotoent");
+    DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
 #endif
 }
 
@@ -4979,7 +4979,7 @@ PP(pp_gservent)
 
     RETURN;
 #else
-    DIE(aTHX_ PL_no_sock_func, "getservent");
+    DIE(aTHX_ PL_no_sock_func, PL_op_desc[PL_op->op_type]);
 #endif
 }
 
