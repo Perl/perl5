@@ -547,9 +547,9 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 #define UTF8_WARN_EMPTY				 1
 #define UTF8_WARN_CONTINUATION			 2
 #define UTF8_WARN_NON_CONTINUATION	 	 3
-#define UTF8_WARN_SHORT				 5
-#define UTF8_WARN_OVERFLOW			 6
-#define UTF8_WARN_LONG				 8
+#define UTF8_WARN_SHORT				 4
+#define UTF8_WARN_OVERFLOW			 5
+#define UTF8_WARN_LONG				 6
 
     if (curlen == 0 &&
 	!(flags & UTF8_ALLOW_EMPTY)) {
