@@ -1,9 +1,19 @@
 CHANGES
 -------
 
+  2.033 11 Jan 2011
+      * Fixed typos & spelling errors.
+        [perl# 81782]
+
+  2.032 4 Jan 2011
+
+      * No Changes
+
   2.031 21 September 2010
 
       * Updated to use bzip2 1.0.6
+        Version 1.0.6 removes a potential security vulnerability,
+        CVE-2010-0405, so all users are recommended to upgrade immediately.
 
   2.030 22 July 2010
 
@@ -29,7 +39,7 @@ CHANGES
         [RT# 47225]
 
       * Fixed instance where $[ should have been $] in t/01bzip2.t
-        Thanks to Robin Barker and zefram [RT #50764] for independantly
+        Thanks to Robin Barker and zefram [RT #50764] for independently
         spotting the issue.
 
   2.021 30 August 2009

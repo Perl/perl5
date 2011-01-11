@@ -143,6 +143,10 @@ C<CGI> has been upgraded from version 3.50 to 3.51
 
 =item *
 
+C<Compress::Raw::Bzip2> has been upgraded from version 2.031 to 2.033
+
+=item *
+
 C<CPANPLUS> has been upgraded from version 0.9010 to 0.9011
 
 =item *
