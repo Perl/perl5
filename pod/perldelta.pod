@@ -147,7 +147,11 @@ C<CPANPLUS> has been upgraded from version 0.9010 to 0.9011
 
 =item *
 
-C<CPANPLUS::Dist::Build> has been upgraded from 0.50 to 0.52
+C<CPANPLUS::Dist::Build> has been upgraded from version 0.50 to 0.52
+
+=item *
+
+C<DB_File> has been upgraded from version 1.820 to 1.821
 
 =item *
 
@@ -170,19 +174,19 @@ C<Log::Message> has been upgraded from version 0.02 to 0.04
 
 =item *
 
-C<Module::Load::Conditional> has been upgraded from 0.38 to 0.40
+C<Module::Load::Conditional> has been upgraded from version 0.38 to 0.40
 
 =item *
 
-C<Object::Accessor> has been upgraded from 0.36 to 0.38
+C<Object::Accessor> has been upgraded from version 0.36 to 0.38
 
 =item *
 
-C<Params::Check> has been upgraded from 0.26 to 0.28
+C<Params::Check> has been upgraded from version 0.26 to 0.28
 
 =item *
 
-C<Term::UI> has been upgraded from 0.20 to 0.22
+C<Term::UI> has been upgraded from version 0.20 to 0.22
 
 =item *
 
