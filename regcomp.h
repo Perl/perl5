@@ -312,7 +312,12 @@ struct regnode_charclass_class {
 /* Flags for node->flags of several of the node types */
 #define USE_UNI                0x01
 
-/* Flags for node->flags of ANYOF */
+/* Flags for node->flags of ANYOF.  These are in short supply, so some games
+ * are done to share them, as described below.  For flags that are applicable
+ * to the synthetic start class (stc) only, with some work, they could be put
+ * in the next-node field, or in an unused bit of the classflags field.  Once
+ * the planned change to compile all the above-latin1 code points is done, then
+ * the UNICODE_ALL bit can be freed up */
 
 #define ANYOF_LOCALE		 0x01
 
@@ -327,7 +332,8 @@ struct regnode_charclass_class {
 
 #define ANYOF_INVERT		 0x04
 
-/* CLASS is never set unless LOCALE is too: has runtime \d, \w, [:posix:], ... */
+/* CLASS is never set unless LOCALE is too: has runtime \d, \w, [:posix:], ...
+ * The non-locale ones are resolved at compile-time */
 #define ANYOF_CLASS	 0x08
 #define ANYOF_LARGE      ANYOF_CLASS    /* Same; name retained for back compat */
 

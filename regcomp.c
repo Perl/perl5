@@ -8618,7 +8618,8 @@ parseit:
 		ANYOF_FLAGS(ret) |= ANYOF_CLASS;
 	    }
 
-	    /* a bad range like a-\d, a-[:digit:] ? */
+	    /* a bad range like a-\d, a-[:digit:].  The '-' is taken as a
+	     * literal */
 	    if (range) {
 		if (!SIZE_ONLY) {
 		    const int w =
@@ -8821,7 +8822,9 @@ parseit:
 		ANYOF_FLAGS(ret) |= (FOLD || value < 256)
 				    ? ANYOF_NONBITMAP
 				    : ANYOF_UTF8;
-		if (prevnatvalue < natvalue) { /* what about > ? */
+		if (prevnatvalue < natvalue) { /* '>' case is fatal error above */
+
+		    /* The \t sets the whole range */
 		    Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\t%04"UVxf"\n",
 				   prevnatvalue, natvalue);
 		}
@@ -8925,7 +8928,8 @@ parseit:
 	    ANYOF_BITMAP(ret)[value] ^= 0xFF;
 	stored = 256 - stored;
 
-	/* The inversion means that everything above 255 is matched */
+	/* The inversion means that everything above 255 is matched; and at the
+	 * same time we clear the invert flag */
 	ANYOF_FLAGS(ret) = ANYOF_UTF8|ANYOF_UNICODE_ALL;
     }
 

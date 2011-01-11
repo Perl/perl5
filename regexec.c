@@ -6295,6 +6295,10 @@ Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool
   bytes in p were matched.  If there was no match, the value is undefined,
   possibly changed from the input.
 
+  Note that this can be a synthetic start class, a combination of various
+  nodes, so things you think might be mutually exclusive, such as locale,
+  aren't.  It can match both locale and non-locale
+
  */
 
 STATIC bool
