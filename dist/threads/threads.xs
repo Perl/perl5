@@ -22,6 +22,9 @@
 #  include "ppport.h"
 #  include "threads.h"
 #endif
+#ifndef sv_dup_inc
+#  define sv_dup_inc(s,t)	SvREFCNT_inc(sv_dup(s,t))
+#endif
 
 #ifdef USE_ITHREADS
 
@@ -776,37 +779,14 @@ S_ithread_create(
      * context for the duration of our work for new interpreter.
      */
     {
-#if (PERL_VERSION < 13) || (PERL_VERSION == 13 && PERL_SUBVERSION <= 1)
-        CLONE_PARAMS clone_param;
-
-        dTHXa(thread->interp);
-
-        MY_CXT_CLONE;
-
-        /* Here we remove END blocks since they should only run in the thread
-         * they are created
-         */
-        SvREFCNT_dec(PL_endav);
-        PL_endav = NULL;
-
-        clone_param.flags = 0;
-        if (SvPOK(init_function)) {
-            thread->init_function = newSV(0);
-            sv_copypv(thread->init_function, init_function);
-        } else {
-            thread->init_function =
-                SvREFCNT_inc(sv_dup(init_function, &clone_param));
-        }
-
-        thread->params = params = newAV();
-        av_extend(params, params_end - params_start - 1);
-        AvFILLp(params) = params_end - params_start - 1;
-        array = AvARRAY(params);
-        while (params_start < params_end) {
-            *array++ = SvREFCNT_inc(sv_dup(*params_start++, &clone_param));
-        }
-#else
+#if (PERL_VERSION > 13) || (PERL_VERSION == 13 && PERL_SUBVERSION > 1)
         CLONE_PARAMS *clone_param = Perl_clone_params_new(aTHX, thread->interp);
+#else
+	CLONE_PARAMS clone_param_s;
+	CLONE_PARAMS *clone_param = &clone_param_s;
+
+        clone_param->flags = 0;
+#endif
 
         dTHXa(thread->interp);
 
@@ -832,6 +812,7 @@ S_ithread_create(
         while (params_start < params_end) {
             *array++ = SvREFCNT_inc(sv_dup(*params_start++, clone_param));
         }
+#if (PERL_VERSION > 13) || (PERL_VERSION == 13 && PERL_SUBVERSION > 1)
         Perl_clone_params_del(clone_param);
 #endif
 
