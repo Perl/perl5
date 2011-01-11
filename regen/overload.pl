@@ -109,7 +109,8 @@ for (0..$#enums) {
     die if $op =~ m{\*/};
     my $l =   3 - int((length($enums[$_]) + 9) / 8);
     $l = 1 if $l < 1;
-    printf "    %s_amg,%s/* %-8s */\n", $enums[$_], ("\t" x $l), $op;
+    printf "    %s_amg,%s/* 0x%02x %-8s */\n", $enums[$_],
+	("\t" x $l), $_, $op;
 }
 
 print <<'EOF';

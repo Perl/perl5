@@ -13,75 +13,75 @@
  */
 
 enum {
-    fallback_amg,	/* fallback */
-    to_sv_amg,		/* ${}      */
-    to_av_amg,		/* @{}      */
-    to_hv_amg,		/* %{}      */
-    to_gv_amg,		/* *{}      */
-    to_cv_amg,		/* &{}      */
-    inc_amg,		/* ++       */
-    dec_amg,		/* --       */
-    bool__amg,		/* bool     */
-    numer_amg,		/* 0+       */
-    string_amg,		/* ""       */
-    not_amg,		/* !        */
-    copy_amg,		/* =        */
-    abs_amg,		/* abs      */
-    neg_amg,		/* neg      */
-    iter_amg,		/* <>       */
-    int_amg,		/* int      */
-    lt_amg,		/* <        */
-    le_amg,		/* <=       */
-    gt_amg,		/* >        */
-    ge_amg,		/* >=       */
-    eq_amg,		/* ==       */
-    ne_amg,		/* !=       */
-    slt_amg,		/* lt       */
-    sle_amg,		/* le       */
-    sgt_amg,		/* gt       */
-    sge_amg,		/* ge       */
-    seq_amg,		/* eq       */
-    sne_amg,		/* ne       */
-    nomethod_amg,	/* nomethod */
-    add_amg,		/* +        */
-    add_ass_amg,	/* +=       */
-    subtr_amg,		/* -        */
-    subtr_ass_amg,	/* -=       */
-    mult_amg,		/* *        */
-    mult_ass_amg,	/* *=       */
-    div_amg,		/* /        */
-    div_ass_amg,	/* /=       */
-    modulo_amg,		/* %        */
-    modulo_ass_amg,	/* %=       */
-    pow_amg,		/* **       */
-    pow_ass_amg,	/* **=      */
-    lshift_amg,		/* <<       */
-    lshift_ass_amg,	/* <<=      */
-    rshift_amg,		/* >>       */
-    rshift_ass_amg,	/* >>=      */
-    band_amg,		/* &        */
-    band_ass_amg,	/* &=       */
-    bor_amg,		/* |        */
-    bor_ass_amg,	/* |=       */
-    bxor_amg,		/* ^        */
-    bxor_ass_amg,	/* ^=       */
-    ncmp_amg,		/* <=>      */
-    scmp_amg,		/* cmp      */
-    compl_amg,		/* ~        */
-    atan2_amg,		/* atan2    */
-    cos_amg,		/* cos      */
-    sin_amg,		/* sin      */
-    exp_amg,		/* exp      */
-    log_amg,		/* log      */
-    sqrt_amg,		/* sqrt     */
-    repeat_amg,		/* x        */
-    repeat_ass_amg,	/* x=       */
-    concat_amg,		/* .        */
-    concat_ass_amg,	/* .=       */
-    smart_amg,		/* ~~       */
-    ftest_amg,		/* -X       */
-    regexp_amg,		/* qr       */
-    DESTROY_amg,	/* DESTROY  */
+    fallback_amg,	/* 0x00 fallback */
+    to_sv_amg,		/* 0x01 ${}      */
+    to_av_amg,		/* 0x02 @{}      */
+    to_hv_amg,		/* 0x03 %{}      */
+    to_gv_amg,		/* 0x04 *{}      */
+    to_cv_amg,		/* 0x05 &{}      */
+    inc_amg,		/* 0x06 ++       */
+    dec_amg,		/* 0x07 --       */
+    bool__amg,		/* 0x08 bool     */
+    numer_amg,		/* 0x09 0+       */
+    string_amg,		/* 0x0a ""       */
+    not_amg,		/* 0x0b !        */
+    copy_amg,		/* 0x0c =        */
+    abs_amg,		/* 0x0d abs      */
+    neg_amg,		/* 0x0e neg      */
+    iter_amg,		/* 0x0f <>       */
+    int_amg,		/* 0x10 int      */
+    lt_amg,		/* 0x11 <        */
+    le_amg,		/* 0x12 <=       */
+    gt_amg,		/* 0x13 >        */
+    ge_amg,		/* 0x14 >=       */
+    eq_amg,		/* 0x15 ==       */
+    ne_amg,		/* 0x16 !=       */
+    slt_amg,		/* 0x17 lt       */
+    sle_amg,		/* 0x18 le       */
+    sgt_amg,		/* 0x19 gt       */
+    sge_amg,		/* 0x1a ge       */
+    seq_amg,		/* 0x1b eq       */
+    sne_amg,		/* 0x1c ne       */
+    nomethod_amg,	/* 0x1d nomethod */
+    add_amg,		/* 0x1e +        */
+    add_ass_amg,	/* 0x1f +=       */
+    subtr_amg,		/* 0x20 -        */
+    subtr_ass_amg,	/* 0x21 -=       */
+    mult_amg,		/* 0x22 *        */
+    mult_ass_amg,	/* 0x23 *=       */
+    div_amg,		/* 0x24 /        */
+    div_ass_amg,	/* 0x25 /=       */
+    modulo_amg,		/* 0x26 %        */
+    modulo_ass_amg,	/* 0x27 %=       */
+    pow_amg,		/* 0x28 **       */
+    pow_ass_amg,	/* 0x29 **=      */
+    lshift_amg,		/* 0x2a <<       */
+    lshift_ass_amg,	/* 0x2b <<=      */
+    rshift_amg,		/* 0x2c >>       */
+    rshift_ass_amg,	/* 0x2d >>=      */
+    band_amg,		/* 0x2e &        */
+    band_ass_amg,	/* 0x2f &=       */
+    bor_amg,		/* 0x30 |        */
+    bor_ass_amg,	/* 0x31 |=       */
+    bxor_amg,		/* 0x32 ^        */
+    bxor_ass_amg,	/* 0x33 ^=       */
+    ncmp_amg,		/* 0x34 <=>      */
+    scmp_amg,		/* 0x35 cmp      */
+    compl_amg,		/* 0x36 ~        */
+    atan2_amg,		/* 0x37 atan2    */
+    cos_amg,		/* 0x38 cos      */
+    sin_amg,		/* 0x39 sin      */
+    exp_amg,		/* 0x3a exp      */
+    log_amg,		/* 0x3b log      */
+    sqrt_amg,		/* 0x3c sqrt     */
+    repeat_amg,		/* 0x3d x        */
+    repeat_ass_amg,	/* 0x3e x=       */
+    concat_amg,		/* 0x3f .        */
+    concat_ass_amg,	/* 0x40 .=       */
+    smart_amg,		/* 0x41 ~~       */
+    ftest_amg,		/* 0x42 -X       */
+    regexp_amg,		/* 0x43 qr       */
+    DESTROY_amg,	/* 0x44 DESTROY  */
     max_amg_code
     /* Do not leave a trailing comma here.  C9X allows it, C89 doesn't. */
 };
