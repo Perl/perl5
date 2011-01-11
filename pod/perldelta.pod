@@ -174,6 +174,10 @@ C<File::Fetch> has been upgraded from version 0.28 to 0.30
 
 =item *
 
+C<IO::Compress> has been upgraded from version 2.030 to 2.033
+
+=item *
+
 C<IPC::Cmd> has been upgraded from version 0.66 to 0.68
 
 =item *

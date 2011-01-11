@@ -249,7 +249,7 @@ EOM
 }
 
 {
-    title "a text file which is not termined by an EOL";
+    title "a text file which is not terminated by an EOL";
     
     my $lex = new LexFile my $name ;
     

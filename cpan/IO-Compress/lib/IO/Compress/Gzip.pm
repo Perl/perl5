@@ -8,12 +8,12 @@ use warnings;
 use bytes;
 
 
-use IO::Compress::RawDeflate 2.030 ;
+use IO::Compress::RawDeflate 2.033 ;
 
-use Compress::Raw::Zlib  2.030 ;
-use IO::Compress::Base::Common  2.030 qw(:Status :Parse createSelfTiedObject);
-use IO::Compress::Gzip::Constants 2.030 ;
-use IO::Compress::Zlib::Extra 2.030 ;
+use Compress::Raw::Zlib  2.033 ;
+use IO::Compress::Base::Common  2.033 qw(:Status :Parse createSelfTiedObject);
+use IO::Compress::Gzip::Constants 2.033 ;
+use IO::Compress::Zlib::Extra 2.033 ;
 
 BEGIN
 {
@@ -27,7 +27,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $GzipError);
 
-$VERSION = '2.030';
+$VERSION = '2.033';
 $GzipError = '' ;
 
 @ISA    = qw(Exporter IO::Compress::RawDeflate);
@@ -141,9 +141,9 @@ sub ckParams
 
         if ( ! $got->parsed('ExtraFlags')) {
             $got->value('ExtraFlags' => 2) 
-                if $got->value('Level') == Z_BEST_SPEED ;
-            $got->value('ExtraFlags' => 4) 
                 if $got->value('Level') == Z_BEST_COMPRESSION ;
+            $got->value('ExtraFlags' => 4) 
+                if $got->value('Level') == Z_BEST_SPEED ;
         }
 
         my $data = $got->value('ExtraField') ;
@@ -512,8 +512,8 @@ data to the output data stream.
 
 So when the output is a filehandle it will carry out a seek to the eof
 before writing any compressed data. If the output is a filename, it will be opened for
-appending. If the output is a buffer, all compressed data will be appened to
-the existing buffer.
+appending. If the output is a buffer, all compressed data will be
+appended to the existing buffer.
 
 Conversely when C<Append> is not specified, or it is present and is set to
 false, it will operate as follows.
@@ -1235,7 +1235,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2010 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2011 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

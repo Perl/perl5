@@ -4,26 +4,26 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.030 qw(:Status createSelfTiedObject);
-use IO::Compress::RawDeflate 2.030 ;
-use IO::Compress::Adapter::Deflate 2.030 ;
-use IO::Compress::Adapter::Identity 2.030 ;
-use IO::Compress::Zlib::Extra 2.030 ;
-use IO::Compress::Zip::Constants 2.030 ;
+use IO::Compress::Base::Common  2.033 qw(:Status createSelfTiedObject);
+use IO::Compress::RawDeflate 2.033 ;
+use IO::Compress::Adapter::Deflate 2.033 ;
+use IO::Compress::Adapter::Identity 2.033 ;
+use IO::Compress::Zlib::Extra 2.033 ;
+use IO::Compress::Zip::Constants 2.033 ;
 
 
-use Compress::Raw::Zlib  2.030 qw(crc32) ;
+use Compress::Raw::Zlib  2.033 qw(crc32) ;
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.030 ;
+           import  IO::Compress::Adapter::Bzip2 2.033 ; 
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.030 ;
+           import  IO::Compress::Bzip2 2.033 ; 
          } ;
 #    eval { require IO::Compress::Adapter::Lzma ; 
 #           import  IO::Compress::Adapter::Lzma 2.020 ; 
 #           require IO::Compress::Lzma ; 
-#           import  IO::Compress::Lzma 2.030 ;
+#           import  IO::Compress::Lzma 2.033 ; 
 #         } ;
 }
 
@@ -32,7 +32,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $ZipError);
 
-$VERSION = '2.030';
+$VERSION = '2.033';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
@@ -156,7 +156,7 @@ sub mkHeader
     my $extFileAttr = 0 ;
     
     # This code assumes Unix.
-    $extFileAttr = 0100644 << 16
+    $extFileAttr = 0100644 << 16 
         if $osCode == ZIP_OS_CODE_UNIX ;
 
     if (*$self->{ZipData}{Zip64}) {
@@ -513,8 +513,8 @@ sub getExtraParams
 {
     my $self = shift ;
 
-    use IO::Compress::Base::Common  2.030 qw(:Parse);
-    use Compress::Raw::Zlib  2.030 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+    use IO::Compress::Base::Common  2.033 qw(:Parse);
+    use Compress::Raw::Zlib  2.033 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
 
     my @Bzip2 = ();
     
@@ -540,7 +540,7 @@ sub getExtraParams
             'exUnix2'   => [0, 1, Parse_any,       undef], 
             'ExtAttr'   => [0, 1, Parse_any, 
                     $Compress::Raw::Zlib::gzip_os_code == 3 
-                        ? 0100644 << 16
+                        ? 0100644 << 16 
                         : 0],
             'OS_Code'   => [0, 1, Parse_unsigned,  $Compress::Raw::Zlib::gzip_os_code],
             
@@ -893,8 +893,8 @@ data to the output data stream.
 
 So when the output is a filehandle it will carry out a seek to the eof
 before writing any compressed data. If the output is a filename, it will be opened for
-appending. If the output is a buffer, all compressed data will be appened to
-the existing buffer.
+appending. If the output is a buffer, all compressed data will be
+appended to the existing buffer.
 
 Conversely when C<Append> is not specified, or it is present and is set to
 false, it will operate as follows.
@@ -946,7 +946,7 @@ of the files C<alpha.txt> and C<beta.txt>
         or die "zip failed: $ZipError\n";
 
 Alternatively, rather than having to explicitly name each of the files that
-you want to comnpress, you could use a fileglob to select all the C<txt>
+you want to compress, you could use a fileglob to select all the C<txt>
 files in the current directory, as follows
 
     use strict ;
@@ -1058,7 +1058,7 @@ This parameter defaults to 0.
 
 =item C<< Name => $string >>
 
-Stores the contents of C<$string> in the zip filename header field.
+Stores the contents of C<$string> in the zip filename header field. 
 
 If C<Name> is not specified and the C<$input> parameter is a filename that
 will be used for the zip filename header field.
@@ -1084,7 +1084,7 @@ If you are running a Unix derivative this value defaults to
     0100644 << 16
 
 This should allow read/write access to any files that are extracted from
-the zip file/buffer.
+the zip file/buffer`.
 
 For all other systems it defaults to 0.
 
@@ -1618,7 +1618,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2010 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2011 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
