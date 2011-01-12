@@ -272,7 +272,7 @@ unimplemented also this time: fork(), signals(), user/group ids,
 select() working for sockets, non-blocking sockets, and so forth.
 See the file symbian/config.sh and look for 'undef' to find the
 unsupported APIs (or from Perl use Config).
-  
+
 The filesystem of Symbian devices uses DOSish syntax, "drives"
 separated from paths by a colon, and backslashes for the path.  The
 exact assignment of the drives probably varies between platforms, but
@@ -319,7 +319,7 @@ the API names.  Instead, developers should consider basing the API
 naming in the existing (C++, or maybe Java) public component and API
 naming, modified as appropriate by the rules of the programming
 language the new APIs are for.
-  
+
 Nokia is a registered trademark of Nokia Corporation. Nokia's product
 names are trademarks or registered trademarks of Nokia.  Other product
 and company names mentioned herein may be trademarks or trade names of
