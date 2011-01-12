@@ -39,7 +39,7 @@ till the end of the lexical scope:
     use re '/x';
     "foo" =~ / (.+) /;  # /x implied
 
-See L<re/'/flags' mode> for details.
+See L<re/"'/flags' mode"> for details.
 
 =head2 Statement labels can appear in more places
 
