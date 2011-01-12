@@ -198,7 +198,7 @@ C<Params::Check> has been upgraded from version 0.26 to 0.28
 
 =item *
 
-C<Term::UI> has been upgraded from version 0.20 to 0.22
+C<Term::UI> has been upgraded from version 0.20 to 0.24
 
 =item *
 
