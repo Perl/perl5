@@ -1,5 +1,8 @@
 Revision history for the Perl extension Win32.
 
+0.44	[2011-01-12]
+	- fix memory leak introduced in 0.43
+
 0.43	[2011-01-12]
 	- fix a few potential buffer overrun bugs reported by Alex Davies.
 	  [perl#78710]

@@ -1524,6 +1524,7 @@ XS(w32_GetLongPathName)
             wcscpy(wide_path, wstr);
             long_path = my_longpathW(wide_path);
             if (long_path) {
+                Safefree(wstr);
                 ST(0) = wstr_to_sv(aTHX_ long_path);
                 XSRETURN(1);
             }
