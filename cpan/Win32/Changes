@@ -1,5 +1,9 @@
 Revision history for the Perl extension Win32.
 
+0.43	[2011-01-12]
+	- fix a few potential buffer overrun bugs reported by Alex Davies.
+	  [perl#78710]
+
 0.42	[2011-01-06]
 	- remove brittle test for Win32::GetLongPathName($ENV{SYSTEMROOT})
 	  which will fail if the case of the environment value doesn't
