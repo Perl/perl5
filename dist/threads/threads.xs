@@ -786,13 +786,14 @@ S_ithread_create(
 #else
         CLONE_PARAMS clone_param_s;
         CLONE_PARAMS *clone_param = &clone_param_s;
-
-        clone_param->flags = 0;
 #endif
-
         dTHXa(thread->interp);
 
         MY_CXT_CLONE;
+
+#if (PERL_VERSION < 13) || (PERL_VERSION == 13 && PERL_SUBVERSION <= 1)
+        clone_param->flags = 0;
+#endif
 
         /* Here we remove END blocks since they should only run in the thread
          * they are created
