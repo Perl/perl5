@@ -198,6 +198,10 @@ C<Params::Check> has been upgraded from version 0.26 to 0.28
 
 =item *
 
+C<Pod::LaTeX> has been upgraded from version 0.58 to 0.59
+
+=item *
+
 C<Term::UI> has been upgraded from version 0.20 to 0.24
 
 =item *

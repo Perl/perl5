@@ -33,7 +33,7 @@ use Carp;
 
 use vars qw/ $VERSION %HTML_Escapes @LatexSections /;
 
-$VERSION = '0.58';
+$VERSION = '0.59';
 
 # Definitions of =headN -> latex mapping
 @LatexSections = (qw/
@@ -494,7 +494,7 @@ If used in conjunction with C<AddPostamble> a full latex document will
 be written that could be immediately processed by C<latex>.
 
 For some pod escapes it may be necessary to include the amsmath
-package. This is not yet added to the preamble automaatically.
+package. This is not yet added to the preamble automatically.
 
 =cut
 
@@ -1839,7 +1839,7 @@ Some HTML escapes are missing and many have not been tested.
 
 =head1 SEE ALSO
 
-L<Pod::Parser>, L<Pod::Select>, L<pod2latex>
+L<Pod::Parser>, L<Pod::Select>, L<pod2latex>, L<Pod::Simple>.
 
 =head1 AUTHORS
 
@@ -1852,12 +1852,13 @@ E<lt>marcel@codewerk.comE<gt>, Hugh S Myers
 E<lt>hsmyers@sdragons.comE<gt>, Peter J Acklam
 E<lt>jacklam@math.uio.noE<gt>, Sudhi Herle E<lt>sudhi@herle.netE<gt>,
 Ariel Scolnicov E<lt>ariels@compugen.co.ilE<gt>,
-Adriano Rodrigues Ferreira E<lt>ferreira@triang.com.brE<gt> and
-R. de Vries E<lt>r.de.vries@dutchspace.nlE<gt>.
-
+Adriano Rodrigues Ferreira E<lt>ferreira@triang.com.brE<gt>,
+R. de Vries E<lt>r.de.vries@dutchspace.nlE<gt> and
+Dave Mitchell E<lt>davem@iabyn.comE<gt>.
 
 =head1 COPYRIGHT
 
+Copyright (C) 2011 Tim Jenness.
 Copyright (C) 2000-2004 Tim Jenness. All Rights Reserved.
 
 This program is free software; you can redistribute it and/or modify
@@ -1867,7 +1868,7 @@ it under the same terms as Perl itself.
 
 =head1 REVISION
 
-$Id: LaTeX.pm,v 1.19 2004/12/30 01:40:44 timj Exp $
+$Id$
 
 =end __PRIVATE__
 
