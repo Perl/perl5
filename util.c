@@ -1411,28 +1411,8 @@ Perl_write_to_stderr(pTHX_ SV* msv)
     if (PL_stderrgv && SvREFCNT(PL_stderrgv) 
 	&& (io = GvIO(PL_stderrgv))
 	&& (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar))) 
-    {
-	dSP;
-	ENTER;
-	SAVETMPS;
-
-	save_re_context();
-	SAVESPTR(PL_stderrgv);
-	PL_stderrgv = NULL;
-
-	PUSHSTACKi(PERLSI_MAGIC);
-
-	PUSHMARK(SP);
-	EXTEND(SP,2);
-	PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
-	PUSHs(msv);
-	PUTBACK;
-	call_method("PRINT", G_SCALAR | G_DISCARD);
-
-	POPSTACK;
-	FREETMPS;
-	LEAVE;
-    }
+	Perl_magic_methcall(aTHX_ MUTABLE_SV(io), mg, "PRINT",
+			    G_SCALAR | G_DISCARD | G_WRITING_TO_STDERR, 1, msv);
     else {
 #ifdef USE_SFIO
 	/* SFIO can really mess with your errno */

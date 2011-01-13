@@ -1740,6 +1740,15 @@ Perl_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, U32 flags,
     PERL_ARGS_ASSERT_MAGIC_METHCALL;
 
     ENTER;
+
+    if (flags & G_WRITING_TO_STDERR) {
+	SAVETMPS;
+
+	save_re_context();
+	SAVESPTR(PL_stderrgv);
+	PL_stderrgv = NULL;
+    }
+
     PUSHSTACKi(PERLSI_MAGIC);
     PUSHMARK(SP);
 
@@ -1769,6 +1778,8 @@ Perl_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, U32 flags,
 	    ret = *PL_stack_sp--;
     }
     POPSTACK;
+    if (flags & G_WRITING_TO_STDERR)
+	FREETMPS;
     LEAVE;
     return ret;
 }
