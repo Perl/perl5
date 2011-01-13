@@ -6089,36 +6089,6 @@ extern void moncontrol(int);
 
 #define PERL_SIGNALS_UNSAFE_FLAG	0x0001
 
-/* From sigaction(2) (FreeBSD man page):
- * | Signal routines normally execute with the signal that
- * | caused their invocation blocked, but other signals may
- * | yet occur.
- * Emulation of this behavior (from within Perl) is enabled
- * by defining PERL_BLOCK_SIGNALS.
- */
-#define PERL_BLOCK_SIGNALS
-
-#if defined(HAS_SIGPROCMASK) && defined(PERL_BLOCK_SIGNALS)
-#   define PERL_BLOCKSIG_ADD(set,sig) \
-	sigset_t set; sigemptyset(&(set)); sigaddset(&(set), sig)
-#   define PERL_BLOCKSIG_BLOCK(set) \
-	sigprocmask(SIG_BLOCK, &(set), NULL)
-#   define PERL_BLOCKSIG_UNBLOCK(set) \
-	sigprocmask(SIG_UNBLOCK, &(set), NULL)
-#endif /* HAS_SIGPROCMASK && PERL_BLOCK_SIGNALS */
-
-/* How about the old style of sigblock()? */
-
-#ifndef PERL_BLOCKSIG_ADD
-#   define PERL_BLOCKSIG_ADD(set, sig)	NOOP
-#endif
-#ifndef PERL_BLOCKSIG_BLOCK
-#   define PERL_BLOCKSIG_BLOCK(set)	NOOP
-#endif
-#ifndef PERL_BLOCKSIG_UNBLOCK
-#   define PERL_BLOCKSIG_UNBLOCK(set)	NOOP
-#endif
-
 /* Use instead of abs() since abs() forces its argument to be an int,
  * but also beware since this evaluates its argument twice, so no x++. */
 #define PERL_ABS(x) ((x) < 0 ? -(x) : (x))
