@@ -3,7 +3,7 @@
 use strict;
 use vars qw($masterpodfile %Build %Targets $Verbose $Quiet $Up %Ignore
 	    @Master %Readmes %Pods %Aux %Readmepods %Pragmata %Modules
-	    %Copies %Generated);
+	    %Copies %Generated $Test);
 use File::Spec;
 use File::Find;
 use FindBin;
@@ -23,6 +23,8 @@ $masterpodfile = File::Spec->catfile($Up, "pod.lst");
 # --build-all tries to build everything
 # --build-foo updates foo as follows
 # --showfiles shows the files to be changed
+# --test exit early, exit if perl.pod, pod.lst, MANIFEST are
+#   consistent, die otherwise.
 
 %Targets
   = (
@@ -49,6 +51,7 @@ __USAGE__
 	&& GetOptions (verbose => \$Verbose,
 		       quiet => \$Quiet,
 		       showfiles => \$showfiles,
+		       test => \$Test,
 		       map {+"build-$_", \$Build{$_}} @files, 'all');
   # Set them all to true
   @Build{@files} = @files if ($Build{all});
@@ -199,12 +202,13 @@ close MASTER;
     unless @perlpods;
   @perlpods{@perlpods} = @perlpods;
 
+  my @inconsistent;
   foreach my $i (sort keys %disk_pods) {
-    warn "$0: $i exists but is unknown by buildtoc\n"
+    push @inconsistent, "$0: $i exists but is unknown by buildtoc\n"
       unless $our_pods{$i};
-    warn "$0: $i exists but is unknown by ../MANIFEST\n"
+    push @inconsistent, "$0: $i exists but is unknown by ../MANIFEST\n"
       if !$manipods{$i} && !$manireadmes{$i} && !$Copies{$i} && !$Generated{$i};
-    warn "$0: $i exists but is unknown by perl.pod\n"
+    push @inconsistent, "$0: $i exists but is unknown by perl.pod\n"
 	if !$perlpods{$i} && !exists $Copies{$i};
   }
   my @BuildTargets = grep {defined} @Targets{grep $_ ne 'all', keys %Build};
@@ -212,18 +216,30 @@ close MASTER;
   @BuildFiles{@BuildTargets} = @BuildTargets;
 
   foreach my $i (sort keys %our_pods) {
-    warn "$0: $i is known by buildtoc but does not exist\n"
+    push @inconsistent, "$0: $i is known by buildtoc but does not exist\n"
       unless $disk_pods{$i} or $BuildFiles{$i};
   }
   foreach my $i (sort keys %manipods) {
-    warn "$0: $i is known by ../MANIFEST but does not exist\n"
+    push @inconsistent, "$0: $i is known by ../MANIFEST but does not exist\n"
       unless $disk_pods{$i};
-    warn "$0: $i is known by ../MANIFEST but is marked as generated\n"
+    push @inconsistent, "$0: $i is known by ../MANIFEST but is marked as generated\n"
       if $Generated{$i};
   }
   foreach my $i (sort keys %perlpods) {
-    warn "$0: $i is known by perl.pod but does not exist\n"
+    push @inconsistent, "$0: $i is known by perl.pod but does not exist\n"
       unless $disk_pods{$i} or $BuildFiles{$i};
+  }
+  if ($Test) {
+    print "1..1\n";
+    if (@inconsistent) {
+      print "not ok 1\n";
+      die @inconsistent
+    }
+    print "ok 1\n";
+    exit;
+  }
+  else {
+    warn @inconsistent if @inconsistent;
   }
 }
 
