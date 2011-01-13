@@ -317,7 +317,7 @@ See L</Extended Patterns> below for details.
 
 =item [7]
 
-Note that C<\N> has two meanings.  When of the form C<\N{NAME}>, it
+Note that C<\N> has two meanings. When of the form C<\N{NAME}>, it
 matches the character or character sequence whose name is C<NAME>; and
 similarly when of the form C<\N{U+I<hex>}>, it matches the character
 whose Unicode code point is I<hex>. Otherwise it matches any character
