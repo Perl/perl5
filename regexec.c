@@ -6441,7 +6441,11 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 		     * there are small limits imposed by Unicode.  XXX A
 		     * performance enhancement would be to have regcomp.c store
 		     * the max number of chars/bytes that are in an av entry,
-		     * as, say the 0th element.  Further down, if there isn't a
+		     * as, say the 0th element.  Even better would be to have a
+		     * hash of the few characters that can start a multi-char
+		     * fold to the max number of chars of those folds.
+		     *
+		     * Further down, if there isn't a
 		     * match in the av, we will check if there is another
 		     * fold-type match.  For that, we also need the fold, but
 		     * only the first character.  No sense in folding it twice,
