@@ -3533,7 +3533,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			NEXT_OFF(oscan) += NEXT_OFF(next);
 		}
 		continue;
-	    default:			/* REF and CLUMP only? */
+	    default:			/* REF, ANYOFV, and CLUMP only? */
 		if (flags & SCF_DO_SUBSTR) {
 		    SCAN_COMMIT(pRExC_state,data,minlenp);	/* Cannot expect anything... */
 		    data->longest = &(data->longest_float);
@@ -8276,17 +8276,10 @@ S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8
         ANYOF_BITMAP_SET(node, fold);
         stored++;
     }
-
-    /* The fold of the German sharp s is two ASCII characters, so isn't in the
-     * bitmap and doesn't have to be in utf8, but we only process it if unicode
-     * semantics are called for */
-    if (UNI_SEMANTICS && value == LATIN_SMALL_LETTER_SHARP_S) {
-	ANYOF_FLAGS(node) |= ANYOF_NONBITMAP_NON_UTF8;
-    }
-    else if (_HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(value)
-	     || (! UNI_SEMANTICS
-                 && ! isASCII(value)
-                 && PL_fold_latin1[value] != value))
+    if (_HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(value)
+	|| (! UNI_SEMANTICS
+	    && ! isASCII(value)
+	    && PL_fold_latin1[value] != value))
     {   /* A character that has a fold outside of Latin1 matches outside the
            bitmap, but only when the target string is utf8.  Similarly when we
            don't have unicode semantics for the above ASCII Latin-1 characters,
@@ -8506,6 +8499,9 @@ parseit:
 		/* The \p could match something in the Latin1 range, hence
 		 * something that isn't utf8 */
 		ANYOF_FLAGS(ret) |= ANYOF_NONBITMAP;
+		if (FOLD) { /* And one of these could have a multi-char fold */
+		    OP(ret) = ANYOFV;
+		}
 		namedclass = ANYOF_MAX;  /* no official name, but it's named */
 		}
 		break;
@@ -8827,6 +8823,13 @@ parseit:
 		    /* The \t sets the whole range */
 		    Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\t%04"UVxf"\n",
 				   prevnatvalue, natvalue);
+
+		    /* Currently, we don't look at every value in the range.
+		     * Therefore we have to assume the worst case: that if
+		     * folding, it will match more than one character */
+		    if (FOLD) {
+		      OP(ret) = ANYOFV;
+		    }
 		}
 		else if (prevnatvalue == natvalue) {
 		    Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n", natvalue);
@@ -8875,6 +8878,7 @@ parseit:
 				  sv = newSVpvn_utf8((char*)foldbuf, foldlen,
 						     TRUE);
 				  av_push(unicode_alternate, sv);
+				  OP(ret) = ANYOFV;
 			      }
 			 }
 
@@ -8912,18 +8916,12 @@ parseit:
         return ret;
     /****** !SIZE_ONLY AFTER HERE *********/
 
-    /* Folding in the bitmap is taken care of above, but not for locale, for
-     * which we have to wait to see what folding is in effect at runtime, and
-     * for things not in the bitmap */
-    if (FOLD && (LOC || ANYOF_FLAGS(ret) & ANYOF_NONBITMAP)) {
-        ANYOF_FLAGS(ret) |= ANYOF_LOC_NONBITMAP_FOLD;
-    }
-
-    /* Optimize inverted simple patterns (e.g. [^a-z]).  Note that this doesn't
+    /* Optimize inverted simple patterns (e.g. [^a-z]).  Note that we haven't
+     * set the FOLD flag yet, so this this does optimize those.  It doesn't
      * optimize locale.  Doing so perhaps could be done as long as there is
      * nothing like \w in it; some thought also would have to be given to the
      * interaction with above 0x100 chars */
-    if ((ANYOF_FLAGS(ret) & ANYOF_FLAGS_ALL) == ANYOF_INVERT) {
+    if (! LOC && (ANYOF_FLAGS(ret) & ANYOF_FLAGS_ALL) == ANYOF_INVERT) {
 	for (value = 0; value < ANYOF_BITMAP_SIZE; ++value)
 	    ANYOF_BITMAP(ret)[value] ^= 0xFF;
 	stored = 256 - stored;
@@ -8931,6 +8929,41 @@ parseit:
 	/* The inversion means that everything above 255 is matched; and at the
 	 * same time we clear the invert flag */
 	ANYOF_FLAGS(ret) = ANYOF_UTF8|ANYOF_UNICODE_ALL;
+    }
+
+    if (FOLD) {
+	SV *sv;
+
+	/* This is the one character in the bitmap that needs special handling
+	 * under non-locale folding, as it folds to two characters 'ss'.  This
+	 * happens if it is set and not inverting, or isn't set and are
+	 * inverting */
+	if (! LOC
+	    && (cBOOL(ANYOF_BITMAP_TEST(ret, LATIN_SMALL_LETTER_SHARP_S))
+		^ cBOOL(ANYOF_FLAGS(ret) & ANYOF_INVERT)))
+	{
+	    OP(ret) = ANYOFV;	/* Can match more than a single char */
+
+	    /* Under Unicode semantics), it can do this when the target string
+	     * isn't in utf8 */
+	    if (UNI_SEMANTICS) {
+		ANYOF_FLAGS(ret) |= ANYOF_NONBITMAP_NON_UTF8;
+	    }
+
+	    if (!unicode_alternate) {
+		unicode_alternate = newAV();
+	    }
+	    sv = newSVpvn_utf8("ss", 2, TRUE);
+	    av_push(unicode_alternate, sv);
+	}
+
+	/* Folding in the bitmap is taken care of above, but not for locale
+	 * (for which we have to wait to see what folding is in effect at
+	 * runtime), and for things not in the bitmap.  Set run-time fold flag
+	 * for these */
+	if ((LOC || (ANYOF_FLAGS(ret) & ANYOF_NONBITMAP))) {
+	    ANYOF_FLAGS(ret) |= ANYOF_LOC_NONBITMAP_FOLD;
+	}
     }
 
     /* A single character class can be "optimized" into an EXACTish node.
@@ -10650,7 +10683,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 	else if ( op == PLUS || op == STAR) {
 	    DUMPUNTIL(NEXTOPER(node), NEXTOPER(node) + 1);
 	}
-	else if (op == ANYOF) {
+	else if (PL_regkind[(U8)op] == ANYOF) {
 	    /* arglen 1 + class block */
 	    node += 1 + ((ANYOF_FLAGS(node) & ANYOF_CLASS)
 		    ? ANYOF_CLASS_SKIP : ANYOF_SKIP);

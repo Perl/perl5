@@ -1364,8 +1364,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         
 	/* We know what class it must start with. */
 	switch (OP(c)) {
+	case ANYOFV:
 	case ANYOF:
-	    if (utf8_target) {
+	    if (utf8_target || OP(c) == ANYOFV) {
 		 REXEC_FBC_UTF8_CLASS_SCAN((ANYOF_FLAGS(c) & ANYOF_NONBITMAP) ||
 			  !UTF8_IS_INVARIANT((U8)s[0]) ?
 			  reginclass(prog, c, (U8*)s, 0, utf8_target) :
@@ -3670,8 +3671,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 				    OP(scan) == BOUNDL))
 		    sayNO;
 	    break;
+	case ANYOFV:
 	case ANYOF:
-	    if (utf8_target) {
+	    if (utf8_target || state_num == ANYOFV) {
 	        STRLEN inclasslen = PL_regeol - locinput;
 		if (locinput >= PL_regeol)
 		    sayNO;
@@ -3693,15 +3695,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		break;
 	    }
 	anyof_fail:
-	    /* If we might have the case of the German sharp s
-	     * in a casefolding Unicode character class. */
-
-	    if (ANYOF_FOLD_SHARP_S(scan, locinput, PL_regeol)) {
-		 locinput += SHARP_S_SKIP;
-		 nextchr = UCHARAT(locinput);
-	    }
-	    else
-		 sayNO;
+	    sayNO;
 	    break;
 	/* Special char classes - The defines start on line 129 or so */
         CCC_TRY_AFF_U( ALNUM,  ALNUML, perl_word,   "a", isALNUM_LC_utf8, isWORDCHAR_L1, isALNUM_LC);
@@ -5926,6 +5920,7 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	    }
 	}
 	break;
+    case ANYOFV:
     case ANYOF:
 	if (utf8_target) {
 	    loceol = PL_regeol;
@@ -6414,31 +6409,158 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 		if (utf8_target) {
 		    utf8_p = (U8 *) p;
 		} else {
-		    STRLEN len = 1;
+
+		    /* Not utf8.  Convert as much of the string as available up
+		     * to the limit of how far the (single) character in the
+		     * pattern can possibly match (no need to go further).  If
+		     * the node is a straight ANYOF or not folding, it can't
+		     * match more than one.  Otherwise, It can match up to how
+		     * far a single char can fold to.  Since not utf8, each
+		     * character is a single byte, so the max it can be in
+		     * bytes is the same as the max it can be in characters */
+		    STRLEN len = (OP(n) == ANYOF
+				  || ! (flags & ANYOF_LOC_NONBITMAP_FOLD))
+				  ? 1
+				  : (maxlen < UTF8_MAX_FOLD_CHAR_EXPAND)
+				    ? maxlen
+				    : UTF8_MAX_FOLD_CHAR_EXPAND;
 		    utf8_p = bytes_to_utf8(p, &len);
 		}
-		if (swash_fetch(sw, utf8_p, 1))
+
+		if (swash_fetch(sw, utf8_p, 1)) /* See if in the swash */
 		    match = TRUE;
 		else if (flags & ANYOF_LOC_NONBITMAP_FOLD) {
-		    if (!match && lenp && av) {
+
+		    /* Here, we need to test if the fold of the target string
+		     * matches.  In the case of a multi-char fold that is
+		     * caught by regcomp.c, it has stored all such folds into
+		     * 'av'; we linearly check to see if any match the target
+		     * string (folded).   We know that the originals were each
+		     * one character, but we don't currently know how many
+		     * characters/bytes each folded to, except we do know that
+		     * there are small limits imposed by Unicode.  XXX A
+		     * performance enhancement would be to have regcomp.c store
+		     * the max number of chars/bytes that are in an av entry,
+		     * as, say the 0th element.  Further down, if there isn't a
+		     * match in the av, we will check if there is another
+		     * fold-type match.  For that, we also need the fold, but
+		     * only the first character.  No sense in folding it twice,
+		     * so we do it here, even if there isn't any multi-char
+		     * fold, so we always fold at least the first character.
+		     * If the node is a straight ANYOF node, or there is only
+		     * one character available in the string, or if there isn't
+		     * any av, that's all we have to fold.  In the case of a
+		     * multi-char fold, we do have guarantees in Unicode that
+		     * it can only expand up to so many characters and so many
+		     * bytes.  We keep track so don't exceed either.
+		     *
+		     * If there is a match, we will need to advance (if lenp is
+		     * specified) the match pointer in the target string.  But
+		     * what we are comparing here isn't that string directly,
+		     * but its fold, whose length may differ from the original.
+		     * As we go along in constructing the fold, therefore, we
+		     * create a map so that we know how many bytes in the
+		     * source to advance given that we have matched a certain
+		     * number of bytes in the fold.  This map is stored in
+		     * 'map_fold_len_back'.  The first character in the fold
+		     * has array element 1 contain the number of bytes in the
+		     * source that folded to it; the 2nd is the cumulative
+		     * number to match it; ... */
+		    U8 map_fold_len_back[UTF8_MAX_FOLD_CHAR_EXPAND] = { 0 };
+		    U8 folded[UTF8_MAXBYTES_CASE+1];
+		    STRLEN foldlen = 0; /* num bytes in fold of 1st char */
+		    STRLEN foldlen_for_av; /* num bytes in fold of all chars */
+
+		    if (OP(n) == ANYOF || maxlen == 1 || ! lenp || ! av) {
+
+			/* Here, only need to fold the first char of the target
+			 * string */
+			to_utf8_fold(utf8_p, folded, &foldlen);
+			foldlen_for_av = foldlen;
+			map_fold_len_back[1] = UTF8SKIP(utf8_p);
+		    }
+		    else {
+
+			/* Here, need to fold more than the first char.  Do so
+			 * up to the limits */
+			UV which_char = 0;
+			U8* source_ptr = utf8_p;    /* The source for the fold
+						       is the regex target
+						       string */
+			U8* folded_ptr = folded;
+			U8* e = utf8_p + maxlen;    /* Can't go beyond last
+						       available byte in the
+						       target string */
+			while (which_char < UTF8_MAX_FOLD_CHAR_EXPAND
+			       && source_ptr < e)
+			{
+
+			    /* Fold the next character */
+			    U8 this_char_folded[UTF8_MAXBYTES_CASE+1];
+			    STRLEN this_char_foldlen;
+			    to_utf8_fold(source_ptr,
+				         this_char_folded,
+					 &this_char_foldlen);
+
+			    /* Bail if it would exceed the byte limit for
+			     * folding a single char. */
+			    if (this_char_foldlen + folded_ptr - folded >
+							    UTF8_MAXBYTES_CASE)
+			    {
+				break;
+			    }
+
+			    /* Save the first character's folded length, in
+			     * case we have to use it later */
+			    if (! foldlen) {
+				foldlen = this_char_foldlen;
+			    }
+
+			    /* Here, add the fold of this character */
+			    Copy(this_char_folded,
+				 folded_ptr,
+				 this_char_foldlen,
+				 U8);
+			    which_char++;
+			    map_fold_len_back[which_char] =
+				map_fold_len_back[which_char - 1]
+				+ UTF8SKIP(source_ptr);
+			    folded_ptr += this_char_foldlen;
+			    source_ptr += UTF8SKIP(source_ptr);
+			}
+			*folded_ptr = '\0';
+			foldlen_for_av = folded_ptr - folded;
+		    }
+
+
+		    /* Do the linear search to see if the fold is in the list
+		     * of multi-char folds.  (Useless to look if won't be able
+		     * to store that it is a multi-char fold in *lenp) */
+		    if (lenp && av) {
 		        I32 i;
 			for (i = 0; i <= av_len(av); i++) {
 			    SV* const sv = *av_fetch(av, i, FALSE);
 			    STRLEN len;
 			    const char * const s = SvPV_const(sv, len);
-			    if (len <= maxlen && memEQ(s, (char*)utf8_p, len)) {
-			        *lenp = len;
+			    if (len <= foldlen_for_av && memEQ(s,
+							       (char*)folded,
+							       len))
+			    {
+
+				/* Advance the target string ptr to account for
+				 * this fold, but have to translate from the
+				 * folded length to the corresponding source
+				 * length.  The array is indexed by how many
+				 * characters in the match */
+			        *lenp = map_fold_len_back[
+					utf8_length(folded, folded + len)];
 				match = TRUE;
 				break;
 			    }
 			}
 		    }
 		    if (!match) { /* See if the folded version matches */
-		        U8 folded[UTF8_MAXBYTES_CASE+1];
 			SV** listp;
-			STRLEN foldlen;
-
-			to_utf8_fold(utf8_p, folded, &foldlen);
 
 			/* Consider "k" =~ /[K]/i.  The line above would have
 			 * just folded the 'k' to itself, and that isn't going
