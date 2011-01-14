@@ -41,7 +41,8 @@ GPOS        GPOS,       no        ; Matches where last m//g left off.
 REG_ANY     REG_ANY,    no 0 S    ; Match any one character (except newline).
 SANY        REG_ANY,    no 0 S    ; Match any one character.
 CANY        REG_ANY,    no 0 S    ; Match any one byte.
-ANYOF       ANYOF,      sv 0 S    ; Match character in (or not in) this class, folding is native charset for non-utf8.
+ANYOF       ANYOF,      sv 0 S    ; Match character in (or not in) this class, single char match only
+ANYOFV      ANYOF,      sv 0 V    ; Match character in (or not in) this class, can match-multiple chars
 ALNUM       ALNUM,      no 0 S    ; Match any alphanumeric character
 ALNUML      ALNUM,      no 0 S    ; Match any alphanumeric char in locale
 NALNUM      NALNUM,     no 0 S    ; Match any non-alphanumeric character
