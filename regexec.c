@@ -3679,7 +3679,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    sayNO;
 
 	        if (!reginclass(rex, scan, (U8*)locinput, &inclasslen, utf8_target))
-		    goto anyof_fail;
+		    sayNO;
 		locinput += inclasslen;
 		nextchr = UCHARAT(locinput);
 		break;
@@ -3690,12 +3690,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		if (!nextchr && locinput >= PL_regeol)
 		    sayNO;
 		if (!REGINCLASS(rex, scan, (U8*)locinput))
-		    goto anyof_fail;
+		    sayNO;
 		nextchr = UCHARAT(++locinput);
 		break;
 	    }
-	anyof_fail:
-	    sayNO;
 	    break;
 	/* Special char classes - The defines start on line 129 or so */
         CCC_TRY_AFF_U( ALNUM,  ALNUML, perl_word,   "a", isALNUM_LC_utf8, isWORDCHAR_L1, isALNUM_LC);
