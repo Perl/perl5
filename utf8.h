@@ -224,6 +224,9 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * SpecialCasing.txt. */
 #define UTF8_MAXBYTES_CASE	6
 
+/* A Unicode character can fold to up to 3 characters */
+#define UTF8_MAX_FOLD_CHAR_EXPAND 3
+
 #define IN_BYTES (CopHINTS_get(PL_curcop) & HINT_BYTES)
 #define DO_UTF8(sv) (SvUTF8(sv) && !IN_BYTES)
 #define IN_UNI_8_BIT ( (CopHINTS_get(PL_curcop) & HINT_UNI_8_BIT) \
