@@ -313,11 +313,15 @@ struct regnode_charclass_class {
 #define USE_UNI                0x01
 
 /* Flags for node->flags of ANYOF.  These are in short supply, so some games
- * are done to share them, as described below.  For flags that are applicable
- * to the synthetic start class (stc) only, with some work, they could be put
- * in the next-node field, or in an unused bit of the classflags field.  Once
- * the planned change to compile all the above-latin1 code points is done, then
- * the UNICODE_ALL bit can be freed up */
+ * are done to share them, as described below.  If necessary, the ANYOF_LOCALE
+ * and ANYOF_CLASS bits could be shared with a space penalty for locale nodes
+ * (and the code at the time this comment was written, is written so that all
+ * that is necessary to make the change would be to redefine the ANYOF_CLASS
+ * define).  Once the planned change to compile all the above-latin1 code points
+ * is done, then the UNICODE_ALL bit can be freed up.  If flags need to be
+ * added that are applicable to the synthetic start class only, with some work,
+ * they could be put in the next-node field, or in an unused bit of the
+ * classflags field. */
 
 #define ANYOF_LOCALE		 0x01
 
@@ -331,6 +335,14 @@ struct regnode_charclass_class {
 #define ANYOF_LOC_NONBITMAP_FOLD 0x02
 
 #define ANYOF_INVERT		 0x04
+
+/* EOS, meaning that it can match an empty string too, is used for the
+ * synthetic start class (ssc) only.  It can share the INVERT bit, as the ssc
+ * is never inverted.  The bit just needs to be turned off before regexec.c
+ * gets a hold of it so that regexec.c doesn't think it's inverted, but this
+ * happens automatically, as if the ssc can match an EOS, the ssc is discarded,
+ * and never passed to regexec.c */
+#define ANYOF_EOS		ANYOF_INVERT
 
 /* CLASS is never set unless LOCALE is too: has runtime \d, \w, [:posix:], ...
  * The non-locale ones are resolved at compile-time */
@@ -349,9 +361,6 @@ struct regnode_charclass_class {
 
 /* Matches every code point 0x100 and above*/
 #define ANYOF_UNICODE_ALL	0x40
-
-/* EOS used for regstclass only */
-#define ANYOF_EOS		0x80	/* Can match an empty string too */
 
 #define ANYOF_FLAGS_ALL		0xff
 
