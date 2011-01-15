@@ -8183,67 +8183,68 @@ S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
     }
 }
 
-/* No locale test */
-#define _C_C_T_NOLOC_(NAME,TEST,WORD)                   \
-ANYOF_##NAME:                                           \
-	for (value = 0; value < 256; value++)           \
-	    if (TEST)                                   \
-		stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value); \
-    yesno = '+';                                        \
-    what = WORD;                                        \
-    break;                                              \
-case ANYOF_N##NAME:                                     \
-	for (value = 0; value < 256; value++)           \
-	    if (!TEST)                                  \
-		stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value); \
-    yesno = '!';                                        \
-    what = WORD;                                        \
+/* No locale test, and always Unicode semantics */
+#define _C_C_T_NOLOC_(NAME,TEST,WORD)                                          \
+ANYOF_##NAME:                                                                  \
+	for (value = 0; value < 256; value++)                                  \
+	    if (TEST)                                                          \
+	    stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value);  \
+    yesno = '+';                                                               \
+    what = WORD;                                                               \
+    break;                                                                     \
+case ANYOF_N##NAME:                                                            \
+	for (value = 0; value < 256; value++)                                  \
+	    if (!TEST)                                                         \
+	    stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value);  \
+    yesno = '!';                                                               \
+    what = WORD;                                                               \
     break
 
 /* Like the above, but there are differences if we are in uni-8-bit or not, so
  * there are two tests passed in, to use depending on that. There aren't any
  * cases where the label is different from the name, so no need for that
  * parameter */
-#define _C_C_T_(NAME,TEST_8,TEST_7,WORD)       \
-ANYOF_##NAME:                                           \
-    if (LOC) ANYOF_CLASS_SET(ret, ANYOF_##NAME);        \
-    else if (UNI_SEMANTICS) {                           \
-        for (value = 0; value < 256; value++) {         \
-            if (TEST_8) stored +=                       \
-                      S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value); \
-        }                                               \
-    }                                                   \
-    else {                                              \
-        for (value = 0; value < 128; value++) {         \
-            if (TEST_7) stored +=                       \
-                       S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) UNI_TO_NATIVE(value)); \
-        }                                               \
-    }                                                   \
-    yesno = '+';                                        \
-    what = WORD;                                        \
-    break;                                              \
-case ANYOF_N##NAME:                                     \
-    if (LOC) ANYOF_CLASS_SET(ret, ANYOF_N##NAME);       \
-    else if (UNI_SEMANTICS) {                           \
-        for (value = 0; value < 256; value++) {         \
-            if (! TEST_8) stored +=                     \
-                        S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value); \
-        }                                               \
-    }                                                   \
-    else {                                              \
-        for (value = 0; value < 128; value++) {         \
-            if (! TEST_7) stored +=                     \
-                        S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value); \
-        }                                               \
+#define _C_C_T_(NAME,TEST_8,TEST_7,WORD)                                       \
+ANYOF_##NAME:                                                                  \
+    if (LOC) ANYOF_CLASS_SET(ret, ANYOF_##NAME);                               \
+    else if (UNI_SEMANTICS) {                                                  \
+        for (value = 0; value < 256; value++) {                                \
+            if (TEST_8) stored +=                                              \
+                      S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value);  \
+        }                                                                      \
+    }                                                                          \
+    else {                                                                     \
+        for (value = 0; value < 128; value++) {                                \
+            if (TEST_7) stored +=                                              \
+		S_set_regclass_bit(aTHX_ pRExC_state, ret,                     \
+			           (U8) UNI_TO_NATIVE(value));                 \
+        }                                                                      \
+    }                                                                          \
+    yesno = '+';                                                               \
+    what = WORD;                                                               \
+    break;                                                                     \
+case ANYOF_N##NAME:                                                            \
+    if (LOC) ANYOF_CLASS_SET(ret, ANYOF_N##NAME);                              \
+    else if (UNI_SEMANTICS) {                                                  \
+        for (value = 0; value < 256; value++) {                                \
+            if (! TEST_8) stored +=                                            \
+		    S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value);    \
+        }                                                                      \
+    }                                                                          \
+    else {                                                                     \
+        for (value = 0; value < 128; value++) {                                \
+            if (! TEST_7) stored +=                                            \
+		    S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value);    \
+        }                                                                      \
 	/* For a non-ut8 target string with DEPENDS semantics, all above ASCII \
 	 * Latin1 code points match the complement of any of the classes.  But \
 	 * in utf8, they have their Unicode semantics, so can't just set them  \
 	 * in the bitmap, or else regexec.c will think they matched when they  \
 	 * shouldn't. */                                                       \
-	ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL|ANYOF_UTF8;  \
-    }                                                   \
-    yesno = '!';                                        \
-    what = WORD;                                        \
+	ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL|ANYOF_UTF8;              \
+    }                                                                          \
+    yesno = '!';                                                               \
+    what = WORD;                                                               \
     break
 
 /* 
