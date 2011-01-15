@@ -29,7 +29,8 @@ that release's perldelta.
 
 =head1 Bug Fixes
 
-"no VERSION" will now correctly deparse with B::Deparse.
+"no VERSION" will now correctly deparse with B::Deparse, as will certain
+constant expressions.
 
 Module::Build should be more reliably pass its tests under cygwin.
 
