@@ -829,6 +829,7 @@ vkonovalov\100lucent.com                vkonovalov\100peterstar.ru
 +                                       vadim\100vkonovalov.ru
 +                                       vkonovalov\100spb.lucent.com
 +                                       vkonovalov\100alcatel-lucent.com
++                                       vadim.konovalov\100alcatel-lucent.com
 
 whatever\100davidnicol.com              davidnicol\100gmail.com
 wolfgang.laun\100alcatel.at             wolfgang.laun\100chello.at

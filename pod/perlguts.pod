@@ -671,11 +671,11 @@ your Perl script, use the following routines, depending on the variable type.
     AV*  get_av("package::varname", GV_ADD);
     HV*  get_hv("package::varname", GV_ADD);
 
-Notice the use of TRUE as the second parameter.  The new variable can now
+Notice the use of GV_ADD as the second parameter.  The new variable can now
 be set, using the routines appropriate to the data type.
 
 There are additional macros whose values may be bitwise OR'ed with the
-C<TRUE> argument to enable certain extra features.  Those bits are:
+C<GV_ADD> argument to enable certain extra features.  Those bits are:
 
 =over
 
