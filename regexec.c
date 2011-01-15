@@ -6336,6 +6336,12 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
     if (c < 256) {
 	if (ANYOF_BITMAP_TEST(n, c))
 	    match = TRUE;
+	else if (flags & ANYOF_NON_UTF8_LATIN1_ALL
+		&& ! utf8_target
+		&& ! isASCII(c))
+	{
+	    match = TRUE;
+	}
 
 	else if (flags & ANYOF_LOCALE) {
 	    PL_reg_flags |= RF_tainted;

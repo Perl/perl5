@@ -707,10 +707,9 @@ S_cl_anything(const RExC_state_t *pRExC_state, struct regnode_charclass_class *c
 
     ANYOF_CLASS_ZERO(cl);
     ANYOF_BITMAP_SETALL(cl);
-    cl->flags = ANYOF_EOS|ANYOF_UNICODE_ALL;
+    cl->flags = ANYOF_EOS|ANYOF_UNICODE_ALL|ANYOF_LOC_NONBITMAP_FOLD|ANYOF_NON_UTF8_LATIN1_ALL;
     if (LOC)
 	cl->flags |= ANYOF_LOCALE;
-    cl->flags |= ANYOF_LOC_NONBITMAP_FOLD;
 }
 
 /* Can match anything (initialization) */
@@ -783,6 +782,8 @@ S_cl_and(struct regnode_charclass_class *cl,
 
     if (!(and_with->flags & ANYOF_LOC_NONBITMAP_FOLD))
 	cl->flags &= ~ANYOF_LOC_NONBITMAP_FOLD;
+    if (!(and_with->flags & ANYOF_NON_UTF8_LATIN1_ALL))
+	cl->flags &= ~ANYOF_NON_UTF8_LATIN1_ALL;
 
     if (cl->flags & ANYOF_UNICODE_ALL && and_with->flags & ANYOF_NONBITMAP &&
 	!(and_with->flags & ANYOF_INVERT)) {
@@ -850,6 +851,8 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
     }
     if (or_with->flags & ANYOF_EOS)
 	cl->flags |= ANYOF_EOS;
+    if (!(or_with->flags & ANYOF_NON_UTF8_LATIN1_ALL))
+	cl->flags |= ANYOF_NON_UTF8_LATIN1_ALL;
 
     if (or_with->flags & ANYOF_LOC_NONBITMAP_FOLD)
 	cl->flags |= ANYOF_LOC_NONBITMAP_FOLD;
@@ -8232,9 +8235,12 @@ case ANYOF_N##NAME:                                     \
             if (! TEST_7) stored +=                     \
                         S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value); \
         }                                               \
-        for (value = 128; value < 256; value++) {         \
-                        S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value); \
-        }                                               \
+	/* For a non-ut8 target string with DEPENDS semantics, all above ASCII \
+	 * Latin1 code points match the complement of any of the classes.  But \
+	 * in utf8, they have their Unicode semantics, so can't just set them  \
+	 * in the bitmap, or else regexec.c will think they matched when they  \
+	 * shouldn't. */                                                       \
+	ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL|ANYOF_UTF8;  \
     }                                                   \
     yesno = '!';                                        \
     what = WORD;                                        \
@@ -9824,6 +9830,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
         
         EMIT_ANYOF_TEST_SEPARATOR(do_sep,sv,flags);
         
+	if (flags & ANYOF_NON_UTF8_LATIN1_ALL) {
+	    sv_catpvs(sv, "{non-utf8-latin1-all}");
+	}
+
         /* output information about the unicode matching */
 	if (flags & ANYOF_UNICODE_ALL)
 	    sv_catpvs(sv, "{unicode_all}");

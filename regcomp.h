@@ -362,6 +362,10 @@ struct regnode_charclass_class {
 /* Matches every code point 0x100 and above*/
 #define ANYOF_UNICODE_ALL	0x40
 
+/* Match all Latin1 characters that aren't ASCII when the target string is not
+ * in utf8. */
+#define ANYOF_NON_UTF8_LATIN1_ALL 0x80
+
 #define ANYOF_FLAGS_ALL		0xff
 
 /* Character classes for node->classflags of ANYOF */
