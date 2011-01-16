@@ -1067,7 +1067,8 @@ strongly discouraged unless you import it without the match variables:
 
 	use English '-no_match_vars'
 
-The C<Devel::NYTProf> module can help you find uses of these
+The C<Devel::NYTProf> and C<Devel::FindAmpersand>
+modules can help you find uses of these
 problematic match variables in your code.
 
 Since Perl 5.10, you can use the C</p> match operator flag and the
