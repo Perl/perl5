@@ -9,6 +9,8 @@ BEGIN {
 use strict;
 use warnings;
 
+plan('no_plan');
+
 # Each case is a valid element of its hash key.  Choose, where available, an
 # ASCII-range, Latin-1 non-ASCII range, and above Latin1 range code point.
 my %testcases = (
