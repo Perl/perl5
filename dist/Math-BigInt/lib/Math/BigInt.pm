@@ -1865,25 +1865,84 @@ sub bmodpow
 
   return $num if $num->modify('bmodpow');
 
-  # check modulus for valid values
-  return $num->bnan() if ($mod->{sign} ne '+'		# NaN, - , -inf, +inf
-                       || $mod->is_zero());
+  # When the exponent 'e' is negative, use the following relation, which is
+  # based on finding the multiplicative inverse 'd' of 'b' modulo 'm':
+  #
+  #    b^(-e) (mod m) = d^e (mod m) where b*d = 1 (mod m)
 
-  # check exponent for valid values
-  if ($exp->{sign} =~ /\w/) 
-    {
-    # i.e., if it's NaN, +inf, or -inf...
-    return $num->bnan();
-    }
+  $num->bmodinv($mod) if ($exp->{sign} eq '-');
 
-  $num->bmodinv ($mod) if ($exp->{sign} eq '-');
+  # Check for valid input. All operands must be finite, and the modulus must be
+  # non-zero.
 
-  # check num for valid values (also NaN if there was no inverse but $exp < 0)
-  return $num->bnan() if $num->{sign} !~ /^[+-]$/;
+  return $num->bnan() if ($num->{sign} =~ /NaN|inf/ ||  # NaN, -inf, +inf
+                          $exp->{sign} =~ /NaN|inf/ ||  # NaN, -inf, +inf
+                          $mod->{sign} =~ /NaN|inf/ ||  # NaN, -inf, +inf
+                          $mod->is_zero());
 
-  # $mod is positive, sign on $exp is ignored, result also positive
-  $num->{value} = $CALC->_modpow($num->{value},$exp->{value},$mod->{value});
-  $num;
+  # Compute 'a (mod m)', ignoring the signs on 'a' and 'm'. If the resulting
+  # value is zero, the output is also zero, regardless of the signs on 'a' and
+  # 'm'.
+
+  my $value = $CALC->_modpow($num->{value}, $exp->{value}, $mod->{value});
+  my $sign  = '+';
+
+  # If the resulting value is non-zero, we have four special cases, depending
+  # on the signs on 'a' and 'm'.
+
+  unless ($CALC->_is_zero($num->{value})) {
+
+      # There is a negative sign on 'a' (= $num**$exp) only if the number we
+      # are exponentiating ($num) is negative and the exponent ($exp) is odd.
+
+      if ($num->{sign} eq '-' && $exp->is_odd()) {
+
+          # When both the number 'a' and the modulus 'm' have a negative sign,
+          # use this relation:
+          #
+          #    -a (mod -m) = -(a (mod m))
+
+          if ($mod->{sign} eq '-') {
+              $sign = '-';
+          }
+
+          # When only the number 'a' has a negative sign, use this relation:
+          #
+          #    -a (mod m) = m - (a (mod m))
+
+          else {
+              # Use copy of $mod since _sub() modifies the first argument.
+              my $mod = $CALC->_copy($mod->{value});
+              $value = $CALC->_sub($mod, $num->{value});
+              $sign  = '+';
+          }
+
+      } else {
+
+          # When only the modulus 'm' has a negative sign, use this relation:
+          #
+          #    a (mod -m) = (a (mod m)) - m
+          #               = -(m - (a (mod m)))
+
+          if ($mod->{sign} eq '-') {
+              my $mod = $CALC->_copy($mod->{value});
+              $value = $CALC->_sub($mod, $num->{value});
+              $sign  = '-';
+          }
+
+          # When neither the number 'a' nor the modulus 'm' have a negative
+          # sign, directly return the already computed value.
+          #
+          #    (a (mod m))
+
+      }
+
+  }
+
+  $num->{value} = $value;
+  $num->{sign}  = $sign;
+
+  return $num;
   }
 
 ###############################################################################
@@ -3212,9 +3271,8 @@ Math::BigInt - Arbitrary size integer/float math package
   $x->bmuladd($y,$z);	# $x = $x * $y + $z
 
   $x->bmod($y);		   # modulus (x % y)
-  $x->bmodpow($exp,$mod);  # modular exponentiation (($num**$exp) % $mod)
-  $x->bmodinv($mod);	   # the inverse of $x in the given modulus $mod
-
+  $x->bmodpow($y,$mod);    # modular exponentiation (($x ** $y) % $mod)
+  $x->bmodinv($mod);       # modular multiplicative inverse
   $x->bpow($y);		   # power of arguments (x ** y)
   $x->blsft($y);	   # left shift in base 2
   $x->brsft($y);	   # right shift in base 2
