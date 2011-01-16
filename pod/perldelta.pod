@@ -216,6 +216,10 @@ C<threads::shared> has been upgraded from version 1.35 to 1.36
 
 C<Time::Local> has been upgraded from version 1.1901_01 to 1.2000.
 
+=item *
+
+C<Unicode::Normalize> has been upgraded from version 1.07 to 1.10
+
 =back
 
 =head2 Removed Modules and Pragmata

@@ -13,7 +13,7 @@ use Carp;
 
 no warnings 'utf8';
 
-our $VERSION = '1.08';
+our $VERSION = '1.10';
 our $PACKAGE = __PACKAGE__;
 
 our @EXPORT = qw( NFC NFD NFKC NFKD );
@@ -34,7 +34,7 @@ our %EXPORT_TAGS = (
 );
 
 ##
-## utilites for tests
+## utilities for tests
 ##
 
 sub pack_U {
@@ -549,6 +549,7 @@ normalization implemented by this module depends on your perl's version.
        5.10.0             5.0.0
     5.8.9, 5.10.1         5.1.0
     5.12.0-5.12.2         5.2.0
+   (5.13.7-5.13.8)        6.0.0
 
 =item Correction of decomposition mapping
 
@@ -576,7 +577,7 @@ lower than 4.1.0.
 
 SADAHIRO Tomoyuki <SADAHIRO@cpan.org>
 
-Copyright(C) 2001-2010, SADAHIRO Tomoyuki. Japan. All rights reserved.
+Copyright(C) 2001-2011, SADAHIRO Tomoyuki. Japan. All rights reserved.
 
 This module is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.

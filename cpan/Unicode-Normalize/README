@@ -1,4 +1,4 @@
-Unicode/Normalize version 1.07
+Unicode/Normalize version 1.10
 ===================================
 
 Unicode::Normalize - Unicode Normalization Forms
@@ -83,7 +83,7 @@ COPYRIGHT AND LICENSE
 
 SADAHIRO Tomoyuki <SADAHIRO@cpan.org>
 
-Copyright(C) 2001-2010, SADAHIRO Tomoyuki. Japan. All rights reserved.
+Copyright(C) 2001-2011, SADAHIRO Tomoyuki. Japan. All rights reserved.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
