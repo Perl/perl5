@@ -88,14 +88,13 @@ my @USER_DEFINED_PROPERTIES = (
    InNotKana                 => ['\x{3040}', '!\x{3041}'],
    InConsonant               => ['d',        '!e'],
    IsSyriac1                 => ['\x{0712}', '!\x{072F}'],
-   Syriac1                   => ['\x{0712}', '!\x{072F}'],
    '# User-defined character properties my lack \n at the end',
    InGreekSmall              => ['\N{GREEK SMALL LETTER PI}',
                                  '\N{GREEK SMALL LETTER FINAL SIGMA}'],
    InGreekCapital            => ['\N{GREEK CAPITAL LETTER PI}', '!\x{03A2}'],
    Dash                      => ['-'],
    ASCII_Hex_Digit           => ['!-', 'A'],
-   AsciiHexAndDash           => ['-', 'A'],
+   IsAsciiHexAndDash         => ['-', 'A'],
 );
 
 
@@ -118,7 +117,8 @@ my %SHORT_PROPERTIES = (
 #
 # Illegal properties
 #
-my @ILLEGAL_PROPERTIES = qw [q qrst];
+my @ILLEGAL_PROPERTIES =
+    qw[q qrst f foo isfoo infoo ISfoo INfoo Is::foo In::foo];
 
 my %d;
 
@@ -288,17 +288,23 @@ sub IsSyriac1 {<<'--'}
 0730    074A
 --
 
-sub Syriac1 {<<'--'}
-0712    072C
-0730    074A
---
-
 sub InGreekSmall   {return "03B1\t03C9"}
 sub InGreekCapital {return "0391\t03A9\n-03A2"}
 
-sub AsciiHexAndDash {<<'--'}
+sub IsAsciiHexAndDash {<<'--'}
 +utf8::ASCII_Hex_Digit
 +utf8::Dash
 --
 
+# fake user-defined properties; these subs shouldn't be called, because
+# their names don't start with In or Is
+
+sub f       { die }
+sub foo     { die }
+sub isfoo   { die }
+sub infoo   { die }
+sub ISfoo   { die }
+sub INfoo   { die }
+sub Is::foo { die }
+sub In::foo { die }
 __END__
