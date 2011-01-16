@@ -83,7 +83,7 @@ sub croak { require Carp; Carp::croak(@_) }
 
                 my $caller1 = $type =~ s/(.+)::// ? $1 : caller(1);
 
-                if (defined $caller1 && $type =~ /^(?:\w+)$/) {
+                if (defined $caller1 && $type =~ /^I[ns]\w+$/) {
                     my $prop = "${caller1}::$type";
                     if (exists &{$prop}) {
                         no strict 'refs';

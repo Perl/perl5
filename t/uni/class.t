@@ -6,13 +6,13 @@ BEGIN {
 
 plan tests => 10;
 
-sub MyUniClass {
+sub IsMyUniClass {
   <<END;
 0030	004F
 END
 }
 
-sub Other::Class {
+sub Other::IsClass {
   <<END;
 0040	005F
 END
@@ -20,8 +20,8 @@ END
 
 sub A::B::Intersection {
   <<END;
-+main::MyUniClass
-&Other::Class
++main::IsMyUniClass
+&Other::IsClass
 END
 }
 
@@ -63,10 +63,10 @@ is(($str =~ /(\p{Letter}+)/)[0], 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
 is(($str =~ /(\p{l}+)/)[0], 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
 
 # make sure it finds user-defined class
-is(($str =~ /(\p{MyUniClass}+)/)[0], '0123456789:;<=>?@ABCDEFGHIJKLMNO');
+is(($str =~ /(\p{IsMyUniClass}+)/)[0], '0123456789:;<=>?@ABCDEFGHIJKLMNO');
 
 # make sure it finds class in other package
-is(($str =~ /(\p{Other::Class}+)/)[0], '@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_');
+is(($str =~ /(\p{Other::IsClass}+)/)[0], '@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_');
 
 # make sure it finds class in other OTHER package
 is(($str =~ /(\p{A::B::Intersection}+)/)[0], '@ABCDEFGHIJKLMNO');
