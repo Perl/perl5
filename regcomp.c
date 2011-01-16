@@ -200,7 +200,7 @@ typedef struct RExC_state_t {
 #define	HASWIDTH	0x01	/* Known to match non-null strings. */
 
 /* Simple enough to be STAR/PLUS operand, in an EXACT node must be a single
- * character, and if utf8, must be invariant. */
+ * character, and if utf8, must be invariant.  Note that this is not the same thing as REGNODE_SIMPLE */
 #define	SIMPLE		0x02
 #define	SPSTART		0x04	/* Starts with * or +. */
 #define TRYAGAIN	0x08	/* Weeded out a declaration. */
