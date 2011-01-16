@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 116 };
+BEGIN { plan tests => 120 };
 
 use strict;
 use warnings;
@@ -127,3 +127,13 @@ our @sortFr = $objFr->sort(@randFr);
 ok("@sortFr" eq "@listFr");
 
 # 116
+
+{
+    my $keyXS = '__useXS'; # see Unicode::Collate internal
+    my $UseXS = ref Unicode::Collate->new->{$keyXS};
+    ok(ref($Collator->{$keyXS}), $UseXS);
+    ok(ref($objFr   ->{$keyXS}), $UseXS);
+    ok(ref($objEs   ->{$keyXS}), $UseXS);
+    ok(ref($objEsT  ->{$keyXS}), $UseXS);
+}
+# 120

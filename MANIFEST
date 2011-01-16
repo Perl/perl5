@@ -2496,6 +2496,9 @@ cpan/Unicode-Collate/Collate/Locale/zh_pin.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/zh.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/zh_strk.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate.pm			Unicode::Collate
+cpan/Unicode-Collate/Collate.xs			Unicode::Collate
+cpan/Unicode-Collate/Makefile.PL			Unicode::Collate
+cpan/Unicode-Collate/mkheader			Unicode::Collate
 cpan/Unicode-Collate/README			Unicode::Collate
 cpan/Unicode-Collate/t/altern.t			Unicode::Collate
 cpan/Unicode-Collate/t/backwds.t			Unicode::Collate
