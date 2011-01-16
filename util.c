@@ -6267,8 +6267,14 @@ Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
     retval = vsprintf(buffer, format, ap);
 #endif
     va_end(ap);
-    /* vsnprintf() shows failure with >= len, vsprintf() with < 0 */
-    if (retval < 0 || (len > 0 && (Size_t)retval >= len))
+    /* vsprintf() shows failure with < 0 */
+    if (retval < 0
+#ifdef HAS_VSNPRINTF
+    /* vsnprintf() shows failure with >= len */
+        ||
+        (len > 0 && (Size_t)retval >= len) 
+#endif
+    )
 	Perl_croak(aTHX_ "panic: my_snprintf buffer overflow");
     return retval;
 }
@@ -6307,8 +6313,14 @@ Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap
     retval = vsprintf(buffer, format, ap);
 # endif
 #endif /* #ifdef NEED_VA_COPY */
-    /* vsnprintf() shows failure with >= len, vsprintf() with < 0 */
-    if (retval < 0 || (len > 0 && (Size_t)retval >= len))
+    /* vsprintf() shows failure with < 0 */
+    if (retval < 0
+#ifdef HAS_VSNPRINTF
+    /* vsnprintf() shows failure with >= len */
+        ||
+        (len > 0 && (Size_t)retval >= len) 
+#endif
+    )
 	Perl_croak(aTHX_ "panic: my_vsnprintf buffer overflow");
     return retval;
 }
