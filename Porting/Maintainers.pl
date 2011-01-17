@@ -765,6 +765,19 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
+    'HTTP::Tiny' =>
+	{
+	'MAINTAINER'	=> 'dagolden',
+	'DISTRIBUTION'	=> 'DAGOLDEN/HTTP-Tiny-0.008.tar.gz',
+	'FILES'		=> q[cpan/HTTP-Tiny],
+	'EXCLUDED'	=> [
+				't/200_live.t',
+				qr/^eg/,
+				qr/^xt/
+			   ],
+	'UPSTREAM'	=> 'cpan',
+	},
+
     'I18N::Collate' =>
 	{
 	'MAINTAINER'	=> 'p5p',

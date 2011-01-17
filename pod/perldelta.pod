@@ -109,6 +109,14 @@ generation task.
 
 =item *
 
+L<HTTP::Tiny> 0.008 has been added as a dual-life module.  It is a very
+small, simple HTTP/1.1 client designed for simple GET requests and file
+mirroring.  It has has been added to enable CPAN.pm and CPANPLUS to
+"bootstrap" HTTP access to CPAN using pure Perl without relying on external
+binaries like F<curl> or F<wget>.
+
+=item *
+
 L<Module::Metadata> 1.000003 has been added as a dual-life module.  It gathers
 package and POD information from Perl module files.  It is a standalone module
 based on Module::Build::ModuleInfo for use by other module installation

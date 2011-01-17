@@ -1029,6 +1029,62 @@ cpan/Getopt-Long/t/gol-linkage.t	See if Getopt::Long works
 cpan/Getopt-Long/t/gol-oo.t		See if Getopt::Long works
 cpan/Getopt-Long/t/gol-xargv.t		See if Getopt::Long works
 cpan/Getopt-Long/t/gol-xstring.t	See if Getopt::Long works
+cpan/HTTP-Tiny/lib/HTTP/Tiny.pm
+cpan/HTTP-Tiny/t/000_load.t
+cpan/HTTP-Tiny/t/001_api.t
+cpan/HTTP-Tiny/t/002_croakage.t
+cpan/HTTP-Tiny/t/00-compile.t
+cpan/HTTP-Tiny/t/010_url.t
+cpan/HTTP-Tiny/t/020_headers.t
+cpan/HTTP-Tiny/t/030_response.t
+cpan/HTTP-Tiny/t/040_content.t
+cpan/HTTP-Tiny/t/050_chunked_body.t
+cpan/HTTP-Tiny/t/060_http_date.t
+cpan/HTTP-Tiny/t/100_get.t
+cpan/HTTP-Tiny/t/110_mirror.t
+cpan/HTTP-Tiny/t/120_put.t
+cpan/HTTP-Tiny/t/130_redirect.t
+cpan/HTTP-Tiny/t/cases/get-01.txt
+cpan/HTTP-Tiny/t/cases/get-02.txt
+cpan/HTTP-Tiny/t/cases/get-03.txt
+cpan/HTTP-Tiny/t/cases/get-04.txt
+cpan/HTTP-Tiny/t/cases/get-05.txt
+cpan/HTTP-Tiny/t/cases/get-06.txt
+cpan/HTTP-Tiny/t/cases/get-07.txt
+cpan/HTTP-Tiny/t/cases/get-08.txt
+cpan/HTTP-Tiny/t/cases/get-09.txt
+cpan/HTTP-Tiny/t/cases/get-10.txt
+cpan/HTTP-Tiny/t/cases/get-11.txt
+cpan/HTTP-Tiny/t/cases/get-12.txt
+cpan/HTTP-Tiny/t/cases/get-13.txt
+cpan/HTTP-Tiny/t/cases/get-14.txt
+cpan/HTTP-Tiny/t/cases/get-15.txt
+cpan/HTTP-Tiny/t/cases/get-16.txt
+cpan/HTTP-Tiny/t/cases/get-17.txt
+cpan/HTTP-Tiny/t/cases/get-18.txt
+cpan/HTTP-Tiny/t/cases/get-19.txt
+cpan/HTTP-Tiny/t/cases/get-20.txt
+cpan/HTTP-Tiny/t/cases/get-21.txt
+cpan/HTTP-Tiny/t/cases/mirror-01.txt
+cpan/HTTP-Tiny/t/cases/mirror-02.txt
+cpan/HTTP-Tiny/t/cases/mirror-03.txt
+cpan/HTTP-Tiny/t/cases/mirror-04.txt
+cpan/HTTP-Tiny/t/cases/mirror-05.txt
+cpan/HTTP-Tiny/t/cases/put-01.txt
+cpan/HTTP-Tiny/t/cases/put-02.txt
+cpan/HTTP-Tiny/t/cases/put-03.txt
+cpan/HTTP-Tiny/t/cases/put-04.txt
+cpan/HTTP-Tiny/t/cases/put-05.txt
+cpan/HTTP-Tiny/t/cases/redirect-01.txt
+cpan/HTTP-Tiny/t/cases/redirect-02.txt
+cpan/HTTP-Tiny/t/cases/redirect-03.txt
+cpan/HTTP-Tiny/t/cases/redirect-04.txt
+cpan/HTTP-Tiny/t/cases/redirect-05.txt
+cpan/HTTP-Tiny/t/cases/redirect-06.txt
+cpan/HTTP-Tiny/t/cases/redirect-07.txt
+cpan/HTTP-Tiny/t/cases/redirect-08.txt
+cpan/HTTP-Tiny/t/cases/redirect-09.txt
+cpan/HTTP-Tiny/t/Util.pm
 cpan/IO-Compress/Changes				IO::Compress
 cpan/IO-Compress/examples/compress-zlib/filtdef		IO::Compress
 cpan/IO-Compress/examples/compress-zlib/filtinf		IO::Compress
