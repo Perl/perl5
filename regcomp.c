@@ -7471,19 +7471,33 @@ tryagain:
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'd':
-            if (LOC) {
-                ret = reg_node(pRExC_state, (U8)(DIGITL));
-            } else {
-                ret = reg_node(pRExC_state, (U8)(DIGIT));
+	    switch (get_regex_charset(RExC_flags)) {
+		case REGEX_LOCALE_CHARSET:
+		    op = DIGITL;
+		    break;
+		case REGEX_DEPENDS_CHARSET: /* No difference between these */
+		case REGEX_UNICODE_CHARSET:
+		    op = DIGIT;
+		    break;
+		default:
+		    goto bad_charset;
             }
+	    ret = reg_node(pRExC_state, op);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'D':
-            if (LOC) {
-                ret = reg_node(pRExC_state, (U8)(NDIGITL));
-            } else {
-                ret = reg_node(pRExC_state, (U8)(NDIGIT));
+	    switch (get_regex_charset(RExC_flags)) {
+		case REGEX_LOCALE_CHARSET:
+		    op = NDIGITL;
+		    break;
+		case REGEX_DEPENDS_CHARSET: /* No difference between these */
+		case REGEX_UNICODE_CHARSET:
+		    op = NDIGIT;
+		    break;
+		default:
+		    goto bad_charset;
             }
+	    ret = reg_node(pRExC_state, op);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'R':
