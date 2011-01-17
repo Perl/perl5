@@ -84,7 +84,8 @@ characters the locale considers decimal digits.  Without a locale, C<\d>
 matches just the digits '0' to '9'.
 
 Unicode digits may cause some confusion, and some security issues.  In UTF-8
-strings, C<\d> matches the same characters matched by
+strings, unless the C<"a"> modifier is specified, C<\d> matches the same
+characters matched by
 C<\p{General_Category=Decimal_Number}>, or synonymously,
 C<\p{General_Category=Digit}>.  Starting with Unicode version 4.1, this is the
 same set of characters matched by C<\p{Numeric_Type=Decimal}>.  

@@ -258,6 +258,7 @@ and check for NULL.
 #define LOCALE_PAT_MOD       'l'
 #define UNICODE_PAT_MOD      'u'
 #define DEPENDS_PAT_MOD      'd'
+#define ASCII_RESTRICT_PAT_MOD 'a'
 
 #define ONCE_PAT_MODS        "o"
 #define KEEPCOPY_PAT_MODS    "p"
@@ -267,6 +268,7 @@ and check for NULL.
 #define LOCALE_PAT_MODS      "l"
 #define UNICODE_PAT_MODS     "u"
 #define DEPENDS_PAT_MODS     "d"
+#define ASCII_RESTRICT_PAT_MODS "a"
 
 /* This string is expected by regcomp.c to be ordered so that the first
  * character is the flag in bit RXf_PMf_STD_PMMOD_SHIFT of extflags; the next
@@ -314,6 +316,7 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
         case REGEX_DEPENDS_CHARSET: return DEPENDS_PAT_MODS;
         case REGEX_LOCALE_CHARSET:  return LOCALE_PAT_MODS;
         case REGEX_UNICODE_CHARSET: return UNICODE_PAT_MODS;
+	case REGEX_ASCII_RESTRICTED_CHARSET: return ASCII_RESTRICT_PAT_MODS;
     }
 
     return "?";	    /* Unknown */

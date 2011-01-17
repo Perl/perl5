@@ -28,6 +28,7 @@ my %reflags = (
     d => 0,
     l => 1,
     u => 2,
+    a => 3,
 );
 
 sub setcolor {
@@ -144,7 +145,7 @@ sub bits {
 	    my $reflags = $^H{reflags} || 0;
 	    my $seen_charset;
 	    for(split//, $s) {
-		if (/[dul]/) {
+		if (/[adul]/) {
 		    if ($on) {
 			if ($seen_charset && $seen_charset ne $_) {
 			    require Carp;
@@ -291,7 +292,7 @@ default, simply put
 
 at the top of your code.
 
-The character set /dul flags cancel each other out. So, in this example,
+The character set /adul flags cancel each other out. So, in this example,
 
     use re "/u";
     "ss" =~ /\xdf/;

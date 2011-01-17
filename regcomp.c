@@ -371,6 +371,9 @@ static const scan_data_t zero_scan_data =
 #define UTF cBOOL(RExC_utf8)
 #define LOC (get_regex_charset(RExC_flags) == REGEX_LOCALE_CHARSET)
 #define UNI_SEMANTICS (get_regex_charset(RExC_flags) == REGEX_UNICODE_CHARSET)
+#define DEPENDS_SEMANTICS (get_regex_charset(RExC_flags) == REGEX_DEPENDS_CHARSET)
+#define AT_LEAST_UNI_SEMANTICS (get_regex_charset(RExC_flags) >= REGEX_UNICODE_CHARSET)
+#define ASCII_RESTRICTED (get_regex_charset(RExC_flags) == REGEX_ASCII_RESTRICTED_CHARSET)
 
 #define FOLD cBOOL(RExC_flags & RXf_PMf_FOLD)
 
@@ -6301,6 +6304,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			cs = REGEX_UNICODE_CHARSET;
                         has_charset_modifier = 1;
                         break;
+                    case ASCII_RESTRICT_PAT_MOD:
+                        if (has_charset_modifier || flagsp == &negflags) {
+                            goto fail_modifiers;
+                        }
+			cs = REGEX_ASCII_RESTRICTED_CHARSET;
+                        has_charset_modifier = 1;
+                        break;
                     case DEPENDS_PAT_MOD:
                         if (has_use_defaults
                             || has_charset_modifier
@@ -7370,6 +7380,9 @@ tryagain:
 		case REGEX_UNICODE_CHARSET:
 		    op = ALNUMU;
 		    break;
+		case REGEX_ASCII_RESTRICTED_CHARSET:
+		    op = ALNUMA;
+		    break;
 		case REGEX_DEPENDS_CHARSET:
 		    op = ALNUM;
 		    break;
@@ -7386,6 +7399,9 @@ tryagain:
 		    break;
 		case REGEX_UNICODE_CHARSET:
 		    op = NALNUMU;
+		    break;
+		case REGEX_ASCII_RESTRICTED_CHARSET:
+		    op = NALNUMA;
 		    break;
 		case REGEX_DEPENDS_CHARSET:
 		    op = NALNUM;
@@ -7405,6 +7421,9 @@ tryagain:
 		    break;
 		case REGEX_UNICODE_CHARSET:
 		    op = BOUNDU;
+		    break;
+		case REGEX_ASCII_RESTRICTED_CHARSET:
+		    op = BOUNDA;
 		    break;
 		case REGEX_DEPENDS_CHARSET:
 		    op = BOUND;
@@ -7426,6 +7445,9 @@ tryagain:
 		case REGEX_UNICODE_CHARSET:
 		    op = NBOUNDU;
 		    break;
+		case REGEX_ASCII_RESTRICTED_CHARSET:
+		    op = NBOUNDA;
+		    break;
 		case REGEX_DEPENDS_CHARSET:
 		    op = NBOUND;
 		    break;
@@ -7444,6 +7466,9 @@ tryagain:
 		case REGEX_UNICODE_CHARSET:
 		    op = SPACEU;
 		    break;
+		case REGEX_ASCII_RESTRICTED_CHARSET:
+		    op = SPACEA;
+		    break;
 		case REGEX_DEPENDS_CHARSET:
 		    op = SPACE;
 		    break;
@@ -7461,6 +7486,9 @@ tryagain:
 		case REGEX_UNICODE_CHARSET:
 		    op = NSPACEU;
 		    break;
+		case REGEX_ASCII_RESTRICTED_CHARSET:
+		    op = NSPACEA;
+		    break;
 		case REGEX_DEPENDS_CHARSET:
 		    op = NSPACE;
 		    break;
@@ -7474,6 +7502,9 @@ tryagain:
 	    switch (get_regex_charset(RExC_flags)) {
 		case REGEX_LOCALE_CHARSET:
 		    op = DIGITL;
+		    break;
+		case REGEX_ASCII_RESTRICTED_CHARSET:
+		    op = DIGITA;
 		    break;
 		case REGEX_DEPENDS_CHARSET: /* No difference between these */
 		case REGEX_UNICODE_CHARSET:
@@ -7489,6 +7520,9 @@ tryagain:
 	    switch (get_regex_charset(RExC_flags)) {
 		case REGEX_LOCALE_CHARSET:
 		    op = NDIGITL;
+		    break;
+		case REGEX_ASCII_RESTRICTED_CHARSET:
+		    op = NDIGITA;
 		    break;
 		case REGEX_DEPENDS_CHARSET: /* No difference between these */
 		case REGEX_UNICODE_CHARSET:
@@ -7596,7 +7630,7 @@ tryagain:
                 ret = reganode(pRExC_state,
                                ((! FOLD)
                                  ? NREF
-                                 : (UNI_SEMANTICS)
+                                 : (AT_LEAST_UNI_SEMANTICS)
                                    ? NREFFU
                                    : (LOC)
                                      ? NREFFL
@@ -7664,7 +7698,7 @@ tryagain:
 		    ret = reganode(pRExC_state,
 				   ((! FOLD)
 				     ? REF
-				     : (UNI_SEMANTICS)
+				     : (AT_LEAST_UNI_SEMANTICS)
 				       ? REFFU
 				       : (LOC)
 				         ? REFFL
@@ -7718,7 +7752,7 @@ tryagain:
 			   (U8) ((! FOLD) ? EXACT
 					  : (LOC)
 					     ? EXACTFL
-					     : (UNI_SEMANTICS)
+					     : (AT_LEAST_UNI_SEMANTICS)
 					       ? EXACTFU
 					       : EXACTF)
 		    );
@@ -8272,12 +8306,20 @@ case ANYOF_N##NAME:                                                            \
             if (! TEST_7) stored +=                                            \
 		    S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value);    \
         }                                                                      \
-	/* For a non-ut8 target string with DEPENDS semantics, all above ASCII \
-	 * Latin1 code points match the complement of any of the classes.  But \
-	 * in utf8, they have their Unicode semantics, so can't just set them  \
-	 * in the bitmap, or else regexec.c will think they matched when they  \
-	 * shouldn't. */                                                       \
-	ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL|ANYOF_UTF8;              \
+	if (ASCII_RESTRICTED) {                                                \
+	    for (value = 128; value < 256; value++) {                          \
+             stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value); \
+	    }                                                                  \
+	    ANYOF_FLAGS(ret) |= ANYOF_UNICODE_ALL|ANYOF_UTF8;                  \
+	}                                                                      \
+	else {                                                                 \
+	    /* For a non-ut8 target string with DEPENDS semantics, all above   \
+	     * ASCII Latin1 code points match the complement of any of the     \
+	     * classes.  But in utf8, they have their Unicode semantics, so    \
+	     * can't just set them in the bitmap, or else regexec.c will think \
+	     * they matched when they shouldn't. */                            \
+	    ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL|ANYOF_UTF8;          \
+	}                                                                      \
     }                                                                          \
     yesno = '!';                                                               \
     what = WORD;                                                               \
@@ -8317,7 +8359,7 @@ S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8
     U8 stored = 0;
     U8 fold;
 
-    fold = (UNI_SEMANTICS) ? PL_fold_latin1[value]
+    fold = (AT_LEAST_UNI_SEMANTICS) ? PL_fold_latin1[value]
                            : PL_fold[value];
 
     /* It assumes the bit for 'value' has already been set */
@@ -8744,6 +8786,7 @@ parseit:
 			    stored +=
                               S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) ASCII_TO_NATIVE(value));
 		    }
+		    ANYOF_FLAGS(ret) |= ANYOF_UNICODE_ALL;
 		    yesno = '!';
 		    what = "ASCII";
 		    break;		
@@ -8773,6 +8816,9 @@ parseit:
 		    }
 		    yesno = '!';
 		    what = POSIX_CC_UNI_NAME("Digit");
+		    if (ASCII_RESTRICTED ) {
+			ANYOF_FLAGS(ret) |= ANYOF_UNICODE_ALL;
+		    }
 		    break;		
 		case ANYOF_MAX:
 		    /* this is to handle \p and \P */
@@ -8781,7 +8827,7 @@ parseit:
 		    vFAIL("Invalid [::] class");
 		    break;
 		}
-		if (what) {
+		if (what && ! (ASCII_RESTRICTED)) {
 		    /* Strings such as "+utf8::isWord\n" */
 		    Perl_sv_catpvf(aTHX_ listsv, "%cutf8::Is%s\n", yesno, what);
 		    ANYOF_FLAGS(ret) |= ANYOF_UTF8;
@@ -9067,7 +9113,7 @@ parseit:
 		op = EXACT;
 	    }
 	}   /* else 2 chars in the bit map: the folds of each other */
-	else if (UNI_SEMANTICS || !isASCII(value)) {
+	else if (AT_LEAST_UNI_SEMANTICS || !isASCII(value)) {
 
 	    /* To join adjacent nodes, they must be the exact EXACTish type.
 	     * Try to use the most likely type, by using EXACTFU if the regex
@@ -9566,6 +9612,9 @@ S_regdump_extflags(pTHX_ const char *lead, const U32 flags)
                     break;
                 case REGEX_LOCALE_CHARSET:
                     PerlIO_printf(Perl_debug_log, "LOCALE");
+                    break;
+                case REGEX_ASCII_RESTRICTED_CHARSET:
+                    PerlIO_printf(Perl_debug_log, "ASCII-RESTRICTED");
                     break;
                 default:
                     PerlIO_printf(Perl_debug_log, "UNKNOWN CHARACTER SET");

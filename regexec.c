@@ -219,7 +219,8 @@
  * This is because that code fails when the test succeeds, so we want to have
  * the test fail so that the code succeeds.  The swash is stored in a
  * predictable PL_ place */
-#define _CCC_TRY_NONLOCALE(NAME, NNAME, FUNC, CLASS, STR)                     \
+#define _CCC_TRY_NONLOCALE(NAME,  NNAME,  FUNC,                               \
+	                   CLASS, STR)                                        \
     case NAME:                                                                \
 	_CCC_TRY_CODE( !, FUNC,                                               \
 		          cBOOL(swash_fetch(CAT2(PL_utf8_,CLASS),             \
@@ -243,6 +244,7 @@
  * irrelevant here */
 #define CCC_TRY(NAME,  NNAME,  FUNC,                                          \
 	        NAMEL, NNAMEL, LCFUNC, LCFUNC_utf8,                           \
+	        NAMEA, NNAMEA, FUNCA,                                         \
 		CLASS, STR)                                                   \
     case NAMEL:                                                               \
 	PL_reg_flags |= RF_tainted;                                           \
@@ -250,6 +252,25 @@
     case NNAMEL:                                                              \
 	PL_reg_flags |= RF_tainted;                                           \
 	_CCC_TRY_CODE(  , LCFUNC, LCFUNC_utf8((U8*)locinput), CLASS, STR)     \
+    case NAMEA:                                                               \
+	if (locinput >= PL_regeol || ! FUNCA(nextchr)) {                      \
+	    sayNO;                                                            \
+	}                                                                     \
+	/* Matched a utf8-invariant, so don't have to worry about utf8 */     \
+	nextchr = UCHARAT(++locinput);                                        \
+	break;                                                                \
+    case NNAMEA:                                                              \
+	if (locinput >= PL_regeol || FUNCA(nextchr)) {                        \
+	    sayNO;                                                            \
+	}                                                                     \
+	if (utf8_target) {                                                    \
+	    locinput += PL_utf8skip[nextchr];                                 \
+	    nextchr = UCHARAT(locinput);                                      \
+	}                                                                     \
+	else {                                                                \
+	    nextchr = UCHARAT(++locinput);                                    \
+	}                                                                     \
+	break;                                                                \
     /* Generate the non-locale cases */                                       \
     _CCC_TRY_NONLOCALE(NAME, NNAME, FUNC, CLASS, STR)
 
@@ -258,8 +279,12 @@
 #define CCC_TRY_U(NAME,  NNAME,  FUNC,                                         \
 		  NAMEL, NNAMEL, LCFUNC, LCFUNC_utf8,                          \
 	          NAMEU, NNAMEU, FUNCU,                                        \
+	          NAMEA, NNAMEA, FUNCA,                                        \
 	          CLASS, STR)                                                  \
-    CCC_TRY(NAME, NNAME, FUNC, NAMEL, NNAMEL, LCFUNC, LCFUNC_utf8, CLASS, STR) \
+    CCC_TRY(NAME, NNAME, FUNC,                                                 \
+	    NAMEL, NNAMEL, LCFUNC, LCFUNC_utf8,                                \
+	    NAMEA, NNAMEA, FUNCA,                                              \
+	    CLASS, STR)                                                        \
     _CCC_TRY_NONLOCALE(NAMEU, NNAMEU, FUNCU, CLASS, STR)
 
 /* TODO: Combine JUMPABLE and HAS_TEXT to cache OP(rn) */
@@ -1332,15 +1357,56 @@ if ((!reginfo || regtry(reginfo, &s))) \
 #define DUMP_EXEC_POS(li,s,doutf8) \
     dump_exec_pos(li,s,(PL_regeol),(PL_bostr),(PL_reg_starttry),doutf8)
 
+
+#define UTF8_NOLOAD(TEST_NON_UTF8, IF_SUCCESS, IF_FAIL) \
+	tmp = (s != PL_bostr) ? UCHARAT(s - 1) : '\n';                         \
+	tmp = TEST_NON_UTF8(tmp);                                              \
+	REXEC_FBC_UTF8_SCAN(                                                   \
+	    if (tmp == ! TEST_NON_UTF8((U8) *s)) { \
+		tmp = !tmp;                                                    \
+		IF_SUCCESS;                                                    \
+	    }                                                                  \
+	    else {                                                             \
+		IF_FAIL;                                                       \
+	    }                                                                  \
+	);                                                                     \
+
+#define UTF8_LOAD(TeSt1_UtF8, TeSt2_UtF8, IF_SUCCESS, IF_FAIL) \
+	if (s == PL_bostr) {                                                   \
+	    tmp = '\n';                                                        \
+	}                                                                      \
+	else {                                                                 \
+	    U8 * const r = reghop3((U8*)s, -1, (U8*)PL_bostr);                 \
+	    tmp = utf8n_to_uvchr(r, UTF8SKIP(r), 0, UTF8_ALLOW_DEFAULT);       \
+	}                                                                      \
+	tmp = TeSt1_UtF8;                                                      \
+	LOAD_UTF8_CHARCLASS_ALNUM();                                                                \
+	REXEC_FBC_UTF8_SCAN(                                                   \
+	    if (tmp == ! (TeSt2_UtF8)) { \
+		tmp = !tmp;                                                    \
+		IF_SUCCESS;                                                    \
+	    }                                                                  \
+	    else {                                                             \
+		IF_FAIL;                                                       \
+	    }                                                                  \
+	);                                                                     \
+
 /* The only difference between the BOUND and NBOUND cases is that
  * REXEC_FBC_TRYIT is called when matched in BOUND, and when non-matched in
  * NBOUND.  This is accomplished by passing it in either the if or else clause,
  * with the other one being empty */
 #define FBC_BOUND(TEST_NON_UTF8, TEST1_UTF8, TEST2_UTF8) \
-    FBC_BOUND_COMMON(TEST_NON_UTF8, TEST1_UTF8, TEST2_UTF8, REXEC_FBC_TRYIT, )
+    FBC_BOUND_COMMON(UTF8_LOAD(TEST1_UTF8, TEST2_UTF8, REXEC_FBC_TRYIT, ), TEST_NON_UTF8, REXEC_FBC_TRYIT, )
+
+#define FBC_BOUND_NOLOAD(TEST_NON_UTF8, TEST1_UTF8, TEST2_UTF8) \
+    FBC_BOUND_COMMON(UTF8_NOLOAD(TEST_NON_UTF8, REXEC_FBC_TRYIT, ), TEST_NON_UTF8, REXEC_FBC_TRYIT, )
 
 #define FBC_NBOUND(TEST_NON_UTF8, TEST1_UTF8, TEST2_UTF8) \
-    FBC_BOUND_COMMON(TEST_NON_UTF8, TEST1_UTF8, TEST2_UTF8, , REXEC_FBC_TRYIT)
+    FBC_BOUND_COMMON(UTF8_LOAD(TEST1_UTF8, TEST2_UTF8, , REXEC_FBC_TRYIT), TEST_NON_UTF8, , REXEC_FBC_TRYIT)
+
+#define FBC_NBOUND_NOLOAD(TEST_NON_UTF8, TEST1_UTF8, TEST2_UTF8) \
+    FBC_BOUND_COMMON(UTF8_NOLOAD(TEST_NON_UTF8, , REXEC_FBC_TRYIT), TEST_NON_UTF8, , REXEC_FBC_TRYIT)
+
 
 /* Common to the BOUND and NBOUND cases.  Unfortunately the UTF8 tests need to
  * be passed in completely with the variable name being tested, which isn't
@@ -1351,27 +1417,9 @@ if ((!reginfo || regtry(reginfo, &s))) \
  * one, and compare it with the wordness of this one.  If they differ, we have
  * a boundary.  At the beginning of the string, pretend that the previous
  * character was a new-line */
-#define FBC_BOUND_COMMON(TEST_NON_UTF8, TEST1_UTF8, TEST2_UTF8,                \
-	                                                  IF_SUCCESS, IF_FAIL) \
+#define FBC_BOUND_COMMON(UTF8_CODE, TEST_NON_UTF8, IF_SUCCESS, IF_FAIL) \
     if (utf8_target) {                                                         \
-	if (s == PL_bostr) {                                                   \
-	    tmp = '\n';                                                        \
-	}                                                                      \
-	else {                                                                 \
-	    U8 * const r = reghop3((U8*)s, -1, (U8*)PL_bostr);                 \
-	    tmp = utf8n_to_uvchr(r, UTF8SKIP(r), 0, UTF8_ALLOW_DEFAULT);       \
-	}                                                                      \
-	tmp = TEST1_UTF8;                                                      \
-	LOAD_UTF8_CHARCLASS_ALNUM();                                           \
-	REXEC_FBC_UTF8_SCAN(                                                   \
-	    if (tmp == ! (TEST2_UTF8)) {                                       \
-		tmp = !tmp;                                                    \
-		IF_SUCCESS;                                                    \
-	    }                                                                  \
-	    else {                                                             \
-		IF_FAIL;                                                       \
-	    }                                                                  \
-	);                                                                     \
+		UTF8_CODE \
     }                                                                          \
     else {  /* Not utf8 */                                                     \
 	tmp = (s != PL_bostr) ? UCHARAT(s - 1) : '\n';                         \
@@ -1596,10 +1644,20 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		      isALNUM_uni(tmp),
 		      cBOOL(swash_fetch(PL_utf8_alnum, (U8*)s, utf8_target)));
 	    break;
+	case BOUNDA:
+	    FBC_BOUND_NOLOAD(isWORDCHAR_A,
+			     isWORDCHAR_A(tmp),
+			     isWORDCHAR_A((U8*)s));
+	    break;
 	case NBOUND:
 	    FBC_NBOUND(isWORDCHAR,
 		       isALNUM_uni(tmp),
 		       cBOOL(swash_fetch(PL_utf8_alnum, (U8*)s, utf8_target)));
+	    break;
+	case NBOUNDA:
+	    FBC_NBOUND_NOLOAD(isWORDCHAR_A,
+			      isWORDCHAR_A(tmp),
+			      isWORDCHAR_A((U8*)s));
 	    break;
 	case BOUNDU:
 	    FBC_BOUND(isWORDCHAR_L1,
@@ -1628,6 +1686,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		swash_fetch(RE_utf8_perl_word,(U8*)s, utf8_target),
                 isWORDCHAR((U8) *s)
 	    );
+	case ALNUMA:
+	    REXEC_FBC_CLASS_SCAN( isWORDCHAR_A(*s));
 	case NALNUMU:
 	    REXEC_FBC_CSCAN_PRELOAD(
 		LOAD_UTF8_CHARCLASS_PERL_WORD(),
@@ -1640,6 +1700,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		!swash_fetch(RE_utf8_perl_word, (U8*)s, utf8_target),
                 ! isALNUM(*s)
 	    );
+	case NALNUMA:
+	    REXEC_FBC_UTF8_CLASS_SCAN( !isWORDCHAR_A(*s));
 	case NALNUML:
 	    REXEC_FBC_CSCAN_TAINT(
 		!isALNUM_LC_utf8((U8*)s),
@@ -1657,6 +1719,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		*s == ' ' || swash_fetch(RE_utf8_perl_space,(U8*)s, utf8_target),
                 isSPACE((U8) *s)
 	    );
+	case SPACEA:
+	    REXEC_FBC_CLASS_SCAN( isSPACE_A(*s));
 	case SPACEL:
 	    REXEC_FBC_CSCAN_TAINT(
 		isSPACE_LC_utf8((U8*)s),
@@ -1674,6 +1738,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		!(*s == ' ' || swash_fetch(RE_utf8_perl_space,(U8*)s, utf8_target)),
                 ! isSPACE((U8) *s)
 	    );
+	case NSPACEA:
+	    REXEC_FBC_UTF8_CLASS_SCAN( !isSPACE_A(*s));
 	case NSPACEL:
 	    REXEC_FBC_CSCAN_TAINT(
 		!isSPACE_LC_utf8((U8*)s),
@@ -1685,6 +1751,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		swash_fetch(RE_utf8_posix_digit,(U8*)s, utf8_target),
 		isDIGIT(*s)
 	    );
+	case DIGITA:
+	    REXEC_FBC_CLASS_SCAN( isDIGIT_A(*s));
 	case DIGITL:
 	    REXEC_FBC_CSCAN_TAINT(
 		isDIGIT_LC_utf8((U8*)s),
@@ -1696,6 +1764,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		!swash_fetch(RE_utf8_posix_digit,(U8*)s, utf8_target),
 		!isDIGIT(*s)
 	    );
+	case NDIGITA:
+	    REXEC_FBC_UTF8_CLASS_SCAN( !isDIGIT_A(*s));
 	case NDIGITL:
 	    REXEC_FBC_CSCAN_TAINT(
 		!isDIGIT_LC_utf8((U8*)s),
@@ -3652,10 +3722,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    /* FALL THROUGH */
 	case BOUND:
 	case BOUNDU:
+	case BOUNDA:
 	case NBOUND:
 	case NBOUNDU:
+	case NBOUNDA:
 	    /* was last char in word? */
-	    if (utf8_target) {
+	    if (utf8_target && FLAGS(scan) != REGEX_ASCII_RESTRICTED_CHARSET) {
 		if (locinput == PL_bostr)
 		    ln = '\n';
 		else {
@@ -3674,6 +3746,18 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		}
 	    }
 	    else {
+
+		/* Here the string isn't utf8, or is utf8 and only ascii
+		 * characters are to match \w.  In the latter case looking at
+		 * the byte just prior to the current one may be just the final
+		 * byte of a multi-byte character.  This is ok.  There are two
+		 * cases:
+		 * 1) it is a single byte character, and then the test is doing
+		 *	just what it's supposed to.
+		 * 2) it is a multi-byte character, in which case the final
+		 *	byte is never mistakable for ASCII, and so the test
+		 *	will say it is not a word character, which is the
+		 *	correct answer. */
 		ln = (locinput != PL_bostr) ?
 		    UCHARAT(locinput - 1) : '\n';
 		switch (FLAGS(scan)) {
@@ -3688,6 +3772,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    case REGEX_DEPENDS_CHARSET:
 			ln = isALNUM(ln);
 			n = isALNUM(nextchr);
+			break;
+		    case REGEX_ASCII_RESTRICTED_CHARSET:
+			ln = isWORDCHAR_A(ln);
+			n = isWORDCHAR_A(nextchr);
 			break;
 		    default:
 			Perl_croak(aTHX_ "panic: Unexpected FLAGS %u in op %u", FLAGS(scan), OP(scan));
@@ -3727,15 +3815,18 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
         CCC_TRY_U(ALNUM,  NALNUM,  isWORDCHAR,
 		  ALNUML, NALNUML, isALNUM_LC, isALNUM_LC_utf8,
 		  ALNUMU, NALNUMU, isWORDCHAR_L1,
+		  ALNUMA, NALNUMA, isWORDCHAR_A,
 		  perl_word, "a");
 
         CCC_TRY_U(SPACE,  NSPACE,  isSPACE,
 		  SPACEL, NSPACEL, isSPACE_LC, isSPACE_LC_utf8,
 		  SPACEU, NSPACEU, isSPACE_L1,
+		  SPACEA, NSPACEA, isSPACE_A,
 		  perl_space, " ");
 
         CCC_TRY(DIGIT,  NDIGIT,  isDIGIT,
 		DIGITL, NDIGITL, isDIGIT_LC, isDIGIT_LC_utf8,
+		DIGITA, NDIGITA, isDIGIT_A,
 		posix_digit, "0");
 
 	case CLUMP: /* Match \X: logical Unicode character.  This is defined as
@@ -5989,6 +6080,11 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	    scan++;
 	}
 	break;
+    case ALNUMA:
+	while (scan < loceol && isWORDCHAR_A((U8) *scan)) {
+	    scan++;
+	}
+	break;
     case ALNUML:
 	PL_reg_flags |= RF_tainted;
 	if (utf8_target) {
@@ -6027,6 +6123,18 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	    goto utf8_Nwordchar;
 	while (scan < loceol && ! isALNUM((U8) *scan)) {
 	    scan++;
+	}
+	break;
+    case NALNUMA:
+	if (utf8_target) {
+	    while (scan < loceol && ! isWORDCHAR_A((U8) *scan)) {
+		scan += UTF8SKIP(scan);
+	    }
+	}
+	else {
+	    while (scan < loceol && ! isWORDCHAR_A((U8) *scan)) {
+		scan++;
+	    }
 	}
 	break;
     case NALNUML:
@@ -6070,6 +6178,11 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	    goto utf8_space;
 
 	while (scan < loceol && isSPACE((U8) *scan)) {
+	    scan++;
+	}
+	break;
+    case SPACEA:
+	while (scan < loceol && isSPACE_A((U8) *scan)) {
 	    scan++;
 	}
 	break;
@@ -6117,6 +6230,18 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	    scan++;
 	}
 	break;
+    case NSPACEA:
+	if (utf8_target) {
+	    while (scan < loceol && ! isSPACE_A((U8) *scan)) {
+		scan += UTF8SKIP(scan);
+	    }
+	}
+	else {
+	    while (scan < loceol && ! isSPACE_A((U8) *scan)) {
+		scan++;
+	    }
+	}
+	break;
     case NSPACEL:
 	PL_reg_flags |= RF_tainted;
 	if (utf8_target) {
@@ -6143,6 +6268,11 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	} else {
 	    while (scan < loceol && isDIGIT(*scan))
 		scan++;
+	}
+	break;
+    case DIGITA:
+	while (scan < loceol && isDIGIT_A((U8) *scan)) {
+	    scan++;
 	}
 	break;
     case DIGITL:
@@ -6172,6 +6302,19 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	    while (scan < loceol && !isDIGIT(*scan))
 		scan++;
 	}
+	break;
+    case NDIGITA:
+	if (utf8_target) {
+	    while (scan < loceol && ! isDIGIT_A((U8) *scan)) {
+		scan += UTF8SKIP(scan);
+	    }
+	}
+	else {
+	    while (scan < loceol && ! isDIGIT_A((U8) *scan)) {
+		scan++;
+	    }
+	}
+	break;
     case NDIGITL:
 	PL_reg_flags |= RF_tainted;
 	if (utf8_target) {

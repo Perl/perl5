@@ -35,7 +35,7 @@ $testcases{'[:space:]'} = $testcases{'\s'};
 $testcases{'[:word:]'} = $testcases{'\w'};
 
 # For each possible character set...
-foreach my $charset ("d", "u") {
+foreach my $charset ("a", "d", "u") {
 
     # And in utf8 or not
     foreach my $upgrade ("", 'utf8::upgrade($a); ') {

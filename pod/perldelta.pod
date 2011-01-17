@@ -28,6 +28,26 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 New regular expression modifier C</a>
+
+The C</a> regular expression modifier restricts C<\s> to match precisely
+the five characters C<[ \f\n\r\t]>, C<\d> to match precisely the 10
+characters C<[0-9]>, C<\w> to match precisely the 63 characters
+C<[A-Za-z0-9_]>, and the Posix (C<[[:posix:]]>) character classes to
+match only the appropriate ASCII characters.  The complements, of
+course, match everything but; and C<\b> and C<\B> are correspondingly
+affected.  Otherwise, C</a> behaves like the C</u> modifier, in that
+case-insensitive matching uses Unicode semantics; for example, "k" will
+match the Unicode C<\N{KELVIN SIGN}> under C</i> matching, and code
+points in the Latin1 range, above ASCII will have Unicode semantics when
+it comes to case-insensitive matching.  Like its cousins (C</u>, C</l>,
+and C</d>), and in spite of the terminology, C</a> in 5.14 will not
+actually be able to be used as a suffix at the end of a regular
+expression (this restriction is planned to be lifted in 5.16).  It must
+occur either as an infix modifier, such as C<(?a:...)> or (C<(?a)...>,
+or it can be turned on within the lexical scope of C<use re '/a'>.
+Turning on C</a> turns off the other "character set" modifiers.
+
 =head2 Any unsigned value can be encoded as a character
 
 With this release, Perl is adopting a model that any unsigned value can

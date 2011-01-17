@@ -596,9 +596,9 @@ whitespace formatting, a simple C<#> will suffice.  Note that Perl closes
 the comment as soon as it sees a C<)>, so there is no way to put a literal
 C<)> in the comment.
 
-=item C<(?dlupimsx-imsx)>
+=item C<(?adlupimsx-imsx)>
 
-=item C<(?^lupimsx)>
+=item C<(?^alupimsx)>
 X<(?)> X<(?^)>
 
 One or more embedded pattern-match modifiers, to be turned on (or
@@ -636,8 +636,8 @@ after the C<"?"> is a shorthand equivalent to C<d-imsx>.  Flags (except
 C<"d">) may follow the caret to override it.
 But a minus sign is not legal with it.
 
-Also, starting in Perl 5.14, are modifiers C<"d">, C<"l">, and C<"u">,
-which for 5.14 may not be used as suffix modifiers.
+Also, starting in Perl 5.14, are modifiers C<"a">, C<"d">, C<"l">, and
+C<"u">, which for 5.14 may not be used as suffix modifiers.
 
 C<"l"> means to use a locale (see L<perllocale>) when pattern matching.
 The locale used will be the one in effect at the time of execution of
@@ -659,7 +659,7 @@ Latin-1 (ISO-8859-1) meanings (which are the same as Unicode's), whereas
 in strict ASCII their meanings are undefined.  Thus the platform
 effectively becomes a Unicode platform.  The ASCII characters remain as
 ASCII characters (since ASCII is a subset of Latin-1 and Unicode).  For
-example, when this option is not on, on a non-utf8 string, C<"\w">
+example, when this option is XXX not on, on a non-utf8 string, C<"\w">
 matches precisely C<[A-Za-z0-9_]>.  When the option is on, it matches
 not just those, but all the Latin-1 word characters (such as an "n" with
 a tilde).  On EBCDIC platforms, which already are equivalent to Latin-1,
@@ -669,6 +669,16 @@ semantics: the C<MICRO SIGN> will match the Greek capital and
 small letters C<MU>; otherwise not; and the C<LATIN CAPITAL LETTER SHARP
 S> will match any of C<SS>, C<Ss>, C<sS>, and C<ss>, otherwise not.
 (This last case is buggy, however.)
+
+C<"a"> is the same as C<"u">, but C<\d>, C<\s>, C<\w>, and the Posix
+character classes are restricted to matching in the ASCII range only.
+That is, with this modifier, C<\d> always means precisely the digits
+C<"0"> to C<"9">; C<\s> means the five characters C<[ \f\n\r\t]>;
+C<\w> means the 53 characters C<[A-Za-z0-9_]>; and likewise, all the
+Posix classes such as C<[[:print:]]> match only the appropriate
+ASCII-range characters.  As you would expect, this modifier causes, for
+example, C<\D> to mean the same thing as C<[^0-9]>.  C<"a"> behaves the
+same as C<"u"> with regards to case-insensitive matches.  XXX
 
 C<"d"> means to use the traditional Perl pattern matching behavior.
 This is dualistic (hence the name C<"d">, which also could stand for
@@ -695,9 +705,9 @@ anywhere in a pattern has a global effect.
 =item C<(?:pattern)>
 X<(?:)>
 
-=item C<(?dluimsx-imsx:pattern)>
+=item C<(?adluimsx-imsx:pattern)>
 
-=item C<(?^luimsx:pattern)>
+=item C<(?^aluimsx:pattern)>
 X<(?^:)>
 
 This is for clustering, not capturing; it groups subexpressions like
@@ -713,7 +723,7 @@ but doesn't spit out extra fields.  It's also cheaper not to capture
 characters if you don't need to.
 
 Any letters between C<?> and C<:> act as flags modifiers as with
-C<(?dluimsx-imsx)>.  For example,
+C<(?adluimsx-imsx)>.  For example,
 
     /(?s-i:more.*than).*million/i
 

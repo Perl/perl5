@@ -366,6 +366,10 @@ digit, while the character class C<\s> matches any whitespace character.
 New in perl 5.10.0 are the classes C<\h> and C<\v> which match horizontal
 and vertical whitespace characters.
 
+The exact set of characters matched by C<\d>, C<\s>, and C<\w> varies
+depending on various pragma and regular expression modifiers.  See
+L<perlre>.
+
 The uppercase variants (C<\W>, C<\D>, C<\S>, C<\H>, and C<\V>) are
 character classes that match, respectively, any character that isn't a
 word character, digit, whitespace, horizontal whitespace, or vertical
