@@ -26,10 +26,14 @@ XXX New core language features go here. Summarise user-visible core language
 enhancements. Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
+[ List each enhancement as a =head2 entry ]
+
+=head2 Any unsigned value can be encoded as a character
+
 With this release, Perl is adopting a model that any unsigned value can
-be encoded internally as utf8 without warnings -- not just the ones that
-are legal in Unicode.
-However, unless UTF8 warnings have been
+be treated as a code point and encoded internally (as utf8) without
+warnings -- not just the code points that are legal in Unicode.
+However, unless utf8 warnings have been
 explicitly lexically turned off, outputting or performing a
 Unicode-defined operation (such as upper-casing) on such a code point
 will generate a warning.  Attempting to input these using strict rules
@@ -41,7 +45,6 @@ standard, are now always legal internally.  But inputting or outputting
 them will work the same as for the non-legal Unicode code points, as the
 Unicode standard says they are illegal for "open interchange".
 
-[ List each enhancement as a =head2 entry ]
 
 =head1 Security
 
