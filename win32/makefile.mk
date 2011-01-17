@@ -1537,8 +1537,8 @@ distclean: realclean
 	-if exist $(LIBDIR)\Win32API rmdir /s /q $(LIBDIR)\Win32API
 	-cd $(PODDIR) && del /f *.html *.bat \
 	    perl5139delta.pod perlaix.pod perlamiga.pod perlapi.pod \
-	    perlbeos.pod perlbs2000.pod perlce.pod \
-	    perlcn.pod perlcygwin.pod perldgux.pod perldos.pod perlepoc.pod \
+	    perlbeos.pod perlbs2000.pod perlce.pod perlcn.pod \
+	    perlcygwin.pod perldgux.pod perldos.pod perlepoc.pod \
 	    perlfreebsd.pod perlhaiku.pod perlhpux.pod perlhurd.pod \
 	    perlintern.pod perlirix.pod perljp.pod perlko.pod perllinux.pod \
 	    perlmacos.pod perlmacosx.pod perlmodlib.pod perlmpeix.pod \
