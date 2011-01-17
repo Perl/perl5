@@ -182,7 +182,7 @@ warned, all 66 warn.
 
 =item *
 
-C<File::Fetch> has been upgraded from version 0.28 to 0.30
+C<File::Fetch> has been upgraded from version 0.28 to 0.32
 
 =item *
 

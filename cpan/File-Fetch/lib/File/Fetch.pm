@@ -22,7 +22,7 @@ use vars    qw[ $VERBOSE $PREFER_BIN $FROM_EMAIL $USER_AGENT
                 $FTP_PASSIVE $TIMEOUT $DEBUG $WARN
             ];
 
-$VERSION        = '0.30';
+$VERSION        = '0.32';
 $VERSION        = eval $VERSION;    # avoid warnings with development releases
 $PREFER_BIN     = 0;                # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';
@@ -36,7 +36,7 @@ $WARN           = 1;
 
 ### methods available to fetch the file depending on the scheme
 $METHODS = {
-    http    => [ qw|lwp httplite wget curl lftp fetch lynx iosock| ],
+    http    => [ qw|lwp httptiny wget curl lftp fetch httplite lynx iosock| ],
     ftp     => [ qw|lwp netftp wget curl lftp fetch ncftp ftp| ],
     file    => [ qw|lwp lftp file| ],
     rsync   => [ qw|rsync| ]
@@ -580,6 +580,46 @@ sub _lwp_fetch {
 
     } else {
         $METHOD_FAIL->{'lwp'} = 1;
+        return;
+    }
+}
+
+### HTTP::Tiny fetching ###
+sub _httptiny_fetch {
+    my $self = shift;
+    my %hash = @_;
+
+    my ($to);
+    my $tmpl = {
+        to  => { required => 1, store => \$to }
+    };
+    check( $tmpl, \%hash ) or return;
+
+    my $use_list = {
+        'HTTP::Tiny'    => '0.008',
+
+    };
+
+    if( can_load(modules => $use_list) ) {
+
+        my $uri = $self->uri;
+
+        my $http = HTTP::Tiny->new( ( $TIMEOUT ? ( timeout => $TIMEOUT ) : () ) );
+
+        my $rc = $http->mirror( $uri, $to );
+
+        unless ( $rc->{success} ) {
+
+            return $self->_error(loc( "Fetch failed! HTTP response: %1 [%2]",
+                        $rc->{status}, $rc->{reason} ) );
+
+        }
+
+        return $to;
+
+    }
+    else {
+        $METHOD_FAIL->{'httptiny'} = 1;
         return;
     }
 }
@@ -1523,6 +1563,7 @@ the $BLACKLIST, $METHOD_FAIL and other internal functions.
 
     LWP         => lwp
     HTTP::Lite  => httplite
+    HTTP::Tiny  => httptiny
     Net::FTP    => netftp
     wget        => wget
     lynx        => lynx
