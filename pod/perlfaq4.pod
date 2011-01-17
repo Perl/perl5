@@ -2431,7 +2431,7 @@ you want to check three keys deep, you might naïvely try this:
 	if( exists $hash{key1}{key2}{key3} ) {
 		...;
 		}
-		
+
 Even though you started with a completely empty hash, after that call to 
 C<exists> you've created the structure you needed to check for C<key3>:
 
