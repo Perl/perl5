@@ -422,6 +422,7 @@ the strings?).
  Jesse    5.12.2        2010-Sep-06
  Ricardo  5.12.3-RC1    2011-Jan-09
  Ricardo  5.12.3-RC2    2011-Jan-14
+ Ricardo  5.12.3-RC3    2011-Jan-17
 
 =head2 SELECTED RELEASE SIZES
 
