@@ -54,7 +54,7 @@ foreach my $charset ("d", "u") {
                 my $char = display(chr($ord));
 
                 # > 255 already implies upgraded.  Skip the ones that don't
-                # have an explicit upgradei.  This shows more clearly in the
+                # have an explicit upgrade.  This shows more clearly in the
                 # output which tests are in utf8, or not.
                 next if $ord > 255 && ! $upgrade;
 
