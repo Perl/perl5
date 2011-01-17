@@ -25,10 +25,10 @@ function that will be called whenever something nasty occurs. What we
 would like is to be able to specify a Perl subroutine that will be
 called instead.
 
-=item * An Event Driven Program
+=item * An Event-Driven Program
 
 The classic example of where callbacks are used is when writing an
-event driven program like for an X windows application.  In this case
+event driven program, such as for an X windows application.  In this case
 you register functions to be called whenever specific events occur,
 e.g., a mouse button is pressed, the cursor moves into a window or a
 menu item is selected.
