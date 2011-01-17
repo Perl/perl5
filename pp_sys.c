@@ -2914,11 +2914,7 @@ S_try_amagic_ftest(pTHX_ char chr) {
 
 	SPAGAIN;
 
-	next = PL_op->op_next;
-	if (next->op_type >= OP_FTRREAD &&
-	    next->op_type <= OP_FTBINARY &&
-	    next->op_private & OPpFT_STACKED
-	) {
+	if (PL_op->op_private & OPpFT_STACKING) {
 	    if (SvTRUE(tmpsv))
 		/* leave the object alone */
 		return TRUE;

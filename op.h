@@ -284,7 +284,8 @@ Deprecated.  Use C<GIMME_V> instead.
 
 /* Private for OP_FTXXX */
 #define OPpFT_ACCESS		2	/* use filetest 'access' */
-#define OPpFT_STACKED		4	/* stacked filetest, as in "-f -x $f" */
+#define OPpFT_STACKED		4	/* stacked filetest, as "-f" in "-f -x $f" */
+#define OPpFT_STACKING		8	/* stacking filetest, as "-x" in "-f -x $f" */
 
 /* Private for OP_(MAP|GREP)(WHILE|START) */
 #define OPpGREP_LEX		2	/* iterate over lexical $_ */

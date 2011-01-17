@@ -7342,8 +7342,10 @@ Perl_ck_ftst(pTHX_ OP *o)
 	if ((PL_hints & HINT_FILETEST_ACCESS) && OP_IS_FILETEST_ACCESS(o->op_type))
 	    o->op_private |= OPpFT_ACCESS;
 	if (PL_check[kidtype] == Perl_ck_ftst
-		&& kidtype != OP_STAT && kidtype != OP_LSTAT)
+	        && kidtype != OP_STAT && kidtype != OP_LSTAT) {
 	    o->op_private |= OPpFT_STACKED;
+	    kid->op_private |= OPpFT_STACKING;
+	}
     }
     else {
 #ifdef PERL_MAD
