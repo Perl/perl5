@@ -1577,11 +1577,12 @@ use File::Glob qw(:case);
     'Unicode::Collate' =>
 	{
 	'MAINTAINER'	=> 'sadahiro',
-	'DISTRIBUTION'	=> 'SADAHIRO/Unicode-Collate-0.68-withoutworldwriteables.tar.gz',
+	'DISTRIBUTION'	=> 'SADAHIRO/Unicode-Collate-0.70-withoutworldwriteables.tar.gz',
 	'FILES'		=> q[cpan/Unicode-Collate],
-			    # ignore experimental XS version
-	'EXCLUDED'	=> [ qr{X$},
-			     qw{disableXS enableXS }
+	'EXCLUDED'	=> [ qr{N$},
+                   qr{^data/},
+                   qr{^gendata/},
+			             qw{disableXS enableXS mklocale},
 			   ],
 	'UPSTREAM'	=> 'first-come',
 	},
