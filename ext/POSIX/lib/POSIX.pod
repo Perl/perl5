@@ -1196,6 +1196,10 @@ Synopsis:
 
 Returns C<undef> on failure.
 
+Note that you can't reliably block or unblock a signal from its own signal
+handler if you're using safe signals. Other signals can be blocked or unblocked
+reliably.
+
 =item sigsetjmp
 
 C<sigsetjmp()> is C-specific: use C<eval {}> instead,
