@@ -33,10 +33,12 @@ SEOL        EOL,        no        ; Same, assuming singleline.
 BOUND       BOUND,      no        ; Match "" at any word boundary using native charset semantics for non-utf8
 BOUNDL      BOUND,      no        ; Match "" at any locale word boundary
 BOUNDU      BOUND,      no        ; Match "" at any word boundary using Unicode semantics
+BOUNDA      BOUND,      no         ; Match "" at any word boundary using ASCII semantics
 # All NBOUND nodes are required by a line regexec.c to be greater than all BOUND ones
 NBOUND      NBOUND,     no        ; Match "" at any word non-boundary using native charset semantics for non-utf8
 NBOUNDL     NBOUND,     no        ; Match "" at any locale word non-boundary
 NBOUNDU     NBOUND,     no        ; Match "" at any word non-boundary using Unicode semantics
+NBOUNDA     NBOUND,     no        ; Match "" at any word non-boundary using ASCII semantics
 GPOS        GPOS,       no        ; Matches where last m//g left off.
 
 #* [Special] alternatives:
@@ -49,19 +51,25 @@ ANYOFV      ANYOF,      sv 0 V    ; Match character in (or not in) this class, c
 ALNUM       ALNUM,      no 0 S    ; Match any alphanumeric character using native charset semantics for non-utf8
 ALNUML      ALNUM,      no 0 S    ; Match any alphanumeric char in locale
 ALNUMU      ALNUM,      no 0 S    ; Match any alphanumeric char using Unicode semantics
+ALNUMA      ALNUM,      no 0 S    ; Match [A-Za-z_0-9]
 NALNUM      NALNUM,     no 0 S    ; Match any non-alphanumeric character using native charset semantics for non-utf8
 NALNUML     NALNUM,     no 0 S    ; Match any non-alphanumeric char in locale
 NALNUMU     NALNUM,     no 0 S    ; Match any non-alphanumeric char using Unicode semantics
+NALNUMA     NALNUM,     no 0 S    ; Match [^A-Za-z_0-9]
 SPACE       SPACE,      no 0 S    ; Match any whitespace character using native charset semantics for non-utf8
 SPACEL      SPACE,      no 0 S    ; Match any whitespace char in locale
 SPACEU      SPACE,      no 0 S    ; Match any whitespace char using Unicode semantics
+SPACEA      SPACE,      no 0 S    ; Match [ \t\n\f\r]
 NSPACE      NSPACE,     no 0 S    ; Match any non-whitespace character using native charset semantics for non-utf8
 NSPACEL     NSPACE,     no 0 S    ; Match any non-whitespace char in locale
 NSPACEU     NSPACE,     no 0 S    ; Match any non-whitespace char using Unicode semantics
+NSPACEA     NSPACE,     no 0 S    ; Match [^ \t\n\f\r]
 DIGIT       DIGIT,      no 0 S    ; Match any numeric character using native charset semantics for non-utf8
 DIGITL      DIGIT,      no 0 S    ; Match any numeric character in locale
+DIGITA      DIGIT,      no 0 S    ; Match [0-9]
 NDIGIT      NDIGIT,     no 0 S    ; Match any non-numeric character using native charset semantics for non-utf8
 NDIGITL     NDIGIT,     no 0 S    ; Match any non-numeric character in locale
+NDIGITA     NDIGIT,     no 0 S    ; Match [^0-9]
 CLUMP       CLUMP,      no 0 V    ; Match any extended grapheme cluster sequence
 
 #* Alternation
