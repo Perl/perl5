@@ -48,14 +48,25 @@ sets the build type to Release by default.
 This is used to set the build type to debug or release. Change the
 build type only after executing SetNWBld.bat
 
-=item *
-
 Example:
-  1. Typing "buildtype d on" at the command prompt causes the buildtype
-     to be set to Debug type with D2 flag set. 
-  2. Typing "buildtype d off" or "buildtype d" at the command prompt causes
-     the buildtype to be set to Debug type with D1 flag set. 
-  2. Typing "buildtype r" at the command prompt sets it to Release Build type.
+
+=over
+
+=item 1.
+
+Typing "buildtype d on" at the command prompt causes the buildtype
+to be set to Debug type with D2 flag set. 
+
+=item 2.
+
+Typing "buildtype d off" or "buildtype d" at the command prompt causes
+the buildtype to be set to Debug type with D1 flag set. 
+
+=item 3.
+
+Typing "buildtype r" at the command prompt sets it to Release Build type.
+
+=back
 
 =back
 
