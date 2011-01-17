@@ -1,3 +1,29 @@
+2011-01-16  Andreas J. Koenig  <andk@cpan.org>
+
+	* release 1.94_63
+
+	* address #63357: use Dumpvalue when dumping potential crap (Andreas
+	Koenig)
+
+	* address #62986: new config option use_file_homedir (Andreas Koenig)
+
+	* address #64037: new config option prefer_external_tar (Andreas Koenig)
+
+	* add support for bootstrapping local::lib when the user does not have
+	write access to perl's site library directories (David Golden)
+
+	* add support for (and prerequisite on) HTTP::Tiny; also adds
+	prerequisites for MIME::Base64 and Digest::MD5 to support proxy
+	authentication (David Golden)
+
+	* automatic mirror selection now returns only http mirrors (David
+	Golden)
+
+	* add 'atexit' option for cache scanning and cleanup (David Golden)
+
+	* now with 421 distroprefs files (but a good portion of them seems
+	outdated)
+
 2010-10-26  Andreas J. Koenig  <andk@cpan.org>
 
 	* release 1.94_62

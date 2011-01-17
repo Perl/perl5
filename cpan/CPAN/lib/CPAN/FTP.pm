@@ -652,8 +652,46 @@ sub hostdleasy { #called from hostdlxxx
                 # Net::FTP can still succeed where LWP fails. So we do not
                 # skip Net::FTP anymore when LWP is available.
             }
-        } else {
-            $CPAN::Frontend->mywarn("  LWP not available\n");
+        } elsif ($url =~ /^http:/ && $CPAN::META->has_usable('HTTP::Tiny')) {
+            require CPAN::HTTP::Client;
+            my $chc = CPAN::HTTP::Client->new(
+                proxy => $CPAN::Config->{http_proxy} || $ENV{http_proxy},
+                no_proxy => $CPAN::Config->{no_proxy} || $ENV{no_proxy},
+            );
+            for my $try ( $url, ( $url !~ /\.gz(?!\n)\Z/ ? "$url.gz" : () ) ) {
+                $CPAN::Frontend->myprint("Fetching with HTTP::Tiny:\n$try\n");
+                my $res = eval { $chc->mirror($try, $aslocal) };
+                if ( $res && $res->{success} ) {
+                    $ThesiteURL = $ro_url;
+                    my $now = time;
+                    utime $now, $now, $aslocal; # download time is more
+                                                # important than upload
+                                                # time
+                    return $aslocal;
+                }
+                elsif ( $res && $res->{status} ne '599') {
+                    $CPAN::Frontend->myprint(sprintf(
+                            "HTTP::Tiny failed with code[%s] message[%s]\n",
+                            $res->{status},
+                            $res->{reason},
+                        )
+                    );
+                }
+                elsif ( $res && $res->{status} eq '599') {
+                    $CPAN::Frontend->myprint(sprintf(
+                            "HTTP::Tiny failed with an internal error: %s\n",
+                            $res->{content},
+                        )
+                    );
+                }
+                else {
+                    my $err = $@ || 'Unknown error';
+                    $CPAN::Frontend->myprint(sprintf(
+                            "Error downloading with HTTP::Tiny: %s\n", $err
+                        )
+                    );
+                }
+            }
         }
         return if $CPAN::Signal;
         if ($url =~ m|^ftp://(.*?)/(.*)/(.*)|) {
@@ -852,7 +890,7 @@ sub _proxy_vars {
         }
         if ($want_proxy) {
             my($user, $pass) =
-                &CPAN::LWP::UserAgent::get_proxy_credentials();
+                CPAN::HTTP::Credentials->get_proxy_credentials();
             $ret = {
                     proxy_user => $user,
                     proxy_pass => $pass,

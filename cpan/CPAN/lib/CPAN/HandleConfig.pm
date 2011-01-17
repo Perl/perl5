@@ -12,8 +12,8 @@ $VERSION = "5.5001"; # see also CPAN::Config::VERSION at end of file
 );
 
 # Q: where is the "How do I add a new config option" HOWTO?
-# A1: svn diff -r 757:758 # where dagolden added test_report
-# A2: svn diff -r 985:986 # where andk added yaml_module
+# A1: svn diff -r 757:758 # where dagolden added test_report [git e997b71de88f1019a1472fc13cb97b1b7f96610f]
+# A2: svn diff -r 985:986 # where andk added yaml_module [git 312b6d9b12b1bdec0b6e282d853482145475021f]
 # A3: 1. add new config option to %keys below
 #     2. add a Pod description in CPAN::FirstTime; it should include a
 #        prompt line; see others for examples
@@ -78,6 +78,7 @@ $VERSION = "5.5001"; # see also CPAN::Config::VERSION at end of file
      "patch",
      "patches_dir",
      "perl5lib_verbosity",
+     "prefer_external_tar",
      "prefer_installer",
      "prefs_dir",
      "prerequisites_policy",
@@ -97,6 +98,7 @@ $VERSION = "5.5001"; # see also CPAN::Config::VERSION at end of file
      "trust_test_report_history",
      "unzip",
      "urllist",
+     "use_file_homedir",
      "use_sqlite",
      "username",
      "version_timeout",
@@ -503,7 +505,7 @@ sub home () {
     # so do it manually instead
     my $old_v = $CPAN::Config->{load_module_verbosity};
     $CPAN::Config->{load_module_verbosity} = q[none];
-    if ($CPAN::META->has_usable("File::HomeDir")) {
+    if (CPAN::_use_file_homedir()) {
         if ($^O eq 'darwin') {
             $home = File::HomeDir->my_home; # my_data is ~/Library/Application Support on darwin,
                                             # which causes issues in the toolchain.
@@ -521,7 +523,8 @@ sub home () {
 
 sub load {
     my($self, %args) = @_;
-    $CPAN::Be_Silent++ if $args{be_silent};
+    $CPAN::Be_Silent+=0; # protect against 'used only once'
+    $CPAN::Be_Silent++ if $args{be_silent}; # do not use; planned to be removed in 2011
     my $doit;
     $doit = delete $args{doit} || 0;
     $loading = 0 unless defined $loading;

@@ -159,6 +159,10 @@ C<Compress::Raw::Zlib> has been upgraded from version 2.030 to 2.033
 
 =item *
 
+C<CPAN> has been upgraded from version 1.94_62 to 1.94_63
+
+=item *
+
 C<CPANPLUS> has been upgraded from version 0.9010 to 0.9011
 
 =item *

@@ -290,6 +290,8 @@ cpan/CPAN/lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
 cpan/CPAN/lib/CPAN/FTP/netrc.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/FTP.pm			helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/HandleConfig.pm	helper package for CPAN.pm
+cpan/CPAN/lib/CPAN/HTTP/Client.pm	helper package for CPAN.pm
+cpan/CPAN/lib/CPAN/HTTP/Credentials.pm	helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Index.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/InfoObj.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Kwalify/distroprefs.dd		helper file for validating config files

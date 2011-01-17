@@ -2,7 +2,7 @@
 # vim: ts=4 sts=4 sw=4:
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.94_62';
+$CPAN::VERSION = '1.94_63';
 $CPAN::VERSION =~ s/_//;
 
 # we need to run chdir all over and we would get at wrong libraries
@@ -513,6 +513,27 @@ sub _flock {
     } else {
         return 1;
     }
+}
+
+sub _use_file_homedir () {
+    my $use_file_homedir = $CPAN::Config->{use_file_homedir};
+    unless (defined $use_file_homedir) {
+        if ($^O =~ /^(MSWin32|darwin)$/) {
+            $use_file_homedir = 1;
+        } else {
+            $use_file_homedir = 0;
+        }
+    }
+    if ($use_file_homedir
+        and not $CPAN::META->has_usable("File::HomeDir")) {
+        my $v = $File::HomeDir::VERSION;
+        if (CPAN::Version->vgt($v,0)) {
+            $CPAN::Frontend->mydie("Version of File::HomeDir ($v) is insufficient. Please upgrade or try 'o conf init use_file_homedir'");
+        } else {
+            $CPAN::Frontend->mydie("File::HomeDir not installed. Please install it or try 'o conf init use_file_homedir'");
+        }
+    }
+    return $use_file_homedir;
 }
 
 sub _yaml_module () {
@@ -1027,10 +1048,21 @@ sub has_usable {
                             sub {require Net::FTP},
                             sub {require Net::Config},
                            ],
+               'HTTP::Tiny' => [
+                            sub {
+                                require HTTP::Tiny;
+                                unless (CPAN::Version->vge(HTTP::Tiny->VERSION, 0.005)) {
+                                    for ("Will not use HTTP::Tiny, need version 0.005\n") {
+                                        $CPAN::Frontend->mywarn($_);
+                                        die $_;
+                                    }
+                                }
+                            },
+                           ],
                'File::HomeDir' => [
                                    sub {require File::HomeDir;
-                                        unless (CPAN::Version->vge(File::HomeDir::->VERSION, 0.52)) {
-                                            for ("Will not use File::HomeDir, need 0.52\n") {
+                                        unless (CPAN::Version->vge(File::HomeDir::->VERSION, 0.65)) {
+                                            for ("Will not use File::HomeDir, need 0.65\n") {
                                                 $CPAN::Frontend->mywarn($_);
                                                 die $_;
                                             }
@@ -1189,6 +1221,12 @@ sub new {
     bless {}, shift;
 }
 
+#-> sub CPAN::_exit_messages ;
+sub _exit_messages {
+    my ($self) = @_;
+    $self->{exit_messages} ||= [];
+}
+
 #-> sub CPAN::cleanup ;
 sub cleanup {
   # warn "cleanup called with arg[@_] End[$CPAN::End] Signal[$Signal]";
@@ -1205,6 +1243,7 @@ sub cleanup {
   return unless defined $META->{LOCK};
   return unless -f $META->{LOCK};
   $META->savehist;
+  $META->{cachemgr} ||= CPAN::CacheMgr->new('atexit');
   close $META->{LOCKFH};
   unlink $META->{LOCK};
   # require Carp;
@@ -1213,6 +1252,9 @@ sub cleanup {
       $CPAN::Frontend->mywarn("Warning: Configuration not saved.\n");
   }
   $CPAN::Frontend->myprint("Lockfile removed.\n");
+  for my $msg ( @{ $META->_exit_messages } ) {
+      $CPAN::Frontend->myprint($msg);
+  }
 }
 
 #-> sub CPAN::readhist
@@ -1385,8 +1427,8 @@ Basic commands:
 
 The CPAN module automates or at least simplifies the make and install
 of perl modules and extensions. It includes some primitive searching
-capabilities and knows how to use Net::FTP, LWP, and certain external
-download clients to fetch distributions from the net.
+capabilities and knows how to use LWP, HTTP::Tiny, Net::FTP and certain
+external download clients to fetch distributions from the net.
 
 These are fetched from one or more mirrored CPAN (Comprehensive
 Perl Archive Network) sites and unpacked in a dedicated directory.
@@ -1993,6 +2035,10 @@ currently defined:
   patch              path to external prg
   patches_dir        local directory containing patch files
   perl5lib_verbosity verbosity level for PERL5LIB additions
+  prefer_external_tar
+                     per default all untar operations are done with
+                     Archive::Tar; by setting this variable to true
+                     the external tar command is used if available
   prefer_installer   legal values are MB and EUMM: if a module comes
                      with both a Makefile.PL and a Build.PL, use the
                      former (EUMM) or the latter (MB); if the module
@@ -2008,7 +2054,7 @@ currently defined:
   proxy_user         username for accessing an authenticating proxy
   proxy_pass         password for accessing an authenticating proxy
   randomize_urllist  add some randomness to the sequence of the urllist
-  scan_cache         controls scanning of cache ('atstart' or 'never')
+  scan_cache         controls scanning of cache ('atstart', 'atexit' or 'never')
   shell              your favorite shell
   show_unparsable_versions
                      boolean if r command tells which modules are versionless
@@ -2025,6 +2071,8 @@ currently defined:
                      CPAN::Reporter history)
   unzip              location of external program unzip
   urllist            arrayref to nearby CPAN sites (or equivalent locations)
+  use_file_homedir   use File::HomeDir to determine home directory and storage
+                     locations
   use_sqlite         use CPAN::SQLite for metadata storage (fast and lean)
   username           your username if you CPAN server wants one
   version_timeout    stops version parsing after this many seconds.
@@ -3381,7 +3429,7 @@ or in your web browser you've proxy information set, then you know
 you are running behind an http firewall.
 
 To access servers outside these types of firewalls with perl (even for
-ftp), you need LWP.
+ftp), you need LWP or HTTP::Tiny.
 
 =item ftp firewall
 
@@ -3553,8 +3601,9 @@ including
 or setting the PERL5LIB environment variable.
 
 While we're speaking about $ENV{HOME}, it might be worth mentioning,
-that for Windows we use the File::HomeDir module that provides an
-equivalent to the concept of the home directory on Unix.
+that for Windows and Darwin (and when use_file_homedir is turned on)
+we use the File::HomeDir module that provides an equivalent to the
+concept of the home directory on Unix.
 
 Another thing you should bear in mind is that the UNINST parameter can
 be dangerous when you are installing into a private area because you
@@ -3679,11 +3728,15 @@ http://search.cpan.org/dist/Module-Build-Convert/
 I'm frequently irritated with the CPAN shell's inability to help me
 select a good mirror.
 
-The urllist config parameter is yours. You can add and remove sites at
-will. You should find out which sites have the best uptodateness,
-bandwidth, reliability, etc. and are topologically close to you. Some
-people prefer fast downloads, others uptodateness, others reliability.
-You decide which to try in which order.
+CPAN can now help you select a "good" mirror, based on which ones have the
+lowest 'ping' round-trip times.  From the shell, use the command 'o conf init
+urllist' and allow CPAN to automatically select mirrors for you.
+
+Beyond that help, the urllist config parameter is yours. You can add and remove
+sites at will. You should find out which sites have the best uptodateness,
+bandwidth, reliability, etc. and are topologically close to you. Some people
+prefer fast downloads, others uptodateness, others reliability.  You decide
+which to try in which order.
 
 Henk P. Penning maintains a site that collects data about CPAN sites:
 

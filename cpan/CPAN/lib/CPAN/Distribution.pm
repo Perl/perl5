@@ -189,7 +189,7 @@ sub color_cmd_tmps {
             my $premo;
             unless ($premo = CPAN::Shell->expand("Module",$pre)) {
                 $CPAN::Frontend->mywarn("prerequisite module[$pre] not known\n");
-                $CPAN::Frontend->mysleep(2);
+                $CPAN::Frontend->mysleep(0.2);
                 next PREREQ;
             }
             $premo->color_cmd_tmps($depth+1,$color,[@$ancestors, $self->id]);
@@ -3181,8 +3181,42 @@ sub test {
         $tests_ok = system($system) == 0;
     }
     $self->introduce_myself;
+    my $but = $self->_make_test_illuminate_prereqs();
     if ( $tests_ok ) {
-        {
+        if ($but) {
+            $CPAN::Frontend->mywarn("Tests succeeded but $but\n");
+            $self->{make_test} = CPAN::Distrostatus->new("NO $but");
+            $self->store_persistent_state;
+            return $self->goodbye("[dependencies] -- NA");
+        }
+        $CPAN::Frontend->myprint("  $system -- OK\n");
+        $self->{make_test} = CPAN::Distrostatus->new("YES");
+        $CPAN::META->is_tested($self->{build_dir},$self->{make_test}{TIME});
+        # probably impossible to need the next line because badtestcnt
+        # has a lifespan of one command
+        delete $self->{badtestcnt};
+    } else {
+        if ($but) {
+            $but .= "; additionally test harness failed";
+            $CPAN::Frontend->mywarn("$but\n");
+            $self->{make_test} = CPAN::Distrostatus->new("NO $but");
+        } else {
+            $self->{make_test} = CPAN::Distrostatus->new("NO");
+        }
+        $self->{badtestcnt}++;
+        $CPAN::Frontend->mywarn("  $system -- NOT OK\n");
+        CPAN::Shell->optprint
+              ("hint",
+               sprintf
+               ("//hint// to see the cpan-testers results for installing this module, try:
+  reports %s\n",
+                $self->pretty_id));
+    }
+    $self->store_persistent_state;
+}
+
+sub _make_test_illuminate_prereqs {
+    my($self) = @_;
             my @prereq;
 
             # local $CPAN::DEBUG = 16; # Distribution
@@ -3213,36 +3247,14 @@ sub test {
                     push @prereq, $m;
                 }
             }
+    my $but;
             if (@prereq) {
                 my $cnt = @prereq;
                 my $which = join ",", @prereq;
-                my $but = $cnt == 1 ? "one dependency not OK ($which)" :
+        $but = $cnt == 1 ? "one dependency not OK ($which)" :
                     "$cnt dependencies missing ($which)";
-                $CPAN::Frontend->mywarn("Tests succeeded but $but\n");
-                $self->{make_test} = CPAN::Distrostatus->new("NO $but");
-                $self->store_persistent_state;
-                return $self->goodbye("[dependencies] -- NA");
             }
-        }
-
-        $CPAN::Frontend->myprint("  $system -- OK\n");
-        $self->{make_test} = CPAN::Distrostatus->new("YES");
-        $CPAN::META->is_tested($self->{build_dir},$self->{make_test}{TIME});
-        # probably impossible to need the next line because badtestcnt
-        # has a lifespan of one command
-        delete $self->{badtestcnt};
-    } else {
-        $self->{make_test} = CPAN::Distrostatus->new("NO");
-        $self->{badtestcnt}++;
-        $CPAN::Frontend->mywarn("  $system -- NOT OK\n");
-        CPAN::Shell->optprint
-              ("hint",
-               sprintf
-               ("//hint// to see the cpan-testers results for installing this module, try:
-  reports %s\n",
-                $self->pretty_id));
-    }
-    $self->store_persistent_state;
+    $but;
 }
 
 sub _prefs_with_expect {
