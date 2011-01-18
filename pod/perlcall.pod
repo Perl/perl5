@@ -799,14 +799,14 @@ then the output will be
     Value 1 = 3
 
 In this case the main point to note is that only the last item in the
-list is returned from the subroutine, I<AddSubtract> actually made it back to
+list is returned from the subroutine. I<AddSubtract> actually made it back to
 I<call_AddSubScalar>.
 
 
 =head2 Returning Data from Perl via the Parameter List
 
-It is also possible to return values directly via the parameter list -
-whether it is actually desirable to do it is another matter entirely.
+It is also possible to return values directly via the parameter
+list--whether it is actually desirable to do it is another matter entirely.
 
 The Perl subroutine, I<Inc>, below takes 2 parameters and increments
 each directly.
