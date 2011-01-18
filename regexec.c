@@ -1676,34 +1676,40 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		isALNUM_LC_utf8((U8*)s),
 		isALNUM_LC(*s)
 	    );
+	    break;
 	case ALNUMU:
 	    REXEC_FBC_CSCAN_PRELOAD(
 		LOAD_UTF8_CHARCLASS_PERL_WORD(),
 		swash_fetch(RE_utf8_perl_word,(U8*)s, utf8_target),
                 isWORDCHAR_L1((U8) *s)
 	    );
+	    break;
 	case ALNUM:
 	    REXEC_FBC_CSCAN_PRELOAD(
 		LOAD_UTF8_CHARCLASS_PERL_WORD(),
 		swash_fetch(RE_utf8_perl_word,(U8*)s, utf8_target),
                 isWORDCHAR((U8) *s)
 	    );
+	    break;
 	case ALNUMA:
 	    /* Don't need to worry about utf8, as it can match only a single
 	     * byte invariant character */
 	    REXEC_FBC_CLASS_SCAN( isWORDCHAR_A(*s));
+	    break;
 	case NALNUMU:
 	    REXEC_FBC_CSCAN_PRELOAD(
 		LOAD_UTF8_CHARCLASS_PERL_WORD(),
 		swash_fetch(RE_utf8_perl_word,(U8*)s, utf8_target),
                 ! isWORDCHAR_L1((U8) *s)
 	    );
+	    break;
 	case NALNUM:
 	    REXEC_FBC_CSCAN_PRELOAD(
 		LOAD_UTF8_CHARCLASS_PERL_WORD(),
 		!swash_fetch(RE_utf8_perl_word, (U8*)s, utf8_target),
                 ! isALNUM(*s)
 	    );
+	    break;
 	case NALNUMA:
 	    REXEC_FBC_CSCAN(
 		!isWORDCHAR_A(*s),
@@ -1715,39 +1721,46 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		!isALNUM_LC_utf8((U8*)s),
 		!isALNUM_LC(*s)
 	    );
+	    break;
 	case SPACEU:
 	    REXEC_FBC_CSCAN_PRELOAD(
 		LOAD_UTF8_CHARCLASS_PERL_SPACE(),
 		*s == ' ' || swash_fetch(RE_utf8_perl_space,(U8*)s, utf8_target),
                 isSPACE_L1((U8) *s)
 	    );
+	    break;
 	case SPACE:
 	    REXEC_FBC_CSCAN_PRELOAD(
 		LOAD_UTF8_CHARCLASS_PERL_SPACE(),
 		*s == ' ' || swash_fetch(RE_utf8_perl_space,(U8*)s, utf8_target),
                 isSPACE((U8) *s)
 	    );
+	    break;
 	case SPACEA:
 	    /* Don't need to worry about utf8, as it can match only a single
 	     * byte invariant character */
 	    REXEC_FBC_CLASS_SCAN( isSPACE_A(*s));
+	    break;
 	case SPACEL:
 	    REXEC_FBC_CSCAN_TAINT(
 		isSPACE_LC_utf8((U8*)s),
 		isSPACE_LC(*s)
 	    );
+	    break;
 	case NSPACEU:
 	    REXEC_FBC_CSCAN_PRELOAD(
 		LOAD_UTF8_CHARCLASS_PERL_SPACE(),
 		!( *s == ' ' || swash_fetch(RE_utf8_perl_space,(U8*)s, utf8_target)),
                 ! isSPACE_L1((U8) *s)
 	    );
+	    break;
 	case NSPACE:
 	    REXEC_FBC_CSCAN_PRELOAD(
 		LOAD_UTF8_CHARCLASS_PERL_SPACE(),
 		!(*s == ' ' || swash_fetch(RE_utf8_perl_space,(U8*)s, utf8_target)),
                 ! isSPACE((U8) *s)
 	    );
+	    break;
 	case NSPACEA:
 	    REXEC_FBC_CSCAN(
 		!isSPACE_A(*s),
@@ -1759,27 +1772,32 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		!isSPACE_LC_utf8((U8*)s),
 		!isSPACE_LC(*s)
 	    );
+	    break;
 	case DIGIT:
 	    REXEC_FBC_CSCAN_PRELOAD(
 		LOAD_UTF8_CHARCLASS_POSIX_DIGIT(),
 		swash_fetch(RE_utf8_posix_digit,(U8*)s, utf8_target),
 		isDIGIT(*s)
 	    );
+	    break;
 	case DIGITA:
 	    /* Don't need to worry about utf8, as it can match only a single
 	     * byte invariant character */
 	    REXEC_FBC_CLASS_SCAN( isDIGIT_A(*s));
+	    break;
 	case DIGITL:
 	    REXEC_FBC_CSCAN_TAINT(
 		isDIGIT_LC_utf8((U8*)s),
 		isDIGIT_LC(*s)
 	    );
+	    break;
 	case NDIGIT:
 	    REXEC_FBC_CSCAN_PRELOAD(
 		LOAD_UTF8_CHARCLASS_POSIX_DIGIT(),
 		!swash_fetch(RE_utf8_posix_digit,(U8*)s, utf8_target),
 		!isDIGIT(*s)
 	    );
+	    break;
 	case NDIGITA:
 	    REXEC_FBC_CSCAN(
 		!isDIGIT_A(*s),
@@ -1791,31 +1809,37 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		!isDIGIT_LC_utf8((U8*)s),
 		!isDIGIT_LC(*s)
 	    );
+	    break;
 	case LNBREAK:
 	    REXEC_FBC_CSCAN(
 		is_LNBREAK_utf8(s),
 		is_LNBREAK_latin1(s)
 	    );
+	    break;
 	case VERTWS:
 	    REXEC_FBC_CSCAN(
 		is_VERTWS_utf8(s),
 		is_VERTWS_latin1(s)
 	    );
+	    break;
 	case NVERTWS:
 	    REXEC_FBC_CSCAN(
 		!is_VERTWS_utf8(s),
 		!is_VERTWS_latin1(s)
 	    );
+	    break;
 	case HORIZWS:
 	    REXEC_FBC_CSCAN(
 		is_HORIZWS_utf8(s),
 		is_HORIZWS_latin1(s)
 	    );
+	    break;
 	case NHORIZWS:
 	    REXEC_FBC_CSCAN(
 		!is_HORIZWS_utf8(s),
 		!is_HORIZWS_latin1(s)
 	    );	    
+	    break;
 	case AHOCORASICKC:
 	case AHOCORASICK: 
 	    {
