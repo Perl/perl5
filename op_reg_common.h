@@ -73,7 +73,7 @@ get_regex_charset(const U32 flags)
 {
     /* Returns the enum corresponding to the character set in 'flags' */
 
-    return (flags & RXf_PMf_CHARSET) >> _RXf_PMf_CHARSET_SHIFT;
+    return (regex_charset) ((flags & RXf_PMf_CHARSET) >> _RXf_PMf_CHARSET_SHIFT);
 }
 
 /* Next available bit after the above.  Name begins with '_' so won't be
