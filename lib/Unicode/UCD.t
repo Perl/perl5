@@ -6,7 +6,6 @@ BEGIN {
     }
     chdir 't' if -d 't';
     @INC = '../lib';
-    @INC = "::lib" if $^O eq 'MacOS'; # module parses @INC itself
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bStorable\b/) {
         print "1..0 # Skip: Storable was not built; Unicode::UCD uses Storable\n";
