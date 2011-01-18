@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlbot - Bag'o Object Tricks (the BOT)
+perlbot - Bag o' Object Tricks (the BOT)
 
 =head1 DESCRIPTION
 
