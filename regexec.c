@@ -1689,6 +1689,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 isWORDCHAR((U8) *s)
 	    );
 	case ALNUMA:
+	    /* Don't need to worry about utf8, as it can match only a single
+	     * byte invariant character */
 	    REXEC_FBC_CLASS_SCAN( isWORDCHAR_A(*s));
 	case NALNUMU:
 	    REXEC_FBC_CSCAN_PRELOAD(
@@ -1703,7 +1705,11 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 ! isALNUM(*s)
 	    );
 	case NALNUMA:
-	    REXEC_FBC_UTF8_CLASS_SCAN( !isWORDCHAR_A(*s));
+	    REXEC_FBC_CSCAN(
+		!isWORDCHAR_A(*s),
+		!isWORDCHAR_A(*s)
+	    );
+	    break;
 	case NALNUML:
 	    REXEC_FBC_CSCAN_TAINT(
 		!isALNUM_LC_utf8((U8*)s),
@@ -1722,6 +1728,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 isSPACE((U8) *s)
 	    );
 	case SPACEA:
+	    /* Don't need to worry about utf8, as it can match only a single
+	     * byte invariant character */
 	    REXEC_FBC_CLASS_SCAN( isSPACE_A(*s));
 	case SPACEL:
 	    REXEC_FBC_CSCAN_TAINT(
@@ -1741,7 +1749,11 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 ! isSPACE((U8) *s)
 	    );
 	case NSPACEA:
-	    REXEC_FBC_UTF8_CLASS_SCAN( !isSPACE_A(*s));
+	    REXEC_FBC_CSCAN(
+		!isSPACE_A(*s),
+		!isSPACE_A(*s)
+	    );
+	    break;
 	case NSPACEL:
 	    REXEC_FBC_CSCAN_TAINT(
 		!isSPACE_LC_utf8((U8*)s),
@@ -1754,6 +1766,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		isDIGIT(*s)
 	    );
 	case DIGITA:
+	    /* Don't need to worry about utf8, as it can match only a single
+	     * byte invariant character */
 	    REXEC_FBC_CLASS_SCAN( isDIGIT_A(*s));
 	case DIGITL:
 	    REXEC_FBC_CSCAN_TAINT(
@@ -1767,7 +1781,11 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		!isDIGIT(*s)
 	    );
 	case NDIGITA:
-	    REXEC_FBC_UTF8_CLASS_SCAN( !isDIGIT_A(*s));
+	    REXEC_FBC_CSCAN(
+		!isDIGIT_A(*s),
+		!isDIGIT_A(*s)
+	    );
+	    break;
 	case NDIGITL:
 	    REXEC_FBC_CSCAN_TAINT(
 		!isDIGIT_LC_utf8((U8*)s),
