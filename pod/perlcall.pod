@@ -42,8 +42,8 @@ embedding Perl. For details on embedding Perl in C refer to
 L<perlembed>.
 
 Before you launch yourself head first into the rest of this document,
-it would be a good idea to have read the following two documents -
-L<perlxs> and L<perlguts>.
+it would be a good idea to have read the following two documents--L<perlxs>
+and L<perlguts>.
 
 =head1 THE CALL_ FUNCTIONS
 
@@ -74,7 +74,7 @@ Each of the functions will now be discussed in turn.
 
 =item call_sv
 
-I<call_sv> takes two parameters, the first, C<sv>, is an SV*.
+I<call_sv> takes two parameters. The first, C<sv>, is an SV*.
 This allows you to specify the Perl subroutine to be called either as a
 C string (which has first been converted to an SV) or a reference to a
 subroutine. The section, I<Using call_sv>, shows how you can make
@@ -103,7 +103,7 @@ of using I<call_method>.
 
 I<call_argv> calls the Perl subroutine specified by the C string
 stored in the C<subname> parameter. It also takes the usual C<flags>
-parameter.  The final parameter, C<argv>, consists of a NULL terminated
+parameter.  The final parameter, C<argv>, consists of a NULL-terminated
 list of C strings to be passed as parameters to the Perl subroutine.
 See I<Using call_argv>.
 
@@ -146,7 +146,7 @@ It ensures that nothing is actually returned from the subroutine.
 =back
 
 The value returned by the I<call_*> function indicates how many
-items have been returned by the Perl subroutine - in this case it will
+items have been returned by the Perl subroutine--in this case it will
 be 0.
 
 
@@ -248,7 +248,7 @@ the effect of not creating the C<@_> array for the Perl subroutine.
 
 Although the functionality provided by this flag may seem
 straightforward, it should be used only if there is a good reason to do
-so.  The reason for being cautious is that even if you have specified
+so.  The reason for being cautious is that, even if you have specified
 the G_NOARGS flag, it is still possible for the Perl subroutine that
 has been called to think that you have passed it parameters.
 
@@ -360,7 +360,7 @@ As mentioned above, you can determine the context of the currently
 executing subroutine in Perl with I<wantarray>.  The equivalent test
 can be made in C by using the C<GIMME_V> macro, which returns
 C<G_ARRAY> if you have been called in a list context, C<G_SCALAR> if
-in a scalar context, or C<G_VOID> if in a void context (i.e. the
+in a scalar context, or C<G_VOID> if in a void context (i.e., the
 return value will not be used).  An older version of this macro is
 called C<GIMME>; in a void context it returns C<G_SCALAR> instead of
 C<G_VOID>.  An example of using the C<GIMME_V> macro is shown in
@@ -368,7 +368,7 @@ section I<Using GIMME_V>.
 
 =head1 EXAMPLES
 
-Enough of the definition talk, let's have a few examples.
+Enough of the definition talk! Let's have a few examples.
 
 Perl provides many macros to assist in accessing the Perl stack.
 Wherever possible, these macros should always be used when interfacing
@@ -382,7 +382,7 @@ possible, if the choice is between using I<call_pv> and
 I<call_sv>, you should always try to use I<call_sv>.  See
 I<Using call_sv> for details.
 
-=head2 No Parameters, Nothing returned
+=head2 No Parameters, Nothing Returned
 
 This first trivial example will call a Perl subroutine, I<PrintUID>, to
 print out the UID of the process.
@@ -403,9 +403,9 @@ and here is a C function to call it
         call_pv("PrintUID", G_DISCARD|G_NOARGS);
     }
 
-Simple, eh.
+Simple, eh?
 
-A few points to note about this example.
+A few points to note about this example:
 
 =over 5
 
@@ -446,7 +446,7 @@ call a Perl subroutine, C<LeftString>, which will take 2 parameters--a
 string ($s) and an integer ($n).  The subroutine will simply
 print the first $n characters of the string.
 
-So the Perl subroutine would look like this
+So the Perl subroutine would look like this:
 
     sub LeftString
     {
@@ -454,7 +454,7 @@ So the Perl subroutine would look like this
         print substr($s, 0, $n), "\n";
     }
 
-The C function required to call I<LeftString> would look like this.
+The C function required to call I<LeftString> would look like this:
 
     static void
     call_LeftString(a, b)
@@ -513,13 +513,13 @@ subroutine, it knows how big to make it.
 
 The C<PUSHMARK> macro tells Perl to make a mental note of the current
 stack pointer. Even if you aren't passing any parameters (like the
-example shown in the section I<No Parameters, Nothing returned>) you
+example shown in the section I<No Parameters, Nothing Returned>) you
 must still call the C<PUSHMARK> macro before you can call any of the
 I<call_*> functions--Perl still needs to know that there are no
 parameters.
 
 The C<PUTBACK> macro sets the global copy of the stack pointer to be
-the same as our local copy. If we didn't do this I<call_pv>
+the same as our local copy. If we didn't do this, I<call_pv>
 wouldn't know where the two parameters we pushed were--remember that
 up to now all the stack pointer manipulation we have done is with our
 local copy, I<not> the global copy.
@@ -557,10 +557,10 @@ the Perl subroutine (see next example), plus it will also dump the
 mortal SVs we have created.  Having C<ENTER>/C<SAVETMPS> at the
 beginning of the code makes sure that no other mortals are destroyed.
 
-Think of these macros as working a bit like using C<{> and C<}> in Perl
+Think of these macros as working a bit like C<{> and C<}> in Perl
 to limit the scope of local variables.
 
-See the section I<Using Perl to dispose of temporaries> for details of
+See the section I<Using Perl to Dispose of Temporaries> for details of
 an alternative to using these macros.
 
 =item 6.
@@ -625,7 +625,7 @@ Points to note this time are
 
 =item 1.
 
-The only flag specified this time was G_SCALAR. That means the C<@_>
+The only flag specified this time was G_SCALAR. That means that the C<@_>
 array will be created and that the value returned by I<Adder> will
 still exist after the call to I<call_pv>.
 
@@ -678,7 +678,7 @@ stack pointer to be the same as our local copy.
 =back
 
 
-=head2 Returning a list of values
+=head2 Returning a List of Values
 
 Now, let's extend the previous example to return both the sum of the
 parameters and the difference.
@@ -750,7 +750,7 @@ order.
 
 =back
 
-=head2 Returning a list in a scalar context
+=head2 Returning a List in a Scalar Context
 
 Say the Perl subroutine in the previous section was called in a scalar
 context, like this
@@ -803,7 +803,7 @@ list is returned from the subroutine, I<AddSubtract> actually made it back to
 I<call_AddSubScalar>.
 
 
-=head2 Returning Data from Perl via the parameter list
+=head2 Returning Data from Perl via the Parameter List
 
 It is also possible to return values directly via the parameter list -
 whether it is actually desirable to do it is another matter entirely.
@@ -1316,7 +1316,7 @@ The output from that will be
     Context is Scalar
     Context is Array
 
-=head2 Using Perl to dispose of temporaries
+=head2 Using Perl to Dispose of Temporaries
 
 In the examples given to date, any temporaries created in the callback
 (i.e., parameters passed on the stack to the I<call_*> function or
@@ -1428,7 +1428,7 @@ any temporaries you may have created. Mind you, if you are at all
 uncertain about what to do, it doesn't do any harm to tidy up anyway.
 
 
-=head2 Strategies for storing Callback Context Information
+=head2 Strategies for Storing Callback Context Information
 
 
 Potentially one of the trickiest problems to overcome when designing a
@@ -1856,7 +1856,7 @@ refers to the last.
 
 =back
 
-=head2 Creating and calling an anonymous subroutine in C
+=head2 Creating and Calling an Anonymous Subroutine in C
 
 As we've already shown, C<call_sv> can be used to invoke an
 anonymous subroutine.  However, our example showed a Perl script
