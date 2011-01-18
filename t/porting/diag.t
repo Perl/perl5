@@ -50,6 +50,12 @@ close $func_fh;
 
 my $function_re = join '|', @functions;
 my $source_msg_re = qr/(?<routine>\bDIE\b|$function_re)/;
+my $text_re = qr/"(?<text>(?:\\"|[^"])*?)"/;
+my $source_msg_call_re = qr/$source_msg_re(?:_nocontext)? \s*
+    \(aTHX_ \s*
+    (?:packWARN\d*\((?<category>.*?)\),)? \s*
+    $text_re /x;
+my $bad_version_re = qr{BADVERSION\([^"]*$text_re};
 
 my %entries;
 
@@ -124,6 +130,28 @@ foreach my $cur_entry ( keys %entries) {
     }
 }
 
+# List from perlguts.pod "Formatted Printing of IVs, UVs, and NVs"
+# Convert from internal formats to ones that the readers will be familiar
+# with, while removing any format modifiers, such as precision, the
+# presence of which would just confuse the pod's explanation
+my %specialformats = (IVdf => 'd',
+		      UVuf => 'd',
+		      UVof => 'o',
+		      UVxf => 'x',
+		      UVXf => 'X',
+		      NVef => 'f',
+		      NVff => 'f',
+		      NVgf => 'f',
+		      SVf  => 's');
+my $format_modifiers = qr/ [#0\ +-]*              # optional flags
+			  (?: [1-9][0-9]* | \* )? # optional field width
+			  (?: \. \d* )?           # optional precision
+			  (?: h|l )?              # optional length modifier
+			/x;
+
+my $specialformats = join '|', sort keys %specialformats;
+my $specialformats_re = qr/%$format_modifiers"\s*($specialformats)(\s*")?/;
+
 # Recursively descend looking for source files.
 my @todo = sort <*>;
 while (@todo) {
@@ -136,22 +164,6 @@ while (@todo) {
   } elsif ($todo =~ m/\.[ch]$/) {
     check_file($todo);
   }
-}
-
-sub find_message {
-  my ($line) = @_;
-  my $text_re = qr/"(?<text>(?:\\"|[^"])*?)"/;
-  if ($line =~ m/$source_msg_re(?:_nocontext)? \s*
-    \(aTHX_ \s*
-    (?:packWARN\d*\((?<category>.*?)\),)? \s*
-    $text_re /x
-  ) {
-    return [$+{'text'}, $+{'category'}];
-  }
-  elsif ( $line =~ m{BADVERSION\([^"]*$text_re}) {
-    return [$+{'text'}, undef];
-  }
-  return;
 }
 
 # Standardize messages with variants into the form that appears
@@ -188,8 +200,8 @@ sub check_file {
     # Getting too much here isn't a problem; we only use this to skip
     # errors inside of XS modules, which should get documented in the
     # docs for the module.
-    if (m<^([^#\s].*)> and $1 !~ m/^[{}]*$/) {
-      $sub = $1;
+    if (m<^[^#\s]> and $_ !~ m/^[{}]*$/) {
+      $sub = $_;
     }
     next if $sub =~ m/^XS/;
     if (m</\* diag_listed_as: (.*) \*/>) {
@@ -197,61 +209,52 @@ sub check_file {
       $listed_as_line = $.+1;
     }
     next if /^#/;
-    next if /^ * /;
+    next if /^ +/;
 
     my $multiline = 0;
     # Loop to accumulate the message text all on one line.
-    while (m/$source_msg_re/ and not m/\);$/) {
-      my $nextline = <$codefh>;
-      # Means we fell off the end of the file.  Not terribly surprising;
-      # this code tries to merge a lot of things that aren't regular C
-      # code (preprocessor stuff, long comments).  That's OK; we don't
-      # need those anyway.
-      last if not defined $nextline;
-      chomp $nextline;
-      $nextline =~ s/^\s+//;
-      # Note that we only want to do this where *both* are true.
-      $_ =~ s/\\$//;
-      if ($_ =~ m/"$/ and $nextline =~ m/^"/) {
-        $_ =~ s/"$//;
-        $nextline =~ s/^"//;
+    if (m/$source_msg_re/) {
+      while (not m/\);$/) {
+        my $nextline = <$codefh>;
+        # Means we fell off the end of the file.  Not terribly surprising;
+        # this code tries to merge a lot of things that aren't regular C
+        # code (preprocessor stuff, long comments).  That's OK; we don't
+        # need those anyway.
+        last if not defined $nextline;
+        chomp $nextline;
+        $nextline =~ s/^\s+//;
+        $_ =~ s/\\$//;
+        # Note that we only want to do this where *both* are true.
+        if ($_ =~ m/"$/ and $nextline =~ m/^"/) {
+          $_ =~ s/"$//;
+          $nextline =~ s/^"//;
+        }
+        $_ .= $nextline;
+        ++$multiline;
       }
-      $_ = "$_$nextline";
-      ++$multiline;
     }
     # This should happen *after* unwrapping, or we don't reformat the things
     # in later lines.
-    # List from perlguts.pod "Formatted Printing of IVs, UVs, and NVs"
-    # Convert from internal formats to ones that the readers will be familiar
-    # with, while removing any format modifiers, such as precision, the
-    # presence of which would just confuse the pod's explanation
-    my %specialformats = (IVdf => 'd',
-                          UVuf => 'd',
-                          UVof => 'o',
-                          UVxf => 'x',
-                          UVXf => 'X',
-                          NVef => 'f',
-                          NVff => 'f',
-                          NVgf => 'f',
-                          SVf  => 's');
-    my $format_modifiers = qr/ [#0\ +-]*              # optional flags
-                              (?: [1-9][0-9]* | \* )? # optional field width
-                              (?: \. \d* )?           # optional precision
-                              (?: h|l )?              # optional length modifier
-                            /x;
-    for my $from (keys %specialformats) {
-      s/%$format_modifiers"\s*$from\s*"/\%$specialformats{$from}/g;
-      s/%$format_modifiers"\s*$from/\%$specialformats{$from}"/g;
-    }
+
+    s/$specialformats_re/"%$specialformats{$1}" .  (defined $2 ? '' : '"')/ge;
 
     # Remove any remaining format modifiers, but not in %%
     s/ (?<!%) % $format_modifiers ( [dioxXucsfeEgGp] ) /%$1/xg;
 
     # The %"foo" thing needs to happen *before* this regex.
-    if ( my $found = find_message($_) ) {
     # diag($_);
     # DIE is just return Perl_die
-    my ($name, $category) = @$found;
+    my ($name, $category);
+    if (/$source_msg_call_re/) {
+      ($name, $category) = ($+{'text'}, $+{'category'});
+    }
+    elsif (/$bad_version_re/) {
+      ($name, $category) = ($+{'text'}, undef);
+    }
+    else {
+      next;
+    }
+
     my $severity = {croak => [qw/P F/],
                       die   => [qw/P F/],
                       warn  => [qw/W D S/],
@@ -328,7 +331,6 @@ sub check_file {
       }
 
       die if $name =~ /%$/;
-    }
   }
 }
 # Lists all missing things as of the inauguration of this script, so we
