@@ -340,7 +340,9 @@ EOPOD2B
 #' make emacs happy
 
   # All the things in the master list that happen to be pod filenames
-  podset(map {"$_->[1].pod"} grep {defined $_ && @$_ == 3 && !$_->[0]{toc_omit}} @Master);
+  foreach (grep {defined $_ && @$_ == 3 && !$_->[0]{toc_omit}} @Master) {
+    podset($_->[1], "$_->[1].pod");
+  }
 
 
   ($_= <<"EOPOD2B") =~ s/^\t//gm && output($_);
@@ -351,7 +353,9 @@ EOPOD2B
 
 EOPOD2B
 
-  podset( @Pragmata{ sort keys %Pragmata } );
+  foreach (sort keys %Pragmata) {
+    podset($_, $Pragmata{$_});
+  }
 
   ($_= <<"EOPOD2B") =~ s/^\t//gm && output($_);
 
@@ -361,7 +365,9 @@ EOPOD2B
 
 EOPOD2B
 
-  podset( @Modules{ sort keys %Modules } );
+  foreach (sort keys %Modules) {
+    podset($_, $Modules{$_});
+  }
 
   $_= <<"EOPOD2B";
 
@@ -399,18 +405,16 @@ EOPOD2B
 my ($inhead1, $inhead2, $initem);
 
 sub podset {
-    local @ARGV = @_;
-    my $pod;
+    my ($pod, $file) = @_;
 
-    return unless scalar(@ARGV);
+    open my $fh, '<', $file or die "Can't open file '$file' for $pod: $!";
 
-    while(<>) {
+    while(<$fh>) {
 	tr/\015//d;
 	if (s/^=head1 (NAME)\s*/=head2 /) {
-	    $pod = path2modname($ARGV);
 	    unhead1();
 	    output "\n \n\n=head2 ";
-	    $_ = <>;
+	    $_ = <$fh>;
 	    # Remove svn keyword expansions from the Perl FAQ
 	    s/ \(\$Revision: \d+ \$\)//g;
 	    if ( /^\s*$pod\b/ ) {
