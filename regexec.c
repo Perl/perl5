@@ -1333,8 +1333,7 @@ if ((!reginfo || regtry(reginfo, &s))) \
     }                                                          \
     else {                                                     \
 	REXEC_FBC_CLASS_SCAN(CoNd);                            \
-    }                                                          \
-    break
+    }
     
 #define REXEC_FBC_CSCAN_PRELOAD(UtFpReLoAd,CoNdUtF8,CoNd)      \
     if (utf8_target) {                                             \
@@ -1343,8 +1342,7 @@ if ((!reginfo || regtry(reginfo, &s))) \
     }                                                          \
     else {                                                     \
 	REXEC_FBC_CLASS_SCAN(CoNd);                            \
-    }                                                          \
-    break
+    }
 
 #define REXEC_FBC_CSCAN_TAINT(CoNdUtF8,CoNd)                   \
     PL_reg_flags |= RF_tainted;                                \
@@ -1353,8 +1351,7 @@ if ((!reginfo || regtry(reginfo, &s))) \
     }                                                          \
     else {                                                     \
 	REXEC_FBC_CLASS_SCAN(CoNd);                            \
-    }                                                          \
-    break
+    }
 
 #define DUMP_EXEC_POS(li,s,doutf8) \
     dump_exec_pos(li,s,(PL_regeol),(PL_bostr),(PL_reg_starttry),doutf8)
