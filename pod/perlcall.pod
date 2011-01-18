@@ -1047,7 +1047,7 @@ I<call_sv> instead of I<call_pv>.
 	PUSHMARK(SP);
 	call_sv(name, G_DISCARD|G_NOARGS);
 
-Because we are using an SV to call I<fred> the following can all be used
+Because we are using an SV to call I<fred> the following can all be used:
 
     CallSubSV("fred");
     CallSubSV(\&fred);
@@ -1058,10 +1058,10 @@ Because we are using an SV to call I<fred> the following can all be used
 As you can see, I<call_sv> gives you much greater flexibility in
 how you can specify the Perl subroutine.
 
-You should note that if it is necessary to store the SV (C<name> in the
+You should note that, if it is necessary to store the SV (C<name> in the
 example above) which corresponds to the Perl subroutine so that it can
 be used later in the program, it not enough just to store a copy of the
-pointer to the SV. Say the code above had been like this
+pointer to the SV. Say the code above had been like this:
 
     static SV * rememberSub;
 
@@ -1077,10 +1077,10 @@ pointer to the SV. Say the code above had been like this
 	PUSHMARK(SP);
 	call_sv(rememberSub, G_DISCARD|G_NOARGS);
 
-The reason this is wrong is that by the time you come to use the
+The reason this is wrong is that, by the time you come to use the
 pointer C<rememberSub> in C<CallSavedSub1>, it may or may not still refer
 to the Perl subroutine that was recorded in C<SaveSub1>.  This is
-particularly true for these cases
+particularly true for these cases:
 
     SaveSub1(\&fred);
     CallSavedSub1();
@@ -1088,7 +1088,7 @@ particularly true for these cases
     SaveSub1( sub { print "Hello there\n" } );
     CallSavedSub1();
 
-By the time each of the C<SaveSub1> statements above have been executed,
+By the time each of the C<SaveSub1> statements above has been executed,
 the SV*s which corresponded to the parameters will no longer exist.
 Expect an error message from Perl of the form
 
@@ -1119,19 +1119,19 @@ code which is referenced by the SV* C<rememberSub>.  In this case
 though, it now refers to the integer C<47>, so expect Perl to complain
 loudly.
 
-A similar but more subtle problem is illustrated with this code
+A similar but more subtle problem is illustrated with this code:
 
     $ref = \&fred;
     SaveSub1($ref);
     $ref = \&joe;
     CallSavedSub1();
 
-This time whenever C<CallSavedSub1> get called it will execute the Perl
+This time whenever C<CallSavedSub1> gets called it will execute the Perl
 subroutine C<joe> (assuming it exists) rather than C<fred> as was
 originally requested in the call to C<SaveSub1>.
 
 To get around these problems it is necessary to take a full copy of the
-SV.  The code below shows C<SaveSub2> modified to do that
+SV.  The code below shows C<SaveSub2> modified to do that.
 
     static SV * keepSub = (SV*)NULL;
 
@@ -1156,8 +1156,8 @@ SV.  The code below shows C<SaveSub2> modified to do that
 To avoid creating a new SV every time C<SaveSub2> is called,
 the function first checks to see if it has been called before.  If not,
 then space for a new SV is allocated and the reference to the Perl
-subroutine, C<name> is copied to the variable C<keepSub> in one
-operation using C<newSVsv>.  Thereafter, whenever C<SaveSub2> is called
+subroutine C<name> is copied to the variable C<keepSub> in one
+operation using C<newSVsv>.  Thereafter, whenever C<SaveSub2> is called,
 the existing SV, C<keepSub>, is overwritten with the new value using
 C<SvSetSV>.
 
@@ -1173,7 +1173,7 @@ to it.
         foreach (@list) { print "$_\n" }
     }
 
-and here is an example of I<call_argv> which will call
+And here is an example of I<call_argv> which will call
 I<PrintList>.
 
     static char * words[] = {"alpha", "beta", "gamma", "delta", NULL};
@@ -1191,7 +1191,7 @@ This is because I<call_argv> will do it for you.
 
 =head2 Using call_method
 
-Consider the following Perl code
+Consider the following Perl code:
 
     {
         package Mine;
@@ -1219,7 +1219,7 @@ It implements just a very simple class to manage an array.  Apart from
 the constructor, C<new>, it declares methods, one static and one
 virtual. The static method, C<PrintID>, prints out simply the class
 name and a version number. The virtual method, C<Display>, prints out a
-single element of the array.  Here is an all Perl example of using it.
+single element of the array.  Here is an all-Perl example of using it.
 
     $a = Mine->new('red', 'green', 'blue');
     $a->Display(1);
@@ -1231,22 +1231,22 @@ will print
     This is Class Mine version 1.0
 
 Calling a Perl method from C is fairly straightforward. The following
-things are required
+things are required:
 
 =over 5
 
 =item *
 
-a reference to the object for a virtual method or the name of the class
-for a static method.
+A reference to the object for a virtual method or the name of the class
+for a static method
 
 =item *
 
-the name of the method.
+The name of the method
 
 =item *
 
-any other parameters specific to the method.
+Any other parameters specific to the method
 
 =back
 
@@ -1278,13 +1278,13 @@ the C<PrintID> and C<Display> methods from C.
         call_method(method, G_DISCARD);
 
 
-So the methods C<PrintID> and C<Display> can be invoked like this
+So the methods C<PrintID> and C<Display> can be invoked like this:
 
     $a = Mine->new('red', 'green', 'blue');
     call_Method($a, 'Display', 1);
     call_PrintID('Mine', 'PrintID');
 
-The only thing to note is that in both the static and virtual methods,
+The only thing to note is that, in both the static and virtual methods,
 the method name is not passed via the stack--it is used as the first
 parameter to I<call_method>.
 
@@ -1304,7 +1304,7 @@ currently executing.
         else
             printf ("Context is Array\n");
 
-and here is some Perl to test it
+And here is some Perl to test it.
 
     PrintContext;
     $a = PrintContext;
@@ -1320,18 +1320,17 @@ The output from that will be
 
 In the examples given to date, any temporaries created in the callback
 (i.e., parameters passed on the stack to the I<call_*> function or
-values returned via the stack) have been freed by one of these methods
+values returned via the stack) have been freed by one of these methods:
 
 =over 5
 
 =item *
 
-specifying the G_DISCARD flag with I<call_*>.
+Specifying the G_DISCARD flag with I<call_*>
 
 =item *
 
-explicitly disposed of using the C<ENTER>/C<SAVETMPS> -
-C<FREETMPS>/C<LEAVE> pairing.
+Explicitly using the C<ENTER>/C<SAVETMPS>--C<FREETMPS>/C<LEAVE> pairing
 
 =back
 
@@ -1416,7 +1415,7 @@ So what is the big problem? Well, if you are expecting Perl to tidy up
 those temporaries for you, you might be in for a long wait.  For Perl
 to dispose of your temporaries, control must drop back to the
 enclosing scope at some stage.  In the event driven scenario that may
-never happen.  This means that as time goes on, your program will
+never happen.  This means that, as time goes on, your program will
 create more and more temporaries, none of which will ever be freed. As
 each of these temporaries consumes some memory your program will
 eventually consume all the available memory in your system--kapow!
@@ -1782,15 +1781,15 @@ returned from Perl subroutines, it is also possible to bypass these
 macros and read the stack using the C<ST> macro (See L<perlxs> for a
 full description of the C<ST> macro).
 
-Most of the time the C<POP*> macros should be adequate, the main
+Most of the time the C<POP*> macros should be adequate; the main
 problem with them is that they force you to process the returned values
 in sequence. This may not be the most suitable way to process the
 values in some cases. What we want is to be able to access the stack in
 a random order. The C<ST> macro as used when coding an XSUB is ideal
 for this purpose.
 
-The code below is the example given in the section I<Returning a list
-of values> recoded to use C<ST> instead of C<POP*>.
+The code below is the example given in the section I<Returning a List
+of Values> recoded to use C<ST> instead of C<POP*>.
 
     static void
     call_AddSubtract2(a, b)
@@ -1835,7 +1834,7 @@ Notes
 Notice that it was necessary to define the variable C<ax>.  This is
 because the C<ST> macro expects it to exist.  If we were in an XSUB it
 would not be necessary to define C<ax> as it is already defined for
-you.
+us.
 
 =item 2.
 
