@@ -179,6 +179,7 @@
 #define RE_utf8_posix_digit PL_utf8_posix_digit
 #endif
 
+#define PLACEHOLDER	/* Something for the preprocessor to grab onto */
 
 /* The actual code for CCC_TRY, which uses several variables from the routine
  * it's callable from.  It is designed to be the bulk of a case statement.
@@ -227,7 +228,7 @@
 			                    (U8*)locinput, TRUE)),            \
 		          CLASS, STR)                                         \
     case NNAME:                                                               \
-	_CCC_TRY_CODE(  , FUNC,                                               \
+	_CCC_TRY_CODE(  PLACEHOLDER , FUNC,                                   \
 		          cBOOL(swash_fetch(CAT2(PL_utf8_,CLASS),             \
 			                    (U8*)locinput, TRUE)),            \
 		          CLASS, STR)                                         \
@@ -251,7 +252,8 @@
 	_CCC_TRY_CODE( !, LCFUNC, LCFUNC_utf8((U8*)locinput), CLASS, STR)     \
     case NNAMEL:                                                              \
 	PL_reg_flags |= RF_tainted;                                           \
-	_CCC_TRY_CODE(  , LCFUNC, LCFUNC_utf8((U8*)locinput), CLASS, STR)     \
+	_CCC_TRY_CODE( PLACEHOLDER, LCFUNC, LCFUNC_utf8((U8*)locinput),       \
+		       CLASS, STR)                                            \
     case NAMEA:                                                               \
 	if (locinput >= PL_regeol || ! FUNCA(nextchr)) {                      \
 	    sayNO;                                                            \
@@ -1396,16 +1398,16 @@ if ((!reginfo || regtry(reginfo, &s))) \
  * NBOUND.  This is accomplished by passing it in either the if or else clause,
  * with the other one being empty */
 #define FBC_BOUND(TEST_NON_UTF8, TEST1_UTF8, TEST2_UTF8) \
-    FBC_BOUND_COMMON(UTF8_LOAD(TEST1_UTF8, TEST2_UTF8, REXEC_FBC_TRYIT, ), TEST_NON_UTF8, REXEC_FBC_TRYIT, )
+    FBC_BOUND_COMMON(UTF8_LOAD(TEST1_UTF8, TEST2_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER), TEST_NON_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER)
 
 #define FBC_BOUND_NOLOAD(TEST_NON_UTF8, TEST1_UTF8, TEST2_UTF8) \
-    FBC_BOUND_COMMON(UTF8_NOLOAD(TEST_NON_UTF8, REXEC_FBC_TRYIT, ), TEST_NON_UTF8, REXEC_FBC_TRYIT, )
+    FBC_BOUND_COMMON(UTF8_NOLOAD(TEST_NON_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER), TEST_NON_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER)
 
 #define FBC_NBOUND(TEST_NON_UTF8, TEST1_UTF8, TEST2_UTF8) \
-    FBC_BOUND_COMMON(UTF8_LOAD(TEST1_UTF8, TEST2_UTF8, , REXEC_FBC_TRYIT), TEST_NON_UTF8, , REXEC_FBC_TRYIT)
+    FBC_BOUND_COMMON(UTF8_LOAD(TEST1_UTF8, TEST2_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT), TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT)
 
 #define FBC_NBOUND_NOLOAD(TEST_NON_UTF8, TEST1_UTF8, TEST2_UTF8) \
-    FBC_BOUND_COMMON(UTF8_NOLOAD(TEST_NON_UTF8, , REXEC_FBC_TRYIT), TEST_NON_UTF8, , REXEC_FBC_TRYIT)
+    FBC_BOUND_COMMON(UTF8_NOLOAD(TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT), TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT)
 
 
 /* Common to the BOUND and NBOUND cases.  Unfortunately the UTF8 tests need to
