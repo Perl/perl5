@@ -965,7 +965,7 @@ C<SvTRUE(ERRSV)> is true.  This is necessary because whenever a
 I<call_*> function invoked with G_EVAL|G_SCALAR returns an error,
 the top of the stack holds the value I<undef>. Because we want the
 program to continue after detecting this error, it is essential that
-the stack is tidied up by removing the I<undef>.
+the stack be tidied up by removing the I<undef>.
 
 =back
 
