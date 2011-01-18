@@ -9,7 +9,7 @@
 #
 package HTTP::Tiny;
 BEGIN {
-  $HTTP::Tiny::VERSION = '0.008';
+  $HTTP::Tiny::VERSION = '0.009';
 }
 use strict;
 use warnings;
@@ -325,6 +325,12 @@ sub new {
     }, $class;
 }
 
+my $ssl_verify_args = {
+    check_cn => "when_only",
+    wildcards_in_alt => "anywhere",
+    wildcards_in_cn => "anywhere"
+};
+
 sub connect {
     @_ == 4 || croak(q/Usage: $handle->connect(scheme, host, port)/);
     my ($self, $scheme, $host, $port) = @_;
@@ -353,8 +359,9 @@ sub connect {
     if ( $scheme eq 'https') {
         IO::Socket::SSL->start_SSL($self->{fh});
         ref($self->{fh}) eq 'IO::Socket::SSL'
-            and $self->{fh}->verify_hostname( $host, 'http' )
-            or croak(qq/SSL connection failed for $host\n/);
+            or die(qq/SSL connection failed for $host\n/);
+        $self->{fh}->verify_hostname( $host, $ssl_verify_args )
+            or die(qq/SSL certificate not valid for $host\n/);
     }
 
     $self->{host} = $host;
@@ -752,7 +759,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.008
+version 0.009
 
 =head1 SYNOPSIS
 
@@ -866,8 +873,8 @@ be updated accordingly.
     $response = $http->request($method, $url);
     $response = $http->request($method, $url, \%options);
 
-Executes an HTTP request of the given method type ('GET', 'HEAD', 'PUT', etc.)
-on the given URL.  The URL must have unsafe characters escaped and
+Executes an HTTP request of the given method type ('GET', 'HEAD', 'POST',
+'PUT', etc.) on the given URL.  The URL must have unsafe characters escaped and
 international domain names encoded.  A hashref of options may be appended to
 modify the request.
 

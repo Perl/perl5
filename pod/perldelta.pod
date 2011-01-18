@@ -132,7 +132,7 @@ generation task.
 
 =item *
 
-L<HTTP::Tiny> 0.008 has been added as a dual-life module.  It is a very
+L<HTTP::Tiny> 0.009 has been added as a dual-life module.  It is a very
 small, simple HTTP/1.1 client designed for simple GET requests and file
 mirroring.  It has has been added to enable CPAN.pm and CPANPLUS to
 "bootstrap" HTTP access to CPAN using pure Perl without relying on external
