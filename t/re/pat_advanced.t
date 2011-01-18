@@ -21,7 +21,7 @@ BEGIN {
 }
 
 
-plan tests => 1303;  # Update this when adding/deleting tests.
+plan tests => 1304;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2072,6 +2072,16 @@ sub run_tests {
         }
     }
 
+    {   # Bleadperl v5.13.8-292-gf56b639 breaks NEZUMI/Unicode-LineBreak-1.011
+        # \xdf in lookbehind failed to compile as is multi-char fold
+        eval_ok 'qr{
+            (?u: (?<=^url:) |
+                 (?<=[/]) (?=[^/]) |
+                 (?<=[^-.]) (?=[-~.,_?\#%=&]) |
+                 (?<=[=&]) (?=.)
+            )}iox', "Lookbehind with \\xdf matchable compiles";
+    }
+
     #
     # Keep the following tests last -- they may crash perl
     #
@@ -2106,6 +2116,9 @@ sub run_tests {
         eval $a =~ /[a-z]/;
         ok(1);  # If it didn't crash, it worked.
     }
+
+    # !!! NOTE that tests that aren't at all likely to crash perl should go
+    # a ways above, above these last ones.
 } # End of sub run_tests
 
 1;

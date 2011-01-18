@@ -138,6 +138,7 @@ typedef struct RExC_state_t {
     
     regnode	**recurse;		/* Recurse regops */
     I32		recurse_count;		/* Number of recurse regops */
+    I32		in_lookbehind;
 #if ADD_TO_REGEXEC
     char 	*starttry;		/* -Dr: where regtry was called. */
 #define RExC_starttry	(pRExC_state->starttry)
@@ -184,6 +185,7 @@ typedef struct RExC_state_t {
 #define RExC_paren_names	(pRExC_state->paren_names)
 #define RExC_recurse	(pRExC_state->recurse)
 #define RExC_recurse_count	(pRExC_state->recurse_count)
+#define RExC_in_lookbehind	(pRExC_state->in_lookbehind)
 
 
 #define	ISMULT1(c)	((c) == '*' || (c) == '+' || (c) == '?')
@@ -4459,6 +4461,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
     RExC_sawback = 0;
 
     RExC_seen = 0;
+    RExC_in_lookbehind = 0;
     RExC_seen_zerolen = *exp == '^' ? -1 : 0;
     RExC_seen_evals = 0;
     RExC_extralen = 0;
@@ -5938,6 +5941,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    goto capturing_parens;
 		}
                 RExC_seen |= REG_SEEN_LOOKBEHIND;
+		RExC_in_lookbehind++;
 		RExC_parse++;
 	    case '=':           /* (?=...) */
 		RExC_seen_zerolen++;
@@ -6584,6 +6588,10 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	else
 	    FAIL("Junk on end of regexp");	/* "Can't happen". */
 	/* NOTREACHED */
+    }
+
+    if (RExC_in_lookbehind) {
+	RExC_in_lookbehind--;
     }
     if (after_freeze)
         RExC_npar = after_freeze;
@@ -8590,9 +8598,6 @@ parseit:
 		/* The \p could match something in the Latin1 range, hence
 		 * something that isn't utf8 */
 		ANYOF_FLAGS(ret) |= ANYOF_NONBITMAP;
-		if (FOLD) { /* And one of these could have a multi-char fold */
-		    OP(ret) = ANYOFV;
-		}
 		namedclass = ANYOF_MAX;  /* no official name, but it's named */
 		}
 		break;
@@ -8921,8 +8926,10 @@ parseit:
 
 		    /* Currently, we don't look at every value in the range.
 		     * Therefore we have to assume the worst case: that if
-		     * folding, it will match more than one character */
-		    if (FOLD) {
+		     * folding, it will match more than one character.  But in
+		     * lookbehind patterns, can only be single character
+		     * length, so disallow those folds */
+		    if (FOLD && ! RExC_in_lookbehind) {
 		      OP(ret) = ANYOFV;
 		    }
 		}
@@ -8956,8 +8963,9 @@ parseit:
 #endif
 				  Perl_sv_catpvf(aTHX_ listsv,
 						 "%04"UVxf"\n", f);
-			      else {
+			      else if (! RExC_in_lookbehind) {
 				  /* Any multicharacter foldings
+				   * (disallowed in lookbehind patterns)
 				   * require the following transform:
 				   * [ABCDEF] -> (?:[ABCabcDEFd]|pq|rst)
 				   * where E folds into "pq" and F folds
@@ -9032,8 +9040,10 @@ parseit:
 	/* This is the one character in the bitmap that needs special handling
 	 * under non-locale folding, as it folds to two characters 'ss'.  This
 	 * happens if it is set and not inverting, or isn't set and are
-	 * inverting */
+	 * inverting (disallowed in lookbehind patterns because they can't be
+	 * variable length) */
 	if (! LOC
+	    && ! RExC_in_lookbehind
 	    && (cBOOL(ANYOF_BITMAP_TEST(ret, LATIN_SMALL_LETTER_SHARP_S))
 		^ cBOOL(ANYOF_FLAGS(ret) & ANYOF_INVERT)))
 	{
