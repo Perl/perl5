@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use vars qw($masterpodfile %Build %Targets $Verbose $Quiet $Up %Ignore
+use vars qw($masterpodfile %Build %Targets $Verbose $Quiet %Ignore
 	    @Master %Readmes %Pods %Aux %Readmepods %Pragmata %Modules
 	    %Copies %Generated $Test);
 use File::Spec;
@@ -14,8 +14,17 @@ use Carp;
 
 no locale;
 
-$Up = File::Spec->updir;
-$masterpodfile = File::Spec->catfile($Up, "pod.lst");
+{
+  my $Top = File::Spec->catdir($FindBin::Bin, File::Spec->updir);
+
+  sub abs_from_top {
+    my $path = shift;
+    return File::Spec->catdir($Top, split /\//, $path) if $path =~ s!/\z!!;
+    return File::Spec->catfile($Top, split /\//, $path);
+  }
+}
+
+$masterpodfile = abs_from_top('pod.lst');
 
 # Generate any/all of these files
 # --verbose gives slightly more output
@@ -28,17 +37,21 @@ $masterpodfile = File::Spec->catfile($Up, "pod.lst");
 
 %Targets
   = (
-     toc => "perltoc.pod",
-     manifest => File::Spec->catdir($Up, "MANIFEST"),
-     perlpod => "perl.pod",
-     vms => File::Spec->catfile($Up, "vms", "descrip_mms.template"),
-     nmake => File::Spec->catfile($Up, "win32", "Makefile"),
-     dmake => File::Spec->catfile($Up, "win32", "makefile.mk"),
-     podmak => File::Spec->catfile($Up, "win32", "pod.mak"),
-     # plan9 =>  File::Spec->catdir($Up, "plan9", "mkfile"),
-     unix => File::Spec->catfile($Up, "Makefile.SH"),
+     toc => 'pod/perltoc.pod',
+     manifest => 'MANIFEST',
+     perlpod => 'pod/perl.pod',
+     vms => 'vms/descrip_mms.template',
+     nmake => 'win32/Makefile',
+     dmake => 'win32/makefile.mk',
+     podmak => 'win32/pod.mak',
+     # plan9 =>  'plan9/mkfile'),
+     unix => 'Makefile.SH',
      # TODO: add roffitall
     );
+
+foreach (values %Targets) {
+  $_ = abs_from_top($_);
+}
 
 {
   my @files = keys %Targets;
@@ -83,8 +96,6 @@ __USAGE__
 if ($Verbose) {
   print "I'm building $_\n" foreach grep {$Build{$_}} keys %Build;
 }
-
-chdir $FindBin::Bin or die "$0: Can't chdir $FindBin::Bin: $!";
 
 open MASTER, $masterpodfile or die "$0: Can't open $masterpodfile: $!";
 
@@ -169,15 +180,19 @@ close MASTER;
     $our_pods{"$_.pod"}++;
   }
 
-  # None of these filenames will be boolean false
-  @disk_pods = glob("*.pod");
-  @disk_pods{@disk_pods} = @disk_pods;
+  opendir my $dh, abs_from_top('pod/');
+  while (readdir $dh) {
+    next unless /\.pod\z/;
+    push @disk_pods, $_;
+    ++$disk_pods{$_};
+  }
 
   # Things we copy from won't be in perl.pod
   # Things we copy to won't be in MANIFEST
 
-  open(MANI, "../MANIFEST") || die "$0: opening ../MANIFEST failed: $!";
-  while (<MANI>) {
+  my $filename = abs_from_top('MANIFEST');
+  open my $mani, '<', $filename or die "$0: opening $filename failed: $!";
+  while (<$mani>) {
     if (m!^pod/([^.]+\.pod)\s+!i) {
       push @manipods, $1;
     } elsif (m!^README\.(\S+)\s+!i) {
@@ -185,19 +200,20 @@ close MASTER;
       push @manireadmes, "perl$1.pod";
     }
   }
-  close(MANI);
+  close $mani or die $!;
   @manipods{@manipods} = @manipods;
   @manireadmes{@manireadmes} = @manireadmes;
 
-  open(PERLPOD, "perl.pod") || die "$0: opening perl.pod failed: $!\n";
-  while (<PERLPOD>) {
+  $filename = abs_from_top('pod/perl.pod');
+  open my $perlpod, '<', $filename or die "$0: opening $filename failed: $!\n";
+  while (<$perlpod>) {
     if (/^For ease of access, /../^\(If you're intending /) {
       if (/^\s+(perl\S*)\s+\w/) {
 	push @perlpods, "$1.pod";
       }
     }
   }
-  close(PERLPOD);
+  close $perlpod or die $!;
   die "$0: could not find the pod listing of perl.pod\n"
     unless @perlpods;
   @perlpods{@perlpods} = @perlpods;
@@ -246,12 +262,12 @@ close MASTER;
 # Find all the modules
 {
   my @modpods;
-  find \&getpods => qw(../lib ../ext);
+  find \&getpods => map {abs_from_top($_)} qw(lib/ ext/);
 
   sub getpods {
     if (/\.p(od|m)$/) {
       my $file = $File::Find::name;
-      return if $file eq '../lib/Pod/Functions.pm'; # Used only by pod itself
+      return if $file =~ qr!/lib/Pod/Functions.pm\z!; # Used only by pod itself
       return if $file =~ m!(?:^|/)t/!;
       return if $file =~ m!lib/Attribute/Handlers/demo/!;
       return if $file =~ m!lib/Net/FTP/.+\.pm!; # Hi, Graham! :-)
@@ -314,7 +330,8 @@ sub path2modname {
 sub output ($);
 
 sub output_perltoc {
-  open(OUT, ">perltoc.pod") || die "$0: creating perltoc.pod failed: $!";
+  my $filename = shift;
+  open OUT, '>', $filename or die "$0: creating $filename failed: $!";
 
   local $/ = '';
 
@@ -341,7 +358,7 @@ EOPOD2B
 
   # All the things in the master list that happen to be pod filenames
   foreach (grep {defined $_ && @$_ == 3 && !$_->[0]{toc_omit}} @Master) {
-    podset($_->[1], "$_->[1].pod");
+    podset($_->[1], abs_from_top("pod/$_->[1].pod"));
   }
 
 
@@ -761,7 +778,7 @@ while (my ($target, $name) = each %Targets) {
   $built++;
   if ($target eq "toc") {
     print "Now processing $name\n" if $Verbose;
-    &output_perltoc;
+    output_perltoc($name);
     print "Finished\n" if $Verbose;
     next;
   }
