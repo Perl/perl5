@@ -1434,6 +1434,14 @@ Perl_csighandler_init(void)
 }
 #endif
 
+#if defined HAS_SIGPROCMASK
+static void
+unblock_sigmask(pTHX_ void* newset)
+{
+    sigprocmask(SIG_UNBLOCK, (sigset_t*)newset, NULL);
+}
+#endif
+
 void
 Perl_despatch_signals(pTHX)
 {
@@ -1443,7 +1451,7 @@ Perl_despatch_signals(pTHX)
     for (sig = 1; sig < SIG_SIZE; sig++) {
 	if (PL_psig_pend[sig]) {
 	    dSAVE_ERRNO;
-#if defined(HAS_SIGPROCMASK)
+#ifdef HAS_SIGPROCMASK
 	    /* From sigaction(2) (FreeBSD man page):
 	     * | Signal routines normally execute with the signal that
 	     * | caused their invocation blocked, but other signals may
@@ -1458,6 +1466,12 @@ Perl_despatch_signals(pTHX)
 	    sigaddset(&newset, sig);
 	    sigprocmask(SIG_BLOCK, &newset, &oldset);
 	    was_blocked = sigismember(&oldset, sig);
+	    if (!was_blocked) {
+		SV* save_sv = newSVpvn((char *)(&newset), sizeof(sigset_t));
+		ENTER;
+		SAVEFREESV(save_sv);
+		SAVEDESTRUCTOR_X(unblock_sigmask, SvPV_nolen(save_sv));
+	    }
 #endif
  	    PL_psig_pend[sig] = 0;
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
@@ -1465,9 +1479,9 @@ Perl_despatch_signals(pTHX)
 #else
 	    (*PL_sighandlerp)(sig);
 #endif
-#if defined(HAS_SIGPROCMASK)
+#ifdef HAS_SIGPROCMASK
 	    if (!was_blocked)
-		sigprocmask(SIG_UNBLOCK, &newset, NULL);
+		LEAVE;
 #endif
 	    RESTORE_ERRNO;
 	}
@@ -3092,22 +3106,15 @@ Perl_sighandler(int sig)
 
     POPSTACK;
     if (SvTRUE(ERRSV)) {
-#ifndef PERL_MICRO
-#ifdef HAS_SIGPROCMASK
+#if !defined(PERL_MICRO) && !defined(HAS_SIGPROCMASK)
 	/* Handler "died", for example to get out of a restart-able read().
 	 * Before we re-do that on its behalf re-enable the signal which was
 	 * blocked by the system when we entered.
 	 */
-	sigset_t set;
-	sigemptyset(&set);
-	sigaddset(&set,sig);
-	sigprocmask(SIG_UNBLOCK, &set, NULL);
-#else
 	/* Not clear if this will work */
 	(void)rsignal(sig, SIG_IGN);
 	(void)rsignal(sig, PL_csighandlerp);
-#endif
-#endif /* !PERL_MICRO */
+#endif /* !PERL_MICRO && !HAS_SIGPROCMASK*/
 	die_sv(ERRSV);
     }
 cleanup:
