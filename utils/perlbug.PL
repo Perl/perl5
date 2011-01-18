@@ -168,7 +168,7 @@ my $Version = "1.39";
 my( $file, $usefile, $cc, $address, $bugaddress, $testaddress, $thanksaddress,
     $filename, $messageid, $domain, $subject, $from, $verbose, $ed, $outfile,
     $fh, $me, $body, $andcc, %REP, $ok, $thanks, $progname,
-    $Is_MacOS, $Is_MSWin32, $Is_Linux, $Is_VMS, $Is_OpenBSD,
+    $Is_MSWin32, $Is_Linux, $Is_VMS, $Is_OpenBSD,
     $report_about_module, $category, $severity,
 
 );
@@ -254,11 +254,6 @@ sub Init {
     $Is_VMS = $^O eq 'VMS';
     $Is_Linux = lc($^O) eq 'linux';
     $Is_OpenBSD = lc($^O) eq 'openbsd';
-    $Is_MacOS = $^O eq 'MacOS';
-
-    @ARGV = split m/\s+/,
-        MacPerl::Ask('Provide command line args here (-h for help):')
-        if $Is_MacOS && $MacPerl::Version =~ /App/;
 
     if (!getopts("Adhva:s:b:f:F:r:e:SCc:to:n:T")) { Help(); exit; };
 
@@ -316,7 +311,6 @@ sub Init {
     $ed = $::opt_e || $ENV{VISUAL} || $ENV{EDITOR} || $ENV{EDIT}
 	|| ($Is_VMS && "edit/tpu")
 	|| ($Is_MSWin32 && "notepad")
-	|| ($Is_MacOS && '')
 	|| "vi";
 
     # Not OK - provide build failure template by finessing OK report
@@ -388,7 +382,6 @@ EOF
     # My username
     $me = $Is_MSWin32 ? $ENV{'USERNAME'}
 	    : $^O eq 'os2' ? $ENV{'USER'} || $ENV{'LOGNAME'}
-	    : $Is_MacOS ? $ENV{'USER'}
 	    : eval { getpwuid($<) };	# May be missing
 
     $from = $::Config{'cf_email'}
@@ -462,12 +455,6 @@ EOF
 
 	$guess = $ENV{'REPLY-TO'} || $ENV{'REPLYTO'} || $ENV{'EMAIL'}
 	    || $from || '';
-        if ($Is_MacOS) {
-            require Mac::InternetConfig;
-            $guess = $Mac::InternetConfig::InternetConfig{
-                Mac::InternetConfig::kICEmail()
-            };
-        }
 
 	unless ($guess) {
 		# move $domain to where we can use it elsewhere	
@@ -813,29 +800,23 @@ sub _edit_file {
     my $report_written = 0;
 
     while ( !$report_written ) {
-        if ($Is_MacOS) {
-            require ExtUtils::MakeMaker;
-            ExtUtils::MM_MacOS::launch_file($filename);
-            _prompt('', "Press Enter when done." );
-        } else {    # we're not on oldschool mac os
-            my $exit_status = system("$editor $filename");
-            if ($exit_status) {
-                my $desc = <<EOF;
+        my $exit_status = system("$editor $filename");
+        if ($exit_status) {
+            my $desc = <<EOF;
 The editor you chose ('$editor') could not be run!
 
 If you mistyped its name, please enter it now, otherwise just press Enter.
 EOF
-                my $entry = _prompt( $desc, 'Editor', $editor );
-                if ( $entry ne "" ) {
-                    $editor = $entry;
-                    next;
-                } else {
-                    paraprint <<EOF;
+            my $entry = _prompt( $desc, 'Editor', $editor );
+            if ( $entry ne "" ) {
+                $editor = $entry;
+                next;
+            } else {
+                paraprint <<EOF;
 You may want to save your report to a file, so you can edit and
 mail it later.
 EOF
-                    return;
-                }
+                return;
             }
         }
         return if ( $ok and not $::opt_n ) || $body;
