@@ -261,78 +261,79 @@ sub check_file {
                      }->{$+{'routine'}||'die'};
     my @categories;
     if (defined $category) {
-        @categories = map {s/^WARN_//; lc $_} split /\s*[|,]\s*/, $category;
+      @categories = map {s/^WARN_//; lc $_} split /\s*[|,]\s*/, $category;
     }
     if ($listed_as and $listed_as_line == $. - $multiline) {
-        $name = $listed_as;
+      $name = $listed_as;
     } else {
-        # The form listed in perldiag ignores most sorts of fancy printf
-        # formatting, or makes it more perlish.
-        $name =~ s/%%/\\%/g;
-        $name =~ s/%l[ud]/%d/g;
-        $name =~ s/%\.(\d+|\*)s/\%s/g;
-        $name =~ s/\\"/"/g;
-        $name =~ s/\\t/\t/g;
-        $name =~ s/\\n/ /g;
-        $name =~ s/\s+$//;
-        $name =~ s/(\\)\\/$1/g;
-      }
+      # The form listed in perldiag ignores most sorts of fancy printf
+      # formatting, or makes it more perlish.
+      $name =~ s/%%/\\%/g;
+      $name =~ s/%l[ud]/%d/g;
+      $name =~ s/%\.(\d+|\*)s/\%s/g;
+      $name =~ s/\\"/"/g;
+      $name =~ s/\\t/\t/g;
+      $name =~ s/\\n/ /g;
+      $name =~ s/\s+$//;
+      $name =~ s/(\\)\\/$1/g;
+    }
 
-      # Extra explanatory info on an already-listed error, doesn't
-      # need it's own listing.
-      next if $name =~ m/^\t/;
+    # Extra explanatory info on an already-listed error, doesn't
+    # need it's own listing.
+    next if $name =~ m/^\t/;
 
-      # Happens fairly often with PL_no_modify.
-      next if $name eq '%s';
+    # Happens fairly often with PL_no_modify.
+    next if $name eq '%s';
 
-      # Special syntax for magic comment, allows ignoring the fact
-      # that it isn't listed.  Only use in very special circumstances,
-      # like this script failing to notice that the Perl_croak call is
-      # inside an #if 0 block.
-      next if $name eq 'SKIPME';
+    # Special syntax for magic comment, allows ignoring the fact
+    # that it isn't listed.  Only use in very special circumstances,
+    # like this script failing to notice that the Perl_croak call is
+    # inside an #if 0 block.
+    next if $name eq 'SKIPME';
 
-      $name = standardize($name);
+    $name = standardize($name);
 
-      if (exists $entries{$name}) {
-        if ( $entries{$name}{seen}++ ) {
-          # no need to repeat entries we've tested
-        } elsif ($entries{$name}{todo}) {
+    if (exists $entries{$name}) {
+      if ( $entries{$name}{seen}++ ) {
+        # no need to repeat entries we've tested
+      } elsif ($entries{$name}{todo}) {
         TODO: {
-            no warnings 'once';
-            local $::TODO = 'in DATA';
-            # There is no listing, but it is in the list of exceptions.  TODO FAIL.
-            fail($name);
-            diag(
-              "    Message '$name'\n    from $codefn line $. is not listed in $pod\n".
-              "    (but it wasn't documented in 5.10 either, so marking it TODO)."
-            );
-          }
-        } else {
-          # We found an actual valid entry in perldiag.pod for this error.
-          pass($name);
-        }
-        # Later, should start checking that the severity is correct, too.
-      } else {
-        if ($make_exceptions_list) {
-          # We're making an updated version of the exception list, to
-          # stick in the __DATA__ section.  I honestly can't think of
-          # a situation where this is the right thing to do, but I'm
-          # leaving it here, just in case one of my descendents thinks
-          # it's a good idea.
-          print STDERR "$name\n";
-        } else {
-          # No listing found, and no excuse either.
-          # Find the correct place in perldiag.pod, and add a stanza beginning =item $name.
+          no warnings 'once';
+          local $::TODO = 'in DATA';
+          # There is no listing, but it is in the list of exceptions.  TODO FAIL.
           fail($name);
-          diag("    Message '$name'\n    from $codefn line $. is not listed in $pod");
+          diag(
+            "    Message '$name'\n    from $codefn line $. is not listed in $pod\n".
+            "    (but it wasn't documented in 5.10 either, so marking it TODO)."
+          );
         }
-        # seen it, so only fail once for this message
-        $entries{$name}{seen}++;
+      } else {
+        # We found an actual valid entry in perldiag.pod for this error.
+        pass($name);
       }
+      # Later, should start checking that the severity is correct, too.
+    } else {
+      if ($make_exceptions_list) {
+        # We're making an updated version of the exception list, to
+        # stick in the __DATA__ section.  I honestly can't think of
+        # a situation where this is the right thing to do, but I'm
+        # leaving it here, just in case one of my descendents thinks
+        # it's a good idea.
+        print STDERR "$name\n";
+      } else {
+        # No listing found, and no excuse either.
+        # Find the correct place in perldiag.pod, and add a stanza beginning =item $name.
+        fail($name);
+        diag("    Message '$name'\n    from $codefn line $. is not listed in $pod");
+      }
+      # seen it, so only fail once for this message
+      $entries{$name}{seen}++;
+    }
 
-      die if $name =~ /%$/;
+    die if $name =~ /%$/;
   }
 }
+
 # Lists all missing things as of the inauguration of this script, so we
 # don't have to go from "meh" to perfect all at once.
 # 
