@@ -1,7 +1,11 @@
 Revision history for Perl module Unicode::Collate.
 
+0.71  Tue Jan 18 22:29:44 2011
+    - t/loc_test.t should not fail without Unicode::Normalize.
+
 0.70  Sun Jan 16 20:31:07 2011
-    - Now U::C::Locale->new will use the compiled DUCET via XS.
+    - Now U::C::Locale->new will use the compiled DUCET via XS if available.
+      added some tests in t/loc_test.t.
 
 0.69  Sat Jan 15 19:41:11 2011
     - clarified about XSUB. revised INSTALL in README.

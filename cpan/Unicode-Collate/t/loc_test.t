@@ -130,7 +130,8 @@ ok("@sortFr" eq "@listFr");
 
 {
     my $keyXS = '__useXS'; # see Unicode::Collate internal
-    my $UseXS = ref Unicode::Collate->new->{$keyXS};
+    my $noLoc = Unicode::Collate->new(normalization => undef);
+    my $UseXS = ref($noLoc->{$keyXS});
     ok(ref($Collator->{$keyXS}), $UseXS);
     ok(ref($objFr   ->{$keyXS}), $UseXS);
     ok(ref($objEs   ->{$keyXS}), $UseXS);
