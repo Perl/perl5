@@ -1909,7 +1909,7 @@ With C<MB_APPLMODAL> the owner of the dialogue is disabled; therefore, do not
 specify the owner as the parent if this option is used.
 
 Additionally, the following flag is possible, but probably not very useful:
-  
+
  Help button 
      MB_HELP             a HELP button appears, which sends a WM_HELP
 				 message is sent to the window procedure of the
