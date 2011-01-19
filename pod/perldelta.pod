@@ -356,13 +356,14 @@ here. Most of these are built within the directories F<utils> and F<x2p>.
 entries for each change
 Use L<XXX> with program names to get proper documentation linking. ]
 
-=head3 L<XXX>
+=head3 L<perlbug>
 
 =over 4
 
 =item *
 
-XXX
+C<perlbug> did not previously generate a From: header, potentially
+resulting in dropped mail. Now it does include that header.
 
 =back
 
@@ -1299,15 +1300,6 @@ Date:   Sun Jan 2 19:38:30 2011 +0000
     didn't handle overloading, even where $foo[0] was an overloaded object.
     This was contrary to the docs for overload, and meant that <> couldn't
     be used as a general overloaded iterator operator.
-
-commit e4ef33329eb648489bad5296e9673c409f5577f9
-Author: Jesse Vincent <jesse@bestpractical.com>
-Date:   Sun Jan 2 10:50:21 2011 +0800
-
-    perlbug did not previously generate a From: header. While some MTAs do
-    the "right" thing and insert a valid "From:", not all of them do,
-    potentially resulting in dropped mail.
-
 
 commit edcf105d70e5423fd928c776e086fe31a4a543f4
 Author: Jesse Vincent <jesse@bestpractical.com>
