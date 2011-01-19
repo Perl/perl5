@@ -1132,18 +1132,6 @@ Date:   Sat Jan 8 00:14:29 2011 +0800
     Update the policy on doc patches to maint
 
 
-commit e8b333e679eb9a7a62c1d86b647515f01821eb60
-Author: David Golden <dagolden@cpan.org>
-Date:   Wed Jan 5 22:47:41 2011 -0500
-
-    Add Module::Metadata as a dual-life core module
-
-    This commit adds Module::Metadata 1.000002 as a dual-life module.  It
-    gathers package and POD information from Perl module files.  It is a
-    standalone module based on Module::Build::ModuleInfo for use by other
-    module installation toolchain components.  Module::Build::ModuleInfo
-    has been deprecated in favor of this module instead.
-
 commit 0b5e625bc99f5cb78697faf03b297b6cacadf60b
 Author: Reini Urban <rurban@x-ray.at>
 Date:   Tue Sep 14 18:04:22 2010 +0200
