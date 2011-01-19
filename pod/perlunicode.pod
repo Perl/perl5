@@ -1352,23 +1352,70 @@ surrogates, which are not real Unicode code points.
 
 =item *
 
-Regular expressions behave slightly differently between byte data and
-character (Unicode) data.  For example, the "word character" character
-class C<\w> will work differently depending on if data is eight-bit bytes
-or Unicode.
+Regular expression pattern matching may surprise you if you're not
+accustomed to Unicode.  Starting in Perl 5.14, there are a number of
+modifiers available that control this.  For convenience, they will be
+referred to in this section using the notation, e.g., C<"/a"> even
+though in 5.14, they are not usable in a postfix form after the
+(typical) trailing slash of a regular expression.  (In 5.14, they are
+usable only infix, for example by C</(?a:foo)/>, or by setting them to
+apply across a scope by, e.g., C<use re '/a';>.  It is planned to lift
+this restriction in 5.16.)
 
-In the first case, the set of C<\w> characters is either small--the
-default set of alphabetic characters, digits, and the "_"--or, if you
-are using a locale (see L<perllocale>), the C<\w> might contain a few
-more letters according to your language and country.
+The C<"/l"> modifier says that the regular expression should match based
+on whatever locale is in effect at execution time.  For example, C<\w>
+will match the "word" characters of that locale, and C<"/i">
+case-insensitive matching will match according to the locale's case
+folding rules.  See L<perllocale>).  C<\d> will likely match just 10
+digit characters.  This modifier is automatically selected within the
+scope of either C<use locale> or C<use re '/l'>.
 
-In the second case, the C<\w> set of characters is much, much larger.
-Most importantly, even in the set of the first 256 characters, it will
-probably match different characters: unlike most locales, which are
-specific to a language and country pair, Unicode classifies all the
-characters that are letters I<somewhere> as C<\w>.  For example, your
-locale might not think that LATIN SMALL LETTER ETH is a letter (unless
-you happen to speak Icelandic), but Unicode does.
+The C<"/u"> modifier says that the regular expression should match based
+on Unicode semantics.  C<\w> will match any of the more than 100_000
+word characters in Unicode.  Unlike most locales, which are specific to
+a language and country pair, Unicode classifies all the characters that
+are letters I<somewhere> as C<\w>.  For example, your locale might not
+think that "LATIN SMALL LETTER ETH" is a letter (unless you happen to
+speak Icelandic), but Unicode does.  Similarly, all the characters that
+are decimal digits somewhere in the world will match C<\d>; this is
+hundreds, not 10, possible matches.  (And some of those digits look like
+some of the 10 ASCII digits, but mean a different number, so a human
+could easily think a number is a different quantity than it really is.)
+Also, case-insensitive matching works on the full set of Unicode
+characters.  The "KELVIN SIGN", for example matches the letters "k" and
+"K"; and "LATIN SMALL LETTER LONG S" (which looks very much like an "f",
+and was common in the 18th century but is now obsolete), matches "s" and
+"S".  This modifier is automatically selected within the scope of either
+C<use re '/u'> or C<use feature 'unicode_strings'> (which in turn is
+selected by C<use 5.012>.
+
+The C<"/a"> modifier is like the C<"/u"> modifier, except that it
+restricts certain constructs to match only in the ASCII range.  C<\w>
+will match only the 63 characters "[A-Za-z0-9_]"; C<\d>, only the 10
+digits 0-9; C<\s>, only the five characters "[ \f\n\r\t]"; and the
+C<"[[:posix:]]"> classes only the appropriate ASCII characters.  (See
+L<perlrebackslash>.)  This modifier is like the C<"/u"> modifier in that
+things like "KELVIN SIGN" match the letters "k" and "K"; and non-ASCII
+characters continue to have Unicode semantics.  This modifier is
+recommended for people who only incidentally use Unicode.  One can write
+C<\d> with confidence that it will only match ASCII characters, and
+should the need arise to match beyond ASCII, you can use C<\p{Digit}> or
+C<\p{Word}>.  (See L<perlrebackslash> for how to extend C<\s>, and the
+Posix classes beyond ASCII under this modifier.)  This modifier is
+automatically selected within the scope of C<use re '/a'>.
+
+The C<"/d"> modifier gives the regular expression behavior that Perl has
+had between 5.6 and 5.12.  For backwards compatibility it is selected
+by default, but it leads to a number of issues, as outlined in
+L</The "Unicode Bug">.  When this modifier is in effect, regular
+expression matching uses the semantics of what is called the "C" or
+"Posix" locale, unless the pattern or target string of the match is
+encoded in UTF-8, in which case it uses Unicode semantics.  That is, it
+uses what this document calls "byte" semantics unless there is some
+UTF-8-ness involved, in which case it uses "character" semantics.  Note
+that byte semantics are not the same as C<"/a"> matching, as the former
+doesn't know about the characters that are in the Latin-1 range which
+aren't ASCII (such as "LATIN SMALL LETTER ETH), but C<"/a"> does.
 
 As discussed elsewhere, Perl has one foot (two hooves?) planted in
 each of two worlds: the old world of bytes and the new world of
@@ -1379,6 +1426,15 @@ downgraded to bytes, either.  It is possible to accidentally mix bytes
 and characters, however (see L<perluniintro>), in which case C<\w> in
 regular expressions might start behaving differently.  Review your
 code.  Use warnings and the C<strict> pragma.
+
+There are some additional rules as to which of these modifiers is in
+effect if there are contradictory rules present.  First, an explicit
+modifier in a regular expression always overrides any pragmas.  And a
+modifier in an inner cluster or capture group overrides one in an outer
+group (for that inner group only).  If both C<use locale> and C<use
+feature 'unicode_strings> are in effect, the C<"/l"> modifier is
+selected.  And finally, a C<use re> that specifies a modifier has
+precedence over both those pragmas.
 
 =back
 
