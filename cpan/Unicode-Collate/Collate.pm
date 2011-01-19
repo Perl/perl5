@@ -14,7 +14,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '0.71';
+our $VERSION = '0.70';
 our $PACKAGE = __PACKAGE__;
 
 require DynaLoader;
