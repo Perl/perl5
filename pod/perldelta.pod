@@ -1020,29 +1020,6 @@ Date:   Sun Jan 9 15:33:28 2011 -0700
     This patch also includes the changes to test the warnings added by recent
     commits for handling the surrogates and above-Unicode code points
 
-commit 949cf4983af707fbd15e422845f4f3df20505f97
-Author: Karl Williamson <public@khwilliamson.com>
-Date:   Sun Jan 9 13:50:18 2011 -0700
-
-    utf8.c(): Default to allow problematic code points
-
-    Surrogates, non-character code points, and code points that aren't in Unicode
-    are now allowed by default, instead of having to specify a flag to allow them.
-    (Most code did specify those flags anyway.)
-
-    This affects uvuni_to_utf8_flags(), utf8n_to_uvuni() and various routines that
-    are specialized interfaces to them.
-
-    Now there is a new set of flags to disallow those code points.  Further, all 66
-    of the non-character code points are known about and handled consistently,
-    instead of just U+FFFF.
-
-    Code that requires these code points to be forbidden will have to change to use
-    the new flags.  I have looked at all the (few) instances in CPAN where these
-    routines are used, and the only one I found that appears to have need to do
-    this, Encode, has already been patched to accommodate this change.  Of course,
-    I may have overlooked some subtleties.
-
 
 commit 7627e6d0fe772ac90fce9e03fea273109521e261
 Author: Nicholas Clark <nick@ccl4.org>
