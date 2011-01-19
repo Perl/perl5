@@ -526,6 +526,13 @@ L<# 51918|http://rt.perl.org/rt3/Ticket/Display.html?id=51918>,
 L<# 51936|http://rt.perl.org/rt3/Ticket/Display.html?id=51936>,
 L<# 63446|http://rt.perl.org/rt3/Ticket/Display.html?id=63446>
 
+=item *
+
+Sometimes magic (ties, tainted, etc.) attached to variables could cause an
+object to last longer than it should, or cause a crash if a tied variable
+were freed from within a tie method. These have been fixed
+L<[perl #81230]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=81230>.
+
 =back
 
 =head1 Known Problems
@@ -1325,44 +1332,6 @@ Date:   Thu Dec 30 16:52:22 2010 +0000
 
     It was checking that category 'closed' was enabled for warnings before calling
     report_evil_fh(), which in turn was (correctly) checking category 'unopened'.
-
-commit 8985fe98dcc5c0af2fadeac15dfbc13f553ee7fc
-Author: David Mitchell <davem@iabyn.com>
-Date:   Thu Dec 30 10:32:44 2010 +0000
-
-    Better handling of magic methods freeing the SV
-
-    This is a fix for RT #81230 (and more). Currently, mg_get() works around
-    the case where the called magic (e.g. FETCH) frees the magic SV. It does
-    this by unconditionally pushing the SV on the tmps stack before invoking
-    the method.
-
-    There are two issues with this. Firstly, it may artificially extend the
-    life of the SV. This was the root of the problem with #81230. There, the
-    DB_File code, under -T, created a tainted tied object. Accessing the
-    object (within FETCH as it happens), caused mg_get() to be invoked on the
-    object (due to the taint magic), and thus extend the life of the object.
-    This then caused c<untie %h if $h{k}> to give the warning
-        untie attempted while 1 inner references still exist.
-    This only became noticeable after efaf36747029c85b4d8825318cb4d485a0bb350e,
-    which stopped wrapping magic method calls in SAVETMPS/FREETMPS.
-
-    The second issue issue that this protection only applies to mg_get();
-    functions like mg_set() can still segfault if the SV is deleted.
-
-    This commit fixes both problems as follows:
-
-    First, the protection mechanism is moved out of mg_get() and into
-    save_magic() / restore_magic(), so that it protects more things.
-    Secondly, the protection is now:
-
-    * in save_magic(), SvREFCNT_inc() the SV, thus protecting it from being
-      freed during FETCH (or whatever)
-
-    * in restore_magic(), SvREFCNT_dec() the SV, undoing the protection
-      without extending the life of the SV, *except* if the refcount is
-      1 (ie FETCH tried to free it), then push it on the mortals stack
-      to extend it life a bit so our callers wont choke on it.
 
 commit cce04bebd8af026c2a6731940ddb895d3c1fc3e4
 Author: David Golden <dagolden@cpan.org>
