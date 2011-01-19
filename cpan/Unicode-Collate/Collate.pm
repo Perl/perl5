@@ -14,12 +14,8 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '0.70';
+our $VERSION = '0.6801';
 our $PACKAGE = __PACKAGE__;
-
-require DynaLoader;
-our @ISA = qw(DynaLoader);
-bootstrap Unicode::Collate $VERSION;
 
 my @Path = qw(Unicode Collate);
 my $KeyFile = "allkeys.txt";
@@ -75,8 +71,49 @@ use constant NON_VAR => 0; # Non-Variable character
 use constant VAR     => 1; # Variable character
 
 # specific code points
+use constant Hangul_SBase  => 0xAC00;
 use constant Hangul_SIni   => 0xAC00;
 use constant Hangul_SFin   => 0xD7A3;
+use constant Hangul_NCount => 588;
+use constant Hangul_TCount => 28;
+use constant Hangul_LBase  => 0x1100;
+use constant Hangul_LIni   => 0x1100;
+use constant Hangul_LFin   => 0x1159;
+use constant Hangul_LFill  => 0x115F;
+use constant Hangul_LEnd   => 0x115F; # Unicode 5.2
+use constant Hangul_VBase  => 0x1161;
+use constant Hangul_VIni   => 0x1160; # from Vowel Filler
+use constant Hangul_VFin   => 0x11A2;
+use constant Hangul_VEnd   => 0x11A7; # Unicode 5.2
+use constant Hangul_TBase  => 0x11A7; # from "no-final" codepoint
+use constant Hangul_TIni   => 0x11A8;
+use constant Hangul_TFin   => 0x11F9;
+use constant Hangul_TEnd   => 0x11FF; # Unicode 5.2
+use constant HangulL2Ini   => 0xA960; # Unicode 5.2
+use constant HangulL2Fin   => 0xA97C; # Unicode 5.2
+use constant HangulV2Ini   => 0xD7B0; # Unicode 5.2
+use constant HangulV2Fin   => 0xD7C6; # Unicode 5.2
+use constant HangulT2Ini   => 0xD7CB; # Unicode 5.2
+use constant HangulT2Fin   => 0xD7FB; # Unicode 5.2
+
+use constant CJK_UidIni   =>  0x4E00;
+use constant CJK_UidFin   =>  0x9FA5;
+use constant CJK_UidF41   =>  0x9FBB;
+use constant CJK_UidF51   =>  0x9FC3;
+use constant CJK_UidF52   =>  0x9FCB;
+use constant CJK_ExtAIni  =>  0x3400; # Unicode 3.0
+use constant CJK_ExtAFin  =>  0x4DB5; # Unicode 3.0
+use constant CJK_ExtBIni  => 0x20000; # Unicode 3.1
+use constant CJK_ExtBFin  => 0x2A6D6; # Unicode 3.1
+use constant CJK_ExtCIni  => 0x2A700; # Unicode 5.2
+use constant CJK_ExtCFin  => 0x2B734; # Unicode 5.2
+use constant CJK_ExtDIni  => 0x2B740; # Unicode 6.0
+use constant CJK_ExtDFin  => 0x2B81D; # Unicode 6.0
+
+my %CompatUI = map +($_ => 1), (
+    0xFA0E, 0xFA0F, 0xFA11, 0xFA13, 0xFA14, 0xFA1F,
+    0xFA21, 0xFA23, 0xFA24, 0xFA27, 0xFA28, 0xFA29,
+);
 
 # Logical_Order_Exception in PropList.txt
 my $DefaultRearrange = [ 0x0E40..0x0E44, 0x0EC0..0x0EC4 ];
@@ -89,6 +126,10 @@ sub Base_Unicode_Version { "5.2.0" }
 
 sub pack_U {
     return pack('U*', @_);
+}
+
+sub unpack_U {
+    return unpack('U*', shift(@_).pack('U*'));
 }
 
 ######
@@ -111,7 +152,6 @@ our @ChangeNG = qw/
     versionTable alternateTable backwardsTable forwardsTable rearrangeTable
     derivCode normCode rearrangeHash backwardsFlag
     suppress suppressHash
-    __useXS
   /;
 # The hash key 'ignored' is deleted at v 0.21.
 # The hash key 'isShift' is deleted at v 0.23.
@@ -245,12 +285,6 @@ sub new
     my $class = shift;
     my $self = bless { @_ }, $class;
 
-    if (! exists $self->{table} &&
-	!defined $self->{undefName} && !defined $self->{ignoreName} &&
-	!defined $self->{undefChar} && !defined $self->{ignoreChar}) {
-	$self->{__useXS} = \&_fetch_simple;
-    } # XS only
-
     # keys of $self->{suppressHash} are $self->{suppress}.
     if ($self->{suppress} && @{ $self->{suppress} }) {
 	@{ $self->{suppressHash} }{ @{ $self->{suppress} } } = ();
@@ -312,20 +346,6 @@ sub parseAtmark {
 
 sub read_table {
     my $self = shift;
-
-    if ($self->{__useXS}) {
-	my @rest = _fetch_rest(); # complex matter need to parse
-	for my $line (@rest) {
-	    next if $line =~ /^\s*#/;
-
-	    if ($line =~ s/^\s*\@//) {
-		$self->parseAtmark($line);
-	    } else {
-		$self->parseEntry($line);
-	    }
-	}
-	return;
-    }
 
     my($f, $fh);
     foreach my $d (@INC) {
@@ -425,10 +445,48 @@ sub parseEntry
 }
 
 
+##
+## VCE = _varCE(variable, VCE)
+##
+sub _varCE
+{
+    my $vbl = shift;
+    my $vce = shift;
+    if ($vbl eq 'non-ignorable') {
+	return $vce;
+    }
+    my ($var, @wt) = unpack VCE_TEMPLATE, $vce;
+
+    if ($var) {
+	return pack(VCE_TEMPLATE, $var, 0, 0, 0,
+		$vbl eq 'blanked' ? $wt[3] : $wt[0]);
+    }
+    elsif ($vbl eq 'blanked') {
+	return $vce;
+    }
+    else {
+	return pack(VCE_TEMPLATE, $var, @wt[0..2],
+	    $vbl eq 'shifted' && $wt[0]+$wt[1]+$wt[2] ? Shift4Wt : 0);
+    }
+}
+
 sub viewSortKey
 {
     my $self = shift;
     $self->visualizeSortKey($self->getSortKey(@_));
+}
+
+sub visualizeSortKey
+{
+    my $self = shift;
+    my $view = join " ", map sprintf("%04X", $_), unpack(KEY_TEMPLATE, shift);
+
+    if ($self->{UCA_Version} <= 8) {
+	$view =~ s/ ?0000 ?/|/g;
+    } else {
+	$view =~ s/\b0000\b/|/g;
+    }
+    return "[$view]";
 }
 
 
@@ -448,7 +506,6 @@ sub splitEnt
     my $reH  = $self->{rearrangeHash};
     my $vers = $self->{UCA_Version};
     my $ver9 = $vers >= 9 && $vers <= 11;
-    my $uXS  = $self->{__useXS};
 
     my ($str, @buf);
 
@@ -487,9 +544,6 @@ sub splitEnt
 	} elsif ($ver9) {
 	    $src[$i] = undef if $map->{ $src[$i] } &&
 			     @{ $map->{ $src[$i] } } == 0;
-	    if ($uXS) {
-		$src[$i] = undef if _ignorable_simple($src[$i]);
-	    }
 	}
     }
 
@@ -569,8 +623,7 @@ sub splitEnt
 	}
 
 	# skip completely ignorable
-	if ($uXS && $jcps =~ /^[0-9]+\z/ && _ignorable_simple($jcps) ||
-	    $map->{$jcps} && @{ $map->{$jcps} } == 0) {
+	if ($map->{$jcps} && @{ $map->{$jcps} } == 0) {
 	    if ($wLen && @buf) {
 		$buf[-1][2] = $i + 1;
 	    }
@@ -609,13 +662,10 @@ sub getWt
     my $vbl  = $self->{variable};
     my $map  = $self->{mapping};
     my $der  = $self->{derivCode};
-    my $uXS  = $self->{__useXS};
 
     return if !defined $u;
     return map(_varCE($vbl, $_), @{ $map->{$u} })
 	if $map->{$u};
-    return map(_varCE($vbl, $_), _fetch_simple($u))
-	if $uXS && _exists_simple($u);
 
     # JCPS must not be a contraction, then it's a code point.
     if (Hangul_SIni <= $u && $u <= Hangul_SFin) {
@@ -642,7 +692,7 @@ sub getWt
 			$map->{$contract} and @decH = ($contract, $decH[2]);
 		    }
 		    # even if V's ignorable, LT contraction is not supported.
-		    # If such a situation were required, NFD should be used.
+		    # If such a situatution were required, NFD should be used.
 		}
 		if (@decH == 3 && $max->{$decH[1]}) {
 		    my $contract = join(CODE_SEP, @decH[1,2]);
@@ -651,9 +701,7 @@ sub getWt
 	    }
 
 	    @hangulCE = map({
-		    $map->{$_} ? @{ $map->{$_} } :
-		    $uXS && _exists_simple($_) ? _fetch_simple($_) :
-		    $der->($_);
+		    $map->{$_} ? @{ $map->{$_} } : $der->($_);
 		} @decH);
 	}
 	return map _varCE($vbl, $_), @hangulCE;
@@ -678,10 +726,12 @@ sub getWt
 sub getSortKey
 {
     my $self = shift;
+    my $lev  = $self->{level};
     my $rEnt = $self->splitEnt(shift); # get an arrayref of JCPS
     my $vers = $self->{UCA_Version};
     my $vbl  = $self->{variable};
     my $term = $self->{hangul_terminator};
+    my $v2i  = $vers >= 9 && $vbl ne 'non-ignorable';
 
     my @buf; # weight arrays
     if ($term) {
@@ -706,7 +756,53 @@ sub getSortKey
 	}
     }
 
-    return $self->mk_SortKey(\@buf);
+    # make sort key
+    my @ret = ([],[],[],[]);
+    my $last_is_variable;
+
+    foreach my $vwt (@buf) {
+	my($var, @wt) = unpack(VCE_TEMPLATE, $vwt);
+
+	# "Ignorable (L1, L2) after Variable" since track. v. 9
+	if ($v2i) {
+	    if ($var) {
+		$last_is_variable = TRUE;
+	    } elsif (!$wt[0]) { # ignorable
+		next if $last_is_variable;
+	    } else {
+		$last_is_variable = FALSE;
+	    }
+	}
+	foreach my $v (0..$lev-1) {
+	    0 < $wt[$v] and push @{ $ret[$v] }, $wt[$v];
+	}
+    }
+
+    # modification of tertiary weights
+    if ($self->{upper_before_lower}) {
+	foreach my $w (@{ $ret[2] }) {
+	    if    (0x8 <= $w && $w <= 0xC) { $w -= 6 } # lower
+	    elsif (0x2 <= $w && $w <= 0x6) { $w += 6 } # upper
+	    elsif ($w == 0x1C)             { $w += 1 } # square upper
+	    elsif ($w == 0x1D)             { $w -= 1 } # square lower
+	}
+    }
+    if ($self->{katakana_before_hiragana}) {
+	foreach my $w (@{ $ret[2] }) {
+	    if    (0x0F <= $w && $w <= 0x13) { $w -= 2 } # katakana
+	    elsif (0x0D <= $w && $w <= 0x0E) { $w += 5 } # hiragana
+	}
+    }
+
+    if ($self->{backwardsFlag}) {
+	for (my $v = MinLevel; $v <= MaxLevel; $v++) {
+	    if ($self->{backwardsFlag} & (1 << $v)) {
+		@{ $ret[$v-1] } = reverse @{ $ret[$v-1] };
+	    }
+	}
+    }
+
+    join LEVEL_SEP, map pack(KEY_TEMPLATE, @$_), @ret;
 }
 
 
@@ -730,6 +826,174 @@ sub sort {
 	map { $_->[1] }
 	    sort{ $a->[0] cmp $b->[0] }
 		map [ $obj->getSortKey($_), $_ ], @_;
+}
+
+
+sub _derivCE_22 {
+    my $u = shift;
+    my $base = (CJK_UidIni  <= $u && $u <= CJK_UidF52 || $CompatUI{$u})
+		? 0xFB40 : # CJK
+	       (CJK_ExtAIni <= $u && $u <= CJK_ExtAFin ||
+		CJK_ExtBIni <= $u && $u <= CJK_ExtBFin ||
+		CJK_ExtCIni <= $u && $u <= CJK_ExtCFin ||
+		CJK_ExtDIni <= $u && $u <= CJK_ExtDFin)
+		? 0xFB80  # CJK ext.
+		: 0xFBC0; # others
+    my $aaaa = $base + ($u >> 15);
+    my $bbbb = ($u & 0x7FFF) | 0x8000;
+    return pack(VCE_TEMPLATE, NON_VAR, $aaaa, Min2Wt, Min3Wt, $u),
+	   pack(VCE_TEMPLATE, NON_VAR, $bbbb,      0,      0, $u);
+}
+
+sub _derivCE_20 {
+    my $u = shift;
+    my $base = (CJK_UidIni  <= $u && $u <= CJK_UidF52 || $CompatUI{$u})
+		? 0xFB40 : # CJK
+	       (CJK_ExtAIni <= $u && $u <= CJK_ExtAFin ||
+		CJK_ExtBIni <= $u && $u <= CJK_ExtBFin ||
+		CJK_ExtCIni <= $u && $u <= CJK_ExtCFin)
+		? 0xFB80  # CJK ext.
+		: 0xFBC0; # others
+    my $aaaa = $base + ($u >> 15);
+    my $bbbb = ($u & 0x7FFF) | 0x8000;
+    return pack(VCE_TEMPLATE, NON_VAR, $aaaa, Min2Wt, Min3Wt, $u),
+	   pack(VCE_TEMPLATE, NON_VAR, $bbbb,      0,      0, $u);
+}
+
+sub _derivCE_18 {
+    my $u = shift;
+    my $base = (CJK_UidIni  <= $u && $u <= CJK_UidF51 || $CompatUI{$u})
+		? 0xFB40 : # CJK
+	       (CJK_ExtAIni <= $u && $u <= CJK_ExtAFin ||
+		CJK_ExtBIni <= $u && $u <= CJK_ExtBFin)
+		? 0xFB80  # CJK ext.
+		: 0xFBC0; # others
+    my $aaaa = $base + ($u >> 15);
+    my $bbbb = ($u & 0x7FFF) | 0x8000;
+    return pack(VCE_TEMPLATE, NON_VAR, $aaaa, Min2Wt, Min3Wt, $u),
+	   pack(VCE_TEMPLATE, NON_VAR, $bbbb,      0,      0, $u);
+}
+
+sub _derivCE_14 {
+    my $u = shift;
+    my $base = (CJK_UidIni  <= $u && $u <= CJK_UidF41 || $CompatUI{$u})
+		? 0xFB40 : # CJK
+	       (CJK_ExtAIni <= $u && $u <= CJK_ExtAFin ||
+		CJK_ExtBIni <= $u && $u <= CJK_ExtBFin)
+		? 0xFB80  # CJK ext.
+		: 0xFBC0; # others
+    my $aaaa = $base + ($u >> 15);
+    my $bbbb = ($u & 0x7FFF) | 0x8000;
+    return pack(VCE_TEMPLATE, NON_VAR, $aaaa, Min2Wt, Min3Wt, $u),
+	   pack(VCE_TEMPLATE, NON_VAR, $bbbb,      0,      0, $u);
+}
+
+sub _derivCE_9 {
+    my $u = shift;
+    my $base = (CJK_UidIni  <= $u && $u <= CJK_UidFin || $CompatUI{$u})
+		? 0xFB40 : # CJK
+	       (CJK_ExtAIni <= $u && $u <= CJK_ExtAFin ||
+		CJK_ExtBIni <= $u && $u <= CJK_ExtBFin)
+		? 0xFB80  # CJK ext.
+		: 0xFBC0; # others
+    my $aaaa = $base + ($u >> 15);
+    my $bbbb = ($u & 0x7FFF) | 0x8000;
+    return pack(VCE_TEMPLATE, NON_VAR, $aaaa, Min2Wt, Min3Wt, $u),
+	   pack(VCE_TEMPLATE, NON_VAR, $bbbb,      0,      0, $u);
+}
+
+sub _derivCE_8 {
+    my $code = shift;
+    my $aaaa =  0xFF80 + ($code >> 15);
+    my $bbbb = ($code & 0x7FFF) | 0x8000;
+    return pack(VCE_TEMPLATE, NON_VAR, $aaaa, 2, 1, $code),
+	   pack(VCE_TEMPLATE, NON_VAR, $bbbb, 0, 0, $code);
+}
+
+sub _uideoCE_8 {
+    my $u = shift;
+    return pack(VCE_TEMPLATE, NON_VAR, $u, Min2Wt, Min3Wt, $u);
+}
+
+sub _isUIdeo {
+    # $uca_vers = 0 for _uideoCE_8()
+    my ($u, $uca_vers) = @_;
+    return((CJK_UidIni <= $u && (
+	    $uca_vers >= 20 ? ($u <= CJK_UidF52) :
+	    $uca_vers >= 18 ? ($u <= CJK_UidF51) :
+	    $uca_vers >= 14 ? ($u <= CJK_UidF41) :
+			      ($u <= CJK_UidFin))) || $CompatUI{$u}
+		||
+	(CJK_ExtAIni <= $u && $u <= CJK_ExtAFin)
+		||
+	($uca_vers >=  8 && CJK_ExtBIni <= $u && $u <= CJK_ExtBFin)
+		||
+	($uca_vers >= 20 && CJK_ExtCIni <= $u && $u <= CJK_ExtCFin)
+		||
+	($uca_vers >= 22 && CJK_ExtDIni <= $u && $u <= CJK_ExtDFin)
+    );
+}
+
+
+##
+## "hhhh hhhh hhhh" to (dddd, dddd, dddd)
+##
+sub _getHexArray { map hex, $_[0] =~ /([0-9a-fA-F]+)/g }
+
+#
+# $code *must* be in Hangul syllable.
+# Check it before you enter here.
+#
+sub _decompHangul {
+    my $code = shift;
+    my $si = $code - Hangul_SBase;
+    my $li = int( $si / Hangul_NCount);
+    my $vi = int(($si % Hangul_NCount) / Hangul_TCount);
+    my $ti =      $si % Hangul_TCount;
+    return (
+	Hangul_LBase + $li,
+	Hangul_VBase + $vi,
+	$ti ? (Hangul_TBase + $ti) : (),
+    );
+}
+
+sub _isIllegal {
+    my $code = shift;
+    return((! defined $code)                    # removed
+	|| ($code < 0 || 0x10FFFF < $code)      # out of range
+    );
+}
+
+sub _isNonchar {
+    my $code = shift;
+    return((($code & 0xFFFE) == 0xFFFE)         # ??FFF[EF] (cf. utf8.c)
+	|| (0xD800 <= $code && $code <= 0xDFFF) # unpaired surrogates
+	|| (0xFDD0 <= $code && $code <= 0xFDEF) # other non-characters
+    );
+}
+
+# Hangul Syllable Type
+sub getHST {
+    my $u = shift;
+    my $vers = shift || 0;
+
+    if (Hangul_SIni <= $u && $u <= Hangul_SFin) {
+	return +($u - Hangul_SBase) % Hangul_TCount ? "LVT" : "LV";
+    }
+
+    if ($vers < 20) {
+	return Hangul_LIni <= $u && $u <= Hangul_LFin ||
+			            $u == Hangul_LFill ? "L" :
+	       Hangul_VIni <= $u && $u <= Hangul_VFin  ? "V" :
+	       Hangul_TIni <= $u && $u <= Hangul_TFin  ? "T" : "";
+    } else {
+	return Hangul_LIni <= $u && $u <= Hangul_LEnd ||
+	       HangulL2Ini <= $u && $u <= HangulL2Fin  ? "L" :
+	       Hangul_VIni <= $u && $u <= Hangul_VEnd ||
+	       HangulV2Ini <= $u && $u <= HangulV2Fin  ? "V" :
+	       Hangul_TIni <= $u && $u <= Hangul_TEnd ||
+	       HangulT2Ini <= $u && $u <= HangulT2Fin  ? "T" : "";
+    }
 }
 
 
@@ -759,7 +1023,7 @@ sub _eqArray($$$)
     my $lev = shift;
 
     for my $g (0..@$substr-1){
-	# Do the $g'th graphemes have the same number of AV weights?
+	# Do the $g'th graphemes have the same number of AV weigths?
 	return if @{ $source->[$g] } != @{ $substr->[$g] };
 
 	for my $w (0..@{ $substr->[$g] }-1) {
@@ -1057,7 +1321,7 @@ The following tracking versions are supported.  The default is 20.
 
 Note: Recent UTS #10 renames "Tracking Version" to "Revision."
 
-* Noncharacters (e.g. U+FFFF) are not ignored, and can be overridden
+* Noncharacters (e.g. U+FFFF) are not ignored, and can be overrided
 since C<UCA_Version> 22.
 
 * Fully ignorable characters were ignored, and would not interrupt
@@ -1095,7 +1359,7 @@ forwards at all the levels.
 
 If the same character (or a sequence of characters) exists
 in the collation element table through C<table>,
-mapping to collation elements is overridden.
+mapping to collation elements is overrided.
 If it does not exist, the mapping is defined additionally.
 
     entry => <<'ENTRY', # for DUCET v4.0.0 (allkeys-4.0.0.txt)
@@ -1272,7 +1536,7 @@ those in the CJK Unified Ideographs Extension A etc.
     Ext.D (U+2B740..U+2B81D) if UCA_Version is 22 or greater.
 
 Through C<overrideCJK>, ordering of CJK unified ideographs (including
-extensions) can be overridden.
+extensions) can be overrided.
 
 ex. CJK unified ideographs in the JIS code point order.
 
@@ -1315,7 +1579,7 @@ in C<table> or C<entry> is still valid.
 B<Note:> In addition to them, 12 CJK compatibility ideographs (C<U+FA0E>,
 C<U+FA0F>, C<U+FA11>, C<U+FA13>, C<U+FA14>, C<U+FA1F>, C<U+FA21>, C<U+FA23>,
 C<U+FA24>, C<U+FA27>, C<U+FA28>, C<U+FA29>) are also treated as CJK unified
-ideographs. But they can't be overridden via C<overrideCJK> when you use
+ideographs. But they can't be overrided via C<overrideCJK> when you use
 DUCET, as the table includes weights for them. C<table> or C<entry> has
 priority over C<overrideCJK>.
 
@@ -1325,7 +1589,7 @@ priority over C<overrideCJK>.
 
 By default, Hangul syllables are decomposed into Hangul Jamo,
 even if C<(normalization =E<gt> undef)>.
-But the mapping of Hangul syllables may be overridden.
+But the mapping of Hangul syllables may be overrided.
 
 This parameter works like C<overrideCJK>, so see there for examples.
 
@@ -1486,7 +1750,7 @@ this parameter doesn't work validly.
 
 This key allows to variable weighting for variable collation elements,
 which are marked with an ASTERISK in the table
-(NOTE: Many punctuation marks and symbols are variable in F<allkeys.txt>).
+(NOTE: Many punction marks and symbols are variable in F<allkeys.txt>).
 
    variable => 'blanked', 'non-ignorable', 'shifted', or 'shift-trimmed'.
 
@@ -1794,7 +2058,7 @@ B<Unicode::Normalize is required to try The Conformance Test.>
 =head1 AUTHOR, COPYRIGHT AND LICENSE
 
 The Unicode::Collate module for perl was written by SADAHIRO Tomoyuki,
-<SADAHIRO@cpan.org>. This module is Copyright(C) 2001-2011,
+<SADAHIRO@cpan.org>. This module is Copyright(C) 2001-2010,
 SADAHIRO Tomoyuki. Japan. All rights reserved.
 
 This module is free software; you can redistribute it and/or

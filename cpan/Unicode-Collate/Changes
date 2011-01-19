@@ -1,13 +1,5 @@
 Revision history for Perl module Unicode::Collate.
 
-0.70  Sun Jan 16 20:31:07 2011
-    - Now U::C::Locale->new will use the compiled DUCET via XS.
-
-0.69  Sat Jan 15 19:41:11 2011
-    - clarified about XSUB. revised INSTALL in README.
-    - xs: flag passed to utf8n_to_uvuni().
-    - doc and comments: [perl #81876] Fix typos by Peter J. Acklam.
-
 0.68  Tue Nov 23 20:17:22 2010
     - doc: clarified about (backwards => [ ]) and (backwards => undef).
     - separated t/backwds.t from t/test.t.
@@ -32,7 +24,7 @@ Revision history for Perl module Unicode::Collate.
     - 12 compat. ideographs (e.g. U+FA0E) are treated as unified ideographs.
      (though DUCET also does it, now Unicode::Collate does it without DUCET.)
     - added t/compatui.t.
-    ! Ideographs Ext.B (U+20000..U+2A6D6) can be overridden with UCA_Version 8.
+    ! Ideographs Ext.B (U+20000..U+2A6D6) can be overrided with UCA_Version 8.
       This is a long-standing behavior from Unicode::Collate 0.11 to 0.63.
       A wrong fix at 0.64 should be abandoned.
 
@@ -129,8 +121,6 @@ Revision history for Perl module Unicode::Collate.
     - U+9FC4..U+9FCB and U+2A700..U+2B734 are new CJK unified ideographs.
     - Many hangul jamo are assigned (affecting hangul_terminator).
 
-    ! Now XSUB will be built by default. (XSUB needs a C compiler.)
-      To build pure perl, run disableXS before Makefile.PL.
     ! DUCET will be compiled when XS is used. Explicit saying
       <table => 'allkeys.txt'> (or using another table) will prevent
       this module from using the compiled DUCET.
@@ -184,11 +174,11 @@ Revision history for Perl module Unicode::Collate.
       (Perl 5.7.3 or before)). If perl 5.6.X is used, XSUB may help it
       in place of broken CORE::unpack('U*') in older perl.
     - added illegal.t and illegalp.t in t.
-    - added XSUB where some functions are implemented in XSUB.
-      Pure Perl is also supported.
+    - added XSUB (EXPERIMENTAL!) where some functions are implemented
+      in XSUB. Pure Perl is also supported.
 
 0.30  Mon Oct 13 21:26:37 2003
-    - fix: Completely ignorable in table should be able to be overridden
+    - fix: Completely ignorable in table should be able to be overrided
       by non-ignorable in entry.
     - fix: Maximum length for contraction must not be shortened
       by a shorter contraction following in table and/or entry.

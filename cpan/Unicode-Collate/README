@@ -1,4 +1,4 @@
-Unicode/Collate version 0.70
+Unicode/Collate version 0.68
 ===============================
 
 NAME
@@ -40,7 +40,6 @@ INSTALL
   gendata/*, and mklocale.
   Tests for Unicode::Collate::Locale are named t/loc_*.t.
 
-Since 0.54, XSUB that requires a C compiler will be built by default.
 To install this module type the following:
 
    perl Makefile.PL
@@ -48,20 +47,20 @@ To install this module type the following:
    make test
    make install
 
-Even if a C compiler is not available, pure Perl (i.e. non-XS) edition
-is available; type the following:
+If you have a C compiler and want to use XSUB edition,
+type the following (!! "enableXS" must run before "Makefile.PL" !!):
 
-   perl disableXS
+   perl enableXS
    perl Makefile.PL
    make
    make test
    make install
 
-If you decide to install XSUB edition after trying to build pure Perl,
-type the following:
+If you decide to install pure Perl (i.e. non-XS) edition after trying
+to build XSUB, type the following:
 
    make clean
-   perl enableXS
+   perl disableXS
    perl Makefile.PL
    make
    make test
@@ -108,7 +107,7 @@ HOW TO CHANGE DUCET (NOT WARRANTED)
 AUTHOR, COPYRIGHT AND LICENSE
 
 The Unicode::Collate module for perl was written by SADAHIRO Tomoyuki,
-<SADAHIRO@cpan.org>. This module is Copyright(C) 2001-2011,
+<SADAHIRO@cpan.org>. This module is Copyright(C) 2001-2010,
 SADAHIRO Tomoyuki. Japan. All rights reserved.
 
 This module is free software; you can redistribute it and/or
