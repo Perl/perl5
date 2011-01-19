@@ -249,6 +249,14 @@ C<Term::UI> has been upgraded from version 0.20 to 0.24
 
 =item *
 
+C<Thread::Queue> has been upgraded from version 2.11 to 2.12.
+
+=item *
+
+C<Thread::Semaphore> has been upgraded from version 2.11 to 2.12.
+
+=item *
+
 C<threads> has been upgraded from version 1.81_03 to 1.82
 
 =item *
@@ -1382,13 +1390,6 @@ Date:   Sun Dec 26 18:10:57 2010 -0800
     zero with a warning, returns undef with a warning, dies.  (There's precedent
     for dying: some BASIC implementations give an error if you ask for ASC("")
     -- here ASC is their equivalent of our ord function.)
-
-commit 23e2fda90bc3d33c854bd36de712a45aca7a7711
-Author: Jerry D. Hedden <jdhedden@cpan.org>
-Date:   Fri Dec 24 12:53:28 2010 -0500
-
-    Upgrade to Thread::Queue 2.12
-    Upgrade to Thread::Semaphore 2.12
 
 commit cce04bebd8af026c2a6731940ddb895d3c1fc3e4
 Author: David Golden <dagolden@cpan.org>
