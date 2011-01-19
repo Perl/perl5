@@ -1237,19 +1237,6 @@ Date:   Tue Sep 14 18:06:38 2010 +0200
     remove deprecated libcygipc info
     remove overlarge stack size
 
-commit ac0650a4c9f69cdc9e7af31df29011c42b42b770
-Author: Father Chrysostomos <sprout@cpan.org>
-Date:   Sun Jan 2 23:14:37 2011 -0800
-
-    Restore the old description of $[
-
-    The new entry is a bit too futuristic: assignment to $[ still works
-    and it is not read-only.
-
-    This does not fully restore the old description, as it contained
-    grammatical errors and parts of it were not updated when 5.10 changed
-    the scoping.
-
 commit 2831a86cee065b53b74fd19ddcc6a4257484646d
 Author: Zsbán Ambrus <ambrus@math.bme.hu>
 Date:   Sun Jan 2 20:25:55 2011 -0800
