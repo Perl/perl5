@@ -328,7 +328,6 @@ MIMEBASE64_NLM		= $(EXTDIR)\MIME\Base64\Base64.NLM
 XSAPITEST_NLM		= $(EXTDIR)\XS\APItest\APItest.NLM
 XSTYPEMAP_NLM		= $(EXTDIR)\XS\Typemap\Typemap.NLM
 UNICODENORMALIZE_NLM 	= $(EXTDIR)\Unicode\Normalize\Normalize.NLM
-UNICODECOLLATE_NLM 	= $(EXTDIR)\Unicode\Collate\Collate.NLM
 
 EXTENSION_NLM	= 		\
 		$(FCNTL_NLM)	\
@@ -791,7 +790,7 @@ X2P_OBJ		= $(X2P_SRC:.c=.obj)
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attributes B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
 		Storable/Storable List/Util MIME/Base64/Base64 XS/APItest/APItest \
-		XS/Typemap/Typemap Unicode/Collate/Collate Unicode/Normalize/Normalize Sys/Hostname
+		XS/Typemap/Typemap Unicode/Normalize/Normalize Sys/Hostname
 
 STATIC_EXT	= DynaLoader
 NONXS_EXT	= Errno
@@ -820,7 +819,6 @@ MIMEBASE64		= $(EXTDIR)\MIME\Base64\Base64
 XSAPITEST		= $(EXTDIR)\XS\APItest\APItest
 XSTYPEMAP		= $(EXTDIR)\XS\Typemap\Typemap
 UNICODENORMALIZE	= $(EXTDIR)\Unicode\Normalize\Normalize
-UNICODECOLLATE	= $(EXTDIR)\Unicode\Collate\Collate
 
 ERRNO_PM_NW	= $(LIBDIR)\Errno.pm
 
@@ -1405,7 +1403,6 @@ distclean: clean nwclean
 	-del /f /q $(LIBDIR)\Devel\Peek.pm $(LIBDIR)\Devel\DProf.pm
 	-del /f /q $(LIBDIR)\File\Glob.pm
 	-del /f /q $(LIBDIR)\Unicode\Normalize.pm
-	-del /f /q $(LIBDIR)\Unicode\Collate.pm
 	-rmdir /s /q $(LIBDIR)\IO
 	-rmdir /s /q $(LIBDIR)\B
 	-rmdir /s /q $(LIBDIR)\Data
