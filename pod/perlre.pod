@@ -631,6 +631,10 @@ These modifiers do not carry over into named subpatterns called in the
 enclosing group. In other words, a pattern such as C<((?i)(&NAME))> does not
 change the case-sensitivity of the "NAME" pattern.
 
+Any of these modifiers can be set to apply globally to all regular
+expressions compiled within the scope of a C<use re>.  See
+L<re/'/flags' mode>.
+
 Starting in Perl 5.14, a C<"^"> (caret or circumflex accent) immediately
 after the C<"?"> is a shorthand equivalent to C<d-imsx>.  Flags (except
 C<"d">) may follow the caret to override it.
@@ -659,7 +663,7 @@ Latin-1 (ISO-8859-1) meanings (which are the same as Unicode's), whereas
 in strict ASCII their meanings are undefined.  Thus the platform
 effectively becomes a Unicode platform.  The ASCII characters remain as
 ASCII characters (since ASCII is a subset of Latin-1 and Unicode).  For
-example, when this option is XXX not on, on a non-utf8 string, C<"\w">
+example, when this option is not on, on a non-utf8 string, C<"\w">
 matches precisely C<[A-Za-z0-9_]>.  When the option is on, it matches
 not just those, but all the Latin-1 word characters (such as an "n" with
 a tilde).  On EBCDIC platforms, which already are equivalent to Latin-1,
@@ -670,15 +674,21 @@ small letters C<MU>; otherwise not; and the C<LATIN CAPITAL LETTER SHARP
 S> will match any of C<SS>, C<Ss>, C<sS>, and C<ss>, otherwise not.
 (This last case is buggy, however.)
 
-C<"a"> is the same as C<"u">, but C<\d>, C<\s>, C<\w>, and the Posix
-character classes are restricted to matching in the ASCII range only.
-That is, with this modifier, C<\d> always means precisely the digits
-C<"0"> to C<"9">; C<\s> means the five characters C<[ \f\n\r\t]>;
-C<\w> means the 53 characters C<[A-Za-z0-9_]>; and likewise, all the
+C<"a"> is the same as C<"u">, except that C<\d>, C<\s>, C<\w>, and the
+Posix character classes are restricted to matching in the ASCII range
+only.  That is, with this modifier, C<\d> always means precisely the
+digits C<"0"> to C<"9">; C<\s> means the five characters C<[ \f\n\r\t]>;
+C<\w> means the 63 characters C<[A-Za-z0-9_]>; and likewise, all the
 Posix classes such as C<[[:print:]]> match only the appropriate
 ASCII-range characters.  As you would expect, this modifier causes, for
-example, C<\D> to mean the same thing as C<[^0-9]>.  C<"a"> behaves the
-same as C<"u"> with regards to case-insensitive matches.  XXX
+example, C<\D> to mean the same thing as C<[^0-9]>; in fact, all
+non-ASCII characters match C<\D>, C<\S>, and C<\W>.  C<\b> still means
+to match at the boundary between C<\w> and C<\W>, using the C<"a">
+definitions of them (similarly for C<\B>).  Otherwise, C<"a"> behaves
+like the C<"u"> modifier, in that case-insensitive matching uses Unicode
+semantics; for example, "k" will match the Unicode C<\N{KELVIN SIGN}>
+under C</i> matching, and code points in the Latin1 range, above ASCII
+will have Unicode semantics when it comes to case-insensitive matching.
 
 C<"d"> means to use the traditional Perl pattern matching behavior.
 This is dualistic (hence the name C<"d">, which also could stand for
@@ -692,9 +702,9 @@ default if the regular expression is compiled neither within the scope
 of a C<"use locale"> pragma nor a <C<"use feature 'unicode_strings">
 pragma.
 
-Note that the C<d>, C<l>, C<p>, and C<u> modifiers are special in that
-they can only be enabled, not disabled, and the C<d>, C<l>, and C<u>
-modifiers are mutually exclusive: specifying one de-specifies the
+Note that the C<a>, C<d>, C<l>, C<p>, and C<u> modifiers are special in
+that they can only be enabled, not disabled, and the C<d>, C<l>, and
+C<u> modifiers are mutually exclusive: specifying one de-specifies the
 others, and a maximum of one may appear in the construct.  Thus, for
 example, C<(?-p)>, C<(?-d:...)>, and C<(?dl:...)> will warn when
 compiled under C<use warnings>.
