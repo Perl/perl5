@@ -985,8 +985,6 @@ Date:   Thu Jan 13 22:36:36 2011 -0700
     not delivering that.  The TODOs that this fixes will be cleaned up in a later commit
 
 
-    Update Pod-LaTeX to CPAN version 0.59
-
 commit 680818c0361b180bb6f09d4bb11c4d5cd467fe62
 Author: Nicholas Clark <nick@ccl4.org>
 Date:   Thu Jan 13 16:24:52 2011 +0000
