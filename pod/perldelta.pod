@@ -451,9 +451,11 @@ XXX List any platforms that this version of perl no longer compiles on.
 
 =over 4
 
-=item XXX-some-platform
+=item Apollo DomainOS
 
-XXX
+The last vestiges of support for this platform have been excised from the
+Perl distribution. It was officially discontinued in version 5.12.0. It had
+not worked for years before that.
 
 =back
 
@@ -1191,9 +1193,6 @@ Date:   Tue Sep 14 17:54:15 2010 +0200
 
 
 Platforms
-
-    Actually excise 'Apollo DomainOS' support. We officially killed it in 5.11.0. It
-    hadn't worked for years before that.
 
 commit cc7e77fd5a0ee9f1498e54dddf566117da62754b
 Author: Reini Urban <rurban@x-ray.at>
