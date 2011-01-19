@@ -65,6 +65,10 @@ standard, are now always legal internally.  But inputting or outputting
 them will work the same as for the non-legal Unicode code points, as the
 Unicode standard says they are illegal for "open interchange".
 
+=head2 Regular expression debugging output improvement
+
+Regular expression debugging output (turned on by C<use re 'debug';>) now
+uses hexadecimal when escaping non-ASCII characters, instead of octal.
 
 =head1 Security
 
@@ -1409,15 +1413,5 @@ Date:   Fri Dec 24 22:29:14 2010 +0000
 
     [PATCH] Upgrade to threads::shared 1.36
     [PATCH] Upgrade to threads 1.82
-
-commit c89df6cf6f70d6460ca3fec9d465e5e6e17fb3a7
-Author: Karl Williamson <public@khwilliamson.com>
-Date:   Sun Dec 19 11:08:47 2010 -0700
-
-    Change regexes to debug dump non-ASCII as hex.
-
-    instead of the less familiar octal for larger values.  Perhaps they
-    should actually print the actual character, but this is far easier than
-    the previous to understand.
 
 =cut
