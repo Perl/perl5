@@ -302,13 +302,13 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlfunc>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+It has now been documented that C<ord> returns 0 for an empty string.
 
 =back
 
@@ -1376,20 +1376,6 @@ Author: David Golden <dagolden@cpan.org>
 Date:   Mon Dec 27 14:50:31 2010 -0500
 
     Add CPAN::Meta::YAML as a dual-life core module
-
-commit 6fae7aa4cab68dd6bb59af7f22c85e77eb8a1b0c
-Author: Zsbán Ambrus <ambrus@math.bme.hu>
-Date:   Sun Dec 26 18:10:57 2010 -0800
-
-    [perl #81016] Document ord("")
-
-    The following patch clarifies what ord("") does in pod/perlfunc.pod.
-
-    From the current documentation, it's not documented what it does, and one
-    could guess several different things: returns zero, returns undef, returns
-    zero with a warning, returns undef with a warning, dies.  (There's precedent
-    for dying: some BASIC implementations give an error if you ask for ASC("")
-    -- here ASC is their equivalent of our ord function.)
 
 commit cce04bebd8af026c2a6731940ddb895d3c1fc3e4
 Author: David Golden <dagolden@cpan.org>
