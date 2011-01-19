@@ -369,7 +369,11 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX
+Previously, if none of the C<gethostbyaddr>, C<gethostbyname> and
+C<gethostent> functions were implemented on a given platform, they would
+all die with the message 'Unsupported socket function "gethostent" called',
+with analogous messages for C<getnet*> and C<getserv*>. This has been
+corrected.
 
 =back
 
@@ -1000,15 +1004,6 @@ Date:   Thu Jan 13 16:24:52 2011 +0000
     Update Compress-Raw-Bzip2 to CPAN version 2.033
     Update DB_File to CPAN version 1.821
 
-DIAGNOSTICS
-    Correct the "unimplemented" message for get{host,net,proto,serv}ent aliases.
-
-    Previously, if all of gethost{byaddr,byname,ent} were unimplemented on a
-    platform, they would all return 'Unsupported socket function "gethostent"
-    called', with the analogous results for getnet{byaddr,byname,ent},
-    getproto{byname,bynumber,ent} and getserv{byname,byport,ent}. This bug was
-    introduced by change af51a00e97d5c559 - prior to this, all 12 functions would
-    report their own name when unimplemented.
 
 
 commit 7627e6d0fe772ac90fce9e03fea273109521e261
