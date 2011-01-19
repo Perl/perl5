@@ -445,9 +445,11 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Solaris
 
-XXX
+DTrace is now supported on Solaris. There used to be build failures, but
+these have been fixed
+L<[perl #73630]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=73630>.
 
 =back
 
@@ -1283,22 +1285,6 @@ Date:   Sun Jan 2 14:51:21 2011 -0800
     count is zero does not apply when called from sv_clean_objs, so the
     new S_curse routine takes a boolean argument that determines whether
     that check should take place.
-
-commit 3d450a5dd4e8f9a7b2aba0b018f9fe078fb6aa30
-Author: David Leadbeater <dgl@dgl.cx>
-Date:   Sun Jan 2 14:33:16 2011 -0800
-
-    [perl #73630] Build separate DTrace for miniperl
-
-    As outlined in the RT ticket due to miniperl's dependencies differing to
-    the final perl binary dtrace -G needs to be called separately for each.
-
-    Build tested on Mac OS X 10.6, Solaris 11 and Scientific Linux with
-    SystemTap from git.
-
-    (Solaris is the only system I have access to where DTRACE_O actually gets
-    defined. Neither the dtrace binary on OS X nor SystemTap's dtrace
-    compatibility layer accept the -G option.)
 
 commit edcf105d70e5423fd928c776e086fe31a4a543f4
 Author: Jesse Vincent <jesse@bestpractical.com>
