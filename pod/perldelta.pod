@@ -588,12 +588,6 @@ It hasn't yet been deduped with the entries that _are_ in the perldelta.
 
     Remove Mac OS classic code from numerous places throughout the core
 
-commit c0395286602760bd9b6d761786177bee69f9b3f5
-Author: Chris 'BinGOs' Williams <chris@bingosnet.co.uk>
-Date:   Wed Jan 19 10:27:27 2011 +0000
-
-    Update Log-Message-Simple to CPAN version 0.08
-
 commit 7fe50b8b8a4dc38fc341e3b403545aaca937f50e
 Author: Leon Timmermans <fawaka@gmail.com>
 Date:   Tue Jan 18 16:40:07 2011 +0100
