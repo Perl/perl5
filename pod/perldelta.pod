@@ -483,6 +483,12 @@ three static in-line functions for accessing the information:
 C<get_regex_charset()>, C<set_regex_charset()>, and C<get_regex_charset_name()>,
 which are defined in the places where the orginal flags were.
 
+=item *
+
+A new option has been added to C<pv_escape> to dump all characters above
+ASCII in hexadecimal. Before, one could get all characters as hexadecimal
+or the Latin1 non-ASCII as octal
+
 =back
 
 =head1 Selected Bug Fixes
@@ -1413,16 +1419,5 @@ Date:   Sun Dec 19 11:08:47 2010 -0700
     instead of the less familiar octal for larger values.  Perhaps they
     should actually print the actual character, but this is far easier than
     the previous to understand.
-
-commit 681f01c2a5ff0846090d78599b3d4caeb93fda26
-Author: Karl Williamson <public@khwilliamson.com>
-Date:   Sun Dec 19 11:00:49 2010 -0700
-
-    pv_escape: Add option to dump all non-ascii as hex
-
-    This patch adds an option to pv_escape() to dump all characters above ASCII
-    in hex.  Before, you could get all chars as hex or the Latin1 non-ASCII
-    as octal, whereas the typical values for these that people think in are
-    given in hex.
 
 =cut
