@@ -295,6 +295,10 @@ C<Unicode::Normalize> has been upgraded from version 1.07 to 1.10
 
 C<version> has been upgraded from 0.86 to 0.88.
 
+=item *
+
+C<Win32> has been upgraded from version 0.41 to 0.44.
+
 =back
 
 =head2 Removed Modules and Pragmata
@@ -997,12 +1001,6 @@ Date:   Thu Jan 13 16:24:52 2011 +0000
     stack instead, read the current value of the relevant interpreter's stack
     at the point of access, and copy all the SVs away before making any further
     calls which might cause reallocation.
-
-    Update to Win32-0.44 from CPAN
-    Update IO-Compress to CPAN version 2.033
-    Update Compress-Raw-Zlib to CPAN version 2.033
-    Update Compress-Raw-Bzip2 to CPAN version 2.033
-    Update DB_File to CPAN version 1.821
 
 
 
