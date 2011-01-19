@@ -573,3 +573,862 @@ The F<README> file for general stuff.
 The F<Artistic> and F<Copying> files for copyright information.
 
 =cut
+
+=for later
+
+Below, you'll find a cut-down version of the git log from 5.13.8 to 1b9043bb.
+Jesse went through and took a first pass at cutting out non-changelog items. He may have been over-(or under-)zealous.
+
+It hasn't yet been deduped with the entries that _are_ in the perldelta.
+
+
+    Major spell-checking pass throughout the core
+
+    Remove references to compat3.sym and interp.sym, deleted over 10 years ago.
+
+    Remove Mac OS classic code from numerous places throughout the core
+
+commit c0395286602760bd9b6d761786177bee69f9b3f5
+Author: Chris 'BinGOs' Williams <chris@bingosnet.co.uk>
+Date:   Wed Jan 19 10:27:27 2011 +0000
+
+    Update Log-Message-Simple to CPAN version 0.08
+
+commit 7fe50b8b8a4dc38fc341e3b403545aaca937f50e
+Author: Leon Timmermans <fawaka@gmail.com>
+Date:   Tue Jan 18 16:40:07 2011 +0100
+
+    Also unblock signal handlers throwing an exception
+
+    Also handle and test the edge case of a signal handler throwing an
+    exception
+
+
+
+
+Numberous POD warnings fixed
+
+
+
+    Update Unicode-Collate to CPAN version 0.71
+
+
+internals
+
+
+    regexec.c: Remove break statements from macros
+
+    This is so future coders won't be tempted to rely on them.
+
+    regexec.c: Don't rely on break stmts in macros
+
+    It is safer and clearer to have the break statement in each case statement at
+    the source level
+
+commit b57e41186b2ceb48bef4f0588dcd19e105cc8a38
+Author: Karl Williamson <public@khwilliamson.com>
+Date:   Tue Jan 18 15:03:41 2011 -0700
+
+    regcomp: Disallow multi-char folds in lookbehind
+
+    The addition of the ANYOFV regnode to treat multi-char folds in a bracketed
+    character class has exposed a bug, in which those classes have long been able
+    to be varying length (due to the multi-char fold), but the compiler wasn't
+    aware of it.  Now it is, and hence won't allow those which have multi-char
+    folds to be part of a lookbehind pattern, which requires a constant length.
+
+    This patch disallows multi-char folds in a lookbehind bracketed character
+    class.
+
+Author: Nicholas Clark <nick@ccl4.org>
+Date:   Tue Jan 18 16:14:43 2011 +0000
+
+    Remove Mac OS classic code from scripts in utils/
+
+
+    Convert DosGlob.t to Test::More.
+
+commit d6dc8a6dc95226ddff7719cd1e0bd053c4e5725e
+Author: Nicholas Clark <nick@ccl4.org>
+Date:   Tue Jan 18 13:08:11 2011 +0000
+
+    Remove Mac OS Classic docs from DirHandle and File::{Copy,DosGlob,Find}
+
+    The documentation for the different behaviour on Mac OS Classic was not
+    removed when the relevant code was removed in 862f843bac3434c2. That commit
+    also remove all callers to several Mac OS classic support functions, but not
+    the functions themselves. Rectify this.
+
+commit 8254cbf193c939338449097a80163197fc755150
+Author: Nicholas Clark <nick@ccl4.org>
+Date:   Tue Jan 18 11:10:41 2011 +0000
+
+    Build perltoc.pod with pragmata sorted by name.
+
+    Previously they were actually sorted by full pathname, which isn't logical.
+    I presume that this is an artefact of all pragmata being in lib/ when
+    pod/buildtoc was originally written.
+
+commit 1d45ec279e4e105512a2803e3d0bd974a151a0f6
+Author: Father Chrysostomos <sprout@cpan.org>
+Date:   Mon Jan 17 22:32:52 2011 -0800
+
+    perlcall: Fixes for various grammatical errors
+
+commit faaf68361923e4bb95d1eb919bc724a0dcc5a4ce
+Author: Leon Timmermans <fawaka@gmail.com>
+Date:   Mon Jan 17 17:59:33 2011 +0100
+
+    Clarify limitation in safe signals.
+
+commit 0c1bf4c7d433bb0ad80bfe5511b1301db32b7b95
+Author: Leon Timmermans <fawaka@gmail.com>
+Date:   Mon Jan 17 16:29:11 2011 +0100
+
+    Added tests for conditional unblocking
+
+commit 555344425f04e96a72e4d29eab96b34bff8f96ae
+Author: Leon Timmermans <fawaka@gmail.com>
+Date:   Thu Jan 13 18:30:29 2011 +0100
+
+    Conditionally unblock after signal handler[#82040]
+
+    Only unblock signal after a safe-signal handler is executed if that signal was
+    also unblocked before the handler.
+commit 435aa301127ed481169903cb35187bde1ea44928
+Author: David Golden <dagolden@cpan.org>
+Date:   Mon Jan 17 20:39:14 2011 -0500
+
+    Update HTTP::Tiny to CPAN version 0.009
+
+commit 78cd53afbb1923bf0a68f361040ad8fe93a7d0d5
+Author: David Mitchell <davem@iabyn.com>
+Date:   Tue Jan 18 00:46:30 2011 +0000
+
+    vastly speed up t/porting/diag.t
+
+    This used to take about 3 minutes of CPU. Reduce this to around
+    6 seconds (!!) by coalescing and pre-compiling various patterns
+    that get applied to nearly every line of every source file.
+
+commit cfaf538b6276c6a8ef80ff6c66e106c6a4f1caaa
+Author: Karl Williamson <public@khwilliamson.com>
+Date:   Mon Jan 17 08:58:53 2011 -0700
+
+    Add /a regex modifier
+
+    This restricts certain constructs, like \w, to matching in the ASCII range only.
+
+commit 56ae17b45d2513d65903d13468e8f6a16b20f916
+Author: Karl Williamson <public@khwilliamson.com>
+Date:   Sun Jan 16 17:41:30 2011 -0700
+
+    regcomp.c: Convert \d \D to a switch{}
+
+commit eee47ba661717bca7751443be1b6ac8f8f64585a
+Author: Chris 'BinGOs' Williams <chris@bingosnet.co.uk>
+Date:   Mon Jan 17 12:35:54 2011 +0000
+
+    Update File-Fetch to CPAN version 0.32
+
+commit e66820012d29519f903709f005e56a2c334ae183
+Author: Tony Cook <tony@develop-help.com>
+Date:   Mon Jan 17 19:22:08 2011 +1100
+
+    test_prep now depends on the pods needed for porting/buildtoc.t
+
+    In the other makefiles test_prep (or test-prep) depends on all, so
+    they shouldn't need updating.
+
+
+commit a52237f3a547cdefddd4c4be6224bfdf67c84263
+Author: David Golden <dagolden@cpan.org>
+Date:   Sun Jan 16 21:32:21 2011 -0500
+
+    Update CPAN to CPAN version 1.94_63
+
+commit 63ac0dadb1aafcf0c171d3c1422c1923b611b2fc
+Author: Karl Williamson <public@khwilliamson.com>
+Date:   Tue Dec 28 16:13:49 2010 -0700
+
+    regex: Use BOUNDU regnodes
+
+    This refactors one area in regexec.c to use BOUNDU, NBOUNDU for
+    efficiciency, and easier adding of the future BOUNDA.
+
+commit 980866de2cf8ecdb4bb72b7f9294763057008f50
+Author: Karl Williamson <public@khwilliamson.com>
+Date:   Mon Dec 27 12:04:58 2010 -0700
+
+    regex: Separate nodes for Unicode semantics \s \w
+
+    This patch converts the \s, \w and complements Unicode semantics to
+    instead of using the flags field of their nodes to instead use separate
+    nodes.  This gains some efficiency, especially useful in tight loops and
+    backtracking of regexec.c, and prepares the way for easily adding other
+    semantic variations, such as /a.
+
+    It refactors the CCC_TRY... macros.  I tried to break this piece up into
+    smaller chunks, but found it much easier to get to this in one step.
+    Further patches will do some more refactoring of these.
+
+    As part of the CCC_TRY macro refactoring, the lines that include the
+    test if (! nextchr) are changed to just look for the end-of-string by
+    position instead of it being NUL.  In locales, it could be (however
+    unlikely), that NUL is a real alphabetic, digit, or space character.
+commit 50e911483ad5c29e25c54c9f81f92df974dd2cc0
+Author: Karl Williamson <public@khwilliamson.com>
+Date:   Sun Dec 26 10:35:58 2010 -0700
+
+    Change name of /d to DEPENDS
+
+    I much prefer David Golden's name for /d whose meaning 'depends' on
+    circumstances, instead of 'dual' meaning it could be one or another.
+    Change it before this gets out in a stable release, and we're stuck with
+    the old name.
+
+commit 73134a2eb4055c76fe5b154da95e09118f716fd8
+Author: Karl Williamson <public@khwilliamson.com>
+Date:   Sun Dec 26 10:35:20 2010 -0700
+
+    CH] Change usage of regex/op common to common names
+
+    This patch changes the core functions to use the common names for the
+    fields that are shared between op.c and regcomp.c, just for consistency
+    of using one name throughout the core for the same thing.
+
+    A grep of cpan shows that both names are used in various modules; so
+    both names must be retained.
+
+commit a3ab329f3fc9494e700f51c38cef42021c130b6e
+Author: David Golden <dagolden@cpan.org>
+Date:   Sun Jan 16 20:57:02 2011 -0500
+
+    Add HTTP::Tiny as a dual-life core module
+
+    HTTP::Tiny has been added as a dual-life module.  It is a very
+    small, simple HTTP/1.1 client designed for simple GET requests and file
+    mirroring.  It has has been added to enable CPAN.pm and CPANPLUS to
+    "bootstrap" HTTP access to CPAN using pure Perl without relying on external
+    binaries like F<curl> or F<wget>.
+
+commit 211cc5012284f4bd900fcaa630adbcac69ca6112
+Author: Chris 'BinGOs' Williams <chris@bingosnet.co.uk>
+Date:   Sun Jan 16 23:23:03 2011 +0000
+
+    Update Unicode-Collate to CPAN version 0.70 and enable XS version
+
+commit a62b1201c068dc7b099bcb7182e188c4d2fbf34c
+Author: Karl Williamson <public@khwilliamson.com>
+Date:   Sun Dec 26 10:31:16 2010 -0700
+
+    Use multi-bit field for regex character set
+
+    The /d, /l, and /u regex modifiers are mutually exclusive.  This patch
+    changes the field that stores the character set to use more than one bit
+    with an enum determining which one.  This data structure more
+    closely follows the semantics of their being mutually exclusive, and
+    conserves bits as well, and is better expandable.
+
+    A small API is added to set and query the bit field.
+
+    This patch is not .xs source backwards compatible.  A handful of cpan
+    programs are affected.
+
+
+tools
+
+    Significant updates to buildtoc
+
+    Update Unicode-Normalize to CPAN version 1.10
+
+commit 11454c594f22abc5945e69a46fc965363dbf326e
+Author: Karl Williamson <public@khwilliamson.com>
+Date:   Sat Jan 15 13:42:58 2011 -0700
+
+    Fix \xa0 matching both [\s] [\S], et.al.
+
+    This bug stemmed from Latin1 characters not matching any (non-complemented)
+    character class in /d semantics when the target string is no utf8; but having
+    unicode semantics when it isn't.  The solution here is to add a special flag.
+
+    There were several tests that relied on the broken behavior, specifically they
+    tested that \xff isn't a printable word character even in utf8.  I changed the
+    deparse test to instead use a non-printable code point, and I changed the ones
+    in re_tests to be TODOs, and will change them back using /a when that is
+    shortly added.
+
+
+SECURITY
+
+    restrict \p{IsUserDefined} to In\w+ and In\w+
+
+    In L<perlunicode/"User-Defined Character Properties">, it says you can
+    create custom properties by defining subroutines whose names begin with
+    "In" or "Is". However, perl doesn't actually enforce that naming
+    restriction, so \p{foo::bar} will call foo::Bar() if it exists.
+
+    This commit finally enforces this convention. Note that this broke a
+    number of existing tests for properties, since they didn't always use an
+    Is/In prefix.
+
+TESTING
+
+    test that perl.pod, pod.lst, MANIFEST and the file system are consistent
+
+commit f56b6394f7cf57733135f56e4e4ac49abe9ac9cc
+Author: Karl Williamson <public@khwilliamson.com>
+Date:   Thu Jan 13 22:36:36 2011 -0700
+
+    regex: Use ANYOFV
+
+    This patch restructures the regex ANYOF code to generate ANYOFV nodes instead
+    when there is a possibility that it could match more than one character.   Note
+    that this doesn't affect the optimizer, as it essentially ignores things that
+    fit into this category.  (But it means that the optimizer will no longer reject
+    these when it shouldn't have.)
+
+    The handling of the LATIN SHARP s is modified to correspond with this new node
+    type.
+
+    The initial handling of ANYOFV is placed in regexec.c.  More analysis will come
+    on that.  But there was significant change to the part that handles matching
+    multi-char strings.  This has long been buggy, with it previously comparing a
+    folded-version on one side with a non-folded version on the other.
+
+    This patch fixes about 60% of the problems that my undelivered test suite gives
+    for multi-char folds.  But there are still 17K test failures left, so I'm still
+    not delivering that.  The TODOs that this fixes will be cleaned up in a later commit
+
+
+    Update Pod-LaTeX to CPAN version 0.59
+
+commit 680818c0361b180bb6f09d4bb11c4d5cd467fe62
+Author: Nicholas Clark <nick@ccl4.org>
+Date:   Thu Jan 13 16:24:52 2011 +0000
+
+    ithread_create() was relying on the stack not moving. Fix this.
+
+    4cf5eae5e58faebb changed S_ithread_create() to avoid creating an AV, by
+    passing the thread creation arguments as pointers to a block of memory
+    holding SVs. Unfortunately, this inadvertently introduced a subtle bug,
+    because the block of memory is on the Perl stack, which can move as a side
+    effect of being reallocated to extend it. Hence pass in the offset on the
+    stack instead, read the current value of the relevant interpreter's stack
+    at the point of access, and copy all the SVs away before making any further
+    calls which might cause reallocation.
+
+    Update to Win32-0.44 from CPAN
+    Update Term-UI to CPAN version 0.24
+    Update IO-Compress to CPAN version 2.033
+    Update Compress-Raw-Zlib to CPAN version 2.033
+    Update Compress-Raw-Bzip2 to CPAN version 2.033
+    Update DB_File to CPAN version 1.821
+
+DIAGNOSTICS
+    Correct the "unimplemented" message for get{host,net,proto,serv}ent aliases.
+
+    Previously, if all of gethost{byaddr,byname,ent} were unimplemented on a
+    platform, they would all return 'Unsupported socket function "gethostent"
+    called', with the analogous results for getnet{byaddr,byname,ent},
+    getproto{byname,bynumber,ent} and getserv{byname,byport,ent}. This bug was
+    introduced by change af51a00e97d5c559 - prior to this, all 12 functions would
+    report their own name when unimplemented.
+
+commit 9ae3ac1a84c63b0eadf5baf47ce7096482280f32
+Author: Karl Williamson <public@khwilliamson.com>
+Date:   Sun Jan 9 15:33:28 2011 -0700
+
+    Add warnings for use of problematic code points
+
+    The non-Unicode code points have no Unicode semantics, so applying operations
+    such as casing on them warns.
+
+    This patch also includes the changes to test the warnings added by recent
+    commits for handling the surrogates and above-Unicode code points
+
+commit 949cf4983af707fbd15e422845f4f3df20505f97
+Author: Karl Williamson <public@khwilliamson.com>
+Date:   Sun Jan 9 13:50:18 2011 -0700
+
+    utf8.c(): Default to allow problematic code points
+
+    Surrogates, non-character code points, and code points that aren't in Unicode
+    are now allowed by default, instead of having to specify a flag to allow them.
+    (Most code did specify those flags anyway.)
+
+    This affects uvuni_to_utf8_flags(), utf8n_to_uvuni() and various routines that
+    are specialized interfaces to them.
+
+    Now there is a new set of flags to disallow those code points.  Further, all 66
+    of the non-character code points are known about and handled consistently,
+    instead of just U+FFFF.
+
+    Code that requires these code points to be forbidden will have to change to use
+    the new flags.  I have looked at all the (few) instances in CPAN where these
+    routines are used, and the only one I found that appears to have need to do
+    this, Encode, has already been patched to accommodate this change.  Of course,
+    I may have overlooked some subtleties.
+
+
+commit 7627e6d0fe772ac90fce9e03fea273109521e261
+Author: Nicholas Clark <nick@ccl4.org>
+Date:   Sat Jan 8 15:56:22 2011 +0000
+
+    Generate "Unsupported socket function" stubs using PL_ppaddr.
+
+    Instead of having each socket op conditionally compile as either the
+    implementation or a DIE() depending on #HAS_SOCKET
+
+    1: remove the conditional code from the ops themselves
+    2: only compile the ops if HAS_SOCKET is defined
+    3: general conditional code for the intialisation of PL_ppaddr - as appropriate
+       either the ops, or Perl_unimplemented_op
+    4: Amend Perl_unimplemented_op to generate the appropriate DIE() for socket
+       ops (ie not the "panic"... message)
+
+    Whilst this complicates the support code in regen/opcode.pl, it's already a
+    net saving of 5 lines in the C code.
+
+commit 897d398936dd2fc088a265fba2a7b62fa97ed458
+Author: Nicholas Clark <nick@ccl4.org>
+Date:   Sun Jan 9 10:54:58 2011 +0000
+
+    Generate pp_* prototypes in pp_proto.h, and remove pp.sym
+
+    Eliminate the #define pp_foo Perl_pp_foo(pTHX) macros, and update the 13
+    locations that relied on them.
+
+    regen/opcode.pl now generates prototypes for the PP functions directly, into
+    pp_proto.h. It no longer writes pp.sym, and regen/embed.pl no longer reads
+    this, removing the only ordering dependency in the regen scripts. opcode.pl
+    is now responsible for prototypes for pp_* functions. (embed.pl remains
+    responsible for ck_* functions, reading from regen/opcodes)
+
+commit f1aaabf80b19a3cc6dc435510732b561ab46361e
+Author: Chris 'BinGOs' Williams <chris@bingosnet.co.uk>
+Date:   Sun Jan 9 00:16:46 2011 +0000
+
+    Update CPANPLUS to CPAN version 0.9011
+    Update CPANPLUS-Dist-Build to CPAN version 0.52
+    Update Term-UI to CPAN version 0.22
+    Update Params-Check to CPAN version 0.28
+
+commit a4a4c9e2c086dd5f7b7b05789161614dbbe8385b
+Author: Karl Williamson <public@khwilliamson.com>
+Date:   Sat Jan 8 14:44:05 2011 -0700
+
+    perldiag.pod: Add missing message severities
+
+commit 0019012ad86d597fb507f71577d70ecd4c416bba
+Author: Chris 'BinGOs' Williams <chris@bingosnet.co.uk>
+Date:   Sat Jan 8 23:09:04 2011 +0000
+
+    Update Object-Accessor to CPAN version 0.38
+    Update Module-Load-Conditional to CPAN version 0.40
+    Update Log-Message to CPAN version 0.04
+    Update IPC-Cmd to CPAN version 0.68
+
+
+TESTING
+    add test for split without a pattern
+
+    Add some while tests, about the context of the last statement in a block and about reinitializaiton of lexical variables.
+
+    modernise t/cmd/while.t
+
+    Add t/base/while.t testing the basic of a while loop with minimal dependencies.  Change t/cmd/while.t into a non-base test using "test.pl".
+
+commit ac066c2ab5bc31260104aeee778921b186894769
+
+    Update File-Fetch to CPAN version 0.30
+    Update Archive-Tar to CPAN version 1.76
+    Update Archive-Extract to CPAN version 0.48
+
+commit b86b68b4eefa1069dabc8ea0401d712b24a67857
+Author: Jesse Vincent <jesse@bestpractical.com>
+Date:   Sat Jan 8 00:14:29 2011 +0800
+
+    Update the policy on doc patches to maint
+
+
+commit e8b333e679eb9a7a62c1d86b647515f01821eb60
+Author: David Golden <dagolden@cpan.org>
+Date:   Wed Jan 5 22:47:41 2011 -0500
+
+    Add Module::Metadata as a dual-life core module
+
+    This commit adds Module::Metadata 1.000002 as a dual-life module.  It
+    gathers package and POD information from Perl module files.  It is a
+    standalone module based on Module::Build::ModuleInfo for use by other
+    module installation toolchain components.  Module::Build::ModuleInfo
+    has been deprecated in favor of this module instead.
+
+commit a8fb8d791b74ff90850140d94407aad99ec86fe3
+Author: John Peacock <jpeacock@jpeacock-hp.doesntexist.org>
+Date:   Thu Jan 6 20:02:37 2011 -0500
+
+    Sync with version 0.88 on CPAN
+
+commit c1b879e57aecbfe520b3f44dd28472d1862f037d
+Author: Craig A. Berry <craigberry@mac.com>
+Date:   Wed Jan 5 19:14:06 2011 -0600
+
+    Make newline on last record explicit.
+
+    On VMS, the last line written to a file will get a trailing newline
+    willy nilly.  This has its advantages insofar as you never get the
+    "no newline at end of file" warnings from various utilities, but
+    reality conflicts with expectations when you explicitly test for
+    the last (or only) line *not* ending with newline, which is what
+    the recent addtion to ref.t (5e3072707906cc4cb8a364c4cf7c487df0300caa)
+    was doing.  Adding an explicit newline makes everyone happy.
+
+commit 935c8d19ecf9ad3ea7589ffd1721e6ba1c671ed9
+Author: David Golden <dagolden@cpan.org>
+Date:   Wed Jan 5 22:25:23 2011 -0500
+
+    Add Perl::OSType as a dual-life core module
+
+    This commit adds Perl::OSType 1.002 as a dual-life module.  It maps Perl
+    operating system names (e.g. 'dragonfly' or 'MSWin32') to more generic
+    types with standardized names (e.g.  "Unix" or "Windows").  It has been
+    refactored out of Module::Build and ExtUtils::CBuilder and consolidates
+    such mappings into a single location for easier maintenance.
+
+    c.f.
+    http://www.nntp.perl.org/group/perl.perl5.porters/2010/05/msg160280.html
+
+commit 2a1594f630b57637ddd7a38daaa1e17f66da396a
+Author: Chris 'BinGOs' Williams <chris@bingosnet.co.uk>
+Date:   Wed Jan 5 23:35:15 2011 +0000
+
+    Update CGI to CPAN version 3.51
+
+      [SECURITY]
+      - Further improvements have been made to guard against newline injections
+        in headers. (Thanks to Max Kanat-Alexander, Yanick Champoux, Mark Stosberg)
+
+
+commit 0b5e625bc99f5cb78697faf03b297b6cacadf60b
+Author: Reini Urban <rurban@x-ray.at>
+Date:   Tue Sep 14 18:04:22 2010 +0200
+
+    build man pages on cygwin too
+
+commit 172830635ea7813c85e51e4ae2b4bed56ddbab83
+Author: Reini Urban <rurban@x-ray.at>
+Date:   Tue Sep 14 17:54:15 2010 +0200
+
+    Improve cygwin rebase behaviour
+
+    If a dll is updated on cygwin reuse the old imagebase address.
+    This solves most rebase errors, esp when updating on core dll's.
+    See http://www.tishler.net/jason/software/rebase/rebase-2.4.2.README
+
+
+NEW TESTS
+
+    t/porting/filenames.t to make sure that filenames and paths are reasonably portable
+
+
+Platforms
+
+    Actually excise 'Apollo DomainOS' support. We officially killed it in 5.11.0. It
+    hadn't worked for years before that.
+
+commit cc7e77fd5a0ee9f1498e54dddf566117da62754b
+Author: Reini Urban <rurban@x-ray.at>
+Date:   Tue Sep 14 17:48:32 2010 +0200
+
+    CYG14 Dynaloader without USEIMPORTLIB, and search cyg prefix
+
+    part1: Support the standard cyg dll prefix, which is e.g. needed for FFI's.
+    Ctypes and C::DynaLib use DynaLoader to find dlls.
+
+    part2: With -DUSEIMPORTLIB DynaLoader symbols link against the prefixed
+    symbol names for the .dll.a importlib, but we need to link against the
+    symbols directly. We don't link Dynaloader against libperl.dll.a.
+
+    Otherwise:
+    $ g++-4 -o cygperl5_13_4.dll --shared perlsrc.o cygwin.o  DynaLoader.o -ldl -lcrypt
+      Creating library file: libperl.dll.a
+      DynaLoader.o: In function `XS_DynaLoader_dl_undef_symbols':
+      ext/DynaLoader/DynaLoader.c:346: undefined reference to `__imp__PL_stack_sp'
+      ext/DynaLoader/DynaLoader.c:346: undefined reference to `__imp__PL_markstack_ptr'
+      ext/DynaLoader/DynaLoader.c:346: undefined reference to `__imp__PL_stack_base'
+
+commit c0a149a90b8b6e1c18de7294ca974265fb559cf5
+Author: Reini Urban <rurban@x-ray.at>
+Date:   Tue Sep 14 18:06:38 2010 +0200
+
+    Update cygwin hints
+    do not use usemymalloc (double size + slow)
+    remove deprecated libcygipc info
+    remove overlarge stack size
+
+commit ac0650a4c9f69cdc9e7af31df29011c42b42b770
+Author: Father Chrysostomos <sprout@cpan.org>
+Date:   Sun Jan 2 23:14:37 2011 -0800
+
+    Restore the old description of $[
+
+    The new entry is a bit too futuristic: assignment to $[ still works
+    and it is not read-only.
+
+    This does not fully restore the old description, as it contained
+    grammatical errors and parts of it were not updated when 5.10 changed
+    the scoping.
+
+commit 2831a86cee065b53b74fd19ddcc6a4257484646d
+Author: Zsbán Ambrus <ambrus@math.bme.hu>
+Date:   Sun Jan 2 20:25:55 2011 -0800
+
+    [perl #81032] Overhaul Porting/epigraphs.pod
+
+    This patch makes multiple changes to Porting/epigraphs.pod and
+    pod/perlhist.pod.
+
+    For those that don't know, Porting/epigraphs.pod is a new document that
+    collects the quotes (chosen by Pumpkins) in perl release announcements.
+
+    The changes are the following.
+
+    1. Add a link pointing to each release announcement in the mailing
+    list archives.  These are from ysth's list, the source from which
+    Porting/epigraphs.pod was originally compiled, but they weren't in
+    Porting/epigraphs.pod so far.
+    2. Reorder Porting/epigraphs.pod chronologically, because I believe
+    that makes more sense -- pod/perlhist.pod is still sorted by version numbers.
+    3. Incidentally, some missing releases are added to pod/perlhist.pod too.
+    4. Fix a mistake where Porting/epigraphs.pod gives the wrong version number.
+    5. Add some epigraphs that appear in ysth's list but not in
+    Porting/epigraphs.pod.
+    6. I did some research in perl history before the part that ysth's list
+    covers, and added older perl announcements I found.  This work is not
+    complete: I stopped somewhere in 2000.
+
+commit eccda089fc3dcaafc1ae0aac6b428f799231b824
+Author: Paul "LeoNerd" Evans <leonerd@leonerd.org.uk>
+Date:   Mon Dec 13 17:50:06 2010 +0000
+
+    Implement Socket::getaddrinfo() and Socket::getnameinfo(), with related constants
+
+commit d54243158c0e4ba0127eb487c5b2e2a10484e8d0
+Author: David Golden <dagolden@cpan.org>
+Date:   Thu Dec 30 23:43:44 2010 -0500
+
+    Add JSON::PP to the Perl core
+
+    Per discussions with Jesse Vincent, JSON::PP has been added
+    to the Perl core to support the new CPAN meta file specification
+
+commit 4155e4fe81b9987a30efea627e43a574f5460f73
+Author: Father Chrysostomos <sprout@cpan.org>
+Date:   Sun Jan 2 14:51:21 2011 -0800
+
+    [perl #36347] Object destruction incomplete
+
+    do_clean_objs only looks for objects referenced by RVs, so blessed
+    array references and lexical variables (and probably other SVs, too)
+    are not DESTROYed.
+
+    This commit adds a new visit() call to sv_clean_objs, which curses
+    (DESTROYs and un-blesses, leaving the reference count as it is) any
+    objects that are still left after do_clean_named_io_objs. The new
+    do_curse routine (a pointer to which is passeds to visit()) follows
+    do_clean_named_io_objs’ example and explicitly skips the STDOUT and
+    STDERR handles, in case destructors need to use them.
+
+    The cursing code, which is now called from two places, is moved out of
+    sv_clear and put in its own routine. The check that the reference
+    count is zero does not apply when called from sv_clean_objs, so the
+    new S_curse routine takes a boolean argument that determines whether
+    that check should take place.
+
+commit 3d450a5dd4e8f9a7b2aba0b018f9fe078fb6aa30
+Author: David Leadbeater <dgl@dgl.cx>
+Date:   Sun Jan 2 14:33:16 2011 -0800
+
+    [perl #73630] Build separate DTrace for miniperl
+
+    As outlined in the RT ticket due to miniperl's dependencies differing to
+    the final perl binary dtrace -G needs to be called separately for each.
+
+    Build tested on Mac OS X 10.6, Solaris 11 and Scientific Linux with
+    SystemTap from git.
+
+    (Solaris is the only system I have access to where DTRACE_O actually gets
+    defined. Neither the dtrace binary on OS X nor SystemTap's dtrace
+    compatibility layer accept the -G option.)
+
+commit 42467a219c70177fc2004ed9b73d6c3db59dba5c
+Author: David Golden <dagolden@cpan.org>
+Date:   Sun Jan 2 17:34:44 2011 -0500
+
+    Update CPAN::Meta::YAML to 0.003
+
+commit 9426e1a55981168c83a030df9bce5e0b46586581
+Author: David Mitchell <davem@iabyn.com>
+Date:   Sun Jan 2 19:38:30 2011 +0000
+
+    make <expr> always overload if expr is overloaded
+
+    Due to the way that '<> as glob' was parsed differently from
+    '<> as filehandle' from 5.6 onwards, something like <$foo[0]>
+    didn't handle overloading, even where $foo[0] was an overloaded object.
+    This was contrary to the docs for overload, and meant that <> couldn't
+    be used as a general overloaded iterator operator.
+
+commit e4ef33329eb648489bad5296e9673c409f5577f9
+Author: Jesse Vincent <jesse@bestpractical.com>
+Date:   Sun Jan 2 10:50:21 2011 +0800
+
+    perlbug did not previously generate a From: header. While some MTAs do
+    the "right" thing and insert a valid "From:", not all of them do,
+    potentially resulting in dropped mail.
+
+
+commit edcf105d70e5423fd928c776e086fe31a4a543f4
+Author: Jesse Vincent <jesse@bestpractical.com>
+Date:   Sat Jan 1 18:46:20 2011 +0800
+
+    Document 'test_porting' and start a section on how committing to blead
+
+commit b85802c5d04fcd6e5c969a5c56136e05061f05d7
+Author: Chris 'BinGOs' Williams <chris@bingosnet.co.uk>
+Date:   Sat Jan 1 10:37:04 2011 +0000
+
+    Update Encode to CPAN version 2.42
+
+
+commit fbcda526a9bbe2ee1302d6f4507b07f83661fc0d
+Author: Nicholas Clark <nick@ccl4.org>
+Date:   Thu Dec 30 17:30:24 2010 +0000
+
+    Most socket ops weren't warning for unopened handles unless 'closed' was enabled
+
+    They were checking that category 'closed' was enabled for warnings before
+    calling report_evil_fh(), which in turn was (correctly) checking category
+    'unopened'.
+commit c521cf7c8af1697e5efd8ce3ad75ed00606db13b
+Author: Nicholas Clark <nick@ccl4.org>
+Date:   Thu Dec 30 16:52:22 2010 +0000
+
+    pp_leavewrite wasn't warning for unopened handles unless 'closed' was enabled.
+
+    It was checking that category 'closed' was enabled for warnings before calling
+    report_evil_fh(), which in turn was (correctly) checking category 'unopened'.
+
+commit 8985fe98dcc5c0af2fadeac15dfbc13f553ee7fc
+Author: David Mitchell <davem@iabyn.com>
+Date:   Thu Dec 30 10:32:44 2010 +0000
+
+    Better handling of magic methods freeing the SV
+
+    This is a fix for RT #81230 (and more). Currently, mg_get() works around
+    the case where the called magic (e.g. FETCH) frees the magic SV. It does
+    this by unconditionally pushing the SV on the tmps stack before invoking
+    the method.
+
+    There are two issues with this. Firstly, it may artificially extend the
+    life of the SV. This was the root of the problem with #81230. There, the
+    DB_File code, under -T, created a tainted tied object. Accessing the
+    object (within FETCH as it happens), caused mg_get() to be invoked on the
+    object (due to the taint magic), and thus extend the life of the object.
+    This then caused c<untie %h if $h{k}> to give the warning
+        untie attempted while 1 inner references still exist.
+    This only became noticeable after efaf36747029c85b4d8825318cb4d485a0bb350e,
+    which stopped wrapping magic method calls in SAVETMPS/FREETMPS.
+
+    The second issue issue that this protection only applies to mg_get();
+    functions like mg_set() can still segfault if the SV is deleted.
+
+    This commit fixes both problems as follows:
+
+    First, the protection mechanism is moved out of mg_get() and into
+    save_magic() / restore_magic(), so that it protects more things.
+    Secondly, the protection is now:
+
+    * in save_magic(), SvREFCNT_inc() the SV, thus protecting it from being
+      freed during FETCH (or whatever)
+
+    * in restore_magic(), SvREFCNT_dec() the SV, undoing the protection
+      without extending the life of the SV, *except* if the refcount is
+      1 (ie FETCH tried to free it), then push it on the mortals stack
+      to extend it life a bit so our callers wont choke on it.
+
+
+commit e8a07a125ebebaf06dc890127439c7461a063b35
+Author: David Golden <dagolden@cpan.org>
+Date:   Mon Dec 27 14:50:31 2010 -0500
+
+    Add CPAN::Meta::YAML as a dual-life core module
+
+commit 6fae7aa4cab68dd6bb59af7f22c85e77eb8a1b0c
+Author: Zsbán Ambrus <ambrus@math.bme.hu>
+Date:   Sun Dec 26 18:10:57 2010 -0800
+
+    [perl #81016] Document ord("")
+
+    The following patch clarifies what ord("") does in pod/perlfunc.pod.
+
+    From the current documentation, it's not documented what it does, and one
+    could guess several different things: returns zero, returns undef, returns
+    zero with a warning, returns undef with a warning, dies.  (There's precedent
+    for dying: some BASIC implementations give an error if you ask for ASC("")
+    -- here ASC is their equivalent of our ord function.)
+
+commit 23e2fda90bc3d33c854bd36de712a45aca7a7711
+Author: Jerry D. Hedden <jdhedden@cpan.org>
+Date:   Fri Dec 24 12:53:28 2010 -0500
+
+    Upgrade to Thread::Queue 2.12
+    Upgrade to Thread::Semaphore 2.12
+
+commit cce04bebd8af026c2a6731940ddb895d3c1fc3e4
+Author: David Golden <dagolden@cpan.org>
+Date:   Mon Dec 13 17:36:33 2010 -0500
+
+    Reorganize perlhack.pod
+
+    Following on an IRC conversation, I've attempted to reorganize
+    perlhack for greater clarity.  I have only cut and paste blocks
+    of text and amended section titles and levels.  (I have not addressed
+    any of the numerous factual issues which remain.)
+
+    The resulting guide should be clearer for those trying to skim the
+    table of contents to understand what is covered in perlhack and
+    whether it is worth an in-depth read.
+
+    I see this change as the first step towards future improvements.
+
+commit 0b76a1aba72393931944e93dffe81e1937ff3ac4
+Author: Jerry D. Hedden <jdhedden@cpan.org>
+Date:   Fri Dec 24 22:29:14 2010 +0000
+
+    [PATCH] Upgrade to threads::shared 1.36
+    [PATCH] Upgrade to threads 1.82
+
+commit c89df6cf6f70d6460ca3fec9d465e5e6e17fb3a7
+Author: Karl Williamson <public@khwilliamson.com>
+Date:   Sun Dec 19 11:08:47 2010 -0700
+
+    Change regexes to debug dump non-ASCII as hex.
+
+    instead of the less familiar octal for larger values.  Perhaps they
+    should actually print the actual character, but this is far easier than
+    the previous to understand.
+
+commit 681f01c2a5ff0846090d78599b3d4caeb93fda26
+Author: Karl Williamson <public@khwilliamson.com>
+Date:   Sun Dec 19 11:00:49 2010 -0700
+
+    pv_escape: Add option to dump all non-ascii as hex
+
+    This patch adds an option to pv_escape() to dump all characters above ASCII
+    in hex.  Before, you could get all chars as hex or the Latin1 non-ASCII
+    as octal, whereas the typical values for these that people think in are
+    given in hex.
+
+=cut
