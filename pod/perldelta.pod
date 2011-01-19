@@ -1146,20 +1146,6 @@ Date:   Thu Jan 6 20:02:37 2011 -0500
 
     Sync with version 0.88 on CPAN
 
-commit c1b879e57aecbfe520b3f44dd28472d1862f037d
-Author: Craig A. Berry <craigberry@mac.com>
-Date:   Wed Jan 5 19:14:06 2011 -0600
-
-    Make newline on last record explicit.
-
-    On VMS, the last line written to a file will get a trailing newline
-    willy nilly.  This has its advantages insofar as you never get the
-    "no newline at end of file" warnings from various utilities, but
-    reality conflicts with expectations when you explicitly test for
-    the last (or only) line *not* ending with newline, which is what
-    the recent addtion to ref.t (5e3072707906cc4cb8a364c4cf7c487df0300caa)
-    was doing.  Adding an explicit newline makes everyone happy.
-
 commit 0b5e625bc99f5cb78697faf03b297b6cacadf60b
 Author: Reini Urban <rurban@x-ray.at>
 Date:   Tue Sep 14 18:04:22 2010 +0200
