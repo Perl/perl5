@@ -1108,8 +1108,6 @@ perly.c: perly.y
 perly.h: perly.y
 	-@sh -c true
 
-# No compat3.sym here since and including the 5.004_50.
-# No interp.sym since 5.005_03.
 SYM  = global.sym globvar.sym perlio.sym
 
 SYMH = perlvars.h intrpvar.h
