@@ -193,6 +193,9 @@ C<Archive::Tar> has been upgraded from version 1.74 to 1.76
 
 C<CGI> has been upgraded from version 3.50 to 3.51
 
+Further improvements have been made to guard against newline injections
+in headers.
+
 =item *
 
 C<Compress::Raw::Bzip2> has been upgraded from version 2.031 to 2.033
@@ -1168,17 +1171,6 @@ Date:   Wed Jan 5 22:25:23 2011 -0500
 
     c.f.
     http://www.nntp.perl.org/group/perl.perl5.porters/2010/05/msg160280.html
-
-commit 2a1594f630b57637ddd7a38daaa1e17f66da396a
-Author: Chris 'BinGOs' Williams <chris@bingosnet.co.uk>
-Date:   Wed Jan 5 23:35:15 2011 +0000
-
-    Update CGI to CPAN version 3.51
-
-      [SECURITY]
-      - Further improvements have been made to guard against newline injections
-        in headers. (Thanks to Max Kanat-Alexander, Yanick Champoux, Mark Stosberg)
-
 
 commit 0b5e625bc99f5cb78697faf03b297b6cacadf60b
 Author: Reini Urban <rurban@x-ray.at>
