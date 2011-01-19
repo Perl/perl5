@@ -156,6 +156,11 @@ binaries like F<curl> or F<wget>.
 
 =item *
 
+L<JSON::PP> 2.27103 has been added as a dual-life module, for the sake of
+reading F<META.json> files in CPAN distributions.
+
+=item *
+
 L<Module::Metadata> 1.000003 has been added as a dual-life module.  It gathers
 package and POD information from Perl module files.  It is a standalone module
 based on Module::Build::ModuleInfo for use by other module installation
@@ -1278,15 +1283,6 @@ Author: Paul "LeoNerd" Evans <leonerd@leonerd.org.uk>
 Date:   Mon Dec 13 17:50:06 2010 +0000
 
     Implement Socket::getaddrinfo() and Socket::getnameinfo(), with related constants
-
-commit d54243158c0e4ba0127eb487c5b2e2a10484e8d0
-Author: David Golden <dagolden@cpan.org>
-Date:   Thu Dec 30 23:43:44 2010 -0500
-
-    Add JSON::PP to the Perl core
-
-    Per discussions with Jesse Vincent, JSON::PP has been added
-    to the Perl core to support the new CPAN meta file specification
 
 commit edcf105d70e5423fd928c776e086fe31a4a543f4
 Author: Jesse Vincent <jesse@bestpractical.com>
