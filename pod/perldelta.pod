@@ -355,7 +355,9 @@ XXX Newly added diagnostic messages go here
 
 =item *
 
-XXX
+Performing an operation requiring Unicode semantics (such as case-folding)
+on a Unicode surrogate or a non-Unicode character now triggers a warning:
+'Operation "%s" returns its argument for ...'.
 
 =back
 
@@ -1007,18 +1009,6 @@ DIAGNOSTICS
     getproto{byname,bynumber,ent} and getserv{byname,byport,ent}. This bug was
     introduced by change af51a00e97d5c559 - prior to this, all 12 functions would
     report their own name when unimplemented.
-
-commit 9ae3ac1a84c63b0eadf5baf47ce7096482280f32
-Author: Karl Williamson <public@khwilliamson.com>
-Date:   Sun Jan 9 15:33:28 2011 -0700
-
-    Add warnings for use of problematic code points
-
-    The non-Unicode code points have no Unicode semantics, so applying operations
-    such as casing on them warns.
-
-    This patch also includes the changes to test the warnings added by recent
-    commits for handling the surrogates and above-Unicode code points
 
 
 commit 7627e6d0fe772ac90fce9e03fea273109521e261
