@@ -291,6 +291,10 @@ C<Time::Local> has been upgraded from version 1.1901_01 to 1.2000.
 
 C<Unicode::Normalize> has been upgraded from version 1.07 to 1.10
 
+=item *
+
+C<version> has been upgraded from 0.86 to 0.88.
+
 =back
 
 =head2 Removed Modules and Pragmata
@@ -1139,12 +1143,6 @@ Date:   Wed Jan 5 22:47:41 2011 -0500
     standalone module based on Module::Build::ModuleInfo for use by other
     module installation toolchain components.  Module::Build::ModuleInfo
     has been deprecated in favor of this module instead.
-
-commit a8fb8d791b74ff90850140d94407aad99ec86fe3
-Author: John Peacock <jpeacock@jpeacock-hp.doesntexist.org>
-Date:   Thu Jan 6 20:02:37 2011 -0500
-
-    Sync with version 0.88 on CPAN
 
 commit 0b5e625bc99f5cb78697faf03b297b6cacadf60b
 Author: Reini Urban <rurban@x-ray.at>
