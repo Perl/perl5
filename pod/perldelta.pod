@@ -1407,11 +1407,4 @@ Date:   Mon Dec 13 17:36:33 2010 -0500
 
     I see this change as the first step towards future improvements.
 
-commit 0b76a1aba72393931944e93dffe81e1937ff3ac4
-Author: Jerry D. Hedden <jdhedden@cpan.org>
-Date:   Fri Dec 24 22:29:14 2010 +0000
-
-    [PATCH] Upgrade to threads::shared 1.36
-    [PATCH] Upgrade to threads 1.82
-
 =cut
