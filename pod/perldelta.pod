@@ -1315,12 +1315,6 @@ Date:   Sat Jan 1 18:46:20 2011 +0800
 
     Document 'test_porting' and start a section on how committing to blead
 
-commit b85802c5d04fcd6e5c969a5c56136e05061f05d7
-Author: Chris 'BinGOs' Williams <chris@bingosnet.co.uk>
-Date:   Sat Jan 1 10:37:04 2011 +0000
-
-    Update Encode to CPAN version 2.42
-
 commit cce04bebd8af026c2a6731940ddb895d3c1fc3e4
 Author: David Golden <dagolden@cpan.org>
 Date:   Mon Dec 13 17:36:33 2010 -0500
