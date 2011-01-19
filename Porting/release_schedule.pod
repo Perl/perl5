@@ -20,7 +20,7 @@ Code Freeze
 
 Target date for 5.14.0 RC0
 
-=item 7 days after the release of a 5.14.0-RCx with no showstoppers reported
+=item Seven days after the release of a 5.14.0-RCx with no showstoppers reported
 
 5.14.0
 

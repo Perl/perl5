@@ -1322,6 +1322,8 @@ L<Announced on 2001-08-04 by Gurusamy Sarathy|http://www.nntp.perl.org/group/per
 
 =head2 v5.6.1-TRIAL3 - I can't find the announcement
 
+No announcement available.
+
 =head2 v5.6.1-TRIAL2 - no epigraph
 
 L<Announced on 2001-01-31 by Gurusamy Sarathy|http://www.nntp.perl.org/group/perl.perl5.porters/2001/01/msg29934.html>
@@ -1339,7 +1341,7 @@ but that had to be the 57th strangest.
 [footnote: he had a tidy mind]
 
 =head2 v5.6.0 - J R R Tolkien, "The Hobbit", The Last Stage
-			 
+
 L<Announced on 2000-03-23 by Gurusamy Sarathy|http://www.nntp.perl.org/group/perl.perl5.porters/2000/03/msg10341.html>
 
     The dragon is withered,
