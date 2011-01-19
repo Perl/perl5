@@ -541,6 +541,17 @@ Most I/O functions were not warning for unopened handles unless the
 C<use warnings 'unopened'> is necessary to trigger these warnings (as was
 always meant to be the case.
 
+=item *
+
+C<< <expr> >> always respects overloading now if the expression is
+overloaded.
+
+Due to the way that '<> as glob' was parsed differently from
+'<> as filehandle' from 5.6 onwards, something like C<< <$foo[0]> >> did
+not handle overloading, even if C<$foo[0]> was an overloaded object. This
+was contrary to the documentation for overload, and meant that C<< <> >>
+could not be used as a general overloaded iterator operator.
+
 =back
 
 =head1 Known Problems
@@ -1288,18 +1299,6 @@ Date:   Sun Jan 2 14:33:16 2011 -0800
     (Solaris is the only system I have access to where DTRACE_O actually gets
     defined. Neither the dtrace binary on OS X nor SystemTap's dtrace
     compatibility layer accept the -G option.)
-
-commit 9426e1a55981168c83a030df9bce5e0b46586581
-Author: David Mitchell <davem@iabyn.com>
-Date:   Sun Jan 2 19:38:30 2011 +0000
-
-    make <expr> always overload if expr is overloaded
-
-    Due to the way that '<> as glob' was parsed differently from
-    '<> as filehandle' from 5.6 onwards, something like <$foo[0]>
-    didn't handle overloading, even where $foo[0] was an overloaded object.
-    This was contrary to the docs for overload, and meant that <> couldn't
-    be used as a general overloaded iterator operator.
 
 commit edcf105d70e5423fd928c776e086fe31a4a543f4
 Author: Jesse Vincent <jesse@bestpractical.com>
