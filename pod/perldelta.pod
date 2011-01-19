@@ -87,6 +87,18 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 All objects are destroyed
+
+It used to be possible to prevent a destructor from being called during
+global destruction by artificially increasing the reference count of an
+object.
+
+Now such objects I<will> will be destroyed, as a result of a bug fix
+L<[perl #81230]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=81230>.
+
+This has the potential to break some XS modules. (In fact, it break some.
+See L</Known Problems>, below.)
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
@@ -554,6 +566,18 @@ not handle overloading, even if C<$foo[0]> was an overloaded object. This
 was contrary to the documentation for overload, and meant that C<< <> >>
 could not be used as a general overloaded iterator operator.
 
+=item *
+
+Destructors on objects were not called during global destruction on objects
+that were not referenced by any scalars. This could happen if an array
+element were blessed (e.g., C<bless \$a[0]>) or if a closure referenced a
+blessed variable (C<bless \my @a; sub foo { @a }>).
+
+Now there is an extra pass during global destruction to fire destructors on
+any objects that might be left after the usual passes that check for
+objects referenced by scalars
+L<[perl #36347]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=36347>.
+
 =back
 
 =head1 Known Problems
@@ -571,7 +595,8 @@ from either 5.XXX.XXX or 5.XXX.XXX.
 
 =item *
 
-XXX
+The fix for [perl #81230] causes test failures for C<Tk> version 804.029.
+This is still being investigated.
 
 =back
 
@@ -1262,29 +1287,6 @@ Date:   Thu Dec 30 23:43:44 2010 -0500
 
     Per discussions with Jesse Vincent, JSON::PP has been added
     to the Perl core to support the new CPAN meta file specification
-
-commit 4155e4fe81b9987a30efea627e43a574f5460f73
-Author: Father Chrysostomos <sprout@cpan.org>
-Date:   Sun Jan 2 14:51:21 2011 -0800
-
-    [perl #36347] Object destruction incomplete
-
-    do_clean_objs only looks for objects referenced by RVs, so blessed
-    array references and lexical variables (and probably other SVs, too)
-    are not DESTROYed.
-
-    This commit adds a new visit() call to sv_clean_objs, which curses
-    (DESTROYs and un-blesses, leaving the reference count as it is) any
-    objects that are still left after do_clean_named_io_objs. The new
-    do_curse routine (a pointer to which is passeds to visit()) follows
-    do_clean_named_io_objs’ example and explicitly skips the STDOUT and
-    STDERR handles, in case destructors need to use them.
-
-    The cursing code, which is now called from two places, is moved out of
-    sv_clear and put in its own routine. The check that the reference
-    count is zero does not apply when called from sv_clean_objs, so the
-    new S_curse routine takes a boolean argument that determines whether
-    that check should take place.
 
 commit edcf105d70e5423fd928c776e086fe31a4a543f4
 Author: Jesse Vincent <jesse@bestpractical.com>
