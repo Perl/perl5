@@ -993,7 +993,6 @@ Date:   Thu Jan 13 16:24:52 2011 +0000
     calls which might cause reallocation.
 
     Update to Win32-0.44 from CPAN
-    Update Term-UI to CPAN version 0.24
     Update IO-Compress to CPAN version 2.033
     Update Compress-Raw-Zlib to CPAN version 2.033
     Update Compress-Raw-Bzip2 to CPAN version 2.033
@@ -1078,15 +1077,6 @@ Date:   Sun Jan 9 10:54:58 2011 +0000
     this, removing the only ordering dependency in the regen scripts. opcode.pl
     is now responsible for prototypes for pp_* functions. (embed.pl remains
     responsible for ck_* functions, reading from regen/opcodes)
-
-commit f1aaabf80b19a3cc6dc435510732b561ab46361e
-Author: Chris 'BinGOs' Williams <chris@bingosnet.co.uk>
-Date:   Sun Jan 9 00:16:46 2011 +0000
-
-    Update CPANPLUS to CPAN version 0.9011
-    Update CPANPLUS-Dist-Build to CPAN version 0.52
-    Update Term-UI to CPAN version 0.22
-    Update Params-Check to CPAN version 0.28
 
 commit a4a4c9e2c086dd5f7b7b05789161614dbbe8385b
 Author: Karl Williamson <public@khwilliamson.com>
