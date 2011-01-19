@@ -1094,15 +1094,6 @@ Date:   Sat Jan 8 14:44:05 2011 -0700
 
     perldiag.pod: Add missing message severities
 
-commit 0019012ad86d597fb507f71577d70ecd4c416bba
-Author: Chris 'BinGOs' Williams <chris@bingosnet.co.uk>
-Date:   Sat Jan 8 23:09:04 2011 +0000
-
-    Update Object-Accessor to CPAN version 0.38
-    Update Module-Load-Conditional to CPAN version 0.40
-    Update Log-Message to CPAN version 0.04
-    Update IPC-Cmd to CPAN version 0.68
-
 
 TESTING
     add test for split without a pattern
