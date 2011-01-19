@@ -1160,21 +1160,6 @@ Date:   Wed Jan 5 19:14:06 2011 -0600
     the recent addtion to ref.t (5e3072707906cc4cb8a364c4cf7c487df0300caa)
     was doing.  Adding an explicit newline makes everyone happy.
 
-commit 935c8d19ecf9ad3ea7589ffd1721e6ba1c671ed9
-Author: David Golden <dagolden@cpan.org>
-Date:   Wed Jan 5 22:25:23 2011 -0500
-
-    Add Perl::OSType as a dual-life core module
-
-    This commit adds Perl::OSType 1.002 as a dual-life module.  It maps Perl
-    operating system names (e.g. 'dragonfly' or 'MSWin32') to more generic
-    types with standardized names (e.g.  "Unix" or "Windows").  It has been
-    refactored out of Module::Build and ExtUtils::CBuilder and consolidates
-    such mappings into a single location for easier maintenance.
-
-    c.f.
-    http://www.nntp.perl.org/group/perl.perl5.porters/2010/05/msg160280.html
-
 commit 0b5e625bc99f5cb78697faf03b297b6cacadf60b
 Author: Reini Urban <rurban@x-ray.at>
 Date:   Tue Sep 14 18:04:22 2010 +0200
