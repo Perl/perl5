@@ -257,13 +257,6 @@ C<Time::Local> has been upgraded from version 1.1901_01 to 1.2000.
 
 =item *
 
-C<Unicode::Collate> has been upgraded from version 0.68 to 0.70
-
-This also sees the switch from using the pure-perl version of this
-module to the XS version.
-
-=item *
-
 C<Unicode::Normalize> has been upgraded from version 1.07 to 1.10
 
 =back
