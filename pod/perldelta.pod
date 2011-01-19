@@ -805,12 +805,6 @@ Date:   Sun Jan 16 17:41:30 2011 -0700
 
     regcomp.c: Convert \d \D to a switch{}
 
-commit eee47ba661717bca7751443be1b6ac8f8f64585a
-Author: Chris 'BinGOs' Williams <chris@bingosnet.co.uk>
-Date:   Mon Jan 17 12:35:54 2011 +0000
-
-    Update File-Fetch to CPAN version 0.32
-
 commit e66820012d29519f903709f005e56a2c334ae183
 Author: Tony Cook <tony@develop-help.com>
 Date:   Mon Jan 17 19:22:08 2011 +1100
@@ -1118,12 +1112,6 @@ TESTING
     modernise t/cmd/while.t
 
     Add t/base/while.t testing the basic of a while loop with minimal dependencies.  Change t/cmd/while.t into a non-base test using "test.pl".
-
-commit ac066c2ab5bc31260104aeee778921b186894769
-
-    Update File-Fetch to CPAN version 0.30
-    Update Archive-Tar to CPAN version 1.76
-    Update Archive-Extract to CPAN version 0.48
 
 commit b86b68b4eefa1069dabc8ea0401d712b24a67857
 Author: Jesse Vincent <jesse@bestpractical.com>
