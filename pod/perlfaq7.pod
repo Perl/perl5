@@ -212,23 +212,23 @@ treat each case individually.
 
 =over 4
 
-=item
+=item *
 
 Get a login for the Perl Authors Upload Server (PAUSE) if you don't
 already have one: http://pause.perl.org
 
-=item
+=item *
 
 Write to modules@perl.org explaining what you did to contact the
 current maintainer. The PAUSE admins will also try to reach the
 maintainer.
 
-=item
+=item *
 
 Post a public message in a heavily trafficked site announcing your
 intention to take over the module.
 
-=item
+=item *
 
 Wait a bit. The PAUSE admins don't want to act too quickly in case
 the current maintainer is on holiday. If there's no response to
