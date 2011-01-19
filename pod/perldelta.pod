@@ -418,7 +418,8 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+A new test script, C<t/porting/filenames.t>, makes sure that filenames and
+paths are reasonably portable.
 
 =back
 
@@ -1187,11 +1188,6 @@ Date:   Tue Sep 14 17:54:15 2010 +0200
     If a dll is updated on cygwin reuse the old imagebase address.
     This solves most rebase errors, esp when updating on core dll's.
     See http://www.tishler.net/jason/software/rebase/rebase-2.4.2.README
-
-
-NEW TESTS
-
-    t/porting/filenames.t to make sure that filenames and paths are reasonably portable
 
 
 Platforms
