@@ -480,11 +480,16 @@ block is all characters whose ordinals are between 0 and 127, inclusive, in
 other words, the ASCII characters.  The "Latin" script contains some letters
 from this block as well as several more, like "Latin-1 Supplement",
 "Latin Extended-A", etc., but it does not contain all the characters from
-those blocks. It does not, for example, contain digits, because digits are
-shared across many scripts. Digits and similar groups, like punctuation, are in
-the script called C<Common>.  There is also a script called C<Inherited> for
-characters that modify other characters, and inherit the script value of the
-controlling character.
+those blocks. It does not, for example, contain the digits 0-9, because
+those digits are shared across many scripts. The digits 0-9 and similar groups,
+like punctuation, are in the script called C<Common>.  There is also a
+script called C<Inherited> for characters that modify other characters,
+and inherit the script value of the controlling character.  (Note that
+there are a number of different sets of digits in Unicode that are
+equivalent to 0-9 and are matchable by C<\d> in a regular expression.
+If they are used in a single language only, they are in that language's
+script.  Only the sets that are used across languages are in the
+C<Common> script.)
 
 For more about scripts versus blocks, see UAX#24 "Unicode Script Property":
 L<http://www.unicode.org/reports/tr24>
