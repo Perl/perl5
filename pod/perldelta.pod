@@ -599,8 +599,23 @@ This is still being investigated.
 
 =head1 Acknowledgements
 
-XXX The list of people to thank goes here.
+Perl 5.13.8 represents approximately one month of development since Perl 5.13.7
+and contains approximately 48000 lines of changes across 809 files from 35 authors and committers:
 
+Abigail, Ævar Arnfjörð Bjarmason, brian d foy, Chris 'BinGOs' Williams,
+Craig A. Berry, David Golden, David Leadbeater, David Mitchell, Father
+Chrysostomos, Florian Ragwitz, Gerard Goossen, H.Merijn Brand, Jan
+Dubois, Jerry D. Hedden, Jesse Vincent, John Peacock, Karl Williamson,
+Leon Timmermans, Michael Parker, Michael Stevens, Nicholas Clark,
+Nuno Carvalho, Paul "LeoNerd" Evans, Peter J. Acklam, Peter Martini,
+Rainer Tammer, Reini Urban, Renee Baecker, Ricardo Signes, Robin Barker,
+Tony Cook, Vadim Konovalov, Vincent Pit, Zefram, and Zsbán Ambrus.
+
+Many of the changes included in this version originated in the CPAN
+modules included in Perl's core. We're grateful to the entire CPAN
+community for helping Perl to flourish.
+
+=head1 Reporting Bugs
 =head1 Reporting Bugs
 
 If you find what you think is a bug, you might check the articles
