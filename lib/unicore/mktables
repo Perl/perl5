@@ -8290,9 +8290,9 @@ sub finish_property_setup {
     my $fold = property_ref('Case_Folding');
     $fold->set_file('Fold') if defined $fold;
 
-    # utf8.c can't currently cope with non range-size-1 for these, and even if
-    # it were changed to do so, someone else may be using them, expecting the
-    # old style
+    # utf8.c has a different meaning for non range-size-1 for map properties
+    # that this program doesn't currently handle; and even if it were changed
+    # to do so, some other code may be using them expecting range size 1.
     foreach my $property (qw {
                                 Case_Folding
                                 Lowercase_Mapping
