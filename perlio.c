@@ -2021,20 +2021,6 @@ PERLIO_FUNCS_DECL(PerlIO_byte) = {
     NULL,                       /* set_ptrcnt */
 };
 
-PerlIO *
-PerlIORaw_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
-	       IV n, const char *mode, int fd, int imode, int perm,
-	       PerlIO *old, int narg, SV **args)
-{
-    PerlIO_funcs * const tab = PerlIO_default_btm();
-    PERL_UNUSED_ARG(self);
-    if (tab && tab->Open)
-	 return (*tab->Open) (aTHX_ tab, layers, n - 1, mode, fd, imode, perm,
-			      old, narg, args);
-    SETERRNO(EINVAL, LIB_INVARG);
-    return NULL;
-}
-
 PERLIO_FUNCS_DECL(PerlIO_raw) = {
     sizeof(PerlIO_funcs),
     "raw",
@@ -2042,7 +2028,7 @@ PERLIO_FUNCS_DECL(PerlIO_raw) = {
     PERLIO_K_DUMMY,
     PerlIORaw_pushed,
     PerlIOBase_popped,
-    PerlIORaw_open,
+    PerlIOBase_open,
     NULL,
     NULL,
     NULL,
