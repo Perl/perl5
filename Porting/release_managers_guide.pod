@@ -445,8 +445,8 @@ If you make changes, be sure to commit them.
 Make sure you have a gitwise-clean perl directory (no modified files,
 unpushed commits etc):
 
-    $ git clean -dxf
     $ git status
+    $ git clean -dxf
 
 =item *
 
