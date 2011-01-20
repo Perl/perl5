@@ -520,7 +520,7 @@ sub output ($) {
 		$NEWLINE++;
 	    }
 	}
-	elsif (/\S/ && length) {
+	elsif (/\S/) {
 	    $LINE .= $_;
 	    $NEWLINE = 0;
 	}
