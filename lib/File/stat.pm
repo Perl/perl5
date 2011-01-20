@@ -10,7 +10,7 @@ BEGIN { *warnif = \&warnings::warnif }
 
 our(@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
-our $VERSION = '1.04';
+our $VERSION = '1.05';
 
 my @fields;
 BEGIN { 
