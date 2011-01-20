@@ -84,8 +84,8 @@ characters the locale considers decimal digits.  Without a locale, C<\d>
 matches just the digits '0' to '9'.
 
 Unicode digits may cause some confusion, and some security issues.  In UTF-8
-strings, unless the C<"a"> modifier is specified, C<\d> matches the same
-characters matched by
+strings, unless the C<"a"> regular expression modifier is specified,
+C<\d> matches the same characters matched by
 C<\p{General_Category=Decimal_Number}>, or synonymously,
 C<\p{General_Category=Digit}>.  Starting with Unicode version 4.1, this is the
 same set of characters matched by C<\p{Numeric_Type=Decimal}>.  
@@ -187,7 +187,8 @@ vertical whitespace. Furthermore, if the source string is not in UTF-8 format,
 and any locale or EBCDIC code page that is in effect doesn't include them, the
 next line (ASCII-platform C<"\x85">) and the no-break space (ASCII-platform
 C<"\xA0">) characters are not matched by C<\s>, but are by C<\v> and C<\h>
-respectively.  If the source string is in UTF-8 format, both the next line and
+respectively.  If the C<"a"> modifier is not in effect, and the source
+string is in UTF-8 format, both the next line and
 the no-break space are matched by C<\s>.
 
 The following table is a complete listing of characters matched by
@@ -230,7 +231,8 @@ page is in effect that changes the C<\s> matching).
 =item [1]
 
 NEXT LINE and NO-BREAK SPACE only match C<\s> if the source string is in
-UTF-8 format, or the locale or EBCDIC code page that is in effect includes them.
+UTF-8 format and the C<"a"> modifier is not in effect; or the locale or
+EBCDIC code page that is in effect includes them.
 
 =back
 
@@ -479,7 +481,7 @@ X<lower> X<print> X<punct> X<space> X<upper> X<word> X<xdigit>
 POSIX character classes have the form C<[:class:]>, where I<class> is
 name, and the C<[:> and C<:]> delimiters. POSIX character classes only appear
 I<inside> bracketed character classes, and are a convenient and descriptive
-way of listing a group of characters, though they currently suffer from
+way of listing a group of characters, though they can suffer from
 portability issues (see below and L<Locale, EBCDIC, Unicode and UTF-8>).
 
 Be careful about the syntax,
@@ -539,13 +541,15 @@ and any C<\p> property name can be prefixed with "Is" such as C<\p{IsAlpha}>.)
 
 Both the C<\p> forms are unaffected by any locale that is in effect, or whether
 the string is in UTF-8 format or not, or whether the platform is EBCDIC or not.
-In contrast, the POSIX character classes are affected.  If the source string is
-in UTF-8 format, the POSIX classes behave like their "Full-range"
-Unicode counterparts.  If the
-source string is not in UTF-8 format, and no locale is in effect, and the
-platform is not EBCDIC, all the POSIX classes behave like their ASCII-range
-counterparts.  Otherwise, they behave based on the rules of the locale or
-EBCDIC code page.
+In contrast, the POSIX character classes are affected, unless the
+regular expression is compiled with the C<"a"> modifier.  If the C<"a">
+modifier is not in effect, and the source string is in UTF-8 format, the
+POSIX classes behave like their "Full-range" Unicode counterparts.  If
+C<"a"> modifier is in effect; or the source string is not in UTF-8
+format, and no locale is in effect, and the platform is not EBCDIC, all
+the POSIX classes behave like their ASCII-range counterparts.
+Otherwise, they behave based on the rules of the locale or EBCDIC code
+page.
 
 It is proposed to change this behavior in a future release of Perl so that the
 the UTF-8-ness of the source string will be irrelevant to the behavior of the
@@ -679,30 +683,37 @@ such a construct will lead to an error.
 
 =head2 Locale, EBCDIC, Unicode and UTF-8
 
-Some of the character classes have a somewhat different behaviour depending
-on the internal encoding of the source string, if the regular expression
-is marked as having Unicode semantics, the locale that is in effect,
-and if the program is running on an EBCDIC platform.
+Some of the character classes have a somewhat different behaviour
+depending on the internal encoding of the source string, if the regular
+expression is marked as having Unicode semantics, the locale that is in
+effect, and if the program is running on an EBCDIC platform.
 
-C<\w>, C<\d>, C<\s> and the POSIX character classes (and their negations,
-including C<\W>, C<\D>, C<\S>) have this behaviour.  (Since the backslash
-sequences C<\b> and C<\B> are defined in terms of C<\w> and C<\W>, they also are
-affected.)
+C<\w>, C<\d>, C<\s> and the POSIX character classes (and their
+negations, including C<\W>, C<\D>, C<\S>) have this behaviour.  (Since
+the backslash sequences C<\b> and C<\B> are defined in terms of C<\w>
+and C<\W>, they also are affected.)
 
-The rule is that if the source string is in UTF-8 format or the regular
-expression is marked as indicating Unicode semantics (see the next
-paragraph), the character classes match according to the Unicode
-properties.  Otherwise, the character classes match according to
-whatever locale or EBCDIC code page is in effect. If there is no locale
-nor EBCDIC, they match the ASCII defaults (0 to 9 for C<\d>; 52 letters,
-10 digits and underscore for C<\w>; etc.).
+Starting in Perl 5.14, if the regular expression is compiled with the
+C<"a"> modifier, the behavior doesn't differ regardless of any other
+factors.  C<\d> matches the 10 digits 0-9; C<\D> any character but those
+10; C<\s>, exactly the five characters "[ \f\n\r\t]"; C<\w> only the 63
+characters "[A-Za-z0-9_]"; and the C<"[[:posix:]]"> classes only the
+appropriate ASCII characters, the same characters as are matched by the
+corresponding C<\p{}> property given in the "ASCII-range Unicode" column
+in the table above.  (The behavior of all of their complements follows
+the same paradigm.)
 
-A regular expression is marked for Unicode semantics if it is encoded in
-utf8 (usually as a result of including a literal character whose code
-point is above 255), or if it contains a C<\N{U+...}> or C<\N{I<name>}>
-construct, or (starting in Perl 5.14) if it was compiled in the scope of a
-C<S<use feature "unicode_strings">> pragma, or has the C<"u"> regular
+Otherwise, a regular expression is marked for Unicode semantics if it is
+encoded in utf8 (usually as a result of including a literal character
+whose code point is above 255), or if it contains a C<\N{U+...}> or
+C<\N{I<name>}> construct, or (starting in Perl 5.14) if it was compiled
+in the scope of a C<S<use feature "unicode_strings">> pragma and not in
+the scope of a C<S<use locale>> pragma, or has the C<"u"> regular
 expression modifier.
+
+Note that one can specify C<"use re '/l'"> for example, for any regular
+expression modifier, and this has precedence over either of the
+C<S<use feature "unicode_strings">> or C<S<use locale>> pragmas.
 
 The differences in behavior between locale and non-locale semantics
 can affect any character whose code point is 255 or less.  The
@@ -711,8 +722,9 @@ affects only ASCII platforms, and only when matching against characters
 whose code points are between 128 and 255 inclusive.  See
 L<perlunicode/The "Unicode Bug">.
 
-For portability reasons, it may be better to not use C<\w>, C<\d>, C<\s>
-or the POSIX character classes, and use the Unicode properties instead.
+For portability reasons, unless the C<"a"> modifier is specified,
+it may be better to not use C<\w>, C<\d>, C<\s> or the POSIX character
+classes and use the Unicode properties instead.
 That way you can control whether you want matching of just characters in
 the ASCII character set, or any Unicode characters.
 C<S<use feature "unicode_strings">> will allow seamless Unicode behavior
