@@ -1315,6 +1315,24 @@ PerlIO_push(pTHX_ PerlIO *f, PERLIO_FUNCS_DECL(*tab), const char *mode, SV *arg)
     return f;
 }
 
+PerlIO *
+PerlIOBase_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
+	       IV n, const char *mode, int fd, int imode, int perm,
+	       PerlIO *old, int narg, SV **args)
+{
+    PerlIO_funcs * const tab = PerlIO_layer_fetch(aTHX_ layers, n - 1, PerlIO_default_layer(aTHX_ 0));
+    if (tab && tab->Open) {
+	PerlIO* ret = (*tab->Open)(aTHX_ tab, layers, n - 1, mode, fd, imode, perm, old, narg, args);
+	if (ret && PerlIO_push(aTHX_ ret, self, mode, PerlIOArg) == -1) {
+	    PerlIO_close(ret);
+	    return NULL;
+	}
+	return ret;
+    }
+    SETERRNO(EINVAL, LIB_INVARG);
+    return NULL;
+}
+
 IV
 PerlIOBase_binmode(pTHX_ PerlIO *f)
 {

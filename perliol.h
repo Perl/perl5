@@ -189,6 +189,7 @@ PERL_EXPORT_C IV        PerlIOBase_noop_fail(pTHX_ PerlIO *f);
 PERL_EXPORT_C IV        PerlIOBase_noop_ok(pTHX_ PerlIO *f);
 PERL_EXPORT_C IV        PerlIOBase_popped(pTHX_ PerlIO *f);
 PERL_EXPORT_C IV        PerlIOBase_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab);
+PERL_EXPORT_C PerlIO *  PerlIOBase_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers, IV n, const char *mode, int fd, int imode, int perm, PerlIO *old, int narg, SV **args);
 PERL_EXPORT_C SSize_t   PerlIOBase_read(pTHX_ PerlIO *f, void *vbuf, Size_t count);
 PERL_EXPORT_C void      PerlIOBase_setlinebuf(pTHX_ PerlIO *f);
 PERL_EXPORT_C SSize_t   PerlIOBase_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count);
