@@ -4513,7 +4513,7 @@ PerlIOCrlf_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
        * any given moment at most one CRLF-capable layer being enabled
        * in the whole layer stack. */
 	 PerlIO *g = PerlIONext(f);
-	 while (PerlIOValid(g)) {
+	 if (PerlIOValid(g)) {
 	      PerlIOl *b = PerlIOBase(g);
 	      if (b && b->tab == &PerlIO_crlf) {
 		   if (!(b->flags & PERLIO_F_CRLF))
@@ -4521,8 +4521,7 @@ PerlIOCrlf_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 		   S_inherit_utf8_flag(g);
 		   PerlIO_pop(aTHX_ f);
 		   return code;
-	      }		  
-	      g = PerlIONext(g);
+	      }
 	 }
     }
     S_inherit_utf8_flag(f);
