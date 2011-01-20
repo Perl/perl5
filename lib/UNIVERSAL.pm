@@ -1,6 +1,6 @@
 package UNIVERSAL;
 
-our $VERSION = '1.07';
+our $VERSION = '1.08';
 
 # UNIVERSAL should not contain any extra subs/methods beyond those
 # that it exists to define. The use of Exporter below is a historical
