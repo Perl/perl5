@@ -3792,7 +3792,7 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
          PL_compiling.cop_hints_hash, STR_WITH_LEN("reflags_charset"), 0, 0
         );
         if (reflags && SvOK(reflags)) {
-            set_regex_charset(&(pmop->op_pmflags), SvIV(reflags));
+            set_regex_charset(&(pmop->op_pmflags), (regex_charset)SvIV(reflags));
         }
     }
 
