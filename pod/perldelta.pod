@@ -616,7 +616,6 @@ modules included in Perl's core. We're grateful to the entire CPAN
 community for helping Perl to flourish.
 
 =head1 Reporting Bugs
-=head1 Reporting Bugs
 
 If you find what you think is a bug, you might check the articles
 recently posted to the comp.lang.perl.misc newsgroup and the perl
