@@ -78,6 +78,20 @@ L</Selected Bug Fixes> section.
 
 [ List each security issue as a =head2 entry ]
 
+=head2 Restrict \p{IsUserDefined} to In\w+ and In\w+
+
+    In L<perlunicode/"User-Defined Character Properties">, it says you can
+    create custom properties by defining subroutines whose names begin with
+    "In" or "Is". However, perl doesn't actually enforce that naming
+    restriction, so \p{foo::bar} will call foo::Bar() if it exists.
+
+    This commit finally enforces this convention. Note that this broke a
+    number of existing tests for properties, since they didn't always use an
+    Is/In prefix.
+
+
+
+
 =head1 Incompatible Changes
 
 XXX For a release on a stable branch, this section aspires to be:
@@ -265,6 +279,12 @@ C<Pod::LaTeX> has been upgraded from version 0.58 to 0.59
 
 =item *
 
+C<Socket> has been updated with new affordances for IPv6,
+including implementations of the C<Socket::getaddrinfo()> and
+C<Socket::getnameinfo()> functions, along with related constants.
+
+=item *
+
 C<Term::UI> has been upgraded from version 0.20 to 0.24
 
 =item *
@@ -329,6 +349,36 @@ XXX Description of the purpose of the new file here
 XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
+
+=head3 Cleanup
+
+=over
+
+=item *
+
+Numerous POD warnings were fixed.
+
+=item *
+
+Many, many spelling errors and typographical mistakes were corrected throughout Perl's core.
+
+=back
+
+=head3 L<Porting/epigraphs.pod> and L<pod/perlhist.pod>
+
+    This patch makes multiple changes to Porting/epigraphs.pod and pod/perlhist.pod.
+
+=head3 L<perlrepository>
+
+=head3 L<perlhack>
+
+=over 4
+
+=item *
+
+L<perlhack> was extensively reorganized.
+
+=back
 
 =head3 L<perlfunc>
 
@@ -401,6 +451,17 @@ resulting in dropped mail. Now it does include that header.
 
 =back
 
+=head3 L<buildtoc>
+
+=over 4
+
+=item *
+
+F<pod/buildtoc> has been modernized and can now be used to test the
+well-formedness of F<pod/perltoc.pod> automatically.
+
+=back
+
 =head1 Configuration and Compilation
 
 XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
@@ -432,10 +493,36 @@ that they represent may be covered elsewhere.
 
 =item *
 
+L<lib/File/DosGlob.t> has been modernized and now uses L<Test::More>.
+
+=item *
+
 A new test script, C<t/porting/filenames.t>, makes sure that filenames and
 paths are reasonably portable.
 
+=item *
+
+C<t/porting/diag.t> is now several orders of magnitude faster.
+
+=item *
+
+C<t/porting/buildtoc.t> now tests that the documentation TOC file is current and well-formed.
+
+=item *
+
+C<t/base/while.t> now tests the basics of a while loop with minimal dependencies.
+
+=item *
+
+C<t/cmd/while.t> now uses F<test.pl> for better maintainability.
+
+=item *
+
+C<t/op/split.t> now tests calls to C<split> without any pattern specified.
+
 =back
+
+
 
 =head1 Platform Support
 
@@ -471,6 +558,11 @@ The last vestiges of support for this platform have been excised from the
 Perl distribution. It was officially discontinued in version 5.12.0. It had
 not worked for years before that.
 
+=item MacOS Classic
+
+The last vestiges of support for this platform have been excised from the
+Perl distribution. It was officially discontinued in an earlier version.
+
 =back
 
 =head2 Platform-Specific Notes
@@ -481,6 +573,33 @@ changes within modules for platforms should generally be listed in the
 L</Modules and Pragmata> section.
 
 =over 4
+
+
+=item Cygwin
+
+=over
+
+=item Update MakeMaker to build man pages on cygwin.
+
+=item Improve rebase behaviour
+
+If a dll is updated on cygwin reuse the old imagebase address.
+This solves most rebase errors, esp when updating on core dll's.
+See L<http://www.tishler.net/jason/software/rebase/rebase-2.4.2.README> for more information.
+
+=item CYG14 Dynaloader without USEIMPORTLIB, and search cyg prefix
+
+Support the standard cyg dll prefix, which is e.g. needed for FFI's.
+Ctypes and C::DynaLib use DynaLoader to find dlls.
+
+With -DUSEIMPORTLIB DynaLoader symbols link against the prefixed
+symbol names for the .dll.a importlib, but we need to link against the
+symbols directly. We don't link Dynaloader against libperl.dll.a.
+
+=item Updated build hints file
+
+=back
+
 
 =item Solaris
 
@@ -540,6 +659,18 @@ which are defined in the places where the orginal flags were.
 A new option has been added to C<pv_escape> to dump all characters above
 ASCII in hexadecimal. Before, one could get all characters as hexadecimal
 or the Latin1 non-ASCII as octal
+
+
+=item Generate pp_* prototypes in pp_proto.h, and remove pp.sym
+
+Eliminate the #define pp_foo Perl_pp_foo(pTHX) macros, and update the 13
+locations that relied on them.
+
+regen/opcode.pl now generates prototypes for the PP functions directly, into
+pp_proto.h. It no longer writes pp.sym, and regen/embed.pl no longer reads
+this, removing the only ordering dependency in the regen scripts. opcode.pl
+is now responsible for prototypes for pp_* functions. (embed.pl remains
+responsible for ck_* functions, reading from regen/opcodes)
 
 =back
 
@@ -686,337 +817,5 @@ The F<Artistic> and F<Copying> files for copyright information.
 =for later
 
 Below, you'll find a cut-down version of the git log from 5.13.8 to 1b9043bb.
-Jesse went through and took a first pass at cutting out non-changelog items. He may have been over-(or under-)zealous.
-
-It hasn't yet been deduped with the entries that _are_ in the perldelta.
-
-
-    Major spell-checking pass throughout the core
-
-    Remove references to compat3.sym and interp.sym, deleted over 10 years ago.
-
-    Remove Mac OS classic code from numerous places throughout the core
-
-commit 7fe50b8b8a4dc38fc341e3b403545aaca937f50e
-Author: Leon Timmermans <fawaka@gmail.com>
-Date:   Tue Jan 18 16:40:07 2011 +0100
-
-    Also unblock signal handlers throwing an exception
-
-    Also handle and test the edge case of a signal handler throwing an
-    exception
-
-
-
-
-Numberous POD warnings fixed
-
-
-
-    Update Unicode-Collate to CPAN version 0.71
-
-
-internals
-
-Author: Nicholas Clark <nick@ccl4.org>
-Date:   Tue Jan 18 16:14:43 2011 +0000
-
-    Remove Mac OS classic code from scripts in utils/
-
-
-    Convert DosGlob.t to Test::More.
-
-commit d6dc8a6dc95226ddff7719cd1e0bd053c4e5725e
-Author: Nicholas Clark <nick@ccl4.org>
-Date:   Tue Jan 18 13:08:11 2011 +0000
-
-    Remove Mac OS Classic docs from DirHandle and File::{Copy,DosGlob,Find}
-
-    The documentation for the different behaviour on Mac OS Classic was not
-    removed when the relevant code was removed in 862f843bac3434c2. That commit
-    also remove all callers to several Mac OS classic support functions, but not
-    the functions themselves. Rectify this.
-
-commit 8254cbf193c939338449097a80163197fc755150
-Author: Nicholas Clark <nick@ccl4.org>
-Date:   Tue Jan 18 11:10:41 2011 +0000
-
-    Build perltoc.pod with pragmata sorted by name.
-
-    Previously they were actually sorted by full pathname, which isn't logical.
-    I presume that this is an artefact of all pragmata being in lib/ when
-    pod/buildtoc was originally written.
-
-commit 1d45ec279e4e105512a2803e3d0bd974a151a0f6
-Author: Father Chrysostomos <sprout@cpan.org>
-Date:   Mon Jan 17 22:32:52 2011 -0800
-
-    perlcall: Fixes for various grammatical errors
-
-commit faaf68361923e4bb95d1eb919bc724a0dcc5a4ce
-Author: Leon Timmermans <fawaka@gmail.com>
-Date:   Mon Jan 17 17:59:33 2011 +0100
-
-    Clarify limitation in safe signals.
-
-commit 0c1bf4c7d433bb0ad80bfe5511b1301db32b7b95
-Author: Leon Timmermans <fawaka@gmail.com>
-Date:   Mon Jan 17 16:29:11 2011 +0100
-
-    Added tests for conditional unblocking
-
-commit 555344425f04e96a72e4d29eab96b34bff8f96ae
-Author: Leon Timmermans <fawaka@gmail.com>
-Date:   Thu Jan 13 18:30:29 2011 +0100
-
-    Conditionally unblock after signal handler[#82040]
-
-    Only unblock signal after a safe-signal handler is executed if that signal was
-    also unblocked before the handler.
-commit 435aa301127ed481169903cb35187bde1ea44928
-Author: David Golden <dagolden@cpan.org>
-Date:   Mon Jan 17 20:39:14 2011 -0500
-
-    Update HTTP::Tiny to CPAN version 0.009
-
-commit 78cd53afbb1923bf0a68f361040ad8fe93a7d0d5
-Author: David Mitchell <davem@iabyn.com>
-Date:   Tue Jan 18 00:46:30 2011 +0000
-
-    vastly speed up t/porting/diag.t
-
-    This used to take about 3 minutes of CPU. Reduce this to around
-    6 seconds (!!) by coalescing and pre-compiling various patterns
-    that get applied to nearly every line of every source file.
-
-commit e66820012d29519f903709f005e56a2c334ae183
-Author: Tony Cook <tony@develop-help.com>
-Date:   Mon Jan 17 19:22:08 2011 +1100
-
-    test_prep now depends on the pods needed for porting/buildtoc.t
-
-    In the other makefiles test_prep (or test-prep) depends on all, so
-    they shouldn't need updating.
-
-
-commit a52237f3a547cdefddd4c4be6224bfdf67c84263
-Author: David Golden <dagolden@cpan.org>
-Date:   Sun Jan 16 21:32:21 2011 -0500
-
-    Update CPAN to CPAN version 1.94_63
-
-commit a3ab329f3fc9494e700f51c38cef42021c130b6e
-Author: David Golden <dagolden@cpan.org>
-Date:   Sun Jan 16 20:57:02 2011 -0500
-
-    Add HTTP::Tiny as a dual-life core module
-
-    HTTP::Tiny has been added as a dual-life module.  It is a very
-    small, simple HTTP/1.1 client designed for simple GET requests and file
-    mirroring.  It has has been added to enable CPAN.pm and CPANPLUS to
-    "bootstrap" HTTP access to CPAN using pure Perl without relying on external
-    binaries like F<curl> or F<wget>.
-
-commit 211cc5012284f4bd900fcaa630adbcac69ca6112
-Author: Chris 'BinGOs' Williams <chris@bingosnet.co.uk>
-Date:   Sun Jan 16 23:23:03 2011 +0000
-
-    Update Unicode-Collate to CPAN version 0.70 and enable XS version
-
-tools
-
-    Significant updates to buildtoc
-
-    Update Unicode-Normalize to CPAN version 1.10
-
-SECURITY
-
-    restrict \p{IsUserDefined} to In\w+ and In\w+
-
-    In L<perlunicode/"User-Defined Character Properties">, it says you can
-    create custom properties by defining subroutines whose names begin with
-    "In" or "Is". However, perl doesn't actually enforce that naming
-    restriction, so \p{foo::bar} will call foo::Bar() if it exists.
-
-    This commit finally enforces this convention. Note that this broke a
-    number of existing tests for properties, since they didn't always use an
-    Is/In prefix.
-
-TESTING
-
-    test that perl.pod, pod.lst, MANIFEST and the file system are consistent
-
-commit 680818c0361b180bb6f09d4bb11c4d5cd467fe62
-Author: Nicholas Clark <nick@ccl4.org>
-Date:   Thu Jan 13 16:24:52 2011 +0000
-
-    ithread_create() was relying on the stack not moving. Fix this.
-
-    4cf5eae5e58faebb changed S_ithread_create() to avoid creating an AV, by
-    passing the thread creation arguments as pointers to a block of memory
-    holding SVs. Unfortunately, this inadvertently introduced a subtle bug,
-    because the block of memory is on the Perl stack, which can move as a side
-    effect of being reallocated to extend it. Hence pass in the offset on the
-    stack instead, read the current value of the relevant interpreter's stack
-    at the point of access, and copy all the SVs away before making any further
-    calls which might cause reallocation.
-
-
-
-commit 7627e6d0fe772ac90fce9e03fea273109521e261
-Author: Nicholas Clark <nick@ccl4.org>
-Date:   Sat Jan 8 15:56:22 2011 +0000
-
-    Generate "Unsupported socket function" stubs using PL_ppaddr.
-
-    Instead of having each socket op conditionally compile as either the
-    implementation or a DIE() depending on #HAS_SOCKET
-
-    1: remove the conditional code from the ops themselves
-    2: only compile the ops if HAS_SOCKET is defined
-    3: general conditional code for the intialisation of PL_ppaddr - as appropriate
-       either the ops, or Perl_unimplemented_op
-    4: Amend Perl_unimplemented_op to generate the appropriate DIE() for socket
-       ops (ie not the "panic"... message)
-
-    Whilst this complicates the support code in regen/opcode.pl, it's already a
-    net saving of 5 lines in the C code.
-
-commit 897d398936dd2fc088a265fba2a7b62fa97ed458
-Author: Nicholas Clark <nick@ccl4.org>
-Date:   Sun Jan 9 10:54:58 2011 +0000
-
-    Generate pp_* prototypes in pp_proto.h, and remove pp.sym
-
-    Eliminate the #define pp_foo Perl_pp_foo(pTHX) macros, and update the 13
-    locations that relied on them.
-
-    regen/opcode.pl now generates prototypes for the PP functions directly, into
-    pp_proto.h. It no longer writes pp.sym, and regen/embed.pl no longer reads
-    this, removing the only ordering dependency in the regen scripts. opcode.pl
-    is now responsible for prototypes for pp_* functions. (embed.pl remains
-    responsible for ck_* functions, reading from regen/opcodes)
-
-TESTING
-    add test for split without a pattern
-
-    Add some while tests, about the context of the last statement in a block and about reinitializaiton of lexical variables.
-
-    modernise t/cmd/while.t
-
-    Add t/base/while.t testing the basic of a while loop with minimal dependencies.  Change t/cmd/while.t into a non-base test using "test.pl".
-
-commit b86b68b4eefa1069dabc8ea0401d712b24a67857
-Author: Jesse Vincent <jesse@bestpractical.com>
-Date:   Sat Jan 8 00:14:29 2011 +0800
-
-    Update the policy on doc patches to maint
-
-
-commit 0b5e625bc99f5cb78697faf03b297b6cacadf60b
-Author: Reini Urban <rurban@x-ray.at>
-Date:   Tue Sep 14 18:04:22 2010 +0200
-
-    build man pages on cygwin too
-
-commit 172830635ea7813c85e51e4ae2b4bed56ddbab83
-Author: Reini Urban <rurban@x-ray.at>
-Date:   Tue Sep 14 17:54:15 2010 +0200
-
-    Improve cygwin rebase behaviour
-
-    If a dll is updated on cygwin reuse the old imagebase address.
-    This solves most rebase errors, esp when updating on core dll's.
-    See http://www.tishler.net/jason/software/rebase/rebase-2.4.2.README
-
-
-Platforms
-
-commit cc7e77fd5a0ee9f1498e54dddf566117da62754b
-Author: Reini Urban <rurban@x-ray.at>
-Date:   Tue Sep 14 17:48:32 2010 +0200
-
-    CYG14 Dynaloader without USEIMPORTLIB, and search cyg prefix
-
-    part1: Support the standard cyg dll prefix, which is e.g. needed for FFI's.
-    Ctypes and C::DynaLib use DynaLoader to find dlls.
-
-    part2: With -DUSEIMPORTLIB DynaLoader symbols link against the prefixed
-    symbol names for the .dll.a importlib, but we need to link against the
-    symbols directly. We don't link Dynaloader against libperl.dll.a.
-
-    Otherwise:
-    $ g++-4 -o cygperl5_13_4.dll --shared perlsrc.o cygwin.o  DynaLoader.o -ldl -lcrypt
-      Creating library file: libperl.dll.a
-      DynaLoader.o: In function `XS_DynaLoader_dl_undef_symbols':
-      ext/DynaLoader/DynaLoader.c:346: undefined reference to `__imp__PL_stack_sp'
-      ext/DynaLoader/DynaLoader.c:346: undefined reference to `__imp__PL_markstack_ptr'
-      ext/DynaLoader/DynaLoader.c:346: undefined reference to `__imp__PL_stack_base'
-
-commit c0a149a90b8b6e1c18de7294ca974265fb559cf5
-Author: Reini Urban <rurban@x-ray.at>
-Date:   Tue Sep 14 18:06:38 2010 +0200
-
-    Update cygwin hints
-    do not use usemymalloc (double size + slow)
-    remove deprecated libcygipc info
-    remove overlarge stack size
-
-commit 2831a86cee065b53b74fd19ddcc6a4257484646d
-Author: Zsbán Ambrus <ambrus@math.bme.hu>
-Date:   Sun Jan 2 20:25:55 2011 -0800
-
-    [perl #81032] Overhaul Porting/epigraphs.pod
-
-    This patch makes multiple changes to Porting/epigraphs.pod and
-    pod/perlhist.pod.
-
-    For those that don't know, Porting/epigraphs.pod is a new document that
-    collects the quotes (chosen by Pumpkins) in perl release announcements.
-
-    The changes are the following.
-
-    1. Add a link pointing to each release announcement in the mailing
-    list archives.  These are from ysth's list, the source from which
-    Porting/epigraphs.pod was originally compiled, but they weren't in
-    Porting/epigraphs.pod so far.
-    2. Reorder Porting/epigraphs.pod chronologically, because I believe
-    that makes more sense -- pod/perlhist.pod is still sorted by version numbers.
-    3. Incidentally, some missing releases are added to pod/perlhist.pod too.
-    4. Fix a mistake where Porting/epigraphs.pod gives the wrong version number.
-    5. Add some epigraphs that appear in ysth's list but not in
-    Porting/epigraphs.pod.
-    6. I did some research in perl history before the part that ysth's list
-    covers, and added older perl announcements I found.  This work is not
-    complete: I stopped somewhere in 2000.
-
-commit eccda089fc3dcaafc1ae0aac6b428f799231b824
-Author: Paul "LeoNerd" Evans <leonerd@leonerd.org.uk>
-Date:   Mon Dec 13 17:50:06 2010 +0000
-
-    Implement Socket::getaddrinfo() and Socket::getnameinfo(), with related constants
-
-commit edcf105d70e5423fd928c776e086fe31a4a543f4
-Author: Jesse Vincent <jesse@bestpractical.com>
-Date:   Sat Jan 1 18:46:20 2011 +0800
-
-    Document 'test_porting' and start a section on how committing to blead
-
-commit cce04bebd8af026c2a6731940ddb895d3c1fc3e4
-Author: David Golden <dagolden@cpan.org>
-Date:   Mon Dec 13 17:36:33 2010 -0500
-
-    Reorganize perlhack.pod
-
-    Following on an IRC conversation, I've attempted to reorganize
-    perlhack for greater clarity.  I have only cut and paste blocks
-    of text and amended section titles and levels.  (I have not addressed
-    any of the numerous factual issues which remain.)
-
-    The resulting guide should be clearer for those trying to skim the
-    table of contents to understand what is covered in perlhack and
-    whether it is worth an in-depth read.
-
-    I see this change as the first step towards future improvements.
 
 =cut
