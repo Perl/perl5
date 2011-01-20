@@ -603,6 +603,19 @@ any objects that might be left after the usual passes that check for
 objects referenced by scalars
 L<[perl #36347]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=36347>.
 
+=item *
+
+A long standing bug has now been fully fixed (partial fixes came in
+earlier releases), in which some Latin-1 non-ASCII characters on
+ASCII-platforms would match both a character class and its complement,
+such as U+00E2 being both in C<\w> and C<\W>, depending on the
+UTF-8-ness of the regular expression pattern and target string.
+Fixing this did expose some bugs in various modules and tests that
+relied on the previous behavior of C<[[:alpha:]]> not ever matching
+U+00FF, "LATIN SMALL LETTER Y WITH DIAERESIS", even when it should, in
+Unicode mode; now it does match when appropriate.
+L<[perl #60156]|http://rt.perl.org/rt3/Ticket/Display.html?id=60156>.
+
 =back
 
 =head1 Known Problems
@@ -705,31 +718,6 @@ Numberous POD warnings fixed
 
 internals
 
-
-    regexec.c: Remove break statements from macros
-
-    This is so future coders won't be tempted to rely on them.
-
-    regexec.c: Don't rely on break stmts in macros
-
-    It is safer and clearer to have the break statement in each case statement at
-    the source level
-
-commit b57e41186b2ceb48bef4f0588dcd19e105cc8a38
-Author: Karl Williamson <public@khwilliamson.com>
-Date:   Tue Jan 18 15:03:41 2011 -0700
-
-    regcomp: Disallow multi-char folds in lookbehind
-
-    The addition of the ANYOFV regnode to treat multi-char folds in a bracketed
-    character class has exposed a bug, in which those classes have long been able
-    to be varying length (due to the multi-char fold), but the compiler wasn't
-    aware of it.  Now it is, and hence won't allow those which have multi-char
-    folds to be part of a lookbehind pattern, which requires a constant length.
-
-    This patch disallows multi-char folds in a lookbehind bracketed character
-    class.
-
 Author: Nicholas Clark <nick@ccl4.org>
 Date:   Tue Jan 18 16:14:43 2011 +0000
 
@@ -801,20 +789,6 @@ Date:   Tue Jan 18 00:46:30 2011 +0000
     6 seconds (!!) by coalescing and pre-compiling various patterns
     that get applied to nearly every line of every source file.
 
-commit cfaf538b6276c6a8ef80ff6c66e106c6a4f1caaa
-Author: Karl Williamson <public@khwilliamson.com>
-Date:   Mon Jan 17 08:58:53 2011 -0700
-
-    Add /a regex modifier
-
-    This restricts certain constructs, like \w, to matching in the ASCII range only.
-
-commit 56ae17b45d2513d65903d13468e8f6a16b20f916
-Author: Karl Williamson <public@khwilliamson.com>
-Date:   Sun Jan 16 17:41:30 2011 -0700
-
-    regcomp.c: Convert \d \D to a switch{}
-
 commit e66820012d29519f903709f005e56a2c334ae183
 Author: Tony Cook <tony@develop-help.com>
 Date:   Mon Jan 17 19:22:08 2011 +1100
@@ -830,59 +804,6 @@ Author: David Golden <dagolden@cpan.org>
 Date:   Sun Jan 16 21:32:21 2011 -0500
 
     Update CPAN to CPAN version 1.94_63
-
-commit 63ac0dadb1aafcf0c171d3c1422c1923b611b2fc
-Author: Karl Williamson <public@khwilliamson.com>
-Date:   Tue Dec 28 16:13:49 2010 -0700
-
-    regex: Use BOUNDU regnodes
-
-    This refactors one area in regexec.c to use BOUNDU, NBOUNDU for
-    efficiciency, and easier adding of the future BOUNDA.
-
-commit 980866de2cf8ecdb4bb72b7f9294763057008f50
-Author: Karl Williamson <public@khwilliamson.com>
-Date:   Mon Dec 27 12:04:58 2010 -0700
-
-    regex: Separate nodes for Unicode semantics \s \w
-
-    This patch converts the \s, \w and complements Unicode semantics to
-    instead of using the flags field of their nodes to instead use separate
-    nodes.  This gains some efficiency, especially useful in tight loops and
-    backtracking of regexec.c, and prepares the way for easily adding other
-    semantic variations, such as /a.
-
-    It refactors the CCC_TRY... macros.  I tried to break this piece up into
-    smaller chunks, but found it much easier to get to this in one step.
-    Further patches will do some more refactoring of these.
-
-    As part of the CCC_TRY macro refactoring, the lines that include the
-    test if (! nextchr) are changed to just look for the end-of-string by
-    position instead of it being NUL.  In locales, it could be (however
-    unlikely), that NUL is a real alphabetic, digit, or space character.
-commit 50e911483ad5c29e25c54c9f81f92df974dd2cc0
-Author: Karl Williamson <public@khwilliamson.com>
-Date:   Sun Dec 26 10:35:58 2010 -0700
-
-    Change name of /d to DEPENDS
-
-    I much prefer David Golden's name for /d whose meaning 'depends' on
-    circumstances, instead of 'dual' meaning it could be one or another.
-    Change it before this gets out in a stable release, and we're stuck with
-    the old name.
-
-commit 73134a2eb4055c76fe5b154da95e09118f716fd8
-Author: Karl Williamson <public@khwilliamson.com>
-Date:   Sun Dec 26 10:35:20 2010 -0700
-
-    CH] Change usage of regex/op common to common names
-
-    This patch changes the core functions to use the common names for the
-    fields that are shared between op.c and regcomp.c, just for consistency
-    of using one name throughout the core for the same thing.
-
-    A grep of cpan shows that both names are used in various modules; so
-    both names must be retained.
 
 commit a3ab329f3fc9494e700f51c38cef42021c130b6e
 Author: David Golden <dagolden@cpan.org>
@@ -902,46 +823,11 @@ Date:   Sun Jan 16 23:23:03 2011 +0000
 
     Update Unicode-Collate to CPAN version 0.70 and enable XS version
 
-commit a62b1201c068dc7b099bcb7182e188c4d2fbf34c
-Author: Karl Williamson <public@khwilliamson.com>
-Date:   Sun Dec 26 10:31:16 2010 -0700
-
-    Use multi-bit field for regex character set
-
-    The /d, /l, and /u regex modifiers are mutually exclusive.  This patch
-    changes the field that stores the character set to use more than one bit
-    with an enum determining which one.  This data structure more
-    closely follows the semantics of their being mutually exclusive, and
-    conserves bits as well, and is better expandable.
-
-    A small API is added to set and query the bit field.
-
-    This patch is not .xs source backwards compatible.  A handful of cpan
-    programs are affected.
-
-
 tools
 
     Significant updates to buildtoc
 
     Update Unicode-Normalize to CPAN version 1.10
-
-commit 11454c594f22abc5945e69a46fc965363dbf326e
-Author: Karl Williamson <public@khwilliamson.com>
-Date:   Sat Jan 15 13:42:58 2011 -0700
-
-    Fix \xa0 matching both [\s] [\S], et.al.
-
-    This bug stemmed from Latin1 characters not matching any (non-complemented)
-    character class in /d semantics when the target string is no utf8; but having
-    unicode semantics when it isn't.  The solution here is to add a special flag.
-
-    There were several tests that relied on the broken behavior, specifically they
-    tested that \xff isn't a printable word character even in utf8.  I changed the
-    deparse test to instead use a non-printable code point, and I changed the ones
-    in re_tests to be TODOs, and will change them back using /a when that is
-    shortly added.
-
 
 SECURITY
 
@@ -959,31 +845,6 @@ SECURITY
 TESTING
 
     test that perl.pod, pod.lst, MANIFEST and the file system are consistent
-
-commit f56b6394f7cf57733135f56e4e4ac49abe9ac9cc
-Author: Karl Williamson <public@khwilliamson.com>
-Date:   Thu Jan 13 22:36:36 2011 -0700
-
-    regex: Use ANYOFV
-
-    This patch restructures the regex ANYOF code to generate ANYOFV nodes instead
-    when there is a possibility that it could match more than one character.   Note
-    that this doesn't affect the optimizer, as it essentially ignores things that
-    fit into this category.  (But it means that the optimizer will no longer reject
-    these when it shouldn't have.)
-
-    The handling of the LATIN SHARP s is modified to correspond with this new node
-    type.
-
-    The initial handling of ANYOFV is placed in regexec.c.  More analysis will come
-    on that.  But there was significant change to the part that handles matching
-    multi-char strings.  This has long been buggy, with it previously comparing a
-    folded-version on one side with a non-folded version on the other.
-
-    This patch fixes about 60% of the problems that my undelivered test suite gives
-    for multi-char folds.  But there are still 17K test failures left, so I'm still
-    not delivering that.  The TODOs that this fixes will be cleaned up in a later commit
-
 
 commit 680818c0361b180bb6f09d4bb11c4d5cd467fe62
 Author: Nicholas Clark <nick@ccl4.org>
@@ -1035,13 +896,6 @@ Date:   Sun Jan 9 10:54:58 2011 +0000
     this, removing the only ordering dependency in the regen scripts. opcode.pl
     is now responsible for prototypes for pp_* functions. (embed.pl remains
     responsible for ck_* functions, reading from regen/opcodes)
-
-commit a4a4c9e2c086dd5f7b7b05789161614dbbe8385b
-Author: Karl Williamson <public@khwilliamson.com>
-Date:   Sat Jan 8 14:44:05 2011 -0700
-
-    perldiag.pod: Add missing message severities
-
 
 TESTING
     add test for split without a pattern
