@@ -23,7 +23,7 @@ use AutoLoader;
 use FileHandle;
 use vars qw($canonical $forgive_me $VERSION);
 
-$VERSION = '2.25';
+$VERSION = '2.26';
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;		# Grrr...
 
 #
