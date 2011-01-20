@@ -430,7 +430,7 @@ sub podset {
 	tr/\015//d;
 	if (s/^=head1 (NAME)\s*/=head2 /) {
 	    unhead1();
-	    output "\n \n\n=head2 ";
+	    output "\n\n=head2 ";
 	    $_ = <$fh>;
 	    # Remove svn keyword expansions from the Perl FAQ
 	    s/ \(\$Revision: \d+ \$\)//g;
