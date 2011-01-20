@@ -444,6 +444,7 @@ the strings?).
  Miyagawa 5.13.6        2010-Oct-20
  BinGOs   5.13.7        2010-Nov-20
  Zefram   5.13.8        2010-Dec-20
+ Jesse    5.13.9        2011-Jan-20
 
 =head2 SELECTED RELEASE SIZES
 
