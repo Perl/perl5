@@ -2,9 +2,6 @@
 
 =head1 NAME
 
-[ this is a template for a new perldelta file. Any text flagged as
-XXX needs to be processed before release. ]
-
 perldelta - what is new for perl v5.13.9
 
 =head1 DESCRIPTION
@@ -21,12 +18,6 @@ L<perl5138delta>, which describes differences between 5.13.7 and
 XXX Any important notices here
 
 =head1 Core Enhancements
-
-XXX New core language features go here. Summarise user-visible core language
-enhancements. Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
-
-[ List each enhancement as a =head2 entry ]
 
 =head2 New regular expression modifier C</a>
 
@@ -72,34 +63,18 @@ uses hexadecimal when escaping non-ASCII characters, instead of octal.
 
 =head1 Security
 
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
-
-[ List each security issue as a =head2 entry ]
-
 =head2 Restrict \p{IsUserDefined} to In\w+ and In\w+
 
-    In L<perlunicode/"User-Defined Character Properties">, it says you can
-    create custom properties by defining subroutines whose names begin with
-    "In" or "Is". However, perl doesn't actually enforce that naming
-    restriction, so \p{foo::bar} will call foo::Bar() if it exists.
+In L<perlunicode/"User-Defined Character Properties">, it says you can
+create custom properties by defining subroutines whose names begin with
+"In" or "Is". However, perl doesn't actually enforce that naming
+restriction, so \p{foo::bar} will call foo::Bar() if it exists.
 
-    This commit finally enforces this convention. Note that this broke a
-    number of existing tests for properties, since they didn't always use an
-    Is/In prefix.
-
-
-
+This commit finally enforces this convention. Note that this broke a
+number of existing tests for properties, since they didn't always use an
+Is/In prefix.
 
 =head1 Incompatible Changes
-
-XXX For a release on a stable branch, this section aspires to be:
-
-    There are no changes intentionally incompatible with 5.XXX.XXX. If any
-    exist, they are bugs and reports are welcome.
-
-[ List each incompatible change as a =head2 entry ]
 
 =head2 All objects are destroyed
 
@@ -112,29 +87,6 @@ L<[perl #81230]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=81230>.
 
 This has the potential to break some XS modules. (In fact, it break some.
 See L</Known Problems>, below.)
-
-=head1 Deprecations
-
-XXX Any deprecated features, syntax, modules etc. should be listed here.
-In particular, deprecated modules should be listed here even if they are
-listed as an updated module in the L</Modules and Pragmata> section.
-
-[ List each deprecation as a =head2 entry ]
-
-=head1 Performance Enhancements
-
-XXX Changes which enhance performance without changing behaviour go here. There
-may well be none in a stable release.
-
-[ List each enhancement as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
 
 =head1 Modules and Pragmata
 
@@ -333,22 +285,7 @@ XXX
 
 =head1 Documentation
 
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
-=head2 New Documentation
-
-XXX Changes which create B<new> files in F<pod/> go here.
-
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
-
 =head2 Changes to Existing Documentation
-
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
 
 =head3 Cleanup
 
@@ -366,9 +303,7 @@ Many, many spelling errors and typographical mistakes were corrected throughout 
 
 =head3 L<Porting/epigraphs.pod> and L<pod/perlhist.pod>
 
-    This patch makes multiple changes to Porting/epigraphs.pod and pod/perlhist.pod.
-
-=head3 L<perlrepository>
+This patch makes multiple changes to Porting/epigraphs.pod and pod/perlhist.pod.
 
 =head3 L<perlhack>
 
@@ -396,14 +331,7 @@ The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
-XXX New or changed warnings emitted by the core's C<C> code go here. Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
-[ Within each section, list entries as a =item entry ]
-
 =head2 New Diagnostics
-
-XXX Newly added diagnostic messages go here
 
 =over 4
 
@@ -416,8 +344,6 @@ on a Unicode surrogate or a non-Unicode character now triggers a warning:
 =back
 
 =head2 Changes to Existing Diagnostics
-
-XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =over 4
 
@@ -462,38 +388,13 @@ well-formedness of F<pod/perltoc.pod> automatically.
 
 =back
 
-=head1 Configuration and Compilation
-
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.  Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as a =item entry ].
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Testing
 
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarising, although the bugs
-that they represent may be covered elsewhere.
-
-[ List each test improvement as a =item entry ]
-
 =over 4
 
 =item *
 
-L<lib/File/DosGlob.t> has been modernized and now uses L<Test::More>.
+C<lib/File/DosGlob.t> has been modernized and now uses L<Test::More>.
 
 =item *
 
@@ -526,29 +427,7 @@ C<t/op/split.t> now tests calls to C<split> without any pattern specified.
 
 =head1 Platform Support
 
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
-
-=head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not. These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
 =head2 Discontinued Platforms
-
-XXX List any platforms that this version of perl no longer compiles on.
 
 =over 4
 
@@ -566,11 +445,6 @@ Perl distribution. It was officially discontinued in an earlier version.
 =back
 
 =head2 Platform-Specific Notes
-
-XXX List any changes for specific platforms. This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
 
 =over 4
 
@@ -610,12 +484,6 @@ L<[perl #73630]|http://rt.perl.org/rt3/Public/Bug/Display.html?id=73630>.
 =back
 
 =head1 Internal Changes
-
-XXX Changes which affect the interface available to C<XS> code go here.
-Other significant internal changes for future core maintainers should
-be noted as well.
-
-[ List each test improvement as a =item entry ]
 
 =over 4
 
@@ -661,7 +529,9 @@ ASCII in hexadecimal. Before, one could get all characters as hexadecimal
 or the Latin1 non-ASCII as octal
 
 
-=item Generate pp_* prototypes in pp_proto.h, and remove pp.sym
+=item *
+
+Generate pp_* prototypes in pp_proto.h, and remove pp.sym
 
 Eliminate the #define pp_foo Perl_pp_foo(pTHX) macros, and update the 13
 locations that relied on them.
@@ -675,12 +545,6 @@ responsible for ck_* functions, reading from regen/opcodes)
 =back
 
 =head1 Selected Bug Fixes
-
-XXX Important bug fixes in the core language are summarised here.
-Bug fixes in files in F<ext/> and F<lib/> are best summarised in
-L</Modules and Pragmata>.
-
-[ List each fix as a =item entry ]
 
 =over 4
 
@@ -751,15 +615,6 @@ L<[perl #60156]|http://rt.perl.org/rt3/Ticket/Display.html?id=60156>.
 
 =head1 Known Problems
 
-XXX Descriptions of platform agnostic bugs we know we can't fix go here. Any
-tests that had to be C<TODO>ed for the release would be noted here, unless
-they were specific to a particular platform (see below).
-
-This is a list of some significant unfixed bugs, which are regressions
-from either 5.XXX.XXX or 5.XXX.XXX.
-
-[ List each fix as a =item entry ]
-
 =over 4
 
 =item *
@@ -768,11 +623,6 @@ The fix for [perl #81230] causes test failures for C<Tk> version 804.029.
 This is still being investigated.
 
 =back
-
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
 
 =head1 Acknowledgements
 
