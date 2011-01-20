@@ -117,7 +117,7 @@ A C<\w> matches a single alphanumeric character (an alphabetic character, or a
 decimal digit) or a connecting punctuation character, such as an
 underscore ("_").  It does not match a whole word.  To match a whole
 word, use C<\w+>.  This isn't the same thing as matching an English word, but 
-in the ASCII range is the same as a string of Perl-identifier
+in the ASCII range it is the same as a string of Perl-identifier
 characters.  What is considered a
 word character depends on several factors, detailed below in L</Locale,
 EBCDIC, Unicode and UTF-8>.  If those factors indicate a Unicode
@@ -351,7 +351,7 @@ C<\e>,
 C<\f>,
 C<\n>,
 C<\N{I<NAME>}>,
-C<\N{U+I<wide hex char>}>,
+C<\N{U+I<hex char>}>,
 C<\r>,
 C<\t>,
 and
@@ -399,7 +399,7 @@ the class. For instance, C<[0-9]> matches any ASCII digit, and C<[a-m]>
 matches any lowercase letter from the first half of the ASCII alphabet.
 
 Note that the two characters on either side of the hyphen are not
-necessary both letters or both digits. Any character is possible,
+necessarily both letters or both digits. Any character is possible,
 although not advisable.  C<['-?]> contains a range of characters, but
 most people will not know which characters that will be. Furthermore,
 such ranges may lead to portability problems if the code has to run on
@@ -447,13 +447,13 @@ Examples:
 =head3 Backslash Sequences
 
 You can put any backslash sequence character class (with the exception of
-C<\N>) inside a bracketed character class, and it will act just
+C<\N> and C<\R>) inside a bracketed character class, and it will act just
 as if you put all the characters matched by the backslash sequence inside the
 character class. For instance, C<[a-f\d]> will match any decimal digit, or any
 of the lowercase letters between 'a' and 'f' inclusive.
 
 C<\N> within a bracketed character class must be of the forms C<\N{I<name>}>
-or C<\N{U+I<wide hex char>}>, and NOT be the form that matches non-newlines,
+or C<\N{U+I<hex char>}>, and NOT be the form that matches non-newlines,
 for the same reason that a dot C<.> inside a bracketed character class loses
 its special meaning: it matches nearly anything, which generally isn't what you
 want to happen.
@@ -528,7 +528,7 @@ The other counterpart, in the column labelled "Full-range Unicode", matches any
 appropriate characters in the full Unicode character set.  For example,
 C<\p{Alpha}> will match not just the ASCII alphabetic characters, but any
 character in the entire Unicode character set that is considered to be
-alphabetic.  The backslash sequence column is a (short) synonym for
+alphabetic.  The column labelled "backslash sequence" is a (short) synonym for
 the Full-range Unicode form.
 
 (Each of the counterparts has various synonyms as well.
@@ -548,12 +548,12 @@ counterparts.  Otherwise, they behave based on the rules of the locale or
 EBCDIC code page.
 
 It is proposed to change this behavior in a future release of Perl so that the
-the UTF8ness of the source string will be irrelevant to the behavior of the
+the UTF-8-ness of the source string will be irrelevant to the behavior of the
 POSIX character classes.  This means they will always behave in strict
 accordance with the official POSIX standard.  That is, if either locale or
 EBCDIC code page is present, they will behave in accordance with those; if
 absent, the classes will match only their ASCII-range counterparts.  If you
-disagree with this proposal, send email to C<perl5-porters@perl.org>.
+wish to comment on this proposal, send email to C<perl5-porters@perl.org>.
 
  [[:...:]]      ASCII-range          Full-range  backslash  Note
                  Unicode              Unicode     sequence
@@ -615,10 +615,10 @@ C<[-!"#%&'()*,./:;?@[\\\]_{}]>.  That is, it is missing C<[$+E<lt>=E<gt>^`|~]>.
 This is because Unicode splits what POSIX considers to be punctuation into two
 categories, Punctuation and Symbols.
 
-C<\p{PosixPunct>, and when the matching string is in UTF-8 format,
-C<[[:punct:]]>, match what they match in the ASCII range, plus what
-C<\p{Punct}> matches.  This is different
-than strictly matching according to C<\p{Punct}>.  Another way to say it is that
+C<\p{XPosixPunct}> and (in Unicode mode) C<[[:punct:]]>, match what
+C<\p{PosixPunct}> matches in the ASCII range, plus what C<\p{Punct}>
+matches.  This is different than strictly matching according to
+C<\p{Punct}>.  Another way to say it is that
 for a UTF-8 string, C<[[:punct:]]> matches all the characters that Unicode
 considers to be punctuation, plus all the ASCII-range characters that Unicode
 considers to be symbols.
@@ -650,7 +650,9 @@ Some examples:
                 \P{PerlSpace}   \P{XPerlSpace}    \S
  [[:^word:]]    \P{PerlWord}    \P{XPosixWord}    \W
 
-Again, the backslash sequence means Full-range Unicode.
+The backslash sequence can mean either ASCII- or Full-range Unicode,
+depending on various factors.  See L</Locale, EBCDIC, Unicode and UTF-8>
+below.
 
 =head4 [= =] and [. .]
 

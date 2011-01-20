@@ -1317,7 +1317,7 @@ time a match C</$pat/> is attempted.  (Perl has many other internal
 optimizations, but none would be triggered in the above example if
 we did not use qr() operator.)
 
-Options are:
+Options (specified by the following modifiers) are:
 
     m	Treat string as multiple lines.
     s	Treat string as single line. (Make . match a newline)

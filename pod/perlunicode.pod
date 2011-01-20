@@ -1394,13 +1394,13 @@ restricts certain constructs to match only in the ASCII range.  C<\w>
 will match only the 63 characters "[A-Za-z0-9_]"; C<\d>, only the 10
 digits 0-9; C<\s>, only the five characters "[ \f\n\r\t]"; and the
 C<"[[:posix:]]"> classes only the appropriate ASCII characters.  (See
-L<perlrebackslash>.)  This modifier is like the C<"/u"> modifier in that
+L<perlrecharclass>.)  This modifier is like the C<"/u"> modifier in that
 things like "KELVIN SIGN" match the letters "k" and "K"; and non-ASCII
 characters continue to have Unicode semantics.  This modifier is
 recommended for people who only incidentally use Unicode.  One can write
 C<\d> with confidence that it will only match ASCII characters, and
 should the need arise to match beyond ASCII, you can use C<\p{Digit}> or
-C<\p{Word}>.  (See L<perlrebackslash> for how to extend C<\s>, and the
+C<\p{Word}>.  (See L<perlrecharclass> for how to extend C<\s>, and the
 Posix classes beyond ASCII under this modifier.)  This modifier is
 automatically selected within the scope of C<use re '/a'>.
 
