@@ -643,9 +643,3 @@ The F<README> file for general stuff.
 The F<Artistic> and F<Copying> files for copyright information.
 
 =cut
-
-=for later
-
-Below, you'll find a cut-down version of the git log from 5.13.8 to 1b9043bb.
-
-=cut
