@@ -247,7 +247,6 @@ PERL_EXPORT_C void      PerlIOPending_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr,
 PERL_EXPORT_C IV        PerlIOPop_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab);
 
 /* Raw */
-PERL_EXPORT_C PerlIO *  PerlIORaw_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers, IV n, const char *mode, int fd, int imode, int perm, PerlIO *old, int narg, SV **args);
 PERL_EXPORT_C IV        PerlIORaw_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab);
 
 /* Stdio */
