@@ -592,8 +592,9 @@ This is still being investigated.
 
 =head1 Acknowledgements
 
-Perl 5.13.8 represents approximately one month of development since Perl 5.13.7
-and contains approximately 48000 lines of changes across 809 files from 35 authors and committers:
+Perl 5.13.9 represents approximately one month of development since
+Perl 5.13.8 and contains approximately 48000 lines of changes across
+809 files from 35 authors and committers:
 
 Abigail, Ævar Arnfjörð Bjarmason, brian d foy, Chris 'BinGOs' Williams,
 Craig A. Berry, David Golden, David Leadbeater, David Mitchell, Father
