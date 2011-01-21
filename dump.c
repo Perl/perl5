@@ -2342,7 +2342,6 @@ Perl_xmldump_all_perl(pTHX_ bool justperl)
     PerlIO_setlinebuf(PL_xmlfp);
     if (PL_main_root)
 	op_xmldump(PL_main_root);
-    xmldump_packsubs_perl(PL_defstash, justperl);
     if (PL_xmlfp != (PerlIO*)PerlIO_stdout())
 	PerlIO_close(PL_xmlfp);
     PL_xmlfp = 0;
