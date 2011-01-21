@@ -303,7 +303,6 @@ close MASTER;
     $name =~ s/\.p(m|od)$//;
     $name =~ s-.*?/lib/--;
     $name =~ s-/-::-g;
-    $name =~ s/(\w+)::\1/$1/;
     next if $done{$name}++;
 
     if ($name =~ /^[a-z]/) {
