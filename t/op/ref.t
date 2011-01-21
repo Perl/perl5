@@ -9,7 +9,7 @@ require 'test.pl';
 use strict qw(refs subs);
 use re ();
 
-plan(196);
+plan(209);
 
 # Test glob operations.
 
@@ -625,6 +625,26 @@ is( runperl(stderr => 1, prog => $hushed . 'for $a (3) {@b=sort {die} 4,5}'), "D
 
 # bug 57564
 is( runperl(stderr => 1, prog => 'my $i;for $i (1) { for $i (2) { } }'), "");
+
+
+# Test undefined hash references as arguments to %{} in boolean context
+# [perl #81750]
+{
+ no strict 'refs';
+ eval { my $foo; %$foo;             }; ok (!$@, '%$undef');
+ eval { my $foo; scalar %$foo;      }; ok (!$@, 'scalar %$undef');
+ eval { my $foo; !%$foo;            }; ok (!$@, '!%$undef');
+ eval { my $foo; if ( %$foo) {}     }; ok (!$@, 'if ( %$undef) {}');
+ eval { my $foo; if (!%$foo) {}     }; ok (!$@, 'if (!%$undef) {}');
+ eval { my $foo; unless ( %$foo) {} }; ok (!$@, 'unless ( %$undef) {}');
+ eval { my $foo; unless (!%$foo) {} }; ok (!$@, 'unless (!%$undef) {}');
+ eval { my $foo; 1 if %$foo;        }; ok (!$@, '1 if %$undef');
+ eval { my $foo; 1 if !%$foo;       }; ok (!$@, '1 if !%$undef');
+ eval { my $foo; 1 unless %$foo;    }; ok (!$@, '1 unless %$undef;');
+ eval { my $foo; 1 unless ! %$foo;  }; ok (!$@, '1 unless ! %$undef');
+ eval { my $foo;  %$foo ? 1 : 0;    }; ok (!$@, ' %$undef ? 1 : 0');
+ eval { my $foo; !%$foo ? 1 : 0;    }; ok (!$@, '!%$undef ? 1 : 0');
+}
 
 
 # Bit of a hack to make test.pl happy. There are 3 more tests after it leaves.

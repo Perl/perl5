@@ -22,6 +22,13 @@ exist, they are bugs and reports are welcome.
 
 =head1 Selected Bug Fixes
 
+When strict "refs" mode is off, C<%{...}> in rvalue context returns
+C<undef> if its argument is undefined.  An optimisation introduced in Perl
+5.12.0 to make C<keys %{...}> faster when used as a boolean did not take
+this into account, causing C<keys %{+undef}> (and C<keys %$foo> when
+C<$foo> is undefined) to be an error, which it should be so in strict
+mode only [perl #81750].
+
 C<lc>, C<uc>, C<lcfirst>, and C<ucfirst> no longer return untainted strings
 when the argument is tainted. This has been broken since perl 5.8.9
 [perl #87336].
