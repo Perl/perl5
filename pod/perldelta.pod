@@ -59,7 +59,7 @@ uses hexadecimal when escaping non-ASCII characters, instead of octal.
 
 =head1 Security
 
-=head2 Restrict \p{IsUserDefined} to In\w+ and In\w+
+=head2 Restrict \p{IsUserDefined} to In\w+ and Is\w+
 
 In L<perlunicode/"User-Defined Character Properties">, it says you can
 create custom properties by defining subroutines whose names begin with
