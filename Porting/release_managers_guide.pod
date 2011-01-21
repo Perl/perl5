@@ -948,13 +948,6 @@ the following files:
     win32/makefile.mk
     win32/pod.mak
 
-Then manually edit (F<vms/descrip_mms.template> to bump the version
-in the following entry:
-
-    [.pod]perl5101delta.pod : [.pod]perldelta.pod
-
-XXX this previous step needs to fixed to automate it in pod/buildtoc.
-
 Finally, commit:
 
     $ git commit -a -m 'update TOC for perlNNNdelta'

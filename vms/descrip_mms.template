@@ -435,9 +435,9 @@ pod32 = [.lib.pods]perluts.pod [.lib.pods]perlvar.pod [.lib.pods]perlvmesa.pod [
 pod33 = [.lib.pods]perlxs.pod [.lib.pods]perlxstut.pod
 pod = $(pod0) $(pod1) $(pod2) $(pod3) $(pod4) $(pod5) $(pod6) $(pod7) $(pod8) $(pod9) $(pod10) $(pod11) $(pod12) $(pod13) $(pod14) $(pod15) $(pod16) $(pod17) $(pod18) $(pod19) $(pod20) $(pod21) $(pod22) $(pod23) $(pod24) $(pod25) $(pod26) $(pod27) $(pod28) $(pod29) $(pod30) $(pod31) $(pod32) $(pod33)
 
-# Would be useful to automate the generation of this rule from pod/buildtoc
-# Plus its corresponding delete in the clean target.
-[.pod]perl5139delta.pod : [.pod]perldelta.pod
+PERLDELTA_CURRENT = [.pod]perl5139delta.pod
+
+$(PERLDELTA_CURRENT) : [.pod]perldelta.pod
 	Copy/NoConfirm/Log $(MMS$SOURCE) $(MMS$TARGET)
 
 [.pod]perlapi.pod : embed.fnc autodoc.pl $(MINIPERL_EXE)
@@ -449,7 +449,7 @@ pod = $(pod0) $(pod1) $(pod2) $(pod3) $(pod4) $(pod5) $(pod6) $(pod7) $(pod8) $(
 [.pod]perlintern.pod : embed.fnc autodoc.pl $(MINIPERL_EXE)
 	$(MINIPERL) autodoc.pl
 
-[.pod]perltoc.pod : [.pod]perl5136delta.pod [.pod]perlapi.pod [.pod]perlintern.pod  [.pod]perlmodlib.pod extra.pods $(PERL_EXE)
+[.pod]perltoc.pod : $(PERLDELTA_CURRENT) [.pod]perlapi.pod [.pod]perlintern.pod  [.pod]perlmodlib.pod extra.pods $(PERL_EXE)
 	@ define/user_mode $(DBG)PERLSHR SYS$DISK:[]$(DBG)perlshr$(E)
 	$(PERL) "-f" [.pod]buildtoc "-q" "--build-toc"
 
@@ -1888,7 +1888,7 @@ clean : tidy cleantest
 	- If F$Search("[.vms.ext...]*.C").nes."" Then Delete/NoConfirm/Log [.vms.ext...]*.C;*
 	- If F$Search("[.vms.ext...]*$(O)").nes."" Then Delete/NoConfirm/Log [.vms.ext...]*$(O);*
 	- If F$Search("[.pod]*.com").nes."" Then Delete/NoConfirm/Log [.pod]*.com;*
-	- If F$Search("[.pod]perl5139delta.pod").nes."" Then Delete/NoConfirm/Log [.pod]perl5139delta.pod;*
+	- If F$Search("$(PERLDELTA_CURRENT)").nes."" Then Delete/NoConfirm/Log $(PERLDELTA_CURRENT);*
 	- If F$Search("[.pod]perlapi.pod").nes."" Then Delete/NoConfirm/Log [.pod]perlapi.pod;*
 	- If F$Search("[.pod]perlintern.pod").nes."" Then Delete/NoConfirm/Log [.pod]perlintern.pod;*
 	- If F$Search("[.pod]perlmodlib.pod").nes."" Then Delete/NoConfirm/Log [.pod]perlmodlib.pod;*

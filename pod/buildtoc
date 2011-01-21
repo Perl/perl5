@@ -162,7 +162,7 @@ if (defined $delta_source) {
     die "$0: delta source defined but not target";
   }
 } elsif (defined $delta_target) {
-  die "$0: delta target defined but not target";
+  die "$0: delta target defined but not source";
 }
 
 close MASTER;
@@ -572,11 +572,6 @@ SNIP
    sort keys %Pods, keys %Readmepods;
 }
 
-sub generate_descrip_mms_3 {
-  map qq{\t- If F\$Search("[.pod]$_").nes."" Then Delete/NoConfirm/Log [.pod]$_;*},
-    sort keys %Generated, keys %Copies;
-}
-
 sub generate_nmake_1 {
   # XXX Fix this with File::Spec
   (map {sprintf "\tcopy ..\\README.%-8s ..\\pod\\perl$_.pod\n", $_}
@@ -682,6 +677,14 @@ sub do_vms {
 
   die "$0: $name contains NUL bytes" if $makefile =~ /\0/;
 
+# Looking for the macro defining the current perldelta:
+#PERLDELTA_CURRENT = [.pod]perl5139delta.pod
+
+  $makefile =~ s/\nPERLDELTA_CURRENT\s+=\s+\Q[.pod]perl\E\d+delta\.pod\n
+		    /\0/sx;
+  verify_contiguous($name, $makefile, 'current perldelta macro');
+  $makefile =~ s/\0+/join "\n", '', "PERLDELTA_CURRENT = [.pod]$delta_target", ''/se;
+
 # Looking for rules like this
 # [.lib.pods]perl.pod : [.pod]perl.pod
 #	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
@@ -693,12 +696,6 @@ sub do_vms {
 		    /\0/gsx;
   verify_contiguous($name, $makefile, 'copy rules');
   $makefile =~ s/\0+/join "\n", '', &generate_descrip_mms_2/se;
-
-# Looking for rules like this:
-#	- If F$Search("[.pod]perldelta.pod").nes."" Then Delete/NoConfirm/Log [.pod]perldelta.pod;*
-  $makefile =~ s!(?:\t- If F\$Search\("\[\.pod\]perl\d*[a-z]+\Q.pod").nes."" Then Delete/NoConfirm/Log [.pod]perl\E\d*[a-z]+\.pod;\*\n)+!\0!sg;
-  verify_contiguous($name, $makefile, 'delete rules');
-  $makefile =~ s/\0+/join "\n", &generate_descrip_mms_3, ''/se;
 
   $makefile;
 }
