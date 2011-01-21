@@ -437,13 +437,13 @@ sub podset {
 	    unhead2();
 	    output "=over 4\n\n" unless $inhead1;
 	    $inhead1 = 1;
-	    output $_; nl(); next;
+	    output "$_\n"; next;
 	}
 	if (s/^=head2 (.*)/=item $1/) {
 	    unitem();
 	    output "=over 4\n\n" unless $inhead2;
 	    $inhead2 = 1;
-	    output $_; nl(); next;
+	    output "$_\n"; next;
 	}
 	if (s/^=item ([^=].*)/$1/) {
 	    next if $pod eq 'perldiag';
@@ -487,10 +487,6 @@ sub unitem {
 	output "\n\n";
     }
     $initem = 0;
-}
-
-sub nl {
-    output "\n";
 }
 
 my $NEWLINE = 0;	# how many newlines have we seen recently
