@@ -4,7 +4,7 @@ use 5.006002;
 use strict;
 # use warnings;	# dont use warnings for older Perls
 
-our $VERSION = '1.99_03';
+our $VERSION = '1.99_04';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -2480,7 +2480,7 @@ Math::BigInt v1.70 or later:
 			NOTE: because of Perl numeric notation defaults,
 			the _num'ified obj may lose accuracy due to 
 			machine-dependent floating point size limitations
-                    
+
 	_add(obj,obj)	Simple addition of two objects
 	_mul(obj,obj)	Multiplication of two objects
 	_div(obj,obj)	Division of the 1st object by the 2nd
@@ -2518,17 +2518,17 @@ Math::BigInt v1.70 or later:
 	_from_hex(str)	return new object from a hexadecimal string
 	_from_bin(str)	return new object from a binary string
 	_from_oct(str)	return new object from an octal string
-	
+
 	_as_hex(str)	return string containing the value as
 			unsigned hex string, with the '0x' prepended.
 			Leading zeros must be stripped.
 	_as_bin(str)	Like as_hex, only as binary string containing only
 			zeros and ones. Leading zeros must be stripped and a
 			'0b' must be prepended.
-	
+
 	_rsft(obj,N,B)	shift object in base B by N 'digits' right
 	_lsft(obj,N,B)	shift object in base B by N 'digits' left
-	
+
 	_xor(obj1,obj2)	XOR (bit-wise) object 1 with object 2
 			Note: XOR, AND and OR pad with zeros if size mismatches
 	_and(obj1,obj2)	AND (bit-wise) object 1 with object 2
@@ -2562,7 +2562,7 @@ The following functions are REQUIRED for an api_version of 2 or greater:
 The following functions are optional, and can be defined if the underlying lib
 has a fast way to do them. If undefined, Math::BigInt will use pure Perl (hence
 slow) fallback routines to emulate these:
-	
+
 	_signed_or
 	_signed_and
 	_signed_xor
@@ -2599,7 +2599,7 @@ by this:
 This way you ensure that your library really works 100% within Math::BigInt.
 
 =head1 LICENSE
- 
+
 This program is free software; you may redistribute it and/or modify it under
 the same terms as Perl itself. 
 

@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 use 5.006002;
 
-$VERSION = '1.99_03';
+$VERSION = '1.99_04';
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(objectify bgcd blcm); 
@@ -3261,7 +3261,7 @@ Math::BigInt - Arbitrary size integer/float math package
   $x->bnot();		# two's complement (bit wise not)
   $x->binc();		# increment $x by 1
   $x->bdec();		# decrement $x by 1
-  
+
   $x->badd($y);		# addition (add $y to $x)
   $x->bsub($y);		# subtraction (subtract $y from $x)
   $x->bmul($y);		# multiplication (multiply $x by $y)
@@ -3280,7 +3280,7 @@ Math::BigInt - Arbitrary size integer/float math package
   $x->blsft($y,$n);	   # left shift by $y places in base $n
   $x->brsft($y,$n);	   # right shift by $y places in base $n
 			   # returns (quo,rem) or quo if in scalar context
-  
+
   $x->band($y);		   # bitwise and
   $x->bior($y);		   # bitwise inclusive or
   $x->bxor($y);		   # bitwise exclusive or
@@ -3295,7 +3295,7 @@ Math::BigInt - Arbitrary size integer/float math package
   $x->blog();		   # logarithm of $x to base e (Euler's number)
   $x->blog($base);	   # logarithm of $x to base $base (f.i. 2)
   $x->bexp();		   # calculate e ** $x where e is Euler's number
-  
+
   $x->round($A,$P,$mode);  # round to accuracy or precision using mode $mode
   $x->bround($n);	   # accuracy: preserve $n digits
   $x->bfround($n);	   # $n > 0: round $nth digits,
@@ -3325,7 +3325,7 @@ Math::BigInt - Arbitrary size integer/float math package
   $x->copy();		   # make a true copy of $x (unlike $y = $x;)
   $x->as_int();		   # return as BigInt (in BigInt: same as copy())
   $x->numify();		   # return as scalar (might overflow!)
-  
+
   # conversion to string (do not modify their argument)
   $x->bstr();		   # normalized string (e.g. '3')
   $x->bsstr();		   # norm. string in scientific notation (e.g. '3E0')
@@ -3381,7 +3381,7 @@ are accepted, too. Please note that octal numbers are not recognized
 by new(), so the following will print "123":
 
 	perl -MMath::BigInt -le 'print Math::BigInt->new("0123")'
-	
+
 To convert an octal number, use from_oct();
 
 	perl -MMath::BigInt -le 'print Math::BigInt->from_oct("0123")'
@@ -3390,8 +3390,8 @@ Currently, Math::BigInt::new() defaults to 0, while Math::BigInt::new('')
 results in 'NaN'. This might change in the future, so use always the following
 explicit forms to get a zero or NaN:
 
-	$zero = Math::BigInt->bzero(); 
-	$nan = Math::BigInt->bnan(); 
+	$zero = Math::BigInt->bzero();
+	$nan = Math::BigInt->bnan();
 
 C<bnorm()> on a BigInt object is now effectively a no-op, since the numbers 
 are always stored in normalized form. If passed a string, creates a BigInt 
@@ -3460,7 +3460,7 @@ The following values can be set by passing C<config()> a reference to a hash:
         upgrade downgrade precision accuracy round_mode div_scale
 
 Example:
-	
+
 	$new_cfg = Math::BigInt->config( { trap_inf => 1, precision => 5 } );
 
 =head2 accuracy()
@@ -3477,7 +3477,7 @@ results have. If you set a global accuracy, then this also applies to new()!
 
 Warning! The accuracy I<sticks>, e.g. once you created a number under the
 influence of C<< CLASS->accuracy($A) >>, all results from math operations with
-that number will also be rounded. 
+that number will also be rounded.
 
 In most cases, you should probably round the results explicitly using one of
 L<round()>, L<bround()> or L<bfround()> or by passing the desired accuracy
@@ -3523,7 +3523,7 @@ Math::BigInt.
 				# This also applies to new()!
 	CLASS->precision(-5);	# ditto
 
-	$P = CLASS->precision();	# read out global precision 
+	$P = CLASS->precision();	# read out global precision
 	$P = $x->precision();		# read out precision that affects $x
 
 Note: You probably want to use L<accuracy()> instead. With L<accuracy> you
@@ -3561,7 +3561,7 @@ Math::BigInt.
 
 =head2 brsft()
 
-	$x->brsft($y,$n);		
+	$x->brsft($y,$n);
 
 Shifts $x right by $y in base $n. Default is base 2, used are usually 10 and
 2, but others work, too.
@@ -3648,7 +3648,6 @@ If used on an object, it will set it to one:
 
 =head2 is_one()/is_zero()/is_nan()/is_inf()
 
-  
 	$x->is_zero();			# true if arg is +0
 	$x->is_nan();			# true if arg is NaN
 	$x->is_one();			# true if arg is +1
@@ -3663,7 +3662,7 @@ like:
 	if ($x == 0)
 
 =head2 is_pos()/is_neg()/is_positive()/is_negative()
-	
+
 	$x->is_pos();			# true if > 0
 	$x->is_neg();			# true if < 0
 
@@ -3743,7 +3742,7 @@ numbers.
 
 =head2 bnot()
 
-	$x->bnot();			
+	$x->bnot();
 
 Two's complement (bitwise not). This is equivalent to
 
@@ -3971,7 +3970,7 @@ Calculates the N'th root of C<$x>.
 =head2 round()
 
 	$x->round($A,$P,$round_mode);
-	
+
 Round $x to accuracy C<$A> or precision C<$P> using the round mode
 C<$round_mode>.
 
@@ -3998,7 +3997,7 @@ Examples:
 
 =head2 bfloor()
 
-	$x->bfloor();			
+	$x->bfloor();
 
 Set $x to the integer less or equal than $x. This is a no-op in BigInt, but
 does change $x in BigFloat.
@@ -4049,14 +4048,14 @@ Return the signed mantissa of $x as BigInt.
 
 =head2 as_int()/as_number()
 
-	$x->as_int();	
+	$x->as_int();
 
 Returns $x as a BigInt (truncated towards zero). In BigInt this is the same as
-C<copy()>. 
+C<copy()>.
 
 C<as_number()> is an alias to this method. C<as_number> was introduced in
 v1.22, while C<as_int()> was only introduced in v1.68.
-  
+
 =head2 bstr()
 
 	$x->bstr();
@@ -4148,7 +4147,7 @@ was). It could also have p < 0, when the digits after the decimal point
 are zero.
 
 The string output (of floating point numbers) will be padded with zeros:
- 
+
 	Initial value   P       A	Result          String
 	------------------------------------------------------------
 	1234.01         -3      	1000            1000
@@ -4343,7 +4342,7 @@ This is how it works now:
 
 	Math::BigInt->accuracy(2);
 	Math::BigInt::SomeSubClass->accuracy(3);
-	$x = Math::BigInt::SomeSubClass->new(1234);	
+	$x = Math::BigInt::SomeSubClass->new(1234);
 
     $x is now 1230, and not 1200. A subclass might choose to implement
     this otherwise, e.g. falling back to the parent's A and P.
@@ -4405,7 +4404,7 @@ This is how it works now:
       and P to -2, globally.
 
  ?Maybe an extra option that forbids local A & P settings would be in order,
- ?so that intermediate rounding does not 'poison' further math? 
+ ?so that intermediate rounding does not 'poison' further math?
 
 =item Overriding globals
 
@@ -4518,7 +4517,7 @@ have real numbers as results, the result is NaN.
 =item exp(), cos(), sin(), atan2()
 
 These all might have problems handling infinity right.
- 
+
 =back
 
 =head1 INTERNALS
@@ -4610,7 +4609,7 @@ C<$e> and C<$m> will stay always the same, though their real values might
 change.
 
 =head1 EXAMPLES
- 
+
   use Math::BigInt;
 
   sub bint { Math::BigInt->new(shift); }
@@ -4897,7 +4896,7 @@ So, the following examples will now work all as expected:
 	print "$x eq 9" if $x eq 3*3;
 
 Additionally, the following still works:
-	
+
 	print "$x == 9" if $x == $y;
 	print "$x == 9" if $x == 9;
 	print "$x == 9" if $x == 3*3;
@@ -4962,8 +4961,8 @@ The following will probably not do what you expect:
 
 It prints both the number of digits in the number and in the fraction part
 since print calls C<length()> in list context. Use something like: 
-	
-	print scalar $c->length(),"\n";		# prints 3 
+
+	print scalar $c->length(),"\n";		# prints 3
 
 =item bdiv
 
@@ -4974,7 +4973,7 @@ The following will probably not do what you expect:
 It prints both quotient and remainder since print calls C<bdiv()> in list
 context. Also, C<bdiv()> will modify $c, so be careful. You probably want
 to use
-	
+
 	print $c / 10000,"\n";
 	print scalar $c->bdiv(10000),"\n";  # or if you want to modify $c
 
@@ -5038,8 +5037,8 @@ clearly the reasoning:
       -inf/-inf =    1,    0         1 * -inf +    0 = -inf
        inf/-inf =   -1,    0        -1 * -inf +    0 =  inf
       -inf/ inf =   -1,    0         1 * -inf +    0 = -inf
-	 8/   0 =  inf,    8       inf *    0 +    8 =    8 
-       inf/   0 =  inf,  inf       inf *    0 +  inf =  inf 
+	 8/   0 =  inf,    8       inf *    0 +    8 =    8
+       inf/   0 =  inf,  inf       inf *    0 +  inf =  inf
          0/   0 =  NaN
 
 These cases below violate the "remainder has the sign of the second of the two
@@ -5047,8 +5046,8 @@ arguments", since they wouldn't match up otherwise.
 
 	A /  B  =   C,     R so that C *    B +    R =    A
      ========================================================
-      -inf/   0 = -inf, -inf      -inf *    0 +  inf = -inf 
-	-8/   0 = -inf,   -8      -inf *    0 +    8 = -8 
+      -inf/   0 = -inf, -inf      -inf *    0 +  inf = -inf
+	-8/   0 = -inf,   -8      -inf *    0 +    8 = -8
 
 =item Modifying and =
 
@@ -5087,7 +5086,7 @@ modify $x, the last one won't:
 	print bpow($x,$i),"\n"; 	# modify $x
 	print $x->bpow($i),"\n"; 	# ditto
 	print $x **= $i,"\n";		# the same
-	print $x ** $i,"\n";		# leave $x alone 
+	print $x ** $i,"\n";		# leave $x alone
 
 The form C<$x **= $y> is faster than C<$x = $x ** $y;>, though.
 
@@ -5137,7 +5136,7 @@ the result should be a Math::BigFloat or the second operant is one.
 To get a Math::BigFloat you either need to call the operation manually,
 make sure the operands are already of the proper type or casted to that type
 via Math::BigFloat->new():
-	
+
 	$float = Math::BigFloat->new($mbi2) / $mbi;	# = 2.5
 
 Beware of simple "casting" the entire expression, this would only convert
@@ -5154,7 +5153,7 @@ If in doubt, break the expression into simpler terms, or cast all operands
 to the desired resulting type.
 
 Scalar values are a bit different, since:
-	
+
 	$float = 2 + $mbf;
 	$float = $mbf + 2;
 

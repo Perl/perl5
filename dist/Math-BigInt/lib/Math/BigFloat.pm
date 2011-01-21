@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _a	: accuracy
 #   _p	: precision
 
-$VERSION = '1.99_03';
+$VERSION = '1.99_04';
 require 5.006002;
 
 require Exporter;
@@ -3864,7 +3864,7 @@ Math::BigFloat - Arbitrary size floating point math package
   # The following all modify their first argument. If you want to preserve
   # $x, use $z = $x->copy()->bXXX($y); See under L<CAVEATS> for why this is
   # necessary when mixing $a = $b assignments with non-overloaded math.
- 
+
   # set 
   $x->bzero();			# set $i to 0
   $x->bnan();			# set $i to NaN
@@ -3879,7 +3879,7 @@ Math::BigFloat - Arbitrary size floating point math package
   $x->bnot();			# two's complement (bit wise not)
   $x->binc();			# increment x by 1
   $x->bdec();			# decrement x by 1
-  
+
   $x->badd($y);			# addition (add $y to $x)
   $x->bsub($y);			# subtraction (subtract $y from $x)
   $x->bmul($y);			# multiplication (multiply $x by $y)
@@ -3892,20 +3892,20 @@ Math::BigFloat - Arbitrary size floating point math package
   $x->blsft($y, $n);		# left shift by $y places in base $n
   $x->brsft($y, $n);		# right shift by $y places in base $n
 				# returns (quo,rem) or quo if in scalar context
-  
+
   $x->blog();			# logarithm of $x to base e (Euler's number)
   $x->blog($base);		# logarithm of $x to base $base (f.i. 2)
   $x->bexp();			# calculate e ** $x where e is Euler's number
-  
+
   $x->band($y);			# bit-wise and
   $x->bior($y);			# bit-wise inclusive or
   $x->bxor($y);			# bit-wise exclusive or
   $x->bnot();			# bit-wise not (two's complement)
- 
+
   $x->bsqrt();			# calculate square-root
   $x->broot($y);		# $y'th root of $x (e.g. $y == 3 => cubic root)
   $x->bfac();			# factorial of $x (1*2*3*4*..$x)
- 
+
   $x->bround($N); 		# accuracy: preserve $N digits
   $x->bfround($N);		# precision: round to the $Nth digit
 
@@ -3916,7 +3916,7 @@ Math::BigFloat - Arbitrary size floating point math package
 
   bgcd(@values);		# greatest common divisor
   blcm(@values);		# lowest common multiplicator
-  
+
   $x->bstr();			# return string
   $x->bsstr();			# return string in scientific notation
 
@@ -3926,7 +3926,7 @@ Math::BigFloat - Arbitrary size floating point math package
   $x->parts();			# return (mantissa,exponent) as BigInt
 
   $x->length();			# number of digits (w/o sign and '.')
-  ($l,$f) = $x->length();	# number of digits, and length of fraction	
+  ($l,$f) = $x->length();	# number of digits, and length of fraction
 
   $x->precision();		# return P of $x (or global, if P of $x undef)
   $x->precision($n);		# set P of $x to $n
@@ -4071,14 +4071,14 @@ It is less confusing to either calculate the result fully, and afterwards
 round it explicitly, or use the additional parameters to the math
 functions like so:
 
-	use Math::BigFloat;	
+	use Math::BigFloat;
 	$x = Math::BigFloat->new(2);
 	$y = $x->copy()->bdiv(3);
 	print $y->bround(5),"\n";		# will give 0.66667
 
 	or
 
-	use Math::BigFloat;	
+	use Math::BigFloat;
 	$x = Math::BigFloat->new(2);
 	$y = $x->copy()->bdiv(3,5);		# will give 0.66667
 	print "$y\n";
@@ -4252,7 +4252,7 @@ This method was added in v1.87 of Math::BigInt (June 2007).
 
 =head2 bmuladd()
 
-	$x->bmuladd($y,$z);		
+	$x->bmuladd($y,$z);
 
 Multiply $x by $y, and then add $z to the result.
 
@@ -4382,7 +4382,7 @@ The following will probably not print what you expect:
 
 It prints both quotient and remainder since print works in list context. Also,
 bdiv() will modify $c, so be careful. You probably want to use
-	
+
 	print $c / 123.456,"\n";
 	print scalar $c->bdiv(123.456),"\n";  # or if you want to modify $c
 
