@@ -1,3 +1,15 @@
+2011-01-20  David Golden <dagolden@cpan.org>
+
+	* release 1.94_64
+
+	* remove 'use_file_homedir' config option and fix #62986 using
+	a more robust method. Original config directories will be found
+	even if File::HomeDir is installed
+
+	* streamline configuration intro text
+
+	* add missing documentation for 'atexit' and local::lib bootstrap
+
 2011-01-16  Andreas J. Koenig  <andk@cpan.org>
 
 	* release 1.94_63

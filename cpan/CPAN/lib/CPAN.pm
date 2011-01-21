@@ -2,7 +2,7 @@
 # vim: ts=4 sts=4 sw=4:
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.94_63';
+$CPAN::VERSION = '1.94_64';
 $CPAN::VERSION =~ s/_//;
 
 # we need to run chdir all over and we would get at wrong libraries
@@ -513,27 +513,6 @@ sub _flock {
     } else {
         return 1;
     }
-}
-
-sub _use_file_homedir () {
-    my $use_file_homedir = $CPAN::Config->{use_file_homedir};
-    unless (defined $use_file_homedir) {
-        if ($^O =~ /^(MSWin32|darwin)$/) {
-            $use_file_homedir = 1;
-        } else {
-            $use_file_homedir = 0;
-        }
-    }
-    if ($use_file_homedir
-        and not $CPAN::META->has_usable("File::HomeDir")) {
-        my $v = $File::HomeDir::VERSION;
-        if (CPAN::Version->vgt($v,0)) {
-            $CPAN::Frontend->mydie("Version of File::HomeDir ($v) is insufficient. Please upgrade or try 'o conf init use_file_homedir'");
-        } else {
-            $CPAN::Frontend->mydie("File::HomeDir not installed. Please install it or try 'o conf init use_file_homedir'");
-        }
-    }
-    return $use_file_homedir;
 }
 
 sub _yaml_module () {
@@ -1061,8 +1040,8 @@ sub has_usable {
                            ],
                'File::HomeDir' => [
                                    sub {require File::HomeDir;
-                                        unless (CPAN::Version->vge(File::HomeDir::->VERSION, 0.65)) {
-                                            for ("Will not use File::HomeDir, need 0.65\n") {
+                                        unless (CPAN::Version->vge(File::HomeDir::->VERSION, 0.52)) {
+                                            for ("Will not use File::HomeDir, need 0.52\n") {
                                                 $CPAN::Frontend->mywarn($_);
                                                 die $_;
                                             }
@@ -2071,8 +2050,6 @@ currently defined:
                      CPAN::Reporter history)
   unzip              location of external program unzip
   urllist            arrayref to nearby CPAN sites (or equivalent locations)
-  use_file_homedir   use File::HomeDir to determine home directory and storage
-                     locations
   use_sqlite         use CPAN::SQLite for metadata storage (fast and lean)
   username           your username if you CPAN server wants one
   version_timeout    stops version parsing after this many seconds.
@@ -3555,55 +3532,10 @@ so that STDOUT is captured in a file for later inspection.
 
 I am not root, how can I install a module in a personal directory?
 
-First of all, you will want to use your own configuration, not the one
-that your root user installed. If you do not have permission to write
-in the cpan directory that root has configured, you will be asked if
-you want to create your own config. Answering "yes" will bring you into
-CPAN's configuration stage, using the system config for all defaults except
-things that have to do with CPAN's work directory, saving your choices to
-your MyConfig.pm file.
-
-You can also manually initiate this process with the following command:
-
-    % perl -MCPAN -e 'mkmyconfig'
-
-or by running
-
-    mkmyconfig
-
-from the CPAN shell.
-
-You will most probably also want to configure something like this:
-
-  o conf makepl_arg "LIB=~/myperl/lib \
-                    INSTALLMAN1DIR=~/myperl/man/man1 \
-                    INSTALLMAN3DIR=~/myperl/man/man3 \
-                    INSTALLSCRIPT=~/myperl/bin \
-                    INSTALLBIN=~/myperl/bin"
-
-and then the equivalent command for Module::Build, which is
-
-  o conf mbuildpl_arg "--lib=~/myperl/lib \
-                    --installman1dir=~/myperl/man/man1 \
-                    --installman3dir=~/myperl/man/man3 \
-                    --installscript=~/myperl/bin \
-                    --installbin=~/myperl/bin"
-
-You can make this setting permanent like all C<o conf> settings with
-C<o conf commit> or by setting C<auto_commit> beforehand.
-
-You will have to add ~/myperl/man to the MANPATH environment variable
-and also tell your perl programs to look into ~/myperl/lib, e.g. by
-including
-
-  use lib "$ENV{HOME}/myperl/lib";
-
-or setting the PERL5LIB environment variable.
-
-While we're speaking about $ENV{HOME}, it might be worth mentioning,
-that for Windows and Darwin (and when use_file_homedir is turned on)
-we use the File::HomeDir module that provides an equivalent to the
-concept of the home directory on Unix.
+As of CPAN 1.9463, if you do not have permission to write the default perl
+library directories, CPAN's configuration process will ask you whether
+you want to bootstrap <local::lib>, which makes keeping a personal
+perl library directory easy.
 
 Another thing you should bear in mind is that the UNINST parameter can
 be dangerous when you are installing into a private area because you
@@ -3775,9 +3707,10 @@ Speaking of the build directory. Do I have to clean it up myself?
 
 You have the choice to set the config variable C<scan_cache> to
 C<never>. Then you must clean it up yourself. The other possible
-value, C<atstart> only cleans up the build directory when you start
-the CPAN shell. If you never start up the CPAN shell, you probably
-also have to clean up the build directory yourself.
+values, C<atstart> and C<atexit> clean up the build directory when you
+start or exit the CPAN shell, respectively. If you never start up the
+CPAN shell, you probably also have to clean up the build directory
+yourself.
 
 =back
 

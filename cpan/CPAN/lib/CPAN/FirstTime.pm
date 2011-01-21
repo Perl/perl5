@@ -10,7 +10,7 @@ use File::Path ();
 use File::Spec ();
 use CPAN::Mirrors ();
 use vars qw($VERSION $auto_config);
-$VERSION = "5.5301";
+$VERSION = "5.5302";
 
 =head1 NAME
 
@@ -538,17 +538,6 @@ regardless of the history using "force".
 
 Do you want to rely on the test report history (yes/no)?
 
-=item use_file_homedir
-
-Windows and Darwin have no tradition of providing a home directory for
-their users, so it has been requested to support the use of
-File::HomeDir. But after so many years of using File::HomeDir, this
-module started to bother people because it didn't fulfil their
-expectations. By setting this variable you can choose whether you want
-to let File::HomeDir decide about your storage locations.
-
-Use File::HomeDir to determine home directory and storage locations?
-
 =item use_sqlite
 
 CPAN::SQLite is a layer between the index files that are downloaded
@@ -602,21 +591,12 @@ use vars qw( %prompts );
 
     my @prompts = (
 
-manual_config => qq[
-CPAN is the world-wide archive of perl resources. It consists of about
-300 sites that all replicate the same contents around the globe. Many
-countries have at least one CPAN site already. The resources found on
-CPAN are easily accessible with the CPAN.pm module. If you want to use
-CPAN.pm, lots of things have to be configured. Fortunately, most of
-them can be determined automatically. If you prefer the automatic
-configuration, answer 'yes' below.
+auto_config => qq{
+CPAN.pm requires configuration, but most of it can be done automatically.
+If you answer 'no' below, you will enter an interactive dialog for each
+configuration option instead.
 
-If you prefer to enter a dialog instead, you can answer 'no' to this
-question and I'll let you configure in small steps one thing after the
-other. (Note: you can revisit this dialog anytime later by typing 'o
-conf init' at the cpan prompt.)
-
-],
+Would you like to configure as much as possible automatically?},
 
 auto_pick => qq{
 Would you like me to automatically choose some CPAN mirror
@@ -797,29 +777,17 @@ sub init {
     #= Files, directories
     #
 
-    unless ($matcher) {
-        $CPAN::Frontend->myprint($prompts{manual_config});
-    }
-
-    my $manual_conf;
-
     local *_real_prompt;
     if ( $args{autoconfig} ) {
-        $manual_conf = "no";
+        $auto_config = 1;
     } elsif ($matcher) {
-        $manual_conf = "yes";
-    } else {
-        my $_conf = prompt("Would you like me to configure as much as possible ".
-                           "automatically?", "yes");
-        $manual_conf = ($_conf and $_conf =~ /^y/i) ? "no" : "yes";
-    }
-    CPAN->debug("manual_conf[$manual_conf]") if $CPAN::DEBUG;
-    $auto_config = 0;
-    {
-        if ($manual_conf =~ /^y/i) {
             $auto_config = 0;
         } else {
-            $auto_config = 1;
+        my $_conf = prompt($prompts{auto_config}, "yes");
+        $auto_config = ($_conf and $_conf =~ /^y/i) ? 1 : 0;
+    }
+    CPAN->debug("auto_config[$auto_config]") if $CPAN::DEBUG;
+    if ( $auto_config ) {
             local $^W = 0;
             # prototype should match that of &MakeMaker::prompt
             my $current_second = time;
@@ -828,7 +796,6 @@ sub init {
             # silent prompting -- just quietly use default
             *_real_prompt = sub { return $_[1] };
         }
-    }
 
     #
     # bootstrap local::lib or sudo
@@ -910,13 +877,12 @@ sub init {
     if (!$matcher or 'test_report' =~ /$matcher/) {
         my_yn_prompt(test_report => 0, $matcher);
         if (
+            $matcher &&
             $CPAN::Config->{test_report} &&
             $CPAN::META->has_inst("CPAN::Reporter") &&
             CPAN::Reporter->can('configure')
            ) {
-            local *_real_prompt;
-            *_real_prompt = \&CPAN::Shell::colorable_makemaker_prompt;
-            my $_conf = prompt("Would you like me configure CPAN::Reporter now?", $auto_config ? "no" : "yes");
+            my $_conf = prompt("Would you like me configure CPAN::Reporter now?", "yes");
             if ($_conf =~ /^y/i) {
               $CPAN::Frontend->myprint("\nProceeding to configure CPAN::Reporter.\n");
               CPAN::Reporter::configure();
@@ -1224,7 +1190,6 @@ sub init {
         or 'show_unparsable_versions' =~ /$matcher/
         or 'show_zero_versions' =~ /$matcher/
        ) {
-        $CPAN::Frontend->myprint($prompts{show_unparsable_or_zero_versions_intro});
         my_yn_prompt(show_unparsable_versions => 0, $matcher);
         my_yn_prompt(show_zero_versions => 0, $matcher);
     }
@@ -1276,11 +1241,6 @@ sub init {
         $auto_config = 0; # reset
     }
 
-    if (!$matcher || "use_file_homedir" =~ $matcher) {
-        my $use_file_homedir = CPAN::_use_file_homedir();
-        my_yn_prompt("use_file_homedir" => $use_file_homedir, $matcher);
-    }
-
     # bootstrap local::lib now if requested
     if ( $CPAN::Config->{install_help} eq 'local::lib' ) {
         if ( ! @{ $CPAN::Config->{urllist} } ) {
@@ -1289,10 +1249,10 @@ sub init {
             );
           }
           else {
-            $CPAN::Frontend->myprint("\nAttempting to boostrap local::lib...\n");
+            $CPAN::Frontend->myprint("\nAttempting to bootstrap local::lib...\n");
             $CPAN::Frontend->myprint("\nWriting $configpm for bootstrap...\n");
             delete $CPAN::Config->{install_help}; # temporary only
-            CPAN::HandleConfig->commit($configpm);
+            CPAN::HandleConfig->commit;
             my $dist;
             if ( $dist = CPAN::Shell->expand('Module', 'local::lib')->distribution ) {
                 # this is a hack to force bootstrapping
@@ -1324,8 +1284,15 @@ sub init {
         $CPAN::Frontend->myprint("Please remember to call 'o conf commit' to ".
                                  "make the config permanent!\n");
     } else {
-        CPAN::HandleConfig->commit($configpm);
+        CPAN::HandleConfig->commit;
     }
+
+    if (! $matcher) {
+        $CPAN::Frontend->myprint(
+            "\nYou can re-run configuration any time with 'o conf init' in the CPAN shell\n"
+        );
+    }
+
 }
 
 sub _local_lib_config {
@@ -1407,7 +1374,7 @@ sub _local_lib_path {
     my $local_lib_home;
     sub _local_lib_home {
         $local_lib_home ||= File::Spec->rel2abs( do {
-            if (CPAN::_use_file_homedir()) {
+            if ($CPAN::META->has_usable("File::HomeDir") && File::HomeDir->VERSION >= 0.65) {
                 File::HomeDir->my_home;
             } elsif (defined $ENV{HOME}) {
                 $ENV{HOME};
@@ -1434,8 +1401,8 @@ sub _do_pick_mirrors {
     else {
         _print_urllist('Current') if @old_list;
         my $msg = scalar @old_list
-            ? "Would you like to edit the urllist or pick new mirrors from a list?"
-            : "Would you like to pick from the CPAN mirror list?" ;
+            ? "\nWould you like to edit the urllist or pick new mirrors from a list?"
+            : "\nWould you like to pick from the CPAN mirror list?" ;
         my $_conf = prompt($msg, "yes");
         if ( $_conf =~ /^y/i ) {
             conf_sites();
@@ -1567,17 +1534,14 @@ HERE
 sub init_cpan_home {
     my($matcher) = @_;
     if (!$matcher or 'cpan_home' =~ /$matcher/) {
-        my $cpan_home = $CPAN::Config->{cpan_home}
-            || File::Spec->catdir(CPAN::HandleConfig::home(), ".cpan");
-
+        my $cpan_home =
+            $CPAN::Config->{cpan_home} || CPAN::HandleConfig::cpan_home();
         if (-d $cpan_home) {
-            $CPAN::Frontend->myprint(qq{
-
-I see you already have a  directory
-    $cpan_home
-Shall we use it as the general CPAN build and cache directory?
-
-}) unless $auto_config;
+            $CPAN::Frontend->myprint(
+                "\nI see you already have a directory\n" .
+                "\n$cpan_home\n" .
+                "Shall we use it as the general CPAN build and cache directory?\n\n"
+            ) unless $auto_config;
         } else {
             # no cpan-home, must prompt and get one
             $CPAN::Frontend->myprint($prompts{cpan_home_where}) unless $auto_config;
@@ -1984,7 +1948,6 @@ sub bring_your_own {
     my($ans,@urls);
     my $eacnt = 0; # empty answers
     $CPAN::Frontend->myprint(<<'HERE');
-
 Now you can enter your own CPAN URLs by hand. A local CPAN mirror can be
 listed using a 'file:' URL like 'file:///path/to/cpan/'
 
@@ -2038,7 +2001,6 @@ sub _print_urllist {
     for ( @{$CPAN::Config->{urllist} || []} ) { 
       $CPAN::Frontend->myprint("  $_\n") 
     };
-    $CPAN::Frontend->myprint("\n");
 }
 
 sub _can_write_to_libdirs {
@@ -2073,7 +2035,7 @@ sub prompt ($;$) {
     my $ans = _real_prompt(@_);
 
     _strip_spaces($ans);
-    $CPAN::Frontend->myprint("\n");
+    $CPAN::Frontend->myprint("\n") unless $auto_config;
 
     return $ans;
 }
