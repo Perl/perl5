@@ -276,8 +276,8 @@ set.  For example, you stick 10,000 things in a hash, but evaluating
 %HASH in scalar context reveals C<"1/16">, which means only one out
 of sixteen buckets has been touched, and presumably contains all
 10,000 of your items.  This isn't supposed to happen.  If a tied hash
-is evaluated in scalar context, a fatal error will result, since this
-bucket usage information is currently not available for tied hashes.
+is evaluated in scalar context, the C<SCALAR> method is called (with a
+fallback to C<FIRSTKEY>).
 X<hash, scalar context> X<hash, bucket> X<bucket>
 
 You can preallocate space for a hash by assigning to the keys() function.
