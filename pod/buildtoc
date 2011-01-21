@@ -432,26 +432,23 @@ sub podset {
 	    s/ \(\$Revision: \d+ \$\)//g;
 	    if ( /^\s*\Q$pod\E\b/ ) {
 		s/$pod\.pm/$pod/;       # '.pm' in NAME !?
-		$OUT .= $_;
 	    } else {
 		s/^/$pod, /;
-		$OUT .= $_;
 	    }
-	    next;
 	}
-	if (s/^=head1 (.*)/=item $1/) {
+	elsif (s/^=head1 (.*)/=item $1/) {
 	    unhead2();
 	    $OUT .= "=over 4\n\n" unless $inhead1;
 	    $inhead1 = 1;
-	    $OUT .= "$_\n"; next;
+	    $_ .= "\n";
 	}
-	if (s/^=head2 (.*)/=item $1/) {
+	elsif (s/^=head2 (.*)/=item $1/) {
 	    unitem();
 	    $OUT .= "=over 4\n\n" unless $inhead2;
 	    $inhead2 = 1;
-	    $OUT .= "$_\n"; next;
+	    $_ .= "\n";
 	}
-	if (s/^=item ([^=].*)/$1/) {
+	elsif (s/^=item ([^=].*)/$1/) {
 	    next if $pod eq 'perldiag';
 	    s/^\s*\*\s*$// && next;
 	    s/^\s*\*\s*//;
@@ -463,12 +460,12 @@ sub podset {
 	    $initem = 1;
 	    s/\.$//;
 	    s/^-X\b/-I<X>/;
-	    $OUT .= $_; next;
 	}
-	if (s/^=cut\s*\n//) {
-	    unhead1();
+	else {
+	    unhead1() if /^=cut\s*\n/;
 	    next;
 	}
+	$OUT .= $_;
     }
 }
 
