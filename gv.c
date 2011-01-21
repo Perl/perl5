@@ -298,7 +298,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     SvIOK_off(gv);
     isGV_with_GP_on(gv);
 
-    GvGP(gv) = Perl_newGP(aTHX_ gv);
+    GvGP_set(gv, Perl_newGP(aTHX_ gv));
     GvSTASH(gv) = stash;
     if (stash)
 	Perl_sv_add_backref(aTHX_ MUTABLE_SV(stash), MUTABLE_SV(gv));
@@ -319,7 +319,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 	    cv = newCONSTSUB(stash, (name0 ? name0 : name), has_constant);
 	    /* In case op.c:S_process_special_blocks stole it: */
 	    if (!GvCV(gv))
-		GvCV(gv) = (CV *)SvREFCNT_inc_simple_NN(cv);
+		GvCV_set(gv, (CV *)SvREFCNT_inc_simple_NN(cv));
 	    assert(GvCV(gv) == cv); /* newCONSTSUB should have set this */
 	    if (name0)
 		Safefree(name0);
@@ -331,7 +331,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 	} else {
 	    (void) start_subparse(0,0);	/* Create empty CV in compcv. */
 	    cv = PL_compcv;
-	    GvCV(gv) = cv;
+	    GvCV_set(gv,cv);
 	}
 	LEAVE;
 
@@ -456,7 +456,8 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
             else {
                 /* stale cache entry, junk it and move on */
 	        SvREFCNT_dec(cand_cv);
-	        GvCV(topgv) = cand_cv = NULL;
+	        GvCV_set(topgv, NULL);
+		cand_cv = NULL;
 	        GvCVGEN(topgv) = 0;
             }
         }
@@ -506,7 +507,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
             if (topgv && (GvREFCNT(topgv) == 1) && (CvROOT(cand_cv) || CvXSUB(cand_cv))) {
                   if ((old_cv = GvCV(topgv))) SvREFCNT_dec(old_cv);
                   SvREFCNT_inc_simple_void_NN(cand_cv);
-                  GvCV(topgv) = cand_cv;
+                  GvCV_set(topgv, cand_cv);
                   GvCVGEN(topgv) = topgen_cmp;
             }
 	    return candidate;
@@ -521,7 +522,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
             if (topgv && (GvREFCNT(topgv) == 1) && (CvROOT(cand_cv) || CvXSUB(cand_cv))) {
                   if ((old_cv = GvCV(topgv))) SvREFCNT_dec(old_cv);
                   SvREFCNT_inc_simple_void_NN(cand_cv);
-                  GvCV(topgv) = cand_cv;
+                  GvCV_set(topgv, cand_cv);
                   GvCVGEN(topgv) = topgen_cmp;
             }
             return candidate;
@@ -1705,7 +1706,7 @@ Perl_gp_free(pTHX_ GV *gv)
     if (--gp->gp_refcnt > 0) {
 	if (gp->gp_egv == gv)
 	    gp->gp_egv = 0;
-	GvGP(gv) = 0;
+	GvGP_set(gv, NULL);
         return;
     }
 
@@ -1727,7 +1728,7 @@ Perl_gp_free(pTHX_ GV *gv)
     SvREFCNT_dec(gp->gp_form);
 
     Safefree(gp);
-    GvGP(gv) = 0;
+    GvGP_set(gv, NULL);
 }
 
 int

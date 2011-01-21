@@ -522,7 +522,7 @@ do_clean_named_objs(pTHX_ SV *const sv)
     if ( ((obj = MUTABLE_SV(GvCV(sv)) )) && SvOBJECT(obj)) {
 	DEBUG_D((PerlIO_printf(Perl_debug_log,
 		"Cleaning named glob CV object:\n "), sv_dump(obj)));
-	GvCV(sv) = NULL;
+	GvCV_set(sv, NULL);
 	SvREFCNT_dec(obj);
     }
     SvREFCNT_dec(sv); /* undo the inc above */
@@ -3623,7 +3623,7 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
         /* If source has method cache entry, clear it */
         if(GvCVGEN(sstr)) {
             SvREFCNT_dec(GvCV(sstr));
-            GvCV(sstr) = NULL;
+            GvCV_set(sstr, NULL);
             GvCVGEN(sstr) = 0;
         }
         /* If source has a real method, then a method is
@@ -3676,7 +3676,7 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
     (void)SvOK_off(dstr);
     isGV_with_GP_on(dstr);
     GvINTRO_off(dstr);		/* one-shot flag */
-    GvGP(dstr) = gp_ref(GvGP(sstr));
+    GvGP_set(dstr, gp_ref(GvGP(sstr)));
     if (SvTAINTED(sstr))
 	SvTAINT(dstr);
     if (GvIMPORTED(dstr) != GVf_IMPORTED
@@ -3731,7 +3731,7 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
     GvMULTI_on(dstr);
     switch (stype) {
     case SVt_PVCV:
-	location = (SV **) &GvCV(dstr);
+	location = (SV **) &(GvGP(dstr)->gp_cv); /* XXX bypassing GvCV_set */
 	import_flag = GVf_IMPORTED_CV;
 	goto common;
     case SVt_PVHV:
@@ -3757,7 +3757,7 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 		/*if (GvCVGEN(dstr) && (GvCV(dstr) != (const CV *)sref || GvCVGEN(dstr))) {*/
 		if (GvCVGEN(dstr)) {
 		    SvREFCNT_dec(GvCV(dstr));
-		    GvCV(dstr) = NULL;
+		    GvCV_set(dstr, NULL);
 		    GvCVGEN(dstr) = 0; /* Switch off cacheness. */
 		}
 	    }
@@ -4129,7 +4129,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 
 		if (GvGP(dstr))
 		    gp_free(MUTABLE_GV(dstr));
-		GvGP(dstr) = gp_ref(GvGP(gv));
+		GvGP_set(dstr, gp_ref(GvGP(gv)));
 
 		if (reset_isa) {
 		    HV * const stash = GvHV(dstr);
@@ -11847,7 +11847,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		    GvSTASH(dstr) = hv_dup(GvSTASH(dstr), param);
 		    if (param->flags & CLONEf_JOIN_IN)
 			Perl_sv_add_backref(aTHX_ MUTABLE_SV(GvSTASH(dstr)), dstr);
-		    GvGP(dstr)	= gp_dup(GvGP(sstr), param);
+		    GvGP_set(dstr, gp_dup(GvGP(sstr), param));
 		    (void)GpREFCNT_inc(GvGP(dstr));
 		}
 		break;

@@ -6244,7 +6244,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    CvISXSUB_on(cv);
 	}
 	else {
-	    GvCV(gv) = NULL;
+	    GvCV_set(gv, NULL);
 	    cv = newCONSTSUB(NULL, name, const_sv);
 	}
         mro_method_changed_in( /* sub Foo::Bar () { 123 } */
@@ -6309,7 +6309,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     else {
 	cv = PL_compcv;
 	if (name) {
-	    GvCV(gv) = cv;
+	    GvCV_set(gv, cv);
 	    if (PL_madskills) {
 		if (strEQ(name, "import")) {
 		    PL_formfeed = MUTABLE_SV(cv);
@@ -6455,7 +6455,7 @@ S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv,
 
 	    DEBUG_x( dump_sub(gv) );
 	    Perl_av_create_and_push(aTHX_ &PL_beginav, MUTABLE_SV(cv));
-	    GvCV(gv) = 0;		/* cv has been hijacked */
+	    GvCV_set(gv,0);		/* cv has been hijacked */
 	    call_list(oldscope, PL_beginav);
 
 	    PL_curcop = &PL_compiling;
@@ -6499,7 +6499,7 @@ S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv,
 	} else
 	    return;
 	DEBUG_x( dump_sub(gv) );
-	GvCV(gv) = 0;		/* cv has been hijacked */
+	GvCV_set(gv,0);		/* cv has been hijacked */
     }
 }
 
@@ -6677,7 +6677,7 @@ Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
     else {
 	cv = MUTABLE_CV(newSV_type(SVt_PVCV));
 	if (name) {
-	    GvCV(gv) = cv;
+	    GvCV_set(gv,cv);
 	    GvCVGEN(gv) = 0;
             mro_method_changed_in(GvSTASH(gv)); /* newXS */
 	}
@@ -7653,7 +7653,7 @@ Perl_ck_glob(pTHX_ OP *o)
 		newSVpvs("File::Glob"), NULL, NULL, NULL);
 	if((glob_gv = gv_fetchpvs("File::Glob::csh_glob", 0, SVt_PVCV))) {
 	    gv = gv_fetchpvs("CORE::GLOBAL::glob", 0, SVt_PVCV);
-	    GvCV(gv) = GvCV(glob_gv);
+	    GvCV_set(gv, GvCV(glob_gv));
 	    SvREFCNT_inc_void(MUTABLE_SV(GvCV(gv)));
 	    GvIMPORTED_CV_on(gv);
 	}

@@ -1045,7 +1045,7 @@ PP(pp_undef)
 
 	    gp_free(MUTABLE_GV(sv));
 	    Newxz(gp, 1, GP);
-	    GvGP(sv) = gp_ref(gp);
+	    GvGP_set(sv, gp_ref(gp));
 	    GvSV(sv) = newSV(0);
 	    GvLINE(sv) = CopLINE(PL_curcop);
 	    GvEGV(sv) = MUTABLE_GV(sv);
