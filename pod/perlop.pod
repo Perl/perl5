@@ -1332,6 +1332,13 @@ of 'msixp' will be propagated appropriately.  The effect of the 'o'
 modifier has is not propagated, being restricted to those patterns
 explicitly using it.
 
+Several other modifiers to control the character set semantics were
+added for 5.14 that, unlike the ones listed above,  may not be used
+after the final pattern delimiter, but only following a C<"(?"> inside
+the regular expression.  (It is planned in 5.16 to make them usable in
+the suffix position.)  These are B<C<"a">>, B<C<"d">>, B<C<"l">>, and
+B<C<"u">>.  They are documented in L<perlre/Extended Patterns>.
+
 See L<perlre> for additional information on valid syntax for STRING, and
 for a detailed look at the semantics of regular expressions.
 

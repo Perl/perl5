@@ -79,7 +79,12 @@ of the g and c modifiers.
 These are usually written as "the C</x> modifier", even though the delimiter
 in question might not really be a slash.  Any of these
 modifiers may also be embedded within the regular expression itself using
-the C<(?...)> construct.  See below.
+the C<(?...)> construct.  Also are new (in 5.14) character set semantics
+modifiers B<C<<"a">>, B<C<"d">>, B<C<"l">> and B<C<"u">>, which, in 5.14
+only, must be used embedded in the regular expression, and not after the
+trailing delimiter.  All this is discussed below in
+L</Extended Patterns>.
+X</a> X</d> X</l> X</u>
 
 The C</x> modifier itself needs a little more explanation.  It tells
 the regular expression parser to ignore most whitespace that is neither
