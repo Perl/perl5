@@ -299,7 +299,11 @@ close MASTER;
 
   my %done;
   for (@modpods) {
-    my $name = path2modname($_);
+    my $name = $_;
+    $name =~ s/\.p(m|od)$//;
+    $name =~ s-.*?/lib/--;
+    $name =~ s-/-::-g;
+    $name =~ s/(\w+)::\1/$1/;
     if ($name =~ /^[a-z]/) {
       $Pragmata{$name} = $_;
     } else {
@@ -313,15 +317,6 @@ close MASTER;
 
 # OK. Now a lot of ancillary function definitions follow
 # Main program returns at "Do stuff"
-
-sub path2modname {
-    local $_ = shift;
-    s/\.p(m|od)$//;
-    s-.*?/lib/--;
-    s-/-::-g;
-    s/(\w+)::\1/$1/;
-    return $_;
-}
 
 sub output ($);
 
