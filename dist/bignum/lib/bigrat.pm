@@ -1,7 +1,7 @@
 package bigrat;
 use 5.006;
 
-$VERSION = '0.26';
+$VERSION = '0.27';
 require Exporter;
 @ISA		= qw( bigint );
 @EXPORT_OK 	= qw( PI e bpi bexp );
@@ -539,11 +539,11 @@ Compare this to:
 =back
 
 =head1 EXAMPLES
- 
+
 	perl -Mbigrat -le 'print sqrt(33)'
 	perl -Mbigrat -le 'print 2*255'
 	perl -Mbigrat -le 'print 4.5+2*255'
-	perl -Mbigrat -le 'print 3/7 + 5/7 + 8/3'	
+	perl -Mbigrat -le 'print 3/7 + 5/7 + 8/3'
 	perl -Mbigrat -le 'print 12->is_odd()';
 	perl -Mbignum=l,GMP -le 'print 7 ** 7777'
 
