@@ -406,6 +406,7 @@ EOPOD2B
   output $_;
   output "\n";                    # flush $LINE
 
+  $OUT =~ s/\n{3,}/\n\n/g;
   open OUT, '>', $filename or die "$0: creating $filename failed: $!";
   print OUT $OUT;
   close OUT;
@@ -493,7 +494,6 @@ sub unitem {
     $initem = 0;
 }
 
-my $NEWLINE = 0;	# how many newlines have we seen recently
 my $LINE;		# what remains to be printed
 
 sub output ($) {
@@ -503,14 +503,10 @@ sub output ($) {
 		$OUT .=  wrap('', '', $LINE);
 		$LINE = '';
 	    }
-	    if (($NEWLINE) < 2) {
-		$OUT .= $_;
-		$NEWLINE++;
-	    }
+	    $OUT .= $_;
 	}
 	elsif (/\S/) {
 	    $LINE .= $_;
-	    $NEWLINE = 0;
 	}
     }
 }
