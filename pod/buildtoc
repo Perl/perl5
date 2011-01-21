@@ -406,6 +406,7 @@ EOPOD2B
   output $_;
   output "\n";                    # flush $LINE
 
+  $OUT =~ s/\n\s+\n/\n\n/gs;
   $OUT =~ s/\n{3,}/\n\n/g;
   open OUT, '>', $filename or die "$0: creating $filename failed: $!";
   print OUT $OUT;
@@ -505,7 +506,7 @@ sub output ($) {
 	    }
 	    $OUT .= $_;
 	}
-	elsif (/\S/) {
+	else {
 	    $LINE .= $_;
 	}
     }
