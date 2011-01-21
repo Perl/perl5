@@ -262,7 +262,7 @@ close MASTER;
 # Find all the modules
 {
   my @modpods;
-  find \&getpods => map {abs_from_top($_)} qw(lib/ ext/);
+  find \&getpods => abs_from_top('lib/');
 
   sub getpods {
     if (/\.p(od|m)$/) {
@@ -317,10 +317,9 @@ close MASTER;
 sub path2modname {
     local $_ = shift;
     s/\.p(m|od)$//;
-    s-.*?/(lib|ext)/--;
+    s-.*?/lib/--;
     s-/-::-g;
     s/(\w+)::\1/$1/;
-    s/-/::/g;
     return $_;
 }
 
