@@ -408,6 +408,9 @@ EOPOD2B
 
   $OUT =~ s/\n\s+\n/\n\n/gs;
   $OUT =~ s/\n{3,}/\n\n/g;
+
+  $OUT =~ s/([^\n]+)/wrap('', '', $1)/ge;
+
   open OUT, '>', $filename or die "$0: creating $filename failed: $!";
   print OUT $OUT;
   close OUT;
@@ -495,21 +498,8 @@ sub unitem {
     $initem = 0;
 }
 
-my $LINE;		# what remains to be printed
-
 sub output ($) {
-    for (split /(\n)/, shift) {
-	if ($_ eq "\n") {
-	    if ($LINE) {
-		$OUT .=  wrap('', '', $LINE);
-		$LINE = '';
-	    }
-	    $OUT .= $_;
-	}
-	else {
-	    $LINE .= $_;
-	}
-    }
+    $OUT .= shift;
 }
 
 # End of original buildtoc. From here on are routines to generate new sections
