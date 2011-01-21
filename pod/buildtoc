@@ -319,9 +319,10 @@ close MASTER;
 
 sub output ($);
 
+my $OUT;
+
 sub output_perltoc {
   my $filename = shift;
-  open OUT, '>', $filename or die "$0: creating $filename failed: $!";
 
   local $/ = '';
 
@@ -404,6 +405,9 @@ EOPOD2B
   s/^\t//gm;
   output $_;
   output "\n";                    # flush $LINE
+
+  open OUT, '>', $filename or die "$0: creating $filename failed: $!";
+  print OUT $OUT;
   close OUT;
 }
 
@@ -496,11 +500,11 @@ sub output ($) {
     for (split /(\n)/, shift) {
 	if ($_ eq "\n") {
 	    if ($LINE) {
-		print OUT wrap('', '', $LINE);
+		$OUT .=  wrap('', '', $LINE);
 		$LINE = '';
 	    }
 	    if (($NEWLINE) < 2) {
-		print OUT;
+		$OUT .= $_;
 		$NEWLINE++;
 	    }
 	}
