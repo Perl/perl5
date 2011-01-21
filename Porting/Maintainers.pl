@@ -570,8 +570,8 @@ use File::Glob qw(:case);
 
     'ExtUtils::CBuilder' =>
 	{
-	'MAINTAINER'	=> 'kwilliams',
-	'DISTRIBUTION'	=> 'DAGOLDEN/ExtUtils-CBuilder-0.2802.tar.gz',
+	'MAINTAINER'	=> 'dagolden',
+	'DISTRIBUTION'	=> 'DAGOLDEN/ExtUtils-CBuilder-0.280201.tar.gz',
 	'FILES'		=> q[dist/ExtUtils-CBuilder],
 	'UPSTREAM'	=> 'blead',
 	},
