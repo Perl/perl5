@@ -320,6 +320,7 @@ sub path2modname {
     s-.*?/(lib|ext)/--;
     s-/-::-g;
     s/(\w+)::\1/$1/;
+    s/-/::/g;
     return $_;
 }
 
