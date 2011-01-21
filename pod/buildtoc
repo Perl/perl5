@@ -276,7 +276,6 @@ close MASTER;
       return if $file =~ m!XS/(?:APItest|Typemap)!;
       my $pod = $file;
       return if $pod =~ s/pm$/pod/ && -e $pod;
-      die "$0: tut $File::Find::name" if $file =~ /TUT/;
       unless (open (F, "< $_\0")) {
 	warn "$0: bogus <$file>: $!";
 	system "ls", "-l", $file;
@@ -286,7 +285,6 @@ close MASTER;
 	while ($line = <F>) {
 	  if ($line =~ /^=head1\s+NAME\b/) {
 	    push @modpods, $file;
-	    #warn "GOOD $file\n";
 	    close F;
 	    return;
 	  }
@@ -301,13 +299,11 @@ close MASTER;
 
   my %done;
   for (@modpods) {
-    #($name) = /(\w+)\.p(m|od)$/;
     my $name = path2modname($_);
     if ($name =~ /^[a-z]/) {
       $Pragmata{$name} = $_;
     } else {
       if ($done{$name}++) {
-	# warn "already did $_\n";
 	next;
       }
       $Modules{$name} = $_;
@@ -463,7 +459,6 @@ sub podset {
 	    s/\s+$//;
 	    next if /^[\d.]+$/;
 	    next if $pod eq 'perlmodlib' && /^ftp:/;
-	    ##print "=over 4\n\n" unless $initem;
 	    output ", " if $initem;
 	    $initem = 1;
 	    s/\.$//;
@@ -496,7 +491,6 @@ sub unhead2 {
 sub unitem {
     if ($initem) {
 	output "\n\n";
-	##print "\n\n=back\n\n";
     }
     $initem = 0;
 }
