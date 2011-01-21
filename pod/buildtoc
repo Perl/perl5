@@ -434,7 +434,7 @@ sub podset {
 	    $_ = <$fh>;
 	    # Remove svn keyword expansions from the Perl FAQ
 	    s/ \(\$Revision: \d+ \$\)//g;
-	    if ( /^\s*$pod\b/ ) {
+	    if ( /^\s*\Q$pod\E\b/ ) {
 		s/$pod\.pm/$pod/;       # '.pm' in NAME !?
 		output $_;
 	    } else {
