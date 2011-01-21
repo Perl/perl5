@@ -8282,18 +8282,18 @@ case ANYOF_N##NAME:                                                            \
  * there are two tests passed in, to use depending on that. There aren't any
  * cases where the label is different from the name, so no need for that
  * parameter */
-#define _C_C_T_(NAME,TEST_8,TEST_7,WORD)                                       \
+#define _C_C_T_(NAME, TEST_8, TEST_7, WORD)                                    \
 ANYOF_##NAME:                                                                  \
     if (LOC) ANYOF_CLASS_SET(ret, ANYOF_##NAME);                               \
     else if (UNI_SEMANTICS) {                                                  \
         for (value = 0; value < 256; value++) {                                \
-            if (TEST_8) stored +=                                              \
+            if (TEST_8(value)) stored +=                                       \
                       S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value);  \
         }                                                                      \
     }                                                                          \
     else {                                                                     \
         for (value = 0; value < 128; value++) {                                \
-            if (TEST_7) stored +=                                              \
+            if (TEST_7(UNI_TO_NATIVE(value))) stored +=                        \
 		S_set_regclass_bit(aTHX_ pRExC_state, ret,                     \
 			           (U8) UNI_TO_NATIVE(value));                 \
         }                                                                      \
@@ -8305,18 +8305,19 @@ case ANYOF_N##NAME:                                                            \
     if (LOC) ANYOF_CLASS_SET(ret, ANYOF_N##NAME);                              \
     else if (UNI_SEMANTICS) {                                                  \
         for (value = 0; value < 256; value++) {                                \
-            if (! TEST_8) stored +=                                            \
+            if (! TEST_8(value)) stored +=                                     \
 		    S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value);    \
         }                                                                      \
     }                                                                          \
     else {                                                                     \
         for (value = 0; value < 128; value++) {                                \
-            if (! TEST_7) stored +=                                            \
-		    S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value);    \
+            if (! TEST_7(UNI_TO_NATIVE(value))) stored += S_set_regclass_bit(  \
+			aTHX_ pRExC_state, ret, (U8) UNI_TO_NATIVE(value));    \
         }                                                                      \
 	if (ASCII_RESTRICTED) {                                                \
 	    for (value = 128; value < 256; value++) {                          \
-             stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value); \
+             stored += S_set_regclass_bit(                                     \
+			   aTHX_ pRExC_state, ret, (U8) UNI_TO_NATIVE(value)); \
 	    }                                                                  \
 	    ANYOF_FLAGS(ret) |= ANYOF_UNICODE_ALL|ANYOF_UTF8;                  \
 	}                                                                      \
@@ -8749,26 +8750,26 @@ parseit:
 		 * --jhi */
 		switch ((I32)namedclass) {
 		
-		case _C_C_T_(ALNUMC, isALNUMC_L1(value), isALNUMC(value), "XPosixAlnum");
-		case _C_C_T_(ALPHA, isALPHA_L1(value), isALPHA(value), "XPosixAlpha");
-		case _C_C_T_(BLANK, isBLANK_L1(value), isBLANK(value), "XPosixBlank");
-		case _C_C_T_(CNTRL, isCNTRL_L1(value), isCNTRL(value), "XPosixCntrl");
-		case _C_C_T_(GRAPH, isGRAPH_L1(value), isGRAPH(value), "XPosixGraph");
-		case _C_C_T_(LOWER, isLOWER_L1(value), isLOWER(value), "XPosixLower");
-		case _C_C_T_(PRINT, isPRINT_L1(value), isPRINT(value), "XPosixPrint");
-		case _C_C_T_(PSXSPC, isPSXSPC_L1(value), isPSXSPC(value), "XPosixSpace");
-		case _C_C_T_(PUNCT, isPUNCT_L1(value), isPUNCT(value), "XPosixPunct");
-		case _C_C_T_(UPPER, isUPPER_L1(value), isUPPER(value), "XPosixUpper");
+		case _C_C_T_(ALNUMC, isALNUMC_L1, isALNUMC, "XPosixAlnum");
+		case _C_C_T_(ALPHA, isALPHA_L1, isALPHA, "XPosixAlpha");
+		case _C_C_T_(BLANK, isBLANK_L1, isBLANK, "XPosixBlank");
+		case _C_C_T_(CNTRL, isCNTRL_L1, isCNTRL, "XPosixCntrl");
+		case _C_C_T_(GRAPH, isGRAPH_L1, isGRAPH, "XPosixGraph");
+		case _C_C_T_(LOWER, isLOWER_L1, isLOWER, "XPosixLower");
+		case _C_C_T_(PRINT, isPRINT_L1, isPRINT, "XPosixPrint");
+		case _C_C_T_(PSXSPC, isPSXSPC_L1, isPSXSPC, "XPosixSpace");
+		case _C_C_T_(PUNCT, isPUNCT_L1, isPUNCT, "XPosixPunct");
+		case _C_C_T_(UPPER, isUPPER_L1, isUPPER, "XPosixUpper");
 #ifdef BROKEN_UNICODE_CHARCLASS_MAPPINGS
                 /* \s, \w match all unicode if utf8. */
-                case _C_C_T_(SPACE, isSPACE_L1(value), isSPACE(value), "SpacePerl");
-                case _C_C_T_(ALNUM, isWORDCHAR_L1(value), isALNUM(value), "Word");
+                case _C_C_T_(SPACE, isSPACE_L1, isSPACE, "SpacePerl");
+                case _C_C_T_(ALNUM, isWORDCHAR_L1, isALNUM, "Word");
 #else
                 /* \s, \w match ascii and locale only */
-                case _C_C_T_(SPACE, isSPACE_L1(value), isSPACE(value), "PerlSpace");
-                case _C_C_T_(ALNUM, isWORDCHAR_L1(value), isALNUM(value), "PerlWord");
+                case _C_C_T_(SPACE, isSPACE_L1, isSPACE, "PerlSpace");
+                case _C_C_T_(ALNUM, isWORDCHAR_L1, isALNUM, "PerlWord");
 #endif		
-		case _C_C_T_(XDIGIT, isXDIGIT_L1(value), isXDIGIT(value), "XPosixXDigit");
+		case _C_C_T_(XDIGIT, isXDIGIT_L1, isXDIGIT, "XPosixXDigit");
 		case _C_C_T_NOLOC_(VERTWS, is_VERTWS_latin1(&value), "VertSpace");
 		case _C_C_T_NOLOC_(HORIZWS, is_HORIZWS_latin1(&value), "HorizSpace");
 		case ANYOF_ASCII:
