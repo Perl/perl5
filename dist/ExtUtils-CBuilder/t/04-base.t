@@ -129,14 +129,14 @@ $base = ExtUtils::CBuilder::Base->new( quiet => 1 );
 ok( $base, "ExtUtils::CBuilder::Base->new() returned true value" );
 isa_ok( $base, 'ExtUtils::CBuilder::Base' );
 
-$source_file = File::Spec->catfile('t', 'compilet.c');
+$source_file = File::Spec->catfile('t', 'baset.c');
 create_c_source_file($source_file);
 ok(-e $source_file, "source file '$source_file' created");
 
 # object filename automatically assigned
 my $obj_ext = $base->{config}{obj_ext};
 is( $base->object_file($source_file),
-    File::Spec->catfile('t', "compilet$obj_ext"),
+    File::Spec->catfile('t', "baset$obj_ext"),
     "object_file(): got expected automatically assigned name for object file"
 );
 
@@ -155,7 +155,7 @@ $base = ExtUtils::CBuilder::Base->new( quiet => 1 );
 ok( $base, "ExtUtils::CBuilder::Base->new() returned true value" );
 isa_ok( $base, 'ExtUtils::CBuilder::Base' );
 
-$source_file = File::Spec->catfile('t', 'compilet.c');
+$source_file = File::Spec->catfile('t', 'baset.c');
 create_c_source_file($source_file);
 ok(-e $source_file, "source file '$source_file' created");
 
@@ -337,14 +337,14 @@ for ($source_file, $object_file, $lib_file) {
 pass("Completed all tests in $0");
 
 if ($^O eq 'VMS') {
-   1 while unlink 'COMPILET.LIS';
-   1 while unlink 'COMPILET.OPT';
+   1 while unlink 'BASET.LIS';
+   1 while unlink 'BASET.OPT';
 }
 
 sub create_c_source_file {
     my $source_file = shift;
     open my $FH, '>', $source_file or die "Can't create $source_file: $!";
-    print $FH "int boot_compilet(void) { return 1; }\n";
+    print $FH "int boot_baset(void) { return 1; }\n";
     close $FH;
 }
 
