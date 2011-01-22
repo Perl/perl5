@@ -423,6 +423,7 @@ the strings?).
  Ricardo  5.12.3-RC1    2011-Jan-09
  Ricardo  5.12.3-RC2    2011-Jan-14
  Ricardo  5.12.3-RC3    2011-Jan-17
+ Ricardo  5.12.3        2011-Jan-21
 
 =head2 SELECTED RELEASE SIZES
 
