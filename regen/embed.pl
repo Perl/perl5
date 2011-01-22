@@ -67,17 +67,6 @@ Edit those files and run 'make regen_headers' to effect changes.
 
 EOW
 
-    $warning .= <<EOW if $file eq 'perlapi.c';
-
-Up to the threshold of the door there mounted a flight of twenty-seven
-broad stairs, hewn by some unknown art of the same black stone.  This
-was the only entrance to the tower; ...
-
-    [p.577 of _The Lord of the Rings_, III/x: "The Voice of Saruman"]
-
-
-EOW
-
     if ($file =~ m:\.[ch]$:) {
 	$warning =~ s:^: * :gm;
 	$warning =~ s: +$::gm;
@@ -814,7 +803,19 @@ EOT
 safer_close($capih);
 rename_if_different('perlapi.h-new', 'perlapi.h');
 
-print $capi do_not_edit ("perlapi.c"), <<'EOT';
+my $warning = do_not_edit ("perlapi.c");
+$warning =~ s! \*/\n! *
+ *
+ * Up to the threshold of the door there mounted a flight of twenty-seven
+ * broad stairs, hewn by some unknown art of the same black stone.  This
+ * was the only entrance to the tower; ...
+ *
+ *     [p.577 of _The Lord of the Rings_, III/x: "The Voice of Saruman"]
+ *
+ */
+!;
+
+print $capi $warning, <<'EOT';
 
 #include "EXTERN.h"
 #include "perl.h"
