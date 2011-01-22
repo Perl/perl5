@@ -530,7 +530,7 @@ sub generate_manifest {
   # Annoyingly, unexpand doesn't consider it good form to replace a single
   # space before a tab with a tab
   # Annoyingly (2) it returns read only values.
-  my @temp = unexpand (map {sprintf "%-32s%s\n", @$_} @_);
+  my @temp = unexpand (map {sprintf "%-32s%s", @$_} @_);
   map {s/ \t/\t\t/g; $_} @temp;
 }
 sub generate_manifest_pod {
@@ -610,16 +610,18 @@ sub verify_contiguous {
 
 sub do_manifest {
   my $name = shift;
+  chomp @_;
   my @manifest =
-    grep {! m!^pod/[^.]+\.pod.*\n!}
+    grep {! m!^pod/[^.]+\.pod.*!}
       grep {! m!^README\.(\S+)! || $Ignore{$1}} @_;
-  # Dictionary order - fold and handle non-word chars as nothing
-  map  { $_->[0] }
-  sort { $a->[1] cmp $b->[1] || $a->[0] cmp $b->[0] }
-  map  { my $f = lc $_; $f =~ s/[^a-z0-9\s]//g; [ $_, $f ] }
-    @manifest,
-      &generate_manifest_pod(),
-	&generate_manifest_readme();
+  join "\n", (
+	      # Dictionary order - fold and handle non-word chars as nothing
+	      map  { $_->[0] }
+	      sort { $a->[1] cmp $b->[1] || $a->[0] cmp $b->[0] }
+	      map  { my $f = lc $_; $f =~ s/[^a-z0-9\s]//g; [ $_, $f ] }
+	      @manifest,
+	      &generate_manifest_pod(),
+	      &generate_manifest_readme()), '';
 }
 
 sub do_nmake {
