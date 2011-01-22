@@ -108,6 +108,27 @@ grounds.  Here I found that the brushwood spread a good way up the
 park, uniting with the wood that approached the little temple I have
 described. 
 
+=head2 v5.12.3 - Howard W. Campbell, Jr., "Reflections on Not Participating in Current Events"
+
+L<Announced on 2011-01-21 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2011/01/msg168368.html>
+
+  I saw a huge steam roller,
+  It blotted out the sun.
+  The people all lay down, lay down;
+  They did not try to run.
+  My love and I, we looked amazed
+  Upon the gory mystery.
+  'Lie down, lie down!' the people cried.
+  'The great machine is history!'
+  My love and I, we ran away,
+  The engine did not find us.
+  We ran up to a mountain top,
+  Left history far behind us.
+  Perhaps we should have stayed and died,
+  But somehow we don't think so.
+  We went to see where history'd been,
+  And my, the dead did stink so.
+
 =head2 v5.12.2 - William Gibson, "Pattern Recognition"
 
 L<Announced on 2919-09-06 by Jesse Vincent|http://www.nntp.perl.org/group/perl.perl5.porters/2010/09/msg163852.html>
