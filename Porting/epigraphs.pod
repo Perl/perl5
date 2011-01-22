@@ -131,7 +131,7 @@ L<Announced on 2011-01-21 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
 
 =head2 v5.12.2 - William Gibson, "Pattern Recognition"
 
-L<Announced on 2919-09-06 by Jesse Vincent|http://www.nntp.perl.org/group/perl.perl5.porters/2010/09/msg163852.html>
+L<Announced on 2010-09-06 by Jesse Vincent|http://www.nntp.perl.org/group/perl.perl5.porters/2010/09/msg163852.html>
 
 CPUs. Cayce Pollard Units. That's what Damien calls the clothing
 she wears. CPUs are either black, white, or gray, and ideally
