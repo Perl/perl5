@@ -260,7 +260,7 @@ close MASTER;
 }
 
 # Find all the modules
-{
+if ($Build{toc}) {
   my @modpods;
   find \&getpods => abs_from_top('lib/');
 
