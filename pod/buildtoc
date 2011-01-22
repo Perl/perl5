@@ -609,11 +609,10 @@ sub verify_contiguous {
 }
 
 sub do_manifest {
-  my $name = shift;
-  chomp @_;
+  my ($name, $prev) = @_;
   my @manifest =
     grep {! m!^pod/[^.]+\.pod.*!}
-      grep {! m!^README\.(\S+)! || $Ignore{$1}} @_;
+      grep {! m!^README\.(\S+)! || $Ignore{$1}} split "\n", $prev;
   join "\n", (
 	      # Dictionary order - fold and handle non-word chars as nothing
 	      map  { $_->[0] }
@@ -625,8 +624,7 @@ sub do_manifest {
 }
 
 sub do_nmake {
-  my $name = shift;
-  my $makefile = join '', @_;
+  my ($name, $makefile) = @_;
   die "$0: $name contains NUL bytes" if $makefile =~ /\0/;
   $makefile =~ s/^\tcopy \.\.\\README.*\n/\0/gm;
   verify_contiguous($name, $makefile, 'README copies');
@@ -643,8 +641,7 @@ sub do_nmake {
 *do_dmake = *do_dmake = \&do_nmake;
 
 sub do_perlpod {
-  my $name = shift;
-  my $pod = join '', @_;
+  my ($name, $pod) = @_;
 
   unless ($pod =~ s{(For\ ease\ of\ access,\ .*\n)
 		    (?:\s+[a-z]{4,}.*\n	#   fooo
@@ -659,8 +656,7 @@ sub do_perlpod {
 }
 
 sub do_podmak {
-  my $name = shift;
-  my $body = join '', @_;
+  my ($name, $body) = @_;
   foreach my $variable (qw(pod man html tex)) {
     die "$0: could not find $variable in $name"
       unless $body =~ s{\n\U$variable\E = (?:[^\n]*\\\n)*[^\n]*}
@@ -670,8 +666,7 @@ sub do_podmak {
 }
 
 sub do_vms {
-  my $name = shift;
-  my $makefile = join '', @_;
+  my ($name, $makefile) = @_;
   die "$0: $name contains NUL bytes" if $makefile =~ /\0/;
   $makefile =~ s/\npod\d* =[^\n]*/\0/gs;
   verify_contiguous($name, $makefile, 'pod assignments');
@@ -703,8 +698,7 @@ sub do_vms {
 }
 
 sub do_unix {
-  my $name = shift;
-  my $makefile_SH = join '', @_;
+  my ($name, $makefile_SH) = @_;
   die "$0: $name contains NUL bytes" if $makefile_SH =~ /\0/;
 
   $makefile_SH =~ s{^(perltoc_pod_prereqs = extra.pods).*}
@@ -746,16 +740,15 @@ while (my ($target, $name) = each %Targets) {
     next;
   }
   print "Now processing $name\n" if $Verbose;
+  local $/;
   open THING, $name or die "Can't open $name: $!";
   binmode THING;
-  my @orig = <THING>;
-  my $orig = join '', @orig;
+  my $orig = <THING>;
   close THING;
-  my @new = do {
+  my $new = do {
     no strict 'refs';
-    &{"do_$target"}($target, @orig);
+    &{"do_$target"}($target, $orig);
   };
-  my $new = join '', @new;
   if ($new eq $orig) {
     print "Was not modified\n" if $Verbose;
     next;
