@@ -625,7 +625,6 @@ sub do_manifest {
 
 sub do_nmake {
   my ($name, $makefile) = @_;
-  die "$0: $name contains NUL bytes" if $makefile =~ /\0/;
   $makefile =~ s/^\tcopy \.\.\\README.*\n/\0/gm;
   verify_contiguous($name, $makefile, 'README copies');
   # Now remove the other copies that follow
@@ -667,7 +666,6 @@ sub do_podmak {
 
 sub do_vms {
   my ($name, $makefile) = @_;
-  die "$0: $name contains NUL bytes" if $makefile =~ /\0/;
   $makefile =~ s/\npod\d* =[^\n]*/\0/gs;
   verify_contiguous($name, $makefile, 'pod assignments');
   $makefile =~ s/\0+/join "\n", '', &generate_descrip_mms_1/se;
@@ -699,7 +697,6 @@ sub do_vms {
 
 sub do_unix {
   my ($name, $makefile_SH) = @_;
-  die "$0: $name contains NUL bytes" if $makefile_SH =~ /\0/;
 
   $makefile_SH =~ s{^(perltoc_pod_prereqs = extra.pods).*}
 		   {join ' ', $1, map "pod/$_",
@@ -745,6 +742,7 @@ while (my ($target, $name) = each %Targets) {
   binmode THING;
   my $orig = <THING>;
   close THING;
+  die "$0: $name contains NUL bytes" if $orig =~ /\0/;
   my $new = do {
     no strict 'refs';
     &{"do_$target"}($target, $orig);
