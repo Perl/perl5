@@ -1,12 +1,10 @@
 #!/usr/bin/perl -w
 
-use Test;
+use strict;
+use Test::More;
 
-# Grab all of the plain routines from File::Spec
-use File::Spec @File::Spec::EXPORT_OK ;
+require_ok('File::Spec');
 
-require File::Spec::Unix ;
-require File::Spec::Win32 ;
 require Cwd;
 
 eval {
@@ -43,18 +41,16 @@ if ( $@ ) {
    - ;
    $INC{"VMS/Filespec.pm"} = 1 ;
 }
-require File::Spec::VMS ;
 
-require File::Spec::OS2 ;
-require File::Spec::Mac ;
-require File::Spec::Epoc ;
-require File::Spec::Cygwin ;
+foreach (qw(Unix Win32 VMS OS2 Mac Epoc Cygwin)) {
+    require_ok("File::Spec::$_");
+}
 
 # Each element in this array is a single test. Storing them this way makes
 # maintenance easy, and should be OK since perl should be pretty functional
 # before these tests are run.
 
-@tests = (
+my @tests = (
 # [ Function          ,            Expected          ,         Platform ]
 
 [ "Unix->case_tolerant()",         '0'  ],
@@ -252,8 +248,6 @@ require File::Spec::Cygwin ;
 [ "Win32->canonpath('/../')",           '\\'                  ],
 [ "Win32->canonpath('/..\\')",          '\\'                  ],
 [ "Win32->canonpath('d1/../foo')",      'foo'                 ],
-
-[ "Win32->can('_cwd')",                 '/CODE/'              ],
 
 # FakeWin32 subclass (see below) just sets CWD to C:\one\two and getdcwd('D') to D:\alpha\beta
 
@@ -743,9 +737,7 @@ require File::Spec::Cygwin ;
 
 ) ;
 
-my $test_count = scalar @tests;
-
-plan tests => scalar @tests;
+can_ok('File::Spec::Win32', '_cwd');
 
 {
     package File::Spec::FakeWin32;
@@ -773,7 +765,6 @@ plan tests => scalar @tests;
     }
 }
 
-
 # Tries a named function with the given args and compares the result against
 # an expected result. Works with functions that return scalars or arrays.
 for ( @tests ) {
@@ -783,15 +774,15 @@ for ( @tests ) {
     $function =~ s/^([^\$].*->)/File::Spec::$1/;
     my $got = join ',', eval $function;
 
-    if ( $@ ) {
-      if ( $@ =~ /^\Q$skip_exception/ ) {
-	skip "skip $function: $skip_exception", 1;
-      }
-      else {
-	ok $@, '', $function;
-      }
-      next;
+ SKIP: {
+	if ($@) {
+	    skip "skip $function: $skip_exception", 1
+		if $@ =~ /^\Q$skip_exception/;
+	    is($@, '', $function);
+	} else {
+	    is($got, $expected, $function);
+	}
     }
-
-    ok $got, $expected, $function;
 }
+
+done_testing();
