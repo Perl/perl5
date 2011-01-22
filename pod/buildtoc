@@ -13,6 +13,7 @@ use Getopt::Long;
 use Carp;
 
 no locale;
+require 5.010;
 
 {
   my $Top = File::Spec->catdir($FindBin::Bin, File::Spec->updir);
@@ -103,11 +104,11 @@ if ($Verbose) {
   print "I'm building $_\n" foreach keys %Build;
 }
 
-open MASTER, $masterpodfile or die "$0: Can't open $masterpodfile: $!";
+open my $master, '<', $masterpodfile or die "$0: Can't open $masterpodfile: $!";
 
 my ($delta_source, $delta_target);
 
-foreach (<MASTER>) {
+foreach (<$master>) {
   next if /^\#/;
 
   # At least one upper case letter somewhere in the first group
@@ -171,7 +172,7 @@ if (defined $delta_source) {
   die "$0: delta target defined but not source";
 }
 
-close MASTER;
+close $master;
 
 # Sanity cross check
 {
@@ -281,20 +282,18 @@ if ($Build{toc}) {
       return if $file =~ m!XS/(?:APItest|Typemap)!;
       my $pod = $file;
       return if $pod =~ s/pm$/pod/ && -e $pod;
-      unless (open (F, "< $_\0")) {
+      unless (open my $f, '<', $_) {
 	warn "$0: bogus <$file>: $!";
 	system "ls", "-l", $file;
       }
       else {
 	my $line;
-	while ($line = <F>) {
+	while ($line = <$f>) {
 	  if ($line =~ /^=head1\s+NAME\b/) {
 	    push @modpods, $file;
-	    close F;
 	    return;
 	  }
 	}
-	close F;
 	warn "$0: $file: cannot find =head1 NAME\n" unless $Quiet;
       }
     }
@@ -737,10 +736,9 @@ while (my ($target, $name) = each %Targets) {
   print "Now processing $name\n" if $Verbose;
   if ($target ne "toc") {
     local $/;
-    open THING, $name or die "Can't open $name: $!";
-    binmode THING;
-    $orig = <THING>;
-    close THING;
+    open my $thing, '<', $name or die "Can't open $name: $!";
+    binmode $thing;
+    $orig = <$thing>;
     die "$0: $name contains NUL bytes" if $orig =~ /\0/;
   }
 
@@ -765,10 +763,10 @@ while (my ($target, $name) = each %Targets) {
     rename $name, "$name.old" or die "$0: Can't rename $name to $name.old: $!";
   }
 
-  open THING, ">$name" or die "$0: Can't open $name for writing: $!";
-  binmode THING;
-  print THING $new or die "$0: print to $name failed: $!";
-  close THING or die "$0: close $name failed: $!";
+  open my $thing, '>', $name or die "$0: Can't open $name for writing: $!";
+  binmode $thing;
+  print $thing $new or die "$0: print to $name failed: $!";
+  close $thing or die "$0: close $name failed: $!";
   if (defined $mode) {
     chmod $mode & 0777, $name or die "$0: can't chmod $mode $name: $!";
   }
