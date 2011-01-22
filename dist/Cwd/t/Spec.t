@@ -50,13 +50,6 @@ require File::Spec::Mac ;
 require File::Spec::Epoc ;
 require File::Spec::Cygwin ;
 
-# $root is only needed by Mac OS tests; these particular
-# tests are skipped on other OSs
-my $root = '';
-if ($^O eq 'MacOS') {
-	$root = File::Spec::Mac->rootdir();
-}
-
 # Each element in this array is a single test. Storing them this way makes
 # maintenance easy, and should be OK since perl should be pretty functional
 # before these tests are run.
@@ -568,15 +561,11 @@ if ($^O eq 'MacOS') {
 [ "Mac->splitdir('hd:d1::d2::')",      'hd:,d1,::,d2,::'  ],
 
 [ "Mac->catdir()",                 ''             ],
-[ "Mac->catdir('')",               $root, 'MacOS' ], # skipped on other OS
 [ "Mac->catdir(':')",              ':'            ],
 
-[ "Mac->catdir('', '')",           $root, 'MacOS' ], # skipped on other OS
-[ "Mac->catdir('', ':')",          $root, 'MacOS' ], # skipped on other OS
 [ "Mac->catdir(':', ':')",         ':'            ],
 [ "Mac->catdir(':', '')",          ':'            ],
 
-[ "Mac->catdir('', '::')",         $root, 'MacOS' ], # skipped on other OS
 [ "Mac->catdir(':', '::')",        '::'           ],
 
 [ "Mac->catdir('::', '')",         '::'           ],
@@ -614,13 +603,6 @@ if ($^O eq 'MacOS') {
 [ "Mac->catdir('d1',':d2')",              ':d1:d2:'      ],
 [ "Mac->catdir('d1',':d2:')",             ':d1:d2:'      ],
 
-[ "Mac->catdir('','d1','d2','d3')",        $root . 'd1:d2:d3:', 'MacOS' ], # skipped on other OS
-[ "Mac->catdir('',':','d1','d2')",         $root . 'd1:d2:'   , 'MacOS' ], # skipped on other OS
-[ "Mac->catdir('','::','d1','d2')",        $root . 'd1:d2:'   , 'MacOS' ], # skipped on other OS
-[ "Mac->catdir('',':','','d1')",           $root . 'd1:'      , 'MacOS' ], # skipped on other OS
-[ "Mac->catdir('', ':d1',':d2')",          $root . 'd1:d2:'   , 'MacOS' ], # skipped on other OS
-[ "Mac->catdir('','',':d1',':d2')",        $root . 'd1:d2:'   , 'MacOS' ], # skipped on other OS
-
 [ "Mac->catdir('hd:',':d1')",       'hd:d1:'      ],
 [ "Mac->catdir('hd:d1:',':d2')",    'hd:d1:d2:'   ],
 [ "Mac->catdir('hd:','d1')",        'hd:d1:'      ],
@@ -629,8 +611,6 @@ if ($^O eq 'MacOS') {
 
 [ "Mac->catfile()",                      ''                      ],
 [ "Mac->catfile('')",                    ''                      ],
-[ "Mac->catfile('', '')",                $root         , 'MacOS' ], # skipped on other OS
-[ "Mac->catfile('', 'file')",            $root . 'file', 'MacOS' ], # skipped on other OS
 [ "Mac->catfile(':')",                   ':'                     ],
 [ "Mac->catfile(':', '')",               ':'                     ],
 
@@ -794,25 +774,10 @@ plan tests => scalar @tests;
 }
 
 
-# Test out the class methods
-for ( @tests ) {
-   tryfunc( @$_ ) ;
-}
-
-
-#
 # Tries a named function with the given args and compares the result against
 # an expected result. Works with functions that return scalars or arrays.
-#
-sub tryfunc {
-    my $function = shift ;
-    my $expected = shift ;
-    my $platform = shift ;
-
-    if ($platform && $^O ne $platform) {
-	skip("skip $function", 1);
-	return;
-    }
+for ( @tests ) {
+    my ($function, $expected) = @$_;
 
     $function =~ s#\\#\\\\#g ;
     $function =~ s/^([^\$].*->)/File::Spec::$1/;
@@ -825,7 +790,7 @@ sub tryfunc {
       else {
 	ok $@, '', $function;
       }
-      return;
+      next;
     }
 
     ok $got, $expected, $function;
