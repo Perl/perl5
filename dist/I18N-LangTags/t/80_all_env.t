@@ -2,7 +2,7 @@
 require 5;
 use Test;
 # Time-stamp: "2004-07-01 14:33:50 ADT"
-BEGIN { plan tests => 20; }
+BEGIN { plan tests => 18; }
 use I18N::LangTags::Detect 1.01;
 print "# Hi there...\n";
 ok 1;
@@ -73,18 +73,6 @@ $ENV{'LANGUAGE'}       = '';
 $ENV{'LC_ALL'}         = '';
 $ENV{'LC_MESSAGES'}    = '';
 $ENV{'LANG'}           = 'Eu_MT';
-
-ok show( scalar I18N::LangTags::Detect::detect()),    "eu-mt";
-ok show( j      I18N::LangTags::Detect::detect()), q{["eu-mt"]};
-
-
-
-print "# Test LANG...\n";
-$ENV{'LANGUAGE'} = '';
-$ENV{'REQUEST_METHOD'} = '';
-$ENV{'LC_ALL'} = '';
-$ENV{'LC_MESSAGES'} = '';
-$ENV{'LANG'}     = 'Eu_MT';
 
 ok show( scalar I18N::LangTags::Detect::detect()),    "eu-mt";
 ok show( j      I18N::LangTags::Detect::detect()), q{["eu-mt"]};
