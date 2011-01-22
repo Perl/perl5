@@ -487,11 +487,10 @@ sub gen_op_is_macro {
     }
 }
 
-print $oc "/* ex: set ro: */\n";
-print $on "/* ex: set ro: */\n";
-
-safer_close($oc);
-safer_close($on);
+foreach ($oc, $on) {
+    print $_ "/* ex: set ro: */\n";
+    safer_close($_);
+}
 
 rename_if_different $opcode_new, 'opcode.h';
 rename_if_different $opname_new, 'opnames.h';
