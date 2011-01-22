@@ -32,8 +32,8 @@ $masterpodfile = abs_from_top('pod.lst');
 # --build-all tries to build everything
 # --build-foo updates foo as follows
 # --showfiles shows the files to be changed
-# --test exit early, exit if perl.pod, pod.lst, MANIFEST are
-#   consistent, die otherwise.
+# --test exit if perl.pod, pod.lst, MANIFEST are consistent, and regenerated
+#   files are up to date, die otherwise.
 
 %Targets
   = (
@@ -251,13 +251,13 @@ close MASTER;
       unless $disk_pods{$i} or $BuildFiles{$i};
   }
   if ($Test) {
-    print "1..1\n";
+    delete $Build{toc};
+    printf "1..%d\n", 1 + scalar keys %Build;
     if (@inconsistent) {
       print "not ok 1\n";
       die @inconsistent
     }
     print "ok 1\n";
-    exit;
   }
   else {
     warn @inconsistent if @inconsistent;
@@ -751,7 +751,14 @@ while (my ($target, $name) = each %Targets) {
 
   if (defined $orig) {
     if ($new eq $orig) {
-      print "Was not modified\n" if $Verbose;
+      if ($Test) {
+	printf "ok %d # $name is up to date\n", $built + 1;
+      } elsif ($Verbose) {
+	print "Was not modified\n";
+      }
+      next;
+    } elsif ($Test) {
+      printf "not ok %d # $name is up to date\n", $built + 1;
       next;
     }
     $mode = (stat $name)[2] // die "$0: Can't stat $name: $!";
@@ -767,4 +774,4 @@ while (my ($target, $name) = each %Targets) {
   }
 }
 
-warn "$0: was not instructed to build anything\n" unless $built;
+warn "$0: was not instructed to build anything\n" unless $built || $Test;
