@@ -57,6 +57,7 @@ foreach (values %Targets) {
   my @files = keys %Targets;
   my $filesopts = join(" | ", map { "--build-$_" } "all", sort @files);
   my $showfiles;
+  my %build_these;
   die <<__USAGE__
 $0: Usage: $0 [--verbose] [--showfiles] $filesopts
 __USAGE__
@@ -65,9 +66,14 @@ __USAGE__
 		       quiet => \$Quiet,
 		       showfiles => \$showfiles,
 		       test => \$Test,
-		       map {+"build-$_", \$Build{$_}} @files, 'all');
-  # Set them all to true
-  @Build{@files} = @files if ($Build{all});
+		       map {+"build-$_", \$build_these{$_}} @files, 'all');
+  if ($build_these{all}) {
+    %Build = %Targets;
+  } else {
+    while (my ($file, $want) = each %build_these) {
+      $Build{$file} = $Targets{$file} if $want;
+    }
+  }
   if ($showfiles) {
       print
 	  join(" ",
@@ -80,7 +86,7 @@ __USAGE__
 		   File::Spec->catfile(@d ?
 				       (@d == 1 && $d[0] eq '' ? () : @d)
 				       : "pod", $f);
-	       } @Targets{grep { $_ ne 'all' && $Build{$_} } keys %Build}),
+	       } @Targets{@files}),
           "\n";
       exit(0);
   }
@@ -94,7 +100,7 @@ __USAGE__
      );
 
 if ($Verbose) {
-  print "I'm building $_\n" foreach grep {$Build{$_}} keys %Build;
+  print "I'm building $_\n" foreach keys %Build;
 }
 
 open MASTER, $masterpodfile or die "$0: Can't open $masterpodfile: $!";
@@ -227,9 +233,8 @@ close MASTER;
     push @inconsistent, "$0: $i exists but is unknown by perl.pod\n"
 	if !$perlpods{$i} && !exists $Copies{$i};
   }
-  my @BuildTargets = grep {defined} @Targets{grep $_ ne 'all', keys %Build};
   my %BuildFiles;
-  @BuildFiles{@BuildTargets} = @BuildTargets;
+  ++$BuildFiles{$_} foreach values %Build;
 
   foreach my $i (sort keys %our_pods) {
     push @inconsistent, "$0: $i is known by buildtoc but does not exist\n"
