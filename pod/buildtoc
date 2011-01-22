@@ -318,7 +318,7 @@ close MASTER;
 
 my $OUT;
 
-sub output_perltoc {
+sub do_toc {
   my $filename = shift;
 
   ($_= <<"EOPOD2B") =~ s/^\t//gm and $OUT .= $_;
@@ -405,9 +405,7 @@ EOPOD2B
 
   $OUT =~ s/([^\n]+)/wrap('', '', $1)/ge;
 
-  open OUT, '>', $filename or die "$0: creating $filename failed: $!";
-  print OUT $OUT;
-  close OUT;
+  return $OUT;
 }
 
 # Below are all the auxiliary routines for generating perltoc.pod
@@ -730,34 +728,38 @@ while (my ($target, $name) = each %Targets) {
   print "Working on target $target\n" if $Verbose;
   next unless $Build{$target};
   $built++;
-  if ($target eq "toc") {
-    print "Now processing $name\n" if $Verbose;
-    output_perltoc($name);
-    print "Finished\n" if $Verbose;
-    next;
-  }
+  my ($orig, $mode);
   print "Now processing $name\n" if $Verbose;
-  local $/;
-  open THING, $name or die "Can't open $name: $!";
-  binmode THING;
-  my $orig = <THING>;
-  close THING;
-  die "$0: $name contains NUL bytes" if $orig =~ /\0/;
+  if ($target ne "toc") {
+    local $/;
+    open THING, $name or die "Can't open $name: $!";
+    binmode THING;
+    $orig = <THING>;
+    close THING;
+    die "$0: $name contains NUL bytes" if $orig =~ /\0/;
+  }
+
   my $new = do {
     no strict 'refs';
     &{"do_$target"}($target, $orig);
   };
-  if ($new eq $orig) {
-    print "Was not modified\n" if $Verbose;
-    next;
+
+  if (defined $orig) {
+    if ($new eq $orig) {
+      print "Was not modified\n" if $Verbose;
+      next;
+    }
+    $mode = (stat $name)[2] // die "$0: Can't stat $name: $!";
+    rename $name, "$name.old" or die "$0: Can't rename $name to $name.old: $!";
   }
-  my $mode = (stat $name)[2] // die "$0: Can't stat $name: $!";
-  rename $name, "$name.old" or die "$0: Can't rename $name to $name.old: $!";
+
   open THING, ">$name" or die "$0: Can't open $name for writing: $!";
   binmode THING;
   print THING $new or die "$0: print to $name failed: $!";
   close THING or die "$0: close $name failed: $!";
-  chmod $mode & 0777, $name or die "$0: can't chmod $mode $name: $!";
+  if (defined $mode) {
+    chmod $mode & 0777, $name or die "$0: can't chmod $mode $name: $!";
+  }
 }
 
 warn "$0: was not instructed to build anything\n" unless $built;
