@@ -29,7 +29,7 @@ If you need access to these removed files, then they can be be found most
 recently in the 5.8.9 and 5.10.0 tarballs, at
 
     http://www.cpan.org/src/perl-5.8.9.tar.gz
-	http://www.cpan.org/src/5.0/perl-5.10.0.tar.gz
+    http://www.cpan.org/src/5.0/perl-5.10.0.tar.gz
 
 The contents of the files in question can mostly be regenerated using git
 commands. The following table shows the equivalents. Note that the files
