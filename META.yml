@@ -53,7 +53,6 @@ no_index:
     - dist/XSLoader
     - lib/version
     - win32
-
   file:
     - dist/IO/ChangeLog
     - dist/IO/hints/sco.pl
@@ -106,4 +105,3 @@ no_index:
     - Porting/Maintainers.pm
     - Porting/perldelta_template.pod
     - TestInit.pm
-

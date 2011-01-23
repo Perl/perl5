@@ -31,7 +31,7 @@ my @dirs  = ('cpan', 'win32', grep { -d $_ && $_  !~ /^cpan/ } map { get_module_
 my %dirs;
 @dirs{@dirs} = ();
 
-my $files = join '', map { "    - $_\n" }
+@files = map { "    - $_" }
   grep {
     my $d = $_;
     while(($d = dirname($d)) ne "."){
@@ -45,10 +45,11 @@ my $files = join '', map { "    - $_\n" }
   }
   sort { lc $a cmp lc $b } @files;
 
-my $dirs  = join '', map { "    - $_\n" } sort { lc $a cmp lc $b } @dirs;
+@dirs  = map { "    - $_" } sort { lc $a cmp lc $b } @dirs;
 
 my $fh = safer_open($new_file);
 
+local $" = "\n";
 print $fh <<"EOI";
 name: perl
 version: $]
@@ -64,11 +65,10 @@ distribution_type: core
 generated_by: $0
 no_index:
   directory:
-$dirs
+@dirs
   file:
-$files
+@files
 EOI
 
 safer_close($fh);
 rename_if_different($new_file, $file);
-
