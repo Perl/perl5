@@ -469,14 +469,6 @@ foreach ($oc, $on, $pp) {
     read_only_bottom_close_and_rename($_);
 }
 
-###########################################################################
-sub tab {
-    my ($l, $t) = @_;
-    $t .= "\t" x ($l - (length($t) + 1) / 8);
-    $t;
-}
-###########################################################################
-
 # Some comments about 'T' opcode classifier:
 
 # Safe to set if the ppcode uses:

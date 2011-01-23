@@ -144,4 +144,10 @@ sub read_only_bottom_close_and_rename {
     rename_if_different($name, *{$fh}->{final_name});
 }
 
+sub tab {
+    my ($l, $t) = @_;
+    $t .= "\t" x ($l - (length($t) + 1) / 8);
+    $t;
+}
+
 1;
