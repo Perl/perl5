@@ -37,6 +37,9 @@ bug*.pl
 /GNUmakefile
 /x2p/GNUmakefile
 
+# produced by dtrace -H when configured with usedtrace
+perldtrace.h
+
 # general build products
 *.o
 *.a
