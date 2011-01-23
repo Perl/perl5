@@ -49,6 +49,7 @@ repair()
      -e 's=xs/apitest=XS/APItest=' \
      -e 's=xs/typemap=XS/Typemap=' \
      -e 's=unicode/normaliz=Unicode/Normalize=' \
+     -e 's=unicode/collate=Unicode/Collate=' \
      -e 's=i18n/langinfo=I18N/Langinfo=' \
      -e 's=devel/ppport=Devel/PPPort='
 }
