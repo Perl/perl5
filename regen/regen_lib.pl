@@ -71,7 +71,7 @@ sub safer_open {
     *{$fh}->{name} = $name;
     if (defined $final_name) {
 	*{$fh}->{final_name} = $final_name;
-	*{$fh}->{lang} = ($final_name =~ /\.[ch]$/ ? 'C' : 'Perl');
+	*{$fh}->{lang} = ($final_name =~ /\.(?:c|h|tab|act)$/ ? 'C' : 'Perl');
     }
     binmode $fh;
     $fh;
