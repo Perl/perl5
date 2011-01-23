@@ -30,10 +30,10 @@ while (<DATA>) {
   push @names, $name;
 }
 
-my $c = safer_open("overload.c-new");
-my $h = safer_open("overload.h-new");
+my $c = safer_open('overload.c-new', 'overload.c');
+my $h = safer_open('overload.h-new', 'overload.h');
 mkdir("lib/overload", 0777) unless -d 'lib/overload';
-my $p = safer_open('lib/overload/numbers.pm-new');
+my $p = safer_open('lib/overload/numbers.pm-new', 'lib/overload/numbers.pm');
 
 
 select $p;
@@ -129,12 +129,9 @@ print $c <<"EOT";
 };
 EOT
 
-safer_close($h);
-safer_close($c);
-safer_close($p);
-rename_if_different("overload.c-new", "overload.c");
-rename_if_different("overload.h-new","overload.h");
-rename_if_different('lib/overload/numbers.pm-new', 'lib/overload/numbers.pm');
+close_and_rename($h);
+close_and_rename($c);
+close_and_rename($p);
 
 __DATA__
 # Fallback should be the first

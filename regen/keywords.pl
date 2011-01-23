@@ -14,7 +14,7 @@ use strict;
 
 require 'regen/regen_lib.pl';
 
-my $kw = safer_open("keywords.h-new");
+my $kw = safer_open('keywords.h-new', 'keywords.h');
 select $kw;
 
 print read_only_top(lang => 'C', by => 'regen/keywords.pl', from => 'its data',
@@ -34,9 +34,7 @@ while (<DATA>) {
 
 print $kw "\n/* ex: set ro: */\n";
 
-safer_close($kw);
-
-rename_if_different("keywords.h-new", "keywords.h");
+close_and_rename($kw);
 
 ###########################################################################
 sub tab {

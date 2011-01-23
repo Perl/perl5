@@ -126,9 +126,7 @@ EXTCONST U8 PL_${varname}_bitmask[] = {
 EOP
 }
 
-my $tmp_h = 'regnodes.h-new';
-
-my $out = safer_open($tmp_h);
+my $out = safer_open('regnodes.h-new', 'regnodes.h');
 
 print $out read_only_top(lang => 'C', by => 'regen/regcomp.pl',
 			 from => 'regcomp.sym');
@@ -330,6 +328,4 @@ EOC
 print $out <<EOP;
 /* ex: set ro: */
 EOP
-safer_close($out);
-
-rename_if_different $tmp_h, 'regnodes.h';
+close_and_rename($out);

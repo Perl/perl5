@@ -51,7 +51,7 @@ my %map = (
 # Example #3: S_CBI   means type func_r(const char*, char*, int)
 
 
-my $h = safer_open("reentr.h-new");
+my $h = safer_open('reentr.h-new', 'reentr.h');
 select $h;
 print read_only_top(lang => 'C', by => 'regen/reentr.pl',
 		    from => 'data in regen/reentr.pl',
@@ -786,12 +786,11 @@ typedef struct {
 /* ex: set ro: */
 EOF
 
-safer_close($h);
-rename_if_different('reentr.h-new', 'reentr.h');
+close_and_rename($h);
 
 # Prepare to write the reentr.c.
 
-my $c = safer_open("reentr.c-new");
+my $c = safer_open('reentr.c-new', 'reentr.c');
 select $c;
 my $top = read_only_top(lang => 'C', by => 'regen/reentr.pl',
 			from => 'data in regen/reentr.pl',
@@ -1082,8 +1081,7 @@ Perl_reentrant_retry(const char *f, ...)
 /* ex: set ro: */
 EOF
 
-safer_close($c);
-rename_if_different('reentr.c-new', 'reentr.c');
+close_and_rename($c);
 
 __DATA__
 asctime S	|time	|const struct tm|B_SB|B_SBI|I_SB|I_SBI

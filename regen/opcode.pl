@@ -20,10 +20,8 @@ BEGIN {
     require 'regen/regen_lib.pl';
 }
 
-my $opcode_new = 'opcode.h-new';
-my $opname_new = 'opnames.h-new';
-my $oc = safer_open($opcode_new);
-my $on = safer_open($opname_new);
+my $oc = safer_open('opcode.h-new', 'opcode.h');
+my $on = safer_open('opnames.h-new', 'opnames.h');
 select $oc;
 
 # Read data.
@@ -459,15 +457,10 @@ sub gen_op_is_macro {
 
 foreach ($oc, $on) {
     print $_ "/* ex: set ro: */\n";
-    safer_close($_);
+    close_and_rename($_);
 }
 
-rename_if_different $opcode_new, 'opcode.h';
-rename_if_different $opname_new, 'opnames.h';
-
-my $pp_proto_new = 'pp_proto.h-new';
-
-my $pp = safer_open($pp_proto_new);
+my $pp = safer_open('pp_proto.h-new', 'pp_proto.h');
 
 print $pp read_only_top(lang => 'C', by => 'opcode.pl', from => 'its data');
 
@@ -481,9 +474,7 @@ print $pp read_only_top(lang => 'C', by => 'opcode.pl', from => 'its data');
 }
 print $pp "\n/* ex: set ro: */\n";
 
-safer_close($pp);
-
-rename_if_different $pp_proto_new, 'pp_proto.h';
+close_and_rename($pp);
 
 ###########################################################################
 sub tab {

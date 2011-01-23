@@ -262,8 +262,8 @@ if (@ARGV && $ARGV[0] eq "tree")
     exit ;
 }
 
-my $warn = safer_open("warnings.h-new");
-my $pm = safer_open("lib/warnings.pm-new");
+my $warn = safer_open('warnings.h-new', 'warnings.h');
+my $pm = safer_open('lib/warnings.pm-new', 'lib/warnings.pm');
 
 print $pm read_only_top(lang => 'Perl', by => 'regen/warnings.pl');
 print $warn read_only_top(lang => 'C', by => 'regen/warnings.pl'), <<'EOM';
@@ -369,8 +369,7 @@ print $warn <<'EOM';
 /* ex: set ro: */
 EOM
 
-safer_close $warn;
-rename_if_different("warnings.h-new", "warnings.h");
+close_and_rename($warn);
 
 while (<DATA>) {
     last if /^KEYWORDS$/ ;
@@ -427,8 +426,7 @@ while (<DATA>) {
 }
 
 print $pm "# ex: set ro:\n";
-safer_close $pm;
-rename_if_different("lib/warnings.pm-new", "lib/warnings.pm");
+close_and_rename($pm);
 
 __END__
 package warnings;

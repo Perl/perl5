@@ -187,7 +187,7 @@ sub walk_table (&@) {
 	$F = $filename;
     }
     else {
-	$F = safer_open("$filename-new");
+	$F = safer_open("$filename-new", $filename);
 	print $F do_not_edit ($filename);
     }
     foreach (@embed) {
@@ -197,14 +197,13 @@ sub walk_table (&@) {
     }
     print $F $trailer if $trailer;
     unless (ref $filename) {
-	safer_close($F);
-	rename_if_different("$filename-new", $filename);
+	close_and_rename($F);
     }
 }
 
 # generate proto.h
 {
-    my $pr = safer_open('proto.h-new');
+    my $pr = safer_open('proto.h-new', 'proto.h');
     print $pr do_not_edit ("proto.h"), "START_EXTERN_C\n";
     my $ret;
 
@@ -337,8 +336,7 @@ END_EXTERN_C
 /* ex: set ro: */
 EOF
 
-    safer_close($pr);
-    rename_if_different('proto.h-new', 'proto.h');
+    close_and_rename($pr);
 }
 
 # generates global.sym (API export list)
@@ -417,7 +415,7 @@ sub multoff ($$) {
     return hide("PL_$pre$sym", "PL_$sym");
 }
 
-my $em = safer_open('embed.h-new');
+my $em = safer_open('embed.h-new', 'embed.h');
 
 print $em do_not_edit ("embed.h"), <<'END';
 /* (Doing namespace management portably in C is really gross.) */
@@ -576,10 +574,9 @@ print $em <<'END';
 /* ex: set ro: */
 END
 
-safer_close($em);
-rename_if_different('embed.h-new', 'embed.h');
+close_and_rename($em);
 
-$em = safer_open('embedvar.h-new');
+$em = safer_open('embedvar.h-new', 'embedvar.h');
 
 print $em do_not_edit ("embedvar.h"), <<'END';
 /* (Doing namespace management portably in C is really gross.) */
@@ -658,11 +655,10 @@ print $em <<'END';
 /* ex: set ro: */
 END
 
-safer_close($em);
-rename_if_different('embedvar.h-new', 'embedvar.h');
+close_and_rename($em);
 
-my $capi = safer_open('perlapi.c-new');
-my $capih = safer_open('perlapi.h-new');
+my $capi = safer_open('perlapi.c-new', 'perlapi.c');
+my $capih = safer_open('perlapi.h-new', 'perlapi.h');
 
 print $capih do_not_edit ("perlapi.h"), <<'EOT';
 /* declare accessor functions for Perl variables */
@@ -769,8 +765,7 @@ print $capih <<'EOT';
 
 /* ex: set ro: */
 EOT
-safer_close($capih);
-rename_if_different('perlapi.h-new', 'perlapi.h');
+close_and_rename($capih);
 
 my $warning = do_not_edit ("perlapi.c");
 $warning =~ s! \*/\n! *
@@ -825,7 +820,6 @@ END_EXTERN_C
 /* ex: set ro: */
 EOT
 
-safer_close($capi);
-rename_if_different('perlapi.c-new', 'perlapi.c');
+close_and_rename($capi);
 
 # ex: set ts=8 sts=4 sw=4 noet:

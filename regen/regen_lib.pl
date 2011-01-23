@@ -62,13 +62,14 @@ sub rename_if_different {
 
 # Saf*er*, but not totally safe. And assumes always open for output.
 sub safer_open {
-    my $name = shift;
+    my ($name, $final_name) = @_;
     if (-f $name) {
 	unlink $name or die "$name exists but can't unlink: $!";
     }
     my $fh = gensym;
     open $fh, ">$name" or die "Can't create $name: $!";
     *{$fh}->{name} = $name;
+    *{$fh}->{final_name} = $final_name if defined $final_name;
     binmode $fh;
     $fh;
 }
@@ -126,6 +127,15 @@ EOM
     $cooked =~ tr/\0/ /; # Don't break Larry's name etc
     $cooked =~ s/ +$//mg; # Remove all trailing spaces
     return $cooked;
+}
+
+sub close_and_rename {
+    my $fh = shift;
+    my $name = *{$fh}->{name};
+    die "No final name specified at open time for $name"
+	unless *{$fh}->{final_name};
+    safer_close($fh);
+    rename_if_different($name, *{$fh}->{final_name});
 }
 
 1;
