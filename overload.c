@@ -164,3 +164,5 @@ static const char * const PL_AMG_names[NofAMmeth] = {
     "(qr",		/* regexp     */
     "DESTROY"
 };
+
+/* ex: set ro: */

@@ -181,7 +181,7 @@ my (@core, @ext, @api);
 # walk table providing an array of components in each line to
 # subroutine, printing the result
 sub walk_table (&@) {
-    my ($function, $filename, $trailer) = @_;
+    my ($function, $filename) = @_;
     my $F;
     if (ref $filename) {	# filehandle
 	$F = $filename;
@@ -195,9 +195,8 @@ sub walk_table (&@) {
 	# $function->(@args) is not 5.003
 	print $F @outs;
     }
-    print $F $trailer if $trailer;
     unless (ref $filename) {
-	close_and_rename($F);
+	read_only_bottom_close_and_rename($F);
     }
 }
 
@@ -333,10 +332,9 @@ sub walk_table (&@) {
 #  include "pp_proto.h"
 #endif
 END_EXTERN_C
-/* ex: set ro: */
 EOF
 
-    close_and_rename($pr);
+    read_only_bottom_close_and_rename($pr);
 }
 
 # generates global.sym (API export list)
@@ -359,7 +357,7 @@ EOF
 }
 
 warn "$unflagged_pointers pointer arguments to clean up\n" if $unflagged_pointers;
-walk_table(\&write_global_sym, "global.sym", "# ex: set ro:\n");
+walk_table(\&write_global_sym, "global.sym");
 
 sub readvars(\%$$@) {
     my ($syms, $file,$pre,$keep_pre) = @_;
@@ -570,11 +568,9 @@ foreach (sort keys %has_va) {
 
 print $em <<'END';
 #endif
-
-/* ex: set ro: */
 END
 
-close_and_rename($em);
+read_only_bottom_close_and_rename($em);
 
 $em = safer_open('embedvar.h-new', 'embedvar.h');
 
@@ -651,11 +647,9 @@ for $sym (sort keys %globvar) {
 print $em <<'END';
 
 #endif /* PERL_GLOBAL_STRUCT */
-
-/* ex: set ro: */
 END
 
-close_and_rename($em);
+read_only_bottom_close_and_rename($em);
 
 my $capi = safer_open('perlapi.c-new', 'perlapi.c');
 my $capih = safer_open('perlapi.h-new', 'perlapi.h');
@@ -762,10 +756,9 @@ print $capih <<'EOT';
 #endif /* MULTIPLICITY && PERL_GLOBAL_STRUCT */
 
 #endif /* __perlapi_h__ */
-
-/* ex: set ro: */
 EOT
-close_and_rename($capih);
+
+read_only_bottom_close_and_rename($capih);
 
 my $warning = do_not_edit ("perlapi.c");
 $warning =~ s! \*/\n! *
@@ -816,10 +809,8 @@ START_EXTERN_C
 END_EXTERN_C
 
 #endif /* MULTIPLICITY && PERL_GLOBAL_STRUCT */
-
-/* ex: set ro: */
 EOT
 
-close_and_rename($capi);
+read_only_bottom_close_and_rename($capi);
 
 # ex: set ts=8 sts=4 sw=4 noet:

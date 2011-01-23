@@ -782,11 +782,9 @@ typedef struct {
 #endif /* USE_REENTRANT_API */
  
 #endif
-
-/* ex: set ro: */
 EOF
 
-close_and_rename($h);
+read_only_bottom_close_and_rename($h);
 
 # Prepare to write the reentr.c.
 
@@ -1077,11 +1075,9 @@ Perl_reentrant_retry(const char *f, ...)
     va_end(ap);
     return retptr;
 }
-
-/* ex: set ro: */
 EOF
 
-close_and_rename($c);
+read_only_bottom_close_and_rename($c);
 
 __DATA__
 asctime S	|time	|const struct tm|B_SB|B_SBI|I_SB|I_SBI

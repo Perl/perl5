@@ -408,7 +408,6 @@ print <<END;
 #endif /* !PERL_GLOBAL_STRUCT_INIT */
 
 END_EXTERN_C
-
 END
 
 # Emit OP_IS_* macros
@@ -418,7 +417,6 @@ print $on <<EO_OP_IS_COMMENT;
 /* the OP_IS_(SOCKET|FILETEST) macros are optimized to a simple range
     check because all the member OPs are contiguous in opcode.pl
     <OPS> table.  opcode.pl verifies the range contiguity.  */
-
 EO_OP_IS_COMMENT
 
 gen_op_is_macro( \%OP_IS_SOCKET, 'OP_IS_SOCKET');
@@ -437,7 +435,7 @@ sub gen_op_is_macro {
 	my $last = pop @rest;	# @rest slurped, get its last
 	die "Invalid range of ops: $first .. $last\n" unless $last;
 
-	print $on "#define $macname(op)	\\\n\t(";
+	print $on "\n#define $macname(op)	\\\n\t(";
 
 	# verify that op-ct matches 1st..last range (and fencepost)
 	# (we know there are no dups)
@@ -445,19 +443,14 @@ sub gen_op_is_macro {
 	    
 	    # contiguous ops -> optimized version
 	    print $on "(op) >= OP_" . uc($first) . " && (op) <= OP_" . uc($last);
-	    print $on ")\n\n";
+	    print $on ")\n";
 	}
 	else {
 	    print $on join(" || \\\n\t ",
 			  map { "(op) == OP_" . uc() } sort keys %$op_is);
-	    print $on ")\n\n";
+	    print $on ")\n";
 	}
     }
-}
-
-foreach ($oc, $on) {
-    print $_ "/* ex: set ro: */\n";
-    close_and_rename($_);
 }
 
 my $pp = safer_open('pp_proto.h-new', 'pp_proto.h');
@@ -472,9 +465,9 @@ print $pp read_only_top(lang => 'C', by => 'opcode.pl', from => 'its data');
     }
     print $pp "PERL_CALLCONV OP *$_(pTHX);\n" foreach sort keys %funcs;
 }
-print $pp "\n/* ex: set ro: */\n";
-
-close_and_rename($pp);
+foreach ($oc, $on, $pp) {
+    read_only_bottom_close_and_rename($_);
+}
 
 ###########################################################################
 sub tab {

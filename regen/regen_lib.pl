@@ -69,7 +69,10 @@ sub safer_open {
     my $fh = gensym;
     open $fh, ">$name" or die "Can't create $name: $!";
     *{$fh}->{name} = $name;
-    *{$fh}->{final_name} = $final_name if defined $final_name;
+    if (defined $final_name) {
+	*{$fh}->{final_name} = $final_name;
+	*{$fh}->{lang} = ($final_name =~ /\.[ch]$/ ? 'C' : 'Perl');
+    }
     binmode $fh;
     $fh;
 }
@@ -129,11 +132,14 @@ EOM
     return $cooked;
 }
 
-sub close_and_rename {
+sub read_only_bottom_close_and_rename {
     my $fh = shift;
     my $name = *{$fh}->{name};
+    my $lang = *{$fh}->{lang};
     die "No final name specified at open time for $name"
 	unless *{$fh}->{final_name};
+    print $fh $lang eq 'Perl'
+	? "\n# ex: set ro:\n" : "\n/* ex: set ro: */\n";
     safer_close($fh);
     rename_if_different($name, *{$fh}->{final_name});
 }

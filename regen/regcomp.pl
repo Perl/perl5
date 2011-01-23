@@ -122,7 +122,6 @@ EXTCONST U8 PL_${varname}_bitmask[] = {
     $out_mask
 };
 #endif /* DOINIT */
-
 EOP
 }
 
@@ -321,11 +320,9 @@ print $out process_flags('V', 'varies', <<'EOC');
 EOC
 
 print $out process_flags('S', 'simple', <<'EOC');
+
 /* The following always have a length of 1. U8 we can do strchr() on it. */
 /* (Note that length 1 means "one character" under UTF8, not "one octet".) */
 EOC
 
-print $out <<EOP;
-/* ex: set ro: */
-EOP
-close_and_rename($out);
+read_only_bottom_close_and_rename($out);

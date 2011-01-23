@@ -366,10 +366,9 @@ print $warn <<'EOM';
 	      isWARNf_on(PL_curcop->cop_warnings, unpackWARN4(x))))
 
 /* end of file warnings.h */
-/* ex: set ro: */
 EOM
 
-close_and_rename($warn);
+read_only_bottom_close_and_rename($warn);
 
 while (<DATA>) {
     last if /^KEYWORDS$/ ;
@@ -425,8 +424,7 @@ while (<DATA>) {
     print $pm $_ ;
 }
 
-print $pm "# ex: set ro:\n";
-close_and_rename($pm);
+read_only_bottom_close_and_rename($pm);
 
 __END__
 package warnings;

@@ -57,7 +57,6 @@ our \@enums = qw#
 { my \$i = 0; our %names = map { \$_ => \$i++ } \@names }
 
 { my \$i = 0; our %enums = map { \$_ => \$i++ } \@enums }
-
 EOF
 }
 
@@ -89,7 +88,6 @@ print <<'EOF';
 };
 
 #define NofAMmeth max_amg_code
-
 EOF
 
 print $c <<'EOF';
@@ -129,10 +127,9 @@ print $c <<"EOT";
 };
 EOT
 
-close_and_rename($h);
-close_and_rename($c);
-close_and_rename($p);
-
+foreach ($h, $c, $p) {
+    read_only_bottom_close_and_rename($_);
+}
 __DATA__
 # Fallback should be the first
 fallback	()

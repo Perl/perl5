@@ -7093,4 +7093,5 @@ PERL_CALLCONV int	Perl_do_spawn_nowait(pTHX_ char* cmd)
 #  include "pp_proto.h"
 #endif
 END_EXTERN_C
+
 /* ex: set ro: */

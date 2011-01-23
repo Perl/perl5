@@ -89,3 +89,4 @@ enum {
 
 #define NofAMmeth max_amg_code
 
+/* ex: set ro: */

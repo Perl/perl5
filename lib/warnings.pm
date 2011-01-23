@@ -551,4 +551,5 @@ sub warnif
 delete $warnings::{$_} foreach qw(NORMAL FATAL MESSAGE);
 
 1;
+
 # ex: set ro:

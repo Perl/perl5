@@ -32,9 +32,7 @@ while (<DATA>) {
     print &tab(5, "#define KEY_$keyword"), $keynum++, "\n";
 }
 
-print $kw "\n/* ex: set ro: */\n";
-
-close_and_rename($kw);
+read_only_bottom_close_and_rename($kw);
 
 ###########################################################################
 sub tab {
