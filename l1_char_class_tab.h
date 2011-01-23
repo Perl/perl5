@@ -1,43 +1,3 @@
-/* Bits for PL_charclass[] */
-#define _CC_ALNUMC_A         (1<<0)
-#define _CC_ALNUMC_L1        (1<<1)
-#define _CC_ALPHA_A          (1<<2)
-#define _CC_ALPHA_L1         (1<<3)
-#define _CC_BLANK_A          (1<<4)
-#define _CC_BLANK_L1         (1<<5)
-#define _CC_CHARNAME_CONT    (1<<6)
-#define _CC_CNTRL_A          (1<<7)
-#define _CC_CNTRL_L1         (1<<8)
-#define _CC_DIGIT_A          (1<<9)
-#define _CC_GRAPH_A          (1<<10)
-#define _CC_GRAPH_L1         (1<<11)
-#define _CC_IDFIRST_A        (1<<12)
-#define _CC_IDFIRST_L1       (1<<13)
-#define _CC_LOWER_A          (1<<14)
-#define _CC_LOWER_L1         (1<<15)
-#define _CC_OCTAL_A          (1<<16)
-#define _CC_PRINT_A          (1<<17)
-#define _CC_PRINT_L1         (1<<18)
-#define _CC_PSXSPC_A         (1<<19)
-#define _CC_PSXSPC_L1        (1<<20)
-#define _CC_PUNCT_A          (1<<21)
-#define _CC_PUNCT_L1         (1<<22)
-#define _CC_SPACE_A          (1<<23)
-#define _CC_SPACE_L1         (1<<24)
-#define _CC_UPPER_A          (1<<25)
-#define _CC_UPPER_L1         (1<<26)
-#define _CC_WORDCHAR_A       (1<<27)
-#define _CC_WORDCHAR_L1      (1<<28)
-#define _CC_XDIGIT_A         (1<<29)
-#define _CC_NONLATIN1_FOLD   (1<<30)
-/* Unused
- *                           (1<<31)
- */
-
-
-#ifdef DOINIT
-EXTCONST  U32 PL_charclass[] = {
-
 /* !! MODIFY AND USE Porting/mk_PL_charclass.pl TO CHANGE THIS TABLE !! */
 /* U+00 NUL */ _CC_CNTRL_A|_CC_CNTRL_L1,
 /* U+01 SOH */ _CC_CNTRL_A|_CC_CNTRL_L1,
@@ -295,9 +255,3 @@ EXTCONST  U32 PL_charclass[] = {
 /* U+FD y with acute */ _CC_ALNUMC_L1|_CC_ALPHA_L1|_CC_CHARNAME_CONT|_CC_GRAPH_L1|_CC_IDFIRST_L1|_CC_LOWER_L1|_CC_PRINT_L1|_CC_WORDCHAR_L1,
 /* U+FE thorn */ _CC_ALNUMC_L1|_CC_ALPHA_L1|_CC_CHARNAME_CONT|_CC_GRAPH_L1|_CC_IDFIRST_L1|_CC_LOWER_L1|_CC_PRINT_L1|_CC_WORDCHAR_L1,
 /* U+FF y with diaeresis */ _CC_NONLATIN1_FOLD|_CC_ALNUMC_L1|_CC_ALPHA_L1|_CC_CHARNAME_CONT|_CC_GRAPH_L1|_CC_IDFIRST_L1|_CC_LOWER_L1|_CC_PRINT_L1|_CC_WORDCHAR_L1,
-};
-
-#else /* ! DOINIT */
-EXTCONST U32 PL_charclass[];
-#endif
-
