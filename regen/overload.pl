@@ -30,11 +30,10 @@ while (<DATA>) {
   push @names, $name;
 }
 
-safer_unlink ('lib/overload/numbers.pm');
 my $c = safer_open("overload.c-new");
 my $h = safer_open("overload.h-new");
 mkdir("lib/overload", 0777) unless -d 'lib/overload';
-my $p = safer_open('lib/overload/numbers.pm');
+my $p = safer_open('lib/overload/numbers.pm-new');
 
 
 select $p;
@@ -135,6 +134,7 @@ safer_close($c);
 safer_close($p);
 rename_if_different("overload.c-new", "overload.c");
 rename_if_different("overload.h-new","overload.h");
+rename_if_different('lib/overload/numbers.pm-new', 'lib/overload/numbers.pm');
 
 __DATA__
 # Fallback should be the first

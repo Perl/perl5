@@ -18,6 +18,6 @@ $ENV{PERL5LIB} = rel2abs($lib);
 
 chdir '..' if $in_t;
 
-print "1..17\n"; # I can't see a clean way to calculate this automatically.
+print "1..18\n"; # I can't see a clean way to calculate this automatically.
 
 system "$^X regen.pl --tap";
