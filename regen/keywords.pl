@@ -15,11 +15,10 @@ use strict;
 require 'regen/regen_lib.pl';
 
 my $kw = safer_open('keywords.h-new', 'keywords.h');
-select $kw;
 
-print read_only_top(lang => 'C', by => 'regen/keywords.pl', from => 'its data',
-		    file => 'keywords.h', style => '*',
-		    copyright => [1994 .. 1997, 1999 .. 2002, 2005 .. 2007]);
+print $kw read_only_top(lang => 'C', by => 'regen/keywords.pl',
+			from => 'its data', file => 'keywords.h', style => '*',
+			copyright => [1994 .. 1997, 1999 .. 2002, 2005 .. 2007]);
 
 # Read & print data.
 
@@ -29,7 +28,7 @@ while (<DATA>) {
     next unless $_;
     next if /^#/;
     my ($keyword) = split;
-    print &tab(5, "#define KEY_$keyword"), $keynum++, "\n";
+    print $kw tab(5, "#define KEY_$keyword"), $keynum++, "\n";
 }
 
 read_only_bottom_close_and_rename($kw);

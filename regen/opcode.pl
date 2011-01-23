@@ -22,7 +22,6 @@ BEGIN {
 
 my $oc = safer_open('opcode.h-new', 'opcode.h');
 my $on = safer_open('opnames.h-new', 'opnames.h');
-select $oc;
 
 # Read data.
 
@@ -139,9 +138,9 @@ foreach my $sock_func (qw(socket bind listen accept shutdown
 
 # Emit defines.
 
-print read_only_top(lang => 'C', by => 'regen/opcode.pl', from => 'its data',
-		    file => 'opcode.h', style => '*',
-		    copyright => [1993 .. 2007]),
+print $oc read_only_top(lang => 'C', by => 'regen/opcode.pl', from => 'its data',
+			file => 'opcode.h', style => '*',
+			copyright => [1993 .. 2007]),
     "#ifndef PERL_GLOBAL_STRUCT_INIT\n\n";
 
 {
@@ -150,11 +149,11 @@ print read_only_top(lang => 'C', by => 'regen/opcode.pl', from => 'its data',
 
     sub unimplemented {
 	if (@unimplemented) {
-	    print "#else\n";
+	    print $oc "#else\n";
 	    foreach (@unimplemented) {
-		print "#define $_ Perl_unimplemented_op\n";
+		print $oc "#define $_ Perl_unimplemented_op\n";
 	    }
-	    print "#endif\n";
+	    print $oc "#endif\n";
 	    @unimplemented = ();
 	}
 
@@ -169,11 +168,11 @@ print read_only_top(lang => 'C', by => 'regen/opcode.pl', from => 'its data',
 	    unimplemented();
 	    $last_cond = $cond;
 	    if ($last_cond) {
-		print "$last_cond\n";
+		print $oc "$last_cond\n";
 	    }
 	}
 	push @unimplemented, $op_func if $last_cond;
-	print "#define $op_func $impl\n" if $impl ne $op_func;
+	print $oc "#define $op_func $impl\n" if $impl ne $op_func;
     }
     # If the last op was conditional, we need to close it out:
     unimplemented();
@@ -186,15 +185,15 @@ print $on read_only_top(lang => 'C', by => 'regen/opcode.pl',
 
 my $i = 0;
 for (@ops) {
-      print $on "\t", &tab(3,"OP_\U$_"), " = ", $i++, ",\n";
+      print $on "\t", tab(3,"OP_\U$_"), " = ", $i++, ",\n";
 }
-print $on "\t", &tab(3,"OP_max"), "\n";
+print $on "\t", tab(3,"OP_max"), "\n";
 print $on "} opcode;\n";
 print $on "\n#define MAXO ", scalar @ops, "\n";
 
 # Emit op names and descriptions.
 
-print <<END;
+print $oc <<'END';
 START_EXTERN_C
 
 #ifndef DOINIT
@@ -204,16 +203,13 @@ EXTCONST char* const PL_op_name[] = {
 END
 
 for (@ops) {
-    print qq(\t"$_",\n);
+    print $oc qq(\t"$_",\n);
 }
 
-print <<END;
+print $oc <<'END';
 };
 #endif
 
-END
-
-print <<END;
 #ifndef DOINIT
 EXTCONST char* const PL_op_desc[];
 #else
@@ -226,10 +222,10 @@ for (@ops) {
     # Have to escape double quotes and escape characters.
     $safe_desc =~ s/([\\"])/\\$1/g;
 
-    print qq(\t"$safe_desc",\n);
+    print $oc qq(\t"$safe_desc",\n);
 }
 
-print <<END;
+print $oc <<'END';
 };
 #endif
 
@@ -240,7 +236,7 @@ END
 
 # Emit ppcode switch array.
 
-print <<END;
+print $oc <<'END';
 
 START_EXTERN_C
 
@@ -262,25 +258,20 @@ for (@ops) {
     my $op_func = "Perl_pp_$_";
     my $name = $alias{$_};
     if ($name && $name->[0] ne $op_func) {
-	print "\t$op_func,\t/* implemented by $name->[0] */\n";
+	print $oc "\t$op_func,\t/* implemented by $name->[0] */\n";
     }
     else {
-	print "\t$op_func,\n";
+	print $oc "\t$op_func,\n";
     }
 }
 
-print <<END;
+print $oc <<'END';
 }
 #endif
 #ifdef PERL_PPADDR_INITED
 ;
 #endif
 
-END
-
-# Emit check routines.
-
-print <<END;
 #ifdef PERL_GLOBAL_STRUCT_INIT
 #  define PERL_CHECK_INITED
 static const Perl_check_t Gcheck[]
@@ -296,23 +287,16 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 END
 
 for (@ops) {
-    print "\t", &tab(3, "Perl_$check{$_},"), "\t/* $_ */\n";
+    print $oc "\t", tab(3, "Perl_$check{$_},"), "\t/* $_ */\n";
 }
 
-print <<END;
+print $oc <<'END';
 }
 #endif
 #ifdef PERL_CHECK_INITED
 ;
 #endif /* #ifdef PERL_CHECK_INITED */
 
-END
-
-# Emit allowed argument types.
-
-my $ARGBITS = 32;
-
-print <<END;
 #ifndef PERL_GLOBAL_STRUCT_INIT
 
 #ifndef DOINIT
@@ -320,6 +304,10 @@ EXTCONST U32 PL_opargs[];
 #else
 EXTCONST U32 PL_opargs[] = {
 END
+
+# Emit allowed argument types.
+
+my $ARGBITS = 32;
 
 my %argnum = (
     'S',  1,		# scalar
@@ -398,10 +386,10 @@ for my $op (@ops) {
 	$argshift += 4;
     }
     $argsum = sprintf("0x%08x", $argsum);
-    print "\t", &tab(3, "$argsum,"), "/* $op */\n";
+    print $oc "\t", tab(3, "$argsum,"), "/* $op */\n";
 }
 
-print <<END;
+print $oc <<'END';
 };
 #endif
 
@@ -412,7 +400,7 @@ END
 
 # Emit OP_IS_* macros
 
-print $on <<EO_OP_IS_COMMENT;
+print $on <<'EO_OP_IS_COMMENT';
 
 /* the OP_IS_(SOCKET|FILETEST) macros are optimized to a simple range
     check because all the member OPs are contiguous in opcode.pl

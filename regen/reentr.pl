@@ -52,13 +52,12 @@ my %map = (
 
 
 my $h = safer_open('reentr.h-new', 'reentr.h');
-select $h;
-print read_only_top(lang => 'C', by => 'regen/reentr.pl',
-		    from => 'data in regen/reentr.pl',
-		    file => 'reentr.h', style => '*',
-		    copyright => [2002, 2003, 2005 .. 2007]);
+print $h read_only_top(lang => 'C', by => 'regen/reentr.pl',
+		       from => 'data in regen/reentr.pl',
+		       file => 'reentr.h', style => '*',
+		       copyright => [2002, 2003, 2005 .. 2007]);
 
-print <<EOF;
+print $h <<EOF;
 #ifndef REENTR_H
 #define REENTR_H
 
@@ -202,7 +201,6 @@ while (<DATA>) { # Read in the protypes.
     # If given the -U option open up the metaconfig unit for this function.
     if ($opts{U} && open(U, ">d_${func}_r.U"))  {
     	binmode U;
-	select U;
     }
 
     if ($opts{U}) {
@@ -223,7 +221,7 @@ while (<DATA>) { # Read in the protypes.
 	    push @prereq, 'i_systime';
 	}
 	# Output the metaconfig unit header.
-	print <<EOF;
+	print U <<"EOF";
 ?RCS: \$Id: d_${func}_r.U,v $
 ?RCS:
 ?RCS: Copyright (c) 2002,2003 Jarkko Hietaniemi
@@ -268,7 +266,7 @@ eval \$inlibc
 case "\$d_${func}_r" in
 "\$define")
 EOF
-	print <<EOF;
+	print U <<"EOF";
 	hdrs="$hdrs"
 	case "\$d_${func}_r_proto:\$usethreads" in
 	":define")	d_${func}_r_proto=define
@@ -284,7 +282,7 @@ EOF
         my ($r, $a) = ($p =~ /^(.)_(.+)/);
 	my $v = join(", ", map { $m{$_} } split '', $a);
 	if ($opts{U}) {
-	    print <<EOF ;
+	    print U <<"EOF";
 	case "\$${func}_r_proto" in
 	''|0) try='$m{$r} ${func}_r($v);'
 	./protochk "extern \$try" \$hdrs && ${func}_r_proto=$p ;;
@@ -300,7 +298,7 @@ EOF
 	$seenm{$func} = \%m;
     }
     if ($opts{U}) {
-	print <<EOF;
+	print U <<"EOF";
 	case "\$${func}_r_proto" in
 	''|0)	d_${func}_r=undef
  	        ${func}_r_proto=0
@@ -331,15 +329,11 @@ EOF
 
 close DATA;
 
-# Prepare to continue writing the reentr.h.
-
-select $h;
-
 {
     # Write out all the known prototype signatures.
     my $i = 1;
     for my $p (sort keys %seenp) {
-	print "#define REENTRANT_PROTO_${p}	${i}\n";
+	print $h "#define REENTRANT_PROTO_${p}	${i}\n";
 	$i++;
     }
 }
@@ -765,7 +759,7 @@ EOF
 
 local $" = '';
 
-print <<EOF;
+print $h <<EOF;
 
 /* Defines for indicating which special features are supported. */
 
@@ -789,7 +783,6 @@ read_only_bottom_close_and_rename($h);
 # Prepare to write the reentr.c.
 
 my $c = safer_open('reentr.c-new', 'reentr.c');
-select $c;
 my $top = read_only_top(lang => 'C', by => 'regen/reentr.pl',
 			from => 'data in regen/reentr.pl',
 			file => 'reentr.c', style => '*',
@@ -808,7 +801,7 @@ $top =~ s! \*/\n! *
  */
 !s;
 
-print $top, <<EOF;
+print $c $top, <<"EOF";
 #include "EXTERN.h"
 #define PERL_IN_REENTR_C
 #include "perl.h"

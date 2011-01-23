@@ -35,15 +35,12 @@ my $h = safer_open('overload.h-new', 'overload.h');
 mkdir("lib/overload", 0777) unless -d 'lib/overload';
 my $p = safer_open('lib/overload/numbers.pm-new', 'lib/overload/numbers.pm');
 
-
-select $p;
-
-print read_only_top(lang => 'Perl', by => 'regen/overload.pl',
-		    file => 'lib/overload/numbers.pm', copyright => [2008]);
+print $p read_only_top(lang => 'Perl', by => 'regen/overload.pl',
+		       file => 'lib/overload/numbers.pm', copyright => [2008]);
 
 {
 local $" = "\n    ";
-print <<"EOF";
+print $p <<"EOF";
 package overload::numbers;
 
 our \@names = qw#
@@ -68,8 +65,7 @@ for ([$c, 'overload.c'], [$h, 'overload.h']) {
 					     2005 .. 2007, 2011]);
 }
 
-select $h;
-print "enum {\n";
+print $h "enum {\n";
 
 for (0..$#enums) {
     my $op = $names[$_];
@@ -78,11 +74,11 @@ for (0..$#enums) {
     die if $op =~ m{\*/};
     my $l =   3 - int((length($enums[$_]) + 9) / 8);
     $l = 1 if $l < 1;
-    printf "    %s_amg,%s/* 0x%02x %-8s */\n", $enums[$_],
+    printf $h "    %s_amg,%s/* 0x%02x %-8s */\n", $enums[$_],
 	("\t" x $l), $_, $op;
 }
 
-print <<'EOF';
+print $h <<'EOF';
     max_amg_code
     /* Do not leave a trailing comma here.  C9X allows it, C89 doesn't. */
 };
