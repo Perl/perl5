@@ -485,12 +485,6 @@ safer_close($pp);
 
 rename_if_different $pp_proto_new, 'pp_proto.h';
 
-END {
-  foreach ('opcode.h', 'opnames.h', 'pp_proto.h') {
-    1 while unlink "$_-old";
-  }
-}
-
 ###########################################################################
 sub tab {
     my ($l, $t) = @_;
