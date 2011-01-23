@@ -51,7 +51,6 @@ my %map = (
 # Example #3: S_CBI   means type func_r(const char*, char*, int)
 
 
-# safer_unlink 'reentr.h';
 my $h = safer_open("reentr.h-new");
 select $h;
 print read_only_top(lang => 'C', by => 'regen/reentr.pl',
@@ -792,7 +791,6 @@ rename_if_different('reentr.h-new', 'reentr.h');
 
 # Prepare to write the reentr.c.
 
-# safer_unlink 'reentr.c';
 my $c = safer_open("reentr.c-new");
 select $c;
 my $top = read_only_top(lang => 'C', by => 'regen/reentr.pl',

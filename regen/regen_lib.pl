@@ -63,6 +63,9 @@ sub rename_if_different {
 # Saf*er*, but not totally safe. And assumes always open for output.
 sub safer_open {
     my $name = shift;
+    if (-f $name) {
+	unlink $name or die "$name exists but can't unlink: $!";
+    }
     my $fh = gensym;
     open $fh, ">$name" or die "Can't create $name: $!";
     *{$fh}->{name} = $name;

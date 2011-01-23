@@ -17,7 +17,6 @@ BEGIN {
     # Get function prototypes
     require 'regen/regen_lib.pl';
 }
-#use Fatal qw(open close rename chmod unlink);
 use strict;
 
 open DESC, 'regcomp.sym';
@@ -128,8 +127,6 @@ EOP
 }
 
 my $tmp_h = 'regnodes.h-new';
-
-unlink $tmp_h if -f $tmp_h;
 
 my $out = safer_open($tmp_h);
 
