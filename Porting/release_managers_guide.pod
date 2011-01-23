@@ -457,24 +457,6 @@ and porting tools:
 
 =item *
 
-Check that files managed by F<regen.pl> and friends are up to date. From
-within your working directory:
-
-    $ git status
-    $ make regen_all
-    $ make regen_perly
-    $ git status
-
-If any of the files managed by F<regen.pl> have changed, then you should
-re-make perl to check that it's okay, then commit the updated versions:
-
-    $ git commit -a -m 'make regen; make regen_perly'
-
-(XXX regen might be a problem depending on the bison version available.
-We need to get a wizard to give better instructions on what to do or not do.)
-
-=item *
-
 I<You MUST SKIP this step for SNAPSHOT>
 
 Update C<Module::CoreList> with module version data for the new release.
