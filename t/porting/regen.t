@@ -26,7 +26,7 @@ $::NO_ENDING = $::NO_ENDING = 1;
 my $in_regen_pl = 18; # I can't see a clean way to calculate this automatically.
 my @files = qw(perly.act perly.h perly.tab);
 
-plan (tests => 1 + $in_regen_pl + @files);
+plan (tests => 2 + $in_regen_pl + @files);
 
 OUTER: foreach my $file (@files) {
     open my $fh, '<', $file or die "Can't open $file: $!";
@@ -50,5 +50,6 @@ OUTER: foreach my $file (@files) {
     is("@bad", '', "generated $file is up to date");
 }
 
-system "$^X regen.pl --tap";
-system "$^X Porting/makemeta --tap";
+foreach (qw(regen.pl Porting/makemeta regen/regcharclass.pl)) {
+  system "$^X $_ --tap";
+}
