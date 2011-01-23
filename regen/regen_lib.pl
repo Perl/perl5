@@ -133,13 +133,29 @@ EOM
 }
 
 sub read_only_bottom_close_and_rename {
-    my $fh = shift;
+    my ($fh, $sources) = @_;
     my $name = *{$fh}->{name};
     my $lang = *{$fh}->{lang};
     die "No final name specified at open time for $name"
 	unless *{$fh}->{final_name};
-    print $fh $lang eq 'Perl'
-	? "\n# ex: set ro:\n" : "\n/* ex: set ro: */\n";
+    my $comment;
+    if ($sources) {
+	$comment = "Generated from:\n";
+	foreach my $file (sort @$sources) {
+	    my $digest = digest($file);
+	    $comment .= "$digest $file\n";
+	}
+    }
+    $comment .= "ex: set ro:";
+
+    if ($lang eq 'Perl') {
+	$comment =~ s/^/# /mg;
+    } else {
+	$comment =~ s/^/ * /mg;
+	$comment =~ s! \* !/* !;
+	$comment .= " */";
+    }
+    print $fh "\n$comment\n";
     safer_close($fh);
     rename_if_different($name, *{$fh}->{final_name});
 }
@@ -149,5 +165,18 @@ sub tab {
     $t .= "\t" x ($l - (length($t) + 1) / 8);
     $t;
 }
+
+sub digest {
+    my $file = shift;
+    # Need to defer loading this, as the main regen scripts work back to 5.004,
+    # and likely we don't even have this module on every 5.8 install yet:
+    require Digest::SHA;
+
+    local ($/, *FH);
+    open FH, "$file" or die "Can't open $file: $!";
+    my $raw = <FH>;
+    close FH or die "Can't close $file: $!";
+    return Digest::SHA::sha256_hex($raw);
+};
 
 1;

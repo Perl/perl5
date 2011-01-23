@@ -101,11 +101,9 @@ my $read_only = read_only_top(lang => 'C', by => $0, from => $y_file);
 
 my $act_fh = safer_open("$act_file-new", $act_file);
 print $act_fh $read_only, $actlines;
-read_only_bottom_close_and_rename($act_fh);
 
 my $tab_fh = safer_open("$tab_file-new", $tab_file);
 print $tab_fh $read_only, $tablines;
-read_only_bottom_close_and_rename($tab_fh);
 
 unlink $tmpc_file;
 
@@ -147,7 +145,9 @@ while (<$tmph_fh>) {
 close $tmph_fh;
 unlink $tmph_file;
 
-read_only_bottom_close_and_rename($h_fh);
+foreach ($act_fh, $tab_fh, $h_fh) {
+    read_only_bottom_close_and_rename($_, ['regen_perly.pl', $y_file]);
+}
 
 exit 0;
 
