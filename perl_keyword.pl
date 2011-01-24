@@ -69,6 +69,9 @@ I32
 Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
 {
     dVAR;
+
+    PERL_ARGS_ASSERT_KEYWORD;
+
 $switch
 unknown:
   return 0;
@@ -82,8 +85,7 @@ sub perl_keyword
 
   if ($k eq 'elseif') {
     return <<END;
-if(ckWARN_d(WARN_SYNTAX))
-  Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "elseif should be elsif");
+Perl_ck_warner_d(aTHX_ packWARN(WARN_SYNTAX), "elseif should be elsif");
 END
   }
   elsif (my $feature = $feature_kw{$k}) {
