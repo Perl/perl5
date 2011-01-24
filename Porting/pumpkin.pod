@@ -91,7 +91,7 @@ The first rule of maintenance work is "First, do no harm."
 Trial releases of bug-fix maintenance releases are announced on
 perl5-porters. Trial releases use the new subversion number (to avoid
 testers installing it over the previous release) and include a 'local
-patch' entry in patchlevel.h. The distribution file contains the
+patch' entry in F<patchlevel.h>. The distribution file contains the
 string C<MAINT_TRIAL> to make clear that the file is not meant for
 public consumption.
 
@@ -158,7 +158,7 @@ settled elsewhere.
 
 If feasible, try to keep filenames 8.3-compliant to humor those poor
 souls that get joy from running Perl under such dire limitations.
-There's a script, check83.pl, for keeping your nose 8.3-clean.
+There's a script, F<check83.pl>, for keeping your nose 8.3-clean.
 In a similar vein, do not create files or directories which differ only
 in case (upper versus lower).
 
@@ -191,8 +191,8 @@ may help out folks on another platform who have the same problem.
 =item source code
 
 If you have many machine-specific #defines or #includes, consider
-creating an "osish.h" (os2ish.h, vmsish.h, and so on) and including
-that in perl.h.  If you have several machine-specific files (function
+creating an "osish.h" (F<os2ish.h>, F<vmsish.h>, and so on) and including
+that in F<perl.h>.  If you have several machine-specific files (function
 emulations, function stubs, build utility wrappers) you may create a
 separate subdirectory (djgpp, win32) and put the files in there.
 Remember to update C<MANIFEST> when you add files.
@@ -244,7 +244,7 @@ File::Copy to become aware of your native filesystem syntax and
 peculiarities.
 
 Remember to have a $VERSION in the modules.  You can use the
-Porting/checkVERSION.pl script for checking this.
+F<Porting/checkVERSION.pl> script for checking this.
 
 =item documentation
 
@@ -324,7 +324,7 @@ change the appropriate metaconfig units instead, and regenerate Configure.
 
 	metaconfig -m
 
-will regenerate Configure and config_h.SH.  Much more information
+will regenerate F<Configure> and F<config_h.SH>.  Much more information
 on obtaining and running metaconfig is in the F<U/README> file
 that comes with Perl's metaconfig units.
 
@@ -337,7 +337,7 @@ files that come with the metaunits.
 
 Perl's metaconfig units should be available on CPAN.  A set of units
 that will work with perl5.9.x is in a file with a name similar to
-F<mc_units-20070423.tgz> under http://www.cpan.org/authors/id/H/HM/HMBRAND/ .
+F<mc_units-20070423.tgz> under L<http://www.cpan.org/authors/id/H/HM/HMBRAND/>.
 The mc_units tar file should be unpacked in your main perl source directory.
 Note: those units were for use with 5.9.x.  There may have been changes since
 then.  Check for later versions or contact perl5-porters@perl.org to obtain a
@@ -382,40 +382,40 @@ sometimes be very hard to follow.  config.sh, on the other hand, can
 safely be sorted, so it's easy to track (typically very small) changes
 to config.sh and then propagate them to a canned 'config.h' by any
 number of means, including a perl script in win32/ or carrying 
-config.sh and config_h.SH to a Unix system and running sh
-config_h.SH.)  Vms uses configure.com to generate its own config.sh
-and config.h.  If you want to add a new variable to config.sh check
+F<config.sh> and F<config_h.SH> to a Unix system and running sh
+config_h.SH.)  Vms uses F<configure.com> to generate its own F<config.sh>
+and F<config.h>.  If you want to add a new variable to F<config.sh> check
 with vms folk how to add it to configure.com too.
 XXX]
 
-The Porting/config.sh and Porting/config_H files are provided to
+The F<Porting/config.sh> and F<Porting/config_H> files are provided to
 help those folks who can't run Configure.  It is important to keep
-them up-to-date.  If you have changed config_h.SH, those changes must
+them up-to-date.  If you have changed F<config_h.SH>, those changes must
 be reflected in config_H as well.  (The name config_H was chosen to
 distinguish the file from config.h even on case-insensitive file systems.)
 Simply edit the existing config_H file; keep the first few explanatory
 lines and then copy your new config.h below.
 
 It may also be necessary to update win32/config.?c, and
-plan9/config.plan9, though you should be quite careful in doing so if
+F<plan9/config.plan9>, though you should be quite careful in doing so if
 you are not familiar with those systems.  You might want to issue your
 patch with a promise to quickly issue a follow-up that handles those
 directories.
 
 =head2 make regen_perly
 
-If perly.y has been edited, it is necessary to run this target to rebuild
-perly.h, perly.act and perly.tab. In fact this target just runs the Perl
-script regen_perly.pl. Note that perly.c is I<not> rebuilt; this is just a
+If F<perly.y> has been edited, it is necessary to run this target to rebuild
+F<perly.h>, F<perly.act> and F<perly.tab>. In fact this target just runs the Perl
+script F<regen_perly.pl>. Note that F<perly.c> is I<not> rebuilt; this is just a
 plain static file now. 
 
 This target relies on you having Bison installed on your system. Running
 the target will tell you if you haven't got the right version, and if so,
 where to get the right one. Or if you prefer, you could hack
-regen_perly.pl to work with your version of Bison. The important things
+F<regen_perly.pl> to work with your version of Bison. The important things
 are that the regexes can still extract out the right chunks of the Bison
-output into perly.act and perly.tab, and that the contents of those two
-files, plus perly.h, are functionally equivalent to those produced by the
+output into F<perly.act> and F<perly.tab>, and that the contents of those two
+files, plus F<perly.h>, are functionally equivalent to those produced by the
 supported version of Bison.
 
 Note that in the old days, you had to do C<make run_byacc> instead.
@@ -453,7 +453,7 @@ command.
 =head2 global.sym, and perlio.sym
 
 Make sure these files are up-to-date.  Read the comments in these
-files and in perl_exp.SH to see what to do.
+files and in F<perl_exp.SH> to see what to do.
 
 =head2 Binary compatibility
 
@@ -472,7 +472,7 @@ Let's not force people to keep changing it.
 =head2 PPPort
 
 F<cpan/Devel-PPPort/PPPort.pm> needs to be synchronized to include all
-new macros added to .h files (normally perl.h and XSUB.h, but others
+new macros added to .h files (normally F<perl.h> and F<XSUB.h>, but others
 as well). Since chances are that when a new macro is added the
 committer will forget to update F<PPPort.pm>, it's the best to diff for
 changes in .h files when making a new release and making sure that
@@ -512,7 +512,7 @@ things that need to be fixed in Configure.
 
 =head2 VMS-specific updates
 
-The Perl revision number appears as "perl5" in configure.com.
+The Perl revision number appears as "perl5" in F<configure.com>.
 It is courteous to update that if necessary.
 
 
@@ -1151,7 +1151,7 @@ Similarly nicely aligned &&s, ||s and ==s would not be respected.
 =head1 Upload Your Work to CPAN
 
 You can upload your work to CPAN if you have a CPAN id.  Check out
-http://www.cpan.org/modules/04pause.html for information on
+L<http://www.cpan.org/modules/04pause.html> for information on
 _PAUSE_, the Perl Author's Upload Server.
 
 I typically upload both the patch file, e.g. F<perl5.004_08.pat.gz>
