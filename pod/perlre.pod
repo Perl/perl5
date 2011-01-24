@@ -638,7 +638,7 @@ change the case-sensitivity of the "NAME" pattern.
 
 Any of these modifiers can be set to apply globally to all regular
 expressions compiled within the scope of a C<use re>.  See
-L<re/'/flags' mode>.
+L<re/"'/flags' mode">.
 
 Starting in Perl 5.14, a C<"^"> (caret or circumflex accent) immediately
 after the C<"?"> is a shorthand equivalent to C<d-imsx>.  Flags (except
