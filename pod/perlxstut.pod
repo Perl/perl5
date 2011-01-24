@@ -220,7 +220,7 @@ and we should see the following output:
 =head2 EXAMPLE 2
 
 Now let's add to our extension a subroutine that will take a single numeric
-argument as input and return 0 if the number is even or 1 if the number
+argument as input and return 1 if the number is even or 0 if the number
 is odd.
 
 Add the following to the end of Mytest.xs:
