@@ -5105,13 +5105,13 @@ reStudy:
     else {
         regnode *first = ri->program + 1;
         U8 fop = OP(first);
-        U8 nop = OP(NEXTOPER(first));
-        
-        if (PL_regkind[fop] == NOTHING && nop == END)
+
+        if (PL_regkind[fop] == NOTHING && OP(NEXTOPER(first)) == END)
             r->extflags |= RXf_NULL;
-        else if (PL_regkind[fop] == BOL && nop == END)
+        else if (PL_regkind[fop] == BOL && OP(NEXTOPER(first)) == END)
             r->extflags |= RXf_START_ONLY;
-        else if (fop == PLUS && nop ==SPACE && OP(regnext(first))==END)
+        else if (fop == PLUS && OP(NEXTOPER(first)) == SPACE
+			     && OP(regnext(first)) == END)
             r->extflags |= RXf_WHITE;    
     }
 #endif
