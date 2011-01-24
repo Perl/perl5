@@ -132,6 +132,7 @@ my @writables = qw(
     NetWare/config_H.wc
     NetWare/Makefile
     keywords.h
+    keywords.c
     opcode.h
     opnames.h
     pp_proto.h

@@ -348,7 +348,7 @@ h = $(h1) $(h2) $(h3) $(h4) $(h5)
 
 c1 = av.c scope.c op.c doop.c doio.c dump.c gv.c hv.c mg.c reentr.c mro.c perl.c
 c2 = perly.c pp.c pp_hot.c pp_ctl.c pp_sys.c regcomp.c regexec.c utf8.c sv.c
-c3 = taint.c toke.c util.c deb.c run.c universal.c pad.c globals.c
+c3 = taint.c toke.c util.c deb.c run.c universal.c pad.c globals.c keywords.c
 c4 = perlio.c perlapi.c numeric.c mathoms.c locale.c pp_pack.c pp_sort.c
 c5 = $(madlysrc) $(mallocsrc)
 

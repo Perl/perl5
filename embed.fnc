@@ -1950,7 +1950,6 @@ s	|U8*	|add_utf16_textfilter|NN U8 *const s|bool reversed
 #endif
 s	|void	|checkcomma	|NN const char *s|NN const char *name \
 				|NN const char *what
-s	|bool	|feature_is_enabled|NN const char *const name|STRLEN namelen
 s	|void	|force_ident	|NN const char *s|int kind
 s	|void	|incline	|NN const char *s
 s	|int	|intuit_method	|NN char *s|NULLOK GV *gv|NULLOK CV *cv
@@ -2421,5 +2420,8 @@ Anop	|void	|clone_params_del|NN CLONE_PARAMS *param
 
 : Used in perl.c and toke.c
 op	|void	|populate_isa	|NN const char *name|STRLEN len|...
+
+: Used in keywords.c and toke.c
+op	|bool	|feature_is_enabled|NN const char *const name|STRLEN namelen
 
 : ex: set ts=8 sts=4 sw=4 noet:

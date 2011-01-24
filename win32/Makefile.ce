@@ -571,6 +571,7 @@ MICROCORE_SRC	=		\
 		..\gv.c		\
 		..\mro.c	\
 		..\hv.c		\
+		..\keywords.c	\
 		..\mg.c		\
 		..\op.c		\
 		..\pad.c	\
