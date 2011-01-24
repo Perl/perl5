@@ -23,8 +23,8 @@ require 'regen/regen_lib.pl';
 require 't/test.pl';
 $::NO_ENDING = $::NO_ENDING = 1;
 
-my $in_regen_pl = 18; # I can't see a clean way to calculate this automatically.
-my @files = qw(perly.act perly.h perly.tab);
+my $in_regen_pl = 17; # I can't see a clean way to calculate this automatically.
+my @files = qw(perly.act perly.h perly.tab keywords.c keywords.h);
 my @progs = qw(Porting/makemeta regen/regcharclass.pl regen/mk_PL_charclass.pl);
 
 plan (tests => $in_regen_pl + @files + @progs);

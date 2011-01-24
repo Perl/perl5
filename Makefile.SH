@@ -1117,7 +1117,6 @@ CHMOD_W = chmod +w
 # The following files are generated automatically
 #	embed.pl:	proto.h embed.h embedvar.h global.sym
 #			perlapi.h perlapi.c 
-#	keywords.pl:	keywords.h
 #	opcode.pl:	opcode.h opnames.h pp_proto.h
 #	regcomp.pl:	regnodes.h
 #	warnings.pl:	warnings.h lib/warnings.pm
@@ -1128,7 +1127,7 @@ CHMOD_W = chmod +w
 # with your existing copy of perl
 # (make regen_headers is kept for backwards compatibility)
 
-AUTOGEN_FILES = keywords.h opcode.h opnames.h pp_proto.h proto.h \
+AUTOGEN_FILES = opcode.h opnames.h pp_proto.h proto.h \
 		embed.h embedvar.h global.sym \
 		perlapi.h perlapi.c regnodes.h \
 		warnings.h lib/warnings.pm
