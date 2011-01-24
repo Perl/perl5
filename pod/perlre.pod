@@ -899,7 +899,7 @@ X<< (?<NAME>) >> X<(?'NAME')> X<named capture> X<capture>
 
 A named capture group. Identical in every respect to normal capturing
 parentheses C<()> but for the additional fact that C<%+> or C<%-> may be
-used after a successful match to refer to a named group. See C<perlvar>
+used after a successful match to refer to a named group. See L<perlvar>
 for more details on the C<%+> and C<%-> hashes.
 
 If multiple distinct capture groups have the same name then the
