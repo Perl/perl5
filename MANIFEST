@@ -4425,7 +4425,6 @@ Porting/makerel			Release making utility
 Porting/make_snapshot.pl	Make a tgz snapshot of our tree with a .patch file in it
 Porting/manicheck		Check against MANIFEST
 Porting/manisort		Sort the MANIFEST
-Porting/mk_PL_charclass.pl	Populate the PL_charclass table
 Porting/newtests-perldelta.pl	Generate Perldelta stub for newly added tests
 Porting/perldelta_template.pod	Template for creating new perldelta.pod files
 Porting/perlhist_calculate.pl		Perform calculations to update perlhist
@@ -4501,6 +4500,7 @@ regcomp.h			Private declarations for above
 regcomp.sym			Data for regnodes.h
 regen/embed.pl			Produces {embed,embedvar,proto}.h, global.sym
 regen/keywords.pl		Program to write keywords.h
+regen/mk_PL_charclass.pl	Populate the PL_charclass table
 regen/opcode.pl			Opcode header generator
 regen/opcodes			Opcode data
 regen/overload.pl		generate overload.h
