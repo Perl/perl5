@@ -2,11 +2,11 @@
 
 $| = 1;
 
-if ($^O eq 'VMS') {
-    print "1..11\n";
-    foreach (1..11) { print "ok $_ # skipped for VMS\n"; }
-    exit 0;
-}
+use strict;
+use Test::More;
+
+plan(skip_all => "skipped for VMS") if $^O eq 'VMS';
+plan(tests => 11);
 
 use Env  qw(@FOO);
 use vars qw(@BAR);
@@ -21,75 +21,46 @@ sub array_equal
     return 1;
 }
 
-sub test
-{
-    my ($desc, $code) = @_;
+@FOO = qw(a B c);
+@BAR = qw(a B c);
+is_deeply(\@FOO, \@BAR, "Assignment");
 
-    &$code;
+$FOO[1] = 'b';
+$BAR[1] = 'b';
+is_deeply(\@FOO, \@BAR, "Storing");
 
-    print "# $desc...\n";
-    print "#    FOO = (", join(", ", @FOO), ")\n";
-    print "#    BAR = (", join(", ", @BAR), ")\n";
+$#FOO = 0;
+$#BAR = 0;
+is_deeply(\@FOO, \@BAR, "Truncation");
 
-    if (defined $check) { print "not " unless &$check; }
-    else { print "not " unless array_equal(\@FOO, \@BAR); }
+push @FOO, 'b', 'c';
+push @BAR, 'b', 'c';
+is_deeply(\@FOO, \@BAR, "Push");
 
-    print "ok ", ++$i, "\n";
-}
+pop @FOO;
+pop @BAR;
+is_deeply(\@FOO, \@BAR, "Pop");
 
-print "1..11\n";
+shift @FOO;
+shift @BAR;
+is_deeply(\@FOO, \@BAR, "Shift");
 
-test "Assignment", sub {
-    @FOO = qw(a B c);
-    @BAR = qw(a B c);
-};
+push @FOO, 'c';
+push @BAR, 'c';
+is_deeply(\@FOO, \@BAR, "Push");
 
-test "Storing", sub {
-    $FOO[1] = 'b';
-    $BAR[1] = 'b';
-};
+unshift @FOO, 'a';
+unshift @BAR, 'a';
+is_deeply(\@FOO, \@BAR, "Unshift");
 
-test "Truncation", sub {
-    $#FOO = 0;
-    $#BAR = 0;
-};
+@FOO = reverse @FOO;
+@BAR = reverse @BAR;
+is_deeply(\@FOO, \@BAR, "Reverse");
 
-test "Push", sub {
-    push @FOO, 'b', 'c';
-    push @BAR, 'b', 'c';
-};
+@FOO = sort @FOO;
+@BAR = sort @BAR;
+is_deeply(\@FOO, \@BAR, "Sort");
 
-test "Pop", sub {
-    pop @FOO;
-    pop @BAR;
-};
-
-test "Shift", sub {
-    shift @FOO;
-    shift @BAR;
-};
-
-test "Push", sub {
-    push @FOO, 'c';
-    push @BAR, 'c';
-};
-
-test "Unshift", sub {
-    unshift @FOO, 'a';
-    unshift @BAR, 'a';
-};
-
-test "Reverse", sub {
-    @FOO = reverse @FOO;
-    @BAR = reverse @BAR;
-};
-
-test "Sort", sub {
-    @FOO = sort @FOO;
-    @BAR = sort @BAR;
-};
-
-test "Splice", sub {
-    splice @FOO, 1, 1, 'B';
-    splice @BAR, 1, 1, 'B';
-};
+splice @FOO, 1, 1, 'B';
+splice @BAR, 1, 1, 'B';
+is_deeply(\@FOO, \@BAR, "Splice");
