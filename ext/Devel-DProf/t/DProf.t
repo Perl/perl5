@@ -1,11 +1,17 @@
 #!perl
 
 BEGIN {
-    require 'test.pl';      # for which_perl() etc
-    require Config; import Config;
-    if ($Config{'extensions'} !~ /\bDevel\/DProf\b/){
-      print "1..0 # Skip: Devel::DProf was not built\n";
-      exit 0;
+    if ($ENV{PERL_CORE}) {
+	require 'test.pl';      # for which_perl() etc
+	require Config; import Config;
+	if ($Config{'extensions'} !~ /\bDevel\/DProf\b/){
+	    print "1..0 # Skip: Devel::DProf was not built\n";
+	    exit 0;
+	}
+	$perl = which_perl();
+    }
+    else {
+	$perl = $^X;
     }
 }
 
@@ -26,7 +32,7 @@ getopts('vI:p:');
 
 $path_sep = $Config{path_sep} || ':';
 $perl5lib = $opt_I || join( $path_sep, @INC );
-$perl = $opt_p || which_perl();
+$perl = $opt_p if $opt_p;
 
 if( $opt_v ){
 	print "tests: @tests\n";
