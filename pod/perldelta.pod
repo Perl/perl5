@@ -96,6 +96,16 @@ XXX
 
 =item *
 
+C<Module::Build> has been upgraded from version 0.3607 to 0.3622.
+
+A notable change is the deprecation of several modules.
+Module::Build::Version has been deprecated and Module::Build now relies
+directly upon L<version>.  Module::Build::ModuleInfo has been deprecated in
+favor of a standalone copy of it called L<Module::Metadata>.
+Module::Build::YAML has been deprecated in favor of L<CPAN::Meta::YAML>.
+
+=item *
+
 C<Unicode::Collate> has been upgraded from version 0.68 to 0.72
 
 This also sees the switch from using the pure-perl version of this

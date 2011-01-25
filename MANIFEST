@@ -1524,8 +1524,10 @@ cpan/Module-Build/lib/Module/Build/YAML.pm		Module::Build
 cpan/Module-Build/scripts/config_data			Module::Build
 cpan/Module-Build/t/00-compile.t			Module::Build
 cpan/Module-Build/t/actions/installdeps.t		Module::Build
+cpan/Module-Build/t/actions/manifest_skip.t
 cpan/Module-Build/t/add_property.t			Module::Build
 cpan/Module-Build/t/basic.t				Module::Build
+cpan/Module-Build/t/bundled/Software/License.pm
 cpan/Module-Build/t/bundled/Tie/CPHash.pm		Module::Build
 cpan/Module-Build/t/bundle_inc.t			Module::Build
 cpan/Module-Build/t/compat/exit.t			Module::Build
@@ -1540,10 +1542,10 @@ cpan/Module-Build/t/install_extra_target.t		Module::Build
 cpan/Module-Build/t/install.t				Module::Build
 cpan/Module-Build/t/lib/DistGen.pm			Module::Build
 cpan/Module-Build/t/lib/MBTest.pm			Module::Build
+cpan/Module-Build/t/lib/Software/License/VaporWare.pm
 cpan/Module-Build/t/manifypods.t			Module::Build
 cpan/Module-Build/t/metadata2.t				Module::Build
 cpan/Module-Build/t/metadata.t				Module::Build
-cpan/Module-Build/t/moduleinfo.t			Module::Build
 cpan/Module-Build/t/mymeta.t				Module::Build
 cpan/Module-Build/t/new_from_context.t			Module::Build
 cpan/Module-Build/t/notes.t				Module::Build
@@ -1552,8 +1554,11 @@ cpan/Module-Build/t/perl_mb_opt.t			Module::Build
 cpan/Module-Build/t/PL_files.t				Module::Build
 cpan/Module-Build/t/pod_parser.t			Module::Build
 cpan/Module-Build/t/ppm.t				Module::Build
+cpan/Module-Build/t/properties/dist_suffix.t
+cpan/Module-Build/t/properties/license.t
 cpan/Module-Build/t/properties/module_name.t		Module::Build
 cpan/Module-Build/t/properties/needs_compiler.t		Module::Build
+cpan/Module-Build/t/properties/release_status.t
 cpan/Module-Build/t/properties/share_dir.t		Module::Build
 cpan/Module-Build/t/README.pod				Module::Build
 cpan/Module-Build/t/resume.t				Module::Build

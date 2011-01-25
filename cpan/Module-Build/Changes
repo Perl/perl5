@@ -1,5 +1,222 @@
 Revision history for Perl extension Module::Build.
 
+0.3622 - Mon Jan 24 21:06:50 EST 2011
+
+  - No changes from 0.36_21
+
+0.36_21 - Fri Jan 21 11:01:28 EST 2011
+
+  - Changed YAML::Tiny references to the new CPAN::Meta::YAML module
+    instead, which is the YAML-variant that is going into the Perl core
+
+0.36_20 - Fri Dec 10 15:36:03 EST 2010
+
+  *** DEPRECATIONS ***
+
+  - Module::Build::Version has been deprecated.  Module::Build now depends
+    directly upon version.pm.  A pure-perl version has been bundled in inc/
+    solely for bootstrapping in case configure_requires is not supported.
+    M::B::Version remains as a wrapper around version.pm.
+
+  - Module::Build::ModuleInfo has been deprecated.  Module::Build now
+    depends directly upon Module::Metadata (which is an extraction of
+    M::B::ModuleInfo intended for general reuse).  A pure-perl version has
+    been bundled in inc/ solely for bootstrapping in case
+    configure_requires is not supported. M::B::ModuleInfo remains as a
+    wrapper around Module::Metadata.
+
+  - Module::Build::YAML has been deprecated.  Module::Build now depends
+    directly upon YAML::Tiny.  M::B::YAML remains as a subclass wrapper.
+    The YAML_support feature has been removed, as YAML is now an ordinary
+    dependency.
+
+0.36_19 - Tue Dec  7 13:43:42 EST 2010
+
+  Bug fixes:
+
+  - Perl::OSType is declared as a 'configure_requires' dependency, but is
+    also bundled in inc (and loaded if needed) [David Golden]
+
+0.36_18 - Mon Dec  6 16:46:49 EST 2010
+
+  Changes:
+
+  - Added dependency on Perl::OSType to refactor and centralize
+    management of OS type mapping [David Golden]
+
+  - When parsing a version number out of a file, any trailing alphabetical
+    characters will be dropped to avoid fatal errors when comparing version
+    numbers.  These would have been dropped (with a warning) anyway during
+    an ordinary numeric comparison. (RT#56071) [David Golden]
+
+  Bug fixes:
+
+  - A Perl interpreter mismatch between running Build.PL and running Build
+    is now a fatal error, not a warning (RT#55183) [David Golden]
+
+  - Bundled Module::Build::Version updated to bring into sync with CPAN
+    version.pm 0.86 [David Golden]
+
+  - No longer uses fake user 'foo' in t/tilde (RT#61793) [David Golden]
+
+  - Won't fail tests if an ancient Tie::IxHash is installed
+    [Christopher J. Madsen]
+
+  - Correctly report missing metafile field names [David Golden]
+
+  - Suppress uninitialized value errors during Pod creation
+    on ActiveState Perl [David Golden]
+
+  - Return to starting directory after install action; this is
+    an attempt to fix an install.t heisenbug (RT#63003) [David Golden]
+
+  - A broken version.pm load won't cause Module::Build::Version to
+    die trying to install itself as a mock version (RT#59499)
+    [Eric Wilhelm and David Golden]
+
+  - PERL_DL_NONLAZY is now always set when tests are run
+    (RT#56055) [Dmitry Karasik]
+
+  - 'fakeinstall' will use .modulebuildrc actions for 'install' if
+    no specific 'fakeinstall' options are provided (RT#57279)
+    [David Golden]
+
+  - Add install*script to search path for installdeps client
+    and search site, then vendor, then core paths
+
+  - Skip noexec tmpdir check on Windows (RT#55667) [Jan Dubois]
+
+  - Arguments with key value pairs may now have keys with "-" in them
+    (RT#53050) [David Golden]
+
+  - Add quotemeta to t/tilde.t test to fix Cygwin fails
+    [Chris Williams and David Golden]
+
+  - Build script now checks that M::B is at least the same version
+    of M::B as provided in 'configure_requires' in META
+    (RT#54954) [David Golden]
+
+0.36_17 - Wed Oct 27 18:08:36 EDT 2010
+
+  Enhancements:
+
+  - Added 'distinstall' action to run 'Build install' inside the
+    generated distribution directory [Jeff Thalhammer]
+
+0.36_16 - Thu Aug 26 12:44:07 EDT 2010
+
+  Bug fixes:
+
+  - Better error message in case package declaration is not found
+    when searching for version. [Alexandr Ciornii]
+
+  - Skips 'release_status' tests on perl < 5.8.1 due to buggy
+    treatment of dotted-decimal version numbers [David Golden]
+
+0.36_15 - Wed Aug 25 10:41:28 EDT 2010
+
+  Bug fixes:
+
+  - Added a mock Software::License to prevent t/properties/license.t
+    from failing.
+
+0.36_14 - Sun Aug 22 22:56:50 EDT 2010
+
+  Enhancements:
+
+  - Adds 'release_status' and 'dist_suffix' properties in preparation
+    for adding CPAN Meta Spec 2 support.  'dist_suffix' will be set
+    to 'TRIAL' automatically when necessary. [David Golden]
+
+  - Makes 'license' more liberal.  You can now specify either a license
+    key from the approved list (c.f. Module::Build::API) or just a
+    Software::License subclass name (e.g. 'Perl_5').  This should
+    provide better support for custom or proprietary licenses.
+    [David Golden]
+
+0.36_13 - Wed Jul 28 22:40:25 EDT 2010
+
+ Bug-fixes:
+
+ - Bundled Module::Build::Version updated to bring into sync with CPAN
+   version.pm 0.82 [David Golden]
+
+0.36_12 - Tue Jul 27 00:08:51 EDT 2010
+
+  Enhancements:
+
+  - Module::Build::Compat will now convert dotted-decimal prereqs into
+    decimal rather than dying (and will warn about this). [Apocalypse]
+
+  Bug fixes:
+
+  - Caches case-sensitivity checks to boost performance, fixes 
+    RT#55162 and RT#56513 [Reini Urban]
+
+  - Won't try to use ActivePerl doc generation tools without confirming
+    that they are indeed installed. [David Golden]
+
+  - Sets temporary $ENV{HOME} in testing to an absolute path, which fixes
+    some issues when tested as part of the Perl core [Nicholas Clark]
+
+  - Module::Build::ModuleInfo now warns instead of dying when a module
+    has an invalid version.  ->version now just returns undef
+    (RT#59593) [David Golden]
+
+  Changes:
+
+  - When authors do not specify Module::Build in configure_requires and
+    Module::Build is automatically added, a warning will be issued
+    showing the added prerequisite [David Golden]
+
+  - Moved automatic configure_requires generation into get_metadata()
+    and added an 'auto' argument to toggle it (on for META and off
+    for MYMETA) [David Golden]
+
+0.36_11 - Thu May 27 09:41:23 EDT 2010
+
+  Bug fixes:
+
+  - Handle META/MYMETA reading and writing within Module::Build to ensure
+    utf8 mode on filehandles.  Now passes/gets only strings to YAML::Tiny
+    or Module::Build::YAML
+
+0.36_10 - Wed May 19 18:36:06 EDT 2010
+
+  Bug fixes:
+
+  - Fix failing t/manifypods.t on Windows from 0.36_09 changes [Klaus
+    Eichner]
+
+0.36_09 - Tue May 11 09:19:12 EDT 2010
+
+  Bug fixes:
+
+  - Improve HTML documentation generation on ActivePerl (RT#53478)
+    [Scott Renner and Klaus Eichner]
+
+0.36_08 - Mon Apr 26 08:00:15 EDT 2010
+
+ Enhancements:
+
+ - Give a list of valid licenses when given one we don't recognize
+   (RT#55951) [Yanick Champoux]
+
+ - Added 'Build manifest_skip' action to generate a default MANIFEST.SKIP
+   [David Golden]
+
+ Changes:
+
+ - When temporarily generating a MANIFEST.SKIP when none exists, it will
+   be removed on exit instead of hanging around until 'Build clean'.  This
+   is less surprising/confusing and the 'Build manifest_skip' action
+   is now available instead to bootstrap the file [David Golden]
+
+ Bug fixes:
+
+ - Fixed runtime error on cygwin when searching for an executable command
+   during installdeps testing [David Golden]
+
 0.3607 - Thu Apr  1 11:27:16 EDT 2010
 
  Bug fixes:
