@@ -20,7 +20,7 @@ use Carp 'croak';
 
 # The revision is no longer being updated since moving to git. 
 $CGI::revision = '$Id: CGI.pm,v 1.266 2009/07/30 16:32:34 lstein Exp $';
-$CGI::VERSION='3.51';
+$CGI::VERSION='3.52';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -5293,17 +5293,14 @@ In either case, the outgoing header will be formatted as:
 
   P3P: policyref="/w3c/p3p.xml" cp="CAO DSP LAW CURa"
 
-Note that if a header value contains a carriage return, a leading space will be
-added to each new line that doesn't already have one as specified by RFC2616
-section 4.2.  For example:
+CGI.pm will accept valid multi-line headers when each line is separated with a
+CRLF value ("\r\n" on most platforms) followed by at least one space. For example:
 
-    print header( -ingredients => "ham\neggs\nbacon" );
+    print header( -ingredients => "ham\r\n\seggs\r\n\sbacon" );
 
-will generate
-
-    Ingredients: ham
-     eggs
-     bacon
+Invalid multi-line header input will trigger in an exception. When multi-line headers
+are received, CGI.pm will always output them back as a single line, according to the
+folding rules of RFC 2616: the newlines will be removed, while the white space remains.
 
 =head2 GENERATING A REDIRECTION HEADER
 
