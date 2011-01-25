@@ -6,6 +6,10 @@ BEGIN {
 }
 
 use strict;
+require 't/test.pl';
 
-my $dotslash = $^O eq "MSWin32" ? ".\\" : "./";
-system("${dotslash}perl -f -Ilib -I../lib pod/buildtoc --build-toc -q --test --build-all");
+my $result = runperl(switches => ['-f', '-Ilib'], 
+                     progfile => 'pod/buildtoc', 
+                     args     => ['--build-toc', '-q', '--test', '--build-all']);
+
+print $result;
