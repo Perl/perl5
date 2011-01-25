@@ -724,7 +724,7 @@ description of an XSUB:
 
 Note that in contrast with L<"EXAMPLE 1">, L<"EXAMPLE 2"> and L<"EXAMPLE 3">,
 this description does not contain the actual I<code> for what is done
-is done during a call to Perl function foo().  To understand what is going
+during a call to Perl function foo().  To understand what is going
 on here, one can add a CODE section to this XSUB:
 
 	double
