@@ -235,7 +235,10 @@ close $master;
 	if !$perlpods{$i} && !exists $Copies{$i};
   }
   my %BuildFiles;
-  ++$BuildFiles{$_} foreach values %Build;
+  foreach my $path (values %Build) {
+    (undef, undef, my $file) = File::Spec->splitpath($path);
+    ++$BuildFiles{$file}
+  }
 
   foreach my $i (sort keys %our_pods) {
     push @inconsistent, "$0: $i is known by buildtoc but does not exist\n"
