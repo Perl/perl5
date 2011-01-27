@@ -326,7 +326,8 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+A Unicode C<\p{}> property match in a regular rexpression pattern will
+now force Unicode rules for the rest of the regular expression
 
 =back
 

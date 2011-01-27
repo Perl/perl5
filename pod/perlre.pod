@@ -697,15 +697,17 @@ will have Unicode semantics when it comes to case-insensitive matching.
 
 C<"d"> means to use the traditional Perl pattern matching behavior.
 This is dualistic (hence the name C<"d">, which also could stand for
-"depends").  When this is in effect, Perl matches utf8-encoded strings
-using Unicode rules, and matches non-utf8-encoded strings using the
-platform's native character set rules.  (If the regular expression
-itself is encoded in utf8, Unicode rules are used regardless of the
-target string's encoding.)
-See L<perlunicode/The "Unicode Bug">.  It is automatically selected by
-default if the regular expression is compiled neither within the scope
-of a C<"use locale"> pragma nor a <C<"use feature 'unicode_strings">
-pragma.
+"depends").  When this is in effect, Perl matches according to the
+platform's native character set rules unless there is something that
+indicates to use Unicode rules.  If either the target string or the
+pattern itself is encoded in UTF-8, Unicode rules are used.  Also, if
+the pattern contains Unicode-only features, such as code points above
+255, C<\p()> Unicode properties or C<\N{}> Unicode names, Unicode rules
+will be used.  It is automatically selected by default if the regular
+expression is compiled neither within the scope of a C<"use locale">
+pragma nor a <C<"use feature 'unicode_strings"> pragma.
+This behavior causes a number of glitches, see
+L<perlunicode/The "Unicode Bug">.
 
 Note that the C<a>, C<d>, C<l>, C<p>, and C<u> modifiers are special in
 that they can only be enabled, not disabled, and the C<a>, C<d>, C<l>, and

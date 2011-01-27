@@ -134,6 +134,9 @@ typedef struct RExC_state_t {
     I32		orig_utf8;	/* whether the pattern was originally in utf8 */
 				/* XXX use this for future optimisation of case
 				 * where pattern must be upgraded to utf8. */
+    I32		uni_semantics;	/* If a d charset modifier should use unicode
+				   rules, even if the pattern is not in
+				   utf8 */
     HV		*paren_names;		/* Paren names */
     
     regnode	**recurse;		/* Recurse regops */
@@ -178,6 +181,7 @@ typedef struct RExC_state_t {
 #define RExC_seen_zerolen	(pRExC_state->seen_zerolen)
 #define RExC_seen_evals	(pRExC_state->seen_evals)
 #define RExC_utf8	(pRExC_state->utf8)
+#define RExC_uni_semantics	(pRExC_state->uni_semantics)
 #define RExC_orig_utf8	(pRExC_state->orig_utf8)
 #define RExC_open_parens	(pRExC_state->open_parens)
 #define RExC_close_parens	(pRExC_state->close_parens)
@@ -4392,6 +4396,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
     DEBUG_r(if (!PL_colorset) reginitcolors());
 
     RExC_utf8 = RExC_orig_utf8 = SvUTF8(pattern);
+    RExC_uni_semantics = 0;
 
     /****************** LONG JUMP TARGET HERE***********************/
     /* Longjmp back to here if have to switch in midstream to utf8 */
@@ -4500,6 +4505,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
     if (used_setjump) {
 	JMPENV_POP;
     }
+
     DEBUG_PARSE_r({
         PerlIO_printf(Perl_debug_log, 
             "Required size %"IVdf" nodes\n"
@@ -4508,6 +4514,14 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
         RExC_lastnum=0; 
         RExC_lastparse=NULL; 
     });
+
+    /* The first pass could have found things that force Unicode semantics */
+    if ((RExC_utf8 || RExC_uni_semantics)
+	 && get_regex_charset(pm_flags) == REGEX_DEPENDS_CHARSET)
+    {
+	set_regex_charset(&pm_flags, REGEX_UNICODE_CHARSET);
+    }
+
     /* Small enough for pointer-storage convention?
        If extralen==0, this means that we will not need long jumps. */
     if (RExC_size >= 0x10000L && RExC_extralen)
@@ -6274,10 +6288,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 				       that follow */
                 has_use_defaults = TRUE;
                 STD_PMMOD_FLAGS_CLEAR(&RExC_flags);
-		if (RExC_utf8) {    /* But the default for a utf8 pattern is
-				       unicode semantics */
-		    set_regex_charset(&RExC_flags, REGEX_UNICODE_CHARSET);
-		}
+		set_regex_charset(&RExC_flags, (RExC_utf8 || RExC_uni_semantics)
+						? REGEX_UNICODE_CHARSET
+						: REGEX_DEPENDS_CHARSET);
                 goto parse_flags;
 	    default:
 	        --RExC_parse;
@@ -6325,8 +6338,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 
 			/* The dual charset means unicode semantics if the
 			 * pattern (or target, not known until runtime) are
-			 * utf8 */
-			cs = (RExC_utf8)
+			 * utf8, or something in the pattern indicates unicode
+			 * semantics */
+			cs = (RExC_utf8 || RExC_uni_semantics)
 			     ? REGEX_UNICODE_CHARSET
 			     : REGEX_DEPENDS_CHARSET;
                         has_charset_modifier = 1;
@@ -8600,6 +8614,9 @@ parseit:
 		 * something that isn't utf8 */
 		ANYOF_FLAGS(ret) |= ANYOF_NONBITMAP;
 		namedclass = ANYOF_MAX;  /* no official name, but it's named */
+
+		/* \p means they want Unicode semantics */
+		RExC_uni_semantics = 1;
 		}
 		break;
 	    case 'n':	value = '\n';			break;
