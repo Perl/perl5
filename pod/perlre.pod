@@ -708,7 +708,7 @@ of a C<"use locale"> pragma nor a <C<"use feature 'unicode_strings">
 pragma.
 
 Note that the C<a>, C<d>, C<l>, C<p>, and C<u> modifiers are special in
-that they can only be enabled, not disabled, and the C<d>, C<l>, and
+that they can only be enabled, not disabled, and the C<a>, C<d>, C<l>, and
 C<u> modifiers are mutually exclusive: specifying one de-specifies the
 others, and a maximum of one may appear in the construct.  Thus, for
 example, C<(?-p)>, C<(?-d:...)>, and C<(?dl:...)> will warn when
