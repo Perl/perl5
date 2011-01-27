@@ -74,9 +74,9 @@ sub _update
  foreach $f (@_)
   {
    my $fn = $vec->_fileno($f);
-   next unless defined $fn;
-   my $i = $fn + FIRST_FD;
    if ($add) {
+     next unless defined $fn;
+     my $i = $fn + FIRST_FD;
      if (defined $vec->[$i]) {
 	 $vec->[$i] = $f;  # if array rest might be different, so we update
 	 next;
@@ -85,6 +85,12 @@ sub _update
      vec($bits, $fn, 1) = 1;
      $vec->[$i] = $f;
    } else {      # remove
+     if ( ! defined $fn ) { # remove if fileno undef'd
+         defined($_) && $_ == $f and do { $vec->[FD_COUNT]--; $_ = undef; }
+           for @{$vec}[FIRST_FD .. $#$vec];
+         next;
+     }
+     my $i = $fn + FIRST_FD;
      next unless defined $vec->[$i];
      $vec->[FD_COUNT]--;
      vec($bits, $fn, 1) = 0;
