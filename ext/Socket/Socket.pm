@@ -312,6 +312,9 @@ use warnings::register;
 require Exporter;
 require XSLoader;
 @ISA = qw(Exporter);
+
+# <@Nicholas> you can't change @EXPORT without breaking the implicit API
+# Please put any new constants in @EXPORT_OK!
 @EXPORT = qw(
 	inet_aton inet_ntoa
 	sockaddr_family
@@ -320,7 +323,6 @@ require XSLoader;
 	pack_sockaddr_in6 unpack_sockaddr_in6
 	sockaddr_in sockaddr_in6 sockaddr_un
 	INADDR_ANY INADDR_BROADCAST INADDR_LOOPBACK INADDR_NONE
-	IN6ADDR_ANY IN6ADDR_LOOPBACK
 	AF_802
 	AF_AAL
 	AF_APPLETALK
@@ -482,6 +484,8 @@ require XSLoader;
 
 	       getaddrinfo
 	       getnameinfo
+
+	       IN6ADDR_ANY IN6ADDR_LOOPBACK
 
 	       AI_CANONNAME
 	       AI_NUMERICHOST
