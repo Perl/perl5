@@ -46,7 +46,7 @@ release series.
 =item *
 
 To the best of our ability, we will provide "critical" security patches
-/ releases for any major version of Perl whose 5.x.0 release was released within
+/ releases for any major version of Perl whose 5.x.0 release was within
 the past three years.  We can only commit to providing these for the
 most recent .y release in any 5.x.y series.
 
