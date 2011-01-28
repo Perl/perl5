@@ -3087,7 +3087,9 @@ S_scan_const(pTHX_ char *start)
 		     * utf8 now, we save a whole pass in the regular expression
 		     * compiler.  Once that code is changed so Unicode
 		     * semantics doesn't necessarily have to be in utf8, this
-		     * block should be removed */
+		     * block should be removed.  However, the code that parses
+		     * the output of this would have to be changed to not
+		     * necessarily expect utf8 */
 		    if (!has_utf8) {
 			SvCUR_set(sv, d - SvPVX_const(sv));
 			SvPOK_on(sv);
