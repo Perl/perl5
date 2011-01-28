@@ -292,9 +292,16 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+=over 4
+
+=item *
+
+The C<test-prep> build target now depends on F<pod/perltoc.pod> to allow the
+F<t/porting/buildtoc.t> test to run successfully.
+
+=back
 
 =back
 
