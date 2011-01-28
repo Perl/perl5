@@ -11130,14 +11130,6 @@ END
     $LC->add_description('[\p{Ll}\p{Lu}\p{Lt}]');
 
     my $Cs = $gc->table('Cs');
-    if (defined $Cs) {
-        $Cs->add_note('Mostly not usable in Perl.');
-        $Cs->add_comment(join_lines(<<END
-Surrogates are used exclusively for I/O in UTF-16, and should not appear in
-Unicode text, and hence their use will generate (usually fatal) messages
-END
-        ));
-    }
 
 
     # Folding information was introduced later into Unicode data.  To get
