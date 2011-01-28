@@ -34,14 +34,17 @@ my %dirs;
 @files = map { "    - $_" }
   grep {
     my $d = $_;
+    my $previous_d = '';
     while(($d = dirname($d)) ne "."){
+      last if $d eq $previous_d; # safety valve
       last if exists $dirs{$d};
+      $previous_d = $d;
     }
 
     # if $d is "." it means we tried every parent dir of the file and none
     # of them were in the private list
     
-    $d eq "."; 
+    $d eq "." || $d eq $previous_d;
   }
   sort { lc $a cmp lc $b } @files;
 
