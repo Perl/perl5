@@ -3327,6 +3327,15 @@ package-specific handler.  That name might have a meaning to Perl itself
 some day, even though it doesn't yet.  Perhaps you should use a
 mixed-case attribute name, instead.  See L<attributes>.
 
+=item \p{} uses Unicode rules, not locale rules
+
+(W) You compiled a regular expression that contained a Unicode property
+match (C<\p> or C<\P>), but the regular expression is also being told to
+use the run-time locale, not Unicode.  It's best to not use these
+Unicode properties with locale, as only if the locale is a properly
+implemented ISO 8859-1 (Latin1) locale (which is supposed to be a subset
+of Unicode) will there not be any anomalies.
+
 =item pack/unpack repeat count overflow
 
 (F) You can't specify a repeat count so large that it overflows your
