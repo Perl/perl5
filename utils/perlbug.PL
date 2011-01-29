@@ -1164,8 +1164,8 @@ send to '$address' with your normal mail client.
 EOF
     }
 
-    open( SENDMAIL, "|$sendmail -t -oi" )
-        || die "'|$sendmail -t -oi' failed: $!";
+    open( SENDMAIL, "|-", $sendmail, "-t", "-oi", "-f", $from )
+        || die "'|$sendmail -t -oi -f $from' failed: $!";
     print SENDMAIL build_complete_message();
     if ( close(SENDMAIL) ) {
         print "\nMessage sent\n";
