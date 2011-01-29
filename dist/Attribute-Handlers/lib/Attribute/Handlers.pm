@@ -858,7 +858,7 @@ C<$referent>, which is a reference to a variable or subroutine (SCALAR, ARRAY,
 HASH, or CODE). If it finds the typeglob, it returns it. Otherwise, it returns
 undef. Note that C<findsym> memoizes the typeglobs it has previously
 successfully found, so subsequent calls with the same arguments should be
-must faster.
+much faster.
 
 =back
 
