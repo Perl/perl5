@@ -597,7 +597,6 @@ jasons\100cs.unm.edu                    jasons\100sandy-home.arc.unm.edu
 jbuehler\100hekimian.com                jhpb\100hekimian.com
 jcromie\100100divsol.com                jcromie\100cpan.org
 +                                       jim.cromie\100gmail.com
-jidanni\100jidanni.org                  jidanni\100hoffa.dreamhost.com
 jdhedden\100cpan.org                    jerry\100hedden.us
 +                                       jdhedden\1001979.usna.com
 +                                       jdhedden\100gmail.com
@@ -607,7 +606,9 @@ jeremy\100zawodny.com                   jzawodn\100wcnet.org
 jesse\100sig.bsh.com                    jesse\100ginger
 jfriedl\100yahoo.com                    jfriedl\100yahoo-inc.com
 jfs\100fluent.com                       jfs\100jfs.fluent.com
-jhannah\100omnihotels.com               jay\100jays.net
+jhannah\100mutationgrid.com             jay\100jays.net
++                                       jhannah\100omnihotels.com
+jidanni\100jidanni.org                  jidanni\100hoffa.dreamhost.com
 jjore\100cpan.org                       twists\100gmail.com
 jns\100integration-house.com            jns\100gellyfish.com
 +                                       gellyfish\100gellyfish.com
