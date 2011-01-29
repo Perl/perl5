@@ -231,8 +231,11 @@ sub walk_table (&@) {
 	    }
 	}
 
-	if ($flags =~ /s/) {
-	    $retval = "STATIC $splint_flags$retval";
+	if ($flags =~ /([si])/) {
+	    my $type = ($1 eq 's') ? "STATIC" : "PERL_STATIC_INLINE";
+	    warn "$func: i and s flags are mutually exclusive"
+					    if $flags =~ /s/ && $flags =~ /i/;
+	    $retval = "$type $splint_flags$retval";
 	    $func = "S_$plain_func";
 	}
 	else {
@@ -468,7 +471,7 @@ sub embed_h {
 		$ret = "#define $func($alist)";
 		my $t = int(length($ret) / 8);
 		$ret .=  "\t" x ($t < 4 ? 4 - $t : 1);
-		if ($flags =~ /s/) {
+		if ($flags =~ /[si]/) {
 		    $ret .= "S_$func(aTHX";
 		}
 		elsif ($flags =~ /p/) {
