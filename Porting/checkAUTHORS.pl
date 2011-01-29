@@ -772,6 +772,7 @@ rurban\100x-ray.at                      rurban\100cpan.org
 schubiger\100cpan.org                   steven\100accognoscere.org
 +                                       sts\100accognoscere.org
 +                                       schubiger\100gmail.com
++                                       stsc\100refcnt.org
 schwern\100pobox.com                    schwern\100gmail.com
 +                                       schwern\100athens.arena-i.com
 +                                       schwern\100blackrider.aocn.com
