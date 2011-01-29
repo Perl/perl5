@@ -117,7 +117,7 @@ L<Encode>.
 
 =item * $success = utf8::downgrade($string[, FAIL_OK])
 
-Converts in-place the the internal representation of the string from
+Converts in-place the internal representation of the string from
 I<UTF-X> to the equivalent octet sequence in the native encoding (Latin-1
 or EBCDIC). The logical character sequence itself is unchanged. If
 I<$string> is already stored as native 8 bit, then this is a no-op.  Can
