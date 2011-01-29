@@ -1238,6 +1238,9 @@
 #define do_trans_simple(a)	S_do_trans_simple(aTHX_ a)
 #define do_trans_simple_utf8(a)	S_do_trans_simple_utf8(aTHX_ a)
 #  endif
+#  if defined(PERL_IN_DQUOTE_STATIC_C)
+#define regcurly(a)		S_regcurly(aTHX_ a)
+#  endif
 #  if defined(PERL_IN_DUMP_C)
 #define deb_curcv(a)		S_deb_curcv(aTHX_ a)
 #define debprof(a)		S_debprof(aTHX_ a)

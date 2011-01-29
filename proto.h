@@ -5179,6 +5179,15 @@ STATIC I32	S_do_trans_simple_utf8(pTHX_ SV * const sv)
 	assert(sv)
 
 #endif
+#if defined(PERL_IN_DQUOTE_STATIC_C)
+PERL_STATIC_INLINE I32	S_regcurly(pTHX_ const char *s)
+			__attribute__warn_unused_result__
+			__attribute__pure__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_REGCURLY	\
+	assert(s)
+
+#endif
 #if defined(PERL_IN_DUMP_C)
 STATIC CV*	S_deb_curcv(pTHX_ const I32 ix);
 STATIC void	S_debprof(pTHX_ const OP *o)
