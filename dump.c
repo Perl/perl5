@@ -1543,6 +1543,37 @@ const struct flag_to_name gp_flags_imported_names[] = {
     {GVf_IMPORTED_CV, " CV"},
 };
 
+const struct flag_to_name regexp_flags_names[] = {
+    {RXf_PMf_MULTILINE,   "PMf_MULTILINE,"},
+    {RXf_PMf_SINGLELINE,  "PMf_SINGLELINE,"},
+    {RXf_PMf_FOLD,        "PMf_FOLD,"},
+    {RXf_PMf_EXTENDED,    "PMf_EXTENDED,"},
+    {RXf_PMf_KEEPCOPY,    "PMf_KEEPCOPY,"},
+    {RXf_ANCH_BOL,        "ANCH_BOL,"},
+    {RXf_ANCH_MBOL,       "ANCH_MBOL,"},
+    {RXf_ANCH_SBOL,       "ANCH_SBOL,"},
+    {RXf_ANCH_GPOS,       "ANCH_GPOS,"},
+    {RXf_GPOS_SEEN,       "GPOS_SEEN,"},
+    {RXf_GPOS_FLOAT,      "GPOS_FLOAT,"},
+    {RXf_LOOKBEHIND_SEEN, "LOOKBEHIND_SEEN,"},
+    {RXf_EVAL_SEEN,       "EVAL_SEEN,"},
+    {RXf_CANY_SEEN,       "CANY_SEEN,"},
+    {RXf_NOSCAN,          "NOSCAN,"},
+    {RXf_CHECK_ALL,       "CHECK_ALL,"},
+    {RXf_MATCH_UTF8,      "MATCH_UTF8,"},
+    {RXf_USE_INTUIT_NOML, "USE_INTUIT_NOML,"},
+    {RXf_USE_INTUIT_ML,   "USE_INTUIT_ML,"},
+    {RXf_INTUIT_TAIL,     "INTUIT_TAIL,"},
+    {RXf_SPLIT,           "SPLIT,"},
+    {RXf_COPY_DONE,       "COPY_DONE,"},
+    {RXf_TAINTED_SEEN,    "TAINTED_SEEN,"},
+    {RXf_TAINTED,         "TAINTED,"},
+    {RXf_START_ONLY,      "START_ONLY,"},
+    {RXf_SKIPWHITE,       "SKIPWHITE,"},
+    {RXf_WHITE,           "WHITE,"},
+    {RXf_NULL,            "NULL,"},
+};
+
 void
 Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim)
 {
@@ -2131,10 +2162,60 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	Perl_dump_indent(aTHX_ level, file, "  FLAGS = 0x%"UVxf"\n", (UV)IoFLAGS(sv));
 	break;
     case SVt_REGEXP:
-	/* FIXME dumping
-	    Perl_dump_indent(aTHX_ level, file, "  REGEXP = 0x%"UVxf"\n",
-			     PTR2UV(((struct regexp *)SvANY(sv))->xrx_regexp));
-	*/
+	{
+	    struct regexp * const r = (struct regexp *)SvANY(sv);
+	    flags = RX_EXTFLAGS((REGEXP*)sv);
+	    sv_setpv(d,"");
+	    append_flags(d, flags, regexp_flags_names);
+	    if (*(SvEND(d) - 1) == ',') {
+		SvCUR_set(d, SvCUR(d) - 1);
+		SvPVX(d)[SvCUR(d)] = '\0';
+	    }
+	    Perl_dump_indent(aTHX_ level, file, "  EXTFLAGS = 0x%"UVxf" (%s)\n",
+				(UV)flags, SvPVX_const(d));
+	    Perl_dump_indent(aTHX_ level, file, "  INTFLAGS = 0x%"UVxf"\n",
+				(UV)(r->intflags));
+	    Perl_dump_indent(aTHX_ level, file, "  NPARENS = %"UVuf"\n",
+				(UV)(r->nparens));
+	    Perl_dump_indent(aTHX_ level, file, "  LASTPAREN = %"UVuf"\n",
+				(UV)(r->lastparen));
+	    Perl_dump_indent(aTHX_ level, file, "  LASTCLOSEPAREN = %"UVuf"\n",
+				(UV)(r->lastcloseparen));
+	    Perl_dump_indent(aTHX_ level, file, "  MINLEN = %"IVdf"\n",
+				(IV)(r->minlen));
+	    Perl_dump_indent(aTHX_ level, file, "  MINLENRET = %"IVdf"\n",
+				(IV)(r->minlenret));
+	    Perl_dump_indent(aTHX_ level, file, "  GOFS = %"UVuf"\n",
+				(UV)(r->gofs));
+	    Perl_dump_indent(aTHX_ level, file, "  PRE_PREFIX = %"UVuf"\n",
+				(UV)(r->pre_prefix));
+	    Perl_dump_indent(aTHX_ level, file, "  SEEN_EVALS = %"UVuf"\n",
+				(UV)(r->seen_evals));
+	    Perl_dump_indent(aTHX_ level, file, "  SUBLEN = %"IVdf"\n",
+				(IV)(r->sublen));
+	    if (r->subbeg)
+		Perl_dump_indent(aTHX_ level, file, "  SUBBEG = 0x%"UVxf" %s\n",
+			    PTR2UV(r->subbeg),
+			    pv_display(d, r->subbeg, r->sublen, 50, pvlim));
+	    else
+		Perl_dump_indent(aTHX_ level, file, "  SUBBEG = 0x0\n");
+	    Perl_dump_indent(aTHX_ level, file, "  ENGINE = 0x%"UVxf"\n",
+				PTR2UV(r->engine));
+	    Perl_dump_indent(aTHX_ level, file, "  MOTHER_RE = 0x%"UVxf"\n",
+				PTR2UV(r->mother_re));
+	    Perl_dump_indent(aTHX_ level, file, "  PAREN_NAMES = 0x%"UVxf"\n",
+				PTR2UV(r->paren_names));
+	    Perl_dump_indent(aTHX_ level, file, "  SUBSTRS = 0x%"UVxf"\n",
+				PTR2UV(r->substrs));
+	    Perl_dump_indent(aTHX_ level, file, "  PPRIVATE = 0x%"UVxf"\n",
+				PTR2UV(r->pprivate));
+	    Perl_dump_indent(aTHX_ level, file, "  OFFS = 0x%"UVxf"\n",
+				PTR2UV(r->offs));
+#ifdef PERL_OLD_COPY_ON_WRITE
+	    Perl_dump_indent(aTHX_ level, file, "  SAVED_COPY = 0x%"UVxf"\n",
+				PTR2UV(r->saved_copy));
+#endif
+	}
 	break;
     }
     SvREFCNT_dec(d);
