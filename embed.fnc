@@ -989,7 +989,7 @@ Ap	|char*	|re_intuit_start|NN REGEXP * const rx|NULLOK SV* sv|NN char* strpos \
 				|NULLOK re_scream_pos_data *data
 Ap	|SV*	|re_intuit_string|NN REGEXP  *const r
 #if defined(PERL_IN_DQUOTE_STATIC_C)
-iPR	|I32	|regcurly	|NN const char *s
+EiPR	|I32	|regcurly	|NN const char *s
 #endif
 Ap	|I32	|regexec_flags	|NN REGEXP *const rx|NN char *stringarg \
 				|NN char *strend|NN char *strbeg|I32 minend \

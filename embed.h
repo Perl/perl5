@@ -857,6 +857,9 @@
 #define dump_exec_pos(a,b,c,d,e,f)	S_dump_exec_pos(aTHX_ a,b,c,d,e,f)
 #    endif
 #  endif
+#  if defined(PERL_IN_DQUOTE_STATIC_C)
+#define regcurly(a)		S_regcurly(aTHX_ a)
+#  endif
 #  if defined(PERL_IN_REGCOMP_C)
 #define add_data		S_add_data
 #define checkposixcc(a)		S_checkposixcc(aTHX_ a)
@@ -1237,9 +1240,6 @@
 #define do_trans_count_utf8(a)	S_do_trans_count_utf8(aTHX_ a)
 #define do_trans_simple(a)	S_do_trans_simple(aTHX_ a)
 #define do_trans_simple_utf8(a)	S_do_trans_simple_utf8(aTHX_ a)
-#  endif
-#  if defined(PERL_IN_DQUOTE_STATIC_C)
-#define regcurly(a)		S_regcurly(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_DUMP_C)
 #define deb_curcv(a)		S_deb_curcv(aTHX_ a)
