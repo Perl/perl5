@@ -307,7 +307,7 @@ for my $bodge_job (2, 1, 0) {
     for (0..2) {
 	my $previous_package = $package;
 	++$package;
-	like( $got, qr/${package}::long\($warning\) called at $previous_package line 7/, "Correct arguments for $package" );
+	like( $got, qr/${package}::long\($warning\) called at $previous_package line \d+/, "Correct arguments for $package" );
     }
     my $arg = $bodge_job ? $warning : 42;
     like( $got, qr!A::long\($arg\) called at.+\b(?i:carp\.t) line \d+!,
