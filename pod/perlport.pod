@@ -775,7 +775,7 @@ Mailing list: cpan-testers-discuss@perl.org
 
 =item *
 
-Testing results: http://www.cpantesters.org/
+Testing results: L<http://www.cpantesters.org/>
 
 =back
 
@@ -929,13 +929,13 @@ Also see:
 
 =item *
 
-The djgpp environment for DOS, http://www.delorie.com/djgpp/
+The djgpp environment for DOS, L<http://www.delorie.com/djgpp/>
 and L<perldos>.
 
 =item *
 
 The EMX environment for DOS, OS/2, etc. emx@iaehv.nl,
-ftp://hobbes.nmsu.edu/pub/os2/dev/emx/  Also L<perlos2>.
+L<ftp://hobbes.nmsu.edu/pub/os2/dev/emx/>  Also L<perlos2>.
 
 =item *
 
@@ -948,17 +948,17 @@ The C<Win32::*> modules in L<Win32>.
 
 =item *
 
-The ActiveState Pages, http://www.activestate.com/
+The ActiveState Pages, L<http://www.activestate.com/>
 
 =item *
 
 The Cygwin environment for Win32; F<README.cygwin> (installed 
-as L<perlcygwin>), http://www.cygwin.com/
+as L<perlcygwin>), L<http://www.cygwin.com/>
 
 =item *
 
 The U/WIN environment for Win32,
-http://www.research.att.com/sw/tools/uwin/
+L<http://www.research.att.com/sw/tools/uwin/>
 
 =item *
 
@@ -1153,7 +1153,7 @@ vmsperl list, vmsperl-subscribe@perl.org
 
 =item *
 
-vmsperl on the web, http://www.sidhe.org/vmsperl/index.html
+vmsperl on the web, L<http://www.sidhe.org/vmsperl/index.html>
 
 =back
 
@@ -1229,7 +1229,7 @@ Anonymous FTP site.
 
 =item *
 
-VOS Perl on the web at http://ftp.stratus.com/pub/vos/posix/posix.html
+VOS Perl on the web at L<http://ftp.stratus.com/pub/vos/posix/posix.html>
 
 =back
 
@@ -1327,7 +1327,7 @@ general usage issues for all EBCDIC Perls.  Send a message body of
 =item *
 
 AS/400 Perl information at
-http://as400.rochester.ibm.com/
+L<http://as400.rochester.ibm.com/>
 as well as on CPAN in the F<ports/> directory.
 
 =back
@@ -1470,12 +1470,12 @@ Be OS, F<README.beos>
 =item *
 
 HP 300 MPE/iX, F<README.mpeix> and Mark Bixby's web page
-http://www.bixby.org/mark/porting.html
+L<http://www.bixby.org/mark/porting.html>
 
 =item *
 
 A free perl5-based PERL.NLM for Novell Netware is available in
-precompiled binary and source code form from http://www.novell.com/
+precompiled binary and source code form from L<http://www.novell.com/>
 as well as from CPAN.
 
 =item  *
@@ -2061,7 +2061,7 @@ Not useful. (S<RISC OS>)
 
 The following platforms are known to build Perl 5.12 (as of April 2010,
 its release date) from the standard source code distribution available
-at http://www.cpan.org/src
+at L<http://www.cpan.org/src>
 
 =over
 
@@ -2175,7 +2175,7 @@ have worked in 5.12, but supporting code has been removed for 5.14:
 
 As of July 2002 (the Perl release 5.8.0), the following platforms were
 able to build Perl from the standard source code distribution
-available at http://www.cpan.org/src/
+available at L<http://www.cpan.org/src/>
 
         AIX
         BeOS
@@ -2280,7 +2280,7 @@ of any trouble.
         Unisys Dynix
 
 The following platforms have their own source code distributions and
-binaries available via http://www.cpan.org/ports/
+binaries available via L<http://www.cpan.org/ports/>
 
                                 Perl release
 
@@ -2288,7 +2288,7 @@ binaries available via http://www.cpan.org/ports/
         Tandem Guardian         5.004
 
 The following platforms have only binaries available via
-http://www.cpan.org/ports/index.html :
+L<http://www.cpan.org/ports/index.html> :
 
                                 Perl release
 
@@ -2299,7 +2299,7 @@ http://www.cpan.org/ports/index.html :
 Although we do suggest that you always build your own Perl from
 the source code, both for maximal configurability and for security,
 in case you are in a hurry you can check
-http://www.cpan.org/ports/index.html for binary distributions.
+L<http://www.cpan.org/ports/index.html> for binary distributions.
 
 =head1 SEE ALSO
 
