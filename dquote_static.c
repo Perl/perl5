@@ -16,7 +16,7 @@
     Pulled from regcomp.c.
  */
 PERL_STATIC_INLINE I32
-S_regcurly(register const char *s)
+S_regcurly(pTHX_ register const char *s)
 {
     PERL_ARGS_ASSERT_REGCURLY;
 
