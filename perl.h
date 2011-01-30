@@ -2425,7 +2425,6 @@ typedef struct STRUCT_SV SV;
 typedef struct av AV;
 typedef struct hv HV;
 typedef struct cv CV;
-typedef struct regexp ORANGE;	/* This is the body structure.  */
 typedef struct p5rx REGEXP;
 typedef struct gp GP;
 typedef struct gv GV;

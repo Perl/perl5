@@ -2705,7 +2705,7 @@ Perl_sv_xmlpeek(pTHX_ SV *sv)
 	sv_catpv(t, " BIND=\"");
 	break;
     case SVt_REGEXP:
-	sv_catpv(t, " ORANGE=\"");
+	sv_catpv(t, " REGEXP=\"");
 	break;
     case SVt_PVFM:
 	sv_catpv(t, " FM=\"");
