@@ -1562,6 +1562,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     flags = SvFLAGS(sv);
     type = SvTYPE(sv);
 
+    /* process general SV flags */
+
     d = Perl_newSVpvf(aTHX_
 		   "(0x%"UVxf") at 0x%"UVxf"\n%*s  REFCNT = %"IVdf"\n%*s  FLAGS = (",
 		   PTR2UV(SvANY(sv)), PTR2UV(sv),
@@ -1587,6 +1589,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	else
 				sv_catpv(d, "SCREAM,");
     }
+
+    /* process type-specific SV flags */
 
     switch (type) {
     case SVt_PVCV:
@@ -1641,6 +1645,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     sv_catpv(d, ")");
     s = SvPVX_const(d);
 
+    /* dump initial SV details */
+
 #ifdef DEBUG_LEAKING_SCALARS
     Perl_dump_indent(aTHX_ level, file,
 	"ALLOCATED at %s:%d %s %s (parent 0x%"UVxf"); serial %"UVuf"\n",
@@ -1653,6 +1659,9 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     );
 #endif
     Perl_dump_indent(aTHX_ level, file, "SV = ");
+
+    /* Dump SV type */
+
     if (type < SVt_LAST) {
 	PerlIO_printf(file, "%s%s\n", svtypenames[type], s);
 
@@ -1665,6 +1674,9 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	SvREFCNT_dec(d);
 	return;
     }
+
+    /* Dump general SV fields */
+
     if ((type >= SVt_PVIV && type != SVt_PVAV && type != SVt_PVHV
 	 && type != SVt_PVCV && !isGV_with_GP(sv) && type != SVt_PVFM
 	 && type != SVt_PVIO && type != SVt_REGEXP)
@@ -1685,6 +1697,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 #endif
 	PerlIO_putc(file, '\n');
     }
+
     if ((type == SVt_PVNV || type == SVt_PVMG) && SvFLAGS(sv) & SVpad_NAME) {
 	Perl_dump_indent(aTHX_ level, file, "  COP_LOW = %"UVuf"\n",
 			 (UV) COP_SEQ_RANGE_LOW(sv));
@@ -1703,15 +1716,18 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 #endif
 	RESTORE_NUMERIC_LOCAL();
     }
+
     if (SvROK(sv)) {
 	Perl_dump_indent(aTHX_ level, file, "  RV = 0x%"UVxf"\n", PTR2UV(SvRV(sv)));
 	if (nest < maxnest)
 	    do_sv_dump(level+1, file, SvRV(sv), nest+1, maxnest, dumpops, pvlim);
     }
+
     if (type < SVt_PV) {
 	SvREFCNT_dec(d);
 	return;
     }
+
     if ((type <= SVt_PVLV && !isGV_with_GP(sv)) || type == SVt_PVFM) {
 	if (SvPVX_const(sv)) {
 	    STRLEN delta;
@@ -1738,12 +1754,14 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	else
 	    Perl_dump_indent(aTHX_ level, file, "  PV = 0\n");
     }
+
     if (type == SVt_REGEXP) {
 	/* FIXME dumping
 	    Perl_dump_indent(aTHX_ level, file, "  REGEXP = 0x%"UVxf"\n",
 			     PTR2UV(((struct regexp *)SvANY(sv))->xrx_regexp));
 	*/
     }
+
     if (type >= SVt_PVMG) {
 	if (type == SVt_PVMG && SvPAD_OUR(sv)) {
 	    HV * const ost = SvOURSTASH(sv);
@@ -1756,6 +1774,9 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (SvSTASH(sv))
 	    do_hv_dump(level, file, "  STASH", SvSTASH(sv));
     }
+
+    /* Dump type-specific SV fields */
+
     switch (type) {
     case SVt_PVAV:
 	Perl_dump_indent(aTHX_ level, file, "  ARRAY = 0x%"UVxf, PTR2UV(AvARRAY(sv)));
@@ -1967,6 +1988,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    }
 	}
 	break;
+
     case SVt_PVCV:
 	if (SvPOK(sv)) {
 	    STRLEN len;
@@ -2030,6 +2052,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (nest < maxnest && (CvCLONE(sv) || CvCLONED(sv)))
 	    do_sv_dump(level+1, file, MUTABLE_SV(CvOUTSIDE(sv)), nest+1, maxnest, dumpops, pvlim);
 	break;
+
     case SVt_PVGV:
     case SVt_PVLV:
 	if (type == SVt_PVLV) {
