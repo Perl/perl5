@@ -379,6 +379,7 @@ curr_test($test + 2);
 # test that DESTROY is called on all objects during global destruction,
 # even those without hard references [perl #36347]
 
+$TODO = 'bug #36347';
 is(
   runperl(
    stderr => 1, prog => 'sub DESTROY { print qq-aaa\n- } bless \$a[0]'
@@ -393,7 +394,7 @@ is(
  "aaa\n",
  'DESTROY called on closure variable'
 );
-
+$TODO = undef;
 
 # test if refgen behaves with autoviv magic
 {

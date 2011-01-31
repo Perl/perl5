@@ -582,7 +582,9 @@ Perl_sv_clean_objs(pTHX)
     visit(do_clean_named_io_objs, SVt_PVGV|SVpgv_GP, SVTYPEMASK|SVp_POK|SVpgv_GP);
     /* And if there are some very tenacious barnacles clinging to arrays,
        closures, or what have you.... */
+    /* XXX This line breaks Tk and Gtk2. See [perl #82542].
     visit(do_curse, SVs_OBJECT, SVs_OBJECT);
+    */
     olddef = PL_defoutgv;
     PL_defoutgv = NULL; /* disable skip of PL_defoutgv */
     if (olddef && isGV_with_GP(olddef))
