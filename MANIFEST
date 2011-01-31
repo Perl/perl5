@@ -4320,11 +4320,15 @@ pod/perlfilter.pod		Perl source filters
 pod/perlfork.pod		Perl fork() information
 pod/perlform.pod		Perl formats
 pod/perlfunc.pod		Perl built-in functions
+pod/perlgit.pod			Using git with the Perl repository
 pod/perlglossary.pod		Perl Glossary
 pod/perlgpl.pod			GNU General Public License
 pod/perlguts.pod		Perl internal functions for those doing extensions
 pod/perlhack.pod		Perl hackers guide
+pod/perlhacktips.pod		Tips for Perl core C code hacking
+pod/perlhacktut.pod		Walk through the creation of a simple C code patch
 pod/perlhist.pod		Perl history records
+pod/perlinterp.pod		Overview of the Perl intepreter source and how it works
 pod/perlintro.pod		Perl introduction for beginners
 pod/perliol.pod			C API for Perl's implementation of IO in Layers
 pod/perlipc.pod			Perl interprocess communication
@@ -4357,12 +4361,12 @@ pod/perlref.pod			Perl references, the rest of the story
 pod/perlreftut.pod		Perl references short introduction
 pod/perlreguts.pod		Perl regular expression engine internals
 pod/perlre.pod			Perl regular expressions, the rest of the story
-pod/perlrepository.pod		Perl source repository
 pod/perlrequick.pod		Perl regular expressions quick start
 pod/perlreref.pod		Perl regular expressions quick reference
 pod/perlretut.pod		Perl regular expressions tutorial
 pod/perlrun.pod			Perl execution and options
 pod/perlsec.pod			Perl security
+pod/perlsource.pod		Guide to the Perl source tree
 pod/perlstyle.pod		Perl style guide
 pod/perlsub.pod			Perl subroutines
 pod/perlsyn.pod			Perl syntax

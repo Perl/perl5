@@ -100,12 +100,16 @@ POD = \
 	perlfork.pod	\
 	perlform.pod	\
 	perlfunc.pod	\
+	perlgit.pod	\
 	perlglossary.pod	\
 	perlgpl.pod	\
 	perlguts.pod	\
 	perlhack.pod	\
+	perlhacktips.pod	\
+	perlhacktut.pod	\
 	perlhist.pod	\
 	perlintern.pod	\
+	perlinterp.pod	\
 	perlintro.pod	\
 	perliol.pod	\
 	perlipc.pod	\
@@ -137,12 +141,12 @@ POD = \
 	perlref.pod	\
 	perlreftut.pod	\
 	perlreguts.pod	\
-	perlrepository.pod	\
 	perlrequick.pod	\
 	perlreref.pod	\
 	perlretut.pod	\
 	perlrun.pod	\
 	perlsec.pod	\
+	perlsource.pod	\
 	perlstyle.pod	\
 	perlsub.pod	\
 	perlsyn.pod	\
@@ -249,12 +253,16 @@ MAN = \
 	perlfork.man	\
 	perlform.man	\
 	perlfunc.man	\
+	perlgit.man	\
 	perlglossary.man	\
 	perlgpl.man	\
 	perlguts.man	\
 	perlhack.man	\
+	perlhacktips.man	\
+	perlhacktut.man	\
 	perlhist.man	\
 	perlintern.man	\
+	perlinterp.man	\
 	perlintro.man	\
 	perliol.man	\
 	perlipc.man	\
@@ -286,12 +294,12 @@ MAN = \
 	perlref.man	\
 	perlreftut.man	\
 	perlreguts.man	\
-	perlrepository.man	\
 	perlrequick.man	\
 	perlreref.man	\
 	perlretut.man	\
 	perlrun.man	\
 	perlsec.man	\
+	perlsource.man	\
 	perlstyle.man	\
 	perlsub.man	\
 	perlsyn.man	\
@@ -398,12 +406,16 @@ HTML = \
 	perlfork.html	\
 	perlform.html	\
 	perlfunc.html	\
+	perlgit.html	\
 	perlglossary.html	\
 	perlgpl.html	\
 	perlguts.html	\
 	perlhack.html	\
+	perlhacktips.html	\
+	perlhacktut.html	\
 	perlhist.html	\
 	perlintern.html	\
+	perlinterp.html	\
 	perlintro.html	\
 	perliol.html	\
 	perlipc.html	\
@@ -435,12 +447,12 @@ HTML = \
 	perlref.html	\
 	perlreftut.html	\
 	perlreguts.html	\
-	perlrepository.html	\
 	perlrequick.html	\
 	perlreref.html	\
 	perlretut.html	\
 	perlrun.html	\
 	perlsec.html	\
+	perlsource.html	\
 	perlstyle.html	\
 	perlsub.html	\
 	perlsyn.html	\
@@ -547,12 +559,16 @@ TEX = \
 	perlfork.tex	\
 	perlform.tex	\
 	perlfunc.tex	\
+	perlgit.tex	\
 	perlglossary.tex	\
 	perlgpl.tex	\
 	perlguts.tex	\
 	perlhack.tex	\
+	perlhacktips.tex	\
+	perlhacktut.tex	\
 	perlhist.tex	\
 	perlintern.tex	\
+	perlinterp.tex	\
 	perlintro.tex	\
 	perliol.tex	\
 	perlipc.tex	\
@@ -584,12 +600,12 @@ TEX = \
 	perlref.tex	\
 	perlreftut.tex	\
 	perlreguts.tex	\
-	perlrepository.tex	\
 	perlrequick.tex	\
 	perlreref.tex	\
 	perlretut.tex	\
 	perlrun.tex	\
 	perlsec.tex	\
+	perlsource.tex	\
 	perlstyle.tex	\
 	perlsub.tex	\
 	perlsyn.tex	\

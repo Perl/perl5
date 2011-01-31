@@ -192,13 +192,24 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlhack> and perlrepository
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+The L<perlhack> and perlrepository documents have been heavily edited and
+split up into several new documents.
+
+The L<perlhack> document is now much shorter, and focuses on the Perl 5
+development process and submitting patches to Perl. The technical content has
+been moved to several new documents, L<perlsource>, L<perlinterp>,
+L<perlhacktut>, and L<perlhacktips>. This technical content has only been
+lightly edited.
+
+The perlrepository document has been renamed to L<perlgit>. This new document
+is just a how-to on using git with the Perl source code. Any other content
+that used to be in perlrepository has been moved to perlhack.
 
 =back
 
