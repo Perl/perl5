@@ -18,7 +18,7 @@ For the most part, everything should just work.
 Starting with Solaris 8, perl5.00503 (or higher) is supplied with the
 operating system, so you might not even need to build a newer version
 of perl at all.  The Sun-supplied version is installed in /usr/perl5
-with /usr/bin/perl pointing to /usr/perl5/bin/perl.  Do not disturb
+with F</usr/bin/perl> pointing to F</usr/perl5/bin/perl>.  Do not disturb
 that installation unless you really know what you are doing.  If you
 remove the perl supplied with the OS, you will render some bits of
 your system inoperable.  If you wish to install a newer version of perl,
@@ -26,9 +26,9 @@ install it under a different prefix from /usr/perl5.  Common prefixes
 to use are /usr/local and /opt/perl.
 
 You may wish to put your version of perl in the PATH of all users by
-changing the link /usr/bin/perl.  This is probably OK, as most perl
+changing the link F</usr/bin/perl>.  This is probably OK, as most perl
 scripts shipped with Solaris use an explicit path.  (There are a few
-exceptions, such as /usr/bin/rpm2cpio and /etc/rcm/scripts/README, but
+exceptions, such as F</usr/bin/rpm2cpio> and F</etc/rcm/scripts/README>, but
 these are also sufficiently generic that the actual version of perl
 probably doesn't matter too much.)
 
@@ -514,7 +514,7 @@ directory.
 
 =head2 op/stat.t test 4 in Solaris
 
-op/stat.t test 4 may fail if you are on a tmpfs of some sort.
+F<op/stat.t> test 4 may fail if you are on a tmpfs of some sort.
 Building in /tmp sometimes shows this behavior.  The
 test suite detects if you are building in /tmp, but it may not be able
 to catch all tmpfs situations.
@@ -594,7 +594,7 @@ L<http://www.cosy.sbg.ac.at/~andi/>. If you use SUNWski, make a
 symbolic link /dev/urandom pointing to /dev/random.  For more details,
 see Document ID27606 entitled "Differing /dev/random support requirements
 within Solaris[TM] Operating Environments", available at
-http://sunsolve.sun.com .
+L<http://sunsolve.sun.com> .
 
 It may be possible to use the Entropy Gathering Daemon (written in
 Perl!), available from L<http://www.lothar.com/tech/crypto/>.
@@ -609,7 +609,7 @@ GNU ld gets very unhappy and spews a lot of errors like this
   ... relocation truncated to fit: BASE13 ...
 
 and dies.  Therefore the SunOS 4.1 hints file explicitly sets the
-ld to be /usr/bin/ld.
+ld to be F</usr/bin/ld>.
 
 As of Perl 5.8.1 the dynamic loading of libraries (DynaLoader, XSLoader)
 also seems to have become broken in in SunOS 4.x.  Therefore the default
