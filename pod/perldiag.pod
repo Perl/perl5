@@ -3327,6 +3327,30 @@ package-specific handler.  That name might have a meaning to Perl itself
 some day, even though it doesn't yet.  Perhaps you should use a
 mixed-case attribute name, instead.  See L<attributes>.
 
+=item \p{} uses Unicode rules, not locale rules
+
+(W) You compiled a regular expression that contained a Unicode property
+match (C<\p> or C<\P>), but the regular expression is also being told to
+use the run-time locale, not Unicode.  Instead, use a POSIX character
+class, which should know about the locale's rules.
+(See L<perlrecharclass/POSIX Character Classes>.)
+
+Even if the run-time locale is ISO 8859-1 (Latin1), which is a subset of
+Unicode, some properties will give results that are not valid for that
+subset.
+
+Here are a couple of examples to help you see what's going on.  If the
+locale is ISO 8859-7, the character at code point 0xD7 is the "GREEK
+CAPITAL LETTER CHI".  But in Unicode that code point means the
+"MULTIPLICATION SIGN" instead, and C<\p> always uses the Unicode
+meaning.  That means that C<\p{Alpha}> won't match, but C<[[:alpha:]]>
+should.  Only in the Latin1 locale are all the characters in the same
+positions as they are in Unicode.  But, even here, some properties give
+incorrect results.  An example is C<\p{Changes_When_Uppercased}> which
+is true for "LATIN SMALL LETTER Y WITH DIAERESIS", but since the upper
+case of that character is not in Latin1, in that locale it doesn't
+change when upper cased.
+
 =item pack/unpack repeat count overflow
 
 (F) You can't specify a repeat count so large that it overflows your

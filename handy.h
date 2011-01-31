@@ -579,7 +579,51 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 
 /* ASCII range only */
 #ifdef H_PERL       /* If have access to perl.h, lookup in its table */
-#   include "l1_char_class_tab.h"
+/* Bits for PL_charclass[] */
+#  define _CC_ALNUMC_A         (1<<0)
+#  define _CC_ALNUMC_L1        (1<<1)
+#  define _CC_ALPHA_A          (1<<2)
+#  define _CC_ALPHA_L1         (1<<3)
+#  define _CC_BLANK_A          (1<<4)
+#  define _CC_BLANK_L1         (1<<5)
+#  define _CC_CHARNAME_CONT    (1<<6)
+#  define _CC_CNTRL_A          (1<<7)
+#  define _CC_CNTRL_L1         (1<<8)
+#  define _CC_DIGIT_A          (1<<9)
+#  define _CC_GRAPH_A          (1<<10)
+#  define _CC_GRAPH_L1         (1<<11)
+#  define _CC_IDFIRST_A        (1<<12)
+#  define _CC_IDFIRST_L1       (1<<13)
+#  define _CC_LOWER_A          (1<<14)
+#  define _CC_LOWER_L1         (1<<15)
+#  define _CC_OCTAL_A          (1<<16)
+#  define _CC_PRINT_A          (1<<17)
+#  define _CC_PRINT_L1         (1<<18)
+#  define _CC_PSXSPC_A         (1<<19)
+#  define _CC_PSXSPC_L1        (1<<20)
+#  define _CC_PUNCT_A          (1<<21)
+#  define _CC_PUNCT_L1         (1<<22)
+#  define _CC_SPACE_A          (1<<23)
+#  define _CC_SPACE_L1         (1<<24)
+#  define _CC_UPPER_A          (1<<25)
+#  define _CC_UPPER_L1         (1<<26)
+#  define _CC_WORDCHAR_A       (1<<27)
+#  define _CC_WORDCHAR_L1      (1<<28)
+#  define _CC_XDIGIT_A         (1<<29)
+#  define _CC_NONLATIN1_FOLD   (1<<30)
+/* Unused
+ *                             (1<<31)
+ */
+
+#  ifdef DOINIT
+EXTCONST  U32 PL_charclass[] = {
+#    include "l1_char_class_tab.h"
+};
+
+#  else /* ! DOINIT */
+EXTCONST U32 PL_charclass[];
+#  endif
+
 #   define isALNUMC_A(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_ALNUMC_A))
 #   define isALPHA_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_ALPHA_A))
 #   define isBLANK_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_BLANK_A))

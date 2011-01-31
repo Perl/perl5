@@ -101,7 +101,7 @@ is("@r", "@s", 'global override');
 # NB. The spaces in the glob patterns need to be backslash escaped.
 my $filename_containing_parens = "foo (123) bar";
 SKIP: {
-    skip("can't create '$filename_containing_parens': $!", 12)
+    skip("can't create '$filename_containing_parens': $!", 9)
 	unless open my $touch, ">", $filename_containing_parens;
     close $touch;
 

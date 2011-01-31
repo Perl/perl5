@@ -267,4 +267,6 @@
 #define KEY_xor			251
 #define KEY_y			252
 
-/* ex: set ro: */
+/* Generated from:
+ * 28d95638560707fb8bee100dab74c90107c3e000f635e3bd310d4e2501d3b073 regen/keywords.pl
+ * ex: set ro: */

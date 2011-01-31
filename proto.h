@@ -925,6 +925,11 @@ PERL_CALLCONV char*	Perl_fbm_instr(pTHX_ unsigned char* big, unsigned char* bige
 #define PERL_ARGS_ASSERT_FBM_INSTR	\
 	assert(big); assert(bigend); assert(littlestr)
 
+PERL_CALLCONV bool	Perl_feature_is_enabled(pTHX_ const char *const name, STRLEN namelen)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_FEATURE_IS_ENABLED	\
+	assert(name)
+
 PERL_CALLCONV const char *	Perl_fetch_cop_label(pTHX_ COP *const cop, STRLEN *len, U32 *flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_FETCH_COP_LABEL	\
@@ -5174,6 +5179,15 @@ STATIC I32	S_do_trans_simple_utf8(pTHX_ SV * const sv)
 	assert(sv)
 
 #endif
+#if defined(PERL_IN_DQUOTE_STATIC_C)
+PERL_STATIC_INLINE I32	S_regcurly(pTHX_ const char *s)
+			__attribute__warn_unused_result__
+			__attribute__pure__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_REGCURLY	\
+	assert(s)
+
+#endif
 #if defined(PERL_IN_DUMP_C)
 STATIC CV*	S_deb_curcv(pTHX_ const I32 ix);
 STATIC void	S_debprof(pTHX_ const OP *o)
@@ -6378,11 +6392,6 @@ STATIC void	S_checkcomma(pTHX_ const char *s, const char *name, const char *what
 	assert(s); assert(name); assert(what)
 
 STATIC int	S_deprecate_commaless_var_list(pTHX);
-STATIC bool	S_feature_is_enabled(pTHX_ const char *const name, STRLEN namelen)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_FEATURE_IS_ENABLED	\
-	assert(name)
-
 STATIC char *	S_filter_gets(pTHX_ SV *sv, STRLEN append)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);

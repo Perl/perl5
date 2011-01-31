@@ -638,7 +638,7 @@ change the case-sensitivity of the "NAME" pattern.
 
 Any of these modifiers can be set to apply globally to all regular
 expressions compiled within the scope of a C<use re>.  See
-L<re/'/flags' mode>.
+L<re/"'/flags' mode">.
 
 Starting in Perl 5.14, a C<"^"> (caret or circumflex accent) immediately
 after the C<"?"> is a shorthand equivalent to C<d-imsx>.  Flags (except
@@ -697,18 +697,20 @@ will have Unicode semantics when it comes to case-insensitive matching.
 
 C<"d"> means to use the traditional Perl pattern matching behavior.
 This is dualistic (hence the name C<"d">, which also could stand for
-"depends").  When this is in effect, Perl matches utf8-encoded strings
-using Unicode rules, and matches non-utf8-encoded strings using the
-platform's native character set rules.  (If the regular expression
-itself is encoded in utf8, Unicode rules are used regardless of the
-target string's encoding.)
-See L<perlunicode/The "Unicode Bug">.  It is automatically selected by
-default if the regular expression is compiled neither within the scope
-of a C<"use locale"> pragma nor a <C<"use feature 'unicode_strings">
-pragma.
+"depends").  When this is in effect, Perl matches according to the
+platform's native character set rules unless there is something that
+indicates to use Unicode rules.  If either the target string or the
+pattern itself is encoded in UTF-8, Unicode rules are used.  Also, if
+the pattern contains Unicode-only features, such as code points above
+255, C<\p()> Unicode properties or C<\N{}> Unicode names, Unicode rules
+will be used.  It is automatically selected by default if the regular
+expression is compiled neither within the scope of a C<"use locale">
+pragma nor a <C<"use feature 'unicode_strings"> pragma.
+This behavior causes a number of glitches, see
+L<perlunicode/The "Unicode Bug">.
 
 Note that the C<a>, C<d>, C<l>, C<p>, and C<u> modifiers are special in
-that they can only be enabled, not disabled, and the C<d>, C<l>, and
+that they can only be enabled, not disabled, and the C<a>, C<d>, C<l>, and
 C<u> modifiers are mutually exclusive: specifying one de-specifies the
 others, and a maximum of one may appear in the construct.  Thus, for
 example, C<(?-p)>, C<(?-d:...)>, and C<(?dl:...)> will warn when
@@ -899,7 +901,7 @@ X<< (?<NAME>) >> X<(?'NAME')> X<named capture> X<capture>
 
 A named capture group. Identical in every respect to normal capturing
 parentheses C<()> but for the additional fact that C<%+> or C<%-> may be
-used after a successful match to refer to a named group. See C<perlvar>
+used after a successful match to refer to a named group. See L<perlvar>
 for more details on the C<%+> and C<%-> hashes.
 
 If multiple distinct capture groups have the same name then the

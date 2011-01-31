@@ -188,8 +188,8 @@ your declared lexicals.
 
 =head1 SEE ALSO
 
-C<B::Showlex> can also be used outside of the O framework, as in the third
-example.  See C<B::Concise> for a fuller explanation of reasons.
+L<B::Showlex> can also be used outside of the O framework, as in the third
+example.  See L<B::Concise> for a fuller explanation of reasons.
 
 =head1 TODO
 

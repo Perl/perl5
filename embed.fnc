@@ -46,6 +46,12 @@
 :
 :         proto.h: add __attribute__format__ (or ...null_ok__)
 :
+:   i  Static inline: function in source code has a S_ prefix:
+:
+:         proto.h: function is declared as S_foo rather than foo,
+:                PERL_STATIC_INLINE is added to declaration;
+:         embed.h: "#define foo S_foo" entries added
+:
 :   M  May change:
 :
 :         any doc entry is marked that function may change
@@ -982,6 +988,9 @@ Ap	|char*	|re_intuit_start|NN REGEXP * const rx|NULLOK SV* sv|NN char* strpos \
 				|NN char* strend|const U32 flags \
 				|NULLOK re_scream_pos_data *data
 Ap	|SV*	|re_intuit_string|NN REGEXP  *const r
+#if defined(PERL_IN_DQUOTE_STATIC_C)
+EiPR	|I32	|regcurly	|NN const char *s
+#endif
 Ap	|I32	|regexec_flags	|NN REGEXP *const rx|NN char *stringarg \
 				|NN char *strend|NN char *strbeg|I32 minend \
 				|NN SV *sv|NULLOK void *data|U32 flags
@@ -1950,7 +1959,6 @@ s	|U8*	|add_utf16_textfilter|NN U8 *const s|bool reversed
 #endif
 s	|void	|checkcomma	|NN const char *s|NN const char *name \
 				|NN const char *what
-s	|bool	|feature_is_enabled|NN const char *const name|STRLEN namelen
 s	|void	|force_ident	|NN const char *s|int kind
 s	|void	|incline	|NN const char *s
 s	|int	|intuit_method	|NN char *s|NULLOK GV *gv|NULLOK CV *cv
@@ -2421,5 +2429,8 @@ Anop	|void	|clone_params_del|NN CLONE_PARAMS *param
 
 : Used in perl.c and toke.c
 op	|void	|populate_isa	|NN const char *name|STRLEN len|...
+
+: Used in keywords.c and toke.c
+op	|bool	|feature_is_enabled|NN const char *const name|STRLEN namelen
 
 : ex: set ts=8 sts=4 sw=4 noet:

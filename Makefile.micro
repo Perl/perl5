@@ -21,7 +21,7 @@ O = uav$(_O) udeb$(_O) udoio$(_O) udoop$(_O) udump$(_O) \
 	uregcomp$(_O) uregexec$(_O) urun$(_O) \
 	uscope$(_O) usv$(_O) utaint$(_O) utoke$(_O) \
 	unumeric$(_O) ulocale$(_O) umathoms$(_O) \
-	uuniversal$(_O) uutf8$(_O) uutil$(_O) uperlapi$(_O)
+	uuniversal$(_O) uutf8$(_O) uutil$(_O) uperlapi$(_O) ukeywords$(_O)
 
 microperl:	$(O)
 	$(LD) -o $@ $(O) $(LDFLAGS) $(LIBS)
@@ -85,6 +85,9 @@ umro$(_O):	$(HE) mro.c
 
 uhv$(_O):	$(HE) hv.c
 	$(CC) $(CCFLAGS) -o $@ $(CFLAGS) hv.c
+
+ukeywords$(_O):	$(HE) keywords.c
+	$(CC) $(CCFLAGS) -o $@ $(CFLAGS) keywords.c
 
 umg$(_O):	$(HE) mg.c
 	$(CC) $(CCFLAGS) -o $@ $(CFLAGS) mg.c

@@ -43,7 +43,7 @@ if (${^UNICODE} & 1) {
 } else {
     $UTF8_STDIN = 0;
 }
-my $NTEST = 45 - (($DOSISH || !$FASTSTDIO) ? 7 : 0) - ($DOSISH ? 5 : 0)
+my $NTEST = 55 - (($DOSISH || !$FASTSTDIO) ? 7 : 0) - ($DOSISH ? 7 : 0)
     + $UTF8_STDIN;
 
 sub PerlIO::F_UTF8 () { 0x00008000 } # from perliol.h
@@ -105,7 +105,7 @@ SKIP: {
 	    # 5 tests potentially skipped because
 	    # DOSISH systems already have a CRLF layer
 	    # which will make new ones not stick.
-	    @$expected = grep { $_ ne 'crlf' } @$expected;
+	    splice @$expected, 1, 1 if $expected->[1] eq 'crlf';
 	}
 	my $n = scalar @$expected;
 	is(scalar @$result, $n, "$id - layers == $n");
@@ -132,13 +132,25 @@ SKIP: {
 	  [ qw(stdio crlf) ],
 	  "open :crlf");
 
+    binmode(F, ":crlf");
+
+    check([ PerlIO::get_layers(F) ],
+	  [ qw(stdio crlf) ],
+	  "binmode :crlf");
+
     binmode(F, ":encoding(cp1047)"); 
 
     check([ PerlIO::get_layers(F) ],
 	  [ qw[stdio crlf encoding(cp1047) utf8] ],
 	  ":encoding(cp1047)");
+
+    binmode(F, ":crlf");
+
+    check([ PerlIO::get_layers(F) ],
+	  [ qw[stdio crlf encoding(cp1047) utf8 crlf utf8] ],
+	  ":encoding(cp1047):crlf");
     
-    binmode(F, ":pop");
+    binmode(F, ":pop:pop");
 
     check([ PerlIO::get_layers(F) ],
 	  [ qw(stdio crlf) ],

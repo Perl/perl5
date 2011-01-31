@@ -1489,4 +1489,5 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 (q1|z)*(q2|z)*z{15}-.*?(x(a|bc)*y){2,3}Z	zzzzzzzzzzzzzzzz-xayxayxayxayZ	y	$&	zzzzzzzzzzzzzzzz-xayxayxayxayZ
 
 (?:(?:)foo|bar|zot|rt78356)	foo	y	$&	foo
+/\xe0\pL/i	\xc0a	y	$&	\xc0a
 # vim: softtabstop=0 noexpandtab

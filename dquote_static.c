@@ -7,24 +7,18 @@
  * It is currently #included by regcomp.c and toke.c.
 */
 
+#define PERL_IN_DQUOTE_STATIC_C
+#include "proto.h"
+#include "embed.h"
+
 /*
  - regcurly - a little FSA that accepts {\d+,?\d*}
     Pulled from regcomp.c.
  */
-
-/* embed.pl doesn't yet know how to handle static inline functions, so
-   manually decorate it here with gcc-style attributes.
-*/
 PERL_STATIC_INLINE I32
-regcurly(register const char *s)
-    __attribute__warn_unused_result__
-    __attribute__pure__
-    __attribute__nonnull__(1);
-
-PERL_STATIC_INLINE I32
-regcurly(register const char *s)
+S_regcurly(pTHX_ register const char *s)
 {
-    assert(s);
+    PERL_ARGS_ASSERT_REGCURLY;
 
     if (*s++ != '{')
 	return FALSE;

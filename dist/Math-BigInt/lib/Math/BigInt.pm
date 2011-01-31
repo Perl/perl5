@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 use 5.006002;
 
-$VERSION = '1.99_04';
+$VERSION = '1.99_05';
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(objectify bgcd blcm); 
@@ -1858,9 +1858,9 @@ sub bmodinv
 
 sub bmodpow
   {
-  # takes a very large number to a very large exponent in a given very
-  # large modulus, quickly, thanks to binary exponentiation. Supports
-  # negative exponents.
+  # Modular exponentiation. Raises a very large number to a very large exponent
+  # in a given very large modulus quickly, thanks to binary exponentiation.
+  # Supports negative exponents.
   my ($self,$num,$exp,$mod,@r) = objectify(3,@_);
 
   return $num if $num->modify('bmodpow');
@@ -1890,7 +1890,7 @@ sub bmodpow
   # If the resulting value is non-zero, we have four special cases, depending
   # on the signs on 'a' and 'm'.
 
-  unless ($CALC->_is_zero($num->{value})) {
+  unless ($CALC->_is_zero($value)) {
 
       # There is a negative sign on 'a' (= $num**$exp) only if the number we
       # are exponentiating ($num) is negative and the exponent ($exp) is odd.
@@ -1913,7 +1913,7 @@ sub bmodpow
           else {
               # Use copy of $mod since _sub() modifies the first argument.
               my $mod = $CALC->_copy($mod->{value});
-              $value = $CALC->_sub($mod, $num->{value});
+              $value = $CALC->_sub($mod, $value);
               $sign  = '+';
           }
 
@@ -1925,8 +1925,9 @@ sub bmodpow
           #               = -(m - (a (mod m)))
 
           if ($mod->{sign} eq '-') {
+              # Use copy of $mod since _sub() modifies the first argument.
               my $mod = $CALC->_copy($mod->{value});
-              $value = $CALC->_sub($mod, $num->{value});
+              $value = $CALC->_sub($mod, $value);
               $sign  = '-';
           }
 

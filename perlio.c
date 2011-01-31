@@ -1267,17 +1267,17 @@ PerlIO_push(pTHX_ PerlIO *f, PERLIO_FUNCS_DECL(*tab), const char *mode, SV *arg)
     VERIFY_HEAD(f);
     if (tab->fsize != sizeof(PerlIO_funcs)) {
 	Perl_croak( aTHX_
-	    "%s (%d) does not match %s (%d)",
-	    "PerlIO layer function table size", tab->fsize,
-	    "size expected by this perl", sizeof(PerlIO_funcs) );
+	    "%s (%"UVuf") does not match %s (%"UVuf")",
+	    "PerlIO layer function table size", (UV)tab->fsize,
+	    "size expected by this perl", (UV)sizeof(PerlIO_funcs) );
     }
     if (tab->size) {
 	PerlIOl *l;
 	if (tab->size < sizeof(PerlIOl)) {
 	    Perl_croak( aTHX_
-		"%s (%d) smaller than %s (%d)",
-		"PerlIO layer instance size", tab->size,
-		"size expected by this perl", sizeof(PerlIOl) );
+		"%s (%"UVuf") smaller than %s (%"UVuf")",
+		"PerlIO layer instance size", (UV)tab->size,
+		"size expected by this perl", (UV)sizeof(PerlIOl) );
 	}
 	/* Real layer with a data area */
 	if (f) {
@@ -4513,7 +4513,7 @@ PerlIOCrlf_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
        * any given moment at most one CRLF-capable layer being enabled
        * in the whole layer stack. */
 	 PerlIO *g = PerlIONext(f);
-	 while (PerlIOValid(g)) {
+	 if (PerlIOValid(g)) {
 	      PerlIOl *b = PerlIOBase(g);
 	      if (b && b->tab == &PerlIO_crlf) {
 		   if (!(b->flags & PERLIO_F_CRLF))
@@ -4521,8 +4521,7 @@ PerlIOCrlf_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 		   S_inherit_utf8_flag(g);
 		   PerlIO_pop(aTHX_ f);
 		   return code;
-	      }		  
-	      g = PerlIONext(g);
+	      }
 	 }
     }
     S_inherit_utf8_flag(f);

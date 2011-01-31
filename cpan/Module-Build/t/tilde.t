@@ -52,13 +52,13 @@ SKIP: {
 
     is( run_sample( $p => '~'     )->$p(),  $home );
 
-    is( run_sample( $p => '~/foo' )->$p(),  "$home/foo" );
+    is( run_sample( $p => '~/fooxzy' )->$p(),  "$home/fooxzy" );
 
-    is( run_sample( $p => '~/ foo')->$p(),  "$home/ foo" );
+    is( run_sample( $p => '~/ fooxzy')->$p(),  "$home/ fooxzy" );
 
     is( run_sample( $p => '~/fo o')->$p(),  "$home/fo o" );
 
-    is( run_sample( $p => 'foo~'  )->$p(),  'foo~' );
+    is( run_sample( $p => 'fooxzy~'  )->$p(),  'fooxzy~' );
 
     is( run_sample( prefix => '~' )->prefix,
 	$home );
@@ -89,7 +89,7 @@ SKIP: {
 
     skip "On OS/2 EMX all users are equal", 2 if $^O eq 'os2';
     is( run_sample( $p => '~~'    )->$p(),  '~~' );
-    is( run_sample( $p => '~ foo' )->$p(),  '~ foo' );
+    is( run_sample( $p => '~ fooxzy' )->$p(),  '~ fooxzy' );
 }
 
 # Again, with named users
@@ -98,15 +98,15 @@ SKIP: {
     skip "No home directory for tilde-expansion tests", 1 if $@;
     my ($me, $home) = @info[0,7];
 
-    my $expected = "$home/foo";
+    my $expected = "$home/fooxzy";
 
     if ($^O eq 'VMS') {
         # Convert the path to UNIX format and trim off the trailing slash
         $home = VMS::Filespec::unixify($home);
         $home =~ s#/$##;
-        $expected = $home . '/../[^/]+' . '/foo';
+        $expected = $home . '/../[^/]+' . '/fooxzy';
     }
 
-    like( run_sample( $p => "~$me/foo")->$p(),  qr($expected)i );
+    like( run_sample( $p => "~$me/fooxzy")->$p(),  qr(\Q$expected\E)i );
 }
 

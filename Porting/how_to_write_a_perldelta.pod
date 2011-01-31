@@ -8,7 +8,7 @@ there, steal it.
 
 =head2 Template
 
-Note there is a file F<Porting/perldelta_template> which contains a
+Note there is a file F<Porting/perldelta_template.pod> which contains a
 skeleton version of a perldelta.pod file, which should normally be copied
 in at the start of a new release.
 

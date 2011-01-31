@@ -32,23 +32,23 @@ the Perl community should expect from Perl's developers:
 =item *
 
 We "officially" support the two most recent stable release
-series'.  As of the release of 5.14.0, we will "officially"
+series.  As of the release of 5.14.0, we will "officially"
 end support for Perl 5.10, other than providing security
 updates as described below.
 
 =item *
 
 To the best of our ability, we will attempt to fix critical issues
-in the two most recent stable 5.x release series'.  Fixes for the
+in the two most recent stable 5.x release series.  Fixes for the
 current release series take precedence over fixes for the previous
 release series.
 
 =item *
 
 To the best of our ability, we will provide "critical" security patches
-/ releases for any major version of Perl initially released within the
-past three years.  We can only commit to providing these for the most
-recent .y release in any 5.x.y series.
+/ releases for any major version of Perl whose 5.x.0 release was within
+the past three years.  We can only commit to providing these for the
+most recent .y release in any 5.x.y series.
 
 =item *
 

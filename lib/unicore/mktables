@@ -11130,14 +11130,6 @@ END
     $LC->add_description('[\p{Ll}\p{Lu}\p{Lt}]');
 
     my $Cs = $gc->table('Cs');
-    if (defined $Cs) {
-        $Cs->add_note('Mostly not usable in Perl.');
-        $Cs->add_comment(join_lines(<<END
-Surrogates are used exclusively for I/O in UTF-16, and should not appear in
-Unicode text, and hence their use will generate (usually fatal) messages
-END
-        ));
-    }
 
 
     # Folding information was introduced later into Unicode data.  To get
@@ -12579,7 +12571,6 @@ sub make_table_pod_entries($) {
                 # expression, but with only one of 'Single', 'Short' if there
                 # are both items.
                 if ($short_name || $single_form || $table->conflicting) {
-                    $parenthesized .= '(';
                     $parenthesized .= "Short: $short_name" if $short_name;
                     if ($short_name && $single_form) {
                         $parenthesized .= ', ';
@@ -12599,13 +12590,11 @@ sub make_table_pod_entries($) {
             # to go on every entry.
             my $conflicting = join " NOR ", $table->conflicting;
             if ($conflicting) {
-                $parenthesized .= '(' if ! $parenthesized;
-                $parenthesized .=  '; ' if $parenthesized ne '(';
+                $parenthesized .=  '; ' if $parenthesized ne "";
                 $parenthesized .= "NOT $conflicting";
             }
-            $parenthesized .= ')' if $parenthesized;
 
-            push @info, $parenthesized if $parenthesized;
+            push @info, "($parenthesized)" if $parenthesized;
 
             if ($table_property != $perl && $table->perl_extension) {
                 push @info, '(Perl extension)';

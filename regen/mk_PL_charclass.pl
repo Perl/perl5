@@ -2,7 +2,7 @@
 use 5.012;
 use strict;
 use warnings;
-use Config;
+require 'regen/regen_lib.pl';
 
 # This program outputs the 256 lines that form the guts of the PL_charclass
 # table.  The output should be used to manually replace the table contents in
@@ -57,7 +57,7 @@ my @properties = qw(
 
 # Read in the case fold mappings.
 my %folded_closure;
-my $file="$Config{privlib}/unicore/CaseFolding.txt";
+my $file="lib/unicore/CaseFolding.txt";
 open my $fh, "<", $file or die "Failed to read '$file': $!";
 while (<$fh>) {
     chomp;
@@ -222,6 +222,9 @@ my @C1 = qw(
                 APC
             );
 
+my $out_fh = safer_open('l1_char_class_tab.h-new', 'l1_char_class_tab.h');
+print $out_fh read_only_top(lang => 'C', style => '*', by => $0, from => $file);
+
 # Output the table using fairly short names for each char.
 for my $ord (0..255) {
     my $name;
@@ -237,6 +240,7 @@ for my $ord (0..255) {
         $name =~ s/LATIN CAPITAL LETTER //
         || $name =~ s/LATIN SMALL LETTER (.*)/\L$1/;
     }
-    printf "/* U+%02X %s */ %s,\n", $ord, $name, $bits[$ord];
+    printf $out_fh "/* U+%02X %s */ %s,\n", $ord, $name, $bits[$ord];
 }
 
+read_only_bottom_close_and_rename($out_fh)

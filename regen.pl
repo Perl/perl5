@@ -16,7 +16,6 @@ use strict;
 # Which scripts to run.
 
 my @scripts = qw(
-keywords.pl
 opcode.pl
 overload.pl
 reentr.pl

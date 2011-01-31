@@ -857,6 +857,9 @@
 #define dump_exec_pos(a,b,c,d,e,f)	S_dump_exec_pos(aTHX_ a,b,c,d,e,f)
 #    endif
 #  endif
+#  if defined(PERL_IN_DQUOTE_STATIC_C)
+#define regcurly(a)		S_regcurly(aTHX_ a)
+#  endif
 #  if defined(PERL_IN_REGCOMP_C)
 #define add_data		S_add_data
 #define checkposixcc(a)		S_checkposixcc(aTHX_ a)
@@ -1457,7 +1460,6 @@
 #define check_uni()		S_check_uni(aTHX)
 #define checkcomma(a,b,c)	S_checkcomma(aTHX_ a,b,c)
 #define deprecate_commaless_var_list()	S_deprecate_commaless_var_list(aTHX)
-#define feature_is_enabled(a,b)	S_feature_is_enabled(aTHX_ a,b)
 #define filter_gets(a,b)	S_filter_gets(aTHX_ a,b)
 #define find_in_my_stash(a,b)	S_find_in_my_stash(aTHX_ a,b)
 #define force_ident(a,b)	S_force_ident(aTHX_ a,b)

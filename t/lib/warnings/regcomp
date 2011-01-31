@@ -255,3 +255,14 @@ Unrecognized escape \9 in character class passed through in regex; marked by <--
 $a = qr/(?^-i:foo)/;
 EXPECT
 Sequence (?^-...) not recognized in regex; marked by <-- HERE in m/(?^- <-- HERE i:foo)/ at - line 2.
+########
+# regcomp.c [S_regclass]
+use warnings 'regexp' ;
+$a = qr/(?^l:\pL)/;
+$a = qr/(?^l:\PL)/;
+no warnings 'regexp' ;
+$a = qr/(?^l:\pL)/;
+$a = qr/(?^l:\PL)/;
+EXPECT
+\p uses Unicode rules, not locale rules in regex; marked by <-- HERE in m/(?^l:\p <-- HERE L)/ at - line 3.
+\P uses Unicode rules, not locale rules in regex; marked by <-- HERE in m/(?^l:\P <-- HERE L)/ at - line 4.

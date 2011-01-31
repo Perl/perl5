@@ -23,7 +23,7 @@ BEGIN {
 }
 
 
-plan tests => 423;  # Update this when adding/deleting tests.
+plan tests => 426;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1170,6 +1170,29 @@ sub run_tests {
 
         iseq($first, $second);
     }
+
+    {
+	# RT #3516: \G in a m//g expression causes problems
+	my $count = 0;
+	while ("abc" =~ m/(\G[ac])?/g) {
+	    last if $count++ > 10;
+	}
+	ok($count < 10, 'RT #3516 A');
+
+	$count = 0;
+	while ("abc" =~ m/(\G|.)[ac]/g) {
+	    last if $count++ > 10;
+	}
+	ok($count < 10, 'RT #3516 B');
+
+	$count = 0;
+	while ("abc" =~ m/(\G?[ac])?/g) {
+	    last if $count++ > 10;
+	}
+	ok($count < 10, 'RT #3516 C');
+    }
+
+
 
 } # End of sub run_tests
 

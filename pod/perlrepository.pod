@@ -928,7 +928,7 @@ pitchforks and torches:
 
 =item *
 
-Make sure you have a good commit message. See </Commit message> elsewhere in
+Make sure you have a good commit message. See L</Commit message> elsewhere in
 this document
 
 =item *

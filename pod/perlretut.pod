@@ -979,11 +979,12 @@ Here are some examples:
                      # any number of digits
     /(\w+)\s+\g1/;    # match doubled words of arbitrary length
     /y(es)?/i;       # matches 'y', 'Y', or a case-insensitive 'yes'
-    $year =~ /\d{2,4}/;  # make sure year is at least 2 but not more
-                         # than 4 digits
-    $year =~ /\d{4}|\d{2}/;    # better match; throw out 3 digit dates
-    $year =~ /\d{2}(\d{2})?/;  # same thing written differently. However,
-                               # this produces $1 and the other does not.
+    $year =~ /^\d{2,4}$/;  # make sure year is at least 2 but not more
+                           # than 4 digits
+    $year =~ /^\d{4}$|^\d{2}$/;    # better match; throw out 3 digit dates
+    $year =~ /^\d{2}(\d{2})?$/;  # same thing written differently. However,
+                                 # this captures the last two digits in $1
+                                 # and the other does not.
 
     % simple_grep '^(\w+)\g1$' /usr/dict/words   # isn't this easier?
     beriberi
