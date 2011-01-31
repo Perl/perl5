@@ -1499,7 +1499,7 @@ Here is the sample C file:
   {
       main_t f;
       handler_t h;
-    
+
       me = argv[0];
       /**/
       handle = load_perl_dll(PERL_DLL_BASENAME);
@@ -2025,7 +2025,7 @@ WM_QUIT, and which did not process the received WM_QUIT message, the
 shutdown will be automatically cancelled.  Do not call C<perl_hmq_GET(1)>
 unless you are going to process messages on an orderly basis.
 
-=item * Treating errors reported by OS/2 API
+=item Treating errors reported by OS/2 API
 
 There are two principal conventions (it is useful to call them C<Dos*>
 and C<Win*> - though this part of the function signature is not always
@@ -2102,7 +2102,7 @@ Sets C<Perl_rc> to C<rc>, and sets $^E to the corresponding value.
 
 =back
 
-=item * Loading DLLs and ordinals in DLLs
+=item Loading DLLs and ordinals in DLLs
 
 Some DLLs are only present in some versions of OS/2, or in some
 configurations of OS/2.  Some exported entry points are present only
