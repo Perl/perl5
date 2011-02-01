@@ -2582,7 +2582,7 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 }
 
 HV*
-Perl__swash_inversion_hash(pTHX_ SV* swash)
+Perl__swash_inversion_hash(pTHX_ SV* const swash)
 {
 
    /* Subject to change or removal.  For use only in one place in regexec.c

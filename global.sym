@@ -17,7 +17,6 @@
 
 Perl_Gv_AMupdate
 Perl_PerlIO_context_layers
-Perl__swash_inversion_hash
 Perl_amagic_call
 Perl_amagic_deref_call
 Perl_apply_attrs_string
