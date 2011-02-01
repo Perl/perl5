@@ -8616,8 +8616,18 @@ parseit:
 			      n--;
 			 }
 		    }
-		    Perl_sv_catpvf(aTHX_ listsv, "%cutf8::%.*s\n",
-			(value=='p' ? '+' : '!'), (int)n, RExC_parse);
+
+		    /* Add the property name to the list.  If /i matching, give
+		     * a different name which consists of the normal name
+		     * sandwiched between two underscores and '_i'.  The design
+		     * is discussed in the commit message for this. */
+		    Perl_sv_catpvf(aTHX_ listsv, "%cutf8::%s%.*s%s\n",
+					(value=='p' ? '+' : '!'),
+					(FOLD) ? "__" : "",
+					(int)n,
+					RExC_parse,
+					(FOLD) ? "_i" : ""
+				    );
 		}
 		RExC_parse = e + 1;
 
