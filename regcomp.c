@@ -795,9 +795,13 @@ S_cl_and(struct regnode_charclass_class *cl,
     if (!(and_with->flags & ANYOF_NON_UTF8_LATIN1_ALL))
 	cl->flags &= ~ANYOF_NON_UTF8_LATIN1_ALL;
 
-    if (cl->flags & ANYOF_UNICODE_ALL && and_with->flags & ANYOF_NONBITMAP &&
-	!(and_with->flags & ANYOF_INVERT)) {
-	cl->flags &= ~ANYOF_UNICODE_ALL;
+    if (cl->flags & ANYOF_UNICODE_ALL
+	&& and_with->flags & ANYOF_NONBITMAP
+	&& !(and_with->flags & ANYOF_INVERT))
+    {
+	if (! (and_with->flags & ANYOF_UNICODE_ALL)) {
+	    cl->flags &= ~ANYOF_UNICODE_ALL;
+	}
 	cl->flags |= and_with->flags & ANYOF_NONBITMAP;	/* field is 2 bits; use
 							   only the one(s)
 							   actually set */
