@@ -3331,6 +3331,11 @@ dist/Term-Complete/lib/Term/Complete.pm	A command completion subroutine
 dist/Term-Complete/t/Complete.t		See if Term::Complete works
 dist/Term-ReadLine/lib/Term/ReadLine.pm		Stub readline library
 dist/Term-ReadLine/t/ReadLine.t			See if Term::ReadLine works
+dist/Test-PerlRun/lib/Test/PerlRun.pm	Test code in a new Perl process
+dist/Test-PerlRun/t/PerlRun.t			Tests for Test::PerlRun
+dist/Test-PerlRun/t/pod-coverage.t		Pod coverage tests for Test::PerlRun
+dist/Test-PerlRun/t/pod-spell.t			Pod spelling tests for Test::PerlRun
+dist/Test-PerlRun/t/pod.t				Pod syntax tests for Test::PerlRun
 dist/Text-Abbrev/lib/Text/Abbrev.pm		An abbreviation table builder
 dist/Text-Abbrev/t/Abbrev.t		Test Text::Abbrev
 dist/Thread-Queue/lib/Thread/Queue.pm	Thread-safe queues
