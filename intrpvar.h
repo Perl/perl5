@@ -767,7 +767,8 @@ PERLVAR(Iregistered_mros, HV *)
 PERLVAR(Iblockhooks, AV *)
 
 
-/* Everything that folds to a character, for case insensitivity regex matching */
+/* Everything that folds to a given character, for case insensitivity regex
+ * matching */
 PERLVARI(Iutf8_foldclosures,	HV *, NULL)
 
 PERLVAR(Icustom_ops, HV *)      /* custom op registrations */
