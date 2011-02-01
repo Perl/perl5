@@ -232,6 +232,9 @@ C<stderr> matches the output regex you expect.
 
 Dave Rolsky, <autarch@urth.org>
 
+Some of the code in this module was taken from F<t/test.pl> in the core Perl
+distribution, which has been worked on by many people over the years.
+
 =head1 LICENSE
 
 Copyright (c) 2011 Dave Rolsky. All rights reserved.
