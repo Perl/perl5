@@ -30,9 +30,10 @@ if (! -d '.git' ) {
 }
 
 #
-# Assume at this point, the version hasn't bumped.
+# Thanks to David Golden for this suggestion.
 #
-my $tag_to_compare = version -> parse ($]) -> normal;
+my $tag_to_compare = `git describe --abbrev=0`;
+chomp $tag_to_compare;
 my $source_dir = '.';
 
 my $null = $^O eq 'MSWin32' ? 'nul' : '/dev/null';
