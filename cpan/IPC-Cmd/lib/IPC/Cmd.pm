@@ -17,7 +17,7 @@ BEGIN {
                         $INSTANCES
                     ];
 
-    $VERSION        = '0.68';
+    $VERSION        = '0.70';
     $VERBOSE        = 0;
     $DEBUG          = 0;
     $WARN           = 1;
@@ -463,7 +463,7 @@ sub open3_run {
     # from http://perldoc.perl.org/IPC/Open3.html,
     # absolutely needed to catch piped commands errors.
     #
-    local $SIG{'SIG_PIPE'} = sub { 1; };
+    local $SIG{'PIPE'} = sub { 1; };
     
     print $child_in $opts->{'child_stdin'};
   }
@@ -514,8 +514,18 @@ sub open3_run {
     # parent was killed otherwise we would have got
     # the same signal as parent and process it same way
     if (getppid() eq "1") {
-      kill_gently($pid);
-      exit;
+
+      # end my process group with all the children
+      # (i am the process group leader, so my pid
+      # equals to the process group id)
+      #
+      # same thing which is done
+      # with $opts->{'clean_up_children'}
+      # in run_forked
+      #
+      kill(-9, $$);
+
+      exit 1;
     }
 
     if ($got_sig_child) {
@@ -561,18 +571,24 @@ sub open3_run {
     }
   }
 
-  waitpid($pid, 0);
+  my $waitpid_ret = waitpid($pid, 0);
+  my $real_exit = $?;
+  my $exit_value  = $real_exit >> 8;
 
   # since we've successfully reaped the child,
   # let our parent know about this.
   #
   if ($opts->{'parent_info'}) {
     my $ps = $opts->{'parent_info'};
+
+    # child was killed, inform parent
+    if ($real_exit & 127) {
+      print $ps "$pid killed with " . ($real_exit & 127) . "\n";
+    }
+
     print $ps "reaped $pid\n";
   }
 
-  my $real_exit = $?;
-  my $exit_value  = $real_exit >> 8;
   if ($opts->{'parent_stdout'} || $opts->{'parent_stderr'}) {
     return $exit_value;
   }
@@ -705,6 +721,9 @@ sub run_forked {
     $opts->{'timeout'} = 0 unless $opts->{'timeout'};
     $opts->{'terminate_wait_time'} = 2 unless defined($opts->{'terminate_wait_time'});
 
+    # turned on by default
+    $opts->{'clean_up_children'} = 1 unless defined($opts->{'clean_up_children'});
+
     # sockets to pass child stdout to parent
     my $child_stdout_socket;
     my $parent_stdout_socket;
@@ -768,10 +787,13 @@ sub run_forked {
       my $child_stderr = '';
       my $child_merged = '';
       my $child_exit_code = 0;
+      my $child_killed_by_signal = 0;
       my $parent_died = 0;
 
       my $got_sig_child = 0;
       my $got_sig_quit = 0;
+      my $orig_sig_child = $SIG{'CHLD'};
+
       $SIG{'CHLD'} = sub { $got_sig_child = time(); };
 
       if ($opts->{'terminate_on_signal'}) {
@@ -790,7 +812,11 @@ sub run_forked {
           # check for parent once each five seconds
           if ($now - $opts->{'runtime'}->{'last_parent_check'} > 5) {
             if (getppid() eq "1") {
-              kill (-9, $pid);
+              kill_gently ($pid, {
+                'first_kill_type' => 'process_group',
+                'final_kill_type' => 'process_group',
+                'wait_time' => $opts->{'terminate_wait_time'}
+                });
               $parent_died = 1;
             }
 
@@ -801,7 +827,11 @@ sub run_forked {
         # user specified timeout
         if ($opts->{'timeout'}) {
           if ($now - $start_time > $opts->{'timeout'}) {
-            kill (-9, $pid);
+            kill_gently ($pid, {
+              'first_kill_type' => 'process_group',
+              'final_kill_type' => 'process_group',
+              'wait_time' => $opts->{'terminate_wait_time'}
+              });
             $child_timedout = 1;
           }
         }
@@ -846,6 +876,10 @@ sub run_forked {
           }
           if ($l =~ /^reaped ([0-9]+?)\n(.*?)/so) {
             $child_child_pid = undef;
+            $l = $2;
+          }
+          if ($l =~ /^[\d]+ killed with ([0-9]+?)\n(.*?)/so) {
+            $child_killed_by_signal = $1;
             $l = $2;
           }
         }
@@ -919,6 +953,7 @@ sub run_forked {
         'timeout' => $child_timedout ? $opts->{'timeout'} : 0,
         'exit_code' => $child_exit_code,
         'parent_died' => $parent_died,
+        'killed_by_signal' => $child_killed_by_signal,
         'child_pgid' => $pid,
         };
 
@@ -938,7 +973,17 @@ sub run_forked {
       if ($o->{'stderr'}) {
         $err_msg .= "stderr:\n" . $o->{'stderr'} . "\n";
       }
+      if ($o->{'killed_by_signal'}) {
+        $err_msg .= "killed by signal [" . $o->{'killed_by_signal'} . "]\n";
+      }
       $o->{'err_msg'} = $err_msg;
+
+      if ($orig_sig_child) {
+        $SIG{'CHLD'} = $orig_sig_child;
+      }
+      else {
+        delete($SIG{'CHLD'});
+      }
 
       return $o;
     }
@@ -952,6 +997,10 @@ sub run_forked {
       # with those)
 
       POSIX::setsid() || die("Error running setsid: " . $!);
+
+      if ($opts->{'child_BEGIN'} && ref($opts->{'child_BEGIN'}) eq 'CODE') {
+        $opts->{'child_BEGIN'}->();
+      }
 
       close($child_stdout_socket);
       close($child_stderr_socket);
@@ -986,6 +1035,10 @@ sub run_forked {
       close($parent_stdout_socket);
       close($parent_stderr_socket);
       close($parent_info_socket);
+
+      if ($opts->{'child_END'} && ref($opts->{'child_END'}) eq 'CODE') {
+        $opts->{'child_END'}->();
+      }
 
       exit $child_exit_code;
     }
