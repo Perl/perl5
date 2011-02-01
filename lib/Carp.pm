@@ -3,7 +3,7 @@ package Carp;
 use strict;
 use warnings;
 
-our $VERSION = '1.19';
+our $VERSION = '1.20';
 
 our $MaxEvalLen = 0;
 our $Verbose    = 0;
