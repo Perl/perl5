@@ -1771,6 +1771,13 @@ use File::Glob qw(:case);
 	)],
 	},
 
+    'Test::PerlRun' =>
+	{
+	'MAINTAINER'	=> 'drolsky',
+	'FILES'		=> q[dist/Test-PerlRun],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Test::Simple' =>
 	{
 	'MAINTAINER'	=> 'mschwern',
