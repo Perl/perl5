@@ -364,18 +364,18 @@ If the PERL_PV_PRETTY_QUOTE flag is set then the result will be
 double quoted with any double quotes in the string escaped. Otherwise
 if the PERL_PV_PRETTY_LTGT flag is set then the result be wrapped in
 angle brackets. 
-           
+
 If the PERL_PV_PRETTY_ELLIPSES flag is set and not all characters in
 string were output then an ellipsis C<...> will be appended to the
 string. Note that this happens AFTER it has been quoted.
-           
+
 If start_color is non-null then it will be inserted after the opening
 quote (if there is one) but before the escaped text. If end_color
 is non-null then it will be inserted after the escaped text but before
 any quotes or ellipses.
 
 Returns a pointer to the prettified text as held by dsv.
-           
+
 =cut           
 */
 
