@@ -89,7 +89,11 @@ sub croak { require Carp; Carp::croak(@_) }
             $type =~ s/^\s+//;
             $type =~ s/\s+$//;
 
-            print STDERR __LINE__, ": type = $type\n" if DEBUG;
+            # regcomp.c surrounds the property name with '__" and '_i' if this
+            # is to be caseless matching.
+            my $caseless = $type =~ s/^__(.*)_i$/$1/;
+
+            print STDERR __LINE__, ": type=$type, caseless=$caseless\n" if DEBUG;
 
         GETFILE:
             {
@@ -105,7 +109,7 @@ sub croak { require Carp; Carp::croak(@_) }
                     if (exists &{$prop}) {
                         no strict 'refs';
                         
-                        $list = &{$prop};
+                        $list = &{$prop}($caseless);
                         last GETFILE;
                     }
                 }
@@ -130,7 +134,7 @@ sub croak { require Carp; Carp::croak(@_) }
                 }
                 BEGIN { delete $utf8::{miniperl} }
 
-                # Everything is caseless matching
+                # All property names are matched caselessly
                 my $property_and_table = lc $type;
                 print STDERR __LINE__, ": $property_and_table\n" if DEBUG;
 
@@ -358,6 +362,12 @@ sub croak { require Carp; Carp::croak(@_) }
                 if (defined $file) {
                     if ($utf8::why_deprecated{$file}) {
                         warnings::warnif('deprecated', "Use of '$type' in \\p{} or \\P{} is deprecated because: $utf8::why_deprecated{$file};");
+                    }
+
+                    if ($caseless
+                        && exists $utf8::caseless_equivalent{$property_and_table})
+                    {
+                        $file = $utf8::caseless_equivalent{$property_and_table};
                     }
                     $file= "$unicore_dir/lib/$file.pl";
                     last GETFILE;
