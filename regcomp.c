@@ -5663,6 +5663,594 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
     DEBUG_PARSE_MSG((funcname));                            \
     PerlIO_printf(Perl_debug_log,fmt "\n",args);               \
 })
+
+/* This section of code defines the inversion list object and its methods.  The
+ * interfaces are highly subject to change, so as much as possible is static to
+ * this file.  An inversion list is here implemented as a malloc'd C array with
+ * some added info.  More will be coming when functionality is added later.
+ *
+ * Some of the methods should always be private to the implementation, and some
+ * should eventually be made public */
+
+#define INVLIST_INITIAL_LEN 10
+#define INVLIST_ARRAY_KEY "array"
+#define INVLIST_MAX_KEY "max"
+#define INVLIST_LEN_KEY "len"
+
+PERL_STATIC_INLINE UV*
+S_invlist_array(pTHX_ HV* const invlist)
+{
+    /* Returns the pointer to the inversion list's array.  Every time the
+     * length changes, this needs to be called in case malloc or realloc moved
+     * it */
+
+    SV** list_ptr = hv_fetchs(invlist, INVLIST_ARRAY_KEY, FALSE);
+
+    PERL_ARGS_ASSERT_INVLIST_ARRAY;
+
+    if (list_ptr == NULL) {
+	Perl_croak(aTHX_ "panic: inversion list without a '%s' element",
+							    INVLIST_ARRAY_KEY);
+    }
+
+    return INT2PTR(UV *, SvUV(*list_ptr));
+}
+
+PERL_STATIC_INLINE void
+S_invlist_set_array(pTHX_ HV* const invlist, const UV* const array)
+{
+    PERL_ARGS_ASSERT_INVLIST_SET_ARRAY;
+
+    /* Sets the array stored in the inversion list to the memory beginning with
+     * the parameter */
+
+    if (hv_stores(invlist, INVLIST_ARRAY_KEY, newSVuv(PTR2UV(array))) == NULL) {
+	Perl_croak(aTHX_ "panic: can't store '%s' entry in inversion list",
+							    INVLIST_ARRAY_KEY);
+    }
+}
+
+PERL_STATIC_INLINE UV
+S_invlist_len(pTHX_ HV* const invlist)
+{
+    /* Returns the current number of elements in the inversion list's array */
+
+    SV** len_ptr = hv_fetchs(invlist, INVLIST_LEN_KEY, FALSE);
+
+    PERL_ARGS_ASSERT_INVLIST_LEN;
+
+    if (len_ptr == NULL) {
+	Perl_croak(aTHX_ "panic: inversion list without a '%s' element",
+							    INVLIST_LEN_KEY);
+    }
+
+    return SvUV(*len_ptr);
+}
+
+PERL_STATIC_INLINE UV
+S_invlist_max(pTHX_ HV* const invlist)
+{
+    /* Returns the maximum number of elements storable in the inversion list's
+     * array, without having to realloc() */
+
+    SV** max_ptr = hv_fetchs(invlist, INVLIST_MAX_KEY, FALSE);
+
+    PERL_ARGS_ASSERT_INVLIST_MAX;
+
+    if (max_ptr == NULL) {
+	Perl_croak(aTHX_ "panic: inversion list without a '%s' element",
+							    INVLIST_MAX_KEY);
+    }
+
+    return SvUV(*max_ptr);
+}
+
+PERL_STATIC_INLINE void
+S_invlist_set_len(pTHX_ HV* const invlist, const UV len)
+{
+    /* Sets the current number of elements stored in the inversion list */
+
+    PERL_ARGS_ASSERT_INVLIST_SET_LEN;
+
+    if (len != 0 && len > invlist_max(invlist)) {
+	Perl_croak(aTHX_ "panic: Can't make '%s=%"UVuf"' more than %s=%"UVuf" in inversion list", INVLIST_LEN_KEY, len, INVLIST_MAX_KEY, invlist_max(invlist));
+    }
+
+    if (hv_stores(invlist, INVLIST_LEN_KEY, newSVuv(len)) == NULL) {
+	Perl_croak(aTHX_ "panic: can't store '%s' entry in inversion list",
+							    INVLIST_LEN_KEY);
+    }
+}
+
+PERL_STATIC_INLINE void
+S_invlist_set_max(pTHX_ HV* const invlist, const UV max)
+{
+
+    /* Sets the maximum number of elements storable in the inversion list
+     * without having to realloc() */
+
+    PERL_ARGS_ASSERT_INVLIST_SET_MAX;
+
+    if (max < invlist_len(invlist)) {
+	Perl_croak(aTHX_ "panic: Can't make '%s=%"UVuf"' less than %s=%"UVuf" in inversion list", INVLIST_MAX_KEY, invlist_len(invlist), INVLIST_LEN_KEY, invlist_max(invlist));
+    }
+
+    if (hv_stores(invlist, INVLIST_MAX_KEY, newSVuv(max)) == NULL) {
+	Perl_croak(aTHX_ "panic: can't store '%s' entry in inversion list",
+							    INVLIST_LEN_KEY);
+    }
+}
+
+HV*
+Perl__new_invlist(pTHX_ IV initial_size)
+{
+
+    /* Return a pointer to a newly constructed inversion list, with enough
+     * space to store 'initial_size' elements.  If that number is negative, a
+     * system default is used instead */
+
+    HV* invlist = newHV();
+    UV* list;
+
+    if (initial_size < 0) {
+	initial_size = INVLIST_INITIAL_LEN;
+    }
+
+    /* Allocate the initial space */
+    Newx(list, initial_size, UV);
+    invlist_set_array(invlist, list);
+
+    /* set_len has to come before set_max, as the latter inspects the len */
+    invlist_set_len(invlist, 0);
+    invlist_set_max(invlist, initial_size);
+
+    return invlist;
+}
+
+PERL_STATIC_INLINE void
+S_invlist_destroy(pTHX_ HV* const invlist)
+{
+   /* Inversion list destructor */
+
+    SV** list_ptr = hv_fetchs(invlist, INVLIST_ARRAY_KEY, FALSE);
+
+    PERL_ARGS_ASSERT_INVLIST_DESTROY;
+
+    if (list_ptr != NULL) {
+	Safefree(INT2PTR(UV *, SvUV(*list_ptr)));
+    }
+}
+
+STATIC void
+S_invlist_extend(pTHX_ HV* const invlist, const UV new_max)
+{
+    /* Change the maximum size of an inversion list (up or down) */
+
+    UV* orig_array;
+    UV* array;
+    const UV old_max = invlist_max(invlist);
+
+    PERL_ARGS_ASSERT_INVLIST_EXTEND;
+
+    if (old_max == new_max) {	/* If a no-op */
+	return;
+    }
+
+    array = orig_array = invlist_array(invlist);
+    Renew(array, new_max, UV);
+
+    /* If the size change moved the list in memory, set the new one */
+    if (array != orig_array) {
+	invlist_set_array(invlist, array);
+    }
+
+    invlist_set_max(invlist, new_max);
+
+}
+
+PERL_STATIC_INLINE void
+S_invlist_trim(pTHX_ HV* const invlist)
+{
+    PERL_ARGS_ASSERT_INVLIST_TRIM;
+
+    /* Change the length of the inversion list to how many entries it currently
+     * has */
+
+    invlist_extend(invlist, invlist_len(invlist));
+}
+
+/* An element is in an inversion list iff its index is even numbered: 0, 2, 4,
+ * etc */
+
+#define ELEMENT_IN_INVLIST_SET(i) (! ((i) & 1))
+
+void
+Perl__append_range_to_invlist(pTHX_ HV* invlist, const UV start, const UV end)
+{
+   /* Subject to change or removal.  Append the range from 'start' to 'end' at
+    * the end of the inversion list.  The range must be above any existing
+    * ones. */
+
+    UV* array = invlist_array(invlist);
+    UV max = invlist_max(invlist);
+    UV len = invlist_len(invlist);
+
+    PERL_ARGS_ASSERT__APPEND_RANGE_TO_INVLIST;
+
+    if (len > 0) {
+
+	/* Here, the existing list is non-empty. The current max entry in the
+	 * list is generally the first value not in the set, except when the
+	 * set extends to the end of permissible values, in which case it is
+	 * the first entry in that final set, and so this call is an attempt to
+	 * append out-of-order */
+
+	UV final_element = len - 1;
+	if (array[final_element] > start
+	    || ELEMENT_IN_INVLIST_SET(final_element))
+	{
+	    Perl_croak(aTHX_ "panic: attempting to append to an inversion list, but wasn't at the end of the list");
+	}
+
+	/* Here, it is a legal append.  If the new range begins with the first
+	 * value not in the set, it is extending the set, so the new first
+	 * value not in the set is one greater than the newly extended range.
+	 * */
+	if (array[final_element] == start) {
+	    if (end != UV_MAX) {
+		array[final_element] = end + 1;
+	    }
+	    else {
+		/* But if the end is the maximum representable on the machine,
+		 * just let the range that this would extend have no end */
+		invlist_set_len(invlist, len - 1);
+	    }
+	    return;
+	}
+    }
+
+    /* Here the new range doesn't extend any existing set.  Add it */
+
+    len += 2;	/* Includes an element each for the start and end of range */
+
+    /* If overflows the existing space, extend, which may cause the array to be
+     * moved */
+    if (max < len) {
+	invlist_extend(invlist, len);
+	array = invlist_array(invlist);
+    }
+
+    invlist_set_len(invlist, len);
+
+    /* The next item on the list starts the range, the one after that is
+     * one past the new range.  */
+    array[len - 2] = start;
+    if (end != UV_MAX) {
+	array[len - 1] = end + 1;
+    }
+    else {
+	/* But if the end is the maximum representable on the machine, just let
+	 * the range have no end */
+	invlist_set_len(invlist, len - 1);
+    }
+}
+
+PERL_STATIC_INLINE HV*
+S_invlist_union(pTHX_ HV* const a, HV* const b)
+{
+    /* Return a new inversion list which is the union of two inversion lists.
+     * The basis for this comes from "Unicode Demystified" Chapter 13 by
+     * Richard Gillam, published by Addison-Wesley, and explained at some
+     * length there.  The preface says to incorporate its examples into your
+     * code at your own risk.
+     *
+     * The algorithm is like a merge sort.
+     *
+     * XXX A potential performance improvement is to keep track as we go along
+     * if only one of the inputs contributes to the result, meaning the other
+     * is a subset of that one.  In that case, we can skip the final copy and
+     * return the larger of the input lists */
+
+    UV* array_a = invlist_array(a);   /* a's array */
+    UV* array_b = invlist_array(b);
+    UV len_a = invlist_len(a);	/* length of a's array */
+    UV len_b = invlist_len(b);
+
+    HV* u;			/* the resulting union */
+    UV* array_u;
+    UV len_u;
+
+    UV i_a = 0;		    /* current index into a's array */
+    UV i_b = 0;
+    UV i_u = 0;
+
+    /* running count, as explained in the algorithm source book; items are
+     * stopped accumulating and are output when the count changes to/from 0.
+     * The count is incremented when we start a range that's in the set, and
+     * decremented when we start a range that's not in the set.  So its range
+     * is 0 to 2.  Only when the count is zero is something not in the set.
+     */
+    UV count = 0;
+
+    PERL_ARGS_ASSERT_INVLIST_UNION;
+
+    /* Size the union for the worst case: that the sets are completely
+     * disjoint */
+    u = _new_invlist(len_a + len_b);
+    array_u = invlist_array(u);
+
+    /* Go through each list item by item, stopping when exhausted one of
+     * them */
+    while (i_a < len_a && i_b < len_b) {
+	UV cp;	    /* The element to potentially add to the union's array */
+	bool cp_in_set;   /* is it in the the input list's set or not */
+
+	/* We need to take one or the other of the two inputs for the union.
+	 * Since we are merging two sorted lists, we take the smaller of the
+	 * next items.  In case of a tie, we take the one that is in its set
+	 * first.  If we took one not in the set first, it would decrement the
+	 * count, possibly to 0 which would cause it to be output as ending the
+	 * range, and the next time through we would take the same number, and
+	 * output it again as beginning the next range.  By doing it the
+	 * opposite way, there is no possibility that the count will be
+	 * momentarily decremented to 0, and thus the two adjoining ranges will
+	 * be seamlessly merged.  (In a tie and both are in the set or both not
+	 * in the set, it doesn't matter which we take first.) */
+	if (array_a[i_a] < array_b[i_b]
+	    || (array_a[i_a] == array_b[i_b] && ELEMENT_IN_INVLIST_SET(i_a)))
+	{
+	    cp_in_set = ELEMENT_IN_INVLIST_SET(i_a);
+	    cp= array_a[i_a++];
+	}
+	else {
+	    cp_in_set = ELEMENT_IN_INVLIST_SET(i_b);
+	    cp= array_b[i_b++];
+	}
+
+	/* Here, have chosen which of the two inputs to look at.  Only output
+	 * if the running count changes to/from 0, which marks the
+	 * beginning/end of a range in that's in the set */
+	if (cp_in_set) {
+	    if (count == 0) {
+		array_u[i_u++] = cp;
+	    }
+	    count++;
+	}
+	else {
+	    count--;
+	    if (count == 0) {
+		array_u[i_u++] = cp;
+	    }
+	}
+    }
+
+    /* Here, we are finished going through at least one of the lists, which
+     * means there is something remaining in at most one.  We check if the list
+     * that hasn't been exhausted is positioned such that we are in the middle
+     * of a range in its set or not.  (We are in the set if the next item in
+     * the array marks the beginning of something not in the set)   If in the
+     * set, we decrement 'count'; if 0, there is potentially more to output.
+     * There are four cases:
+     *	1) Both weren't in their sets, count is 0, and remains 0.  What's left
+     *	   in the union is entirely from the non-exhausted set.
+     *	2) Both were in their sets, count is 2.  Nothing further should
+     *	   be output, as everything that remains will be in the exhausted
+     *	   list's set, hence in the union; decrementing to 1 but not 0 insures
+     *	   that
+     *	3) the exhausted was in its set, non-exhausted isn't, count is 1.
+     *	   Nothing further should be output because the union includes
+     *	   everything from the exhausted set.  Not decrementing insures that.
+     *	4) the exhausted wasn't in its set, non-exhausted is, count is 1;
+     *	   decrementing to 0 insures that we look at the remainder of the
+     *	   non-exhausted set */
+    if ((i_a != len_a && ! ELEMENT_IN_INVLIST_SET(i_a))
+	|| (i_b != len_b && ! ELEMENT_IN_INVLIST_SET(i_b)))
+    {
+	count--;
+    }
+
+    /* The final length is what we've output so far, plus what else is about to
+     * be output.  (If 'count' is non-zero, then the input list we exhausted
+     * has everything remaining up to the machine's limit in its set, and hence
+     * in the union, so there will be no further output. */
+    len_u = i_u;
+    if (count == 0) {
+	/* At most one of the subexpressions will be non-zero */
+	len_u += (len_a - i_a) + (len_b - i_b);
+    }
+
+    /* Set result to final length, which can change the pointer to array_u, so
+     * re-find it */
+    if (len_u != invlist_len(u)) {
+	invlist_set_len(u, len_u);
+	invlist_trim(u);
+	array_u = invlist_array(u);
+    }
+
+    /* When 'count' is 0, the list that was exhausted (if one was shorter than
+     * the other) ended with everything above it not in its set.  That means
+     * that the remaining part of the union is precisely the same as the
+     * non-exhausted list, so can just copy it unchanged.  (If both list were
+     * exhausted at the same time, then the operations below will be both 0.)
+     */
+    if (count == 0) {
+	IV copy_count; /* At most one will have a non-zero copy count */
+	if ((copy_count = len_a - i_a) > 0) {
+	    Copy(array_a + i_a, array_u + i_u, copy_count, UV);
+	}
+	else if ((copy_count = len_b - i_b) > 0) {
+	    Copy(array_b + i_b, array_u + i_u, copy_count, UV);
+	}
+    }
+
+    return u;
+}
+
+PERL_STATIC_INLINE HV*
+S_invlist_intersection(pTHX_ HV* const a, HV* const b)
+{
+    /* Return the intersection of two inversion lists.  The basis for this
+     * comes from "Unicode Demystified" Chapter 13 by Richard Gillam, published
+     * by Addison-Wesley, and explained at some length there.  The preface says
+     * to incorporate its examples into your code at your own risk.
+     *
+     * The algorithm is like a merge sort, and is essentially the same as the
+     * union above
+     */
+
+    UV* array_a = invlist_array(a);   /* a's array */
+    UV* array_b = invlist_array(b);
+    UV len_a = invlist_len(a);	/* length of a's array */
+    UV len_b = invlist_len(b);
+
+    HV* r;		     /* the resulting intersection */
+    UV* array_r;
+    UV len_r;
+
+    UV i_a = 0;		    /* current index into a's array */
+    UV i_b = 0;
+    UV i_r = 0;
+
+    /* running count, as explained in the algorithm source book; items are
+     * stopped accumulating and are output when the count changes to/from 2.
+     * The count is incremented when we start a range that's in the set, and
+     * decremented when we start a range that's not in the set.  So its range
+     * is 0 to 2.  Only when the count is 2 is something in the intersection.
+     */
+    UV count = 0;
+
+    PERL_ARGS_ASSERT_INVLIST_INTERSECTION;
+
+    /* Size the intersection for the worst case: that the intersection ends up
+     * fragmenting everything to be completely disjoint */
+    r= _new_invlist(len_a + len_b);
+    array_r = invlist_array(r);
+
+    /* Go through each list item by item, stopping when exhausted one of
+     * them */
+    while (i_a < len_a && i_b < len_b) {
+	UV cp;	    /* The element to potentially add to the intersection's
+		       array */
+	bool cp_in_set;	/* Is it in the input list's set or not */
+
+	/* We need to take one or the other of the two inputs for the union.
+	 * Since we are merging two sorted lists, we take the smaller of the
+	 * next items.  In case of a tie, we take the one that is not in its
+	 * set first (a difference from the union algorithm).  If we took one
+	 * in the set first, it would increment the count, possibly to 2 which
+	 * would cause it to be output as starting a range in the intersection,
+	 * and the next time through we would take that same number, and output
+	 * it again as ending the set.  By doing it the opposite of this, we
+	 * there is no possibility that the count will be momentarily
+	 * incremented to 2.  (In a tie and both are in the set or both not in
+	 * the set, it doesn't matter which we take first.) */
+	if (array_a[i_a] < array_b[i_b]
+	    || (array_a[i_a] == array_b[i_b] && ! ELEMENT_IN_INVLIST_SET(i_a)))
+	{
+	    cp_in_set = ELEMENT_IN_INVLIST_SET(i_a);
+	    cp= array_a[i_a++];
+	}
+	else {
+	    cp_in_set = ELEMENT_IN_INVLIST_SET(i_b);
+	    cp= array_b[i_b++];
+	}
+
+	/* Here, have chosen which of the two inputs to look at.  Only output
+	 * if the running count changes to/from 2, which marks the
+	 * beginning/end of a range that's in the intersection */
+	if (cp_in_set) {
+	    count++;
+	    if (count == 2) {
+		array_r[i_r++] = cp;
+	    }
+	}
+	else {
+	    if (count == 2) {
+		array_r[i_r++] = cp;
+	    }
+	    count--;
+	}
+    }
+
+    /* Here, we are finished going through at least one of the sets, which
+     * means there is something remaining in at most one.  See the comments in
+     * the union code */
+    if ((i_a != len_a && ! ELEMENT_IN_INVLIST_SET(i_a))
+	|| (i_b != len_b && ! ELEMENT_IN_INVLIST_SET(i_b)))
+    {
+	count--;
+    }
+
+    /* The final length is what we've output so far plus what else is in the
+     * intersection.  Only one of the subexpressions below will be non-zero */
+    len_r = i_r;
+    if (count == 2) {
+	len_r += (len_a - i_a) + (len_b - i_b);
+    }
+
+    /* Set result to final length, which can change the pointer to array_r, so
+     * re-find it */
+    if (len_r != invlist_len(r)) {
+	invlist_set_len(r, len_r);
+	invlist_trim(r);
+	array_r = invlist_array(r);
+    }
+
+    /* Finish outputting any remaining */
+    if (count == 2) { /* Only one of will have a non-zero copy count */
+	IV copy_count;
+	if ((copy_count = len_a - i_a) > 0) {
+	    Copy(array_a + i_a, array_r + i_r, copy_count, UV);
+	}
+	else if ((copy_count = len_b - i_b) > 0) {
+	    Copy(array_b + i_b, array_r + i_r, copy_count, UV);
+	}
+    }
+
+    return r;
+}
+
+STATIC HV*
+S_add_range_to_invlist(pTHX_ HV* const invlist, const UV start, const UV end)
+{
+    /* Add the range from 'start' to 'end' inclusive to the inversion list's
+     * set.  A pointer to the inversion list is returned.  This may actually be
+     * a new list, in which case the passed in one has been destroyed */
+
+    HV* range_invlist;
+    HV* added_invlist;
+
+    UV len = invlist_len(invlist);
+
+    PERL_ARGS_ASSERT_ADD_RANGE_TO_INVLIST;
+
+    /* If comes after the final entry, can just append it to the end */
+    if (len == 0
+	|| start >= invlist_array(invlist)
+				    [invlist_len(invlist) - 1])
+    {
+	_append_range_to_invlist(invlist, start, end);
+	return invlist;
+    }
+
+    /* Here, can't just append things, create and return a new inversion list
+     * which is the union of this range and the existing inversion list */
+    range_invlist = _new_invlist(2);
+    _append_range_to_invlist(range_invlist, start, end);
+
+    added_invlist = invlist_union(invlist, range_invlist);
+
+    /* The passed in list can be freed, as well as our temporary */
+    invlist_destroy(range_invlist);
+    if (invlist != added_invlist) {
+	invlist_destroy(invlist);
+    }
+
+    return added_invlist;
+}
+
+/* End of inversion list object */
+
 /*
  - reg - regular expression, i.e. main body or parenthesized thing
  *

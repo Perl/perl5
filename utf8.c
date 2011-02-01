@@ -2713,6 +2713,71 @@ Perl__swash_inversion_hash(pTHX_ SV* swash)
     return ret;
 }
 
+HV*
+Perl__swash_to_invlist(pTHX_ SV* const swash)
+{
+
+   /* Subject to change or removal.  For use only in one place in regcomp.c */
+
+    U8 *l, *lend;
+    char *loc;
+    STRLEN lcur;
+    HV *const hv = MUTABLE_HV(SvRV(swash));
+    UV elements = 0;    /* Number of elements in the inversion list */
+
+    /* The string containing the main body of the table */
+    SV** const listsvp = hv_fetchs(hv, "LIST", FALSE);
+    SV** const typesvp = hv_fetchs(hv, "TYPE", FALSE);
+    SV** const bitssvp = hv_fetchs(hv, "BITS", FALSE);
+
+    const U8* const typestr = (U8*)SvPV_nolen(*typesvp);
+    const STRLEN bits  = SvUV(*bitssvp);
+    const STRLEN octets = bits >> 3; /* if bits == 1, then octets == 0 */
+
+    HV* invlist;
+
+    PERL_ARGS_ASSERT__SWASH_TO_INVLIST;
+
+    /* read $swash->{LIST} */
+    l = (U8*)SvPV(*listsvp, lcur);
+    loc = (char *) l;
+    lend = l + lcur;
+
+    /* Scan the input to count the number of lines to preallocate array size
+     * based on worst possible case, which is each line in the input creates 2
+     * elements in the inversion list: 1) the beginning of a range in the list;
+     * 2) the beginning of a range not in the list.  */
+    while ((loc = (strchr(loc, '\n'))) != NULL) {
+	elements += 2;
+	loc++;
+    }
+
+    /* If the ending is somehow corrupt and isn't a new line, add another
+     * element for the final range that isn't in the inversion list */
+    if (! (*lend == '\n' || (*lend == '\0' && *(lend - 1) == '\n'))) {
+	elements++;
+    }
+
+    invlist = _new_invlist(elements);
+
+    /* Now go through the input again, adding each range to the list */
+    while (l < lend) {
+	UV start, end;
+	UV val;		/* Not used by this function */
+
+	l = S_swash_scan_list_line(aTHX_ l, lend, &start, &end, &val,
+					 cBOOL(octets), typestr);
+
+	if (l > lend) {
+	    break;
+	}
+
+	_append_range_to_invlist(invlist, start, end);
+    }
+
+    return invlist;
+}
+
 /*
 =for apidoc uvchr_to_utf8
 

@@ -1284,7 +1284,24 @@ Apd	|void	|sv_vsetpvfn	|NN SV *const sv|NN const char *const pat|const STRLEN pa
 ApR	|NV	|str_to_version	|NN SV *sv
 Ap	|SV*	|swash_init	|NN const char* pkg|NN const char* name|NN SV* listsv|I32 minbits|I32 none
 Ap	|UV	|swash_fetch	|NN SV *swash|NN const U8 *ptr|bool do_utf8
-EMpRX	|HV*	|_swash_inversion_hash	|NN SV *swash
+EMpRX	|HV*	|_swash_inversion_hash	|NN SV* const swash
+EMpR	|HV*	|_new_invlist	|const IV initial_size
+EMpR	|HV*	|_swash_to_invlist	|NN SV* const swash
+EMp	|void	|_append_range_to_invlist   |NN HV* const invlist|const UV start|const UV end
+#ifdef PERL_IN_REGCOMP_C
+EsMR	|HV*	|add_range_to_invlist	|NN HV* const invlist|const UV start|const UV end
+EiMR	|UV*	|invlist_array	|NN HV* const invlist
+EiM	|void	|invlist_destroy	|NN HV* const invlist
+EsM	|void	|invlist_extend    |NN HV* const invlist|const UV len
+EsMR	|HV*	|invlist_intersection	|NN HV* const a|NN HV* const b
+EiMR	|UV	|invlist_len	|NN HV* const invlist
+EiMR	|UV	|invlist_max	|NN HV* const invlist
+EiM	|void	|invlist_set_array	|NN HV* const invlist|NN const UV* const array
+EiM	|void	|invlist_set_len	|NN HV* const invlist|const UV len
+EiM	|void	|invlist_set_max	|NN HV* const invlist|const UV max
+EiM	|void	|invlist_trim	|NN HV* const invlist
+EsMR	|HV*	|invlist_union	|NN HV* const a|NN HV* const b
+#endif
 Ap	|void	|taint_env
 Ap	|void	|taint_proper	|NULLOK const char* f|NN const char *const s
 Apd	|UV	|to_utf8_case	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp \

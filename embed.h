@@ -814,7 +814,10 @@
 #define do_spawn_nowait(a)	Perl_do_spawn_nowait(aTHX_ a)
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
+#define _append_range_to_invlist(a,b,c)	Perl__append_range_to_invlist(aTHX_ a,b,c)
+#define _new_invlist(a)		Perl__new_invlist(aTHX_ a)
 #define _swash_inversion_hash(a)	Perl__swash_inversion_hash(aTHX_ a)
+#define _swash_to_invlist(a)	Perl__swash_to_invlist(aTHX_ a)
 #define av_reify(a)		Perl_av_reify(aTHX_ a)
 #define grok_bslash_c(a,b)	Perl_grok_bslash_c(aTHX_ a,b)
 #define grok_bslash_o(a,b,c,d,e)	Perl_grok_bslash_o(aTHX_ a,b,c,d,e)
@@ -862,6 +865,7 @@
 #  endif
 #  if defined(PERL_IN_REGCOMP_C)
 #define add_data		S_add_data
+#define add_range_to_invlist(a,b,c)	S_add_range_to_invlist(aTHX_ a,b,c)
 #define checkposixcc(a)		S_checkposixcc(aTHX_ a)
 #define cl_and			S_cl_and
 #define cl_anything		S_cl_anything
@@ -869,6 +873,17 @@
 #define cl_init_zero		S_cl_init_zero
 #define cl_is_anything		S_cl_is_anything
 #define cl_or			S_cl_or
+#define invlist_array(a)	S_invlist_array(aTHX_ a)
+#define invlist_destroy(a)	S_invlist_destroy(aTHX_ a)
+#define invlist_extend(a,b)	S_invlist_extend(aTHX_ a,b)
+#define invlist_intersection(a,b)	S_invlist_intersection(aTHX_ a,b)
+#define invlist_len(a)		S_invlist_len(aTHX_ a)
+#define invlist_max(a)		S_invlist_max(aTHX_ a)
+#define invlist_set_array(a,b)	S_invlist_set_array(aTHX_ a,b)
+#define invlist_set_len(a,b)	S_invlist_set_len(aTHX_ a,b)
+#define invlist_set_max(a,b)	S_invlist_set_max(aTHX_ a,b)
+#define invlist_trim(a)		S_invlist_trim(aTHX_ a)
+#define invlist_union(a,b)	S_invlist_union(aTHX_ a,b)
 #define join_exact(a,b,c,d,e,f)	S_join_exact(aTHX_ a,b,c,d,e,f)
 #define make_trie(a,b,c,d,e,f,g,h)	S_make_trie(aTHX_ a,b,c,d,e,f,g,h)
 #define make_trie_failtable(a,b,c,d)	S_make_trie_failtable(aTHX_ a,b,c,d)
