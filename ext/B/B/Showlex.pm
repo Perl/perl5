@@ -1,6 +1,6 @@
 package B::Showlex;
 
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 
 use strict;
 use B qw(svref_2object comppadlist class);
