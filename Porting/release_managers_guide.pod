@@ -231,16 +231,11 @@ fix.
 I<You MAY SKIP this step for SNAPSHOT>
 
 Run F<Porting/cmpVERSION.pl> to compare the current source tree with the
-previous version to check for for modules that have identical version
+previous version to check for dual-lifed modules that have identical version
 numbers but different contents, e.g.:
 
      $ cd ~/some-perl-root
-     $ ./perl -Ilib Porting/cmpVERSION.pl -xd . v5.10.0
-
-then bump the version numbers of any non-dual-life modules that have
-changed since the previous release, but which still have the old version
-number. If there is more than one maintenance branch (e.g. 5.8.x, 5.10.x),
-then compare against both.
+     $ ./perl -Ilib Porting/cmpVERSION.pl -d . v5.10.0
 
 Be sure to bump the version numbers in separate commits for each module
 (or group of related modules) so that changes can be cherry-picked later
@@ -251,11 +246,6 @@ to lib/, or a script like lib/lib_pm.PL is run to produce lib/lib.pm);
 make sure you edit the correct file!
 
 Once all version numbers have been bumped, re-run the checks.
-
-Then run again without the -x option, to check that dual-life modules are
-also sensible.
-
-     $ ./perl -Ilib Porting/cmpVERSION.pl -d . v5.10.0
 
 =item *
 
