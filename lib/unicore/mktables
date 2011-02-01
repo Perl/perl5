@@ -7975,6 +7975,30 @@ sub standardize ($) {
     return lc $name;
 }
 
+sub utf8_heavy_name ($$) {
+    # Returns the name that utf8_heavy.pl will use to find a table.  XXX
+    # perhaps this function should be placed somewhere, like Heavy.pl so that
+    # utf8_heavy can use it directly without duplicating code that can get
+    # out-of sync.
+
+    my $table = shift;
+    my $alias = shift;
+    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+    my $property = $table->property;
+    $property = ($property == $perl)
+                ? ""                # 'perl' is never explicitly stated
+                : standardize($property->name) . '=';
+    if ($alias->loose_match) {
+        return $property . standardize($alias->name);
+    }
+    else {
+        return lc ($property . $alias->name);
+    }
+
+    return;
+}
+
 {   # Closure
 
     my $indent_increment = " " x 2;
@@ -12117,14 +12141,12 @@ sub register_file_for_name($$$) {
         # goes through all aliases in the UCD that we generate regex match
         # files for
         foreach my $alias ($table->aliases) {
-            my $name = $alias->name;
+            my $standard = utf8_heavy_name($table, $alias);
 
             # Generate an entry in either the loose or strict hashes, which
             # will translate the property and alias names combination into the
             # file where the table for them is stored.
-            my $standard;
             if ($alias->loose_match) {
-                $standard = $property . standardize($alias->name);
                 if (exists $loose_to_file_of{$standard}) {
                     Carp::my_carp("Can't change file registered to $loose_to_file_of{$standard} to '$sub_filename'.");
                 }
@@ -12133,7 +12155,6 @@ sub register_file_for_name($$$) {
                 }
             }
             else {
-                $standard = lc ($property . $name);
                 if (exists $stricter_to_file_of{$standard}) {
                     Carp::my_carp("Can't change file registered to $stricter_to_file_of{$standard} to '$sub_filename'.");
                 }
@@ -12146,7 +12167,7 @@ sub register_file_for_name($$$) {
                     # will work.  Also note that this assumes that such a
                     # number is matched strictly; so if that were to change,
                     # this would be wrong.
-                    if ((my $integer_name = $name)
+                    if ((my $integer_name = $alias->name)
                             =~ s/^ ( -? \d+ ) \.0+ $ /$1/x)
                     {
                         $stricter_to_file_of{$property . $integer_name}
