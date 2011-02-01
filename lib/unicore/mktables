@@ -1204,6 +1204,18 @@ my %nv_floating_to_rational; # maps numeric values floating point numbers to
                              # their rational equivalent
 my %loose_property_name_of; # Loosely maps property names to standard form
 
+# Most properties are immune to caseless matching, otherwise you would get
+# nonsensical results, as properties are a function of a code point, not
+# everything that is caselessly equivalent to that code point.  For example,
+# Changes_When_Case_Folded('s') should be false, whereas caselessly it would
+# be true because 's' and 'S' are equivalent caselessly.  However,
+# traditionally, [:upper:] and [:lower:] are equivalent caselessly, so we
+# extend that concept to those very few properties that are like this.  Each
+# such property will match the full range caselessly.  They are hard-coded in
+# the program; it's not worth trying to make it general as it's extremely
+# unlikely that they will ever change.
+my %caseless_equivalent_to;
+
 # These constants names and values were taken from the Unicode standard,
 # version 5.1, section 3.12.  They are used in conjunction with Hangul
 # syllables.  The '_string' versions are so generated tables can retain the
@@ -4404,6 +4416,10 @@ sub trace { return main::trace(@_); }
     # A comment about its being obsolete, or whatever non normal status it has
     main::set_access('status_info', \%status_info, 'r');
 
+    my %caseless_equivalent;
+    # The table this is equivalent to under /i matching, if any.
+    main::set_access('caseless_equivalent', \%caseless_equivalent, 'r', 's');
+
     my %range_size_1;
     # Is the table to be output with each range only a single code point?
     # This is done to avoid breaking existing code that may have come to rely
@@ -4455,6 +4471,7 @@ sub trace { return main::trace(@_); }
         $status{$addr} = delete $args{'Status'} || $NORMAL;
         $status_info{$addr} = delete $args{'_Status_Info'} || "";
         $range_size_1{$addr} = delete $args{'Range_Size_1'} || 0;
+        $caseless_equivalent{$addr} = delete $args{'Caseless_Equivalent'} || 0;
 
         my $description = delete $args{'Description'};
         my $externally_ok = delete $args{'Externally_Ok'};
@@ -6616,6 +6633,7 @@ sub trace { return main::trace(@_); }
         my $status = $other->status;
         my $status_info = $other->status_info;
         my $matches_all = $matches_all{other_addr};
+        my $caseless_equivalent = $other->caseless_equivalent;
         foreach my $table ($current_leader, @{$equivalents{$leader}}) {
             next if $table == $other;
             trace "setting $other to be the leader of $table, status=$status" if main::DEBUG && $to_trace;
@@ -6629,6 +6647,7 @@ sub trace { return main::trace(@_); }
                 $parent{$table_addr} = $other;
                 push @{$children{$other_addr}}, $table;
                 $table->set_status($status, $status_info);
+                $self->set_caseless_equivalent($caseless_equivalent);
             }
         }
 
@@ -12136,6 +12155,7 @@ sub register_file_for_name($$$) {
         my $deprecated = ($table->status eq $DEPRECATED)
                          ? $table->status_info
                          : "";
+        my $caseless_equivalent = $table->caseless_equivalent;
 
         # And for each of the table's aliases...  This inner loop eventually
         # goes through all aliases in the UCD that we generate regex match
@@ -12179,6 +12199,11 @@ sub register_file_for_name($$$) {
             # Keep a list of the deprecated properties and their filenames
             if ($deprecated) {
                 $utf8::why_deprecated{$sub_filename} = $deprecated;
+            }
+
+            # And a substitute table, if any, for case-insensitive matching
+            if ($caseless_equivalent != 0) {
+                $caseless_equivalent_to{$standard} = $caseless_equivalent;
             }
         }
     }
@@ -13257,6 +13282,25 @@ END
 END
 
     push @heavy, simple_dumper (\%utf8::why_deprecated, ' ' x 4);
+    push @heavy, <<END;
+);
+
+# A few properties have different behavior under /i matching.  This maps the
+# those to substitute files to use under /i.
+\%utf8::caseless_equivalent = (
+END
+
+
+    # We set the key to the file when we associated files with tables, but we
+    # couldn't do the same for the value then, as we might not have the file
+    # for the alternate table figured out at that time.
+    foreach my $cased (keys %caseless_equivalent_to) {
+        my @path = $caseless_equivalent_to{$cased}->file_path;
+        my $path = join '/', @path[1, -1];
+        $path =~ s/\.pl//;
+        $utf8::caseless_equivalent_to{$cased} = $path;
+    }
+    push @heavy, simple_dumper (\%utf8::caseless_equivalent_to, ' ' x 4);
     push @heavy, <<END;
 );
 
