@@ -77,9 +77,12 @@ may well be none in a stable release.
 
 =over 4
 
-=item *
+=item * Test::PerlRun
 
-XXX
+This module provides some test function a piece of code in a new Perl
+process. This is very similar to the C<perlrun()> sub in F<t/test.pl>. The
+module exists to make it easier to dual-life modules which use F<t/test.pl>
+for their test suite.
 
 =back
 
