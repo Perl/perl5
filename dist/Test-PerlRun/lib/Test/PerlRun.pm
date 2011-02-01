@@ -228,6 +228,11 @@ C<stderr> matches the output you expect.
 This function runs the specified code and checks if the output sent to
 C<stderr> matches the output regex you expect.
 
+=head1 PERLEXE ENVIRONMENT VARIABLE
+
+When this module runs code, it sets the C<$ENV{PERLEXE}> variable. This
+contains the path to the perl executable that is running the code.
+
 =head1 AUTHOR
 
 Dave Rolsky, <autarch@urth.org>
