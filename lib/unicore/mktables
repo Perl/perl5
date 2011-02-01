@@ -11168,9 +11168,15 @@ END
         $LC->initialize($gc->table('Ll') + $gc->table('Lu'));
 
         # Lt not in release 1.
-        $LC += $gc->table('Lt') if defined $gc->table('Lt');
+        if (defined $gc->table('Lt')) {
+            $LC += $gc->table('Lt');
+            $gc->table('Lt')->set_caseless_equivalent($LC);
+        }
     }
     $LC->add_description('[\p{Ll}\p{Lu}\p{Lt}]');
+
+    $gc->table('Ll')->set_caseless_equivalent($LC);
+    $gc->table('Lu')->set_caseless_equivalent($LC);
 
     my $Cs = $gc->table('Cs');
 
@@ -11281,13 +11287,17 @@ sub compile_perl() {
     my $Unicode_Lower = property_ref('Lowercase');
     if (defined $Unicode_Lower && ! $Unicode_Lower->is_empty) {
         $Lower->set_equivalent_to($Unicode_Lower->table('Y'), Related => 1);
+        $Unicode_Lower->table('Y')->set_caseless_equivalent(property_ref('Cased')->table('Y'));
+        $Unicode_Lower->table('N')->set_caseless_equivalent(property_ref('Cased')->table('N'));
+        $Lower->set_caseless_equivalent(property_ref('Cased')->table('Y'));
+
     }
     else {
         $Lower->set_equivalent_to($gc->table('Lowercase_Letter'),
                                                                 Related => 1);
     }
     $Lower->add_alias('XPosixLower');
-    $perl->add_match_table("PosixLower",
+    my $Posix_Lower = $perl->add_match_table("PosixLower",
                             Description => "[a-z]",
                             Initialize => $Lower & $ASCII,
                             );
@@ -11296,13 +11306,16 @@ sub compile_perl() {
     my $Unicode_Upper = property_ref('Uppercase');
     if (defined $Unicode_Upper && ! $Unicode_Upper->is_empty) {
         $Upper->set_equivalent_to($Unicode_Upper->table('Y'), Related => 1);
+        $Unicode_Upper->table('Y')->set_caseless_equivalent(property_ref('Cased')->table('Y'));
+        $Unicode_Upper->table('N')->set_caseless_equivalent(property_ref('Cased')->table('N'));
+        $Upper->set_caseless_equivalent(property_ref('Cased')->table('Y'));
     }
     else {
         $Upper->set_equivalent_to($gc->table('Uppercase_Letter'),
                                                                 Related => 1);
     }
     $Upper->add_alias('XPosixUpper');
-    $perl->add_match_table("PosixUpper",
+    my $Posix_Upper = $perl->add_match_table("PosixUpper",
                             Description => "[A-Z]",
                             Initialize => $Upper & $ASCII,
                             );
@@ -11311,20 +11324,25 @@ sub compile_perl() {
     # otherwise present
     my $Title = $perl->add_match_table('Title');
     my $lt = $gc->table('Lt');
-    if (defined $lt) {
-        $Title->set_equivalent_to($lt, Related => 1);
-    }
+
+    # Earlier versions of mktables had this related to $lt since they have
+    # identical code points, but their casefolds are not equivalent, and so
+    # now must be kept as separate entities.
+    $Title += $lt if defined $lt;
 
     # If this Unicode version doesn't have Cased, set up our own.  From
     # Unicode 5.1: Definition D120: A character C is defined to be cased if
     # and only if C has the Lowercase or Uppercase property or has a
     # General_Category value of Titlecase_Letter.
-    unless (defined property_ref('Cased')) {
+    my $Unicode_Cased = property_ref('Cased');
+    unless (defined $Unicode_Cased) {
         my $cased = $perl->add_match_table('Cased',
                         Initialize => $Lower + $Upper + $Title,
                         Description => 'Uppercase or Lowercase or Titlecase',
                         );
+        $Unicode_Cased = $cased;
     }
+    $Title->set_caseless_equivalent($Unicode_Cased->table('Y'));
 
     # Similarly, set up our own Case_Ignorable property if this Unicode
     # version doesn't have it.  From Unicode 5.1: Definition D121: A character
@@ -11397,10 +11415,12 @@ sub compile_perl() {
         $Alpha->add_description('Alphabetic');
     }
     $Alpha->add_alias('XPosixAlpha');
-    $perl->add_match_table("PosixAlpha",
+    my $Posix_Alpha = $perl->add_match_table("PosixAlpha",
                             Description => "[A-Za-z]",
                             Initialize => $Alpha & $ASCII,
                             );
+    $Posix_Upper->set_caseless_equivalent($Posix_Alpha);
+    $Posix_Lower->set_caseless_equivalent($Posix_Alpha);
 
     my $Alnum = $perl->add_match_table('Alnum',
                         Description => 'Alphabetic and (Decimal) Numeric',
