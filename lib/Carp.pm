@@ -1,5 +1,8 @@
 package Carp;
 
+use strict;
+use warnings;
+
 our $VERSION = '1.19';
 
 our $MaxEvalLen = 0;
@@ -23,6 +26,9 @@ our @EXPORT_FAIL = qw(verbose);	# hook to enable verbose mode
 # $Max(EvalLen|(Arg(Len|Nums)) variables are used to specify how the eval
 # text and function arguments should be formatted when printed.
 
+our %CarpInternal;
+our %Internal;
+
 # disable these by default, so they can live w/o require Carp
 $CarpInternal{Carp}++;
 $CarpInternal{warnings}++;
@@ -36,6 +42,12 @@ $Internal{'Exporter::Heavy'}++;
 
 sub export_fail { shift; $Verbose = shift if $_[0] eq 'verbose'; @_ }
 
+sub _cgc {
+    no strict 'refs';
+    return \&{"CORE::GLOBAL::caller"} if defined &{"CORE::GLOBAL::caller"};
+    return;
+}
+
 sub longmess {
     # Icky backwards compatibility wrapper. :-(
     #
@@ -43,7 +55,8 @@ sub longmess {
     # number of call levels to go back, so calls to longmess were off
     # by one.  Other code began calling longmess and expecting this
     # behaviour, so the replacement has to emulate that behaviour.
-    my $call_pack = defined &{"CORE::GLOBAL::caller"} ? &{"CORE::GLOBAL::caller"}() : caller();
+    my $cgc = _cgc();
+    my $call_pack = $cgc ? $cgc->() : caller();
     if ($Internal{$call_pack} or $CarpInternal{$call_pack}) {
       return longmess_heavy(@_);
     }
@@ -53,9 +66,11 @@ sub longmess {
     }
 };
 
+our @CARP_NOT;
 sub shortmess {
+    my $cgc = _cgc();
     # Icky backwards compatibility wrapper. :-(
-    local @CARP_NOT = defined &{"CORE::GLOBAL::caller"} ? &{"CORE::GLOBAL::caller"}() : caller();
+    local @CARP_NOT = $cgc ? $cgc->() : caller();
     shortmess_heavy(@_);
 };
 
@@ -67,12 +82,13 @@ sub cluck   { warn longmess  @_ }
 sub caller_info {
   my $i = shift(@_) + 1;
   my %call_info;
+  my $cgc = _cgc();
   {
   package DB;
-  @args = \$i; # A sentinal, which no-one else has the address of
+  @DB::args = \$i; # A sentinel, which no-one else has the address of
   @call_info{
     qw(pack file line sub has_args wantarray evaltext is_require)
-  } = defined &{"CORE::GLOBAL::caller"} ? &{"CORE::GLOBAL::caller"}($i) : caller($i);
+  } = $cgc ? $cgc->($i) : caller($i);
   }
   
   unless (defined $call_info{pack}) {
@@ -86,7 +102,7 @@ sub caller_info {
       @DB::args = (); # Don't let anyone see the address of $i
       local $@;
       my $where = eval {
-	my $func = defined &{"CORE::GLOBAL::caller"} ? \&{"CORE::GLOBAL::caller"} : return '';
+	my $func = $cgc or return '';
 	my $gv = B::svref_2object($func)->GV;
 	my $package = $gv->STASH->NAME;
 	my $subname = $gv->NAME;
@@ -170,7 +186,8 @@ sub long_error_loc {
   my $lvl = $CarpLevel;
   {
     ++$i;
-    my $pkg = defined &{"CORE::GLOBAL::caller"} ? &{"CORE::GLOBAL::caller"}($i) : caller($i);
+    my $cgc = _cgc();
+    my $pkg = $cgc ? $cgc->($i) : caller($i);
     unless(defined($pkg)) {
       # This *shouldn't* happen.
       if (%Internal) {
@@ -245,10 +262,10 @@ sub short_error_loc {
   my $i = 1;
   my $lvl = $CarpLevel;
   {
-
-    my $called = defined &{"CORE::GLOBAL::caller"} ? &{"CORE::GLOBAL::caller"}($i) : caller($i);
+    my $cgc = _cgc();
+    my $called = $cgc ? $cgc->($i) : caller($i);
     $i++;
-    my $caller = defined &{"CORE::GLOBAL::caller"} ? &{"CORE::GLOBAL::caller"}($i) : caller($i);
+    my $caller = $cgc ? $cgc->($i) : caller($i);
 
     return 0 unless defined($caller); # What happened?
     redo if $Internal{$caller};
