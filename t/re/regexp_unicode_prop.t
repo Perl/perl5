@@ -88,7 +88,7 @@ my @USER_DEFINED_PROPERTIES = (
    InNotKana                 => ['\x{3040}', '!\x{3041}'],
    InConsonant               => ['d',        '!e'],
    IsSyriac1                 => ['\x{0712}', '!\x{072F}'],
-   '# User-defined character properties my lack \n at the end',
+   '# User-defined character properties may lack \n at the end',
    InGreekSmall              => ['\N{GREEK SMALL LETTER PI}',
                                  '\N{GREEK SMALL LETTER FINAL SIGMA}'],
    InGreekCapital            => ['\N{GREEK CAPITAL LETTER PI}', '!\x{03A2}'],
@@ -213,7 +213,7 @@ sub run_tests {
         match $_, $in_pat,  $out_pat for @in;
         match $_, $out_pat, $in_pat  for @out;
 
-        if (1 == length $class) {
+        if (1 == length $class) {   # Repeat without braces if name length 1
             my $in_pat  = eval qq ['\\p$class'];
             my $out_pat = eval qq ['\\P$class'];
 
