@@ -230,27 +230,6 @@ fix.
 
 I<You MAY SKIP this step for SNAPSHOT>
 
-Run F<Porting/cmpVERSION.pl> to compare the current source tree with the
-previous version to check for dual-lifed modules that have identical version
-numbers but different contents, e.g.:
-
-     $ cd ~/some-perl-root
-     $ ./perl -Ilib Porting/cmpVERSION.pl -d . v5.10.0
-
-Be sure to bump the version numbers in separate commits for each module
-(or group of related modules) so that changes can be cherry-picked later
-if necessary.
-
-Note that some of the files listed may be generated (e.g. copied from ext/
-to lib/, or a script like lib/lib_pm.PL is run to produce lib/lib.pm);
-make sure you edit the correct file!
-
-Once all version numbers have been bumped, re-run the checks.
-
-=item *
-
-I<You MAY SKIP this step for SNAPSHOT>
-
 Get perldelta in a mostly finished state.
 
 Read  F<Porting/how_to_write_a_perldelta.pod>, and try to make sure that
