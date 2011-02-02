@@ -8872,14 +8872,14 @@ S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
 ANYOF_##NAME:                                                                  \
 	for (value = 0; value < 256; value++)                                  \
 	    if (TEST)                                                          \
-	    stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value);  \
+	    stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value, &nonbitmap);  \
     yesno = '+';                                                               \
     what = WORD;                                                               \
     break;                                                                     \
 case ANYOF_N##NAME:                                                            \
 	for (value = 0; value < 256; value++)                                  \
 	    if (!TEST)                                                         \
-	    stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value);  \
+	    stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value, &nonbitmap);  \
     yesno = '!';                                                               \
     what = WORD;                                                               \
     break
@@ -8894,14 +8894,14 @@ ANYOF_##NAME:                                                                  \
     else if (UNI_SEMANTICS) {                                                  \
         for (value = 0; value < 256; value++) {                                \
             if (TEST_8(value)) stored +=                                       \
-                      S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value);  \
+                      S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value, &nonbitmap);  \
         }                                                                      \
     }                                                                          \
     else {                                                                     \
         for (value = 0; value < 128; value++) {                                \
             if (TEST_7(UNI_TO_NATIVE(value))) stored +=                        \
 		S_set_regclass_bit(aTHX_ pRExC_state, ret,                     \
-			           (U8) UNI_TO_NATIVE(value));                 \
+			           (U8) UNI_TO_NATIVE(value), &nonbitmap);                 \
         }                                                                      \
     }                                                                          \
     yesno = '+';                                                               \
@@ -8912,18 +8912,18 @@ case ANYOF_N##NAME:                                                            \
     else if (UNI_SEMANTICS) {                                                  \
         for (value = 0; value < 256; value++) {                                \
             if (! TEST_8(value)) stored +=                                     \
-		    S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value);    \
+		    S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value, &nonbitmap);    \
         }                                                                      \
     }                                                                          \
     else {                                                                     \
         for (value = 0; value < 128; value++) {                                \
             if (! TEST_7(UNI_TO_NATIVE(value))) stored += S_set_regclass_bit(  \
-			aTHX_ pRExC_state, ret, (U8) UNI_TO_NATIVE(value));    \
+			aTHX_ pRExC_state, ret, (U8) UNI_TO_NATIVE(value), &nonbitmap);    \
         }                                                                      \
 	if (ASCII_RESTRICTED) {                                                \
 	    for (value = 128; value < 256; value++) {                          \
              stored += S_set_regclass_bit(                                     \
-			   aTHX_ pRExC_state, ret, (U8) UNI_TO_NATIVE(value)); \
+			   aTHX_ pRExC_state, ret, (U8) UNI_TO_NATIVE(value), &nonbitmap); \
 	    }                                                                  \
 	    ANYOF_FLAGS(ret) |= ANYOF_UNICODE_ALL|ANYOF_UTF8;                  \
 	}                                                                      \
@@ -8957,7 +8957,7 @@ case ANYOF_N##NAME:                                                            \
 #endif
 
 STATIC U8
-S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8 value)
+S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8 value, HV** nonbitmap_ptr)
 {
 
     /* Handle the setting of folds in the bitmap for non-locale ANYOF nodes.
@@ -8991,6 +8991,10 @@ S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8
            don't have unicode semantics for the above ASCII Latin-1 characters,
            and they have a fold, they should match if the target is utf8, and
            not otherwise */
+	if (! *nonbitmap_ptr) {
+	    *nonbitmap_ptr = _new_invlist(2);
+	}
+	*nonbitmap_ptr = add_range_to_invlist(*nonbitmap_ptr, value, value);
 	ANYOF_FLAGS(node) |= ANYOF_UTF8;
     }
 
@@ -8999,7 +9003,7 @@ S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8
 
 
 PERL_STATIC_INLINE U8
-S_set_regclass_bit(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8 value)
+S_set_regclass_bit(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8 value, HV** nonbitmap_ptr)
 {
     /* This inline function sets a bit in the bitmap if not already set, and if
      * appropriate, its fold, returning the number of bits that actually
@@ -9015,7 +9019,7 @@ S_set_regclass_bit(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8 valu
     stored = 1;
 
     if (FOLD && ! LOC) {	/* Locale folds aren't known until runtime */
-	stored += S_set_regclass_bit_fold(aTHX_ pRExC_state, node, value);
+	stored += S_set_regclass_bit_fold(aTHX_ pRExC_state, node, value, nonbitmap_ptr);
     }
 
     return stored;
@@ -9043,6 +9047,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
     bool need_class = 0;
     SV *listsv = NULL;
     UV n;
+    HV* nonbitmap = NULL;
     AV* unicode_alternate  = NULL;
 #ifdef EBCDIC
     UV literal_endpoint = 0;
@@ -9064,8 +9069,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
     /* Assume we are going to generate an ANYOF node. */
     ret = reganode(pRExC_state, ANYOF, 0);
 
-    if (!SIZE_ONLY)
+
+    if (!SIZE_ONLY) {
 	ANYOF_FLAGS(ret) = 0;
+    }
 
     if (UCHARAT(RExC_parse) == '^') {	/* Complement of range. */
 	RExC_naughty++;
@@ -9350,9 +9357,9 @@ parseit:
 
 		    if (prevvalue < 256) {
 			stored +=
-                         S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) prevvalue);
+                         S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) prevvalue, &nonbitmap);
 			stored +=
-                         S_set_regclass_bit(aTHX_ pRExC_state, ret, '-');
+                         S_set_regclass_bit(aTHX_ pRExC_state, ret, '-', &nonbitmap);
 		    }
 		    else {
 			ANYOF_FLAGS(ret) |= ANYOF_UTF8;
@@ -9404,7 +9411,7 @@ parseit:
 		    else {
 			for (value = 0; value < 128; value++)
 			    stored +=
-                              S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) ASCII_TO_NATIVE(value));
+                              S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) ASCII_TO_NATIVE(value), &nonbitmap);
 		    }
 		    yesno = '+';
 		    what = NULL;	/* Doesn't match outside ascii, so
@@ -9416,7 +9423,7 @@ parseit:
 		    else {
 			for (value = 128; value < 256; value++)
 			    stored +=
-                              S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) ASCII_TO_NATIVE(value));
+                              S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) ASCII_TO_NATIVE(value), &nonbitmap);
 		    }
 		    ANYOF_FLAGS(ret) |= ANYOF_UNICODE_ALL;
 		    yesno = '!';
@@ -9429,7 +9436,7 @@ parseit:
 			/* consecutive digits assumed */
 			for (value = '0'; value <= '9'; value++)
 			    stored +=
-                              S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value);
+                              S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value, &nonbitmap);
 		    }
 		    yesno = '+';
 		    what = POSIX_CC_UNI_NAME("Digit");
@@ -9441,10 +9448,10 @@ parseit:
 			/* consecutive digits assumed */
 			for (value = 0; value < '0'; value++)
 			    stored +=
-                              S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value);
+                              S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value, &nonbitmap);
 			for (value = '9' + 1; value < 256; value++)
 			    stored +=
-                              S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value);
+                              S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) value, &nonbitmap);
 		    }
 		    yesno = '!';
 		    what = POSIX_CC_UNI_NAME("Digit");
@@ -9494,11 +9501,15 @@ parseit:
 		    }
 		    if (!SIZE_ONLY)
 			stored +=
-                            S_set_regclass_bit(aTHX_ pRExC_state, ret, '-');
+                            S_set_regclass_bit(aTHX_ pRExC_state, ret, '-', &nonbitmap);
 		} else
 		    range = 1;	/* yeah, it's a range! */
 		continue;	/* but do it the next time */
 	    }
+	}
+
+	if (value > 255) {
+	    RExC_uni_semantics = 1;
 	}
 
 	/* now is the next time */
@@ -9517,25 +9528,32 @@ parseit:
 			for (i = prevvalue; i <= ceilvalue; i++)
 			    if (isLOWER(i) && !ANYOF_BITMAP_TEST(ret,i)) {
 				stored +=
-                                  S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) i);
+                                  S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) i, &nonbitmap);
 			    }
 		    } else {
 			for (i = prevvalue; i <= ceilvalue; i++)
 			    if (isUPPER(i) && !ANYOF_BITMAP_TEST(ret,i)) {
 				stored +=
-                                  S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) i);
+                                  S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) i, &nonbitmap);
 			    }
 		    }
 		}
 		else
 #endif
 		      for (i = prevvalue; i <= ceilvalue; i++) {
-			stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) i);
+			stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) i, &nonbitmap);
 	              }
 	  }
-	  if (value > 255 || UTF) {
-	        const UV prevnatvalue  = NATIVE_TO_UNI(prevvalue);
-		const UV natvalue      = NATIVE_TO_UNI(value);
+	  if (value > 255) {
+	    const UV prevnatvalue  = NATIVE_TO_UNI(prevvalue);
+	    const UV natvalue      = NATIVE_TO_UNI(value);
+	    if (! nonbitmap) {
+		nonbitmap = _new_invlist(2);
+	    }
+	    nonbitmap = add_range_to_invlist(nonbitmap, prevnatvalue, natvalue);
+	    ANYOF_FLAGS(ret) |= ANYOF_UTF8;
+	}
+#if 0
 
 		/* If the code point requires utf8 to represent, and we are not
 		 * folding, it can't match unless the target is in utf8.  Only
@@ -9632,6 +9650,7 @@ parseit:
 		    }
 		}
 	    }
+#endif
 #ifdef EBCDIC
 	    literal_endpoint = 0;
 #endif
@@ -9645,6 +9664,167 @@ parseit:
     if (SIZE_ONLY)
         return ret;
     /****** !SIZE_ONLY AFTER HERE *********/
+
+    /* Finish up the non-bitmap entries */
+    if (nonbitmap) {
+	UV* nonbitmap_array;
+	UV i;
+
+	/* If folding, we add to the list all characters that could fold to or
+	 * from the ones already on the list */
+	if (FOLD) {
+	    HV* fold_intersection;
+	    UV* fold_list;
+
+	    /* This is a list of all the characters that participate in folds
+	     * (except marks, etc in multi-char folds */
+	    if (! PL_utf8_foldable) {
+		SV* swash = swash_init("utf8", "Cased", &PL_sv_undef, 1, 0);
+		PL_utf8_foldable = _swash_to_invlist(swash);
+	    }
+
+	    /* This is a hash that for a particular fold gives all characters
+	     * that are involved in it */
+	    if (! PL_utf8_foldclosures) {
+
+		/* If the folds haven't been read in, call a fold
+		    * function to force that */
+		if (! PL_utf8_tofold) {
+		    U8 dummy[UTF8_MAXBYTES+1];
+		    STRLEN dummy_len;
+		    to_utf8_fold((U8*) "A", dummy, &dummy_len);
+		}
+		PL_utf8_foldclosures = _swash_inversion_hash(PL_utf8_tofold);
+	    }
+
+	    /* Only the characters in this class that participate in folds need
+	     * be checked.  Get the intersection of this class and all the
+	     * possible characters that are foldable.  This can quickly narrow
+	     * down a large class */
+	    fold_intersection = invlist_intersection(PL_utf8_foldable, nonbitmap);
+
+	    /* Now look at the foldable characters in this class individually */
+	    fold_list = invlist_array(fold_intersection);
+	    for (i = 0; i < invlist_len(fold_intersection); i++) {
+		UV j;
+
+		/* The next entry is the beginning of the range that is in the
+		 * class */
+		UV start = fold_list[i++];
+
+
+		/* The next entry is the beginning of the next range, which
+		 * isn't in the class, so the end of the current range is one
+		 * less than that */
+		UV end = fold_list[i] - 1;
+
+		/* Look at every character in the range */
+		for (j = start; j <= end; j++) {
+
+		    /* Get its fold */
+		    U8 foldbuf[UTF8_MAXBYTES_CASE+1];
+		    STRLEN foldlen;
+		    const UV f = to_uni_fold(j, foldbuf, &foldlen);
+
+		    if (foldlen > (STRLEN)UNISKIP(f)) {
+
+			/* Any multicharacter foldings (disallowed in
+			 * lookbehind patterns) require the following
+			 * transform: [ABCDEF] -> (?:[ABCabcDEFd]|pq|rst) where
+			 * E folds into "pq" and F folds into "rst", all other
+			 * characters fold to single characters.  We save away
+			 * these multicharacter foldings, to be later saved as
+			 * part of the additional "s" data. */
+			if (! RExC_in_lookbehind) {
+			    /* XXX Discard this fold if any are latin1 and LOC */
+			    SV *sv;
+
+			    if (!unicode_alternate) {
+				unicode_alternate = newAV();
+			    }
+			    sv = newSVpvn_utf8((char*)foldbuf, foldlen, TRUE);
+			    av_push(unicode_alternate, sv);
+
+			    /* This node is variable length */
+			    OP(ret) = ANYOFV;
+			    ANYOF_FLAGS(ret) |= ANYOF_UNICODE;
+			}
+		    }
+		    else { /* Single character fold */
+			SV** listp;
+
+			/* Consider "k" =~ /[K]/i.  The line above would have
+			 * just folded the 'k' to itself, and that isn't going
+			 * to match 'K'.  So we look through the closure of
+			 * everything that folds to 'k'.  That will find the
+			 * 'K'.  Initialize the list, if necessary */
+
+			/* The data structure is a hash with the keys every
+			 * character that is folded to, like 'k', and the
+			 * values each an array of everything that folds to its
+			 * key.  e.g. [ 'k', 'K', KELVIN_SIGN ] */
+			if ((listp = hv_fetch(PL_utf8_foldclosures,
+				      (char *) foldbuf, foldlen, FALSE)))
+			{
+			    AV* list = (AV*) *listp;
+			    IV k;
+			    for (k = 0; k <= av_len(list); k++) {
+				SV** c_p = av_fetch(list, k, FALSE);
+				UV c;
+				if (c_p == NULL) {
+				    Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
+				}
+				c = SvUV(*c_p);
+
+				if (c < 256 && AT_LEAST_UNI_SEMANTICS) {
+				    stored += S_set_regclass_bit(aTHX_ pRExC_state, ret, (U8) c, &nonbitmap);
+				}
+				    /* It may be that the code point is already
+				     * in this range or already in the bitmap,
+				     * XXX THink about LOC
+				     * in which case we need do nothing */
+				else if ((c < start || c > end)
+					 && (c > 255
+					     || ! ANYOF_BITMAP_TEST(ret, c)))
+				{
+				    nonbitmap = add_range_to_invlist(nonbitmap, c, c);
+				}
+			    }
+			}
+		    }
+		}
+	    }
+	    invlist_destroy(fold_intersection);
+	} /* End of processing all the folds */
+
+	/*  Here have the full list of items to match that aren't in the
+	 *  bitmap.  Convert to the structure that the rest of the code is
+	 *  expecting.   XXX That rest of the code should convert to this
+	 *  structure */
+	nonbitmap_array = invlist_array(nonbitmap);
+	for (i = 0; i < invlist_len(nonbitmap); i++) {
+
+	    /* The next entry is the beginning of the range that is in the
+	     * class */
+	    UV start = nonbitmap_array[i++];
+
+	    /* The next entry is the beginning of the next range, which isn't
+	     * in the class, so the end of the current range is one less than
+	     * that */
+	    UV end = nonbitmap_array[i] - 1;
+
+	    if (start == end) {
+		Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n", start);
+	    }
+	    else {
+		/* The \t sets the whole range */
+		Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\t%04"UVxf"\n",
+			/* XXX EBCDIC */
+				   start, end);
+	    }
+	}
+	invlist_destroy(nonbitmap);
+    }
 
     /* Optimize inverted simple patterns (e.g. [^a-z]).  Note that we haven't
      * set the FOLD flag yet, so this this does optimize those.  It doesn't

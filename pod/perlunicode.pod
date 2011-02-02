@@ -349,6 +349,27 @@ You can also use negation in both C<\p{}> and C<\P{}> by introducing a caret
 (^) between the first brace and the property name: C<\p{^Tamil}> is
 equal to C<\P{Tamil}>.
 
+Almost all properties are immune to case-insensitive matching.  That is,
+adding a C</i> regular expression modifier does not change what they
+match.  There are two sets that are affected.
+The first set is
+C<Uppercase_Letter>,
+C<Lowercase_Letter>,
+and C<Titlecase_Letter>,
+all of which match C<Cased_Letter> under C</i> matching.
+And the second set is
+C<Uppercase>,
+C<Lowercase>,
+and C<Titlecase>,
+all of which match C<Cased> under C</i> matching.
+This set also includes its subsets C<PosixUpper> and C<PosixLower> both
+of which under C</i> matching match C<PosixAlpha>.
+(The difference between these sets is that some things, such as Roman
+Numerals come in both upper and lower case so they are C<Cased>, but aren't considered to be
+letters, so they aren't C<Cased_Letter>s.)
+L<perluniprops> includes a notation for all forms that have C</i>
+differences.
+
 =head3 B<General_Category>
 
 Every Unicode character is assigned a general category, which is the "most
@@ -773,6 +794,12 @@ C<\p> or C<\P> construct.
 
 
 Note that the effect is compile-time and immutable once defined.
+However the subroutines are passed a single parameter which is 0 if
+case-sensitive matching is in effect, and non-zero if caseless matching
+is in effect.  The subroutine may return different values depending on
+the value of the flag, and one set of values will immutably be in effect
+for all case-sensitive matches; the other set for all case-insensitive
+matches.
 
 The subroutines must return a specially-formatted string, with one
 or more newline-separated lines.  Each line must be one of the following:

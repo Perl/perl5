@@ -12395,6 +12395,7 @@ sub make_table_pod_entries($) {
     my $string_count = clarify_number($count);
     my $status = $input_table->status;
     my $status_info = $input_table->status_info;
+    my $caseless_equivalent = $input_table->caseless_equivalent;
 
     my $entry_for_first_table; # The entry for the first table output.
                            # Almost certainly, it is the parent.
@@ -12616,6 +12617,11 @@ sub make_table_pod_entries($) {
                     }
                     $parenthesized .= $single_form if $single_form;
                 }
+            }
+
+            if ($caseless_equivalent != 0) {
+                $parenthesized .=  '; ' if $parenthesized ne "";
+                $parenthesized .= "/i= " . $caseless_equivalent->complete_name;
             }
 
 
@@ -13059,6 +13065,15 @@ are noted as such.
 Numbers in (parentheses) indicate the total number of code points matched by
 the property.  For emphasis, those properties that match no code points at all
 are listed as well in a separate section following the table.
+
+Most properties match the same code points regardless of whether C<"/i">
+case-insensitive matching is specified or not.  But a few properties are
+affected.  These are shown with the notation
+
+ (/i= other_property)
+
+in the second column.  Under case-insensitive matching they match the
+same code pode points as the property "other_property".
 
 There is no description given for most non-Perl defined properties (See
 $unicode_reference_url for that).

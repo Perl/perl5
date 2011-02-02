@@ -273,12 +273,31 @@ C</\pLl/> is valid, but means something different.
 It matches a two character string: a letter (Unicode property C<\pL>),
 followed by a lowercase C<l>.
 
-For more details, see L<perlunicode/Unicode Character Properties>; for a
+Note that almost all properties are immune to case-insensitive matching.
+That is, adding a C</i> regular expression modifier does not change what
+they match.  There are two sets that are affected.  The first set is
+C<Uppercase_Letter>,
+C<Lowercase_Letter>,
+and C<Titlecase_Letter>,
+all of which match C<Cased_Letter> under C</i> matching.
+And the second set is
+C<Uppercase>,
+C<Lowercase>,
+and C<Titlecase>,
+all of which match C<Cased> under C</i> matching.
+(The difference between these sets is that some things, such as Roman
+Numerals come in both upper and lower case so they are C<Cased>, but
+aren't considered to be letters, so they aren't C<Cased_Letter>s.)
+This set also includes its subsets C<PosixUpper> and C<PosixLower> both
+of which under C</i> matching match C<PosixAlpha>.
+
+For more details on Unicode properties, see L<perlunicode/Unicode
+Character Properties>; for a
 complete list of possible properties, see
-L<perluniprops/Properties accessible through \p{} and \P{}>.
+L<perluniprops/Properties accessible through \p{} and \P{}>,
+which notes all forms that have C</i> differences.
 It is also possible to define your own properties. This is discussed in
 L<perlunicode/User-Defined Character Properties>.
-
 
 =head4 Examples
 

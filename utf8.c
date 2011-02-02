@@ -2657,10 +2657,6 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
 	    char* key_end = (char *) uvuni_to_utf8((U8*) key, val);
 	    STRLEN key_len = key_end - key;
 
-	    /* And the value is what the forward mapping is from. */
-	    char utf8_inverse[UTF8_MAXBYTES+1];
-	    char *utf8_inverse_end = (char *) uvuni_to_utf8((U8*) utf8_inverse, inverse);
-
 	    /* Get the list for the map */
 	    if ((listp = hv_fetch(ret, key, key_len, FALSE))) {
 		list = (AV*) *listp;
@@ -2679,22 +2675,21 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
 		    Perl_croak(aTHX_ "panic: av_fetch() unexpectedly failed");
 		}
 		entry = *entryp;
-		if (SvCUR(entry) != key_len) {
-		    continue;
-		}
-		if (memEQ(key, SvPVX(entry), key_len)) {
+		if (SvUV(entry) == val) {
 		    found_key = TRUE;
 		    break;
 		}
 	    }
+
+	    /* Make sure there is a mapping to itself on the list */
 	    if (! found_key) {
-		element = newSVpvn_flags(key, key_len, SVf_UTF8);
+		element = newSVuv(val);
 		av_push(list, element);
 	    }
 
 
 	    /* Simply add the value to the list */
-	    element = newSVpvn_flags(utf8_inverse, utf8_inverse_end - utf8_inverse, SVf_UTF8);
+	    element = newSVuv(inverse);
 	    av_push(list, element);
 
 	    /* swash_get() increments the value of val for each element in the

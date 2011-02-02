@@ -6813,6 +6813,7 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 			    }
 			}
 		    }
+#if 0
 		    if (!match) { /* See if the folded version matches */
 			SV** listp;
 
@@ -6881,6 +6882,7 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 			    }
 			}
 		    }
+#endif
 		}
 
 		/* If we allocated a string above, free it */
