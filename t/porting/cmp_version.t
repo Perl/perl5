@@ -63,7 +63,7 @@ my %skip;
     'lib/Exporter/Heavy.pm',
     'win32/FindExt.pm',
 } = ();
-my $skip_dirs = qr|^t/lib|;
+my $skip_dirs = qr{^(?:t/lib|cpan)};
 
 my @all_diffs = `git --no-pager diff --name-only $tag_to_compare`;
 chomp @all_diffs;
