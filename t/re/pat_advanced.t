@@ -21,7 +21,7 @@ BEGIN {
 }
 
 
-plan tests => 1304;  # Update this when adding/deleting tests.
+plan tests => 1343;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -900,6 +900,9 @@ sub run_tests {
         my $re = qq /^([^X]*)X/;
         utf8::upgrade ($re);
         ok "\x{100}X" =~ /$re/, "S_cl_and ANYOF_UNICODE & ANYOF_INVERTED";
+        my $loc_re = qq /(?l:^([^X]*)X)/;
+        utf8::upgrade ($loc_re);
+        ok "\x{100}X" =~ /$loc_re/, "locale, S_cl_and ANYOF_UNICODE & ANYOF_INVERTED";
     }
 
     {
@@ -1465,9 +1468,55 @@ sub run_tests {
         ok "\N{ROMAN NUMERAL ONE}" =~ /\p{IDContinue}/, "I =~ ID_Continue";
         ok "\N{SMALL ROMAN NUMERAL ONE}" =~ /\p{Alphabetic}/, "i =~ Alphabetic";
         ok "\N{SMALL ROMAN NUMERAL ONE}" !~ /\p{Uppercase}/,  "i !~ Uppercase";
+        ok "\N{SMALL ROMAN NUMERAL ONE}" =~ /\p{Uppercase}/i,  "i =~ Uppercase under /i";
+        ok "\N{SMALL ROMAN NUMERAL ONE}" !~ /\p{Titlecase}/,  "i !~ Titlecase";
+        ok "\N{SMALL ROMAN NUMERAL ONE}" =~ /\p{Titlecase}/i,  "i =~ Titlecase under /i";
+        ok "\N{ROMAN NUMERAL ONE}" =~ /\p{Lowercase}/i,  "I =~ Lowercase under
+        /i";
         ok "\N{SMALL ROMAN NUMERAL ONE}" =~ /\p{Lowercase}/,  "i =~ Lowercase";
         ok "\N{SMALL ROMAN NUMERAL ONE}" =~ /\p{IDStart}/,    "i =~ ID_Start";
         ok "\N{SMALL ROMAN NUMERAL ONE}" =~ /\p{IDContinue}/, "i =~ ID_Continue"
+    }
+
+    {   # More checking that /i works on the few properties that it makes a
+        # difference.  Uppercase, Lowercase, and Titlecase were done in the
+        # block above
+        ok "A" =~ /\p{PosixUpper}/,  "A =~ PosixUpper";
+        ok "A" =~ /\p{PosixUpper}/i,  "A =~ PosixUpper under /i";
+        ok "A" !~ /\p{PosixLower}/,  "A !~ PosixLower";
+        ok "A" =~ /\p{PosixLower}/i,  "A =~ PosixLower under /i";
+        ok "a" !~ /\p{PosixUpper}/,  "a !~ PosixUpper";
+        ok "a" =~ /\p{PosixUpper}/i,  "a =~ PosixUpper under /i";
+        ok "a" =~ /\p{PosixLower}/,  "a =~ PosixLower";
+        ok "a" =~ /\p{PosixLower}/i,  "a =~ PosixLower under /i";
+
+        ok "\xC0" =~ /\p{XPosixUpper}/,  "\\xC0 =~ XPosixUpper";
+        ok "\xC0" =~ /\p{XPosixUpper}/i,  "\\xC0 =~ XPosixUpper under /i";
+        ok "\xC0" !~ /\p{XPosixLower}/,  "\\xC0 !~ XPosixLower";
+        ok "\xC0" =~ /\p{XPosixLower}/i,  "\\xC0 =~ XPosixLower under /i";
+        ok "\xE0" !~ /\p{XPosixUpper}/,  "\\xE0 !~ XPosixUpper";
+        ok "\xE0" =~ /\p{XPosixUpper}/i,  "\\xE0 =~ XPosixUpper under /i";
+        ok "\xE0" =~ /\p{XPosixLower}/,  "\\xE0 =~ XPosixLower";
+        ok "\xE0" =~ /\p{XPosixLower}/i,  "\\xE0 =~ XPosixLower under /i";
+
+        ok "\xC0" =~ /\p{UppercaseLetter}/,  "\\xC0 =~ UppercaseLetter";
+        ok "\xC0" =~ /\p{UppercaseLetter}/i,  "\\xC0 =~ UppercaseLetter under /i";
+        ok "\xC0" !~ /\p{LowercaseLetter}/,  "\\xC0 !~ LowercaseLetter";
+        ok "\xC0" =~ /\p{LowercaseLetter}/i,  "\\xC0 =~ LowercaseLetter under /i";
+        ok "\xC0" !~ /\p{TitlecaseLetter}/,  "\\xC0 !~ TitlecaseLetter";
+        ok "\xC0" =~ /\p{TitlecaseLetter}/i,  "\\xC0 =~ TitlecaseLetter under /i";
+        ok "\xE0" !~ /\p{UppercaseLetter}/,  "\\xE0 !~ UppercaseLetter";
+        ok "\xE0" =~ /\p{UppercaseLetter}/i,  "\\xE0 =~ UppercaseLetter under /i";
+        ok "\xE0" =~ /\p{LowercaseLetter}/,  "\\xE0 =~ LowercaseLetter";
+        ok "\xE0" =~ /\p{LowercaseLetter}/i,  "\\xE0 =~ LowercaseLetter under /i";
+        ok "\xE0" !~ /\p{TitlecaseLetter}/,  "\\xE0 !~ TitlecaseLetter";
+        ok "\xE0" =~ /\p{TitlecaseLetter}/i,  "\\xE0 =~ TitlecaseLetter under /i";
+        ok "\x{1C5}" !~ /\p{UppercaseLetter}/,  "\\x{1C5} !~ UppercaseLetter";
+        ok "\x{1C5}" =~ /\p{UppercaseLetter}/i,  "\\x{1C5} =~ UppercaseLetter under /i";
+        ok "\x{1C5}" !~ /\p{LowercaseLetter}/,  "\\x{1C5} !~ LowercaseLetter";
+        ok "\x{1C5}" =~ /\p{LowercaseLetter}/i,  "\\x{1C5} =~ LowercaseLetter under /i";
+        ok "\x{1C5}" =~ /\p{TitlecaseLetter}/,  "\\x{1C5} =~ TitlecaseLetter";
+        ok "\x{1C5}" =~ /\p{TitlecaseLetter}/i,  "\\x{1C5} =~ TitlecaseLetter under /i";
     }
 
 
