@@ -68,14 +68,15 @@ my $skip_dirs = qr|^t/lib|;
 my @all_diffs = `git --no-pager diff --name-only $tag_to_compare`;
 chomp @all_diffs;
 
-my @module_diffs = grep {
+my @tmp_diffs = grep {
     my $this_dir;
     $this_dir = $1 if m/^(.*)\//;
     /\.pm$/ &&
     (!defined($this_dir) || ($this_dir !~ $skip_dirs)) &&
-    !exists $skip{$_} &&
-    !exists $dual_files{$_}
+    !exists $skip{$_};
 } @all_diffs;
+my   @module_diffs =  grep {!exists $dual_files {$_}} @tmp_diffs;
+push @module_diffs => grep { exists $dual_files {$_}} @tmp_diffs;
 
 unless (@module_diffs) {
     print "1..1\n";
