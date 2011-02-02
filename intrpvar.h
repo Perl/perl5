@@ -771,6 +771,10 @@ PERLVAR(Iblockhooks, AV *)
  * matching */
 PERLVARI(Iutf8_foldclosures,	HV *, NULL)
 
+/* List of characters that participate in folds (except marks, etc in
+ * multi-char folds) */
+PERLVAR(Iutf8_foldable,	HV *)
+
 PERLVAR(Icustom_ops, HV *)      /* custom op registrations */
 
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
