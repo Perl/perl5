@@ -507,16 +507,14 @@ cherry-pick it back).
 
 Check that the manifest is sorted and correct:
 
-    $ make manisort
     $ make distclean
     $ git clean -xdf # This shouldn't be necessary if distclean is correct
     $ perl Porting/manicheck
-    $ git status
 
-	XXX manifest _sorting_ is now checked with make test_porting
+If manicheck turns up anything wrong, update MANIFEST and begin this step again.
 
-Commit MANIFEST if it has changed:
-
+    $ ./configure -des -Dusedevel
+    $ make test_porting
     $ git commit -m 'Update MANIFEST' MANIFEST
 
 =item *
