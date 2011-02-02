@@ -97,6 +97,14 @@ my @USER_DEFINED_PROPERTIES = (
    IsAsciiHexAndDash         => ['-', 'A'],
 );
 
+my @USER_CASELESS_PROPERTIES = (
+   #
+   # User defined properties which differ depending on /i.  Second entry is
+   # false regularly, true under /i
+   #
+   'IsMyUpper'                => ["M", "!m" ],
+);
+
 
 #
 # From the short properties we populate POSIX-like classes.
@@ -162,6 +170,7 @@ for (my $i = 0; $i < @CLASSES; $i += 2) {
 }
 $count += 2 * @ILLEGAL_PROPERTIES;
 $count += 2 * grep {length $_ == 1} @ILLEGAL_PROPERTIES;
+$count += 4 * @USER_CASELESS_PROPERTIES;
 
 my $tests = 0;
 
@@ -170,7 +179,9 @@ say "1..$count";
 run_tests unless caller ();
 
 sub match {
-    my ($char, $match, $nomatch) = @_;
+    my ($char, $match, $nomatch, $caseless) = @_;
+    $caseless = "" unless defined $caseless;
+    $caseless = 'i' if $caseless;
 
     my ($str, $name);
 
@@ -189,10 +200,15 @@ sub match {
         }
     }
 
-    print "not " unless $str =~ /$match/;
-    print "ok ", ++ $tests, " - $name =~ /$match/\n";
-    print "not " unless $str !~ /$nomatch/;
-    print "ok ", ++ $tests, " - $name !~ /$nomatch/\n";
+    undef $@;
+    my $match_pat = eval "qr/$match/$caseless";
+    print "not " if $@ || ! ($str =~ /$match_pat/);
+    print "ok ", ++ $tests, " - $name =~ $match_pat\n";
+
+    undef $@;
+    my $nomatch_pat = eval "qr/$nomatch/$caseless";
+    print "not " if $@ || ! ($str !~ /$nomatch_pat/);
+    print "ok ", ++ $tests, " - $name !~ $nomatch_pat\n";
 }
 
 sub run_tests {
@@ -245,6 +261,25 @@ sub run_tests {
             print "ok ", ++ $tests, " - Unknown Unicode property \\P$p\n";
         }
     }
+
+    print "# User-defined properties with /i differences\n";
+    foreach my $class (shift @USER_CASELESS_PROPERTIES) {
+        my $chars_ref = shift @USER_CASELESS_PROPERTIES;
+        my @in      =                       grep {!/^!./} @$chars_ref;
+        my @out     = map {s/^!(?=.)//; $_} grep { /^!./} @$chars_ref;
+        my $in_pat  = eval qq ['\\p{$class}'];
+        my $out_pat = eval qq ['\\P{$class}'];
+
+        # Verify works as regularly for not /i
+        match $_, $in_pat,  $out_pat for @in;
+        match $_, $out_pat, $in_pat  for @out;
+
+        # Verify that adding /i doesn't change the in set.
+        match $_, $in_pat,  $out_pat, 'i' for @in;
+
+        # Verify that adding /i does change the out set to match.
+        match $_, $in_pat,  $out_pat, 'i' for @out;
+    }
 }
 
 
@@ -295,6 +330,16 @@ sub IsAsciiHexAndDash {<<'--'}
 +utf8::ASCII_Hex_Digit
 +utf8::Dash
 --
+
+sub IsMyUpper {
+    my $caseless = shift;
+    if ($caseless) {
+        return "0041\t005A\n0061\t007A"
+    }
+    else {
+        return "0041\t005A"
+    }
+}
 
 # fake user-defined properties; these subs shouldn't be called, because
 # their names don't start with In or Is
