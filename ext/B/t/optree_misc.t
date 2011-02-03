@@ -13,7 +13,7 @@ use Config;
 plan tests => 3;
 
 SKIP: {
-skip "no perlio in this build", 1 unless $Config::Config{useperlio};
+skip "no perlio in this build", 2 unless $Config::Config{useperlio};
 
 # The regression this is testing is that the first aelemfast, derived
 # from a lexical array, is supposed to be a BASEOP "<0>", while the
@@ -60,6 +60,30 @@ EOT_EOT
 # -              <0> ex-const s ->-
 EONT_EONT
 
+checkOptree ( name	=> 'PMOP children',
+	      code	=> sub { $foo =~ s/(a)/$1/ },
+	      strip_open_hints => 1,
+	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+# 6  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->6
+# 1        <;> nextstate(main 1 -e:1) v:>,<,%,{ ->2
+# 3        </> subst(/"(a)"/ replstart->4) KS ->6
+# -           <1> ex-rv2sv sKRM/1 ->3
+# 2              <#> gvsv[*foo] s ->3
+# 5           <|> substcont(other->3) sK/1 ->(end)
+# -              <1> ex-rv2sv sK/1 ->5
+# 4                 <#> gvsv[*1] s ->5
+EOT_EOT
+# 6  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->6
+# 1        <;> nextstate(main 1 -e:1) v:>,<,%,{ ->2
+# 3        </> subst(/"(a)"/ replstart->4) KS ->6
+# -           <1> ex-rv2sv sKRM/1 ->3
+# 2              <$> gvsv(*foo) s ->3
+# 5           <|> substcont(other->3) sK/1 ->(end)
+# -              <1> ex-rv2sv sK/1 ->5
+# 4                 <$> gvsv(*1) s ->5
+EONT_EONT
 
 } #skip
 
@@ -97,30 +121,3 @@ checkOptree ( name      => 'index and PVBM',
 	      prog	=> '$_ = index q(foo), q(foo)',
 	      strip_open_hints => 1,
 	      expect	=> $t,  expect_nt => $nt);
-
-checkOptree ( name	=> 'PMOP children',
-	      code	=> sub { $foo =~ s/(a)/$1/ },
-	      strip_open_hints => 1,
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 6  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->6
-# 1        <;> nextstate(main 1 -e:1) v:>,<,%,{ ->2
-# 3        </> subst(/"(a)"/ replstart->4) KS ->6
-# -           <1> ex-rv2sv sKRM/1 ->3
-# 2              <#> gvsv[*foo] s ->3
-# 5           <|> substcont(other->3) sK/1 ->(end)
-# -              <1> ex-rv2sv sK/1 ->5
-# 4                 <#> gvsv[*1] s ->5
-EOT_EOT
-# 6  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->6
-# 1        <;> nextstate(main 1 -e:1) v:>,<,%,{ ->2
-# 3        </> subst(/"(a)"/ replstart->4) KS ->6
-# -           <1> ex-rv2sv sKRM/1 ->3
-# 2              <$> gvsv(*foo) s ->3
-# 5           <|> substcont(other->3) sK/1 ->(end)
-# -              <1> ex-rv2sv sK/1 ->5
-# 4                 <$> gvsv(*1) s ->5
-EONT_EONT
-
-__END__
