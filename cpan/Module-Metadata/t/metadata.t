@@ -177,6 +177,13 @@ plan tests => 37 + 2 * keys( %modules );
 
 require_ok('Module::Metadata');
 
+# class method C<find_module_by_name>
+my $module = Module::Metadata->find_module_by_name(
+               'Module::Metadata' );
+ok( -e $module, 'find_module_by_name() succeeds' );
+
+#########################
+
 my $tmp = MBTest->tmpdir;
 
 use DistGen;
@@ -184,13 +191,6 @@ my $dist = DistGen->new( dir => $tmp );
 $dist->regen;
 
 $dist->chdir_in;
-
-#########################
-
-# class method C<find_module_by_name>
-my $module = Module::Metadata->find_module_by_name(
-               'Module::Metadata' );
-ok( -e $module, 'find_module_by_name() succeeds' );
 
 
 # fail on invalid module name

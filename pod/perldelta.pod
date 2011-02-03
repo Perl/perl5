@@ -144,6 +144,10 @@ Module::Build::YAML has been deprecated in favor of L<CPAN::Meta::YAML>.
 
 =item *
 
+C<Module::Metadata> has been upgraded from version 1.000003 to 1.000004.
+
+=item *
+
 C<Unicode::Collate> has been upgraded from version 0.68 to 0.72
 
 This also sees the switch from using the pure-perl version of this
