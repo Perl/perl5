@@ -97,6 +97,7 @@ EXACT       EXACT,      str       ; Match this string (preceded by length).
 EXACTF      EXACT,      str       ; Match this string, folded, native charset semantics for non-utf8 (prec. by length).
 EXACTFL     EXACT,      str       ; Match this string, folded in locale (w/len).
 EXACTFU     EXACT,      str	  ; Match this string, folded, Unicode semantics for non-utf8 (prec. by length).
+EXACTFA     EXACT,      str	  ; Match this string, folded, Unicode semantics for non-utf8, but no ASCII-range character matches outside ASCII (prec. by length),.
 
 #*Do nothing types
 
@@ -171,7 +172,7 @@ RENUM       BRANCHJ,    off 1 . 1 ; Group with independently numbered parens.
 # inline charclass data (ascii only), the 'C' store it in the structure.
 # NOTE: the relative order of the TRIE-like regops  is significant
 
-TRIE        TRIE,       trie 1    ; Match many EXACT(F[LU]?)? at once. flags==type
+TRIE        TRIE,       trie 1    ; Match many EXACT(F[ALU]?)? at once. flags==type
 TRIEC       TRIE,trie charclass   ; Same as TRIE, but with embedded charclass data
 
 # For start classes, contains an added fail table.

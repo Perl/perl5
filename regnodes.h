@@ -6,8 +6,8 @@
 
 /* Regops and State definitions */
 
-#define REGNODE_MAX           	108
-#define REGMATCH_STATE_MAX    	148
+#define REGNODE_MAX           	109
+#define REGMATCH_STATE_MAX    	149
 
 #define	END                   	0	/* 0000 End of program. */
 #define	SUCCEED               	1	/* 0x01 Return from a subroutine, basically. */
@@ -61,63 +61,64 @@
 #define	EXACTF                	49	/* 0x31 Match this string, folded, native charset semantics for non-utf8 (prec. by length). */
 #define	EXACTFL               	50	/* 0x32 Match this string, folded in locale (w/len). */
 #define	EXACTFU               	51	/* 0x33 Match this string, folded, Unicode semantics for non-utf8 (prec. by length). */
-#define	NOTHING               	52	/* 0x34 Match empty string. */
-#define	TAIL                  	53	/* 0x35 Match empty string. Can jump here from outside. */
-#define	STAR                  	54	/* 0x36 Match this (simple) thing 0 or more times. */
-#define	PLUS                  	55	/* 0x37 Match this (simple) thing 1 or more times. */
-#define	CURLY                 	56	/* 0x38 Match this simple thing {n,m} times. */
-#define	CURLYN                	57	/* 0x39 Capture next-after-this simple thing */
-#define	CURLYM                	58	/* 0x3a Capture this medium-complex thing {n,m} times. */
-#define	CURLYX                	59	/* 0x3b Match this complex thing {n,m} times. */
-#define	WHILEM                	60	/* 0x3c Do curly processing and see if rest matches. */
-#define	OPEN                  	61	/* 0x3d Mark this point in input as start of */
-#define	CLOSE                 	62	/* 0x3e Analogous to OPEN. */
-#define	REF                   	63	/* 0x3f Match some already matched string */
-#define	REFF                  	64	/* 0x40 Match already matched string, folded using native charset semantics for non-utf8 */
-#define	REFFL                 	65	/* 0x41 Match already matched string, folded in loc. */
-#define	REFFU                 	66	/* 0x42 Match already matched string, folded using unicode semantics for non-utf8 */
-#define	NREF                  	67	/* 0x43 Match some already matched string */
-#define	NREFF                 	68	/* 0x44 Match already matched string, folded using native charset semantics for non-utf8 */
-#define	NREFFL                	69	/* 0x45 Match already matched string, folded in loc. */
-#define	NREFFU                	70	/* 0x46 Match already matched string, folded using unicode semantics for non-utf8 */
-#define	IFMATCH               	71	/* 0x47 Succeeds if the following matches. */
-#define	UNLESSM               	72	/* 0x48 Fails if the following matches. */
-#define	SUSPEND               	73	/* 0x49 "Independent" sub-RE. */
-#define	IFTHEN                	74	/* 0x4a Switch, should be preceded by switcher . */
-#define	GROUPP                	75	/* 0x4b Whether the group matched. */
-#define	LONGJMP               	76	/* 0x4c Jump far away. */
-#define	BRANCHJ               	77	/* 0x4d BRANCH with long offset. */
-#define	EVAL                  	78	/* 0x4e Execute some Perl code. */
-#define	MINMOD                	79	/* 0x4f Next operator is not greedy. */
-#define	LOGICAL               	80	/* 0x50 Next opcode should set the flag only. */
-#define	RENUM                 	81	/* 0x51 Group with independently numbered parens. */
-#define	TRIE                  	82	/* 0x52 Match many EXACT(F[LU]?)? at once. flags==type */
-#define	TRIEC                 	83	/* 0x53 Same as TRIE, but with embedded charclass data */
-#define	AHOCORASICK           	84	/* 0x54 Aho Corasick stclass. flags==type */
-#define	AHOCORASICKC          	85	/* 0x55 Same as AHOCORASICK, but with embedded charclass data */
-#define	GOSUB                 	86	/* 0x56 recurse to paren arg1 at (signed) ofs arg2 */
-#define	GOSTART               	87	/* 0x57 recurse to start of pattern */
-#define	NGROUPP               	88	/* 0x58 Whether the group matched. */
-#define	INSUBP                	89	/* 0x59 Whether we are in a specific recurse. */
-#define	DEFINEP               	90	/* 0x5a Never execute directly. */
-#define	ENDLIKE               	91	/* 0x5b Used only for the type field of verbs */
-#define	OPFAIL                	92	/* 0x5c Same as (?!) */
-#define	ACCEPT                	93	/* 0x5d Accepts the current matched string. */
-#define	VERB                  	94	/* 0x5e Used only for the type field of verbs */
-#define	PRUNE                 	95	/* 0x5f Pattern fails at this startpoint if no-backtracking through this */
-#define	MARKPOINT             	96	/* 0x60 Push the current location for rollback by cut. */
-#define	SKIP                  	97	/* 0x61 On failure skip forward (to the mark) before retrying */
-#define	COMMIT                	98	/* 0x62 Pattern fails outright if backtracking through this */
-#define	CUTGROUP              	99	/* 0x63 On failure go to the next alternation in the group */
-#define	KEEPS                 	100	/* 0x64 $& begins here. */
-#define	LNBREAK               	101	/* 0x65 generic newline pattern */
-#define	VERTWS                	102	/* 0x66 vertical whitespace         (Perl 6) */
-#define	NVERTWS               	103	/* 0x67 not vertical whitespace     (Perl 6) */
-#define	HORIZWS               	104	/* 0x68 horizontal whitespace       (Perl 6) */
-#define	NHORIZWS              	105	/* 0x69 not horizontal whitespace   (Perl 6) */
-#define	FOLDCHAR              	106	/* 0x6a codepoint with tricky case folding properties. */
-#define	OPTIMIZED             	107	/* 0x6b Placeholder for dump. */
-#define	PSEUDO                	108	/* 0x6c Pseudo opcode for internal use. */
+#define	EXACTFA               	52	/* 0x34 Match this string, folded, Unicode semantics for non-utf8, but no ASCII-range character matches outside ASCII (prec. by length),. */
+#define	NOTHING               	53	/* 0x35 Match empty string. */
+#define	TAIL                  	54	/* 0x36 Match empty string. Can jump here from outside. */
+#define	STAR                  	55	/* 0x37 Match this (simple) thing 0 or more times. */
+#define	PLUS                  	56	/* 0x38 Match this (simple) thing 1 or more times. */
+#define	CURLY                 	57	/* 0x39 Match this simple thing {n,m} times. */
+#define	CURLYN                	58	/* 0x3a Capture next-after-this simple thing */
+#define	CURLYM                	59	/* 0x3b Capture this medium-complex thing {n,m} times. */
+#define	CURLYX                	60	/* 0x3c Match this complex thing {n,m} times. */
+#define	WHILEM                	61	/* 0x3d Do curly processing and see if rest matches. */
+#define	OPEN                  	62	/* 0x3e Mark this point in input as start of */
+#define	CLOSE                 	63	/* 0x3f Analogous to OPEN. */
+#define	REF                   	64	/* 0x40 Match some already matched string */
+#define	REFF                  	65	/* 0x41 Match already matched string, folded using native charset semantics for non-utf8 */
+#define	REFFL                 	66	/* 0x42 Match already matched string, folded in loc. */
+#define	REFFU                 	67	/* 0x43 Match already matched string, folded using unicode semantics for non-utf8 */
+#define	NREF                  	68	/* 0x44 Match some already matched string */
+#define	NREFF                 	69	/* 0x45 Match already matched string, folded using native charset semantics for non-utf8 */
+#define	NREFFL                	70	/* 0x46 Match already matched string, folded in loc. */
+#define	NREFFU                	71	/* 0x47 Match already matched string, folded using unicode semantics for non-utf8 */
+#define	IFMATCH               	72	/* 0x48 Succeeds if the following matches. */
+#define	UNLESSM               	73	/* 0x49 Fails if the following matches. */
+#define	SUSPEND               	74	/* 0x4a "Independent" sub-RE. */
+#define	IFTHEN                	75	/* 0x4b Switch, should be preceded by switcher . */
+#define	GROUPP                	76	/* 0x4c Whether the group matched. */
+#define	LONGJMP               	77	/* 0x4d Jump far away. */
+#define	BRANCHJ               	78	/* 0x4e BRANCH with long offset. */
+#define	EVAL                  	79	/* 0x4f Execute some Perl code. */
+#define	MINMOD                	80	/* 0x50 Next operator is not greedy. */
+#define	LOGICAL               	81	/* 0x51 Next opcode should set the flag only. */
+#define	RENUM                 	82	/* 0x52 Group with independently numbered parens. */
+#define	TRIE                  	83	/* 0x53 Match many EXACT(F[ALU]?)? at once. flags==type */
+#define	TRIEC                 	84	/* 0x54 Same as TRIE, but with embedded charclass data */
+#define	AHOCORASICK           	85	/* 0x55 Aho Corasick stclass. flags==type */
+#define	AHOCORASICKC          	86	/* 0x56 Same as AHOCORASICK, but with embedded charclass data */
+#define	GOSUB                 	87	/* 0x57 recurse to paren arg1 at (signed) ofs arg2 */
+#define	GOSTART               	88	/* 0x58 recurse to start of pattern */
+#define	NGROUPP               	89	/* 0x59 Whether the group matched. */
+#define	INSUBP                	90	/* 0x5a Whether we are in a specific recurse. */
+#define	DEFINEP               	91	/* 0x5b Never execute directly. */
+#define	ENDLIKE               	92	/* 0x5c Used only for the type field of verbs */
+#define	OPFAIL                	93	/* 0x5d Same as (?!) */
+#define	ACCEPT                	94	/* 0x5e Accepts the current matched string. */
+#define	VERB                  	95	/* 0x5f Used only for the type field of verbs */
+#define	PRUNE                 	96	/* 0x60 Pattern fails at this startpoint if no-backtracking through this */
+#define	MARKPOINT             	97	/* 0x61 Push the current location for rollback by cut. */
+#define	SKIP                  	98	/* 0x62 On failure skip forward (to the mark) before retrying */
+#define	COMMIT                	99	/* 0x63 Pattern fails outright if backtracking through this */
+#define	CUTGROUP              	100	/* 0x64 On failure go to the next alternation in the group */
+#define	KEEPS                 	101	/* 0x65 $& begins here. */
+#define	LNBREAK               	102	/* 0x66 generic newline pattern */
+#define	VERTWS                	103	/* 0x67 vertical whitespace         (Perl 6) */
+#define	NVERTWS               	104	/* 0x68 not vertical whitespace     (Perl 6) */
+#define	HORIZWS               	105	/* 0x69 horizontal whitespace       (Perl 6) */
+#define	NHORIZWS              	106	/* 0x6a not horizontal whitespace   (Perl 6) */
+#define	FOLDCHAR              	107	/* 0x6b codepoint with tricky case folding properties. */
+#define	OPTIMIZED             	108	/* 0x6c Placeholder for dump. */
+#define	PSEUDO                	109	/* 0x6d Pseudo opcode for internal use. */
 	/* ------------ States ------------- */
 #define	TRIE_next             	(REGNODE_MAX + 1)	/* state for TRIE */
 #define	TRIE_next_fail        	(REGNODE_MAX + 2)	/* state for TRIE */
@@ -218,6 +219,7 @@ EXTCONST U8 PL_regkind[] = {
 	EXACT,    	/* EXACTF                 */
 	EXACT,    	/* EXACTFL                */
 	EXACT,    	/* EXACTFU                */
+	EXACT,    	/* EXACTFA                */
 	NOTHING,  	/* NOTHING                */
 	NOTHING,  	/* TAIL                   */
 	STAR,     	/* STAR                   */
@@ -375,6 +377,7 @@ static const U8 regarglen[] = {
 	0,                                   	/* EXACTF       */
 	0,                                   	/* EXACTFL      */
 	0,                                   	/* EXACTFU      */
+	0,                                   	/* EXACTFA      */
 	0,                                   	/* NOTHING      */
 	0,                                   	/* TAIL         */
 	0,                                   	/* STAR         */
@@ -489,6 +492,7 @@ static const char reg_off_by_arg[] = {
 	0,	/* EXACTF       */
 	0,	/* EXACTFL      */
 	0,	/* EXACTFU      */
+	0,	/* EXACTFA      */
 	0,	/* NOTHING      */
 	0,	/* TAIL         */
 	0,	/* STAR         */
@@ -608,63 +612,64 @@ EXTCONST char * const PL_reg_name[] = {
 	"EXACTF",                	/* 0x31 */
 	"EXACTFL",               	/* 0x32 */
 	"EXACTFU",               	/* 0x33 */
-	"NOTHING",               	/* 0x34 */
-	"TAIL",                  	/* 0x35 */
-	"STAR",                  	/* 0x36 */
-	"PLUS",                  	/* 0x37 */
-	"CURLY",                 	/* 0x38 */
-	"CURLYN",                	/* 0x39 */
-	"CURLYM",                	/* 0x3a */
-	"CURLYX",                	/* 0x3b */
-	"WHILEM",                	/* 0x3c */
-	"OPEN",                  	/* 0x3d */
-	"CLOSE",                 	/* 0x3e */
-	"REF",                   	/* 0x3f */
-	"REFF",                  	/* 0x40 */
-	"REFFL",                 	/* 0x41 */
-	"REFFU",                 	/* 0x42 */
-	"NREF",                  	/* 0x43 */
-	"NREFF",                 	/* 0x44 */
-	"NREFFL",                	/* 0x45 */
-	"NREFFU",                	/* 0x46 */
-	"IFMATCH",               	/* 0x47 */
-	"UNLESSM",               	/* 0x48 */
-	"SUSPEND",               	/* 0x49 */
-	"IFTHEN",                	/* 0x4a */
-	"GROUPP",                	/* 0x4b */
-	"LONGJMP",               	/* 0x4c */
-	"BRANCHJ",               	/* 0x4d */
-	"EVAL",                  	/* 0x4e */
-	"MINMOD",                	/* 0x4f */
-	"LOGICAL",               	/* 0x50 */
-	"RENUM",                 	/* 0x51 */
-	"TRIE",                  	/* 0x52 */
-	"TRIEC",                 	/* 0x53 */
-	"AHOCORASICK",           	/* 0x54 */
-	"AHOCORASICKC",          	/* 0x55 */
-	"GOSUB",                 	/* 0x56 */
-	"GOSTART",               	/* 0x57 */
-	"NGROUPP",               	/* 0x58 */
-	"INSUBP",                	/* 0x59 */
-	"DEFINEP",               	/* 0x5a */
-	"ENDLIKE",               	/* 0x5b */
-	"OPFAIL",                	/* 0x5c */
-	"ACCEPT",                	/* 0x5d */
-	"VERB",                  	/* 0x5e */
-	"PRUNE",                 	/* 0x5f */
-	"MARKPOINT",             	/* 0x60 */
-	"SKIP",                  	/* 0x61 */
-	"COMMIT",                	/* 0x62 */
-	"CUTGROUP",              	/* 0x63 */
-	"KEEPS",                 	/* 0x64 */
-	"LNBREAK",               	/* 0x65 */
-	"VERTWS",                	/* 0x66 */
-	"NVERTWS",               	/* 0x67 */
-	"HORIZWS",               	/* 0x68 */
-	"NHORIZWS",              	/* 0x69 */
-	"FOLDCHAR",              	/* 0x6a */
-	"OPTIMIZED",             	/* 0x6b */
-	"PSEUDO",                	/* 0x6c */
+	"EXACTFA",               	/* 0x34 */
+	"NOTHING",               	/* 0x35 */
+	"TAIL",                  	/* 0x36 */
+	"STAR",                  	/* 0x37 */
+	"PLUS",                  	/* 0x38 */
+	"CURLY",                 	/* 0x39 */
+	"CURLYN",                	/* 0x3a */
+	"CURLYM",                	/* 0x3b */
+	"CURLYX",                	/* 0x3c */
+	"WHILEM",                	/* 0x3d */
+	"OPEN",                  	/* 0x3e */
+	"CLOSE",                 	/* 0x3f */
+	"REF",                   	/* 0x40 */
+	"REFF",                  	/* 0x41 */
+	"REFFL",                 	/* 0x42 */
+	"REFFU",                 	/* 0x43 */
+	"NREF",                  	/* 0x44 */
+	"NREFF",                 	/* 0x45 */
+	"NREFFL",                	/* 0x46 */
+	"NREFFU",                	/* 0x47 */
+	"IFMATCH",               	/* 0x48 */
+	"UNLESSM",               	/* 0x49 */
+	"SUSPEND",               	/* 0x4a */
+	"IFTHEN",                	/* 0x4b */
+	"GROUPP",                	/* 0x4c */
+	"LONGJMP",               	/* 0x4d */
+	"BRANCHJ",               	/* 0x4e */
+	"EVAL",                  	/* 0x4f */
+	"MINMOD",                	/* 0x50 */
+	"LOGICAL",               	/* 0x51 */
+	"RENUM",                 	/* 0x52 */
+	"TRIE",                  	/* 0x53 */
+	"TRIEC",                 	/* 0x54 */
+	"AHOCORASICK",           	/* 0x55 */
+	"AHOCORASICKC",          	/* 0x56 */
+	"GOSUB",                 	/* 0x57 */
+	"GOSTART",               	/* 0x58 */
+	"NGROUPP",               	/* 0x59 */
+	"INSUBP",                	/* 0x5a */
+	"DEFINEP",               	/* 0x5b */
+	"ENDLIKE",               	/* 0x5c */
+	"OPFAIL",                	/* 0x5d */
+	"ACCEPT",                	/* 0x5e */
+	"VERB",                  	/* 0x5f */
+	"PRUNE",                 	/* 0x60 */
+	"MARKPOINT",             	/* 0x61 */
+	"SKIP",                  	/* 0x62 */
+	"COMMIT",                	/* 0x63 */
+	"CUTGROUP",              	/* 0x64 */
+	"KEEPS",                 	/* 0x65 */
+	"LNBREAK",               	/* 0x66 */
+	"VERTWS",                	/* 0x67 */
+	"NVERTWS",               	/* 0x68 */
+	"HORIZWS",               	/* 0x69 */
+	"NHORIZWS",              	/* 0x6a */
+	"FOLDCHAR",              	/* 0x6b */
+	"OPTIMIZED",             	/* 0x6c */
+	"PSEUDO",                	/* 0x6d */
 	/* ------------ States ------------- */
 	"TRIE_next",             	/* REGNODE_MAX +0x01 */
 	"TRIE_next_fail",        	/* REGNODE_MAX +0x02 */
@@ -769,7 +774,7 @@ EXTCONST U8 PL_varies[] __attribute__deprecated__ = {
 EXTCONST U8 PL_varies_bitmask[];
 #else
 EXTCONST U8 PL_varies_bitmask[] = {
-    0x00, 0x00, 0x40, 0x00, 0x00, 0xE0, 0xC0, 0x9F, 0x7F, 0x26, 0x00, 0x00, 0x00, 0x00
+    0x00, 0x00, 0x40, 0x00, 0x00, 0xE0, 0x80, 0x3F, 0xFF, 0x4C, 0x00, 0x00, 0x00, 0x00
 };
 #endif /* DOINIT */
 
@@ -793,7 +798,7 @@ EXTCONST U8 PL_simple[] __attribute__deprecated__ = {
 EXTCONST U8 PL_simple_bitmask[];
 #else
 EXTCONST U8 PL_simple_bitmask[] = {
-    0x00, 0x00, 0xBC, 0xFF, 0xFF, 0x1F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC0, 0x03
+    0x00, 0x00, 0xBC, 0xFF, 0xFF, 0x1F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x07
 };
 #endif /* DOINIT */
 
