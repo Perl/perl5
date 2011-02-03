@@ -41,11 +41,12 @@ typedef enum {
     REGEX_DEPENDS_CHARSET = 0,
     REGEX_LOCALE_CHARSET,
     REGEX_UNICODE_CHARSET,
-    REGEX_ASCII_RESTRICTED_CHARSET
+    REGEX_ASCII_RESTRICTED_CHARSET,
+    REGEX_ASCII_MORE_RESTRICTED_CHARSET
 } regex_charset;
 
 #define _RXf_PMf_CHARSET_SHIFT ((RXf_PMf_STD_PMMOD_SHIFT)+5)
-#define RXf_PMf_CHARSET (3 << (_RXf_PMf_CHARSET_SHIFT)) /* 2 bits */
+#define RXf_PMf_CHARSET (7 << (_RXf_PMf_CHARSET_SHIFT)) /* 3 bits */
 
 /* embed.pl doesn't yet know how to handle static inline functions, so
    manually decorate them here with gcc-style attributes.
@@ -78,7 +79,7 @@ get_regex_charset(const U32 flags)
 
 /* Next available bit after the above.  Name begins with '_' so won't be
  * exported by B */
-#define _RXf_PMf_SHIFT_NEXT (RXf_PMf_STD_PMMOD_SHIFT+7)
+#define _RXf_PMf_SHIFT_NEXT (RXf_PMf_STD_PMMOD_SHIFT+8)
 
 /* Mask of the above bits.  These need to be transferred from op_pmflags to
  * re->extflags during compilation */

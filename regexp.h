@@ -269,6 +269,7 @@ and check for NULL.
 #define UNICODE_PAT_MODS     "u"
 #define DEPENDS_PAT_MODS     "d"
 #define ASCII_RESTRICT_PAT_MODS "a"
+#define ASCII_MORE_RESTRICT_PAT_MODS "aa"
 
 /* This string is expected by regcomp.c to be ordered so that the first
  * character is the flag in bit RXf_PMf_STD_PMMOD_SHIFT of extflags; the next
@@ -293,7 +294,7 @@ and check for NULL.
 
 /* Leave some space, so future bit allocations can go either in the shared or
  * unshared area without affecting binary compatibility */
-#define RXf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT+2)
+#define RXf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT+1)
 
 /* embed.pl doesn't yet know how to handle static inline functions, so
    manually decorate them here with gcc-style attributes.
@@ -302,7 +303,7 @@ PERL_STATIC_INLINE const char *
 get_regex_charset_name(const U32 flags, STRLEN* const lenp)
     __attribute__warn_unused_result__;
 
-#define MAX_CHARSET_NAME_LENGTH 1
+#define MAX_CHARSET_NAME_LENGTH 2
 
 PERL_STATIC_INLINE const char *
 get_regex_charset_name(const U32 flags, STRLEN* const lenp)
@@ -317,6 +318,8 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
         case REGEX_LOCALE_CHARSET:  return LOCALE_PAT_MODS;
         case REGEX_UNICODE_CHARSET: return UNICODE_PAT_MODS;
 	case REGEX_ASCII_RESTRICTED_CHARSET: return ASCII_RESTRICT_PAT_MODS;
+	case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
+					     return ASCII_MORE_RESTRICT_PAT_MODS;
     }
 
     return "?";	    /* Unknown */

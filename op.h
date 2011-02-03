@@ -367,7 +367,7 @@ struct pmop {
 
 /* Leave some space, so future bit allocations can go either in the shared or
  * unshared area without affecting binary compatibility */
-#define PMf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT+7)
+#define PMf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT+6)
 
 /* taint $1 etc. if target tainted */
 #define PMf_RETAINT	(1<<(PMf_BASE_SHIFT+0))
