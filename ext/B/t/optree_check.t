@@ -7,7 +7,10 @@ BEGIN {
         print "1..0 # Skip -- Perl configured without B module\n";
         exit 0;
     }
-    # require 'test.pl'; # now done by OptreeCheck
+    if (!$Config::Config{useperlio}) {
+        print "1..0 # Skip -- need perlio to walk the optree\n";
+        exit 0;
+    }
 }
 
 use OptreeCheck;
@@ -23,13 +26,7 @@ cmdline args in 'standard' way across all clients of OptreeCheck.
 
 =cut
 
-my $tests = 5 + 15 + 16 * $gOpts{selftest};	# pass()s + $#tests
-plan tests => $tests;
-
-SKIP: {
-    skip "no perlio in this build", $tests
-    unless $Config::Config{useperlio};
-
+plan tests => 5 + 15 + 16 * $gOpts{selftest};	# pass()s + $#tests
 
 pass("REGEX TEST HARNESS SELFTEST");
 
@@ -222,8 +219,3 @@ EOT_EOT
 # 6  <2> sassign sKS/2
 # 7  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
-
-} # skip
-
-__END__
-

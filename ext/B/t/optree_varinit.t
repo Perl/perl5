@@ -7,13 +7,14 @@ BEGIN {
         print "1..0 # Skip -- Perl configured without B module\n";
         exit 0;
     }
-    # require 'test.pl'; # now done by OptreeCheck
+    if (!$Config::Config{useperlio}) {
+        print "1..0 # Skip -- need perlio to walk the optree\n";
+        exit 0;
+    }
 }
 use OptreeCheck;
 use Config;
 plan tests	=> 22;
-SKIP: {
-skip "no perlio in this build", 22 unless $Config::Config{useperlio};
 
 pass("OPTIMIZER TESTS - VAR INITIALIZATION");
 
@@ -404,8 +405,3 @@ EOT_EOT
 # 7  <2> aassign[t3] vKS
 # 8  <@> leave[1 ref] vKP/REFC
 EONT_EONT
-
-} #skip
-
-__END__
-
