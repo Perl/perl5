@@ -9,6 +9,8 @@ use Test::Builder;
 
 use base 'Exporter';
 
+our $VERSION = '0.01';
+
 our @EXPORT = qw(
     perlrun_exit_status_is
     perlrun_stdout_is
