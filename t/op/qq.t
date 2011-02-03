@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print q(1..29
+print q(1..30
 );
 
 # This is() function is written to avoid ""
@@ -87,3 +87,7 @@ else {  # Something wrong; someone has removed the failure in util.c
     is ("Should fail for 5.13 until fix test", "0");
     is ("1", "1");
 }
+
+# This caused a memory fault
+no warnings "utf8";
+is ("abc", eval qq[qq\x{8000_0000}abc\x{8000_0000}])
