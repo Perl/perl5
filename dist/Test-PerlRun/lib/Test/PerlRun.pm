@@ -17,16 +17,31 @@ our @EXPORT = qw(
     perlrun_stderr_like
 );
 
+our @EXPORT_OK = 'perlrun';
+
+our %EXPORT_TAGS = ( all => [ @EXPORT, @EXPORT_OK ] );
+
 my $TB = Test::Builder->new();
 
 sub perlrun_exit_status_is {
     my $error = ( _run(shift) )[2];
-    # This is a hack, but unfortunately IPC::Cmd local-izes $? so we cannot
-    # check that directly.
-    my ($status) = $error ? ( $error =~ /exited with value (\d+)/ ) : 0;
+
+    my $status = _status($error);
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     $TB->is_eq( $status, @_ );
+}
+
+sub _status {
+    my $error = shift;
+
+    return 0 unless defined $error;
+
+    # This is a hack, but unfortunately IPC::Cmd local-izes $? so we cannot
+    # check that directly.
+    my ($status) = $error =~ /exited with value (\d+)/;
+
+    return $status || 0;
 }
 
 sub perlrun_stdout_is {
@@ -55,6 +70,12 @@ sub perlrun_stderr_like {
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     $TB->like( $stderr, @_ );
+}
+
+sub perlrun {
+    my ( $stdout, $stderr, $error ) = _run(shift);
+
+    return ( $stdout, $stderr, _status($error) );
 }
 
 sub _run {
@@ -201,32 +222,56 @@ C<-C>.
 
 =back
 
-This module exports the following functions:
+You can import all the functions this module exports with the C<:all> import
+tag.
+
+This module provides the following functions:
 
 =head2 perlrun_exit_status_is( $code, $status, $description )
 
 This function runs the specified code and checks if the exit status matches
 the status you provide.
 
+This function is exported by default.
+
 =head2 perlrun_stdout_is( $code, $output, $description )
 
 This function runs the specified code and checks if the output sent to
 C<stdout> matches the output you expect.
+
+This function is exported by default.
 
 =head2 perlrun_stdout_like( $code, $output_regex, $description )
 
 This function runs the specified code and checks if the output sent to
 C<stdout> matches the output regex you expect.
 
+This function is exported by default.
+
 =head2 perlrun_stderr_is( $code, $output, $description )
 
 This function runs the specified code and checks if the output sent to
 C<stderr> matches the output you expect.
 
+This function is exported by default.
+
 =head2 perlrun_stderr_like( $code, $output_regex, $description )
 
 This function runs the specified code and checks if the output sent to
 C<stderr> matches the output regex you expect.
+
+This function is exported by default.
+
+=head2 perlrun($code)
+
+This function runs the specified code. It returns a three element list. The
+first item is the output sent to C<stdout>, the second is the output to
+C<stderr>, and the final element is the exit status for the Perl process that
+was run.
+
+This function does not actually run a test.
+
+This function is exported only by request.
 
 =head1 PERLEXE ENVIRONMENT VARIABLE
 

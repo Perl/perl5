@@ -5,7 +5,7 @@ use File::Temp qw( tempfile );
 use Test::Builder::Tester;
 use Test::More;
 
-use Test::PerlRun;
+use Test::PerlRun qw( :all );
 
 test_out('ok 1');
 perlrun_exit_status_is( 'exit 42', 42 );
@@ -58,5 +58,21 @@ perlrun_stdout_is(
     'tainting'
 );
 test_test('array ref passed for switches parameter');
+
+my ( $stdout, $stderr, $status )
+    = perlrun(q{print "stdout\n"; warn "stderr\n"; exit 99;});
+
+is(
+    $stdout, "stdout\n",
+    'perlrun() captured stdout'
+);
+is(
+    $stderr, "stderr\n",
+    'perlrun() captured stderr'
+);
+is(
+    $status, 99,
+    'perlrun() captured status'
+);
 
 done_testing();
