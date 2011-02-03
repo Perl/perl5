@@ -285,11 +285,12 @@ contains the path to the perl executable that is running the code.
 Dave Rolsky, <autarch@urth.org>
 
 Some of the code in this module was taken from F<t/test.pl> in the core Perl
-distribution, which has been worked on by many people over the years.
+distribution.
 
 =head1 LICENSE
 
-Copyright (c) 2011 Dave Rolsky. All rights reserved.
+Copyright (c) 2011 Dave Rolsky, Michael Schwern, Jarkko Hietaaniemi, Craig
+Berry, Paul Green, and Nicholas Clark. All rights reserved.
 
 This program is free software; you can redistribute it and/or modify it under
 the same terms as Perl itself.
