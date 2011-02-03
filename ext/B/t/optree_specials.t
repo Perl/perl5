@@ -14,7 +14,6 @@ BEGIN {
         print "1..0 # Skip -- Perl configured without B module\n";
         exit 0;
     }
-    # require 'test.pl'; # now done by OptreeCheck
 }
 
 # import checkOptree(), and %gOpts (containing test state)
