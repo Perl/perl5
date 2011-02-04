@@ -84,7 +84,7 @@ if (1) {
 		      expect	=> '',
 		      expect_nt	=> '');
     };
-    like($@, /no '\w+' golden-sample found/, "empty expectations prevented");
+    like($@, qr/no '\w+' golden-sample found/, "empty expectations prevented");
     
     $@='';
     eval {
@@ -95,7 +95,7 @@ if (1) {
 		      expect_nt	=> "\n",
 		      expect	=> "\n");
     };
-    like($@, /no '\w+' golden-sample found/,
+    like($@, qr/whitespace only reftext found for '\w+'/,
 	 "just whitespace expectations prevented");
 }
     

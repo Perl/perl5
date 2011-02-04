@@ -733,7 +733,7 @@ sub mkCheckRex {
     $str =~ s/leavesub \[\d\]/leavesub [\\d]/msg;	# for -terse
     #$str =~ s/(\s*)\n/\n/msg;				# trailing spaces
     
-    croak "no reftext found for $want: $tc->{name}"
+    croak "whitespace only reftext found for '$want': $tc->{name}"
 	unless $str =~ /\w+/; # fail unless a real test
     
     # $str = '.*'	if 1;	# sanity test
