@@ -2279,10 +2279,7 @@ PP(pp_subst)
 	    }
 	    TAINT_IF(rxtainted & 1);
 	    SPAGAIN;
-	    if (rpm->op_pmflags & PMf_NONDESTRUCT)
-		PUSHs(TARG);
-	    else
-		PUSHs(&PL_sv_yes);
+	    PUSHs(rpm->op_pmflags & PMf_NONDESTRUCT ? TARG : &PL_sv_yes);
 	}
 	else {
 	    do {
@@ -2416,10 +2413,7 @@ PP(pp_subst)
 
 ret_no:
     SPAGAIN;
-    if (rpm->op_pmflags & PMf_NONDESTRUCT)
-	PUSHs(TARG);
-    else
-	PUSHs(&PL_sv_no);
+    PUSHs(rpm->op_pmflags & PMf_NONDESTRUCT ? TARG : &PL_sv_no);
     LEAVE_SCOPE(oldsave);
     RETURN;
 }
