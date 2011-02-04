@@ -2216,6 +2216,9 @@ PP(pp_subst)
 	doutf8 = FALSE;
     }
     
+    if (!matched)
+	goto ret_no;
+
     /* can do inplace substitution? */
     if (c
 #ifdef PERL_OLD_COPY_ON_WRITE
@@ -2225,8 +2228,6 @@ PP(pp_subst)
 	&& !(RX_EXTFLAGS(rx) & RXf_LOOKBEHIND_SEEN)
 	&& (!doutf8 || SvUTF8(TARG)))
     {
-	if (!matched)
-	    goto ret_no;
 
 #ifdef PERL_OLD_COPY_ON_WRITE
 	if (SvIsCOW(TARG)) {
@@ -2328,9 +2329,7 @@ PP(pp_subst)
 	LEAVE_SCOPE(oldsave);
 	RETURN;
     }
-
-    if (matched)
-    {
+    else {
 	if (force_on_match) {
 	    force_on_match = 0;
 	    s = SvPV_force(TARG, len);
@@ -2413,7 +2412,7 @@ PP(pp_subst)
 	LEAVE_SCOPE(oldsave);
 	RETURN;
     }
-    goto ret_no;
+    /* NOTREACHED */
 
 nope:
 ret_no:
