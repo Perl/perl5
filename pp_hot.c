@@ -2226,15 +2226,8 @@ PP(pp_subst)
 	&& (!doutf8 || SvUTF8(TARG)))
     {
 	if (!matched)
-	{
-	    SPAGAIN;
-	    if (rpm->op_pmflags & PMf_NONDESTRUCT)
-		PUSHs(TARG);
-	    else
-		PUSHs(&PL_sv_no);
-	    LEAVE_SCOPE(oldsave);
-	    RETURN;
-	}
+	    goto ret_no;
+
 #ifdef PERL_OLD_COPY_ON_WRITE
 	if (SvIsCOW(TARG)) {
 	    assert (!force_on_match);
