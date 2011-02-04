@@ -561,41 +561,34 @@ sub checkErrs {
 
     # check for agreement, by hash (order less important)
     my (%goterrs, @got);
-    $tc->{goterrs} ||= [];
-    @goterrs{@{$tc->{goterrs}}} = (1) x scalar @{$tc->{goterrs}};
-    
+    @goterrs{@{$tc->{goterrs}}} = (1) x scalar @{$tc->{goterrs}}
+	if $tc->{goterrs};
+
     foreach my $k (keys %{$tc->{errs}}) {
 	if (@got = grep /^$k$/, keys %goterrs) {
 	    delete $tc->{errs}{$k};
 	    delete $goterrs{$_} foreach @got;
 	}
     }
-    $tc->{goterrs} = \%goterrs;
 
     # relook at altered
-    if (%{$tc->{errs}} or %{$tc->{goterrs}}) {
-	$tc->diag_or_fail();
+    if (%{$tc->{errs}} or %goterrs) {
+	my @lines;
+	push @lines, "got unexpected:", sort keys %goterrs if %goterrs;
+	push @lines, "missed expected:", sort keys %{$tc->{errs}}   if %{$tc->{errs}};
+
+	if (@lines) {
+	    unshift @lines, $tc->{name};
+	    my $report = join("\n", @lines);
+
+	    if    ($gOpts{report} eq 'diag')	{ _diag ($report) }
+	    elsif ($gOpts{report} eq 'fail')	{ fail  ($report) }
+	    else				{ print ($report) }
+	    next unless $gOpts{errcont}; # skip block
+	}
     }
+
     fail("FORCED: $tc->{name}:\n") if $gOpts{fail}; # silly ?
-}
-
-sub diag_or_fail {
-    # help checkErrs
-    my $tc = shift;
-
-    my @lines;
-    push @lines, "got unexpected:", sort keys %{$tc->{goterrs}} if %{$tc->{goterrs}};
-    push @lines, "missed expected:", sort keys %{$tc->{errs}}   if %{$tc->{errs}};
-
-    if (@lines) {
-	unshift @lines, $tc->{name};
-	my $report = join("\n", @lines);
-
-	if    ($gOpts{report} eq 'diag')	{ _diag ($report) }
-	elsif ($gOpts{report} eq 'fail')	{ fail  ($report) }
-	else					{ print ($report) }
-	next unless $gOpts{errcont}; # skip block
-    }
 }
 
 =head1 mkCheckRex ($tc)
