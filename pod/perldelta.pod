@@ -134,6 +134,10 @@ C<IPC::Cmd> has been upgraded from version 0.68 to 0.70
 
 =item *
 
+C<HTTP::Tiny> has been upgraded from version 0.009 to 0.010
+
+=item *
+
 C<Module::Build> has been upgraded from version 0.3607 to 0.3622.
 
 A notable change is the deprecation of several modules.

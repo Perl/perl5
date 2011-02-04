@@ -17,11 +17,12 @@ use t::Util    qw[tmpfile rewind slurp monkey_patch dir_list parse_case
                   set_socket_source sort_headers $CRLF $LF];
 use HTTP::Tiny;
 use File::Temp qw/tempdir/;
+use File::Spec;
 
 BEGIN { monkey_patch() }
 
 my $tempdir = tempdir( TMPDIR => 1, CLEANUP => 1 );
-my $tempfile = $tempdir . "/tempfile.txt";
+my $tempfile = File::Spec->catfile( $tempdir, "tempfile.txt" );
 
 my $known_epoch = 760233600;
 my $day = 24*3600;
@@ -32,7 +33,7 @@ my %timestamp = (
 );
 
 for my $file ( dir_list("t/cases", qr/^mirror/ ) ) {
-  unlink $tempfile;
+  1 while unlink $tempfile;
   my $data = do { local (@ARGV,$/) = $file; <> };
   my ($params, $expect_req, $give_res) = split /--+\n/, $data;
   # cleanup source data

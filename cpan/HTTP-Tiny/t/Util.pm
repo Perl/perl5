@@ -11,7 +11,7 @@ package t::Util;
 use strict;
 use warnings;
 
-use IO::File q[SEEK_SET];
+use IO::File qw(SEEK_SET SEEK_END);
 use IO::Dir;
 
 BEGIN {
@@ -72,12 +72,16 @@ sub dir_list {
 sub slurp (*) {
     my ($fh) = @_;
 
+    seek($fh, 0, SEEK_END)
+      || die(qq/Couldn't navigate to EOF on file handle: '$!'/);
+
+    my $exp = tell($fh);
+
     rewind($fh);
 
     binmode($fh)
       || die(qq/Couldn't binmode file handle: '$!'/);
 
-    my $exp = -s $fh;
     my $buf = do { local $/; <$fh> };
     my $got = length $buf;
 

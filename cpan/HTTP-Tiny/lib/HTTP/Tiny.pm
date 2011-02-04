@@ -9,7 +9,7 @@
 #
 package HTTP::Tiny;
 BEGIN {
-  $HTTP::Tiny::VERSION = '0.009';
+  $HTTP::Tiny::VERSION = '0.010';
 }
 use strict;
 use warnings;
@@ -759,7 +759,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.009
+version 0.010
 
 =head1 SYNOPSIS
 
@@ -1050,6 +1050,23 @@ There is no support for a Request-URI of '*' for the 'OPTIONS' request.
 L<LWP::UserAgent>
 
 =back
+
+=for :stopwords CPAN AnnoCPAN RT CPANTS Kwalitee diff IRC
+
+=head1 SUPPORT
+
+=head2 Bugs / Feature Requests
+
+Please report any bugs or feature requests on the bugtracker website L<http://rt.cpan.org/Public/Dist/Display.html?Name=HTTP-Tiny> or by email to 'bug-http-tiny at rt.cpan.org'. I will be notified, and then you'll automatically be notified of progress on your bug as I make changes.
+
+=head2 Source Code
+
+This is open source software.  The code repository is available for
+public review and contribution under the terms of the license.
+
+L<http://github.com/dagolden/p5-http-tiny/tree>
+
+  git clone git://github.com/dagolden/p5-http-tiny.git
 
 =head1 AUTHORS
 
