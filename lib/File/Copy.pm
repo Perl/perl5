@@ -22,7 +22,7 @@ sub syscopy;
 sub cp;
 sub mv;
 
-$VERSION = '2.21';
+$VERSION = '2.22';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -60,7 +60,7 @@ sub _vms_unix_rpt {
         $unix_rpt = VMS::Feature::current("filename_unix_report");
     } else {
         my $env_unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
-        $unix_rpt = $env_unix_rpt =~ /^[ET1]/i;
+        $unix_rpt = $env_unix_rpt =~ /^[ETet1]/;
     }
     return $unix_rpt;
 }
@@ -73,7 +73,7 @@ sub _vms_efs {
         $efs = VMS::Feature::current("efs_charset");
     } else {
         my $env_efs = $ENV{'DECC$EFS_CHARSET'} || '';
-        $efs = $env_efs =~ /^[ET1]/i;
+        $efs = $env_efs =~ /^[ETet1]/;
     }
     return $efs;
 }
