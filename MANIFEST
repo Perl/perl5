@@ -2310,6 +2310,11 @@ cpan/Test-Harness/t/yamlish-output.t			Test::Harness test
 cpan/Test-Harness/t/yamlish.t				Test::Harness test
 cpan/Test-Harness/t/yamlish-writer.t			Test::Harness test
 cpan/Test/lib/Test.pm		A simple framework for writing test scripts
+cpan/Test-PerlRun/lib/Test/PerlRun.pm	Run a perl and capture output
+cpan/Test-PerlRun/t/PerlRun.t		Run a perl and capture output
+cpan/Test-PerlRun/t/pod-coverage.t	Run a perl and capture output
+cpan/Test-PerlRun/t/pod-spell.t		Run a perl and capture output
+cpan/Test-PerlRun/t/pod.t		Run a perl and capture output
 cpan/Test-Simple/Changes				Test::Simple changes
 cpan/Test-Simple/examples/indent.pl			Test::Simple examples
 cpan/Test-Simple/examples/subtest.t			Test::Simple examples
