@@ -13,7 +13,7 @@ BEGIN {
     }
 }
 use OptreeCheck;
-plan tests => 18;
+use Test::More tests => 18;
 
 
 =head1 f_map.t

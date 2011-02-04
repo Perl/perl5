@@ -13,8 +13,7 @@ BEGIN {
     }
 }
 use OptreeCheck;
-use Config;
-plan tests	=> 34;
+use Test::More tests => 34;
 
 pass("GENERAL OPTREE EXAMPLES");
 

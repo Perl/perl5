@@ -9,8 +9,7 @@ BEGIN {
     }
 }
 use OptreeCheck;
-use Config;
-plan tests => 6;
+use Test::More tests => 6;
 
 SKIP: {
 skip "no perlio in this build", 4 unless $Config::Config{useperlio};

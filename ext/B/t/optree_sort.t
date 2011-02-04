@@ -13,8 +13,7 @@ BEGIN {
     }
 }
 use OptreeCheck;
-use Config;
-plan tests => 21;
+use Test::More tests => 21;
 
 pass("SORT OPTIMIZATION");
 

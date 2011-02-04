@@ -7,14 +7,15 @@ BEGIN {
         print "1..0 # Skip -- Perl configured without B module\n";
         exit 0;
     }
-    require 'test.pl';		# we use runperl from 'test.pl', so can't use Test::More
 }
 
-plan tests => 159;
+use Test::More tests => 170;
+use Test::PerlRun 'perlrun';
 
 require_ok("B::Concise");
 
-$out = runperl(switches => ["-MO=Concise"], prog => '$a', stderr => 1);
+($out, $err) = perlrun({switches => ["-MO=Concise"], code => '$a'});
+like($err, qr/\A-e syntax OK\r?\n\z/, 'Just the -e banner');
 
 # If either of the next two tests fail, it probably means you need to
 # fix the section labeled 'fragile kludge' in Concise.pm
@@ -32,12 +33,11 @@ is($cop_base, 1, "Smallest COP sequence number");
 
 # test that with -exec B::Concise navigates past logops (bug #18175)
 
-$out = runperl(
+($out, $err) = perlrun({
     switches => ["-MO=Concise,-exec"],
-    prog => q{$a=$b && print q/foo/},
-    stderr => 1,
-);
-#diag($out);
+    code => q{$a=$b && print q/foo/},
+});
+like($err, qr/\A-e syntax OK\r?\n\z/, 'Just the -e banner');
 like($out, qr/print/, "'-exec' option output has print opcode");
 
 ######## API tests v.60 
@@ -366,25 +366,25 @@ SKIP: {
 # re-vivified later, but not in time for this (BEGIN/CHECK)-time
 # rendering.
 
-$out = runperl ( switches => ["-MO=Concise,Config::AUTOLOAD"],
-		 prog => 'use Config; BEGIN { $Config{awk} }',
-		 stderr => 1 );
+($out, $err) = perlrun({ switches => ["-MO=Concise,Config::AUTOLOAD"],
+			 code => 'use Config; BEGIN { $Config{awk} }' });
+like($err, qr/\A-e syntax OK\r?\n\z/, 'Just the -e banner');
 
 like($out, qr/Config::AUTOLOAD exists in stash, but has no START/,
     "coderef properly undefined");
 
-$out = runperl ( switches => ["-MO=Concise,Config::AUTOLOAD"],
-		 prog => 'use Config; CHECK { $Config{awk} }',
-		 stderr => 1 );
+($out, $err) = perlrun({ switches => ["-MO=Concise,Config::AUTOLOAD"],
+			 code => 'use Config; CHECK { $Config{awk} }' });
+like($err, qr/\A-e syntax OK\r?\n\z/, 'Just the -e banner');
 
 like($out, qr/Config::AUTOLOAD exists in stash, but has no START/,
     "coderef properly undefined");
 
 # test -stash and -src rendering
-# todo: stderr=1 puts '-e syntax OK' into $out,
 # conceivably fouling one of the lines that are tested
-$out = runperl ( switches => ["-MO=Concise,-stash=B::Concise,-src"],
-		 prog => '-e 1', stderr => 1 );
+($out, $err) = perlrun({ switches => ["-MO=Concise,-stash=B::Concise,-src"],
+			 code => '-e 1' });
+like($err, qr/\A-e syntax OK\r?\n\z/, 'Just the -e banner');
 
 like($out, qr/FUNC: \*B::Concise::concise_cv_obj/,
      "stash rendering of B::Concise includes Concise::concise_cv_obj");
@@ -395,8 +395,9 @@ like($out, qr/FUNC: \*B::Concise::walk_output/,
 like($out, qr/\# 4\d\d: \s+ \$l->concise\(\$level\);/,
      "src-line rendering works");
 
-$out = runperl ( switches => ["-MStorable", "-MO=Concise,-stash=Storable,-src"],
-		 prog => '-e 1', stderr => 1 );
+($out, $err) = perlrun({ switches => ["-MStorable", "-MO=Concise,-stash=Storable,-src"],
+			 code => '-e 1' });
+like($err, qr/\A-e syntax OK\r?\n\z/, 'Just the -e banner');
 
 like($out, qr/FUNC: \*Storable::BIN_MAJOR/,
      "stash rendering includes constant sub: PAD_FAKELEX_MULTI");
@@ -404,14 +405,16 @@ like($out, qr/FUNC: \*Storable::BIN_MAJOR/,
 like($out, qr/BIN_MAJOR is a constant sub, optimized to a IV/,
      "stash rendering identifies it as constant");
 
-$out = runperl ( switches => ["-MO=Concise,-stash=ExtUtils::Mksymlists,-src,-exec"],
-		 prog => '-e 1', stderr => 1 );
+($out, $err) = perlrun({ switches => ["-MO=Concise,-stash=ExtUtils::Mksymlists,-src,-exec"],
+			 code => '-e 1' });
+like($err, qr/\A-e syntax OK\r?\n\z/, 'Just the -e banner');
 
 like($out, qr/FUNC: \*ExtUtils::Mksymlists::_write_vms/,
      "stash rendering loads package as needed");
 
-$out = runperl ( switches => ["-MO=Concise,-stash=Data::Dumper,-src,-exec"],
-		 prog => '-e 1', stderr => 1 );
+($out, $err) = perlrun({ switches => ["-MO=Concise,-stash=Data::Dumper,-src,-exec"],
+			 code => '-e 1' });
+like($err, qr/\A-e syntax OK\r?\n\z/, 'Just the -e banner');
 
 like($out, qr/FUNC: \*Data::Dumper::format_refaddr/,
      "stash rendering loads package as needed");
@@ -419,8 +422,9 @@ like($out, qr/FUNC: \*Data::Dumper::format_refaddr/,
 my $prog = q{package FOO; sub bar { print q{bar} } package main; FOO::bar(); };
 
 # this would fail if %INC used for -stash test
-$out = runperl ( switches => ["-MO=Concise,-src,-stash=FOO,-main"],
-		 prog => $prog, stderr => 1 );
+($out, $err) = perlrun({ switches => ["-MO=Concise,-src,-stash=FOO,-main"],
+			 code => $prog });
+like($err, qr/\A-e syntax OK\r?\n\z/, 'Just the -e banner');
 
 like($out, qr/FUNC: \*FOO::bar/,
      "stash rendering works on inlined package");
@@ -429,18 +433,17 @@ like($out, qr/FUNC: \*FOO::bar/,
 # is set.
 # XXX Does this test belong here?
 
-$out = runperl ( switches => ["-MO=Concise"],
-		 prog => 'BEGIN{$^P = 0x04} 1 if 0; print',
-		 stderr => 1 );
+($out, $err) = perlrun({ switches => ["-MO=Concise"],
+			 code => 'BEGIN{$^P = 0x04} 1 if 0; print' });
+like($err, qr/\A-e syntax OK\r?\n\z/, 'Just the -e banner');
+
 like $out, qr/nextstate.*nextstate/s,
   'nulling of nextstate-nextstate happeneth not when $^P | PERLDBf_NOOPT';
 
 
 # A very basic test for -tree output
-$out =
- runperl(
-  switches => ["-MO=Concise,-tree"], prog => 'print', stderr => 1
- );
+($out, $err) = perlrun({ switches => ["-MO=Concise,-tree"], code => 'print' });
+like($err, qr/\A-e syntax OK\r?\n\z/, 'Just the -e banner');
 ok index $out=~s/\r\n/\n/gr=~s/gvsv\(\*_\)/gvsv[*_]/r, <<'end'=~s/\r\n/\n/gr =>>= 0, '-tree output';
 <6>leave[1 ref]-+-<1>enter
                 |-<2>nextstate(main 1 -e:1)

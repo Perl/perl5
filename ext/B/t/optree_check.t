@@ -26,7 +26,7 @@ cmdline args in 'standard' way across all clients of OptreeCheck.
 
 =cut
 
-plan tests => 5 + 15 + 12 + 16 * $gOpts{selftest};	# pass()s + $#tests
+use Test::More tests => 5 + 15 + 12 + 16 * $gOpts{selftest};	# pass()s + $#tests
 
 pass("REGEX TEST HARNESS SELFTEST");
 

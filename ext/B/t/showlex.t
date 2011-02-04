@@ -7,16 +7,17 @@ BEGIN {
         print "1..0 # Skip -- Perl configured without B module\n";
         exit 0;
     }
-    require 'test.pl';
 }
 
 $| = 1;
 use warnings;
 use strict;
 use Config;
-use B::Showlex ();
+use Test::More tests => 16;
+use Test::PerlRun 'perlrun';
 
-plan tests => 15;
+require_ok('B::Showlex');
+
 
 my $verbose = @ARGV; # set if ANY ARGS
 
@@ -49,8 +50,8 @@ sub padrep {
 
 for $newlex ('', '-newlex') {
 
-    $out = runperl ( switches => ["-MO=Showlex,$newlex"],
-		     prog => 'my ($a,$b)', stderr => 1 );
+    ($out) = perlrun({ switches => ["-MO=Showlex,$newlex"],
+		     code => 'my ($a,$b)' });
     $na = padrep('$a',$newlex);
     $nb = padrep('$b',$newlex);
     like ($out, qr/1: $na/ms, 'found $a in "my ($a,$b)"');

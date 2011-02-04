@@ -14,9 +14,7 @@ BEGIN {
 }
 
 use OptreeCheck;	# ALSO DOES @ARGV HANDLING !!!!!!
-use Config;
-
-plan tests => 67;
+use Test::More tests => 67;
 
 #################################
 
@@ -28,7 +26,7 @@ use constant {		# see also t/op/gv.t line 282
     myint	=> 42,
     myrex	=> qr/foo/,
     mystr	=> 'hithere',
-    mysub	=> \&ok,
+    mysub	=> \&printerr,
     myundef	=> undef,
     myunsub	=> \&nosuch,
 };

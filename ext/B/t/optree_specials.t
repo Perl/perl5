@@ -18,16 +18,16 @@ BEGIN {
 
 # import checkOptree(), and %gOpts (containing test state)
 use OptreeCheck;	# ALSO DOES @ARGV HANDLING !!!!!!
-use Config;
 
-plan tests => 13 + ($] > 5.009 ? 2 : 0);
+use Test::More tests => 13 + ($] > 5.009 ? 2 : 0);
+use Test::PerlRun 'perlrun';
 
 require_ok("B::Concise");
 
-my $out = runperl(
+my ($out) = perlrun({
     switches => ["-MO=Concise,BEGIN,CHECK,INIT,END,-exec"],
-    prog => q{$a=$b && print q/foo/},
-    stderr => 1 );
+    code => q{$a=$b && print q/foo/},
+    stderr => 1 });
 
 #print "out:$out\n";
 

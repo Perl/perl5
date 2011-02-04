@@ -7,13 +7,14 @@ BEGIN {
 		print "1..0 # Skip -- Perl configured without B module\n";
 		exit 0;
 	}
-	require 'test.pl';
 }
 
 use strict;
 use Config;
 use File::Spec;
 use File::Path;
+use Test::More tests => 9;
+use Test::PerlRun 'perlrun';
 
 my $path = File::Spec->catdir( 'lib', 'B' );
 unless (-d $path) {
@@ -26,38 +27,36 @@ open(OUT, '>', $file) or skip_all( 'Cannot write fake backend module');
 print OUT while <DATA>;
 close *OUT;
 
-plan( 9 ); # And someone's responsible.
-
 # use() makes it difficult to avoid O::import()
 require_ok( 'O' );
 
-my @lines = get_lines( '-MO=success,foo,bar' );
+my ($out, $err) = get_lines( '-MO=success,foo,bar' );
 
-is( $lines[0], 'Compiling!', 'Output should not be saved without -q switch' );
-is( $lines[1], '(foo) <bar>', 'O.pm should call backend compile() method' );
-is( $lines[2], '[]', 'Nothing should be in $O::BEGIN_output without -q' );
-is( $lines[3], '-e syntax OK', 'O.pm should not munge perl output without -qq');
+is( $out->[0], 'Compiling!', 'Output should not be saved without -q switch' );
+is( $out->[1], '(foo) <bar>', 'O.pm should call backend compile() method' );
+is( $out->[2], '[]', 'Nothing should be in $O::BEGIN_output without -q' );
+is( $err->[0], '-e syntax OK', 'O.pm should not munge perl output without -qq');
 
-@lines = get_lines( '-MO=-q,success,foo,bar' );
-isnt( $lines[1], 'Compiling!', 'Output should not be printed with -q switch' );
+($out) = get_lines( '-MO=-q,success,foo,bar' );
+isnt( $out->[1], 'Compiling!', 'Output should not be printed with -q switch' );
 
 SKIP: {
 	skip( '-q redirection does not work without PerlIO', 2)
 		unless $Config{useperlio};
-	is( $lines[1], "[Compiling!", '... but should be in $O::BEGIN_output' );
+	is( $out->[1], "[Compiling!", '... but should be in $O::BEGIN_output' );
 
-	@lines = get_lines( '-MO=-qq,success,foo,bar' );
-	is( scalar @lines, 3, '-qq should suppress even the syntax OK message' );
+	($out) = get_lines( '-MO=-qq,success,foo,bar' );
+	is( scalar @$out, 3, '-qq should suppress even the syntax OK message' );
 }
 
-@lines = get_lines( '-MO=success,fail' );
-like( $lines[1], qr/fail at .eval/,
+($out, $err) = get_lines( '-MO=success,fail' );
+like( $err->[0], qr/fail at .eval/,
 	'O.pm should die if backend compile() does not return a subref' );
 
 sub get_lines {
     my $compile = shift;
-	split(/[\r\n]+/, runperl( switches => [ '-Ilib', $compile ],
-				  prog => 1, stderr => 1 ));
+    my ($out, $err) = perlrun({ switches => [ '-Ilib', $compile ], code => 1 });
+    return [split /[\r\n]+/, $out], [split /[\r\n]+/, $err];
 }
 
 END {

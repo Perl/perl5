@@ -15,9 +15,7 @@ BEGIN {
 
 # import checkOptree(), and %gOpts (containing test state)
 use OptreeCheck;	# ALSO DOES @ARGV HANDLING !!!!!!
-use Config;
-
-plan tests => 41;
+use Test::More tests => 41;
 
 $SIG{__WARN__} = sub {
     my $err = shift;

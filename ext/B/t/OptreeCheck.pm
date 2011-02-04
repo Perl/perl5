@@ -3,13 +3,12 @@ use base 'Exporter';
 use strict;
 use warnings;
 use vars qw($TODO $Level $using_open);
-require "test.pl";
+use Test::PerlRun 'perlrun';
+use Test::More;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
-# now export checkOptree, and those test.pl functions used by tests
-our @EXPORT = qw( checkOptree plan skip skip_all pass is like unlike
-		  require_ok runperl);
+our @EXPORT = qw(checkOptree);
 
 
 # The hints flags will differ if ${^OPEN} is set.
@@ -117,7 +116,7 @@ various modes.
 
 Errors are reported 3 different ways;
 
-The 1st form is directly from test.pl's like() and unlike().  Note
+The 1st form is directly from Test::More's like() and unlike().  Note
 that this form is used as input, so you can easily cut-paste results
 into test-files you are developing.  Just make sure you recognize
 insane results, to avoid canonizing them as golden samples.
@@ -130,7 +129,7 @@ unhelpful.
 =head1 TestCase Overview
 
 checkOptree(%tc) constructs a testcase object from %tc, and then calls
-methods which eventually call test.pl's like() to produce test
+methods which eventually call Test::More's like() and ok() to produce test
 results.
 
 =head2 getRendering
@@ -187,7 +186,7 @@ Either code or prog must be present.
 =head2 prog => $perl_source_string
 
 prog => $src provides a snippet of code, which is run in a sub-process,
-via test.pl:runperl, and through B::Concise like so:
+via Test::PerlRun::perlrun, and through B::Concise like so:
 
     './perl -w -MO=Concise,$bcopts_massaged -e $src'
 
@@ -472,9 +471,15 @@ sub getRendering {
 
 
     if ($tc->{prog}) {
-	$rendering = runperl( switches => ['-w',join(',',"-MO=Concise",@opts)],
-			      prog => $tc->{prog}, stderr => 1,
-			      ); # verbose => 1);
+	($rendering, my $errors) = perlrun({switches => ['-w',join(',',"-MO=Concise",@opts)],
+					    code => $tc->{prog}
+					});
+	if ($tc->{strip}) {
+	    @errs = grep {!m/-e had compilation errors\./}
+	    grep {!m/-e syntax OK/} split "\n", $errors;
+	} else {
+	    @errs = split "\n", $errors;
+	}
     } else {
 	my $code = $tc->{code};
 	unless (ref $code eq 'CODE') {
@@ -500,19 +505,11 @@ sub getRendering {
 
 	# kludge error into rendering if its empty.
 	$rendering = $@ if $@ and ! $rendering;
-    }
-    # separate banner, other stuff whose printing order isnt guaranteed
-    if ($tc->{strip}) {
-	$rendering =~ s/(B::Concise::compile.*?\n)//;
-	print "stripped from rendering <$1>\n" if $1 and $tc->{stripv};
 
-	#while ($rendering =~ s/^(.*?(-e) line \d+\.)\n//g) {
-	while ($rendering =~ s/^(.*?(-e|\(eval \d+\).*?) line \d+\.)\n//g) {
-	    print "stripped <$1> $2\n" if $tc->{stripv};
-	    push @errs, $1;
+	if ($tc->{strip}) {
+	    $rendering =~ s/(B::Concise::compile.*?\n)//;
+	    note("stripped from rendering <$1>") if $1 and $tc->{stripv};
 	}
-	$rendering =~ s/-e syntax OK\n//;
-	$rendering =~ s/-e had compilation errors\.\n//;
     }
     $tc->{got}	   = $rendering;
     $tc->{goterrs} = \@errs if @errs;
@@ -562,8 +559,8 @@ sub checkErrs {
 	# @missed must be 0 here.
 	is(scalar @got, 0, "Got no errors for $tc->{name}")
     }
-    _diag(join "\n", "got unexpected:", @got) if @got;
-    _diag(join "\n", "missed expected:", @missed) if @missed;
+    diag(join "\n", "got unexpected:", @got) if @got;
+    diag(join "\n", "missed expected:", @missed) if @missed;
 }
 
 =head1 mkCheckRex ($tc)
@@ -760,11 +757,11 @@ sub reduceDiffs {
         my $line = shift @got;
         # remove matches, and report
         unless ($got =~ s/($rex\n)//msg) {
-            _diag("got:\t\t'$line'\nwant:\t $rex\n");
+            diag("got:\t\t'$line'\nwant:\t $rex\n");
         }
     }
-    _diag("remainder:\n$got");
-    _diag("these lines not matched:\n$got\n");
+    diag("remainder:\n$got");
+    diag("these lines not matched:\n$got\n");
 }
 
 =head1 Global modes
@@ -831,7 +828,7 @@ and NT->T separately.  The tweaking is incomplete.
 
 A reasonable 1st step is to add tags to indicate when TonNT or NTonT
 is known to fail.  This needs an option to force failure, so the
-test.pl reporting mechanics show results to aid the user.
+Test::More reporting mechanics show results to aid the user.
 
 =head2 testmode=native
 
@@ -905,12 +902,16 @@ sub preamble {
 #!perl
 
 BEGIN {
-    chdir q(t);
-    \@INC = qw(../lib ../ext/B/t);
-    require q(./test.pl);
+    unshift @INC, 't';
+    require Config;
+    if (($Config::Config{'extensions'} !~ /\bB\b/) ){
+        print "1..0 # Skip -- Perl configured without B module\n";
+        exit 0;
+    }
 }
+
 use OptreeCheck;
-plan tests => $testct;
+use Test::More tests => $testct;
 
 EO_HEADER
 
@@ -949,9 +950,7 @@ sub OptreeCheck::gentest {
 
     # run the prog, capture 'reference' concise output
     my $preamble = preamble(1);
-    my $got = runperl( prog => "$preamble $testcode", stderr => 1,
-		       #switches => ["-I../ext/B/t", "-MOptreeCheck"], 
-		       );  #verbose => 1);
+    my ($got) = perlrun( prog => "$preamble $testcode", stderr => 1 );
     
     # extract the 'reftext' ie the got 'block'
     if ($got =~ m/got \'.*?\n(.*)\n\# \'\n\# expected/s) {
@@ -995,7 +994,6 @@ sub OptreeCheck::processExamples {
 if ($0 =~ /OptreeCheck\.pm/) {
 
     #use lib 't';
-    require './t/test.pl';
 
     # invoked as program.  Work like former gentest.pl,
     # ie read files given as cmdline args,

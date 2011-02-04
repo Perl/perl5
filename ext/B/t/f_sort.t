@@ -13,7 +13,7 @@ BEGIN {
     }
 }
 use OptreeCheck;
-plan tests => 40;
+use Test::More tests => 40;
 
 =head1 f_sort.t
 
