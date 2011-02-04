@@ -57,12 +57,14 @@ These are the functions that are available, they may either be called as functio
 Behaviour since version 2.11
 
 Requires a MODULE name as an argument, returns the perl version when that module first
-appeared in core as ordered by perl version number or undef if that module is not in core.
+appeared in core as ordered by perl version number or undef ( in scalar context )
+or an empty list ( in list context ) if that module is not in core.
 
 =item C<first_release_by_date( MODULE )>
 
 Requires a MODULE name as an argument, returns the perl version when that module first
-appeared in core as ordered by release date or undef if that module is not in core.
+appeared in core as ordered by release date or undef ( in scalar context )
+or an empty list ( in list context ) if that module is not in core.
 
 =item C<find_modules( REGEX, [ LIST OF PERLS ] )>
 
