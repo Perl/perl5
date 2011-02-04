@@ -5,7 +5,7 @@ use warnings;
 use vars qw($TODO $Level $using_open);
 require "test.pl";
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 # now export checkOptree, and those test.pl functions used by tests
 our @EXPORT = qw( checkOptree plan skip skip_all pass is like unlike
@@ -58,8 +58,6 @@ various modes.
     # skip => 1,		# skips test
     # todo => 'excuse',		# anticipated failures
     # fail => 1			# force fail (by redirecting result)
-    # retry => 1		# retry on test failure
-    # debug => 1,		# use re 'debug' for retried failures !!
 
     # the 'golden-sample's, (must provide both)
 
@@ -236,16 +234,6 @@ invokes todo('reason')
 For code arguments, this option causes getRendering to redirect the
 rendering operation to STDERR, which causes the regex match to fail.
 
-=head2 retry => 1
-
-If retry is set, and a test fails, it is run a second time, possibly
-with regex debug.
-
-=head2 debug => 1
-
-If a failure is retried, this turns on eval "use re 'debug'", thus
-turning on regex debug.  It's quite verbose, and not hugely helpful.
-
 =head2 noanchors => 1
 
 If set, this relaxes the regex check, which is normally pretty strict.
@@ -312,8 +300,6 @@ sub import {
 our %gOpts = 	# values are replaced at runtime !!
     (
      # scalar values are help string
-     retry	=> 'retry failures after turning on re debug',
-     debug	=> 'turn on re debug for those retries',
      selftest	=> 'self-tests mkCheckRex vs the reference rendering',
 
      fail	=> 'force all test to fail, print to stdout',
@@ -657,7 +643,6 @@ sub mkCheckRex {
     # converts expected text into Regexp which should match against
     # unaltered version.  also adjusts threaded => non-threaded
     my ($tc, $want) = @_;
-    eval "no re 'debug'";
 
     my $str = $tc->{expect} || $tc->{expect_nt};	# standard bias
     $str = $tc->{$want} if $want && $tc->{$want};	# stated pref
@@ -776,28 +761,13 @@ sub mylike {
     my $cmnt	= $tc->{name};
     my $cross	= $tc->{cross};
 
-    my $msgs	= $tc->{msgs};
-    my $retry	= $tc->{retry}; # || $gopts{retry};
-    my $debug	= $tc->{debug}; #|| $gopts{retrydbg};
-
     # bad is anticipated failure
-    my $bad = (0 or ( $cross && $tc->{crossfail})
-	       or (!$cross && $tc->{fail})
-	       or 0); # no undefs !
+    my $bad = ($cross && $tc->{crossfail}) || (!$cross && $tc->{fail});
 
-    # same as A ^ B, but B has side effects
-    my $ok = ( $bad  &&  unlike ($got, $want, $cmnt, @$msgs)
-	       or !$bad && like ($got, $want, $cmnt, @$msgs));
+    my $ok = $bad ? unlike ($got, $want, $cmnt) : like ($got, $want, $cmnt);
 
     reduceDiffs ($tc) if not $ok;
 
-    if (not $ok and $retry) {
-	# redo, perhaps with use re debug - NOT ROBUST
-	eval "use re 'debug'" if $debug;
-	$ok = ( $bad  &&  unlike ($got, $want, "(RETRY) $cmnt", @$msgs)
-		or !$bad && like ($got, $want, "(RETRY) $cmnt", @$msgs));
-	eval "no re 'debug'";
-    }
     return $ok;
 }
 

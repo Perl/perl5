@@ -174,7 +174,6 @@ checkOptree ( name	=> 'canonical example w -basic',
 	      bcopts	=> '-basic',
 	      code	=>  sub{$a=$b+42},
 	      crossfail => 1,
-	      debug	=> 1,
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 7  <1> leavesub[1 ref] K/REFC,1 ->(end)
