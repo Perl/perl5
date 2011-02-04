@@ -274,7 +274,7 @@ checkOptree
     ( name	=> 'cmdline self-strict compile err using code',
       code	=> 'use strict; sort @a',
       bcopts	=> [qw/ -basic -concise -exec /],
-      errs	=> 'Global symbol "@a" requires explicit package name at .*? line 1.',
+      errs	=> qr/Global symbol "\@a" requires explicit package name at .*? line 1\./,
       note	=> 'this test relys on a kludge which copies $@ to rendering when empty',
       expect	=> 'Global symbol',
       expect_nt	=> 'Global symbol',

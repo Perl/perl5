@@ -51,7 +51,8 @@ various modes.
     prog   => 'sort @a',	# run in subprocess, aka -MO=Concise
     bcopts => '-exec',		# $opt or \@opts, passed to BC::compile
 
-    errs   => 'Useless variable "@main::a" .*'	# str, regex, [str+] [regex+],
+    errs   => 'Name "main::a" used only once: possible typo at -e line 1.',
+				# str, regex, [str+] [regex+],
 
     # various test options
     # errs   => '.*',		# match against any emitted errs, -w warnings
@@ -452,19 +453,8 @@ sub newTestCases {
 	    $tc->{$k} = $gOpts{$k} unless defined $tc->{$k};
 	}
     }
-    # transform errs to self-hash for efficient set-math
     if ($tc->{errs}) {
-	if (not ref $tc->{errs}) {
-	    $tc->{errs} = { $tc->{errs} => 1};
-	}
-	elsif (ref $tc->{errs} eq 'ARRAY') {
-	    my %errs;
-	    @errs{@{$tc->{errs}}} = (1) x @{$tc->{errs}};
-	    $tc->{errs} = \%errs;
-	}
-	elsif (ref $tc->{errs} eq 'Regexp') {
-	    warn "regexp err matching not yet implemented";
-	}
+	$tc->{errs} = [$tc->{errs}] unless ref $tc->{errs} eq 'ARRAY';
     }
     return $tc;
 }
@@ -559,23 +549,30 @@ sub checkErrs {
     # check rendering errs against expected errors, reduce and report
     my $tc = shift;
 
-    # check for agreement, by hash (order less important)
-    my (%goterrs, @got);
+    # check for agreement (order not important)
+    my (%goterrs, @missed);
     @goterrs{@{$tc->{goterrs}}} = (1) x scalar @{$tc->{goterrs}}
 	if $tc->{goterrs};
 
-    foreach my $k (keys %{$tc->{errs}}) {
-	if (@got = grep /^$k$/, keys %goterrs) {
-	    delete $tc->{errs}{$k};
-	    delete $goterrs{$_} foreach @got;
+    foreach my $want (@{$tc->{errs}}) {
+	if (ref $want) {
+	    my $seen;
+	    foreach my $k (keys %goterrs) {
+		next unless $k =~ $want;
+		delete $goterrs{$k};
+		++$seen;
+	    }
+	    push @missed, $want unless $seen;
+	} else {
+	    push @missed, $want unless defined delete $goterrs{$want};
 	}
     }
 
     # relook at altered
-    if (%{$tc->{errs}} or %goterrs) {
+    if (@missed or %goterrs) {
 	my @lines;
 	push @lines, "got unexpected:", sort keys %goterrs if %goterrs;
-	push @lines, "missed expected:", sort keys %{$tc->{errs}}   if %{$tc->{errs}};
+	push @lines, "missed expected:", sort @missed if @missed;
 
 	if (@lines) {
 	    unshift @lines, $tc->{name};
