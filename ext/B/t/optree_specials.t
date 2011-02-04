@@ -20,7 +20,7 @@ BEGIN {
 use OptreeCheck;	# ALSO DOES @ARGV HANDLING !!!!!!
 use Config;
 
-plan tests => 7 + ($] > 5.009 ? 1 : 0);
+plan tests => 13 + ($] > 5.009 ? 2 : 0);
 
 require_ok("B::Concise");
 

@@ -263,17 +263,6 @@ checkErrs() is a getRendering helper that verifies that expected errs
 against those found when rendering the code on the platform.  It is
 run after rendering, and before mkCheckRex.
 
-Errors can be reported 3 different ways; diag, fail, print.
-
-  diag - uses test.pl _diag()
-  fail - causes double-testing
-  print-.no # in front of the output (may mess up test harnesses)
-
-The 3 ways are selectable at runtimve via cmdline-arg:
-report={diag,fail,print}.  
-
-
-
 =cut
 
 use Config;
@@ -311,10 +300,6 @@ our %gOpts = 	# values are replaced at runtime !!
      #  array: 2nd value is used as help-str, 1st val (still) default
      help	=> [0, 'provides help and exits', 0],
      testmode	=> [qw/ native cross both /],
-
-     # reporting mode for rendering errs
-     report	=> [qw/ diag fail print /],
-     errcont	=> [1, 'if 1, tests match even if report is fail', 0],
 
      # fixup for VMS, cygwin, which don't have stderr b4 stdout
      rxnoorder	=> [1, 'if 1, dont req match on -e lines, and -banner',0],
@@ -568,21 +553,15 @@ sub checkErrs {
 	}
     }
 
-    # relook at altered
-    if (@missed or %goterrs) {
-	my @lines;
-	push @lines, "got unexpected:", sort keys %goterrs if %goterrs;
-	push @lines, "missed expected:", sort @missed if @missed;
+    @missed = sort @missed;
+    my @got = sort keys %goterrs;
 
-	if (@lines) {
-	    unshift @lines, $tc->{name};
-	    my $report = join("\n", @lines);
-
-	    if    ($gOpts{report} eq 'diag')	{ _diag ($report) }
-	    elsif ($gOpts{report} eq 'fail')	{ fail  ($report) }
-	    else				{ print ($report) }
-	    next unless $gOpts{errcont}; # skip block
-	}
+    if (@{$tc->{errs}}
+	? is(@missed + @got, 0, "Only got expected errors for $tc->{name}")
+	: is(scalar @got, 0, "Got no errors for $tc->{name}") # @missed must be 0 here.
+       ) {
+	_diag(join "\n", "got unexpected:", @got) if @got;
+	_diag(join "\n", "missed expected:", @missed) if @missed;
     }
 
     fail("FORCED: $tc->{name}:\n") if $gOpts{fail}; # silly ?

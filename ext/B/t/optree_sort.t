@@ -14,7 +14,7 @@ BEGIN {
 }
 use OptreeCheck;
 use Config;
-plan tests => 11;
+plan tests => 21;
 
 pass("SORT OPTIMIZATION");
 

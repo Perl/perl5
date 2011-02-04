@@ -14,7 +14,7 @@ BEGIN {
 }
 use OptreeCheck;
 use Config;
-plan tests	=> 22;
+plan tests	=> 42;
 
 pass("OPTIMIZER TESTS - VAR INITIALIZATION");
 

@@ -17,7 +17,7 @@ BEGIN {
 use OptreeCheck;	# ALSO DOES @ARGV HANDLING !!!!!!
 use Config;
 
-plan tests => 23;
+plan tests => 41;
 
 $SIG{__WARN__} = sub {
     my $err = shift;

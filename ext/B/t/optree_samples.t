@@ -14,7 +14,7 @@ BEGIN {
 }
 use OptreeCheck;
 use Config;
-plan tests	=> 20;
+plan tests	=> 34;
 
 pass("GENERAL OPTREE EXAMPLES");
 

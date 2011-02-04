@@ -10,10 +10,10 @@ BEGIN {
 }
 use OptreeCheck;
 use Config;
-plan tests => 3;
+plan tests => 6;
 
 SKIP: {
-skip "no perlio in this build", 2 unless $Config::Config{useperlio};
+skip "no perlio in this build", 4 unless $Config::Config{useperlio};
 
 # The regression this is testing is that the first aelemfast, derived
 # from a lexical array, is supposed to be a BASEOP "<0>", while the

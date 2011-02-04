@@ -16,7 +16,7 @@ BEGIN {
 use OptreeCheck;	# ALSO DOES @ARGV HANDLING !!!!!!
 use Config;
 
-plan tests => 30;
+plan tests => 57;
 
 #################################
 
