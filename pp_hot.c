@@ -2161,7 +2161,7 @@ PP(pp_subst)
 	s = CALLREG_INTUIT_START(rx, TARG, s, strend, r_flags, NULL);
 
 	if (!s)
-	    goto nope;
+	    goto ret_no;
 	/* How to do it in subst? */
 /*	if ( (RX_EXTFLAGS(rx) & RXf_CHECK_ALL)
 	     && !PL_sawampersand
@@ -2414,7 +2414,6 @@ PP(pp_subst)
     }
     /* NOTREACHED */
 
-nope:
 ret_no:
     SPAGAIN;
     if (rpm->op_pmflags & PMf_NONDESTRUCT)
