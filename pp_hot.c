@@ -2216,8 +2216,13 @@ PP(pp_subst)
 	doutf8 = FALSE;
     }
     
-    if (!matched)
-	goto ret_no;
+    if (!matched) {
+      ret_no:
+	SPAGAIN;
+	PUSHs(rpm->op_pmflags & PMf_NONDESTRUCT ? TARG : &PL_sv_no);
+	LEAVE_SCOPE(oldsave);
+	RETURN;
+    }
 
     /* can do inplace substitution? */
     if (c
@@ -2410,12 +2415,6 @@ PP(pp_subst)
 	RETURN;
     }
     /* NOTREACHED */
-
-ret_no:
-    SPAGAIN;
-    PUSHs(rpm->op_pmflags & PMf_NONDESTRUCT ? TARG : &PL_sv_no);
-    LEAVE_SCOPE(oldsave);
-    RETURN;
 }
 
 PP(pp_grepwhile)
