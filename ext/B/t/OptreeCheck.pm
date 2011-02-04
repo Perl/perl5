@@ -556,15 +556,14 @@ sub checkErrs {
     @missed = sort @missed;
     my @got = sort keys %goterrs;
 
-    if (@{$tc->{errs}}
-	? is(@missed + @got, 0, "Only got expected errors for $tc->{name}")
-	: is(scalar @got, 0, "Got no errors for $tc->{name}") # @missed must be 0 here.
-       ) {
-	_diag(join "\n", "got unexpected:", @got) if @got;
-	_diag(join "\n", "missed expected:", @missed) if @missed;
+    if (@{$tc->{errs}}) {
+	is(@missed + @got, 0, "Only got expected errors for $tc->{name}")
+    } else {
+	# @missed must be 0 here.
+	is(scalar @got, 0, "Got no errors for $tc->{name}")
     }
-
-    fail("FORCED: $tc->{name}:\n") if $gOpts{fail}; # silly ?
+    _diag(join "\n", "got unexpected:", @got) if @got;
+    _diag(join "\n", "missed expected:", @missed) if @missed;
 }
 
 =head1 mkCheckRex ($tc)
