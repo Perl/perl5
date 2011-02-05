@@ -9,24 +9,25 @@ BEGIN {
 }
 
 use strict;
-BEGIN { require "../../t/test.pl"; }
+use Test::More;
+use Test::PerlRun 'perlrun';
+
 our $NUM_SECTS;
 chomp(my @strs= grep { !/^\s*\#/ } <DATA>);
-my $out = runperl(progfile => "t/regop.pl", stderr => 1 );
+my ($out, $err) = perlrun({file => "t/regop.pl"});
 # VMS currently embeds linefeeds in the output.
-$out =~ s/\cJ//g if $^O = 'VMS';
-my @tests = grep { /\S/ } split /(?=Compiling REx)/, $out;
+$err =~ s/\cJ//g if $^O = 'VMS';
+my @tests = grep { /\S/ } split /(?=Compiling REx)/, $err;
 # on debug builds we get an EXECUTING... message in there at the top
 shift @tests
     if $tests[0] =~ /EXECUTING.../;
 
-plan( @tests + 2 + ( @strs - grep { !$_ or /^---/ } @strs ));
+plan(tests => @tests + 2 + ( @strs - grep { !$_ or /^---/ } @strs ));
 
 is( scalar @tests, $NUM_SECTS,
     "Expecting output for $NUM_SECTS patterns" );
-ok( defined $out, 'regop.pl returned something defined' );
+isnt($out, undef, 'regop.pl returned something defined');
 
-$out ||= "";
 my $test= 1;
 foreach my $testout ( @tests ) {
     my ( $pattern )= $testout=~/Compiling REx "([^"]+)"/;
@@ -39,7 +40,7 @@ foreach my $testout ( @tests ) {
         next if /^\s*#/;
         s/^\s+//;
         s/\s+$//;
-        ok( $testout=~/\Q$_\E/, "$_: /$pattern/" )
+        like($testout, qr/\Q$_\E/, "$_: /$pattern/")
             or do {
                 !$diaged++ and diag("PATTERN: /$pattern/\n\n"
 		    . "EXPECTED:\n$_\n\n"

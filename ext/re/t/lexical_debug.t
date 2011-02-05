@@ -10,26 +10,23 @@ BEGIN {
 
 use strict;
 
-# must use a BEGIN or the prototypes wont be respected meaning 
-    # tests could pass that shouldn't
-BEGIN { require "../../t/test.pl"; }
-my $out = runperl(progfile => "t/lexical_debug.pl", stderr => 1 );
+use Test::More tests => 10;
+use Test::PerlRun 'perlrun';
 
-print "1..10\n";
+my ($out, $err) = perlrun({file => "t/lexical_debug.pl"});
+
+is($out, "Count=7\n", "Count is 7");
 
 # Each pattern will produce an EXACT node with a specific string in 
 # it, so we will look for that. We can't just look for the string
 # alone as the string being matched against contains all of them.
 
-ok( $out =~ /EXACT <foo>/, "Expect 'foo'"    );
-ok( $out !~ /EXACT <bar>/, "No 'bar'"        );
-ok( $out =~ /EXACT <baz>/, "Expect 'baz'"    );
-ok( $out !~ /EXACT <bop>/, "No 'bop'"        );
-ok( $out =~ /EXACT <fip>/, "Expect 'fip'"    );
-ok( $out !~ /EXACT <fop>/, "No 'baz'"        );
-ok( $out =~ /<liz>/,       "Got 'liz'"       ); # in a TRIE so no EXACT
-ok( $out =~ /<zoo>/,       "Got 'zoo'"       ); # in a TRIE so no EXACT
-ok( $out =~ /<zap>/,       "Got 'zap'"       ); # in a TRIE so no EXACT
-ok( $out =~ /Count=7\n/,   "Count is 7") 
-    or diag($out);
-
+like($err, qr/EXACT <foo>/,   "Expect 'foo'"    );
+unlike($err, qr/EXACT <bar>/, "No 'bar'"        );
+like($err, qr/EXACT <baz>/,   "Expect 'baz'"    );
+unlike($err, qr/EXACT <bop>/, "No 'bop'"        );
+like($err, qr/EXACT <fip>/,   "Expect 'fip'"    );
+unlike($err, qr/EXACT <fop>/, "No 'baz'"        );
+like($err, qr/<liz>/,         "Got 'liz'"       ); # in a TRIE so no EXACT
+like($err, qr/<zoo>/,         "Got 'zoo'"       ); # in a TRIE so no EXACT
+like($err, qr/<zap>/,         "Got 'zap'"       ); # in a TRIE so no EXACT
