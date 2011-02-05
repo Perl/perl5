@@ -1285,9 +1285,9 @@ ApR	|NV	|str_to_version	|NN SV *sv
 Ap	|SV*	|swash_init	|NN const char* pkg|NN const char* name|NN SV* listsv|I32 minbits|I32 none
 Ap	|UV	|swash_fetch	|NN SV *swash|NN const U8 *ptr|bool do_utf8
 EXMpR	|HV*	|_swash_inversion_hash	|NN SV* const swash
-EMpR	|HV*	|_new_invlist	|const IV initial_size
+EXMpR	|HV*	|_new_invlist	|const IV initial_size
 EXMpR	|HV*	|_swash_to_invlist	|NN SV* const swash
-EMp	|void	|_append_range_to_invlist   |NN HV* const invlist|const UV start|const UV end
+EXMp	|void	|_append_range_to_invlist   |NN HV* const invlist|const UV start|const UV end
 #ifdef PERL_IN_REGCOMP_C
 EsMR	|HV*	|add_range_to_invlist	|NN HV* const invlist|const UV start|const UV end
 EiMR	|UV*	|invlist_array	|NN HV* const invlist
