@@ -3736,8 +3736,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		break;
 	    }
 
-	    /* Neither the target and the pattern are utf8. */
-
+	    /* Neither the target nor the pattern are utf8 */
 	    if (UCHARAT(s) != nextchr &&
 		UCHARAT(s) != fold_array[nextchr])
 	    {
