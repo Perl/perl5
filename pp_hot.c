@@ -2405,7 +2405,7 @@ PP(pp_subst)
 	else
 	    mPUSHi((I32)iters);
 
-	(void)SvPOK_only(TARG);
+	(void)SvPOK_only_UTF8(TARG);
 	if (doutf8)
 	    SvUTF8_on(TARG);
 	TAINT_IF(rxtainted);
