@@ -5781,6 +5781,7 @@ S_invlist_set_max(pTHX_ HV* const invlist, const UV max)
     }
 }
 
+#ifndef PERL_IN_XSUB_RE
 HV*
 Perl__new_invlist(pTHX_ IV initial_size)
 {
@@ -5806,6 +5807,7 @@ Perl__new_invlist(pTHX_ IV initial_size)
 
     return invlist;
 }
+#endif
 
 PERL_STATIC_INLINE void
 S_invlist_destroy(pTHX_ HV* const invlist)
@@ -5864,6 +5866,7 @@ S_invlist_trim(pTHX_ HV* const invlist)
 
 #define ELEMENT_IN_INVLIST_SET(i) (! ((i) & 1))
 
+#ifndef PERL_IN_XSUB_RE
 void
 Perl__append_range_to_invlist(pTHX_ HV* invlist, const UV start, const UV end)
 {
@@ -5934,6 +5937,7 @@ Perl__append_range_to_invlist(pTHX_ HV* invlist, const UV start, const UV end)
 	invlist_set_len(invlist, len - 1);
     }
 }
+#endif
 
 PERL_STATIC_INLINE HV*
 S_invlist_union(pTHX_ HV* const a, HV* const b)
