@@ -16,7 +16,6 @@ outlist(int* a, int* b){
 
 STATIC int
 len(const char* const s, int const l){
-	PERL_UNUSED_ARG(s);
 	return l;
 }
 
@@ -85,7 +84,6 @@ int
 myabs(...)
 OVERLOAD: abs
 CODE:
-	PERL_UNUSED_VAR(items);
 	RETVAL = 42;
 OUTPUT:
 	RETVAL
