@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 use 5.006002;
 
-$VERSION = '1.99_05';
+$VERSION = '1.991';
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(objectify bgcd blcm); 
@@ -1834,6 +1834,11 @@ sub bmodinv
 
   ($x->{value}, $x->{sign}) = $CALC->_modinv($x->{value}, $y->{value});
   return $x->bnan() if !defined $x->{value};
+
+  # Library inconsistency workaround: _modinv() in Math::BigInt::GMP versions
+  # <= 1.32 return undef rather than a "+" for the sign.
+
+  $x->{sign} = '+' unless defined $x->{sign};
 
   # When one or both arguments are negative, we have the following
   # relations.  If x and y are positive:
