@@ -207,6 +207,35 @@ please explain why when you submit it.
 If you are submitting a code patch there are several things that you
 can do to help the Perl 5 Porters accept your patch.
 
+=head3 Patch style
+
+If you used git to check out the Perl source, then using C<git
+format-patch> will produce a patch in a style suitable for Perl. The
+C<format-patch> command produces one patch file for each commit you
+made. If you prefer to send a single patch for all commits, you can use
+C<git diff>.
+
+  % git co blead
+  % git pull
+  % git diff blead my-branch-name
+
+This produces a patch based on the difference between blead and your
+current branch. It's important to make sure that blead is up to date
+before producing the diff, that's why we call C<git pull> first.
+
+We strongly recommend that you use git if possible. It will make your
+life easier, and ours as well.
+
+However, if you're not using git, you can still produce a suitable
+patch. You'll need a pristine copy of the Perl source to diff against.
+The porters prefer unified diffs. Using GNU C<diff>, you can produce a
+diff like this:
+
+  % diff -Npurd perl.pristine perl.mine
+
+Make sure that you C<make realclean> in your copy of Perl to remove any
+build artifacts, or you may get a confusing result.
+
 =head3 Commit message
 
 As you craft each patch you intend to submit to the Perl core, it's
