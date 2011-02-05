@@ -2320,11 +2320,7 @@ PP(pp_subst)
 	}
 	(void)SvPOK_only_UTF8(TARG);
 	TAINT_IF(rxtainted);
-	if (SvSMAGICAL(TARG)) {
-	    PUTBACK;
-	    mg_set(TARG);
-	    SPAGAIN;
-	}
+	SvSETMAGIC(TARG);
 	SvTAINT(TARG);
 	if (doutf8)
 	    SvUTF8_on(TARG);
