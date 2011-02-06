@@ -7,6 +7,7 @@ our (@ISA, @EXPORT_OK);
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(
   standard_typemap_locations
+  trim_whitespace
 );
 
 =head1 NAME
@@ -17,6 +18,7 @@ ExtUtils::ParseXS::Utilities - Subroutines used with ExtUtils::ParseXS
 
   use ExtUtils::ParseXS::Utilities qw(
     standard_typemap_locations
+    trim_whitespace
   );
 
 =head1 SUBROUTINES
@@ -108,6 +110,31 @@ sub standard_typemap_locations {
     unshift @tm, $file if -e $file;
   }
   return @tm;
+}
+
+=head2 C<trim_whitespace()>
+
+=over 4
+
+=item * Purpose
+
+Perform an in-place trimming of leading and trailing whitespace from the
+first argument provided to the function.
+
+=item * Argument
+
+  trim_whitespace($arg);
+
+=item * Return Value
+
+None.  Remember:  this is an I<in-place> modification of the argument.
+
+=back
+
+=cut
+
+sub trim_whitespace {
+  $_[0] =~ s/^\s+|\s+$//go;
 }
 
 1;

@@ -2980,6 +2980,7 @@ dist/ExtUtils-ParseXS/t/001-basic.t		See if ExtUtils::ParseXS works
 dist/ExtUtils-ParseXS/t/002-more.t		Extended ExtUtils::ParseXS testing
 dist/ExtUtils-ParseXS/t/003-usage.t		ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/101-standard_typemap_locations.t	ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/t/102-trim_whitespace.t	ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/lib/IncludeTester.pm	ExtUtils::ParseXS testing utility
 dist/ExtUtils-ParseXS/t/typemap			Standard typemap for controlled testing
 dist/ExtUtils-ParseXS/t/XSInclude.xsh		Test file for ExtUtils::ParseXS tests

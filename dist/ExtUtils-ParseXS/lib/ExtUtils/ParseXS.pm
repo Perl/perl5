@@ -9,6 +9,7 @@ use File::Spec;
 use Symbol;
 use ExtUtils::ParseXS::Utilities qw(
   standard_typemap_locations
+  trim_whitespace
 );
 
 our (@ISA, @EXPORT_OK, $VERSION);
@@ -169,7 +170,7 @@ sub process_file {
       if ($mode eq 'Typemap') {
         chomp;
         my $line = $_;
-        TrimWhitespace($_);
+        trim_whitespace($_);
         # skip blank lines and comment lines
         next if /^$/ or /^#/;
         my($type,$kind, $proto) = /^\s*(.*?\S)\s+(\S+)\s*($proto_re*)\s*$/ or
@@ -1090,10 +1091,6 @@ EOF
 
 sub errors { $errors }
 
-sub TrimWhitespace {
-  $_[0] =~ s/^\s+|\s+$//go;
-}
-
 sub TidyType {
   local ($_) = @_;
 
@@ -1105,7 +1102,7 @@ sub TidyType {
   s/\s+/ /g;
 
   # trim leading & trailing whitespace
-  TrimWhitespace($_);
+  trim_whitespace($_);
 
   $_;
 }
@@ -1156,7 +1153,7 @@ sub CASE_handler {
   blurt ("Error: `CASE:' after unconditional `CASE:'")
     if $condnum && $cond eq '';
   $cond = $_;
-  TrimWhitespace($cond);
+  trim_whitespace($cond);
   print "   ", ($condnum++ ? " else" : ""), ($cond ? " if ($cond)\n" : "\n");
   $_ = '';
 }
@@ -1166,7 +1163,7 @@ sub INPUT_handler {
     last if /^\s*NOT_IMPLEMENTED_YET/;
     next unless /\S/;        # skip blank lines
 
-    TrimWhitespace($_);
+    trim_whitespace($_);
     my $line = $_;
 
     # remove trailing semicolon if no initialisation
@@ -1273,14 +1270,14 @@ sub OUTPUT_handler {
 sub C_ARGS_handler() {
   my $in = merge_section();
 
-  TrimWhitespace($in);
+  trim_whitespace($in);
   $func_args = $in;
 }
 
 sub INTERFACE_MACRO_handler() {
   my $in = merge_section();
 
-  TrimWhitespace($in);
+  trim_whitespace($in);
   if ($in =~ /\s/) {        # two
     ($interface_macro, $interface_macro_set) = split ' ', $in;
   }
@@ -1295,7 +1292,7 @@ sub INTERFACE_MACRO_handler() {
 sub INTERFACE_handler() {
   my $in = merge_section();
 
-  TrimWhitespace($in);
+  trim_whitespace($in);
 
   foreach (split /[\s,]+/, $in) {
     my $name = $_;
@@ -1351,7 +1348,7 @@ sub GetAliases {
 sub ATTRS_handler () {
   for (;  !/^$BLOCK_re/o;  $_ = shift(@line)) {
     next unless /\S/;
-    TrimWhitespace($_);
+    trim_whitespace($_);
     push @Attributes, $_;
   }
 }
@@ -1359,7 +1356,7 @@ sub ATTRS_handler () {
 sub ALIAS_handler () {
   for (;  !/^$BLOCK_re/o;  $_ = shift(@line)) {
     next unless /\S/;
-    TrimWhitespace($_);
+    trim_whitespace($_);
     GetAliases($_) if $_;
   }
 }
@@ -1367,7 +1364,7 @@ sub ALIAS_handler () {
 sub OVERLOAD_handler() {
   for (;  !/^$BLOCK_re/o;  $_ = shift(@line)) {
     next unless /\S/;
-    TrimWhitespace($_);
+    trim_whitespace($_);
     while ( s/^\s*([\w:"\\)\+\-\*\/\%\<\>\.\&\|\^\!\~\{\}\=]+)\s*//) {
       $Overload = 1 unless $Overload;
       my $overload = "$Package\::(".$1;
@@ -1381,7 +1378,7 @@ sub FALLBACK_handler() {
   # the rest of the current line should contain either TRUE,
   # FALSE or UNDEF
 
-  TrimWhitespace($_);
+  trim_whitespace($_);
   my %map = (
     TRUE => "&PL_sv_yes", 1 => "&PL_sv_yes",
     FALSE => "&PL_sv_no", 0 => "&PL_sv_no",
@@ -1399,7 +1396,7 @@ sub REQUIRE_handler () {
   # the rest of the current line should contain a version number
   my ($Ver) = $_;
 
-  TrimWhitespace($Ver);
+  trim_whitespace($Ver);
 
   death ("Error: REQUIRE expects a version number")
     unless $Ver;
@@ -1416,7 +1413,7 @@ sub VERSIONCHECK_handler () {
   # the rest of the current line should contain either ENABLE or
   # DISABLE
 
-  TrimWhitespace($_);
+  trim_whitespace($_);
 
   # check for ENABLE/DISABLE
   death ("Error: VERSIONCHECK: ENABLE/DISABLE")
@@ -1436,7 +1433,7 @@ sub PROTOTYPE_handler () {
   for (;  !/^$BLOCK_re/o;  $_ = shift(@line)) {
     next unless /\S/;
     $specified = 1;
-    TrimWhitespace($_);
+    trim_whitespace($_);
     if ($_ eq 'DISABLE') {
       $ProtoThisXSUB = 0;
     }
@@ -1462,7 +1459,7 @@ sub SCOPE_handler () {
   death("Error: Only 1 SCOPE declaration allowed per xsub")
     if $scope_in_this_xsub ++;
 
-  TrimWhitespace($_);
+  trim_whitespace($_);
   death ("Error: SCOPE: ENABLE/DISABLE")
       unless /^(ENABLE|DISABLE)\b/i;
   $ScopeThisXSUB = ( uc($1) eq 'ENABLE' );
@@ -1472,7 +1469,7 @@ sub PROTOTYPES_handler () {
   # the rest of the current line should contain either ENABLE or
   # DISABLE
 
-  TrimWhitespace($_);
+  trim_whitespace($_);
 
   # check for ENABLE/DISABLE
   death ("Error: PROTOTYPES: ENABLE/DISABLE")
@@ -1503,7 +1500,7 @@ sub PushXSStack {
 sub INCLUDE_handler () {
   # the rest of the current line should contain a valid filename
 
-  TrimWhitespace($_);
+  trim_whitespace($_);
 
   death("INCLUDE: filename missing")
     unless $_;
@@ -1567,7 +1564,7 @@ sub QuoteArgs {
 sub INCLUDE_COMMAND_handler () {
   # the rest of the current line should contain a valid command
 
-  TrimWhitespace($_);
+  trim_whitespace($_);
 
   $_ = QuoteArgs($_) if $^O eq 'VMS';
 
@@ -2040,5 +2037,3 @@ sub end_marker {
 }
 
 1;
-__END__
-
