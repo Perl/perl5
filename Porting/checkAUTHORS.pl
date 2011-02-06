@@ -866,3 +866,5 @@ wolfgang.laun\100alcatel.at             wolfgang.laun\100chello.at
 +                                       wolfgang.laun\100thalesgroup.com
 +                                       wolfgang.laun\100gmail.com
 yath\100yath.de                         yath-perlbug\100yath.de
+
+jkeen@verizon.net                       jkeenan@cpan.org
