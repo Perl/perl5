@@ -3223,7 +3223,7 @@ Perl_sv_utf8_upgrade_flags_grow(pTHX_ register SV *const sv, const I32 flags, ST
 		return len;
 	    }
 	} else {
-	    (void) SvPV_force(sv,len);
+	    (void) SvPV_force_flags(sv,len,flags & SV_GMAGIC);
 	}
     }
 
