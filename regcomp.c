@@ -9775,7 +9775,7 @@ parseit:
 
 			    /* This node is variable length */
 			    OP(ret) = ANYOFV;
-			    ANYOF_FLAGS(ret) |= ANYOF_UNICODE;
+			    ANYOF_FLAGS(ret) |= ANYOF_UTF8;
 			}
 		    }
 		    else { /* Single character fold */
