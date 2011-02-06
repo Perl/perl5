@@ -115,50 +115,6 @@ encountered during processing of the XS file.
 
 =back
 
-=head1 INTERNAL SUBROUTINES
-
-The following functions are not considered to be part of the public interface.
-They are documented here for the benefit of future maintainers of this module.
-
-=head2 C<standard_typemap_locations()>
-
-=over 4
-
-=item * Purpose
-
-Provide a list of directories in which to search for F<typemap> files.  The
-directories appear in this list in lowest-to-highest priority.  The lowest
-priority directories are directories named F<ExtUtils> which are
-subdirectories of directories found in C<@INC> -- provided a file named
-F<typemap> actually exists in such a directory.  The highest priority
-directory is the current directory.  The second highest priority directory is
-the parent of the current directory.  The third highest priority directory is
-a directory called F<lib/ExtUtils> underneath the parent directory. And so
-forth for three more upward levels.  This results in a list like this:
-
-  '/usr/local/lib/perl5/5.10.1/ExtUtils/typemap',
-  '../../../../lib/ExtUtils/typemap',
-  '../../../../typemap',
-  '../../../lib/ExtUtils/typemap',
-  '../../../typemap',
-  '../../lib/ExtUtils/typemap',
-  '../../typemap',
-  '../lib/ExtUtils/typemap',
-  '../typemap',
-  'typemap'
-
-=item * Arguments
-
-  my @stl = standard_typemap_locations( \@INC );
-
-Reference to C<@INC>.
-
-=item * Return Value
-
-Array holding list of directories to be searched for F<typemap> files.
-
-=back
-
 =head1 AUTHOR
 
 Based on xsubpp code, written by Larry Wall.
