@@ -2719,6 +2719,7 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
     STRLEN lcur;
     HV *const hv = MUTABLE_HV(SvRV(swash));
     UV elements = 0;    /* Number of elements in the inversion list */
+    U8 empty[] = "";
 
     /* The string containing the main body of the table */
     SV** const listsvp = hv_fetchs(hv, "LIST", FALSE);
@@ -2734,7 +2735,16 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
     PERL_ARGS_ASSERT__SWASH_TO_INVLIST;
 
     /* read $swash->{LIST} */
-    l = (U8*)SvPV(*listsvp, lcur);
+    if (SvPOK(*listsvp)) {
+	l = (U8*)SvPV(*listsvp, lcur);
+    }
+    else {
+	/* LIST legitimately doesn't contain a string during compilation phases
+	 * of Perl itself, before the Unicode tables are generated.  In this
+	 * case, just fake things up by creating an empty list */
+	l = empty;
+	lcur = 0;
+    }
     loc = (char *) l;
     lend = l + lcur;
 

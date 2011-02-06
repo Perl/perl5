@@ -9692,14 +9692,24 @@ parseit:
 	     * that are involved in it */
 	    if (! PL_utf8_foldclosures) {
 
-		/* If the folds haven't been read in, call a fold
-		    * function to force that */
-		if (! PL_utf8_tofold) {
-		    U8 dummy[UTF8_MAXBYTES+1];
-		    STRLEN dummy_len;
-		    to_utf8_fold((U8*) "A", dummy, &dummy_len);
+		/* If we were unable to find any folds, then we likely won't be
+		 * able to find the closures.  So just create an empty list.
+		 * Folding will effectively be restricted to the non-Unicode
+		 * rules hard-coded into Perl.  (This case happens legitimately
+		 * during compilation of Perl itself before the Unicode tables
+		 * are generated) */
+		if (invlist_len(PL_utf8_foldable) == 0) {
+		    PL_utf8_foldclosures = _new_invlist(0);
+		} else {
+		    /* If the folds haven't been read in, call a fold function
+		     * to force that */
+		    if (! PL_utf8_tofold) {
+			U8 dummy[UTF8_MAXBYTES+1];
+			STRLEN dummy_len;
+			to_utf8_fold((U8*) "A", dummy, &dummy_len);
+		    }
+		    PL_utf8_foldclosures = _swash_inversion_hash(PL_utf8_tofold);
 		}
-		PL_utf8_foldclosures = _swash_inversion_hash(PL_utf8_tofold);
 	    }
 
 	    /* Only the characters in this class that participate in folds need
