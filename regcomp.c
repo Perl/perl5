@@ -9043,10 +9043,8 @@ S_set_regclass_bit(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8 valu
 
 /*
    parse a class specification and produce either an ANYOF node that
-   matches the pattern or if the pattern matches a single char only and
-   that char is < 256 and we are case insensitive then we produce an 
-   EXACT node instead.
-*/
+   matches the pattern or perhaps will be optimized into an EXACTish node
+   instead. */
 
 STATIC regnode *
 S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
