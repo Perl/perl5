@@ -32,7 +32,9 @@ sub croak { require Carp; Carp::croak(@_) }
         local $^D = 0 if $^D;
 
         $class = "" unless defined $class;
-        print STDERR __LINE__, ": class=$class, type=$type, list=$list, minbits=$minbits, none=$none\n" if DEBUG;
+        print STDERR __LINE__, ": class=$class, type=$type, list=",
+                                (defined $list) ? $list : ':undef:',
+                                ", minbits=$minbits, none=$none\n" if DEBUG;
 
         ##
         ## Get the list of codepoints for the type.
