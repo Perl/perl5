@@ -19,13 +19,23 @@ use Carp; $SIG{__WARN__} = \&Carp::cluck;
 
 # Try sending to filehandle
 tie *FH, 'Foo';
-process_file( filename => 'XSTest.xs', output => \*FH, prototypes => 1 );
+process_file(
+    filename => 'XSTest.xs',
+    output => \*FH,
+    prototypes => 1,
+    linenumbers => 0,
+);
 like tied(*FH)->content, '/is_even/', "Test that output contains some text";
 
 $source_file = 'XSTest.c';
 
 # Try sending to file
-process_file(filename => 'XSTest.xs', output => $source_file, prototypes => 0);
+process_file(
+    filename => 'XSTest.xs',
+    output => $source_file,
+    prototypes => 0,
+    linenumbers => 0,
+);
 ok -e $source_file, "Create an output file";
 
 my $quiet = $ENV{PERL_CORE} && !$ENV{HARNESS_ACTIVE};
@@ -73,7 +83,8 @@ while (my $l = <$IN>) {
   $seen++ if $l =~ m/#line\s1\s/;
 }
 close $IN or die "Unable to close $source_file: $!";
-is( $seen, 1, "Linenumbers created in output file, as intended" ); 
+is( $seen, 0, "No linenumbers created in output file, as intended" ); 
+
 
 unless ($ENV{PERL_NO_CLEANUP}) {
   for ( $obj_file, $lib_file, $source_file) {
