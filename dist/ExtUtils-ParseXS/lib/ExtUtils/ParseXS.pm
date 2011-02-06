@@ -7,6 +7,9 @@ use Exporter;
 use File::Basename;
 use File::Spec;
 use Symbol;
+use ExtUtils::ParseXS::Utilities qw(
+  standard_typemap_locations
+);
 
 our (@ISA, @EXPORT_OK, $VERSION);
 @ISA = qw(Exporter);
@@ -139,7 +142,7 @@ sub process_file {
     die "Can't find $typemap in $pwd\n" unless -r $typemap;
   }
 
-  push @tm, standard_typemap_locations();
+  push @tm, standard_typemap_locations( \@INC );
 
   foreach my $typemap (@tm) {
     next unless -f $typemap;
@@ -1086,24 +1089,6 @@ EOF
 }
 
 sub errors { $errors }
-
-sub standard_typemap_locations {
-  # Add all the default typemap locations to the search path
-  my @tm = qw(typemap);
-
-  my $updir = File::Spec->updir;
-  foreach my $dir (File::Spec->catdir(($updir) x 1), File::Spec->catdir(($updir) x 2),
-           File::Spec->catdir(($updir) x 3), File::Spec->catdir(($updir) x 4)) {
-
-    unshift @tm, File::Spec->catfile($dir, 'typemap');
-    unshift @tm, File::Spec->catfile($dir, lib => ExtUtils => 'typemap');
-  }
-  foreach my $dir (@INC) {
-    my $file = File::Spec->catfile($dir, ExtUtils => 'typemap');
-    unshift @tm, $file if -e $file;
-  }
-  return @tm;
-}
 
 sub TrimWhitespace {
   $_[0] =~ s/^\s+|\s+$//go;
@@ -2056,156 +2041,4 @@ sub end_marker {
 
 1;
 __END__
-
-=head1 NAME
-
-ExtUtils::ParseXS - converts Perl XS code into C code
-
-=head1 SYNOPSIS
-
-  use ExtUtils::ParseXS qw(process_file);
-
-  process_file( filename => 'foo.xs' );
-
-  process_file( filename => 'foo.xs',
-                output => 'bar.c',
-                'C++' => 1,
-                typemap => 'path/to/typemap',
-                hiertype => 1,
-                except => 1,
-                prototypes => 1,
-                versioncheck => 1,
-                linenumbers => 1,
-                optimize => 1,
-                prototypes => 1,
-              );
-=head1 DESCRIPTION
-
-C<ExtUtils::ParseXS> will compile XS code into C code by embedding the constructs
-necessary to let C functions manipulate Perl values and creates the glue
-necessary to let Perl access those functions.  The compiler uses typemaps to
-determine how to map C function parameters and variables to Perl values.
-
-The compiler will search for typemap files called I<typemap>.  It will use
-the following search path to find default typemaps, with the rightmost
-typemap taking precedence.
-
-    ../../../typemap:../../typemap:../typemap:typemap
-
-=head1 EXPORT
-
-None by default.  C<process_file()> may be exported upon request.
-
-
-=head1 FUNCTIONS
-
-=over 4
-
-=item process_xs()
-
-This function processes an XS file and sends output to a C file.
-Named parameters control how the processing is done.  The following
-parameters are accepted:
-
-=over 4
-
-=item B<C++>
-
-Adds C<extern "C"> to the C code.  Default is false.
-
-=item B<hiertype>
-
-Retains C<::> in type names so that C++ hierachical types can be
-mapped.  Default is false.
-
-=item B<except>
-
-Adds exception handling stubs to the C code.  Default is false.
-
-=item B<typemap>
-
-Indicates that a user-supplied typemap should take precedence over the
-default typemaps.  A single typemap may be specified as a string, or
-multiple typemaps can be specified in an array reference, with the
-last typemap having the highest precedence.
-
-=item B<prototypes>
-
-Generates prototype code for all xsubs.  Default is false.
-
-=item B<versioncheck>
-
-Makes sure at run time that the object file (derived from the C<.xs>
-file) and the C<.pm> files have the same version number.  Default is
-true.
-
-=item B<linenumbers>
-
-Adds C<#line> directives to the C output so error messages will look
-like they came from the original XS file.  Default is true.
-
-=item B<optimize>
-
-Enables certain optimizations.  The only optimization that is currently
-affected is the use of I<target>s by the output C code (see L<perlguts>).
-Not optimizing may significantly slow down the generated code, but this is the way
-B<xsubpp> of 5.005 and earlier operated.  Default is to optimize.
-
-=item B<inout>
-
-Enable recognition of C<IN>, C<OUT_LIST> and C<INOUT_LIST>
-declarations.  Default is true.
-
-=item B<argtypes>
-
-Enable recognition of ANSI-like descriptions of function signature.
-Default is true.
-
-=item B<s>
-
-I have no clue what this does.  Strips function prefixes?
-
-=back
-
-=item errors()
-
-This function returns the number of [a certain kind of] errors
-encountered during processing of the XS file.
-
-=back
-
-=head1 AUTHOR
-
-Based on xsubpp code, written by Larry Wall.
-
-Maintained by:
-
-=over 4
-
-=item *
-
-Ken Williams, <ken@mathforum.org>
-
-=item *
-
-David Golden, <dagolden@cpan.org>
-
-=back
-
-=head1 COPYRIGHT
-
-Copyright 2002-2009 by Ken Williams, David Golden and other contributors.  All
-rights reserved.
-
-This library is free software; you can redistribute it and/or
-modify it under the same terms as Perl itself.
-
-Based on the ExtUtils::xsubpp code by Larry Wall and the Perl 5
-Porters, which was released under the same license terms.
-
-=head1 SEE ALSO
-
-L<perl>, ExtUtils::xsubpp, ExtUtils::MakeMaker, L<perlxs>, L<perlxstut>.
-
-=cut
 

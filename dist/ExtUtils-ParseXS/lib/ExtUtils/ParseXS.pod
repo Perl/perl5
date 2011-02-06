@@ -1,0 +1,197 @@
+=head1 NAME
+
+ExtUtils::ParseXS - converts Perl XS code into C code
+
+=head1 SYNOPSIS
+
+  use ExtUtils::ParseXS qw(process_file);
+
+  process_file( filename => 'foo.xs' );
+
+  process_file( filename => 'foo.xs',
+                output => 'bar.c',
+                'C++' => 1,
+                typemap => 'path/to/typemap',
+                hiertype => 1,
+                except => 1,
+                prototypes => 1,
+                versioncheck => 1,
+                linenumbers => 1,
+                optimize => 1,
+                prototypes => 1,
+              );
+
+=head1 DESCRIPTION
+
+C<ExtUtils::ParseXS> will compile XS code into C code by embedding the constructs
+necessary to let C functions manipulate Perl values and creates the glue
+necessary to let Perl access those functions.  The compiler uses typemaps to
+determine how to map C function parameters and variables to Perl values.
+
+The compiler will search for typemap files called I<typemap>.  It will use
+the following search path to find default typemaps, with the rightmost
+typemap taking precedence.
+
+    ../../../typemap:../../typemap:../typemap:typemap
+
+=head1 EXPORT
+
+None by default.  C<process_file()> may be exported upon request.
+
+=head1 FUNCTIONS
+
+=over 4
+
+=item process_xs()
+
+This function processes an XS file and sends output to a C file.
+Named parameters control how the processing is done.  The following
+parameters are accepted:
+
+=over 4
+
+=item B<C++>
+
+Adds C<extern "C"> to the C code.  Default is false.
+
+=item B<hiertype>
+
+Retains C<::> in type names so that C++ hierachical types can be
+mapped.  Default is false.
+
+=item B<except>
+
+Adds exception handling stubs to the C code.  Default is false.
+
+=item B<typemap>
+
+Indicates that a user-supplied typemap should take precedence over the
+default typemaps.  A single typemap may be specified as a string, or
+multiple typemaps can be specified in an array reference, with the
+last typemap having the highest precedence.
+
+=item B<prototypes>
+
+Generates prototype code for all xsubs.  Default is false.
+
+=item B<versioncheck>
+
+Makes sure at run time that the object file (derived from the C<.xs>
+file) and the C<.pm> files have the same version number.  Default is
+true.
+
+=item B<linenumbers>
+
+Adds C<#line> directives to the C output so error messages will look
+like they came from the original XS file.  Default is true.
+
+=item B<optimize>
+
+Enables certain optimizations.  The only optimization that is currently
+affected is the use of I<target>s by the output C code (see L<perlguts>).
+Not optimizing may significantly slow down the generated code, but this is the way
+B<xsubpp> of 5.005 and earlier operated.  Default is to optimize.
+
+=item B<inout>
+
+Enable recognition of C<IN>, C<OUT_LIST> and C<INOUT_LIST>
+declarations.  Default is true.
+
+=item B<argtypes>
+
+Enable recognition of ANSI-like descriptions of function signature.
+Default is true.
+
+=item B<s>
+
+I have no clue what this does.  Strips function prefixes?
+
+=back
+
+=item errors()
+
+This function returns the number of [a certain kind of] errors
+encountered during processing of the XS file.
+
+=back
+
+=head1 INTERNAL SUBROUTINES
+
+The following functions are not considered to be part of the public interface.
+They are documented here for the benefit of future maintainers of this module.
+
+=head2 C<standard_typemap_locations()>
+
+=over 4
+
+=item * Purpose
+
+Provide a list of directories in which to search for F<typemap> files.  The
+directories appear in this list in lowest-to-highest priority.  The lowest
+priority directories are directories named F<ExtUtils> which are
+subdirectories of directories found in C<@INC> -- provided a file named
+F<typemap> actually exists in such a directory.  The highest priority
+directory is the current directory.  The second highest priority directory is
+the parent of the current directory.  The third highest priority directory is
+a directory called F<lib/ExtUtils> underneath the parent directory. And so
+forth for three more upward levels.  This results in a list like this:
+
+  '/usr/local/lib/perl5/5.10.1/ExtUtils/typemap',
+  '../../../../lib/ExtUtils/typemap',
+  '../../../../typemap',
+  '../../../lib/ExtUtils/typemap',
+  '../../../typemap',
+  '../../lib/ExtUtils/typemap',
+  '../../typemap',
+  '../lib/ExtUtils/typemap',
+  '../typemap',
+  'typemap'
+
+=item * Arguments
+
+  my @stl = standard_typemap_locations( \@INC );
+
+Reference to C<@INC>.
+
+=item * Return Value
+
+Array holding list of directories to be searched for F<typemap> files.
+
+=back
+
+=head1 AUTHOR
+
+Based on xsubpp code, written by Larry Wall.
+
+Maintained by:
+
+=over 4
+
+=item *
+
+Ken Williams, <ken@mathforum.org>
+
+=item *
+
+David Golden, <dagolden@cpan.org>
+
+=back
+
+=head1 COPYRIGHT
+
+Copyright 2002-2009 by Ken Williams, David Golden and other contributors.  All
+rights reserved.
+
+This library is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+Based on the ExtUtils::xsubpp code by Larry Wall and the Perl 5
+Porters, which was released under the same license terms.
+
+=head1 SEE ALSO
+
+L<perl>, ExtUtils::xsubpp, ExtUtils::MakeMaker, L<perlxs>, L<perlxstut>.
+
+=cut
+
+
