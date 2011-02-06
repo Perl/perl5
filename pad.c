@@ -128,8 +128,6 @@ For state vars, SVs_PADSTALE is overloaded to mean 'not yet initialised'
 #define PARENT_FAKELEX_FLAGS_set(sv,val)	\
   STMT_START { ((XPVNV*)SvANY(sv))->xnv_u.xpad_cop_seq.xhigh = (val); } STMT_END
 
-#define PAD_MAX U32_MAX
-
 #ifdef PERL_MAD
 void pad_peg(const char* s) {
     static int pegcnt; /* XXX not threadsafe */
@@ -477,8 +475,8 @@ Perl_pad_add_name(pTHX_ const char *name, const STRLEN len, const U32 flags,
     offset = pad_add_name_sv(namesv, flags, typestash, ourstash);
 
     /* not yet introduced */
-    COP_SEQ_RANGE_LOW_set(namesv, PAD_MAX);	/* min */
-    COP_SEQ_RANGE_HIGH_set(namesv, 0);		/* max */
+    COP_SEQ_RANGE_LOW_set(namesv, PERL_PADSEQ_INTRO);
+    COP_SEQ_RANGE_HIGH_set(namesv, 0);
 
     if (!PL_min_intro_pending)
 	PL_min_intro_pending = offset;
@@ -591,7 +589,7 @@ Perl_pad_add_anon(pTHX_ SV* sv, OPCODE op_type)
     pad_peg("add_anon");
     sv_setpvs(name, "&");
     /* Are these two actually ever read? */
-    COP_SEQ_RANGE_HIGH_set(name, PAD_MAX);
+    COP_SEQ_RANGE_HIGH_set(name, PERL_PADSEQ_INTRO);
     COP_SEQ_RANGE_LOW_set(name, 1);
     ix = pad_alloc(op_type, SVs_PADMY);
     av_store(PL_comppad_name, ix, name);
@@ -650,7 +648,8 @@ S_pad_check_dup(pTHX_ SV *name, const U32 flags, const HV *ourstash)
 	if (sv
 	    && sv != &PL_sv_undef
 	    && !SvFAKE(sv)
-	    && (COP_SEQ_RANGE_HIGH(sv) == PAD_MAX || COP_SEQ_RANGE_HIGH(sv) == 0)
+	    && (   COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO
+		|| COP_SEQ_RANGE_HIGH(sv) == 0)
 	    && sv_eq(name, sv))
 	{
 	    if (is_our && (SvPAD_OUR(sv)))
@@ -659,7 +658,8 @@ S_pad_check_dup(pTHX_ SV *name, const U32 flags, const HV *ourstash)
 		"\"%s\" variable %"SVf" masks earlier declaration in same %s",
 		(is_our ? "our" : PL_parser->in_my == KEY_my ? "my" : "state"),
 		sv,
-		(COP_SEQ_RANGE_HIGH(sv) == PAD_MAX ? "scope" : "statement"));
+		(COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO
+		    ? "scope" : "statement"));
 	    --off;
 	    break;
 	}
@@ -671,7 +671,8 @@ S_pad_check_dup(pTHX_ SV *name, const U32 flags, const HV *ourstash)
 	    if (sv
 		&& sv != &PL_sv_undef
 		&& !SvFAKE(sv)
-		&& (COP_SEQ_RANGE_HIGH(sv) == PAD_MAX || COP_SEQ_RANGE_HIGH(sv) == 0)
+		&& (   COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO
+		    || COP_SEQ_RANGE_HIGH(sv) == 0)
 		&& SvOURSTASH(sv) == ourstash
 		&& sv_eq(name, sv))
 	    {
@@ -746,7 +747,7 @@ Perl_pad_findmy(pTHX_ const char *name, STRLEN len, U32 flags)
 	    && !SvFAKE(namesv)
 	    && (SvPAD_OUR(namesv))
 	    && strEQ(SvPVX_const(namesv), name)
-	    && COP_SEQ_RANGE_LOW(namesv) == PAD_MAX /* min */
+	    && COP_SEQ_RANGE_LOW(namesv) == PERL_PADSEQ_INTRO
 	)
 	    return offset;
     }
@@ -1159,7 +1160,7 @@ Perl_intro_my(pTHX)
 	SV * const sv = svp[i];
 
 	if (sv && sv != &PL_sv_undef && !SvFAKE(sv) && !COP_SEQ_RANGE_HIGH(sv)) {
-	    COP_SEQ_RANGE_HIGH_set(sv, PAD_MAX);	/* Don't know scope end yet. */
+	    COP_SEQ_RANGE_HIGH_set(sv, PERL_PADSEQ_INTRO); /* Don't know scope end yet. */
 	    COP_SEQ_RANGE_LOW_set(sv, PL_cop_seqmax);
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		"Pad intromy: %ld \"%s\", (%lu,%lu)\n",
@@ -1208,7 +1209,9 @@ Perl_pad_leavemy(pTHX)
     /* "Deintroduce" my variables that are leaving with this scope. */
     for (off = AvFILLp(PL_comppad_name); off > PL_comppad_name_fill; off--) {
 	const SV * const sv = svp[off];
-	if (sv && sv != &PL_sv_undef && !SvFAKE(sv) && COP_SEQ_RANGE_HIGH(sv) == PAD_MAX) {
+	if (sv && sv != &PL_sv_undef && !SvFAKE(sv)
+	    && COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO)
+	{
 	    COP_SEQ_RANGE_HIGH_set(sv, PL_cop_seqmax);
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		"Pad leavemy: %ld \"%s\", (%lu,%lu)\n",

@@ -31,6 +31,12 @@ typedef U64TYPE PADOFFSET;
 #endif
 #define NOT_IN_PAD ((PADOFFSET) -1)
 
+/* a value that PL_cop_seqmax is guaranteed never to be,
+ * flagging that a lexical is being introduced, or has not yet left scope
+ */
+#define PERL_PADSEQ_INTRO  U32_MAX
+
+
 /* B.xs needs these for the benefit of B::Deparse */
 /* Low range end is exclusive (valid from the cop seq after this one) */
 /* High range end is inclusive (valid up to this cop seq) */
