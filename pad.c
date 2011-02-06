@@ -128,7 +128,7 @@ For state vars, SVs_PADSTALE is overloaded to mean 'not yet initialised'
 #define PARENT_FAKELEX_FLAGS_set(sv,val)	\
   STMT_START { ((XPVNV*)SvANY(sv))->xnv_u.xpad_cop_seq.xhigh = (val); } STMT_END
 
-#define PAD_MAX I32_MAX
+#define PAD_MAX U32_MAX
 
 #ifdef PERL_MAD
 void pad_peg(const char* s) {
@@ -591,7 +591,7 @@ Perl_pad_add_anon(pTHX_ SV* sv, OPCODE op_type)
     pad_peg("add_anon");
     sv_setpvs(name, "&");
     /* Are these two actually ever read? */
-    COP_SEQ_RANGE_HIGH_set(name, ~0);
+    COP_SEQ_RANGE_HIGH_set(name, PAD_MAX);
     COP_SEQ_RANGE_LOW_set(name, 1);
     ix = pad_alloc(op_type, SVs_PADMY);
     av_store(PL_comppad_name, ix, name);
