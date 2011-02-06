@@ -10182,59 +10182,28 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 	    width = expect_number(&q);
 	}
 
-	if (vectorize) {
-	    if (vectorarg) {
-		if (args)
-		    vecsv = va_arg(*args, SV*);
-		else if (evix) {
-		    vecsv = (evix > 0 && evix <= svmax)
-			? svargs[evix-1] : S_vcatpvfn_missing_argument(aTHX);
-		} else {
-		    vecsv = svix < svmax
-			? svargs[svix++] : S_vcatpvfn_missing_argument(aTHX);
-		}
+	if (vectorize && vectorarg) {
+	    /* vectorizing, but not with the default "." */
+	    if (args)
+		vecsv = va_arg(*args, SV*);
+	    else if (evix) {
+		vecsv = (evix > 0 && evix <= svmax)
+		    ? svargs[evix-1] : S_vcatpvfn_missing_argument(aTHX);
+	    } else {
+		vecsv = svix < svmax
+		    ? svargs[svix++] : S_vcatpvfn_missing_argument(aTHX);
+	    }
+	    dotstr = SvPV_const(vecsv, dotstrlen);
+	    /* Keep the DO_UTF8 test *after* the SvPV call, else things go
+	       bad with tied or overloaded values that return UTF8.  */
+	    if (DO_UTF8(vecsv))
+		is_utf8 = TRUE;
+	    else if (has_utf8) {
+		vecsv = sv_mortalcopy(vecsv);
+		sv_utf8_upgrade(vecsv);
 		dotstr = SvPV_const(vecsv, dotstrlen);
-		/* Keep the DO_UTF8 test *after* the SvPV call, else things go
-		   bad with tied or overloaded values that return UTF8.  */
-		if (DO_UTF8(vecsv))
-		    is_utf8 = TRUE;
-		else if (has_utf8) {
-		    vecsv = sv_mortalcopy(vecsv);
-		    sv_utf8_upgrade(vecsv);
-		    dotstr = SvPV_const(vecsv, dotstrlen);
-		    is_utf8 = TRUE;
-		}		    
-	    }
-	    if (args) {
-		VECTORIZE_ARGS
-	    }
-	    else if (efix ? (efix > 0 && efix <= svmax) : svix < svmax) {
-		vecsv = svargs[efix ? efix-1 : svix++];
-		vecstr = (U8*)SvPV_const(vecsv,veclen);
-		vec_utf8 = DO_UTF8(vecsv);
-
-		/* if this is a version object, we need to convert
-		 * back into v-string notation and then let the
-		 * vectorize happen normally
-		 */
-		if (sv_derived_from(vecsv, "version")) {
-		    char *version = savesvpv(vecsv);
-		    if ( hv_exists(MUTABLE_HV(SvRV(vecsv)), "alpha", 5 ) ) {
-			Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
-			"vector argument not supported with alpha versions");
-			goto unknown;
-		    }
-		    vecsv = sv_newmortal();
-		    scan_vstring(version, version + veclen, vecsv);
-		    vecstr = (U8*)SvPV_const(vecsv, veclen);
-		    vec_utf8 = DO_UTF8(vecsv);
-		    Safefree(version);
-		}
-	    }
-	    else {
-		vecstr = (U8*)"";
-		veclen = 0;
-	    }
+		is_utf8 = TRUE;
+	    }		    
 	}
 
 	if (asterisk) {
@@ -10272,6 +10241,39 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 		while (isDIGIT(*q))
 		    precis = precis * 10 + (*q++ - '0');
 		has_precis = TRUE;
+	    }
+	}
+
+	if (vectorize) {
+	    if (args) {
+		VECTORIZE_ARGS
+	    }
+	    else if (efix ? (efix > 0 && efix <= svmax) : svix < svmax) {
+		vecsv = svargs[efix ? efix-1 : svix++];
+		vecstr = (U8*)SvPV_const(vecsv,veclen);
+		vec_utf8 = DO_UTF8(vecsv);
+
+		/* if this is a version object, we need to convert
+		 * back into v-string notation and then let the
+		 * vectorize happen normally
+		 */
+		if (sv_derived_from(vecsv, "version")) {
+		    char *version = savesvpv(vecsv);
+		    if ( hv_exists(MUTABLE_HV(SvRV(vecsv)), "alpha", 5 ) ) {
+			Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
+			"vector argument not supported with alpha versions");
+			goto unknown;
+		    }
+		    vecsv = sv_newmortal();
+		    scan_vstring(version, version + veclen, vecsv);
+		    vecstr = (U8*)SvPV_const(vecsv, veclen);
+		    vec_utf8 = DO_UTF8(vecsv);
+		    Safefree(version);
+		}
+	    }
+	    else {
+		vecstr = (U8*)"";
+		veclen = 0;
 	    }
 	}
 
