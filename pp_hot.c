@@ -2185,12 +2185,13 @@ PP(pp_subst)
 	 * http://www.nntp.perl.org/group/perl.perl5.porters/2010/04/msg158809.html
 	 */
 	if (matched && DO_UTF8(dstr) && ! DO_UTF8(TARG)) {
-	    const STRLEN new_len = sv_utf8_upgrade(TARG);
+	    char * const orig_pvx =  SvPVX(TARG);
+	    const STRLEN new_len = sv_utf8_upgrade_nomg(TARG);
 
 	    /* If the lengths are the same, the pattern contains only
 	     * invariants, can keep going; otherwise, various internal markers
 	     * could be off, so redo */
-	    if (new_len != len) {
+	    if (new_len != len || orig_pvx != SvPVX(TARG)) {
 		goto setup_match;
 	    }
 	}

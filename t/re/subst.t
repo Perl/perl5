@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 174 );
+plan( tests => 176 );
 
 # Stolen from re/ReTest.pl. Can't just use the file since it doesn't support
 # like() and it conflicts with test.pl
@@ -750,4 +750,22 @@ fresh_perl_is( '$_="abcef"; s/bc|(.)\G(.)/$1 ? "[$1-$2]" : "XX"/ge; print' => 'a
   "$&", G =>
   'Match vars reflect the last match after s/pat/$a{m|pat|}/ without /e'
  );
+}
+
+{
+    # a tied scalar that returned a plain string, got messed up
+    # when substituted with a UTF8 replacement string, due to
+    # magic getting called multiple times, and pointers now pointing
+    # to stale/freed strings
+    package FOO;
+    my $fc;
+    sub TIESCALAR { bless [ "abcdefgh" ] }
+    sub FETCH { $fc++; $_[0][0] }
+    sub STORE { $_[0][0] = $_[1] }
+
+    my $s;
+    tie $s, 'FOO';
+    $s =~ s/..../\x{101}/;
+    ::is($fc, 1, "tied UTF8 stuff FETCH count");
+    ::is("$s", "\x{101}efgh", "tied UTF8 stuff");
 }
