@@ -905,6 +905,8 @@
 #define reguni(a,b,c)		S_reguni(aTHX_ a,b,c)
 #define regwhite		S_regwhite
 #define scan_commit(a,b,c,d)	S_scan_commit(aTHX_ a,b,c,d)
+#define set_regclass_bit(a,b,c,d)	S_set_regclass_bit(aTHX_ a,b,c,d)
+#define set_regclass_bit_fold(a,b,c,d)	S_set_regclass_bit_fold(aTHX_ a,b,c,d)
 #define study_chunk(a,b,c,d,e,f,g,h,i,j,k)	S_study_chunk(aTHX_ a,b,c,d,e,f,g,h,i,j,k)
 #  endif
 #  if defined(PERL_IN_REGEXEC_C)

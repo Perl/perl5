@@ -6188,6 +6188,20 @@ STATIC void	S_scan_commit(pTHX_ const struct RExC_state_t *pRExC_state, struct s
 #define PERL_ARGS_ASSERT_SCAN_COMMIT	\
 	assert(pRExC_state); assert(data); assert(minlenp)
 
+PERL_STATIC_INLINE U8	S_set_regclass_bit(pTHX_ struct RExC_state_t* pRExC_state, regnode* node, const U8 value, HV** nonbitmap_ptr)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_4);
+#define PERL_ARGS_ASSERT_SET_REGCLASS_BIT	\
+	assert(pRExC_state); assert(node); assert(nonbitmap_ptr)
+
+STATIC U8	S_set_regclass_bit_fold(pTHX_ struct RExC_state_t *pRExC_state, regnode* node, const U8 value, HV** nonbitmap_ptr)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_4);
+#define PERL_ARGS_ASSERT_SET_REGCLASS_BIT_FOLD	\
+	assert(pRExC_state); assert(node); assert(nonbitmap_ptr)
+
 STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t *pRExC_state, regnode **scanp, I32 *minlenp, I32 *deltap, regnode *last, struct scan_data_t *data, I32 stopparen, U8* recursed, struct regnode_charclass_class *and_withp, U32 flags, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)

@@ -831,6 +831,8 @@ Perl_warn_nocontext
 Perl_warner_nocontext
 perl_alloc_using
 perl_clone_using
+Perl_set_regclass_bit
+Perl_set_regclass_bit_fold
 Perl_sv_setsv_cow
 Perl_Slab_Alloc
 Perl_Slab_Free
