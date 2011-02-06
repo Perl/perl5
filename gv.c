@@ -1085,7 +1085,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 			GvMULTI_on(gv);
 		}
 		if (key != name)
-		    Safefree((char *)key);
+		    Safefree(key);
 		if (!gv || gv == (const GV *)&PL_sv_undef)
 		    return NULL;
 

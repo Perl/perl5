@@ -5819,7 +5819,8 @@ S_invlist_destroy(pTHX_ HV* const invlist)
     PERL_ARGS_ASSERT_INVLIST_DESTROY;
 
     if (list_ptr != NULL) {
-	Safefree(INT2PTR(UV *, SvUV(*list_ptr)));
+	UV *list = INT2PTR(UV *, SvUV(*list_ptr)); /* PERL_POISON needs lvalue */
+	Safefree(list);
     }
 }
 
