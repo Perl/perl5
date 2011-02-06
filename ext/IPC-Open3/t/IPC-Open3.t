@@ -14,7 +14,8 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 37;
+use Test::More tests => 42;
+use Test::PerlRun qw(perlrun perlrun_stdout_like);
 
 use IO::Handle;
 use IPC::Open3;
@@ -181,4 +182,38 @@ foreach my $handle (qw (DUMMY STDIN STDOUT STDERR)) {
 	     "Expected output with localised $handle");
     }
     waitpid $pid, 0;
+}
+
+# [perl #76474]
+SKIP: {
+    skip('needs porting, perhaps imitating Win32 mechanisms', 4)
+	if $^O eq 'VMS';
+
+    my ($stdout, $stderr, $status)
+	= perlrun({switches => ['-MIPC::Open3', '-w'],
+		   code => 'open STDIN, q _Makefile_ or die $!; open3(q _<&0_, my $out, undef, $ENV{PERLEXE}, q _-e0_)',
+		   });
+
+    is($stdout, '',
+       'dup STDOUT in a child process by using its file descriptor');
+    is($stderr, '', 'no errors');
+    is($status, 0, 'clean exit');
+}
+
+{
+    my $want = qr/\A# This Makefile is for the IPC::Open3 extension to perl\.\r?\n\z/;
+    open my $fh, '<', 'Makefile' or die "Can't open MAKEFILE: $!";
+    my $have = <$fh>;
+    like($have, $want, 'No surprises from MakeMaker');
+    close $fh;
+
+    perlrun_stdout_like(<<'EOP',
+use IPC::Open3;
+open FOO, 'Makefile' or die $!;
+open3('<&' . fileno FOO, my $out, undef, $ENV{PERLEXE}, '-eprint scalar <STDIN>');
+print <$out>;
+EOP
+			$want,
+			'Numeric file handles are duplicated correctly'
+		       );
 }
