@@ -2319,14 +2319,6 @@ PP(pp_subst)
 	    else
 		mPUSHi((I32)iters);
 	}
-	(void)SvPOK_only_UTF8(TARG);
-	if (doutf8)
-	    SvUTF8_on(TARG);
-	TAINT_IF(rxtainted);
-	SvSETMAGIC(TARG);
-	SvTAINT(TARG);
-	LEAVE_SCOPE(oldsave);
-	RETURN;
     }
     else {
 	if (force_on_match) {
@@ -2401,17 +2393,15 @@ PP(pp_subst)
 	    PUSHs(TARG);
 	else
 	    mPUSHi((I32)iters);
-
-	(void)SvPOK_only_UTF8(TARG);
-	if (doutf8)
-	    SvUTF8_on(TARG);
-	TAINT_IF(rxtainted);
-	SvSETMAGIC(TARG);
-	SvTAINT(TARG);
-	LEAVE_SCOPE(oldsave);
-	RETURN;
     }
-    /* NOTREACHED */
+    (void)SvPOK_only_UTF8(TARG);
+    if (doutf8)
+	SvUTF8_on(TARG);
+    TAINT_IF(rxtainted);
+    SvSETMAGIC(TARG);
+    SvTAINT(TARG);
+    LEAVE_SCOPE(oldsave);
+    RETURN;
 }
 
 PP(pp_grepwhile)
