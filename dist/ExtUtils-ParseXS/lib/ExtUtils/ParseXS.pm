@@ -9,6 +9,7 @@ use Exporter;
 use File::Basename;
 use File::Spec;
 use Symbol;
+use ExtUtils::ParseXS::CountLines;
 use ExtUtils::ParseXS::Utilities qw(
   standard_typemap_locations
   trim_whitespace
@@ -37,6 +38,8 @@ our (
   $interface_macro, $interface_macro_set, $ProtoThisXSUB, $ScopeThisXSUB, 
   @line_no, $ret_type, $func_name, $Full_func_name, $Packprefix, $Packid,  
   %XsubAliases, %XsubAliasValues, %Interfaces, @Attributes, %outargs, $pname,
+  $thisdone, $retvaldone, $deferred, $gotRETVAL, $condnum, $cond,
+  $RETVAL_code, $name_printed, $func_args, 
 );
 #our $DoSetMagic;
 
@@ -158,7 +161,6 @@ sub process_file {
     my $current = \$junk;
     while (<$TYPEMAP>) {
       next if /^\s*#/;
-#      my $line_no = $. + 1;
       if (/^INPUT\s*$/) {
         $mode = 'Input';   $current = \$junk;  next;
       }
@@ -387,9 +389,9 @@ EOF
   while (fetch_para()) {
     # Print initial preprocessor statements and blank lines
     while (@line && $line[0] !~ /^[^\#]/) {
-      my $line = shift(@line);
-      print $line, "\n";
-      next unless $line =~ /^\#\s*((if)(?:n?def)?|elsif|else|endif)\b/;
+      my $ln = shift(@line);
+      print $ln, "\n";
+      next unless $ln =~ /^\#\s*((if)(?:n?def)?|elsif|else|endif)\b/;
       my $statement = $+;
       if ($statement eq 'if') {
         $XSS_work_idx = @XSStack;
@@ -513,7 +515,7 @@ EOF
       Warn("Warning: duplicate function definition '$clean_func_name' detected");
       last;
     }
-    $XSStack[$XSS_work_idx]{functions}{$Full_func_name} ++;
+    $XSStack[$XSS_work_idx]{functions}{$Full_func_name}++;
     %XsubAliases = %XsubAliasValues = %Interfaces = @Attributes = ();
     $DoSetMagic = 1;
 
@@ -626,14 +628,14 @@ EOF
     $func_args = join(", ", @func_args);
     @args_match{@args} = @args_num;
 
-    $PPCODE = grep(/^\s*PPCODE\s*:/, @line);
-    $CODE = grep(/^\s*CODE\s*:/, @line);
+    my $PPCODE = grep(/^\s*PPCODE\s*:/, @line);
+    my $CODE = grep(/^\s*CODE\s*:/, @line);
     # Detect CODE: blocks which use ST(n)= or XST_m*(n,v)
     #   to set explicit return values.
-    $EXPLICIT_RETURN = ($CODE &&
+    my $EXPLICIT_RETURN = ($CODE &&
             ("@line" =~ /(\bST\s*\([^;]*=) | (\bXST_m\w+\s*\()/x ));
-    $ALIAS  = grep(/^\s*ALIAS\s*:/,  @line);
-    $INTERFACE  = grep(/^\s*INTERFACE\s*:/,  @line);
+    my $ALIAS  = grep(/^\s*ALIAS\s*:/,  @line);
+    my $INTERFACE  = grep(/^\s*INTERFACE\s*:/,  @line);
 
     $xsreturn = 1 if $EXPLICIT_RETURN;
 
@@ -973,7 +975,7 @@ EOF
       push(@InitFileCode,
        "        (void)${newXS}(\"$pname\", XS_$Full_func_name, file$proto);\n");
     }
-  }
+  } # END 'PARAGRAPH' 'while' loop
 
   if ($Overload) { # make it findable with fetchmethod
     print Q(<<"EOF");
@@ -1156,7 +1158,7 @@ sub INPUT_handler {
     next unless /\S/;        # skip blank lines
 
     trim_whitespace($_);
-    my $line = $_;
+    my $ln = $_;
 
     # remove trailing semicolon if no initialisation
     s/\s*;$//g unless /[=;+].*\S/;
@@ -1176,7 +1178,7 @@ sub INPUT_handler {
 
     s/\s+/ /g;
     my ($var_type, $var_addr, $var_name) = /^(.*?[^&\s])\s*(\&?)\s*\b(\w+)$/s
-      or blurt("Error: invalid argument declaration '$line'"), next;
+      or blurt("Error: invalid argument declaration '$ln'"), next;
 
     # Check for duplicate definitions
     blurt ("Error: duplicate definition of argument '$var_name' ignored"), next
@@ -1235,7 +1237,7 @@ sub OUTPUT_handler {
     }
     my ($outarg, $outcode) = /^\s*(\S+)\s*(.*?)\s*$/s;
     blurt ("Error: duplicate OUTPUT argument '$outarg' ignored"), next
-      if $outargs{$outarg} ++;
+      if $outargs{$outarg}++;
     if (!$gotRETVAL and $outarg eq 'RETVAL') {
       # deal with RETVAL last
       $RETVAL_code = $outcode;
@@ -1306,17 +1308,14 @@ sub INIT_handler()    { print_section() }
 sub GetAliases {
   my ($line) = @_;
   my ($orig) = $line;
-  my ($alias);
-  my ($value);
 
   # Parse alias definitions
   # format is
   #    alias = value alias = value ...
 
   while ($line =~ s/^\s*([\w:]+)\s*=\s*(\w+)\s*//) {
-    $alias = $1;
-    $orig_alias = $alias;
-    $value = $2;
+    my ($alias, $value) = ($1, $2);
+    my $orig_alias = $alias;
 
     # check for optional package definition in the alias
     $alias = $Packprefix . $alias if $alias !~ /::/;
@@ -1420,7 +1419,7 @@ sub PROTOTYPE_handler () {
   my $specified;
 
   death("Error: Only 1 PROTOTYPE definition allowed per xsub")
-    if $proto_in_this_xsub ++;
+    if $proto_in_this_xsub++;
 
   for (;  !/^$BLOCK_re/o;  $_ = shift(@line)) {
     next unless /\S/;
@@ -1449,7 +1448,7 @@ sub PROTOTYPE_handler () {
 
 sub SCOPE_handler () {
   death("Error: Only 1 SCOPE declaration allowed per xsub")
-    if $scope_in_this_xsub ++;
+    if $scope_in_this_xsub++;
 
   trim_whitespace($_);
   death ("Error: SCOPE: ENABLE/DISABLE")
@@ -1504,7 +1503,7 @@ sub INCLUDE_handler () {
   death("INCLUDE loop detected")
     if $IncludedFiles{$_};
 
-  ++ $IncludedFiles{$_} unless /\|\s*$/;
+  ++$IncludedFiles{$_} unless /\|\s*$/;
 
   if (/\|\s*$/ && /^\s*perl\s/) {
     Warn("The INCLUDE directive with a command is discouraged." .
@@ -1607,7 +1606,7 @@ sub PopFile() {
   my $ThisFile = $filename;
   my $isPipe   = $data->{IsPipe};
 
-  -- $IncludedFiles{$filename}
+  --$IncludedFiles{$filename}
     unless $isPipe;
 
   close $FH;
@@ -1624,7 +1623,7 @@ sub PopFile() {
   @line_no    = @{ $data->{LineNo} };
 
   if ($isPipe and $? ) {
-    -- $lastline_no;
+    --$lastline_no;
     print STDERR "Error reading from pipe '$ThisFile': $! in $filename, line $lastline_no\n" ;
     exit 1;
   }
@@ -1763,7 +1762,7 @@ sub output_init {
     else {
       eval qq/print "\\t$var $init\\n"/;
     }
-    warn $@   if  $@;
+    warn $@ if $@;
   }
   else {
     if (  $init =~ s/^\+//  &&  $num  ) {
@@ -1775,7 +1774,7 @@ sub output_init {
     }
     else {
       eval qq/print "\\t$var;\\n"/;
-      warn $@   if  $@;
+      warn $@ if $@;
       $init =~ s/^;//;
     }
     $deferred .= eval qq/"\\n\\t$init\\n"/;
@@ -1792,7 +1791,7 @@ sub Warn {
 
 sub blurt {
   Warn @_;
-  $errors ++
+  $errors++
 }
 
 sub death {
@@ -1974,58 +1973,6 @@ sub map_type {
     }
   }
   $type;
-}
-
-
-#########################################################
-package
-  ExtUtils::ParseXS::CountLines;
-use strict;
-our $SECTION_END_MARKER;
-
-sub TIEHANDLE {
-  my ($class, $cfile, $fh) = @_;
-  $cfile =~ s/\\/\\\\/g;
-  $SECTION_END_MARKER = qq{#line --- "$cfile"};
-
-  return bless {
-    buffer => '',
-    fh => $fh,
-    line_no => 1,
-  }, $class;
-}
-
-sub PRINT {
-  my $self = shift;
-  for (@_) {
-    $self->{buffer} .= $_;
-    while ($self->{buffer} =~ s/^([^\n]*\n)//) {
-      my $line = $1;
-      ++ $self->{line_no};
-      $line =~ s|^\#line\s+---(?=\s)|#line $self->{line_no}|;
-      print {$self->{fh}} $line;
-    }
-  }
-}
-
-sub PRINTF {
-  my $self = shift;
-  my $fmt = shift;
-  $self->PRINT(sprintf($fmt, @_));
-}
-
-sub DESTROY {
-  # Not necessary if we're careful to end with a "\n"
-  my $self = shift;
-  print {$self->{fh}} $self->{buffer};
-}
-
-sub UNTIE {
-  # This sub does nothing, but is neccessary for references to be released.
-}
-
-sub end_marker {
-  return $SECTION_END_MARKER;
 }
 
 1;

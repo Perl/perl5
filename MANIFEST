@@ -2972,9 +2972,10 @@ dist/ExtUtils-Manifest/lib/ExtUtils/Manifest.pm			Utilities to write MANIFEST fi
 dist/ExtUtils-Manifest/lib/ExtUtils/MANIFEST.SKIP		The default MANIFEST.SKIP
 dist/ExtUtils-Manifest/t/Manifest.t				See if ExtUtils::Manifest works
 dist/ExtUtils-ParseXS/Changes			ExtUtils::ParseXS change log
+dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS/CountLines.pm	ExtUtils::ParseXS guts
 dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS.pm	converts Perl XS code into C code
 dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS.pod	ExtUtils::ParseXS documentation
-dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS/Utilities.pm	ExtUtils::ParseXS guts
+dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS/Utilities.pm		ExtUtils::ParseXS guts
 dist/ExtUtils-ParseXS/lib/ExtUtils/xsubpp	External subroutine preprocessor
 dist/ExtUtils-ParseXS/t/001-basic.t		See if ExtUtils::ParseXS works
 dist/ExtUtils-ParseXS/t/002-more.t		Extended ExtUtils::ParseXS testing
