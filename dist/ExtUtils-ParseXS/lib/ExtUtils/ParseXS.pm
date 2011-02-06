@@ -10,6 +10,7 @@ use Symbol;
 use ExtUtils::ParseXS::Utilities qw(
   standard_typemap_locations
   trim_whitespace
+  tidy_type
 );
 
 our (@ISA, @EXPORT_OK, $VERSION);
@@ -175,7 +176,7 @@ sub process_file {
         next if /^$/ or /^#/;
         my($type,$kind, $proto) = /^\s*(.*?\S)\s+(\S+)\s*($proto_re*)\s*$/ or
           warn("Warning: File '$typemap' Line $. '$line' TYPEMAP entry needs 2 or 3 columns\n"), next;
-        $type = TidyType($type);
+        $type = tidy_type($type);
         $type_kind{$type} = $kind;
         # prototype defaults to '$'
         $proto = "\$" unless $proto;
@@ -472,7 +473,7 @@ EOF
     }
 
     # extract return type, function name and arguments
-    ($ret_type) = TidyType($_);
+    ($ret_type) = tidy_type($_);
     $RETVAL_no_return = 1 if $ret_type =~ s/^NO_OUTPUT\s+//;
 
     # Allow one-line ANSI-like declaration
@@ -1090,22 +1091,6 @@ EOF
 }
 
 sub errors { $errors }
-
-sub TidyType {
-  local ($_) = @_;
-
-  # rationalise any '*' by joining them into bunches and removing whitespace
-  s#\s*(\*+)\s*#$1#g;
-  s#(\*+)# $1 #g;
-
-  # change multiple whitespace into a single space
-  s/\s+/ /g;
-
-  # trim leading & trailing whitespace
-  trim_whitespace($_);
-
-  $_;
-}
 
 # Input:  ($_, @line) == unparsed input.
 # Output: ($_, @line) == (rest of line, following lines).
@@ -1815,7 +1800,7 @@ sub generate_init {
   local($ntype);
   local($tk);
 
-  $type = TidyType($type);
+  $type = tidy_type($type);
   blurt("Error: '$type' not in typemap"), return
     unless defined($type_kind{$type});
 
@@ -1894,7 +1879,7 @@ sub generate_output {
   local($argoff) = $num - 1;
   local($ntype);
 
-  $type = TidyType($type);
+  $type = tidy_type($type);
   if ($type =~ /^array\(([^,]*),(.*)\)/) {
     print "\t$arg = sv_newmortal();\n";
     print "\tsv_setpvn($arg, (char *)$var, $2 * sizeof($1));\n";
