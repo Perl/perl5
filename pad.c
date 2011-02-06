@@ -863,11 +863,35 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 	    if (namesv && namesv != &PL_sv_undef
 		    && strEQ(SvPVX_const(namesv), name))
 	    {
-		if (SvFAKE(namesv))
+		if (SvFAKE(namesv)) {
 		    fake_offset = offset; /* in case we don't find a real one */
-		else if (  seq >  COP_SEQ_RANGE_LOW(namesv)	/* min */
-			&& seq <= COP_SEQ_RANGE_HIGH(namesv))	/* max */
-		    break;
+		    continue;
+		}
+		/* is seq within the range _LOW to _HIGH ?
+		 * This is complicated by the fact that PL_cop_seqmax
+		 * may have wrapped around at some point */
+		if (COP_SEQ_RANGE_LOW(namesv) == PERL_PADSEQ_INTRO)
+		    continue; /* not yet introduced */
+
+		if (COP_SEQ_RANGE_HIGH(namesv) == PERL_PADSEQ_INTRO) {
+		    /* in compiling scope */
+		    if (
+			(seq >  COP_SEQ_RANGE_LOW(namesv))
+			? (seq - COP_SEQ_RANGE_LOW(namesv) < (U32_MAX >> 1))
+			: (COP_SEQ_RANGE_LOW(namesv) - seq > (U32_MAX >> 1))
+		    )
+		       break;
+		}
+		else if (
+		    (COP_SEQ_RANGE_LOW(namesv) > COP_SEQ_RANGE_HIGH(namesv))
+		    ?
+			(  seq >  COP_SEQ_RANGE_LOW(namesv)
+			|| seq <= COP_SEQ_RANGE_HIGH(namesv))
+
+		    :    (  seq >  COP_SEQ_RANGE_LOW(namesv)
+			 && seq <= COP_SEQ_RANGE_HIGH(namesv))
+		)
+		break;
 	    }
 	}
 
@@ -1161,6 +1185,7 @@ Perl_intro_my(pTHX)
     dVAR;
     SV **svp;
     I32 i;
+    U32 seq;
 
     ASSERT_CURPAD_ACTIVE("intro_my");
     if (! PL_min_intro_pending)
@@ -1183,12 +1208,16 @@ Perl_intro_my(pTHX)
 	    );
 	}
     }
+    seq = PL_cop_seqmax;
+    PL_cop_seqmax++;
+    if (PL_cop_seqmax == PERL_PADSEQ_INTRO) /* not a legal value */
+	PL_cop_seqmax++;
     PL_min_intro_pending = 0;
     PL_comppad_name_fill = PL_max_intro_pending; /* Needn't search higher */
     DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-		"Pad intromy: seq -> %ld\n", (long)(PL_cop_seqmax+1)));
+		"Pad intromy: seq -> %ld\n", (long)(PL_cop_seqmax)));
 
-    return PL_cop_seqmax++;
+    return seq;
 }
 
 /*
@@ -1235,6 +1264,8 @@ Perl_pad_leavemy(pTHX)
 	}
     }
     PL_cop_seqmax++;
+    if (PL_cop_seqmax == PERL_PADSEQ_INTRO) /* not a legal value */
+	PL_cop_seqmax++;
     DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 	    "Pad leavemy: seq = %ld\n", (long)PL_cop_seqmax));
 }
