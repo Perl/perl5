@@ -2320,11 +2320,11 @@ PP(pp_subst)
 		mPUSHi((I32)iters);
 	}
 	(void)SvPOK_only_UTF8(TARG);
+	if (doutf8)
+	    SvUTF8_on(TARG);
 	TAINT_IF(rxtainted);
 	SvSETMAGIC(TARG);
 	SvTAINT(TARG);
-	if (doutf8)
-	    SvUTF8_on(TARG);
 	LEAVE_SCOPE(oldsave);
 	RETURN;
     }
