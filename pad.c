@@ -78,7 +78,17 @@ in PL_op->op_targ), wasting a name SV for them doesn't make sense.
 
 The SVs in the names AV have their PV being the name of the variable.
 xlow+1..xhigh inclusive in the NV union is a range of cop_seq numbers for
-which the name is valid.  For typed lexicals name SV is SVt_PVMG and SvSTASH
+which the name is valid (assed through the macros COP_SEQ_RANGE_LOW and _HIGH).
+During compilation, these fields may hold the special value PERL_PADSEQ_INTRO
+to indicate various stages:
+
+   COP_SEQ_RANGE_LOW        _HIGH
+   -----------------        -----
+   PERL_PADSEQ_INTRO            0   variable not yet introduced:   { my ($x
+   valid-seq#   PERL_PADSEQ_INTRO   variable in scope:             { my ($x)
+   valid-seq#          valid-seq#   compilation of scope complete: { my ($x) }
+
+For typed lexicals name SV is SVt_PVMG and SvSTASH
 points at the type.  For C<our> lexicals, the type is also SVt_PVMG, with the
 SvOURSTASH slot pointing at the stash of the associated global (so that
 duplicate C<our> declarations in the same package can be detected).  SvUVX is
@@ -588,9 +598,10 @@ Perl_pad_add_anon(pTHX_ SV* sv, OPCODE op_type)
 
     pad_peg("add_anon");
     sv_setpvs(name, "&");
-    /* Are these two actually ever read? */
-    COP_SEQ_RANGE_HIGH_set(name, PERL_PADSEQ_INTRO);
-    COP_SEQ_RANGE_LOW_set(name, 1);
+    /* These two aren't used; just make sure they're not equal to
+     * PERL_PADSEQ_INTRO */
+    COP_SEQ_RANGE_LOW_set(name, 0);
+    COP_SEQ_RANGE_HIGH_set(name, 0);
     ix = pad_alloc(op_type, SVs_PADMY);
     av_store(PL_comppad_name, ix, name);
     /* XXX DAPM use PL_curpad[] ? */
@@ -648,8 +659,8 @@ S_pad_check_dup(pTHX_ SV *name, const U32 flags, const HV *ourstash)
 	if (sv
 	    && sv != &PL_sv_undef
 	    && !SvFAKE(sv)
-	    && (   COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO
-		|| COP_SEQ_RANGE_HIGH(sv) == 0)
+	    && (   COP_SEQ_RANGE_LOW(sv)  == PERL_PADSEQ_INTRO
+		|| COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO)
 	    && sv_eq(name, sv))
 	{
 	    if (is_our && (SvPAD_OUR(sv)))
@@ -671,8 +682,8 @@ S_pad_check_dup(pTHX_ SV *name, const U32 flags, const HV *ourstash)
 	    if (sv
 		&& sv != &PL_sv_undef
 		&& !SvFAKE(sv)
-		&& (   COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO
-		    || COP_SEQ_RANGE_HIGH(sv) == 0)
+		&& (   COP_SEQ_RANGE_LOW(sv)  == PERL_PADSEQ_INTRO
+		    || COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO)
 		&& SvOURSTASH(sv) == ourstash
 		&& sv_eq(name, sv))
 	    {
@@ -1159,7 +1170,9 @@ Perl_intro_my(pTHX)
     for (i = PL_min_intro_pending; i <= PL_max_intro_pending; i++) {
 	SV * const sv = svp[i];
 
-	if (sv && sv != &PL_sv_undef && !SvFAKE(sv) && !COP_SEQ_RANGE_HIGH(sv)) {
+	if (sv && sv != &PL_sv_undef && !SvFAKE(sv)
+	    && COP_SEQ_RANGE_LOW(sv) == PERL_PADSEQ_INTRO)
+	{
 	    COP_SEQ_RANGE_HIGH_set(sv, PERL_PADSEQ_INTRO); /* Don't know scope end yet. */
 	    COP_SEQ_RANGE_LOW_set(sv, PL_cop_seqmax);
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
