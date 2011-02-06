@@ -23,9 +23,6 @@ Nothing is exported.  Use fully qualified variable names.
 
 =cut
 
-our @XSStack      = ({type => 'none'});
-our $XSS_work_idx = 0;
-our $cpp_next_tmp = "XSubPPtmpAAAA";
 our @InitFileCode = ();
 our $FH           = Symbol::gensym();
 our $proto_re     = "[" . quotemeta('\$%&*@;[]') . "]";

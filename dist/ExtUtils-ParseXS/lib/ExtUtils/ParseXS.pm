@@ -9,12 +9,14 @@ use Exporter;
 use File::Basename;
 use File::Spec;
 use Symbol;
+use ExtUtils::ParseXS::Constants ();
 use ExtUtils::ParseXS::CountLines;
 use ExtUtils::ParseXS::Utilities qw(
   standard_typemap_locations
   trim_whitespace
   tidy_type
   C_string
+  valid_proto_string
 );
 
 our (@ISA, @EXPORT_OK, $VERSION);
@@ -24,9 +26,6 @@ $VERSION = '3';
 $VERSION = eval $VERSION if $VERSION =~ /_/;
 
 # use strict;  # One of these days ...
-
-my(@XSStack);    # Stack of conditionals and INCLUDEs
-my($XSS_work_idx, $cpp_next_tmp);
 
 our (
   $ProtoUsed, @InitFileCode, $FH, $proto_re, $Overload, $errors, $Fallback, 
@@ -40,7 +39,7 @@ our (
   @line_no, $ret_type, $func_name, $Full_func_name, $Packprefix, $Packid,  
   %XsubAliases, %XsubAliasValues, %Interfaces, @Attributes, %outargs, $pname,
   $thisdone, $retvaldone, $deferred, $gotRETVAL, $condnum, $cond,
-  $RETVAL_code, $name_printed, $func_args, 
+  $RETVAL_code, $name_printed, $func_args, @XSStack, 
 );
 #our $DoSetMagic;
 
@@ -79,13 +78,14 @@ sub process_file {
     $SymSet = new ExtUtils::XSSymSet 28;
   }
   @XSStack = ({type => 'none'});
-  ($XSS_work_idx, $cpp_next_tmp) = (0, "XSubPPtmpAAAA");
-  @InitFileCode = ();
-  $FH = Symbol::gensym();
-  $proto_re = "[" . quotemeta('\$%&*@;[]_') . "]";
-  $Overload = 0;
-  $errors = 0;
-  $Fallback = '&PL_sv_undef';
+  my $XSS_work_idx = 0;
+  my $cpp_next_tmp = 'XSubPPtmpAAAA';
+  @InitFileCode = @ExtUtils::ParseXS::Constants::InitFileCode;
+  $FH           = $ExtUtils::ParseXS::Constants::FH;
+  $proto_re     = $ExtUtils::ParseXS::Constants::proto_re;
+  $Overload     = $ExtUtils::ParseXS::Constants::Overload;
+  $errors       = $ExtUtils::ParseXS::Constants::errors;
+  $Fallback     = $ExtUtils::ParseXS::Constants::Fallback;
 
   # Most of the 1500 lines below uses these globals.  We'll have to
   # clean this up sometime, probably.  For now, we just pull them out
@@ -181,7 +181,7 @@ sub process_file {
         # prototype defaults to '$'
         $proto = "\$" unless $proto;
         warn("Warning: File '$typemap' Line $. '$line' Invalid prototype '$proto'\n")
-          unless ValidProtoString($proto);
+          unless valid_proto_string($proto);
         $proto_letter{$type} = C_string($proto);
       }
       elsif (/^\s/) {
@@ -1433,7 +1433,7 @@ sub PROTOTYPE_handler () {
       # remove any whitespace
       s/\s+//g;
       death("Error: Invalid prototype '$_'")
-        unless ValidProtoString($_);
+        unless valid_proto_string($_);
       $ProtoThisXSUB = C_string($_);
     }
   }
@@ -1633,16 +1633,6 @@ sub PopFile() {
 EOF
 
   return 1;
-}
-
-sub ValidProtoString ($) {
-  my($string) = @_;
-
-  if ( $string =~ /^$proto_re+$/ ) {
-    return $string;
-  }
-
-  return 0;
 }
 
 sub ProtoString ($) {

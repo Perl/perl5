@@ -3,6 +3,8 @@ use strict;
 use warnings;
 use Exporter;
 use File::Spec;
+use lib qw( lib );
+use ExtUtils::ParseXS::Constants ();
 our (@ISA, @EXPORT_OK);
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(
@@ -10,6 +12,7 @@ our (@ISA, @EXPORT_OK);
   trim_whitespace
   tidy_type
   C_string
+  valid_proto_string
 );
 
 =head1 NAME
@@ -208,4 +211,35 @@ sub C_string {
   $string;
 }
 
+=head2 C<valid_proto_string()>
+
+=over 4
+
+=item * Purpose
+
+Validate prototype string.
+
+=item * Arguments
+
+String needing checking.
+
+=item * Return Value
+
+Upon success, returns the same string passed as argument.
+
+Upon failure, returns C<0>.
+
+=back
+
+=cut
+
+sub valid_proto_string {
+  my($string) = @_;
+
+  if ( $string =~ /^$ExtUtils::ParseXS::Constants::proto_re+$/ ) {
+    return $string;
+  }
+
+  return 0;
+}
 1;
