@@ -2974,11 +2974,11 @@ dist/ExtUtils-Manifest/t/Manifest.t				See if ExtUtils::Manifest works
 dist/ExtUtils-ParseXS/Changes			ExtUtils::ParseXS change log
 dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS.pm	converts Perl XS code into C code
 dist/ExtUtils-ParseXS/lib/ExtUtils/xsubpp	External subroutine preprocessor
-dist/ExtUtils-ParseXS/t/basic.t			See if ExtUtils::ParseXS works
+dist/ExtUtils-ParseXS/t/001-basic.t		See if ExtUtils::ParseXS works
+dist/ExtUtils-ParseXS/t/002-more.t		Extended ExtUtils::ParseXS testing
+dist/ExtUtils-ParseXS/t/003-usage.t		ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/lib/IncludeTester.pm	ExtUtils::ParseXS testing utility
-dist/ExtUtils-ParseXS/t/more.t			Extended ExtUtils::ParseXS testing
 dist/ExtUtils-ParseXS/t/typemap			Standard typemap for controlled testing
-dist/ExtUtils-ParseXS/t/usage.t			ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSInclude.xsh		Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSMore.xs		Test file for ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSTest.pm		Test file for ExtUtils::ParseXS tests
