@@ -78,9 +78,9 @@ in PL_op->op_targ), wasting a name SV for them doesn't make sense.
 
 The SVs in the names AV have their PV being the name of the variable.
 xlow+1..xhigh inclusive in the NV union is a range of cop_seq numbers for
-which the name is valid (assed through the macros COP_SEQ_RANGE_LOW and _HIGH).
-During compilation, these fields may hold the special value PERL_PADSEQ_INTRO
-to indicate various stages:
+which the name is valid (accessed through the macros COP_SEQ_RANGE_LOW and
+_HIGH).  During compilation, these fields may hold the special value
+PERL_PADSEQ_INTRO to indicate various stages:
 
    COP_SEQ_RANGE_LOW        _HIGH
    -----------------        -----
