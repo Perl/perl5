@@ -702,3 +702,11 @@ __END__
 >%#x<		>0<	>0<
 >%2147483647$v2d<	>''<	><
 >%*2147483647$v2d<	>''<	> MISSING<
+>%.3X<		>[11]<			>00B<		>perl #83194: hex, zero-padded to 3 places<
+>%.*X<		>[3, 11]<		>00B<		>perl #83194: dynamic precision<
+>%vX<		>['012']<		>30.31.32<	>perl #83194: vector flag<
+>%*vX<		>[':', '012']<		>30:31:32<	>perl #83194: vector flag + custom separator<
+>%v.3X<		>['012']<		>030.031.032<	>perl #83194: vector flag + static precision<
+>%v.*X<		>[3, '012']<		>030.031.032<	>perl #83194: vector flag + dynamic precision<
+>%*v.3X<	>[':', '012']<		>030:031:032<	>perl #83194: vector flag + custom separator + static precision<
+>%*v.*X<	>[':', 3, '012']<	>030:031:032<	>perl #83194: vector flag + custom separator + dynamic precision<
