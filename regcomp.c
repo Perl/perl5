@@ -5869,7 +5869,7 @@ S_invlist_trim(pTHX_ HV* const invlist)
 
 #ifndef PERL_IN_XSUB_RE
 void
-Perl__append_range_to_invlist(pTHX_ HV* invlist, const UV start, const UV end)
+Perl__append_range_to_invlist(pTHX_ HV* const invlist, const UV start, const UV end)
 {
    /* Subject to change or removal.  Append the range from 'start' to 'end' at
     * the end of the inversion list.  The range must be above any existing

@@ -28,7 +28,7 @@ PERL_CALLCONV void	Perl__append_range_to_invlist(pTHX_ HV* const invlist, const 
 #define PERL_ARGS_ASSERT__APPEND_RANGE_TO_INVLIST	\
 	assert(invlist)
 
-PERL_CALLCONV HV*	Perl__new_invlist(pTHX_ const IV initial_size)
+PERL_CALLCONV HV*	Perl__new_invlist(pTHX_ IV initial_size)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV HV*	Perl__swash_inversion_hash(pTHX_ SV* const swash)
