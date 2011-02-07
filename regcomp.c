@@ -9922,15 +9922,11 @@ parseit:
 	ANYOF_FLAGS(ret) = ANYOF_UTF8|ANYOF_UNICODE_ALL;
     }
 
-    if (FOLD) {
-
-	/* Folding in the bitmap is taken care of above, but not for locale
-	 * (for which we have to wait to see what folding is in effect at
-	 * runtime), and for things not in the bitmap.  Set run-time fold flag
-	 * for these */
-	if ((LOC || (ANYOF_FLAGS(ret) & ANYOF_NONBITMAP))) {
-	    ANYOF_FLAGS(ret) |= ANYOF_LOC_NONBITMAP_FOLD;
-	}
+    /* Folding in the bitmap is taken care of above, but not for locale (for
+     * which we have to wait to see what folding is in effect at runtime), and
+     * for things not in the bitmap.  Set run-time fold flag for these */
+    if (FOLD && (LOC || (ANYOF_FLAGS(ret) & ANYOF_NONBITMAP))) {
+	ANYOF_FLAGS(ret) |= ANYOF_LOC_NONBITMAP_FOLD;
     }
 
     /* A single character class can be "optimized" into an EXACTish node.
