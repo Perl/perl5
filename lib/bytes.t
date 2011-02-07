@@ -1,11 +1,5 @@
-
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-    require './test.pl';
-}
-
-plan tests => 20;
+use Test::More tests => 20;
+use Test::PerlRun;
 
 my $a = chr(0x100);
 
@@ -59,7 +53,7 @@ my $c = chr(0x100);
 }
 
 {
-    fresh_perl_like ('use bytes; bytes::moo()',
-		     qr/Undefined subroutine bytes::moo/, {stderr=>1},
-		    "Check Carp is loaded for AUTOLOADing errors")
+    perlrun_stderr_like ('use bytes; bytes::moo()',
+			 qr/Undefined subroutine bytes::moo/,
+			 "Check Carp is loaded for AUTOLOADing errors")
 }
