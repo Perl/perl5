@@ -3,9 +3,6 @@
 my $has_perlio;
 
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-    require './test.pl';
     unless ($has_perlio = find PerlIO::Layer 'perlio') {
 	print <<EOF;
 # Since you don't have perlio you might get failures with UTF-8 locales.
@@ -16,6 +13,10 @@ EOF
 use strict;
 use warnings;
 no utf8; # Ironic, no?
+
+use Test::More;
+use Test::PerlRun;
+use File::Temp;
 
 # NOTE!
 #
@@ -121,8 +122,8 @@ no utf8; # Ironic, no?
                  1;
                 );
     eval $show or die $@; # We don't expect this sub definition to fail.
-    my $progfile = 'utf' . $$;
-    END {unlink_all $progfile}
+    my $progfile = File::Temp->new();
+    $progfile->close(); # else the mandatory locking on a certain OS bites us.
 
     # If I'm right 60 is '>' in ASCII, ' ' in EBCDIC
     # 173 is not punctuation in either ASCII or EBCDIC
@@ -163,7 +164,9 @@ no utf8; # Ironic, no?
              # or q()] to get the best explosion.
              ["!Feed malformed utf8 into perl.", <<"BANG",
     use utf8; %a = ("\xE1\xA0"=>"sterling");
-    print 'start'; printf '%x,', ord \$_ foreach keys %a; print "end\n";
+    print STDERR 'start';
+    printf STDERR '%x,', ord \$_ foreach keys %a;
+    print STDERR "end\n";
 BANG
 	      qr/^Malformed UTF-8 character \(\d bytes?, need \d, .+\).*start\d+,end$/sm
 	     ],
@@ -177,11 +180,11 @@ BANG
         close P or die "Can't close '$progfile': $!";
         if ($why =~ s/^!//) {
             print "# Possible delay...\n";
+	    perlrun_stderr_like({file => $progfile}, $expect, $why);
         } else {
             print "# $prog\n";
+	    perlrun_stdout_like({file => $progfile}, $expect, $why);
         }
-        my $result = runperl ( stderr => 1, progfile => $progfile );
-        like ($result, $expect, $why);
     }
     print
         "# Again! Again! [but this time as eval, and not the explosive one]\n";
@@ -271,7 +274,7 @@ BANG
 #
 SKIP: {
     skip("Embedded UTF-8 does not work in EBCDIC", 1) if ord("A") == 193;
-    ok('' eq runperl(prog => <<'CODE'), "change #17928");
+    perlrun_stdout_is(<<'CODE', '', "change #17928");
 	my $code = qq{ my \$\xe3\x83\x95\xe3\x83\xbc = 5; };
     {
 	use utf8;
@@ -448,11 +451,9 @@ SKIP: {
     is($b, $a, "utf8::upgrade OffsetOK");
 }
 
-{
-    fresh_perl_like ('use utf8; utf8::moo()',
-		     qr/Undefined subroutine utf8::moo/, {stderr=>1},
-		    "Check Carp is loaded for AUTOLOADing errors")
-}
+perlrun_stderr_like('use utf8; utf8::moo()',
+		    qr/Undefined subroutine utf8::moo/,
+		    "Check Carp is loaded for AUTOLOADing errors");
 
 {
     # failure of is_utf8_char() without NATIVE_TO_UTF on EBCDIC (0260..027F)
