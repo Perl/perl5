@@ -9902,6 +9902,11 @@ parseit:
 	invlist_destroy(nonbitmap);
     }
 
+    /* Here, we have calculated what code points should be in the character
+     * class.   Now we can see about various optimizations.  Fold calculation
+     * needs to take place before inversion.  Otherwise /[^k]/i would invert to
+     * include K, which under /i would match k. */
+
     /* Optimize inverted simple patterns (e.g. [^a-z]).  Note that we haven't
      * set the FOLD flag yet, so this this does optimize those.  It doesn't
      * optimize locale.  Doing so perhaps could be done as long as there is
