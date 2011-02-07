@@ -9790,8 +9790,31 @@ parseit:
 			 * these multicharacter foldings, to be later saved as
 			 * part of the additional "s" data. */
 			if (! RExC_in_lookbehind) {
-			    /* XXX Discard this fold if any are latin1 and LOC */
 			    SV *sv;
+			    U8* loc = foldbuf;
+			    U8* e = foldbuf + foldlen;
+
+			    /* If any of the folded characters of this are in
+			     * the Latin1 range, tell the regex engine that
+			     * this can match a non-utf8 target string.  The
+			     * multi-byte fold whose source is in the
+			     * Latin1 range (U+00DF) applies only when the
+			     * target string is utf8, or under unicode rules */
+			    if (j > 255 || AT_LEAST_UNI_SEMANTICS) {
+				while (loc < e) {
+				    /* XXX Discard this fold if any are latin1
+				     * and LOC */
+				    if (UTF8_IS_INVARIANT(*loc)
+					|| UTF8_IS_DOWNGRADEABLE_START(*loc))
+				    {
+					ANYOF_FLAGS(ret)
+						|= ANYOF_NONBITMAP_NON_UTF8;
+					break;
+				    }
+				    loc += UTF8SKIP(loc);
+				}
+			    }
+			    ANYOF_FLAGS(ret) |= ANYOF_UTF8;
 
 			    if (!unicode_alternate) {
 				unicode_alternate = newAV();
@@ -9801,7 +9824,6 @@ parseit:
 
 			    /* This node is variable length */
 			    OP(ret) = ANYOFV;
-			    ANYOF_FLAGS(ret) |= ANYOF_UTF8;
 			}
 		    }
 		    else { /* Single character fold */
