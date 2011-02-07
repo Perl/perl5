@@ -1,34 +1,22 @@
 #!./perl
 
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-    require './test.pl';
-}
-
 use strict;
 use warnings;
+
+use Test::More;
+use Test::PerlRun;
 use Config;
 
 BEGIN {
-    if (! -c "/dev/null") {
-        print "1..0 # Skip: no /dev/null\n";
-        exit 0;
-    }
+    plan(skip_all => 'no /dev/null') unless -c '/dev/null';
 
-    my $dev_tty = '/dev/tty';
-    $dev_tty = 'TT:' if ($^O eq 'VMS');
-    if (! -c $dev_tty) {
-        print "1..0 # Skip: no $dev_tty\n";
-        exit 0;
-    }
-    if ($ENV{PERL5DB}) {
-        print "1..0 # Skip: \$ENV{PERL5DB} is already set to '$ENV{PERL5DB}'\n";
-        exit 0;
-    }
+    my $dev_tty = $^O eq 'VMS' ? 'TT:' : '/dev/tty';
+    plan(skip_all => "no $dev_tty") unless -c $dev_tty;
+    plan(skip_all => "\$ENV{PERL5DB} is already set to '$ENV{PERL5DB}'")
+        if $ENV{PERL5DB};
 }
 
-plan(11);
+plan(tests => 13);
 
 my $rc_filename = '.perldb';
 
@@ -89,7 +77,7 @@ EOF
 
     {
         local $ENV{PERLDB_OPTS} = "ReadLine=0";
-        runperl(switches => [ '-d' ], progfile => $target);
+        perlrun_stdout_is({switches => [ '-d' ], file => $target}, '');
     }
 }
 
@@ -99,34 +87,36 @@ like(_out_contents(), qr/sub factorial/,
 
 {
     local $ENV{PERLDB_OPTS} = "ReadLine=0";
-    my $output = runperl(switches => [ '-d' ], progfile => '../lib/perl5db/t/lvalue-bug');
-    like($output, qr/foo is defined/, 'lvalue subs work in the debugger');
+    perlrun_stdout_like({switches => [ '-d' ],
+			 file => '../lib/perl5db/t/lvalue-bug'},
+			qr/foo is defined/,
+			'lvalue subs work in the debugger');
 }
 
 {
     local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
-    my $output = runperl(switches => [ '-d' ], progfile => '../lib/perl5db/t/symbol-table-bug');
-    like($output, qr/Undefined symbols 0/, 'there are no undefined values in the symbol table');
+    perlrun_stdout_like({switches => [ '-d' ],
+			 file => '../lib/perl5db/t/symbol-table-bug'},
+			qr/Undefined symbols 0/,
+			'there are no undefined values in the symbol table');
 }
 
 SKIP: {
-    if ( $Config{usethreads} ) {
-        skip('This perl has threads, skipping non-threaded debugger tests');
-    } else {
-        my $error = 'This Perl not built to support threads';
-        my $output = runperl( switches => [ '-dt' ], stderr => 1 );
-        like($output, qr/$error/, 'Perl debugger correctly complains that it was not built with threads');
-    }
-
+    skip('This perl has threads, skipping non-threaded debugger tests', 1)
+	if $Config{usethreads};
+    perlrun_stderr_like({switches => '-dt', code => 0},
+			qr/This Perl not built to support threads/,
+			'Perl debugger correctly complains that it was not built with threads');
 }
+
 SKIP: {
-    if ( $Config{usethreads} ) {
-        local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
-        my $output = runperl(switches => [ '-dt' ], progfile => '../lib/perl5db/t/symbol-table-bug');
-        like($output, qr/Undefined symbols 0/, 'there are no undefined values in the symbol table when running with thread support');
-    } else {
-        skip("This perl is not threaded, skipping threaded debugger tests");
-    }
+    skip('This perl is not threaded, skipping threaded debugger tests', 1)
+	unless $Config{usethreads};
+    local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
+    perlrun_stdout_like({switches => '-dt',
+			 file => '../lib/perl5db/t/symbol-table-bug'},
+			 qr/Undefined symbols 0/,
+			 'there are no undefined values in the symbol table when running with thread support');
 }
 
 
@@ -145,7 +135,9 @@ SKIP: {
 EOF
     );
 
-    my $output = runperl(switches => [ '-d' ], stderr => 1, progfile => '../lib/perl5db/t/rt-61222');
+    perlrun_exit_status_is({switches => '-d',
+			    file => '../lib/perl5db/t/rt-61222'},
+			   0, 'Program exits cleanly');
     unlike(_out_contents(), qr/INCORRECT/, "[perl #61222]");
 }
 
@@ -168,8 +160,9 @@ sub afterinit {
 EOF
     );
 
-    my $output = runperl(switches => [ '-d' ], stderr => 1, progfile => '../lib/perl5db/t/proxy-constants');
-    is($output, "", "proxy constant subroutines");
+    perlrun_stderr_is({switches => '-d',
+		      file => '../lib/perl5db/t/proxy-constants'},
+		      '', 'proxy constant subroutines');
 }
 
 # Testing that we can set a line in the middle of the file.
@@ -189,9 +182,9 @@ sub afterinit {
 }
 EOF
 
-    my $output = runperl(switches => [ '-d', '-I', '../lib/perl5db/t', ], stderr => 1, progfile => '../lib/perl5db/t/filename-line-breakpoint');
-
-    like($output, qr/
+    perlrun_stdout_like({switches => ['-d', '-I', '../lib/perl5db/t'],
+			 file => '../lib/perl5db/t/filename-line-breakpoint'},
+			qr/
         ^Var=Bar$
             .*
         ^In\ MyModule\.$
@@ -199,25 +192,25 @@ EOF
         ^In\ Main\ File\.$
             .*
         /msx,
-        "Can set breakpoint in a line in the middle of the file.");
+			'Can set breakpoint in a line in the middle of the file.');
 }
 
 
 # [perl #66110] Call a subroutine inside a regex
 {
     local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
-    my $output = runperl(switches => [ '-d' ], stderr => 1, progfile => '../lib/perl5db/t/rt-66110');
-    like($output, "All tests successful.", "[perl #66110]");
+    perlrun_stdout_like({switches => '-d',
+			 file => '../lib/perl5db/t/rt-66110'},
+			qr/All tests successful/, '[perl #66110]');
 }
 
 # taint tests
 
 {
     local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
-    my $output = runperl(switches => [ '-d', '-T' ], stderr => 1,
-        progfile => '../lib/perl5db/t/taint');
-    chomp $output if $^O eq 'VMS'; # newline guaranteed at EOF
-    is($output, '[$^X][done]', "taint");
+    perlrun_stdout_like({switches => [ '-d', '-T', '-I../lib' ],
+			 file => '../lib/perl5db/t/taint'},
+			qr/^\[\$\^X]\[done]$/, "taint");
 }
 
 # Testing that we can set a breakpoint
@@ -237,12 +230,12 @@ sub afterinit {
 }
 EOF
 
-    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/breakpoint-bug');
-
-    like($output, qr/
+    perlrun_stdout_like({switches => '-d',
+			file => '../lib/perl5db/t/breakpoint-bug'},
+			qr/
         X=\{Two\}
         /msx,
-        "Can set breakpoint in a line.");
+			'Can set breakpoint in a line.');
 }
 
 
