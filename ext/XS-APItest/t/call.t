@@ -6,12 +6,10 @@
 use warnings;
 use strict;
 
-# Test::More doesn't have fresh_perl_is() yet
-# use Test::More tests => 342;
+use Test::More tests => 436;
+use Test::PerlRun;
 
 BEGIN {
-    require '../../t/test.pl';
-    plan(436);
     use_ok('XS::APItest')
 };
 
@@ -271,7 +269,7 @@ for my $fn_type (0..2) { #   0:eval_pv   1:eval_sv   2:call_sv
 	    }
 	    else {
 		is($warn_msg, undef, "$desc - __WARN__ not called");
-		unlike($@, 'pre-err', "$desc - \$@ modified");
+		unlike($@, qr/pre-err/, "$desc - \$@ modified");
 	    }
 	    like($@,
 		(
@@ -289,7 +287,7 @@ for my $fn_type (0..2) { #   0:eval_pv   1:eval_sv   2:call_sv
 # a new jump level but before pushing an eval context, leading to
 # stack corruption
 
-fresh_perl_is(<<'EOF', "x=2", { switches => ['-T', '-I../../lib'] }, 'eval_sv() taint');
+perlrun_stdout_is({ file => '-', stdin => <<'EOF', switches => ['-T', '-I../../lib'] }, "x=2\n", 'eval_sv() taint');
 use XS::APItest;
 
 my $x = 0;
