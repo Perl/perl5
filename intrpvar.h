@@ -475,7 +475,16 @@ PERLVAR(Ieuid,		Uid_t)		/* current effective user id */
 PERLVAR(Igid,		Gid_t)		/* current real group id */
 PERLVAR(Iegid,		Gid_t)		/* current effective group id */
 PERLVARI(Ian,		U32,	0)	/* malloc sequence number */
-PERLVARI(Icop_seqmax,	U32,	0)	/* statement sequence number */
+
+#ifdef DEBUGGING
+    /* exercise wrap-around */
+    #define PERL_COP_SEQMAX (U32_MAX-50)
+#else
+    #define PERL_COP_SEQMAX 0
+#endif
+PERLVARI(Icop_seqmax,	U32,	PERL_COP_SEQMAX) /* statement sequence number */
+#undef PERL_COP_SEQMAX
+
 PERLVARI(Ievalseq,	U32,	0)	/* eval sequence number */
 PERLVAR(Iorigalen,	U32)
 PERLVAR(Iorigenviron,	char **)
