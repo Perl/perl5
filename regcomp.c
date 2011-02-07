@@ -3105,11 +3105,29 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    && (!(data->start_class->flags & ANYOF_LOC_NONBITMAP_FOLD)
 			|| !ANYOF_BITMAP_TEST(data->start_class, PL_fold_latin1[uc])))
                     )
+		{
 		    compat = 0;
+		}
 		ANYOF_CLASS_ZERO(data->start_class);
 		ANYOF_BITMAP_ZERO(data->start_class);
 		if (compat)
 		    ANYOF_BITMAP_SET(data->start_class, uc);
+		else if (uc >= 0x100) {
+		    int i;
+
+		    /* Some Unicode code points fold to the Latin1 range; as
+		     * XXX temporary code, instead of figuring out if this is
+		     * one, just assume it is and set all the start class bits
+		     * that could be some such above 255 code point's fold
+		     * which will generate fals positives.  As the code
+		     * elsewhere that does compute the fold settles down, it
+		     * can be extracted out and re-used here */
+		    for (i = 0; i < 256; i++){
+			if (_HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(i)) {
+			    ANYOF_BITMAP_SET(data->start_class, i);
+			}
+		    }
+		}
 		data->start_class->flags &= ~ANYOF_EOS;
 		if (uc < 0x100)
 		  data->start_class->flags &= ~ANYOF_UNICODE_ALL;
@@ -3168,6 +3186,14 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			 * the full latin1 fold.  (Can't do this for locale,
 			 * because not known until runtime */
 			ANYOF_BITMAP_SET(data->start_class, PL_fold_latin1[uc]);
+		    }
+		}
+		else if (uc >= 0x100) {
+		    int i;
+		    for (i = 0; i < 256; i++){
+			if (_HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(i)) {
+			    ANYOF_BITMAP_SET(data->start_class, i);
+			}
 		    }
 		}
 	    }
