@@ -131,4 +131,26 @@ is(
     'No signal'
 );
 
+( $stdout, $stderr, $status, $signal )
+    = perlrun({ args => [qw(perl rules)],
+                switches => q{-l},
+		code => q{print foreach @ARGV}});
+
+is(
+    $stdout, "perl\nrules\n",
+    'perlrun() feeds to STDIN'
+);
+is(
+    $stderr, "",
+    'No errors'
+);
+is(
+    $status, 0,
+    'Clean exit'
+);
+is(
+    $signal, undef,
+    'No signal'
+);
+
 done_testing();

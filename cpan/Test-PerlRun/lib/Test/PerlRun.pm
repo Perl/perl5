@@ -88,6 +88,7 @@ sub perlrun {
         else {
             push @args, $p->{file};
         }
+        push @args, @{$p->{args}} if $p->{args};
         my $perl = _which_perl();
 
         my $err_file;
@@ -296,6 +297,10 @@ C<-C>.
 Data to feed to stdin of the spawned process. By declaring a I<file> of C<->
 and using I<stdin> you can execute complex code without needing to create a
 temporary file.
+
+=item * args
+
+A reference to an array of arguments to pass to the spawned program.
 
 =back
 
