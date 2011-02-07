@@ -9918,32 +9918,6 @@ parseit:
     }
 
     if (FOLD) {
-	SV *sv;
-
-	/* This is the one character in the bitmap that needs special handling
-	 * under non-locale folding, as it folds to two characters 'ss'.  This
-	 * happens if it is set and not inverting, or isn't set and are
-	 * inverting (disallowed in lookbehind patterns because they can't be
-	 * variable length) */
-	if (! LOC
-	    && ! RExC_in_lookbehind
-	    && (cBOOL(ANYOF_BITMAP_TEST(ret, LATIN_SMALL_LETTER_SHARP_S))
-		^ cBOOL(ANYOF_FLAGS(ret) & ANYOF_INVERT)))
-	{
-	    OP(ret) = ANYOFV;	/* Can match more than a single char */
-
-	    /* Under Unicode semantics), it can do this when the target string
-	     * isn't in utf8 */
-	    if (UNI_SEMANTICS) {
-		ANYOF_FLAGS(ret) |= ANYOF_NONBITMAP_NON_UTF8;
-	    }
-
-	    if (!unicode_alternate) {
-		unicode_alternate = newAV();
-	    }
-	    sv = newSVpvn_utf8("ss", 2, TRUE);
-	    av_push(unicode_alternate, sv);
-	}
 
 	/* Folding in the bitmap is taken care of above, but not for locale
 	 * (for which we have to wait to see what folding is in effect at
