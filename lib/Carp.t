@@ -1,19 +1,14 @@
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-    require './test.pl';
-}
-
 use warnings;
 no warnings "once";
+
+use Test::More tests => 61;
+use Test::PerlRun qw(perlrun perlrun_stderr_like);
 
 my $Is_VMS = $^O eq 'VMS';
 
 use Carp qw(carp cluck croak confess);
 
 BEGIN {
-    plan tests => 57;
-
     # This test must be run at BEGIN time, because code later in this file
     # sets CORE::GLOBAL::caller
     ok !exists $CORE::GLOBAL::{caller},
@@ -278,19 +273,20 @@ sub w { cluck @_ }
     local $TODO = "VMS exit status semantics don't work this way" if $Is_VMS;
 
     # Check that croak() and confess() don't clobber $!
-    runperl(
-        prog   => 'use Carp; $@=q{Phooey}; $!=42; croak(q{Dead})',
-        stderr => 1
+    my ($stdout, $stderr, $status) = perlrun(
+        'use Carp; $@=q{Phooey}; $!=42; croak(q{Dead})'
     );
+    is( $status, 42, 'croak() doesn\'t clobber $!' );
+    like( $stderr, qr/\ADead at/, 'expected stderr' );
+    is( $stdout, '', 'no stdout' );
 
-    is( $? >> 8, 42, 'croak() doesn\'t clobber $!' );
 
-    runperl(
-        prog   => 'use Carp; $@=q{Phooey}; $!=42; confess(q{Dead})',
-        stderr => 1
+    ($stdout, $stderr, $status) = perlrun(
+        'use Carp; $@=q{Phooey}; $!=42; confess(q{Dead})',
     );
-
-    is( $? >> 8, 42, 'confess() doesn\'t clobber $!' );
+    is( $status, 42, 'confess() doesn\'t clobber $!' );
+    like( $stderr, qr/\ADead at/, 'expected stderr' );
+    is( $stdout, '', 'no stdout' );
 }
 
 # undef used to be incorrectly reported as the string "undef"
@@ -379,14 +375,13 @@ like(
 
 # UTF8-flagged strings should not cause Carp to try to load modules (even
 # implicitly via utf8_heavy.pl) after a syntax error [perl #82854].
-fresh_perl_like(
+perlrun_stderr_like(
  q<
    use utf8; use strict; use Carp;
    BEGIN { $SIG{__DIE__} = sub { Carp::croak "aaaaa$_[0]" } }
    $c
   >,
  qr/aaaaa/,
- {stderr=>1},
  'Carp can handle UTF8-flagged strings after a syntax error',
 );
 
