@@ -246,6 +246,8 @@ sub _scan_test {
 		    $testswitch = $testswitch . ',NC';
 		}
 	    }
+	} elsif ($test =~ m!^\.\./lib!) {
+	    $testswitch = '-I.. -MTestInit=U1'; # -T will remove . from @INC
 	} else {
 	    $testswitch = '-I.. -MTestInit';  # -T will remove . from @INC
 	}
