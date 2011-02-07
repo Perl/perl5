@@ -6,7 +6,7 @@ use warnings;
 use File::Spec;
 use Test::Builder;
 use File::Temp;
-use POSIX ':sys_wait_h';
+use POSIX qw(_exit :sys_wait_h);
 
 use base 'Exporter';
 
@@ -71,7 +71,7 @@ sub perlrun {
     my $use_backticks = $^O eq 'MSWin32';
 
     sub _run {
-        my $p = ref $_[0] ? shift : { code => shift };
+        my $p = ref $_[0] ? shift : { stdin => shift, file => '-' };
         my $capture_stderr = shift;
 
         die "You cannot run a command without some Perl code to execute"
@@ -101,16 +101,41 @@ sub perlrun {
         local $/;
         if ($use_backticks) {
             $perl = qq{"$perl"} if $perl =~ /\s/;
+            my $stdin;
+            if (exists $p->{stdin}) {
+                $stdin = File::Temp->new();
+                $stdin->print($p->{stdin}) && $stdin->close()
+                    or die "Can't write data for stdin to $stdin: $!";
+                unshift @args, "<$stdin";
+            }
             push @args, "2>$err_file" if $err_file;
             $stdout = `$perl @args`;
         } else {
             my $fh;
-            if ($capture_stderr) {
+            if ($capture_stderr || exists $p->{stdin}) {
                 my $pid = open $fh, '-|';
                 die "Can't fork by opening -|" unless defined $pid;
                 if ($pid == 0) {
                     # We are in the child
-                    open STDERR, '>&=', $err_file or die "Can't redirect STDERR: $!";
+
+                    if (exists $p->{stdin}) {
+                        # Spawn a grandchild to provide the contents of stdin.
+                        # As easy as a tempfile, and no files to fail to clean
+                        $pid = open STDIN, '-|';
+                        die "Can't fork by opening -|" unless defined $pid;
+                        if ($pid == 0) {
+                            # We are in the grandchild
+                            print $p->{stdin};
+                            close STDOUT;
+                            _exit(0);
+                        }
+                    }
+
+                    if ($capture_stderr) {
+                        open STDERR, '>&=', $err_file
+                            or die "Can't redirect STDERR: $!";
+                    }
+
                     exec $perl, @args;
                     die "exec failed: $!";
                 }
@@ -244,13 +269,16 @@ All the functions that this module provides accept the same first
 argument. This can be either a scalar containing Perl code to run, or a hash
 reference.
 
+If you pass a scalar, the contents are passed as STDIN of the spawned F<perl>.
 If you pass a hash reference, you can use the following keys:
 
 =over 4
 
 =item * code
 
-This should be a string of code to run.
+This should be a string of code to run. It is passed to the spawned F<perl> on
+its command line using C<-e>, so avoid newlines and double quotes in the
+string if you need to be portable to Win32
 
 =item * file
 
@@ -262,6 +290,12 @@ C<file> parameters.
 This can either be a scalar or an array reference of scalars. Each scalar
 should be a switch that will be passed to the F<perl> command, like C<-T> or
 C<-C>.
+
+=item * stdin
+
+Data to feed to stdin of the spawned process. By declaring a I<file> of C<->
+and using I<stdin> you can execute complex code without needing to create a
+temporary file.
 
 =back
 
