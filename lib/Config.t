@@ -1,12 +1,9 @@
 #!./perl -w
 
+use Test::More;
+use Test::PerlRun 'perlrun';
+
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-    require "./test.pl";
-
-    plan ('no_plan');
-
     use_ok('Config');
 }
 
@@ -14,7 +11,7 @@ use strict;
 
 # Some (safe?) bets.
 
-ok(keys %Config > 500, "Config has more than 500 entries");
+cmp_ok(keys %Config, '>', 500, "Config has more than 500 entries");
 
 my ($first) = Config::config_sh() =~ /^(\S+)=/m;
 die "Can't find first entry in Config::config_sh()" unless defined $first;
@@ -246,8 +243,7 @@ foreach my $pain ($first, @virtual) {
 # now some octal in an eval.
 my ($path, $ver, @orig_inc)
   = split /\n/,
-    runperl (nolib=>1,
-	     prog=>'print qq{$_\n} foreach $^X, $], eval qq{\100INC}');
+    (perlrun ({code=>'print qq{$_\n} foreach $^X, $], eval qq{\100INC}'}))[0];
 
 die "This perl is $] at $^X; other perl is $ver (at $path) "
   . '- failed to find this perl' unless $] eq $ver;
@@ -261,9 +257,9 @@ foreach my $lib (qw(applibexp archlibexp privlibexp sitearchexp sitelibexp
 		     vendorarchexp vendorlibexp)) {
   my $dir = $Config{$lib};
   SKIP: {
-    skip "lib $lib not in \@INC on Win32" if $^O eq 'MSWin32';
-    skip "lib $lib not defined" unless defined $dir;
-    skip "lib $lib not set" unless length $dir;
+    skip "lib $lib not in \@INC on Win32", 1 if $^O eq 'MSWin32';
+    skip "lib $lib not defined",1  unless defined $dir;
+    skip "lib $lib not set", 1 unless length $dir;
     # May be in @INC in either Unix or VMS format on VMS.
     if ($^O eq 'VMS' && !exists($orig_inc{$dir})) {
         $dir = VMS::Filespec::unixify($dir);
@@ -276,3 +272,5 @@ foreach my $lib (qw(applibexp archlibexp privlibexp sitearchexp sitelibexp
   }
 }
 _diag ('@INC is:', @orig_inc) if $failed;
+
+done_testing();
