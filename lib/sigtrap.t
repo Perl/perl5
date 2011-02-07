@@ -1,17 +1,11 @@
 #!./perl
-
-BEGIN {
-	chdir 't' if -d 't';
-	@INC = '../lib';
-	require './test.pl';
-}
-
 use strict;
 use Config;
 
-plan 16;
+use Test::More tests => 16;
+use Test::PerlRun;
 
-use_ok( 'sigtrap' );
+BEGIN {use_ok('sigtrap')};
 
 package main;
 local %SIG;
@@ -57,7 +51,7 @@ $SIG{FAKE} = 'IGNORE';
 sigtrap->import('untrapped', 'FAKE');
 is( $SIG{FAKE}, 'IGNORE', 'respect existing handler set to IGNORE' );
 
-fresh_perl_like
+perlrun_stderr_like(
   '
     BEGIN { *CORE::GLOBAL::kill = sub {} }
     require sigtrap;
@@ -65,9 +59,8 @@ fresh_perl_like
     sub { $SIG{INT}->("INT") } -> (3)
   ',
    qr/\$ = main::__ANON__\(3\) called/,
-  { stderr => 1 },
   "stack-trace does not try to modify read-only arguments"
-;
+);
 
 my $out = tie *STDOUT, 'TieOut';
 $SIG{FAKE} = 'DEFAULT';
