@@ -152,6 +152,13 @@ C<Module::Metadata> has been upgraded from version 1.000003 to 1.000004.
 
 =item *
 
+C<Parse::CPAN::Meta> has been upgraded from version 1.40 to 1.4401.
+
+The latest Parse::CPAN::Meta can now read YAML or JSON files using
+L<CPAN::Meta::YAML> and L<JSON::PP>, which are now part of the Perl core.
+
+=item *
+
 C<Unicode::Collate> has been upgraded from version 0.68 to 0.72
 
 This also sees the switch from using the pure-perl version of this

@@ -1128,14 +1128,11 @@ use File::Glob qw(:case);
 
     'Parse::CPAN::Meta' =>
 	{
-	'MAINTAINER'	=> 'smueller',
-	'DISTRIBUTION'	=> 'SMUELLER/Parse-CPAN-Meta-1.40.tar.gz',
+	'MAINTAINER'	=> 'dagolden',
+	'DISTRIBUTION'	=> 'DAGOLDEN/Parse-CPAN-Meta-1.4401.tar.gz',
 	'FILES'		=> q[cpan/Parse-CPAN-Meta],
-	'EXCLUDED'	=> [ qw( t/97_meta.t t/98_pod.t t/99_pmv.t ) ],
+	'EXCLUDED'	=> [ ],
 	'UPSTREAM'	=> 'cpan',
-	# NOTE: 'perl uupacktool.pl t/data/utf_16_le_bom.yml.packed'
-	# run by hand after import, as the core's test harness doesn't
-	# run dists' "make test" steps
 	},
 
     'PathTools' =>
