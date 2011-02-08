@@ -2,32 +2,31 @@
 
 BEGIN {
     unshift @INC, 't';
-    push @INC, "../../t";
     require Config;
     if ( ( $Config::Config{'extensions'} !~ /\bB\b/ ) ) {
         print "1..0 # Skip -- Perl configured without B module\n";
         exit 0;
     }
-    require 'test.pl';
 }
 
 use strict;
 use warnings;
 
-plan tests => 29;
+use Test::More tests => 56;
+use Test::PerlRun qw(perlrun perlrun_stderr_like);
 
 # Runs a separate perl interpreter with the appropriate lint options
 # turned on
 sub runlint ($$$;$) {
     my ( $opts, $prog, $result, $testname ) = @_;
-    my $res = runperl(
+    my ($out, $err) = perlrun({
         switches => ["-MO=Lint,$opts"],
-        prog     => $prog,
-        stderr   => 1,
-    );
-    $res =~ s/-e syntax OK\n$//;
-    local $::Level = $::Level + 1;
-    is( $res, $result, $testname || $opts );
+        code     => $prog,
+    });
+    $err =~ s/-e syntax OK\n$//;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    is( $err, $result, $testname || $opts );
+    is( $out, '', 'nothing on STDOUT' );
 }
 
 runlint 'magic-diamond', 'while(<>){}', <<'RESULT';
@@ -125,22 +124,18 @@ RESULT
 
     # Check for backwards-compatible plugin support. This was where
     # preloaded mdoules would register themselves with B::Lint.
-    my $res = runperl(
+    perlrun_stderr_like({
         switches => ["-MB::Lint"],
-        prog =>
+        code =>
             'BEGIN{B::Lint->register_plugin(X=>[q[x]])};use O(qw[Lint x]);sub X::match{warn qq[X ok.\n]};dummy()',
-        stderr => 1,
-    );
-    like( $res, qr/X ok\./, 'Lint legacy plugin' );
+	}, qr/X ok\./, 'Lint legacy plugin' );
 }
 
 {
 
     # Check for Module::Plugin support
-    my $res = runperl(
+    perlrun_stderr_like({
         switches => [ '-It/pluglib', '-MO=Lint,none' ],
-        prog     => 1,
-        stderr   => 1,
-    );
-    like( $res, qr/Module::Pluggable ok\./, 'Lint uses Module::Pluggable' );
+        code     => 1,
+    }, qr/Module::Pluggable ok\./, 'Lint uses Module::Pluggable' );
 }
