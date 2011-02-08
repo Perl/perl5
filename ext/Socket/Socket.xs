@@ -292,6 +292,7 @@ static void xs_getaddrinfo(pTHX_ CV *cv)
 	}
 
 	Zero(&hints_s, sizeof hints_s, char);
+	hints_s.ai_family = PF_UNSPEC;
 
 	if(hints && SvOK(hints)) {
 		HV *hintshash;

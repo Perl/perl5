@@ -282,7 +282,8 @@ The address in a packed string (such as would be returned by pack_sockaddr_in)
 =item canonname => STRING
 
 The canonical name for the host if the C<AI_CANONNAME> flag was provided, or
-C<undef> otherwise.
+C<undef> otherwise. This field will only be present on the first returned
+address.
 
 =back
 
@@ -736,9 +737,14 @@ sub fake_getaddrinfo
 		socktype  => $socktype,
 		protocol  => $protocol,
 		addr      => Socket::pack_sockaddr_in( $port, $addr ),
-		canonname => $canonname,
+		canonname => undef,
 	    };
 	}
+    }
+
+    # Only supply canonname for the first result
+    if( defined $canonname ) {
+	$ret[0]->{canonname} = $canonname;
     }
 
     return ( fake_makeerr( 0 ), @ret );
