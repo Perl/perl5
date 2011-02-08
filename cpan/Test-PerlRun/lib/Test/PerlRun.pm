@@ -7,6 +7,7 @@ use File::Spec;
 use Test::Builder;
 use File::Temp;
 use POSIX qw(_exit :sys_wait_h);
+use Config;
 
 use base 'Exporter';
 
@@ -68,7 +69,37 @@ sub perlrun {
 }
 
 {
-    my $use_backticks = $^O eq 'MSWin32';
+    my $is_mswin      = $^O eq 'MSWin32';
+    my $is_vms        = $^O eq 'VMS';
+    my $is_cygwin     = $^O eq 'cygwin';
+    my $use_backticks = $is_mswin;
+
+    sub _forcibly_untaint {
+        my $sub = shift;
+        return &$sub(@_) unless ${^TAINT};
+
+        # We will assume that if you're running under -T, you really mean to
+        # run a fresh perl, so we'll brute force launder everything for you
+        my $sep = $Config{path_sep};
+
+        my @keys = grep {exists $ENV{$_}} qw(CDPATH IFS ENV BASH_ENV);
+        local @ENV{@keys} = ();
+        # Untaint, plus take out . and empty string:
+        local $ENV{'DCL$PATH'} = $1
+            if $is_vms && exists($ENV{'DCL$PATH'}) && ($ENV{'DCL$PATH'} =~ /(.*)/s);
+        $ENV{PATH} =~ /(.*)/s;
+        local $ENV{PATH} =
+            join $sep, grep { $_ ne "" and $_ ne "." and -d $_ and
+                                  ($is_mswin or $is_vms or !(stat && (stat _)[2]&0022)) }
+                split quotemeta ($sep), $1;
+        if ($is_cygwin) {   # Must have /bin under Cygwin
+            if (length $ENV{PATH}) {
+                $ENV{PATH} = $ENV{PATH} . $sep;
+            }
+            $ENV{PATH} = $ENV{PATH} . '/bin';
+        }
+        return &$sub(map {/(.*)/s; $1} @_);
+    }
 
     sub _run {
         my $p = ref $_[0] ? shift : { stdin => shift, file => '-' };
@@ -110,7 +141,7 @@ sub perlrun {
                 unshift @args, "<$stdin";
             }
             push @args, "2>$err_file" if $err_file;
-            $stdout = `$perl @args`;
+            $stdout = _forcibly_untaint(sub {`@_`}, $perl, @args);
         } else {
             my $fh;
             if ($capture_stderr || exists $p->{stdin}) {
@@ -137,11 +168,17 @@ sub perlrun {
                             or die "Can't redirect STDERR: $!";
                     }
 
-                    exec $perl, @args;
-                    die "exec failed: $!";
+                    _forcibly_untaint(sub {
+                                          exec @_;
+                                          die "exec failed: $!";
+                                      }, $perl, @args);
+
                 }
             } else {
-                open $fh, '-|', $perl, @args or die "Can't open $perl @args: $!";
+                _forcibly_untaint(sub {
+                                      open $fh, '-|', @_
+                                          or die "Can't open @_: $!";
+                                  }, $perl, @args);
             }
             $stdout = <$fh>;
             $! = 0;
@@ -175,10 +212,6 @@ sub perlrun {
 
         return ($stdout, $stderr, $status, $signalled);
     }
-}
-
-{
-    my $IsVMS = $^O eq 'VMS';
 
     my $Perl;
 
@@ -192,11 +225,9 @@ sub perlrun {
         $Perl = $^X;
 
         # VMS should have 'perl' aliased properly
-        return $Perl if $IsVMS;
+        return $Perl if $is_vms;
 
-        require Config;
-
-        my $exe = defined $Config::Config{_exe} ? $Config::Config{_exe} : q{};
+        my $exe = defined $Config{_exe} ? $Config{_exe} : q{};
 
         # This doesn't absolutize the path: beware of future chdirs().
         # We could do File::Spec->abs2rel() but that does getcwd()s,
