@@ -12,7 +12,7 @@ my $Is_VMS = $^O eq 'VMS';
 use Carp qw(carp cluck croak confess);
 
 BEGIN {
-    plan tests => 56;
+    plan tests => 57;
 
     # This test must be run at BEGIN time, because code later in this file
     # sets CORE::GLOBAL::caller
@@ -375,6 +375,19 @@ like(
     $got,
     qr!A::long\(\Q** Incomplete caller override detected; \E\@DB::args\Q were not set **\E\) called at.+\b(?i:carp\.t) line \d+!,
     'Correct arguments for A'
+);
+
+# UTF8-flagged strings should not cause Carp to try to load modules (even
+# implicitly via utf8_heavy.pl) after a syntax error [perl #82854].
+fresh_perl_like(
+ q<
+   use utf8; use strict; use Carp;
+   BEGIN { $SIG{__DIE__} = sub { Carp::croak "aaaaa$_[0]" } }
+   $c
+  >,
+ qr/aaaaa/,
+ {stderr=>1},
+ 'Carp can handle UTF8-flagged strings after a syntax error',
 );
 
 # New tests go here

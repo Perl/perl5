@@ -146,9 +146,9 @@ sub format_arg {
         $arg = str_len_trim( $arg, $MaxArgLen );
 
         # Quote it?
-        $arg = "'$arg'" unless $arg =~ /^-?[\d.]+\z/;
-    }
-    else {
+        $arg = "'$arg'" unless $arg =~ /^-?[0-9.]+\z/;
+    }                                    # 0-9, not \d, as \d will try to
+    else {                               # load Unicode tables
         $arg = 'undef';
     }
 
