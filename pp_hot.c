@@ -1345,7 +1345,7 @@ PP(pp_match)
     if (SvSCREAM(TARG))
 	r_flags |= REXEC_SCREAM;
 
-play_it_again:
+  play_it_again:
     if (global && RX_OFFS(rx)[0].start != -1) {
 	t = s = RX_OFFS(rx)[0].end + truebase - RX_GOFS(rx);
 	if ((s + RX_MINLEN(rx)) > strend || s < truebase)
