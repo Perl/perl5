@@ -8611,7 +8611,8 @@ tryagain:
 		    else
 			ender = *p++;
 		    break;
-		}
+		} /* End of switch on the literal */
+
 		if ( RExC_flags & RXf_PMf_EXTENDED)
 		    p = regwhite( pRExC_state, p );
 		if (UTF && FOLD) {
@@ -8691,7 +8692,8 @@ tryagain:
 		else
 		    REGC((char)ender, s++);
 	    }
-	loopdone:
+	loopdone:   /* Jumped to when encounters something that shouldn't be in
+		       the node */
 	    RExC_parse = p - 1;
             Set_Node_Cur_Length(ret); /* MJD */
 	    nextchar(pRExC_state);
