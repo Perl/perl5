@@ -152,7 +152,6 @@ Perl_gp_free
 Perl_gp_ref
 Perl_grok_bin
 Perl_grok_bslash_c
-Perl_grok_bslash_o
 Perl_grok_hex
 Perl_grok_number
 Perl_grok_numeric_radix
@@ -833,6 +832,7 @@ Perl_warn_nocontext
 Perl_warner_nocontext
 perl_alloc_using
 perl_clone_using
+Perl_grok_bslash_o
 Perl_sv_setsv_cow
 Perl_Slab_Alloc
 Perl_Slab_Free
