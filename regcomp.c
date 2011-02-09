@@ -8392,6 +8392,7 @@ tryagain:
 	    char *s;
 	    STRLEN foldlen;
 	    U8 tmpbuf[UTF8_MAXBYTES_CASE+1], *foldbuf;
+	    regnode * orig_emit;
 
             parse_start = RExC_parse - 1;
 
@@ -8399,6 +8400,9 @@ tryagain:
 
 	defchar:
 	    ender = 0;
+	    orig_emit = RExC_emit; /* Save the original output node position in
+				      case we need to output a different node
+				      type */
 	    ret = reg_node(pRExC_state,
 			   (U8) ((! FOLD) ? EXACT
 					  : (LOC)
@@ -8612,6 +8616,63 @@ tryagain:
 			ender = *p++;
 		    break;
 		} /* End of switch on the literal */
+
+		/* Certain characters are problematic because their folded
+		 * length is so different from their original length that it
+		 * isn't handleable by the optimizer.  They are therefore not
+		 * placed in an EXACTish node; and are here handled specially.
+		 * (Even if the optimizer handled LATIN_SMALL_LETTER_SHARP_S,
+		 * putting it in a special node keeps regexec from having to
+		 * deal with a non-utf8 multi-char fold */
+		if (FOLD && is_TRICKYFOLD_cp(ender)) {
+		    /* If is in middle of outputting characters into an
+		     * EXACTish node, go output what we have so far, and
+		     * position the parse so that this will be called again
+		     * immediately */
+		    if (len) {
+			p  = RExC_parse + len - 1;
+			goto loopdone;
+		    }
+		    else {
+
+			/* Here we are ready to output our tricky fold
+			 * character.  What's done is to pretend it's in a
+			 * [bracketed] class, and let the code that deals with
+			 * those handle it, as that code has all the
+			 * intelligence necessary.  First save the current
+			 * parse state, get rid of the already allocated EXACT
+			 * node that the ANYOFV node will replace, and point
+			 * the parse to a buffer which we fill with the
+			 * character we want the regclass code to think is
+			 * being parsed */
+			char* const oldregxend = RExC_end;
+			char tmpbuf[2];
+			RExC_emit = orig_emit;
+			RExC_parse = tmpbuf;
+			if (UTF) {
+			    tmpbuf[0] = UTF8_TWO_BYTE_HI(ender);
+			    tmpbuf[1] = UTF8_TWO_BYTE_LO(ender);
+			    RExC_end = RExC_parse + 2;
+			}
+			else {
+			    tmpbuf[0] = ender;
+			    RExC_end = RExC_parse + 1;
+			}
+
+			ret = regclass(pRExC_state,depth+1);
+
+			/* Here, have parsed the buffer.  Reset the parse to
+			 * the actual input, and return */
+			RExC_end = oldregxend;
+			RExC_parse = p - 1;
+
+			Set_Node_Offset(ret, RExC_parse);
+			Set_Node_Cur_Length(ret);
+			nextchar(pRExC_state);
+			*flagp |= HASWIDTH|SIMPLE;
+			return ret;
+		    }
+		}
 
 		if ( RExC_flags & RXf_PMf_EXTENDED)
 		    p = regwhite( pRExC_state, p );
