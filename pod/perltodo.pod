@@ -5,7 +5,7 @@ perltodo - Perl TO-DO List
 =head1 DESCRIPTION
 
 This is a list of wishes for Perl. The most up to date version of this file
-is at http://perl5.git.perl.org/perl.git/blob_plain/HEAD:/pod/perltodo.pod
+is at L<http://perl5.git.perl.org/perl.git/blob_plain/HEAD:/pod/perltodo.pod>
 
 The tasks we think are smaller or easier are listed first. Anyone is welcome
 to work on any of these, but it's a good idea to first contact
@@ -15,9 +15,8 @@ prefer.
 
 Whilst patches to make the list shorter are most welcome, ideas to add to
 the list are also encouraged. Check the perl5-porters archives for past
-ideas, and any discussion about them. One set of archives may be found at:
-
-    http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
+ideas, and any discussion about them. One set of archives may be found at
+L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/>
 
 What can we offer you in return? Fame, fortune, and everlasting glory? Maybe
 not, but if your patch is incorporated, then we'll add your name to the
@@ -437,7 +436,7 @@ The way @INC is laid out by default, one cannot upgrade core (dual-life)
 modules without overwriting files. This causes problems for binary
 package builders.  One possible proposal is laid out in this
 message:
-L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2002-04/msg02380.html>.
+L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2002-04/msg02380.html>
 
 =head2 -Duse32bit*
 
@@ -525,7 +524,7 @@ bug is fixed in the VC8 and VC9 CRTs (but, of course, the directory may still
 not actually be writable if access is indeed denied by DACLs).
 
 For the chdir() issue, see ActiveState bug #74552:
-http://bugs.activestate.com/show_bug.cgi?id=74552
+L<http://bugs.activestate.com/show_bug.cgi?id=74552>
 
 Therefore, DACLs should be checked both for consistency across CRTs and for
 the correct answer.
@@ -748,7 +747,7 @@ of running Perl code inside the signal handler context. (With all the dangers
 of things like C<malloc> corruption that that currently offers us)
 
 For more information see the thread starting with this message:
-http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2008-03/msg00305.html
+L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2008-03/msg00305.html>
 
 =head2 autovivification
 
@@ -929,7 +928,7 @@ C<;> is parsed where it is not legal as a statement terminator (ie inside
 C<{}> used as a hashref, C<[]> or C<()>) it issues an error something like
 I<';' isn't legal inside an expression - if you need multiple statements use a
 do {...} block>. See the thread starting at
-http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2008-09/msg00573.html
+L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2008-09/msg00573.html>
 
 =head2 lexicals used only once
 
@@ -1027,7 +1026,8 @@ arrays as alternations. With it, C</P/w> would be roughly equivalent to:
 
     do { local $"='|'; /\b(?:P)\b/ }
 
-See L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-01/msg00400.html>
+See
+L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-01/msg00400.html>
 for the discussion.
 
 =head2 optional optimizer
@@ -1105,7 +1105,8 @@ See also L</"Extend PerlIO and PerlIO::Scalar">.
 
 The peephole optimiser converts constants used for hash key lookups to shared
 hash key scalars. Under ithreads, something is undoing this work.
-See http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-09/msg00793.html
+See
+L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-09/msg00793.html>
 
 =head2 Store the current pad in the OP slab allocator
 
@@ -1134,7 +1135,8 @@ Note that the slab allocator allocates ops downwards in memory, so one would
 have to actually "allocate" the ops in reverse-execution order to get them
 contiguous in memory in execution order.
 
-See http://www.nntp.perl.org/group/perl.perl5.porters/2007/12/msg131975.html
+See
+L<http://www.nntp.perl.org/group/perl.perl5.porters/2007/12/msg131975.html>
 
 Note that running this copy, and then freeing all the old location ops would
 cause their slabs to be freed, which would eliminate possible memory wastage if
