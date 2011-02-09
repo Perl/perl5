@@ -281,7 +281,7 @@ If you want to delete your temporary branch, you may do so with:
 
 =head2 Committing your changes
 
-Assuming that you'd like to commit all the changes you've made as a a
+Assuming that you'd like to commit all the changes you've made as a
 single atomic unit, run this command:
 
    % git commit -a
