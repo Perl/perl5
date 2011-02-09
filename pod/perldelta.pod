@@ -159,6 +159,10 @@ L<CPAN::Meta::YAML> and L<JSON::PP>, which are now part of the Perl core.
 
 =item *
 
+C<Term::UI> has been upgraded from version 0.24 to 0.26
+
+=item *
+
 C<Unicode::Collate> has been upgraded from version 0.68 to 0.72
 
 This also sees the switch from using the pure-perl version of this
