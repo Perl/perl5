@@ -6085,11 +6085,15 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	break;
     case ANYOFV:
     case ANYOF:
-	if (utf8_target) {
+	if (utf8_target || OP(p) == ANYOFV) {
+	    STRLEN inclasslen;
 	    loceol = PL_regeol;
-	    while (hardcount < max && scan < loceol &&
-		   reginclass(prog, p, (U8*)scan, 0, utf8_target)) {
-		scan += UTF8SKIP(scan);
+	    inclasslen = loceol - scan;
+	    while (hardcount < max
+		   && ((inclasslen = loceol - scan) > 0)
+		   && reginclass(prog, p, (U8*)scan, &inclasslen, utf8_target))
+	    {
+		scan += inclasslen;
 		hardcount++;
 	    }
 	} else {
