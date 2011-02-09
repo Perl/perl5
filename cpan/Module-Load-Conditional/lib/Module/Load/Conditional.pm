@@ -18,7 +18,7 @@ BEGIN {
                         $FIND_VERSION $ERROR $CHECK_INC_HASH];
     use Exporter;
     @ISA            = qw[Exporter];
-    $VERSION        = '0.42';
+    $VERSION        = '0.44';
     $VERBOSE        = 0;
     $DEPRECATED     = 0;
     $FIND_VERSION   = 1;
@@ -85,7 +85,7 @@ and so forth.
 
 =head1 Methods
 
-=head1 $href = check_install( module => NAME [, version => VERSION, verbose => BOOL ] );
+=head2 $href = check_install( module => NAME [, version => VERSION, verbose => BOOL ] );
 
 C<check_install> allows you to verify if a certain module is installed
 or not. You may call it with the following arguments:
