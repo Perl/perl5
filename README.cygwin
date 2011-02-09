@@ -27,7 +27,7 @@ platforms.  They run thanks to the Cygwin library which provides the UNIX
 system calls and environment these programs expect.  More information
 about this project can be found at:
 
-  F<http://www.cygwin.com/>
+L<http://www.cygwin.com/>
 
 A recent net or commercial release of Cygwin is required.
 
@@ -368,7 +368,7 @@ C<Cygwin::posix_to_win_path()>.
 Pathnames may not contain Unicode characters. C<Cygwin> still uses the
 ANSI API calls and no Unicode calls because of newlib deficiencies.
 There's an unofficial unicode patch for cygwin at
-F<http://www.okisoft.co.jp/esc/utf8-cygwin/>
+L<http://www.okisoft.co.jp/esc/utf8-cygwin/>
 
 =item * Text/Binary
 
@@ -458,7 +458,7 @@ error like the following:
 
 Use the rebase utility to resolve the conflicting dll addresses.  The
 rebase package is included in the Cygwin netrelease.  Use setup.exe from
-F<http://www.cygwin.com/setup.exe> to install it and run rebaseall.
+L<http://www.cygwin.com/setup.exe> to install it and run rebaseall.
 
 =back
 
