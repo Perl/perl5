@@ -1632,6 +1632,13 @@ enabled, a generic number will be encoded in a method compatible with
 the C library _POSIX_EXIT macro so that it can be decoded by other
 programs, particularly ones written in C, like the GNV package.  (VMS)
 
+C<exit()> resets file pointers, which is a problem when called 
+from a child process (created by C<fork()>) in C<BEGIN>.  
+A workaround is to use C<POSIX::_exit>.  (Solaris)
+
+    exit unless $Config{archname} =~ /\bsolaris\b/;
+    require POSIX and POSIX::_exit(0);
+
 =item fcntl
 
 Not implemented. (Win32)
