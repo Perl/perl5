@@ -132,16 +132,18 @@ CLOSE       CLOSE,      num 1     ; Analogous to OPEN.
 REF         REF,        num 1 V   ; Match some already matched string
 REFF        REF,        num 1 V   ; Match already matched string, folded using native charset semantics for non-utf8
 REFFL       REF,        num 1 V   ; Match already matched string, folded in loc.
-# REFFU and NREFFU could have been implemented using the FLAGS field of the
+# N?REFF[AU] could have been implemented using the FLAGS field of the
 # regnode, but by having a separate node type, we can use the existing switch
 # statement to avoid some tests
 REFFU       REF,        num 1 V   ; Match already matched string, folded using unicode semantics for non-utf8
+REFFA       REF,        num 1 V   ; Match already matched string, folded using unicode semantics for non-utf8, no mixing ASCII, non-ASCII
 
 #*Named references.  Code in regcomp.c assumes that these all are after the numbered references
 NREF        REF,        no-sv 1 V ; Match some already matched string
 NREFF       REF,        no-sv 1 V ; Match already matched string, folded using native charset semantics for non-utf8
 NREFFL      REF,        no-sv 1 V ; Match already matched string, folded in loc.
 NREFFU      REF,        num   1 V ; Match already matched string, folded using unicode semantics for non-utf8
+NREFFA      REF,        num   1 V ; Match already matched string, folded using unicode semantics for non-utf8, no mixing ASCII, non-ASCII
 
 IFMATCH     BRANCHJ,    off 1 . 2 ; Succeeds if the following matches.
 UNLESSM     BRANCHJ,    off 1 . 2 ; Fails if the following matches.
