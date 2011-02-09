@@ -9552,6 +9552,8 @@ parseit:
 	    }
 	}
 
+	/* non-Latin1 code point implies unicode semantics.  Must be set in
+	 * pass1 so is there for the whole of pass 2 */
 	if (value > 255) {
 	    RExC_uni_semantics = 1;
 	}
