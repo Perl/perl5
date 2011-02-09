@@ -1635,6 +1635,7 @@ programs, particularly ones written in C, like the GNV package.  (VMS)
 =item fcntl
 
 Not implemented. (Win32)
+
 Some functions available based on the version of VMS. (VMS)
 
 =item flock
