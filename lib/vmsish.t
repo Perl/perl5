@@ -126,7 +126,7 @@ is($?,0,"outer lex scope of vmsish [POSIX status]");
   END { 1 while unlink $file; }
 
   {
-     use_ok('vmsish qw(time)');
+     use_ok('vmsish', 'time');
 
      # but that didn't get it in our current scope
      use vmsish qw(time);
