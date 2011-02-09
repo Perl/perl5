@@ -1465,10 +1465,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	case ANYOFV:
 	case ANYOF:
 	    if (utf8_target || OP(c) == ANYOFV) {
-		 REXEC_FBC_UTF8_CLASS_SCAN((ANYOF_FLAGS(c) & ANYOF_NONBITMAP) ||
-			  !UTF8_IS_INVARIANT((U8)s[0]) ?
-			  reginclass(prog, c, (U8*)s, 0, utf8_target) :
-			  REGINCLASS(prog, c, (U8*)s));
+		STRLEN inclasslen = strend - s;
+		REXEC_FBC_UTF8_CLASS_SCAN(
+                          reginclass(prog, c, (U8*)s, &inclasslen, utf8_target));
 	    }
 	    else {
 		 while (s < strend) {
