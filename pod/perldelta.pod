@@ -148,6 +148,10 @@ Module::Build::YAML has been deprecated in favor of L<CPAN::Meta::YAML>.
 
 =item *
 
+C<Module::Load::Conditional> has been upgraded from version 0.40 to 0.42
+
+=item *
+
 C<Module::Metadata> has been upgraded from version 1.000003 to 1.000004.
 
 =item *
