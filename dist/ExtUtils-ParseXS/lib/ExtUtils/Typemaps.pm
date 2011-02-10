@@ -78,6 +78,7 @@ sub new {
     file            => undef,
     %args,
     typemap_section => [],
+    typemap_lookup  => {},
     input_section   => [],
     output_section  => [],
   } => $class;
@@ -159,7 +160,11 @@ sub add_typemap {
   } else {
     $self->validate(typemap_xstype => $type->xstype, ctype => $type->ctype);
   }
+
+  # store
   push @{$self->{typemap_section}}, $type;
+  # remember type for lookup, too.
+  $self->{typemap_lookup}{$type->tidy_ctype} = $#{$self->{typemap_section}};
   return 1;
 }
 
@@ -286,8 +291,8 @@ sub remove_typemap {
   else {
     $ctype = $_[0]->tidy_ctype;
   }
-  
-  return $self->_remove($ctype, 'tidy_ctype', $self->{typemap_section});
+
+  return $self->_remove($ctype, 'tidy_ctype', $self->{typemap_section}, $self->{typemap_lookup});
 }
 
 =head2 remove_inputmap
@@ -345,15 +350,28 @@ sub _remove {
   my $rm     = shift;
   my $method = shift;
   my $array  = shift;
+  my $lookup = shift;
 
-  my $index = 0;
-  foreach my $map (@$array) {
-    last if $map->$method() eq $rm;
-    $index++;
-  }
-  if ($index < @$array) {
+  if ($lookup) {
+    my $index = $lookup->{$rm};
+    return() if not defined $index;
     splice(@$array, $index, 1);
-    return 1;
+    foreach my $key (keys %$lookup) {
+      if ($lookup->{$key} > $index) {
+        $lookup->{$key}--;
+      }
+    }
+  }
+  else {
+    my $index = 0;
+    foreach my $map (@$array) {
+      last if $map->$method() eq $rm;
+      $index++;
+    }
+    if ($index < @$array) {
+      splice(@$array, $index, 1);
+      return 1;
+    }
   }
   return();
 }
@@ -376,10 +394,9 @@ sub get_typemap {
   croak("Need ctype argument") if not defined $ctype;
   $ctype = _tidy_type($ctype);
 
-  foreach my $map (@{$self->{typemap_section}}) {
-    return $map if $map->tidy_ctype eq $ctype;
-  }
-  return();
+  my $index = $self->{typemap_lookup}{$ctype};
+  return() if not defined $index;
+  return $self->{typemap_section}[$index];
 }
 
 =head2 get_inputmap
@@ -533,22 +550,13 @@ sub validate {
   my $self = shift;
   my %args = @_;
 
-  my %xstypes;
-  my %ctypes;
-  $xstypes{$args{typemap_xstype}}++ if defined $args{typemap_xstype};
-  $ctypes{$args{ctype}}++ if defined $args{ctype};
-
-  foreach my $map (@{$self->{typemap_section}}) {
-    my $ctype = $map->tidy_ctype;
-    croak("Multiple definition of ctype '$ctype' in TYPEMAP section")
-      if exists $ctypes{$ctype};
-    my $xstype = $map->xstype;
-    # TODO check this: We shouldn't complain about reusing XS types in TYPEMAP.
-    #croak("Multiple definition of xstype '$xstype' in TYPEMAP section")
-    #  if exists $xstypes{$xstype};
-    $xstypes{$xstype}++;
-    $ctypes{$ctype}++;
+  if ( exists $args{ctype}
+       and exists $self->{typemap_lookup}{_tidy_type($args{ctype})} )
+  {
+    croak("Multiple definition of ctype '$args{ctype}' in TYPEMAP section");
   }
+
+  my %xstypes;
 
   %xstypes = ();
   $xstypes{$args{inputmap_xstype}}++ if defined $args{inputmap_xstype};
@@ -584,7 +592,6 @@ sub _parse {
   my $lineno = 0;
   my $junk = "";
   my $current = \$junk;
-  my @typemap_expr;
   my @input_expr;
   my @output_expr;
   while ($$stringref =~ /^(.*)$/gcm) {
@@ -620,8 +627,10 @@ sub _parse {
       #$proto = '$' unless $proto;
       #warn("Warning: File '$filename' Line $lineno '$line' Invalid prototype '$proto'\n")
       #  unless _valid_proto_string($proto);
-      push @typemap_expr, ExtUtils::Typemaps::Type->new(
-        xstype => $kind, proto => $proto, ctype => $type
+      $self->add_typemap(
+        ExtUtils::Typemaps::Type->new(
+          xstype => $kind, proto => $proto, ctype => $type
+        )
       );
     } elsif (/^\s/) {
       $$current .= $$current eq '' ? $_ : "\n".$_;
@@ -639,10 +648,11 @@ sub _parse {
 
   } # end while lines
 
-  $self->{typemap_section} = \@typemap_expr;
   $self->{input_section}   = [ map {ExtUtils::Typemaps::InputMap->new(%$_) } @input_expr ];
   $self->{output_section}  = [ map {ExtUtils::Typemaps::OutputMap->new(%$_) } @output_expr ];
   
+  # Now, setup the lookups
+
   return $self->validate();
 }
 
