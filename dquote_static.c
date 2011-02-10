@@ -1,6 +1,6 @@
 /*    dquote_static.c
  *
- * This file contains static inline functions that are related to
+ * This file contains static functions that are related to
  * parsing double-quotish expressions, but are used in more than
  * one file.
  *
