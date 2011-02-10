@@ -22,9 +22,9 @@ $SIG{__WARN__} = sub {
      }
 };
 
-require './test.pl';
+BEGIN { require './test.pl'; }
 
-plan(361);
+plan(362);
 
 run_tests() unless caller;
 
@@ -735,3 +735,13 @@ $destroyed = 0;
     $x = bless({}, 'Class');
 }
 is($destroyed, 1, 'Timely scalar destruction with lvalue substr');
+
+# [perl #77692] UTF8 cache not being reset when TARG is reused
+ok eval {
+ local ${^UTF8CACHE} = -1;
+ for my $i (0..1)
+ {
+   my $dummy = length(substr("\x{100}",0,$i));
+ }
+ 1
+}, 'UTF8 cache is reset when TARG is reused [perl #77692]';

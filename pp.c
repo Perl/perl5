@@ -3540,7 +3540,8 @@ PP(pp_substr)
 	}
     }
     SPAGAIN;
-    PUSHs(TARG);		/* avoid SvSETMAGIC here */
+    SvSETMAGIC(TARG);
+    PUSHs(TARG);
     RETURN;
 
 bound_fail:
