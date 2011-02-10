@@ -1678,19 +1678,6 @@ from two overloaded packages.
 
 =item *
 
-Relation between overloading and tie()ing is broken.  Overloading is
-triggered or not basing on the I<previous> class of tie()d value.
-
-This happens because the presence of overloading is checked too early,
-before any tie()d access is attempted.  If the FETCH()ed class of the
-tie()d value does not change, a simple workaround is to access the value
-immediately after tie()ing, so that after this call the I<previous> class
-coincides with the current one.
-
-B<Needed:> a way to fix this without a speed penalty.
-
-=item *
-
 Barewords are not covered by overloaded string constants.
 
 =back
