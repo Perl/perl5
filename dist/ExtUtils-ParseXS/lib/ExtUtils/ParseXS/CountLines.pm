@@ -40,7 +40,7 @@ sub DESTROY {
 }
 
 sub UNTIE {
-  # This sub does nothing, but is neccessary for references to be released.
+  # This sub does nothing, but is necessary for references to be released.
 }
 
 sub end_marker {

@@ -720,7 +720,7 @@ EOF
 
         # 0: type, 1: with_size, 2: how, 3: how_size
         if ($t and not $t->[1] and $t->[0] eq 'p') {
-          # PUSHp corresponds to setpvn.  Treate setpv directly
+          # PUSHp corresponds to setpvn.  Treat setpv directly
           my $what = eval qq("$t->[2]");
           warn $@ if $@;
 

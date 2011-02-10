@@ -56,7 +56,7 @@ Adds C<extern "C"> to the C code.  Default is false.
 
 =item B<hiertype>
 
-Retains C<::> in type names so that C++ hierachical types can be
+Retains C<::> in type names so that C++ hierarchical types can be
 mapped.  Default is false.
 
 =item B<except>
