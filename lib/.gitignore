@@ -171,6 +171,8 @@
 /ExtUtils/Mksymlists.pm
 /ExtUtils/Packlist.pm
 /ExtUtils/ParseXS.pm
+/ExtUtils/ParseXS.pod
+/ExtUtils/ParseXS/
 /ExtUtils/testlib.pm
 /ExtUtils/xsubpp
 /Fatal.pm
