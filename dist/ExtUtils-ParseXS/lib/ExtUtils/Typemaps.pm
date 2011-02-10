@@ -80,6 +80,7 @@ sub new {
     typemap_section => [],
     typemap_lookup  => {},
     input_section   => [],
+    input_lookup    => {},
     output_section  => [],
   } => $class;
 
@@ -165,6 +166,7 @@ sub add_typemap {
   push @{$self->{typemap_section}}, $type;
   # remember type for lookup, too.
   $self->{typemap_lookup}{$type->tidy_ctype} = $#{$self->{typemap_section}};
+
   return 1;
 }
 
@@ -210,7 +212,12 @@ sub add_inputmap {
   } else {
     $self->validate(inputmap_xstype => $input->xstype);
   }
+
+  # store
   push @{$self->{input_section}}, $input;
+  # remember type for lookup, too.
+  $self->{input_lookup}{$input->xstype} = $#{$self->{input_section}};
+
   return 1;
 }
 
@@ -317,7 +324,7 @@ sub remove_inputmap {
     $xstype = $_[0]->xstype;
   }
   
-  return $self->_remove($xstype, 'xstype', $self->{input_section});
+  return $self->_remove($xstype, 'xstype', $self->{input_section}, $self->{input_lookup});
 }
 
 =head2 remove_inputmap
@@ -418,10 +425,9 @@ sub get_inputmap {
   my $xstype = $args{xstype};
   croak("Need xstype argument") if not defined $xstype;
 
-  foreach my $map (@{$self->{input_section}}) {
-    return $map if $map->xstype eq $xstype;
-  }
-  return();
+  my $index = $self->{input_lookup}{$xstype};
+  return() if not defined $index;
+  return $self->{input_section}[$index];
 }
 
 =head2 get_outputmap
@@ -545,7 +551,9 @@ sub merge {
   return 1;
 }
 
-# Note: This is really inefficient. One could keep a hash to start with.
+
+# make sure that the provided types wouldn't collide with what's
+# in the object already.
 sub validate {
   my $self = shift;
   my %args = @_;
@@ -556,18 +564,13 @@ sub validate {
     croak("Multiple definition of ctype '$args{ctype}' in TYPEMAP section");
   }
 
-  my %xstypes;
-
-  %xstypes = ();
-  $xstypes{$args{inputmap_xstype}}++ if defined $args{inputmap_xstype};
-  foreach my $map (@{$self->{input_section}}) {
-    my $xstype = $map->xstype;
-    croak("Multiple definition of xstype '$xstype' in INPUTMAP section")
-      if exists $xstypes{$xstype};
-    $xstypes{$xstype}++;
+  if ( exists $args{inputmap_xstype}
+       and exists $self->{input_lookup}{$args{inputmap_xstype}} )
+  {
+    croak("Multiple definition of ctype '$args{inputmap_xstype}' in INPUTMAP section");
   }
 
-  %xstypes = ();
+  my %xstypes;
   $xstypes{$args{outputmap_xstype}}++ if defined $args{outputmap_xstype};
   foreach my $map (@{$self->{output_section}}) {
     my $xstype = $map->xstype;
@@ -648,11 +651,12 @@ sub _parse {
 
   } # end while lines
 
-  $self->{input_section}   = [ map {ExtUtils::Typemaps::InputMap->new(%$_) } @input_expr ];
+  foreach my $inexpr (@input_expr) {
+    $self->add_inputmap( ExtUtils::Typemaps::InputMap->new(%$inexpr) );
+  }
+
   $self->{output_section}  = [ map {ExtUtils::Typemaps::OutputMap->new(%$_) } @output_expr ];
   
-  # Now, setup the lookups
-
   return $self->validate();
 }
 
@@ -694,9 +698,6 @@ sub _escape_backslashes {
 =head1 CAVEATS
 
 Inherits some evil code from C<ExtUtils::ParseXS>.
-
-Adding more typemaps incurs an O(n) validation penalty
-that could be optimized with a hash.
 
 =head1 SEE ALSO
 
