@@ -82,6 +82,7 @@ sub new {
     input_section   => [],
     input_lookup    => {},
     output_section  => [],
+    output_lookup   => {},
   } => $class;
 
   $self->_init();
@@ -254,7 +255,12 @@ sub add_outputmap {
   } else {
     $self->validate(outputmap_xstype => $output->xstype);
   }
+
+  # store
   push @{$self->{output_section}}, $output;
+  # remember type for lookup, too.
+  $self->{output_lookup}{$output->xstype} = $#{$self->{output_section}};
+
   return 1;
 }
 
@@ -349,7 +355,7 @@ sub remove_outputmap {
     $xstype = $_[0]->xstype;
   }
   
-  return $self->_remove($xstype, 'xstype', $self->{output_section});
+  return $self->_remove($xstype, 'xstype', $self->{output_section}, $self->{output_lookup});
 }
 
 sub _remove {
@@ -449,10 +455,9 @@ sub get_outputmap {
   my $xstype = $args{xstype};
   croak("Need xstype argument") if not defined $xstype;
 
-  foreach my $map (@{$self->{output_section}}) {
-    return $map if $map->xstype eq $xstype;
-  }
-  return();
+  my $index = $self->{output_lookup}{$xstype};
+  return() if not defined $index;
+  return $self->{output_section}[$index];
 }
 
 =head2 write
@@ -567,16 +572,13 @@ sub validate {
   if ( exists $args{inputmap_xstype}
        and exists $self->{input_lookup}{$args{inputmap_xstype}} )
   {
-    croak("Multiple definition of ctype '$args{inputmap_xstype}' in INPUTMAP section");
+    croak("Multiple definition of xstype '$args{inputmap_xstype}' in INPUTMAP section");
   }
 
-  my %xstypes;
-  $xstypes{$args{outputmap_xstype}}++ if defined $args{outputmap_xstype};
-  foreach my $map (@{$self->{output_section}}) {
-    my $xstype = $map->xstype;
-    croak("Multiple definition of xstype '$xstype' in OUTPUTMAP section")
-      if exists $xstypes{$xstype};
-    $xstypes{$xstype}++;
+  if ( exists $args{outputmap_xstype}
+       and exists $self->{output_lookup}{$args{outputmap_xstype}} )
+  {
+    croak("Multiple definition of xstype '$args{outputmap_xstype}' in OUTPUTMAP section");
   }
 
   return 1;
@@ -654,10 +656,11 @@ sub _parse {
   foreach my $inexpr (@input_expr) {
     $self->add_inputmap( ExtUtils::Typemaps::InputMap->new(%$inexpr) );
   }
+  foreach my $outexpr (@output_expr) {
+    $self->add_outputmap( ExtUtils::Typemaps::OutputMap->new(%$outexpr) );
+  }
 
-  $self->{output_section}  = [ map {ExtUtils::Typemaps::OutputMap->new(%$_) } @output_expr ];
-  
-  return $self->validate();
+  return 1;
 }
 
 # taken from ExtUtils::ParseXS
