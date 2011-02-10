@@ -937,6 +937,9 @@ EOF
   print Q(<<"EOF");
 #    PERL_UNUSED_VAR(cv); /* -W */
 #    PERL_UNUSED_VAR(items); /* -W */
+##ifdef XS_APIVERSION_BOOTCHECK
+#    XS_APIVERSION_BOOTCHECK;
+##endif
 EOF
 
   print Q(<<"EOF") if $self->{WantVersionChk};
