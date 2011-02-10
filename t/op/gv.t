@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 231 );
+plan( tests => 232 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -872,6 +872,26 @@ ok eval {
     $var = 3;
     is $alias, 3, "[perl #77926] Glob reification during localisation";
   }
+}
+
+# This code causes gp_free to call a destructor when a glob is being
+# restored on scope exit. The destructor used to see SVs with a refcount of
+# zero inside the glob, which could result in crashes (though not in this
+# test case, which just panics).
+{
+ no warnings 'once';
+ my $survived;
+ *Trit::DESTROY = sub {
+   $thwext = 42;  # panic
+   $survived = 1;
+ };
+ {
+  local *thwext;
+  $thwext = bless[],'Trit';
+  ();
+ }
+ ok $survived,
+  'no error when gp_free calls a destructor that assigns to the gv';
 }
 
 __END__

@@ -3439,6 +3439,13 @@ failure was caught.
 (P) We popped the context stack to a context with the specified label,
 and then discovered it wasn't a context we know how to do a goto in.
 
+=item panic: gp_free failed to free glob pointer
+
+(P) The internal routine used to clear a typeglob's entries tried
+repeatedly, but each time something re-created entries in the glob. Most
+likely the glob contains an object with a reference back to the glob and a
+destructor that adds a new object to the glob.
+
 =item panic: hfreeentries failed to free hash
 
 (P) The internal routine used to clear a hashes entries tried repeatedly,
