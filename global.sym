@@ -133,7 +133,7 @@ Perl_find_rundefsvoffset
 Perl_foldEQ
 Perl_foldEQ_latin1
 Perl_foldEQ_locale
-Perl_foldEQ_utf8
+Perl_foldEQ_utf8_flags
 Perl_form
 Perl_free_tmps
 Perl_get_av

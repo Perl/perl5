@@ -134,7 +134,7 @@
 #define foldEQ			Perl_foldEQ
 #define foldEQ_latin1		Perl_foldEQ_latin1
 #define foldEQ_locale		Perl_foldEQ_locale
-#define foldEQ_utf8(a,b,c,d,e,f,g,h)	Perl_foldEQ_utf8(aTHX_ a,b,c,d,e,f,g,h)
+#define foldEQ_utf8_flags(a,b,c,d,e,f,g,h,i)	Perl_foldEQ_utf8_flags(aTHX_ a,b,c,d,e,f,g,h,i)
 #ifndef PERL_IMPLICIT_CONTEXT
 #define form			Perl_form
 #endif

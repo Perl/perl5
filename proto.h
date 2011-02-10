@@ -994,10 +994,14 @@ PERL_CALLCONV I32	Perl_foldEQ_locale(const char* a, const char* b, I32 len)
 #define PERL_ARGS_ASSERT_FOLDEQ_LOCALE	\
 	assert(a); assert(b)
 
-PERL_CALLCONV I32	Perl_foldEQ_utf8(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const char *s2, char **pe2, UV l2, bool u2)
+/* PERL_CALLCONV I32	foldEQ_utf8(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const char *s2, char **pe2, UV l2, bool u2)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_5); */
+
+PERL_CALLCONV I32	Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const char *s2, char **pe2, UV l2, bool u2, U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_5);
-#define PERL_ARGS_ASSERT_FOLDEQ_UTF8	\
+#define PERL_ARGS_ASSERT_FOLDEQ_UTF8_FLAGS	\
 	assert(s1); assert(s2)
 
 PERL_CALLCONV char*	Perl_form(pTHX_ const char* pat, ...)

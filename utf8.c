@@ -3034,7 +3034,7 @@ http://www.unicode.org/unicode/reports/tr21/ (Case Mappings).
 
 =cut */
 I32
-Perl_foldEQ_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const char *s2, char **pe2, register UV l2, bool u2)
+Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const char *s2, char **pe2, register UV l2, bool u2, U32 flags)
 {
     dVAR;
     register const U8 *p1  = (const U8*)s1; /* Point to current char */
@@ -3051,7 +3051,7 @@ Perl_foldEQ_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, cons
     U8 natbuf[2];               /* Holds native 8-bit char converted to utf8;
                                    these always fit in 2 bytes */
 
-    PERL_ARGS_ASSERT_FOLDEQ_UTF8;
+    PERL_ARGS_ASSERT_FOLDEQ_UTF8_FLAGS;
 
     if (pe1) {
         e1 = *(U8**)pe1;
