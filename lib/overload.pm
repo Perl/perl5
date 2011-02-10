@@ -1522,7 +1522,8 @@ package C<symbolic>.  Add methods
   sub FETCH { shift }
   sub nop {  }		# Around a bug
 
-(the bug is described in L<"BUGS">).  One can use this new interface as
+(the bug, fixed in Perl 5.14, is described in L<"BUGS">).  One can use this
+new interface as
 
   tie $a, 'symbolic', 3;
   tie $b, 'symbolic', 4;
@@ -1678,16 +1679,17 @@ from two overloaded packages.
 
 =item *
 
-Relation between overloading and tie()ing is broken.  Overloading is
-triggered or not basing on the I<previous> class of tie()d value.
+Before Perl 5.14, the relation between overloading and tie()ing was broken.
+Overloading is triggered or not basing on the I<previous> class of the
+tie()d variable.
 
-This happens because the presence of overloading is checked too early,
-before any tie()d access is attempted.  If the FETCH()ed class of the
-tie()d value does not change, a simple workaround is to access the value
+This happened because the presence of overloading was checked
+too early, before any tie()d access was attempted.  If the
+class of the value FETCH()ed from the tied variable does not
+change, a simple workaround for code that is to run on older Perl
+versions is to access the value (via C<() = $foo> or some such)
 immediately after tie()ing, so that after this call the I<previous> class
 coincides with the current one.
-
-B<Needed:> a way to fix this without a speed penalty.
 
 =item *
 
