@@ -2977,6 +2977,10 @@ dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS/CountLines.pm	ExtUtils::ParseXS guts
 dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS.pm			converts Perl XS code into C code
 dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS.pod			ExtUtils::ParseXS documentation
 dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS/Utilities.pm		ExtUtils::ParseXS guts
+dist/ExtUtils-ParseXS/lib/ExtUtils/Typemap/InputMap.pm		ExtUtils::Typemap guts
+dist/ExtUtils-ParseXS/lib/ExtUtils/Typemap/OutputMap.pm		ExtUtils::Typemap guts
+dist/ExtUtils-ParseXS/lib/ExtUtils/Typemap.pm			ExtUtils::Typemap, a PXS helper
+dist/ExtUtils-ParseXS/lib/ExtUtils/Typemap/Type.pm		ExtUtils::Typemap guts
 dist/ExtUtils-ParseXS/lib/ExtUtils/xsubpp			External subroutine preprocessor
 dist/ExtUtils-ParseXS/t/001-basic.t				See if ExtUtils::ParseXS works
 dist/ExtUtils-ParseXS/t/002-more.t				Extended ExtUtils::ParseXS testing
@@ -2996,6 +3000,14 @@ dist/ExtUtils-ParseXS/t/111-analyze_preprocessor_statements.t	ExtUtils::ParseXS 
 dist/ExtUtils-ParseXS/t/112-set_cond.t				ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/113-check_cond_preproc_statements.t	ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/114-blurt_death_Warn.t			ExtUtils::ParseXS tests
+dist/ExtUtils-ParseXS/t/501-t-compile.t				ExtUtils::Typemap tests
+dist/ExtUtils-ParseXS/t/510-t-bare.t				ExtUtils::Typemap tests
+dist/ExtUtils-ParseXS/t/511-t-whitespace.t			ExtUtils::Typemap tests
+dist/ExtUtils-ParseXS/t/512-t-file.t				ExtUtils::Typemap tests
+dist/ExtUtils-ParseXS/t/513-t-merge.t				ExtUtils::Typemap tests
+dist/ExtUtils-ParseXS/t/data/combined.typemap			ExtUtils::Typemap test data
+dist/ExtUtils-ParseXS/t/data/other.typemap			ExtUtils::Typemap test data
+dist/ExtUtils-ParseXS/t/data/simple.typemap			ExtUtils::Typemap test data
 dist/ExtUtils-ParseXS/t/lib/IncludeTester.pm			ExtUtils::ParseXS testing utility
 dist/ExtUtils-ParseXS/t/lib/PrimitiveCapture.pm			Primitive STDOUT/ERR capturing for tests
 dist/ExtUtils-ParseXS/t/pseudotypemap1				A test-typemap
