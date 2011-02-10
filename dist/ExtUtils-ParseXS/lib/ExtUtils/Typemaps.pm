@@ -305,7 +305,7 @@ sub remove_typemap {
     $ctype = $_[0]->tidy_ctype;
   }
 
-  return $self->_remove($ctype, 'tidy_ctype', $self->{typemap_section}, $self->{typemap_lookup});
+  return $self->_remove($ctype, $self->{typemap_section}, $self->{typemap_lookup});
 }
 
 =head2 remove_inputmap
@@ -330,7 +330,7 @@ sub remove_inputmap {
     $xstype = $_[0]->xstype;
   }
   
-  return $self->_remove($xstype, 'xstype', $self->{input_section}, $self->{input_lookup});
+  return $self->_remove($xstype, $self->{input_section}, $self->{input_lookup});
 }
 
 =head2 remove_inputmap
@@ -355,35 +355,26 @@ sub remove_outputmap {
     $xstype = $_[0]->xstype;
   }
   
-  return $self->_remove($xstype, 'xstype', $self->{output_section}, $self->{output_lookup});
+  return $self->_remove($xstype, $self->{output_section}, $self->{output_lookup});
 }
 
 sub _remove {
   my $self   = shift;
   my $rm     = shift;
-  my $method = shift;
   my $array  = shift;
   my $lookup = shift;
 
-  if ($lookup) {
-    my $index = $lookup->{$rm};
-    return() if not defined $index;
-    splice(@$array, $index, 1);
-    foreach my $key (keys %$lookup) {
-      if ($lookup->{$key} > $index) {
-        $lookup->{$key}--;
-      }
-    }
-  }
-  else {
-    my $index = 0;
-    foreach my $map (@$array) {
-      last if $map->$method() eq $rm;
-      $index++;
-    }
-    if ($index < @$array) {
-      splice(@$array, $index, 1);
-      return 1;
+  # Just fetch the index of the item from the lookup table
+  my $index = $lookup->{$rm};
+  return() if not defined $index;
+
+  # Nuke the item from storage
+  splice(@$array, $index, 1);
+
+  # Decrement the storage position of all items thereafter
+  foreach my $key (keys %$lookup) {
+    if ($lookup->{$key} > $index) {
+      $lookup->{$key}--;
     }
   }
   return();
