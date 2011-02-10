@@ -25,7 +25,7 @@ Nothing is exported.  Use fully qualified variable names.
 
 our @InitFileCode = ();
 our $FH           = Symbol::gensym();
-our $proto_re     = "[" . quotemeta('\$%&*@;[]') . "]";
+our $proto_re     = "[" . quotemeta('\$%&*@;[]_') . "]";
 our $Overload     = 0;
 our $errors       = 0;
 our $Fallback     = '&PL_sv_undef';
