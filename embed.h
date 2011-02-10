@@ -819,7 +819,6 @@
 #define _swash_inversion_hash(a)	Perl__swash_inversion_hash(aTHX_ a)
 #define _swash_to_invlist(a)	Perl__swash_to_invlist(aTHX_ a)
 #define av_reify(a)		Perl_av_reify(aTHX_ a)
-#define grok_bslash_c(a,b)	Perl_grok_bslash_c(aTHX_ a,b)
 #define is_utf8_X_L(a)		Perl_is_utf8_X_L(aTHX_ a)
 #define is_utf8_X_LV(a)		Perl_is_utf8_X_LV(aTHX_ a)
 #define is_utf8_X_LVT(a)	Perl_is_utf8_X_LVT(aTHX_ a)
@@ -860,6 +859,7 @@
 #    endif
 #  endif
 #  if defined(PERL_IN_DQUOTE_STATIC_C)
+#define grok_bslash_c(a,b)	S_grok_bslash_c(aTHX_ a,b)
 #define grok_bslash_o(a,b,c,d,e)	S_grok_bslash_o(aTHX_ a,b,c,d,e)
 #define regcurly(a)		S_regcurly(aTHX_ a)
 #  endif

@@ -3915,47 +3915,6 @@ Perl_report_evil_fh(pTHX_ const GV *gv)
     }
 }
 
-/* XXX Add documentation after final interface and behavior is decided */
-/* May want to show context for error, so would pass Perl_bslash_c(pTHX_ const char* current, const char* start, const bool output_warning)
-    U8 source = *current;
-
-    May want to add eg, WARN_REGEX
-*/
-
-char
-Perl_grok_bslash_c(pTHX_ const char source, const bool output_warning)
-{
-
-    U8 result;
-
-    if (! isASCII(source)) {
-	Perl_croak(aTHX_ "Character following \"\\c\" must be ASCII");
-    }
-
-    result = toCTRL(source);
-    if (! isCNTRL(result)) {
-	if (source == '{') {
-	    Perl_croak(aTHX_ "It is proposed that \"\\c{\" no longer be valid. It has historically evaluated to\n \";\".  If you disagree with this proposal, send email to perl5-porters@perl.org\nOtherwise, or in the meantime, you can work around this failure by changing\n\"\\c{\" to \";\"");
-	}
-	else if (output_warning) {
-	    U8 clearer[3];
-	    U8 i = 0;
-	    if (! isALNUM(result)) {
-		clearer[i++] = '\\';
-	    }
-	    clearer[i++] = result;
-	    clearer[i++] = '\0';
-
-	    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-			    "\"\\c%c\" more clearly written simply as \"%s\"",
-			    source,
-			    clearer);
-	}
-    }
-
-    return result;
-}
-
 /* To workaround core dumps from the uninitialised tm_zone we get the
  * system to give us a reasonable struct to copy.  This fix means that
  * strftime uses the tm_zone and tm_gmtoff values returned by
