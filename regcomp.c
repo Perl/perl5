@@ -8613,7 +8613,7 @@ tryagain:
 			p += numlen;
 		    }
 		    else
-			ender = *p++;
+			ender = (U8) *p++;
 		    break;
 		} /* End of switch on the literal */
 
