@@ -413,20 +413,29 @@ sub eq_hash {
   !$fail;
 }
 
+# We only provide a subset of the Test::More functionality.
 sub require_ok ($) {
     my ($require) = @_;
-    eval <<REQUIRE_OK;
+    if ($require =~ tr/[A-Za-z0-9:.]//c) {
+	fail("Invalid character in \"$require\", passed to require_ok");
+    } else {
+	eval <<REQUIRE_OK;
 require $require;
 REQUIRE_OK
-    _ok(!$@, _where(), "require $require");
+	is($@, '', _where(), "require $require");
+    }
 }
 
 sub use_ok ($) {
     my ($use) = @_;
-    eval <<USE_OK;
+    if ($use =~ tr/[A-Za-z0-9:.]//c) {
+	fail("Invalid character in \"$use\", passed to use");
+    } else {
+	eval <<USE_OK;
 use $use;
 USE_OK
-    _ok(!$@, _where(), "use $use");
+	is($@, '', _where(), "use $use");
+    }
 }
 
 # runperl - Runs a separate perl interpreter.
