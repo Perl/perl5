@@ -39,26 +39,34 @@ S_regcurly(pTHX_ register const char *s)
 /* XXX Add documentation after final interface and behavior is decided */
 /* May want to show context for error, so would pass Perl_bslash_c(pTHX_ const char* current, const char* start, const bool output_warning)
     U8 source = *current;
-
-    May want to add eg, WARN_REGEX
 */
 
 STATIC char
-S_grok_bslash_c(pTHX_ const char source, const bool output_warning)
+S_grok_bslash_c(pTHX_ const char source, const bool utf8, const bool output_warning)
 {
 
     U8 result;
 
-    if (! isASCII(source)) {
-	Perl_croak(aTHX_ "Character following \"\\c\" must be ASCII");
+    if (utf8) {
+	/* Trying to deprecate non-ASCII usages.  This construct has never
+	 * worked for a utf8 variant.  So, even though are accepting non-ASCII
+	 * Latin1 in 5.14, no need to make them work under utf8 */
+	if (! isASCII(source)) {
+	    Perl_croak(aTHX_ "Character following \"\\c\" must be ASCII");
+	}
     }
 
     result = toCTRL(source);
-    if (! isCNTRL(result)) {
+    if (! isASCII(source)) {
+	    Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
+			    "Character following \"\\c\" must be ASCII");
+    }
+    else if (! isCNTRL(result) && output_warning) {
 	if (source == '{') {
-	    Perl_croak(aTHX_ "It is proposed that \"\\c{\" no longer be valid. It has historically evaluated to\n \";\".  If you disagree with this proposal, send email to perl5-porters@perl.org\nOtherwise, or in the meantime, you can work around this failure by changing\n\"\\c{\" to \";\"");
+	    Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
+			    "\"\\c{\" is deprecated and is more clearly written as \";\"");
 	}
-	else if (output_warning) {
+	else {
 	    U8 clearer[3];
 	    U8 i = 0;
 	    if (! isALNUM(result)) {
@@ -67,8 +75,8 @@ S_grok_bslash_c(pTHX_ const char source, const bool output_warning)
 	    clearer[i++] = result;
 	    clearer[i++] = '\0';
 
-	    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-			    "\"\\c%c\" more clearly written simply as \"%s\"",
+	    Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
+			    "\"\\c%c\" is more clearly written simply as \"%s\"",
 			    source,
 			    clearer);
 	}

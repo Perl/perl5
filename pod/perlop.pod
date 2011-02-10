@@ -1114,7 +1114,8 @@ L<perlebcdic/OPERATOR DIFFERENCES> for the complete list of what these
 sequences mean on both ASCII and EBCDIC platforms.
 
 Use of any other character following the "c" besides those listed above is
-discouraged, and may become deprecated or forbidden.  What happens for those
+discouraged, and some are deprecated with the intention of removing
+those in Perl 5.16.  What happens for any of these
 other characters currently though, is that the value is derived by inverting
 the 7th bit (0x40).
 

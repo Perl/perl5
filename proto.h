@@ -5182,7 +5182,7 @@ STATIC I32	S_do_trans_simple_utf8(pTHX_ SV * const sv)
 
 #endif
 #if defined(PERL_IN_DQUOTE_STATIC_C)
-STATIC char	S_grok_bslash_c(pTHX_ const char source, const bool output_warning)
+STATIC char	S_grok_bslash_c(pTHX_ const char source, const bool utf8, const bool output_warning)
 			__attribute__warn_unused_result__;
 
 STATIC bool	S_grok_bslash_o(pTHX_ const char* s, UV* uv, STRLEN* len, const char** error_msg, const bool output_warning)

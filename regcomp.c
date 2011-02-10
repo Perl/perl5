@@ -8522,7 +8522,7 @@ tryagain:
 			break;
 		    case 'c':
 			p++;
-			ender = grok_bslash_c(*p++, SIZE_ONLY);
+			ender = grok_bslash_c(*p++, UTF, SIZE_ONLY);
 			break;
 		    case '0': case '1': case '2': case '3':case '4':
 		    case '5': case '6': case '7': case '8':case '9':
@@ -9287,7 +9287,7 @@ parseit:
 		    goto recode_encoding;
 		break;
 	    case 'c':
-		value = grok_bslash_c(*RExC_parse++, SIZE_ONLY);
+		value = grok_bslash_c(*RExC_parse++, UTF, SIZE_ONLY);
 		break;
 	    case '0': case '1': case '2': case '3': case '4':
 	    case '5': case '6': case '7':

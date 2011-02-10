@@ -1451,8 +1451,8 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 # Verify works in single quotish context; regex compiler delivers slightly different msg
 # \N{U+BEEF.BEAD} succeeds here, because can't completely hide it from the outside.
 \N{U+0xBEEF}	-	c	-	Invalid hexadecimal number
-\c`	-	c	-	\"\\c`\" more clearly written simply as \"\\ \"
-\c1	-	c	-	\"\\c1\" more clearly written simply as \"q\"
+\c`	-	c	-	\"\\c`\" is more clearly written simply as \"\\ \"
+\c1	-	c	-	\"\\c1\" is more clearly written simply as \"q\"
 \cA	\001	y	$&	\1
 
 \400	\x{100}	y	$&	\x{100}
