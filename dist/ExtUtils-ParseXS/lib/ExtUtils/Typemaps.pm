@@ -683,8 +683,6 @@ sub _escape_backslashes {
 
 =head1 CAVEATS
 
-Not as well tested as I'd like it to be.
-
 Inherits some evil code from C<ExtUtils::ParseXS>.
 
 Adding more typemaps incurs an O(n) validation penalty
