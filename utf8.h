@@ -22,6 +22,8 @@
 
 #define foldEQ_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2) \
 		    foldEQ_utf8_flags(s1, pe1, l1, u1, s2, pe2, l2, u2, 0)
+#define FOLDEQ_UTF8_NOMIX_ASCII (1 << 0)
+
 /*
 =for apidoc ibcmp_utf8
 

@@ -3033,6 +3033,13 @@ instead of upper/lowercasing both the characters, see
 http://www.unicode.org/unicode/reports/tr21/ (Case Mappings).
 
 =cut */
+
+/* A flags parameter has been added which may change, and hence isn't
+ * externally documented.  Currently it is:
+ *  0 for as-documented above
+ *  FOLDEQ_UTF8_NOMIX_ASCII meaning that if a non-ASCII character folds to an
+			    ASCII one, to not match
+ */
 I32
 Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const char *s2, char **pe2, register UV l2, bool u2, U32 flags)
 {
@@ -3100,7 +3107,16 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
         /* If at the beginning of a new character in s1, get its fold to use
          * and the length of the fold */
         if (n1 == 0) {
-            if (u1) {
+	    if (isASCII(*p1)) {
+
+		/* But if not to mix non- with ASCII, fail */
+		if ((flags & FOLDEQ_UTF8_NOMIX_ASCII) && ! isASCII(*p2)) {
+		    return 0;
+		}
+		n1 = 1;
+		*foldbuf1 = toLOWER(*p1);   /* ASCII range fold is lowercase */
+	    }
+	    else if (u1) {
                 to_utf8_fold(p1, foldbuf1, &n1);
             }
             else {  /* Not utf8, convert to it first and then get fold */
@@ -3111,7 +3127,14 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
         }
 
         if (n2 == 0) {    /* Same for s2 */
-            if (u2) {
+	    if (isASCII(*p2)) {
+		if (flags && ! isASCII(*p1)) {
+		    return 0;
+		}
+		n2 = 1;
+		*foldbuf2 = toLOWER(*p2);
+	    }
+	    else if (u2) {
                 to_utf8_fold(p2, foldbuf2, &n2);
             }
             else {
