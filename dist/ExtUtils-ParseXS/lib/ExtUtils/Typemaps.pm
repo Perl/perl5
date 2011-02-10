@@ -5,7 +5,7 @@ use warnings;
 our $VERSION = '1.00';
 use Carp qw(croak);
 
-our $Proto_Regexp = "[" . quotemeta('\$%&*@;[]') . "]";
+our $Proto_Regexp = "[" . quotemeta('\$%&*@;[]_') . "]"; # TODO: Use ExtUtils::ParseXS' constant instead
 
 require ExtUtils::Typemaps::InputMap;
 require ExtUtils::Typemaps::OutputMap;
