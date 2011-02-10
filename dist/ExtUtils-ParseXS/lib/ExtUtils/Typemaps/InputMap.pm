@@ -1,4 +1,4 @@
-package ExtUtils::Typemap::OutputMap;
+package ExtUtils::Typemaps::InputMap;
 use 5.006001;
 use strict;
 use warnings;
@@ -7,19 +7,19 @@ use Carp qw(croak);
 
 =head1 NAME
 
-ExtUtils::Typemap::OutputMap - Entry in the OUTPUT section of a typemap
+ExtUtils::Typemaps::InputMap - Entry in the INPUT section of a typemap
 
 =head1 SYNOPSIS
 
-  use ExtUtils::Typemap;
+  use ExtUtils::Typemaps;
   ...
-  my $output = $typemap->get_output_map('T_NV');
-  my $code = $output->code();
-  $output->code("...");
+  my $input = $typemap->get_input_map('T_NV');
+  my $code = $input->code();
+  $input->code("...");
 
 =head1 DESCRIPTION
 
-Refer to L<ExtUtils::Typemap> for details.
+Refer to L<ExtUtils::Typemaps> for details.
 
 =head1 METHODS
 
@@ -56,7 +56,7 @@ sub new {
 
 =head2 code
 
-Returns or sets the OUTPUT mapping code for this entry.
+Returns or sets the INPUT mapping code for this entry.
 
 =cut
 
@@ -67,7 +67,7 @@ sub code {
 
 =head2 xstype
 
-Returns the name of the XS type of the OUTPUT map.
+Returns the name of the XS type of the INPUT map.
 
 =cut
 
@@ -77,7 +77,7 @@ sub xstype {
 
 =head1 SEE ALSO
 
-L<ExtUtils::Typemap>
+L<ExtUtils::Typemaps>
 
 =head1 AUTHOR
 

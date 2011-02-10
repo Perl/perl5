@@ -1,25 +1,25 @@
-package ExtUtils::Typemap::Type;
+package ExtUtils::Typemaps::Type;
 use 5.006001;
 use strict;
 use warnings;
 our $VERSION = '0.05';
 use Carp qw(croak);
-use ExtUtils::Typemap;
+use ExtUtils::Typemaps;
 
 =head1 NAME
 
-ExtUtils::Typemap::Type - Entry in the TYPEMAP section of a typemap
+ExtUtils::Typemaps::Type - Entry in the TYPEMAP section of a typemap
 
 =head1 SYNOPSIS
 
-  use ExtUtils::Typemap;
+  use ExtUtils::Typemaps;
   ...
   my $type = $typemap->get_type_map('char*');
   my $input = $typemap->get_input_map($type->xstype);
 
 =head1 DESCRIPTION
 
-Refer to L<ExtUtils::Typemap> for details.
+Refer to L<ExtUtils::Typemaps> for details.
 Object associates C<ctype> with C<xstype>, which is the index
 into the in- and output mapping tables.
 
@@ -53,7 +53,7 @@ sub new {
 
   $self->{xstype} = $args{xstype} if defined $args{xstype};
   $self->{ctype} = $args{ctype} if defined $args{ctype};
-  $self->{tidy_ctype} = ExtUtils::Typemap::_tidy_type($self->{ctype});
+  $self->{tidy_ctype} = ExtUtils::Typemaps::_tidy_type($self->{ctype});
   $self->{proto} = $args{'prototype'} if defined $args{'prototype'};
 
   return $self;
@@ -102,7 +102,7 @@ sub tidy_ctype {
 
 =head1 SEE ALSO
 
-L<ExtUtils::Typemap>
+L<ExtUtils::Typemaps>
 
 =head1 AUTHOR
 

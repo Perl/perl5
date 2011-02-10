@@ -173,6 +173,8 @@
 /ExtUtils/ParseXS.pm
 /ExtUtils/ParseXS.pod
 /ExtUtils/ParseXS/
+/ExtUtils/Typemaps.pm
+/ExtUtils/Typemaps/
 /ExtUtils/testlib.pm
 /ExtUtils/xsubpp
 /Fatal.pm

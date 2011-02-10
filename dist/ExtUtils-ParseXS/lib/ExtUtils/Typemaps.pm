@@ -1,4 +1,4 @@
-package ExtUtils::Typemap;
+package ExtUtils::Typemaps;
 use 5.006001;
 use strict;
 use warnings;
@@ -7,22 +7,22 @@ use Carp qw(croak);
 
 our $Proto_Regexp = "[" . quotemeta('\$%&*@;[]') . "]";
 
-require ExtUtils::Typemap::InputMap;
-require ExtUtils::Typemap::OutputMap;
-require ExtUtils::Typemap::Type;
+require ExtUtils::Typemaps::InputMap;
+require ExtUtils::Typemaps::OutputMap;
+require ExtUtils::Typemaps::Type;
 
 =head1 NAME
 
-ExtUtils::Typemap - Read/Write/Modify Perl/XS typemap files
+ExtUtils::Typemaps - Read/Write/Modify Perl/XS typemap files
 
 =head1 SYNOPSIS
 
   # read/create file
-  my $typemap = ExtUtils::Typemap->new(file => 'typemap');
+  my $typemap = ExtUtils::Typemaps->new(file => 'typemap');
   # alternatively create an in-memory typemap
-  # $typemap = ExtUtils::Typemap->new();
+  # $typemap = ExtUtils::Typemaps->new();
   # alternatively create an in-memory typemap by parsing a string
-  # $typemap = ExtUtils::Typemap->new(string => $sometypemap);
+  # $typemap = ExtUtils::Typemaps->new(string => $sometypemap);
   
   # add a mapping
   $typemap->add_typemap(ctype => 'NV', xstype => 'T_NV');
@@ -126,7 +126,7 @@ Optional named arguments: C<replace =E<gt> 1> forces removal/replacement of
 existing C<TYPEMAP> entries of the same C<ctype>.
 
 As an alternative to the named parameters usage, you may pass in
-an C<ExtUtils::Typemap::Type> object, a copy of which will be
+an C<ExtUtils::Typemaps::Type> object, a copy of which will be
 added to the typemap.
 
 =cut
@@ -146,7 +146,7 @@ sub add_typemap {
     my $xstype = $args{xstype};
     croak("Need xstype argument") if not defined $xstype;
 
-    $type = ExtUtils::Typemap::Type->new(
+    $type = ExtUtils::Typemaps::Type->new(
       xstype      => $xstype,
       'prototype' => $args{'prototype'},
       ctype       => $ctype,
@@ -174,7 +174,7 @@ and the C<code> to associate with it for input.
 Optional named arguments: C<replace =E<gt> 1> forces removal/replacement of
 existing C<INPUT> entries of the same C<xstype>.
 
-You may pass in a single C<ExtUtils::Typemap::InputMap> object instead,
+You may pass in a single C<ExtUtils::Typemaps::InputMap> object instead,
 a copy of which will be added to the typemap.
 
 =cut
@@ -194,7 +194,7 @@ sub add_inputmap {
     my $code = $args{code};
     croak("Need code argument") if not defined $code;
 
-    $input = ExtUtils::Typemap::InputMap->new(
+    $input = ExtUtils::Typemaps::InputMap->new(
       xstype => $xstype,
       code   => $code,
     );
@@ -231,7 +231,7 @@ sub add_outputmap {
     my $code = $args{code};
     croak("Need code argument") if not defined $code;
 
-    $output = ExtUtils::Typemap::OutputMap->new(
+    $output = ExtUtils::Typemaps::OutputMap->new(
       xstype => $xstype,
       code   => $code,
     );
@@ -260,7 +260,7 @@ sub add_string {
   croak("Need 'string' argument") if not defined $args{string};
 
   # no, this is not elegant.
-  my $other = ExtUtils::Typemap->new(string => $args{string});
+  my $other = ExtUtils::Typemaps->new(string => $args{string});
   $self->merge(typemap => $other);
 }
 
@@ -270,7 +270,7 @@ Removes a C<TYPEMAP> entry from the typemap.
 
 Required named argument: C<ctype> to specify the entry to remove from the typemap.
 
-Alternatively, you may pass a single C<ExtUtils::Typemap::Type> object.
+Alternatively, you may pass a single C<ExtUtils::Typemaps::Type> object.
 
 =cut
 
@@ -296,7 +296,7 @@ Removes an C<INPUT> entry from the typemap.
 
 Required named argument: C<xstype> to specify the entry to remove from the typemap.
 
-Alternatively, you may pass a single C<ExtUtils::Typemap::InputMap> object.
+Alternatively, you may pass a single C<ExtUtils::Typemaps::InputMap> object.
 
 =cut
 
@@ -321,7 +321,7 @@ Removes an C<OUTPUT> entry from the typemap.
 
 Required named argument: C<xstype> to specify the entry to remove from the typemap.
 
-Alternatively, you may pass a single C<ExtUtils::Typemap::OutputMap> object.
+Alternatively, you may pass a single C<ExtUtils::Typemaps::OutputMap> object.
 
 =cut
 
@@ -364,7 +364,7 @@ Fetches an entry of the TYPEMAP section of the typemap.
 
 Mandatory named arguments: The C<ctype> of the entry.
 
-Returns the C<ExtUtils::Typemap::Type>
+Returns the C<ExtUtils::Typemaps::Type>
 object for the entry if found.
 
 =cut
@@ -390,7 +390,7 @@ typemap.
 Mandatory named arguments: The C<xstype> of the
 entry.
 
-Returns the C<ExtUtils::Typemap::InputMap>
+Returns the C<ExtUtils::Typemaps::InputMap>
 object for the entry if found.
 
 =cut
@@ -415,7 +415,7 @@ typemap.
 Mandatory named arguments: The C<xstype> of the
 entry.
 
-Returns the C<ExtUtils::Typemap::InputMap>
+Returns the C<ExtUtils::Typemaps::InputMap>
 object for the entry if found.
 
 =cut
@@ -506,8 +506,8 @@ sub merge {
   my $self = shift;
   my %args = @_;
   my $typemap = $args{typemap};
-  croak("Need ExtUtils::Typemap as argument")
-    if not ref $typemap or not $typemap->isa('ExtUtils::Typemap');
+  croak("Need ExtUtils::Typemaps as argument")
+    if not ref $typemap or not $typemap->isa('ExtUtils::Typemaps');
 
   my $replace = $args{replace};
 
@@ -620,7 +620,7 @@ sub _parse {
       #$proto = '$' unless $proto;
       #warn("Warning: File '$filename' Line $lineno '$line' Invalid prototype '$proto'\n")
       #  unless _valid_proto_string($proto);
-      push @typemap_expr, ExtUtils::Typemap::Type->new(
+      push @typemap_expr, ExtUtils::Typemaps::Type->new(
         xstype => $kind, proto => $proto, ctype => $type
       );
     } elsif (/^\s/) {
@@ -640,8 +640,8 @@ sub _parse {
   } # end while lines
 
   $self->{typemap_section} = \@typemap_expr;
-  $self->{input_section}   = [ map {ExtUtils::Typemap::InputMap->new(%$_) } @input_expr ];
-  $self->{output_section}  = [ map {ExtUtils::Typemap::OutputMap->new(%$_) } @output_expr ];
+  $self->{input_section}   = [ map {ExtUtils::Typemaps::InputMap->new(%$_) } @input_expr ];
+  $self->{output_section}  = [ map {ExtUtils::Typemaps::OutputMap->new(%$_) } @output_expr ];
   
   return $self->validate();
 }

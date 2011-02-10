@@ -3,7 +3,7 @@ use strict;
 use warnings;
 
 use Test::More tests => 5;
-use ExtUtils::Typemap;
+use ExtUtils::Typemaps;
 use File::Spec;
 use File::Temp;
 
@@ -23,10 +23,10 @@ my $combined_typemap_file = File::Spec->catfile($datadir, 'combined.typemap');
 
 
 SCOPE: {
-  my $first = ExtUtils::Typemap->new(file => $first_typemap_file);
-  isa_ok($first, 'ExtUtils::Typemap');
-  my $second = ExtUtils::Typemap->new(file => $second_typemap_file);
-  isa_ok($second, 'ExtUtils::Typemap');
+  my $first = ExtUtils::Typemaps->new(file => $first_typemap_file);
+  isa_ok($first, 'ExtUtils::Typemaps');
+  my $second = ExtUtils::Typemaps->new(file => $second_typemap_file);
+  isa_ok($second, 'ExtUtils::Typemaps');
 
   $first->merge(typemap => $second);
 
@@ -34,8 +34,8 @@ SCOPE: {
 }
 
 SCOPE: {
-  my $first = ExtUtils::Typemap->new(file => $first_typemap_file);
-  isa_ok($first, 'ExtUtils::Typemap');
+  my $first = ExtUtils::Typemaps->new(file => $first_typemap_file);
+  isa_ok($first, 'ExtUtils::Typemaps');
   my $second_str = slurp($second_typemap_file);
 
   $first->add_string(string => $second_str);

@@ -3,7 +3,7 @@ use strict;
 use warnings;
 
 use Test::More tests => 6;
-use ExtUtils::Typemap;
+use ExtUtils::Typemaps;
 use File::Spec;
 use File::Temp;
 
@@ -20,7 +20,7 @@ sub slurp {
 my $cmp_typemap_file = File::Spec->catfile($datadir, 'simple.typemap');
 my $cmp_typemap_str  = slurp($cmp_typemap_file);
 
-my $map = ExtUtils::Typemap->new();
+my $map = ExtUtils::Typemaps->new();
 $map->add_typemap(ctype => 'unsigned int', xstype => 'T_UV');
 $map->add_inputmap(xstype => 'T_UV', code => '$var = ($type)SvUV($arg);');
 $map->add_outputmap(xstype => 'T_UV', code => 'sv_setuv($arg, (UV)$var);');
@@ -35,15 +35,15 @@ my $tmpfile = File::Spec->catdir($tmpdir, 'simple.typemap');
 
 $map->write(file => $tmpfile);
 is($map->as_string(), slurp($tmpfile), "Simple typemap write matches as_string");
-is(ExtUtils::Typemap->new(file => $cmp_typemap_file)->as_string(), $cmp_typemap_str, "Simple typemap roundtrips");
-is(ExtUtils::Typemap->new(file => $tmpfile)->as_string(), $cmp_typemap_str, "Simple typemap roundtrips (2)");
+is(ExtUtils::Typemaps->new(file => $cmp_typemap_file)->as_string(), $cmp_typemap_str, "Simple typemap roundtrips");
+is(ExtUtils::Typemaps->new(file => $tmpfile)->as_string(), $cmp_typemap_str, "Simple typemap roundtrips (2)");
 
 SCOPE: {
   local $map->{file} = $cmp_typemap_file;
-  is_deeply(ExtUtils::Typemap->new(file => $cmp_typemap_file), $map, "Simple typemap roundtrips (in memory)");
+  is_deeply(ExtUtils::Typemaps->new(file => $cmp_typemap_file), $map, "Simple typemap roundtrips (in memory)");
 }
 
 # test that we can also create them from a string
-my $map_from_str = ExtUtils::Typemap->new(string => $map->as_string());
+my $map_from_str = ExtUtils::Typemaps->new(string => $map->as_string());
 is_deeply($map_from_str, $map);
 
