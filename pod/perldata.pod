@@ -52,7 +52,7 @@ X<scalar>
     $#days		# the last index of array @days
 
 Entire arrays (and slices of arrays and hashes) are denoted by '@',
-which works much like the word "these" or "those" does in English,
+which works much as the word "these" or "those" does in English,
 in that it indicates multiple values are expected.
 X<array>
 
@@ -140,7 +140,7 @@ to determine the context for the right argument.  Assignment to a
 scalar evaluates the right-hand side in scalar context, while
 assignment to an array or hash evaluates the righthand side in list
 context.  Assignment to a list (or slice, which is just a list
-anyway) also evaluates the righthand side in list context.
+anyway) also evaluates the right-hand side in list context.
 
 When you use the C<use warnings> pragma or Perl's B<-w> command-line 
 option, you may see warnings
@@ -391,7 +391,7 @@ inet_aton()/inet_ntoa() routines of the Socket package.
 
 Note that since Perl 5.8.1 the single-number v-strings (like C<v65>)
 are not v-strings before the C<< => >> operator (which is usually used
-to separate a hash key from a hash value), instead they are interpreted
+to separate a hash key from a hash value); instead they are interpreted
 as literal strings ('v65').  They were v-strings from Perl 5.6.0 to
 Perl 5.8.0, but that caused more confusion and breakage than good.
 Multi-number v-strings like C<v65.66> and C<65.66.67> continue to
