@@ -18,8 +18,9 @@ PROTOTYPES: ENABLE
 INCLUDE: const-xs.inc
 
 SV*
-internal_langinfo(code)
+langinfo(code)
 	int	code
+  PROTOTYPE: _
   CODE:
 #ifdef HAS_NL_LANGINFO
 	RETVAL = newSVpv(nl_langinfo(code), 0);
