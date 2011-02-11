@@ -126,11 +126,13 @@ Required named arguments: The C<ctype> (e.g. C<ctype =E<gt> 'double'>)
 and the C<xstype> (e.g. C<xstype =E<gt> 'T_NV'>).
 
 Optional named arguments: C<replace =E<gt> 1> forces removal/replacement of
-existing C<TYPEMAP> entries of the same C<ctype>.
+existing C<TYPEMAP> entries of the same C<ctype>. C<skip =E<gt> 1>
+triggers a I<"first come first serve"> logic by which new entries that conflict
+with existing entries are silently ignored.
 
 As an alternative to the named parameters usage, you may pass in
 an C<ExtUtils::Typemaps::Type> object as first argument, a copy of which will be
-added to the typemap. In that case, only the C<replace> named parameter
+added to the typemap. In that case, only the C<replace> or C<skip> named parameters
 may be used after the object. Example:
 
   $map->add_typemap($type_obj, replace => 1);
@@ -161,9 +163,17 @@ sub add_typemap {
     );
   }
 
+  if ($args{skip} and $args{replace}) {
+    croak("Cannot use both 'skip' and 'replace'");
+  }
+
   if ($args{replace}) {
     $self->remove_typemap(ctype => $type->ctype);
-  } else {
+  }
+  elsif ($args{skip}) {
+    return() if exists $self->{typemap_lookup}{$type->ctype};
+  }
+  else {
     $self->validate(typemap_xstype => $type->xstype, ctype => $type->ctype);
   }
 
@@ -184,11 +194,13 @@ The C<xstype> (e.g. C<xstype =E<gt> 'T_NV'>)
 and the C<code> to associate with it for input.
 
 Optional named arguments: C<replace =E<gt> 1> forces removal/replacement of
-existing C<INPUT> entries of the same C<xstype>.
+existing C<INPUT> entries of the same C<xstype>. C<skip =E<gt> 1>
+triggers a I<"first come first serve"> logic by which new entries that conflict
+with existing entries are silently ignored.
 
 As an alternative to the named parameters usage, you may pass in
 an C<ExtUtils::Typemaps::InputMap> object as first argument, a copy of which will be
-added to the typemap. In that case, only the C<replace> named parameter
+added to the typemap. In that case, only the C<replace> or C<skip> named parameters
 may be used after the object. Example:
 
   $map->add_inputmap($type_obj, replace => 1);
@@ -218,9 +230,17 @@ sub add_inputmap {
     );
   }
 
+  if ($args{skip} and $args{replace}) {
+    croak("Cannot use both 'skip' and 'replace'");
+  }
+
   if ($args{replace}) {
     $self->remove_inputmap(xstype => $input->xstype);
-  } else {
+  }
+  elsif ($args{skip}) {
+    return() if exists $self->{input_lookup}{$input->xstype};
+  }
+  else {
     $self->validate(inputmap_xstype => $input->xstype);
   }
 
@@ -262,9 +282,17 @@ sub add_outputmap {
     );
   }
 
+  if ($args{skip} and $args{replace}) {
+    croak("Cannot use both 'skip' and 'replace'");
+  }
+
   if ($args{replace}) {
     $self->remove_outputmap(xstype => $output->xstype);
-  } else {
+  }
+  elsif ($args{skip}) {
+    return() if exists $self->{output_lookup}{$output->xstype};
+  }
+  else {
     $self->validate(outputmap_xstype => $output->xstype);
   }
 
@@ -529,8 +557,9 @@ operation leaves the object in an inconsistent state so clone it if necessary.
 Mandatory named arguments: Either C<typemap =E<gt> $another_typemap_obj>
 or C<file =E<gt> $path_to_typemap_file> but not both.
 
-Optional argument: C<replace =E<gt> 1> to force replacement
-of existing typemap entries without warning.
+Optional arguments: C<replace =E<gt> 1> to force replacement
+of existing typemap entries without warning or C<skip =E<gt> 1>
+to skip entries that exist already in the typemap.
 
 =cut
 
@@ -550,20 +579,21 @@ sub merge {
     $typemap = ref($self)->new(file => $args{file});
   }
 
-  my $replace = $args{replace};
+  my @params;
+  push @params, 'replace' => $args{replace} if exists $args{replace};
+  push @params, 'skip' => $args{skip} if exists $args{skip};
 
   # FIXME breaking encapsulation. Add accessor code.
-  #
   foreach my $entry (@{$typemap->{typemap_section}}) {
-    $self->add_typemap( $entry, replace => $args{replace} );
+    $self->add_typemap( $entry, @params );
   }
 
   foreach my $entry (@{$typemap->{input_section}}) {
-    $self->add_inputmap( $entry, replace => $args{replace} );
+    $self->add_inputmap( $entry, @params );
   }
 
   foreach my $entry (@{$typemap->{output_section}}) {
-    $self->add_outputmap( $entry, replace => $args{replace} );
+    $self->add_outputmap( $entry, @params );
   }
 
   return 1;

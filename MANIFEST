@@ -3008,6 +3008,7 @@ dist/ExtUtils-ParseXS/t/513-t-merge.t				ExtUtils::Typemaps tests
 dist/ExtUtils-ParseXS/t/data/combined.typemap			ExtUtils::Typemaps test data
 dist/ExtUtils-ParseXS/t/data/conflicting.typemap		ExtUtils::Typemaps test data
 dist/ExtUtils-ParseXS/t/data/confl_repl.typemap			ExtUtils::Typemaps test data
+dist/ExtUtils-ParseXS/t/data/confl_skip.typemap			ExtUtils::Typemaps test data
 dist/ExtUtils-ParseXS/t/data/other.typemap			ExtUtils::Typemaps test data
 dist/ExtUtils-ParseXS/t/data/simple.typemap			ExtUtils::Typemaps test data
 dist/ExtUtils-ParseXS/t/lib/IncludeTester.pm			ExtUtils::ParseXS testing utility
