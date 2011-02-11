@@ -1605,7 +1605,7 @@ See L</warn>, L<perlvar>, L<warnings> and L<perllexwarn>.
 
 Note that, because C<eval> traps otherwise-fatal errors, it is useful for
 determining whether a particular feature (such as C<socket> or C<symlink>)
-is implemented.  It is also Perl's exception trapping mechanism, where
+is implemented.  It is also Perl's exception-trapping mechanism, where
 the die operator is used to raise exceptions.
 
 If you want to trap errors when loading an XS module, some problems with
