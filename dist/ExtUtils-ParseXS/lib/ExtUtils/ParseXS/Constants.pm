@@ -11,7 +11,7 @@ ExtUtils::ParseXS::Constants - Initialization values for some globals
 
   use ExtUtils::ParseXS::Constants ();
 
-  $proto_re = $ExtUtils::ParseXS::Constants::proto_re;
+  $PrototypeRegexp = $ExtUtils::ParseXS::Constants::PrototypeRegexp;
 
 =head1 DESCRIPTION
 
@@ -23,13 +23,16 @@ Nothing is exported.  Use fully qualified variable names.
 
 =cut
 
-our @InitFileCode = ();
-our $FH           = Symbol::gensym();
-our $proto_re     = "[" . quotemeta('\$%&*@;[]_') . "]";
-our $Overload     = 0;
-our $errors       = 0;
-our $Fallback     = '&PL_sv_undef';
-our @keywords     = qw( 
+# FIXME: THESE ARE NOT CONSTANTS!
+our @InitFileCode;
+our $FH              = Symbol::gensym();
+our $Overload        = 0;
+our $errors          = 0;
+
+our $Fallback        = '&PL_sv_undef'; # FIXME Check: Is this a constant?
+
+our $PrototypeRegexp = "[" . quotemeta('\$%&*@;[]_') . "]";
+our @XSKeywords      = qw( 
   REQUIRE BOOT CASE PREINIT INPUT INIT CODE PPCODE
   OUTPUT CLEANUP ALIAS ATTRS PROTOTYPES PROTOTYPE
   VERSIONCHECK INCLUDE INCLUDE_COMMAND SCOPE INTERFACE

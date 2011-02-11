@@ -262,7 +262,7 @@ Upon failure, returns C<0>.
 sub valid_proto_string {
   my($string) = @_;
 
-  if ( $string =~ /^$ExtUtils::ParseXS::Constants::proto_re+$/ ) {
+  if ( $string =~ /^$ExtUtils::ParseXS::Constants::PrototypeRegexp+$/ ) {
     return $string;
   }
 
@@ -440,7 +440,7 @@ sub process_single_typemap {
       # skip blank lines
       next if /^$/;
       my($type,$kind, $proto) =
-        m/^\s*(.*?\S)\s+(\S+)\s*($ExtUtils::ParseXS::Constants::proto_re*)\s*$/
+        m/^\s*(.*?\S)\s+(\S+)\s*($ExtUtils::ParseXS::Constants::PrototypeRegexp*)\s*$/
           or warn(
             "Warning: File '$typemap' Line $.  '$logged_line' " .
             "TYPEMAP entry needs 2 or 3 columns\n"

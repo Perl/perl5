@@ -161,7 +161,7 @@ sub process_file {
 
   # Match an XS keyword
   $self->{BLOCK_re} = '\s*(' .
-    join('|' => @ExtUtils::ParseXS::Constants::keywords) .
+    join('|' => @ExtUtils::ParseXS::Constants::XSKeywords) .
     "|$END)\\s*:";
 
   our ($C_group_rex, $C_arg);
