@@ -5,6 +5,8 @@ use Exporter;
 use File::Spec;
 use lib qw( lib );
 use ExtUtils::ParseXS::Constants ();
+require ExtUtils::Typemaps;
+
 our (@ISA, @EXPORT_OK);
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(

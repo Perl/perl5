@@ -129,21 +129,26 @@ Optional named arguments: C<replace =E<gt> 1> forces removal/replacement of
 existing C<TYPEMAP> entries of the same C<ctype>.
 
 As an alternative to the named parameters usage, you may pass in
-an C<ExtUtils::Typemaps::Type> object, a copy of which will be
-added to the typemap.
+an C<ExtUtils::Typemaps::Type> object as first argument, a copy of which will be
+added to the typemap. In that case, only the C<replace> named parameter
+may be used after the object. Example:
+
+  $map->add_typemap($type_obj, replace => 1);
 
 =cut
 
 sub add_typemap {
   my $self = shift;
   my $type;
-  my $replace = 0;
-  if (@_ == 1) {
+  my %args;
+
+  if ((@_ % 2) == 1) {
     my $orig = shift;
-    $type = $orig->new(@_);
+    $type = $orig->new();
+    %args = @_;
   }
   else {
-    my %args = @_;
+    %args = @_;
     my $ctype = $args{ctype};
     croak("Need ctype argument") if not defined $ctype;
     my $xstype = $args{xstype};
@@ -154,10 +159,9 @@ sub add_typemap {
       'prototype' => $args{'prototype'},
       ctype       => $ctype,
     );
-    $replace = $args{replace};
   }
 
-  if ($replace) {
+  if ($args{replace}) {
     $self->remove_typemap(ctype => $type->ctype);
   } else {
     $self->validate(typemap_xstype => $type->xstype, ctype => $type->ctype);
@@ -182,21 +186,27 @@ and the C<code> to associate with it for input.
 Optional named arguments: C<replace =E<gt> 1> forces removal/replacement of
 existing C<INPUT> entries of the same C<xstype>.
 
-You may pass in a single C<ExtUtils::Typemaps::InputMap> object instead,
-a copy of which will be added to the typemap.
+As an alternative to the named parameters usage, you may pass in
+an C<ExtUtils::Typemaps::InputMap> object as first argument, a copy of which will be
+added to the typemap. In that case, only the C<replace> named parameter
+may be used after the object. Example:
+
+  $map->add_inputmap($type_obj, replace => 1);
 
 =cut
 
 sub add_inputmap {
   my $self = shift;
   my $input;
-  my $replace = 0;
-  if (@_ == 1) {
+  my %args;
+
+  if ((@_ % 2) == 1) {
     my $orig = shift;
-    $input = $orig->new(@_);
+    $input = $orig->new();
+    %args = @_;
   }
   else {
-    my %args = @_;
+    %args = @_;
     my $xstype = $args{xstype};
     croak("Need xstype argument") if not defined $xstype;
     my $code = $args{code};
@@ -206,9 +216,9 @@ sub add_inputmap {
       xstype => $xstype,
       code   => $code,
     );
-    $replace = $args{replace};
   }
-  if ($replace) {
+
+  if ($args{replace}) {
     $self->remove_inputmap(xstype => $input->xstype);
   } else {
     $self->validate(inputmap_xstype => $input->xstype);
@@ -232,13 +242,15 @@ Works exactly the same as C<add_inputmap>.
 sub add_outputmap {
   my $self = shift;
   my $output;
-  my $replace = 0;
-  if (@_ == 1) {
+  my %args;
+
+  if ((@_ % 2) == 1) {
     my $orig = shift;
-    $output = $orig->new(@_);
+    $output = $orig->new();
+    %args = @_;
   }
   else {
-    my %args = @_;
+    %args = @_;
     my $xstype = $args{xstype};
     croak("Need xstype argument") if not defined $xstype;
     my $code = $args{code};
@@ -248,9 +260,9 @@ sub add_outputmap {
       xstype => $xstype,
       code   => $code,
     );
-    $replace = $args{replace};
   }
-  if ($replace) {
+
+  if ($args{replace}) {
     $self->remove_outputmap(xstype => $output->xstype);
   } else {
     $self->validate(outputmap_xstype => $output->xstype);
@@ -543,15 +555,15 @@ sub merge {
   # FIXME breaking encapsulation. Add accessor code.
   #
   foreach my $entry (@{$typemap->{typemap_section}}) {
-    $self->add_typemap( $entry );
+    $self->add_typemap( $entry, replace => $args{replace} );
   }
 
   foreach my $entry (@{$typemap->{input_section}}) {
-    $self->add_inputmap( $entry );
+    $self->add_inputmap( $entry, replace => $args{replace} );
   }
 
   foreach my $entry (@{$typemap->{output_section}}) {
-    $self->add_outputmap( $entry );
+    $self->add_outputmap( $entry, replace => $args{replace} );
   }
 
   return 1;
