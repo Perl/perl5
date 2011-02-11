@@ -2,7 +2,6 @@ package ExtUtils::Typemaps::InputMap;
 use 5.006001;
 use strict;
 use warnings;
-our $VERSION = '0.05';
 use Carp qw(croak);
 
 =head1 NAME
@@ -73,6 +72,26 @@ Returns the name of the XS type of the INPUT map.
 
 sub xstype {
   return $_[0]->{xstype};
+}
+
+=head2 cleaned_code
+
+Returns a cleaned-up copy of the code to which certain transformations
+have been applied to make it more ANSI compliant.
+
+=cut
+
+sub cleaned_code {
+  my $self = shift;
+  my $code = $self->code;
+
+  $code =~ s/;*\s+\z//;
+
+  # Move C pre-processor instructions to column 1 to be strictly ANSI
+  # conformant. Some pre-processors are fussy about this.
+  $code =~ s/^\s+#/#/mg;
+
+  return $code;
 }
 
 =head1 SEE ALSO
