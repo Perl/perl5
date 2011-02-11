@@ -512,9 +512,10 @@ sub as_string {
 =head2 merge
 
 Merges a given typemap into the object. Note that a failed merge
-operation leaves the object in an inconsistent state so clone if necessary.
+operation leaves the object in an inconsistent state so clone it if necessary.
 
-Mandatory named argument: C<typemap =E<gt> $another_typemap>
+Mandatory named arguments: Either C<typemap =E<gt> $another_typemap_obj>
+or C<file =E<gt> $path_to_typemap_file> but not both.
 
 Optional argument: C<replace =E<gt> 1> to force replacement
 of existing typemap entries without warning.
@@ -524,9 +525,18 @@ of existing typemap entries without warning.
 sub merge {
   my $self = shift;
   my %args = @_;
+
+  if (exists $args{typemap} and exists $args{file}) {
+    croak("Need {file} OR {typemap} argument. Not both!");
+  }
+  elsif (not exists $args{typemap} and not exists $args{file}) {
+    croak("Need {file} or {typemap} argument!");
+  }
+
   my $typemap = $args{typemap};
-  croak("Need ExtUtils::Typemaps as argument")
-    if not ref $typemap or not $typemap->isa('ExtUtils::Typemaps');
+  if (not defined $typemap) {
+    $typemap = ref($self)->new(file => $args{file});
+  }
 
   my $replace = $args{replace};
 
