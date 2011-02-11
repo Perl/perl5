@@ -10,9 +10,9 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 48;
+use Test::More tests => 58;
 
-my @flags = qw( a d l u );
+my @flags = qw( a d l u aa );
 
 use re '/i';
 ok "Foo" =~ /foo/, 'use re "/i"';
@@ -127,13 +127,32 @@ no re '/x';
       $w = "";
       eval "use re '/$i$j'";
       if ($i eq $j) {
-        like $w, qr/The \"$i\" flag may not appear twice/,
-            "warning with use re \"/$i$i\"";
+        if ($i eq 'a') {
+          is ($w, "", "no warning with use re \"/aa\", $w");
+        }
+        else {
+            like $w, qr/The \"$i\" flag may not appear twice/,
+              "warning with use re \"/$i$i\"";
+        }
       }
       else {
-        like $w, qr/The "$i" and "$j" flags are exclusive/,
-          "warning with eval \"use re \"/$i$j\"";
+        if ($j =~ /$i/) {
+          # If one is a subset of the other, re.pm uses the longest one.
+          like $w, qr/The "$j" and "$i" flags are exclusive/,
+            "warning with eval \"use re \"/$j$i\"";
+        }
+        else {
+          like $w, qr/The "$i" and "$j" flags are exclusive/,
+            "warning with eval \"use re \"/$i$j\"";
+        }
       }
     }
   }
+
+  $w = "";
+  eval "use re '/axa'";
+  like $w, qr/The "a" flag may only appear twice if adjacent, like "aa"/,
+    "warning with eval \"use re \"/axa\"";
+
+
 }

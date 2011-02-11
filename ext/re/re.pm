@@ -4,7 +4,7 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.17";
+our $VERSION     = "0.18";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = ('regmust',
                     qw(is_regexp regexp_pattern
@@ -29,6 +29,7 @@ my %reflags = (
     l => 1,
     u => 2,
     a => 3,
+    aa => 4,
 );
 
 sub setcolor {
@@ -144,7 +145,8 @@ sub bits {
 	} elsif ($s =~ s/^\///) {
 	    my $reflags = $^H{reflags} || 0;
 	    my $seen_charset;
-	    for(split//, $s) {
+	    while ($s =~ m/( aa | . )/gx) {
+                $_ = $1;
 		if (/[adul]/) {
 		    if ($on) {
 			if ($seen_charset) {
@@ -153,6 +155,12 @@ sub bits {
                                 Carp::carp(
                                 qq 'The "$seen_charset" and "$_" flags '
                                 .qq 'are exclusive'
+                                );
+                            }
+                            elsif ($seen_charset eq 'a') {
+                                Carp::carp(
+                                qq 'The "a" flag may only appear twice if '
+                                .qq 'adjacent, like "aa"'
                                 );
                             }
                             else {
