@@ -810,11 +810,10 @@ sub _parse {
       my($type, $kind, $proto) = /^(.*?\S)\s+(\S+)\s*($ExtUtils::ParseXS::Constants::PrototypeRegexp*)$/o
         or warn("Warning: File '$filename' Line $lineno '$line' TYPEMAP entry needs 2 or 3 columns\n"),
            next;
-      #$proto = '' if not $proto;
       # prototype defaults to '$'
-      #$proto = '$' unless $proto;
-      #warn("Warning: File '$filename' Line $lineno '$line' Invalid prototype '$proto'\n")
-      #  unless _valid_proto_string($proto);
+      $proto = '$' unless $proto;
+      warn("Warning: File '$filename' Line $lineno '$line' Invalid prototype '$proto'\n")
+        unless _valid_proto_string($proto);
       $self->add_typemap(
         ExtUtils::Typemaps::Type->new(
           xstype => $kind, proto => $proto, ctype => $type
