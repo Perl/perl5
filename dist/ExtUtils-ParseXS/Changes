@@ -1,5 +1,19 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+  - Significant refactoring of the whole code base.
+    It finally runs under 'use strict' for the first time!
+    [James Keenan]
+
+  - Check API compatibility when loading xs modules.
+    If on a new-enough perl, add the XS_APIVERSION_BOOTCHECK macro to
+    the _boot function of every XS module to compare it against the API
+    version the module has been compiled against. If the versions do
+    not match, an exception is thrown. [Florian Ragwitz]
+
+  - Fixed compiler warnings in XS. [Zefram]
+
+  - Spell-check [Peter J. Acklam]
+
 2.2206 - Sun Jul  4 15:43:21 EDT 2010
 
  Bug fixes:
