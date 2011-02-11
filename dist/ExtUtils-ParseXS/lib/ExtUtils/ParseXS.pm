@@ -44,7 +44,7 @@ our (
   $FH, $Package, $func_name, $Full_func_name, $pname, $ALIAS,
 );
 
-our $self = {};
+our $self = bless {} => __PACKAGE__;
 
 sub process_file {
 
