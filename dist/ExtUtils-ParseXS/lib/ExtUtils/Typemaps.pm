@@ -548,6 +548,114 @@ sub merge {
 }
 
 
+=head2 _get_typemap_hash
+
+Returns a hash mapping the C types to the XS types:
+
+  {
+    'char **' => 'T_PACKEDARRAY',
+    'bool_t' => 'T_IV',
+    'AV *' => 'T_AVREF',
+    'InputStream' => 'T_IN',
+    'double' => 'T_DOUBLE',
+    # ...
+  }
+
+This is documented because it is used by C<ExtUtils::ParseXS>,
+but it's not intended for general consumption. May be removed
+at any time.
+
+=cut
+
+sub _get_typemap_hash {
+  my $self = shift;
+  my $lookup  = $self->{typemap_lookup};
+  my $storage = $self->{typemap_section};
+
+  my %rv;
+  foreach my $ctype (keys %$lookup) {
+    $rv{$ctype} = $storage->[ $lookup->{$ctype} ]->xstype;
+  }
+
+  return \%rv;
+}
+
+=head2 _get_inputmap_hash
+
+Returns a hash mapping the XS types (identifiers) to the
+corresponding INPUT code:
+
+  {
+    'T_CALLBACK' => '   $var = make_perl_cb_$type($arg)
+  ',
+    'T_OUT' => '    $var = IoOFP(sv_2io($arg))
+  ',
+    'T_REF_IV_PTR' => '   if (sv_isa($arg, \\"${ntype}\\")) {
+    # ...
+  }
+
+This is documented because it is used by C<ExtUtils::ParseXS>,
+but it's not intended for general consumption. May be removed
+at any time.
+
+=cut
+
+sub _get_inputmap_hash {
+  my $self = shift;
+  my $lookup  = $self->{input_lookup};
+  my $storage = $self->{input_section};
+
+  my %rv;
+  foreach my $xstype (keys %$lookup) {
+    $rv{$xstype} = $storage->[ $lookup->{$xstype} ]->code;
+  }
+
+  return \%rv;
+}
+
+
+=head2 _get_outputmap_hash
+
+Returns a hash mapping the XS types (identifiers) to the
+corresponding OUTPUT code:
+
+  {
+    'T_CALLBACK' => '   sv_setpvn($arg, $var.context.value().chp(),
+                $var.context.value().size());
+  ',
+    'T_OUT' => '    {
+            GV *gv = newGVgen("$Package");
+            if ( do_open(gv, "+>&", 3, FALSE, 0, 0, $var) )
+                sv_setsv($arg, sv_bless(newRV((SV*)gv), gv_stashpv("$Package",1)));
+            else
+                $arg = &PL_sv_undef;
+         }
+  ',
+    # ...
+  }
+
+This is documented because it is used by C<ExtUtils::ParseXS>,
+but it's not intended for general consumption. May be removed
+at any time.
+
+=cut
+
+sub _get_outputmap_hash {
+  my $self = shift;
+  my $lookup  = $self->{output_lookup};
+  my $storage = $self->{output_section};
+
+  my %rv;
+  foreach my $xstype (keys %$lookup) {
+    $rv{$xstype} = $storage->[ $lookup->{$xstype} ]->code;
+  }
+
+  return \%rv;
+}
+
+
+
+
 # make sure that the provided types wouldn't collide with what's
 # in the object already.
 sub validate {
