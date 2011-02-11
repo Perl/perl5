@@ -517,7 +517,7 @@ None.
 
 =item * Return Value
 
-Implicitly returns true when final C<print> statement completes.
+Returns true.
 
 =back
 
@@ -580,6 +580,7 @@ S_croak_xs_usage(pTHX_ const CV *const cv, const char *const params)
 #endif /* !defined(newXS_flags) */
 
 EOF
+  return 1;
 }
 
 =head2 C<assign_func_args()>
