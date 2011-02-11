@@ -2656,6 +2656,13 @@ cpan/Unicode-Normalize/t/proto.t	Unicode::Normalize
 cpan/Unicode-Normalize/t/split.t	Unicode::Normalize
 cpan/Unicode-Normalize/t/test.t		Unicode::Normalize
 cpan/Unicode-Normalize/t/tie.t		Unicode::Normalize
+cpan/Version-Requirements/Changes
+cpan/Version-Requirements/lib/Version/Requirements.pm
+cpan/Version-Requirements/t/accepts.t
+cpan/Version-Requirements/t/basic.t
+cpan/Version-Requirements/t/finalize.t
+cpan/Version-Requirements/t/from-hash.t
+cpan/Version-Requirements/t/merge.t
 cpan/Win32API-File/buffers.h	Win32API::File extension
 cpan/Win32API-File/cFile.h	Win32API::File extension
 cpan/Win32API-File/cFile.pc	Win32API::File extension

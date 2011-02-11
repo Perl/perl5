@@ -1593,6 +1593,15 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'first-come',
 	},
 
+    'Version::Requirements' =>
+	{
+	'MAINTAINER'	=> 'rjbs',
+	'DISTRIBUTION'	=> 'RJBS/Version-Requirements-0.101020.tar.gz',
+	'FILES'		=> q[cpan/Version-Requirements],
+	'EXCLUDED'	=> [ qw(t/release-pod-syntax.t) ],
+	'UPSTREAM'	=> 'cpan',
+	},
+
     'version' =>
 	{
 	'MAINTAINER'	=> 'jpeacock',

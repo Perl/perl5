@@ -367,6 +367,7 @@
 /Unicode/Collate.pm
 /Unicode/Collate/
 /Unicode/Normalize.pm
+/Version/Requirements.pm
 /XS
 /XSLoader.pm
 /attributes.pm

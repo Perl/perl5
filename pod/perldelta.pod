@@ -116,7 +116,9 @@ cribbed.
 
 =item *
 
-XXX
+C<Version::Requirements> version 0.101020 has been added as a dual-life
+module.  It provides a standard library to model and manipulates module
+prerequisites and version constraints as defined in the L<CPAN::Meta::Spec>.
 
 =back
 
