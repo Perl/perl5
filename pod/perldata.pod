@@ -452,7 +452,7 @@ produces a compile-time error instead.  The restriction lasts to the
 end of the enclosing block.  An inner block may countermand this
 by saying C<no strict 'subs'>.
 
-=head3 Array Joining Delimiter
+=head3 Array Interpolation
 X<array, interpolation> X<interpolation, array> X<$">
 
 Arrays and slices are interpolated into double-quoted strings
