@@ -31,6 +31,8 @@ our $errors          = 0;
 
 our $Fallback        = '&PL_sv_undef'; # FIXME Check: Is this a constant?
 
+# Note that to reduce maintenance, $PrototypeRegexp is used
+# by ExtUtils::Typemaps, too!
 our $PrototypeRegexp = "[" . quotemeta('\$%&*@;[]_') . "]";
 our @XSKeywords      = qw( 
   REQUIRE BOOT CASE PREINIT INPUT INIT CODE PPCODE

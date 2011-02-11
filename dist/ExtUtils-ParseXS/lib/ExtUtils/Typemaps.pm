@@ -5,8 +5,8 @@ use warnings;
 our $VERSION = '1.00';
 use Carp qw(croak);
 
-our $Proto_Regexp = "[" . quotemeta('\$%&*@;[]_') . "]"; # TODO: Use ExtUtils::ParseXS' constant instead
-
+require ExtUtils::ParseXS;
+require ExtUtils::ParseXS::Constants;
 require ExtUtils::Typemaps::InputMap;
 require ExtUtils::Typemaps::OutputMap;
 require ExtUtils::Typemaps::Type;
@@ -486,7 +486,7 @@ sub as_string {
   push @code, "TYPEMAP\n";
   foreach my $entry (@$typemap) {
     # type kind proto
-    # /^(.*?\S)\s+(\S+)\s*($Proto_Regexp*)$/o
+    # /^(.*?\S)\s+(\S+)\s*($ExtUtils::ParseXS::Constants::PrototypeRegexp*)$/o
     push @code, $entry->ctype . "\t" . $entry->xstype
               . ($entry->proto ne '' ? "\t".$entry->proto : '') . "\n";
   }
@@ -615,7 +615,7 @@ sub _parse {
       my $line = $_;
       s/^\s+//; s/\s+$//;
       next if /^#/ or /^$/;
-      my($type, $kind, $proto) = /^(.*?\S)\s+(\S+)\s*($Proto_Regexp*)$/o
+      my($type, $kind, $proto) = /^(.*?\S)\s+(\S+)\s*($ExtUtils::ParseXS::Constants::PrototypeRegexp*)$/o
         or warn("Warning: File '$filename' Line $lineno '$line' TYPEMAP entry needs 2 or 3 columns\n"),
            next;
       #$proto = '' if not $proto;
@@ -675,7 +675,7 @@ sub _tidy_type {
 # taken from ExtUtils::ParseXS
 sub _valid_proto_string {
   my $string = shift;
-  if ($string =~ /^$Proto_Regexp+$/o) {
+  if ($string =~ /^$ExtUtils::ParseXS::Constants::PrototypeRegexp+$/o) {
     return $string;
   }
 
