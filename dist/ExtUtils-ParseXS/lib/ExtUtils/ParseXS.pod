@@ -104,7 +104,7 @@ Default is true.
 
 =item B<s>
 
-I have no clue what this does.  Strips function prefixes?
+I<Maintainer note:> I have no clue what this does.  Strips function prefixes?
 
 =back
 
@@ -131,17 +131,25 @@ Ken Williams, <ken@mathforum.org>
 
 David Golden, <dagolden@cpan.org>
 
+=item *
+
+James Keenan, <jkeenan@cpan.org>
+
+=item *
+
+Steffen Mueller, <smueller@cpan.org>
+
 =back
 
 =head1 COPYRIGHT
 
-Copyright 2002-2009 by Ken Williams, David Golden and other contributors.  All
+Copyright 2002-2011 by Ken Williams, David Golden and other contributors.  All
 rights reserved.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
-Based on the ExtUtils::xsubpp code by Larry Wall and the Perl 5
+Based on the C<ExtUtils::xsubpp> code by Larry Wall and the Perl 5
 Porters, which was released under the same license terms.
 
 =head1 SEE ALSO
