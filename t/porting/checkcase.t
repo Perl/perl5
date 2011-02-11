@@ -10,6 +10,10 @@ my %files;
 my $test_count = 0;
 
 find(sub {
+	   # We only care about directories to the extent they
+	   # result in an actual file collision, so skip dirs
+	   return if -d $File::Find::name;
+
 	   my $name = $File::Find::name;
 	   # Assumes that the path separator is exactly one character.
 	   $name =~ s/^\.\..//;
