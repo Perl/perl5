@@ -42,7 +42,7 @@ None by default.  C<process_file()> may be exported upon request.
 
 =over 4
 
-=item process_xs()
+=item process_file()
 
 This function processes an XS file and sends output to a C file.
 Named parameters control how the processing is done.  The following
