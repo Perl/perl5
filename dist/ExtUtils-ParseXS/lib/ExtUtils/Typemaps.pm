@@ -653,6 +653,38 @@ sub _get_outputmap_hash {
   return \%rv;
 }
 
+=head2 _get_prototype_hash
+
+Returns a hash mapping the C types of the typemap to their
+corresponding prototypes.
+
+  {
+    'char **' => '$',
+    'bool_t' => '$',
+    'AV *' => '$',
+    'InputStream' => '$',
+    'double' => '$',
+    # ...
+  }
+
+This is documented because it is used by C<ExtUtils::ParseXS>,
+but it's not intended for general consumption. May be removed
+at any time.
+
+=cut
+
+sub _get_prototype_hash {
+  my $self = shift;
+  my $lookup  = $self->{typemap_lookup};
+  my $storage = $self->{typemap_section};
+
+  my %rv;
+  foreach my $ctype (keys %$lookup) {
+    $rv{$ctype} = $storage->[ $lookup->{$ctype} ]->proto || '$';
+  }
+
+  return \%rv;
+}
 
 
 
