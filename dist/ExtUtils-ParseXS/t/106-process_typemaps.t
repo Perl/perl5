@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use Carp;
 use Cwd;
-use Data::Dumper;$Data::Dumper::Indent=1;
 use File::Spec;
 use File::Temp qw( tempdir );
 use Test::More tests =>  7;
