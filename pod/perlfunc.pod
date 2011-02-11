@@ -2996,9 +2996,26 @@ total number of elements so generated.  Evaluates BLOCK or EXPR in
 list context, so each element of LIST may produce zero, one, or
 more elements in the returned value.
 
-    @chars = map(chr, @nums);
+    @chars = map(chr, @numbers);
 
-translates a list of numbers to the corresponding characters.  And
+translates a list of numbers to the corresponding characters.
+
+    my @squares = map { $_ * $_ } @numbers;
+
+translates a list of numbers to their squared values.
+
+    my @squares = map { $_ > 5 ? ($_ * $_) : () } @numbers;
+
+shows that number of returned elements can differ from the number of
+input elements. To omit an element, return an empty list ().
+This could also be achieved by writing
+
+    my @squares = map { $_ * $_ } grep { $_ > 5 } @numbers;
+
+which makes the intention more clear.
+
+Map always returns a list which can be assigned to a hash where the elements
+become key/value pairs. See L<perldata> for more details.
 
     %hash = map { get_a_key_for($_) => $_ } @array;
 
