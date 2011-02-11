@@ -375,19 +375,22 @@ sub process_typemaps {
 
   push @tm, standard_typemap_locations( \@INC );
 
-  my ($type_kind_ref, $proto_letter_ref, $input_expr_ref, $output_expr_ref)
-    = ( {}, {}, {}, {} );
-
-  foreach my $typemap (@tm) {
-    next unless -f $typemap;
+  my $typemap = ExtUtils::Typemaps->new;
+  foreach my $typemap_loc (@tm) {
+    next unless -f $typemap_loc;
     # skip directories, binary files etc.
-    warn("Warning: ignoring non-text typemap file '$typemap'\n"), next
-      unless -T $typemap;
-    ($type_kind_ref, $proto_letter_ref, $input_expr_ref, $output_expr_ref) =
-      process_single_typemap( $typemap,
-        $type_kind_ref, $proto_letter_ref, $input_expr_ref, $output_expr_ref);
+    warn("Warning: ignoring non-text typemap file '$typemap_loc'\n"), next
+      unless -T $typemap_loc;
+
+    $typemap->merge(file => $typemap_loc, replace => 1);
   }
-  return ($type_kind_ref, $proto_letter_ref, $input_expr_ref, $output_expr_ref);
+
+  return (
+    $typemap->_get_typemap_hash(),
+    $typemap->_get_prototype_hash(),
+    $typemap->_get_inputmap_hash(),
+    $typemap->_get_outputmap_hash(),
+  );
 }
 
 =head2 C<process_single_typemap()>
