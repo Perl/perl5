@@ -14,13 +14,13 @@ evidence that the Perl users apply TMTOWTDI to all endeavors, not just
 programming. From websites, to IRC, to mailing lists, there is more than one
 way to get involved in the community.
 
-=head2 Where to find the community
+=head2 Where to Find the Community
 
 There is a central directory for the Perl community: L<http://perl.org>
 maintained by the Perl Foundation (L<http://www.perlfoundation.org/>),
 which tracks and provides services for a variety of other community sites.
 
-=head2 Mailing lists and Newsgroups
+=head2 Mailing Lists and Newsgroups
 
 Perl runs on e-mail, there is no doubt about it. The Camel book was originally
 written mostly over e-mail and today Perl's development is co-ordinated through
