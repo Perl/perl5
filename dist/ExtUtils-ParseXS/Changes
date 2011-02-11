@@ -1,5 +1,8 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+  - Move typemap handling code to ExtUtils::Typemaps
+    with full object-oriented goodness. [Steffen Mueller]
+
   - Significant refactoring of the whole code base.
     It finally runs under 'use strict' for the first time!
     [James Keenan]
