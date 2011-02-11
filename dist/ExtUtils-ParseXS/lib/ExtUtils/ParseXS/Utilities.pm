@@ -303,7 +303,7 @@ refactored.)  Here is a I<rough> description of what is in these hashrefs:
     # ...
   }
 
-Keys:  C types.  Values:  Corresponding Perl types.
+Keys:  C types.  Values:  XS types identifiers
 
 =item * C<$proto_letter_ref>
 
@@ -329,7 +329,7 @@ Keys: C types.  Values. Corresponding prototype letters.
     # ...
   }
 
-Keys:  Perl API calls B<CONFIRM!>.  Values:  Newline-terminated strings that
+Keys:  XS typemap identifiers.  Values:  Newline-terminated strings that
 will be written to C source code (F<.c>) files.   The strings are C code, but
 with Perl variables whose values will be interpolated at F<xsubpp>'s runtime
 by one of the C<eval EXPR> statements in ExtUtils::ParseXS.
@@ -351,7 +351,7 @@ by one of the C<eval EXPR> statements in ExtUtils::ParseXS.
     # ...
   }
 
-Keys:  Perl API calls B<CONFIRM!>.  Values:  Newline-terminated strings that
+Keys:  XS typemap identifiers.  Values:  Newline-terminated strings that
 will be written to C source code (F<.c>) files.   The strings are C code, but
 with Perl variables whose values will be interpolated at F<xsubpp>'s runtime
 by one of the C<eval EXPR> statements in ExtUtils::ParseXS.
