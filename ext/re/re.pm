@@ -147,12 +147,20 @@ sub bits {
 	    for(split//, $s) {
 		if (/[adul]/) {
 		    if ($on) {
-			if ($seen_charset && $seen_charset ne $_) {
+			if ($seen_charset) {
 			    require Carp;
-			    Carp::carp(
-			      qq 'The "$seen_charset" and "$_" flags '
-			     .qq 'are exclusive'
-			    );
+                            if ($seen_charset ne $_) {
+                                Carp::carp(
+                                qq 'The "$seen_charset" and "$_" flags '
+                                .qq 'are exclusive'
+                                );
+                            }
+                            else {
+                                Carp::carp(
+                                qq 'The "$seen_charset" flag may not appear '
+                                .qq 'twice'
+                                );
+                            }
 			}
 			$^H{reflags_charset} = $reflags{$_};
 			$seen_charset = $_;

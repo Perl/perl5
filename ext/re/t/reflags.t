@@ -10,7 +10,9 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 38;
+use Test::More tests => 48;
+
+my @flags = qw( a d l u );
 
 use re '/i';
 ok "Foo" =~ /foo/, 'use re "/i"';
@@ -116,23 +118,22 @@ ok "A\n\n" =~ / a.$/sm, 'use re "/xi" in combination with explicit /sm';
 }
 no re '/x';
 
-# use re "/dul" combinations
+# use re "/adul" combinations
 {
-  my $w = '';
+  my $w;
   local $SIG{__WARN__} = sub { $w = shift };
-  eval "use re '/dd'";
-  is $w, "", 'no warning with eval "use re "/dd"';
-  eval "use re '/uu'";
-  is $w, "", 'no warning with eval "use re "/uu"';
-  eval "use re '/ll'";
-  is $w, "", 'no warning with eval "use re "/ll"';
-  eval "use re '/dl'";
-  like $w, qr/The "d" and "l" flags are exclusive/,
-    'warning with eval "use re "/dl"';
-  eval "use re '/du'";
-  like $w, qr/The "d" and "u" flags are exclusive/,
-   'warning with eval "use re "/du"';
-  eval "use re '/ul'";
-  like $w, qr/The "u" and "l" flags are exclusive/,
-   'warning with use re "/ul"';
+  for my $i (@flags) {
+    for my $j (@flags) {
+      $w = "";
+      eval "use re '/$i$j'";
+      if ($i eq $j) {
+        like $w, qr/The \"$i\" flag may not appear twice/,
+            "warning with use re \"/$i$i\"";
+      }
+      else {
+        like $w, qr/The "$i" and "$j" flags are exclusive/,
+          "warning with eval \"use re \"/$i$j\"";
+      }
+    }
+  }
 }
