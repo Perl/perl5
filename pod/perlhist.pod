@@ -524,6 +524,8 @@ explained below.
  5.10.1         4858  98   7440 519   6195  921   6147 1751   5151 163
  5.12.0         4999 100   1146 121  15227 2176   6400 1843   5342 168
  5.12.1         5000 100   1146 121  15283 2178   6407 1846   5354 169
+ 5.12.2         5003 100   1146 121  15404 2178   6413 1846   5376 170
+ 5.12.3         5004 100   1146 121  15529 2180   6417 1848   5391 171
 
 The "core"..."doc" mean the following files from the Perl source code
 distribution.  The glob notation ** means recursively, (.) means
@@ -796,6 +798,35 @@ the Perl source distribution for somewhat more selected releases.
  vos            19    8    19    8    16    8    16    8    16    8
  win32        1482   68  1485   68  1497   70  1841   73  1841   73
  x2p           349   19   349   19   345   19   345   19   345   19
+
+ ======================================================================
+
+                  5.12.2     5.12.3
+
+ apollo          0    3     0    3
+ beos            4    4     4    4
+ Configure     536    1   536    1
+ Cross         118   15   118   15
+ djgpp          17    7    17    7
+ emacs         402    4   402    4
+ epoc           31    8    31    8
+ h2pl           12   15    12   15
+ hints         368   97   368   97
+ mad           174    8   174    8
+ mpeix          45    6    45    6
+ NetWare       466   61   466   61
+ os2           507   70   507   70
+ plan9         316   17   316   17
+ Porting       750   54   750   54
+ qnx             1    4     1    4
+ symbian       288   54   288   54
+ utils         269   27   269   27
+ uts             8    3     8    3
+ vmesa          21    4    21    4
+ vms           646   18   644   18
+ vos            16    8    16    8
+ win32        1841   73  1841   73
+ x2p           345   19   345   19
 
 =head2 SELECTED PATCH SIZES
 
