@@ -660,6 +660,11 @@ sub _get_inputmap_hash {
   my %rv;
   foreach my $xstype (keys %$lookup) {
     $rv{$xstype} = $storage->[ $lookup->{$xstype} ]->code;
+
+    # Squash trailing whitespace to one line break max
+    # This isn't strictly necessary, but makes the output more similar
+    # to the original ExtUtils::ParseXS.
+    $rv{$xstype} =~ s/\s+?\n\z/\n/;
   }
 
   return \%rv;
