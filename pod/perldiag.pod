@@ -103,11 +103,12 @@ a missing quote, operator, parenthesis pair or declaration.
 =item Ambiguous use of %c resolved as operator %c
 
 (W ambiguous) C<%>, C<&>, and C<*> are both infix operators (modulus,
-bitwise and, and multpication), and you said something like C<*foo *
-foo> that might be interpreted as either of them.  We assumed you
-meant the infix operator, but please try to make it more clear -- in
-the example given, you might write C<*foo * foo()> if you really meant
-to multiply a glob by the result of calling a function.
+bitwise and, and multiplication) I<and> initial special characters
+(denoting hashes, subroutines and typeglobs), and you said something
+like C<*foo * foo> that might be interpreted as either of them.  We
+assumed you meant the infix operator, but please try to make it more
+clear -- in the example given, you might write C<*foo * foo()> if you
+really meant to multiply a glob by the result of calling a function.
 
 =item Ambiguous use of %c{%s} resolved to %c%s
 
