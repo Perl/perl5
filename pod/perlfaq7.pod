@@ -831,10 +831,8 @@ diagnostics as C<Carp> does, use the C<caller> built-in:
 		print "I was called from package $package\n";
 		);
 
-By default, your program starts in package C<main>, so you should
-always be in some package unless someone uses the C<package> built-in
-with no namespace. See the C<package> entry in L<perlfunc> for the
-details of empty packages.
+By default, your program starts in package C<main>, so you will
+always be in some package.
 
 This is different from finding out the package an object is blessed
 into, which might not be the current package. For that, use C<blessed>
