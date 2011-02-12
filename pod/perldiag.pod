@@ -437,7 +437,7 @@ plugin API.
 
 (S malloc) An internal routine called realloc() on something that had
 never been malloc()ed in the first place. Mandatory, but can be disabled
-by setting environment variable C<PERL_BADFREE> to 1.
+by setting the environment variable C<PERL_BADFREE> to 1.
 
 =item Bad symbol for array
 
@@ -524,7 +524,7 @@ check the return value of your socket() call?  See L<perlfunc/bind>.
 =item binmode() on closed filehandle %s
 
 (W unopened) You tried binmode() on a filehandle that was never opened.
-Check you control flow and number of arguments.
+Check your control flow and number of arguments.
 
 =item Bit vector size > 32 non-portable
 
@@ -533,7 +533,7 @@ Check you control flow and number of arguments.
 =item Bizarre copy of %s in %s
 
 (P) Perl detected an attempt to copy an internal value that is not
-copyable.
+copiable.
 
 =item Buffer overflow in prime_env_iter: %s
 
@@ -579,7 +579,7 @@ from that type of reference to a typeglob.
 =item Cannot copy to %s in %s
 
 (P) Perl detected an attempt to copy a value to an internal type that cannot
-be directly assigned not.
+be directly assigned to.
 
 =item Cannot find encoding "%s"
 
