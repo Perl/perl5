@@ -9,7 +9,7 @@ First of all, have you tried using the B<-w> switch?
 
 
 If you're new to the Perl debugger, you may prefer to read
-L<perldebtut>, which is a tutorial introduction to the debugger .
+L<perldebtut>, which is a tutorial introduction to the debugger.
 
 =head1 The Perl Debugger
 
@@ -388,7 +388,7 @@ Delete all watch-expressions.
 =item o
 X<debugger command, o>
 
-Display all options
+Display all options.
 
 =item o booloption ...
 X<debugger command, o>
@@ -589,7 +589,7 @@ blessed object, or to a package name.
 =item M
 X<debugger command, M>
 
-Displays all loaded modules and their versions
+Display all loaded modules and their versions.
 
 
 =item man [manpage]
@@ -942,7 +942,7 @@ also from I<camel_flea>, but from line 4.
 
 If you execute the C<T> command from inside an active C<use>
 statement, the backtrace will contain both a C<require> frame and
-an C<eval>) frame.
+an C<eval> frame.
 
 =item Line Listing Format
 
@@ -982,7 +982,7 @@ for incredibly long examples of these.
 If you have compile-time executable statements (such as code within
 BEGIN, UNITCHECK and CHECK blocks or C<use> statements), these will
 I<not> be stopped by debugger, although C<require>s and INIT blocks
-will, and compile-time statements can be traced with C<AutoTrace>
+will, and compile-time statements can be traced with the C<AutoTrace>
 option set in C<PERLDB_OPTS>).  From your own Perl code, however, you
 can transfer control back to the debugger using the following
 statement, which is harmless if the debugger is not running:
@@ -1007,7 +1007,7 @@ compile subname> for the same purpose.
 
 The debugger probably contains enough configuration hooks that you
 won't ever have to modify it yourself.  You may change the behaviour
-of debugger from within the debugger using its C<o> command, from
+of the debugger from within the debugger using its C<o> command, from
 the command line via the C<PERLDB_OPTS> environment variable, and
 from customization files.
 
@@ -1062,7 +1062,7 @@ As shipped, the only command-line history supplied is a simplistic one
 that checks for leading exclamation points.  However, if you install
 the Term::ReadKey and Term::ReadLine modules from CPAN (such as
 Term::ReadLine::Gnu, Term::ReadLine::Perl, ...) you will
-have full editing capabilities much like GNU I<readline>(3) provides.
+have full editing capabilities much like those GNU I<readline>(3) provides.
 Look for these in the F<modules/by-module/Term> directory on CPAN.
 These do not support normal B<vi> command-line editing, however.
 
