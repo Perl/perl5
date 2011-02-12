@@ -32,7 +32,7 @@ CPANPLUS::Dist::MM
     $mm->create;        # runs make && make test
     $mm->install;       # runs make install
 
-    
+
 =head1 DESCRIPTION
 
 C<CPANPLUS::Dist::MM> is a distribution class for MakeMaker related
@@ -154,7 +154,9 @@ sub format_available {
     return 1;     
 }
 
-=pod $bool = $dist->init();
+=pod
+
+=head2 $bool = $dist->init();
 
 Sets up the C<CPANPLUS::Dist::MM> object for use. 
 Effectively creates all the needed status accessors.
@@ -174,7 +176,9 @@ sub init {
     return 1;
 }    
 
-=pod $bool = $dist->prepare([perl => '/path/to/perl', makemakerflags => 'EXTRA=FLAGS', force => BOOL, verbose => BOOL])
+=pod
+
+=head2 $bool = $dist->prepare([perl => '/path/to/perl', makemakerflags => 'EXTRA=FLAGS', force => BOOL, verbose => BOOL])
 
 C<prepare> preps a distribution for installation. This means it will 
 run C<perl Makefile.PL> and determine what prerequisites this distribution

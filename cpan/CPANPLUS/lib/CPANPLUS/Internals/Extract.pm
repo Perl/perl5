@@ -36,12 +36,12 @@ CPANPLUS::Internals::Extract extracts compressed files for CPANPLUS.
 It can do this by either a pure perl solution (preferred) with the 
 use of C<Archive::Tar> and C<Compress::Zlib>, or with binaries, like
 C<gzip> and C<tar>.
- 
+
 The flow looks like this:
 
     $cb->_extract
         Delegate to Archive::Extract
- 
+
 =head1 METHODS
 
 =head2 $dir = _extract( module => $modobj, [perl => '/path/to/perl', extractdir => '/path/to/extract/to', prefer_bin => BOOL, verbose => BOOL, force => BOOL] )

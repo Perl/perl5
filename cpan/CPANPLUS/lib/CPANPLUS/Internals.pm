@@ -42,7 +42,7 @@ use vars qw[@ISA $VERSION];
             CPANPLUS::Internals::Report
         ];
 
-$VERSION = "0.9011";
+$VERSION = "0.91";
 
 =pod
 
@@ -104,6 +104,7 @@ You have to pass it a valid C<CPANPLUS::Configure> object.
 Returns the object on success, or dies on failure.
 
 =cut
+
 {   ### NOTE:
     ### if extra callbacks are added, don't forget to update the
     ### 02-internals.t test script with them!

@@ -13,7 +13,7 @@ BEGIN {
     use vars        qw( @EXPORT @ISA $VERSION );
     @EXPORT     =   qw( shell fetch get install );
     @ISA        =   qw( Exporter );
-    $VERSION = "0.9011";     #have to hardcode or cpan.org gets unhappy
+    $VERSION = "0.91";     #have to hardcode or cpan.org gets unhappy
 }
 
 ### purely for backward compatibility, so we can call it from the commandline:
@@ -113,7 +113,7 @@ CPANPLUS - API & CLI access to the CPAN mirrors
     $ perl -MCPANPLUS -eshell
     $ perl -MCPANPLUS -e'fetch Some::Module'
 
-    
+
 =head1 DESCRIPTION
 
 The C<CPANPLUS> library is an API to the C<CPAN> mirrors and a
@@ -160,7 +160,7 @@ the two following commands:
 All commands available are listed in the interactive shells
 help menu. See C<cpanp -h> or L<CPANPLUS::Shell::Default> 
 for instructions on using the default shell.  
-    
+
 =head2 CHOOSE A SHELL
 
 By running C<cpanp> without arguments, you will start up
@@ -173,7 +173,7 @@ the old C<CPAN.pm> shell.
 You can start this shell by typing:
 
     $ perl -MCPANPLUS -e'shell Classic'
-    
+
 Even more shells may be available from C<CPAN>.    
 
 Note that if you have changed your default shell in your
@@ -188,8 +188,8 @@ from C<CPAN> into a package in the format of your choice, like
 for example C<.deb> or C<FreeBSD ports>. 
 
 See C<cpan2dist -h> for details.
-    
-    
+
+
 =head1 FUNCTIONS
 
 For quick access to common commands, you may use this module,

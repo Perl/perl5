@@ -132,6 +132,13 @@ C<CGI> has been upgraded from version 3.51 to 3.52
 
 =item *
 
+C<CPANPLUS> has been upgraded from version 0.9011 to 0.91
+
+Includes support for META.json and MYMETA.json and a change to
+using Digest::SHA for CPAN checksums.
+
+=item *
+
 C<IPC::Cmd> has been upgraded from version 0.68 to 0.70
 
 =item *

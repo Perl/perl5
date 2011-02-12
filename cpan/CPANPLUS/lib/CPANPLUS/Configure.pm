@@ -70,14 +70,18 @@ This method returns a new object. Normal users will never need to
 invoke the C<new> method, but instead retrieve the desired object via
 a method call on a C<CPANPLUS::Backend> object.
 
+=over 4
+
 =item load_configs
 
 Controls whether or not additional user configurations are to be loaded 
 or not. Defaults to C<true>.
 
+=back
+
 =cut
 
-### store teh CPANPLUS::Config object in a closure, so we only
+### store the CPANPLUS::Config object in a closure, so we only
 ### initialize it once.. otherwise, on a 2nd ->new, settings
 ### from configs on top of this one will be reset
 {   my $Config;

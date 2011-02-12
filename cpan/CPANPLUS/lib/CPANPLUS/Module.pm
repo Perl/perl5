@@ -833,7 +833,7 @@ sub dist {
 =pod
 
 =head2 $bool = $mod->prepare( )
- 
+
 Convenience method around C<install()> that prepares a module 
 without actually building it. This is equivalent to invoking C<install>
 with C<target> set to C<prepare>

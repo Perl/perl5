@@ -154,6 +154,16 @@ use constant MYMETA_YML     => sub { return @_
                                         : 'MYMETA.yml';
                             }; 
 
+use constant META_JSON       => sub { return @_
+                                        ? File::Spec->catfile( @_, 'META.json' )
+                                        : 'META.json';
+                            };
+
+use constant MYMETA_JSON     => sub { return @_
+                                        ? File::Spec->catfile( @_, 'MYMETA.json' )
+                                        : 'MYMETA.json';
+                            };
+
 use constant BLIB           => sub { return @_
                                         ? File::Spec->catfile(@_, 'blib')
                                         : 'blib';
