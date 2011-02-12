@@ -53,7 +53,7 @@ C<"$break_condition\0$action">.
 
 The same holds for evaluated strings that contain subroutines, or
 which are currently being executed.  The $filename for C<eval>ed strings
-looks like C<(eval 34)> or  C<(re_eval 19)>.
+looks like C<(eval 34)> or C<(re_eval 19)>.
 
 =item *
 
@@ -153,7 +153,7 @@ environment variable and uses it to set debugger options. The
 contents of this variable are treated as if they were the argument
 of an C<o ...> debugger command (q.v. in L<perldebug/Options>).
 
-=head3 Debugger internal variables
+=head3 Debugger Internal Variables
 
 In addition to the file and subroutine-related variables mentioned above,
 the debugger also maintains various magical internal variables.
@@ -172,7 +172,7 @@ equal to zero only if the line is not breakable.
 
 =item *
 
-C<%DB::dbline>, is an alias for C<%{"::_<current_file"}>, which
+C<%DB::dbline> is an alias for C<%{"::_<current_file"}>, which
 contains breakpoints and actions keyed by line number in
 the currently-selected file, either explicitly chosen with the
 debugger's C<f> command, or implicitly by flow of execution.
@@ -184,7 +184,7 @@ C<"$break_condition\0$action">.
 
 =back
 
-=head3 Debugger customization functions
+=head3 Debugger Customization Functions
 
 Some functions are provided to simplify customization.
 
@@ -257,8 +257,8 @@ with this one, once the C<o>ption C<frame=2> has been set:
 By way of demonstration, we present below a laborious listing
 resulting from setting your C<PERLDB_OPTS> environment variable to
 the value C<f=n N>, and running I<perl -d -V> from the command line.
-Examples use various values of C<n> are shown to give you a feel
-for the difference between settings.  Long those it may be, this
+Examples using various values of C<n> are shown to give you a feel
+for the difference between settings.  Long though it may be, this
 is not a complete listing, but only excerpts.
 
 =over 4
@@ -397,7 +397,7 @@ When a package is compiled, a line like this
 
 is printed with proper indentation.
 
-=head1 Debugging regular expressions
+=head1 Debugging Regular Expressions
 
 There are two ways to enable debugging output for regular expressions.
 
@@ -408,7 +408,7 @@ Otherwise, one can C<use re 'debug'>, which has effects at
 compile time and run time.  Since Perl 5.9.5, this pragma is lexically
 scoped.
 
-=head2 Compile-time output
+=head2 Compile-time Output
 
 The debugging output at compile time looks like this:
 
@@ -514,7 +514,7 @@ C<(??{ code })>.
 
 =item C<anchored(TYPE)>
 
-If the pattern may match only at a handful of places, (with C<TYPE>
+If the pattern may match only at a handful of places, with C<TYPE>
 being C<BOL>, C<MBOL>, or C<GPOS>.  See the table below.
 
 =back
@@ -532,7 +532,7 @@ form of the regex.  Each line has format
 
 C<   >I<id>: I<TYPE> I<OPTIONAL-INFO> (I<next-id>)
 
-=head2 Types of nodes
+=head2 Types of Nodes
 
 Here are the possible types, with short descriptions:
 
@@ -625,7 +625,7 @@ Here are the possible types, with short descriptions:
     IFMATCH	off 1 2	Succeeds if the following matches.
     UNLESSM	off 1 2	Fails if the following matches.
     SUSPEND	off 1 1	"Independent" sub-regex.
-    IFTHEN	off 1 1	Switch, should be preceded by switcher .
+    IFTHEN	off 1 1	Switch, should be preceded by switcher.
     GROUPP	num 1	Whether the group matched.
 
     # Support for long regex
@@ -642,7 +642,7 @@ Here are the possible types, with short descriptions:
     # This is not used yet
     RENUM	off 1 1	Group with independently numbered parens.
 
-    # This is not really a node, but an optimized away piece of a "long" node.
+    # This is not really a node, but an optimized-away piece of a "long" node.
     # To simplify debugging output, we mark it as if it were a node
     OPTIMIZED	off	Placeholder for dump.
 
@@ -676,7 +676,7 @@ is, it corresponds to the C<+> symbol in the precompiled regex.
 
 C<0[0]> items indicate that there is no corresponding node.
 
-=head2 Run-time output
+=head2 Run-time Output
 
 First of all, when doing a match, one may get no run-time output even
 if debugging is enabled.  This means that the regex engine was never
@@ -719,7 +719,7 @@ C<    >I<STRING-OFFSET> <I<PRE-STRING>> <I<POST-STRING>>   |I<ID>:  I<TYPE>
 The I<TYPE> info is indented with respect to the backtracking level.
 Other incidental information appears interspersed within.
 
-=head1 Debugging Perl memory usage
+=head1 Debugging Perl Memory Usage
 
 Perl is a profligate wastrel when it comes to memory use.  There
 is a saying that to estimate memory usage of Perl, assume a reasonable
@@ -755,7 +755,7 @@ The B<-DL> command-line switch is obsolete since circa Perl 5.6.0
 The switch was used to track Perl's memory allocations and possible
 memory leaks.  These days the use of malloc debugging tools like
 F<Purify> or F<valgrind> is suggested instead.  See also
-L<perlhack/PERL_MEM_LOG>.
+L<perlhacktips/PERL_MEM_LOG>.
 
 One way to find out how much memory is being used by Perl data
 structures is to install the Devel::Size module from CPAN: it gives
@@ -764,7 +764,7 @@ structure.  Please be mindful of the difference between the size()
 and total_size().
 
 If Perl has been compiled using Perl's malloc you can analyze Perl
-memory usage by setting the $ENV{PERL_DEBUG_MSTATS}.
+memory usage by setting $ENV{PERL_DEBUG_MSTATS}.
 
 =head2 Using C<$ENV{PERL_DEBUG_MSTATS}>
 
@@ -812,7 +812,7 @@ would have usable size 8188, and the memory footprint would be 8192.
 In a Perl built for debugging, some buckets may have negative usable
 size.  This means that these buckets cannot (and will not) be used.
 For larger buckets, the memory footprint may be one page greater
-than a power of 2.  If so, case the corresponding power of two is
+than a power of 2.  If so, the corresponding power of two is
 printed in the C<APPROX> field above.
 
 =item Free/Used
@@ -830,7 +830,7 @@ were
      free:    8     16    32    64    128  256 512 1024 2048 4096 8192
 	   4     12    24    48    80
 
-With non-C<DEBUGGING> perl, the buckets starting from C<128> have
+With a non-C<DEBUGGING> perl, the buckets starting from C<128> have
 a 4-byte overhead, and thus an 8192-long bucket may take up to
 8188-byte allocations.
 
