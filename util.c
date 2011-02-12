@@ -3844,7 +3844,7 @@ Perl_my_fflush_all(pTHX)
 }
 
 void
-Perl_report_wrongway_fh(pTHX_ const GV *gv, char have)
+Perl_report_wrongway_fh(pTHX_ const GV *gv, const char have)
 {
     if (ckWARN(WARN_IO)) {
 	const char * const name
