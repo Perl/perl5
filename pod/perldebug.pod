@@ -1128,7 +1128,7 @@ voluminous output, one must not only have some idea about how regular
 expression matching works in general, but also know how Perl's regular
 expressions are internally compiled into an automaton. These matters
 are explored in some detail in
-L<perldebguts/"Debugging regular expressions">.
+L<perldebguts/"Debugging Regular Expressions">.
 
 =head1 Debugging memory usage
 X<memory usage>
@@ -1136,7 +1136,7 @@ X<memory usage>
 Perl contains internal support for reporting its own memory usage,
 but this is a fairly advanced concept that requires some understanding
 of how memory allocation works.
-See L<perldebguts/"Debugging Perl memory usage"> for the details.
+See L<perldebguts/"Debugging Perl Memory Usage"> for the details.
 
 =head1 SEE ALSO
 

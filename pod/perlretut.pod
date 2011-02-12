@@ -2838,7 +2838,7 @@ Each step is of the form S<C<< n <x> <y> >>>, with C<< <x> >> the
 part of the string matched and C<< <y> >> the part not yet
 matched.  The S<C<< |  1:  STAR >>> says that Perl is at line number 1
 n the compilation list above.  See
-L<perldebguts/"Debugging regular expressions"> for much more detail.
+L<perldebguts/"Debugging Regular Expressions"> for much more detail.
 
 An alternative method of debugging regexps is to embed C<print>
 statements within the regexp.  This provides a blow-by-blow account of
