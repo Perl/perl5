@@ -323,7 +323,7 @@ form of output that can be used to get a colorful display on terminals
 that understand termcap color sequences.  Set C<$ENV{PERL_RE_TC}> to a
 comma-separated list of C<termcap> properties to use for highlighting
 strings on/off, pre-point part on/off.
-See L<perldebug/"Debugging regular expressions"> for additional info.
+See L<perldebug/"Debugging Regular Expressions"> for additional info.
 
 As of 5.9.5 the directive C<use re 'debug'> and its equivalents are
 lexically scoped, as the other directives are.  However they have both 

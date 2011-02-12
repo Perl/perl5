@@ -360,7 +360,7 @@ debugging.
 
 =item *
 
-L<perldebug/"Debugging regular expressions">
+L<perldebug/"Debugging Regular Expressions">
 
 =item *
 

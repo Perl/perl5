@@ -54,7 +54,7 @@ function with something that doesn't look like a debugger command, such
 as a leading C<;> or perhaps a C<+>, or by wrapping it with parentheses
 or braces.
 
-=head2 Calling the debugger
+=head2 Calling the Debugger
 
 There are several ways to call the debugger:
 
@@ -876,7 +876,7 @@ corresponds to F</dev/ttyXX>, say, by issuing a command like
 
 See L<perldebguts/"Debugger Internals"> for details.
 
-=head2 Debugger input/output
+=head2 Debugger Input/Output
 
 =over 8
 
@@ -977,7 +977,7 @@ for incredibly long examples of these.
 
 =back
 
-=head2 Debugging compile-time statements
+=head2 Debugging Compile-Time Statements
 
 If you have compile-time executable statements (such as code within
 BEGIN, UNITCHECK and CHECK blocks or C<use> statements), these will
@@ -1056,7 +1056,7 @@ Note that any variables and functions that are not documented in
 this document (or in L<perldebguts>) are considered for internal
 use only, and as such are subject to change without notice.
 
-=head2 Readline Support / History in the debugger
+=head2 Readline Support / History in the Debugger
 
 As shipped, the only command-line history supplied is a simplistic one
 that checks for leading exclamation points.  However, if you install
@@ -1118,7 +1118,7 @@ interpret the information in that profile.  More powerful profilers,
 such as C<Devel::NYTProf> are available from the CPAN:  see L<perlperf>
 for details.
 
-=head1 Debugging regular expressions
+=head1 Debugging Regular Expressions
 X<regular expression, debugging>
 X<regex, debugging> X<regexp, debugging>
 
@@ -1130,7 +1130,7 @@ expressions are internally compiled into an automaton. These matters
 are explored in some detail in
 L<perldebguts/"Debugging Regular Expressions">.
 
-=head1 Debugging memory usage
+=head1 Debugging Memory Usage
 X<memory usage>
 
 Perl contains internal support for reporting its own memory usage,
