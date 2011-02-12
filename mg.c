@@ -3106,15 +3106,27 @@ Perl_sighandler(int sig)
 
     POPSTACK;
     if (SvTRUE(ERRSV)) {
-#if !defined(PERL_MICRO) && !defined(HAS_SIGPROCMASK)
+#ifndef PERL_MICRO
 	/* Handler "died", for example to get out of a restart-able read().
 	 * Before we re-do that on its behalf re-enable the signal which was
 	 * blocked by the system when we entered.
 	 */
+#ifdef HAS_SIGPROCMASK
+#ifdef HAS_SIGACTION
+	if (sip)
+#endif
+	{
+	    sigset_t set;
+	    sigemptyset(&set);
+	    sigaddset(&set,sig);
+	    sigprocmask(SIG_UNBLOCK, &set, NULL);
+	}
+#else
 	/* Not clear if this will work */
 	(void)rsignal(sig, SIG_IGN);
 	(void)rsignal(sig, PL_csighandlerp);
-#endif /* !PERL_MICRO && !HAS_SIGPROCMASK*/
+#endif
+#endif /* !PERL_MICRO */
 	die_sv(ERRSV);
     }
 cleanup:

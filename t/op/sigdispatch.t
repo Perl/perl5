@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 12;
+plan tests => 13;
 
 watchdog(10);
 
@@ -70,4 +70,10 @@ SKIP: {
     POSIX::sigprocmask(&POSIX::SIG_UNBLOCK, $new, $old);
     ok $old->ismember(&POSIX::SIGUSR1), 'SIGUSR1 was still blocked';
     is $gotit, 2, 'Received fifth signal';
+
+    # test unsafe signal handlers in combination with exceptions
+    my $action = POSIX::SigAction->new(sub { $gotit--, die }, POSIX::SigSet->new, 0);
+    POSIX::sigaction(&POSIX::SIGUSR1, $action);
+    eval { kill SIGUSR1, $$ } for 1..2;
+    is $gotit, 0, 'Received both signals';
 }
