@@ -650,12 +650,6 @@ that you can chdir to, possibly because it doesn't exist.
 (P) For some reason you can't check the filesystem of the script for
 nosuid.
 
-=item Can't coerce array into hash
-
-(F) You used an array where a hash was expected, but the array has no
-information on how to map from keys to array indices.  You can do that
-only with arrays that have a hash reference at index 0.
-
 =item Can't coerce %s to integer in %s
 
 (F) Certain types of SVs, in particular real symbol table entries
