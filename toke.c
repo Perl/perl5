@@ -2607,8 +2607,8 @@ S_scan_const(pTHX_ char *start)
     register char *d = SvPVX(sv);		/* destination for copies */
     bool dorange = FALSE;			/* are we in a translit range? */
     bool didrange = FALSE;		        /* did we just finish a range? */
-    I32  has_utf8 = FALSE;			/* Output constant is UTF8 */
-    I32  this_utf8 = UTF;			/* Is the source string assumed
+    bool has_utf8 = FALSE;			/* Output constant is UTF8 */
+    bool  this_utf8 = cBOOL(UTF);		/* Is the source string assumed
 						   to be UTF8?  But, this can
 						   show as true when the source
 						   isn't utf8, as for example
