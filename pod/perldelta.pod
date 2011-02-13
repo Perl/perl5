@@ -254,9 +254,13 @@ XXX Newly added diagnostic messages go here
 
 =over 4
 
-=item *
+=item "\b{" is deprecated; use "\b\{" instead
 
-XXX
+=item "\B{" is deprecated; use "\B\{" instead
+
+Use of an unescaped "{" immediately following a C<\b> or C<\B> is now
+deprecated so as to reserve its use for Perl itself in a future release.
+
 
 =back
 

@@ -510,6 +510,14 @@ substitution, but stylistically it's better to use the variable form
 because other Perl programmers will expect it, and it works better if
 there are more than 9 backreferences.
 
+=item "\b{" is deprecated; use "\b\{" instead
+
+=item "\B{" is deprecated; use "\B\{" instead
+
+(W deprecated, regexp) Use of an unescaped "{" immediately following a
+C<\b> or C<\B> is now deprecated so as to reserve its use for Perl
+itself in a future release.
+
 =item Binary number > 0b11111111111111111111111111111111 non-portable
 
 (W portable) The binary number you specified is larger than 2**32-1
