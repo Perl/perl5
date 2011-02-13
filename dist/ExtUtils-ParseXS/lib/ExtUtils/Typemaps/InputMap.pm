@@ -2,7 +2,7 @@ package ExtUtils::Typemaps::InputMap;
 use 5.006001;
 use strict;
 use warnings;
-use Carp qw(croak);
+#use Carp qw(croak);
 
 =head1 NAME
 
@@ -37,7 +37,7 @@ sub new {
 
   if (!ref($prot)) {
     if (not defined $args{xstype} or not defined $args{code}) {
-      croak("Need xstype and code parameters");
+      die("Need xstype and code parameters");
     }
   }
 

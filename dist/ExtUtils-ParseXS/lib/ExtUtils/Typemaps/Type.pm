@@ -3,7 +3,7 @@ use 5.006001;
 use strict;
 use warnings;
 our $VERSION = '0.05';
-use Carp qw(croak);
+#use Carp qw(croak);
 require ExtUtils::Typemaps;
 
 =head1 NAME
@@ -42,7 +42,7 @@ sub new {
 
   if (!ref($prot)) {
     if (not defined $args{xstype} or not defined $args{ctype}) {
-      croak("Need xstype and ctype parameters");
+      die("Need xstype and ctype parameters");
     }
   }
 

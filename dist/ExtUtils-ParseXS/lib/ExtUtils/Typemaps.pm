@@ -3,7 +3,7 @@ use 5.006001;
 use strict;
 use warnings;
 our $VERSION = '1.00';
-use Carp qw(croak);
+#use Carp qw(croak);
 
 require ExtUtils::ParseXS;
 require ExtUtils::ParseXS::Constants;
@@ -71,7 +71,7 @@ sub new {
   my %args = @_;
 
   if (defined $args{file} and defined $args{string}) {
-    croak("Cannot handle both 'file' and 'string' arguments to constructor");
+    die("Cannot handle both 'file' and 'string' arguments to constructor");
   }
 
   my $self = bless {
@@ -152,9 +152,9 @@ sub add_typemap {
   else {
     %args = @_;
     my $ctype = $args{ctype};
-    croak("Need ctype argument") if not defined $ctype;
+    die("Need ctype argument") if not defined $ctype;
     my $xstype = $args{xstype};
-    croak("Need xstype argument") if not defined $xstype;
+    die("Need xstype argument") if not defined $xstype;
 
     $type = ExtUtils::Typemaps::Type->new(
       xstype      => $xstype,
@@ -164,7 +164,7 @@ sub add_typemap {
   }
 
   if ($args{skip} and $args{replace}) {
-    croak("Cannot use both 'skip' and 'replace'");
+    die("Cannot use both 'skip' and 'replace'");
   }
 
   if ($args{replace}) {
@@ -220,9 +220,9 @@ sub add_inputmap {
   else {
     %args = @_;
     my $xstype = $args{xstype};
-    croak("Need xstype argument") if not defined $xstype;
+    die("Need xstype argument") if not defined $xstype;
     my $code = $args{code};
-    croak("Need code argument") if not defined $code;
+    die("Need code argument") if not defined $code;
 
     $input = ExtUtils::Typemaps::InputMap->new(
       xstype => $xstype,
@@ -231,7 +231,7 @@ sub add_inputmap {
   }
 
   if ($args{skip} and $args{replace}) {
-    croak("Cannot use both 'skip' and 'replace'");
+    die("Cannot use both 'skip' and 'replace'");
   }
 
   if ($args{replace}) {
@@ -272,9 +272,9 @@ sub add_outputmap {
   else {
     %args = @_;
     my $xstype = $args{xstype};
-    croak("Need xstype argument") if not defined $xstype;
+    die("Need xstype argument") if not defined $xstype;
     my $code = $args{code};
-    croak("Need code argument") if not defined $code;
+    die("Need code argument") if not defined $code;
 
     $output = ExtUtils::Typemaps::OutputMap->new(
       xstype => $xstype,
@@ -283,7 +283,7 @@ sub add_outputmap {
   }
 
   if ($args{skip} and $args{replace}) {
-    croak("Cannot use both 'skip' and 'replace'");
+    die("Cannot use both 'skip' and 'replace'");
   }
 
   if ($args{replace}) {
@@ -315,7 +315,7 @@ Required named argument: C<string> to specify the string to parse.
 sub add_string {
   my $self = shift;
   my %args = @_;
-  croak("Need 'string' argument") if not defined $args{string};
+  die("Need 'string' argument") if not defined $args{string};
 
   # no, this is not elegant.
   my $other = ExtUtils::Typemaps->new(string => $args{string});
@@ -338,7 +338,7 @@ sub remove_typemap {
   if (@_ > 1) {
     my %args = @_;
     $ctype = $args{ctype};
-    croak("Need ctype argument") if not defined $ctype;
+    die("Need ctype argument") if not defined $ctype;
     $ctype = _tidy_type($ctype);
   }
   else {
@@ -364,7 +364,7 @@ sub remove_inputmap {
   if (@_ > 1) {
     my %args = @_;
     $xstype = $args{xstype};
-    croak("Need xstype argument") if not defined $xstype;
+    die("Need xstype argument") if not defined $xstype;
   }
   else {
     $xstype = $_[0]->xstype;
@@ -389,7 +389,7 @@ sub remove_outputmap {
   if (@_ > 1) {
     my %args = @_;
     $xstype = $args{xstype};
-    croak("Need xstype argument") if not defined $xstype;
+    die("Need xstype argument") if not defined $xstype;
   }
   else {
     $xstype = $_[0]->xstype;
@@ -435,7 +435,7 @@ sub get_typemap {
   my $self = shift;
   my %args = @_;
   my $ctype = $args{ctype};
-  croak("Need ctype argument") if not defined $ctype;
+  die("Need ctype argument") if not defined $ctype;
   $ctype = _tidy_type($ctype);
 
   my $index = $self->{typemap_lookup}{$ctype};
@@ -460,7 +460,7 @@ sub get_inputmap {
   my $self = shift;
   my %args = @_;
   my $xstype = $args{xstype};
-  croak("Need xstype argument") if not defined $xstype;
+  die("Need xstype argument") if not defined $xstype;
 
   my $index = $self->{input_lookup}{$xstype};
   return() if not defined $index;
@@ -484,7 +484,7 @@ sub get_outputmap {
   my $self = shift;
   my %args = @_;
   my $xstype = $args{xstype};
-  croak("Need xstype argument") if not defined $xstype;
+  die("Need xstype argument") if not defined $xstype;
 
   my $index = $self->{output_lookup}{$xstype};
   return() if not defined $index;
@@ -504,7 +504,7 @@ sub write {
   my $self = shift;
   my %args = @_;
   my $file = defined $args{file} ? $args{file} : $self->file();
-  croak("write() needs a file argument (or set the file name of the typemap using the 'file' method)")
+  die("write() needs a file argument (or set the file name of the typemap using the 'file' method)")
     if not defined $file;
 
   open my $fh, '>', $file
@@ -568,20 +568,20 @@ sub merge {
   my %args = @_;
 
   if (exists $args{typemap} and exists $args{file}) {
-    croak("Need {file} OR {typemap} argument. Not both!");
+    die("Need {file} OR {typemap} argument. Not both!");
   }
   elsif (not exists $args{typemap} and not exists $args{file}) {
-    croak("Need {file} or {typemap} argument!");
-  }
-
-  my $typemap = $args{typemap};
-  if (not defined $typemap) {
-    $typemap = ref($self)->new(file => $args{file});
+    die("Need {file} or {typemap} argument!");
   }
 
   my @params;
   push @params, 'replace' => $args{replace} if exists $args{replace};
   push @params, 'skip' => $args{skip} if exists $args{skip};
+
+  my $typemap = $args{typemap};
+  if (not defined $typemap) {
+    $typemap = ref($self)->new(file => $args{file}, @params);
+  }
 
   # FIXME breaking encapsulation. Add accessor code.
   foreach my $entry (@{$typemap->{typemap_section}}) {
@@ -759,19 +759,19 @@ sub validate {
   if ( exists $args{ctype}
        and exists $self->{typemap_lookup}{_tidy_type($args{ctype})} )
   {
-    croak("Multiple definition of ctype '$args{ctype}' in TYPEMAP section");
+    die("Multiple definition of ctype '$args{ctype}' in TYPEMAP section");
   }
 
   if ( exists $args{inputmap_xstype}
        and exists $self->{input_lookup}{$args{inputmap_xstype}} )
   {
-    croak("Multiple definition of xstype '$args{inputmap_xstype}' in INPUTMAP section");
+    die("Multiple definition of xstype '$args{inputmap_xstype}' in INPUTMAP section");
   }
 
   if ( exists $args{outputmap_xstype}
        and exists $self->{output_lookup}{$args{outputmap_xstype}} )
   {
-    croak("Multiple definition of xstype '$args{outputmap_xstype}' in OUTPUTMAP section");
+    die("Multiple definition of xstype '$args{outputmap_xstype}' in OUTPUTMAP section");
   }
 
   return 1;
@@ -782,6 +782,13 @@ sub _parse {
   my $stringref = shift;
   my $filename = shift;
   $filename = '<string>' if not defined $filename;
+
+  my $replace = $self->{replace};
+  my $skip    = $self->{skip};
+  die "Can only replace OR skip" if $replace and $skip;
+  my @add_params;
+  push @add_params, replace => 1 if $replace;
+  push @add_params, skip    => 1 if $skip;
 
   # TODO comments should round-trip, currently ignoring
   # TODO order of sections, multiple sections of same type
@@ -827,7 +834,8 @@ sub _parse {
       $self->add_typemap(
         ExtUtils::Typemaps::Type->new(
           xstype => $kind, proto => $proto, ctype => $type
-        )
+        ),
+        @add_params
       );
     } elsif (/^\s/) {
       s/\s+$//;
@@ -847,10 +855,10 @@ sub _parse {
   } # end while lines
 
   foreach my $inexpr (@input_expr) {
-    $self->add_inputmap( ExtUtils::Typemaps::InputMap->new(%$inexpr) );
+    $self->add_inputmap( ExtUtils::Typemaps::InputMap->new(%$inexpr), @add_params );
   }
   foreach my $outexpr (@output_expr) {
-    $self->add_outputmap( ExtUtils::Typemaps::OutputMap->new(%$outexpr) );
+    $self->add_outputmap( ExtUtils::Typemaps::OutputMap->new(%$outexpr), @add_params );
   }
 
   return 1;
