@@ -2303,9 +2303,9 @@ silently ignored.
 (F)  A version number did not meet the "lax" criteria for versions.
 A "lax" version number is a positive decimal number (integer or
 decimal-fraction) without exponentiation or else a dotted-decimal
-v-string. If the v-string has less than three components, it must have a
-leading 'v' character.  Otherwise, the leading 'v' is optional.  Both
-decimal and dotted-decimal versions may have a trailing "alpha"
+v-string. If the v-string has fewer than three components, it must
+have a leading 'v' character.  Otherwise, the leading 'v' is optional.
+Both decimal and dotted-decimal versions may have a trailing "alpha"
 component separated by an underscore character after a fractional or
 dotted-decimal component.  The parenthesized text indicates which
 criteria were not met.  See the L<version> module for more details on
