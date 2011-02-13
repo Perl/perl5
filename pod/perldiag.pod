@@ -2277,8 +2277,8 @@ See L<attributes>.
 
 =item Invalid separator character %s in PerlIO layer specification %s
 
-(W layer) When pushing layers onto the Perl I/O system, something other than a
-colon or whitespace was seen between the elements of a layer list.
+(W layer) When pushing layers onto the Perl I/O system, something other
+than a colon or whitespace was seen between the elements of a layer list.
 If the previous attribute had a parenthesised parameter list, perhaps that
 list was terminated too soon.
 
