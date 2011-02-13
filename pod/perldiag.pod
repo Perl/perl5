@@ -1808,7 +1808,7 @@ is not possible.
 (W pack) Each line in an uuencoded string start with a length indicator
 which can't encode values above 63. So there is no point in asking for
 a line length bigger than that. Perl will behave as if you specified
-C<u63> as format.
+C<u63> as the format.
 
 =item Filehandle %s opened only for input
 
