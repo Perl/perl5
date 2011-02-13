@@ -495,6 +495,7 @@ andreas.koenig\100anima.de              andreas.koenig.gmwojprw\100franz.ak.mind
 +                                       root\100dubravka.in-berlin.de
 anno4000\100lublin.zrz.tu-berlin.de     anno4000\100mailbox.tu-berlin.de
 +                                       siegel\100zrz.tu-berlin.de
+apocal@cpan.org                         perl\1000ne.us
 arnold\100gnu.ai.mit.edu                arnold\100emoryu2.arpa
 +                                       gatech!skeeve!arnold
 arodland\100cpan.org                    andrew\100hbslabs.com
