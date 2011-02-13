@@ -495,11 +495,26 @@ Hash.
 
 sub make_targetable {
   my $output_expr_ref = shift;
-  my ($cast, $size);
-  our $bal;
-  $bal = qr[(?:(?>[^()]+)|\((??{ $bal })\))*]; # ()-balanced
-  $cast = qr[(?:\(\s*SV\s*\*\s*\)\s*)?]; # Optional (SV*) cast
-  $size = qr[,\s* (??{ $bal }) ]x; # Third arg (to setpvn)
+
+  our $bal; # ()-balanced
+  $bal = qr[
+    (?:
+      (?>[^()]+)
+      |
+      \( (??{ $bal }) \)
+    )*
+  ]x;
+
+  # matches variations on (SV*)
+  my $sv_cast = qr[
+    (?:
+      \( \s* SV \s* \* \s* \) \s*
+    )?
+  ]x;
+
+  my $size = qr[ # Third arg (to setpvn)
+    , \s* (??{ $bal })
+  ]x;
 
   my %targetable;
   foreach my $key (keys %{ $output_expr_ref }) {
@@ -507,16 +522,20 @@ sub make_targetable {
     # available to miniperl, and does not attempt to load the XS code.
     use re 'eval';
 
-    my ($t, $with_size, $arg, $sarg) =
+    my ($type, $with_size, $arg, $sarg) =
       ($output_expr_ref->{$key} =~
-        m[^ \s+ sv_set ( [iunp] ) v (n)?    # Type, is_setpvn
-          \s* \( \s* $cast \$arg \s* ,
-          \s* ( (??{ $bal }) )    # Set from
+        m[^
+          \s+
+          sv_set([iunp])v(n)?    # Type, is_setpvn
+          \s*
+          \( \s*
+            $sv_cast \$arg \s* , \s*
+            ( (??{ $bal }) )    # Set from
           ( (??{ $size }) )?    # Possible sizeof set-from
           \) \s* ; \s* $
         ]x
     );
-    $targetable{$key} = [$t, $with_size, $arg, $sarg] if $t;
+    $targetable{$key} = [$type, $with_size, $arg, $sarg] if $type;
   }
   return %targetable;
 }
