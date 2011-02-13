@@ -669,12 +669,6 @@ or C<default> block.
 (P) An error peculiar to VMS.  The process is suffering from exhausted
 quotas or other plumbing problems.
 
-=item Can't declare class for non-scalar %s in "%s"
-
-(F) Currently, only scalar variables can be declared with a specific
-class qualifier in a "my", "our" or "state" declaration.  The semantics may be
-extended for other types of variables in future.
-
 =item Can't declare %s in "%s"
 
 (F) Only scalar, array, and hash variables may be declared as "my", "our" or
