@@ -1997,8 +1997,8 @@ without an intervening space.  For example, the two constructs:
  $a =~ m/$foo/sand $bar
  $a =~ m/$foo/s and $bar
 
-both currently mean the same thing, but it is planned to disallow the first form
-in Perl 5.16.  And,
+both currently mean the same thing, but it is planned to disallow the first
+form in Perl 5.16.  And,
 
  $a =~ m/$foo/and $bar
 
