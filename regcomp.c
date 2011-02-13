@@ -8558,8 +8558,13 @@ tryagain:
 			    FAIL("Trailing \\");
 			/* FALL THROUGH */
 		    default:
-			if (!SIZE_ONLY&& isALPHA(*p))
-			    ckWARN2reg(p + 1, "Unrecognized escape \\%c passed through", UCHARAT(p));
+			if (!SIZE_ONLY&& isALPHA(*p)) {
+			    /* Include any { following the alpha to emphasize
+			     * that it could be part of an escape at some point
+			     * in the future */
+			    int len = (*(p + 1) == '{') ? 2 : 1;
+			    ckWARN3reg(p + len, "Unrecognized escape \\%.*s passed through", len, p);
+			}
 			goto normal_default;
 		    }
 		    break;
