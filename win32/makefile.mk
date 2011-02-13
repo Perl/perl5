@@ -1035,7 +1035,7 @@ all : CHECKDMAKE .\config.h ..\git_version.h $(GLOBEXE) $(MINIPERL) $(MK2)	\
 
 regnodes : ..\regnodes.h
 
-..\regcomp$(o) : ..\regnodes.h ..\regcharclass.h	
+..\regcomp$(o) : ..\regnodes.h ..\regcharclass.h
 
 ..\regexec$(o) : ..\regnodes.h ..\regcharclass.h
 
