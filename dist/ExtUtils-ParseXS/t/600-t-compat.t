@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 1;
+use Test::More;
 
 # This test is for making sure that the new EU::Typemaps
 # based typemap merging produces the same result as the old
@@ -19,15 +19,50 @@ use ExtUtils::ParseXS::Constants;
 use File::Spec;
 
 my $path_prefix = File::Spec->catdir(-d 't' ? qw(t data) : qw(data));
-my @local_tmaps = (
-  File::Spec->catdir($path_prefix, "conflicting.typemap"),
-);
 
+my @tests = (
+  {
+    name => 'Simple conflict',
+    local_maps => [
+      File::Spec->catdir($path_prefix, "conflicting.typemap"),
+    ],
+    std_maps => [
+      File::Spec->catdir($path_prefix, "other.typemap"),
+    ],
+  },
+  {
+    name => 'B',
+    local_maps => [
+      File::Spec->catdir($path_prefix, "b.typemap"),
+    ],
+    std_maps => [],
+  },
+  {
+    name => 'B and perl',
+    local_maps => [
+      File::Spec->catdir($path_prefix, "b.typemap"),
+    ],
+    std_maps => [
+      File::Spec->catdir($path_prefix, "perl.typemap"),
+    ],
+  },
+  {
+    name => 'B and perl and B again',
+    local_maps => [
+      File::Spec->catdir($path_prefix, "b.typemap"),
+    ],
+    std_maps => [
+      File::Spec->catdir($path_prefix, "perl.typemap"),
+      File::Spec->catdir($path_prefix, "b.typemap"),
+    ],
+  },
+);
+plan tests => scalar(@tests);
+
+my @local_tmaps;
+my @standard_typemap_locations;
 SCOPE: {
   no warnings 'redefine';
-  my @standard_typemap_locations = (
-    File::Spec->catdir($path_prefix, "other.typemap"),
-  );
   sub ExtUtils::ParseXS::Utilities::standard_typemap_locations {
     @standard_typemap_locations;
   }
@@ -36,21 +71,28 @@ SCOPE: {
   }
 }
 
-my $res = [_process_typemaps([@local_tmaps], '.')];
-my $res_new = [process_typemaps([@local_tmaps], '.')];
+foreach my $test (@tests) {
+  @local_tmaps = @{ $test->{local_maps} };
+  @standard_typemap_locations = @{ $test->{std_maps} };
 
-# Normalize trailing whitespace. Let's be that lenient, mkay?
-for ($res, $res_new) {
-  for ($_->[2], $_->[3]) {
-    for (values %$_) {
-      s/\s+\z//;
+  my $res = [_process_typemaps([@local_tmaps], '.')];
+  my $res_new = [process_typemaps([@local_tmaps], '.')];
+
+  # Normalize trailing whitespace. Let's be that lenient, mkay?
+  for ($res, $res_new) {
+    for ($_->[2], $_->[3]) {
+      for (values %$_) {
+        s/\s+\z//;
+      }
     }
   }
-}
-#use Data::Dumper; warn Dumper $res;
-#use Data::Dumper; warn Dumper $res_new;
+  #use Data::Dumper; warn Dumper $res;
+  #use Data::Dumper; warn Dumper $res_new;
 
-is_deeply($res_new, $res);
+  is_deeply($res_new, $res, "typemap equivalency for '$test->{name}'");
+}
+
+
 
 sub _process_typemaps {
   my ($tmap, $pwd) = @_;
