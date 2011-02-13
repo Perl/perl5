@@ -1134,11 +1134,6 @@ with Perl, though, if you really want to do that.
 however, redefine it while it's running, and you can even undef the
 redefined subroutine while the old routine is running.  Go figure.
 
-=item Can't unshift
-
-(F) You tried to unshift an "unreal" array that can't be unshifted, such
-as the main Perl stack.
-
 =item Can't upgrade %s (%d) to %d
 
 (P) The internal sv_upgrade routine adds "members" to an SV, making it
