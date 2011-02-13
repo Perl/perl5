@@ -1602,7 +1602,7 @@ carried away.
 =item Died
 
 (F) You passed die() an empty string (the equivalent of C<die "">) or
-you called it with no args and both C<$@> and C<$_> were empty.
+you called it with no args and C<$@> was empty.
 
 =item Document contains no data
 
