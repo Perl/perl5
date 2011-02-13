@@ -319,7 +319,9 @@ my %msg;
     print STDERR "FINISHING COMPILATION for $_\n" if $DEBUG;
     local $/ = '';
     my $header;
+    my @headers;
     my $for_item;
+    my $seen_body;
     while (<POD_DIAG>) {
 
 	sub _split_pod_link {
@@ -365,10 +367,22 @@ my %msg;
 		}
 		s/^/    /gm;
 		$msg{$header} .= $_;
+		for my $h(@headers) { $msg{$h} .= $_ }
+		++$seen_body;
 	 	undef $for_item;	
 	    }
 	    next;
 	} 
+
+	# If we have not come across the body of the description yet, then
+	# the previous header needs to share the same description.
+	if ($seen_body) {
+	    @headers = ();
+	}
+	else {
+	    push @headers, $header if defined $header;
+	}
+
 	unless ( s/=item (.*?)\s*\z//) {
 
 	    if ( s/=head1\sDESCRIPTION//) {
@@ -428,6 +442,7 @@ my %msg;
 	    if $msg{$header};
 
 	$msg{$header} = '';
+	$seen_body = 0;
     } 
 
 

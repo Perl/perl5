@@ -5,7 +5,7 @@ BEGIN {
     @INC = 'lib';
 }
 
-use Test::More tests => 5;
+use Test::More tests => 6;
 
 BEGIN { use_ok('diagnostics') }
 
@@ -36,3 +36,11 @@ $warning = '';
 warn
  'Lexing code attempted to stuff non-Latin-1 character into Latin-1 input';
 like $warning, qr/using lex_stuff_pvn_flags or similar/, 'L<foo|bar/baz>';
+
+# Multiple messages with the same description
+seek STDERR, 0,0;
+$warning = '';
+warn 'Code point 0x%X is not Unicode, may not be portable';
+like $warning, qr/W utf8/,
+   'Message sharing its description with the following message';
+
