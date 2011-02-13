@@ -1625,6 +1625,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    }
 	    goto do_exactf;
 	case EXACTFL:
+	    utf8_fold_flags = 0;
 	    m   = STRING(c);
 	    ln  = STR_LEN(c);
 	    lnc = (I32) ln;
@@ -3765,20 +3766,24 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    re_fold_t folder;
 	    const U8 * fold_array;
 	    const char * s;
+	    U32 fold_utf8_flags;
 
 	    PL_reg_flags |= RF_tainted;
 	    folder = foldEQ_locale;
 	    fold_array = PL_fold_locale;
+	    fold_utf8_flags = 0;
 	    goto do_exactf;
 
 	case EXACTFU:
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
+	    fold_utf8_flags = 0;
 	    goto do_exactf;
 
 	case EXACTF:
 	    folder = foldEQ;
 	    fold_array = PL_fold;
+	    fold_utf8_flags = 0;
 
 	  do_exactf:
 	    s = STRING(scan);
@@ -3789,8 +3794,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		const char * const l = locinput;
 		char *e = PL_regeol;
 
-		if (! foldEQ_utf8(s, 0,  ln, cBOOL(UTF_PATTERN),
-			       l, &e, 0,  utf8_target)) {
+		if (! foldEQ_utf8_flags(s, 0,  ln, cBOOL(UTF_PATTERN),
+			       l, &e, 0,  utf8_target, fold_utf8_flags)) {
 		     /* One more case for the sharp s:
 		      * pack("U0U*", 0xDF) =~ /ss/i,
 		      * the 0xC3 0x9F are the UTF-8
@@ -4164,6 +4169,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    char type;
 	    re_fold_t folder;
 	    const U8 *fold_array;
+	    UV utf8_fold_flags;
 
 	    PL_reg_flags |= RF_tainted;
 	    folder = foldEQ_locale;
@@ -4175,18 +4181,21 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
 	    type = REFFU;
+	    utf8_fold_flags = 0;
 	    goto do_nref;
 
 	case NREFF:
 	    folder = foldEQ;
 	    fold_array = PL_fold;
 	    type = REFF;
+	    utf8_fold_flags = 0;
 	    goto do_nref;
 
 	case NREF:
 	    type = REF;
 	    folder = NULL;
 	    fold_array = NULL;
+	    utf8_fold_flags = 0;
 	  do_nref:
 
 	    /* For the named back references, find the corresponding buffer
@@ -4202,21 +4211,25 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    PL_reg_flags |= RF_tainted;
 	    folder = foldEQ_locale;
 	    fold_array = PL_fold_locale;
+	    utf8_fold_flags = 0;
 	    goto do_ref;
 
 	case REFFU:
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
+	    utf8_fold_flags = 0;
 	    goto do_ref;
 
 	case REFF:
 	    folder = foldEQ;
 	    fold_array = PL_fold;
+	    utf8_fold_flags = 0;
 	    goto do_ref;
 
         case REF:
 	    folder = NULL;
 	    fold_array = NULL;
+	    utf8_fold_flags = 0;
 
 	  do_ref:
 	    type = OP(scan);
@@ -4244,8 +4257,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    * not going off the end given by PL_regeol, and returns in
 		    * limit upon success, how much of the current input was
 		    * matched */
-		if (! foldEQ_utf8(s, NULL, PL_regoffs[n].end - ln, utf8_target,
-				    locinput, &limit, 0, utf8_target))
+		if (! foldEQ_utf8_flags(s, NULL, PL_regoffs[n].end - ln, utf8_target,
+				    locinput, &limit, 0, utf8_target, utf8_fold_flags))
 		{
 		    sayNO;
 		}
@@ -6021,6 +6034,7 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
     register char *loceol = PL_regeol;
     register I32 hardcount = 0;
     register bool utf8_target = PL_reg_match_utf8;
+    UV utf8_flags;
 #ifndef DEBUGGING
     PERL_UNUSED_ARG(depth);
 #endif
@@ -6101,6 +6115,7 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	/* FALL THROUGH */
     case EXACTF:
     case EXACTFU:
+	utf8_flags = 0;
 
 	/* The comments for the EXACT case above apply as well to these fold
 	 * ones */
@@ -6116,8 +6131,8 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 
 	    char *tmpeol = loceol;
 	    while (hardcount < max
-		    && foldEQ_utf8(scan, &tmpeol, 0, utf8_target,
-				   STRING(p), NULL, 1, cBOOL(UTF_PATTERN)))
+		    && foldEQ_utf8_flags(scan, &tmpeol, 0, utf8_target,
+				   STRING(p), NULL, 1, cBOOL(UTF_PATTERN), utf8_flags))
 	    {
 		scan = tmpeol;
 		tmpeol = loceol;
