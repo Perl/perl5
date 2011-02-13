@@ -1698,10 +1698,11 @@ is unsafe.  See L<perlre/(?{ code })>, and L<perlsec>.
 
 (F) Perl tried to compile a regular expression containing the
 C<(?{ ... })> zero-width assertion at run time, as it would when the
-pattern contains interpolated values.  Since that is a security risk, it
-is not allowed.  If you insist, you may still do this by explicitly
-building the pattern from an interpolated string at run time and using
-that in an eval().  See L<perlre/(?{ code })>.
+pattern contains interpolated values.  Since that is a security risk,
+it is not allowed.  If you insist, you may still do this by using the
+C<re 'eval'> pragma or by explicitly building the pattern from an
+interpolated string at run time and using that in an eval().  See
+L<perlre/(?{ code })>.
 
 =item %s: Eval-group not allowed, use re 'eval'
 
