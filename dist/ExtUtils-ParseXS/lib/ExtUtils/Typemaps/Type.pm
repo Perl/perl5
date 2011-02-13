@@ -4,7 +4,7 @@ use strict;
 use warnings;
 our $VERSION = '0.05';
 use Carp qw(croak);
-use ExtUtils::Typemaps;
+require ExtUtils::Typemaps;
 
 =head1 NAME
 
