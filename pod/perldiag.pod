@@ -791,14 +791,14 @@ editor will have a way to help you find these characters.
 
 =item Can't find Unicode property definition "%s"
 
-(F) You may have tried to use C<\p> which means a Unicode property (for
-example C<\p{Lu}> matches all uppercase letters).  If you did mean to use a
-Unicode property, see
+(F) You may have tried to use C<\p> which means a Unicode
+property (for example C<\p{Lu}> matches all uppercase
+letters). If you did mean to use a Unicode property, see
 L<perluniprops/Properties accessible through \p{} and \P{}>
-for a complete list of available properties.
-If you didn't mean to use a Unicode property, escape the C<\p>, either
-by C<\\p> (just the C<\p>) or by C<\Q\p> (the rest of the string, until
-possible C<\E>).
+for a complete list of available properties. If you didn't
+mean to use a Unicode property, escape the C<\p>, either by C<\\p>
+(just the C<\p>) or by C<\Q\p> (the rest of the string, or
+until C<\E>).
 
 =item Can't fork: %s
 
