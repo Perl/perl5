@@ -661,10 +661,10 @@ sub _get_inputmap_hash {
   foreach my $xstype (keys %$lookup) {
     $rv{$xstype} = $storage->[ $lookup->{$xstype} ]->code;
 
-    # Squash trailing whitespace to one line break max
+    # Squash trailing whitespace to one line break
     # This isn't strictly necessary, but makes the output more similar
     # to the original ExtUtils::ParseXS.
-    $rv{$xstype} =~ s/\s+?\n\z/\n/;
+    $rv{$xstype} =~ s/\s*\z/\n/;
   }
 
   return \%rv;
@@ -705,6 +705,11 @@ sub _get_outputmap_hash {
   my %rv;
   foreach my $xstype (keys %$lookup) {
     $rv{$xstype} = $storage->[ $lookup->{$xstype} ]->code;
+
+    # Squash trailing whitespace to one line break
+    # This isn't strictly necessary, but makes the output more similar
+    # to the original ExtUtils::ParseXS.
+    $rv{$xstype} =~ s/\s*\z/\n/;
   }
 
   return \%rv;
@@ -811,7 +816,7 @@ sub _parse {
     if ($section eq 'typemap') {
       my $line = $_;
       s/^\s+//; s/\s+$//;
-      next if /^#/ or /^$/;
+      next if $_ eq '' or /^#/;
       my($type, $kind, $proto) = /^(.*?\S)\s+(\S+)\s*($ExtUtils::ParseXS::Constants::PrototypeRegexp*)$/o
         or warn("Warning: File '$filename' Line $lineno '$line' TYPEMAP entry needs 2 or 3 columns\n"),
            next;
@@ -825,8 +830,9 @@ sub _parse {
         )
       );
     } elsif (/^\s/) {
+      s/\s+$//;
       $$current .= $$current eq '' ? $_ : "\n".$_;
-    } elsif (/^$/) {
+    } elsif ($_ eq '') {
       next;
     } elsif ($section eq 'input') {
       s/\s+$//;
