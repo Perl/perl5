@@ -4104,10 +4104,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 
 	    s = PL_bostr + ln;
 	    if (type != REF	/* REF can do byte comparison */
-		&& (utf8_target
-                    || (type == REFFU
-                        && (*s == (char) LATIN_SMALL_LETTER_SHARP_S
-                            || *locinput == (char) LATIN_SMALL_LETTER_SHARP_S))))
+		&& (utf8_target || type == REFFU))
 	    { /* XXX handle REFFL better */
 		char * limit = PL_regeol;
 
