@@ -650,7 +650,7 @@ that you can chdir to, possibly because it doesn't exist.
 (P) For some reason you can't check the filesystem of the script for
 nosuid.
 
-=item Can't coerce %s to integer in %s
+=item Can't coerce %s to %s in %s
 
 (F) Certain types of SVs, in particular real symbol table entries
 (typeglobs), can't be forced to stop being what they are.  So you can't
@@ -664,16 +664,6 @@ You CAN say
     $foo += 1;
 
 but then $foo no longer contains a glob.
-
-=item Can't coerce %s to number in %s
-
-(F) Certain types of SVs, in particular real symbol table entries
-(typeglobs), can't be forced to stop being what they are.
-
-=item Can't coerce %s to string in %s
-
-(F) Certain types of SVs, in particular real symbol table entries
-(typeglobs), can't be forced to stop being what they are.
 
 =item Can't "continue" outside a when block
 

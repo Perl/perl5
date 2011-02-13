@@ -1580,6 +1580,7 @@ Perl_sv_setiv(pTHX_ register SV *const sv, const IV i)
     case SVt_PVCV:
     case SVt_PVFM:
     case SVt_PVIO:
+	/* diag_listed_as: Can't coerce %s to %s in %s */
 	Perl_croak(aTHX_ "Can't coerce %s to integer in %s", sv_reftype(sv,0),
 		   OP_DESC(PL_op));
     default: NOOP;
@@ -1689,6 +1690,7 @@ Perl_sv_setnv(pTHX_ register SV *const sv, const NV num)
     case SVt_PVCV:
     case SVt_PVFM:
     case SVt_PVIO:
+	/* diag_listed_as: Can't coerce %s to %s in %s */
 	Perl_croak(aTHX_ "Can't coerce %s to number in %s", sv_reftype(sv,0),
 		   OP_DESC(PL_op));
     default: NOOP;
@@ -8989,6 +8991,7 @@ Perl_sv_pvn_force_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 	}
 	if ((SvTYPE(sv) > SVt_PVLV && SvTYPE(sv) != SVt_PVFM)
 	    || isGV_with_GP(sv))
+	    /* diag_listed_as: Can't coerce %s to %s in %s */
 	    Perl_croak(aTHX_ "Can't coerce %s to string in %s", sv_reftype(sv,0),
 		OP_DESC(PL_op));
 	s = sv_2pv_flags(sv, &len, flags);
