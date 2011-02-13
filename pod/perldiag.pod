@@ -1964,9 +1964,8 @@ unspecified destination.  See L<perlfunc/goto>.
 
 =item ()-group starts with a count
 
-(F) A ()-group started with a count.  A count is
-supposed to follow something: a template character or a ()-group.
- See L<perlfunc/pack>.
+(F) A ()-group started with a count.  A count is supposed to follow
+something: a template character or a ()-group.  See L<perlfunc/pack>.
 
 =item %s had compilation errors.
 
