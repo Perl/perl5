@@ -1076,7 +1076,7 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
 	   even for \b or \B.  But (minlen? 1 : 0) below assumes that
 	   regstclass does not come from lookahead...  */
 	/* If regstclass takes bytelength more than 1: If charlength==1, OK.
-	   This leaves EXACTF, EXACTFU only, which are dealt with in find_byclass().  */
+	   This leaves EXACTF-ish only, which are dealt with in find_byclass().  */
         const U8* const str = (U8*)STRING(progi->regstclass);
         const int cl_l = (PL_regkind[OP(progi->regstclass)] == EXACT
 		    ? CHR_DIST(str+STR_LEN(progi->regstclass), str)
