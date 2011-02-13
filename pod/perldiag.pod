@@ -510,14 +510,6 @@ substitution, but stylistically it's better to use the variable form
 because other Perl programmers will expect it, and it works better if
 there are more than 9 backreferences.
 
-=item "\b{" is deprecated; use "\b\{" instead
-
-=item "\B{" is deprecated; use "\B\{" instead
-
-(W deprecated, regexp) Use of an unescaped "{" immediately following a
-C<\b> or C<\B> is now deprecated so as to reserve its use for Perl
-itself in a future release.
-
 =item Binary number > 0b11111111111111111111111111111111 non-portable
 
 (W portable) The binary number you specified is larger than 2**32-1
@@ -533,6 +525,14 @@ check the return value of your socket() call?  See L<perlfunc/bind>.
 
 (W unopened) You tried binmode() on a filehandle that was never opened.
 Check your control flow and number of arguments.
+
+=item "\b{" is deprecated; use "\b\{" instead
+
+=item "\B{" is deprecated; use "\B\{" instead
+
+(W deprecated, regexp) Use of an unescaped "{" immediately following a
+C<\b> or C<\B> is now deprecated so as to reserve its use for Perl
+itself in a future release.
 
 =item Bit vector size > 32 non-portable
 
@@ -1328,6 +1328,21 @@ uses the character values modulus 256 instead, as if you had provided:
 
    unpack("s", "\x{f3}b")
 
+=item "\c{" is deprecated and is more clearly written as ";"
+
+(D deprecated, syntax) The C<\cI<X>> construct is intended to be a way
+to specify non-printable characters.  You used it with a "{" which
+evaluates to ";", which is printable.  It is planned to remove the
+ability to specify a semi-colon this way in Perl 5.16.  Just use a
+semi-colon or a backslash-semi-colon without the "\c".
+
+=item "\c%c" is more clearly written simply as "%s"
+
+(W syntax) The C<\cI<X>> construct is intended to be a way to specify
+non-printable characters.  You used it for a printable one, which is better
+written as simply itself, perhaps preceded by a backslash for non-word
+characters.
+
 =item close() on unopened filehandle %s
 
 (W unopened) You tried to close a filehandle that was never opened.
@@ -1487,21 +1502,6 @@ valid magic number.
 (F) You had an unpack template indicating a counted-length string, but
 you have also specified an explicit size for the string.  See
 L<perlfunc/pack>.
-
-=item "\c{" is deprecated and is more clearly written as ";"
-
-(D deprecated, syntax) The C<\cI<X>> construct is intended to be a way
-to specify non-printable characters.  You used it with a "{" which
-evaluates to ";", which is printable.  It is planned to remove the
-ability to specify a semi-colon this way in Perl 5.16.  Just use a
-semi-colon or a backslash-semi-colon without the "\c".
-
-=item "\c%c" is more clearly written simply as "%s"
-
-(W syntax) The C<\cI<X>> construct is intended to be a way to specify
-non-printable characters.  You used it for a printable one, which is better
-written as simply itself, perhaps preceded by a backslash for non-word
-characters.
 
 =item Deep recursion on subroutine "%s"
 
