@@ -818,12 +818,12 @@ Under VMS, access checks are done by filename, rather than by bits in
 the stat buffer, so that ACLs and other protections can be taken into
 account.  Unfortunately, Perl assumes that the stat buffer contains all
 the necessary information, and passes it, instead of the filespec, to
-the access checking routine.  It will try to retrieve the filespec using
+the access-checking routine.  It will try to retrieve the filespec using
 the device name and FID present in the stat buffer, but this works only
 if you haven't made a subsequent call to the CRTL stat() routine,
 because the device name is overwritten with each call.  If this warning
-appears, the name lookup failed, and the access checking routine gave up
-and returned FALSE, just to be conservative.  (Note: The access checking
+appears, the name lookup failed, and the access-checking routine gave up
+and returned FALSE, just to be conservative.  (Note: The access-checking
 routine knows about the Perl C<stat> operator and file tests, so you
 shouldn't ever see this warning in response to a Perl command; it arises
 only if some internal code takes stat buffers lightly.)
@@ -979,7 +979,7 @@ a NULL.
 =item Can't modify non-lvalue subroutine call
 
 (F) Subroutines meant to be used in lvalue context should be declared as
-such, see L<perlsub/"Lvalue subroutines">.
+such.  See L<perlsub/"Lvalue subroutines">.
 
 =item Can't msgrcv to read-only var
 
@@ -1006,7 +1006,7 @@ the command line.
 =item Can't open a reference
 
 (W io) You tried to open a scalar reference for reading or writing,
-using the 3-arg open() syntax :
+using the 3-arg open() syntax:
 
     open FH, '>', $ref;
 
@@ -1089,7 +1089,7 @@ to reopen it to accept binary data.  Alas, it failed.
 
 (F|P) Error resolving overloading specified by a method name (as opposed
 to a subroutine reference): no such method callable via the package. If
-method name is C<???>, this is an internal error.
+the method name is C<???>, this is an internal error.
 
 =item Can't return %s from lvalue subroutine
 
