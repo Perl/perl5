@@ -1618,6 +1618,8 @@ Implemented via Spawn. (VM/ESA)
 Does not automatically flush output handles on some platforms.
 (SunOS, Solaris, HP-UX)
 
+Not supported. (Symbian OS)
+
 =item exit
 
 Emulates Unix exit() (which considers C<exit 1> to indicate an error) by
