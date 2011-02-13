@@ -606,12 +606,6 @@ a C<given> block. You probably meant to use C<next> or C<last>.
 
 (F) You called C<break>, but you're not inside a C<given> block.
 
-=item Can't call method "%s" in empty package "%s"
-
-(F) You called a method correctly, and it correctly indicated a package
-functioning as a class, but that package doesn't have ANYTHING defined
-in it, let alone methods.  See L<perlobj>.
-
 =item Can't call method "%s" on an undefined value
 
 (F) You used the syntax of a method call, but the slot filled by the
