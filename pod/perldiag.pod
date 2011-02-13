@@ -2250,9 +2250,10 @@ escape was discovered.
 
 =item Invalid mro name: '%s'
 
-(F) You tried to C<mro::set_mro("classname", "foo")>
-or C<use mro 'foo'>, where C<foo> is not a valid method resolution order (MRO).
-(Currently, the only valid ones are C<dfs> and C<c3>). See L<mro>.
+(F) You tried to C<mro::set_mro("classname", "foo")> or C<use mro 'foo'>,
+where C<foo> is not a valid method resolution order (MRO).  Currently,
+the only valid ones supported are C<dfs> and C<c3>, unless you have loaded
+a module that is a MRO plugin.  See L<mro> and L<perlmroapi>.
 
 =item Invalid [] range "%s" in regex; marked by <-- HERE in m/%s/
 
