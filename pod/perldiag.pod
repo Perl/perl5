@@ -2169,6 +2169,12 @@ C<$ENV{ENV}>, C<$ENV{BASH_ENV}> or C<$ENV{TERM}> are derived from data
 supplied (or potentially supplied) by the user.  The script must set
 the path to a known value, using trustworthy data.  See L<perlsec>.
 
+=item Integer overflow in format string for %s
+
+(F) The indexes and widths specified in the format string of C<printf()>
+or C<sprintf()> are too large.  The numbers must not overflow the size of
+integers for your architecture.
+
 =item Integer overflow in %s number
 
 (W overflow) The hexadecimal, octal or binary number you have specified
@@ -2180,12 +2186,6 @@ representable without overflow is 0xFFFFFFFF, 037777777777, or
 transparently promotes all numbers to a floating point representation
 internally--subject to loss of precision errors in subsequent
 operations.
-
-=item Integer overflow in format string for %s
-
-(F) The indexes and widths specified in the format string of C<printf()>
-or C<sprintf()> are too large.  The numbers must not overflow the size of
-integers for your architecture.
 
 =item Integer overflow in version
 
