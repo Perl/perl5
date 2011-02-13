@@ -93,7 +93,10 @@ foreach my $test (@tests) {
 }
 
 
-
+# The code below is a reproduction of what the pre-ExtUtils::Typemap
+# typemap-parsing/handling code in ExtUtils::ParseXS looked like. For
+# bug-compatibility, we want to produce the same data structures as that
+# code as much as possible.
 sub _process_typemaps {
   my ($tmap, $pwd) = @_;
 
