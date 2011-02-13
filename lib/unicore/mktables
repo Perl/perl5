@@ -12906,8 +12906,10 @@ END
     # Generate a list of the formats that can appear in the map tables.
     my @map_table_formats;
     foreach my $format (sort keys %map_table_formats) {
-        push @map_table_formats, " $format    $map_table_formats{$format}\n";
+        push @map_table_formats, "  $format    $map_table_formats{$format}\n";
     }
+
+    local $" = "";
 
     # Everything is ready to assemble.
     my @OUT = << "END";
@@ -13203,7 +13205,7 @@ this is not necessarily the property's official Unicode name.  (The 'To' is
 also for backwards compatibility.)  The hash entry gives the format of the
 mapping fields of the table, currently one of the following:
 
- @map_table_formats
+@map_table_formats
 
 This format applies only to the entries in the main body of the table.
 Entries defined in hashes or ones that are missing from the list can have a
