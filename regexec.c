@@ -1240,30 +1240,6 @@ uvc, charid, foldlen, foldbuf, uniflags) STMT_START {                       \
     }                                                                       \
 } STMT_END
 
-#define REXEC_FBC_EXACTISH_CHECK(CoNd)                 \
-{                                                      \
-    char *my_strend= (char *)strend;                   \
-    if ( (CoNd)                                        \
-	 && (ln == len ||                              \
-	     foldEQ_utf8(s, &my_strend, 0,  utf8_target,   \
-			m, NULL, ln, cBOOL(UTF_PATTERN)))      \
-	 && (!reginfo || regtry(reginfo, &s)) )        \
-	goto got_it;                                   \
-    else {                                             \
-	 U8 foldbuf[UTF8_MAXBYTES_CASE+1];             \
-	 uvchr_to_utf8(tmpbuf, c);                     \
-	 f = to_utf8_fold(tmpbuf, foldbuf, &foldlen);  \
-	 if ( f != c                                   \
-	      && (f == c1 || f == c2)                  \
-	      && (ln == len ||                         \
-	        foldEQ_utf8_flags(s, &my_strend, 0,  utf8_target,\
-			      m, NULL, ln, cBOOL(UTF_PATTERN), utf8_fold_flags))\
-	      && (!reginfo || regtry(reginfo, &s)) )   \
-	      goto got_it;                             \
-    }                                                  \
-}                                                      \
-s += len
-
 #define REXEC_FBC_EXACTISH_SCAN(CoNd)                     \
 STMT_START {                                              \
     while (s <= e) {                                      \
