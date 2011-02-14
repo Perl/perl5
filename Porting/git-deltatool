@@ -783,6 +783,10 @@ git-deltatool - Annotate commits for perldelta
 
  $ git-deltatool --mode render
 
+ # Get a list of commits needing further review, e.g. for peer review
+
+ $ git-deltatool --mode summary --type blocking
+
  # mark 'pending' annotations as 'done' (i.e. added to perldelta)
 
  $ git-deltatool --mode update --type pending --status done
