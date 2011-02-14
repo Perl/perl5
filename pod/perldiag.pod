@@ -3129,8 +3129,9 @@ the meantime, try using scientific notation (e.g. "1e6" instead of
 
 =item Number with no digits
 
-(F) Perl was looking for a number but found nothing that looked like a number.
-This happens, for example with C<\o{}>, with no number between the braces.
+(F) Perl was looking for a number but found nothing that looked like
+a number. This happens, for example with C<\o{}>, with no number between
+the braces.
 
 =item Octal number in vector unsupported
 
