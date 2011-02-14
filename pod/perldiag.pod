@@ -3089,7 +3089,7 @@ indicated.
 
 (W misc) A number has been passed as a bitmask argument to select().
 Use the vec() function to construct the file descriptor bitmasks for
-select. See L<perlfunc/select>
+select. See L<perlfunc/select>.
 
 =item Null filename used
 
