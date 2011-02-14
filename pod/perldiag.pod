@@ -2346,8 +2346,9 @@ previous versions of perl the use of C<$*> enabled or disabled multi-line
 matching within a string.
 
 Instead of using C<$*> you should use the C</m> (and maybe C</s>) regexp
-modifiers. (In older versions: when C<$*> was set to a true value then
-all regular expressions behaved as if they were written using C</m>.)
+modifiers. You can enable C</m> for a lexical scope (even a whole file)
+with C<use re '/m'>. (In older versions: when C<$*> was set to a true value
+then all regular expressions behaved as if they were written using C</m>.)
 
 =item $# is no longer supported
 
