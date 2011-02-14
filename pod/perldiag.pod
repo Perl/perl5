@@ -4906,16 +4906,6 @@ character to get your parentheses to balance.  See L<attributes>.
 compressed integer format and could not be converted to an integer.
 See L<perlfunc/pack>.
 
-=item Unterminated verb pattern in regex; marked by <-- HERE in m/%s/
-
-(F) You used a pattern of the form C<(*VERB)> but did not terminate
-the pattern with a C<)>. Fix the pattern and retry.
-
-=item Unterminated verb pattern argument in regex; marked by <-- HERE in m/%s/
-
-(F) You used a pattern of the form C<(*VERB:ARG)> but did not terminate
-the pattern with a C<)>. Fix the pattern and retry.
-
 =item Unterminated \g{...} pattern in regex; marked by <-- HERE in m/%s/
 
 (F) You missed a close brace on a \g{..} pattern (group reference) in
@@ -4927,6 +4917,16 @@ a regular expression. Fix the pattern and retry.
 a term, so it's looking for the corresponding right angle bracket, and
 not finding it.  Chances are you left some needed parentheses out
 earlier in the line, and you really meant a "less than".
+
+=item Unterminated verb pattern argument in regex; marked by <-- HERE in m/%s/
+
+(F) You used a pattern of the form C<(*VERB:ARG)> but did not terminate
+the pattern with a C<)>. Fix the pattern and retry.
+
+=item Unterminated verb pattern in regex; marked by <-- HERE in m/%s/
+
+(F) You used a pattern of the form C<(*VERB)> but did not terminate
+the pattern with a C<)>. Fix the pattern and retry.
 
 =item untie attempted while %d inner references still exist
 
@@ -5095,15 +5095,6 @@ error, so C<:=> can be reclaimed as a new operator in the future.
 If you need an empty attribute list, for example in a code generator, add
 a space before the C<=>.
 
-=item Use of ?PATTERN? without explicit operator is deprecated
-
-(D deprecated) You have written something like C<?\w?>, for a regular
-expression that matches only once.  Starting this term directly with
-the question mark delimiter is now deprecated, so that the question mark
-will be available for use in new operators in the future.  Write C<m?\w?>
-instead, explicitly using the C<m> operator: the question mark delimiter
-still invokes match-once behaviour.
-
 =item Use of freed value in iteration
 
 (F) Perhaps you modified the iterated array within the loop?
@@ -5192,6 +5183,15 @@ The operation returned C<undef>.  Use a filename instead.
 name. So no namespace is current at all. Using this can cause many
 otherwise reasonable constructs to fail in baffling ways. C<use strict;>
 instead.
+
+=item Use of ?PATTERN? without explicit operator is deprecated
+
+(D deprecated) You have written something like C<?\w?>, for a regular
+expression that matches only once.  Starting this term directly with
+the question mark delimiter is now deprecated, so that the question mark
+will be available for use in new operators in the future.  Write C<m?\w?>
+instead, explicitly using the C<m> operator: the question mark delimiter
+still invokes match-once behaviour.
 
 =item Use of qw(...) as parentheses is deprecated
 
