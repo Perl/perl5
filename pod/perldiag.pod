@@ -3145,8 +3145,6 @@ future version.
 (4294967295) and therefore non-portable between systems.  See
 L<perlport> for more on portability concerns.
 
-See also L<perlport> for writing portable code.
-
 =item Odd number of arguments for overload::constant
 
 (W overload) The call to overload::constant contained an odd number of
