@@ -10,6 +10,8 @@ BEGIN {
     require './test.pl';
 }
 
+my $DEBUG = 0;  # Outputs extra information for debugging this test
+
 use strict;
 use warnings;
 use Encode;
@@ -50,8 +52,22 @@ sub range_type {
     return $Unicode;
 }
 
+my %todos;
+map { $todos{$_} = '1' } (
+);
+
 sub numerically {
     return $a <=> $b
+}
+
+sub format_test($$$) {
+    my ($test, $count, $debug) = @_;
+
+    $debug = "" unless $DEBUG;
+
+    my $todo = (exists $todos{$count}) ? "Known problem" : 0;
+
+    return qq[TODO: { local \$::TODO = "$todo"; ok(eval '$test', '$test; $debug'); }];
 }
 
 my %tests;
@@ -187,7 +203,7 @@ sub pairs (@) {
 
 
 # Finally ready to do the tests
-my $count=1;
+my $count=0;
 foreach my $test (sort { numerically } keys %tests) {
 
   my $previous_target;
@@ -268,16 +284,17 @@ foreach my $test (sort { numerically } keys %tests) {
           $op = '!~' if $should_fail;
 
           my $eval = "my \$c = \"$lhs$rhs\"; my \$p = qr/(?$charset:^($rhs)\\1\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-          push @eval_tests, qq[ok(eval '$eval', '$eval')];
+          push @eval_tests, format_test($eval, ++$count, "");
+
           $eval = "my \$c = \"$lhs$rhs\"; my \$p = qr/(?$charset:^(?<grind>$rhs)\\k<grind>\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-          push @eval_tests, qq[ok(eval '$eval', '$eval')];
-          $count += 2;
+          push @eval_tests, format_test($eval, ++$count, "");
+
           if ($lhs ne $rhs) {
             $eval = "my \$c = \"$rhs$lhs\"; my \$p = qr/(?$charset:^($rhs)\\1\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-            push @eval_tests, qq[ok(eval '$eval', '$eval')];
+            push @eval_tests, format_test($eval, ++$count, "");
+
             $eval = "my \$c = \"$rhs$lhs\"; my \$p = qr/(?$charset:^(?<grind>$rhs)\\k<grind>\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-            push @eval_tests, qq[ok(eval '$eval', '$eval')];
-            $count += 2;
+            push @eval_tests, format_test($eval, ++$count, "");
           }
           #diag $eval_tests[-1];
           #next;
@@ -348,19 +365,22 @@ foreach my $test (sort { numerically } keys %tests) {
                           $op = ! $op if $must_match && $inverted;
                           $op = ($op) ? '=~' : '!~';
 
-                          my $stuff .= " uni_semantics=$uni_semantics, should_fail=$should_fail, bracketed=$bracketed, prepend=$prepend, append=$append, parend=$parend, quantifier=$quantifier, l_anchor=$l_anchor, r_anchor=$r_anchor";
-                          $stuff .= "; pattern_above_latin1=$pattern_above_latin1; utf8_pattern=$utf8_pattern";
-                          my $eval = "my \$c = \"$prepend$lhs$append\"; my \$p = qr/$quantified/i;$upgrade_target$upgrade_pattern \$c $op \$p;";
+                          my $debug .= " uni_semantics=$uni_semantics, should_fail=$should_fail, bracketed=$bracketed, prepend=$prepend, append=$append, parend=$parend, quantifier=$quantifier, l_anchor=$l_anchor, r_anchor=$r_anchor";
+                          $debug .= "; pattern_above_latin1=$pattern_above_latin1; utf8_pattern=$utf8_pattern";
+                          my $eval = "my \$c = \"$prepend$lhs$append\"; my \$p = qr/$quantified/i;$upgrade_target$upgrade_pattern \$c $op \$p";
 
-                          # XXX Doesn't currently test multi-char folds
+                          # XXX Doesn't currently test multi-char folds in pattern
                           next if @pattern != 1;
-                          #next if ! $must_match;
-                          push @eval_tests, qq[ok(eval '$eval', '$eval')];
-                          $count++;
+                          push @eval_tests, format_test($eval, ++$count, $debug);
 
                           # Group tests
                           if (@eval_tests >= $clump_execs) {
+                              #eval "use re qw(Debug COMPILE EXECUTE);" . join ";\n", @eval_tests;
                               eval join ";\n", @eval_tests;
+                              if ($@) {
+                                fail($@);
+                                exit 1;
+                              }
                               undef @eval_tests;
                           }
                         }
@@ -379,7 +399,11 @@ foreach my $test (sort { numerically } keys %tests) {
 
 # Finish up any tests not already done
 eval join ";\n", @eval_tests;
+if ($@) {
+  fail($@);
+  exit 1;
+}
 
-plan($count-1);
+plan($count);
 
 1
