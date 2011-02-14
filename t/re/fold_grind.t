@@ -128,7 +128,7 @@ foreach my $folded (sort numerically keys %folded_from) {
     else {
         push @{$simple_folds{$target_range_type}{$count}},
                { $folded => $folded_from{$folded} };
-    } 
+    }
 }
 
 foreach my $from_length (keys %multi_folds) {
@@ -173,15 +173,15 @@ my @eval_tests;
 # For use by pairs() in generating combinations
 sub prefix {
     my $p = shift;
-    map [ $p, $_ ], @_ 
+    map [ $p, $_ ], @_
 }
 
 # Returns all ordered combinations of pairs of elements from the input array.
 # It doesn't return pairs like (a, a), (b, b).  Change the slice to an array
 # to do that.  This was just to have fewer tests.
-sub pairs (@) { 
+sub pairs (@) {
     #print __LINE__, ": ", join(" XXX ", @_), "\n";
-    map { prefix $_[$_], @_[0..$_-1, $_+1..$#_] } 0..$#_ 
+    map { prefix $_[$_], @_[0..$_-1, $_+1..$#_] } 0..$#_
 }
 
 
