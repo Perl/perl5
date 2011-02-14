@@ -2864,7 +2864,7 @@ One possible cause for this is that you expected to have imported a
 constant to your name space with B<use> or B<import> while no such
 importing took place, it may for example be that your operating system
 does not support that particular constant. Hopefully you did use an
-explicit import list for the constants you expect to see, please see
+explicit import list for the constants you expect to see; please see
 L<perlfunc/use> and L<perlfunc/import>. While an explicit import list
 would probably have caught this error earlier it naturally does not
 remedy the fact that your operating system still does not support that
@@ -2881,7 +2881,7 @@ doesn't know where you want to pipe the output from this command.
 =item No DB::DB routine defined
 
 (F) The currently executing code was compiled with the B<-d> switch, but
-for some reason the  current debugger (e.g. F<perl5db.pl> or a C<Devel::>
+for some reason the current debugger (e.g. F<perl5db.pl> or a C<Devel::>
 module) didn't define a routine to be called at the beginning of each
 statement.
 
@@ -2972,6 +2972,7 @@ your system.
 
 (F) The indicated command line switch needs a mandatory argument, but
 you haven't specified one.
+
 =item No such class field "%s" in variable %s of type %s
 
 (F) You tried to access a key from a hash through the indicated typed variable
