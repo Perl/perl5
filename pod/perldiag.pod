@@ -1940,14 +1940,14 @@ earlier in the line, and you really meant a "less than".
 
 =item gmtime(%f) too large
 
-(W overflow) You called C<gmtime> with an number that was larger than
+(W overflow) You called C<gmtime> with a number that was larger than
 it can reliably handle and C<gmtime> probably returned the wrong
 date. This warning is also triggered with nan (the special
 not-a-number value).
 
 =item gmtime(%f) too small
 
-(W overflow) You called C<gmtime> with an number that was smaller than
+(W overflow) You called C<gmtime> with a number that was smaller than
 it can reliably handle and C<gmtime> probably returned the wrong
 date. This warning is also triggered with nan (the special
 not-a-number value).
@@ -2421,14 +2421,14 @@ L<perlfunc/listen>.
 
 =item localtime(%f) too large
 
-(W overflow) You called C<localtime> with an number that was larger
+(W overflow) You called C<localtime> with a number that was larger
 than it can reliably handle and C<localtime> probably returned the
 wrong date. This warning is also triggered with nan (the special
 not-a-number value).
 
 =item localtime(%f) too small
 
-(W overflow) You called C<localtime> with an number that was smaller
+(W overflow) You called C<localtime> with a number that was smaller
 than it can reliably handle and C<localtime> probably returned the
 wrong date. This warning is also triggered with nan (the special
 not-a-number value).
