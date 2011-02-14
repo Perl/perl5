@@ -255,7 +255,7 @@ edit; then you feed this list back and it applies the edits. So, first
 scan the source directory looking for likely candidates. The command line
 arguments are the old and new version numbers, and -s means scan:
 
-    $ Porting/bump-perl-version -s 5.10.0 5.10.1 > /tmp/scan
+    $ ./perl -Ilib Porting/bump-perl-version -s 5.10.0 5.10.1 > /tmp/scan
 
 This produces a file containing a list of suggested edits, e.g.:
 
@@ -271,7 +271,7 @@ suggested replacement text. Remember that this tool is largely just
 grepping for '5.10.0' or whatever, so it will generate false positives. Be
 careful not change text like "this was fixed in 5.10.0"! Then run:
 
-    $ Porting/bump-perl-version -u < /tmp/scan
+    $ ./perl -Ilib Porting/bump-perl-version -u < /tmp/scan
 
 which will update all the files shown.
 
