@@ -4076,15 +4076,15 @@ C<foo ? 0 : 1>) leading to some ambiguous constructions being wrongly
 parsed. One way to disambiguate the parsing is to put parentheses around
 the conditional expression, i.e. C<(foo) ? 0 : 1>.
 
-=item %sseek() on unopened filehandle
-
-(W unopened) You tried to use the seek() or sysseek() function on a
-filehandle that was either never opened or has since been closed.
-
 =item seekdir() attempted on invalid dirhandle %s
 
 (W io) The dirhandle you are doing a seekdir() on is either closed or not
 really a dirhandle.  Check your control flow.
+
+=item %sseek() on unopened filehandle
+
+(W unopened) You tried to use the seek() or sysseek() function on a
+filehandle that was either never opened or has since been closed.
 
 =item select not implemented
 
