@@ -4711,6 +4711,17 @@ reserved for internal use; so, applications shouldn't attempt to exchange
 them.  If you know what you are doing you can turn
 off this warning by C<no warnings 'utf8';>.
 
+=item Unicode surrogate U+%X is illegal in UTF-8
+
+(W utf8) You had a UTF-16 surrogate in a context where they are
+not considered acceptable.  These code points, between U+D800 and
+U+DFFF (inclusive), are used by Unicode only for UTF-16.  However, Perl
+internally allows all unsigned integer code points (up to the size limit
+available on your platform), including surrogates.  But these can cause
+problems when being input or output, which is likely where this message
+came from.  If you really really know what you are doing you can turn
+off this warning by C<no warnings 'utf8';>.
+
 =item Unknown BYTEORDER
 
 (F) There are no byte-swapping functions for a machine with this byte
@@ -5253,13 +5264,6 @@ C<< @foo->[23] >> or C<< @$ref->[99] >>.  Versions of perl <= 5.6.1 used to
 allow this syntax, but shouldn't have. It is now deprecated, and will be
 removed in a future version.
 
-=item Using !~ with %s doesn't make sense
-
-(F) Using the C<!~> operator with C<s///r>, C<tr///r> or C<y///r> is
-currently reserved for future use, as the exact behaviour has not
-been decided. (Simply returning the boolean opposite of the
-modified string is usually not particularly useful.)
-
 =item Using just the first character returned by \N{} in character class
 
 (W) A charnames handler may return a sequence of more than one character.
@@ -5274,7 +5278,12 @@ exceeded.  In the message, the characters in the sequence are separated by
 dots, and each is shown by its ordinal in hex.  Anything to the left of the
 C<HERE> was retained; anything to the right was discarded.
 
-=item Unicode surrogate U+%X is illegal in UTF-8
+=item Using !~ with %s doesn't make sense
+
+(F) Using the C<!~> operator with C<s///r>, C<tr///r> or C<y///r> is
+currently reserved for future use, as the exact behaviour has not
+been decided. (Simply returning the boolean opposite of the
+modified string is usually not particularly useful.)
 
 =item UTF-16 surrogate U+%X
 
