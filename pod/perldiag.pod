@@ -3970,9 +3970,9 @@ discovered.
 =item Reference to nonexistent named group in regex; marked by <-- HERE in m/%s/
 
 (F) You used something like C<\k'NAME'> or C<< \k<NAME> >> in your regular
-expression, but there is no corresponding named capturing parentheses such
-as C<(?'NAME'...)> or C<(?<NAME>...). Check if the name has been spelled
-correctly both in the backreference and the declaration.
+expression, but there is no corresponding named capturing parentheses
+such as C<(?'NAME'...)> or C<< (?<NAME>...) >>. Check if the name has been
+spelled correctly both in the backreference and the declaration.
 
 The <-- HERE shows in the regular expression about where the problem was
 discovered.
