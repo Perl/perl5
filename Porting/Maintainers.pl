@@ -98,7 +98,7 @@ use File::Glob qw(:case);
 @IGNORABLE = qw(
     .cvsignore .dualLivedDiffConfig .gitignore
     ANNOUNCE Announce Artistic AUTHORS BENCHMARK BUGS Build.PL
-    CHANGELOG ChangeLog CHANGES Changes COPYING Copying CREDITS
+    CHANGELOG ChangeLog CHANGES Changes COPYING Copying CREDITS dist.ini
     GOALS HISTORY INSTALL INSTALL.SKIP LICENSE Makefile.PL
     MANIFEST MANIFEST.SKIP META.yml MYMETA.yml META.json MYMETA.json
     NEW NOTES ppport.h README SIGNATURE THANKS TODO Todo VERSION WHATSNEW
