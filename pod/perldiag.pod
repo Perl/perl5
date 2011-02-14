@@ -3081,8 +3081,9 @@ need to be added to UTC to get local time.
 
 =item Non-octal character '%c'.  Resolved as "%s"
 
-(W digit)  In parsing an octal numeric constant, a character was unexpectedly
-encountered that isn't octal.  The resulting value is as indicated.
+(W digit)  In parsing an octal numeric constant, a character was
+unexpectedly encountered that isn't octal.  The resulting value is as
+indicated.
 
 =item Non-string passed as bitmask
 
