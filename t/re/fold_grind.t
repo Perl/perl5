@@ -10,7 +10,7 @@ BEGIN {
     require './test.pl';
 }
 
-my $DEBUG = 0;  # Outputs extra information for debugging this test
+my $DEBUG = 0;  # Outputs extra information for debugging this .t
 
 use strict;
 use warnings;
@@ -63,6 +63,9 @@ sub numerically {
 sub format_test($$$) {
     my ($test, $count, $debug) = @_;
 
+    # Create a test entry, with TODO set if it is one of the known problem
+    # code points
+
     $debug = "" unless $DEBUG;
 
     my $todo = (exists $todos{$count}) ? "Known problem" : 0;
@@ -70,7 +73,7 @@ sub format_test($$$) {
     return qq[TODO: { local \$::TODO = "$todo"; ok(eval '$test', '$test; $debug'); }];
 }
 
-my %tests;
+my %tests;          # The final set of tests. keys are the code points to test
 my %simple_folds;
 my %multi_folds;
 
@@ -96,7 +99,7 @@ while (<$fh>) {
         @folded = map { hex $_ } @folded;
 
         # Include three code points that are handled internally by the regex
-        # engine specially, plus all non-Unicode multi folds (which actually
+        # engine specially, plus all non-above-255 multi folds (which actually
         # the only one is already included in the three, but this makes sure)
         # And if any member of the fold is not the same range type as the
         # source, add it directly to the tests.  It needs to be an array of an
@@ -296,8 +299,6 @@ foreach my $test (sort { numerically } keys %tests) {
             $eval = "my \$c = \"$rhs$lhs\"; my \$p = qr/(?$charset:^(?<grind>$rhs)\\k<grind>\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
             push @eval_tests, format_test($eval, ++$count, "");
           }
-          #diag $eval_tests[-1];
-          #next;
 
           foreach my $bracketed (0, 1) {   # Put rhs in [...], or not
             foreach my $inverted (0,1) {
@@ -308,8 +309,6 @@ foreach my $test (sort { numerically } keys %tests) {
               my $extra_char = "_";
               foreach my $prepend ("", $extra_char) {
                 foreach my $append ("", $extra_char) {
-                  # Append a char for after quantifier, as results vary if no
-                  # char appended.
 
                   # Assemble the rhs.  Put each character in a separate
                   # bracketed if using charclasses.  This creates a stress on
