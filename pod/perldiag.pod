@@ -5177,13 +5177,6 @@ there is currently no way to tie the scalar itself when it holds
 a typeglob, and no way to untie a scalar that has had a typeglob
 assigned to it.
 
-=item Use of "package" with no arguments is deprecated
-
-(D deprecated) You used the C<package> keyword without specifying a package
-name. So no namespace is current at all. Using this can cause many
-otherwise reasonable constructs to fail in baffling ways. C<use strict;>
-instead.
-
 =item Use of ?PATTERN? without explicit operator is deprecated
 
 (D deprecated) You have written something like C<?\w?>, for a regular
