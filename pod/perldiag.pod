@@ -1527,6 +1527,15 @@ array is empty, just use C<if (@array) { # not empty }> for example.
 checks for an undefined I<scalar> value.  If you want to see if the hash
 is empty, just use C<if (%hash) { # not empty }> for example.
 
+=item (?(DEFINE)....) does not allow branches in regex; marked by <-- HERE in m/%s/
+
+(F) You used something like C<(?(DEFINE)...|..)> which is illegal. The
+most likely cause of this error is that you left out a parenthesis inside
+of the C<....> part.
+
+The <-- HERE shows in the regular expression about where the problem was
+discovered.
+
 =item %s defines neither package nor VERSION--version check failed
 
 (F) You said something like "use Module 42" but in the Module file
@@ -3958,15 +3967,6 @@ expression, prepend zeroes to make it three digits long: C<\007>
 The <-- HERE shows in the regular expression about where the problem was
 discovered.
 
-=item Reference to nonexistent or unclosed group in regex; marked by <-- HERE in m/%s/
-
-(F) You used something like C<\g{-7}> in your regular expression, but there
-are not at least seven sets of closed capturing parentheses in the
-expression before where the C<\g{-7}> was located.
-
-The <-- HERE shows in the regular expression about where the problem was
-discovered.
-
 =item Reference to nonexistent named group in regex; marked by <-- HERE in m/%s/
 
 (F) You used something like C<\k'NAME'> or C<< \k<NAME> >> in your regular
@@ -3977,11 +3977,11 @@ correctly both in the backreference and the declaration.
 The <-- HERE shows in the regular expression about where the problem was
 discovered.
 
-=item (?(DEFINE)....) does not allow branches in regex; marked by <-- HERE in m/%s/
+=item Reference to nonexistent or unclosed group in regex; marked by <-- HERE in m/%s/
 
-(F) You used something like C<(?(DEFINE)...|..)> which is illegal. The
-most likely cause of this error is that you left out a parenthesis inside
-of the C<....> part.
+(F) You used something like C<\g{-7}> in your regular expression, but there
+are not at least seven sets of closed capturing parentheses in the
+expression before where the C<\g{-7}> was located.
 
 The <-- HERE shows in the regular expression about where the problem was
 discovered.
