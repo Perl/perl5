@@ -5451,7 +5451,7 @@ filehandle with an encoding, see L<open> and L<perlfunc/binmode>.
 
 (F) The count in the (un)pack template may be replaced by C<[TEMPLATE]> only if
 C<TEMPLATE> always matches the same amount of packed bytes that can be
-determined from the template alone. This is not possible if it contains an
+determined from the template alone. This is not possible if it contains any
 of the codes @, /, U, u, w or a *-length. Redesign the template.
 
 =item write() on closed filehandle %s
