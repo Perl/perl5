@@ -5159,6 +5159,12 @@ only C.  This usually means there's a better way to do it in Perl.
 generally because there's a better way to do it, and also because the
 old way has bad side effects.
 
+=item Use of -l on filehandle %s
+
+(W io) A filehandle represents an opened file, and when you opened the file
+it already went past any symlink you are presumably trying to look for.
+The operation returned C<undef>.  Use a filename instead.
+
 =item Use of %s on a handle without * is deprecated
 
 (D deprecated) You used C<tie>, C<tied> or C<untie> on a scalar but that
@@ -5170,12 +5176,6 @@ This is a long-standing bug that will be removed in Perl 5.16, as
 there is currently no way to tie the scalar itself when it holds
 a typeglob, and no way to untie a scalar that has had a typeglob
 assigned to it.
-
-=item Use of -l on filehandle %s
-
-(W io) A filehandle represents an opened file, and when you opened the file
-it already went past any symlink you are presumably trying to look for.
-The operation returned C<undef>.  Use a filename instead.
 
 =item Use of "package" with no arguments is deprecated
 
