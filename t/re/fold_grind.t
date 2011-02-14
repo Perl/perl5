@@ -105,11 +105,12 @@ while (<$fh>) {
     # Perl only deals with C and F folds
     next if $fold_type ne 'C';
 
-    # C folds are single-char $from to single-char $folded
+    # C folds are single-char $from to single-char $folded, in chr terms
+    # folded_from{'s'} = [ 'S', \N{LATIN SMALL LETTER LONG S} ]
     push @{$folded_from{hex $folded[0]}}, $from;
 }
 
-# Now try to sort the single char folds into equivalence classes of that are
+# Now try to sort the single char folds into equivalence classes that are
 # likely to have identical successes and failures.  Any fold that crosses
 # range types is suspect, and is automatically tested.  Otherwise, store by
 # the number of characters that participate in a fold.  Likely all folds in a
@@ -265,6 +266,7 @@ foreach my $test (sort { numerically } keys %tests) {
           # numbered.
           my $op = '=~';
           $op = '!~' if $should_fail;
+
           my $eval = "my \$c = \"$lhs$rhs\"; my \$p = qr/(?$charset:^($rhs)\\1\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
           push @eval_tests, qq[ok(eval '$eval', '$eval')];
           $eval = "my \$c = \"$lhs$rhs\"; my \$p = qr/(?$charset:^(?<grind>$rhs)\\k<grind>\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
@@ -282,7 +284,7 @@ foreach my $test (sort { numerically } keys %tests) {
 
           foreach my $bracketed (0, 1) {   # Put rhs in [...], or not
             foreach my $inverted (0,1) {
-                next if $inverted && ! $bracketed;
+                next if $inverted && ! $bracketed;  # inversion only valid in [^...]
 
               # In some cases, add an extra character that doesn't fold, and
               # looks ok in the output.
