@@ -717,7 +717,7 @@ fi
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
 .PHONY: preplibrary
-preplibrary: miniperl $(CONFIGPM) lib/lib.pm lib/re.pm $(PREPLIBRARY_LIBPERL)
+preplibrary: miniperl $(CONFIGPM) lib/lib.pm $(PREPLIBRARY_LIBPERL)
 
 .PHONY: makeppport
 makeppport: miniperl$(EXE_EXT) $(CONFIGPM)
@@ -733,10 +733,6 @@ $(CONFIGPM): $(CROSS_LIB)/Config.pod xconfig.h
 lib/re.pm: ext/re/re.pm
 	@-rm -f $@
 	cp ext/re/re.pm lib/re.pm
-
-lib/lib.pm:	miniperl $(CONFIGPM)
-	@-rm -f $@
-	$(LDLIBPTH) ./miniperl -Ilib -MCross lib/lib_pm.PL
 
 lib/buildcustomize.pl: $(MINIPERL_EXE) write_buildcustomize.pl
 	$(MINIPERL) write_buildcustomize.pl >lib/buildcustomize.pl
@@ -1193,7 +1189,7 @@ minitest.prep:
 
 # Can't depend on lib/Config.pm because that might be where miniperl
 # is crashing.
-minitest: miniperl$(EXE_EXT) lib/re.pm minitest.prep
+minitest: miniperl$(EXE_EXT) minitest.prep
 	- cd t && (rm -f perl$(EXE_EXT); $(LNS) ../miniperl$(EXE_EXT) perl$(EXE_EXT)) \
 		&& $(LDLIBPTH) ./perl TEST -minitest base/*.t comp/*.t cmd/*.t run/*.t io/*.t op/*.t uni/*.t </dev/tty
 

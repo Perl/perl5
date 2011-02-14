@@ -24,6 +24,7 @@ my @toolchain = qw(cpan/AutoLoader/lib
 		   cpan/ExtUtils-MakeMaker/lib
 		   dist/ExtUtils-Manifest/lib
 		   cpan/File-Path/lib
+		   ext/re
 		   );
 
 # Used only in ExtUtils::Liblist::Kid::_win32_ext()

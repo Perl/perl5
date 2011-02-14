@@ -361,7 +361,7 @@ CRTLOPTS =,$(CRTL)/Options
 unidatadirs = lib/unicore/To lib/unicore/lib
 
 # Modules which must be installed before we can build extensions
-LIBPREREQ = $(ARCHDIR)Config.pm $(ARCHDIR)Config_heavy.pl [.lib.VMS]Filespec.pm $(ARCHDIR)vmspipe.com [.lib]re.pm [.lib]buildcustomize.pl
+LIBPREREQ = $(ARCHDIR)Config.pm $(ARCHDIR)Config_heavy.pl [.lib.VMS]Filespec.pm $(ARCHDIR)vmspipe.com [.lib]buildcustomize.pl
 
 utils1 = [.lib.pods]perldoc.com [.lib.ExtUtils]Miniperl.pm [.utils]c2ph.com [.utils]h2ph.com 
 utils2 = [.utils]h2xs.com [.utils]libnetcfg.com [.lib]perlbug.com [.utils]dprofpp.com  [.utils]json_pp.com
@@ -456,9 +456,6 @@ $(PERLDELTA_CURRENT) : [.pod]perldelta.pod
 
 archcorefiles : $(ac) $(ARCHAUTO)time.stamp
 	@ $(NOOP)
-
-[.lib]re.pm  : [.ext.re]re.pm
-	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib]
 
 [.lib]buildcustomize.pl : write_buildcustomize.pl $(MINIPERL_EXE)
        $(MINIPERL) write_buildcustomize.pl > [.lib]buildcustomize.pl
@@ -1522,7 +1519,7 @@ test_harness : all [.t.lib]vmsfspec.t
 	- @[.vms]test.com "$(E)" "$(__DEBUG__)"
 	@ $(MINIPERL) -e "print ""Ran tests"";" > [.t]rantests.
 
-minitest : $(MINITEST_EXE) [.lib]re.pm [.lib.VMS]Filespec.pm unidatafiles.ts
+minitest : $(MINITEST_EXE) [.lib.VMS]Filespec.pm unidatafiles.ts
 	@ PERL_TEST_DRIVER == "minitest"
 	- @[.vms]test.com "$(E)" "$(__DEBUG__)"
 

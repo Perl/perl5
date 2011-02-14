@@ -985,7 +985,7 @@ esac
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
 .PHONY: preplibrary
-preplibrary: $(MINIPERL_EXE) $(CONFIGPM) lib/re.pm $(PREPLIBRARY_LIBPERL)
+preplibrary: $(MINIPERL_EXE) $(CONFIGPM) $(PREPLIBRARY_LIBPERL)
 
 $(CONFIGPM_FROM_CONFIG_SH): $(CONFIGPOD)
 
@@ -994,10 +994,6 @@ $(CONFIGPOD): config.sh $(MINIPERL_EXE) configpm Porting/Glossary lib/Config_git
 
 lib/ExtUtils/Miniperl.pm: miniperlmain.c $(MINIPERL_EXE) minimod.pl $(CONFIGPM)
 	$(MINIPERL) minimod.pl > lib/ExtUtils/Miniperl.pm
-
-lib/re.pm: ext/re/re.pm
-	@-rm -f $@
-	cp ext/re/re.pm lib/re.pm
 
 lib/buildcustomize.pl: $(MINIPERL_EXE) write_buildcustomize.pl
 	$(MINIPERL) write_buildcustomize.pl >lib/buildcustomize.pl
@@ -1273,7 +1269,7 @@ _cleaner2:
 	rm -f lib/.exists lib/*/.exists lib/*/*/.exists
 	rm -f h2ph.man pstruct
 	rm -rf .config
-	rm -f preload lib/re.pm
+	rm -f preload
 	rm -rf lib/Encode lib/Compress lib/Hash lib/re
 	rm -rf lib/TAP lib/Module/Pluggable lib/App
 	rm -rf lib/mro
@@ -1468,7 +1464,7 @@ minitest.prep:
 
 # Can't depend on lib/Config.pm because that might be where miniperl
 # is crashing.
-minitest: $(MINIPERL_EXE) lib/re.pm minitest.prep
+minitest: $(MINIPERL_EXE) minitest.prep
 	- cd t && (rm -f $(PERL_EXE); $(LNS) ../$(MINIPERL_EXE) $(PERL_EXE)) \
 		&& $(RUN_PERL) TEST -minitest base/*.t comp/*.t cmd/*.t run/*.t io/*.t re/*.t op/*.t uni/*.t </dev/tty
 
