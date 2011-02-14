@@ -419,7 +419,7 @@ esac
 ## In the following dollars and backticks do not need the extra backslash.
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
-private = preplibrary $(CONFIGPM) $(CONFIGPOD) lib/ExtUtils/Miniperl.pm git_version.h
+private = preplibrary $(CONFIGPM) $(CONFIGPOD) lib/ExtUtils/Miniperl.pm git_version.h lib/buildcustomize.pl
 
 # Files to be built with variable substitution before miniperl
 # is available.
@@ -999,6 +999,9 @@ lib/re.pm: ext/re/re.pm
 	@-rm -f $@
 	cp ext/re/re.pm lib/re.pm
 
+lib/buildcustomize.pl: $(MINIPERL_EXE) write_buildcustomize.pl
+	$(MINIPERL) write_buildcustomize.pl >lib/buildcustomize.pl
+
 unidatafiles $(unidatafiles) pod/perluniprops.pod: uni.data
 
 uni.data: $(MINIPERL_EXE) $(CONFIGPM) lib/unicore/mktables $(nonxs_ext)
@@ -1167,16 +1170,16 @@ manicheck:	FORCE
 #
 # DynaLoader may be needed for extensions that use Makefile.PL.
 
-$(DYNALOADER):	$(MINIPERL_EXE) preplibrary FORCE $(nonxs_ext)
+$(DYNALOADER):	$(MINIPERL_EXE) lib/buildcustomize.pl preplibrary FORCE $(nonxs_ext)
 	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=static $(STATIC_LDFLAGS)
 
-d_dummy $(dynamic_ext):	$(MINIPERL_EXE) preplibrary makeppport $(DYNALOADER) FORCE $(PERLEXPORT)
+d_dummy $(dynamic_ext):	$(MINIPERL_EXE) lib/buildcustomize.pl preplibrary makeppport $(DYNALOADER) FORCE $(PERLEXPORT)
 	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=dynamic
 
-s_dummy $(static_ext):	$(MINIPERL_EXE) preplibrary makeppport $(DYNALOADER) FORCE
+s_dummy $(static_ext):	$(MINIPERL_EXE) lib/buildcustomize.pl preplibrary makeppport $(DYNALOADER) FORCE
 	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=static $(STATIC_LDFLAGS)
 
-n_dummy $(nonxs_ext):	$(MINIPERL_EXE) preplibrary FORCE
+n_dummy $(nonxs_ext):	$(MINIPERL_EXE) lib/buildcustomize.pl preplibrary FORCE
 	$(MINIPERL) make_ext.pl $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 !NO!SUBS!
 

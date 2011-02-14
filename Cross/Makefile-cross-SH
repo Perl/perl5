@@ -324,7 +324,7 @@ $spitshell >>$Makefile <<'!NO!SUBS!'
 
 CONFIGPM = xlib/$(CROSS_NAME)/Config.pm
 
-private = preplibrary $(CONFIGPM) $(CROSS_LIB)/Config.pod
+private = preplibrary $(CONFIGPM) $(CROSS_LIB)/Config.pod lib/buildcustomize.pl
 
 shextract = Makefile cflags config.h makedepend \
 	makedir myconfig writemain pod/Makefile
@@ -738,6 +738,9 @@ lib/lib.pm:	miniperl $(CONFIGPM)
 	@-rm -f $@
 	$(LDLIBPTH) ./miniperl -Ilib -MCross lib/lib_pm.PL
 
+lib/buildcustomize.pl: $(MINIPERL_EXE) write_buildcustomize.pl
+	$(MINIPERL) write_buildcustomize.pl >lib/buildcustomize.pl
+
 unidatafiles $(unidatafiles): uni.data
 
 uni.data: miniperl$(EXE_EXT) $(CONFIGPM) lib/unicore/mktables
@@ -904,16 +907,16 @@ manicheck:	FORCE
 
 
 
-$(DYNALOADER):	preplibrary FORCE
+$(DYNALOADER): lib/buildcustomize.pl preplibrary FORCE
 	@$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl --cross $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=static $(STATIC_LDFLAGS)
 
-d_dummy $(dynamic_ext):	miniperl$(EXE_EXT) preplibrary makeppport $(DYNALOADER) FORCE
+d_dummy $(dynamic_ext):	miniperl$(EXE_EXT) lib/buildcustomize.pl preplibrary makeppport $(DYNALOADER) FORCE
 	@$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl --cross $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=dynamic
 
-s_dummy $(static_ext):	miniperl$(EXE_EXT) preplibrary makeppport $(DYNALOADER) FORCE
+s_dummy $(static_ext):	miniperl$(EXE_EXT) lib/buildcustomize.pl preplibrary makeppport $(DYNALOADER) FORCE
 	@$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl --cross $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=static $(STATIC_LDFLAGS)
 
-n_dummy $(nonxs_ext):	miniperl$(EXE_EXT) preplibrary $(DYNALOADER) FORCE
+n_dummy $(nonxs_ext):	miniperl$(EXE_EXT) lib/buildcustomize.pl preplibrary $(DYNALOADER) FORCE
 	@$(LDLIBPTH) $(RUN) ./miniperl$(EXE_EXT) -Ilib make_ext.pl --cross $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
 !NO!SUBS!
 

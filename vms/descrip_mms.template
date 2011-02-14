@@ -361,7 +361,7 @@ CRTLOPTS =,$(CRTL)/Options
 unidatadirs = lib/unicore/To lib/unicore/lib
 
 # Modules which must be installed before we can build extensions
-LIBPREREQ = $(ARCHDIR)Config.pm $(ARCHDIR)Config_heavy.pl [.lib.VMS]Filespec.pm $(ARCHDIR)vmspipe.com [.lib]re.pm
+LIBPREREQ = $(ARCHDIR)Config.pm $(ARCHDIR)Config_heavy.pl [.lib.VMS]Filespec.pm $(ARCHDIR)vmspipe.com [.lib]re.pm [.lib]buildcustomize.pl
 
 utils1 = [.lib.pods]perldoc.com [.lib.ExtUtils]Miniperl.pm [.utils]c2ph.com [.utils]h2ph.com 
 utils2 = [.utils]h2xs.com [.utils]libnetcfg.com [.lib]perlbug.com [.utils]dprofpp.com  [.utils]json_pp.com
@@ -459,6 +459,9 @@ archcorefiles : $(ac) $(ARCHAUTO)time.stamp
 
 [.lib]re.pm  : [.ext.re]re.pm
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib]
+
+[.lib]buildcustomize.pl : write_buildcustomize.pl $(MINIPERL_EXE)
+       $(MINIPERL) write_buildcustomize.pl > [.lib]buildcustomize.pl
 
 vmspipe.com : [.vms]vmspipe.com
 	Copy/NoConfirm/Log $(MMS$SOURCE) []
@@ -566,7 +569,7 @@ unidatafiles.ts : $(MINIPERL_EXE) [.lib]Config.pm [.lib.unicore]mktables nonxsex
 	@ If F$Search("$(MMS$TARGET)").nes."" Then Delete/NoLog/NoConfirm $(MMS$TARGET);*
 	@ Copy/NoConfirm _NLA0: $(MMS$TARGET)
  
-DynaLoader$(O) : $(ARCHDIR)Config.pm $(MINIPERL_EXE) [.lib.VMS]Filespec.pm 
+DynaLoader$(O) : [.lib]buildcustomize.pl $(ARCHDIR)Config.pm $(MINIPERL_EXE) [.lib.VMS]Filespec.pm 
 	$(MINIPERL) make_ext.pl "MAKE=$(MMS)" "DynaLoader"
 
 dynext : $(LIBPREREQ) $(DBG)perlshr$(E) unidatafiles.ts DynaLoader$(O) preplibrary makeppport $(MINIPERL_EXE)
@@ -1896,6 +1899,7 @@ tidy : cleanlis
 	- If F$Search("[.utils]*.com;-1").nes."" Then Purge/NoConfirm/Log [.utils]*.com
 	- If F$Search("[.x2p]*.com;-1").nes."" Then Purge/NoConfirm/Log [.x2p]*.com
 	- If F$Search("[.lib.pods]*.com;-1").nes."" Then Purge/NoConfirm/Log [.lib.pods]*.com
+	- If F$Search("[.lib]buildcustomize.pl;-1").nes."" Then Purge/NoConfirm/Log [.lib]buildcustomize.pl
 
 clean : tidy cleantest
       	- $(MINIPERL) make_ext.pl "MAKE=$(MMS)" "--all" "--target=clean"

@@ -714,6 +714,8 @@ sub installlib {
     # ignore the test extensions
     return if $dir =~ m{\bXS/(?:APItest|Typemap)\b};
     return if $name =~ m{\b(?:APItest|Typemap)\.pm$};
+    # ignore the build support code
+    return if $name =~ /\bbuildcustomize\.pl$/;
     # ignore the demo files
     return if $dir =~ /\b(?:demos?|eg)\b/;
     # ignore unneeded unicore files
