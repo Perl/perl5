@@ -795,13 +795,13 @@ git-deltatool - Annotate commits for perldelta
 
 Indicates the run mode for the program.  The default is 'assign' which
 assigns categories and marks the notes as 'pending' (or 'ignored').  Other
-modes are 'review', 'render', 'summarize' and 'update'.
+modes are 'review', 'render', 'summary' and 'update'.
 
 =item B<--type>|B<-t> TYPE
 
 Indicates what types of commits to process.  The default for 'assign' mode is
 'new', which processes commits without any perldelta notes.  The default for
-'review', 'summarize' and 'render' modes is 'pending'.  The options must be set
+'review', 'summary' and 'render' modes is 'pending'.  The options must be set
 explicitly for 'update' mode.
 
 The type 'blocking' is reserved for commits needing further review.
