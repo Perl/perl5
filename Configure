@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Sun Jan 23 10:14:12 CET 2011 [metaconfig 3.5 PL0]
+# Generated on Mon Feb 14 23:00:18 CET 2011 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1319,7 +1319,7 @@ inclwanted=''
 
 : Enable -DEBUGGING and -DDEBUGGING from the command line
 EBUGGING=''
-DEBUGGING=old
+DEBUGGING=''
 
 : set usethreads on the Configure command line to enable threads.
 usereentrant='undef'
