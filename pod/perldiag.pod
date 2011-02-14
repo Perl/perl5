@@ -177,13 +177,6 @@ hash) and then work on that scalar value.  This is probably not what
 you meant to do.  See L<perlfunc/grep> and L<perlfunc/map> for
 alternatives.
 
-=item Args must match #! line
-
-(F) The setuid emulator requires that the arguments Perl was invoked
-with match the arguments specified on the #! line.  Since some systems
-impose a one-argument limit on the #! line, try combining switches;
-for example, turn C<-w -U> into C<-wU>.
-
 =item Arg too short for msgsnd
 
 (F) msgsnd() requires a string at least as long as sizeof(long).
@@ -2906,10 +2899,6 @@ for some reason the current debugger (e.g. F<perl5db.pl> or a C<Devel::>
 module) didn't define a C<DB::sub> routine to be called at the beginning
 of each ordinary subroutine call.
 
-=item No B<-e> allowed in setuid scripts
-
-(F) A setuid script can't be specified by the user.
-
 =item No error file after 2> or 2>> on command line
 
 (F) An error peculiar to VMS.  Perl handles its own command line
@@ -2926,11 +2915,6 @@ matching counterpart. See L<perlfunc/pack>.
 (F) An error peculiar to VMS.  Perl handles its own command line
 redirection, and found a '<' on the command line, but can't find the
 name of the file from which to read data for stdin.
-
-=item No #! line
-
-(F) The setuid emulator requires that scripts have a well-formed #! line
-even on machines that don't support the #! construct.
 
 =item No next::method '%s' found for %s
 
@@ -3040,12 +3024,6 @@ find out what kind of ref it really was.  See L<perlref>.
 (F) Perl was trying to evaluate a reference to an array value, but found
 a reference to something else instead.  You can use the ref() function
 to find out what kind of ref it really was.  See L<perlref>.
-
-=item Not a perl script
-
-(F) The setuid emulator requires that scripts have a well-formed #! line
-even on machines that don't support the #! construct.  The line must
-mention perl.
 
 =item Not a SCALAR reference
 
@@ -4219,16 +4197,6 @@ didn't think so.
 (W closed) You tried to set a socket option on a closed socket.  Did you
 forget to check the return value of your socket() call?  See
 L<perlfunc/setsockopt>.
-
-=item Setuid/gid script is writable by world
-
-(F) The setuid emulator won't run a script that is writable by the
-world, because the world might have written on it already.
-
-=item Setuid script not plain file
-
-(F) The setuid emulator won't run a script that isn't read from a file,
-but from a socket, a pipe or another device.
 
 =item shm%s not implemented
 
