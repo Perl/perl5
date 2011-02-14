@@ -3919,12 +3919,6 @@ which is why it's currently left out of your copy.
 believes it found an infinite loop in the C<@ISA> hierarchy.  This is a
 crude check that bails out after 100 levels of C<@ISA> depth.
 
-=item Recursive inheritance detected while looking for method %s
-
-(F) More than 100 levels of inheritance were encountered while invoking
-a method.  Probably indicates an unintended loop in your inheritance
-hierarchy.
-
 =item Reference found where even-sized list expected
 
 (W misc) You gave a single reference where Perl was expecting a list
