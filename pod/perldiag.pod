@@ -4011,7 +4011,7 @@ are meaningless.
 =item Reversed %s= operator
 
 (W syntax) You wrote your assignment operator backwards.  The = must
-always comes last, to avoid ambiguity with subsequent unary operators.
+always come last, to avoid ambiguity with subsequent unary operators.
 
 =item rewinddir() attempted on invalid dirhandle %s
 
