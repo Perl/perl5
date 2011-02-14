@@ -170,9 +170,11 @@ my $perl;
 my %extra_passthrough;
 
 if ($is_Win32) {
-    (my $here = getcwd()) =~ s{/}{\\}g;
+    my $build = getcwd();
     $perl = $^X;
     if ($perl =~ m#^\.\.#) {
+	my $here = $build;
+	$here =~ s{/}{\\}g;
 	$perl = "$here\\$perl";
     }
     (my $topdir = $perl) =~ s/\\[^\\]+$//;
@@ -185,7 +187,6 @@ if ($is_Win32) {
 	system(@args) unless defined $::Cross::platform;
     }
 
-    my $build = getcwd();
     print "In $build";
     foreach my $dir (@dirs) {
 	chdir($dir) or die "Cannot cd to $dir: $!\n";
