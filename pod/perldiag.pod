@@ -3945,14 +3945,14 @@ Doing so has no effect.
 =item Reference miscount in sv_replace()
 
 (W internal) The internal sv_replace() function was handed a new SV with
-a reference count of other than 1.
+a reference count other than 1.
 
 =item Reference to invalid group 0
 
 (F) You used C<\g0> or similar in a regular expression. You may refer to
 capturing parentheses only with strictly positive integers (normal
 backreferences) or with strictly negative integers (relative
-backreferences), but using 0 does not make sense.
+backreferences). Using 0 does not make sense.
 
 =item Reference to nonexistent group in regex; marked by <-- HERE in m/%s/
 
