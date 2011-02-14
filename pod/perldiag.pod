@@ -2253,8 +2253,8 @@ escape was discovered.
 =item Invalid hexadecimal number in \N{U+...}
 
 (F) The character constant represented by C<...> is not a valid hexadecimal
-number.  Either it is empty, or you tried to use a character other than 0 - 9
-or A - F, a - f in a hexadecimal number.
+number.  Either it is empty, or you tried to use a character other than
+0 - 9 or A - F, a - f in a hexadecimal number.
 
 =item Invalid mro name: '%s'
 
