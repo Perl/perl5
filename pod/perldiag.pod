@@ -4381,7 +4381,7 @@ expression about where the problem was discovered. See L<perlre>.
 (F) While under the C<use filetest> pragma, we cannot switch the real
 and effective uids or gids.
 
-=item %s syntax
+=item %s syntax OK
 
 (F) The final summary message when a C<perl -c> succeeds.
 
