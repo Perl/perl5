@@ -3753,13 +3753,6 @@ higher precedence of C<==>. This is probably not what you want. (If you
 really meant to write this, disable the warning, or, better, put the
 parentheses explicitly and write C<$x & ($y == 0)>).
 
-=item Possible unintended interpolation of %s in string
-
-(W ambiguous) You said something like `@foo' in a double-quoted string
-but there was no array C<@foo> in scope at the time. If you wanted a
-literal @foo, then write it as \@foo; otherwise find out what happened
-to the array you apparently lost track of.
-
 =item Possible unintended interpolation of $\ in regex
 
 (W ambiguous) You said something like C<m/$\/> in a regex.
@@ -3773,6 +3766,13 @@ C<m/${\}/> (for example: C<m/foo${\}s+bar/>).
 If instead you intended to match the word 'foo' at the end of the line
 followed by whitespace and the word 'bar' on the next line then you can use
 C<m/$(?)\/> (for example: C<m/foo$(?)\s+bar/>).
+
+=item Possible unintended interpolation of %s in string
+
+(W ambiguous) You said something like `@foo' in a double-quoted string
+but there was no array C<@foo> in scope at the time. If you wanted a
+literal @foo, then write it as \@foo; otherwise find out what happened
+to the array you apparently lost track of.
 
 =item Precedence problem: open %s should be open(%s)
 
