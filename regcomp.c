@@ -380,6 +380,8 @@ static const scan_data_t zero_scan_data =
 #define DEPENDS_SEMANTICS (get_regex_charset(RExC_flags) == REGEX_DEPENDS_CHARSET)
 #define AT_LEAST_UNI_SEMANTICS (get_regex_charset(RExC_flags) >= REGEX_UNICODE_CHARSET)
 #define ASCII_RESTRICTED (get_regex_charset(RExC_flags) == REGEX_ASCII_RESTRICTED_CHARSET)
+#define MORE_ASCII_RESTRICTED (get_regex_charset(RExC_flags) == REGEX_ASCII_MORE_RESTRICTED_CHARSET)
+#define AT_LEAST_ASCII_RESTRICTED (get_regex_charset(RExC_flags) >= REGEX_ASCII_RESTRICTED_CHARSET)
 
 #define FOLD cBOOL(RExC_flags & RXf_PMf_FOLD)
 
@@ -1397,6 +1399,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 #endif
 
     switch (flags) {
+	case EXACTFA:
 	case EXACTFU: folder = PL_fold_latin1; break;
 	case EXACTF:  folder = PL_fold; break;
 	case EXACTFL: folder = PL_fold_locale; break;
@@ -2472,7 +2475,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, I32 *min, U32 flags
 #define UPSILON_D_T	GREEK_SMALL_LETTER_UPSILON_WITH_DIALYTIKA_AND_TONOS
 
     if (UTF
-	&& ( OP(scan) == EXACTF || OP(scan) == EXACTFU)
+	&& ( OP(scan) == EXACTF || OP(scan) == EXACTFU || OP(scan) == EXACTFA)
 	&& ( STR_LEN(scan) >= 6 ) )
     {
     /*
@@ -6478,11 +6481,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    ret = reganode(pRExC_state,
 				   ((! FOLD)
 				     ? NREF
-				     : (UNI_SEMANTICS)
-				       ? NREFFU
-				       : (LOC)
-				         ? NREFFL
-					 : NREFF),
+				     : (MORE_ASCII_RESTRICTED)
+				       ? NREFFA
+                                       : (AT_LEAST_UNI_SEMANTICS)
+                                         ? NREFFU
+                                         : (LOC)
+                                           ? NREFFL
+                                           : NREFF),
 				    num);
                     *flagp |= HASWIDTH;
 
@@ -6948,7 +6953,14 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         if (has_charset_modifier || flagsp == &negflags) {
                             goto fail_modifiers;
                         }
-			cs = REGEX_ASCII_RESTRICTED_CHARSET;
+			if (*(RExC_parse + 1) == ASCII_RESTRICT_PAT_MOD) {
+			    /* Doubled modifier implies more restricted */
+			    cs = REGEX_ASCII_MORE_RESTRICTED_CHARSET;
+			    RExC_parse++;
+			}
+			else {
+			    cs = REGEX_ASCII_RESTRICTED_CHARSET;
+			}
                         has_charset_modifier = 1;
                         break;
                     case DEPENDS_PAT_MOD:
@@ -7669,13 +7681,15 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
 	STRLEN len = 0;	    /* Its current byte length */
 	char *endchar;	    /* Points to '.' or '}' ending cur char in the input
 			       stream */
-
-	ret = reg_node(pRExC_state, (U8) ((! FOLD) ? EXACT
-						   : (LOC)
-						      ? EXACTFL
-						      : UNI_SEMANTICS
-						        ? EXACTFU
-						        : EXACTF));
+	ret = reg_node(pRExC_state,
+			   (U8) ((! FOLD) ? EXACT
+					  : (LOC)
+					     ? EXACTFL
+					     : (MORE_ASCII_RESTRICTED)
+					       ? EXACTFA
+					       : (AT_LEAST_UNI_SEMANTICS)
+					         ? EXACTFU
+					         : EXACTF));
 	s= STRING(ret);
 
 	/* Exact nodes can hold only a U8 length's of text = 255.  Loop through
@@ -7692,6 +7706,7 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
 			    | PERL_SCAN_DISALLOW_PREFIX
 			    | (SIZE_ONLY ? PERL_SCAN_SILENT_ILLDIGIT : 0);
 	    UV cp;  /* Ord of current character */
+	    bool use_this_char_fold = FOLD;
 
 	    /* Code points are separated by dots.  If none, there is only one
 	     * code point, and is terminated by the brace */
@@ -7712,7 +7727,37 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
 		vFAIL("Invalid hexadecimal number in \\N{U+...}");
 	    }    
 
-	    if (! FOLD) {	/* Not folding, just append to the string */
+	    if (FOLD
+		&& (cp > 255 || ! MORE_ASCII_RESTRICTED)
+		&& is_TRICKYFOLD_cp(cp))
+	    {
+	    }
+
+	    /* Under /aa, we can't mix ASCII with non- in a fold.  If we are
+	     * folding, and the source isn't ASCII, look through all the
+	     * characters it folds to.  If any one of them is ASCII, forbid
+	     * this fold.  (cp is uni, so the 127 below is correct even for
+	     * EBCDIC) */
+	    if (use_this_char_fold && cp > 127 && MORE_ASCII_RESTRICTED) {
+		U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
+		U8* s = tmpbuf;
+		U8* e;
+		STRLEN foldlen;
+
+		(void) toFOLD_uni(cp, tmpbuf, &foldlen);
+		e = s + foldlen;
+
+		while (s < e) {
+		    if (isASCII(*s)) {
+			use_this_char_fold = FALSE;
+			break;
+		    }
+		    s += UTF8SKIP(s);
+		}
+	    }
+
+	    if (! use_this_char_fold) {	/* Not folding, just append to the
+					   string */
 		STRLEN unilen;
 
 		/* Quit before adding this character if would exceed limit */
@@ -8026,6 +8071,7 @@ tryagain:
 		    op = ALNUMU;
 		    break;
 		case REGEX_ASCII_RESTRICTED_CHARSET:
+		case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
 		    op = ALNUMA;
 		    break;
 		case REGEX_DEPENDS_CHARSET:
@@ -8046,6 +8092,7 @@ tryagain:
 		    op = NALNUMU;
 		    break;
 		case REGEX_ASCII_RESTRICTED_CHARSET:
+		case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
 		    op = NALNUMA;
 		    break;
 		case REGEX_DEPENDS_CHARSET:
@@ -8068,6 +8115,7 @@ tryagain:
 		    op = BOUNDU;
 		    break;
 		case REGEX_ASCII_RESTRICTED_CHARSET:
+		case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
 		    op = BOUNDA;
 		    break;
 		case REGEX_DEPENDS_CHARSET:
@@ -8094,6 +8142,7 @@ tryagain:
 		    op = NBOUNDU;
 		    break;
 		case REGEX_ASCII_RESTRICTED_CHARSET:
+		case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
 		    op = NBOUNDA;
 		    break;
 		case REGEX_DEPENDS_CHARSET:
@@ -8118,6 +8167,7 @@ tryagain:
 		    op = SPACEU;
 		    break;
 		case REGEX_ASCII_RESTRICTED_CHARSET:
+		case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
 		    op = SPACEA;
 		    break;
 		case REGEX_DEPENDS_CHARSET:
@@ -8138,6 +8188,7 @@ tryagain:
 		    op = NSPACEU;
 		    break;
 		case REGEX_ASCII_RESTRICTED_CHARSET:
+		case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
 		    op = NSPACEA;
 		    break;
 		case REGEX_DEPENDS_CHARSET:
@@ -8155,6 +8206,7 @@ tryagain:
 		    op = DIGITL;
 		    break;
 		case REGEX_ASCII_RESTRICTED_CHARSET:
+		case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
 		    op = DIGITA;
 		    break;
 		case REGEX_DEPENDS_CHARSET: /* No difference between these */
@@ -8173,6 +8225,7 @@ tryagain:
 		    op = NDIGITL;
 		    break;
 		case REGEX_ASCII_RESTRICTED_CHARSET:
+		case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
 		    op = NDIGITA;
 		    break;
 		case REGEX_DEPENDS_CHARSET: /* No difference between these */
@@ -8281,11 +8334,13 @@ tryagain:
                 ret = reganode(pRExC_state,
                                ((! FOLD)
                                  ? NREF
-                                 : (AT_LEAST_UNI_SEMANTICS)
-                                   ? NREFFU
-                                   : (LOC)
-                                     ? NREFFL
-                                     : NREFF),
+				 : (MORE_ASCII_RESTRICTED)
+				   ? NREFFA
+                                   : (AT_LEAST_UNI_SEMANTICS)
+                                     ? NREFFU
+                                     : (LOC)
+                                       ? NREFFL
+                                       : NREFF),
                                 num);
                 *flagp |= HASWIDTH;
 
@@ -8349,11 +8404,13 @@ tryagain:
 		    ret = reganode(pRExC_state,
 				   ((! FOLD)
 				     ? REF
-				     : (AT_LEAST_UNI_SEMANTICS)
-				       ? REFFU
-				       : (LOC)
-				         ? REFFL
-					 : REFF),
+				     : (MORE_ASCII_RESTRICTED)
+				       ? REFFA
+                                       : (AT_LEAST_UNI_SEMANTICS)
+                                         ? REFFU
+                                         : (LOC)
+                                           ? REFFL
+                                           : REFF),
 				    num);
 		    *flagp |= HASWIDTH;
 
@@ -8407,9 +8464,11 @@ tryagain:
 			   (U8) ((! FOLD) ? EXACT
 					  : (LOC)
 					     ? EXACTFL
-					     : (AT_LEAST_UNI_SEMANTICS)
-					       ? EXACTFU
-					       : EXACTF)
+					     : (MORE_ASCII_RESTRICTED)
+					       ? EXACTFA
+					       : (AT_LEAST_UNI_SEMANTICS)
+					         ? EXACTFU
+					         : EXACTF)
 		    );
 	    s = STRING(ret);
 	    for (len = 0, p = RExC_parse - 1;
@@ -8624,7 +8683,10 @@ tryagain:
 		 * (Even if the optimizer handled LATIN_SMALL_LETTER_SHARP_S,
 		 * putting it in a special node keeps regexec from having to
 		 * deal with a non-utf8 multi-char fold */
-		if (FOLD && is_TRICKYFOLD_cp(ender)) {
+		if (FOLD
+		    && (ender > 255 || ! MORE_ASCII_RESTRICTED)
+		    && is_TRICKYFOLD_cp(ender))
+		{
 		    /* If is in middle of outputting characters into an
 		     * EXACTish node, go output what we have so far, and
 		     * position the parse so that this will be called again
@@ -8678,7 +8740,41 @@ tryagain:
 		    p = regwhite( pRExC_state, p );
 		if (UTF && FOLD) {
 		    /* Prime the casefolded buffer. */
-		    ender = toFOLD_uni(ender, tmpbuf, &foldlen);
+		    if (isASCII(ender)) {
+			ender = toLOWER(ender);
+			*tmpbuf = ender;
+			foldlen = 1;
+		    }
+		    else if (! MORE_ASCII_RESTRICTED) {
+			ender = toFOLD_uni(ender, tmpbuf, &foldlen);
+		    }
+		    else {
+			/* When not to mix ASCII with non-, reject folds that
+			 * mix them, using only the non-folded code point.  So
+			 * do the fold to a temporary, and inspect each
+			 * character in it. */
+			U8 trialbuf[UTF8_MAXBYTES_CASE+1];
+			U8* s = trialbuf;
+			UV tmpender = toFOLD_uni(ender, trialbuf, &foldlen);
+			U8* e = s + foldlen;
+			bool fold_ok = TRUE;
+
+			while (s < e) {
+			    if (isASCII(*s)) {
+				fold_ok = FALSE;
+				break;
+			    }
+			    s += UTF8SKIP(s);
+			}
+			if (fold_ok) {
+			    Copy(trialbuf, tmpbuf, foldlen, U8);
+			    ender = tmpender;
+			}
+			else {
+			    uvuni_to_utf8(tmpbuf, ender);
+			    foldlen = UNISKIP(ender);
+			}
+		    }
 		}
 		if (p < RExC_end && ISMULT2(p)) { /* Back off on ?+*. */
 		    if (len)
@@ -9025,7 +9121,7 @@ case ANYOF_N##NAME:                                                            \
             if (! TEST_7(UNI_TO_NATIVE(value))) stored += set_regclass_bit(  \
 			pRExC_state, ret, (U8) UNI_TO_NATIVE(value), &nonbitmap);    \
         }                                                                      \
-	if (ASCII_RESTRICTED) {                                                \
+	if (AT_LEAST_ASCII_RESTRICTED) {                                       \
 	    for (value = 128; value < 256; value++) {                          \
              stored += set_regclass_bit(                                     \
 			   pRExC_state, ret, (U8) UNI_TO_NATIVE(value), &nonbitmap); \
@@ -9082,14 +9178,14 @@ S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8
     PERL_ARGS_ASSERT_SET_REGCLASS_BIT_FOLD;
 
     fold = (AT_LEAST_UNI_SEMANTICS) ? PL_fold_latin1[value]
-                           : PL_fold[value];
+                                    : PL_fold[value];
 
     /* It assumes the bit for 'value' has already been set */
     if (fold != value && ! ANYOF_BITMAP_TEST(node, fold)) {
         ANYOF_BITMAP_SET(node, fold);
         stored++;
     }
-    if (_HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(value)
+    if ((_HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(value) && (! isASCII(value) || ! MORE_ASCII_RESTRICTED))
 	|| (! UNI_SEMANTICS
 	    && ! isASCII(value)
 	    && PL_fold_latin1[value] != value))
@@ -9562,7 +9658,7 @@ parseit:
 		    }
 		    yesno = '!';
 		    what = POSIX_CC_UNI_NAME("Digit");
-		    if (ASCII_RESTRICTED ) {
+		    if (AT_LEAST_ASCII_RESTRICTED ) {
 			ANYOF_FLAGS(ret) |= ANYOF_UNICODE_ALL;
 		    }
 		    break;		
@@ -9573,7 +9669,7 @@ parseit:
 		    vFAIL("Invalid [::] class");
 		    break;
 		}
-		if (what && ! (ASCII_RESTRICTED)) {
+		if (what && ! (AT_LEAST_ASCII_RESTRICTED)) {
 		    /* Strings such as "+utf8::isWord\n" */
 		    Perl_sv_catpvf(aTHX_ listsv, "%cutf8::Is%s\n", yesno, what);
 		    ANYOF_FLAGS(ret) |= ANYOF_UTF8;
@@ -9867,6 +9963,9 @@ parseit:
 			     * target string is utf8, or under unicode rules */
 			    if (j > 255 || AT_LEAST_UNI_SEMANTICS) {
 				while (loc < e) {
+				    if (MORE_ASCII_RESTRICTED && (isASCII(*loc) != isASCII(j))) {
+					goto end_multi_fold;
+				    }
 				    /* XXX Discard this fold if any are latin1
 				     * and LOC */
 				    if (UTF8_IS_INVARIANT(*loc)
@@ -9889,6 +9988,7 @@ parseit:
 
 			    /* This node is variable length */
 			    OP(ret) = ANYOFV;
+			end_multi_fold: ;
 			}
 		    }
 		    else { /* Single character fold */
@@ -9916,6 +10016,9 @@ parseit:
 				    Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
 				}
 				c = SvUV(*c_p);
+				if (MORE_ASCII_RESTRICTED && (isASCII(c) != isASCII(j))) {
+				    continue;
+				}
 
 				if (c < 256 && AT_LEAST_UNI_SEMANTICS) {
 				    stored += set_regclass_bit(pRExC_state, ret, (U8) c, &nonbitmap);
@@ -10468,6 +10571,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p, const regnode *val,
             switch (OP(scan)) {
                 case EXACT:
                 case EXACTF:
+                case EXACTFA:
                 case EXACTFU:
                 case EXACTFL:
                         if( exact == PSEUDO )
@@ -10548,6 +10652,9 @@ S_regdump_extflags(pTHX_ const char *lead, const U32 flags)
                     break;
                 case REGEX_ASCII_RESTRICTED_CHARSET:
                     PerlIO_printf(Perl_debug_log, "ASCII-RESTRICTED");
+                    break;
+                case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
+                    PerlIO_printf(Perl_debug_log, "ASCII-MORE_RESTRICTED");
                     break;
                 default:
                     PerlIO_printf(Perl_debug_log, "UNKNOWN CHARACTER SET");

@@ -318,13 +318,13 @@
 /* Currently these are only used when PL_regkind[OP(rn)] == EXACT so
    we don't need this definition. */
 #define IS_TEXT(rn)   ( OP(rn)==EXACT   || OP(rn)==REF   || OP(rn)==NREF   )
-#define IS_TEXTF(rn)  ( (OP(rn)==EXACTFU ||  OP(rn)==EXACTF)  || OP(rn)==REFF  || OP(rn)==NREFF )
+#define IS_TEXTF(rn)  ( (OP(rn)==EXACTFU || OP(rn)==EXACTFA ||  OP(rn)==EXACTF)  || OP(rn)==REFF  || OP(rn)==NREFF )
 #define IS_TEXTFL(rn) ( OP(rn)==EXACTFL || OP(rn)==REFFL || OP(rn)==NREFFL )
 
 #else
 /* ... so we use this as its faster. */
 #define IS_TEXT(rn)   ( OP(rn)==EXACT   )
-#define IS_TEXTFU(rn)  ( OP(rn)==EXACTFU )
+#define IS_TEXTFU(rn)  ( OP(rn)==EXACTFU || OP(rn) == EXACTFA)
 #define IS_TEXTF(rn)  ( OP(rn)==EXACTF  )
 #define IS_TEXTFL(rn) ( OP(rn)==EXACTFL )
 
@@ -1469,6 +1469,16 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		    tmp = doevery;
 	    );
 	    break;
+
+	case EXACTFA:
+	    if (UTF_PATTERN || utf8_target) {
+		utf8_fold_flags = FOLDEQ_UTF8_NOMIX_ASCII;
+		goto do_exactf_utf8;
+	    }
+	    fold_array = PL_fold_latin1;    /* Latin1 folds are not affected by */
+	    folder = foldEQ_latin1;	    /* /a, except the sharp s one which */
+	    goto do_exactf_non_utf8;	    /* isn't dealt with by these */
+
 	case EXACTFU:
 	    if (UTF_PATTERN || utf8_target) {
 		utf8_fold_flags = 0;
@@ -3639,6 +3649,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    fold_utf8_flags = 0;
 	    goto do_exactf;
 
+	case EXACTFA:
+	    folder = foldEQ_latin1;
+	    fold_array = PL_fold_latin1;
+	    fold_utf8_flags = 1;
+	    goto do_exactf;
+
 	case EXACTF:
 	    folder = foldEQ;
 	    fold_array = PL_fold;
@@ -4036,6 +4052,13 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    type = REFFL;
 	    goto do_nref;
 
+	case NREFFA:
+	    folder = foldEQ_latin1;
+	    fold_array = PL_fold_latin1;
+	    type = REFFA;
+	    utf8_fold_flags = FOLDEQ_UTF8_NOMIX_ASCII;
+	    goto do_nref;
+
 	case NREFFU:
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
@@ -4071,6 +4094,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    folder = foldEQ_locale;
 	    fold_array = PL_fold_locale;
 	    utf8_fold_flags = 0;
+	    goto do_ref;
+
+	case REFFA:
+	    folder = foldEQ_latin1;
+	    fold_array = PL_fold_latin1;
+	    utf8_fold_flags = FOLDEQ_UTF8_NOMIX_ASCII;
 	    goto do_ref;
 
 	case REFFU:
@@ -5017,6 +5046,7 @@ NULL
 			ST.c1 = (U8)*STRING(text_node);
 			switch (OP(text_node)) {
 			    case EXACTF: ST.c2 = PL_fold[ST.c1]; break;
+			    case EXACTFA:
 			    case EXACTFU: ST.c2 = PL_fold_latin1[ST.c1]; break;
 			    case EXACTFL: ST.c2 = PL_fold_locale[ST.c1]; break;
 			    default: ST.c2 = ST.c1;
@@ -5170,6 +5200,7 @@ NULL
 			ST.c1 = *s;
 			switch (OP(text_node)) {
 			    case EXACTF: ST.c2 = PL_fold[ST.c1]; break;
+			    case EXACTFA:
 			    case EXACTFU: ST.c2 = PL_fold_latin1[ST.c1]; break;
 			    case EXACTFL: ST.c2 = PL_fold_locale[ST.c1]; break;
 			    default: ST.c2 = ST.c1; break;
@@ -5966,6 +5997,10 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	    }
 	}
 	break;
+    case EXACTFA:
+	utf8_flags = FOLDEQ_UTF8_NOMIX_ASCII;
+	goto do_exactf;
+
     case EXACTFL:
 	PL_reg_flags |= RF_tainted;
 	/* FALL THROUGH */
@@ -5976,6 +6011,7 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	/* The comments for the EXACT case above apply as well to these fold
 	 * ones */
 
+    do_exactf:
 	c = (U8)*STRING(p);
 	assert(! UTF_PATTERN || UNI_IS_INVARIANT(c));
 
@@ -6014,6 +6050,7 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	     * fold matching. */
 	    switch (OP(p)) {
 		case EXACTF: folded = PL_fold[c]; break;
+		case EXACTFA:
 		case EXACTFU: folded = PL_fold_latin1[c]; break;
 		case EXACTFL: folded = PL_fold_locale[c]; break;
 		default: Perl_croak(aTHX_ "panic: Unexpected op %u", OP(p));

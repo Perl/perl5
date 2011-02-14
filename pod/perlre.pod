@@ -694,6 +694,9 @@ like the C<"u"> modifier, in that case-insensitive matching uses Unicode
 semantics; for example, "k" will match the Unicode C<\N{KELVIN SIGN}>
 under C</i> matching, and code points in the Latin1 range, above ASCII
 will have Unicode semantics when it comes to case-insensitive matching.
+But writing two in "a"'s in a row will increase its effect, causing the
+Kelvin sign and all other non-ASCII characters to not match any ASCII
+character under C</i> matching.
 
 C<"d"> means to use the traditional Perl pattern matching behavior.
 This is dualistic (hence the name C<"d">, which also could stand for

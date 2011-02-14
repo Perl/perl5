@@ -190,6 +190,10 @@ $tests{0x2C7} = [ 0x2C7 ];
 my $clump_execs = 10000;    # Speed up by building an 'exec' of many tests
 my @eval_tests;
 
+# To cut down on the number of tests
+my $has_tested_aa_above_latin1;
+my $has_tested_latin1_aa;
+
 # For use by pairs() in generating combinations
 sub prefix {
     my $p = shift;
@@ -244,6 +248,8 @@ foreach my $test (sort { numerically } keys %tests) {
 
     my $target_above_latin1 = grep { $_ > 255 } @target;
     my $pattern_above_latin1 = grep { $_ > 255 } @pattern;
+    my $target_has_ascii = grep { $_ < 128 } @target;
+    my $pattern_has_ascii = grep { $_ < 128 } @pattern;
     my $is_self = @target == 1 && @pattern == 1 && $target[0] == $pattern[0];
 
     # We don't test multi-char folding into other multi-chars.  We are testing
@@ -258,8 +264,24 @@ foreach my $test (sort { numerically } keys %tests) {
     #diag $progress;
 
     # Now grind out tests, using various combinations.
-    # XXX foreach my $charset ('d', 'u', 'l') {
-    foreach my $charset ('d', 'u') {
+    foreach my $charset ('d', 'u', 'aa') {
+
+      # /aa should only affect things with folds in the ASCII range.  But, try
+      # it on one pair in the other ranges just to make sure it doesn't break
+      # them.  Set these flags.  They are set to the ord of the character
+      # tested so that all pairs of that ord get tested.
+      if ($charset eq 'aa') {
+        if (! $target_has_ascii && ! $pattern_has_ascii) {
+          if ($target_above_latin1 || $pattern_above_latin1) {
+            next if defined $has_tested_aa_above_latin1
+                    && $has_tested_aa_above_latin1 != $ord;
+            $has_tested_aa_above_latin1 = $ord;
+          }
+          next if defined $has_tested_latin1_aa && $has_tested_latin1_aa != $ord;
+          $has_tested_latin1_aa = $ord;
+        }
+      }
+
       foreach my $utf8_target (0, 1) {    # Both utf8 and not, for
                                           # code points < 256
         my $upgrade_target = "";
@@ -272,14 +294,15 @@ foreach my $test (sort { numerically } keys %tests) {
 
         foreach my $utf8_pattern (0, 1) {
           next if $pattern_above_latin1 && ! $utf8_pattern;
-          my $uni_semantics = $utf8_target || $charset eq 'u' || ($charset eq 'd' && $utf8_pattern);
+          my $uni_semantics = $utf8_target || $charset eq 'u' || ($charset eq 'd' && $utf8_pattern) || $charset =~ /a/;
           my $upgrade_pattern = "";
           $upgrade_pattern = ' utf8::upgrade($p);' if ! $pattern_above_latin1 && $utf8_pattern;
 
           my $lhs = join "", @x_target;
           my @rhs = @x_pattern;
           my $rhs = join "", @rhs;
-          my $should_fail = ! $uni_semantics && $ord >= 128 && $ord < 256 && ! $is_self;
+          my $should_fail = (! $uni_semantics && $ord >= 128 && $ord < 256 && ! $is_self)
+                            || ($charset eq 'aa' && $target_has_ascii != $pattern_has_ascii);
 
           # Do simple tests of referencing capture buffers, named and
           # numbered.
@@ -352,7 +375,9 @@ foreach my $test (sort { numerically } keys %tests) {
                           # The folded part can match the null string if it
                           # isn't required to have width, and there's not
                           # something on one or both sides that force it to.
-                          my $must_match = ! $can_match_null || ($l_anchor && $r_anchor) || ($l_anchor && $append) || ($r_anchor && $prepend) || ($prepend && $append);
+                          my $both_sides = ($l_anchor && $r_anchor) || ($l_anchor && $append) || ($r_anchor && $prepend) || ($prepend && $append);
+                          my $must_match = ! $can_match_null || $both_sides;
+                          # for performance, but doing this missed many failures
                           #next unless $must_match;
                           my $quantified = "(?$charset:$l_anchor$prepend$interior${quantifier}$append$r_anchor)";
                           my $op;

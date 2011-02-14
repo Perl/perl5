@@ -33,6 +33,17 @@ here, but most should go in the L</Performance Enhancements> section.
 This synyom is added for symmetry with the Unicode property names
 C<\p{Uppercase}> and C<\p{Lowercase}>.
 
+=head2 New regular expression modifier option C</aa>
+
+Doubling the C</a> regular expression modifier increases its effect,
+so that in case-insensitive matching, no ASCII character will match a
+non-ASCII character.  For example, normally,
+
+    'k' =~ /\N{KELVIN SIGN}/
+
+will match; it won't under C</aa>.  Note that like C</a>, C</aa>
+in 5.14 will not actually be able to be used as a suffix at the end of a
+regular expression.
 
 =head1 Security
 
