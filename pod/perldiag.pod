@@ -4372,9 +4372,9 @@ discovered. See L<perlre>.
 
 =item Switch condition not recognized in regex; marked by <-- HERE in m/%s/
 
-(F) If the argument to the (?(...)if-clause|else-clause) construct is a
-number, it can be only a number. The <-- HERE shows in the regular expression
-about where the problem was discovered. See L<perlre>.
+(F) If the argument to the (?(...)if-clause|else-clause) construct is
+a number, it can be only a number. The <-- HERE shows in the regular
+expression about where the problem was discovered. See L<perlre>.
 
 =item switching effective %s is not implemented
 
