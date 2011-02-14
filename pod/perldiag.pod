@@ -2981,13 +2981,13 @@ package has restricted the set of allowed keys using the L<fields> pragma.
 
 =item No such class %s
 
-(F) You provided a class qualifier in a "my", "our" or "state" declaration, but
-this class doesn't exist at this point in your program.
+(F) You provided a class qualifier in a "my", "our" or "state"
+declaration, but this class doesn't exist at this point in your program.
 
 =item No such hook: %s
 
-(F) You specified a signal hook that was not recognized by Perl.  Currently, Perl
-accepts C<__DIE__> and C<__WARN__> as valid signal hooks
+(F) You specified a signal hook that was not recognized by Perl.
+Currently, Perl accepts C<__DIE__> and C<__WARN__> as valid signal hooks.
 
 =item No such pipe open
 
