@@ -2467,14 +2467,14 @@ the definition.
 values cannot be returned in subroutines used in lvalue context.  See
 L<perlsub/"Lvalue subroutines">.
 
-=item Malformed integer in [] in  pack
+=item Malformed integer in [] in pack
 
-(F) Between the  brackets enclosing a numeric repeat count only digits
+(F) Between the brackets enclosing a numeric repeat count only digits
 are permitted.  See L<perlfunc/pack>.
 
 =item Malformed integer in [] in unpack
 
-(F) Between the  brackets enclosing a numeric repeat count only digits
+(F) Between the brackets enclosing a numeric repeat count only digits
 are permitted.  See L<perlfunc/pack>.
 
 =item Malformed PERLLIB_PREFIX
@@ -2540,7 +2540,7 @@ rules and perl was unable to guess how to make more progress.
 
 =item Maximal count of pending signals (%u) exceeded
 
-(F) Perl aborted due to a too high number of signals pending. This
+(F) Perl aborted due to too high a number of signals pending. This
 usually indicates that your operating system tried to deliver signals
 too fast (with a very high priority), starving the perl process from
 resources it would need to reach a point where it can process signals
