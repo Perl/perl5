@@ -2250,6 +2250,12 @@ The escape was replaced with REPLACEMENT CHARACTER (U+FFFD) instead.
 The <-- HERE shows in the regular expression about where the
 escape was discovered.
 
+=item Invalid hexadecimal number in \N{U+...}
+
+(F) The character constant represented by C<...> is not a valid hexadecimal
+number.  Either it is empty, or you tried to use a character other than 0 - 9
+or A - F, a - f in a hexadecimal number.
+
 =item Invalid mro name: '%s'
 
 (F) You tried to C<mro::set_mro("classname", "foo")> or C<use mro 'foo'>,
@@ -2756,6 +2762,18 @@ that yet.
 sense to try to declare one with a package qualifier on the front.  Use
 local() if you want to localize a package variable.
 
+=item Name "%s::%s" used only once: possible typo
+
+(W once) Typographical errors often show up as unique variable names.
+If you had a good reason for having a unique name, then just mention it
+again somehow to suppress the message.  The C<our> declaration is
+provided for this purpose.
+
+NOTE: This warning detects symbols that have been used only once so $c, @c,
+%c, *c, &c, sub c{}, c(), and c (the filehandle or format) are considered
+the same; if a program uses $c only once but also uses any of the others it
+will not trigger this warning.
+
 =item \N in a character class must be a named character: \N{...}
 
 (F) The new (5.12) meaning of C<\N> as C<[^\n]> is not valid in a bracketed
@@ -2793,24 +2811,6 @@ C<\N> is separated by spaces from the C<{>, in which case, remove the spaces.
 
     /\N {SPACE}/x;	# Wrong!
     /\N{SPACE}/x;	# ok
-
-=item Name "%s::%s" used only once: possible typo
-
-(W once) Typographical errors often show up as unique variable names.
-If you had a good reason for having a unique name, then just mention it
-again somehow to suppress the message.  The C<our> declaration is
-provided for this purpose.
-
-NOTE: This warning detects symbols that have been used only once so $c, @c,
-%c, *c, &c, sub c{}, c(), and c (the filehandle or format) are considered
-the same; if a program uses $c only once but also uses any of the others it
-will not trigger this warning.
-
-=item Invalid hexadecimal number in \N{U+...}
-
-(F) The character constant represented by C<...> is not a valid hexadecimal
-number.  Either it is empty, or you tried to use a character other than 0 - 9
-or A - F, a - f in a hexadecimal number.
 
 =item Negative '/' count in unpack
 
