@@ -2750,7 +2750,7 @@ See L<perlfunc/pack>.
 (F) Lexically scoped subroutines are not yet implemented.  Don't try
 that yet.
 
-=item "%s" variable %s can't be in a package
+=item "my" variable %s can't be in a package
 
 (F) Lexically scoped variables aren't in a package, so it doesn't make
 sense to try to declare one with a package qualifier on the front.  Use
@@ -4302,6 +4302,12 @@ die().  This is almost always an error, because exec() never returns
 unless there was a failure.  You probably wanted to use system()
 instead, which does return.  To suppress this warning, put the exec() in
 a block by itself.
+
+=item "state" variable %s can't be in a package
+
+(F) Lexically scoped variables aren't in a package, so it doesn't make
+sense to try to declare one with a package qualifier on the front.  Use
+local() if you want to localize a package variable.
 
 =item stat() on unopened filehandle %s
 
