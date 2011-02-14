@@ -5126,11 +5126,11 @@ scope is deprecated and should be avoided.
 
 =item Use of inherited AUTOLOAD for non-method %s() is deprecated
 
-(D deprecated) As an (ahem) accidental feature, C<AUTOLOAD> subroutines
-are looked up as methods (using the C<@ISA> hierarchy) even when the
-subroutines to be autoloaded were called as plain functions (e.g.
-C<Foo::bar()>), not as methods (e.g. C<< Foo->bar() >> or C<<
-$obj->bar() >>).
+(D deprecated) As an (ahem) accidental feature, C<AUTOLOAD>
+subroutines are looked up as methods (using the C<@ISA> hierarchy)
+even when the subroutines to be autoloaded were called as plain
+functions (e.g. C<Foo::bar()>), not as methods (e.g. C<< Foo->bar() >> or
+C<< $obj->bar() >>).
 
 This bug will be rectified in future by using method lookup only for
 methods' C<AUTOLOAD>s.  However, there is a significant base of existing
