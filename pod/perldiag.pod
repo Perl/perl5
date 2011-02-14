@@ -2514,14 +2514,14 @@ message.
 
 See also L<Encode/"Handling Malformed Data">.
 
-=item Malformed UTF-16 surrogate
-
-(F) Perl thought it was reading UTF-16 encoded character data but while
-doing it Perl met a malformed Unicode surrogate.
-
 =item Malformed UTF-8 returned by \N
 
 (F) The charnames handler returned malformed UTF-8.
+
+=item Malformed UTF-8 string in '%c' format in unpack
+
+(F) You tried to unpack something that didn't comply with UTF-8 encoding
+rules and perl was unable to guess how to make more progress.
 
 =item Malformed UTF-8 string in pack
 
@@ -2533,10 +2533,17 @@ rules and perl was unable to guess how to make more progress.
 (F) You tried to unpack something that didn't comply with UTF-8 encoding
 rules and perl was unable to guess how to make more progress.
 
-=item Malformed UTF-8 string in '%c' format in unpack
+=item Malformed UTF-16 surrogate
 
-(F) You tried to unpack something that didn't comply with UTF-8 encoding
-rules and perl was unable to guess how to make more progress.
+(F) Perl thought it was reading UTF-16 encoded character data but while
+doing it Perl met a malformed Unicode surrogate.
+
+=item %s matches null string many times in regex; marked by <-- HERE in m/%s/
+
+(W regexp) The pattern you've specified would be an infinite loop if the
+regular expression engine didn't specifically check for that.  The <-- HERE
+shows in the regular expression about where the problem was discovered.
+See L<perlre>.
 
 =item Maximal count of pending signals (%u) exceeded
 
@@ -2545,13 +2552,6 @@ usually indicates that your operating system tried to deliver signals
 too fast (with a very high priority), starving the perl process from
 resources it would need to reach a point where it can process signals
 safely. (See L<perlipc/"Deferred Signals (Safe Signals)">.)
-
-=item %s matches null string many times in regex; marked by <-- HERE in m/%s/
-
-(W regexp) The pattern you've specified would be an infinite loop if the
-regular expression engine didn't specifically check for that.  The <-- HERE
-shows in the regular expression about where the problem was discovered.
-See L<perlre>.
 
 =item "%s" may clash with future reserved word
 
