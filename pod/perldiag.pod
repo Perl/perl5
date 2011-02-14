@@ -3540,8 +3540,8 @@ was string.
 
 =item panic: unimplemented op %s (#%d) called
 
-(P) The compiler is screwed up and attempted to use an op that isn't permitted
-at run time.
+(P) The compiler is screwed up and attempted to use an op that isn't
+permitted at run time.
 
 =item panic: utf16_to_utf8: odd bytelen
 
