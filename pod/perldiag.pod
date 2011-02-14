@@ -2598,10 +2598,10 @@ immediately after the switch, without intervening spaces.
 =item Missing braces on \N{}
 
 (F) Wrong syntax of character name literal C<\N{charname}> within
-double-quotish context.  This can also happen when there is a space (or
-comment) between the C<\N> and the C<{> in a regex with the C</x> modifier.
-This modifier does not change the requirement that the brace immediately follow
-the C<\N>.
+double-quotish context.  This can also happen when there is a space
+(or comment) between the C<\N> and the C<{> in a regex with the C</x> modifier.
+This modifier does not change the requirement that the brace immediately
+follow the C<\N>.
 
 =item Missing braces on \o{}
 
