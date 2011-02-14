@@ -24,6 +24,10 @@
  * function of the interpreter; that can be found in perlmain.c
  */
 
+#ifdef PERL_IS_MINIPERL
+#  define USE_SITECUSTOMIZE
+#endif
+
 #include "EXTERN.h"
 #define PERL_IN_PERL_C
 #include "perl.h"
@@ -1973,15 +1977,26 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     }
     }
 
-#if defined(USE_SITECUSTOMIZE) && !defined(PERL_IS_MINIPERL)
+#if defined(USE_SITECUSTOMIZE)
     if (!minus_f) {
-	/* SITELIB_EXP is a function call on Win32.
-	   The games with local $! are to avoid setting errno if there is no
+	/* The games with local $! are to avoid setting errno if there is no
 	   sitecustomize script.  */
+#  ifdef PERL_IS_MINIPERL
+	AV *const inc = GvAV(PL_incgv);
+	SV **const inc0 = inc ? av_fetch(inc, 0, FALSE) : NULL;
+
+	if (inc0) {
+	    (void)Perl_av_create_and_unshift_one(aTHX_ &PL_preambleav,
+						 Perl_newSVpvf(aTHX_
+							       "BEGIN { do {local $!; -f '%"SVf"/buildcustomize.pl'} && do '%"SVf"/buildcustomize.pl' }", *inc0, *inc0));
+	}
+#  else
+	/* SITELIB_EXP is a function call on Win32.  */
 	const char *const sitelib = SITELIB_EXP;
 	(void)Perl_av_create_and_unshift_one(aTHX_ &PL_preambleav,
 					     Perl_newSVpvf(aTHX_
 							   "BEGIN { do {local $!; -f '%s/sitecustomize.pl'} && do '%s/sitecustomize.pl' }", sitelib, sitelib));
+#  endif
     }
 #endif
 
