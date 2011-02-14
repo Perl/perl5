@@ -2759,14 +2759,16 @@ local() if you want to localize a package variable.
 =item \N in a character class must be a named character: \N{...}
 
 (F) The new (5.12) meaning of C<\N> as C<[^\n]> is not valid in a bracketed
-character class, for the same reason that C<.> in a character class loses its
-specialness: it matches almost everything, which is probably not what you want.
+character class, for the same reason that C<.> in a character class loses
+its specialness: it matches almost everything, which is probably not
+what you want.
 
 =item \N{NAME} must be resolved by the lexer
 
-(F) When compiling a regex pattern, an unresolved named character or sequence
-was encountered.  This can happen in any of several ways that bypass the lexer,
-such as using single-quotish context, or an extra backslash in double quotish:
+(F) When compiling a regex pattern, an unresolved named character or
+sequence was encountered.  This can happen in any of several ways that
+bypass the lexer, such as using single-quotish context, or an extra
+backslash in double quotish:
 
     $re = '\N{SPACE}';	# Wrong!
     $re = "\\N{SPACE}";	# Wrong!
