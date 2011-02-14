@@ -1208,9 +1208,14 @@ Checks if the numbered capturing group has matched something.
 
 Checks if a group with the given name has matched something.
 
+=item (?=...) (?!...) (?<=...) (?<!...)
+
+Checks whether the pattern matches (or does not match, for the '!'
+variants).
+
 =item (?{ CODE })
 
-Treats the code block as the condition.
+Treats the return value of the code block as the condition.
 
 =item (R)
 
