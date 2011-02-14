@@ -4355,7 +4355,7 @@ assignment or as a subroutine argument for example).
 
 =item sv_upgrade from type %d down to type %d
 
-(P) Perl tried to force the upgrade an SV to a type which was actually
+(P) Perl tried to force the upgrade of an SV to a type which was actually
 inferior to its current type.
 
 =item Switch (?(condition)... contains too many branches in regex; marked by <-- HERE in m/%s/
