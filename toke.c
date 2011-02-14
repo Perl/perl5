@@ -8702,6 +8702,7 @@ S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRL
 		    const char * const brack =
 			(const char *)
 			((*s == '[') ? "[...]" : "{...}");
+   /* diag_listed_as: Ambiguous use of %c{%s[...]} resolved to %c%s[...] */
 		    Perl_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
 			"Ambiguous use of %c{%s%s} resolved to %c%s%s",
 			funny, dest, brack, funny, dest, brack);

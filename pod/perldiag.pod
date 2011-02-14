@@ -119,7 +119,9 @@ the varable, you can just write C<@foo>.  If you wanted to call the
 function, write C<@{foo()}> ... or you could just not have a variable
 and a function with the same name, and save yourself a lot of trouble.
 
-=item Ambiguous use of %c{%s%s} resolved to %c%s%s
+=item Ambiguous use of %c{%s[...]} resolved to %c%s[...]
+
+=item Ambiguous use of %c{%s{...}} resolved to %c%s{...}
 
 (W ambiguous) You wrote something like C<${foo[2]}> (where foo
 represents the name of a Perl keyword), which might be looking for
