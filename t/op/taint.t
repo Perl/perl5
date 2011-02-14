@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 608;
+plan tests => 684;
 
 $| = 1;
 
@@ -407,7 +407,7 @@ my $TEST = catfile(curdir(), 'TEST');
     $res = $s =~ s/(.)/x/g;
     $one = $1;
     ok( tainted($s),   "$desc: s tainted");
-    { local $::TODO = "todo"; ok( tainted($res), "$desc: res tainted"); }
+    ok( tainted($res), "$desc: res tainted");
     ok(!tainted($one), "$desc: \$1 not tainted");
     is($s,   'xxxx',   "$desc: s value");
     is($res, 4,        "$desc: res value");
@@ -425,14 +425,33 @@ my $TEST = catfile(curdir(), 'TEST');
     is($res, 'xyz',    "$desc: res value");
     is($one, 'abcd',   "$desc: \$1 value");
 
+    $desc = "substitution /e with string tainted";
+
+    $s = 'abcd' . $TAINT;
+    $one = '';
+    $res = $s =~ s{(.+)}{
+		$one = $one . "x"; # make sure code not tainted
+		ok(!tainted($one), "$desc: code not tainted within /e");
+		$one = $1;
+		ok(!tainted($one), "$desc: \$1 not tainted within /e");
+		"xyz";
+	    }e;
+    $one = $1;
+    ok( tainted($s),   "$desc: s tainted");
+    ok(!tainted($res), "$desc: res not tainted");
+    ok(!tainted($one), "$desc: \$1 not tainted");
+    is($s,   'xyz',    "$desc: s value");
+    is($res, 1,        "$desc: res value");
+    is($one, 'abcd',   "$desc: \$1 value");
+
     $desc = "substitution with pattern tainted";
 
     $s = 'abcd';
     $res = $s =~ s/$TAINT(.+)/xyz/;
     $one = $1;
     ok( tainted($s),   "$desc: s tainted");
-    { local $::TODO = "todo"; ok(!tainted($res), "$desc: res not tainted"); }
-    { local $::TODO = "todo"; ok( tainted($one), "$desc: \$1 tainted"); }
+    ok(!tainted($res), "$desc: res not tainted");
+    ok( tainted($one), "$desc: \$1 tainted");
     is($s,  'xyz',     "$desc: s value");
     is($res, 1,        "$desc: res value");
     is($one, 'abcd',   "$desc: \$1 value");
@@ -444,10 +463,39 @@ my $TEST = catfile(curdir(), 'TEST');
     $one = $1;
     ok( tainted($s),   "$desc: s tainted");
     ok( tainted($res), "$desc: res tainted");
-    { local $::TODO = "todo"; ok( tainted($one), "$desc: \$1 tainted"); }
+    ok( tainted($one), "$desc: \$1 tainted");
     is($s,  'xxxx',    "$desc: s value");
     is($res, 4,        "$desc: res value");
     is($one, 'd',      "$desc: \$1 value");
+
+    $desc = "substitution /ge with pattern tainted";
+
+    $s = 'abc';
+    {
+	my $i = 0;
+	my $j;
+	$res = $s =~ s{(.)$TAINT}{
+		    $j = $i; # make sure code not tainted
+		    $one = $1;
+		    ok(!tainted($j), "$desc: code not tainted within /e");
+		    $i++;
+		    if ($i == 1) {
+			ok(!tainted($s),   "$desc: s not tainted loop 1");
+		    }
+		    else {
+			ok( tainted($s),   "$desc: s tainted loop $i");
+		    }
+		    ok( tainted($one), "$desc: \$1 tainted loop $i");
+		    $i.$TAINT;
+		}ge;
+	$one = $1;
+    }
+    ok( tainted($s),   "$desc: s tainted");
+    ok( tainted($res), "$desc: res tainted");
+    ok( tainted($one), "$desc: \$1 tainted");
+    is($s,  '123',     "$desc: s value");
+    is($res, 3,        "$desc: res value");
+    is($one, 'c',      "$desc: \$1 value");
 
     $desc = "substitution /r with pattern tainted";
 
@@ -456,7 +504,7 @@ my $TEST = catfile(curdir(), 'TEST');
     $one = $1;
     ok(!tainted($s),   "$desc: s not tainted");
     ok( tainted($res), "$desc: res tainted");
-    { local $::TODO = "todo"; ok( tainted($one), "$desc: \$1 tainted"); }
+    ok( tainted($one), "$desc: \$1 tainted");
     is($s,  'abcd',    "$desc: s value");
     is($res, 'xyz',    "$desc: res value");
     is($one, 'abcd',   "$desc: \$1 value");
@@ -465,7 +513,7 @@ my $TEST = catfile(curdir(), 'TEST');
 
     $s = 'abcd';
     { use locale;  $res = $s =~ s/(\w+)/xyz/; $one = $1; }
-    { local $::TODO = "todo"; ok( tainted($s),   "$desc: s tainted"); }
+    ok( tainted($s),   "$desc: s tainted");
     ok(!tainted($res), "$desc: res not tainted");
     ok( tainted($one), "$desc: \$1 tainted");
     is($s,  'xyz',     "$desc: s value");
@@ -476,8 +524,8 @@ my $TEST = catfile(curdir(), 'TEST');
 
     $s = 'abcd';
     { use locale;  $res = $s =~ s/(\w)/x/g; $one = $1; }
-    { local $::TODO = "todo"; ok( tainted($s),   "$desc: s tainted"); }
-    { local $::TODO = "todo"; ok( tainted($res), "$desc: res tainted"); }
+    ok( tainted($s),   "$desc: s tainted");
+    ok( tainted($res), "$desc: res tainted");
     ok( tainted($one), "$desc: \$1 tainted");
     is($s,  'xxxx',    "$desc: s value");
     is($res, 4,        "$desc: res value");
@@ -488,7 +536,7 @@ my $TEST = catfile(curdir(), 'TEST');
     $s = 'abcd';
     { use locale;  $res = $s =~ s/(\w+)/xyz/r; $one = $1; }
     ok(!tainted($s),   "$desc: s not tainted");
-    { local $::TODO = "todo"; ok( tainted($res), "$desc: res tainted"); }
+    ok( tainted($res), "$desc: res tainted");
     ok( tainted($one), "$desc: \$1 tainted");
     is($s,  'abcd',    "$desc: s value");
     is($res, 'xyz',    "$desc: res value");
@@ -500,7 +548,7 @@ my $TEST = catfile(curdir(), 'TEST');
     $res = $s =~ s/(.+)/xyz$TAINT/;
     $one = $1;
     ok( tainted($s),   "$desc: s tainted");
-    { local $::TODO = "todo"; ok(!tainted($res), "$desc: res not tainted"); }
+    ok(!tainted($res), "$desc: res not tainted");
     ok(!tainted($one), "$desc: \$1 not tainted");
     is($s,  'xyz',     "$desc: s value");
     is($res, 1,        "$desc: res value");
@@ -512,11 +560,40 @@ my $TEST = catfile(curdir(), 'TEST');
     $res = $s =~ s/(.)/x$TAINT/g;
     $one = $1;
     ok( tainted($s),   "$desc: s tainted");
-    { local $::TODO = "todo"; ok(!tainted($res), "$desc: res not tainted"); }
+    ok(!tainted($res), "$desc: res not tainted");
     ok(!tainted($one), "$desc: \$1 not tainted");
     is($s,  'xxxx',    "$desc: s value");
     is($res, 4,        "$desc: res value");
     is($one, 'd',      "$desc: \$1 value");
+
+    $desc = "substitution /ge with replacement tainted";
+
+    $s = 'abc';
+    {
+	my $i = 0;
+	my $j;
+	$res = $s =~ s{(.)}{
+		    $j = $i; # make sure code not tainted
+		    $one = $1;
+		    ok(!tainted($j), "$desc: code not tainted within /e");
+		    $i++;
+		    if ($i == 1) {
+			ok(!tainted($s),   "$desc: s not tainted loop 1");
+		    }
+		    else {
+			ok( tainted($s),   "$desc: s tainted loop $i");
+		    }
+		    ok(!tainted($one), "$desc: \$1 not tainted within /e");
+		    $i.$TAINT;
+		}ge;
+	$one = $1;
+    }
+    ok( tainted($s),   "$desc: s tainted");
+    ok( tainted($res), "$desc: res tainted");
+    ok(!tainted($one), "$desc: \$1 not tainted");
+    is($s,  '123',     "$desc: s value");
+    is($res, 3,        "$desc: res value");
+    is($one, 'c',      "$desc: \$1 value");
 
     $desc = "substitution /r with replacement tainted";
 
@@ -674,8 +751,8 @@ my $TEST = catfile(curdir(), 'TEST');
 	$res = $s =~ s/(.+)/xyz/;
 	$one = $1;
 	ok( tainted($s),   "$desc: s tainted");
-	{ local $::TODO = "todo"; ok(!tainted($res), "$desc: res not tainted"); }
-	{ local $::TODO = "todo"; ok( tainted($one), "$desc: \$1 tainted"); }
+	ok(!tainted($res), "$desc: res not tainted");
+	ok( tainted($one), "$desc: \$1 tainted");
 	is($s,   'xyz',    "$desc: s value");
 	is($res, 1,        "$desc: res value");
 	is($one, 'abcd',   "$desc: \$1 value");
@@ -687,7 +764,7 @@ my $TEST = catfile(curdir(), 'TEST');
 	$one = $1;
 	ok( tainted($s),   "$desc: s tainted");
 	ok( tainted($res), "$desc: res tainted");
-	{ local $::TODO = "todo"; ok( tainted($one), "$desc: \$1 tainted"); }
+	ok( tainted($one), "$desc: \$1 tainted");
 	is($s,   'xxxx',   "$desc: s value");
 	is($res, 4,        "$desc: res value");
 	is($one, 'd',      "$desc: \$1 value");
@@ -699,9 +776,28 @@ my $TEST = catfile(curdir(), 'TEST');
 	$one = $1;
 	ok( tainted($s),   "$desc: s tainted");
 	ok( tainted($res), "$desc: res tainted");
-	{ local $::TODO = "todo"; ok( tainted($one), "$desc: \$1 tainted"); }
+	ok( tainted($one), "$desc: \$1 tainted");
 	is($s,   'abcd',   "$desc: s value");
 	is($res, 'xyz',    "$desc: res value");
+	is($one, 'abcd',   "$desc: \$1 value");
+
+	$desc = "use re 'taint': substitution /e with string tainted";
+
+	$s = 'abcd' . $TAINT;
+	$one = '';
+	$res = $s =~ s{(.+)}{
+		    $one = $one . "x"; # make sure code not tainted
+		    ok(!tainted($one), "$desc: code not tainted within /e");
+		    $one = $1;
+		    ok(tainted($one), "$desc: $1 tainted within /e");
+		    "xyz";
+		}e;
+	$one = $1;
+	ok( tainted($s),   "$desc: s tainted");
+	ok(!tainted($res), "$desc: res not tainted");
+	ok( tainted($one), "$desc: \$1 tainted");
+	is($s,   'xyz',    "$desc: s value");
+	is($res, 1,        "$desc: res value");
 	is($one, 'abcd',   "$desc: \$1 value");
 
 	$desc = "use re 'taint': substitution with pattern tainted";
@@ -710,8 +806,8 @@ my $TEST = catfile(curdir(), 'TEST');
 	$res = $s =~ s/$TAINT(.+)/xyz/;
 	$one = $1;
 	ok( tainted($s),   "$desc: s tainted");
-	{ local $::TODO = "todo"; ok(!tainted($res), "$desc: res not tainted"); }
-	{ local $::TODO = "todo"; ok( tainted($one), "$desc: \$1 tainted"); }
+	ok(!tainted($res), "$desc: res not tainted");
+	ok( tainted($one), "$desc: \$1 tainted");
 	is($s,  'xyz',     "$desc: s value");
 	is($res, 1,        "$desc: res value");
 	is($one, 'abcd',   "$desc: \$1 value");
@@ -723,10 +819,40 @@ my $TEST = catfile(curdir(), 'TEST');
 	$one = $1;
 	ok( tainted($s),   "$desc: s tainted");
 	ok( tainted($res), "$desc: res tainted");
-	{ local $::TODO = "todo"; ok( tainted($one), "$desc: \$1 tainted"); }
+	ok( tainted($one), "$desc: \$1 tainted");
 	is($s,  'xxxx',    "$desc: s value");
 	is($res, 4,        "$desc: res value");
 	is($one, 'd',      "$desc: \$1 value");
+
+	$desc = "use re 'taint': substitution /ge with pattern tainted";
+
+	$s = 'abc';
+	{
+	    my $i = 0;
+	    my $j;
+	    $res = $s =~ s{(.)$TAINT}{
+			$j = $i; # make sure code not tainted
+			$one = $1;
+			ok(!tainted($j), "$desc: code not tainted within /e");
+			$i++;
+			if ($i == 1) {
+			    ok(!tainted($s),   "$desc: s not tainted loop 1");
+			}
+			else {
+			    ok( tainted($s),   "$desc: s tainted loop $i");
+			}
+			ok( tainted($one), "$desc: \$1 tainted loop $i");
+			$i.$TAINT;
+		    }ge;
+	    $one = $1;
+	}
+	ok( tainted($s),   "$desc: s tainted");
+	ok( tainted($res), "$desc: res tainted");
+	ok( tainted($one), "$desc: \$1 tainted");
+	is($s,  '123',     "$desc: s value");
+	is($res, 3,        "$desc: res value");
+	is($one, 'c',      "$desc: \$1 value");
+
 
 	$desc = "use re 'taint': substitution /r with pattern tainted";
 
@@ -735,7 +861,7 @@ my $TEST = catfile(curdir(), 'TEST');
 	$one = $1;
 	ok(!tainted($s),   "$desc: s not tainted");
 	ok( tainted($res), "$desc: res tainted");
-	{ local $::TODO = "todo"; ok( tainted($one), "$desc: \$1 tainted"); }
+	ok( tainted($one), "$desc: \$1 tainted");
 	is($s,  'abcd',    "$desc: s value");
 	is($res, 'xyz',    "$desc: res value");
 	is($one, 'abcd',   "$desc: \$1 value");
@@ -744,7 +870,7 @@ my $TEST = catfile(curdir(), 'TEST');
 
 	$s = 'abcd';
 	{ use locale;  $res = $s =~ s/(\w+)/xyz/; $one = $1; }
-	{ local $::TODO = "todo"; ok( tainted($s),   "$desc: s tainted"); }
+	ok( tainted($s),   "$desc: s tainted");
 	ok(!tainted($res), "$desc: res not tainted");
 	ok( tainted($one), "$desc: \$1 tainted");
 	is($s,  'xyz',     "$desc: s value");
@@ -755,8 +881,8 @@ my $TEST = catfile(curdir(), 'TEST');
 
 	$s = 'abcd';
 	{ use locale;  $res = $s =~ s/(\w)/x/g; $one = $1; }
-	{ local $::TODO = "todo"; ok( tainted($s),   "$desc: s tainted"); }
-	{ local $::TODO = "todo"; ok( tainted($res), "$desc: res tainted"); }
+	ok( tainted($s),   "$desc: s tainted");
+	ok( tainted($res), "$desc: res tainted");
 	ok( tainted($one), "$desc: \$1 tainted");
 	is($s,  'xxxx',    "$desc: s value");
 	is($res, 4,        "$desc: res value");
@@ -767,7 +893,7 @@ my $TEST = catfile(curdir(), 'TEST');
 	$s = 'abcd';
 	{ use locale;  $res = $s =~ s/(\w+)/xyz/r; $one = $1; }
 	ok(!tainted($s),   "$desc: s not tainted");
-	{ local $::TODO = "todo"; ok( tainted($res), "$desc: res tainted"); }
+	ok( tainted($res), "$desc: res tainted");
 	ok( tainted($one), "$desc: \$1 tainted");
 	is($s,  'abcd',    "$desc: s value");
 	is($res, 'xyz',    "$desc: res value");
@@ -779,7 +905,7 @@ my $TEST = catfile(curdir(), 'TEST');
 	$res = $s =~ s/(.+)/xyz$TAINT/;
 	$one = $1;
 	ok( tainted($s),   "$desc: s tainted");
-	{ local $::TODO = "todo"; ok(!tainted($res), "$desc: res not tainted"); }
+	ok(!tainted($res), "$desc: res not tainted");
 	ok(!tainted($one), "$desc: \$1 not tainted");
 	is($s,  'xyz',     "$desc: s value");
 	is($res, 1,        "$desc: res value");
@@ -791,11 +917,40 @@ my $TEST = catfile(curdir(), 'TEST');
 	$res = $s =~ s/(.)/x$TAINT/g;
 	$one = $1;
 	ok( tainted($s),   "$desc: s tainted");
-	{ local $::TODO = "todo"; ok(!tainted($res), "$desc: res not tainted"); }
+	ok(!tainted($res), "$desc: res not tainted");
 	ok(!tainted($one), "$desc: \$1 not tainted");
 	is($s,  'xxxx',    "$desc: s value");
 	is($res, 4,        "$desc: res value");
 	is($one, 'd',      "$desc: \$1 value");
+
+	$desc = "use re 'taint': substitution /ge with replacement tainted";
+
+	$s = 'abc';
+	{
+	    my $i = 0;
+	    my $j;
+	    $res = $s =~ s{(.)}{
+			$j = $i; # make sure code not tainted
+			$one = $1;
+			ok(!tainted($j), "$desc: code not tainted within /e");
+			$i++;
+			if ($i == 1) {
+			    ok(!tainted($s),   "$desc: s not tainted loop 1");
+			}
+			else {
+			    ok( tainted($s),   "$desc: s tainted loop $i");
+			}
+			    ok(!tainted($one), "$desc: \$1 not tainted");
+			$i.$TAINT;
+		    }ge;
+	    $one = $1;
+	}
+	ok( tainted($s),   "$desc: s tainted");
+	ok( tainted($res), "$desc: res tainted");
+	ok(!tainted($one), "$desc: \$1 not tainted");
+	is($s,  '123',     "$desc: s value");
+	is($res, 3,        "$desc: res value");
+	is($one, 'c',      "$desc: \$1 value");
 
 	$desc = "use re 'taint': substitution /r with replacement tainted";
 

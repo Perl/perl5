@@ -541,6 +541,15 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #define TAINT_ENV()	if (PL_tainting) { taint_env(); }
 #define TAINT_PROPER(s)	if (PL_tainting) { taint_proper(NULL, s); }
 
+/* flags used internally only within pp_subst and pp_substcont */
+#ifdef PERL_CORE
+#  define SUBST_TAINT_STR      1	/* string tainted */
+#  define SUBST_TAINT_PAT      2	/* pattern tainted */
+#  define SUBST_TAINT_REPL     4	/* replacement tainted */
+#  define SUBST_TAINT_RETAINT  8	/* use re'taint' in scope */
+#  define SUBST_TAINT_BOOLRET 16	/* return is boolean (don't taint) */
+#endif
+
 /* XXX All process group stuff is handled in pp_sys.c.  Should these
    defines move there?  If so, I could simplify this a lot. --AD  9/96.
 */

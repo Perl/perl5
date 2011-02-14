@@ -2071,7 +2071,7 @@ PP(pp_subst)
     I32 maxiters;
     register I32 i;
     bool once;
-    U8 rxtainted;
+    U8 rxtainted = 0; /* holds various SUBST_TAINT_* flag bits */
     char *orig;
     U8 r_flags;
     register REGEXP *rx = PM_GETRE(pm);
@@ -2127,11 +2127,19 @@ PP(pp_subst)
     s = SvPV_mutable(TARG, len);
     if (!SvPOKp(TARG) || SvTYPE(TARG) == SVt_PVGV)
 	force_on_match = 1;
-    rxtainted = ((RX_EXTFLAGS(rx) & RXf_TAINTED) ||
-		 (PL_tainted && (pm->op_pmflags & PMf_RETAINT)));
-    if (PL_tainted)
-	rxtainted |= 2;
-    TAINT_NOT;
+
+    /* only replace once? */
+    once = !(rpm->op_pmflags & PMf_GLOBAL);
+
+    if (PL_tainting) {
+	rxtainted  = (
+	    (SvTAINTED(TARG) ? SUBST_TAINT_STR : 0)
+	  | ((RX_EXTFLAGS(rx) & RXf_TAINTED) ? SUBST_TAINT_PAT : 0)
+	  | ((pm->op_pmflags & PMf_RETAINT) ? SUBST_TAINT_RETAINT : 0)
+	  | ((once && !(rpm->op_pmflags & PMf_NONDESTRUCT))
+		? SUBST_TAINT_BOOLRET : 0));
+	TAINT_NOT;
+    }
 
     RX_MATCH_UTF8_set(rx, DO_UTF8(TARG));
 
@@ -2173,12 +2181,12 @@ PP(pp_subst)
 */
     }
 
-    /* only replace once? */
-    once = !(rpm->op_pmflags & PMf_GLOBAL);
     matched = CALLREGEXEC(rx, s, strend, orig, 0, TARG, NULL,
 			 r_flags | REXEC_CHECKED);
     /* known replacement string? */
     if (dstr) {
+	if (SvTAINTED(dstr))
+	    rxtainted |= SUBST_TAINT_REPL;
 
 	/* Upgrade the source if the replacement is utf8 but the source is not,
 	 * but only if it matched; see
@@ -2250,7 +2258,8 @@ PP(pp_subst)
 	PL_curpm = pm;
 	SvSCREAM_off(TARG);	/* disable possible screamer */
 	if (once) {
-	    rxtainted |= RX_MATCH_TAINTED(rx);
+	    if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
+		rxtainted |= SUBST_TAINT_PAT;
 	    m = orig + RX_OFFS(rx)[0].start;
 	    d = orig + RX_OFFS(rx)[0].end;
 	    s = orig;
@@ -2283,7 +2292,6 @@ PP(pp_subst)
 	    else {
 		sv_chop(TARG, d);
 	    }
-	    TAINT_IF(rxtainted & 1);
 	    SPAGAIN;
 	    PUSHs(rpm->op_pmflags & PMf_NONDESTRUCT ? TARG : &PL_sv_yes);
 	}
@@ -2291,7 +2299,8 @@ PP(pp_subst)
 	    do {
 		if (iters++ > maxiters)
 		    DIE(aTHX_ "Substitution loop");
-		rxtainted |= RX_MATCH_TAINTED(rx);
+		if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
+		    rxtainted |= SUBST_TAINT_PAT;
 		m = RX_OFFS(rx)[0].start + orig;
 		if ((i = m - s)) {
 		    if (s != d)
@@ -2312,7 +2321,6 @@ PP(pp_subst)
 		SvCUR_set(TARG, d - SvPVX_const(TARG) + i);
 		Move(s, d, i+1, char);		/* include the NUL */
 	    }
-	    TAINT_IF(rxtainted & 1);
 	    SPAGAIN;
 	    if (rpm->op_pmflags & PMf_NONDESTRUCT)
 		PUSHs(TARG);
@@ -2329,13 +2337,19 @@ PP(pp_subst)
 #ifdef PERL_OLD_COPY_ON_WRITE
       have_a_cow:
 #endif
-	rxtainted |= RX_MATCH_TAINTED(rx);
+	if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
+	    rxtainted |= SUBST_TAINT_PAT;
 	dstr = newSVpvn_utf8(m, s-m, DO_UTF8(TARG));
 	SAVEFREESV(dstr);
 	PL_curpm = pm;
 	if (!c) {
 	    register PERL_CONTEXT *cx;
 	    SPAGAIN;
+	    /* note that a whole bunch of local vars are saved here for
+	     * use by pp_substcont: here's a list of them in case you're
+	     * searching for places in this sub that uses a particular var:
+	     * iters maxiters r_flags oldsave rxtainted orig dstr targ
+	     * s m strend rx once */
 	    PUSHSUBST(cx);
 	    RETURNOP(cPMOP->op_pmreplrootu.op_pmreplroot);
 	}
@@ -2343,7 +2357,8 @@ PP(pp_subst)
 	do {
 	    if (iters++ > maxiters)
 		DIE(aTHX_ "Substitution loop");
-	    rxtainted |= RX_MATCH_TAINTED(rx);
+	    if (RX_MATCH_TAINTED(rx))
+		rxtainted |= SUBST_TAINT_PAT;
 	    if (RX_MATCH_COPIED(rx) && RX_SUBBEG(rx) != orig) {
 		m = s;
 		s = orig;
@@ -2387,7 +2402,6 @@ PP(pp_subst)
 	doutf8 |= DO_UTF8(dstr);
 	SvPV_set(dstr, NULL);
 
-	TAINT_IF(rxtainted & 1);
 	SPAGAIN;
 	if (rpm->op_pmflags & PMf_NONDESTRUCT)
 	    PUSHs(TARG);
@@ -2397,9 +2411,28 @@ PP(pp_subst)
     (void)SvPOK_only_UTF8(TARG);
     if (doutf8)
 	SvUTF8_on(TARG);
-    TAINT_IF(rxtainted);
-    SvSETMAGIC(TARG);
-    SvTAINT(TARG);
+
+    if (PL_tainting) {
+	if ((rxtainted & SUBST_TAINT_PAT) ||
+	    ((rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_RETAINT)) ==
+				(SUBST_TAINT_STR|SUBST_TAINT_RETAINT))
+	)
+	    (RX_MATCH_TAINTED_on(rx)); /* taint $1 et al */
+
+	if (!(rxtainted & SUBST_TAINT_BOOLRET)
+	    && (rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_PAT))
+	)
+	    SvTAINTED_on(TOPs);  /* taint return value */
+	else
+	    SvTAINTED_off(TOPs);  /* may have got tainted earlier */
+
+	/* needed for mg_set below */
+	PL_tainted =
+	  cBOOL(rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_PAT|SUBST_TAINT_REPL));
+	SvTAINT(TARG);
+    }
+    SvSETMAGIC(TARG); /* PL_tainted must be correctly set for this mg_set */
+    TAINT_NOT;
     LEAVE_SCOPE(oldsave);
     RETURN;
 }

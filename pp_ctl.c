@@ -294,8 +294,8 @@ PP(pp_substcont)
 
 	SvGETMAGIC(TOPs); /* possibly clear taint on $1 etc: #67962 */
 
-	if (!(cx->sb_rxtainted & 2) && SvTAINTED(TOPs))
-	    cx->sb_rxtainted |= 2;
+	if (SvTAINTED(TOPs))
+	    cx->sb_rxtainted |= SUBST_TAINT_REPL;
 	sv_catsv_nomg(dstr, POPs);
 	/* XXX: adjust for positive offsets of \G for instance s/(.)\G//g with positive pos() */
 	s -= RX_GOFS(rx);
@@ -317,7 +317,8 @@ PP(pp_substcont)
 		 else
 		      sv_catpvn(dstr, s, cx->sb_strend - s);
 	    }
-	    cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
+	    if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
+		cx->sb_rxtainted |= SUBST_TAINT_PAT;
 
 #ifdef PERL_OLD_COPY_ON_WRITE
 	    if (SvIsCOW(targ)) {
@@ -334,20 +335,38 @@ PP(pp_substcont)
 		SvUTF8_on(targ);
 	    SvPV_set(dstr, NULL);
 
-	    TAINT_IF(cx->sb_rxtainted & 1);
 	    if (pm->op_pmflags & PMf_NONDESTRUCT)
 		PUSHs(targ);
 	    else
 		mPUSHi(saviters - 1);
 
 	    (void)SvPOK_only_UTF8(targ);
-	    TAINT_IF(cx->sb_rxtainted);
-	    SvSETMAGIC(targ);
-	    SvTAINT(targ);
 
+	    /* update the taint state of various various variables in
+	     * preparation for final exit */
+	    if (PL_tainting) {
+		if ((cx->sb_rxtainted & SUBST_TAINT_PAT) ||
+		    ((cx->sb_rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_RETAINT))
+				    == (SUBST_TAINT_STR|SUBST_TAINT_RETAINT))
+		)
+		    (RX_MATCH_TAINTED_on(rx)); /* taint $1 et al */
+
+		if (!(cx->sb_rxtainted & SUBST_TAINT_BOOLRET)
+		    && (cx->sb_rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_PAT))
+		)
+		    SvTAINTED_on(TOPs);  /* taint return value */
+		/* needed for mg_set below */
+		PL_tainted = cBOOL(cx->sb_rxtainted &
+			    (SUBST_TAINT_STR|SUBST_TAINT_PAT|SUBST_TAINT_REPL));
+		SvTAINT(TARG);
+	    }
+	    /* PL_tainted must be correctly set for this mg_set */
+	    SvSETMAGIC(TARG);
+	    TAINT_NOT;
 	    LEAVE_SCOPE(cx->sb_oldsave);
 	    POPSUBST(cx);
 	    RETURNOP(pm->op_next);
+	    /* NOTREACHED */
 	}
 	cx->sb_iters = saviters;
     }
@@ -382,7 +401,23 @@ PP(pp_substcont)
     }
     if (old != rx)
 	(void)ReREFCNT_inc(rx);
-    cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
+    /* update the taint state of various various variables in preparation
+     * for calling the code block */
+    if (PL_tainting) {
+	if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
+	    cx->sb_rxtainted |= SUBST_TAINT_PAT;
+
+	if ((cx->sb_rxtainted & SUBST_TAINT_PAT) ||
+	    ((cx->sb_rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_RETAINT))
+			    == (SUBST_TAINT_STR|SUBST_TAINT_RETAINT))
+	)
+	    (RX_MATCH_TAINTED_on(rx)); /* taint $1 et al */
+
+	if (cx->sb_iters > 1 && (cx->sb_rxtainted & 
+			(SUBST_TAINT_STR|SUBST_TAINT_PAT|SUBST_TAINT_REPL)))
+	    SvTAINTED_on(cx->sb_targ);
+	TAINT_NOT;
+    }
     rxres_save(&cx->sb_rxres, rx);
     PL_curpm = pm;
     RETURNOP(pm->op_pmstashstartu.op_pmreplstart);
