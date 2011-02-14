@@ -4156,7 +4156,7 @@ for Perl to detect the end of the clause properly. The <-- HERE shows in
 the regular expression about where the problem was discovered. See
 L<perlre>.
 
-=item "500 Server error"
+=item Z<>500 Server error
 
 See Server error.
 
