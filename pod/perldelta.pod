@@ -86,6 +86,32 @@ C</i> must change to read the new boolean parameter passed it which is
 non-zero if case-insensitive matching is in effect; 0 if not.  See
 L<perluniprops/User-Defined Character Properties>.
 
+=head2 [perl #82996] Use the user's from address as return-path in perlbug
+
+Many systems these days don't have a valid Internet domain name and
+perlbug@perl.org does not accept email with a return-path that does
+not resolve. Therefore pass the user's address to sendmail so it's
+less likely to get stuck in a mail queue somewhere. (019cfd2)
+
+=head2 regex: \p{} in pattern implies Unicode semantics
+
+Now, a Unicode property match specified in the pattern will indicate
+that the pattern is meant for matching according to Unicode rules
+(e40e74f)
+
+=head2 add GvCV_set() and GvGP_set() macros and change GvGP()
+
+This allows a future commit to eliminate some backref magic between GV
+and CVs, which will require complete control over assignment to the
+gp_cv slot.
+
+If you've been using GvGP() in lvalue context this change will break
+your code, you should use GvGP_set() instead. (c43ae56)
+
+=head2 _swash_inversion_hash is no longer exported as part of the API
+
+This function  shouldn't be called from XS code. (4c2e113)
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
@@ -207,6 +233,10 @@ or of "Mathematical Bold" digits would would be safe.
 
 =item *
 
+C<CPAN> has been upgraded from version1.94_63 to 1.94_64.
+
+=item *
+
 XXX
 
 =back
@@ -261,6 +291,39 @@ that used to be in perlrepository has been moved to perlhack.
 
 =back
 
+=head3 L<perlfunc>
+
+=over 4
+
+=item *
+
+The documentation for the C<map> function now contains more examples,
+see B<perldoc -f map> (f947627)
+
+=back
+
+=head3 L<perlfaq4>
+
+=over 4
+
+=item *
+
+Examples in L<perlfaq4> have been updated to show the use of
+L<Time::Piece>. (9243591)
+
+=back
+
+=head3 Miscellaneous
+
+=over 4
+
+=item *
+
+Many POD related RT bugs and other issues which are too numerous to
+enumerate have been solved by Michael Stevens.
+
+=back
+
 =head1 Diagnostics
 
 The following additions or changes have been made to diagnostic output,
@@ -285,6 +348,10 @@ XXX Newly added diagnostic messages go here
 Use of an unescaped "{" immediately following a C<\b> or C<\B> is now
 deprecated so as to reserve its use for Perl itself in a future release.
 
+=item regcomp: Add warning if \p is used under locale. (fb2e24c)
+
+C<\p> implies Unicode matching rules, which are likely going to be
+different than the locale's.
 
 =back
 
@@ -293,6 +360,20 @@ deprecated so as to reserve its use for Perl itself in a future release.
 XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =over 4
+
+=item *
+
+The warning message about regex unrecognized escapes passed through is
+changed to include any literal '{' following the 2-char escape.  e.g.,
+"\q{" will include the { in the message as part of the escape
+(216bfc0).
+
+=item * C<binmode $fh, ':scalar'> no longer warns (8250589)
+
+Perl will now no longer produce this warning:
+
+    $ perl -we 'open my $f, ">", \my $x; binmode $f, "scalar"'
+    Use of uninitialized value in binmode at -e line 1.
 
 =item *
 
@@ -329,6 +410,22 @@ L</Platform Support> section, instead.
 [ List changes as a =item entry ].
 
 =over 4
+
+=item * make reg_eval_scope.t TODOs consistently fail (daaf7ac)
+
+Some of the TODO tests in reg_eval_scope.t spuriously passed under
+non-threaded builds. Make the tests harder so they always fail.
+
+Since one of the key bugs in (?{..}) is the trashing of the parent pad,
+add some extra lexical vars to the parent scope and check they're still
+there at the end.
+
+=item *
+
+Stop EU::CBuilder's tests from failing in parallel (cbf59d5)
+
+It used to use the same paths for temporary files in all tests. This
+blew up randomly when the tests were run in parallel.
 
 =item *
 
@@ -414,6 +511,26 @@ F<t/porting/buildtoc.t> test to run successfully.
 
 =back
 
+=item MirBSD
+
+=over 4
+
+=item *
+
+[perl #82988] Skip hanging taint.t test on MirBSD 10 (1fb83d0)
+
+Skip a hanging test under MirBSD that was already being skipped under
+OpenBSD.
+
+=item *
+
+Previously if you build perl with a shared libperl.so on MirBSD (the
+default config), it will work up to the installation; however, once
+installed, it will be unable to find libperl. Treat path handling
+like in the other BSD dialects.
+
+=back
+
 =back
 
 =head1 Internal Changes
@@ -425,6 +542,34 @@ be noted as well.
 [ List each test improvement as a =item entry ]
 
 =over 4
+
+=item * Fix harmless invalid read in Perl_re_compile() (f6d9469)
+
+[perl #2460] described a case where electric fence reported an invalid
+read. This could be reproduced under valgrind with blead and -e'/x/',
+but only on a non-debugging build.
+
+This was because it was checking for certain pairs of nodes (e.g. BOL + END)
+and wasn't allowing for EXACT nodes, which have the string at the next
+node position when using a naive NEXTOPER(first). In the non-debugging
+build, the nodes aren't initialised to zero, and a 1-char EXACT node isn't
+long enough to spill into the type field of the "next node".
+
+Fix this by only using NEXTOPER(first) when we know the first node is
+kosher.
+
+=item * Break out the generated function Perl_keywords() into F<keywords.c>, a new file. (26ea9e1)
+
+As it and Perl_yylex() both need FEATURE_IS_ENABLED, feature_is_enabled() is
+no longer static, and the two macro definitions move from toke.c to perl.h
+
+Previously, one had to cut and paste the output of perl_keywords.pl into the
+middle of toke.c, and it was not clear that it was generated code.
+
+=item *
+
+A lot of tests have been ported from Test to Test::More, e.g. in
+3842ad6.
 
 =item *
 
@@ -444,8 +589,46 @@ L</Modules and Pragmata>.
 
 =item *
 
-A Unicode C<\p{}> property match in a regular rexpression pattern will
+A Unicode C<\p{}> property match in a regular expression pattern will
 now force Unicode rules for the rest of the regular expression
+
+=item *
+
+[perl #38456] binmode FH, ":crlf" only modifies top crlf layer (7826b36)
+
+When pushed on top of the stack, crlf will no longer enable crlf layers
+lower in the stack. This will prevent unexpected results.
+
+=item *
+
+Fix 'raw' layer for RT #80764 (ecfd064)
+
+Made a ':raw' open do what it advertises to do (first open the file,
+then binmode it), instead of leaving off the top layer.
+
+=item *
+
+Use PerlIOBase_open for pop, utf8 and bytes layers (c0888ac)
+
+Three of Perl's builtin PerlIO layers (C<:pop>, C<:utf8> and
+C<:bytes>) didn't allow stacking when opening a file. For example
+this:
+
+    open FH, '>:pop:perlio', 'some.file' or die $!;
+
+Would throw an error: "Invalid argument". This has been fixed in this
+release.
+
+=item *
+
+An issue present since 5.13.1, where s/A/B/ with A utf8 and B
+non-utf8, could cause corruption or segfaults has been
+fixed. (c95ca9b)
+
+=item *
+
+String evals will no longer fail after 2 billion scopes have been
+compiled (d1bfb64, 2df5bdd, 0d311cd and 6012dc8)
 
 =back
 
