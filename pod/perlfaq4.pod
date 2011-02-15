@@ -408,7 +408,7 @@ integers (inclusive), For example: C<random_int_between(50,120)>.
 The C<localtime> function returns the day of the year.  Without an
 argument C<localtime> uses the current time.
 
-	$day_of_year = (localtime)[7];
+	my $day_of_year = (localtime)[7];
 
 The C<POSIX> module can also format a date as the day of the year or
 week of the year.
@@ -424,7 +424,14 @@ a time in epoch seconds for the argument to C<localtime>.
 	my $week_of_year = strftime "%W",
 		localtime( mktime( 0, 0, 0, 18, 11, 87 ) );
 
-The C<Date::Calc> module provides two functions to calculate these.
+You can also use C<Time::Piece>, which comes with Perl and provides a
+C<localtime> that returns an object:
+
+	use Time::Piece;
+	my $day_of_year  = localtime->yday;
+	my $week_of_year = localtime->week;
+	
+The C<Date::Calc> module provides two functions to calculate these too:.
 
 	use Date::Calc;
 	my $day_of_year  = Day_of_Year(  1987, 12, 18 );
@@ -454,42 +461,73 @@ millennium.
 (contributed by brian d foy)
 
 You could just store all your dates as a number and then subtract.
-Life isn't always that simple though. If you want to work with
-formatted dates, the C<Date::Manip>, C<Date::Calc>, or C<DateTime>
-modules can help you.
+Life isn't always that simple though. 
+
+The C<Time::Piece> module, which comes with Perl, replaces C<localtime>
+with a version that returns an object. It also overloads the comparison
+operators so you can compare them directly:
+
+	use Time::Piece;
+	my $date1 = localtime( $some_time );
+	my $date2 = localtime( $some_other_time );
+	
+	if( $date1 < $date2 ) {
+		print "The date was in the past\n";
+		}
+
+You can also get differences with a subtraction, which returns a 
+C<Time::Seconds> object:
+
+	my $diff = $date1 - $date2;
+	print "The difference is ", $date_diff->days, " days\n";
+	
+If you want to work with formatted dates, the C<Date::Manip>,
+C<Date::Calc>, or C<DateTime> modules can help you.
 
 =head2 How can I take a string and turn it into epoch seconds?
 
 If it's a regular enough string that it always has the same format,
 you can split it up and pass the parts to C<timelocal> in the standard
 C<Time::Local> module.  Otherwise, you should look into the C<Date::Calc>
-and C<Date::Manip> modules from CPAN.
+C<Date::Parse>, and C<Date::Manip> modules from CPAN.
 
 =head2 How can I find the Julian Day?
 
 (contributed by brian d foy and Dave Cross)
 
-You can use the C<Time::JulianDay> module available on CPAN.  Ensure
-that you really want to find a Julian day, though, as many people have
-different ideas about Julian days.  See
-http://www.hermetic.ch/cal_stud/jdn.htm for instance.
+You can use  the C<Time::Piece> module, part of the Standard Library,
+which can convert a date/time to a Julian Day:
 
-You can also try the C<DateTime> module, which can convert a date/time
-to a Julian Day.
+	$ perl -MTime::Piece -le 'print localtime->julian_day'
+	2455607.7959375
+
+Or the modified Julian Day:
+
+	$ perl -MTime::Piece -le 'print localtime->mjd'
+	55607.2961226851
+
+Or even the day of the year (which is what some people think of as a
+Julian day):
+
+	$ perl -MTime::Piece -le 'print localtime->yday'
+	45
+
+You can also do the same things with the C<DateTime> module:
 
 	$ perl -MDateTime -le'print DateTime->today->jd'
 	2453401.5
-
-Or the modified Julian Day
-
 	$ perl -MDateTime -le'print DateTime->today->mjd'
 	53401
-
-Or even the day of the year (which is what some people think of as a
-Julian day)
-
 	$ perl -MDateTime -le'print DateTime->today->doy'
 	31
+
+You can use the C<Time::JulianDay> module available on CPAN.  Ensure
+that you really want to find a Julian day, though, as many people have
+different ideas about Julian days (see http://www.hermetic.ch/cal_stud/jdn.htm 
+for instance):
+
+	$  perl -MTime::JulianDay -le 'print local_julian_day( time )'
+	55608
 
 =head2 How do I find yesterday's date?
 X<date> X<yesterday> X<DateTime> X<Date::Calc> X<Time::Local>
@@ -498,8 +536,10 @@ X<timelocal>
 
 (contributed by brian d foy)
 
-Use one of the Date modules. The C<DateTime> module makes it simple, and
-give you the same time of day, only the day before.
+To do it correctly, you can use one of the C<Date> modules since they
+work with calendars instead of times. The C<DateTime> module makes it
+simple, and give you the same time of day, only the day before,
+despite daylight saving time changes:
 
 	use DateTime;
 
@@ -519,23 +559,34 @@ function.
 Most people try to use the time rather than the calendar to figure out
 dates, but that assumes that days are twenty-four hours each.  For
 most people, there are two days a year when they aren't: the switch to
-and from summer time throws this off. Let the modules do the work.
+and from summer time throws this off. For example, the rest of the 
+suggestions will be wrong sometimes:
 
-If you absolutely must do it yourself (or can't use one of the
-modules), here's a solution using C<Time::Local>, which comes with
-Perl:
+Starting with Perl 5.10, C<Time::Piece> and C<Time::Seconds> are part
+of the standard distribution, so you might think that you could do 
+something like this:
+
+	use Time::Piece;
+	use Time::Seconds;
+	
+	my $yesterday = localtime() - ONE_DAY; # WRONG
+	print "Yesterday was $yesterday\n";
+
+The C<Time::Piece> module exports a new C<localtime> that returns an
+object, and C<Time::Seconds> exports the C<ONE_DAY> constant that is a
+set number of seconds. This means that it always gives the time 24
+hours ago, which is not always yesterday. This can cause problems
+around the end of daylight saving time when there's one day that is 25
+hours long.
+
+You have the same problem with C<Time::Local>, which will give the wrong
+answer for those same special cases:
 
 	# contributed by Gunnar Hjalmarsson
 	 use Time::Local;
 	 my $today = timelocal 0, 0, 12, ( localtime )[3..5];
-	 my ($d, $m, $y) = ( localtime $today-86400 )[3..5];
+	 my ($d, $m, $y) = ( localtime $today-86400 )[3..5]; # WRONG
 	 printf "Yesterday: %d-%02d-%02d\n", $y+1900, $m+1, $d;
-
-In this case, you measure the day starting at noon, and subtract 24
-hours. Even if the length of the calendar day is 23 or 25 hours,
-you'll still end up on the previous calendar day, although not at
-noon. Since you don't care about the time, the one hour difference
-doesn't matter and you end up with the previous date.
 
 =head2 Does Perl have a Year 2000 or 2038 problem? Is Perl Y2K compliant?
 
@@ -545,18 +596,18 @@ Perl itself never had a Y2K problem, although that never stopped people
 from creating Y2K problems on their own. See the documentation for
 C<localtime> for its proper use.
 
-Starting with Perl 5.11, C<localtime> and C<gmtime> can handle dates past
+Starting with Perl 5.12, C<localtime> and C<gmtime> can handle dates past
 03:14:08 January 19, 2038, when a 32-bit based time would overflow. You
 still might get a warning on a 32-bit C<perl>:
 
-	% perl5.11.2 -E 'say scalar localtime( 0x9FFF_FFFFFFFF )'
+	% perl5.12 -E 'say scalar localtime( 0x9FFF_FFFFFFFF )'
 	Integer overflow in hexadecimal number at -e line 1.
 	Wed Nov  1 19:42:39 5576711
 
 On a 64-bit C<perl>, you can get even larger dates for those really long
 running projects:
 
-	% perl5.11.2 -E 'say scalar gmtime( 0x9FFF_FFFFFFFF )'
+	% perl5.12 -E 'say scalar gmtime( 0x9FFF_FFFFFFFF )'
 	Thu Nov  2 00:42:39 5576711
 
 You're still out of luck if you need to keep track of decaying protons
