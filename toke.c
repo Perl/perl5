@@ -4328,7 +4328,7 @@ Perl_yylex(pTHX)
 		    if (PL_lex_brackets > 100)
 			Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
 		    PL_lex_brackstack[PL_lex_brackets++] =
-			(next_type >> 16) & 0xff;
+			(char) ((next_type >> 16) & 0xff);
 		}
 		if (next_type & (2<<24))
 		    PL_lex_allbrackets++;
