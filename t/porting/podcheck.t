@@ -65,13 +65,3 @@ plan (tests => scalar @files);
 
 pod_ok $_
     for @files;
-
-__DATA__
-lib/
-ext/
-pod/
-AUTHORS
-Changes
-INSTALL
-README*
-*.pod
