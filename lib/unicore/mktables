@@ -1072,6 +1072,10 @@ my $DEVELOPMENT_ONLY=<<"EOF";
 
 EOF
 
+# Enum values for to_output_map() method in the Map_Table package.
+my $EXTERNAL_MAP = 1;
+my $INTERNAL_MAP = 2;
+
 my $LAST_UNICODE_CODEPOINT_STRING = "10FFFF";
 my $LAST_UNICODE_CODEPOINT = hex $LAST_UNICODE_CODEPOINT_STRING;
 my $MAX_UNICODE_CODEPOINTS = $LAST_UNICODE_CODEPOINT + 1;
@@ -5366,7 +5370,13 @@ sub trace { return main::trace(@_); }
     main::set_access('core_access', \%core_access, 'r', 's');
 
     my %to_output_map;
-    # Boolean as to whether or not to write out this map table
+    # Enum as to whether or not to write out this map table:
+    #   $EXTERNAL_MAP   means its existence is noted in the documentation, and
+    #                   it should not be removed nor its format changed.  This
+    #                   is done for those files that have traditionally been
+    #                   output.
+    #   $INTERNAL_MAP   means Perl reserves the right to do anything it wants
+    #                   with this file
     main::set_access('to_output_map', \%to_output_map, 's');
 
 
@@ -5571,7 +5581,7 @@ sub trace { return main::trace(@_); }
         my $full_name = $self->full_name;
 
         # If table says to output, do so; if says to suppress it, do do.
-        return 1 if grep { $_ eq $full_name } @output_mapped_properties;
+        return $EXTERNAL_MAP if grep { $_ eq $full_name } @output_mapped_properties;
         return 0 if $self->status eq $SUPPRESSED;
 
         my $type = $self->property->type;
@@ -5580,10 +5590,10 @@ sub trace { return main::trace(@_); }
         return 0 if $type == $BINARY;
 
         # But do want to output string ones.
-        return 1 if $type == $STRING;
+        return $EXTERNAL_MAP if $type == $STRING;
 
-        # Otherwise is an $ENUM, don't output it
-        return 0;
+        # Otherwise is an $ENUM, do output it, for Perl's purposes
+        return $INTERNAL_MAP;
     }
 
     sub inverse_list {
@@ -5596,6 +5606,16 @@ sub trace { return main::trace(@_); }
         my $current = Range_List->new(Initialize => $self->_range_list,
                                 Owner => $self->property);
         return ~ $current;
+    }
+
+    sub header {
+        my $self = shift;
+        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+        my $return = $self->SUPER::header();
+
+        $return .= $INTERNAL_ONLY if $self->to_output_map == $INTERNAL_MAP;
+        return $return;
     }
 
     sub set_final_comment {
@@ -11713,7 +11733,7 @@ END
                             File => 'CombiningClass',
                             Directory => File::Spec->curdir(),
                             );
-    $perl_ccc->set_to_output_map(1);
+    $perl_ccc->set_to_output_map($EXTERNAL_MAP);
     $perl_ccc->add_comment(join_lines(<<END
 This mapping is for normalize.pm.  It is currently identical to the Unicode
 Canonical_Combining_Class property.
@@ -12872,6 +12892,10 @@ END
         # directory.
         my @path = $property->file_path;
         next if $path[0] ne $map_directory;
+
+        # Don't mention map tables that are for internal-use only
+        next if $property->to_output_map == $INTERNAL_MAP;
+
         shift @path;    # Remove the standard name
 
         my $file = join '/', @path; # In case is in sub directory
