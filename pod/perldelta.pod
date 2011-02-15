@@ -350,7 +350,13 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+F<porting/FindExt.t> now skips all tests on a static (-Uusedl) build
+of perl.
+
+=item *
+
+F<porting/FindExt.t> now passes on non-Win32 platforms when some
+extensions are built statically.
 
 =back
 
