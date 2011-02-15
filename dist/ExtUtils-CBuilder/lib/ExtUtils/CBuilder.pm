@@ -21,7 +21,7 @@ my $load = sub {
 {
   my @package = split /::/, __PACKAGE__;
   
-  my $os_type = os_type();
+  my $ostype = os_type();
 
   if (grep {-e File::Spec->catfile($_, @package, 'Platform', $^O) . '.pm'} @INC) {
     $load->(__PACKAGE__ . "::Platform::$^O");
