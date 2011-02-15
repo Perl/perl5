@@ -8717,7 +8717,7 @@ tryagain:
 			    RExC_end = RExC_parse + 2;
 			}
 			else {
-			    tmpbuf[0] = ender;
+			    tmpbuf[0] = (char) ender;
 			    RExC_end = RExC_parse + 1;
 			}
 
@@ -8742,7 +8742,7 @@ tryagain:
 		    /* Prime the casefolded buffer. */
 		    if (isASCII(ender)) {
 			ender = toLOWER(ender);
-			*tmpbuf = ender;
+			*tmpbuf = (U8) ender;
 			foldlen = 1;
 		    }
 		    else if (! MORE_ASCII_RESTRICTED) {
