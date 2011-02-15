@@ -4039,17 +4039,19 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	       named buffers just convert to the equivalent numbered and
 	       pretend they were called as the corresponding numbered buffer
 	       op.  */
-	    /* don't initialize these, it makes C++ unhappy */
+	    /* don't initialize these in the declaration, it makes C++
+	       unhappy */
 	    char *s;
 	    char type;
 	    re_fold_t folder;
 	    const U8 *fold_array;
-	    UV utf8_fold_flags = 0;
+	    UV utf8_fold_flags;
 
 	    PL_reg_flags |= RF_tainted;
 	    folder = foldEQ_locale;
 	    fold_array = PL_fold_locale;
 	    type = REFFL;
+	    utf8_fold_flags = 0;
 	    goto do_nref;
 
 	case NREFFA:
