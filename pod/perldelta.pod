@@ -194,7 +194,7 @@ module to the XS version.`
 
 =item *
 
-Added new function C<Unicode::UCD::num().  This function will return the
+Added new function C<Unicode::UCD::num()>.  This function will return the
 numeric value of the string passed it; C<undef> if the string in its
 entirety has no safe numeric value.
 
