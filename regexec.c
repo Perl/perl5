@@ -1427,7 +1427,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	char *e;
 	register I32 tmp = 1;	/* Scratch variable? */
 	register const bool utf8_target = PL_reg_match_utf8;
-	UV utf8_fold_flags;
+	UV utf8_fold_flags = 0;
         RXi_GET_DECL(prog,progi);
 
 	PERL_ARGS_ASSERT_FIND_BYCLASS;
@@ -4044,7 +4044,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    char type;
 	    re_fold_t folder;
 	    const U8 *fold_array;
-	    UV utf8_fold_flags;
+	    UV utf8_fold_flags = 0;
 
 	    PL_reg_flags |= RF_tainted;
 	    folder = foldEQ_locale;
