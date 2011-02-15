@@ -177,7 +177,7 @@ sub update {
 sub _iterate_commits {
   my ($self, $fcn) = @_;
   my $type = $self->opt('type');
-  say "Scanning for $type commits since " . $self->last_tag . "...";
+  say STDERR "Scanning for $type commits since " . $self->last_tag . "...";
   for my $log ( $self->find_commits($type) ) {
     redo unless $fcn->($log);
   }
