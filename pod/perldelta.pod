@@ -194,6 +194,19 @@ module to the XS version.`
 
 =item *
 
+Added new function C<Unicode::UCD::num().  This function will return the
+numeric value of the string passed it; C<undef> if the string in its
+entirety has no safe numeric value.
+
+To be safe, a string must be a single character which has a numeric
+value, or consist entirely of characters that match \d, coming from the
+same Unicode block of digits.  Thus, a mix of  Bengali and Western
+digits would be considered unsafe, as well as a mix of half- and
+full-width digits, but strings consisting entirely of Devanagari digits
+or of "Mathematical Bold" digits would would be safe.
+
+=item *
+
 XXX
 
 =back

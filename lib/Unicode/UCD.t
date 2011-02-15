@@ -17,7 +17,7 @@ use strict;
 use Unicode::UCD;
 use Test::More;
 
-BEGIN { plan tests => 258 };
+BEGIN { plan tests => 268 };
 
 use Unicode::UCD 'charinfo';
 
@@ -448,3 +448,16 @@ is($ns{"KATAKANA LETTER AINU P"}, "\x{31F7}\x{309A}");
 @ns = namedseq(42);
 is(@ns, 0);
 
+use Unicode::UCD qw(num);
+use charnames ":full";
+
+is(num("0"), 0, 'Verify num("0") == 0');
+is(num("98765"), 98765, 'Verify num("98765") == 98765');
+ok(! defined num("98765\N{FULLWIDTH DIGIT FOUR}"), 'Verify num("98765\N{FULLWIDTH DIGIT FOUR}") isnt defined');
+is(num("\N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE DIGIT ONE}"), 21, 'Verify \N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE DIGIT ONE}" == 21');
+ok(! defined num("\N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE THAM DIGIT ONE}"), 'Verify \N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE DIGIT ONE}" isnt defined');
+is(num("\N{CHAM DIGIT ZERO}\N{CHAM DIGIT THREE}"), 3, 'Verify num("\N{CHAM DIGIT ZERO}\N{CHAM DIGIT THREE}") == 3');
+ok(! defined num("\N{CHAM DIGIT ZERO}\N{JAVANESE DIGIT NINE}"), 'Verify num("\N{CHAM DIGIT ZERO}\N{JAVANESE DIGIT NINE}") isnt defined');
+is(num("\N{SUPERSCRIPT TWO}"), 2, 'Verify num("\N{SUPERSCRIPT TWO} == 2');
+is(num("\N{ETHIOPIC NUMBER TEN THOUSAND}"), 10000, 'Verify num("\N{ETHIOPIC NUMBER TEN THOUSAND}") == 10000');
+is(num("\N{NORTH INDIC FRACTION ONE HALF}"), .5, 'Verify num("\N{NORTH INDIC FRACTION ONE HALF}") == .5');

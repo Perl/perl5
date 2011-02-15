@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use charnames ();
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 use Storable qw(dclone);
 
@@ -19,7 +19,9 @@ our @EXPORT_OK = qw(charinfo
 		    general_categories bidi_types
 		    compexcl
 		    casefold casespec
-		    namedseq);
+		    namedseq
+                    num
+                );
 
 use Carp;
 
@@ -65,6 +67,9 @@ Unicode::UCD - Unicode character database
     my $namedseq = namedseq($named_sequence_name);
 
     my $unicode_version = Unicode::UCD::UnicodeVersion();
+
+    my $convert_to_numeric =
+                Unicode::UCD::num("\N{RUMI DIGIT ONE}\N{RUMI DIGIT TWO}");
 
 =head1 DESCRIPTION
 
@@ -1178,6 +1183,113 @@ sub namedseq {
     }
     return;
 }
+
+my %NUMERIC;
+
+sub _numeric {
+
+    # Unicode 6.0 instituted the rule that only digits in a consecutive
+    # block of 10 would be considered decimal digits.  Before that, the only
+    # problematic code point that I'm (khw) aware of is U+019DA, NEW TAI LUE
+    # THAM DIGIT ONE, which is an alternate form of U+019D1, NEW TAI LUE DIGIT
+    # ONE.  The code could be modified to handle that, but not bothering, as
+    # in TUS 6.0, U+19DA was changed to Nt=Di.
+    if ((pack "C*", split /\./, UnicodeVersion()) lt 6.0.0) {
+	croak __PACKAGE__, "::num requires Unicode 6.0 or greater"
+    }
+    my @temp = split /^/m, do "unicore/To/Nv.pl";
+    foreach my $line (@temp) {
+        chomp $line;
+        my @value = split /\t\t/, $line;
+        if ((my @rational = split /\//, $value[1]) == 2) {
+            $value[1] = $rational[0] / $rational[1];
+        }
+        $NUMERIC{$value[0]} = $value[1];
+    }
+    use Math::Trig;
+    my $pi = acos(-1.0);
+    $NUMERIC{"03C0"} = $pi;
+
+    # Euler's constant, not to be confused with Euler's number
+    $NUMERIC{"2107"} = 0.57721566490153286060651209008240243104215933593992;
+
+    # Euler's number
+    $NUMERIC{"212F"} = 2.7182818284590452353602874713526624977572;
+    return;
+}
+
+=pod
+
+=head2 num
+
+C<num> returns the numeric value of the input Unicode string; or C<undef> if it
+doesn't think the entire string has a completely valid, safe numeric value.
+
+If the string is just one character in length, the Unicode numeric value
+is returned if it has one, or C<undef> otherwise.  Note that this need
+not be a whole number.  C<num("\N{TIBETAN DIGIT HALF ZERO}")>, for
+example returns -0.5.  A few characters to which Unicode doesn't officially
+assign a numeric value are considered numeric by C<num>.
+These are:
+
+ EULER CONSTANT             0.5772...  (this is NOT Euler's number)
+ SCRIPT SMALL E             2.71828... (this IS Euler's number)
+ GREEK SMALL LETTER PI      3.14159...
+
+If the string is more than one character, C<undef> is returned unless
+all its characters are decimal digits (that is they would match C<\d+>),
+from the same script.  For example if you have an ASCII '0' and a Bengali
+'3', mixed together, they aren't considered a valid number, and C<undef>
+is returned.  A further restriction is that the digits all have to be of
+the same form.  A half-width digit mixed with a full-width one will
+return C<undef>.  The Arabic script has two sets of digits;  C<num> will
+return C<undef> unless all the digits in the string come from the same
+set.
+
+C<num> errs on the side of safety, and there may be valid strings of
+decimal digits that it doesn't recognize.  Note that Unicode defines
+a number of "digit" characters that aren't "decimal digit" characters.
+"Decimal digits" have the property that they have a positional value, that is
+there is a units position, a 10's position, a 100's, etc, AND they are
+arranged in Unicode in blocks of 10 contiguous code points.  The Chinese
+digits, for example, are not in such a contiguous block, and so Unicode
+doesn't view them as decimal digits, but merely digits, and so C<\d> will not
+match them.  A single-character string containing one of these digits will
+have its decimal value returned by C<num>, but any longer string containing
+only these digits will return C<undef>.
+
+Strings of sub- and superscripts are not recognized as numbers.  You can
+use either of the compatibility decompositions in Unicode::Normalize to
+change these into digits, and then call C<num> on the result.
+
+=cut
+
+# To handle sub, superscripts, this could if called in list context,
+# consider those, and return the <decomposition> type in the second
+# array element.
+
+sub num {
+    my $string = $_[0];
+
+    _numeric unless %NUMERIC;
+
+    my $length = length($string);
+    return $NUMERIC{sprintf("%04X", ord($string))} if $length == 1;
+    return if $string =~ /\D/;
+    my $first_ord = ord(substr($string, 0, 1));
+    my $value = $NUMERIC{sprintf("%04X", $first_ord)};
+    my $zero_ord = $first_ord - $value;
+
+    for my $i (1 .. $length -1) {
+        my $ord = ord(substr($string, $i, 1));
+        my $digit = $ord - $zero_ord;
+        return unless $digit >= 0 && $digit <= 9;
+        $value = $value * 10 + $digit;
+    }
+    return $value;
+}
+
+
 
 =head2 Unicode::UCD::UnicodeVersion
 
