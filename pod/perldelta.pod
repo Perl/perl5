@@ -192,6 +192,10 @@ prerequisites and version constraints as defined in the L<CPAN::Meta::Spec>.
 
 =item *
 
+C<B> has been upgraded from version 1.27 to 1.28.
+
+=item *
+
 C<Carp> has been upgraded from version 1.19 to 1.20.
 
 [perl #82854] It now avoids using regular expressions that cause perl to
@@ -450,6 +454,11 @@ different than the locale's.
 This new error is triggered if a destructor called on an object in a
 typeglob that is being freed creates a new typeglob entry containing an
 object with a destructor that creates a new entry containing an object....
+
+=item refcnt: fd %d%s
+
+This new error only occurs if a internal consistency check fails when a
+pipe is about to be closed.
 
 =back
 
