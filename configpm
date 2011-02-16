@@ -168,9 +168,14 @@ sub _V {
 
 ENDOFBEG
 
-my $myver = sprintf "%vd", $^V;
+my $export_funcs = <<'EOT';
+my %Export_Cache = (myconfig => 1,
+		    config_sh => 1, config_vars => 1, config_re => 1);
+EOT
 
-$config_txt .= sprintf <<'ENDOFBEG', ($myver) x 3;
+my %export_ok = eval $export_funcs or die;
+
+$config_txt .= sprintf << 'EOT', $export_funcs;
 # This file was created by configpm when Perl was built. Any changes
 # made to this file will be lost the next time perl is built.
 
@@ -182,22 +187,24 @@ package Config;
 use strict;
 # use warnings; Pulls in Carp
 # use vars pulls in Carp
-@Config::EXPORT = qw(%%Config);
-@Config::EXPORT_OK = qw(myconfig config_sh config_vars config_re);
-
-# Need to stub all the functions to make code such as print Config::config_sh
-# keep working
-
-sub myconfig;
-sub config_sh;
-sub config_vars;
-sub config_re;
 
 # Skip @Config::EXPORT because it only contains %%Config, which we special
 # case below as it's not a function. @Config::EXPORT won't change in the
 # lifetime of Perl 5.
-my %%Export_Cache = map {($_ => 1)} @Config::EXPORT_OK;
+%s
+@Config::EXPORT = qw(%%Config);
+@Config::EXPORT_OK = keys %%Export_Cache;
 
+# Need to stub all the functions to make code such as print Config::config_sh
+# keep working
+
+EOT
+
+$config_txt .= "sub $_;\n" foreach sort keys %export_ok;
+
+my $myver = sprintf "%vd", $^V;
+
+$config_txt .= sprintf <<'ENDOFBEG', ($myver) x 3;
 our %%Config;
 
 # Define our own import method to avoid pulling in the full Exporter:
