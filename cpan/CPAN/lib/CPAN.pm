@@ -2,7 +2,7 @@
 # vim: ts=4 sts=4 sw=4:
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.94_64';
+$CPAN::VERSION = '1.94_65';
 $CPAN::VERSION =~ s/_//;
 
 # we need to run chdir all over and we would get at wrong libraries
@@ -547,7 +547,7 @@ sub _yaml_loadfile {
     return +[] unless -s $local_file;
     my $yaml_module = _yaml_module;
     if ($CPAN::META->has_inst($yaml_module)) {
-        # temporarly enable yaml code deserialisation
+        # temporarily enable yaml code deserialisation
         no strict 'refs';
         # 5.6.2 could not do the local() with the reference
         # so we do it manually instead
@@ -1007,6 +1007,17 @@ sub has_usable {
                #
                # these subroutines die if they believe the installed version is unusable;
                #
+               'CPAN::Meta' => [
+                            sub {
+                                require CPAN::Meta;
+                                unless (CPAN::Version->vge(CPAN::Meta->VERSION, 2.110350)) {
+                                    for ("Will not use CPAN::Meta, need version 2.110350\n") {
+                                        $CPAN::Frontend->mywarn($_);
+                                        die $_;
+                                    }
+                                }
+                            },
+                           ],
 
                LWP => [ # we frequently had "Can't locate object
                         # method "new" via package "LWP::UserAgent" at
@@ -1173,7 +1184,7 @@ sub has_inst {
   CPAN: Module::Signature security checks disabled because Module::Signature
   not installed.  Please consider installing the Module::Signature module.
   You may also need to be able to connect over the Internet to the public
-  keyservers like pool.sks-keyservers.net or pgp.mit.edu.
+  key servers like pool.sks-keyservers.net or pgp.mit.edu.
 
 });
                 $CPAN::Frontend->mysleep(2);
@@ -1725,7 +1736,7 @@ B<Note>: See also L<smoke>
 
 recompile() is a special command that takes no argument and
 runs the make/test/install cycle with brute force over all installed
-dynamically loadable extensions (aka XS modules) with 'force' in
+dynamically loadable extensions (a.k.a. XS modules) with 'force' in
 effect. The primary purpose of this command is to finish a network
 installation. Imagine you have a common source tree for two different
 architectures. You decide to do a completely independent fresh
@@ -1971,7 +1982,8 @@ currently defined:
   dontload_list      arrayref: modules in the list will not be
                      loaded by the CPAN::has_inst() routine
   ftp                path to external prg
-  ftp_passive        if set, the envariable FTP_PASSIVE is set for downloads
+  ftp_passive        if set, the environment variable FTP_PASSIVE is set
+                     for downloads
   ftp_proxy          proxy host for ftp requests
   ftpstats_period    max number of days to keep download statistics
   ftpstats_size      max number of items to keep in the download statistics
@@ -2460,7 +2472,7 @@ parameter is C<0> or C<1> is determined by reading the patch
 beforehand. The path to each patch is either an absolute path on the
 local filesystem or relative to a patch directory specified in the
 C<patches_dir> configuration variable or in the format of a canonical
-distroname. For examples please consult the distroprefs/ directory in
+distro name. For examples please consult the distroprefs/ directory in
 the CPAN.pm distribution (these examples are not installed by
 default).
 
@@ -2734,7 +2746,7 @@ Like CPAN::Bundle::inst_file, but returns the $VERSION
 
 =item CPAN::Bundle::uptodate()
 
-Returns 1 if the bundle itself and all its members are uptodate.
+Returns 1 if the bundle itself and all its members are up-to-date.
 
 =item CPAN::Bundle::install()
 
@@ -2832,7 +2844,7 @@ Note that install() gives no meaningful return value. See uptodate().
 
 =item CPAN::Distribution::install_tested()
 
-Install all distributions that have tested sucessfully but
+Install all distributions that have tested successfully but
 not yet installed. See also C<is_tested>.
 
 =item CPAN::Distribution::isa_perl()
@@ -2868,7 +2880,7 @@ in C<< $CPAN::Config->{pager} >>.
 Returns the hash reference from the first matching YAML file that the
 user has deposited in the C<prefs_dir/> directory. The first
 succeeding match wins. The files in the C<prefs_dir/> are processed
-alphabetically, and the canonical distroname (e.g.
+alphabetically, and the canonical distro name (e.g.
 AUTHOR/Foo-Bar-3.14.tar.gz) is matched against the regular expressions
 stored in the $root->{match}{distribution} attribute value.
 Additionally all module names contained in a distribution are matched
@@ -2913,7 +2925,7 @@ runs C<make test> there.
 =item CPAN::Distribution::uptodate()
 
 Returns 1 if all the modules contained in the distribution are
-uptodate. Relies on containsmods.
+up-to-date. Relies on containsmods.
 
 =item CPAN::Index::force_reload()
 
@@ -2936,7 +2948,7 @@ internal and thus subject to change without notice.
 Returns a one-line description of the module in four columns: The
 first column contains the word C<Module>, the second column consists
 of one character: an equals sign if this module is already installed
-and uptodate, a less-than sign if this module is installed but can be
+and up-to-date, a less-than sign if this module is installed but can be
 upgraded, and a space if the module is not installed. The third column
 is the name of the module and the fourth column gives maintainer or
 distribution information.
@@ -2998,7 +3010,7 @@ Where the 'DSLIP' characters have the following meanings:
     d   - Developer
     u   - Usenet newsgroup comp.lang.perl.modules
     n   - None known, try comp.lang.perl.modules
-    a   - abandoned; volunteers welcome to take over maintainance
+    a   - abandoned; volunteers welcome to take over maintenance
 
   L - Language Used:
     p   - Perl-only, no compiler needed, should be platform independent
@@ -3022,9 +3034,9 @@ Where the 'DSLIP' characters have the following meanings:
     b   - BSD: The BSD License
     a   - Artistic license alone
     2   - Artistic license 2.0 or later
-    o   - open source: appoved by www.opensource.org
+    o   - open source: approved by www.opensource.org
     d   - allows distribution without restrictions
-    r   - restricted distribtion
+    r   - restricted distribution
     n   - no license at all
 
 =item CPAN::Module::force($method,@args)
@@ -3143,7 +3155,7 @@ In this pod section each line obeys the format
         Module_Name [Version_String] [- optional text]
 
 The only required part is the first field, the name of a module
-(e.g. Foo::Bar, ie. I<not> the name of the distribution file). The rest
+(e.g. Foo::Bar, i.e. I<not> the name of the distribution file). The rest
 of the line is optional. The comment part is delimited by a dash just
 as in the man page header.
 
@@ -3161,7 +3173,7 @@ modules in a snapshot bundle file.
 =head1 PREREQUISITES
 
 The CPAN program is trying to depend on as little as possible so the
-user can use it in hostile enviroment. It works better the more goodies
+user can use it in hostile environment. It works better the more goodies
 the environment provides. For example if you try in the CPAN shell
 
   install Bundle::CPAN
@@ -3321,7 +3333,7 @@ requires that you have at least one of Crypt::OpenPGP module or the
 command-line F<gpg> tool installed.
 
 You will also need to be able to connect over the Internet to the public
-keyservers, like pgp.mit.edu, and their port 11731 (the HKP protocol).
+key servers, like pgp.mit.edu, and their port 11731 (the HKP protocol).
 
 The configuration parameter check_sigs is there to turn signature
 checking on or off.
@@ -3379,7 +3391,7 @@ prerequisites as early as possible. On the other hand, it's
 annoying that so many distributions need some interactive configuring. So
 what you can try to accomplish in your private bundle file is to have the
 packages that need to be configured early in the file and the gentle
-ones later, so you can go out for cofeee after a few minutes and leave CPAN.pm
+ones later, so you can go out for coffee after a few minutes and leave CPAN.pm
 to churn away untended.
 
 =head1 WORKING WITH CPAN.pm BEHIND FIREWALLS
@@ -3598,7 +3610,7 @@ would be
 
     cpan> o conf term_is_latin 1
 
-If other charset support is needed, please file a bugreport against
+If other charset support is needed, please file a bug report against
 CPAN.pm at rt.cpan.org and describe your needs. Maybe we can extend
 the support or maybe UTF-8 terminals become widely available.
 
@@ -3665,9 +3677,9 @@ lowest 'ping' round-trip times.  From the shell, use the command 'o conf init
 urllist' and allow CPAN to automatically select mirrors for you.
 
 Beyond that help, the urllist config parameter is yours. You can add and remove
-sites at will. You should find out which sites have the best uptodateness,
+sites at will. You should find out which sites have the best up-to-dateness,
 bandwidth, reliability, etc. and are topologically close to you. Some people
-prefer fast downloads, others uptodateness, others reliability.  You decide
+prefer fast downloads, others up-to-dateness, others reliability.  You decide
 which to try in which order.
 
 Henk P. Penning maintains a site that collects data about CPAN sites:

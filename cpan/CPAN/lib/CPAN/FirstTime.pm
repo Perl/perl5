@@ -10,7 +10,7 @@ use File::Path ();
 use File::Spec ();
 use CPAN::Mirrors ();
 use vars qw($VERSION $auto_config);
-$VERSION = "5.5302";
+$VERSION = "5.5303";
 
 =head1 NAME
 
@@ -64,7 +64,7 @@ directory between sessions. Since 1.88_58 CPAN.pm has a YAML-based
 mechanism that makes it possible to share the contents of the
 build_dir/ directory between different sessions with the same version
 of perl. People who prefer to test things several days before
-installing will like this feature because it safes a lot of time.
+installing will like this feature because it saves a lot of time.
 
 If you say yes to the following question, CPAN will try to store
 enough information about the build process so that it can pick up in
@@ -201,7 +201,7 @@ Preferred method for determining the current working directory?
 
 =item halt_on_failure
 
-Normaly, CPAN.pm continues processing the full list of targets and
+Normally, CPAN.pm continues processing the full list of targets and
 dependencies, even if one of them fails.  However, you can specify 
 that CPAN should halt after the first failure. 
 
@@ -389,7 +389,7 @@ default options for CPAN.pm and the environment can be overridden and
 dialog sequences can be stored that can later be executed by an
 Expect.pm object. The CPAN.pm distribution comes with some prefab YAML
 files that cover sample distributions that can be used as blueprints
-to store one own prefs. Please check out the distroprefs/ directory of
+to store your own prefs. Please check out the distroprefs/ directory of
 the CPAN.pm distribution to get a quick start into the prefs system.
 
 Directory where to store default options/environment/dialogs for
@@ -472,7 +472,7 @@ Tar command verbosity level (none or v or vv)?
 
 =item term_is_latin
 
-The next option deals with the charset (aka character set) your
+The next option deals with the charset (a.k.a. character set) your
 terminal supports. In general, CPAN is English speaking territory, so
 the charset does not matter much but some CPAN have names that are
 outside the ASCII range. If your terminal supports UTF-8, you should

@@ -2,10 +2,11 @@ package CPAN::HandleConfig;
 use strict;
 use vars qw(%can %keys $loading $VERSION);
 use File::Path ();
+use File::Spec ();
 use File::Basename ();
 use Carp ();
 
-$VERSION = "5.5002"; # see also CPAN::Config::VERSION at end of file
+$VERSION = "5.5003"; # see also CPAN::Config::VERSION at end of file
 
 %can = (
         commit   => "Commit changes to disk",
@@ -518,9 +519,15 @@ sub cpan_home_dir_candidates {
         }
         push @dirs, File::HomeDir->my_home;
     }
-    push @dirs, $ENV{HOME};
+    # Windows might not have HOME, so check it first
+    push @dirs, $ENV{HOME} if $ENV{HOME};
+    # Windows might have these instead
+    push( @dirs, File::Spec->catpath($ENV{HOMEDRIVE}, $ENV{HOMEPATH}, '') )
+      if $ENV{HOMEDRIVE} && $ENV{HOMEPATH};
+    push @dirs, $ENV{USERPROFILE} if $ENV{USERPROFILE};
+
     $CPAN::Config->{load_module_verbosity} = $old_v;
-    @dirs = map { "$_/.cpan" } @dirs;
+    @dirs = map { "$_/.cpan" } grep { defined } @dirs;
     return wantarray ? @dirs : $dirs[0];
 }
 

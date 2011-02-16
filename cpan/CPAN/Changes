@@ -1,3 +1,19 @@
+2011-02-14  David Golden <dagolden@cpan.org>
+
+	* release 1.94_65
+
+	* Adds support for META/MYMETA.json files if CPAN::Meta is
+        installed
+
+	* Adds HOMEDRIVE/HOMEPATH or USERPROFILE as home directory
+        options on Windows
+
+	* fixes a minor test bug related to Makefile timeskews
+
+	* fixes a minor test bug related to Makefile timeskews
+
+	* various documentation typo fixes
+
 2011-01-20  David Golden <dagolden@cpan.org>
 
 	* release 1.94_64
