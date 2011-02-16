@@ -25,7 +25,9 @@
 #define PERL_IN_UTIL_C
 #include "perl.h"
 
+#ifdef USE_PERLIO
 #include "perliol.h" /* For PerlIOUnix_refcnt */
+#endif
 
 #ifndef PERL_MICRO
 #include <signal.h>
