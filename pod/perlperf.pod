@@ -567,7 +567,7 @@ to execute, C<if ( $debug ) { > and C<my $message = shift;>, for example.  The
 differences in the actual times recorded might be in the algorithm used
 internally, or it could be due to system resource limitations or contention.
 
-See also the L<DBIx::Profiler> which will profile database queries running
+See also the L<DBIx::Profile> which will profile database queries running
 under the C<DBIx::*> namespace.
 
 =head2 Devel::NYTProf
@@ -1137,7 +1137,7 @@ deserve further attention.
     Apache::DProf
     Apache::SmallProf
     Benchmark
-    DBIx::Profiler
+    DBIx::Profile
     Devel::AutoProfiler
     Devel::DProf
     Devel::DProfLB

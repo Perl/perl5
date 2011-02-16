@@ -66,7 +66,7 @@ main, but we decided it was more useful for package writers to be able
 to use leading underscore to indicate private variables and method names.
 However, variables and functions named with a single C<_>, such as
 $_ and C<sub _>, are still forced into the package C<main>.  See also
-L<perlvar/"Technical Note on the Syntax of Variable Names">.
+L<perlvar/"The Syntax of Variable Names">.
 
 C<eval>ed strings are compiled in the package in which the eval() was
 compiled.  (Assignments to C<$SIG{}>, however, assume the signal

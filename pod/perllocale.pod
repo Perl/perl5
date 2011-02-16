@@ -866,7 +866,7 @@ using GNU libc and you can ignore C<LANGUAGE>.
 However, in the case you are using C<LANGUAGE>: it affects the
 language of informational, warning, and error messages output by
 commands (in other words, it's like C<LC_MESSAGES>) but it has higher
-priority than L<LC_ALL>.  Moreover, it's not a single value but
+priority than C<LC_ALL>.  Moreover, it's not a single value but
 instead a "path" (":"-separated list) of I<languages> (not locales).
 See the GNU C<gettext> library documentation for more information.
 

@@ -1145,7 +1145,7 @@ Also see:
 
 =item *
 
-F<README.vms> (installed as L<README_vms>), L<perlvms>
+F<README.vms> (installed as F<README_vms>), L<perlvms>
 
 =item *
 

@@ -927,7 +927,7 @@ will treat the #! line as the first line.
 Thus a warning on the 2nd line of the program (which is on the 100th
 line in the file) will be reported as line 2, and not as line 100.
 This can be overridden by using the #line directive.
-(See L<perlsyn/"Plain-Old-Comments-(Not!)">)
+(See L<perlsyn/"Plain Old Comments (Not!)">)
 
 If a directory name is specified, Perl will switch to that directory
 before running the program.  The B<-x> switch controls only the
@@ -1211,7 +1211,7 @@ X<PERL_DESTRUCT_LEVEL>
 
 Relevant only if your perl executable was built with B<-DDEBUGGING>,
 this controls the behavior of global destruction of objects and other
-references.  See L<perlhack/PERL_DESTRUCT_LEVEL> for more information.
+references.  See L<perlhacktips/PERL_DESTRUCT_LEVEL> for more information.
 
 =item PERL_DL_NONLAZY
 X<PERL_DL_NONLAZY>

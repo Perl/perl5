@@ -933,7 +933,7 @@ approach will suffice:
 
 =head2 How can I write expect in Perl?
 
-Once upon a time, there was a library called L<chat2.pl> (part of the
+Once upon a time, there was a library called F<chat2.pl> (part of the
 standard perl distribution), which never really got finished.  If you
 find it somewhere, I<don't use it>.  These days, your best bet is to
 look at the Expect module available from CPAN, which also requires two

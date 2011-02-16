@@ -151,7 +151,7 @@ after the debugger completes its own initialization.)
 After the rc file is read, the debugger reads the PERLDB_OPTS
 environment variable and uses it to set debugger options. The
 contents of this variable are treated as if they were the argument
-of an C<o ...> debugger command (q.v. in L<perldebug/Options>).
+of an C<o ...> debugger command (q.v. in L<perldebug/"Configurable Options">).
 
 =head3 Debugger Internal Variables
 

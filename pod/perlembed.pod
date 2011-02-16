@@ -1109,8 +1109,8 @@ you will have to write the explicit full form
 
     Perl_warn(aTHX_ "%d bottles of beer on the wall", bottlecount);
 
-(See L<perlguts/Background and PERL_IMPLICIT_CONTEXT for the explanation
-of the C<aTHX_>.> )  Hiding the short forms is very useful for avoiding
+(See L<perlguts/"Background and PERL_IMPLICIT_CONTEXT"> for the explanation
+of the C<aTHX_>. )  Hiding the short forms is very useful for avoiding
 all sorts of nasty (C preprocessor or otherwise) conflicts with other
 software packages (Perl defines about 2400 APIs with these short names,
 take or leave few hundred, so there certainly is room for conflict.)

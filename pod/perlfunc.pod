@@ -1271,7 +1271,7 @@ C<die> raises an exception. Inside an C<eval> the error message is stuffed
 into C<$@> and the C<eval> is terminated with the undefined value.
 If the exception is outside of all enclosing C<eval>s, then the uncaught
 exception prints LIST to C<STDERR> and exits with a non-zero value. If you
-need to exit the process with a specific exit code, see L<exit>.
+need to exit the process with a specific exit code, see L</exit>.
 
 Equivalent examples:
 
@@ -1355,7 +1355,7 @@ You can arrange for a callback to be run just before the C<die>
 does its deed, by setting the C<$SIG{__DIE__}> hook.  The associated
 handler is called with the error text and can change the error
 message, if it sees fit, by calling C<die> again.  See
-L<perlvar/$SIG{expr}> for details on setting C<%SIG> entries, and
+L<perlvar/%SIG> for details on setting C<%SIG> entries, and
 L<"eval BLOCK"> for some examples.  Although this feature was 
 to be run only right before your program was to exit, this is not
 currently so: the C<$SIG{__DIE__}> hook is currently called
@@ -1401,9 +1401,9 @@ is just like
     eval `cat stat.pl`;
 
 except that it's more efficient and concise, keeps track of the current
-filename for error messages, searches the @INC directories, and updates
-C<%INC> if the file is found.  See L<perlvar/Predefined Names> for these
-variables.  It also differs in that code evaluated with C<do FILENAME>
+filename for error messages, searches the C<@INC> directories, and updates
+C<%INC> if the file is found.  See L<perlvar/@INC> and L<perlvar/%INC> for
+these variables.  It also differs in that code evaluated with C<do FILENAME>
 cannot see lexicals in the enclosing scope; C<eval STRING> does.  It's the
 same, however, in that it does reparse the file every time you call it,
 so you probably don't want to do this inside a loop.
@@ -2775,7 +2775,8 @@ respectively.
 =item Otherwise, If EXPR has the UTF8 flag set
 
 If the current package has a subroutine named C<ToLower>, it will be used to
-change the case (See L<perlunicode/User-Defined Case Mappings>.)
+change the case
+(See L<perlunicode/"User-Defined Case Mappings (for serious hackers only)">.)
 Otherwise Unicode semantics are used for the case change.
 
 =item Otherwise, if C<use locale> is in effect
@@ -3302,7 +3303,8 @@ replace dash (C<'-'>) with the command.
 See L<perlipc/"Using open() for IPC"> for more examples of this.
 (You are not allowed to C<open> to a command that pipes both in I<and>
 out, but see L<IPC::Open2>, L<IPC::Open3>, and
-L<perlipc/"Bidirectional Communication"> for alternatives.)
+L<perlipc/"Bidirectional Communication with Another Process"> for
+alternatives.)
 
 In the form of pipe opens taking three or more arguments, if LIST is specified
 (extra arguments after the command name) then LIST becomes arguments
@@ -4342,7 +4344,8 @@ unless you are very careful.  In addition, note that Perl's pipes use
 IO buffering, so you may need to set C<$|> to flush your WRITEHANDLE
 after each command, depending on the application.
 
-See L<IPC::Open2>, L<IPC::Open3>, and L<perlipc/"Bidirectional Communication">
+See L<IPC::Open2>, L<IPC::Open3>, and
+L<perlipc/"Bidirectional Communication with Another Process">
 for examples of such things.
 
 On systems that support a close-on-exec flag on files, that flag is set
@@ -7030,7 +7033,7 @@ The behavior is undefined if LENGTH is greater than the length of the
 file.
 
 The position in the file of FILEHANDLE is left unchanged.  You may want to
-call L<seek> before writing to the file.
+call L<seek|/"seek FILEHANDLE,POSITION,WHENCE"> before writing to the file.
 
 =item uc EXPR
 X<uc> X<uppercase> X<toupper>

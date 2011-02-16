@@ -848,10 +848,10 @@ Therefore, the "system time" elements will always be 0, since
 there is no difference between "user time" and "system" time 
 under VMS, and the time accumulated by a subprocess may or may 
 not appear separately in the "child time" field, depending on 
-whether L<times> keeps track of subprocesses separately.  Note
+whether C<times()> keeps track of subprocesses separately.  Note
 especially that the VAXCRTL (at least) keeps track only of
-subprocesses spawned using L<fork> and L<exec>; it will not
-accumulate the times of subprocesses spawned via pipes, L<system>,
+subprocesses spawned using C<fork()> and C<exec()>; it will not
+accumulate the times of subprocesses spawned via pipes, C<system()>,
 or backticks.
 
 =item unlink LIST

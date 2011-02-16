@@ -131,7 +131,7 @@ Additional flags:
 Set if C<use locale> is in effect. If present in C<< rx->extflags >>
 C<split> will use the locale dependent definition of whitespace under
 when RXf_SKIPWHITE or RXf_WHITE are in effect. Under ASCII whitespace
-is defined as per L<isSPACE|perlapi/ISSPACE>, and by the internal
+is defined as per L<isSPACE|perlapi/isSPACE>, and by the internal
 macros C<is_utf8_space> under UTF-8 and C<isSPACE_LC> under C<use
 locale>.
 

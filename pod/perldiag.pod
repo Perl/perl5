@@ -2413,7 +2413,7 @@ an undefined value for the length. See L<perlfunc/pack>.
 =item Lexing code attempted to stuff non-Latin-1 character into Latin-1 input
 
 (F) An extension is attempting to insert text into the current parse
-(using L<lex_stuff_pvn_flags|perlapi/lex_stuff_pvn_flags> or similar), but tried to insert a character
+(using L<lex_stuff_pvn|perlapi/lex_stuff_pvn> or similar), but tried to insert a character
 that couldn't be part of the current input. This is an inherent pitfall
 of the stuffing mechanism, and one of the reasons to avoid it.  Where it
 is necessary to stuff, stuffing only plain ASCII is recommended.

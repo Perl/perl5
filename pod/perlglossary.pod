@@ -241,7 +241,7 @@ the numbered variables (C<$1>, C<$2>, etc.) continue to refer to these
 same values, as long as the pattern was the last successful match of
 the current dynamic scope.  C<\g{-1}> can be used to refer to a group by
 relative rather than absolute position; and groups can be also be named, and
-referred to later by name rather than number.  See L<perlre/Capture Buffers>.
+referred to later by name rather than number.  See L<perlre/"Capture groups">.
 
 =item backtracking
 
@@ -894,7 +894,7 @@ will be called a "binary-only" distribution.
 
 =item (to be) dropped modules
 
-When Perl 5 was first released (see L<perlhistory>), several modules were
+When Perl 5 was first released (see L<perlhist>), several modules were
 included, which have now fallen out of common use.  It has been suggested
 that these modules should be removed, since the distribution became rather
 large, and the common criterion for new module additions is now limited to
@@ -2985,9 +2985,8 @@ L</argument> must be the last switch in a cluster.
 A program technique that lets you evaluate an L</expression> and then,
 based on the value of the expression, do a multiway branch to the
 appropriate piece of code for that value.  Also called a "case
-structure", named after the similar Pascal construct.  Most switch
-statements in Perl are spelled C<for>.  See L<perlsyn/Basic BLOCKs and
-Switch Statements>.
+structure", named after the similar Pascal construct.  See
+L<perlsyn/"Switch statements">.
 
 =item symbol
 
@@ -3155,7 +3154,7 @@ to build special tools.  Perl is sort of a machine shop.
 To turn one string representation into another by mapping each
 character of the source string to its corresponding character in the
 result string.  See
-L<perlop/trE<sol>SEARCHLISTE<sol>REPLACEMENTLISTE<sol>cds>.
+L<perlop/trE<sol>SEARCHLISTE<sol>REPLACEMENTLISTE<sol>cdsr>.
 
 =item trigger
 

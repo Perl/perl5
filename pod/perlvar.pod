@@ -1691,7 +1691,7 @@ A format contains C<formline()> calls that put their result into
 C<$^A>. After calling its format, C<write()> prints out the contents
 of C<$^A> and empties. So you never really see the contents of C<$^A>
 unless you call C<formline()> yourself and then look at it. See
-L<perlform> and L<perlfunc/formline()>.
+L<perlform> and L<perlfunc/"formline PICTURE,LIST">.
 
 =item HANDLE->format_formfeed(EXPR)
 
