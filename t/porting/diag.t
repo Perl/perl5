@@ -459,11 +459,6 @@ Perls since %s too modern--this is %s, stopped
 ptr wrong %p != %p fl=%x nl=%p e=%p for %d
 Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)
 Recursive call to Perl_load_module in PerlIO_find_layer
-refcnt_dec: fd %d < 0
-refcnt_dec: fd %d: %d <= 0
-refcnt_dec: fd %d >= refcnt_size %d
-refcnt_inc: fd %d < 0
-refcnt_inc: fd %d: %d <= 0
 Reversed %c= operator
 Runaway prototype
 %s(%.0

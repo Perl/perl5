@@ -3906,7 +3906,11 @@ which is why it's currently left out of your copy.
 believes it found an infinite loop in the C<@ISA> hierarchy.  This is a
 crude check that bails out after 100 levels of C<@ISA> depth.
 
+=item refcnt_dec: fd %d%s
+
 =item refcnt: fd %d%s
+
+=item refcnt_inc: fd %d%s
 
 (P) Perl's I/O implementation failed an internal consistency check. If
 you see this message, something is very wrong.
