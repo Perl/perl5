@@ -317,8 +317,7 @@ EOF
                 next;
             }
 
-            my $relative_mapped_file = $mapped_file;
-            $relative_mapped_file =~ s/^(cpan|dist|ext)\/.*?\///;
+            my $relative_mapped_file = relatively_mapped($mapped_file);
 
             my $different =
               file_diff( $outfh, $abs_cpan_file, $mapped_file, $reverse,
@@ -364,9 +363,21 @@ EOF
             }
         }
         for ( sort keys %perl_unseen ) {
-            print $outfh "  Perl only: $_\n" unless $use_diff;
+            my $relative_mapped_file = relatively_mapped($_);
+            if ( customized( $m, $relative_mapped_file ) ) {
+                print $outfh "  Customized: $_\n";
+            }
+            else {
+                print $outfh "  Perl only: $_\n" unless $use_diff;
+            }
         }
     }
+}
+
+sub relatively_mapped {
+    my $relative = shift;
+    $relative =~ s/^(cpan|dist|ext)\/.*?\///;
+    return $relative;
 }
 
 # given FooBar-1.23_45.tar.gz, return FooBar
