@@ -39,6 +39,8 @@
 /CPAN/Kwalify/distroprefs.yml
 /CPAN/LWP
 /CPAN/LWP/UserAgent.pm
+/CPAN/Meta
+/CPAN/Meta.pm
 /CPAN/Module.pm
 /CPAN/Nox.pm
 /CPAN/PAUSE2003.pub

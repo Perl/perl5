@@ -440,6 +440,18 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
+    'CPAN::Meta' =>
+	{
+	'MAINTAINER'	=> 'dagolden',
+	'DISTRIBUTION'	=> 'DAGOLDEN/CPAN-Meta-2.110440.tar.gz',
+	'FILES'		=> q[cpan/CPAN-Meta],
+	'EXCLUDED'	=> [
+				qr/^xt/,
+				qr/^history/,
+			   ],
+	'UPSTREAM'	=> 'cpan',
+	},
+
     'CPAN::Meta::YAML' =>
 	{
 	'MAINTAINER'	=> 'dagolden',

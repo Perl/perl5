@@ -308,6 +308,61 @@ cpan/CPAN/lib/CPAN/Shell.pm
 cpan/CPAN/lib/CPAN/Tarzip.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/URL.pm
 cpan/CPAN/lib/CPAN/Version.pm		Simple math with different flavors of version strings
+cpan/CPAN-Meta/Changes
+cpan/CPAN-Meta/lib/CPAN/Meta/Converter.pm
+cpan/CPAN-Meta/lib/CPAN/Meta/Feature.pm
+cpan/CPAN-Meta/lib/CPAN/Meta/History.pm
+cpan/CPAN-Meta/lib/CPAN/Meta.pm
+cpan/CPAN-Meta/lib/CPAN/Meta/Prereqs.pm
+cpan/CPAN-Meta/lib/CPAN/Meta/Spec.pm
+cpan/CPAN-Meta/lib/CPAN/Meta/Validator.pm
+cpan/CPAN-Meta/t/converter-bad.t
+cpan/CPAN-Meta/t/converter-fail.t
+cpan/CPAN-Meta/t/converter.t
+cpan/CPAN-Meta/t/data-bad/107650337-META.yml
+cpan/CPAN-Meta/t/data-bad/1122575719-META.yml
+cpan/CPAN-Meta/t/data-bad/1206545041-META.yml
+cpan/CPAN-Meta/t/data-bad/1598804075-META.yml
+cpan/CPAN-Meta/t/data-bad/1927486199-META.yml
+cpan/CPAN-Meta/t/data-bad/1985684504-META.yml
+cpan/CPAN-Meta/t/data-bad/1985980974-META.yml
+cpan/CPAN-Meta/t/data-bad/2031017050-META.yml
+cpan/CPAN-Meta/t/data-bad/284247103-META.yml
+cpan/CPAN-Meta/t/data-bad/344981821-META.yml
+cpan/CPAN-Meta/t/data-bad/35478989-META.yml
+cpan/CPAN-Meta/t/data-bad/476602558-META.yml
+cpan/CPAN-Meta/t/data-bad/98042513-META.yml
+cpan/CPAN-Meta/t/data-bad/META-1_0.yml
+cpan/CPAN-Meta/t/data-bad/META-1_1.yml
+cpan/CPAN-Meta/t/data-bad/META-1_2.yml
+cpan/CPAN-Meta/t/data-bad/META-1_3.yml
+cpan/CPAN-Meta/t/data-bad/META-1_4.yml
+cpan/CPAN-Meta/t/data-bad/META-2.json
+cpan/CPAN-Meta/t/data-bad/restrictive-2.json
+cpan/CPAN-Meta/t/data-fail/META-1_0.yml
+cpan/CPAN-Meta/t/data-fail/META-1_1.yml
+cpan/CPAN-Meta/t/data-fail/META-1_2.yml
+cpan/CPAN-Meta/t/data-fail/META-1_3.yml
+cpan/CPAN-Meta/t/data-fail/META-1_4.yml
+cpan/CPAN-Meta/t/data-fail/META-2.json
+cpan/CPAN-Meta/t/data/META-1_0.yml
+cpan/CPAN-Meta/t/data/META-1_1.yml
+cpan/CPAN-Meta/t/data/META-1_2.yml
+cpan/CPAN-Meta/t/data/META-1_3.yml
+cpan/CPAN-Meta/t/data/META-1_4.yml
+cpan/CPAN-Meta/t/data/META-2.json
+cpan/CPAN-Meta/t/data/resources.yml
+cpan/CPAN-Meta/t/data/restricted-2.json
+cpan/CPAN-Meta/t/data/restrictive-1_4.yml
+cpan/CPAN-Meta/t/load-bad.t
+cpan/CPAN-Meta/t/meta-obj.t
+cpan/CPAN-Meta/t/no-index.t
+cpan/CPAN-Meta/t/prereqs-finalize.t
+cpan/CPAN-Meta/t/prereqs-merge.t
+cpan/CPAN-Meta/t/prereqs.t
+cpan/CPAN-Meta/t/repository.t
+cpan/CPAN-Meta/t/save-load.t
+cpan/CPAN-Meta/t/validator.t
 cpan/CPAN-Meta-YAML/lib/CPAN/Meta/YAML.pm		CPAN-Meta-YAML files
 cpan/CPAN-Meta-YAML/t/01_compile.t		CPAN-Meta-YAML files
 cpan/CPAN-Meta-YAML/t/02_basic.t		CPAN-Meta-YAML files
