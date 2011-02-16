@@ -80,7 +80,7 @@
 #  include "regcomp.h"
 #endif
 
-#define RF_tainted	1		/* tainted information used? */
+#define RF_tainted	1	/* tainted information used? e.g. locale */
 #define RF_warned	2		/* warned about big count? */
 
 #define RF_utf8		8		/* Pattern contains multibyte chars? */

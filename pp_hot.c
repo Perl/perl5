@@ -2056,6 +2056,72 @@ PP(pp_iter)
     RETPUSHYES;
 }
 
+/*
+A description of how taint works in pattern matching and substitution.
+
+While the pattern is being assembled and them compiled, PL_tainted will
+get set if any part of the pattern is tainted, e.g. qr/.*$tainted/.
+At the end of pattern compilation, the RXf_TAINTED flag is set on the
+pattern if PL_tainted is set.
+
+When the pattern is copied, e.g. $r = qr/..../, the SV holding the ref the
+pattern is marked as tainted. This means that subsequent usage, such as
+/x$r/, will set PL_tainted and thus RXf_TAINTED on the new pattern too.
+
+During execution of a pattern, locale-variant ops such as ALNUML set the
+local flag RF_tainted. At the end of execution, the engine sets the
+RXf_TAINTED_SEEN on the pattern if RF_tainted got set.
+
+In addition, RXf_TAINTED_SEEN is used post-execution by the get magic code
+of $1 et al to indicate whether the returned value should be tainted.
+It is the responsibility of the caller of the pattern (i.e. pp_match,
+pp_subst etc) to set this flag for any other circumstances where $1 needs
+to be tainted.
+
+The taint behaviour of pp_subst (and pp_substcont) is quite complex.
+
+There are three possible sources of taint
+    * the source string
+    * the pattern (both compile- and run-time, RXf_TAINTED / RXf_TAINTED_SEEN)
+    * the replacement string (or expression under /e)
+    
+There are four destinations of taint and they are affected by the sources
+according to the rules below:
+
+    * the return value (not including /r):
+	tainted by the source string and pattern, but only for the
+	number-of-iterations case; boolean returns aren't tainted;
+    * the modified string (or modified copy under /r):
+	tainted by the source string, pattern, and replacement strings;
+    * $1 et al:
+	tainted by the pattern, and under 'use re "taint"', by the source
+	string too;
+    * PL_taint - i.e. whether subsequent code (e.g. in a /e block) is tainted:
+	should always be unset before executing subsequent code.
+
+The overall action of pp_subst is:
+
+    * at the start, set bits in rxtainted indicating the taint status of
+	the various sources.
+
+    * After each pattern execution, update the SUBST_TAINT_PAT bit in
+	rxtainted if RXf_TAINTED_SEEN has been set, to indicate that the
+	pattern has subsequently become tainted via locale ops.
+
+    * If control is being passed to pp_substcont to execute a /e block,
+	save rxtainted in the CXt_SUBST block, for future use by
+	pp_substcont.
+
+    * Whenever control is being returned to perl code (either by falling
+	off the "end" of pp_subst/pp_substcont, or by entering a /e block),
+	use the flag bits in rxtainted to make all the appropriate types of
+	destination taint visible; e.g. set RXf_TAINTED_SEEN so that $1 et
+	al will appear tainted.
+
+pp_match is just a simpler version of the above.
+
+*/
+
 PP(pp_subst)
 {
     dVAR; dSP; dTARG;
@@ -2071,7 +2137,8 @@ PP(pp_subst)
     I32 maxiters;
     register I32 i;
     bool once;
-    U8 rxtainted = 0; /* holds various SUBST_TAINT_* flag bits */
+    U8 rxtainted = 0; /* holds various SUBST_TAINT_* flag bits.
+			See "how taint works" above */
     char *orig;
     U8 r_flags;
     register REGEXP *rx = PM_GETRE(pm);
@@ -2131,6 +2198,7 @@ PP(pp_subst)
     /* only replace once? */
     once = !(rpm->op_pmflags & PMf_GLOBAL);
 
+    /* See "how taint works" above */
     if (PL_tainting) {
 	rxtainted  = (
 	    (SvTAINTED(TARG) ? SUBST_TAINT_STR : 0)
@@ -2412,6 +2480,7 @@ PP(pp_subst)
     if (doutf8)
 	SvUTF8_on(TARG);
 
+    /* See "how taint works" above */
     if (PL_tainting) {
 	if ((rxtainted & SUBST_TAINT_PAT) ||
 	    ((rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_RETAINT)) ==

@@ -294,6 +294,7 @@ PP(pp_substcont)
 
 	SvGETMAGIC(TOPs); /* possibly clear taint on $1 etc: #67962 */
 
+    	/* See "how taint works" above pp_subst() */
 	if (SvTAINTED(TOPs))
 	    cx->sb_rxtainted |= SUBST_TAINT_REPL;
 	sv_catsv_nomg(dstr, POPs);
@@ -343,7 +344,8 @@ PP(pp_substcont)
 	    (void)SvPOK_only_UTF8(targ);
 
 	    /* update the taint state of various various variables in
-	     * preparation for final exit */
+	     * preparation for final exit.
+	     * See "how taint works" above pp_subst() */
 	    if (PL_tainting) {
 		if ((cx->sb_rxtainted & SUBST_TAINT_PAT) ||
 		    ((cx->sb_rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_RETAINT))
@@ -402,7 +404,8 @@ PP(pp_substcont)
     if (old != rx)
 	(void)ReREFCNT_inc(rx);
     /* update the taint state of various various variables in preparation
-     * for calling the code block */
+     * for calling the code block.
+     * See "how taint works" above pp_subst() */
     if (PL_tainting) {
 	if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
 	    cx->sb_rxtainted |= SUBST_TAINT_PAT;
