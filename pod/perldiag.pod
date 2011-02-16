@@ -3906,6 +3906,11 @@ which is why it's currently left out of your copy.
 believes it found an infinite loop in the C<@ISA> hierarchy.  This is a
 crude check that bails out after 100 levels of C<@ISA> depth.
 
+=item refcnt: fd %d%s
+
+(P) Perl's I/O implementation failed an internal consistency check. If
+you see this message, something is very wrong.
+
 =item Reference found where even-sized list expected
 
 (W misc) You gave a single reference where Perl was expecting a list

@@ -2455,6 +2455,37 @@ PerlIOUnix_refcnt_dec(int fd)
     return cnt;
 }
 
+int
+PerlIOUnix_refcnt(int fd)
+{
+    dTHX;
+    int cnt = 0;
+    if (fd >= 0) {
+	dVAR;
+#ifdef USE_ITHREADS
+	MUTEX_LOCK(&PL_perlio_mutex);
+#endif
+	if (fd >= PL_perlio_fd_refcnt_size) {
+	    /* diag_listed_as: refcnt: fd %d%s */
+	    Perl_croak(aTHX_ "refcnt: fd %d >= refcnt_size %d\n",
+		       fd, PL_perlio_fd_refcnt_size);
+	}
+	if (PL_perlio_fd_refcnt[fd] <= 0) {
+	    /* diag_listed_as: refcnt: fd %d%s */
+	    Perl_croak(aTHX_ "refcnt: fd %d: %d <= 0\n",
+		       fd, PL_perlio_fd_refcnt[fd]);
+	}
+	cnt = PL_perlio_fd_refcnt[fd];
+#ifdef USE_ITHREADS
+	MUTEX_UNLOCK(&PL_perlio_mutex);
+#endif
+    } else {
+	/* diag_listed_as: refcnt: fd %d%s */
+	Perl_croak(aTHX_ "refcnt: fd %d < 0\n", fd);
+    }
+    return cnt;
+}
+
 void
 PerlIO_cleanup(pTHX)
 {

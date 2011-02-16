@@ -910,6 +910,10 @@ on the pipe to exit--in case you wish to look at the output of the pipe
 afterwards--and implicitly puts the exit status value of that command into
 C<$?> and C<${^CHILD_ERROR_NATIVE}>.
 
+If there are multiple threads running, C<close> on a filehandle from a
+piped open returns true without waiting for the child process to terminate,
+if the filehandle is still open in another thread.
+
 Closing the read end of a pipe before the process writing to it at the
 other end is done writing results in the writer receiving a SIGPIPE.  If
 the other end can't handle that, be sure to read all the data before

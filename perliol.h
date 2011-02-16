@@ -279,6 +279,7 @@ PERL_EXPORT_C IV        PerlIOUnix_pushed(pTHX_ PerlIO *f, const char *mode, SV 
 PERL_EXPORT_C SSize_t   PerlIOUnix_read(pTHX_ PerlIO *f, void *vbuf, Size_t count);
 PERL_EXPORT_C int       PerlIOUnix_refcnt_dec(int fd);
 PERL_EXPORT_C void      PerlIOUnix_refcnt_inc(int fd);
+PERL_EXPORT_C int       PerlIOUnix_refcnt(int fd);
 PERL_EXPORT_C IV        PerlIOUnix_seek(pTHX_ PerlIO *f, Off_t offset, int whence);
 PERL_EXPORT_C Off_t     PerlIOUnix_tell(pTHX_ PerlIO *f);
 PERL_EXPORT_C SSize_t   PerlIOUnix_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count);

@@ -25,6 +25,8 @@
 #define PERL_IN_UTIL_C
 #include "perl.h"
 
+#include "perliol.h" /* For PerlIOUnix_refcnt */
+
 #ifndef PERL_MICRO
 #include <signal.h>
 #ifndef SIG_ERR
@@ -3118,11 +3120,16 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     int status;
     SV **svp;
     Pid_t pid;
-    Pid_t pid2;
+    Pid_t pid2 = 0;
     bool close_failed;
     dSAVEDERRNO;
+    const int fd = PerlIO_fileno(ptr);
 
-    svp = av_fetch(PL_fdpid,PerlIO_fileno(ptr),TRUE);
+    /* Find out whether the refcount is low enough for us to wait for the
+       child proc without blocking. */
+    const bool should_wait = PerlIOUnix_refcnt(fd) == 1;
+
+    svp = av_fetch(PL_fdpid,fd,TRUE);
     pid = (SvTYPE(*svp) == SVt_IV) ? SvIVX(*svp) : -1;
     SvREFCNT_dec(*svp);
     *svp = &PL_sv_undef;
@@ -3141,7 +3148,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     rsignal_save(SIGINT,  (Sighandler_t) SIG_IGN, &istat);
     rsignal_save(SIGQUIT, (Sighandler_t) SIG_IGN, &qstat);
 #endif
-    do {
+    if (should_wait) do {
 	pid2 = wait4pid(pid, &status, 0);
     } while (pid2 == -1 && errno == EINTR);
 #ifndef PERL_MICRO
@@ -3153,7 +3160,11 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 	RESTORE_ERRNO;
 	return -1;
     }
-    return(pid2 < 0 ? pid2 : status == 0 ? 0 : (errno = 0, status));
+    return(
+      should_wait
+       ? pid2 < 0 ? pid2 : status == 0 ? 0 : (errno = 0, status)
+       : 0
+    );
 }
 #else
 #if defined(__LIBCATAMOUNT__)

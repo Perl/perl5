@@ -16,7 +16,7 @@ BEGIN {
        exit 0;
      }
 
-     plan(23);
+     plan(24);
 }
 
 use strict;
@@ -348,5 +348,15 @@ threads->create(
 )->join();
 
 EOI
+
+# [perl #78494] Pipes shared between threads block when closed
+watchdog 10;
+{
+  my $perl = which_perl;
+  $perl = qq'"$perl"' if $perl =~ /\s/;
+  open(my $OUT, "|$perl") || die("ERROR: $!");
+  threads->create(sub { })->join;
+  ok(1, "Pipes shared between threads do not block when closed");
+}
 
 # EOF
