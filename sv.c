@@ -4661,7 +4661,7 @@ we do the copy, and is also used locally. If C<SV_COW_DROP_PV> is set
 then a copy-on-write scalar drops its PV buffer (if any) and becomes
 SvPOK_off rather than making a copy. (Used where this scalar is about to be
 set to some other value.) In addition, the C<flags> parameter gets passed to
-C<sv_unref_flags()> when unrefing. C<sv_force_normal> calls this function
+C<sv_unref_flags()> when unreffing. C<sv_force_normal> calls this function
 with flags set to 0.
 
 =cut
