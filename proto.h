@@ -4695,6 +4695,52 @@ PERL_CALLCONV int	Perl_my_sprintf(char *buffer, const char *pat, ...)
 	assert(buffer); assert(pat)
 
 #endif
+#if !defined(USE_SFIO)
+PERL_CALLCONV void	Perl_PerlIO_clearerr(pTHX_ PerlIO *f);
+PERL_CALLCONV int	Perl_PerlIO_close(pTHX_ PerlIO *f);
+PERL_CALLCONV int	Perl_PerlIO_eof(pTHX_ PerlIO *f);
+PERL_CALLCONV int	Perl_PerlIO_error(pTHX_ PerlIO *f);
+PERL_CALLCONV int	Perl_PerlIO_fileno(pTHX_ PerlIO *f);
+PERL_CALLCONV int	Perl_PerlIO_fill(pTHX_ PerlIO *f);
+PERL_CALLCONV int	Perl_PerlIO_flush(pTHX_ PerlIO *f);
+PERL_CALLCONV STDCHAR *	Perl_PerlIO_get_base(pTHX_ PerlIO *f);
+PERL_CALLCONV int	Perl_PerlIO_get_bufsiz(pTHX_ PerlIO *f)
+			__attribute__warn_unused_result__;
+
+PERL_CALLCONV int	Perl_PerlIO_get_cnt(pTHX_ PerlIO *f)
+			__attribute__warn_unused_result__;
+
+PERL_CALLCONV STDCHAR *	Perl_PerlIO_get_ptr(pTHX_ PerlIO *f);
+PERL_CALLCONV SSize_t	Perl_PerlIO_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_PERLIO_READ	\
+	assert(vbuf)
+
+PERL_CALLCONV int	Perl_PerlIO_seek(pTHX_ PerlIO *f, Off_t offset, int whence);
+PERL_CALLCONV void	Perl_PerlIO_set_cnt(pTHX_ PerlIO *f, int cnt);
+PERL_CALLCONV void	Perl_PerlIO_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR *ptr, int cnt);
+PERL_CALLCONV void	Perl_PerlIO_setlinebuf(pTHX_ PerlIO *f);
+PERL_CALLCONV PerlIO *	Perl_PerlIO_stderr(pTHX)
+			__attribute__warn_unused_result__;
+
+PERL_CALLCONV PerlIO *	Perl_PerlIO_stdin(pTHX)
+			__attribute__warn_unused_result__;
+
+PERL_CALLCONV PerlIO *	Perl_PerlIO_stdout(pTHX)
+			__attribute__warn_unused_result__;
+
+PERL_CALLCONV Off_t	Perl_PerlIO_tell(pTHX_ PerlIO *f);
+PERL_CALLCONV SSize_t	Perl_PerlIO_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_PERLIO_UNREAD	\
+	assert(vbuf)
+
+PERL_CALLCONV SSize_t	Perl_PerlIO_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_PERLIO_WRITE	\
+	assert(vbuf)
+
+#endif
 #if !defined(WIN32)
 PERL_CALLCONV bool	Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 			__attribute__nonnull__(pTHX_1);
@@ -7123,52 +7169,6 @@ PERL_CALLCONV char*	Perl_sv_collxfrm_flags(pTHX_ SV *const sv, STRLEN *const nxp
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_SV_COLLXFRM_FLAGS	\
 	assert(sv); assert(nxp)
-
-#endif
-#if !defined(USE_SFIO)
-PERL_CALLCONV void	Perl_PerlIO_clearerr(pTHX_ PerlIO *f);
-PERL_CALLCONV int	Perl_PerlIO_close(pTHX_ PerlIO *f);
-PERL_CALLCONV int	Perl_PerlIO_eof(pTHX_ PerlIO *f);
-PERL_CALLCONV int	Perl_PerlIO_error(pTHX_ PerlIO *f);
-PERL_CALLCONV int	Perl_PerlIO_fileno(pTHX_ PerlIO *f);
-PERL_CALLCONV int	Perl_PerlIO_fill(pTHX_ PerlIO *f);
-PERL_CALLCONV int	Perl_PerlIO_flush(pTHX_ PerlIO *f);
-PERL_CALLCONV STDCHAR *	Perl_PerlIO_get_base(pTHX_ PerlIO *f);
-PERL_CALLCONV int	Perl_PerlIO_get_bufsiz(pTHX_ PerlIO *f)
-			__attribute__warn_unused_result__;
-
-PERL_CALLCONV int	Perl_PerlIO_get_cnt(pTHX_ PerlIO *f)
-			__attribute__warn_unused_result__;
-
-PERL_CALLCONV STDCHAR *	Perl_PerlIO_get_ptr(pTHX_ PerlIO *f);
-PERL_CALLCONV SSize_t	Perl_PerlIO_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_PERLIO_READ	\
-	assert(vbuf)
-
-PERL_CALLCONV int	Perl_PerlIO_seek(pTHX_ PerlIO *f, Off_t offset, int whence);
-PERL_CALLCONV void	Perl_PerlIO_set_cnt(pTHX_ PerlIO *f, int cnt);
-PERL_CALLCONV void	Perl_PerlIO_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR *ptr, int cnt);
-PERL_CALLCONV void	Perl_PerlIO_setlinebuf(pTHX_ PerlIO *f);
-PERL_CALLCONV PerlIO *	Perl_PerlIO_stderr(pTHX)
-			__attribute__warn_unused_result__;
-
-PERL_CALLCONV PerlIO *	Perl_PerlIO_stdin(pTHX)
-			__attribute__warn_unused_result__;
-
-PERL_CALLCONV PerlIO *	Perl_PerlIO_stdout(pTHX)
-			__attribute__warn_unused_result__;
-
-PERL_CALLCONV Off_t	Perl_PerlIO_tell(pTHX_ PerlIO *f);
-PERL_CALLCONV SSize_t	Perl_PerlIO_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_PERLIO_UNREAD	\
-	assert(vbuf)
-
-PERL_CALLCONV SSize_t	Perl_PerlIO_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_PERLIO_WRITE	\
-	assert(vbuf)
 
 #endif
 #if defined(USE_REENTRANT_API)
