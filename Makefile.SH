@@ -1483,7 +1483,7 @@ test-reonly: test_prep_reonly
 # Porting tests (well-formedness of pod, manifest, etc)
 
 test_porting: test_prep
-	cd t && $(RUN_PERL) harness porting/*.t
+	cd t && $(RUN_PERL) harness porting/*.t ../lib/diagnostics.t
 
 # Handy way to run perlbug -ok without having to install and run the
 # installed perlbug. We don't re-run the tests here - we trust the user.
