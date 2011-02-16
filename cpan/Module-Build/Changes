@@ -1,5 +1,66 @@
 Revision history for Perl extension Module::Build.
 
+0.37_04 - Wed Feb 16 15:27:21 EST 2011
+
+  [OTHER]
+
+  - moved scripts/ to bin/ for less confusing porting to bleadperl
+
+0.37_03 - Wed Feb 16 09:54:05 EST 2011
+
+  [BUG FIXES]
+
+  - removed an irrelevant test in t/actions/installdeps.t that was causing
+    failures on some Cygwin platforms
+
+  [OTHER]
+
+  - dropped configure_requires as some CPAN clients apparently get
+    confused by having things in both configure_requires and requires
+
+  - bumped Parse::CPAN::Meta build prereq to 1.4401
+
+  - bumped CPAN::Meta prereq to 2.110420
+
+0.37_02 - Mon Feb  7 21:05:30 EST 2011
+
+  [BUG FIXES]
+
+  - bumped CPAN::Meta prereq to 2.110390 to avoid a regression in 2.110360
+
+0.37_01 - Thu Feb  3 03:44:38 EST 2011
+
+  [ENHANCEMENTS]
+
+  - Generates META.json and MYMETA.json consistent with version 2 of the
+    CPAN Meta Spec. [David Golden]
+
+  [BUG FIXES]
+
+  - t/signature.t now uses a mocked Module::Signature; this should be
+    more robust across platforms as it only needs to confirm that
+    Module::Build is calling Module::Signature when expected
+
+  [OTHER]
+
+  - Added CPAN::Meta and Parse::CPAN::Meta to prerequisites and dropped
+    CPAN::Meta::YAML
+
+0.3624 - Thu Jan 27 11:38:39 EST 2011
+
+  - Fixed pod2html directory bugs and fixed creation of spurious blib
+    directory in core perl directory when running install.t (RT#63003)
+    [Chris Williams]
+
+0.3623 - Wed Jan 26 17:45:30 EST 2011
+
+  - Fixed bugs involving bootstrapping configure_requires prerequisites
+    on older CPANPLUS clients or for either CPAN/CPANPLUS when using
+    the compatibility Makefile.PL
+
+  - Added diagnostic output when configure_requires are missing for
+    the benefit of users doing manual installation
+
 0.3622 - Mon Jan 24 21:06:50 EST 2011
 
   - No changes from 0.36_21

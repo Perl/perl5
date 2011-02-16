@@ -1930,6 +1930,8 @@ accessor methods for the following properties:
 
 =item destdir()
 
+=item dynamic_config()
+
 =item get_options()
 
 =item html_css()
@@ -1954,9 +1956,13 @@ accessor methods for the following properties:
 
 =item metafile()
 
+=item metafile2()
+
 =item module_name()
 
 =item mymetafile()
+
+=item mymetafile2()
 
 =item needs_compiler()
 
@@ -2003,7 +2009,6 @@ accessor methods for the following properties:
 =item xs_files()
 
 =back
-
 
 =head1 MODULE METADATA
 

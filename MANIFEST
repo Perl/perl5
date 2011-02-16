@@ -1543,91 +1543,92 @@ cpan/MIME-Base64/t/base64.t		See whether MIME::Base64 works
 cpan/MIME-Base64/t/length.t	See whether MIME::QuotedPrint works
 cpan/MIME-Base64/t/quoted-print.t	See whether MIME::QuotedPrint works
 cpan/MIME-Base64/t/unicode.t		See whether MIME::Base64 works
-cpan/Module-Build/Changes				Module::Build
-cpan/Module-Build/lib/inc/latest.pm			Module::Build
-cpan/Module-Build/lib/inc/latest/private.pm		Module::Build
-cpan/Module-Build/lib/Module/Build/API.pod		Module::Build
-cpan/Module-Build/lib/Module/Build/Authoring.pod	Module::Build
-cpan/Module-Build/lib/Module/Build/Base.pm		Module::Build
-cpan/Module-Build/lib/Module/Build/Bundling.pod		Module::Build
-cpan/Module-Build/lib/Module/Build/Compat.pm		Module::Build
-cpan/Module-Build/lib/Module/Build/ConfigData.pm		Module::Build
-cpan/Module-Build/lib/Module/Build/Config.pm		Module::Build
-cpan/Module-Build/lib/Module/Build/Cookbook.pm		Module::Build
-cpan/Module-Build/lib/Module/Build/Dumper.pm		Module::Build
-cpan/Module-Build/lib/Module/Build/ModuleInfo.pm	Module::Build
-cpan/Module-Build/lib/Module/Build/Notes.pm		Module::Build
-cpan/Module-Build/lib/Module/Build/Platform/aix.pm	Module::Build
-cpan/Module-Build/lib/Module/Build/Platform/Amiga.pm	Module::Build
-cpan/Module-Build/lib/Module/Build/Platform/cygwin.pm	Module::Build
-cpan/Module-Build/lib/Module/Build/Platform/darwin.pm	Module::Build
-cpan/Module-Build/lib/Module/Build/Platform/Default.pm	Module::Build
-cpan/Module-Build/lib/Module/Build/Platform/EBCDIC.pm	Module::Build
-cpan/Module-Build/lib/Module/Build/Platform/MacOS.pm	Module::Build
-cpan/Module-Build/lib/Module/Build/Platform/MPEiX.pm	Module::Build
-cpan/Module-Build/lib/Module/Build/Platform/os2.pm	Module::Build
-cpan/Module-Build/lib/Module/Build/Platform/RiscOS.pm	Module::Build
-cpan/Module-Build/lib/Module/Build/Platform/Unix.pm	Module::Build
-cpan/Module-Build/lib/Module/Build/Platform/VMS.pm	Module::Build
-cpan/Module-Build/lib/Module/Build/Platform/VOS.pm	Module::Build
-cpan/Module-Build/lib/Module/Build/Platform/Windows.pm	Module::Build
-cpan/Module-Build/lib/Module/Build.pm			Module::Build
-cpan/Module-Build/lib/Module/Build/PodParser.pm		Module::Build
-cpan/Module-Build/lib/Module/Build/PPMMaker.pm		Module::Build
-cpan/Module-Build/lib/Module/Build/Version.pm		Module::Build
-cpan/Module-Build/lib/Module/Build/YAML.pm		Module::Build
-cpan/Module-Build/scripts/config_data			Module::Build
-cpan/Module-Build/t/00-compile.t			Module::Build
-cpan/Module-Build/t/actions/installdeps.t		Module::Build
+cpan/Module-Build/bin/config_data
+cpan/Module-Build/Changes
+cpan/Module-Build/lib/inc/latest.pm
+cpan/Module-Build/lib/inc/latest/private.pm
+cpan/Module-Build/lib/Module/Build/API.pod
+cpan/Module-Build/lib/Module/Build/Authoring.pod
+cpan/Module-Build/lib/Module/Build/Base.pm
+cpan/Module-Build/lib/Module/Build/Bundling.pod
+cpan/Module-Build/lib/Module/Build/Compat.pm
+cpan/Module-Build/lib/Module/Build/ConfigData.pm
+cpan/Module-Build/lib/Module/Build/Config.pm
+cpan/Module-Build/lib/Module/Build/Cookbook.pm
+cpan/Module-Build/lib/Module/Build/Dumper.pm
+cpan/Module-Build/lib/Module/Build/ModuleInfo.pm
+cpan/Module-Build/lib/Module/Build/Notes.pm
+cpan/Module-Build/lib/Module/Build/Platform/aix.pm
+cpan/Module-Build/lib/Module/Build/Platform/Amiga.pm
+cpan/Module-Build/lib/Module/Build/Platform/cygwin.pm
+cpan/Module-Build/lib/Module/Build/Platform/darwin.pm
+cpan/Module-Build/lib/Module/Build/Platform/Default.pm
+cpan/Module-Build/lib/Module/Build/Platform/EBCDIC.pm
+cpan/Module-Build/lib/Module/Build/Platform/MacOS.pm
+cpan/Module-Build/lib/Module/Build/Platform/MPEiX.pm
+cpan/Module-Build/lib/Module/Build/Platform/os2.pm
+cpan/Module-Build/lib/Module/Build/Platform/RiscOS.pm
+cpan/Module-Build/lib/Module/Build/Platform/Unix.pm
+cpan/Module-Build/lib/Module/Build/Platform/VMS.pm
+cpan/Module-Build/lib/Module/Build/Platform/VOS.pm
+cpan/Module-Build/lib/Module/Build/Platform/Windows.pm
+cpan/Module-Build/lib/Module/Build.pm
+cpan/Module-Build/lib/Module/Build/PodParser.pm
+cpan/Module-Build/lib/Module/Build/PPMMaker.pm
+cpan/Module-Build/lib/Module/Build/Version.pm
+cpan/Module-Build/lib/Module/Build/YAML.pm
+cpan/Module-Build/t/00-compile.t
+cpan/Module-Build/t/actions/installdeps.t
 cpan/Module-Build/t/actions/manifest_skip.t
-cpan/Module-Build/t/add_property.t			Module::Build
-cpan/Module-Build/t/basic.t				Module::Build
+cpan/Module-Build/t/add_property.t
+cpan/Module-Build/t/basic.t
 cpan/Module-Build/t/bundled/Software/License.pm
-cpan/Module-Build/t/bundled/Tie/CPHash.pm		Module::Build
-cpan/Module-Build/t/bundle_inc.t			Module::Build
-cpan/Module-Build/t/compat/exit.t			Module::Build
-cpan/Module-Build/t/compat.t				Module::Build
-cpan/Module-Build/t/debug.t				Module::Build
-cpan/Module-Build/t/destinations.t			Module::Build
-cpan/Module-Build/t/extend.t				Module::Build
-cpan/Module-Build/t/ext.t				Module::Build
-cpan/Module-Build/t/files.t				Module::Build
-cpan/Module-Build/t/help.t				Module::Build
-cpan/Module-Build/t/install_extra_target.t		Module::Build
-cpan/Module-Build/t/install.t				Module::Build
-cpan/Module-Build/t/lib/DistGen.pm			Module::Build
-cpan/Module-Build/t/lib/MBTest.pm			Module::Build
+cpan/Module-Build/t/bundled/Tie/CPHash.pm
+cpan/Module-Build/t/bundle_inc.t
+cpan/Module-Build/t/compat/exit.t
+cpan/Module-Build/t/compat.t
+cpan/Module-Build/t/debug.t
+cpan/Module-Build/t/destinations.t
+cpan/Module-Build/t/extend.t
+cpan/Module-Build/t/ext.t
+cpan/Module-Build/t/files.t
+cpan/Module-Build/t/help.t
+cpan/Module-Build/t/install_extra_target.t
+cpan/Module-Build/t/install.t
+cpan/Module-Build/t/lib/DistGen.pm
+cpan/Module-Build/t/lib/MBTest.pm
+cpan/Module-Build/t/lib/Module/Signature.pm
 cpan/Module-Build/t/lib/Software/License/VaporWare.pm
-cpan/Module-Build/t/manifypods.t			Module::Build
-cpan/Module-Build/t/metadata2.t				Module::Build
-cpan/Module-Build/t/metadata.t				Module::Build
-cpan/Module-Build/t/mymeta.t				Module::Build
-cpan/Module-Build/t/new_from_context.t			Module::Build
-cpan/Module-Build/t/notes.t				Module::Build
-cpan/Module-Build/t/parents.t				Module::Build
-cpan/Module-Build/t/perl_mb_opt.t			Module::Build
-cpan/Module-Build/t/PL_files.t				Module::Build
-cpan/Module-Build/t/pod_parser.t			Module::Build
-cpan/Module-Build/t/ppm.t				Module::Build
+cpan/Module-Build/t/manifypods.t
+cpan/Module-Build/t/metadata2.t
+cpan/Module-Build/t/metadata.t
+cpan/Module-Build/t/mymeta.t
+cpan/Module-Build/t/new_from_context.t
+cpan/Module-Build/t/notes.t
+cpan/Module-Build/t/parents.t
+cpan/Module-Build/t/perl_mb_opt.t
+cpan/Module-Build/t/PL_files.t
+cpan/Module-Build/t/pod_parser.t
+cpan/Module-Build/t/ppm.t
 cpan/Module-Build/t/properties/dist_suffix.t
 cpan/Module-Build/t/properties/license.t
-cpan/Module-Build/t/properties/module_name.t		Module::Build
-cpan/Module-Build/t/properties/needs_compiler.t		Module::Build
+cpan/Module-Build/t/properties/module_name.t
+cpan/Module-Build/t/properties/needs_compiler.t
 cpan/Module-Build/t/properties/release_status.t
-cpan/Module-Build/t/properties/share_dir.t		Module::Build
-cpan/Module-Build/t/README.pod				Module::Build
-cpan/Module-Build/t/resume.t				Module::Build
-cpan/Module-Build/t/runthrough.t			Module::Build
-cpan/Module-Build/t/sample.t				Module::Build
-cpan/Module-Build/t/script_dist.t			Module::Build
-cpan/Module-Build/t/test_file_exts.t			Module::Build
-cpan/Module-Build/t/test_types.t			Module::Build
-cpan/Module-Build/t/test_type.t				Module::Build
-cpan/Module-Build/t/tilde.t				Module::Build
-cpan/Module-Build/t/use_tap_harness.t			Module::Build
-cpan/Module-Build/t/versions.t				Module::Build
-cpan/Module-Build/t/write_default_maniskip.t		Module::Build
-cpan/Module-Build/t/xs.t				Module::Build
+cpan/Module-Build/t/properties/share_dir.t
+cpan/Module-Build/t/README.pod
+cpan/Module-Build/t/resume.t
+cpan/Module-Build/t/runthrough.t
+cpan/Module-Build/t/sample.t
+cpan/Module-Build/t/script_dist.t
+cpan/Module-Build/t/test_file_exts.t
+cpan/Module-Build/t/test_types.t
+cpan/Module-Build/t/test_type.t
+cpan/Module-Build/t/tilde.t
+cpan/Module-Build/t/use_tap_harness.t
+cpan/Module-Build/t/versions.t
+cpan/Module-Build/t/write_default_maniskip.t
+cpan/Module-Build/t/xs.t
 cpan/Module-Load-Conditional/lib/Module/Load/Conditional.pm	Module::Conditional
 cpan/Module-Load-Conditional/t/01_Module_Load_Conditional.t	Module::Conditional tests
 cpan/Module-Load-Conditional/t/02_Parse_Version.t		Module::Load::Conditional tests

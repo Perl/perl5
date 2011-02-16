@@ -40,7 +40,7 @@ my %details = (
   dist_version => '0.01',
 );
 my %meta_provides = (
-  'bin-foo' => {
+  'foo' => {
     file => 'bin/foo',
     version => '0.01',
   }

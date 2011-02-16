@@ -2,7 +2,6 @@
 
 Module::Build::Authoring - Authoring Module::Build modules
 
-
 =head1 DESCRIPTION
 
 When creating a C<Build.PL> script for a module, something like the

@@ -4,7 +4,7 @@ package Module::Build::Base;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.3622';
+$VERSION = '0.37_04';
 $VERSION = eval $VERSION;
 BEGIN { require 5.00503 }
 
@@ -902,10 +902,13 @@ __PACKAGE__->add_property(build_bat => 0);
 __PACKAGE__->add_property(bundle_inc => []);
 __PACKAGE__->add_property(bundle_inc_preload => []);
 __PACKAGE__->add_property(config_dir => '_build');
+__PACKAGE__->add_property(dynamic_config => 1);
 __PACKAGE__->add_property(include_dirs => []);
 __PACKAGE__->add_property(license => 'unknown');
 __PACKAGE__->add_property(metafile => 'META.yml');
 __PACKAGE__->add_property(mymetafile => 'MYMETA.yml');
+__PACKAGE__->add_property(metafile2 => 'META.json');
+__PACKAGE__->add_property(mymetafile2 => 'MYMETA.json');
 __PACKAGE__->add_property(recurse_into => []);
 __PACKAGE__->add_property(use_rcfile => 1);
 __PACKAGE__->add_property(create_packlist => 1);
@@ -1876,39 +1879,72 @@ EOF
 
 sub create_mymeta {
   my ($self) = @_;
-  my $mymetafile = $self->mymetafile;
-  my $metafile = $self->metafile;
 
-  # cleanup
-  if ( $self->delete_filetree($mymetafile) ) {
-    $self->log_verbose("Removed previous '$mymetafile'\n");
-  }
-  $self->log_info("Creating new '$mymetafile' with configuration results\n");
+  my ($meta_obj, $mymeta);
+  my @metafiles = ( $self->metafile, $self->metafile2 );
+  my @mymetafiles = ( $self->mymetafile, $self->mymetafile2 );
 
-  # use old meta and update prereqs, if possible
-  my $mymeta;
-  if ( -f $metafile ) {
-    $mymeta = eval { $self->read_metafile( $self->metafile ) };
-  }
-  # if we read META OK, just update it
-  if ( defined $mymeta ) {
-    my $prereqs = $self->_normalize_prereqs;
-    for my $t ( 'configure_requires', @{$self->prereq_action_types} ) {
-        $mymeta->{$t} = $prereqs->{$t} if $prereqs->{$t};
+  # cleanup old MYMETA
+  for my $f ( @mymetafiles ) {
+    if ( $self->delete_filetree($f) ) {
+      $self->log_verbose("Removed previous '$f'\n");
     }
   }
-  # but generate from scratch, ignoring errors if META doesn't exist
-  else {
-    $mymeta = $self->get_metadata( fatal => 0 );
+
+  # Try loading META.json or META.yml
+  if ( $self->try_require("CPAN::Meta", "2.110420") ) {
+    for my $file ( @metafiles ) {
+      next unless -f $file;
+      $meta_obj = eval { CPAN::Meta->load_file($file) };
+      last if $meta_obj;
+    }
   }
 
-  # MYMETA is always static
-  $mymeta->{dynamic_config} = 0;
-  # Note which M::B created it
-  $mymeta->{generated_by} = "Module::Build version $Module::Build::VERSION";
+  # maybe get a copy in spec v2 format (regardless of original source)
+  $mymeta = $meta_obj->as_struct
+    if $meta_obj;
 
-  $self->write_metafile( $mymetafile, $mymeta ) or
-    $self->log_warn("Could not create MYMETA.yml\n");
+  # if we have metadata, just update it
+  if ( defined $mymeta ) {
+    my $prereqs = $self->_normalize_prereqs;
+    # XXX refactor this mapping somewhere
+    $mymeta->{prereqs}{runtime}{requires} = $prereqs->{requires};
+    $mymeta->{prereqs}{build}{requires} = $prereqs->{build_requires};
+    $mymeta->{prereqs}{runtime}{recommends} = $prereqs->{recommends};
+    $mymeta->{prereqs}{runtime}{conflicts} = $prereqs->{conflicts};
+    # delete empty entries
+    for my $phase ( keys %{$mymeta->{prereqs}} ) {
+      if ( ref $mymeta->{prereqs}{$phase} eq 'HASH' ) {
+        for my $type ( keys %{$mymeta->{prereqs}{$phase}} ) {
+          if ( ! defined $mymeta->{prereqs}{$phase}{$type}
+            || ! keys %{$mymeta->{prereqs}{$phase}{$type}}
+          ) {
+            delete $mymeta->{prereqs}{$phase}{$type};
+          }
+        }
+      }
+      if ( ! defined $mymeta->{prereqs}{$phase}
+        || ! keys %{$mymeta->{prereqs}{$phase}}
+      ) {
+        delete $mymeta->{prereqs}{$phase};
+      }
+    }
+    $mymeta->{dynamic_config} = 0;
+    $mymeta->{generated_by} = "Module::Build version $Module::Build::VERSION";
+    $meta_obj = CPAN::Meta->new( $mymeta );
+  }
+  # or generate from scratch, ignoring errors if META doesn't exist
+  else {
+    $meta_obj = $self->_get_meta_object(
+      quiet => 0, dynamic => 0, fatal => 0, auto => 0
+    );
+  }
+
+  my @created = $self->_write_meta_files( $meta_obj, 'MYMETA' );
+
+  $self->log_warn("Could not create MYMETA files\n")
+    unless @created;
+
   return 1;
 }
 
@@ -2977,9 +3013,9 @@ sub find_PL_files {
   }
 
   return unless -d 'lib';
-  return { 
-    map {$_, [/^(.*)\.PL$/i ]} 
-    @{ $self->rscan_dir('lib', $self->file_qr('\.PL$')) } 
+  return {
+    map {$_, [/^(.*)\.PL$/i ]}
+    @{ $self->rscan_dir('lib', $self->file_qr('\.PL$')) }
   };
 }
 
@@ -3317,8 +3353,7 @@ sub htmlify_pods {
     ( $self->install_sets('core', 'lib'), # lib
       $self->install_sets('core', 'bin'), # bin
       $self->install_sets('site', 'lib'), # site/lib
-    ),File::Spec->rel2abs($self->blib)
-  );
+    ) ), File::Spec->rel2abs($self->blib);
 
   my $podpath = join(":", map { tr,:\\,|/,; $_ } @podpath);
 
@@ -3403,9 +3438,13 @@ sub htmlify_pods {
       }
 
       $self->log_verbose("P::H::pod2html @opts\n");
-      eval { Pod::Html::pod2html(@opts); 1 }
-        or $self->log_warn("[$htmltool] pod2html( " .
-        join(", ", map { "q{$_}" } @opts) . ") failed: $@");
+      {
+        my $orig = Cwd::getcwd();
+        eval { Pod::Html::pod2html(@opts); 1 }
+          or $self->log_warn("[$htmltool] pod2html( " .
+          join(", ", map { "q{$_}" } @opts) . ") failed: $@");
+        chdir($orig);
+      }
     }
     # We now have to cleanup the resulting html file
     if ( ! -r $tmpfile ) {
@@ -3650,7 +3689,7 @@ sub ACTION_realclean {
   $self->depends_on('clean');
   $self->log_info("Cleaning up configuration files\n");
   $self->delete_filetree(
-    $self->config_dir, $self->mymetafile, $self->build_script
+    $self->config_dir, $self->mymetafile, $self->mymetafile2, $self->build_script
   );
 }
 
@@ -3782,9 +3821,12 @@ sub _check_mymeta_skip {
 
   my $mymetafile = $self->mymetafile;
   # we can't check it, just add it anyway to be safe
-  unless ( $skip_factory && $skip_factory->($maniskip)->($mymetafile) ) {
-    $self->log_warn("File '$maniskip' does not include '$mymetafile'. Adding it now.\n");
-    $self->_append_maniskip("^$mymetafile\$", $maniskip);
+  for my $file ( $self->mymetafile, $self->mymetafile2 ) {
+    unless ( $skip_factory && $skip_factory->($maniskip)->($file) ) {
+      $self->log_warn("File '$maniskip' does not include '$file'. Adding it now.\n");
+      my $safe = quotemeta($file);
+      $self->_append_maniskip("^$safe\$", $maniskip);
+    }
   }
 }
 
@@ -3902,7 +3944,6 @@ HERE
 
   $self->delete_filetree('LICENSE');
 
-  my $author = join " & ", @{ $self->dist_author };
   my $fh = IO::File->new('> LICENSE')
     or die "Can't write LICENSE file: $!";
   print $fh $license->fulltext;
@@ -4420,7 +4461,8 @@ sub _software_license_object {
   return unless defined $class;
 
   # Software::License requires a 'holder' argument
-  my $sl = eval { $class->new({holder=>"nobody"}) };
+  my $author = join( " & ", @{ $self->dist_author }) || 'unknown';
+  my $sl = eval { $class->new({holder=>$author}) };
   if ( $@ ) {
     $self->log_warn( "Error getting '$class' object: $@" );
   }
@@ -4452,16 +4494,15 @@ sub do_create_metafile {
   return if $self->{wrote_metadata};
 
   my $p = $self->{properties};
-  my $metafile = $self->metafile;
 
   unless ($p->{license}) {
     $self->log_warn("No license specified, setting license = 'unknown'\n");
     $p->{license} = 'unknown';
   }
 
+  my @metafiles = ( $self->metafile, $self->metafile2 );
   # If we're in the distdir, the metafile may exist and be non-writable.
-  $self->delete_filetree($metafile);
-  $self->log_info("Creating $metafile\n");
+  $self->delete_filetree($_) for @metafiles;
 
   # Since we're building ourself, we have to do some special stuff
   # here: the ConfigData module is found in blib/lib.
@@ -4471,46 +4512,85 @@ sub do_create_metafile {
     push @INC, File::Spec->catdir($self->blib, 'lib');
   }
 
-  if (
-    $self->write_metafile(
-      $self->metafile,$self->get_metadata(fatal=>1, auto => 1)
-    )
-  ){
+  my $meta_obj = $self->_get_meta_object(
+    quiet => 1, fatal => 1, auto => 1
+  );
+  my @created = $self->_write_meta_files( $meta_obj, 'META' );
+  if ( @created ) {
     $self->{wrote_metadata} = 1;
-    $self->_add_to_manifest('MANIFEST', $metafile);
+    $self->_add_to_manifest('MANIFEST', $_) for @created;
   }
-
   return 1;
 }
 
-# We handle slurping from the metafile to ensure proper utf8 if possible
+sub _write_meta_files {
+  my $self = shift;
+  my ($meta, $file) = @_;
+  $file =~ s{\.(?:yml|json)$}{};
+
+  my @created;
+  push @created, "$file\.yml"
+    if $meta && $meta->save( "$file\.yml", {version => "1.4"} );
+  push @created, "$file\.json"
+    if $meta && $meta->save( "$file\.json" );
+
+  if ( @created ) {
+    $self->log_info("Created " . join(" and ", @created) . "\n");
+  }
+  return @created;
+}
+
+sub _get_meta_object {
+  my $self = shift;
+  my %args = @_;
+  return unless $self->try_require("CPAN::Meta", "2.110420");
+
+  my $meta;
+  eval {
+    my $data = $self->get_metadata(
+      fatal => $args{fatal},
+      auto => $args{auto},
+    );
+    $data->{dynamic_config} = $args{dynamic} if defined $args{dynamic};
+    $meta = CPAN::Meta->create( $data );
+  };
+  if ($@ && ! $args{quiet}) {
+    $self->log_warn(
+      "Could not get valid metadata. Error is: $@\n"
+    );
+  }
+
+  return $meta;
+}
+
+# We return a version 1.4 structure for backwards compatibility
 sub read_metafile {
   my $self = shift;
   my ($metafile) = @_;
 
-  return unless $self->try_require("CPAN::Meta::YAML", "0.002");
-
-  my $string = $self->_slurp($metafile, $] < 5.8 ? "" : ":utf8");
-  my $meta = CPAN::Meta::YAML->read_string($string)
-    or $self->log_warn( "Error parsing '$metafile': " . CPAN::Meta::YAML->errstr . "\n");
-
-  return $meta->[0] || {};
+  return unless $self->try_require("CPAN::Meta", "2.110420");
+  my $meta = CPAN::Meta->load_file($metafile);
+  return $meta->as_struct( {version => "1.4"} );
 }
 
-# We handle spewing to the metafile to ensure proper utf8 if possible
+# For legacy compatibility, we upconvert a 1.4 data structure, ensuring
+# validity, and then downconvert it back to save it.
+#
+# generally, this code should no longer be used
 sub write_metafile {
   my $self = shift;
-  my ($metafile, $node) = @_;
+  my ($metafile, $struct) = @_;
 
-  return unless $self->try_require("CPAN::Meta::YAML", "0.002");
+  return unless $self->try_require("CPAN::Meta", "2.110420");
 
-  my $yaml = CPAN::Meta::YAML->new($node);
-  my $string = $yaml->write_string;
-  return $self->_spew($metafile, $string, $] < 5.8 ? "" : ":utf8")
+  my $meta = CPAN::Meta->new( $struct );
+  return $meta->save( $metafile, { version => "1.4" } );
 }
 
 sub normalize_version {
   my ($self, $version) = @_;
+  $version = 0 unless defined $version;
+
   if ( $version =~ /[=<>!,]/ ) { # logic, not just version
     # take as is without modification
   }
@@ -4544,7 +4624,6 @@ sub _normalize_prereqs {
   }
   return \%prereq_types;
 }
-
 
 # wrapper around old prepare_metadata API;
 sub get_metadata {

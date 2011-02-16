@@ -1032,10 +1032,15 @@ use File::Glob qw(:case);
     'Module::Build' =>
 	{
 	'MAINTAINER'	=> 'kwilliams',
-	'DISTRIBUTION'	=> 'DAGOLDEN/Module-Build-0.3622.tar.gz',
+	'DISTRIBUTION'	=> 'DAGOLDEN/Module-Build-0.37_04.tar.gz',
 	'FILES'		=> q[cpan/Module-Build],
-	'EXCLUDED'	=> [ qw{ t/par.t t/signature.t },
-			     qr!^contrib/!,  qr!^devtools! ],
+	'EXCLUDED'	=> [
+		qw{ t/par.t t/signature.t },
+		qr!^contrib/!,
+		qr!^devtools!,
+		qr!^inc!,
+	],
+	'CUSTOMIZED'	=> [ 'lib/Module/Build/ConfigData.pm' ],
 	'UPSTREAM'	=> 'cpan',
 	},
 

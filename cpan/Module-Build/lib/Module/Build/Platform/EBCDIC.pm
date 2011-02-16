@@ -2,7 +2,7 @@ package Module::Build::Platform::EBCDIC;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.3622';
+$VERSION = '0.37_04';
 $VERSION = eval $VERSION;
 use Module::Build::Base;
 

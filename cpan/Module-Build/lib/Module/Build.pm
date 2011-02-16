@@ -16,7 +16,7 @@ use Module::Build::Base;
 
 use vars qw($VERSION @ISA);
 @ISA = qw(Module::Build::Base);
-$VERSION = '0.3622';
+$VERSION = '0.37_04';
 $VERSION = eval $VERSION;
 
 
@@ -682,7 +682,7 @@ specify the C<versionlib> parameter when you run the C<Build.PL> script:
   perl Build.PL --versionlib /my/version/place/
 
 To override which version the module is installed as, specify the
-C<versionlib> parameter when you run the C<Build.PL> script:
+C<version> parameter when you run the C<Build.PL> script:
 
   perl Build.PL --version 0.50
 
@@ -858,7 +858,7 @@ This is the same as C<bindoc> above, but applies to HTML documents.
 
 =item libhtml
 
-This is the same as C<bindoc> above, but applies to HTML documents.
+This is the same as C<libdoc> above, but applies to HTML documents.
 
 =back
 
@@ -1085,8 +1085,8 @@ Module-Build mailing list at <module-build@perl.org>.
 Bug reports are also welcome at
 <http://rt.cpan.org/NoAuth/Bugs.html?Dist=Module-Build>.
 
-The latest development version is available from the Subversion
-repository at <https://svn.perl.org/modules/Module-Build/trunk/>
+The latest development version is available from the Git
+repository at <https://github.com/dagolden/module-build/>
 
 
 =head1 COPYRIGHT
