@@ -112,6 +112,23 @@ your code, you should use GvGP_set() instead. (c43ae56)
 
 This function shouldn't be called from XS code. (4c2e113)
 
+=head2 Unreferenced objects in global destruction
+
+The fix for [perl #36347], which made sure that destructors were called on
+unreferenced objects, broke the tests for three CPAN modules, which
+apparently rely on the bug.
+
+To provide more time for fixing them (as this is such a minor bug), we
+have reverted the fix until after perl 5.14.0.
+
+This resolves [perl #82542] and other related tickets.
+
+=head2 C<close> on shared pipes
+
+The C<close> function no longer waits for the child process to exit if the
+underlying file descriptor is still in use by another thread, to avoid
+deadlocks. It returns true in such cases.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
@@ -165,6 +182,14 @@ prerequisites and version constraints as defined in the L<CPAN::Meta::Spec>.
 
 =item *
 
+C<Carp> has been upgraded from version 1.19 to 1.20.
+
+[perl #82854] It now avoids using regular expressions that cause perl to
+load its Unicode tables, in order to avoid the 'BEGIN not safe after
+errors' error that will ensue if there has been a syntax error.
+
+=item *
+
 C<CGI> has been upgraded from version 3.51 to 3.52
 
 =item *
@@ -176,11 +201,31 @@ using Digest::SHA for CPAN checksums.
 
 =item *
 
+C<diagnostics> has been upgraded from version 1.21 to 1.22.
+
+It now renders pod links slightly better, and has been taught to find
+descriptions for messages that share their descriptions with other
+messages.
+
+=item *
+
+C<IO::Select> has been upgraded from version 1.17 to 1.18.
+
+It now allows IO::Handle objects (and objects in derived classes) to be
+removed from an IO::Select set even if the underlying file descriptor is
+closed or invalid.
+
+=item *
+
 C<IPC::Cmd> has been upgraded from version 0.68 to 0.70
 
 =item *
 
 C<HTTP::Tiny> has been upgraded from version 0.009 to 0.010
+
+=item *
+
+C<Math::BigInt> has been upgraded from version 1.99_04 to 1.991.
 
 =item *
 
@@ -202,10 +247,22 @@ C<Module::Metadata> has been upgraded from version 1.000003 to 1.000004.
 
 =item *
 
+C<overload> has been upgraded from version 1.12 to 1.13.
+
+The documentation has greatly improved. See L</Documentation> below.
+
+=item *
+
 C<Parse::CPAN::Meta> has been upgraded from version 1.40 to 1.4401.
 
 The latest Parse::CPAN::Meta can now read YAML or JSON files using
 L<CPAN::Meta::YAML> and L<JSON::PP>, which are now part of the Perl core.
+
+=item *
+
+C<re> has been upgraded from version 0.16 to 0.17.
+
+It now supports the double-a flag: C<use re '/aa';>
 
 =item *
 
@@ -217,6 +274,20 @@ C<Unicode::Collate> has been upgraded from version 0.68 to 0.72
 
 This also sees the switch from using the pure-perl version of this
 module to the XS version.`
+
+=item *
+
+C<VMS::DCLsym> has been upgraded from version 1.04 to 1.05.
+
+Two bugs have been fixed [perl #84086]:
+
+The symbol table name was lost when tying a hash, due to a thinko in
+C<TIEHASH>. The result was that all tied hashes interacted with the
+local symbol table.
+
+Unless a symbol table name had been explicitly specified in the call
+to the constructor, querying the special key ':LOCAL' failed to
+identify objects connected to the local symbol table.
 
 =item *
 
@@ -269,6 +340,17 @@ XXX Description of the purpose of the new file here
 XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
+
+=head3 L<overload>
+
+=over 4
+
+=item *
+
+L<overload>'s documentation has practically undergone a rewrite. It
+is now much more straightforward and clear.
+
+=back
 
 =head3 L<perlhack> and perlrepository
 
@@ -352,6 +434,12 @@ deprecated so as to reserve its use for Perl itself in a future release.
 
 C<\p> implies Unicode matching rules, which are likely going to be
 different than the locale's.
+
+=item panic: gp_free failed to free glob pointer - something is repeatedly re-creating entries
+
+This new error is triggered if a destructor called on an object in a
+typeglob that is being freed creates a new typeglob entry containing an
+object with a destructor that creates a new entry containing an object....
 
 =back
 
@@ -629,6 +717,50 @@ fixed. (c95ca9b)
 
 String evals will no longer fail after 2 billion scopes have been
 compiled (d1bfb64, 2df5bdd, 0d311cd and 6012dc8)
+
+=item *
+
+[perl #81750] When strict 'refs' mode is off, C<%{...}> returns C<undef> if
+its argument is undefined. An optimisation introduced in perl 5.12.0 to
+make C<keys %{...}> faster when used as a boolean did not take this into
+account, causing C<keys %{+undef}> (and C<keys %$foo> when C<$foo> is
+undefined) to be an error, which it should only be in strict mode.
+
+=item *
+
+[perl #83194] Combining the vector (%v) flag and dynamic precision would
+cause sprintf to confuse the order of its arguments, making it treat the
+string as the precision and vice versa.
+
+=item *
+
+[perl #77692] Sometimes the UTF8 length cache would not be reset on a value
+returned by substr, causing C<length(substr($uni_string,...))> to give
+wrong answers. With C<${^UTF8CACHE}> set to -1, it would produce a 'panic'
+error message, too.
+
+=item *
+
+During the restoration of a localised typeglob on scope exit, any
+destructors called as a result would be able to see the typeglob in an
+inconsistent state, containing freed entries, which could result in a
+crash. This would affect code like this:
+
+  local *@;
+  eval { die bless [] }; # puts an object in $@
+  sub DESTROY {
+    local $@; # boom
+  }
+
+Now the glob entries are cleared before any destructors are called. This
+also means that destructors can vivify entries in the glob. So perl tries
+again and, if the entries are re-created too many times, dies with a
+'panic: gp_free...' error message.
+
+=item *
+
+[perl #78494] When pipes are shared between threads, the C<close> function
+(and any implicit close, such as on thread exit) no longer blocks.
 
 =back
 
