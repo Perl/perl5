@@ -588,7 +588,12 @@ XSLoader::load();
 
 my %errstr;
 
-if( !defined &getaddrinfo ) {
+if( defined &getaddrinfo ) {
+    # These are not part of the API, nothing uses them, and deleting them
+    # reduces the size of %Socket:: by about 12K
+    delete $Socket::{fake_getaddrinfo};
+    delete $Socket::{fake_getnameinfo};
+} else {
     require Scalar::Util;
 
     *getaddrinfo = \&fake_getaddrinfo;
