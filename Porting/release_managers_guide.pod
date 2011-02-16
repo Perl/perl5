@@ -134,7 +134,7 @@ but ongoing. (No, a minicpan mirror is not sufficient)
 
 You will need a working C<git> installation, checkout of the perl
 git repository and perl commit bit.  For information about working
-with perl and git, see F<pod/perlrepository.pod>.
+with perl and git, see F<pod/perlgit.pod>.
 
 If you are not yet a perl committer, you won't be able to make a
 release.  Have a chat with whichever evil perl porter tried to talk

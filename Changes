@@ -16,7 +16,7 @@ then run a command like
 
 to view all the changes between 5.13.7 and 5.13.8.
 
-See pod/perlrepository.pod for more details on using git and accessing the
+See pod/perlgit.pod for more details on using git and accessing the
 commit history.
 
 In perl releases prior to 2009, the source tarball included a collection
