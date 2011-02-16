@@ -110,7 +110,7 @@ your code, you should use GvGP_set() instead. (c43ae56)
 
 =head2 _swash_inversion_hash is no longer exported as part of the API
 
-This function  shouldn't be called from XS code. (4c2e113)
+This function shouldn't be called from XS code. (4c2e113)
 
 =head1 Deprecations
 
