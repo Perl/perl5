@@ -1746,7 +1746,7 @@ Perl_magic_setnkeys(pTHX_ SV *sv, MAGIC *mg)
 
 Invoke a magic method (like FETCH).
 
-* sv and mg are the tied thinggy and the tie magic;
+* sv and mg are the tied thingy and the tie magic;
 * meth is the name of the method to call;
 * argc is the number of args (in addition to $self) to pass to the method;
        the args themselves are any values following the argc argument.

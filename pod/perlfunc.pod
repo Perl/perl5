@@ -1680,7 +1680,8 @@ normally you I<would> like to use double quotes, except that in this
 particular situation, you can just use symbolic references instead, as
 in case 6.
 
-Before Perl 5.14, the assignment to C<$@> occured before restoration of localised variables, which means that, if your code is to run on older
+Before Perl 5.14, the assignment to C<$@> occurred before restoration 
+of localised variables, which means that for your code to run on older
 versions, a temporary is required if you want to mask some but not all
 errors:
 

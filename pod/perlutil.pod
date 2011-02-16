@@ -75,7 +75,7 @@ typeset PostScript or text file of the whole lot.
 
 =back
 
-=head2 Convertors
+=head2 Converters
 
 To help you convert legacy programs to Perl, we've included three
 conversion filters:

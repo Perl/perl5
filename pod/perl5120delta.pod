@@ -1515,7 +1515,7 @@ The documentation for C<$1> in perlvar.pod has been clarified.
 
 =item *
 
-C<\N{U+I<wide hex char>}> is now documented.
+C<\N{U+I<code point>}> is now documented.
 
 =back
 
@@ -1666,7 +1666,7 @@ C<\N{...}> now compiles better, always forces UTF-8 internal representation
 
 Perl's developers have fixed several problems with the recognition of
 C<\N{...}> constructs.  As part of this, perl will store any scalar
-or regex containing C<\N{I<name>}> or C<\N{U+I<wide hex char>}> in its
+or regex containing C<\N{I<name>}> or C<\N{U+I<code point>}> in its
 definition in UTF-8 format. (This was true previously for all occurrences
 of C<\N{I<name>}> that did not use a custom translator, but now it's
 always true.)

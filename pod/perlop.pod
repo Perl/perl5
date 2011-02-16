@@ -1197,7 +1197,7 @@ X<\l> X<\u> X<\L> X<\U> X<\E> X<\Q>
 
 If C<use locale> is in effect, the case map used by C<\l>, C<\L>,
 C<\u> and C<\U> is taken from the current locale.  See L<perllocale>.
-If Unicode (for example, C<\N{}> or wide hex characters of 0x100 or
+If Unicode (for example, C<\N{}> or code points of 0x100 or
 beyond) is being used, the case map used by C<\l>, C<\L>, C<\u> and
 C<\U> is as defined by Unicode.
 
@@ -2143,12 +2143,12 @@ C<tr///>), the search is repeated once more.
 If the first delimiter is not an opening punctuation, three delimiters must
 be same such as C<s!!!> and C<tr)))>, in which case the second delimiter
 terminates the left part and starts the right part at once.
-If the left part is delimited by bracketing punctuations (that is C<()>,
+If the left part is delimited by bracketing punctuation (that is C<()>,
 C<[]>, C<{}>, or C<< <> >>), the right part needs another pair of
-delimiters such as C<s(){}> and C<tr[]//>.  In these cases, whitespaces
+delimiters such as C<s(){}> and C<tr[]//>.  In these cases, whitespace
 and comments are allowed between both parts, though the comment must follow
-at least one whitespace; otherwise a character expected as the start of
-the comment may be regarded as the starting delimiter of the right part.
+at least one whitespace character; otherwise a character expected as the 
+start of the comment may be regarded as the starting delimiter of the right part.
 
 During this search no attention is paid to the semantics of the construct.
 Thus:

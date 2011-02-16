@@ -44,7 +44,7 @@ Keep hacking until the tests pass.
 
 =item * Commit your change
 
-Commiting your work will save the change I<on your local system>:
+Committing your work will save the change I<on your local system>:
 
   % git commit -a -m 'Commit message goes here'
 

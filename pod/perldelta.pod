@@ -30,7 +30,7 @@ here, but most should go in the L</Performance Enhancements> section.
 
 =head2 Add C<\p{Titlecase}> as a synonym for C<\p{Title}>
 
-This synyom is added for symmetry with the Unicode property names
+This synonym is added for symmetry with the Unicode property names
 C<\p{Uppercase}> and C<\p{Lowercase}>.
 
 =head2 New regular expression modifier option C</aa>

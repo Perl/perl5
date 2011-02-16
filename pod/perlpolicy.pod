@@ -133,7 +133,7 @@ bug as a feature, we need to treat it as such.
 
 New syntax and semantics which don't break existing language constructs
 and syntax have a much lower bar.  They merely need to prove themselves
-to be useful, elegant, well designed and well tested.
+to be useful, elegant, well designed, and well tested.
 
 =head2 Terminology
 
@@ -198,9 +198,9 @@ acceptable.
 
 =item *
 
-Documentation updates that correct factual errors, explain significant
-bugs or deficiences in the current implementation or fix broken markup
-are acceptable.
+Acceptable documentation updates are those that correct factual errors,
+explain significant bugs or deficiencies in the current implementation, 
+or fix broken markup.
 
 =item *
 

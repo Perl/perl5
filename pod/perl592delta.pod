@@ -242,7 +242,7 @@ C<map> in scalar context is now optimized.
 =item *
 
 The regexp engine now implements the trie optimization : it's able to
-factorize common prefixes and suffixes in regular expressions. A new
+factor out common prefixes and suffixes in regular expressions. A new
 special variable, ${^RE_TRIE_MAXBUF}, has been added to fine-tune this
 optimization.
 
