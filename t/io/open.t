@@ -10,7 +10,7 @@ $|  = 1;
 use warnings;
 use Config;
 
-plan tests => 114;
+plan tests => 113;
 
 my $Perl = which_perl();
 
