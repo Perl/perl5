@@ -17,22 +17,12 @@ use strict;
 # This attempts to mirror the #ifdef forest found in perl.h so that we
 # know when to run these tests.  If that forest ever changes, change
 # it here too or expect test gratuitous test failures.
-my $useperlio = defined $Config{useperlio} ? $Config{useperlio} eq 'define' ? 1 : 0 : 0;
 my $fflushNULL = defined $Config{fflushNULL} ? $Config{fflushNULL} eq 'define' ? 1 : 0 : 0;
 my $d_sfio = defined $Config{d_sfio} ? $Config{d_sfio} eq 'define' ? 1 : 0 : 0;
 my $fflushall = defined $Config{fflushall} ? $Config{fflushall} eq 'define' ? 1 : 0 : 0;
 my $d_fork = defined $Config{d_fork} ? $Config{d_fork} eq 'define' ? 1 : 0 : 0;
 
-if ($useperlio || $fflushNULL || $d_sfio) {
-    print "1..7\n";
-} else {
-    if ($fflushall) {
-	print "1..7\n";
-    } else {
-	print "1..0 # Skip: fflush(NULL) or equivalent not available\n";
-        exit;
-    }
-}
+print "1..7\n";
 
 my $runperl = $^X =~ m/\s/ ? qq{"$^X"} : $^X;
 $runperl .= qq{ "-I../lib"};

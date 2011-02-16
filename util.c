@@ -3796,51 +3796,7 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
 I32
 Perl_my_fflush_all(pTHX)
 {
-#if defined(USE_PERLIO) || defined(FFLUSH_NULL) || defined(USE_SFIO)
     return PerlIO_flush(NULL);
-#else
-# if defined(HAS__FWALK)
-    extern int fflush(FILE *);
-    /* undocumented, unprototyped, but very useful BSDism */
-    extern void _fwalk(int (*)(FILE *));
-    _fwalk(&fflush);
-    return 0;
-# else
-#  if defined(FFLUSH_ALL) && defined(HAS_STDIO_STREAM_ARRAY)
-    long open_max = -1;
-#   ifdef PERL_FFLUSH_ALL_FOPEN_MAX
-    open_max = PERL_FFLUSH_ALL_FOPEN_MAX;
-#   else
-#    if defined(HAS_SYSCONF) && defined(_SC_OPEN_MAX)
-    open_max = sysconf(_SC_OPEN_MAX);
-#     else
-#      ifdef FOPEN_MAX
-    open_max = FOPEN_MAX;
-#      else
-#       ifdef OPEN_MAX
-    open_max = OPEN_MAX;
-#       else
-#        ifdef _NFILE
-    open_max = _NFILE;
-#        endif
-#       endif
-#      endif
-#     endif
-#    endif
-    if (open_max > 0) {
-      long i;
-      for (i = 0; i < open_max; i++)
-	    if (STDIO_STREAM_ARRAY[i]._file >= 0 &&
-		STDIO_STREAM_ARRAY[i]._file < open_max &&
-		STDIO_STREAM_ARRAY[i]._flag)
-		PerlIO_flush(&STDIO_STREAM_ARRAY[i]);
-      return 0;
-    }
-#  endif
-    SETERRNO(EBADF,RMS_IFI);
-    return EOF;
-# endif
-#endif
 }
 
 void

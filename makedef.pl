@@ -1047,124 +1047,103 @@ if ($PLATFORM eq 'netware') {
     push(@layer_syms,'PL_def_layerlist','PL_known_layers','PL_perlio');
 }
 
-if ($define{'USE_PERLIO'}) {
-    # Export the symols that make up the PerlIO abstraction, regardless
-    # of its implementation - read from a file
-    push @syms, $perlio_sym;
+# Export the symols that make up the PerlIO abstraction, regardless
+# of its implementation - read from a file
+push @syms, $perlio_sym;
 
-    # This part is then dependent on how the abstraction is implemented
-    if ($define{'USE_SFIO'}) {
-	# Old legacy non-stdio "PerlIO"
-	skip_symbols \@layer_syms;
-	skip_symbols [qw(perlsio_binmode)];
-	# SFIO defines most of the PerlIO routines as macros
-	# So undo most of what $perlio_sym has just done - d'oh !
-	# Perhaps it would be better to list the ones which do exist
-	# And emit them
-	skip_symbols [qw(
-			 PerlIO_canset_cnt
-			 PerlIO_clearerr
-			 PerlIO_close
-			 PerlIO_eof
-			 PerlIO_error
-			 PerlIO_exportFILE
-			 PerlIO_fast_gets
-			 PerlIO_fdopen
-			 PerlIO_fileno
-			 PerlIO_findFILE
-			 PerlIO_flush
-			 PerlIO_get_base
-			 PerlIO_get_bufsiz
-			 PerlIO_get_cnt
-			 PerlIO_get_ptr
-			 PerlIO_getc
-			 PerlIO_getname
-			 PerlIO_has_base
-			 PerlIO_has_cntptr
-			 PerlIO_importFILE
-			 PerlIO_open
-			 PerlIO_printf
-			 PerlIO_putc
-			 PerlIO_puts
-			 PerlIO_read
-			 PerlIO_releaseFILE
-			 PerlIO_reopen
-			 PerlIO_rewind
-			 PerlIO_seek
-			 PerlIO_set_cnt
-			 PerlIO_set_ptrcnt
-			 PerlIO_setlinebuf
-			 PerlIO_sprintf
-			 PerlIO_stderr
-			 PerlIO_stdin
-			 PerlIO_stdout
-			 PerlIO_stdoutf
-			 PerlIO_tell
-			 PerlIO_ungetc
-			 PerlIO_vprintf
-			 PerlIO_write
-			 PerlIO_perlio
-			 Perl_PerlIO_clearerr
-			 Perl_PerlIO_close
-			 Perl_PerlIO_eof
-			 Perl_PerlIO_error
-			 Perl_PerlIO_fileno
-			 Perl_PerlIO_fill
-			 Perl_PerlIO_flush
-			 Perl_PerlIO_get_base
-			 Perl_PerlIO_get_bufsiz
-			 Perl_PerlIO_get_cnt
-			 Perl_PerlIO_get_ptr
-			 Perl_PerlIO_read
-			 Perl_PerlIO_seek
-			 Perl_PerlIO_set_cnt
-			 Perl_PerlIO_set_ptrcnt
-			 Perl_PerlIO_setlinebuf
-			 Perl_PerlIO_stderr
-			 Perl_PerlIO_stdin
-			 Perl_PerlIO_stdout
-			 Perl_PerlIO_tell
-			 Perl_PerlIO_unread
-			 Perl_PerlIO_write
-                         PL_def_layerlist
-                         PL_known_layers
-                         PL_perlio
-			 )];
-    }
-    else {
-	# PerlIO with layers - export implementation
-	emit_symbols \@layer_syms;
-	emit_symbols [qw(perlsio_binmode)];
-    }
-    if ($define{'USE_ITHREADS'}) {
-	emit_symbols [qw(
-			PL_perlio_mutex
-			)];
-    }
-    else {
-	skip_symbols [qw(
-			PL_perlio_mutex
-			)];
-    }
-} else {
-	# -Uuseperlio
-	# Skip the PerlIO layer symbols - although
-	# nothing should have exported them anyway.
-	skip_symbols \@layer_syms;
-	skip_symbols [qw(
-			perlsio_binmode
-			PL_def_layerlist
-			PL_known_layers
-			PL_perlio
-			PL_perlio_debug_fd
-			PL_perlio_fd_refcnt
-			PL_perlio_fd_refcnt_size
-			)];
-
-	# Also do NOT add abstraction symbols from $perlio_sym
-	# abstraction is done as #define to stdio
-	# Remaining remnants that _may_ be functions
-	# are handled in <DATA>
+# This part is then dependent on how the abstraction is implemented
+if ($define{'USE_SFIO'}) {
+    # Old legacy non-stdio "PerlIO"
+    skip_symbols \@layer_syms;
+    skip_symbols [qw(perlsio_binmode)];
+    # SFIO defines most of the PerlIO routines as macros
+    # So undo most of what $perlio_sym has just done - d'oh !
+    # Perhaps it would be better to list the ones which do exist
+    # And emit them
+    skip_symbols [qw(
+		     PerlIO_canset_cnt
+		     PerlIO_clearerr
+		     PerlIO_close
+		     PerlIO_eof
+		     PerlIO_error
+		     PerlIO_exportFILE
+		     PerlIO_fast_gets
+		     PerlIO_fdopen
+		     PerlIO_fileno
+		     PerlIO_findFILE
+		     PerlIO_flush
+		     PerlIO_get_base
+		     PerlIO_get_bufsiz
+		     PerlIO_get_cnt
+		     PerlIO_get_ptr
+		     PerlIO_getc
+		     PerlIO_getname
+		     PerlIO_has_base
+		     PerlIO_has_cntptr
+		     PerlIO_importFILE
+		     PerlIO_open
+		     PerlIO_printf
+		     PerlIO_putc
+		     PerlIO_puts
+		     PerlIO_read
+		     PerlIO_releaseFILE
+		     PerlIO_reopen
+		     PerlIO_rewind
+		     PerlIO_seek
+		     PerlIO_set_cnt
+		     PerlIO_set_ptrcnt
+		     PerlIO_setlinebuf
+		     PerlIO_sprintf
+		     PerlIO_stderr
+		     PerlIO_stdin
+		     PerlIO_stdout
+		     PerlIO_stdoutf
+		     PerlIO_tell
+		     PerlIO_ungetc
+		     PerlIO_vprintf
+		     PerlIO_write
+		     PerlIO_perlio
+		     Perl_PerlIO_clearerr
+		     Perl_PerlIO_close
+		     Perl_PerlIO_eof
+		     Perl_PerlIO_error
+		     Perl_PerlIO_fileno
+		     Perl_PerlIO_fill
+		     Perl_PerlIO_flush
+		     Perl_PerlIO_get_base
+		     Perl_PerlIO_get_bufsiz
+		     Perl_PerlIO_get_cnt
+		     Perl_PerlIO_get_ptr
+		     Perl_PerlIO_read
+		     Perl_PerlIO_seek
+		     Perl_PerlIO_set_cnt
+		     Perl_PerlIO_set_ptrcnt
+		     Perl_PerlIO_setlinebuf
+		     Perl_PerlIO_stderr
+		     Perl_PerlIO_stdin
+		     Perl_PerlIO_stdout
+		     Perl_PerlIO_tell
+		     Perl_PerlIO_unread
+		     Perl_PerlIO_write
+		     PL_def_layerlist
+		     PL_known_layers
+		     PL_perlio
+		     )];
+}
+else {
+    # PerlIO with layers - export implementation
+    emit_symbols \@layer_syms;
+    emit_symbols [qw(perlsio_binmode)];
+}
+if ($define{'USE_ITHREADS'}) {
+    emit_symbols [qw(
+		    PL_perlio_mutex
+		    )];
+}
+else {
+    skip_symbols [qw(
+		    PL_perlio_mutex
+		    )];
 }
 
 for my $syms (@syms) {

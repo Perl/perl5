@@ -23,14 +23,6 @@ $got = read(FOO,$buf,4);
 is ($got, 0);
 is ($buf, "");
 
-# This is true if Config is not built, or if PerlIO is enabled
-# ie assume that PerlIO is present, unless we know for sure otherwise.
-my $has_perlio = !eval {
-    no warnings;
-    require Config;
-    !$Config::Config{useperlio}
-};
-
 my $tmpfile = tempfile();
 
 my (@values, @buffers) = ('', '');
@@ -51,9 +43,6 @@ foreach my $value (@values) {
 	}
       SKIP:
 	foreach my $utf8 (@utf8) {
-	    skip "Needs :utf8 layer but no perlio", 2 * @offsets * @lengths
-	      if $utf8 and !$has_perlio;
-
 	    open FH, ">$tmpfile" or die "Can't open $tmpfile: $!";
 	    binmode FH, "utf8" if $utf8;
 	    print FH $value;

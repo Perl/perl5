@@ -77,5 +77,5 @@ $define|true|[yY]*)
 esac
 EOCBU
 
-useperlio='undef'
+# useperlio='undef'
 uselargefiles='undef'

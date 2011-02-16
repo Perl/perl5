@@ -10,7 +10,6 @@ usenm='true'
 d_fork='undef' # available but ENOSYS
 
 usemymalloc='n'
-useperlio='true'
 d_eofnblk='define'
 groupstype='int'
 

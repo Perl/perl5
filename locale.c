@@ -498,7 +498,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 #endif /* USE_LOCALE */
 
-#ifdef USE_PERLIO
     {
       /* Set PL_utf8locale to TRUE if using PerlIO _and_
 	 any of the following are true:
@@ -553,7 +552,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 	 if (PL_unicode & PERL_UNICODE_UTF8CACHEASSERT_FLAG)
 	     PL_utf8cache = -1;
     }
-#endif
 
 #ifdef USE_LOCALE_CTYPE
     Safefree(curctype);

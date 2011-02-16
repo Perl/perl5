@@ -2985,9 +2985,7 @@ pipe_exit_routine()
 #if defined(USE_ITHREADS)
              && my_perl
 #endif
-#ifdef USE_PERLIO
              && PL_perlio_fd_refcnt 
-#endif
               )
                PerlIO_flush(info->fp);
            else 
@@ -4589,9 +4587,7 @@ static I32 my_pclose_pinfo(pTHX_ pInfo info) {
 #if defined(USE_ITHREADS)
           && my_perl
 #endif
-#ifdef USE_PERLIO
           && PL_perlio_fd_refcnt 
-#endif
            )
             PerlIO_flush(info->fp);
         else 
@@ -4619,9 +4615,7 @@ static I32 my_pclose_pinfo(pTHX_ pInfo info) {
 #if defined(USE_ITHREADS)
          && my_perl
 #endif
-#ifdef USE_PERLIO
          && PL_perlio_fd_refcnt
-#endif
         )
         PerlIO_close(info->fp);
      else 

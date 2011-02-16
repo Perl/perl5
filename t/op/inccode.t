@@ -6,7 +6,6 @@ use Config;
 
 my $can_fork   = 0;
 my $minitest   = $ENV{PERL_CORE_MINITEST};
-my $has_perlio = $Config{useperlio};
 
 BEGIN {
     chdir 't' if -d 't';
@@ -231,7 +230,6 @@ shift @INC;
 exit if $minitest;
 
 SKIP: {
-    skip( "No PerlIO available", 3 ) unless $has_perlio;
     pop @INC;
 
     push @INC, sub {

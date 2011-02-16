@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Mon Feb 14 23:00:18 CET 2011 [metaconfig 3.5 PL0]
+# Generated on Wed Feb 16 14:13:55 CET 2011 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -4071,77 +4071,6 @@ $undef$define) . ./whoa; eval "$var=\$tu";;
 *) eval "$var=$val";;
 esac'
 
-: Check is we will use socks
-case "$usesocks" in
-$define|true|[yY]*)	dflt='y';;
-*) dflt='n';;
-esac
-cat <<EOM
-
-Perl can be built to use the SOCKS proxy protocol library.  To do so,
-Configure must be run with -Dusesocks.  If you use SOCKS you also need
-to use the PerlIO abstraction layer, this will be implicitly selected.
-
-If this doesn't make any sense to you, just accept the default '$dflt'.
-EOM
-rp='Build Perl for SOCKS?'
-. ./myread
-case "$ans" in
-y|Y)	val="$define" ;;
-*)      val="$undef" ;;
-esac
-set usesocks
-eval $setvar
-
-case "$usesocks" in
-$define|true|[yY]*) useperlio="$define";;
-esac
-
-: Check if we want perlio
-case "$useperlio" in
-$define|true|[yY]*|'')	dflt='y';;
-*) dflt='n';;
-esac
-cat <<EOM
-
-Previous version of $package used the standard IO mechanisms as
-defined in <stdio.h>.  Versions 5.003_02 and later of $package allow
-alternate IO mechanisms via the PerlIO abstraction layer, but the
-stdio mechanism is still available if needed.  The abstraction layer
-can use AT&T's sfio (if you already have sfio installed) or regular stdio.
-Using PerlIO with sfio may cause problems with some extension modules.
-
-If this doesn't make any sense to you, just accept the default '$dflt'.
-EOM
-rp='Use the PerlIO abstraction layer?'
-. ./myread
-case "$ans" in
-y|Y)
-	val="$define"
-	;;
-*)
-	echo "Ok, doing things the stdio way."
-	val="$undef"
-	;;
-esac
-set useperlio
-eval $setvar
-
-case "$usesocks" in
-$define|true|[yY]*)
-	case "$useperlio" in
-	$define|true|[yY]*) ;;
-	*)	cat >&4 <<EOM
-
-You are using the SOCKS proxy protocol library which means that you
-should also use the PerlIO layer.  You may be headed for trouble.
-
-EOM
-		;;
-	esac
-	;;
-esac
-
 : get the patchlevel
 echo " "
 echo "Getting the current patchlevel..." >&4
@@ -4201,13 +4130,8 @@ $define|true|[yY]*)     dflt='y';;
 *)     # Catch case where user specified ithreads or 5005threads but
        # forgot -Dusethreads (A.D. 4/2002)
        case "$useithreads$use5005threads" in
-       *$define*)
-		case "$useperlio" in
-		"$define")	dflt='y' ;;
-		*)		dflt='n' ;;
-		esac
-		;;
-       *)	dflt='n';;
+       *$define*)	dflt='y';;
+       *)		dflt='n';;
        esac
        ;;
 esac
@@ -4307,16 +4231,6 @@ EOM
 
     use5005threads="$undef"
     useithreads="$usethreads"
-fi
-
-if test X"$usethreads" = "X$define" -a "X$useperlio" = "Xundef"; then
-	cat >&4 <<EOF
-***
-*** To build with ithreads you must also use the PerlIO layer.
-*** Cannot continue, aborting.
-***
-EOF
-	exit 1
 fi
 
 case "$d_oldpthreads" in
@@ -4893,6 +4807,28 @@ rm_try="$rm -f try try$_exe a.out .out try.[cho] try.$_o core core.try* try.core
 case "$firstmakefile" in
 '') firstmakefile='makefile';;
 esac
+
+: Check is we will use socks
+case "$usesocks" in
+$define|true|[yY]*)	dflt='y';;
+*) dflt='n';;
+esac
+cat <<EOM
+
+Perl can be built to use the SOCKS proxy protocol library.  To do so,
+Configure must be run with -Dusesocks.  If you use SOCKS you also need
+to use the PerlIO abstraction layer, this will be implicitly selected.
+
+If this doesn't make any sense to you, just accept the default '$dflt'.
+EOM
+rp='Build Perl for SOCKS?'
+. ./myread
+case "$ans" in
+y|Y)	val="$define" ;;
+*)      val="$undef" ;;
+esac
+set usesocks
+eval $setvar
 
 : Check for uselongdouble support
 case "$ccflags" in
@@ -6133,21 +6069,6 @@ $define)
 	        esac
 		;;
 	esac
-	;;
-esac
-case "$useperlio" in
-$define)
-	echo "Perlio selected." >&4
-	;;
-*)
-	echo "Perlio not selected, using stdio." >&4
-	case "$archname" in
-        *-stdio*) echo "...and architecture name already has -stdio." >&4
-                ;;
-        *)      archname="$archname-stdio"
-                echo "...setting architecture name to $archname." >&4
-                ;;
-        esac
 	;;
 esac
 if $test -f archname.cbu; then
@@ -9409,6 +9330,9 @@ EOCP
 	fi
 	;;
 esac
+
+: Check if we want perlio
+useperlio="$define"
 
 : Set the vendorbin variables
 case "$vendorprefix" in
@@ -17364,17 +17288,10 @@ $define)
 	*) dflt='n';;
 	esac
 	echo "$package can use the sfio library, but it is experimental."
-	case "$useperlio" in
-	"$undef")
-	    echo "For sfio also the PerlIO abstraction layer is needed."
-	    echo "Earlier you said you wouldn't want that."
-	    ;;
-	esac
 	rp="You seem to have sfio available, do you want to try using it?"
 	. ./myread
 	case "$ans" in
-	y|Y)	echo "Ok, turning on both sfio and PerlIO, then."
-		useperlio="$define"
+	y|Y)	echo "Ok, turning on sfio then."
 		val="$define"
 		;;
 	*)	echo "Ok, avoiding sfio this time.  I'll use stdio instead."
@@ -23485,16 +23402,16 @@ if $test -f UU/config.sh; then
 	$sed -n 's/^\([a-zA-Z_0-9]*\)=.*/\1/p' \
 		config.sh config.sh UU/oldconfig.sh |\
 		$sort | $uniq -u >UU/oldsyms
-	set X `cat UU/oldsyms`
+	set X `$cat UU/oldsyms`
 	shift
 	case $# in
 	0) ;;
 	*)
-		cat <<EOM
+		$cat <<EOM
 Hmm...You had some extra variables I don't know about...I'll try to keep 'em...
 EOM
 		echo ": Variables propagated from previous config.sh file." >>config.sh
-		for sym in `cat UU/oldsyms`; do
+		for sym in `$cat UU/oldsyms`; do
 			echo "    Propagating $hint variable "'$'"$sym..."
 			eval 'tmp="$'"${sym}"'"'
 			echo "$tmp" | \

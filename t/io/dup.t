@@ -10,8 +10,7 @@ use Config;
 no warnings 'once';
 
 my $test = 1;
-my $tests_needing_perlio = 17;
-plan(12 + $tests_needing_perlio);
+plan(29);
 print "ok 1\n";
 
 open(DUPOUT,">&STDOUT");
@@ -64,15 +63,9 @@ open(F,">&=",1) or die "Cannot dup to numeric 1: $!";
 print F "ok 11\n";
 close(F);
 
-if ($Config{useperlio}) {
-    open(F,">&=",'1') or die "Cannot dup to string '1': $!";
-    print F "ok 12\n";
-    close(F);
-} else {
-    open(F, ">&DUPOUT") or die "Cannot dup stdout back: $!";
-    print F "ok 12\n";
-    close(F);
-}
+open(F,">&=",'1') or die "Cannot dup to string '1': $!";
+print F "ok 12\n";
+close(F);
 
 # To get STDOUT back.
 open(F, ">&DUPOUT") or die "Cannot dup stdout back: $!";
@@ -80,8 +73,6 @@ open(F, ">&DUPOUT") or die "Cannot dup stdout back: $!";
 curr_test(13);
 
 SKIP: {
-    skip("need perlio", $tests_needing_perlio) unless $Config{useperlio};
-    
     ok(open(F, ">&", STDOUT));
     isnt(fileno(F), fileno(STDOUT));
     close F;

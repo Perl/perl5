@@ -4571,14 +4571,7 @@
 /*#define	MULTIPLICITY		/ **/
 #endif
 
-/* USE_PERLIO:
- *	This symbol, if defined, indicates that the PerlIO abstraction should
- *	be used throughout.  If not defined, stdio should be
- *	used in a fully backward compatible manner.
- */
-#ifndef USE_PERLIO
-/*#define	USE_PERLIO		/ **/
-#endif
+#define	USE_PERLIO
 
 /* USE_SOCKS:
  *	This symbol, if defined, indicates that Perl should

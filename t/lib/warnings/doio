@@ -251,15 +251,6 @@ Can't open a reference at - line 14.
 ########
 # doio.c [Perl_do_openn]
 use Config;
-BEGIN {
-    if (!$Config{useperlio}) {
-	print <<EOM;
-SKIPPED
-# warns only with perlio
-EOM
-	exit;
-    }
-}
 use warnings 'io' ;
 close STDOUT;
 open FH1, "../harness"; close FH1;
@@ -270,15 +261,6 @@ Filehandle STDOUT reopened as FH1 only for input at - line 14.
 ########
 # doio.c [Perl_do_openn]
 use Config;
-BEGIN {
-    if (!$Config{useperlio}) {
-	print <<EOM;
-SKIPPED
-# warns only with perlio
-EOM
-	exit;
-    }
-}
 use warnings 'io' ;
 close STDIN;
 open my $fh1, ">doiowarn.tmp"; close $fh1;

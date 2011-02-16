@@ -82,11 +82,9 @@ PERLVARI(Gcsighandlerp,	Sighandler_t, Perl_csighandler)	/* Pointer to C-level si
 PERLVARI(Guse_safe_putenv, int, 1)
 #endif
 
-#ifdef USE_PERLIO
 PERLVARI(Gperlio_fd_refcnt, int*, 0) /* Pointer to array of fd refcounts.  */
 PERLVARI(Gperlio_fd_refcnt_size, int, 0) /* Size of the array */
 PERLVARI(Gperlio_debug_fd, int, 0) /* the fd to write perlio debug into, 0 means not set yet */
-#endif
 
 #ifdef HAS_MMAP
 PERLVARI(Gmmap_page_size, IV, 0)

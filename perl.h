@@ -3140,15 +3140,7 @@ typedef pthread_key_t	perl_key;
  * out there, Solaris being the most prominent.
  */
 #ifndef PERL_FLUSHALL_FOR_CHILD
-# if defined(USE_PERLIO) || defined(FFLUSH_NULL) || defined(USE_SFIO)
 #  define PERL_FLUSHALL_FOR_CHILD	PerlIO_flush((PerlIO*)NULL)
-# else
-#  ifdef FFLUSH_ALL
-#   define PERL_FLUSHALL_FOR_CHILD	my_fflush_all()
-#  else
-#   define PERL_FLUSHALL_FOR_CHILD	NOOP
-#  endif
-# endif
 #endif
 
 #ifndef PERL_WAIT_FOR_CHILDREN
@@ -4117,22 +4109,17 @@ typedef Sighandler_t Sigsave_t;
 # define RUNOPS_DEFAULT Perl_runops_standard
 #endif
 
-#ifdef USE_PERLIO
 EXTERN_C void PerlIO_teardown(void);
-# ifdef USE_ITHREADS
-#  define PERLIO_INIT MUTEX_INIT(&PL_perlio_mutex)
-#  define PERLIO_TERM 				\
+#ifdef USE_ITHREADS
+# define PERLIO_INIT MUTEX_INIT(&PL_perlio_mutex)
+# define PERLIO_TERM 				\
 	STMT_START {				\
 		PerlIO_teardown();		\
 		MUTEX_DESTROY(&PL_perlio_mutex);\
 	} STMT_END
-# else
-#  define PERLIO_INIT
-#  define PERLIO_TERM	PerlIO_teardown()
-# endif
 #else
-#  define PERLIO_INIT
-#  define PERLIO_TERM
+# define PERLIO_INIT
+# define PERLIO_TERM	PerlIO_teardown()
 #endif
 
 #ifdef MYMALLOC
@@ -4703,9 +4690,7 @@ EXTCONST char PL_bincompat_options[] =
 #  ifdef USE_LONG_DOUBLE
 			     " USE_LONG_DOUBLE"
 #  endif
-#  ifdef USE_PERLIO
 			     " USE_PERLIO"
-#  endif
 #  ifdef USE_REENTRANT_API
 			     " USE_REENTRANT_API"
 #  endif

@@ -2069,7 +2069,7 @@ pMXE	|SV*	|sv_setsv_cow	|NULLOK SV* dstr|NN SV* sstr
 
 Aop	|const char *|PerlIO_context_layers|NULLOK const char *mode
 
-#if defined(USE_PERLIO) && !defined(USE_SFIO)
+#if !defined(USE_SFIO)
 Ap	|int	|PerlIO_close		|NULLOK PerlIO *f
 Ap	|int	|PerlIO_fill		|NULLOK PerlIO *f
 Ap	|int	|PerlIO_fileno		|NULLOK PerlIO *f

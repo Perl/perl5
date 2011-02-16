@@ -29,9 +29,7 @@
 #define PERL_IN_UNIVERSAL_C
 #include "perl.h"
 
-#ifdef USE_PERLIO
 #include "perliol.h" /* For the PERLIO_F_XXX */
-#endif
 
 /*
  * Contributed by Graham Barr  <Graham.Barr@tiuk.ti.com>
@@ -840,7 +838,6 @@ XS(XS_PerlIO_get_layers)
     dXSARGS;
     if (items < 1 || items % 2 == 0)
 	croak_xs_usage(cv, "filehandle[,args]");
-#ifdef USE_PERLIO
     {
 	SV *	sv;
 	GV *	gv;
@@ -957,7 +954,6 @@ XS(XS_PerlIO_get_layers)
 	     XSRETURN(nitem);
 	}
     }
-#endif
 
     XSRETURN(0);
 }

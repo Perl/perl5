@@ -41,8 +41,7 @@ BEGIN {
 	}
     }
 
-    if (not defined $where &&		# Try dscl
-	$Config{useperlio} eq 'define') {	# need perlio
+    if (not defined $where) {		# Try dscl
 
 	# Map dscl items to passwd fields, and provide support for
 	# mucking with the dscl output if we need to (and we do).

@@ -666,9 +666,6 @@ EOCBU
 #  non-debugging builds and 'y' for all others
 
 usemymalloc='n'
-case "$useperlio" in
-    $undef|false|[nN]*) usemymalloc='y' ;;
-    esac
 
 # malloc wrap works
 case "$usemallocwrap" in

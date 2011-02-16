@@ -226,18 +226,6 @@ like( $@, qr/Bad filehandle:\s+$afile/,          '       right error' );
     ok( open(my $stdin,  "<&", fileno STDIN),   'dup fileno(STDIN) into lexical fh') or _diag $!;
 }
 
-SKIP: {
-    skip "This perl uses perlio", 1 if $Config{useperlio};
-    skip "miniperl cannot be relied on to load %Errno"
-	if $ENV{PERL_CORE_MINITEST};
-    # Force the reference to %! to be run time by writing ! as {"!"}
-    skip "This system doesn't understand EINVAL", 1
-	unless exists ${"!"}{EINVAL};
-
-    no warnings 'io';
-    ok(!open(F,'>',\my $s) && ${"!"}{EINVAL}, 'open(reference) raises EINVAL');
-}
-
 {
     ok( !eval { open F, "BAR", "QUUX" },       'Unknown open() mode' );
     like( $@, qr/\QUnknown open() mode 'BAR'/, '       right error' );
@@ -273,7 +261,6 @@ SKIP: {
 }
     
 SKIP: {
-    skip("These tests use perlio", 5) unless $Config{useperlio};
     my $w;
     use warnings 'layer';
     local $SIG{__WARN__} = sub { $w = shift };

@@ -778,7 +778,7 @@
 #if defined(USE_LOCALE_COLLATE)
 #define sv_collxfrm_flags(a,b,c)	Perl_sv_collxfrm_flags(aTHX_ a,b,c)
 #endif
-#if defined(USE_PERLIO) && !defined(USE_SFIO)
+#if !defined(USE_SFIO)
 #define PerlIO_clearerr(a)	Perl_PerlIO_clearerr(aTHX_ a)
 #define PerlIO_close(a)		Perl_PerlIO_close(aTHX_ a)
 #define PerlIO_eof(a)		Perl_PerlIO_eof(aTHX_ a)

@@ -16,8 +16,8 @@
 
 /* This file contains the functions needed to implement PerlIO, which
  * is Perl's private replacement for the C stdio library. This is used
- * by default unless you compile with -Uuseperlio or run with
- * PERLIO=:stdio (but don't do this unless you know what you're doing)
+ * by default unless run with PERLIO=:stdio (but don't do this unless
+ * you know what you're doing)
  */
 
 /*

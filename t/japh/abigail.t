@@ -242,10 +242,6 @@ truncate$0,-1+-s$0;exec$0;}}//rekcaH_lreP_rehtona_tsuJ
     }
 
     use Config;
-    unless (defined $Config {useperlio}) {
-        skip "Uuseperlio", 2 * @programs;
-        last
-    }
 
     my $i = 1;
     foreach my $program (@programs) {

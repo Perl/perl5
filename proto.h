@@ -7125,7 +7125,7 @@ PERL_CALLCONV char*	Perl_sv_collxfrm_flags(pTHX_ SV *const sv, STRLEN *const nxp
 	assert(sv); assert(nxp)
 
 #endif
-#if defined(USE_PERLIO) && !defined(USE_SFIO)
+#if !defined(USE_SFIO)
 PERL_CALLCONV void	Perl_PerlIO_clearerr(pTHX_ PerlIO *f);
 PERL_CALLCONV int	Perl_PerlIO_close(pTHX_ PerlIO *f);
 PERL_CALLCONV int	Perl_PerlIO_eof(pTHX_ PerlIO *f);
