@@ -257,7 +257,7 @@ open FH1, "../harness"; close FH1;
 no warnings 'io' ;
 open FH2, "../harness"; close FH2;
 EXPECT
-Filehandle STDOUT reopened as FH1 only for input at - line 14.
+Filehandle STDOUT reopened as FH1 only for input at - line 5.
 ########
 # doio.c [Perl_do_openn]
 use Config;
@@ -268,4 +268,4 @@ no warnings 'io' ;
 open my $fh2, ">doiowarn.tmp"; close $fh2;
 unlink "doiowarn.tmp";
 EXPECT
-Filehandle STDIN reopened as $fh1 only for output at - line 14.
+Filehandle STDIN reopened as $fh1 only for output at - line 5.
