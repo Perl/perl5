@@ -191,7 +191,7 @@ PERL_EXPORT_C void PerlIO_clone(pTHX_ PerlInterpreter *proto,
 
 /* The default buffer size for the perlio buffering layer */
 #ifndef PERLIOBUF_DEFAULT_BUFSIZ
-#define PERLIOBUF_DEFAULT_BUFSIZ 4096
+#define PERLIOBUF_DEFAULT_BUFSIZ (BUFSIZ > 8192 ? BUFSIZ : 8192)
 #endif
 
 #ifndef SEEK_SET
