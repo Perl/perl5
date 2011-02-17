@@ -1501,6 +1501,19 @@ Perl_is_utf8_idfirst(pTHX_ const U8 *p) /* The naming is historical. */
 }
 
 bool
+Perl_is_utf8_xidfirst(pTHX_ const U8 *p) /* The naming is historical. */
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_IS_UTF8_XIDFIRST;
+
+    if (*p == '_')
+	return TRUE;
+    /* is_utf8_idstart would be more logical. */
+    return is_utf8_common(p, &PL_utf8_xidstart, "XIdStart");
+}
+
+bool
 Perl_is_utf8_idcont(pTHX_ const U8 *p)
 {
     dVAR;
@@ -1510,6 +1523,18 @@ Perl_is_utf8_idcont(pTHX_ const U8 *p)
     if (*p == '_')
 	return TRUE;
     return is_utf8_common(p, &PL_utf8_idcont, "IdContinue");
+}
+
+bool
+Perl_is_utf8_xidcont(pTHX_ const U8 *p)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_IS_UTF8_XIDCONT;
+
+    if (*p == '_')
+	return TRUE;
+    return is_utf8_common(p, &PL_utf8_idcont, "XIdContinue");
 }
 
 bool

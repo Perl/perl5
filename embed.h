@@ -251,6 +251,8 @@
 #define is_utf8_string_loclen	Perl_is_utf8_string_loclen
 #define is_utf8_upper(a)	Perl_is_utf8_upper(aTHX_ a)
 #define is_utf8_xdigit(a)	Perl_is_utf8_xdigit(aTHX_ a)
+#define is_utf8_xidcont(a)	Perl_is_utf8_xidcont(aTHX_ a)
+#define is_utf8_xidfirst(a)	Perl_is_utf8_xidfirst(aTHX_ a)
 #define leave_scope(a)		Perl_leave_scope(aTHX_ a)
 #define lex_bufutf8()		Perl_lex_bufutf8(aTHX)
 #define lex_discard_to(a)	Perl_lex_discard_to(aTHX_ a)

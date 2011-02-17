@@ -287,6 +287,8 @@ Perl_is_utf8_string_loc
 Perl_is_utf8_string_loclen
 Perl_is_utf8_upper
 Perl_is_utf8_xdigit
+Perl_is_utf8_xidcont
+Perl_is_utf8_xidfirst
 Perl_leave_scope
 Perl_lex_bufutf8
 Perl_lex_discard_to

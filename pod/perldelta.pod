@@ -801,6 +801,12 @@ again and, if the entries are re-created too many times, dies with a
 [perl #78494] When pipes are shared between threads, the C<close> function
 (and any implicit close, such as on thread exit) no longer blocks.
 
+=item *
+
+Several contexts no longer allow a Unicode character to begin a word
+that should never begin words, for an example an accent that must follow
+another character previously could precede all other characters.
+
 =back
 
 =head1 Known Problems

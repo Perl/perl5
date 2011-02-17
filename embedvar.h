@@ -361,6 +361,8 @@
 #define PL_utf8_toupper		(vTHX->Iutf8_toupper)
 #define PL_utf8_upper		(vTHX->Iutf8_upper)
 #define PL_utf8_xdigit		(vTHX->Iutf8_xdigit)
+#define PL_utf8_xidcont		(vTHX->Iutf8_xidcont)
+#define PL_utf8_xidstart	(vTHX->Iutf8_xidstart)
 #define PL_utf8cache		(vTHX->Iutf8cache)
 #define PL_utf8locale		(vTHX->Iutf8locale)
 #define PL_warnhook		(vTHX->Iwarnhook)
@@ -693,6 +695,8 @@
 #define PL_Iutf8_toupper	PL_utf8_toupper
 #define PL_Iutf8_upper		PL_utf8_upper
 #define PL_Iutf8_xdigit		PL_utf8_xdigit
+#define PL_Iutf8_xidcont	PL_utf8_xidcont
+#define PL_Iutf8_xidstart	PL_utf8_xidstart
 #define PL_Iutf8cache		PL_utf8cache
 #define PL_Iutf8locale		PL_utf8locale
 #define PL_Iwarnhook		PL_warnhook
