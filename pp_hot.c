@@ -2252,6 +2252,15 @@ PP(pp_subst)
 
     matched = CALLREGEXEC(rx, s, strend, orig, 0, TARG, NULL,
 			 r_flags | REXEC_CHECKED);
+
+    if (!matched) {
+      ret_no:
+	SPAGAIN;
+	PUSHs(rpm->op_pmflags & PMf_NONDESTRUCT ? TARG : &PL_sv_no);
+	LEAVE_SCOPE(oldsave);
+	RETURN;
+    }
+
     /* known replacement string? */
     if (dstr) {
 	if (SvTAINTED(dstr))
@@ -2261,7 +2270,7 @@ PP(pp_subst)
 	 * but only if it matched; see
 	 * http://www.nntp.perl.org/group/perl.perl5.porters/2010/04/msg158809.html
 	 */
-	if (matched && DO_UTF8(dstr) && ! DO_UTF8(TARG)) {
+	if (DO_UTF8(dstr) && ! DO_UTF8(TARG)) {
 	    char * const orig_pvx =  SvPVX(TARG);
 	    const STRLEN new_len = sv_utf8_upgrade_nomg(TARG);
 
@@ -2294,14 +2303,6 @@ PP(pp_subst)
 	doutf8 = FALSE;
     }
     
-    if (!matched) {
-      ret_no:
-	SPAGAIN;
-	PUSHs(rpm->op_pmflags & PMf_NONDESTRUCT ? TARG : &PL_sv_no);
-	LEAVE_SCOPE(oldsave);
-	RETURN;
-    }
-
     /* can do inplace substitution? */
     if (c
 #ifdef PERL_OLD_COPY_ON_WRITE
