@@ -389,6 +389,7 @@ sub croak { require Carp; Carp::croak(@_) }
                         no strict 'refs';
                         
                         $list = &{$map};
+                        warnings::warnif('deprecated', "User-defined case-mapping '$type' is deprecated");
                         last GETFILE;
                     }
                 }

@@ -5262,6 +5262,15 @@ currently reserved for future use, as the exact behaviour has not
 been decided. (Simply returning the boolean opposite of the
 modified string is usually not particularly useful.)
 
+=item User-defined case-mapping '%s' is deprecated
+
+(W deprecated) You defined a function, such as C<ToLower> that overrides
+the standard case mapping, such as C<lc()> gives.  This feature is being
+deprecated due to its many issues, as documented in
+L<perlunicode/User-Defined Case Mappings (for serious hackers only)>.
+It is planned to remove this feature in Perl 5.16.  A CPAN module
+providing improved functionality is being prepared.
+
 =item UTF-16 surrogate U+%X
 
 (W utf8) You had a UTF-16 surrogate in a context where they are
