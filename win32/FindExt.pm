@@ -38,7 +38,7 @@ sub set_static_extensions {
     # (with possible exclusions)
     %static = ();
     my @list = @_;
-    if ($_[0] eq '*') {
+    if (@_ and $_[0] eq '*') {
 	my %excl = map {$_=>1} map {m/^!(.*)$/} @_[1 .. $#_];
 	@list = grep {!exists $excl{$_}} keys %ext;
     }
