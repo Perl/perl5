@@ -1206,15 +1206,19 @@ sub _numeric {
         }
         $NUMERIC{$value[0]} = $value[1];
     }
-    use Math::Trig;
-    my $pi = acos(-1.0);
-    $NUMERIC{"03C0"} = $pi;
+
+    # Decided unsafe to use these that aren't officially part of the Unicode
+    # standard.
+    #use Math::Trig;
+    #my $pi = acos(-1.0);
+    #$NUMERIC{"03C0"} = $pi;
 
     # Euler's constant, not to be confused with Euler's number
-    $NUMERIC{"2107"} = 0.57721566490153286060651209008240243104215933593992;
+    #$NUMERIC{"2107"} = 0.57721566490153286060651209008240243104215933593992;
 
     # Euler's number
-    $NUMERIC{"212F"} = 2.7182818284590452353602874713526624977572;
+    #$NUMERIC{"212F"} = 2.7182818284590452353602874713526624977572;
+
     return;
 }
 
@@ -1228,13 +1232,19 @@ doesn't think the entire string has a completely valid, safe numeric value.
 If the string is just one character in length, the Unicode numeric value
 is returned if it has one, or C<undef> otherwise.  Note that this need
 not be a whole number.  C<num("\N{TIBETAN DIGIT HALF ZERO}")>, for
-example returns -0.5.  A few characters to which Unicode doesn't officially
-assign a numeric value are considered numeric by C<num>.
-These are:
+example returns -0.5.
 
- EULER CONSTANT             0.5772...  (this is NOT Euler's number)
- SCRIPT SMALL E             2.71828... (this IS Euler's number)
- GREEK SMALL LETTER PI      3.14159...
+=cut
+
+#A few characters to which Unicode doesn't officially
+#assign a numeric value are considered numeric by C<num>.
+#These are:
+
+# EULER CONSTANT             0.5772...  (this is NOT Euler's number)
+# SCRIPT SMALL E             2.71828... (this IS Euler's number)
+# GREEK SMALL LETTER PI      3.14159...
+
+=pod
 
 If the string is more than one character, C<undef> is returned unless
 all its characters are decimal digits (that is they would match C<\d+>),
