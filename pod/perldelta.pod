@@ -750,7 +750,8 @@ compiled (d1bfb64, 2df5bdd, 0d311cd and 6012dc8)
 
 =item *
 
-[perl #81750] When strict 'refs' mode is off, C<%{...}> returns C<undef> if
+[perl #81750] When strict 'refs' mode is off,
+C<%{...}> in rvalue context returns C<undef> if
 its argument is undefined. An optimisation introduced in perl 5.12.0 to
 make C<keys %{...}> faster when used as a boolean did not take this into
 account, causing C<keys %{+undef}> (and C<keys %$foo> when C<$foo> is
