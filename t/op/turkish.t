@@ -76,7 +76,7 @@ sub ToLower {
 is(uc("\x{DF}\x{DF}"), "SSSS", "Verify that uc of non-overridden multi-char works");
 is(uc("aa"), "AA", "Verify that uc of non-overridden ASCII works");
 is(uc("\x{101}\x{101}"), "\x{100}\x{100}", "Verify that uc of non-overridden utf8 works");
-is(uc("ii"), "\x{130}\x{130}", "Verify uc('i') eq \\x{130}");
+is(uc("ii"), "\x{130}\x{130}", "Verify uc('ii') eq \\x{130}\\x{130}");
 
 is(ucfirst("\x{DF}\x{DF}"), "Ss\x{DF}", "Verify that ucfirst of non-overridden multi-char works");
 is(ucfirst("\x{101}\x{101}"), "\x{100}\x{101}", "Verify that ucfirst of non-overridden utf8 works");
@@ -89,7 +89,7 @@ is(lc("\x{0178}\x{0178}"), "\x{FF}\x{FF}", "Verify that lc of non-overridden utf
 is(lc("II"), "\x{131}\x{131}", "Verify that lc('I') eq \\x{131}");
 is(lc("IG\x{0307}IG\x{0307}"), "\x{131}g\x{0307}\x{131}g\x{0307}", "Verify that lc(\"I...\\x{0307}\") eq \"\\x{131}...\\x{0307}\"");
 is(lc("I\x{0307}I\x{0307}"), "ii", "Verify that lc(\"I\\x{0307}\") removes the \\x{0307}, leaving 'i'");
-is(lc("\x{130}\x{130}"), "ii", "Verify that lc(\"\\x{130}\") eq 'i'");
+is(lc("\x{130}\x{130}"), "ii", "Verify that lc(\"\\x{130}\\x{130}\") eq 'ii'");
 
 is(lcfirst("AA"), "aA", "Verify that lcfirst of non-overridden ASCII works");
 is(lcfirst("\x{C0}\x{C0}"), "\x{E0}\x{C0}", "Verify that lcfirst of non-overridden latin1 works");
