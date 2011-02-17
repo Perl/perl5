@@ -131,12 +131,13 @@ sub _ok {
 
     _print "$out\n";
 
-    unless ($pass) {
-	_diag "# Failed $where\n";
+    if ($pass) {
+	note @mess; # Ensure that the message is properly escaped.
     }
-
-    # Ensure that the message is properly escaped.
-    _diag @mess;
+    else {
+	_diag "# Failed $where\n";
+	_diag @mess;
+    }
 
     $test = $test + 1; # don't use ++
 
