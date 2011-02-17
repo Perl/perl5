@@ -128,6 +128,23 @@ use strict;
 # use warnings; Pulls in Carp
 # use vars pulls in Carp
 
+sub bincompat_options {
+    return sort split ' ', (Internals::V())[0];
+}
+
+sub non_bincompat_options {
+    return sort split ' ', (Internals::V())[1];
+}
+
+sub compile_date {
+    return (Internals::V())[2]
+}
+
+sub local_patches {
+    my (undef, undef, undef, @patches) = Internals::V();
+    return @patches;
+}
+
 sub _V {
     my ($bincompat, $non_bincompat, $date, @patches) = Internals::V();
 
@@ -170,7 +187,9 @@ ENDOFBEG
 
 my $export_funcs = <<'EOT';
 my %Export_Cache = (myconfig => 1,
-		    config_sh => 1, config_vars => 1, config_re => 1);
+		    config_sh => 1, config_vars => 1, config_re => 1,
+		    bincompat_options => 1, non_bincompat_options => 1,
+		    compile_date => 1, local_patches => 1);
 EOT
 
 my %export_ok = eval $export_funcs or die;
@@ -844,6 +863,28 @@ printed on a separate line in the form:
 
 Names which are unknown are output as C<name='UNKNOWN';>.
 See also C<-V:name> in L<perlrun/Switches>.
+
+=item bincompat_options()
+
+Returns a list of C pre-processor options used when compiling this F<perl>
+binary, which affect its binary compatibility with extensions.
+C<bincompat_options()> and C<non_bincompat_options()> are shown together in
+the output of C<perl -V> as I<Compile-time options>.
+
+=item non_bincompat_options()
+
+Returns a list of C pre-processor options used when compiling this F<perl>
+binary, which do not affect binary compatibility with extensions.
+
+=item compile_date()
+
+Returns the compile date (as a string), equivalent to what is shown by
+C<perl -V>
+
+=item local_patches()
+
+Returns a list of the names of locally applied patches, equivalent to what
+is shown by C<perl -V>.
 
 =back
 
