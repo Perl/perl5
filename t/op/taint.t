@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 684;
+plan tests => 687;
 
 $| = 1;
 
@@ -2174,6 +2174,18 @@ end
     my $y = $ENV{PATH} . $x->(); # Compile $x inside a tainted expression
     my $z = $x->();
     ok( ! tainted($z), "Constants folded value not tainted");
+}
+
+{
+    # now that regexes are first class SVs, make sure that they themselves
+    # as well as references to them are tainted
+
+    my $rr = qr/(.)$TAINT/;
+    my $r = $$rr; # bare REGEX
+    my $s ="abc";
+    ok($s =~ s/$r/x/, "match bare regex");
+    ok(tainted($s), "match bare regex taint");
+    is($s, 'xbc', "match bare regex taint value");
 }
 
 # This may bomb out with the alarm signal so keep it last

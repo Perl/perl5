@@ -240,8 +240,10 @@ PP(pp_regcomp)
 
 #ifndef INCOMPLETE_TAINTS
     if (PL_tainting) {
-	if (PL_tainted)
+	if (PL_tainted) {
+	    SvTAINTED_on((SV*)re);
 	    RX_EXTFLAGS(re) |= RXf_TAINTED;
+	}
 	else
 	    RX_EXTFLAGS(re) &= ~RXf_TAINTED;
     }

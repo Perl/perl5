@@ -1235,8 +1235,10 @@ PP(pp_qr)
 	(void)sv_bless(rv, stash);
     }
 
-    if (RX_EXTFLAGS(rx) & RXf_TAINTED)
+    if (RX_EXTFLAGS(rx) & RXf_TAINTED) {
         SvTAINTED_on(rv);
+        SvTAINTED_on(SvRV(rv));
+    }
     XPUSHs(rv);
     RETURN;
 }
