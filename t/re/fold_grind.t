@@ -207,7 +207,7 @@ $tests{0x3A} = [ 0x3A ];
 $tests{0xF7} = [ 0xF7 ];
 $tests{0x2C7} = [ 0x2C7 ];
 
-my $clump_execs = 10000;    # Speed up by building an 'exec' of many tests
+my $clump_execs = 1000;    # Speed up by building an 'exec' of many tests
 my @eval_tests;
 
 # To cut down on the number of tests
