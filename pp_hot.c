@@ -2059,18 +2059,19 @@ PP(pp_iter)
 /*
 A description of how taint works in pattern matching and substitution.
 
-While the pattern is being assembled and them compiled, PL_tainted will
-get set if any part of the pattern is tainted, e.g. qr/.*$tainted/.
-At the end of pattern compilation, the RXf_TAINTED flag is set on the
-pattern if PL_tainted is set.
+While the pattern is being assembled/concatenated and them compiled,
+PL_tainted will get set if any component of the pattern is tainted, e.g.
+/.*$tainted/.  At the end of pattern compilation, the RXf_TAINTED flag
+is set on the pattern if PL_tainted is set.
 
-When the pattern is copied, e.g. $r = qr/..../, the SV holding the ref the
-pattern is marked as tainted. This means that subsequent usage, such as
-/x$r/, will set PL_tainted and thus RXf_TAINTED on the new pattern too.
+When the pattern is copied, e.g. $r = qr/..../, the SV holding the ref to
+the pattern is marked as tainted. This means that subsequent usage, such
+as /x$r/, will set PL_tainted, and thus RXf_TAINTED, on the new pattern too.
 
 During execution of a pattern, locale-variant ops such as ALNUML set the
 local flag RF_tainted. At the end of execution, the engine sets the
-RXf_TAINTED_SEEN on the pattern if RF_tainted got set.
+RXf_TAINTED_SEEN on the pattern if RF_tainted got set, or clears it
+otherwise.
 
 In addition, RXf_TAINTED_SEEN is used post-execution by the get magic code
 of $1 et al to indicate whether the returned value should be tainted.
@@ -2115,8 +2116,8 @@ The overall action of pp_subst is:
     * Whenever control is being returned to perl code (either by falling
 	off the "end" of pp_subst/pp_substcont, or by entering a /e block),
 	use the flag bits in rxtainted to make all the appropriate types of
-	destination taint visible; e.g. set RXf_TAINTED_SEEN so that $1 et
-	al will appear tainted.
+	destination taint visible; e.g. set RXf_TAINTED_SEEN so that $1
+	et al will appear tainted.
 
 pp_match is just a simpler version of the above.
 
