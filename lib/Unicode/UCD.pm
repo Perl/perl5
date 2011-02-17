@@ -1249,7 +1249,7 @@ set.
 C<num> errs on the side of safety, and there may be valid strings of
 decimal digits that it doesn't recognize.  Note that Unicode defines
 a number of "digit" characters that aren't "decimal digit" characters.
-"Decimal digits" have the property that they have a positional value, that is
+"Decimal digits" have the property that they have a positional value, i.e.,
 there is a units position, a 10's position, a 100's, etc, AND they are
 arranged in Unicode in blocks of 10 contiguous code points.  The Chinese
 digits, for example, are not in such a contiguous block, and so Unicode
@@ -1258,8 +1258,8 @@ match them.  A single-character string containing one of these digits will
 have its decimal value returned by C<num>, but any longer string containing
 only these digits will return C<undef>.
 
-Strings of sub- and superscripts are not recognized as numbers.  You can
-use either of the compatibility decompositions in Unicode::Normalize to
+Strings of multiple sub- and superscripts are not recognized as numbers.  You
+can use either of the compatibility decompositions in Unicode::Normalize to
 change these into digits, and then call C<num> on the result.
 
 =cut
