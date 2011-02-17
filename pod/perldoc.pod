@@ -80,7 +80,7 @@ Consider arguments as file names; no search in directories will be performed.
 
 =item B<-f> I<perlfunc>
 
-The B<-f> option followed by the name of a perl built in function will
+The B<-f> option followed by the name of a perl built-in function will
 extract the documentation of this function from L<perlfunc>.
 
 Example:
@@ -160,7 +160,7 @@ You can use C<-w optionname> (without a value) as shorthand for
 C<-w optionname:I<TRUE>>.  This is presumably useful in cases of on/off
 features like: C<-w page_numbering>.
 
-You can use a "=" instead of the ":", as in: C<-w textsize=15>.  This
+You can use an "=" instead of the ":", as in: C<-w textsize=15>.  This
 might be more (or less) convenient, depending on what shell you use.
 
 =item B<-X>
@@ -172,12 +172,12 @@ qualified filenames, one per line.
 
 =item B<-L> I<language_code>
 
-This allows to specify the I<language code> for desired language translation.
-If C<POD2::E<lt>language_codeE<gt>> package doesn't exist (or isn't installed
-in your system), the switch will be ignored. 
-All available translation packages should be found under the C<POD2::>
-namespace. See L<POD2::IT> (or L<POD2::FR>) in order to see how to create and
-integrate new localized C<POD2::*> pod documentation packages in
+This allows one to specify the I<language code> for the desired language
+translation. If the C<POD2::E<lt>language_codeE<gt>> package isn't
+installed in your system, the switch is ignored. 
+All available translation packages are to be found under the C<POD2::>
+namespace. See L<POD2::IT> (or L<POD2::FR>) to see how to create new
+localized C<POD2::*> documentation packages and integrate them into
 L<Pod::Perldoc>.
 
 =item B<PageName|ModuleName|ProgramName>
@@ -226,7 +226,7 @@ command line arguments.
 
 Useful values for C<PERLDOC> include C<-oman>, C<-otext>, C<-otk>, C<-ortf>,
 C<-oxml>, and so on, depending on what modules you have on hand; or
-exactly specify the formatter class with C<-MPod::Perldoc::ToMan>
+the formatter class may be specified exactly with C<-MPod::Perldoc::ToMan>
 or the like.
 
 C<perldoc> also searches directories
