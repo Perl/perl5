@@ -3332,6 +3332,7 @@ ext/B/t/terse.t		See if B::Terse works
 ext/B/t/walkoptree.t	See if B::walkoptree (and friends) work
 ext/B/t/xref.t		See if B::Xref works
 ext/B/typemap			Compiler backend interface types
+ext/Devel-DProf/bin/dprofpp	Perl code profile post-processor
 ext/Devel-DProf/Changes		Perl code profiler changelog
 ext/Devel-DProf/DProf.pm	Perl code profiler
 ext/Devel-DProf/dprof/test1_t	Perl code profiler tests
