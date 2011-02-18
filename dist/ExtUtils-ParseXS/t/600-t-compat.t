@@ -76,7 +76,8 @@ foreach my $test (@tests) {
   @standard_typemap_locations = @{ $test->{std_maps} };
 
   my $res = [_process_typemaps([@local_tmaps], '.')];
-  my $res_new = [process_typemaps([@local_tmaps], '.')];
+  my $tm = process_typemaps([@local_tmaps], '.');
+  my $res_new = [map $tm->$_(), qw(_get_typemap_hash _get_prototype_hash _get_inputmap_hash _get_outputmap_hash) ];
 
   # Normalize trailing whitespace. Let's be that lenient, mkay?
   for ($res, $res_new) {

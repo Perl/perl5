@@ -289,76 +289,7 @@ directory.
 
 =item * Return Value
 
-Upon success, returns a list of four hash references.  (This will probably be
-refactored.)  Here is a I<rough> description of what is in these hashrefs:
-
-=over 4
-
-=item * C<$type_kind_ref>
-
-  {
-    'char **' => 'T_PACKEDARRAY',
-    'bool_t' => 'T_IV',
-    'AV *' => 'T_AVREF',
-    'InputStream' => 'T_IN',
-    'double' => 'T_DOUBLE',
-    # ...
-  }
-
-Keys:  C types.  Values:  XS types identifiers
-
-=item * C<$proto_letter_ref>
-
-  {
-    'char **' => '$',
-    'bool_t' => '$',
-    'AV *' => '$',
-    'InputStream' => '$',
-    'double' => '$',
-    # ...
-  }
-
-Keys: C types.  Values. Corresponding prototype letters.
-
-=item * C<$input_expr_ref>
-
-  {
-    'T_CALLBACK' => '	$var = make_perl_cb_$type($arg)
-  ',
-    'T_OUT' => '	$var = IoOFP(sv_2io($arg))
-  ',
-    'T_REF_IV_PTR' => '	if (sv_isa($arg, \\"${ntype}\\")) {
-    # ...
-  }
-
-Keys:  XS typemap identifiers.  Values:  Newline-terminated strings that
-will be written to C source code (F<.c>) files.   The strings are C code, but
-with Perl variables whose values will be interpolated at F<xsubpp>'s runtime
-by one of the C<eval EXPR> statements in ExtUtils::ParseXS.
-
-=item * C<$output_expr_ref>
-
-  {
-    'T_CALLBACK' => '	sv_setpvn($arg, $var.context.value().chp(),
-  		$var.context.value().size());
-  ',
-    'T_OUT' => '	{
-  	    GV *gv = newGVgen("$Package");
-  	    if ( do_open(gv, "+>&", 3, FALSE, 0, 0, $var) )
-  		sv_setsv($arg, sv_bless(newRV((SV*)gv), gv_stashpv("$Package",1)));
-  	    else
-  		$arg = &PL_sv_undef;
-  	}
-  ',
-    # ...
-  }
-
-Keys:  XS typemap identifiers.  Values:  Newline-terminated strings that
-will be written to C source code (F<.c>) files.   The strings are C code, but
-with Perl variables whose values will be interpolated at F<xsubpp>'s runtime
-by one of the C<eval EXPR> statements in ExtUtils::ParseXS.
-
-=back
+Upon success, returns an L<ExtUtils::Typemaps> object.
 
 =back
 
@@ -385,12 +316,7 @@ sub process_typemaps {
     $typemap->merge(file => $typemap_loc, replace => 1);
   }
 
-  return (
-    $typemap->_get_typemap_hash(),
-    $typemap->_get_prototype_hash(),
-    $typemap->_get_inputmap_hash(),
-    $typemap->_get_outputmap_hash(),
-  );
+  return $typemap;
 }
 
 =head2 C<make_targetable()>

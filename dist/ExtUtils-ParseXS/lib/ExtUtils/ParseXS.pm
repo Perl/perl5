@@ -137,25 +137,7 @@ sub process_file {
     select $args{output};
   }
 
-  (
-    $self->{type_kind},
-    $self->{proto_letter},
-    $self->{input_expr},
-    $self->{output_expr},
-  ) = process_typemaps( $args{typemap}, $pwd );
-
-  foreach my $value (values %{ $self->{input_expr} }) {
-    $value =~ s/;*\s+\z//;
-    # Move C pre-processor instructions to column 1 to be strictly ANSI
-    # conformant. Some pre-processors are fussy about this.
-    $value =~ s/^\s+#/#/mg;
-  }
-  foreach my $value (values %{ $self->{output_expr} }) {
-    # And again.
-    $value =~ s/^\s+#/#/mg;
-  }
-
-  my %targetable = make_targetable($self->{output_expr});
+  $self->{typemap} = process_typemaps( $args{typemap}, $pwd );
 
   my $END = "!End!\n\n";        # "impossible" keyword (multiple newline)
 
@@ -628,8 +610,9 @@ EOF
             if !$self->{retvaldone};
           $self->{args_match}->{"RETVAL"} = 0;
           $self->{var_types}->{"RETVAL"} = $self->{ret_type};
+          my $outputmap = $self->{typemap}->get_outputmap( ctype => $self->{ret_type} );
           print "\tdXSTARG;\n"
-            if $self->{optimize} and $targetable{$self->{type_kind}->{$self->{ret_type}}};
+            if $self->{optimize} and $outputmap and $outputmap->targetable;
         }
 
         if (@fake_INPUT or @fake_INPUT_pre) {
@@ -706,7 +689,8 @@ EOF
         print "\t$self->{RETVAL_code}\n";
       }
       elsif ($self->{gotRETVAL} || $wantRETVAL) {
-        my $t = $self->{optimize} && $targetable{$self->{type_kind}->{$self->{ret_type}}};
+        my $outputmap = $self->{typemap}->get_outputmap( ctype => $self->{ret_type} );
+        my $t = $self->{optimize} && $outputmap && $outputmap->targetable;
         # Although the '$var' declared in the next line is never explicitly
         # used within this 'elsif' block, commenting it out leads to
         # disaster, starting with the first 'eval qq' inside the 'elsif' block
@@ -718,24 +702,23 @@ EOF
         my $var = 'RETVAL';
         my $type = $self->{ret_type};
 
-        # 0: type, 1: with_size, 2: how, 3: how_size
-        if ($t and not $t->[1] and $t->[0] eq 'p') {
+        if ($t and not $t->{with_size} and $t->{type} eq 'p') {
           # PUSHp corresponds to setpvn.  Treat setpv directly
-          my $what = eval qq("$t->[2]");
+          my $what = eval qq("$t->{what}");
           warn $@ if $@;
 
           print "\tsv_setpv(TARG, $what); XSprePUSH; PUSHTARG;\n";
           $prepush_done = 1;
         }
         elsif ($t) {
-          my $what = eval qq("$t->[2]");
+          my $what = eval qq("$t->{what}");
           warn $@ if $@;
 
-          my $tsize = $t->[3];
+          my $tsize = $t->{what_size};
           $tsize = '' unless defined $tsize;
           $tsize = eval qq("$tsize");
           warn $@ if $@;
-          print "\tXSprePUSH; PUSH$t->[0]($what$tsize);\n";
+          print "\tXSprePUSH; PUSH$t->{type}($what$tsize);\n";
           $prepush_done = 1;
         }
         else {
@@ -1108,7 +1091,8 @@ sub INPUT_handler {
     $self->{var_num} = $self->{args_match}->{$var_name};
 
     if ($self->{var_num}) {
-      $self->{proto_arg}->[$self->{var_num}] = $self->{proto_letter}->{$var_type} || "\$";
+      my $typemap = $self->{typemap}->get_typemap(ctype => $var_type);
+      $self->{proto_arg}->[$self->{var_num}] = ($typemap && $typemap->proto) || "\$";
     }
     $self->{func_args} =~ s/\b($var_name)\b/&$1/ if $var_addr;
     if ($var_init =~ /^[=;]\s*NO_INIT\s*;?\s*$/
@@ -1681,19 +1665,22 @@ sub generate_init {
     $argsref->{printed_name},
   );
   my $arg = "ST(" . ($num - 1) . ")";
-  my ($argoff, $ntype, $tk);
+  my ($argoff, $ntype);
   $argoff = $num - 1;
+
+  my $typemaps = $self->{typemap};
 
   $type = tidy_type($type);
   blurt( $self, "Error: '$type' not in typemap"), return
-    unless defined($self->{type_kind}->{$type});
+    unless $typemaps->get_typemap(ctype => $type);
 
   ($ntype = $type) =~ s/\s*\*/Ptr/g;
   my $subtype;
   ($subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
-  $tk = $self->{type_kind}->{$type};
-  $tk =~ s/OBJ$/REF/ if $func_name =~ /DESTROY$/;
-  if ($tk eq 'T_PV' and exists $self->{lengthof}->{$var}) {
+  my $typem = $typemaps->get_typemap(ctype => $type);
+  my $xstype = $typem->xstype;
+  $xstype =~ s/OBJ$/REF/ if $func_name =~ /DESTROY$/;
+  if ($xstype eq 'T_PV' and exists $self->{lengthof}->{$var}) {
     print "\t$var" unless $printed_name;
     print " = ($type)SvPV($arg, STRLEN_length_of_$var);\n";
     die "default value not supported with length(NAME) supplied"
@@ -1701,15 +1688,21 @@ sub generate_init {
     return;
   }
   $type =~ tr/:/_/ unless $self->{hiertype};
-  blurt( $self, "Error: No INPUT definition for type '$type', typekind '$self->{type_kind}->{$type}' found"), return
-    unless defined $self->{input_expr}->{$tk};
-  my $expr = $self->{input_expr}->{$tk};
+
+  my $inputmap = $typemaps->get_inputmap(xstype => $xstype);
+  blurt( $self, "Error: No INPUT definition for type '$type', typekind '" . $type->xstype . "' found"), return
+    unless defined $inputmap;
+
+  my $expr = $inputmap->cleaned_code;
+  # Note: This gruesome bit either needs heavy rethinking or documentation. I vote for the former. --Steffen
   if ($expr =~ /DO_ARRAY_ELEM/) {
+    my $subtypemap  = $typemaps->get_typemap(ctype => $subtype);
+    my $subinputmap = $typemaps->get_inputmap(xstype => $subtypemap->xstype);
     blurt( $self, "Error: '$subtype' not in typemap"), return
-      unless defined($self->{type_kind}->{$subtype});
-    blurt( $self, "Error: No INPUT definition for type '$subtype', typekind '$self->{type_kind}->{$subtype}' found"), return
-      unless defined $self->{input_expr}->{$self->{type_kind}->{$subtype}};
-    my $subexpr = $self->{input_expr}->{$self->{type_kind}->{$subtype}};
+      unless $subtypemap;
+    blurt( $self, "Error: No INPUT definition for type '$subtype', typekind '" . $subtypemap->xstype . "' found"), return
+      unless $subinputmap;
+    my $subexpr = $subinputmap->cleaned_code;
     $subexpr =~ s/\$type/\$subtype/g;
     $subexpr =~ s/ntype/subtype/g;
     $subexpr =~ s/\$arg/ST(ix_$var)/g;
@@ -1770,6 +1763,8 @@ sub generate_output {
   my $arg = "ST(" . ($num - ($num != 0)) . ")";
   my $ntype;
 
+  my $typemaps = $self->{typemap};
+
   $type = tidy_type($type);
   if ($type =~ /^array\(([^,]*),(.*)\)/) {
     print "\t$arg = sv_newmortal();\n";
@@ -1777,21 +1772,26 @@ sub generate_output {
     print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
   }
   else {
+    my $typemap   = $typemaps->get_typemap(ctype => $type);
+    my $outputmap = $typemaps->get_outputmap(xstype => $typemap->xstype);
     blurt( $self, "Error: '$type' not in typemap"), return
-      unless defined($self->{type_kind}->{$type});
-    blurt( $self, "Error: No OUTPUT definition for type '$type', typekind '$self->{type_kind}->{$type}' found"), return
-      unless defined $self->{output_expr}->{$self->{type_kind}->{$type}};
+      unless $typemap;
+    blurt( $self, "Error: No OUTPUT definition for type '$type', typekind '" . $typemap->xstype . "' found"), return
+      unless $outputmap;
     ($ntype = $type) =~ s/\s*\*/Ptr/g;
     $ntype =~ s/\(\)//g;
     my $subtype;
     ($subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
-    my $expr = $self->{output_expr}->{$self->{type_kind}->{$type}};
+
+    my $expr = $outputmap->cleaned_code;
     if ($expr =~ /DO_ARRAY_ELEM/) {
+      my $subtypemap   = $typemaps->get_typemap(ctype => $subtype);
+      my $suboutputmap = $typemaps->get_outputmap(xstype => $subtypemap->xstype);
       blurt( $self, "Error: '$subtype' not in typemap"), return
-        unless defined($self->{type_kind}->{$subtype});
-      blurt( $self, "Error: No OUTPUT definition for type '$subtype', typekind '$self->{type_kind}->{$subtype}' found"), return
-        unless defined $self->{output_expr}->{$self->{type_kind}->{$subtype}};
-      my $subexpr = $self->{output_expr}->{$self->{type_kind}->{$subtype}};
+        unless $subtypemap;
+      blurt( $self, "Error: No OUTPUT definition for type '$subtype', typekind '" . $subtypemap->xstype . "' found"), return
+        unless $suboutputmap;
+      my $subexpr = $suboutputmap->cleaned_code;
       $subexpr =~ s/ntype/subtype/g;
       $subexpr =~ s/\$arg/ST(ix_$var)/g;
       $subexpr =~ s/\$var/${var}[ix_$var]/g;
