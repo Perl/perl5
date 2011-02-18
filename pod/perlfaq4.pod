@@ -25,8 +25,8 @@ L<perlnumber> shows the gory details of number representations and
 conversions.
 
 To limit the number of decimal places in your numbers, you can use the
-C<printf> or C<sprintf> function.  See the L<"Floating Point
-Arithmetic"|perlop> for more details.
+C<printf> or C<sprintf> function.  See
+L<perlop/"Floating Point Arithmetic"> for more details.
 
 	printf "%.2f", 10/3;
 
@@ -117,8 +117,8 @@ the real axis into the complex plane, for example the inverse sine of
 
 Rounding in financial applications can have serious implications, and
 the rounding method used should be specified precisely.  In these
-cases, it probably pays not to trust whichever system rounding is
-being used by Perl, but to instead implement the rounding function you
+cases, it probably pays not to trust whichever system of rounding is
+being used by Perl, but instead to implement the rounding function you
 need yourself.
 
 To see why, notice how you'll still have an issue on half-way-point
@@ -131,7 +131,7 @@ alternation:
 
 Don't blame Perl.  It's the same as in C.  IEEE says we have to do
 this. Perl numbers whose absolute values are integers under 2**31 (on
-32 bit machines) will work pretty much like mathematical integers.
+32-bit machines) will work pretty much like mathematical integers.
 Other numbers are not guaranteed.
 
 =head2 How do I convert between numeric representations/bases/radixes?
@@ -143,7 +143,7 @@ exhaustive.
 
 Some of the examples later in L<perlfaq4> use the C<Bit::Vector>
 module from CPAN. The reason you might choose C<Bit::Vector> over the
-perl built in functions is that it works with numbers of ANY size,
+perl built-in functions is that it works with numbers of ANY size,
 that it is optimized for speed on some operations, and for at least
 some programmers the notation might be familiar.
 
@@ -244,7 +244,7 @@ Using C<pack> and C<unpack> for larger strings:
 	substr("0" x 32 . "11110101011011011111011101111", -32)));
 	$dec = sprintf("%d", $int);
 
-	# substr() is used to left pad a 32 character string with zeros.
+	# substr() is used to left-pad a 32-character string with zeros.
 
 Using C<Bit::Vector>:
 
@@ -285,7 +285,9 @@ C<3>).  Saying C<"11" & "3"> performs the "and" operation on strings
 (yielding C<"1">).
 
 Most problems with C<&> and C<|> arise because the programmer thinks
-they have a number but really it's a string.  The rest arise because
+they have a number but really it's a string or vice versa.  To avoid this,
+stringify the arguments explicitly (using C<""> or C<qq()>) or convert them
+to numbers explicitly (using C<0+$arg>). The rest arise because
 the programmer says:
 
 	if ("\020\020" & "\101\101") {
@@ -326,7 +328,7 @@ To call a function on each integer in a (small) range, you B<can> use:
 
 	@results = map { some_func($_) } (5 .. 25);
 
-but you should be aware that the C<..> operator creates an array of
+but you should be aware that the C<..> operator creates a list of
 all integers in the range.  This can take a lot of memory for large
 ranges.  Instead use:
 
@@ -360,7 +362,7 @@ call C<srand> more than once--you make your numbers less random,
 rather than more.
 
 Computers are good at being predictable and bad at being random
-(despite appearances caused by bugs in your programs :-).  see the
+(despite appearances caused by bugs in your programs :-).  The
 F<random> article in the "Far More Than You Ever Wanted To Know"
 collection in L<http://www.cpan.org/misc/olddoc/FMTEYEWTK.tgz>, courtesy
 of Tom Phoenix, talks more about this.  John von Neumann said, "Anyone
@@ -405,7 +407,8 @@ integers (inclusive), For example: C<random_int_between(50,120)>.
 
 =head2 How do I find the day or week of the year?
 
-The C<localtime> function returns the day of the year.  Without an
+The day of the year is in the list returned
+by the C<localtime> function. Without an
 argument C<localtime> uses the current time.
 
 	my $day_of_year = (localtime)[7];
@@ -431,7 +434,7 @@ C<localtime> that returns an object:
 	my $day_of_year  = localtime->yday;
 	my $week_of_year = localtime->week;
 
-The C<Date::Calc> module provides two functions to calculate these too:.
+The C<Date::Calc> module provides two functions to calculate these, too:
 
 	use Date::Calc;
 	my $day_of_year  = Day_of_Year(  1987, 12, 18 );
@@ -453,7 +456,7 @@ On some systems, the C<POSIX> module's C<strftime()> function has been
 extended in a non-standard way to use a C<%C> format, which they
 sometimes claim is the "century". It isn't, because on most such
 systems, this is only the first two digits of the four-digit year, and
-thus cannot be used to reliably determine the current century or
+thus cannot be used to determine reliably the current century or
 millennium.
 
 =head2 How can I compare two dates and find the difference?
@@ -488,14 +491,14 @@ C<Date::Calc>, or C<DateTime> modules can help you.
 
 If it's a regular enough string that it always has the same format,
 you can split it up and pass the parts to C<timelocal> in the standard
-C<Time::Local> module.  Otherwise, you should look into the C<Date::Calc>
+C<Time::Local> module.  Otherwise, you should look into the C<Date::Calc>,
 C<Date::Parse>, and C<Date::Manip> modules from CPAN.
 
 =head2 How can I find the Julian Day?
 
 (contributed by brian d foy and Dave Cross)
 
-You can use  the C<Time::Piece> module, part of the Standard Library,
+You can use the C<Time::Piece> module, part of the Standard Library,
 which can convert a date/time to a Julian Day:
 
 	$ perl -MTime::Piece -le 'print localtime->julian_day'
@@ -2232,7 +2235,7 @@ You can look into using the C<DB_File> module and C<tie()> using the
 C<$DB_BTREE> hash bindings as documented in L<DB_File/"In Memory
 Databases">. The C<Tie::IxHash> module from CPAN might also be
 instructive. Although this does keep your hash sorted, you might not
-like the slow down you suffer from the tie interface. Are you sure you
+like the slowdown you suffer from the tie interface. Are you sure you
 need to do this? :)
 
 =head2 What's the difference between "delete" and "undef" with hashes?
@@ -2367,7 +2370,8 @@ Or if you really want to save space:
 
 Either stringify the structure yourself (no fun), or else
 get the MLDBM (which uses Data::Dumper) module from CPAN and layer
-it on top of either DB_File or GDBM_File.
+it on top of either DB_File or GDBM_File. You might also try DBM::Deep, but
+it can be a bit slow.
 
 =head2 How can I make my hash remember the order I put elements into it?
 
@@ -2543,7 +2547,7 @@ C<Data::Diver> does for you:
 
 =head2 How do I handle binary data correctly?
 
-Perl is binary clean, so it can handle binary data just fine.
+Perl is binary-clean, so it can handle binary data just fine.
 On Windows or DOS, however, you have to use C<binmode> for binary
 files to avoid conversions for line endings. In general, you should
 use C<binmode> any time you want to work with binary data.
@@ -2586,7 +2590,8 @@ expressions to match various types of numbers. Those three modules are
 available from the CPAN.
 
 If you're on a POSIX system, Perl supports the C<POSIX::strtod>
-function. Its semantics are somewhat cumbersome, so here's a
+function for converting strings to doubles (and also C<POSIX::strtol>
+for longs). Its semantics are somewhat cumbersome, so here's a
 C<getnum> wrapper function for more convenient access. This function
 takes a string and returns the number it found, or C<undef> for input
 that isn't a C float. The C<is_numeric> function is a front end to
@@ -2610,9 +2615,7 @@ C<getnum> if you just want to say, "Is this a float?"
 	sub is_numeric { defined getnum($_[0]) }
 
 Or you could check out the L<String::Scanf> module on the CPAN
-instead. The C<POSIX> module (part of the standard Perl distribution)
-provides the C<strtod> and C<strtol> for converting strings to double
-and longs, respectively.
+instead.
 
 =head2 How do I keep persistent data across program calls?
 
