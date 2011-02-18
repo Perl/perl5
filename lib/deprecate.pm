@@ -1,14 +1,14 @@
 package deprecate;
 use strict;
 use warnings;
-our $VERSION = 0.01;
+our $VERSION = 0.02;
 
 # our %Config can ignore %Config::Config, e.g. for testing
 our %Config;
 unless (%Config) { require Config; *Config = \%Config::Config; }
 
 sub import {
-    my ($package, $file, $line) = caller;
+    my ($package, $file) = caller;
     my $expect_leaf = "$package.pm";
     $expect_leaf =~ s!::!/!g;
 
