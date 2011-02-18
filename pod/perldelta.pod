@@ -323,6 +323,11 @@ C<re> has been upgraded from version 0.16 to 0.17.
 
 It now supports the double-a flag: C<use re '/aa';>
 
+The C<regmust> function used to crash when called on a regular expression
+belonging to a pluggable engine. Now it has been disabled for those.
+
+C<regmust> no longer leaks memory.
+
 =item *
 
 C<Term::UI> has been upgraded from version 0.24 to 0.26
