@@ -279,7 +279,7 @@ C<HTTP::Tiny> has been upgraded from version 0.009 to 0.010
 
 =item *
 
-C<Math::BigInt> has been upgraded from version 1.99_04 to 1.991.
+C<Math::BigInt> has been upgraded from version 1.99_04 to 1.992.
 
 =item *
 
