@@ -3073,6 +3073,10 @@ http://www.unicode.org/unicode/reports/tr21/ (Case Mappings).
  *  0 for as-documented above
  *  FOLDEQ_UTF8_NOMIX_ASCII meaning that if a non-ASCII character folds to an
 			    ASCII one, to not match
+ *  FOLDEQ_UTF8_LOCALE	    meaning that locale rules are to be used for code
+ *			    points below 256; unicode rules for above 255; and
+ *			    folds that cross those boundaries are disallowed,
+ *			    like the NOMIX_ASCII option
  */
 I32
 Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const char *s2, char **pe2, register UV l2, bool u2, U32 flags)
@@ -3139,16 +3143,43 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
     while (p1 < e1 && p2 < e2) {
 
         /* If at the beginning of a new character in s1, get its fold to use
-         * and the length of the fold */
+	 * and the length of the fold.  (exception: locale rules just get the
+	 * character to a single byte) */
         if (n1 == 0) {
-	    if (isASCII(*p1)) {
 
-		/* But if not to mix non- with ASCII, fail */
+	    /* If in locale matching, we use two sets of rules, depending on if
+	     * the code point is above or below 255.  Here, we test for and
+	     * handle locale rules */
+	    if ((flags & FOLDEQ_UTF8_LOCALE)
+		&& (! u1 || UTF8_IS_INVARIANT(*p1) || UTF8_IS_DOWNGRADEABLE_START(*p1)))
+	    {
+		/* There is no mixing of code points above and below 255. */
+		if (u2 && (! UTF8_IS_INVARIANT(*p2)
+		    && ! UTF8_IS_DOWNGRADEABLE_START(*p2)))
+		{
+		    return 0;
+		}
+
+		/* We handle locale rules by converting, if necessary, the code
+		 * point to a single byte. */
+		if (! u1 || UTF8_IS_INVARIANT(*p1)) {
+		    *foldbuf1 = *p1;
+		}
+		else {
+		    *foldbuf1 = TWO_BYTE_UTF8_TO_UNI(*p1, *(p1 + 1));
+		}
+		n1 = 1;
+	    }
+	    else if (isASCII(*p1)) {	/* Note, that here won't be both ASCII
+					   and using locale rules */
+
+		/* If trying to mix non- with ASCII, and not supposed to, fail */
 		if ((flags & FOLDEQ_UTF8_NOMIX_ASCII) && ! isASCII(*p2)) {
 		    return 0;
 		}
 		n1 = 1;
-		*foldbuf1 = toLOWER(*p1);   /* ASCII range fold is lowercase */
+		*foldbuf1 = toLOWER(*p1);   /* Folds in the ASCII range are
+					       just lowercased */
 	    }
 	    else if (u1) {
                 to_utf8_fold(p1, foldbuf1, &n1);
@@ -3161,7 +3192,23 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
         }
 
         if (n2 == 0) {    /* Same for s2 */
-	    if (isASCII(*p2)) {
+	    if ((flags & FOLDEQ_UTF8_LOCALE)
+		&& (! u2 || UTF8_IS_INVARIANT(*p2) || UTF8_IS_DOWNGRADEABLE_START(*p2)))
+	    {
+		if (u1 && (! UTF8_IS_INVARIANT(*p1)
+		    && ! UTF8_IS_DOWNGRADEABLE_START(*p1)))
+		{
+		    return 0;
+		}
+		if (! u2 || UTF8_IS_INVARIANT(*p2)) {
+		    *foldbuf2 = *p2;
+		}
+		else {
+		    *foldbuf2 = TWO_BYTE_UTF8_TO_UNI(*p2, *(p2 + 1));
+		}
+		n1 = 1;
+	    }
+	    else if (isASCII(*p2)) {
 		if (flags && ! isASCII(*p1)) {
 		    return 0;
 		}
@@ -3177,6 +3224,20 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
             }
             f2 = foldbuf2;
         }
+
+	/* Here f1 and f2 point to the beginning of the strings to compare.  In
+	 * the case of Unicode rules, these strings are the folds of the input
+	 * characters, stored in utf8.  In the case of locale rules, they are
+	 * the original characters, each stored as a single byte. */
+
+	/* Use another function to handle locale rules.  n1 has to equal n2
+	 * under them, as they've been converted to single bytes above */
+	if (flags & FOLDEQ_UTF8_LOCALE && n1 == 1) {
+	    if (! foldEQ_locale((char *) f1, (char *) f2, 1)) {
+		return 0;
+	    }
+	    n1 = n2 = 0;
+	}
 
         /* While there is more to look for in both folds, see if they
         * continue to match */
