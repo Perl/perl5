@@ -1362,7 +1362,7 @@ template code following the slash. See L<perlfunc/pack>.
 
 =item Code point 0x%X is not Unicode, no properties match it; all inverse properties do
 
-(W utf8) You had a code point above the Unicode maximum of U+10FFFF.
+(W utf8, non_unicode) You had a code point above the Unicode maximum of U+10FFFF.
 
 Perl allows strings to contain a superset of Unicode code
 points, up to the limit of what is storable in an unsigned integer on
@@ -3203,7 +3203,8 @@ the C<fallback> overloading key is specified to be true.  See L<overload>.
 
 =item Operation "%s" returns its argument for non-Unicode code point 0x%X
 
-(W) You performed an operation requiring Unicode semantics on a code
+(W utf8, non_unicode) You performed an operation requiring Unicode
+semantics on a code
 point that is not in Unicode, so what it should do is not defined.  Perl
 has chosen to have it do nothing, and warn you.
 
@@ -3211,11 +3212,12 @@ If the operation shown is "ToFold", it means that case-insensitive
 matching in a regular expression was done on the code point.
 
 If you know what you are doing you can turn off this warning by
-C<no warnings 'utf8';>.
+C<no warnings 'non_unicode';>.
 
 =item Operation "%s" returns its argument for UTF-16 surrogate U+%X
 
-(W) You performed an operation requiring Unicode semantics on a Unicode
+(W utf8, surrogate) You performed an operation requiring Unicode
+semantics on a Unicode
 surrogate.  Unicode frowns upon the use of surrogates for anything but
 storing strings in UTF-16, but semantics are (reluctantly) defined for
 the surrogates, and they are to do nothing for this operation.  Because
@@ -3225,7 +3227,7 @@ If the operation shown is "ToFold", it means that case-insensitive
 matching in a regular expression was done on the code point.
 
 If you know what you are doing you can turn off this warning by
-C<no warnings 'utf8';>.
+C<no warnings 'surrogate';>.
 
 =item Operator or semicolon missing before %s
 
@@ -4686,22 +4688,23 @@ representative, who probably put it there in the first place.
 
 =item Unicode non-character U+%X is illegal for open interchange
 
-(W utf8) Certain codepoints, such as U+FFFE and U+FFFF, are defined by the
+(W utf8, nonchar) Certain codepoints, such as U+FFFE and U+FFFF, are
+defined by the
 Unicode standard to be non-characters. Those are legal codepoints, but are
 reserved for internal use; so, applications shouldn't attempt to exchange
 them.  If you know what you are doing you can turn
-off this warning by C<no warnings 'utf8';>.
+off this warning by C<no warnings 'nonchar';>.
 
 =item Unicode surrogate U+%X is illegal in UTF-8
 
-(W utf8) You had a UTF-16 surrogate in a context where they are
+(W utf8, surrogate) You had a UTF-16 surrogate in a context where they are
 not considered acceptable.  These code points, between U+D800 and
 U+DFFF (inclusive), are used by Unicode only for UTF-16.  However, Perl
 internally allows all unsigned integer code points (up to the size limit
 available on your platform), including surrogates.  But these can cause
 problems when being input or output, which is likely where this message
 came from.  If you really really know what you are doing you can turn
-off this warning by C<no warnings 'utf8';>.
+off this warning by C<no warnings 'surrogate';>.
 
 =item Unknown BYTEORDER
 
@@ -5277,14 +5280,14 @@ providing improved functionality is being prepared.
 
 =item UTF-16 surrogate U+%X
 
-(W utf8) You had a UTF-16 surrogate in a context where they are
+(W utf8, surrogate) You had a UTF-16 surrogate in a context where they are
 not considered acceptable.  These code points, between U+D800 and
 U+DFFF (inclusive), are used by Unicode only for UTF-16.  However, Perl
 internally allows all unsigned integer code points (up to the size limit
 available on your platform), including surrogates.  But these can cause
 problems when being input or output, which is likely where this message
 came from.  If you really really know what you are doing you can turn
-off this warning by C<no warnings 'utf8';>.
+off this warning by C<no warnings 'surrogate';>.
 
 =item Value of %s can be "0"; test with defined()
 

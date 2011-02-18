@@ -67,6 +67,31 @@ Operation "uc" returns its argument for UTF-16 surrogate U+DFFF at - line 4.
 Operation "uc" returns its argument for non-Unicode code point 0x110000 at - line 14.
 ########
 use warnings 'utf8';
+my $d800  = uc(chr(0xD800));
+my $nonUnicode =  uc(chr(0x110000));
+no warnings 'surrogate';
+my $d800  = uc(chr(0xD800));
+my $nonUnicode =  uc(chr(0x110000));
+EXPECT
+Operation "uc" returns its argument for UTF-16 surrogate U+D800 at - line 2.
+Operation "uc" returns its argument for non-Unicode code point 0x110000 at - line 3.
+Operation "uc" returns its argument for non-Unicode code point 0x110000 at - line 6.
+########
+use warnings 'utf8';
+my $d800  = uc(chr(0xD800));
+my $nonUnicode =  uc(chr(0x110000));
+my $big_nonUnicode = uc(chr(0x8000_0000));
+no warnings 'non_unicode';
+my $d800  = uc(chr(0xD800));
+my $nonUnicode =  uc(chr(0x110000));
+my $big_nonUnicode = uc(chr(0x8000_0000));
+EXPECT
+Operation "uc" returns its argument for UTF-16 surrogate U+D800 at - line 2.
+Operation "uc" returns its argument for non-Unicode code point 0x110000 at - line 3.
+Operation "uc" returns its argument for non-Unicode code point 0x80000000 at - line 4.
+Operation "uc" returns its argument for UTF-16 surrogate U+D800 at - line 6.
+########
+use warnings 'utf8';
 my $d7ff  = lc pack("U", 0xD7FF);
 my $d800  = lc pack("U", 0xD800);
 my $dfff  = lc pack("U", 0xDFFF);
@@ -163,6 +188,13 @@ chr(0x110000) =~ /\p{Any}/;
 EXPECT
 Code point 0x110000 is not Unicode, no properties match it; all inverse properties do at - line 14.
 ########
+use warnings 'utf8';
+chr(0x110000) =~ /\p{Any}/;
+no warnings 'non_unicode';
+chr(0x110000) =~ /\p{Any}/;
+EXPECT
+Code point 0x110000 is not Unicode, no properties match it; all inverse properties do at - line 2.
+########
 require "../test.pl";
 use warnings 'utf8';
 my $file = tempfile();
@@ -255,6 +287,58 @@ Unicode non-character U+FFFFF is illegal for open interchange at - line 47.
 Unicode non-character U+10FFFE is illegal for open interchange at - line 49.
 Unicode non-character U+10FFFF is illegal for open interchange at - line 50.
 Code point 0x110000 is not Unicode, may not be portable at - line 51.
+########
+require "../test.pl";
+use warnings 'utf8';
+my $file = tempfile();
+open(my $fh, "+>:utf8", $file);
+print $fh "\x{D800}", "\n";
+print $fh "\x{FFFF}", "\n";
+print $fh "\x{110000}", "\n";
+close $fh;
+EXPECT
+Unicode surrogate U+D800 is illegal in UTF-8 at - line 5.
+Unicode non-character U+FFFF is illegal for open interchange at - line 6.
+Code point 0x110000 is not Unicode, may not be portable at - line 7.
+########
+require "../test.pl";
+use warnings 'utf8';
+no warnings 'surrogate';
+my $file = tempfile();
+open(my $fh, "+>:utf8", $file);
+print $fh "\x{D800}", "\n";
+print $fh "\x{FFFF}", "\n";
+print $fh "\x{110000}", "\n";
+close $fh;
+EXPECT
+Unicode non-character U+FFFF is illegal for open interchange at - line 7.
+Code point 0x110000 is not Unicode, may not be portable at - line 8.
+########
+require "../test.pl";
+use warnings 'utf8';
+no warnings 'nonchar';
+my $file = tempfile();
+open(my $fh, "+>:utf8", $file);
+print $fh "\x{D800}", "\n";
+print $fh "\x{FFFF}", "\n";
+print $fh "\x{110000}", "\n";
+close $fh;
+EXPECT
+Unicode surrogate U+D800 is illegal in UTF-8 at - line 6.
+Code point 0x110000 is not Unicode, may not be portable at - line 8.
+########
+require "../test.pl";
+use warnings 'utf8';
+no warnings 'non_unicode';
+my $file = tempfile();
+open(my $fh, "+>:utf8", $file);
+print $fh "\x{D800}", "\n";
+print $fh "\x{FFFF}", "\n";
+print $fh "\x{110000}", "\n";
+close $fh;
+EXPECT
+Unicode surrogate U+D800 is illegal in UTF-8 at - line 6.
+Unicode non-character U+FFFF is illegal for open interchange at - line 7.
 ########
 require "../test.pl";
 no warnings 'utf8';

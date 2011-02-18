@@ -45,6 +45,16 @@ will match; it won't under C</aa>.  Note that like C</a>, C</aa>
 in 5.14 will not actually be able to be used as a suffix at the end of a
 regular expression.
 
+=head2 New warnings categories for problematic (non-)Unicode code points.
+
+Three new warnings subcategories of WARN_UTF8 have been added.  These
+allow you to turn off warnings for their covered events, while allowing
+the other UTF-8 warnings to remain on.  The three categories are:
+C<surrogate> when UTF-16 surrogates are encountered;
+C<nonchar> when Unicode non-character code points are encountered;
+and C<non_unicode> when code points that are above the legal Unicode
+maximum of 0x10FFFF are encountered.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

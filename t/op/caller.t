@@ -111,8 +111,8 @@ sub testwarn {
 
     # The repetition number must be set to the value of $BYTES in
     # lib/warnings.pm
-    BEGIN { check_bits( ${^WARNING_BITS}, "\0" x 12, 'all bits off via "no warnings"' ) }
-    testwarn("\0" x 12, 'no bits');
+    BEGIN { check_bits( ${^WARNING_BITS}, "\0" x 13, 'all bits off via "no warnings"' ) }
+    testwarn("\0" x 13, 'no bits');
 
     use warnings;
     BEGIN { check_bits( ${^WARNING_BITS}, $default,

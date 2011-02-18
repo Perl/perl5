@@ -8,6 +8,9 @@
 # from information hardcoded into this script (the $tree hash), plus the
 # template for warnings.pm in the DATA section.
 #
+# When changing the number of warnings, the $BYTES in t/op/caller.t should
+# change to correspond with the same symbol's value in lib/warnings.pm
+#
 # With an argument of 'tree', just dump the contents of $tree and exits.
 # Also accepts the standard regen_lib -q and -v args.
 #
@@ -71,7 +74,11 @@ my $tree = {
 	'closure'	=> [ 5.008, DEFAULT_OFF],
 	'overflow'	=> [ 5.008, DEFAULT_OFF],
 	'portable'	=> [ 5.008, DEFAULT_OFF],
-	'utf8'		=> [ 5.008, DEFAULT_OFF],
+	'utf8'		=> [ 5.008, {
+                                'surrogate' => [ 5.013, DEFAULT_OFF],
+                                'nonchar' => [ 5.013, DEFAULT_OFF],
+                                'non_unicode' => [ 5.013, DEFAULT_OFF],
+                        }],
        	'exiting'	=> [ 5.008, DEFAULT_OFF],
        	'pack'		=> [ 5.008, DEFAULT_OFF],
        	'unpack'	=> [ 5.008, DEFAULT_OFF],

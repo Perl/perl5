@@ -81,9 +81,15 @@
 #define WARN_IMPRECISION	46
 #define WARN_ILLEGALPROTO	47
 
-#define WARNsize		12
-#define WARN_ALLstring		"\125\125\125\125\125\125\125\125\125\125\125\125"
-#define WARN_NONEstring		"\0\0\0\0\0\0\0\0\0\0\0\0"
+/* Warnings Categories added in Perl 5.013 */
+
+#define WARN_NON_UNICODE	48
+#define WARN_NONCHAR		49
+#define WARN_SURROGATE		50
+
+#define WARNsize		13
+#define WARN_ALLstring		"\125\125\125\125\125\125\125\125\125\125\125\125\125"
+#define WARN_NONEstring		"\0\0\0\0\0\0\0\0\0\0\0\0\0"
 
 #define isLEXWARN_on 	(PL_curcop->cop_warnings != pWARN_STD)
 #define isLEXWARN_off	(PL_curcop->cop_warnings == pWARN_STD)
