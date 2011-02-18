@@ -8,8 +8,8 @@
 # from information hardcoded into this script (the $tree hash), plus the
 # template for warnings.pm in the DATA section.
 #
-# When changing the number of warnings, the $BYTES in t/op/caller.t should
-# change to correspond with the same symbol's value in lib/warnings.pm
+# When changing the number of warnings, t/op/caller.t should change to
+# correspond with the value of $BYTES in lib/warnings.pm
 #
 # With an argument of 'tree', just dump the contents of $tree and exits.
 # Also accepts the standard regen_lib -q and -v args.
