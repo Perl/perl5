@@ -911,7 +911,6 @@ struct subst {
 #define sb_maxiters	cx_u.cx_subst.sbu_maxiters
 #define sb_rflags	cx_u.cx_subst.sbu_rflags
 #define sb_oldsave	cx_u.cx_subst.sbu_oldsave
-#define sb_once		cx_u.cx_subst.sbu_once
 #define sb_rxtainted	cx_u.cx_subst.sbu_rxtainted
 #define sb_orig		cx_u.cx_subst.sbu_orig
 #define sb_dstr		cx_u.cx_subst.sbu_dstr
