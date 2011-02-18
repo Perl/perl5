@@ -39,7 +39,7 @@ eval {
 is($@, "Alarm!\n", 'after the second loop');
 
 SKIP: {
-    skip('We can\'t test blocking without sigprocmask', 8) if $ENV{PERL_CORE_MINITEST} || !$Config{d_sigprocmask};
+    skip('We can\'t test blocking without sigprocmask', 9) if $ENV{PERL_CORE_MINITEST} || !$Config{d_sigprocmask};
 
     require POSIX;
     my $new = POSIX::SigSet->new(&POSIX::SIGUSR1);
