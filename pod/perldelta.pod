@@ -293,8 +293,8 @@ C<use Devel::DProf> and C<perl -d:DProf ...> still behave as before and start
 the profiler.
 
 NOTE: C<Devel::DProf> is deprecated and will be removed from a future
-version of Perl. We strongly recommend that you install and used
-L<Devel::NYTProf> in preference, as it offers significantly improved
+version of Perl. We strongly recommend that you install and use
+L<Devel::NYTProf> instead, as it offers significantly improved
 profiling and reporting.
 
 =item *
