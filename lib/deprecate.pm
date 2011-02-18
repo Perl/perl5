@@ -34,7 +34,7 @@ sub import {
 		Carp::cluck(<<"EOM");
 Can't find use/require $expect_leaf in caller stack
 EOM
-		next;
+		return;
 	    }
 
 	    # This is fragile, because it
