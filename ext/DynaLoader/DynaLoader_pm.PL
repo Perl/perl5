@@ -88,9 +88,6 @@ BEGIN {
     $VERSION = '1.12';
 }
 
-require AutoLoader;
-*AUTOLOAD = \&AutoLoader::AUTOLOAD;
-
 use Config;
 
 # enable debug/trace messages from DynaLoader perl code
@@ -389,19 +386,6 @@ sub bootstrap {
     &$xs(@args);
 }
 
-
-#sub _check_file {   # private utility to handle dl_expandspec vs -f tests
-#    my($file) = @_;
-#    return $file if (!$do_expand && -f $file); # the common case
-#    return $file if ( $do_expand && ($file=dl_expandspec($file)));
-#    return undef;
-#}
-
-
-# Let autosplit and the autoloader deal with these functions:
-__END__
-
-
 sub dl_findfile {
     # Read ext/DynaLoader/DynaLoader.doc for detailed information.
     # This function does not automatically consider the architecture
@@ -537,6 +521,8 @@ sub dl_find_symbol_anywhere
     }
     return undef;
 }
+
+__END__
 
 =head1 NAME
 
