@@ -449,7 +449,14 @@ Fetches an entry of the INPUT section of the
 typemap.
 
 Mandatory named arguments: The C<xstype> of the
-entry.
+entry or the C<ctype> of the typemap that can be used to find
+the C<xstype>. To wit, the following pieces of code
+are equivalent:
+
+  my $type = $typemap->get_typemap(ctype => $ctype)
+  my $input_map = $typemap->get_inputmap(xstype => $type->xstype);
+
+  my $input_map = $typemap->get_inputmap(ctype => $ctype);
 
 Returns the C<ExtUtils::Typemaps::InputMap>
 object for the entry if found.
@@ -460,7 +467,16 @@ sub get_inputmap {
   my $self = shift;
   my %args = @_;
   my $xstype = $args{xstype};
-  die("Need xstype argument") if not defined $xstype;
+  my $ctype  = $args{ctype};
+  die("Need xstype or ctype argument")
+    if not defined $xstype
+    and not defined $ctype;
+  die("Need xstype OR ctype arguments, not both")
+    if defined $xstype and defined $ctype;
+
+  if (defined $ctype) {
+    $xstype = $self->get_typemap(ctype => $ctype)->xstype;
+  }
 
   my $index = $self->{input_lookup}{$xstype};
   return() if not defined $index;
@@ -473,7 +489,8 @@ Fetches an entry of the OUTPUT section of the
 typemap.
 
 Mandatory named arguments: The C<xstype> of the
-entry.
+entry or the C<ctype> of the typemap that can be used to
+resolve the C<xstype>. (See above for an example.)
 
 Returns the C<ExtUtils::Typemaps::InputMap>
 object for the entry if found.
@@ -484,7 +501,16 @@ sub get_outputmap {
   my $self = shift;
   my %args = @_;
   my $xstype = $args{xstype};
-  die("Need xstype argument") if not defined $xstype;
+  my $ctype  = $args{ctype};
+  die("Need xstype or ctype argument")
+    if not defined $xstype
+    and not defined $ctype;
+  die("Need xstype OR ctype arguments, not both")
+    if defined $xstype and defined $ctype;
+
+  if (defined $ctype) {
+    $xstype = $self->get_typemap(ctype => $ctype)->xstype;
+  }
 
   my $index = $self->{output_lookup}{$xstype};
   return() if not defined $index;

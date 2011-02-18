@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 29;
+use Test::More tests => 30;
 use ExtUtils::Typemaps;
 
 # typemap only
@@ -44,6 +44,10 @@ HERE
   my $in = $map->get_inputmap(xstype => 'T_UV');
   isa_ok($in, 'ExtUtils::Typemaps::InputMap');
   is($in->xstype, 'T_UV');
+
+  # test fetching inputmap by ctype
+  my $in2 = $map->get_inputmap(ctype => 'unsigned int');
+  is_deeply($in2, $in, "get_inputmap returns the same typemap for ctype and xstype");
 }
 
 
