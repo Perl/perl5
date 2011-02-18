@@ -2,11 +2,17 @@ use 5.006_001;
 
 =head1 NAME
 
-Devel::DProf - a Perl code profiler
+Devel::DProf - a B<DEPRECATED> Perl code profiler
 
 =head1 SYNOPSIS
 
 	perl -d:DProf test.pl
+
+=head1 ACHTUNG!
+
+C<Devel::DProf> is B<DEPRECATED> and will be removed from a future version of
+Perl. We strongly recommend that you install and use L<Devel::NYTProf> instead,
+as it offers significantly improved profiling and reporting.
 
 =head1 DESCRIPTION
 
