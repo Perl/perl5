@@ -141,9 +141,44 @@ deadlocks. It returns true in such cases.
 
 =head1 Deprecations
 
-XXX Any deprecated features, syntax, modules etc. should be listed here.
-In particular, deprecated modules should be listed here even if they are
-listed as an updated module in the L</Modules and Pragmata> section.
+=over
+
+=item Deprecated Modules
+
+The following modules will be removed from the core distribution in a
+future release, and should be installed from CPAN instead. Distributions
+on CPAN which require these should add them to their prerequisites. The
+core versions of these modules warnings will issue a deprecation warning.
+
+If you ship a packaged version of Perl, either alone or as part of a
+larger system, then you should carefully consider the repercussions of
+core module deprecations. You may want to consider shipping your default
+build of Perl with packages for some or all deprecated modules which
+install into C<vendor> or C<site> perl library directories. This will
+inhibit the deprecation warnings.
+
+Alternatively, you may want to consider patching F<lib/deprecate.pm>
+to provide deprecation warnings specific to your packaging system
+or distribution of Perl, consistent with how your packaging system
+or distribution manages a staged transition from a release where the
+installation of a single package provides the given functionality, to
+a later release where the system administrator needs to know to install
+multiple packages to get that same functionality.
+
+You can silence these deprecation warnings by installing the modules
+in question from CPAN.  To install the latest version of all of them,
+just install C<Task::Deprecations::5_12>.
+
+=over
+
+=item L<Devel::DProf>
+
+We strongly recommend that you install and used L<Devel::NYTProf> in
+preference, as it offers significantly improved profiling and reporting.
+
+=back
+
+=back
 
 =head2 User-defined case-mapping
 
@@ -256,6 +291,11 @@ C<Devel::DProf> has been upgraded from version 20080331.00 to 20110217.00.
 Merely loading C<Devel::DProf> now no longer triggers profiling to start.
 C<use Devel::DProf> and C<perl -d:DProf ...> still behave as before and start
 the profiler.
+
+NOTE: C<Devel::DProf> is deprecated and will be removed from a future
+version of Perl. We strongly recommend that you install and used
+L<Devel::NYTProf> in preference, as it offers significantly improved
+profiling and reporting.
 
 =item *
 

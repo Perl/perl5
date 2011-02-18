@@ -235,6 +235,8 @@ use XSLoader ();
 $Devel::DProf::VERSION = '20110217.00';  # this version not authorized by
 				         # Dean Roehrich. See "Changes" file.
 
+use if $] >= 5.013, 'deprecate';
+
 sub import {
     XSLoader::load 'Devel::DProf', $Devel::DProf::VERSION;
 }

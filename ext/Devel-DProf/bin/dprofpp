@@ -12,6 +12,14 @@ BEGIN {
     }
 }
 
+require Devel::DProf;
+require deprecate;
+
+if(deprecate::__loaded_from_core('Devel::DProf', $INC{'Devel/DProf.pm'},
+				 'Devel/DProf.pm')) {
+    warn "dprofpp will be removed from the Perl core distribution in the next major release. Please install Devel::DProf from CPAN.\n";
+}
+
 =head1 NAME
 
 dprofpp - display perl profile data
@@ -356,7 +364,6 @@ Setup: {
         }
 
 	if( defined $opt_V ){
-		require Devel::DProf;
 		my $fh = 'main::fh';
 		print "$0 version: $Devel::DProf::VERSION\n";
 		open( $fh, "<$Monfile" ) && do {
