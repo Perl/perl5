@@ -705,6 +705,21 @@ middle of toke.c, and it was not clear that it was generated code.
 A lot of tests have been ported from Test to Test::More, e.g. in
 3842ad6.
 
+=item * Increase default PerlIO buffer size. (b83080d)
+
+The previous default size of a PerlIO buffer (4096 bytes) has been increased
+to the larger of 8192 bytes and your local BUFSIZ.  Benchmarks show that doubling
+this decade-old default increases read and write performance in the neighborhood
+of 25% to 50% when using the default layers of perlio on top of unix.  To choose
+a non-default size, such as to get back the old value or to obtain and even
+larger value, configure with:
+
+     ./Configure -Accflags=-DPERLIOBUF_DEFAULT_BUFSIZ=N
+
+where N is the desired size in bytes; it should probably be a multiple of
+your page size.
+
+
 =item *
 
 XXX
