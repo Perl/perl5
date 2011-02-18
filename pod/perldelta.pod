@@ -239,6 +239,10 @@ using Digest::SHA for CPAN checksums.
 
 =item *
 
+C<deprecate> has been upgraded from version 0.01 to 0.02.
+
+=item *
+
 C<diagnostics> has been upgraded from version 1.21 to 1.22.
 
 It now renders pod links slightly better, and has been taught to find
