@@ -2150,7 +2150,6 @@ PP(pp_subst)
     const I32 oldsave = PL_savestack_ix;
     STRLEN slen;
     bool doutf8 = FALSE;
-    I32 matched;
 #ifdef PERL_OLD_COPY_ON_WRITE
     bool is_cow;
 #endif
@@ -2252,10 +2251,9 @@ PP(pp_subst)
 */
     }
 
-    matched = CALLREGEXEC(rx, s, strend, orig, 0, TARG, NULL,
-			 r_flags | REXEC_CHECKED);
-
-    if (!matched) {
+    if (!CALLREGEXEC(rx, s, strend, orig, 0, TARG, NULL,
+			 r_flags | REXEC_CHECKED))
+    {
       ret_no:
 	SPAGAIN;
 	PUSHs(rpm->op_pmflags & PMf_NONDESTRUCT ? TARG : &PL_sv_no);
