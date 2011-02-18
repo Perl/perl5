@@ -245,6 +245,14 @@ the profiler.
 
 =item *
 
+C<DynaLoader> has been upgraded from version 1.12 to 1.13.
+
+[perl #84358] It no longer inherits from AutoLoader; hence it no longer
+produces weird error messages for unsuccessful method calls on classes that
+inherit from DynaLoader.
+
+=item *
+
 C<IO::Select> has been upgraded from version 1.17 to 1.18.
 
 It now allows IO::Handle objects (and objects in derived classes) to be
