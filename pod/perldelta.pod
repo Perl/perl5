@@ -47,7 +47,7 @@ regular expression.
 
 =head2 New warnings categories for problematic (non-)Unicode code points.
 
-Three new warnings subcategories of WARN_UTF8 have been added.  These
+Three new warnings subcategories of <utf8> have been added.  These
 allow you to turn off warnings for their covered events, while allowing
 the other UTF-8 warnings to remain on.  The three categories are:
 C<surrogate> when UTF-16 surrogates are encountered;
