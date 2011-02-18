@@ -4,7 +4,7 @@ use 5.006002;
 use strict;
 # use warnings;	# dont use warnings for older Perls
 
-our $VERSION = '1.991';
+our $VERSION = '1.992';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -1355,22 +1355,24 @@ sub _mod
   # if possible, use mod shortcut
   my ($c,$x,$yo) = @_;
 
-  # slow way since $y to big
+  # slow way since $y too big
   if (scalar @$yo > 1)
     {
     my ($xo,$rem) = _div($c,$x,$yo);
-    return $rem;
+    @$x = @$rem;
+    return $x;
     }
 
   my $y = $yo->[0];
-  # both are single element arrays
+
+  # if both are single element arrays
   if (scalar @$x == 1)
     {
     $x->[0] %= $y;
     return $x;
     }
 
-  # @y is a single element, but @x has more than one element
+  # if @$x has more than one element, but @$y is a single element
   my $b = $BASE % $y;
   if ($b == 0)
     {
@@ -1381,7 +1383,8 @@ sub _mod
     }
   elsif ($b == 1)
     {
-    # else need to go through all elements: O(N), but loop is a bit simplified
+    # else need to go through all elements in @$x: O(N), but loop is a bit
+    # simplified
     my $r = 0;
     foreach (@$x)
       {
@@ -1393,8 +1396,9 @@ sub _mod
     }
   else
     {
-    # else need to go through all elements: O(N)
-    my $r = 0; my $bm = 1;
+    # else need to go through all elements in @$x: O(N)
+    my $r = 0;
+    my $bm = 1;
     foreach (@$x)
       {
       $r = ($_ * $bm + $r) % $y;
@@ -1408,8 +1412,8 @@ sub _mod
     $r = 0 if $r == $y;
     $x->[0] = $r;
     }
-  splice (@$x,1);		# keep one element of $x
-  $x;
+  @$x = $x->[0];		# keep one element of @$x
+  return $x;
   }
 
 ##############################################################################
@@ -1533,38 +1537,68 @@ sub _pow
   $cx;
   }
 
-sub _nok
-  {
-  # n over k
-  # ref to array, return ref to array
-  my ($c,$n,$k) = @_;
+sub _nok {
+    # Return binomial coefficient (n over k).
+    # Given refs to arrays, return ref to array.
+    # First input argument is modified.
 
-  # ( 7 )       7!       1*2*3*4 * 5*6*7   5 * 6 * 7       6   7
-  # ( - ) = --------- =  --------------- = --------- = 5 * - * -
-  # ( 3 )   (7-3)! 3!    1*2*3*4 * 1*2*3   1 * 2 * 3       2   3
+    my ($c, $n, $k) = @_;
 
-  if (!_is_zero($c,$k))
+    # If k > n/2, or, equivalently, 2*k > n, compute nok(n, k) as
+    # nok(n, n-k), to minimize the number if iterations in the loop.
+
     {
-    my $x = _copy($c,$n);
-    _sub($c,$n,$k);
-    _inc($c,$n);
-    my $f = _copy($c,$n); _inc($c,$f);		# n = 5, f = 6, d = 2
-    my $d = _two($c);
-    while (_acmp($c,$f,$x) <= 0)		# f <= n ?
-      {
-      # n = (n * f / d) == 5 * 6 / 2
-      $n = _mul($c,$n,$f); $n = _div($c,$n,$d);
-      # f = 7, d = 3
-      _inc($c,$f); _inc($c,$d);
-      }
+        my $twok = _mul($c, _two($c), _copy($c, $k));   # 2 * k
+        if (_acmp($c, $twok, $n) > 0) {                 # if 2*k > n
+            $k = _sub($c, _copy($c, $n), $k);           # k = n - k
+        }
     }
-  else
-    {
-    # keep ref to $n and set it to 1
-    splice (@$n,1); $n->[0] = 1;
+
+    # Example:
+    #
+    # / 7 \       7!       1*2*3*4 * 5*6*7   5 * 6 * 7       6   7
+    # |   | = --------- =  --------------- = --------- = 5 * - * -
+    # \ 3 /   (7-3)! 3!    1*2*3*4 * 1*2*3   1 * 2 * 3       2   3
+
+    if (_is_zero($c, $k)) {
+        @$n = 1;
     }
-  $n;
-  }
+
+    else {
+
+        # Make a copy of the original n, since we'll be modifing n in-place.
+
+        my $n_orig = _copy($c, $n);
+
+        # n = 5, f = 6, d = 2 (cf. example above)
+
+        _sub($c, $n, $k);
+        _inc($c, $n);
+
+        my $f = _copy($c, $n);
+        _inc($c, $f);
+
+        my $d = _two($c);
+
+        # while f <= n (the original n, that is) ...
+
+        while (_acmp($c, $f, $n_orig) <= 0) {
+
+            # n = (n * f / d) == 5 * 6 / 2 (cf. example above)
+
+            _mul($c, $n, $f);
+            _div($c, $n, $d);
+
+            # f = 7, d = 3 (cf. example above)
+
+            _inc($c, $f);
+            _inc($c, $d);
+        }
+
+    }
+
+    return $n;
+}
 
 my @factorials = (
   1,
@@ -2349,32 +2383,45 @@ sub _from_bin
 
 sub _modinv
   {
-  # modular inverse
+  # modular multiplicative inverse
   my ($c,$x,$y) = @_;
 
-  my $u = _zero($c); my $u1 = _one($c);
-  my $a = _copy($c,$y); my $b = _copy($c,$x);
+  # modulo zero
+  if (_is_zero($c, $y)) {
+      return (undef, undef);
+  }
 
-  # Euclid's Algorithm for bgcd(), only that we calc bgcd() ($a) and the
-  # result ($u) at the same time. See comments in BigInt for why this works.
+  # modulo one
+  if (_is_one($c, $y)) {
+      return (_zero($c), '+');
+  }
+
+  my $u = _zero($c);
+  my $v = _one($c);
+  my $a = _copy($c,$y);
+  my $b = _copy($c,$x);
+
+  # Euclid's Algorithm for bgcd(), only that we calc bgcd() ($a) and the result
+  # ($u) at the same time. See comments in BigInt for why this works.
   my $q;
-  ($a, $q, $b) = ($b, _div($c,$a,$b));		# step 1
   my $sign = 1;
-  while (!_is_zero($c,$b))
-    {
-    my $t = _add($c, 				# step 2:
-       _mul($c,_copy($c,$u1), $q) ,		#  t =  u1 * q
-       $u );					#     + u
-    $u = $u1;					#  u = u1, u1 = t
-    $u1 = $t;
-    $sign = -$sign;
-    ($a, $q, $b) = ($b, _div($c,$a,$b));	# step 1
-    }
+  {
+      ($a, $q, $b) = ($b, _div($c, $a, $b));        # step 1
+      last if _is_zero($c, $b);
+
+      my $t = _add($c,                              # step 2:
+                   _mul($c, _copy($c, $v), $q) ,    #  t =   v * q
+                   $u );                            #      + u
+      $u = $v;                                      #  u = v
+      $v = $t;                                      #  v = t
+      $sign = -$sign;
+      redo;
+  }
 
   # if the gcd is not 1, then return NaN
-  return (undef,undef) unless _is_one($c,$a);
- 
-  ($u1, $sign == 1 ? '+' : '-');
+  return (undef, undef) unless _is_one($c, $a);
+
+  ($v, $sign == 1 ? '+' : '-');
   }
 
 sub _modpow
@@ -2420,19 +2467,40 @@ sub _modpow
   $num;
   }
 
-sub _gcd
-  {
-  # greatest common divisor
-  my ($c,$x,$y) = @_;
+sub _gcd {
+    # Greatest common divisor.
 
-  while ( (scalar @$y != 1) || ($y->[0] != 0) )		# while ($y != 0)
-    {
-    my $t = _copy($c,$y);
-    $y = _mod($c, $x, $y);
-    $x = $t;
+    my ($c, $x, $y) = @_;
+
+    # gcd(0,0) = 0
+    # gcd(0,a) = a, if a != 0
+
+    if (@$x == 1 && $x->[0] == 0) {
+        if (@$y == 1 && $y->[0] == 0) {
+            @$x = 0;
+        } else {
+            @$x = @$y;
+        }
+        return $x;
     }
-  $x;
-  }
+
+    # Until $y is zero ...
+
+    until (@$y == 1 && $y->[0] == 0) {
+
+        # Compute remainder.
+
+        _mod($c, $x, $y);
+
+        # Swap $x and $y.
+
+        my $tmp = [ @$x ];
+        @$x = @$y;
+        $y = $tmp;      # no deref here; that would modify input $y
+    }
+
+    return $x;
+}
 
 ##############################################################################
 ##############################################################################

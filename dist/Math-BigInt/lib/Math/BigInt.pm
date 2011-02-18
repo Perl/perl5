@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 use 5.006002;
 
-$VERSION = '1.991';
+$VERSION = '1.992';
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(objectify bgcd blcm); 
@@ -2854,93 +2854,145 @@ sub import
   # import done
   }
 
-sub from_hex
-  {
-  # create a bigint from a hexadecimal string
-  my ($self, $hs) = @_;
+sub from_hex {
+    # Create a bigint from a hexadecimal string.
 
-  my $rc = __from_hex($hs);
+    my ($self, $str) = @_;
 
-  return $self->bnan() unless defined $rc;
+    if ($str =~ s/
+                     ^
+                     ( [+-]? )
+                     (0?x)?
+                     (
+                         [0-9a-fA-F]*
+                         ( _ [0-9a-fA-F]+ )*
+                     )
+                     $
+                 //x)
+    {
+        # Get a "clean" version of the string, i.e., non-emtpy and with no
+        # underscores or invalid characters.
 
-  $rc;
-  }  
+        my $sign = $1;
+        my $chrs = $3;
+        $chrs =~ tr/_//d;
+        $chrs = '0' unless CORE::length $chrs;
 
-sub from_bin
-  {
-  # create a bigint from a hexadecimal string
-  my ($self, $bs) = @_;
+        # Initialize output.
 
-  my $rc = __from_bin($bs);
+        my $x = Math::BigInt->bzero();
 
-  return $self->bnan() unless defined $rc;
+        # The library method requires a prefix.
 
-  $rc;
-  }  
+        $x->{value} = $CALC->_from_hex('0x' . $chrs);
 
-sub from_oct
-  {
-  # create a bigint from a hexadecimal string
-  my ($self, $os) = @_;
+        # Place the sign.
 
-  my $x = $self->bzero();
-  
-  # strip underscores
-  $os =~ s/([0-7])_([0-7])/$1$2/g;	
-  $os =~ s/([0-7])_([0-7])/$1$2/g;	
-  
-  return $x->bnan() if $os !~ /^[\-\+]?0[0-7]+\z/;
+        if ($sign eq '-' && ! $CALC->_is_zero($x->{value})) {
+            $x->{sign} = '-';
+        }
 
-  my $sign = '+'; $sign = '-' if $os =~ /^-/;
+        return $x;
+    }
 
-  $os =~ s/^[+-]//;						# strip sign
-  $x->{value} = $CALC->_from_oct($os);
-  $x->{sign} = $sign unless $CALC->_is_zero($x->{value}); 	# no '-0'
-  $x;
-  }
+    # CORE::hex() parses as much as it can, and ignores any trailing garbage.
+    # For backwards compatibility, we return NaN.
 
-sub __from_hex
-  {
-  # internal
-  # convert a (ref to) big hex string to BigInt, return undef for error
-  my $hs = shift;
+    return $self->bnan();
+}
 
-  my $x = Math::BigInt->bzero();
-  
-  # strip underscores
-  $hs =~ s/([0-9a-fA-F])_([0-9a-fA-F])/$1$2/g;	
-  $hs =~ s/([0-9a-fA-F])_([0-9a-fA-F])/$1$2/g;	
-  
-  return $x->bnan() if $hs !~ /^[\-\+]?0x[0-9A-Fa-f]+$/;
+sub from_oct {
+    # Create a bigint from an octal string.
 
-  my $sign = '+'; $sign = '-' if $hs =~ /^-/;
+    my ($self, $str) = @_;
 
-  $hs =~ s/^[+-]//;						# strip sign
-  $x->{value} = $CALC->_from_hex($hs);
-  $x->{sign} = $sign unless $CALC->_is_zero($x->{value}); 	# no '-0'
-  $x;
-  }
+    if ($str =~ s/
+                     ^
+                     ( [+-]? )
+                     (
+                         [0-7]*
+                         ( _ [0-7]+ )*
+                     )
+                     $
+                 //x)
+    {
+        # Get a "clean" version of the string, i.e., non-emtpy and with no
+        # underscores or invalid characters.
 
-sub __from_bin
-  {
-  # internal
-  # convert a (ref to) big binary string to BigInt, return undef for error
-  my $bs = shift;
+        my $sign = $1;
+        my $chrs = $2;
+        $chrs =~ tr/_//d;
+        $chrs = '0' unless CORE::length $chrs;
 
-  my $x = Math::BigInt->bzero();
+        # Initialize output.
 
-  # strip underscores
-  $bs =~ s/([01])_([01])/$1$2/g;	
-  $bs =~ s/([01])_([01])/$1$2/g;	
-  return $x->bnan() if $bs !~ /^[+-]?0b[01]+$/;
+        my $x = Math::BigInt->bzero();
 
-  my $sign = '+'; $sign = '-' if $bs =~ /^\-/;
-  $bs =~ s/^[+-]//;						# strip sign
+        # The library method requires a prefix.
 
-  $x->{value} = $CALC->_from_bin($bs);
-  $x->{sign} = $sign unless $CALC->_is_zero($x->{value}); 	# no '-0'
-  $x;
-  }
+        $x->{value} = $CALC->_from_oct('0' . $chrs);
+
+        # Place the sign.
+
+        if ($sign eq '-' && ! $CALC->_is_zero($x->{value})) {
+            $x->{sign} = '-';
+        }
+
+        return $x;
+    }
+
+    # CORE::oct() parses as much as it can, and ignores any trailing garbage.
+    # For backwards compatibility, we return NaN.
+
+    return $self->bnan();
+}
+
+sub from_bin {
+    # Create a bigint from a binary string.
+
+    my ($self, $str) = @_;
+
+    if ($str =~ s/
+                     ^
+                     ( [+-]? )
+                     (0?b)?
+                     (
+                         [01]*
+                         ( _ [01]+ )*
+                     )
+                     $
+                 //x)
+    {
+        # Get a "clean" version of the string, i.e., non-emtpy and with no
+        # underscores or invalid characters.
+
+        my $sign = $1;
+        my $chrs = $3;
+        $chrs =~ tr/_//d;
+        $chrs = '0' unless CORE::length $chrs;
+
+        # Initialize output.
+
+        my $x = Math::BigInt->bzero();
+
+        # The library method requires a prefix.
+
+        $x->{value} = $CALC->_from_bin('0b' . $chrs);
+
+        # Place the sign.
+
+        if ($sign eq '-' && ! $CALC->_is_zero($x->{value})) {
+            $x->{sign} = '-';
+        }
+
+        return $x;
+    }
+
+    # For consistency with from_hex() and from_oct(), we return NaN when the
+    # input is invalid.
+
+    return $self->bnan();
+}
 
 sub _split
   {
@@ -2966,9 +3018,9 @@ sub _split
   # invalid starting char?
   return if $x !~ /^[+-]?(\.?[0-9]|0b[0-1]|0x[0-9a-fA-F])/;
 
-  return __from_hex($x) if $x =~ /^[\-\+]?0x/;		# hex string
-  return __from_bin($x) if $x =~ /^[\-\+]?0b/;		# binary string
-  
+  return Math::BigInt->from_hex($x) if $x =~ /^[+-]?0x/;        # hex string
+  return Math::BigInt->from_bin($x) if $x =~ /^[+-]?0b/;        # binary string
+
   # strip underscores between digits
   $x =~ s/([0-9])_([0-9])/$1$2/g;
   $x =~ s/([0-9])_([0-9])/$1$2/g;		# do twice for 1_2_3
