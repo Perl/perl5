@@ -3112,7 +3112,7 @@ Perl_sighandler(int sig)
 	 * blocked by the system when we entered.
 	 */
 #ifdef HAS_SIGPROCMASK
-#ifdef HAS_SIGACTION
+#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 	if (sip)
 #endif
 	{
