@@ -240,7 +240,7 @@ messages.
 C<Devel::DProf> has been upgraded from version 20080331.00 to 20110217.00.
 
 Merely loading C<Devel::DProf> now no longer triggers profiling to start.
-C<use Devel::DProf> and C<perl -d:DProf ...> still behaves as before and starts
+C<use Devel::DProf> and C<perl -d:DProf ...> still behave as before and start
 the profiler.
 
 =item *
