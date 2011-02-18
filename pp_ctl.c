@@ -244,8 +244,6 @@ PP(pp_regcomp)
 	    SvTAINTED_on((SV*)re);
 	    RX_EXTFLAGS(re) |= RXf_TAINTED;
 	}
-	else
-	    RX_EXTFLAGS(re) &= ~RXf_TAINTED;
     }
 #endif
 
