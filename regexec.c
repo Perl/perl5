@@ -3652,7 +3652,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	case EXACTFA:
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
-	    fold_utf8_flags = 1;
+	    fold_utf8_flags = FOLDEQ_UTF8_NOMIX_ASCII;
 	    goto do_exactf;
 
 	case EXACTF:
