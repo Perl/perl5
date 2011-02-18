@@ -35,7 +35,7 @@ use File::Spec;
 
 my $script = File::Spec->catfile(
             File::Spec->catdir(
-                File::Spec->updir, qw[ ext Devel-DProf bin ]
+                File::Spec->updir, qw[ cpan Devel-DProf bin ]
             ), "dprofpp");
 
 if (open(IN, $script)) {

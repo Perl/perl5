@@ -485,6 +485,14 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> undef,
 	},
 
+    'Devel::DProf' =>
+	{
+	'MAINTAINER'	=> 'rafl',
+	'DISTRIBUTION'	=> 'FLORA/Devel-DProf-20110217.00.tar.gz',
+	'FILES'		=> q[cpan/Devel-DProf],
+	'UPSTREAM'	=> 'cpan',
+	},
+
     'Devel::SelfStubber' =>
 	{
 	'MAINTAINER'	=> 'p5p',
@@ -1760,7 +1768,6 @@ use File::Glob qw(:case);
 				ext/B/hints/openbsd.pl
 				ext/B/hints/darwin.pl
 
-				ext/Devel-DProf/
 				ext/Devel-Peek/
 				ext/DynaLoader/
 				ext/Errno

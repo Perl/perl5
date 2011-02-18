@@ -509,6 +509,30 @@ cpan/DB_File/t/db-hash.t	See if DB_File works
 cpan/DB_File/t/db-recno.t	See if DB_File works
 cpan/DB_File/typemap		Berkeley DB extension interface types
 cpan/DB_File/version.c		Berkeley DB extension interface version check
+cpan/Devel-DProf/bin/dprofpp	Perl code profile post-processor
+cpan/Devel-DProf/Changes		Perl code profiler changelog
+cpan/Devel-DProf/DProf.pm	Perl code profiler
+cpan/Devel-DProf/dprof/test1_t	Perl code profiler tests
+cpan/Devel-DProf/dprof/test1_v	Perl code profiler tests
+cpan/Devel-DProf/dprof/test2_t	Perl code profiler tests
+cpan/Devel-DProf/dprof/test2_v	Perl code profiler tests
+cpan/Devel-DProf/dprof/test3_t	Perl code profiler tests
+cpan/Devel-DProf/dprof/test3_v	Perl code profiler tests
+cpan/Devel-DProf/dprof/test4_t	Perl code profiler tests
+cpan/Devel-DProf/dprof/test4_v	Perl code profiler tests
+cpan/Devel-DProf/dprof/test5_t	Perl code profiler tests
+cpan/Devel-DProf/dprof/test5_v	Perl code profiler tests
+cpan/Devel-DProf/dprof/test6_t	Perl code profiler tests
+cpan/Devel-DProf/dprof/test6_v	Perl code profiler tests
+cpan/Devel-DProf/dprof/test7_t	Perl code profiler tests
+cpan/Devel-DProf/dprof/test7_v	Perl code profiler tests
+cpan/Devel-DProf/dprof/test8_t	Perl code profiler tests
+cpan/Devel-DProf/dprof/test8_v	Perl code profiler tests
+cpan/Devel-DProf/dprof/V.pm	Perl code profiler tests
+cpan/Devel-DProf/DProf.xs	Perl code profiler
+cpan/Devel-DProf/Makefile.PL	Perl code profiler makefile writer
+cpan/Devel-DProf/t/DProf.t	Perl code profiler
+cpan/Devel-DProf/Todo		Perl code profiler todo list
 cpan/Devel-PPPort/apicheck_c.PL		Devel::PPPort apicheck generator
 cpan/Devel-PPPort/Changes		Devel::PPPort changes
 cpan/Devel-PPPort/devel/buildperl.pl	Devel::PPPort perl version builder
@@ -3332,30 +3356,6 @@ ext/B/t/terse.t		See if B::Terse works
 ext/B/t/walkoptree.t	See if B::walkoptree (and friends) work
 ext/B/t/xref.t		See if B::Xref works
 ext/B/typemap			Compiler backend interface types
-ext/Devel-DProf/bin/dprofpp	Perl code profile post-processor
-ext/Devel-DProf/Changes		Perl code profiler changelog
-ext/Devel-DProf/DProf.pm	Perl code profiler
-ext/Devel-DProf/dprof/test1_t	Perl code profiler tests
-ext/Devel-DProf/dprof/test1_v	Perl code profiler tests
-ext/Devel-DProf/dprof/test2_t	Perl code profiler tests
-ext/Devel-DProf/dprof/test2_v	Perl code profiler tests
-ext/Devel-DProf/dprof/test3_t	Perl code profiler tests
-ext/Devel-DProf/dprof/test3_v	Perl code profiler tests
-ext/Devel-DProf/dprof/test4_t	Perl code profiler tests
-ext/Devel-DProf/dprof/test4_v	Perl code profiler tests
-ext/Devel-DProf/dprof/test5_t	Perl code profiler tests
-ext/Devel-DProf/dprof/test5_v	Perl code profiler tests
-ext/Devel-DProf/dprof/test6_t	Perl code profiler tests
-ext/Devel-DProf/dprof/test6_v	Perl code profiler tests
-ext/Devel-DProf/dprof/test7_t	Perl code profiler tests
-ext/Devel-DProf/dprof/test7_v	Perl code profiler tests
-ext/Devel-DProf/dprof/test8_t	Perl code profiler tests
-ext/Devel-DProf/dprof/test8_v	Perl code profiler tests
-ext/Devel-DProf/dprof/V.pm	Perl code profiler tests
-ext/Devel-DProf/DProf.xs	Perl code profiler
-ext/Devel-DProf/Makefile.PL	Perl code profiler makefile writer
-ext/Devel-DProf/t/DProf.t	Perl code profiler
-ext/Devel-DProf/Todo		Perl code profiler todo list
 ext/Devel-Peek/Changes		Data debugging tool, changelog
 ext/Devel-Peek/Makefile.PL	Data debugging tool, makefile writer
 ext/Devel-Peek/Peek.pm		Data debugging tool, module and pod
