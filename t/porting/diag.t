@@ -70,7 +70,7 @@ my $cur_entry;
 open my $diagfh, "<", $pod
   or die "Can't open $pod: $!";
 
-my $category_re = qr/ [a-z0-9]+?/;      # Note: requires an initial space
+my $category_re = qr/ [a-z0-9_]+?/;      # Note: requires an initial space
 my $severity_re = qr/ . (?: \| . )* /x; # A severity is a single char, but can
                                         # be of the form 'S|P|W'
 while (<$diagfh>) {
