@@ -900,7 +900,7 @@ that C<s> after the apostrophe? You could try a regular expression:
 Now, what if you don't want to capitalize that "and"? Just use
 L<Text::Autoformat> and get on with the next problem. :)
 
-=head2 How can I split a [character] delimited string except when inside [character]?
+=head2 How can I split a [character]-delimited string except when inside [character]?
 
 Several modules can handle this sort of parsing--C<Text::Balanced>,
 C<Text::CSV>, C<Text::CSV_XS>, and C<Text::ParseWords>, among others.

@@ -436,7 +436,7 @@ later, you should only see C<re> report that for the first iteration.
 		print STDERR "\t$_ is good!\n" if m/$regex/;
 		}
 
-=head2 How do I use a regular expression to strip C style comments from a file?
+=head2 How do I use a regular expression to strip C-style comments from a file?
 
 While this actually can be done, it's much harder than you'd think.
 For example, this one-liner

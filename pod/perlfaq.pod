@@ -512,7 +512,7 @@ How do I capitalize all the words on one line?
 
 =item *
 
-How can I split a [character] delimited string except when inside [character]?
+How can I split a [character]-delimited string except when inside [character]?
 
 =item *
 
@@ -934,7 +934,7 @@ What is C</o> really for?
 
 =item *
 
-How do I use a regular expression to strip C style comments from a file?
+How do I use a regular expression to strip C-style comments from a file?
 
 =item *
 
