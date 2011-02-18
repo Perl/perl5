@@ -1999,7 +1999,7 @@ You had a word that isn't a regex modifier immediately following a pattern
 without an intervening space or you used one of the regex modifiers
 ("a", "d", "l", and "u") that in 5.14 are disallowed as suffixes.
 In that case, use the infix form, like C</(?a:...)/>.  In the other case,
-add between the pattern and following word.  As an example of the
+add white space between the pattern and following word.  As an example of the
 latter, the two constructs:
 
  $a =~ m/$foo/sand $bar
