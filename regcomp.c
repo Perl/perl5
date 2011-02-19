@@ -7739,8 +7739,20 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
 	     * folding, and the source isn't ASCII, look through all the
 	     * characters it folds to.  If any one of them is ASCII, forbid
 	     * this fold.  (cp is uni, so the 127 below is correct even for
-	     * EBCDIC) */
-	    if (use_this_char_fold && cp > 127 && MORE_ASCII_RESTRICTED) {
+	     * EBCDIC).  Similarly under locale rules, we don't mix under 256
+	     * with above 255.  XXX It really doesn't make sense to have \N{}
+	     * which means a Unicode rules under locale.  I (khw) think this
+	     * should be warned about, but the counter argument is that people
+	     * who have programmed around Perl's earlier lack of specifying the
+	     * rules and used \N{} to force Unicode things in a local
+	     * environment shouldn't get suddenly a warning */
+	    if (use_this_char_fold) {
+		if (LOC && cp < 256) {	/* Fold not known until run-time */
+		    use_this_char_fold = FALSE;
+		}
+		else if ((cp > 127 && MORE_ASCII_RESTRICTED)
+		         || (cp > 255 && LOC))
+		{
 		U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
 		U8* s = tmpbuf;
 		U8* e;
@@ -7750,11 +7762,15 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
 		e = s + foldlen;
 
 		while (s < e) {
-		    if (isASCII(*s)) {
+		    if (isASCII(*s)
+			|| (LOC && (UTF8_IS_INVARIANT(*s)
+				    || UTF8_IS_DOWNGRADEABLE_START(*s))))
+		    {
 			use_this_char_fold = FALSE;
 			break;
 		    }
 		    s += UTF8SKIP(s);
+		}
 		}
 	    }
 
@@ -8741,20 +8757,39 @@ tryagain:
 		if ( RExC_flags & RXf_PMf_EXTENDED)
 		    p = regwhite( pRExC_state, p );
 		if (UTF && FOLD) {
-		    /* Prime the casefolded buffer. */
-		    if (isASCII(ender)) {
+		    /* Prime the casefolded buffer.  Locale rules, which apply
+		     * only to code points < 256, aren't known until execution,
+		     * so for them, just output the original character using
+		     * utf8 */
+		    if (LOC && ender < 256) {
+			if (UNI_IS_INVARIANT(ender)) {
+			    *tmpbuf = (U8) ender;
+			    foldlen = 1;
+			} else {
+			    *tmpbuf = UTF8_TWO_BYTE_HI(ender);
+			    *(tmpbuf + 1) = UTF8_TWO_BYTE_LO(ender);
+			    foldlen = 2;
+			}
+		    }
+		    else if (isASCII(ender)) {	/* Note: Here can't also be LOC
+						 */
 			ender = toLOWER(ender);
 			*tmpbuf = (U8) ender;
 			foldlen = 1;
 		    }
-		    else if (! MORE_ASCII_RESTRICTED) {
+		    else if (! MORE_ASCII_RESTRICTED && ! LOC) {
+
+			/* Locale and /aa require more selectivity about the
+			 * fold, so are handled below.  Otherwise, here, just
+			 * use the fold */
 			ender = toFOLD_uni(ender, tmpbuf, &foldlen);
 		    }
 		    else {
-			/* When not to mix ASCII with non-, reject folds that
-			 * mix them, using only the non-folded code point.  So
-			 * do the fold to a temporary, and inspect each
-			 * character in it. */
+			/* Under locale rules or /aa we are not to mix,
+			 * respectively, ords < 256 or ASCII with non-.  So
+			 * reject folds that mix them, using only the
+			 * non-folded code point.  So do the fold to a
+			 * temporary, and inspect each character in it. */
 			U8 trialbuf[UTF8_MAXBYTES_CASE+1];
 			U8* s = trialbuf;
 			UV tmpender = toFOLD_uni(ender, trialbuf, &foldlen);
@@ -8762,7 +8797,10 @@ tryagain:
 			bool fold_ok = TRUE;
 
 			while (s < e) {
-			    if (isASCII(*s)) {
+			    if (isASCII(*s)
+				|| (LOC && (UTF8_IS_INVARIANT(*s)
+					   || UTF8_IS_DOWNGRADEABLE_START(*s))))
+			    {
 				fold_ok = FALSE;
 				break;
 			    }
@@ -9967,14 +10005,21 @@ parseit:
 			     * target string is utf8, or under unicode rules */
 			    if (j > 255 || AT_LEAST_UNI_SEMANTICS) {
 				while (loc < e) {
-				    if (MORE_ASCII_RESTRICTED && (isASCII(*loc) != isASCII(j))) {
+
+				    /* Can't mix ascii with non- under /aa */
+				    if (MORE_ASCII_RESTRICTED
+					&& (isASCII(*loc) != isASCII(j)))
+				    {
 					goto end_multi_fold;
 				    }
-				    /* XXX Discard this fold if any are latin1
-				     * and LOC */
 				    if (UTF8_IS_INVARIANT(*loc)
 					|| UTF8_IS_DOWNGRADEABLE_START(*loc))
 				    {
+					/* Can't mix above and below 256 under
+					 * LOC */
+					if (LOC) {
+					    goto end_multi_fold;
+					}
 					ANYOF_FLAGS(ret)
 						|= ANYOF_NONBITMAP_NON_UTF8;
 					break;
@@ -10016,7 +10061,13 @@ parseit:
 				    Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
 				}
 				c = SvUV(*c_p);
-				if (MORE_ASCII_RESTRICTED && (isASCII(c) != isASCII(j))) {
+
+				/* /aa doesn't allow folds between ASCII and
+				 * non-; /l doesn't allow them between above
+				 * and below 256 */
+				if ((MORE_ASCII_RESTRICTED && (isASCII(c) != isASCII(j)))
+				     || (LOC && ((c < 256) != (j < 256))))
+				{
 				    continue;
 				}
 
@@ -10025,7 +10076,6 @@ parseit:
 				}
 				    /* It may be that the code point is already
 				     * in this range or already in the bitmap,
-				     * XXX THink about LOC
 				     * in which case we need do nothing */
 				else if ((c < start || c > end)
 					 && (c > 255

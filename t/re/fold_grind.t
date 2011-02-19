@@ -52,20 +52,20 @@ sub range_type {
     return $Unicode;
 }
 
-my %todos;
+my %todos;  # List of test numbers that are expected to fail
 map { $todos{$_} = '1' } (
-95557,
-95558,
-95561,
-95562,
-95573,
-95574,
-95605,
-95606,
-95609,
-95610,
-95621,
-95622,
+127405,
+127406,
+127425,
+127426,
+127437,
+127438,
+127469,
+127470,
+127489,
+127490,
+127501,
+127502,
 );
 
 sub numerically {
@@ -213,6 +213,8 @@ my @eval_tests;
 # To cut down on the number of tests
 my $has_tested_aa_above_latin1;
 my $has_tested_latin1_aa;
+my $has_tested_l_above_latin1;
+my $has_tested_latin1_l;
 
 # For use by pairs() in generating combinations
 sub prefix {
@@ -270,6 +272,8 @@ foreach my $test (sort { numerically } keys %tests) {
     my $pattern_above_latin1 = grep { $_ > 255 } @pattern;
     my $target_has_ascii = grep { $_ < 128 } @target;
     my $pattern_has_ascii = grep { $_ < 128 } @pattern;
+    my $target_has_latin1 = grep { $_ < 256 } @target;
+    my $pattern_has_latin1 = grep { $_ < 256 } @pattern;
     my $is_self = @target == 1 && @pattern == 1 && $target[0] == $pattern[0];
 
     # We don't test multi-char folding into other multi-chars.  We are testing
@@ -285,7 +289,7 @@ foreach my $test (sort { numerically } keys %tests) {
     #diag $progress;
 
     # Now grind out tests, using various combinations.
-    foreach my $charset ('d', 'u', 'aa') {
+    foreach my $charset ('d', 'l', 'u', 'aa') {
 
       # /aa should only affect things with folds in the ASCII range.  But, try
       # it on one pair in the other ranges just to make sure it doesn't break
@@ -302,6 +306,12 @@ foreach my $test (sort { numerically } keys %tests) {
           $has_tested_latin1_aa = $test;
         }
       }
+      elsif ($charset eq 'l') {
+        if (! $target_has_latin1 && ! $pattern_has_latin1) {
+          next if defined $has_tested_latin1_l && $has_tested_latin1_l != $test;
+          $has_tested_latin1_l = $test;
+        }
+      }
 
       foreach my $utf8_target (0, 1) {    # Both utf8 and not, for
                                           # code points < 256
@@ -315,7 +325,9 @@ foreach my $test (sort { numerically } keys %tests) {
 
         foreach my $utf8_pattern (0, 1) {
           next if $pattern_above_latin1 && ! $utf8_pattern;
-          my $uni_semantics = $utf8_target || $charset eq 'u' || ($charset eq 'd' && $utf8_pattern) || $charset =~ /a/;
+
+          # Our testing of 'l' uses the POSIX locale, which is ASCII-only
+          my $uni_semantics = $charset ne 'l' && ($utf8_target || $charset eq 'u' || ($charset eq 'd' && $utf8_pattern) || $charset =~ /a/);
           my $upgrade_pattern = "";
           $upgrade_pattern = ' utf8::upgrade($p);' if ! $pattern_above_latin1 && $utf8_pattern;
 
@@ -323,7 +335,8 @@ foreach my $test (sort { numerically } keys %tests) {
           my @rhs = @x_pattern;
           my $rhs = join "", @rhs;
           my $should_fail = (! $uni_semantics && $ord >= 128 && $ord < 256 && ! $is_self)
-                            || ($charset eq 'aa' && $target_has_ascii != $pattern_has_ascii);
+                            || ($charset eq 'aa' && $target_has_ascii != $pattern_has_ascii)
+                            || ($charset eq 'l' && $target_has_latin1 != $pattern_has_latin1);
 
           # Do simple tests of referencing capture buffers, named and
           # numbered.
@@ -436,6 +449,9 @@ foreach my $test (sort { numerically } keys %tests) {
                             # fold for /aa and the quantifier isn't sufficient
                             # to allow it to span to both sides.
                             $op = 0 if $target_has_ascii && $charset eq 'aa' && $both_sides && ( ! $quantifier || $quantifier eq '?') && $parend < 2;
+
+                            # Or for /l
+                            $op = 0 if $target_has_latin1 && $charset eq 'l' && $both_sides && ( ! $quantifier || $quantifier eq '?') && $parend < 2;
                           }
 
                           $op = ($op) ? '=~' : '!~';

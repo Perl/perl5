@@ -52,7 +52,8 @@ X<regular expression, case-insensitive>
 Do case-insensitive pattern matching.
 
 If C<use locale> is in effect, the case map is taken from the current
-locale.  See L<perllocale>.
+locale for code points less than 255, and from Unicode rules for larger
+code points.  See L<perllocale>.
 
 =item x
 X</x>
@@ -655,8 +656,15 @@ locale, and can differ from one match to another if there is an
 intervening call of the
 L<setlocale() function|perllocale/The setlocale function>.
 This modifier is automatically set if the regular expression is compiled
-within the scope of a C<"use locale"> pragma.  Results are not
-well-defined when using this and matching against a utf8-encoded string.
+within the scope of a C<"use locale"> pragma.
+Perl only allows single-byte locales.  This means that code points above
+255 are treated as Unicode no matter what locale is in effect.
+Under Unicode rules, there are a few case-insensitive matches that cross the
+boundary 255/256 boundary.  These are disallowed.  For example,
+0xFF does not caselessly match the character at 0x178, LATIN CAPITAL
+LETTER Y WITH DIAERESIS, because 0xFF may not be LATIN SMALL LETTER Y
+in the current locale, and Perl has no way of knowing if that character
+even exists in the locale, much less what code point it is.
 
 C<"u"> means to use Unicode semantics when pattern matching.  It is
 automatically set if the regular expression is encoded in utf8, or is

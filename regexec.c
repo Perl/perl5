@@ -1504,7 +1504,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
 	case EXACTFL:
 	    if (UTF_PATTERN || utf8_target) {
-		utf8_fold_flags = 0; /* XXX, add new flag for locale */
+		utf8_fold_flags = FOLDEQ_UTF8_LOCALE;
 		goto do_exactf_utf8;
 	    }
 	    fold_array = PL_fold_locale;
@@ -3640,7 +3640,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    PL_reg_flags |= RF_tainted;
 	    folder = foldEQ_locale;
 	    fold_array = PL_fold_locale;
-	    fold_utf8_flags = 0;
+	    fold_utf8_flags = FOLDEQ_UTF8_LOCALE;
 	    goto do_exactf;
 
 	case EXACTFU:
@@ -4051,7 +4051,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    folder = foldEQ_locale;
 	    fold_array = PL_fold_locale;
 	    type = REFFL;
-	    utf8_fold_flags = 0;
+	    utf8_fold_flags = FOLDEQ_UTF8_LOCALE;
 	    goto do_nref;
 
 	case NREFFA:
@@ -4095,7 +4095,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    PL_reg_flags |= RF_tainted;
 	    folder = foldEQ_locale;
 	    fold_array = PL_fold_locale;
-	    utf8_fold_flags = 0;
+	    utf8_fold_flags = FOLDEQ_UTF8_LOCALE;
 	    goto do_ref;
 
 	case REFFA:
@@ -6005,7 +6005,9 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 
     case EXACTFL:
 	PL_reg_flags |= RF_tainted;
-	/* FALL THROUGH */
+	utf8_flags = FOLDEQ_UTF8_LOCALE;
+	goto do_exactf;
+
     case EXACTF:
     case EXACTFU:
 	utf8_flags = 0;
@@ -6018,11 +6020,6 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	assert(! UTF_PATTERN || UNI_IS_INVARIANT(c));
 
 	if (utf8_target) { /* Use full Unicode fold matching */
-
-	    /* For the EXACTFL case, It doesn't really make sense to compare
-	     * locale and utf8, but it is best we can do.  The documents warn
-	     * against mixing them */
-
 	    char *tmpeol = loceol;
 	    while (hardcount < max
 		    && foldEQ_utf8_flags(scan, &tmpeol, 0, utf8_target,

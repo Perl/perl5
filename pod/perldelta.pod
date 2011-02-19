@@ -897,6 +897,21 @@ Several contexts no longer allow a Unicode character to begin a word
 that should never begin words, for an example an accent that must follow
 another character previously could precede all other characters.
 
+=item *
+
+Case insensitive matching in regular expressions compiled under C<use
+locale> now works much more sanely when the pattern and/or target string
+are encoded in UTF-8.  Previously, under these conditions the localeness
+was completely lost.  Now, code points above 255 are treated as Unicode,
+but code points between 0 and 255 are treated using the current locale
+rules, regardless of whether the pattern or string are encoded in UTF-8.
+The few case insensitive matches that cross the 255/256 boundary are not
+allowed.  For example, 0xFF does not caselessly match the character at
+0x178, LATIN CAPITAL LETTER Y WITH DIAERESIS, because 0xFF may not be
+LATIN SMALL LETTER Y in the current locale, and Perl has no way of
+knowing if that character even exists in the locale, much less what code
+point it is.
+
 =back
 
 =head1 Known Problems
