@@ -233,7 +233,7 @@ and check for NULL.
     case SINGLE_PAT_MOD:    *(pmfl) |= RXf_PMf_SINGLELINE; break;   \
     case XTENDED_PAT_MOD:   *(pmfl) |= RXf_PMf_EXTENDED;   break
 
-/* Note, includes locale, unicode */
+/* Note, includes charset ones, assumes 0 is the default for them */
 #define STD_PMMOD_FLAGS_CLEAR(pmfl)                        \
     *(pmfl) &= ~(RXf_PMf_FOLD|RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_EXTENDED|RXf_PMf_CHARSET)
 
@@ -276,13 +276,15 @@ and check for NULL.
  * character is bit +1, etc. */
 #define STD_PAT_MODS        "msix"
 
+#define CHARSET_PAT_MODS    ASCII_RESTRICT_PAT_MODS DEPENDS_PAT_MODS LOCALE_PAT_MODS UNICODE_PAT_MODS
+
 /* This string is expected by XS_re_regexp_pattern() in universal.c to be ordered
  * so that the first character is the flag in bit RXf_PMf_STD_PMMOD_SHIFT of
  * extflags; the next character is in bit +1, etc. */
 #define INT_PAT_MODS    STD_PAT_MODS    KEEPCOPY_PAT_MODS
 
 #define EXT_PAT_MODS    ONCE_PAT_MODS   KEEPCOPY_PAT_MODS
-#define QR_PAT_MODS     STD_PAT_MODS    EXT_PAT_MODS
+#define QR_PAT_MODS     STD_PAT_MODS    EXT_PAT_MODS	   CHARSET_PAT_MODS
 #define M_PAT_MODS      QR_PAT_MODS     LOOP_PAT_MODS
 #define S_PAT_MODS      M_PAT_MODS      EXEC_PAT_MODS      NONDESTRUCT_PAT_MODS
 

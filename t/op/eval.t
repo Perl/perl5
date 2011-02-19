@@ -462,7 +462,7 @@ print "ok $test - eval and last\n"; $test++;
 
 {
     no warnings;
-    eval "/ /a;";
+    eval "/ /b;";
     print "not " unless $@ =~ /^syntax error/;
     print "ok $test # eval syntax error, no warnings \n"; $test++;
 }

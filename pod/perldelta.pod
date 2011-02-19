@@ -28,6 +28,24 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 The new regular expression modifiers available in suffix form
+
+Various releases of the 5.13.x series have added new regular expression
+modifiers, C</a>, C</d>, C</l>, and C</u>.  They were only available in
+infix form (e.g., C<(?a:...)> until this release; now they are usable
+in suffix form.  This change was made too late to change all the
+affected documentation, so there are a number of places that erroneously
+say these must be used in infix form.
+
+However, there is an ambiguity with the construct, C<s/foo/bar/le...>.  Due
+to backward compatibility constraints, in Perl 5.14 only, it will be
+resolved as C<s/foo/bar/ le...>, that is, as meaning to take the result
+of the substitution, and see if it is stringwise less-than-or-equal-to
+what follows. In Perl 5.16 and later, it will instead be resolved as
+meaing to do the pattern match using the rules of the current locale,
+and evaluate the rhs as an expression when doing the substitution.  In
+5.14, if you want the latter interpretation, you can write "el" instead.
+
 =head2 Add C<\p{Titlecase}> as a synonym for C<\p{Title}>
 
 This synonym is added for symmetry with the Unicode property names
@@ -41,9 +59,7 @@ non-ASCII character.  For example, normally,
 
     'k' =~ /\N{KELVIN SIGN}/
 
-will match; it won't under C</aa>.  Note that like C</a>, C</aa>
-in 5.14 will not actually be able to be used as a suffix at the end of a
-regular expression.
+will match; it won't under C</aa>.
 
 =head2 New warnings categories for problematic (non-)Unicode code points.
 

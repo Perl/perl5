@@ -146,6 +146,18 @@ string C<"-foo">, or a call to the function C<foo>, negated.  If you meant
 the string, just write C<"-foo">.  If you meant the function call,
 write C<-foo()>.
 
+=item Ambiguous use of 's//le...' resolved as 's// le...'; Rewrite as 's//el' if you meant 'use locale rules and evaluate rhs as an expression'.  In Perl 5.16, it will be resolved the other way
+
+(W deprecated, ambiguous)  You wrote a pattern match with substitution
+immediately followed by "le".  In Perl 5.14 and earlier, this is
+resolved as meaning to take the result of the substitution, and see if
+it is stringwise less-than-or-equal-to what follows in the expression.
+Having the "le" immediately following a pattern is deprecated behavior,
+so in Perl 5.16, this expression will be resolved as meaning to do the
+pattern match using the rules of the current locale, and evaluate the
+rhs as an expression when doing the substitution.  In 5.14, if you want
+the latter interpretation, you can simply write "el" instead.
+
 =item '|' and '<' may not both be specified on command line
 
 (F) An error peculiar to VMS.  Perl does its own command line

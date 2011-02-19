@@ -55,6 +55,30 @@ if ('1234'=~/(?:(?<A>\d)|(?<C>!))(?<B>\d)(?<A>\d)(?<B>\d)/){
 }
 
 {
+    my ($pat, $mods);
+    $|=1;
+
+    my $re = qr/a/d;
+    ($pat, $mods) = regexp_pattern($re);
+    is($mods, "", "Verify /d results in default mod");
+    $re = qr/a/u;
+    ($pat, $mods) = regexp_pattern($re);
+    is($mods, "u", "Verify /u is understood");
+    $re = qr/a/l;
+    ($pat, $mods) = regexp_pattern($re);
+    is($mods, "l", "Verify /l is understood");
+    $re = qr/a/a;
+    ($pat, $mods) = regexp_pattern($re);
+    is($mods, "a", "Verify /a is understood");
+    $re = qr/a/aa;
+    ($pat, $mods) = regexp_pattern($re);
+    is($mods, "aa", "Verify /aa is understood");
+    diag($mods);
+    $pat = regexp_pattern($re);
+    diag($pat);
+}
+
+{
     # tests for new regexp flags
     my $text = "\xE4";
     my $check;
@@ -110,5 +134,5 @@ if ('1234'=~/(?:(?<A>\d)|(?<C>!))(?<B>\d)(?<A>\d)(?<B>\d)/){
     }
 
 # New tests above this line, don't forget to update the test count below!
-BEGIN { plan tests => 28 }
+BEGIN { plan tests => 33 }
 # No tests here!
