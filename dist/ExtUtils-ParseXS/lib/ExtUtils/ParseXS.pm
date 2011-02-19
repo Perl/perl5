@@ -299,9 +299,8 @@ EOM
 
     $_ = shift(@{ $self->{line} });
     while (my $kwd = $self->check_keyword("REQUIRE|PROTOTYPES|FALLBACK|VERSIONCHECK|INCLUDE(?:_COMMAND)?|SCOPE")) {
-      no strict 'refs';
-      &{"${kwd}_handler"}();
-      use strict 'refs';
+      my $method = $kwd . "_handler";
+      $self->$method($_);
       next PARAGRAPH unless @{ $self->{line} };
       $_ = shift(@{ $self->{line} });
     }
@@ -555,7 +554,7 @@ EOF
     $_ = '';
     $self->check_conditional_preprocessor_statements();
     while (@{ $self->{line} }) {
-      CASE_handler() if $self->check_keyword("CASE");
+      $self->CASE_handler($_) if $self->check_keyword("CASE");
       print Q(<<"EOF");
 #   $self->{except} [[
 EOF
@@ -567,7 +566,7 @@ EOF
       %{ $self->{arg_list} } = ();
       $self->{gotRETVAL} = 0;
 
-      INPUT_handler();
+      $self->INPUT_handler($_);
       $self->process_keyword("INPUT|PREINIT|INTERFACE_MACRO|C_ARGS|ALIAS|ATTRS|PROTOTYPE|SCOPE|OVERLOAD");
 
       print Q(<<"EOF") if $self->{ScopeThisXSUB};
@@ -619,7 +618,7 @@ EOF
           unshift @{ $self->{line} }, @fake_INPUT_pre, @fake_INPUT, $_;
           $_ = "";
           $self->{processing_arg_with_types} = 1;
-          INPUT_handler();
+          $self->INPUT_handler($_);
         }
         print $self->{deferred};
 
@@ -1025,15 +1024,16 @@ sub merge_section {
 
 sub process_keyword {
   my($self, $pattern) = @_;
-  my $kwd;
 
-  no strict 'refs';
-  &{"${kwd}_handler"}()
-    while $kwd = $self->check_keyword($pattern);
-  use strict 'refs';
+  while (my $kwd = $self->check_keyword($pattern)) {
+    my $method = $kwd . "_handler";
+    $self->$method($_);
+  }
 }
 
 sub CASE_handler {
+  my $self = shift;
+  $_ = shift;
   blurt( $self, "Error: `CASE:' after unconditional `CASE:'")
     if $self->{condnum} && $self->{cond} eq '';
   $self->{cond} = $_;
@@ -1043,6 +1043,8 @@ sub CASE_handler {
 }
 
 sub INPUT_handler {
+  my $self = shift;
+  $_ = shift;
   for (;  !/^$self->{BLOCK_re}/o;  $_ = shift(@{ $self->{line} })) {
     last if /^\s*NOT_IMPLEMENTED_YET/;
     next unless /\S/;        # skip blank lines
@@ -1131,6 +1133,8 @@ sub INPUT_handler {
 }
 
 sub OUTPUT_handler {
+  my $self = shift;
+  $_ = shift;
   for (;  !/^$self->{BLOCK_re}/o;  $_ = shift(@{ $self->{line} })) {
     next unless /\S/;
     if (/^\s*SETMAGIC\s*:\s*(ENABLE|DISABLE)\s*/) {
@@ -1169,14 +1173,18 @@ sub OUTPUT_handler {
   }
 }
 
-sub C_ARGS_handler() {
+sub C_ARGS_handler {
+  my $self = shift;
+  $_ = shift;
   my $in = $self->merge_section();
 
   trim_whitespace($in);
   $self->{func_args} = $in;
 }
 
-sub INTERFACE_MACRO_handler() {
+sub INTERFACE_MACRO_handler {
+  my $self = shift;
+  $_ = shift;
   my $in = $self->merge_section();
 
   trim_whitespace($in);
@@ -1191,7 +1199,9 @@ sub INTERFACE_MACRO_handler() {
   $self->{interfaces} = 1;        # global
 }
 
-sub INTERFACE_handler() {
+sub INTERFACE_handler {
+  my $self = shift;
+  $_ = shift;
   my $in = $self->merge_section();
 
   trim_whitespace($in);
@@ -1208,10 +1218,29 @@ EOF
   $self->{interfaces} = 1;        # global
 }
 
-sub CLEANUP_handler() { print_section() }
-sub PREINIT_handler() { print_section() }
-sub POSTCALL_handler() { print_section() }
-sub INIT_handler()    { print_section() }
+sub CLEANUP_handler {
+  my $self = shift;
+  $_ = shift;
+  print_section();
+}
+
+sub PREINIT_handler {
+  my $self = shift;
+  $_ = shift;
+  print_section();
+}
+
+sub POSTCALL_handler {
+  my $self = shift;
+  $_ = shift;
+  print_section();
+}
+
+sub INIT_handler {
+  my $self = shift;
+  $_ = shift;
+  print_section();
+}
 
 sub GetAliases {
   my ($line) = @_;
@@ -1244,7 +1273,10 @@ sub GetAliases {
     if $line;
 }
 
-sub ATTRS_handler () {
+sub ATTRS_handler {
+  my $self = shift;
+  $_ = shift;
+
   for (;  !/^$self->{BLOCK_re}/o;  $_ = shift(@{ $self->{line} })) {
     next unless /\S/;
     trim_whitespace($_);
@@ -1252,7 +1284,10 @@ sub ATTRS_handler () {
   }
 }
 
-sub ALIAS_handler () {
+sub ALIAS_handler {
+  my $self = shift;
+  $_ = shift;
+
   for (;  !/^$self->{BLOCK_re}/o;  $_ = shift(@{ $self->{line} })) {
     next unless /\S/;
     trim_whitespace($_);
@@ -1260,7 +1295,10 @@ sub ALIAS_handler () {
   }
 }
 
-sub OVERLOAD_handler() {
+sub OVERLOAD_handler {
+  my $self = shift;
+  $_ = shift;
+
   for (;  !/^$self->{BLOCK_re}/o;  $_ = shift(@{ $self->{line} })) {
     next unless /\S/;
     trim_whitespace($_);
@@ -1273,7 +1311,10 @@ sub OVERLOAD_handler() {
   }
 }
 
-sub FALLBACK_handler() {
+sub FALLBACK_handler {
+  my $self = shift;
+  $_ = shift;
+
   # the rest of the current line should contain either TRUE,
   # FALSE or UNDEF
 
@@ -1291,9 +1332,10 @@ sub FALLBACK_handler() {
 }
 
 
-sub REQUIRE_handler () {
+sub REQUIRE_handler {
+  my $self = shift;
   # the rest of the current line should contain a version number
-  my ($Ver) = $_;
+  my $Ver = shift;
 
   trim_whitespace($Ver);
 
@@ -1308,7 +1350,10 @@ sub REQUIRE_handler () {
     unless $VERSION >= $Ver;
 }
 
-sub VERSIONCHECK_handler () {
+sub VERSIONCHECK_handler {
+  my $self = shift;
+  $_ = shift;
+
   # the rest of the current line should contain either ENABLE or
   # DISABLE
 
@@ -1323,7 +1368,10 @@ sub VERSIONCHECK_handler () {
 
 }
 
-sub PROTOTYPE_handler () {
+sub PROTOTYPE_handler {
+  my $self = shift;
+  $_ = shift;
+
   my $specified;
 
   death( $self, "Error: Only 1 PROTOTYPE definition allowed per xsub")
@@ -1354,7 +1402,10 @@ sub PROTOTYPE_handler () {
   $self->{ProtoUsed} = 1;
 }
 
-sub SCOPE_handler () {
+sub SCOPE_handler {
+  my $self = shift;
+  $_ = shift;
+
   death( $self, "Error: Only 1 SCOPE declaration allowed per xsub")
     if $self->{scope_in_this_xsub}++;
 
@@ -1364,7 +1415,10 @@ sub SCOPE_handler () {
   $self->{ScopeThisXSUB} = ( uc($1) eq 'ENABLE' );
 }
 
-sub PROTOTYPES_handler () {
+sub PROTOTYPES_handler {
+  my $self = shift;
+  $_ = shift;
+
   # the rest of the current line should contain either ENABLE or
   # DISABLE
 
@@ -1377,7 +1431,6 @@ sub PROTOTYPES_handler () {
   $self->{WantPrototypes} = 1 if $1 eq 'ENABLE';
   $self->{WantPrototypes} = 0 if $1 eq 'DISABLE';
   $self->{ProtoUsed} = 1;
-
 }
 
 sub PushXSStack {
@@ -1399,7 +1452,9 @@ sub PushXSStack {
 
 }
 
-sub INCLUDE_handler () {
+sub INCLUDE_handler {
+  my $self = shift;
+  $_ = shift;
   # the rest of the current line should contain a valid filename
 
   trim_whitespace($_);
@@ -1463,7 +1518,9 @@ sub QuoteArgs {
   return join (' ', ($cmd, @args));
 }
 
-sub INCLUDE_COMMAND_handler () {
+sub INCLUDE_COMMAND_handler {
+  my $self = shift;
+  $_ = shift;
   # the rest of the current line should contain a valid command
 
   trim_whitespace($_);
@@ -1511,6 +1568,8 @@ EOF
 }
 
 sub PopFile {
+  my $self = shift;
+
   return 0 unless $self->{XSStack}->[-1]{type} eq 'file';
 
   my $data     = pop @{ $self->{XSStack} };
@@ -1565,7 +1624,7 @@ sub fetch_para {
     if !defined $self->{lastline} && $self->{XSStack}->[-1]{type} eq 'if';
   @{ $self->{line} } = ();
   @{ $self->{line_no} } = ();
-  return PopFile() if !defined $self->{lastline};
+  return $self->PopFile() if !defined $self->{lastline};
 
   if ($self->{lastline} =~
       /^MODULE\s*=\s*([\w:]+)(?:\s+PACKAGE\s*=\s*([\w:]+))?(?:\s+PREFIX\s*=\s*(\S+))?\s*$/) {
