@@ -484,12 +484,15 @@ sub dl_findfile {
 }
 
 
+<<$^O-eq-VMS>>
+# dl_expandspec should be defined in dl_vms.xs
+<<|$^O-eq-VMS>>
 sub dl_expandspec {
     my($spec) = @_;
     # Optional function invoked if DynaLoader.pm sets $do_expand.
     # Most systems do not require or use this function.
     # Some systems may implement it in the dl_*.xs file in which case
-    # this autoload version will not be called but is harmless.
+    # this Perl version should be excluded at build time.
 
     # This function is designed to deal with systems which treat some
     # 'filenames' in a special way. For example VMS 'Logical Names'
@@ -500,16 +503,11 @@ sub dl_expandspec {
 
     my $file = $spec; # default output to input
 
-    <<$^O-eq-VMS>>
-        # dl_expandspec should be defined in dl_vms.xs
-	require Carp;
-	Carp::croak("dl_expandspec: should be defined in XS file!\n");
-    <<|$^O-eq-VMS>>
 	return undef unless -f $file;
-    <</$^O-eq-VMS>>
     print STDERR "dl_expandspec($spec) => $file\n" if $dl_debug;
     $file;
 }
+<</$^O-eq-VMS>>
 
 sub dl_find_symbol_anywhere
 {
