@@ -1964,6 +1964,7 @@ realclean : clean
 	- If F$Search("[.t.lib]vmsfspec.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vmsfspec.t;*
 	- If F$Search("[.t.lib]vmsish.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vmsish.t;*
 	- If F$Search("vmspipe.com").nes."" Then Delete/NoConfirm/Log vmspipe.com;*
+	- If F$Search("[.lib]buildcustomize.pl").nes."" Then Delete/NoConfirm/Log [.lib]buildcustomize.pl;*
 
 cleansrc : clean
 	- If F$Search("*.c;-1").nes."" Then Purge/NoConfirm/Log *.c
