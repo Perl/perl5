@@ -279,22 +279,21 @@ EOM
       if $self->{line}->[0] =~ /^\s/;
 
     # initialize info arrays
-    undef(%{ $self->{args_match} });
-    undef(%{ $self->{var_types} });
-    undef(%{ $self->{defaults} });
-    undef(%{ $self->{arg_list} });
-    undef(@{ $self->{proto_arg} });
-    undef($self->{processing_arg_with_types});
-    undef(%{ $self->{argtype_seen} });
-    undef(%{ $self->{in_out} });
-    undef(%{ $self->{lengthof} });
-    undef($self->{proto_in_this_xsub});
-    undef($self->{scope_in_this_xsub});
-    undef($self->{interface});
-    $self->{interface_macro} = 'XSINTERFACE_FUNC';
-    $self->{interface_macro_set} = 'XSINTERFACE_FUNC_SET';
-    $self->{ProtoThisXSUB} = $self->{WantPrototypes};
-    $self->{ScopeThisXSUB} = 0;
+    foreach my $member (qw(args_match var_types defaults arg_list
+                           argtype_seen in_out lengthof))
+    {
+      $self->{$member} = {};
+    }
+    $self->{proto_arg} = [];
+    $self->{processing_arg_with_types} = undef;
+    $self->{proto_in_this_xsub}        = undef;
+    $self->{scope_in_this_xsub}        = undef;
+    $self->{interface}                 = undef;
+    $self->{interface_macro}           = 'XSINTERFACE_FUNC';
+    $self->{interface_macro_set}       = 'XSINTERFACE_FUNC_SET';
+    $self->{ProtoThisXSUB}             = $self->{WantPrototypes};
+    $self->{ScopeThisXSUB}             = 0;
+
     my $xsreturn = 0;
 
     $_ = shift(@{ $self->{line} });
@@ -552,7 +551,7 @@ EOF
     push(@{ $self->{line} }, "$END:");
     push(@{ $self->{line_no} }, $self->{line_no}->[-1]);
     $_ = '';
-    $self->check_conditional_preprocessor_statements();
+    check_conditional_preprocessor_statements();
     while (@{ $self->{line} }) {
       $self->CASE_handler($_) if $self->check_keyword("CASE");
       print Q(<<"EOF");
