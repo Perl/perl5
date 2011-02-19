@@ -7727,11 +7727,13 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
 		vFAIL("Invalid hexadecimal number in \\N{U+...}");
 	    }    
 
+	    /* XXX ? Change to ANYOF node
 	    if (FOLD
-		&& (cp > 255 || ! MORE_ASCII_RESTRICTED)
+		&& (cp > 255 || (! MORE_ASCII_RESTRICTED && ! LOC))
 		&& is_TRICKYFOLD_cp(cp))
 	    {
 	    }
+	    */
 
 	    /* Under /aa, we can't mix ASCII with non- in a fold.  If we are
 	     * folding, and the source isn't ASCII, look through all the
@@ -8684,7 +8686,7 @@ tryagain:
 		 * putting it in a special node keeps regexec from having to
 		 * deal with a non-utf8 multi-char fold */
 		if (FOLD
-		    && (ender > 255 || ! MORE_ASCII_RESTRICTED)
+		    && (ender > 255 || (! MORE_ASCII_RESTRICTED && ! LOC))
 		    && is_TRICKYFOLD_cp(ender))
 		{
 		    /* If is in middle of outputting characters into an
