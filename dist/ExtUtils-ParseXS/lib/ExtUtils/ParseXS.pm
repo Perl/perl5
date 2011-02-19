@@ -248,7 +248,7 @@ EOM
   my $XSS_work_idx = 0;
   my $cpp_next_tmp = 'XSubPPtmpAAAA';
  PARAGRAPH:
-  while (fetch_para()) {
+  while ($self->fetch_para()) {
     my $outlist_ref  = [];
     # Print initial preprocessor statements and blank lines
     while (@{ $self->{line} } && $self->{line}->[0] !~ /^[^\#]/) {
@@ -1009,6 +1009,7 @@ sub print_section {
 }
 
 sub merge_section {
+  my $self = shift;
   my $in = '';
 
   while (!/\S/ && @{ $self->{line} }) {
@@ -1081,7 +1082,7 @@ sub INPUT_handler {
     # one can use 2-args map_type() unconditionally.
     my $printed_name;
     if ($var_type =~ / \( \s* \* \s* \) /x) {
-      # Function pointers are not yet supported with &output_init!
+      # Function pointers are not yet supported with output_init()!
       print "\t" . map_type($self, $var_type, $var_name);
       $printed_name = 1;
     }
@@ -1169,14 +1170,14 @@ sub OUTPUT_handler {
 }
 
 sub C_ARGS_handler() {
-  my $in = merge_section();
+  my $in = $self->merge_section();
 
   trim_whitespace($in);
   $self->{func_args} = $in;
 }
 
 sub INTERFACE_MACRO_handler() {
-  my $in = merge_section();
+  my $in = $self->merge_section();
 
   trim_whitespace($in);
   if ($in =~ /\s/) {        # two
@@ -1191,7 +1192,7 @@ sub INTERFACE_MACRO_handler() {
 }
 
 sub INTERFACE_handler() {
-  my $in = merge_section();
+  my $in = $self->merge_section();
 
   trim_whitespace($in);
 
@@ -1557,6 +1558,8 @@ sub Q {
 
 # Read next xsub into @{ $self->{line} } from ($lastline, <$FH>).
 sub fetch_para {
+  my $self = shift;
+
   # parse paragraph
   death("Error: Unterminated `#if/#ifdef/#ifndef'")
     if !defined $self->{lastline} && $self->{XSStack}->[-1]{type} eq 'if';
