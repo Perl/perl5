@@ -8755,17 +8755,34 @@ S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRL
     return s;
 }
 
-static U32
-S_pmflag(U32 pmfl, const char ch) {
-    switch (ch) {
-	CASE_STD_PMMOD_FLAGS_PARSE_SET(&pmfl);
-    case GLOBAL_PAT_MOD:      pmfl |= PMf_GLOBAL; break;
-    case CONTINUE_PAT_MOD:    pmfl |= PMf_CONTINUE; break;
-    case ONCE_PAT_MOD:        pmfl |= PMf_KEEP; break;
-    case KEEPCOPY_PAT_MOD:    pmfl |= RXf_PMf_KEEPCOPY; break;
-    case NONDESTRUCT_PAT_MOD: pmfl |= PMf_NONDESTRUCT; break;
+static bool
+S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s) {
+
+    /* Adds, subtracts to/from 'pmfl' based on regex modifier flags found in
+     * the parse starting at 's', based on the subset that are valid in this
+     * context input to this routine in 'valid_flags'. Advances s.  Returns
+     * TRUE if the input was a valid flag, so the next char may be as well;
+     * otherwise FALSE */
+
+    const char c = **s;
+    if (! strchr(valid_flags, c)) {
+        if (isALNUM(c)) {
+            Perl_ck_warner_d(aTHX_ packWARN(WARN_SYNTAX),
+	    "Having no space between pattern and following word is deprecated");
+        }
+        return FALSE;
     }
-    return pmfl;
+
+    switch (c) {
+        CASE_STD_PMMOD_FLAGS_PARSE_SET(pmfl);
+        case GLOBAL_PAT_MOD:      *pmfl |= PMf_GLOBAL; break;
+        case CONTINUE_PAT_MOD:    *pmfl |= PMf_CONTINUE; break;
+        case ONCE_PAT_MOD:        *pmfl |= PMf_KEEP; break;
+        case KEEPCOPY_PAT_MOD:    *pmfl |= RXf_PMf_KEEPCOPY; break;
+        case NONDESTRUCT_PAT_MOD: *pmfl |= PMf_NONDESTRUCT; break;
+    }
+    (*s)++;
+    return TRUE;
 }
 
 STATIC char *
@@ -8817,14 +8834,7 @@ S_scan_pat(pTHX_ char *start, I32 type)
 #ifdef PERL_MAD
     modstart = s;
 #endif
-    while (*s && strchr(valid_flags, *s))
-	pm->op_pmflags = S_pmflag(pm->op_pmflags, *s++);
-
-    if (isALNUM(*s)) {
-	Perl_ck_warner_d(aTHX_ packWARN(WARN_SYNTAX),
-	    "Having no space between pattern and following word is deprecated");
-
-    }
+    while (*s && S_pmflag(aTHX_ valid_flags, &(pm->op_pmflags), &s)) {};
 #ifdef PERL_MAD
     if (PL_madskills && modstart != s) {
 	SV* tmptoken = newSVpvn(modstart, s - modstart);
@@ -8903,14 +8913,7 @@ S_scan_subst(pTHX_ char *start)
 	    s++;
 	    es++;
 	}
-	else if (strchr(S_PAT_MODS, *s))
-	    pm->op_pmflags = S_pmflag(pm->op_pmflags, *s++);
-	else {
-	    if (isALNUM(*s)) {
-		Perl_ck_warner_d(aTHX_ packWARN(WARN_SYNTAX),
-		    "Having no space between pattern and following word is deprecated");
-
-	    }
+	else if (! S_pmflag(aTHX_ S_PAT_MODS, &(pm->op_pmflags), &s)) {
 	    break;
 	}
     }
