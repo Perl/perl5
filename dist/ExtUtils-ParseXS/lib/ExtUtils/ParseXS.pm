@@ -1240,7 +1240,8 @@ sub INIT_handler {
   $self->print_section();
 }
 
-sub GetAliases {
+sub get_aliases {
+  my $self = shift;
   my ($line) = @_;
   my ($orig) = $line;
 
@@ -1289,7 +1290,7 @@ sub ALIAS_handler {
   for (;  !/^$self->{BLOCK_re}/o;  $_ = shift(@{ $self->{line} })) {
     next unless /\S/;
     trim_whitespace($_);
-    GetAliases($_) if $_;
+    $self->get_aliases($_) if $_;
   }
 }
 
