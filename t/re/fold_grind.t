@@ -295,11 +295,11 @@ foreach my $test (sort { numerically } keys %tests) {
         if (! $target_has_ascii && ! $pattern_has_ascii) {
           if ($target_above_latin1 || $pattern_above_latin1) {
             next if defined $has_tested_aa_above_latin1
-                    && $has_tested_aa_above_latin1 != $ord;
-            $has_tested_aa_above_latin1 = $ord;
+                    && $has_tested_aa_above_latin1 != $test;
+            $has_tested_aa_above_latin1 = $test;
           }
-          next if defined $has_tested_latin1_aa && $has_tested_latin1_aa != $ord;
-          $has_tested_latin1_aa = $ord;
+          next if defined $has_tested_latin1_aa && $has_tested_latin1_aa != $test;
+          $has_tested_latin1_aa = $test;
         }
       }
 
