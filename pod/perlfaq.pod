@@ -914,7 +914,7 @@ I put a regular expression into $/ but it didn't work. What's wrong?
 
 =item *
 
-How do I substitute case insensitively on the LHS while preserving case on the RHS?
+How do I substitute case-insensitively on the LHS while preserving case on the RHS?
 
 =item *
 

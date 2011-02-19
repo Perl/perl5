@@ -235,7 +235,7 @@ being in memory at the end.
 	}
 
 
-=head2 How do I substitute case insensitively on the LHS while preserving case on the RHS?
+=head2 How do I substitute case-insensitively on the LHS while preserving case on the RHS?
 X<replace, case preserving> X<substitute, case preserving>
 X<substitution, case preserving> X<s, case preserving>
 
@@ -644,7 +644,7 @@ An example:
 Notice how the second substitution stopped matching as soon as it
 encountered "y ". The C<*?> quantifier effectively tells the regular
 expression engine to find a match as quickly as possible and pass
-control on to whatever is next in line, like you would if you were
+control on to whatever is next in line, as you would if you were
 playing hot potato.
 
 =head2 How do I process each word on each line?
