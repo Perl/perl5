@@ -49,8 +49,8 @@ I<not> use the brackets.  These are correct: C<eof(FH)>, C<seek(FH, 0,
 
 Normally, a bareword doesn't need to be quoted, but in most cases
 probably should be (and must be under C<use strict>).  But a hash key
-consisting of a simple word (that isn't the name of a defined
-subroutine) and the left-hand operand to the C<< => >> operator both
+consisting of a simple word and the left-hand
+operand to the C<< => >> operator both
 count as though they were quoted:
 
 	This                    is like this
