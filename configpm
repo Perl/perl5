@@ -707,9 +707,7 @@ $heavy_txt .= <<'ENDOFEND';
 }
 
 sub STORE  { die "\%Config::Config is read-only\n" }
-*DELETE = \&STORE;
-*CLEAR  = \&STORE;
-
+*DELETE = *CLEAR = \*STORE; # Typeglob aliasing uses less space
 
 sub config_sh {
     substr $Config_SH_expanded, 1, $config_sh_len;
