@@ -9233,7 +9233,9 @@ S_set_regclass_bit(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8 valu
 /*
    parse a class specification and produce either an ANYOF node that
    matches the pattern or perhaps will be optimized into an EXACTish node
-   instead. */
+   instead. The node contains a bit map for the first 256 characters, with the
+   corresponding bit set if that character is in the list.  For characters
+   above 255, a range list is used */
 
 STATIC regnode *
 S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
@@ -9958,7 +9960,7 @@ parseit:
 			    /* If any of the folded characters of this are in
 			     * the Latin1 range, tell the regex engine that
 			     * this can match a non-utf8 target string.  The
-			     * multi-byte fold whose source is in the
+			     * only multi-byte fold whose source is in the
 			     * Latin1 range (U+00DF) applies only when the
 			     * target string is utf8, or under unicode rules */
 			    if (j > 255 || AT_LEAST_UNI_SEMANTICS) {
@@ -9991,19 +9993,15 @@ parseit:
 			end_multi_fold: ;
 			}
 		    }
-		    else { /* Single character fold */
+		    else {
+			/* Single character fold.  Add everything in its fold
+			 * closure to the list that this node should match */
 			SV** listp;
 
-			/* Consider "k" =~ /[K]/i.  The line above would have
-			 * just folded the 'k' to itself, and that isn't going
-			 * to match 'K'.  So we look through the closure of
-			 * everything that folds to 'k'.  That will find the
-			 * 'K'.  Initialize the list, if necessary */
-
-			/* The data structure is a hash with the keys every
-			 * character that is folded to, like 'k', and the
-			 * values each an array of everything that folds to its
-			 * key.  e.g. [ 'k', 'K', KELVIN_SIGN ] */
+			/* The fold closures data structure is a hash with the
+			 * keys being every character that is folded to, like
+			 * 'k', and the values each an array of everything that
+			 * folds to its key.  e.g. [ 'k', 'K', KELVIN_SIGN ] */
 			if ((listp = hv_fetch(PL_utf8_foldclosures,
 				      (char *) foldbuf, foldlen, FALSE)))
 			{
