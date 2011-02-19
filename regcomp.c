@@ -9439,14 +9439,7 @@ parseit:
 		    e = RExC_parse;
 		    n = 1;
 		}
-		if (SIZE_ONLY) {
-		    if (LOC) {
-			ckWARN2reg(RExC_parse,
-				"\\%c uses Unicode rules, not locale rules",
-				(int) value);
-		    }
-		}
-		else {
+		if (!SIZE_ONLY) {
 		    if (UCHARAT(RExC_parse) == '^') {
 			 RExC_parse++;
 			 n--;
