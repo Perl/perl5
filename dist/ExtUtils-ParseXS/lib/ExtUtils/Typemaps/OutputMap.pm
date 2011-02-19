@@ -88,6 +88,7 @@ sub cleaned_code {
   # Move C pre-processor instructions to column 1 to be strictly ANSI
   # conformant. Some pre-processors are fussy about this.
   $code =~ s/^\s+#/#/mg;
+  $code =~ s/\s*\z/\n/;
 
   return $code;
 }
