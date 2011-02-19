@@ -4127,7 +4127,7 @@ discovered.  This happens when using the C<(?^...)> construct to tell
 Perl to use the default regular expression modifiers, and you
 redundantly specify a default modifier; or having a modifier that can't
 be turned off (such as C<"p"> or C<"l">) after a minus; or specifying
-more than one of the C<"d">, C<"l">, or C<"u"> modifiers.  For other
+more than one of the C<"a>, C<"d">, C<"l">, or C<"u"> modifiers.  For other
 causes, see L<perlre>.
 
 =item Sequence \%s... not terminated in regex; marked by <-- HERE in m/%s/
