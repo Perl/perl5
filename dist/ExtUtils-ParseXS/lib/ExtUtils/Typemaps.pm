@@ -433,6 +433,8 @@ object for the entry if found.
 
 sub get_typemap {
   my $self = shift;
+  die("Need named parameters, got uneven number") if @_ % 2;
+
   my %args = @_;
   my $ctype = $args{ctype};
   die("Need ctype argument") if not defined $ctype;
@@ -465,6 +467,8 @@ object for the entry if found.
 
 sub get_inputmap {
   my $self = shift;
+  die("Need named parameters, got uneven number") if @_ % 2;
+
   my %args = @_;
   my $xstype = $args{xstype};
   my $ctype  = $args{ctype};
@@ -475,7 +479,9 @@ sub get_inputmap {
     if defined $xstype and defined $ctype;
 
   if (defined $ctype) {
-    $xstype = $self->get_typemap(ctype => $ctype)->xstype;
+    my $tm = $self->get_typemap(ctype => $ctype);
+    $xstype = $tm && $tm->xstype;
+    return() if not defined $xstype;
   }
 
   my $index = $self->{input_lookup}{$xstype};
@@ -499,6 +505,8 @@ object for the entry if found.
 
 sub get_outputmap {
   my $self = shift;
+  die("Need named parameters, got uneven number") if @_ % 2;
+
   my %args = @_;
   my $xstype = $args{xstype};
   my $ctype  = $args{ctype};
@@ -509,7 +517,9 @@ sub get_outputmap {
     if defined $xstype and defined $ctype;
 
   if (defined $ctype) {
-    $xstype = $self->get_typemap(ctype => $ctype)->xstype;
+    my $tm = $self->get_typemap(ctype => $ctype);
+    $xstype = $tm && $tm->xstype;
+    return() if not defined $xstype;
   }
 
   my $index = $self->{output_lookup}{$xstype};
