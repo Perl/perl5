@@ -277,7 +277,8 @@ foreach my $test (sort { numerically } keys %tests) {
     # code point for diagnostic purposes.  (If both are single, choose the
     # target string)
     my $ord = @target == 1 ? $target[0] : $pattern[0];
-    my $progress = sprintf "\"%s\" and /%s/",
+    my $progress = sprintf "%04X: \"%s\" and /%s/",
+                            $test,
                             join("", @x_target),
                             join("", @x_pattern);
     #print $progress, "\n";
