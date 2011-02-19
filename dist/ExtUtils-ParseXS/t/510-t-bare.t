@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 30;
+use Test::More tests => 38;
 use ExtUtils::Typemaps;
 
 # typemap only
@@ -19,6 +19,16 @@ HERE
   is($type->ctype, 'unsigned int');
   is($type->xstype, 'T_IV');
   is($type->tidy_ctype, 'unsigned int');
+
+  # test failure
+  ok(!$map->get_typemap(ctype => 'foo'), "Access to nonexistent typemap doesn't die");
+  ok(!$map->get_inputmap(ctype => 'foo'), "Access to nonexistent inputmap via ctype doesn't die");
+  ok(!$map->get_outputmap(ctype => 'foo'), "Access to nonexistent outputmap via ctype doesn't die");
+  ok(!$map->get_inputmap(xstype => 'foo'), "Access to nonexistent inputmap via xstype doesn't die");
+  ok(!$map->get_outputmap(xstype => 'foo'), "Access to nonexistent outputmap via xstype doesn't die");
+  ok(!eval{$map->get_typemap('foo')} && $@, "Access to typemap with positional params dies");
+  ok(!eval{$map->get_inputmap('foo')} && $@, "Access to inputmap with positional params dies");
+  ok(!eval{$map->get_outputmap('foo')} && $@, "Access to outputmap with positional params dies");
 }
 
 # typemap & input
