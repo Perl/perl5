@@ -1380,6 +1380,7 @@ sub PROTOTYPES_handler () {
 }
 
 sub PushXSStack {
+  my $self = shift;
   my %args = @_;
   # Save the current file context.
   push(@{ $self->{XSStack} }, {
@@ -1423,7 +1424,7 @@ sub INCLUDE_handler () {
           " 'perldoc perlxs' for details.");
   }
 
-  PushXSStack();
+  $self->PushXSStack();
 
   $FH = Symbol::gensym();
 
@@ -1474,7 +1475,7 @@ sub INCLUDE_COMMAND_handler () {
   death( $self, "INCLUDE_COMMAND: pipes are illegal")
     if /^\s*\|/ or /\|\s*$/;
 
-  PushXSStack( IsPipe => 1 );
+  $self->PushXSStack( IsPipe => 1 );
 
   $FH = Symbol::gensym();
 
@@ -1508,7 +1509,7 @@ EOF
   $self->{lastline_no} = $.;
 }
 
-sub PopFile() {
+sub PopFile {
   return 0 unless $self->{XSStack}->[-1]{type} eq 'file';
 
   my $data     = pop @{ $self->{XSStack} };
