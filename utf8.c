@@ -3206,7 +3206,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
 		else {
 		    *foldbuf2 = TWO_BYTE_UTF8_TO_UNI(*p2, *(p2 + 1));
 		}
-		n1 = 1;
+		n2 = 1;
 	    }
 	    else if (isASCII(*p2)) {
 		if (flags && ! isASCII(*p1)) {
