@@ -1118,26 +1118,6 @@ to each filehandle.
 =head2 How can I read in an entire file all at once?
 X<slurp> X<file, slurping>
 
-Are you sure you want to read the entire file and store it in memory?
-If you mmap the file, you can virtually load the entire file into a
-string without actually storing it in memory:
-
-	use File::Map qw(map_file);
-
-	map_file my $string, $filename;
-
-Once mapped, you can treat C<$string> as you would any other string.
-Since you don't necessarily have to load the data, mmap-ing can be
-very fast and may not increase your memory footprint.
-
-If you want to load the entire file, you can use the C<File::Slurp>
-module to do it in one one simple and efficient step:
-
-	use File::Slurp;
-
-	my $all_of_it = read_file($filename); # entire file in scalar
-	my @all_lines = read_file($filename); # one line per element
-
 The customary Perl approach for processing all the lines in a file is to
 do so one line at a time:
 
@@ -1156,13 +1136,35 @@ you see someone do this:
 	my @lines = <INPUT>;
 
 You should think long and hard about why you need everything loaded at
-once. It's just not a scalable solution. You might also find it more
+once. It's just not a scalable solution.
+
+If you "mmap" the file with the File::Map module from 
+CPAN, you can virtually load the entire file into a
+string without actually storing it in memory:
+
+	use File::Map qw(map_file);
+
+	map_file my $string, $filename;
+
+Once mapped, you can treat C<$string> as you would any other string.
+Since you don't necessarily have to load the data, mmap-ing can be
+very fast and may not increase your memory footprint.
+
+You might also find it more
 fun to use the standard C<Tie::File> module, or the C<DB_File> module's
 C<$DB_RECNO> bindings, which allow you to tie an array to a file so that
 accessing an element of the array actually accesses the corresponding
 line in the file.
 
-You can read the entire filehandle contents into a scalar.
+If you want to load the entire file, you can use the C<File::Slurp>
+module to do it in one one simple and efficient step:
+
+	use File::Slurp;
+
+	my $all_of_it = read_file($filename); # entire file in scalar
+	my @all_lines = read_file($filename); # one line per element
+
+Or you can read the entire file contents into a scalar like this:
 
 	my $var;
 	{
@@ -1176,8 +1178,7 @@ close the file at block exit. If the file is already open, just use this:
 
 	my $var = do { local $/; <$fh> };
 
-You can do that one better by using a localized C<@ARGV> so you can
-eliminate the C<open>:
+You can also use a localized C<@ARGV> to eliminate the C<open>:
 
 	my $var = do { local( @ARGV, $/ ) = $file; <> };
 
@@ -1185,7 +1186,7 @@ For ordinary files you can also use the C<read> function.
 
 	read( $fh, $var, -s $fh );
 
-That third argument tests the byte size of the data on the C<INPUT> filehandle
+That third argument tests the byte size of the data on the C<$fh> filehandle
 and reads that many bytes into the buffer C<$var>.
 
 =head2 How can I read in a file by paragraphs?
