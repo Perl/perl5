@@ -625,13 +625,13 @@ EOF
         $self->process_keyword("INIT|ALIAS|ATTRS|PROTOTYPE|INTERFACE_MACRO|INTERFACE|C_ARGS|OVERLOAD");
 
         if ($self->check_keyword("PPCODE")) {
-          print_section();
+          $self->print_section();
           death( $self, "PPCODE must be last thing") if @{ $self->{line} };
           print "\tLEAVE;\n" if $self->{ScopeThisXSUB};
           print "\tPUTBACK;\n\treturn;\n";
         }
         elsif ($self->check_keyword("CODE")) {
-          print_section();
+          $self->print_section();
         }
         elsif (defined($class) and $func_name eq "DESTROY") {
           print "\n\t";
@@ -956,7 +956,7 @@ EOF
   if (@{ $BootCode_ref }) {
     print "\n    /* Initialisation Section */\n\n";
     @{ $self->{line} } = @{ $BootCode_ref };
-    print_section();
+    $self->print_section();
     print "\n    /* End of Initialisation Section */\n\n";
   }
 
@@ -996,6 +996,8 @@ sub check_keyword {
 }
 
 sub print_section {
+  my $self = shift;
+
   # the "do" is required for right semantics
   do { $_ = shift(@{ $self->{line} }) } while !/\S/ && @{ $self->{line} };
 
@@ -1220,26 +1222,22 @@ EOF
 
 sub CLEANUP_handler {
   my $self = shift;
-  $_ = shift;
-  print_section();
+  $self->print_section();
 }
 
 sub PREINIT_handler {
   my $self = shift;
-  $_ = shift;
-  print_section();
+  $self->print_section();
 }
 
 sub POSTCALL_handler {
   my $self = shift;
-  $_ = shift;
-  print_section();
+  $self->print_section();
 }
 
 sub INIT_handler {
   my $self = shift;
-  $_ = shift;
-  print_section();
+  $self->print_section();
 }
 
 sub GetAliases {
