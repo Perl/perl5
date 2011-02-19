@@ -155,8 +155,8 @@ $heavy_txt .= <<'ENDOFBEG';
 
 package Config;
 use strict;
-# use warnings; Pulls in Carp
-# use vars pulls in Carp
+use warnings;
+use vars '%Config';
 
 sub bincompat_options {
     return sort split ' ', (Internals::V())[0];
@@ -219,10 +219,9 @@ ENDOFBEG
 $heavy_txt .= $header_files . "\n}\n\n";
 
 my $export_funcs = <<'EOT';
-my %Export_Cache = (myconfig => 1,
-		    config_sh => 1, config_vars => 1, config_re => 1,
+my %Export_Cache = (myconfig => 1, config_sh => 1, config_vars => 1,
+		    config_re => 1, compile_date => 1, local_patches => 1,
 		    bincompat_options => 1, non_bincompat_options => 1,
-		    compile_date => 1, local_patches => 1,
 		    header_files => 1);
 EOT
 
@@ -238,8 +237,8 @@ $config_txt .= sprintf << 'EOT', $export_funcs;
 
 package Config;
 use strict;
-# use warnings; Pulls in Carp
-# use vars pulls in Carp
+use warnings;
+use vars '%%Config';
 
 # Skip @Config::EXPORT because it only contains %%Config, which we special
 # case below as it's not a function. @Config::EXPORT won't change in the
@@ -258,7 +257,6 @@ $config_txt .= "sub $_;\n" foreach sort keys %export_ok;
 my $myver = sprintf "%vd", $^V;
 
 $config_txt .= sprintf <<'ENDOFBEG', ($myver) x 3;
-our %%Config;
 
 # Define our own import method to avoid pulling in the full Exporter:
 sub import {
@@ -659,10 +657,9 @@ sub FETCH {
     my($self, $key) = @_;
 
     # check for cached value (which may be undef so we use exists not defined)
-    return $self->{$key} if exists $self->{$key};
-
-    return $self->fetch_string($key);
+    return exists $self->{$key} ? $self->{$key} : $self->fetch_string($key);
 }
+
 ENDOFEND
 
 $heavy_txt .= <<'ENDOFEND';
