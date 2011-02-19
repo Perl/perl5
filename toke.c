@@ -8857,7 +8857,7 @@ STATIC char *
 S_scan_subst(pTHX_ char *start)
 {
     dVAR;
-    register char *s;
+    char *s;
     register PMOP *pm;
     I32 first_start;
     I32 es = 0;
