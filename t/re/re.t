@@ -73,9 +73,6 @@ if ('1234'=~/(?:(?<A>\d)|(?<C>!))(?<B>\d)(?<A>\d)(?<B>\d)/){
     $re = qr/a/aa;
     ($pat, $mods) = regexp_pattern($re);
     is($mods, "aa", "Verify /aa is understood");
-    diag($mods);
-    $pat = regexp_pattern($re);
-    diag($pat);
 }
 
 {
