@@ -73,7 +73,7 @@ SKIP: {
 
     # test unsafe signal handlers in combination with exceptions
     my $action = POSIX::SigAction->new(sub { $gotit--, die }, POSIX::SigSet->new, 0);
-    POSIX::sigaction(&POSIX::SIGUSR1, $action);
-    eval { kill SIGUSR1, $$ } for 1..2;
+    POSIX::sigaction(&POSIX::SIGALRM, $action);
+    eval { alarm 1; POSIX::sigsuspend(POSIX::SigSet->new) } for 1..2;
     is $gotit, 0, 'Received both signals';
 }
