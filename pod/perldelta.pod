@@ -29,7 +29,7 @@ to backward compatibility constraints, in Perl 5.14 only, it will be
 resolved as C<s/foo/bar/ le...>, that is, as meaning to take the result
 of the substitution, and see if it is stringwise less-than-or-equal-to
 what follows. In Perl 5.16 and later, it will instead be resolved as
-meaing to do the pattern match using the rules of the current locale,
+meaning to do the pattern match using the rules of the current locale,
 and evaluate the rhs as an expression when doing the substitution.  In
 5.14, if you want the latter interpretation, you can write "el" instead.
 
