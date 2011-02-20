@@ -781,6 +781,12 @@ based on (or at least the last commit of any consequence).
 Then check that the smoke tests pass (particularly on Win32). If not, go
 back and fix things.
 
+Note that for I<BLEAD> releases this may not be practical. It takes a
+long time for the smokers to catch up, especially the Win32
+smokers. This is why we have a RC cycle for I<MAINT> releases, but for
+I<BLEAD> releases sometimes the best you can do is to plead with
+people on IRC to test stuff on their platforms, fire away, and then
+hope for the best.
 
 =item *
 
