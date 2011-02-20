@@ -15,6 +15,31 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.13.9 - John F Kennedy, L<Inaugural Address January 20, 1961|http://en.wikisource.org/wiki/John_F._Kennedy%27s_Inaugural_Address>
+
+L<Announced on 2011-01-20 by Jesse Vincent|http://www.nntp.perl.org/group/perl.perl5.porters/2011/01/msg168335.html>
+
+In the long history of the world, only a few generations have been
+granted the role of defending freedom in its hour of maximum danger. I
+do not shrink from this responsibility -- I welcome it. I do not believe
+that any of us would exchange places with any other people or any other
+generation. The energy, the faith, the devotion which we bring to this
+endeavor will light our country and all who serve it. And the glow from
+that fire can truly light the world.
+
+And so, my fellow Americans, ask not what your country can do for you;
+ask what you can do for your country.
+
+My fellow citizens of the world, ask not what America will do for you,
+but what together we can do for the freedom of man.
+
+Finally, whether you are citizens of America or citizens of the world,
+ask of us here the same high standards of strength and sacrifice which
+we ask of you. With a good conscience our only sure reward, with history
+the final judge of our deeds, let us go forth to lead the land we love,
+asking His blessing and His help, but knowing that here on earth God's
+work must truly be our own.
+
 =head2 v5.13.8 - Roger Williams, L<"The Fifth Gift"|http://www.kuro5hin.org/story/2005/8/19/21304/8493>
 
 L<Announced on 2010-12-19 by Zefram|http://www.nntp.perl.org/group/perl.perl5.porters/2010/12/msg167271.html>
