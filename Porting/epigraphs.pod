@@ -19,7 +19,7 @@ Consult your favorite dictionary for details.
 
 =head1 v5.13.10 - Egill Skalla-Grímsson, L<Egils saga Skalla-Grímssonar|http://www.heimskringla.no/wiki/Egils_saga_Skalla-Gr%C3%ADmssonar>
 
-Annonced on 2011-02-20 by Ævar Arnfjörð Bjarmason
+L<Annonced on 2011-02-20 by Ævar Arnfjörð Bjarmason|http://www.nntp.perl.org/group/perl.perl5.porters/2011/02/msg169340.html>
    
     Skalat maðr rúnar rísta, 
     nema ráða vel kunni. 
