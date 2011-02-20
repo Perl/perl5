@@ -58,8 +58,6 @@ C<nonchar> when Unicode non-character code points are encountered;
 and C<non_unicode> when code points that are above the legal Unicode
 maximum of 0x10FFFF are encountered.
 
-=head1 Security
-
 =head1 Incompatible Changes
 
 =head2 Most C<\p{}> properties are now immune from case-insensitive matching
