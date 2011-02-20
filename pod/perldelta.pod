@@ -366,7 +366,7 @@ or of "Mathematical Bold" digits would would be safe.
 
 =item *
 
-C<CPAN> has been upgraded from version1.94_63 to 1.94_64.
+C<CPAN> has been upgraded from version 1.94_63 to 1.94_64.
 
 =back
 
