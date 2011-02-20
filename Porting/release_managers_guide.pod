@@ -392,6 +392,15 @@ For example:
   $ git log --pretty=fuller v5.13.2..HEAD | \
     perl Porting/checkAUTHORS.pl --who -
 
+Look at the previous L<perldelta> for how to write the opening
+paragraph of the Acknowledgements section. To get the amount of
+changed files and number of lines use this command:
+
+  $ git diff --shortstat v5.13.8..v5.13.9 | \
+    ./perl -Ilib -nE 'my ($files, $insert, $delete) = /(\d+)/ga; say "$files files and ", $insert + $delete, " lines changed"'
+
+Making sure to round off the number of lines changed.
+
 Re-read the perldelta to try to find any embarrassing typos and thinkos;
 remove any C<TODO> or C<XXX> flags; update the "Known Problems" section
 with any serious issues for which fixes are not going to happen now; and
