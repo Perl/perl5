@@ -17,7 +17,7 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
-=head1 v5.13.10 - Egill Skalla-Grímsson, L<Egils saga Skalla-Grímssonar|http://www.heimskringla.no/wiki/Egils_saga_Skalla-Gr%C3%ADmssonar>
+=head2 v5.13.10 - Egill Skalla-Grímsson, L<Egils saga Skalla-Grímssonar|http://www.heimskringla.no/wiki/Egils_saga_Skalla-Gr%C3%ADmssonar>
 
 L<Annonced on 2011-02-20 by Ævar Arnfjörð Bjarmason|http://www.nntp.perl.org/group/perl.perl5.porters/2011/02/msg169340.html>
    
@@ -148,60 +148,6 @@ grounds.  Here I found that the brushwood spread a good way up the
 park, uniting with the wood that approached the little temple I have
 described. 
 
-=head2 v5.12.3 - Howard W. Campbell, Jr., "Reflections on Not Participating in Current Events"
-
-L<Announced on 2011-01-21 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2011/01/msg168368.html>
-
-  I saw a huge steam roller,
-  It blotted out the sun.
-  The people all lay down, lay down;
-  They did not try to run.
-  My love and I, we looked amazed
-  Upon the gory mystery.
-  'Lie down, lie down!' the people cried.
-  'The great machine is history!'
-  My love and I, we ran away,
-  The engine did not find us.
-  We ran up to a mountain top,
-  Left history far behind us.
-  Perhaps we should have stayed and died,
-  But somehow we don't think so.
-  We went to see where history'd been,
-  And my, the dead did stink so.
-
-=head2 v5.12.2 - William Gibson, "Pattern Recognition"
-
-L<Announced on 2010-09-06 by Jesse Vincent|http://www.nntp.perl.org/group/perl.perl5.porters/2010/09/msg163852.html>
-
-CPUs. Cayce Pollard Units. That's what Damien calls the clothing
-she wears. CPUs are either black, white, or gray, and ideally
-seem to have come into this world without human intervention.
-
-What people take for relentless minimalism is a side effect
-of too much exposure to the reactor-cores of fashion. This
-has resulted in a remorseless paring-down of what she can and
-will wear. She is, literally, allergic to fashion. She can
-only tolerate things that could have been worn, to a general
-lack of comment, during any year between 1945 and 2000. She's a
-design-free zone, a one-woman school of and whose very austerity
-periodically threatens to spawn its own cult.
-
-=head2 v5.12.2-RC1 - William Gibson, "Pattern Recognition"
-
-L<Announced on 2010-08-31 by Jesse Vincent|http://www.nntp.perl.org/group/perl.perl5.porters/2010/08/msg163670.html>
-
-The front page opens, familiar as a friend's living room. A frame-grab
-from #48 serves as backdrop, dim and almost monochrome, no characters in
-view. This is one of the sequences that generate comparisons with
-Tarkovsky. She only knows Tarkovsky from stills, really, though she did
-once fall asleep during a screening of The Stalker, going under on an
-endless pan, the camera aimed straight down, in close-up, at a puddle on
-a ruined mosaic floor. But she is not one of those who think that much
-will be gained by analysis of the maker's imagined influences. The cult
-of the footage is rife with subcults, claiming every possible influence.
-Truffaut, Peckinpah -- The Peckinpah people, among the least likely, are
-still waiting for the guns to be drawn.
-
 =head2 v5.13.4 - Lewis Carroll, "Alice's Adventures in Wonderland"
 
 L<Announced on 2010-08-20 by Florian Ragwitz|http://www.nntp.perl.org/group/perl.perl5.porters/2010/08/msg163150.html>
@@ -287,6 +233,75 @@ if half the crusaders drown themselves.  Let the engineer go off and build
 bridges somewhere else, where they are badly wanted.  For those who go in
 quest of the sepulchre, faith is bridge enough.
 
+=head2 v5.13.0 - Jules Verne, "A Journey to the Centre of the Earth"
+
+L<Announced on 2010-04-20 by LE<0xe9>on Brocard|http://www.nntp.perl.org/group/perl.perl5.porters/2010/04/msg159275.html>
+
+The heat still remained at quite a supportable degree. With an
+involuntary shudder, I reflected on what the heat must have been
+when the volcano of Sneffels was pouring its smoke, flames, and
+streams of boiling lava -- all of which must have come up by the
+road we were now following. I could imagine the torrents of hot
+seething stone darting on, bubbling up with accompaniments of
+smoke, steam, and sulphurous stench!
+
+"Only to think of the consequences," I mused, "if the old
+volcano were once more to set to work."
+
+=head2 v5.12.3 - Howard W. Campbell, Jr., "Reflections on Not Participating in Current Events"
+
+L<Announced on 2011-01-21 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2011/01/msg168368.html>
+
+  I saw a huge steam roller,
+  It blotted out the sun.
+  The people all lay down, lay down;
+  They did not try to run.
+  My love and I, we looked amazed
+  Upon the gory mystery.
+  'Lie down, lie down!' the people cried.
+  'The great machine is history!'
+  My love and I, we ran away,
+  The engine did not find us.
+  We ran up to a mountain top,
+  Left history far behind us.
+  Perhaps we should have stayed and died,
+  But somehow we don't think so.
+  We went to see where history'd been,
+  And my, the dead did stink so.
+
+=head2 v5.12.2 - William Gibson, "Pattern Recognition"
+
+L<Announced on 2010-09-06 by Jesse Vincent|http://www.nntp.perl.org/group/perl.perl5.porters/2010/09/msg163852.html>
+
+CPUs. Cayce Pollard Units. That's what Damien calls the clothing
+she wears. CPUs are either black, white, or gray, and ideally
+seem to have come into this world without human intervention.
+
+What people take for relentless minimalism is a side effect
+of too much exposure to the reactor-cores of fashion. This
+has resulted in a remorseless paring-down of what she can and
+will wear. She is, literally, allergic to fashion. She can
+only tolerate things that could have been worn, to a general
+lack of comment, during any year between 1945 and 2000. She's a
+design-free zone, a one-woman school of and whose very austerity
+periodically threatens to spawn its own cult.
+
+=head2 v5.12.2-RC1 - William Gibson, "Pattern Recognition"
+
+L<Announced on 2010-08-31 by Jesse Vincent|http://www.nntp.perl.org/group/perl.perl5.porters/2010/08/msg163670.html>
+
+The front page opens, familiar as a friend's living room. A frame-grab
+from #48 serves as backdrop, dim and almost monochrome, no characters in
+view. This is one of the sequences that generate comparisons with
+Tarkovsky. She only knows Tarkovsky from stills, really, though she did
+once fall asleep during a screening of The Stalker, going under on an
+endless pan, the camera aimed straight down, in close-up, at a puddle on
+a ruined mosaic floor. But she is not one of those who think that much
+will be gained by analysis of the maker's imagined influences. The cult
+of the footage is rife with subcults, claiming every possible influence.
+Truffaut, Peckinpah -- The Peckinpah people, among the least likely, are
+still waiting for the guns to be drawn.
+
 =head2 v5.12.1 - Kurt Vonnegut, "Cat's Cradle"
 
 L<Announced on 2010-05-16 by Jesse Vincent|http://www.nntp.perl.org/group/perl.perl5.porters/2010/05/msg160109.html>
@@ -332,21 +347,6 @@ bodies that revolve. As Bokonon invites us to sing:
 
    Around and around and around we spin,
    With feet of lead and wings of tin . . .
-
-=head2 v5.13.0 - Jules Verne, "A Journey to the Centre of the Earth"
-
-L<Announced on 2010-04-20 by LE<0xe9>on Brocard|http://www.nntp.perl.org/group/perl.perl5.porters/2010/04/msg159275.html>
-
-The heat still remained at quite a supportable degree. With an
-involuntary shudder, I reflected on what the heat must have been
-when the volcano of Sneffels was pouring its smoke, flames, and
-streams of boiling lava -- all of which must have come up by the
-road we were now following. I could imagine the torrents of hot
-seething stone darting on, bubbling up with accompaniments of
-smoke, steam, and sulphurous stench!
-
-"Only to think of the consequences," I mused, "if the old
-volcano were once more to set to work."
 
 =head2 v5.12.0 - Lewis Carroll, "Alice's Adventures in Wonderland"
 
@@ -591,9 +591,80 @@ L<Announced on 2009-08-18 by Dave Mitchell|http://www.nntp.perl.org/group/perl.p
 
 L<Announced on 2009-08-06 by Dave Mitchell|http://www.nntp.perl.org/group/perl.perl5.porters/2009/08/msg149498.html>
 
-=head2 5.005_05-RC1 - no epigraph
+=head2 v5.10.0 - Laurence Sterne, "Tristram Shandy"
 
-L<Announced on 2009-02-16 by LE<0xe9>on Brocard|http://www.nntp.perl.org/group/perl.perl5.porters/2009/02/msg144227.html>
+L<Announced on 2007-12-18 by Rafael Garcia-Suarez|http://www.nntp.perl.org/group/perl.perl5.porters/2007/12/msg131636.html>
+
+He would often declare, in speaking his thoughts upon the subject, that
+he did not conceive how the greatest family in England could stand it
+out against an uninterrupted succession of six or seven short
+noses.--And for the contrary reason, he would generally add, That it
+must be one of the greatest problems in civil life, where the same
+number of long and jolly noses, following one another in a direct line,
+did not raise and hoist it up into the best vacancies in the kingdom.
+
+=head2 v5.10.0-RC2 - no epigraph
+
+L<Announced on 2007-11-25 by Rafael Garcia-Suarez|http://www.nntp.perl.org/group/perl.perl5.porters/2007/11/msg130978.html>
+
+=head2 v5.10.0-RC1 - no epigraph
+
+L<Announced on 2007-11-17 by Rafael Garcia-Suarez|http://www.nntp.perl.org/group/perl.perl5.porters/2007/11/msg130653.html>
+
+=head2 v5.9.5 - no announcement
+
+L<Pre-announced on 2007-07-07 by Rafael Garcia-Suarez|http://www.nntp.perl.org/group/perl.perl5.porters/2007/07/msg126358.html>,
+available on CPAN with same date, but never actually announced.
+
+=head2 v5.9.4 - no epigraph
+
+L<Announced on 2006-08-15 by Rafael Garcia-Suarez|http://www.nntp.perl.org/group/perl.perl5.porters/2006/08/msg115782.html>
+
+=head2 v5.9.3 - no epigraph
+
+L<Announced on 2006-01-28 by Rafael Garcia-Suarez|http://www.nntp.perl.org/group/perl.perl5.porters/2006/01/msg109086.html>
+
+=head2 v5.9.2 - Thomas Pynchon, "V"
+
+L<Announced on 2005-04-01 by Rafael Garcia-Suarez|http://groups.google.com/groups?selm=20050401150702.2b4a70d5@grubert.mandrakesoft.com>
+
+This word flip was weird. Every recording date of McClintic's he'd
+gotten into the habit of talking electricity with the audio men and
+technicians of the studio. McClintic once couldn't have cared less
+about electricity, but now it seemed if that was helping him reach a
+bigger audience, some digging, some who would never dig, but all
+paying and those royalties keeping the Triumph in gas and McClintic
+in J. Press suits, then McClintic ought to be grateful to
+electricity, ought maybe to learn a little more about it. So he'd
+picked up some here and there, and one day last summer he got around
+to talking stochastic music and digital computers with one
+technician. Out of the conversation had come Set/Reset, which was
+getting to be a signature for the group. He had found out from this
+sound man about a two-triode circuit called a flip-flop, which when
+it turned on could be one of two ways, depending on which tube was
+conducting and which was cut off: set or reset, flip or flop.
+
+"And that," the man said, "can be yes or no, or one or zero. And
+that is what you might call one of the basic units, or specialized
+`cells' in a big `electronic brain.' "
+
+"Crazy," said McClintic, having lost him back there someplace. But
+one thing that did occur to him was if a computer's brain could go
+flip or flop, why so could a musician's. As long as you were flop,
+everything was cool. But where did the trigger-pulse come from to
+make you flip?
+
+=head2 v5.9.1 - Tom Stoppard, "Arcadia"
+
+L<Announced on 2004-03-16 by Rafael Garcia-Suarez|http://groups.google.com/group/perl.perl5.porters/msg/8587d77c565f2d43>
+
+Aren't you supposed to have a pony?
+
+=head2 v5.9.0 - Doris Lessing, "Martha Quest"
+
+L<Announced on 2003-10-27 by Rafael Garcia-Suarez|http://groups.google.com/group/perl.perl5.porters/msg/63a8c34385de82a1>
+
+What of October, that ambiguous month
 
 =head2 v5.8.9 - Right Hon. James Hacker MP, "The Complete Yes Minister: The Diaries of a Cabinet Minister"
 
@@ -751,35 +822,6 @@ revolving door and comes out in front.'
 
 'Ah, I see. A politician, Minister.'
 
-=head2 v5.10.0 - Laurence Sterne, "Tristram Shandy"
-
-L<Announced on 2007-12-18 by Rafael Garcia-Suarez|http://www.nntp.perl.org/group/perl.perl5.porters/2007/12/msg131636.html>
-
-He would often declare, in speaking his thoughts upon the subject, that
-he did not conceive how the greatest family in England could stand it
-out against an uninterrupted succession of six or seven short
-noses.--And for the contrary reason, he would generally add, That it
-must be one of the greatest problems in civil life, where the same
-number of long and jolly noses, following one another in a direct line,
-did not raise and hoist it up into the best vacancies in the kingdom.
-
-=head2 v5.10.0-RC2 - no epigraph
-
-L<Announced on 2007-11-25 by Rafael Garcia-Suarez|http://www.nntp.perl.org/group/perl.perl5.porters/2007/11/msg130978.html>
-
-=head2 v5.10.0-RC1 - no epigraph
-
-L<Announced on 2007-11-17 by Rafael Garcia-Suarez|http://www.nntp.perl.org/group/perl.perl5.porters/2007/11/msg130653.html>
-
-=head2 v5.9.5 - no announcement
-
-L<Pre-announced on 2007-07-07 by Rafael Garcia-Suarez|http://www.nntp.perl.org/group/perl.perl5.porters/2007/07/msg126358.html>,
-available on CPAN with same date, but never actually announced.
-
-=head2 v5.9.4 - no epigraph
-
-L<Announced on 2006-08-15 by Rafael Garcia-Suarez|http://www.nntp.perl.org/group/perl.perl5.porters/2006/08/msg115782.html>
-
 =head2 v5.8.8 - Joe Raposo, "Bein' Green"
 
 L<Announced on 2006-02-01 by Nicholas Clark|http://groups.google.com/group/perl.perl5.porters/msg/28caf52e41ebe723>
@@ -805,10 +847,6 @@ L<Announced on 2006-02-01 by Nicholas Clark|http://groups.google.com/group/perl.
     It could make you wonder why, but why wonder why?
     Wonder I am green and it'll do fine, it's beautiful
     And I think it's what I want to be
-
-=head2 v5.9.3 - no epigraph
-
-L<Announced on 2006-01-28 by Rafael Garcia-Suarez|http://www.nntp.perl.org/group/perl.perl5.porters/2006/01/msg109086.html>
 
 =head2 v5.8.8-RC1 - Cosgrove Hall Productions, "Dangermouse"
 
@@ -853,36 +891,6 @@ snapped angrily at him from this side and that.
 
 How that bird teased the wolf, how that wolf wanted to catch him! But
 the bird was clever and the wolf simply couldn't do anything about it.
-
-=head2 v5.9.2 - Thomas Pynchon, "V"
-
-L<Announced on 2005-04-01 by Rafael Garcia-Suarez|http://groups.google.com/groups?selm=20050401150702.2b4a70d5@grubert.mandrakesoft.com>
-
-This word flip was weird. Every recording date of McClintic's he'd
-gotten into the habit of talking electricity with the audio men and
-technicians of the studio. McClintic once couldn't have cared less
-about electricity, but now it seemed if that was helping him reach a
-bigger audience, some digging, some who would never dig, but all
-paying and those royalties keeping the Triumph in gas and McClintic
-in J. Press suits, then McClintic ought to be grateful to
-electricity, ought maybe to learn a little more about it. So he'd
-picked up some here and there, and one day last summer he got around
-to talking stochastic music and digital computers with one
-technician. Out of the conversation had come Set/Reset, which was
-getting to be a signature for the group. He had found out from this
-sound man about a two-triode circuit called a flip-flop, which when
-it turned on could be one of two ways, depending on which tube was
-conducting and which was cut off: set or reset, flip or flop.
-
-"And that," the man said, "can be yes or no, or one or zero. And
-that is what you might call one of the basic units, or specialized
-`cells' in a big `electronic brain.' "
-
-"Crazy," said McClintic, having lost him back there someplace. But
-one thing that did occur to him was if a computer's brain could go
-flip or flop, why so could a musician's. As long as you were flop,
-everything was cool. But where did the trigger-pulse come from to
-make you flip?
 
 =head2 v5.8.6 - A. A. Milne, "The House at Pooh Corner"
 
@@ -1063,48 +1071,6 @@ L<Announced on 2004-04-05 by Nicholas Clark|http://groups.google.com/group/perl.
   And we're off at last of the northern part
   Of the Northern Hemisphere!
 
-=head2 v5.9.1 - Tom Stoppard, "Arcadia"
-
-L<Announced on 2004-03-16 by Rafael Garcia-Suarez|http://groups.google.com/group/perl.perl5.porters/msg/8587d77c565f2d43>
-
-Aren't you supposed to have a pony?
-
-=head2 5.005_04 - no epigraph
-
-L<Announced on 2004-03-01 by LE<0xe9>on Brocard|http://groups.google.com/group/perl.perl5.porters/msg/6c240ad0b189cb47>
-
-=head2 5.005_04-RC2 - Rudyard Kipling, "The Jungle Book"
-
-L<Announced on 2004-02-19 by LE<0xe9>on Brocard|http://groups.google.com/group/perl.perl5.porters/msg/83e5421124a7b49d>
-
-The monkeys called the place their city, and pretended to despise
-the Jungle-People because they lived in the forest. And yet they
-never knew what the buildings were made for nor how to use
-them. They would sit in circles on the hall of the king's council
-chamber, and scratch for fleas and pretend to be men; or they would
-run in and out of the roofless houses and collect pieces of plaster
-and old bricks in a corner, and forget where they had hidden them,
-and fight and cry in scuffling crowds, and then break off to play up
-and down the terraces of the king's garden, where they would shake
-the rose trees and the oranges in sport to see the fruit and flowers
-fall.
-
-=head2 5.005_04-RC1 - Lewis Carroll, "Alice's Adventures in Wonderland"
-
-L<Announced on 2004-02-05 by LE<0xe9>on Brocard|http://groups.google.com/group/perl.perl5.porters/msg/6aaeb6ec699bd116>
-
-Either the well was very deep, or she fell very slowly, for she had
-plenty of time as she went down to look about her and to wonder what was
-going to happen next. First, she tried to look down and make out what
-she was coming to, but it was too dark to see anything; then she looked
-at the sides of the well, and noticed that they were filled with
-cupboards and book-shelves; here and there she saw maps and pictures
-hung upon pegs. She took down a jar from one of the shelves as she
-passed; it was labelled 'ORANGE MARMALADE', but to her great
-disappointment it was empty: she did not like to drop the jar for fear
-of killing somebody, so managed to put it into one of the cupboards as
-she fell past it.
-
 =head2 v5.8.3 - Arthur William Edgar O'Shaugnessy, "Ode"
 
 L<Announced on 2004-01-14 by Nicholas Clark|http://groups.google.com/group/perl.perl5.porters/msg/968fb8d71e23af69>
@@ -1139,26 +1105,6 @@ L<Announced on 2004-01-07 by Nicholas Clark|http://groups.google.com/group/perl.
   So while there's music and moonlight,
   And love and romance,
   Let's face the music and dance.
-
-=head2 v1.0_16 - Johan Vromans, extemporarily
-
-L<Announced on 2003-12-18 by Richard Clamp|http://groups.google.com/group/perl.perl5.porters/msg/9281dc6194d15940>
-
-=head2 v5.6.2 - Sterne, "Tristram Shandy"
-
-L<Announced on 2003-11-15 by Rafael Garcia-Suarez|http://groups.google.com/group/perl.perl5.porters/msg/deb8cb9ad918716f>
-
-When great or unexpected events fall out upon the stage of this
-sublunary word--the mind of man, which is an inquisitive kind of
-a substance, naturally takes a flight, behind the scenes, to see
-what is the cause and first spring of them--The search was not
-long in this instance.
-
-=head2 v5.6.2-RC1 - Sterne, "Tristram Shandy"
-
-L<Announced on 2003-11-15 by Rafael Garcia-Suarez|http://groups.google.com/group/perl.perl5.porters/msg/e3d4acc7a8dd3ce5>
-
-"Pray, my dear", quoth my mother, "have you not forgot to wind up the clock?"
 
 =head2 v5.8.2 - Walt Whitman, "Passage to India"
 
@@ -1209,12 +1155,6 @@ L<Announced on 2003-10-28 by Nicholas Clark|http://groups.google.com/group/perl.
     Are the lands where the Jumblies live;
   Their heads are green, and their hands are blue,
     And they went to sea in a Sieve.
-
-=head2 v5.9.0 - Doris Lessing, "Martha Quest"
-
-L<Announced on 2003-10-27 by Rafael Garcia-Suarez|http://groups.google.com/group/perl.perl5.porters/msg/63a8c34385de82a1>
-
-What of October, that ambiguous month
 
 =head2 v5.8.1 - epigraph same as v5.7.1
 
@@ -1267,22 +1207,6 @@ open to attract the spending customer and whose concession to
 defense was the sign "Thank You For Not Attacking Our City.
 Bonum Diem."  These things were big and made of metal and there
 was a guardhouse and a squad of unhelpful men in black armor.
-
-=head2 v5.6.2 - Sterne, "Tristram Shandy"
-
-L<Announced on 2003-11-15 by Rafael Garcia-Suarez|http://groups.google.com/group/perl.perl5.porters/msg/deb8cb9ad918716f>
-
-When great or unexpected events fall out upon the stage of this
-sublunary word--the mind of man, which is an inquisitive kind of
-a substance, naturally takes a flight, behind the scenes, to see
-what is the cause and first spring of them--The search was not
-long in this instance.
-
-=head2 v5.6.2-RC1 - Sterne, "Tristram Shandy"
-
-L<Announced on 2003-11-08 by Rafael Garcia-Suarez|http://groups.google.com/group/perl.perl5.porters/msg/e3d4acc7a8dd3ce5>
-
-"Pray, my dear", quoth my mother, "have you not forgot to wind up the clock?"
 
 =head2 v5.8.0 - Terry Pratchett, "Reaper Man"
 
@@ -1359,6 +1283,30 @@ ceiling, whistling tunelessly.
 
 "Usually."
 
+=head2 v5.7.0 - Terry Pratchett, "Moving Pictures"
+
+L<Announced on 2000-09-02 by Jarkko Hietaniemi|http://www.nntp.perl.org/group/perl.perl5.porters/2000/09/msg17730.html>
+
+The Librarian had seen many weird things in his time,
+but that had to be the 57th strangest.
+[footnote: he had a tidy mind]
+
+=head2 v5.6.2 - Sterne, "Tristram Shandy"
+
+L<Announced on 2003-11-15 by Rafael Garcia-Suarez|http://groups.google.com/group/perl.perl5.porters/msg/deb8cb9ad918716f>
+
+When great or unexpected events fall out upon the stage of this
+sublunary word--the mind of man, which is an inquisitive kind of
+a substance, naturally takes a flight, behind the scenes, to see
+what is the cause and first spring of them--The search was not
+long in this instance.
+
+=head2 v5.6.2-RC1 - Sterne, "Tristram Shandy"
+
+L<Announced on 2003-11-15 by Rafael Garcia-Suarez|http://groups.google.com/group/perl.perl5.porters/msg/e3d4acc7a8dd3ce5>
+
+"Pray, my dear", quoth my mother, "have you not forgot to wind up the clock?"
+
 =head2 v5.6.1 - J R R Tolkien, "The Hobbit", Riddles in the Dark
 
 L<Announced on 2001-04-08 by Gurusamy Sarathy|http://www.nntp.perl.org/group/perl.perl5.porters/2001/04/msg33823.html>
@@ -1393,14 +1341,6 @@ L<Announced on 2001-01-31 by Gurusamy Sarathy|http://www.nntp.perl.org/group/per
 
 L<Announced on 2000-12-18 by Gurusamy Sarathy|http://www.nntp.perl.org/group/perl.perl5.porters/2000/12/msg27738.html>
 
-=head2 v5.7.0 - Terry Pratchett, "Moving Pictures"
-
-L<Announced on 2000-09-02 by Jarkko Hietaniemi|http://www.nntp.perl.org/group/perl.perl5.porters/2000/09/msg17730.html>
-
-The Librarian had seen many weird things in his time,
-but that had to be the 57th strangest.
-[footnote: he had a tidy mind]
-
 =head2 v5.6.0 - J R R Tolkien, "The Hobbit", The Last Stage
 
 L<Announced on 2000-03-23 by Gurusamy Sarathy|http://www.nntp.perl.org/group/perl.perl5.porters/2000/03/msg10341.html>
@@ -1420,10 +1360,53 @@ L<Announced on 2000-03-23 by Gurusamy Sarathy|http://www.nntp.perl.org/group/per
         Come! Tra-la-la-lally!
         Come back to the valley.
 
-
 =head2 v5.6.0-RC3 - no epigraph
 
 L<Announced on 2000-03-22 by Gurusamy Sarathy|http://www.nntp.perl.org/group/perl.perl5.porters/2000/03/msg10140.html>
+
+=head2 v5.005_05-RC1 - no epigraph
+
+L<Announced on 2009-02-16 by LE<0xe9>on Brocard|http://www.nntp.perl.org/group/perl.perl5.porters/2009/02/msg144227.html>
+
+=head2 v5.005_04 - no epigraph
+
+L<Announced on 2004-03-01 by LE<0xe9>on Brocard|http://groups.google.com/group/perl.perl5.porters/msg/6c240ad0b189cb47>
+
+=head2 v5.005_04-RC2 - Rudyard Kipling, "The Jungle Book"
+
+L<Announced on 2004-02-19 by LE<0xe9>on Brocard|http://groups.google.com/group/perl.perl5.porters/msg/83e5421124a7b49d>
+
+The monkeys called the place their city, and pretended to despise
+the Jungle-People because they lived in the forest. And yet they
+never knew what the buildings were made for nor how to use
+them. They would sit in circles on the hall of the king's council
+chamber, and scratch for fleas and pretend to be men; or they would
+run in and out of the roofless houses and collect pieces of plaster
+and old bricks in a corner, and forget where they had hidden them,
+and fight and cry in scuffling crowds, and then break off to play up
+and down the terraces of the king's garden, where they would shake
+the rose trees and the oranges in sport to see the fruit and flowers
+fall.
+
+=head2 v5.005_04-RC1 - Lewis Carroll, "Alice's Adventures in Wonderland"
+
+L<Announced on 2004-02-05 by LE<0xe9>on Brocard|http://groups.google.com/group/perl.perl5.porters/msg/6aaeb6ec699bd116>
+
+Either the well was very deep, or she fell very slowly, for she had
+plenty of time as she went down to look about her and to wonder what was
+going to happen next. First, she tried to look down and make out what
+she was coming to, but it was too dark to see anything; then she looked
+at the sides of the well, and noticed that they were filled with
+cupboards and book-shelves; here and there she saw maps and pictures
+hung upon pegs. She took down a jar from one of the shelves as she
+passed; it was labelled 'ORANGE MARMALADE', but to her great
+disappointment it was empty: she did not like to drop the jar for fear
+of killing somebody, so managed to put it into one of the cupboards as
+she fell past it.
+
+=head2 v1.0_16 - Johan Vromans, extemporarily
+
+L<Announced on 2003-12-18 by Richard Clamp|http://groups.google.com/group/perl.perl5.porters/msg/9281dc6194d15940>
 
 =head1 ACKNOWLEDGEMENTS
 
