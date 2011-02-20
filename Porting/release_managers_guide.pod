@@ -483,6 +483,10 @@ entry, as that is likely to reflect the previous version number.
 Also edit Module::CoreList's new version number in its F<Changes> file and
 in its F<META.yml> file.
 
+You should also add the version you're about to release to the
+L<Module::CoreList/CAVEATS> section which enumerates the perl releases
+that Module::CoreList covers.
+
 In addition, if this is a final release (rather than a release candidate):
 
 =over 4 
