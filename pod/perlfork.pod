@@ -37,7 +37,7 @@ thread that implements this child "process" as the pseudo-process.
 
 To the Perl program that called fork(), all this is designed to be
 transparent.  The parent returns from the fork() with a pseudo-process
-ID that can be subsequently used in any process manipulation functions;
+ID that can be subsequently used in any process-manipulation functions;
 the child returns from the fork() with a value of C<0> to signify that
 it is the child pseudo-process.
 
@@ -141,7 +141,7 @@ A way to mark a pseudo-processes as running detached from their parent (so
 that the parent would not have to wait() for them if it doesn't want to)
 will be provided in future.
 
-=head2 CAVEATS AND LIMITATIONS
+=head1 CAVEATS AND LIMITATIONS
 
 =over 8
 
@@ -192,7 +192,7 @@ on this.
 Perl will completely read from all open directory handles until they
 reach the end of the stream.  It will then seekdir() back to the
 original location and all future readdir() requests will be fulfilled
-from the cache buffer.  That means that neither directory handle held
+from the cache buffer.  That means that neither the directory handle held
 by the parent process nor the one held by the child process will see
 any changes made to the directory after the fork() call.
 
