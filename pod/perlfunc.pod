@@ -79,10 +79,10 @@ there, not the list construction version of the comma.  That means it
 was never a list to start with.
 
 In general, functions in Perl that serve as wrappers for system calls ("syscalls")
-of the same name (like chown(2), fork(2), closedir(2), etc.) all return
+of the same name (like chown(2), fork(2), closedir(2), etc.) return
 true when they succeed and C<undef> otherwise, as is usually mentioned
 in the descriptions below.  This is different from the C interfaces,
-which return C<-1> on failure.  Exceptions to this rule are C<wait>,
+which return C<-1> on failure.  Exceptions to this rule include C<wait>,
 C<waitpid>, and C<syscall>.  System calls also set the special C<$!>
 variable on failure.  Other functions do not, except accidentally.
 
@@ -146,7 +146,7 @@ C<readdir>, C<rewinddir>, C<say>, C<seek>, C<seekdir>, C<select>, C<syscall>,
 C<sysread>, C<sysseek>, C<syswrite>, C<tell>, C<telldir>, C<truncate>,
 C<warn>, C<write>
 
-=item Functions for fixed length data or records
+=item Functions for fixed-length data or records
 
 C<pack>, C<read>, C<syscall>, C<sysread>, C<syswrite>, C<unpack>, C<vec>
 
@@ -367,8 +367,8 @@ or temporarily set their effective uid to something else.
 
 If you are using ACLs, there is a pragma called C<filetest> that may
 produce more accurate results than the bare stat() mode bits.
-When under the C<use filetest 'access'> the above-mentioned filetests
-test whether the permission can (not) be granted using the
+When under C<use filetest 'access'> the above-mentioned filetests
+test whether the permission can(not) be granted using the
 access(2) family of system calls.  Also note that the C<-x> and C<-X> may
 under this pragma return true even if there are no execute permission
 bits set (nor any extra execute permission ACLs).  This strangeness is
@@ -393,7 +393,7 @@ file, or a file at EOF when testing a filehandle.  Because you have to
 read a file to do the C<-T> test, on most occasions you want to use a C<-f>
 against the file first, as in C<next unless -f $file && -T $file>.
 
-If any of the file tests (or either the C<stat> or C<lstat> operators) are given
+If any of the file tests (or either the C<stat> or C<lstat> operator) is given
 the special filehandle consisting of a solitary underline, then the stat
 structure of the previous file test (or stat operator) is used, saving
 a system call.  (This doesn't work with C<-t>, and you need to remember
