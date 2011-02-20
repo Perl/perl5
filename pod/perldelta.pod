@@ -765,7 +765,19 @@ point it is.
 
 =head1 Acknowledgements
 
-XXX The list of people to thank goes here.
+Perl 5.13.10 represents approximately one month of development since
+Perl 5.13.9 and contains approximately 63000 lines of changes across
+609 files from 38 authors and committers:
+
+Abigail, Alexander Hartmaier, brian d foy, Charles Bailey, Chip
+Salzenberg, Chris 'BinGOs' Williams, Craig A. Berry, Curtis Jewell,
+Dave Rolsky, David Golden, David Leadbeater, David Mitchell, David
+Wheeler, Father Chrysostomos, Florian Ragwitz, Franz Fasching, George
+Greer, H.Merijn Brand, Hongwen Qiu, Hugo van der Sanden, Jay Hannah,
+Jesse Vincent, Karl Williamson, Larwan Berke, Leon Timmermans, Michael
+Breen, Michael Stevens, Nicholas Clark, Noirin Shirley, Paul Evans,
+Peter John Acklam, Ricardo Signes, Robin Barker, Steven Schubiger, Tom
+Christiansen, Tony Cook, Zsbán Ambrus and Ævar Arnfjörð Bjarmason
 
 =head1 Reporting Bugs
 
