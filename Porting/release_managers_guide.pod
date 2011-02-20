@@ -412,7 +412,7 @@ run through pod and spell checkers, e.g.
 Also, you may want to generate and view an HTML version of it to check
 formatting, e.g.
 
-    $ perl pod/pod2html pod/perldelta.pod > /tmp/perldelta.html
+    $ ./perl -Ilib ext/Pod-Html/pod2html pod/perldelta.pod > /tmp/perldelta.html
 
 Another good HTML preview option is http://search.cpan.org/pod2html
 
