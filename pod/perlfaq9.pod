@@ -36,7 +36,7 @@ job to create an accurate HTTP response based on it). So "\n" written in
 text mode is technically correct, and recommended. NPH scripts are more
 tricky: they must put out a complete and accurate set of HTTP
 transaction response headers; the HTTP specification calls for records
-to be terminated with carriage-return and line-feed, i.e ASCII \015\012
+to be terminated with carriage-return and line-feed; i.e., ASCII \015\012
 written in binary mode.
 
 Using C<CGI.pm> gives excellent platform independence, including EBCDIC
@@ -56,7 +56,7 @@ guide on Perlmonks:
 =head2 How can I get better error messages from a CGI program?
 
 Use the C<CGI::Carp> module.  It replaces C<warn> and C<die>, plus the
-normal C<Carp> modules C<carp>, C<croak>, and C<confess> functions with
+normal C<Carp> module's C<carp>, C<croak>, and C<confess> functions with
 more verbose and safer versions.  It still sends them to the normal
 server error log.
 
@@ -96,7 +96,7 @@ attempts to do a little simple formatting of the resulting plain text.
 Many folks attempt a simple-minded regular expression approach, like
 C<< s/<.*?>//g >>, but that fails in many cases because the tags
 may continue over line breaks, they may contain quoted angle-brackets,
-or HTML comment may be present.  Plus, folks forget to convert
+or HTML comments may be present.  Plus, folks forget to convert
 entities--like C<&lt;> for example.
 
 Here's one "simple-minded" approach, that works for most files:
@@ -147,7 +147,7 @@ You can use C<URI::Find> to extract URLs from an arbitrary text document.
 Less complete solutions involving regular expressions can save
 you a lot of processing time if you know that the input is simple.  One
 solution from Tom Christiansen runs 100 times faster than most
-module based approaches but only extracts URLs from anchors where the first
+module-based approaches but only extracts URLs from anchors where the first
 attribute is HREF and there are no other attributes.
 
 	#!/usr/bin/perl -n00
