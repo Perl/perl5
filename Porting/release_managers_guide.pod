@@ -814,6 +814,8 @@ time to publish the tag you created earlier to the public git repo (e.g.):
 
 =item *
 
+I<You MUST SKIP this step for SNAPSHOT or BLEAD release>
+
 Disarm the F<patchlevel.h> change; for example,
 
      static const char * const local_patches[] = {
