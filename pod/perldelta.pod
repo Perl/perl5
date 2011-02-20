@@ -19,7 +19,7 @@ L<perl5139delta>, which describes differences between 5.13.8 and
 
 Various releases of the 5.13.x series have added new regular expression
 modifiers, C</a>, C</d>, C</l>, and C</u>.  They were only available in
-infix form (e.g., C<(?a:...)> until this release; now they are usable
+infix form (e.g., C<(?a:...)>) until this release; now they are usable
 in suffix form.  This change was made too late to change all the
 affected documentation, so there are a number of places that erroneously
 say these must be used in infix form.
