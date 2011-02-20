@@ -1267,7 +1267,7 @@ matching and related activities.
 
 =over 8
 
-=item qr/STRING/msixpo
+=item qr/STRING/msixpodual
 X<qr> X</i> X</m> X</o> X</s> X</x> X</p>
 
 This operator quotes (and possibly compiles) its I<STRING> as a regular
@@ -1327,28 +1327,29 @@ Options (specified by the following modifiers) are:
     p	When matching preserve a copy of the matched string so
         that ${^PREMATCH}, ${^MATCH}, ${^POSTMATCH} will be defined.
     o	Compile pattern only once.
+    l   Use the locale
+    u   Use Unicode semantics
+    a   Use ASCII for \d, \s, \w
+    d   Use Unicode or native charset, as in 5.12 and earlier
 
 If a precompiled pattern is embedded in a larger pattern then the effect
 of 'msixp' will be propagated appropriately.  The effect of the 'o'
 modifier has is not propagated, being restricted to those patterns
 explicitly using it.
 
-Several other modifiers to control the character set semantics were
-added for 5.14 that, unlike the ones listed above,  may not be used
-after the final pattern delimiter, but only following a C<"(?"> inside
-the regular expression.  (It is planned in 5.16 to make them usable in
-the suffix position.)  These are B<C<"a">>, B<C<"d">>, B<C<"l">>, and
-B<C<"u">>.  They are documented in L<perlre/Extended Patterns>.
+The last four modifiers listed above, added in Perl 5.14,
+control the character set semantics.  They are documented in
+L<perlre/Modifiers>.
 
 See L<perlre> for additional information on valid syntax for STRING, and
 for a detailed look at the semantics of regular expressions.
 
-=item m/PATTERN/msixpogc
+=item m/PATTERN/msixpodualgc
 X<m> X<operator, match>
 X<regexp, options> X<regexp> X<regex, options> X<regex>
 X</m> X</s> X</i> X</x> X</p> X</o> X</g> X</c>
 
-=item /PATTERN/msixpogc
+=item /PATTERN/msixpodualgc
 
 Searches a string for a pattern match, and in scalar context returns
 true if it succeeds, false if it fails.  If no string is specified
@@ -1384,7 +1385,7 @@ the trailing delimiter.  This avoids expensive run-time recompilations,
 and is useful when the value you are interpolating won't change over
 the life of the script.  However, mentioning C</o> constitutes a promise
 that you won't change the variables in the pattern.  If you change them,
-Perl won't even notice.  See also L<"qr/STRING/msixpo">.
+Perl won't even notice.  See also L<"qr/STRING/msixpodual">.
 
 =item The empty pattern //
 
@@ -1561,7 +1562,7 @@ but the resulting C<?PATTERN?> syntax is deprecated, will warn on
 usage and may be removed from a future stable release of Perl without
 further notice.
 
-=item s/PATTERN/REPLACEMENT/msixpogcer
+=item s/PATTERN/REPLACEMENT/msixpodualgcer
 X<substitute> X<substitution> X<replace> X<regexp, replace>
 X<regexp, substitute> X</m> X</s> X</i> X</x> X</p> X</o> X</g> X</c> X</e> X</r>
 

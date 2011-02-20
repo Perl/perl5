@@ -75,19 +75,23 @@ rather than the regex itself. See
 L<perlretut/"Using regular expressions in Perl"> for further explanation
 of the g and c modifiers.
 
+=item a, d, l and u
+X</a> X</d> X</l> X</u>
+
+These modifiers, new in 5.14, affect which character-set semantics
+(Unicode, ASCII, etc.) are used, as described below.
+
 =back
 
 These are usually written as "the C</x> modifier", even though the delimiter
-in question might not really be a slash.  The modifiers C</imsx>
+in question might not really be a slash.  The modifiers C</imsxadlup>
 may also be embedded within the regular expression itself using
-the C<(?...)> construct.  Also are new (in 5.14) character set semantics
-modifiers B<C<<"a">>, B<C<"d">>, B<C<"l">> and B<C<"u">>, which, in 5.14
-only, must be used embedded in the regular expression, and not after the
-trailing delimiter.  All this is discussed below in
-L</Extended Patterns>.
-X</a> X</d> X</l> X</u>
+the C<(?...)> construct.
 
-The C</x> modifier itself needs a little more explanation.  It tells
+The C</x>, C</l>, C</u>, C</a> and C</d> modifiers need a little more
+explanation.
+
+C</x> tells
 the regular expression parser to ignore most whitespace that is neither
 backslashed nor within a character class.  You can use this to break up
 your regular expression into (slightly) more readable parts.  The C<#>
@@ -113,6 +117,81 @@ numbers don't have spaces in them.  But, Unicode properties can have spaces, so
 in C<\p{...}>  there can be spaces that follow the Unicode rules, for which see
 L<perluniprops/Properties accessible through \p{} and \P{}>.
 X</x>
+
+C</l> means to use a locale (see L<perllocale>) when pattern matching.
+The locale used will be the one in effect at the time of execution of
+the pattern match.  This may not be the same as the compilation-time
+locale, and can differ from one match to another if there is an
+intervening call of the
+L<setlocale() function|perllocale/The setlocale function>.
+This modifier is automatically set if the regular expression is compiled
+within the scope of a C<"use locale"> pragma.
+Perl only allows single-byte locales.  This means that code points above
+255 are treated as Unicode no matter what locale is in effect.
+Under Unicode rules, there are a few case-insensitive matches that cross the
+boundary 255/256 boundary.  These are disallowed.  For example,
+0xFF does not caselessly match the character at 0x178, LATIN CAPITAL
+LETTER Y WITH DIAERESIS, because 0xFF may not be LATIN SMALL LETTER Y
+in the current locale, and Perl has no way of knowing if that character
+even exists in the locale, much less what code point it is.
+X</l>
+
+C</u> means to use Unicode semantics when pattern matching.  It is
+automatically set if the regular expression is encoded in utf8, or is
+compiled within the scope of a
+L<C<"use feature 'unicode_strings">|feature> pragma (and isn't also in
+the scope of L<C<"use locale">|locale> nor L<C<"use bytes">|bytes>
+pragmas).  On ASCII platforms, the code points between 128 and 255 take on their
+Latin-1 (ISO-8859-1) meanings (which are the same as Unicode's), whereas
+in strict ASCII their meanings are undefined.  Thus the platform
+effectively becomes a Unicode platform.  The ASCII characters remain as
+ASCII characters (since ASCII is a subset of Latin-1 and Unicode).  For
+example, when this option is not on, on a non-utf8 string, C<"\w">
+matches precisely C<[A-Za-z0-9_]>.  When the option is on, it matches
+not just those, but all the Latin-1 word characters (such as an "n" with
+a tilde).  On EBCDIC platforms, which already are equivalent to Latin-1,
+this modifier changes behavior only when the C<"/i"> modifier is also
+specified, and affects only two characters, giving them full Unicode
+semantics: the C<MICRO SIGN> will match the Greek capital and
+small letters C<MU>; otherwise not; and the C<LATIN CAPITAL LETTER SHARP
+S> will match any of C<SS>, C<Ss>, C<sS>, and C<ss>, otherwise not.
+(This last case is buggy, however.)
+X</u>
+
+C</a> is the same as C</u>, except that C<\d>, C<\s>, C<\w>, and the
+Posix character classes are restricted to matching in the ASCII range
+only.  That is, with this modifier, C<\d> always means precisely the
+digits C<"0"> to C<"9">; C<\s> means the five characters C<[ \f\n\r\t]>;
+C<\w> means the 63 characters C<[A-Za-z0-9_]>; and likewise, all the
+Posix classes such as C<[[:print:]]> match only the appropriate
+ASCII-range characters.  As you would expect, this modifier causes, for
+example, C<\D> to mean the same thing as C<[^0-9]>; in fact, all
+non-ASCII characters match C<\D>, C<\S>, and C<\W>.  C<\b> still means
+to match at the boundary between C<\w> and C<\W>, using the C<"a">
+definitions of them (similarly for C<\B>).  Otherwise, C<"a"> behaves
+like the C<"u"> modifier, in that case-insensitive matching uses Unicode
+semantics; for example, "k" will match the Unicode C<\N{KELVIN SIGN}>
+under C</i> matching, and code points in the Latin1 range, above ASCII
+will have Unicode semantics when it comes to case-insensitive matching.
+But writing two in "a"'s in a row will increase its effect, causing the
+Kelvin sign and all other non-ASCII characters to not match any ASCII
+character under C</i> matching.
+X</a>
+
+C</d> means to use the traditional Perl pattern-matching behavior.
+This is dualistic (hence the name C</d>, which also could stand for
+"depends").  When this is in effect, Perl matches according to the
+platform's native character set rules unless there is something that
+indicates to use Unicode rules.  If either the target string or the
+pattern itself is encoded in UTF-8, Unicode rules are used.  Also, if
+the pattern contains Unicode-only features, such as code points above
+255, C<\p()> Unicode properties or C<\N{}> Unicode names, Unicode rules
+will be used.  It is automatically selected by default if the regular
+expression is compiled neither within the scope of a C<"use locale">
+pragma nor a <C<"use feature 'unicode_strings"> pragma.
+This behavior causes a number of glitches, see
+L<perlunicode/The "Unicode Bug">.
+X</d>
 
 =head2 Regular Expressions
 
@@ -646,86 +725,12 @@ after the C<"?"> is a shorthand equivalent to C<d-imsx>.  Flags (except
 C<"d">) may follow the caret to override it.
 But a minus sign is not legal with it.
 
-Also, starting in Perl 5.14, are modifiers C<"a">, C<"d">, C<"l">, and
-C<"u">, which for 5.14 may not be used as suffix modifiers.
-
-C<"l"> means to use a locale (see L<perllocale>) when pattern matching.
-The locale used will be the one in effect at the time of execution of
-the pattern match.  This may not be the same as the compilation-time
-locale, and can differ from one match to another if there is an
-intervening call of the
-L<setlocale() function|perllocale/The setlocale function>.
-This modifier is automatically set if the regular expression is compiled
-within the scope of a C<"use locale"> pragma.
-Perl only allows single-byte locales.  This means that code points above
-255 are treated as Unicode no matter what locale is in effect.
-Under Unicode rules, there are a few case-insensitive matches that cross the
-boundary 255/256 boundary.  These are disallowed.  For example,
-0xFF does not caselessly match the character at 0x178, LATIN CAPITAL
-LETTER Y WITH DIAERESIS, because 0xFF may not be LATIN SMALL LETTER Y
-in the current locale, and Perl has no way of knowing if that character
-even exists in the locale, much less what code point it is.
-
-C<"u"> means to use Unicode semantics when pattern matching.  It is
-automatically set if the regular expression is encoded in utf8, or is
-compiled within the scope of a
-L<C<"use feature 'unicode_strings">|feature> pragma (and isn't also in
-the scope of L<C<"use locale">|locale> nor L<C<"use bytes">|bytes>
-pragmas.  On ASCII platforms, the code points between 128 and 255 take on their
-Latin-1 (ISO-8859-1) meanings (which are the same as Unicode's), whereas
-in strict ASCII their meanings are undefined.  Thus the platform
-effectively becomes a Unicode platform.  The ASCII characters remain as
-ASCII characters (since ASCII is a subset of Latin-1 and Unicode).  For
-example, when this option is not on, on a non-utf8 string, C<"\w">
-matches precisely C<[A-Za-z0-9_]>.  When the option is on, it matches
-not just those, but all the Latin-1 word characters (such as an "n" with
-a tilde).  On EBCDIC platforms, which already are equivalent to Latin-1,
-this modifier changes behavior only when the C<"/i"> modifier is also
-specified, and affects only two characters, giving them full Unicode
-semantics: the C<MICRO SIGN> will match the Greek capital and
-small letters C<MU>; otherwise not; and the C<LATIN CAPITAL LETTER SHARP
-S> will match any of C<SS>, C<Ss>, C<sS>, and C<ss>, otherwise not.
-(This last case is buggy, however.)
-
-C<"a"> is the same as C<"u">, except that C<\d>, C<\s>, C<\w>, and the
-Posix character classes are restricted to matching in the ASCII range
-only.  That is, with this modifier, C<\d> always means precisely the
-digits C<"0"> to C<"9">; C<\s> means the five characters C<[ \f\n\r\t]>;
-C<\w> means the 63 characters C<[A-Za-z0-9_]>; and likewise, all the
-Posix classes such as C<[[:print:]]> match only the appropriate
-ASCII-range characters.  As you would expect, this modifier causes, for
-example, C<\D> to mean the same thing as C<[^0-9]>; in fact, all
-non-ASCII characters match C<\D>, C<\S>, and C<\W>.  C<\b> still means
-to match at the boundary between C<\w> and C<\W>, using the C<"a">
-definitions of them (similarly for C<\B>).  Otherwise, C<"a"> behaves
-like the C<"u"> modifier, in that case-insensitive matching uses Unicode
-semantics; for example, "k" will match the Unicode C<\N{KELVIN SIGN}>
-under C</i> matching, and code points in the Latin1 range, above ASCII
-will have Unicode semantics when it comes to case-insensitive matching.
-But writing two in "a"'s in a row will increase its effect, causing the
-Kelvin sign and all other non-ASCII characters to not match any ASCII
-character under C</i> matching.
-
-C<"d"> means to use the traditional Perl pattern matching behavior.
-This is dualistic (hence the name C<"d">, which also could stand for
-"depends").  When this is in effect, Perl matches according to the
-platform's native character set rules unless there is something that
-indicates to use Unicode rules.  If either the target string or the
-pattern itself is encoded in UTF-8, Unicode rules are used.  Also, if
-the pattern contains Unicode-only features, such as code points above
-255, C<\p()> Unicode properties or C<\N{}> Unicode names, Unicode rules
-will be used.  It is automatically selected by default if the regular
-expression is compiled neither within the scope of a C<"use locale">
-pragma nor a <C<"use feature 'unicode_strings"> pragma.
-This behavior causes a number of glitches, see
-L<perlunicode/The "Unicode Bug">.
-
 Note that the C<a>, C<d>, C<l>, C<p>, and C<u> modifiers are special in
 that they can only be enabled, not disabled, and the C<a>, C<d>, C<l>, and
 C<u> modifiers are mutually exclusive: specifying one de-specifies the
 others, and a maximum of one may appear in the construct.  Thus, for
-example, C<(?-p)>, C<(?-d:...)>, and C<(?dl:...)> will warn when
-compiled under C<use warnings>.
+example, C<(?-p)>, will warn when compiled under C<use warnings>;
+C<(?-d:...)> and C<(?dl:...)> are fatal errors.
 
 Note also that the C<p> modifier is special in that its presence
 anywhere in a pattern has a global effect.
@@ -1018,7 +1023,7 @@ For reasons of security, this construct is forbidden if the regular
 expression involves run-time interpolation of variables, unless the
 perilous C<use re 'eval'> pragma has been used (see L<re>), or the
 variables contain results of C<qr//> operator (see
-L<perlop/"qr/STRINGE<sol>msixpo">).
+L<perlop/"qr/STRINGE<sol>msixpodual">).
 
 This restriction is due to the wide-spread and remarkably convenient
 custom of using run-time determined strings as patterns.  For example:
@@ -1090,7 +1095,7 @@ For reasons of security, this construct is forbidden if the regular
 expression involves run-time interpolation of variables, unless the
 perilous C<use re 'eval'> pragma has been used (see L<re>), or the
 variables contain results of C<qr//> operator (see
-L<perlop/"qrE<sol>STRINGE<sol>msixpo">).
+L<perlop/"qrE<sol>STRINGE<sol>msixpodual">).
 
 In perl 5.12.x and earlier, because the regex engine was not re-entrant,
 delayed code could not safely invoke the regex engine either directly with
