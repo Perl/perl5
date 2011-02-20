@@ -534,16 +534,16 @@ otherwise it returns C<undef> and sets C<$!> (errno).
 
 On some systems (in general, DOS and Windows-based systems) binmode()
 is necessary when you're not working with a text file.  For the sake
-of portability it is a good idea to always use it when appropriate,
-and to never use it when it isn't appropriate.  Also, people can
+of portability it is a good idea always to use it when appropriate,
+and never to use it when it isn't appropriate.  Also, people can
 set their I/O to be by default UTF-8 encoded Unicode, not bytes.
 
 In other words: regardless of platform, use binmode() on binary data,
-like for example images.
+like images, for example.
 
 If LAYER is present it is a single string, but may contain multiple
 directives. The directives alter the behaviour of the filehandle.
-When LAYER is present using binmode on a text file makes sense.
+When LAYER is present, using binmode on a text file makes sense.
 
 If LAYER is omitted or specified as C<:raw> the filehandle is made
 suitable for passing binary data. This includes turning off possible CRLF
@@ -574,7 +574,7 @@ In general, binmode() should be called after open() but before any I/O
 is done on the filehandle.  Calling binmode() normally flushes any
 pending buffered output data (and perhaps pending input data) on the
 handle.  An exception to this is the C<:encoding> layer that
-changes the default character encoding of the handle, see L<open>.
+changes the default character encoding of the handle; see L</open>.
 The C<:encoding> layer sometimes needs to be called in
 mid-stream, and it doesn't flush the stream.  The C<:encoding>
 also implicitly pushes on top of itself the C<:utf8> layer because
@@ -601,8 +601,8 @@ you want for text files, but it can be disastrous for binary files.
 
 Another consequence of using binmode() (on some systems) is that
 special end-of-file markers will be seen as part of the data stream.
-For systems from the Microsoft family this means that if your binary
-data contains C<\cZ>, the I/O subsystem will regard it as the end of
+For systems from the Microsoft family this means that, if your binary
+data contain C<\cZ>, the I/O subsystem will regard it as the end of
 the file, unless you use binmode().
 
 binmode() is important not only for readline() and print() operations,
@@ -699,7 +699,7 @@ subroutine makes to C<@_> or its contents, not the original values at call
 time. C<@DB::args>, like C<@_>, does not hold explicit references to its
 elements, so under certain cases its elements may have become freed and
 reallocated for other variables or temporary values. Finally, a side effect
-of the current implementation means that the effects of C<shift @_> can
+of the current implementation is that the effects of C<shift @_> can
 I<normally> be undone (but not C<pop @_> or other splicing, and not if a
 reference to C<@_> has been taken, and subject to the caveat about reallocated
 elements), so C<@DB::args> is actually a hybrid of the current state and
