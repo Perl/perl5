@@ -682,7 +682,7 @@ which is why you should test from the tarball.
 
 Run the Installation Verification Procedure utility:
 
-    $ bin/perlivp
+    $ ./perl utils/perlivp
     ...
     All tests successful.
     $
