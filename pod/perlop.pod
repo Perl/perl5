@@ -1570,7 +1570,8 @@ with the replacement text and returns the number of substitutions
 made.  Otherwise it returns false (specifically, the empty string).
 
 If the C</r> (non-destructive) option is used then it will perform the
-substitution on a copy of the string and return the copy whether or not a
+substitution on a copy of the string and instead of returning the
+number of substitutions, it returns the copy whether or not a
 substitution occurred. The original string will always remain unchanged in
 this case. The copy will always be a plain string, even if the input is an
 object or a tied variable.
