@@ -349,6 +349,20 @@ Example:
         #...
     }
 
+Note that C<-s/a/b/> does not do a negated substitution.  Saying
+C<-exp($foo)> still works as expected, however: only single letters
+following a minus are interpreted as file tests.
+
+These operators are exempt from the "looks like a function rule" described
+above. That is, an opening parenthesis after the operator does not affect
+how much of the following code constitutes the argument. Put the opening
+parentheses before the operator to separate it from code that follows (this
+applies only to operators with higher precedence than unary operators, of
+course):
+
+    -s($file) + 1024   # probably wrong; same as -s($file + 1024)
+    (-s $file) + 1024  # correct
+
 The interpretation of the file permission operators C<-r>, C<-R>,
 C<-w>, C<-W>, C<-x>, and C<-X> is by default based solely on the mode
 of the file and the uids and gids of the user.  There may be other
@@ -377,10 +391,6 @@ the implementation of C<use filetest 'access'>, the C<_> special
 filehandle won't cache the results of the file tests when this pragma is
 in effect.  Read the documentation for the C<filetest> pragma for more
 information.
-
-Note that C<-s/a/b/> does not do a negated substitution.  Saying
-C<-exp($foo)> still works as expected, however: only single letters
-following a minus are interpreted as file tests.
 
 The C<-T> and C<-B> switches work as follows.  The first block or so of the
 file is examined for odd characters such as strange control codes or
