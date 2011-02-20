@@ -697,10 +697,10 @@ previous is 5.10.0:
 
 Bootstrap the CPAN client on the clean install:
 
-    $ bin/perl -MCPAN -e'shell' 
+    $ bin/perl -MCPAN -e "shell"
 
-(Use C<... -e "shell"> instead on Win32. You probably also need a set of
-Unix command-line tools available for CPAN to function correctly without
+If you're running this on Win32 you probably also need a set of Unix
+command-line tools available for CPAN to function correctly without
 Perl alternatives like LWP installed. Cygwin is an obvious choice.)
 
 =item *
@@ -713,11 +713,9 @@ has dependencies; for example:
 
 Check that your perl can run this:
 
-    $ bin/perl -lwe 'use Inline C => "int f() { return 42;} "; print f'
+    $ bin/perl -lwe "use Inline C => q[int f() { return 42;}]; print f"
     42
     $
-
-(Use C<... -lwe "use ..."> instead on Win32.)
 
 =item *
 
