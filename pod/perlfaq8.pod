@@ -289,7 +289,7 @@ L<perlfunc/"sysopen"> for more on this approach.
 
 Some devices will be expecting a "\r" at the end of each line rather
 than a "\n".  In some ports of perl, "\r" and "\n" are different from
-their usual (Unix) ASCII values of "\012" and "\015".  You may have to
+their usual (Unix) ASCII values of "\015" and "\012".  You may have to
 give the numeric values you want directly, using octal ("\015"), hex
 ("0x0D"), or as a control-character specification ("\cM").
 
@@ -524,7 +524,7 @@ L<perlfunc/syscall>.
 =head2 How can I do an atexit() or setjmp()/longjmp()? (Exception handling)
 
 You can use the C<END> block to simulate C<atexit()>. Each package's
-C<END> block is called when the program or thread ends See L<perlmod>
+C<END> block is called when the program or thread ends. See the L<perlmod>
 manpage for more details about C<END> blocks.
 
 For example, you can use this to make sure your filter program managed
@@ -860,7 +860,7 @@ list. Further examples of this can be found in L<perlipc/"Safe Pipe
 Opens">.
 
 Note that if you're using Windows, no solution to this vexing issue is
-even possible.  Even if Perl were to emulate C<fork()>, you'd still be
+even possible.  Even though Perl emulates C<fork()>, you'll still be
 stuck, because Windows does not have an argc/argv-style API.
 
 =head2 Why can't my script read from STDIN after I gave it EOF (^D on Unix, ^Z on MS-DOS)?
@@ -1302,11 +1302,11 @@ include path (@INC) at runtime?> for details on how to run your newly
 installed modules.
 
 There is one caveat with INSTALL_BASE, though, since it acts
-differently than the PREFIX and LIB settings that older versions of
+differently from the PREFIX and LIB settings that older versions of
 C<ExtUtils::MakeMaker> advocated. INSTALL_BASE does not support
 installing modules for multiple versions of Perl or different
-architectures under the same directory. You should consider if you
-really want that , and if you do, use the older PREFIX and LIB
+architectures under the same directory. You should consider whether you
+really want that and, if you do, use the older PREFIX and LIB
 settings. See the C<ExtUtils::Makemaker> documentation for more details.
 
 =head2 How do I add the directory my program lives in to the module/library search path?
@@ -1391,8 +1391,8 @@ environment variables, run-time switches, and in-code statements:
 
 =back
 
-The last is particularly useful because it knows about machine
-dependent architectures.  The C<lib.pm> pragmatic module was first
+The last is particularly useful because it knows about machine-dependent
+architectures.  The C<lib.pm> pragmatic module was first
 included with the 5.002 release of Perl.
 
 =head2 What is socket.ph and where do I get it?
