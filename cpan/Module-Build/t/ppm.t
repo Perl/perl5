@@ -5,8 +5,6 @@ use lib 't/lib';
 use MBTest;
 use Config;
 
-plan skip_all => 'Currently broken in core' if $ENV{PERL_CORE};
-
 blib_load('Module::Build');
 blib_load('Module::Build::ConfigData');
 my $PPM_support = Module::Build::ConfigData->feature('PPM_support');

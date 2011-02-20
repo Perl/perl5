@@ -1,5 +1,15 @@
 Revision history for Perl extension Module::Build.
 
+0.37_05 - Sat Feb 19 20:43:23 EST 2011
+
+  [BUG FIXES]
+
+  - fixes failing ppm.t in perl core
+
+  [OTHER]
+
+  - Pod typo fixes [Hongwen Qiu]
+
 0.37_04 - Wed Feb 16 15:27:21 EST 2011
 
   [OTHER]
@@ -21,6 +31,8 @@ Revision history for Perl extension Module::Build.
   - bumped Parse::CPAN::Meta build prereq to 1.4401
 
   - bumped CPAN::Meta prereq to 2.110420
+
+  - Pod typo fixes [Hongwen Qiu]
 
 0.37_02 - Mon Feb  7 21:05:30 EST 2011
 

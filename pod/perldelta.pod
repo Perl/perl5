@@ -327,7 +327,7 @@ C<Math::BigInt> has been upgraded from version 1.99_04 to 1.992.
 
 =item *
 
-C<Module::Build> has been upgraded from version 0.3607 to 0.37_04.
+C<Module::Build> has been upgraded from version 0.3607 to 0.37_05.
 
 A notable change is the deprecation of several modules.
 Module::Build::Version has been deprecated and Module::Build now relies

@@ -4,7 +4,7 @@ package Module::Build::Base;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.37_04';
+$VERSION = '0.37_05';
 $VERSION = eval $VERSION;
 BEGIN { require 5.00503 }
 
@@ -3346,7 +3346,9 @@ sub htmlify_pods {
 
   my @rootdirs = ($type eq 'bin') ? qw(bin) :
       $self->installdirs eq 'core' ? qw(lib) : qw(site lib);
-  my $podroot = $self->original_prefix('core');
+  my $podroot = $ENV{PERL_CORE}
+              ? File::Basename::dirname($ENV{PERL_CORE})
+              : $self->original_prefix('core');
 
   my $htmlroot = $self->install_sets('core')->{libhtml};
   my @podpath = (map { File::Spec->abs2rel($_ ,$podroot) } grep { -d  }
@@ -3355,7 +3357,9 @@ sub htmlify_pods {
       $self->install_sets('site', 'lib'), # site/lib
     ) ), File::Spec->rel2abs($self->blib);
 
-  my $podpath = join(":", map { tr,:\\,|/,; $_ } @podpath);
+  my $podpath = $ENV{PERL_CORE}
+              ? File::Spec->catdir($podroot, 'lib')
+              : join(":", map { tr,:\\,|/,; $_ } @podpath);
 
   my $blibdir = join('/', File::Spec->splitdir(
     (File::Spec->splitpath(File::Spec->rel2abs($htmldir),1))[1]),''
