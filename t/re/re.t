@@ -8,7 +8,6 @@ BEGIN {
 
 use strict;
 use warnings;
-use POSIX;
 
 use re qw(is_regexp regexp_pattern
           regname regnames regnames_count);
@@ -89,6 +88,8 @@ if ('1234'=~/(?:(?<A>\d)|(?<C>!))(?<B>\d)(?<A>\d)(?<B>\d)/){
     }
 
     SKIP: {
+        skip_if_miniperl("no dynamic loading on miniperl, no POSIX", 3);
+        require POSIX;
         my $current_locale = POSIX::setlocale( &POSIX::LC_CTYPE, 'de_DE.ISO-8859-1' );
         if ( !$current_locale || $current_locale ne 'de_DE.ISO-8859-1' ) {
             skip( 'cannot use locale de_DE.ISO-8859-1', 3 );
@@ -103,6 +104,8 @@ if ('1234'=~/(?:(?<A>\d)|(?<C>!))(?<B>\d)(?<A>\d)(?<B>\d)/){
     }
 
     SKIP: {
+        skip_if_miniperl("no dynamic loading on miniperl, no POSIX", 3);
+        require POSIX;
         my $current_locale = POSIX::setlocale( &POSIX::LC_CTYPE, 'C' );
         if ( !$current_locale || $current_locale ne 'C' ) {
             skip( 'cannot set locale C', 3 );

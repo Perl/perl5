@@ -366,6 +366,10 @@ sub skip {
     last SKIP;
 }
 
+sub skip_if_miniperl {
+    skip(@_) if !defined &DynaLoader::boot_DynaLoader;
+}
+
 sub todo_skip {
     my $why = shift;
     my $n   = @_ ? shift : 1;

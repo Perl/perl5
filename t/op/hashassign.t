@@ -310,9 +310,10 @@ foreach my $chr (60, 200, 600, 6000, 60000) {
 }
 
 # [perl #76716] Hash assignment should not zap weak refs.
-{
+SKIP: {
+ skip_if_miniperl("no dynamic loading on miniperl, no Scalar::Util", 2);
  my %tb;
- use Scalar::Util;
+ require Scalar::Util;
  Scalar::Util::weaken(my $p = \%tb);
  %tb = ();
  is $p, \%tb, "hash assignment should not zap weak refs";
