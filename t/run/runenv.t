@@ -15,7 +15,7 @@ BEGIN {
     require './test.pl'
 }
 
-plan tests => 78;
+plan tests => 98;
 
 my $STDOUT = tempfile();
 my $STDERR = tempfile();
@@ -27,6 +27,7 @@ delete $ENV{PERL5LIB};
 delete $ENV{PERL5OPT};
 
 
+# Run perl with specified environment and arguments, return (STDOUT, STDERR)
 sub runperl_and_capture {
   local *F;
   my ($env, $args) = @_;
@@ -54,39 +55,19 @@ sub runperl_and_capture {
       $ENV{$k} = $env->{$k};
     }
     open STDOUT, "> $STDOUT" or exit $FAILURE_CODE;
-    open STDERR, "> $STDERR" or it_didnt_work();
-    { exec $PERL, @$args }
-    it_didnt_work();
-  }
-}
-
-# Run perl with specified environment and arguments returns a list.
-# First element is true if Perl's stdout and stderr match the
-# supplied $stdout and $stderr argument strings exactly.
-# second element is an explanation of the failure
-sub runperl {
-  local *F;
-  my ($env, $args, $stdout, $stderr) = @_;
-  my ($actual_stdout, $actual_stderr) = runperl_and_capture($env, $args);
-  if ($actual_stdout ne $stdout) {
-    return (0, "Stdout mismatch: expected [$stdout], saw [$actual_stdout]");
-  } elsif ($actual_stderr ne $stderr) {
-    return (0, "Stderr mismatch: expected [$stderr], saw [$actual_stderr]");
-  } else {
-    return 1;                 # success
-  }
-}
-
-sub it_didnt_work {
+    open STDERR, "> $STDERR" and do { exec $PERL, @$args };
+    # it didn't_work:
     print STDOUT "IWHCWJIHCI\cNHJWCJQWKJQJWCQW\n";
     exit $FAILURE_CODE;
+  }
 }
 
 sub try {
-  my ($success, $reason) = runperl(@_);
-  $reason =~ s/\n/\\n/g if defined $reason;
+  my ($env, $args, $stdout, $stderr) = @_;
+  my ($actual_stdout, $actual_stderr) = runperl_and_capture($env, $args);
   local $::Level = $::Level + 1;
-  ok( $success, $reason );
+  is ($stdout, $actual_stdout);
+  is ($stderr, $actual_stderr);
 }
 
 #  PERL5OPT    Command-line options (switches).  Switches in
@@ -260,8 +241,3 @@ foreach (['nothing', ''],
 }
 
 # PERL5LIB tests with included arch directories still missing
-
-END {
-    1 while unlink $STDOUT;
-    1 while unlink $STDERR;
-}
