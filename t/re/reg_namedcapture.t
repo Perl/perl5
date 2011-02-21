@@ -7,6 +7,10 @@ BEGIN {
       print "1..0 # Skip: Errno.pm not yet available\n";
       exit 0;
     }
+    unless (defined &DynaLoader::boot_DynaLoader) {
+      print "1..0 # Skip: no dynamic loading on miniperl, no Tie::Hash::NamedCapture\n";
+      exit 0;
+    }
 }
 
 # WARNING: Do not directly use any modules as part of this test code.
