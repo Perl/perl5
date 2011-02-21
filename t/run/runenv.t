@@ -15,7 +15,7 @@ BEGIN {
     require './test.pl'
 }
 
-plan tests => 98;
+plan tests => 84;
 
 my $STDOUT = tempfile();
 my $STDERR = tempfile();
@@ -31,7 +31,6 @@ delete $ENV{PERL5OPT};
 sub runperl_and_capture {
   local *F;
   my ($env, $args) = @_;
-  unshift @$args, '-I../lib';
 
   local %ENV = %ENV;
   delete $ENV{PERLLIB};
@@ -85,20 +84,20 @@ try({PERL5OPT => '-w'}, ['-e', 'print $::x'],
     "", 
     qq{Name "main::x" used only once: possible typo at -e line 1.\nUse of uninitialized value \$x in print at -e line 1.\n});
 
-try({PERL5OPT => '-Mstrict'}, ['-e', 'print $::x'],
+try({PERL5OPT => '-Mstrict'}, ['-I../lib', '-e', 'print $::x'],
     "", "");
 
-try({PERL5OPT => '-Mstrict'}, ['-e', 'print $x'],
+try({PERL5OPT => '-Mstrict'}, ['-I../lib', '-e', 'print $x'],
     "", 
     qq{Global symbol "\$x" requires explicit package name at -e line 1.\nExecution of -e aborted due to compilation errors.\n});
 
 # Fails in 5.6.0
-try({PERL5OPT => '-Mstrict -w'}, ['-e', 'print $x'],
+try({PERL5OPT => '-Mstrict -w'}, ['-I../lib', '-e', 'print $x'],
     "", 
     qq{Global symbol "\$x" requires explicit package name at -e line 1.\nExecution of -e aborted due to compilation errors.\n});
 
 # Fails in 5.6.0
-try({PERL5OPT => '-w -Mstrict'}, ['-e', 'print $::x'],
+try({PERL5OPT => '-w -Mstrict'}, ['-I../lib', '-e', 'print $::x'],
     "", 
     <<ERROR
 Name "main::x" used only once: possible typo at -e line 1.
@@ -107,7 +106,7 @@ ERROR
     );
 
 # Fails in 5.6.0
-try({PERL5OPT => '-w -Mstrict'}, ['-e', 'print $::x'],
+try({PERL5OPT => '-w -Mstrict'}, ['-I../lib', '-e', 'print $::x'],
     "", 
     <<ERROR
 Name "main::x" used only once: possible typo at -e line 1.
@@ -115,17 +114,17 @@ Use of uninitialized value \$x in print at -e line 1.
 ERROR
     );
 
-try({PERL5OPT => '-MExporter'}, ['-e0'],
+try({PERL5OPT => '-MExporter'}, ['-I../lib', '-e0'],
     "", 
     "");
 
 # Fails in 5.6.0
-try({PERL5OPT => '-MExporter -MExporter'}, ['-e0'],
+try({PERL5OPT => '-MExporter -MExporter'}, ['-I../lib', '-e0'],
     "", 
     "");
 
 try({PERL5OPT => '-Mstrict -Mwarnings'}, 
-    ['-e', 'print "ok" if $INC{"strict.pm"} and $INC{"warnings.pm"}'],
+    ['-I../lib', '-e', 'print "ok" if $INC{"strict.pm"} and $INC{"warnings.pm"}'],
     "ok",
     "");
 
@@ -155,7 +154,7 @@ try({PERL5OPT => '-t'},
     '');
 
 try({PERL5OPT => '-W'},
-    ['-e', 'local $^W = 0;  no warnings;  print $x'],
+    ['-I../lib','-e', 'local $^W = 0;  no warnings;  print $x'],
     '',
     <<ERROR
 Name "main::x" used only once: possible typo at -e line 1.
@@ -205,7 +204,7 @@ is ($err, '', 'No errors when determining @INC');
 
 my @default_inc = split /\n/, $out;
 
-is (shift @default_inc, '../lib', 'Our -I../lib is at the front');
+is ($default_inc[-1], '.', '. is last in @INC');
 
 my $sep = $Config{path_sep};
 foreach (['nothing', ''],
@@ -232,8 +231,6 @@ foreach (['nothing', ''],
   is ($err, '', "No errors when determining \@INC for $name");
 
   my @inc = split /\n/, $out;
-
-  is (shift @inc, '../lib', 'Our -I../lib is at the front for $name');
 
   is (scalar @inc, scalar @expect,
       "expected number of elements in \@INC for $name");
