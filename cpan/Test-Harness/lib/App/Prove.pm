@@ -17,11 +17,11 @@ App::Prove - Implements the C<prove> command.
 
 =head1 VERSION
 
-Version 3.22
+Version 3.23
 
 =cut
 
-$VERSION = '3.22';
+$VERSION = '3.23';
 
 =head1 DESCRIPTION
 
@@ -81,10 +81,12 @@ sub _initialize {
     my $self = shift;
     my $args = shift || {};
 
+    my @is_array = qw(
+      argv rc_opts includes modules state plugins rules sources
+    );
+
     # setup defaults:
-    for my $key (
-        qw( argv rc_opts includes modules state plugins rules sources ))
-    {
+    for my $key (@is_array) {
         $self->{$key} = [];
     }
     $self->{harness_class} = 'TAP::Harness';
@@ -203,18 +205,23 @@ sub process_args {
 
         # Don't add coderefs to GetOptions
         GetOptions(
-            'v|verbose'    => \$self->{verbose},
-            'f|failures'   => \$self->{failures},
-            'o|comments'   => \$self->{comments},
-            'l|lib'        => \$self->{lib},
-            'b|blib'       => \$self->{blib},
-            's|shuffle'    => \$self->{shuffle},
-            'color!'       => \$self->{color},
-            'colour!'      => \$self->{color},
-            'count!'       => \$self->{show_count},
-            'c'            => \$self->{color},
-            'D|dry'        => \$self->{dry},
-            'ext=s@'       => \$self->{extensions},
+            'v|verbose'  => \$self->{verbose},
+            'f|failures' => \$self->{failures},
+            'o|comments' => \$self->{comments},
+            'l|lib'      => \$self->{lib},
+            'b|blib'     => \$self->{blib},
+            's|shuffle'  => \$self->{shuffle},
+            'color!'     => \$self->{color},
+            'colour!'    => \$self->{color},
+            'count!'     => \$self->{show_count},
+            'c'          => \$self->{color},
+            'D|dry'      => \$self->{dry},
+            'ext=s@'     => sub {
+                my ( $opt, $val ) = @_;
+                # Workaround for Getopt::Long 2.25 handling of
+                # multivalue options
+                push @{ $self->{extensions} ||= [] }, $val;
+            },
             'harness=s'    => \$self->{harness},
             'ignore-exit'  => \$self->{ignore_exit},
             'source=s@'    => $self->{sources},
@@ -435,18 +442,20 @@ sub _parse_source {
     Getopt::Long::GetOptions(
         "$opt_name-option=s%" => sub {
             my ( $name, $k, $v ) = @_;
-            if ($v =~ /(?<!\\)=/) {
+            if ( $v =~ /(?<!\\)=/ ) {
+
                 # It's a hash option.
                 croak "Option $name must be consistently used as a hash"
-                    if exists $config{$k} && ref $config{$k} ne 'HASH';
+                  if exists $config{$k} && ref $config{$k} ne 'HASH';
                 $config{$k} ||= {};
-                my ($hk, $hv) = split /(?<!\\)=/, $v, 2;
+                my ( $hk, $hv ) = split /(?<!\\)=/, $v, 2;
                 $config{$k}{$hk} = $hv;
-            } else {
+            }
+            else {
                 $v =~ s/\\=/=/g;
                 if ( exists $config{$k} ) {
                     $config{$k} = [ $config{$k} ]
-                        unless ref $config{$k} eq 'ARRAY';
+                      unless ref $config{$k} eq 'ARRAY';
                     push @{ $config{$k} } => $v;
                 }
                 else {

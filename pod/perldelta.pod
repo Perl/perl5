@@ -106,7 +106,7 @@ C<JSON::PP> has been upgraded from version 2.27103 to 2.27104
 
 =item *
 
-XXX
+C<Test::Harness> has been upgraded from version 3.22 to 3.23
 
 =back
 

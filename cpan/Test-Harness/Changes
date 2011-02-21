@@ -1,5 +1,12 @@
 Revision history for Test-Harness
 
+3.23    2011-02-20
+        - Merge in changes from core. Thanks BinGOs.
+        - Made SourceHandler understand that an executable binary file
+          is probably an executable.
+        - Added workaround for Getopt::Long 2.25 handling of
+          multivalue options. Fixes test failure on stock perl 5.6.2.
+
 3.22    2010-08-14
         - Allow TAP::Parser to recognize a nested BAIL_OUT directive.
         - Add brief HOWTO for creating and running pgTAP tests to

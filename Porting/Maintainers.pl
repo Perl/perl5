@@ -1424,7 +1424,7 @@ use File::Glob qw(:case);
     'Test::Harness' =>
 	{
 	'MAINTAINER'	=> 'andya',
-	'DISTRIBUTION'	=> 'ANDYA/Test-Harness-3.22.tar.gz',
+	'DISTRIBUTION'	=> 'ANDYA/Test-Harness-3.23.tar.gz',
 	'FILES'		=> q[cpan/Test-Harness],
 	'EXCLUDED'	=> [ qr{^examples/},
 			     qr{^inc/},
