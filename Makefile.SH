@@ -1407,7 +1407,7 @@ test.torture torturetest:	test_prep
 
 minitest.utf16: minitest.prep
 	- cd t && (rm -f $(PERL_EXE); $(LNS) ../$(MINIPERL_EXE) $(PERL_EXE)) \
-		&& $(RUN_PERL) TEST -minitest -utf16 base/*.t comp/*.t cmd/*.t run/*.t io/*.t op/*.t uni/*.t </dev/tty
+		&& $(RUN_PERL) TEST -utf16 base/*.t comp/*.t cmd/*.t run/*.t io/*.t op/*.t uni/*.t </dev/tty
 
 test.utf16 check.utf16: test_prep
 	TEST_ARGS=-utf16 $(RUN_TESTS) choose
@@ -1466,7 +1466,7 @@ minitest.prep:
 # is crashing.
 minitest: $(MINIPERL_EXE) minitest.prep
 	- cd t && (rm -f $(PERL_EXE); $(LNS) ../$(MINIPERL_EXE) $(PERL_EXE)) \
-		&& $(RUN_PERL) TEST -minitest base/*.t comp/*.t cmd/*.t run/*.t io/*.t re/*.t op/*.t uni/*.t </dev/tty
+		&& $(RUN_PERL) TEST base/*.t comp/*.t cmd/*.t run/*.t io/*.t re/*.t op/*.t uni/*.t </dev/tty
 
 # Test via harness
 

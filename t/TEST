@@ -124,7 +124,6 @@ our $show_elapsed_time = $ENV{HARNESS_TIMER} || 0;
 	$::with_utf8 = 1 if $1 eq 'utf8';
 	$::with_utf16 = 1 if $1 eq 'utf16';
 	$::taintwarn = 1 if $1 eq 'taintwarn';
-	$ENV{PERL_CORE_MINITEST} = 1 if $1 eq 'minitest';
 	if ($1 =~ /^deparse(,.+)?$/) {
 	    $::deparse = 1;
 	    $::deparse_opts = $1;
@@ -132,6 +131,8 @@ our $show_elapsed_time = $ENV{HARNESS_TIMER} || 0;
     }
     @ARGV = @argv;
 }
+
+$ENV{PERL_CORE_MINITEST} = 1 unless defined &DynaLoader::boot_DynaLoader;
 
 chdir 't' if -f 't/TEST';
 if (-f 'TEST' && -f 'harness' && -d '../lib') {
