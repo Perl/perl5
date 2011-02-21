@@ -8791,8 +8791,9 @@ S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s) {
 	     * following the 'e').  Otherwise, we resolve to the backwards-
 	     * compatible, but less likely 's/// le ...', i.e. as meaning
 	     * less-than-or-equal.  The reason it's not likely is that s//
-	     * returns a number, and so '<=' should be used for comparing, not
-	     * 'le'. */
+	     * returns a number for code in the field (/r returns a string, but
+	     * that wasn't added until the 5.13 series), and so '<=' should be
+	     * used for comparing, not 'le'. */
 	    if (*((*s) + 1) == 't') {
 		goto deprecate;
 	    }
