@@ -117,6 +117,7 @@ if ('1234'=~/(?:(?<A>\d)|(?<C>!))(?<B>\d)(?<A>\d)(?<B>\d)/){
     }
 }
 
+# New tests go here ^^^
 
     { # Keep these tests last, as whole script will be interrupted if times out
         # Bug #72998; this can loop 
@@ -130,6 +131,7 @@ if ('1234'=~/(?:(?<A>\d)|(?<C>!))(?<B>\d)(?<A>\d)(?<B>\d)/){
         pass(q"qr/\18/ didn't loop");
     }
 
-# New tests above this line, don't forget to update the test count below!
-BEGIN { plan tests => 33 }
-# No tests here!
+done_testing();
+
+__END__
+# New tests go up there^^^
