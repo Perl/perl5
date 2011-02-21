@@ -500,12 +500,15 @@ format CHOLET =
 wellington
 .
 $foo .= "(1)";
-my $cholet;
-open(CHOLET, ">", \$cholet);
-write CHOLET;
-close CHOLET;
-$foo .= "(".$cholet.")";
-is($foo, "(0)(1)(wellington\n)", "label before format decl");
+SKIP: {
+    skip_if_miniperl("no dynamic loading on miniperl, so can't load PerlIO::scalar", 1);
+    my $cholet;
+    open(CHOLET, ">", \$cholet);
+    write CHOLET;
+    close CHOLET;
+    $foo .= "(".$cholet.")";
+    is($foo, "(0)(1)(wellington\n)", "label before format decl");
+}
 
 $foo = "(A)";
 if($foo eq $foo) {
