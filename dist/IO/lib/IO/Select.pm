@@ -11,7 +11,7 @@ use warnings::register;
 use     vars qw($VERSION @ISA);
 require Exporter;
 
-$VERSION = "1.18";
+$VERSION = "1.20";
 
 @ISA = qw(Exporter); # This is only so we can do version checking
 
@@ -352,8 +352,8 @@ listening for more connections on a listen socket
     use IO::Select;
     use IO::Socket;
 
-    $lsn = new IO::Socket::INET(Listen => 1, LocalPort => 8080);
-    $sel = new IO::Select( $lsn );
+    $lsn = IO::Socket::INET->new(Listen => 1, LocalPort => 8080);
+    $sel = IO::Select->new( $lsn );
 
     while(@ready = $sel->can_read) {
         foreach $fh (@ready) {

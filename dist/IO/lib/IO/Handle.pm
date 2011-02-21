@@ -8,13 +8,13 @@ IO::Handle - supply object methods for I/O handles
 
     use IO::Handle;
 
-    $io = new IO::Handle;
+    $io = IO::Handle->new();
     if ($io->fdopen(fileno(STDIN),"r")) {
         print $io->getline;
         $io->close;
     }
 
-    $io = new IO::Handle;
+    $io = IO::Handle->new();
     if ($io->fdopen(fileno(STDOUT),"w")) {
         $io->print("Some text\n");
     }
@@ -268,7 +268,7 @@ use IO ();	# Load the XS module
 require Exporter;
 @ISA = qw(Exporter);
 
-$VERSION = "1.29";
+$VERSION = "1.30";
 $VERSION = eval $VERSION;
 
 @EXPORT_OK = qw(
@@ -309,14 +309,14 @@ $VERSION = eval $VERSION;
 
 sub new {
     my $class = ref($_[0]) || $_[0] || "IO::Handle";
-    @_ == 1 or croak "usage: new $class";
+    @_ == 1 or croak "usage: $class->new()";
     my $io = gensym;
     bless $io, $class;
 }
 
 sub new_from_fd {
     my $class = ref($_[0]) || $_[0] || "IO::Handle";
-    @_ == 3 or croak "usage: new_from_fd $class FD, MODE";
+    @_ == 3 or croak "usage: $class->new_from_fd(FD, MODE)";
     my $io = gensym;
     shift;
     IO::Handle::fdopen($io, @_)
