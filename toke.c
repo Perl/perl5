@@ -8798,6 +8798,14 @@ S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s) {
 		goto deprecate;
 	    }
 	    else if (*((*s) + 1) == 'e' && ! isALNUM(*((*s) + 2))) {
+
+		/* 'e' is valid only for substitutes, s///e.  If it is not
+		 * valid in the current context, then 'm//le' must mean the
+		 * comparison operator, so use the regular deprecation message.
+		 */
+		if (! strchr(valid_flags, 'e')) {
+		    goto deprecate;
+		}
 		Perl_ck_warner_d(aTHX_ packWARN(WARN_AMBIGUOUS),
 		    "Ambiguous use of 's//le...' resolved as 's// le...'; Rewrite as 's//el' if you meant 'use locale rules and evaluate rhs as an expression'.  In Perl 5.16, it will be resolved the other way");
 		return FALSE;
