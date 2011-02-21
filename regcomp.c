@@ -5969,7 +5969,7 @@ Perl__append_range_to_invlist(pTHX_ HV* const invlist, const UV start, const UV 
 }
 #endif
 
-PERL_STATIC_INLINE HV*
+STATIC HV*
 S_invlist_union(pTHX_ HV* const a, HV* const b)
 {
     /* Return a new inversion list which is the union of two inversion lists.
@@ -6120,7 +6120,7 @@ S_invlist_union(pTHX_ HV* const a, HV* const b)
     return u;
 }
 
-PERL_STATIC_INLINE HV*
+STATIC HV*
 S_invlist_intersection(pTHX_ HV* const a, HV* const b)
 {
     /* Return the intersection of two inversion lists.  The basis for this
