@@ -96,7 +96,7 @@ XXX
 
 =item *
 
-XXX
+C<JSON::PP> has been upgraded from version 2.27103 to 2.27104
 
 =back
 

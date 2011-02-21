@@ -11,7 +11,7 @@ use Carp ();
 use B ();
 #use Devel::Peek;
 
-$JSON::PP::VERSION = '2.27103';
+$JSON::PP::VERSION = '2.27104';
 
 @JSON::PP::EXPORT = qw(encode_json decode_json from_json to_json);
 
@@ -322,8 +322,8 @@ sub allow_bigint {
 
                 if ( $convert_blessed and $obj->can('TO_JSON') ) {
                     my $result = $obj->TO_JSON();
-                    if ( defined $result and overload::Overloaded( $obj ) ) {
-                        if ( overload::StrVal( $obj ) eq $result ) {
+                    if ( defined $result and ref( $result ) ) {
+                        if ( refaddr( $obj ) eq refaddr( $result ) ) {
                             encode_error( sprintf(
                                 "%s::TO_JSON method returned same object as was passed instead of a new one",
                                 ref $obj
@@ -889,7 +889,7 @@ BEGIN {
 
 
     sub array {
-        my $a  = [];
+        my $a  = $_[0] || []; # you can use this code to use another array ref object.
 
         decode_error('json text or perl structure exceeds maximum nesting level (max_depth set too low?)')
                                                     if (++$depth > $max_depth);
@@ -939,7 +939,7 @@ BEGIN {
 
 
     sub object {
-        my $o = {};
+        my $o = $_[0] || {}; # you can use this code to use another hash ref object.
         my $k;
 
         decode_error('json text or perl structure exceeds maximum nesting level (max_depth set too low?)')
@@ -1338,6 +1338,7 @@ BEGIN {
     unless($@){
         *JSON::PP::blessed = \&Scalar::Util::blessed;
         *JSON::PP::reftype = \&Scalar::Util::reftype;
+        *JSON::PP::refaddr = \&Scalar::Util::refaddr;
     }
     else{ # This code is from Sclar::Util.
         # warn $@;
@@ -1367,6 +1368,23 @@ BEGIN {
               : length(ref($$r)) ? 'REF'
               :                    'SCALAR';
         };
+        *JSON::PP::refaddr = sub {
+          return undef unless length(ref($_[0]));
+
+          my $addr;
+          if(defined(my $pkg = blessed($_[0]))) {
+            $addr .= bless $_[0], 'Scalar::Util::Fake';
+            bless $_[0], $pkg;
+          }
+          else {
+            $addr .= $_[0]
+          }
+
+          $addr =~ /0x(\w+)/;
+          local $^W;
+          #no warnings 'portable';
+          hex($1);
+        }
     }
 }
 
@@ -1386,13 +1404,6 @@ sub null  { undef; }
 
 package JSON::PP::Boolean;
 
-#BEGIN { # when renamed into JSON::PP, delete this code.
-#    # avoid for warning Can't locate package JSON::PP::Boolean for @JSON::PP::Boolean::ISA
-#    eval q{ package JSON::PP::Boolean; };
-#    @JSON::PP::Boolean::ISA = ('JSON::PP::Boolean');
-#}
-
-# @JSON::PP::Boolean::ISA = ('JSON::PP::Boolean');
 use overload (
    "0+"     => sub { ${$_[0]} },
    "++"     => sub { $_[0] = ${$_[0]} + 1 },
