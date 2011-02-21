@@ -351,7 +351,8 @@ fresh_perl_is(
 
 # check that we can call methods on filehandles auto-magically
 # and have IO::File loaded for us
-{
+SKIP: {
+    skip_if_miniperl("no dynamic loading on miniperl, so can't load IO::File", 3);
     is( $INC{'IO/File.pm'}, undef, "IO::File not loaded" );
     my $var = "";
     open my $fh, ">", \$var;
