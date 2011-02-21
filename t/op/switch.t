@@ -1201,7 +1201,6 @@ unreified_check(undef,"");
 }
 
 { # RT#84526 - Handle magical TARG
-    local our $TODO = "RT#84526 - Handle magical TARG";
     my $x = my $y = "aaa";
     for ($x, $y) {
 	given ($_) {
