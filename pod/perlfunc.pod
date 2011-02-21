@@ -1610,8 +1610,11 @@ determined.
 
 If there is a syntax error or runtime error, or a C<die> statement is
 executed, C<eval> returns an undefined value in scalar context
-or an empty list in list context, and C<$@> is set to the
-error message.  If there was no error, C<$@> is guaranteed to be the empty
+or an empty list--or, for syntax errors, a list containing a single
+undefined value--in list context, and C<$@> is set to the error
+message.  The discrepancy in the return values in list context is
+considered a bug by some, and will probably be fixed in a future
+release.  If there was no error, C<$@> is guaranteed to be the empty
 string.  Beware that using C<eval> neither silences Perl from printing
 warnings to STDERR, nor does it stuff the text of warning messages into C<$@>.
 To do either of those, you have to use the C<$SIG{__WARN__}> facility, or
