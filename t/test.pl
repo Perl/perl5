@@ -110,6 +110,10 @@ sub skip_all {
     exit(0);
 }
 
+sub skip_all_if_miniperl {
+    skip_all(@_) if !defined &DynaLoader::boot_DynaLoader;
+}
+
 sub _ok {
     my ($pass, $where, $name, @mess) = @_;
     # Do not try to microoptimize by factoring out the "not ".

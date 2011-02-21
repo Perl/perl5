@@ -8,6 +8,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
+    skip_all_if_miniperl("no dynamic loading on miniperl, no Encode");
 }
 
 my $DEBUG = 0;  # Outputs extra information for debugging this .t
