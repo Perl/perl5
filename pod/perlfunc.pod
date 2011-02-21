@@ -1396,7 +1396,8 @@ See L<perlsyn> for alternative strategies.
 =item do SUBROUTINE(LIST)
 X<do>
 
-This form of subroutine call is deprecated.  See L<perlsub>.
+This form of subroutine call is deprecated.  SUBROUTINE can be a bareword,
+a scalar variable or a subroutine beginning with C<&>.
 
 =item do EXPR
 X<do>
