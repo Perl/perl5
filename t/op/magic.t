@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 use Config;
 
-plan (tests => 85);
+plan (tests => 83);
 
 $Is_MSWin32  = $^O eq 'MSWin32';
 $Is_NetWare  = $^O eq 'NetWare';
@@ -478,28 +478,6 @@ is "@+", "10 1 6 10";
 	$ok = "a$\b" eq "aa\0bb";
     }
     ok $ok;
-}
-
-# Test for bug [perl #27839]
-{
-    my $x;
-    sub f {
-	"abc" =~ /(.)./;
-	$x = "@+";
-	return @+;
-    };
-    "pqrstuvwxyz" =~ /..(....)../; # prime @+ etc in this scope
-    my @y = f();
-    is $x, "@y", "return a magic array ($x) vs (@y)";
-
-    sub f2 {
-	"abc" =~ /(?<foo>.)./;
-	my @h =  %+;
-	$x = "@h";
-	return %+;
-    };
-    @y = f();
-    is $x, "@y", "return a magic hash ($x) vs (@y)";
 }
 
 # Test for bug [perl #36434]
