@@ -724,7 +724,7 @@ neither is set, C<chdir> does nothing. It returns true on success,
 false otherwise. See the example under C<die>.
 
 On systems that support fchdir(2), you may pass a filehandle or
-directory handle as argument.  On systems that don't support fchdir(2),
+directory handle as the argument.  On systems that don't support fchdir(2),
 passing handles raises an exception.
 
 =item chmod LIST
@@ -774,7 +774,7 @@ remove the newline from the end of an input record when you're worried
 that the final record may be missing its newline.  When in paragraph
 mode (C<$/ = "">), it removes all trailing newlines from the string.
 When in slurp mode (C<$/ = undef>) or fixed-length record mode (C<$/> is
-a reference to an integer or the like, see L<perlvar>) chomp() won't
+a reference to an integer or the like; see L<perlvar>) chomp() won't
 remove anything.
 If VARIABLE is omitted, it chomps C<$_>.  Example:
 
@@ -1001,7 +1001,7 @@ X<cos> X<cosine> X<acos> X<arccosine>
 =item cos
 
 Returns the cosine of EXPR (expressed in radians).  If EXPR is omitted,
-takes cosine of C<$_>.
+takes the cosine of C<$_>.
 
 For the inverse cosine operation, you may use the C<Math::Trig::acos()>
 function, or use this relation:
@@ -1016,7 +1016,7 @@ Creates a digest string exactly like the crypt(3) function in the C
 library (assuming that you actually have a version there that has not
 been extirpated as a potential munition).
 
-crypt() is a one-way hash function.  The PLAINTEXT and SALT is turned
+crypt() is a one-way hash function.  The PLAINTEXT and SALT are turned
 into a short string, called a digest, which is returned.  The same
 PLAINTEXT and SALT will always return the same string, but there is no
 (known) way to get the original PLAINTEXT from the hash.  Small
@@ -1031,7 +1031,7 @@ having to transmit or store the text itself.  An example is checking
 if a correct password is given.  The digest of the password is stored,
 not the password itself.  The user types in a password that is
 crypt()'d with the same salt as the stored digest.  If the two digests
-match the password is correct.
+match, the password is correct.
 
 When verifying an existing digest string you should use the digest as
 the salt (like C<crypt($plain, $digest) eq $digest>).  The SALT used
@@ -1082,7 +1082,7 @@ back.  Look at the L<Digest> module for more robust algorithms.
 
 If using crypt() on a Unicode string (which I<potentially> has
 characters with codepoints above 255), Perl tries to make sense
-of the situation by trying to downgrade (a copy of the string)
+of the situation by trying to downgrade (a copy of)
 the string back to an eight-bit byte string before calling crypt()
 (on that copy).  If that works, good.  If not, crypt() dies with
 C<Wide character in crypt>.
@@ -1164,7 +1164,7 @@ makes it spring into existence the first time that it is called; see
 L<perlsub>.
 
 Use of C<defined> on aggregates (hashes and arrays) is deprecated.  It
-used to report whether memory for that aggregate has ever been
+used to report whether memory for that aggregate had ever been
 allocated.  This behavior may disappear in future versions of Perl.
 You should instead use a simple test for size:
 
@@ -1317,7 +1317,7 @@ This is useful for propagating exceptions:
 If the output is empty and C<$@> contains an object reference that has a
 C<PROPAGATE> method, that method will be called with additional file
 and line number parameters.  The return value replaces the value in
-C<$@>.  i.e., as if C<< $@ = eval { $@->PROPAGATE(__FILE__, __LINE__) }; >>
+C<$@>;  i.e., as if C<< $@ = eval { $@->PROPAGATE(__FILE__, __LINE__) }; >>
 were called.
 
 If C<$@> is empty then the string C<"Died"> is used.
