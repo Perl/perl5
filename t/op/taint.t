@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 687;
+plan tests => 689;
 
 $| = 1;
 
@@ -2186,6 +2186,20 @@ end
     ok($s =~ s/$r/x/, "match bare regex");
     ok(tainted($s), "match bare regex taint");
     is($s, 'xbc', "match bare regex taint value");
+}
+
+{
+    # [perl #82616] security Issues with user-defined \p{} properties
+    # A using a tainted user-defined property should croak
+
+    sub IsA { sprintf "%02x", ord("A") }
+
+    my $prop = "IsA";
+    ok("A" =~ /\p{$prop}/, "user-defined property: non-tainted case");
+    $prop = "IsA$TAINT";
+    eval { "A" =~ /\p{$prop}/};
+    like($@, qr/Insecure user-defined property \\p{main::IsA}/,
+	    "user-defined property: tainted case");
 }
 
 # This may bomb out with the alarm signal so keep it last

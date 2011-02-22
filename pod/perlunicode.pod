@@ -801,6 +801,10 @@ the value of the flag, and one set of values will immutably be in effect
 for all case-sensitive matches; the other set for all case-insensitive
 matches.
 
+Note that  if the regular expression is tainted, then perl will die rather
+than calling the subroutine, where the name of the subroutine is
+determined by the tainted data.
+
 The subroutines must return a specially-formatted string, with one
 or more newline-separated lines.  Each line must be one of the following:
 

@@ -2188,6 +2188,14 @@ C<$ENV{ENV}>, C<$ENV{BASH_ENV}> or C<$ENV{TERM}> are derived from data
 supplied (or potentially supplied) by the user.  The script must set
 the path to a known value, using trustworthy data.  See L<perlsec>.
 
+=item Insecure user-defined property %s
+
+(F) Perl detected tainted data when trying to compile a regular
+expression that contains a call to a user-defined character property
+function, i.e. C<\p{IsFoo}> or C<\p{InFoo}>.
+See L<perlunicode/User-Defined Character Properties> and L<perlsec>.
+
+
 =item Integer overflow in format string for %s
 
 (F) The indexes and widths specified in the format string of C<printf()>
