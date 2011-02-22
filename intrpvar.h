@@ -784,7 +784,7 @@ PERLVARI(Iutf8_foldclosures,	HV *, NULL)
 
 /* List of characters that participate in folds (except marks, etc in
  * multi-char folds) */
-PERLVAR(Iutf8_foldable,	HV *)
+PERLVARI(Iutf8_foldable,	HV *, NULL)
 
 PERLVAR(Icustom_ops, HV *)      /* custom op registrations */
 
