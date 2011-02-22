@@ -2101,6 +2101,10 @@ Be careful if you put double quotes around the picture, because an C<@>
 character may be taken to mean the beginning of an array name.
 C<formline> always returns true.  See L<perlform> for other examples.
 
+If you are trying to use this instead of C<write> to capture the output,
+you may find it easier to open a filehandle to a scalar
+(C<< open $fh, ">", \$output >>) and write to that instead.
+
 =item getc FILEHANDLE
 X<getc> X<getchar> X<character> X<file, read>
 
