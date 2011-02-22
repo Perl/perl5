@@ -340,7 +340,8 @@ fresh_perl_is(
     '[perl #77492]: open $fh, ">", \*glob causes SEGV');
 
 # [perl #77684] Opening a reference to a glob copy.
-{
+SKIP: {
+    skip_if_miniperl("no dynamic loading on miniperl, so can't load PerlIO::scalar", 1);
     my $var = *STDOUT;
     open my $fh, ">", \$var;
     print $fh "hello";
