@@ -55,6 +55,18 @@ sub range_type {
 
 my %todos;  # List of test numbers that are expected to fail
 map { $todos{$_} = '1' } (
+127405,
+127406,
+127425,
+127426,
+127437,
+127438,
+127469,
+127470,
+127489,
+127490,
+127501,
+127502,
 );
 
 sub numerically {
@@ -95,9 +107,17 @@ while (<$fh>) {
     my $from = hex $hex_from;
 
     if ($fold_type eq 'F') {
-        next;   # XXX TODO multi-char folds
-        my $from_range_type = range_type($from);
+         my $from_range_type = range_type($from);
+
+        # If we were testing comprehensively, we would try every combination
+        # of upper and lower case in the fold, but it is quite likely that if
+        # the code can handle all combinations if it can handle the cases
+        # where everything is upper and when everything is lower.  Because of
+        # complement matching, we need to do both.  And we use the
+        # reverse-fold instead of uppercase.
         @folded = map { hex $_ } @folded;
+        # XXX better to use reverse fold of these instead of uc
+        my @uc_folded = map { ord uc chr $_ } @folded;
 
         # Include three code points that are handled internally by the regex
         # engine specially, plus all non-above-255 multi folds (which actually
@@ -109,16 +129,16 @@ while (<$fh>) {
             || $from_range_type != $Unicode
             || grep { range_type($_) != $from_range_type } @folded)
         {
-            $tests{$from} = [ [ @folded ] ];
+            $tests{$from} = [ [ @folded ], [ @uc_folded ] ];
         }
         else {
 
-            # Must be Unicode here, so chr is automatically utf8.  Get the
-            # number of bytes in each.  This is because the optimizer cares
-            # about length differences.
-            my $from_length = length encode('utf-8', chr($from));
-            my $to_length = length encode('utf-8', pack 'U*', @folded);
-            push @{$multi_folds{$from_length}{$to_length}}, { $from => [ @folded ] };
+            # The only multi-char non-utf8 fold is DF, which is handled above,
+            # so here chr() must be utf8.  Get the number of bytes in each.
+            # This is because the optimizer cares about length differences.
+            my $from_length = length encode('UTF-8', chr($from));
+            my $to_length = length encode('UTF-8', pack 'U*', @folded);
+            push @{$multi_folds{$from_length}{$to_length}}, { $from => [ [ @folded ], [ @uc_folded ] ] };
         }
     }
 
@@ -402,6 +422,39 @@ foreach my $test (sort { numerically } keys %tests) {
                               $op = 1;
                           }
                           $op = ! $op if $must_match && $inverted;
+
+                          if ($inverted && @target > 1) {
+                            # When doing an inverted match against a
+                            # multi-char target, and there is not something on
+                            # the left to anchor the match, if it shouldn't
+                            # succeed, skip, as what will happen (when working
+                            # correctly) is that it will match the first
+                            # position correctly, and then be inverted to not
+                            # match; then it will go to the second position
+                            # where it won't match, but get inverted to match,
+                            # and hence succeeding.
+                            next if ! ($l_anchor || $prepend) && ! $op;
+
+                            # Can't ever match for latin1 code points non-uni
+                            # semantics that have a inverted multi-char fold
+                            # when there is something on both sides and the
+                            # quantifier isn't such as to span the required
+                            # width, which is 2 or 3.
+                            $op = 0 if $ord < 255
+                                       && ! $uni_semantics
+                                       && $both_sides
+                                       && ( ! $quantifier || $quantifier eq '?')
+                                       && $parend < 2;
+
+                            # Similarly can't ever match when inverting a multi-char
+                            # fold for /aa and the quantifier isn't sufficient
+                            # to allow it to span to both sides.
+                            $op = 0 if $target_has_ascii && $charset eq 'aa' && $both_sides && ( ! $quantifier || $quantifier eq '?') && $parend < 2;
+
+                            # Or for /l
+                            $op = 0 if $target_has_latin1 && $charset eq 'l' && $both_sides && ( ! $quantifier || $quantifier eq '?') && $parend < 2;
+                          }
+
                           $op = ($op) ? '=~' : '!~';
 
                           my $debug .= " uni_semantics=$uni_semantics, should_fail=$should_fail, bracketed=$bracketed, prepend=$prepend, append=$append, parend=$parend, quantifier=$quantifier, l_anchor=$l_anchor, r_anchor=$r_anchor";
