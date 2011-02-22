@@ -1938,7 +1938,11 @@ on your own, though.
 X<fileno>
 
 Returns the file descriptor for a filehandle, or undefined if the
-filehandle is not open.  This is mainly useful for constructing
+filehandle is not open.  If there is no real file descriptor at the OS
+level, as can happen with filehandles connected to memory objects via
+C<open> with a reference for the third argument, -1 is returned.
+
+This is mainly useful for constructing
 bitmaps for C<select> and low-level POSIX tty-handling operations.
 If FILEHANDLE is an expression, the value is taken as an indirect
 filehandle, generally its name.
@@ -1949,10 +1953,6 @@ same underlying descriptor:
     if (fileno(THIS) == fileno(THAT)) {
         print "THIS and THAT are dups\n";
     }
-
-(Filehandles connected to memory objects via new features of C<open> may
-return undefined even though they are open.)
-
 
 =item flock FILEHANDLE,OPERATION
 X<flock> X<lock> X<locking>
