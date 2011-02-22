@@ -53,35 +53,18 @@ sub range_type {
     return $Unicode;
 }
 
-my %todos;  # List of test numbers that are expected to fail
-map { $todos{$_} = '1' } (
-127405,
-127406,
-127425,
-127426,
-127437,
-127438,
-127469,
-127470,
-127489,
-127490,
-127501,
-127502,
-);
-
 sub numerically {
     return $a <=> $b
 }
 
-sub format_test($$$) {
-    my ($test, $count, $debug) = @_;
+sub format_test($$$$) {
+    my ($test, $count, $todo, $debug) = @_;
 
     # Create a test entry, with TODO set if it is one of the known problem
     # code points
 
     $debug = "" unless $DEBUG;
-
-    my $todo = (exists $todos{$count}) ? "Known problem" : 0;
+    $todo = "Known problem" if $todo;
 
     return qq[TODO: { local \$::TODO = "$todo"; ok(eval '$test', '$test; $debug'); }];
 }
@@ -344,18 +327,26 @@ foreach my $test (sort { numerically } keys %tests) {
           my $op = '=~';
           $op = '!~' if $should_fail;
 
+          # I'm afraid this was derived from trial and error.
+          my $todo = ($test == 0xdf
+                      && $lhs =~ /DF/
+                      && $uni_semantics
+                      && ($charset eq 'u' || $charset eq 'd')
+                      && ! ($charset eq 'u' && (($upgrade_target eq "") != ($upgrade_pattern eq "")))
+                      && ! ($charset eq 'd' && (! $upgrade_target || ! $upgrade_pattern))
+                      );
           my $eval = "my \$c = \"$lhs$rhs\"; my \$p = qr/(?$charset:^($rhs)\\1\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-          push @eval_tests, format_test($eval, ++$count, "");
+          push @eval_tests, format_test($eval, ++$count, $todo, "");
 
           $eval = "my \$c = \"$lhs$rhs\"; my \$p = qr/(?$charset:^(?<grind>$rhs)\\k<grind>\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-          push @eval_tests, format_test($eval, ++$count, "");
+          push @eval_tests, format_test($eval, ++$count, $todo, "");
 
           if ($lhs ne $rhs) {
             $eval = "my \$c = \"$rhs$lhs\"; my \$p = qr/(?$charset:^($rhs)\\1\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-            push @eval_tests, format_test($eval, ++$count, "");
+            push @eval_tests, format_test($eval, ++$count, "", "");
 
             $eval = "my \$c = \"$rhs$lhs\"; my \$p = qr/(?$charset:^(?<grind>$rhs)\\k<grind>\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-            push @eval_tests, format_test($eval, ++$count, "");
+            push @eval_tests, format_test($eval, ++$count, "", "");
           }
 
           foreach my $bracketed (0, 1) {   # Put rhs in [...], or not
@@ -463,7 +454,7 @@ foreach my $test (sort { numerically } keys %tests) {
 
                           # XXX Doesn't currently test multi-char folds in pattern
                           next if @pattern != 1;
-                          push @eval_tests, format_test($eval, ++$count, $debug);
+                          push @eval_tests, format_test($eval, ++$count, "", $debug);
 
                           # Group tests
                           if (@eval_tests >= $clump_execs) {
