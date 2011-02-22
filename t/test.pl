@@ -96,6 +96,10 @@ sub note {
     _print( _comment(@_) );
 }
 
+sub is_miniperl {
+    return !defined &DynaLoader::boot_DynaLoader;
+}
+
 sub _comment {
     return map { /^#/ ? "$_\n" : "# $_\n" }
            map { split /\n/ } @_;
@@ -111,7 +115,7 @@ sub skip_all {
 }
 
 sub skip_all_if_miniperl {
-    skip_all(@_) if !defined &DynaLoader::boot_DynaLoader;
+    skip_all(@_) if is_miniperl();
 }
 
 sub _ok {
@@ -367,7 +371,7 @@ sub skip {
 }
 
 sub skip_if_miniperl {
-    skip(@_) if !defined &DynaLoader::boot_DynaLoader;
+    skip(@_) if is_miniperl();
 }
 
 sub todo_skip {
