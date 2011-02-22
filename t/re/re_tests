@@ -1067,35 +1067,35 @@ X(?<=foo.)[YZ]	..XfooXY..	y	pos	8
 ((?2)*)([fF]o+)	fooFoFoo	y	$1-$2	fooFo-Foo
 (<(?:[^<>]+|(?R))*>)	<<><<<><>>>>	y	$1	<<><<<><>>>>
 (?<n>foo|bar|baz)	snofooewa	y	$1	foo
-(?<n>foo|bar|baz)	snofooewa	y	$+{n}	foo
-(?<n>foo|bar|baz)(?<m>[ew]+)	snofooewa	y	$+{n}	foo
-(?<n>foo|bar|baz)(?<m>[ew]+)	snofooewa	y	$+{m}	ew
-(?<n>foo)|(?<n>bar)|(?<n>baz)	snofooewa	y	$+{n}	foo
-(?<n>foo)(??{ $+{n} })	snofooefoofoowaa	y	$+{n}	foo
+(?<n>foo|bar|baz)	snofooewa	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
+(?<n>foo|bar|baz)(?<m>[ew]+)	snofooewa	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
+(?<n>foo|bar|baz)(?<m>[ew]+)	snofooewa	yM	$+{m}	ew	miniperl cannot load Tie::Hash::NamedCapture
+(?<n>foo)|(?<n>bar)|(?<n>baz)	snofooewa	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
+(?<n>foo)(??{ $+{n} })	snofooefoofoowaa	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
 (?P<n>foo|bar|baz)	snofooewa	y	$1	foo
-(?P<n>foo|bar|baz)	snofooewa	y	$+{n}	foo
-(?P<n>foo|bar|baz)(?P<m>[ew]+)	snofooewa	y	$+{n}	foo
-(?P<n>foo|bar|baz)(?P<m>[ew]+)	snofooewa	y	$+{m}	ew
-(?P<n>foo)|(?P<n>bar)|(?P<n>baz)	snofooewa	y	$+{n}	foo
-(?P<n>foo)(??{ $+{n} })	snofooefoofoowaa	y	$+{n}	foo
+(?P<n>foo|bar|baz)	snofooewa	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
+(?P<n>foo|bar|baz)(?P<m>[ew]+)	snofooewa	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
+(?P<n>foo|bar|baz)(?P<m>[ew]+)	snofooewa	yM	$+{m}	ew	miniperl cannot load Tie::Hash::NamedCapture
+(?P<n>foo)|(?P<n>bar)|(?P<n>baz)	snofooewa	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
+(?P<n>foo)(??{ $+{n} })	snofooefoofoowaa	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
 (?P<=n>foo|bar|baz)	snofooewa	c	-	Sequence (?P<=...) not recognized
 (?P<!n>foo|bar|baz)	snofooewa	c	-	Sequence (?P<!...) not recognized
 (?PX<n>foo|bar|baz)	snofooewa	c	-	Sequence (?PX<...) not recognized
 /(?'n'foo|bar|baz)/	snofooewa	y	$1	foo
-/(?'n'foo|bar|baz)/	snofooewa	y	$+{n}	foo
-/(?'n'foo|bar|baz)(?'m'[ew]+)/	snofooewa	y	$+{n}	foo
-/(?'n'foo|bar|baz)(?'m'[ew]+)/	snofooewa	y	$+{m}	ew
-/(?'n'foo)|(?'n'bar)|(?<n>baz)/	snobazewa	y	$+{n}	baz
-/(?'n'foo)(??{ $+{n} })/	snofooefoofoowaa	y	$+{n}	foo
+/(?'n'foo|bar|baz)/	snofooewa	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
+/(?'n'foo|bar|baz)(?'m'[ew]+)/	snofooewa	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
+/(?'n'foo|bar|baz)(?'m'[ew]+)/	snofooewa	yM	$+{m}	ew	miniperl cannot load Tie::Hash::NamedCapture
+/(?'n'foo)|(?'n'bar)|(?<n>baz)/	snobazewa	yM	$+{n}	baz	miniperl cannot load Tie::Hash::NamedCapture
+/(?'n'foo)(??{ $+{n} })/	snofooefoofoowaa	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
 /(?'n'foo)\k<n>/	..foofoo..	y	$1	foo
-/(?'n'foo)\k<n>/	..foofoo..	y	$+{n}	foo
+/(?'n'foo)\k<n>/	..foofoo..	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
 /(?<n>foo)\k'n'/	..foofoo..	y	$1	foo
-/(?<n>foo)\k'n'/	..foofoo..	y	$+{n}	foo
-/(?:(?<n>foo)|(?<n>bar))\k<n>/	..barbar..	y	$+{n}	bar
-/^(?'main'<(?:[^<>]+|(?&crap)|(?&main))*>)(?'empty')(?'crap'!>!>!>)$/	<<!>!>!>><>>!>!>!>	y	$+{main}	<<!>!>!>><>>
+/(?<n>foo)\k'n'/	..foofoo..	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
+/(?:(?<n>foo)|(?<n>bar))\k<n>/	..barbar..	yM	$+{n}	bar	miniperl cannot load Tie::Hash::NamedCapture
+/^(?'main'<(?:[^<>]+|(?&crap)|(?&main))*>)(?'empty')(?'crap'!>!>!>)$/	<<!>!>!>><>>!>!>!>	yM	$+{main}	<<!>!>!>><>>	miniperl cannot load Tie::Hash::NamedCapture
 /^(?'main'<(?:[^<>]+|(?&main))*>)$/	<<><<<><>>>>	y	$1	<<><<<><>>>>
-/(?'first'(?&second)*)(?'second'[fF]o+)/	fooFoFoo	y	$+{first}-$+{second}	fooFo-Foo
-(?<A>foo)?(?(<A>)bar|nada)	foobar	y	$+{A}	foo
+/(?'first'(?&second)*)(?'second'[fF]o+)/	fooFoFoo	yM	$+{first}-$+{second}	fooFo-Foo	miniperl cannot load Tie::Hash::NamedCapture
+(?<A>foo)?(?(<A>)bar|nada)	foobar	yM	$+{A}	foo	miniperl cannot load Tie::Hash::NamedCapture
 (?<A>foo)?(?(<A>)bar|nada)	foo-barnada	y	$&	nada
 (?<A>foo)?(?(1)bar|nada)	foo-barnada	y	$&	nada
 (?<A>foo(?(R)bar))?(?1)	foofoobar	y	$1	foo
@@ -1249,15 +1249,15 @@ a*(*F)	aaaab	n	-	-
 
 # \k<n> preceded by a literal
 /(?'n'foo) \k<n>/	..foo foo..	y	$1	foo
-/(?'n'foo) \k<n>/	..foo foo..	y	$+{n}	foo
+/(?'n'foo) \k<n>/	..foo foo..	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
 /(?<n>foo) \k'n'/	..foo foo..	y	$1	foo
-/(?<n>foo) \k'n'/	..foo foo..	y	$+{n}	foo
-/(?'a1'foo) \k'a1'/	..foo foo..	y	$+{a1}	foo
-/(?<a1>foo) \k<a1>/	..foo foo..	y	$+{a1}	foo
-/(?'_'foo) \k'_'/	..foo foo..	y	$+{_}	foo
-/(?<_>foo) \k<_>/	..foo foo..	y	$+{_}	foo
-/(?'_0_'foo) \k'_0_'/	..foo foo..	y	$+{_0_}	foo
-/(?<_0_>foo) \k<_0_>/	..foo foo..	y	$+{_0_}	foo
+/(?<n>foo) \k'n'/	..foo foo..	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
+/(?'a1'foo) \k'a1'/	..foo foo..	yM	$+{a1}	foo	miniperl cannot load Tie::Hash::NamedCapture
+/(?<a1>foo) \k<a1>/	..foo foo..	yM	$+{a1}	foo	miniperl cannot load Tie::Hash::NamedCapture
+/(?'_'foo) \k'_'/	..foo foo..	yM	$+{_}	foo	miniperl cannot load Tie::Hash::NamedCapture
+/(?<_>foo) \k<_>/	..foo foo..	yM	$+{_}	foo	miniperl cannot load Tie::Hash::NamedCapture
+/(?'_0_'foo) \k'_0_'/	..foo foo..	yM	$+{_0_}	foo	miniperl cannot load Tie::Hash::NamedCapture
+/(?<_0_>foo) \k<_0_>/	..foo foo..	yM	$+{_0_}	foo	miniperl cannot load Tie::Hash::NamedCapture
 /(?'0'foo) bar/	..foo bar..	c	-	Sequence (?'
 /(?<0>foo) bar/	..foo bar..	c	-	Sequence (?<
 /(?'12'foo) bar/	..foo bar..	c	-	Sequence (?'
@@ -1286,19 +1286,19 @@ a*(*F)	aaaab	n	-	-
 
 # \g{...} with a name as the argument 
 /(?'n'foo) \g{n}/	..foo foo..	y	$1	foo
-/(?'n'foo) \g{n}/	..foo foo..	y	$+{n}	foo
+/(?'n'foo) \g{n}/	..foo foo..	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
 /(?<n>foo) \g{n}/	..foo foo..	y	$1	foo
-/(?<n>foo) \g{n}/	..foo foo..	y	$+{n}	foo
+/(?<n>foo) \g{n}/	..foo foo..	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
 /(?<as>as) (\w+) \g{as} (\w+)/	as easy as pie	y	$1-$2-$3	as-easy-pie
 
 # Python style named capture buffer stuff
 /(?P<n>foo)(?P=n)/	..foofoo..	y	$1	foo
-/(?P<n>foo)(?P=n)/	..foofoo..	y	$+{n}	foo
-/(?:(?P<n>foo)|(?P<n>bar))(?P=n)/	..barbar..	y	$+{n}	bar
+/(?P<n>foo)(?P=n)/	..foofoo..	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
+/(?:(?P<n>foo)|(?P<n>bar))(?P=n)/	..barbar..	yM	$+{n}	bar	miniperl cannot load Tie::Hash::NamedCapture
 /^(?P<PAL>(?P<CHAR>.)((?P>PAL)|.?)(?P=CHAR))$/	madamimadam	y	$&	madamimadam
 /^(?P<PAL>(?P<CHAR>.)((?P>PAL)|.?)(?P=CHAR))$/	madamiamadam	n	-	-
 /(?P<n>foo) (?P=n)/	..foo foo..	y	$1	foo
-/(?P<n>foo) (?P=n)/	..foo foo..	y	$+{n}	foo
+/(?P<n>foo) (?P=n)/	..foo foo..	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
 /(?P<as>as) (\w+) (?P=as) (\w+)/	as easy as pie	y	$1-$2-$3	as-easy-pie
 
 #check that non identifiers as names are treated as the appropriate lookaround
@@ -1325,10 +1325,10 @@ X(\w+)(?=\s)|X(\w+)	Xab	y	[$1-$2]	[-ab]
 (?|(?|(a)|(b))|(?|(c)|(d)))	d	y	$1	d
 (.)(?|(.)(.)x|(.)d)(.)	abcde	y	$1-$2-$3-$4-$5-	b-c--e--
 (\N)(?|(\N)(\N)x|(\N)d)(\N)	abcde	y	$1-$2-$3-$4-$5-	b-c--e--
-(?|(?<foo>x))	x	y	$+{foo}	x
-(?|(?<foo>x)|(?<bar>y))	x	y	$+{foo}	x
-(?|(?<bar>y)|(?<foo>x))	x	y	$+{foo}	x
-(?<bar>)(?|(?<foo>x))	x	y	$+{foo}	x
+(?|(?<foo>x))	x	yM	$+{foo}	x	miniperl cannot load Tie::Hash::NamedCapture
+(?|(?<foo>x)|(?<bar>y))	x	yM	$+{foo}	x	miniperl cannot load Tie::Hash::NamedCapture
+(?|(?<bar>y)|(?<foo>x))	x	yM	$+{foo}	x	miniperl cannot load Tie::Hash::NamedCapture
+(?<bar>)(?|(?<foo>x))	x	yM	$+{foo}	x	miniperl cannot load Tie::Hash::NamedCapture
 
 #Bug #41492
 (?(DEFINE)(?<A>(?&B)+)(?<B>a))(?&A)	a	y	$&	a
