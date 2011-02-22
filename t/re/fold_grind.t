@@ -8,7 +8,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    skip_all_if_miniperl("no dynamic loading on miniperl, no Encode");
+    skip_all_if_miniperl("no dynamic loading on miniperl, no Encode nor POSIX");
 }
 
 my $DEBUG = 0;  # Outputs extra information for debugging this .t
@@ -16,6 +16,7 @@ my $DEBUG = 0;  # Outputs extra information for debugging this .t
 use strict;
 use warnings;
 use Encode;
+use POSIX;
 
 # Tests both unicode and not, so make sure not implicitly testing unicode
 no feature 'unicode_strings';
@@ -214,6 +215,9 @@ sub pairs (@) {
     map { prefix $_[$_], @_[0..$_-1, $_+1..$#_] } 0..$#_
 }
 
+my @charsets = qw(d u aa);
+my $current_locale = POSIX::setlocale( &POSIX::LC_ALL, "C") // "";
+push @charsets, 'l' if $current_locale eq 'C';
 
 # Finally ready to do the tests
 my $count=0;
@@ -273,7 +277,7 @@ foreach my $test (sort { numerically } keys %tests) {
     #diag $progress;
 
     # Now grind out tests, using various combinations.
-    foreach my $charset ('d', 'l', 'u', 'aa') {
+    foreach my $charset (@charsets) {
 
       # /aa should only affect things with folds in the ASCII range.  But, try
       # it on one pair in the other ranges just to make sure it doesn't break
