@@ -1960,14 +1960,14 @@ X<flock> X<lock> X<locking>
 Calls flock(2), or an emulation of it, on FILEHANDLE.  Returns true
 for success, false on failure.  Produces a fatal error if used on a
 machine that doesn't implement flock(2), fcntl(2) locking, or lockf(3).
-C<flock> is Perl's portable file locking interface, although it locks
+C<flock> is Perl's portable file-locking interface, although it locks
 entire files only, not records.
 
 Two potentially non-obvious but traditional C<flock> semantics are
 that it waits indefinitely until the lock is granted, and that its locks
-B<merely advisory>.  Such discretionary locks are more flexible, but offer
-fewer guarantees.  This means that programs that do not also use C<flock>
-may modify files locked with C<flock>.  See L<perlport>, 
+are B<merely advisory>.  Such discretionary locks are more flexible, but
+offer fewer guarantees.  This means that programs that do not also use
+C<flock> may modify files locked with C<flock>.  See L<perlport>, 
 your port's specific documentation, or your system-specific local manpages
 for details.  It's best to assume traditional behavior if you're writing
 portable programs.  (But if you're not, you should as always feel perfectly
