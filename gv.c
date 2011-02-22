@@ -1239,7 +1239,8 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	if (add) {
 	    GvMULTI_on(gv);
 	    gv_init_sv(gv, sv_type);
-	    if (len == 1 && (sv_type == SVt_PVHV || sv_type == SVt_PVGV)) {
+	    if (len == 1 && stash == PL_defstash
+		&& (sv_type == SVt_PVHV || sv_type == SVt_PVGV)) {
 	        if (*name == '!')
 		    require_tie_mod(gv, "!", newSVpvs("Errno"), "TIEHASH", 1);
 		else if (*name == '-' || *name == '+')

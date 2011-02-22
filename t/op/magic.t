@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 use Config;
 
-plan (tests => 83);
+plan (tests => 87);
 
 $Is_MSWin32  = $^O eq 'MSWin32';
 $Is_NetWare  = $^O eq 'NetWare';
@@ -443,6 +443,25 @@ SKIP:  {
     open(FOO, "nonesuch"); # Generate ENOENT
     my %errs = %{"!"}; # Cause Errno.pm to be loaded at run-time
     ok ${"!"}{ENOENT};
+}
+
+# Check that we don't auto-load packages
+foreach (['powie::!', 'Errno'],
+	 ['powie::+', 'Tie::Hash::NamedCapture']) {
+    my ($symbol, $package) = @$_;
+    foreach my $scalar_first ('', '$$symbol;') {
+	my $desc = qq{Referencing %{"$symbol"}};
+	$desc .= qq{ after mentioning \${"$symbol"}} if $scalar_first;
+	$desc .= " doesn't load $package";
+
+	fresh_perl_is(<<"EOP", 0, {}, $desc);
+use strict qw(vars subs);
+my \$symbol = '$symbol';
+$scalar_first;
+1 if %{\$symbol};
+print scalar %${package}::;
+EOP
+    }
 }
 
 is $^S, 0;
