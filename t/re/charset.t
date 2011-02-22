@@ -34,6 +34,13 @@ $testcases{'[:print:]'} = $testcases{'[:graph:]'};
 $testcases{'[:space:]'} = $testcases{'\s'};
 $testcases{'[:word:]'} = $testcases{'\w'};
 
+my @charsets = qw(a d u);
+if (! is_miniperl()) {
+    require POSIX;
+    my $current_locale = POSIX::setlocale( &POSIX::LC_ALL, "C") // "";
+    push @charsets, 'l' if $current_locale eq 'C';
+}
+
 # For each possible character set...
 foreach my $charset ("a", "d", "l", "u") {
 
