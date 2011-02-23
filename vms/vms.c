@@ -3169,59 +3169,6 @@ popen_completion_ast(pInfo info)
 
 static unsigned long int setup_cmddsc(pTHX_ const char *cmd, int check_img, int *suggest_quote, struct dsc$descriptor_s **pvmscmd);
 static void vms_execfree(struct dsc$descriptor_s *vmscmd);
-
-/*
-    we actually differ from vmstrnenv since we use this to
-    get the RMS IFI to check if SYS$OUTPUT and SYS$ERROR *really*
-    are pointing to the same thing
-*/
-
-static unsigned short
-popen_translate(pTHX_ char *logical, char *result)
-{
-    int iss;
-    $DESCRIPTOR(d_table,"LNM$PROCESS_TABLE");
-    $DESCRIPTOR(d_log,"");
-    struct _il3 {
-        unsigned short length;
-        unsigned short code;
-        char *         buffer_addr;
-        unsigned short *retlenaddr;
-    } itmlst[2];
-    unsigned short l, ifi;
-
-    d_log.dsc$a_pointer = logical;
-    d_log.dsc$w_length  = strlen(logical);
-
-    itmlst[0].code = LNM$_STRING;
-    itmlst[0].length = 255;
-    itmlst[0].buffer_addr = result;
-    itmlst[0].retlenaddr = &l;
-
-    itmlst[1].code = 0;
-    itmlst[1].length = 0;
-    itmlst[1].buffer_addr = 0;
-    itmlst[1].retlenaddr = 0;
-
-    iss = sys$trnlnm(0, &d_table, &d_log, 0, itmlst);
-    if (iss == SS$_NOLOGNAM) {
-        iss = SS$_NORMAL;
-        l = 0;
-    }
-    if (!(iss&1)) lib$signal(iss);
-    result[l] = '\0';
-/*
-    logicals for PPFs have a 4 byte prefix  ESC+NUL+(RMS IFI)
-    strip it off and return the ifi, if any
-*/
-    ifi  = 0;
-    if (result[0] == 0x1b && result[1] == 0x00) {
-        memmove(&ifi,result+2,2);
-        strcpy(result,result+4);
-    }
-    return ifi;     /* this is the RMS internal file id */
-}
-
 static void pipe_infromchild_ast(pPipe p);
 
 /*
