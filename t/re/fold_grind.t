@@ -58,16 +58,16 @@ sub numerically {
     return $a <=> $b
 }
 
-sub format_test($$$$) {
+sub run_test($$$$) {
     my ($test, $count, $todo, $debug) = @_;
-
-    # Create a test entry, with TODO set if it is one of the known problem
-    # code points
 
     $debug = "" unless $DEBUG;
     $todo = "Known problem" if $todo;
 
-    return qq[TODO: { local \$::TODO = "$todo"; ok(eval '$test', '$test; $debug'); }];
+    TODO: {
+	local $::TODO = $todo ? "Known problem" : undef;
+	ok(eval $test, "$test; $debug");
+    }
 }
 
 my %tests;          # The final set of tests. keys are the code points to test
@@ -192,8 +192,6 @@ $tests{0x3A} = [ 0x3A ];
 $tests{0xF7} = [ 0xF7 ];
 $tests{0x2C7} = [ 0x2C7 ];
 
-my $clump_execs = 1000;    # Speed up by building an 'exec' of many tests
-my @eval_tests;
 
 # To cut down on the number of tests
 my $has_tested_aa_above_latin1;
@@ -340,17 +338,17 @@ foreach my $test (sort { numerically } keys %tests) {
                       && ! ($charset eq 'd' && (! $upgrade_target || ! $upgrade_pattern))
                       );
           my $eval = "my \$c = \"$lhs$rhs\"; my \$p = qr/(?$charset:^($rhs)\\1\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-          push @eval_tests, format_test($eval, ++$count, $todo, "");
+          run_test($eval, ++$count, $todo, "");
 
           $eval = "my \$c = \"$lhs$rhs\"; my \$p = qr/(?$charset:^(?<grind>$rhs)\\k<grind>\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-          push @eval_tests, format_test($eval, ++$count, $todo, "");
+          run_test($eval, ++$count, $todo, "");
 
           if ($lhs ne $rhs) {
             $eval = "my \$c = \"$rhs$lhs\"; my \$p = qr/(?$charset:^($rhs)\\1\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-            push @eval_tests, format_test($eval, ++$count, "", "");
+            run_test($eval, ++$count, "", "");
 
             $eval = "my \$c = \"$rhs$lhs\"; my \$p = qr/(?$charset:^(?<grind>$rhs)\\k<grind>\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-            push @eval_tests, format_test($eval, ++$count, "", "");
+            run_test($eval, ++$count, "", "");
           }
 
           foreach my $bracketed (0, 1) {   # Put rhs in [...], or not
@@ -458,18 +456,7 @@ foreach my $test (sort { numerically } keys %tests) {
 
                           # XXX Doesn't currently test multi-char folds in pattern
                           next if @pattern != 1;
-                          push @eval_tests, format_test($eval, ++$count, "", $debug);
-
-                          # Group tests
-                          if (@eval_tests >= $clump_execs) {
-                              #eval "use re qw(Debug COMPILE EXECUTE);" . join ";\n", @eval_tests;
-                              eval join ";\n", @eval_tests;
-                              if ($@) {
-                                fail($@);
-                                exit 1;
-                              }
-                              undef @eval_tests;
-                          }
+                          run_test($eval, ++$count, "", $debug);
                         }
                       }
                     }
@@ -482,13 +469,6 @@ foreach my $test (sort { numerically } keys %tests) {
       }
     }
   }
-}
-
-# Finish up any tests not already done
-eval join ";\n", @eval_tests;
-if ($@) {
-  fail($@);
-  exit 1;
 }
 
 plan($count);
