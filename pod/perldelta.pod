@@ -96,11 +96,19 @@ XXX
 
 =item *
 
+C<IO> has been upgraded from version 1.25_03 to 1.25_04.
+
+=item *
+
 C<JSON::PP> has been upgraded from version 2.27103 to 2.27104
 
 =item *
 
-C<IO> has been upgraded from version 1.25_03 to 1.25_04.
+C<Test::Harness> has been upgraded from version 3.22 to 3.23
+
+=item *
+
+C<Test::Simple> has been upgraded from version 0.97_01 to 0.98
 
 =back
 
@@ -110,7 +118,7 @@ C<IO> has been upgraded from version 1.25_03 to 1.25_04.
 
 =item *
 
-C<Test::Harness> has been upgraded from version 3.22 to 3.23
+XXX
 
 =back
 

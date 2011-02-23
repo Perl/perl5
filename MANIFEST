@@ -2419,6 +2419,7 @@ cpan/Test-Simple/t/subtest/plan.t			Test::Builder tests
 cpan/Test-Simple/t/subtest/predicate.t			Test::Builder tests
 cpan/Test-Simple/t/subtest/singleton.t			Test::More test
 cpan/Test-Simple/t/subtest/todo.t			Test::Builder tests
+cpan/Test-Simple/t/subtest/wstat.t			Test::More test
 cpan/Test-Simple/t/tbm_doesnt_set_exported_to.t		Test::Builder::Module test
 cpan/Test-Simple/t/Tester/tbt_01basic.t			Test::Builder::Tester test
 cpan/Test-Simple/t/Tester/tbt_02fhrestore.t		Test::Builder::Tester test
