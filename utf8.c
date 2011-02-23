@@ -3195,6 +3195,8 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
 	    if ((flags & FOLDEQ_UTF8_LOCALE)
 		&& (! u2 || UTF8_IS_INVARIANT(*p2) || UTF8_IS_DOWNGRADEABLE_START(*p2)))
 	    {
+		/* Here, the next char in s2 is < 256.  We've already worked on
+		 * s1, and if it isn't also < 256, can't match */
 		if (u1 && (! UTF8_IS_INVARIANT(*p1)
 		    && ! UTF8_IS_DOWNGRADEABLE_START(*p1)))
 		{
@@ -3206,7 +3208,13 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
 		else {
 		    *foldbuf2 = TWO_BYTE_UTF8_TO_UNI(*p2, *(p2 + 1));
 		}
-		n2 = 1;
+
+		/* Use another function to handle locale rules.  We've made
+		 * sure that both characters to compare are single bytes */
+		if (! foldEQ_locale((char *) f1, (char *) foldbuf2, 1)) {
+		    return 0;
+		}
+		n1 = n2 = 0;
 	    }
 	    else if (isASCII(*p2)) {
 		if (flags && ! isASCII(*p1)) {
@@ -3225,19 +3233,9 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
             f2 = foldbuf2;
         }
 
-	/* Here f1 and f2 point to the beginning of the strings to compare.  In
-	 * the case of Unicode rules, these strings are the folds of the input
-	 * characters, stored in utf8.  In the case of locale rules, they are
-	 * the original characters, each stored as a single byte. */
-
-	/* Use another function to handle locale rules.  n1 has to equal n2
-	 * under them, as they've been converted to single bytes above */
-	if (flags & FOLDEQ_UTF8_LOCALE && n1 == 1) {
-	    if (! foldEQ_locale((char *) f1, (char *) f2, 1)) {
-		return 0;
-	    }
-	    n1 = n2 = 0;
-	}
+	/* Here f1 and f2 point to the beginning of the strings to compare.
+	 * These strings are the folds of the input characters, stored in utf8.
+	 */
 
         /* While there is more to look for in both folds, see if they
         * continue to match */
