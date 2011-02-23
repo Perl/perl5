@@ -318,6 +318,7 @@ foreach my $test (sort { numerically } keys %tests) {
           $upgrade_pattern = ' utf8::upgrade($p);' if ! $pattern_above_latin1 && $utf8_pattern;
 
           my $lhs = join "", @x_target;
+          my $lhs_str = eval qq{"$lhs"}; fail($@) if $@;
           my @rhs = @x_pattern;
           my $rhs = join "", @rhs;
           my $should_fail = (! $uni_semantics && $ord >= 128 && $ord < 256 && ! $is_self)
@@ -452,11 +453,27 @@ foreach my $test (sort { numerically } keys %tests) {
 
                           my $debug .= " uni_semantics=$uni_semantics, should_fail=$should_fail, bracketed=$bracketed, prepend=$prepend, append=$append, parend=$parend, quantifier=$quantifier, l_anchor=$l_anchor, r_anchor=$r_anchor";
                           $debug .= "; pattern_above_latin1=$pattern_above_latin1; utf8_pattern=$utf8_pattern";
-                          my $eval = "my \$c = \"$prepend$lhs$append\"; my \$p = qr/$quantified/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-
                           # XXX Doesn't currently test multi-char folds in pattern
                           next if @pattern != 1;
-                          run_test($eval, ++$count, "", $debug);
+                          my $eval = "my \$c = \"$prepend$lhs$append\"; my \$p = qr/$quantified/i;$upgrade_target$upgrade_pattern \$c $op \$p";
+                          my $c = "$prepend$lhs_str$append";
+                          my $p = qr/$quantified/i;
+                          utf8::upgrade($c) if length($upgrade_target);
+                          utf8::upgrade($p) if length($upgrade_pattern);
+                          my $res;
+                          if ($op eq '=~') {
+                              $res = ($c =~ $p);
+                          }
+                          elsif ($op eq '!~') {
+                              $res = ($c !~ $p);
+                          }
+                          else {
+                              fail("unknown op '$op'");
+                          }
+
+                          $debug = "" unless $DEBUG;
+			  $count++;
+                          ok($res, "$eval; $debug");
                         }
                       }
                     }
