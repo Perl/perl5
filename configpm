@@ -159,11 +159,11 @@ use warnings;
 use vars '%Config';
 
 sub bincompat_options {
-    return sort split ' ', (Internals::V())[0];
+    return split ' ', (Internals::V())[0];
 }
 
 sub non_bincompat_options {
-    return sort split ' ', (Internals::V())[1];
+    return split ' ', (Internals::V())[1];
 }
 
 sub compile_date {

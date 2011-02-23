@@ -13,6 +13,6 @@ my @to_check = qw(bincompat_options non_bincompat_options);
 my @V = map {s/^ //r} Internals::V();
 
 while (my ($index, $sub) = each @to_check) {
-    my $got = join ' ', &{Config->can($sub)}();
+    my $got = join ' ', sort &{Config->can($sub)}();
     is($got, $V[$index], "C source code has $sub in sorted order");
 }
