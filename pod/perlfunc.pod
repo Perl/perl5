@@ -2478,6 +2478,10 @@ necessarily recommended if you're optimizing for maintainability:
 
     goto ("FOO", "BAR", "GLARCH")[$i];
 
+As shown in this example, C<goto-EXPR> is exempt from the "looks like a
+function" rule. A pair of parentheses following it does not (necessarily)
+delimit its argument. C<goto("NE")."XT"> is equivalent to C<goto NEXT>.
+
 Use of C<goto-LABEL> or C<goto-EXPR> to jump into a construct is
 deprecated and will issue a warning.  Even then, it may not be used to
 go into any construct that requires initialization, such as a
