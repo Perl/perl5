@@ -15,6 +15,10 @@ $| = 1;
 
 
 BEGIN {
+    if (!defined &DynaLoader::boot_DynaLoader) {
+	print "1..0 # Skip miniperl can't load Tie::Hash::NamedCapture, need for %+ and %-\n";
+	exit 0;
+    }
     chdir 't' if -d 't';
     @INC = ('../lib','.');
     do "re/ReTest.pl" or die $@;
