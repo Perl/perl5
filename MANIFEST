@@ -4996,6 +4996,7 @@ t/op/yadayada.t			See if ... works
 t/perl.supp			Perl valgrind suppressions
 t/porting/args_assert.t		Check that all PERL_ARGS_ASSERT* macros are used
 t/porting/authors.t		Check that all authors have been acknowledged
+t/porting/bincompat.t		Check that {non_,}bincompat_options are ordered
 t/porting/buildtoc.t		Check that various pod lists are consistent
 t/porting/checkcase.t		Check whether we are case-insensitive-fs-friendly
 t/porting/cmp_version.t		Test whether all changed module files have their VERSION bumped
