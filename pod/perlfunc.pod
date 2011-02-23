@@ -2139,7 +2139,7 @@ is left as an exercise to the reader.
 
 The C<POSIX::getattr> function can do this more portably on
 systems purporting POSIX compliance.  See also the C<Term::ReadKey>
-module from your nearest CPAN site; details on CPAN can be found on
+module from your nearest CPAN site; details on CPAN can be found under
 L<perlmodlib/CPAN>.
 
 =item getlogin
@@ -2157,7 +2157,8 @@ secure as C<getpwuid>.
 =item getpeername SOCKET
 X<getpeername> X<peer>
 
-Returns the packed sockaddr address of other end of the SOCKET connection.
+Returns the packed sockaddr address of the other end of the SOCKET
+connection.
 
     use Socket;
     $hersockaddr    = getpeername(SOCK);
@@ -2171,8 +2172,8 @@ X<getpgrp> X<group>
 Returns the current process group for the specified PID.  Use
 a PID of C<0> to get the current process group for the
 current process.  Will raise an exception if used on a machine that
-doesn't implement getpgrp(2).  If PID is omitted, returns process
-group of current process.  Note that the POSIX version of C<getpgrp>
+doesn't implement getpgrp(2).  If PID is omitted, returns the process
+group of the current process.  Note that the POSIX version of C<getpgrp>
 does not accept a PID argument, so only C<PID==0> is truly portable.
 
 =item getppid
@@ -2280,7 +2281,7 @@ information pertaining to the user.  Beware, however, that in many
 system users are able to change this information and therefore it
 cannot be trusted and therefore the $gcos is tainted (see
 L<perlsec>).  The $passwd and $shell, user's encrypted password and
-login shell, are also tainted, because of the same reason.
+login shell, are also tainted, for the same reason.
 
 In scalar context, you get the name, unless the function was a
 lookup by name, in which case you get the other thing, whatever it is.
@@ -2313,10 +2314,10 @@ files are supported only if your vendor has implemented them in the
 intuitive fashion that calling the regular C library routines gets the
 shadow versions if you're running under privilege or if there exists
 the shadow(3) functions as found in System V (this includes Solaris
-and Linux.)  Those systems that implement a proprietary shadow password
+and Linux).  Those systems that implement a proprietary shadow password
 facility are unlikely to be supported.
 
-The $members value returned by I<getgr*()> is a space separated list of
+The $members value returned by I<getgr*()> is a space-separated list of
 the login names of the members of the group.
 
 For the I<gethost*()> functions, if the C<h_errno> variable is supported in
@@ -2361,7 +2362,7 @@ for each field.  For example:
    use User::pwent;
    $is_his = (stat($filename)->uid == pwent($whoever)->uid);
 
-Even though it looks like they're the same method calls (uid),
+Even though it looks as though they're the same method calls (uid),
 they aren't, because a C<File::stat> object is different from
 a C<User::pwent> object.
 
@@ -2393,7 +2394,7 @@ number of TCP, which you can get using C<getprotobyname>.
 
 The function returns a packed string representing the requested socket
 option, or C<undef> on error, with the reason for the error placed in
-C<$!>). Just what is in the packed string depends on LEVEL and OPTNAME;
+C<$!>. Just what is in the packed string depends on LEVEL and OPTNAME;
 consult getsockopt(2) for details.  A common case is that the option is an
 integer, in which case the result is a packed integer, which you can decode
 using C<unpack> with the C<i> (or C<I>) format.
@@ -2448,8 +2449,8 @@ X<gmtime> X<UTC> X<Greenwich>
 Works just like L<localtime> but the returned values are
 localized for the standard Greenwich time zone.
 
-Note: when called in list context, $isdst, the last value
-returned by gmtime is always C<0>.  There is no
+Note: When called in list context, $isdst, the last value
+returned by gmtime, is always C<0>.  There is no
 Daylight Saving Time in GMT.
 
 See L<perlport/gmtime> for portability concerns.
