@@ -2810,7 +2810,7 @@ Respects current LC_CTYPE locale.  See L<perllocale>.
 =item Otherwise, if C<use feature 'unicode_strings'> is in effect:
 
 Unicode semantics are used for the case change.  Any subroutine named
-C<ToLower> will not be used.
+C<ToLower> will be ignored.
 
 =item Otherwise:
 
@@ -2840,7 +2840,7 @@ double-quoted strings.
 
 If EXPR is omitted, uses C<$_>.
 
-This function behaves the same way under various pragma, such as in a locale,
+This function behaves the same way under various pragmata, such as in a locale,
 as L</lc> does.
 
 =item length EXPR
@@ -2849,7 +2849,8 @@ X<length> X<size>
 =item length
 
 Returns the length in I<characters> of the value of EXPR.  If EXPR is
-omitted, returns length of C<$_>.  If EXPR is undefined, returns C<undef>.
+omitted, returns the length of C<$_>.  If EXPR is undefined, returns
+C<undef>.
 
 This function cannot be used on an entire array or hash to find out how
 many elements these have.  For that, use C<scalar @array> and C<scalar keys
@@ -2941,13 +2942,13 @@ In scalar context, C<localtime()> returns the ctime(3) value:
 
     $now_string = localtime;  # e.g., "Thu Oct 13 04:54:34 1994"
 
-This scalar value is B<not> locale dependent but is a Perl builtin. For GMT
+This scalar value is B<not> locale-dependent but is a Perl builtin. For GMT
 instead of local time use the L</gmtime> builtin. See also the
-C<Time::Local> module (to convert the second, minutes, hours, ... back to
+C<Time::Local> module (to convert the seconds, minutes, hours, ... back to
 the integer value returned by time()), and the L<POSIX> module's strftime(3)
 and mktime(3) functions.
 
-To get somewhat similar but locale dependent date strings, set up your
+To get somewhat similar but locale-dependent date strings, set up your
 locale environment variables appropriately (please see L<perllocale>) and
 try for example:
 
@@ -2961,7 +2962,7 @@ and the month of the year, may not necessarily be three characters wide.
 
 See L<perlport/localtime> for portability concerns.
 
-The L<Time::gmtime> and L<Time::localtime> modules provides a convenient,
+The L<Time::gmtime> and L<Time::localtime> modules provide a convenient,
 by-name access mechanism to the gmtime() and localtime() functions,
 respectively.
 
@@ -2971,7 +2972,7 @@ L<DateTime> module on CPAN.
 =item lock THING
 X<lock>
 
-This function places an advisory lock on a shared variable, or referenced
+This function places an advisory lock on a shared variable or referenced
 object contained in I<THING> until the lock goes out of scope.
 
 lock() is a "weak keyword" : this means that if you've defined a function
@@ -2985,7 +2986,8 @@ X<log> X<logarithm> X<e> X<ln> X<base>
 =item log
 
 Returns the natural logarithm (base I<e>) of EXPR.  If EXPR is omitted,
-returns log of C<$_>.  To get the log of another base, use basic algebra:
+returns the log of C<$_>.  To get the
+log of another base, use basic algebra:
 The base-N log of a number is equal to the natural log of that number
 divided by the natural log of N.  For example:
 
@@ -3043,7 +3045,8 @@ This could also be achieved by writing
 
 which makes the intention more clear.
 
-Map always returns a list which can be assigned to a hash where the elements
+Map always returns a list, which can be
+assigned to a hash such that the elements
 become key/value pairs. See L<perldata> for more details.
 
     %hash = map { get_a_key_for($_) => $_ } @array;
@@ -3103,7 +3106,7 @@ returns true, otherwise it returns false and sets C<$!> (errno).
 If omitted, MASK defaults to 0777. If omitted, FILENAME defaults
 to C<$_>.
 
-In general, it is better to create directories with permissive MASK,
+In general, it is better to create directories with a permissive MASK,
 and let the user modify that with their C<umask>, than it is to supply
 a restrictive MASK and give the user no way to be more permissive.
 The exceptions to this rule are when the file or directory should be
@@ -3129,14 +3132,16 @@ first to get the correct constant definitions.  If CMD is C<IPC_STAT>,
 then ARG must be a variable that will hold the returned C<msqid_ds>
 structure.  Returns like C<ioctl>: the undefined value for error,
 C<"0 but true"> for zero, or the actual return value otherwise.  See also
-L<perlipc/"SysV IPC">, C<IPC::SysV>, and C<IPC::Semaphore> documentation.
+L<perlipc/"SysV IPC"> and the documentation for C<IPC::SysV> and
+C<IPC::Semaphore>.
 
 =item msgget KEY,FLAGS
 X<msgget>
 
 Calls the System V IPC function msgget(2).  Returns the message queue
 id, or the undefined value if there is an error.  See also
-L<perlipc/"SysV IPC"> and C<IPC::SysV> and C<IPC::Msg> documentation.
+L<perlipc/"SysV IPC"> and the documentation for C<IPC::SysV> and
+C<IPC::Msg>.
 
 =item msgrcv ID,VAR,SIZE,TYPE,FLAGS
 X<msgrcv>
@@ -3147,8 +3152,8 @@ SIZE.  Note that when a message is received, the message type as a
 native long integer will be the first thing in VAR, followed by the
 actual message.  This packing may be opened with C<unpack("l! a*")>.
 Taints the variable.  Returns true if successful, or false if there is
-an error.  See also L<perlipc/"SysV IPC">, C<IPC::SysV>, and
-C<IPC::SysV::Msg> documentation.
+an error.  See also L<perlipc/"SysV IPC"> and the documentation for
+C<IPC::SysV> and C<IPC::SysV::Msg>.
 
 =item msgsnd ID,MSG,FLAGS
 X<msgsnd>
@@ -3158,7 +3163,7 @@ message queue ID.  MSG must begin with the native long integer message
 type, and be followed by the length of the actual message, and finally
 the message itself.  This kind of packing can be achieved with
 C<pack("l! a*", $type, $message)>.  Returns true if successful,
-or false if there is an error.  See also C<IPC::SysV>
+or false if there is an error.  See also the C<IPC::SysV>
 and C<IPC::SysV::Msg> documentation.
 
 =item my EXPR
@@ -3175,7 +3180,7 @@ enclosing block, file, or C<eval>.  If more than one value is listed,
 the list must be placed in parentheses.
 
 The exact semantics and interface of TYPE and ATTRS are still
-evolving.  TYPE is currently bound to the use of C<fields> pragma,
+evolving.  TYPE is currently bound to the use of the C<fields> pragma,
 and attributes are handled using the C<attributes> pragma, or starting
 from Perl 5.8.0 also via the C<Attribute::Handlers> module.  See
 L<perlsub/"Private Variables via my()"> for details, and L<fields>,
