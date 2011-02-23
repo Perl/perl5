@@ -802,26 +802,26 @@ foreach $Locale (@Locale) {
 	    # With utf8 both will fail since the locale concept
 	    # of upper/lower does not work well in Unicode.
 	    push @f, $x unless $x =~ /$y/i == $y =~ /$x/i;
-
-	    foreach my $x (keys %lower) {
-		my $y = uc $x;
-		next unless lc $y eq $x;
-		print "# lower $x uc $y ",
-		$x =~ /$y/i ? 1 : 0, " ",
-		$y =~ /$x/i ? 1 : 0, "\n" if 0;
-		if ($x =~ $re || $y =~ $re) { # See above.
-		    print "# Regex characters in '$x' or '$y', skipping test 117 for locale '$Locale'\n";
-		    next;
-		}
-		# With utf8 both will fail since the locale concept
-		# of upper/lower does not work well in Unicode.
-		push @f, $x unless $x =~ /$y/i == $y =~ /$x/i;
-	    }
-	    tryneoalpha($Locale, 117, @f == 0);
-	    if (@f) {
-		print "# failed 117 locale '$Locale' characters @f\n"
-  	    }
         }
+
+	foreach my $x (keys %lower) {
+	    my $y = uc $x;
+	    next unless lc $y eq $x;
+	    print "# lower $x uc $y ",
+	    $x =~ /$y/i ? 1 : 0, " ",
+	    $y =~ /$x/i ? 1 : 0, "\n" if 0;
+	    if ($x =~ $re || $y =~ $re) { # See above.
+		print "# Regex characters in '$x' or '$y', skipping test 117 for locale '$Locale'\n";
+		next;
+	    }
+	    # With utf8 both will fail since the locale concept
+	    # of upper/lower does not work well in Unicode.
+	    push @f, $x unless $x =~ /$y/i == $y =~ /$x/i;
+	}
+	tryneoalpha($Locale, 117, @f == 0);
+	if (@f) {
+	    print "# failed 117 locale '$Locale' characters @f\n"
+	}
     }
 }
 
