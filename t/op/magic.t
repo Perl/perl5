@@ -295,74 +295,6 @@ EOP
     }
 }
 
-SKIP: {
-    skip("%ENV manipulations fail or aren't safe on $^O", 4)
-	if $Is_VMS || $Is_Dos;
-
- SKIP: {
-	skip("clearing \%ENV is not safe when running under valgrind")
-	    if $ENV{PERL_VALGRIND};
-
-	    $PATH = $ENV{PATH};
-	    $PDL = $ENV{PERL_DESTRUCT_LEVEL} || 0;
-	    $ENV{foo} = "bar";
-	    %ENV = ();
-	    $ENV{PATH} = $PATH;
-	    $ENV{PERL_DESTRUCT_LEVEL} = $PDL || 0;
-	    if ($Is_MSWin32) {
-		is `set foo 2>NUL`, "";
-	    } else {
-		is `echo \$foo`, "\n";
-	    }
-	}
-
-	$ENV{__NoNeSuCh} = "foo";
-	$0 = "bar";
-# cmd.exe will echo 'variable=value' but 4nt will echo just the value
-# -- Nikola Knezevic
-    	if ($Is_MSWin32) {
-	    like `set __NoNeSuCh`, qr/^(?:__NoNeSuCh=)?foo$/;
-	} else {
-	    is `echo \$__NoNeSuCh`, "foo\n";
-	}
-    SKIP: {
-	    skip("\$0 check only on Linux and FreeBSD", 2)
-		unless $^O =~ /^(linux|freebsd)$/
-		    && open CMDLINE, "/proc/$$/cmdline";
-
-	    chomp(my $line = scalar <CMDLINE>);
-	    my $me = (split /\0/, $line)[0];
-	    is $me, $0, 'altering $0 is effective (testing with /proc/)';
-	    close CMDLINE;
-            # perlbug #22811
-            my $mydollarzero = sub {
-              my($arg) = shift;
-              $0 = $arg if defined $arg;
-	      # In FreeBSD the ps -o command= will cause
-	      # an empty header line, grab only the last line.
-              my $ps = (`ps -o command= -p $$`)[-1];
-              return if $?;
-              chomp $ps;
-              printf "# 0[%s]ps[%s]\n", $0, $ps;
-              $ps;
-            };
-            my $ps = $mydollarzero->("x");
-            ok(!$ps  # we allow that something goes wrong with the ps command
-	       # In Linux 2.4 we would get an exact match ($ps eq 'x') but
-	       # in Linux 2.2 there seems to be something funny going on:
-	       # it seems as if the original length of the argv[] would
-	       # be stored in the proc struct and then used by ps(1),
-	       # no matter what characters we use to pad the argv[].
-	       # (And if we use \0:s, they are shown as spaces.)  Sigh.
-               || $ps =~ /^x\s*$/
-	       # FreeBSD cannot get rid of both the leading "perl :"
-	       # and the trailing " (perl)": some FreeBSD versions
-	       # can get rid of the first one.
-	       || ($^O eq 'freebsd' && $ps =~ m/^(?:perl: )?x(?: \(perl\))?$/),
-		       'altering $0 is effective (testing with `ps`)');
-	}
-}
-
 # Check that assigning to $0 on Linux sets the process name with both
 # argv[0] assignment and by calling prctl()
 {
@@ -401,20 +333,6 @@ SKIP: {
     $! = undef;
     local $TODO = $Is_VMS ? "'\$!=undef' does throw a warning" : '';
     ok($ok, $warn);
-}
-
-# test case-insignificance of %ENV (these tests must be enabled only
-# when perl is compiled with -DENV_IS_CASELESS)
-SKIP: {
-    skip('no caseless %ENV support', 4) unless $Is_MSWin32 || $Is_NetWare;
-
-    %ENV = ();
-    $ENV{'Foo'} = 'bar';
-    $ENV{'fOo'} = 'baz';
-    is scalar(keys(%ENV)), 1;
-    ok exists $ENV{'FOo'};
-    is delete $ENV{'foO'}, 'baz';
-    is scalar(keys(%ENV)), 0;
 }
 
 SKIP: {
@@ -552,3 +470,90 @@ foreach my $sig (qw(__DIE__ _BOGUS_HOOK KILL THIRSTY)) {
 
 }
 
+# ^^^^^^^^^ New tests go here ^^^^^^^^^
+
+SKIP: {
+    skip("%ENV manipulations fail or aren't safe on $^O", 4)
+	if $Is_VMS || $Is_Dos;
+
+ SKIP: {
+	skip("clearing \%ENV is not safe when running under valgrind")
+	    if $ENV{PERL_VALGRIND};
+
+	    $PATH = $ENV{PATH};
+	    $PDL = $ENV{PERL_DESTRUCT_LEVEL} || 0;
+	    $ENV{foo} = "bar";
+	    %ENV = ();
+	    $ENV{PATH} = $PATH;
+	    $ENV{PERL_DESTRUCT_LEVEL} = $PDL || 0;
+	    if ($Is_MSWin32) {
+		is `set foo 2>NUL`, "";
+	    } else {
+		is `echo \$foo`, "\n";
+	    }
+	}
+
+	$ENV{__NoNeSuCh} = "foo";
+	$0 = "bar";
+# cmd.exe will echo 'variable=value' but 4nt will echo just the value
+# -- Nikola Knezevic
+    	if ($Is_MSWin32) {
+	    like `set __NoNeSuCh`, qr/^(?:__NoNeSuCh=)?foo$/;
+	} else {
+	    is `echo \$__NoNeSuCh`, "foo\n";
+	}
+    SKIP: {
+	    skip("\$0 check only on Linux and FreeBSD", 2)
+		unless $^O =~ /^(linux|freebsd)$/
+		    && open CMDLINE, "/proc/$$/cmdline";
+
+	    chomp(my $line = scalar <CMDLINE>);
+	    my $me = (split /\0/, $line)[0];
+	    is $me, $0, 'altering $0 is effective (testing with /proc/)';
+	    close CMDLINE;
+            # perlbug #22811
+            my $mydollarzero = sub {
+              my($arg) = shift;
+              $0 = $arg if defined $arg;
+	      # In FreeBSD the ps -o command= will cause
+	      # an empty header line, grab only the last line.
+              my $ps = (`ps -o command= -p $$`)[-1];
+              return if $?;
+              chomp $ps;
+              printf "# 0[%s]ps[%s]\n", $0, $ps;
+              $ps;
+            };
+            my $ps = $mydollarzero->("x");
+            ok(!$ps  # we allow that something goes wrong with the ps command
+	       # In Linux 2.4 we would get an exact match ($ps eq 'x') but
+	       # in Linux 2.2 there seems to be something funny going on:
+	       # it seems as if the original length of the argv[] would
+	       # be stored in the proc struct and then used by ps(1),
+	       # no matter what characters we use to pad the argv[].
+	       # (And if we use \0:s, they are shown as spaces.)  Sigh.
+               || $ps =~ /^x\s*$/
+	       # FreeBSD cannot get rid of both the leading "perl :"
+	       # and the trailing " (perl)": some FreeBSD versions
+	       # can get rid of the first one.
+	       || ($^O eq 'freebsd' && $ps =~ m/^(?:perl: )?x(?: \(perl\))?$/),
+		       'altering $0 is effective (testing with `ps`)');
+	}
+}
+
+# test case-insignificance of %ENV (these tests must be enabled only
+# when perl is compiled with -DENV_IS_CASELESS)
+SKIP: {
+    skip('no caseless %ENV support', 4) unless $Is_MSWin32 || $Is_NetWare;
+
+    %ENV = ();
+    $ENV{'Foo'} = 'bar';
+    $ENV{'fOo'} = 'baz';
+    is scalar(keys(%ENV)), 1;
+    ok exists $ENV{'FOo'};
+    is delete $ENV{'foO'}, 'baz';
+    is scalar(keys(%ENV)), 0;
+}
+
+__END__
+
+# Put new tests before the various ENV tests, as they blow %ENV away.
