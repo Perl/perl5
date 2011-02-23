@@ -352,6 +352,9 @@ foreach my $test (sort { numerically } keys %tests) {
             run_test($eval, ++$count, "", "");
           }
 
+          # XXX Doesn't currently test multi-char folds in pattern
+          next if @pattern != 1;
+
           foreach my $bracketed (0, 1) {   # Put rhs in [...], or not
             foreach my $inverted (0,1) {
                 next if $inverted && ! $bracketed;  # inversion only valid in [^...]
@@ -449,8 +452,6 @@ foreach my $test (sort { numerically } keys %tests) {
                             $op = 0 if $target_has_latin1 && $charset eq 'l' && $both_sides && ( ! $quantifier || $quantifier eq '?') && $parend < 2;
                           }
 
-                          # XXX Doesn't currently test multi-char folds in pattern
-                          next if @pattern != 1;
 
                           my $desc = "my \$c = \"$prepend$lhs$append\"; "
                                    . "my \$p = qr/$quantified/i;"
