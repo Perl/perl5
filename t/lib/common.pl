@@ -198,7 +198,19 @@ for (@prgs){
     }
  
     local $::TODO = $reason{todo};
-    print_err_line( $switch, $prog, $expected, $results, $::TODO ) unless $ok;
+
+    unless ($ok) {
+	my $err_line = "PROG: $switch\n$prog\n" .
+		       "EXPECTED:\n$expected\n" .
+		       "GOT:\n$results\n";
+	if ($::TODO) {
+	    $err_line =~ s/^/# /mg;
+	    print $err_line;  # Harness can't filter it out from STDERR.
+	}
+	else {
+	    print STDERR $err_line;
+	}
+    }
 
     ok($ok);
 
@@ -206,22 +218,6 @@ for (@prgs){
 	{ unlink $_ if $_ }
     foreach (@temp_path)
 	{ rmtree $_ if -d $_ }
-}
-
-sub print_err_line {
-    my($switch, $prog, $expected, $results, $todo) = @_;
-    my $err_line = "PROG: $switch\n$prog\n" .
-		   "EXPECTED:\n$expected\n" .
-		   "GOT:\n$results\n";
-    if ($todo) {
-	$err_line =~ s/^/# /mg;
-	print $err_line;  # Harness can't filter it out from STDERR.
-    }
-    else {
-	print STDERR $err_line;
-    }
-
-    return 1;
 }
 
 1;
