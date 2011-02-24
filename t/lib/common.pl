@@ -20,8 +20,6 @@ my ($pragma_name) = $file =~ /([A-Za-z_0-9]+)\.t$/
 
 $| = 1;
 
-my $tmpfile = tempfile();
-
 my @prgs = () ;
 my @w_files = () ;
 
@@ -39,9 +37,9 @@ foreach my $file (@w_files) {
     next if $file =~ /perlio$/ && !(find PerlIO::Layer 'perlio');
     next if -d $file;
 
-    open F, "<$file" or die "Cannot open $file: $!\n" ;
+    open my $fh, '<', $file or die "Cannot open $file: $!\n" ;
     my $line = 0;
-    while (<F>) {
+    while (<$fh>) {
         $line++;
 	last if /^__END__/ ;
     }
@@ -49,9 +47,9 @@ foreach my $file (@w_files) {
     {
         local $/ = undef;
         $files++;
-        @prgs = (@prgs, $file, split "\n########\n", <F>) ;
+        @prgs = (@prgs, $file, split "\n########\n", <$fh>) ;
     }
-    close F ;
+    close $fh;
 }
 
 $^X = rel2abs($^X);
@@ -61,7 +59,6 @@ mkdir $tempdir, 0700 or die "Can't mkdir '$tempdir': $!";
 chdir $tempdir or die die "Can't chdir '$tempdir': $!";
 unshift @INC, '../../lib';
 my $cleanup = 1;
-my %tempfiles;
 
 END {
     if ($cleanup) {
@@ -76,6 +73,8 @@ local $/ = undef;
 my $tests = $::local_tests || 0;
 $tests = scalar(@prgs)-$files + $tests if $tests !~ /\D/;
 plan $tests;    # If input is 'no_plan', pass it on unchanged
+
+my $tmpfile = tempfile();
 
 for (@prgs){
     unless (/\n/)
@@ -120,24 +119,24 @@ for (@prgs){
                 File::Path::mkpath($1);
                 push(@temp_path, $1);
 	    }
-	    open F, ">$filename" or die "Cannot open $filename: $!\n" ;
-	    print F $code ;
-	    close F or die "Cannot close $filename: $!\n";
+	    open my $fh, '>', $filename or die "Cannot open $filename: $!\n" ;
+	    print $fh $code;
+	    close $fh or die "Cannot close $filename: $!\n";
 	}
 	shift @files ;
 	$prog = shift @files ;
     }
 
-    open TEST, ">$tmpfile" or die "Cannot open >$tmpfile: $!";
-    print TEST q{
+    open my $fh, '>', $tmpfile or die "Cannot open >$tmpfile: $!";
+    print $fh q{
         BEGIN {
-            open(STDERR, ">&STDOUT")
+            open STDERR, '>&', STDOUT
               or die "Can't dup STDOUT->STDERR: $!;";
         }
     };
-    print TEST "\n#line 1\n";  # So the line numbers don't get messed up.
-    print TEST $prog,"\n";
-    close TEST or die "Cannot close $tmpfile: $!";
+    print $fh "\n#line 1\n";  # So the line numbers don't get messed up.
+    print $fh $prog,"\n";
+    close $fh or die "Cannot close $tmpfile: $!";
     my $results = runperl( switches => ["-I../../lib", $switch], nolib => 1,
 			   stderr => 1, progfile => $tmpfile );
     my $status = $?;
