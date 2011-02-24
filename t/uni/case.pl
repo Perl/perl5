@@ -1,5 +1,3 @@
-use File::Spec;
-
 require "test.pl";
 
 sub unidump {
@@ -22,9 +20,7 @@ sub casetest {
 		    },
 		   )} @funcs;
 
-    my $file = File::Spec->catfile(File::Spec->catdir(File::Spec->updir,
-						      "lib", "unicore", "To"),
-				   "$base.pl");
+    my $file = "../lib/unicore/To/$base.pl";
     my $simple = do $file or die $@;
     my %simple;
     for my $i (split(/\n/, $simple)) {

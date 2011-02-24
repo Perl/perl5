@@ -11,15 +11,12 @@ BEGIN {
 
 binmode *STDOUT, ":utf8";
 
-use File::Spec;
 our $TODO;
 
 plan("no_plan");
 
 # Read in the official case folding definitions.
-my $CF = File::Spec->catfile(File::Spec->catdir(File::Spec->updir,
-					       "lib", "unicore"),
-			    "CaseFolding.txt");
+my $CF = '../lib/unicore/CaseFolding.txt';
 
 die qq[$0: failed to open "$CF": $!\n] if ! open(my $fh, "<", $CF);
 

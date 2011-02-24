@@ -61,9 +61,8 @@ foreach my $l (1, 21) {
 }
 
 use strict;
-use File::Spec;
 
-open F, File::Spec->curdir and sysread F, $_, 1;
+open F, '.' and sysread F, $_, 1;
 my $err = $! + 0;
 close F;
 
@@ -71,13 +70,13 @@ SKIP: {
   skip "you can read directories as plain files", 2 unless( $err );
 
   $!=0;
-  open F, File::Spec->curdir and $_=<F>;
+  open F, '.' and $_=<F>;
   ok( $!==$err && !defined($_) => 'readline( DIRECTORY )' );
   close F;
 
   $!=0;
   { local $/;
-    open F, File::Spec->curdir and $_=<F>;
+    open F, '.' and $_=<F>;
     ok( $!==$err && !defined($_) => 'readline( DIRECTORY ) slurp mode' );
     close F;
   }
