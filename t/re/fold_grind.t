@@ -279,8 +279,7 @@ foreach my $test (sort { numerically } keys %tests) {
 
       # /aa should only affect things with folds in the ASCII range.  But, try
       # it on one pair in the other ranges just to make sure it doesn't break
-      # them.  Set these flags.  They are set to the ord of the character
-      # tested so that all pairs of that ord get tested.
+      # them.
       if ($charset eq 'aa') {
         if (! $target_has_ascii && ! $pattern_has_ascii) {
           if ($target_above_latin1 || $pattern_above_latin1) {
