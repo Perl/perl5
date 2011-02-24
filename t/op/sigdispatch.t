@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 13;
+plan tests => 15;
 
 watchdog(10);
 
@@ -39,7 +39,7 @@ eval {
 is($@, "Alarm!\n", 'after the second loop');
 
 SKIP: {
-    skip('We can\'t test blocking without sigprocmask', 9) if $ENV{PERL_CORE_MINITEST} || !$Config{d_sigprocmask};
+    skip('We can\'t test blocking without sigprocmask', 11) if $ENV{PERL_CORE_MINITEST} || !$Config{d_sigprocmask};
 
     require POSIX;
     my $new = POSIX::SigSet->new(&POSIX::SIGUSR1);
@@ -74,6 +74,12 @@ SKIP: {
     # test unsafe signal handlers in combination with exceptions
     my $action = POSIX::SigAction->new(sub { $gotit--, die }, POSIX::SigSet->new, 0);
     POSIX::sigaction(&POSIX::SIGALRM, $action);
-    eval { alarm 1; POSIX::sigsuspend(POSIX::SigSet->new) } for 1..2;
+    eval {
+        alarm 1;
+        my $set = POSIX::SigSet->new;
+        POSIX::sigprocmask(&POSIX::SIG_BLOCK, undef, $set);
+        is $set->ismember(&POSIX::SIGALRM), 0, "SIGALRM is not blocked on attempt $_";
+        POSIX::sigsuspend($set);
+    } for 1..2;
     is $gotit, 0, 'Received both signals';
 }

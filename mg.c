@@ -3001,7 +3001,7 @@ Perl_whichsig(pTHX_ const char *sig)
 
 Signal_t
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-Perl_sighandler(int sig, siginfo_t *sip, void *uap PERL_UNUSED_DECL)
+Perl_sighandler(int sig, siginfo_t *sip, void *uap)
 #else
 Perl_sighandler(int sig)
 #endif
@@ -3113,7 +3113,7 @@ Perl_sighandler(int sig)
 	 */
 #ifdef HAS_SIGPROCMASK
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-	if (sip)
+       if (sip || uap)
 #endif
 	{
 	    sigset_t set;
