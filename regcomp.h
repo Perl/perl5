@@ -310,9 +310,6 @@ struct regnode_charclass_class {
 
 #define SIZE_ONLY (RExC_emit == &PL_regdummy)
 
-/* Flags for node->flags of several of the node types */
-#define USE_UNI                0x01
-
 /* Flags for node->flags of ANYOF.  These are in short supply, so some games
  * are done to share them, as described below.  If necessary, the ANYOF_LOCALE
  * and ANYOF_CLASS bits could be shared with a space penalty for locale nodes
