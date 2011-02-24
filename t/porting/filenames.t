@@ -31,7 +31,6 @@ use File::Spec;
 use File::Basename;
 require './test.pl';
 
-plan('no_plan');
 
 my $manifest = File::Spec->catfile(File::Spec->updir(), 'MANIFEST');
 
@@ -40,10 +39,18 @@ my @files;
 while (<$m>) {
     chomp;
     my($path) = split /\t+/;
+    push @files, $path;
 
-    validate_file_name($path);
 }
 close $m or die $!;
+
+plan(scalar @files);
+
+for my $file (@files) {
+    validate_file_name($file);
+}
+exit 0;
+
 
 sub validate_file_name {
     my $path = shift;
@@ -54,30 +61,44 @@ sub validate_file_name {
     my @path_components = split('/',$path);
     pop @path_components; # throw away the filename
     for my $component (@path_components) {
-        unlike($component, qr/\..*?\./,
-	      "no directory components containing more than one '.'")
-	    or return;
-
-        cmp_ok(length $component, '<=', 32,
-	       "no directory with a name over 32 characters (VOS requirement)")
-	    or return;
+	if ($component =~ /\..*?\./) {
+	    fail("no directory components containing more than one '.'");
+	    return;
+	}
+	if (length $component > 32) {
+	    fail("no directory with a name over 32 characters (VOS requirement)");
+	    return;
+	}
     }
 
 
-    unlike($filename, qr/^\-/, "filename does not start with -");
+    if ($filename =~ /^\-/) {
+	fail("filename does not start with -");
+	return;
+    }
 
     my($before, $after) = split /\./, $filename;
-    cmp_ok(length $before, '<=', 39,
-	   "filename has 39 or fewer characters before the dot");
+    if (length $before > 39) {
+	fail("filename has 39 or fewer characters before the dot");
+	return;
+    }
     if ($after) {
-	cmp_ok(length $after, '<=', 39,
-	       "filename has 39 or fewer characters after the dot");
+	if (length $after > 39) {
+	    fail("filename has 39 or fewer characters after the dot");
+	    return;
+	}
     }
 
-    unlike($filename, qr/^(?:CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])\./i,
-	   "filename has a reserved name");
+    if ($filename =~ /^(?:CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])\./i) {
+	fail("filename has a reserved name");
+	return;
+    }
 
-    unlike($filename, qr/\s|\(|\&/, "filename has a reserved character");
+    if ($filename =~ /\s|\(|\&/) {
+	fail("filename has a reserved character");
+	return;
+    }
+    pass("filename ok");
 }
 
 # EOF
