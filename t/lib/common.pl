@@ -182,7 +182,10 @@ for (@prgs){
 	$ok = 1;
     }
     elsif ($option_random) {
-        $ok = randomMatch($results, $expected);
+	my @got = sort split "\n", $results;
+	my @expected = sort split "\n", $expected;
+	
+	$ok = "@got" eq "@expected";
     }
     elsif ($option_regex) {
 	$ok = $results =~ /^$expected/;
@@ -203,18 +206,6 @@ for (@prgs){
 	{ unlink $_ if $_ }
     foreach (@temp_path)
 	{ rmtree $_ if -d $_ }
-}
-
-sub randomMatch
-{
-    my $got = shift ;
-    my $expected = shift;
-
-    my @got = sort split "\n", $got ;
-    my @expected = sort split "\n", $expected ;
-
-   return "@got" eq "@expected";
-
 }
 
 sub print_err_line {
