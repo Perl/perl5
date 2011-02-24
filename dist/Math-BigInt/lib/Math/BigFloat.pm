@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _a	: accuracy
 #   _p	: precision
 
-$VERSION = '1.992';
+$VERSION = '1.993';
 require 5.006002;
 
 require Exporter;
@@ -60,7 +60,7 @@ $upgrade = undef;
 $downgrade = undef;
 # the package we are using for our private parts, defaults to:
 # Math::BigInt->config()->{lib}
-my $MBI = 'Math::BigInt::FastCalc';
+my $MBI = 'Math::BigInt::Calc';
 
 # are NaNs ok? (otherwise it dies when encountering an NaN) set w/ config()
 $_trap_nan = 0;

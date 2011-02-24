@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 use 5.006002;
 
-$VERSION = '1.992';
+$VERSION = '1.993';
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(objectify bgcd blcm); 
@@ -172,8 +172,8 @@ $_trap_nan = 0;				# are NaNs ok? set w/ config()
 $_trap_inf = 0;				# are infs ok? set w/ config()
 my $nan = 'NaN'; 			# constants for easier life
 
-my $CALC = 'Math::BigInt::FastCalc';	# module to do the low level math
-					# default is FastCalc.pm
+my $CALC = 'Math::BigInt::Calc';	# module to do the low level math
+					# default is Calc.pm
 my $IMPORT = 0;				# was import() called yet?
 					# used to make require work
 my %WARN;				# warn only once for low-level libs
@@ -2742,7 +2742,7 @@ sub import
     {
     $_ =~ tr/a-zA-Z0-9://cd;			# limit to sane characters
     }
-  push @c, \'FastCalc', \'Calc'			# if all fail, try these
+  push @c, \'Calc'				# if all fail, try these
     if $warn_or_die < 2;			# but not for "only"
   $CALC = '';					# signal error
   foreach my $l (@c)
