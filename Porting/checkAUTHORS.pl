@@ -35,17 +35,21 @@ my $map = generate_known_author_map();
 
 read_authors_files($author_file);
 
-parse_commits_from_stdin();
 
 if ($rank) {
+  parse_commits_from_stdin();
   display_ordered(\%patchers);
 } elsif ($ta) {
+  parse_commits_from_stdin();
   display_ordered(\%committers);
 } elsif ($tap) {
+  parse_commits_from_stdin_authors();
   display_test_output(\%patchers, \%authors, \%real_names);
 } elsif ($ack) {
+  parse_commits_from_stdin();
   display_missing_authors(\%patchers, \%authors, \%real_names);
 } elsif ($who) {
+  parse_commits_from_stdin();
   list_authors(\%patchers, \%authors);
 }
 
@@ -103,6 +107,17 @@ sub parse_commits_from_stdin {
         }
     }
 
+}
+
+# just grab authors. Quicker than parse_commits_from_stdin
+
+sub parse_commits_from_stdin_authors {
+    while (<>) {
+        next unless /^Author:\s*(.*)$/;
+	my $author = $1;
+	$author = _raw_address($author);
+	$patchers{$author}++;
+    }
 }
 
 
@@ -232,9 +247,9 @@ sub display_test_output {
     my $authors    = shift;
     my $real_names = shift;
     my $count = 0;
+    printf "1..%d\n", scalar keys %$patchers;
     foreach ( sort keys %$patchers ) {
-           $count++;
-
+        $count++;
         if ($authors->{$_}) {
             print "ok $count - ".$real_names->{$_} ." $_\n";
         } else {
@@ -242,7 +257,6 @@ sub display_test_output {
         }
 
     }
-    print "1..$count\n";
 }
 
 sub display_missing_authors {
