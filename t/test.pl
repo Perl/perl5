@@ -702,16 +702,8 @@ sub tempfile {
 # This is the temporary file for _fresh_perl
 my $tmpfile = tempfile();
 
-#
-# _fresh_perl
-#
-# The $resolve must be a subref that tests the first argument
-# for success, or returns the definition of success (e.g. the
-# expected scalar) if given no arguments.
-#
-
 sub _fresh_perl {
-    my($prog, $resolve, $runperl_args, $name) = @_;
+    my($prog, $action, $expect, $runperl_args, $name) = @_;
 
     # Given the choice of the mis-parsable {}
     # (we want an anon hash, but a borked lexer might think that it's a block)
@@ -758,21 +750,31 @@ sub _fresh_perl {
         $results =~ s/\n\n/\n/g;
     }
 
-    my $pass = $resolve->($results);
-    unless ($pass) {
-        _diag "# PROG: \n$prog\n";
-        _diag "# EXPECTED:\n", $resolve->(), "\n";
-        _diag "# GOT:\n$results\n";
-        _diag "# STATUS: $status\n";
-    }
-
     # Use the first line of the program as a name if none was given
     unless( $name ) {
         ($first_line, $name) = $prog =~ /^((.{1,50}).*)/;
         $name = $name . '...' if length $first_line > length $name;
     }
 
-    _ok($pass, _where(), "fresh_perl - $name");
+    # Historically this was implemented using a closure, but then that means
+    # that the tests for closures avoid using this code. Given that there
+    # are exactly two callers, doing exactly two things, the simpler approach
+    # feels like a better trade off.
+    my $pass;
+    if ($action eq 'eq') {
+	$pass = is($results, $expect, $name);
+    } elsif ($action eq '=~') {
+	$pass = like($results, $expect, $name);
+    } else {
+	die "_fresh_perl can't process action '$action'";
+    }
+	
+    unless ($pass) {
+        _diag "# PROG: \n$prog\n";
+        _diag "# STATUS: $status\n";
+    }
+
+    return $pass;
 }
 
 #
@@ -789,9 +791,7 @@ sub fresh_perl_is {
     $expected =~ s/\n+$//;
 
     local $Level = 2;
-    _fresh_perl($prog,
-		sub { @_ ? $_[0] eq $expected : $expected },
-		$runperl_args, $name);
+    _fresh_perl($prog, 'eq', $expected, $runperl_args, $name);
 }
 
 #
@@ -803,9 +803,7 @@ sub fresh_perl_is {
 sub fresh_perl_like {
     my($prog, $expected, $runperl_args, $name) = @_;
     local $Level = 2;
-    _fresh_perl($prog,
-		sub { @_ ? $_[0] =~ $expected : $expected },
-		$runperl_args, $name);
+    _fresh_perl($prog, '=~', $expected, $runperl_args, $name);
 }
 
 sub can_ok ($@) {
