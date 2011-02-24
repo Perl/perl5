@@ -14427,73 +14427,6 @@ int Perl_vms_case_tolerant(void)
 
  /* Start of DECC RTL Feature handling */
 
-static int sys_trnlnm
-   (const char * logname,
-    char * value,
-    int value_len)
-{
-    const $DESCRIPTOR(table_dsc, "LNM$FILE_DEV");
-    const unsigned long attr = LNM$M_CASE_BLIND;
-    struct dsc$descriptor_s name_dsc;
-    int status;
-    unsigned short result;
-    struct itmlst_3 itlst[2] = {{value_len, LNM$_STRING, value, &result},
-                                {0, 0, 0, 0}};
-
-    name_dsc.dsc$w_length = strlen(logname);
-    name_dsc.dsc$a_pointer = (char *)logname;
-    name_dsc.dsc$b_dtype = DSC$K_DTYPE_T;
-    name_dsc.dsc$b_class = DSC$K_CLASS_S;
-
-    status = sys$trnlnm(&attr, &table_dsc, &name_dsc, 0, itlst);
-
-    if ($VMS_STATUS_SUCCESS(status)) {
-
-	 /* Null terminate and return the string */
-	/*--------------------------------------*/
-	value[result] = 0;
-    }
-
-    return status;
-}
-
-static int sys_crelnm
-   (const char * logname,
-    const char * value)
-{
-    int ret_val;
-    const char * proc_table = "LNM$PROCESS_TABLE";
-    struct dsc$descriptor_s proc_table_dsc;
-    struct dsc$descriptor_s logname_dsc;
-    struct itmlst_3 item_list[2];
-
-    proc_table_dsc.dsc$a_pointer = (char *) proc_table;
-    proc_table_dsc.dsc$w_length = strlen(proc_table);
-    proc_table_dsc.dsc$b_dtype = DSC$K_DTYPE_T;
-    proc_table_dsc.dsc$b_class = DSC$K_CLASS_S;
-
-    logname_dsc.dsc$a_pointer = (char *) logname;
-    logname_dsc.dsc$w_length = strlen(logname);
-    logname_dsc.dsc$b_dtype = DSC$K_DTYPE_T;
-    logname_dsc.dsc$b_class = DSC$K_CLASS_S;
-
-    item_list[0].buflen = strlen(value);
-    item_list[0].itmcode = LNM$_STRING;
-    item_list[0].bufadr = (char *)value;
-    item_list[0].retlen = NULL;
-
-    item_list[1].buflen = 0;
-    item_list[1].itmcode = 0;
-
-    ret_val = sys$crelnm
-		       (NULL,
-			(const struct dsc$descriptor_s *)&proc_table_dsc,
-			(const struct dsc$descriptor_s *)&logname_dsc,
-			NULL,
-			(const struct item_list_3 *) item_list);
-
-    return ret_val;
-}
 
 /* C RTL Feature settings */
 
@@ -14514,7 +14447,7 @@ static int set_features
 
     /* Allow an exception to bring Perl into the VMS debugger */
     vms_debug_on_exception = 0;
-    status = sys_trnlnm("PERL_VMS_EXCEPTION_DEBUG", val_str, sizeof(val_str));
+    status = simple_trnlnm("PERL_VMS_EXCEPTION_DEBUG", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
        val_str[0] = _toupper(val_str[0]);
        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
@@ -14525,7 +14458,7 @@ static int set_features
 
     /* Debug unix/vms file translation routines */
     vms_debug_fileify = 0;
-    status = sys_trnlnm("PERL_VMS_FILEIFY_DEBUG", val_str, sizeof(val_str));
+    status = simple_trnlnm("PERL_VMS_FILEIFY_DEBUG", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
 	val_str[0] = _toupper(val_str[0]);
         if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
@@ -14545,7 +14478,7 @@ static int set_features
     /* This should really be fixed, but for now, set up a feature to    */
     /* enable it so that the impact can be studied.                     */
     vms_bug_stat_filename = 0;
-    status = sys_trnlnm("PERL_VMS_BUG_STAT_FILENAME", val_str, sizeof(val_str));
+    status = simple_trnlnm("PERL_VMS_BUG_STAT_FILENAME", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
 	val_str[0] = _toupper(val_str[0]);
         if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
@@ -14557,7 +14490,7 @@ static int set_features
 
     /* Create VTF-7 filenames from Unicode instead of UTF-8 */
     vms_vtf7_filenames = 0;
-    status = sys_trnlnm("PERL_VMS_VTF7_FILENAMES", val_str, sizeof(val_str));
+    status = simple_trnlnm("PERL_VMS_VTF7_FILENAMES", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
        val_str[0] = _toupper(val_str[0]);
        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
@@ -14568,7 +14501,7 @@ static int set_features
 
     /* unlink all versions on unlink() or rename() */
     vms_unlink_all_versions = 0;
-    status = sys_trnlnm
+    status = simple_trnlnm
 	("PERL_VMS_UNLINK_ALL_VERSIONS", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
        val_str[0] = _toupper(val_str[0]);
@@ -14581,7 +14514,7 @@ static int set_features
     /* Dectect running under GNV Bash or other UNIX like shell */
 #if __CRTL_VER >= 70300000 && !defined(__VAX)
     gnv_unix_shell = 0;
-    status = sys_trnlnm("GNV$UNIX_SHELL", val_str, sizeof(val_str));
+    status = simple_trnlnm("GNV$UNIX_SHELL", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
 	 gnv_unix_shell = 1;
 	 set_feature_default("DECC$EFS_CASE_PRESERVE", 1);
@@ -14599,7 +14532,7 @@ static int set_features
 
     /* PCP mode requires creating /dev/null special device file */
     decc_bug_devnull = 0;
-    status = sys_trnlnm("DECC_BUG_DEVNULL", val_str, sizeof(val_str));
+    status = simple_trnlnm("DECC_BUG_DEVNULL", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
        val_str[0] = _toupper(val_str[0]);
        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
@@ -14610,7 +14543,7 @@ static int set_features
 
     /* UNIX directory names with no paths are broken in a lot of places */
     decc_dir_barename = 1;
-    status = sys_trnlnm("DECC_DIR_BARENAME", val_str, sizeof(val_str));
+    status = simple_trnlnm("DECC_DIR_BARENAME", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
       val_str[0] = _toupper(val_str[0]);
       if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
@@ -14690,7 +14623,7 @@ static int set_features
 
 #endif
 #else
-    status = sys_trnlnm
+    status = simple_trnlnm
 	("DECC$DISABLE_TO_VMS_LOGNAME_TRANSLATION", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
 	val_str[0] = _toupper(val_str[0]);
@@ -14700,7 +14633,7 @@ static int set_features
     }
 
 #ifndef __VAX
-    status = sys_trnlnm("DECC$EFS_CASE_PRESERVE", val_str, sizeof(val_str));
+    status = simple_trnlnm("DECC$EFS_CASE_PRESERVE", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
 	val_str[0] = _toupper(val_str[0]);
 	if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T')) {
@@ -14709,14 +14642,14 @@ static int set_features
     }
 #endif
 
-    status = sys_trnlnm("DECC$FILENAME_UNIX_REPORT", val_str, sizeof(val_str));
+    status = simple_trnlnm("DECC$FILENAME_UNIX_REPORT", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
 	val_str[0] = _toupper(val_str[0]);
 	if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T')) {
 	   decc_filename_unix_report = 1;
 	}
     }
-    status = sys_trnlnm("DECC$FILENAME_UNIX_ONLY", val_str, sizeof(val_str));
+    status = simple_trnlnm("DECC$FILENAME_UNIX_ONLY", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
 	val_str[0] = _toupper(val_str[0]);
 	if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T')) {
@@ -14724,14 +14657,14 @@ static int set_features
 	   decc_filename_unix_report = 1;
 	}
     }
-    status = sys_trnlnm("DECC$FILENAME_UNIX_NO_VERSION", val_str, sizeof(val_str));
+    status = simple_trnlnm("DECC$FILENAME_UNIX_NO_VERSION", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
 	val_str[0] = _toupper(val_str[0]);
 	if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T')) {
 	   decc_filename_unix_no_version = 1;
 	}
     }
-    status = sys_trnlnm("DECC$READDIR_DROPDOTNOTYPE", val_str, sizeof(val_str));
+    status = simple_trnlnm("DECC$READDIR_DROPDOTNOTYPE", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
 	val_str[0] = _toupper(val_str[0]);
 	if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T')) {
@@ -14758,7 +14691,7 @@ static int set_features
 
     /* USE POSIX/DCL Exit codes - Recommended, but needs to default to  */
     /* for strict backward compatibility */
-    status = sys_trnlnm
+    status = simple_trnlnm
 	("PERL_VMS_POSIX_EXIT", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
        val_str[0] = _toupper(val_str[0]);
