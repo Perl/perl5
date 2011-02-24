@@ -74,6 +74,6 @@ my $tests = $::local_tests || 0;
 $tests = scalar(@prgs)-$files + $tests if $tests !~ /\D/;
 plan $tests;    # If input is 'no_plan', pass it on unchanged
 
-run_multiple_progs(@prgs);
+run_multiple_progs('../..', @prgs);
 
 1;

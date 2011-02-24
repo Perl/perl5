@@ -811,7 +811,19 @@ sub fresh_perl_like {
 # what the expected output is. So have excatly one copy of the code to run that
 
 sub run_multiple_progs {
-    my @prgs = @_;
+    my $up = shift;
+    my @prgs;
+    if ($up) {
+	# The tests in lib run in a temporary subdirectory of t, and always
+	# pass in a list of "programs" to run
+	@prgs = @_;
+    } else {
+	# The tests below t run in t and pass in a file handle.
+	my $fh = shift;
+	local $/;
+	@prgs = split "\n########\n", <$fh>;
+    }
+
     my $tmpfile = tempfile();
 
     for (@prgs){
@@ -874,8 +886,10 @@ sub run_multiple_progs {
 	print $fh "\n#line 1\n";  # So the line numbers don't get messed up.
 	print $fh $prog,"\n";
 	close $fh or die "Cannot close $tmpfile: $!";
-	my $results = runperl( switches => ["-I../../lib", $switch], nolib => 1,
-			       stderr => 1, progfile => $tmpfile );
+	my $results = runperl( stderr => 1, progfile => $tmpfile, $up
+			       ? (switches => ["-I$up/lib", $switch], nolib => 1)
+			       : (switches => [$switch])
+			        );
 	my $status = $?;
 	$results =~ s/\n+$//;
 	# allow expected output to be written as if $prog is on STDIN

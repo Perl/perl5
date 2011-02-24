@@ -11,28 +11,13 @@
 
 chdir 't' if -d 't';
 @INC = '../lib';
-$ENV{PERL5LIB} = "../lib";
+require './test.pl';
 
 $|=1;
 
-undef $/;
-@prgs = split /^########\n/m, <DATA>;
+run_multiple_progs('', \*DATA);
 
-require './test.pl';
-plan(tests => scalar @prgs);
-for (@prgs){
-    ++$i;
-    my($prog,$expected) = split(/\nEXPECT\n/, $_, 2);
-    print("not ok $i # bad test format\n"), next
-        unless defined $expected;
-    my ($testname) = $prog =~ /^# (.*)\n/m;
-    $testname ||= '';
-    $TODO = $testname =~ s/^TODO //;
-    $results =~ s/\n+$//;
-    $expected =~ s/\n+$//;
-
-    fresh_perl_is($prog, $expected, {}, $testname);
-}
+done_testing();
 
 __END__
 
