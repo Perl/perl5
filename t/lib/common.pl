@@ -10,7 +10,6 @@ BEGIN {
 }
 
 use Config;
-use File::Path;
 use File::Spec::Functions qw(catfile curdir rel2abs);
 
 use strict;
@@ -66,8 +65,9 @@ my %tempfiles;
 
 END {
     if ($cleanup) {
+	require File::Path;
 	chdir '..' or die "Couldn't chdir .. for cleanup: $!";
-	rmtree($tempdir);
+	File::Path::rmtree($tempdir);
     }
 }
 
@@ -116,7 +116,8 @@ for (@prgs){
 	    my $code = shift @files ;
     	    push @temps, $filename ;
     	    if ($filename =~ m#(.*)/# && $filename !~ m#^\.\./#) {
-                mkpath($1);
+		require File::Path;
+                File::Path::mkpath($1);
                 push(@temp_path, $1);
 	    }
 	    open F, ">$filename" or die "Cannot open $filename: $!\n" ;
@@ -217,7 +218,7 @@ for (@prgs){
     foreach (@temps)
 	{ unlink $_ if $_ }
     foreach (@temp_path)
-	{ rmtree $_ if -d $_ }
+	{ File::Path::rmtree $_ if -d $_ }
 }
 
 1;
