@@ -9467,7 +9467,7 @@ parseit:
 
 		/* The \p could match something in the Latin1 range, hence
 		 * something that isn't utf8 */
-		ANYOF_FLAGS(ret) |= ANYOF_NONBITMAP;
+		ANYOF_FLAGS(ret) |= ANYOF_NONBITMAP_NON_UTF8;
 		namedclass = ANYOF_MAX;  /* no official name, but it's named */
 
 		/* \p means they want Unicode semantics */
