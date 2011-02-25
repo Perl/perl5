@@ -203,9 +203,6 @@ For example, this code will break under Devel::DProf:
 A pattern like this is used by Test::More's skip() function, for
 example.  See L<perldiag> for more details.
 
-Mail bug reports and feature requests to the perl5-porters mailing list at
-F<E<lt>perl5-porters@perl.orgE<gt>>.
-
 =head1 SEE ALSO
 
 L<perl>, L<dprofpp>, times(2)
@@ -238,7 +235,7 @@ sub NONESUCH_noxs {
 
 use XSLoader ();
 
-$Devel::DProf::VERSION = '20110217.00';  # this version not authorized by
+$Devel::DProf::VERSION = '20110225.00';  # this version not authorized by
 				         # Dean Roehrich. See "Changes" file.
 
 use if $] >= 5.013, 'deprecate';

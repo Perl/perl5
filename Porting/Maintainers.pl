@@ -488,7 +488,7 @@ use File::Glob qw(:case);
     'Devel::DProf' =>
 	{
 	'MAINTAINER'	=> 'rafl',
-	'DISTRIBUTION'	=> 'FLORA/Devel-DProf-20110217.00.tar.gz',
+	'DISTRIBUTION'	=> 'FLORA/Devel-DProf-20110225.00.tar.gz',
 	'FILES'		=> q[cpan/Devel-DProf],
 	'UPSTREAM'	=> 'cpan',
 	},
