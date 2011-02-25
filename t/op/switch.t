@@ -784,8 +784,7 @@ sub contains_x {
 }
 
 SKIP: {
-    skip "Scalar/Util.pm not yet available", 20
-	unless -r "$INC[0]/Scalar/Util.pm";
+    skip_if_miniperl("no dynamic loading on miniperl, no Scalar::Util", 14);
     # Test overloading
     { package OverloadTest;
 
