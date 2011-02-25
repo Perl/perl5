@@ -20,7 +20,6 @@ if (!$minitest) {
 }
 
 use strict;
-use File::Spec;
 
 require "test.pl";
 plan(tests => 49 + !$minitest * (3 + 14 * $can_fork));
