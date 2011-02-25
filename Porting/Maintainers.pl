@@ -1566,7 +1566,7 @@ use File::Glob qw(:case);
     'Tie::RefHash' =>
 	{
 	'MAINTAINER'	=> 'nuffin',
-	'DISTRIBUTION'	=> 'NUFFIN/Tie-RefHash-1.38.tar.gz',
+	'DISTRIBUTION'	=> 'FLORA/Tie-RefHash-1.39.tar.gz',
 	'FILES'		=> q[cpan/Tie-RefHash],
 	'UPSTREAM'	=> 'cpan',
 	},
