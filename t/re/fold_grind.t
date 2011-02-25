@@ -301,6 +301,17 @@ foreach my $test (sort { numerically } keys %tests) {
                     && $has_tested_latin1_aa != $test;
             $has_tested_latin1_aa = $test;
           }
+          elsif ($target_only_ascii && $pattern_only_ascii) {
+
+              # And, except for one set just to make sure, skip tests
+              # where both elements in the pair are ASCII.  If one works for
+              # aa, the others are likely too.  This skips tests where the
+              # fold is from non-ASCII to ASCII, but this part of the test
+              # is just about the ASCII components.
+              next if defined $has_tested_ascii_l
+                      && $has_tested_ascii_l != $test;
+              $has_tested_ascii_l = $test;
+          }
         }
         elsif ($charset eq 'l') {
 
@@ -314,10 +325,8 @@ foreach my $test (sort { numerically } keys %tests) {
           elsif ($target_only_ascii && $pattern_only_ascii) {
 
               # And, except for one set just to make sure, skip tests
-              # where both elements in the pair are ASCII.  If one works for
-              # l, the others are likely too.  This skips tests where the
-              # fold is from non-ASCII to ASCII, but this part of the test
-              # is just about the ASCII components.
+              # where both elements in the pair are ASCII.  This is
+              # essentially the same reasoning as above for /aa.
               next if defined $has_tested_ascii_l
                       && $has_tested_ascii_l != $test;
               $has_tested_ascii_l = $test;
