@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 2514;  # Update this when adding/deleting tests.
+plan tests => 2520;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1096,6 +1096,29 @@ sub run_tests {
 
         is(join("-", "   abc   def  " =~ /(?=(\S+))/g), "abc-bc-c-def-ef-f",
 	   'stclass optimisation does not break + inside (?=); Bug 68564');
+    }
+
+    {
+        use charnames ":full";
+        # Delayed interpolation of \N'
+        my $r1 = qr/\N{THAI CHARACTER SARA I}/;
+        my $s1 = "\x{E34}\x{E34}\x{E34}\x{E34}";
+
+        # Bug #56444
+        ok $s1 =~ /$r1+/, 'my $r1 = qr/\N{THAI CHARACTER SARA I}/; my $s1 = "\x{E34}\x{E34}\x{E34}\x{E34}; $s1 =~ /$r1+/';
+
+        # Bug #62056
+        ok "${s1}A" =~ m/$s1\N{LATIN CAPITAL LETTER A}/, '"${s1}A" =~ m/$s1\N{LATIN CAPITAL LETTER A}/';
+
+        ok "abbbbc" =~ m/\N{1}/ && $& eq "a", '"abbbbc" =~ m/\N{1}/ && $& eq "a"';
+        ok "abbbbc" =~ m/\N{3,4}/ && $& eq "abbb", '"abbbbc" =~ m/\N{3,4}/ && $& eq "abbb"';
+    }
+
+    {
+        use charnames ":full";
+        my $message = '[perl #74982] Period coming after \N{}';
+        ok("\x{ff08}." =~ m/\N{FULLWIDTH LEFT PARENTHESIS}./ && $& eq "\x{ff08}.", $message);
+        ok("\x{ff08}." =~ m/[\N{FULLWIDTH LEFT PARENTHESIS}]./ && $& eq "\x{ff08}.", $message);
     }
 
 } # End of sub run_tests
