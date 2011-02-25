@@ -1,7 +1,5 @@
 # Grind out a lot of combinatoric tests for folding.
 
-use charnames ":full";
-
 binmode STDOUT, ":utf8";
 
 BEGIN {
@@ -10,6 +8,8 @@ BEGIN {
     require './test.pl';
     skip_all_if_miniperl("no dynamic loading on miniperl, no Encode nor POSIX");
 }
+
+use charnames ":full";
 
 my $DEBUG = 0;  # Outputs extra information for debugging this .t
 
