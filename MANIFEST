@@ -510,7 +510,6 @@ cpan/DB_File/t/db-recno.t	See if DB_File works
 cpan/DB_File/typemap		Berkeley DB extension interface types
 cpan/DB_File/version.c		Berkeley DB extension interface version check
 cpan/Devel-DProf/bin/dprofpp	Perl code profile post-processor
-cpan/Devel-DProf/Changes		Perl code profiler changelog
 cpan/Devel-DProf/DProf.pm	Perl code profiler
 cpan/Devel-DProf/dprof/test1_t	Perl code profiler tests
 cpan/Devel-DProf/dprof/test1_v	Perl code profiler tests
