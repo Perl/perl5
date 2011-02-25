@@ -283,26 +283,28 @@ foreach my $test (sort { numerically } keys %tests) {
       # that don't fold, plus one other set in each range group.
       if (! $is_self) {
 
-      # /aa should only affect things with folds in the ASCII range.  But, try
-      # it on one pair in the other ranges just to make sure it doesn't break
-      # them.
-      if ($charset eq 'aa') {
-        if (! $target_has_ascii && ! $pattern_has_ascii) {
-          if ($target_above_latin1 || $pattern_above_latin1) {
-            next if defined $has_tested_aa_above_latin1
-                    && $has_tested_aa_above_latin1 != $test;
-            $has_tested_aa_above_latin1 = $test;
+        # /aa should only affect things with folds in the ASCII range.  But, try
+        # it on one set in the other ranges just to make sure it doesn't break
+        # them.
+        if ($charset eq 'aa') {
+          if (! $target_has_ascii && ! $pattern_has_ascii) {
+            if ($target_above_latin1 || $pattern_above_latin1) {
+              next if defined $has_tested_aa_above_latin1
+                      && $has_tested_aa_above_latin1 != $test;
+              $has_tested_aa_above_latin1 = $test;
+            }
+            next if defined $has_tested_latin1_aa
+                    && $has_tested_latin1_aa != $test;
+            $has_tested_latin1_aa = $test;
           }
-          next if defined $has_tested_latin1_aa && $has_tested_latin1_aa != $test;
-          $has_tested_latin1_aa = $test;
         }
-      }
-      elsif ($charset eq 'l') {
-        if (! $target_has_latin1 && ! $pattern_has_latin1) {
-          next if defined $has_tested_latin1_l && $has_tested_latin1_l != $test;
-          $has_tested_latin1_l = $test;
+        elsif ($charset eq 'l') {
+          if (! $target_has_latin1 && ! $pattern_has_latin1) {
+            next if defined $has_tested_latin1_l
+                    && $has_tested_latin1_l != $test;
+            $has_tested_latin1_l = $test;
+          }
         }
-      }
       }
 
       foreach my $utf8_target (0, 1) {    # Both utf8 and not, for
