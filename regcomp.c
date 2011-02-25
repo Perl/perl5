@@ -9908,7 +9908,6 @@ parseit:
 
     /* Finish up the non-bitmap entries */
     if (nonbitmap) {
-	UV* nonbitmap_array;
 	UV i;
 
 	/* If folding, we add to the list all characters that could fold to or
@@ -10084,34 +10083,6 @@ parseit:
 	    }
 	    invlist_destroy(fold_intersection);
 	} /* End of processing all the folds */
-
-	/*  Here have the full list of items to match that aren't in the
-	 *  bitmap.  Convert to the structure that the rest of the code is
-	 *  expecting.   XXX That rest of the code should convert to this
-	 *  structure */
-	nonbitmap_array = invlist_array(nonbitmap);
-	for (i = 0; i < invlist_len(nonbitmap); i++) {
-
-	    /* The next entry is the beginning of the range that is in the
-	     * class */
-	    UV start = nonbitmap_array[i++];
-
-	    /* The next entry is the beginning of the next range, which isn't
-	     * in the class, so the end of the current range is one less than
-	     * that */
-	    UV end = nonbitmap_array[i] - 1;
-
-	    if (start == end) {
-		Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n", start);
-	    }
-	    else {
-		/* The \t sets the whole range */
-		Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\t%04"UVxf"\n",
-			/* XXX EBCDIC */
-				   start, end);
-	    }
-	}
-	invlist_destroy(nonbitmap);
     }
 
     /* Here, we have calculated what code points should be in the character
@@ -10220,6 +10191,38 @@ parseit:
 	}
 	SvREFCNT_dec(listsv);
         return ret;
+    }
+
+    if (nonbitmap) {
+	UV* nonbitmap_array = invlist_array(nonbitmap);
+	UV nonbitmap_len = invlist_len(nonbitmap);
+	UV i;
+
+	/*  Here have the full list of items to match that aren't in the
+	 *  bitmap.  Convert to the structure that the rest of the code is
+	 *  expecting.   XXX That rest of the code should convert to this
+	 *  structure */
+	for (i = 0; i < nonbitmap_len; i++) {
+
+	    /* The next entry is the beginning of the range that is in the
+	     * class */
+	    UV start = nonbitmap_array[i++];
+
+	    /* The next entry is the beginning of the next range, which isn't
+	     * in the class, so the end of the current range is one less than
+	     * that.  */
+	    UV end = nonbitmap_array[i] - 1;
+	    if (start == end) {
+		Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n", start);
+	    }
+	    else {
+		/* The \t sets the whole range */
+		Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\t%04"UVxf"\n",
+			/* XXX EBCDIC */
+				   start, end);
+	    }
+	}
+	invlist_destroy(nonbitmap);
     }
 
     {
