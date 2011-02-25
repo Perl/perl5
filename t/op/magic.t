@@ -193,7 +193,7 @@ like ($@, qr/^Modification of a read-only value attempted/);
     else {
 	$wd = '.';
     }
-    my $perl = $Is_VMS ? $^X : "$wd/perl";
+    my $perl = $Is_VMS || $Config{d_procselfexe} ? $^X : "$wd/perl";
     my $headmaybe = '';
     my $middlemaybe = '';
     my $tailmaybe = '';
@@ -237,7 +237,7 @@ EOH
     $s1 = "\$^X is $perl, \$0 is $script\n";
     ok open(SCRIPT, ">$script") or diag "Can't write to $script: $!";
     ok print(SCRIPT $headmaybe . <<EOB . $middlemaybe . <<'EOF' . $tailmaybe) or diag $!;
-#!$wd/perl
+#!$perl
 EOB
 print "\$^X is $^X, \$0 is $0\n";
 EOF
@@ -246,7 +246,6 @@ EOF
     $_ = $Is_VMS ? `$perl $script` : `$script`;
     s/\.exe//i if $Is_Dos or $Is_Cygwin or $Is_os2;
     s{./$script}{$script} if $Is_BeOS; # revert BeOS execvp() side-effect
-    s{\bminiperl\b}{perl}; # so that test doesn't fail with miniperl
     s{is perl}{is $perl}; # for systems where $^X is only a basename
     s{\\}{/}g;
     if ($Is_MSWin32 || $Is_os2) {
