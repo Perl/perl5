@@ -10,6 +10,7 @@ BEGIN {
     $| = 1;
 
     require './test.pl';
+    skip_all_if_miniperl("no dynamic loading on miniperl, no re");
 }
 
 use strict;
