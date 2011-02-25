@@ -530,7 +530,6 @@ cpan/Devel-DProf/dprof/test8_t	Perl code profiler tests
 cpan/Devel-DProf/dprof/test8_v	Perl code profiler tests
 cpan/Devel-DProf/dprof/V.pm	Perl code profiler tests
 cpan/Devel-DProf/DProf.xs	Perl code profiler
-cpan/Devel-DProf/Makefile.PL	Perl code profiler makefile writer
 cpan/Devel-DProf/t/DProf.t	Perl code profiler
 cpan/Devel-DProf/Todo		Perl code profiler todo list
 cpan/Devel-PPPort/apicheck_c.PL		Devel::PPPort apicheck generator
