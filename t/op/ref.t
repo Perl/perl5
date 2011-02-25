@@ -7,7 +7,6 @@ BEGIN {
 }
 
 use strict qw(refs subs);
-use re ();
 
 plan(213);
 
@@ -136,7 +135,9 @@ sub mysub2 { lc shift }
 
 # Test REGEXP assignment
 
-{
+SKIP: {
+    skip_if_miniperl("no dynamic loading on miniperl, so can't load re", 5);
+    require re;
     my $x = qr/x/;
     my $str = "$x"; # regex stringification may change
 
