@@ -277,6 +277,12 @@ foreach my $test (sort { numerically } keys %tests) {
     # Now grind out tests, using various combinations.
     foreach my $charset (@charsets) {
 
+      # To cut down somewhat on the enormous quantity of tests this currently
+      # runs, skip some for some of the character sets whose results aren't
+      # likely to differ from others.  But run all tests on the code points
+      # that don't fold, plus one other set in each range group.
+      if (! $is_self) {
+
       # /aa should only affect things with folds in the ASCII range.  But, try
       # it on one pair in the other ranges just to make sure it doesn't break
       # them.
@@ -296,6 +302,7 @@ foreach my $test (sort { numerically } keys %tests) {
           next if defined $has_tested_latin1_l && $has_tested_latin1_l != $test;
           $has_tested_latin1_l = $test;
         }
+      }
       }
 
       foreach my $utf8_target (0, 1) {    # Both utf8 and not, for
