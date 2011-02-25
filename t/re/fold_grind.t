@@ -196,8 +196,10 @@ $tests{0x2C7} = [ 0x2C7 ];
 # To cut down on the number of tests
 my $has_tested_aa_above_latin1;
 my $has_tested_latin1_aa;
+my $has_tested_ascii_aa;
 my $has_tested_l_above_latin1;
 my $has_tested_latin1_l;
+my $has_tested_ascii_l;
 
 # For use by pairs() in generating combinations
 sub prefix {
@@ -258,6 +260,8 @@ foreach my $test (sort { numerically } keys %tests) {
     my $pattern_above_latin1 = grep { $_ > 255 } @pattern;
     my $target_has_ascii = grep { $_ < 128 } @target;
     my $pattern_has_ascii = grep { $_ < 128 } @pattern;
+    my $target_only_ascii = ! grep { $_ > 127 } @target;
+    my $pattern_only_ascii = ! grep { $_ > 127 } @pattern;
     my $target_has_latin1 = grep { $_ < 256 } @target;
     my $pattern_has_latin1 = grep { $_ < 256 } @pattern;
     my $is_self = @target == 1 && @pattern == 1 && $target[0] == $pattern[0];
@@ -306,6 +310,17 @@ foreach my $test (sort { numerically } keys %tests) {
             next if defined $has_tested_latin1_l
                     && $has_tested_latin1_l != $test;
             $has_tested_latin1_l = $test;
+          }
+          elsif ($target_only_ascii && $pattern_only_ascii) {
+
+              # And, except for one set just to make sure, skip tests
+              # where both elements in the pair are ASCII.  If one works for
+              # l, the others are likely too.  This skips tests where the
+              # fold is from non-ASCII to ASCII, but this part of the test
+              # is just about the ASCII components.
+              next if defined $has_tested_ascii_l
+                      && $has_tested_ascii_l != $test;
+              $has_tested_ascii_l = $test;
           }
         }
       }
