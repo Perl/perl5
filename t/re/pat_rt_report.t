@@ -210,8 +210,7 @@ sub run_tests {
 
     {
         local $BugId   = "20020124.005";
-        local $PatchId = "14795";
-        local $Message = "s///eg";
+        local $Message = "s///eg [change 13f46d054db22cf4]";
 
         for my $char ("a", "\x{df}", "\x{100}") {
             my $x = "$char b $char";
@@ -260,11 +259,10 @@ sub run_tests {
     }
 
     {
-        local $PatchId = '18179';
         my $s = "\x{100}" x 5;
         my $ok = $s =~ /(\x{100}{4})/;
         my ($ord, $len) = (ord $1, length $1);
-        ok $ok && $ord == 0x100 && $len == 4, "No panic: end_shift";
+        ok $ok && $ord == 0x100 && $len == 4, "No panic: end_shift [change 0e933229fa758625]";
     }
 
 
@@ -589,18 +587,17 @@ sub run_tests {
 
 
     {
-        local $PatchId = '26410';
         {
             package wooosh;
             sub gloople {"!"}
         }
         my $aeek = bless {} => 'wooosh';
         eval_ok sub {$aeek -> gloople () =~ /(.)/g},
-               "//g match against return value of sub";
+               "//g match against return value of sub [change e26a497577f3ce7b]";
 
         sub gloople {"!"}
         eval_ok sub {gloople () =~ /(.)/g},
-               "26410 didn't affect sub calls for some reason";
+               "change e26a497577f3ce7b didn't affect sub calls for some reason";
     }
 
 

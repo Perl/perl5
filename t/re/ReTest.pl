@@ -15,7 +15,6 @@ use vars qw(
     $DiePattern
     $WarnPattern
     $BugId
-    $PatchId
     $running_as_thread
     $IS_ASCII
     $IS_EBCDIC
@@ -61,7 +60,7 @@ sub pretty {
 }
 
 sub safe_globals {
-    defined($_) and s/#/\\#/g for $BugId, $PatchId, $TODO;
+    defined($_) and s/#/\\#/g for $BugId, $TODO;
 }
 
 sub _ok {
@@ -70,7 +69,6 @@ sub _ok {
     safe_globals();
     $mess    = pretty ($mess // $Message);
     $mess   .= "; Bug $BugId"     if defined $BugId;
-    $mess   .= "; Patch $PatchId" if defined $PatchId;
     $mess   .= " # TODO $TODO"     if defined $TODO;
 
     my $line_nr = (caller(1)) [2];

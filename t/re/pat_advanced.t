@@ -488,14 +488,14 @@ sub run_tests {
 
     {
         use charnames ':full';
-        local $PatchId = "13843";
         local $Message = "GREEK CAPITAL LETTER SIGMA vs " .
                          "COMBINING GREEK PERISPOMENI";
 
         my $SIGMA = "\N{GREEK CAPITAL LETTER SIGMA}";
         my $char  = "\N{COMBINING GREEK PERISPOMENI}";
 
-        may_not_warn sub {ok "_:$char:_" !~ m/_:$SIGMA:_/i};
+        may_not_warn sub {ok "_:$char:_" !~ m/_:$SIGMA:_/i},
+	    'Did not warn [change a5961de5f4215b5c]';
     }
 
 
