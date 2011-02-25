@@ -299,6 +299,9 @@ foreach my $test (sort { numerically } keys %tests) {
           }
         }
         elsif ($charset eq 'l') {
+
+          # For l, don't need to test beyond one set those things that are
+          # all above latin1.
           if (! $target_has_latin1 && ! $pattern_has_latin1) {
             next if defined $has_tested_latin1_l
                     && $has_tested_latin1_l != $test;
