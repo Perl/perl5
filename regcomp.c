@@ -9233,7 +9233,8 @@ S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8
            bitmap, but only when the target string is utf8.  Similarly when we
            don't have unicode semantics for the above ASCII Latin-1 characters,
            and they have a fold, they should match if the target is utf8, and
-           not otherwise */
+	   not otherwise.  We add the character here, and calculate the fold
+	   later, with the other nonbitmap folds */
 	if (! *nonbitmap_ptr) {
 	    *nonbitmap_ptr = _new_invlist(2);
 	}
