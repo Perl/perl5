@@ -950,11 +950,11 @@ X<READLINE>
 This method is called when the handle is read via C<E<lt>HANDLEE<gt>>
 or C<readline HANDLE>.
 
-As per L<perlfunc/readline>, in scalar context it should return the
-next line, or C<undef> if no more data.  In list context it should
-return all remaining lines or an empty list if no more data.  The
-input record separator C<$/> (see L<perlvar>) is included in the
-strings, or C<$/> C<undef> means "slurp" mode.
+As per L<C<readline>|perlfunc/readline>, in scalar context it should return
+the next line, or C<undef> for no more data.  In list context it should
+return all remaining lines, or an empty list for no more data.  The strings
+returned should include the input record separator C<$/> (see L<perlvar>),
+unless it is C<undef> (which means "slurp" mode).
 
     sub READLINE {
       my $r = shift;
@@ -963,7 +963,7 @@ strings, or C<$/> C<undef> means "slurp" mode.
                 "lines up\n",
                 "to eof\n");
       } else {
-        return "READLINE called $$r times\n";
+        return "READLINE called " . ++$$r . " times\n";
       }
     }
 
