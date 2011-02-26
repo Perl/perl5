@@ -409,10 +409,9 @@ sub do_head2 {
   my $section = _strip_parens($choice->{name});
   my $subject = $log->subject;
   my $body = $log->body;
-  my $id = $log->short_id;
 
   my $template = $self->note_template( $log,
-    "perldelta: $section [pending]\n\n=head2 $subject\n\n$body ($id)\n"
+    "perldelta: $section [pending]\n\n=head2 $subject\n\n$body\n"
   );
 
   my $note = $self->edit_text( $template );
@@ -428,10 +427,9 @@ sub do_linked_item {
   my $section = _strip_parens($choice->{name});
   my $subject = $log->subject;
   my $body = $log->body;
-  my $id = $log->short_id;
 
   my $template = $self->note_template( $log,
-    "perldelta: $section [pending]\n\n=head3 L<LINK>\n\n=over\n\n=item *\n\n$subject ($id)\n\n$body\n\n=back\n"
+    "perldelta: $section [pending]\n\n=head3 L<LINK>\n\n=over\n\n=item *\n\n$subject\n\n$body\n\n=back\n"
   );
 
   my $note = $self->edit_text($template);
@@ -447,10 +445,9 @@ sub do_item {
   my $section = _strip_parens($choice->{name});
   my $subject = $log->subject;
   my $body = $log->body;
-  my $id = $log->short_id;
 
   my $template = $self->note_template( $log,
-    "perldelta: $section [pending]\n\n=item *\n\n$subject ($id)\n\n$body\n"
+    "perldelta: $section [pending]\n\n=item *\n\n$subject\n\n$body\n"
   );
 
   my $note = $self->edit_text($template);
@@ -473,10 +470,9 @@ sub do_platform {
   my $section = _strip_parens($choice->{name});
   my $subject = $log->subject;
   my $body = $log->body;
-  my $id = $log->short_id;
 
   my $template = $self->note_template( $log,
-    "perldelta: $section [pending]\n\n=item PLATFORM-NAME\n\n$subject ($id)\n\n$body\n"
+    "perldelta: $section [pending]\n\n=item PLATFORM-NAME\n\n$subject\n\n$body\n"
   );
 
   my $note = $self->edit_text($template);
@@ -498,14 +494,13 @@ sub do_special {
   my $section = _strip_parens($choice->{name});
   my $subject = $log->subject;
   my $body = $log->body;
-  my $id = $log->short_id;
 
   my $template = $self->note_template( $log, << "HERE" );
 perldelta: $section [pending]
 
 $subject
 
-$body ($id)
+$body
 HERE
 
   my $note = $self->edit_text( $template );
