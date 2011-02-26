@@ -7,7 +7,7 @@ BEGIN {
 
 require 'test.pl';
 
-plan (127);
+plan (128);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -442,5 +442,7 @@ sub test_arylen {
  );
 }
 
+*trit = *scile;  $trit[0];
+ok(1, 'aelem_fast on a nonexistent array does not crash');
 
 "We're included by lib/Tie/Array/std.t so we need to return something true";
