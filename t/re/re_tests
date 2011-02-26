@@ -1329,6 +1329,9 @@ X(\w+)(?=\s)|X(\w+)	Xab	y	[$1-$2]	[-ab]
 (?|(?<foo>x)|(?<bar>y))	x	yM	$+{foo}	x	miniperl cannot load Tie::Hash::NamedCapture
 (?|(?<bar>y)|(?<foo>x))	x	yM	$+{foo}	x	miniperl cannot load Tie::Hash::NamedCapture
 (?<bar>)(?|(?<foo>x))	x	yM	$+{foo}	x	miniperl cannot load Tie::Hash::NamedCapture
+# Used to crash, because the last branch was ignored when the parens
+# were counted:
+(?|(b)|()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()()(a))	a	y	$&	a
 
 #Bug #41492
 (?(DEFINE)(?<A>(?&B)+)(?<B>a))(?&A)	a	y	$&	a

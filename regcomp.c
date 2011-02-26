@@ -7097,12 +7097,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     parse_start = RExC_parse;   /* MJD */
     br = regbranch(pRExC_state, &flags, 1,depth+1);
 
-    if (freeze_paren) {
-        if (RExC_npar > after_freeze)
-            after_freeze = RExC_npar;
-        RExC_npar = freeze_paren;
-    }
-
     /*     branch_len = (paren != 0); */
 
     if (br == NULL)
@@ -7246,7 +7240,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     if (RExC_in_lookbehind) {
 	RExC_in_lookbehind--;
     }
-    if (after_freeze)
+    if (after_freeze > RExC_npar)
         RExC_npar = after_freeze;
     return(ret);
 }
