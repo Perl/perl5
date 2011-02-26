@@ -10207,11 +10207,20 @@ parseit:
 	    /* The next entry is the beginning of the range that is in the
 	     * class */
 	    UV start = nonbitmap_array[i++];
+	    UV end;
 
 	    /* The next entry is the beginning of the next range, which isn't
 	     * in the class, so the end of the current range is one less than
-	     * that.  */
-	    UV end = nonbitmap_array[i] - 1;
+	     * that.  But if there is no next range, it means that the range
+	     * begun by 'start' extends to infinity, which for this platform
+	     * ends at UV_MAX */
+	    if (i == nonbitmap_len) {
+		end = UV_MAX;
+	    }
+	    else {
+		end = nonbitmap_array[i] - 1;
+	    }
+
 	    if (start == end) {
 		Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n", start);
 	    }
