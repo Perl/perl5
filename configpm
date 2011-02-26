@@ -203,7 +203,7 @@ sub _V {
     print "  $date\n" if defined $date;
 
     my @env = map { "$_=\"$ENV{$_}\"" } sort grep {/^PERL/} keys %ENV;
-    push @env, "CYGWIN=\"$ENV{CYGWIN}\"" if $^O eq 'cygwin';
+    push @env, "CYGWIN=\"$ENV{CYGWIN}\"" if $^O eq 'cygwin' and $ENV{CYGWIN};
 
     if (@env) {
         print "  \%ENV:\n";
