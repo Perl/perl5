@@ -6700,7 +6700,7 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 		     * has array element 1 contain the number of bytes in the
 		     * source that folded to it; the 2nd is the cumulative
 		     * number to match it; ... */
-		    U8 map_fold_len_back[UTF8_MAX_FOLD_CHAR_EXPAND] = { 0 };
+		    U8 map_fold_len_back[UTF8_MAX_FOLD_CHAR_EXPAND+1] = { 0 };
 		    U8 folded[UTF8_MAXBYTES_CASE+1];
 		    STRLEN foldlen = 0; /* num bytes in fold of 1st char */
 		    STRLEN foldlen_for_av; /* num bytes in fold of all chars */
