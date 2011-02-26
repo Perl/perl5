@@ -798,23 +798,27 @@ S_cl_and(struct regnode_charclass_class *cl,
 	cl->flags &= ~ANYOF_NON_UTF8_LATIN1_ALL;
 
     if (cl->flags & ANYOF_UNICODE_ALL
-	&& and_with->flags & ANYOF_NONBITMAP
+	&& ANYOF_NONBITMAP(and_with)
 	&& !(and_with->flags & ANYOF_INVERT))
     {
 	if (! (and_with->flags & ANYOF_UNICODE_ALL)) {
 	    cl->flags &= ~ANYOF_UNICODE_ALL;
 	}
-	cl->flags |= and_with->flags & ANYOF_NONBITMAP;	/* field is 2 bits; use
-							   only the one(s)
-							   actually set */
-	ARG_SET(cl, ARG(and_with));
+	else {
+
+	    /* The intersection of all unicode with something that isn't all
+	     * unicode is that something */
+	    ARG_SET(cl, ARG(and_with));
+	}
     }
     if (!(and_with->flags & ANYOF_UNICODE_ALL) &&
 	!(and_with->flags & ANYOF_INVERT))
+    {
 	cl->flags &= ~ANYOF_UNICODE_ALL;
-    if (!(and_with->flags & (ANYOF_NONBITMAP|ANYOF_UNICODE_ALL)) &&
-	!(and_with->flags & ANYOF_INVERT))
-	cl->flags &= ~ANYOF_NONBITMAP;
+	if (! ANYOF_NONBITMAP(and_with)) {
+	    ARG_SET(cl, ANYOF_NONBITMAP_EMPTY);
+	}
+    }
 }
 
 /* 'OR' a given class with another one.  Can create false positives */
@@ -876,7 +880,7 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
     /* If both nodes match something outside the bitmap, but what they match
      * outside is not the same pointer, and hence not easily compared, give up
      * and allow the start class to match everything outside the bitmap */
-    if (cl->flags & ANYOF_NONBITMAP && or_with->flags & ANYOF_NONBITMAP &&
+    if (ANYOF_NONBITMAP(cl) && ANYOF_NONBITMAP(or_with) &&
 	ARG(cl) != ARG(or_with)) {
 	cl->flags |= ANYOF_UNICODE_ALL;
     }
@@ -9166,7 +9170,7 @@ case ANYOF_N##NAME:                                                            \
              stored += set_regclass_bit(                                     \
 			   pRExC_state, ret, (U8) UNI_TO_NATIVE(value), &nonbitmap); \
 	    }                                                                  \
-	    ANYOF_FLAGS(ret) |= ANYOF_UNICODE_ALL|ANYOF_UTF8;                  \
+	    ANYOF_FLAGS(ret) |= ANYOF_UNICODE_ALL;                             \
 	}                                                                      \
 	else {                                                                 \
 	    /* For a non-ut8 target string with DEPENDS semantics, all above   \
@@ -9174,7 +9178,7 @@ case ANYOF_N##NAME:                                                            \
 	     * classes.  But in utf8, they have their Unicode semantics, so    \
 	     * can't just set them in the bitmap, or else regexec.c will think \
 	     * they matched when they shouldn't. */                            \
-	    ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL|ANYOF_UTF8;          \
+	    ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL;                     \
 	}                                                                      \
     }                                                                          \
     yesno = '!';                                                               \
@@ -9239,7 +9243,6 @@ S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8
 	    *nonbitmap_ptr = _new_invlist(2);
 	}
 	*nonbitmap_ptr = add_range_to_invlist(*nonbitmap_ptr, value, value);
-	ANYOF_FLAGS(node) |= ANYOF_UTF8;
     }
 
     return stored;
@@ -9292,6 +9295,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
     char *rangebegin = NULL;
     bool need_class = 0;
     SV *listsv = NULL;
+    STRLEN initial_listsv_len = 0; /* Kind of a kludge to see if it is more
+				      than just initialized.  */
     UV n;
     HV* nonbitmap = NULL;
     AV* unicode_alternate  = NULL;
@@ -9346,6 +9351,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
 	}
 	ANYOF_BITMAP_ZERO(ret);
 	listsv = newSVpvs("# comment\n");
+	initial_listsv_len = SvCUR(listsv);
     }
 
     nextvalue = RExC_parse < RExC_end ? UCHARAT(RExC_parse) : 0;
@@ -9601,7 +9607,6 @@ parseit:
                          set_regclass_bit(pRExC_state, ret, '-', &nonbitmap);
 		    }
 		    else {
-			ANYOF_FLAGS(ret) |= ANYOF_UTF8;
 			Perl_sv_catpvf(aTHX_ listsv,
 			   "%04"UVxf"\n%04"UVxf"\n", (UV)prevvalue, (UV) '-');
 		    }
@@ -9708,7 +9713,6 @@ parseit:
 		if (what && ! (AT_LEAST_ASCII_RESTRICTED)) {
 		    /* Strings such as "+utf8::isWord\n" */
 		    Perl_sv_catpvf(aTHX_ listsv, "%cutf8::Is%s\n", yesno, what);
-		    ANYOF_FLAGS(ret) |= ANYOF_UTF8;
 		}
 
 		continue;
@@ -9792,7 +9796,6 @@ parseit:
 		nonbitmap = _new_invlist(2);
 	    }
 	    nonbitmap = add_range_to_invlist(nonbitmap, prevnatvalue, natvalue);
-	    ANYOF_FLAGS(ret) |= ANYOF_UTF8;
 	}
 #if 0
 
@@ -10020,7 +10023,6 @@ parseit:
 				    loc += UTF8SKIP(loc);
 				}
 			    }
-			    ANYOF_FLAGS(ret) |= ANYOF_UTF8;
 
 			    if (!unicode_alternate) {
 				unicode_alternate = newAV();
@@ -10095,20 +10097,25 @@ parseit:
      * optimize locale.  Doing so perhaps could be done as long as there is
      * nothing like \w in it; some thought also would have to be given to the
      * interaction with above 0x100 chars */
-    if (! LOC && (ANYOF_FLAGS(ret) & ANYOF_FLAGS_ALL) == ANYOF_INVERT) {
+    if (! LOC
+	&& (ANYOF_FLAGS(ret) & ANYOF_FLAGS_ALL) == ANYOF_INVERT
+	&& ! unicode_alternate
+	&& ! nonbitmap
+	&& SvCUR(listsv) == initial_listsv_len)
+    {
 	for (value = 0; value < ANYOF_BITMAP_SIZE; ++value)
 	    ANYOF_BITMAP(ret)[value] ^= 0xFF;
 	stored = 256 - stored;
 
 	/* The inversion means that everything above 255 is matched; and at the
 	 * same time we clear the invert flag */
-	ANYOF_FLAGS(ret) = ANYOF_UTF8|ANYOF_UNICODE_ALL;
+	ANYOF_FLAGS(ret) = ANYOF_UNICODE_ALL;
     }
 
     /* Folding in the bitmap is taken care of above, but not for locale (for
      * which we have to wait to see what folding is in effect at runtime), and
      * for things not in the bitmap.  Set run-time fold flag for these */
-    if (FOLD && (LOC || (ANYOF_FLAGS(ret) & ANYOF_NONBITMAP))) {
+    if (FOLD && (LOC || nonbitmap)) {
 	ANYOF_FLAGS(ret) |= ANYOF_LOC_NONBITMAP_FOLD;
     }
 
@@ -10126,7 +10133,9 @@ parseit:
      * characters which only have the two folds; so things like 'fF' and 'Ii'
      * wouldn't work because they are part of the fold of 'LATIN SMALL LIGATURE
      * FI'. */
-    if (! (ANYOF_FLAGS(ret) & (ANYOF_NONBITMAP|ANYOF_INVERT|ANYOF_UNICODE_ALL))
+    if (! nonbitmap
+	&& SvCUR(listsv) == initial_listsv_len
+	&& ! (ANYOF_FLAGS(ret) & (ANYOF_INVERT|ANYOF_UNICODE_ALL))
         && (((stored == 1 && ((! (ANYOF_FLAGS(ret) & ANYOF_LOCALE))
                               || (! ANYOF_CLASS_TEST_ANY_SET(ret)))))
 	    || (stored == 2 && ((! (ANYOF_FLAGS(ret) & ANYOF_LOCALE))
@@ -10234,7 +10243,13 @@ parseit:
 	invlist_destroy(nonbitmap);
     }
 
-    {
+    if (SvCUR(listsv) == initial_listsv_len && ! unicode_alternate) {
+	ARG_SET(ret, ANYOF_NONBITMAP_EMPTY);
+	SvREFCNT_dec(listsv);
+	SvREFCNT_dec(unicode_alternate);
+    }
+    else {
+
 	AV * const av = newAV();
 	SV *rv;
 	/* The 0th element stores the character class description
@@ -11039,7 +11054,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
         /* output information about the unicode matching */
 	if (flags & ANYOF_UNICODE_ALL)
 	    sv_catpvs(sv, "{unicode_all}");
-	else if (flags & ANYOF_UTF8)
+	else if (ANYOF_NONBITMAP(o))
 	    sv_catpvs(sv, "{unicode}");
 	if (flags & ANYOF_NONBITMAP_NON_UTF8)
 	    sv_catpvs(sv, "{outside bitmap}");

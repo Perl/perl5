@@ -310,6 +310,22 @@ struct regnode_charclass_class {
 
 #define SIZE_ONLY (RExC_emit == &PL_regdummy)
 
+/* If the bitmap doesn't fully represent what this ANYOF node can match, the
+ * ARG is set to this special value (since 0, 1, ... are legal, but will never
+ * reach this high). */
+#define ANYOF_NONBITMAP_EMPTY	((U32) -1)
+
+/* The information used to be stored as as combination of the ANYOF_UTF8 and
+ * ANYOF_NONBITMAP_NON_UTF8 bits in the flags field, but was moved out of there
+ * to free up a bit for other uses.  This tries to hide the change from
+ * existing code as much as possible.  Now, the data structure that goes in ARG
+ * is not allocated unless it is needed, and that is what is used to determine
+ * if there is something outside the bitmap.  The code now assumes that if
+ * that structure exists, that any UTF-8 encoded string should be tried against
+ * it, but a non-UTF8-encoded string will be tried only if the
+ * ANYOF_NONBITMAP_NON_UTF8 bit is also set. */
+#define ANYOF_NONBITMAP(node)	(ARG(node) != ANYOF_NONBITMAP_EMPTY)
+
 /* Flags for node->flags of ANYOF.  These are in short supply, so some games
  * are done to share them, as described below.  If necessary, the ANYOF_LOCALE
  * and ANYOF_CLASS bits could be shared with a space penalty for locale nodes
@@ -347,15 +363,8 @@ struct regnode_charclass_class {
 #define ANYOF_CLASS	 0x08
 #define ANYOF_LARGE      ANYOF_CLASS    /* Same; name retained for back compat */
 
-/* Can match something outside the bitmap that is expressible only in utf8 */
-#define ANYOF_UTF8		0x10
-
 /* Can match something outside the bitmap that isn't in utf8 */
 #define ANYOF_NONBITMAP_NON_UTF8 0x20
-
-/* Set if the bitmap doesn't fully represent what this node can match */
-#define ANYOF_NONBITMAP		(ANYOF_UTF8|ANYOF_NONBITMAP_NON_UTF8)
-#define ANYOF_UNICODE		ANYOF_NONBITMAP	/* old name, for back compat */
 
 /* Matches every code point 0x100 and above*/
 #define ANYOF_UNICODE_ALL	0x40
