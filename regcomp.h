@@ -351,12 +351,19 @@ struct regnode_charclass_class {
 #define ANYOF_INVERT		 0x04
 
 /* EOS, meaning that it can match an empty string too, is used for the
- * synthetic start class (ssc) only.  It can share the INVERT bit, as the ssc
- * is never inverted.  The bit just needs to be turned off before regexec.c
- * gets a hold of it so that regexec.c doesn't think it's inverted, but this
- * happens automatically, as if the ssc can match an EOS, the ssc is discarded,
- * and never passed to regexec.c */
-#define ANYOF_EOS		ANYOF_INVERT
+ * synthetic start class (ssc) only.  It looks like it could share the INVERT
+ * bit, as the ssc is never inverted.  But doing that caused this reges to
+ * not match:
+ * 'foo/file.fob' =~ m,^(?=[^\.])[^/]* /(?=[^\.])[^/]*\.fo[^/]$,;
+ * (except the space between the * and the / above shouldn't be there; it was
+ * inserted to make this comment continue on.)
+ * Rather than try to figure out what was going on in the optimizer, I (khw)
+ * found a way to save a different bit.  But my original line of reasoning was
+ * "The bit just needs to be turned off before regexec.c gets a hold of it so
+ * that regexec.c doesn't think it's inverted, but this happens automatically,
+ * as if the ssc can match an EOS, the ssc is discarded, and never passed to
+ * regexec.c" */
+#define ANYOF_EOS		0x10
 
 /* CLASS is never set unless LOCALE is too: has runtime \d, \w, [:posix:], ...
  * The non-locale ones are resolved at compile-time */

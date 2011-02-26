@@ -25,7 +25,7 @@ BEGIN {
 }
 
 
-plan tests => 1343;  # Update this when adding/deleting tests.
+plan tests => 1344;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2134,6 +2134,9 @@ sub run_tests {
                  (?<=[=&]) (?=.)
             )}iox', "Lookbehind with \\xdf matchable compiles";
     }
+
+    # RT #82610
+    ok 'foo/file.fob' =~ m,^(?=[^\.])[^/]*/(?=[^\.])[^/]*\.fo[^/]$,;
 
     #
     # Keep the following tests last -- they may crash perl
