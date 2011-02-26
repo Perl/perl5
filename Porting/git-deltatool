@@ -17,7 +17,7 @@ use Term::ReadKey;
 use Term::ANSIColor;
 use Pod::Usage;
 
-BEGIN { struct( git => '$', last_tag => '$', opt => '%' ) }
+BEGIN { struct( git => '$', last_tag => '$', opt => '%', original_stdout => '$' ) }
 
 __PACKAGE__->run;
 
@@ -371,6 +371,14 @@ sub do_blocking {
   return 1;
 }
 
+sub do_examine {
+  my ($self, $choice, $log) = @_;
+  $self->start_pager;
+  say $self->get_diff($log);
+  $self->end_pager;
+  return;
+}
+
 sub do_cherry {
   my ($self, $choice, $log) = @_;
   my $id = $log->short_id;
@@ -522,6 +530,7 @@ sub do_subsection {
 sub action_choices {
   my ($self) = @_;
   state $action_choices = [
+      { name => 'E(x)amine', handler => 'examine' },
       { name => '(+)Cherrymaint', handler => 'cherry' },
       { name => '(?)NeedHelp', handler => 'blocking' },
       { name => 'S(k)ip', handler => 'skip' },
@@ -697,6 +706,42 @@ sub section_order {
     }
   }
   return @order;
+}
+
+#--------------------------------------------------------------------------#
+# Pager handling
+#--------------------------------------------------------------------------#
+
+sub get_pager { $ENV{'PAGER'} || `which less` || `which more` }
+
+sub in_pager { shift->original_stdout ? 1 : 0 }
+
+sub start_pager {
+  my $self = shift;
+  my $content = shift;
+  if (!$self->in_pager) {
+    local $ENV{'LESS'} ||= '-FXe';
+    local $ENV{'MORE'};
+    $ENV{'MORE'} ||= '-FXe' unless $^O =~ /^MSWin/;
+
+    my $pager = $self->get_pager;
+    return unless $pager;
+    open (my $cmd, "|-", $pager) || return;
+    $|++;
+    $self->original_stdout(*STDOUT);
+
+    # $pager will be closed once we restore STDOUT to $original_stdout
+    *STDOUT = $cmd;
+  }
+}
+
+sub end_pager {
+  my $self = shift;
+  return unless ($self->in_pager);
+  *STDOUT = $self->original_stdout;
+
+  # closes the pager
+  $self->original_stdout(undef);
 }
 
 #--------------------------------------------------------------------------#
