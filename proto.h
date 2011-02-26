@@ -5961,11 +5961,8 @@ STATIC U32	S_add_data(struct RExC_state_t *pRExC_state, U32 n, const char *s)
 #define PERL_ARGS_ASSERT_ADD_DATA	\
 	assert(pRExC_state); assert(s)
 
-STATIC HV*	S_add_range_to_invlist(pTHX_ HV* const invlist, const UV start, const UV end)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_ADD_RANGE_TO_INVLIST	\
-	assert(invlist)
+STATIC HV*	S_add_range_to_invlist(pTHX_ HV* invlist, const UV start, const UV end)
+			__attribute__warn_unused_result__;
 
 STATIC void	S_checkposixcc(pTHX_ struct RExC_state_t *pRExC_state)
 			__attribute__nonnull__(pTHX_1);

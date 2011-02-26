@@ -6249,18 +6249,25 @@ S_invlist_intersection(pTHX_ HV* const a, HV* const b)
 }
 
 STATIC HV*
-S_add_range_to_invlist(pTHX_ HV* const invlist, const UV start, const UV end)
+S_add_range_to_invlist(pTHX_ HV* invlist, const UV start, const UV end)
 {
     /* Add the range from 'start' to 'end' inclusive to the inversion list's
      * set.  A pointer to the inversion list is returned.  This may actually be
-     * a new list, in which case the passed in one has been destroyed */
+     * a new list, in which case the passed in one has been destroyed.  The
+     * passed in inversion list can be NULL, in which case a new one is created
+     * with just the one range in it */
 
     HV* range_invlist;
     HV* added_invlist;
+    UV len;
 
-    UV len = invlist_len(invlist);
-
-    PERL_ARGS_ASSERT_ADD_RANGE_TO_INVLIST;
+    if (invlist == NULL) {
+	invlist = _new_invlist(2);
+	len = 0;
+    }
+    else {
+	len = invlist_len(invlist);
+    }
 
     /* If comes after the final entry, can just append it to the end */
     if (len == 0

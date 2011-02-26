@@ -1300,7 +1300,7 @@ EXMpR	|HV*	|_new_invlist	|IV initial_size
 EXMpR	|HV*	|_swash_to_invlist	|NN SV* const swash
 EXMp	|void	|_append_range_to_invlist   |NN HV* const invlist|const UV start|const UV end
 #ifdef PERL_IN_REGCOMP_C
-EsMR	|HV*	|add_range_to_invlist	|NN HV* const invlist|const UV start|const UV end
+EsMR	|HV*	|add_range_to_invlist	|NULLOK HV* invlist|const UV start|const UV end
 EiMR	|UV*	|invlist_array	|NN HV* const invlist
 EiM	|void	|invlist_destroy	|NN HV* const invlist
 EsM	|void	|invlist_extend    |NN HV* const invlist|const UV len
