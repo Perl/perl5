@@ -9240,9 +9240,6 @@ S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8
            and they have a fold, they should match if the target is utf8, and
 	   not otherwise.  We add the character here, and calculate the fold
 	   later, with the other nonbitmap folds */
-	if (! *nonbitmap_ptr) {
-	    *nonbitmap_ptr = _new_invlist(2);
-	}
 	*nonbitmap_ptr = add_range_to_invlist(*nonbitmap_ptr, value, value);
     }
 
@@ -9793,9 +9790,6 @@ parseit:
 	  if (value > 255) {
 	    const UV prevnatvalue  = NATIVE_TO_UNI(prevvalue);
 	    const UV natvalue      = NATIVE_TO_UNI(value);
-	    if (! nonbitmap) {
-		nonbitmap = _new_invlist(2);
-	    }
 	    nonbitmap = add_range_to_invlist(nonbitmap, prevnatvalue, natvalue);
 	}
 #if 0
