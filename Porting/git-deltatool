@@ -219,7 +219,7 @@ sub edit_text {
   $args //= {};
   my $tempfh = File::Temp->new;
   $tempfh->printflush( $text );
-  if ( my (@editor) = $ENV{VISUAL} || $ENV{EDITOR} ) {
+  if ( my @editor = split /\s+/, ($ENV{VISUAL} || $ENV{EDITOR}) ) {
     push @editor, "-f" if $editor[0] =~ /^gvim/;
     system(@editor, "$tempfh");
   }
