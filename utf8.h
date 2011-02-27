@@ -436,6 +436,8 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #   define LATIN_SMALL_LETTER_SHARP_S	0x00DF
 #   define LATIN_SMALL_LETTER_Y_WITH_DIAERESIS 0x00FF
 #   define MICRO_SIGN 0x00B5
+#   define LATIN_CAPITAL_LETTER_A_WITH_RING_ABOVE 0x00C5
+#   define LATIN_SMALL_LETTER_A_WITH_RING_ABOVE 0x00E5
 #endif
 
 #define ANYOF_FOLD_SHARP_S(node, input, end)	\
