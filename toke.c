@@ -1511,6 +1511,7 @@ S_incline(pTHX_ const char *s)
     const char *t;
     const char *n;
     const char *e;
+    line_t line_num;
 
     PERL_ARGS_ASSERT_INCLINE;
 
@@ -1554,9 +1555,10 @@ S_incline(pTHX_ const char *s)
     if (*e != '\n' && *e != '\0')
 	return;		/* false alarm */
 
+    line_num = atoi(n)-1;
+
     if (t - s > 0) {
 	const STRLEN len = t - s;
-#ifndef USE_ITHREADS
 	SV *const temp_sv = CopFILESV(PL_curcop);
 	const char *cf;
 	STRLEN tmplen;
@@ -1611,19 +1613,35 @@ S_incline(pTHX_ const char *s)
 		    gv_init(gv2, PL_defstash, tmpbuf2, tmplen2, FALSE);
 		    /* adjust ${"::_<newfilename"} to store the new file name */
 		    GvSV(gv2) = newSVpvn(tmpbuf2 + 2, tmplen2 - 2);
-		    GvHV(gv2) = MUTABLE_HV(SvREFCNT_inc(GvHV(*gvp)));
-		    GvAV(gv2) = MUTABLE_AV(SvREFCNT_inc(GvAV(*gvp)));
+		    /* The line number may differ. If that is the case,
+		       alias the saved lines that are in the array.
+		       Otherwise alias the whole array. */
+		    if (CopLINE(PL_curcop) == line_num) {
+			GvHV(gv2) = MUTABLE_HV(SvREFCNT_inc(GvHV(*gvp)));
+			GvAV(gv2) = MUTABLE_AV(SvREFCNT_inc(GvAV(*gvp)));
+		    }
+		    else if (GvAV(*gvp)) {
+			AV * const av = GvAV(*gvp);
+			const I32 start = CopLINE(PL_curcop)+1;
+			I32 items = AvFILLp(av) - start;
+			if (items > 0) {
+			    AV * const av2 = GvAVn(gv2);
+			    SV **svp = AvARRAY(av) + start;
+			    I32 l = (I32)line_num+1;
+			    while (items--)
+				av_store(av2, l++, SvREFCNT_inc(*svp++));
+			}
+		    }
 		}
 
 		if (tmpbuf2 != smallbuf) Safefree(tmpbuf2);
 	    }
 	    if (tmpbuf != smallbuf) Safefree(tmpbuf);
 	}
-#endif
 	CopFILE_free(PL_curcop);
 	CopFILE_setn(PL_curcop, s, len);
     }
-    CopLINE_set(PL_curcop, atoi(n)-1);
+    CopLINE_set(PL_curcop, line_num);
 }
 
 #ifdef PERL_MAD
