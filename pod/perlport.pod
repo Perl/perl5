@@ -2119,6 +2119,8 @@ at L<http://www.cpan.org/src>
 
 =item FreeBSD
 
+=item Debian GNU/kFreeBSD
+
 =item Haiku
 
 =item Irix (6.5. What else?)
