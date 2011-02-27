@@ -9611,7 +9611,8 @@ parseit:
 	    }
 
 	    /* a bad range like a-\d, a-[:digit:].  The '-' is taken as a
-	     * literal */
+	     * literal, as is the character that began the false range, i.e.
+	     * the 'a' in the examples */
 	    if (range) {
 		if (!SIZE_ONLY) {
 		    const int w =
@@ -9621,15 +9622,14 @@ parseit:
 			       "False [] range \"%*.*s\"",
 			       w, w, rangebegin);
 
+		    stored +=
+                         set_regclass_bit(pRExC_state, ret, '-', &nonbitmap);
 		    if (prevvalue < 256) {
 			stored +=
                          set_regclass_bit(pRExC_state, ret, (U8) prevvalue, &nonbitmap);
-			stored +=
-                         set_regclass_bit(pRExC_state, ret, '-', &nonbitmap);
 		    }
 		    else {
-			Perl_sv_catpvf(aTHX_ listsv,
-			   "%04"UVxf"\n%04"UVxf"\n", (UV)prevvalue, (UV) '-');
+			nonbitmap = add_cp_to_invlist(nonbitmap, prevvalue);
 		    }
 		}
 
