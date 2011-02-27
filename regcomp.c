@@ -9123,14 +9123,14 @@ S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
 ANYOF_##NAME:                                                                  \
 	for (value = 0; value < 256; value++)                                  \
 	    if (TEST)                                                          \
-	    stored += set_regclass_bit(pRExC_state, ret, (U8) value, &nonbitmap);  \
+	    stored += set_regclass_bit(pRExC_state, ret, (U8) value, &nonbitmap, &unicode_alternate);  \
     yesno = '+';                                                               \
     what = WORD;                                                               \
     break;                                                                     \
 case ANYOF_N##NAME:                                                            \
 	for (value = 0; value < 256; value++)                                  \
 	    if (!TEST)                                                         \
-	    stored += set_regclass_bit(pRExC_state, ret, (U8) value, &nonbitmap);  \
+	    stored += set_regclass_bit(pRExC_state, ret, (U8) value, &nonbitmap, &unicode_alternate);  \
     yesno = '!';                                                               \
     what = WORD;                                                               \
     break
@@ -9145,14 +9145,14 @@ ANYOF_##NAME:                                                                  \
     else if (UNI_SEMANTICS) {                                                  \
         for (value = 0; value < 256; value++) {                                \
             if (TEST_8(value)) stored +=                                       \
-                      set_regclass_bit(pRExC_state, ret, (U8) value, &nonbitmap);  \
+                      set_regclass_bit(pRExC_state, ret, (U8) value, &nonbitmap, &unicode_alternate);  \
         }                                                                      \
     }                                                                          \
     else {                                                                     \
         for (value = 0; value < 128; value++) {                                \
             if (TEST_7(UNI_TO_NATIVE(value))) stored +=                        \
 		set_regclass_bit(pRExC_state, ret,                     \
-			           (U8) UNI_TO_NATIVE(value), &nonbitmap);                 \
+			           (U8) UNI_TO_NATIVE(value), &nonbitmap, &unicode_alternate);                 \
         }                                                                      \
     }                                                                          \
     yesno = '+';                                                               \
@@ -9163,18 +9163,18 @@ case ANYOF_N##NAME:                                                            \
     else if (UNI_SEMANTICS) {                                                  \
         for (value = 0; value < 256; value++) {                                \
             if (! TEST_8(value)) stored +=                                     \
-		    set_regclass_bit(pRExC_state, ret, (U8) value, &nonbitmap);    \
+		    set_regclass_bit(pRExC_state, ret, (U8) value, &nonbitmap, &unicode_alternate);    \
         }                                                                      \
     }                                                                          \
     else {                                                                     \
         for (value = 0; value < 128; value++) {                                \
             if (! TEST_7(UNI_TO_NATIVE(value))) stored += set_regclass_bit(  \
-			pRExC_state, ret, (U8) UNI_TO_NATIVE(value), &nonbitmap);    \
+			pRExC_state, ret, (U8) UNI_TO_NATIVE(value), &nonbitmap, &unicode_alternate);    \
         }                                                                      \
 	if (AT_LEAST_ASCII_RESTRICTED) {                                       \
 	    for (value = 128; value < 256; value++) {                          \
              stored += set_regclass_bit(                                     \
-			   pRExC_state, ret, (U8) UNI_TO_NATIVE(value), &nonbitmap); \
+			   pRExC_state, ret, (U8) UNI_TO_NATIVE(value), &nonbitmap, &unicode_alternate); \
 	    }                                                                  \
 	    ANYOF_FLAGS(ret) |= ANYOF_UNICODE_ALL;                             \
 	}                                                                      \
@@ -9208,7 +9208,7 @@ case ANYOF_N##NAME:                                                            \
 #endif
 
 STATIC U8
-S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8 value, HV** nonbitmap_ptr)
+S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8 value, HV** invlist_ptr, AV** alternate_ptr)
 {
 
     /* Handle the setting of folds in the bitmap for non-locale ANYOF nodes.
@@ -9245,7 +9245,7 @@ S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8
            and they have a fold, they should match if the target is utf8, and
 	   not otherwise.  We add the character here, and calculate the fold
 	   later, with the other nonbitmap folds */
-	*nonbitmap_ptr = add_range_to_invlist(*nonbitmap_ptr, value, value);
+	*invlist_ptr = add_range_to_invlist(*invlist_ptr, value, value);
     }
 
     return stored;
@@ -9253,7 +9253,7 @@ S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8
 
 
 PERL_STATIC_INLINE U8
-S_set_regclass_bit(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8 value, HV** nonbitmap_ptr)
+S_set_regclass_bit(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8 value, HV** invlist_ptr, AV** alternate_ptr)
 {
     /* This inline function sets a bit in the bitmap if not already set, and if
      * appropriate, its fold, returning the number of bits that actually
@@ -9271,7 +9271,7 @@ S_set_regclass_bit(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8 valu
     stored = 1;
 
     if (FOLD && ! LOC) {	/* Locale folds aren't known until runtime */
-	stored += set_regclass_bit_fold(pRExC_state, node, value, nonbitmap_ptr);
+	stored += set_regclass_bit_fold(pRExC_state, node, value, invlist_ptr, alternate_ptr);
     }
 
     return stored;
@@ -9623,10 +9623,10 @@ parseit:
 			       w, w, rangebegin);
 
 		    stored +=
-                         set_regclass_bit(pRExC_state, ret, '-', &nonbitmap);
+                         set_regclass_bit(pRExC_state, ret, '-', &nonbitmap, &unicode_alternate);
 		    if (prevvalue < 256) {
 			stored +=
-                         set_regclass_bit(pRExC_state, ret, (U8) prevvalue, &nonbitmap);
+                         set_regclass_bit(pRExC_state, ret, (U8) prevvalue, &nonbitmap, &unicode_alternate);
 		    }
 		    else {
 			nonbitmap = add_cp_to_invlist(nonbitmap, prevvalue);
@@ -9676,7 +9676,7 @@ parseit:
 		    else {
 			for (value = 0; value < 128; value++)
 			    stored +=
-                              set_regclass_bit(pRExC_state, ret, (U8) ASCII_TO_NATIVE(value), &nonbitmap);
+                              set_regclass_bit(pRExC_state, ret, (U8) ASCII_TO_NATIVE(value), &nonbitmap, &unicode_alternate);
 		    }
 		    yesno = '+';
 		    what = NULL;	/* Doesn't match outside ascii, so
@@ -9688,7 +9688,7 @@ parseit:
 		    else {
 			for (value = 128; value < 256; value++)
 			    stored +=
-                              set_regclass_bit(pRExC_state, ret, (U8) ASCII_TO_NATIVE(value), &nonbitmap);
+                              set_regclass_bit(pRExC_state, ret, (U8) ASCII_TO_NATIVE(value), &nonbitmap, &unicode_alternate);
 		    }
 		    ANYOF_FLAGS(ret) |= ANYOF_UNICODE_ALL;
 		    yesno = '!';
@@ -9701,7 +9701,7 @@ parseit:
 			/* consecutive digits assumed */
 			for (value = '0'; value <= '9'; value++)
 			    stored +=
-                              set_regclass_bit(pRExC_state, ret, (U8) value, &nonbitmap);
+                              set_regclass_bit(pRExC_state, ret, (U8) value, &nonbitmap, &unicode_alternate);
 		    }
 		    yesno = '+';
 		    what = POSIX_CC_UNI_NAME("Digit");
@@ -9713,10 +9713,10 @@ parseit:
 			/* consecutive digits assumed */
 			for (value = 0; value < '0'; value++)
 			    stored +=
-                              set_regclass_bit(pRExC_state, ret, (U8) value, &nonbitmap);
+                              set_regclass_bit(pRExC_state, ret, (U8) value, &nonbitmap, &unicode_alternate);
 			for (value = '9' + 1; value < 256; value++)
 			    stored +=
-                              set_regclass_bit(pRExC_state, ret, (U8) value, &nonbitmap);
+                              set_regclass_bit(pRExC_state, ret, (U8) value, &nonbitmap, &unicode_alternate);
 		    }
 		    yesno = '!';
 		    what = POSIX_CC_UNI_NAME("Digit");
@@ -9765,7 +9765,7 @@ parseit:
 		    }
 		    if (!SIZE_ONLY)
 			stored +=
-                            set_regclass_bit(pRExC_state, ret, '-', &nonbitmap);
+                            set_regclass_bit(pRExC_state, ret, '-', &nonbitmap, &unicode_alternate);
 		} else
 		    range = 1;	/* yeah, it's a range! */
 		continue;	/* but do it the next time */
@@ -9794,20 +9794,20 @@ parseit:
 			for (i = prevvalue; i <= ceilvalue; i++)
 			    if (isLOWER(i) && !ANYOF_BITMAP_TEST(ret,i)) {
 				stored +=
-                                  set_regclass_bit(pRExC_state, ret, (U8) i, &nonbitmap);
+                                  set_regclass_bit(pRExC_state, ret, (U8) i, &nonbitmap, &unicode_alternate);
 			    }
 		    } else {
 			for (i = prevvalue; i <= ceilvalue; i++)
 			    if (isUPPER(i) && !ANYOF_BITMAP_TEST(ret,i)) {
 				stored +=
-                                  set_regclass_bit(pRExC_state, ret, (U8) i, &nonbitmap);
+                                  set_regclass_bit(pRExC_state, ret, (U8) i, &nonbitmap, &unicode_alternate);
 			    }
 		    }
 		}
 		else
 #endif
 		      for (i = prevvalue; i <= ceilvalue; i++) {
-			stored += set_regclass_bit(pRExC_state, ret, (U8) i, &nonbitmap);
+			stored += set_regclass_bit(pRExC_state, ret, (U8) i, &nonbitmap, &unicode_alternate);
 	              }
 	  }
 	  if (value > 255) {
@@ -10077,7 +10077,7 @@ parseit:
 				}
 
 				if (c < 256 && AT_LEAST_UNI_SEMANTICS) {
-				    stored += set_regclass_bit(pRExC_state, ret, (U8) c, &nonbitmap);
+				    stored += set_regclass_bit(pRExC_state, ret, (U8) c, &nonbitmap, &unicode_alternate);
 				}
 				    /* It may be that the code point is already
 				     * in this range or already in the bitmap,
