@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 693;
+plan tests => 691;
 
 $| = 1;
 
@@ -1004,18 +1004,6 @@ SKIP: {
     close FILE;
     test tainted $block;
     test tainted $line;
-}
-
-# Globs should be forbidden, except under VMS,
-#   which doesn't spawn an external program.
-SKIP: {
-    skip "globs should be forbidden", 2 if 1 or $Is_VMS;
-
-    my @globs = eval { <*> };
-    test @globs == 0 && $@ =~ /^Insecure dependency/;
-
-    @globs = eval { glob '*' };
-    test @globs == 0 && $@ =~ /^Insecure dependency/;
 }
 
 # Output of commands should be tainted
