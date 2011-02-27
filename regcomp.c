@@ -9319,8 +9319,27 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
     STRLEN initial_listsv_len = 0; /* Kind of a kludge to see if it is more
 				      than just initialized.  */
     UV n;
+
+    /* code points this node matches that can't be stored in the bitmap */
     HV* nonbitmap = NULL;
+
+    /* The items that are to match that aren't stored in the bitmap, but are a
+     * result of things that are stored there.  This is the fold closure of
+     * such a character, either because it has DEPENDS semantics and shouldn't
+     * be matched unless the target string is utf8, or is a code point that is
+     * too large for the bit map, as for example, the fold of the MICRO SIGN is
+     * above 255.  This all is solely for performance reasons.  By having this
+     * code know the outside-the-bitmap folds that the bitmapped characters are
+     * involved with, we don't have to go out to disk to find the list of
+     * matches, unless the character class includes code points that aren't
+     * storable in the bit map.  That means that a character class with an 's'
+     * in it, for example, doesn't need to go out to disk to find everything
+     * that matches.  A 2nd list is used so that the 'nonbitmap' list is kept
+     * empty unless there is something whose fold we don't know about, and will
+     * have to go out to the disk to find. */
     HV* l1_fold_invlist = NULL;
+
+    /* List of multi-character folds that are matched by this node */
     AV* unicode_alternate  = NULL;
 #ifdef EBCDIC
     UV literal_endpoint = 0;
@@ -9936,6 +9955,7 @@ parseit:
 	else {
 	    nonbitmap = l1_fold_invlist;
 	}
+        l1_fold_invlist = NULL;
     }
     if (nonbitmap) {
 	UV i;
@@ -10106,6 +10126,16 @@ parseit:
 	} /* End of processing all the folds */
     }
 
+    /* Combine the two lists into one. */
+    if (l1_fold_invlist) {
+	if (nonbitmap) {
+	    nonbitmap = invlist_union(nonbitmap, l1_fold_invlist);
+	}
+	else {
+	    nonbitmap = l1_fold_invlist;
+	}
+    }
+
     /* Here, we have calculated what code points should be in the character
      * class.   Now we can see about various optimizations.  Fold calculation
      * needs to take place before inversion.  Otherwise /[^k]/i would invert to
@@ -10134,7 +10164,7 @@ parseit:
     /* Folding in the bitmap is taken care of above, but not for locale (for
      * which we have to wait to see what folding is in effect at runtime), and
      * for things not in the bitmap.  Set run-time fold flag for these */
-    if (FOLD && (LOC || nonbitmap)) {
+    if (FOLD && (LOC || nonbitmap || unicode_alternate)) {
 	ANYOF_FLAGS(ret) |= ANYOF_LOC_NONBITMAP_FOLD;
     }
 
@@ -10153,6 +10183,7 @@ parseit:
      * wouldn't work because they are part of the fold of 'LATIN SMALL LIGATURE
      * FI'. */
     if (! nonbitmap
+	&& ! unicode_alternate
 	&& SvCUR(listsv) == initial_listsv_len
 	&& ! (ANYOF_FLAGS(ret) & (ANYOF_INVERT|ANYOF_UNICODE_ALL))
         && (((stored == 1 && ((! (ANYOF_FLAGS(ret) & ANYOF_LOCALE))
