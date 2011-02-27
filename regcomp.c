@@ -10086,7 +10086,7 @@ parseit:
 					 && (c > 255
 					     || ! ANYOF_BITMAP_TEST(ret, c)))
 				{
-				    nonbitmap = add_range_to_invlist(nonbitmap, c, c);
+				    nonbitmap = add_cp_to_invlist(nonbitmap, c);
 				}
 			    }
 			}
