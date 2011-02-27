@@ -852,7 +852,9 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
     varsv = GvSVn(vargv);
     sv_setpvn(varsv, packname, packname_len);
     sv_catpvs(varsv, "::");
-    sv_catpvn(varsv, name, len);
+    /* Ensure SvSETMAGIC() is called if necessary. In particular, to clear
+       tainting if $FOO::AUTOLOAD was previously tainted, but is not now.  */
+    sv_catpvn_mg(varsv, name, len);
     return gv;
 }
 

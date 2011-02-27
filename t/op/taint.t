@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 689;
+plan tests => 693;
 
 $| = 1;
 
@@ -1888,13 +1888,18 @@ SKIP:
         return if $AUTOLOAD =~ /DESTROY/;
         if ($AUTOLOAD =~ /untainted/) {
             main::ok(!main::tainted($AUTOLOAD), '$AUTOLOAD can be untainted');
+            my $copy = $AUTOLOAD;
+            main::ok(!main::tainted($copy), '$AUTOLOAD can be untainted');
         } else {
             main::ok(main::tainted($AUTOLOAD), '$AUTOLOAD can be tainted');
+            my $copy = $AUTOLOAD;
+            main::ok(main::tainted($copy), '$AUTOLOAD can be tainted');
         }
     }
 
     package main;
     my $o = bless [], 'AUTOLOAD_TAINT';
+    $o->untainted;
     $o->$TAINT;
     $o->untainted;
 }
