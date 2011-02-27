@@ -13,8 +13,6 @@ BEGIN {
 use strict;
 use warnings;
 
-my $TODO = "Bug 76814";
-
 my $count = 0;
 
 sub TIESCALAR {bless \do {my $var = $_ [1]} => $_ [0];}
@@ -84,11 +82,9 @@ $dummy  = ~$var         ; check_count '~';
 
 # Logical operators
 $dummy  = !$var         ; check_count '!';
-TODO: {
-    local $::TODO = $TODO;
-    $dummy  =  $var  ||   1 ; check_count '||';
-    $dummy  = ($var  or   1); check_count 'or';
-}
+tie my $v_1, "main", 0;
+$dummy  =  $v_1  ||   1 ; check_count '||';
+$dummy  = ($v_1  or   1); check_count 'or';
 $dummy  =  $var  &&   1 ; check_count '&&';
 $dummy  = ($var and   1); check_count 'and';
 $dummy  = ($var xor   1); check_count 'xor';
