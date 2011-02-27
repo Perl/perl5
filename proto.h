@@ -5954,6 +5954,12 @@ STATIC SV *	S_space_join_names_mortal(pTHX_ char *const *array)
 
 #endif
 #if defined(PERL_IN_REGCOMP_C)
+STATIC void	S_add_alternate(pTHX_ AV** alternate_ptr, U8* string, STRLEN len)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_ADD_ALTERNATE	\
+	assert(alternate_ptr); assert(string)
+
 STATIC U32	S_add_data(struct RExC_state_t *pRExC_state, U32 n, const char *s)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1)

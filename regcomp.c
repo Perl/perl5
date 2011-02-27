@@ -9272,6 +9272,24 @@ S_set_regclass_bit(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8 valu
     return stored;
 }
 
+STATIC void
+S_add_alternate(pTHX_ AV** alternate_ptr, U8* string, STRLEN len)
+{
+    /* Adds input 'string' with length 'len' to the ANYOF node's unicode
+     * alternate list, pointed to by 'alternate_ptr'.  This is an array of
+     * the multi-character folds of characters in the node */
+    SV *sv;
+
+    PERL_ARGS_ASSERT_ADD_ALTERNATE;
+
+    if (! *alternate_ptr) {
+	*alternate_ptr = newAV();
+    }
+    sv = newSVpvn_utf8((char*)string, len, TRUE);
+    av_push(*alternate_ptr, sv);
+    return;
+}
+
 /*
    parse a class specification and produce either an ANYOF node that
    matches the pattern or perhaps will be optimized into an EXACTish node
@@ -9984,7 +10002,6 @@ parseit:
 			 * these multicharacter foldings, to be later saved as
 			 * part of the additional "s" data. */
 			if (! RExC_in_lookbehind) {
-			    SV *sv;
 			    U8* loc = foldbuf;
 			    U8* e = foldbuf + foldlen;
 
@@ -10019,11 +10036,7 @@ parseit:
 				}
 			    }
 
-			    if (!unicode_alternate) {
-				unicode_alternate = newAV();
-			    }
-			    sv = newSVpvn_utf8((char*)foldbuf, foldlen, TRUE);
-			    av_push(unicode_alternate, sv);
+			    add_alternate(&unicode_alternate, foldbuf, foldlen);
 
 			    /* This node is variable length */
 			    OP(ret) = ANYOFV;
