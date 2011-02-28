@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 706;
+plan tests => 712;
 
 $| = 1;
 
@@ -102,10 +102,6 @@ sub any_tainted (@) {
 }
 sub tainted ($) {
     any_tainted @_;
-}
-sub all_tainted (@) {
-    for (@_) { return 0 unless tainted $_ }
-    1;
 }
 
 sub is_tainted {
@@ -235,7 +231,7 @@ my $TEST = catfile(curdir(), 'TEST');
     ok(not any_tainted @list);
     taint_these @list[1,3,5,7,9];
     ok(any_tainted @list);
-    ok(all_tainted @list[1,3,5,7,9]);
+    is_tainted($_) foreach @list[1,3,5,7,9];
     ok(not any_tainted @list[0,2,4,6,8]);
 
     ($foo) = $foo =~ /(.+)/;
@@ -1001,7 +997,8 @@ SKIP: {
 
 # Certain system variables should be tainted
 {
-    ok(all_tainted $^X, $0);
+    is_tainted($^X);
+    is_tainted($0);
 }
 
 # Results of matching should all be untainted
@@ -1206,7 +1203,8 @@ SKIP: {
 {
     my $foo = $TAINT0;
     my $bar = $foo;
-    ok(all_tainted $foo, $bar);
+    is_tainted($foo);
+    is_tainted($bar);
     is_tainted($foo = $bar);
     is_tainted($bar = $bar);
     is_tainted($bar += $bar);
