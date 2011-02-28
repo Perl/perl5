@@ -1192,7 +1192,7 @@ might not be perl's message.
 (contributed by brian d foy)
 
 The easiest way is to have a module also named CPAN do it for you by using
-the C<cpan> command the comes with Perl. You can give it a list of modules
+the C<cpan> command that comes with Perl. You can give it a list of modules
 to install:
 
 	$ cpan IO::Interactive Getopt::Whatever
