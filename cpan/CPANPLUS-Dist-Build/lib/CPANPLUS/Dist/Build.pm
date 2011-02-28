@@ -30,7 +30,7 @@ use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
 local $Params::Check::VERBOSE = 1;
 
-$VERSION = '0.52';
+$VERSION = '0.54';
 
 =pod
 
@@ -145,8 +145,8 @@ to create and install modules in your environment.
 
 ### check if the format is available ###
 sub format_available {
-    my $mod = "Module::Build";
-    unless( can_load( modules => { $mod => '0.2611' } ) ) {
+    my $mod = 'Module::Build';
+    unless( can_load( modules => { $mod => '0.2611' }, nocache => 1 ) ) {
         error( loc( "You do not have '%1' -- '%2' not available",
                     $mod, __PACKAGE__ ) );
         return;
@@ -426,8 +426,12 @@ sub _find_prereqs {
         $prereqs->{$_} = $bphash->{$type}->{$_} for keys %{ $bphash->{$type} };
       }
     }
-    # Temporary fix
-    delete $prereqs->{'perl'};
+
+    {
+      delete $prereqs->{'perl'}
+         unless version->new($CPANPLUS::Internals::VERSION)
+             >= version->new('0.9102');
+    }
 
     ### allows for a user defined callback to filter the prerequisite
     ### list as they see fit, to remove (or add) any prereqs they see

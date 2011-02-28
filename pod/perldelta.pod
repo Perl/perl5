@@ -96,6 +96,10 @@ XXX
 
 =item *
 
+C<CPANPLUS::Dist::Build> has been upgraded from version 0.52 to 0.54
+
+=item *
+
 C<Devel::DProf> has been upgraded from version 20110225.01 to 20110228.00.
 
 =item *
