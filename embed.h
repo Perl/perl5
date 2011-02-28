@@ -867,6 +867,7 @@
 #  endif
 #  if defined(PERL_IN_REGCOMP_C)
 #define add_alternate(a,b,c)	S_add_alternate(aTHX_ a,b,c)
+#define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
 #define add_data		S_add_data
 #define add_range_to_invlist(a,b,c)	S_add_range_to_invlist(aTHX_ a,b,c)
 #define checkposixcc(a)		S_checkposixcc(aTHX_ a)

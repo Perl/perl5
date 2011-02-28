@@ -5960,6 +5960,9 @@ STATIC void	S_add_alternate(pTHX_ AV** alternate_ptr, U8* string, STRLEN len)
 #define PERL_ARGS_ASSERT_ADD_ALTERNATE	\
 	assert(alternate_ptr); assert(string)
 
+PERL_STATIC_INLINE HV*	S_add_cp_to_invlist(pTHX_ HV* invlist, const UV cp)
+			__attribute__warn_unused_result__;
+
 STATIC U32	S_add_data(struct RExC_state_t *pRExC_state, U32 n, const char *s)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1)

@@ -6294,6 +6294,11 @@ S_add_range_to_invlist(pTHX_ HV* invlist, const UV start, const UV end)
     return added_invlist;
 }
 
+PERL_STATIC_INLINE HV*
+S_add_cp_to_invlist(pTHX_ HV* invlist, const UV cp) {
+    return add_range_to_invlist(invlist, cp, cp);
+}
+
 /* End of inversion list object */
 
 /*
