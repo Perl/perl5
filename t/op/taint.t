@@ -14,10 +14,9 @@ BEGIN {
 
 use strict;
 use Config;
-use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 753;
+plan tests => 766;
 
 $| = 1;
 
@@ -124,12 +123,12 @@ sub violates_taint {
 # We need an external program to call.
 my $ECHO = ($Is_MSWin32 ? ".\\echo$$" : ($Is_NetWare ? "echo$$" : "./echo$$"));
 END { unlink $ECHO }
-open PROG, "> $ECHO" or die "Can't create $ECHO: $!";
-print PROG 'print "@ARGV\n"', "\n";
-close PROG;
+open my $fh, '>', $ECHO or die "Can't create $ECHO: $!";
+print $fh 'print "@ARGV\n"', "\n";
+close $fh;
 my $echo = "$Invoke_Perl $ECHO";
 
-my $TEST = catfile(curdir(), 'TEST');
+my $TEST = 'TEST';
 
 # First, let's make sure that Perl is checking the dangerous
 # environment variables. Maybe they aren't set yet, so we'll
@@ -968,14 +967,14 @@ my $TEST = catfile(curdir(), 'TEST');
 # always get some, so we'll run another process with some.
 SKIP: {
     my $arg = tempfile();
-    open PROG, "> $arg" or die "Can't create $arg: $!";
-    print PROG q{
+    open $fh, '>', $arg or die "Can't create $arg: $!";
+    print $fh q{
 	eval { join('', @ARGV), kill 0 };
 	exit 0 if $@ =~ /^Insecure dependency/;
 	print "# Oops: \$@ was [$@]\n";
 	exit 1;
     };
-    close PROG;
+    close $fh or die "Can't close $arg: $!";
     print `$Invoke_Perl "-T" $arg and some suspect arguments`;
     is($?, 0, "Exited with status $?");
     unlink $arg;
@@ -983,12 +982,12 @@ SKIP: {
 
 # Reading from a file should be tainted
 {
-    ok(open FILE, $TEST) or diag("Couldn't open '$TEST': $!");
+    ok(open my $fh, '<', $TEST) or diag("Couldn't open '$TEST': $!");
 
     my $block;
-    sysread(FILE, $block, 100);
-    my $line = <FILE>;
-    close FILE;
+    sysread($fh, $block, 100);
+    my $line = <$fh>;
+    close $fh;
     is_tainted($block);
     is_tainted($line);
 }
@@ -1085,6 +1084,8 @@ violates_taint(sub { link $TAINT, '' }, 'link');
 
     is(eval { open FOO, $foo }, undef, 'open for read');
     is($@, '');                # NB: This should be allowed
+    is(eval { open my $fh, , '<', $foo }, undef, 'open for read');
+    is($@, '');                # NB: This should be allowed
 
     # Try first new style but allow also old style.
     # We do not want the whole taint.t to fail
@@ -1094,6 +1095,7 @@ violates_taint(sub { link $TAINT, '' }, 'link');
 	($Is_Dos && $! == 22));
 
     violates_taint(sub { open FOO, "> $foo" }, 'open', 'open for write');
+    violates_taint(sub { open my $fh, '>', $foo }, 'open', 'open for write');
 }
 
 # Commands to the system can't use tainted data
@@ -1101,10 +1103,12 @@ violates_taint(sub { link $TAINT, '' }, 'link');
     my $foo = $TAINT;
 
     SKIP: {
-        skip "open('|') is not available", 4 if $^O eq 'amigaos';
+        skip "open('|') is not available", 8 if $^O eq 'amigaos';
 
-	violates_taint(sub { open FOO, "| x$foo" }, 'piped open', 'popen to');
-	violates_taint(sub { open FOO, "x$foo |" }, 'piped open', 'popen from');
+        violates_taint(sub { open FOO, "| x$foo" }, 'piped open', 'popen to');
+        violates_taint(sub { open FOO, "x$foo |" }, 'piped open', 'popen from');
+        violates_taint(sub { open my $fh, '|-', "x$foo" }, 'piped open', 'popen to');
+        violates_taint(sub { open my $fh, '-|', "x$foo" }, 'piped open', 'popen from');
     }
 
     violates_taint(sub { exec $TAINT }, 'exec');
@@ -1155,13 +1159,17 @@ violates_taint(sub { link $TAINT, '' }, 'link');
 	local *FOO;
 	my $temp = tempfile();
 	ok(open FOO, "> $temp") or diag("Couldn't open $temp for write: $!");
-
 	violates_taint(sub { ioctl FOO, $TAINT0, $foo }, 'ioctl');
 
+	my $temp2 = tempfile();
+	ok(open my $fh, '>', $temp2) or diag("Couldn't open $temp2 for write: $!");
+	violates_taint(sub { ioctl $fh, $TAINT0, $foo }, 'ioctl');
+
         SKIP: {
-            skip "fcntl() is not available", 2 unless $Config{d_fcntl};
+            skip "fcntl() is not available", 4 unless $Config{d_fcntl};
 
 	    violates_taint(sub { fcntl FOO, $TAINT0, $foo }, 'fcntl');
+	    violates_taint(sub { fcntl $fh, $TAINT0, $foo }, 'fcntl');
 	}
 
 	close FOO;
@@ -1260,11 +1268,10 @@ violates_taint(sub { link $TAINT, '' }, 'link');
         # pretty hard to imagine not
         skip "readdir() is not available", 1 unless $Config{d_readdir};
 
-	local(*D);
-	opendir(D, "op") or die "opendir: $!\n";
-	my $readdir = readdir(D);
+	opendir my $dh, "op" or die "opendir: $!\n";
+	my $readdir = readdir $dh;
 	is_tainted($readdir);
-	closedir(D);
+	closedir $dh;
     }
 
     SKIP: {
@@ -1381,23 +1388,21 @@ SKIP: {
 {
     # bug id 20001004.006
 
-    open IN, $TEST or warn "$0: cannot read $TEST: $!" ;
+    open my $fh, '<', $TEST or warn "$0: cannot read $TEST: $!" ;
     local $/;
-    my $a = <IN>;
-    my $b = <IN>;
+    my $a = <$fh>;
+    my $b = <$fh>;
 
     is_tainted($a);
     is_tainted($b);
     is($b, undef);
-
-    close IN;
 }
 
 {
     # bug id 20001004.007
 
-    open IN, $TEST or warn "$0: cannot read $TEST: $!" ;
-    my $a = <IN>;
+    open my $fh, '<', $TEST or warn "$0: cannot read $TEST: $!" ;
+    my $a = <$fh>;
 
     my $c = { a => 42,
 	      b => $a };
@@ -1418,8 +1423,6 @@ SKIP: {
     isnt_tainted($e->{b});
     is_tainted($e->{b}->{c});
     isnt_tainted($e->{b}->{d});
-
-    close IN;
 }
 
 {
@@ -1855,9 +1858,9 @@ SKIP:
     like ($@, qr/^Insecure dependency in eval/);
 
     # Rather nice code to get a tainted undef by from Rick Delaney
-    open FH, "test.pl" or die $!;
-    seek FH, 0, 2 or die $!;
-    $tainted = <FH>;
+    open my $fh, "test.pl" or die $!;
+    seek $fh, 0, 2 or die $!;
+    $tainted = <$fh>;
 
     eval 'eval $tainted';
     like ($@, qr/^Insecure dependency in eval/);
