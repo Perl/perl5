@@ -3,6 +3,11 @@
 #include "perl.h"
 #include "XSUB.h"
 
+#ifndef get_cvs
+#define get_cvs(name, flags) \
+    Perl_get_cvn_flags(aTHX_ name, sizeof(name) - 1, (flags))
+#endif
+
 /* define DBG_SUB to cause a warning on each subroutine entry. */
 /*#define DBG_SUB 1      */
 

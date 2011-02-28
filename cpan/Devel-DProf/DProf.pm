@@ -235,7 +235,7 @@ sub NONESUCH_noxs {
 
 use XSLoader ();
 
-$Devel::DProf::VERSION = '20110225.01';  # this version not authorized by
+$Devel::DProf::VERSION = '20110228.00';  # this version not authorized by
 				         # Dean Roehrich. See "Changes" file.
 
 use if $] >= 5.013, 'deprecate';
