@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 691;
+plan tests => 706;
 
 $| = 1;
 
@@ -106,6 +106,18 @@ sub tainted ($) {
 sub all_tainted (@) {
     for (@_) { return 0 unless tainted $_ }
     1;
+}
+
+sub is_tainted {
+    my $thing = shift;
+    local $::Level = $::Level + 1;
+    ok(any_tainted($thing), @_);
+}
+
+sub isnt_tainted {
+    my $thing = shift;
+    local $::Level = $::Level + 1;
+    ok(!any_tainted($thing), @_);
 }
 
 # We need an external program to call.
@@ -208,16 +220,16 @@ my $TEST = catfile(curdir(), 'TEST');
 # Let's see that we can taint and untaint as needed.
 {
     my $foo = $TAINT;
-    ok(tainted $foo);
+    is_tainted($foo);
 
     # That was a sanity check. If it failed, stop the insanity!
     die "Taint checks don't seem to be enabled" unless tainted $foo;
 
     $foo = "foo";
-    ok(!tainted $foo);
+    isnt_tainted($foo);
 
     taint_these($foo);
-    ok(tainted $foo);
+    is_tainted($foo);
 
     my @list = 1..10;
     ok(not any_tainted @list);
@@ -227,7 +239,7 @@ my $TEST = catfile(curdir(), 'TEST');
     ok(not any_tainted @list[0,2,4,6,8]);
 
     ($foo) = $foo =~ /(.+)/;
-    ok(not tainted $foo);
+    isnt_tainted($foo);
 
     my ($desc, $s, $res, $res2, $one);
 
@@ -236,9 +248,9 @@ my $TEST = catfile(curdir(), 'TEST');
     $s = 'abcd' . $TAINT;
     $res = $s =~ /(.+)/;
     $one = $1;
-    ok( tainted($s),   "$desc: s tainted");
-    ok(!tainted($res), "$desc: res not tainted");
-    ok(!tainted($one), "$desc: \$1 not tainted");
+    is_tainted($s,     "$desc: s tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
     is($res, 1,        "$desc: res value");
     is($one, 'abcd',   "$desc: \$1 value");
 
@@ -247,9 +259,9 @@ my $TEST = catfile(curdir(), 'TEST');
     $s = 'abcd' . $TAINT;
     $res = $s =~ /(.)/g;
     $one = $1;
-    ok( tainted($s),   "$desc: s tainted");
-    ok(!tainted($res), "$desc: res not tainted");
-    ok(!tainted($one), "$desc: \$1 not tainted");
+    is_tainted($s,     "$desc: s tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
     is($res, 1,        "$desc: res value");
     is($one, 'a',      "$desc: \$1 value");
 
@@ -258,9 +270,9 @@ my $TEST = catfile(curdir(), 'TEST');
     $s = 'abcd' . $TAINT;
     ($res) = $s =~ /(.+)/;
     $one = $1;
-    ok( tainted($s),   "$desc: s tainted");
-    ok(!tainted($res), "$desc: res not tainted");
-    ok(!tainted($one), "$desc: \$1 not tainted");
+    is_tainted($s,     "$desc: s tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
     is($res, 'abcd',   "$desc: res value");
     is($one, 'abcd',   "$desc: \$1 value");
 
@@ -269,10 +281,10 @@ my $TEST = catfile(curdir(), 'TEST');
     $s = 'abcd' . $TAINT;
     ($res, $res2) = $s =~ /(.)/g;
     $one = $1;
-    ok( tainted($s),   "$desc: s tainted");
-    ok(!tainted($res), "$desc: res not tainted");
-    ok(!tainted($res2),"$desc: res2 not tainted");
-    ok(!tainted($one), "$desc: \$1 not tainted");
+    is_tainted($s,     "$desc: s tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($res2,"$desc: res2 not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
     is($res, 'a',      "$desc: res value");
     is($res2,'b',      "$desc: res2 value");
     is($one, 'd',      "$desc: \$1 value");
@@ -282,9 +294,9 @@ my $TEST = catfile(curdir(), 'TEST');
     $s = 'abcd';
     $res = $s =~ /$TAINT(.+)/;
     $one = $1;
-    ok(!tainted($s),   "$desc: s not tainted");
-    ok(!tainted($res), "$desc: res not tainted");
-    ok( tainted($one), "$desc: \$1 tainted");
+    isnt_tainted($s,   "$desc: s not tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    is_tainted($one,   "$desc: \$1 tainted");
     is($res, 1,        "$desc: res value");
     is($one, 'abcd',   "$desc: \$1 value");
 
@@ -293,9 +305,9 @@ my $TEST = catfile(curdir(), 'TEST');
     $s = 'abcd';
     $res = $s =~ /$TAINT(.)/g;
     $one = $1;
-    ok(!tainted($s),   "$desc: s not tainted");
-    ok(!tainted($res), "$desc: res not tainted");
-    ok( tainted($one), "$desc: \$1 tainted");
+    isnt_tainted($s,   "$desc: s not tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    is_tainted($one,   "$desc: \$1 tainted");
     is($res, 1,        "$desc: res value");
     is($one, 'a',      "$desc: \$1 value");
 
@@ -303,9 +315,9 @@ my $TEST = catfile(curdir(), 'TEST');
 
     $s = 'abcd';
     { use locale; $res = $s =~ /(\w+)/; $one = $1; }
-    ok(!tainted($s),   "$desc: s not tainted");
-    ok(!tainted($res), "$desc: res not tainted");
-    ok( tainted($one), "$desc: \$1 tainted");
+    isnt_tainted($s,   "$desc: s not tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    is_tainted($one,   "$desc: \$1 tainted");
     is($res, 1,        "$desc: res value");
     is($one, 'abcd',   "$desc: \$1 value");
 
@@ -313,9 +325,9 @@ my $TEST = catfile(curdir(), 'TEST');
 
     $s = 'abcd';
     { use locale; $res = $s =~ /(\w)/g; $one = $1; }
-    ok(!tainted($s),   "$desc: s not tainted");
-    ok(!tainted($res), "$desc: res not tainted");
-    ok( tainted($one), "$desc: \$1 tainted");
+    isnt_tainted($s,   "$desc: s not tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    is_tainted($one,   "$desc: \$1 tainted");
     is($res, 1,        "$desc: res value");
     is($one, 'a',      "$desc: \$1 value");
 
@@ -324,9 +336,9 @@ my $TEST = catfile(curdir(), 'TEST');
     $s = 'abcd';
     ($res) = $s =~ /$TAINT(.+)/;
     $one = $1;
-    ok(!tainted($s),   "$desc: s not tainted");
-    ok( tainted($res), "$desc: res tainted");
-    ok( tainted($one), "$desc: \$1 tainted");
+    isnt_tainted($s,   "$desc: s not tainted");
+    is_tainted($res,   "$desc: res tainted");
+    is_tainted($one,   "$desc: \$1 tainted");
     is($res, 'abcd',   "$desc: res value");
     is($one, 'abcd',   "$desc: \$1 value");
 
@@ -335,9 +347,9 @@ my $TEST = catfile(curdir(), 'TEST');
     $s = 'abcd';
     ($res, $res2) = $s =~ /$TAINT(.)/g;
     $one = $1;
-    ok(!tainted($s),   "$desc: s not tainted");
-    ok( tainted($res), "$desc: res tainted");
-    ok( tainted($one), "$desc: \$1 tainted");
+    isnt_tainted($s,   "$desc: s not tainted");
+    is_tainted($res,   "$desc: res tainted");
+    is_tainted($one,   "$desc: \$1 tainted");
     is($res, 'a',      "$desc: res value");
     is($res2,'b',      "$desc: res2 value");
     is($one, 'd',      "$desc: \$1 value");
@@ -346,9 +358,9 @@ my $TEST = catfile(curdir(), 'TEST');
 
     $s = 'abcd';
     { use locale; ($res) = $s =~ /(\w+)/; $one = $1; }
-    ok(!tainted($s),   "$desc: s not tainted");
-    ok( tainted($res), "$desc: res tainted");
-    ok( tainted($one), "$desc: \$1 tainted");
+    isnt_tainted($s,   "$desc: s not tainted");
+    is_tainted($res,   "$desc: res tainted");
+    is_tainted($one,   "$desc: \$1 tainted");
     is($res, 'abcd',   "$desc: res value");
     is($one, 'abcd',   "$desc: \$1 value");
 
@@ -356,10 +368,10 @@ my $TEST = catfile(curdir(), 'TEST');
 
     $s = 'abcd';
     { use locale; ($res, $res2) = $s =~ /(\w)/g; $one = $1; }
-    ok(!tainted($s),   "$desc: s not tainted");
-    ok( tainted($res), "$desc: res tainted");
-    ok( tainted($res2),"$desc: res2 tainted");
-    ok( tainted($one), "$desc: \$1 tainted");
+    isnt_tainted($s,   "$desc: s not tainted");
+    is_tainted($res,   "$desc: res tainted");
+    is_tainted($res2,  "$desc: res2 tainted");
+    is_tainted($one,   "$desc: \$1 tainted");
     is($res, 'a',      "$desc: res value");
     is($res2,'b',      "$desc: res2 value");
     is($one, 'd',      "$desc: \$1 value");
@@ -369,9 +381,9 @@ my $TEST = catfile(curdir(), 'TEST');
     $s = 'abcd' . $TAINT;
     $res = $s =~ s/(.+)/xyz/;
     $one = $1;
-    ok( tainted($s),   "$desc: s tainted");
-    ok(!tainted($res), "$desc: res not tainted");
-    ok(!tainted($one), "$desc: \$1 not tainted");
+    is_tainted($s,     "$desc: s tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
     is($s,   'xyz',    "$desc: s value");
     is($res, 1,        "$desc: res value");
     is($one, 'abcd',   "$desc: \$1 value");
@@ -381,9 +393,9 @@ my $TEST = catfile(curdir(), 'TEST');
     $s = 'abcd' . $TAINT;
     $res = $s =~ s/(.)/x/g;
     $one = $1;
-    ok( tainted($s),   "$desc: s tainted");
-    ok( tainted($res), "$desc: res tainted");
-    ok(!tainted($one), "$desc: \$1 not tainted");
+    is_tainted($s,     "$desc: s tainted");
+    is_tainted($res,   "$desc: res tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
     is($s,   'xxxx',   "$desc: s value");
     is($res, 4,        "$desc: res value");
     is($one, 'd',      "$desc: \$1 value");
@@ -393,9 +405,9 @@ my $TEST = catfile(curdir(), 'TEST');
     $s = 'abcd' . $TAINT;
     $res = $s =~ s/(.+)/xyz/r;
     $one = $1;
-    ok( tainted($s),   "$desc: s tainted");
-    ok( tainted($res), "$desc: res tainted");
-    ok(!tainted($one), "$desc: \$1 not tainted");
+    is_tainted($s,     "$desc: s tainted");
+    is_tainted($res,   "$desc: res tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
     is($s,   'abcd',   "$desc: s value");
     is($res, 'xyz',    "$desc: res value");
     is($one, 'abcd',   "$desc: \$1 value");
@@ -406,15 +418,15 @@ my $TEST = catfile(curdir(), 'TEST');
     $one = '';
     $res = $s =~ s{(.+)}{
 		$one = $one . "x"; # make sure code not tainted
-		ok(!tainted($one), "$desc: code not tainted within /e");
+		isnt_tainted($one, "$desc: code not tainted within /e");
 		$one = $1;
-		ok(!tainted($one), "$desc: \$1 not tainted within /e");
+		isnt_tainted($one, "$desc: \$1 not tainted within /e");
 		"xyz";
 	    }e;
     $one = $1;
-    ok( tainted($s),   "$desc: s tainted");
-    ok(!tainted($res), "$desc: res not tainted");
-    ok(!tainted($one), "$desc: \$1 not tainted");
+    is_tainted($s,     "$desc: s tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
     is($s,   'xyz',    "$desc: s value");
     is($res, 1,        "$desc: res value");
     is($one, 'abcd',   "$desc: \$1 value");
@@ -424,9 +436,9 @@ my $TEST = catfile(curdir(), 'TEST');
     $s = 'abcd';
     $res = $s =~ s/$TAINT(.+)/xyz/;
     $one = $1;
-    ok( tainted($s),   "$desc: s tainted");
-    ok(!tainted($res), "$desc: res not tainted");
-    ok( tainted($one), "$desc: \$1 tainted");
+    is_tainted($s,     "$desc: s tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    is_tainted($one,   "$desc: \$1 tainted");
     is($s,  'xyz',     "$desc: s value");
     is($res, 1,        "$desc: res value");
     is($one, 'abcd',   "$desc: \$1 value");
@@ -436,9 +448,9 @@ my $TEST = catfile(curdir(), 'TEST');
     $s = 'abcd';
     $res = $s =~ s/$TAINT(.)/x/g;
     $one = $1;
-    ok( tainted($s),   "$desc: s tainted");
-    ok( tainted($res), "$desc: res tainted");
-    ok( tainted($one), "$desc: \$1 tainted");
+    is_tainted($s,     "$desc: s tainted");
+    is_tainted($res,   "$desc: res tainted");
+    is_tainted($one,   "$desc: \$1 tainted");
     is($s,  'xxxx',    "$desc: s value");
     is($res, 4,        "$desc: res value");
     is($one, 'd',      "$desc: \$1 value");
@@ -452,22 +464,22 @@ my $TEST = catfile(curdir(), 'TEST');
 	$res = $s =~ s{(.)$TAINT}{
 		    $j = $i; # make sure code not tainted
 		    $one = $1;
-		    ok(!tainted($j), "$desc: code not tainted within /e");
+		    isnt_tainted($j, "$desc: code not tainted within /e");
 		    $i++;
 		    if ($i == 1) {
-			ok(!tainted($s),   "$desc: s not tainted loop 1");
+			isnt_tainted($s,   "$desc: s not tainted loop 1");
 		    }
 		    else {
-			ok( tainted($s),   "$desc: s tainted loop $i");
+			is_tainted($s,     "$desc: s tainted loop $i");
 		    }
-		    ok( tainted($one), "$desc: \$1 tainted loop $i");
+		    is_tainted($one,   "$desc: \$1 tainted loop $i");
 		    $i.$TAINT;
 		}ge;
 	$one = $1;
     }
-    ok( tainted($s),   "$desc: s tainted");
-    ok( tainted($res), "$desc: res tainted");
-    ok( tainted($one), "$desc: \$1 tainted");
+    is_tainted($s,     "$desc: s tainted");
+    is_tainted($res,   "$desc: res tainted");
+    is_tainted($one,   "$desc: \$1 tainted");
     is($s,  '123',     "$desc: s value");
     is($res, 3,        "$desc: res value");
     is($one, 'c',      "$desc: \$1 value");
@@ -477,9 +489,9 @@ my $TEST = catfile(curdir(), 'TEST');
     $s = 'abcd';
     $res = $s =~ s/$TAINT(.+)/xyz/r;
     $one = $1;
-    ok(!tainted($s),   "$desc: s not tainted");
-    ok( tainted($res), "$desc: res tainted");
-    ok( tainted($one), "$desc: \$1 tainted");
+    isnt_tainted($s,   "$desc: s not tainted");
+    is_tainted($res,   "$desc: res tainted");
+    is_tainted($one,   "$desc: \$1 tainted");
     is($s,  'abcd',    "$desc: s value");
     is($res, 'xyz',    "$desc: res value");
     is($one, 'abcd',   "$desc: \$1 value");
@@ -488,9 +500,9 @@ my $TEST = catfile(curdir(), 'TEST');
 
     $s = 'abcd';
     { use locale;  $res = $s =~ s/(\w+)/xyz/; $one = $1; }
-    ok( tainted($s),   "$desc: s tainted");
-    ok(!tainted($res), "$desc: res not tainted");
-    ok( tainted($one), "$desc: \$1 tainted");
+    is_tainted($s,     "$desc: s tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    is_tainted($one,   "$desc: \$1 tainted");
     is($s,  'xyz',     "$desc: s value");
     is($res, 1,        "$desc: res value");
     is($one, 'abcd',   "$desc: \$1 value");
@@ -499,9 +511,9 @@ my $TEST = catfile(curdir(), 'TEST');
 
     $s = 'abcd';
     { use locale;  $res = $s =~ s/(\w)/x/g; $one = $1; }
-    ok( tainted($s),   "$desc: s tainted");
-    ok( tainted($res), "$desc: res tainted");
-    ok( tainted($one), "$desc: \$1 tainted");
+    is_tainted($s,     "$desc: s tainted");
+    is_tainted($res,   "$desc: res tainted");
+    is_tainted($one,   "$desc: \$1 tainted");
     is($s,  'xxxx',    "$desc: s value");
     is($res, 4,        "$desc: res value");
     is($one, 'd',      "$desc: \$1 value");
@@ -510,9 +522,9 @@ my $TEST = catfile(curdir(), 'TEST');
 
     $s = 'abcd';
     { use locale;  $res = $s =~ s/(\w+)/xyz/r; $one = $1; }
-    ok(!tainted($s),   "$desc: s not tainted");
-    ok( tainted($res), "$desc: res tainted");
-    ok( tainted($one), "$desc: \$1 tainted");
+    isnt_tainted($s,   "$desc: s not tainted");
+    is_tainted($res,   "$desc: res tainted");
+    is_tainted($one,   "$desc: \$1 tainted");
     is($s,  'abcd',    "$desc: s value");
     is($res, 'xyz',    "$desc: res value");
     is($one, 'abcd',   "$desc: \$1 value");
@@ -522,9 +534,9 @@ my $TEST = catfile(curdir(), 'TEST');
     $s = 'abcd';
     $res = $s =~ s/(.+)/xyz$TAINT/;
     $one = $1;
-    ok( tainted($s),   "$desc: s tainted");
-    ok(!tainted($res), "$desc: res not tainted");
-    ok(!tainted($one), "$desc: \$1 not tainted");
+    is_tainted($s,     "$desc: s tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
     is($s,  'xyz',     "$desc: s value");
     is($res, 1,        "$desc: res value");
     is($one, 'abcd',   "$desc: \$1 value");
@@ -534,9 +546,9 @@ my $TEST = catfile(curdir(), 'TEST');
     $s = 'abcd';
     $res = $s =~ s/(.)/x$TAINT/g;
     $one = $1;
-    ok( tainted($s),   "$desc: s tainted");
-    ok(!tainted($res), "$desc: res not tainted");
-    ok(!tainted($one), "$desc: \$1 not tainted");
+    is_tainted($s,     "$desc: s tainted");
+    isnt_tainted($res, "$desc: res not tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
     is($s,  'xxxx',    "$desc: s value");
     is($res, 4,        "$desc: res value");
     is($one, 'd',      "$desc: \$1 value");
@@ -550,22 +562,22 @@ my $TEST = catfile(curdir(), 'TEST');
 	$res = $s =~ s{(.)}{
 		    $j = $i; # make sure code not tainted
 		    $one = $1;
-		    ok(!tainted($j), "$desc: code not tainted within /e");
+		    isnt_tainted($j, "$desc: code not tainted within /e");
 		    $i++;
 		    if ($i == 1) {
-			ok(!tainted($s),   "$desc: s not tainted loop 1");
+			isnt_tainted($s,   "$desc: s not tainted loop 1");
 		    }
 		    else {
-			ok( tainted($s),   "$desc: s tainted loop $i");
+			is_tainted($s,     "$desc: s tainted loop $i");
 		    }
-		    ok(!tainted($one), "$desc: \$1 not tainted within /e");
+		    isnt_tainted($one, "$desc: \$1 not tainted within /e");
 		    $i.$TAINT;
 		}ge;
 	$one = $1;
     }
-    ok( tainted($s),   "$desc: s tainted");
-    ok( tainted($res), "$desc: res tainted");
-    ok(!tainted($one), "$desc: \$1 not tainted");
+    is_tainted($s,     "$desc: s tainted");
+    is_tainted($res,   "$desc: res tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
     is($s,  '123',     "$desc: s value");
     is($res, 3,        "$desc: res value");
     is($one, 'c',      "$desc: \$1 value");
@@ -575,9 +587,9 @@ my $TEST = catfile(curdir(), 'TEST');
     $s = 'abcd';
     $res = $s =~ s/(.+)/xyz$TAINT/r;
     $one = $1;
-    ok(!tainted($s),   "$desc: s not tainted");
-    ok( tainted($res), "$desc: res tainted");
-    ok(!tainted($one), "$desc: \$1 not tainted");
+    isnt_tainted($s,   "$desc: s not tainted");
+    is_tainted($res,   "$desc: res tainted");
+    isnt_tainted($one, "$desc: \$1 not tainted");
     is($s,   'abcd',   "$desc: s value");
     is($res, 'xyz',    "$desc: res value");
     is($one, 'abcd',   "$desc: \$1 value");
@@ -592,9 +604,9 @@ my $TEST = catfile(curdir(), 'TEST');
 	$s = 'abcd' . $TAINT;
 	$res = $s =~ /(.+)/;
 	$one = $1;
-	ok( tainted($s),   "$desc: s tainted");
-	ok(!tainted($res), "$desc: res not tainted");
-	ok( tainted($one), "$desc: \$1 tainted");
+	is_tainted($s,     "$desc: s tainted");
+	isnt_tainted($res, "$desc: res not tainted");
+	is_tainted($one,   "$desc: \$1 tainted");
 	is($res, 1,        "$desc: res value");
 	is($one, 'abcd',   "$desc: \$1 value");
 
@@ -603,9 +615,9 @@ my $TEST = catfile(curdir(), 'TEST');
 	$s = 'abcd' . $TAINT;
 	$res = $s =~ /(.)/g;
 	$one = $1;
-	ok( tainted($s),   "$desc: s tainted");
-	ok(!tainted($res), "$desc: res not tainted");
-	ok( tainted($one), "$desc: \$1 tainted");
+	is_tainted($s,     "$desc: s tainted");
+	isnt_tainted($res, "$desc: res not tainted");
+	is_tainted($one,   "$desc: \$1 tainted");
 	is($res, 1,        "$desc: res value");
 	is($one, 'a',      "$desc: \$1 value");
 
@@ -614,9 +626,9 @@ my $TEST = catfile(curdir(), 'TEST');
 	$s = 'abcd' . $TAINT;
 	($res) = $s =~ /(.+)/;
 	$one = $1;
-	ok( tainted($s),   "$desc: s tainted");
-	ok( tainted($res), "$desc: res tainted");
-	ok( tainted($one), "$desc: \$1 tainted");
+	is_tainted($s,     "$desc: s tainted");
+	is_tainted($res,   "$desc: res tainted");
+	is_tainted($one,   "$desc: \$1 tainted");
 	is($res, 'abcd',   "$desc: res value");
 	is($one, 'abcd',   "$desc: \$1 value");
 
@@ -625,10 +637,10 @@ my $TEST = catfile(curdir(), 'TEST');
 	$s = 'abcd' . $TAINT;
 	($res, $res2) = $s =~ /(.)/g;
 	$one = $1;
-	ok( tainted($s),   "$desc: s tainted");
-	ok( tainted($res), "$desc: res tainted");
-	ok( tainted($res2),"$desc: res2 tainted");
-	ok( tainted($one), "$desc: \$1 not tainted");
+	is_tainted($s,     "$desc: s tainted");
+	is_tainted($res,   "$desc: res tainted");
+	is_tainted($res2,  "$desc: res2 tainted");
+	is_tainted($one,   "$desc: \$1 not tainted");
 	is($res, 'a',      "$desc: res value");
 	is($res2,'b',      "$desc: res2 value");
 	is($one, 'd',      "$desc: \$1 value");
@@ -638,9 +650,9 @@ my $TEST = catfile(curdir(), 'TEST');
 	$s = 'abcd';
 	$res = $s =~ /$TAINT(.+)/;
 	$one = $1;
-	ok(!tainted($s),   "$desc: s not tainted");
-	ok(!tainted($res), "$desc: res not tainted");
-	ok( tainted($one), "$desc: \$1 tainted");
+	isnt_tainted($s,   "$desc: s not tainted");
+	isnt_tainted($res, "$desc: res not tainted");
+	is_tainted($one,   "$desc: \$1 tainted");
 	is($res, 1,        "$desc: res value");
 	is($one, 'abcd',   "$desc: \$1 value");
 
@@ -649,9 +661,9 @@ my $TEST = catfile(curdir(), 'TEST');
 	$s = 'abcd';
 	$res = $s =~ /$TAINT(.)/g;
 	$one = $1;
-	ok(!tainted($s),   "$desc: s not tainted");
-	ok(!tainted($res), "$desc: res not tainted");
-	ok( tainted($one), "$desc: \$1 tainted");
+	isnt_tainted($s,   "$desc: s not tainted");
+	isnt_tainted($res, "$desc: res not tainted");
+	is_tainted($one,   "$desc: \$1 tainted");
 	is($res, 1,        "$desc: res value");
 	is($one, 'a',      "$desc: \$1 value");
 
@@ -659,9 +671,9 @@ my $TEST = catfile(curdir(), 'TEST');
 
 	$s = 'abcd';
 	{ use locale; $res = $s =~ /(\w+)/; $one = $1; }
-	ok(!tainted($s),   "$desc: s not tainted");
-	ok(!tainted($res), "$desc: res not tainted");
-	ok( tainted($one), "$desc: \$1 tainted");
+	isnt_tainted($s,   "$desc: s not tainted");
+	isnt_tainted($res, "$desc: res not tainted");
+	is_tainted($one,   "$desc: \$1 tainted");
 	is($res, 1,        "$desc: res value");
 	is($one, 'abcd',   "$desc: \$1 value");
 
@@ -669,9 +681,9 @@ my $TEST = catfile(curdir(), 'TEST');
 
 	$s = 'abcd';
 	{ use locale; $res = $s =~ /(\w)/g; $one = $1; }
-	ok(!tainted($s),   "$desc: s not tainted");
-	ok(!tainted($res), "$desc: res not tainted");
-	ok( tainted($one), "$desc: \$1 tainted");
+	isnt_tainted($s,   "$desc: s not tainted");
+	isnt_tainted($res, "$desc: res not tainted");
+	is_tainted($one,   "$desc: \$1 tainted");
 	is($res, 1,        "$desc: res value");
 	is($one, 'a',      "$desc: \$1 value");
 
@@ -680,9 +692,9 @@ my $TEST = catfile(curdir(), 'TEST');
 	$s = 'abcd';
 	($res) = $s =~ /$TAINT(.+)/;
 	$one = $1;
-	ok(!tainted($s),   "$desc: s not tainted");
-	ok( tainted($res), "$desc: res tainted");
-	ok( tainted($one), "$desc: \$1 tainted");
+	isnt_tainted($s,   "$desc: s not tainted");
+	is_tainted($res,   "$desc: res tainted");
+	is_tainted($one,   "$desc: \$1 tainted");
 	is($res, 'abcd',   "$desc: res value");
 	is($one, 'abcd',   "$desc: \$1 value");
 
@@ -691,9 +703,9 @@ my $TEST = catfile(curdir(), 'TEST');
 	$s = 'abcd';
 	($res, $res2) = $s =~ /$TAINT(.)/g;
 	$one = $1;
-	ok(!tainted($s),   "$desc: s not tainted");
-	ok( tainted($res), "$desc: res tainted");
-	ok( tainted($one), "$desc: \$1 tainted");
+	isnt_tainted($s,   "$desc: s not tainted");
+	is_tainted($res,   "$desc: res tainted");
+	is_tainted($one,   "$desc: \$1 tainted");
 	is($res, 'a',      "$desc: res value");
 	is($res2,'b',      "$desc: res2 value");
 	is($one, 'd',      "$desc: \$1 value");
@@ -702,9 +714,9 @@ my $TEST = catfile(curdir(), 'TEST');
 
 	$s = 'abcd';
 	{ use locale; ($res) = $s =~ /(\w+)/; $one = $1; }
-	ok(!tainted($s),   "$desc: s not tainted");
-	ok( tainted($res), "$desc: res tainted");
-	ok( tainted($one), "$desc: \$1 tainted");
+	isnt_tainted($s,   "$desc: s not tainted");
+	is_tainted($res,   "$desc: res tainted");
+	is_tainted($one,   "$desc: \$1 tainted");
 	is($res, 'abcd',   "$desc: res value");
 	is($one, 'abcd',   "$desc: \$1 value");
 
@@ -712,10 +724,10 @@ my $TEST = catfile(curdir(), 'TEST');
 
 	$s = 'abcd';
 	{ use locale; ($res, $res2) = $s =~ /(\w)/g; $one = $1; }
-	ok(!tainted($s),   "$desc: s not tainted");
-	ok( tainted($res), "$desc: res tainted");
-	ok( tainted($res2),"$desc: res2 tainted");
-	ok( tainted($one), "$desc: \$1 tainted");
+	isnt_tainted($s,   "$desc: s not tainted");
+	is_tainted($res,   "$desc: res tainted");
+	is_tainted($res2,  "$desc: res2 tainted");
+	is_tainted($one,   "$desc: \$1 tainted");
 	is($res, 'a',      "$desc: res value");
 	is($res2,'b',      "$desc: res2 value");
 	is($one, 'd',      "$desc: \$1 value");
@@ -725,9 +737,9 @@ my $TEST = catfile(curdir(), 'TEST');
 	$s = 'abcd' . $TAINT;
 	$res = $s =~ s/(.+)/xyz/;
 	$one = $1;
-	ok( tainted($s),   "$desc: s tainted");
-	ok(!tainted($res), "$desc: res not tainted");
-	ok( tainted($one), "$desc: \$1 tainted");
+	is_tainted($s,     "$desc: s tainted");
+	isnt_tainted($res, "$desc: res not tainted");
+	is_tainted($one,   "$desc: \$1 tainted");
 	is($s,   'xyz',    "$desc: s value");
 	is($res, 1,        "$desc: res value");
 	is($one, 'abcd',   "$desc: \$1 value");
@@ -737,9 +749,9 @@ my $TEST = catfile(curdir(), 'TEST');
 	$s = 'abcd' . $TAINT;
 	$res = $s =~ s/(.)/x/g;
 	$one = $1;
-	ok( tainted($s),   "$desc: s tainted");
-	ok( tainted($res), "$desc: res tainted");
-	ok( tainted($one), "$desc: \$1 tainted");
+	is_tainted($s,     "$desc: s tainted");
+	is_tainted($res,   "$desc: res tainted");
+	is_tainted($one,   "$desc: \$1 tainted");
 	is($s,   'xxxx',   "$desc: s value");
 	is($res, 4,        "$desc: res value");
 	is($one, 'd',      "$desc: \$1 value");
@@ -749,9 +761,9 @@ my $TEST = catfile(curdir(), 'TEST');
 	$s = 'abcd' . $TAINT;
 	$res = $s =~ s/(.+)/xyz/r;
 	$one = $1;
-	ok( tainted($s),   "$desc: s tainted");
-	ok( tainted($res), "$desc: res tainted");
-	ok( tainted($one), "$desc: \$1 tainted");
+	is_tainted($s,     "$desc: s tainted");
+	is_tainted($res,   "$desc: res tainted");
+	is_tainted($one,   "$desc: \$1 tainted");
 	is($s,   'abcd',   "$desc: s value");
 	is($res, 'xyz',    "$desc: res value");
 	is($one, 'abcd',   "$desc: \$1 value");
@@ -762,15 +774,15 @@ my $TEST = catfile(curdir(), 'TEST');
 	$one = '';
 	$res = $s =~ s{(.+)}{
 		    $one = $one . "x"; # make sure code not tainted
-		    ok(!tainted($one), "$desc: code not tainted within /e");
+		    isnt_tainted($one, "$desc: code not tainted within /e");
 		    $one = $1;
-		    ok(tainted($one), "$desc: $1 tainted within /e");
+		    is_tainted($one, "$desc: $1 tainted within /e");
 		    "xyz";
 		}e;
 	$one = $1;
-	ok( tainted($s),   "$desc: s tainted");
-	ok(!tainted($res), "$desc: res not tainted");
-	ok( tainted($one), "$desc: \$1 tainted");
+	is_tainted($s,     "$desc: s tainted");
+	isnt_tainted($res, "$desc: res not tainted");
+	is_tainted($one,   "$desc: \$1 tainted");
 	is($s,   'xyz',    "$desc: s value");
 	is($res, 1,        "$desc: res value");
 	is($one, 'abcd',   "$desc: \$1 value");
@@ -780,9 +792,9 @@ my $TEST = catfile(curdir(), 'TEST');
 	$s = 'abcd';
 	$res = $s =~ s/$TAINT(.+)/xyz/;
 	$one = $1;
-	ok( tainted($s),   "$desc: s tainted");
-	ok(!tainted($res), "$desc: res not tainted");
-	ok( tainted($one), "$desc: \$1 tainted");
+	is_tainted($s,     "$desc: s tainted");
+	isnt_tainted($res, "$desc: res not tainted");
+	is_tainted($one,   "$desc: \$1 tainted");
 	is($s,  'xyz',     "$desc: s value");
 	is($res, 1,        "$desc: res value");
 	is($one, 'abcd',   "$desc: \$1 value");
@@ -792,9 +804,9 @@ my $TEST = catfile(curdir(), 'TEST');
 	$s = 'abcd';
 	$res = $s =~ s/$TAINT(.)/x/g;
 	$one = $1;
-	ok( tainted($s),   "$desc: s tainted");
-	ok( tainted($res), "$desc: res tainted");
-	ok( tainted($one), "$desc: \$1 tainted");
+	is_tainted($s,     "$desc: s tainted");
+	is_tainted($res,   "$desc: res tainted");
+	is_tainted($one,   "$desc: \$1 tainted");
 	is($s,  'xxxx',    "$desc: s value");
 	is($res, 4,        "$desc: res value");
 	is($one, 'd',      "$desc: \$1 value");
@@ -808,22 +820,22 @@ my $TEST = catfile(curdir(), 'TEST');
 	    $res = $s =~ s{(.)$TAINT}{
 			$j = $i; # make sure code not tainted
 			$one = $1;
-			ok(!tainted($j), "$desc: code not tainted within /e");
+			isnt_tainted($j, "$desc: code not tainted within /e");
 			$i++;
 			if ($i == 1) {
-			    ok(!tainted($s),   "$desc: s not tainted loop 1");
+			    isnt_tainted($s,   "$desc: s not tainted loop 1");
 			}
 			else {
-			    ok( tainted($s),   "$desc: s tainted loop $i");
+			    is_tainted($s,     "$desc: s tainted loop $i");
 			}
-			ok( tainted($one), "$desc: \$1 tainted loop $i");
+			is_tainted($one,   "$desc: \$1 tainted loop $i");
 			$i.$TAINT;
 		    }ge;
 	    $one = $1;
 	}
-	ok( tainted($s),   "$desc: s tainted");
-	ok( tainted($res), "$desc: res tainted");
-	ok( tainted($one), "$desc: \$1 tainted");
+	is_tainted($s,     "$desc: s tainted");
+	is_tainted($res,   "$desc: res tainted");
+	is_tainted($one,   "$desc: \$1 tainted");
 	is($s,  '123',     "$desc: s value");
 	is($res, 3,        "$desc: res value");
 	is($one, 'c',      "$desc: \$1 value");
@@ -834,9 +846,9 @@ my $TEST = catfile(curdir(), 'TEST');
 	$s = 'abcd';
 	$res = $s =~ s/$TAINT(.+)/xyz/r;
 	$one = $1;
-	ok(!tainted($s),   "$desc: s not tainted");
-	ok( tainted($res), "$desc: res tainted");
-	ok( tainted($one), "$desc: \$1 tainted");
+	isnt_tainted($s,   "$desc: s not tainted");
+	is_tainted($res,   "$desc: res tainted");
+	is_tainted($one,   "$desc: \$1 tainted");
 	is($s,  'abcd',    "$desc: s value");
 	is($res, 'xyz',    "$desc: res value");
 	is($one, 'abcd',   "$desc: \$1 value");
@@ -845,9 +857,9 @@ my $TEST = catfile(curdir(), 'TEST');
 
 	$s = 'abcd';
 	{ use locale;  $res = $s =~ s/(\w+)/xyz/; $one = $1; }
-	ok( tainted($s),   "$desc: s tainted");
-	ok(!tainted($res), "$desc: res not tainted");
-	ok( tainted($one), "$desc: \$1 tainted");
+	is_tainted($s,     "$desc: s tainted");
+	isnt_tainted($res, "$desc: res not tainted");
+	is_tainted($one,   "$desc: \$1 tainted");
 	is($s,  'xyz',     "$desc: s value");
 	is($res, 1,        "$desc: res value");
 	is($one, 'abcd',   "$desc: \$1 value");
@@ -856,9 +868,9 @@ my $TEST = catfile(curdir(), 'TEST');
 
 	$s = 'abcd';
 	{ use locale;  $res = $s =~ s/(\w)/x/g; $one = $1; }
-	ok( tainted($s),   "$desc: s tainted");
-	ok( tainted($res), "$desc: res tainted");
-	ok( tainted($one), "$desc: \$1 tainted");
+	is_tainted($s,     "$desc: s tainted");
+	is_tainted($res,   "$desc: res tainted");
+	is_tainted($one,   "$desc: \$1 tainted");
 	is($s,  'xxxx',    "$desc: s value");
 	is($res, 4,        "$desc: res value");
 	is($one, 'd',      "$desc: \$1 value");
@@ -867,9 +879,9 @@ my $TEST = catfile(curdir(), 'TEST');
 
 	$s = 'abcd';
 	{ use locale;  $res = $s =~ s/(\w+)/xyz/r; $one = $1; }
-	ok(!tainted($s),   "$desc: s not tainted");
-	ok( tainted($res), "$desc: res tainted");
-	ok( tainted($one), "$desc: \$1 tainted");
+	isnt_tainted($s,   "$desc: s not tainted");
+	is_tainted($res,   "$desc: res tainted");
+	is_tainted($one,   "$desc: \$1 tainted");
 	is($s,  'abcd',    "$desc: s value");
 	is($res, 'xyz',    "$desc: res value");
 	is($one, 'abcd',   "$desc: \$1 value");
@@ -879,9 +891,9 @@ my $TEST = catfile(curdir(), 'TEST');
 	$s = 'abcd';
 	$res = $s =~ s/(.+)/xyz$TAINT/;
 	$one = $1;
-	ok( tainted($s),   "$desc: s tainted");
-	ok(!tainted($res), "$desc: res not tainted");
-	ok(!tainted($one), "$desc: \$1 not tainted");
+	is_tainted($s,     "$desc: s tainted");
+	isnt_tainted($res, "$desc: res not tainted");
+	isnt_tainted($one, "$desc: \$1 not tainted");
 	is($s,  'xyz',     "$desc: s value");
 	is($res, 1,        "$desc: res value");
 	is($one, 'abcd',   "$desc: \$1 value");
@@ -891,9 +903,9 @@ my $TEST = catfile(curdir(), 'TEST');
 	$s = 'abcd';
 	$res = $s =~ s/(.)/x$TAINT/g;
 	$one = $1;
-	ok( tainted($s),   "$desc: s tainted");
-	ok(!tainted($res), "$desc: res not tainted");
-	ok(!tainted($one), "$desc: \$1 not tainted");
+	is_tainted($s,     "$desc: s tainted");
+	isnt_tainted($res, "$desc: res not tainted");
+	isnt_tainted($one, "$desc: \$1 not tainted");
 	is($s,  'xxxx',    "$desc: s value");
 	is($res, 4,        "$desc: res value");
 	is($one, 'd',      "$desc: \$1 value");
@@ -907,22 +919,22 @@ my $TEST = catfile(curdir(), 'TEST');
 	    $res = $s =~ s{(.)}{
 			$j = $i; # make sure code not tainted
 			$one = $1;
-			ok(!tainted($j), "$desc: code not tainted within /e");
+			isnt_tainted($j, "$desc: code not tainted within /e");
 			$i++;
 			if ($i == 1) {
-			    ok(!tainted($s),   "$desc: s not tainted loop 1");
+			    isnt_tainted($s,   "$desc: s not tainted loop 1");
 			}
 			else {
-			    ok( tainted($s),   "$desc: s tainted loop $i");
+			    is_tainted($s,     "$desc: s tainted loop $i");
 			}
-			    ok(!tainted($one), "$desc: \$1 not tainted");
+			    isnt_tainted($one, "$desc: \$1 not tainted");
 			$i.$TAINT;
 		    }ge;
 	    $one = $1;
 	}
-	ok( tainted($s),   "$desc: s tainted");
-	ok( tainted($res), "$desc: res tainted");
-	ok(!tainted($one), "$desc: \$1 not tainted");
+	is_tainted($s,     "$desc: s tainted");
+	is_tainted($res,   "$desc: res tainted");
+	isnt_tainted($one, "$desc: \$1 not tainted");
 	is($s,  '123',     "$desc: s value");
 	is($res, 3,        "$desc: res value");
 	is($one, 'c',      "$desc: \$1 value");
@@ -932,23 +944,23 @@ my $TEST = catfile(curdir(), 'TEST');
 	$s = 'abcd';
 	$res = $s =~ s/(.+)/xyz$TAINT/r;
 	$one = $1;
-	ok(!tainted($s),   "$desc: s not tainted");
-	ok( tainted($res), "$desc: res tainted");
-	ok(!tainted($one), "$desc: \$1 not tainted");
+	isnt_tainted($s,   "$desc: s not tainted");
+	is_tainted($res,   "$desc: res tainted");
+	isnt_tainted($one, "$desc: \$1 not tainted");
 	is($s,   'abcd',   "$desc: s value");
 	is($res, 'xyz',    "$desc: res value");
 	is($one, 'abcd',   "$desc: \$1 value");
     }
 
     $foo = $1 if 'bar' =~ /(.+)$TAINT/;
-    ok(tainted $foo);
+    is_tainted($foo);
     is($foo, 'bar');
 
     my $pi = 4 * atan2(1,1) + $TAINT0;
-    ok(tainted $pi);
+    is_tainted($pi);
 
     ($pi) = $pi =~ /(\d+\.\d+)/;
-    ok(not tainted $pi);
+    isnt_tainted($pi);
     is(sprintf("%.5f", $pi), '3.14159');
 }
 
@@ -977,14 +989,14 @@ SKIP: {
     sysread(FILE, $block, 100);
     my $line = <FILE>;
     close FILE;
-    ok(tainted $block);
-    ok(tainted $line);
+    is_tainted($block);
+    is_tainted($line);
 }
 
 # Output of commands should be tainted
 {
     my $foo = `$echo abc`;
-    ok(tainted $foo);
+    is_tainted($foo);
 }
 
 # Certain system variables should be tainted
@@ -995,7 +1007,7 @@ SKIP: {
 # Results of matching should all be untainted
 {
     my $foo = "abcdefghi" . $TAINT;
-    ok(tainted $foo);
+    is_tainted($foo);
 
     $foo =~ /def/;
     ok(not any_tainted $`, $&, $');
@@ -1006,7 +1018,7 @@ SKIP: {
     my @bar = $foo =~ /(...)(...)(...)/;
     ok(not any_tainted @bar);
 
-    ok(tainted $foo);	# $foo should still be tainted!
+    is_tainted($foo);	# $foo should still be tainted!
     is($foo, "abcdefghi");
 }
 
@@ -1185,9 +1197,9 @@ SKIP: {
 {
     my $foo = 'abc' . $TAINT;
     my $fooref = \$foo;
-    ok(not tainted $fooref);
-    ok(tainted $$fooref);
-    ok(tainted $foo);
+    isnt_tainted($fooref);
+    is_tainted($$fooref);
+    is_tainted($foo);
 }
 
 # Some tests involving assignment
@@ -1195,76 +1207,76 @@ SKIP: {
     my $foo = $TAINT0;
     my $bar = $foo;
     ok(all_tainted $foo, $bar);
-    ok(tainted($foo = $bar));
-    ok(tainted($bar = $bar));
-    ok(tainted($bar += $bar));
-    ok(tainted($bar -= $bar));
-    ok(tainted($bar *= $bar));
-    ok(tainted($bar++));
-    ok(tainted($bar /= $bar));
-    ok(tainted($bar += 0));
-    ok(tainted($bar -= 2));
-    ok(tainted($bar *= -1));
-    ok(tainted($bar /= 1));
-    ok(tainted($bar--));
+    is_tainted($foo = $bar);
+    is_tainted($bar = $bar);
+    is_tainted($bar += $bar);
+    is_tainted($bar -= $bar);
+    is_tainted($bar *= $bar);
+    is_tainted($bar++);
+    is_tainted($bar /= $bar);
+    is_tainted($bar += 0);
+    is_tainted($bar -= 2);
+    is_tainted($bar *= -1);
+    is_tainted($bar /= 1);
+    is_tainted($bar--);
     is($bar, 0);
 }
 
 # Test assignment and return of lists
 {
     my @foo = ("A", "tainted" . $TAINT, "B");
-    ok(not tainted $foo[0]);
-    ok(    tainted $foo[1]);
-    ok(not tainted $foo[2]);
+    isnt_tainted($foo[0]);
+    is_tainted(    $foo[1]);
+    isnt_tainted($foo[2]);
     my @bar = @foo;
-    ok(not tainted $bar[0]);
-    ok(    tainted $bar[1]);
-    ok(not tainted $bar[2]);
+    isnt_tainted($bar[0]);
+    is_tainted(    $bar[1]);
+    isnt_tainted($bar[2]);
     my @baz = eval { "A", "tainted" . $TAINT, "B" };
-    ok(not tainted $baz[0]);
-    ok(    tainted $baz[1]);
-    ok(not tainted $baz[2]);
+    isnt_tainted($baz[0]);
+    is_tainted(    $baz[1]);
+    isnt_tainted($baz[2]);
     my @plugh = eval q[ "A", "tainted" . $TAINT, "B" ];
-    ok(not tainted $plugh[0]);
-    ok(    tainted $plugh[1]);
-    ok(not tainted $plugh[2]);
+    isnt_tainted($plugh[0]);
+    is_tainted(    $plugh[1]);
+    isnt_tainted($plugh[2]);
     my $nautilus = sub { "A", "tainted" . $TAINT, "B" };
-    ok(not tainted ((&$nautilus)[0]));
-    ok(    tainted ((&$nautilus)[1]));
-    ok(not tainted ((&$nautilus)[2]));
+    isnt_tainted(((&$nautilus)[0]));
+    is_tainted(    ((&$nautilus)[1]));
+    isnt_tainted(((&$nautilus)[2]));
     my @xyzzy = &$nautilus;
-    ok(not tainted $xyzzy[0]);
-    ok(    tainted $xyzzy[1]);
-    ok(not tainted $xyzzy[2]);
+    isnt_tainted($xyzzy[0]);
+    is_tainted(    $xyzzy[1]);
+    isnt_tainted($xyzzy[2]);
     my $red_october = sub { return "A", "tainted" . $TAINT, "B" };
-    ok(not tainted ((&$red_october)[0]));
-    ok(    tainted ((&$red_october)[1]));
-    ok(not tainted ((&$red_october)[2]));
+    isnt_tainted(((&$red_october)[0]));
+    is_tainted(    ((&$red_october)[1]));
+    isnt_tainted(((&$red_october)[2]));
     my @corge = &$red_october;
-    ok(not tainted $corge[0]);
-    ok(    tainted $corge[1]);
-    ok(not tainted $corge[2]);
+    isnt_tainted($corge[0]);
+    is_tainted(    $corge[1]);
+    isnt_tainted($corge[2]);
 }
 
 # Test for system/library calls returning string data of dubious origin.
 {
     # No reliable %Config check for getpw*
     SKIP: {
-        skip "getpwent() is not available", 1 unless 
+        skip "getpwent() is not available", 9 unless 
           eval { setpwent(); getpwent() };
 
 	setpwent();
 	my @getpwent = getpwent();
 	die "getpwent: $!\n" unless (@getpwent);
-	ok(       not tainted $getpwent[0]
-	          and     tainted $getpwent[1]
-	          and not tainted $getpwent[2]
-	          and not tainted $getpwent[3]
-	          and not tainted $getpwent[4]
-	          and not tainted $getpwent[5]
-	          and     tainted $getpwent[6]		# ge?cos
-	          and not tainted $getpwent[7]
-		  and     tainted $getpwent[8]);	# shell
+	isnt_tainted($getpwent[0]);
+	is_tainted($getpwent[1]);
+	isnt_tainted($getpwent[2]);
+	isnt_tainted($getpwent[3]);
+	isnt_tainted($getpwent[4]);
+	isnt_tainted($getpwent[5]);
+	is_tainted($getpwent[6], 'ge?cos');
+	isnt_tainted($getpwent[7]);
+	is_tainted($getpwent[8], 'shell');
 	endpwent();
     }
 
@@ -1275,7 +1287,7 @@ SKIP: {
 	local(*D);
 	opendir(D, "op") or die "opendir: $!\n";
 	my $readdir = readdir(D);
-	ok(tainted $readdir);
+	is_tainted($readdir);
 	closedir(D);
     }
 
@@ -1289,7 +1301,7 @@ SKIP: {
 	# it has to be a real path on Mac OS
 	symlink($sl, $symlink) or die "symlink: $!\n";
 	my $readlink = readlink($symlink);
-	ok(tainted $readlink);
+	is_tainted($readlink);
 	unlink($symlink);
     }
 }
@@ -1298,24 +1310,24 @@ SKIP: {
 {
     my $why = "y";
     my $j = "x" | $why;
-    ok(not tainted $j);
+    isnt_tainted($j);
     $why = $TAINT."y";
     $j = "x" | $why;
-    ok(    tainted $j);
+    is_tainted(    $j);
 }
 
 # test target of substitution (regression bug)
 {
     my $why = $TAINT."y";
     $why =~ s/y/z/;
-    ok(    tainted $why);
+    is_tainted(    $why);
 
     my $z = "[z]";
     $why =~ s/$z/zee/;
-    ok(    tainted $why);
+    is_tainted(    $why);
 
     $why =~ s/e/'-'.$$/ge;
-    ok(    tainted $why);
+    is_tainted(    $why);
 }
 
 
@@ -1350,7 +1362,7 @@ SKIP: {
         skip "SysV shared memory operation failed", 1 unless 
           $rcvd eq $sent;
 
-        ok(tainted $rcvd);
+        is_tainted($rcvd);
     }
 
 
@@ -1385,7 +1397,7 @@ SKIP: {
             skip "SysV message queue operation failed", 1
               unless $rcvd eq $sent && $type_sent == $type_rcvd;
 
-	    ok(tainted $rcvd);
+	    is_tainted($rcvd);
 	}
     }
 }
@@ -1398,7 +1410,9 @@ SKIP: {
     my $a = <IN>;
     my $b = <IN>;
 
-    ok tainted($a) && tainted($b) && !defined($b);
+    is_tainted($a);
+    is_tainted($b);
+    is($b, undef);
 
     close IN;
 }
@@ -1412,20 +1426,22 @@ SKIP: {
     my $c = { a => 42,
 	      b => $a };
 
-    ok !tainted($c->{a}) && tainted($c->{b});
+    isnt_tainted($c->{a});
+    is_tainted($c->{b});
 
 
     my $d = { a => $a,
 	      b => 42 };
-    ok tainted($d->{a}) && !tainted($d->{b});
+    is_tainted($d->{a});
+    isnt_tainted($d->{b});
 
 
     my $e = { a => 42,
 	      b => { c => $a, d => 42 } };
-    ok !tainted($e->{a}) &&
-       !tainted($e->{b}) &&
-	tainted($e->{b}->{c}) &&
-       !tainted($e->{b}->{d});
+    isnt_tainted($e->{a});
+    isnt_tainted($e->{b});
+    is_tainted($e->{b}->{c});
+    isnt_tainted($e->{b}->{d});
 
     close IN;
 }
@@ -1578,13 +1594,13 @@ ok( $@ =~ /^Modification of a read-only value attempted/,
     # bug 20011111.105
     
     my $re1 = qr/x$TAINT/;
-    ok(tainted $re1);
+    is_tainted($re1);
     
     my $re2 = qr/^$re1\z/;
-    ok(tainted $re2);
+    is_tainted($re2);
     
     my $re3 = "$re2";
-    ok(tainted $re3);
+    is_tainted($re3);
 }
 
 SKIP: {
@@ -1643,7 +1659,7 @@ TODO: {
     # [ID 20020704.001] taint propagation failure
     use re 'taint';
     $TAINT =~ /(.*)/;
-    ok(tainted(my $foo = $1));
+    is_tainted(my $foo = $1);
 }
 
 {
@@ -1659,42 +1675,42 @@ TODO: {
 {
     # [perl #24248]
     $TAINT =~ /(.*)/;
-    ok(!tainted($1));
+    isnt_tainted($1);
     my $notaint = $1;
-    ok(!tainted($notaint));
+    isnt_tainted($notaint);
 
     my $l;
     $notaint =~ /($notaint)/;
     $l = $1;
-    ok(!tainted($1));
-    ok(!tainted($l));
+    isnt_tainted($1);
+    isnt_tainted($l);
     $notaint =~ /($TAINT)/;
     $l = $1;
-    ok(tainted($1));
-    ok(tainted($l));
+    is_tainted($1);
+    is_tainted($l);
 
     $TAINT =~ /($notaint)/;
     $l = $1;
-    ok(!tainted($1));
-    ok(!tainted($l));
+    isnt_tainted($1);
+    isnt_tainted($l);
     $TAINT =~ /($TAINT)/;
     $l = $1;
-    ok(tainted($1));
-    ok(tainted($l));
+    is_tainted($1);
+    is_tainted($l);
 
     my $r;
     ($r = $TAINT) =~ /($notaint)/;
-    ok(!tainted($1));
+    isnt_tainted($1);
     ($r = $TAINT) =~ /($TAINT)/;
-    ok(tainted($1));
+    is_tainted($1);
 
     #  [perl #24674]
     # accessing $^O  shoudn't taint it as a side-effect;
     # assigning tainted data to it is now an error
 
-    ok(!tainted($^O));
+    isnt_tainted($^O);
     if (!$^X) { } elsif ($^O eq 'bar') { }
-    ok(!tainted($^O));
+    isnt_tainted($^O);
     local $^O;  # We're going to clobber something test infrastructure depends on.
     eval '$^O = $^X';
     like($@, qr/Insecure dependency in/);
@@ -1702,38 +1718,38 @@ TODO: {
 
 EFFECTIVELY_CONSTANTS: {
     my $tainted_number = 12 + $TAINT0;
-    ok(tainted( $tainted_number ));
+    is_tainted( $tainted_number );
 
     # Even though it's always 0, it's still tainted
     my $tainted_product = $tainted_number * 0;
-    ok(tainted( $tainted_product ));
+    is_tainted( $tainted_product );
     is($tainted_product, 0);
 }
 
 TERNARY_CONDITIONALS: {
     my $tainted_true  = $TAINT . "blah blah blah";
     my $tainted_false = $TAINT0;
-    ok(tainted( $tainted_true ));
-    ok(tainted( $tainted_false ));
+    is_tainted( $tainted_true );
+    is_tainted( $tainted_false );
 
     my $result = $tainted_true ? "True" : "False";
     is($result, "True");
-    ok(!tainted( $result ));
+    isnt_tainted( $result );
 
     $result = $tainted_false ? "True" : "False";
     is($result, "False");
-    ok(!tainted( $result ));
+    isnt_tainted( $result );
 
     my $untainted_whatever = "The Fabulous Johnny Cash";
     my $tainted_whatever = "Soft Cell" . $TAINT;
 
     $result = $tainted_true ? $tainted_whatever : $untainted_whatever;
     is($result, "Soft Cell");
-    ok(tainted( $result ));
+    is_tainted( $result );
 
     $result = $tainted_false ? $tainted_whatever : $untainted_whatever;
     is($result, "The Fabulous Johnny Cash");
-    ok(!tainted( $result ));
+    isnt_tainted( $result );
 }
 
 {
@@ -1747,7 +1763,7 @@ TERNARY_CONDITIONALS: {
     if ( $foo eq '' ) {
     }
     elsif ( $foo =~ /([$valid_chars]+)/o ) {
-        ok(not tainted $1);
+        isnt_tainted($1);
     }
 
     if ( $foo eq '' ) {
@@ -1762,20 +1778,20 @@ TERNARY_CONDITIONALS: {
 
 {
     our $x99 = $^X;
-    ok(tainted $x99);
+    is_tainted($x99);
 
     $x99 = '';
-    ok(not tainted $x99);
+    isnt_tainted($x99);
 
     my $c = do { local $x99; $^X };
-    ok(not tainted $x99);
+    isnt_tainted($x99);
 }
 {
     our $x99 = $^X;
-    ok(tainted $x99);
+    is_tainted($x99);
 
     my $c = do { local $x99; '' };
-    ok(tainted $x99);
+    is_tainted($x99);
 }
 
 # an mg_get of a tainted value during localization shouldn't taint the
@@ -1851,13 +1867,13 @@ SKIP:
         our $AUTOLOAD;
         return if $AUTOLOAD =~ /DESTROY/;
         if ($AUTOLOAD =~ /untainted/) {
-            main::ok(!main::tainted($AUTOLOAD), '$AUTOLOAD can be untainted');
+            main::isnt_tainted($AUTOLOAD, '$AUTOLOAD can be untainted');
             my $copy = $AUTOLOAD;
-            main::ok(!main::tainted($copy), '$AUTOLOAD can be untainted');
+            main::isnt_tainted($copy, '$AUTOLOAD can be untainted');
         } else {
-            main::ok(main::tainted($AUTOLOAD), '$AUTOLOAD can be tainted');
+            main::is_tainted($AUTOLOAD, '$AUTOLOAD can be tainted');
             my $copy = $AUTOLOAD;
-            main::ok(main::tainted($copy), '$AUTOLOAD can be tainted');
+            main::is_tainted($copy, '$AUTOLOAD can be tainted');
         }
     }
 
@@ -1914,7 +1930,7 @@ foreach my $ord (78, 163, 256) {
     chop $line;
     is($line, 'A1');
     $line =~ /(A\S*)/;
-    ok(!tainted($1), "\\S match with chr $ord");
+    isnt_tainted($1, "\\S match with chr $ord");
 }
 
 {
@@ -1924,12 +1940,12 @@ foreach my $ord (78, 163, 256) {
     my ($a, $b);
     $a = cr('hello', 'foo' . $TAINT);
     $b = cr('hello', 'foo');
-    ok(tainted($a),  "tainted crypt");
-    ok(!tainted($b), "untainted crypt");
+    is_tainted($a,  "tainted crypt");
+    isnt_tainted($b, "untainted crypt");
     $a = co('foo' . $TAINT);
     $b = co('foo');
-    ok(tainted($a),  "tainted complement");
-    ok(!tainted($b), "untainted complement");
+    is_tainted($a,  "tainted complement");
+    isnt_tainted($b, "untainted complement");
 }
 
 {
@@ -1937,33 +1953,33 @@ foreach my $ord (78, 163, 256) {
     # Clearly some sort of usenet bang-path
     my $string = $TAINT . join "!", @data;
 
-    ok(tainted($string), "tainted data");
+    is_tainted($string, "tainted data");
 
     my @got = split /!|,/, $string;
 
     # each @got would be useful here, but I want the test for earlier perls
     for my $i (0 .. $#data) {
-	ok(tainted($got[$i]), "tainted result $i");
+	is_tainted($got[$i], "tainted result $i");
 	is($got[$i], $data[$i], "correct content $i");
     }
 
-    ok(tainted($string), "still tainted data");
+    is_tainted($string, "still tainted data");
 
     my @got = split /[!,]/, $string;
 
     # each @got would be useful here, but I want the test for earlier perls
     for my $i (0 .. $#data) {
-	ok(tainted($got[$i]), "tainted result $i");
+	is_tainted($got[$i], "tainted result $i");
 	is($got[$i], $data[$i], "correct content $i");
     }
 
-    ok(tainted($string), "still tainted data");
+    is_tainted($string, "still tainted data");
 
     my @got = split /!/, $string;
 
     # each @got would be useful here, but I want the test for earlier perls
     for my $i (0 .. $#data) {
-	ok(tainted($got[$i]), "tainted result $i");
+	is_tainted($got[$i], "tainted result $i");
 	is($got[$i], $data[$i], "correct content $i");
     }
 }
@@ -1972,13 +1988,13 @@ foreach my $ord (78, 163, 256) {
 {
     my $x = $TAINT. q{print "Hello world\n"};
     my $y = pack "a*", $x;
-    ok(tainted($y), "pack a* preserves tainting");
+    is_tainted($y, "pack a* preserves tainting");
 
     my $z = pack "A*", q{print "Hello world\n"}.$TAINT;
-    ok(tainted($z), "pack A* preserves tainting");
+    is_tainted($z, "pack A* preserves tainting");
 
     my $zz = pack "a*a*", q{print "Hello world\n"}, $TAINT;
-    ok(tainted($zz), "pack a*a* preserves tainting");
+    is_tainted($zz, "pack a*a* preserves tainting");
 }
 
 # Bug RT #61976 tainted $! would show numeric rather than string value
@@ -2004,8 +2020,8 @@ foreach my $ord (78, 163, 256) {
     my $i = 0;
 
     sub STORE {
-	main::ok(main::tainted($_[1]), "tied arg1 tainted");
-	main::ok(main::tainted($_[2]), "tied arg2 tainted");
+	main::is_tainted($_[1], "tied arg1 tainted");
+	main::is_tainted($_[2], "tied arg2 tainted");
         $i++;
     }
 
@@ -2049,14 +2065,14 @@ foreach my $ord (78, 163, 256) {
 {
     use re 'taint';
     "abc".$TAINT =~ /(.*)/; # make $1 tainted
-    ok(tainted($1), '$1 should be tainted');
+    is_tainted($1, '$1 should be tainted');
 
     my $untainted = "abcdef";
-    ok(!tainted($untainted), '$untainted should be untainted');
+    isnt_tainted($untainted, '$untainted should be untainted');
     $untainted =~ s/(abc)/$1/;
-    ok(!tainted($untainted), '$untainted should still be untainted');
+    isnt_tainted($untainted, '$untainted should still be untainted');
     $untainted =~ s/(abc)/x$1/;
-    ok(!tainted($untainted), '$untainted should yet still be untainted');
+    isnt_tainted($untainted, '$untainted should yet still be untainted');
 }
 
 {
@@ -2077,35 +2093,35 @@ end
 }
 
 {
-    ok(!tainted($^A), "format accumulator not tainted yet");
+    isnt_tainted($^A, "format accumulator not tainted yet");
     formline('@ | @*', 'hallo' . $TAINT, 'welt');
-    ok(tainted($^A), "tainted formline argument makes a tainted accumulator");
+    is_tainted($^A, "tainted formline argument makes a tainted accumulator");
     $^A = "";
-    ok(!tainted($^A), "accumulator can be explicitly untainted");
+    isnt_tainted($^A, "accumulator can be explicitly untainted");
     formline('@' .('<'*5) . ' | @*', 'hallo', 'welt');
-    ok(!tainted($^A), "accumulator still untainted");
+    isnt_tainted($^A, "accumulator still untainted");
     $^A = "" . $TAINT;
-    ok(tainted($^A), "accumulator can be explicitly tainted");
+    is_tainted($^A, "accumulator can be explicitly tainted");
     formline('@' .('<'*5) . ' | @*', 'hallo', 'welt');
-    ok(tainted($^A), "accumulator still tainted");
+    is_tainted($^A, "accumulator still tainted");
     $^A = "";
-    ok(!tainted($^A), "accumulator untainted again");
+    isnt_tainted($^A, "accumulator untainted again");
     formline('@' .('<'*5) . ' | @*', 'hallo', 'welt');
-    ok(!tainted($^A), "accumulator still untainted");
+    isnt_tainted($^A, "accumulator still untainted");
     formline('@' .('<'*(5+$TAINT0)) . ' | @*', 'hallo', 'welt');
     TODO: {
         local $::TODO = "get magic handled too late?";
-        ok(tainted($^A), "the accumulator should be tainted already");
+        is_tainted($^A, "the accumulator should be tainted already");
     }
-    ok(tainted($^A), "tainted formline picture makes a tainted accumulator");
+    is_tainted($^A, "tainted formline picture makes a tainted accumulator");
 }
 
 {   # Bug #80610
     "Constant(1)" =~ / ^ ([a-z_]\w*) (?: [(] (.*) [)] )? $ /xi;
     my $a = $1;
     my $b = $2;
-    ok(! tainted($a), "regex optimization of single char /[]/i doesn't taint");
-    ok(! tainted($b), "regex optimization of single char /[]/i doesn't taint");
+    isnt_tainted($a, "regex optimization of single char /[]/i doesn't taint");
+    isnt_tainted($b, "regex optimization of single char /[]/i doesn't taint");
 }
 
 {
@@ -2138,7 +2154,7 @@ end
     my $x = sub { "x" . "y" };
     my $y = $ENV{PATH} . $x->(); # Compile $x inside a tainted expression
     my $z = $x->();
-    ok( ! tainted($z), "Constants folded value not tainted");
+    isnt_tainted($z, "Constants folded value not tainted");
 }
 
 {
@@ -2149,7 +2165,7 @@ end
     my $r = $$rr; # bare REGEX
     my $s ="abc";
     ok($s =~ s/$r/x/, "match bare regex");
-    ok(tainted($s), "match bare regex taint");
+    is_tainted($s, "match bare regex taint");
     is($s, 'xbc', "match bare regex taint value");
 }
 
