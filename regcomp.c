@@ -10052,15 +10052,6 @@ parseit:
     /****** !SIZE_ONLY AFTER HERE *********/
 
     /* Finish up the non-bitmap entries */
-    if (l1_fold_invlist) {
-	if (nonbitmap) {
-	    nonbitmap = invlist_union(nonbitmap, l1_fold_invlist);
-	}
-	else {
-	    nonbitmap = l1_fold_invlist;
-	}
-        l1_fold_invlist = NULL;
-    }
     if (nonbitmap) {
 	UV i;
 
