@@ -10037,9 +10037,6 @@ parseit:
 			    }
 
 			    add_alternate(&unicode_alternate, foldbuf, foldlen);
-
-			    /* This node is variable length */
-			    OP(ret) = ANYOFV;
 			end_multi_fold: ;
 			}
 		    }
@@ -10269,6 +10266,9 @@ parseit:
 	av_store(av, 0, listsv);
 	av_store(av, 1, NULL);
 	av_store(av, 2, MUTABLE_SV(unicode_alternate));
+	if (unicode_alternate) { /* This node is variable length */
+	    OP(ret) = ANYOFV;
+	}
 	rv = newRV_noinc(MUTABLE_SV(av));
 	n = add_data(pRExC_state, 1, "s");
 	RExC_rxi->data->data[n] = (void*)rv;
