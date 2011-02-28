@@ -114,10 +114,11 @@ sub isnt_tainted {
 }
 
 sub violates_taint {
-    my ($code, $desc) = @_;
+    my ($code, $what, $desc) = @_;
+    $desc //= $what;
     local $::Level = $::Level + 1;
     is(eval { $code->(); }, undef, $desc);
-    like($@, qr/^Insecure dependency/);
+    like($@, qr/^Insecure dependency in $what while running with -T switch/);
 }
 
 # We need an external program to call.
@@ -1092,7 +1093,7 @@ violates_taint(sub { link $TAINT, '' }, 'link');
 	$! == 2 || # File not found
 	($Is_Dos && $! == 22));
 
-    violates_taint(sub { open FOO, "> $foo" }, 'open for write');
+    violates_taint(sub { open FOO, "> $foo" }, 'open', 'open for write');
 }
 
 # Commands to the system can't use tainted data
@@ -1102,8 +1103,8 @@ violates_taint(sub { link $TAINT, '' }, 'link');
     SKIP: {
         skip "open('|') is not available", 4 if $^O eq 'amigaos';
 
-	violates_taint(sub { open FOO, "| x$foo" }, 'popen to');
-	violates_taint(sub { open FOO, "x$foo |" }, 'popen from');
+	violates_taint(sub { open FOO, "| x$foo" }, 'piped open', 'popen to');
+	violates_taint(sub { open FOO, "x$foo |" }, 'piped open', 'popen from');
     }
 
     violates_taint(sub { exec $TAINT }, 'exec');
@@ -1112,7 +1113,7 @@ violates_taint(sub { link $TAINT, '' }, 'link');
     $foo = "*";
     taint_these $foo;
 
-    violates_taint(sub { `$echo 1$foo` }, 'backticks');
+    violates_taint(sub { `$echo 1$foo` }, '``', 'backticks');
 
     SKIP: {
         # wildcard expansion doesn't invoke shell on VMS, so is safe
