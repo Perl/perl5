@@ -11,6 +11,7 @@ use Data::Dumper;
 use Params::Check               qw[check];
 use Module::Load::Conditional   qw[can_load];
 use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
+use version;
 
 $Params::Check::VERBOSE = 1;
 
@@ -347,7 +348,22 @@ sub _send_report {
         ### as FAIL modules where prereqs are not filled
         {   my $prq = $mod->status->prereqs || {};
         
-            while( my($prq_name,$prq_ver) = each %$prq ) {
+            PREREQ: while( my($prq_name,$prq_ver) = each %$prq ) {
+
+                # 'perl' listed as prereq
+
+                if ( $prq_name eq 'perl' ) {
+                   my $req_ver = eval { version->new( $prq_ver ) };
+                   next PREREQ unless $req_ver;
+                   if ( version->new( $] ) < $req_ver ) {
+                      msg(loc("'%1' requires a higher version of perl than your current ".
+                              "version -- sending N/A grade.", $name), $verbose);
+
+                      $grade = GRADE_NA;
+                      last GRADE;
+                   }
+                }
+
                 my $obj = $cb->module_tree( $prq_name );
                 my $sub = CPANPLUS::Module->can(         
                             'module_is_supplied_with_perl_core' );
@@ -365,7 +381,7 @@ sub _send_report {
                              $prq_name, $name ), $verbose );
 
                     $grade = GRADE_NA;
-                    last GRADE;        
+                    last GRADE;
                 }
 
                 if ( !$obj ) {
@@ -377,7 +393,7 @@ sub _send_report {
                                $name, $prq_ver ), $verbose );
                              
                       $grade = GRADE_NA;
-                      last GRADE;        
+                      last GRADE;
                     }
                 }
 
@@ -388,7 +404,7 @@ sub _send_report {
                              $name, $prq_ver ), $verbose );
                              
                     $grade = GRADE_NA;
-                    last GRADE;        
+                    last GRADE;
                 }                             
             }
         }
@@ -413,8 +429,8 @@ sub _send_report {
         } elsif ( PERL_VERSION_TOO_LOW->( $buffer ) ) {
             msg(loc("'%1' requires a higher version of perl than your current ".
                     "version -- sending N/A grade.", $name), $verbose);
-        
-            $grade = GRADE_NA;                
+
+            $grade = GRADE_NA;
 
         ### perhaps where were no tests...
         ### see if the thing even had tests ###
@@ -426,7 +442,7 @@ sub _send_report {
             $grade = GRADE_UNKNOWN
 
         } else {
-            
+
             $grade = GRADE_FAIL;
         }
 

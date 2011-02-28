@@ -96,6 +96,10 @@ XXX
 
 =item *
 
+C<CPANPLUS> has been upgraded from version 0.9101 to 0.9102
+
+=item *
+
 C<CPANPLUS::Dist::Build> has been upgraded from version 0.52 to 0.54
 
 =item *
