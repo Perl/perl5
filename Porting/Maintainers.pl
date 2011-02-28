@@ -599,7 +599,7 @@ use File::Glob qw(:case);
     'ExtUtils::Command' =>
 	{
 	'MAINTAINER'	=> 'p5p',
-	'DISTRIBUTION'	=> 'RKOBES/ExtUtils-Command-1.16.tar.gz',
+	'DISTRIBUTION'	=> 'FLORA/ExtUtils-Command-1.17.tar.gz',
 	'FILES'		=> q[dist/ExtUtils-Command],
 	'EXCLUDED'	=> [ qw{ t/shell_command.t
 				 t/shell_exit.t

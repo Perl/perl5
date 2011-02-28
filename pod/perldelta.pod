@@ -96,6 +96,10 @@ XXX
 
 =item *
 
+C<ExtUtils::Command> has been upgraded from version 1.16 to 1.17.
+
+=item *
+
 C<IO> has been upgraded from version 1.25_03 to 1.25_04.
 
 =item *
