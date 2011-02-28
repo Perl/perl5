@@ -113,6 +113,13 @@ sub isnt_tainted {
     ok(!tainted($thing), @_);
 }
 
+sub violates_taint {
+    my ($code, $desc) = @_;
+    local $::Level = $::Level + 1;
+    is(eval { $code->(); }, undef, $desc);
+    like($@, qr/^Insecure dependency/);
+}
+
 # We need an external program to call.
 my $ECHO = ($Is_MSWin32 ? ".\\echo$$" : ($Is_NetWare ? "echo$$" : "./echo$$"));
 END { unlink $ECHO }
@@ -1022,78 +1029,61 @@ SKIP: {
 
 # Operations which affect files can't use tainted data.
 {
-    is(eval { chmod 0, $TAINT }, undef, 'chmod');
-    like($@, qr/^Insecure dependency/);
+    violates_taint(sub { chmod 0, $TAINT }, 'chmod');
 
     SKIP: {
         skip "truncate() is not available", 2 unless $Config{d_truncate};
 
-	is(eval { truncate 'NoSuChFiLe', $TAINT0 }, undef, 'truncate');
-	like($@, qr/^Insecure dependency/);
+	violates_taint(sub { truncate 'NoSuChFiLe', $TAINT0 }, 'truncate');
     }
 
-    is(eval { rename '', $TAINT }, undef, 'rename');
-    like($@, qr/^Insecure dependency/);
-
-    is(eval { unlink $TAINT }, undef, 'unlink');
-    like($@, qr/^Insecure dependency/);
-
-    is(eval { utime $TAINT }, undef, 'utime');
-    like($@, qr/^Insecure dependency/);
+    violates_taint(sub { rename '', $TAINT }, 'rename');
+    violates_taint(sub { unlink $TAINT }, 'unlink');
+    violates_taint(sub { utime $TAINT }, 'utime');
 
     SKIP: {
         skip "chown() is not available", 2 unless $Config{d_chown};
 
-	is(eval { chown -1, -1, $TAINT }, undef, 'chown');
-	like($@, qr/^Insecure dependency/);
+	violates_taint(sub { chown -1, -1, $TAINT }, 'chown');
     }
 
     SKIP: {
         skip "link() is not available", 2 unless $Config{d_link};
 
-	is(eval { link $TAINT, '' }, undef, 'link');
-	like($@, qr/^Insecure dependency/);
+violates_taint(sub { link $TAINT, '' }, 'link');
     }
 
     SKIP: {
         skip "symlink() is not available", 2 unless $Config{d_symlink};
 
-	is(eval { symlink $TAINT, '' }, undef, 'symlink');
-	like($@, qr/^Insecure dependency/);
+	violates_taint(sub { symlink $TAINT, '' }, 'symlink');
     }
 }
 
 # Operations which affect directories can't use tainted data.
 {
-    is(eval { mkdir "foo".$TAINT, 0755 . $TAINT0 }, undef, 'mkdir');
-    like($@, qr/^Insecure dependency/);
-
-    is(eval { rmdir $TAINT }, undef, 'rmdir');
-    like($@, qr/^Insecure dependency/);
-
-    is(eval { chdir "foo".$TAINT }, undef, 'chdir');
-    like($@, qr/^Insecure dependency/);
+    violates_taint(sub { mkdir "foo".$TAINT, 0755 . $TAINT0 }, 'mkdir');
+    violates_taint(sub { rmdir $TAINT }, 'rmdir');
+    violates_taint(sub { chdir "foo".$TAINT }, 'chdir');
 
     SKIP: {
         skip "chroot() is not available", 2 unless $Config{d_chroot};
 
-	is(eval { chroot $TAINT }, undef, 'chroot');
-	like($@, qr/^Insecure dependency/);
+	violates_taint(sub { chroot $TAINT }, 'chroot');
     }
 }
 
 # Some operations using files can't use tainted data.
 {
     my $foo = "imaginary library" . $TAINT;
-    is(eval { require $foo }, undef, 'require');
-    like($@, qr/^Insecure dependency/);
+    violates_taint(sub { require $foo }, 'require');
 
     my $filename = tempfile();	# NB: $filename isn't tainted!
     $foo = $filename . $TAINT;
     unlink $filename;	# in any case
 
     is(eval { open FOO, $foo }, undef, 'open for read');
-    is($@, '');		# NB: This should be allowed
+    is($@, '');                # NB: This should be allowed
 
     # Try first new style but allow also old style.
     # We do not want the whole taint.t to fail
@@ -1102,8 +1092,7 @@ SKIP: {
 	$! == 2 || # File not found
 	($Is_Dos && $! == 22));
 
-    is(eval { open FOO, "> $foo" }, undef, 'open for write');
-    like($@, qr/^Insecure dependency/);
+    violates_taint(sub { open FOO, "> $foo" }, 'open for write');
 }
 
 # Commands to the system can't use tainted data
@@ -1113,24 +1102,17 @@ SKIP: {
     SKIP: {
         skip "open('|') is not available", 4 if $^O eq 'amigaos';
 
-	is(eval { open FOO, "| x$foo" }, undef, 'popen to');
-	like($@, qr/^Insecure dependency/);
-
-	is(eval { open FOO, "x$foo |" }, undef, 'popen from');
-	like($@, qr/^Insecure dependency/);
+	violates_taint(sub { open FOO, "| x$foo" }, 'popen to');
+	violates_taint(sub { open FOO, "x$foo |" }, 'popen from');
     }
 
-    is(eval { exec $TAINT }, undef, 'exec');
-    like($@, qr/^Insecure dependency/);
-
-    is(eval { system $TAINT }, undef, 'system');
-    like($@, qr/^Insecure dependency/);
+    violates_taint(sub { exec $TAINT }, 'exec');
+    violates_taint(sub { system $TAINT }, 'system');
 
     $foo = "*";
     taint_these $foo;
 
-    is(eval { `$echo 1$foo` }, undef, 'backticks');
-    like($@, qr/^Insecure dependency/);
+    violates_taint(sub { `$echo 1$foo` }, 'backticks');
 
     SKIP: {
         # wildcard expansion doesn't invoke shell on VMS, so is safe
@@ -1143,21 +1125,18 @@ SKIP: {
 
 # Operations which affect processes can't use tainted data.
 {
-    is(eval { kill 0, $TAINT }, undef, 'kill');
-    like($@, qr/^Insecure dependency/);
+    violates_taint(sub { kill 0, $TAINT }, 'kill');
 
     SKIP: {
         skip "setpgrp() is not available", 2 unless $Config{d_setpgrp};
 
-	is(eval { setpgrp 0, $TAINT0 }, undef, 'setpgrp');
-	like($@, qr/^Insecure dependency/);
+	violates_taint(sub { setpgrp 0, $TAINT0 }, 'setpgrp');
     }
 
     SKIP: {
         skip "setpriority() is not available", 2 unless $Config{d_setprior};
 
-	is(eval { setpriority 0, $TAINT0, $TAINT0 }, undef, 'setpriority');
-	like($@, qr/^Insecure dependency/);
+	violates_taint(sub { setpriority 0, $TAINT0, $TAINT0 }, 'setpriority');
     }
 }
 
@@ -1166,8 +1145,7 @@ SKIP: {
     SKIP: {
         skip "syscall() is not available", 2 unless $Config{d_syscall};
 
-	is(eval { syscall $TAINT }, undef, 'syscall');
-	like($@, qr/^Insecure dependency/);
+	violates_taint(sub { syscall $TAINT }, 'syscall');
     }
 
     {
@@ -1177,14 +1155,12 @@ SKIP: {
 	my $temp = tempfile();
 	ok(open FOO, "> $temp") or diag("Couldn't open $temp for write: $!");
 
-	is(eval { ioctl FOO, $TAINT0, $foo }, undef, 'ioctl');
-	like($@, qr/^Insecure dependency/);
+	violates_taint(sub { ioctl FOO, $TAINT0, $foo }, 'ioctl');
 
         SKIP: {
             skip "fcntl() is not available", 2 unless $Config{d_fcntl};
 
-	    is(eval { fcntl FOO, $TAINT0, $foo }, undef, 'fcntl');
-	    like($@, qr/^Insecure dependency/);
+	    violates_taint(sub { fcntl FOO, $TAINT0, $foo }, 'fcntl');
 	}
 
 	close FOO;
@@ -1616,28 +1592,17 @@ TODO: {
       if $Is_VMS;
 
     # bug 20020208.005 plus some single arg exec/system extras
-    my $err = qr/^Insecure dependency/ ;
-    is(eval { exec $TAINT, $TAINT }, undef, 'exec');
-    like($@, $err);
-    is(eval { exec $TAINT $TAINT }, undef, 'exec');
-    like($@, $err);
-    is(eval { exec $TAINT $TAINT, $TAINT }, undef, 'exec');
-    like($@, $err);
-    is(eval { exec $TAINT 'notaint' }, undef, 'exec');
-    like($@, $err);
-    is(eval { exec {'notaint'} $TAINT }, undef, 'exec');
-    like($@, $err);
+    violates_taint(sub { exec $TAINT, $TAINT }, 'exec');
+    violates_taint(sub { exec $TAINT $TAINT }, 'exec');
+    violates_taint(sub { exec $TAINT $TAINT, $TAINT }, 'exec');
+    violates_taint(sub { exec $TAINT 'notaint' }, 'exec');
+    violates_taint(sub { exec {'notaint'} $TAINT }, 'exec');
 
-    is(eval { system $TAINT, $TAINT }, undef, 'system');
-    like($@, $err);
-    is(eval { system $TAINT $TAINT }, undef, 'system');
-    like($@, $err);
-    is(eval { system $TAINT $TAINT, $TAINT }, undef, 'system');
-    like($@, $err);
-    is(eval { system $TAINT 'notaint' }, undef, 'system');
-    like($@, $err);
-    is(eval { system {'notaint'} $TAINT }, undef, 'system');
-    like($@, $err);
+    violates_taint(sub { system $TAINT, $TAINT }, 'system');
+    violates_taint(sub { system $TAINT $TAINT }, 'system');
+    violates_taint(sub { system $TAINT $TAINT, $TAINT }, 'system');
+    violates_taint(sub { system $TAINT 'notaint' }, 'system');
+    violates_taint(sub { system {'notaint'} $TAINT }, 'system');
 
     eval { 
         no warnings;
