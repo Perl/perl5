@@ -202,6 +202,7 @@ my $has_tested_above_latin1_l;
 my $has_tested_ascii_l;
 my $has_tested_above_latin1_d;
 my $has_tested_ascii_d;
+my $has_tested_non_latin1_d;
 
 # For use by pairs() in generating combinations
 sub prefix {
@@ -265,6 +266,8 @@ foreach my $test (sort { numerically } keys %tests) {
     my $target_only_ascii = ! grep { $_ > 127 } @target;
     my $pattern_only_ascii = ! grep { $_ > 127 } @pattern;
     my $target_has_latin1 = grep { $_ < 256 } @target;
+    my $target_has_upper_latin1 = grep { $_ < 256 && $_ > 127 } @target;
+    my $pattern_has_upper_latin1 = grep { $_ < 256 && $_ > 127 } @pattern;
     my $pattern_has_latin1 = grep { $_ < 256 } @pattern;
     my $is_self = @target == 1 && @pattern == 1 && $target[0] == $pattern[0];
 
@@ -335,16 +338,26 @@ foreach my $test (sort { numerically } keys %tests) {
               $has_tested_ascii_l = $test;
           }
         }
-        elsif ($charset eq 'd') {   # Same for d
-          if (! $target_has_latin1 && ! $pattern_has_latin1) {
-            next if defined $has_tested_above_latin1_d
-                    && $has_tested_above_latin1_d != $test;
-            $has_tested_above_latin1_d = $test;
-          }
-          elsif ($target_only_ascii && $pattern_only_ascii) {
+        elsif ($charset eq 'd') {
+          # Similarly for d.  Beyond one test (besides self) each, we  don't
+          # test pairs that are both ascii; or both above latin1, or are
+          # combinations of ascii and above latin1.
+          if (! $target_has_upper_latin1 && ! $pattern_has_upper_latin1) {
+            if ($target_has_ascii && $pattern_has_ascii) {
               next if defined $has_tested_ascii_d
                       && $has_tested_ascii_d != $test;
-              $has_tested_ascii_d = $test;
+              $has_tested_ascii_d = $test
+            }
+            elsif (! $target_has_latin1 && ! $pattern_has_latin1) {
+              next if defined $has_tested_above_latin1_d
+                      && $has_tested_above_latin1_d != $test;
+              $has_tested_above_latin1_d = $test;
+            }
+            else {
+              next if defined $has_tested_non_latin1_d
+                      && $has_tested_non_latin1_d != $test;
+              $has_tested_non_latin1_d = $test;
+            }
           }
         }
       }
