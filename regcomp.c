@@ -10051,13 +10051,11 @@ parseit:
         return ret;
     /****** !SIZE_ONLY AFTER HERE *********/
 
-    /* Finish up the non-bitmap entries */
-    if (nonbitmap) {
+    /* If folding and there are code points above 255, we calculate all
+     * characters that could fold to or from the ones already on the list */
+    if (FOLD && nonbitmap) {
 	UV i;
 
-	/* If folding, we add to the list all characters that could fold to or
-	 * from the ones already on the list */
-	if (FOLD) {
 	    HV* fold_intersection;
 	    UV* fold_list;
 
@@ -10218,7 +10216,6 @@ parseit:
 		}
 	    }
 	    invlist_destroy(fold_intersection);
-	} /* End of processing all the folds */
     }
 
     /* Combine the two lists into one. */
