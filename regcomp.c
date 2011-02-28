@@ -9198,22 +9198,6 @@ case ANYOF_N##NAME:                                                            \
     what = WORD;                                                               \
     break
 
-/* 
-   We dont use PERL_LEGACY_UNICODE_CHARCLASS_MAPPINGS as the direct test
-   so that it is possible to override the option here without having to 
-   rebuild the entire core. as we are required to do if we change regcomp.h
-   which is where PERL_LEGACY_UNICODE_CHARCLASS_MAPPINGS is defined.
-*/
-#if PERL_LEGACY_UNICODE_CHARCLASS_MAPPINGS
-#define BROKEN_UNICODE_CHARCLASS_MAPPINGS
-#endif
-
-#ifdef BROKEN_UNICODE_CHARCLASS_MAPPINGS
-#define POSIX_CC_UNI_NAME(CCNAME) CCNAME
-#else
-#define POSIX_CC_UNI_NAME(CCNAME) "Posix" CCNAME
-#endif
-
 STATIC U8
 S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8 value, HV** invlist_ptr, AV** alternate_ptr)
 {
@@ -9782,15 +9766,9 @@ parseit:
 		case _C_C_T_(PSXSPC, isPSXSPC_L1, isPSXSPC, "XPosixSpace");
 		case _C_C_T_(PUNCT, isPUNCT_L1, isPUNCT, "XPosixPunct");
 		case _C_C_T_(UPPER, isUPPER_L1, isUPPER, "XPosixUpper");
-#ifdef BROKEN_UNICODE_CHARCLASS_MAPPINGS
                 /* \s, \w match all unicode if utf8. */
                 case _C_C_T_(SPACE, isSPACE_L1, isSPACE, "SpacePerl");
                 case _C_C_T_(ALNUM, isWORDCHAR_L1, isALNUM, "Word");
-#else
-                /* \s, \w match ascii and locale only */
-                case _C_C_T_(SPACE, isSPACE_L1, isSPACE, "PerlSpace");
-                case _C_C_T_(ALNUM, isWORDCHAR_L1, isALNUM, "PerlWord");
-#endif		
 		case _C_C_T_(XDIGIT, isXDIGIT_L1, isXDIGIT, "XPosixXDigit");
 		case _C_C_T_NOLOC_(VERTWS, is_VERTWS_latin1(&value), "VertSpace");
 		case _C_C_T_NOLOC_(HORIZWS, is_HORIZWS_latin1(&value), "HorizSpace");
@@ -9828,7 +9806,7 @@ parseit:
                               set_regclass_bit(pRExC_state, ret, (U8) value, &l1_fold_invlist, &unicode_alternate);
 		    }
 		    yesno = '+';
-		    what = POSIX_CC_UNI_NAME("Digit");
+		    what = "Digit";
 		    break;
 		case ANYOF_NDIGIT:
 		    if (LOC)
@@ -9843,7 +9821,7 @@ parseit:
                               set_regclass_bit(pRExC_state, ret, (U8) value, &l1_fold_invlist, &unicode_alternate);
 		    }
 		    yesno = '!';
-		    what = POSIX_CC_UNI_NAME("Digit");
+		    what = "Digit";
 		    if (AT_LEAST_ASCII_RESTRICTED ) {
 			ANYOF_FLAGS(ret) |= ANYOF_UNICODE_ALL;
 		    }

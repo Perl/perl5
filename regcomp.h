@@ -18,25 +18,6 @@ typedef OP OP_4tree;			/* Will be redefined later. */
 /* Be really aggressive about optimising patterns with trie sequences? */
 #define PERL_ENABLE_EXTENDED_TRIE_OPTIMISATION 1
 
-/* Use old style unicode mappings for perl and posix character classes
- *
- * NOTE: Enabling this essentially breaks character class matching against unicode 
- * strings, so that POSIX char classes match when they shouldn't, and \d matches 
- * way more than 10 characters, and sometimes a charclass and its complement either
- * both match or neither match.
- * NOTE: Disabling this will cause various backwards compatibility issues to rear 
- * their head, and tests to fail. However it will make the charclass behaviour 
- * consistent regardless of internal string type, and make character class inversions
- * consistent. The tests that fail in the regex engine are basically broken tests.
- *
- * Personally I think 5.12 should disable this for sure. Its a bit more debatable for
- * 5.10, so for now im leaving it enabled.
- * XXX: It is now enabled for 5.11/5.12
- *
- * -demerphq
- */
-#define PERL_LEGACY_UNICODE_CHARCLASS_MAPPINGS 1
-
 /* Should the optimiser take positive assertions into account? */
 #define PERL_ENABLE_POSITIVE_ASSERTION_STUDY 0
 
