@@ -20,7 +20,7 @@ Consult your favorite dictionary for details.
 =head2 v5.13.10 - Egill Skalla-Grímsson, L<Egils saga Skalla-Grímssonar|http://www.heimskringla.no/wiki/Egils_saga_Skalla-Gr%C3%ADmssonar>
 
 L<Annonced on 2011-02-20 by Ævar Arnfjörð Bjarmason|http://www.nntp.perl.org/group/perl.perl5.porters/2011/02/msg169340.html>
-   
+
     Skalat maðr rúnar rísta, 
     nema ráða vel kunni. 
     Þat verðr mörgum manni, 
@@ -29,7 +29,7 @@ L<Annonced on 2011-02-20 by Ævar Arnfjörð Bjarmason|http://www.nntp.perl.org/
     tíu launstafi ristna. 
     Þat hefr lauka lindi 
     langs ofrtrega fengit.
-    
+
 =head2 v5.13.9 - John F Kennedy, L<Inaugural Address January 20, 1961|http://en.wikisource.org/wiki/John_F._Kennedy%27s_Inaugural_Address>
 
 L<Announced on 2011-01-20 by Jesse Vincent|http://www.nntp.perl.org/group/perl.perl5.porters/2011/01/msg168335.html>
