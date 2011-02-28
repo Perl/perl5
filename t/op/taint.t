@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 733;
+plan tests => 753;
 
 $| = 1;
 
@@ -1439,59 +1439,31 @@ SKIP: {
 	my $foo = tempfile();
 	my $evil = $foo . $TAINT;
 
-	eval { sysopen(my $ro, $evil, &O_RDONLY) };
-	unlike($@, qr/^Insecure dependency/);
-	
-	eval { sysopen(my $wo, $evil, &O_WRONLY) };
-	like($@, qr/^Insecure dependency/);
-	
-	eval { sysopen(my $rw, $evil, &O_RDWR) };
-	like($@, qr/^Insecure dependency/);
-	
-	eval { sysopen(my $ap, $evil, &O_APPEND) };
-	like($@, qr/^Insecure dependency/);
-	
-	eval { sysopen(my $cr, $evil, &O_CREAT) };
-	like($@, qr/^Insecure dependency/);
-	
-	eval { sysopen(my $tr, $evil, &O_TRUNC) };
-	like($@, qr/^Insecure dependency/);
-	
-	eval { sysopen(my $ro, $foo, &O_RDONLY | $TAINT0) };
-	unlike($@, qr/^Insecure dependency/);
-	
-	eval { sysopen(my $wo, $foo, &O_WRONLY | $TAINT0) };
-	like($@, qr/^Insecure dependency/);
+	is(eval { sysopen(my $ro, $evil, &O_RDONLY) }, undef);
+	is($@, '');
 
-	eval { sysopen(my $rw, $foo, &O_RDWR | $TAINT0) };
-	like($@, qr/^Insecure dependency/);
+	violates_taint(sub { sysopen(my $wo, $evil, &O_WRONLY) }, 'sysopen');
+	violates_taint(sub { sysopen(my $rw, $evil, &O_RDWR) }, 'sysopen');
+	violates_taint(sub { sysopen(my $ap, $evil, &O_APPEND) }, 'sysopen');
+	violates_taint(sub { sysopen(my $cr, $evil, &O_CREAT) }, 'sysopen');
+	violates_taint(sub { sysopen(my $tr, $evil, &O_TRUNC) }, 'sysopen');
 
-	eval { sysopen(my $ap, $foo, &O_APPEND | $TAINT0) };
-	like($@, qr/^Insecure dependency/);
-	
-	eval { sysopen(my $cr, $foo, &O_CREAT | $TAINT0) };
-	like($@, qr/^Insecure dependency/);
+	is(eval { sysopen(my $ro, $foo, &O_RDONLY | $TAINT0) }, undef);
+	is($@, '');
 
-	eval { sysopen(my $tr, $foo, &O_TRUNC | $TAINT0) };
-	like($@, qr/^Insecure dependency/);
+	violates_taint(sub { sysopen(my $wo, $foo, &O_WRONLY | $TAINT0) }, 'sysopen');
+	violates_taint(sub { sysopen(my $rw, $foo, &O_RDWR | $TAINT0) }, 'sysopen');
+	violates_taint(sub { sysopen(my $ap, $foo, &O_APPEND | $TAINT0) }, 'sysopen');
+	violates_taint(sub { sysopen(my $cr, $foo, &O_CREAT | $TAINT0) }, 'sysopen');
+	violates_taint(sub { sysopen(my $tr, $foo, &O_TRUNC | $TAINT0) }, 'sysopen');
+	is(eval { sysopen(my $ro, $foo, &O_RDONLY, $TAINT0) }, undef);
+	is($@, '');
 
-	eval { sysopen(my $ro, $foo, &O_RDONLY, $TAINT0) };
-	unlike($@, qr/^Insecure dependency/);
-	
-	eval { sysopen(my $wo, $foo, &O_WRONLY, $TAINT0) };
-	like($@, qr/^Insecure dependency/);
-	
-	eval { sysopen(my $rw, $foo, &O_RDWR, $TAINT0) };
-	like($@, qr/^Insecure dependency/);
-	
-	eval { sysopen(my $ap, $foo, &O_APPEND, $TAINT0) };
-	like($@, qr/^Insecure dependency/);
-	
-	eval { sysopen(my $cr, $foo, &O_CREAT, $TAINT0) };
-	like($@, qr/^Insecure dependency/);
-
-	eval { sysopen(my $tr, $foo, &O_TRUNC, $TAINT0) };
-	like($@, qr/^Insecure dependency/);
+	violates_taint(sub { sysopen(my $wo, $foo, &O_WRONLY, $TAINT0) }, 'sysopen');
+	violates_taint(sub { sysopen(my $rw, $foo, &O_RDWR, $TAINT0) }, 'sysopen');
+	violates_taint(sub { sysopen(my $ap, $foo, &O_APPEND, $TAINT0) }, 'sysopen');
+	violates_taint(sub { sysopen(my $cr, $foo, &O_CREAT, $TAINT0) }, 'sysopen');
+	violates_taint(sub { sysopen(my $tr, $foo, &O_TRUNC, $TAINT0) }, 'sysopen');
     }
 }
 
@@ -1853,12 +1825,12 @@ SKIP:
 
 {
     # tests for tainted format in s?printf
-    eval { printf($TAINT . "# %s\n", "foo") };
-    like($@, qr/^Insecure dependency in printf/, q/printf doesn't like tainted formats/);
+    violates_taint(sub { printf($TAINT . "# %s\n", "foo") }, 'printf',
+		   q/printf doesn't like tainted formats/);
     eval { printf("# %s\n", $TAINT . "foo") };
     is($@, '', q/printf accepts other tainted args/);
-    eval { sprintf($TAINT . "# %s\n", "foo") };
-    like($@, qr/^Insecure dependency in sprintf/, q/sprintf doesn't like tainted formats/);
+    violates_taint(sub { sprintf($TAINT . "# %s\n", "foo") }, 'sprintf',
+		   q/sprintf doesn't like tainted formats/);
     eval { sprintf("# %s\n", $TAINT . "foo") };
     is($@, '', q/sprintf accepts other tainted args/);
 }
