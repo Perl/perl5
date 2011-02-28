@@ -1469,7 +1469,8 @@ SKIP: {
     SKIP: {
         skip "no Fcntl", 18 unless $has_fcntl;
 
-	my $evil = "foo" . $TAINT;
+	my $foo = tempfile();
+	my $evil = $foo . $TAINT;
 
 	eval { sysopen(my $ro, $evil, &O_RDONLY) };
 	test $@ !~ /^Insecure dependency/, $@;
@@ -1489,43 +1490,41 @@ SKIP: {
 	eval { sysopen(my $tr, $evil, &O_TRUNC) };
 	test $@ =~ /^Insecure dependency/, $@;
 	
-	eval { sysopen(my $ro, "foo", &O_RDONLY | $TAINT0) };
+	eval { sysopen(my $ro, $foo, &O_RDONLY | $TAINT0) };
 	test $@ !~ /^Insecure dependency/, $@;
 	
-	eval { sysopen(my $wo, "foo", &O_WRONLY | $TAINT0) };
+	eval { sysopen(my $wo, $foo, &O_WRONLY | $TAINT0) };
 	test $@ =~ /^Insecure dependency/, $@;
 
-	eval { sysopen(my $rw, "foo", &O_RDWR | $TAINT0) };
+	eval { sysopen(my $rw, $foo, &O_RDWR | $TAINT0) };
 	test $@ =~ /^Insecure dependency/, $@;
 
-	eval { sysopen(my $ap, "foo", &O_APPEND | $TAINT0) };
+	eval { sysopen(my $ap, $foo, &O_APPEND | $TAINT0) };
 	test $@ =~ /^Insecure dependency/, $@;
 	
-	eval { sysopen(my $cr, "foo", &O_CREAT | $TAINT0) };
+	eval { sysopen(my $cr, $foo, &O_CREAT | $TAINT0) };
 	test $@ =~ /^Insecure dependency/, $@;
 
-	eval { sysopen(my $tr, "foo", &O_TRUNC | $TAINT0) };
+	eval { sysopen(my $tr, $foo, &O_TRUNC | $TAINT0) };
 	test $@ =~ /^Insecure dependency/, $@;
 
-	eval { sysopen(my $ro, "foo", &O_RDONLY, $TAINT0) };
+	eval { sysopen(my $ro, $foo, &O_RDONLY, $TAINT0) };
 	test $@ !~ /^Insecure dependency/, $@;
 	
-	eval { sysopen(my $wo, "foo", &O_WRONLY, $TAINT0) };
+	eval { sysopen(my $wo, $foo, &O_WRONLY, $TAINT0) };
 	test $@ =~ /^Insecure dependency/, $@;
 	
-	eval { sysopen(my $rw, "foo", &O_RDWR, $TAINT0) };
+	eval { sysopen(my $rw, $foo, &O_RDWR, $TAINT0) };
 	test $@ =~ /^Insecure dependency/, $@;
 	
-	eval { sysopen(my $ap, "foo", &O_APPEND, $TAINT0) };
+	eval { sysopen(my $ap, $foo, &O_APPEND, $TAINT0) };
 	test $@ =~ /^Insecure dependency/, $@;
 	
-	eval { sysopen(my $cr, "foo", &O_CREAT, $TAINT0) };
+	eval { sysopen(my $cr, $foo, &O_CREAT, $TAINT0) };
 	test $@ =~ /^Insecure dependency/, $@;
 
-	eval { sysopen(my $tr, "foo", &O_TRUNC, $TAINT0) };
+	eval { sysopen(my $tr, $foo, &O_TRUNC, $TAINT0) };
 	test $@ =~ /^Insecure dependency/, $@;
-	
-	unlink("foo"); # not unlink($evil), because that would fail...
     }
 }
 
