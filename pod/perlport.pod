@@ -2358,5 +2358,5 @@ Gurusamy Sarathy <gsar@activestate.com>,
 Paul J. Schinder <schinder@pobox.com>,
 Michael G Schwern <schwern@pobox.com>,
 Dan Sugalski <dan@sidhe.org>,
-Nathan Torkington <gnat@frii.com>.
+Nathan Torkington <gnat@frii.com>,
 John Malmberg <wb8tyw@qsl.net>
