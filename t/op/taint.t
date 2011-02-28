@@ -1040,10 +1040,12 @@ SKIP: {
     test !eval { chmod 0, $TAINT }, 'chmod';
     test $@ =~ /^Insecure dependency/, $@;
 
-    # There is no feature test in $Config{} for truncate,
-    #   so we allow for the possibility that it's missing.
-    test !eval { truncate 'NoSuChFiLe', $TAINT0 }, 'truncate';
-    test $@ =~ /^(?:Insecure dependency|truncate not implemented)/, $@;
+    SKIP: {
+        skip "truncate() is not available", 2 unless $Config{d_truncate};
+
+	test !eval { truncate 'NoSuChFiLe', $TAINT0 }, 'truncate';
+	test $@ =~ /^Insecure dependency/, $@;
+    }
 
     test !eval { rename '', $TAINT }, 'rename';
     test $@ =~ /^Insecure dependency/, $@;
