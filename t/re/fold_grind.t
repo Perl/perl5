@@ -198,7 +198,7 @@ my $has_tested_aa_above_latin1;
 my $has_tested_latin1_aa;
 my $has_tested_ascii_aa;
 my $has_tested_l_above_latin1;
-my $has_tested_latin1_l;
+my $has_tested_above_latin1_l;
 my $has_tested_ascii_l;
 
 # For use by pairs() in generating combinations
@@ -318,9 +318,9 @@ foreach my $test (sort { numerically } keys %tests) {
           # For l, don't need to test beyond one set those things that are
           # all above latin1.
           if (! $target_has_latin1 && ! $pattern_has_latin1) {
-            next if defined $has_tested_latin1_l
-                    && $has_tested_latin1_l != $test;
-            $has_tested_latin1_l = $test;
+            next if defined $has_tested_above_latin1_l
+                    && $has_tested_above_latin1_l != $test;
+            $has_tested_above_latin1_l = $test;
           }
           elsif ($target_only_ascii && $pattern_only_ascii) {
 
