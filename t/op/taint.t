@@ -1582,12 +1582,12 @@ SKIP: {
 }
 
 
-ok( ${^TAINT} == 1, '$^TAINT is on' );
+is(${^TAINT}, 1, '$^TAINT is on');
 
 eval { ${^TAINT} = 0 };
-ok( ${^TAINT},  '$^TAINT is not assignable' );
-ok( $@ =~ /^Modification of a read-only value attempted/,
-                                'Assigning to ${^TAINT} fails' );
+is(${^TAINT}, 1, '$^TAINT is not assignable');
+like($@, qr/^Modification of a read-only value attempted/,
+     'Assigning to ${^TAINT} fails');
 
 {
     # bug 20011111.105
@@ -1890,11 +1890,11 @@ SKIP:
     eval { printf($TAINT . "# %s\n", "foo") };
     like($@, qr/^Insecure dependency in printf/, q/printf doesn't like tainted formats/);
     eval { printf("# %s\n", $TAINT . "foo") };
-    ok(!$@, q/printf accepts other tainted args/);
+    is($@, '', q/printf accepts other tainted args/);
     eval { sprintf($TAINT . "# %s\n", "foo") };
     like($@, qr/^Insecure dependency in sprintf/, q/sprintf doesn't like tainted formats/);
     eval { sprintf("# %s\n", $TAINT . "foo") };
-    ok(!$@, q/sprintf accepts other tainted args/);
+    is($@, '', q/sprintf accepts other tainted args/);
 }
 
 {
