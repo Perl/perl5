@@ -10056,166 +10056,170 @@ parseit:
     if (FOLD && nonbitmap) {
 	UV i;
 
-	    HV* fold_intersection;
-	    UV* fold_list;
+	HV* fold_intersection;
+	UV* fold_list;
 
-	    /* This is a list of all the characters that participate in folds
-	     * (except marks, etc in multi-char folds */
-	    if (! PL_utf8_foldable) {
-		SV* swash = swash_init("utf8", "Cased", &PL_sv_undef, 1, 0);
-		PL_utf8_foldable = _swash_to_invlist(swash);
-	    }
+	/* This is a list of all the characters that participate in folds
+	    * (except marks, etc in multi-char folds */
+	if (! PL_utf8_foldable) {
+	    SV* swash = swash_init("utf8", "Cased", &PL_sv_undef, 1, 0);
+	    PL_utf8_foldable = _swash_to_invlist(swash);
+	}
 
-	    /* This is a hash that for a particular fold gives all characters
-	     * that are involved in it */
-	    if (! PL_utf8_foldclosures) {
+	/* This is a hash that for a particular fold gives all characters
+	    * that are involved in it */
+	if (! PL_utf8_foldclosures) {
 
-		/* If we were unable to find any folds, then we likely won't be
-		 * able to find the closures.  So just create an empty list.
-		 * Folding will effectively be restricted to the non-Unicode
-		 * rules hard-coded into Perl.  (This case happens legitimately
-		 * during compilation of Perl itself before the Unicode tables
-		 * are generated) */
-		if (invlist_len(PL_utf8_foldable) == 0) {
-		    PL_utf8_foldclosures = _new_invlist(0);
-		} else {
-		    /* If the folds haven't been read in, call a fold function
-		     * to force that */
-		    if (! PL_utf8_tofold) {
-			U8 dummy[UTF8_MAXBYTES+1];
-			STRLEN dummy_len;
-			to_utf8_fold((U8*) "A", dummy, &dummy_len);
-		    }
-		    PL_utf8_foldclosures = _swash_inversion_hash(PL_utf8_tofold);
+	    /* If we were unable to find any folds, then we likely won't be
+	     * able to find the closures.  So just create an empty list.
+	     * Folding will effectively be restricted to the non-Unicode rules
+	     * hard-coded into Perl.  (This case happens legitimately during
+	     * compilation of Perl itself before the Unicode tables are
+	     * generated) */
+	    if (invlist_len(PL_utf8_foldable) == 0) {
+		PL_utf8_foldclosures = _new_invlist(0);
+	    } else {
+		/* If the folds haven't been read in, call a fold function
+		    * to force that */
+		if (! PL_utf8_tofold) {
+		    U8 dummy[UTF8_MAXBYTES+1];
+		    STRLEN dummy_len;
+		    to_utf8_fold((U8*) "A", dummy, &dummy_len);
 		}
+		PL_utf8_foldclosures = _swash_inversion_hash(PL_utf8_tofold);
 	    }
+	}
 
-	    /* Only the characters in this class that participate in folds need
-	     * be checked.  Get the intersection of this class and all the
-	     * possible characters that are foldable.  This can quickly narrow
-	     * down a large class */
-	    fold_intersection = invlist_intersection(PL_utf8_foldable, nonbitmap);
+	/* Only the characters in this class that participate in folds need
+	    * be checked.  Get the intersection of this class and all the
+	    * possible characters that are foldable.  This can quickly narrow
+	    * down a large class */
+	fold_intersection = invlist_intersection(PL_utf8_foldable, nonbitmap);
 
-	    /* Now look at the foldable characters in this class individually */
-	    fold_list = invlist_array(fold_intersection);
-	    for (i = 0; i < invlist_len(fold_intersection); i++) {
-		UV j;
+	/* Now look at the foldable characters in this class individually */
+	fold_list = invlist_array(fold_intersection);
+	for (i = 0; i < invlist_len(fold_intersection); i++) {
+	    UV j;
 
-		/* The next entry is the beginning of the range that is in the
-		 * class */
-		UV start = fold_list[i++];
+	    /* The next entry is the beginning of the range that is in the
+	     * class */
+	    UV start = fold_list[i++];
 
 
-		/* The next entry is the beginning of the next range, which
-		 * isn't in the class, so the end of the current range is one
-		 * less than that */
-		UV end = fold_list[i] - 1;
+	    /* The next entry is the beginning of the next range, which
+		* isn't in the class, so the end of the current range is one
+		* less than that */
+	    UV end = fold_list[i] - 1;
 
-		/* Look at every character in the range */
-		for (j = start; j <= end; j++) {
+	    /* Look at every character in the range */
+	    for (j = start; j <= end; j++) {
 
-		    /* Get its fold */
-		    U8 foldbuf[UTF8_MAXBYTES_CASE+1];
-		    STRLEN foldlen;
-		    const UV f = to_uni_fold(j, foldbuf, &foldlen);
+		/* Get its fold */
+		U8 foldbuf[UTF8_MAXBYTES_CASE+1];
+		STRLEN foldlen;
+		const UV f = to_uni_fold(j, foldbuf, &foldlen);
 
-		    if (foldlen > (STRLEN)UNISKIP(f)) {
+		if (foldlen > (STRLEN)UNISKIP(f)) {
 
-			/* Any multicharacter foldings (disallowed in
-			 * lookbehind patterns) require the following
-			 * transform: [ABCDEF] -> (?:[ABCabcDEFd]|pq|rst) where
-			 * E folds into "pq" and F folds into "rst", all other
-			 * characters fold to single characters.  We save away
-			 * these multicharacter foldings, to be later saved as
-			 * part of the additional "s" data. */
-			if (! RExC_in_lookbehind) {
-			    U8* loc = foldbuf;
-			    U8* e = foldbuf + foldlen;
+		    /* Any multicharacter foldings (disallowed in
+			* lookbehind patterns) require the following
+			* transform: [ABCDEF] -> (?:[ABCabcDEFd]|pq|rst) where
+			* E folds into "pq" and F folds into "rst", all other
+			* characters fold to single characters.  We save away
+			* these multicharacter foldings, to be later saved as
+			* part of the additional "s" data. */
+		    if (! RExC_in_lookbehind) {
+			U8* loc = foldbuf;
+			U8* e = foldbuf + foldlen;
 
-			    /* If any of the folded characters of this are in
-			     * the Latin1 range, tell the regex engine that
-			     * this can match a non-utf8 target string.  The
-			     * only multi-byte fold whose source is in the
-			     * Latin1 range (U+00DF) applies only when the
-			     * target string is utf8, or under unicode rules */
-			    if (j > 255 || AT_LEAST_UNI_SEMANTICS) {
-				while (loc < e) {
+			/* If any of the folded characters of this are in
+			    * the Latin1 range, tell the regex engine that
+			    * this can match a non-utf8 target string.  The
+			    * only multi-byte fold whose source is in the
+			    * Latin1 range (U+00DF) applies only when the
+			    * target string is utf8, or under unicode rules */
+			if (j > 255 || AT_LEAST_UNI_SEMANTICS) {
+			    while (loc < e) {
 
-				    /* Can't mix ascii with non- under /aa */
-				    if (MORE_ASCII_RESTRICTED
-					&& (isASCII(*loc) != isASCII(j)))
-				    {
+				/* Can't mix ascii with non- under /aa */
+				if (MORE_ASCII_RESTRICTED
+				    && (isASCII(*loc) != isASCII(j)))
+				{
+				    goto end_multi_fold;
+				}
+				if (UTF8_IS_INVARIANT(*loc)
+				    || UTF8_IS_DOWNGRADEABLE_START(*loc))
+				{
+				    /* Can't mix above and below 256 under
+					* LOC */
+				    if (LOC) {
 					goto end_multi_fold;
 				    }
-				    if (UTF8_IS_INVARIANT(*loc)
-					|| UTF8_IS_DOWNGRADEABLE_START(*loc))
-				    {
-					/* Can't mix above and below 256 under
-					 * LOC */
-					if (LOC) {
-					    goto end_multi_fold;
-					}
-					ANYOF_FLAGS(ret)
-						|= ANYOF_NONBITMAP_NON_UTF8;
-					break;
-				    }
-				    loc += UTF8SKIP(loc);
+				    ANYOF_FLAGS(ret)
+					    |= ANYOF_NONBITMAP_NON_UTF8;
+				    break;
 				}
+				loc += UTF8SKIP(loc);
+			    }
+			}
+
+			add_alternate(&unicode_alternate, foldbuf, foldlen);
+		    end_multi_fold: ;
+		    }
+		}
+		else {
+		    /* Single character fold.  Add everything in its fold
+			* closure to the list that this node should match */
+		    SV** listp;
+
+		    /* The fold closures data structure is a hash with the
+			* keys being every character that is folded to, like
+			* 'k', and the values each an array of everything that
+			* folds to its key.  e.g. [ 'k', 'K', KELVIN_SIGN ] */
+		    if ((listp = hv_fetch(PL_utf8_foldclosures,
+				    (char *) foldbuf, foldlen, FALSE)))
+		    {
+			AV* list = (AV*) *listp;
+			IV k;
+			for (k = 0; k <= av_len(list); k++) {
+			    SV** c_p = av_fetch(list, k, FALSE);
+			    UV c;
+			    if (c_p == NULL) {
+				Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
+			    }
+			    c = SvUV(*c_p);
+
+			    /* /aa doesn't allow folds between ASCII and
+				* non-; /l doesn't allow them between above
+				* and below 256 */
+			    if ((MORE_ASCII_RESTRICTED
+				 && (isASCII(c) != isASCII(j)))
+				    || (LOC && ((c < 256) != (j < 256))))
+			    {
+				continue;
 			    }
 
-			    add_alternate(&unicode_alternate, foldbuf, foldlen);
-			end_multi_fold: ;
-			}
-		    }
-		    else {
-			/* Single character fold.  Add everything in its fold
-			 * closure to the list that this node should match */
-			SV** listp;
-
-			/* The fold closures data structure is a hash with the
-			 * keys being every character that is folded to, like
-			 * 'k', and the values each an array of everything that
-			 * folds to its key.  e.g. [ 'k', 'K', KELVIN_SIGN ] */
-			if ((listp = hv_fetch(PL_utf8_foldclosures,
-				      (char *) foldbuf, foldlen, FALSE)))
-			{
-			    AV* list = (AV*) *listp;
-			    IV k;
-			    for (k = 0; k <= av_len(list); k++) {
-				SV** c_p = av_fetch(list, k, FALSE);
-				UV c;
-				if (c_p == NULL) {
-				    Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
-				}
-				c = SvUV(*c_p);
-
-				/* /aa doesn't allow folds between ASCII and
-				 * non-; /l doesn't allow them between above
-				 * and below 256 */
-				if ((MORE_ASCII_RESTRICTED && (isASCII(c) != isASCII(j)))
-				     || (LOC && ((c < 256) != (j < 256))))
-				{
-				    continue;
-				}
-
-				if (c < 256 && AT_LEAST_UNI_SEMANTICS) {
-				    stored += set_regclass_bit(pRExC_state, ret, (U8) c, &l1_fold_invlist, &unicode_alternate);
-				}
-				    /* It may be that the code point is already
-				     * in this range or already in the bitmap,
-				     * in which case we need do nothing */
-				else if ((c < start || c > end)
-					 && (c > 255
-					     || ! ANYOF_BITMAP_TEST(ret, c)))
-				{
-				    nonbitmap = add_cp_to_invlist(nonbitmap, c);
-				}
+			    if (c < 256 && AT_LEAST_UNI_SEMANTICS) {
+				stored += set_regclass_bit(pRExC_state,
+					ret,
+					(U8) c,
+					&l1_fold_invlist, &unicode_alternate);
+			    }
+				/* It may be that the code point is already
+				    * in this range or already in the bitmap,
+				    * in which case we need do nothing */
+			    else if ((c < start || c > end)
+					&& (c > 255
+					    || ! ANYOF_BITMAP_TEST(ret, c)))
+			    {
+				nonbitmap = add_cp_to_invlist(nonbitmap, c);
 			    }
 			}
 		    }
 		}
 	    }
-	    invlist_destroy(fold_intersection);
+	}
+	invlist_destroy(fold_intersection);
     }
 
     /* Combine the two lists into one. */
