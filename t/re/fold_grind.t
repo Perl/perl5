@@ -200,6 +200,8 @@ my $has_tested_ascii_aa;
 my $has_tested_l_above_latin1;
 my $has_tested_above_latin1_l;
 my $has_tested_ascii_l;
+my $has_tested_above_latin1_d;
+my $has_tested_ascii_d;
 
 # For use by pairs() in generating combinations
 sub prefix {
@@ -331,6 +333,18 @@ foreach my $test (sort { numerically } keys %tests) {
               next if defined $has_tested_ascii_l
                       && $has_tested_ascii_l != $test;
               $has_tested_ascii_l = $test;
+          }
+        }
+        elsif ($charset eq 'd') {   # Same for d
+          if (! $target_has_latin1 && ! $pattern_has_latin1) {
+            next if defined $has_tested_above_latin1_d
+                    && $has_tested_above_latin1_d != $test;
+            $has_tested_above_latin1_d = $test;
+          }
+          elsif ($target_only_ascii && $pattern_only_ascii) {
+              next if defined $has_tested_ascii_d
+                      && $has_tested_ascii_d != $test;
+              $has_tested_ascii_d = $test;
           }
         }
       }
