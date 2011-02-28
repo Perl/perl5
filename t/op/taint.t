@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 712;
+plan tests => 733;
 
 $| = 1;
 
@@ -97,23 +97,20 @@ sub taint_these (@) {
 }
 
 # How to identify taint when you see it
-sub any_tainted (@) {
-    not eval { join("",@_), kill 0; 1 };
-}
 sub tainted ($) {
-    any_tainted @_;
+    not eval { join("",@_), kill 0; 1 };
 }
 
 sub is_tainted {
     my $thing = shift;
     local $::Level = $::Level + 1;
-    ok(any_tainted($thing), @_);
+    ok(tainted($thing), @_);
 }
 
 sub isnt_tainted {
     my $thing = shift;
     local $::Level = $::Level + 1;
-    ok(!any_tainted($thing), @_);
+    ok(!tainted($thing), @_);
 }
 
 # We need an external program to call.
@@ -228,11 +225,10 @@ my $TEST = catfile(curdir(), 'TEST');
     is_tainted($foo);
 
     my @list = 1..10;
-    ok(not any_tainted @list);
+    isnt_tainted($_) foreach @list;
     taint_these @list[1,3,5,7,9];
-    ok(any_tainted @list);
     is_tainted($_) foreach @list[1,3,5,7,9];
-    ok(not any_tainted @list[0,2,4,6,8]);
+    isnt_tainted($_) foreach @list[0,2,4,6,8];
 
     ($foo) = $foo =~ /(.+)/;
     isnt_tainted($foo);
@@ -1007,13 +1003,18 @@ SKIP: {
     is_tainted($foo);
 
     $foo =~ /def/;
-    ok(not any_tainted $`, $&, $');
+    isnt_tainted($`);
+    isnt_tainted($&);
+    isnt_tainted($');
 
     $foo =~ /(...)(...)(...)/;
-    ok(not any_tainted $1, $2, $3, $+);
+    isnt_tainted($1);
+    isnt_tainted($2);
+    isnt_tainted($3);
+    isnt_tainted($+);
 
     my @bar = $foo =~ /(...)(...)(...)/;
-    ok(not any_tainted @bar);
+    isnt_tainted($_) foreach @bar;
 
     is_tainted($foo);	# $foo should still be tainted!
     is($foo, "abcdefghi");
@@ -1761,13 +1762,15 @@ TERNARY_CONDITIONALS: {
     if ( $foo eq '' ) {
     }
     elsif ( $foo =~ /([$valid_chars]+)/o ) {
-        isnt_tainted($1);
+	isnt_tainted($1);
+	isnt($1, undef);
     }
 
     if ( $foo eq '' ) {
     }
     elsif ( my @bar = $foo =~ /([$valid_chars]+)/o ) {
-        ok(not any_tainted @bar);
+	isnt_tainted($bar[0]);
+	is(scalar @bar, 1);
     }
 }
 
