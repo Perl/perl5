@@ -9222,12 +9222,15 @@ S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8
      * Locale folding is done at run-time, so this function should not be
      * called for nodes that are for locales.
      *
-     * This function simply sets the bit corresponding to the fold of the input
+     * This function sets the bit corresponding to the fold of the input
      * 'value', if not already set.  The fold of 'f' is 'F', and the fold of
      * 'F' is 'f'.
      *
-     * It also sets any necessary flags, and returns the number of bits that
-     * actually changed from 0 to 1 */
+     * It also knows about the characters that are in the bitmap that have
+     * folds that are matchable only outside it, and sets the appropriate lists
+     * and flags.
+     *
+     * It returns the number of bits that actually changed from 0 to 1 */
 
     U8 stored = 0;
     U8 fold;
@@ -9242,17 +9245,111 @@ S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8
         ANYOF_BITMAP_SET(node, fold);
         stored++;
     }
-    if ((_HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(value) && (! isASCII(value) || ! MORE_ASCII_RESTRICTED))
-	|| (! UNI_SEMANTICS
+    if (_HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(value) && (! isASCII(value) || ! MORE_ASCII_RESTRICTED)) {
+	/* Certain Latin1 characters have matches outside the bitmap.  To get
+	 * here, 'value' is one of those characters.   None of these matches is
+	 * valid for ASCII characters under /aa, which have been excluded by
+	 * the 'if' above.  The matches fall into three categories:
+	 * 1) They are singly folded-to or -from an above 255 character, as
+	 *    LATIN SMALL LETTER Y WITH DIAERESIS and LATIN CAPITAL LETTER Y
+	 *    WITH DIAERESIS;
+	 * 2) They are part of a multi-char fold with another character in the
+	 *    bitmap, only LATIN SMALL LETTER SHARP S => "ss" fits that bill;
+	 * 3) They are part of a multi-char fold with a character not in the
+	 *    bitmap, such as various ligatures.
+	 * We aren't dealing fully with multi-char folds, except we do deal
+	 * with the pattern containing a character that has a multi-char fold
+	 * (not so much the inverse).
+	 * For types 1) and 3), the matches only happen when the target string
+	 * is utf8; that's not true for 2), and we set a flag for it.
+	 *
+	 * The code below adds to the passed in inversion list the single fold
+	 * closures for 'value'.  The values are hard-coded here so that an
+	 * innocent-looking character class, like /[ks]/i won't have to go out
+	 * to disk to find the possible matches.  XXX It would be better to
+	 * generate these via regen, in case a new version of the Unicode
+	 * standard adds new mappings, though that is not really likely. */
+	switch (value) {
+	    case 'k':
+	    case 'K':
+		/* KELVIN SIGN */
+		*invlist_ptr = add_cp_to_invlist(*invlist_ptr, 0x212A);
+		break;
+	    case 's':
+	    case 'S':
+		/* LATIN SMALL LETTER LONG S */
+		*invlist_ptr = add_cp_to_invlist(*invlist_ptr, 0x017F);
+		break;
+	    case MICRO_SIGN:
+		*invlist_ptr = add_cp_to_invlist(*invlist_ptr,
+						 GREEK_SMALL_LETTER_MU);
+		*invlist_ptr = add_cp_to_invlist(*invlist_ptr,
+						 GREEK_CAPITAL_LETTER_MU);
+		break;
+	    case LATIN_CAPITAL_LETTER_A_WITH_RING_ABOVE:
+	    case LATIN_SMALL_LETTER_A_WITH_RING_ABOVE:
+		/* ANGSTROM SIGN */
+		*invlist_ptr = add_cp_to_invlist(*invlist_ptr, 0x212B);
+		if (DEPENDS_SEMANTICS) {    /* See DEPENDS comment below */
+		    *invlist_ptr = add_cp_to_invlist(*invlist_ptr,
+						     PL_fold_latin1[value]);
+		}
+		break;
+	    case LATIN_SMALL_LETTER_Y_WITH_DIAERESIS:
+		*invlist_ptr = add_cp_to_invlist(*invlist_ptr,
+					LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS);
+		break;
+	    case LATIN_SMALL_LETTER_SHARP_S:
+
+		/* Under /d and /u, this can match the two chars "ss" */
+		if (! MORE_ASCII_RESTRICTED) {
+		    add_alternate(alternate_ptr, (U8 *) "ss", 2);
+
+		    /* And under /u, it can match even if the target is not
+		     * utf8 */
+		    if (UNI_SEMANTICS) {
+			ANYOF_FLAGS(node) |= ANYOF_NONBITMAP_NON_UTF8;
+		    }
+		}
+		break;
+	    case 'F': case 'f':
+	    case 'I': case 'i':
+	    case 'L': case 'l':
+	    case 'T': case 't':
+		/* These all are targets of multi-character folds, which can
+		 * occur with only non-Latin1 characters in the fold, so they
+		 * can match if the target string isn't UTF-8 */
+		ANYOF_FLAGS(node) |= ANYOF_NONBITMAP_NON_UTF8;
+		break;
+	    case 'A': case 'a':
+	    case 'H': case 'h':
+	    case 'J': case 'j':
+	    case 'N': case 'n':
+	    case 'W': case 'w':
+	    case 'Y': case 'y':
+		/* These all are targets of multi-character folds, which occur
+		 * only with a non-Latin1 character as part of the fold, so
+		 * they can't match unless the target string is in UTF-8, so no
+		 * action here is necessary */
+		break;
+	    default:
+		/* Use deprecated warning to increase the chances of this
+		 * being output */
+		ckWARN2regdep(RExC_parse, "Perl folding rules are not up-to-date for 0x%x; please use the perlbug utility to report;", value);
+		break;
+	}
+    }
+    else if (DEPENDS_SEMANTICS
 	    && ! isASCII(value)
-	    && PL_fold_latin1[value] != value))
-    {   /* A character that has a fold outside of Latin1 matches outside the
-           bitmap, but only when the target string is utf8.  Similarly when we
-           don't have unicode semantics for the above ASCII Latin-1 characters,
-           and they have a fold, they should match if the target is utf8, and
-	   not otherwise.  We add the character here, and calculate the fold
-	   later, with the other nonbitmap folds */
-	*invlist_ptr = add_range_to_invlist(*invlist_ptr, value, value);
+	    && PL_fold_latin1[value] != value)
+    {
+	   /* Under DEPENDS rules, non-ASCII Latin1 characters match their
+	    * folds only when the target string is in UTF-8.  We add the fold
+	    * here to the list of things to match outside the bitmap, which
+	    * won't be looked at unless it is UTF8 (or else if something else
+	    * says to look even if not utf8, but those things better not happen
+	    * under DEPENDS semantics. */
+	*invlist_ptr = add_cp_to_invlist(*invlist_ptr, PL_fold_latin1[value]);
     }
 
     return stored;
