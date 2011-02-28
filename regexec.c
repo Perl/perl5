@@ -1445,11 +1445,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		 while (s < strend) {
 		      STRLEN skip = 1;
 
-		      if (REGINCLASS(prog, c, (U8*)s) ||
-			  (ANYOF_FOLD_SHARP_S(c, s, strend) &&
-			   /* The assignment of 2 is intentional:
-			    * for the folded sharp s, the skip is 2. */
-			   (skip = SHARP_S_SKIP))) {
+		      if (REGINCLASS(prog, c, (U8*)s)) {
 			   if (tmp && (!reginfo || regtry(reginfo, &s)))
 				goto got_it;
 			   else
