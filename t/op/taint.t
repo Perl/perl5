@@ -2055,17 +2055,13 @@ foreach my $ord (78, 163, 256) {
 {
     for my $var1 ($TAINT, "123") {
 	for my $var2 ($TAINT0, "456") {
-	    my @s;
-	    push @s, sprintf '%s', $var1, $var2;
-	    push @s, sprintf ' %s', $var1, $var2;
-	    push @s, sprintf '%s%s', $var1, $var2;
-	    for (0..2) {
-		ok( !(
-			tainted($s[$_]) xor
-			(tainted($var1) || ($_==2 && tainted($var2)))
-		    ),
-		    "sprintf fmt$_, '$var1', '$var2'");
-	    }
+	    is( tainted(sprintf '%s', $var1, $var2), tainted($var1),
+		"sprintf '%s', '$var1', '$var2'" );
+	    is( tainted(sprintf ' %s', $var1, $var2), tainted($var1),
+		"sprintf ' %s', '$var1', '$var2'" );
+	    is( tainted(sprintf '%s%s', $var1, $var2),
+		tainted($var1) || tainted($var2),
+		"sprintf '%s%s', '$var1', '$var2'" );
 	}
     }
 }
