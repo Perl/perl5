@@ -124,7 +124,7 @@ C<Math::BigInt> has been upgraded from version 1.992 to 1.993
 
 =item *
 
-C<Math::BigInt::FastCalc> has been upgraded from version 0.24_02 to 0.25
+C<Math::BigInt::FastCalc> has been upgraded from version 0.24_02 to 0.28
 
 =item *
 
