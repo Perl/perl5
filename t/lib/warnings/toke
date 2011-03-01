@@ -956,3 +956,16 @@ EXPECT
 "\c," is more clearly written simply as "l" at - line 4.
 "\c`" is more clearly written simply as "\ " at - line 5.
 "\c{" is deprecated and is more clearly written as ";" at - line 7.
+########
+# toke.c
+use warnings 'syntax' ;
+my $a = qr/foo/du;
+$a = qr/foo/laai;
+$a = qr/foo/lil;
+no warnings 'syntax' ;
+my $a = qr/foo/du;
+EXPECT
+Regexp modifiers "/d" and "/u" are mutually exclusive at - line 3, near "= "
+Regexp modifiers "/l" and "/a" are mutually exclusive at - line 4, near "= "
+Regexp modifier "/l" may not appear twice at - line 5, near "= "
+BEGIN not safe after errors--compilation aborted at - line 6.
