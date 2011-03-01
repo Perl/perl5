@@ -91,7 +91,6 @@ unlimited): you may have more than 4 hexdigits.
 
 my $UNICODEFH;
 my $BLOCKSFH;
-my $SCRIPTSFH;
 my $VERSIONFH;
 my $COMPEXCLFH;
 my $CASEFOLDFH;
@@ -546,22 +545,9 @@ my @SCRIPTS;
 my %SCRIPTS;
 
 sub _charscripts {
-    unless (@SCRIPTS) {
-	if (openunicode(\$SCRIPTSFH, "Scripts.txt")) {
-	    local $_;
-	    while (<$SCRIPTSFH>) {
-		if (/^([0-9A-F]+)(?:\.\.([0-9A-F]+))?\s+;\s+(\w+)/) {
-		    my ($lo, $hi) = (hex($1), $2 ? hex($2) : hex($1));
-		    my $script = lc($3);
-		    $script =~ s/\b(\w)/uc($1)/ge;
-		    my $subrange = [ $lo, $hi, $script ];
-		    push @SCRIPTS, $subrange;
-		    push @{$SCRIPTS{$script}}, $subrange;
-		}
-	    }
-	    close($SCRIPTSFH);
-	    @SCRIPTS = sort { $a->[0] <=> $b->[0] } @SCRIPTS;
-	}
+    @SCRIPTS =_read_table("unicore/To/Sc.pl") unless @SCRIPTS;
+    foreach my $entry (@SCRIPTS) {
+        push @{$SCRIPTS{$entry->[2]}}, $entry;
     }
 }
 
@@ -573,14 +559,14 @@ sub charscript {
     my $code = _getcode($arg);
 
     if (defined $code) {
-	_search(\@SCRIPTS, 0, $#SCRIPTS, $code);
-    } else {
-	if (exists $SCRIPTS{$arg}) {
-	    return dclone $SCRIPTS{$arg};
-	} else {
-	    return;
-	}
+	my $result = _search(\@SCRIPTS, 0, $#SCRIPTS, $code);
+        return $result if defined $result;
+        #return $utf8::SwashInfo{'ToSc'}{'missing'};
+    } elsif (exists $SCRIPTS{$arg}) {
+        return dclone $SCRIPTS{$arg};
     }
+
+    return;
 }
 
 =head2 B<charblocks()>

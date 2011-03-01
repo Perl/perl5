@@ -266,8 +266,8 @@ is($charscript, 'Ethiopic');
 my $ranges;
 
 $ranges = charscript('Ogham');
-is($ranges->[1]->[0], hex('1681'), 'Ogham charscript');
-is($ranges->[1]->[1], hex('169a'));
+is($ranges->[0]->[0], hex('1680'), 'Ogham charscript');
+is($ranges->[0]->[1], hex('169C'));
 
 use Unicode::UCD qw(charinrange);
 
@@ -423,7 +423,7 @@ is(Unicode::UCD::_getcode('U+123x'),  undef, "_getcode(x123)");
 {
     my $r1 = charscript('Latin');
     my $n1 = @$r1;
-    is($n1, 45, "number of ranges in Latin script (Unicode 6.0.0)");
+    is($n1, 30, "number of ranges in Latin script (Unicode 6.0.0)");
     shift @$r1 while @$r1;
     my $r2 = charscript('Latin');
     is(@$r2, $n1, "modifying results should not mess up internal caches");
