@@ -144,8 +144,8 @@ foreach (qw/ 1 12 123 1234 12345 123456 1234567 12345678 123456789/)
 # _zeros
 $x = $C->_new("1256000000"); is ($C->_zeros($x),6);
 $x = $C->_new("152"); is ($C->_zeros($x),0);
-$x = $C->_new("123000"); is ($C->_zeros($x),3); 
-$x = $C->_new("0"); is ($C->_zeros($x),0); 
+$x = $C->_new("123000"); is ($C->_zeros($x),3);
+$x = $C->_new("0"); is ($C->_zeros($x),0);
 
 # _lsft, _rsft
 $x = $C->_new("10"); $y = $C->_new("3"); 

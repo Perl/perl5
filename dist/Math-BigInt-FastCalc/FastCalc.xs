@@ -7,6 +7,11 @@
 #  define SvUOK(sv) SvIOK_UV(sv)
 #endif
 
+/* for Perl v5.6 (RT #63859) */
+#ifndef croak_xs_usage
+# define croak_xs_usage croak
+#endif
+
 double XS_BASE = 0;
 double XS_BASE_LEN = 0;
 
@@ -310,7 +315,7 @@ _is_zero(class, x)
       SV *const temp = *av_fetch(a, 0, 0);	/* fetch first element */
       ST(0) = boolSV(SvIV(temp) == ix);
       }
-    XSRETURN(1);		
+    XSRETURN(1);
 
 ##############################################################################
 
