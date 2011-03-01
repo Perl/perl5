@@ -411,6 +411,39 @@ sub _search { # Binary search in a [[lo,hi,prop],[...],...] table.
     }
 }
 
+sub _read_table {
+
+    # Returns the contents of the mktables generated table file located at $1
+    # in the form of an array of arrays.  Each outer array denotes a range
+    # with [0] the start point of that range; [1] the end point; and [2] the
+    # value that every code point in the range has.
+    #
+    # This has the side effect of setting
+    # $utf8::SwashInfo{$property}{'format'} to be the mktables format of the
+    #                                       table; and
+    # $utf8::SwashInfo{$property}{'missing'} to be the value for all entries
+    #                                        not listed in the table.
+    # where $property is the Unicode property name, preceded by 'To' for map
+    # properties., e.g., 'ToSc'.
+    #
+    # Table entries look like one of:
+    # 0000	0040	Common	# [65]
+    # 00AA		Latin
+
+    my $table = shift;
+    my @return;
+    local $_;
+
+    for (split /^/m, do $table) {
+        my ($start, $end, $value) = / ^ (.+?) \t (.*?) \t (.+?)
+                                        \s* ( \# .* )?  # Optional comment
+                                        $ /x;
+        $end = $start if $end eq "";
+        push @return, [ hex $start, hex $end, $value ];
+    }
+    return @return;
+}
+
 sub charinrange {
     my ($range, $arg) = @_;
     my $code = _getcode($arg);
