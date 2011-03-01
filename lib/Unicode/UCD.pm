@@ -1230,27 +1230,32 @@ sub _numeric {
     if ((pack "C*", split /\./, UnicodeVersion()) lt 6.0.0) {
 	croak __PACKAGE__, "::num requires Unicode 6.0 or greater"
     }
-    my @temp = split /^/m, do "unicore/To/Nv.pl";
-    foreach my $line (@temp) {
-        chomp $line;
-        my @value = split /\t\t/, $line;
-        if ((my @rational = split /\//, $value[1]) == 2) {
-            $value[1] = $rational[0] / $rational[1];
+    my @numbers = _read_table("unicore/To/Nv.pl");
+    foreach my $entry (@numbers) {
+        my ($start, $end, $value) = @$entry;
+
+        # If value contains a slash, convert to decimal
+        if ((my @rational = split /\//, $value) == 2) {
+            my $real = $rational[0] / $rational[1];
+            $value = $real;
         }
-        $NUMERIC{$value[0]} = $value[1];
+
+        for my $i ($start .. $end) {
+            $NUMERIC{$i} = $value;
+        }
     }
 
     # Decided unsafe to use these that aren't officially part of the Unicode
     # standard.
     #use Math::Trig;
     #my $pi = acos(-1.0);
-    #$NUMERIC{"03C0"} = $pi;
+    #$NUMERIC{0x03C0} = $pi;
 
     # Euler's constant, not to be confused with Euler's number
-    #$NUMERIC{"2107"} = 0.57721566490153286060651209008240243104215933593992;
+    #$NUMERIC{0x2107} = 0.57721566490153286060651209008240243104215933593992;
 
     # Euler's number
-    #$NUMERIC{"212F"} = 2.7182818284590452353602874713526624977572;
+    #$NUMERIC{0x212F} = 2.7182818284590452353602874713526624977572;
 
     return;
 }
@@ -1317,10 +1322,10 @@ sub num {
     _numeric unless %NUMERIC;
 
     my $length = length($string);
-    return $NUMERIC{sprintf("%04X", ord($string))} if $length == 1;
+    return $NUMERIC{ord($string)} if $length == 1;
     return if $string =~ /\D/;
     my $first_ord = ord(substr($string, 0, 1));
-    my $value = $NUMERIC{sprintf("%04X", $first_ord)};
+    my $value = $NUMERIC{$first_ord};
     my $zero_ord = $first_ord - $value;
 
     for my $i (1 .. $length -1) {
