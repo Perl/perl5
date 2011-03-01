@@ -9,7 +9,10 @@ also check on request, so if a code changes that you use, feel free to contact m
 Any time there are new codes, I will add them to the module and release a new version.
         sbeck@cpan.org
 
-3.16
+3.17
+
+3.16  2011-03-01 sbeck
+	* NEW CODE(s)
 
 3.15  2010-12-02 sbeck
         * NEW CODE(s)
