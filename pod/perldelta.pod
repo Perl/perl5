@@ -120,6 +120,10 @@ C<JSON::PP> has been upgraded from version 2.27103 to 2.27104
 
 =item *
 
+C<Locale::Codes> has been upgraded from version 3.15 to 3.16
+
+=item *
+
 C<Math::BigInt> has been upgraded from version 1.992 to 1.993
 
 =item *
