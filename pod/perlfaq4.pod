@@ -1172,15 +1172,17 @@ Stringification also destroys arrays.
 
 =head2 Why don't my E<lt>E<lt>HERE documents work?
 
-Check for these three things:
+Here documents are found in L<perlop>. Check for these three things:
 
 =over 4
 
 =item There must be no space after the E<lt>E<lt> part.
 
-=item There (probably) should be a semicolon at the end.
+=item There (probably) should be a semicolon at the end of the opening token
 
 =item You can't (easily) have any space in front of the tag.
+
+=item There needs to be at least a line separator after the end token.
 
 =back
 
