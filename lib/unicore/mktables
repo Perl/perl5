@@ -5393,9 +5393,6 @@ sub trace { return main::trace(@_); }
         my $default_map = delete $args{'Default_Map'};
         my $property = delete $args{'_Property'};
         my $full_name = delete $args{'Full_Name'};
-
-        # Default map tables to range size 1
-        my $range_size_1 = delete $args{'Range_Size_1'} // 1;
         # Rest of parameters passed on
 
         my $range_list = Range_Map->new(Owner => $property);
@@ -5406,7 +5403,6 @@ sub trace { return main::trace(@_); }
                                     Full_Name => $full_name,
                                     _Property => $property,
                                     _Range_List => $range_list,
-                                    Range_Size_1 => $range_size_1,
                                     %args);
 
         my $addr = do { no overloading; pack 'J', $self; };
