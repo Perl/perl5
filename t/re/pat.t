@@ -329,10 +329,9 @@ sub run_tests {
 
     {
         # Long Monsters
-        local $Message = "Long monster";
         for my $l (125, 140, 250, 270, 300000, 30) { # Ordered to free memory
             my $a = 'a' x $l;
-            local $Error = "length = $l";
+	    local $Message = "Long monster, length = $l";
              ok "ba$a=" =~ /a$a=/;
             nok "b$a="  =~ /a$a=/;
              ok "b$a="  =~ /ba+=/;
@@ -356,12 +355,11 @@ sub run_tests {
                     'ax13876y25677y21378y21378y21378kbc' => 0, # 5 runs
                   );
 
-        local $Message = "20000 nodes";
         for (keys %ans) {
-            local $Error = "const-len '$_'";
+	    local $Message = "20000 nodes, const-len '$_'";
             ok !($ans{$_} xor /a(?=([yx]($long_constant_len)){2,4}[k-o]).*b./o);
 
-            local $Error = "var-len '$_'";
+	    $Message = "20000 nodes, var-len '$_'";
             ok !($ans{$_} xor /a(?=([yx]($long_var_len)){2,4}[k-o]).*b./o);
         }
     }
@@ -446,7 +444,7 @@ sub run_tests {
 	my $res = eval { "xx" =~ /(?$code)/o };
 	{
 	    no warnings 'uninitialized';
-	    local $Error = "'$@', '$res', '$blah'";
+	    local $Message = "$Message '$@', '$res', '$blah'";
 	    ok $@ && $@ =~ /not allowed at runtime/ && $blah == 12;
 	}
 
@@ -455,7 +453,7 @@ sub run_tests {
 	$res = eval { "xx" =~ /(?$code)/o };
 	{
 	    no warnings 'uninitialized';
-            local $Error = "'$@', '$res', '$blah'";
+	    local $Message = "$Message '$@', '$res', '$blah'";
 	    ok !$@ && $res;
 	}
 

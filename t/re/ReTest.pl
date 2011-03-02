@@ -11,7 +11,6 @@ use vars qw(
     $EXPECTED_TESTS 
     $TODO
     $Message
-    $Error
     $DiePattern
     $WarnPattern
     $BugId
@@ -80,7 +79,7 @@ sub _ok {
 
     unless ($ok) {
         print "# Failed test at line $line_nr\n" unless defined $TODO;
-        if ($error //= $Error) {
+        if ($error) {
             no warnings 'utf8';
             chomp $error;
             $error = join "\n#", map {pretty $_} split /\n\h*#/ => $error;
