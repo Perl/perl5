@@ -442,18 +442,22 @@ sub run_tests {
         eval { /(?$code)/ };
         ok $@ && $@ =~ /not allowed at runtime/ && $blah == 12;
 
-        for $code ('{$blah = 45}','=xx') {
-            $blah = 12;
-            my $res = eval { "xx" =~ /(?$code)/o };
-            no warnings 'uninitialized';
+	$blah = 12;
+	my $res = eval { "xx" =~ /(?$code)/o };
+	{
+	    no warnings 'uninitialized';
+	    local $Error = "'$@', '$res', '$blah'";
+	    ok $@ && $@ =~ /not allowed at runtime/ && $blah == 12;
+	}
+
+        $code = '=xx';
+	$blah = 12;
+	$res = eval { "xx" =~ /(?$code)/o };
+	{
+	    no warnings 'uninitialized';
             local $Error = "'$@', '$res', '$blah'";
-            if ($code eq '=xx') {
-                ok !$@ && $res;
-            }
-            else {
-                ok $@ && $@ =~ /not allowed at runtime/ && $blah == 12;
-            }
-        }
+	    ok !$@ && $res;
+	}
 
         $code = '{$blah = 45}';
         $blah = 12;
