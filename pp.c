@@ -5434,6 +5434,7 @@ S_deref_plain_array(pTHX_ AV *ary)
 PP(pp_splice)
 {
     dVAR; dSP; dMARK; dORIGMARK;
+    int num_args = (SP - MARK);
     register AV *ary = DEREF_PLAIN_ARRAY(MUTABLE_AV(*++MARK));
     register SV **src;
     register SV **dst;
@@ -5477,7 +5478,8 @@ PP(pp_splice)
 	length = AvMAX(ary) + 1;
     }
     if (offset > AvFILLp(ary) + 1) {
-	Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "splice() offset past end of array" );
+	if (num_args > 2)
+	    Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "splice() offset past end of array" );
 	offset = AvFILLp(ary) + 1;
     }
     after = AvFILLp(ary) + 1 - (offset + length);

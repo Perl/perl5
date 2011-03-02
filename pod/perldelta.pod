@@ -28,6 +28,11 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 C<splice()> doesn't warn when truncating
+
+You can now limit the size of an array using C<splice(@a,MAX_LEN)> without
+worrying about warnings.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

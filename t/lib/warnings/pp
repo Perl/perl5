@@ -46,6 +46,25 @@ EXPECT
 Attempt to use reference as lvalue in substr at - line 5.
 ########
 # pp.c
+use warnings 'misc' ;
+@a = qw( a b c );
+splice(@a, 4, 0, 'e') ;
+@a = qw( a b c );
+splice(@a, 4, 1) ;
+@a = qw( a b c );
+splice(@a, 4) ;
+no warnings 'misc' ;
+@a = qw( a b c );
+splice(@a, 4, 0, 'e') ;
+@a = qw( a b c );
+splice(@a, 4, 1) ;
+@a = qw( a b c );
+splice(@a, 4) ;
+EXPECT
+splice() offset past end of array at - line 4.
+splice() offset past end of array at - line 6.
+########
+# pp.c
 use warnings 'uninitialized' ;
 *x = *{ undef() };
 no warnings 'uninitialized' ;
