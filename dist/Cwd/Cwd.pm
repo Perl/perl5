@@ -171,7 +171,7 @@ use strict;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 
-$VERSION = '3.37';
+$VERSION = '3.36';
 my $xs_version = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -222,7 +222,7 @@ sub _vms_unix_rpt {
         $unix_rpt = VMS::Feature::current("filename_unix_report");
     } else {
         my $env_unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
-        $unix_rpt = $env_unix_rpt =~ /^[ETet1]/;
+        $unix_rpt = $env_unix_rpt =~ /^[ET1]/i; 
     }
     return $unix_rpt;
 }
@@ -235,7 +235,7 @@ sub _vms_efs {
         $efs = VMS::Feature::current("efs_charset");
     } else {
         my $env_efs = $ENV{'DECC$EFS_CHARSET'} || '';
-        $efs = $env_efs =~ /^[ETet1]/;
+        $efs = $env_efs =~ /^[ET1]/i; 
     }
     return $efs;
 }
