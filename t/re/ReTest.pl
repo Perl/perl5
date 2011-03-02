@@ -102,16 +102,20 @@ sub skip {
     safe_globals();
     $why =~ s/\n.*//s;
     $why .= "; Bug $BugId" if defined $BugId;
-    # seems like the new harness code doesn't like todo and skip to be mixed.
-    # which seems like a bug in the harness to me. -- dmq
-    #$why .= " # TODO $TODO" if defined $TODO;
-    
+    my $ok;
+    if (defined $TODO) {
+	$why = "TODO & SKIP $why $TODO";
+	$ok = "not ok";
+    } else {
+	$why = "SKIP $why";
+	$ok = "ok";
+    }
+
     my $n = shift // 1;
     my $line_nr = (caller(0)) [2];
     for (1 .. $n) {
         ++ $test;
-        #print "not " if defined $TODO;
-        print "ok $test # skip $why\tLine $line_nr\n";
+        print "$ok $test # $why\tLine $line_nr\n";
     }
     no warnings "exiting";
     last SKIP;
