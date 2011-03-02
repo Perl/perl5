@@ -119,27 +119,41 @@ sub skip {
 }
 
 sub iseq ($$;$) { 
-    my ($got, $expect, $name) = @_;
-    
-    $_ = defined ($_) ? "'$_'" : "undef" for $got, $expect;
-        
-    my $ok    = $got eq $expect;
-    my $error = "# expected: $expect\n" .
+    my ($got, $expected, $name) = @_;
+
+    my $pass;
+    if(!defined $got || !defined $expected) {
+        # undef only matches undef
+        $pass = !defined $got && !defined $expected;
+    }
+    else {
+        $pass = $got eq $expected;
+    }
+
+    $_ = defined ($_) ? "'$_'" : "undef" for $got, $expected;
+
+    my $error = "# expected: $expected\n" .
                 "#   result: $got";
 
-    _ok $ok, $name, $error;
+    _ok $pass, $name, $error;
 }   
 
 sub isneq ($$;$) { 
-    my ($got, $expect, $name) = @_;
-    my $todo = $TODO ? " # TODO $TODO" : '';
-    
-    $_ = defined ($_) ? "'$_'" : "undef" for $got, $expect;
-        
-    my $ok    = $got ne $expect;
+    my ($got, $isnt, $name) = @_;
+
+    my $pass;
+    if(!defined $got || !defined $isnt) {
+        # undef only matches undef
+        $pass = defined $got || defined $isnt;
+    }
+    else {
+        $pass = $got ne $isnt;
+    }
+
+    $got = defined $got ? "'$got'" : "undef";
     my $error = "# results are equal ($got)";
 
-    _ok $ok, $name, $error;
+    _ok $pass, $name, $error;
 }   
 
 
