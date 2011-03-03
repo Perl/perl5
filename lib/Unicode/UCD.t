@@ -17,11 +17,13 @@ use strict;
 use Unicode::UCD;
 use Test::More;
 
-BEGIN { plan tests => 269 };
+BEGIN { plan tests => 270 };
 
 use Unicode::UCD 'charinfo';
 
 my $charinfo;
+
+is(charinfo(0x110000), undef, "Verify charinfo() of non-unicode is undef");
 
 $charinfo = charinfo(0);    # Null is often problematic, so test it.
 
