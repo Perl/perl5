@@ -11,7 +11,6 @@ use vars qw(
     $EXPECTED_TESTS 
     $TODO
     $Message
-    $DiePattern
     $WarnPattern
     $BugId
     $running_as_thread
@@ -158,12 +157,11 @@ sub eval_ok ($;$) {
 
 sub must_die {
     my ($code, $pattern, $name) = @_;
-    $pattern //= $DiePattern
-        or Carp::confess("Bad pattern");
+    Carp::confess("Bad pattern") unless $pattern;
     undef $@;
     ref $code ? &$code : eval $code;
     my  $r = $@ && $@ =~ /$pattern/;
-    _ok $r, $name // $Message // "\$\@ =~ /$pattern/";
+    _ok $r, $name // "\$\@ =~ /$pattern/";
 }
 
 sub must_warn {

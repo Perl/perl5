@@ -590,12 +590,12 @@ sub run_tests {
 
     {
         must_die 'q(a:[b]:) =~ /[x[:foo:]]/',
-                 'POSIX class \[:[^:]+:\] unknown in regex',
+                 qr/POSIX class \[:[^:]+:\] unknown in regex/,
                  'POSIX class [: :] must have valid name';
 
         for my $d (qw [= .]) {
             must_die "/[[${d}foo${d}]]/",
-                     "\QPOSIX syntax [$d $d] is reserved for future extensions",
+                     qr/\QPOSIX syntax [$d $d] is reserved for future extensions/,
                      "POSIX syntax [[$d $d]] is an error";
         }
     }
@@ -683,13 +683,9 @@ sub run_tests {
     }
 
 
-    {
-        local $DiePattern = '^Modification of a read-only value attempted';
-        local $Message    = 'Elements of @- and @+ are read-only';
-        must_die '$+[0] = 13';
-        must_die '$-[0] = 13';
-        must_die '@+ = (7, 6, 5)';
-        must_die '@- = qw (foo bar)';
+    foreach ('$+[0] = 13', '$-[0] = 13', '@+ = (7, 6, 5)', '@- = qw (foo bar)') {
+        must_die($_, qr/^Modification of a read-only value attempted/,
+		 'Elements of @- and @+ are read-only');
     }
 
 
