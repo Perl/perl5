@@ -183,9 +183,7 @@ sub may_not_warn {
     local $SIG {__WARN__} = sub {$w .= join "" => @_};
     use warnings 'all';
     ref $code ? &$code : eval $code;
-    _ok !$w, $name // ($Message ? "$Message (did not warn)"
-                                : "Did not warn"),
-             "Got warning '$w'";
+    _ok !$w, $name, "Got warning '$w'";
 }
 
 1;

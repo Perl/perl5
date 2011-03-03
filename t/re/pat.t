@@ -984,8 +984,8 @@ sub run_tests {
 
 
     {
-        local $Message = '"1" is not \s';
-        may_not_warn sub {ok ("1\n" x 102) !~ /^\s*\n/m};
+        my $message = '"1" is not \s';
+        may_not_warn sub {ok ("1\n" x 102 !~ /^\s*\n/m, $message)}, "$message (did not warn)";
     }
 
 
