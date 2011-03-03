@@ -172,7 +172,7 @@ sub must_warn {
     ref $code ? &$code : eval $code;
     my $r = $w && $w =~ /$pattern/;
     $w //= "UNDEF";
-    _ok $r, $name // $Message // "Got warning /$pattern/",
+    _ok $r, $name // "Got warning /$pattern/",
             "# expected: /$pattern/\n" .
             "#   result: $w";
 }
