@@ -455,7 +455,7 @@ is(num("0"), 0, 'Verify num("0") == 0');
 is(num("98765"), 98765, 'Verify num("98765") == 98765');
 ok(! defined num("98765\N{FULLWIDTH DIGIT FOUR}"), 'Verify num("98765\N{FULLWIDTH DIGIT FOUR}") isnt defined');
 is(num("\N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE DIGIT ONE}"), 21, 'Verify \N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE DIGIT ONE}" == 21');
-ok(! defined num("\N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE THAM DIGIT ONE}"), 'Verify \N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE DIGIT ONE}" isnt defined');
+ok(! defined num("\N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE THAM DIGIT ONE}"), 'Verify \N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE THAM DIGIT ONE}" isnt defined');
 is(num("\N{CHAM DIGIT ZERO}\N{CHAM DIGIT THREE}"), 3, 'Verify num("\N{CHAM DIGIT ZERO}\N{CHAM DIGIT THREE}") == 3');
 ok(! defined num("\N{CHAM DIGIT ZERO}\N{JAVANESE DIGIT NINE}"), 'Verify num("\N{CHAM DIGIT ZERO}\N{JAVANESE DIGIT NINE}") isnt defined');
 is(num("\N{SUPERSCRIPT TWO}"), 2, 'Verify num("\N{SUPERSCRIPT TWO} == 2');
