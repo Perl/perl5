@@ -156,6 +156,28 @@ sub isneq ($$;$) {
     _ok $pass, $name, $error;
 }   
 
+*is = \&iseq;
+*isnt = \&isneq;
+
+sub like ($$$) {
+    my (undef, $expected, $name) = @_;
+    my ($pass, $error);
+    $pass = $_[0] =~ /$expected/;
+    unless ($pass) {
+	$error = "#      got '$_[0]'\n# expected /$expected/";
+    }
+    _ok($pass, $name, $error);
+}
+
+sub unlike ($$$) {
+    my (undef, $expected, $name) = @_;
+    my ($pass, $error);
+    $pass = $_[0] !~ /$expected/;
+    unless ($pass) {
+	$error = "#      got '$_[0]'\n# expected !~ /$expected/";
+    }
+    _ok($pass, $name, $error);
+}
 
 sub eval_ok ($;$) {
     my ($code, $name) = @_;
