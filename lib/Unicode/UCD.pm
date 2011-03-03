@@ -92,7 +92,6 @@ unlimited): you may have more than 4 hexdigits.
 my $UNICODEFH;
 my $BLOCKSFH;
 my $VERSIONFH;
-my $COMPEXCLFH;
 my $CASEFOLDFH;
 my $CASESPECFH;
 my $NAMEDSEQFH;
