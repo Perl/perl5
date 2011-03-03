@@ -108,6 +108,12 @@ C<Devel::DProf> has been upgraded from version 20110225.01 to 20110228.00.
 
 =item *
 
+C<Digest::SHA> has been upgraded from version 5.50 to 5.60
+
+New SHA-512/224 and SHA-512/256 transforms ref. NIST Draft FIPS 180-4 (February 2011)
+
+=item *
+
 C<ExtUtils::Command> has been upgraded from version 1.16 to 1.17.
 
 =item *

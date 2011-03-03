@@ -1,5 +1,12 @@
 Revision history for Perl extension Digest::SHA.
 
+5.60  Thu Mar  3 05:26:42 MST 2011
+	- added new SHA-512/224 and SHA-512/256 transforms
+		-- ref. NIST Draft FIPS 180-4 (February 2011)
+	- simplified shasum by removing duplicative text
+	- improved efficiency of Addfile
+		-- expensive -T test now occurs only in portable mode
+
 5.50  Tue Dec 14 06:20:08 MST 2010
 	- adopted convention that '-' always means STDIN
 		-- actual filename '-' accessed as './-'
