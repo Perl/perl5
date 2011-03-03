@@ -178,14 +178,14 @@ sub run_tests {
             "ff" => [1, 1, 0],
            "100" => [0, 1, 1],
         );
-      SKIP:
+
         while (my ($code, $match) = each %d) {
             local $Message = "Properties of \\x$code";
             my $char = eval qq ["\\x{$code}"];
-            my $i = 0;
-            ok (($char =~ /[\x80-\xff]/)            xor !$$match [$i ++]);
-            ok (($char =~ /[\x80-\x{100}]/)         xor !$$match [$i ++]);
-            ok (($char =~ /[\x{100}]/)              xor !$$match [$i ++]);
+
+            iseq(0 + ($char =~ /[\x80-\xff]/),    $$match[0]);
+            iseq(0 + ($char =~ /[\x80-\x{100}]/), $$match[1]);
+            iseq(0 + ($char =~ /[\x{100}]/),      $$match[2]);
         }
     }
 
