@@ -175,6 +175,9 @@ I<code>.  Each has at least four hexdigits.
 The codes may be preceded by a word enclosed in angle brackets then a space,
 like C<E<lt>compatE<gt> >, giving the type of decomposition
 
+This decomposition may be an intermediate one whose components are also
+decomposable.  Use L<Unicode::Normalize> to get the final decomposition.
+
 =item B<decimal>
 
 if I<code> is a decimal digit this is its integer numeric value
@@ -204,7 +207,8 @@ As of Unicode 6.0, this is always empty.
 
 =item B<upper>
 
-is empty if there is no single code point uppercase mapping for I<code>;
+is empty if there is no single code point uppercase mapping for I<code>
+(it's uppercase mapping is itself);
 otherwise it is that mapping expressed as at least four hexdigits.
 (L</casespec()> should be used in addition to B<charinfo()>
 for case mappings when the calling program can cope with multiple code point
@@ -212,7 +216,8 @@ mappings.)
 
 =item B<lower>
 
-is empty if there is no single code point lowercase mapping for I<code>;
+is empty if there is no single code point lowercase mapping for I<code>
+(it's lowercase mapping is itself);
 otherwise it is that mapping expressed as at least four hexdigits.
 (L</casespec()> should be used in addition to B<charinfo()>
 for case mappings when the calling program can cope with multiple code point
@@ -220,7 +225,8 @@ mappings.)
 
 =item B<title>
 
-is empty if there is no single code point titlecase mapping for I<code>;
+is empty if there is no single code point titlecase mapping for I<code>
+(it's titlecase mapping is itself);
 otherwise it is that mapping expressed as at least four hexdigits.
 (L</casespec()> should be used in addition to B<charinfo()>
 for case mappings when the calling program can cope with multiple code point
@@ -480,6 +486,9 @@ my @BLOCKS;
 my %BLOCKS;
 
 sub _charblocks {
+
+    # Can't read from the mktables table because it loses the hyphens in the
+    # original.
     unless (@BLOCKS) {
 	if (openunicode(\$BLOCKSFH, "Blocks.txt")) {
 	    local $_;
