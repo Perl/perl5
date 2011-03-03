@@ -11,7 +11,6 @@ use vars qw(
     $EXPECTED_TESTS 
     $TODO
     $Message
-    $WarnPattern
     $BugId
     $running_as_thread
     $IS_ASCII
@@ -166,7 +165,7 @@ sub must_die {
 
 sub must_warn {
     my ($code, $pattern, $name) = @_;
-    $pattern //= $WarnPattern;
+    Carp::confess("Bad pattern") unless $pattern;
     my $w;
     local $SIG {__WARN__} = sub {$w .= join "" => @_};
     use warnings 'all';
