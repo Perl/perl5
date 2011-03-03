@@ -181,7 +181,8 @@ if I<code> is a decimal digit this is its integer numeric value
 
 =item B<digit>
 
-if I<code> represents a whole number, this is its integer numeric value
+if I<code> represents some other digit-like number, this is its integer
+numeric value
 
 =item B<numeric>
 
@@ -199,10 +200,7 @@ existed for this code point and is different from the current name
 
 =item B<comment>
 
-ISO 10646 comment field.
-It appears in parentheses in the ISO 10646 names list,
-or contains an asterisk to indicate there is
-a note for this code point in Annex P of that standard.
+As of Unicode 6.0, this is always empty.
 
 =item B<upper>
 
@@ -230,7 +228,7 @@ mappings.)
 
 =item B<block>
 
-block I<code> belongs to (used in \p{In...}).
+block I<code> belongs to (used in C<\p{Blk=...}>).
 See L</Blocks versus Scripts>.
 
 
@@ -1042,7 +1040,7 @@ will be its locale name, defined as a 2-letter ISO 3166 country code, possibly
 followed by a "_" and a 2-letter ISO language code (possibly followed by a "_"
 and a variant code).  You can find the lists of all possible locales, see
 L<Locale::Country> and L<Locale::Language>.
-(In Unicode 5.1, the only locales returned by this function
+(In Unicode 6.0, the only locales returned by this function
 are C<lt>, C<tr>, and C<az>.)
 
 Each locale key is a reference to a hash that has the form above, and gives
