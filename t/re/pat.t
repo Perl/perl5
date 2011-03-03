@@ -116,42 +116,42 @@ sub run_tests {
     }
 
     {
-        local $Message = "Test empty pattern";
+        my $message = "Test empty pattern";
         my $xyz = 'xyz';
         my $cde = 'cde';
 
         $cde =~ /[^ab]*/;
         $xyz =~ //;
-        iseq $&, $xyz;
+        is($&, $xyz, $message);
 
         my $foo = '[^ab]*';
         $cde =~ /$foo/;
         $xyz =~ //;
-        iseq $&, $xyz;
+        is($&, $xyz, $message);
 
         $cde =~ /$foo/;
         my $null;
         no warnings 'uninitialized';
         $xyz =~ /$null/;
-        iseq $&, $xyz;
+        is($&, $xyz, $message);
 
         $null = "";
         $xyz =~ /$null/;
-        iseq $&, $xyz;
+        is($&, $xyz, $message);
     }
 
     {
-        local $Message = q !Check $`, $&, $'!;
+        my $message = q !Check $`, $&, $'!;
         $_ = 'abcdefghi';
         /def/;        # optimized up to cmd
-        iseq "$`:$&:$'", 'abc:def:ghi';
+        is("$`:$&:$'", 'abc:def:ghi', $message);
 
         no warnings 'void';
         /cde/ + 0;    # optimized only to spat
-        iseq "$`:$&:$'", 'ab:cde:fghi';
+        is("$`:$&:$'", 'ab:cde:fghi', $message);
 
         /[d][e][f]/;    # not optimized
-        iseq "$`:$&:$'", 'abc:def:ghi';
+        is("$`:$&:$'", 'abc:def:ghi', $message);
     }
 
     {
@@ -161,44 +161,44 @@ sub run_tests {
     }
 
     {
-        local $Message = "{N,M} quantifier";
+        my $message = "{N,M} quantifier";
         $_ = 'xxx {3,4}  yyy   zzz';
-        ok /( {3,4})/;
-        iseq $1, '   ';
-        ok !/( {4,})/;
-        ok /( {2,3}.)/;
-        iseq $1, '  y';
-        ok /(y{2,3}.)/;
-        iseq $1, 'yyy ';
-        ok !/x {3,4}/;
-        ok !/^xxx {3,4}/;
+        ok(/( {3,4})/, $message);
+        is($1, '   ', $message);
+        unlike($_, qr/( {4,})/, $message);
+        ok(/( {2,3}.)/, $message);
+        is($1, '  y', $message);
+        ok(/(y{2,3}.)/, $message);
+        is($1, 'yyy ', $message);
+        unlike($_, qr/x {3,4}/, $message);
+        unlike($_, qr/^xxx {3,4}/, $message);
     }
 
     {
-        local $Message = "Test /g";
+        my $message = "Test /g";
         local $" = ":";
         $_ = "now is the time for all good men to come to.";
         my @words = /(\w+)/g;
         my $exp   = "now:is:the:time:for:all:good:men:to:come:to";
 
-        iseq "@words", $exp;
+        is("@words", $exp, $message);
 
         @words = ();
         while (/\w+/g) {
             push (@words, $&);
         }
-        iseq "@words", $exp;
+        is("@words", $exp, $message);
 
         @words = ();
         pos = 0;
         while (/to/g) {
             push(@words, $&);
         }
-        iseq "@words", "to:to";
+        is("@words", "to:to", $message);
 
         pos $_ = 0;
         @words = /to/g;
-        iseq "@words", "to:to";
+        is("@words", "to:to", $message);
     }
 
     {
@@ -233,38 +233,38 @@ sub run_tests {
     }
 
 
-    SKIP: {
+    {
         my $xyz = 'xyz';
         ok "abc" =~ /^abc$|$xyz/, "| after \$";
 
         # perl 4.009 says "unmatched ()"
-        local $Message = '$ inside ()';
+        my $message = '$ inside ()';
 
         my $result;
         eval '"abc" =~ /a(bc$)|$xyz/; $result = "$&:$1"';
-        iseq $@, "" or skip "eval failed", 1;
-        iseq $result, "abc:bc";
+        is($@, "", $message);
+        is($result, "abc:bc", $message);
     }
 
 
     {
-        local $Message = "Scalar /g";
+        my $message = "Scalar /g";
         $_ = "abcfooabcbar";
 
-        ok  /abc/g && $` eq "";
-        ok  /abc/g && $` eq "abcfoo";
-        ok !/abc/g;
+        ok( /abc/g && $` eq "", $message);
+        ok( /abc/g && $` eq "abcfoo", $message);
+        ok(!/abc/g, $message);
 
-        local $Message = "Scalar /gi";
+        $message = "Scalar /gi";
         pos = 0;
-        ok  /ABC/gi && $` eq "";
-        ok  /ABC/gi && $` eq "abcfoo";
-        ok !/ABC/gi;
+        ok( /ABC/gi && $` eq "", $message);
+        ok( /ABC/gi && $` eq "abcfoo", $message);
+        ok(!/ABC/gi, $message);
 
-        local $Message = "Scalar /g";
+        $message = "Scalar /g";
         pos = 0;
-        ok  /abc/g && $' eq "fooabcbar";
-        ok  /abc/g && $' eq "bar";
+        ok( /abc/g && $' eq "fooabcbar", $message);
+        ok( /abc/g && $' eq "bar", $message);
 
         $_ .= '';
         my @x = /abc/g;
@@ -272,24 +272,24 @@ sub run_tests {
     }
 
     {
-        local $Message = '/g, \G and pos';
+        my $message = '/g, \G and pos';
         $_ = "abdc";
         pos $_ = 2;
         /\Gc/gc;
-        iseq pos $_, 2;
+        is(pos $_, 2, $message);
         /\Gc/g;
-        ok !defined pos $_;
+        is(pos $_, undef, $message);
     }
 
     {
-        local $Message = '(?{ })';
+        my $message = '(?{ })';
         our $out = 1;
         'abc' =~ m'a(?{ $out = 2 })b';
-        iseq $out, 2;
+        is($out, 2, $message);
 
         $out = 1;
         'abc' =~ m'a(?{ $out = 3 })c';
-        iseq $out, 1;
+        is($out, 1, $message);
     }
 
 
@@ -300,7 +300,7 @@ sub run_tests {
     }
 
     {
-        local $Message = "REG_INFTY tests";
+        my $message = "REG_INFTY tests";
         # Tests which depend on REG_INFTY
         $::reg_infty   = $Config {reg_infty} // 32767;
         $::reg_infty_m = $::reg_infty - 1;
@@ -311,13 +311,13 @@ sub run_tests {
         # next three tests will fail if you should have picked up a lower-than-
         # default value for $reg_infty from Config.pm, but have not.
 
-        eval_ok q (('aaa' =~ /(a{1,$::reg_infty_m})/)[0] eq 'aaa');
-        eval_ok q (('a' x $::reg_infty_m) =~ /a{$::reg_infty_m}/);
-        eval_ok q (('a' x ($::reg_infty_m - 1)) !~ /a{$::reg_infty_m}/);
+        eval_ok q (('aaa' =~ /(a{1,$::reg_infty_m})/)[0] eq 'aaa'), $message;
+        eval_ok q (('a' x $::reg_infty_m) =~ /a{$::reg_infty_m}/), $message;
+        eval_ok q (('a' x ($::reg_infty_m - 1)) !~ /a{$::reg_infty_m}/), $message;
         eval "'aaa' =~ /a{1,$::reg_infty}/";
-        ok $@ =~ /^\QQuantifier in {,} bigger than/;
+        like($@, /^\QQuantifier in {,} bigger than/, $message);
         eval "'aaa' =~ /a{1,$::reg_infty_p}/";
-        ok $@ =~ /^\QQuantifier in {,} bigger than/;
+        like($@, qr/^\QQuantifier in {,} bigger than/, $message);
     }
 
     {
@@ -331,12 +331,12 @@ sub run_tests {
         # Long Monsters
         for my $l (125, 140, 250, 270, 300000, 30) { # Ordered to free memory
             my $a = 'a' x $l;
-	    local $Message = "Long monster, length = $l";
-             ok "ba$a=" =~ /a$a=/;
-            nok "b$a="  =~ /a$a=/;
-             ok "b$a="  =~ /ba+=/;
+	    my $message = "Long monster, length = $l";
+	    like("ba$a=", qr/a$a=/, $message);
+            unlike("b$a=", qr/a$a=/, $message);
+            like("b$a=", qr/ba+=/, $message);
 
-             ok "ba$a=" =~ /b(?:a|b)+=/;
+	    like("ba$a=", /b(?:a|b)+=/, $message);
         }
     }
 
@@ -356,16 +356,16 @@ sub run_tests {
                   );
 
         for (keys %ans) {
-	    local $Message = "20000 nodes, const-len '$_'";
-            ok !($ans{$_} xor /a(?=([yx]($long_constant_len)){2,4}[k-o]).*b./o);
+	    my $message = "20000 nodes, const-len '$_'";
+            ok !($ans{$_} xor /a(?=([yx]($long_constant_len)){2,4}[k-o]).*b./o), $message;
 
-	    $Message = "20000 nodes, var-len '$_'";
-            ok !($ans{$_} xor /a(?=([yx]($long_var_len)){2,4}[k-o]).*b./o);
+	    $message = "20000 nodes, var-len '$_'";
+            ok !($ans{$_} xor /a(?=([yx]($long_var_len)){2,4}[k-o]).*b./o,), $message;
         }
     }
 
     {
-        local $Message = "Complicated backtracking";
+        my $message = "Complicated backtracking";
         $_ = " a (bla()) and x(y b((l)u((e))) and b(l(e)e)e";
         my $expect = "(bla()) ((l)u((e))) (l(e)e)";
 
@@ -404,23 +404,23 @@ sub run_tests {
         my @ans = ();
         my $res;
         push @ans, $res while $res = matchit;
-        iseq "@ans", "1 1 1";
+        is("@ans", "1 1 1", $message);
 
         @ans = matchit;
-        iseq "@ans", $expect;
+        is("@ans", $expect, $message);
 
-        local $Message = "Recursion with (??{ })";
+        $message = "Recursion with (??{ })";
         our $matched;
         $matched = qr/\((?:(?>[^()]+)|(??{$matched}))*\)/;
 
         @ans = my @ans1 = ();
         push (@ans, $res), push (@ans1, $&) while $res = m/$matched/g;
 
-        iseq "@ans", "1 1 1";
-        iseq "@ans1", $expect;
+        is("@ans", "1 1 1", $message);
+        is("@ans1", $expect, $message);
 
         @ans = m/$matched/g;
-        iseq "@ans", $expect;
+        is("@ans", $expect, $message);
 
     }
 
@@ -434,18 +434,18 @@ sub run_tests {
     }
 
     {
-        local $Message = "Eval-group not allowed at runtime";
+        my $message = "Eval-group not allowed at runtime";
         my $code = '{$blah = 45}';
         our $blah = 12;
         eval { /(?$code)/ };
-        ok $@ && $@ =~ /not allowed at runtime/ && $blah == 12;
+        ok($@ && $@ =~ /not allowed at runtime/ && $blah == 12, $message);
 
 	$blah = 12;
 	my $res = eval { "xx" =~ /(?$code)/o };
 	{
 	    no warnings 'uninitialized';
-	    local $Message = "$Message '$@', '$res', '$blah'";
-	    ok $@ && $@ =~ /not allowed at runtime/ && $blah == 12;
+	    my $message = "$message '$@', '$res', '$blah'";
+	    ok($@ && $@ =~ /not allowed at runtime/ && $blah == 12, $message);
 	}
 
         $code = '=xx';
@@ -453,28 +453,28 @@ sub run_tests {
 	$res = eval { "xx" =~ /(?$code)/o };
 	{
 	    no warnings 'uninitialized';
-	    local $Message = "$Message '$@', '$res', '$blah'";
-	    ok !$@ && $res;
+	    my $message = "$message '$@', '$res', '$blah'";
+	    ok(!$@ && $res, $message);
 	}
 
         $code = '{$blah = 45}';
         $blah = 12;
         eval "/(?$code)/";
-        iseq $blah, 45;
+        is($blah, 45, $message);
 
         $blah = 12;
         /(?{$blah = 45})/;
-        iseq $blah, 45;
+        is($blah, 45, $message);
     }
 
     {
-        local $Message = "Pos checks";
+        my $message = "Pos checks";
         my $x = 'banana';
         $x =~ /.a/g;
-        iseq pos ($x), 2;
+        is(pos $x, 2, $message);
 
         $x =~ /.z/gc;
-        iseq pos ($x), 2;
+        is(pos $x, 2, $message);
 
         sub f {
             my $p = $_[0];
@@ -482,22 +482,22 @@ sub run_tests {
         }
 
         $x =~ /.a/g;
-        iseq f (pos ($x)), 4;
+        is(f (pos $x), 4, $message);
     }
 
     {
-        local $Message = 'Checking $^R';
+        my $message = 'Checking $^R';
         our $x = $^R = 67;
         'foot' =~ /foo(?{$x = 12; 75})[t]/;
-        iseq $^R, 75;
+        is($^R, 75, $message);
 
         $x = $^R = 67;
         'foot' =~ /foo(?{$x = 12; 75})[xy]/;
-        ok $^R eq '67' && $x eq '12';
+        ok($^R eq '67' && $x eq '12', $message);
 
         $x = $^R = 67;
         'foot' =~ /foo(?{ $^R + 12 })((?{ $x = 12; $^R + 17 })[xy])?/;
-        ok $^R eq '79' && $x eq '12';
+        ok($^R eq '79' && $x eq '12', $message);
     }
 
     {
@@ -538,32 +538,32 @@ sub run_tests {
     }
 
 
+
     {
-        local $Message = "Look around";
+        my $message = "Look around";
         $_ = 'xabcx';
-      SKIP:
         foreach my $ans ('', 'c') {
-            ok /(?<=(?=a)..)((?=c)|.)/g or skip "Match failed", 1;
-            iseq $1, $ans;
+            ok(/(?<=(?=a)..)((?=c)|.)/g, $message);
+            is($1, $ans, $message);
         }
     }
 
     {
-        local $Message = "Empty clause";
+        my $message = "Empty clause";
         $_ = 'a';
         foreach my $ans ('', 'a', '') {
-            ok /^|a|$/g or skip "Match failed", 1;
-            iseq $&, $ans;
+            ok(/^|a|$/g, $message);
+            is($&, $ans, $message);
         }
     }
 
     {
-        local $Message = "Prefixify";
         sub prefixify {
-            SKIP: {
+        my $message = "Prefixify";
+            {
                 my ($v, $a, $b, $res) = @_;
-                ok $v =~ s/\Q$a\E/$b/ or skip "Match failed", 1;
-                iseq $v, $res;
+                ok($v =~ s/\Q$a\E/$b/, $message);
+                is($v, $res, $message);
             }
         }
 
@@ -579,13 +579,13 @@ sub run_tests {
 
     {
         no warnings 'closure';
-        local $Message = '(?{ $var } refers to package vars';
+        my $message = '(?{ $var } refers to package vars';
         package aa;
         our $c = 2;
         $::c = 3;
         '' =~ /(?{ $c = 4 })/;
-        main::iseq $c, 4;
-        main::iseq $::c, 3;
+        main::is($c, 4, $message);
+        main::is($::c, 3, $message);
     }
 
     {
@@ -603,83 +603,83 @@ sub run_tests {
 
     {
         # test if failure of patterns returns empty list
-        local $Message = "Failed pattern returns empty list";
+        my $message = "Failed pattern returns empty list";
         $_ = 'aaa';
         @_ = /bbb/;
-        iseq "@_", "";
+        is("@_", "", $message);
 
         @_ = /bbb/g;
-        iseq "@_", "";
+        is("@_", "", $message);
 
         @_ = /(bbb)/;
-        iseq "@_", "";
+        is("@_", "", $message);
 
         @_ = /(bbb)/g;
-        iseq "@_", "";
+        is("@_", "", $message);
     }
 
 
     {
-        local $Message = '@- and @+ tests';
+        my $message = '@- and @+ tests';
 
         /a(?=.$)/;
-        iseq $#+, 0;
-        iseq $#-, 0;
-        iseq $+ [0], 2;
-        iseq $- [0], 1;
-        ok !defined $+ [1] && !defined $- [1] &&
-           !defined $+ [2] && !defined $- [2];
+        is($#+, 0, $message);
+        is($#-, 0, $message);
+        is($+ [0], 2, $message);
+        is($- [0], 1, $message);
+        ok(!defined $+ [1] && !defined $- [1] &&
+           !defined $+ [2] && !defined $- [2], $message);
 
         /a(a)(a)/;
-        iseq $#+, 2;
-        iseq $#-, 2;
-        iseq $+ [0], 3;
-        iseq $- [0], 0;
-        iseq $+ [1], 2;
-        iseq $- [1], 1;
-        iseq $+ [2], 3;
-        iseq $- [2], 2;
-        ok !defined $+ [3] && !defined $- [3] &&
-           !defined $+ [4] && !defined $- [4];
+        is($#+, 2, $message);
+        is($#-, 2, $message);
+        is($+ [0], 3, $message);
+        is($- [0], 0, $message);
+        is($+ [1], 2, $message);
+        is($- [1], 1, $message);
+        is($+ [2], 3, $message);
+        is($- [2], 2, $message);
+        ok(!defined $+ [3] && !defined $- [3] &&
+           !defined $+ [4] && !defined $- [4], $message);
 
         # Exists has a special check for @-/@+ - bug 45147
-        ok exists $-[0];
-        ok exists $+[0];
-        ok exists $-[2];
-        ok exists $+[2];
-        ok !exists $-[3];
-        ok !exists $+[3];
-        ok exists $-[-1];
-        ok exists $+[-1];
-        ok exists $-[-3];
-        ok exists $+[-3];
-        ok !exists $-[-4];
-        ok !exists $+[-4];
+        ok(exists $-[0], $message);
+        ok(exists $+[0], $message);
+        ok(exists $-[2], $message);
+        ok(exists $+[2], $message);
+        ok(!exists $-[3], $message);
+        ok(!exists $+[3], $message);
+        ok(exists $-[-1], $message);
+        ok(exists $+[-1], $message);
+        ok(exists $-[-3], $message);
+        ok(exists $+[-3], $message);
+        ok(!exists $-[-4], $message);
+        ok(!exists $+[-4], $message);
 
         /.(a)(b)?(a)/;
-        iseq $#+, 3;
-        iseq $#-, 3;
-        iseq $+ [1], 2;
-        iseq $- [1], 1;
-        iseq $+ [3], 3;
-        iseq $- [3], 2;
-        ok !defined $+ [2] && !defined $- [2] &&
-           !defined $+ [4] && !defined $- [4];
+        is($#+, 3, $message);
+        is($#-, 3, $message);
+        is($+ [1], 2, $message);
+        is($- [1], 1, $message);
+        is($+ [3], 3, $message);
+        is($- [3], 2, $message);
+        ok(!defined $+ [2] && !defined $- [2] &&
+           !defined $+ [4] && !defined $- [4], $message);
 
 
         /.(a)/;
-        iseq $#+, 1;
-        iseq $#-, 1;
-        iseq $+ [0], 2;
-        iseq $- [0], 0;
-        iseq $+ [1], 2;
-        iseq $- [1], 1;
-        ok !defined $+ [2] && !defined $- [2] &&
-           !defined $+ [3] && !defined $- [3];
+        is($#+, 1, $message);
+        is($#-, 1, $message);
+        is($+ [0], 2, $message);
+        is($- [0], 0, $message);
+        is($+ [1], 2, $message);
+        is($- [1], 1, $message);
+        ok(!defined $+ [2] && !defined $- [2] &&
+           !defined $+ [3] && !defined $- [3], $message);
 
         /.(a)(ba*)?/;
-        iseq $#+, 2;
-        iseq $#-, 1;
+        is($#+, 2, $message);
+        is($#-, 1, $message);
     }
 
 
@@ -690,121 +690,121 @@ sub run_tests {
 
 
     {
-        local $Message = '\G testing';
+        my $message = '\G testing';
         $_ = 'aaa';
         pos = 1;
         my @a = /\Ga/g;
-        iseq "@a", "a a";
+        is("@a", "a a", $message);
 
         my $str = 'abcde';
         pos $str = 2;
-        ok $str !~ /^\G/;
-        ok $str !~ /^.\G/;
-        ok $str =~ /^..\G/;
-        ok $str !~ /^...\G/;
-        ok $str =~ /\G../ && $& eq 'cd';
+        unlike($str, qr/^\G/, $message);
+        unlike($str, qr/^.\G/, $message);
+        like($str, qr/^..\G/, $message);
+        unlike($str, qr/^...\G/, $message);
+        ok($str =~ /\G../ && $& eq 'cd', $message);
 
         local $TODO = $running_as_thread;
-        ok $str =~ /.\G./ && $& eq 'bc';
+        ok($str =~ /.\G./ && $& eq 'bc', $message);
     }
 
 
     {
-        local $Message = 'pos inside (?{ })';
+        my $message = 'pos inside (?{ })';
         my $str = 'abcde';
         our ($foo, $bar);
-        ok $str =~ /b(?{$foo = $_; $bar = pos})c/;
-        iseq $foo, $str;
-        iseq $bar, 2;
-        ok !defined pos ($str);
+        like($str, qr/b(?{$foo = $_; $bar = pos})c/, $message);
+        is($foo, $str, $message);
+        is($bar, 2, $message);
+        is(pos $str, undef, $message);
 
         undef $foo;
         undef $bar;
         pos $str = undef;
-        ok $str =~ /b(?{$foo = $_; $bar = pos})c/g;
-        iseq $foo, $str;
-        iseq $bar, 2;
-        iseq pos ($str), 3;
+        ok($str =~ /b(?{$foo = $_; $bar = pos})c/g, $message);
+        is($foo, $str, $message);
+        is($bar, 2, $message);
+        is(pos $str, 3, $message);
 
         $_ = $str;
         undef $foo;
         undef $bar;
-        ok /b(?{$foo = $_; $bar = pos})c/;
-        iseq $foo, $str;
-        iseq $bar, 2;
+        like($_, qr/b(?{$foo = $_; $bar = pos})c/, $message);
+        is($foo, $str, $message);
+        is($bar, 2, $message);
 
         undef $foo;
         undef $bar;
-        ok /b(?{$foo = $_; $bar = pos})c/g;
-        iseq $foo, $str;
-        iseq $bar, 2;
-        iseq pos, 3;
+        ok(/b(?{$foo = $_; $bar = pos})c/g, $message);
+        is($foo, $str, $message);
+        is($bar, 2, $message);
+        is(pos, 3, $message);
 
         undef $foo;
         undef $bar;
         pos = undef;
         1 while /b(?{$foo = $_; $bar = pos})c/g;
-        iseq $foo, $str;
-        iseq $bar, 2;
-        ok !defined pos;
+        is($foo, $str, $message);
+        is($bar, 2, $message);
+        is(pos, undef, $message);
 
         undef $foo;
         undef $bar;
         $_ = 'abcde|abcde';
-        ok s/b(?{$foo = $_; $bar = pos})c/x/g;
-        iseq $foo, 'abcde|abcde';
-        iseq $bar, 8;
-        iseq $_, 'axde|axde';
+        ok(s/b(?{$foo = $_; $bar = pos})c/x/g, $message);
+        is($foo, 'abcde|abcde', $message);
+        is($bar, 8, $message);
+        is($_, 'axde|axde', $message);
 
         # List context:
         $_ = 'abcde|abcde';
         our @res;
         () = /([ace]).(?{push @res, $1,$2})([ce])(?{push @res, $1,$2})/g;
         @res = map {defined $_ ? "'$_'" : 'undef'} @res;
-        iseq "@res", "'a' undef 'a' 'c' 'e' undef 'a' undef 'a' 'c'";
+        is("@res", "'a' undef 'a' 'c' 'e' undef 'a' undef 'a' 'c'", $message);
 
         @res = ();
         () = /([ace]).(?{push @res, $`,$&,$'})([ce])(?{push @res, $`,$&,$'})/g;
         @res = map {defined $_ ? "'$_'" : 'undef'} @res;
-        iseq "@res", "'' 'ab' 'cde|abcde' " .
+        is("@res", "'' 'ab' 'cde|abcde' " .
                      "'' 'abc' 'de|abcde' " .
                      "'abcd' 'e|' 'abcde' " .
                      "'abcde|' 'ab' 'cde' " .
-                     "'abcde|' 'abc' 'de'" ;
+                     "'abcde|' 'abc' 'de'", $message);
     }
 
 
     {
-        local $Message = '\G anchor checks';
+        my $message = '\G anchor checks';
         my $foo = 'aabbccddeeffgg';
         pos ($foo) = 1;
         {
             local $TODO = $running_as_thread;
             no warnings 'uninitialized';
-            ok $foo =~ /.\G(..)/g;
-            iseq $1, 'ab';
+            ok($foo =~ /.\G(..)/g, $message);
+            is($1, 'ab', $message);
 
             pos ($foo) += 1;
-            ok $foo =~ /.\G(..)/g;
-            iseq $1, 'cc';
+            ok($foo =~ /.\G(..)/g, $message);
+            is($1, 'cc', $message);
 
             pos ($foo) += 1;
-            ok $foo =~ /.\G(..)/g;
-            iseq $1, 'de';
+            ok($foo =~ /.\G(..)/g, $message);
+            is($1, 'de', $message);
 
-            ok $foo =~ /\Gef/g;
+            ok($foo =~ /\Gef/g, $message);
         }
 
         undef pos $foo;
-        ok $foo =~ /\G(..)/g;
-        iseq $1, 'aa';
+        ok($foo =~ /\G(..)/g, $message);
+        is($1, 'aa', $message);
 
-        ok $foo =~ /\G(..)/g;
-        iseq $1, 'bb';
+        ok($foo =~ /\G(..)/g, $message);
+        is($1, 'bb', $message);
 
         pos ($foo) = 5;
-        ok $foo =~ /\G(..)/g;
-        iseq $1, 'cd';
+        ok($foo =~ /\G(..)/g, $message);
+        is($1, 'cd', $message);
     }
 
 
@@ -817,46 +817,46 @@ sub run_tests {
 
 
     {
-        local $Message = "Match against temporaries (created via pp_helem())" .
+        my $message = "Match against temporaries (created via pp_helem())" .
                          " is safe";
-        ok {foo => "bar\n" . $^X} -> {foo} =~ /^(.*)\n/g;
-        iseq $1, "bar";
+        ok({foo => "bar\n" . $^X} -> {foo} =~ /^(.*)\n/g, $message);
+        is($1, "bar", $message);
     }
 
 
     {
-        local $Message = 'package $i inside (?{ }), ' .
+        my $message = 'package $i inside (?{ }), ' .
                          'saved substrings and changing $_';
         our @a = qw [foo bar];
         our @b = ();
         s/(\w)(?{push @b, $1})/,$1,/g for @a;
-        iseq "@b", "f o o b a r";
-        iseq "@a", ",f,,o,,o, ,b,,a,,r,";
+        is("@b", "f o o b a r", $message);
+        is("@a", ",f,,o,,o, ,b,,a,,r,", $message);
 
-        local $Message = 'lexical $i inside (?{ }), ' .
+        $message = 'lexical $i inside (?{ }), ' .
                          'saved substrings and changing $_';
         no warnings 'closure';
         my @c = qw [foo bar];
         my @d = ();
         s/(\w)(?{push @d, $1})/,$1,/g for @c;
-        iseq "@d", "f o o b a r";
-        iseq "@c", ",f,,o,,o, ,b,,a,,r,";
+        is("@d", "f o o b a r", $message);
+        is("@c", ",f,,o,,o, ,b,,a,,r,", $message);
     }
 
 
     {
-        local $Message = 'Brackets';
+        my $message = 'Brackets';
         our $brackets;
         $brackets = qr {
             {  (?> [^{}]+ | (??{ $brackets }) )* }
         }x;
 
-        ok "{{}" =~ $brackets;
-        iseq $&, "{}";
-        ok "something { long { and } hairy" =~ $brackets;
-        iseq $&, "{ and }";
-        ok "something { long { and } hairy" =~ m/((??{ $brackets }))/;
-        iseq $&, "{ and }";
+        ok("{{}" =~ $brackets, $message);
+        is($&, "{}", $message);
+        ok("something { long { and } hairy" =~ $brackets, $message);
+        is($&, "{ and }", $message);
+        ok("something { long { and } hairy" =~ m/((??{ $brackets }))/, $message);
+        is($&, "{ and }", $message);
     }
 
 
@@ -868,10 +868,10 @@ sub run_tests {
 
 
     {
-        local $Message = '\G anchor checks';
+        my $message = '\G anchor checks';
         my $text = "aaXbXcc";
         pos ($text) = 0;
-        ok $text !~ /\GXb*X/g;
+        ok($text !~ /\GXb*X/g, $message);
     }
 
 
@@ -886,77 +886,77 @@ sub run_tests {
 
 
     {
-        local $Message = '\S, [\S], \s, [\s]';
+        my $message = '\S, [\S], \s, [\s]';
         my @a = map chr, 0 .. 255;
         my @b = grep m/\S/, @a;
         my @c = grep m/[^\s]/, @a;
-        iseq "@b", "@c";
+        is("@b", "@c", $message);
 
         @b = grep /\S/, @a;
         @c = grep /[\S]/, @a;
-        iseq "@b", "@c";
+        is("@b", "@c", $message);
 
         @b = grep /\s/, @a;
         @c = grep /[^\S]/, @a;
-        iseq "@b", "@c";
+        is("@b", "@c", $message);
 
         @b = grep /\s/, @a;
         @c = grep /[\s]/, @a;
-        iseq "@b", "@c";
+        is("@b", "@c", $message);
     }
     {
-        local $Message = '\D, [\D], \d, [\d]';
+        my $message = '\D, [\D], \d, [\d]';
         my @a = map chr, 0 .. 255;
         my @b = grep /\D/, @a;
         my @c = grep /[^\d]/, @a;
-        iseq "@b", "@c";
+        is("@b", "@c", $message);
 
         @b = grep /\D/, @a;
         @c = grep /[\D]/, @a;
-        iseq "@b", "@c";
+        is("@b", "@c", $message);
 
         @b = grep /\d/, @a;
         @c = grep /[^\D]/, @a;
-        iseq "@b", "@c";
+        is("@b", "@c", $message);
 
         @b = grep /\d/, @a;
         @c = grep /[\d]/, @a;
-        iseq "@b", "@c";
+        is("@b", "@c", $message);
     }
     {
-        local $Message = '\W, [\W], \w, [\w]';
+        my $message = '\W, [\W], \w, [\w]';
         my @a = map chr, 0 .. 255;
         my @b = grep /\W/, @a;
         my @c = grep /[^\w]/, @a;
-        iseq "@b", "@c";
+        is("@b", "@c", $message);
 
         @b = grep /\W/, @a;
         @c = grep /[\W]/, @a;
-        iseq "@b", "@c";
+        is("@b", "@c", $message);
 
         @b = grep /\w/, @a;
         @c = grep /[^\W]/, @a;
-        iseq "@b", "@c";
+        is("@b", "@c", $message);
 
         @b = grep /\w/, @a;
         @c = grep /[\w]/, @a;
-        iseq "@b", "@c";
+        is("@b", "@c", $message);
     }
 
 
     {
         # see if backtracking optimization works correctly
-        local $Message = 'Backtrack optimization';
-        ok "\n\n" =~ /\n   $ \n/x;
-        ok "\n\n" =~ /\n*  $ \n/x;
-        ok "\n\n" =~ /\n+  $ \n/x;
-        ok "\n\n" =~ /\n?  $ \n/x;
-        ok "\n\n" =~ /\n*? $ \n/x;
-        ok "\n\n" =~ /\n+? $ \n/x;
-        ok "\n\n" =~ /\n?? $ \n/x;
-        ok "\n\n" !~ /\n*+ $ \n/x;
-        ok "\n\n" !~ /\n++ $ \n/x;
-        ok "\n\n" =~ /\n?+ $ \n/x;
+        my $message = 'Backtrack optimization';
+        like("\n\n", qr/\n   $ \n/x, $message);
+        like("\n\n", qr/\n*  $ \n/x, $message);
+        like("\n\n", qr/\n+  $ \n/x, $message);
+        like("\n\n", qr/\n?  $ \n/x, $message);
+        like("\n\n", qr/\n*? $ \n/x, $message);
+        like("\n\n", qr/\n+? $ \n/x, $message);
+        like("\n\n", qr/\n?? $ \n/x, $message);
+        unlike("\n\n", qr/\n*+ $ \n/x, $message);
+        unlike("\n\n", qr/\n++ $ \n/x, $message);
+        like("\n\n", qr/\n?+ $ \n/x, $message);
     }
 
 
@@ -965,21 +965,21 @@ sub run_tests {
         use overload '""' => sub {'Object S'};
         sub new {bless []}
 
-        local $::Message  = "Ref stringification";
-      ::ok do { \my $v} =~ /^SCALAR/,   "Scalar ref stringification";
-      ::ok do {\\my $v} =~ /^REF/,      "Ref ref stringification";
-      ::ok []           =~ /^ARRAY/,    "Array ref stringification";
-      ::ok {}           =~ /^HASH/,     "Hash ref stringification";
-      ::ok 'S' -> new   =~ /^Object S/, "Object stringification";
+        my $message  = "Ref stringification";
+      ::ok(do { \my $v} =~ /^SCALAR/,   "Scalar ref stringification", $message);
+      ::ok(do {\\my $v} =~ /^REF/,      "Ref ref stringification", $message);
+      ::ok([]           =~ /^ARRAY/,    "Array ref stringification", $message);
+      ::ok({}           =~ /^HASH/,     "Hash ref stringification", $message);
+      ::ok('S' -> new   =~ /^Object S/, "Object stringification", $message);
     }
 
 
     {
-        local $Message = "Test result of match used as match";
-        ok 'a1b' =~ ('xyz' =~ /y/);
-        iseq $`, 'a';
-        ok 'a1b' =~ ('xyz' =~ /t/);
-        iseq $`, 'a';
+        my $message = "Test result of match used as match";
+        ok('a1b' =~ ('xyz' =~ /y/), $message);
+        is($`, 'a', $message);
+        ok('a1b' =~ ('xyz' =~ /t/), $message);
+        is($`, 'a', $message);
     }
 
 
@@ -990,7 +990,7 @@ sub run_tests {
 
 
     {
-        local $Message = '\s, [[:space:]] and [[:blank:]]';
+        my $message = '\s, [[:space:]] and [[:blank:]]';
         my %space = (spc   => " ",
                      tab   => "\t",
                      cr    => "\r",
@@ -1005,14 +1005,14 @@ sub run_tests {
         my @space1 = sort grep {$space {$_} =~ /[[:space:]]/} keys %space;
         my @space2 = sort grep {$space {$_} =~ /[[:blank:]]/} keys %space;
 
-        iseq "@space0", "cr ff lf spc tab";
-        iseq "@space1", "cr ff lf spc tab vt";
-        iseq "@space2", "spc tab";
+        is("@space0", "cr ff lf spc tab", $message);
+        is("@space1", "cr ff lf spc tab vt", $message);
+        is("@space2", "spc tab", $message);
     }
 
     {
         use charnames ":full";
-        local $Message = 'Delayed interpolation of \N';
+        # Delayed interpolation of \N'
         my $r1 = qr/\N{THAI CHARACTER SARA I}/;
         my $s1 = "\x{E34}\x{E34}\x{E34}\x{E34}";
 
@@ -1028,9 +1028,9 @@ sub run_tests {
 
     {
         use charnames ":full";
-        local $Message = '[perl #74982] Period coming after \N{}';
-        ok "\x{ff08}." =~ m/\N{FULLWIDTH LEFT PARENTHESIS}./ && $& eq "\x{ff08}.";
-        ok "\x{ff08}." =~ m/[\N{FULLWIDTH LEFT PARENTHESIS}]./ && $& eq "\x{ff08}.";
+        my $message = '[perl #74982] Period coming after \N{}';
+        ok("\x{ff08}." =~ m/\N{FULLWIDTH LEFT PARENTHESIS}./ && $& eq "\x{ff08}.", $message);
+        ok("\x{ff08}." =~ m/[\N{FULLWIDTH LEFT PARENTHESIS}]./ && $& eq "\x{ff08}.", $message);
     }
     {
         my $n= 50;
@@ -1069,17 +1069,17 @@ sub run_tests {
         # Tests for bug 77414.
         #
 
-        local $Message = '\p property after empty * match';
+        my $message = '\p property after empty * match';
         {
             local $TODO = "Bug 77414";
-            ok "1" =~ /\s*\pN/;
-            ok "-" =~ /\s*\p{Dash}/;
-            ok " " =~ /\w*\p{Blank}/;
+            like("1", qr/\s*\pN/, $message);
+            like("-", qr/\s*\p{Dash}/, $message);
+            like(" ", qr/\w*\p{Blank}/, $message);
         }
 
-        ok "1" =~ /\s*\pN+/;
-        ok "-" =~ /\s*\p{Dash}{1}/;
-        ok " " =~ /\w*\p{Blank}{1,4}/;
+        like("1", qr/\s*\pN+/, $message);
+        like("-", qr/\s*\p{Dash}{1}/, $message);
+        like(" ", qr/\w*\p{Blank}{1,4}/, $message);
 
     }
 
