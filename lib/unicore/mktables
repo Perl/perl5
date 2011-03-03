@@ -6278,6 +6278,12 @@ END
 
         $self->_set_format($format);
 
+        # Core Perl has a different definition of mapping ranges than we do,
+        # that is applicable mainly to mapping code points, so for tables
+        # where it is possible that core Perl could be used to read it,
+        # make it range size 1 to prevent possible confusion
+        $self->set_range_size_1(1) if $format eq $HEX_FORMAT;
+
         return $self->SUPER::write(
             ($self->property == $block)
                 ? 7     # block file needs more tab stops
