@@ -325,12 +325,12 @@ sub like   ($$@) { like_yn (0,@_) }; # 0 for -
 sub unlike ($$@) { like_yn (1,@_) }; # 1 for un-
 
 sub like_yn ($$$@) {
-    my ($flip, $got, $expected, $name, @mess) = @_;
+    my ($flip, undef, $expected, $name, @mess) = @_;
     my $pass;
-    $pass = $got =~ /$expected/ if !$flip;
-    $pass = $got !~ /$expected/ if $flip;
+    $pass = $_[1] =~ /$expected/ if !$flip;
+    $pass = $_[1] !~ /$expected/ if $flip;
     unless ($pass) {
-	unshift(@mess, "#      got '$got'\n",
+	unshift(@mess, "#      got '$_[1]'\n",
 		$flip
 		? "# expected !~ /$expected/\n" : "# expected /$expected/\n");
     }
