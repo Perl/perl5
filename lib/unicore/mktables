@@ -839,6 +839,10 @@ if ($v_version ge v5.2.0) {
     }
 }
 
+# Enum values for to_output_map() method in the Map_Table package.
+my $EXTERNAL_MAP = 1;
+my $INTERNAL_MAP = 2;
+
 # Properties that this program ignores.
 my @unimplemented_properties = (
 'Unicode_Radical_Stroke'    # Remove if changing to handle this one.
@@ -1071,10 +1075,6 @@ my $DEVELOPMENT_ONLY=<<"EOF";
 # not be used for production.
 
 EOF
-
-# Enum values for to_output_map() method in the Map_Table package.
-my $EXTERNAL_MAP = 1;
-my $INTERNAL_MAP = 2;
 
 my $LAST_UNICODE_CODEPOINT_STRING = "10FFFF";
 my $LAST_UNICODE_CODEPOINT = hex $LAST_UNICODE_CODEPOINT_STRING;
