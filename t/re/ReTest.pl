@@ -10,7 +10,6 @@ use Carp;
 use vars qw(
     $EXPECTED_TESTS 
     $TODO
-    $BugId
     $running_as_thread
     $IS_ASCII
     $IS_EBCDIC
@@ -55,7 +54,7 @@ sub pretty {
 }
 
 sub safe_globals {
-    defined($_) and s/#/\\#/g for $BugId, $TODO;
+    defined($_) and s/#/\\#/g for $TODO;
 }
 
 sub _ok {
@@ -63,7 +62,6 @@ sub _ok {
     plan();
     safe_globals();
     $mess    = defined $mess ? pretty ($mess) : 'Noname test';
-    $mess   .= "; Bug $BugId"     if defined $BugId;
     $mess   .= " # TODO $TODO"     if defined $TODO;
 
     my $line_nr = (caller(1)) [2];
@@ -96,7 +94,6 @@ sub skip {
     my $why = shift;
     safe_globals();
     $why =~ s/\n.*//s;
-    $why .= "; Bug $BugId" if defined $BugId;
     my $ok;
     if (defined $TODO) {
 	$why = "TODO & SKIP $why $TODO";
