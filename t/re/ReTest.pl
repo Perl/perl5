@@ -69,7 +69,7 @@ sub _ok {
     printf "%sok %d - %s\n",
               ($ok ? "" : "not "),
               ++ $test,
-              "$mess\tLine $line_nr";
+              $mess;
 
     unless ($ok) {
         print "# Failed test at line $line_nr\n" unless defined $TODO;
