@@ -10371,6 +10371,11 @@ sub filter_arabic_shaping_line {
     return;
 }
 
+{ # Closure
+    my $lc; # Table for lowercase mapping
+    my $tc;
+    my $uc;
+
 sub setup_special_casing {
     # SpecialCasing.txt contains the non-simple case change mappings.  The
     # simple ones are in UnicodeData.txt, which should already have been read
@@ -10391,8 +10396,13 @@ sub setup_special_casing {
     my $file= shift;
     Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
+    $lc = property_ref('lc');
+    $tc = property_ref('tc');
+    $uc = property_ref('uc');
+
     # For each of the case change mappings...
-    foreach my $case ('lc', 'tc', 'uc') {
+    foreach my $case_table ($lc, $tc, $uc) {
+        my $case = $case_table->name;
         my $full = property_ref($case);
         unless (defined $full && ! $full->is_empty) {
             Carp::my_carp_bug("Need to process UnicodeData before SpecialCasing.  Only special casing will be generated.");
@@ -10402,6 +10412,18 @@ sub setup_special_casing {
         # of the full one's
         my $simple = property_ref('s' . $case);
         $simple->initialize($full) if $simple->to_output_map();
+
+        my $simple_only = Property->new("_s$case",
+                Type => $STRING,
+                Default_Map => $CODE_POINT,
+                Perl_Extension => 1,
+                Description => "The simple mappings for $case for code points that have full mappings as well");
+        $simple_only->set_to_output_map($INTERNAL_MAP);
+        $simple_only->add_comment(join_lines( <<END
+This file is for UCD.pm so that it can construct simple mappings that would
+otherwise be lost because they are overridden by full mappings.
+END
+        ));
     }
 
     return;
@@ -10469,7 +10491,26 @@ sub filter_special_casing_line {
     $file->insert_adjusted_lines("$fields[0]; tc; $fields[2]");
     $file->insert_adjusted_lines("$fields[0]; uc; $fields[3]");
 
+    # Copy any simple case change to the special tables constructed if
+    # being overridden by a multi-character case change.
+    if ($fields[1] ne $fields[0]
+        && (my $value = $lc->value_of(hex $fields[0])) ne $CODE_POINT)
+    {
+        $file->insert_adjusted_lines("$fields[0]; _slc; $value");
+    }
+    if ($fields[2] ne $fields[0]
+        && (my $value = $tc->value_of(hex $fields[0])) ne $CODE_POINT)
+    {
+        $file->insert_adjusted_lines("$fields[0]; _stc; $value");
+    }
+    if ($fields[3] ne $fields[0]
+        && (my $value = $uc->value_of(hex $fields[0])) ne $CODE_POINT)
+    {
+        $file->insert_adjusted_lines("$fields[0]; _suc; $value");
+    }
+
     return;
+}
 }
 
 sub filter_old_style_case_folding {
