@@ -86,9 +86,8 @@ a decimal or a hexadecimal scalar designating a Unicode code point, or C<U+>
 followed by hexadecimals designating a Unicode code point.  In other words, if
 you want a code point to be interpreted as a hexadecimal number, you must
 prefix it with either C<0x> or C<U+>, because a string like e.g. C<123> will be
-interpreted as a decimal code point.  Also note that Unicode is B<not> limited
-to 16 bits (the number of Unicode code points is open-ended, in theory
-unlimited): you may have more than 4 hexdigits.
+interpreted as a decimal code point.  Note that the largest code point in
+Unicode is U+10FFFF.
 =cut
 
 my $BLOCKSFH;
@@ -634,7 +633,7 @@ sub charscripts {
 
 =head2 B<charinrange()>
 
-In addition to using the C<\p{In...}> and C<\P{In...}> constructs, you
+In addition to using the C<\p{Blk=...}> and C<\P{Blk=...}> constructs, you
 can also test whether a code point is in the I<range> as returned by
 L</charblock()> and L</charscript()> or as the values of the hash returned
 by L</charblocks()> and L</charscripts()> by using charinrange():
@@ -1396,7 +1395,7 @@ For scripts see UTR #24: L<http://www.unicode.org/unicode/reports/tr24/>
 
 Scripts are matched with the regular-expression construct
 C<\p{...}> (e.g. C<\p{Tibetan}> matches characters of the Tibetan script),
-while C<\p{In...}> is used for blocks (e.g. C<\p{InTibetan}> matches
+while C<\p{Blk=...}> is used for blocks (e.g. C<\p{Blk=Tibetan}> matches
 any of the 256 code points in the Tibetan block).
 
 
