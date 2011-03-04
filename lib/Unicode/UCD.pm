@@ -4,6 +4,7 @@ use strict;
 use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
+use Unicode::Normalize qw(getCombinClass NFKD);
 
 our $VERSION = '0.32';
 
@@ -90,7 +91,6 @@ to 16 bits (the number of Unicode code points is open-ended, in theory
 unlimited): you may have more than 4 hexdigits.
 =cut
 
-my $UNICODEFH;
 my $BLOCKSFH;
 my $VERSIONFH;
 my $CASEFOLDFH;
@@ -264,134 +264,152 @@ sub _getcode {
     return;
 }
 
-# Lingua::KO::Hangul::Util not part of the standard distribution
-# but it will be used if available.
+# Populated by _num.  Converts real number back to input rational
+my %real_to_rational;
 
-eval { require Lingua::KO::Hangul::Util };
-my $hasHangulUtil = ! $@;
-if ($hasHangulUtil) {
-    Lingua::KO::Hangul::Util->import();
+# To store the contents of files found on disk.
+my @BIDIS;
+my @CATEGORIES;
+my @DECOMPOSITIONS;
+my @NUMERIC_TYPES;
+my @SIMPLE_LOWER;
+my @SIMPLE_TITLE;
+my @SIMPLE_UPPER;
+my @UNICODE_1_NAMES;
+
+sub _charinfo_case {
+
+    # Returns the value to set into one of the case fields in the charinfo
+    # structure.
+    #   $char is the character,
+    #   $cased is the case-changed character
+    #   $file is the file in lib/unicore/To/$file that contains the data
+    #       needed for this, in the form that _search() understands.
+    #   $array_ref points to the array holding the contents of $file.  It will
+    #       be populated if empty.
+    # By using the 'uc', etc. functions, we avoid loading more files into
+    # memory except for those rare cases where the simple casing (which has
+    # been what charinfo() has always returned, is different than the full
+    # casing.
+    my ($char, $cased, $file, $array_ref) = @_;
+
+    return "" if $cased eq $char;
+
+    return sprintf("%04X", ord $cased) if length($cased) == 1;
+
+    @$array_ref =_read_table("unicore/To/$file") unless @$array_ref;
+    return _search($array_ref, 0, $#$array_ref, ord $char) // "";
 }
-
-sub hangul_decomp { # internal: called from charinfo
-    if ($hasHangulUtil) {
-	my @tmp = decomposeHangul(shift);
-	return sprintf("%04X %04X",      @tmp) if @tmp == 2;
-	return sprintf("%04X %04X %04X", @tmp) if @tmp == 3;
-    }
-    return;
-}
-
-sub hangul_charname { # internal: called from charinfo
-    return sprintf("HANGUL SYLLABLE-%04X", shift);
-}
-
-sub han_charname { # internal: called from charinfo
-    return sprintf("CJK UNIFIED IDEOGRAPH-%04X", shift);
-}
-
-# Overwritten by data in file
-my %first_last = (
-   'CJK Ideograph Extension A' => [ 0x3400,   0x4DB5   ],
-   'CJK Ideograph'             => [ 0x4E00,   0x9FA5   ],
-   'CJK Ideograph Extension B' => [ 0x20000,  0x2A6D6  ],
-);
-
-get_charinfo_ranges();
-
-sub get_charinfo_ranges {
-   my @blocks = keys %first_last;
-   
-   my $fh;
-   openunicode( \$fh, 'UnicodeData.txt' );
-   if( defined $fh ){
-      while( my $line = <$fh> ){
-         next unless $line =~ /(?:First|Last)/;
-         if( grep{ $line =~ /[^;]+;<$_\s*,\s*(?:First|Last)>/ }@blocks ){
-            my ($number,$block,$type);
-            ($number,$block) = split /;/, $line;
-            $block =~ s/<|>//g;
-            ($block,$type) = split /, /, $block;
-            my $index = $type eq 'First' ? 0 : 1;
-            $first_last{ $block }->[$index] = hex $number;
-         }
-      }
-   }
-}
-
-my @CharinfoRanges = (
-# block name
-# [ first, last, coderef to name, coderef to decompose ],
-# CJK Ideographs Extension A
-  [ @{ $first_last{'CJK Ideograph Extension A'} },        \&han_charname,   undef  ],
-# CJK Ideographs
-  [ @{ $first_last{'CJK Ideograph'} },                    \&han_charname,   undef  ],
-# Hangul Syllables
-  [ 0xAC00,   0xD7A3,   $hasHangulUtil ? \&getHangulName : \&hangul_charname,  \&hangul_decomp ],
-# Non-Private Use High Surrogates
-  [ 0xD800,   0xDB7F,   undef,   undef  ],
-# Private Use High Surrogates
-  [ 0xDB80,   0xDBFF,   undef,   undef  ],
-# Low Surrogates
-  [ 0xDC00,   0xDFFF,   undef,   undef  ],
-# The Private Use Area
-  [ 0xE000,   0xF8FF,   undef,   undef  ],
-# CJK Ideographs Extension B
-  [ @{ $first_last{'CJK Ideograph Extension B'} },        \&han_charname,   undef  ],
-# Plane 15 Private Use Area
-  [ 0xF0000,  0xFFFFD,  undef,   undef  ],
-# Plane 16 Private Use Area
-  [ 0x100000, 0x10FFFD, undef,   undef  ],
-);
 
 sub charinfo {
+
+    # This function has traditionally mimicked what is in UnicodeData.txt,
+    # warts and all.  This is a re-write that avoids UnicodeData.txt so that
+    # it can be removed to save disk space.  Instead, this assembles
+    # information gotten by other methods that get data from various other
+    # files.  It uses charnames to get the character name; and various
+    # mktables tables.
+
+    use feature 'unicode_strings';
+
     my $arg  = shift;
     my $code = _getcode($arg);
-    croak __PACKAGE__, "::charinfo: unknown code '$arg'"
-	unless defined $code;
-    my $hexk = sprintf("%06X", $code);
-    my($rcode,$rname,$rdec);
-    foreach my $range (@CharinfoRanges){
-      if ($range->[0] <= $code && $code <= $range->[1]) {
-        $rcode = $hexk;
-	$rcode =~ s/^0+//;
-	$rcode =  sprintf("%04X", hex($rcode));
-        $rname = $range->[2] ? $range->[2]->($code) : '';
-        $rdec  = $range->[3] ? $range->[3]->($code) : '';
-        $hexk  = sprintf("%06X", $range->[0]); # replace by the first
-        last;
-      }
+    croak __PACKAGE__, "::charinfo: unknown code '$arg'" unless defined $code;
+
+    # Non-unicode implies undef.
+    return if $code > 0x10FFFF;
+
+    my %prop;
+    my $char = chr($code);
+
+    @CATEGORIES =_read_table("unicore/To/Gc.pl") unless @CATEGORIES;
+    $prop{'category'} = _search(\@CATEGORIES, 0, $#CATEGORIES, $code)
+                        // $utf8::SwashInfo{'ToGc'}{'missing'};
+
+    return if $prop{'category'} eq 'Cn';    # Unassigned code points are undef
+
+    $prop{'code'} = sprintf "%04X", $code;
+    $prop{'name'} = ($char =~ /\p{Cntrl}/) ? '<control>'
+                                           : (charnames::viacode($code) // "");
+
+    $prop{'combining'} = getCombinClass($code);
+
+    @BIDIS =_read_table("unicore/To/Bc.pl") unless @BIDIS;
+    $prop{'bidi'} = _search(\@BIDIS, 0, $#BIDIS, $code)
+                    // $utf8::SwashInfo{'ToBc'}{'missing'};
+
+    # For most code points, we can just read in "unicore/Decomposition.pl", as
+    # its contents are exactly what should be output.  But that file doesn't
+    # contain the data for the Hangul syllable decompositions, which can be
+    # algorithmically computed, and NFKD() does that, so we call NFKD() for
+    # those.  We can't use NFKD() for everything, as it does a complete
+    # recursive decomposition, and what this function has always done is to
+    # return what's in UnicodeData.txt which doesn't have the recursivenss
+    # specified.
+    # in the decomposition types.  No decomposition implies an empty field;
+    # otherwise, all but "Canonical" imply a compatible decomposition, and
+    # the type is prefixed to that, as it is in UnicodeData.txt
+    if ($char =~ /\p{Block=Hangul_Syllables}/) {
+        # The code points of the decomposition are output in standard Unicode
+        # hex format, separated by blanks.
+        $prop{'decomposition'} = join " ", map { sprintf("%04X", $_)}
+                                           unpack "U*", NFKD($char);
     }
-    openunicode(\$UNICODEFH, "UnicodeData.txt");
-    if (defined $UNICODEFH) {
-	use Search::Dict 1.02;
-	if (look($UNICODEFH, "$hexk;", { xfrm => sub { $_[0] =~ /^([^;]+);(.+)/; sprintf "%06X;$2", hex($1) } } ) >= 0) {
-	    my $line = <$UNICODEFH>;
-	    return unless defined $line;
-	    chomp $line;
-	    my %prop;
-	    @prop{qw(
-		     code name category
-		     combining bidi decomposition
-		     decimal digit numeric
-		     mirrored unicode10 comment
-		     upper lower title
-		    )} = split(/;/, $line, -1);
-	    $hexk =~ s/^0+//;
-	    $hexk =  sprintf("%04X", hex($hexk));
-	    if ($prop{code} eq $hexk) {
-		$prop{block}  = charblock($code);
-		$prop{script} = charscript($code);
-		if(defined $rname){
-                    $prop{code} = $rcode;
-                    $prop{name} = $rname;
-                    $prop{decomposition} = $rdec;
-                }
-		return \%prop;
-	    }
-	}
+    else {
+        @DECOMPOSITIONS = _read_table("unicore/Decomposition.pl")
+                          unless @DECOMPOSITIONS;
+        $prop{'decomposition'} = _search(\@DECOMPOSITIONS, 0, $#DECOMPOSITIONS,
+                                                                $code) // "";
     }
-    return;
+
+    # Can use num() to get the numeric values, if any.
+    if (! defined (my $value = num($char))) {
+        $prop{'decimal'} = $prop{'digit'} = $prop{'numeric'} = "";
+    }
+    else {
+        if ($char =~ /\d/) {
+            $prop{'decimal'} = $prop{'digit'} = $prop{'numeric'} = $value;
+        }
+        else {
+
+            # For non-decimal-digits, we have to read in the Numeric type
+            # to distinguish them.  It is not just a matter of integer vs.
+            # rational, as some whole number values are not considered digits,
+            # e.g., TAMIL NUMBER TEN.
+            $prop{'decimal'} = "";
+
+            @NUMERIC_TYPES =_read_table("unicore/To/Nt.pl")
+                                unless @NUMERIC_TYPES;
+            if ((_search(\@NUMERIC_TYPES, 0, $#NUMERIC_TYPES, $code) // "")
+                eq 'Digit')
+            {
+                $prop{'digit'} = $prop{'numeric'} = $value;
+            }
+            else {
+                $prop{'digit'} = "";
+                $prop{'numeric'} = $real_to_rational{$value} // $value;
+            }
+        }
+    }
+
+    $prop{'mirrored'} = ($char =~ /\p{Bidi_Mirrored}/) ? 'Y' : 'N';
+
+    @UNICODE_1_NAMES =_read_table("unicore/To/Na1.pl") unless @UNICODE_1_NAMES;
+    $prop{'unicode10'} = _search(\@UNICODE_1_NAMES, 0, $#UNICODE_1_NAMES, $code)
+                         // "";
+
+    # This is true starting in 6.0, but, num() also requires 6.0, so
+    # don't need to test for version again here.
+    $prop{'comment'} = "";
+
+    $prop{'upper'} = _charinfo_case($char, uc $char, '_suc.pl', \@SIMPLE_UPPER);
+    $prop{'lower'} = _charinfo_case($char, lc $char, '_slc.pl', \@SIMPLE_LOWER);
+    $prop{'title'} = _charinfo_case($char, ucfirst $char, '_stc.pl',
+                                                                \@SIMPLE_TITLE);
+
+    $prop{block}  = charblock($code);
+    $prop{script} = charscript($code);
+    return \%prop;
 }
 
 sub _search { # Binary search in a [[lo,hi,prop],[...],...] table.
@@ -1228,9 +1246,11 @@ sub _numeric {
     foreach my $entry (@numbers) {
         my ($start, $end, $value) = @$entry;
 
-        # If value contains a slash, convert to decimal
+        # If value contains a slash, convert to decimal, add a reverse hash
+        # used by charinfo.
         if ((my @rational = split /\//, $value) == 2) {
             my $real = $rational[0] / $rational[1];
+            $real_to_rational{$real} = $value;
             $value = $real;
         }
 

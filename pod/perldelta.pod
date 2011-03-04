@@ -148,6 +148,46 @@ C<Test::Simple> has been upgraded from version 0.97_01 to 0.98
 
 C<Tie::RefHash> has been upgraded from version 1.38 to 1.39.
 
+=item *
+
+Unicode::UCD has been upgraded from version 0.31 to 0.32.
+This includes a number of bug fixes:
+
+=over 4
+
+=item charinfo()
+
+=over 4
+
+=item *
+
+It is now updated to Unicode Version 6 with Corrigendum #8, except,
+as with Perl 5.14, the code point at U+1F514 has no name.
+
+=item *
+
+The Hangul syllable code points have the correct names, and their
+decompositions are always output without requiring L<Lingua::KO::Hangul::Util>
+to be installed.
+
+=item *
+
+The CJK (Chinese-Japanese-Korean) code points U+2A700 - U+2B734
+and U+2B740 - 2B81D are now properly handled.
+
+=item *
+
+The numeric values are now output for those CJK code points that have them.
+
+=item *
+
+The names that are output for code points with multiple aliases are now the
+corrected ones.
+
+=back
+
+=back
+
 =back
 
 =head2 Removed Modules and Pragmata

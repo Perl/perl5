@@ -133,12 +133,12 @@ is($charinfo->{script},         'Hebrew');
 
 $charinfo = charinfo(0xAC00);
 
-is($charinfo->{code},           'AC00', 'HANGUL SYLLABLE-AC00');
-is($charinfo->{name},           'HANGUL SYLLABLE-AC00');
+is($charinfo->{code},           'AC00', 'HANGUL SYLLABLE U+AC00');
+is($charinfo->{name},           'HANGUL SYLLABLE GA');
 is($charinfo->{category},       'Lo');
 is($charinfo->{combining},      '0');
 is($charinfo->{bidi},           'L');
-is($charinfo->{decomposition},  undef);
+is($charinfo->{decomposition},  '1100 1161');
 is($charinfo->{decimal},        '');
 is($charinfo->{digit},          '');
 is($charinfo->{numeric},        '');
@@ -155,12 +155,12 @@ is($charinfo->{script},         'Hangul');
 
 $charinfo = charinfo(0xAE00);
 
-is($charinfo->{code},           'AE00', 'HANGUL SYLLABLE-AE00');
-is($charinfo->{name},           'HANGUL SYLLABLE-AE00');
+is($charinfo->{code},           'AE00', 'HANGUL SYLLABLE U+AE00');
+is($charinfo->{name},           'HANGUL SYLLABLE GEUL');
 is($charinfo->{category},       'Lo');
 is($charinfo->{combining},      '0');
 is($charinfo->{bidi},           'L');
-is($charinfo->{decomposition},  undef);
+is($charinfo->{decomposition},  "1100 1173 11AF");
 is($charinfo->{decimal},        '');
 is($charinfo->{digit},          '');
 is($charinfo->{numeric},        '');
