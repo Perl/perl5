@@ -10,7 +10,6 @@ use Carp;
 use vars qw(
     $EXPECTED_TESTS 
     $TODO
-    $Message
     $BugId
     $running_as_thread
     $IS_ASCII
@@ -19,8 +18,6 @@ use vars qw(
 );
 
 $| = 1;
-
-$Message ||= "Noname test";
 
 our $ordA = ord ('A');  # This defines ASCII/UTF-8 vs EBCDIC/UTF-EBCDIC
 # This defined the platform.
@@ -48,6 +45,7 @@ sub plan {
 
 sub pretty {
     my ($mess) = @_;
+    return unless defined $mess;
     $mess =~ s/\n/\\n/g;
     $mess =~ s/\r/\\r/g;
     $mess =~ s/\t/\\t/g;
@@ -64,7 +62,7 @@ sub _ok {
     my ($ok, $mess, $error) = @_;
     plan();
     safe_globals();
-    $mess    = pretty ($mess // $Message);
+    $mess    = defined $mess ? pretty ($mess) : 'Noname test';
     $mess   .= "; Bug $BugId"     if defined $BugId;
     $mess   .= " # TODO $TODO"     if defined $TODO;
 
@@ -91,7 +89,7 @@ sub _ok {
 
 # Force scalar context on the pattern match
 sub  ok ($;$$) {_ok  $_ [0], $_ [1], $_ [2]}
-sub nok ($;$$) {_ok !$_ [0], "Failed: " . ($_ [1] // $Message), $_ [2]}
+sub nok ($;$$) {_ok !$_ [0], "Failed: " . $_ [1], $_ [2]}
 
 
 sub skip {
