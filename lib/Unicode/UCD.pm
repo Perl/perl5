@@ -208,7 +208,7 @@ As of Unicode 6.0, this is always empty.
 =item B<upper>
 
 is empty if there is no single code point uppercase mapping for I<code>
-(it's uppercase mapping is itself);
+(its uppercase mapping is itself);
 otherwise it is that mapping expressed as at least four hexdigits.
 (L</casespec()> should be used in addition to B<charinfo()>
 for case mappings when the calling program can cope with multiple code point
@@ -217,7 +217,7 @@ mappings.)
 =item B<lower>
 
 is empty if there is no single code point lowercase mapping for I<code>
-(it's lowercase mapping is itself);
+(its lowercase mapping is itself);
 otherwise it is that mapping expressed as at least four hexdigits.
 (L</casespec()> should be used in addition to B<charinfo()>
 for case mappings when the calling program can cope with multiple code point
@@ -226,7 +226,7 @@ mappings.)
 =item B<title>
 
 is empty if there is no single code point titlecase mapping for I<code>
-(it's titlecase mapping is itself);
+(its titlecase mapping is itself);
 otherwise it is that mapping expressed as at least four hexdigits.
 (L</casespec()> should be used in addition to B<charinfo()>
 for case mappings when the calling program can cope with multiple code point
