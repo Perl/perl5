@@ -530,13 +530,12 @@ sub charblock {
     my $code = _getcode($arg);
 
     if (defined $code) {
-	_search(\@BLOCKS, 0, $#BLOCKS, $code);
-    } else {
-	if (exists $BLOCKS{$arg}) {
-	    return dclone $BLOCKS{$arg};
-	} else {
-	    return;
-	}
+	my $result = _search(\@BLOCKS, 0, $#BLOCKS, $code);
+        return $result if defined $result;
+        return 'No_Block';
+    }
+    elsif (exists $BLOCKS{$arg}) {
+        return dclone $BLOCKS{$arg};
     }
 }
 

@@ -17,7 +17,7 @@ use strict;
 use Unicode::UCD;
 use Test::More;
 
-BEGIN { plan tests => 270 };
+BEGIN { plan tests => 271 };
 
 use Unicode::UCD 'charinfo';
 
@@ -219,6 +219,7 @@ use Unicode::UCD qw(charblock charscript);
 
 is(charblock(0x590),          'Hebrew', '0x0590 - Hebrew unused charblock');
 is(charscript(0x590),         'Unknown',    '0x0590 - Hebrew unused charscript');
+is(charblock(0x1FFFF),        'No_Block', '0x1FFFF - unused charblock');
 
 $charinfo = charinfo(0xbe);
 
