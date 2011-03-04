@@ -4429,6 +4429,21 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	    libdir = newSVpv(PERLLIB_MANGLE(dir, 0), 0);
 	}
 
+#ifdef VMS
+	char *unix;
+	STRLEN len;
+
+	if ((unix = tounixspec_ts(SvPV(libdir,len),NULL)) != NULL) {
+	    len = strlen(unix);
+	    while (unix[len-1] == '/') len--;  /* Cosmetic */
+	    sv_usepvn(libdir,unix,len);
+	}
+	else
+	    PerlIO_printf(Perl_error_log,
+		          "Failed to unixify @INC element \"%s\"\n",
+			  SvPV(libdir,len));
+#endif
+
 	/* Do the if() outside the #ifdef to avoid warnings about an unused
 	   parameter.  */
 	if (canrelocate) {
@@ -4539,22 +4554,6 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	    const char * const incverlist[] = { PERL_INC_VERSION_LIST };
 	    const char * const *incver;
 #endif
-#ifdef VMS
-	    char *unix;
-	    STRLEN len;
-
-
-	    if ((unix = tounixspec_ts(SvPV(libdir,len),NULL)) != NULL) {
-		len = strlen(unix);
-		while (unix[len-1] == '/') len--;  /* Cosmetic */
-		sv_usepvn(libdir,unix,len);
-	    }
-	    else
-		PerlIO_printf(Perl_error_log,
-		              "Failed to unixify @INC element \"%s\"\n",
-			      SvPV(libdir,len));
-#endif
-
 	    subdir = newSVsv(libdir);
 
 	    if (add_versioned_sub_dirs) {
