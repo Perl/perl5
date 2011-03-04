@@ -30,37 +30,37 @@ run_tests() unless caller;
 #
 sub run_tests {
     {
-        local $Message =  "Call code from qr //";
+        my $message =  "Call code from qr //";
         local $_ = 'var="foo"';
         $a = qr/(?{++$b})/;
         $b = 7;
-        ok /$a$a/ && $b eq '9';
+        ok(/$a$a/ && $b eq '9', $message);
 
         my $c="$a";
-        ok /$a$a/ && $b eq '11';
+        ok(/$a$a/ && $b eq '11', $message);
 
         undef $@;
         eval {/$c/};
-        ok $@ && $@ =~ /not allowed at runtime/;
+        like($@, qr/not allowed at runtime/, $message);
 
         use re "eval";
         /$a$c$a/;
-        iseq $b, '14';
+        is($b, '14', $message);
 
         our $lex_a = 43;
         our $lex_b = 17;
         our $lex_c = 27;
         my $lex_res = ($lex_b =~ qr/$lex_b(?{ $lex_c = $lex_a++ })/);
 
-        iseq $lex_res, 1;
-        iseq $lex_a, 44;
-        iseq $lex_c, 43;
+        is($lex_res, 1, $message);
+        is($lex_a, 44, $message);
+        is($lex_c, 43, $message);
 
         no re "eval";
         undef $@;
         my $match = eval { /$a$c$a/ };
-        ok $@ && $@ =~ /Eval-group not allowed/ && !$match;
-        iseq $b, '14';
+        ok($@ && $@ =~ /Eval-group not allowed/ && !$match, $message);
+        is($b, '14', $message);
 
         $lex_a = 2;
         $lex_a = 43;
@@ -68,9 +68,9 @@ sub run_tests {
         $lex_c = 27;
         $lex_res = ($lex_b =~ qr/17(?{ $lex_c = $lex_a++ })/);
 
-        iseq $lex_res, 1;
-        iseq $lex_a, 44;
-        iseq $lex_c, 43;
+        is($lex_res, 1, $message);
+        is($lex_a, 44, $message);
+        is($lex_c, 43, $message);
 
     }
 
@@ -116,7 +116,7 @@ sub run_tests {
 
     {
         use re 'eval';
-        local $Message = 'Test if $^N and $+ work in (?{{})';
+        # Test if $^N and $+ work in (?{{})
         our @ctl_n = ();
         our @plus = ();
         our $nested_tags;
