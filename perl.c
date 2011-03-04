@@ -4384,8 +4384,12 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 {
     dVAR;
     const U8 using_sub_dirs
+#ifdef PERL_IS_MINIPERL
+        = 0;
+#else
 	= (U8)flags & (INCPUSH_ADD_VERSIONED_SUB_DIRS
 		       |INCPUSH_ADD_ARCHONLY_SUB_DIRS|INCPUSH_ADD_OLD_VERS);
+#endif
     const U8 add_versioned_sub_dirs
 	= (U8)flags & INCPUSH_ADD_VERSIONED_SUB_DIRS;
     const U8 add_archonly_sub_dirs
