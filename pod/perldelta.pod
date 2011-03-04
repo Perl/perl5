@@ -191,6 +191,11 @@ corrected ones.
 This now correctly returns "Unknown" instead of C<undef> for the script
 of a code point that hasn't been assigned another one.
 
+=item charblock()
+
+This now correctly returns "No_Block" instead of C<undef> for the block
+of a code point that hasn't been assigned to another one.
+
 =back
 
 =back
