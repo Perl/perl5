@@ -10376,141 +10376,142 @@ sub filter_arabic_shaping_line {
     my $tc;
     my $uc;
 
-sub setup_special_casing {
-    # SpecialCasing.txt contains the non-simple case change mappings.  The
-    # simple ones are in UnicodeData.txt, which should already have been read
-    # in to the full property data structures, so as to initialize these with
-    # the simple ones.  Then the SpecialCasing.txt entries overwrite the ones
-    # which have different full mappings.
+    sub setup_special_casing {
+        # SpecialCasing.txt contains the non-simple case change mappings.  The
+        # simple ones are in UnicodeData.txt, which should already have been
+        # read in to the full property data structures, so as to initialize
+        # these with the simple ones.  Then the SpecialCasing.txt entries
+        # overwrite the ones which have different full mappings.
 
-    # This routine sees if the simple mappings are to be output, and if so,
-    # copies what has already been put into the full mapping tables, while
-    # they still contain only the simple mappings.
+        # This routine sees if the simple mappings are to be output, and if
+        # so, copies what has already been put into the full mapping tables,
+        # while they still contain only the simple mappings.
 
-    # The reason it is done this way is that the simple mappings are probably
-    # not going to be output, so it saves work to initialize the full tables
-    # with the simple mappings, and then overwrite those relatively few
-    # entries in them that have different full mappings, and thus skip the
-    # simple mapping tables altogether.
+        # The reason it is done this way is that the simple mappings are
+        # probably not going to be output, so it saves work to initialize the
+        # full tables with the simple mappings, and then overwrite those
+        # relatively few entries in them that have different full mappings,
+        # and thus skip the simple mapping tables altogether.
 
-    my $file= shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+        my $file= shift;
+        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-    $lc = property_ref('lc');
-    $tc = property_ref('tc');
-    $uc = property_ref('uc');
+        $lc = property_ref('lc');
+        $tc = property_ref('tc');
+        $uc = property_ref('uc');
 
-    # For each of the case change mappings...
-    foreach my $case_table ($lc, $tc, $uc) {
-        my $case = $case_table->name;
-        my $full = property_ref($case);
-        unless (defined $full && ! $full->is_empty) {
-            Carp::my_carp_bug("Need to process UnicodeData before SpecialCasing.  Only special casing will be generated.");
-        }
+        # For each of the case change mappings...
+        foreach my $case_table ($lc, $tc, $uc) {
+            my $case = $case_table->name;
+            my $full = property_ref($case);
+            unless (defined $full && ! $full->is_empty) {
+                Carp::my_carp_bug("Need to process UnicodeData before SpecialCasing.  Only special casing will be generated.");
+            }
 
-        # The simple version's name in each mapping merely has an 's' in front
-        # of the full one's
-        my $simple = property_ref('s' . $case);
-        $simple->initialize($full) if $simple->to_output_map();
+            # The simple version's name in each mapping merely has an 's' in
+            # front of the full one's
+            my $simple = property_ref('s' . $case);
+            $simple->initialize($full) if $simple->to_output_map();
 
-        my $simple_only = Property->new("_s$case",
-                Type => $STRING,
-                Default_Map => $CODE_POINT,
-                Perl_Extension => 1,
-                Description => "The simple mappings for $case for code points that have full mappings as well");
-        $simple_only->set_to_output_map($INTERNAL_MAP);
-        $simple_only->add_comment(join_lines( <<END
+            my $simple_only = Property->new("_s$case",
+                    Type => $STRING,
+                    Default_Map => $CODE_POINT,
+                    Perl_Extension => 1,
+                    Description => "The simple mappings for $case for code points that have full mappings as well");
+            $simple_only->set_to_output_map($INTERNAL_MAP);
+            $simple_only->add_comment(join_lines( <<END
 This file is for UCD.pm so that it can construct simple mappings that would
 otherwise be lost because they are overridden by full mappings.
 END
-        ));
+            ));
+        }
+
+        return;
     }
 
-    return;
-}
+    sub filter_special_casing_line {
+        # Change the format of $_ from SpecialCasing.txt into something that
+        # the generic handler understands.  Each input line contains three
+        # case mappings.  This will generate three lines to pass to the
+        # generic handler for each of those.
 
-sub filter_special_casing_line {
-    # Change the format of $_ from SpecialCasing.txt into something that the
-    # generic handler understands.  Each input line contains three case
-    # mappings.  This will generate three lines to pass to the generic handler
-    # for each of those.
+        # The input syntax (after stripping comments and trailing white space
+        # is like one of the following (with the final two being entries that
+        # we ignore):
+        # 00DF; 00DF; 0053 0073; 0053 0053; # LATIN SMALL LETTER SHARP S
+        # 03A3; 03C2; 03A3; 03A3; Final_Sigma;
+        # 0307; ; 0307; 0307; tr After_I; # COMBINING DOT ABOVE
+        # Note the trailing semi-colon, unlike many of the input files.  That
+        # means that there will be an extra null field generated by the split
 
-    # The input syntax (after stripping comments and trailing white space is
-    # like one of the following (with the final two being entries that we
-    # ignore):
-    # 00DF; 00DF; 0053 0073; 0053 0053; # LATIN SMALL LETTER SHARP S
-    # 03A3; 03C2; 03A3; 03A3; Final_Sigma;
-    # 0307; ; 0307; 0307; tr After_I; # COMBINING DOT ABOVE
-    # Note the trailing semi-colon, unlike many of the input files.  That
-    # means that there will be an extra null field generated by the split
+        my $file = shift;
+        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-    my $file = shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+        my @fields = split /\s*;\s*/, $_, -1; # -1 => retain trailing null
+                                              # fields
 
-    my @fields = split /\s*;\s*/, $_, -1; # -1 => retain trailing null fields
+        # field #4 is when this mapping is conditional.  If any of these get
+        # implemented, it would be by hard-coding in the casing functions in
+        # the Perl core, not through tables.  But if there is a new condition
+        # we don't know about, output a warning.  We know about all the
+        # conditions through 6.0
+        if ($fields[4] ne "") {
+            my @conditions = split ' ', $fields[4];
+            if ($conditions[0] ne 'tr'  # We know that these languages have
+                                        # conditions, and some are multiple
+                && $conditions[0] ne 'az'
+                && $conditions[0] ne 'lt'
 
-    # field #4 is when this mapping is conditional.  If any of these get
-    # implemented, it would be by hard-coding in the casing functions in the
-    # Perl core, not through tables.  But if there is a new condition we don't
-    # know about, output a warning.  We know about all the conditions through
-    # 6.0
-    if ($fields[4] ne "") {
-        my @conditions = split ' ', $fields[4];
-        if ($conditions[0] ne 'tr'  # We know that these languages have
-                                    # conditions, and some are multiple
-            && $conditions[0] ne 'az'
-            && $conditions[0] ne 'lt'
+                # And, we know about a single condition Final_Sigma, but
+                # nothing else.
+                && ($v_version gt v5.2.0
+                    && (@conditions > 1 || $conditions[0] ne 'Final_Sigma')))
+            {
+                $file->carp_bad_line("Unknown condition '$fields[4]'.  You should inspect it and either add code to handle it, or add to list of those that are to ignore");
+            }
+            elsif ($conditions[0] ne 'Final_Sigma') {
 
-            # And, we know about a single condition Final_Sigma, but
-            # nothing else.
-            && ($v_version gt v5.2.0
-                && (@conditions > 1 || $conditions[0] ne 'Final_Sigma')))
-        {
-            $file->carp_bad_line("Unknown condition '$fields[4]'.  You should inspect it and either add code to handle it, or add to list of those that are to ignore");
-        }
-        elsif ($conditions[0] ne 'Final_Sigma') {
+                    # Don't print out a message for Final_Sigma, because we
+                    # have hard-coded handling for it.  (But the standard
+                    # could change what the rule should be, but it wouldn't
+                    # show up here anyway.
 
-                # Don't print out a message for Final_Sigma, because we have
-                # hard-coded handling for it.  (But the standard could change
-                # what the rule should be, but it wouldn't show up here
-                # anyway.
-
-                print "# SKIPPING Special Casing: $_\n"
+                    print "# SKIPPING Special Casing: $_\n"
                                                     if $verbosity >= $VERBOSE;
+            }
+            $_ = "";
+            return;
         }
-        $_ = "";
+        elsif (@fields > 6 || (@fields == 6 && $fields[5] ne "" )) {
+            $file->carp_bad_line('Extra fields');
+            $_ = "";
+            return;
+        }
+
+        $_ = "$fields[0]; lc; $fields[1]";
+        $file->insert_adjusted_lines("$fields[0]; tc; $fields[2]");
+        $file->insert_adjusted_lines("$fields[0]; uc; $fields[3]");
+
+        # Copy any simple case change to the special tables constructed if
+        # being overridden by a multi-character case change.
+        if ($fields[1] ne $fields[0]
+            && (my $value = $lc->value_of(hex $fields[0])) ne $CODE_POINT)
+        {
+            $file->insert_adjusted_lines("$fields[0]; _slc; $value");
+        }
+        if ($fields[2] ne $fields[0]
+            && (my $value = $tc->value_of(hex $fields[0])) ne $CODE_POINT)
+        {
+            $file->insert_adjusted_lines("$fields[0]; _stc; $value");
+        }
+        if ($fields[3] ne $fields[0]
+            && (my $value = $uc->value_of(hex $fields[0])) ne $CODE_POINT)
+        {
+            $file->insert_adjusted_lines("$fields[0]; _suc; $value");
+        }
+
         return;
     }
-    elsif (@fields > 6 || (@fields == 6 && $fields[5] ne "" )) {
-        $file->carp_bad_line('Extra fields');
-        $_ = "";
-        return;
-    }
-
-    $_ = "$fields[0]; lc; $fields[1]";
-    $file->insert_adjusted_lines("$fields[0]; tc; $fields[2]");
-    $file->insert_adjusted_lines("$fields[0]; uc; $fields[3]");
-
-    # Copy any simple case change to the special tables constructed if
-    # being overridden by a multi-character case change.
-    if ($fields[1] ne $fields[0]
-        && (my $value = $lc->value_of(hex $fields[0])) ne $CODE_POINT)
-    {
-        $file->insert_adjusted_lines("$fields[0]; _slc; $value");
-    }
-    if ($fields[2] ne $fields[0]
-        && (my $value = $tc->value_of(hex $fields[0])) ne $CODE_POINT)
-    {
-        $file->insert_adjusted_lines("$fields[0]; _stc; $value");
-    }
-    if ($fields[3] ne $fields[0]
-        && (my $value = $uc->value_of(hex $fields[0])) ne $CODE_POINT)
-    {
-        $file->insert_adjusted_lines("$fields[0]; _suc; $value");
-    }
-
-    return;
-}
 }
 
 sub filter_old_style_case_folding {
