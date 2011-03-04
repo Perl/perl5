@@ -553,6 +553,7 @@ my %SCRIPTS;
 sub _charscripts {
     @SCRIPTS =_read_table("unicore/To/Sc.pl") unless @SCRIPTS;
     foreach my $entry (@SCRIPTS) {
+        $entry->[2] =~ s/(_\w)/\L$1/g;  # Preserve old-style casing
         push @{$SCRIPTS{$entry->[2]}}, $entry;
     }
 }
