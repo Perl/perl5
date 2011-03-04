@@ -33,26 +33,26 @@ run_tests() unless caller;
 sub run_tests {
 
     {
-
         my $x = "abc\ndef\n";
+	(my $x_pretty = $x) =~ s/\n/\\n/g;
 
-        ok $x =~ /^abc/,  qq ["$x" =~ /^abc/];
-        ok $x !~ /^def/,  qq ["$x" !~ /^def/];
+        ok $x =~ /^abc/,  qq ["$x_pretty" =~ /^abc/];
+        ok $x !~ /^def/,  qq ["$x_pretty" !~ /^def/];
 
         # used to be a test for $*
-        ok $x =~ /^def/m, qq ["$x" =~ /^def/m];
+        ok $x =~ /^def/m, qq ["$x_pretty" =~ /^def/m];
 
-        nok $x =~ /^xxx/, qq ["$x" =~ /^xxx/];
-        nok $x !~ /^abc/, qq ["$x" !~ /^abc/];
+        nok $x =~ /^xxx/, qq ["$x_pretty" =~ /^xxx/];
+        nok $x !~ /^abc/, qq ["$x_pretty" !~ /^abc/];
 
-         ok $x =~ /def/, qq ["$x" =~ /def/];
-        nok $x !~ /def/, qq ["$x" !~ /def/];
+         ok $x =~ /def/, qq ["$x_pretty" =~ /def/];
+        nok $x !~ /def/, qq ["$x_pretty" !~ /def/];
 
-         ok $x !~ /.def/, qq ["$x" !~ /.def/];
-        nok $x =~ /.def/, qq ["$x" =~ /.def/];
+         ok $x !~ /.def/, qq ["$x_pretty" !~ /.def/];
+        nok $x =~ /.def/, qq ["$x_pretty" =~ /.def/];
 
-         ok $x =~ /\ndef/, qq ["$x" =~ /\ndef/];
-        nok $x !~ /\ndef/, qq ["$x" !~ /\ndef/];
+         ok $x =~ /\ndef/, qq ["$x_pretty" =~ /\\ndef/];
+        nok $x !~ /\ndef/, qq ["$x_pretty" !~ /\\ndef/];
     }
 
     {
@@ -84,7 +84,7 @@ sub run_tests {
 
     {
         # used to be a test for $*
-        ok "ab\ncd\n" =~ /^cd/m, qq ["ab\ncd\n" =~ /^cd/m];
+        ok "ab\ncd\n" =~ /^cd/m, q ["ab\ncd\n" =~ /^cd/m];
     }
 
     {
@@ -444,7 +444,7 @@ sub run_tests {
 	my $res = eval { "xx" =~ /(?$code)/o };
 	{
 	    no warnings 'uninitialized';
-	    my $message = "$message '$@', '$res', '$blah'";
+	    chomp $@; my $message = "$message '$@', '$res', '$blah'";
 	    ok($@ && $@ =~ /not allowed at runtime/ && $blah == 12, $message);
 	}
 
@@ -966,11 +966,11 @@ sub run_tests {
         sub new {bless []}
 
         my $message  = "Ref stringification";
-      ::ok(do { \my $v} =~ /^SCALAR/,   "Scalar ref stringification", $message);
-      ::ok(do {\\my $v} =~ /^REF/,      "Ref ref stringification", $message);
-      ::ok([]           =~ /^ARRAY/,    "Array ref stringification", $message);
-      ::ok({}           =~ /^HASH/,     "Hash ref stringification", $message);
-      ::ok('S' -> new   =~ /^Object S/, "Object stringification", $message);
+      ::ok(do { \my $v} =~ /^SCALAR/,   "Scalar ref stringification") or diag($message);
+      ::ok(do {\\my $v} =~ /^REF/,      "Ref ref stringification") or diag($message);
+      ::ok([]           =~ /^ARRAY/,    "Array ref stringification") or diag($message);
+      ::ok({}           =~ /^HASH/,     "Hash ref stringification") or diag($message);
+      ::ok('S' -> new   =~ /^Object S/, "Object stringification") or diag($message);
     }
 
 

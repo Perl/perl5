@@ -154,6 +154,10 @@ sub isneq ($$;$) {
 *is = \&iseq;
 *isnt = \&isneq;
 
+sub diag {
+    print STDERR "# $_[0]\n";
+}
+
 sub like ($$$) {
     my (undef, $expected, $name) = @_;
     my ($pass, $error);

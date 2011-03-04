@@ -1042,7 +1042,7 @@ sub run_tests {
 
         undef $w;
         eval q [ok "\0" !~ /[\N{EMPTY-STR}XY]/,
-                   "Zerolength charname in charclass doesn't match \\0"];
+                   "Zerolength charname in charclass doesn't match \\\\0"];
         ok $w && $w =~ /Ignoring zero length/,
                  'Ignoring zero length \N{} in character class warning';
 
@@ -1475,8 +1475,8 @@ sub run_tests {
         ok "\N{SMALL ROMAN NUMERAL ONE}" =~ /\p{Uppercase}/i,  "i =~ Uppercase under /i";
         ok "\N{SMALL ROMAN NUMERAL ONE}" !~ /\p{Titlecase}/,  "i !~ Titlecase";
         ok "\N{SMALL ROMAN NUMERAL ONE}" =~ /\p{Titlecase}/i,  "i =~ Titlecase under /i";
-        ok "\N{ROMAN NUMERAL ONE}" =~ /\p{Lowercase}/i,  "I =~ Lowercase under
-        /i";
+        ok "\N{ROMAN NUMERAL ONE}" =~ /\p{Lowercase}/i,  "I =~ Lowercase under /i";
+
         ok "\N{SMALL ROMAN NUMERAL ONE}" =~ /\p{Lowercase}/,  "i =~ Lowercase";
         ok "\N{SMALL ROMAN NUMERAL ONE}" =~ /\p{IDStart}/,    "i =~ ID_Start";
         ok "\N{SMALL ROMAN NUMERAL ONE}" =~ /\p{IDContinue}/, "i =~ ID_Continue"

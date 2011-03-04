@@ -147,7 +147,7 @@ sub run_tests {
 
         # Amazingly vertical tabulator is the same in ASCII and EBCDIC.
         for ("\n", "\t", "\014", "\r") {
-            unlike($_, qr/[[:print:]]/, "'$_' not in [[:print:]]; Bug 20010619.003");
+            unlike($_, qr/[[:print:]]/, sprintf "\\%03o not in [[:print:]]; Bug 20010619.003", ord $_);
         }
         for (" ") {
             like($_, qr/[[:print:]]/, "'$_' in [[:print:]]; Bug 20010619.003");
@@ -232,10 +232,10 @@ sub run_tests {
         $num =~ /\d/;
         for (0 .. 1) {
             my $match = m?? + 0;
-            ok $match != $_, $message, 
-                sprintf "'match one' %s on %s iteration" =>
-                               $match ? 'succeeded' : 'failed',
-                               $_     ? 'second'    : 'first';
+            ok($match != $_, $message)
+                or diag(sprintf "'match one' %s on %s iteration" =>
+			$match ? 'succeeded' : 'failed',
+			$_     ? 'second'    : 'first');
         }
         $num =~ /(\d)/;
         my $result = join "" => $num =~ //g;
@@ -251,9 +251,9 @@ sub run_tests {
             for my $len (32000, 32768, 33000) {
                 my  $s = $char . "f" x $len;
                 my  $r = $s =~ /$char([f]*)/gc;
-                ok  $r, $message, "<$type x $len>";
-                ok !$r || pos ($s) == $len + 1, $message,
-                        "<$type x $len>; pos = @{[pos $s]}";
+                ok($r, $message) or diag("<$type x $len>");
+                ok(!$r || pos ($s) == $len + 1, $message)
+		    or diag("<$type x $len>; pos = @{[pos $s]}");
             }
         }
     }
