@@ -34,19 +34,19 @@ run_tests() unless caller;
 #
 sub run_tests {
 
-  SKIP:
+
     {
-        local $Message = '\C matches octet';
+        my $message = '\C matches octet';
         $_ = "a\x{100}b";
-        ok /(.)(\C)(\C)(.)/ or skip q [\C doesn't match], 4;
-        iseq $1, "a";
+        ok(/(.)(\C)(\C)(.)/, $message);
+        is($1, "a", $message);
         if ($IS_ASCII) {     # ASCII (or equivalent), should be UTF-8
-            iseq $2, "\xC4";
-            iseq $3, "\x80";
+            is($2, "\xC4", $message);
+            is($3, "\x80", $message);
         }
         elsif ($IS_EBCDIC) { # EBCDIC (or equivalent), should be UTF-EBCDIC
-            iseq $2, "\x8C";
-            iseq $3, "\x41";
+            is($2, "\x8C", $message);
+            is($3, "\x41", $message);
         }
         else {
             SKIP: {
@@ -54,30 +54,30 @@ sub run_tests {
                 skip "Unexpected platform";
             }
         }
-        iseq $4, "b";
+        is($4, "b", $message);
     }
 
 
-  SKIP:
+
     {
-        local $Message = '\C matches octet';
+        my $message = '\C matches octet';
         $_ = "\x{100}";
-        ok /(\C)/g or skip q [\C doesn't match], 2;
+        ok(/(\C)/g, $message);
         if ($IS_ASCII) {
-            iseq $1, "\xC4";
+            is($1, "\xC4", $message);
         }
         elsif ($IS_EBCDIC) {
-            iseq $1, "\x8C";
+            is($1, "\x8C", $message);
         }
         else {
             ok 0, "Unexpected platform", "ord ('A') = $ordA";
         }
-        ok /(\C)/g or skip q [\C doesn't match];
+        ok(/(\C)/g, $message);
         if ($IS_ASCII) {
-            iseq $1, "\x80";
+            is($1, "\x80", $message);
         }
         elsif ($IS_EBCDIC) {
-            iseq $1, "\x41";
+            is($1, "\x41", $message);
         }
         else {
             ok 0, "Unexpected platform", "ord ('A') = $ordA";
@@ -120,14 +120,14 @@ sub run_tests {
 
 
     {
-        local $Message = 'bug id 20001008.001';
+        my $message = 'bug id 20001008.001';
 
         my @x = ("stra\337e 138", "stra\337e 138");
         for (@x) {
-            ok s/(\d+)\s*([\w\-]+)/$1 . uc $2/e;
-            ok my ($latin) = /^(.+)(?:\s+\d)/;
-            iseq $latin, "stra\337e";
-        ok $latin =~ s/stra\337e/straße/;
+            ok(s/(\d+)\s*([\w\-]+)/$1 . uc $2/e, $message);
+            ok(my ($latin) = /^(.+)(?:\s+\d)/, $message);
+            is($latin, "stra\337e", $message);
+	    ok($latin =~ s/stra\337e/straße/, $message);
             #
             # Previous code follows, but outcommented - there were no tests.
             #
@@ -139,27 +139,27 @@ sub run_tests {
 
 
     {
-        local $Message = 'Test \x escapes';
-        ok "ba\xd4c" =~ /([a\xd4]+)/ && $1 eq "a\xd4";
-        ok "ba\xd4c" =~ /([a\xd4]+)/ && $1 eq "a\x{d4}";
-        ok "ba\x{d4}c" =~ /([a\xd4]+)/ && $1 eq "a\x{d4}";
-        ok "ba\x{d4}c" =~ /([a\xd4]+)/ && $1 eq "a\xd4";
-        ok "ba\xd4c" =~ /([a\x{d4}]+)/ && $1 eq "a\xd4";
-        ok "ba\xd4c" =~ /([a\x{d4}]+)/ && $1 eq "a\x{d4}";
-        ok "ba\x{d4}c" =~ /([a\x{d4}]+)/ && $1 eq "a\x{d4}";
-        ok "ba\x{d4}c" =~ /([a\x{d4}]+)/ && $1 eq "a\xd4";
+        my $message = 'Test \x escapes';
+        ok("ba\xd4c" =~ /([a\xd4]+)/ && $1 eq "a\xd4", $message);
+        ok("ba\xd4c" =~ /([a\xd4]+)/ && $1 eq "a\x{d4}", $message);
+        ok("ba\x{d4}c" =~ /([a\xd4]+)/ && $1 eq "a\x{d4}", $message);
+        ok("ba\x{d4}c" =~ /([a\xd4]+)/ && $1 eq "a\xd4", $message);
+        ok("ba\xd4c" =~ /([a\x{d4}]+)/ && $1 eq "a\xd4", $message);
+        ok("ba\xd4c" =~ /([a\x{d4}]+)/ && $1 eq "a\x{d4}", $message);
+        ok("ba\x{d4}c" =~ /([a\x{d4}]+)/ && $1 eq "a\x{d4}", $message);
+        ok("ba\x{d4}c" =~ /([a\x{d4}]+)/ && $1 eq "a\xd4", $message);
     }
 
 
-  SKIP:
+
     {
-        local $Message = 'Match code points > 255';
+        my $message = 'Match code points > 255';
         $_ = "abc\x{100}\x{200}\x{300}\x{380}\x{400}defg";
-        ok /(.\x{300})./ or skip "No match", 4;
-        ok $` eq "abc\x{100}"            && length ($`) == 4;
-        ok $& eq "\x{200}\x{300}\x{380}" && length ($&) == 3;
-        ok $' eq "\x{400}defg"           && length ($') == 5;
-        ok $1 eq "\x{200}\x{300}"        && length ($1) == 2;
+        ok(/(.\x{300})./, $message);
+        ok($` eq "abc\x{100}"            && length ($`) == 4, $message);
+        ok($& eq "\x{200}\x{300}\x{380}" && length ($&) == 3, $message);
+        ok($' eq "\x{400}defg"           && length ($') == 5, $message);
+        ok($1 eq "\x{200}\x{300}"        && length ($1) == 2, $message);
     }
 
 
@@ -180,19 +180,19 @@ sub run_tests {
         );
 
         while (my ($code, $match) = each %d) {
-            local $Message = "Properties of \\x$code";
+            my $message = "Properties of \\x$code";
             my $char = eval qq ["\\x{$code}"];
 
-            iseq(0 + ($char =~ /[\x80-\xff]/),    $$match[0]);
-            iseq(0 + ($char =~ /[\x80-\x{100}]/), $$match[1]);
-            iseq(0 + ($char =~ /[\x{100}]/),      $$match[2]);
+            is(0 + ($char =~ /[\x80-\xff]/),    $$match[0], $message);
+            is(0 + ($char =~ /[\x80-\x{100}]/), $$match[1], $message);
+            is(0 + ($char =~ /[\x{100}]/),      $$match[2], $message);
         }
     }
 
 
+
     {
         # From Japhy
-        local $Message;
         must_warn 'qr/(?c)/',    '^Useless \(\?c\)';
         must_warn 'qr/(?-c)/',   '^Useless \(\?-c\)';
         must_warn 'qr/(?g)/',    '^Useless \(\?g\)';
@@ -211,16 +211,16 @@ sub run_tests {
 
 
     {
-        local $Message = "/x tests";
+        my $message = "/x tests";
         $_ = "foo";
-        eval_ok <<"        --";
+        eval_ok(<<"        --", $message);
           /f
            o\r
            o
            \$
           /x
         --
-        eval_ok <<"        --";
+        eval_ok(<<"        --", $message);
           /f
            o
            o
@@ -231,45 +231,45 @@ sub run_tests {
 
 
     {
-        local $Message = "/o feature";
+        my $message = "/o feature";
         sub test_o {$_ [0] =~ /$_[1]/o; return $1}
-        iseq test_o ('abc', '(.)..'), 'a';
-        iseq test_o ('abc', '..(.)'), 'a';
+        is(test_o ('abc', '(.)..'), 'a', $message);
+        is(test_o ('abc', '..(.)'), 'a', $message);
     }
 
     {
         # Test basic $^N usage outside of a regex
-        local $Message = '$^N usage outside of a regex';
+        my $message = '$^N usage outside of a regex';
         my $x = "abcdef";
-        ok ($x =~ /cde/                  and !defined $^N);
-        ok ($x =~ /(cde)/                and $^N eq "cde");
-        ok ($x =~ /(c)(d)(e)/            and $^N eq   "e");
-        ok ($x =~ /(c(d)e)/              and $^N eq "cde");
-        ok ($x =~ /(foo)|(c(d)e)/        and $^N eq "cde");
-        ok ($x =~ /(c(d)e)|(foo)/        and $^N eq "cde");
-        ok ($x =~ /(c(d)e)|(abc)/        and $^N eq "abc");
-        ok ($x =~ /(c(d)e)|(abc)x/       and $^N eq "cde");
-        ok ($x =~ /(c(d)e)(abc)?/        and $^N eq "cde");
-        ok ($x =~ /(?:c(d)e)/            and $^N eq   "d");
-        ok ($x =~ /(?:c(d)e)(?:f)/       and $^N eq   "d");
-        ok ($x =~ /(?:([abc])|([def]))*/ and $^N eq   "f");
-        ok ($x =~ /(?:([ace])|([bdf]))*/ and $^N eq   "f");
-        ok ($x =~ /(([ace])|([bd]))*/    and $^N eq   "e");
-       {ok ($x =~ /(([ace])|([bdf]))*/   and $^N eq   "f");}
+        ok(($x =~ /cde/                  and !defined $^N), $message);
+        ok(($x =~ /(cde)/                and $^N eq "cde"), $message);
+        ok(($x =~ /(c)(d)(e)/            and $^N eq   "e"), $message);
+        ok(($x =~ /(c(d)e)/              and $^N eq "cde"), $message);
+        ok(($x =~ /(foo)|(c(d)e)/        and $^N eq "cde"), $message);
+        ok(($x =~ /(c(d)e)|(foo)/        and $^N eq "cde"), $message);
+        ok(($x =~ /(c(d)e)|(abc)/        and $^N eq "abc"), $message);
+        ok(($x =~ /(c(d)e)|(abc)x/       and $^N eq "cde"), $message);
+        ok(($x =~ /(c(d)e)(abc)?/        and $^N eq "cde"), $message);
+        ok(($x =~ /(?:c(d)e)/            and $^N eq   "d"), $message);
+        ok(($x =~ /(?:c(d)e)(?:f)/       and $^N eq   "d"), $message);
+        ok(($x =~ /(?:([abc])|([def]))*/ and $^N eq   "f"), $message);
+        ok(($x =~ /(?:([ace])|([bdf]))*/ and $^N eq   "f"), $message);
+        ok(($x =~ /(([ace])|([bd]))*/    and $^N eq   "e"), $message);
+       {ok(($x =~ /(([ace])|([bdf]))*/   and $^N eq   "f"), $message);}
         ## Test to see if $^N is automatically localized -- it should now
         ## have the value set in the previous test.
         iseq $^N, "e", '$^N is automatically localized';
 
         # Now test inside (?{ ... })
-        local $Message = '$^N usage inside (?{ ... })';
+        $message = '$^N usage inside (?{ ... })';
         our ($y, $z);
-        ok ($x =~ /a([abc])(?{$y=$^N})c/                    and $y eq  "b");
-        ok ($x =~ /a([abc]+)(?{$y=$^N})d/                   and $y eq  "bc");
-        ok ($x =~ /a([abcdefg]+)(?{$y=$^N})d/               and $y eq  "bc");
-        ok ($x =~ /(a([abcdefg]+)(?{$y=$^N})d)(?{$z=$^N})e/ and $y eq  "bc"
-                                                            and $z eq "abcd");
-        ok ($x =~ /(a([abcdefg]+)(?{$y=$^N})de)(?{$z=$^N})/ and $y eq  "bc"
-                                                            and $z eq "abcde");
+        ok(($x =~ /a([abc])(?{$y=$^N})c/                    and $y eq  "b"), $message);
+        ok(($x =~ /a([abc]+)(?{$y=$^N})d/                   and $y eq  "bc"), $message);
+        ok(($x =~ /a([abcdefg]+)(?{$y=$^N})d/               and $y eq  "bc"), $message);
+        ok(($x =~ /(a([abcdefg]+)(?{$y=$^N})d)(?{$z=$^N})e/ and $y eq  "bc"
+                                                            and $z eq "abcd"), $message);
+        ok(($x =~ /(a([abcdefg]+)(?{$y=$^N})de)(?{$z=$^N})/ and $y eq  "bc"
+                                                            and $z eq "abcde"), $message);
 
     }
 
@@ -280,39 +280,39 @@ sub run_tests {
         ## but not sure how to guarantee a specific locale......
 
         skip "Not an ASCII platform", 2 unless $IS_ASCII;
-        local $Message = 'Test [[:cntrl:]]';
+        my $message = 'Test [[:cntrl:]]';
         my $AllBytes = join "" => map {chr} 0 .. 255;
         (my $x = $AllBytes) =~ s/[[:cntrl:]]//g;
-        iseq $x, join "", map {chr} 0x20 .. 0x7E, 0x80 .. 0xFF;
+        is($x, join("", map {chr} 0x20 .. 0x7E, 0x80 .. 0xFF), $message);
 
         ($x = $AllBytes) =~ s/[^[:cntrl:]]//g;
-        iseq $x, join "", map {chr} 0x00 .. 0x1F, 0x7F;
+        is($x, (join "", map {chr} 0x00 .. 0x1F, 0x7F), $message);
     }
 
 
     {
         # With /s modifier UTF8 chars were interpreted as bytes
-        local $Message = "UTF-8 chars aren't bytes";
+        my $message = "UTF-8 chars aren't bytes";
         my $a = "Hello \x{263A} World";
         my @a = ($a =~ /./gs);
-        iseq $#a, 12;
+        is($#a, 12, $message);
     }
 
 
     {
-        local $Message = '. matches \n with /s';
+        my $message = '. matches \n with /s';
         my $str1 = "foo\nbar";
         my $str2 = "foo\n\x{100}bar";
         my ($a, $b) = map {chr} $IS_ASCII ? (0xc4, 0x80) : (0x8c, 0x41);
         my @a;
-        @a = $str1 =~ /./g;   iseq @a, 6; iseq "@a", "f o o b a r";
-        @a = $str1 =~ /./gs;  iseq @a, 7; iseq "@a", "f o o \n b a r";
-        @a = $str1 =~ /\C/g;  iseq @a, 7; iseq "@a", "f o o \n b a r";
-        @a = $str1 =~ /\C/gs; iseq @a, 7; iseq "@a", "f o o \n b a r";
-        @a = $str2 =~ /./g;   iseq @a, 7; iseq "@a", "f o o \x{100} b a r";
-        @a = $str2 =~ /./gs;  iseq @a, 8; iseq "@a", "f o o \n \x{100} b a r";
-        @a = $str2 =~ /\C/g;  iseq @a, 9; iseq "@a", "f o o \n $a $b b a r";
-        @a = $str2 =~ /\C/gs; iseq @a, 9; iseq "@a", "f o o \n $a $b b a r";
+        @a = $str1 =~ /./g;   is(@a, 6, $message); is("@a", "f o o b a r", $message);
+        @a = $str1 =~ /./gs;  is(@a, 7, $message); is("@a", "f o o \n b a r", $message);
+        @a = $str1 =~ /\C/g;  is(@a, 7, $message); is("@a", "f o o \n b a r", $message);
+        @a = $str1 =~ /\C/gs; is(@a, 7, $message); is("@a", "f o o \n b a r", $message);
+        @a = $str2 =~ /./g;   is(@a, 7, $message); is("@a", "f o o \x{100} b a r", $message);
+        @a = $str2 =~ /./gs;  is(@a, 8, $message); is("@a", "f o o \n \x{100} b a r", $message);
+        @a = $str2 =~ /\C/g;  is(@a, 9, $message); is("@a", "f o o \n $a $b b a r", $message);
+        @a = $str2 =~ /\C/gs; is(@a, 9, $message); is("@a", "f o o \n $a $b b a r", $message);
     }
 
 
@@ -428,166 +428,166 @@ sub run_tests {
 
 
     {
-        local $Message = "Folding matches and Unicode";
-        ok "a\x{100}" =~ /A/i;
-        ok "A\x{100}" =~ /a/i;
-        ok "a\x{100}" =~ /a/i;
-        ok "A\x{100}" =~ /A/i;
-        ok "\x{101}a" =~ /\x{100}/i;
-        ok "\x{100}a" =~ /\x{100}/i;
-        ok "\x{101}a" =~ /\x{101}/i;
-        ok "\x{100}a" =~ /\x{101}/i;
-        ok "a\x{100}" =~ /A\x{100}/i;
-        ok "A\x{100}" =~ /a\x{100}/i;
-        ok "a\x{100}" =~ /a\x{100}/i;
-        ok "A\x{100}" =~ /A\x{100}/i;
-        ok "a\x{100}" =~ /[A]/i;
-        ok "A\x{100}" =~ /[a]/i;
-        ok "a\x{100}" =~ /[a]/i;
-        ok "A\x{100}" =~ /[A]/i;
-        ok "\x{101}a" =~ /[\x{100}]/i;
-        ok "\x{100}a" =~ /[\x{100}]/i;
-        ok "\x{101}a" =~ /[\x{101}]/i;
-        ok "\x{100}a" =~ /[\x{101}]/i;
+        my $message = "Folding matches and Unicode";
+        like("a\x{100}", qr/A/i, $message);
+        like("A\x{100}", qr/a/i, $message);
+        like("a\x{100}", qr/a/i, $message);
+        like("A\x{100}", qr/A/i, $message);
+        like("\x{101}a", qr/\x{100}/i, $message);
+        like("\x{100}a", qr/\x{100}/i, $message);
+        like("\x{101}a", qr/\x{101}/i, $message);
+        like("\x{100}a", qr/\x{101}/i, $message);
+        like("a\x{100}", qr/A\x{100}/i, $message);
+        like("A\x{100}", qr/a\x{100}/i, $message);
+        like("a\x{100}", qr/a\x{100}/i, $message);
+        like("A\x{100}", qr/A\x{100}/i, $message);
+        like("a\x{100}", qr/[A]/i, $message);
+        like("A\x{100}", qr/[a]/i, $message);
+        like("a\x{100}", qr/[a]/i, $message);
+        like("A\x{100}", qr/[A]/i, $message);
+        like("\x{101}a", qr/[\x{100}]/i, $message);
+        like("\x{100}a", qr/[\x{100}]/i, $message);
+        like("\x{101}a", qr/[\x{101}]/i, $message);
+        like("\x{100}a", qr/[\x{101}]/i, $message);
     }
 
 
     {
         use charnames ':full';
-        local $Message = "Folding 'LATIN LETTER A WITH GRAVE'";
+        my $message = "Folding 'LATIN LETTER A WITH GRAVE'";
 
         my $lower = "\N{LATIN SMALL LETTER A WITH GRAVE}";
         my $UPPER = "\N{LATIN CAPITAL LETTER A WITH GRAVE}";
 
-        ok $lower =~ m/$UPPER/i;
-        ok $UPPER =~ m/$lower/i;
-        ok $lower =~ m/[$UPPER]/i;
-        ok $UPPER =~ m/[$lower]/i;
+        like($lower, qr/$UPPER/i, $message);
+        like($UPPER, qr/$lower/i, $message);
+        like($lower, qr/[$UPPER]/i, $message);
+        like($UPPER, qr/[$lower]/i, $message);
 
-        local $Message = "Folding 'GREEK LETTER ALPHA WITH VRACHY'";
+        $message = "Folding 'GREEK LETTER ALPHA WITH VRACHY'";
 
         $lower = "\N{GREEK CAPITAL LETTER ALPHA WITH VRACHY}";
         $UPPER = "\N{GREEK SMALL LETTER ALPHA WITH VRACHY}";
 
-        ok $lower =~ m/$UPPER/i;
-        ok $UPPER =~ m/$lower/i;
-        ok $lower =~ m/[$UPPER]/i;
-        ok $UPPER =~ m/[$lower]/i;
+        like($lower, qr/$UPPER/i, $message);
+        like($UPPER, qr/$lower/i, $message);
+        like($lower, qr/[$UPPER]/i, $message);
+        like($UPPER, qr/[$lower]/i, $message);
 
-        local $Message = "Folding 'LATIN LETTER Y WITH DIAERESIS'";
+        $message = "Folding 'LATIN LETTER Y WITH DIAERESIS'";
 
         $lower = "\N{LATIN SMALL LETTER Y WITH DIAERESIS}";
         $UPPER = "\N{LATIN CAPITAL LETTER Y WITH DIAERESIS}";
 
-        ok $lower =~ m/$UPPER/i;
-        ok $UPPER =~ m/$lower/i;
-        ok $lower =~ m/[$UPPER]/i;
-        ok $UPPER =~ m/[$lower]/i;
+        like($lower, qr/$UPPER/i, $message);
+        like($UPPER, qr/$lower/i, $message);
+        like($lower, qr/[$UPPER]/i, $message);
+        like($UPPER, qr/[$lower]/i, $message);
     }
 
 
     {
         use charnames ':full';
-        local $Message = "GREEK CAPITAL LETTER SIGMA vs " .
+        my $message = "GREEK CAPITAL LETTER SIGMA vs " .
                          "COMBINING GREEK PERISPOMENI";
 
         my $SIGMA = "\N{GREEK CAPITAL LETTER SIGMA}";
         my $char  = "\N{COMBINING GREEK PERISPOMENI}";
 
-        may_not_warn sub {ok "_:$char:_" !~ m/_:$SIGMA:_/i},
+        may_not_warn sub {unlike("_:$char:_", qr/_:$SIGMA:_/i, $message)},
 	    'Did not warn [change a5961de5f4215b5c]';
     }
 
 
     {
-        local $Message = '\X';
+        my $message = '\X';
         use charnames ':full';
 
-        ok "a!"                          =~ /^(\X)!/ && $1 eq "a";
-        ok "\xDF!"                       =~ /^(\X)!/ && $1 eq "\xDF";
-        ok "\x{100}!"                    =~ /^(\X)!/ && $1 eq "\x{100}";
-        ok "\x{100}\x{300}!"             =~ /^(\X)!/ && $1 eq "\x{100}\x{300}";
-        ok "\N{LATIN CAPITAL LETTER E}!" =~ /^(\X)!/ &&
-               $1 eq "\N{LATIN CAPITAL LETTER E}";
-        ok "\N{LATIN CAPITAL LETTER E}\N{COMBINING GRAVE ACCENT}!"
+        ok("a!"                          =~ /^(\X)!/ && $1 eq "a", $message);
+        ok("\xDF!"                       =~ /^(\X)!/ && $1 eq "\xDF", $message);
+        ok("\x{100}!"                    =~ /^(\X)!/ && $1 eq "\x{100}", $message);
+        ok("\x{100}\x{300}!"             =~ /^(\X)!/ && $1 eq "\x{100}\x{300}", $message);
+        ok("\N{LATIN CAPITAL LETTER E}!" =~ /^(\X)!/ &&
+               $1 eq "\N{LATIN CAPITAL LETTER E}", $message);
+        ok("\N{LATIN CAPITAL LETTER E}\N{COMBINING GRAVE ACCENT}!"
                                          =~ /^(\X)!/ &&
-               $1 eq "\N{LATIN CAPITAL LETTER E}\N{COMBINING GRAVE ACCENT}";
+               $1 eq "\N{LATIN CAPITAL LETTER E}\N{COMBINING GRAVE ACCENT}", $message);
 
-        local $Message = '\C and \X';
-        ok "!abc!" =~ /a\Cc/;
-        ok "!abc!" =~ /a\Xc/;
+        $message = '\C and \X';
+        like("!abc!", qr/a\Cc/, $message);
+        like("!abc!", qr/a\Xc/, $message);
     }
 
 
     {
-        local $Message = "Final Sigma";
+        my $message = "Final Sigma";
 
         my $SIGMA = "\x{03A3}"; # CAPITAL
         my $Sigma = "\x{03C2}"; # SMALL FINAL
         my $sigma = "\x{03C3}"; # SMALL
 
-        ok $SIGMA =~ /$SIGMA/i;
-        ok $SIGMA =~ /$Sigma/i;
-        ok $SIGMA =~ /$sigma/i;
+        like($SIGMA, qr/$SIGMA/i, $message);
+        like($SIGMA, qr/$Sigma/i, $message);
+        like($SIGMA, qr/$sigma/i, $message);
 
-        ok $Sigma =~ /$SIGMA/i;
-        ok $Sigma =~ /$Sigma/i;
-        ok $Sigma =~ /$sigma/i;
+        like($Sigma, qr/$SIGMA/i, $message);
+        like($Sigma, qr/$Sigma/i, $message);
+        like($Sigma, qr/$sigma/i, $message);
 
-        ok $sigma =~ /$SIGMA/i;
-        ok $sigma =~ /$Sigma/i;
-        ok $sigma =~ /$sigma/i;
+        like($sigma, qr/$SIGMA/i, $message);
+        like($sigma, qr/$Sigma/i, $message);
+        like($sigma, qr/$sigma/i, $message);
 
-        ok $SIGMA =~ /[$SIGMA]/i;
-        ok $SIGMA =~ /[$Sigma]/i;
-        ok $SIGMA =~ /[$sigma]/i;
+        like($SIGMA, qr/[$SIGMA]/i, $message);
+        like($SIGMA, qr/[$Sigma]/i, $message);
+        like($SIGMA, qr/[$sigma]/i, $message);
 
-        ok $Sigma =~ /[$SIGMA]/i;
-        ok $Sigma =~ /[$Sigma]/i;
-        ok $Sigma =~ /[$sigma]/i;
+        like($Sigma, qr/[$SIGMA]/i, $message);
+        like($Sigma, qr/[$Sigma]/i, $message);
+        like($Sigma, qr/[$sigma]/i, $message);
 
-        ok $sigma =~ /[$SIGMA]/i;
-        ok $sigma =~ /[$Sigma]/i;
-        ok $sigma =~ /[$sigma]/i;
+        like($sigma, qr/[$SIGMA]/i, $message);
+        like($sigma, qr/[$Sigma]/i, $message);
+        like($sigma, qr/[$sigma]/i, $message);
 
-        local $Message = "More final Sigma";
+        $message = "More final Sigma";
 
         my $S3 = "$SIGMA$Sigma$sigma";
 
-        ok ":$S3:" =~ /:(($SIGMA)+):/i   && $1 eq $S3 && $2 eq $sigma;
-        ok ":$S3:" =~ /:(($Sigma)+):/i   && $1 eq $S3 && $2 eq $sigma;
-        ok ":$S3:" =~ /:(($sigma)+):/i   && $1 eq $S3 && $2 eq $sigma;
+        ok(":$S3:" =~ /:(($SIGMA)+):/i   && $1 eq $S3 && $2 eq $sigma, $message);
+        ok(":$S3:" =~ /:(($Sigma)+):/i   && $1 eq $S3 && $2 eq $sigma, $message);
+        ok(":$S3:" =~ /:(($sigma)+):/i   && $1 eq $S3 && $2 eq $sigma, $message);
 
-        ok ":$S3:" =~ /:(([$SIGMA])+):/i && $1 eq $S3 && $2 eq $sigma;
-        ok ":$S3:" =~ /:(([$Sigma])+):/i && $1 eq $S3 && $2 eq $sigma;
-        ok ":$S3:" =~ /:(([$sigma])+):/i && $1 eq $S3 && $2 eq $sigma;
+        ok(":$S3:" =~ /:(([$SIGMA])+):/i && $1 eq $S3 && $2 eq $sigma, $message);
+        ok(":$S3:" =~ /:(([$Sigma])+):/i && $1 eq $S3 && $2 eq $sigma, $message);
+        ok(":$S3:" =~ /:(([$sigma])+):/i && $1 eq $S3 && $2 eq $sigma, $message);
     }
 
 
     {
         use charnames ':full';
-        local $Message = "Parlez-Vous " .
+        my $message = "Parlez-Vous " .
                          "Fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais?";
 
-        ok "Fran\N{LATIN SMALL LETTER C}ais" =~ /Fran.ais/ &&
-            $& eq "Francais";
-        ok "Fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" =~ /Fran.ais/ &&
-            $& eq "Fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais";
-        ok "Fran\N{LATIN SMALL LETTER C}ais" =~ /Fran\Cais/ &&
-            $& eq "Francais";
+        ok("Fran\N{LATIN SMALL LETTER C}ais" =~ /Fran.ais/ &&
+            $& eq "Francais", $message);
+        ok("Fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" =~ /Fran.ais/ &&
+            $& eq "Fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais", $message);
+        ok("Fran\N{LATIN SMALL LETTER C}ais" =~ /Fran\Cais/ &&
+            $& eq "Francais", $message);
         # COMBINING CEDILLA is two bytes when encoded
-        ok "Franc\N{COMBINING CEDILLA}ais" =~ /Franc\C\Cais/;
-        ok "Fran\N{LATIN SMALL LETTER C}ais" =~ /Fran\Xais/ &&
-            $& eq "Francais";
-        ok "Fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" =~ /Fran\Xais/  &&
-            $& eq "Fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais";
-        ok "Franc\N{COMBINING CEDILLA}ais" =~ /Fran\Xais/ &&
-            $& eq "Franc\N{COMBINING CEDILLA}ais";
-        ok "Fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" =~
+        like("Franc\N{COMBINING CEDILLA}ais", qr/Franc\C\Cais/, $message);
+        ok("Fran\N{LATIN SMALL LETTER C}ais" =~ /Fran\Xais/ &&
+            $& eq "Francais", $message);
+        ok("Fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" =~ /Fran\Xais/  &&
+            $& eq "Fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais", $message);
+        ok("Franc\N{COMBINING CEDILLA}ais" =~ /Fran\Xais/ &&
+            $& eq "Franc\N{COMBINING CEDILLA}ais", $message);
+        ok("Fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" =~
            /Fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais/  &&
-            $& eq "Fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais";
-        ok "Franc\N{COMBINING CEDILLA}ais" =~ /Franc\N{COMBINING CEDILLA}ais/ &&
-            $& eq "Franc\N{COMBINING CEDILLA}ais";
+            $& eq "Fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais", $message);
+        ok("Franc\N{COMBINING CEDILLA}ais" =~ /Franc\N{COMBINING CEDILLA}ais/ &&
+            $& eq "Franc\N{COMBINING CEDILLA}ais", $message);
 
         my @f = (
             ["Fran\N{LATIN SMALL LETTER C}ais",                    "Francais"],
@@ -597,62 +597,62 @@ sub run_tests {
         );
         foreach my $entry (@f) {
             my ($subject, $match) = @$entry;
-            ok $subject =~ /Fran(?:c\N{COMBINING CEDILLA}?|
+            ok($subject =~ /Fran(?:c\N{COMBINING CEDILLA}?|
                     \N{LATIN SMALL LETTER C WITH CEDILLA})ais/x &&
-               $& eq $match;
+               $& eq $match, $message);
         }
     }
 
 
     {
-        local $Message = "Lingering (and useless) UTF8 flag doesn't mess up /i";
+        my $message = "Lingering (and useless) UTF8 flag doesn't mess up /i";
         my $pat = "ABcde";
         my $str = "abcDE\x{100}";
         chop $str;
-        ok $str =~ /$pat/i;
+        like($str, qr/$pat/i, $message);
 
         $pat = "ABcde\x{100}";
         $str = "abcDE";
         chop $pat;
-        ok $str =~ /$pat/i;
+        like($str, qr/$pat/i, $message);
 
         $pat = "ABcde\x{100}";
         $str = "abcDE\x{100}";
         chop $pat;
         chop $str;
-        ok $str =~ /$pat/i;
+        like($str, qr/$pat/i, $message);
     }
 
 
     {
         use charnames ':full';
-        local $Message = "LATIN SMALL LETTER SHARP S " .
+        my $message = "LATIN SMALL LETTER SHARP S " .
                          "(\N{LATIN SMALL LETTER SHARP S})";
 
-        ok "\N{LATIN SMALL LETTER SHARP S}" =~
-                                            /\N{LATIN SMALL LETTER SHARP S}/;
-        ok "\N{LATIN SMALL LETTER SHARP S}" =~
-                                            /\N{LATIN SMALL LETTER SHARP S}/i;
-        ok "\N{LATIN SMALL LETTER SHARP S}" =~
-                                           /[\N{LATIN SMALL LETTER SHARP S}]/;
-        ok "\N{LATIN SMALL LETTER SHARP S}" =~
-                                           /[\N{LATIN SMALL LETTER SHARP S}]/i;
+        like("\N{LATIN SMALL LETTER SHARP S}",
+	     qr/\N{LATIN SMALL LETTER SHARP S}/, $message);
+        like("\N{LATIN SMALL LETTER SHARP S}",
+	     qr/\N{LATIN SMALL LETTER SHARP S}/i, $message);
+        like("\N{LATIN SMALL LETTER SHARP S}",
+	     qr/[\N{LATIN SMALL LETTER SHARP S}]/, $message);
+        like("\N{LATIN SMALL LETTER SHARP S}",
+	     qr/[\N{LATIN SMALL LETTER SHARP S}]/i, $message);
 
-        ok "ss" =~  /\N{LATIN SMALL LETTER SHARP S}/i;
-        ok "SS" =~  /\N{LATIN SMALL LETTER SHARP S}/i;
-        ok "ss" =~ /[\N{LATIN SMALL LETTER SHARP S}]/i;
-        ok "SS" =~ /[\N{LATIN SMALL LETTER SHARP S}]/i;
+        like("ss", qr /\N{LATIN SMALL LETTER SHARP S}/i, $message);
+        like("SS", qr /\N{LATIN SMALL LETTER SHARP S}/i, $message);
+        like("ss", qr/[\N{LATIN SMALL LETTER SHARP S}]/i, $message);
+        like("SS", qr/[\N{LATIN SMALL LETTER SHARP S}]/i, $message);
 
-        ok "\N{LATIN SMALL LETTER SHARP S}" =~ /ss/i;
-        ok "\N{LATIN SMALL LETTER SHARP S}" =~ /SS/i;
+        like("\N{LATIN SMALL LETTER SHARP S}", qr/ss/i, $message);
+        like("\N{LATIN SMALL LETTER SHARP S}", qr/SS/i, $message);
 
-        local $Message = "Unoptimized named sequence in class";
-        ok "ss" =~ /[\N{LATIN SMALL LETTER SHARP S}x]/i;
-        ok "SS" =~ /[\N{LATIN SMALL LETTER SHARP S}x]/i;
-        ok "\N{LATIN SMALL LETTER SHARP S}" =~
-          /[\N{LATIN SMALL LETTER SHARP S}x]/;
-        ok "\N{LATIN SMALL LETTER SHARP S}" =~
-          /[\N{LATIN SMALL LETTER SHARP S}x]/i;
+         $message = "Unoptimized named sequence in class";
+        like("ss", qr/[\N{LATIN SMALL LETTER SHARP S}x]/i, $message);
+        like("SS", qr/[\N{LATIN SMALL LETTER SHARP S}x]/i, $message);
+        like("\N{LATIN SMALL LETTER SHARP S}",
+	     qr/[\N{LATIN SMALL LETTER SHARP S}x]/, $message);
+        like("\N{LATIN SMALL LETTER SHARP S}",
+	     qr/[\N{LATIN SMALL LETTER SHARP S}x]/i, $message);
     }
 
 
@@ -707,7 +707,7 @@ sub run_tests {
 
     {
         # . with /s should work on characters, as opposed to bytes
-        local $Message = ". with /s works on characters, not bytes";
+        my $message = ". with /s works on characters, not bytes";
 
         my $s = "\x{e4}\x{100}";
         # This is not expected to match: the point is that
@@ -718,7 +718,7 @@ sub run_tests {
         push @c => $1 while $s =~ /\G(.)/gs;
 
         local $" = "";
-        iseq "@c", $s;
+        is("@c", $s, $message);
 
         # Test only chars < 256
         my $t1 = "Q003\n\n\x{e4}\x{f6}\n\nQ004\n\n\x{e7}";
@@ -734,16 +734,16 @@ sub run_tests {
         }
         $r2 =~ s/\x{100}//;
 
-        iseq $r1, $r2;
+        is($r1, $r2, $message);
     }
 
 
     {
-        local $Message = "Unicode lookbehind";
-        ok "A\x{100}B"        =~ /(?<=A.)B/;
-        ok "A\x{200}\x{300}B" =~ /(?<=A..)B/;
-        ok "\x{400}AB"        =~ /(?<=\x{400}.)B/;
-        ok "\x{500}\x{600}B"  =~ /(?<=\x{500}.)B/;
+        my $message = "Unicode lookbehind";
+        like("A\x{100}B"       , qr/(?<=A.)B/, $message);
+        like("A\x{200}\x{300}B", qr/(?<=A..)B/, $message);
+        like("\x{400}AB"       , qr/(?<=\x{400}.)B/, $message);
+        like("\x{500}\x{600}B" , qr/(?<=\x{500}.)B/, $message);
 
         # Original code also contained:
         # ok "\x{500\x{600}}B"  =~ /(?<=\x{500}.)B/;
@@ -752,7 +752,7 @@ sub run_tests {
 
 
     {
-        local $Message = 'UTF-8 hash keys and /$/';
+        my $message = 'UTF-8 hash keys and /$/';
         # http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters
         #                                         /2002-01/msg01327.html
 
@@ -763,41 +763,41 @@ sub run_tests {
         for (keys %u) {
             my $m1 =            /^\w*$/ ? 1 : 0;
             my $m2 = $u {$_} =~ /^\w*$/ ? 1 : 0;
-            iseq $m1, $m2;
+            is($m1, $m2, $message);
         }
     }
 
 
     {
-        local $Message = "No SEGV in s/// and UTF-8";
+        my $message = "No SEGV in s/// and UTF-8";
         my $s = "s#\x{100}" x 4;
-        ok $s =~ s/[^\w]/ /g;
+        ok($s =~ s/[^\w]/ /g, $message);
         if ( 1 or $ENV{PERL_TEST_LEGACY_POSIX_CC} ) {
-            iseq $s, "s \x{100}" x 4;
+            is($s, "s \x{100}" x 4, $message);
         }
         else {
-            iseq $s, "s  " x 4;
+            is($s, "s  " x 4, $message);
         }
     }
 
 
     {
-        local $Message = "UTF-8 bug (maybe already known?)";
+        my $message = "UTF-8 bug (maybe already known?)";
         my $u = "foo";
         $u =~ s/./\x{100}/g;
-        iseq $u, "\x{100}\x{100}\x{100}";
+        is($u, "\x{100}\x{100}\x{100}", $message);
 
         $u = "foobar";
         $u =~ s/[ao]/\x{100}/g;
-        iseq $u, "f\x{100}\x{100}b\x{100}r";
+        is($u, "f\x{100}\x{100}b\x{100}r", $message);
 
         $u =~ s/\x{100}/e/g;
-        iseq $u, "feeber";
+        is($u, "feeber", $message);
     }
 
 
     {
-        local $Message = "UTF-8 bug with s///";
+        my $message = "UTF-8 bug with s///";
         # check utf8/non-utf8 mixtures
         # try to force all float/anchored check combinations
 
@@ -805,37 +805,37 @@ sub run_tests {
         my $subst;
         for my $re ("xx.*$c", "x.*$c$c", "$c.*xx", "$c$c.*x",
                     "xx.*(?=$c)", "(?=$c).*xx",) {
-            ok "xxx" !~ /$re/;
-            ok +($subst = "xxx") !~ s/$re//;
+            unlike("xxx", qr/$re/, $message);
+            ok(+($subst = "xxx") !~ s/$re//, $message);
         }
         for my $re ("xx.*$c*", "$c*.*xx") {
-            ok "xxx" =~ /$re/;
-            ok +($subst = "xxx") =~ s/$re//;
-            iseq $subst, "";
+            like("xxx", qr/$re/, $message);
+            ok(+($subst = "xxx") =~ s/$re//, $message);
+            is($subst, "", $message);
         }
         for my $re ("xxy*", "y*xx") {
-            ok "xx$c" =~ /$re/;
-            ok +($subst = "xx$c") =~ s/$re//;
-            iseq $subst, $c;
-            ok "xy$c" !~ /$re/;
-            ok +($subst = "xy$c") !~ s/$re//;
+            like("xx$c", qr/$re/, $message);
+            ok(+($subst = "xx$c") =~ s/$re//, $message);
+            is($subst, $c, $message);
+            unlike("xy$c", qr/$re/, $message);
+            ok(+($subst = "xy$c") !~ s/$re//, $message);
         }
         for my $re ("xy$c*z", "x$c*yz") {
-            ok "xyz" =~ /$re/;
-            ok +($subst = "xyz") =~ s/$re//;
-            iseq $subst, "";
+            like("xyz", qr/$re/, $message);
+            ok(+($subst = "xyz") =~ s/$re//, $message);
+            is($subst, "", $message);
         }
     }
 
 
     {
-        local $Message = "qr /.../x";
+        my $message = "qr /.../x";
         my $R = qr / A B C # D E/x;
-        ok "ABCDE" =~    $R   && $& eq "ABC";
-        ok "ABCDE" =~   /$R/  && $& eq "ABC";
-        ok "ABCDE" =~  m/$R/  && $& eq "ABC";
-        ok "ABCDE" =~  /($R)/ && $1 eq "ABC";
-        ok "ABCDE" =~ m/($R)/ && $1 eq "ABC";
+        ok("ABCDE" =~    $R   && $& eq "ABC", $message);
+        ok("ABCDE" =~   /$R/  && $& eq "ABC", $message);
+        ok("ABCDE" =~  m/$R/  && $& eq "ABC", $message);
+        ok("ABCDE" =~  /($R)/ && $1 eq "ABC", $message);
+        ok("ABCDE" =~ m/($R)/ && $1 eq "ABC", $message);
     }
 
 
@@ -861,17 +861,17 @@ sub run_tests {
         # Message-Id: <E18o4nw-0008Ly-00@wisbech.cl.cam.ac.uk>
         # To: perl-unicode@perl.org
 
-        local $Message = 'Markus Kuhn 2003-02-26';
+        my $message = 'Markus Kuhn 2003-02-26';
 
         my $x = "\x{2019}\nk";
-        ok $x =~ s/(\S)\n(\S)/$1 $2/sg;
-        ok $x eq "\x{2019} k";
+        ok($x =~ s/(\S)\n(\S)/$1 $2/sg, $message);
+        is($x, "\x{2019} k", $message);
 
         $x = "b\nk";
-        ok $x =~ s/(\S)\n(\S)/$1 $2/sg;
-        ok $x eq "b k";
+        ok($x =~ s/(\S)\n(\S)/$1 $2/sg, $message);
+        is($x, "b k", $message);
 
-        ok "\x{2019}" =~ /\S/;
+        like("\x{2019}", qr/\S/, $message);
     }
 
 
@@ -915,34 +915,34 @@ sub run_tests {
     }
 
     {
-        local $Message = '<20030808193656.5109.1@llama.ni-s.u-net.com>';
+        my $message = '<20030808193656.5109.1@llama.ni-s.u-net.com>';
 
         # LATIN SMALL/CAPITAL LETTER A WITH MACRON
-        ok "  \x{101}" =~ qr/\x{100}/i;
+        like("  \x{101}", qr/\x{100}/i, $message);
 
         # LATIN SMALL/CAPITAL LETTER A WITH RING BELOW
-        ok "  \x{1E01}" =~ qr/\x{1E00}/i;
+        like("  \x{1E01}", qr/\x{1E00}/i, $message);
 
         # DESERET SMALL/CAPITAL LETTER LONG I
-        ok "  \x{10428}" =~ qr/\x{10400}/i;
+        like("  \x{10428}", qr/\x{10400}/i, $message);
 
         # LATIN SMALL/CAPITAL LETTER A WITH RING BELOW + 'X'
-        ok "  \x{1E01}x" =~ qr/\x{1E00}X/i;
+        like("  \x{1E01}x", qr/\x{1E00}X/i, $message);
     }
 
     {
         for (120 .. 130) {
             my $head = 'x' x $_;
-            local $Message = q [Don't misparse \x{...} in regexp ] .
+            my $message = q [Don't misparse \x{...} in regexp ] .
                              q [near 127 char EXACT limit];
             for my $tail ('\x{0061}', '\x{1234}', '\x61') {
-                eval_ok qq ["$head$tail" =~ /$head$tail/];
+                eval_ok qq ["$head$tail" =~ /$head$tail/], $message;
             }
-            local $Message = q [Don't misparse \N{...} in regexp ] .
+            $message = q [Don't misparse \N{...} in regexp ] .
                              q [near 127 char EXACT limit];
             for my $tail ('\N{SNOWFLAKE}') {
                 eval_ok qq [use charnames ':full';
-                           "$head$tail" =~ /$head$tail/];
+                           "$head$tail" =~ /$head$tail/], $message;
             }
         }
     }
@@ -1344,13 +1344,13 @@ sub run_tests {
 
     {
         # Test named commits and the $REGERROR var
-        local $Message = '$REGERROR';
+	my $message = '$REGERROR';
         our $REGERROR;
         for my $word (qw (bar baz bop)) {
             $REGERROR = "";
             "aaaaa$word" =~
               /a+(?:bar(*COMMIT:bar)|baz(*COMMIT:baz)|bop(*COMMIT:bop))(*FAIL)/;
-            iseq $REGERROR, $word;
+            is($REGERROR, $word, $message);
         }
     }
 
@@ -1363,15 +1363,15 @@ sub run_tests {
 
 
     {
-        local $Message = "Relative Recursion";
+        my $message = "Relative Recursion";
         my $parens = qr/(\((?:[^()]++|(?-1))*+\))/;
         local $_ = 'foo((2*3)+4-3) + bar(2*(3+4)-1*(2-3))';
         my ($all, $one, $two) = ('', '', '');
-        ok m/foo $parens \s* \+ \s* bar $parens/x;
-        iseq $1, '((2*3)+4-3)';
-        iseq $2, '(2*(3+4)-1*(2-3))';
-        iseq $&, 'foo((2*3)+4-3) + bar(2*(3+4)-1*(2-3))';
-        iseq $&, $_;
+        ok(m/foo $parens \s* \+ \s* bar $parens/x, $message);
+        is($1, '((2*3)+4-3)', $message);
+        is($2, '(2*(3+4)-1*(2-3))', $message);
+        is($&, 'foo((2*3)+4-3) + bar(2*(3+4)-1*(2-3))', $message);
+        is($&, $_, $message);
     }
 
     {
@@ -1406,43 +1406,43 @@ sub run_tests {
 
 
     {
-        local $Message = "http://nntp.perl.org/group/perl.perl5.porters/118663";
+        my $message = "http://nntp.perl.org/group/perl.perl5.porters/118663";
         my $qr_barR1 = qr/(bar)\g-1/;
-        ok "foobarbarxyz" =~ $qr_barR1;
-        ok "foobarbarxyz" =~ qr/foo${qr_barR1}xyz/;
-        ok "foobarbarxyz" =~ qr/(foo)${qr_barR1}xyz/;
-        ok "foobarbarxyz" =~ qr/(foo)(bar)\g{-1}xyz/;
-        ok "foobarbarxyz" =~ qr/(foo${qr_barR1})xyz/;
-        ok "foobarbarxyz" =~ qr/(foo(bar)\g{-1})xyz/;
+        like("foobarbarxyz", $qr_barR1, $message);
+        like("foobarbarxyz", qr/foo${qr_barR1}xyz/, $message);
+        like("foobarbarxyz", qr/(foo)${qr_barR1}xyz/, $message);
+        like("foobarbarxyz", qr/(foo)(bar)\g{-1}xyz/, $message);
+        like("foobarbarxyz", qr/(foo${qr_barR1})xyz/, $message);
+        like("foobarbarxyz", qr/(foo(bar)\g{-1})xyz/, $message);
     }
 
     {
-        local $Message = '$REGMARK';
+        my $message = '$REGMARK';
         our @r = ();
         our ($REGMARK, $REGERROR);
-        ok 'foofoo' =~ /foo (*MARK:foo) (?{push @r,$REGMARK}) /x;
-        iseq "@r","foo";
-        iseq $REGMARK, "foo";
-        ok 'foofoo' !~ /foo (*MARK:foo) (*FAIL) /x;
-        ok !$REGMARK;
-        iseq $REGERROR, 'foo';
+        like('foofoo', qr/foo (*MARK:foo) (?{push @r,$REGMARK}) /x, $message);
+        is("@r","foo", $message);
+        is($REGMARK, "foo", $message);
+        unlike('foofoo', qr/foo (*MARK:foo) (*FAIL) /x, $message);
+        is($REGMARK, '', $message);
+        is($REGERROR, 'foo', $message);
     }
 
 
     {
-        local $Message = '\K test';
+        my $message = '\K test';
         my $x;
         $x = "abc.def.ghi.jkl";
         $x =~ s/.*\K\..*//;
-        iseq $x, "abc.def.ghi";
+        is($x, "abc.def.ghi", $message);
 
         $x = "one two three four";
         $x =~ s/o+ \Kthree//g;
-        iseq $x, "one two  four";
+        is($x, "one two  four", $message);
 
         $x = "abcde";
         $x =~ s/(.)\K/$1/g;
-        iseq $x, "aabbccddee";
+        is($x, "aabbccddee", $message);
     }
 
 
@@ -1556,44 +1556,44 @@ sub run_tests {
 
     {
         use warnings;
-        local $Message = "ASCII pattern that really is UTF-8";
+        my $message = "ASCII pattern that really is UTF-8";
         my @w;
         local $SIG {__WARN__} = sub {push @w, "@_"};
         my $c = qq (\x{DF});
-        ok $c =~ /${c}|\x{100}/;
-        ok @w == 0;
+        like($c, qr/${c}|\x{100}/, $message);
+        is("@w", '', $message);
     }
 
 
     {
-        local $Message = "Corruption of match results of qr// across scopes";
+        my $message = "Corruption of match results of qr// across scopes";
         my $qr = qr/(fo+)(ba+r)/;
         'foobar' =~ /$qr/;
-        iseq "$1$2", "foobar";
+        is("$1$2", "foobar", $message);
         {
             'foooooobaaaaar' =~ /$qr/;
-            iseq "$1$2", 'foooooobaaaaar';
+            is("$1$2", 'foooooobaaaaar', $message);
         }
-        iseq "$1$2", "foobar";
+        is("$1$2", "foobar", $message);
     }
 
 
     {
-        local $Message = "HORIZWS";
+        my $message = "HORIZWS";
         local $_ = "\t \r\n \n \t".chr(11)."\n";
         s/\H/H/g;
         s/\h/h/g;
-        iseq $_, "hhHHhHhhHH";
+        is($_, "hhHHhHhhHH", $message);
         $_ = "\t \r\n \n \t" . chr (11) . "\n";
         utf8::upgrade ($_);
         s/\H/H/g;
         s/\h/h/g;
-        iseq $_, "hhHHhHhhHH";
+        is($_, "hhHHhHhhHH", $message);
     }
 
 
     {
-        local $Message = "Various whitespace special patterns";
+        # Various whitespace special patterns
         my @h = map {chr $_}   0x09,   0x20,   0xa0, 0x1680, 0x180e, 0x2000,
                              0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0x2006,
                              0x2007, 0x2008, 0x2009, 0x200a, 0x202f, 0x205f,
@@ -1619,7 +1619,7 @@ sub run_tests {
 
 
     {
-        local $Message = "Check that \\xDF match properly in its various forms";
+        # Check that \\xDF match properly in its various forms
         # Test that \xDF matches properly. this is pretty hacky stuff,
         # but its actually needed. The malarky with '-' is to prevent
         # compilation caching from playing any role in the test.
@@ -1657,7 +1657,7 @@ sub run_tests {
 
 
     {
-        local $Message = "BBC(Bleadperl Breaks CPAN) Today: String::Multibyte";
+        my $message = "BBC(Bleadperl Breaks CPAN) Today: String::Multibyte";
         my $re  = qr/(?:[\x00-\xFF]{4})/;
         my $hyp = "\0\0\0-";
         my $esc = "\0\0\0\\";
@@ -1665,32 +1665,32 @@ sub run_tests {
         my $str = "$esc$hyp$hyp$esc$esc";
         my @a = ($str =~ /\G(?:\Q$esc$esc\E|\Q$esc$hyp\E|$re)/g);
 
-        iseq @a,3;
+        is(@a,3, $message);
         local $" = "=";
-        iseq "@a","$esc$hyp=$hyp=$esc$esc";
+        is("@a","$esc$hyp=$hyp=$esc$esc", $message);
     }
 
 
     {
         # Test for keys in %+ and %-
-        local $Message = 'Test keys in %+ and %-';
+        my $message = 'Test keys in %+ and %-';
         no warnings 'uninitialized';
         my $_ = "abcdef";
         /(?<foo>a)|(?<foo>b)/;
-        iseq ((join ",", sort keys %+), "foo");
-        iseq ((join ",", sort keys %-), "foo");
-        iseq ((join ",", sort values %+), "a");
-        iseq ((join ",", sort map "@$_", values %-), "a ");
+        is((join ",", sort keys %+), "foo", $message);
+        is((join ",", sort keys %-), "foo", $message);
+        is((join ",", sort values %+), "a", $message);
+        is((join ",", sort map "@$_", values %-), "a ", $message);
         /(?<bar>a)(?<bar>b)(?<quux>.)/;
-        iseq ((join ",", sort keys %+), "bar,quux");
-        iseq ((join ",", sort keys %-), "bar,quux");
-        iseq ((join ",", sort values %+), "a,c"); # leftmost
-        iseq ((join ",", sort map "@$_", values %-), "a b,c");
+        is((join ",", sort keys %+), "bar,quux", $message);
+        is((join ",", sort keys %-), "bar,quux", $message);
+        is((join ",", sort values %+), "a,c", $message); # leftmost
+        is((join ",", sort map "@$_", values %-), "a b,c", $message);
         /(?<un>a)(?<deux>c)?/; # second buffer won't capture
-        iseq ((join ",", sort keys %+), "un");
-        iseq ((join ",", sort keys %-), "deux,un");
-        iseq ((join ",", sort values %+), "a");
-        iseq ((join ",", sort map "@$_", values %-), ",a");
+        is((join ",", sort keys %+), "un", $message);
+        is((join ",", sort keys %-), "deux,un", $message);
+        is((join ",", sort values %+), "a", $message);
+        is((join ",", sort map "@$_", values %-), ",a", $message);
     }
 
 
@@ -1742,7 +1742,7 @@ sub run_tests {
 
 
     {
-        local $Message = 'Message-ID: <20070818091501.7eff4831@r2d2>';
+        # Message-ID: <20070818091501.7eff4831@r2d2>
         my $str = "";
         for (0 .. 5) {
             my @x;
@@ -2149,28 +2149,28 @@ sub run_tests {
     }
 
     {
-        local $Message = "Substitution with lookahead (possible segv)";
+        my $message = "Substitution with lookahead (possible segv)";
         $_ = "ns1ns1ns1";
         s/ns(?=\d)/ns_/g;
-        iseq $_, "ns_1ns_1ns_1";
+        is($_, "ns_1ns_1ns_1", $message);
         $_ = "ns1";
         s/ns(?=\d)/ns_/;
-        iseq $_, "ns_1";
+        is($_, "ns_1", $message);
         $_ = "123";
         s/(?=\d+)|(?<=\d)/!Bang!/g;
-        iseq $_, "!Bang!1!Bang!2!Bang!3!Bang!";
+        is($_, "!Bang!1!Bang!2!Bang!3!Bang!", $message);
     }
 
     { 
         # Earlier versions of Perl said this was fatal.
-        local $Message = "U+0FFFF shouldn't crash the regex engine";
+        my $message = "U+0FFFF shouldn't crash the regex engine";
         no warnings 'utf8';
         my $a = eval "chr(65535)";
         use warnings;
         my $warning_message;
         local $SIG{__WARN__} = sub { $warning_message = $_[0] };
         eval $a =~ /[a-z]/;
-        ok(1);  # If it didn't crash, it worked.
+        ok(1, $message);  # If it didn't crash, it worked.
     }
 
     # !!! NOTE that tests that aren't at all likely to crash perl should go
