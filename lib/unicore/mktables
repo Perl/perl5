@@ -900,7 +900,6 @@ my %why_obsolete;    # Documentation only
         'Decomposition_Mapping' => 'Accessible via Unicode::Normalize',
 
         'ISO_Comment' => 'Apparently no demand for it, but can access it through Unicode::UCD::charinfo.  Obsoleted, and code points for it removed in Unicode 5.2',
-        'Unicode_1_Name' => "$simple, and no apparent demand for it, but can access it through Unicode::UCD::charinfo.  If there is no later name for a code point, then this one is used instead in charnames",
 
         'Simple_Case_Folding' => "$simple.  Can access this through Unicode::UCD::casefold",
         'Simple_Lowercase_Mapping' => "$simple.  Can access this through Unicode::UCD::charinfo",
