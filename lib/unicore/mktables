@@ -843,6 +843,22 @@ if ($v_version ge v5.2.0) {
 my $EXTERNAL_MAP = 1;
 my $INTERNAL_MAP = 2;
 
+# To override computed values for writing the map tables for these properties.
+# The default for enum map tables is to write them out, so that the Unicode
+# .txt files can be removed, but all the data to compute any property value
+# for any code point is available in a more compact form.
+my %global_to_output_map = (
+    # Needed by UCD.pm, but don't want to publicize that it exists, so won't
+    # get stuck supporting it if things change.  Sinc it is a STRING property,
+    # it normally would be listed in the pod, but INTERNAL_MAP suppresses
+    # that.
+    Unicode_1_Name => $INTERNAL_MAP,
+
+    Present_In => 0,                # Suppress, as easily computed from Age
+    Canonical_Combining_Class => 0, # Duplicate of CombiningClass.pl
+    Block => 0,                     # Suppress, as Blocks.txt is retained.
+);
+
 # Properties that this program ignores.
 my @unimplemented_properties = (
 'Unicode_Radical_Stroke'    # Remove if changing to handle this one.
@@ -5580,6 +5596,8 @@ sub trace { return main::trace(@_); }
         return $to_output_map{$addr} if defined $to_output_map{$addr};
 
         my $full_name = $self->full_name;
+        return $global_to_output_map{$full_name}
+                                if defined $global_to_output_map{$full_name};
 
         # If table says to output, do so; if says to suppress it, do so.
         return $EXTERNAL_MAP if grep { $_ eq $full_name } @output_mapped_properties;
