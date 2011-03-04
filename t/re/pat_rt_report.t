@@ -49,14 +49,14 @@ sub run_tests {
     }
 
     {
-        local $Message = 'bug id 20001008.001';
+        my $message = 'bug id 20001008.001';
 
         my @x = ("stra\337e 138", "stra\337e 138");
         for (@x) {
-            ok s/(\d+)\s*([\w\-]+)/$1 . uc $2/e;
-            ok my ($latin) = /^(.+)(?:\s+\d)/;
-            iseq $latin, "stra\337e";
-	    ok $latin =~ s/stra\337e/straße/;
+            ok(s/(\d+)\s*([\w\-]+)/$1 . uc $2/e, $message);
+            ok(my ($latin) = /^(.+)(?:\s+\d)/, $message);
+            is($latin, "stra\337e", $message);
+	    ok($latin =~ s/stra\337e/straße/, $message);
             #
             # Previous code follows, but outcommented - there were no tests.
             #
@@ -71,62 +71,62 @@ sub run_tests {
         local $BugId   = '20001028.003';
 
         # Fist half of the bug.
-        local $Message = 'HEBREW ACCENT QADMA matched by .*';
+        my $message = 'HEBREW ACCENT QADMA matched by .*';
         my $X = chr (1448);
-        ok my ($Y) = $X =~ /(.*)/;
-        iseq $Y, v1448;
-        iseq length ($Y), 1;
+        ok(my ($Y) = $X =~ /(.*)/, $message);
+        is($Y, v1448, $message);
+        is(length $Y, 1, $message);
 
         # Second half of the bug.
-        $Message = 'HEBREW ACCENT QADMA in replacement';
+        $message = 'HEBREW ACCENT QADMA in replacement';
         $X = '';
         $X =~ s/^/chr(1488)/e;
-        iseq length $X, 1;
-        iseq ord ($X), 1488;
+        is(length $X, 1, $message);
+        is(ord $X, 1488, $message);
     }
 
 
     {   
         local $BugId   = '20001108.001';
-        local $Message = 'Repeated s///';
+        my $message = 'Repeated s///';
         my $X = "Szab\x{f3},Bal\x{e1}zs";
         my $Y = $X;
         $Y =~ s/(B)/$1/ for 0 .. 3;
-        iseq $Y, $X;
-        iseq $X, "Szab\x{f3},Bal\x{e1}zs";
+        is($Y, $X, $message);
+        is($X, "Szab\x{f3},Bal\x{e1}zs", $message);
     }
 
 
     {
         local $BugId   = '20000517.001';
-        local $Message = 's/// on UTF-8 string';
+        my $message = 's/// on UTF-8 string';
         my $x = "\x{100}A";
         $x =~ s/A/B/;
-        iseq $x, "\x{100}B";
-        iseq length $x, 2;
+        is($x, "\x{100}B", $message);
+        is(length $x, 2, $message);
     }
 
 
     {
         local $BugId   = '20001230.002';
-        local $Message = '\C and É';
-        ok "École" =~ /^\C\C(.)/ && $1 eq 'c';
-        ok "École" =~ /^\C\C(c)/;
+        my $message = '\C and É';
+        ok("École" =~ /^\C\C(.)/ && $1 eq 'c', $message);
+        like("École", qr/^\C\C(c)/, $message);
     }
 
 
     {
         # The original bug report had 'no utf8' here but that was irrelevant.
         local $BugId   = '20010306.008';
-        local $Message = "Don't dump core";
+        my $message = "Don't dump core";
         my $a = "a\x{1234}";
-        ok $a =~ m/\w/;  # used to core dump.
+        like($a, qr/\w/, $message);  # used to core dump.
     }
 
 
     {
         local $BugId = '20010410.006';
-        local $Message = '/g in scalar context';
+        my $message = '/g in scalar context';
         for my $rx ('/(.*?)\{(.*?)\}/csg',
 		    '/(.*?)\{(.*?)\}/cg',
 		    '/(.*?)\{(.*?)\}/sg',
@@ -139,7 +139,7 @@ sub run_tests {
                     \$i ++;
                 }
             --
-            iseq $i, 2;
+            is($i, 2, $message);
         }
     }
 
@@ -171,17 +171,17 @@ sub run_tests {
         # [ID 20010407.006] matching utf8 return values from
         # functions does not work
         local $BugId   = '20010407.006';
-        local $Message = 'UTF-8 return values from functions';
+        my $message = 'UTF-8 return values from functions';
         package ID_20010407_006;
         sub x {"a\x{1234}"}
         my $x = x;
         my $y;
-      ::ok $x =~ /(..)/;
+      ::ok($x =~ /(..)/, $message);
         $y = $1;
-      ::ok length ($y) == 2 && $y eq $x;
-      ::ok x =~ /(..)/;
+      ::ok(length ($y) == 2 && $y eq $x, $message);
+      ::ok(x =~ /(..)/, $message);
         $y = $1;
-      ::ok length ($y) == 2 && $y eq $x;
+      ::ok(length ($y) == 2 && $y eq $x, $message);
     }
 
     {
@@ -192,7 +192,7 @@ sub run_tests {
 
 
     {
-        local $Message = 'UTF-8 hash keys and /$/';
+        my $message = 'UTF-8 hash keys and /$/';
         # http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters
         #                                         /2002-01/msg01327.html
 
@@ -203,14 +203,14 @@ sub run_tests {
         for (keys %u) {
             my $m1 =            /^\w*$/ ? 1 : 0;
             my $m2 = $u {$_} =~ /^\w*$/ ? 1 : 0;
-            iseq $m1, $m2;
+            is($m1, $m2, $message);
         }
     }
 
 
     {
         local $BugId   = "20020124.005";
-        local $Message = "s///eg [change 13f46d054db22cf4]";
+        my $message = "s///eg [change 13f46d054db22cf4]";
 
         for my $char ("a", "\x{df}", "\x{100}") {
             my $x = "$char b $char";
@@ -218,41 +218,41 @@ sub run_tests {
                   "c" =~ /c/;
                   "x";
             }ge;
-            iseq substr ($x, 0, 1), substr ($x, -1, 1);
+            is(substr ($x, 0, 1), substr ($x, -1, 1), $message);
         }
     }
 
 
     {
         local $BugId = "20020412.005";
-        local $Message = "Correct pmop flags checked when empty pattern";
+        my $message = "Correct pmop flags checked when empty pattern";
 
         # Requires reuse of last successful pattern.
         my $num = 123;
         $num =~ /\d/;
         for (0 .. 1) {
             my $match = m?? + 0;
-            ok $match != $_, $Message, 
+            ok $match != $_, $message, 
                 sprintf "'match one' %s on %s iteration" =>
                                $match ? 'succeeded' : 'failed',
                                $_     ? 'second'    : 'first';
         }
         $num =~ /(\d)/;
         my $result = join "" => $num =~ //g;
-        iseq $result, $num;
+        is($result, $num, $message);
     }
 
 
     {
         local $BugId   = '20020630.002';
-        local $Message = 'UTF-8 regex matches above 32k';
+        my $message = 'UTF-8 regex matches above 32k';
         for (['byte', "\x{ff}"], ['utf8', "\x{1ff}"]) {
             my ($type, $char) = @$_;
             for my $len (32000, 32768, 33000) {
                 my  $s = $char . "f" x $len;
                 my  $r = $s =~ /$char([f]*)/gc;
-                ok  $r, $Message, "<$type x $len>";
-                ok !$r || pos ($s) == $len + 1, $Message,
+                ok  $r, $message, "<$type x $len>";
+                ok !$r || pos ($s) == $len + 1, $message,
                         "<$type x $len>; pos = @{[pos $s]}";
             }
         }
@@ -320,50 +320,50 @@ sub run_tests {
     
     {
         local $BugId   = '15397';
-        local $Message = 'UTF-8 matching';
-        ok "\x{100}" =~ /\x{100}/;
-        ok "\x{100}" =~ /(\x{100})/;
-        ok "\x{100}" =~ /(\x{100}){1}/;
-        ok "\x{100}\x{100}" =~ /(\x{100}){2}/;
-        ok "\x{100}\x{100}" =~ /(\x{100})(\x{100})/;
+        my $message = 'UTF-8 matching';
+        like("\x{100}", qr/\x{100}/, $message);
+        like("\x{100}", qr/(\x{100})/, $message);
+        like("\x{100}", qr/(\x{100}){1}/, $message);
+        like("\x{100}\x{100}", qr/(\x{100}){2}/, $message);
+        like("\x{100}\x{100}", qr/(\x{100})(\x{100})/, $message);
     }
 
 
     {
         local $BugId   = '7471';
-        local $Message = 'Neither ()* nor ()*? sets $1 when matched 0 times';
+        my $message = 'Neither ()* nor ()*? sets $1 when matched 0 times';
         local $_       = 'CD';
-        ok /(AB)*?CD/ && !defined $1;
-        ok /(AB)*CD/  && !defined $1;
+        ok(/(AB)*?CD/ && !defined $1, $message);
+        ok(/(AB)*CD/  && !defined $1, $message);
     }
 
 
     {
         local $BugId   = '3547';
-        local $Message = "Caching shouldn't prevent match";
+        my $message = "Caching shouldn't prevent match";
         my $pattern = "^(b+?|a){1,2}c";
-        ok "bac"    =~ /$pattern/ && $1 eq 'a';
-        ok "bbac"   =~ /$pattern/ && $1 eq 'a';
-        ok "bbbac"  =~ /$pattern/ && $1 eq 'a';
-        ok "bbbbac" =~ /$pattern/ && $1 eq 'a';
+        ok("bac"    =~ /$pattern/ && $1 eq 'a', $message);
+        ok("bbac"   =~ /$pattern/ && $1 eq 'a', $message);
+        ok("bbbac"  =~ /$pattern/ && $1 eq 'a', $message);
+        ok("bbbbac" =~ /$pattern/ && $1 eq 'a', $message);
     }
 
 
 
     {
         local $BugId   = '18232';
-        local $Message = '$1 should keep UTF-8 ness';
-        ok "\x{100}" =~ /(.)/;
-        iseq  $1, "\x{100}",  '$1 is UTF-8';
+        my $message = '$1 should keep UTF-8 ness';
+        ok("\x{100}" =~ /(.)/, $message);
+        is($1, "\x{100}",  '$1 is UTF-8');
         { 'a' =~ /./; }
-        iseq  $1, "\x{100}",  '$1 is still UTF-8';
-        isneq $1, "\xC4\x80", '$1 is not non-UTF-8';
+        is($1, "\x{100}",  '$1 is still UTF-8');
+        isnt($1, "\xC4\x80", '$1 is not non-UTF-8');
     }
 
 
     {
         local $BugId   = '19767';
-        local $Message = "Optimizer doesn't prematurely reject match";
+        my $message = "Optimizer doesn't prematurely reject match";
         use utf8;
 
         my $attr = 'Name-1';
@@ -372,21 +372,21 @@ sub run_tests {
         my $PredNameHyphen  = qr /^${NormalWord}(\-${NormalWord})*?$/;
 
         $attr =~ /^$/;
-        ok $attr =~ $PredNameHyphen;  # Original test.
+        like($attr, $PredNameHyphen, $message);  # Original test.
 
         "a" =~ m/[b]/;
-        ok "0" =~ /\p{N}+\z/;         # Variant.
+        like("0", qr/\p{N}+\z/, $message);         # Variant.
     }
 
 
     {
         local $BugId   = '20683';
-        local $Message = "(??{ }) doesn't return stale values";
+        my $message = "(??{ }) doesn't return stale values";
         our $p = 1;
         foreach (1, 2, 3, 4) {
             $p ++ if /(??{ $p })/
         }
-        iseq $p, 5;
+        is($p, 5, $message);
 
         {
             package P;
@@ -398,7 +398,7 @@ sub run_tests {
         foreach (1, 2, 3, 4) {
             /(??{ $p })/
         }
-        iseq $p, 5;
+        is($p, 5, $message);
     }
 
 
@@ -409,29 +409,29 @@ sub run_tests {
         # Message-Id: <E18o4nw-0008Ly-00@wisbech.cl.cam.ac.uk>
         # To: perl-unicode@perl.org
 
-        local $Message = 'Markus Kuhn 2003-02-26';
+        my $message = 'Markus Kuhn 2003-02-26';
     
         my $x = "\x{2019}\nk";
-        ok $x =~ s/(\S)\n(\S)/$1 $2/sg;
-        ok $x eq "\x{2019} k";
+        ok($x =~ s/(\S)\n(\S)/$1 $2/sg, $message);
+        is($x, "\x{2019} k", $message);
 
         $x = "b\nk";
-        ok $x =~ s/(\S)\n(\S)/$1 $2/sg;
-        ok $x eq "b k";
+        ok($x =~ s/(\S)\n(\S)/$1 $2/sg, $message);
+        is($x, "b k", $message);
 
-        ok "\x{2019}" =~ /\S/;
+        like("\x{2019}", qr/\S/, $message);
     }
 
 
     {
         local $BugId = '21411';
-        local $Message = "(??{ .. }) in split doesn't corrupt its stack";
+        my $message = "(??{ .. }) in split doesn't corrupt its stack";
         our $i;
-        ok '-1-3-5-' eq join '', split /((??{$i++}))/, '-1-3-5-';
+        is('-1-3-5-', join('', split /((??{$i++}))/, '-1-3-5-'), $message);
         no warnings 'syntax';
         @_ = split /(?{'WOW'})/, 'abc';
         local $" = "|";
-        iseq "@_", "a|b|c";
+        is("@_", "a|b|c", $message);
     }
 
 
@@ -481,48 +481,48 @@ sub run_tests {
         # regrepeat() didn't handle UTF-8 EXACT case right.
         local $BugId   = '23769';
         my $Mess       = 'regrepeat() handles UTF-8 EXACT case right';
-        local $Message = $Mess;
+        my $message = $Mess;
 
         my $s = "\x{a0}\x{a0}\x{a0}\x{100}"; chop $s;
 
-        ok $s =~ /\x{a0}/;
-        ok $s =~ /\x{a0}+/;
-        ok $s =~ /\x{a0}\x{a0}/;
+        like($s, qr/\x{a0}/, $message);
+        like($s, qr/\x{a0}+/, $message);
+        like($s, qr/\x{a0}\x{a0}/, $message);
 
-        $Message = "$Mess (easy variant)";
-        ok "aaa\x{100}" =~ /(a+)/;
-        iseq $1, "aaa";
+        $message = "$Mess (easy variant)";
+        ok("aaa\x{100}" =~ /(a+)/, $message);
+        is($1, "aaa", $message);
 
-        $Message = "$Mess (easy invariant)";
-        ok "aaa\x{100}     " =~ /(a+?)/;
-        iseq $1, "a";
+        $message = "$Mess (easy invariant)";
+        ok("aaa\x{100}     " =~ /(a+?)/, $message);
+        is($1, "a", $message);
 
-        $Message = "$Mess (regrepeat variant)";
-        ok "\xa0\xa0\xa0\x{100}    " =~ /(\xa0+?)/;
-        iseq $1, "\xa0";
+        $message = "$Mess (regrepeat variant)";
+        ok("\xa0\xa0\xa0\x{100}    " =~ /(\xa0+?)/, $message);
+        is($1, "\xa0", $message);
 
-        $Message = "$Mess (regrepeat invariant)";
-        ok "\xa0\xa0\xa0\x{100}" =~ /(\xa0+)/;
-        iseq $1, "\xa0\xa0\xa0";
+        $message = "$Mess (regrepeat invariant)";
+        ok("\xa0\xa0\xa0\x{100}" =~ /(\xa0+)/, $message);
+        is($1, "\xa0\xa0\xa0", $message);
 
-        $Message = "$Mess (hard variant)";
-        ok "\xa0\xa1\xa0\xa1\xa0\xa1\x{100}" =~ /((?:\xa0\xa1)+?)/;
-        iseq $1, "\xa0\xa1";
+        $message = "$Mess (hard variant)";
+        ok("\xa0\xa1\xa0\xa1\xa0\xa1\x{100}" =~ /((?:\xa0\xa1)+?)/, $message);
+        is($1, "\xa0\xa1", $message);
 
-        $Message = "$Mess (hard invariant)";
-        ok "ababab\x{100}  " =~ /((?:ab)+)/;
-        iseq $1, 'ababab';
+        $message = "$Mess (hard invariant)";
+        ok("ababab\x{100}  " =~ /((?:ab)+)/, $message);
+        is($1, 'ababab', $message);
 
-        ok "\xa0\xa1\xa0\xa1\xa0\xa1\x{100}" =~ /((?:\xa0\xa1)+)/;
-        iseq $1, "\xa0\xa1\xa0\xa1\xa0\xa1";
+        ok("\xa0\xa1\xa0\xa1\xa0\xa1\x{100}" =~ /((?:\xa0\xa1)+)/, $message);
+        is($1, "\xa0\xa1\xa0\xa1\xa0\xa1", $message);
 
-        ok "ababab\x{100}  " =~ /((?:ab)+?)/;
-        iseq $1, "ab";
+        ok("ababab\x{100}  " =~ /((?:ab)+?)/, $message);
+        is($1, "ab", $message);
 
-        $Message = "Don't match first byte of UTF-8 representation";
-        ok "\xc4\xc4\xc4" !~ /(\x{100}+)/;
-        ok "\xc4\xc4\xc4" !~ /(\x{100}+?)/;
-        ok "\xc4\xc4\xc4" !~ /(\x{100}++)/;
+        $message = "Don't match first byte of UTF-8 representation";
+        unlike("\xc4\xc4\xc4", qr/(\x{100}+)/, $message);
+        unlike("\xc4\xc4\xc4", qr/(\x{100}+?)/, $message);
+        unlike("\xc4\xc4\xc4", qr/(\x{100}++)/, $message);
     }
 
 
@@ -843,87 +843,87 @@ sub run_tests {
 
     {
         local $BugId = '40684';
-        local $Message = '/m in precompiled regexp';
+        my $message = '/m in precompiled regexp';
         my $s = "abc\ndef";
         my $rex = qr'^abc$'m;
-        ok $s =~ m/$rex/;
-        ok $s =~ m/^abc$/m;
+        ok($s =~ m/$rex/, $message);
+        ok($s =~ m/^abc$/m, $message);
     }
 
 
     {
         local $BugId   = '36909';
-        local $Message = '(?: ... )? should not lose $^R';
+        my $message = '(?: ... )? should not lose $^R';
         $^R = 'Nothing';
         {
             local $^R = "Bad";
-            ok 'x foofoo y' =~ m {
+            ok('x foofoo y' =~ m {
                       (foo) # $^R correctly set
                       (?{ "last regexp code result" })
-            }x;
-            iseq $^R, 'last regexp code result';
+            }x, $message);
+            is($^R, 'last regexp code result', $message);
         }
-        iseq $^R, 'Nothing';
+        is($^R, 'Nothing', $message);
 
         {
             local $^R = "Bad";
 
-            ok 'x foofoo y' =~ m {
+            ok('x foofoo y' =~ m {
                       (?:foo|bar)+ # $^R correctly set
                       (?{ "last regexp code result" })
-            }x;
-            iseq $^R, 'last regexp code result';
+            }x, $message);
+            is($^R, 'last regexp code result', $message);
         }
-        iseq $^R, 'Nothing';
+        is($^R, 'Nothing', $message);
 
         {
             local $^R = "Bad";
-            ok 'x foofoo y' =~ m {
+            ok('x foofoo y' =~ m {
                       (foo|bar)\1+ # $^R undefined
                       (?{ "last regexp code result" })
-            }x;
-            iseq $^R, 'last regexp code result';
+            }x, $message);
+            is($^R, 'last regexp code result', $message);
         }
-        iseq $^R, 'Nothing';
+        is($^R, 'Nothing', $message);
 
         {
             local $^R = "Bad";
-            ok 'x foofoo y' =~ m {
+            ok('x foofoo y' =~ m {
                       (foo|bar)\1 # This time without the +
                       (?{"last regexp code result"})
-            }x;
-            iseq $^R, 'last regexp code result';
+            }x, $message);
+            is($^R, 'last regexp code result', $message);
         }
-        iseq $^R, 'Nothing';
+        is($^R, 'Nothing', $message);
     }
 
 
     {
         local $BugId   = '22395';
-        local $Message = 'Match is linear, not quadratic';
+        my $message = 'Match is linear, not quadratic';
         our $count;
         for my $l (10, 100, 1000) {
             $count = 0;
             ('a' x $l) =~ /(.*)(?{$count++})[bc]/;
             local $TODO = "Should be L+1 not L*(L+3)/2 (L=$l)";
-            iseq $count, $l + 1;
+            is($count, $l + 1, $message);
         }
     }
 
 
     {
         local $BugId   = '22614';
-        local $Message = '@-/@+ should not have undefined values';
+        my $message = '@-/@+ should not have undefined values';
         local $_ = 'ab';
         our @len = ();
         /(.){1,}(?{push @len,0+@-})(.){1,}(?{})^/;
-        iseq "@len", "2 2 2";
+        is("@len", "2 2 2", $message);
     }
 
 
     {
         local $BugId   = '18209';
-        local $Message = '$& set on s///';
+        my $message = '$& set on s///';
         my $text = ' word1 word2 word3 word4 word5 word6 ';
 
         my @words = ('word1', 'word3', 'word5');
@@ -937,8 +937,8 @@ sub run_tests {
             }
             # End bad block
         }
-        iseq $count, 3;
-        iseq $text, ' word2 word4 word6 ';
+        is($count, 3, $message);
+        is($text, ' word2 word4 word6 ', $message);
     }
 
 
@@ -958,7 +958,7 @@ sub run_tests {
 
     {
         local $BugId   = '41010';
-        local $Message = 'No optimizer bug';
+        # No optimizer bug
         my @tails  = ('', '(?(1))', '(|)', '()?');    
         my @quants = ('*','+');
         my $doit = sub {
@@ -968,8 +968,8 @@ sub run_tests {
                     for my $quant (@quants) {
                         for my $tail (@tails) {
                             my $re = "($pat$quant\$)$tail";
-                            ok /$re/  && $1 eq $_, "'$_' =~ /$re/";
-                            ok /$re/m && $1 eq $_, "'$_' =~ /$re/m";
+                            ok(/$re/  && $1 eq $_, "'$_' =~ /$re/");
+                            ok(/$re/m && $1 eq $_, "'$_' =~ /$re/m");
                         }
                     }
                 }
@@ -1022,25 +1022,25 @@ sub run_tests {
 
     {
          local $BugId   = '49190';
-         local $Message = '$REGMARK in replacement';
+         my $message = '$REGMARK in replacement';
          our $REGMARK;
          my $_ = "A";
-         ok s/(*:B)A/$REGMARK/;
-         iseq $_, "B";
+         ok(s/(*:B)A/$REGMARK/, $message);
+         is($_, "B", $message);
          $_ = "CCCCBAA";
-         ok s/(*:X)A+|(*:Y)B+|(*:Z)C+/$REGMARK/g;
-         iseq $_, "ZYX";
+         ok(s/(*:X)A+|(*:Y)B+|(*:Z)C+/$REGMARK/g, $message);
+         is($_, "ZYX", $message);
     }
 
 
     {
         local $BugId   = '52658';
-        local $Message = 'Substitution evaluation in list context';
+        my $message = 'Substitution evaluation in list context';
         my $reg = '../xxx/';
         my @te  = ($reg =~ m{^(/?(?:\.\./)*)},
                    $reg =~ s/(x)/'b'/eg > 1 ? '##' : '++');
-        iseq $reg, '../bbb/';
-        iseq $te [0], '../';
+        is($reg, '../bbb/', $message);
+        is($te [0], '../', $message);
     }
 
     {
@@ -1064,7 +1064,7 @@ sub run_tests {
     print "# Tests that follow may crash perl\n";
     {   
         local $BugId   = '19049/38869';
-        local $Message = 'Pattern in a loop, failure should not ' .
+        my $message = 'Pattern in a loop, failure should not ' .
                          'affect previous success';
         my @list = (
             'ab cdef',             # Matches regex
@@ -1077,8 +1077,8 @@ sub run_tests {
             $y = $1;      # Use $1, which might not be from the last match!
             $x = substr ($list [0], $- [0], $+ [0] - $- [0]);
         }
-        iseq $y, ' ';
-        iseq $x, 'ab cd';
+        is($y, ' ', $message);
+        is($x, 'ab cd', $message);
     }
 
 
@@ -1095,14 +1095,14 @@ sub run_tests {
         # [perl #45337] utf8 + "[a]a{2}" + /$.../ = panic: sv_len_utf8 cache
         local $BugId = '45337';
         local ${^UTF8CACHE} = -1;
-        local $Message = "Shouldn't panic";
+        my $message = "Shouldn't panic";
         my $s = "[a]a{2}";
         utf8::upgrade $s;
-        ok "aaa" =~ /$s/;
+        like("aaa", qr/$s/, $message);
     }
     {
         local $BugId = '57042';
-	local $Message = "Check if tree logic breaks \$^R";
+	my $message = "Check if tree logic breaks \$^R";
 	my $cond_re = qr/\s*
 	    \s* (?:
 		   \( \s* A  (?{1})
@@ -1115,7 +1115,7 @@ sub run_tests {
 	       push @res, $^R ? "#$^R" : "UNDEF";
 	   }
 	}
-	iseq "@res","#1 #2";
+	is("@res","#1 #2", $message);
     }
     {
 	no warnings 'closure';
@@ -1130,7 +1130,7 @@ sub run_tests {
     # This only works under -DEBUGGING because it relies on an assert().
     {
         local $BugId = '60508';
-	local $Message = "Check capture offset re-entrancy of utf8 code.";
+	# Check capture offset re-entrancy of utf8 code.
 
         sub fswash { $_[0] =~ s/([>X])//g; }
 
@@ -1141,7 +1141,7 @@ sub run_tests {
         $k2 =~ s/([\360-\362])/>/g;
         fswash($k2);
 
-        iseq($k2, "\x{2022}", "utf8::SWASHNEW doesn't cause capture leaks");
+        is($k2, "\x{2022}", "utf8::SWASHNEW doesn't cause capture leaks");
     }
 
 
@@ -1174,7 +1174,7 @@ sub run_tests {
 
     {
        local $BugId = 70998;
-       local $Message
+       my $message
         = 'utf8 =~ /trie/ where trie matches a continuation octet';
 
        # Catch warnings:
@@ -1205,14 +1205,14 @@ sub run_tests {
 
        $x =~ s{$conv_rx}{$conv{$1}}eg;
 
-       iseq($w,undef);
+       is($w, undef, $message);
     }
 
     {
         local $BugId = 68564;   # minimal CURLYM limited to 32767 matches
-        local $Message = "stclass optimisation does not break + inside (?=)";
-        iseq join("-", "   abc   def  " =~ /(?=(\S+))/g),
-             "abc-bc-c-def-ef-f",
+
+        is(join("-", "   abc   def  " =~ /(?=(\S+))/g), "abc-bc-c-def-ef-f",
+	   'stclass optimisation does not break + inside (?=)');
     }
 
 } # End of sub run_tests
