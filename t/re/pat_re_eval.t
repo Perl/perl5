@@ -86,10 +86,10 @@ sub run_tests {
         ok "a$x" =~ /^a$a\z/, "Interpolated qr // preserves UTF-8";
         ok "a$x" =~ /^a(??{$a})\z/,
                         "Postponed interpolation of qr // preserves UTF-8";
-        {
-            local $BugId = '17776';
-            iseq length qr /##/x, 9, "## in qr // doesn't corrupt memory";
-        }
+
+
+        is(length qr /##/x, 9, "## in qr // doesn't corrupt memory; Bug 17776");
+
         {
             use re 'eval';
             ok "$x$x" =~ /^$x(??{$x})\z/,
@@ -170,7 +170,7 @@ sub run_tests {
 
     {
         use re 'eval';
-        local $BugId = '56194';
+
 
         our $f;
         local $f;
@@ -178,7 +178,7 @@ sub run_tests {
             defined $_[0] ? $_[0] : "undef";
         };
 
-        ok("123" =~ m/^(\d)(((??{1 + $^N})))+$/);
+        like("123", qr/^(\d)(((??{1 + $^N})))+$/, "Noname test; Bug 56194");
 
         our @ctl_n;
         our @plus;
@@ -301,15 +301,15 @@ sub run_tests {
             my $str = join(", ", '$1 = '.$f->($1), '$2 = '.$f->($2), '$3 = '.$f->($3), '$4 = '.$f->($4),'$5 = '.$f->($5));
             push @ctl_n, $f->($^N);
             push @plus, $f->($+);
-            ok($match, "match $c");
+            ok($match, "match $c; Bug 56194");
             if (not $match) {
                 # unset $str, @ctl_n and @plus
                 $str = "";
                 @ctl_n = @plus = ();
             }
-            iseq("@ctl_n", $test->[2], "ctl_n $c");
-            iseq("@plus", $test->[3], "plus $c");
-            iseq($str, $test->[4], "str $c");
+            is("@ctl_n", $test->[2], "ctl_n $c; Bug 56194");
+            is("@plus", $test->[3], "plus $c; Bug 56194");
+            is($str, $test->[4], "str $c; Bug 56194");
         }
         SKIP: {
             if ($] le '5.010') {
@@ -326,16 +326,16 @@ sub run_tests {
             my $str = join(", ", '$1 = '.$f->($1), '$2 = '.$f->($2), '$3 = '.$f->($3), '$4 = '.$f->($4),'$5 = '.$f->($5),'$^R = '.$f->($^R));
             push @ctl_n, $f->($^N);
             push @plus, $f->($+);
-            ok($match);
+            ok($match, "Noname test; Bug 56194");
             if (not $match) {
                 # unset $str
                 @ctl_n = ();
                 @plus = ();
                 $str = "";
             }
-            iseq("@ctl_n", "1 2 undef");
-            iseq("@plus", "1 2 undef");
-            iseq($str, "\$1 = undef, \$2 = undef, \$3 = undef, \$4 = undef, \$5 = undef, \$^R = undef");
+            is("@ctl_n", "1 2 undef", "Noname test; Bug 56194");
+            is("@plus", "1 2 undef", "Noname test; Bug 56194");
+            is($str, "\$1 = undef, \$2 = undef, \$3 = undef, \$4 = undef, \$5 = undef, \$^R = undef", "Noname test; Bug 56194");
        }
     }
 
