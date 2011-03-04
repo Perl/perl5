@@ -218,7 +218,7 @@ use Unicode::UCD qw(charblock charscript);
 # 0x0590 is in the Hebrew block but unused.
 
 is(charblock(0x590),          'Hebrew', '0x0590 - Hebrew unused charblock');
-is(charscript(0x590),         undef,    '0x0590 - Hebrew unused charscript');
+is(charscript(0x590),         'Unknown',    '0x0590 - Hebrew unused charscript');
 
 $charinfo = charinfo(0xbe);
 

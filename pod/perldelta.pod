@@ -186,6 +186,11 @@ corrected ones.
 
 =back
 
+=item charscript()
+
+This now correctly returns "Unknown" instead of C<undef> for the script
+of a code point that hasn't been assigned another one.
+
 =back
 
 =back

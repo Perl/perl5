@@ -586,7 +586,7 @@ sub charscript {
     if (defined $code) {
 	my $result = _search(\@SCRIPTS, 0, $#SCRIPTS, $code);
         return $result if defined $result;
-        #return $utf8::SwashInfo{'ToSc'}{'missing'};
+        return $utf8::SwashInfo{'ToSc'}{'missing'};
     } elsif (exists $SCRIPTS{$arg}) {
         return dclone $SCRIPTS{$arg};
     }
