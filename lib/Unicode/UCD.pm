@@ -2,6 +2,7 @@ package Unicode::UCD;
 
 use strict;
 use warnings;
+no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
 our $VERSION = '0.32';
@@ -776,7 +777,7 @@ sub compexcl {
     croak __PACKAGE__, "::compexcl: unknown code '$arg'"
 	unless defined $code;
 
-    no warnings "utf8";     # So works on surrogates and non-Unicode code points
+    no warnings "non_unicode";     # So works on non-Unicode code points
     return chr($code) =~ /\p{Composition_Exclusion}/;
 }
 
