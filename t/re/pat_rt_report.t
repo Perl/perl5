@@ -440,7 +440,7 @@ sub run_tests {
         # hasn't been crashing. Disable this test until it is fixed properly.
         # XXX also check what it returns rather than just doing ok(1,...)
         # split /(?{ split "" })/, "abc";
-        local $TODO = "Recursive split is still broken";
+        local $::TODO = "Recursive split is still broken";
         ok 0, 'cache_re & "(?{": it dumps core in 5.6.1 & 5.8.0';
     }
 
@@ -602,7 +602,7 @@ sub run_tests {
 
 
     {
-        local $TODO = "See changes 26925-26928, which reverted change 26410";
+        local $::TODO = "See changes 26925-26928, which reverted change 26410";
         {
             package lv;
             our $var = "abc";
@@ -620,7 +620,7 @@ sub run_tests {
             iseq $f, "ab", "pos() retained between calls";
         }
         else {
-            local $TODO;
+            local $::TODO;
             ok 0, "Code failed: $@";
         }
 
@@ -637,7 +637,7 @@ sub run_tests {
             iseq $g, "ab", "pos() retained between calls";
         }
         else {
-            local $TODO;
+            local $::TODO;
             ok 0, "Code failed: $@";
         }
     }
@@ -905,7 +905,7 @@ sub run_tests {
         for my $l (10, 100, 1000) {
             $count = 0;
             ('a' x $l) =~ /(.*)(?{$count++})[bc]/;
-            local $TODO = "Should be L+1 not L*(L+3)/2 (L=$l)";
+            local $::TODO = "Should be L+1 not L*(L+3)/2 (L=$l)";
             is($count, $l + 1, $message);
         }
     }
@@ -1161,7 +1161,7 @@ sub run_tests {
     }
 
     {
-        local $TODO = "[perl #38133]";
+        local $::TODO = "[perl #38133]";
 
         "A" =~ /(((?:A))?)+/;
         my $first = $2;

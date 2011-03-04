@@ -704,7 +704,7 @@ sub run_tests {
         unlike($str, qr/^...\G/, $message);
         ok($str =~ /\G../ && $& eq 'cd', $message);
 
-        local $TODO = $running_as_thread;
+        local $::TODO = $::running_as_thread;
         ok($str =~ /.\G./ && $& eq 'bc', $message);
     }
 
@@ -779,7 +779,7 @@ sub run_tests {
         my $foo = 'aabbccddeeffgg';
         pos ($foo) = 1;
         {
-            local $TODO = $running_as_thread;
+            local $::TODO = $::running_as_thread;
             no warnings 'uninitialized';
             ok($foo =~ /.\G(..)/g, $message);
             is($1, 'ab', $message);
@@ -1071,7 +1071,7 @@ sub run_tests {
 
         my $message = '\p property after empty * match';
         {
-            local $TODO = "Bug 77414";
+            local $::TODO = "Bug 77414";
             like("1", qr/\s*\pN/, $message);
             like("-", qr/\s*\p{Dash}/, $message);
             like(" ", qr/\w*\p{Blank}/, $message);
@@ -1158,7 +1158,7 @@ sub run_tests {
     }
 
     {
-        local $TODO = "[perl #38133]";
+        local $::TODO = "[perl #38133]";
 
         "A" =~ /(((?:A))?)+/;
         my $first = $2;
