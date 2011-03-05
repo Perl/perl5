@@ -18,7 +18,7 @@ $| = 1;
 BEGIN {
     chdir 't' if -d 't';
     @INC = ('../lib','.');
-    do "re/ReTest.pl" or die $@;
+    require './test.pl';
 }
 
 plan tests => 455;  # Update this when adding/deleting tests.

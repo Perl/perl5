@@ -21,7 +21,7 @@ BEGIN {
     }
     chdir 't' if -d 't';
     @INC = ('../lib','.');
-    do "re/ReTest.pl" or die $@;
+    require './test.pl';
 }
 
 

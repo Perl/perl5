@@ -5051,7 +5051,6 @@ t/re/reg_pmod.t			See if regexp /p modifier works as expected
 t/re/reg_posixcc.t		See if posix character classes behave consistently
 t/re/reg_unsafe.t		Check for unsafe match vars
 t/re/re.t			See if exportable 're' funcs in universal.c work
-t/re/ReTest.pl			Test utilities for the t/re/pat*.t tests (used by do)
 t/re/re_tests			Regular expressions for regexp.t
 t/re/rxcode.t			See if /(?{ code })/ works
 t/re/subst_amp.t		See if $&-related substitution works
