@@ -232,7 +232,6 @@ sub run_tests {
         is($x, '505550555', "Test /o");
     }
 
-
     {
         my $xyz = 'xyz';
         ok "abc" =~ /^abc$|$xyz/, "| after \$";
@@ -245,7 +244,6 @@ sub run_tests {
         is($@, "", $message);
         is($result, "abc:bc", $message);
     }
-
 
     {
         my $message = "Scalar /g";
@@ -291,7 +289,6 @@ sub run_tests {
         'abc' =~ m'a(?{ $out = 3 })c';
         is($out, 1, $message);
     }
-
 
     {
         $_ = 'foobar1 bar2 foobar3 barfoobar5 foobar6';
@@ -339,7 +336,6 @@ sub run_tests {
 	    like("ba$a=", /b(?:a|b)+=/, $message);
         }
     }
-
 
     {
         # 20000 nodes, each taking 3 words per string, and 1 per branch
@@ -537,8 +533,6 @@ sub run_tests {
         is(qr/abc$unicode/,    '(?^l:abc(?^u:\b\v$))', 'Verify retains u when interpolated under locale');
     }
 
-
-
     {
         my $message = "Look around";
         $_ = 'xabcx';
@@ -600,7 +594,6 @@ sub run_tests {
         }
     }
 
-
     {
         # test if failure of patterns returns empty list
         my $message = "Failed pattern returns empty list";
@@ -617,7 +610,6 @@ sub run_tests {
         @_ = /(bbb)/g;
         is("@_", "", $message);
     }
-
 
     {
         my $message = '@- and @+ tests';
@@ -666,7 +658,6 @@ sub run_tests {
         ok(!defined $+ [2] && !defined $- [2] &&
            !defined $+ [4] && !defined $- [4], $message);
 
-
         /.(a)/;
         is($#+, 1, $message);
         is($#-, 1, $message);
@@ -682,12 +673,10 @@ sub run_tests {
         is($#-, 1, $message);
     }
 
-
     foreach ('$+[0] = 13', '$-[0] = 13', '@+ = (7, 6, 5)', '@- = qw (foo bar)') {
         must_die($_, qr/^Modification of a read-only value attempted/,
 		 'Elements of @- and @+ are read-only');
     }
-
 
     {
         my $message = '\G testing';
@@ -707,7 +696,6 @@ sub run_tests {
         local $::TODO = $::running_as_thread;
         ok($str =~ /.\G./ && $& eq 'bc', $message);
     }
-
 
     {
         my $message = 'pos inside (?{ })';
@@ -773,7 +761,6 @@ sub run_tests {
                      "'abcde|' 'abc' 'de'", $message);
     }
 
-
     {
         my $message = '\G anchor checks';
         my $foo = 'aabbccddeeffgg';
@@ -807,7 +794,6 @@ sub run_tests {
         is($1, 'cd', $message);
     }
 
-
     {
         $_ = '123x123';
         my @res = /(\d*|x)/g;
@@ -815,14 +801,12 @@ sub run_tests {
         is("@res", "123||x|123|", "0 match in alternation");
     }
 
-
     {
         my $message = "Match against temporaries (created via pp_helem())" .
                          " is safe";
         ok({foo => "bar\n" . $^X} -> {foo} =~ /^(.*)\n/g, $message);
         is($1, "bar", $message);
     }
-
 
     {
         my $message = 'package $i inside (?{ }), ' .
@@ -843,7 +827,6 @@ sub run_tests {
         is("@c", ",f,,o,,o, ,b,,a,,r,", $message);
     }
 
-
     {
         my $message = 'Brackets';
         our $brackets;
@@ -859,13 +842,11 @@ sub run_tests {
         is($&, "{ and }", $message);
     }
 
-
     {
         $_ = "a-a\nxbb";
         pos = 1;
         ok(!m/^-.*bb/mg, '$_ = "a-a\nxbb"; m/^-.*bb/mg');
     }
-
 
     {
         my $message = '\G anchor checks';
@@ -873,7 +854,6 @@ sub run_tests {
         pos ($text) = 0;
         ok($text !~ /\GXb*X/g, $message);
     }
-
 
     {
         $_ = "xA\n" x 500;
@@ -883,7 +863,6 @@ sub run_tests {
         my @res = ($text =~ /.*?(b).*?\b/g);
         is("@res", "b b", '\b is not special');
     }
-
 
     {
         my $message = '\S, [\S], \s, [\s]';
@@ -943,7 +922,6 @@ sub run_tests {
         is("@b", "@c", $message);
     }
 
-
     {
         # see if backtracking optimization works correctly
         my $message = 'Backtrack optimization';
@@ -959,7 +937,6 @@ sub run_tests {
         like("\n\n", qr/\n?+ $ \n/x, $message);
     }
 
-
     {
         package S;
         use overload '""' => sub {'Object S'};
@@ -973,7 +950,6 @@ sub run_tests {
       ::ok('S' -> new   =~ /^Object S/, "Object stringification") or diag($message);
     }
 
-
     {
         my $message = "Test result of match used as match";
         ok('a1b' =~ ('xyz' =~ /y/), $message);
@@ -982,12 +958,10 @@ sub run_tests {
         is($`, 'a', $message);
     }
 
-
     {
         my $message = '"1" is not \s';
         may_not_warn sub {ok ("1\n" x 102 !~ /^\s*\n/m, $message)}, "$message (did not warn)";
     }
-
 
     {
         my $message = '\s, [[:space:]] and [[:blank:]]';
@@ -1189,9 +1163,6 @@ sub run_tests {
 	}
 	ok($count < 10, 'RT #3516 C');
     }
-
-
-
 } # End of sub run_tests
 
 1;

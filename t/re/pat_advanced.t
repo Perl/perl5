@@ -34,7 +34,6 @@ run_tests() unless caller;
 #
 sub run_tests {
 
-
     {
         my $message = '\C matches octet';
         $_ = "a\x{100}b";
@@ -56,8 +55,6 @@ sub run_tests {
         }
         is($4, "b", $message);
     }
-
-
 
     {
         my $message = '\C matches octet';
@@ -84,14 +81,12 @@ sub run_tests {
         }
     }
 
-
     {
         # Japhy -- added 03/03/2001
         () = (my $str = "abc") =~ /(...)/;
         $str = "def";
         is($1, "abc", 'Changing subject does not modify $1');
     }
-
 
   SKIP:
     {
@@ -112,12 +107,10 @@ sub run_tests {
         unlike("\xce", qr/[I-J]/, '"\xce" !~ /[I-J]/');
     }
 
-
     {
         ok "\x{ab}"   =~ /\x{ab}/,   '"\x{ab}"   =~ /\x{ab}/  ';
         ok "\x{abcd}" =~ /\x{abcd}/, '"\x{abcd}" =~ /\x{abcd}/';
     }
-
 
     {
         my $message = 'bug id 20001008.001';
@@ -137,7 +130,6 @@ sub run_tests {
         }
     }
 
-
     {
         my $message = 'Test \x escapes';
         ok("ba\xd4c" =~ /([a\xd4]+)/ && $1 eq "a\xd4", $message);
@@ -150,8 +142,6 @@ sub run_tests {
         ok("ba\x{d4}c" =~ /([a\x{d4}]+)/ && $1 eq "a\xd4", $message);
     }
 
-
-
     {
         my $message = 'Match code points > 255';
         $_ = "abc\x{100}\x{200}\x{300}\x{380}\x{400}defg";
@@ -162,14 +152,11 @@ sub run_tests {
         ok($1 eq "\x{200}\x{300}"        && length ($1) == 2, $message);
     }
 
-
-
     {
         my $x = "\x{10FFFD}";
         $x =~ s/(.)/$1/g;
         ok ord($x) == 0x10FFFD && length($x) == 1, "From Robin Houston";
     }
-
 
     {
         my %d = (
@@ -189,8 +176,6 @@ sub run_tests {
         }
     }
 
-
-
     {
         # From Japhy
         must_warn 'qr/(?c)/',    '^Useless \(\?c\)';
@@ -208,7 +193,6 @@ sub run_tests {
         must_warn 'qr/(?ogc)/',  '^Useless \(\?o\).*\nUseless \(\?g\).*\n' .
                                   'Useless \(\?c\)';
     }
-
 
     {
         my $message = "/x tests";
@@ -228,7 +212,6 @@ sub run_tests {
           /x
         --
     }
-
 
     {
         my $message = "/o feature";
@@ -273,7 +256,6 @@ sub run_tests {
 
     }
 
-
   SKIP:
     {
         ## Should probably put in tests for all the POSIX stuff,
@@ -289,7 +271,6 @@ sub run_tests {
         is($x, (join "", map {chr} 0x00 .. 0x1F, 0x7F), $message);
     }
 
-
     {
         # With /s modifier UTF8 chars were interpreted as bytes
         my $message = "UTF-8 chars aren't bytes";
@@ -297,7 +278,6 @@ sub run_tests {
         my @a = ($a =~ /./gs);
         is($#a, 12, $message);
     }
-
 
     {
         my $message = '. matches \n with /s';
@@ -314,7 +294,6 @@ sub run_tests {
         @a = $str2 =~ /\C/g;  is(@a, 9, $message); is("@a", "f o o \n $a $b b a r", $message);
         @a = $str2 =~ /\C/gs; is(@a, 9, $message); is("@a", "f o o \n $a $b b a r", $message);
     }
-
 
     {
         no warnings 'digit';
@@ -411,13 +390,11 @@ sub run_tests {
 
     }
 
-
     {
         # High bit bug -- japhy
         my $x = "ab\200d";
         ok $x =~ /.*?\200/, "High bit fine";
     }
-
 
     {
         # The basic character classes and Unicode
@@ -425,7 +402,6 @@ sub run_tests {
         ok "\x{0660}" =~ /\d/, 'ARABIC-INDIC DIGIT ZERO in /\d/';
         ok "\x{1680}" =~ /\s/, 'OGHAM SPACE MARK in /\s/';
     }
-
 
     {
         my $message = "Folding matches and Unicode";
@@ -450,7 +426,6 @@ sub run_tests {
         like("\x{101}a", qr/[\x{101}]/i, $message);
         like("\x{100}a", qr/[\x{101}]/i, $message);
     }
-
 
     {
         use charnames ':full';
@@ -485,7 +460,6 @@ sub run_tests {
         like($UPPER, qr/[$lower]/i, $message);
     }
 
-
     {
         use charnames ':full';
         my $message = "GREEK CAPITAL LETTER SIGMA vs " .
@@ -497,7 +471,6 @@ sub run_tests {
         may_not_warn sub {unlike("_:$char:_", qr/_:$SIGMA:_/i, $message)},
 	    'Did not warn [change a5961de5f4215b5c]';
     }
-
 
     {
         my $message = '\X';
@@ -517,7 +490,6 @@ sub run_tests {
         like("!abc!", qr/a\Cc/, $message);
         like("!abc!", qr/a\Xc/, $message);
     }
-
 
     {
         my $message = "Final Sigma";
@@ -563,7 +535,6 @@ sub run_tests {
         ok(":$S3:" =~ /:(([$sigma])+):/i && $1 eq $S3 && $2 eq $sigma, $message);
     }
 
-
     {
         use charnames ':full';
         my $message = "Parlez-Vous " .
@@ -603,7 +574,6 @@ sub run_tests {
         }
     }
 
-
     {
         my $message = "Lingering (and useless) UTF8 flag doesn't mess up /i";
         my $pat = "ABcde";
@@ -622,7 +592,6 @@ sub run_tests {
         chop $str;
         like($str, qr/$pat/i, $message);
     }
-
 
     {
         use charnames ':full';
@@ -654,7 +623,6 @@ sub run_tests {
         like("\N{LATIN SMALL LETTER SHARP S}",
 	     qr/[\N{LATIN SMALL LETTER SHARP S}x]/i, $message);
     }
-
 
     {
         # More whitespace: U+0085, U+2028, U+2029\n";
@@ -704,7 +672,6 @@ sub run_tests {
         }
     }
 
-
     {
         # . with /s should work on characters, as opposed to bytes
         my $message = ". with /s works on characters, not bytes";
@@ -737,7 +704,6 @@ sub run_tests {
         is($r1, $r2, $message);
     }
 
-
     {
         my $message = "Unicode lookbehind";
         like("A\x{100}B"       , qr/(?<=A.)B/, $message);
@@ -749,7 +715,6 @@ sub run_tests {
         # ok "\x{500\x{600}}B"  =~ /(?<=\x{500}.)B/;
         # but that looks like a typo.
     }
-
 
     {
         my $message = 'UTF-8 hash keys and /$/';
@@ -767,7 +732,6 @@ sub run_tests {
         }
     }
 
-
     {
         my $message = "No SEGV in s/// and UTF-8";
         my $s = "s#\x{100}" x 4;
@@ -779,7 +743,6 @@ sub run_tests {
             is($s, "s  " x 4, $message);
         }
     }
-
 
     {
         my $message = "UTF-8 bug (maybe already known?)";
@@ -794,7 +757,6 @@ sub run_tests {
         $u =~ s/\x{100}/e/g;
         is($u, "feeber", $message);
     }
-
 
     {
         my $message = "UTF-8 bug with s///";
@@ -827,7 +789,6 @@ sub run_tests {
         }
     }
 
-
     {
         my $message = "qr /.../x";
         my $R = qr / A B C # D E/x;
@@ -838,9 +799,6 @@ sub run_tests {
         ok("ABCDE" =~ m/($R)/ && $1 eq "ABC", $message);
     }
 
-
-
-
     {
         local $\;
         $_ = 'aaaaaaaaaa';
@@ -850,9 +808,6 @@ sub run_tests {
         ok +($a = $_, $_ =~ s/[^\s]+/./g), 's/[^\s]/ utf8';
         ok +($a = $_, $a =~ s/[^\d]+/./g), 's/[^\s]/ utf8';
     }
-
-
-
 
     {
         # Subject: Odd regexp behavior
@@ -874,7 +829,6 @@ sub run_tests {
         like("\x{2019}", qr/\S/, $message);
     }
 
-
     {
         # XXX DAPM 13-Apr-06. Recursive split is still broken. It's only luck it
         # hasn't been crashing. Disable this test until it is fixed properly.
@@ -884,11 +838,9 @@ sub run_tests {
         ok 0, 'cache_re & "(?{": it dumps core in 5.6.1 & 5.8.0';
     }
 
-
     {
         ok "\x{100}\n" =~ /\x{100}\n$/, "UTF-8 length cache and fbm_compile";
     }
-
 
     {
         package Str;
@@ -977,7 +929,6 @@ sub run_tests {
         ok $ok, "Trie min count matches";
     }
 
-
     {
         # TRIE related
         # LATIN SMALL/CAPITAL LETTER A WITH MACRON
@@ -1020,9 +971,6 @@ sub run_tests {
             &&  $1 eq "ba${s}pxySS$s$s",
            "COMMON PREFIX TRIEF + LATIN SMALL LETTER SHARP S";
     }
-
-
-
 
     {
     BEGIN {
@@ -1089,7 +1037,6 @@ sub run_tests {
 
     }
 
-
     {
         use charnames ':full';
 
@@ -1106,7 +1053,6 @@ sub run_tests {
             'Intermixed named and unicode escapes';
         ok "\0" =~ /^\N{NULL}$/, 'Verify that \N{NULL} works; is not confused with an error';
     }
-
 
     {
         our $brackets;
@@ -1144,7 +1090,6 @@ sub run_tests {
         }
     }
 
-
     {
         my $s = '123453456';
         $s =~ s/(?<digits>\d+)\k<digits>/$+{digits}/;
@@ -1153,7 +1098,6 @@ sub run_tests {
         $s =~ s/(?'digits'\d+)\k'digits'/$+{digits}/;
         ok $s eq '123456', 'Named capture (single quotes) s///';
     }
-
 
     {
         my @ary = (
@@ -1238,7 +1182,6 @@ sub run_tests {
         is($count, 4, "/.(*PRUNE)/");
     }
 
-
     {   # Test the (*SKIP) pattern
         our $count = 0;
         'aaab' =~ /a+b?(*SKIP)(?{$count++})(*FAIL)/;
@@ -1254,7 +1197,6 @@ sub run_tests {
         is($count, 2, "Expect 2 with (*SKIP)");
         is("@res", "aaab aaab", "Adjacent (*SKIP) works as expected");
     }
-
 
     {   # Test the (*SKIP) pattern
         our $count = 0;
@@ -1272,7 +1214,6 @@ sub run_tests {
         is("@res", "aaab aaab", "Adjacent (*SKIP) works as expected");
     }
 
-
     {   # Test the (*SKIP) pattern
         our $count = 0;
         'aaab' =~ /a*(*MARK:a)b?(*MARK:b)(*SKIP:a)(?{$count++})(*FAIL)/;
@@ -1286,7 +1227,6 @@ sub run_tests {
         is("@res", "aaab b aaab b ",
 	   "Adjacent (*MARK:a)b?)(*MARK:x)(*SKIP:a) works as expected");
     }
-
 
     {   # Test the (*COMMIT) pattern
         our $count = 0;
@@ -1304,7 +1244,6 @@ sub run_tests {
         is("@res", "aaab", "Adjacent (*COMMIT) works as expected");
     }
 
-
     {
         # Test named commits and the $REGERROR var
         our $REGERROR;
@@ -1321,7 +1260,6 @@ sub run_tests {
             }
         }
     }
-
 
     {
         # Test named commits and the $REGERROR var
@@ -1341,7 +1279,6 @@ sub run_tests {
         }
     }
 
-
     {
         # Test named commits and the $REGERROR var
 	my $message = '$REGERROR';
@@ -1360,7 +1297,6 @@ sub run_tests {
             ok /A (*THEN) X | B (*THEN) C/x, "Simple (*THEN) test";
         }
     }
-
 
     {
         my $message = "Relative Recursion";
@@ -1383,7 +1319,6 @@ sub run_tests {
         is($count, 1, "Optimiser should have prevented more than one match");
     }
 
-
     {
         # From Message-ID: <877ixs6oa6.fsf@k75.linux.bogus>
         my $dow_name = "nada";
@@ -1395,7 +1330,6 @@ sub run_tests {
         is($dow_name, $time_string, "UTF-8 trie common prefix extraction");
     }
 
-
     {
         my $v;
         ($v = 'bar') =~ /(\w+)/g;
@@ -1403,7 +1337,6 @@ sub run_tests {
         is("$1", 'bar',
 	   '$1 is safe after /g - may fail due to specialized config in pp_hot.c');
     }
-
 
     {
         my $message = "http://nntp.perl.org/group/perl.perl5.porters/118663";
@@ -1428,7 +1361,6 @@ sub run_tests {
         is($REGERROR, 'foo', $message);
     }
 
-
     {
         my $message = '\K test';
         my $x;
@@ -1445,7 +1377,6 @@ sub run_tests {
         is($x, "aabbccddee", $message);
     }
 
-
     {
         sub kt {
             return '4' if $_[0] eq '09028623';
@@ -1461,7 +1392,6 @@ sub run_tests {
         our $qr = qr/ (o) (??{ $1 }) /x;
         ok 'boob'=~/( b (??{ $qr }) b )/x && 1, "PL_curpm, nested eval";
     }
-
 
     {
         use charnames ":full";
@@ -1523,7 +1453,6 @@ sub run_tests {
         ok "\x{1C5}" =~ /\p{TitlecaseLetter}/i,  "\\x{1C5} =~ TitlecaseLetter under /i";
     }
 
-
     {
         # requirement of Unicode Technical Standard #18, 1.7 Code Points
         # cf. http://www.unicode.org/reports/tr18/#Supplementary_Characters
@@ -1534,7 +1463,6 @@ sub run_tests {
             ok "A${c}B" =~ /A[\0-\x{10000}]B/, "Unicode range - $x";
         }
     }
-
 
     {
         my $res="";
@@ -1553,7 +1481,6 @@ sub run_tests {
 	   "Check that (?&..) to a buffer inside a (?|...) goes to the leftmost");
     }
 
-
     {
         use warnings;
         my $message = "ASCII pattern that really is UTF-8";
@@ -1563,7 +1490,6 @@ sub run_tests {
         like($c, qr/${c}|\x{100}/, $message);
         is("@w", '', $message);
     }
-
 
     {
         my $message = "Corruption of match results of qr// across scopes";
@@ -1577,7 +1503,6 @@ sub run_tests {
         is("$1$2", "foobar", $message);
     }
 
-
     {
         my $message = "HORIZWS";
         local $_ = "\t \r\n \n \t".chr(11)."\n";
@@ -1590,7 +1515,6 @@ sub run_tests {
         s/\h/h/g;
         is($_, "hhHHhHhhHH", $message);
     }
-
 
     {
         # Various whitespace special patterns
@@ -1616,7 +1540,6 @@ sub run_tests {
             }
         }
     }
-
 
     {
         # Check that \\xDF match properly in its various forms
@@ -1655,7 +1578,6 @@ sub run_tests {
         }
     }
 
-
     {
         my $message = "BBC(Bleadperl Breaks CPAN) Today: String::Multibyte";
         my $re  = qr/(?:[\x00-\xFF]{4})/;
@@ -1669,7 +1591,6 @@ sub run_tests {
         local $" = "=";
         is("@a","$esc$hyp=$hyp=$esc$esc", $message);
     }
-
 
     {
         # Test for keys in %+ and %-
@@ -1693,7 +1614,6 @@ sub run_tests {
         is((join ",", sort map "@$_", values %-), ",a", $message);
     }
 
-
     {
         # length() on captures, the numbered ones end up in Perl_magic_len
         my $_ = "aoeu \xe6var ook";
@@ -1705,7 +1625,6 @@ sub run_tests {
         is(length $1,      4, q[length $1]);
         is(length $+{eek}, 4, q[length $+{eek} == length $1]);
     }
-
 
     {
         my $ok = -1;
@@ -1732,14 +1651,12 @@ sub run_tests {
         is($ok, 1, '$+{x} exists after "foo"=~/(?<x>foo)|bar/');
     }
 
-
     {
         local $_;
         ($_ = 'abc') =~ /(abc)/g;
         $_ = '123';
         is("$1", 'abc', "/g leads to unsafe match vars: $1");
     }
-
 
     {
         # Message-ID: <20070818091501.7eff4831@r2d2>
@@ -1761,7 +1678,6 @@ sub run_tests {
         is(length $str, 0, "Trie scope error, string should be empty");
     }
 
-
     {
 # more TRIE/AHOCORASICK problems with mixed utf8 / latin-1 and case folding
     for my $chr (160 .. 255) {
@@ -1777,7 +1693,6 @@ sub run_tests {
         our $b = $a;
         is($b, $a, "Copy of scalar used for postponed subexpression");
     }
-
 
     {
         our @ctl_n = ();
@@ -1800,7 +1715,6 @@ sub run_tests {
         is("@ctl_n", "bla blubb", '$^N inside of (?{}) works as expected');
         is("@plus",  "bla blubb", '$+  inside of (?{}) works as expected');
     }
-
 
     SKIP: {
         # XXX: This set of tests is essentially broken, POSIX character classes
@@ -1833,7 +1747,6 @@ sub run_tests {
         is(join ('', @isPunctLatin1), '',
 	   'IsPunct agrees with [:punct:] with explicit Latin1');
     }
-
 
     {
 	# Tests for [#perl 71942]
