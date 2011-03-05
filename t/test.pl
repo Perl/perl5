@@ -1063,6 +1063,18 @@ WHOA
     _ok( !$diag, _where(), $name );
 }
 
+sub warning_is {
+    my ($code, $expect, $name) = @_;
+    my $w;
+    local $SIG {__WARN__} = sub {$w .= join "" => @_};
+    {
+	use warnings 'all';
+	&$code;
+    }
+    local $Level = $Level + 1;
+    is($w, $expect, $name);
+}
+
 # Set a watchdog to timeout the entire test file
 # NOTE:  If the test file uses 'threads', then call the watchdog() function
 #        _AFTER_ the 'threads' module is loaded.

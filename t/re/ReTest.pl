@@ -43,13 +43,4 @@ sub must_warn {
     like($w, qr/$pattern/, "Got warning /$pattern/");
 }
 
-sub may_not_warn {
-    my ($code, $name) = @_;
-    my $w;
-    local $SIG {__WARN__} = sub {$w .= join "" => @_};
-    use warnings 'all';
-    ref $code ? &$code : eval $code;
-    is($w, undef, $name) or diag("Got warning '$w'");
-}
-
 1;

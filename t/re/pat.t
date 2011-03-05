@@ -962,7 +962,8 @@ sub run_tests {
 
     {
         my $message = '"1" is not \s';
-        may_not_warn sub {ok ("1\n" x 102 !~ /^\s*\n/m, $message)}, "$message (did not warn)";
+        warning_is(sub {unlike("1\n" x 102, qr/^\s*\n/m, $message)},
+		   undef, "$message (did not warn)");
     }
 
     {

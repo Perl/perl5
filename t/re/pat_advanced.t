@@ -468,8 +468,8 @@ sub run_tests {
         my $SIGMA = "\N{GREEK CAPITAL LETTER SIGMA}";
         my $char  = "\N{COMBINING GREEK PERISPOMENI}";
 
-        may_not_warn sub {unlike("_:$char:_", qr/_:$SIGMA:_/i, $message)},
-	    'Did not warn [change a5961de5f4215b5c]';
+        warning_is(sub {unlike("_:$char:_", qr/_:$SIGMA:_/i, $message)}, undef,
+		   'Did not warn [change a5961de5f4215b5c]');
     }
 
     {
@@ -679,7 +679,8 @@ sub run_tests {
         my $s = "\x{e4}\x{100}";
         # This is not expected to match: the point is that
         # neither should we get "Malformed UTF-8" warnings.
-        may_not_warn sub {$s =~ /\G(.+?)\n/gcs}, "No 'Malformed UTF-8' warning";
+        warning_is(sub {$s =~ /\G(.+?)\n/gcs}, undef,
+		   "No 'Malformed UTF-8' warning");
 
         my @c;
         push @c => $1 while $s =~ /\G(.)/gs;
