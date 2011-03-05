@@ -25,8 +25,6 @@ eval 'use Config';          #  Defaults assumed if this fails
 
 require './test.pl';
 
-*iseq = \&is;
-
 sub eval_ok ($;$) {
     my ($code, $name) = @_;
     local $@;

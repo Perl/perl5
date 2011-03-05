@@ -617,7 +617,7 @@ sub run_tests {
             1;
         };
         if ($r) {
-            iseq $f, "ab", "pos() retained between calls";
+            is($f, "ab", "pos() retained between calls");
         }
         else {
             local $::TODO;
@@ -634,7 +634,7 @@ sub run_tests {
             1;
         };
         if ($s) {
-            iseq $g, "ab", "pos() retained between calls";
+            is($g, "ab", "pos() retained between calls");
         }
         else {
             local $::TODO;
@@ -951,7 +951,7 @@ sub run_tests {
             push @res, "$2"; 
             last if @res > 3;
         }
-        iseq "@res", "A B C", "/g pattern shouldn't infinite loop; Bug 6893";
+        is("@res", "A B C", "/g pattern shouldn't infinite loop; Bug 6893");
     }
 
 
@@ -1169,7 +1169,7 @@ sub run_tests {
         "A" =~ /(((A))?)+/;
         my $second = $2;
 
-        iseq($first, $second);
+        is($first, $second);
     }    
 
     {

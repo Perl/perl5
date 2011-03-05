@@ -77,7 +77,7 @@ sub run_tests {
     {
         our $a = bless qr /foo/ => 'Foo';
         ok 'goodfood' =~ $a,     "Reblessed qr // matches";
-        iseq $a, '(?^:foo)', "Reblessed qr // stringifies";
+        is($a, '(?^:foo)', "Reblessed qr // stringifies");
         my $x = "\x{3fe}";
         my $z = my $y = "\317\276";  # Byte representation of $x
         $a = qr /$x/;
@@ -163,8 +163,8 @@ sub run_tests {
               # unset @ctl_n and @plus
               @ctl_n = @plus = ();
             }
-            iseq("@ctl_n", $test->[2], "ctl_n $c");
-            iseq("@plus", $test->[3], "plus $c");
+            is("@ctl_n", $test->[2], "ctl_n $c");
+            is("@plus", $test->[3], "plus $c");
         }
     }
 

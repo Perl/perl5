@@ -157,7 +157,7 @@ sub run_tests {
     {
         $_ = 'now is the {time for all} good men to come to.';
         / {([^}]*)}/;
-        iseq $1, 'time for all', "Match braces";
+        is($1, 'time for all', "Match braces");
     }
 
     {
@@ -229,7 +229,7 @@ sub run_tests {
             $t9++ if /$pat9/o;
         }
         my $x = "$t1$t2$t3$t4$t5$t6$t7$t8$t9";
-        iseq $x, '505550555', "Test /o";
+        is($x, '505550555', "Test /o");
     }
 
 
@@ -268,7 +268,7 @@ sub run_tests {
 
         $_ .= '';
         my @x = /abc/g;
-        iseq @x, 2, "/g reset after assignment";
+        is(@x, 2, "/g reset after assignment");
     }
 
     {
@@ -296,7 +296,7 @@ sub run_tests {
     {
         $_ = 'foobar1 bar2 foobar3 barfoobar5 foobar6';
         my @out = /(?<!foo)bar./g;
-        iseq "@out", 'bar2 barf', "Negative lookbehind";
+        is("@out", 'bar2 barf', "Negative lookbehind");
     }
 
     {
@@ -430,7 +430,7 @@ sub run_tests {
 
     {
         my @ans = ('a/b' =~ m%(.*/)?(.*)%);    # Stack may be bad
-        iseq "@ans", 'a/ b', "Stack may be bad";
+        is("@ans", 'a/ b', "Stack may be bad");
     }
 
     {
@@ -501,40 +501,40 @@ sub run_tests {
     }
 
     {
-        iseq qr/\b\v$/i,    '(?^i:\b\v$)', 'qr/\b\v$/i';
-        iseq qr/\b\v$/s,    '(?^s:\b\v$)', 'qr/\b\v$/s';
-        iseq qr/\b\v$/m,    '(?^m:\b\v$)', 'qr/\b\v$/m';
-        iseq qr/\b\v$/x,    '(?^x:\b\v$)', 'qr/\b\v$/x';
-        iseq qr/\b\v$/xism, '(?^msix:\b\v$)',  'qr/\b\v$/xism';
-        iseq qr/\b\v$/,     '(?^:\b\v$)', 'qr/\b\v$/';
+        is(qr/\b\v$/i,    '(?^i:\b\v$)', 'qr/\b\v$/i');
+        is(qr/\b\v$/s,    '(?^s:\b\v$)', 'qr/\b\v$/s');
+        is(qr/\b\v$/m,    '(?^m:\b\v$)', 'qr/\b\v$/m');
+        is(qr/\b\v$/x,    '(?^x:\b\v$)', 'qr/\b\v$/x');
+        is(qr/\b\v$/xism, '(?^msix:\b\v$)',  'qr/\b\v$/xism');
+        is(qr/\b\v$/,     '(?^:\b\v$)', 'qr/\b\v$/');
     }
 
     {   # Test that charset modifier work, and are interpolated
-        iseq qr/\b\v$/, '(?^:\b\v$)', 'Verify no locale, no unicode_strings gives default modifier';
-        iseq qr/(?l:\b\v$)/, '(?^:(?l:\b\v$))', 'Verify infix l modifier compiles';
-        iseq qr/(?u:\b\v$)/, '(?^:(?u:\b\v$))', 'Verify infix u modifier compiles';
-        iseq qr/(?l)\b\v$/, '(?^:(?l)\b\v$)', 'Verify (?l) compiles';
-        iseq qr/(?u)\b\v$/, '(?^:(?u)\b\v$)', 'Verify (?u) compiles';
+        is(qr/\b\v$/, '(?^:\b\v$)', 'Verify no locale, no unicode_strings gives default modifier');
+        is(qr/(?l:\b\v$)/, '(?^:(?l:\b\v$))', 'Verify infix l modifier compiles');
+        is(qr/(?u:\b\v$)/, '(?^:(?u:\b\v$))', 'Verify infix u modifier compiles');
+        is(qr/(?l)\b\v$/, '(?^:(?l)\b\v$)', 'Verify (?l) compiles');
+        is(qr/(?u)\b\v$/, '(?^:(?u)\b\v$)', 'Verify (?u) compiles');
 
         my $dual = qr/\b\v$/;
         use locale;
         my $locale = qr/\b\v$/;
-        iseq $locale,    '(?^l:\b\v$)', 'Verify has l modifier when compiled under use locale';
+        is($locale,    '(?^l:\b\v$)', 'Verify has l modifier when compiled under use locale');
         no locale;
 
         use feature 'unicode_strings';
         my $unicode = qr/\b\v$/;
-        iseq $unicode,    '(?^u:\b\v$)', 'Verify has u modifier when compiled under unicode_strings';
-        iseq qr/abc$dual/,    '(?^u:abc(?^:\b\v$))', 'Verify retains d meaning when interpolated under locale';
-        iseq qr/abc$locale/,    '(?^u:abc(?^l:\b\v$))', 'Verify retains l when interpolated under unicode_strings';
+        is($unicode,    '(?^u:\b\v$)', 'Verify has u modifier when compiled under unicode_strings');
+        is(qr/abc$dual/,    '(?^u:abc(?^:\b\v$))', 'Verify retains d meaning when interpolated under locale');
+        is(qr/abc$locale/,    '(?^u:abc(?^l:\b\v$))', 'Verify retains l when interpolated under unicode_strings');
 
         no feature 'unicode_strings';
-        iseq qr/abc$locale/,    '(?^:abc(?^l:\b\v$))', 'Verify retains l when interpolated outside locale and unicode strings';
-        iseq qr/def$unicode/,    '(?^:def(?^u:\b\v$))', 'Verify retains u when interpolated outside locale and unicode strings';
+        is(qr/abc$locale/,    '(?^:abc(?^l:\b\v$))', 'Verify retains l when interpolated outside locale and unicode strings');
+        is(qr/def$unicode/,    '(?^:def(?^u:\b\v$))', 'Verify retains u when interpolated outside locale and unicode strings');
 
         use locale;
-        iseq qr/abc$dual/,    '(?^l:abc(?^:\b\v$))', 'Verify retains d meaning when interpolated under locale';
-        iseq qr/abc$unicode/,    '(?^l:abc(?^u:\b\v$))', 'Verify retains u when interpolated under locale';
+        is(qr/abc$dual/,    '(?^l:abc(?^:\b\v$))', 'Verify retains d meaning when interpolated under locale');
+        is(qr/abc$unicode/,    '(?^l:abc(?^u:\b\v$))', 'Verify retains u when interpolated under locale');
     }
 
 
@@ -812,7 +812,7 @@ sub run_tests {
         $_ = '123x123';
         my @res = /(\d*|x)/g;
         local $" = '|';
-        iseq "@res", "123||x|123|", "0 match in alternation";
+        is("@res", "123||x|123|", "0 match in alternation");
     }
 
 
@@ -881,7 +881,7 @@ sub run_tests {
 
         my $text = "abc dbf";
         my @res = ($text =~ /.*?(b).*?\b/g);
-        iseq "@res", "b b", '\b is not special';
+        is("@res", "b b", '\b is not special');
     }
 
 
@@ -1123,37 +1123,37 @@ sub run_tests {
         # When this happens the tests can be removed
 
         no warnings 'syntax';
-        iseq( eval q#my $r = "a" =~ m/a/lt 2;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by lt");
-        iseq( eval q#my $r = "a" =~ m/a/le 1;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by le");
-        iseq( eval q#my $r = "a" =~ m/a/eq 1;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by eq");
-        iseq( eval q#my $r = "a" =~ m/a/ne 0;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by ne");
-        iseq( eval q#my $r = "a" =~ m/a/and 1;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by and");
-        iseq( eval q#my $r = "a" =~ m/a/unless 0;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by unless");
-        iseq( eval q#my $c = 1; my $r; $r = "a" =~ m/a/while $c--;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by while");
-        iseq( eval q#my $c = 0; my $r; $r = "a" =~ m/a/until $c++;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by until");
-        iseq( eval q#my $r; $r = "a" =~ m/a/for 1;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by for");
-        iseq( eval q#my $r; $r = "a" =~ m/a/foreach 1;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by foreach");
+        is(eval q#my $r = "a" =~ m/a/lt 2;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by lt");
+        is(eval q#my $r = "a" =~ m/a/le 1;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by le");
+        is(eval q#my $r = "a" =~ m/a/eq 1;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by eq");
+        is(eval q#my $r = "a" =~ m/a/ne 0;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by ne");
+        is(eval q#my $r = "a" =~ m/a/and 1;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by and");
+        is(eval q#my $r = "a" =~ m/a/unless 0;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by unless");
+        is(eval q#my $c = 1; my $r; $r = "a" =~ m/a/while $c--;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by while");
+        is(eval q#my $c = 0; my $r; $r = "a" =~ m/a/until $c++;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by until");
+        is(eval q#my $r; $r = "a" =~ m/a/for 1;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by for");
+        is(eval q#my $r; $r = "a" =~ m/a/foreach 1;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by foreach");
 
-        iseq( eval q#my $t = "a"; my $r = $t =~ s/a//lt 2;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by lt");
-        iseq( eval q#my $t = "a"; my $r = $t =~ s/a//le 1;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by le");
-        iseq( eval q#my $t = "a"; my $r = $t =~ s/a//ne 0;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by ne");
-        iseq( eval q#my $t = "a"; my $r = $t =~ s/a//and 1;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by and");
-        iseq( eval q#my $t = "a"; my $r = $t =~ s/a//unless 0;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by unless");
+        is(eval q#my $t = "a"; my $r = $t =~ s/a//lt 2;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by lt");
+        is(eval q#my $t = "a"; my $r = $t =~ s/a//le 1;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by le");
+        is(eval q#my $t = "a"; my $r = $t =~ s/a//ne 0;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by ne");
+        is(eval q#my $t = "a"; my $r = $t =~ s/a//and 1;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by and");
+        is(eval q#my $t = "a"; my $r = $t =~ s/a//unless 0;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by unless");
 
-        iseq( eval q#my $c = 1; my $r; my $t = "a"; $r = $t =~ s/a//while $c--;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by while");
-        iseq( eval q#my $c = 0; my $r; my $t = "a"; $r = $t =~ s/a//until $c++;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by until");
-        iseq( eval q#my $r; my $t = "a"; $r = $t =~ s/a//for 1;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by for");
-        iseq( eval q#my $r; my $t = "a"; $r = $t =~ s/a//for 1;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by foreach");
+        is(eval q#my $c = 1; my $r; my $t = "a"; $r = $t =~ s/a//while $c--;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by while");
+        is(eval q#my $c = 0; my $r; my $t = "a"; $r = $t =~ s/a//until $c++;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by until");
+        is(eval q#my $r; my $t = "a"; $r = $t =~ s/a//for 1;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by for");
+        is(eval q#my $r; my $t = "a"; $r = $t =~ s/a//for 1;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by foreach");
     }
 
     {
         my $str= "\x{100}";
         chop $str;
         my $qr= qr/$str/;
-        iseq( "$qr", "(?^:)", "Empty pattern qr// stringifies to (?^:) with unicode flag enabled - Bug #80212" );
+        is("$qr", "(?^:)", "Empty pattern qr// stringifies to (?^:) with unicode flag enabled - Bug #80212");
         $str= "";
         $qr= qr/$str/;
-        iseq( "$qr", "(?^:)", "Empty pattern qr// stringifies to (?^:) with unicode flag disabled - Bug #80212" )
+        is("$qr", "(?^:)", "Empty pattern qr// stringifies to (?^:) with unicode flag disabled - Bug #80212");
 
     }
 
@@ -1166,7 +1166,7 @@ sub run_tests {
         "A" =~ /(((A))?)+/;
         my $second = $2;
 
-        iseq($first, $second);
+        is($first, $second);
     }
 
     {
