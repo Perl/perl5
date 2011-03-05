@@ -524,6 +524,27 @@ is (ref($x),'Math::Foo');
 $x = $class->new('+inf'); is ($x,'inf');
 
 ###############################################################################
+# numify() and 64 bit integer support
+
+require Config;
+SKIP: {
+    skip("no 64 bit integer support", 4)
+      unless $Config::Config{use64bitint} || $Config::Config{use64bitall};
+
+    # The following should not give "1.84467440737096e+19".
+
+    $x = $class -> new(2) -> bpow(64) -> bdec();
+    is($x -> bstr(),   "18446744073709551615", "bigint 2**64-1 as string");
+    is($x -> numify(), "18446744073709551615", "bigint 2**64-1 as number");
+
+    # The following should not give "-9.22337203685478e+18".
+
+    $x = $class -> new(2) -> bpow(63) -> bneg();
+    is($x -> bstr(),   "-9223372036854775808", "bigint -2**63 as string");
+    is($x -> numify(), "-9223372036854775808", "bigint -2**63 as number");
+};
+
+###############################################################################
 ###############################################################################
 # the following tests only make sense with Math::BigInt::Calc or BareCalc or
 # FastCalc
