@@ -1050,9 +1050,7 @@ sub run_tests {
 	     '(?>) does not cause wrongness on long string; Bug 60034');
         my $b = $a . chr 256;
         chop $b;
-        {
-            is($a, $b, 'Noname test; Bug 60034');
-        }
+	is($a, $b, 'Bug 60034');
         like($b, qr/\A(?>[a-z])*\z/,
 	     '(?>) does not cause wrongness on long string with UTF-8; Bug 60034');
     }

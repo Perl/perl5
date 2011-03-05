@@ -178,7 +178,7 @@ sub run_tests {
             defined $_[0] ? $_[0] : "undef";
         };
 
-        like("123", qr/^(\d)(((??{1 + $^N})))+$/, "Noname test; Bug 56194");
+        like("123", qr/^(\d)(((??{1 + $^N})))+$/, 'Bug 56194');
 
         our @ctl_n;
         our @plus;
@@ -326,16 +326,18 @@ sub run_tests {
             my $str = join(", ", '$1 = '.$f->($1), '$2 = '.$f->($2), '$3 = '.$f->($3), '$4 = '.$f->($4),'$5 = '.$f->($5),'$^R = '.$f->($^R));
             push @ctl_n, $f->($^N);
             push @plus, $f->($+);
-            ok($match, "Noname test; Bug 56194");
+            ok($match, 'Bug 56194');
             if (not $match) {
                 # unset $str
                 @ctl_n = ();
                 @plus = ();
                 $str = "";
             }
-            is("@ctl_n", "1 2 undef", "Noname test; Bug 56194");
-            is("@plus", "1 2 undef", "Noname test; Bug 56194");
-            is($str, "\$1 = undef, \$2 = undef, \$3 = undef, \$4 = undef, \$5 = undef, \$^R = undef", "Noname test; Bug 56194");
+            is("@ctl_n", "1 2 undef", 'Bug 56194');
+            is("@plus", "1 2 undef", 'Bug 56194');
+            is($str,
+               "\$1 = undef, \$2 = undef, \$3 = undef, \$4 = undef, \$5 = undef, \$^R = undef",
+               'Bug 56194');
        }
     }
 
