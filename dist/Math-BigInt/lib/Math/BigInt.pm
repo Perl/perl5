@@ -3656,13 +3656,26 @@ See L<Input> for more info on accepted input formats.
 
 	$x = Math::BigInt->from_oct("0775");	# input is octal
 
+Interpret the input as an octal string and return the corresponding value. A
+"0" (zero) prefix is optional. A single underscore character may be placed
+right after the prefix, if present, or between any two digits. If the input is
+invalid, a NaN is returned.
+
 =head2 from_hex()
 
 	$x = Math::BigInt->from_hex("0xcafe");	# input is hexadecimal
 
+Interpret input as a hexadecimal string. A "0x" or "x" prefix is optional. A
+single underscore character may be placed right after the prefix, if present,
+or between any two digits. If the input is invalid, a NaN is returned.
+
 =head2 from_bin()
 
 	$x = Math::BigInt->from_bin("0b10011");	# input is binary
+
+Interpret the input as a binary string. A "0b" or "b" prefix is optional. A
+single underscore character may be placed right after the prefix, if present,
+or between any two digits. If the input is invalid, a NaN is returned.
 
 =head2 bnan()
 
