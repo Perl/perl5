@@ -21,7 +21,7 @@ BEGIN {
     do "re/ReTest.pl" or die $@;
 }
 
-plan tests => 426;  # Update this when adding/deleting tests.
+plan tests => 433;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -584,14 +584,14 @@ sub run_tests {
     }
 
     {
-        must_die 'q(a:[b]:) =~ /[x[:foo:]]/',
-                 qr/POSIX class \[:[^:]+:\] unknown in regex/,
-                 'POSIX class [: :] must have valid name';
+        is(eval 'q(a:[b]:) =~ /[x[:foo:]]/', undef);
+	like ($@, qr/POSIX class \[:[^:]+:\] unknown in regex/,
+	      'POSIX class [: :] must have valid name');
 
         for my $d (qw [= .]) {
-            must_die "/[[${d}foo${d}]]/",
-                     qr/\QPOSIX syntax [$d $d] is reserved for future extensions/,
-                     "POSIX syntax [[$d $d]] is an error";
+            is(eval "/[[${d}foo${d}]]/", undef);
+	    like ($@, qr/\QPOSIX syntax [$d $d] is reserved for future extensions/,
+		  "POSIX syntax [[$d $d]] is an error");
         }
     }
 
@@ -675,8 +675,9 @@ sub run_tests {
     }
 
     foreach ('$+[0] = 13', '$-[0] = 13', '@+ = (7, 6, 5)', '@- = qw (foo bar)') {
-        must_die($_, qr/^Modification of a read-only value attempted/,
-		 'Elements of @- and @+ are read-only');
+	is(eval $_, undef);
+        like($@, qr/^Modification of a read-only value attempted/,
+	     'Elements of @- and @+ are read-only');
     }
 
     {

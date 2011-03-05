@@ -33,14 +33,6 @@ sub eval_ok ($;$) {
     }
 }
 
-sub must_die {
-    my ($code, $pattern, $name) = @_;
-    Carp::confess("Bad pattern") unless $pattern;
-    undef $@;
-    ref $code ? &$code : eval $code;
-    like($@, $pattern, $name // "\$\@ =~ /$pattern/");
-}
-
 sub must_warn {
     my ($code, $pattern, $name) = @_;
     Carp::confess("Bad pattern") unless $pattern;
