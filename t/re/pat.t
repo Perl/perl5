@@ -21,7 +21,7 @@ BEGIN {
     do "re/ReTest.pl" or die $@;
 }
 
-plan tests => 436;  # Update this when adding/deleting tests.
+plan tests => 455;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1103,28 +1103,38 @@ sub run_tests {
         # which indicate that this syntax will be removed in 5.16.
         # When this happens the tests can be removed
 
-        no warnings 'syntax';
-        is(eval q#my $r = "a" =~ m/a/lt 2;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by lt");
-        is(eval q#my $r = "a" =~ m/a/le 1;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by le");
-        is(eval q#my $r = "a" =~ m/a/eq 1;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by eq");
-        is(eval q#my $r = "a" =~ m/a/ne 0;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by ne");
-        is(eval q#my $r = "a" =~ m/a/and 1;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by and");
-        is(eval q#my $r = "a" =~ m/a/unless 0;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by unless");
-        is(eval q#my $c = 1; my $r; $r = "a" =~ m/a/while $c--;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by while");
-        is(eval q#my $c = 0; my $r; $r = "a" =~ m/a/until $c++;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by until");
-        is(eval q#my $r; $r = "a" =~ m/a/for 1;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by for");
-        is(eval q#my $r; $r = "a" =~ m/a/foreach 1;"eval_ok $r"#, "eval_ok 1", "regex (m//) followed by foreach");
+	foreach (['my $r = "a" =~ m/a/lt 2', 'm', 'lt'],
+		 ['my $r = "a" =~ m/a/le 1', 'm', 'le'],
+		 ['my $r = "a" =~ m/a/eq 1', 'm', 'eq'],
+		 ['my $r = "a" =~ m/a/ne 0', 'm', 'ne'],
+		 ['my $r = "a" =~ m/a/and 1', 'm', 'and'],
+		 ['my $r = "a" =~ m/a/unless 0', 'm', 'unless'],
+		 ['my $c = 1; my $r; $r = "a" =~ m/a/while $c--', 'm', 'while'],
+		 ['my $c = 0; my $r; $r = "a" =~ m/a/until $c++', 'm', 'until'],
+		 ['my $r; $r = "a" =~ m/a/for 1', 'm', 'for'],
+		 ['my $r; $r = "a" =~ m/a/foreach 1', 'm', 'foreach'],
 
-        is(eval q#my $t = "a"; my $r = $t =~ s/a//lt 2;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by lt");
-        is(eval q#my $t = "a"; my $r = $t =~ s/a//le 1;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by le");
-        is(eval q#my $t = "a"; my $r = $t =~ s/a//ne 0;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by ne");
-        is(eval q#my $t = "a"; my $r = $t =~ s/a//and 1;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by and");
-        is(eval q#my $t = "a"; my $r = $t =~ s/a//unless 0;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by unless");
+		 ['my $t = "a"; my $r = $t =~ s/a//lt 2', 's', 'lt'],
+		 ['my $t = "a"; my $r = $t =~ s/a//le 1', 's', 'le'],
+		 ['my $t = "a"; my $r = $t =~ s/a//ne 0', 's', 'ne'],
+		 ['my $t = "a"; my $r = $t =~ s/a//and 1', 's', 'and'],
+		 ['my $t = "a"; my $r = $t =~ s/a//unless 0', 's', 'unless'],
 
-        is(eval q#my $c = 1; my $r; my $t = "a"; $r = $t =~ s/a//while $c--;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by while");
-        is(eval q#my $c = 0; my $r; my $t = "a"; $r = $t =~ s/a//until $c++;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by until");
-        is(eval q#my $r; my $t = "a"; $r = $t =~ s/a//for 1;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by for");
-        is(eval q#my $r; my $t = "a"; $r = $t =~ s/a//for 1;"eval_ok $r"#, "eval_ok 1", "regex (s///) followed by foreach");
+		 ['my $c = 1; my $r; my $t = "a"; $r = $t =~ s/a//while $c--', 's', 'while'],
+		 ['my $c = 0; my $r; my $t = "a"; $r = $t =~ s/a//until $c++', 's', 'until'],
+		 ['my $r; my $t = "a"; $r = $t =~ s/a//for 1', 's', 'for'],
+		 ['my $r; my $t = "a"; $r = $t =~ s/a//for 1', 's', 'foreach'],
+		) {
+	    my $message = sprintf 'regex (%s) followed by $_->[2]',
+		$_->[1] eq 'm' ? 'm//' : 's///';
+	    my $code = "$_->[0]; 'eval_ok ' . \$r";
+	    my $result = do {
+		no warnings 'syntax';
+		eval $code;
+	    };
+	    is($@, '', $message);
+	    is($result, 'eval_ok 1', $message);
+	}
     }
 
     {

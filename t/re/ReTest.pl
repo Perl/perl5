@@ -22,15 +22,4 @@ our $IS_EBCDIC = $ordA == 193;
 
 require './test.pl';
 
-sub eval_ok ($;$) {
-    my ($code, $name) = @_;
-    local $@;
-    if (ref $code) {
-        ok(eval {&$code} && !$@, $name);
-    }
-    else {
-        ok(eval  ($code) && !$@, $name);
-    }
-}
-
 1;
