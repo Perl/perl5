@@ -10,7 +10,6 @@ use strict;
 use warnings;
 use 5.010;
 
-
 sub run_tests;
 
 $| = 1;
@@ -21,7 +20,6 @@ BEGIN {
     @INC = ('../lib','.');
     do "re/ReTest.pl" or die $@;
 }
-
 
 plan tests => 426;  # Update this when adding/deleting tests.
 
@@ -299,7 +297,10 @@ sub run_tests {
     {
         my $message = "REG_INFTY tests";
         # Tests which depend on REG_INFTY
-        $::reg_infty   = $Config {reg_infty} // 32767;
+
+	#  Defaults assumed if this fails
+	eval { require Config; };
+        $::reg_infty   = $Config::Config{reg_infty} // 32767;
         $::reg_infty_m = $::reg_infty - 1;
         $::reg_infty_p = $::reg_infty + 1;
         $::reg_infty_m = $::reg_infty_m;   # Suppress warning.

@@ -20,9 +20,6 @@ our $ordA = ord ('A');  # This defines ASCII/UTF-8 vs EBCDIC/UTF-EBCDIC
 our $IS_ASCII  = $ordA ==  65;
 our $IS_EBCDIC = $ordA == 193;
 
-use vars '%Config';
-eval 'use Config';          #  Defaults assumed if this fails
-
 require './test.pl';
 
 sub eval_ok ($;$) {
