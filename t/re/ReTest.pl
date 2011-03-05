@@ -33,14 +33,4 @@ sub eval_ok ($;$) {
     }
 }
 
-sub must_warn {
-    my ($code, $pattern, $name) = @_;
-    Carp::confess("Bad pattern") unless $pattern;
-    my $w;
-    local $SIG {__WARN__} = sub {$w .= join "" => @_};
-    use warnings 'all';
-    ref $code ? &$code : eval $code;
-    like($w, qr/$pattern/, "Got warning /$pattern/");
-}
-
 1;

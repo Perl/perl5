@@ -24,9 +24,6 @@ BEGIN {
     do "re/ReTest.pl" or die $@;
 }
 
-
-plan tests => 1344;  # Update this when adding/deleting tests.
-
 run_tests() unless caller;
 
 #
@@ -184,12 +181,16 @@ sub run_tests {
 	}
 
         # Now test multi-error regexes
-        must_warn 'qr/(?g-o)/',  '^Useless \(\?g\).*\nUseless \(\?-o\)';
-        must_warn 'qr/(?g-c)/',  '^Useless \(\?g\).*\nUseless \(\?-c\)';
-        # (?c) means (?g) error won't be thrown
-        must_warn 'qr/(?o-cg)/', '^Useless \(\?o\).*\nUseless \(\?-c\)';
-        must_warn 'qr/(?ogc)/',  '^Useless \(\?o\).*\nUseless \(\?g\).*\n' .
-                                  'Useless \(\?c\)';
+	foreach (['(?g-o)', qr/^Useless \(\?g\)/, qr/^Useless \(\?-o\)/],
+		 ['(?g-c)', qr/^Useless \(\?g\)/, qr/^Useless \(\?-c\)/],
+		 # (?c) means (?g) error won't be thrown
+		 ['(?o-cg)', qr/^Useless \(\?o\)/, qr/^Useless \(\?-c\)/],
+		 ['(?ogc)', qr/^Useless \(\?o\)/, qr/^Useless \(\?g\)/,
+		  qr/^Useless \(\?c\)/],
+		) {
+	    my ($re, @warnings) = @$_;
+	    warnings_like(sub {eval "qr/$re/"}, \@warnings, "qr/$re/ warns");
+	}
     }
 
     {
@@ -2087,6 +2088,8 @@ sub run_tests {
 
     # !!! NOTE that tests that aren't at all likely to crash perl should go
     # a ways above, above these last ones.
+
+    done_testing();
 } # End of sub run_tests
 
 1;

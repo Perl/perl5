@@ -1063,7 +1063,9 @@ WHOA
     _ok( !$diag, _where(), $name );
 }
 
-sub _warning {
+# This will generate a variable number of tests if passed an array of 2 or more
+# tests. Use done_testing() instead of a fixed plan.
+sub warnings_like {
     my ($code, $expect, $name) = @_;
     my @w;
     local $SIG {__WARN__} = sub {push @w, join "", @_};
@@ -1071,19 +1073,15 @@ sub _warning {
 	use warnings 'all';
 	&$code;
     }
-    local $Level = $Level + 2;
-    if(!defined $expect) {
-	is("@w", '', $name);
-    } elsif (@w == 1) {
-	if(ref $expect) {
-	    like($w[0], $expect, $name);
+    local $Level = $Level + 1;
+
+    cmp_ok(scalar @w, '==', scalar @$expect, $name) if @$expect != 1;
+    while (my ($i, $e) = each @$expect) {
+	if (ref $e) {
+	    like($w[$i], $e, $name);
 	} else {
-	    is($w[0], $expect, $name);
+	    is($w[$i], $e, $name);
 	}
-    } else {
-	# This will fail, generating diagnostics
-	cmp_ok(scalar @w, '==', 1, $name);
-	diag("Warning: $_") foreach @w;
     }
 }
 
@@ -1091,14 +1089,16 @@ sub warning_is {
     my ($code, $expect, $name) = @_;
     die sprintf "Expect must be a string or undef, not a %s reference", ref $expect
 	if ref $expect;
-    _warning($code, $expect, $name);
+    local $Level = $Level + 1;
+    warnings_like($code, defined $expect? [$expect] : [], $name);
 }
 
 sub warning_like {
     my ($code, $expect, $name) = @_;
     die sprintf "Expect must be a regexp object"
 	unless ref $expect eq 'Regexp';
-    _warning($code, $expect, $name);
+    local $Level = $Level + 1;
+    warnings_like($code, [$expect], $name);
 }
 
 # Set a watchdog to timeout the entire test file
