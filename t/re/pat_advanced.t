@@ -46,7 +46,7 @@ sub run_tests {
         }
         else {
             SKIP: {
-                ok 0, "Unexpected platform", "ord ('A') = $ordA";
+                ok 0, "Unexpected platform", "ord ('A') =" . ord 'A';
                 skip "Unexpected platform";
             }
         }
@@ -64,7 +64,7 @@ sub run_tests {
             is($1, "\x8C", $message);
         }
         else {
-            ok 0, "Unexpected platform", "ord ('A') = $ordA";
+            ok 0, "Unexpected platform", "ord ('A') = " . ord 'A';
         }
         ok(/(\C)/g, $message);
         if ($IS_ASCII) {
@@ -74,7 +74,7 @@ sub run_tests {
             is($1, "\x41", $message);
         }
         else {
-            ok 0, "Unexpected platform", "ord ('A') = $ordA";
+            ok 0, "Unexpected platform", "ord ('A') = " . ord 'A';
         }
     }
 

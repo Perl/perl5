@@ -10,12 +10,11 @@ use Carp;
 use vars qw(
     $IS_ASCII
     $IS_EBCDIC
-    $ordA
 );
 
 $| = 1;
 
-our $ordA = ord ('A');  # This defines ASCII/UTF-8 vs EBCDIC/UTF-EBCDIC
+my $ordA = ord ('A');  # This defines ASCII/UTF-8 vs EBCDIC/UTF-EBCDIC
 # This defined the platform.
 our $IS_ASCII  = $ordA ==  65;
 our $IS_EBCDIC = $ordA == 193;
