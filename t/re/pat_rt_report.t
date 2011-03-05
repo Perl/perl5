@@ -528,12 +528,12 @@ sub run_tests {
             sub gloople {"!"}
         }
         my $aeek = bless {} => 'wooosh';
-        eval_ok sub {$aeek -> gloople () =~ /(.)/g},
-               "//g match against return value of sub [change e26a497577f3ce7b]";
+        is(do {$aeek -> gloople () =~ /(.)/g}, 1,
+	   "//g match against return value of sub [change e26a497577f3ce7b]");
 
         sub gloople {"!"}
-        eval_ok sub {gloople () =~ /(.)/g},
-               "change e26a497577f3ce7b didn't affect sub calls for some reason";
+        is(do{gloople () =~ /(.)/g}, 1,
+	   "change e26a497577f3ce7b didn't affect sub calls for some reason");
     }
 
     {
@@ -583,8 +583,8 @@ sub run_tests {
         no warnings 'utf8';
         $_ = pack 'U0C2', 0xa2, 0xf8;  # Ill-formed UTF-8
         my $ret = 0;
-        eval_ok sub {!($ret = s/[\0]+//g)},
-                "Ill-formed UTF-8 doesn't match NUL in class; Bug 37836";
+        is(do {!($ret = s/[\0]+//g)}, 1,
+	   "Ill-formed UTF-8 doesn't match NUL in class; Bug 37836");
     }
 
     {
