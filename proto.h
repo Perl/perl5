@@ -4676,6 +4676,17 @@ STATIC PerlIO *	S_doopen_pm(pTHX_ SV *name)
 
 #  endif
 #endif
+#if !defined(PERL_IS_MINIPERL)
+#  if defined(PERL_IN_PERL_C)
+STATIC SV *	S_incpush_if_exists(pTHX_ AV *const av, SV *dir, SV *const stem)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_INCPUSH_IF_EXISTS	\
+	assert(av); assert(dir); assert(stem)
+
+#  endif
+#endif
 #if !defined(PERL_NO_UTF16_FILTER)
 #  if defined(PERL_IN_TOKE_C)
 STATIC U8*	S_add_utf16_textfilter(pTHX_ U8 *const s, bool reversed)
@@ -5610,13 +5621,6 @@ STATIC void	S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_INCPUSH	\
 	assert(dir)
-
-STATIC SV *	S_incpush_if_exists(pTHX_ AV *const av, SV *dir, SV *const stem)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
-#define PERL_ARGS_ASSERT_INCPUSH_IF_EXISTS	\
-	assert(av); assert(dir); assert(stem)
 
 STATIC void	S_incpush_use_sep(pTHX_ const char *p, STRLEN len, U32 flags)
 			__attribute__nonnull__(pTHX_1);

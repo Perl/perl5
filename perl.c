@@ -4357,6 +4357,7 @@ S_init_perllib(pTHX)
 #  define PERLLIB_MANGLE(s,n) (s)
 #endif
 
+#ifndef PERL_IS_MINIPERL
 /* Push a directory onto @INC if it exists.
    Generate a new SV if we do this, to save needing to copy the SV we push
    onto @INC  */
@@ -4378,24 +4379,23 @@ S_incpush_if_exists(pTHX_ AV *const av, SV *dir, SV *const stem)
     }
     return dir;
 }
+#endif
 
 STATIC void
 S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 {
     dVAR;
+#ifndef PERL_IS_MINIPERL
     const U8 using_sub_dirs
-#ifdef PERL_IS_MINIPERL
-        = 0;
-#else
 	= (U8)flags & (INCPUSH_ADD_VERSIONED_SUB_DIRS
 		       |INCPUSH_ADD_ARCHONLY_SUB_DIRS|INCPUSH_ADD_OLD_VERS);
-#endif
     const U8 add_versioned_sub_dirs
 	= (U8)flags & INCPUSH_ADD_VERSIONED_SUB_DIRS;
     const U8 add_archonly_sub_dirs
 	= (U8)flags & INCPUSH_ADD_ARCHONLY_SUB_DIRS;
 #ifdef PERL_INC_VERSION_LIST
     const U8 addoldvers  = (U8)flags & INCPUSH_ADD_OLD_VERS;
+#endif
 #endif
     const U8 canrelocate = (U8)flags & INCPUSH_CAN_RELOCATE;
     const U8 unshift     = (U8)flags & INCPUSH_UNSHIFT;
@@ -4416,7 +4416,9 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	   pushing. Hence to make it work, need to push the architecture
 	   (etc) libraries onto a temporary array, then "unshift" that onto
 	   the front of @INC.  */
+#ifndef PERL_IS_MINIPERL
 	AV *const av = (using_sub_dirs) ? (unshift ? newAV() : inc) : NULL;
+#endif
 
 	if (len) {
 	    /* I am not convinced that this is valid when PERLLIB_MANGLE is
@@ -4543,6 +4545,7 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	    }
 #endif
 	}
+#ifndef PERL_IS_MINIPERL
 	/*
 	 * BEFORE pushing libdir onto @INC we may first push version- and
 	 * archname-specific sub-directories.
@@ -4586,9 +4589,10 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	    assert (SvREFCNT(subdir) == 1);
 	    SvREFCNT_dec(subdir);
 	}
-
+#endif /* !PERL_IS_MINIPERL */
 	/* finally add this lib directory at the end of @INC */
 	if (unshift) {
+#ifndef PERL_IS_MINIPERL
 	    U32 extra = av_len(av) + 1;
 	    av_unshift(inc, extra + push_basedir);
 	    if (push_basedir)
@@ -4607,6 +4611,7 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 		av_store(inc, extra, SvREFCNT_inc(*av_fetch(av, extra, FALSE)));
 	    }
 	    SvREFCNT_dec(av);
+#endif
 	}
 	else if (push_basedir) {
 	    av_push(inc, libdir);

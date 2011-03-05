@@ -1190,6 +1190,11 @@
 #define doopen_pm(a)		S_doopen_pm(aTHX_ a)
 #    endif
 #  endif
+#  if !defined(PERL_IS_MINIPERL)
+#    if defined(PERL_IN_PERL_C)
+#define incpush_if_exists(a,b,c)	S_incpush_if_exists(aTHX_ a,b,c)
+#    endif
+#  endif
 #  if !defined(PERL_NO_UTF16_FILTER)
 #    if defined(PERL_IN_TOKE_C)
 #define add_utf16_textfilter(a,b)	S_add_utf16_textfilter(aTHX_ a,b)
@@ -1358,7 +1363,6 @@
 #define find_beginning(a,b)	S_find_beginning(aTHX_ a,b)
 #define forbid_setid(a,b)	S_forbid_setid(aTHX_ a,b)
 #define incpush(a,b,c)		S_incpush(aTHX_ a,b,c)
-#define incpush_if_exists(a,b,c)	S_incpush_if_exists(aTHX_ a,b,c)
 #define incpush_use_sep(a,b,c)	S_incpush_use_sep(aTHX_ a,b,c)
 #define init_ids()		S_init_ids(aTHX)
 #define init_interp()		S_init_interp(aTHX)

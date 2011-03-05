@@ -1682,7 +1682,9 @@ so	|void	|validate_suid	|NN PerlIO *rsfp
 
 s	|void*	|parse_body	|NULLOK char **env|XSINIT_t xsinit
 rs	|void	|run_body	|I32 oldscope
+#  ifndef PERL_IS_MINIPERL
 s	|SV *	|incpush_if_exists|NN AV *const av|NN SV *dir|NN SV *const stem
+#  endif
 #endif
 
 #if defined(PERL_IN_PP_C)
