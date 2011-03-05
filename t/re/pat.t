@@ -1066,7 +1066,7 @@ sub run_tests {
 
     SKIP: {   # Some constructs with Latin1 characters cause a utf8 string not
               # to match itself in non-utf8
-        if ($IS_EBCDIC) {
+        if ($::IS_EBCDIC) {
             skip "Needs to be customized to run on EBCDIC", 6;
         }
         my $c = "\xc0";
@@ -1084,7 +1084,7 @@ sub run_tests {
     }
 
     SKIP: {   # Make sure can override the formatting
-        if ($IS_EBCDIC) {
+        if ($::IS_EBCDIC) {
             skip "Needs to be customized to run on EBCDIC", 2;
         }
         use feature 'unicode_strings';

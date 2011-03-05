@@ -24,6 +24,10 @@ my $planned;
 my $noplan;
 my $Perl;       # Safer version of $^X set by which_perl()
 
+# This defines ASCII/UTF-8 vs EBCDIC/UTF-EBCDIC
+$::IS_ASCII  = ord 'A' ==  65;
+$::IS_EBCDIC = ord 'A' == 193;
+
 $TODO = 0;
 $NO_ENDING = 0;
 $Tests_Are_Passing = 1;

@@ -36,11 +36,11 @@ sub run_tests {
         $_ = "a\x{100}b";
         ok(/(.)(\C)(\C)(.)/, $message);
         is($1, "a", $message);
-        if ($IS_ASCII) {     # ASCII (or equivalent), should be UTF-8
+        if ($::IS_ASCII) {     # ASCII (or equivalent), should be UTF-8
             is($2, "\xC4", $message);
             is($3, "\x80", $message);
         }
-        elsif ($IS_EBCDIC) { # EBCDIC (or equivalent), should be UTF-EBCDIC
+        elsif ($::IS_EBCDIC) { # EBCDIC (or equivalent), should be UTF-EBCDIC
             is($2, "\x8C", $message);
             is($3, "\x41", $message);
         }
@@ -57,20 +57,20 @@ sub run_tests {
         my $message = '\C matches octet';
         $_ = "\x{100}";
         ok(/(\C)/g, $message);
-        if ($IS_ASCII) {
+        if ($::IS_ASCII) {
             is($1, "\xC4", $message);
         }
-        elsif ($IS_EBCDIC) {
+        elsif ($::IS_EBCDIC) {
             is($1, "\x8C", $message);
         }
         else {
             ok 0, "Unexpected platform", "ord ('A') = " . ord 'A';
         }
         ok(/(\C)/g, $message);
-        if ($IS_ASCII) {
+        if ($::IS_ASCII) {
             is($1, "\x80", $message);
         }
-        elsif ($IS_EBCDIC) {
+        elsif ($::IS_EBCDIC) {
             is($1, "\x41", $message);
         }
         else {
@@ -262,7 +262,7 @@ sub run_tests {
         ## Should probably put in tests for all the POSIX stuff,
         ## but not sure how to guarantee a specific locale......
 
-        skip "Not an ASCII platform", 2 unless $IS_ASCII;
+        skip "Not an ASCII platform", 2 unless $::IS_ASCII;
         my $message = 'Test [[:cntrl:]]';
         my $AllBytes = join "" => map {chr} 0 .. 255;
         (my $x = $AllBytes) =~ s/[[:cntrl:]]//g;
@@ -284,7 +284,7 @@ sub run_tests {
         my $message = '. matches \n with /s';
         my $str1 = "foo\nbar";
         my $str2 = "foo\n\x{100}bar";
-        my ($a, $b) = map {chr} $IS_ASCII ? (0xc4, 0x80) : (0x8c, 0x41);
+        my ($a, $b) = map {chr} $::IS_ASCII ? (0xc4, 0x80) : (0x8c, 0x41);
         my @a;
         @a = $str1 =~ /./g;   is(@a, 6, $message); is("@a", "f o o b a r", $message);
         @a = $str1 =~ /./gs;  is(@a, 7, $message); is("@a", "f o o \n b a r", $message);
@@ -630,7 +630,7 @@ sub run_tests {
 
         # U+0085, U+00A0 need to be forced to be Unicode, the \x{100} does that.
       SKIP: {
-          skip "EBCDIC platform", 4 if $IS_EBCDIC;
+          skip "EBCDIC platform", 4 if $::IS_EBCDIC;
           # Do \x{0015} and \x{0041} match \s in EBCDIC?
           ok "<\x{100}\x{0085}>" =~ /<\x{100}\s>/, '\x{0085} in \s';
           ok        "<\x{0085}>" =~        /<\v>/, '\x{0085} in \v';
@@ -1724,7 +1724,7 @@ sub run_tests {
         # XXX: This set of tests is essentially broken, POSIX character classes
         # should not have differing definitions under Unicode.
         # There are property names for that.
-        skip "Tests assume ASCII", 4 unless $IS_ASCII;
+        skip "Tests assume ASCII", 4 unless $::IS_ASCII;
 
         my @notIsPunct = grep {/[[:punct:]]/ and not /\p{IsPunct}/}
                                 map {chr} 0x20 .. 0x7f;
