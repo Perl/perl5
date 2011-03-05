@@ -1065,14 +1065,22 @@ WHOA
 
 sub warning_is {
     my ($code, $expect, $name) = @_;
-    my $w;
-    local $SIG {__WARN__} = sub {$w .= join "" => @_};
+    my @w;
+    local $SIG {__WARN__} = sub {push @w, join "", @_};
     {
 	use warnings 'all';
 	&$code;
     }
     local $Level = $Level + 1;
-    is($w, $expect, $name);
+    if(!defined $expect) {
+	is("@w", '', $name);
+    } elsif (@w == 1) {
+	is($w[0], $expect, $name);
+    } else {
+	# This will fail, generating diagnostics
+	cmp_ok(scalar @w, '==', 1, $name);
+	diag("Warning: $_") foreach @w;
+    }
 }
 
 # Set a watchdog to timeout the entire test file
