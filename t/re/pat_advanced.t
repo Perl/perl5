@@ -108,8 +108,8 @@ sub run_tests {
         # in most character sets match 'i' or 'j' nor would \xce match
         # 'I' or 'J', but strictly speaking these tests are here for
         # the good of EBCDIC, so let's test these only there.
-        nok "\x8e" !~ /[i-j]/, '"\x8e" !~ /[i-j]/';
-        nok "\xce" !~ /[I-J]/, '"\xce" !~ /[I-J]/';
+        unlike("\x8e", qr/[i-j]/, '"\x8e" !~ /[i-j]/');
+        unlike("\xce", qr/[I-J]/, '"\xce" !~ /[I-J]/');
     }
 
 

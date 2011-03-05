@@ -42,17 +42,17 @@ sub run_tests {
         # used to be a test for $*
         ok $x =~ /^def/m, qq ["$x_pretty" =~ /^def/m];
 
-        nok $x =~ /^xxx/, qq ["$x_pretty" =~ /^xxx/];
-        nok $x !~ /^abc/, qq ["$x_pretty" !~ /^abc/];
+        ok(!($x =~ /^xxx/), qq ["$x_pretty" =~ /^xxx/]);
+        ok(!($x !~ /^abc/), qq ["$x_pretty" !~ /^abc/]);
 
          ok $x =~ /def/, qq ["$x_pretty" =~ /def/];
-        nok $x !~ /def/, qq ["$x_pretty" !~ /def/];
+        ok(!($x !~ /def/), qq ["$x_pretty" !~ /def/]);
 
          ok $x !~ /.def/, qq ["$x_pretty" !~ /.def/];
-        nok $x =~ /.def/, qq ["$x_pretty" =~ /.def/];
+        ok(!($x =~ /.def/), qq ["$x_pretty" =~ /.def/]);
 
          ok $x =~ /\ndef/, qq ["$x_pretty" =~ /\\ndef/];
-        nok $x !~ /\ndef/, qq ["$x_pretty" !~ /\\ndef/];
+        ok(!($x !~ /\ndef/), qq ["$x_pretty" !~ /\\ndef/]);
     }
 
     {
@@ -65,7 +65,7 @@ sub run_tests {
          ok /(a*b*)(c*)/ && $1 eq 'aaabbb' && $2 eq 'ccc',
                                              qq [\$_ = '$_'; /(a*b*)(c*)/];
          ok /(a+b+c+)/ && $1 eq 'aaabbbccc', qq [\$_ = '$_'; /(a+b+c+)/];
-        nok /a+b?c+/,                        qq [\$_ = '$_'; /a+b?c+/];
+        unlike($_, qr/a+b?c+/, qq [\$_ = '$_'; /a+b?c+/]);
 
         $_ = 'aaabccc';
          ok /a+b?c+/, qq [\$_ = '$_'; /a+b?c+/];
@@ -73,7 +73,7 @@ sub run_tests {
 
         $_ = 'aaaccc';
          ok /a*b?c*/, qq [\$_ = '$_'; /a*b?c*/];
-        nok /a*b+c*/, qq [\$_ = '$_'; /a*b+c*/];
+        unlike($_, qr/a*b+c*/, qq [\$_ = '$_'; /a*b+c*/]);
 
         $_ = 'abcdef';
          ok /bcd|xyz/, qq [\$_ = '$_'; /bcd|xyz/];
@@ -92,9 +92,9 @@ sub run_tests {
 
         our @XXX = ('ok 1','not ok 1', 'ok 2','not ok 2','not ok 3');
         while ($_ = shift(@XXX)) {
-            my $f = index ($_, 'not') >= 0 ? \&nok : \&ok;
+            my $e = index ($_, 'not') >= 0 ? '' : 1;
             my $r = m?(.*)?;
-            &$f ($r, "?(.*)?");
+            is($r, $e, "?(.*)?");
             /not/ && reset;
             if (/not ok 2/) {
                 if ($^O eq 'VMS') {
@@ -863,7 +863,7 @@ sub run_tests {
     {
         $_ = "a-a\nxbb";
         pos = 1;
-        nok m/^-.*bb/mg, '$_ = "a-a\nxbb"; m/^-.*bb/mg';
+        ok(!m/^-.*bb/mg, '$_ = "a-a\nxbb"; m/^-.*bb/mg');
     }
 
 
@@ -877,7 +877,7 @@ sub run_tests {
 
     {
         $_ = "xA\n" x 500;
-        nok /^\s*A/m, '$_ = "xA\n" x 500; /^\s*A/m"';
+        unlike($_, qr/^\s*A/m, '$_ = "xA\n" x 500; /^\s*A/m"');
 
         my $text = "abc dbf";
         my @res = ($text =~ /.*?(b).*?\b/g);

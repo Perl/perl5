@@ -27,11 +27,6 @@ require './test.pl';
 
 *iseq = \&is;
 
-sub nok ($;$$) {
-    my $bool = shift;
-    ok(!$bool, @_);
-}
-
 sub eval_ok ($;$) {
     my ($code, $name) = @_;
     local $@;
