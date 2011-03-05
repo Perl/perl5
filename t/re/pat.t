@@ -21,7 +21,7 @@ BEGIN {
     do "re/ReTest.pl" or die $@;
 }
 
-plan tests => 433;  # Update this when adding/deleting tests.
+plan tests => 436;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -309,9 +309,13 @@ sub run_tests {
         # next three tests will fail if you should have picked up a lower-than-
         # default value for $reg_infty from Config.pm, but have not.
 
-        eval_ok q (('aaa' =~ /(a{1,$::reg_infty_m})/)[0] eq 'aaa'), $message;
-        eval_ok q (('a' x $::reg_infty_m) =~ /a{$::reg_infty_m}/), $message;
-        eval_ok q (('a' x ($::reg_infty_m - 1)) !~ /a{$::reg_infty_m}/), $message;
+        is(eval q{('aaa' =~ /(a{1,$::reg_infty_m})/)[0]}, 'aaa', $message);
+        is($@, '', $message);
+        is(eval q{('a' x $::reg_infty_m) =~ /a{$::reg_infty_m}/}, 1, $message);
+        is($@, '', $message);
+        isnt(q{('a' x ($::reg_infty_m - 1)) !~ /a{$::reg_infty_m}/}, 1, $message);
+        is($@, '', $message);
+
         eval "'aaa' =~ /a{1,$::reg_infty}/";
         like($@, /^\QQuantifier in {,} bigger than/, $message);
         eval "'aaa' =~ /a{1,$::reg_infty_p}/";

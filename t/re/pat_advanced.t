@@ -196,20 +196,22 @@ sub run_tests {
     {
         my $message = "/x tests";
         $_ = "foo";
-        eval_ok(<<"        --", $message);
+        foreach my $pat (<<"        --", <<"        --") {
           /f
            o\r
            o
            \$
           /x
         --
-        eval_ok(<<"        --", $message);
           /f
            o
            o
            \$\r
           /x
         --
+	    is(eval $pat, 1, $message);
+	    is($@, '', $message);
+	}
     }
 
     {
@@ -888,13 +890,15 @@ sub run_tests {
             my $message = q [Don't misparse \x{...} in regexp ] .
                              q [near 127 char EXACT limit];
             for my $tail ('\x{0061}', '\x{1234}', '\x61') {
-                eval_ok qq ["$head$tail" =~ /$head$tail/], $message;
+                eval qq{like("$head$tail", qr/$head$tail/, \$message)};
+		is($@, '', $message);
             }
             $message = q [Don't misparse \N{...} in regexp ] .
                              q [near 127 char EXACT limit];
             for my $tail ('\N{SNOWFLAKE}') {
-                eval_ok qq [use charnames ':full';
-                           "$head$tail" =~ /$head$tail/], $message;
+                eval qq {use charnames ':full';
+                         like("$head$tail", qr/$head$tail/, \$message)};
+		is($@, '', $message);
             }
         }
     }
@@ -2040,12 +2044,15 @@ sub run_tests {
 
     {   # Bleadperl v5.13.8-292-gf56b639 breaks NEZUMI/Unicode-LineBreak-1.011
         # \xdf in lookbehind failed to compile as is multi-char fold
-        eval_ok 'qr{
+        my $message = "Lookbehind with \\xdf matchable compiles";
+        my $r = eval 'qr{
             (?u: (?<=^url:) |
                  (?<=[/]) (?=[^/]) |
                  (?<=[^-.]) (?=[-~.,_?\#%=&]) |
                  (?<=[=&]) (?=.)
-            )}iox', "Lookbehind with \\xdf matchable compiles";
+            )}iox';
+	is($@, '', $message);
+	isa_ok($r, 'Regexp', $message);
     }
 
     # RT #82610
