@@ -178,12 +178,10 @@ sub run_tests {
 
     {
         # From Japhy
-        must_warn 'qr/(?c)/',    '^Useless \(\?c\)';
-        must_warn 'qr/(?-c)/',   '^Useless \(\?-c\)';
-        must_warn 'qr/(?g)/',    '^Useless \(\?g\)';
-        must_warn 'qr/(?-g)/',   '^Useless \(\?-g\)';
-        must_warn 'qr/(?o)/',    '^Useless \(\?o\)';
-        must_warn 'qr/(?-o)/',   '^Useless \(\?-o\)';
+	foreach (qw(c g o)) {
+	    must_warn "qr/(?$_)/",    qr/^Useless \(\?$_\)/;
+	    must_warn "qr/(?-$_)/",   qr/^Useless \(\?-$_\)/;
+	}
 
         # Now test multi-error regexes
         must_warn 'qr/(?g-o)/',  '^Useless \(\?g\).*\nUseless \(\?-o\)';
