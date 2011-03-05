@@ -8,7 +8,10 @@ use strict;
 use warnings;
 use 5.010;
 
-my $IS_EBCDIC = ord ('A') == 193;
+BEGIN {
+    require './test.pl';
+    skip_all_if_miniperl("no dynamic loading on miniperl, no File::Spec (used by charnames)");
+}
 
 sub run_tests;
 
@@ -61,8 +64,8 @@ my @CLASSES = (
     # It's ok to repeat class names.
     #
     InLatin1Supplement        =>
-               $IS_EBCDIC ? ['!\x{7f}',  '\x{80}',            '!\x{100}']
-                          : ['!\x{7f}',  '\x{80}',  '\x{ff}', '!\x{100}'],
+               $::IS_EBCDIC ? ['!\x{7f}',  '\x{80}',            '!\x{100}']
+                            : ['!\x{7f}',  '\x{80}',  '\x{ff}', '!\x{100}'],
     InLatinExtendedA          =>
                             ['!\x{7f}', '!\x{80}', '!\x{ff}',  '\x{100}'],
 
@@ -153,7 +156,7 @@ while (my ($class, $chars) = each %SHORT_PROPERTIES) {
                                                      ? $_ : "!$_"} @$chars;
 }
 
-delete $d {IsASCII} if $IS_EBCDIC;
+delete $d {IsASCII} if $::IS_EBCDIC;
 
 push @CLASSES => "# Short properties"        => %SHORT_PROPERTIES,
                  "# POSIX like properties"   => %d,
