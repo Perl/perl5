@@ -4592,11 +4592,15 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 #endif /* !PERL_IS_MINIPERL */
 	/* finally add this lib directory at the end of @INC */
 	if (unshift) {
-#ifndef PERL_IS_MINIPERL
+#ifdef PERL_IS_MINIPERL
+	    const U32 extra = 0;
+#else
 	    U32 extra = av_len(av) + 1;
+#endif
 	    av_unshift(inc, extra + push_basedir);
 	    if (push_basedir)
 		av_store(inc, extra, libdir);
+#ifndef PERL_IS_MINIPERL
 	    while (extra--) {
 		/* av owns a reference, av_store() expects to be donated a
 		   reference, and av expects to be sane when it's cleared.
