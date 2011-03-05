@@ -1063,7 +1063,7 @@ WHOA
     _ok( !$diag, _where(), $name );
 }
 
-sub warning_is {
+sub _warning {
     my ($code, $expect, $name) = @_;
     my @w;
     local $SIG {__WARN__} = sub {push @w, join "", @_};
@@ -1071,16 +1071,34 @@ sub warning_is {
 	use warnings 'all';
 	&$code;
     }
-    local $Level = $Level + 1;
+    local $Level = $Level + 2;
     if(!defined $expect) {
 	is("@w", '', $name);
     } elsif (@w == 1) {
-	is($w[0], $expect, $name);
+	if(ref $expect) {
+	    like($w[0], $expect, $name);
+	} else {
+	    is($w[0], $expect, $name);
+	}
     } else {
 	# This will fail, generating diagnostics
 	cmp_ok(scalar @w, '==', 1, $name);
 	diag("Warning: $_") foreach @w;
     }
+}
+
+sub warning_is {
+    my ($code, $expect, $name) = @_;
+    die sprintf "Expect must be a string or undef, not a %s reference", ref $expect
+	if ref $expect;
+    _warning($code, $expect, $name);
+}
+
+sub warning_like {
+    my ($code, $expect, $name) = @_;
+    die sprintf "Expect must be a regexp object"
+	unless ref $expect eq 'Regexp';
+    _warning($code, $expect, $name);
 }
 
 # Set a watchdog to timeout the entire test file

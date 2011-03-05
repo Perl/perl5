@@ -9,21 +9,6 @@ BEGIN {
 require './test.pl';
 plan( tests => 176 );
 
-# Stolen from re/ReTest.pl. Can't just use the file since it doesn't support
-# like() and it conflicts with test.pl
-sub must_warn {
-    my ($code, $pattern, $name) = @_;
-    my $w;
-    local $SIG {__WARN__} = sub {$w .= join "" => @_};
-    use warnings 'all';
-    ref $code ? &$code : eval $code;
-    my $r = $w && $w =~ /$pattern/;
-    $w //= "UNDEF";
-    ok( $r, $name // "Got warning /$pattern/", $r ? undef :
-            "# expected: /$pattern/\n" .
-            "#   result: $w" );
-}
-
 $_ = 'david';
 $a = s/david/rules/r;
 ok( $_ eq 'david' && $a eq 'rules', 'non-destructive substitute' );
@@ -61,10 +46,14 @@ like( $@, qr{Using !~ with s///r doesn't make sense}, 's///r !~ operator gives e
         ok ( !defined $a && !defined $b, 's///r with undef input' );
 
         use warnings;
-        must_warn sub { $b = $a =~ s/left/right/r }, '^Use of uninitialized value', 's///r Uninitialized warning';
+        warning_like(sub { $b = $a =~ s/left/right/r },
+		     qr/^Use of uninitialized value/,
+		     's///r Uninitialized warning');
 
         $a = 'david';
-        must_warn 's/david/sucks/r; 1',    '^Useless use of non-destructive substitution', 's///r void context warning';
+        warning_like(sub {eval 's/david/sucks/r; 1'},
+		     qr/^Useless use of non-destructive substitution/,
+		     's///r void context warning');
 }
 
 $a = '';

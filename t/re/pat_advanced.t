@@ -179,8 +179,8 @@ sub run_tests {
     {
         # From Japhy
 	foreach (qw(c g o)) {
-	    must_warn "qr/(?$_)/",    qr/^Useless \(\?$_\)/;
-	    must_warn "qr/(?-$_)/",   qr/^Useless \(\?-$_\)/;
+	    warning_like(sub {'' =~ "(?$_)"},    qr/^Useless \(\?$_\)/);
+	    warning_like(sub {'' =~ "(?-$_)"},   qr/^Useless \(\?-$_\)/);
 	}
 
         # Now test multi-error regexes
