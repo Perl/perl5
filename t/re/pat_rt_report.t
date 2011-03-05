@@ -15,13 +15,10 @@ $| = 1;
 
 
 BEGIN {
-    if (!defined &DynaLoader::boot_DynaLoader) {
-	print "1..0 # Skip miniperl can't load Tie::Hash::NamedCapture, need for %+ and %-\n";
-	exit 0;
-    }
     chdir 't' if -d 't';
     @INC = ('../lib','.');
     require './test.pl';
+    skip_all_if_miniperl("miniperl can't load Tie::Hash::NamedCapture, need for %+ and %-");
 }
 
 
