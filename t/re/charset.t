@@ -42,7 +42,7 @@ if (! is_miniperl()) {
 }
 
 # For each possible character set...
-foreach my $charset ("a", "d", "l", "u") {
+foreach my $charset (@charsets) {
 
     # And in utf8 or not
     foreach my $upgrade ("", 'utf8::upgrade($a); ') {
