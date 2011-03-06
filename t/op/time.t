@@ -140,16 +140,10 @@ ok(gmtime() =~ /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)[ ]
 
 # Test floating point args
 {
-    eval {
-        $SIG{__WARN__} = sub { die @_; };
-        is( (localtime(1296000.23))[5] + 1900, 1970 );
-    };
-    is($@, '', 'Ignore fractional time');
-    eval {
-        $SIG{__WARN__} = sub { die @_; };
-        is( (gmtime(1.23))[5] + 1900, 1970 );
-    };
-    is($@, '', 'Ignore fractional time');
+    warning_is(sub {is( (localtime(1296000.23))[5] + 1900, 1970 )},
+	       undef, 'Ignore fractional time');
+    warning_is(sub {is( (gmtime(1.23))[5] + 1900, 1970 )},
+	       undef, 'Ignore fractional time');
 }
 
 
