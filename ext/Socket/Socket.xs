@@ -431,9 +431,7 @@ inet_aton(host)
 		ok = 1;
 	}
 
-	ST(0) = sv_newmortal();
-	if (ok)
-		sv_setpvn( ST(0), (char *)&ip_address, sizeof ip_address );
+	ST(0) = newSVpvn_flags(ok ? (char *)&ip_address : NULL, sizeof ip_address, SVs_TEMP);
 	}
 
 void
