@@ -2382,6 +2382,43 @@ $   THEN
 $     echo4 "I'll go with ''archname' anyway..."
 $   ENDIF
 $ ENDIF
+$!
+$ IF usethreads .OR. usethreads .EQS. "define"
+$ THEN
+$   echo4 "Threads selected."
+$   IF F$LOCATE("-thread", archname) .EQ. F$LENGTH(archname)
+$   THEN
+$     archname = "''archname'-thread"
+$     echo4 "...setting architecture name to ''archname'."
+$   ELSE
+$     echo4 "...and architecture name already has -thread."
+$   ENDIF
+$ ENDIF
+$!
+$ IF usemultiplicity .OR. usemultiplicity .EQS. "define"
+$ THEN
+$   echo4 "Multiplicity selected."
+$   IF F$LOCATE("-multi", archname) .EQ. F$LENGTH(archname)
+$   THEN
+$     archname = "''archname'-multi"
+$     echo4 "...setting architecture name to ''archname'."
+$   ELSE
+$     echo4 "...and architecture name already has -multi."
+$   ENDIF
+$ ENDIF
+$!
+$ IF uselongdouble .OR. uselongdouble .EQS. "define"
+$ THEN
+$   echo4 "Long doubles selected."
+$   IF F$LOCATE("-ld", archname) .EQ. F$LENGTH(archname)
+$   THEN
+$     archname = "''archname'-ld"
+$     echo4 "...setting architecture name to ''archname'."
+$   ELSE
+$     echo4 "...and architecture name already has -ld."
+$   ENDIF
+$ ENDIF
+$!
 $ bool_dflt = "n"
 $ vms_prefix = "perl_root"
 $ vms_prefixup = F$EDIT(vms_prefix,"UPCASE")
@@ -3382,15 +3419,11 @@ $ IF use_threads
 $ THEN
 $   IF use_5005_threads
 $   THEN
-$     arch = "''arch'-thread"
-$     archname = "''archname'-thread"
 $     d_old_pthread_create_joinable = "undef"
 $     old_pthread_create_joinable = " "
 $     use5005threads = "define"
 $     useithreads = "undef"
 $   ELSE
-$     arch = "''arch'-ithread"
-$     archname = "''archname'-ithread"
 $     d_old_pthread_create_joinable = "undef"
 $     old_pthread_create_joinable = " "
 $     use5005threads = "undef"
