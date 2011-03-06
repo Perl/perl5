@@ -6,15 +6,13 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    unless (find PerlIO::Layer 'perlio') {
-	print "1..0 # Skip: not perlio\n";
-	exit 0;
-    }
-    eval 'use Encode';
-    if ($@ =~ /dynamic loading not available/) {
-        print "1..0 # miniperl cannot load Encode\n";
-	exit 0;
-    }
+    skip_all('not perlio') unless (find PerlIO::Layer 'perlio');
+    # FIXME - more of these could be tested without Encode or full perl
+    skip_all_if_miniperl("no dynamic loading on miniperl, no Encode");
+    require Config; Config->import;
+    skip_all('Encode was not built')
+	unless ($Config::Config{extensions} =~ /\bEncode\b/);
+
     # Makes testing easier.
     $ENV{PERLIO} = 'stdio' if exists $ENV{PERLIO} && $ENV{PERLIO} eq '';
     if (exists $ENV{PERLIO} && $ENV{PERLIO} !~ /^(stdio|perlio|mmap)$/) {
@@ -25,7 +23,6 @@ BEGIN {
     $PERLIO = exists $ENV{PERLIO} ? $ENV{PERLIO} : "(undef)";
 }
 
-use Config;
 
 my $DOSISH    = $^O =~ /^(?:MSWin32|os2|dos|NetWare)$/ ? 1 : 0;
    $DOSISH    = 1 if !$DOSISH and $^O =~ /^uwin/;
@@ -60,12 +57,7 @@ print <<__EOH__;
 # UTF8_STDIN = $UTF8_STDIN
 __EOH__
 
-SKIP: {
-    # FIXME - more of these could be tested without Encode or full perl
-    skip("This perl does not have Encode", $NTEST)
-	unless " $Config{extensions} " =~ / Encode /;
-    skip("miniperl does not have Encode", $NTEST) if $ENV{PERL_CORE_MINITEST};
-
+{
     sub check {
 	my ($result, $expected, $id) = @_;
 	# An interesting dance follows where we try to make the following
