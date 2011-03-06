@@ -793,11 +793,10 @@ nesting levels, the following is missing its final parenthesis:
     print q(The character '(' starts a side comment.);
 
 If you're getting this error from a here-document, you may have
-included unseen whitespace before or after your closing tag or not
-have anything, including a linebreak, after the closing tag.  A good
-programmer's editor will have a way to help you find these characters
-(or lack of characters).  See L<perlop> for the full details on here
-documents.
+included unseen whitespace before or after your closing tag or there
+may not be a linebreak after it.  A good programmer's editor will have
+a way to help you find these characters (or lack of characters).  See
+L<perlop> for the full details on here-documents.
 
 =item Can't find Unicode property definition "%s"
 
