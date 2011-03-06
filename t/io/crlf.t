@@ -29,8 +29,7 @@ if (find PerlIO::Layer 'perlio') {
 
     SKIP:
     {
-	skip("miniperl can't rely on loading PerlIO::scalar")
-	if $ENV{PERL_CORE_MINITEST};
+	skip_if_miniperl("miniperl can't rely on loading PerlIO::scalar");
 	skip("no PerlIO::scalar") unless $Config{extensions} =~ m!\bPerlIO/scalar\b!;
 	require PerlIO::scalar;
 	my $fcontents = join "", map {"$_\015\012"} "a".."zzz";
@@ -41,7 +40,7 @@ if (find PerlIO::Layer 'perlio') {
 	seek $fh, $pos, 0;
 	$/ = "\n";
 	$s = <$fh>.<$fh>;
-	ok($s eq "\nxxy\n");
+	is($s, "\nxxy\n");
     }
 
     ok(close(FOO));
@@ -66,8 +65,8 @@ if (find PerlIO::Layer 'perlio') {
 	    close FOO;
 	    print join(" ", "#", map { sprintf("%02x", $_) } unpack("C*", $foo)),
 	    "\n";
-	    ok($foo =~ /\x0d\x0a$/);
-	    ok($foo !~ /\x0d\x0d/);
+	    like($foo, qr/\x0d\x0a$/);
+	    unlike($foo, qr/\x0d\x0d/);
 	}
     }
 }
