@@ -897,6 +897,9 @@ C<@+> instead:
     $& is the same as substr( $x, $-[0], $+[0]-$-[0] )
     $' is the same as substr( $x, $+[0] )
 
+As of Perl 5.10, the C<${^PREMATCH}>, C<${^MATCH}> and C<${^POSTMATCH}>
+variables may be used. These are only set if the C</p> modifier is present.
+Consequently they do not penalize the rest of the program.
 
 =head2 Non-capturing groupings
 
