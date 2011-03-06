@@ -3330,8 +3330,11 @@ PP(pp_length)
 			   SV_UNDEF_RETURNS_NULL|SV_CONST_RETURN|SV_GMAGIC);
 
 	if (!p) {
-	    sv_setsv(TARG, &PL_sv_undef);
-	    SETTARG;
+	    if (!SvPADTMP(TARG)) {
+		sv_setsv(TARG, &PL_sv_undef);
+		SETTARG;
+	    }
+	    SETs(&PL_sv_undef);
 	}
 	else if (DO_UTF8(sv)) {
 	    SETi(utf8_length((U8*)p, (U8*)p + len));
@@ -3345,8 +3348,11 @@ PP(pp_length)
 	else
 	    SETi(sv_len(sv));
     } else {
-	sv_setsv_nomg(TARG, &PL_sv_undef);
-	SETTARG;
+	if (!SvPADTMP(TARG)) {
+	    sv_setsv_nomg(TARG, &PL_sv_undef);
+	    SETTARG;
+	}
+	SETs(&PL_sv_undef);
     }
     RETURN;
 }
