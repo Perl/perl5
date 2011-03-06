@@ -1195,11 +1195,11 @@ $ THEN
 $   sharedperl = "N"
 $ ELSE
 $   sharedperl = "Y"
-$   IF (archname.EQS."VMS_AXP")
+$   IF (F$ELEMENT(0, "-", archname).EQS."VMS_AXP")
 $   THEN
 $     macros = macros + """AXE=1"","
 $   ENDIF
-$   IF (archname.EQS."VMS_IA64")
+$   IF (F$ELEMENT(0, "-", archname).EQS."VMS_IA64")
 $   THEN
 $     macros = macros + """IXE=1"","
 $   ENDIF
@@ -1898,7 +1898,7 @@ $   CLOSE CONFIG
 $   echo "You are using Dec C ''line'"
 $   ccversion = line
 $   Dec_C_Version = F$INTEGER(line)
-$   IF Dec_C_Version .GE. 60200000 .AND. archname .NES. "VMS_VAX"
+$   IF Dec_C_Version .GE. 60200000 .AND. F$ELEMENT(0, "-", archname) .NES. "VMS_VAX"
 $   THEN
 $     echo4 "adding /NOANSI_ALIAS qualifier to ccflags."
 $     ccflags = ccflags + "/NOANSI_ALIAS"
@@ -2093,12 +2093,12 @@ $!
 $List_Parse:
 $ OPEN/READ CONFIG ccvms.lis
 $ READ CONFIG line
-$ IF archname .EQS. "VMS_VAX"
+$ IF F$ELEMENT(0, "-", archname) .EQS. "VMS_VAX"
 $ THEN
 $   read CONFIG line
 $   archsufx = "VAX"
 $ ELSE
-$   IF archname .EQS. "VMS_AXP"
+$   IF F$ELEMENT(0, "-", archname) .EQS. "VMS_AXP"
 $   THEN
 $       archsufx = "AXP"
 $   ELSE
@@ -2350,7 +2350,7 @@ $   usemultiplicity="undef"
 $ ENDIF
 $!
 $! Ask if they want to build with 64-bit support
-$ IF (archname.NES."VMS_VAX").and.("''f$extract(1,3, f$getsyi(""version""))'".ges."7.1")
+$ IF (F$ELEMENT(0, "-", archname).NES."VMS_VAX").and.("''f$extract(1,3, f$getsyi(""version""))'".ges."7.1")
 $ THEN
 $   bool_dflt = "n"
 $   IF F$TYPE(use64bitint) .NES. "" 
@@ -2509,7 +2509,7 @@ $       THEN
 $           thread_upcalls = "MTU=MTU=1"
 $	    usethreadupcalls = "define"
 $     	    ! Are they on alpha or itanium?
-$	    IF (archname .NES. "VMS_VAX") .AND. ("''f$extract(1,3, f$getsyi(""version""))'" .GES. "7.2")
+$	    IF (F$ELEMENT(0, "-", archname) .NES. "VMS_VAX") .AND. ("''f$extract(1,3, f$getsyi(""version""))'" .GES. "7.2")
 $     	    THEN
 $       	echo ""
 $       	echo "Threaded Perl can be linked to use multiple kernel threads on your system."
@@ -2569,7 +2569,7 @@ $   endif
 $   rp = "Build with long symbols shortened? [''bool_dflt'] "
 $   GOSUB myread
 $   shorten_long_symbols = ans
-$ IF archname .NES. "VMS_VAX"
+$ IF F$ELEMENT(0, "-", archname) .NES. "VMS_VAX"
 $ THEN
 $! IEEE math?
 $   echo ""
@@ -3043,7 +3043,7 @@ $ IF use_ieee_math
 $ THEN
 $   extra_flags = "''extra_flags'" + "/float=ieee/ieee=denorm"
 $ ELSE
-$   IF (archname.EQS."VMS_IA64")
+$   IF (F$ELEMENT(0, "-", archname).EQS."VMS_IA64")
 $   THEN
 $     extra_flags = "''extra_flags'" + "/float=g_float"
 $   ENDIF
@@ -3258,7 +3258,7 @@ $ if mymalloc then usemymalloc = "define"
 $!
 $ perl_cc=Mcc
 $!
-$ IF (sharedperl .AND. archname .EQS. "VMS_AXP")
+$ IF (sharedperl .AND. F$ELEMENT(0, "-", archname) .EQS. "VMS_AXP")
 $ THEN
 $   obj_ext=".abj"
 $   so="axe"
@@ -3266,7 +3266,7 @@ $   dlext="axe"
 $   exe_ext=".axe"
 $   lib_ext=".alb"
 $ ELSE
-$   IF (sharedperl .AND. archname .EQS. "VMS_IA64")
+$   IF (sharedperl .AND. F$ELEMENT(0, "-", archname) .EQS. "VMS_IA64")
 $   THEN
 $     obj_ext=".ibj"
 $     so="ixe"
@@ -3320,7 +3320,7 @@ $!
 $ perllibs=libs
 $!
 $!
-$ IF archname .NES. "VMS_VAX"
+$ IF F$ELEMENT(0, "-", archname) .NES. "VMS_VAX"
 $ THEN
 $   d_PRId64 = "define"
 $   d_PRIu64 = "define"
@@ -5119,7 +5119,7 @@ $! easy to use DCL test to see if hardlinks are enabled on the build
 $! disk.  That would require more work to test, and I am only testing
 $! this on 8.2, so that is why the 8.2 test.
 $!
-$  IF (vms_ver .GES. "8.2") .AND. (archname .NES. "VMS_VAX")
+$  IF (vms_ver .GES. "8.2") .AND. (F$ELEMENT(0, "-", archname) .NES. "VMS_VAX")
 $  THEN
 $   IF f$getdvi("SYS$DISK","HARDLINKS_SUPPORTED")
 $   THEN
@@ -5137,7 +5137,7 @@ $  ENDIF
 $!
 $  IF uselargefiles .OR. uselargefiles .eqs. "define"
 $  THEN
-$    IF (vms_ver .GES. "8.2") .AND. (archname .NES. "VMS_VAX")
+$    IF (vms_ver .GES. "8.2") .AND. (F$ELEMENT(0, "-", archname) .NES. "VMS_VAX")
 $    THEN
 $      echo4 "Largefile support enabled, so enabling standard stat support too."
 $      usestdstat = "y"
@@ -5179,7 +5179,7 @@ $       echo4 "Your system does not support symbolic links."
 $       echo4 "I am disabling symbolic link support."
 $    ENDIF
 $  ELSE
-$    IF (vms_ver .GES. "8.2") .AND. (archname .NES. "VMS_VAX")
+$    IF (vms_ver .GES. "8.2") .AND. (F$ELEMENT(0, "-", archname) .NES. "VMS_VAX")
 $    THEN
 $       echo4 "-Duselargefiles is required for symbolic link support."
 $       echo4 "You did not specify that, so I am disabling symbolic link support."
@@ -5213,7 +5213,7 @@ $  d_ttyname_r = "undef"
 $  ttyname_r_proto = "0"
 $  d_snprintf = "undef"
 $  d_vsnprintf = "undef"
-$  if (vms_ver .GES. "7.3-2") .AND. (archname .NES. "VMS_VAX")
+$  if (vms_ver .GES. "7.3-2") .AND. (F$ELEMENT(0, "-", archname) .NES. "VMS_VAX")
 $  then
 $    echo "Found 64 bit OpenVMS ''vms_ver' -- will build with V7.3-2 routines"
 $    d_getgrgid_r = "define"
@@ -5247,7 +5247,7 @@ $  d_setregid = "undef"
 $  d_setreuid = "undef"
 $  d_setsid = "undef"
 $  ! Disable this section for now.
-$!$  if (vms_ver .GES. "8.2") .AND. (archname .NES. "VMS_VAX")
+$!$  if (vms_ver .GES. "8.2") .AND. (F$ELEMENT(0, "-", archname) .NES. "VMS_VAX")
 $  if .NOT. 1
 $  then
 $    echo "Found 64 bit OpenVMS ''vms_ver' -- will build with V7.3-2 UID setting routines"
@@ -5265,7 +5265,7 @@ $!
 $  d_fstatvfs = "undef"
 $!  d_statvfs = "undef"
 $  i_sysstatvfs = "undef"
-$  if (vms_ver .GES. "8.2") .AND. (archname .NES. "VMS_VAX")
+$  if (vms_ver .GES. "8.2") .AND. (F$ELEMENT(0, "-", archname) .NES. "VMS_VAX")
 $  then
 $    echo "Found 64 bit OpenVMS ''vms_ver' -- will build with 8.2 routines"
 $    d_fstatvfs = "define"
@@ -5531,7 +5531,7 @@ $   d_vms_do_sockets="define"
 $   d_htonl="define"
 $   d_socket="define"
 $   d_sockpair = "undef"
-$   if (vms_ver .GES. "8.2") .AND. (archname .NES. "VMS_VAX")
+$   if (vms_ver .GES. "8.2") .AND. (F$ELEMENT(0, "-", archname) .NES. "VMS_VAX")
 $   then
 $     echo "Found 64 bit OpenVMS 8.2, will build with socketpair support"
 $     d_sockpair = "define"
@@ -6988,7 +6988,7 @@ $ IF use_ieee_math THEN WC "#define USE_IEEE"
 $ IF d_herrno .EQS. "undef" THEN WC "#define NEED_AN_H_ERRNO"
 $ WC "#define HAS_ENVGETENV"
 $ WC "#define PERL_EXTERNAL_GLOB"
-$ IF archname .EQS. "VMS_VAX" .AND. -
+$ IF F$ELEMENT(0, "-", archname) .EQS. "VMS_VAX" .AND. -
      ccname .EQS. "DEC" .AND. -
      ccversion .LE. 50390006
 $ THEN
@@ -7216,8 +7216,8 @@ $   echo ""
 $   echo4 "The perl.cld file is now being written..."
 $   OPEN/WRITE CONFIG 'file_2_find'
 $   ext = ".exe"
-$   IF (sharedperl .AND. F$EXTRACT(0,7,archname) .EQS. "VMS_AXP") THEN ext := .AXE
-$   IF (sharedperl .AND. F$EXTRACT(0,8,archname) .EQS. "VMS_IA64") THEN ext := .IXE
+$   IF (sharedperl .AND. F$ELEMENT(0, "-", archname) .EQS. "VMS_AXP") THEN ext := .AXE
+$   IF (sharedperl .AND. F$ELEMENT(0, "-", archname) .EQS. "VMS_IA64") THEN ext := .IXE
 $   IF (use_vmsdebug_perl)
 $   THEN
 $     WRITE CONFIG "define verb dbgperl"
