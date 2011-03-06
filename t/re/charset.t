@@ -66,19 +66,23 @@ foreach my $charset (@charsets) {
                 next if $ord > 255 && ! $upgrade;
 
                 my $reason = "";    # Explanation output with each test
+                my $neg_reason = "";
                 my $match = 1;      # Calculated whether test regex should
                                     # match or not
 
                 # Everything always matches in ASCII, or under /u
                 if ($ord < 128 || $charset eq 'u') {
                     $reason = "\"$char\" is a $class under /$charset";
+                    $neg_reason = "\"$char\" is not a $complement under /$charset";
                 }
                 elsif ($charset eq "a") {
                     $match = 0;
                     $reason = "\"$char\" is non-ASCII, which can't be a $class under /a";
+                    $neg_reason = "\"$char\" is non-ASCII, which is a $complement under /a";
                 }
                 elsif ($ord > 255) {
                     $reason = "\"$char\" is a $class under /$charset";
+                    $neg_reason = "\"$char\" is not a $complement under /$charset";
                 }
                 elsif ($charset eq 'l') {
 
@@ -86,16 +90,20 @@ foreach my $charset (@charsets) {
                     # but under utf8, the above-latin1 chars are treated as
                     # Unicode)
                     $reason = "\"$char\" is not a $class in this locale under /l";
+                    $neg_reason = "\"$char\" is a $complement in this locale under /l";
                     $match = 0;
                 }
                 elsif ($upgrade) {
                     $reason = "\"$char\" is a $class in utf8 under /d";
+                    $neg_reason = "\"$char\" is not a $complement in utf8 under /d";
                 }
                 else {
-                    $reason = "\"$char\" is latin1, which requires utf8 to be a $class under /d";
+                    $reason = "\"$char\" is above-ASCII latin1, which requires utf8 to be a $class under /d";
+                    $neg_reason = "\"$char\" is above-ASCII latin1, which is a $complement under /d (unless in utf8)";
                     $match = 0;
                 }
                 $reason = "; $reason" if $reason;
+                $neg_reason = "; $neg_reason" if $neg_reason;
 
                 my $op;
                 my $neg_op;
@@ -137,7 +145,7 @@ foreach my $charset (@charsets) {
                         qq[my \$a = "$char"; $upgrade\$a $neg_op qr/ (?$charset: $lb$complement$rb ) /x],
                         qq[my \$a = "$char" x $length; $upgrade\$a $neg_op qr/ (?$charset: $lb$complement$rb\{$length} ) /x],
                     ) {
-                        ok (eval $eval, $eval . $reason);
+                        ok (eval $eval, $eval . $neg_reason);
                     }
                 }
 
@@ -154,7 +162,7 @@ foreach my $charset (@charsets) {
                     qq[my \$a = "$char"; $upgrade\$a $neg_op qr/(?$charset: ^ \\B . ) /x],
                     qq[my \$a = "$char"; $upgrade\$a $neg_op qr/(?$charset: . \\B \$ ) /x],
                 ) {
-                    ok (eval $eval, $eval . $reason);
+                    ok (eval $eval, $eval . $neg_reason);
                 }
 
                 # Test \b, \B adjacent to a non-word char, both before it and
@@ -177,7 +185,7 @@ foreach my $charset (@charsets) {
                         qq[my \$a = "$space$char"; $upgrade\$a $neg_op qr/ (?$charset: . \\B . ) /x],
                         qq[my \$a = "$char$space"; $upgrade\$a $neg_op qr/ (?$charset: . \\B . ) /x],
                     ) {
-                        ok (eval $eval, $eval . $reason . "; \"$space\" is not a \\w");
+                        ok (eval $eval, $eval . $neg_reason . "; \"$space\" is not a \\w");
                     }
                 }
 
@@ -192,6 +200,7 @@ foreach my $charset (@charsets) {
                     # circumstances
                     my $other_is_word = 1;
                     my $other_reason = "\"$other\" is a $class under /$charset";
+                    my $other_neg_reason = "\"$other\" is not a $complement under /$charset";
                     if ($other_ord > 127
                         && $charset ne 'u'
                         && ($charset eq "a"
@@ -199,9 +208,12 @@ foreach my $charset (@charsets) {
                     {
                         $other_is_word = 0;
                         $other_reason = "\"$other\" is not a $class under /$charset";
+                        $other_neg_reason = "\"$other\" is a $complement under /$charset";
                     }
                     my $both_reason = $reason;
                     $both_reason .= "; $other_reason" if $other_ord != $ord;
+                    my $both_neg_reason = $neg_reason;
+                    $both_neg_reason .= "; $other_neg_reason" if $other_ord != $ord;
 
                     # If both are the same wordness, then \b will fail; \B
                     # succeed
@@ -224,7 +236,7 @@ foreach my $charset (@charsets) {
                         qq[my \$a = "$other$char"; $upgrade\$a $neg_op qr/ (?$charset: $other \\B $char ) /x],
                         qq[my \$a = "$char$other"; $upgrade\$a $neg_op qr/ (?$charset: $char \\B $other ) /x],
                     ) {
-                        ok (eval $eval, $eval . $both_reason);
+                        ok (eval $eval, $eval . $both_neg_reason);
                     }
 
                     next if $other_ord == $ord;
@@ -242,7 +254,7 @@ foreach my $charset (@charsets) {
                         qq[my \$a = "$other$char"; $upgrade\$a $neg_op qr/ (?$charset: \\B $char ) /x],
                         qq[my \$a = "$char$other"; $upgrade\$a $neg_op qr/ (?$charset: \\B $other ) /x],
                     ) {
-                        ok (eval $eval, $eval . $both_reason);
+                        ok (eval $eval, $eval . $both_neg_reason);
                     }
                 }
             } # End of each test case in a class
