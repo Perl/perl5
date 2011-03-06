@@ -129,8 +129,12 @@ foreach my $charset (@charsets) {
                     # than one item to match.
                     foreach my $eval (
                         qq[my \$a = "$char"; $upgrade\$a $op qr/ (?$charset: $lb$class$rb ) /x],
-                        qq[my \$a = "$char"; $upgrade\$a $neg_op qr/ (?$charset: $lb$complement$rb ) /x],
                         qq[my \$a = "$char" x $length; $upgrade\$a $op qr/ (?$charset: $lb$class$rb\{$length} ) /x],
+                    ) {
+                        ok (eval $eval, $eval . $reason);
+                    }
+                    foreach my $eval (
+                        qq[my \$a = "$char"; $upgrade\$a $neg_op qr/ (?$charset: $lb$complement$rb ) /x],
                         qq[my \$a = "$char" x $length; $upgrade\$a $neg_op qr/ (?$charset: $lb$complement$rb\{$length} ) /x],
                     ) {
                         ok (eval $eval, $eval . $reason);
@@ -143,6 +147,10 @@ foreach my $charset (@charsets) {
                 foreach my $eval (
                     qq[my \$a = "$char"; $upgrade\$a $op qr/ (?$charset: ^ \\b . ) /x],
                     qq[my \$a = "$char"; $upgrade\$a $op qr/ (?$charset: . \\b \$) /x],
+                ) {
+                    ok (eval $eval, $eval . $reason);
+                }
+                foreach my $eval (
                     qq[my \$a = "$char"; $upgrade\$a $neg_op qr/(?$charset: ^ \\B . ) /x],
                     qq[my \$a = "$char"; $upgrade\$a $neg_op qr/(?$charset: . \\B \$ ) /x],
                 ) {
@@ -162,6 +170,10 @@ foreach my $charset (@charsets) {
                     foreach my $eval (
                         qq[my \$a = "$space$char"; $upgrade\$a $op qr/ (?$charset: . \\b . ) /x],
                         qq[my \$a = "$char$space"; $upgrade\$a $op qr/ (?$charset: . \\b . ) /x],
+                    ) {
+                        ok (eval $eval, $eval . $reason . "; \"$space\" is not a \\w");
+                    }
+                    foreach my $eval (
                         qq[my \$a = "$space$char"; $upgrade\$a $neg_op qr/ (?$charset: . \\B . ) /x],
                         qq[my \$a = "$char$space"; $upgrade\$a $neg_op qr/ (?$charset: . \\B . ) /x],
                     ) {
@@ -205,6 +217,10 @@ foreach my $charset (@charsets) {
                     foreach my $eval (
                         qq[my \$a = "$other$char"; $upgrade\$a $op qr/ (?$charset: $other \\b $char ) /x],
                         qq[my \$a = "$char$other"; $upgrade\$a $op qr/ (?$charset: $char \\b $other ) /x],
+                    ) {
+                        ok (eval $eval, $eval . $both_reason);
+                    }
+                    foreach my $eval (
                         qq[my \$a = "$other$char"; $upgrade\$a $neg_op qr/ (?$charset: $other \\B $char ) /x],
                         qq[my \$a = "$char$other"; $upgrade\$a $neg_op qr/ (?$charset: $char \\B $other ) /x],
                     ) {
@@ -219,6 +235,10 @@ foreach my $charset (@charsets) {
                     foreach my $eval (
                         qq[my \$a = "$other$char"; $upgrade\$a $op qr/ (?$charset: \\b $char ) /x],
                         qq[my \$a = "$char$other"; $upgrade\$a $op qr/ (?$charset: \\b $other ) /x],
+                    ) {
+                        ok (eval $eval, $eval . $both_reason);
+                    }
+                    foreach my $eval (
                         qq[my \$a = "$other$char"; $upgrade\$a $neg_op qr/ (?$charset: \\B $char ) /x],
                         qq[my \$a = "$char$other"; $upgrade\$a $neg_op qr/ (?$charset: \\B $other ) /x],
                     ) {
