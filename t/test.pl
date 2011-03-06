@@ -122,6 +122,16 @@ sub skip_all_if_miniperl {
     skip_all(@_) if is_miniperl();
 }
 
+sub skip_all_without_extension {
+    my $extension = shift;
+    unless (eval 'require Config; 1') {
+	warn "test.pl had problems loading Config: $@";
+	return;
+    }
+    return if ($Config::Config{extensions} =~ /\b$extension\b/);
+    skip_all("$extension was not built");
+}
+
 sub _ok {
     my ($pass, $where, $name, @mess) = @_;
     # Do not try to microoptimize by factoring out the "not ".

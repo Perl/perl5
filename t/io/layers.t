@@ -9,9 +9,7 @@ BEGIN {
     skip_all('not perlio') unless (find PerlIO::Layer 'perlio');
     # FIXME - more of these could be tested without Encode or full perl
     skip_all_if_miniperl("no dynamic loading on miniperl, no Encode");
-    require Config; Config->import;
-    skip_all('Encode was not built')
-	unless ($Config::Config{extensions} =~ /\bEncode\b/);
+    skip_all_without_extension('Encode');
 
     # Makes testing easier.
     $ENV{PERLIO} = 'stdio' if exists $ENV{PERLIO} && $ENV{PERLIO} eq '';
@@ -23,6 +21,7 @@ BEGIN {
     $PERLIO = exists $ENV{PERLIO} ? $ENV{PERLIO} : "(undef)";
 }
 
+use Config;
 
 my $DOSISH    = $^O =~ /^(?:MSWin32|os2|dos|NetWare)$/ ? 1 : 0;
    $DOSISH    = 1 if !$DOSISH and $^O =~ /^uwin/;
