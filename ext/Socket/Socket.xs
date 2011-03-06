@@ -435,7 +435,25 @@ inet_aton(host)
 		XSRETURN(1);
 	}
 
-	XSRETURN_UNDEF;
+	ST(0) = &PL_sv_undef;
+#ifdef HAS_GETADDRINFO
+	{
+		struct addrinfo hints = { 0 };
+		struct addrinfo *result;
+
+		hints.ai_family = AF_INET;
+		if (!getaddrinfo(host, NULL, &hints, &result) && result) {
+			/* These two checks are just paranoia.  */
+			if (result->ai_family == AF_INET && result->ai_addr->sa_family == AF_INET) {
+				ST(0) = newSVpvn_flags((char *)&((const struct sockaddr_in *)result->ai_addr)->sin_addr,
+						       sizeof(ip_address), SVs_TEMP);
+			}
+			freeaddrinfo(result);
+		}
+	}
+#endif
+
+	XSRETURN(1);
 	}
 
 void
