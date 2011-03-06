@@ -41,7 +41,7 @@ you master the first part, you will have all the tools needed to solve
 about 98% of your needs.  The second part of the tutorial is for those
 comfortable with the basics and hungry for more power tools.  It
 discusses the more advanced regular expression operators and
-introduces the latest cutting edge innovations in 5.6.0.
+introduces the latest cutting-edge innovations.
 
 A note: to save time, 'regular expression' is often abbreviated as
 regexp or regex.  Regexp is a more natural abbreviation than regex, but
@@ -60,7 +60,7 @@ contains that word:
     "Hello World" =~ /World/;  # matches
 
 What is this Perl statement all about? C<"Hello World"> is a simple
-double quoted string.  C<World> is the regular expression and the
+double-quoted string.  C<World> is the regular expression and the
 C<//> enclosing C</World/> tells Perl to search a string for a match.
 The operator C<=~> associates the string with the regexp match and
 produces a true value if the regexp matched, or false if the regexp
@@ -287,7 +287,7 @@ Although one can already do quite a lot with the literal string
 regexps above, we've only scratched the surface of regular expression
 technology.  In this and subsequent sections we will introduce regexp
 concepts (and associated metacharacter notations) that will allow a
-regexp to not just represent a single character sequence, but a I<whole
+regexp to represent not just a single character sequence, but a I<whole
 class> of them.
 
 One such concept is that of a I<character class>.  A character class
@@ -742,7 +742,7 @@ all 3-letter doubles with a space in between:
 
     /\b(\w\w\w)\s\g1\b/;
 
-The grouping assigns a value to \g1, so that the same 3 letter sequence
+The grouping assigns a value to \g1, so that the same 3-letter sequence
 is used for both parts.
 
 A similar task is to find words consisting of two identical parts:
@@ -773,7 +773,7 @@ preceding capture group one now may write C<\g{-1}>, the next but
 last is available via C<\g{-2}>, and so on.
 
 Another good reason in addition to readability and maintainability
-for using relative backreferences  is illustrated by the following example,
+for using relative backreferences is illustrated by the following example,
 where a simple pattern for matching peculiar strings is used:
 
     $a99a = '([a-z])(\d)\g2\g1';   # matches a11a, g22g, x33x, etc.
