@@ -449,7 +449,9 @@ PP(pp_warn)
     else {
 	exsv = newSVpvs_flags("Warning: something's wrong", SVs_TEMP);
     }
-    warn_sv(exsv);
+    if (SvROK(exsv) && !PL_warnhook)
+	 Perl_warn(aTHX_ "%"SVf, SVfARG(exsv));
+    else warn_sv(exsv);
     RETSETYES;
 }
 

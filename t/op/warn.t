@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan 21;
+plan 22;
 
 my @warnings;
 my $wa = []; my $ea = [];
@@ -139,6 +139,13 @@ fresh_perl_like(
   qr/^Wide character in warn .*\n\xc4\xac at /,
   { switches => [ "-C0" ] },
  'Wide character in warn (not print)'
+);
+
+fresh_perl_like(
+ 'warn []',
+  qr/^ARRAY\(0x[\da-f]+\) at /a,
+  { },
+ 'warn stringifies in the absence of $SIG{__WARN__}'
 );
 
 1;
