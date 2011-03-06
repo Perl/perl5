@@ -88,7 +88,7 @@ e.g., C<\x1B>:
     "1000\t2000" =~ m(0\t2)      # matches
     "cat"      =~ /\143\x61\x74/ # matches in ASCII, but a weird way to spell cat
 
-Regexes are treated mostly as double quoted strings, so variable
+Regexes are treated mostly as double-quoted strings, so variable
 substitution works:
 
     $foo = 'house';
@@ -161,7 +161,9 @@ character, or the match fails.  Then
     /[^0-9]/;  # matches a non-numeric character
     /[a^]at/;  # matches 'aat' or '^at'; here '^' is ordinary
 
-Perl has several abbreviations for common character classes:
+Perl has several abbreviations for common character classes. (These
+definitions are those that Perl uses in ASCII mode with the C</a> modifier.
+See L<perlrecharclass/Backslash sequences> for details.)
 
 =over 4
 
@@ -417,11 +419,11 @@ there are no groupings, a list of matches to the whole regex.  So
 =head2 Search and replace
 
 Search and replace is performed using C<s/regex/replacement/modifiers>.
-The C<replacement> is a Perl double quoted string that replaces in the
+The C<replacement> is a Perl double-quoted string that replaces in the
 string whatever is matched with the C<regex>.  The operator C<=~> is
 also used here to associate a string with C<s///>.  If matching
-against C<$_>, the S<C<$_ =~> > can be dropped.  If there is a match,
-C<s///> returns the number of substitutions made, otherwise it returns
+against C<$_>, the S<C<$_ =~>> can be dropped.  If there is a match,
+C<s///> returns the number of substitutions made; otherwise it returns
 false.  Here are a few examples:
 
     $x = "Time to feed the cat!";
@@ -469,7 +471,7 @@ matched substring.  Some examples:
 
 The last example shows that C<s///> can use other delimiters, such as
 C<s!!!> and C<s{}{}>, and even C<s{}//>.  If single quotes are used
-C<s'''>, then the regex and replacement are treated as single quoted
+C<s'''>, then the regex and replacement are treated as single-quoted
 strings.
 
 =head2 The split operator
