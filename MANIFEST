@@ -4950,6 +4950,7 @@ t/op/smartmatch.t		See if the ~~ operator works
 t/op/sort.t			See if sort works
 t/op/splice.t			See if splice works
 t/op/split.t			See if split works
+t/op/split_unicode.t		Test split /\s/ and Unicode
 t/op/sprintf2.t			See if sprintf works
 t/op/sprintf.t			See if sprintf works
 t/op/srand.t			See if srand works
