@@ -8,8 +8,15 @@ BEGIN {
 
 plan tests => 22;
 
-use File::Path;
-rmtree('blurfl');
+unless (eval {
+    require File::Path;
+    File::Path::rmtree('blurfl');
+    1
+}) {
+    diag("$0 may fail if its temporary directory remains from a previous run");
+    diag("Attempted to load File::Path to delete directory t/blurfl - error was\n$@");
+    diag("\nIf you have problems, please manually delete t/blurfl");
+}    
 
 # tests 3 and 7 rather naughtily expect English error messages
 $ENV{'LC_ALL'} = 'C';
