@@ -422,21 +422,14 @@ inet_aton(host)
 	CODE:
 	{
 	struct in_addr ip_address;
-	struct hostent * phe;
 
 	if ((*host != '\0') && inet_aton(host, &ip_address)) {
 		ST(0) = newSVpvn_flags((char *)&ip_address, sizeof ip_address, SVs_TEMP);
 		XSRETURN(1);
 	}
 
-	phe = gethostbyname(host);
-	if (phe && phe->h_addrtype == AF_INET && phe->h_length == 4) {
-		ST(0) = newSVpvn_flags((char *)phe->h_addr, phe->h_length, SVs_TEMP);
-		XSRETURN(1);
-	}
-
 	ST(0) = &PL_sv_undef;
-#ifdef HAS_GETADDRINFO
+#if 1
 	{
 		struct addrinfo hints = { 0 };
 		struct addrinfo *result;
