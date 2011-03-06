@@ -3546,6 +3546,7 @@ ext/re/t/lexical_debug.t	test that lexical re 'debug' works
 ext/re/t/qr.t			test that qr// is a Regexp
 ext/re/t/reflags.t		see if re '/xism' pragma works
 ext/re/t/re_funcs.t		See if exportable 're' funcs in re.xs work
+ext/re/t/re_funcs_u.t		See if exportable 're' funcs in universal.c work
 ext/re/t/regop.pl		generate debug output for various patterns
 ext/re/t/regop.t		test RE optimizations by scraping debug output
 ext/re/t/re.t			see if re pragma works
@@ -5050,7 +5051,6 @@ t/re/reg_nc_tie.t		Test the tied methods of Tie::Hash::NamedCapture
 t/re/reg_pmod.t			See if regexp /p modifier works as expected
 t/re/reg_posixcc.t		See if posix character classes behave consistently
 t/re/reg_unsafe.t		Check for unsafe match vars
-t/re/re.t			See if exportable 're' funcs in universal.c work
 t/re/re_tests			Regular expressions for regexp.t
 t/re/rxcode.t			See if /(?{ code })/ works
 t/re/subst_amp.t		See if $&-related substitution works

@@ -1,9 +1,12 @@
 #!./perl
 
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-    require './test.pl';
+    require Config;
+    if (($Config::Config{'extensions'} !~ /\bre\b/) ){
+	print "1..0 # Skip -- Perl configured without re module\n";
+	    exit 0;
+    }
+    require 'test.pl'; # For watchdog
 }
 
 use strict;
