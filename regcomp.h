@@ -331,6 +331,11 @@ struct regnode_charclass_class {
 
 #define ANYOF_INVERT		 0x04
 
+/* CLASS is never set unless LOCALE is too: has runtime \d, \w, [:posix:], ...
+ * The non-locale ones are resolved at compile-time */
+#define ANYOF_CLASS	 0x08
+#define ANYOF_LARGE      ANYOF_CLASS    /* Same; name retained for back compat */
+
 /* EOS, meaning that it can match an empty string too, is used for the
  * synthetic start class (ssc) only.  It looks like it could share the INVERT
  * bit, as the ssc is never inverted.  But doing that caused this reges to
@@ -345,11 +350,6 @@ struct regnode_charclass_class {
  * as if the ssc can match an EOS, the ssc is discarded, and never passed to
  * regexec.c" */
 #define ANYOF_EOS		0x10
-
-/* CLASS is never set unless LOCALE is too: has runtime \d, \w, [:posix:], ...
- * The non-locale ones are resolved at compile-time */
-#define ANYOF_CLASS	 0x08
-#define ANYOF_LARGE      ANYOF_CLASS    /* Same; name retained for back compat */
 
 /* Can match something outside the bitmap that isn't in utf8 */
 #define ANYOF_NONBITMAP_NON_UTF8 0x20
