@@ -760,6 +760,13 @@ If you don't run the full test suite, at least C<make test_porting>.
 This will run basic sanity checks. To see which sanity checks, have a
 look in F<t/porting>.
 
+=item *
+
+If you make any changes that affect miniperl or core routines that have
+different code paths for miniperl, be sure to run C<make minitest>. 
+This will catch problems that even the full test suite will not catch
+because it runs a subset of tests under miniperl rather than perl.
+
 =back
 
 =head2 Committing to maintenance versions
