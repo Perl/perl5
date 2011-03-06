@@ -423,15 +423,19 @@ inet_aton(host)
 	{
 	struct in_addr ip_address;
 	struct hostent * phe;
-	int ok = (*host != '\0') && inet_aton(host, &ip_address);
 
-	if (!ok && (phe = gethostbyname(host)) &&
-			phe->h_addrtype == AF_INET && phe->h_length == 4) {
-		Copy( phe->h_addr, &ip_address, phe->h_length, char );
-		ok = 1;
+	if ((*host != '\0') && inet_aton(host, &ip_address)) {
+		ST(0) = newSVpvn_flags((char *)&ip_address, sizeof ip_address, SVs_TEMP);
+		XSRETURN(1);
 	}
 
-	ST(0) = newSVpvn_flags(ok ? (char *)&ip_address : NULL, sizeof ip_address, SVs_TEMP);
+	phe = gethostbyname(host);
+	if (phe && phe->h_addrtype == AF_INET && phe->h_length == 4) {
+		ST(0) = newSVpvn_flags((char *)phe->h_addr, phe->h_length, SVs_TEMP);
+		XSRETURN(1);
+	}
+
+	XSRETURN_UNDEF;
 	}
 
 void
