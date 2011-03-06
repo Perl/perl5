@@ -1148,11 +1148,23 @@ $Beyond_TimeZone:
 $ tz = f$fao("UTC!AS!UL:!2ZL",signothetime,tzhour,tzminrem)
 $ cf_time = "''wkday' ''mon' ''mday' ''hour':''min':''sec' ''tz' ''year'"
 $!
-$!: determine the architecture name  
-$! Note that DCL in VMS V5.4 does not have F$GETSYI("ARCH_NAME")
-$! but does have F$GETSYI("HW_MODEL").
-$! Please try to use either archname .EQS. "VMS_VAX" or archname .EQS. 
-$! "VMS_AXP" from here on to allow cross-platform configuration (e.g.
+$! This quotation from Configure has to be included on VMS:
+$!
+$ TYPE SYS$INPUT:
+$ DECK
+
+There is, however, a strange, musty smell in the air that reminds me of
+something...hmm...yes...I've got it...there's a VMS nearby, or I'm a Blit.
+$ EOD
+$!
+$! Determine the architecture name.  For now we just get the base
+$! architecture name, which may accumulate various minus sign-delimited
+$! appendages later depending on configuration options.  But we need the
+$! base name early because not all questions are worth asking on all
+$! platforms.
+$!
+$! Please use F$ELEMENT(0,"-",archname) .EQS. "VMS_VAX" (or "VMS_AXP" or
+$! "VMS_IA64") from here on to allow cross-platform configuration (e.g.
 $! configure a VAX build on an Alpha).
 $!
 $ IF (F$GETSYI("HW_MODEL") .LT. 1024 .AND. F$GETSYI("HW_MODEL") .GT. 0)
@@ -1174,164 +1186,6 @@ $       arch_type = "ARCH-TYPE=__IA64__"
 $   ENDIF
 $   alignbytes="8"
 $ ENDIF
-$ dflt = archname
-$ rp = "What is your architecture name? [''archname'] "
-$ GOSUB myread
-$ IF ans.NES.""
-$ THEN
-$   ans = F$EDIT(ans,"COLLAPSE, UPCASE")
-$   IF (ans.NES.archname) !.AND.knowitall
-$   THEN
-$     echo4 "I'll go with ''archname' anyway..."
-$   ENDIF
-$ ENDIF
-$ bool_dflt = "n"
-$ vms_prefix = "perl_root"
-$ vms_prefixup = F$EDIT(vms_prefix,"UPCASE")
-$ rp = "Will you be sharing your ''vms_prefixup' with ''otherarch'? [''bool_dflt'] "
-$ GOSUB myread
-$ IF .NOT. ans
-$ THEN
-$   sharedperl = "N"
-$ ELSE
-$   sharedperl = "Y"
-$   IF (F$ELEMENT(0, "-", archname).EQS."VMS_AXP")
-$   THEN
-$     macros = macros + """AXE=1"","
-$   ENDIF
-$   IF (F$ELEMENT(0, "-", archname).EQS."VMS_IA64")
-$   THEN
-$     macros = macros + """IXE=1"","
-$   ENDIF
-$ ENDIF
-$!
-$!: is AFS running?                       !sfn
-$!: decide how portable to be.  Allow command line overrides. !sfn
-$!: set up shell script to do ~ expansion !sfn
-$!: expand filename                       !sfn
-$!: now set up to get a file name         !sfn
-$!
-$ IF F$TYPE(prefix) .EQS. ""
-$ THEN
-$   prefix = F$ENVIRONMENT("DEFAULT") - ".UU]" + "]"
-$   prefix = F$PARSE(prefix,,,,"NO_CONCEAL") - "][" - "000000." - ".000000" - ".;"
-$   prefixbase = prefix - "]"
-$!  Add _ROOT to make install PERL_ROOT differ from build directory.
-$   prefix = prefixbase + "_ROOT.]"
-$ ENDIF
-$ ! more redundant scrubbing of values
-$ prefix = prefix - "000000."
-$ IF F$LOCATE(".]",prefix) .EQ. F$LENGTH(prefix) THEN prefix = prefix - "]" + ".]"
-$ src = prefix
-$!: determine root of directory hierarchy where package will be installed.
-$ dflt = prefix
-$ IF .NOT.silent 
-$ THEN 
-$   echo ""
-$   echo "By default, ''package' will be installed in ''dflt', pod"
-$   echo "pages under ''prefixbase'.LIB.POD], etc..., i.e. with ''dflt' as prefix for"
-$   echo "all installation directories."
-$   echo "On ''osname' the prefix is used to DEFINE the ''vms_prefixup' prior to installation"
-$   echo "as well as during subsequent use of ''package' via ''packageup'_SETUP.COM."
-$ ENDIF
-$ rp = "Installation prefix to use (for ''vms_prefixup')? [ ''dflt' ] "
-$ GOSUB myread
-$ IF ans.NES.""
-$ THEN 
-$   prefix = ans
-$   IF F$LOCATE(".]",ans) .EQ. F$LENGTH(ans) THEN prefix = prefix - "]" + ".]"
-$ ELSE 
-$   prefix = dflt
-$ ENDIF
-$ perl_root = prefix
-$!
-$! Check here for pre-existing PERL_ROOT.
-$!  -> ask if removal desired.
-$! Check here for writability of requested PERL_ROOT if it is not the default (cwd).
-$!  -> recommend letting PERL_ROOT be PERL_SRC if requested PERL_ROOT is not writable.
-$!
-$   tmp = perl_root - ".]" + "]"
-$ dflt = f$parse(tmp,,,,)
-$   IF dflt .eqs. ""
-$   THEN
-$       echo4 "''tmp' does not yet exist."
-$!      create/directory 'tmp'
-$   ELSE
-$       echo4 "''tmp' already exists."
-$   ENDIF
-$!
-$ vms_skip_install = "true"
-$ bool_dflt = "y"
-$! echo ""
-$ rp = "Skip the remaining """"where install"""" questions? [''bool_dflt'] "
-$ GOSUB myread
-$ IF (.NOT.ans) THEN vms_skip_install = "false"
-$ IF (.NOT.vms_skip_install)
-$ THEN
-$!
-$!: set the prefixit variable, to compute a suitable default value
-$!
-$!: determine where private library files go
-$!: Usual default is /usr/local/lib/perl5.  Also allow things like 
-$!: /opt/perl/lib, since /opt/perl/lib/perl5 would be redundant.
-$   IF .NOT.silent 
-$   THEN
-$     TYPE SYS$INPUT:
-$     DECK
-
-There are some auxiliary files for perl5 that need to be put into a
-private library directory that is accessible by everyone.
-$     EOD
-$   ENDIF
-$   IF F$TYPE(privlib) .NES. ""
-$   THEN dflt = privlib
-$   ELSE dflt = "''vms_prefix':[lib]"
-$   ENDIF
-$   rp = "Pathname where the private library files will reside? " 
-$   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
-$   GOSUB myread
-$   privlib = ans
-$!
-$ ENDIF !%Config-I-VMS, skip remaining "where install" questions
-$!
-$ IF F$TYPE(perl_symbol) .EQS. "" THEN perl_symbol := true
-$ IF F$TYPE(perl_verb) .EQS. "" THEN perl_verb = ""
-$ IF perl_symbol
-$ THEN bool_dflt = "y"
-$ ELSE bool_dflt = "n"
-$ ENDIF
-$ IF .NOT.silent 
-$ THEN 
-$   echo ""
-$   echo "You may choose to write ''packageup'_SETUP.COM to assign a foreign"
-$   echo "symbol to invoke ''package', which is the usual method."
-$   echO "If you do not do so then you would need a DCL command verb at the"
-$   echo "process or the system wide level."
-$ ENDIF
-$ rp = "Invoke perl as a global symbol foreign command? [''bool_dflt'] "
-$ GOSUB myread
-$ IF (.NOT.ans) THEN perl_symbol = "false"
-$!
-$ IF (.NOT.perl_symbol)
-$ THEN
-$   IF perl_verb .EQS. "DCLTABLES"
-$   THEN bool_dflt = "n"
-$   ELSE bool_dflt = "y"
-$   ENDIF
-$   IF .NOT.silent 
-$   THEN 
-$     echo ""
-$     echo "Since you won't be using a symbol you must choose to put the ''packageup'"
-$     echo "verb in a per-process table or in the system wide DCLTABLES (which"
-$     echo "would require write privilege)."
-$   ENDIF
-$   rp = "Invoke perl as a per process command verb? [ ''bool_dflt' ] "
-$   GOSUB myread
-$   IF (.NOT.ans)
-$   THEN perl_verb = "DCLTABLES"
-$   ELSE perl_verb = "PROCESS"
-$   ENDIF
-$ ENDIF ! (.NOT.perl_symbol)
 $!
 $!: set the base revision
 $ baserev="5.0"
@@ -1439,175 +1293,6 @@ $ ENDIF
 $ echo "(You have ''package' ''version_patchlevel_string'.)"
 $!
 $ version = revision + "_" + patchlevel + "_" + subversion
-$!
-$ IF (.NOT.vms_skip_install)
-$ THEN
-$!: set the prefixup variable, to restore leading tilde escape !sfn
-$!
-$!: determine where public architecture dependent libraries go
-$   IF (.NOT.silent) 
-$   THEN 
-$     echo ""
-$     echo "''package' contains architecture-dependent library files.  If you are"
-$   ENDIF
-$   IF (.NOT.silent) 
-$   THEN
-$     TYPE SYS$INPUT:
-$     DECK
-sharing libraries in a heterogeneous environment, you might store
-these files in a separate location.  Otherwise, you can just include
-them with the rest of the public library files.
-$     EOD
-$   ENDIF
-$   IF F$TYPE(archlib) .NES. ""
-$   THEN dflt = archlib
-$   ELSE dflt = privlib - "]" + "." + archname + "." + version + "]"
-$   ENDIF
-$   rp = "Where do you want to put the public architecture-dependent libraries? "
-$   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
-$   GOSUB myread
-$   archlib = ans
-$!
-$ ENDIF !%Config-I-VMS, skip "where install" questions
-$!
-$! This quotation from Configure has to be included on VMS:
-$!
-$ TYPE SYS$INPUT:
-$ DECK
-
-There is, however, a strange, musty smell in the air that reminds me of
-something...hmm...yes...I've got it...there's a VMS nearby, or I'm a Blit.
-$ EOD
-$ IF (.NOT.vms_skip_install)
-$ THEN
-$!: it so happens the Eunice I know will not run shell scripts in Unix format
-$!
-$!: see if setuid scripts can be secure           !sfn
-$!: now see if they want to do setuid emulation   !sfn
-$!
-$!: determine where site specific libraries go.
-$   IF .NOT.silent 
-$   THEN
-$     TYPE SYS$INPUT:
-$     DECK
-
-The installation process will also create a directory for
-site-specific extensions and modules.  Some users find it convenient
-to place all local files in this directory rather than in the main
-distribution directory.
-$     EOD
-$   ENDIF
-$   IF F$TYPE(sitelib) .NES. ""
-$   THEN dflt = sitelib
-$   ELSE dflt = privlib - "]" + ".SITE_PERL]"
-$   ENDIF
-$   rp = "Pathname for the site-specific library files? "
-$   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
-$   GOSUB myread
-$   sitelib = ans
-$!
-$!: determine where site specific architecture-dependent libraries go.
-$   IF .NOT.silent 
-$   THEN TYPE SYS$INPUT:
-$     DECK
-
-The installation process will also create a directory for
-architecture-dependent site-specific extensions and modules.
-$     EOD
-$   ENDIF
-$   IF F$TYPE(sitearch) .NES. ""
-$   THEN dflt = sitearch
-$   ELSE dflt = sitelib - "]" + "." + archname + "]"
-$   ENDIF
-$   rp = "Pathname for the site-specific architecture-dependent library files? "
-$   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
-$   GOSUB myread
-$   sitearch = ans
-$!
-$!: determine where old public architecture dependent libraries might be
-$!
-$!: determine where public executables go
-$   IF F$TYPE(bin) .NES. ""
-$   THEN dflt = bin
-$!   ELSE dflt = prefix - ".]" + ".BIN]"
-$   ELSE dflt = "/''vms_prefix'"
-$   ENDIF
-$   rp = "Pathname where the public executables will reside? "
-$   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
-$   GOSUB myread
-$   bin = ans
-$!
-$!: determine where add-on public executables go
-$   IF F$TYPE(sitebin) .NES. ""
-$   THEN dflt = sitebin
-$   ELSE dflt = "''vms_prefix':[bin.''archname']"
-$   ENDIF
-$   rp = "Pathname where the add-on public executables should be installed? "
-$   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
-$   GOSUB myread
-$   sitebin = ans
-$!
-$!: determine where manual pages are on this system
-$!: What suffix to use on installed man pages
-$!: see if we can have long filenames
-$!: determine where library module manual pages go
-$!: What suffix to use on installed man pages
-$!: see what memory models we can support
-$!
-$ ELSE ! skipping "where install" questions, we must set some symbols
-$   IF F$TYPE(archlib).EQS."" THEN -
-      archlib="''vms_prefix':[lib.''archname'.''version']"
-$   IF F$TYPE(bin) .EQS. "" THEN -
-      bin="/''vms_prefix'"
-$   IF F$TYPE(privlib) .EQS. "" THEN -
-      privlib ="''vms_prefix':[lib]"
-$   IF F$TYPE(sitearch) .EQS. "" THEN -
-      sitearch="''vms_prefix':[lib.site_perl.''archname']"
-$   IF F$TYPE(sitelib) .EQS. "" THEN -
-      sitelib ="''vms_prefix':[lib.site_perl]"
-$   IF F$TYPE(sitebin) .EQS. "" THEN -
-      sitebin="''vms_prefix':[bin.''archname']"
-$ ENDIF !%Config-I-VMS, skip "where install" questions
-$!
-$! These derived locations can be set whether we've opted to
-$! skip the where install questions or not.
-$!
-$ IF F$TYPE(archlibexp) .EQS. "" THEN -
-    archlibexp="''vms_prefix':[lib.''archname'.''version']"
-$ IF F$TYPE(binexp) .EQS. "" THEN -
-    binexp ="''vms_prefix':[000000]"
-$ IF F$TYPE(builddir) .EQS. "" THEN -
-    builddir ="''vms_prefix':[000000]"
-$ IF F$TYPE(installarchlib) .EQS. "" THEN -
-    installarchlib="''vms_prefix':[lib.''archname'.''version']"
-$ IF F$TYPE(installbin) .EQS. "" THEN -
-    installbin ="''vms_prefix':[000000]"
-$ IF F$TYPE(installscript) .EQS. "" THEN -
-    installscript ="''vms_prefix':[utils]"
-$ IF F$TYPE(installman1dir) .EQS. "" THEN -
-    installman1dir ="''vms_prefix':[man.man1]"
-$ IF F$TYPE(installman3dir) .EQS. "" THEN -
-    installman3dir ="''vms_prefix':[man.man3]"
-$ IF F$TYPE(installprivlib) .EQS. "" THEN -
-    installprivlib ="''vms_prefix':[lib]"
-$ IF F$TYPE(installsitearch) .EQS. "" THEN -
-    installsitearch="''vms_prefix':[lib.site_perl.''archname']"
-$ IF F$TYPE(installsitelib) .EQS. "" THEN -
-    installsitelib ="''vms_prefix':[lib.site_perl]"
-$ IF F$TYPE(oldarchlib) .EQS. "" THEN -
-    oldarchlib="''vms_prefix':[lib.''archname']"
-$ IF F$TYPE(oldarchlibexp) .EQS. "" THEN -
-    oldarchlibexp="''vms_prefix':[lib.''archname']"
-$ IF F$TYPE(privlibexp) .EQS. "" THEN -
-    privlibexp ="''vms_prefix':[lib]"
-$ IF F$TYPE(scriptdir) .EQS. "" THEN -
-    scriptdir ="''vms_prefix':[utils]"
-$ IF F$TYPE(sitearchexp) .EQS. "" THEN -
-    sitearchexp ="''vms_prefix':[lib.site_perl.''archname']"
-$ IF F$TYPE(sitelib_stem) .EQS. "" THEN -
-    sitelib_stem ="''vms_prefix':[lib.site_perl]"
-$ IF F$TYPE(sitelibexp) .EQS. "" THEN -
-    sitelibexp ="''vms_prefix':[lib.site_perl]"
 $!
 $!: see if we need a special compiler
 $! cc_list = "cc/decc|gcc" !%Config-I-VMS, compiler symbols/commands
@@ -2685,6 +2370,325 @@ $ GOSUB myread
 $ d_alwdeftype = ans
 $ usedefaulttypes = "undef"
 $ if (d_alwdeftype) then usedefaulttypes = "define"
+$!
+$ dflt = archname
+$ rp = "What is your architecture name? [''archname'] "
+$ GOSUB myread
+$ IF ans.NES.""
+$ THEN
+$   ans = F$EDIT(ans,"COLLAPSE, UPCASE")
+$   IF (ans.NES.archname) !.AND.knowitall
+$   THEN
+$     echo4 "I'll go with ''archname' anyway..."
+$   ENDIF
+$ ENDIF
+$ bool_dflt = "n"
+$ vms_prefix = "perl_root"
+$ vms_prefixup = F$EDIT(vms_prefix,"UPCASE")
+$ rp = "Will you be sharing your ''vms_prefixup' with ''otherarch'? [''bool_dflt'] "
+$ GOSUB myread
+$ IF .NOT. ans
+$ THEN
+$   sharedperl = "N"
+$ ELSE
+$   sharedperl = "Y"
+$   IF (F$ELEMENT(0, "-", archname).EQS."VMS_AXP")
+$   THEN
+$     macros = macros + """AXE=1"","
+$   ENDIF
+$   IF (F$ELEMENT(0, "-", archname).EQS."VMS_IA64")
+$   THEN
+$     macros = macros + """IXE=1"","
+$   ENDIF
+$ ENDIF
+$!
+$!: is AFS running?                       !sfn
+$!: decide how portable to be.  Allow command line overrides. !sfn
+$!: set up shell script to do ~ expansion !sfn
+$!: expand filename                       !sfn
+$!: now set up to get a file name         !sfn
+$!
+$ IF F$TYPE(prefix) .EQS. ""
+$ THEN
+$   prefix = F$ENVIRONMENT("DEFAULT") - ".UU]" + "]"
+$   prefix = F$PARSE(prefix,,,,"NO_CONCEAL") - "][" - "000000." - ".000000" - ".;"
+$   prefixbase = prefix - "]"
+$!  Add _ROOT to make install PERL_ROOT differ from build directory.
+$   prefix = prefixbase + "_ROOT.]"
+$ ENDIF
+$ ! more redundant scrubbing of values
+$ prefix = prefix - "000000."
+$ IF F$LOCATE(".]",prefix) .EQ. F$LENGTH(prefix) THEN prefix = prefix - "]" + ".]"
+$ src = prefix
+$!: determine root of directory hierarchy where package will be installed.
+$ dflt = prefix
+$ IF .NOT.silent 
+$ THEN 
+$   echo ""
+$   echo "By default, ''package' will be installed in ''dflt', pod"
+$   echo "pages under ''prefixbase'.LIB.POD], etc..., i.e. with ''dflt' as prefix for"
+$   echo "all installation directories."
+$   echo "On ''osname' the prefix is used to DEFINE the ''vms_prefixup' prior to installation"
+$   echo "as well as during subsequent use of ''package' via ''packageup'_SETUP.COM."
+$ ENDIF
+$ rp = "Installation prefix to use (for ''vms_prefixup')? [ ''dflt' ] "
+$ GOSUB myread
+$ IF ans.NES.""
+$ THEN 
+$   prefix = ans
+$   IF F$LOCATE(".]",ans) .EQ. F$LENGTH(ans) THEN prefix = prefix - "]" + ".]"
+$ ELSE 
+$   prefix = dflt
+$ ENDIF
+$ perl_root = prefix
+$!
+$! Check here for pre-existing PERL_ROOT.
+$!  -> ask if removal desired.
+$! Check here for writability of requested PERL_ROOT if it is not the default (cwd).
+$!  -> recommend letting PERL_ROOT be PERL_SRC if requested PERL_ROOT is not writable.
+$!
+$   tmp = perl_root - ".]" + "]"
+$ dflt = f$parse(tmp,,,,)
+$   IF dflt .eqs. ""
+$   THEN
+$       echo4 "''tmp' does not yet exist."
+$!      create/directory 'tmp'
+$   ELSE
+$       echo4 "''tmp' already exists."
+$   ENDIF
+$!
+$ vms_skip_install = "true"
+$ bool_dflt = "y"
+$! echo ""
+$ rp = "Skip the remaining """"where install"""" questions? [''bool_dflt'] "
+$ GOSUB myread
+$ IF (.NOT.ans) THEN vms_skip_install = "false"
+$ IF (.NOT.vms_skip_install)
+$ THEN
+$!
+$!: set the prefixit variable, to compute a suitable default value
+$!
+$!: determine where private library files go
+$!: Usual default is /usr/local/lib/perl5.  Also allow things like 
+$!: /opt/perl/lib, since /opt/perl/lib/perl5 would be redundant.
+$   IF .NOT.silent 
+$   THEN
+$     TYPE SYS$INPUT:
+$     DECK
+
+There are some auxiliary files for perl5 that need to be put into a
+private library directory that is accessible by everyone.
+$     EOD
+$   ENDIF
+$   IF F$TYPE(privlib) .NES. ""
+$   THEN dflt = privlib
+$   ELSE dflt = "''vms_prefix':[lib]"
+$   ENDIF
+$   rp = "Pathname where the private library files will reside? " 
+$   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
+$   GOSUB myread
+$   privlib = ans
+$!
+$ ENDIF !%Config-I-VMS, skip remaining "where install" questions
+$!
+$ IF F$TYPE(perl_symbol) .EQS. "" THEN perl_symbol := true
+$ IF F$TYPE(perl_verb) .EQS. "" THEN perl_verb = ""
+$ IF perl_symbol
+$ THEN bool_dflt = "y"
+$ ELSE bool_dflt = "n"
+$ ENDIF
+$ IF .NOT.silent 
+$ THEN 
+$   echo ""
+$   echo "You may choose to write ''packageup'_SETUP.COM to assign a foreign"
+$   echo "symbol to invoke ''package', which is the usual method."
+$   echO "If you do not do so then you would need a DCL command verb at the"
+$   echo "process or the system wide level."
+$ ENDIF
+$ rp = "Invoke perl as a global symbol foreign command? [''bool_dflt'] "
+$ GOSUB myread
+$ IF (.NOT.ans) THEN perl_symbol = "false"
+$!
+$ IF (.NOT.perl_symbol)
+$ THEN
+$   IF perl_verb .EQS. "DCLTABLES"
+$   THEN bool_dflt = "n"
+$   ELSE bool_dflt = "y"
+$   ENDIF
+$   IF .NOT.silent 
+$   THEN 
+$     echo ""
+$     echo "Since you won't be using a symbol you must choose to put the ''packageup'"
+$     echo "verb in a per-process table or in the system wide DCLTABLES (which"
+$     echo "would require write privilege)."
+$   ENDIF
+$   rp = "Invoke perl as a per process command verb? [ ''bool_dflt' ] "
+$   GOSUB myread
+$   IF (.NOT.ans)
+$   THEN perl_verb = "DCLTABLES"
+$   ELSE perl_verb = "PROCESS"
+$   ENDIF
+$ ENDIF ! (.NOT.perl_symbol)
+$!
+$ IF (.NOT.vms_skip_install)
+$ THEN
+$!: set the prefixup variable, to restore leading tilde escape !sfn
+$!
+$!: determine where public architecture dependent libraries go
+$   IF (.NOT.silent) 
+$   THEN 
+$     echo ""
+$     echo "''package' contains architecture-dependent library files.  If you are"
+$   ENDIF
+$   IF (.NOT.silent) 
+$   THEN
+$     TYPE SYS$INPUT:
+$     DECK
+sharing libraries in a heterogeneous environment, you might store
+these files in a separate location.  Otherwise, you can just include
+them with the rest of the public library files.
+$     EOD
+$   ENDIF
+$   IF F$TYPE(archlib) .NES. ""
+$   THEN dflt = archlib
+$   ELSE dflt = privlib - "]" + "." + archname + "." + version + "]"
+$   ENDIF
+$   rp = "Where do you want to put the public architecture-dependent libraries? "
+$   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
+$   GOSUB myread
+$   archlib = ans
+$!
+$ ENDIF !%Config-I-VMS, skip "where install" questions
+$ IF (.NOT.vms_skip_install)
+$ THEN
+$!: it so happens the Eunice I know will not run shell scripts in Unix format
+$!
+$!: see if setuid scripts can be secure           !sfn
+$!: now see if they want to do setuid emulation   !sfn
+$!
+$!: determine where site specific libraries go.
+$   IF .NOT.silent 
+$   THEN
+$     TYPE SYS$INPUT:
+$     DECK
+
+The installation process will also create a directory for
+site-specific extensions and modules.  Some users find it convenient
+to place all local files in this directory rather than in the main
+distribution directory.
+$     EOD
+$   ENDIF
+$   IF F$TYPE(sitelib) .NES. ""
+$   THEN dflt = sitelib
+$   ELSE dflt = privlib - "]" + ".SITE_PERL]"
+$   ENDIF
+$   rp = "Pathname for the site-specific library files? "
+$   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
+$   GOSUB myread
+$   sitelib = ans
+$!
+$!: determine where site specific architecture-dependent libraries go.
+$   IF .NOT.silent 
+$   THEN TYPE SYS$INPUT:
+$     DECK
+
+The installation process will also create a directory for
+architecture-dependent site-specific extensions and modules.
+$     EOD
+$   ENDIF
+$   IF F$TYPE(sitearch) .NES. ""
+$   THEN dflt = sitearch
+$   ELSE dflt = sitelib - "]" + "." + archname + "]"
+$   ENDIF
+$   rp = "Pathname for the site-specific architecture-dependent library files? "
+$   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
+$   GOSUB myread
+$   sitearch = ans
+$!
+$!: determine where old public architecture dependent libraries might be
+$!
+$!: determine where public executables go
+$   IF F$TYPE(bin) .NES. ""
+$   THEN dflt = bin
+$!   ELSE dflt = prefix - ".]" + ".BIN]"
+$   ELSE dflt = "/''vms_prefix'"
+$   ENDIF
+$   rp = "Pathname where the public executables will reside? "
+$   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
+$   GOSUB myread
+$   bin = ans
+$!
+$!: determine where add-on public executables go
+$   IF F$TYPE(sitebin) .NES. ""
+$   THEN dflt = sitebin
+$   ELSE dflt = "''vms_prefix':[bin.''archname']"
+$   ENDIF
+$   rp = "Pathname where the add-on public executables should be installed? "
+$   rp = F$FAO("!AS!/!AS",rp,"[ ''dflt' ] ")
+$   GOSUB myread
+$   sitebin = ans
+$!
+$!: determine where manual pages are on this system
+$!: What suffix to use on installed man pages
+$!: see if we can have long filenames
+$!: determine where library module manual pages go
+$!: What suffix to use on installed man pages
+$!: see what memory models we can support
+$!
+$ ELSE ! skipping "where install" questions, we must set some symbols
+$   IF F$TYPE(archlib).EQS."" THEN -
+      archlib="''vms_prefix':[lib.''archname'.''version']"
+$   IF F$TYPE(bin) .EQS. "" THEN -
+      bin="/''vms_prefix'"
+$   IF F$TYPE(privlib) .EQS. "" THEN -
+      privlib ="''vms_prefix':[lib]"
+$   IF F$TYPE(sitearch) .EQS. "" THEN -
+      sitearch="''vms_prefix':[lib.site_perl.''archname']"
+$   IF F$TYPE(sitelib) .EQS. "" THEN -
+      sitelib ="''vms_prefix':[lib.site_perl]"
+$   IF F$TYPE(sitebin) .EQS. "" THEN -
+      sitebin="''vms_prefix':[bin.''archname']"
+$ ENDIF !%Config-I-VMS, skip "where install" questions
+$!
+$! These derived locations can be set whether we've opted to
+$! skip the where install questions or not.
+$!
+$ IF F$TYPE(archlibexp) .EQS. "" THEN -
+    archlibexp="''vms_prefix':[lib.''archname'.''version']"
+$ IF F$TYPE(binexp) .EQS. "" THEN -
+    binexp ="''vms_prefix':[000000]"
+$ IF F$TYPE(builddir) .EQS. "" THEN -
+    builddir ="''vms_prefix':[000000]"
+$ IF F$TYPE(installarchlib) .EQS. "" THEN -
+    installarchlib="''vms_prefix':[lib.''archname'.''version']"
+$ IF F$TYPE(installbin) .EQS. "" THEN -
+    installbin ="''vms_prefix':[000000]"
+$ IF F$TYPE(installscript) .EQS. "" THEN -
+    installscript ="''vms_prefix':[utils]"
+$ IF F$TYPE(installman1dir) .EQS. "" THEN -
+    installman1dir ="''vms_prefix':[man.man1]"
+$ IF F$TYPE(installman3dir) .EQS. "" THEN -
+    installman3dir ="''vms_prefix':[man.man3]"
+$ IF F$TYPE(installprivlib) .EQS. "" THEN -
+    installprivlib ="''vms_prefix':[lib]"
+$ IF F$TYPE(installsitearch) .EQS. "" THEN -
+    installsitearch="''vms_prefix':[lib.site_perl.''archname']"
+$ IF F$TYPE(installsitelib) .EQS. "" THEN -
+    installsitelib ="''vms_prefix':[lib.site_perl]"
+$ IF F$TYPE(oldarchlib) .EQS. "" THEN -
+    oldarchlib="''vms_prefix':[lib.''archname']"
+$ IF F$TYPE(oldarchlibexp) .EQS. "" THEN -
+    oldarchlibexp="''vms_prefix':[lib.''archname']"
+$ IF F$TYPE(privlibexp) .EQS. "" THEN -
+    privlibexp ="''vms_prefix':[lib]"
+$ IF F$TYPE(scriptdir) .EQS. "" THEN -
+    scriptdir ="''vms_prefix':[utils]"
+$ IF F$TYPE(sitearchexp) .EQS. "" THEN -
+    sitearchexp ="''vms_prefix':[lib.site_perl.''archname']"
+$ IF F$TYPE(sitelib_stem) .EQS. "" THEN -
+    sitelib_stem ="''vms_prefix':[lib.site_perl]"
+$ IF F$TYPE(sitelibexp) .EQS. "" THEN -
+    sitelibexp ="''vms_prefix':[lib.site_perl]"
 $!
 $! determine whether to use malloc wrapping
 $ echo ""
