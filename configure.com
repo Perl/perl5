@@ -7091,6 +7091,7 @@ $ WC "''THREAD_KERNEL'"
 $ WC "PV=''version'"
 $ WC "FLAGS=FLAGS=''extra_flags'"
 $ WC "''LARGEFILE_REPLACE'"
+$ WC "ARCHNAME=ARCHNAME=''archname'"
 $ close CONFIG
 $!
 $ echo4 "Extracting ''defmakefile' (with variable substitutions)"

@@ -33,6 +33,7 @@
 ~MTU~
 ~FLAGS~
 ~LARGEFILE~
+~ARCHNAME~
 
 #: >>>>> Architecture-specific options <<<<<
 .ifdef IXE
@@ -58,14 +59,11 @@ E = .exe
 .endif
 
 .ifdef __IA64__
-ARCH = VMS_IA64
 OBJVAL = $(O)
 .else
 .ifdef __AXP__
-ARCH = VMS_AXP
 OBJVAL = $(O)
 .else
-ARCH = VMS_VAX
 OBJVAL = $(MMS$TARGET_NAME)$(O)
 .endif
 .endif
@@ -96,9 +94,9 @@ SOCKETSHR_SOCKETS=1
 .endif
 .endif
 
-ARCHDIR =  [.lib.$(ARCH).$(PERL_VERSION)]
-ARCHCORE = [.lib.$(ARCH).$(PERL_VERSION).CORE]
-ARCHAUTO = [.lib.$(ARCH).$(PERL_VERSION).auto]
+ARCHDIR =  [.lib.$(ARCHNAME).$(PERL_VERSION)]
+ARCHCORE = [.lib.$(ARCHNAME).$(PERL_VERSION).CORE]
+ARCHAUTO = [.lib.$(ARCHNAME).$(PERL_VERSION).auto]
 
 #: Backwards compatibility
 .ifdef DECC_PIPES_BROKEN
@@ -1535,7 +1533,7 @@ install : $(MINIPERL_EXE)
 	$(MINIPERL) installperl
 
 archify : all
-	@ Write Sys$Output "Moving files to architecture-specific locations for $(ARCH)"
+	@ Write Sys$Output "Moving files to architecture-specific locations for $(ARCHNAME)"
 	archroot = "$(ARCHAUTO)" - "]" + "...]"
 	Backup/Log/Verify [.lib.auto...]*.*;/Exclude=(*.al,*.ix) 'archroot'/New_Version
 	Delete/Log/NoConfirm [.lib.auto...]*.*;*/exclude=(*.al,*.ix,*.dir)
@@ -1944,7 +1942,7 @@ realclean : clean
 	- If F$Search("Descrip.MMS").nes."" Then Delete/NoConfirm/Log Descrip.MMS;*
 	- If F$Search("extra_pods.Com").nes."" Then Delete/NoConfirm/Log extra_pods.Com;*
 	- If F$Search("extra.pods").nes."" Then Delete/NoConfirm/Log extra.pods;*
-	- $(MINIPERL) -e "use File::Path; rmtree(['lib/auto','lib/VMS','lib/$(ARCH)'],1,0);"
+	- $(MINIPERL) -e "use File::Path; rmtree(['lib/auto','lib/VMS','lib/$(ARCHNAME)'],1,0);"
 	- If F$Search("*.TS").nes."" Then Delete/NoConfirm/Log *.TS;*
 	- If F$Search("[.lib]Config.pm").nes."" Then Delete/NoConfirm/Log [.lib]Config.pm;*
 	- If F$Search("[.lib]Config_heavy.pl").nes."" Then Delete/NoConfirm/Log [.lib]Config_heavy.pl;*
