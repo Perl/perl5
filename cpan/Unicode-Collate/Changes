@@ -1,5 +1,15 @@
 Revision history for Perl module Unicode::Collate.
 
+0.73  Sun Mar  6 13:24:22 2011
+    - DUCET is updated (for Unicode 6.0.0) as Collate/allkeys.txt.
+    ! However no maint perl has supported Unicode 6.0.0 yet;
+      wait for 5.14, or try developing 5.13.7 or later.
+    ! Please notice that allkeys.txt will be overwritten if you have had
+      other allkeys.txt already.
+    - The default UCA_Version is 22. Locale/*.pl and Korean.pm are updated.
+    - test: compare allkeys.txt's version with Base_Unicode_Version
+      in t/default.t.
+
 0.72  Sat Jan 22 17:28:32 2011
     - xs: fix mixing char* and U8*.
 

@@ -14,7 +14,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '0.72';
+our $VERSION = '0.73';
 our $PACKAGE = __PACKAGE__;
 
 require DynaLoader;
@@ -81,9 +81,9 @@ use constant Hangul_SFin   => 0xD7A3;
 # Logical_Order_Exception in PropList.txt
 my $DefaultRearrange = [ 0x0E40..0x0E44, 0x0EC0..0x0EC4 ];
 
-sub UCA_Version { "20" }
+sub UCA_Version { "22" }
 
-sub Base_Unicode_Version { "5.2.0" }
+sub Base_Unicode_Version { "6.0.0" }
 
 ######
 
@@ -1038,11 +1038,11 @@ with no parameters, the collator should do the default collation.
 
 =item UCA_Version
 
-If the tracking version number of UCA is given,
-behavior of that tracking version is emulated on collating.
+If the revision (previously "tracking version") number of UCA is given,
+behavior of that revision is emulated on collating.
 If omitted, the return value of C<UCA_Version()> is used.
 
-The following tracking versions are supported.  The default is 20.
+The following revisions are supported.  The default is 22.
 
      UCA       Unicode Standard         DUCET (@version)
    -------------------------------------------------------
@@ -1054,8 +1054,6 @@ The following tracking versions are supported.  The default is 20.
      18             5.1.0               5.1.0 (5.1.0)
      20             5.2.0               5.2.0 (5.2.0)
      22             6.0.0               6.0.0 (6.0.0)
-
-Note: Recent UTS #10 renames "Tracking Version" to "Revision."
 
 * Noncharacters (e.g. U+FFFF) are not ignored, and can be overridden
 since C<UCA_Version> 22.
@@ -1729,13 +1727,13 @@ returns C<"unknown">.
 
 =item C<UCA_Version()>
 
-Returns the tracking version number of UTS #10 this module consults.
-C<UCA_Version()> should return the tracking version corresponding
-with the DUCET incorporated.
+Returns the revision number of UTS #10 this module consults,
+that should correspond with the DUCET incorporated.
 
 =item C<Base_Unicode_Version()>
 
-Returns the version number of UTS #10 this module consults.
+Returns the version number of UTS #10 this module consults,
+that should correspond with the DUCET incorporated.
 
 =back
 
@@ -1801,8 +1799,8 @@ This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
 The file Unicode/Collate/allkeys.txt was copied verbatim
-from L<http://www.unicode.org/Public/UCA/5.2.0/allkeys.txt>.
-This file is Copyright (c) 1991-2009 Unicode, Inc. All rights reserved.
+from L<http://www.unicode.org/Public/UCA/6.0.0/allkeys.txt>.
+This file is Copyright (c) 1991-2010 Unicode, Inc. All rights reserved.
 Distributed under the Terms of Use in L<http://www.unicode.org/copyright.html>.
 
 =head1 SEE ALSO

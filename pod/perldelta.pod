@@ -150,7 +150,14 @@ C<Tie::RefHash> has been upgraded from version 1.38 to 1.39.
 
 =item *
 
-Unicode::UCD has been upgraded from version 0.31 to 0.32.
+C<Unicode::Collate> has been upgraded from version 0.72 to 0.73
+
+DUCET has been updated for Unicode 6.0.0 as Collate/allkeys.txt and
+the default UCA_Version is 22.
+
+=item *
+
+C<Unicode::UCD> has been upgraded from version 0.31 to 0.32.
 This includes a number of bug fixes:
 
 =over 4

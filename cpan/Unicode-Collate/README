@@ -1,4 +1,4 @@
-Unicode/Collate version 0.72
+Unicode/Collate version 0.73
 ===============================
 
 NAME
@@ -115,6 +115,6 @@ This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
 The file Unicode/Collate/allkeys.txt was copied verbatim
-from http://www.unicode.org/Public/UCA/5.2.0/allkeys.txt
-This file is Copyright (c) 1991-2009 Unicode, Inc. All rights reserved.
+from http://www.unicode.org/Public/UCA/6.0.0/allkeys.txt
+This file is Copyright (c) 1991-2010 Unicode, Inc. All rights reserved.
 Distributed under the Terms of Use in http://www.unicode.org/copyright.html
