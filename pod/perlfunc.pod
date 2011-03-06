@@ -3303,7 +3303,7 @@ indicate that you want both read and write access to the file; thus
 C<< '+<' >> is almost always preferred for read/write updates--the 
 C<< '+>' >> mode would clobber the file first.  You can't usually use
 either read-write mode for updating textfiles, since they have
-variable length records.  See the B<-i> switch in L<perlrun> for a
+variable-length records.  See the B<-i> switch in L<perlrun> for a
 better approach.  The file is created with permissions of C<0666>
 modified by the process's C<umask> value.
 
@@ -3314,15 +3314,6 @@ In the two-argument (and one-argument) form of the call, the mode and
 filename should be concatenated (in that order), possibly separated by
 spaces.  You may omit the mode in these forms when that mode is
 C<< '<' >>.
-
-If the filename begins with C<'|'>, the filename is interpreted as a
-command to which output is to be piped, and if the filename ends with a
-C<'|'>, the filename is interpreted as a command that pipes output to
-us.  See L<perlipc/"Using open() for IPC">
-for more examples of this.  (You are not allowed to C<open> to a command
-that pipes both in I<and> out, but see L<IPC::Open2>, L<IPC::Open3>,
-and L<perlipc/"Bidirectional Communication with Another Process">
-for alternatives.)
 
 For three or more arguments if MODE is C<'|-'>, the filename is
 interpreted as a command to which output is to be piped, and if MODE
@@ -3521,11 +3512,11 @@ certain value, typically 255.  For Perls 5.8.0 and later, PerlIO is
 most often the default.
 
 You can see whether Perl has been compiled with PerlIO or not by
-running C<perl -V> and looking for C<useperlio=> line.  If C<useperlio>
-is C<define>, you have PerlIO, otherwise you don't.
+running C<perl -V> and looking for the C<useperlio=> line.  If C<useperlio>
+is C<define>, you have PerlIO; otherwise you don't.
 
 If you open a pipe on the command C<'-'>, i.e., either C<'|-'> or C<'-|'>
-with 2-arguments (or 1-argument) form of open(), then
+with the 2-argument (or 1-argument) form of open(), then
 there is an implicit fork done, and the return value of open is the pid
 of the child within the parent process, and C<0> within the child
 process.  (Use C<defined($pid)> to determine whether the open was successful.)
@@ -3570,7 +3561,7 @@ Closing any piped filehandle causes the parent process to wait for the
 child to finish, and returns the status value in C<$?> and
 C<${^CHILD_ERROR_NATIVE}>.
 
-The filename passed to 2-argument (or 1-argument) form of open() will
+The filename passed to the 2-argument (or 1-argument) form of open() will
 have leading and trailing whitespace deleted, and the normal
 redirection characters honored.  This property, known as "magic open",
 can often be used to good effect.  A user could specify a filename of
@@ -3646,7 +3637,7 @@ scalar variable (or array or hash element), the variable is assigned a
 reference to a new anonymous dirhandle.
 DIRHANDLEs have their own namespace separate from FILEHANDLEs.
 
-See example at C<readdir>.
+See the example at C<readdir>.
 
 =item ord EXPR
 X<ord> X<encoding>
@@ -3673,7 +3664,7 @@ C<our> associates a simple name with a package variable in the current
 package for use within the current scope.  When C<use strict 'vars'> is in
 effect, C<our> lets you use declared global variables without qualifying
 them with package names, within the lexical scope of the C<our> declaration.
-In this way C<our> differs from C<use vars>, which is package scoped.
+In this way C<our> differs from C<use vars>, which is package-scoped.
 
 Unlike C<my>, which both allocates storage for a variable and associates
 a simple name with that storage for use within the current scope, C<our>
@@ -4128,7 +4119,7 @@ or little-endian byte-order.  These modifiers are especially useful
 given how C<n>, C<N>, C<v> and C<V> don't cover signed integers, 
 64-bit integers, or floating-point values.
 
-Here are some concerns to keep in mind when using endianness modifier:
+Here are some concerns to keep in mind when using an endianness modifier:
 
 =over
 
@@ -4247,7 +4238,7 @@ for complicated pattern matches.
 
 =item *
 
-If TEMPLATE requires more arguments that pack() is given, pack()
+If TEMPLATE requires more arguments than pack() is given, pack()
 assumes additional C<""> arguments.  If TEMPLATE requires fewer arguments
 than given, extra arguments are ignored.
 
