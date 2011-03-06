@@ -10,6 +10,8 @@
 # The use of this database for anything else than Perl development
 # is strictly forbidden.  (Passive distribution with the Perl source
 # code kit is, of course, allowed.)
+#
+# After editing, please run: make test_porting
 -- 
 A. C. Yardley			<yardley@tanet.net>
 A. Sinan Unur			<nanis@cpan.org>
