@@ -132,6 +132,10 @@ sub skip_all_without_extension {
     skip_all("$extension was not built");
 }
 
+sub skip_all_without_perlio {
+    skip_all('no PerlIO') unless PerlIO::Layer->find('perlio');
+}
+
 sub _ok {
     my ($pass, $where, $name, @mess) = @_;
     # Do not try to microoptimize by factoring out the "not ".

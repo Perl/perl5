@@ -3,15 +3,16 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = qw(. ../lib);
+    require "test.pl";
+    skip_all_without_perlio();
 }
 
 use Config;
 
-require "test.pl";
 
 my $file = tempfile();
 
-if (find PerlIO::Layer 'perlio') {
+{
     plan(tests => 16);
     ok(open(FOO,">:crlf",$file));
     ok(print FOO 'a'.((('a' x 14).qq{\n}) x 2000) || close(FOO));
@@ -69,9 +70,6 @@ if (find PerlIO::Layer 'perlio') {
 	    unlike($foo, qr/\x0d\x0d/);
 	}
     }
-}
-else {
-    skip_all("No perlio, so no :crlf");
 }
 
 sub count_chars {

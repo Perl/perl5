@@ -7,10 +7,7 @@ BEGIN {
     @INC = qw(. ../lib);
     require 'test.pl';
     skip_all_if_miniperl('no dynamic loading on miniperl, no Filter::Util::Call');
-    unless (find PerlIO::Layer 'perlio') {
-	print "1..0 # Skip: not perlio\n";
-	exit 0;
-    }
+    skip_all_without_perlio();
 }
 use strict;
 use Config;

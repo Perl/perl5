@@ -4,7 +4,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    skip_all('not perlio') unless (find PerlIO::Layer 'perlio');
+    skip_all_without_perlio();
     skip_all_if_miniperl("no dynamic loading on miniperl, no Fcntl");
     skip_all_without_extension('Fcntl'); # how did you get this far?
 }

@@ -6,7 +6,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    skip_all('not perlio') unless (find PerlIO::Layer 'perlio');
+    skip_all_without_perlio();
     # FIXME - more of these could be tested without Encode or full perl
     skip_all_if_miniperl("no dynamic loading on miniperl, no Encode");
     skip_all_without_extension('Encode');

@@ -7,10 +7,7 @@ BEGIN {
     @INC = '../lib';
     require "./test.pl";
 
-    unless (find PerlIO::Layer 'perlio') {
-	print "1..0 # Skip: not perlio\n";
-	exit 0;
-    }
+    skip_all_without_perlio();
     skip_all_if_miniperl('-C and $ENV{PERL_UNICODE} are disabled on miniperl');
 }
 
