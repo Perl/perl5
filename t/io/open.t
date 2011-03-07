@@ -228,8 +228,7 @@ like( $@, qr/Bad filehandle:\s+$afile/,          '       right error' );
 
 SKIP: {
     skip "This perl uses perlio", 1 if $Config{useperlio};
-    skip "miniperl cannot be relied on to load %Errno"
-	if $ENV{PERL_CORE_MINITEST};
+    skip_if_miniperl("miniperl can't rely on loading %Errno", 1);
     # Force the reference to %! to be run time by writing ! as {"!"}
     skip "This system doesn't understand EINVAL", 1
 	unless exists ${"!"}{EINVAL};

@@ -21,7 +21,6 @@ $Is_Dos      = $^O eq 'dos';
 $Is_os2      = $^O eq 'os2';
 $Is_Cygwin   = $^O eq 'cygwin';
 $Is_MPE      = $^O eq 'mpeix';		
-$Is_miniperl = $ENV{PERL_CORE_MINITEST};
 $Is_BeOS     = $^O eq 'beos';
 
 $PERL = $ENV{PERL}
@@ -335,7 +334,7 @@ EOP
 }
 
 SKIP: {
-    skip ("miniperl can't rely on loading %Errno", 2) if $Is_miniperl;
+    skip_if_miniperl("miniperl can't rely on loading %Errno", 2);
    no warnings 'void';
 
 # Make sure Errno hasn't been prematurely autoloaded
@@ -351,7 +350,7 @@ SKIP: {
 }
 
 SKIP:  {
-    skip ("miniperl can't rely on loading %Errno") if $Is_miniperl;
+    skip_if_miniperl("miniperl can't rely on loading %Errno", 1);
     # Make sure that Errno loading doesn't clobber $!
 
     undef %Errno::;
