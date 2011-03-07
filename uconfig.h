@@ -4174,7 +4174,7 @@
  *	of copying mechanisms, handy.h defines a platform-
  *	independent macro, Perl_va_copy(src, dst), to do the job.
  */
-/*#define	NEED_VA_COPY		/ **/
+#define	NEED_VA_COPY		/**/
 
 /* IVTYPE:
  *	This symbol defines the C type used for Perl's IV.
@@ -4687,5 +4687,5 @@
 
 /* Generated from:
  * 323778627146f2762cd41f4dd1db6659f59006ec9bcaaf6bcc645d0380dda938 config_h.SH
- * c59d2b1fc6a313e8ff46597b14976c14307b9504013fb059305440a127074130 uconfig.sh
+ * d61f2bab075c864edee2d7c0eddf56cf6ea8a3a99b12bf8327caf7fc4bb1b3d6 uconfig.sh
  * ex: set ro: */
