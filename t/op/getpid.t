@@ -12,14 +12,7 @@ use strict;
 use Config;
 
 BEGIN {
-    if (!$Config{useithreads}) {
-	print "1..0 # Skip: no ithreads\n";
-	exit;
-    }
-    if (!$Config{d_getppid}) {
-	print "1..0 # Skip: no getppid\n";
-	exit;
-    }
+    skip_all_without_config($_) foreach qw(useithreads d_getppid);
     if ($ENV{PERL_CORE_MINITEST}) {
         print "1..0 # Skip: no dynamic loading on miniperl, no threads\n";
         exit 0;

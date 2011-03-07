@@ -6,11 +6,7 @@ BEGIN {
      require './test.pl';
      $| = 1;
 
-     require Config;
-     if (!$Config::Config{useithreads}) {
-        print "1..0 # Skip: no ithreads\n";
-        exit 0;
-     }
+     skip_all_without_config('useithreads');
      skip_all_if_miniperl("no dynamic loading on miniperl, no threads");
 
      plan(24);

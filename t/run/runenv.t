@@ -8,11 +8,8 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require Config; import Config;
-    unless ($Config{'d_fork'}) {
-        print "1..0 # Skip: no fork\n";
-	    exit 0;
-    }
-    require './test.pl'
+    require './test.pl';
+    skip_all_without_config('d_fork');
 }
 
 plan tests => 84;

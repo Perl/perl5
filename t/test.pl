@@ -136,6 +136,21 @@ sub skip_all_without_perlio {
     skip_all('no PerlIO') unless PerlIO::Layer->find('perlio');
 }
 
+sub skip_all_without_config {
+    my ($key, $reason) = @_;
+    unless (eval 'require Config; 1') {
+	warn "test.pl had problems loading Config: $@";
+	return;
+    }
+    return if $Config::Config{$key};
+    unless (defined $reason) {
+	$key =~ s/^use//;
+	$key =~ s/^d_//;
+	$reason = "no $key";
+    }
+    skip_all($reason);
+}
+
 sub _ok {
     my ($pass, $where, $name, @mess) = @_;
     # Do not try to microoptimize by factoring out the "not ".
