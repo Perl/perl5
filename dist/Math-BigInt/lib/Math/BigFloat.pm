@@ -437,10 +437,10 @@ sub bsstr
     
 sub numify 
   {
-  # Make a number from a BigFloat object
-  # simple return a string and let Perl's atoi()/atof() handle the rest
+  # Convert a Perl scalar number from a BigFloat object.
+  # Create a string and let Perl's atoi()/atof() handle the rest.
   my ($self,$x) = ref($_[0]) ? (undef,$_[0]) : objectify(1,@_);
-  $x->bsstr(); 
+  return 0 + $x->bsstr(); 
   }
 
 ##############################################################################
