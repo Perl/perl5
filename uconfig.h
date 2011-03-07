@@ -280,7 +280,7 @@
  *	This symbol, if defined, indicates that the memset routine is available
  *	to set blocks of memory.
  */
-/*#define HAS_MEMSET	/ **/
+#define HAS_MEMSET	/**/
 
 /* HAS_MKDIR:
  *	This symbol, if defined, indicates that the mkdir routine is available
@@ -4687,5 +4687,5 @@
 
 /* Generated from:
  * 323778627146f2762cd41f4dd1db6659f59006ec9bcaaf6bcc645d0380dda938 config_h.SH
- * 2cdfa76d1081a21ef8613b40d1cf699548c8347531c5e8358469f5bb52db6a44 uconfig.sh
+ * 90b7a3f95ddf0116391ca50b622a54eb7f8b4268aebfe9ab052bd22978c94c54 uconfig.sh
  * ex: set ro: */
