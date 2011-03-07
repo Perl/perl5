@@ -13,10 +13,7 @@ use Config;
 
 BEGIN {
     skip_all_without_config($_) foreach qw(useithreads d_getppid);
-    if ($ENV{PERL_CORE_MINITEST}) {
-        print "1..0 # Skip: no dynamic loading on miniperl, no threads\n";
-        exit 0;
-    }
+    skip_all_if_miniperl("no dynamic loading on miniperl, no threads");
     eval 'use threads; use threads::shared';
     plan tests => 3;
     if ($@) {
