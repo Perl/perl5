@@ -2589,102 +2589,137 @@ sub as_oct
 ##############################################################################
 # private stuff (internal use only)
 
-sub objectify
-  {
-  # check for strings, if yes, return objects instead
- 
-  # the first argument is number of args objectify() should look at it will
-  # return $count+1 elements, the first will be a classname. This is because
-  # overloaded '""' calls bstr($object,undef,undef) and this would result in
-  # useless objects being created and thrown away. So we cannot simple loop
-  # over @_. If the given count is 0, all arguments will be used.
- 
-  # If the second arg is a ref, use it as class.
-  # If not, try to use it as classname, unless undef, then use $class 
-  # (aka Math::BigInt). The latter shouldn't happen,though.
+sub objectify {
+    # Convert strings and "foreign objects" to the objects we want.
 
-  # caller:			   gives us:
-  # $x->badd(1);                => ref x, scalar y
-  # Class->badd(1,2);           => classname x (scalar), scalar x, scalar y
-  # Class->badd( Class->(1),2); => classname x (scalar), ref x, scalar y
-  # Math::BigInt::badd(1,2);    => scalar x, scalar y
-  # In the last case we check number of arguments to turn it silently into
-  # $class,1,2. (We can not take '1' as class ;o)
-  # badd($class,1) is not supported (it should, eventually, try to add undef)
-  # currently it tries 'Math::BigInt' + 1, which will not work.
+    # The first argument, $count, is the number of following arguments that
+    # objectify() looks at and converts to objects. The first is a classname.
+    # If the given count is 0, all arguments will be used.
 
-  # some shortcut for the common cases
-  # $x->unary_op();
-  return (ref($_[1]),$_[1]) if (@_ == 2) && ($_[0]||0 == 1) && ref($_[1]);
+    # After the count is read, objectify obtains the name of the class to which
+    # the following arguments are converted. If the second argument is a
+    # reference, use the reference type as the class name. Otherwise, if it is
+    # a string that looks like a class name, use that. Otherwise, use $class.
 
-  my $count = abs(shift || 0);
-  
-  my (@a,$k,$d);		# resulting array, temp, and downgrade 
-  if (ref $_[0])
-    {
-    # okay, got object as first
-    $a[0] = ref $_[0];
-    }
-  else
-    {
-    # nope, got 1,2 (Class->xxx(1) => Class,1 and not supported)
-    $a[0] = $class;
-    $a[0] = shift if $_[0] =~ /^[A-Z].*::/;	# classname as first?
+    # Caller:                        Gives us:
+    #
+    # $x->badd(1);                => ref x, scalar y
+    # Class->badd(1,2);           => classname x (scalar), scalar x, scalar y
+    # Class->badd(Class->(1),2);  => classname x (scalar), ref x, scalar y
+    # Math::BigInt::badd(1,2);    => scalar x, scalar y
+
+    # A shortcut for the common case $x->unary_op():
+
+    return (ref($_[1]), $_[1]) if (@_ == 2) && ($_[0]||0 == 1) && ref($_[1]);
+
+    # Check the context.
+
+    unless (wantarray) {
+        require Carp;
+        Carp::croak ("${class}::objectify() needs list context");
     }
 
-  no strict 'refs';
-  # disable downgrading, because Math::BigFLoat->foo('1.0','2.0') needs floats
-  if (defined ${"$a[0]::downgrade"})
-    {
-    $d = ${"$a[0]::downgrade"};
-    ${"$a[0]::downgrade"} = undef;
-    }
+    # Get the number of arguments to objectify.
 
-  my $up = ${"$a[0]::upgrade"};
-  # print STDERR "# Now in objectify, my class is today $a[0], count = $count\n";
-  if ($count == 0)
+    my $count = shift;
+    $count ||= @_;
+
+    # Initialize the output array.
+
+    my @a = @_;
+
+    # If the first argument is a reference, use that reference type as our
+    # class name. Otherwise, if the first argument looks like a class name,
+    # then use that as our class name. Otherwise, use the default class name.
+
     {
-    while (@_)
-      {
-      $k = shift;
-      if (!ref($k))
-        {
-        $k = $a[0]->new($k);
+        if (ref($a[0])) {               # reference?
+            unshift @a, ref($a[0]);
+            last;
         }
-      elsif (!defined $up && ref($k) ne $a[0])
-	{
-	# foreign object, try to convert to integer
-        $k->can('as_number') ?  $k = $k->as_number() : $k = $a[0]->new($k);
-	}
-      push @a,$k;
-      }
-    }
-  else
-    {
-    while ($count > 0)
-      {
-      $count--; 
-      $k = shift;
-      if (!ref($k))
-        {
-        $k = $a[0]->new($k);
+        if ($a[0] =~ /^[A-Z].*::/) {    # string with class name?
+            last;
         }
-      elsif (ref($k) ne $a[0] and !defined $up || ref $k ne $up)
-	{
-	# foreign object, try to convert to integer
-        $k->can('as_number') ? $k = $k->as_number() : $k = $a[0]->new($k);
-	}
-      push @a,$k;
-      }
-    push @a,@_;		# return other params, too
+        unshift @a, $class;             # default class name
     }
-  if (! wantarray)
-    {
-    require Carp; Carp::croak ("$class objectify needs list context");
+
+    no strict 'refs';
+
+    # What we upgrade to, if anything.
+
+    my $up = ${"$a[0]::upgrade"};
+
+    # Disable downgrading, because Math::BigFloat -> foo('1.0','2.0') needs
+    # floats.
+
+    my $down;
+    if (defined ${"$a[0]::downgrade"}) {
+        $down = ${"$a[0]::downgrade"};
+        ${"$a[0]::downgrade"} = undef;
     }
-  ${"$a[0]::downgrade"} = $d;
-  @a;
-  }
+
+    for my $i (1 .. $count) {
+        my $ref = ref $a[$i];
+
+        # If it is an object of the right class, all is fine.
+
+        if ($ref eq $a[0]) {
+            next;
+        }
+
+        # Don't do anything with undefs.
+
+        unless (defined($a[$i])) {
+            next;
+        }
+
+        # Perl scalars are fed to the appropriate constructor.
+
+        unless ($ref) {
+            $a[$i] = $a[0] -> new($a[$i]);
+            next;
+        }
+
+        # Upgrading is OK, so skip further tests if the argument is upgraded.
+
+        if (defined $up && $ref eq $up) {
+            next;
+        }
+
+        # If we want a Math::BigInt, see if the object can become one.
+        # Support the old misnomer as_number().
+
+        if ($a[0] eq 'Math::BigInt') {
+            if ($a[$i] -> can('as_int')) {
+                $a[$i] = $a[$i] -> as_int();
+                next;
+            }
+            if ($a[$i] -> can('as_number')) {
+                $a[$i] = $a[$i] -> as_number();
+                next;
+            }
+        }
+
+        # If we want a Math::BigFloat, see if the object can become one.
+
+        if ($a[0] eq 'Math::BigFloat') {
+            if ($a[$i] -> can('as_float')) {
+                $a[$i] = $a[$i] -> as_float();
+                next;
+            }
+        }
+
+        # Last resort.
+
+        $a[$i] = $a[0] -> new($a[$i]);
+    }
+
+    # Reset the downgrading.
+
+    ${"$a[0]::downgrade"} = $down;
+
+    return @a;
+}
 
 sub _register_callback
   {
