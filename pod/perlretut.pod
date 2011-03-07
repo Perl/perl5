@@ -984,7 +984,7 @@ Here are some examples:
     /y(es)?/i;       # matches 'y', 'Y', or a case-insensitive 'yes'
     $year =~ /^\d{2,4}$/;  # make sure year is at least 2 but not more
                            # than 4 digits
-    $year =~ /^\d{4}$|^\d{2}$/;    # better match; throw out 3 digit dates
+    $year =~ /^\d{4}$|^\d{2}$/;    # better match; throw out 3-digit dates
     $year =~ /^\d{2}(\d{2})?$/;  # same thing written differently. However,
                                  # this captures the last two digits in $1
                                  # and the other does not.
@@ -1022,9 +1022,9 @@ stop there, but that wouldn't give the longest possible string to the
 first quantifier C<.*>.  Instead, the first quantifier C<.*> grabs as
 much of the string as possible while still having the regexp match.  In
 this example, that means having the C<at> sequence with the final C<at>
-in the string.  The other important principle illustrated here is that
+in the string.  The other important principle illustrated here is that,
 when there are two or more elements in a regexp, the I<leftmost>
-quantifier, if there is one, gets to grab as much the string as
+quantifier, if there is one, gets to grab as much of the string as
 possible, leaving the rest of the regexp to fight over scraps.  Thus in
 our example, the first quantifier C<.*> grabs most of the string, while
 the second quantifier C<.*> gets the empty string.   Quantifiers that
@@ -1422,7 +1422,7 @@ we can rewrite our 'extended' regexp in the more pleasing form
 If whitespace is mostly irrelevant, how does one include space
 characters in an extended regexp? The answer is to backslash it
 S<C<'\ '>> or put it in a character class S<C<[ ]>>.  The same thing
-goes for pound signs, use C<\#> or C<[#]>.  For instance, Perl allows
+goes for pound signs: use C<\#> or C<[#]>.  For instance, Perl allows
 a space between the sign and the mantissa or integer, and we could add
 this to our regexp as follows:
 
@@ -1551,7 +1551,7 @@ The final two modifiers C<//g> and C<//c> concern multiple matches.
 The modifier C<//g> stands for global matching and allows the
 matching operator to match within a string as many times as possible.
 In scalar context, successive invocations against a string will have
-`C<//g> jump from match to match, keeping track of position in the
+C<//g> jump from match to match, keeping track of position in the
 string as it goes along.  You can get or set the position with the
 C<pos()> function.
 
@@ -1618,7 +1618,7 @@ bit at a time and use arbitrary Perl logic to decide what to do next.
 Currently, the C<\G> anchor is only fully supported when used to anchor
 to the start of the pattern.
 
-C<\G> is also invaluable in processing fixed length records with
+C<\G> is also invaluable in processing fixed-length records with
 regexps.  Suppose we have a snippet of coding region DNA, encoded as
 base pair letters C<ATCGTTGAAT...> and we want to find all the stop
 codons C<TGA>.  In a coding region, codons are 3-letter sequences, so
@@ -1669,11 +1669,11 @@ operations in Perl.  Search and replace is accomplished with the
 C<s///> operator.  The general form is
 C<s/regexp/replacement/modifiers>, with everything we know about
 regexps and modifiers applying in this case as well.  The
-C<replacement> is a Perl double quoted string that replaces in the
+C<replacement> is a Perl double-quoted string that replaces in the
 string whatever is matched with the C<regexp>.  The operator C<=~> is
 also used here to associate a string with C<s///>.  If matching
 against C<$_>, the S<C<$_ =~>> can be dropped.  If there is a match,
-C<s///> returns the number of substitutions made, otherwise it returns
+C<s///> returns the number of substitutions made; otherwise it returns
 false.  Here are a few examples:
 
     $x = "Time to feed the cat!";
@@ -1687,7 +1687,7 @@ false.  Here are a few examples:
 
 In the last example, the whole string was matched, but only the part
 inside the single quotes was grouped.  With the C<s///> operator, the
-matched variables C<$1>, C<$2>, etc.  are immediately available for use
+matched variables C<$1>, C<$2>, etc. are immediately available for use
 in the replacement expression, so we use C<$1> to replace the quoted
 string with just what was quoted.  With the global modifier, C<s///g>
 will search and replace all occurrences of the regexp in the string:
@@ -1728,7 +1728,7 @@ behavior so that C<s///r> returns the final substituted string:
     print "$x $y\n";
 
 That example will print "I like dogs. I like cats". Notice the original
-C<$x> variable has not been affected by the substitute. The overall
+C<$x> variable has not been affected. The overall
 result of the substitution is instead stored in C<$y>. If the
 substitution doesn't affect anything then the original string is
 returned:
@@ -1745,8 +1745,9 @@ substitutions:
     # prints "Hedgehogs are great."
 
 A modifier available specifically to search and replace is the
-C<s///e> evaluation modifier.  C<s///e> wraps an C<eval{...}> around
-the replacement string and the evaluated result is substituted for the
+C<s///e> evaluation modifier.  C<s///e> treats the
+replacement text as Perl code, rather than a double-quoted
+string.  The value that the code returns is substituted for the
 matched substring.  C<s///e> is useful if you need to do a bit of
 computation in the process of replacing text.  This example counts
 character frequencies in a line:
@@ -1770,8 +1771,9 @@ This prints
 
 As with the match C<m//> operator, C<s///> can use other delimiters,
 such as C<s!!!> and C<s{}{}>, and even C<s{}//>.  If single quotes are
-used C<s'''>, then the regexp and replacement are treated as single
-quoted strings and there are no substitutions.  C<s///> in list context
+used C<s'''>, then the regexp and replacement are
+treated as single-quoted strings and there are no
+variable substitutions.  C<s///> in list context
 returns the same thing as in scalar context, i.e., the number of
 matches.
 
@@ -1813,7 +1815,7 @@ an empty initial element to the list.
 If you have read this far, congratulations! You now have all the basic
 tools needed to use regular expressions to solve a wide range of text
 processing problems.  If this is your first time through the tutorial,
-why not stop here and play around with regexps a while...  S<Part 2>
+why not stop here and play around with regexps a while....  S<Part 2>
 concerns the more esoteric aspects of regular expressions and those
 concepts certainly aren't needed right at the start.
 
