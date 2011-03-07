@@ -73,7 +73,7 @@ while (<DATA>)
    } elsif ($f eq "bone") {
     $try .= "\$x->bone('$args[1]');";
   # some unary ops
-   } elsif ($f =~ /^b(nan|floor|ceil|sstr|neg|abs|inc|dec|not|sqrt|fac)$/) {
+   } elsif ($f =~ /^b(nan|floor|ceil|sstr|neg|abs|sgn|inc|dec|not|sqrt|fac)$/) {
     $try .= "\$x->$f();";
    } elsif ($f =~ /^(numify|length|stringify|as_hex|as_bin)$/) {
     $try .= "\$x->$f();";
@@ -1222,6 +1222,13 @@ babsNaN:NaN
 -1:1
 +123456789:123456789
 -123456789:123456789
+&bsgn
+NaN:NaN
++inf:1
+-inf:-1
+0:0
++123456789:1
+-123456789:-1
 &bcmp
 bcmpNaN:bcmpNaN:
 bcmpNaN:0:

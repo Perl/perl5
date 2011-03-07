@@ -1013,6 +1013,18 @@ sub babs
   $x;
   }
 
+sub bsgn {
+    # Signum function.
+
+    my $self = shift;
+
+    return $self if $self->modify('bsgn');
+
+    return $self -> bone("+") if $self -> is_pos();
+    return $self -> bone("-") if $self -> is_neg();
+    return $self;               # zero or NaN
+}
+
 sub bneg 
   { 
   # (BINT or num_str) return BINT
@@ -3310,6 +3322,7 @@ Math::BigInt - Arbitrary size integer/float math package
 
   $x->bneg();		# negation
   $x->babs();		# absolute value
+  $x->bsgn();		# sign function (-1, 0, 1, or NaN)
   $x->bnorm();		# normalize (no-op in BigInt)
   $x->bnot();		# two's complement (bit wise not)
   $x->binc();		# increment $x by 1
