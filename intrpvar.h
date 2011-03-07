@@ -708,7 +708,9 @@ PERLVARI(Iunlockhook,	share_proc_t,	PERL_UNLOCK_HOOK)
 
 PERLVARI(Ithreadhook,	thrhook_proc_t,	Perl_nothreadhook)
 
+#ifndef PERL_MICRO
 PERLVARI(Isignalhook,	despatch_signals_proc_t, Perl_despatch_signals)
+#endif
 
 PERLVARI(Ihash_seed, UV, 0)		/* Hash initializer */
 
