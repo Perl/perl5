@@ -5,13 +5,11 @@
 BEGIN {
 	chdir 't' if -d 't';
 	@INC = '../lib';
-	# Don't bother if there are no quad offsets.
-	require Config; import Config;
-	if ($Config{lseeksize} < 8) {
-		print "1..0 # Skip: no 64-bit file offsets\n";
-		exit(0);
-	}
 	require './test.pl';
+	require Config;
+	# Don't bother if there are no quad offsets.
+	skip_all('no 64-bit file offsets')
+		if $Config::Config{lseeksize} < 8;
 }
 
 use strict;

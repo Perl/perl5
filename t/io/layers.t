@@ -13,11 +13,8 @@ BEGIN {
 
     # Makes testing easier.
     $ENV{PERLIO} = 'stdio' if exists $ENV{PERLIO} && $ENV{PERLIO} eq '';
-    if (exists $ENV{PERLIO} && $ENV{PERLIO} !~ /^(stdio|perlio|mmap)$/) {
-	# We are not prepared for anything else.
-	print "1..0 # PERLIO='$ENV{PERLIO}' unknown\n";
-	exit 0;
-    }
+    skip_all("PERLIO='$ENV{PERLIO}' unknown")
+	if exists $ENV{PERLIO} && $ENV{PERLIO} !~ /^(stdio|perlio|mmap)$/;
     $PERLIO = exists $ENV{PERLIO} ? $ENV{PERLIO} : "(undef)";
 }
 

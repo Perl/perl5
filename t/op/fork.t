@@ -5,19 +5,15 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    require Config; import Config;
-    unless ($Config{'d_fork'} or $Config{'d_pseudofork'}) {
-	print "1..0 # Skip: no fork\n";
-	exit 0;
-    }
     $ENV{PERL5LIB} = "../lib";
     require './test.pl';
+    require Config;
+    skip_all('no fork')
+	unless ($Config::Config{d_fork} or $Config::Config{d_pseudofork});
 }
 
-if ($^O eq 'mpeix') {
-    print "1..0 # Skip: fork/status problems on MPE/iX\n";
-    exit 0;
-}
+skip_all('fork/status problems on MPE/iX')
+    if $^O eq 'mpeix';
 
 $|=1;
 
