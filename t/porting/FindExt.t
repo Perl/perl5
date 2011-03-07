@@ -1,12 +1,10 @@
 #!../miniperl -w
 
 BEGIN {
-    if ($^O eq 'VMS') {
-        print "1..0 # FindExt not portable.\n";
-        exit 0;
-    }
     @INC = qw(../win32 ../lib);
     require './test.pl';
+    skip_all('FindExt not portable')
+	if $^O eq 'VMS';
 }
 use strict;
 use Config;
