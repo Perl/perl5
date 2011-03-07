@@ -2,15 +2,14 @@
 use strict;
 use warnings;
 
-use Config;
-if (!$Config{useithreads}) {
-    print "1..0 # Skip: no ithreads\n";
-    exit 0;
-}
-if ($ENV{PERL_CORE_MINITEST}) {
-    print "1..0 # Skip: no dynamic loading on miniperl, no threads\n";
-    exit 0;
-}
+# As perlfunc.pod says:
+# Note that the file will not be included twice under the same specified name.
+# So ensure that this, textually, is the same name as all the loaded tests use.
+# Otherwise if we require 'test.pl' and they require './test.pl', it is loaded
+# twice.
+require './test.pl';
+skip_all_without_config('useithreads');
+skip_all_if_miniperl("no dynamic loading on miniperl, no threads");
 
 require threads;
 
