@@ -35,7 +35,7 @@ H = av.h uconfig.h cop.h cv.h embed.h embedvar.h form.h gv.h handy.h \
 HE = $(H) EXTERN.h
 
 clean:
-	-rm -f $(O) microperl generate_uudmap$(_X) uudmap.h
+	-rm -f $(O) microperl generate_uudmap$(_X) uudmap.h bitcount.h
 
 distclean:	clean
 
@@ -74,7 +74,7 @@ udoop$(_O):	$(HE) doop.c
 udump$(_O):	$(HE) dump.c regcomp.h regnodes.h
 	$(CC) $(CCFLAGS) -o $@ $(CFLAGS) dump.c
 
-uglobals$(_O):	$(H) globals.c INTERN.h perlapi.h
+uglobals$(_O):	$(H) globals.c INTERN.h perlapi.h uudmap.h bitcount.h
 	$(CC) $(CCFLAGS) -o $@ $(CFLAGS) globals.c
 
 ugv$(_O):	$(HE) gv.c
@@ -173,8 +173,8 @@ uutil$(_O):	$(HE) util.c
 uperlapi$(_O):	$(HE) perlapi.c perlapi.h
 	$(CC) $(CCFLAGS) -o $@ $(CFLAGS) perlapi.c
 
-uudmap.h: generate_uudmap$(_X)
-	$(RUN) ./generate_uudmap$(_X) >uudmap.h
+uudmap.h bitcount.h: generate_uudmap$(_X)
+	$(RUN) ./generate_uudmap$(_X) uudmap.h bitcount.h
 
 generate_uudmap$(_O): generate_uudmap.c
 	$(CC) $(CCFLAGS) -o $@ $(CFLAGS) generate_uudmap.c
