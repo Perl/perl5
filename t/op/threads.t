@@ -11,10 +11,7 @@ BEGIN {
         print "1..0 # Skip: no ithreads\n";
         exit 0;
      }
-     if ($ENV{PERL_CORE_MINITEST}) {
-       print "1..0 # Skip: no dynamic loading on miniperl, no threads\n";
-       exit 0;
-     }
+     skip_all_if_miniperl("no dynamic loading on miniperl, no threads");
 
      plan(24);
 }

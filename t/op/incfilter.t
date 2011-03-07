@@ -5,15 +5,12 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = qw(. ../lib);
-    if ($ENV{PERL_CORE_MINITEST}) {
-        print "1..0 # Skip: no dynamic loading on miniperl\n";
-        exit 0;
-    }
+    require 'test.pl';
+    skip_all_if_miniperl('no dynamic loading on miniperl, no Filter::Util::Call');
     unless (find PerlIO::Layer 'perlio') {
 	print "1..0 # Skip: not perlio\n";
 	exit 0;
     }
-    require "test.pl";
 }
 use strict;
 use Config;
