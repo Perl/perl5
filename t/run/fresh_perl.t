@@ -804,23 +804,6 @@ print glob(q(./"TEST"));
 EXPECT
 ./"TEST"
 ./"TEST"
-######## "Segfault using HTML::Entities", Richard Jolly <richardjolly@mac.com>, <A3C7D27E-C9F4-11D8-B294-003065AE00B6@mac.com> in perl-unicode@perl.org
--lw
-# SKIP: use Config; $ENV{PERL_CORE_MINITEST} or " $Config::Config{'extensions'} " !~ m[ Encode ] # Perl configured without Encode module
-BEGIN {
-  eval 'require Encode';
-  if ($@) { exit 0 } # running minitest?
-}
-# Test case cut down by jhi
-$SIG{__WARN__} = sub { $@ = shift };
-use Encode;
-my $t = ord('A') == 193 ? "\xEA" : "\xE9";
-Encode::_utf8_on($t);
-$t =~ s/([^a])//ge;
-$@ =~ s/ at .*/ at/;
-print $@
-EXPECT
-Malformed UTF-8 character (unexpected end of string) in substitution (s///) at
 ######## "#75146: 27e904532594b7fb (fix for #23810) introduces a #regression"
 use strict;
 

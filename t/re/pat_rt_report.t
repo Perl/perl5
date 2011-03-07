@@ -7,7 +7,7 @@
 use strict;
 use warnings;
 use 5.010;
-
+use Config;
 
 sub run_tests;
 
@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 2520;  # Update this when adding/deleting tests.
+plan tests => 2521;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1119,6 +1119,21 @@ sub run_tests {
         my $message = '[perl #74982] Period coming after \N{}';
         ok("\x{ff08}." =~ m/\N{FULLWIDTH LEFT PARENTHESIS}./ && $& eq "\x{ff08}.", $message);
         ok("\x{ff08}." =~ m/[\N{FULLWIDTH LEFT PARENTHESIS}]./ && $& eq "\x{ff08}.", $message);
+    }
+
+SKIP: {
+    ######## "Segfault using HTML::Entities", Richard Jolly <richardjolly@mac.com>, <A3C7D27E-C9F4-11D8-B294-003065AE00B6@mac.com> in perl-unicode@perl.org
+
+    skip('Perl configured without Encode module', 1)
+	unless $Config{extensions} =~ / Encode /;
+
+    # Test case cut down by jhi
+    fresh_perl_like(<<'EOP', qr!Malformed UTF-8 character \(unexpected end of string\) in substitution \(s///\) at!, 'Segfault using HTML::Entities');
+use Encode;
+my $t = ord('A') == 193 ? "\xEA" : "\xE9";
+Encode::_utf8_on($t);
+$t =~ s/([^a])//ge;
+EOP
     }
 
 } # End of sub run_tests
