@@ -713,7 +713,7 @@
  *	This symbol, if defined, indicates that <stddef.h> exists and should
  *	be included.
  */
-/*#define I_STDDEF	/ **/
+#define I_STDDEF	/**/
 
 /* I_STDLIB:
  *	This symbol, if defined, indicates that <stdlib.h> exists and should
@@ -4687,5 +4687,5 @@
 
 /* Generated from:
  * 323778627146f2762cd41f4dd1db6659f59006ec9bcaaf6bcc645d0380dda938 config_h.SH
- * 0a1e8a170495d354031144ac47835fc8f8fc03739bc761d973cc3a4aa347797e uconfig.sh
+ * 88e2345cc35c7e487688d8fa408da4da757067afcec4dd4e0698c31d25630026 uconfig.sh
  * ex: set ro: */
