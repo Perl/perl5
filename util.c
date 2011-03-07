@@ -3127,9 +3127,13 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     dSAVEDERRNO;
     const int fd = PerlIO_fileno(ptr);
 
+#ifdef USE_PERLIO
     /* Find out whether the refcount is low enough for us to wait for the
        child proc without blocking. */
     const bool should_wait = PerlIOUnix_refcnt(fd) == 1;
+#else
+    const bool should_wait = 1;
+#endif
 
     svp = av_fetch(PL_fdpid,fd,TRUE);
     pid = (SvTYPE(*svp) == SVt_IV) ? SvIVX(*svp) : -1;
