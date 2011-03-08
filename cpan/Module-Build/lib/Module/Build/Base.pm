@@ -4,7 +4,7 @@ package Module::Build::Base;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.37_05';
+$VERSION = '0.3800';
 $VERSION = eval $VERSION;
 BEGIN { require 5.00503 }
 
@@ -1931,7 +1931,7 @@ sub create_mymeta {
     }
     $mymeta->{dynamic_config} = 0;
     $mymeta->{generated_by} = "Module::Build version $Module::Build::VERSION";
-    $meta_obj = CPAN::Meta->new( $mymeta );
+    eval { $meta_obj = CPAN::Meta->new( $mymeta, { lazy_validation => 1 } ) }
   }
   # or generate from scratch, ignoring errors if META doesn't exist
   else {
@@ -4593,7 +4593,7 @@ sub write_metafile {
 
 sub normalize_version {
   my ($self, $version) = @_;
-  $version = 0 unless defined $version;
+  $version = 0 unless defined $version and length $version;
 
   if ( $version =~ /[=<>!,]/ ) { # logic, not just version
     # take as is without modification

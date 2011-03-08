@@ -1718,8 +1718,8 @@ Examples:
 [version 0.32]
 
 Returns a reference to a hash describing all prerequisites.  The keys of the
-hash will the various prerequisite types ('requires', 'build_requires',
-'configure_requires', 'recommends', or 'conflicts') and the values will
+hash will be the various prerequisite types ('requires', 'build_requires',
+'configure_requires', 'recommends', or 'conflicts') and the values will be
 references to hashes of module names and version numbers.  Only prerequisites
 types that are defined will be included.  The C<prereq_data> action is just a
 thin wrapper around the C<prereq_data()> method and dumps the hash as a string
@@ -2015,8 +2015,7 @@ accessor methods for the following properties:
 If you would like to add other useful metadata, C<Module::Build>
 supports this with the C<meta_add> and C<meta_merge> arguments to
 L</new()>. The authoritative list of supported metadata can be found at
-L<http://module-build.sourceforge.net/META-spec-current.html>, but for
-convenience - here are a few of the more useful ones:
+L<CPAN::META::Spec> but for convenience - here are a few of the more useful ones:
 
 =over 4
 
@@ -2025,16 +2024,12 @@ convenience - here are a few of the more useful ones:
 For describing the distribution using keyword (or "tags") in order to
 make CPAN.org indexing and search more efficient and useful.
 
-See L<http://module-build.sourceforge.net/META-spec-current.html#keywords>.
-
 =item resources
 
 A list of additional resources available for users of the
 distribution. This can include links to a homepage on the web, a
-bug tracker, the repository location, a even subscription page for the
+bug tracker, the repository location, and even a subscription page for the
 distribution mailing list.
-
-See L<http://module-build.sourceforge.net/META-spec-current.html#resources>.
 
 =back
 
@@ -2058,6 +2053,6 @@ perl(1), L<Module::Build>(3), L<Module::Build::Authoring>(3),
 L<Module::Build::Cookbook>(3), L<ExtUtils::MakeMaker>(3)
 
 F<META.yml> Specification:
-L<http://module-build.sourceforge.net/META-spec-current.html>
+L<CPAN::META::Spec>
 
 =cut

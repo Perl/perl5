@@ -138,6 +138,10 @@ C<Math::BigInt::FastCalc> has been upgraded from version 0.24_02 to 0.28
 
 =item *
 
+C<Module::Build> has been upgraded from version 0.37_05 to 0.3800
+
+=item *
+
 C<Test::Harness> has been upgraded from version 3.22 to 3.23
 
 =item *

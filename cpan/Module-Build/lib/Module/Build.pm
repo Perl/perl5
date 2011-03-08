@@ -16,7 +16,7 @@ use Module::Build::Base;
 
 use vars qw($VERSION @ISA);
 @ISA = qw(Module::Build::Base);
-$VERSION = '0.37_05';
+$VERSION = '0.3800';
 $VERSION = eval $VERSION;
 
 
@@ -114,28 +114,25 @@ This illustrates initial configuration and the running of three
 'actions'.  In this case the actions run are 'build' (the default
 action), 'test', and 'install'.  Other actions defined so far include:
 
-  build                          manifest_skip
-  checkchanges                   manpages
-  checkgit                       pardist
-  clean                          patch_blead
-  code                           ppd
-  config_data                    ppmdist
-  diff                           prereq_data
-  dist                           prereq_report
-  distcheck                      pure_install
-  distclean                      realclean
-  distdir                        retest
-  distinstall                    skipcheck
-  distmeta                       tag_git
-  distsign                       test
-  disttest                       testall
-  docs                           testcover
-  fakeinstall                    testdb
-  help                           testpod
-  html                           testpodcoverage
-  install                        upload
+  build                          manifest
+  clean                          manifest_skip
+  code                           manpages
+  config_data                    pardist
+  diff                           ppd
+  dist                           ppmdist
+  distcheck                      prereq_data
+  distclean                      prereq_report
+  distdir                        pure_install
+  distinstall                    realclean
+  distmeta                       retest
+  distsign                       skipcheck
+  disttest                       test
+  docs                           testall
+  fakeinstall                    testcover
+  help                           testdb
+  html                           testpod
+  install                        testpodcoverage
   installdeps                    versioninstall
-  manifest
 
 You can run the 'help' action for a complete list of actions.
 

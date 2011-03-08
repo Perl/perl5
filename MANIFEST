@@ -1638,6 +1638,7 @@ cpan/Module-Build/t/properties/license.t
 cpan/Module-Build/t/properties/module_name.t
 cpan/Module-Build/t/properties/needs_compiler.t
 cpan/Module-Build/t/properties/release_status.t
+cpan/Module-Build/t/properties/requires.t
 cpan/Module-Build/t/properties/share_dir.t
 cpan/Module-Build/t/README.pod
 cpan/Module-Build/t/resume.t
