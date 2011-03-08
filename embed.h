@@ -874,7 +874,6 @@
 #define cl_and			S_cl_and
 #define cl_anything		S_cl_anything
 #define cl_init			S_cl_init
-#define cl_init_zero		S_cl_init_zero
 #define cl_is_anything		S_cl_is_anything
 #define cl_or			S_cl_or
 #define invlist_array(a)	S_invlist_array(aTHX_ a)

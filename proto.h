@@ -6000,12 +6000,6 @@ STATIC void	S_cl_init(const struct RExC_state_t *pRExC_state, struct regnode_cha
 #define PERL_ARGS_ASSERT_CL_INIT	\
 	assert(pRExC_state); assert(cl)
 
-STATIC void	S_cl_init_zero(const struct RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
-			__attribute__nonnull__(1)
-			__attribute__nonnull__(2);
-#define PERL_ARGS_ASSERT_CL_INIT_ZERO	\
-	assert(pRExC_state); assert(cl)
-
 STATIC int	S_cl_is_anything(const struct regnode_charclass_class *cl)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1);

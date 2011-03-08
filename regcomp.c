@@ -758,15 +758,8 @@ S_cl_init(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
     cl_anything(pRExC_state, cl);
 }
 
-STATIC void
-S_cl_init_zero(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
-{
-    PERL_ARGS_ASSERT_CL_INIT_ZERO;
-
-    Zero(cl, 1, struct regnode_charclass_class);
-    cl->type = ANYOF;
-    cl_anything(pRExC_state, cl);
-}
+/* These two functions currently do the exact same thing */
+#define cl_init_zero		S_cl_init
 
 /* 'And' a given class with another one.  Can create false positives */
 /* cl should not be inverted */
