@@ -5,9 +5,9 @@
 #  in the README file that comes with the distribution.
 #
 
-require DynaLoader;
+require XSLoader;
 require Exporter;
-package Storable; @ISA = qw(Exporter DynaLoader);
+package Storable; @ISA = qw(Exporter);
 
 @EXPORT = qw(store retrieve);
 @EXPORT_OK = qw(
@@ -23,7 +23,7 @@ use AutoLoader;
 use FileHandle;
 use vars qw($canonical $forgive_me $VERSION);
 
-$VERSION = '2.26';
+$VERSION = '2.27';
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;		# Grrr...
 
 #
@@ -64,7 +64,8 @@ sub retrieve_fd { &fd_retrieve }		# Backward compatibility
 
 $Storable::downgrade_restricted = 1;
 $Storable::accept_future_minor = 1;
-bootstrap Storable;
+
+XSLoader::load 'Storable', $Storable::VERSION;
 1;
 __END__
 #
