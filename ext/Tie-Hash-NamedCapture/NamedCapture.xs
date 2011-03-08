@@ -16,13 +16,15 @@
 #define SCALAR_ALIAS (RXapif_SCALAR | (1 << EXPECT_SHIFT))
 
 static
-tie_it(pTHX_ const char name, UV flag)
+tie_it(pTHX_ const char name, UV flag, HV *const stash)
 {
     GV *const gv = gv_fetchpvn(&name, 1, GV_ADDMULTI|GV_NOTQUAL, SVt_PVHV);
     HV *const hv = GvHV(gv);
     SV *rv = newSV_type(SVt_RV);
 
-    sv_setuv(newSVrv(rv, "Tie::Hash::NamedCapture"), flag);
+    SvRV_set(rv, newSVuv(flag));
+    SvROK_on(rv);
+    sv_bless(rv, stash);
 
     sv_unmagic((SV *)hv, PERL_MAGIC_tied);
     sv_magic((SV *)hv, rv, PERL_MAGIC_tied, NULL, 0);
@@ -33,8 +35,11 @@ MODULE = Tie::Hash::NamedCapture	PACKAGE = Tie::Hash::NamedCapture
 PROTOTYPES: DISABLE
 
 BOOT:
-	tie_it(aTHX_ '-', RXapif_ALL);
-	tie_it(aTHX_ '+', RXapif_ONE);
+	{
+	    HV *const stash = GvSTASH(CvGV(cv));
+	    tie_it(aTHX_ '-', RXapif_ALL, stash);
+	    tie_it(aTHX_ '+', RXapif_ONE, stash);
+	}
 
 SV *
 TIEHASH(package, ...)
