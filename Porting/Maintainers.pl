@@ -1143,7 +1143,7 @@ use File::Glob qw(:case);
     'parent' =>
 	{
 	'MAINTAINER'	=> 'corion',
-	'DISTRIBUTION'	=> 'CORION/parent-0.224.tar.gz',
+	'DISTRIBUTION'	=> 'CORION/parent-0.225.tar.gz',
 	'FILES'		=> q[cpan/parent],
 	'UPSTREAM'	=> undef,
 	},

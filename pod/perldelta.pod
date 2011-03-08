@@ -142,6 +142,10 @@ C<Module::Build> has been upgraded from version 0.37_05 to 0.3800
 
 =item *
 
+C<parent> has been upgraded from version 0.224 to 0.225
+
+=item *
+
 C<Test::Harness> has been upgraded from version 3.22 to 3.23
 
 =item *

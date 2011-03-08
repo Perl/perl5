@@ -1,7 +1,7 @@
 package parent;
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.224';
+$VERSION = '0.225';
 
 sub import {
     my $class = shift;
@@ -102,7 +102,7 @@ either C<.pm> or C<.pmc>), use the following code:
 
 Attempting to inherit from yourself generates a warning.
 
-    use Foo;
+    package Foo;
     use parent 'Foo';
 
 =back
