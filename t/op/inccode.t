@@ -2,18 +2,18 @@
 
 # Tests for the coderef-in-@INC feature
 
-use Config;
-
-my $can_fork   = 0;
-my $minitest   = $ENV{PERL_CORE_MINITEST};
-my $has_perlio = $Config{useperlio};
-
 BEGIN {
     chdir 't' if -d 't';
     @INC = qw(. ../lib);
+    require './test.pl';
 }
 
-if (!$minitest) {
+use Config;
+
+my $can_fork   = 0;
+my $has_perlio = $Config{useperlio};
+
+unless (is_miniperl()) {
     if ($Config{d_fork} && eval 'require POSIX; 1') {
 	$can_fork = 1;
     }
@@ -21,8 +21,7 @@ if (!$minitest) {
 
 use strict;
 
-require "test.pl";
-plan(tests => 49 + !$minitest * (3 + 14 * $can_fork));
+plan(tests => 49 + !is_miniperl() * (3 + 14 * $can_fork));
 
 sub get_temp_fh {
     my $f = tempfile();
@@ -227,7 +226,7 @@ eval 'use foo';
 ok( 1, 'returning PVBM ref doesn\'t segfault use' );
 shift @INC;
 
-exit if $minitest;
+exit if is_miniperl();
 
 SKIP: {
     skip( "No PerlIO available", 3 ) unless $has_perlio;
