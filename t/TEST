@@ -132,8 +132,6 @@ our $show_elapsed_time = $ENV{HARNESS_TIMER} || 0;
     @ARGV = @argv;
 }
 
-$ENV{PERL_CORE_MINITEST} = 1 unless defined &DynaLoader::boot_DynaLoader;
-
 chdir 't' if -f 't/TEST';
 if (-f 'TEST' && -f 'harness' && -d '../lib') {
     @INC = '../lib';
