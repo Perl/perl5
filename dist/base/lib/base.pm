@@ -243,7 +243,7 @@ found in your path.
 
 Attempting to inherit from yourself generates a warning.
 
-    use Foo;
+    package Foo;
     use base 'Foo';
 
 =back
