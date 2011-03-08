@@ -124,7 +124,7 @@ sub skip_all_if_miniperl {
 
 sub skip_all_without_extension {
     my $extension = shift;
-    unless (eval 'require Config; 1') {
+    unless (eval {require Config; 1}) {
 	warn "test.pl had problems loading Config: $@";
 	return;
     }
@@ -137,7 +137,7 @@ sub skip_all_without_perlio {
 }
 
 sub skip_all_without_config {
-    unless (eval 'require Config; 1') {
+    unless (eval {require Config; 1}) {
 	warn "test.pl had problems loading Config: $@";
 	return;
     }
@@ -602,7 +602,7 @@ sub runperl {
 	# run a fresh perl, so we'll brute force launder everything for you
 	my $sep;
 
-	if (! eval 'require Config; 1') {
+	if (! eval {require Config; 1}) {
 	    warn "test.pl had problems loading Config: $@";
 	    $sep = ':';
 	} else {
@@ -652,7 +652,7 @@ sub which_perl {
 	return $Perl if $is_vms;
 
 	my $exe;
-	if (! eval 'require Config; 1') {
+	if (! eval {require Config; 1}) {
 	    warn "test.pl had problems loading Config: $@";
 	    $exe = '';
 	} else {
@@ -666,7 +666,7 @@ sub which_perl {
 
 	if ($Perl =~ /^perl\Q$exe\E$/i) {
 	    my $perl = "perl$exe";
-	    if (! eval 'require File::Spec; 1') {
+	    if (! eval {require File::Spec; 1}) {
 		warn "test.pl had problems loading File::Spec: $@";
 		$Perl = "./$perl";
 	    } else {
@@ -1238,7 +1238,7 @@ sub watchdog ($;$)
 
     # Use a watchdog thread because either 'threads' is loaded,
     #   or fork() failed
-    if (eval 'require threads; 1') {
+    if (eval {require threads; 1}) {
         'threads'->create(sub {
                 # Load POSIX if available
                 eval { require POSIX; };
