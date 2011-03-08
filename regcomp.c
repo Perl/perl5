@@ -773,7 +773,7 @@ S_cl_init_zero(const RExC_state_t *pRExC_state, struct regnode_charclass_class *
 }
 
 /* 'And' a given class with another one.  Can create false positives */
-/* We assume that cl is not inverted */
+/* cl should not be inverted */
 STATIC void
 S_cl_and(struct regnode_charclass_class *cl,
 	const struct regnode_charclass_class *and_with)
@@ -829,7 +829,7 @@ S_cl_and(struct regnode_charclass_class *cl,
 }
 
 /* 'OR' a given class with another one.  Can create false positives */
-/* We assume that cl is not inverted */
+/* cl should not be inverted */
 STATIC void
 S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with)
 {
