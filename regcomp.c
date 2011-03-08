@@ -726,9 +726,7 @@ S_cl_anything(const RExC_state_t *pRExC_state, struct regnode_charclass_class *c
 
     ANYOF_CLASS_ZERO(cl);
     ANYOF_BITMAP_SETALL(cl);
-    cl->flags = ANYOF_EOS|ANYOF_UNICODE_ALL|ANYOF_LOC_NONBITMAP_FOLD|ANYOF_NON_UTF8_LATIN1_ALL;
-    if (LOC)
-	cl->flags |= ANYOF_LOCALE;
+    cl->flags = ANYOF_EOS|ANYOF_UNICODE_ALL|ANYOF_LOC_NONBITMAP_FOLD|ANYOF_NON_UTF8_LATIN1_ALL|ANYOF_LOCALE;
 }
 
 /* Can match anything (initialization) */
@@ -768,8 +766,6 @@ S_cl_init_zero(const RExC_state_t *pRExC_state, struct regnode_charclass_class *
     Zero(cl, 1, struct regnode_charclass_class);
     cl->type = ANYOF;
     cl_anything(pRExC_state, cl);
-    if (LOC)
-	cl->flags |= ANYOF_LOCALE;
 }
 
 /* 'And' a given class with another one.  Can create false positives */
