@@ -18,6 +18,25 @@
 MODULE = Tie::Hash::NamedCapture	PACKAGE = Tie::Hash::NamedCapture
 PROTOTYPES: DISABLE
 
+SV *
+TIEHASH(package, ...)
+	const char *package;
+    PREINIT:
+	UV flag = RXapif_ONE;
+    CODE:
+	mark += 2;
+	while(mark < sp) {
+	    STRLEN len;
+	    const char *p = SvPV_const(*mark, len);
+	    if(memEQs(p, len, "all"))
+		flag = SvTRUE(mark[1]) ? RXapif_ALL : RXapif_ONE;
+	    mark += 2;
+	}
+	RETVAL = newSV_type(SVt_RV);
+	sv_setuv(newSVrv(RETVAL, package), flag);
+    OUTPUT:
+	RETVAL
+
 void
 FETCH(...)
     ALIAS:
@@ -94,4 +113,3 @@ flags(...)
 	EXTEND(SP, 2);
 	mPUSHu(RXapif_ONE);
 	mPUSHu(RXapif_ALL);
-
