@@ -19,7 +19,6 @@ package Storable; @ISA = qw(Exporter);
         file_magic read_magic
 );
 
-use FileHandle;
 use vars qw($canonical $forgive_me $VERSION);
 
 $VERSION = '2.27';
@@ -108,8 +107,10 @@ EOM
 }
 
 sub file_magic {
+    require IO::File;
+
     my $file = shift;
-    my $fh = new FileHandle;
+    my $fh = IO::File->new;
     open($fh, "<". $file) || die "Can't open '$file': $!";
     binmode($fh);
     defined(sysread($fh, my $buf, 32)) || die "Can't read from '$file': $!";
