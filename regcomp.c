@@ -2939,10 +2939,13 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
     If/when this is fixed the following define can be swapped
     in below to fully enable trie logic.
 
+    XXX It may work if not UTF and/or /a (AT_LEAST_UNI_SEMANTICS) but perhaps
+    not /aa
+
 #define TRIE_TYPE_IS_SAFE 1
 
 */
-#define TRIE_TYPE_IS_SAFE (UTF || optype==EXACT)
+#define TRIE_TYPE_IS_SAFE ((UTF && UNI_SEMANTICS) || optype==EXACT)
 
                                 if ( last && TRIE_TYPE_IS_SAFE ) {
                                     make_trie( pRExC_state, 
