@@ -137,18 +137,17 @@ sub skip_all_without_perlio {
 }
 
 sub skip_all_without_config {
-    my ($key, $reason) = @_;
     unless (eval 'require Config; 1') {
 	warn "test.pl had problems loading Config: $@";
 	return;
     }
-    return if $Config::Config{$key};
-    unless (defined $reason) {
+    foreach (@_) {
+	next if $Config::Config{$_};
+	my $key = $_; # Need to copy, before trying to modify.
 	$key =~ s/^use//;
 	$key =~ s/^d_//;
-	$reason = "no $key";
+	skip_all("no $key");
     }
-    skip_all($reason);
 }
 
 sub _ok {
