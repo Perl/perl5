@@ -2017,21 +2017,24 @@ $! Ask if they want to build with MULTIPLICITY
 $ echo ""
 $ echo "Perl can be built so that multiple Perl interpreters can coexist"
 $ echo "within the same Perl executable."
-$ echo "There is some performance overhead, however, so you"
-$ echo "probably do not want to choose this unless you are going to be" 
-$ echo "doing things with embedded perl."
-$ bool_dflt = "n"
-$ if f$type(usemultiplicity) .nes. "" 
-$ then
-$   if usemultiplicity .or. usemultiplicity .eqs. "define" then bool_dflt = "y"
-$ endif
-$ rp = "Build Perl for multiplicity? [''bool_dflt'] "
-$ GOSUB myread
-$ IF ans
+$ IF usethreads .OR. usethreads .EQS. "define"
 $ THEN
+$   echo "This multiple interpreter support is required for interpreter-based threads."
 $   usemultiplicity="define"
 $ ELSE
-$   usemultiplicity="undef"
+$   bool_dflt = "n"
+$   if f$type(usemultiplicity) .nes. "" 
+$   then
+$     if usemultiplicity .or. usemultiplicity .eqs. "define" then bool_dflt = "y"
+$   endif
+$   rp = "Build Perl for multiplicity? [''bool_dflt'] "
+$   GOSUB myread
+$   IF ans
+$   THEN
+$     usemultiplicity="define"
+$   ELSE
+$     usemultiplicity="undef"
+$   ENDIF
 $ ENDIF
 $!
 $! Ask if they want to build with 64-bit support
