@@ -11,7 +11,7 @@ use Carp ();
 use B ();
 #use Devel::Peek;
 
-$JSON::PP::VERSION = '2.27104';
+$JSON::PP::VERSION = '2.27105';
 
 @JSON::PP::EXPORT = qw(encode_json decode_json from_json to_json);
 
@@ -1625,7 +1625,9 @@ JSON::PP - JSON::XS compatible pure-Perl module.
 
 =head1 VERSION
 
-    2.27103
+    2.27105
+
+L<JSON::XS> 2.27 compatible.
 
 =head1 NOTE
 

@@ -122,7 +122,7 @@ C<IO> has been upgraded from version 1.25_03 to 1.25_04.
 
 =item *
 
-C<JSON::PP> has been upgraded from version 2.27103 to 2.27104
+C<JSON::PP> has been upgraded from version 2.27103 to 2.27105
 
 =item *
 
