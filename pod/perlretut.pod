@@ -2769,7 +2769,8 @@ the end of the block enclosing the pragmas.
     use re '/m';  # or any other flags
     $multiline_string =~ /^foo/; # /m is implied
 
-The C<re '/flags'> pragma turns on the given regular expression flags
+The C<re '/flags'> pragma (introduced in Perl
+5.14) turns on the given regular expression flags
 until the end of the lexical scope.  See C<re/"'/flags' mode"> for more
 detail.
 
