@@ -3591,6 +3591,7 @@ ext/Sys-Hostname/Hostname.xs	Sys::Hostname extension external subroutines
 ext/Sys-Hostname/t/Hostname.t	See if Sys::Hostname works
 ext/Tie-Hash-NamedCapture/NamedCapture.pm	Implements %- and %+ behaviour
 ext/Tie-Hash-NamedCapture/NamedCapture.xs	Implements %- and %+ behaviour
+ext/Tie-Hash-NamedCapture/t/tiehash.t		Tests TIEHASH
 ext/Tie-Memoize/lib/Tie/Memoize.pm	Base class for memoized tied hashes
 ext/Tie-Memoize/t/Tie-Memoize.t		Test for Tie::Memoize
 ext/VMS-DCLsym/0README.txt	ReadMe file for VMS::DCLsym
