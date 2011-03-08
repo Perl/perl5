@@ -3,15 +3,8 @@ package Tie::Hash::NamedCapture;
 
 our $VERSION = "0.08";
 
-sub TIEHASH;
-
 require XSLoader;
-XSLoader::load();
-
-tie %+, __PACKAGE__;
-tie %-, __PACKAGE__, all => 1;
-
-1;
+XSLoader::load(); # This returns true, which makes require happy.
 
 __END__
 
