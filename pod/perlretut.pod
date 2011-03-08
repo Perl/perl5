@@ -2163,8 +2163,8 @@ Starting with this section, we will be discussing Perl's set of
 I<extended patterns>.  These are extensions to the traditional regular
 expression syntax that provide powerful new tools for pattern
 matching.  We have already seen extensions in the form of the minimal
-matching constructs C<??>, C<*?>, C<+?>, C<{n,m}?>, and C<{n,}?>.  The
-rest of the extensions below have the form C<(?char...)>, where the
+matching constructs C<??>, C<*?>, C<+?>, C<{n,m}?>, and C<{n,}?>.  Most
+of the extensions below have the form C<(?char...)>, where the
 C<char> is a character that determines the type of extension.
 
 The first extension is an embedded comment C<(?#text)>.  This embeds a
@@ -2235,8 +2235,8 @@ we have seen so far are the anchors.  The anchor C<^> matches the
 beginning of the line, but doesn't eat any characters.  Similarly, the
 word boundary anchor C<\b> matches wherever a character matching C<\w>
 is next to a character that doesn't, but it doesn't eat up any
-characters itself.  Anchors are examples of I<zero-width assertions>.
-Zero-width, because they consume
+characters itself.  Anchors are examples of I<zero-width assertions>:
+zero-width, because they consume
 no characters, and assertions, because they test some property of the
 string.  In the context of our walk in the woods analogy to regexp
 matching, most regexp elements move us along a trail, but anchors have
@@ -2384,7 +2384,7 @@ integer in parentheses C<(integer)>.  It is true if the corresponding
 backreference C<\integer> matched earlier in the regexp.  The same
 thing can be done with a name associated with a capture group, written
 as C<< (<name>) >> or C<< ('name') >>.  The second form is a bare
-zero width assertion C<(?...)>, either a lookahead, a lookbehind, or a
+zero-width assertion C<(?...)>, either a lookahead, a lookbehind, or a
 code assertion (discussed in the next section).  The third set of forms
 provides tests that return true if the expression is executed within
 a recursion (C<(R)>) or is being called from some capturing group,
@@ -2718,8 +2718,9 @@ detailed description.
 
 Below is just one example, illustrating the control verb C<(*FAIL)>,
 which may be abbreviated as C<(*F)>. If this is inserted in a regexp
-it will cause to fail, just like at some mismatch between the pattern
-and the string. Processing of the regexp continues like after any "normal"
+it will cause it to fail, just as it would at some
+mismatch between the pattern and the string. Processing
+of the regexp continues as it would after any "normal"
 failure, so that, for instance, the next position in the string or another
 alternative will be tried. As failing to match doesn't preserve capture
 groups or produce results, it may be necessary to use this in
@@ -2733,8 +2734,8 @@ combination with embedded code.
 The pattern begins with a class matching a subset of letters.  Whenever
 this matches, a statement like C<$count{'a'}++;> is executed, incrementing
 the letter's counter. Then C<(*FAIL)> does what it says, and
-the regexp  engine proceeds according to the book: as long as the end of
-the string  hasn't been reached, the position is advanced before looking
+the regexp engine proceeds according to the book: as long as the end of
+the string hasn't been reached, the position is advanced before looking
 for another vowel. Thus, match or no match makes no difference, and the
 regexp engine proceeds until the entire string has been inspected.
 (It's remarkable that an alternative solution using something like
