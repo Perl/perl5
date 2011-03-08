@@ -2013,6 +2013,116 @@ $ rp = "Build a DEBUGGING version of Perl? [''bool_dflt'] "
 $ GOSUB myread
 $ use_debugging_perl = ans
 $!
+$!
+$! Ask about threads, if appropriate
+$ IF ccname .EQS. "DEC" .OR. ccname .EQS. "CXX"
+$ THEN
+$   echo ""
+$   echo "Perl can be built to take advantage of threads on some systems."
+$   echo "To do so, configure.com can be run with -""Dusethreads""."
+$   echo ""
+$   echo "Note that Perl built with threading support runs slightly slower"
+$   echo "and uses more memory than plain Perl. The current implementation"
+$   echo "is believed to be stable, but it is fairly new, and so should be"
+$   echo "treated with caution."
+$   echo ""
+$   bool_dflt = "n"
+$   if f$type(usethreads) .nes. "" 
+$   then 
+$       if usethreads .or. usethreads .eqs. "define" then bool_dflt="y"
+$   endif
+$!  Catch cases where user specified ithreads or 5005threads but
+$!  forgot -Dusethreads 
+$   if f$type(useithreads) .nes. ""
+$   then
+$         if useithreads .or. useithreads .eqs. "define" then bool_dflt="y"
+$   endif
+$   if f$type(use5005threads) .nes. ""
+$   then
+$         if use5005threads .or. use5005threads .eqs. "define" then bool_dflt="y"
+$   endif
+$   echo "If this doesn't make any sense to you, just accept the default '" + bool_dflt + "'."
+$   rp = "Build a threading Perl? [''bool_dflt'] "
+$   GOSUB myread
+$   if ans
+$   THEN
+$     usethreads = "define"
+$     use_threads="T"
+$     ! Shall we do the 5.005-type threads, or IThreads?
+$     echo "Since release 5.6, Perl has had two different threading implementations,"
+$     echo "the newer interpreter-based version (ithreads) with one interpreter per"
+$     echo "thread, and the older 5.005 version (5005threads)."
+$     echo "The 5005threads version is effectively unmaintained and will probably be"
+$     echo "removed in Perl 5.10, so there should be no need to build a Perl using it"
+$     echo "unless needed for backwards compatibility with some existing 5.005threads"
+$     echo "code."
+$     echo ""
+$     bool_dflt = "y"
+$     if f$type(useithreads) .nes. ""
+$     then
+$         if useithreads .eqs. "undef" then bool_dflt="n"
+$     endif
+$     if f$type(use5005threads) .nes. ""
+$     then
+$         if use5005threads .or. use5005threads .eqs. "define" then bool_dflt="n"
+$     endif
+$     rp = "Use the newer intepreter-based ithreads? [''bool_dflt'] "
+$     GOSUB myread
+$     use_ithreads=ans
+$     if use_ithreads 
+$     THEN
+$       use_5005_threads="N"
+$     ELSE
+$       use_5005_threads="Y"
+$     ENDIF
+$     ! Are they on VMS 7.1 or greater?
+$     IF "''f$extract(1,3, f$getsyi(""version""))'" .GES. "7.1"
+$     THEN
+$       echo ""
+$	echo "Threaded Perl can be linked to use system upcalls on your system. This feature"
+$	echo "allows the thread scheduler to be made aware of system events (such as I/O)"
+$	echo "so as to prevent a single thread from blocking all the threads in a program,"
+$	echo "even on a single-processor machine."
+$	bool_dflt = "y"
+$	IF f$type(usethreadupcalls) .NES. ""
+$	THEN
+$       	if .not. usethreadupcalls .or. usethreadupcalls .eqs. "undef" then bool_dflt="n"
+$	ENDIF
+$       rp = "Enable thread upcalls? [''bool_dflt'] "
+$       gosub myread
+$       IF ans
+$       THEN
+$           thread_upcalls = "MTU=MTU=1"
+$	    usethreadupcalls = "define"
+$     	    ! Are they on alpha or itanium?
+$	    IF (F$ELEMENT(0, "-", archname) .NES. "VMS_VAX") .AND. ("''f$extract(1,3, f$getsyi(""version""))'" .GES. "7.2")
+$     	    THEN
+$       	echo ""
+$       	echo "Threaded Perl can be linked to use multiple kernel threads on your system."
+$       	echo "This feature allows multiple user threads to make use of multiple CPUs on"
+$		echo "a multi-processor machine."
+$       	bool_dflt = "n"
+$		IF f$type(usekernelthreads) .nes. ""
+$		THEN
+$       		if usekernelthreads .or. usekernelthreads .eqs. "define" then bool_dflt="y"
+$		ENDIF
+$       	rp = "Enable multiple kernel threads? [''bool_dflt'] "
+$       	gosub myread
+$       	IF ans
+$		THEN
+$           	    thread_kernel = "MTK=MTK=1"
+$	    	    usekernelthreads = "define"
+$           	ENDIF
+$           ENDIF
+$       ENDIF
+$     ENDIF
+$   ELSE
+$     usethreads = "undef"
+$   ENDIF
+$ ENDIF
+$ IF F$TYPE(usethreadupcalls) .EQS. "" THEN usethreadupcalls = "undef"
+$ IF F$TYPE(usekernelthreads) .EQS. "" THEN usekernelthreads = "undef"
+$!
 $! Ask if they want to build with MULTIPLICITY
 $ echo ""
 $ echo "Perl can be built so that multiple Perl interpreters can coexist"
@@ -2117,111 +2227,6 @@ $ ELSE
 $       usesitecustomize = "undef"
 $ ENDIF
 $!
-$! Ask about threads, if appropriate
-$ IF ccname .EQS. "DEC" .OR. ccname .EQS. "CXX"
-$ THEN
-$   echo ""
-$   echo "Perl can be built to take advantage of threads on some systems."
-$   echo "To do so, configure.com can be run with -""Dusethreads""."
-$   echo ""
-$   echo "Note that Perl built with threading support runs slightly slower"
-$   echo "and uses more memory than plain Perl. The current implementation"
-$   echo "is believed to be stable, but it is fairly new, and so should be"
-$   echo "treated with caution."
-$   echo ""
-$   bool_dflt = "n"
-$   if f$type(usethreads) .nes. "" 
-$   then 
-$       if usethreads .or. usethreads .eqs. "define" then bool_dflt="y"
-$   endif
-$!  Catch cases where user specified ithreads or 5005threads but
-$!  forgot -Dusethreads 
-$   if f$type(useithreads) .nes. ""
-$   then
-$         if useithreads .or. useithreads .eqs. "define" then bool_dflt="y"
-$   endif
-$   if f$type(use5005threads) .nes. ""
-$   then
-$         if use5005threads .or. use5005threads .eqs. "define" then bool_dflt="y"
-$   endif
-$   echo "If this doesn't make any sense to you, just accept the default '" + bool_dflt + "'."
-$   rp = "Build a threading Perl? [''bool_dflt'] "
-$   GOSUB myread
-$   if ans
-$   THEN
-$     use_threads="T"
-$     ! Shall we do the 5.005-type threads, or IThreads?
-$     echo "Since release 5.6, Perl has had two different threading implementations,"
-$     echo "the newer interpreter-based version (ithreads) with one interpreter per"
-$     echo "thread, and the older 5.005 version (5005threads)."
-$     echo "The 5005threads version is effectively unmaintained and will probably be"
-$     echo "removed in Perl 5.10, so there should be no need to build a Perl using it"
-$     echo "unless needed for backwards compatibility with some existing 5.005threads"
-$     echo "code."
-$     echo ""
-$     bool_dflt = "y"
-$     if f$type(useithreads) .nes. ""
-$     then
-$         if useithreads .eqs. "undef" then bool_dflt="n"
-$     endif
-$     if f$type(use5005threads) .nes. ""
-$     then
-$         if use5005threads .or. use5005threads .eqs. "define" then bool_dflt="n"
-$     endif
-$     rp = "Use the newer intepreter-based ithreads? [''bool_dflt'] "
-$     GOSUB myread
-$     use_ithreads=ans
-$     if use_ithreads 
-$     THEN
-$       use_5005_threads="N"
-$     ELSE
-$       use_5005_threads="Y"
-$     ENDIF
-$     ! Are they on VMS 7.1 or greater?
-$     IF "''f$extract(1,3, f$getsyi(""version""))'" .GES. "7.1"
-$     THEN
-$       echo ""
-$	echo "Threaded Perl can be linked to use system upcalls on your system. This feature"
-$	echo "allows the thread scheduler to be made aware of system events (such as I/O)"
-$	echo "so as to prevent a single thread from blocking all the threads in a program,"
-$	echo "even on a single-processor machine."
-$	bool_dflt = "y"
-$	IF f$type(usethreadupcalls) .NES. ""
-$	THEN
-$       	if .not. usethreadupcalls .or. usethreadupcalls .eqs. "undef" then bool_dflt="n"
-$	ENDIF
-$       rp = "Enable thread upcalls? [''bool_dflt'] "
-$       gosub myread
-$       IF ans
-$       THEN
-$           thread_upcalls = "MTU=MTU=1"
-$	    usethreadupcalls = "define"
-$     	    ! Are they on alpha or itanium?
-$	    IF (F$ELEMENT(0, "-", archname) .NES. "VMS_VAX") .AND. ("''f$extract(1,3, f$getsyi(""version""))'" .GES. "7.2")
-$     	    THEN
-$       	echo ""
-$       	echo "Threaded Perl can be linked to use multiple kernel threads on your system."
-$       	echo "This feature allows multiple user threads to make use of multiple CPUs on"
-$		echo "a multi-processor machine."
-$       	bool_dflt = "n"
-$		IF f$type(usekernelthreads) .nes. ""
-$		THEN
-$       		if usekernelthreads .or. usekernelthreads .eqs. "define" then bool_dflt="y"
-$		ENDIF
-$       	rp = "Enable multiple kernel threads? [''bool_dflt'] "
-$       	gosub myread
-$       	IF ans
-$		THEN
-$           	    thread_kernel = "MTK=MTK=1"
-$	    	    usekernelthreads = "define"
-$           	ENDIF
-$           ENDIF
-$       ENDIF
-$     ENDIF
-$   ENDIF
-$ ENDIF
-$ IF F$TYPE(usethreadupcalls) .EQS. "" THEN usethreadupcalls = "undef"
-$ IF F$TYPE(usekernelthreads) .EQS. "" THEN usekernelthreads = "undef"
 $! Case sensitive?
 $   echo ""
 $   echo "By default, perl (and pretty much everything else on VMS) uses"
