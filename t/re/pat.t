@@ -317,7 +317,7 @@ sub run_tests {
         is($@, '', $message);
 
         eval "'aaa' =~ /a{1,$::reg_infty}/";
-        like($@, /^\QQuantifier in {,} bigger than/, $message);
+        like($@, qr/^\QQuantifier in {,} bigger than/, $message);
         eval "'aaa' =~ /a{1,$::reg_infty_p}/";
         like($@, qr/^\QQuantifier in {,} bigger than/, $message);
     }
@@ -338,7 +338,7 @@ sub run_tests {
             unlike("b$a=", qr/a$a=/, $message);
             like("b$a=", qr/ba+=/, $message);
 
-	    like("ba$a=", /b(?:a|b)+=/, $message);
+	    like("ba$a=", qr/b(?:a|b)+=/, $message);
         }
     }
 
