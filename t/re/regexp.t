@@ -57,18 +57,6 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
 
-    if ($qr_embed_thr) {
-	require Config;
-	if (!$Config::Config{useithreads}) {
-	    print "1..0 # Skip: no ithreads\n";
-		exit 0;
-	}
-	if ($ENV{PERL_CORE_MINITEST}) {
-	    print "1..0 # Skip: no dynamic loading on miniperl, no threads\n";
-		exit 0;
-	}
-	require threads;
-    }
 }
 
 use strict;
