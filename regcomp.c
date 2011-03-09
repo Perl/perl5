@@ -756,6 +756,7 @@ S_cl_init(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
     Zero(cl, 1, struct regnode_charclass_class);
     cl->type = ANYOF;
     cl_anything(pRExC_state, cl);
+    ARG_SET(cl, ANYOF_NONBITMAP_EMPTY);
 }
 
 /* These two functions currently do the exact same thing */

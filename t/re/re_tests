@@ -1493,4 +1493,7 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 
 (?:(?:)foo|bar|zot|rt78356)	foo	y	$&	foo
 /\xe0\pL/i	\xc0a	y	$&	\xc0a
+
+# RT #85528
+(?{})[\x{100}]	\x{100}	y	$&	\x{100}
 # vim: softtabstop=0 noexpandtab
