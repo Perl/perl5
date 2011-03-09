@@ -46,6 +46,11 @@ my $Unicode = 3;
 # set.
 my $skip_apparently_redundant = ! $ENV{PERL_RUN_SLOW_TESTS};
 
+# Additionally parts of this test run a lot of subtests, outputting the
+# resulting TAP can be expensive so the tests are summarised internally. The
+# PERL_DEBUG_FULL_TEST environment variable can be set to produce the full
+# output for debugging purposes.
+
 sub range_type {
     my $ord = shift;
 
@@ -418,6 +423,9 @@ foreach my $test (sort { numerically } keys %tests) {
           # XXX Doesn't currently test multi-char folds in pattern
           next if @pattern != 1;
 
+          my $okays = 0;
+          my $this_iteration = 0;
+
           foreach my $bracketed (0, 1) {   # Put rhs in [...], or not
             foreach my $inverted (0,1) {
                 next if $inverted && ! $bracketed;  # inversion only valid in [^...]
@@ -542,8 +550,15 @@ foreach my $test (sort { numerically } keys %tests) {
                           utf8::upgrade($p) if length($upgrade_pattern);
                           my $res = $op ? ($c =~ $p): ($c !~ $p);
 
-                          $count++;
-                          ok($res, $desc);
+                          if (!$res || $ENV{PERL_DEBUG_FULL_TEST}) {
+                            # Failed or debug; output the result
+                            $count++;
+                            ok($res, $desc);
+                          } else {
+                            # Just count the test as passed
+                            $okays++;
+                          }
+                          $this_iteration++;
                         }
                       }
                     }
@@ -551,6 +566,12 @@ foreach my $test (sort { numerically } keys %tests) {
                 }
               }
             }
+          }
+
+          unless($ENV{PERL_DEBUG_FULL_TEST}) {
+            $count++;
+            is $okays, $this_iteration, "Subtests okay for "
+              .  "charset=$charset, utf8_pattern=$utf8_pattern";
           }
         }
       }
