@@ -361,6 +361,16 @@ struct regnode_charclass_class {
 
 #define ANYOF_FLAGS_ALL		0xff
 
+/* These are the flags that ANYOF_INVERT being set or not doesn't affect
+ * whether they are operative or not.  e.g., the node still has LOCALE
+ * regardless of being inverted; whereas ANYOF_UNICODE_ALL means something
+ * different if inverted */
+#define INVERSION_UNAFFECTED_FLAGS (ANYOF_LOCALE                        \
+	                           |ANYOF_LOC_NONBITMAP_FOLD            \
+	                           |ANYOF_CLASS                         \
+	                           |ANYOF_EOS                           \
+	                           |ANYOF_NONBITMAP_NON_UTF8)
+
 /* Character classes for node->classflags of ANYOF */
 /* Should be synchronized with a table in regprop() */
 /* 2n should pair with 2n+1 */
