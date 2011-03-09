@@ -16,7 +16,7 @@
 #define EXISTS_ALIAS (RXapif_EXISTS | (2 << EXPECT_SHIFT))
 #define SCALAR_ALIAS (RXapif_SCALAR | (1 << EXPECT_SHIFT))
 
-static
+static void
 tie_it(pTHX_ const char name, UV flag, HV *const stash)
 {
     GV *const gv = gv_fetchpvn(&name, 1, GV_ADDMULTI|GV_NOTQUAL, SVt_PVHV);
