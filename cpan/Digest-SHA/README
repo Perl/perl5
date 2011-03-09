@@ -1,11 +1,11 @@
-Digest::SHA version 5.60
+Digest::SHA version 5.61
 ========================
 
 Digest::SHA is a complete implementation of the NIST Secure Hash
 Standard.  It gives Perl programmers a convenient way to calculate
-SHA-1, SHA-224, SHA-256, SHA-384, and SHA-512 message digests.
-The module can handle all types of input, including partial-byte
-data.
+SHA-1, SHA-224, SHA-256, SHA-384, SHA-512, SHA-512/224, and SHA-512/256
+message digests.  The module can handle all types of input, including
+partial-byte data.
 
 Digest::SHA is written in C for speed.  If your platform lacks a
 C compiler, you can install the functionally-equivalent (but much

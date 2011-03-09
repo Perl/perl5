@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2011 Mark Shelor, All Rights Reserved
  *
- * Version: 5.60
- * Thu Mar  3 05:26:42 MST 2011
+ * Version: 5.61
+ * Wed Mar  9 05:26:36 MST 2011
  *
  */
 
@@ -211,6 +211,7 @@ unsigned char	*shadigest	(_SHA_STATE);
 char		*shahex		(_SHA_STATE);
 char		*shabase64	(_SHA_STATE);
 int		 shadsize	(_SHA_STATE);
+int		 shaalg		(_SHA_STATE);
 SHA		*shadup		(_SHA_STATE);
 int		 shadump	(_SHA_FNAME, _SHA_STATE);
 SHA		*shaload	(_SHA_FNAME);

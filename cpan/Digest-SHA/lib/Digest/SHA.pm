@@ -7,7 +7,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 use Fcntl;
 use integer;
 
-$VERSION = '5.60';
+$VERSION = '5.61';
 
 require Exporter;
 require DynaLoader;
@@ -430,10 +430,11 @@ I<OOP style>
 
 =item B<new($alg)>
 
-Returns a new Digest::SHA object.  Allowed values for I<$alg> are
-1, 224, 256, 384, or 512.  It's also possible to use common string
-representations of the algorithm (e.g. "sha256", "SHA-384").  If
-the argument is missing, SHA-1 will be used by default.
+Returns a new Digest::SHA object.  Allowed values for I<$alg> are 1,
+224, 256, 384, 512, 512224, or 512256.  It's also possible to use
+common string representations of the algorithm (e.g. "sha256",
+"SHA-384").  If the argument is missing, SHA-1 will be used by
+default.
 
 Invoking I<new> as an instance method will not create a new object;
 instead, it will simply reset the object to the initial state
@@ -448,14 +449,14 @@ I<reset> is just an alias for I<new>.
 =item B<hashsize>
 
 Returns the number of digest bits for this object.  The values are
-160, 224, 256, 384, and 512 for SHA-1, SHA-224, SHA-256, SHA-384,
-and SHA-512, respectively.
+160, 224, 256, 384, 512, 224, and 256 for SHA-1, SHA-224, SHA-256,
+SHA-384, SHA-512, SHA-512/224 and SHA-512/256, respectively.
 
 =item B<algorithm>
 
 Returns the digest algorithm for this object.  The values are 1,
-224, 256, 384, and 512 for SHA-1, SHA-224, SHA-256, SHA-384, and
-SHA-512, respectively.
+224, 256, 384, 512, 512224, and 512256 for SHA-1, SHA-224, SHA-256,
+SHA-384, SHA-512, SHA-512/224, and SHA-512/256, respectively.
 
 =item B<clone>
 

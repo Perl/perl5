@@ -6,6 +6,8 @@
 #undef sha512
 #undef H0384
 #undef H0512
+#undef H0512224
+#undef H0512256
 
 #define sha_384_512	1
 
@@ -70,8 +72,8 @@ static W64 H0512224[8] =	/* SHA-512/224 initial hash value */
 C64(0x8c3d37c819544da2), C64(0x73e1996689dcd4d6), C64(0x1dfab7ae32ff9c82),
 C64(0x679dd514582f9fcf), C64(0x0f6d2b697bd44da8), C64(0x77e36f7304c48942),
 C64(0x3f9d85a86a1d36c8), C64(0x1112e6ad91d692a1)
-
 };
+
 static W64 H0512256[8] =	/* SHA-512/256 initial hash value */
 {
 C64(0x22312194fc2bf72c), C64(0x9f555fa3c84c64c2), C64(0x2393b86b6f53b151),

@@ -166,9 +166,7 @@ PREINIT:
 	int result;
 PPCODE:
 	state = INT2PTR(SHA *, SvIV(SvRV(SvRV(self))));
-	result = shadsize(state) << 3;
-	if (ix == 1 && result == 160)
-		result = 1;
+	result = ix ? shaalg(state) : shadsize(state) << 3;
 	ST(0) = sv_2mortal(newSViv(result));
 	XSRETURN(1);
 
