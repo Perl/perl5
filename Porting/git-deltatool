@@ -327,6 +327,7 @@ sub show_header {
   my ($self, $log) = @_;
   my $header = $log->short_id;
   $header .= " " . $log->subject if length $log->subject;
+  $header .= sprintf(' (%s)', $log->author) if $log->author;
   say colored( $header, "yellow");
   return;
 }
@@ -769,6 +770,7 @@ BEGIN { our @ISA = qw/Git::Wrapper::Log/; }
 sub subject { shift->attr->{subject} }
 sub body { shift->attr->{body} }
 sub short_id { shift->attr->{short_id} }
+sub author { shift->attr->{author} }
 
 sub from_log {
   my ($class, $log) = @_;
