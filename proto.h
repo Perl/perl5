@@ -6005,12 +6005,11 @@ STATIC int	S_cl_is_anything(const struct regnode_charclass_class *cl)
 #define PERL_ARGS_ASSERT_CL_IS_ANYTHING	\
 	assert(cl)
 
-STATIC void	S_cl_or(const struct RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with)
+STATIC void	S_cl_or(struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with)
 			__attribute__nonnull__(1)
-			__attribute__nonnull__(2)
-			__attribute__nonnull__(3);
+			__attribute__nonnull__(2);
 #define PERL_ARGS_ASSERT_CL_OR	\
-	assert(pRExC_state); assert(cl); assert(or_with)
+	assert(cl); assert(or_with)
 
 PERL_STATIC_INLINE UV*	S_invlist_array(pTHX_ HV* const invlist)
 			__attribute__warn_unused_result__

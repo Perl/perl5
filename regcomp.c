@@ -855,7 +855,7 @@ S_cl_and(struct regnode_charclass_class *cl,
 /* 'OR' a given class with another one.  Can create false positives */
 /* cl should not be inverted */
 STATIC void
-S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with)
+S_cl_or(struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with)
 {
     PERL_ARGS_ASSERT_CL_OR;
 
@@ -2802,7 +2802,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			data->whilem_c = data_fake.whilem_c;
 		    }
 		    if (flags & SCF_DO_STCLASS)
-			cl_or(pRExC_state, &accum, &this_class);
+			cl_or(&accum, &this_class);
 		}
 		if (code == IFTHEN && num < 2) /* Empty ELSE branch */
 		    min1 = 0;
@@ -2815,7 +2815,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		min += min1;
 		delta += max1 - min1;
 		if (flags & SCF_DO_STCLASS_OR) {
-		    cl_or(pRExC_state, data->start_class, &accum);
+		    cl_or(data->start_class, &accum);
 		    if (min1) {
 			cl_and(data->start_class, and_withp);
 			flags &= ~SCF_DO_STCLASS;
@@ -3379,7 +3379,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    data->start_class = oclass;
 		if (mincount == 0 || minnext == 0) {
 		    if (flags & SCF_DO_STCLASS_OR) {
-			cl_or(pRExC_state, data->start_class, &this_class);
+			cl_or(data->start_class, &this_class);
 		    }
 		    else if (flags & SCF_DO_STCLASS_AND) {
 			/* Switch to OR mode: cache the old value of
@@ -3395,7 +3395,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    }
 		} else {		/* Non-zero len */
 		    if (flags & SCF_DO_STCLASS_OR) {
-			cl_or(pRExC_state, data->start_class, &this_class);
+			cl_or(data->start_class, &this_class);
 			cl_and(data->start_class, and_withp);
 		    }
 		    else if (flags & SCF_DO_STCLASS_AND)
@@ -3726,7 +3726,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			cl_and(data->start_class,
 			       (struct regnode_charclass_class*)scan);
 		    else
-			cl_or(pRExC_state, data->start_class,
+			cl_or(data->start_class,
 			      (struct regnode_charclass_class*)scan);
 		    break;
 		case ALNUM:
@@ -4240,7 +4240,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         data->whilem_c = data_fake.whilem_c;
                     }
                     if (flags & SCF_DO_STCLASS)
-                        cl_or(pRExC_state, &accum, &this_class);
+                        cl_or(&accum, &this_class);
                 }
             }
             if (flags & SCF_DO_SUBSTR) {
@@ -4252,7 +4252,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
             min += min1;
             delta += max1 - min1;
             if (flags & SCF_DO_STCLASS_OR) {
-                cl_or(pRExC_state, data->start_class, &accum);
+                cl_or(data->start_class, &accum);
                 if (min1) {
                     cl_and(data->start_class, and_withp);
                     flags &= ~SCF_DO_STCLASS;
