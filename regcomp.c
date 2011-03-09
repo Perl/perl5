@@ -771,6 +771,7 @@ S_cl_and(struct regnode_charclass_class *cl,
 
     assert(and_with->type == ANYOF);
 
+    /* I (khw) am not sure all these restrictions are necessary XXX */
     if (!(ANYOF_CLASS_TEST_ANY_SET(and_with))
 	&& !(ANYOF_CLASS_TEST_ANY_SET(cl))
 	&& (and_with->flags & ANYOF_LOCALE) == (cl->flags & ANYOF_LOCALE)
@@ -785,35 +786,68 @@ S_cl_and(struct regnode_charclass_class *cl,
 	    for (i = 0; i < ANYOF_BITMAP_SIZE; i++)
 		cl->bitmap[i] &= and_with->bitmap[i];
     } /* XXXX: logic is complicated otherwise, leave it along for a moment. */
-    if (!(and_with->flags & ANYOF_EOS))
-	cl->flags &= ~ANYOF_EOS;
 
-    if (!(and_with->flags & ANYOF_LOC_NONBITMAP_FOLD))
-	cl->flags &= ~ANYOF_LOC_NONBITMAP_FOLD;
-    if (!(and_with->flags & ANYOF_NON_UTF8_LATIN1_ALL))
-	cl->flags &= ~ANYOF_NON_UTF8_LATIN1_ALL;
+    if (and_with->flags & ANYOF_INVERT) {
 
-    if (cl->flags & ANYOF_UNICODE_ALL
-	&& ANYOF_NONBITMAP(and_with)
-	&& !(and_with->flags & ANYOF_INVERT))
-    {
-	if (! (and_with->flags & ANYOF_UNICODE_ALL)) {
+        /* Here, the and'ed node is inverted.  Get the AND of the flags that
+         * aren't affected by the inversion.  Those that are affected are
+         * handled individually below */
+	U8 affected_flags = cl->flags & ~INVERSION_UNAFFECTED_FLAGS;
+	cl->flags &= (and_with->flags & INVERSION_UNAFFECTED_FLAGS);
+	cl->flags |= affected_flags;
+
+        /* We currently don't know how to deal with things that aren't in the
+         * bitmap, but we know that the intersection is no greater than what
+         * is already in cl, so let there be false positives that get sorted
+         * out after the synthetic start class succeeds, and the node is
+         * matched for real. */
+
+        /* The inversion of these two flags indicate that the resulting
+         * intersection doesn't have them */
+	if (and_with->flags & ANYOF_UNICODE_ALL) {
 	    cl->flags &= ~ANYOF_UNICODE_ALL;
 	}
-	else {
-
-	    /* The intersection of all unicode with something that isn't all
-	     * unicode is that something */
-	    ARG_SET(cl, ARG(and_with));
+	if (and_with->flags & ANYOF_NON_UTF8_LATIN1_ALL) {
+	    cl->flags &= ~ANYOF_NON_UTF8_LATIN1_ALL;
 	}
     }
-    if (!(and_with->flags & ANYOF_UNICODE_ALL) &&
-	!(and_with->flags & ANYOF_INVERT))
-    {
-	cl->flags &= ~ANYOF_UNICODE_ALL;
+    else {   /* and'd node is not inverted */
 	if (! ANYOF_NONBITMAP(and_with)) {
-	    ARG_SET(cl, ANYOF_NONBITMAP_EMPTY);
+
+            /* Here 'and_with' doesn't match anything outside the bitmap
+             * (except possibly ANYOF_UNICODE_ALL), which means the
+             * intersection can't either, except for ANYOF_UNICODE_ALL, in
+             * which case we don't know what the intersection is, but it's no
+             * greater than what cl already has, so can just leave it alone,
+             * with possible false positives */
+            if (! (and_with->flags & ANYOF_UNICODE_ALL)) {
+                ARG_SET(cl, ANYOF_NONBITMAP_EMPTY);
+            }
 	}
+	else if (! ANYOF_NONBITMAP(cl)) {
+
+	    /* Here, 'and_with' does match something outside the bitmap, and cl
+	     * doesn't have a list of things to match outside the bitmap.  If
+             * cl can match all code points above 255, the intersection will
+             * be those above-255 code points that 'and_with' matches.  There
+             * may be false positives from code points in 'and_with' that are
+             * outside the bitmap but below 256, but those get sorted out
+             * after the synthetic start class succeeds).  If cl can't match
+             * all Unicode code points, it means here that it can't match *
+             * anything outside the bitmap, so we leave the bitmap empty */
+	    if (cl->flags & ANYOF_UNICODE_ALL) {
+		ARG_SET(cl, ARG(and_with));
+	    }
+	}
+	else {
+            /* Here, both 'and_with' and cl match something outside the
+             * bitmap.  Currently we do not do the intersection, so just match
+             * whatever cl had at the beginning.  */
+	}
+
+
+        /* Take the intersection of the two sets of flags */
+	cl->flags &= and_with->flags;
     }
 }
 
@@ -825,6 +859,13 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
     PERL_ARGS_ASSERT_CL_OR;
 
     if (or_with->flags & ANYOF_INVERT) {
+
+        /* Here, the or'd node is to be inverted.  This means we take the
+         * complement of everything not in the bitmap, but currently we don't
+         * know what that is, so give up and match anything */
+	if (ANYOF_NONBITMAP(or_with)) {
+	    cl_anything(pRExC_state, cl);
+	}
 	/* We do not use
 	 * (B1 | CL1) | (!B2 & !CL2) = (B1 | !B2 & !CL2) | (CL1 | (!B2 & !CL2))
 	 *   <= (B1 | !B2) | (CL1 | !CL2)
@@ -834,7 +875,7 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
 	 *   (OK1(i) | OK1(i')) | !(OK1(i) | OK1(i')) =
 	 *   (OK1(i) | OK1(i')) | (!OK1(i) & !OK1(i'))
 	 */
-	if ( (or_with->flags & ANYOF_LOCALE) == (cl->flags & ANYOF_LOCALE)
+	else if ( (or_with->flags & ANYOF_LOCALE) == (cl->flags & ANYOF_LOCALE)
 	     && !(or_with->flags & ANYOF_LOC_NONBITMAP_FOLD)
 	     && !(cl->flags & ANYOF_LOC_NONBITMAP_FOLD) ) {
 	    int i;
@@ -845,7 +886,21 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
 	else {
 	    cl_anything(pRExC_state, cl);
 	}
-    } else {
+
+        /* And, we can just take the union of the flags that aren't affected
+         * by the inversion */
+	cl->flags |= or_with->flags & INVERSION_UNAFFECTED_FLAGS;
+
+        /* For the remaining flags:
+            ANYOF_UNICODE_ALL and inverted means to not match anything above
+                    255, which means that the union with cl should just be
+                    what cl has in it, so can ignore this flag
+            ANYOF_NON_UTF8_LATIN1_ALL and inverted means if not utf8 and ord
+                    is 127-255 to match them, but then invert that, so the
+                    union with cl should just be what cl has in it, so can
+                    ignore this flag
+         */
+    } else {    /* 'or_with' is not inverted */
 	/* (B1 | CL1) | (B2 | CL2) = (B1 | B2) | (CL1 | CL2)) */
 	if ( (or_with->flags & ANYOF_LOCALE) == (cl->flags & ANYOF_LOCALE)
 	     && (!(or_with->flags & ANYOF_LOC_NONBITMAP_FOLD)
@@ -864,25 +919,25 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
 	else { /* XXXX: logic is complicated, leave it along for a moment. */
 	    cl_anything(pRExC_state, cl);
 	}
-    }
-    if (or_with->flags & ANYOF_EOS)
-	cl->flags |= ANYOF_EOS;
-    if (!(or_with->flags & ANYOF_NON_UTF8_LATIN1_ALL))
-	cl->flags |= ANYOF_NON_UTF8_LATIN1_ALL;
 
-    if (or_with->flags & ANYOF_LOC_NONBITMAP_FOLD)
-	cl->flags |= ANYOF_LOC_NONBITMAP_FOLD;
+        /* Take the union */
+	cl->flags |= or_with->flags;
 
-    /* If both nodes match something outside the bitmap, but what they match
-     * outside is not the same pointer, and hence not easily compared, give up
-     * and allow the start class to match everything outside the bitmap */
-    if (ANYOF_NONBITMAP(cl) && ANYOF_NONBITMAP(or_with) &&
-	ARG(cl) != ARG(or_with)) {
-	cl->flags |= ANYOF_UNICODE_ALL;
-    }
+	if (ANYOF_NONBITMAP(or_with)) {
 
-    if (or_with->flags & ANYOF_UNICODE_ALL) {
-	cl->flags |= ANYOF_UNICODE_ALL;
+	    /* Use the added node's outside-the-bit-map match if there isn't a
+	     * conflict.  If there is a conflict (both nodes match something
+	     * outside the bitmap, but what they match outside is not the same
+	     * pointer, and hence not easily compared until XXX we extend
+	     * inversion lists this far), give up and allow the start class to
+	     * match everything outside the bitmap */
+	    if (! ANYOF_NONBITMAP(cl)) {
+		ARG_SET(cl, ARG(or_with));
+	    }
+	    else if (ARG(cl) != ARG(or_with)) {
+		cl->flags |= ANYOF_UNICODE_ALL;
+	    }
+	}
     }
 }
 
