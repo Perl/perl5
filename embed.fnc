@@ -1803,8 +1803,7 @@ Es	|bool	|reg_skipcomment|NN struct RExC_state_t *pRExC_state
 Es	|void	|scan_commit	|NN const struct RExC_state_t *pRExC_state \
 				|NN struct scan_data_t *data|NN I32 *minlenp \
 				|int is_inf
-Esn	|void	|cl_anything	|NN const struct RExC_state_t *pRExC_state \
-				|NN struct regnode_charclass_class *cl
+Esn	|void	|cl_anything	|NN struct regnode_charclass_class *cl
 EsRn	|int	|cl_is_anything	|NN const struct regnode_charclass_class *cl
 Esn	|void	|cl_init	|NN const struct RExC_state_t *pRExC_state \
 				|NN struct regnode_charclass_class *cl

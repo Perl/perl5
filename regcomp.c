@@ -720,7 +720,7 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data, I32 *min
 
 /* Can match anything (initialization) */
 STATIC void
-S_cl_anything(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
+S_cl_anything(struct regnode_charclass_class *cl)
 {
     PERL_ARGS_ASSERT_CL_ANYTHING;
 
@@ -755,7 +755,7 @@ S_cl_init(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
 
     Zero(cl, 1, struct regnode_charclass_class);
     cl->type = ANYOF;
-    cl_anything(pRExC_state, cl);
+    cl_anything(cl);
     ARG_SET(cl, ANYOF_NONBITMAP_EMPTY);
 }
 
@@ -865,7 +865,7 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
          * complement of everything not in the bitmap, but currently we don't
          * know what that is, so give up and match anything */
 	if (ANYOF_NONBITMAP(or_with)) {
-	    cl_anything(pRExC_state, cl);
+	    cl_anything(cl);
 	}
 	/* We do not use
 	 * (B1 | CL1) | (!B2 & !CL2) = (B1 | !B2 & !CL2) | (CL1 | (!B2 & !CL2))
@@ -885,7 +885,7 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
 		cl->bitmap[i] |= ~or_with->bitmap[i];
 	} /* XXXX: logic is complicated otherwise */
 	else {
-	    cl_anything(pRExC_state, cl);
+	    cl_anything(cl);
 	}
 
         /* And, we can just take the union of the flags that aren't affected
@@ -918,7 +918,7 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
 	    }
 	}
 	else { /* XXXX: logic is complicated, leave it along for a moment. */
-	    cl_anything(pRExC_state, cl);
+	    cl_anything(cl);
 	}
 
         /* Take the union */
@@ -3090,7 +3090,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     }
                     is_inf = is_inf_internal = 1;
                     if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
-                        cl_anything(pRExC_state, data->start_class);
+                        cl_anything(data->start_class);
                     flags &= ~SCF_DO_STCLASS;
 	        }
             } else {
@@ -3645,7 +3645,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		}
 		is_inf = is_inf_internal = 1;
 		if (flags & SCF_DO_STCLASS_OR)
-		    cl_anything(pRExC_state, data->start_class);
+		    cl_anything(data->start_class);
 		flags &= ~SCF_DO_STCLASS;
 		break;
 	    }
@@ -3708,7 +3708,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		  do_default:
 		    /* Perl_croak(aTHX_ "panic: unexpected simple REx opcode %d", OP(scan)); */
 		    if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
-			cl_anything(pRExC_state, data->start_class);
+			cl_anything(data->start_class);
 		    break;
 		case REG_ANY:
 		    if (OP(scan) == SANY)
@@ -3716,7 +3716,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    if (flags & SCF_DO_STCLASS_OR) { /* Everything but \n */
 			value = (ANYOF_BITMAP_TEST(data->start_class,'\n')
 				 || ANYOF_CLASS_TEST_ANY_SET(data->start_class));
-			cl_anything(pRExC_state, data->start_class);
+			cl_anything(data->start_class);
 		    }
 		    if (flags & SCF_DO_STCLASS_AND || !value)
 			ANYOF_BITMAP_CLEAR(data->start_class,'\n');
@@ -4142,7 +4142,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		}
 		is_inf = is_inf_internal = 1;
 		if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
-		    cl_anything(pRExC_state, data->start_class);
+		    cl_anything(data->start_class);
 		flags &= ~SCF_DO_STCLASS;
 	}
 	else if (OP(scan) == GPOS) {
