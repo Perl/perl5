@@ -204,14 +204,14 @@ my $TEST = 'TEST';
         skip "This is not VMS", 4 unless $Is_VMS;
 
 	$ENV{'DCL$PATH'} = $TAINT;
-	is(eval { `$echo 1` }, '');
+	is(eval { `$echo 1` }, undef);
 	like($@, qr/^Insecure \$ENV{DCL\$PATH}/);
 	SKIP: {
             skip q[can't find world-writeable directory to test DCL$PATH], 2
               unless $tmp;
 
 	    $ENV{'DCL$PATH'} = $tmp;
-	    is(eval { `$echo 1` }, '');
+	    is(eval { `$echo 1` }, undef);
 	    like($@, qr/^Insecure directory in \$ENV{DCL\$PATH}/);
 	}
 	$ENV{'DCL$PATH'} = '';
