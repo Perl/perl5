@@ -96,6 +96,10 @@ XXX
 
 =item *
 
+C<base> has been upgraded from version 2.15 to 2.16.
+
+=item *
+
 C<CPANPLUS> has been upgraded from version 0.9101 to 0.9102
 
 =item *
@@ -130,7 +134,7 @@ C<Locale::Codes> has been upgraded from version 3.15 to 3.16
 
 =item *
 
-C<Math::BigInt> has been upgraded from version 1.992 to 1.993
+C<Math::BigInt> has been upgraded from version 1.992 to 1.994
 
 =item *
 
@@ -273,7 +277,17 @@ XXX Newly added diagnostic messages go here
 
 =item *
 
-XXX
+Regexp modifier "/%c" may not appear twice
+
+(F syntax) The regular expression pattern had one of the mutually exclusive
+modifiers repeated.  Remove all but one of the occurrences.
+
+=item *
+
+Regexp modifiers "/%c" and "/%c" are mutually exclusive
+
+(F syntax) The regular expression pattern had more than one of the mutually
+exclusive modifiers.  Retain only the modifier that is supposed to be there.
 
 =back
 
