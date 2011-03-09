@@ -749,7 +749,7 @@ S_cl_is_anything(const struct regnode_charclass_class *cl)
 
 /* Can match anything (initialization) */
 STATIC void
-S_cl_init(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
+S_cl_init(struct regnode_charclass_class *cl)
 {
     PERL_ARGS_ASSERT_CL_INIT;
 
@@ -2748,7 +2748,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		if (flags & SCF_DO_SUBSTR)
 		    SCAN_COMMIT(pRExC_state, data, minlenp); /* Cannot merge strings after this. */
 		if (flags & SCF_DO_STCLASS)
-		    cl_init_zero(pRExC_state, &accum);
+		    cl_init_zero(&accum);
 
 		while (OP(scan) == code) {
 		    I32 deltanext, minnext, f = 0, fake;
@@ -2769,7 +2769,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    if (code != BRANCH)
 			scan = NEXTOPER(scan);
 		    if (flags & SCF_DO_STCLASS) {
-			cl_init(pRExC_state, &this_class);
+			cl_init(&this_class);
 			data_fake.start_class = &this_class;
 			f = SCF_DO_STCLASS_AND;
 		    }
@@ -3351,7 +3351,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			data->flags |= SF_IS_INF;
 		}
 		if (flags & SCF_DO_STCLASS) {
-		    cl_init(pRExC_state, &this_class);
+		    cl_init(&this_class);
 		    oclass = data->start_class;
 		    data->start_class = &this_class;
 		    f |= SCF_DO_STCLASS_AND;
@@ -3955,7 +3955,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		data_fake.pos_delta = delta;
                 if ( flags & SCF_DO_STCLASS && !scan->flags
                      && OP(scan) == IFMATCH ) { /* Lookahead */
-                    cl_init(pRExC_state, &intrnl);
+                    cl_init(&intrnl);
                     data_fake.start_class = &intrnl;
                     f |= SCF_DO_STCLASS_AND;
 		}
@@ -3989,7 +3989,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			 * *** HACK *** for now just treat as "no information".
 			 * See [perl #56690].
 			 */
-			cl_init(pRExC_state, data->start_class);
+			cl_init(data->start_class);
 		    }  else {
 			/* AND before and after: combine and continue */
 			const int was = (data->start_class->flags & ANYOF_EOS);
@@ -4040,7 +4040,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	            data_fake.flags |= SF_IS_INF;
                 if ( flags & SCF_DO_STCLASS && !scan->flags
                      && OP(scan) == IFMATCH ) { /* Lookahead */
-                    cl_init(pRExC_state, &intrnl);
+                    cl_init(&intrnl);
                     data_fake.start_class = &intrnl;
                     f |= SCF_DO_STCLASS_AND;
                 }
@@ -4173,7 +4173,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
             if (flags & SCF_DO_SUBSTR) /* XXXX Add !SUSPEND? */
                 SCAN_COMMIT(pRExC_state, data,minlenp); /* Cannot merge strings after this. */
             if (flags & SCF_DO_STCLASS)
-                cl_init_zero(pRExC_state, &accum);
+                cl_init_zero(&accum);
                 
             if (!trie->jump) {
                 min1= trie->minlen;
@@ -4196,7 +4196,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         data_fake.last_closep = &fake;
 		    data_fake.pos_delta = delta;
                     if (flags & SCF_DO_STCLASS) {
-                        cl_init(pRExC_state, &this_class);
+                        cl_init(&this_class);
                         data_fake.start_class = &this_class;
                         f = SCF_DO_STCLASS_AND;
                     }
@@ -4948,7 +4948,7 @@ reStudy:
 	data.longest = &(data.longest_fixed);
 	first = scan;
 	if (!ri->regstclass) {
-	    cl_init(pRExC_state, &ch_class);
+	    cl_init(&ch_class);
 	    data.start_class = &ch_class;
 	    stclass_flag = SCF_DO_STCLASS_AND;
 	} else				/* XXXX Check for BOUND? */
@@ -5131,7 +5131,7 @@ reStudy:
 	DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log, "\nMulti Top Level\n"));
 
 	scan = ri->program + 1;
-	cl_init(pRExC_state, &ch_class);
+	cl_init(&ch_class);
 	data.start_class = &ch_class;
 	data.last_closep = &last_close;
 
