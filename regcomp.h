@@ -337,19 +337,17 @@ struct regnode_charclass_class {
 #define ANYOF_LARGE      ANYOF_CLASS    /* Same; name retained for back compat */
 
 /* EOS, meaning that it can match an empty string too, is used for the
- * synthetic start class (ssc) only.  It looks like it could share the INVERT
- * bit, as the ssc is never inverted.  But doing that caused this reges to
- * not match:
- * 'foo/file.fob' =~ m,^(?=[^\.])[^/]* /(?=[^\.])[^/]*\.fo[^/]$,;
- * (except the space between the * and the / above shouldn't be there; it was
- * inserted to make this comment continue on.)
- * Rather than try to figure out what was going on in the optimizer, I (khw)
- * found a way to save a different bit.  But my original line of reasoning was
- * "The bit just needs to be turned off before regexec.c gets a hold of it so
- * that regexec.c doesn't think it's inverted, but this happens automatically,
- * as if the ssc can match an EOS, the ssc is discarded, and never passed to
- * regexec.c" */
+ * synthetic start class only. */
 #define ANYOF_EOS		0x10
+
+/* ? Is this node the synthetic start class (ssc).  This bit is shared with
+ * ANYOF_EOS, as the latter is used only for the ssc, and then not used by
+ * regexec.c.  And, the code is structured so that if it is set, the ssc is
+ * not used, so it is guaranteed to be 0 for the ssc by the time regexec.c
+ * gets executed, and 0 for a non-ssc ANYOF node, as it only ever gets set for
+ * a potential ssc candidate.  Thus setting it to 1 after it has been
+ * determined that the ssc will be used is not ambiguous */
+#define ANYOF_IS_SYNTHETIC	ANYOF_EOS
 
 /* Can match something outside the bitmap that isn't in utf8 */
 #define ANYOF_NONBITMAP_NON_UTF8 0x20

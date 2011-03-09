@@ -5014,14 +5014,13 @@ reStudy:
 	    && (OP(ri->regstclass) == REG_ANY || OP(ri->regstclass) == SANY))
 	    ri->regstclass = NULL;
 
-	/* If the synthetic start class were to ever be used when EOS is set,
-	 * that bit would have to be cleared, as it is shared with another */
 	if ((!(r->anchored_substr || r->anchored_utf8) || r->anchored_offset)
 	    && stclass_flag
 	    && !(data.start_class->flags & ANYOF_EOS)
 	    && !cl_is_anything(data.start_class))
 	{
 	    const U32 n = add_data(pRExC_state, 1, "f");
+	    data.start_class->flags |= ANYOF_IS_SYNTHETIC;
 
 	    Newx(RExC_rxi->data->data[n], 1,
 		struct regnode_charclass_class);
@@ -5089,12 +5088,11 @@ reStudy:
 	r->check_substr = r->check_utf8 = r->anchored_substr = r->anchored_utf8
 		= r->float_substr = r->float_utf8 = NULL;
 
-	/* If the synthetic start class were to ever be used when EOS is set,
-	 * that bit would have to be cleared, as it is shared with another */
 	if (!(data.start_class->flags & ANYOF_EOS)
 	    && !cl_is_anything(data.start_class))
 	{
 	    const U32 n = add_data(pRExC_state, 1, "f");
+	    data.start_class->flags |= ANYOF_IS_SYNTHETIC;
 
 	    Newx(RExC_rxi->data->data[n], 1,
 		struct regnode_charclass_class);

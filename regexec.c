@@ -6587,16 +6587,21 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
     /* If the bitmap didn't (or couldn't) match, and something outside the
      * bitmap could match, try that.  Locale nodes specifiy completely the
      * behavior of code points in the bit map (otherwise, a utf8 target would
-     * cause them to be treated as Unicode and not locale), except XXX in
+     * cause them to be treated as Unicode and not locale), except in
      * the very unlikely event when this node is a synthetic start class, which
-     * could be a combination of locale and non-locale nodes */
+     * could be a combination of locale and non-locale nodes.  So allow locale
+     * to match for the synthetic start class, which will give a false
+     * positive that will be resolved when the match is done again as not part
+     * of the synthetic start class */
     if (!match) {
 	if (utf8_target && (flags & ANYOF_UNICODE_ALL) && c >= 256) {
 	    match = TRUE;	/* Everything above 255 matches */
 	}
 	else if ((flags & ANYOF_NONBITMAP_NON_UTF8
 		  || (utf8_target && ANYOF_NONBITMAP(n)
-		      && (c >=256 || ! (flags & ANYOF_LOCALE)))))
+		      && (c >=256
+			  || (! (flags & ANYOF_LOCALE))
+			  || (flags & ANYOF_IS_SYNTHETIC)))))
 	{
 	    AV *av;
 	    SV * const sw = regclass_swash(prog, n, TRUE, 0, (SV**)&av);
