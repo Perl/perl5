@@ -1335,7 +1335,7 @@ use File::Glob qw(:case);
 			     qr{^inc/Test/},
 			     qw{ mytypemap },
 			   ],
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'SelfLoader' =>
