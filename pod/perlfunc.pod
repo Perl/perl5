@@ -4405,6 +4405,9 @@ expressions. Both of these effects take place for the next match, so
 you can't affect the position with C<pos> during the current match,
 such as in C<(?{pos() = 5})> or C<s//pos() = 5/e>.
 
+Setting C<pos> also resets the I<matched with zero-length> flag, described
+under L<perlre/"Repeated Patterns Matching a Zero-length Substring">.
+
 Because a failed C<m//gc> match doesn't reset the offset, the return
 from C<pos> won't change either in this case.  See L<perlre> and
 L<perlop>.
