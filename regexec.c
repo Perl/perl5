@@ -6432,6 +6432,8 @@ Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool
 
     PERL_ARGS_ASSERT_REGCLASS_SWASH;
 
+    assert(ANYOF_NONBITMAP(node));
+
     if (data && data->count) {
 	const U32 n = ARG(node);
 
