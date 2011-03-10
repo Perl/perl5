@@ -6597,11 +6597,12 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 	if (utf8_target && (flags & ANYOF_UNICODE_ALL) && c >= 256) {
 	    match = TRUE;	/* Everything above 255 matches */
 	}
-	else if ((flags & ANYOF_NONBITMAP_NON_UTF8
-		  || (utf8_target && ANYOF_NONBITMAP(n)
-		      && (c >=256
-			  || (! (flags & ANYOF_LOCALE))
-			  || (flags & ANYOF_IS_SYNTHETIC)))))
+	else if (ANYOF_NONBITMAP(n)
+		 && ((flags & ANYOF_NONBITMAP_NON_UTF8)
+		     || (utf8_target
+		         && (c >=256
+			     || (! (flags & ANYOF_LOCALE))
+			     || (flags & ANYOF_IS_SYNTHETIC)))))
 	{
 	    AV *av;
 	    SV * const sw = regclass_swash(prog, n, TRUE, 0, (SV**)&av);
