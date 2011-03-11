@@ -1,4 +1,4 @@
-#!./perl
+#!./perl -w
 
 #
 # Verify that C<die> return the return code
@@ -17,29 +17,28 @@ skip_all('broken on MPE/iX') if $^O eq 'mpeix';
 
 $| = 1;
 
-
-my %tests = (
-	 1 => [   0,   0],
-	 2 => [   0,   1], 
-	 3 => [   0, 127], 
-	 4 => [   0, 128], 
-	 5 => [   0, 255], 
-	 6 => [   0, 256], 
-	 7 => [   0, 512], 
-	 8 => [   1,   0],
-	 9 => [   1,   1],
-	10 => [   1, 256],
-	11 => [ 128,   0],
-	12 => [ 128,   1],
-	13 => [ 128, 256],
-	14 => [ 255,   0],
-	15 => [ 255,   1],
-	16 => [ 255, 256],
+my @tests = (
+	[   0,   0],
+	[   0,   1],
+	[   0, 127],
+	[   0, 128],
+	[   0, 255],
+	[   0, 256],
+	[   0, 512],
+	[   1,   0],
+	[   1,   1],
+	[   1, 256],
+	[ 128,   0],
+	[ 128,   1],
+	[ 128, 256],
+	[ 255,   0],
+	[ 255,   1],
+	[ 255, 256],
 	# see if implicit close preserves $?
-	17 => [  0,  512, '{ local *F; open F, q[TEST]; close F; $!=0 } die;'],
+	[  0,  512, '{ local *F; open F, q[TEST]; close F; $!=0 } die;'],
 );
 
-my $max = keys %tests;
+plan(tests => scalar @tests);
 
 my $vms_exit_mode = 0;
 
@@ -59,14 +58,12 @@ if ($^O eq 'VMS') {
     }
 }
 
-plan(tests => $max);
-
 # Dump any error messages from the dying processes off to a temp file.
 my $tempfile = tempfile();
 open STDERR, '>', $tempfile or die "Can't open temp error file $tempfile:  $!";
 
-foreach my $test (1 .. $max) {
-    my($bang, $query, $code) = @{$tests{$test}};
+foreach my $test (@tests) {
+    my($bang, $query, $code) = @$test;
     $code ||= 'die;';
     if ($^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS') {
         system(qq{$^X -e "\$! = $bang; \$? = $query; $code"});
@@ -85,4 +82,3 @@ foreach my $test (1 .. $max) {
 }
 
 close STDERR;
-
