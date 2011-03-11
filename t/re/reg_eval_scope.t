@@ -126,15 +126,25 @@ on;
 fresh_perl_is <<'CODE', '45', { stderr => 1 }, '(?{die})';
  eval { my $a=4; my $b=5; "a" =~ /(?{die})a/ }; print $a,$b"
 CODE
-fresh_perl_is <<'CODE', '45', { stderr => 1 }, '(?{last})';
- {  my $a=4; my $b=5; "a" =~ /(?{last})a/ }; print $a,$b
+
+SKIP: {
+    # The remaining TODO tests crash, which will display an error dialog
+    # on Windows that has to be manually dismissed.  We don't want this
+    # to happen for release builds: 5.14.x, 5.16.x etc.
+    skip "Don't run crashing TODO test on release build", 3
+	if $::TODO && $^O eq "MSWin32" && (int($]*1000) & 1) == 0;
+
+    fresh_perl_is <<'CODE', '45', { stderr => 1 }, '(?{last})';
+     {  my $a=4; my $b=5; "a" =~ /(?{last})a/ }; print $a,$b
 CODE
-fresh_perl_is <<'CODE', '45', { stderr => 1 }, '(?{next})';
- {  my $a=4; my $b=5; "a" =~ /(?{last})a/ }; print $a,$b
+    fresh_perl_is <<'CODE', '45', { stderr => 1 }, '(?{next})';
+     {  my $a=4; my $b=5; "a" =~ /(?{last})a/ }; print $a,$b
 CODE
-fresh_perl_is <<'CODE', '45', { stderr => 1 }, '(?{return})';
- print sub {  my $a=4; my $b=5; "a" =~ /(?{return $a.$b})a/ }->();
+    fresh_perl_is <<'CODE', '45', { stderr => 1 }, '(?{return})';
+     print sub {  my $a=4; my $b=5; "a" =~ /(?{return $a.$b})a/ }->();
 CODE
+}
+
 fresh_perl_is <<'CODE', '45', { stderr => 1 }, '(?{goto})';
   my $a=4; my $b=5; "a" =~ /(?{goto _})a/; die; _: print $a,$b
 CODE
