@@ -1,5 +1,16 @@
 #!./perl
 
+sub try_prog {
+    my ($where, $args, @pathnames) = @_;
+    foreach my $prog (@pathnames) {
+	next unless -x $prog;
+	next unless open PW, '-|', "$prog $args 2>/dev/null";
+	next unless defined <PW>;
+	return $where;
+    }
+    return;
+}
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
@@ -17,29 +28,12 @@ BEGIN {
 	$reason = 'no /etc/passwd file';
     }
 
-    if (not defined $where) {	# Try NIS.
-	foreach my $ypcat (qw(/usr/bin/ypcat /bin/ypcat /etc/ypcat)) {
-	    if (-x $ypcat &&
-		open(PW, "$ypcat passwd 2>/dev/null |") &&
-		defined(<PW>)) {
-		$where = "NIS passwd";
-		undef $reason;
-		last;
-	    }
-	}
-    }
+    # Try NIS.
+    $where = try_prog('NIS passwd', 'passwd',
+		      qw(/usr/bin/ypcat /bin/ypcat /etc/ypcat));
 
-    if (not defined $where) {	# Try NetInfo.
-	foreach my $nidump (qw(/usr/bin/nidump)) {
-	    if (-x $nidump &&
-		open(PW, "$nidump passwd . 2>/dev/null |") &&
-		defined(<PW>)) {
-		$where = "NetInfo passwd";
-		undef $reason;
-		last;
-	    }
-	}
-    }
+    # Try NetInfo.
+    $where //= try_prog('NetInfo passwd', 'passwd .', '/usr/bin/nidump');
 
     if (not defined $where &&		# Try dscl
 	$Config{useperlio} eq 'define') {	# need perlio
@@ -100,7 +94,6 @@ BEGIN {
 	    @rec and $data .= join (':', @rec) . "\n";
 	    if (open (PW, '<', \$data)) {
 		$where = "dscl . -readall /Users";
-		undef $reason;
 		last;
 	    }
 	}
@@ -110,21 +103,13 @@ BEGIN {
 	my $PW = "/etc/passwd";
 	if (-f $PW && open(PW, $PW) && defined(<PW>)) {
 	    $where = $PW;
-	    undef $reason;
 	}
     }
 
-    if (not defined $where) {      # Try NIS+
-     foreach my $niscat (qw(/bin/niscat)) {
-         if (-x $niscat &&
-           open(PW, "$niscat passwd.org_dir 2>/dev/null |") &&
-           defined(<PW>)) {
-           $where = "NIS+ $niscat passwd.org_dir";
-           undef $reason;
-           last;
-         }
-     }
-    }
+    # Try NIS+.
+    $where //= try_prog('NIS+', 'passwd.org_dir', '/bin/niscat');
+
+    undef $reason if defined $where;
 
     if ($reason) {	# Give up.
 	print "1..0 # Skip: $reason\n";
