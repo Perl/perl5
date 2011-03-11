@@ -46,8 +46,8 @@ my @MK = split(/\n/, <<__EOMK__);
 2.2	Last possible sequence of certain length
 2.2.1 y "\x7f"			7f		1	7f	1
 2.2.2 y "\xdf\xbf"			7ff		2	df:bf	1
-# The ffff is illegal unless UTF8_ALLOW_FFFF
-2.2.3 n "\xef\xbf\xbf"			ffff		3	ef:bf:bf	1	character 0xffff
+# The ffff is legal by default since 872c91ae155f6880
+2.2.3 y "\xef\xbf\xbf"			ffff		3	ef:bf:bf	1	character 0xffff
 2.2.4 y "\xf7\xbf\xbf\xbf"			1fffff		4	f7:bf:bf:bf	1
 2.2.5 y "\xfb\xbf\xbf\xbf\xbf"			3ffffff		5	fb:bf:bf:bf:bf	1
 2.2.6 y "\xfd\xbf\xbf\xbf\xbf\xbf"		7fffffff	6	fd:bf:bf:bf:bf:bf	1
@@ -69,11 +69,11 @@ my @MK = split(/\n/, <<__EOMK__);
 3.1.8 n "\x80\xbf\x80\xbf\x80\xbf\x80"	-		7	80:bf:80:bf:80:bf:80	-	unexpected continuation byte 0x80
 3.1.9 n "\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae\xaf\xb0\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xbb\xbc\xbd\xbe\xbf"				-	64	80:81:82:83:84:85:86:87:88:89:8a:8b:8c:8d:8e:8f:90:91:92:93:94:95:96:97:98:99:9a:9b:9c:9d:9e:9f:a0:a1:a2:a3:a4:a5:a6:a7:a8:a9:aa:ab:ac:ad:ae:af:b0:b1:b2:b3:b4:b5:b6:b7:b8:b9:ba:bb:bc:bd:be:bf	-	unexpected continuation byte 0x80
 3.2	Lonely start characters
-3.2.1 n "\xc0 \xc1 \xc2 \xc3 \xc4 \xc5 \xc6 \xc7 \xc8 \xc9 \xca \xcb \xcc \xcd \xce \xcf \xd0 \xd1 \xd2 \xd3 \xd4 \xd5 \xd6 \xd7 \xd8 \xd9 \xda \xdb \xdc \xdd \xde \xdf "	-	64 	c0:20:c1:20:c2:20:c3:20:c4:20:c5:20:c6:20:c7:20:c8:20:c9:20:ca:20:cb:20:cc:20:cd:20:ce:20:cf:20:d0:20:d1:20:d2:20:d3:20:d4:20:d5:20:d6:20:d7:20:d8:20:d9:20:da:20:db:20:dc:20:dd:20:de:20:df:20	-	unexpected non-continuation byte 0x20 after start byte 0xc0
-3.2.2 n "\xe0 \xe1 \xe2 \xe3 \xe4 \xe5 \xe6 \xe7 \xe8 \xe9 \xea \xeb \xec \xed \xee \xef "	-	32	e0:20:e1:20:e2:20:e3:20:e4:20:e5:20:e6:20:e7:20:e8:20:e9:20:ea:20:eb:20:ec:20:ed:20:ee:20:ef:20	-	unexpected non-continuation byte 0x20 after start byte 0xe0
-3.2.3 n "\xf0 \xf1 \xf2 \xf3 \xf4 \xf5 \xf6 \xf7 "	-	16	f0:20:f1:20:f2:20:f3:20:f4:20:f5:20:f6:20:f7:20	-	unexpected non-continuation byte 0x20 after start byte 0xf0
-3.2.4 n "\xf8 \xf9 \xfa \xfb "		-	8	f8:20:f9:20:fa:20:fb:20	-	unexpected non-continuation byte 0x20 after start byte 0xf8
-3.2.5 n "\xfc \xfd "			-	4	fc:20:fd:20	-	unexpected non-continuation byte 0x20 after start byte 0xfc
+3.2.1 n "\xc0 \xc1 \xc2 \xc3 \xc4 \xc5 \xc6 \xc7 \xc8 \xc9 \xca \xcb \xcc \xcd \xce \xcf \xd0 \xd1 \xd2 \xd3 \xd4 \xd5 \xd6 \xd7 \xd8 \xd9 \xda \xdb \xdc \xdd \xde \xdf "	-	64 	c0:20:c1:20:c2:20:c3:20:c4:20:c5:20:c6:20:c7:20:c8:20:c9:20:ca:20:cb:20:cc:20:cd:20:ce:20:cf:20:d0:20:d1:20:d2:20:d3:20:d4:20:d5:20:d6:20:d7:20:d8:20:d9:20:da:20:db:20:dc:20:dd:20:de:20:df:20	-	unexpected non-continuation byte 0x20, immediately after start byte 0xc0
+3.2.2 n "\xe0 \xe1 \xe2 \xe3 \xe4 \xe5 \xe6 \xe7 \xe8 \xe9 \xea \xeb \xec \xed \xee \xef "	-	32	e0:20:e1:20:e2:20:e3:20:e4:20:e5:20:e6:20:e7:20:e8:20:e9:20:ea:20:eb:20:ec:20:ed:20:ee:20:ef:20	-	unexpected non-continuation byte 0x20, immediately after start byte 0xe0
+3.2.3 n "\xf0 \xf1 \xf2 \xf3 \xf4 \xf5 \xf6 \xf7 "	-	16	f0:20:f1:20:f2:20:f3:20:f4:20:f5:20:f6:20:f7:20	-	unexpected non-continuation byte 0x20, immediately after start byte 0xf0
+3.2.4 n "\xf8 \xf9 \xfa \xfb "		-	8	f8:20:f9:20:fa:20:fb:20	-	unexpected non-continuation byte 0x20, immediately after start byte 0xf8
+3.2.5 n "\xfc \xfd "			-	4	fc:20:fd:20	-	unexpected non-continuation byte 0x20, immediately after start byte 0xfc
 3.3	Sequences with last continuation byte missing
 3.3.1 n "\xc0"			-	1	c0	-	1 byte, need 2
 3.3.2 n "\xe0\x80"			-	2	e0:80	-	2 bytes, need 3
@@ -86,7 +86,7 @@ my @MK = split(/\n/, <<__EOMK__);
 3.3.9 n "\xfb\xbf\xbf\xbf"			-	4	fb:bf:bf:bf	-	4 bytes, need 5
 3.3.10 n "\xfd\xbf\xbf\xbf\xbf"		-	5	fd:bf:bf:bf:bf	-	5 bytes, need 6
 3.4	Concatenation of incomplete sequences
-3.4.1 n "\xc0\xe0\x80\xf0\x80\x80\xf8\x80\x80\x80\xfc\x80\x80\x80\x80\xdf\xef\xbf\xf7\xbf\xbf\xfb\xbf\xbf\xbf\xfd\xbf\xbf\xbf\xbf"	-	30	c0:e0:80:f0:80:80:f8:80:80:80:fc:80:80:80:80:df:ef:bf:f7:bf:bf:fb:bf:bf:bf:fd:bf:bf:bf:bf	-	unexpected non-continuation byte 0xe0 after start byte 0xc0
+3.4.1 n "\xc0\xe0\x80\xf0\x80\x80\xf8\x80\x80\x80\xfc\x80\x80\x80\x80\xdf\xef\xbf\xf7\xbf\xbf\xfb\xbf\xbf\xbf\xfd\xbf\xbf\xbf\xbf"	-	30	c0:e0:80:f0:80:80:f8:80:80:80:fc:80:80:80:80:df:ef:bf:f7:bf:bf:fb:bf:bf:bf:fd:bf:bf:bf:bf	-	unexpected non-continuation byte 0xe0, immediately after start byte 0xc0
 3.5	Impossible bytes
 3.5.1 n "\xfe"			-	1	fe	-	byte 0xfe
 3.5.2 n "\xff"			-	1	ff	-	byte 0xff
@@ -112,26 +112,26 @@ my @MK = split(/\n/, <<__EOMK__);
 4.3.5 n "\xfc\x80\x80\x80\x80\x80"	-	6	fc:80:80:80:80:80	-	6 bytes, need 1
 5	Illegal code positions
 5.1	Single UTF-16 surrogates
-5.1.1 n "\xed\xa0\x80"		-	3	ed:a0:80	-	UTF-16 surrogate 0xd800
-5.1.2 n "\xed\xad\xbf"			-	3	ed:ad:bf	-	UTF-16 surrogate 0xdb7f
-5.1.3 n "\xed\xae\x80"		-	3	ed:ae:80	-	UTF-16 surrogate 0xdb80
-5.1.4 n "\xed\xaf\xbf"			-	3	ed:af:bf	-	UTF-16 surrogate 0xdbff
-5.1.5 n "\xed\xb0\x80"		-	3	ed:b0:80	-	UTF-16 surrogate 0xdc00
-5.1.6 n "\xed\xbe\x80"		-	3	ed:be:80	-	UTF-16 surrogate 0xdf80
-5.1.7 n "\xed\xbf\xbf"			-	3	ed:bf:bf	-	UTF-16 surrogate 0xdfff
+5.1.1 y "\xed\xa0\x80"		-	3	ed:a0:80	-	UTF-16 surrogate 0xd800
+5.1.2 y "\xed\xad\xbf"			-	3	ed:ad:bf	-	UTF-16 surrogate 0xdb7f
+5.1.3 y "\xed\xae\x80"		-	3	ed:ae:80	-	UTF-16 surrogate 0xdb80
+5.1.4 y "\xed\xaf\xbf"			-	3	ed:af:bf	-	UTF-16 surrogate 0xdbff
+5.1.5 y "\xed\xb0\x80"		-	3	ed:b0:80	-	UTF-16 surrogate 0xdc00
+5.1.6 y "\xed\xbe\x80"		-	3	ed:be:80	-	UTF-16 surrogate 0xdf80
+5.1.7 y "\xed\xbf\xbf"			-	3	ed:bf:bf	-	UTF-16 surrogate 0xdfff
 5.2	Paired UTF-16 surrogates
-5.2.1 n "\xed\xa0\x80\xed\xb0\x80"		-	6	ed:a0:80:ed:b0:80	-	UTF-16 surrogate 0xd800
-5.2.2 n "\xed\xa0\x80\xed\xbf\xbf"		-	6	ed:a0:80:ed:bf:bf	-	UTF-16 surrogate 0xd800
-5.2.3 n "\xed\xad\xbf\xed\xb0\x80"		-	6	ed:ad:bf:ed:b0:80	-	UTF-16 surrogate 0xdb7f
-5.2.4 n "\xed\xad\xbf\xed\xbf\xbf"		-	6	ed:ad:bf:ed:bf:bf	-	UTF-16 surrogate 0xdb7f
-5.2.5 n "\xed\xae\x80\xed\xb0\x80"		-	6	ed:ae:80:ed:b0:80	-	UTF-16 surrogate 0xdb80
-5.2.6 n "\xed\xae\x80\xed\xbf\xbf"		-	6	ed:ae:80:ed:bf:bf	-	UTF-16 surrogate 0xdb80
-5.2.7 n "\xed\xaf\xbf\xed\xb0\x80"		-	6	ed:af:bf:ed:b0:80	-	UTF-16 surrogate 0xdbff
-5.2.8 n "\xed\xaf\xbf\xed\xbf\xbf"		-	6	ed:af:bf:ed:bf:bf	-	UTF-16 surrogate 0xdbff
+5.2.1 y "\xed\xa0\x80\xed\xb0\x80"		-	6	ed:a0:80:ed:b0:80	-	UTF-16 surrogate 0xd800
+5.2.2 y "\xed\xa0\x80\xed\xbf\xbf"		-	6	ed:a0:80:ed:bf:bf	-	UTF-16 surrogate 0xd800
+5.2.3 y "\xed\xad\xbf\xed\xb0\x80"		-	6	ed:ad:bf:ed:b0:80	-	UTF-16 surrogate 0xdb7f
+5.2.4 y "\xed\xad\xbf\xed\xbf\xbf"		-	6	ed:ad:bf:ed:bf:bf	-	UTF-16 surrogate 0xdb7f
+5.2.5 y "\xed\xae\x80\xed\xb0\x80"		-	6	ed:ae:80:ed:b0:80	-	UTF-16 surrogate 0xdb80
+5.2.6 y "\xed\xae\x80\xed\xbf\xbf"		-	6	ed:ae:80:ed:bf:bf	-	UTF-16 surrogate 0xdb80
+5.2.7 y "\xed\xaf\xbf\xed\xb0\x80"		-	6	ed:af:bf:ed:b0:80	-	UTF-16 surrogate 0xdbff
+5.2.8 y "\xed\xaf\xbf\xed\xbf\xbf"		-	6	ed:af:bf:ed:bf:bf	-	UTF-16 surrogate 0xdbff
 5.3	Other illegal code positions
-5.3.1 n "\xef\xbf\xbe"			-	3	ef:bf:be	-	byte order mark 0xfffe
-# The ffff is illegal unless UTF8_ALLOW_FFFF
-5.3.2 n "\xef\xbf\xbf"			-	3	ef:bf:bf	-	character 0xffff
+5.3.1 y "\xef\xbf\xbe"			-	3	ef:bf:be	-	byte order mark 0xfffe
+# The ffff is legal by default since 872c91ae155f6880
+5.3.2 y "\xef\xbf\xbf"			-	3	ef:bf:bf	-	character 0xffff
 __EOMK__
 
 # 104..181
@@ -140,7 +140,7 @@ __EOMK__
 
     local $SIG{__WARN__} = sub {
 	print "# $id: @_";
-	$@ = "@_";
+	$@ .= "@_";
     };
 
     sub moan {
@@ -149,7 +149,7 @@ __EOMK__
 
     sub warn_unpack_U {
 	$@ = '';
-	my @null = unpack('U0U*', $_[0]);
+	my @null = unpack('C0U*', $_[0]);
 	return $@;
     }
 
@@ -175,12 +175,12 @@ __EOMK__
 	    my $warn = warn_unpack_U($bytes);
 	    if ($okay eq 'y') {
 		if ($warn) {
-		    moan "unpack('U0U*') false negative\n";
+		    moan "unpack('C0U*') false negative\n";
 		    print "not ";
 		}
 	    } elsif ($okay eq 'n') {
-		if (not $warn || ($experr ne '' && $warn !~ /$experr/)) {
-		    moan "unpack('U0U*') false positive\n";
+		if (!$warn || ($experr ne '' && $warn !~ /$experr/)) {
+		    moan "unpack('C0U*') false positive\n";
 		    print "not ";
 		}
 	    }
