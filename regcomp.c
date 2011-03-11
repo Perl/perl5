@@ -11134,7 +11134,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	if (flags & ANYOF_NONBITMAP_NON_UTF8)
 	    sv_catpvs(sv, "{outside bitmap}");
 
-	{
+	if (ANYOF_NONBITMAP(o)) {
 	    SV *lv;
 	    SV * const sw = regclass_swash(prog, o, FALSE, &lv, 0);
 	

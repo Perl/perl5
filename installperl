@@ -722,7 +722,7 @@ sub installlib {
     if ( $dir =~ /^unicore/ ) {
       if ( $name =~ /\.txt\z/ ) {
         # We can ignore most, but not all .txt files
-        return unless $name =~ /\A(?:UnicodeData|Blocks|Scripts|CompositionExclusions|CaseFolding|SpecialCasing|NamedSequences)\.txt\z/;
+        return unless $name =~ /\A(?:Blocks|CaseFolding|SpecialCasing|NamedSequences)\.txt\z/;
       }
       else {
         # TestProp only needed during testing

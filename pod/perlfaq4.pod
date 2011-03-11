@@ -13,7 +13,7 @@ numbers, dates, strings, arrays, hashes, and miscellaneous data issues.
 
 For the long explanation, see David Goldberg's "What Every Computer
 Scientist Should Know About Floating-Point Arithmetic"
-(http://docs.sun.com/source/806-3568/ncg_goldberg.html).
+(U<http://web.cse.msu.edu/~cse320/Documents/FloatingPoint.pdf>).
 
 Internally, your computer represents floating-point numbers in binary.
 Digital (as in powers of two) computers cannot store all numbers
