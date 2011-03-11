@@ -8,16 +8,15 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require './test.pl';
 }
 
-if ($^O eq 'mpeix') {
-    print "1..0 # Skip: broken on MPE/iX\n";
-    exit 0;
-}
+use strict;
+
+skip_all('broken on MPE/iX') if $^O eq 'mpeix';
 
 $| = 1;
 
-use strict;
 
 my %tests = (
 	 1 => [   0,   0],
@@ -60,11 +59,11 @@ if ($^O eq 'VMS') {
     }
 }
 
-
-print "1..$max\n";
+plan(tests => $max);
 
 # Dump any error messages from the dying processes off to a temp file.
-open(STDERR, ">die_exit.err") or die "Can't open temp error file:  $!";
+my $tempfile = tempfile();
+open STDERR, '>', $tempfile or die "Can't open temp error file $tempfile:  $!";
 
 foreach my $test (1 .. $max) {
     my($bang, $query, $code) = @{$tests{$test}};
@@ -81,11 +80,9 @@ foreach my $test (1 .. $max) {
     # We only get the severity bits, which boils down to 4.  See L<perlvms/$?>.
     $bang = 4 if $vms_exit_mode;
 
-    printf "# 0x%04x  0x%04x  0x%04x\n", $exit, $bang, $query;
-    print "not " unless $exit == (($bang || ($query >> 8) || 255) << 8);
-    print "ok $test\n";
+    is($exit, (($bang || ($query >> 8) || 255) << 8),
+       sprintf "exit = 0x%04x bang = 0x%04x query = 0x%04x", $exit, $bang, $query);
 }
-    
+
 close STDERR;
-END { 1 while unlink 'die_exit.err' }
 
