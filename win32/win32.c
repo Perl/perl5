@@ -1282,6 +1282,13 @@ win32_kill(int pid, int sig)
 	    case 9:
                 /* kill -9 style un-graceful exit */
 	    	if (TerminateThread(hProcess, sig)) {
+                    /* Allow the scheduler to finish cleaning up the other thread.
+                     * Otherwise, if we ExitProcess() before another context switch
+                     * happens we will end up with a process exit code of "sig" instead
+                     * of our own exit status.
+                     * See also: https://rt.cpan.org/Ticket/Display.html?id=66016#txn-908976
+                     */
+                    Sleep(0);
 		    remove_dead_pseudo_process(child);
 		    return 0;
 	    	}

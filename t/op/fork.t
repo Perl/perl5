@@ -452,3 +452,15 @@ EXPECT
 OPTION random
 child: called as [main::f(foo,bar)]
 waitpid() returned ok
+########
+# Windows 2000: https://rt.cpan.org/Ticket/Display.html?id=66016#txn-908976
+system $^X,  "-e", "if (\$pid=fork){sleep 1;kill(9, \$pid)} else {sleep 5}";
+print $?>>8, "\n";
+EXPECT
+0
+########
+# Windows 7: https://rt.cpan.org/Ticket/Display.html?id=66016#txn-908976
+system $^X,  "-e", "if (\$pid=fork){kill(9, \$pid)} else {sleep 5}";
+print $?>>8, "\n";
+EXPECT
+0
