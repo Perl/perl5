@@ -35,6 +35,9 @@ BEGIN {
     # Try NetInfo.
     $where //= try_prog('NetInfo passwd', 'passwd .', '/usr/bin/nidump');
 
+    # Try NIS+.
+    $where //= try_prog('NIS+', 'passwd.org_dir', '/bin/niscat');
+
     if (not defined $where &&		# Try dscl
 	$Config{useperlio} eq 'define') {	# need perlio
 
@@ -105,9 +108,6 @@ BEGIN {
 	    $where = $PW;
 	}
     }
-
-    # Try NIS+.
-    $where //= try_prog('NIS+', 'passwd.org_dir', '/bin/niscat');
 
     undef $reason if defined $where;
 
