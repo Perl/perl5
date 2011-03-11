@@ -54,7 +54,7 @@ our(@ISA, @EXPORT, $VERSION, $Fileparse_fstype, $Fileparse_igncase);
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(fileparse fileparse_set_fstype basename dirname);
-$VERSION = "2.80";
+$VERSION = "2.81";
 
 fileparse_set_fstype($^O);
 
@@ -78,8 +78,8 @@ The remainder of the $path is the $filename.
      # On Unix returns ("baz", "/foo/bar/", "")
      fileparse("/foo/bar/baz");
 
-     # On Windows returns ("baz", "C:\foo\bar\", "")
-     fileparse("C:\foo\bar\baz");
+     # On Windows returns ("baz", 'C:\foo\bar\', "")
+     fileparse('C:\foo\bar\baz');
 
      # On Unix returns ("", "/foo/bar/baz/", "")
      fileparse("/foo/bar/baz/");
