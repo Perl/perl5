@@ -1413,19 +1413,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                           reginclass(prog, c, (U8*)s, &inclasslen, utf8_target));
 	    }
 	    else {
-		 while (s < strend) {
-		      STRLEN skip = 1;
-
-		      if (REGINCLASS(prog, c, (U8*)s)) {
-			   if (tmp && (!reginfo || regtry(reginfo, &s)))
-				goto got_it;
-			   else
-				tmp = doevery;
-		      }
-		      else 
-			   tmp = 1;
-		      s += skip;
-		 }
+		REXEC_FBC_CLASS_SCAN(REGINCLASS(prog, c, (U8*)s));
 	    }
 	    break;
 	case CANY:
