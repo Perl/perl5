@@ -42,8 +42,10 @@ if (exists $ENV{PERLIO} && $ENV{PERLIO} =~ /stdio/  ) {
 
 # on Win32, alarm() won't interrupt the read/write call.
 # Similar issues with VMS.
+# On FreeBSD, writes to pipes of 8192 bytes or more use a mechanism
+# that is not interruptible (see perl #85842 and #84688).
 
-if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'cygwin') {
+if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'freebsd') {
 	skip_all('various portability issues');
 	exit 0;
 }
