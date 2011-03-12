@@ -989,8 +989,19 @@ PP(pp_aassign)
     /* If there's a common identifier on both sides we have to take
      * special care that assigning the identifier on the left doesn't
      * clobber a value on the right that's used later in the list.
+     * Don't bother if LHS is just an empty hash or array.
      */
-    if (PL_op->op_private & (OPpASSIGN_COMMON)) {
+
+    if (    (PL_op->op_private & OPpASSIGN_COMMON)
+	&&  (
+	       firstlelem != lastlelem
+	    || ! ((sv = *firstlelem))
+	    || SvMAGICAL(sv)
+	    || ! (SvTYPE(sv) == SVt_PVAV || SvTYPE(sv) == SVt_PVHV)
+	    || (SvTYPE(sv) == SVt_PVAV && AvFILL((AV*)sv) != -1)
+	    || (SvTYPE(sv) == SVt_PVHV && HvKEYS((HV*)sv) != 0)
+	    )
+    ) {
 	EXTEND_MORTAL(lastrelem - firstrelem + 1);
 	for (relem = firstrelem; relem <= lastrelem; relem++) {
 	    if ((sv = *relem)) {
