@@ -1,5 +1,15 @@
 =encoding utf8
 
+=for comment
+This has been completed up to 67aeb7895 except for:
+b3dbdd48ca2da90bce7f16d545cca54c3dc58f35 (Leon Timmermans)
+816005240f1a3b9989c940e630e829048597537c (Craig Berry)
+44caa20c7d9248fd77483468d77c9b5835e7066e (Craig Berry)
+4581ada393ba58f2b8f438c7b9c336d6c79ec94c (Craig Berry)
+3b28d668e9efe9433c3099521167a6723cbddc26 (Craig Berry)
+82e24582a585cdcc94ac54b3e77a325e7aa89846 (Jan Dubois)
+and any bugs that Karl Williamson has fixed.
+
 =head1 NAME
 
 [ this is a template for a new perldelta file. Any text flagged as
@@ -36,6 +46,11 @@ L</Selected Bug Fixes> section.
 
 [ List each security issue as a =head2 entry ]
 
+=head2 User-defined regular expression properties
+
+Perl no longer allows a tainted regular expression to invoke a user-defined
+property via C<\p{...}> syntax. It simply dies instead [perl #82616].
+
 =head1 Incompatible Changes
 
 XXX For a release on a stable branch, this section aspires to be:
@@ -44,6 +59,19 @@ XXX For a release on a stable branch, this section aspires to be:
     exist, they are bugs and reports are welcome.
 
 [ List each incompatible change as a =head2 entry ]
+
+=head2 Passing references to warn()
+
+An earlier Perl 5.13.x release changed C<warn($ref)> to leave the reference
+unchanged, allowing C<$SIG{__WARN__}> handlers to access the original
+reference. But this stopped warnings that were references from having the
+file and line number appended even when there was no C<$SIG{__WARN__}>
+handler in place.
+
+Now C<warn> checks for the presence of such a handler and, if there is
+none, proceeds to stringify the reference and append the file and line
+number. This allows simple uses of C<warn> for debugging to continue to
+work as they did before.
 
 =head1 Deprecations
 
@@ -108,6 +136,13 @@ C<CPANPLUS::Dist::Build> has been upgraded from version 0.52 to 0.54
 
 =item *
 
+C<Cwd> has been downgraded from version 3.37 to 3.36.
+
+An optimisation that recent core changes have rendered unnecessary has been
+reverted.
+
+=item *
+
 C<Devel::DProf> has been upgraded from version 20110225.01 to 20110228.00.
 
 =item *
@@ -119,6 +154,13 @@ New SHA-512/224 and SHA-512/256 transforms ref. NIST Draft FIPS 180-4 (February 
 =item *
 
 C<ExtUtils::Command> has been upgraded from version 1.16 to 1.17.
+
+=item *
+
+C<File::Copy> has been downgraded from version 2.22 to 2.21.
+
+An optimisation that recent core changes have rendered unnecessary has been
+reverted.
 
 =item *
 
@@ -144,9 +186,17 @@ C<Math::BigInt::FastCalc> has been upgraded from version 0.24_02 to 0.28
 
 C<Module::Build> has been upgraded from version 0.37_05 to 0.3800
 
+=item
+
+C<Module::CoreList> has been upgraded from version 2.45 to 2.46.
+
 =item *
 
 C<parent> has been upgraded from version 0.224 to 0.225
+
+=item *
+
+C<Storable> has been upgraded from version 2.26 to 2.27.
 
 =item *
 
@@ -155,6 +205,12 @@ C<Test::Harness> has been upgraded from version 3.22 to 3.23
 =item *
 
 C<Test::Simple> has been upgraded from version 0.97_01 to 0.98
+
+=item *
+
+C<Tie::Hash::NamedCapture> has been upgraded from version 0.07 to 0.08.
+
+Some of the Perl code has been converted to XS for efficency's sake.
 
 =item *
 
@@ -289,6 +345,15 @@ Regexp modifiers "/%c" and "/%c" are mutually exclusive
 (F syntax) The regular expression pattern had more than one of the mutually
 exclusive modifiers.  Retain only the modifier that is supposed to be there.
 
+=item *
+
+Insecure user-defined property %s
+
+(F) Perl detected tainted data when trying to compile a regular
+expression that contains a call to a user-defined character property
+function, i.e. C<\p{IsFoo}> or C<\p{InFoo}>.
+See L<perlunicode/User-Defined Character Properties> and L<perlsec>.
+
 =back
 
 =head2 Changes to Existing Diagnostics
@@ -347,13 +412,24 @@ large changes to the testing harness (e.g. when parallel testing was added).
 Changes to existing files in F<t/> aren't worth summarising, although the bugs
 that they represent may be covered elsewhere.
 
-[ List each test improvement as a =item entry ]
+Some of the tests have been refactored. In some cases they were moved to
+new files:
 
 =over 4
 
 =item *
 
-XXX
+The tests for C<split /\s/> and Unicode have been moved from
+F<t/op/split.t> to F<t/op/split_unicode.t>.
+
+=item *
+
+F<t/re/re.t> has been moved to F<ext/re/t/re_funcs_u.t>.
+
+=item *
+
+The tests for [perl #72922] have been moved from F<t/re/qr.t> to
+F<t/re/qr-72922.t>.
 
 =back
 
@@ -434,7 +510,46 @@ L</Modules and Pragmata>.
 
 A fix for a bug in C<length(undef)> in 5.13.4 introduced a regression that
 meant C<print length undef> did not warn when warnings were enabled. It now
-correctly warns (RT #85508).
+correctly warns [perl #85508].
+
+=item *
+
+The C<(?|...)> regular expression construct no longer crashes if the final
+branch has more sets of capturing parentheses than any other branch. This
+was fixed in Perl 5.10.1 for the case of a single branch, but that fix did
+not take multiple branches into account [perl #84746].
+
+=item *
+
+Accessing an element of a package array with a hard-coded number (as
+opposed to an arbitrary expression) would crash if the array did not exist.
+Usually the array would be autovivified during compilation, but typeglob
+manipulation could remove it, as in these two cases which used to crash:
+
+  *d = *a;  print $d[0];
+  undef *d; print $d[0];
+
+=item *
+
+C<#line> directives in string evals were not properly updating the arrays
+of lines of code (C<< @{"_<..."} >>) that the debugger (or any debugging or
+profiling module) uses. In threaded builds, they were not being updated at
+all. In non-threaded builds, the line number was ignored, so any change to
+the existing line number would cause the lines to be misnumbered
+[perl #79442].
+
+=item *
+
+C<$AUTOLOAD> used to remain tainted forever if it ever became tainted. Now
+it is correctly untainted if an autoloaded method is called and the method
+name was not tainted.
+
+=item *
+
+A bug has been fixed in the implementation of C<{...}> quantifiers in
+regular expressions that prevented the code block in
+C</((\w+)(?{ print $2 })){2}/> from seeing the C<$2> sometimes
+[perl #84294].
 
 =back
 
