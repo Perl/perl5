@@ -201,7 +201,7 @@ ok ($a == 2147483647, $a);
 # sparcs have a 112 bit mantissa for their long doubles. Just to be awkward :-)
 
 sub check_some_code {
-    my ($start, $warn, $action, $description) = @_;
+    my ($warn, $start, $action, $description) = @_;
     my $warn_line = ($warn ? 'use' : 'no') . " warnings 'imprecision';";
     my @warnings;
     local $SIG{__WARN__} = sub {push @warnings, "@_"};
@@ -257,12 +257,10 @@ for my $n (47..113) {
 	    unless $start_p == $check;
     }
 
-    foreach my $warn (0, 1) {
-	foreach (['++$i', 'pre-inc'], ['$i++', 'post-inc']) {
-	    check_some_code($start_p, $warn, @$_);
-	}
-	foreach (['--$i', 'pre-dec'], ['$i--', 'post-dec']) {
-	    check_some_code($start_n, $warn, @$_);
+    foreach ([$start_p, '++$i', 'pre-inc'], [$start_p, '$i++', 'post-inc'],
+	     [$start_n, '--$i', 'pre-dec'], [$start_n, '$i--', 'post-dec']) {
+	foreach my $warn (0, 1) {
+	    check_some_code($warn, @$_);
 	}
     }
 
