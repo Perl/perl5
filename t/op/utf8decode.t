@@ -3,6 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require './test.pl';
 }
 
 {
@@ -10,20 +11,14 @@ BEGIN {
     use bytes;
     my $ordwide = ord($wide);
     printf "# under use bytes ord(v256) = 0x%02x\n", $ordwide;
-    if ($ordwide == 140) {
-	print "1..0 # Skip: UTF-EBCDIC (not UTF-8) used here\n";
-	exit 0;
-    }
-    elsif ($ordwide != 196) {
+    skip_all('UTF-EBCDIC (not UTF-8) used here') if $ordwide == 140;
+
+    if ($ordwide != 196) {
 	printf "# v256 starts with 0x%02x\n", $ordwide;
     }
 }
 
 no utf8;
-
-print "1..78\n";
-
-my $test = 1;
 
 # This table is based on Markus Kuhn's UTF-8 Decode Stress Tester,
 # http://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt,
@@ -143,10 +138,6 @@ __EOMK__
 	$@ .= "@_";
     };
 
-    sub moan {
-	print "$id: @_";
-    }
-
     sub warn_unpack_U {
 	$@ = '';
 	my @null = unpack('C0U*', $_[0]);
@@ -161,33 +152,27 @@ __EOMK__
 	    my ($okay, $bytes, $Unicode, $byteslen, $hex, $charslen, $experr) =
 		($2, $3, $4, $5, $6, $7, $8);
 	    my @hex = split(/:/, $hex);
-	    unless (@hex == $byteslen) {
-		my $nhex = @hex;
-		moan "amount of hex ($nhex) not equal to byteslen ($byteslen)\n";
-	    }
+	    is(scalar @hex, $byteslen, 'Amount of hex tallies with byteslen');
 	    {
 		use bytes;
 		my $bytesbyteslen = length($bytes);
-		unless ($bytesbyteslen == $byteslen) {
-		    moan "bytes length() ($bytesbyteslen) not equal to $byteslen\n";
-		}
+		is($bytesbyteslen, $byteslen,
+		   'bytes length() tallies with byteslen');
 	    }
 	    my $warn = warn_unpack_U($bytes);
 	    if ($okay eq 'y') {
-		if ($warn) {
-		    moan "unpack('C0U*') false negative\n";
-		    print "not ";
-		}
-	    } elsif ($okay eq 'n') {
-		if (!$warn || ($experr ne '' && $warn !~ /$experr/)) {
-		    moan "unpack('C0U*') false positive\n";
-		    print "not ";
-		}
+		is($warn, '', "No warnings expected for $id");
+	    } elsif ($okay ne 'n') {
+		is($okay, 'n', "Confused test description for $id");
+	    } elsif($experr) {
+		like($warn, qr/$experr/, "Expected warning for $id");
+	    } else {
+		isnt($warn, '', "Expect a warning for $id");
 	    }
-	    print "ok $test # $id $okay\n";
-	    $test++;
  	} else {
-	    moan "unknown format\n";
+	    fail("unknown format '$_'");
 	}
     }
 }
+
+done_testing();
