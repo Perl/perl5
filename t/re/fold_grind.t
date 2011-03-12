@@ -208,6 +208,9 @@ my $has_tested_ascii_l;
 my $has_tested_above_latin1_d;
 my $has_tested_ascii_d;
 my $has_tested_non_latin1_d;
+my $has_tested_above_latin1_a;
+my $has_tested_ascii_a;
+my $has_tested_non_latin1_a;
 
 # For use by pairs() in generating combinations
 sub prefix {
@@ -223,7 +226,7 @@ sub pairs (@) {
     map { prefix $_[$_], @_[0..$_-1, $_+1..$#_] } 0..$#_
 }
 
-my @charsets = qw(d u aa);
+my @charsets = qw(d u a aa);
 my $current_locale = POSIX::setlocale( &POSIX::LC_ALL, "C") // "";
 push @charsets, 'l' if $current_locale eq 'C';
 
@@ -365,6 +368,30 @@ foreach my $test (sort { numerically } keys %tests) {
             }
           }
         }
+        elsif ($charset eq 'a') {
+          # Similarly for a.  This should match identically to /u, so wasn't
+          # tested at all until a bug was found that was thereby missed.
+          # As a compromise, beyond one test (besides self) each, we  don't
+          # test pairs that are both ascii; or both above latin1, or are
+          # combinations of ascii and above latin1.
+          if (! $target_has_upper_latin1 && ! $pattern_has_upper_latin1) {
+            if ($target_has_ascii && $pattern_has_ascii) {
+              next if defined $has_tested_ascii_a
+                      && $has_tested_ascii_a != $test;
+              $has_tested_ascii_a = $test
+            }
+            elsif (! $target_has_latin1 && ! $pattern_has_latin1) {
+              next if defined $has_tested_above_latin1_a
+                      && $has_tested_above_latin1_a != $test;
+              $has_tested_above_latin1_a = $test;
+            }
+            else {
+              next if defined $has_tested_non_latin1_a
+                      && $has_tested_non_latin1_a != $test;
+              $has_tested_non_latin1_a = $test;
+            }
+          }
+        }
       }
 
       foreach my $utf8_target (0, 1) {    # Both utf8 and not, for
@@ -402,8 +429,9 @@ foreach my $test (sort { numerically } keys %tests) {
           my $todo = ($test == 0xdf
                       && $lhs =~ /DF/
                       && $uni_semantics
-                      && ($charset eq 'u' || $charset eq 'd')
-                      && ! ($charset eq 'u' && (($upgrade_target eq "") != ($upgrade_pattern eq "")))
+                      && ($charset eq 'u' || $charset eq 'a' || $charset eq 'd')
+                      && ! (($charset eq 'u' || $charset eq 'a')
+                            && (($upgrade_target eq "") != ($upgrade_pattern eq "")))
                       && ! ($charset eq 'd' && (! $upgrade_target || ! $upgrade_pattern))
                       );
           my $eval = "my \$c = \"$lhs$rhs\"; my \$p = qr/(?$charset:^($rhs)\\1\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";

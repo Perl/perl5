@@ -9331,13 +9331,13 @@ S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8
 		break;
 	    case LATIN_SMALL_LETTER_SHARP_S:
 
-		/* Under /d and /u, this can match the two chars "ss" */
+		/* Under /a, /d, and /u, this can match the two chars "ss" */
 		if (! MORE_ASCII_RESTRICTED) {
 		    add_alternate(alternate_ptr, (U8 *) "ss", 2);
 
-		    /* And under /u, it can match even if the target is not
-		     * utf8 */
-		    if (UNI_SEMANTICS) {
+		    /* And under /u or /a, it can match even if the target is
+		     * not utf8 */
+		    if (AT_LEAST_UNI_SEMANTICS) {
 			ANYOF_FLAGS(node) |= ANYOF_NONBITMAP_NON_UTF8;
 		    }
 		}
