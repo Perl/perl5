@@ -4648,7 +4648,10 @@ NULL
 	    /* First just match a string of min A's. */
 
 	    if (n < min) {
+		ST.cp = regcppush(cur_curlyx->u.curlyx.parenfloor);
 		cur_curlyx->u.curlyx.lastloc = locinput;
+		REGCP_SET(ST.lastcp);
+
 		PUSH_STATE_GOTO(WHILEM_A_pre, A);
 		/* NOTREACHED */
 	    }
@@ -4754,10 +4757,10 @@ NULL
 	    /* NOTREACHED */
 
 	case WHILEM_A_min_fail: /* just failed to match A in a minimal match */
-	    REGCP_UNWIND(ST.lastcp);
-	    regcppop(rex);
 	    /* FALL THROUGH */
 	case WHILEM_A_pre_fail: /* just failed to match even minimal A */
+	    REGCP_UNWIND(ST.lastcp);
+	    regcppop(rex);
 	    cur_curlyx->u.curlyx.lastloc = ST.save_lastloc;
 	    cur_curlyx->u.curlyx.count--;
 	    CACHEsayNO;

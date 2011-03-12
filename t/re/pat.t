@@ -1162,7 +1162,6 @@ sub run_tests {
         #          : Nested buffers and (?{...}) dont play nicely on partial matches
         our @got= ();
         ok("ab" =~ /((\w+)(?{ push @got, $2 })){2}/,"RT #84294: Pattern should match");
-        local $::TODO= "not fixed yet";
         my $want= "'ab', 'a', 'b'";
         my $got= join(", ", map { defined($_) ? "'$_'" : "undef" } @got);
         is($got,$want,'RT #84294: check that "ab" =~ /((\w+)(?{ push @got, $2 })){2}/ leaves @got in the correct state');
