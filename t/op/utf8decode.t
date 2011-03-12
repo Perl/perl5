@@ -23,7 +23,7 @@ no utf8;
 foreach (<DATA>) {
     if (/^(?:\d+(?:\.\d+)?)\s/ || /^#/) {
 	# print "# $_\n";
-    } elsif (/^(\d+\.\d+\.\d+[bu]?)\s+(y|n|N-?\d+)\s+([0-9a-f]{1,8}|-)\s+(\d+)\s+([0-9a-f]{2}(?::[0-9a-f]{2})*)\s+(\d+|-)(?:\s+(.+))?$/) {
+    } elsif (/^(\d+\.\d+\.\d+[bu]?)\s+(y|n|N-?\d+)\s+([0-9a-f]{1,8}(?:,[0-9a-f]{1,8})*|-)\s+(\d+)\s+([0-9a-f]{2}(?::[0-9a-f]{2})*)\s+(\d+|-)(?:\s+(.+))?$/) {
 	my ($id, $okay, $Unicode, $byteslen, $hex, $charslen, $experr) =
 	    ($1, $2, $3, $4, $5, $6, $7);
 	my @hex = split(/:/, $hex);
@@ -31,8 +31,12 @@ foreach (<DATA>) {
 	my $octets = join '', map {chr hex $_} @hex;
 	is(length $octets, $byteslen, 'Number of octets tallies with byteslen');
 	if ($okay eq 'y') {
-	    warning_is(sub {unpack 'C0U*', $octets}, undef,
+	    my @chars = map {hex $_} split ',', $Unicode;
+	    is(scalar @chars, $charslen, 'Amount of hex tallies with charslen');
+	    my @got;
+	    warning_is(sub {@got = unpack 'C0U*', $octets}, undef,
 		       "No warnings expected for $id");
+	    is("@got", "@chars", 'Got expected Unicode characters');
 	} elsif ($okay eq 'n') {
 	    isnt($experr, '', "Expected warning for $id provided");
 	    warnings_like(sub {unpack 'C0U*', $octets}, [qr/$experr/],
@@ -73,7 +77,7 @@ done_testing();
 
 __DATA__
 1	Correct UTF-8
-1.1.1 y -		11	ce:ba:e1:bd:b9:cf:83:ce:bc:ce:b5	5
+1.1.1 y 3ba,1f79,3c3,3bc,3b5	11	ce:ba:e1:bd:b9:cf:83:ce:bc:ce:b5	5
 2	Boundary conditions
 2.1	First possible sequence of certain length
 2.1.1 y 0		1	00	1
@@ -151,23 +155,23 @@ __DATA__
 4.3.5 n -	6	fc:80:80:80:80:80	-	6 bytes, need 1
 5	Illegal code positions
 5.1	Single UTF-16 surrogates
-5.1.1 y -	3	ed:a0:80	-	UTF-16 surrogate 0xd800
-5.1.2 y -	3	ed:ad:bf	-	UTF-16 surrogate 0xdb7f
-5.1.3 y -	3	ed:ae:80	-	UTF-16 surrogate 0xdb80
-5.1.4 y -	3	ed:af:bf	-	UTF-16 surrogate 0xdbff
-5.1.5 y -	3	ed:b0:80	-	UTF-16 surrogate 0xdc00
-5.1.6 y -	3	ed:be:80	-	UTF-16 surrogate 0xdf80
-5.1.7 y -	3	ed:bf:bf	-	UTF-16 surrogate 0xdfff
+5.1.1 y d800	3	ed:a0:80	1	UTF-16 surrogate 0xd800
+5.1.2 y db7f	3	ed:ad:bf	1	UTF-16 surrogate 0xdb7f
+5.1.3 y db80	3	ed:ae:80	1	UTF-16 surrogate 0xdb80
+5.1.4 y dbff	3	ed:af:bf	1	UTF-16 surrogate 0xdbff
+5.1.5 y dc00	3	ed:b0:80	1	UTF-16 surrogate 0xdc00
+5.1.6 y df80	3	ed:be:80	1	UTF-16 surrogate 0xdf80
+5.1.7 y dfff	3	ed:bf:bf	1	UTF-16 surrogate 0xdfff
 5.2	Paired UTF-16 surrogates
-5.2.1 y -	6	ed:a0:80:ed:b0:80	-	UTF-16 surrogate 0xd800
-5.2.2 y -	6	ed:a0:80:ed:bf:bf	-	UTF-16 surrogate 0xd800
-5.2.3 y -	6	ed:ad:bf:ed:b0:80	-	UTF-16 surrogate 0xdb7f
-5.2.4 y -	6	ed:ad:bf:ed:bf:bf	-	UTF-16 surrogate 0xdb7f
-5.2.5 y -	6	ed:ae:80:ed:b0:80	-	UTF-16 surrogate 0xdb80
-5.2.6 y -	6	ed:ae:80:ed:bf:bf	-	UTF-16 surrogate 0xdb80
-5.2.7 y -	6	ed:af:bf:ed:b0:80	-	UTF-16 surrogate 0xdbff
-5.2.8 y -	6	ed:af:bf:ed:bf:bf	-	UTF-16 surrogate 0xdbff
+5.2.1 y d800,dc00	6	ed:a0:80:ed:b0:80	2	UTF-16 surrogates 0xd800, dc00
+5.2.2 y d800,dfff	6	ed:a0:80:ed:bf:bf	2	UTF-16 surrogates 0xd800, dfff
+5.2.3 y db7f,dc00	6	ed:ad:bf:ed:b0:80	2	UTF-16 surrogates 0xdb7f, dc00
+5.2.4 y db7f,dfff	6	ed:ad:bf:ed:bf:bf	2	UTF-16 surrogates 0xdb7f, dfff
+5.2.5 y db80,dc00	6	ed:ae:80:ed:b0:80	2	UTF-16 surrogates 0xdb80, dc00
+5.2.6 y db80,dfff	6	ed:ae:80:ed:bf:bf	2	UTF-16 surrogates 0xdb80, dfff
+5.2.7 y dbff,dc00	6	ed:af:bf:ed:b0:80	2	UTF-16 surrogates 0xdbff, dc00
+5.2.8 y dbff,dfff	6	ed:af:bf:ed:bf:bf	2	UTF-16 surrogates 0xdbff, dfff
 5.3	Other illegal code positions
-5.3.1 y -	3	ef:bf:be	-	byte order mark 0xfffe
+5.3.1 y fffe	3	ef:bf:be	1	byte order mark 0xfffe
 # The ffff is legal by default since 872c91ae155f6880
-5.3.2 y -	3	ef:bf:bf	-	character 0xffff
+5.3.2 y ffff	3	ef:bf:bf	1	character 0xffff
