@@ -8,8 +8,7 @@ BEGIN {
     require './test.pl';
     skip_all_without_perlio();
     # FIXME - more of these could be tested without Encode or full perl
-    skip_all_if_miniperl("no dynamic loading on miniperl, no Encode");
-    skip_all_without_extension('Encode');
+    skip_all_without_dynamic_extension('Encode');
 
     # Makes testing easier.
     $ENV{PERLIO} = 'stdio' if exists $ENV{PERLIO} && $ENV{PERLIO} eq '';

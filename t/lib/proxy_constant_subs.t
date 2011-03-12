@@ -1,8 +1,7 @@
 my @symbols;
 BEGIN {
     require './test.pl';
-    skip_all_without_extension('B');
-    skip_all_without_extension('Fcntl');
+    skip_all_without_dynamic_extension($_) foreach qw(B Fcntl);
     # S_IFMT is a real subroutine, and acts as control
     # SEEK_SET is a proxy constant subroutine.
     @symbols = qw(S_IFMT SEEK_SET);

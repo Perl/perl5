@@ -6,10 +6,9 @@
 
 BEGIN {
     require './test.pl';
-    skip_all_if_miniperl("no dynamic loading on miniperl, no Encode");
+    skip_all_without_dynamic_extension('Encode');
     skip_all("EBCDIC") if $::IS_EBCDIC;
     skip_all_without_perlio();
-    skip_all_without_extension('Encode');
 }
 
 use strict;
