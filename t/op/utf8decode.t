@@ -23,9 +23,15 @@ no utf8;
 foreach (<DATA>) {
     if (/^(?:\d+(?:\.\d+)?)\s/ || /^#/) {
 	# print "# $_\n";
-    } elsif (/^(\d+\.\d+\.\d+[bu]?)\s+(y|n|N-?\d+)\s+([0-9a-f]{1,8}(?:,[0-9a-f]{1,8})*|-)\s+(\d+)\s+([0-9a-f]{2}(?::[0-9a-f]{2})*)\s+(\d+|-)(?:\s+(.+))?$/) {
-	my ($id, $okay, $Unicode, $byteslen, $hex, $charslen, $experr) =
-	    ($1, $2, $3, $4, $5, $6, $7);
+    } elsif (my ($id, $okay, $Unicode, $byteslen, $hex, $charslen, $experr)
+	     = /^(\d+\.\d+\.\d+[bu]?)   # ID
+		\s+(y|n|N-?\d+)         # expect to pass or fail
+                \s+([0-9a-f]{1,8}(?:,[0-9a-f]{1,8})*|-) # Unicode characters
+                \s+(\d+)                # number of octets
+                \s+([0-9a-f]{2}(?::[0-9a-f]{2})*)       # octets in hex
+                \s+(\d+|-)              # number of characters
+                (?:\s+(.+))?            # expected error (or comment)
+                $/x) {
 	my @hex = split(/:/, $hex);
 	is(scalar @hex, $byteslen, 'Amount of hex tallies with byteslen');
 	my $octets = join '', map {chr hex $_} @hex;
