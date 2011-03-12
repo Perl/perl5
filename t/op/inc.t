@@ -6,7 +6,7 @@ print "1..56\n";
 
 my $test = 1;
 
-sub ok {
+sub ok ($;$$) {
   my ($pass, $wrong, $err) = @_;
   if ($pass) {
     print "ok $test\n";
@@ -224,9 +224,11 @@ for my $n (47..113) {
 	    unless $start_p == $check;
     }
 
-    foreach ([$start_p, '++$i', 'pre-inc'], [$start_p, '$i++', 'post-inc'],
-	     [$start_n, '--$i', 'pre-dec'], [$start_n, '$i--', 'post-dec']) {
-	my ($start, $action, $description) = @$_;
+    foreach ([$start_p, '++$i', 'pre-inc', 'inc'],
+	     [$start_p, '$i++', 'post-inc', 'inc'],
+	     [$start_n, '--$i', 'pre-dec', 'dec'],
+	     [$start_n, '$i--', 'post-dec', 'dec']) {
+	my ($start, $action, $description, $act) = @$_;
 	foreach my $warn (0, 1) {
 	    my $warn_line = ($warn ? 'use' : 'no') . " warnings 'imprecision';";
 
@@ -250,7 +252,7 @@ EOC
 		    print STDERR "# $_" foreach @warnings;
 		}
 		foreach (@warnings) {
-		    unless (ok (/Lost precision when incrementing \d+/, $_)) {
+		    unless (ok (/Lost precision when ${act}rementing -?\d+/, $_)) {
 			print STDERR "# $_"
 		    }
 		}
