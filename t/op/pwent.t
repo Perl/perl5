@@ -20,13 +20,6 @@ BEGIN {
 	exit 0;
     }
     eval { require Config; import Config; };
-    my $reason;
-    if ($Config{'i_pwd'} ne 'define') {
-	$reason = '$Config{i_pwd} undefined';
-    }
-    elsif (not -f "/etc/passwd" ) { # Play safe.
-	$reason = 'no /etc/passwd file';
-    }
 
     # Try NIS.
     $where = try_prog('NIS passwd', 'passwd',
@@ -102,18 +95,24 @@ BEGIN {
 	}
     }
 
-    if (not defined $where) {	# Try local.
+    if (not defined $where) {
+	# Try local.
+	my $no_i_pwd = !$Config{i_pwd} && '$Config{i_pwd} undefined';
+
 	my $PW = "/etc/passwd";
-	if (-f $PW && open(PW, $PW) && defined(<PW>)) {
-	    $where = $PW;
+	if (!-f $PW) {
+	    skip_all($no_i_pwd) if $no_i_pwd;
+	    skip_all("no $PW file");
+	} elsif (open PW, '<', $PW) {
+	    if(defined <PW>) {
+		$where = $PW;
+	    } else {
+		skip_all($no_i_pwd) if $no_i_pwd;
+		die "\$Config{i_pwd} is defined, $PW exists but has no entries, all other approaches failed, giving up";
+	    }
+	} else {
+	    die "Can't open $PW: $!";
 	}
-    }
-
-    undef $reason if defined $where;
-
-    if ($reason) {	# Give up.
-	print "1..0 # Skip: $reason\n";
-	exit 0;
     }
 }
 
