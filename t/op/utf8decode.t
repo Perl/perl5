@@ -20,39 +20,34 @@ BEGIN {
 
 no utf8;
 
-my $id;
-
-local $SIG{__WARN__} = sub {
-    print "# $id: @_";
-    $@ .= "@_";
-};
-
-sub warn_unpack_U {
-    $@ = '';
-    my @null = unpack('C0U*', $_[0]);
-    return $@;
-}
-
 foreach (<DATA>) {
     if (/^(?:\d+(?:\.\d+)?)\s/ || /^#/) {
 	# print "# $_\n";
-    } elsif (/^(\d+\.\d+\.\d+[bu]?)\s+([yn])\s+([0-9a-f]{1,8}|-)\s+(\d+)\s+([0-9a-f]{2}(?::[0-9a-f]{2})*)(?:\s+((?:\d+|-)(?:\s+(.+))?))?$/) {
-	$id = $1;
-	my ($okay, $Unicode, $byteslen, $hex, $charslen, $experr) =
-	    ($2, $3, $4, $5, $6, $7);
+    } elsif (/^(\d+\.\d+\.\d+[bu]?)\s+(y|n)\s+([0-9a-f]{1,8}|-)\s+(\d+)\s+([0-9a-f]{2}(?::[0-9a-f]{2})*)\s+(\d+|-)(?:\s+(.+))?$/) {
+	my ($id, $okay, $Unicode, $byteslen, $hex, $charslen, $experr) =
+	    ($1, $2, $3, $4, $5, $6, $7);
 	my @hex = split(/:/, $hex);
 	is(scalar @hex, $byteslen, 'Amount of hex tallies with byteslen');
 	my $octets = join '', map {chr hex $_} @hex;
 	is(length $octets, $byteslen, 'Number of octets tallies with byteslen');
-	my $warn = warn_unpack_U($octets);
 	if ($okay eq 'y') {
-	    is($warn, '', "No warnings expected for $id");
+	    warning_is(sub {unpack 'C0U*', $octets}, undef,
+		       "No warnings expected for $id");
 	} elsif ($okay ne 'n') {
 	    is($okay, 'n', "Confused test description for $id");
-	} elsif($experr) {
-	    like($warn, qr/$experr/, "Expected warning for $id");
 	} else {
-	    isnt($warn, '', "Expect a warning for $id");
+	    my $warnings;
+
+	    {
+		local $SIG{__WARN__} = sub {
+		    print "# $id: @_";
+		    $warnings .= "@_";
+		};
+		unpack 'C0U*', $octets;
+	    }
+
+	    isnt($experr, '', "Expected warning for $id provided");
+	    like($warnings, qr/$experr/, "Expected warning for $id seen");
 	}
     } else {
 	fail("unknown format '$_'");
