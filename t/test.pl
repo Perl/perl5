@@ -129,6 +129,7 @@ sub skip_all_without_dynamic_extension {
 	warn "test.pl had problems loading Config: $@";
 	return;
     }
+    $extension =~ s!::!/!g;
     return if ($Config::Config{extensions} =~ /\b$extension\b/);
     skip_all("$extension was not built");
 }
