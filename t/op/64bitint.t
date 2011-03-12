@@ -14,6 +14,7 @@ BEGIN {
 # 32+ bit integers don't cause noise
 use warnings;
 no warnings qw(overflow portable);
+use Config;
 
 # as 6 * 6 = 36, the last digit of 6**n will always be six. Hence the last
 # digit of 16**n will always be six. Hence 16**n - 1 will always end in 5.
@@ -314,6 +315,8 @@ cmp_ok($q, '==', 0x5555555555555555);
 SKIP: {
     skip("Maths does not preserve UVs", 2) unless $maths_preserves_UVs;
     cmp_ok($q, '!=', 0x5555555555555556);
+    skip("All UV division is precise as NVs, so is done as NVs", 1)
+	if $Config{d_nv_preserves_uv};
     unlike($q, qr/[e.]/);
 }
 
