@@ -21,7 +21,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 449;  # Update this when adding/deleting tests.
+plan tests => 451;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1157,6 +1157,17 @@ sub run_tests {
 	}
 	ok($count < 10, 'RT #3516 C');
     }
+    {
+        # RT #84294: Is this a bug in the simple Perl regex?
+        #          : Nested buffers and (?{...}) dont play nicely on partial matches
+        our @got= ();
+        ok("ab" =~ /((\w+)(?{ push @got, $2 })){2}/,"RT #84294: Pattern should match");
+        local $::TODO= "not fixed yet";
+        my $want= "'ab', 'a', 'b'";
+        my $got= join(", ", map { defined($_) ? "'$_'" : "undef" } @got);
+        is($got,$want,'RT #84294: check that "ab" =~ /((\w+)(?{ push @got, $2 })){2}/ leaves @got in the correct state');
+    }
+
 } # End of sub run_tests
 
 1;
