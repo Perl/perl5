@@ -494,6 +494,8 @@ entry, as that is likely to reflect the previous version number.
 Also edit Module::CoreList's new version number in its F<Changes>
 file.
 
+Add a perldelta entry for the new Module::CoreList version.
+
 You should also add the version you're about to release to the
 L<Module::CoreList/CAVEATS> section which enumerates the perl releases
 that Module::CoreList covers.
