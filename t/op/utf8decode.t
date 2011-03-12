@@ -153,6 +153,8 @@ __EOMK__
 		($2, $3, $4, $5, $6, $7, $8);
 	    my @hex = split(/:/, $hex);
 	    is(scalar @hex, $byteslen, 'Amount of hex tallies with byteslen');
+	    my $fromhex = join '', map {chr hex $_} @hex;
+	    is($fromhex, $bytes, 'hex matches bytes');
 	    {
 		use bytes;
 		my $bytesbyteslen = length($bytes);
