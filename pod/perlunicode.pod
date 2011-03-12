@@ -801,7 +801,7 @@ the value of the flag, and one set of values will immutably be in effect
 for all case-sensitive matches; the other set for all case-insensitive
 matches.
 
-Note that  if the regular expression is tainted, then perl will die rather
+Note that if the regular expression is tainted, then perl will die rather
 than calling the subroutine, where the name of the subroutine is
 determined by the tainted data.
 
