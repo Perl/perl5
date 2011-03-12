@@ -200,39 +200,6 @@ ok ($a == 2147483647, $a);
 # 80 bit long doubles have a 64 bit mantissa
 # sparcs have a 112 bit mantissa for their long doubles. Just to be awkward :-)
 
-sub check_some_code {
-    my ($warn, $start, $action, $description) = @_;
-    my $warn_line = ($warn ? 'use' : 'no') . " warnings 'imprecision';";
-    my @warnings;
-    local $SIG{__WARN__} = sub {push @warnings, "@_"};
-
-    print "# checking $action under $warn_line\n";
-    my $code = <<"EOC";
-$warn_line
-my \$i = \$start;
-for(0 .. 3) {
-    my \$a = $action;
-}
-1;
-EOC
-    eval $code or die "# $@\n$code";
-
-    if ($warn) {
-	unless (ok (scalar @warnings == 2, scalar @warnings)) {
-	    print STDERR "# $_" foreach @warnings;
-	}
-	foreach (@warnings) {
-	    unless (ok (/Lost precision when incrementing \d+/, $_)) {
-		print STDERR "# $_"
-	    }
-	}
-    } else {
-	unless (ok (scalar @warnings == 0)) {
-	    print STDERR "# @$_" foreach @warnings;
-	}
-    }
-}
-
 my $h_uv_max = 1 + (~0 >> 1);
 my $found;
 for my $n (47..113) {
@@ -259,8 +226,39 @@ for my $n (47..113) {
 
     foreach ([$start_p, '++$i', 'pre-inc'], [$start_p, '$i++', 'post-inc'],
 	     [$start_n, '--$i', 'pre-dec'], [$start_n, '$i--', 'post-dec']) {
+	my ($start, $action, $description) = @$_;
 	foreach my $warn (0, 1) {
-	    check_some_code($warn, @$_);
+	    my $warn_line = ($warn ? 'use' : 'no') . " warnings 'imprecision';";
+
+	    print "# checking $action under $warn_line\n";
+	    my $code = <<"EOC";
+$warn_line
+my \$i = \$start;
+for(0 .. 3) {
+    my \$a = $action;
+}
+1;
+EOC
+	    my @warnings;
+	    {
+		local $SIG{__WARN__} = sub {push @warnings, "@_"};
+		eval $code or die "# $@\n$code";
+	    }
+
+	    if ($warn) {
+		unless (ok (scalar @warnings == 2, scalar @warnings)) {
+		    print STDERR "# $_" foreach @warnings;
+		}
+		foreach (@warnings) {
+		    unless (ok (/Lost precision when incrementing \d+/, $_)) {
+			print STDERR "# $_"
+		    }
+		}
+	    } else {
+		unless (ok (scalar @warnings == 0)) {
+		    print STDERR "# @$_" foreach @warnings;
+		}
+	    }
 	}
     }
 
