@@ -20,11 +20,52 @@ BEGIN {
 
 no utf8;
 
+my $id;
+
+local $SIG{__WARN__} = sub {
+    print "# $id: @_";
+    $@ .= "@_";
+};
+
+sub warn_unpack_U {
+    $@ = '';
+    my @null = unpack('C0U*', $_[0]);
+    return $@;
+}
+
+foreach (<DATA>) {
+    if (/^(?:\d+(?:\.\d+)?)\s/ || /^#/) {
+	# print "# $_\n";
+    } elsif (/^(\d+\.\d+\.\d+[bu]?)\s+([yn])\s+([0-9a-f]{1,8}|-)\s+(\d+)\s+([0-9a-f]{2}(?::[0-9a-f]{2})*)(?:\s+((?:\d+|-)(?:\s+(.+))?))?$/) {
+	$id = $1;
+	my ($okay, $Unicode, $byteslen, $hex, $charslen, $experr) =
+	    ($2, $3, $4, $5, $6, $7);
+	my @hex = split(/:/, $hex);
+	is(scalar @hex, $byteslen, 'Amount of hex tallies with byteslen');
+	my $octets = join '', map {chr hex $_} @hex;
+	is(length $octets, $byteslen, 'Number of octets tallies with byteslen');
+	my $warn = warn_unpack_U($octets);
+	if ($okay eq 'y') {
+	    is($warn, '', "No warnings expected for $id");
+	} elsif ($okay ne 'n') {
+	    is($okay, 'n', "Confused test description for $id");
+	} elsif($experr) {
+	    like($warn, qr/$experr/, "Expected warning for $id");
+	} else {
+	    isnt($warn, '', "Expect a warning for $id");
+	}
+    } else {
+	fail("unknown format '$_'");
+    }
+}
+
+done_testing();
+
 # This table is based on Markus Kuhn's UTF-8 Decode Stress Tester,
 # http://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt,
 # version dated 2000-09-02.
 
-my @MK = split(/\n/, <<__EOMK__);
+__DATA__
 1	Correct UTF-8
 1.1.1 y -		11	ce:ba:e1:bd:b9:cf:83:ce:bc:ce:b5	5
 2	Boundary conditions
@@ -124,48 +165,3 @@ my @MK = split(/\n/, <<__EOMK__);
 5.3.1 y -	3	ef:bf:be	-	byte order mark 0xfffe
 # The ffff is legal by default since 872c91ae155f6880
 5.3.2 y -	3	ef:bf:bf	-	character 0xffff
-__EOMK__
-
-# 104..181
-{
-    my $id;
-
-    local $SIG{__WARN__} = sub {
-	print "# $id: @_";
-	$@ .= "@_";
-    };
-
-    sub warn_unpack_U {
-	$@ = '';
-	my @null = unpack('C0U*', $_[0]);
-	return $@;
-    }
-
-    for (@MK) {
-	if (/^(?:\d+(?:\.\d+)?)\s/ || /^#/) {
-	    # print "# $_\n";
-	} elsif (/^(\d+\.\d+\.\d+[bu]?)\s+([yn])\s+([0-9a-f]{1,8}|-)\s+(\d+)\s+([0-9a-f]{2}(?::[0-9a-f]{2})*)(?:\s+((?:\d+|-)(?:\s+(.+))?))?$/) {
-	    $id = $1;
-	    my ($okay, $Unicode, $byteslen, $hex, $charslen, $experr) =
-		($2, $3, $4, $5, $6, $7);
-	    my @hex = split(/:/, $hex);
-	    is(scalar @hex, $byteslen, 'Amount of hex tallies with byteslen');
-	    my $octets = join '', map {chr hex $_} @hex;
-	    is(length $octets, $byteslen, 'Number of octets tallies with byteslen');
-	    my $warn = warn_unpack_U($octets);
-	    if ($okay eq 'y') {
-		is($warn, '', "No warnings expected for $id");
-	    } elsif ($okay ne 'n') {
-		is($okay, 'n', "Confused test description for $id");
-	    } elsif($experr) {
-		like($warn, qr/$experr/, "Expected warning for $id");
-	    } else {
-		isnt($warn, '', "Expect a warning for $id");
-	    }
- 	} else {
-	    fail("unknown format '$_'");
-	}
-    }
-}
-
-done_testing();
