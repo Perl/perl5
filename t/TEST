@@ -524,8 +524,18 @@ EOT
     my %failed_tests;
 
     while (my $test = shift @tests) {
-        my $test_start_time = $show_elapsed_time ? Time::HiRes::time() : 0;
-
+        my ($test_start_time, @starttimes) = 0;
+	if ($show_elapsed_time) {
+	    $test_start_time = Time::HiRes::time();
+	    # times() reports usage by TEST, but we want usage of each
+	    # testprog it calls, so record accumulated times now,
+	    # subtract them out afterwards.  Ideally, we'd take times
+	    # in BEGIN/END blocks (giving better visibility of self vs
+	    # children of each testprog), but that would require some
+	    # IPC to send results back here, or a completely different
+	    # collection scheme (Storable isnt tuned for incremental use)
+	    @starttimes = times;
+	}
 	if ($test =~ /^$/) {
 	    next;
 	}
@@ -729,8 +739,14 @@ EOT
 		my ($elapsed, $etms) = ("", 0);
 		if ( $show_elapsed_time ) {
 		    $etms = (Time::HiRes::time() - $test_start_time) * 1000;
-		    $elapsed = sprintf( " %8.0f ms", $etms);
-		    $timings{$test} = $etms;
+		    $elapsed = sprintf(" %8.0f ms", $etms);
+
+		    my (@endtimes) = times;
+		    $endtimes[$_] -= $starttimes[$_] for 0..$#endtimes;
+		    splice @endtimes, 0, 2;    # drop self/harness times
+		    $_ *= 1000 for @endtimes;  # and scale to ms
+		    $timings{$test} = [$etms,@endtimes];
+		    $elapsed .= sprintf(" %5.0f ms", $_) for @endtimes;
 		}
 		print "${te}ok$elapsed\n";
 		$good_files = $good_files + 1;
