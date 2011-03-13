@@ -1097,13 +1097,18 @@ WHOA
     _ok( !$diag, _where(), $name );
 }
 
+# Purposefully avoiding a closure.
+sub __capture {
+    push @::__capture, join "", @_;
+}
+    
 sub capture_warnings {
     my $code = shift;
 
-    my @w;
-    local $SIG {__WARN__} = sub {push @w, join "", @_};
+    local @::__capture;
+    local $SIG {__WARN__} = \&__capture;
     &$code;
-    return @w;
+    return @::__capture;
 }
 
 # This will generate a variable number of tests.
