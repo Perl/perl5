@@ -509,7 +509,7 @@ EOT
     }
     my $maxlen = 0;
     foreach (@::path_to_name{@tests}) {
-	s/\.\w+\z/./;
+	s/\.\w+\z/ /; # space gives easy doubleclick to select fname
 	my $len = length ;
 	$maxlen = $len if $len > $maxlen;
     }
@@ -539,7 +539,7 @@ EOT
 	    }
 	}
 	my $te = $::path_to_name{$test} . '.'
-		    x ($dotdotdot - length($::path_to_name{$test}));
+		    x ($dotdotdot - length($::path_to_name{$test})) .' ';
 
 	if ($^O ne 'VMS') {  # defer printing on VMS due to piping bug
 	    print $te;
