@@ -5053,7 +5053,6 @@ t/re/reg_namedcapture.t		Make sure glob assignment doesn't break named capture
 t/re/reg_nc_tie.t		Test the tied methods of Tie::Hash::NamedCapture
 t/re/reg_pmod.t			See if regexp /p modifier works as expected
 t/re/reg_posixcc.t		See if posix character classes behave consistently
-t/re/reg_unsafe.t		Check for unsafe match vars
 t/re/re_tests			Regular expressions for regexp.t
 t/re/rxcode.t			See if /(?{ code })/ works
 t/re/subst_amp.t		See if $&-related substitution works
