@@ -795,13 +795,62 @@ SHRDLU_5
 	}
     }
     my ($user,$sys,$cuser,$csys) = times;
-    print sprintf("u=%.2f  s=%.2f  cu=%.2f  cs=%.2f  scripts=%d  tests=%d\n",
-	$user,$sys,$cuser,$csys,$tested_files,$totmax);
+    my $tot = sprintf("u=%.2f  s=%.2f  cu=%.2f  cs=%.2f  scripts=%d  tests=%d",
+		      $user,$sys,$cuser,$csys,$tested_files,$totmax);
+    print "$tot\n";
+    if ($good_files) {
+	if (-d $show_elapsed_time) {
+	    # HARNESS_TIMER = <a-directory>.  Save timings etc to
+	    # storable file there.  NB: the test cds to ./t/, so
+	    # relative path must account for that, ie ../../perf
+	    # points to dir next to source tree.
+	    require Storable;
+	    my @dt = localtime;
+	    $dt[5] += 1900; $dt[4] += 1; # fix year, month
+	    my $fn = "$show_elapsed_time/".join('-', @dt[5,4,3,2,1]).".ttimes";
+	    Storable::store({ perf => \%timings,
+			      gather_conf_platform_info(),
+			      total => $tot,
+			    }, $fn);
+	    print "wrote storable file: $fn\n";
+	}
+    }
     if ($ENV{PERL_VALGRIND}) {
 	my $s = $valgrind == 1 ? '' : 's';
 	print "$valgrind valgrind report$s created.\n", ;
     }
 }
 exit ($::bad_files != 0);
+
+# Collect platform, config data that should allow comparing
+# performance data between different machines.  With enough data,
+# and/or clever statistical analysis, it should be possible to
+# determine the effect of config choices, more memory, etc
+
+sub gather_conf_platform_info {
+    # currently rather quick & dirty, and subject to change
+    # for both content and format.
+    require Config;
+    my (%conf, @platform) = ();
+    $conf{$_} = $Config::Config{$_} for
+	grep /cc|git|config_arg\d+/, keys %Config::Config;
+    if (-f '/proc/cpuinfo') {
+	open my $fh, '/proc/cpuinfo' or warn "$!: /proc/cpuinfo\n";
+	@platform = grep /name|cpu/, <$fh>;
+	chomp $_ for @platform;
+    }
+    unshift @platform, $^O;
+
+    return (
+	conf => \%conf,
+	platform => {cpu => \@platform,
+		     mem => [ grep s/\s+/ /,
+			      grep chomp, `free` ],
+		     load => [ grep chomp, `uptime` ],
+	},
+	host => (grep chomp, `hostname -f`),
+	version => '0.03', # bump for conf, platform, or data collection changes
+	);
+}
 
 # ex: set ts=8 sts=4 sw=4 noet:
