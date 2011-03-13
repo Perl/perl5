@@ -3,7 +3,6 @@
 chdir 't' if -d 't';
 @INC = '../lib';
 require './test.pl';
-$ENV{PERL5LIB} = "../lib" unless $^O eq 'VMS';
 use strict;
 
 $|=1;

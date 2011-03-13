@@ -5,7 +5,6 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    $ENV{PERL5LIB} = "../lib";
     require './test.pl';
     require Config;
     skip_all('no fork')
