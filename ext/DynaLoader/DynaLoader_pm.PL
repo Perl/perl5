@@ -262,9 +262,6 @@ sub bootstrap_inherit {
     bootstrap(@_);
 }
 
-# The bootstrap function cannot be autoloaded (without complications)
-# so we define it here:
-
 sub bootstrap {
     # use local vars to enable $module.bs script to edit values
     local(@args) = @_;
@@ -722,9 +719,8 @@ Some unusual systems, such as VMS, require special filename handling in
 order to deal with symbolic names for files (i.e., VMS's Logical Names).
 
 To support these systems a dl_expandspec() function can be implemented
-either in the F<dl_*.xs> file or code can be added to the autoloadable
-dl_expandspec() function in F<DynaLoader.pm>.  See F<DynaLoader.pm> for
-more information.
+either in the F<dl_*.xs> file or code can be added to the dl_expandspec()
+function in F<DynaLoader.pm>.  See F<DynaLoader_pm.PL> for more information.
 
 =item dl_load_file()
 
