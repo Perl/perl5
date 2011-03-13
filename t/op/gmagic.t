@@ -1,67 +1,62 @@
 #!./perl -w
 
 BEGIN {
-    $| = 1;
     chdir 't' if -d 't';
     @INC = '../lib';
+    require './test.pl';
 }
 
-print "1..24\n";
+use strict;
 
-my $t = 1;
 tie my $c => 'Tie::Monitor';
-my $tied_to;
 
-sub ok {
-    my($ok, $got, $exp, $rexp, $wexp) = @_;
-    my($rgot, $wgot) = ($tied_to || tied $c)->init(0);
-    print $ok ? "ok $t\n" : "# expected $exp, got $got\nnot ok $t\n";
-    ++$t;
-    if ($rexp == $rgot && $wexp == $wgot) {
-	print "ok $t\n";
-    } else {
-	print "# read $rgot expecting $rexp\n" if $rgot != $rexp;
-	print "# wrote $wgot expecting $wexp\n" if $wgot != $wexp;
-	print "not ok $t\n";
-    }
-    ++$t;
+sub expected_tie_calls {
+    my ($obj, $rexp, $wexp) = @_;
+    local $::Level = $::Level + 1;
+    my ($rgot, $wgot) = $obj->init();
+    is ($rgot, $rexp);
+    is ($wgot, $wexp);
 }
 
-sub ok_undef { ok(!defined($_[0]), shift, "undef", @_) }
-sub ok_numeric { ok($_[0] == $_[1], @_) }
-sub ok_string { ok($_[0] eq $_[1], @_) }
-
+# Use ok() instead of is(), cmp_ok() etc, to strictly control number of accesses
 my($r, $s);
-# the thing itself
-ok_numeric($r = $c + 0, 0, 1, 0);
-ok_string($r = "$c", '0', 1, 0);
+ok($r = $c + 0 == 0, 'the thing itself');
+expected_tie_calls(tied $c, 1, 0);
+ok($r = "$c" eq '0', 'the thing itself');
+expected_tie_calls(tied $c, 1, 0);
 
-# concat
-ok_string($c . 'x', '0x', 1, 0);
-ok_string('x' . $c, 'x0', 1, 0);
+ok($c . 'x' eq '0x', 'concat');
+expected_tie_calls(tied $c, 1, 0);
+ok('x' . $c eq 'x0', 'concat');
+expected_tie_calls(tied $c, 1, 0);
 $s = $c . $c;
-ok_string($s, '00', 2, 0);
+ok($s eq '00', 'concat');
+expected_tie_calls(tied $c, 2, 0);
 $r = 'x';
 $s = $c = $r . 'y';
-ok_string($s, 'xy', 1, 1);
+ok($s eq 'xy', 'concat');
+expected_tie_calls(tied $c, 1, 1);
 $s = $c = $c . 'x';
-ok_string($s, '0x', 2, 1);
+ok($s eq '0x', 'concat');
+expected_tie_calls(tied $c, 2, 1);
 $s = $c = 'x' . $c;
-ok_string($s, 'x0', 2, 1);
+ok($s eq 'x0', 'concat');
+expected_tie_calls(tied $c, 2, 1);
 $s = $c = $c . $c;
-ok_string($s, '00', 3, 1);
+ok($s eq '00', 'concat');
+expected_tie_calls(tied $c, 3, 1);
 
-# multiple magic in core functions
 $s = chop($c);
-ok_string($s, '0', 1, 1);
+ok($s eq '0', 'multiple magic in core functions');
+expected_tie_calls(tied $c, 1, 1);
 
-# Assignment should not ignore magic when the last thing assigned
 # was a glob
-$tied_to = tied $c;
+my $tied_to = tied $c;
 $c = *strat;
 $s = $c;
-ok_string $s, *strat, 1, 1;
-$tied_to = undef;
+ok($s eq *strat,
+   'Assignment should not ignore magic when the last thing assigned was a glob');
+expected_tie_calls($tied_to, 1, 1);
 
 # A plain *foo should not call get-magic on *foo.
 # This method of scalar-tying an immutable glob relies on details of the
@@ -71,11 +66,10 @@ my $tyre = tie $::{gelp} => 'Tie::Monitor';
 # Compilation of this eval autovivifies the *gelp glob.
 eval '$tyre->init(0); () = \*gelp';
 my($rgot, $wgot) = $tyre->init(0);
-print "not " unless $rgot == 0;
-print "ok ", $t++, " - a plain *foo causes no get-magic\n";
-print "not " unless $wgot == 0;
-print "ok ", $t++, " - a plain *foo causes no set-magic\n";
+ok($rgot == 0, 'a plain *foo causes no get-magic');
+ok($wgot == 0, 'a plain *foo causes no set-magic');
 
+done_testing();
 
 # adapted from Tie::Counter by Abigail
 package Tie::Monitor;
