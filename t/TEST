@@ -159,6 +159,7 @@ $ENV{PERL_DESTRUCT_LEVEL} = 2 unless exists $ENV{PERL_DESTRUCT_LEVEL};
 $ENV{EMXSHELL} = 'sh';        # For OS/2
 
 if ($show_elapsed_time) { require Time::HiRes }
+my %timings = (); # testname => [@et] pairs if $show_elapsed_time.
 
 my %skip = (
 	    '.' => 1,
@@ -725,12 +726,11 @@ EOT
 	}
 	else {
 	    if ($max) {
-		my $elapsed;
+		my ($elapsed, $etms) = ("", 0);
 		if ( $show_elapsed_time ) {
-		    $elapsed = sprintf( " %8.0f ms", (Time::HiRes::time() - $test_start_time) * 1000 );
-		}
-		else {
-		    $elapsed = "";
+		    $etms = (Time::HiRes::time() - $test_start_time) * 1000;
+		    $elapsed = sprintf( " %8.0f ms", $etms);
+		    $timings{$test} = $etms;
 		}
 		print "${te}ok$elapsed\n";
 		$good_files = $good_files + 1;
