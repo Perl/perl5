@@ -1,10 +1,7 @@
-#!./perl
+#!./perl -w
 
-print "1..12\n";
-my $test_num = 0;
-sub ok {
-    print $_[0] ? "" : "not ", "ok ", ++$test_num, "\n";
-}
+require './test.pl';
+use strict;
 
 {
     package End;
@@ -22,8 +19,8 @@ $val = eval {
 	$@ = "t1\n";
 	1;
 }; $err = $@;
-ok $val == 1;
-ok $err eq "";
+is($val, 1);
+is($err, "");
 
 $@ = "t0\n";
 $val = eval {
@@ -33,8 +30,8 @@ $val = eval {
 	};
 	1;
 }; $err = $@;
-ok !defined($val);
-ok $err eq "t3\n";
+is($val, undef);
+is($err, "t3\n");
 
 $@ = "t0\n";
 $val = eval {
@@ -42,8 +39,8 @@ $val = eval {
 	local $@ = "t2\n";
 	1;
 }; $err = $@;
-ok $val == 1;
-ok $err eq "";
+is($val, 1);
+is($err, "");
 
 $@ = "t0\n";
 $val = eval {
@@ -54,8 +51,8 @@ $val = eval {
 	};
 	1;
 }; $err = $@;
-ok !defined($val);
-ok $err eq "t3\n";
+is($val, undef);
+is($err, "t3\n");
 
 $@ = "t0\n";
 $val = eval {
@@ -63,8 +60,8 @@ $val = eval {
 	my $c = end { $@ = "t2\n"; };
 	1;
 }; $err = $@;
-ok $val == 1;
-ok $err eq "";
+is($val, 1);
+is($err, "");
 
 $@ = "t0\n";
 $val = eval {
@@ -75,7 +72,7 @@ $val = eval {
 	};
 	1;
 }; $err = $@;
-ok !defined($val);
-ok $err eq "t3\n";
+is($val, undef);
+is($err, "t3\n");
 
-1;
+done_testing();
