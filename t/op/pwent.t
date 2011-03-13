@@ -31,8 +31,8 @@ BEGIN {
     # Try NIS+.
     $where //= try_prog('NIS+', 'passwd.org_dir', '/bin/niscat');
 
-    if (not defined $where &&		# Try dscl
-	$Config{useperlio} eq 'define') {	# need perlio
+    if (!defined $where &&		# Try dscl
+	$Config{useperlio}) {	# need perlio
 
 	# Map dscl items to passwd fields, and provide support for
 	# mucking with the dscl output if we need to (and we do).
