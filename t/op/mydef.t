@@ -196,7 +196,7 @@ my $file = tempfile();
     ok( eval q/$fqdb::_/ eq 'fqdb', 'fully qualified, evaled $_ is not in main' );
     package fqdb;
     ::ok( $_ ne 'fqdb', 'unqualified $_ is in main' );
-    ::ok( q/$_/ ne 'fqdb', 'unqualified, evaled $_ is in main' );
+    ::ok( eval q/$_/ ne 'fqdb', 'unqualified, evaled $_ is in main' );
 }
 
 {
