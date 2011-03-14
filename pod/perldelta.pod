@@ -475,7 +475,7 @@ non-printable characters, but there were no restrictions (on ASCII
 platforms) on what the character following the C<c> could be.  Now, that
 character must be one of the ASCII characters.
 
-=head2 localised tied hashes, arrays and scalars are no longed tied
+=head2 Localised tied hashes and arrays are no longed tied
 
 In the following:
 
@@ -492,7 +492,7 @@ in behaviour of some code.
 
 =head2 C<given> return values
 
-Starting from this release, C<given> blocks returns the last evaluated
+C<given> blocks now return the last evaluated
 expression, or an empty list if the block was exited by C<break>. Thus you
 can now write:
 
@@ -507,21 +507,13 @@ can now write:
 
 See L<perlsyn/Return value> for details.
 
-=head2 localised tied scalars are tied again.
-
-The change in behaviour in 5.13.1 of localising tied scalar values has
-been reverted to the existing 5.12.0 and earlier behaviour (the change for
-arrays and hashes remains).
-
 =head2 Naming fixes in Policy_sh.SH may invalidate Policy.sh
 
 Several long-standing typos and naming confusions in Policy_sh.SH have
 been fixed, standardizing on the variable names used in config.sh.
 
 This will change the behavior of Policy.sh if you happen to have been
-accidentally relying on the Policy.sh incorrect behavior. We'd appreciate
-feedback from anyone using Policy.sh to be sure nothing is broken by
-this change (c1bd23).
+accidentally relying on the Policy.sh incorrect behavior.
 
 =head2 Stashes are now always defined
 
@@ -530,10 +522,10 @@ defined in that package.
 
 This is a side effect of removing a special case kludge in the tokeniser,
 added for 5.10.0, to hide side effects of changes to the internal storage of
-hashes that to drastically reduce their memory usage overhead.
+hashes that drastically reduce their memory usage overhead.
 
 Calling defined on a stash has been deprecated since 5.6.0, warned on
-lexicals since 5.6.0, and has warned for stashes (and other package
+lexicals since 5.6.0, and warned for stashes (and other package
 variables) since 5.12.0. C<defined %hash> has always exposed an
 implementation detail - emptying a hash by deleting all entries from it does
 not make C<defined %hash> false, hence C<defined %hash> is not valid code to
@@ -552,25 +544,11 @@ command line option C<"-0"> retains the current meaning to slurp input
 files whole; previously, this was documented only for C<"-0777">.  It is
 recommended, however, because of various ambiguities, to use the new
 C<\o{...}> construct to represent characters in octal.
-(fa1639c..f6993e9).
-
-=head2 Declare API incompatibility between blead releases
-
-Only stable releases (5.10.x, 5.12.x, 5.14.x, ...) guarantee binary
-compatibility with each other, while blead releases (5.13.x, 5.15.x, ...) often
-break this compatibility. However, prior to perl 5.13.4, all blead releases had
-the same C<PERL_API_REVISION>, C<PERL_API_VERSION>, and C<PERL_API_SUBVERSION>,
-effectively declaring them as binary compatible, which they weren't. From now
-on, blead releases will have a C<PERL_API_SUBVERSION> equal to their
-C<PERL_SUBVERSION>, explicitly marking them as incompatible with each other.
-
-Maintenance releases of stable perl versions will continue to make no
-intentionally incompatible API changes.
 
 =head2 Check API compatibility when loading XS modules
 
 When perl's API changes in incompatible ways (which usually happens between
-every major release), XS modules compiled for previous versions of perl will not
+major releases), XS modules compiled for previous versions of perl will not
 work anymore. They will need to be recompiled against the new perl.
 
 In order to ensure that modules are recompiled, and to prevent users from
@@ -580,49 +558,24 @@ when loading every newly compiled extension, compares the API version of the
 running perl with the version a module has been compiled for and raises an
 exception if they don't match.
 
-=head2 Binary Incompatible with all previous Perls
+=head2 Binary-incompatible with all previous Perls
 
-Some bit fields have been reordered; therefore, this release will not be binary
-compatible with any previous Perl release.
+Perl 5.14.0 is not binary-compatible with any previous stable release.
 
 =head2 Change in the parsing of certain prototypes
 
 Functions declared with the following prototypes now behave correctly as unary
 functions:
 
-=over 4
+  *
+  \$ \% \@ \* \&
+  \[...]
+  ;$ ;*
+  ;\$ ;\% etc.
+  ;\[...]
 
-=item *
-
-C<*>
-
-=item *
-
-C<\sigil>
-
-=item *
-
-C<\[...]>
-
-=item *
-
-C<;$>
-
-=item *
-
-C<;*>
-
-=item *
-
-C<;\sigil>
-
-=item *
-
-C<;\[...]>
-
-=back
-
-Due to this bug fix, functions using the C<(*)>, C<(;$)> and C<(;*)> prototypes
+Due to this bug fix [perl #75904], functions
+using the C<(*)>, C<(;$)> and C<(;*)> prototypes
 are parsed with higher precedence than before. So in the following example:
 
   sub foo($);
@@ -683,15 +636,10 @@ not have to change (after this one time), as the stringification will
 automatically incorporate the new modifiers.
 
 Code that needs to work properly with both old- and new-style regexes
-can avoid the whole issue by using (for Perls since 5.9.5):
+can avoid the whole issue by using (for Perls since 5.9.5; see L<re>):
 
  use re qw(regexp_pattern);
  my ($pat, $mods) = regexp_pattern($re_ref);
-
-where C<$re_ref> is a reference to a compiled regular expression.  Upon
-return, C<$mods> will be a string containing all the non-default
-modifiers used when the regular expression was compiled, and C<$pattern>
-the actual pattern.
 
 If the actual stringification is important, or older Perls need to be
 supported, you can use something like the following:
@@ -746,7 +694,7 @@ Many Perl operators did not distinguish between these two types of globs.
 This would result in strange behaviour in edge cases: C<untie $scalar>
 would do nothing if the last thing assigned to the scalar was a glob
 (because it treated it as C<untie *$scalar>, which unties a handle).
-Assignment to a glob slot (e.g., C<(*$glob) = \@some_array>) would simply
+Assignment to a glob slot (e.g., C<*$glob = \@some_array>) would simply
 assign C<\@some_array> to C<$glob>.
 
 To fix this, the C<*{}> operator (including the C<*foo> and C<*$foo> forms)
@@ -764,9 +712,6 @@ following code, for instance:
 The C<*$glob> on the second line returns a new immutable glob. That new
 glob is made an alias to C<*bar>. Then it is discarded. So the second
 assignment has no effect.
-
-It also means that C<tie $handle> will now tie C<$handle> as a scalar, even
-if it has had a glob assigned to it.
 
 The upside to this incompatible change is that bugs [perl #77496],
 [perl #77502], [perl #77508], [perl #77688], and [perl #77812],
@@ -812,18 +757,6 @@ was compiled at run time as happens in cases like these two:
 This was a bug, which has now been fixed. But it has the potential to break
 any code that was relying on this bug.
 
-=head2 All objects are destroyed
-
-It used to be possible to prevent a destructor from being called during
-global destruction by artificially increasing the reference count of an
-object.
-
-Now such objects I<will> will be destroyed, as a result of a bug fix
-[perl #81230].
-
-This has the potential to break some XS modules. (In fact, it break some.
-See L</Known Problems>, below.)
-
 =head2 Most C<\p{}> properties are now immune from case-insensitive matching
 
 For most Unicode properties, it doesn't make sense to have them match
@@ -843,59 +776,34 @@ C<m/\p{Lowercase}/i>, both of which match the exact same code points,
 namely those matched by C<m/\p{Cased}/i>.  Details are in
 L<perlrecharclass/Unicode Properties>.
 
+XXX The mention of ‘until an earlier release in the 5.13 series’ needs to
+change, but I do not fully understand what happened here.
+
 User-defined property handlers that need to match differently under
-C</i> must change to read the new boolean parameter passed it which is
-non-zero if case-insensitive matching is in effect; 0 if not.  See
+C</i> must change to read the new boolean parameter passed to it which is
+non-zero if case-insensitive matching is in effect or 0 otherwise.  See
 L<perluniprops/User-Defined Character Properties>.
 
 =head2 regex: \p{} in pattern implies Unicode semantics
 
 Now, a Unicode property match specified in the pattern will indicate
-that the pattern is meant for matching according to Unicode rules
-(e40e74f)
+that the pattern is meant for matching according to Unicode rules, the way
+C<\x{}> does.
 
-=head2 add GvCV_set() and GvGP_set() macros and change GvGP()
+=head2 GvCV() and GvGP() are no longer lvalues
+
+The new GvCV_set() and GvGP_set() macros are now provided to replace
+assignment to those two macros.
 
 This allows a future commit to eliminate some backref magic between GV
 and CVs, which will require complete control over assignment to the
 gp_cv slot.
-
-If you've been using GvGP() in lvalue context this change will break
-your code, you should use GvGP_set() instead. (c43ae56)
-
-=head2 _swash_inversion_hash is no longer exported as part of the API
-
-This function shouldn't be called from XS code. (4c2e113)
-
-=head2 Unreferenced objects in global destruction
-
-The fix for [perl #36347], which made sure that destructors were called on
-unreferenced objects, broke the tests for three CPAN modules, which
-apparently rely on the bug.
-
-To provide more time for fixing them (as this is such a minor bug), we
-have reverted the fix until after perl 5.14.0.
-
-This resolves [perl #82542] and other related tickets.
 
 =head2 C<close> on shared pipes
 
 The C<close> function no longer waits for the child process to exit if the
 underlying file descriptor is still in use by another thread, to avoid
 deadlocks. It returns true in such cases.
-
-=head2 Passing references to warn()
-
-An earlier Perl 5.13.x release changed C<warn($ref)> to leave the reference
-unchanged, allowing C<$SIG{__WARN__}> handlers to access the original
-reference. But this stopped warnings that were references from having the
-file and line number appended even when there was no C<$SIG{__WARN__}>
-handler in place.
-
-Now C<warn> checks for the presence of such a handler and, if there is
-none, proceeds to stringify the reference and append the file and line
-number. This allows simple uses of C<warn> for debugging to continue to
-work as they did before.
 
 =head1 Deprecations
 
