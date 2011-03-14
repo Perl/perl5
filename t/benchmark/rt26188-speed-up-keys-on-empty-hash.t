@@ -86,5 +86,5 @@ __END__
     /* quick bailout if the hash is empty anyway.
        I don't know if placeholders are included in the KEYS count, so a defensive check
     */
-    if (! HvKEYS(hv) && !(flags & HV_ITERNEXT_WANTPLACEHOLDERS) )
+    if (! HvUSEDKEYS(hv) && !(flags & HV_ITERNEXT_WANTPLACEHOLDERS) )
         return NULL;

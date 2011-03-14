@@ -2289,7 +2289,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 #ifdef HAS_RESTRICTED_HASHES
             HvTOTALKEYS(hv);
 #else
-            HvKEYS(hv);
+            HvUSEDKEYS(hv);
 #endif
 	I32 i;
 	int ret = 0;

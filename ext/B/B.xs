@@ -1959,12 +1959,12 @@ void
 HvARRAY(hv)
 	B::HV	hv
     PPCODE:
-	if (HvKEYS(hv) > 0) {
+	if (HvUSEDKEYS(hv) > 0) {
 	    SV *sv;
 	    char *key;
 	    I32 len;
 	    (void)hv_iterinit(hv);
-	    EXTEND(sp, HvKEYS(hv) * 2);
+	    EXTEND(sp, HvUSEDKEYS(hv) * 2);
 	    while ((sv = hv_iternextsv(hv, &key, &len))) {
 		mPUSHp(key, len);
 		PUSHs(make_sv_object(aTHX_ sv));

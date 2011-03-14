@@ -1262,7 +1262,7 @@ Perl_do_kv(pTHX)
 	    dTARGET;
 
 	    if (! SvTIED_mg((const SV *)keys, PERL_MAGIC_tied) ) {
-		i = HvKEYS(keys);
+		i = HvUSEDKEYS(keys);
 	    }
 	    else {
 		i = 0;
@@ -1273,7 +1273,7 @@ Perl_do_kv(pTHX)
 	RETURN;
     }
 
-    EXTEND(SP, HvKEYS(keys) * (dokeys + dovalues));
+    EXTEND(SP, HvUSEDKEYS(keys) * (dokeys + dovalues));
 
     PUTBACK;	/* hv_iternext and hv_iterval might clobber stack_sp */
     while ((entry = hv_iternext(keys))) {

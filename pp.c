@@ -6339,7 +6339,7 @@ PP(pp_boolkeys)
         }	    
     }
 
-    XPUSHs(boolSV(HvKEYS(hv) != 0));
+    XPUSHs(boolSV(HvUSEDKEYS(hv) != 0));
     RETURN;
 }
 

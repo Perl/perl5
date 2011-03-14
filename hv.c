@@ -800,7 +800,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	xhv->xhv_keys++; /* HvTOTALKEYS(hv)++ */
 	if (!counter) {				/* initial entry? */
 	} else if (xhv->xhv_keys > xhv->xhv_max) {
-		/* Use only the old HvKEYS(hv) > HvMAX(hv) condition to limit
+		/* Use only the old HvUSEDKEYS(hv) > HvMAX(hv) condition to limit
 		   bucket splits on a rehashed hash, as we're not going to
 		   split it again, and if someone is lucky (evil) enough to
 		   get all the keys in one list they could exhaust our memory
@@ -1623,7 +1623,7 @@ S_clear_placeholders(pTHX_ HV *hv, U32 items)
 		if (--items == 0) {
 		    /* Finished.  */
 		    HvTOTALKEYS(hv) -= (IV)HvPLACEHOLDERS_get(hv);
-		    if (HvKEYS(hv) == 0)
+		    if (HvUSEDKEYS(hv) == 0)
 			HvHASKFLAGS_off(hv);
 		    HvPLACEHOLDERS_set(hv, 0);
 		    return;
@@ -2003,7 +2003,7 @@ S_hv_auxinit(HV *hv) {
 =for apidoc hv_iterinit
 
 Prepares a starting point to traverse a hash table.  Returns the number of
-keys in the hash (i.e. the same as C<HvKEYS(hv)>).  The return value is
+keys in the hash (i.e. the same as C<HvUSEDKEYS(hv)>).  The return value is
 currently only meaningful for hashes without tie magic.
 
 NOTE: Before version 5.004_65, C<hv_iterinit> used to return the number of
@@ -2817,7 +2817,7 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 
 	xhv->xhv_keys++; /* HvTOTALKEYS(hv)++ */
 	if (!next) {			/* initial entry? */
-	} else if (xhv->xhv_keys > xhv->xhv_max /* HvKEYS(hv) > HvMAX(hv) */) {
+	} else if (xhv->xhv_keys > xhv->xhv_max /* HvUSEDKEYS(hv) > HvMAX(hv) */) {
 		hsplit(PL_strtab);
 	}
     }

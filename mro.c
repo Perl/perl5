@@ -666,7 +666,7 @@ S_mro_clean_isarev(pTHX_ HV * const isa, const char * const name,
             if(svp) {
                 HV * const isarev = (HV *)*svp;
                 (void)hv_delete(isarev, name, len, G_DISCARD);
-                if(!HvARRAY(isarev) || !HvKEYS(isarev))
+                if(!HvARRAY(isarev) || !HvUSEDKEYS(isarev))
                     (void)hv_delete(PL_isarev, key, klen, G_DISCARD);
             }
         }

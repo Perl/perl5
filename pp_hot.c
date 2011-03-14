@@ -999,7 +999,7 @@ PP(pp_aassign)
 	    || SvMAGICAL(sv)
 	    || ! (SvTYPE(sv) == SVt_PVAV || SvTYPE(sv) == SVt_PVHV)
 	    || (SvTYPE(sv) == SVt_PVAV && AvFILL((AV*)sv) != -1)
-	    || (SvTYPE(sv) == SVt_PVHV && HvKEYS((HV*)sv) != 0)
+	    || (SvTYPE(sv) == SVt_PVHV && HvUSEDKEYS((HV*)sv) != 0)
 	    )
     ) {
 	EXTEND_MORTAL(lastrelem - firstrelem + 1);

@@ -1732,7 +1732,7 @@ Perl_magic_getnkeys(pTHX_ SV *sv, MAGIC *mg)
     if (hv) {
          (void) hv_iterinit(hv);
          if (! SvTIED_mg((const SV *)hv, PERL_MAGIC_tied))
-	     i = HvKEYS(hv);
+	     i = HvUSEDKEYS(hv);
          else {
 	     while (hv_iternext(hv))
 	         i++;

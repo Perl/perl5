@@ -1039,7 +1039,7 @@ sharedsv_array_mg_FETCHSIZE(pTHX_ SV *sv, MAGIC *mg)
         val = av_len((AV*) ssv);
     } else {
         /* Not actually defined by tie API but ... */
-        val = HvKEYS((HV*) ssv);
+        val = HvUSEDKEYS((HV*) ssv);
     }
     SHARED_RELEASE;
     return (val);
