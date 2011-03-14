@@ -21,96 +21,49 @@ XXX Any important notices here
 
 =head1 Core Enhancements
 
-=head2 Assignment to C<$0> sets the legacy process name with C<prctl()> on Linux
+=head2 Unicode
 
-On Linux the legacy process name will be set with L<prctl(2)>, in
-addition to altering the POSIX name via C<argv[0]> as perl has done
-since version 4.000. Now system utilities that read the legacy process
-name such as ps, top and killall will recognize the name you set when
-assigning to C<$0>. The string you supply will be cut off at 16 bytes,
-this is a limitation imposed by Linux.
+=head3 Unicode Version 6.0 is now supported (mostly)
 
-=head2 Exception Handling Reliability
+Perl comes with the Unicode 6.0 data base updated with
+L<Corrigendum #8|http://www.unicode.org/versions/corrigendum8.html>,
+with one exception noted below.
+See L<http://unicode.org/versions/Unicode6.0.0> for details on the new
+release.  Perl does not support any Unicode provisional properties,
+including the new ones for this release, but their database files are
+packaged with Perl.
 
-Several changes have been made to the way C<die>, C<warn>, and C<$@>
-behave, in order to make them more reliable and consistent.
+Unicode 6.0 has chosen to use the name C<BELL> for the character at U+1F514,
+which is a symbol that looks like a bell, and used in Japanese cell
+phones.  This conflicts with the long-standing Perl usage of having
+C<BELL> mean the ASCII C<BEL> character, U+0007.  In Perl 5.14,
+C<\N{BELL}> will continue to mean U+0007, but its use will generate a
+deprecated warning message, unless such warnings are turned off.  The
+new name for U+0007 in Perl will be C<ALERT>, which corresponds nicely
+with the existing shorthand sequence for it, C<"\a">.  C<\N{BEL}> will
+mean U+0007, with no warning given.  The character at U+1F514 will not
+have a name in 5.14, but can be referred to by C<\N{U+1F514}>.  The plan
+is that in Perl 5.16, C<\N{BELL}> will refer to U+1F514, and so all code
+that uses C<\N{BELL}> should convert by then to using C<\N{ALERT}>,
+C<\N{BEL}>, or C<"\a"> instead.
 
-When an exception is thrown inside an C<eval>, the exception is no
-longer at risk of being clobbered by code running during unwinding
-(e.g., destructors).  Previously, the exception was written into C<$@>
-early in the throwing process, and would be overwritten if C<eval> was
-used internally in the destructor for an object that had to be freed
-while exiting from the outer C<eval>.  Now the exception is written
-into C<$@> last thing before exiting the outer C<eval>, so the code
-running immediately thereafter can rely on the value in C<$@> correctly
-corresponding to that C<eval>.  (C<$@> is still also set before exiting the
-C<eval>, for the sake of destructors that rely on this.)
+=head3 Full functionality for C<use feature 'unicode_strings'>
 
-Likewise, a C<local $@> inside an C<eval> will no longer clobber any
-exception thrown in its scope.  Previously, the restoration of C<$@> upon
-unwinding would overwrite any exception being thrown.  Now the exception
-gets to the C<eval> anyway.  So C<local $@> is safe before a C<die>.
+This release provides full functionality for C<use feature
+'unicode_strings'>.  Under its scope, all string operations executed and
+regular expressions compiled (even if executed outside its scope) have
+Unicode semantics.  See L<feature>.
 
-Exceptions thrown from object destructors no longer modify the C<$@>
-of the surrounding context.  (If the surrounding context was exception
-unwinding, this used to be another way to clobber the exception being
-thrown.)  Previously such an exception was
-sometimes emitted as a warning, and then either was
-string-appended to the surrounding C<$@> or completely replaced the
-surrounding C<$@>, depending on whether that exception and the surrounding
-C<$@> were strings or objects.  Now, an exception in this situation is
-always emitted as a warning, leaving the surrounding C<$@> untouched.
-In addition to object destructors, this also affects any function call
-performed by XS code using the C<G_KEEPERR> flag.
+This feature avoids most forms of the "Unicode Bug" (See
+L<perlunicode/The "Unicode Bug"> for details.)  If there is a
+possibility that your code will process Unicode strings, you are
+B<strongly> encouraged to use this subpragma to avoid nasty surprises.
 
-Warnings for C<warn> can now be objects, in the same way as exceptions
-for C<die>.  If an object-based warning gets the default handling,
-of writing to standard error, it is stringified as
-before, with the file and line number appended.  But
-a C<$SIG{__WARN__}> handler will now receive an
-object-based warning as an object, where previously it was passed the
-result of stringifying the object.
+=head3 C<\N{I<name>}> and C<charnames> enhancements
 
-=head2 Non-destructive substitution
+=over
 
-The substitution (C<s///>) and transliteration
-(C<y///>) operators now support an C</r> option that
-copies the input variable, carries out the substitution on
-the copy and returns the result.  The original remains unmodified.
-
-  my $old = 'cat';
-  my $new = $old =~ s/cat/dog/r;
-  # $old is 'cat' and $new is 'dog'
-
-This is particularly useful with C<map>.  See L<perlop> for more examples.
-
-=head2 package block syntax
-
-A package declaration can now contain a code block, in which case the
-declaration is in scope only inside that block.  So C<package Foo { ... }>
-is precisely equivalent to C<{ package Foo; ... }>.  It also works with
-a version number in the declaration, as in C<package Foo 1.2 { ... }>.
-See L<perlfunc> (434da3..36f77d, 702646).
-
-=head2 perl -h no longer recommends -w
-
-perl -h used to mark the -w option as recommended; since this option is
-far less useful than it used to be due to lexical 'use warnings' and since
-perl -h is primary a list and brief explanation of the command line switches,
-the recommendation has now been removed (60eaec).
-
-=head2 \o{...} for octals
-
-There is a new escape sequence, C<"\o">, in double-quote-like contexts.
-It must be followed by braces enclosing an octal number of at least one
-digit.  It interpolates as the character with an ordinal value equal to
-the octal number.  This construct allows large octal ordinals beyond the
-current max of 0777 to be represented.  It also allows you to specify a
-character in octal which can safely be concatenated with other regex
-snippets and which won't be confused with being a backreference to
-a regex capture group.  See L<perlre/Capture groups>.
-
-=head2 C<\N{I<name>}> and C<charnames> enhancements
+=item *
 
 C<\N{}> and C<charnames::vianame> now know about the abbreviated
 character names listed by Unicode, such as NBSP, SHY, LRO, ZWJ, etc., as
@@ -118,15 +71,23 @@ well as all the customary abbreviations for the C0 and C1 control
 characters (such as ACK, BEL, CAN, etc.), as well as a few new variants
 in common usage of some C1 full names.
 
+=item *
+
 Unicode has a number of named character sequences, in which particular sequences
 of code points are given names.  C<\N{...}> now recognizes these.
+
+=item *
 
 C<\N{}>, C<charnames::vianame>, C<charnames::viacode> now know about every
 character in Unicode.  Previously, they didn't know about the Hangul syllables
 nor a number of CJK (Chinese/Japanese/Korean) characters.
 
+=item *
+
 In the past, it was ineffective to override one of Perl's abbreviations
 with your own custom alias.  Now it works.
+
+=item *
 
 You can also create a custom alias directly to the ordinal of a
 character, known by C<\N{...}>, C<charnames::vianame()>, and
@@ -137,6 +98,8 @@ use.  So this change allows you to make more effective use of private
 use characters.  Only if there is no official name will
 C<charnames::viacode()> return your custom one.
 
+=item *
+
 A new function, C<charnames::string_vianame()>, has been added.
 This function is a run-time version of C<\N{...}>, returning the string
 of characters whose Unicode name is its parameter.  It can handle
@@ -144,30 +107,40 @@ Unicode named character sequences, whereas the pre-existing
 C<charnames::vianame()> cannot, as the latter returns a single code
 point.
 
+=back
+
 See L<charnames> for details on all these changes.
 
-=head2 Uppercase X/B allowed in hexadecimal/binary literals
+=head3 Any unsigned value can be encoded as a character
 
-Literals may now use either upper case C<0X...> or C<0B...> prefixes,
-in addition to the already supported C<0x...> and C<0b...>
-syntax. (RT#76296) (a674e8d, 333f87f)
+With this release, Perl is adopting a model that any unsigned value can
+be treated as a code point and encoded internally (as utf8) without
+warnings -- not just the code points that are legal in Unicode.
+However, unless utf8 warnings have been
+explicitly lexically turned off, outputting or performing a
+Unicode-defined operation (such as upper-casing) on such a code point
+will generate a warning.  Attempting to input these using strict rules
+(such as with the C<:encoding('UTF-8')> layer) will continue to fail.
+Prior to this release the handling was very inconsistent, and incorrect
+in places.  Also, the Unicode non-characters, some of which previously were
+erroneously considered illegal in places by Perl, contrary to the Unicode
+standard, are now always legal internally.  But inputting or outputting
+them will work the same as for the non-legal Unicode code points, as the
+Unicode standard says they are illegal for "open interchange".
 
-C, Ruby, Python and PHP already supported this syntax, and it makes
-Perl more internally consistent. A round-trip with C<eval sprintf
-"%#X", 0x10> now returns C<16> in addition to C<eval sprintf "%#x",
-0x10>, which worked before.
+=head3 New warnings categories for problematic (non-)Unicode code points.
 
-=head2 C<srand()> now returns the seed
+Three new warnings subcategories of <utf8> have been added.  These
+allow you to turn off warnings for their covered events, while allowing
+the other UTF-8 warnings to remain on.  The three categories are:
+C<surrogate> when UTF-16 surrogates are encountered;
+C<nonchar> when Unicode non-character code points are encountered;
+and C<non_unicode> when code points that are above the legal Unicode
+maximum of 0x10FFFF are encountered.
 
-This allows programs that need to have repeatable results to not have to come
-up with their own seed generating mechanism.  Instead, they can use C<srand()>
-and somehow stash the return for future use.  Typical is a test program which
-has too many combinations to test comprehensively in the time available to it
-each run.  It can test a random subset each time, and should there be a failure,
-log the seed used for that run so that it can later be used to reproduce the
-exact results.
+=head2 Regular Expressions
 
-=head2  C<(?^...)> regex construct added to signify default modifiers
+=head3 C<(?^...)> construct to signify default modifiers
 
 A caret (also called a "circumflex accent") C<"^"> immediately following
 a C<"(?"> in a regular expression now means that the subexpression is to
@@ -182,7 +155,7 @@ The main purpose of this is to allow tests that rely on the
 stringification to not have to change when new modifiers are added.
 See L<perlre/Extended Patterns>.
 
-=head2 C</d>, C</l>, C</u>, C</a>, and C</aa> regular expression modifiers
+=head3 C</d>, C</l>, C</u>, C</a>, and C</aa> modifiers
 
 Four new regular expression modifiers have been added. These are mutually
 exclusive; one only can be turned on at a time.
@@ -215,7 +188,20 @@ will match; it won't under C</aa>.
 
 See L<perlre/Modifiers> for more detail.
 
-=head2 Reentrant regular expression engine
+=head3 Non-destructive substitution
+
+The substitution (C<s///>) and transliteration
+(C<y///>) operators now support an C</r> option that
+copies the input variable, carries out the substitution on
+the copy and returns the result.  The original remains unmodified.
+
+  my $old = 'cat';
+  my $new = $old =~ s/cat/dog/r;
+  # $old is 'cat' and $new is 'dog'
+
+This is particularly useful with C<map>.  See L<perlop> for more examples.
+
+=head3 Reentrant regular expression engine
 
 It is now safe to use regular expressions within C<(?{...})> and
 C<(??{...})> code blocks inside regular expressions.
@@ -223,28 +209,7 @@ C<(??{...})> code blocks inside regular expressions.
 These block are still experimental, however, and still have problems with
 lexical (C<my>) variables, lexical pragmata and abnormal exiting.
 
-=head2 Return value of C<delete $+{...}>
-
-Custom regular expression engines can now determine the return value of
-C<delete> on an entry of C<%+> or C<%->.
-
-=head2 Single term prototype
-
-The C<+> prototype is a special alternative to C<$> that will act like
-C<\[@%]> when given a literal array or hash variable, but will otherwise
-force scalar context on the argument.  This is useful for functions which
-should accept either a literal array or an array reference as the argument:
-
-    sub smartpush (+@) {
-        my $aref = shift;
-        die "Not an array or arrayref" unless ref $aref eq 'ARRAY';
-        push @$aref, @_;
-    }
-
-When using the C<+> prototype, your function must check that the argument
-is of an acceptable type.
-
-=head2 C<use re '/flags';>
+=head3 C<use re '/flags';>
 
 The C<re> pragma now has the ability to turn on regular expression flags
 till the end of the lexical scope:
@@ -254,12 +219,30 @@ till the end of the lexical scope:
 
 See L<re/"'/flags' mode"> for details.
 
-=head2 Statement labels can appear in more places
+=head3 \o{...} for octals
 
-Statement labels can now occur before any type of statement or declaration,
-such as C<package>.
+There is a new escape sequence, C<"\o">, in double-quote-like contexts.
+It must be followed by braces enclosing an octal number of at least one
+digit.  It interpolates as the character with an ordinal value equal to
+the octal number.  This construct allows large octal ordinals beyond the
+current max of 0777 to be represented.  It also allows you to specify a
+character in octal which can safely be concatenated with other regex
+snippets and which won't be confused with being a backreference to
+a regex capture group.  See L<perlre/Capture groups>.
 
-=head2 Array and hash container functions accept references
+=head3 Add C<\p{Titlecase}> as a synonym for C<\p{Title}>
+
+This synonym is added for symmetry with the Unicode property names
+C<\p{Uppercase}> and C<\p{Lowercase}>.
+
+=head3 Regular expression debugging output improvement
+
+Regular expression debugging output (turned on by C<use re 'debug';>) now
+uses hexadecimal when escaping non-ASCII characters, instead of octal.
+
+=head2 Syntactical Enhancements
+
+=head3 Array and hash container functions accept references
 
 All built-in functions that operate directly on array or hash
 containers now also accept hard references to arrays or hashes:
@@ -305,38 +288,129 @@ following three ambiguous cases:
   (b) If %{} overloading exists on a blessed arrayref, %{} is used
   (c) If @{} overloading exists on a blessed hashref, @{} is used
 
-=head2 New global variable C<${^GLOBAL_PHASE}>
+=head3 Single term prototype
+
+The C<+> prototype is a special alternative to C<$> that will act like
+C<\[@%]> when given a literal array or hash variable, but will otherwise
+force scalar context on the argument.  This is useful for functions which
+should accept either a literal array or an array reference as the argument:
+
+    sub smartpush (+@) {
+        my $aref = shift;
+        die "Not an array or arrayref" unless ref $aref eq 'ARRAY';
+        push @$aref, @_;
+    }
+
+When using the C<+> prototype, your function must check that the argument
+is of an acceptable type.
+
+=head3 C<package> block syntax
+
+A package declaration can now contain a code block, in which case the
+declaration is in scope only inside that block.  So C<package Foo { ... }>
+is precisely equivalent to C<{ package Foo; ... }>.  It also works with
+a version number in the declaration, as in C<package Foo 1.2 { ... }>.
+See L<perlfunc> (434da3..36f77d, 702646).
+
+=head3 Statement labels can appear in more places
+
+Statement labels can now occur before any type of statement or declaration,
+such as C<package>.
+
+=head3 Stacked labels
+
+Multiple statement labels can now appear before a single statement.
+
+=head3 Uppercase X/B allowed in hexadecimal/binary literals
+
+Literals may now use either upper case C<0X...> or C<0B...> prefixes,
+in addition to the already supported C<0x...> and C<0b...>
+syntax. (RT#76296) (a674e8d, 333f87f)
+
+C, Ruby, Python and PHP already supported this syntax, and it makes
+Perl more internally consistent. A round-trip with C<eval sprintf
+"%#X", 0x10> now returns C<16> in addition to C<eval sprintf "%#x",
+0x10>, which worked before.
+
+=head2 Exception Handling
+
+Several changes have been made to the way C<die>, C<warn>, and C<$@>
+behave, in order to make them more reliable and consistent.
+
+When an exception is thrown inside an C<eval>, the exception is no
+longer at risk of being clobbered by code running during unwinding
+(e.g., destructors).  Previously, the exception was written into C<$@>
+early in the throwing process, and would be overwritten if C<eval> was
+used internally in the destructor for an object that had to be freed
+while exiting from the outer C<eval>.  Now the exception is written
+into C<$@> last thing before exiting the outer C<eval>, so the code
+running immediately thereafter can rely on the value in C<$@> correctly
+corresponding to that C<eval>.  (C<$@> is still also set before exiting the
+C<eval>, for the sake of destructors that rely on this.)
+
+Likewise, a C<local $@> inside an C<eval> will no longer clobber any
+exception thrown in its scope.  Previously, the restoration of C<$@> upon
+unwinding would overwrite any exception being thrown.  Now the exception
+gets to the C<eval> anyway.  So C<local $@> is safe before a C<die>.
+
+Exceptions thrown from object destructors no longer modify the C<$@>
+of the surrounding context.  (If the surrounding context was exception
+unwinding, this used to be another way to clobber the exception being
+thrown.)  Previously such an exception was
+sometimes emitted as a warning, and then either was
+string-appended to the surrounding C<$@> or completely replaced the
+surrounding C<$@>, depending on whether that exception and the surrounding
+C<$@> were strings or objects.  Now, an exception in this situation is
+always emitted as a warning, leaving the surrounding C<$@> untouched.
+In addition to object destructors, this also affects any function call
+performed by XS code using the C<G_KEEPERR> flag.
+
+Warnings for C<warn> can now be objects, in the same way as exceptions
+for C<die>.  If an object-based warning gets the default handling,
+of writing to standard error, it is stringified as
+before, with the file and line number appended.  But
+a C<$SIG{__WARN__}> handler will now receive an
+object-based warning as an object, where previously it was passed the
+result of stringifying the object.
+
+=head2 Other Enhancements
+
+=head3 Assignment to C<$0> sets the legacy process name with C<prctl()> on Linux
+
+On Linux the legacy process name will be set with L<prctl(2)>, in
+addition to altering the POSIX name via C<argv[0]> as perl has done
+since version 4.000. Now system utilities that read the legacy process
+name such as ps, top and killall will recognize the name you set when
+assigning to C<$0>. The string you supply will be cut off at 16 bytes,
+this is a limitation imposed by Linux.
+
+=head3 C<srand()> now returns the seed
+
+This allows programs that need to have repeatable results to not have to come
+up with their own seed generating mechanism.  Instead, they can use C<srand()>
+and somehow stash the return for future use.  Typical is a test program which
+has too many combinations to test comprehensively in the time available to it
+each run.  It can test a random subset each time, and should there be a failure,
+log the seed used for that run so that it can later be used to reproduce the
+exact results.
+
+=head3 printf-like functions understand post-1980 size modifiers
+
+Perl's printf and sprintf operators, and Perl's internal printf replacement
+function, now understand the C90 size modifiers "hh" (C<char>), "z"
+(C<size_t>), and "t" (C<ptrdiff_t>).  Also, when compiled with a C99
+compiler, Perl now understands the size modifier "j" (C<intmax_t>).
+
+So, for example, on any modern machine, C<sprintf('%hhd', 257)> returns '1'.
+
+=head3 New global variable C<${^GLOBAL_PHASE}>
 
 A new global variable, C<${^GLOBAL_PHASE}>, has been added to allow
 introspection of the current phase of the perl interpreter. It's explained in
 detail in L<perlvar/"${^GLOBAL_PHASE}"> and
 L<perlmod/"BEGIN, UNITCHECK, CHECK, INIT and END">.
 
-=head2 Unicode Version 6.0 is now supported (mostly)
-
-Perl comes with the Unicode 6.0 data base updated with
-L<Corrigendum #8|http://www.unicode.org/versions/corrigendum8.html>,
-with one exception noted below.
-See L<http://unicode.org/versions/Unicode6.0.0> for details on the new
-release.  Perl does not support any Unicode provisional properties,
-including the new ones for this release, but their database files are
-packaged with Perl.
-
-Unicode 6.0 has chosen to use the name C<BELL> for the character at U+1F514,
-which is a symbol that looks like a bell, and used in Japanese cell
-phones.  This conflicts with the long-standing Perl usage of having
-C<BELL> mean the ASCII C<BEL> character, U+0007.  In Perl 5.14,
-C<\N{BELL}> will continue to mean U+0007, but its use will generate a
-deprecated warning message, unless such warnings are turned off.  The
-new name for U+0007 in Perl will be C<ALERT>, which corresponds nicely
-with the existing shorthand sequence for it, C<"\a">.  C<\N{BEL}> will
-mean U+0007, with no warning given.  The character at U+1F514 will not
-have a name in 5.14, but can be referred to by C<\N{U+1F514}>.  The plan
-is that in Perl 5.16, C<\N{BELL}> will refer to U+1F514, and so all code
-that uses C<\N{BELL}> should convert by then to using C<\N{ALERT}>,
-C<\N{BEL}>, or C<"\a"> instead.
-
-=head2 C<-d:-foo> calls C<Devel::foo::unimport>
+=head3 C<-d:-foo> calls C<Devel::foo::unimport>
 
 The syntax C<-dI<B<:>foo>> was extended in 5.6.1 to make C<-dI<:fooB<=bar>>>
 equivalent to C<-MDevel::foo=bar>, which expands
@@ -362,7 +436,7 @@ calls C<< Devel::foo->unimport('bar') >> if the method exists.
 This is particularly useful to suppresses the default actions of a
 C<Devel::*> module's C<import> method whilst still loading it for debugging.
 
-=head2 Filehandle method calls load L<IO::File> on demand
+=head3 Filehandle method calls load L<IO::File> on demand
 
 When a method call on a filehandle would die because the method cannot
 be resolved, and L<IO::File> has not been loaded, Perl now loads L<IO::File>
@@ -383,28 +457,7 @@ method support still works as expected:
   open my $fh, ">", $file;
   $fh->autoflush(1);        # IO::File not loaded
 
-=head2 Full functionality for C<use feature 'unicode_strings'>
-
-This release provides full functionality for C<use feature
-'unicode_strings'>.  Under its scope, all string operations executed and
-regular expressions compiled (even if executed outside its scope) have
-Unicode semantics.  See L<feature>.
-
-This feature avoids most forms of the "Unicode Bug" (See
-L<perlunicode/The "Unicode Bug"> for details.)  If there is a
-possibility that your code will process Unicode strings, you are
-B<strongly> encouraged to use this subpragma to avoid nasty surprises.
-
-=head2 printf-like functions understand post-1980 size modifiers
-
-Perl's printf and sprintf operators, and Perl's internal printf replacement
-function, now understand the C90 size modifiers "hh" (C<char>), "z"
-(C<size_t>), and "t" (C<ptrdiff_t>).  Also, when compiled with a C99
-compiler, Perl now understands the size modifier "j" (C<intmax_t>).
-
-So, for example, on any modern machine, C<sprintf('%hhd', 257)> returns '1'.
-
-=head2 DTrace probes now include package name
+=head3 DTrace probes now include package name
 
 The DTrace probes now include an additional argument (C<arg3>) which contains
 the package the subroutine being entered or left was compiled in.
@@ -423,47 +476,6 @@ and then running:
 DTrace will print:
 
   main::test
-
-=head2 Stacked labels
-
-Multiple statement labels can now appear before a single statement.
-
-=head2 Any unsigned value can be encoded as a character
-
-With this release, Perl is adopting a model that any unsigned value can
-be treated as a code point and encoded internally (as utf8) without
-warnings -- not just the code points that are legal in Unicode.
-However, unless utf8 warnings have been
-explicitly lexically turned off, outputting or performing a
-Unicode-defined operation (such as upper-casing) on such a code point
-will generate a warning.  Attempting to input these using strict rules
-(such as with the C<:encoding('UTF-8')> layer) will continue to fail.
-Prior to this release the handling was very inconsistent, and incorrect
-in places.  Also, the Unicode non-characters, some of which previously were
-erroneously considered illegal in places by Perl, contrary to the Unicode
-standard, are now always legal internally.  But inputting or outputting
-them will work the same as for the non-legal Unicode code points, as the
-Unicode standard says they are illegal for "open interchange".
-
-=head2 Regular expression debugging output improvement
-
-Regular expression debugging output (turned on by C<use re 'debug';>) now
-uses hexadecimal when escaping non-ASCII characters, instead of octal.
-
-=head2 Add C<\p{Titlecase}> as a synonym for C<\p{Title}>
-
-This synonym is added for symmetry with the Unicode property names
-C<\p{Uppercase}> and C<\p{Lowercase}>.
-
-=head2 New warnings categories for problematic (non-)Unicode code points.
-
-Three new warnings subcategories of <utf8> have been added.  These
-allow you to turn off warnings for their covered events, while allowing
-the other UTF-8 warnings to remain on.  The three categories are:
-C<surrogate> when UTF-16 surrogates are encountered;
-C<nonchar> when Unicode non-character code points are encountered;
-and C<non_unicode> when code points that are above the legal Unicode
-maximum of 0x10FFFF are encountered.
 
 =head1 Security
 
@@ -3442,6 +3454,13 @@ detail.
 
 The old C<PL_custom_op_names>/C<PL_custom_op_descs> interface is still
 supported but discouraged.
+
+=head2 Return value of C<delete $+{...}>
+
+Custom regular expression engines can now determine the return value of
+C<delete> on an entry of C<%+> or C<%->.
+
+XXX Mention the actual API.
 
 =head2 Changes to existing APIs
 
