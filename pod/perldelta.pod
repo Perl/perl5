@@ -34,7 +34,7 @@ including the new ones for this release, but their database files are
 packaged with Perl.
 
 Unicode 6.0 has chosen to use the name C<BELL> for the character at U+1F514,
-which is a symbol that looks like a bell, and used in Japanese cell
+which is a symbol that looks like a bell, and is used in Japanese cell
 phones.  This conflicts with the long-standing Perl usage of having
 C<BELL> mean the ASCII C<BEL> character, U+0007.  In Perl 5.14,
 C<\N{BELL}> will continue to mean U+0007, but its use will generate a
@@ -66,10 +66,10 @@ B<strongly> encouraged to use this subpragma to avoid nasty surprises.
 =item *
 
 C<\N{}> and C<charnames::vianame> now know about the abbreviated
-character names listed by Unicode, such as NBSP, SHY, LRO, ZWJ, etc., as
-well as all the customary abbreviations for the C0 and C1 control
-characters (such as ACK, BEL, CAN, etc.), as well as a few new variants
-in common usage of some C1 full names.
+character names listed by Unicode, such as NBSP, SHY, LRO, ZWJ, etc., all
+the customary abbreviations for the C0 and C1 control characters (such as
+ACK, BEL, CAN, etc.), and a few new variants of some C1 full names that
+are in common usage.
 
 =item *
 
@@ -89,14 +89,12 @@ with your own custom alias.  Now it works.
 
 =item *
 
-You can also create a custom alias directly to the ordinal of a
+You can also create a custom alias of the ordinal of a
 character, known by C<\N{...}>, C<charnames::vianame()>, and
 C<charnames::viacode()>.  Previously, an alias had to be to an official
 Unicode character name.  This made it impossible to create an alias for
-a code point that had no name, such as the ones reserved for private
-use.  So this change allows you to make more effective use of private
-use characters.  Only if there is no official name will
-C<charnames::viacode()> return your custom one.
+a code point that had no name, such as those reserved for private
+use.
 
 =item *
 
@@ -130,9 +128,9 @@ Unicode standard says they are illegal for "open interchange".
 
 =head3 New warnings categories for problematic (non-)Unicode code points.
 
-Three new warnings subcategories of <utf8> have been added.  These
-allow you to turn off warnings for their covered events, while allowing
-the other UTF-8 warnings to remain on.  The three categories are:
+Three new warnings subcategories of "utf8" have been added.  These
+allow you to turn off some "utf8" warnings, while allowing
+others warnings to remain on.  The three categories are:
 C<surrogate> when UTF-16 surrogates are encountered;
 C<nonchar> when Unicode non-character code points are encountered;
 and C<non_unicode> when code points that are above the legal Unicode
@@ -142,9 +140,10 @@ maximum of 0x10FFFF are encountered.
 
 =head3 C<(?^...)> construct to signify default modifiers
 
-A caret (also called a "circumflex accent") C<"^"> immediately following
-a C<"(?"> in a regular expression now means that the subexpression is to
-not inherit the surrounding modifiers such as C</i>, but to revert to the
+An ASCII caret (also called a "circumflex accent") C<"^">
+immediately following a C<"(?"> in a regular expression
+now means that the subexpression does not inherit the
+surrounding modifiers such as C</i>, but reverts to the
 Perl defaults.  Any modifiers following the caret override the defaults.
 
 The stringification of regular expressions now uses this
@@ -152,7 +151,7 @@ notation.  E.g., before, C<qr/hlagh/i> would be stringified as
 C<(?i-xsm:hlagh)>, but now it's stringified as C<(?^i:hlagh)>.
 
 The main purpose of this is to allow tests that rely on the
-stringification to not have to change when new modifiers are added.
+stringification not to have to change when new modifiers are added.
 See L<perlre/Extended Patterns>.
 
 =head3 C</d>, C</l>, C</u>, C</a>, and C</aa> modifiers
@@ -166,7 +165,7 @@ in the scope of C<use locale>, even if it is not.
 The C</u> modifier says to compile the regular expression as if it were
 in the scope of a C<use feature "unicode_strings"> pragma.
 
-The C</d> modifier is used to override any C<use locale> and
+The C</d> (default) modifier is used to override any C<use locale> and
 C<use feature "unicode_strings"> pragmas that are in effect at the time
 of compiling the regular expression.
 
@@ -174,10 +173,7 @@ The C</a> regular expression modifier restricts C<\s>, C<\d> and C<\w> and
 the Posix (C<[[:posix:]]>) character classes to the ASCII range.  The
 complements and C<\b> and C<\B> are correspondingly
 affected.  Otherwise, C</a> behaves like the C</u> modifier, in that
-case-insensitive matching uses Unicode semantics; for example, "k" will
-match the Unicode C<\N{KELVIN SIGN}> under C</i> matching, and code
-points in the Latin1 range, above ASCII will have Unicode semantics when
-it comes to case-insensitive matching.
+case-insensitive matching uses Unicode semantics.
 
 The C</aa> modifier is like C</a>, except that, in case-insensitive matching, no ASCII character will match a
 non-ASCII character.  For example,
@@ -207,7 +203,7 @@ It is now safe to use regular expressions within C<(?{...})> and
 C<(??{...})> code blocks inside regular expressions.
 
 These block are still experimental, however, and still have problems with
-lexical (C<my>) variables, lexical pragmata and abnormal exiting.
+lexical (C<my>) variables and abnormal exiting.
 
 =head3 C<use re '/flags';>
 
@@ -221,10 +217,8 @@ See L<re/"'/flags' mode"> for details.
 
 =head3 \o{...} for octals
 
-There is a new escape sequence, C<"\o">, in double-quote-like contexts.
-It must be followed by braces enclosing an octal number of at least one
-digit.  It interpolates as the character with an ordinal value equal to
-the octal number.  This construct allows large octal ordinals beyond the
+There is a new octal escape sequence, C<"\o">, in double-quote-like
+contexts.  This construct allows large octal ordinals beyond the
 current max of 0777 to be represented.  It also allows you to specify a
 character in octal which can safely be concatenated with other regex
 snippets and which won't be confused with being a backreference to
@@ -276,33 +270,16 @@ C<@{}> or C<%{}>:
 For C<push>, C<unshift> and C<splice>, the reference will auto-vivify
 if it is not defined, just as if it were wrapped with C<@{}>.
 
-Calling C<keys> or C<values> directly on a reference gives a substantial
-performance improvement over explicit dereferencing.
-
 For C<keys>, C<values>, C<each>, when overloaded dereferencing is
 present, the overloaded dereference is used instead of dereferencing the
-underlying reftype.  Warnings are issued about assumptions made in the
-following three ambiguous cases:
-
-  (a) If both %{} and @{} overloading exists, %{} is used
-  (b) If %{} overloading exists on a blessed arrayref, %{} is used
-  (c) If @{} overloading exists on a blessed hashref, @{} is used
+underlying reftype.  Warnings are issued about assumptions made in
+ambiguous cases.
 
 =head3 Single term prototype
 
 The C<+> prototype is a special alternative to C<$> that will act like
 C<\[@%]> when given a literal array or hash variable, but will otherwise
-force scalar context on the argument.  This is useful for functions which
-should accept either a literal array or an array reference as the argument:
-
-    sub smartpush (+@) {
-        my $aref = shift;
-        die "Not an array or arrayref" unless ref $aref eq 'ARRAY';
-        push @$aref, @_;
-    }
-
-When using the C<+> prototype, your function must check that the argument
-is of an acceptable type.
+force scalar context on the argument.  See L<perlsub/Prototypes>.
 
 =head3 C<package> block syntax
 
@@ -310,7 +287,7 @@ A package declaration can now contain a code block, in which case the
 declaration is in scope only inside that block.  So C<package Foo { ... }>
 is precisely equivalent to C<{ package Foo; ... }>.  It also works with
 a version number in the declaration, as in C<package Foo 1.2 { ... }>.
-See L<perlfunc> (434da3..36f77d, 702646).
+See L<perlfunc>.
 
 =head3 Statement labels can appear in more places
 
@@ -325,12 +302,11 @@ Multiple statement labels can now appear before a single statement.
 
 Literals may now use either upper case C<0X...> or C<0B...> prefixes,
 in addition to the already supported C<0x...> and C<0b...>
-syntax. (RT#76296) (a674e8d, 333f87f)
+syntax [perl #76296].
 
 C, Ruby, Python and PHP already supported this syntax, and it makes
 Perl more internally consistent. A round-trip with C<eval sprintf
-"%#X", 0x10> now returns C<16> in addition to C<eval sprintf "%#x",
-0x10>, which worked before.
+"%#X", 0x10> now returns C<16>, the way C<eval sprintf "%#x", 0x10> does.
 
 =head2 Exception Handling
 
@@ -386,13 +362,13 @@ this is a limitation imposed by Linux.
 
 =head3 C<srand()> now returns the seed
 
-This allows programs that need to have repeatable results to not have to come
-up with their own seed generating mechanism.  Instead, they can use C<srand()>
-and somehow stash the return for future use.  Typical is a test program which
+This allows programs that need to have repeatable results not to have to come
+up with their own seed-generating mechanism.  Instead, they can use C<srand()>
+and stash the return value for future use.  Typical is a test program which
 has too many combinations to test comprehensively in the time available to it
-each run.  It can test a random subset each time, and should there be a failure,
+each run.  It can test a random subset each time and, should there be a failure,
 log the seed used for that run so that it can later be used to reproduce the
-exact results.
+same results.
 
 =head3 printf-like functions understand post-1980 size modifiers
 
@@ -433,7 +409,7 @@ calls C<< Devel::foo->unimport('bar') >> if the method exists.
 
 =back
 
-This is particularly useful to suppresses the default actions of a
+This is particularly useful for suppressing the default actions of a
 C<Devel::*> module's C<import> method whilst still loading it for debugging.
 
 =head3 Filehandle method calls load L<IO::File> on demand
