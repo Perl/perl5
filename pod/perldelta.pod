@@ -453,6 +453,10 @@ DTrace will print:
 
   main::test
 
+=head2 New C APIs
+
+See L</Internal Changes>.
+
 =head1 Security
 
 =head2 User-defined regular expression properties
