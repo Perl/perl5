@@ -1684,6 +1684,14 @@ to occur that you might want.  Here are two common cases:
     # expand tabs to 8-column spacing
     1 while s/\t+/' ' x (length($&)*8 - length($`)%8)/e;
 
+C<s///le> is treated as a substitution followed by the C<le> operator, not
+the C</le> flags.  This may change in a future version of Perl.  It
+produces a warning if warnings are enabled.  To disambiguate, use a space
+or change the order of the flags:
+
+    s/foo/bar/ le 5;  # "le" infix operator
+    s/foo/bar/el;     # "e" and "l" flags
+
 =back
 
 =head2 Quote-Like Operators
