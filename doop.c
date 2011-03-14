@@ -741,6 +741,14 @@ Perl_do_sprintf(pTHX_ SV *sv, I32 len, SV **sarg)
 
     PERL_ARGS_ASSERT_DO_SPRINTF;
 
+    if (SvTAINTED(*sarg))
+	TAINT_PROPER(
+		(PL_op && PL_op->op_type < OP_max)
+		    ? (PL_op->op_type == OP_PRTF)
+			? "printf"
+			: PL_op_name[PL_op->op_type]
+		    : "(unknown)"
+	);
     SvUTF8_off(sv);
     if (DO_UTF8(*sarg))
         SvUTF8_on(sv);

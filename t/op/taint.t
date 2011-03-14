@@ -17,7 +17,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 766;
+plan tests => 770;
 
 $| = 1;
 
@@ -1829,12 +1829,17 @@ SKIP:
 
 {
     # tests for tainted format in s?printf
-    violates_taint(sub { printf($TAINT . "# %s\n", "foo") }, 'printf',
+    my $fmt = $TAINT . "# %s\n";
+    violates_taint(sub { printf($fmt, "foo") }, 'printf',
 		   q/printf doesn't like tainted formats/);
+    violates_taint(sub { printf($TAINT . "# %s\n", "foo") }, 'printf',
+		   q/printf doesn't like tainted format expressions/);
     eval { printf("# %s\n", $TAINT . "foo") };
     is($@, '', q/printf accepts other tainted args/);
-    violates_taint(sub { sprintf($TAINT . "# %s\n", "foo") }, 'sprintf',
+    violates_taint(sub { sprintf($fmt, "foo") }, 'sprintf',
 		   q/sprintf doesn't like tainted formats/);
+    violates_taint(sub { sprintf($TAINT . "# %s\n", "foo") }, 'sprintf',
+		   q/sprintf doesn't like tainted format expressions/);
     eval { sprintf("# %s\n", $TAINT . "foo") };
     is($@, '', q/sprintf accepts other tainted args/);
 }
