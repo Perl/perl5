@@ -213,7 +213,7 @@ END {
 
 sub first_release_raw {
     my $module = shift;
-    $module = shift if $module->isa(__PACKAGE__)
+    $module = shift if eval { $module->isa(__PACKAGE__) }
       and scalar @_ and $_[0] =~ m#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z#;
     my $version = shift;
 
@@ -239,7 +239,7 @@ sub first_release {
 
 sub find_modules {
     my $regex = shift;
-    $regex = shift if $regex->isa(__PACKAGE__);
+    $regex = shift if eval { $regex->isa(__PACKAGE__) };
     my @perls = @_;
     @perls = keys %version unless @perls;
 
@@ -254,14 +254,14 @@ sub find_modules {
 
 sub find_version {
     my $v = shift;
-    $v = shift if $v->isa(__PACKAGE__);
+    $v = shift if eval { $v->isa(__PACKAGE__) };
     return $version{$v} if defined $version{$v};
     return undef;
 }
 
 sub is_deprecated {
     my $module = shift;
-    $module = shift if $module->isa(__PACKAGE__)
+    $module = shift if eval { $module->isa(__PACKAGE__) }
       and scalar @_ and $_[0] =~ m#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z#;
     my $perl_version = shift;
     $perl_version ||= $];
@@ -281,7 +281,7 @@ sub removed_from_by_date {
 
 sub removed_raw {
   my $mod = shift;
-  $mod = shift if $mod->isa(__PACKAGE__)
+  $mod = shift if eval { $mod->isa(__PACKAGE__) }
       and scalar @_ and $_[0] =~ m#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z#;
   return unless my @perls = sort { $a cmp $b } first_release_raw($mod);
   my $last = pop @perls;
