@@ -1436,7 +1436,7 @@ C<Compress::Zlib> has been upgraded from version 2.024 to 2.027.
 
 =item *
 
-C<CPAN> has been upgraded from version 1.94_56 to 1.94_63.
+C<CPAN> has been upgraded from version 1.94_56 to 1.9600.
 
 =over 4
 
