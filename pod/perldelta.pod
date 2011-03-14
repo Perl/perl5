@@ -21,16 +21,6 @@ XXX Any important notices here
 
 =head1 Core Enhancements
 
-=head2 "safe signals" optimization
-
-Signal dispatch has been moved from the runloop into control ops. This
-should give a few percent speed increase, and eliminates almost all of
-the speed penalty caused by the introduction of "safe signals" in
-5.8.0. Signals should still be dispatched within the same statement as
-they were previously - if this is not the case, or it is possible to
-create uninterruptible loops, this is a bug, and reports are encouraged
-of how to recreate such issues.
-
 =head2 Assignment to C<$0> sets the legacy process name with C<prctl()> on Linux
 
 On Linux the legacy process name will be set with L<prctl(2)>, in
@@ -39,12 +29,6 @@ since version 4.000. Now system utilities that read the legacy process
 name such as ps, top and killall will recognize the name you set when
 assigning to C<$0>. The string you supply will be cut off at 16 bytes,
 this is a limitation imposed by Linux.
-
-=head2 Optimization of shift; and pop; calls without arguments
-
-Additional two OPs are not added anymore into op tree for shift and pop
-calls without argument (when it works on C<@_>). Makes C<shift;> 5%
-faster over C<shift @_;> on not threaded perl and 25% faster on threaded.
 
 =head2 Exception Handling Reliability
 
@@ -192,27 +176,6 @@ C<\N{}>, C<charnames::vianame>, C<charnames::viacode> now know about every
 character in Unicode.  Previously, they didn't know about the Hangul syllables
 nor a number of CJK (Chinese/Japanese/Korean) characters.
 
-=head2 Adjacent pairs of nextstate opcodes are now optimized away
-
-Previously, in code such as
-
-    use constant DEBUG => 0;
-
-    sub GAK {
-        warn if DEBUG;
-        print "stuff\n";
-    }
-
-the ops for C<warn if DEBUG;> would be folded to a C<null> op (C<ex-const>), but
-the C<nextstate> op would remain, resulting in a runtime op dispatch of
-C<nextstate>, C<nextstate>, ...
-
-The execution of a sequence of C<nextstate> ops is indistinguishable from just
-the last C<nextstate> op so the peephole optimizer now eliminates the first of
-a pair of C<nextstate> ops, except where the first carries a label, since labels
-must not be eliminated by the optimizer and label usage isn't conclusively known
-at compile time.
-
 =head2 API function to parse statements
 
 The C<parse_fullstmt> function has been added to allow parsing of a single
@@ -314,13 +277,6 @@ C<entersub> op checking have been separated out and exposed in the API.
 
 Custom regular expression engines can now determine the return value of
 C<delete> on an entry of C<%+> or C<%->.
-
-=head2 C<keys>, C<values> work on arrays
-
-You can now use the C<keys>, C<values>, C<each> builtin functions on arrays
-(previously you could only use them on hashes).  See L<perlfunc> for details.
-This is actually a change introduced in perl 5.12.0, but it was missed from
-that release's perldelta.
 
 =head2 Single term prototype
 
@@ -1248,6 +1204,45 @@ providing improved functionality is being prepared for release by the
 time 5.14 is.
 
 =head1 Performance Enhancements
+
+=head2 "safe signals" optimization
+
+Signal dispatch has been moved from the runloop into control ops. This
+should give a few percent speed increase, and eliminates almost all of
+the speed penalty caused by the introduction of "safe signals" in
+5.8.0. Signals should still be dispatched within the same statement as
+they were previously - if this is not the case, or it is possible to
+create uninterruptible loops, this is a bug, and reports are encouraged
+of how to recreate such issues.
+
+=head2 Optimization of shift; and pop; calls without arguments
+
+Additional two OPs are not added anymore into op tree for shift and pop
+calls without argument (when it works on C<@_>). Makes C<shift;> 5%
+faster over C<shift @_;> on not threaded perl and 25% faster on threaded.
+
+=head2 Adjacent pairs of nextstate opcodes are now optimized away
+
+Previously, in code such as
+
+    use constant DEBUG => 0;
+
+    sub GAK {
+        warn if DEBUG;
+        print "stuff\n";
+    }
+
+the ops for C<warn if DEBUG;> would be folded to a C<null> op (C<ex-const>), but
+the C<nextstate> op would remain, resulting in a runtime op dispatch of
+C<nextstate>, C<nextstate>, ...
+
+The execution of a sequence of C<nextstate> ops is indistinguishable from just
+the last C<nextstate> op so the peephole optimizer now eliminates the first of
+a pair of C<nextstate> ops, except where the first carries a label, since labels
+must not be eliminated by the optimizer and label usage isn't conclusively known
+at compile time.
+
+=head2 blah blah blah
 
 Only allocate entries for @_ on demand - this not only saves memory per
 subroutine defined but should hopefully improve COW behaviour (77bac2).
@@ -4969,7 +4964,12 @@ Module-Install distribution on CPAN to fail. (Specifically, F<02_mymeta.t> tests
 
 =head1 Errata
 
-XXX
+=head2 C<keys>, C<values> work on arrays
+
+You can now use the C<keys>, C<values>, C<each> builtin functions on arrays
+(previously you could only use them on hashes).  See L<perlfunc> for details.
+This is actually a change introduced in perl 5.12.0, but it was missed from
+that release's perldelta.
 
 =head1 Obituary
 
