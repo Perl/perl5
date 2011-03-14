@@ -10,7 +10,7 @@ use File::Find;
 use vars qw(
             $VERSION
 );
-$VERSION = "5.5";
+$VERSION = "5.5001";
 
 package CPAN::CacheMgr;
 use strict;

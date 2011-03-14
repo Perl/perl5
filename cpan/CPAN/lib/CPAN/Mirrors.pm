@@ -3,7 +3,7 @@
 package CPAN::Mirrors;
 use strict;
 use vars qw($VERSION $urllist $silent);
-$VERSION = "1.77";
+$VERSION = "1.9600";
 
 use Carp;
 use FileHandle;

@@ -1,3 +1,25 @@
+2011-03-12  Andreas J. Koenig  <andk@cpan.org>
+
+	* release 1.9600
+
+	* Added PAUSE batch signing key 2011 to the distribution
+
+	* Make t/00signature.t skip if verification fails.  The user
+	  shouldn't be prevented from installing if their gpg isn't
+	  configured correctly, but we still run this to see diagnostics
+
+	* Major highlights:
+
+	- much less configuration dialog hassle
+	- support for META/MYMETA.json
+	- support for local::lib
+	- support for HTTP::Tiny to reduce the dependency on ftp sites
+	- automatic mirror selection
+	- iron out all known bugs in configure_requires
+	- support for distributions compressed with bzip2
+	- allow Foo/Bar.pm on the commandline to mean Foo::Bar
+	- for more see Changes file for the 0.94_51 to 0.94_65 dev releases
+
 2011-02-14  David Golden <dagolden@cpan.org>
 
 	* release 1.94_65

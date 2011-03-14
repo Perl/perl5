@@ -395,6 +395,7 @@ cpan/CPAN/PAUSE2003.pub		CPAN public key
 cpan/CPAN/PAUSE2005.pub		CPAN public key
 cpan/CPAN/PAUSE2007.pub		CPAN public key
 cpan/CPAN/PAUSE2009.pub		CPAN public key
+cpan/CPAN/PAUSE2011.pub
 cpan/CPANPLUS/bin/cpan2dist			the cpan2dist utility
 cpan/CPANPLUS/bin/cpanp				the cpanp utility
 cpan/CPANPLUS/bin/cpanp-run-perl		the cpanp-run-perl utility
