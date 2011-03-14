@@ -147,7 +147,7 @@ sub croak { require Carp; Carp::croak(@_) }
                 BEGIN { delete $utf8::{miniperl} }
 
                 # All property names are matched caselessly
-                my $property_and_table = lc $type;
+                my $property_and_table = CORE::lc $type;
                 print STDERR __LINE__, ": $property_and_table\n" if DEBUG;
 
                 # See if is of the compound form 'property=value', where the
