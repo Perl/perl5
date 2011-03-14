@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-print "1..108\n";
+print "1..109\n";
 
 eval 'print "ok 1\n";';
 
@@ -500,52 +500,40 @@ print "ok $test # length of \$@ after eval\n"; $test++;
 print "not " if (length $@ != 0);
 print "ok $test # length of \$@ after eval\n"; $test++;
 
+curr_test($test);
+
 # Check if eval { 1 }; completely resets $@
-if (eval "use Devel::Peek; 1;") {
-  $tempfile = tempfile();
-  $outfile = tempfile();
-  open PROG, ">", $tempfile or die "Can't create test file";
-  my $prog = <<'END_EVAL_TEST';
+SKIP: {
+    skip("Can't load Devel::Peek: $@", 2)
+	unless eval "use Devel::Peek; 1;";
+
+    my $tempfile = tempfile();
+    open $prog, ">", $tempfile or die "Can't create test file";
+    print $prog <<'END_EVAL_TEST';
     use Devel::Peek;
     $! = 0;
     $@ = $!;
-    my $ok = 0;
-    open(SAVERR, ">&STDERR") or die "Can't dup STDERR: $!";
-    if (open(OUT, '>', '@@@@')) {
-      open(STDERR, ">&OUT") or die "Can't dup OUT: $!";
-      Dump($@);
-      print STDERR "******\n";
-      eval { die "\x{a10d}"; };
-      $_ = length $@;
-      eval { 1 };
-      Dump($@);
-      open(STDERR, ">&SAVERR") or die "Can't restore STDERR: $!";
-      close(OUT);
-      if (open(IN, '<', '@@@@')) {
-        local $/;
-        my $in = <IN>;
-        my ($first, $second) = split (/\*\*\*\*\*\*\n/, $in, 2);
-        $first =~ s/,pNOK//;
-        s/ PV = 0x[0-9a-f]+/ PV = 0x/ foreach $first, $second;
-        s/ LEN = [0-9]+/ LEN = / foreach $first, $second;
-        $ok = 1 if ($first eq $second);
-      }
-    }
-
-    print $ok;
+    Dump($@);
+    print STDERR "******\n";
+    eval { die "\x{a10d}"; };
+    $_ = length $@;
+    eval { 1 };
+    Dump($@);
+    print STDERR "******\n";
+    print STDERR "Done\n";
 END_EVAL_TEST
-    $prog =~ s/\@\@\@\@/$outfile/g;
-    print PROG $prog;
-   close PROG;
+    close $prog or die "Can't close $tempfile: $!";
+    my $got = runperl(progfile => $tempfile, stderr => 1);
+    my ($first, $second, $tombstone) = split (/\*\*\*\*\*\*\n/, $got);
 
-   my $ok = runperl(progfile => $tempfile);
-   print "not " unless $ok;
-   print "ok $test # eval { 1 } completely resets \$@\n";
+    is($tombstone, "Done\n", 'Program completed successfully');
+
+    $first =~ s/,pNOK//;
+    s/ PV = 0x[0-9a-f]+/ PV = 0x/ foreach $first, $second;
+    s/ LEN = [0-9]+/ LEN = / foreach $first, $second;
+
+    is($second, $first, 'eval { 1 } completely resets $@');
 }
-else {
-  print "ok $test # skipped - eval { 1 } completely resets \$@\n";
-}
-$test++;
 
 # Test that "use feature" and other hint transmission in evals and s///ee
 # don't leak memory
@@ -555,12 +543,8 @@ $test++;
     my $t;
     my $s = "a";
     $s =~ s/a/$t = \%^H;  qq( qq() );/ee;
-    print "not " if Internals::SvREFCNT(%$t) != $count_expected;
-    print "ok $test - RT 63110\n";
-    $test++;
+    is(Internals::SvREFCNT(%$t), $count_expected, 'RT 63110');
 }
-
-curr_test($test);
 
 {
     # test that the CV compiled for the eval is freed by checking that no additional 
