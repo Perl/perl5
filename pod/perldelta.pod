@@ -1654,6 +1654,9 @@ C<Cwd> has been upgraded from version 3.31 to 3.36.
 
 C<Data::Dumper> has been upgraded from version 2.125 to 2.130_02.
 
+The indentation used to be off when C<$Data::Dumper::Terse> was set. This
+has been fixed [perl #73604].
+
 This fixes a crash when using custom sort functions that might cause the stack
 to change.
 
@@ -1934,6 +1937,10 @@ Resolves an issue with splitting Win32 command lines.
 =item *
 
 C<IPC::Open3> has been upgraded from 1.05 to 1.08.
+
+C<open3> now produces an error if the C<exec> call fails, allowing this
+condition to be distinguished from a child process that exited with a
+non-zero status [perl #72016].
 
 The internal C<xclose> routine now knows how to handle file descriptors, as
 documented, so duplicating STDIN in a child process using its file
@@ -2539,6 +2546,12 @@ split mostly from the NOTES section of the pod2man man page.
 
 =head2 Changes to Existing Documentation
 
+=head3 L<perlmodlib>
+
+The perlmodlib page that came with Perl 5.12.0 was missing a lot of
+modules, due to a bug in the script that generates the list. This has been
+fixed [perl #74332].
+
 =head3 Replace wrong tr/// table in perlebcdic.pod
 
 perlebcdic.pod contains a helpful table to use in tr/// to convert
@@ -2975,6 +2988,12 @@ See L<perlunicode/User-Defined Character Properties> and L<perlsec>.
 
 =item *
 
+The "Variable $foo is not imported" warning that precedes a
+C<strict 'vars'> error has now been assigned the "misc" category, so that
+C<no warnings> will suppress it [perl #73712].
+
+=item *
+
 C<warn> and C<die> now produce 'Wide character' warnings when fed a
 character outside the byte range if STDERR is a byte-sized handle.
 
@@ -3074,6 +3093,11 @@ in a tar archive. It comes with C<Archive::Tar>.
 =head3 C<perlbug>
 
 =over 4
+
+=item *
+
+C<perlbug> now looks in the EMAIL environment variable for a return address
+if the REPLY-TO and REPLYTO variables are empty.
 
 =item *
 
@@ -3911,6 +3935,29 @@ your page size.
 =head1 Selected Bug Fixes
 
 =over 4
+
+=item *
+
+C<when(scalar){...}> no longer crashes, but produces a syntax error
+[perl #74114].
+
+=item *
+
+The C-level C<lex_stuff_pvn> function would sometimes cause a spurious
+syntax error on the last line of the file if it lacked a final semicolon
+[perl #74006].
+
+=item *
+
+The regular expression engine no longer loops when matching
+C<"\N{LATIN SMALL LIGATURE FF}" =~ /f+/i> and similar expressions
+[perl #72998].
+
+=item *
+
+A label right before a string eval (C<foo: eval $string>) no longer causes
+the label to be associated also with the first statement inside the eval
+[perl #74290] (5.12.1).
 
 =item *
 
