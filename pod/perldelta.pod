@@ -43,20 +43,19 @@ used internally in the destructor for an object that had to be freed
 while exiting from the outer C<eval>.  Now the exception is written
 into C<$@> last thing before exiting the outer C<eval>, so the code
 running immediately thereafter can rely on the value in C<$@> correctly
-corresponding to that C<eval>.
+corresponding to that C<eval>.  (C<$@> is still also set before exiting the
+C<eval>, for the sake of destructors that rely on this.)
 
 Likewise, a C<local $@> inside an C<eval> will no longer clobber any
 exception thrown in its scope.  Previously, the restoration of C<$@> upon
 unwinding would overwrite any exception being thrown.  Now the exception
-gets to the C<eval> anyway.  So C<local $@> is safe inside an C<eval>,
-albeit of rather limited use.
+gets to the C<eval> anyway.  So C<local $@> is safe before a C<die>.
 
 Exceptions thrown from object destructors no longer modify the C<$@>
 of the surrounding context.  (If the surrounding context was exception
 unwinding, this used to be another way to clobber the exception being
-thrown.  Due to the above change it no longer has that significance,
-but there are other situations where C<$@> is significant.)  Previously
-such an exception was sometimes emitted as a warning, and then either
+thrown.)  Previously such an exception was
+sometimes emitted as a warning, and then either was
 string-appended to the surrounding C<$@> or completely replaced the
 surrounding C<$@>, depending on whether that exception and the surrounding
 C<$@> were strings or objects.  Now, an exception in this situation is
@@ -64,25 +63,18 @@ always emitted as a warning, leaving the surrounding C<$@> untouched.
 In addition to object destructors, this also affects any function call
 performed by XS code using the C<G_KEEPERR> flag.
 
-C<$@> is also no longer used as an internal temporary variable when
-preparing to C<die>.  Previously it was internally necessary to put
-any exception object (any non-string exception) into C<$@> first,
-before it could be used as an exception.  (The C API still offers the
-old option, so an XS module might still clobber C<$@> in the old way.)
-This change together with the foregoing means that, in various places,
-C<$@> may be observed to contain its previously-assigned value, rather
-than having been overwritten by recent exception-related activity.
-
 Warnings for C<warn> can now be objects, in the same way as exceptions
 for C<die>.  If an object-based warning gets the default handling,
-of writing to standard error, it will of course still be stringified
-along the way.  But a C<$SIG{__WARN__}> handler will now receive an
+of writing to standard error, it is stringified as
+before, with the file and line number appended.  But
+a C<$SIG{__WARN__}> handler will now receive an
 object-based warning as an object, where previously it was passed the
 result of stringifying the object.
 
 =head2 Non-destructive substitution
 
-The substitution operator now supports a C</r> option that
+The substitution (C<s///>) and transliteration
+(C<y///>) operators now support an C</r> option that
 copies the input variable, carries out the substitution on
 the copy and returns the result.  The original remains unmodified.
 
@@ -90,8 +82,7 @@ the copy and returns the result.  The original remains unmodified.
   my $new = $old =~ s/cat/dog/r;
   # $old is 'cat' and $new is 'dog'
 
-This is particularly useful with C<map>.  See L<perlop> for more examples
-(4f4d75, 000c65).
+This is particularly useful with C<map>.  See L<perlop> for more examples.
 
 =head2 package block syntax
 
@@ -135,6 +126,13 @@ well as all the customary abbreviations for the C0 and C1 control
 characters (such as ACK, BEL, CAN, etc.), as well as a few new variants
 in common usage of some C1 full names.
 
+Unicode has a number of named character sequences, in which particular sequences
+of code points are given names.  C<\N{...}> now recognizes these.
+
+C<\N{}>, C<charnames::vianame>, C<charnames::viacode> now know about every
+character in Unicode.  Previously, they didn't know about the Hangul syllables
+nor a number of CJK (Chinese/Japanese/Korean) characters.
+
 In the past, it was ineffective to override one of Perl's abbreviations
 with your own custom alias.  Now it works.
 
@@ -146,6 +144,13 @@ a code point that had no name, such as the ones reserved for private
 use.  So this change allows you to make more effective use of private
 use characters.  Only if there is no official name will
 C<charnames::viacode()> return your custom one.
+
+A new function, C<charnames::string_vianame()>, has been added.
+This function is a run-time version of C<\N{...}>, returning the string
+of characters whose Unicode name is its parameter.  It can handle
+Unicode named character sequences, whereas the pre-existing
+C<charnames::vianame()> cannot, as the latter returns a single code
+point.
 
 See L<charnames> for details on all these changes.
 
@@ -169,12 +174,6 @@ has too many combinations to test comprehensively in the time available to it
 each run.  It can test a random subset each time, and should there be a failure,
 log the seed used for that run so that it can later be used to reproduce the
 exact results.
-
-=head2 C<\N{I<name>}> and C<charnames> enhancements
-
-C<\N{}>, C<charnames::vianame>, C<charnames::viacode> now know about every
-character in Unicode.  Previously, they didn't know about the Hangul syllables
-nor a number of CJK (Chinese/Japanese/Korean) characters.
 
 =head2 API function to parse statements
 
@@ -207,46 +206,38 @@ The main purpose of this is to allow tests that rely on the
 stringification to not have to change when new modifiers are added.
 See L<perlre/Extended Patterns>.
 
-=head2 C<"d">, C<"l">, and C<"u"> regex modifiers added
+=head2 C</d>, C</l>, C</u>, C</a>, and C</aa> regular expression modifiers
 
-These modifiers are currently only available within a C<(?...)> construct.
+Four new regular expression modifiers have been added. These are mutually
+exclusive; one only can be turned on at a time.
 
-The C<"l"> modifier says to compile the regular expression as if it were
+The C</l> modifier says to compile the regular expression as if it were
 in the scope of C<use locale>, even if it is not.
 
-The C<"u"> modifier says to compile the regular expression as if it were
+The C</u> modifier says to compile the regular expression as if it were
 in the scope of a C<use feature "unicode_strings"> pragma.
 
-The C<"d"> modifier is used to override any C<use locale> and
+The C</d> modifier is used to override any C<use locale> and
 C<use feature "unicode_strings"> pragmas that are in effect at the time
 of compiling the regular expression.
 
-See just below and L<perlre/(?dlupimsx-imsx)>.
+The C</a> regular expression modifier restricts C<\s>, C<\d> and C<\w> and
+the Posix (C<[[:posix:]]>) character classes to the ASCII range.  The
+complements and C<\b> and C<\B> are correspondingly
+affected.  Otherwise, C</a> behaves like the C</u> modifier, in that
+case-insensitive matching uses Unicode semantics; for example, "k" will
+match the Unicode C<\N{KELVIN SIGN}> under C</i> matching, and code
+points in the Latin1 range, above ASCII will have Unicode semantics when
+it comes to case-insensitive matching.
 
-=head2 C<use feature "unicode_strings"> now applies to some regex matching
+The C</aa> modifier is like C</a>, except that, in case-insensitive matching, no ASCII character will match a
+non-ASCII character.  For example,
 
-Another chunk of the L<perlunicode/The "Unicode Bug"> is fixed in this
-release.  Now, regular expressions compiled within the scope of the
-"unicode_strings" feature will match the same whether or not the target
-string is encoded in utf8, with regard to C<\s>, C<\w>, C<\b>, and their
-complements.  Work is underway to add the C<[[:posix:]]> character
-classes and case sensitive matching to the control of this feature, but
-was not complete in time for this dot release.
+    'k' =~ /\N{KELVIN SIGN}/ai
 
-=head2 C<\N{...}> now handles Unicode named character sequences
+will match; it won't under C</aa>.
 
-Unicode has a number of named character sequences, in which particular sequences
-of code points are given names.  C<\N{...}> now recognizes these.
-See L<charnames>.
-
-=head2 New function C<charnames::string_vianame()>
-
-This function is a run-time version of C<\N{...}>, returning the string
-of characters whose Unicode name is its parameter.  It can handle
-Unicode named character sequences, whereas the pre-existing
-C<charnames::vianame()> cannot, as the latter returns a single code
-point.
-See L<charnames>.
+See L<perlre/Modifiers> for more detail.
 
 =head2 Reentrant regular expression engine
 
@@ -309,18 +300,6 @@ See L<re/"'/flags' mode"> for details.
 Statement labels can now occur before any type of statement or declaration,
 such as C<package>.
 
-=head2 C<use feature "unicode_strings"> now applies to more regex matching
-
-Another chunk of the L<perlunicode/The "Unicode Bug"> is fixed in this
-release.  Now, regular expressions compiled within the scope of the
-"unicode_strings" feature (or under the "u" regex modifier (specifiable
-currently only with infix notation C<(?u:...)> or via C<use re '/u'>)
-will match the same whether or not the target string is encoded in utf8,
-with regard to C<[[:posix:]]> character classes
-
-Work is underway to add the case sensitive matching to the control of
-this feature, but was not complete in time for this dot release.
-
 =head2 Array and hash container functions accept references
 
 All built-in functions that operate directly on array or hash
@@ -366,14 +345,6 @@ following three ambiguous cases:
   (a) If both %{} and @{} overloading exists, %{} is used
   (b) If %{} overloading exists on a blessed arrayref, %{} is used
   (c) If @{} overloading exists on a blessed hashref, @{} is used
-
-=head2 y///r
-
-The C</r> flag, which was added to C<s///> in 5.13.2, has been extended to
-the C<y///> operator.
-
-It causes it to perform the substitution on a I<copy> of its operand,
-returning that copy instead of a character count.
 
 =head2 New global variable C<${^GLOBAL_PHASE}>
 
@@ -483,21 +454,6 @@ L<perlunicode/The "Unicode Bug"> for details.)  If there is a
 possibility that your code will process Unicode strings, you are
 B<strongly> encouraged to use this subpragma to avoid nasty surprises.
 
-The availability of this should strongly affect the whole tone of
-various documents, such as L<perlunicode> and L<perluniintro>, but this
-work has not been done yet.
-
-=head2 Exception Handling Backcompat Hack
-
-When an exception is thrown in an C<eval BLOCK>, C<$@> is now set before
-unwinding, as well as being set after unwinding as the eval block exits.  This
-early setting supports code that has historically treated C<$@> during unwinding
-as an indicator of whether the unwinding was due to an exception.  These modules
-had been broken by 5.13.1's change from setting C<$@> early to setting it late.
-This double setting arrangement is a stopgap until the reason for unwinding can
-be made properly introspectable.  C<$@> has never been a reliable indicator of
-the reason for unwinding.
-
 =head2 printf-like functions understand post-1980 size modifiers
 
 Perl's printf and sprintf operators, and Perl's internal printf replacement
@@ -531,26 +487,6 @@ DTrace will print:
 
 Multiple statement labels can now appear before a single statement.
 
-=head2 New regular expression modifier C</a>
-
-The C</a> regular expression modifier restricts C<\s> to match precisely
-the five characters C<[ \f\n\r\t]>, C<\d> to match precisely the 10
-characters C<[0-9]>, C<\w> to match precisely the 63 characters
-C<[A-Za-z0-9_]>, and the Posix (C<[[:posix:]]>) character classes to
-match only the appropriate ASCII characters.  The complements, of
-course, match everything but; and C<\b> and C<\B> are correspondingly
-affected.  Otherwise, C</a> behaves like the C</u> modifier, in that
-case-insensitive matching uses Unicode semantics; for example, "k" will
-match the Unicode C<\N{KELVIN SIGN}> under C</i> matching, and code
-points in the Latin1 range, above ASCII will have Unicode semantics when
-it comes to case-insensitive matching.  Like its cousins (C</u>, C</l>,
-and C</d>), and in spite of the terminology, C</a> in 5.14 will not
-actually be able to be used as a suffix at the end of a regular
-expression (this restriction is planned to be lifted in 5.16).  It must
-occur either as an infix modifier, such as C<(?a:...)> or (C<(?a)...>,
-or it can be turned on within the lexical scope of C<use re '/a'>.
-Turning on C</a> turns off the other "character set" modifiers.
-
 =head2 Any unsigned value can be encoded as a character
 
 With this release, Perl is adopting a model that any unsigned value can
@@ -573,38 +509,10 @@ Unicode standard says they are illegal for "open interchange".
 Regular expression debugging output (turned on by C<use re 'debug';>) now
 uses hexadecimal when escaping non-ASCII characters, instead of octal.
 
-=head2 The new regular expression modifiers available in suffix form
-
-Various releases of the 5.13.x series have added new regular expression
-modifiers, C</a>, C</d>, C</l>, and C</u>.  They were only available in
-infix form (e.g., C<(?a:...)>) until this release; now they are usable
-in suffix form.  This change was made too late to change all the
-affected documentation, so there are a number of places that erroneously
-say these must be used in infix form.
-
-However, there is an ambiguity with the construct, C<s/foo/bar/le...>.  Due
-to backward compatibility constraints, in Perl 5.14 only, it will be
-resolved as C<s/foo/bar/ le...>, that is, as meaning to take the result
-of the substitution, and see if it is stringwise less-than-or-equal-to
-what follows. In Perl 5.16 and later, it will instead be resolved as
-meaning to do the pattern match using the rules of the current locale,
-and evaluate the rhs as an expression when doing the substitution.  In
-5.14, if you want the latter interpretation, you can write "el" instead.
-
 =head2 Add C<\p{Titlecase}> as a synonym for C<\p{Title}>
 
 This synonym is added for symmetry with the Unicode property names
 C<\p{Uppercase}> and C<\p{Lowercase}>.
-
-=head2 New regular expression modifier option C</aa>
-
-Doubling the C</a> regular expression modifier increases its effect,
-so that in case-insensitive matching, no ASCII character will match a
-non-ASCII character.  For example, normally,
-
-    'k' =~ /\N{KELVIN SIGN}/
-
-will match; it won't under C</aa>.
 
 =head2 New warnings categories for problematic (non-)Unicode code points.
 
