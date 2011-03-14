@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 67aeb7895 except for:
+This has been completed up to d24f2be2 except for:
 b3dbdd48ca2da90bce7f16d545cca54c3dc58f35 (Leon Timmermans)
 816005240f1a3b9989c940e630e829048597537c (Craig Berry)
 44caa20c7d9248fd77483468d77c9b5835e7066e (Craig Berry)
@@ -92,7 +92,10 @@ may well be none in a stable release.
 
 =item *
 
-XXX
+An earlier optimisation to speed up C<my @array = ...> and
+C<my %hash = ...> assignments caused a bug and was disabled in Perl 5.12.0.
+
+Now we have found another way to speed up these assignments [perl #82110].
 
 =back
 
@@ -412,15 +415,15 @@ large changes to the testing harness (e.g. when parallel testing was added).
 Changes to existing files in F<t/> aren't worth summarising, although the bugs
 that they represent may be covered elsewhere.
 
-Some of the tests have been refactored. In some cases they were moved to
-new files:
+Many of the tests have been refactored to use testing libraries more
+consistently. In some cases test files were created or deleted:
 
 =over 4
 
 =item *
 
 The tests for C<split /\s/> and Unicode have been moved from
-F<t/op/split.t> to F<t/op/split_unicode.t>.
+F<t/op/split.t> to the new F<t/op/split_unicode.t>.
 
 =item *
 
@@ -428,8 +431,13 @@ F<t/re/re.t> has been moved to F<ext/re/t/re_funcs_u.t>.
 
 =item *
 
-The tests for [perl #72922] have been moved from F<t/re/qr.t> to
+The tests for [perl #72922] have been moved from F<t/re/qr.t> to the new
 F<t/re/qr-72922.t>.
+
+=item *
+
+F<t/re/reg_unsafe.t> has been deleted and its only test moved to
+F<t/re/pat_advanced.t>.
 
 =back
 
