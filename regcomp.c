@@ -6996,7 +6996,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 U32 posflags = 0, negflags = 0;
 	        U32 *flagsp = &posflags;
                 bool has_charset_modifier = 0;
-		regex_charset cs = REGEX_DEPENDS_CHARSET;
+		regex_charset cs = (RExC_utf8 || RExC_uni_semantics)
+				    ? REGEX_UNICODE_CHARSET
+				    : REGEX_DEPENDS_CHARSET;
 
 		while (*RExC_parse) {
 		    /* && strchr("iogcmsx", *RExC_parse) */

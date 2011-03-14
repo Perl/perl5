@@ -2071,6 +2071,12 @@ EOP
     # RT #82610
     ok 'foo/file.fob' =~ m,^(?=[^\.])[^/]*/(?=[^\.])[^/]*\.fo[^/]$,;
 
+    {   # This was failing unless an explicit /d was added
+        my $p = qr/[\xE0_]/i;
+        utf8::upgrade($p);
+        like("\xC0", $p, "Verify \"\\xC0\" =~ /[\\xE0_]/i; pattern in utf8");
+    }
+
     #
     # Keep the following tests last -- they may crash perl
     #
