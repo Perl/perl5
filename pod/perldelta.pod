@@ -4840,6 +4840,12 @@ regular expressions that prevented the code block in
 C</((\w+)(?{ print $2 })){2}/> from seeing the C<$2> sometimes
 [perl #84294].
 
+=item *
+
+C<sprintf> now dies when passed a tainted scalar for the format. It did
+already die for arbitrary expressions, but not for simple scalars
+[perl #82250].
+
 =back
 
 =head1 Known Problems
