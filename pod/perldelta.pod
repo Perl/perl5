@@ -455,21 +455,16 @@ DTrace will print:
 
 =head1 Security
 
-=head2 Restrict \p{IsUserDefined} to In\w+ and Is\w+
+=head2 User-defined regular expression properties
 
 In L<perlunicode/"User-Defined Character Properties">, it says you can
 create custom properties by defining subroutines whose names begin with
-"In" or "Is". However, perl doesn't actually enforce that naming
-restriction, so \p{foo::bar} will call foo::Bar() if it exists.
+"In" or "Is". However, Perl did not actually enforce that naming
+restriction, so \p{foo::bar} could call foo::bar() if it existed. Now this
+convention has been enforced.
 
-This commit finally enforces this convention. Note that this broke a
-number of existing tests for properties, since they didn't always use an
-Is/In prefix.
-
-=head2 User-defined regular expression properties
-
-Perl no longer allows a tainted regular expression to invoke a user-defined
-property via C<\p{...}> syntax. It simply dies instead [perl #82616].
+Also, Perl no longer allows a tainted regular expression to invoke a
+user-defined. It simply dies instead [perl #82616].
 
 =head1 Incompatible Changes
 
