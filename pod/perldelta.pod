@@ -1880,42 +1880,6 @@ have been corrected.
 
 =back
 
-=head2 Dual-life Modules and Pragmata
-
-These modules were formerly distributed only in the Perl core
-distribution, and are now dual-lifed (meaning they are now also available
-separately on CPAN):
-
-XXX I know there are a lot more than this!
-
-=over 4
-
-=item *
-
-C<autouse>
-
-=item *
-
-C<Devel::SelfStubber>
-
-=item *
-
-C<Dumpvalue>
-
-=item *
-
-C<Env>
-
-=item *
-
-C<File::CheckTree>
-
-=item *
-
-C<I18N::Collate>
-
-=back
-
 =head2 Removed Modules and Pragmata
 
 The following modules have been removed from the core distribution, and if
