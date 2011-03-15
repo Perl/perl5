@@ -77,12 +77,24 @@ and return its status.
 
 =item kill()
 
-kill() can be used to terminate a pseudo-process by passing it the ID returned
-by fork().  This should not be used except under dire circumstances, because
-the operating system may not guarantee integrity of the process resources
-when a running thread is terminated.  Note that using kill() on a
-pseudo-process() may typically cause memory leaks, because the thread that
-implements the pseudo-process does not get a chance to clean up its resources.
+C<kill('KILL', ...)> can be used to terminate a pseudo-process by
+passing it the ID returned by fork().  This should not be used except
+under dire circumstances, because the operating system may not
+guarantee integrity of the process resources when a running thread is
+terminated.  Note that using C<kill('KILL', ...)> on a
+pseudo-process() may typically cause memory leaks, because the thread
+that implements the pseudo-process does not get a chance to clean up
+its resources.
+
+C<kill('TERM', ...)> can also be used on pseudo-processes, but the
+signal will not be delivered while the pseudo-process is blocked by a
+system call, e.g. waiting for a socket to connect, or trying to read
+from a socket with no data available.  Starting in Perl 5.14 the
+parent process will not wait for children to exit once they have been
+signalled with C<kill('TERM', ...)> to avoid deadlock during process
+exit.  You will have to explicitly call waitpid() to make sure the
+child has time to clean-up itself, but you are then also responsible
+that the child is not blocking on I/O either.
 
 =item exec()
 
@@ -137,9 +149,10 @@ to complete before they exit.  This means that the parent and every
 pseudo-child created by it that is also a pseudo-parent will only exit
 after their pseudo-children have exited.
 
-A way to mark a pseudo-processes as running detached from their parent (so
-that the parent would not have to wait() for them if it doesn't want to)
-will be provided in future.
+Starting with Perl 5.14 a parent will not wait() automatically
+for any child that has been signalled with C<sig('TERM', ...)>
+to avoid a deadlock in case the child is blocking on I/O and
+never receives the signal.
 
 =head1 CAVEATS AND LIMITATIONS
 

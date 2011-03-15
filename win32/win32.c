@@ -1310,6 +1310,14 @@ win32_kill(int pid, int sig)
                     if ((hwnd != NULL && PostMessage(hwnd, WM_USER_KILL, sig, 0)) ||
                         PostThreadMessage(-pid, WM_USER_KILL, sig, 0))
                     {
+                        /* Don't wait for child process to terminate after we send a SIGTERM
+                         * because the child may be blocked in a system call and never receive
+                         * the signal.
+                         */
+                        if (sig == SIGTERM) {
+                            Sleep(0);
+                            remove_dead_pseudo_process(child);
+                        }
                         /* It might be us ... */
                         PERL_ASYNC_CHECK();
                         return 0;
