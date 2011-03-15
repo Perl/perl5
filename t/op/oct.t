@@ -2,9 +2,9 @@
 
 # tests 51 onwards aren't all warnings clean. (intentionally)
 
-print "1..77\n";
+require './test.pl';
 
-my $test = 1;
+plan(tests => 77);
 
 sub test ($$$) {
   my ($act, $string, $value) = @_;
@@ -16,14 +16,9 @@ sub test ($$$) {
   } else {
     die "Unknown action 'act'";
   }
-  if ($value == $result) {
-    if ($^O eq 'VMS' && length $string > 256) {
-      $string = '';
-    } else {
-      $string = "\"$string\"";
-    }
-    print "ok $test # $act $string\n";
-  } else {
+  my $desc = ($^O ne 'VMS' || length $string <= 256) && "$act \"$string\"";
+
+  unless (cmp_ok($value, '==', $result, $desc)) {
     my ($valstr, $resstr);
     if ($act eq 'hex' or $string =~ /x/i) {
       $valstr = sprintf "0x%X", $value;
@@ -35,9 +30,8 @@ sub test ($$$) {
       $valstr = sprintf "0%o", $value;
       $resstr = sprintf "0%o", $result;
     }
-    print "not ok $test # $act \"$string\" gives \"$result\" ($resstr), not $value ($valstr)\n";
+    diag("$act \"$string\" gives \"$result\" ($resstr), not $value ($valstr)\n");
   }
-  $test++;
 }
 
 test ('oct', '0b1_0101', 0b101_01);
@@ -86,32 +80,31 @@ test ('oct', '0xffff_ffff', 4294967295);
 test ('hex', '0xff_ff_ff_ff', 4294967295);
 
 $_ = "\0_7_7";
-print length eq 5                      ? "ok" : "not ok", " 37\n";
-print $_ eq "\0"."_"."7"."_"."7"       ? "ok" : "not ok", " 38\n";
+is(length, 5);
+is($_, "\0"."_"."7"."_"."7");
 chop, chop, chop, chop;
-print $_ eq "\0"                       ? "ok" : "not ok", " 39\n";
+is($_, "\0");
 if (ord("\t") != 9) {
     # question mark is 111 in 1047, 037, && POSIX-BC
-    print "\157_" eq "?_"                  ? "ok" : "not ok", " 40\n";
+    is("\157_", "?_");
 }
 else {
-    print "\077_" eq "?_"                  ? "ok" : "not ok", " 40\n";
+    is("\077_", "?_");
 }
 
 $_ = "\x_7_7";
-print length eq 5                      ? "ok" : "not ok", " 41\n";
-print $_ eq "\0"."_"."7"."_"."7"       ? "ok" : "not ok", " 42\n";
+is(length, 5);
+is($_, "\0"."_"."7"."_"."7");
 chop, chop, chop, chop;
-print $_ eq "\0"                       ? "ok" : "not ok", " 43\n";
+is($_, "\0");
 if (ord("\t") != 9) {
     # / is 97 in 1047, 037, && POSIX-BC
-    print "\x61_" eq "/_"                  ? "ok" : "not ok", " 44\n";
+    is("\x61_", "/_");
 }
 else {
-    print "\x2F_" eq "/_"                  ? "ok" : "not ok", " 44\n";
+    is("\x2F_", "/_");
 }
 
-$test = 45;
 test ('oct', '0b'.(  '0'x10).'1_0101', 0b101_01);
 test ('oct', '0b'.( '0'x100).'1_0101', 0b101_01);
 test ('oct', '0b'.('0'x1000).'1_0101', 0b101_01);
@@ -146,10 +139,10 @@ test ('hex', "0x4",	 4);
 test ('hex', "x4",	 4);
 
 eval '$a = oct "10\x{100}"';
-print $@ =~ /Wide character/ ? "ok $test\n" : "not ok $test\n"; $test++;
+like($@, qr/Wide character/);
 
 eval '$a = hex "ab\x{100}"';
-print $@ =~ /Wide character/ ? "ok $test\n" : "not ok $test\n"; $test++;
+like($@, qr/Wide character/);
 
 # Allow uppercase base markers (#76296)
 
