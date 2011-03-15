@@ -836,14 +836,14 @@ as C<< m/foo/s and $bar >> but will issue a warning.
 This is a mandatory warning, not obeying -X or lexical warning bits.
 The warning is modelled on that supplied by deprecate.pm for
 deprecated-in-core .pm libraries.  It points to the specific CPAN
-distribution that contains the .pl libraries. The CPAN version, of
-course, does not generate the warning. (0111154)
+distribution that contains the .pl libraries.  The CPAN version, of
+course, does not generate the warning.
 
 =head2 List assignment to C<$[>
 
-After assignment to C<$[> has been deprecated and started to give warnings in
-perl version 5.12.0, this version of perl also starts to emit a warning when
-assigning to C<$[> in list context. This fixes an oversight in 5.12.0.
+Assignment to C<$[> was deprecated and started to give warnings in
+Perl version 5.12.0.  This version of perl also starts to emit a warning when
+assigning to C<$[> in list context.  This fixes an oversight in 5.12.0.
 
 =head2 Use of qw(...) as parentheses
 
@@ -854,7 +854,7 @@ parentheses around them:
     for $x qw(a b c) { ... }
 
 The parser no longer lies to itself in this way.  Wrap the list literal in
-parentheses, like:
+parentheses, like this:
 
     for $x (qw(a b c)) { ... }
 
@@ -880,8 +880,7 @@ there is currently no way to tie the scalar itself when it holds
 a typeglob, and no way to untie a scalar that has had a typeglob
 assigned to it.
 
-This bug was fixed in 5.13.7 but, because of the breakage it caused, the
-fix has been reverted. Now there is a deprecation warning whenever a tie
+Now there is a deprecation warning whenever a tie
 function is used on a handle without an explicit C<*>.
 
 =head2 User-defined case-mapping
@@ -892,18 +891,20 @@ It is planned to remove this feature in Perl 5.16.  A CPAN module
 providing improved functionality is being prepared for release by the
 time 5.14 is.
 
+XXX What module is that?
+
 =head2 Deprecated modules
 
 The following modules will be removed from the core distribution in a
 future release, and should be installed from CPAN instead. Distributions
 on CPAN which require these should add them to their prerequisites. The
-core versions of these modules warnings will issue a deprecation warning.
+core versions of these modules will issue a deprecation warning.
 
 If you ship a packaged version of Perl, either alone or as part of a
 larger system, then you should carefully consider the repercussions of
-core module deprecations. You may want to consider shipping your default
+core module deprecations.  You may want to consider shipping your default
 build of Perl with packages for some or all deprecated modules which
-install into C<vendor> or C<site> perl library directories. This will
+install into C<vendor> or C<site> perl library directories.  This will
 inhibit the deprecation warnings.
 
 Alternatively, you may want to consider patching F<lib/deprecate.pm>
