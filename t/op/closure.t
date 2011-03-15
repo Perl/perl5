@@ -14,8 +14,6 @@ BEGIN {
 use Config;
 require './test.pl'; # for runperl()
 
-print "1..190\n";
-
 my $test = 1;
 sub test (&) {
   my $ok = &{$_[0]};
@@ -503,10 +501,12 @@ END
 
 }
 
+curr_test($test);
+
 # The following dumps core with perl <= 5.8.0 (bugid 9535) ...
 BEGIN { $vanishing_pad = sub { eval $_[0] } }
 $some_var = 123;
-test { $vanishing_pad->( '$some_var' ) == 123 };
+is($vanishing_pad->('$some_var'), 123, 'RT #9535');
 
 # ... and here's another coredump variant - this time we explicitly
 # delete the sub rather than using a BEGIN ...
@@ -515,7 +515,7 @@ sub deleteme { $a = sub { eval '$newvar' } }
 deleteme();
 *deleteme = sub {}; # delete the sub
 $newvar = 123; # realloc the SV of the freed CV
-test { $a->() == 123 };
+is($a->(), 123, 'RT #9535');
 
 # ... and a further coredump variant - the fixup of the anon sub's
 # CvOUTSIDE pointer when the middle eval is freed, wasn't good enough to
@@ -528,7 +528,7 @@ $a = eval q(
     ]
 );
 @a = ('\1\1\1\1\1\1\1') x 100; # realloc recently-freed CVs
-test { $a->() == 123 };
+is($a->(), 123, 'RT #9535');
 
 # this coredumped on <= 5.8.0 because evaling the closure caused
 # an SvFAKE to be added to the outer anon's pad, which was then grown.
@@ -540,14 +540,14 @@ sub {
     $a = [ 99 ];
     $x->();
 }->();
-test {1};
+pass();
 
 # [perl #17605] found that an empty block called in scalar context
 # can lead to stack corruption
 {
     my $x = "foooobar";
     $x =~ s/o//eg;
-    test { $x eq 'fbar' }
+    is($x, 'fbar', 'RT #17605');
 }
 
 # DAPM 24-Nov-02
@@ -557,14 +557,12 @@ test {1};
 {
     my $x = 1;
     sub fake {
-		test { sub {eval'$x'}->() == 1 };
-	{ $x;	test { sub {eval'$x'}->() == 1 } }
-		test { sub {eval'$x'}->() == 1 };
+		is(sub {eval'$x'}->(), 1, 'RT #18286');
+	{ $x;	is(sub {eval'$x'}->(), 1, 'RT #18286'); }
+		is(sub {eval'$x'}->(), 1, 'RT #18286');
     }
 }
 fake();
-
-# undefining a sub shouldn't alter visibility of outer lexicals
 
 {
     $x = 1;
@@ -572,14 +570,14 @@ fake();
     sub tmp { sub { eval '$x' } }
     my $a = tmp();
     undef &tmp;
-    test { $a->() == 2 };
+    is($a->(), 2,
+       "undefining a sub shouldn't alter visibility of outer lexicals");
 }
 
 # handy class: $x = Watch->new(\$foo,'bar')
 # causes 'bar' to be appended to $foo when $x is destroyed
 sub Watch::new { bless [ $_[1], $_[2] ], $_[0] }
 sub Watch::DESTROY { ${$_[0][0]} .= $_[0][1] }
-
 
 # bugid 1028:
 # nested anon subs (and associated lexicals) not freed early enough
@@ -595,7 +593,7 @@ sub linger {
 {
     my $watch = '1';
     linger(\$watch);
-    test { $watch eq '12' }
+    is($watch, '12', 'RT #1028');
 }
 
 # bugid 10085
@@ -608,7 +606,7 @@ sub linger2 {
 {
     my $watch = '1';
     linger2(\$watch);
-    test { $watch eq '12' }
+    is($watch, 12, 'RT #10085');
 }
 
 # bugid 16302 - named subs didn't capture lexicals on behalf of inner subs
@@ -617,7 +615,7 @@ sub linger2 {
     my $x = 1;
     sub f16302 {
 	sub {
-	    test { defined $x and $x == 1 }
+	    is($x, 1, 'RT #16302');
 	}->();
     }
 }
@@ -631,16 +629,14 @@ f16302();
     for my $x (7,11) {
 	$a{$x} = sub { $x=$x; sub { eval '$x' } };
     }
-    test { $a{7}->()->() + $a{11}->()->() == 18 };
+    is($a{7}->()->() + $a{11}->()->(), 18);
 }
 
 {
    # bugid #23265 - this used to coredump during destruction of PL_maincv
    # and its children
 
-    my $progfile = "b23265.pl";
-    open(T, ">$progfile") or die "$0: $!\n";
-    print T << '__EOF__';
+    fresh_perl_is(<< '__EOF__', "yxx\n", {stderr => 1}, 'RT #23265');
         print
             sub {$_[0]->(@_)} -> (
                 sub {
@@ -653,23 +649,18 @@ f16302();
             , "\n"
         ;
 __EOF__
-    close T;
-    my $got = runperl(progfile => $progfile);
-    test { chomp $got; $got eq "yxx" };
-    END { 1 while unlink $progfile }
 }
 
 {
     # bugid #24914 = used to coredump restoring PL_comppad in the
     # savestack, due to the early freeing of the anon closure
 
-    my $got = runperl(stderr => 1, prog => 
-'sub d {die} my $f; $f = sub {my $x=1; $f = 0; d}; eval{$f->()}; print qq(ok\n)'
-    );
-    test { $got eq "ok\n" };
+    fresh_perl_is('sub d {die} my $f; $f = sub {my $x=1; $f = 0; d}; eval{$f->()}; print qq(ok\n)',
+		  "ok\n", {stderr => 1}, 'RT #24914');
 }
 
-# After newsub is redefined outside the BEGIN, it's CvOUTSIDE should point
+
+# After newsub is redefined outside the BEGIN, its CvOUTSIDE should point
 # to main rather than BEGIN, and BEGIN should be freed.
 
 {
@@ -681,10 +672,8 @@ __EOF__
 	sub newsub {};
 	$x = bless {}, 'X';
     }
-    test { $flag == 1 };
+    is($flag, 1);
 }
-
-# don't copy a stale lexical; crate a fresh undef one instead
 
 sub f {
     my $x if $_[0];
@@ -698,7 +687,8 @@ sub f {
 
     my $r1 = $c1->();
     my $r2 = $c2->();
-    test { $r1 != $r2 };
+    isnt($r1, $r2,
+	 "don't copy a stale lexical; crate a fresh undef one instead");
 }
 
 # [perl #63540] Don’t treat sub { if(){.....}; "constant" } as a constant
@@ -711,8 +701,8 @@ BEGIN {
   my $blonk_was_called;
   *blonk = sub { ++$blonk_was_called };
   my $ret = baz();
-  test { $ret == 0 or diag("got $ret at line ".__LINE__),0 };
-  test { $blonk_was_called };
+  is($ret, 0, 'RT #63540');
+  is($blonk_was_called, 1, 'RT #63540');
 }
 
-
+done_testing();
