@@ -472,14 +472,112 @@ user-defined. It simply dies instead [perl #82616].
 
 =head1 Incompatible Changes
 
-=head2 "C<\cI<X>>"
+Perl 5.14.0 is not binary-compatible with any previous stable release.
+
+=head2 Regular Expressions and String Escapes
+
+=head3 C<\cI<X>>
 
 The backslash-c construct was designed as a way of specifying
 non-printable characters, but there were no restrictions (on ASCII
 platforms) on what the character following the C<c> could be.  Now, that
 character must be one of the ASCII characters.
 
-=head2 Localised tied hashes and arrays are no longed tied
+=head3 \400 - \777
+
+Use of C<\400> - C<\777> in regexes in certain circumstances has given
+different, anomalous behavior than their use in all other
+double-quote-like contexts.   Since 5.10.1, a deprecated warning message
+has been raised when this happens.  Now, all double-quote-like contexts
+have the same behavior, namely to be equivalent to C<\x{100}> -
+C<\x{1FF}>, with no deprecation warning. Use of these values in the
+command line option C<"-0"> retains the current meaning to slurp input
+files whole; previously, this was documented only for C<"-0777">.  It is
+recommended, however, because of various ambiguities, to use the new
+C<\o{...}> construct to represent characters in octal.
+
+=head3 Most C<\p{}> properties are now immune to case-insensitive matching
+
+For most Unicode properties, it doesn't make sense to have them match
+differently under C</i> case-insensitive matching than not.  And doing
+so leads to unexpected results and potential security holes.  For
+example
+
+ m/\p{ASCII_Hex_Digit}+/i
+
+could previously match non-ASCII characters because of the Unicode
+matching rules.  There were a number of bugs in this feature until an
+earlier release in the 5.13 series.  Now this release reverts, and
+removes the feature completely except for the few properties where
+people have come to expect it, namely the ones where casing is an
+integral part of their functionality, such as C<m/\p{Uppercase}/i> and
+C<m/\p{Lowercase}/i>, both of which match the exact same code points,
+namely those matched by C<m/\p{Cased}/i>.  Details are in
+L<perlrecharclass/Unicode Properties>.
+
+XXX The mention of ‘until an earlier release in the 5.13 series’ needs to
+change, but I do not fully understand what happened here.
+
+User-defined property handlers that need to match differently under
+C</i> must change to read the new boolean parameter passed to it which is
+non-zero if case-insensitive matching is in effect or 0 otherwise.  See
+L<perluniprops/User-Defined Character Properties>.
+
+=head3 \p{} implies Unicode semantics
+
+Now, a Unicode property match specified in the pattern will indicate
+that the pattern is meant for matching according to Unicode rules, the way
+C<\x{}> does.
+
+=head3 Regular expressions retain their localeness when interpolated
+
+Regular expressions compiled under C<"use locale"> now retain this when
+interpolated into a new regular expression compiled outside a
+C<"use locale">, and vice-versa.
+
+Previously, a regular expression interpolated into another one inherited
+the localeness of the surrounding one, losing whatever state it
+originally had.  This is considered a bug fix, but may trip up code that
+has come to rely on the incorrect behavior.
+
+=head3 Stringification of regexes has changed
+
+Default regular expression modifiers are now notated by using
+C<(?^...)>.  Code relying on the old stringification will fail.  The
+purpose of this is so that when new modifiers are added, such code will
+not have to change (after this one time), as the stringification will
+automatically incorporate the new modifiers.
+
+Code that needs to work properly with both old- and new-style regexes
+can avoid the whole issue by using (for Perls since 5.9.5; see L<re>):
+
+ use re qw(regexp_pattern);
+ my ($pat, $mods) = regexp_pattern($re_ref);
+
+If the actual stringification is important, or older Perls need to be
+supported, you can use something like the following:
+
+    # Accept both old and new-style stringification
+    my $modifiers = (qr/foobar/ =~ /\Q(?^/) ? '^' : '-xism';
+
+And then use C<$modifiers> instead of C<-xism>.
+
+=head3 Run-time code blocks in regular expressions inherit pragmata
+
+Code blocks in regular expressions (C<(?{...})> and C<(??{...})>) used not
+to inherit any pragmata (strict, warnings, etc.) if the regular expression
+was compiled at run time as happens in cases like these two:
+
+  use re 'eval';
+  $foo =~ $bar; # when $bar contains (?{...})
+  $foo =~ /$bar(?{ $finished = 1 })/;
+
+This was a bug, which has now been fixed. But it has the potential to break
+any code that was relying on it.
+
+=head2 Stashes and Package Variables
+
+=head3 Localised tied hashes and arrays are no longed tied
 
 In the following:
 
@@ -494,32 +592,7 @@ The new local array used to be made tied too, which was fairly pointless,
 and has now been fixed. This fix could however potentially cause a change
 in behaviour of some code.
 
-=head2 C<given> return values
-
-C<given> blocks now return the last evaluated
-expression, or an empty list if the block was exited by C<break>. Thus you
-can now write:
-
-    my $type = do {
-     given ($num) {
-      break     when undef;
-      'integer' when /^[+-]?[0-9]+$/;
-      'float'   when /^[+-]?[0-9]+(?:\.[0-9]+)?$/;
-      'unknown';
-     }
-    };
-
-See L<perlsyn/Return value> for details.
-
-=head2 Naming fixes in Policy_sh.SH may invalidate Policy.sh
-
-Several long-standing typos and naming confusions in Policy_sh.SH have
-been fixed, standardizing on the variable names used in config.sh.
-
-This will change the behavior of Policy.sh if you happen to have been
-accidentally relying on the Policy.sh incorrect behavior.
-
-=head2 Stashes are now always defined
+=head3 Stashes are now always defined
 
 C<defined %Foo::> now always returns true, even when no symbols have yet been
 defined in that package.
@@ -536,37 +609,90 @@ not make C<defined %hash> false, hence C<defined %hash> is not valid code to
 determine whether an arbitrary hash is empty. Instead, use the behaviour
 that an empty C<%hash> always returns false in a scalar context.
 
-=head2 \400 - \777
+=head3 Dereferencing typeglobs
 
-Use of C<\400> - C<\777> in regexes in certain circumstances has given
-different, anomalous behavior than their use in all other
-double-quote-like contexts.   Since 5.10.1, a deprecated warning message
-has been raised when this happens.  Now, all double-quote-like contexts
-have the same behavior, namely to be equivalent to C<\x{100}> -
-C<\x{1FF}>, with no deprecation warning. Use of these values in the
-command line option C<"-0"> retains the current meaning to slurp input
-files whole; previously, this was documented only for C<"-0777">.  It is
-recommended, however, because of various ambiguities, to use the new
-C<\o{...}> construct to represent characters in octal.
+If you assign a typeglob to a scalar variable:
 
-=head2 Check API compatibility when loading XS modules
+    $glob = *foo;
 
-When perl's API changes in incompatible ways (which usually happens between
-major releases), XS modules compiled for previous versions of perl will not
-work anymore. They will need to be recompiled against the new perl.
+the glob that is copied to C<$glob> is marked with a special flag
+indicating that the glob is just a copy. This allows subsequent assignments
+to C<$glob> to overwrite the glob. The original glob, however, is
+immutable.
 
-In order to ensure that modules are recompiled, and to prevent users from
-accidentally loading modules compiled for old perls into newer ones, the
-C<XS_APIVERSION_BOOTCHECK> macro has been added. That macro, which is called
-when loading every newly compiled extension, compares the API version of the
-running perl with the version a module has been compiled for and raises an
-exception if they don't match.
+Many Perl operators did not distinguish between these two types of globs.
+This would result in strange behaviour in edge cases: C<untie $scalar>
+would do nothing if the last thing assigned to the scalar was a glob
+(because it treated it as C<untie *$scalar>, which unties a handle).
+Assignment to a glob slot (e.g., C<*$glob = \@some_array>) would simply
+assign C<\@some_array> to C<$glob>.
 
-=head2 Binary-incompatible with all previous Perls
+To fix this, the C<*{}> operator (including the C<*foo> and C<*$foo> forms)
+has been modified to make a new immutable glob if its operand is a glob
+copy. Various operators that make a distinction between globs and scalars
+have been modified to treat only immutable globs as globs. (C<tie>,
+C<tied> and C<untie> has been left as they are for compatibility's sake,
+but will warn. See L</Deprecations>.)
 
-Perl 5.14.0 is not binary-compatible with any previous stable release.
+This causes an incompatible change in code that assigns a glob to the
+return value of C<*{}> when that operator was passed a glob copy. Take the
+following code, for instance:
 
-=head2 Change in the parsing of certain prototypes
+    $glob = *foo;
+    *$glob = *bar;
+
+The C<*$glob> on the second line returns a new immutable glob. That new
+glob is made an alias to C<*bar>. Then it is discarded. So the second
+assignment has no effect.
+
+The upside to this incompatible change is that bugs [perl #77496],
+[perl #77502], [perl #77508], [perl #77688], and [perl #77812],
+and maybe others, too, have been fixed.
+
+See L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=77810> for even
+more detail.
+
+=head3 Clearing stashes
+
+Stash list assignment C<%foo:: = ()> used to make the stash anonymous
+temporarily while it was being emptied. Consequently, any of its
+subroutines referenced elsewhere would become anonymous (showing up as
+"(unknown)" in C<caller>). Now they retain their package names, such that
+C<caller> will return the original sub name if there is still a reference
+to its typeglob, or "foo::__ANON__" otherwise [perl #79208].
+
+=head3 Magic variables outside the main package
+
+In previous versions of Perl, magic variables like C<$!>, C<%SIG>, etc. would
+'leak' into other packages.  So C<%foo::SIG> could be used to access signals,
+C<${"foo::!"}> (with strict mode off) to access C's C<errno>, etc.
+
+This was a bug, or an 'unintentional' feature, which caused various ill effects,
+such as signal handlers being wiped when modules were loaded, etc.
+
+This has been fixed (or the feature has been removed, depending on how you see
+it).
+
+=head2 Changes to Syntax or to Perl Operators
+
+=head3 C<given> return values
+
+C<given> blocks now return the last evaluated
+expression, or an empty list if the block was exited by C<break>. Thus you
+can now write:
+
+    my $type = do {
+     given ($num) {
+      break     when undef;
+      'integer' when /^[+-]?[0-9]+$/;
+      'float'   when /^[+-]?[0-9]+(?:\.[0-9]+)?$/;
+      'unknown';
+     }
+    };
+
+See L<perlsyn/Return value> for details.
+
+=head3 Change in the parsing of certain prototypes
 
 Functions declared with the following prototypes now behave correctly as unary
 functions:
@@ -599,19 +725,7 @@ an unparenthesised argument:
   ?:
   = += -= *= etc.
 
-=head2 Magic variables outside the main package
-
-In previous versions of Perl, magic variables like C<$!>, C<%SIG>, etc. would
-'leak' into other packages.  So C<%foo::SIG> could be used to access signals,
-C<${"foo::!"}> (with strict mode off) to access C's C<errno>, etc.
-
-This was a bug, or an 'unintentional' feature, which caused various ill effects,
-such as signal handlers being wiped when modules were loaded, etc.
-
-This has been fixed (or the feature has been removed, depending on how you see
-it).
-
-=head2 Smart-matching against array slices
+=head3 Smart-matching against array slices
 
 Previously, the following code resulted in a successful match:
 
@@ -621,61 +735,12 @@ Previously, the following code resulted in a successful match:
 
 This odd behaviour has now been fixed [perl #77468].
 
-=head2 C API changes
-
-The first argument of the C API function C<Perl_fetch_cop_label> has changed
-from C<struct refcounted he *> to C<COP *>, to better insulate the user from
-implementation details.
-
-This API function was marked as "may change", and likely isn't in use outside
-the core.  (Neither an unpacked CPAN, nor Google's codesearch, finds any other
-references to it.)
-
-=head2 Stringification of regexes has changed
-
-Default regular expression modifiers are now notated by using
-C<(?^...)>.  Code relying on the old stringification will fail.  The
-purpose of this is so that when new modifiers are added, such code will
-not have to change (after this one time), as the stringification will
-automatically incorporate the new modifiers.
-
-Code that needs to work properly with both old- and new-style regexes
-can avoid the whole issue by using (for Perls since 5.9.5; see L<re>):
-
- use re qw(regexp_pattern);
- my ($pat, $mods) = regexp_pattern($re_ref);
-
-If the actual stringification is important, or older Perls need to be
-supported, you can use something like the following:
-
-    # Accept both old and new-style stringification
-    my $modifiers = (qr/foobar/ =~ /\Q(?^/) ? '^' : '-xism';
-
-And then use C<$modifiers> instead of C<-xism>.
-
-=head2 Regular expressions retain their localeness when interpolated
-
-Regular expressions compiled under C<"use locale"> now retain this when
-interpolated into a new regular expression compiled outside a
-C<"use locale">, and vice-versa.
-
-Previously, a regular expression interpolated into another one inherited
-the localeness of the surrounding one, losing whatever state it
-originally had.  This is considered a bug fix, but may trip up code that
-has come to rely on the incorrect behavior.
-
-=head2 Directory handles not copied to threads
-
-On systems that do not have a C<fchdir> function, newly-created threads no
-longer inherit directory handles from their parent threads. Such programs
-would probably have crashed anyway [perl #75154].
-
-=head2 Negation treats strings differently from before
+=head3 Negation treats strings differently from before
 
 The unary negation operator C<-> now treats strings that look like numbers
 as numbers [perl #57706].
 
-=head2 Negative zero
+=head3 Negative zero
 
 Negative zero (-0.0), when converted to a string, now becomes "0" on all
 platforms. It used to become "-0" on some, but "0" on others.
@@ -683,57 +748,7 @@ platforms. It used to become "-0" on some, but "0" on others.
 If you still need to determine whether a zero is negative, use
 C<sprintf("%g", $zero) =~ /^-/> or the L<Data::Float> module on CPAN.
 
-=head2 Dereferencing typeglobs
-
-If you assign a typeglob to a scalar variable:
-
-    $glob = *foo;
-
-the glob that is copied to C<$glob> is marked with a special flag
-indicating that the glob is just a copy. This allows subsequent assignments
-to C<$glob> to overwrite the glob. The original glob, however, is
-immutable.
-
-Many Perl operators did not distinguish between these two types of globs.
-This would result in strange behaviour in edge cases: C<untie $scalar>
-would do nothing if the last thing assigned to the scalar was a glob
-(because it treated it as C<untie *$scalar>, which unties a handle).
-Assignment to a glob slot (e.g., C<*$glob = \@some_array>) would simply
-assign C<\@some_array> to C<$glob>.
-
-To fix this, the C<*{}> operator (including the C<*foo> and C<*$foo> forms)
-has been modified to make a new immutable glob if its operand is a glob
-copy. Various operators that make a distinction between globs and scalars
-have been modified to treat only immutable globs as globs.
-
-This causes an incompatible change in code that assigns a glob to the
-return value of C<*{}> when that operator was passed a glob copy. Take the
-following code, for instance:
-
-    $glob = *foo;
-    *$glob = *bar;
-
-The C<*$glob> on the second line returns a new immutable glob. That new
-glob is made an alias to C<*bar>. Then it is discarded. So the second
-assignment has no effect.
-
-The upside to this incompatible change is that bugs [perl #77496],
-[perl #77502], [perl #77508], [perl #77688], and [perl #77812],
-and maybe others, too, have been fixed.
-
-See L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=77810> for even
-more detail.
-
-=head2 Clearing stashes
-
-Stash list assignment C<%foo:: = ()> used to make the stash anonymous
-temporarily while it was being emptied. Consequently, any of its
-subroutines referenced elsewhere would become anonymous (showing up as
-"(unknown)" in C<caller>). Now they retain their package names, such that
-C<caller> will return the original sub name if there is still a reference
-to its typeglob, or "foo::__ANON__" otherwise [perl #79208].
-
-=head2 C<:=> is now a syntax error
+=head3 C<:=> is now a syntax error
 
 Previously C<my $pi := 4;> was exactly equivalent to C<my $pi : = 4;>,
 with the C<:> being treated as the start of an attribute list, ending before
@@ -748,53 +763,57 @@ If it is absolutely necessary to have empty attribute lists (for example,
 because of a code generator) then avoid the error by adding a space before
 the C<=>.
 
-=head2 Run-time code block in regular expressions
+=head2 Threads and Processes
 
-Code blocks in regular expressions (C<(?{...})> and C<(??{...})>) used not
-to inherit any pragmata (strict, warnings, etc.) if the regular expression
-was compiled at run time as happens in cases like these two:
+=head3 Directory handles not copied to threads
 
-  use re 'eval';
-  $foo =~ $bar; # when $bar contains (?{...})
-  $foo =~ /$bar(?{ $finished = 1 })/;
+On systems other than Windows that do not have
+a C<fchdir> function, newly-created threads no
+longer inherit directory handles from their parent threads. Such programs
+would usually have crashed anyway [perl #75154].
 
-This was a bug, which has now been fixed. But it has the potential to break
-any code that was relying on this bug.
+=head3 C<close> on shared pipes
 
-=head2 Most C<\p{}> properties are now immune from case-insensitive matching
+The C<close> function no longer waits for the child process to exit if the
+underlying file descriptor is still in use by another thread, to avoid
+deadlocks. It returns true in such cases.
 
-For most Unicode properties, it doesn't make sense to have them match
-differently under C</i> case-insensitive matching than not.  And doing
-so leads to unexpected results and potential security holes.  For
-example
+=head2 Configuration
 
- m/\p{ASCII_Hex_Digit}+/i
+=head3 Naming fixes in Policy_sh.SH may invalidate Policy.sh
 
-could previously match non-ASCII characters because of the Unicode
-matching rules.  There were a number of bugs in this feature until an
-earlier release in the 5.13 series.  Now this release reverts, and
-removes the feature completely except for the few properties where
-people have come to expect it, namely the ones where casing is an
-integral part of their functionality, such as C<m/\p{Uppercase}/i> and
-C<m/\p{Lowercase}/i>, both of which match the exact same code points,
-namely those matched by C<m/\p{Cased}/i>.  Details are in
-L<perlrecharclass/Unicode Properties>.
+Several long-standing typos and naming confusions in Policy_sh.SH have
+been fixed, standardizing on the variable names used in config.sh.
 
-XXX The mention of ‘until an earlier release in the 5.13 series’ needs to
-change, but I do not fully understand what happened here.
+This will change the behavior of Policy.sh if you happen to have been
+accidentally relying on the Policy.sh incorrect behavior.
 
-User-defined property handlers that need to match differently under
-C</i> must change to read the new boolean parameter passed to it which is
-non-zero if case-insensitive matching is in effect or 0 otherwise.  See
-L<perluniprops/User-Defined Character Properties>.
+=head2 C API changes
 
-=head2 regex: \p{} in pattern implies Unicode semantics
+=head3 Check API compatibility when loading XS modules
 
-Now, a Unicode property match specified in the pattern will indicate
-that the pattern is meant for matching according to Unicode rules, the way
-C<\x{}> does.
+When perl's API changes in incompatible ways (which usually happens between
+major releases), XS modules compiled for previous versions of perl will not
+work anymore. They will need to be recompiled against the new perl.
 
-=head2 GvCV() and GvGP() are no longer lvalues
+In order to ensure that modules are recompiled, and to prevent users from
+accidentally loading modules compiled for old perls into newer ones, the
+C<XS_APIVERSION_BOOTCHECK> macro has been added. That macro, which is called
+when loading every newly compiled extension, compares the API version of the
+running perl with the version a module has been compiled for and raises an
+exception if they don't match.
+
+=head3 Perl_fetch_cop_label
+
+The first argument of the C API function C<Perl_fetch_cop_label> has changed
+from C<struct refcounted he *> to C<COP *>, to better insulate the user from
+implementation details.
+
+This API function was marked as "may change", and likely isn't in use outside
+the core.  (Neither an unpacked CPAN, nor Google's codesearch, finds any other
+references to it.)
+
+=head3 GvCV() and GvGP() are no longer lvalues
 
 The new GvCV_set() and GvGP_set() macros are now provided to replace
 assignment to those two macros.
@@ -802,12 +821,6 @@ assignment to those two macros.
 This allows a future commit to eliminate some backref magic between GV
 and CVs, which will require complete control over assignment to the
 gp_cv slot.
-
-=head2 C<close> on shared pipes
-
-The C<close> function no longer waits for the child process to exit if the
-underlying file descriptor is still in use by another thread, to avoid
-deadlocks. It returns true in such cases.
 
 =head1 Deprecations
 
@@ -2872,6 +2885,9 @@ less likely to get stuck in a mail queue somewhere. (019cfd2)
 =back
 
 =head1 Configuration and Compilation
+
+See also L</"Naming fixes in Policy_sh.SH may invalidate Policy.sh">,
+above.
 
 =over 4
 
