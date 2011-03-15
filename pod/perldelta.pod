@@ -455,7 +455,71 @@ DTrace will print:
 
 =head2 New C APIs
 
-See L</Internal Changes>.
+=head3 CLONE_PARAMS structure added to ease correct thread creation
+
+Modules that create threads should now create C<CLONE_PARAMS> structures
+by calling the new function C<Perl_clone_params_new()>, and free them with
+C<Perl_clone_params_del()>. This will ensure compatibility with any future
+changes to the internals of the C<CLONE_PARAMS> structure layout, and that
+it is correctly allocated and initialised.
+
+=head3 API function to parse statements
+
+The C<parse_fullstmt> function has been added to allow parsing of a single
+complete Perl statement.  See L<perlapi> for details.
+
+=head3 API functions for accessing the runtime hinthash
+
+A new C API for introspecting the hinthash C<%^H> at runtime has been added.
+See C<cop_hints_2hv>, C<cop_hints_fetchpvn>, C<cop_hints_fetchpvs>,
+C<cop_hints_fetchsv>, and C<hv_copy_hints_hv> in L<perlapi> for details.
+
+=head3 C interface to C<caller()>
+
+The C<caller_cx> function has been added as an XSUB-writer's equivalent of
+C<caller()>.  See L<perlapi> for details.
+
+=head3 Custom per-subroutine check hooks
+
+XS code in an extension module can now annotate a subroutine (whether
+implemented in XS or in Perl) so that nominated XS code will be called
+at compile time (specifically as part of op checking) to change the op
+tree of that subroutine.  The compile-time check function (supplied by
+the extension module) can implement argument processing that can't be
+expressed as a prototype, generate customised compile-time warnings,
+perform constant folding for a pure function, inline a subroutine
+consisting of sufficiently simple ops, replace the whole call with a
+custom op, and so on.  This was previously all possible by hooking the
+C<entersub> op checker, but the new mechanism makes it easy to tie the
+hook to a specific subroutine.  See L<perlapi/cv_set_call_checker>.
+
+To help in writing custom check hooks, several subtasks within standard
+C<entersub> op checking have been separated out and exposed in the API.
+
+=head3 Improved support for custom OPs
+
+Custom ops can now be registered with the new C<custom_op_register> C
+function and the C<XOP> structure. This will make it easier to add new
+properties of custom ops in the future. Two new properties have been added
+already, C<xop_class> and C<xop_peep>.
+
+C<xop_class> is one of the OA_*OP constants, and allows L<B> and other
+introspection mechanisms to work with custom ops that aren't BASEOPs.
+C<xop_peep> is a pointer to a function that will be called for ops of this
+type from C<Perl_rpeep>.
+
+See L<perlguts/Custom Operators> and L<perlapi/Custom Operators> for more
+detail.
+
+The old C<PL_custom_op_names>/C<PL_custom_op_descs> interface is still
+supported but discouraged.
+
+=head3 Return value of C<delete $+{...}>
+
+Custom regular expression engines can now determine the return value of
+C<delete> on an entry of C<%+> or C<%->.
+
+XXX Mention the actual API.
 
 =head1 Security
 
@@ -3264,79 +3328,7 @@ like in the other BSD dialects.
 
 =head1 Internal Changes
 
-=head2 New APIs
-
-=head2 CLONE_PARAMS structure added to ease correct thread creation
-
-Modules that create threads should now create C<CLONE_PARAMS> structures
-by calling the new function C<Perl_clone_params_new()>, and free them with
-C<Perl_clone_params_del()>. This will ensure compatibility with any future
-changes to the internals of the C<CLONE_PARAMS> structure layout, and that
-it is correctly allocated and initialised.
-
-=head2 API function to parse statements
-
-The C<parse_fullstmt> function has been added to allow parsing of a single
-complete Perl statement.  See L<perlapi> for details.
-
-=head2 API functions for accessing the runtime hinthash
-
-A new C API for introspecting the hinthash C<%^H> at runtime has been added.
-See C<cop_hints_2hv>, C<cop_hints_fetchpvn>, C<cop_hints_fetchpvs>,
-C<cop_hints_fetchsv>, and C<hv_copy_hints_hv> in L<perlapi> for details.
-
-=head2 C interface to C<caller()>
-
-The C<caller_cx> function has been added as an XSUB-writer's equivalent of
-C<caller()>.  See L<perlapi> for details.
-
-=head2 Custom per-subroutine check hooks
-
-XS code in an extension module can now annotate a subroutine (whether
-implemented in XS or in Perl) so that nominated XS code will be called
-at compile time (specifically as part of op checking) to change the op
-tree of that subroutine.  The compile-time check function (supplied by
-the extension module) can implement argument processing that can't be
-expressed as a prototype, generate customised compile-time warnings,
-perform constant folding for a pure function, inline a subroutine
-consisting of sufficiently simple ops, replace the whole call with a
-custom op, and so on.  This was previously all possible by hooking the
-C<entersub> op checker, but the new mechanism makes it easy to tie the
-hook to a specific subroutine.  See L<perlapi/cv_set_call_checker>.
-
-To help in writing custom check hooks, several subtasks within standard
-C<entersub> op checking have been separated out and exposed in the API.
-
-=head2 Improved support for custom OPs
-
-Custom ops can now be registered with the new C<custom_op_register> C
-function and the C<XOP> structure. This will make it easier to add new
-properties of custom ops in the future. Two new properties have been added
-already, C<xop_class> and C<xop_peep>.
-
-C<xop_class> is one of the OA_*OP constants, and allows L<B> and other
-introspection mechanisms to work with custom ops that aren't BASEOPs.
-C<xop_peep> is a pointer to a function that will be called for ops of this
-type from C<Perl_rpeep>.
-
-See L<perlguts/Custom Operators> and L<perlapi/Custom Operators> for more
-detail.
-
-The old C<PL_custom_op_names>/C<PL_custom_op_descs> interface is still
-supported but discouraged.
-
-=head2 Return value of C<delete $+{...}>
-
-Custom regular expression engines can now determine the return value of
-C<delete> on an entry of C<%+> or C<%->.
-
-XXX Mention the actual API.
-
-=head2 Changes to existing APIs
-
-XXX This probably contains also internal changes unrelated to APIs. It
-needs to be sorted out. Maybe we also need an ‘Other Changes’ or ‘Really
-Internal Changes’ section.
+See also L</New C APIs>, L</C API Changes> and L</Deprecated C APIs>, above.
 
 =over 4
 
