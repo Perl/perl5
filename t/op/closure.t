@@ -12,34 +12,27 @@ BEGIN {
 }
 
 use Config;
-require './test.pl'; # for runperl()
-
-my $test = 1;
-sub test (&) {
-  my $ok = &{$_[0]};
-  print $ok ? "ok $test\n" : "not ok $test\n";
-  printf "# Failed at line %d\n", (caller)[2] unless $ok;
-  $test++;
-}
+require './test.pl';
 
 my $i = 1;
 sub foo { $i = shift if @_; $i }
 
 # no closure
-test { foo == 1 };
+is(foo, 1);
 foo(2);
-test { foo == 2 };
+is(foo, 2);
 
 # closure: lexical outside sub
 my $foo = sub {$i = shift if @_; $i };
 my $bar = sub {$i = shift if @_; $i };
-test {&$foo() == 2 };
+is(&$foo(), 2);
 &$foo(3);
-test {&$foo() == 3 };
+is(&$foo(), 3);
 # did the lexical change?
-test { foo == 3 and $i == 3};
+is(foo, 3, 'lexical changed');
+is($i, 3, 'lexical changed');
 # did the second closure notice?
-test {&$bar() == 3 };
+is(&$bar(), 3, 'second closure noticed');
 
 # closure: lexical inside sub
 sub bar {
@@ -49,10 +42,10 @@ sub bar {
 
 $foo = bar(4);
 $bar = bar(5);
-test {&$foo() == 4 };
+is(&$foo(), 4);
 &$foo(6);
-test {&$foo() == 6 };
-test {&$bar() == 5 };
+is(&$foo(), 6);
+is(&$bar(), 5);
 
 # nested closures
 sub bizz {
@@ -67,14 +60,14 @@ sub bizz {
 }
 $foo = bizz();
 $bar = bizz();
-test {&$foo() == 7 };
+is(&$foo(), 7);
 &$foo(8);
-test {&$foo() == 8 };
-test {&$bar() == 7 };
+is(&$foo(), 8);
+is(&$bar(), 7);
 
 $foo = bizz(9);
 $bar = bizz(10);
-test {&$foo(11)-1 == &$bar()};
+is(&$foo(11)-1, &$bar());
 
 my @foo;
 for (qw(0 1 2 3 4)) {
@@ -82,25 +75,21 @@ for (qw(0 1 2 3 4)) {
   $foo[$_] = sub {$i = shift if @_; $i };
 }
 
-test {
-  &{$foo[0]}() == 0 and
-  &{$foo[1]}() == 1 and
-  &{$foo[2]}() == 2 and
-  &{$foo[3]}() == 3 and
-  &{$foo[4]}() == 4
-  };
+is(&{$foo[0]}(), 0);
+is(&{$foo[1]}(), 1);
+is(&{$foo[2]}(), 2);
+is(&{$foo[3]}(), 3);
+is(&{$foo[4]}(), 4);
 
 for (0 .. 4) {
   &{$foo[$_]}(4-$_);
 }
 
-test {
-  &{$foo[0]}() == 4 and
-  &{$foo[1]}() == 3 and
-  &{$foo[2]}() == 2 and
-  &{$foo[3]}() == 1 and
-  &{$foo[4]}() == 0
-  };
+is(&{$foo[0]}(), 4);
+is(&{$foo[1]}(), 3);
+is(&{$foo[2]}(), 2);
+is(&{$foo[3]}(), 1);
+is(&{$foo[4]}(), 0);
 
 sub barf {
   my @foo;
@@ -112,25 +101,21 @@ sub barf {
 }
 
 @foo = barf();
-test {
-  &{$foo[0]}() == 0 and
-  &{$foo[1]}() == 1 and
-  &{$foo[2]}() == 2 and
-  &{$foo[3]}() == 3 and
-  &{$foo[4]}() == 4
-  };
+is(&{$foo[0]}(), 0);
+is(&{$foo[1]}(), 1);
+is(&{$foo[2]}(), 2);
+is(&{$foo[3]}(), 3);
+is(&{$foo[4]}(), 4);
 
 for (0 .. 4) {
   &{$foo[$_]}(4-$_);
 }
 
-test {
-  &{$foo[0]}() == 4 and
-  &{$foo[1]}() == 3 and
-  &{$foo[2]}() == 2 and
-  &{$foo[3]}() == 1 and
-  &{$foo[4]}() == 0
-  };
+is(&{$foo[0]}(), 4);
+is(&{$foo[1]}(), 3);
+is(&{$foo[2]}(), 2);
+is(&{$foo[3]}(), 1);
+is(&{$foo[4]}(), 0);
 
 # test if closures get created in optimized for loops
 
@@ -139,25 +124,21 @@ for my $n ('A'..'E') {
     $foo{$n} = sub { $n eq $_[0] };
 }
 
-test {
-  &{$foo{A}}('A') and
-  &{$foo{B}}('B') and
-  &{$foo{C}}('C') and
-  &{$foo{D}}('D') and
-  &{$foo{E}}('E')
-};
+ok(&{$foo{A}}('A'));
+ok(&{$foo{B}}('B'));
+ok(&{$foo{C}}('C'));
+ok(&{$foo{D}}('D'));
+ok(&{$foo{E}}('E'));
 
 for my $n (0..4) {
     $foo[$n] = sub { $n == $_[0] };
 }
 
-test {
-  &{$foo[0]}(0) and
-  &{$foo[1]}(1) and
-  &{$foo[2]}(2) and
-  &{$foo[3]}(3) and
-  &{$foo[4]}(4)
-};
+ok(&{$foo[0]}(0));
+ok(&{$foo[1]}(1));
+ok(&{$foo[2]}(2));
+ok(&{$foo[3]}(3));
+ok(&{$foo[4]}(4));
 
 for my $n (0..4) {
     $foo[$n] = sub {
@@ -166,25 +147,21 @@ for my $n (0..4) {
 		   };
 }
 
-test {
-  $foo[0]->()->(0) and
-  $foo[1]->()->(1) and
-  $foo[2]->()->(2) and
-  $foo[3]->()->(3) and
-  $foo[4]->()->(4)
-};
+ok($foo[0]->()->(0));
+ok($foo[1]->()->(1));
+ok($foo[2]->()->(2));
+ok($foo[3]->()->(3));
+ok($foo[4]->()->(4));
 
 {
     my $w;
     $w = sub {
 	my ($i) = @_;
-	test { $i == 10 };
+	is($i, 10);
 	sub { $w };
     };
     $w->(10);
 }
-
-curr_test($test);
 
 # Additional tests by Tom Phoenix <rootbeer@teleport.com>.
 
