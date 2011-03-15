@@ -433,6 +433,13 @@ method support still works as expected:
   open my $fh, ">", $file;
   $fh->autoflush(1);        # IO::File not loaded
 
+=head3 IPv6 support
+
+The C<Socket> module provides new affordances for IPv6,
+including implementations of the C<Socket::getaddrinfo()> and
+C<Socket::getnameinfo()> functions, along with related constants, and a
+handful of new functions.  See L<Socket>.
+
 =head3 DTrace probes now include package name
 
 The DTrace probes now include an additional argument (C<arg3>) which contains
@@ -1249,29 +1256,48 @@ C<Archive::Extract> has been upgraded from version 0.38 to 0.48.
 
 Updates since 0.38 include: a safe print method that guards
 Archive::Extract from changes to $\; a fix to the tests when run in core
-perl; support for TZ files; and a modification for the lzma logic to favour
-IO::Uncompress::Unlzma
-
-Resolves an issue with NetBSD-current and its new unzip 
+perl; support for TZ files; a modification for the lzma
+logic to favour IO::Uncompress::Unlzma; and a fix
+for an issue with NetBSD-current and its new unzip 
 executable.
 
 =item *
 
 C<Archive::Tar> has been upgraded from version 1.54 to 1.76.
 
-Important changes since 1.54 include: compatibility with busybox
-implementations of tar; a fix so that C<write()> and C<create_archive()>
-close only handles they opened; and a bug was fixed regarding the exit code
-of extract_archive. (afabe0e)
+Important changes since 1.54 include the following:
 
-Among other things, the new version adds a new option to C<ptar> to allow safe
+=over
+
+=item *
+
+Compatibility with busybox implementations of tar
+
+=item *
+
+A fix so that C<write()> and C<create_archive()>
+close only handles they opened
+
+=item *
+
+A bug was fixed regarding the exit code of extract_archive.
+
+=item *
+
+C<ptar> has a new option to allow safe
 creation of tarballs without world-writable files on Windows, allowing those
 archives to be uploaded to CPAN.
 
-This adds the ptargrep utility for using regular expressions against 
+=item *
+
+A new ptargrep utility for using regular expressions against 
 the contents of files in a tar archive.
 
-Skip extracting pax extended headers.
+=item *
+
+Pax extended headers are now skipped.
+
+=back
 
 =item *
 
@@ -1297,20 +1323,18 @@ It no longer produces mangled output with the C<-tree> option
 
 C<B::Deparse> has been upgraded from version 0.96 to 1.02.
 
-A bug has been fixed when deparsing a nextstate op that has both a
+The deparsing of a nextstate op has changed when it has both a
 change of package (relative to the previous nextstate), or a change of
 C<%^H> or other state, and a label.  Previously the label was emitted
-first, leading to syntactically invalid output because a label is not
-permitted immediately before a package declaration, B<BEGIN> block,
-or some other things.  Now the label is emitted last.
+first, but now the label is emitted last.
 
-The 'no 5.13.2' or similar form is now correctly handled by B::Deparse.
+The C<no 5.13.2> or similar form is now correctly handled by B::Deparse.
 
 B::Deparse now properly handles the code that applies a conditional
 pattern match against implicit C<$_> as it was fixed in [perl #20444].
 
-It fixes deparsing of C<our> followed by a variable with funny characters
-(as permitted under the C<utf8> pragma) [perl #33752].
+Deparsing of C<our> followed by a variable with funny characters
+(as permitted under the C<utf8> pragma) has also been fixed [perl #33752].
 
 =item *
 
@@ -1326,7 +1350,7 @@ backtraces (best case), or obscure fatal errors (worst case)
 This fixes certain cases of C<Bizarre copy of ARRAY> caused by modules
 overriding C<caller()> incorrectly.
 
-It now avoids using regular expressions that cause perl to
+It now also avoids using regular expressions that cause perl to
 load its Unicode tables, in order to avoid the 'BEGIN not safe after
 errors' error that will ensue if there has been a syntax error
 [perl #82854].
@@ -1336,51 +1360,49 @@ errors' error that will ensue if there has been a syntax error
 C<CGI> has been upgraded from version 3.48 to 3.51.
 
 This provides the following security fixes: the MIME boundary in 
-multipart_init is now random and improvements to the handling of 
-newlines embedded in header values.
-
-The documentation for param_fetch() has been corrected and clarified.
+multipart_init is now random and the handling of 
+newlines embedded in header values has been improved.
 
 =item *
 
 C<Compress::Raw::Bzip2> has been upgraded from version 2.024 to 2.033.
 
-Updated to use bzip2 1.0.6
+It has been updated to use bzip2 1.0.6.
 
 =item *
 
-C<CPAN> has been upgraded from version 1.94_56 to 1.9600.
+C<CPAN> has been upgraded from version 1.94_56 to 1.9600.-
+
+Major highlights:
 
 =over 4
 
-=item * release 1.94_57
+=item * much less configuration dialog hassle
 
-=item * bugfix: treat modules correctly that are deprecated in perl 5.12.
+=item * support for META/MYMETA.json
 
-=item * bugfix: RT #57482 and #57788 revealed that configure_requires
-implicitly assumed build_requires instead of normal requires. (Reported
-by Andrew Whatson and Father Chrysostomos respectively)
+=item * support for local::lib
 
-=item * testfix: solaris should run the tests without expect because (some?)
-solaris have a broken expect 
+=item * support for HTTP::Tiny to reduce the dependency on ftp sites 
 
-=item * testfix: run tests with cache_metadata off to prevent spill over
-effects from previous test runs
+=item * automatic mirror selection
+
+=item * iron out all known bugs in configure_requires
+
+=item * support for distributions compressed with bzip2
+
+=item * allow Foo/Bar.pm on the commandline to mean Foo::Bar
 
 =back
-
-Includes support for META.json and MYMETA.json.
 
 =item *
 
 C<CPANPLUS> has been upgraded from version 0.90 to 0.9102.
 
-Fixed the shell test to skip if test is not being run under a terminal;
-resolved the issue where a prereq on Config would not be recognised as a
-core module.
+A dependency on Config was not recognised as a
+core module dependency.  This has been fixed.
 
-Includes support for META.json and MYMETA.json and a change to
-using Digest::SHA for CPAN checksums.
+CPANPLUS now includes support for META.json and MYMETA.json.
 
 =item *
 
@@ -1389,8 +1411,8 @@ C<Data::Dumper> has been upgraded from version 2.125 to 2.130_02.
 The indentation used to be off when C<$Data::Dumper::Terse> was set. This
 has been fixed [perl #73604].
 
-This fixes a crash when using custom sort functions that might cause the stack
-to change.
+This upgrade also fixes a crash when using custom sort functions that might
+cause the stack to change [perl #74170].
 
 C<Dumpxs> no longer crashes with globs returned by C<*$io_ref>
 [perl #72332].
@@ -1404,7 +1426,7 @@ C<use Devel::DProf> and C<perl -d:DProf ...> still behave as before and start
 the profiler.
 
 NOTE: C<Devel::DProf> is deprecated and will be removed from a future
-version of Perl. We strongly recommend that you install and use
+version of Perl.  We strongly recommend that you install and use
 L<Devel::NYTProf> instead, as it offers significantly improved
 profiling and reporting.
 
@@ -1430,7 +1452,8 @@ C<shasum> now more closely mimics C<sha1sum>/C<md5sum>.
 
 C<Addfile> accepts all POSIX filenames.
 
-New SHA-512/224 and SHA-512/256 transforms ref. NIST Draft FIPS 180-4 (February 2011)
+New SHA-512/224 and SHA-512/256 transforms (ref. NIST Draft FIPS 180-4
+[February 2011])
 
 =item *
 
@@ -1447,15 +1470,14 @@ inherit from DynaLoader [perl #84358].
 C<Encode> has been upgraded from version 2.39 to 2.42.
 
 Now, all 66 Unicode non-characters are treated the same way U+FFFF has
-always been treated; if it was disallowed, all 66 are disallowed; if it
-warned, all 66 warn.
+always been treated; in cases when it was disallowed, all 66 are
+disallowed; in those cases where it warned, all 66 warn.
 
 =item *
 
 C<Errno> has been upgraded from version 1.11 to 1.13.
 
 The implementation of C<Errno> has been refactored to use about 55% less memory.
-There should be no user-visible changes.
 
 On some platforms with unusual header files, like Win32/gcc using mingw64
 headers, some constants which weren't actually error numbers have been exposed
@@ -1473,20 +1495,20 @@ C<ExtUtils::Constant> has been upgraded from 0.22 to 0.23.
 
 The C<AUTOLOAD> helper code generated by C<ExtUtils::Constant::ProxySubs>
 can now C<croak> for missing constants, or generate a complete C<AUTOLOAD>
-subroutine in XS, allowing simplification of many modules that use it.
-(C<Fcntl>, C<File::Glob>, C<GDBM_File>, C<I18N::Langinfo>, C<POSIX>, C<Socket>)
+subroutine in XS, allowing simplification of many modules that use it
+(C<Fcntl>, C<File::Glob>, C<GDBM_File>, C<I18N::Langinfo>, C<POSIX>,
+C<Socket>).
 
 C<ExtUtils::Constant::ProxySubs> can now optionally push the names of all
-constants onto the package's C{@EXPORT_OK}. This has been used to replace
-less space-efficient code in C<B>, helping considerably shrink the size of its
-shared object.
+constants onto the package's C<@EXPORT_OK>.
 
 =item *
 
 C<File::DosGlob> has been upgraded from version 1.01 to 1.03.
 
 It allows patterns containing literal parentheses (they no longer need to
-be escaped). On Windows, it no longer adds an extra F<./> to the file names
+be escaped).  On Windows, it no longer
+adds an extra F<./> to the file names
 returned when the pattern is a relative glob with a drive specification,
 like F<c:*.pl> [perl #71712].
 
@@ -1503,7 +1525,7 @@ Dragonfly BSD for the C<http> and C<ftp> schemes.
 
 C<File::Find> has been upgraded from version 1.15 to 1.18.
 
-It improves handling of backslashes on Windows, so that paths such as
+It improves handling of backslashes on Windows, so that paths like
 F<c:\dir\/file> are no longer generated [perl #71710].
 
 =item *
@@ -1523,8 +1545,8 @@ This fixes a memory leak when DBM filters are used.
 
 C<Hash::Util> has been upgraded from 0.07 to 0.10.
 
-Hash::Util now enables "no warnings 'uninitialized'" to suppress spurious
-warnings from undefined hash values [perl #74280].
+Hash::Util no longer emits spurious "uninitialized" warnings when
+recursively locking hashes that have undefined values [perl #74280].
 
 =item *
 
@@ -1545,7 +1567,8 @@ closed or invalid.
 
 C<IPC::Cmd> has been upgraded from version 0.54 to 0.68.
 
-Resolves an issue with splitting Win32 command lines.
+Resolves an issue with splitting Win32 command lines.  An argument
+consisting of the single character "0" used to be omitted (CPAN RT #62961).
 
 =item *
 
@@ -1561,24 +1584,15 @@ descriptor now works [perl #76474].
 
 =item *
 
-The Locale-Codes distribution has been upgraded from version 2.07 to 3.16.
-
-Locale::Country, Locale::Language and Locale::Currency were updated from
-3.12 to 3.13 of the Locale-Codes distribution to include locale code changes.
-
-Adds some codes.
-
-=item *
-
 C<Locale::Maketext> has been upgraded from version 1.14 to 1.17.
 
-Locale::Maketext guts have been merged back into the main module
-and adds external cache support
+Locale::Maketext now supports external caches.
 
-It fixes an infinite loop in C<Locale::Maketext::Guts::_compile()> when
+This upgrade also fixes an infinite loop in
+C<Locale::Maketext::Guts::_compile()> when
 working with tainted values (CPAN RT #40727).
 
-C<< ->maketext >> calls will now backup and restore C<$@> so that error
+C<< ->maketext >> calls will now back up and restore C<$@> so that error
 messages are not suppressed (CPAN RT #34182).
 
 =item *
@@ -1588,7 +1602,7 @@ C<Math::BigInt> has been upgraded from version 1.89_01 to 1.994.
 This fixes, among other things, incorrect results when computing binomial
 coefficients [perl #77640].
 
-This prevents C<sqrt($int)> from crashing under C<use bigrat;>
+It also prevents C<sqrt($int)> from crashing under C<use bigrat;>
 [perl #73534].
 
 =item *
@@ -1621,19 +1635,14 @@ still generated, as well.
 C<Module::CoreList> has been upgraded from version 2.29 to XXX.
 
 Besides listing the updated core modules of this release, it also stops listing
-the C<Filespec> module. That module never existed in core. The scripts
+the C<Filespec> module.  That module never existed in core.  The scripts
 generating C<Module::CoreList> confused it with C<VMS::Filespec>, which actually
-is a core module, since the time of perl 5.8.7.
+is a core module as of perl 5.8.7.
 
 =item *
 
-C<NDBM_File> has been upgraded from 1.08 to 1.11.
-
-This fixes a memory leak when DBM filters are used.
-
-=item *
-
-C<ODBM_File> has been upgraded from 1.08 to 1.09.
+C<NDBM_File> and C<ODBM_File> have been upgraded from 1.08 to 1.11, and
+from 1.08 to 1.09, respectively.
 
 This fixes a memory leak when DBM filters are used.
 
@@ -1644,15 +1653,13 @@ C<overload> has been upgraded from 1.11 to 1.12.
 C<overload::Method> can now handle subroutines that are themselves blessed
 into overloaded classes [perl #71998].
 
-Avoid a taint problem in use of sprintf.
-
 The documentation has greatly improved. See L</Documentation> below.
 
 =item *
 
 C<Parse::CPAN::Meta> has been upgraded from version 1.40 to 1.4401.
 
-The latest Parse::CPAN::Meta can now read YAML or JSON files using
+The latest Parse::CPAN::Meta can now read YAML and JSON files using
 L<CPAN::Meta::YAML> and L<JSON::PP>, which are now part of the Perl core.
 
 =item *
@@ -1670,18 +1677,12 @@ It now includes constants for POSIX signal constants.
 
 =item *
 
-C<re> has been upgraded from version 0.11 to 0.15.
+C<re> has been upgraded from version 0.11 to 0.17.
 
 New C<use re "/flags"> pragma
 
-Enforce that C</d>, C</u>, and C</l> are mutually exclusive.
-
-C<re> has been upgraded from version 0.16 to 0.17.
-
-It now supports the double-a flag: C<use re '/aa';>
-
 The C<regmust> function used to crash when called on a regular expression
-belonging to a pluggable engine. Now it has been disabled for those.
+belonging to a pluggable engine.  Now it croaks instead.
 
 C<regmust> no longer leaks memory.
 
@@ -1708,13 +1709,9 @@ backtrace [perl #72340].
 
 =item *
 
-C<Socket> has been upgraded from version 1.87 to XXX.
+C<Socket> has been upgraded from version 1.87 to 1.94.
 
-It has several new functions for handling IPv6 addresses. (from 5.13.8)
-
-It provides new affordances for IPv6,
-including implementations of the C<Socket::getaddrinfo()> and
-C<Socket::getnameinfo()> functions, along with related constants.
+See L</IPv6 support>, above.
 
 =item *
 
@@ -1723,20 +1720,13 @@ C<Storable> has been upgraded from version 2.22 to 2.27.
 Includes performance improvement for overloaded classes.
 
 This adds support for serialising code references that contain UTF-8 strings
-correctly. The Storable minor version number changed as a result, meaning that
+correctly.  The Storable minor version
+number changed as a result, meaning that
 Storable users who set C<$Storable::accept_future_minor> to a C<FALSE> value
 will see errors (see L<Storable/FORWARD COMPATIBILITY> for more details).
 
 Freezing no longer gets confused if the Perl stack gets reallocated
 during freezing [perl #80074].
-
-=item *
-
-C<Test::Harness> has been upgraded from version 3.17 to 3.23.
-
-The core update from Test-Harness 3.17 to 3.21 fixed some things, but
-also L<introduced a known problem|/"Known Problems"> with argument
-passing to non-Perl tests. (5.13.3)
 
 =item *
 
@@ -1749,10 +1739,8 @@ implicit C<done_testing()> added to them.
 
 C<Thread::Semaphore> has been upgraded from version 2.09 to 2.12.
 
-Added new methods -E<gt>down_nb() and -E<gt>down_force() at the suggestion
-of Rick Garlick.
-
-Refactored methods to skip argument validation when no argument is supplied.
+It provides two new methods that give more control over the decrementing of
+semaphores: C<down_nb> and C<down_force>.
 
 =item *
 
@@ -1764,18 +1752,11 @@ Calling C<< Tie::Hash-E<gt>TIEHASH() >> used to loop forever.  Now it C<croak>s.
 
 C<Unicode::Collate> has been upgraded from version 0.52_01 to 0.73.
 
-Includes Unicode Collation Algorithm 18
+Unicode::Collate has been updated to use Unicode 6.0.0.
 
-Among other things, it is now using UCA Revision 20 (based on Unicode 5.2.0) and
-supports a couple of new locales.
-
-U::C::Locale newly supports locales: ar, be, bg, de__phonebook, hu, hy, kk, mk, nso, om, 
-tn, vi, hr, ig, ru, sq, se, sr, to and uk
-
-This release newly adds locales C<ja> C<ko> and C<zh> and its variants 
-( C<zh__big5han>, C<zh__gb2312han>, C<zh__pinyin>, C<zh__stroke> ).
-
-Supported UCA_Version 22 for Unicode 6.0.0.
+Unicode::Collate::Locale now supports a plethora of new locales: ar, be,
+bg, de__phonebook, hu, hy, kk, mk, nso, om, tn, vi, hr, ig, ja, ko, ru, sq, 
+se, sr, to, uk, zh, zh__big5han, zh__gb2312han, zh__pinyin and zh__stroke.
 
 The following modules have been added:
 
@@ -1797,9 +1778,6 @@ tailoring of CJK Unified Ideographs in the order of CLDR's pinyin ordering.
 C<Unicode::Collate::CJK::Stroke> for C<zh__stroke> which makes
 tailoring of CJK Unified Ideographs in the order of CLDR's stroke ordering.
 
-DUCET has been updated for Unicode 6.0.0 as Collate/allkeys.txt and
-the default UCA_Version is 22.
-
 This also sees the switch from using the pure-perl version of this
 module to the XS version.
 
@@ -1807,11 +1785,12 @@ module to the XS version.
 
 C<Unicode::UCD> has been upgraded from version 0.27 to 0.32.
 
-Add info about named sequence alternatives.
+A new function, C<Unicode::UCD::num()>, has been added.  This function
+returns the numeric value of the string passed it or C<undef> if the string
+in its entirety has no "safe" numeric value.  (For more detail, and for the
+definition of "safe", see L<Unicode::UCD/num>.)
 
-Don't use C<CompositionExclusions.txt>.
-
-This includes a number of bug fixes:
+This upgrade also includes a number of bug fixes:
 
 =over 4
 
@@ -1858,22 +1837,12 @@ of a code point that hasn't been assigned to another one.
 
 =back
 
-Added new function C<Unicode::UCD::num()>.  This function will return the
-numeric value of the string passed it; C<undef> if the string in its
-entirety has no safe numeric value.
-
-To be safe, a string must be a single character which has a numeric
-value, or consist entirely of characters that match \d, coming from the
-same Unicode block of digits.  Thus, a mix of  Bengali and Western
-digits would be considered unsafe, as well as a mix of half- and
-full-width digits, but strings consisting entirely of Devanagari digits
-or of "Mathematical Bold" digits would would be safe.
-
 =item *
 
 C<version> has been upgraded from 0.82 to 0.88.
 
-Modify export logic for C<is_strict> and C<is_lax>.
+Due to a bug, now fixed, the C<is_strict> and C<is_lax> functions did not
+work when exported.
 
 =item *
 
@@ -1903,10 +1872,11 @@ identify objects connected to the local symbol table.
 
 C<Win32> has been upgraded from version 0.39 to 0.44.
 
-Add several functions. (5.13.8)
+This release has several new functions: C<Win32::GetSystemMetrics>,
+C<Win32::GetProductInfo>, C<Win32::GetOSDisplayName>.
 
-Corrections to names returned by C<Win32::GetOSName> and
-C<Win32::GetOSDisplayName>.
+The names returned by C<Win32::GetOSName> and C<Win32::GetOSDisplayName>
+have been corrected.
 
 =back
 
