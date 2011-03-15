@@ -849,6 +849,24 @@ The C<close> function no longer waits for the child process to exit if the
 underlying file descriptor is still in use by another thread, to avoid
 deadlocks. It returns true in such cases.
 
+=head3 fork() emulation will not wait for signalled children
+
+On Windows parent processes would not terminate until all forked
+childred had terminated first.  However, C<kill('KILL', ...)> is
+inherently unstable on pseudo-processes, and C<kill('TERM', ...)>
+might not get delivered if the child if blocked in a system call.
+
+To avoid the deadlock and still provide a safe mechanism to terminate
+the hosting process, Perl will now no longer wait for children that
+have been sent a SIGTERM signal.  It is up to the parent process to
+waitpid() for these children if child clean-up processing must be
+allowed to finish. However, it is also the responsibility of the
+parent then to avoid the deadlock by making sure the child process
+can't be blocked on I/O either.
+
+See L<perlfork> for more information about the fork() emulation on
+Windows.
+
 =head2 Configuration
 
 =head3 Naming fixes in Policy_sh.SH may invalidate Policy.sh
