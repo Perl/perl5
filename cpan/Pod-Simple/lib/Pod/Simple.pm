@@ -18,7 +18,7 @@ use vars qw(
 );
 
 @ISA = ('Pod::Simple::BlackBox');
-$VERSION = '3.15';
+$VERSION = '3.16';
 
 @Known_formatting_codes = qw(I B C L E F S X Z); 
 %Known_formatting_codes = map(($_=>1), @Known_formatting_codes);
@@ -474,7 +474,7 @@ sub whine {
   return $self->_complain_errata(@_);
 }
 
-sub scream {    # like whine, but not suppressable
+sub scream {    # like whine, but not suppressible
   #my($self,$line,$complaint) = @_;
   my $self = shift(@_);
   ++$self->{'errors_seen'};

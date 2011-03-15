@@ -10,7 +10,7 @@ use vars qw(
   $Doctype_decl  $Content_decl
 );
 @ISA = ('Pod::Simple::PullParser');
-$VERSION = '3.15';
+$VERSION = '3.16';
 
 BEGIN {
   if(defined &DEBUG) { } # no-op
@@ -902,10 +902,10 @@ TODO
 =head2 Minimal code
 
   use Pod::Simple::HTML;
-  my $html;
-  $p->output_string(\$html);
-  $p->parse_from_file('path/to/Module/Name.pm');
-  open my $out, '>', 'out.html' or die;
+  my $p = Pod::Simple::HTML->new;
+  $p->output_string(\my $html);
+  $p->parse_file('path/to/Module/Name.pm');
+  open my $out, '>', 'out.html' or die "Cannot open 'out.html': $!\n";
   print $out $html;
 
 =head2 More detailed example
@@ -946,7 +946,7 @@ Tell the parser where should the output go. In this case it will be placed in th
 
 Parse and process a file with pod in it:
 
-  $p->parse_from_file('path/to/Module/Name.pm');
+  $p->parse_file('path/to/Module/Name.pm');
 
 =head1 METHODS
 
@@ -1005,7 +1005,7 @@ to be added at the top of the generated HTML.
 
 =head2 html_header_after_title
 
-Includes the closing tag of </title> and throught the rest of the head
+Includes the closing tag of </title> and through the rest of the head
 till the opening of the body
 
   $p->html_header_after_title('</title>...</head><body id="my_id">');
@@ -1064,7 +1064,7 @@ Meanwhile in script.pl:
 
   my $html;
   $p->output_string(\$html);
-  $p->parse_from_file('path/to/Module/Name.pm');
+  $p->parse_file('path/to/Module/Name.pm');
   open my $out, '>', 'out.html' or die;
   print $out $html;
 
@@ -1105,7 +1105,7 @@ merchantability or fitness for a particular purpose.
 
 =head1 ACKNOWLEDGEMENTS
 
-Thanks to L<Hurricane Electrict|http://he.net/> for permission to use its
+Thanks to L<Hurricane Electric|http://he.net/> for permission to use its
 L<Linux man pages online|http://man.he.net/> site for man page links.
 
 Thanks to L<search.cpan.org|http://search.cpan.org/> for permission to use the

@@ -275,7 +275,7 @@ some link text.)
 For example, this Pod source:
 
   L<hell itself!|crontab(5)>
-  
+
 will produce this event structure:
 
   <L to="crontab(5)" type="man">
@@ -425,7 +425,7 @@ names in the event structure.
 =item events with an element_name of over-bullet
 
 When an "=over ... Z<>=back" block is parsed where the items are
-a bulletted list, it will produce this event structure:
+a bulleted list, it will produce this event structure:
 
   <over-bullet indent="4" start_line="543">
     <item-bullet start_line="545">
@@ -509,15 +509,15 @@ The I<indent> attribute is as with the other over-* events.
 For example, this Pod source:
 
   =over
-  
+
   =item Foo
-  
+
   Stuff
-  
+
   =item Bar I<baz>!
-  
+
   Quux
-  
+
   =back
 
 produces this event structure:
@@ -559,18 +559,18 @@ The I<indent> attribute is as with the other over-* events.
 For example, this Pod source:
 
   =over
-  
+
   For cutting off our trade with all parts of the world
-  
+
   For transporting us beyond seas to be tried for pretended offenses
-  
+
   He is at this time transporting large armies of foreign mercenaries to
   complete the works of death, desolation and tyranny, already begun with
   circumstances of cruelty and perfidy scarcely paralleled in the most
   barbarous ages, and totally unworthy the head of a civilized nation.
-  
+
   =cut
-  
+
 will produce this event structure:
 
   <over-block indent="4" start_line="2">
@@ -615,7 +615,7 @@ Pod::Simple provides a lot of methods that aren't generally interesting
 to the end user of an existing Pod formatter, but some of which you
 might find useful in writing a Pod formatter. They are listed below. The
 first several methods (the accept_* methods) are for declaring the
-capabilites of your parser, notably what C<=for I<targetname>> sections
+capabilities of your parser, notably what C<=for I<targetname>> sections
 it's interested in, what extra NE<lt>...E<gt> codes it accepts beyond
 the ones described in the I<perlpod>.
 
@@ -793,7 +793,7 @@ C<complain_stderr>.
 =item C<< $parser->scream( I<linenumber>, I<complaint string> ) >>
 
 This notes an error like C<whine> does, except that it is not
-suppressable with C<no_whining>. This should be used only for very
+suppressible with C<no_whining>. This should be used only for very
 serious errors.
 
 
@@ -806,7 +806,7 @@ C<die>!
 
 =item C<< $parser->hide_line_numbers( I<SOMEVALUE> ) >>
 
-Some subclasses that indescriminately dump event attributes (well,
+Some subclasses that indiscriminately dump event attributes (well,
 except for ones beginning with "~") can use this object attribute for
 refraining to dump the "start_line" attribute.
 

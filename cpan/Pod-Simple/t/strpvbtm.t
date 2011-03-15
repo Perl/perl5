@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# t/strip_verbatim_indent.t.t - check verabtim indent stripping feature
+# t/strip_verbatim_indent.t.t - check verbatim indent stripping feature
 
 BEGIN {
     chdir 't' if -d 't';

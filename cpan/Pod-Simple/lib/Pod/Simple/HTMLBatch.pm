@@ -5,7 +5,7 @@ use strict;
 use vars qw( $VERSION $HTML_RENDER_CLASS $HTML_EXTENSION
  $CSS $JAVASCRIPT $SLEEPY $SEARCH_CLASS @ISA
 );
-$VERSION = '3.15';
+$VERSION = '3.16';
 @ISA = ();  # Yup, we're NOT a subclass of Pod::Simple::HTML!
 
 # TODO: nocontents stylesheets. Strike some of the color variations?
@@ -1141,7 +1141,7 @@ directory:
 
 =item $batchconv->batch_convert( 'somedir:someother:also' , ...);
 
-This specifies that you want the dirs "somedir", "somother", and "also"
+This specifies that you want the dirs "somedir", "someother", and "also"
 scanned, just as if you'd passed the arrayref
 C<[qw( somedir someother also)]>.  Note that a ":"-separator is normal
 under Unix, but Under MSWin, you'll need C<'somedir;someother;also'>
@@ -1226,7 +1226,7 @@ If you set this to a false value, no contents file will be written.
 This specifies what string should be put at the beginning of
 the contents page.
 The default is a string more or less like this:
-  
+
   <html>
   <head><title>Perl Documentation</title></head>
   <body class='contentspage'>
