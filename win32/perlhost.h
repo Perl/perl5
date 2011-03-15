@@ -1877,6 +1877,7 @@ PerlProcFork(struct IPerlProc* piPerl)
     }
     w32_pseudo_child_handles[w32_num_pseudo_children] = handle;
     w32_pseudo_child_pids[w32_num_pseudo_children] = id;
+    w32_pseudo_child_sigterm[w32_num_pseudo_children] = 0;
     ++w32_num_pseudo_children;
 #  endif
     return -(int)id;

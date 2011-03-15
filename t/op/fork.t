@@ -463,3 +463,23 @@ system $^X,  "-e", "if (\$pid=fork){kill(9, \$pid)} else {sleep 5}";
 print $?>>8, "\n";
 EXPECT
 0
+########
+# Windows fork() emulation: can we still waitpid() after signalling SIGTERM?
+$|=1;
+if (my $pid = fork) {
+    sleep 1;
+    print "1\n";
+    kill 'TERM', $pid;
+    waitpid($pid, 0);
+    print "4\n";
+}
+else {
+    $SIG{TERM} = sub { print "2\n" };
+    sleep 3;
+    print "3\n";
+}
+EXPECT
+1
+2
+3
+4

@@ -1177,7 +1177,31 @@ remove_dead_pseudo_process(long child)
 	     (w32_num_pseudo_children-child-1), DWORD);
 	Move(&w32_pseudo_child_message_hwnds[child+1], &w32_pseudo_child_message_hwnds[child],
 	     (w32_num_pseudo_children-child-1), HWND);
+	Move(&w32_pseudo_child_sigterm[child+1], &w32_pseudo_child_sigterm[child],
+	     (w32_num_pseudo_children-child-1), char);
 	w32_num_pseudo_children--;
+    }
+}
+
+void
+win32_wait_for_children(pTHX)
+{
+    if (w32_pseudo_children && w32_num_pseudo_children) {
+        long child = 0;
+        long count = 0;
+        HANDLE handles[MAXIMUM_WAIT_OBJECTS];
+
+        for (child = 0; child < w32_num_pseudo_children; ++child) {
+            if (!w32_pseudo_child_sigterm[child])
+                handles[count++] = w32_pseudo_child_handles[child];
+        }
+        /* XXX should use MsgWaitForMultipleObjects() to continue
+         * XXX processing messages while we wait.
+         */
+        WaitForMultipleObjects(count, handles, TRUE, INFINITE);
+
+        while (w32_num_pseudo_children)
+            CloseHandle(w32_pseudo_child_handles[--w32_num_pseudo_children]);
     }
 }
 #endif
@@ -1316,7 +1340,7 @@ win32_kill(int pid, int sig)
                          */
                         if (sig == SIGTERM) {
                             Sleep(0);
-                            remove_dead_pseudo_process(child);
+                            w32_pseudo_child_sigterm[child] = 1;
                         }
                         /* It might be us ... */
                         PERL_ASYNC_CHECK();
