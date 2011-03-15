@@ -2084,50 +2084,33 @@ diagnostic messages, see L<perldiag>.
 
 =head2 New Diagnostics
 
+=head3 New Errors
+
 =over
-
-=item Parsing code internal error (%s)
-
-New fatal error produced when parsing code supplied by an extension violated the
-parser's API in a detectable way.
-
-=item Use of qw(...) as parentheses is deprecated
-
-See L</"Use of qw(...) as parentheses"> for details.
-
-=item Using !~ with %s doesn't make sense
-
-This message was actually added in
-5.13.2, but was omitted from perldelta. It now applies also to the C<y///>
-operator, and has been documented.
 
 =item Closure prototype called
 
-There is a new "Closure prototype called" error [perl #68560].
+This error occurs when a subroutine reference passed to an attribute
+handler is called, if the subroutine is a closure [perl #68560].
 
-=item Operation "%s" returns its argument for ...
+=item Insecure user-defined property %s
 
-Performing an operation requiring Unicode semantics (such as case-folding)
-on a Unicode surrogate or a non-Unicode character now triggers a warning:
-'Operation "%s" returns its argument for ...'.
-
-=item "\b{" is deprecated; use "\b\{" instead
-
-=item "\B{" is deprecated; use "\B\{" instead
-
-Use of an unescaped "{" immediately following a C<\b> or C<\B> is now
-deprecated so as to reserve its use for Perl itself in a future release.
-
-=item regcomp: Add warning if \p is used under locale. (fb2e24c)
-
-C<\p> implies Unicode matching rules, which are likely going to be
-different than the locale's.
+Perl detected tainted data when trying to compile a regular
+expression that contains a call to a user-defined character property
+function, i.e. C<\p{IsFoo}> or C<\p{InFoo}>.
+See L<perlunicode/User-Defined Character Properties> and L<perlsec>.
 
 =item panic: gp_free failed to free glob pointer - something is repeatedly re-creating entries
 
 This new error is triggered if a destructor called on an object in a
 typeglob that is being freed creates a new typeglob entry containing an
 object with a destructor that creates a new entry containing an object....
+
+=item Parsing code internal error (%s)
+
+This new fatal error is produced when parsing
+code supplied by an extension violates the
+parser's API in a detectable way.
 
 =item refcnt: fd %d%s
 
@@ -2136,20 +2119,40 @@ pipe is about to be closed.
 
 =item Regexp modifier "/%c" may not appear twice
 
-(F syntax) The regular expression pattern had one of the mutually exclusive
-modifiers repeated.  Remove all but one of the occurrences.
+The regular expression pattern has one of the
+mutually exclusive modifiers repeated.
 
 =item Regexp modifiers "/%c" and "/%c" are mutually exclusive
 
-(F syntax) The regular expression pattern had more than one of the mutually
-exclusive modifiers.  Retain only the modifier that is supposed to be there.
+The regular expression pattern has more than one of the mutually
+exclusive modifiers.
 
-=item Insecure user-defined property %s
+=item Using !~ with %s doesn't make sense
 
-(F) Perl detected tainted data when trying to compile a regular
-expression that contains a call to a user-defined character property
-function, i.e. C<\p{IsFoo}> or C<\p{InFoo}>.
-See L<perlunicode/User-Defined Character Properties> and L<perlsec>.
+This error occurs when C<!~> is used with C<s///r> or C<y///r>.
+
+=back
+
+=head3 New Warnings
+
+=over
+
+=item "\b{" is deprecated; use "\b\{" instead
+
+=item "\B{" is deprecated; use "\B\{" instead
+
+Use of an unescaped "{" immediately following a C<\b> or C<\B> is now
+deprecated so as to reserve its use for Perl itself in a future release.
+
+=item Operation "%s" returns its argument for ...
+
+Performing an operation requiring Unicode semantics (such as case-folding)
+on a Unicode surrogate or a non-Unicode character now triggers a warning:
+'Operation "%s" returns its argument for ...'.
+
+=item Use of qw(...) as parentheses is deprecated
+
+See L</"Use of qw(...) as parentheses">, above, for details.
 
 =back
 
@@ -2171,7 +2174,7 @@ character outside the byte range if STDERR is a byte-sized handle.
 =item *
 
 The 'Layer does not match this perl' error message has been replaced with
-these more helpful messages:
+these more helpful messages [perl #73754]:
 
 =over 4
 
@@ -2186,8 +2189,6 @@ PerlIO layer instance size (%d) does not match size expected by this perl
 (%d)
 
 =back
-
-[perl #73754]
 
 =item *
 
@@ -2207,19 +2208,9 @@ corrected.
 
 =item *
 
-The warning message about regex unrecognized escapes passed through is
-changed to include any literal '{' following the 2-char escape.  e.g.,
-"\q{" will include the { in the message as part of the escape
-(216bfc0).
-
-=item *
-
-C<binmode $fh, ':scalar'> no longer warns (8250589)
-
-Perl will now no longer produce this warning:
-
-    $ perl -we 'open my $f, ">", \my $x; binmode $f, "scalar"'
-    Use of uninitialized value in binmode at -e line 1.
+The warning message about unrecognized regular expression escapes passed
+through has been changed to include any literal '{' following the
+two-character escape.  E.g., "\q{" is now emitted instead of "\q".
 
 =back
 
@@ -3111,6 +3102,15 @@ your page size.
 =head1 Selected Bug Fixes
 
 =over 4
+
+=item *
+
+C<binmode $fh, ':scalar'> no longer warns (8250589)
+
+Perl will now no longer produce this warning:
+
+    $ perl -we 'open my $f, ">", \my $x; binmode $f, "scalar"'
+    Use of uninitialized value in binmode at -e line 1.
 
 =item *
 
