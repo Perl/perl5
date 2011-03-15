@@ -1901,38 +1901,38 @@ warning that it was to be removed from core.
 
 =head1 Documentation
 
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
 =head2 New Documentation
 
-=head3 perlgpl
+=head3 L<perlgpl>
 
 L<perlgpl> has been updated to contain GPL version 1, as is included in the
 F<README> distributed with perl.
 
-=head3 L<perl5121delta>
+=head3 Perl 5.12.x delta files
 
-The Perl 5.12.1 perldelta file was added from the Perl maintenance branch
+The perldelta files for Perl 5.12.1 to 5.12.3 have been added from the
+maintenance branch: L<perl5121delta>, L<perl5122delta>, L<perl5123delta>.
 
 =head3 L<perlpodstyle>
 
 New style guide for POD documentation,
 split mostly from the NOTES section of the pod2man man page.
 
-( This was added to C<v5.13.6> but was not documented with that release ).
+=head3 L<perlsource>, L<perlinterp>, L<perlhacktut>, and L<perlhacktips>
+
+See L</L<perlhack> and perlrepository revamp>, below.
 
 =head2 Changes to Existing Documentation
 
-=head3 L<perlmodlib>
+=head3 L<perlmodlib> is now complete
 
 The perlmodlib page that came with Perl 5.12.0 was missing a lot of
 modules, due to a bug in the script that generates the list. This has been
 fixed [perl #74332].
 
-=head3 Replace wrong tr/// table in perlebcdic.pod
+=head3 Replace wrong tr/// table in L<perlebcdic>
 
-perlebcdic.pod contains a helpful table to use in tr/// to convert
+L<perlebcdic> contains a helpful table to use in tr/// to convert
 between EBCDIC and Latin1/ASCII.  Unfortunately, the table was the
 inverse of the one it describes, though the code that used the table
 worked correctly for the specific example given.
@@ -1943,131 +1943,35 @@ instructions since deriving the old table is somewhat more complicated.
 
 The table has also been changed to hex from octal, as that is more the norm
 these days, and the recipes in the pod altered to print out leading
-zeros to make all the values the same length, as the table that they can
-generate has them (5f26d5).
+zeros to make all the values the same length.
 
-=head3 Document tricks for user-defined casing
+=head3 Tricks for user-defined casing
 
-perlunicode.pod now contains an explanation of how to override, mangle
-and otherwise tweak the way perl handles upper, lower and other case
-conversions on unicode data, and how to provide scoped changes to alter
-one's own code's behaviour without stomping on anybody else (71648f).
-
-=head3 Document $# and $* as removed and clarify $#array usage
-
-$# and $* were both disabled as of perl5 version 10; this release adds
-documentation to that effect, a description of the results of continuing
-to try and use them, and a note explaining that $# can also function as a
-sigil in the $#array form (7f315d2).
+L<perlunicode> now contains an explanation of how to override, mangle
+and otherwise tweak the way perl handles upper-, lower- and other-case
+conversions on Unicode data, and how to provide scoped changes to alter
+one's own code's behaviour without stomping on anybody else.
 
 =head3 INSTALL explicitly states the requirement for C89
 
-This was already true but it's now Officially Stated For The Record (51eec7).
+This was already true but it's now Officially Stated For The Record.
 
-=head3 No longer advertise Math::TrulyRandom
+=head3 Explanation of C<\xI<HH>> and C<\oI<OOO>> escapes
 
-This module hasn't been updated since 1996 so we can't recommend it any more
-(83918a).
+L<perlop> has been updated with more detailed explanation of these two
+character escapes.
 
-=head3 perlfaq synchronised to upstream
+=head3 C<-0I<NNN>> switch
 
-The FAQ has been updated to commit
-37550b8f812e591bcd0dd869d61677dac5bda92c from the perlfaq repository
-at git@github.com:briandfoy/perlfaq.git
+In L<perlrun>, the behavior of the C<-0NNN> switch for C<-0400> or higher
+has been clarified.
 
-=head3 General changes
+=head3 Deprecation policy
 
-=over
+L<perlpolicy> now contains the policy on compatibility and deprecation
+along with definitions of terms like "deprecation"
 
-=item *
-
-Octal character escapes in documentation now prefer a three-digit octal
-escape or the new C<\o{...}> escape as they have more consistent behavior
-in different contexts than other forms. (ce7b6f0) (d8b950d) (e1f120a)
-
-=item *
-
-Documentation now standardizes on the term 'capture group' over 'buffer'
-in regular expression documentation (c27a5cf)
-
-=back
-
-=head3 L<perlfunc>
-
-=over
-
-=item *
-
-Added cautionary note about "no VERSION" (e0de7c2)
-
-=item *
-
-Added additional notes regarding srand when forking (d460397)
-
-=back
-
-=head3 L<perlop>
-
-=over 4
-
-=item *
-
-Improved documentation of unusual character escapes (4068718, 9644846)
-
-=item *
-
-Clarified how hexadecimal escapes are interpreted, with particular
-attention to the treatment of invalid characters (9644846)
-
-=back
-
-=head3 L<perlrun>
-
-=over
-
-=item *
-
-Clarified the behavior of the C<-0NNN> switch for C<-0400> or higher (7ba31cb)
-
-=back
-
-=head3 L<perlpolicy>
-
-=over
-
-=item *
-
-Added the policy on compatibility and deprecation along with definitions of
-terms like "deprecation" (70e4a83)
-
-=back
-
-=head3 L<perlre>
-
-=over
-
-=item *
-
-Added examples of the perils of not using \g{} when there are more
-than nine back-references (9d86067)
-
-=back
-
-=head3 L<perltie>
-
-=over
-
-=item *
-
-Updated some examples for modern Perl style (67d00dd)
-
-=back
-
-=head3 L<perldiag>
-
-=over 4
-
-=item *
+=head3 New descriptions in L<perldiag>
 
 The following existing diagnostics are now documented:
 
@@ -2103,137 +2007,38 @@ L<Invalid version object|perldiag/"Invalid version object">
 
 =back
 
-=back
-
-=head3 L<perlport>
-
-=over 4
-
-=item *
-
-Documented a L<limitation|perlport/alarm> of L<alarm()|perlfunc/"alarm SECONDS">
-on Win32.
-
-=back
-
-=head3 L<perlre>
-
-=over 4
-
-=item *
-
-Minor fix to a multiple scalar match example.
-
-=back
-
-=head3 L<perlapi>
-
-=over 4
-
-=item *
-
-Many of the optree construction functions are now documented.
-
-=back
-
 =head3 L<perlbook>
 
-=over 4
+L<perlbook> has been expanded to cover many more popular books.
 
-=item *
+=head3 C<SvTRUE> macro
 
-Expanded to cover many more popular books.
-
-=back
-
-=head3 L<perlfaq>
-
-=over 4
-
-=item *
-
-L<perlfaq>, L<perlfaq2>, L<perlfaq4>, L<perlfaq5>, L<perlfaq6>, L<perlfaq8>, and
-L<perlfaq9> have seen various updates and modernizations.
-
-=back
-
-=head3 L<perlapi>
-
-=over 4
-
-=item *
-
-The documentation for the C<SvTRUE> macro was simply wrong in stating that
+The documentation for the C<SvTRUE> macro in
+L<perlapi> was simply wrong in stating that
 get-magic is not processed. It has been corrected.
 
-=back
+=head3 L<perlvar> revamp
 
-=head3 L<perlvar>
-
-L<perlvar> reorders the variables and groups them by topic. Each variable
+L<perlvar> reorders the variables and groups them by topic.  Each variable
 introduced after Perl 5.000 notes the first version in which it is 
-available. L<perlvar> also has a new section for deprecated variables to
+available.  L<perlvar> also has a new section for deprecated variables to
 note when they were removed.
 
-=head3 blah blah blah
+=head3 Array and hash slices in scalar context
 
-Array and hash slices in scalar context are now documented in L<perldata>.
+These are now documented in L<perldata>.
 
-=head3 blah blah blah
+=head3 C<use locale> and formats
 
 L<perlform> and L<perllocale> have been corrected to state that
 C<use locale> affects formats.
 
-=head3 All documentation
-
-=over
-
-=item *
-
-Numerous POD warnings were fixed.
-
-=item *
-
-Many, many spelling errors and typographical mistakes were corrected throughout Perl's core.
-
-=back
-
-=head3 C<perlhack>
-
-=over 4
-
-=item *
-
-C<perlhack> was extensively reorganized.
-
-=back
-
-=head3 C<perlfunc>
-
-=over 4
-
-=item *
-
-It has now been documented that C<ord> returns 0 for an empty string.
-
-=back
-
 =head3 L<overload>
-
-=over 4
-
-=item *
 
 L<overload>'s documentation has practically undergone a rewrite. It
 is now much more straightforward and clear.
 
-=back
-
-=head3 L<perlhack> and perlrepository
-
-=over 4
-
-=item *
+=head3 L<perlhack> and perlrepository revamp
 
 The L<perlhack> and perlrepository documents have been heavily edited and
 split up into several new documents.
@@ -2248,40 +2053,10 @@ The perlrepository document has been renamed to L<perlgit>. This new document
 is just a how-to on using git with the Perl source code. Any other content
 that used to be in perlrepository has been moved to perlhack.
 
-=back
-
-=head3 L<perlfunc>
-
-=over 4
-
-=item *
-
-The documentation for the C<map> function now contains more examples,
-see B<perldoc -f map> (f947627)
-
-=back
-
-=head3 L<perlfaq4>
-
-=over 4
-
-=item *
+=head3 Time::Piece examples
 
 Examples in L<perlfaq4> have been updated to show the use of
-L<Time::Piece>. (9243591)
-
-=back
-
-=head3 Miscellaneous
-
-=over 4
-
-=item *
-
-Many POD related RT bugs and other issues which are too numerous to
-enumerate have been solved by Michael Stevens.
-
-=back
+L<Time::Piece>.
 
 =head1 Diagnostics
 
