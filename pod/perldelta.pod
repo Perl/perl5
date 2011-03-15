@@ -951,7 +951,7 @@ fix this problem within the constraints of its parameters and return value.
 
 =head1 Performance Enhancements
 
-=head2 "safe signals" optimization
+=head2 "Safe signals" optimization
 
 Signal dispatch has been moved from the runloop into control ops. This
 should give a few percent speed increase, and eliminates almost all of
@@ -963,9 +963,9 @@ of how to recreate such issues.
 
 =head2 Optimization of shift; and pop; calls without arguments
 
-Additional two OPs are not added anymore into op tree for shift and pop
-calls without argument (when it works on C<@_>). Makes C<shift;> 5%
-faster over C<shift @_;> on not threaded perl and 25% faster on threaded.
+Two fewer OPs are used for shift and pop calls with no argument (with
+implicit C<@_>). This change makes C<shift;> 5% faster than C<shift @_;>
+on non-threaded perls and 25% faster on threaded.
 
 =head2 Adjacent pairs of nextstate opcodes are now optimized away
 
@@ -980,7 +980,7 @@ Previously, in code such as
 
 the ops for C<warn if DEBUG;> would be folded to a C<null> op (C<ex-const>), but
 the C<nextstate> op would remain, resulting in a runtime op dispatch of
-C<nextstate>, C<nextstate>, ...
+C<nextstate>, C<nextstate>, ....
 
 The execution of a sequence of C<nextstate> ops is indistinguishable from just
 the last C<nextstate> op so the peephole optimizer now eliminates the first of
@@ -988,30 +988,31 @@ a pair of C<nextstate> ops, except where the first carries a label, since labels
 must not be eliminated by the optimizer and label usage isn't conclusively known
 at compile time.
 
-=head2 blah blah blah
+=head2 C<@_> uses less memory
 
-Only allocate entries for @_ on demand - this not only saves memory per
-subroutine defined but should hopefully improve COW behaviour (77bac2).
+Previously, C<@_> was allocated for every subroutine at compile time with
+enough space for four entries.  Now this allocation is done on demand when
+the subroutine is called [perl #72416].
 
 =head2 Multiple small improvements to threads
 
 The internal structures of threading now make fewer API calls and fewer
-allocations, resulting in noticeably smaller object code. Additionally,
+allocations, resulting in noticeably smaller object code.  Additionally,
 many thread context checks have been deferred so that they're only done
 when required (although this is only possible for non-debugging builds).
 
 =head2 Size optimisations to SV and HV structures
 
 xhv_fill has been eliminated from struct xpvhv, saving 1 IV per hash and
-on some systems will cause struct xpvhv to become cache aligned. To avoid
+on some systems will cause struct xpvhv to become cache-aligned. To avoid
 this memory saving causing a slowdown elsewhere, boolean use of HvFILL
 now calls HvTOTALKEYS instead (which is equivalent) - so while the fill
-data when actually required is now calculated on demand, the cases when
-this needs to be done should be few and far between (f4431c .. fcd245).
+data when actually required are now calculated on demand, the cases when
+this needs to be done should be few and far between.
 
-The order of structure elements in SV bodies has changed. Effectively,
-the NV slot has swapped location with STASH and MAGIC. As all access to
-SV members is via macros, this should be completely transparent. This
+The order of structure elements in SV bodies has changed.  Effectively,
+the NV slot has swapped location with STASH and MAGIC.  As all access to
+SV members is via macros, this should be completely transparent.  This
 change allows the space saving for PVHVs documented above, and may reduce
 the memory allocation needed for PVIVs on some architectures.
 
@@ -1019,29 +1020,15 @@ the memory allocation needed for PVIVs on some architectures.
 
 The foldEQ_utf8 API function for case-insensitive comparison of strings (which
 is used heavily by the regexp engine) was substantially refactored and
-optimised - and its documentation much improved as a free bonus gift
-(8b3587, e6226b).
+optimised - and its documentation much improved as a free bonus gift.
 
 =head2 Memory consumption improvements to Exporter
 
 The @EXPORT_FAIL AV is no longer created unless required, hence neither is
-the typeglob backing it - this saves about 200 bytes per Exporter using
-package that doesn't use this functionality.
+the typeglob backing it.  This saves about 200 bytes for every package that
+uses Exporter but doesn't use this functionality.
 
-=head2 blah blah blah
-
-There are several small optimizations to reduce CPU cache misses in various very
-commonly used modules like C<warnings> and C<Carp> as well in accessing
-file-handles for reading. (5.13.3)
-
-XXX These need to be changed to =head2 entries, or the entries above need
-to change:
-
-=over 4
-
-=item *
-
-Make string appending 100 times faster
+=head2 Make string appending 100 times faster
 
 When doing a lot of string appending, perl could end up allocating a lot more
 memory than needed in a very inefficient way, if perl was configured to use the
@@ -1050,63 +1037,64 @@ system's C<malloc> implementation instead of its own.
 C<sv_grow>, which is what's being used to allocate more memory if necessary when
 appending to a string, has now been taught how to round up the memory it
 requests to a certain geometric progression, making it much faster on certain
-platforms and configurations. On Win32, it's now about 100 times faster.
+platforms and configurations.  On Win32, it's now about 100 times faster.
 
-=item *
+=head2 Memory savings for weak references
 
 For weak references, the common case of just a single weak reference per
 referent has been optimised to reduce the storage required. In this case it
-saves the equivalent of one small perl array per referent.
+saves the equivalent of one small Perl array per referent.
 
-=item *
+=head2 XPV* allocations
 
 C<XPV>, C<XPVIV>, and C<XPVNV> now only allocate the parts of the C<SV> body
 they actually use, saving some space.
 
-=item *
+=head2 qr// allocations
 
 Scalars containing regular expressions now only allocate the part of the C<SV>
 body they actually use, saving some space.
 
-=item *
+=head2 Regular expression compilation
 
 Compiling regular expressions has been made faster for the case where upgrading
 the regex to utf8 is necessary but that isn't known when the compilation begins.
 
-=item *
+=head2 C<%+> and C<%-> use less memory
 
 The bulk of the C<Tie::Hash::NamedCapture> module used to be in the perl
-core. It has now been moved to an XS module, to reduce the overhead for
+core.  It has now been moved to an XS module, to reduce the overhead for
 programs that do not use C<%+> or C<%->.
 
-=item *
-
-Eliminate C<PL_*> accessor functions under ithreads.
+=head2 Eliminate C<PL_*> accessor functions under ithreads
 
 When C<MULTIPLICITY> was first developed, and interpreter state moved into an
 interpreter struct, thread and interpreter local C<PL_*> variables were defined
 as macros that called accessor functions, returning the address of the value,
-outside of the perl core. The intent was to allow members within the interpreter
+outside of the perl core.  The intent was
+to allow members within the interpreter
 struct to change size without breaking binary compatibility, so that bug fixes
 could be merged to a maintenance branch that necessitated such a size change.
 
 However, some non-core code defines C<PERL_CORE>, sometimes intentionally to
 bypass this mechanism for speed reasons, sometimes for other reasons but with
-the inadvertent side effect of bypassing this mechanism. As some of this code is
-widespread in production use, the result is that the core B<can't> change the
+the inadvertent side effect of bypassing
+this mechanism.  As some of this code is
+widespread in production use, the result is that the core I<can't> change the
 size of members of the interpreter struct, as it will break such modules
-compiled against a previous release on that maintenance branch. The upshot is
+compiled against a previous release on
+that maintenance branch.  The upshot is
 that this mechanism is redundant, and well-behaved code is penalised by
-it. Hence it can and should be removed.
+it.  Hence it can and should be removed (and has been).
 
-=item *
+=head2 Freeing weak references
 
 When an object has many weak references to it, freeing that object
 can under some some circumstances take O(N^2) time to free (where N is the
 number of references). The number of circumstances has been reduced
 [perl #75254]
 
-=item *
+=head2 Lexical array and hash assignments
 
 An earlier optimisation to speed up C<my @array = ...> and
 C<my %hash = ...> assignments caused a bug and was disabled in Perl 5.12.0.
