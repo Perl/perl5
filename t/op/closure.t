@@ -184,6 +184,8 @@ test {
     $w->(10);
 }
 
+curr_test($test);
+
 # Additional tests by Tom Phoenix <rootbeer@teleport.com>.
 
 {
@@ -219,6 +221,7 @@ test {
 	# a naked block, or another named sub
 	for $within (qw!foreach naked other_sub!) {
 
+	  my $test = curr_test();
 	  # Here are a number of variables which show what's
 	  # going on, in a way.
 	  $nc_attempt = 0+		# Named closure attempted
@@ -261,15 +264,8 @@ END_MARK_TWO
     print "not ok: got unexpected warning \$msg\\n";
 } }
 
-{
-    my \$test = $test;
-    sub test (&) {
-      my \$ok = &{\$_[0]};
-      print \$ok ? "ok \$test\n" : "not ok \$test\n";
-      printf "# Failed at line %d\n", (caller)[2] unless \$ok;
-      \$test++;
-    }
-}
+require './test.pl';
+curr_test($test);
 
 # some of the variables which the closure will access
 \$global_scalar = 1000;
@@ -423,10 +419,11 @@ END
 	    }
 
 	    # Here's the test:
+	    my $desc = "$inner_type $where_declared $within $inner_sub_test";
 	    if ($inner_type eq 'anon') {
-	      $code .= "test { &\$anon_$test == $expected };\n"
+	      $code .= "is(&\$anon_$test, $expected, '$desc');\n"
 	    } else {
-	      $code .= "test { &named_$test == $expected };\n"
+	      $code .= "is(&named_$test, $expected, '$desc');\n"
 	    }
 	    $test++;
 	  }
@@ -485,14 +482,20 @@ END
 	    { local $/; open IN, $errfile; $errors = <IN>; close IN }
 	  }
 	  print $output;
+	  curr_test($test);
 	  print STDERR $errors;
+	  # This has the side effect of alerting *our* test.pl to the state of
+	  # what has just been passed to STDOUT, so that if anything there has
+	  # failed, our test.pl will print a diagnostic and exit uncleanly.
+	  unlike($output, qr/not ok/, 'All good');
+	  is($errors, '', 'STDERR is silent');
 	  if ($debugging && ($errors || $? || ($output =~ /not ok/))) {
 	    my $lnum = 0;
 	    for $line (split '\n', $code) {
 	      printf "%3d:  %s\n", ++$lnum, $line;
 	    }
 	  }
-	  printf "not ok: exited with error code %04X\n", $? if $?;
+	  is($?, 0, 'exited cleanly') or diag(sprintf "Error code $? = 0x%X", $?);
 	  print '#', "-" x 30, "\n" if $debugging;
 
 	}	# End of foreach $within
@@ -500,8 +503,6 @@ END
     }	# End of foreach $inner_type
 
 }
-
-curr_test($test);
 
 # The following dumps core with perl <= 5.8.0 (bugid 9535) ...
 BEGIN { $vanishing_pad = sub { eval $_[0] } }
