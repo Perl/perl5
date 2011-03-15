@@ -824,32 +824,12 @@ gp_cv slot.
 
 =head1 Deprecations
 
-The following items are now deprecated.
-
-=over 4
-
-=item C<Perl_ptr_table_clear>
-
-C<Perl_ptr_table_clear> is no longer part of Perl's public API. Calling it now
-generates a deprecation warning, and it will be removed in a future
-release.
-
-=item *
-
-Omitting a space between a regex pattern or pattern modifiers and the following
-word is deprecated.  For example, C<< m/foo/sand $bar >> will still be parsed
-as C<< m/foo/s and $bar >> but will issue a warning.
-
-=back
-
 =head2 Omitting a space between a regular expression and subsequent word
 
-Omitting a space between a regex pattern or pattern modifiers and the
-following word is deprecated. Deprecation for regular expression
-I<matches> was added in Perl 5.13.2.  In this release, the deprecation
-is extended to regular expression I<substitutions>. For example,
-C<< s/foo/bar/sand $bar >> will still be parsed as
-C<< s/foo/bar/s and $bar >> but will issue a warning. (aa78b66)
+Omitting a space between a regular expression operator or
+its modifiers and the following word is deprecated.  For
+example, C<< m/foo/sand $bar >> will still be parsed
+as C<< m/foo/s and $bar >> but will issue a warning.
 
 =head2 Deprecation warning added for deprecated-in-core .pl libs
 
@@ -890,15 +870,6 @@ C<?PATTERN?> (without the initial m) has been deprecated and now produces
 a warning.  This is to allow future use of C<?> in new operators.
 The match-once functionality is still available in the form of C<m?PATTERN?>.
 
-=head2 C<sv_compile_2op()> is now deprecated
-
-The C<sv_compile_2op()> API function is now deprecated. Searches suggest
-that nothing on CPAN is using it, so this should have zero impact.
-
-It attempted to provide an API to compile code down to an optree, but failed
-to bind correctly to lexicals in the enclosing scope. It's not possible to
-fix this problem within the constraints of its parameters and return value.
-
 =head2 Tie functions on scalars holding typeglobs
 
 Calling a tie function (C<tie>, C<tied>, C<untie>) with a scalar argument
@@ -913,9 +884,15 @@ This bug was fixed in 5.13.7 but, because of the breakage it caused, the
 fix has been reverted. Now there is a deprecation warning whenever a tie
 function is used on a handle without an explicit C<*>.
 
-=over
+=head2 User-defined case-mapping
 
-=item Deprecated Modules
+This feature is being deprecated due to its many issues, as documented in
+L<perlunicode/User-Defined Case Mappings (for serious hackers only)>.
+It is planned to remove this feature in Perl 5.16.  A CPAN module
+providing improved functionality is being prepared for release by the
+time 5.14 is.
+
+=head2 Deprecated modules
 
 The following modules will be removed from the core distribution in a
 future release, and should be installed from CPAN instead. Distributions
@@ -950,15 +927,26 @@ preference, as it offers significantly improved profiling and reporting.
 
 =back
 
+=head2 Deprecated C APIs
+
+=over
+
+=item C<Perl_ptr_table_clear>
+
+C<Perl_ptr_table_clear> is no longer part of Perl's public API. Calling it now
+generates a deprecation warning, and it will be removed in a future
+release.
+
+=item C<sv_compile_2op>
+
+The C<sv_compile_2op()> API function is now deprecated. Searches suggest
+that nothing on CPAN is using it, so this should have zero impact.
+
+It attempted to provide an API to compile code down to an optree, but failed
+to bind correctly to lexicals in the enclosing scope. It's not possible to
+fix this problem within the constraints of its parameters and return value.
+
 =back
-
-=head2 User-defined case-mapping
-
-This feature is being deprecated due to its many issues, as documented in
-L<perlunicode/User-Defined Case Mappings (for serious hackers only)>.
-It is planned to remove this feature in Perl 5.16.  A CPAN module
-providing improved functionality is being prepared for release by the
-time 5.14 is.
 
 =head1 Performance Enhancements
 
