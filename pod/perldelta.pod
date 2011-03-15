@@ -113,7 +113,7 @@ See L<charnames> for details on all these changes.
 
 With this release, Perl is adopting a model that any unsigned value can
 be treated as a code point and encoded internally (as utf8) without
-warnings -- not just the code points that are legal in Unicode.
+warnings - not just the code points that are legal in Unicode.
 However, unless utf8 warnings have been
 explicitly lexically turned off, outputting or performing a
 Unicode-defined operation (such as upper-casing) on such a code point
@@ -483,9 +483,9 @@ non-printable characters, but there were no restrictions (on ASCII
 platforms) on what the character following the C<c> could be.  Now, that
 character must be one of the ASCII characters.
 
-=head3 \400 - \777
+=head3 \400-\777
 
-Use of C<\400> - C<\777> in regexes in certain circumstances has given
+Use of C<\400>-C<\777> in regexes in certain circumstances has given
 different, anomalous behavior than their use in all other
 double-quote-like contexts.   Since 5.10.1, a deprecated warning message
 has been raised when this happens.  Now, all double-quote-like contexts
@@ -951,7 +951,7 @@ fix this problem within the constraints of its parameters and return value.
 
 =head1 Performance Enhancements
 
-=head2 "Safe signals" optimization
+=head2 "Safe signals" optimisation
 
 Signal dispatch has been moved from the runloop into control ops. This
 should give a few percent speed increase, and eliminates almost all of
@@ -961,7 +961,7 @@ they were previously - if this is not the case, or it is possible to
 create uninterruptible loops, this is a bug, and reports are encouraged
 of how to recreate such issues.
 
-=head2 Optimization of shift; and pop; calls without arguments
+=head2 Optimisation of shift; and pop; calls without arguments
 
 Two fewer OPs are used for shift and pop calls with no argument (with
 implicit C<@_>). This change makes C<shift;> 5% faster than C<shift @_;>
@@ -2109,8 +2109,8 @@ to be installed.
 
 =item *
 
-The CJK (Chinese-Japanese-Korean) code points U+2A700 - U+2B734
-and U+2B740 - 2B81D are now properly handled.
+The CJK (Chinese-Japanese-Korean) code points U+2A700 to U+2B734
+and U+2B740 to U+2B81D are now properly handled.
 
 =item *
 
@@ -3955,7 +3955,7 @@ A fatal error in regular expressions when processing UTF-8 data has been fixed [
 
 =item *
 
-An erroneous regular expression engine optimization that caused regex verbs like
+An erroneous regular expression engine optimisation that caused regex verbs like
 C<*COMMIT> to sometimes be ignored has been removed.
 
 =item *
