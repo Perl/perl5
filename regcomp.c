@@ -3885,10 +3885,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		case DIGIT:
 		    if (flags & SCF_DO_STCLASS_AND) {
 			if (!(data->start_class->flags & ANYOF_LOCALE)) {
-			ANYOF_CLASS_CLEAR(data->start_class,ANYOF_NDIGIT);
-			for (value = 0; value < 256; value++)
-			    if (!isDIGIT(value))
-				ANYOF_BITMAP_CLEAR(data->start_class, value);
+                            ANYOF_CLASS_CLEAR(data->start_class,ANYOF_NDIGIT);
+			    for (value = 0; value < 256; value++)
+				if (!isDIGIT(value))
+				    ANYOF_BITMAP_CLEAR(data->start_class, value);
 			}
 		    }
 		    else {
@@ -3904,7 +3904,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		case NDIGIT:
 		    if (flags & SCF_DO_STCLASS_AND) {
 			if (!(data->start_class->flags & ANYOF_LOCALE))
-			ANYOF_CLASS_CLEAR(data->start_class,ANYOF_DIGIT);
+                            ANYOF_CLASS_CLEAR(data->start_class,ANYOF_DIGIT);
 			for (value = 0; value < 256; value++)
 			    if (isDIGIT(value))
 				ANYOF_BITMAP_CLEAR(data->start_class, value);
