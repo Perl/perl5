@@ -492,6 +492,9 @@ END_EVAL_TEST
     $first =~ s/,pNOK//;
     s/ PV = 0x[0-9a-f]+/ PV = 0x/ foreach $first, $second;
     s/ LEN = [0-9]+/ LEN = / foreach $first, $second;
+    # Dump may double newlines through pipes, though not files
+    # which is what this test used to use.
+    $second =~ s/ IV = 0\n\n/ IV = 0\n/ if $^O eq 'VMS';
 
     is($second, $first, 'eval { 1 } completely resets $@');
 }
