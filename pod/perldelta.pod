@@ -234,6 +234,11 @@ C<\p{Uppercase}> and C<\p{Lowercase}>.
 Regular expression debugging output (turned on by C<use re 'debug';>) now
 uses hexadecimal when escaping non-ASCII characters, instead of octal.
 
+=head3 Return value of C<delete $+{...}>
+
+Custom regular expression engines can now determine the return value of
+C<delete> on an entry of C<%+> or C<%->.
+
 =head2 Syntactical Enhancements
 
 =head3 Array and hash container functions accept references
@@ -307,6 +312,10 @@ syntax [perl #76296].
 C, Ruby, Python and PHP already supported this syntax, and it makes
 Perl more internally consistent. A round-trip with C<eval sprintf
 "%#X", 0x10> now returns C<16>, the way C<eval sprintf "%#x", 0x10> does.
+
+=head3 Overridable tie functions
+
+C<tie>, C<tied> and C<untie> can now be overridden [perl #75902].
 
 =head2 Exception Handling
 
@@ -462,71 +471,7 @@ DTrace will print:
 
 =head2 New C APIs
 
-=head3 CLONE_PARAMS structure added to ease correct thread creation
-
-Modules that create threads should now create C<CLONE_PARAMS> structures
-by calling the new function C<Perl_clone_params_new()>, and free them with
-C<Perl_clone_params_del()>. This will ensure compatibility with any future
-changes to the internals of the C<CLONE_PARAMS> structure layout, and that
-it is correctly allocated and initialised.
-
-=head3 API function to parse statements
-
-The C<parse_fullstmt> function has been added to allow parsing of a single
-complete Perl statement.  See L<perlapi> for details.
-
-=head3 API functions for accessing the runtime hinthash
-
-A new C API for introspecting the hinthash C<%^H> at runtime has been added.
-See C<cop_hints_2hv>, C<cop_hints_fetchpvn>, C<cop_hints_fetchpvs>,
-C<cop_hints_fetchsv>, and C<hv_copy_hints_hv> in L<perlapi> for details.
-
-=head3 C interface to C<caller()>
-
-The C<caller_cx> function has been added as an XSUB-writer's equivalent of
-C<caller()>.  See L<perlapi> for details.
-
-=head3 Custom per-subroutine check hooks
-
-XS code in an extension module can now annotate a subroutine (whether
-implemented in XS or in Perl) so that nominated XS code will be called
-at compile time (specifically as part of op checking) to change the op
-tree of that subroutine.  The compile-time check function (supplied by
-the extension module) can implement argument processing that can't be
-expressed as a prototype, generate customised compile-time warnings,
-perform constant folding for a pure function, inline a subroutine
-consisting of sufficiently simple ops, replace the whole call with a
-custom op, and so on.  This was previously all possible by hooking the
-C<entersub> op checker, but the new mechanism makes it easy to tie the
-hook to a specific subroutine.  See L<perlapi/cv_set_call_checker>.
-
-To help in writing custom check hooks, several subtasks within standard
-C<entersub> op checking have been separated out and exposed in the API.
-
-=head3 Improved support for custom OPs
-
-Custom ops can now be registered with the new C<custom_op_register> C
-function and the C<XOP> structure. This will make it easier to add new
-properties of custom ops in the future. Two new properties have been added
-already, C<xop_class> and C<xop_peep>.
-
-C<xop_class> is one of the OA_*OP constants, and allows L<B> and other
-introspection mechanisms to work with custom ops that aren't BASEOPs.
-C<xop_peep> is a pointer to a function that will be called for ops of this
-type from C<Perl_rpeep>.
-
-See L<perlguts/Custom Operators> and L<perlapi/Custom Operators> for more
-detail.
-
-The old C<PL_custom_op_names>/C<PL_custom_op_descs> interface is still
-supported but discouraged.
-
-=head3 Return value of C<delete $+{...}>
-
-Custom regular expression engines can now determine the return value of
-C<delete> on an entry of C<%+> or C<%->.
-
-XXX Mention the actual API.
+See L</Internal Changes>.
 
 =head1 Security
 
@@ -544,6 +489,8 @@ user-defined. It simply dies instead [perl #82616].
 =head1 Incompatible Changes
 
 Perl 5.14.0 is not binary-compatible with any previous stable release.
+
+In addition to the sections that follow, see L</C API Changes>.
 
 =head2 Regular Expressions and String Escapes
 
@@ -877,41 +824,9 @@ been fixed, standardizing on the variable names used in config.sh.
 This will change the behavior of Policy.sh if you happen to have been
 accidentally relying on the Policy.sh incorrect behavior.
 
-=head2 C API changes
-
-=head3 Check API compatibility when loading XS modules
-
-When perl's API changes in incompatible ways (which usually happens between
-major releases), XS modules compiled for previous versions of perl will not
-work anymore. They will need to be recompiled against the new perl.
-
-In order to ensure that modules are recompiled, and to prevent users from
-accidentally loading modules compiled for old perls into newer ones, the
-C<XS_APIVERSION_BOOTCHECK> macro has been added. That macro, which is called
-when loading every newly compiled extension, compares the API version of the
-running perl with the version a module has been compiled for and raises an
-exception if they don't match.
-
-=head3 Perl_fetch_cop_label
-
-The first argument of the C API function C<Perl_fetch_cop_label> has changed
-from C<struct refcounted he *> to C<COP *>, to better insulate the user from
-implementation details.
-
-This API function was marked as "may change", and likely isn't in use outside
-the core.  (Neither an unpacked CPAN, nor Google's codesearch, finds any other
-references to it.)
-
-=head3 GvCV() and GvGP() are no longer lvalues
-
-The new GvCV_set() and GvGP_set() macros are now provided to replace
-assignment to those two macros.
-
-This allows a future commit to eliminate some backref magic between GV
-and CVs, which will require complete control over assignment to the
-gp_cv slot.
-
 =head1 Deprecations
+
+See also L</Deprecated C APIs>.
 
 =head2 Omitting a space between a regular expression and subsequent word
 
@@ -1014,27 +929,6 @@ just install C<Task::Deprecations::5_14>.
 
 We strongly recommend that you install and used L<Devel::NYTProf> in
 preference, as it offers significantly improved profiling and reporting.
-
-=back
-
-=head2 Deprecated C APIs
-
-=over
-
-=item C<Perl_ptr_table_clear>
-
-C<Perl_ptr_table_clear> is no longer part of Perl's public API. Calling it now
-generates a deprecation warning, and it will be removed in a future
-release.
-
-=item C<sv_compile_2op>
-
-The C<sv_compile_2op()> API function is now deprecated. Searches suggest
-that nothing on CPAN is using it, so this should have zero impact.
-
-It attempted to provide an API to compile code down to an optree, but failed
-to bind correctly to lexicals in the enclosing scope. It's not possible to
-fix this problem within the constraints of its parameters and return value.
 
 =back
 
@@ -2296,6 +2190,20 @@ The C<Encode> module can now (once again) be included in a static Perl
 build.  The special-case handling for this situation got broken in Perl
 5.11.0, and has now been repaired.
 
+=item *
+
+The previous default size of a PerlIO buffer (4096 bytes) has been increased
+to the larger of 8192 bytes and your local BUFSIZ.  Benchmarks show that doubling
+this decade-old default increases read and write performance in the neighborhood
+of 25% to 50% when using the default layers of perlio on top of unix.  To choose
+a non-default size, such as to get back the old value or to obtain an even
+larger value, configure with:
+
+     ./Configure -Accflags=-DPERLIOBUF_DEFAULT_BUFSIZ=N
+
+where N is the desired size in bytes; it should probably be a multiple of
+your page size.
+
 =back
 
 =head1 Testing
@@ -2616,287 +2524,46 @@ this part of the distribution to sometimes be omitted is long gone.
 
 =head1 Internal Changes
 
-See also L</New C APIs>, L</C API Changes> and L</Deprecated C APIs>, above.
+=head2 New APIs
 
-=over 4
+=head3 CLONE_PARAMS structure added to ease correct thread creation
 
-=item *
+Modules that create threads should now create C<CLONE_PARAMS> structures
+by calling the new function C<Perl_clone_params_new()>, and free them with
+C<Perl_clone_params_del()>.  This will ensure compatibility with any future
+changes to the internals of the C<CLONE_PARAMS> structure layout, and that
+it is correctly allocated and initialised.
 
-The protocol for unwinding the C stack at the last stage of a C<die>
-has changed how it identifies the target stack frame.  This now uses
-a separate variable C<PL_restartjmpenv>, where previously it relied on
-the C<blk_eval.cur_top_env> pointer in the C<eval> context frame that
-has nominally just been discarded.  This change means that code running
-during various stages of Perl-level unwinding no longer needs to take
-care to avoid destroying the ghost frame.
+=head3 New parsing functions
 
-=item *
+Several functions have been added for parsing statements or multiple
+statements:
 
-The format of entries on the scope stack has been changed, resulting in a
-reduction of memory usage of about 10%. In particular, the memory used by
-the scope stack to record each active lexical variable has been halved.
+=over
 
 =item *
 
-Memory allocation for pointer tables has been changed. Previously
-C<Perl_ptr_table_store> allocated memory from the same arena system as C<SV>
-bodies and C<HE>s, with freed memory remaining bound to those arenas until
-interpreter exit. Now it allocates memory from arenas private to the specific
-pointer table, and that memory is returned to the system when
-C<Perl_ptr_table_free> is called. Additionally, allocation and release are both
-less CPU intensive.
+C<parse_fullstmt> parses a complete Perl statement.
 
 =item *
 
-A new function, Perl_magic_methcall has been added that wraps the setup needed
-to call a magic method like FETCH (the existing S_magic_methcall function has
-been renamed S_magic_methcall1).
-
-=item *
-
-The implementation of sv_dup_inc() has changed from a macro to a function.
-
-=item *
-
-The C<find_rundefsvoffset> function has been deprecated. It appeared that
-its design was insufficient to reliably get the lexical C<$_> at run-time.
-
-Use the new C<find_rundefsv> function or the C<UNDERBAR> macro instead.
-They directly return the right SV representing C<$_>, whether it's lexical
-or dynamic (789bd8 .. 03d5bc).
-
-=item *
-
-The following new functions or macros have been added to the public API:
-C<SvNV_nomg>,  C<sv_2nv_flags>, C<find_rundefsv>.
-
-=item *
-
-The C<UNDERBAR> macro now calls C<find_rundefsv>. C<dUNDERBAR> is now a
-noop but should still be used to ensure past and future compatibility.
-
-=item *
-
-The ibcmp_* functions have been renamed and are now called foldEQ,
-foldEQ_locale and foldEQ_utf8 (e6226b).
-
-=item *
-
-Under some circumstances, the C<CvGV()> field of a CV is now reference
-counted. To ensure consistent behaviour, direct assignment to it, for
-example C<CvGV(cv) = gv> is now a compile-time error. A new macro,
-C<CvGV_set(cv,gv)> has been introduced to perform this operation safely.
-Note that modification of this field is not part of of the public API,
-regardless of this new macro. This change caused some
-L<issues|/"Known Problems"> in modules that used the private C<GvGV()>
-field.
-
-=item *
-
-It is now possible for XS code to hook into Perl's lexical scope
-mechanism at compile time, using the new C<Perl_blockhook_register>
-function. See L<perlguts/"Compile-time scope hooks">.
-
-=item *
-
-Added C<Perl_croak_no_modify()> to implement
-C<Perl_croak("%s", PL_no_modify)> (6ad8f25)
-
-=item *
-
-Added prototypes for C<tie()> and C<untie()> to allow overloading (RT#75902)
-(1db4d19)
-
-=item *
-
-Adds C<my_[l]stat_flags()> to replace C<my_[l]stat()>.  C<my_stat()> and
-C<my_lstat()> call get magic on the stack arg, so create C<_flags()>
-variants that allow us to control this. (0d7d409)
-
-=item *
-
-Removed C<PERL_POLLUTE>
-
-The option to define C<PERL_POLLUTE> to expose older 5.005 symbols for backwards
-compatibility has been removed. It's use was always discouraged, and MakeMaker
-contains a more specific escape hatch:
-
-    perl Makefile.PL POLLUTE=1
-
-This can be used for modules that have not been upgraded to 5.6 naming
-conventions (and really should be completely obsolete by now).
-
-=item *
-
-Added C<PERL_STATIC_INLINE>
-
-The C<PERL_STATIC_INLINE> define has been added to provide the best-guess
-incantation to use for static inline functions, if the C compiler supports
-C99-style static inline. If it doesn't, it'll give a plain C<static>.
-
-C<HAS_STATIC_INLINE> can be used to check if the compiler actually supports
-inline functions.
-
-=item *
-
-C<CALL_FPTR> and C<CPERLscope> have been deprecated.
-
-Those are left from an old implementation of C<MULTIPLICITY> using C++ objects,
-which was removed in Perl 5.8.  Nowadays these macros do exactly nothing, so
-they shouldn't be used anymore.
-
-For compatibility, they are still defined for external C<XS> code.  Only
-extensions defining C<PERL_CORE> must be updated now.
-
-=item *
-
-C<lex_stuff_pvs()> has been added as a convenience macro wrapping
-C<lex_stuff_pvn()> for literal strings.
-
-=item *
-
-The recursive part of the peephole optimizer is now hookable.
-
-In addition to C<PL_peepp>, for hooking into the toplevel peephole optimizer, a
-C<PL_rpeepp> is now available to hook into the optimizer recursing into
-side-chains of the optree.
-
-=item *
-
-See L</Regular expressions retain their localeness when interpolated>,
-above.
-
-=item *
-
-The C<sv_cmp_flags>, C<sv_cmp_locale_flags>, C<sv_eq_flags> and
-C<sv_collxfrm_flags> functions have been added. These are like their
-non-_flags counterparts, but allow one to specify whether get-magic is
-processed.
-
-The C<sv_cmp>, C<sv_cmp_locale>, C<sv_eq> and C<sv_collxfrm> functions have
-been replaced with wrappers around the new functions. 
-
-=item *
-
-A new C<sv_2bool_flags> function has been added.
-
-This is like C<sv_2bool>, but it lets the calling code decide whether
-get-magic is handled. C<sv_2bool> is now a macro that calls the new
-function.
-
-=item *
-
-A new macro, C<SvTRUE_nomg>, has been added.
-
-This is like C<SvTRUE>, except that it does not process magic. It uses the
-new C<sv_2bool_flags> function.
-
-=item *
-
-C<sv_catsv_flags> no longer calls C<mg_get> on its second argument (the
-source string) if the flags passed to it do not include SV_GMAGIC. So it
-now matches the documentation.
-
-=item *
-
-A new interface has been added for custom check hooks on subroutines. See
-L</Custom per-subroutine check hooks>, above.
-
-=item *
-
-List op building functions have been added to the
-API.  See L<op_append_elem|perlapi/op_append_elem>,
-L<op_append_list|perlapi/op_append_list>, and
-L<op_prepend_elem|perlapi/op_prepend_elem>.
-
-=item *
-
-The L<LINKLIST|perlapi/LINKLIST> macro, part of op building that
-constructs the execution-order op chain, has been added to the API.
-
-=item *
-
-Many functions ending with pvn now have equivalent pv/pvs/sv versions.
-
-=item *
-
-The C<save_freeop>, C<save_op>, C<save_pushi32ptr> and C<save_pushptrptr>
-functions have been added to the API.
-
-=item *
-
-The new API function C<parse_stmtseq()> parses a sequence of statements, up
+C<parse_stmtseq> parses a sequence of statements, up
 to closing brace or EOF.
 
 =item *
 
-C<lex_start> has been added to the API, but is considered experimental.
+C<parse_block> parses a block [perl #78222].
 
 =item *
 
-A new C<parse_block> function has been added to the API [perl #78222].
-
-=item *
-
-A new, experimental API has been added for accessing the internal
-structure that Perl uses for C<%^H>. See the functions beginning with
-C<cophh_> in L<perlapi>.
-
-=item *
-
-A stash can now have a list of effective names in addition to its usual
-name. The first effective name can be accessed via the C<HvENAME> macro,
-which is now the recommended name to use in MRO linearisations (C<HvNAME>
-being a fallback if there is no C<HvENAME>).
-
-These names are added and deleted via C<hv_ename_add> and
-C<hv_ename_delete>. These two functions are I<not> part of the API.
-
-=item *
-
-The way the parser handles labels has been cleaned up and refactored. As a
-result, the C<newFOROP()> constructor function no longer takes a parameter
-stating what label is to go in the state op.
-
-=item *
-
-The C<newWHILEOP()> and C<newFOROP()> functions no longer accept a line
-number as a parameter.
-
-=item *
-
-A new C<parse_barestmt()> function has been added, for parsing a statement
+C<parse_barestmt> parses a statement
 without a label.
 
 =item *
 
-A new C<parse_label()> function has been added, that parses a statement
-label, separate from statements.
+C<parse_label> parses a statement label, separate from statements.
 
-=item *
-
-The C<CvSTASH()> macro can now only be used as an rvalue. C<CvSTASH_set()>
-has been added to replace assignment to C<CvSTASH()>. This is to ensure
-that backreferences are handled properly. These macros are not part of the
-API.
-
-=item *
-
-The C<op_scope()> and C<op_lvalue()> functions have been added to the API,
-but are considered experimental.
-
-=item *
-
-The L<C<mg_findext()>|perlapi/mg_findext> and
-L<C<sv_unmagicext()>|perlapi/sv_unmagicext>
-functions have been added to the API.
-They allow extension authors to find and remove magic attached to
-scalars based on both the magic type and the magic virtual table, similar to how
-C<sv_magicext()> attaches magic of a certain type and with a given virtual table
-to a scalar. This eliminates the need for extensions to walk the list of
-C<MAGIC> pointers of an C<SV> to find the magic that belongs to them.
-
-=item *
+=back
 
 The
 L<C<parse_fullexpr()>|perlapi/parse_fullexpr>,
@@ -2907,19 +2574,240 @@ functions have been added to the API.  They perform
 recursive-descent parsing of expressions at various precedence levels.
 They are expected to be used by syntax plugins.
 
-=item *
+See L<perlapi> for details.
 
-The opcode bodies for C<chop> and C<chomp> and for C<schop> and C<schomp> have
-been merged. The implementation functions C<Perl_do_chop()> and
-C<Perl_do_chomp()>, never part of the public API, have been merged and moved to
-a static function in F<pp.c>. This shrinks the perl binary slightly, and should
-not affect any code outside the core (unless it is relying on the order of side
-effects when C<chomp> is passed a I<list> of values).
+=head3 Hints hash API
 
-=item *
+A new C API for introspecting the hinthash C<%^H> at runtime has been
+added.  See C<cop_hints_2hv>, C<cop_hints_fetchpvn>, C<cop_hints_fetchpvs>,
+C<cop_hints_fetchsv>, and C<hv_copy_hints_hv> in L<perlapi> for details.
 
-Some of the flags parameters to the uvuni_to_utf8_flags() and
-utf8n_to_uvuni() have changed.  This is a result of Perl now allowing
+A new, experimental API has been added for accessing the internal
+structure that Perl uses for C<%^H>.  See the functions beginning with
+C<cophh_> in L<perlapi>.
+
+=head3 C interface to C<caller()>
+
+The C<caller_cx> function has been added as an XSUB-writer's equivalent of
+C<caller()>.  See L<perlapi> for details.
+
+=head3 Custom per-subroutine check hooks
+
+XS code in an extension module can now annotate a subroutine (whether
+implemented in XS or in Perl) so that nominated XS code will be called
+at compile time (specifically as part of op checking) to change the op
+tree of that subroutine.  The compile-time check function (supplied by
+the extension module) can implement argument processing that can't be
+expressed as a prototype, generate customised compile-time warnings,
+perform constant folding for a pure function, inline a subroutine
+consisting of sufficiently simple ops, replace the whole call with a
+custom op, and so on.  This was previously all possible by hooking the
+C<entersub> op checker, but the new mechanism makes it easy to tie the
+hook to a specific subroutine.  See L<perlapi/cv_set_call_checker>.
+
+To help in writing custom check hooks, several subtasks within standard
+C<entersub> op checking have been separated out and exposed in the API.
+
+=head3 Improved support for custom OPs
+
+Custom ops can now be registered with the new C<custom_op_register> C
+function and the C<XOP> structure.  This will make it easier to add new
+properties of custom ops in the future.  Two new properties have been added
+already, C<xop_class> and C<xop_peep>.
+
+C<xop_class> is one of the OA_*OP constants, and allows L<B> and other
+introspection mechanisms to work with custom ops
+that aren't BASEOPs.  C<xop_peep> is a pointer to
+a function that will be called for ops of this
+type from C<Perl_rpeep>.
+
+See L<perlguts/Custom Operators> and L<perlapi/Custom Operators> for more
+detail.
+
+The old C<PL_custom_op_names>/C<PL_custom_op_descs> interface is still
+supported but discouraged.
+
+=head3 Scope hooks
+
+It is now possible for XS code to hook into Perl's lexical scope
+mechanism at compile time, using the new C<Perl_blockhook_register>
+function. See L<perlguts/"Compile-time scope hooks">.
+
+=head3 The recursive part of the peephole optimizer is now hookable
+
+In addition to C<PL_peepp>, for hooking into the toplevel peephole optimizer, a
+C<PL_rpeepp> is now available to hook into the optimizer recursing into
+side-chains of the optree.
+
+=head3 New non-magical variants of existing functions
+
+The following functions/macros have been added to the API.  The C<*_nomg>
+macros are equivalent to their non-_nomg variants, except that they ignore
+get-magic.  Those ending in C<_flags> allow one to specify whether
+get-magic is processed.
+
+  sv_2bool_flags
+  SvTRUE_nomg
+  sv_2nv_flags
+  SvNV_nomg
+  sv_cmp_flags
+  sv_cmp_locale_flags
+  sv_eq_flags
+  sv_collxfrm_flags
+
+In some of these cases, the non-_flags functions have
+been replaced with wrappers around the new functions. 
+
+=head3 pv/pvs/sv versions of existing functions
+
+Many functions ending with pvn now have equivalent pv/pvs/sv versions.
+
+=head3 List op-building functions
+
+List op-building functions have been added to the
+API.  See L<op_append_elem|perlapi/op_append_elem>,
+L<op_append_list|perlapi/op_append_list>, and
+L<op_prepend_elem|perlapi/op_prepend_elem> in L<perlapi>.
+
+=head3 C<LINKLIST>
+
+The L<LINKLIST|perlapi/LINKLIST> macro, part of op building that
+constructs the execution-order op chain, has been added to the API.
+
+=head3 Localisation functions
+
+The C<save_freeop>, C<save_op>, C<save_pushi32ptr> and C<save_pushptrptr>
+functions have been added to the API.
+
+=head3 Stash names
+
+A stash can now have a list of effective names in addition to its usual
+name.  The first effective name can be accessed via the C<HvENAME> macro,
+which is now the recommended name to use in MRO linearisations (C<HvNAME>
+being a fallback if there is no C<HvENAME>).
+
+These names are added and deleted via C<hv_ename_add> and
+C<hv_ename_delete>.  These two functions are I<not> part of the API.
+
+=head3 New functions for finding and removing magic
+
+The L<C<mg_findext()>|perlapi/mg_findext> and
+L<C<sv_unmagicext()>|perlapi/sv_unmagicext>
+functions have been added to the API.
+They allow extension authors to find and remove magic attached to
+scalars based on both the magic type and the magic virtual table, similar to how
+C<sv_magicext()> attaches magic of a certain type and with a given virtual table
+to a scalar. This eliminates the need for extensions to walk the list of
+C<MAGIC> pointers of an C<SV> to find the magic that belongs to them.
+
+=head3 C<find_rundefsv>
+
+This function returns the SV representing C<$_>, whether it's lexical
+or dynamic.
+
+=head3 C<Perl_croak_no_modify>
+
+C<Perl_croak_no_modify()> is short-hand for
+C<Perl_croak("%s", PL_no_modify)>.
+
+=head3 C<PERL_STATIC_INLINE> define
+
+The C<PERL_STATIC_INLINE> define has been added to provide the best-guess
+incantation to use for static inline functions, if the C compiler supports
+C99-style static inline.  If it doesn't, it'll give a plain C<static>.
+
+C<HAS_STATIC_INLINE> can be used to check if the compiler actually supports
+inline functions.
+
+=head3 New C<pv_escape> option for hexadecimal escapes
+
+A new option, C<PERL_PV_ESCAPE_NONASCII>, has been added to C<pv_escape> to
+dump all characters above ASCII in hexadecimal.  Before, one could get all
+characters as hexadecimal or the Latin1 non-ASCII as octal.
+
+=head3 C<lex_start>
+
+C<lex_start> has been added to the API, but is considered experimental.
+
+=head3 C<op_scope()> and C<op_lvalue()>
+
+The C<op_scope()> and C<op_lvalue()> functions have been added to the API,
+but are considered experimental.
+
+=head2 C API Changes
+
+=head3 C<PERL_POLLUTE> has been removed
+
+The option to define C<PERL_POLLUTE> to expose older 5.005 symbols for
+backwards compatibility has been removed.  It's use was always discouraged,
+and MakeMaker contains a more specific escape hatch:
+
+    perl Makefile.PL POLLUTE=1
+
+This can be used for modules that have not been upgraded to 5.6 naming
+conventions (and really should be completely obsolete by now).
+
+=head3 Check API compatibility when loading XS modules
+
+When perl's API changes in incompatible ways (which usually happens between
+major releases), XS modules compiled for previous versions of perl will not
+work anymore.  They will need to be recompiled against the new perl.
+
+In order to ensure that modules are recompiled, and to prevent users from
+accidentally loading modules compiled for old perls into newer ones, the
+C<XS_APIVERSION_BOOTCHECK> macro has been added.  That macro, which is
+called when loading every newly compiled extension, compares the API
+version of the running perl with the version a module has been compiled for
+and raises an exception if they don't match.
+
+=head3 Perl_fetch_cop_label
+
+The first argument of the C API function C<Perl_fetch_cop_label> has changed
+from C<struct refcounted he *> to C<COP *>, to insulate the user from
+implementation details.
+
+This API function was marked as "may change", and likely isn't in use outside
+the core.  (Neither an unpacked CPAN, nor Google's codesearch, finds any other
+references to it.)
+
+=head3 GvCV() and GvGP() are no longer lvalues
+
+The new GvCV_set() and GvGP_set() macros are now provided to replace
+assignment to those two macros.
+
+This allows a future commit to eliminate some backref magic between GV
+and CVs, which will require complete control over assignment to the
+gp_cv slot.
+
+=head3 CvGV() is no longer an lvalue
+
+Under some circumstances, the C<CvGV()> field of a CV is now
+reference-counted.  To ensure consistent behaviour, direct assignment to
+it, for example C<CvGV(cv) = gv> is now a compile-time error.  A new macro,
+C<CvGV_set(cv,gv)> has been introduced to perform this operation
+safely.  Note that modification of this field is not part of the public
+API, regardless of this new macro (and despite its being listed in this section).
+
+=head3 CvSTASH() is no longer an lvalue
+
+The C<CvSTASH()> macro can now only be used as an rvalue.  C<CvSTASH_set()>
+has been added to replace assignment to C<CvSTASH()>.  This is to ensure
+that backreferences are handled properly.  These macros are not part of the
+API.
+
+=head3 Calling conventions for C<newFOROP> and C<newWHILEOP>
+
+The way the parser handles labels has been cleaned up and refactored. As a
+result, the C<newFOROP()> constructor function no longer takes a parameter
+stating what label is to go in the state op.
+
+The C<newWHILEOP()> and C<newFOROP()> functions no longer accept a line
+number as a parameter.
+
+=head3 Flags passed to C<uvuni_to_utf8_flags> and C<utf8n_to_uvuni>
+
+Some of the flags parameters to uvuni_to_utf8_flags() and
+utf8n_to_uvuni() have changed.  This is a result of Perl's now allowing
 internal storage and manipulation of code points that are problematic
 in some situations.  Hence, the default actions for these functions has
 been complemented to allow these code points.  The new flags are
@@ -2933,84 +2821,97 @@ fundamentally broken model of how the Unicode non-character code points
 should be handled, which is now described in
 L<perlunicode/Non-character code points>.  See also L</Selected Bug Fixes>.
 
-=item *
+XXX Which bugs in particular? Selected Bug Fixes is too long for this link
+to be meaningful right now.
 
-Certain shared flags in the C<pmop.op_pmflags> and C<regexp.extflags>
-structures have been removed.  These are: C<Rxf_Pmf_LOCALE>,
-C<Rxf_Pmf_UNICODE>, and C<PMf_LOCALE>.  Instead there are encodes and
-three static in-line functions for accessing the information:
-C<get_regex_charset()>, C<set_regex_charset()>, and C<get_regex_charset_name()>,
-which are defined in the places where the original flags were.
+=head2 Deprecated C APIs
 
-=item *
+=over
 
-A new option has been added to C<pv_escape> to dump all characters above
-ASCII in hexadecimal. Before, one could get all characters as hexadecimal
-or the Latin1 non-ASCII as octal
+=item C<Perl_ptr_table_clear>
 
+C<Perl_ptr_table_clear> is no longer part of Perl's public API.  Calling it
+now generates a deprecation warning, and it will be removed in a future
+release.
 
-=item *
+=item C<sv_compile_2op>
 
-Generate pp_* prototypes in pp_proto.h, and remove pp.sym
+The C<sv_compile_2op()> API function is now deprecated.  Searches suggest
+that nothing on CPAN is using it, so this should have zero impact.
 
-Eliminate the #define pp_foo Perl_pp_foo(pTHX) macros, and update the 13
-locations that relied on them.
+It attempted to provide an API to compile code down to an optree, but failed
+to bind correctly to lexicals in the enclosing scope.  It's not possible to
+fix this problem within the constraints of its parameters and return value.
 
-regen/opcode.pl now generates prototypes for the PP functions directly, into
-pp_proto.h. It no longer writes pp.sym, and regen/embed.pl no longer reads
-this, removing the only ordering dependency in the regen scripts. opcode.pl
-is now responsible for prototypes for pp_* functions. (embed.pl remains
-responsible for ck_* functions, reading from regen/opcodes)
+=item C<find_rundefsvoffset>
 
-=item *
+The C<find_rundefsvoffset> function has been deprecated.  It appeared that
+its design was insufficient for reliably getting the lexical C<$_> at
+run-time.
 
-Fix harmless invalid read in Perl_re_compile() (f6d9469)
+Use the new C<find_rundefsv> function or the C<UNDERBAR> macro
+instead. They directly return the right SV representing C<$_>, whether it's
+lexical or dynamic.
 
-[perl #2460] described a case where electric fence reported an invalid
-read. This could be reproduced under valgrind with blead and -e'/x/',
-but only on a non-debugging build.
+=item C<CALL_FPTR> and C<CPERLscope>
 
-This was because it was checking for certain pairs of nodes (e.g. BOL + END)
-and wasn't allowing for EXACT nodes, which have the string at the next
-node position when using a naive NEXTOPER(first). In the non-debugging
-build, the nodes aren't initialised to zero, and a 1-char EXACT node isn't
-long enough to spill into the type field of the "next node".
+Those are left from an old implementation of C<MULTIPLICITY> using C++ objects,
+which was removed in Perl 5.8.  Nowadays these macros do exactly nothing, so
+they shouldn't be used anymore.
 
-Fix this by only using NEXTOPER(first) when we know the first node is
-kosher.
-
-=item *
-
-Break out the generated function Perl_keywords() into F<keywords.c>, a new file. (26ea9e1)
-
-As it and Perl_yylex() both need FEATURE_IS_ENABLED, feature_is_enabled() is
-no longer static, and the two macro definitions move from toke.c to perl.h
-
-Previously, one had to cut and paste the output of perl_keywords.pl into the
-middle of toke.c, and it was not clear that it was generated code.
-
-=item *
-
-A lot of tests have been ported from Test to Test::More, e.g. in
-3842ad6.
-
-=item *
-
-Increase default PerlIO buffer size. (b83080d)
-
-The previous default size of a PerlIO buffer (4096 bytes) has been increased
-to the larger of 8192 bytes and your local BUFSIZ.  Benchmarks show that doubling
-this decade-old default increases read and write performance in the neighborhood
-of 25% to 50% when using the default layers of perlio on top of unix.  To choose
-a non-default size, such as to get back the old value or to obtain and even
-larger value, configure with:
-
-     ./Configure -Accflags=-DPERLIOBUF_DEFAULT_BUFSIZ=N
-
-where N is the desired size in bytes; it should probably be a multiple of
-your page size.
+For compatibility, they are still defined for external C<XS> code.  Only
+extensions defining C<PERL_CORE> must be updated now.
 
 =back
+
+=head2 Other Internal Changes
+
+=head3 Stack unwinding
+
+The protocol for unwinding the C stack at the last stage of a C<die>
+has changed how it identifies the target stack frame.  This now uses
+a separate variable C<PL_restartjmpenv>, where previously it relied on
+the C<blk_eval.cur_top_env> pointer in the C<eval> context frame that
+has nominally just been discarded.  This change means that code running
+during various stages of Perl-level unwinding no longer needs to take
+care to avoid destroying the ghost frame.
+
+=head3 Scope stack entries
+
+The format of entries on the scope stack has been changed, resulting in a
+reduction of memory usage of about 10%.  In particular, the memory used by
+the scope stack to record each active lexical variable has been halved.
+
+=head3 Memory allocation for pointer tables
+
+Memory allocation for pointer tables has been changed.  Previously
+C<Perl_ptr_table_store> allocated memory from the same arena system as
+C<SV> bodies and C<HE>s, with freed memory remaining bound to those arenas
+until interpreter exit.  Now it allocates memory from arenas private to the
+specific pointer table, and that memory is returned to the system when
+C<Perl_ptr_table_free> is called.  Additionally, allocation and release are
+both less CPU intensive.
+
+=head3 C<UNDERBAR>
+
+The C<UNDERBAR> macro now calls C<find_rundefsv>.  C<dUNDERBAR> is now a
+noop but should still be used to ensure past and future compatibility.
+
+=head3 String comparison routines renamed
+
+The ibcmp_* functions have been renamed and are now called foldEQ,
+foldEQ_locale and foldEQ_utf8.  The old names are still available as
+macros.
+
+=head3 C<chop> and C<chomp> implementations merged
+
+The opcode bodies for C<chop> and C<chomp> and for C<schop> and C<schomp>
+have been merged.  The implementation functions C<Perl_do_chop()> and
+C<Perl_do_chomp()>, never part of the public API, have been merged and
+moved to a static function in F<pp.c>.  This shrinks the perl binary
+slightly, and should not affect any code outside the core (unless it is
+relying on the order of side effects when C<chomp> is passed a I<list> of
+values).
 
 =head1 Selected Bug Fixes
 
@@ -4004,6 +3905,12 @@ C</((\w+)(?{ print $2 })){2}/> from seeing the C<$2> sometimes
 C<sprintf> now dies when passed a tainted scalar for the format. It did
 already die for arbitrary expressions, but not for simple scalars
 [perl #82250].
+
+=item *
+
+C<sv_catsv_flags> no longer calls C<mg_get> on its second argument (the
+source string) if the flags passed to it do not include SV_GMAGIC. So it
+now matches the documentation.
 
 =back
 
