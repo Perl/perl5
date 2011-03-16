@@ -823,6 +823,7 @@ S_cl_and(struct regnode_charclass_class *cl,
              * with possible false positives */
             if (! (and_with->flags & ANYOF_UNICODE_ALL)) {
                 ARG_SET(cl, ANYOF_NONBITMAP_EMPTY);
+		cl->flags &= ~ANYOF_NONBITMAP_NON_UTF8;
             }
 	}
 	else if (! ANYOF_NONBITMAP(cl)) {
