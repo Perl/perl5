@@ -1496,4 +1496,18 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 
 # RT #85528
 (?{})[\x{100}]	\x{100}	y	$&	\x{100}
+
+# RT #85964
+^m?(\S)(.*)\1$	aba	Ty	$1	a
+^m?(\S)(.*)\1$	\tb\t	n	-	-
+^m?(\s)(.*)\1$	\tb\t	Ty	$1	\t
+^m?(\s)(.*)\1$	aba	n	-	-
+^m?(\W)(.*)\1$	:b:	Ty	$1	:
+^m?(\W)(.*)\1$	aba	n	-	-
+^m?(\w)(.*)\1$	aba	Ty	$1	a
+^m?(\w)(.*)\1$	:b:	n	-	-
+^m?(\D)(.*)\1$	aba	Ty	$1	a
+^m?(\D)(.*)\1$	5b5	n	-	-
+^m?(\d)(.*)\1$	5b5	Ty	$1	5
+^m?(\d)(.*)\1$	aba	n	-	-
 # vim: softtabstop=0 noexpandtab
