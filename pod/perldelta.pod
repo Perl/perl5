@@ -2446,17 +2446,7 @@ F<t/re/pat_advanced.t>.
 
 =head1 Platform Support
 
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
-
 =head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not. These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
 
 =over 4
 
@@ -2469,12 +2459,6 @@ Perl now builds on AIX 4.2.
 =head2 Discontinued Platforms
 
 =over 4
-
-=item MacOS Classic
-
-Support for MacOS Classic within ExtUtils::MakeMaker was removed from Perl in
-December 2004.  Vestigial MacOS Classic specific code has now been removed
-from other core modules as well (8f8c2a4..c457df0)
 
 =item Apollo DomainOS
 
@@ -2491,20 +2475,82 @@ Perl distribution. It was officially discontinued in an earlier version.
 
 =head2 Platform-Specific Notes
 
-=head3 Recent OpenBSDs now use perl's malloc
-
-OpenBSD E<gt> 3.7 has a new malloc implementation which is mmap based
-and as such can release memory back to the OS; however for perl using
-this malloc causes a substantial slowdown so we now default to using
-perl's malloc instead (RT #75742) (9b58b5).
-
-=head3 VMS
+=head3 Cygwin
 
 =over 4
 
 =item *
 
-Make C<PerlIOUnix_open> honour default permissions on VMS.
+MakeMaker has been updated to build man pages on cygwin.
+
+=item *
+
+Improved rebase behaviour
+
+If a dll is updated on cygwin the old imagebase address is reused.
+This solves most rebase errors, especially when updating on core dll's.
+See L<http://www.tishler.net/jason/software/rebase/rebase-2.4.2.README> for more information.
+
+=item *
+
+Support for the standard cygwin dll prefix, which is e.g. needed for FFI's
+
+=item *
+
+Updated build hints file
+
+=back
+
+=head3 IRIX
+
+Conversion of strings to floating-point numbers is now more accurate on
+IRIX systems [perl #32380].
+
+=head3 Mac OS X
+
+Early versions of Mac OS X (Darwin) had buggy implementations of the
+C<setregid>, C<setreuid>, C<setrgid> and C<setruid> functions, so perl
+would pretend they did not exist.
+
+These functions are now recognised on Mac OS 10.5 (Leopard; Darwin 9) and
+higher, as they have been fixed [perl #72990].
+
+=head3 MirBSD
+
+Previously if you built perl with a shared libperl.so on MirBSD (the
+default config), it would work up to the installation; however, once
+installed, it would be unable to find libperl.  So path handling is now
+treated as in the other BSD dialects.
+
+=head3 NetBSD
+
+The NetBSD hints file has been changed to make the system's malloc the
+default.
+
+=head3 Recent OpenBSDs now use perl's malloc
+
+OpenBSD E<gt> 3.7 has a new malloc implementation which is mmap-based
+and as such can release memory back to the OS; however, perl's use of
+this malloc causes a substantial slowdown so we now default to using
+perl's malloc instead [perl #75742].
+
+=head3 OpenVOS
+
+perl now builds again with OpenVOS (formerly known as Stratus VOS)
+[perl #78132].
+
+=head3 Solaris
+
+DTrace is now supported on Solaris. There used to be build failures, but
+these have been fixed [perl #73630].
+
+=head3 VMS
+
+=over
+
+=item *
+
+C<PerlIOUnix_open> now honours the default permissions on VMS.
 
 When C<perlio> became the default and C<unixio> became the default bottom layer,
 the most common path for creating files from Perl became C<PerlIOUnix_open>,
@@ -2515,18 +2561,23 @@ VMS CRTL, C<0777> has a special meaning over and above intersecting with the
 current umask; specifically, it allows Unix syscalls to preserve native default
 permissions.
 
-=back
+=item *
 
-=head3 Win32
-
-t/io/openpid.t now uses the alarm() watchdog strategy for more
-robustness (5732108)
-
-=over 4
+The shortening of symbols longer than 31 characters in the C sources is
+now done by the compiler rather than by xsubpp (which could only do so
+for generated symbols in XS code).
 
 =item *
 
-Fixed a possible hang in F<t/op/readline.t>.
+Record-oriented files (record format variable or variable with fixed control)
+opened for write by the perlio layer will now be line-buffered to prevent the
+introduction of spurious line breaks whenever the perlio buffer fills up.
+
+=back
+
+=head3 Windows
+
+=over 4
 
 =item *
 
@@ -2534,139 +2585,32 @@ Fixed build process for SDK2003SP1 compilers.
 
 =item *
 
-When using old 32-bit compilers, the define C<_USE_32BIT_TIME_T> will now be set
-in C<$Config{ccflags}>. This improves portability when compiling XS extensions
-using new compilers, but for a perl compiled with old 32-bit compilers.
+When using old 32-bit compilers, the define C<_USE_32BIT_TIME_T> will now
+be set in C<$Config{ccflags}>.  This improves portability when compiling
+XS extensions using new compilers, but for a perl compiled with old 32-bit
+compilers.
 
-=back
-
-XXX A bunch of entries that need conversion to =head2 format (unless the
-entries above change to =items):
-
-=over
-
-=item IRIX
-
-Conversion of strings to floating-point numbers is now more accurate on
-IRIX systems [perl #32380].
-
-=item Mac OS X
-
-Early versions of Mac OS X (Darwin) had buggy implementations of the
-C<setregid>, C<setreuid>, C<setrgid> and C<setruid> functions, so perl
-would pretend they did not exist.
-
-These functions are now recognised on Mac OS 10.5 (Leopard; Darwin 9) and
-higher, as they have been fixed [perl #72990].
-
-=item OpenVOS
-
-perl now builds again with OpenVOS (formerly known as Stratus VOS)
-[perl #78132].
-
-=item VMS
-
-The shortening of symbols longer than 31 characters in the C sources is
-now done by the compiler rather than by xsubpp (which could only do so
-for generated symbols in XS code).
-
-=item Windows
+=item *
 
 C<$Config{gccversion}> is now set correctly when perl is built using the
 mingw64 compiler from L<http://mingw64.org> [perl #73754].
 
+=item *
+
 The build process proceeds more smoothly with mingw and dmake when
 F<C:\MSYS\bin> is in the PATH, due to a C<Cwd> fix.
 
-=item Windows
-
-Directory handles are now properly cloned when threads are created. In perl
-5.13.6, child threads simply stopped inheriting directory handles. In
-previous versions, threads would share handles, resulting in crashes.
+=item *
 
 Support for building with Visual C++ 2010 is now underway, but is not yet
-complete. See F<README.win32> for more details.
+complete.  See F<README.win32> or L<perlwin32> for more details.
 
-=item VMS
-
-Record-oriented files (record format variable or variable with fixed control)
-opened for write by the perlio layer will now be line buffered to prevent the
-introduction of spurious line breaks whenever the perlio buffer fills up.
-
-=item NetBSD
-
-The NetBSD hints file has been changed to make the system's malloc the
-default.
-
-=item Windows
+=item *
 
 The option to use an externally-supplied C<crypt()>, or to build with no
 C<crypt()> at all, has been removed.  Perl supplies its own C<crypt()>
 implementation for Windows, and the political situation that required
 this part of the distribution to sometimes be omitted is long gone.
-
-=item Cygwin
-
-=over
-
-=item *
-
-Updated MakeMaker to build man pages on cygwin.
-
-=item *
-
-Improved rebase behaviour
-
-If a dll is updated on cygwin reuse the old imagebase address.
-This solves most rebase errors, esp when updating on core dll's.
-See L<http://www.tishler.net/jason/software/rebase/rebase-2.4.2.README> for more information.
-
-=item *
-
-Support the standard cyg dll prefix, which is e.g. needed for FFI's.
-
-=item *
-
-Updated build hints file
-
-=back
-
-
-=item Solaris
-
-DTrace is now supported on Solaris. There used to be build failures, but
-these have been fixed [perl #73630].
-
-=item Windows
-
-=over 4
-
-=item *
-
-The C<test-prep> build target now depends on F<pod/perltoc.pod> to allow the
-F<t/porting/buildtoc.t> test to run successfully.
-
-=back
-
-=item MirBSD
-
-=over 4
-
-=item *
-
-[perl #82988] Skip hanging taint.t test on MirBSD 10 (1fb83d0)
-
-Skip a hanging test under MirBSD that was already being skipped under
-OpenBSD.
-
-=item *
-
-Previously if you build perl with a shared libperl.so on MirBSD (the
-default config), it will work up to the installation; however, once
-installed, it will be unable to find libperl. Treat path handling
-like in the other BSD dialects.
-
-=back
 
 =back
 
