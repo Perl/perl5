@@ -727,6 +727,9 @@ S_cl_anything(struct regnode_charclass_class *cl)
     ANYOF_BITMAP_SETALL(cl);
     ANYOF_CLASS_ZERO(cl);	/* all bits set, so class is irrelevant */
     cl->flags = ANYOF_EOS|ANYOF_UNICODE_ALL|ANYOF_LOC_NONBITMAP_FOLD|ANYOF_NON_UTF8_LATIN1_ALL|ANYOF_LOCALE;
+    /* The above set locale which given the current logic may not get cleared
+     * even if no locale is in the regex, which may lead to false positives;
+     * see the commit message */
 }
 
 /* Can match anything (initialization) */
@@ -3240,6 +3243,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    data->start_class->flags &= ~ANYOF_EOS;
 		    data->start_class->flags |= ANYOF_LOC_NONBITMAP_FOLD;
 		    if (OP(scan) == EXACTFL) {
+			/* XXX This set is probably no longer necessary, and
+			 * probably wrong as LOCALE now is on in the initial
+			 * state */
 			data->start_class->flags |= ANYOF_LOCALE;
 		    }
 		    else {
@@ -3752,7 +3758,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    else {
 			if (data->start_class->flags & ANYOF_LOCALE)
 			    ANYOF_CLASS_SET(data->start_class,ANYOF_ALNUM);
-                        else if (OP(scan) == ALNUMU) {
+
+			/* Even if under locale, set the bits for non-locale
+			 * in case it isn't a true locale-node.  This will
+			 * create false positives if it truly is locale */
+                        if (OP(scan) == ALNUMU) {
                             for (value = 0; value < 256; value++) {
                                 if (isWORDCHAR_L1(value)) {
                                     ANYOF_BITMAP_SET(data->start_class, value);
@@ -3789,7 +3799,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    else {
 			if (data->start_class->flags & ANYOF_LOCALE)
 			    ANYOF_CLASS_SET(data->start_class,ANYOF_NALNUM);
-			else {
+
+			    /* Even if under locale, set the bits for
+			     * non-locale in case it isn't a true locale-node.
+			     * This will create false positives if it truly is
+			     * locale */
                             if (OP(scan) == NALNUMU) {
                                 for (value = 0; value < 256; value++) {
                                     if (! isWORDCHAR_L1(value)) {
@@ -3803,7 +3817,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                     }
                                 }
 			    }
-			}
 		    }
 		    break;
 		case SPACE:
@@ -3829,7 +3842,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         if (data->start_class->flags & ANYOF_LOCALE) {
 			    ANYOF_CLASS_SET(data->start_class,ANYOF_SPACE);
                         }
-                        else if (OP(scan) == SPACEU) {
+                        if (OP(scan) == SPACEU) {
                             for (value = 0; value < 256; value++) {
                                 if (isSPACE_L1(value)) {
                                     ANYOF_BITMAP_SET(data->start_class, value);
@@ -3866,7 +3879,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    else {
 			if (data->start_class->flags & ANYOF_LOCALE)
 			    ANYOF_CLASS_SET(data->start_class,ANYOF_NSPACE);
-                        else if (OP(scan) == NSPACEU) {
+                        if (OP(scan) == NSPACEU) {
                             for (value = 0; value < 256; value++) {
                                 if (!isSPACE_L1(value)) {
                                     ANYOF_BITMAP_SET(data->start_class, value);
@@ -3894,11 +3907,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    else {
 			if (data->start_class->flags & ANYOF_LOCALE)
 			    ANYOF_CLASS_SET(data->start_class,ANYOF_DIGIT);
-			else {
 			    for (value = 0; value < 256; value++)
 				if (isDIGIT(value))
 				    ANYOF_BITMAP_SET(data->start_class, value);
-			}
 		    }
 		    break;
 		case NDIGIT:
@@ -3912,11 +3923,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    else {
 			if (data->start_class->flags & ANYOF_LOCALE)
 			    ANYOF_CLASS_SET(data->start_class,ANYOF_NDIGIT);
-			else {
 			    for (value = 0; value < 256; value++)
 				if (!isDIGIT(value))
 				    ANYOF_BITMAP_SET(data->start_class, value);
-			}
 		    }
 		    break;
 		CASE_SYNST_FNC(VERTWS);
