@@ -2216,28 +2216,39 @@ two-character escape.  E.g., "\q{" is now emitted instead of "\q".
 
 =head1 Utility Changes
 
-=head3 L<perldb>
+=head3 L<perlbug>
+
+=over 4
+
+=item *
+
+L<perlbug> now looks in the EMAIL environment variable for a return address
+if the REPLY-TO and REPLYTO variables are empty.
+
+=item *
+
+L<perlbug> did not previously generate a From: header, potentially
+resulting in dropped mail.  Now it does include that header.
+
+=item *
+
+The user's address is now used as the return-path.
+
+Many systems these days don't have a valid Internet domain name and
+perlbug@perl.org does not accept email with a return-path that does
+not resolve.  So the user's address is now passed to sendmail so it's
+less likely to get stuck in a mail queue somewhere [perl #82996].
+
+=back
+
+=head3 L<perl5db.pl>
 
 =over
 
 =item *
 
 The remote terminal works after forking and spawns new sessions - one
-for each forked process (11653f7)
-
-=item *
-
-Uses the less pager path from Config instead of searching for it (bf320d6)
-
-=back
-
-=head3 L<h2ph>
-
-=over 4
-
-=item *
-
-The use of a deprecated C<goto> construct has been removed [perl #74404].
+for each forked process.
 
 =back
 
@@ -2247,50 +2258,8 @@ The use of a deprecated C<goto> construct has been removed [perl #74404].
 
 =item *
 
-L<ptargrep> is a utility to apply pattern matching to the contents of files 
-in a tar archive. It comes with C<Archive::Tar>.
-
-=back
-
-=head3 C<perlbug>
-
-=over 4
-
-=item *
-
-C<perlbug> now looks in the EMAIL environment variable for a return address
-if the REPLY-TO and REPLYTO variables are empty.
-
-=item *
-
-C<perlbug> did not previously generate a From: header, potentially
-resulting in dropped mail. Now it does include that header.
-
-=back
-
-=head3 C<buildtoc>
-
-=over 4
-
-=item *
-
-F<pod/buildtoc> has been modernized and can now be used to test the
-well-formedness of F<pod/perltoc.pod> automatically.
-
-=back
-
-=head3 L<perlbug>
-
-=over 4
-
-=item *
-
-[perl #82996] Use the user's from address as return-path in perlbug
-
-Many systems these days don't have a valid Internet domain name and
-perlbug@perl.org does not accept email with a return-path that does
-not resolve. Therefore pass the user's address to sendmail so it's
-less likely to get stuck in a mail queue somewhere. (019cfd2)
+L<ptargrep> is a new utility to apply pattern matching to the contents of
+files  in a tar archive.  It comes with C<Archive::Tar>.
 
 =back
 
