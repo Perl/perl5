@@ -724,8 +724,8 @@ S_cl_anything(struct regnode_charclass_class *cl)
 {
     PERL_ARGS_ASSERT_CL_ANYTHING;
 
-    ANYOF_CLASS_ZERO(cl);
     ANYOF_BITMAP_SETALL(cl);
+    ANYOF_CLASS_ZERO(cl);	/* all bits set, so class is irrelevant */
     cl->flags = ANYOF_EOS|ANYOF_UNICODE_ALL|ANYOF_LOC_NONBITMAP_FOLD|ANYOF_NON_UTF8_LATIN1_ALL|ANYOF_LOCALE;
 }
 
