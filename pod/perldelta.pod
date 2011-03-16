@@ -2300,6 +2300,11 @@ build.  The special-case handling for this situation got broken in Perl
 
 =head1 Testing
 
+XXX This section has not been cleaned up yet. Do we really need this
+section? How many people are going to find a list of new test files useful?
+Anyone hacking on the core can use
+‘git diff v5.12.0..v5.14.0 MANIFEST|grep '^[+-]t/'’.
+
 XXX Any significant changes to the testing of a freshly built perl should be
 listed here.  Changes which create B<new> files in F<t/> go here as do any
 large changes to the testing harness (e.g. when parallel testing was added).
