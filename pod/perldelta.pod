@@ -2272,23 +2272,18 @@ above.
 
 =item *
 
-Fix CCINCDIR and CCLIBDIR for mingw64 cross compiler to correctly be under
+CCINCDIR and CCLIBDIR for the mingw64
+cross-compiler are now correctly under
 $(CCHOME)\mingw\include and \lib rather than immediately below $(CCHOME).
-
-=item *
 
 This means the 'incpath', 'libpth', 'ldflags', 'lddlflags' and
 'ldflags_nolargefiles' values in Config.pm and Config_heavy.pl are now
-set correctly (23ae7f).
+set correctly.
 
 =item *
 
-Adjusted 'make test.valgrind' to account for cpan/dist/ext separation
-(e07ce2e)
-
-=item *
-
-Compatibility with C<C++> compilers has been improved.
+'make test.valgrind' has been adjusted to account for cpan/dist/ext
+separation.
 
 =item *
 
