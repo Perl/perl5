@@ -4641,7 +4641,15 @@ S_incpush_use_sep(pTHX_ const char *p, STRLEN len, U32 flags)
 
     PERL_ARGS_ASSERT_INCPUSH_USE_SEP;
 
+    /* perl compiled with -DPERL_RELOCATABLE_INCPUSH will ignore the len
+     * argument to incpush_use_sep.  This allows creation of relocatable
+     * Perl distributions that patch the binary at install time.  Those
+     * distributions will have to provide their own relocation tools; this
+     * is not a feature otherwise supported by core Perl.
+     */
+#ifndef PERL_RELOCATABLE_INCPUSH
     if (!len)
+#endif
 	len = strlen(p);
 
     end = p + len;
