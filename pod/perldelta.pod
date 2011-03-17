@@ -3145,11 +3145,6 @@ destruction to happen too late. This has now been fixed.
 
 =item *
 
-Building with C<PERL_GLOBAL_STRUCT>, which has been broken accidentally in
-5.13.3, now works again.
-
-=item *
-
 A regression introduced in Perl 5.12.0, making
 C<< my $x = 3; $x = length(undef) >> result in C<$x> set to C<3> has been
 fixed.  C<$x> will now be C<undef>.
@@ -3224,17 +3219,6 @@ This has now been fixed [perl #31865].
 
 =item *
 
-An earlier release of the 5.13 series of Perl changed the semantics of opening a
-reference to a copy of a glob:
-
-    my $var = *STDOUT;
-    open my $fh, '>', \$var;
-
-This was a mistake, and the previous behaviour from Perl 5.10 and 5.12, which is
-to treat \$var as a scalar reference, has now been restored.
-
-=item *
-
 The regular expression bracketed character class C<[\8\9]> was effectively the
 same as C<[89\000]>, incorrectly matching a NULL character.  It also gave
 incorrect warnings that the C<8> and C<9> were ignored.  Now C<[\8\9]> is the
@@ -3285,24 +3269,6 @@ method of a tie) on its left-hand side just once, not twice [perl #76814].
 
 =item *
 
-String comparison (C<eq>, C<ne>, C<lt>, C<gt>, C<le>, C<ge> and
-C<cmp>) and logical not (C<not> and C<!>) operators no longer call magic
-(e.g., tie methods) twice on their operands [perl #76814].
-
-This bug was introduced in an earlier 5.13 release, and does not affect
-perl 5.12.
-
-=item *
-
-When a tied (or other magic) variable is used as, or in, a regular
-expression, it no longer has its C<FETCH> method called twice
-[perl #76814].
-
-This bug was introduced in an earlier 5.13 release, and does not affect
-perl 5.12.
-
-=item *
-
 The C<-C> command line option can now be followed by other options
 [perl #72434].
 
@@ -3330,14 +3296,6 @@ handles from their parent threads [perl #75154].
 
 =item *
 
-The regular expression parser no longer hangs when parsing C<\18> and
-C<\88>.
-
-This bug was introduced in version 5.13.5 and did not affect earlier
-versions [perl #78058].
-
-=item *
-
 Subroutine redefinition works once more in the debugger [perl #48332].
 
 =item *
@@ -3356,14 +3314,6 @@ Aliasing packages by assigning to globs or deleting packages by deleting
 their containing stash elements used to have erratic effects on method
 resolution, because the internal 'isa' caches were not reset. This has been
 fixed.
-
-=item *
-
-C<sort> with a custom sort routine could crash if too many nested
-subroutine calls occurred from within the sort routine [perl #77930].
-
-This bug was introduced in an earlier 5.13 release, and did not affect
-perl 5.12.
 
 =item *
 
@@ -3418,31 +3368,11 @@ active subroutine as the first argument could cause a crash [perl #78070].
 
 =item *
 
-The C<parse_stmt> C function added in earlier in the 5.13.x series has been
-fixed to work with statements ending with C<}> [perl #78222].
-
-=item *
-
-The C<parse_fullstmt> C function added in 5.13.5 has been fixed to work
-when called while an expression is being parsed.
-
-=item *
-
 Characters in the Latin-1 non-ASCII range (0x80 to 0xFF) used not to match
 themselves if the string happened to be UTF8-encoded internally, the
 regular expression was not, and the character in the regular expression was
 inside a repeated group (e.g.,
 C<Encode::decode_utf8("\303\200") =~ /(\xc0)+/>) [perl #78464].
-
-=item *
-
-The C<(?d)> regular expression construct now overrides a previous C<(?u)>
-or C<use feature "unicode_string"> [perl #78508].
-
-=item *
-
-A memory leak in C<do "file">, introduced in perl 5.13.6, has been fixed
-[perl #78488].
 
 =item *
 
@@ -3511,21 +3441,10 @@ The C<recv> function could crash when called with the MSG_TRUNC flag
 
 =item *
 
-Evaluating a simple glob (like C<*a>) was calling get-magic on the glob,
-even when its contents were not being used [perl #78580].
-
-This bug was introduced in 5.13.2 and did not affect earlier perl versions.
-
-=item *
-
 Matching a Unicode character against an alternation containing characters
 that happened to match continuation bytes in the former's UTF8
 representation (C<qq{\x{30ab}} =~ /\xab|\xa9/>) would cause erroneous
 warnings [perl #70998].
-
-=item *
-
-C<s///r> (added in 5.13.2) no longer leaks.
 
 =item *
 
@@ -3738,18 +3657,6 @@ could not be used as a general overloaded iterator operator.
 
 =item *
 
-Destructors on objects were not called during global destruction on objects
-that were not referenced by any scalars. This could happen if an array
-element were blessed (e.g., C<bless \$a[0]>) or if a closure referenced a
-blessed variable (C<bless \my @a; sub foo { @a }>).
-
-Now there is an extra pass during global destruction to fire destructors on
-any objects that might be left after the usual passes that check for
-objects referenced by scalars
-[perl #36347].
-
-=item *
-
 A long standing bug has now been fully fixed (partial fixes came in
 earlier releases), in which some Latin-1 non-ASCII characters on
 ASCII-platforms would match both a character class and its complement,
@@ -3792,12 +3699,6 @@ this:
 
 Would throw an error: "Invalid argument". This has been fixed in this
 release.
-
-=item *
-
-An issue present since 5.13.1, where s/A/B/ with A utf8 and B
-non-utf8, could cause corruption or segfaults has been
-fixed. (c95ca9b)
 
 =item *
 
@@ -3869,12 +3770,6 @@ allowed.  For example, 0xFF does not caselessly match the character at
 LATIN SMALL LETTER Y in the current locale, and Perl has no way of
 knowing if that character even exists in the locale, much less what code
 point it is.
-
-=item *
-
-A fix for a bug in C<length(undef)> in 5.13.4 introduced a regression that
-meant C<print length undef> did not warn when warnings were enabled. It now
-correctly warns [perl #85508].
 
 =item *
 
