@@ -6000,10 +6000,17 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 	    if (!curse(sv, 1)) goto get_next_sv;
 	}
 	if (type >= SVt_PVMG) {
+	    /* Free back-references before magic, in case the magic calls
+	     * Perl code that has weak references to sv. */
+	    if (type == SVt_PVHV)
+		Perl_hv_kill_backrefs(aTHX_ MUTABLE_HV(sv));
 	    if (type == SVt_PVMG && SvPAD_OUR(sv)) {
 		SvREFCNT_dec(SvOURSTASH(sv));
-	    } else if (SvMAGIC(sv))
+	    } else if (SvMAGIC(sv)) {
+		/* Free back-references before other types of magic. */
+		sv_unmagic(sv, PERL_MAGIC_backref);
 		mg_free(sv);
+	    }
 	    if (type == SVt_PVMG && SvPAD_TYPED(sv))
 		SvREFCNT_dec(SvSTASH(sv));
 	}
@@ -6042,7 +6049,6 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 	    if (PL_last_swash_hv == (const HV *)sv) {
 		PL_last_swash_hv = NULL;
 	    }
-	    Perl_hv_kill_backrefs(aTHX_ MUTABLE_HV(sv));
 	    Perl_hv_undef_flags(aTHX_ MUTABLE_HV(sv), HV_NAME_SETALL);
 	    break;
 	case SVt_PVAV:
