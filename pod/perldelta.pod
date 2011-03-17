@@ -2930,252 +2930,16 @@ values).
 
 =head1 Selected Bug Fixes
 
+=head2 I/O
+
 =over 4
 
 =item *
 
-C<binmode $fh, ':scalar'> no longer warns (8250589)
-
-Perl will now no longer produce this warning:
+Perl no longer produces this warning:
 
     $ perl -we 'open my $f, ">", \my $x; binmode $f, "scalar"'
     Use of uninitialized value in binmode at -e line 1.
-
-=item *
-
-C<when(scalar){...}> no longer crashes, but produces a syntax error
-[perl #74114].
-
-=item *
-
-The C-level C<lex_stuff_pvn> function would sometimes cause a spurious
-syntax error on the last line of the file if it lacked a final semicolon
-[perl #74006].
-
-=item *
-
-The regular expression engine no longer loops when matching
-C<"\N{LATIN SMALL LIGATURE FF}" =~ /f+/i> and similar expressions
-[perl #72998].
-
-=item *
-
-A label right before a string eval (C<foo: eval $string>) no longer causes
-the label to be associated also with the first statement inside the eval
-[perl #74290] (5.12.1).
-
-=item *
-
-Naming a deprecated character in \N{...} will not leak memory.
-
-=item *
-
-FETCH is no longer called needlessly on some tied variables.
-
-=item *
-
-The trie runtime code should no longer allocate massive amounts of memory,
-fixing #74484.
-
-=item *
-
-Timely cleanup of SVs that are cloned into a new thread but then
-discovered to be orphaned (i.e. their owners are -not- cloned) (e42956)
-
-=item *
-
-Don't accidentally clone lexicals in scope within active stack frames in
-the parent when creating a child thread (RT #73086) (05d04d).
-
-=item *
-
-Avoid loading feature.pm when 'no 5.13.2;' or similar is
-encountered (faee19).
-
-=item *
-
-Trap invalid use of SvIVX on SVt_REGEXP when assertions are on
-(e77da3)
-
-=item *
-
-Don't stamp on $DB::single, $DB::trace and $DB::signal if they
-already have values when $^P is assigned to (RT #72422) (4c0f30).
-
-=item *
-
-chop now correctly handles perl's extended UTF-8 (RT #73246) (65ab92)
-
-=item *
-
-Defer signal handling when shared SV locks are held to avoid
-deadlocks (RT #74868) (65c742).
-
-=item *
-
-glob() no longer crashes when %File::Glob:: is empty and
-CORE::GLOBAL::glob isn't present (4984aa).
-
-=item *
-
-perlbug now always permits the sender address to be changed
-before sending - if you were having trouble sending bug reports before
-now, this should fix it, we hope (e6eb90).
-
-=item *
-
-Overloading now works properly in conjunction with tied
-variables. What formerly happened was that most ops checked their
-arguments for overloading I<before> checking for magic, so for example
-an overloaded object returned by a tied array access would usually be
-treated as not overloaded (RT #57012) (6f1401, ed3b9b, 6a5f8c .. 24328f).
-
-=item *
-
-Independently, a bug was fixed that prevented $tied-E<gt>() from
-always calling FETCH correctly (RT #8438) (7c7501)
-
-=item *
-
-Some work has been done on the internal pointers that link between symbol
-tables (stashes), typeglobs and subroutines. This has the effect that
-various edge cases related to deleting stashes or stash entries (e.g.
-<%FOO:: = ()>), and complex typeglob or code reference aliasing, will no
-longer crash the interpreter.
-
-=item *
-
-Fixed readline() when interrupted by signals so it no longer returns
-the "same thing" as before or random memory
-
-=item *
-
-Fixed a regression of kill() when a match variable is used for the
-process ID to kill  (RT#75812) (8af710e)
-
-=item *
-
-Fixed several subtle bugs in sort() when @_ is accessed within a subroutine
-used for sorting (RT#72334) (8f443ca)
-
-=item *
-
-Catch yyparse() exceptions in C<< (?{...}) >> (RT#2353) (634d691)
-
-=item *
-
-Avoid UTF-8 cache panics with offsets beyond a string (RT #75898) (3e2d381)
-
-=item *
-
-Fixed POSIX::strftime memory leak (RT#73520) (c4bc4aa)
-
-=item *
-
-Doesn't set strict with C<no VERSION> if C<VERSION> is greater than 5.12
-(da8fb5d)
-
-=item *
-
-Avoids multiple FETCH/stringify on filetest ops (40c852d)
-
-=item *
-
-Fixed issue with string C<eval> not detecting taint of overloaded/tied
-arguments (RT #75716) (895b760)
-
-=item *
-
-Fix potential crashes of string C<eval> when evaluating a object with
-overloaded stringification by creating a stringified copy when necessary
-(3e5c018)
-
-=item *
-
-Fixed bug where overloaded stringification could remove tainting
-(RT #75716) (a02ec77)
-
-=item *
-
-Plugs more memory leaks in vms.c. (9e2bec0)
-
-=item *
-
-Fix pthread include error for Time::Piece (e9f284c)
-
-=item *
-
-A possible memory leak when using L<caller()|perlfunc/"caller EXPR"> to set
-C<@DB::args> has been fixed.
-
-=item *
-
-Several memory leaks when loading XS modules were fixed.
-
-=item *
-
-A panic in the regular expression optimizer has been fixed (RT#75762).
-
-=item *
-
-Assignments to lvalue subroutines now honor copy-on-write behavior again, which
-has been broken since version 5.10.0 (RT#75656).
-
-=item *
-
-Assignments to glob copies now behave just like assignments to regular globs
-(RT#1804).
-
-=item *
-
-Within signal handlers, C<$!> is now implicitly localized.
-
-=item *
-
-L<readline|perlfunc/"readline EXPR"> now honors C<< <> >> overloading on tied
-arguments.
-
-=item *
-
-L<substr()|perlfunc/"substr EXPR,OFFSET,LENGTH,REPLACEMENT">,
-L<pos()|perlfunc/"index STR,SUBSTR,POSITION">, L<keys()|perlfunc/"keys HASH">,
-and L<vec()|perlfunc/"vec EXPR,OFFSET,BITS"> could, when used in combination
-with lvalues, result in leaking the scalar value they operate on, and cause its
-destruction to happen too late. This has now been fixed.
-
-=item *
-
-A regression introduced in Perl 5.12.0, making
-C<< my $x = 3; $x = length(undef) >> result in C<$x> set to C<3> has been
-fixed.  C<$x> will now be C<undef>.
-
-=item *
-
-A fatal error in regular expressions when processing UTF-8 data has been fixed [perl #75680].
-
-=item *
-
-An erroneous regular expression engine optimisation that caused regex verbs like
-C<*COMMIT> to sometimes be ignored has been removed.
-
-=item *
-
-The Perl debugger now also works in taint mode [perl #76872].
-
-=item *
-
-Several memory leaks in cloning and freeing threaded Perl interpreters have been
-fixed [perl #77352].
-
-=item *
-
-A possible string corruption when doing regular expression matches on overloaded
-objects has been fixed [perl #77084].
-
-=item *
-
-Magic applied to variables in the main package no longer affects other packages.
-See L</Magic variables outside the main package> above [perl #76138].
 
 =item *
 
@@ -3186,456 +2950,8 @@ cause perl to crash whenever the glob's contents were accessed
 
 =item *
 
-The postincrement and postdecrement operators, C<++> and C<-->, used to cause
-leaks when being used on references.  This has now been fixed.
-
-=item *
-
-A bug when replacing the glob of a loop variable within the loop has been fixed
-[perl #21469].  This
-means the following code will no longer crash:
-
-    for $x (...) {
-        *x = *y;
-    }
-
-=item *
-
-Perl would segfault if the undocumented C<Internals> functions that used
-reference prototypes were called with the C<&foo()> syntax, e.g.
-C<&Internals::SvREADONLY(undef)> [perl #77776].
-
-These functions now call C<SvROK> on their arguments before dereferencing them
-with C<SvRV>, and we test for this case in F<t/lib/universal.t>.
-
-=item *
-
-When assigning a list with duplicated keys to a hash, the assignment used to
-return garbage and/or freed values:
-
-    @a = %h = (list with some duplicate keys);
-
-This has now been fixed [perl #31865].
-
-=item *
-
-The regular expression bracketed character class C<[\8\9]> was effectively the
-same as C<[89\000]>, incorrectly matching a NULL character.  It also gave
-incorrect warnings that the C<8> and C<9> were ignored.  Now C<[\8\9]> is the
-same as C<[89]> and gives legitimate warnings that C<\8> and C<\9> are
-unrecognized escape sequences, passed-through.
-
-=item *
-
-C<warn()> and C<die()> now respect utf8-encoded scalars [perl #45549].
-
-=item *
-
-A regular expression match in the right-hand side of a global substitution
-(C<s///g>) that is in the same scope will no longer cause match variables
-to have the wrong values on subsequent iterations. This can happen when an
-array or hash subscript is interpolated in the right-hand side, as in
-C<s|(.)|@a{ print($1), /./ }|g> [perl #19078].
-
-=item *
-
-Constant-folding used to cause
-
-  $text =~ ( 1 ? /phoo/ : /bear/)
-
-to turn into
-
-  $text =~ /phoo/
-
-at compile time. Now it correctly matches against C<$_> [perl #20444].
-
-=item *
-
-Parsing Perl code (either with string C<eval> or by loading modules) from
-within a C<UNITCHECK> block no longer causes the interpreter to crash
-[perl #70614].
-
-=item *
-
-When C<-d> is used on the shebang (C<#!>) line, the debugger now has access
-to the lines of the main program. In the past, this sometimes worked and
-sometimes did not, depending on what order things happened to be arranged
-in memory [perl #71806].
-
-=item *
-
-The C<y///> or C<tr///> operator now calls get-magic (e.g., the C<FETCH>
-method of a tie) on its left-hand side just once, not twice [perl #76814].
-
-=item *
-
-The C<-C> command line option can now be followed by other options
-[perl #72434].
-
-=item *
-
-Assigning a glob to a PVLV used to convert it to a plain string. Now it
-works correctly, and a PVLV can hold a glob. This would happen when a
-nonexistent hash or array element was passed to a subroutine:
-
-  sub { $_[0] = *foo }->($hash{key});
-  # $_[0] would have been the string "*main::foo"
-
-It also happened when a glob was assigned to, or returned from, an element
-of a tied array or hash [perl #36051].
-
-=item *
-
-Creating a new thread when directory handles were open used to cause a
-crash, because the handles were not cloned, but simply passed to the new
-thread, resulting in a double free.
-
-Now directory handles are cloned properly, on systems that have a C<fchdir>
-function. On other systems, new threads simply do not inherit directory
-handles from their parent threads [perl #75154].
-
-=item *
-
-Subroutine redefinition works once more in the debugger [perl #48332].
-
-=item *
-
-The C<&> C<|> C<^> bitwise operators no longer coerce read-only arguments
-[perl #20661].
-
-=item *
-
-Stringifying a scalar containing -0.0 no longer has the affect of turning
-false into true [perl #45133].
-
-=item *
-
-Aliasing packages by assigning to globs or deleting packages by deleting
-their containing stash elements used to have erratic effects on method
-resolution, because the internal 'isa' caches were not reset. This has been
-fixed.
-
-=item *
-
-The C<eval_sv> and C<eval_pv> C functions now set C<$@> correctly when
-there is a syntax error and no C<G_KEEPERR> flag, and never set it if the
-C<G_KEEPERR> flag is present [perl #3719].
-
-=item *
-
-Nested C<map> and C<grep> blocks no longer leak memory when processing
-large lists [perl #48004].
-
-=item *
-
-Malformed C<version> objects no longer cause crashes [perl #78286].
-
-=item *
-
-The interpreter no longer crashes when freeing deeply-nested arrays of
-arrays. Hashes have not been fixed yet [perl #44225].
-
-=item *
-
-The mechanism for freeing objects in globs used to leave dangling
-pointers to freed SVs, meaning Perl users could see corrupted state
-during destruction.
-
-Perl now only frees the affected slots of the GV, rather than freeing
-the GV itself. This makes sure that there are no dangling refs or
-corrupted state during destruction.
-
-=item *
-
-The typeglob C<*,>, which holds the scalar variable C<$,> (output field
-separator), had the wrong reference count in child threads.
-
-=item *
-
-C<splice> now calls set-magic. This means that, for instance, changes made
-by C<splice @ISA> are respected by method calls [perl #78400].
-
-=item *
-
-C<use v5.8> no longer leaks memory [perl #78436].
-
-=item *
-
-The XS multicall API no longer causes subroutines to lose reference counts
-if called via the multicall interface from within those very subroutines.
-This affects modules like List::Util. Calling one of its functions with an
-active subroutine as the first argument could cause a crash [perl #78070].
-
-=item *
-
-Characters in the Latin-1 non-ASCII range (0x80 to 0xFF) used not to match
-themselves if the string happened to be UTF8-encoded internally, the
-regular expression was not, and the character in the regular expression was
-inside a repeated group (e.g.,
-C<Encode::decode_utf8("\303\200") =~ /(\xc0)+/>) [perl #78464].
-
-=item *
-
-Various bugs related to typeglob dereferencing have been fixed. See
-L</Dereferencing typeglobs>, above.
-
-=item *
-
-The C<SvPVbyte> function available to XS modules now calls magic before
-downgrading the SV, to avoid warnings about wide characters [perl #72398].
-
-=item *
-
-The C<=> operator used to ignore magic (e.g., tie methods) on its
-right-hand side if the scalar happened to hold a typeglob. This could
-happen if a typeglob was the last thing returned from or assigned to a tied
-scalar [perl #77498].
-
-=item *
-
-C<sprintf> was ignoring locales when called with constant arguments
-[perl #78632].
-
-=item *
-
-A non-ASCII character in the Latin-1 range could match both a Posix
-class, such as C<[[:alnum:]]>, and its inverse C<[[:^alnum:]]>.  This is
-now fixed for regular expressions compiled under the C<"u"> modifier.
-See L</C<use feature "unicode_strings"> now applies to more regex matching>. [perl #18281].
-
-=item *
-
-Concatenating long strings under C<use encoding> no longer causes perl to
-crash [perl #78674].
-
-=item *
-
-Typeglob assignments would crash if the glob's stash no longer existed, so
-long as the glob assigned to was named 'ISA' or the glob on either side of
-the assignment contained a subroutine.
-
-=item *
-
-Calling C<< ->import >> on a class lacking an import method could corrupt
-the stack, resulting in strange behaviour. For instance,
-
-  push @a, "foo", $b = bar->import;
-
-would assign 'foo' to C<$b> [perl #63790].
-
-=item *
-
-Creating an alias to a package when that package had been detached from the
-symbol table would result in corrupted isa caches [perl #77358].
-
-=item *
-
-C<.=> followed by C<< <> >> or C<readline> would leak memory if C<$/>
-contained characters beyond the octet range and the scalar assigned to
-happened to be encoded as UTF8 internally [perl #72246].
-
-=item *
-
-The C<recv> function could crash when called with the MSG_TRUNC flag
-[perl #75082].
-
-=item *
-
-Matching a Unicode character against an alternation containing characters
-that happened to match continuation bytes in the former's UTF8
-representation (C<qq{\x{30ab}} =~ /\xab|\xa9/>) would cause erroneous
-warnings [perl #70998].
-
-=item *
-
-The trie optimisation was not taking empty groups into account, preventing
-'foo' from matching C</\A(?:(?:)foo|bar|zot)\z/> [perl #78356].
-
-=item *
-
-A pattern containing a C<+> inside a lookahead would sometimes cause an
-incorrect match failure in a global match (e.g., C</(?=(\S+))/g>)
-[perl #68564].
-
-=item *
-
-Iterating with C<foreach> over an array returned by an lvalue sub now works
-[perl #23790].
-
-=item *
-
-C<$@> is now localised during calls to C<binmode> to prevent action at a
-distance [perl #78844].
-
-=item *
-
-C<PL_isarev>, which is accessible to Perl via C<mro::get_isarev> is now
-updated properly when packages are deleted or removed from the C<@ISA> of
-other classes. This allows many packages to be created and deleted without
-causing a memory leak [perl #75176].
-
-=item *
-
-C<undef *Foo::> and C<undef *Foo::ISA> and C<delete $package::{ISA}>
-used not to update the internal isa caches if the
-stash or C<@ISA> array had a reference elsewhere. In
-fact, C<undef *Foo::ISA> would stop a new C<@Foo::ISA> array from updating
-caches.
-
-=item *
-
-C<@ISA> arrays can now be shared between classes via
-C<*Foo::ISA = \@Bar::ISA> or C<*Foo::ISA = *Bar::ISA> [perl #77238].
-
-=item *
-
-The parser no longer hangs when encountering certain Unicode characters,
-such as U+387 [perl #74022].
-
-=item *
-
-C<formline> no longer crashes when passed a tainted format picture. It also
-taints C<$^A> now if its arguments are tainted [perl #79138].
-
-=item *
-
-A signal handler called within a signal handler could cause leaks or
-double-frees. Now fixed. [perl #76248].
-
-=item *
-
-When trying to report C<Use of uninitialized value $Foo::BAR>, crashes could
-occur if the GLOB of the global variable causing the warning has been detached
-from its original stash by, for example C<delete $::{'Foo::'}>. This has been
-fixed by disabling the reporting of variable names in the warning in those
-cases.
-
-=item *
-
-C<BEGIN {require 5.12.0}> now behaves as documented, rather than behaving
-identically to C<use 5.12.0;>. Previously, C<require> in a C<BEGIN> block
-was erroneously executing the C<use feature ':5.12.0'> and
-C<use strict; use warnings;> behaviour, which only C<use> was documented to
-provide [perl #69050].
-
-=item *
-
-C<use 5.42> [perl #69050],
-C<use 6> and C<no 5> no longer leak memory.
-
-=item *
-
-C<eval "BEGIN{die}"> no longer leaks memory on non-threaded builds.
-
-=item *
-
 PerlIO no longer crashes when called recursively, e.g., from a signal
 handler. Now it just leaks memory [perl #75556].
-
-=item *
-
-Defining a constant with the same name as one of perl's special blocks
-(e.g., INIT) stopped working in 5.12.0, but has now been fixed
-[perl #78634].
-
-=item *
-
-A reference to a literal value used as a hash key (C<$hash{\"foo"}>) used
-to be stringified, even if the hash was tied [perl #79178].
-
-=item *
-
-A closure containing an C<if> statement followed by a constant or variable
-is no longer treated as a constant [perl #63540].
-
-=item *
-
-Calling a closure prototype (what is passed to an attribute handler for a
-closure) now results in a "Closure prototype called" error message instead
-of a crash [perl #68560].
-
-=item *
-
-A regular expression optimisation would sometimes cause a match with a
-C<{n,m}> quantifier to fail when it should match [perl #79152].
-
-=item *
-
-What has become known as the "Unicode Bug" is mostly resolved in this release.
-Under C<use feature 'unicode_strings'>, the internal storage format of a
-string no longer affects the external semantics.  There are two known
-exceptions.  User-defined case changing functions, which are planned to
-be deprecated in 5.14, require utf8-encoded strings to function; and the
-character C<LATIN SMALL LETTER SHARP S> in regular expression
-case-insensitive matching has a somewhat different set of bugs depending
-on the internal storage format.  Case-insensitive matching of all
-characters that have multi-character matches, as this one does, is
-problematical in Perl [perl #58182].
-
-=item *
-
-Mentioning a read-only lexical variable from the enclosing scope in a
-string C<eval> no longer causes the variable to become writable
-[perl #19135].
-
-=item *
-
-C<state> can now be used with attributes. It used to mean the same thing as
-C<my> if attributes were present [perl #68658].
-
-=item *
-
-Expressions like C<< @$a > 3 >> no longer cause C<$a> to be mentioned in
-the "Use of uninitialized value in numeric gt" warning when C<$a> is
-undefined (since it is not part of the C<E<gt>> expression, but the operand
-of the C<@>) [perl #72090].
-
-=item *
-
-C<require> no longer causes C<caller> to return the wrong file name for
-the scope that called C<require> and other scopes higher up that had the
-same file name [perl #68712].
-
-=item *
-
-The ref types in the typemap for XS bindings now support magical variables
-[perl #72684].
-
-=item *
-
-Match variables (e.g., C<$1>) no longer persist between calls to a sort
-subroutine [perl #76026].
-
-=item *
-
-The C<B> module was returning C<B::OP>s instead of C<B::LOGOP>s for C<entertry> [perl #80622].
-This was due to a bug in the perl core, not in C<B> itself.
-
-=item *
-
-Some numeric operators were converting integers to floating point,
-resulting in loss of precision on 64-bit platforms [perl #77456].
-
-=item *
-
-The fallback behaviour of overloading on binary operators was asymmetric
-[perl #71286].
-
-=item *
-
-The handling of Unicode non-characters has changed.
-Previously they were mostly considered illegal, except that only one of
-the 66 of them was known about in places.  The Unicode standard
-considers them legal, but forbids the "open interchange" of them.
-This is part of the change to allow the internal use of any code point
-(see L</Core Enhancements>).  Together, these changes resolve
-[perl #38722], [perl #51918], [perl #51936], [perl #63446]
-
-=item *
-
-Sometimes magic (ties, tainted, etc.) attached to variables could cause an
-object to last longer than it should, or cause a crash if a tied variable
-were freed from within a tie method. These have been fixed [perl #81230].
 
 =item *
 
@@ -3643,35 +2959,6 @@ Most I/O functions were not warning for unopened handles unless the
 'closed' and 'unopened' warnings categories were both enabled. Now only
 C<use warnings 'unopened'> is necessary to trigger these warnings (as was
 always meant to be the case.
-
-=item *
-
-C<< E<lt>exprE<gt> >> always respects overloading now if the expression is
-overloaded.
-
-Due to the way that 'E<lt>E<gt> as glob' was parsed differently from
-'E<lt>E<gt> as filehandle' from 5.6 onwards, something like C<< E<lt>$foo[0]E<gt> >> did
-not handle overloading, even if C<$foo[0]> was an overloaded object. This
-was contrary to the documentation for overload, and meant that C<< E<lt>E<gt> >>
-could not be used as a general overloaded iterator operator.
-
-=item *
-
-A long standing bug has now been fully fixed (partial fixes came in
-earlier releases), in which some Latin-1 non-ASCII characters on
-ASCII-platforms would match both a character class and its complement,
-such as U+00E2 being both in C<\w> and C<\W>, depending on the
-UTF-8-ness of the regular expression pattern and target string.
-Fixing this did expose some bugs in various modules and tests that
-relied on the previous behavior of C<[[:alpha:]]> not ever matching
-U+00FF, "LATIN SMALL LETTER Y WITH DIAERESIS", even when it should, in
-Unicode mode; now it does match when appropriate.
-[perl #60156].
-
-=item *
-
-A Unicode C<\p{}> property match in a regular expression pattern will
-now force Unicode rules for the rest of the regular expression
 
 =item *
 
@@ -3700,61 +2987,116 @@ this:
 Would throw an error: "Invalid argument". This has been fixed in this
 release.
 
-=item *
+=back
 
-String evals will no longer fail after 2 billion scopes have been
-compiled (d1bfb64, 2df5bdd, 0d311cd and 6012dc8)
+=head2 Regular Expression Bug Fixes
 
-=item *
-
-[perl #81750] When strict 'refs' mode is off,
-C<%{...}> in rvalue context returns C<undef> if
-its argument is undefined. An optimisation introduced in perl 5.12.0 to
-make C<keys %{...}> faster when used as a boolean did not take this into
-account, causing C<keys %{+undef}> (and C<keys %$foo> when C<$foo> is
-undefined) to be an error, which it should only be in strict mode.
+=over
 
 =item *
 
-[perl #83194] Combining the vector (%v) flag and dynamic precision would
-cause sprintf to confuse the order of its arguments, making it treat the
-string as the precision and vice versa.
+The regular expression engine no longer loops when matching
+C<"\N{LATIN SMALL LIGATURE FF}" =~ /f+/i> and similar expressions
+[perl #72998].
 
 =item *
 
-[perl #77692] Sometimes the UTF8 length cache would not be reset on a value
-returned by substr, causing C<length(substr($uni_string,...))> to give
-wrong answers. With C<${^UTF8CACHE}> set to -1, it would produce a 'panic'
-error message, too.
+The trie runtime code should no longer allocate massive amounts of memory,
+fixing #74484.
 
 =item *
 
-During the restoration of a localised typeglob on scope exit, any
-destructors called as a result would be able to see the typeglob in an
-inconsistent state, containing freed entries, which could result in a
-crash. This would affect code like this:
-
-  local *@;
-  eval { die bless [] }; # puts an object in $@
-  sub DESTROY {
-    local $@; # boom
-  }
-
-Now the glob entries are cleared before any destructors are called. This
-also means that destructors can vivify entries in the glob. So perl tries
-again and, if the entries are re-created too many times, dies with a
-'panic: gp_free...' error message.
+Trap invalid use of SvIVX on SVt_REGEXP when assertions are on
+(e77da3)
 
 =item *
 
-[perl #78494] When pipes are shared between threads, the C<close> function
-(and any implicit close, such as on thread exit) no longer blocks.
+Catch yyparse() exceptions in C<< (?{...}) >> (RT#2353) (634d691)
 
 =item *
 
-Several contexts no longer allow a Unicode character to begin a word
-that should never begin words, for an example an accent that must follow
-another character previously could precede all other characters.
+A panic in the regular expression optimizer has been fixed (RT#75762).
+
+=item *
+
+A fatal error in regular expressions when processing UTF-8 data has been fixed [perl #75680].
+
+=item *
+
+An erroneous regular expression engine optimisation that caused regex verbs like
+C<*COMMIT> to sometimes be ignored has been removed.
+
+=item *
+
+The regular expression bracketed character class C<[\8\9]> was effectively the
+same as C<[89\000]>, incorrectly matching a NULL character.  It also gave
+incorrect warnings that the C<8> and C<9> were ignored.  Now C<[\8\9]> is the
+same as C<[89]> and gives legitimate warnings that C<\8> and C<\9> are
+unrecognized escape sequences, passed-through.
+
+=item *
+
+A regular expression match in the right-hand side of a global substitution
+(C<s///g>) that is in the same scope will no longer cause match variables
+to have the wrong values on subsequent iterations. This can happen when an
+array or hash subscript is interpolated in the right-hand side, as in
+C<s|(.)|@a{ print($1), /./ }|g> [perl #19078].
+
+=item *
+
+Characters in the Latin-1 non-ASCII range (0x80 to 0xFF) used not to match
+themselves if the string happened to be UTF8-encoded internally, the
+regular expression was not, and the character in the regular expression was
+inside a repeated group (e.g.,
+C<Encode::decode_utf8("\303\200") =~ /(\xc0)+/>) [perl #78464].
+
+=item *
+
+A non-ASCII character in the Latin-1 range could match both a Posix
+class, such as C<[[:alnum:]]>, and its inverse C<[[:^alnum:]]>.  This is
+now fixed for regular expressions compiled under the C<"u"> modifier.
+See L</C<use feature "unicode_strings"> now applies to more regex matching>. [perl #18281].
+
+=item *
+
+Matching a Unicode character against an alternation containing characters
+that happened to match continuation bytes in the former's UTF8
+representation (C<qq{\x{30ab}} =~ /\xab|\xa9/>) would cause erroneous
+warnings [perl #70998].
+
+=item *
+
+The trie optimisation was not taking empty groups into account, preventing
+'foo' from matching C</\A(?:(?:)foo|bar|zot)\z/> [perl #78356].
+
+=item *
+
+A pattern containing a C<+> inside a lookahead would sometimes cause an
+incorrect match failure in a global match (e.g., C</(?=(\S+))/g>)
+[perl #68564].
+
+=item *
+
+A regular expression optimisation would sometimes cause a match with a
+C<{n,m}> quantifier to fail when it should match [perl #79152].
+
+=item *
+
+A long standing bug has now been fully fixed (partial fixes came in
+earlier releases), in which some Latin-1 non-ASCII characters on
+ASCII-platforms would match both a character class and its complement,
+such as U+00E2 being both in C<\w> and C<\W>, depending on the
+UTF-8-ness of the regular expression pattern and target string.
+Fixing this did expose some bugs in various modules and tests that
+relied on the previous behavior of C<[[:alpha:]]> not ever matching
+U+00FF, "LATIN SMALL LETTER Y WITH DIAERESIS", even when it should, in
+Unicode mode; now it does match when appropriate.
+[perl #60156].
+
+=item *
+
+A Unicode C<\p{}> property match in a regular expression pattern will
+now force Unicode rules for the rest of the regular expression
 
 =item *
 
@@ -3780,6 +3122,178 @@ not take multiple branches into account [perl #84746].
 
 =item *
 
+A bug has been fixed in the implementation of C<{...}> quantifiers in
+regular expressions that prevented the code block in
+C</((\w+)(?{ print $2 })){2}/> from seeing the C<$2> sometimes
+[perl #84294].
+
+=back
+
+=head2 Bugs Relating to the C API
+
+=over
+
+=item *
+
+The C-level C<lex_stuff_pvn> function would sometimes cause a spurious
+syntax error on the last line of the file if it lacked a final semicolon
+[perl #74006].
+
+=item *
+
+The C<eval_sv> and C<eval_pv> C functions now set C<$@> correctly when
+there is a syntax error and no C<G_KEEPERR> flag, and never set it if the
+C<G_KEEPERR> flag is present [perl #3719].
+
+=item *
+
+The XS multicall API no longer causes subroutines to lose reference counts
+if called via the multicall interface from within those very subroutines.
+This affects modules like List::Util. Calling one of its functions with an
+active subroutine as the first argument could cause a crash [perl #78070].
+
+=item *
+
+The C<SvPVbyte> function available to XS modules now calls magic before
+downgrading the SV, to avoid warnings about wide characters [perl #72398].
+
+=item *
+
+The ref types in the typemap for XS bindings now support magical variables
+[perl #72684].
+
+=item *
+
+C<sv_catsv_flags> no longer calls C<mg_get> on its second argument (the
+source string) if the flags passed to it do not include SV_GMAGIC. So it
+now matches the documentation.
+
+=back
+
+
+=head2 Syntax/Parsing Bugs
+
+=over
+
+=item *
+
+C<when(scalar){...}> no longer crashes, but produces a syntax error
+[perl #74114].
+
+=item *
+
+A label right before a string eval (C<foo: eval $string>) no longer causes
+the label to be associated also with the first statement inside the eval
+[perl #74290] (5.12.1).
+
+=item *
+
+Avoid loading feature.pm when 'no 5.13.2;' or similar is
+encountered (faee19).
+
+=item *
+
+Doesn't set strict with C<no VERSION> if C<VERSION> is greater than 5.12
+(da8fb5d)
+
+=item *
+
+Assignments to lvalue subroutines now honor copy-on-write behavior again, which
+has been broken since version 5.10.0 (RT#75656).
+
+=item *
+
+A regression introduced in Perl 5.12.0, making
+C<< my $x = 3; $x = length(undef) >> result in C<$x> set to C<3> has been
+fixed.  C<$x> will now be C<undef>.
+
+=item *
+
+Constant-folding used to cause
+
+  $text =~ ( 1 ? /phoo/ : /bear/)
+
+to turn into
+
+  $text =~ /phoo/
+
+at compile time. Now it correctly matches against C<$_> [perl #20444].
+
+=item *
+
+Parsing Perl code (either with string C<eval> or by loading modules) from
+within a C<UNITCHECK> block no longer causes the interpreter to crash
+[perl #70614].
+
+=item *
+
+The parser no longer hangs when encountering certain Unicode characters,
+such as U+387 [perl #74022].
+
+=item *
+
+C<BEGIN {require 5.12.0}> now behaves as documented, rather than behaving
+identically to C<use 5.12.0;>. Previously, C<require> in a C<BEGIN> block
+was erroneously executing the C<use feature ':5.12.0'> and
+C<use strict; use warnings;> behaviour, which only C<use> was documented to
+provide [perl #69050].
+
+=item *
+
+Defining a constant with the same name as one of perl's special blocks
+(e.g., INIT) stopped working in 5.12.0, but has now been fixed
+[perl #78634].
+
+=item *
+
+A reference to a literal value used as a hash key (C<$hash{\"foo"}>) used
+to be stringified, even if the hash was tied [perl #79178].
+
+=item *
+
+A closure containing an C<if> statement followed by a constant or variable
+is no longer treated as a constant [perl #63540].
+
+=item *
+
+C<state> can now be used with attributes. It used to mean the same thing as
+C<my> if attributes were present [perl #68658].
+
+=item *
+
+Expressions like C<< @$a > 3 >> no longer cause C<$a> to be mentioned in
+the "Use of uninitialized value in numeric gt" warning when C<$a> is
+undefined (since it is not part of the C<E<gt>> expression, but the operand
+of the C<@>) [perl #72090].
+
+=item *
+
+C<require> no longer causes C<caller> to return the wrong file name for
+the scope that called C<require> and other scopes higher up that had the
+same file name [perl #68712].
+
+=item *
+
+String evals will no longer fail after 2 billion scopes have been
+compiled (d1bfb64, 2df5bdd, 0d311cd and 6012dc8)
+
+=item *
+
+[perl #81750] When strict 'refs' mode is off,
+C<%{...}> in rvalue context returns C<undef> if
+its argument is undefined. An optimisation introduced in perl 5.12.0 to
+make C<keys %{...}> faster when used as a boolean did not take this into
+account, causing C<keys %{+undef}> (and C<keys %$foo> when C<$foo> is
+undefined) to be an error, which it should only be in strict mode.
+
+=item *
+
+Several contexts no longer allow a Unicode character to begin a word
+that should never begin words, for an example an accent that must follow
+another character previously could precede all other characters.
+
+=item *
+
 Accessing an element of a package array with a hard-coded number (as
 opposed to an arbitrary expression) would crash if the array did not exist.
 Usually the array would be autovivified during compilation, but typeglob
@@ -3787,6 +3301,301 @@ manipulation could remove it, as in these two cases which used to crash:
 
   *d = *a;  print $d[0];
   undef *d; print $d[0];
+
+=back
+
+=head2 Stashes, Globs, MROs
+
+=over 
+
+=item *
+
+Some work has been done on the internal pointers that link between symbol
+tables (stashes), typeglobs and subroutines. This has the effect that
+various edge cases related to deleting stashes or stash entries (e.g.
+<%FOO:: = ()>), and complex typeglob or code reference aliasing, will no
+longer crash the interpreter.
+
+=item *
+
+Assignments to glob copies now behave just like assignments to regular globs
+(RT#1804).
+
+=item *
+
+A bug when replacing the glob of a loop variable within the loop has been fixed
+[perl #21469].  This
+means the following code will no longer crash:
+
+    for $x (...) {
+        *x = *y;
+    }
+
+=item *
+
+Assigning a glob to a PVLV used to convert it to a plain string. Now it
+works correctly, and a PVLV can hold a glob. This would happen when a
+nonexistent hash or array element was passed to a subroutine:
+
+  sub { $_[0] = *foo }->($hash{key});
+  # $_[0] would have been the string "*main::foo"
+
+It also happened when a glob was assigned to, or returned from, an element
+of a tied array or hash [perl #36051].
+
+=item *
+
+Aliasing packages by assigning to globs or deleting packages by deleting
+their containing stash elements used to have erratic effects on method
+resolution, because the internal 'isa' caches were not reset. This has been
+fixed.
+
+=item *
+
+Various bugs related to typeglob dereferencing have been fixed. See
+L</Dereferencing typeglobs>, above.
+
+=item *
+
+Typeglob assignments would crash if the glob's stash no longer existed, so
+long as the glob assigned to was named 'ISA' or the glob on either side of
+the assignment contained a subroutine.
+
+=item *
+
+Creating an alias to a package when that package had been detached from the
+symbol table would result in corrupted isa caches [perl #77358].
+
+=item *
+
+C<PL_isarev>, which is accessible to Perl via C<mro::get_isarev> is now
+updated properly when packages are deleted or removed from the C<@ISA> of
+other classes. This allows many packages to be created and deleted without
+causing a memory leak [perl #75176].
+
+=item *
+
+C<undef *Foo::> and C<undef *Foo::ISA> and C<delete $package::{ISA}>
+used not to update the internal isa caches if the
+stash or C<@ISA> array had a reference elsewhere. In
+fact, C<undef *Foo::ISA> would stop a new C<@Foo::ISA> array from updating
+caches.
+
+=item *
+
+C<@ISA> arrays can now be shared between classes via
+C<*Foo::ISA = \@Bar::ISA> or C<*Foo::ISA = *Bar::ISA> [perl #77238].
+
+=item *
+
+When trying to report C<Use of uninitialized value $Foo::BAR>, crashes could
+occur if the GLOB of the global variable causing the warning has been detached
+from its original stash by, for example C<delete $::{'Foo::'}>. This has been
+fixed by disabling the reporting of variable names in the warning in those
+cases.
+
+=item *
+
+During the restoration of a localised typeglob on scope exit, any
+destructors called as a result would be able to see the typeglob in an
+inconsistent state, containing freed entries, which could result in a
+crash. This would affect code like this:
+
+  local *@;
+  eval { die bless [] }; # puts an object in $@
+  sub DESTROY {
+    local $@; # boom
+  }
+
+Now the glob entries are cleared before any destructors are called. This
+also means that destructors can vivify entries in the glob. So perl tries
+again and, if the entries are re-created too many times, dies with a
+'panic: gp_free...' error message.
+
+=back
+
+=head2 Unicode
+
+=over
+
+=item *
+
+Naming a deprecated character in \N{...} will not leak memory.
+
+=item *
+
+chop now correctly handles perl's extended UTF-8 (RT #73246) (65ab92)
+
+=item *
+
+Avoid UTF-8 cache panics with offsets beyond a string (RT #75898) (3e2d381)
+
+=item *
+
+C<warn()> and C<die()> now respect utf8-encoded scalars [perl #45549].
+
+=item *
+
+What has become known as the "Unicode Bug" is mostly resolved in this release.
+Under C<use feature 'unicode_strings'>, the internal storage format of a
+string no longer affects the external semantics.  There are two known
+exceptions.  User-defined case changing functions, which are planned to
+be deprecated in 5.14, require utf8-encoded strings to function; and the
+character C<LATIN SMALL LETTER SHARP S> in regular expression
+case-insensitive matching has a somewhat different set of bugs depending
+on the internal storage format.  Case-insensitive matching of all
+characters that have multi-character matches, as this one does, is
+problematical in Perl [perl #58182].
+
+=item *
+
+The handling of Unicode non-characters has changed.
+Previously they were mostly considered illegal, except that only one of
+the 66 of them was known about in places.  The Unicode standard
+considers them legal, but forbids the "open interchange" of them.
+This is part of the change to allow the internal use of any code point
+(see L</Core Enhancements>).  Together, these changes resolve
+[perl #38722], [perl #51918], [perl #51936], [perl #63446]
+
+=item *
+
+[perl #77692] Sometimes the UTF8 length cache would not be reset on a value
+returned by substr, causing C<length(substr($uni_string,...))> to give
+wrong answers. With C<${^UTF8CACHE}> set to -1, it would produce a 'panic'
+error message, too.
+
+=back
+
+=head2 Ties and Other Magic
+
+=over
+
+=item *
+
+FETCH is no longer called needlessly on some tied variables.
+
+=item *
+
+Overloading now works properly in conjunction with tied
+variables. What formerly happened was that most ops checked their
+arguments for overloading I<before> checking for magic, so for example
+an overloaded object returned by a tied array access would usually be
+treated as not overloaded (RT #57012) (6f1401, ed3b9b, 6a5f8c .. 24328f).
+
+=item *
+
+Independently, a bug was fixed that prevented $tied-E<gt>() from
+always calling FETCH correctly (RT #8438) (7c7501)
+
+=item *
+
+Avoids multiple FETCH/stringify on filetest ops (40c852d)
+
+=item *
+
+Fixed issue with string C<eval> not detecting taint of overloaded/tied
+arguments (RT #75716) (895b760)
+
+=item *
+
+Fix potential crashes of string C<eval> when evaluating a object with
+overloaded stringification by creating a stringified copy when necessary
+(3e5c018)
+
+=item *
+
+Fixed bug where overloaded stringification could remove tainting
+(RT #75716) (a02ec77)
+
+=item *
+
+L<readline|perlfunc/"readline EXPR"> now honors C<< <> >> overloading on tied
+arguments.
+
+=item *
+
+A possible string corruption when doing regular expression matches on overloaded
+objects has been fixed [perl #77084].
+
+=item *
+
+Magic applied to variables in the main package no longer affects other packages.
+See L</Magic variables outside the main package> above [perl #76138].
+
+=item *
+
+The C<y///> or C<tr///> operator now calls get-magic (e.g., the C<FETCH>
+method of a tie) on its left-hand side just once, not twice [perl #76814].
+
+=item *
+
+C<splice> now calls set-magic. This means that, for instance, changes made
+by C<splice @ISA> are respected by method calls [perl #78400].
+
+=item *
+
+The C<=> operator used to ignore magic (e.g., tie methods) on its
+right-hand side if the scalar happened to hold a typeglob. This could
+happen if a typeglob was the last thing returned from or assigned to a tied
+scalar [perl #77498].
+
+=item *
+
+The fallback behaviour of overloading on binary operators was asymmetric
+[perl #71286].
+
+=item *
+
+Sometimes magic (ties, tainted, etc.) attached to variables could cause an
+object to last longer than it should, or cause a crash if a tied variable
+were freed from within a tie method. These have been fixed [perl #81230].
+
+=item *
+
+C<< E<lt>exprE<gt> >> always respects overloading now if the expression is
+overloaded.
+
+Due to the way that 'E<lt>E<gt> as glob' was parsed differently from
+'E<lt>E<gt> as filehandle' from 5.6 onwards, something like C<< E<lt>$foo[0]E<gt> >> did
+not handle overloading, even if C<$foo[0]> was an overloaded object. This
+was contrary to the documentation for overload, and meant that C<< E<lt>E<gt> >>
+could not be used as a general overloaded iterator operator.
+
+=item *
+
+DESTROY methods of objects implementing ties are no longer able to crash by
+accessing the tied variable through a weak reference [perl #86328].
+
+=back
+
+=head2 The Debugger
+
+=over
+
+=item *
+
+Don't stamp on $DB::single, $DB::trace and $DB::signal if they
+already have values when $^P is assigned to (RT #72422) (4c0f30).
+
+=item *
+
+A possible memory leak when using L<caller()|perlfunc/"caller EXPR"> to set
+C<@DB::args> has been fixed.
+
+=item *
+
+The Perl debugger now also works in taint mode [perl #76872].
+
+=item *
+
+When C<-d> is used on the shebang (C<#!>) line, the debugger now has access
+to the lines of the main program. In the past, this sometimes worked and
+sometimes did not, depending on what order things happened to be arranged
+in memory [perl #71806].
+
+=item *
+
+Subroutine redefinition works once more in the debugger [perl #48332].
 
 =item *
 
@@ -3797,6 +3606,264 @@ all. In non-threaded builds, the line number was ignored, so any change to
 the existing line number would cause the lines to be misnumbered
 [perl #79442].
 
+=back
+
+=head2 Threads, Signals
+
+=over
+
+=item *
+
+Don't accidentally clone lexicals in scope within active stack frames in
+the parent when creating a child thread (RT #73086) (05d04d).
+
+=item *
+
+Defer signal handling when shared SV locks are held to avoid
+deadlocks (RT #74868) (65c742).
+
+=item *
+
+Within signal handlers, C<$!> is now implicitly localized.
+
+=item *
+
+Several memory leaks in cloning and freeing threaded Perl interpreters have been
+fixed [perl #77352].
+
+=item *
+
+Creating a new thread when directory handles were open used to cause a
+crash, because the handles were not cloned, but simply passed to the new
+thread, resulting in a double free.
+
+Now directory handles are cloned properly, on systems that have a C<fchdir>
+function. On other systems, new threads simply do not inherit directory
+handles from their parent threads [perl #75154].
+
+=item *
+
+The typeglob C<*,>, which holds the scalar variable C<$,> (output field
+separator), had the wrong reference count in child threads.
+
+=item *
+
+[perl #78494] When pipes are shared between threads, the C<close> function
+(and any implicit close, such as on thread exit) no longer blocks.
+
+=back
+
+=head2 Miscellaneous Memory Leaks
+
+=over
+
+=item *
+
+Timely cleanup of SVs that are cloned into a new thread but then
+discovered to be orphaned (i.e. their owners are -not- cloned) (e42956)
+
+=item *
+
+Plugs more memory leaks in vms.c. (9e2bec0)
+
+=item *
+
+Several memory leaks when loading XS modules were fixed.
+
+=item *
+
+L<substr()|perlfunc/"substr EXPR,OFFSET,LENGTH,REPLACEMENT">,
+L<pos()|perlfunc/"index STR,SUBSTR,POSITION">, L<keys()|perlfunc/"keys HASH">,
+and L<vec()|perlfunc/"vec EXPR,OFFSET,BITS"> could, when used in combination
+with lvalues, result in leaking the scalar value they operate on, and cause its
+destruction to happen too late. This has now been fixed.
+
+=item *
+
+The postincrement and postdecrement operators, C<++> and C<-->, used to cause
+leaks when being used on references.  This has now been fixed.
+
+=item *
+
+Nested C<map> and C<grep> blocks no longer leak memory when processing
+large lists [perl #48004].
+
+=item *
+
+C<use v5.8> no longer leaks memory [perl #78436].
+
+=item *
+
+C<.=> followed by C<< <> >> or C<readline> would leak memory if C<$/>
+contained characters beyond the octet range and the scalar assigned to
+happened to be encoded as UTF8 internally [perl #72246].
+
+=item *
+
+A signal handler called within a signal handler could cause leaks or
+double-frees. Now fixed. [perl #76248].
+
+=item *
+
+C<use 5.42> [perl #69050],
+C<use 6> and C<no 5> no longer leak memory.
+
+=item *
+
+C<eval "BEGIN{die}"> no longer leaks memory on non-threaded builds.
+
+=back
+
+=head2 Miscellaneous
+
+XXX ‘Miscellaneous’ means things that have not been sorted out yet.
+
+=over
+
+=item *
+
+glob() no longer crashes when %File::Glob:: is empty and
+CORE::GLOBAL::glob isn't present (4984aa).
+
+=item *
+
+Fixed readline() when interrupted by signals so it no longer returns
+the "same thing" as before or random memory
+
+=item *
+
+Fixed a regression of kill() when a match variable is used for the
+process ID to kill  (RT#75812) (8af710e)
+
+=item *
+
+Fixed several subtle bugs in sort() when @_ is accessed within a subroutine
+used for sorting (RT#72334) (8f443ca)
+
+=item *
+
+Perl would segfault if the undocumented C<Internals> functions that used
+reference prototypes were called with the C<&foo()> syntax, e.g.
+C<&Internals::SvREADONLY(undef)> [perl #77776].
+
+These functions now call C<SvROK> on their arguments before dereferencing them
+with C<SvRV>, and we test for this case in F<t/lib/universal.t>.
+
+=item *
+
+When assigning a list with duplicated keys to a hash, the assignment used to
+return garbage and/or freed values:
+
+    @a = %h = (list with some duplicate keys);
+
+This has now been fixed [perl #31865].
+
+=item *
+
+The C<-C> command line option can now be followed by other options
+[perl #72434].
+
+=item *
+
+The C<&> C<|> C<^> bitwise operators no longer coerce read-only arguments
+[perl #20661].
+
+=item *
+
+Stringifying a scalar containing -0.0 no longer has the affect of turning
+false into true [perl #45133].
+
+=item *
+
+Malformed C<version> objects no longer cause crashes [perl #78286].
+
+=item *
+
+The interpreter no longer crashes when freeing deeply-nested arrays of
+arrays. Hashes have not been fixed yet [perl #44225].
+
+=item *
+
+The mechanism for freeing objects in globs used to leave dangling
+pointers to freed SVs, meaning Perl users could see corrupted state
+during destruction.
+
+Perl now only frees the affected slots of the GV, rather than freeing
+the GV itself. This makes sure that there are no dangling refs or
+corrupted state during destruction.
+
+=item *
+
+C<sprintf> was ignoring locales when called with constant arguments
+[perl #78632].
+
+=item *
+
+Concatenating long strings under C<use encoding> no longer causes perl to
+crash [perl #78674].
+
+=item *
+
+Calling C<< ->import >> on a class lacking an import method could corrupt
+the stack, resulting in strange behaviour. For instance,
+
+  push @a, "foo", $b = bar->import;
+
+would assign 'foo' to C<$b> [perl #63790].
+
+=item *
+
+The C<recv> function could crash when called with the MSG_TRUNC flag
+[perl #75082].
+
+=item *
+
+Iterating with C<foreach> over an array returned by an lvalue sub now works
+[perl #23790].
+
+=item *
+
+C<$@> is now localised during calls to C<binmode> to prevent action at a
+distance [perl #78844].
+
+=item *
+
+C<formline> no longer crashes when passed a tainted format picture. It also
+taints C<$^A> now if its arguments are tainted [perl #79138].
+
+=item *
+
+Calling a closure prototype (what is passed to an attribute handler for a
+closure) now results in a "Closure prototype called" error message instead
+of a crash [perl #68560].
+
+=item *
+
+Mentioning a read-only lexical variable from the enclosing scope in a
+string C<eval> no longer causes the variable to become writable
+[perl #19135].
+
+=item *
+
+Match variables (e.g., C<$1>) no longer persist between calls to a sort
+subroutine [perl #76026].
+
+=item *
+
+The C<B> module was returning C<B::OP>s instead of C<B::LOGOP>s for C<entertry> [perl #80622].
+This was due to a bug in the perl core, not in C<B> itself.
+
+=item *
+
+Some numeric operators were converting integers to floating point,
+resulting in loss of precision on 64-bit platforms [perl #77456].
+
+=item *
+
+[perl #83194] Combining the vector (%v) flag and dynamic precision would
+cause sprintf to confuse the order of its arguments, making it treat the
+string as the precision and vice versa.
+
 =item *
 
 C<$AUTOLOAD> used to remain tainted forever if it ever became tainted. Now
@@ -3805,22 +3872,29 @@ name was not tainted.
 
 =item *
 
-A bug has been fixed in the implementation of C<{...}> quantifiers in
-regular expressions that prevented the code block in
-C</((\w+)(?{ print $2 })){2}/> from seeing the C<$2> sometimes
-[perl #84294].
-
-=item *
-
 C<sprintf> now dies when passed a tainted scalar for the format. It did
 already die for arbitrary expressions, but not for simple scalars
 [perl #82250].
 
+=back
+
+=head2 XXX Bugs that probably belong in other sections
+
+=over
+
 =item *
 
-C<sv_catsv_flags> no longer calls C<mg_get> on its second argument (the
-source string) if the flags passed to it do not include SV_GMAGIC. So it
-now matches the documentation.
+perlbug now always permits the sender address to be changed
+before sending - if you were having trouble sending bug reports before
+now, this should fix it, we hope (e6eb90).
+
+=item *
+
+Fixed POSIX::strftime memory leak (RT#73520) (c4bc4aa)
+
+=item *
+
+Fix pthread include error for Time::Piece (e9f284c)
 
 =back
 
@@ -3876,11 +3950,6 @@ Module-Install distribution on CPAN to fail. (Specifically, F<02_mymeta.t> tests
 5 and 21, F<18_all_from.t> tests 6 and 15, F<19_authors.t> tests 5, 13, 21 and
 29, and F<20_authors_with_special_characters.t> tests 6, 15 and 23 in version
 1.00 of that distribution now fail.)
-
-=item *
-
-DESTROY methods of objects implementing ties are no longer able to crash by
-accessing the tied variable through a weak reference [perl #86328].
 
 =back
 
