@@ -8787,7 +8787,7 @@ tryagain:
 		     * position the parse so that this will be called again
 		     * immediately */
 		    if (len) {
-			p  = RExC_parse + len - 1;
+			p  = oldp;
 			goto loopdone;
 		    }
 		    else {
