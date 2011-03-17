@@ -4557,10 +4557,10 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
     restudied = 0;
 #endif
 
-    /* Set to use unicode semantics if the pattern is in utf8 and has the
-     * 'depends' charset specified, as it means unicode when utf8  */
     pm_flags = orig_pm_flags;
 
+    /* Set to use unicode semantics if the pattern is in utf8 and has the
+     * 'depends' charset specified, as it means unicode when utf8  */
     if (RExC_utf8 && get_regex_charset(pm_flags) == REGEX_DEPENDS_CHARSET) {
 	set_regex_charset(&pm_flags, REGEX_UNICODE_CHARSET);
     }
