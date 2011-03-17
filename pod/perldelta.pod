@@ -3982,6 +3982,11 @@ Module-Install distribution on CPAN to fail. (Specifically, F<02_mymeta.t> tests
 29, and F<20_authors_with_special_characters.t> tests 6, 15 and 23 in version
 1.00 of that distribution now fail.)
 
+=item *
+
+DESTROY methods of objects implementing ties are no longer able to crash by
+accessing the tied variable through a weak reference [perl #86328].
+
 =back
 
 =head1 Errata
