@@ -142,6 +142,7 @@ typedef struct RExC_state_t {
     regnode	**recurse;		/* Recurse regops */
     I32		recurse_count;		/* Number of recurse regops */
     I32		in_lookbehind;
+    I32		contains_locale;
 #if ADD_TO_REGEXEC
     char 	*starttry;		/* -Dr: where regtry was called. */
 #define RExC_starttry	(pRExC_state->starttry)
@@ -190,6 +191,7 @@ typedef struct RExC_state_t {
 #define RExC_recurse	(pRExC_state->recurse)
 #define RExC_recurse_count	(pRExC_state->recurse_count)
 #define RExC_in_lookbehind	(pRExC_state->in_lookbehind)
+#define RExC_contains_locale	(pRExC_state->contains_locale)
 
 
 #define	ISMULT1(c)	((c) == '*' || (c) == '+' || (c) == '?')
@@ -4483,6 +4485,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
     I32 sawplus = 0;
     I32 sawopen = 0;
     bool used_setjump = FALSE;
+    regex_charset initial_charset = get_regex_charset(orig_pm_flags);
 
     U8 jump_ret = 0;
     dJMPENV;
@@ -4501,6 +4504,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
 
     RExC_utf8 = RExC_orig_utf8 = SvUTF8(pattern);
     RExC_uni_semantics = 0;
+    RExC_contains_locale = 0;
 
     /****************** LONG JUMP TARGET HERE***********************/
     /* Longjmp back to here if have to switch in midstream to utf8 */
@@ -4559,9 +4563,13 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
 
     pm_flags = orig_pm_flags;
 
-    /* Set to use unicode semantics if the pattern is in utf8 and has the
-     * 'depends' charset specified, as it means unicode when utf8  */
-    if (RExC_utf8 && get_regex_charset(pm_flags) == REGEX_DEPENDS_CHARSET) {
+    if (initial_charset == REGEX_LOCALE_CHARSET) {
+	RExC_contains_locale = 1;
+    }
+    else if (RExC_utf8 && initial_charset == REGEX_DEPENDS_CHARSET) {
+
+	/* Set to use unicode semantics if the pattern is in utf8 and has the
+	 * 'depends' charset specified, as it means unicode when utf8  */
 	set_regex_charset(&pm_flags, REGEX_UNICODE_CHARSET);
     }
 
@@ -7024,6 +7032,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         }
 			cs = REGEX_LOCALE_CHARSET;
                         has_charset_modifier = 1;
+			RExC_contains_locale = 1;
                         break;
                     case UNICODE_PAT_MOD:
                         if (has_charset_modifier || flagsp == &negflags) {
