@@ -722,16 +722,24 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data, I32 *min
 
 /* Can match anything (initialization) */
 STATIC void
-S_cl_anything(struct regnode_charclass_class *cl)
+S_cl_anything(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
 {
     PERL_ARGS_ASSERT_CL_ANYTHING;
 
     ANYOF_BITMAP_SETALL(cl);
     ANYOF_CLASS_ZERO(cl);	/* all bits set, so class is irrelevant */
-    cl->flags = ANYOF_EOS|ANYOF_UNICODE_ALL|ANYOF_LOC_NONBITMAP_FOLD|ANYOF_NON_UTF8_LATIN1_ALL|ANYOF_LOCALE;
-    /* The above line set locale which given the current logic may not get
-     * cleared even if no locale is in the regex, which may lead to false
-     * positives; see the commit message */
+    cl->flags = ANYOF_EOS|ANYOF_UNICODE_ALL|ANYOF_LOC_NONBITMAP_FOLD|ANYOF_NON_UTF8_LATIN1_ALL;
+
+    /* If any portion of the regex is to operate under locale rules,
+     * initialization includes it.  The reason this isn't done for all regexes
+     * is that the optimizer was written under the assumption that locale was
+     * all-or-nothing.  Given the complexity and lack of documentation in the
+     * optimizer, and that there are inadequate test cases for locale, so many
+     * parts of it may not work properly, it is safest to avoid locale unless
+     * necessary. */
+    if (RExC_contains_locale) {
+	cl->flags |= ANYOF_LOCALE;
+    }
 }
 
 /* Can match anything (initialization) */
@@ -760,7 +768,7 @@ S_cl_init(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
 
     Zero(cl, 1, struct regnode_charclass_class);
     cl->type = ANYOF;
-    cl_anything(cl);
+    cl_anything(pRExC_state, cl);
     ARG_SET(cl, ANYOF_NONBITMAP_EMPTY);
 }
 
@@ -861,7 +869,7 @@ S_cl_and(struct regnode_charclass_class *cl,
 /* 'OR' a given class with another one.  Can create false positives */
 /* cl should not be inverted */
 STATIC void
-S_cl_or(struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with)
+S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with)
 {
     PERL_ARGS_ASSERT_CL_OR;
 
@@ -871,7 +879,7 @@ S_cl_or(struct regnode_charclass_class *cl, const struct regnode_charclass_class
          * complement of everything not in the bitmap, but currently we don't
          * know what that is, so give up and match anything */
 	if (ANYOF_NONBITMAP(or_with)) {
-	    cl_anything(cl);
+	    cl_anything(pRExC_state, cl);
 	}
 	/* We do not use
 	 * (B1 | CL1) | (!B2 & !CL2) = (B1 | !B2 & !CL2) | (CL1 | (!B2 & !CL2))
@@ -891,7 +899,7 @@ S_cl_or(struct regnode_charclass_class *cl, const struct regnode_charclass_class
 		cl->bitmap[i] |= ~or_with->bitmap[i];
 	} /* XXXX: logic is complicated otherwise */
 	else {
-	    cl_anything(cl);
+	    cl_anything(pRExC_state, cl);
 	}
 
         /* And, we can just take the union of the flags that aren't affected
@@ -924,7 +932,7 @@ S_cl_or(struct regnode_charclass_class *cl, const struct regnode_charclass_class
 	    }
 	}
 	else { /* XXXX: logic is complicated, leave it along for a moment. */
-	    cl_anything(cl);
+	    cl_anything(pRExC_state, cl);
 	}
 
         /* Take the union */
@@ -2808,7 +2816,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			data->whilem_c = data_fake.whilem_c;
 		    }
 		    if (flags & SCF_DO_STCLASS)
-			cl_or(&accum, &this_class);
+			cl_or(pRExC_state, &accum, &this_class);
 		}
 		if (code == IFTHEN && num < 2) /* Empty ELSE branch */
 		    min1 = 0;
@@ -2821,7 +2829,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		min += min1;
 		delta += max1 - min1;
 		if (flags & SCF_DO_STCLASS_OR) {
-		    cl_or(data->start_class, &accum);
+		    cl_or(pRExC_state, data->start_class, &accum);
 		    if (min1) {
 			cl_and(data->start_class, and_withp);
 			flags &= ~SCF_DO_STCLASS;
@@ -3096,7 +3104,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     }
                     is_inf = is_inf_internal = 1;
                     if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
-                        cl_anything(data->start_class);
+                        cl_anything(pRExC_state, data->start_class);
                     flags &= ~SCF_DO_STCLASS;
 	        }
             } else {
@@ -3388,7 +3396,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    data->start_class = oclass;
 		if (mincount == 0 || minnext == 0) {
 		    if (flags & SCF_DO_STCLASS_OR) {
-			cl_or(data->start_class, &this_class);
+			cl_or(pRExC_state, data->start_class, &this_class);
 		    }
 		    else if (flags & SCF_DO_STCLASS_AND) {
 			/* Switch to OR mode: cache the old value of
@@ -3404,7 +3412,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    }
 		} else {		/* Non-zero len */
 		    if (flags & SCF_DO_STCLASS_OR) {
-			cl_or(data->start_class, &this_class);
+			cl_or(pRExC_state, data->start_class, &this_class);
 			cl_and(data->start_class, and_withp);
 		    }
 		    else if (flags & SCF_DO_STCLASS_AND)
@@ -3654,7 +3662,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		}
 		is_inf = is_inf_internal = 1;
 		if (flags & SCF_DO_STCLASS_OR)
-		    cl_anything(data->start_class);
+		    cl_anything(pRExC_state, data->start_class);
 		flags &= ~SCF_DO_STCLASS;
 		break;
 	    }
@@ -3717,7 +3725,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		  do_default:
 		    /* Perl_croak(aTHX_ "panic: unexpected simple REx opcode %d", OP(scan)); */
 		    if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
-			cl_anything(data->start_class);
+			cl_anything(pRExC_state, data->start_class);
 		    break;
 		case REG_ANY:
 		    if (OP(scan) == SANY)
@@ -3725,7 +3733,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    if (flags & SCF_DO_STCLASS_OR) { /* Everything but \n */
 			value = (ANYOF_BITMAP_TEST(data->start_class,'\n')
 				 || ANYOF_CLASS_TEST_ANY_SET(data->start_class));
-			cl_anything(data->start_class);
+			cl_anything(pRExC_state, data->start_class);
 		    }
 		    if (flags & SCF_DO_STCLASS_AND || !value)
 			ANYOF_BITMAP_CLEAR(data->start_class,'\n');
@@ -3735,7 +3743,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			cl_and(data->start_class,
 			       (struct regnode_charclass_class*)scan);
 		    else
-			cl_or(data->start_class,
+			cl_or(pRExC_state, data->start_class,
 			      (struct regnode_charclass_class*)scan);
 		    break;
 		case ALNUM:
@@ -4156,7 +4164,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		}
 		is_inf = is_inf_internal = 1;
 		if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
-		    cl_anything(data->start_class);
+		    cl_anything(pRExC_state, data->start_class);
 		flags &= ~SCF_DO_STCLASS;
 	}
 	else if (OP(scan) == GPOS) {
@@ -4254,7 +4262,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         data->whilem_c = data_fake.whilem_c;
                     }
                     if (flags & SCF_DO_STCLASS)
-                        cl_or(&accum, &this_class);
+                        cl_or(pRExC_state, &accum, &this_class);
                 }
             }
             if (flags & SCF_DO_SUBSTR) {
@@ -4266,7 +4274,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
             min += min1;
             delta += max1 - min1;
             if (flags & SCF_DO_STCLASS_OR) {
-                cl_or(data->start_class, &accum);
+                cl_or(pRExC_state, data->start_class, &accum);
                 if (min1) {
                     cl_and(data->start_class, and_withp);
                     flags &= ~SCF_DO_STCLASS;
