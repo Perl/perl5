@@ -91,6 +91,18 @@ can't be blocked on I/O either.
 See L<perlfork> for more information about the fork() emulation on
 Windows.
 
+=head2 Perl source code is read in text mode on Windows
+
+Perl scripts used to be read in binary mode on Windows for the benefit
+of the ByteLoader module (which is no longer part of core Perl).  This
+had the side effect of breaking various operations on the DATA filehandle,
+including seek()/tell(), and even simply reading from DATA after file handles
+have been flushed by a call to system(), backticks, fork() etc.
+
+The default build options for Windows have been changed to read Perl source
+code on Windows in text mode now.  Hopefully ByteLoader will be updated on
+CPAN to automatically handle this situation.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
