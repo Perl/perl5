@@ -824,6 +824,18 @@ been fixed, standardizing on the variable names used in config.sh.
 This will change the behavior of Policy.sh if you happen to have been
 accidentally relying on the Policy.sh incorrect behavior.
 
+=head3 Perl source code is read in text mode on Windows
+
+Perl scripts used to be read in binary mode on Windows for the benefit
+of the ByteLoader module (which is no longer part of core Perl).  This
+had the side effect of breaking various operations on the DATA filehandle,
+including seek()/tell(), and even simply reading from DATA after file handles
+have been flushed by a call to system(), backticks, fork() etc.
+
+The default build options for Windows have been changed to read Perl source
+code on Windows in text mode now.  Hopefully ByteLoader will be updated on
+CPAN to automatically handle this situation [perl #28106].
+
 =head1 Deprecations
 
 See also L</Deprecated C APIs>.
@@ -2484,6 +2496,9 @@ introduction of spurious line breaks whenever the perlio buffer fills up.
 =back
 
 =head3 Windows
+
+See also L</"fork() emulation will not wait for signalled children"> and
+L</"Perl source code is read in text mode on Windows">, above.
 
 =over 4
 
