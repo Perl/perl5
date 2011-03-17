@@ -9344,6 +9344,8 @@ S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8
 					LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS);
 		break;
 	    case LATIN_SMALL_LETTER_SHARP_S:
+		/* 0x1E9E is LATIN CAPITAL LETTER SHARP S */
+		*invlist_ptr = add_cp_to_invlist(*invlist_ptr, 0x1E9E);
 
 		/* Under /a, /d, and /u, this can match the two chars "ss" */
 		if (! MORE_ASCII_RESTRICTED) {
