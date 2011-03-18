@@ -3113,24 +3113,36 @@ the label to be associated also with the first statement inside the eval
 
 =item *
 
-Avoid loading feature.pm when 'no 5.13.2;' or similar is
-encountered (faee19).
+The C<no 5.13.2;> form of C<no> no longer tries to turn on features or
+pragmata (i.e., strict) [perl #70075].
 
 =item *
 
-Doesn't set strict with C<no VERSION> if C<VERSION> is greater than 5.12
-(da8fb5d)
+C<BEGIN {require 5.12.0}> now behaves as documented, rather than behaving
+identically to C<use 5.12.0;>.  Previously, C<require> in a C<BEGIN> block
+was erroneously executing the C<use feature ':5.12.0'> and
+C<use strict;> behaviour, which only C<use> was documented to
+provide [perl #69050].
 
 =item *
 
-Assignments to lvalue subroutines now honor copy-on-write behavior again, which
-has been broken since version 5.10.0 (RT#75656).
+Lvalue subroutines are again able to return copy-on-write scalars.  This
+had been broken since version 5.10.0 [perl #75656].
 
 =item *
 
 A regression introduced in Perl 5.12.0, making
 C<< my $x = 3; $x = length(undef) >> result in C<$x> set to C<3> has been
-fixed.  C<$x> will now be C<undef>.
+fixed.  C<$x> will now be C<undef> [perl #85508].
+
+=item *
+
+When strict 'refs' mode is off, C<%{...}> in rvalue context returns
+C<undef> if its argument is undefined.  An optimisation introduced in perl
+5.12.0 to make C<keys %{...}> faster when used as a boolean did not take
+this into account, causing C<keys %{+undef}> (and C<keys %$foo> when
+C<$foo> is undefined) to be an error, which it should only be in strict
+mode [perl #81750].
 
 =item *
 
@@ -3152,16 +3164,19 @@ within a C<UNITCHECK> block no longer causes the interpreter to crash
 
 =item *
 
+String evals no longer fail after 2 billion scopes have been
+compiled [perl #83364].
+
+=item *
+
 The parser no longer hangs when encountering certain Unicode characters,
 such as U+387 [perl #74022].
 
 =item *
 
-C<BEGIN {require 5.12.0}> now behaves as documented, rather than behaving
-identically to C<use 5.12.0;>. Previously, C<require> in a C<BEGIN> block
-was erroneously executing the C<use feature ':5.12.0'> and
-C<use strict; use warnings;> behaviour, which only C<use> was documented to
-provide [perl #69050].
+Several contexts no longer allow a Unicode character to begin a word
+that should never begin words, for an example an accent that must follow
+another character previously could precede all other characters.
 
 =item *
 
@@ -3196,26 +3211,6 @@ of the C<@>) [perl #72090].
 C<require> no longer causes C<caller> to return the wrong file name for
 the scope that called C<require> and other scopes higher up that had the
 same file name [perl #68712].
-
-=item *
-
-String evals will no longer fail after 2 billion scopes have been
-compiled (d1bfb64, 2df5bdd, 0d311cd and 6012dc8)
-
-=item *
-
-[perl #81750] When strict 'refs' mode is off,
-C<%{...}> in rvalue context returns C<undef> if
-its argument is undefined. An optimisation introduced in perl 5.12.0 to
-make C<keys %{...}> faster when used as a boolean did not take this into
-account, causing C<keys %{+undef}> (and C<keys %$foo> when C<$foo> is
-undefined) to be an error, which it should only be in strict mode.
-
-=item *
-
-Several contexts no longer allow a Unicode character to begin a word
-that should never begin words, for an example an accent that must follow
-another character previously could precede all other characters.
 
 =item *
 
