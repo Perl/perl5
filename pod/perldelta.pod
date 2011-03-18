@@ -2958,34 +2958,28 @@ handler. Now it just leaks memory [perl #75556].
 Most I/O functions were not warning for unopened handles unless the
 'closed' and 'unopened' warnings categories were both enabled. Now only
 C<use warnings 'unopened'> is necessary to trigger these warnings (as was
-always meant to be the case.
+always meant to be the case).
 
 =item *
 
-[perl #38456] binmode FH, ":crlf" only modifies top crlf layer (7826b36)
+There have been several fixes to PerlIO layers:
 
-When pushed on top of the stack, crlf will no longer enable crlf layers
-lower in the stack. This will prevent unexpected results.
+When C<binmode FH, ":crlf"> pushes the C<:crlf> layer on top of the stack,
+it no longer enables crlf layers lower in the stack, to avoid unexpected
+results [perl #38456].
 
-=item *
+Opening a file in C<:raw> mode now does what it advertises to do (first
+open the file, then binmode it), instead of simply leaving off the top
+layer [perl #80764].
 
-Fix 'raw' layer for RT #80764 (ecfd064)
-
-Made a ':raw' open do what it advertises to do (first open the file,
-then binmode it), instead of leaving off the top layer.
-
-=item *
-
-Use PerlIOBase_open for pop, utf8 and bytes layers (c0888ac)
-
-Three of Perl's builtin PerlIO layers (C<:pop>, C<:utf8> and
-C<:bytes>) didn't allow stacking when opening a file. For example
+The three layers C<:pop>, C<:utf8> and C<:bytes> didn't allow stacking when
+opening a file.  For example
 this:
 
     open FH, '>:pop:perlio', 'some.file' or die $!;
 
-Would throw an error: "Invalid argument". This has been fixed in this
-release.
+Would throw an error: "Invalid argument".  This has been fixed in this
+release [perl #82484].
 
 =back
 
@@ -3006,25 +3000,23 @@ fixing #74484.
 
 =item *
 
-Trap invalid use of SvIVX on SVt_REGEXP when assertions are on
-(e77da3)
+Syntax errors in C<< (?{...}) >> blocks no longer cause panic messages
+[perl #2353].
 
 =item *
 
-Catch yyparse() exceptions in C<< (?{...}) >> (RT#2353) (634d691)
+A pattern like C<(?:(o){2})?> no longer causes a "panic" error
+[perl #39233].
 
 =item *
 
-A panic in the regular expression optimizer has been fixed (RT#75762).
-
-=item *
-
-A fatal error in regular expressions when processing UTF-8 data has been fixed [perl #75680].
+A fatal error in regular expressions containing C<(.*?)> when processing
+UTF-8 data has been fixed [perl #75680].
 
 =item *
 
 An erroneous regular expression engine optimisation that caused regex verbs like
-C<*COMMIT> to sometimes be ignored has been removed.
+C<*COMMIT> sometimes to be ignored has been removed.
 
 =item *
 
@@ -3044,18 +3036,10 @@ C<s|(.)|@a{ print($1), /./ }|g> [perl #19078].
 
 =item *
 
-Characters in the Latin-1 non-ASCII range (0x80 to 0xFF) used not to match
-themselves if the string happened to be UTF8-encoded internally, the
-regular expression was not, and the character in the regular expression was
-inside a repeated group (e.g.,
-C<Encode::decode_utf8("\303\200") =~ /(\xc0)+/>) [perl #78464].
-
-=item *
-
-A non-ASCII character in the Latin-1 range could match both a Posix
-class, such as C<[[:alnum:]]>, and its inverse C<[[:^alnum:]]>.  This is
-now fixed for regular expressions compiled under the C<"u"> modifier.
-See L</C<use feature "unicode_strings"> now applies to more regex matching>. [perl #18281].
+Several cases in which characters in the Latin-1 non-ASCII range (0x80 to
+0xFF) used not to match themselves or used to match both a character class
+and its complement have been fixed.  For instance, U+00E2 could match both
+C<\w> and C<\W> [perl #78464] [perl #18281] [perl #60156].
 
 =item *
 
@@ -3082,31 +3066,14 @@ C<{n,m}> quantifier to fail when it should match [perl #79152].
 
 =item *
 
-A long standing bug has now been fully fixed (partial fixes came in
-earlier releases), in which some Latin-1 non-ASCII characters on
-ASCII-platforms would match both a character class and its complement,
-such as U+00E2 being both in C<\w> and C<\W>, depending on the
-UTF-8-ness of the regular expression pattern and target string.
-Fixing this did expose some bugs in various modules and tests that
-relied on the previous behavior of C<[[:alpha:]]> not ever matching
-U+00FF, "LATIN SMALL LETTER Y WITH DIAERESIS", even when it should, in
-Unicode mode; now it does match when appropriate.
-[perl #60156].
-
-=item *
-
-A Unicode C<\p{}> property match in a regular expression pattern will
-now force Unicode rules for the rest of the regular expression
-
-=item *
-
 Case insensitive matching in regular expressions compiled under C<use
-locale> now works much more sanely when the pattern and/or target string
-are encoded in UTF-8.  Previously, under these conditions the localeness
+locale> now works much more sanely when the pattern or
+target string is encoded internally in
+UTF8.  Previously, under these conditions the localeness
 was completely lost.  Now, code points above 255 are treated as Unicode,
 but code points between 0 and 255 are treated using the current locale
-rules, regardless of whether the pattern or string are encoded in UTF-8.
-The few case insensitive matches that cross the 255/256 boundary are not
+rules, regardless of whether the pattern or the string is encoded in UTF8.
+The few case-insensitive matches that cross the 255/256 boundary are not
 allowed.  For example, 0xFF does not caselessly match the character at
 0x178, LATIN CAPITAL LETTER Y WITH DIAERESIS, because 0xFF may not be
 LATIN SMALL LETTER Y in the current locale, and Perl has no way of
