@@ -3096,48 +3096,6 @@ C</((\w+)(?{ print $2 })){2}/> from seeing the C<$2> sometimes
 
 =back
 
-=head2 Bugs Relating to the C API
-
-=over
-
-=item *
-
-The C-level C<lex_stuff_pvn> function would sometimes cause a spurious
-syntax error on the last line of the file if it lacked a final semicolon
-[perl #74006].
-
-=item *
-
-The C<eval_sv> and C<eval_pv> C functions now set C<$@> correctly when
-there is a syntax error and no C<G_KEEPERR> flag, and never set it if the
-C<G_KEEPERR> flag is present [perl #3719].
-
-=item *
-
-The XS multicall API no longer causes subroutines to lose reference counts
-if called via the multicall interface from within those very subroutines.
-This affects modules like List::Util. Calling one of its functions with an
-active subroutine as the first argument could cause a crash [perl #78070].
-
-=item *
-
-The C<SvPVbyte> function available to XS modules now calls magic before
-downgrading the SV, to avoid warnings about wide characters [perl #72398].
-
-=item *
-
-The ref types in the typemap for XS bindings now support magical variables
-[perl #72684].
-
-=item *
-
-C<sv_catsv_flags> no longer calls C<mg_get> on its second argument (the
-source string) if the flags passed to it do not include SV_GMAGIC. So it
-now matches the documentation.
-
-=back
-
-
 =head2 Syntax/Parsing Bugs
 
 =over
@@ -3862,6 +3820,47 @@ Fixed POSIX::strftime memory leak (RT#73520) (c4bc4aa)
 =item *
 
 Fix pthread include error for Time::Piece (e9f284c)
+
+=back
+
+=head2 Bugs Relating to the C API
+
+=over
+
+=item *
+
+The C-level C<lex_stuff_pvn> function would sometimes cause a spurious
+syntax error on the last line of the file if it lacked a final semicolon
+[perl #74006].
+
+=item *
+
+The C<eval_sv> and C<eval_pv> C functions now set C<$@> correctly when
+there is a syntax error and no C<G_KEEPERR> flag, and never set it if the
+C<G_KEEPERR> flag is present [perl #3719].
+
+=item *
+
+The XS multicall API no longer causes subroutines to lose reference counts
+if called via the multicall interface from within those very subroutines.
+This affects modules like List::Util. Calling one of its functions with an
+active subroutine as the first argument could cause a crash [perl #78070].
+
+=item *
+
+The C<SvPVbyte> function available to XS modules now calls magic before
+downgrading the SV, to avoid warnings about wide characters [perl #72398].
+
+=item *
+
+The ref types in the typemap for XS bindings now support magical variables
+[perl #72684].
+
+=item *
+
+C<sv_catsv_flags> no longer calls C<mg_get> on its second argument (the
+source string) if the flags passed to it do not include SV_GMAGIC. So it
+now matches the documentation.
 
 =back
 
