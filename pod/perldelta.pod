@@ -3346,22 +3346,6 @@ again and, if the entries are re-created too many times, dies with a
 
 =item *
 
-Naming a deprecated character in \N{...} will not leak memory.
-
-=item *
-
-chop now correctly handles perl's extended UTF-8 (RT #73246) (65ab92)
-
-=item *
-
-Avoid UTF-8 cache panics with offsets beyond a string (RT #75898) (3e2d381)
-
-=item *
-
-C<warn()> and C<die()> now respect utf8-encoded scalars [perl #45549].
-
-=item *
-
 What has become known as the "Unicode Bug" is mostly resolved in this release.
 Under C<use feature 'unicode_strings'>, the internal storage format of a
 string no longer affects the external semantics.  There are two known
@@ -3381,14 +3365,32 @@ the 66 of them was known about in places.  The Unicode standard
 considers them legal, but forbids the "open interchange" of them.
 This is part of the change to allow the internal use of any code point
 (see L</Core Enhancements>).  Together, these changes resolve
-[perl #38722], [perl #51918], [perl #51936], [perl #63446]
+[perl #38722], [perl #51918], [perl #51936], [perl #63446].
 
 =item *
 
-[perl #77692] Sometimes the UTF8 length cache would not be reset on a value
+Naming a deprecated character in \N{...} no longer leaks memory.
+
+=item *
+
+C<chop> now correctly handles characters above "\x{7fffffff}"
+[perl #73246].
+
+=item *
+
+Passing to C<index> an offset beyond the end of the string when the string
+is encoded internally in UTF8 no longer causes panics [perl #75898].
+
+=item *
+
+C<warn()> and C<die()> now respect utf8-encoded scalars [perl #45549].
+
+=item *
+
+Sometimes the UTF8 length cache would not be reset on a value
 returned by substr, causing C<length(substr($uni_string,...))> to give
-wrong answers. With C<${^UTF8CACHE}> set to -1, it would produce a 'panic'
-error message, too.
+wrong answers.  With C<${^UTF8CACHE}> set to -1, it would produce a 'panic'
+error message, too [perl #77692].
 
 =back
 
