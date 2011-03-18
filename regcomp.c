@@ -9921,8 +9921,10 @@ parseit:
 	}
 	else {
 	    prevvalue = value; /* save the beginning of the range */
-	    if (*RExC_parse == '-' && RExC_parse+1 < RExC_end &&
-		RExC_parse[1] != ']') {
+	    if (RExC_parse+1 < RExC_end
+		&& *RExC_parse == '-'
+		&& RExC_parse[1] != ']')
+	    {
 		RExC_parse++;
 
 		/* a bad range like \w-, [:word:]- ? */
