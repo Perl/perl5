@@ -309,14 +309,13 @@ struct regnode_charclass_class {
 
 /* Flags for node->flags of ANYOF.  These are in short supply, so some games
  * are done to share them, as described below.  If necessary, the ANYOF_LOCALE
- * and ANYOF_CLASS bits could be shared with a space penalty for locale nodes
- * (and the code at the time this comment was written, is written so that all
- * that is necessary to make the change would be to redefine the ANYOF_CLASS
- * define).  Once the planned change to compile all the above-latin1 code points
- * is done, then the UNICODE_ALL bit can be freed up.  If flags need to be
- * added that are applicable to the synthetic start class only, with some work,
- * they could be put in the next-node field, or in an unused bit of the
- * classflags field. */
+ * and ANYOF_CLASS bits could be shared with a space penalty for locale nodes,
+ * but this isn't quite so easy, as the optimizer also uses ANYOF_CLASS.
+ * Once the planned change to compile all the above-latin1 code points is done,
+ * then the UNICODE_ALL bit can be freed up, with a small performance penalty.
+ * If flags need to be added that are applicable to the synthetic start class
+ * only, with some work, they could be put in the next-node field, or in an
+ * unused bit of the classflags field. */
 
 #define ANYOF_LOCALE		 0x01
 
@@ -331,8 +330,10 @@ struct regnode_charclass_class {
 
 #define ANYOF_INVERT		 0x04
 
-/* CLASS is never set unless LOCALE is too: has runtime \d, \w, [:posix:], ...
- * The non-locale ones are resolved at compile-time */
+/* Set if this is a struct regnode_charclass_class vs a regnode_charclass.  This
+ * is used for runtime \d, \w, [:posix:], ..., which are used only in locale
+ * and the optimizer's synthetic start class.  Non-locale \d, etc are resolved
+ * at compile-time */
 #define ANYOF_CLASS	 0x08
 #define ANYOF_LARGE      ANYOF_CLASS    /* Same; name retained for back compat */
 
@@ -457,28 +458,14 @@ struct regnode_charclass_class {
 #define ANYOF_SKIP		((ANYOF_SIZE - 1)/sizeof(regnode))
 #define ANYOF_CLASS_SKIP	((ANYOF_CLASS_SIZE - 1)/sizeof(regnode))
 
-/* The class bit can be set to the locale one if necessary to save bits at the
- * expense of having locale ANYOF nodes always have a class bit map, and hence
- * take up extra space.  This allows convenient changing it as development
- * proceeds on this */
-#if ANYOF_CLASS == ANYOF_LOCALE
-#   undef ANYOF_CLASS_ADD_SKIP
-#   define ANYOF_ADD_LOC_SKIP	(ANYOF_CLASS_SKIP - ANYOF_SKIP)
-
-    /* Quicker way to see if there are actually any tests.  This is because
-     * currently the set of tests can be empty even when the class bitmap is
-     * allocated */
-#   if ANYOF_CLASSBITMAP_SIZE != 4
-#	error ANYOF_CLASSBITMAP_SIZE is expected to be 4
-#   endif
-#   define ANYOF_CLASS_TEST_ANY_SET(p)	/* assumes sizeof(p) = 4 */       \
-	memNE (((struct regnode_charclass_class*)(p))->classflags,	  \
-		"\0\0\0\0", ANYOF_CLASSBITMAP_SIZE)
-#else
-#   define ANYOF_CLASS_ADD_SKIP	(ANYOF_CLASS_SKIP - ANYOF_SKIP)
-#   undef ANYOF_ADD_LOC_SKIP
-#   define ANYOF_CLASS_TEST_ANY_SET(p) (ANYOF_FLAGS(p) & ANYOF_CLASS)
+#if ANYOF_CLASSBITMAP_SIZE != 4
+#   error ANYOF_CLASSBITMAP_SIZE is expected to be 4
 #endif
+#define ANYOF_CLASS_TEST_ANY_SET(p) ((ANYOF_FLAGS(p) & ANYOF_CLASS)         \
+	&& memNE (((struct regnode_charclass_class*)(p))->classflags,	    \
+		    "\0\0\0\0", ANYOF_CLASSBITMAP_SIZE))
+/*#define ANYOF_CLASS_ADD_SKIP	(ANYOF_CLASS_SKIP - ANYOF_SKIP)
+ * */
 
 
 /*

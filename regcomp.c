@@ -728,7 +728,8 @@ S_cl_anything(const RExC_state_t *pRExC_state, struct regnode_charclass_class *c
 
     ANYOF_BITMAP_SETALL(cl);
     ANYOF_CLASS_ZERO(cl);	/* all bits set, so class is irrelevant */
-    cl->flags = ANYOF_EOS|ANYOF_UNICODE_ALL|ANYOF_LOC_NONBITMAP_FOLD|ANYOF_NON_UTF8_LATIN1_ALL;
+    cl->flags = ANYOF_CLASS|ANYOF_EOS|ANYOF_UNICODE_ALL
+		|ANYOF_LOC_NONBITMAP_FOLD|ANYOF_NON_UTF8_LATIN1_ALL;
 
     /* If any portion of the regex is to operate under locale rules,
      * initialization includes it.  The reason this isn't done for all regexes
@@ -775,8 +776,9 @@ S_cl_init(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
 /* These two functions currently do the exact same thing */
 #define cl_init_zero		S_cl_init
 
-/* 'And' a given class with another one.  Can create false positives */
-/* cl should not be inverted */
+/* 'AND' a given class with another one.  Can create false positives.  'cl'
+ * should not be inverted.  'and_with->flags & ANYOF_CLASS' should be 0 if
+ * 'and_with' is a regnode_charclass instead of a regnode_charclass_class. */
 STATIC void
 S_cl_and(struct regnode_charclass_class *cl,
 	const struct regnode_charclass_class *and_with)
@@ -866,8 +868,9 @@ S_cl_and(struct regnode_charclass_class *cl,
     }
 }
 
-/* 'OR' a given class with another one.  Can create false positives */
-/* cl should not be inverted */
+/* 'OR' a given class with another one.  Can create false positives.  'cl'
+ * should not be inverted.  'or_with->flags & ANYOF_CLASS' should be 0 if
+ * 'or_with' is a regnode_charclass instead of a regnode_charclass_class. */
 STATIC void
 S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with)
 {
@@ -9542,20 +9545,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
 
     if (SIZE_ONLY) {
 	RExC_size += ANYOF_SKIP;
-#ifdef ANYOF_ADD_LOC_SKIP
-	if (LOC) {
-	    RExC_size += ANYOF_ADD_LOC_SKIP;
-	}
-#endif
 	listsv = &PL_sv_undef; /* For code scanners: listsv always non-NULL. */
     }
     else {
  	RExC_emit += ANYOF_SKIP;
 	if (LOC) {
 	    ANYOF_FLAGS(ret) |= ANYOF_LOCALE;
-#ifdef ANYOF_ADD_LOC_SKIP
-	    RExC_emit += ANYOF_ADD_LOC_SKIP;
-#endif
 	}
 	ANYOF_BITMAP_ZERO(ret);
 	listsv = newSVpvs("# comment\n");
@@ -9784,14 +9779,10 @@ parseit:
 	    if (LOC && namedclass < ANYOF_MAX && ! need_class) {
 		need_class = 1;
 		if (SIZE_ONLY) {
-#ifdef ANYOF_CLASS_ADD_SKIP
-		    RExC_size += ANYOF_CLASS_ADD_SKIP;
-#endif
+		    RExC_size += ANYOF_CLASS_SKIP - ANYOF_SKIP;
 		}
 		else {
-#ifdef ANYOF_CLASS_ADD_SKIP
-		    RExC_emit += ANYOF_CLASS_ADD_SKIP;
-#endif
+		    RExC_emit += ANYOF_CLASS_SKIP - ANYOF_SKIP;
 		    ANYOF_CLASS_ZERO(ret);
 		}
 		ANYOF_FLAGS(ret) |= ANYOF_CLASS;
