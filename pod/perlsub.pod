@@ -608,16 +608,9 @@ magical and read-only :
 
     local $1 = 2;
 
-Similarly, but in a way more difficult to spot, the following snippet will
-die in perl 5.9.0 :
-
-    sub f { local $_ = "foo"; print }
-    for ($1) {
-	# now $_ is aliased to $1, thus is magic and readonly
-	f();
-    }
-
-See next section for an alternative to this situation.
+One exception is the default scalar variable: starting with perl 5.14
+C<local($_)> will always strip all magic from $_, to make it possible
+to safely reuse $_ in a subroutine.
 
 B<WARNING>: Localization of tied arrays and hashes does not currently
 work as described.
@@ -643,12 +636,6 @@ This implies, among other things, that any magic eventually carried by
 those variables is locally lost.  In other words, saying C<local */>
 will not have any effect on the internal value of the input record
 separator.
-
-Notably, if you want to work with a brand new value of the default scalar
-$_, and avoid the potential problem listed above about $_ previously
-carrying a magic value, you should use C<local *_> instead of C<local $_>.
-As of perl 5.9.1, you can also use the lexical form of C<$_> (declaring it
-with C<my $_>), which avoids completely this problem.
 
 =head3 Localization of elements of composite types
 X<local, composite type element> X<local, array element> X<local, hash element>

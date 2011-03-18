@@ -286,7 +286,7 @@ Perl_mg_set(pTHX_ SV *sv)
 	    mg->mg_flags &= ~MGf_GSKIP;	/* setting requires another read */
 	    (SSPTR(mgs_ix, MGS*))->mgs_magical = 0;
 	}
-	if (PL_localizing == 2 && !S_is_container_magic(mg))
+	if (PL_localizing == 2 && (!S_is_container_magic(mg) || sv == DEFSV))
 	    continue;
 	if (vtbl && vtbl->svt_set)
 	    vtbl->svt_set(aTHX_ sv, mg);
@@ -510,6 +510,9 @@ Perl_mg_localize(pTHX_ SV *sv, SV *nsv, bool setmagic)
     MAGIC *mg;
 
     PERL_ARGS_ASSERT_MG_LOCALIZE;
+
+    if (nsv == DEFSV)
+	return;
 
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	const MGVTBL* const vtbl = mg->mg_virtual;

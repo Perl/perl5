@@ -59,6 +59,19 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 local($_) will strip all magic from $_
+
+local() on scalar variables will give them a new value, but keep all
+their magic intact.  This has proven to be problematic for the default
+scalar variable $_, where L<perlsub> recommends that any subroutine
+that assigns to $_ should localize it first.  This would throw an
+exception if $_ is aliased to a read-only variable, and could have
+various unintentional side-effects in general.
+
+Therefore, as an exception to the general rule, local($_) will not
+only assign a new value to $_, but also remove all existing magic from
+it as well.
+
 =head2 Passing references to warn()
 
 An earlier Perl 5.13.x release changed C<warn($ref)> to leave the reference

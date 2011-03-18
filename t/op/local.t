@@ -644,12 +644,23 @@ while (/(o.+?),/gc) {
 eval { local $1 = 1 };
 like($@, qr/Modification of a read-only value attempted/);
 
+# local($_) always strips all magic
 eval { for ($1) { local $_ = 1 } };
-like($@, qr/Modification of a read-only value attempted/);
+is($@, "");
 
-# make sure $1 is still read-only
-eval { for ($1) { local $_ = 1 } };
-like($@, qr/Modification of a read-only value attempted/);
+{
+    my $STORE = 0;
+    package TieHash;
+    sub TIEHASH { bless $_[1], $_[0] }
+    sub FETCH   { 42 }
+    sub STORE   { ++$STORE }
+
+    package main;
+    tie my %hash, "TieHash", {};
+
+    eval { for ($hash{key}) {local $_ = 2} };
+    is($STORE, 0);
+}
 
 # The s/// adds 'g' magic to $_, but it should remain non-readonly
 eval { for("a") { for $x (1,2) { local $_="b"; s/(.*)/+$1/ } } };
