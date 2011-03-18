@@ -647,9 +647,9 @@ assign C<\@some_array> to C<$glob>.
 
 To fix this, the C<*{}> operator (including the C<*foo> and C<*$foo> forms)
 has been modified to make a new immutable glob if its operand is a glob
-copy. Various operators that make a distinction between globs and scalars
-have been modified to treat only immutable globs as globs. (C<tie>,
-C<tied> and C<untie> has been left as they are for compatibility's sake,
+copy.  This allows operators that make a distinction between globs and
+scalars to be modified to treat only immutable globs as globs.  (C<tie>,
+C<tied> and C<untie> have been left as they are for compatibility's sake,
 but will warn. See L</Deprecations>.)
 
 This causes an incompatible change in code that assigns a glob to the
@@ -662,10 +662,6 @@ following code, for instance:
 The C<*$glob> on the second line returns a new immutable glob. That new
 glob is made an alias to C<*bar>. Then it is discarded. So the second
 assignment has no effect.
-
-The upside to this incompatible change is that bugs [perl #77496],
-[perl #77502], [perl #77508], [perl #77688], and [perl #77812],
-and maybe others, too, have been fixed.
 
 See L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=77810> for even
 more detail.
@@ -3224,22 +3220,75 @@ manipulation could remove it, as in these two cases which used to crash:
 
 =back
 
-=head2 Stashes, Globs, MROs
+=head2 Stashes, Globs and Method Lookup
+
+Perl 5.10.0 introduced a new internal mechanism for caching MROs (method
+resolution orders, or lists of parent classes; aka "isa" caches) to make
+method lookup faster (so @ISA arrays would not have to be searched
+repeatedly).  Unfortunately, this brought with it quite a few bugs.  Almost
+all of these have been fixed now, along with a few MRO-related bugs that
+existed before 5.10.0:
+
+=over
+
+=item *
+
+The following used to have erratic effects on method resolution, because
+the "isa" caches were not reset or otherwise ended up listing the wrong
+classes.  These have been fixed.
+
+=over
+
+=item Aliasing packages by assigning to globs [perl #77358]
+
+=item Deleting packages by deleting their containing stash elements
+
+=item Undefining the glob containing a package (C<undef *Foo::>)
+
+=item Undefining an ISA glob (C<undef *Foo::ISA>)
+
+=item Deleting an ISA stash element (C<delete $Foo::{ISA}>)
+
+=item Sharing @ISA arrays between classes (via C<*Foo::ISA = \@Bar::ISA> or
+C<*Foo::ISA = *Bar::ISA>) [perl #77238]
+
+=back
+
+C<undef *Foo::ISA> would even stop a new C<@Foo::ISA> array from updating
+caches.
+
+=item *
+
+Typeglob assignments would crash if the glob's stash no longer existed, so
+long as the glob assigned to was named 'ISA' or the glob on either side of
+the assignment contained a subroutine.
+
+=item *
+
+C<PL_isarev>, which is accessible to Perl via C<mro::get_isarev> is now
+updated properly when packages are deleted or removed from the C<@ISA> of
+other classes. This allows many packages to be created and deleted without
+causing a memory leak [perl #75176].
+
+=back
+
+In addition, various other bugs related to typeglobs and stashes have been
+fixed:
 
 =over 
 
 =item *
 
 Some work has been done on the internal pointers that link between symbol
-tables (stashes), typeglobs and subroutines. This has the effect that
+tables (stashes), typeglobs and subroutines.  This has the effect that
 various edge cases related to deleting stashes or stash entries (e.g.
 <%FOO:: = ()>), and complex typeglob or code reference aliasing, will no
 longer crash the interpreter.
 
 =item *
 
-Assignments to glob copies now behave just like assignments to regular globs
-(RT#1804).
+Assigning a reference to a glob copy now assigns to a glob slot instead of
+overwriting the glob with a scalar [perl #1804] [perl #77508].
 
 =item *
 
@@ -3265,53 +3314,10 @@ of a tied array or hash [perl #36051].
 
 =item *
 
-Aliasing packages by assigning to globs or deleting packages by deleting
-their containing stash elements used to have erratic effects on method
-resolution, because the internal 'isa' caches were not reset. This has been
-fixed.
-
-=item *
-
-Various bugs related to typeglob dereferencing have been fixed. See
-L</Dereferencing typeglobs>, above.
-
-=item *
-
-Typeglob assignments would crash if the glob's stash no longer existed, so
-long as the glob assigned to was named 'ISA' or the glob on either side of
-the assignment contained a subroutine.
-
-=item *
-
-Creating an alias to a package when that package had been detached from the
-symbol table would result in corrupted isa caches [perl #77358].
-
-=item *
-
-C<PL_isarev>, which is accessible to Perl via C<mro::get_isarev> is now
-updated properly when packages are deleted or removed from the C<@ISA> of
-other classes. This allows many packages to be created and deleted without
-causing a memory leak [perl #75176].
-
-=item *
-
-C<undef *Foo::> and C<undef *Foo::ISA> and C<delete $package::{ISA}>
-used not to update the internal isa caches if the
-stash or C<@ISA> array had a reference elsewhere. In
-fact, C<undef *Foo::ISA> would stop a new C<@Foo::ISA> array from updating
-caches.
-
-=item *
-
-C<@ISA> arrays can now be shared between classes via
-C<*Foo::ISA = \@Bar::ISA> or C<*Foo::ISA = *Bar::ISA> [perl #77238].
-
-=item *
-
 When trying to report C<Use of uninitialized value $Foo::BAR>, crashes could
-occur if the GLOB of the global variable causing the warning has been detached
-from its original stash by, for example C<delete $::{'Foo::'}>. This has been
-fixed by disabling the reporting of variable names in the warning in those
+occur if the glob holding the global variable in question had been detached
+from its original stash by, for example, C<delete $::{'Foo::'}>.  This has
+been fixed by disabling the reporting of variable names in those
 cases.
 
 =item *
