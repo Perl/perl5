@@ -440,7 +440,7 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+Compilation on Windows with Visual Studio 2010 is now supported.
 
 =back
 

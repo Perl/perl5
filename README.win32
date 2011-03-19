@@ -40,17 +40,9 @@ system).  Currently, this port is capable of using one of the
 following compilers on the Intel x86 architecture:
 
       Borland C++             version 5.02 or later
-      Microsoft Visual C++    version 6.0 or later (*)
+      Microsoft Visual C++    version 6.0 or later
       Gcc by mingw.org        gcc version 3.2 or later
       Gcc by mingw-w64.sf.net gcc version 4.4.3 or later
-
-(*) NOTE: Support for Visual C++ 2010 is not yet complete. This latest
-version of VC++ introduces some new C<errno.h> constants which conflict
-with Perl's current setting of them to match the corresponding WSAE*
-constants' values. Until this issue is resolved you will see several test
-failures (in F<cpan/autodie/t/flock.t>, F<dist/IO/t/io_multihomed.t >,
-F<dist/Net-Ping/t/450_service.t> and F<dist/Net-Ping/t/510_ping_udp.t>)
-and experience other problems in code involving sockets.
 
 Note that the last two of these are actually competing projects both
 delivering complete gcc toolchain for MS Windows:
@@ -411,9 +403,6 @@ Type "dmake test" (or "nmake test").  This will run most of the tests from
 the testsuite (many tests will be skipped).
 
 There should be no test failures.
-
-(If you're using VC++ 2010 then you will currently see several test failures,
-as noted in the list of supported compilers above.)
 
 Some test failures may occur if you use a command shell other than the
 native "cmd.exe", or if you are building from a path that contains
