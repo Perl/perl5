@@ -14,7 +14,7 @@ our $VERSION;
 our $host;
 
 BEGIN {
-    $VERSION = '1.15';
+    $VERSION = '1.16';
     {
 	local $SIG{__DIE__};
 	eval {

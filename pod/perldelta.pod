@@ -156,6 +156,10 @@ XXX
 
 =item *
 
+C<attributes> has been upgraded from version 0.13 to 0.14.
+
+=item *
+
 C<base> has been upgraded from version 2.15 to 2.16.
 
 =item *
@@ -200,6 +204,22 @@ reverted.
 
 =item *
 
+C<File::Glob> has been upgraded from version 1.11 to 1.12.
+
+=item *
+
+C<Hash::Util> has been upgraded from version 0.10 to 0.11.
+
+=item *
+
+C<Hash::Util::FieldHash> has been upgraded from version 1.08 to 1.09.
+
+=item *
+
+C<I18N::Langinfo> has been upgraded from version 0.07 to 0.08.
+
+=item *
+
 C<IO> has been upgraded from version 1.25_03 to 1.25_04.
 
 =item *
@@ -228,6 +248,10 @@ C<Module::CoreList> has been upgraded from version 2.45 to 2.46.
 
 =item *
 
+C<mro> has been upgraded from version 1.06 to 1.07.
+
+=item *
+
 C<parent> has been upgraded from version 0.224 to 0.225
 
 =item *
@@ -237,6 +261,10 @@ C<Pod::Simple> has been upgraded from version 3.15 to 3.16
 =item *
 
 C<Storable> has been upgraded from version 2.26 to 2.27.
+
+=item *
+
+C<Sys::Hostname> has been upgraded from version 1.15 to 1.16.
 
 =item *
 
@@ -312,6 +340,10 @@ This now correctly returns "No_Block" instead of C<undef> for the block
 of a code point that hasn't been assigned to another one.
 
 =back
+
+=item *
+
+C<XS::Typemap> has been upgraded from version 0.04 to 0.05.
 
 =back
 
