@@ -3919,7 +3919,7 @@ Module-Install distribution on CPAN to fail. (Specifically, F<02_mymeta.t> tests
 
 =head1 Errata
 
-=head2 C<keys>, C<values> work on arrays
+=head2 C<keys>, C<values> and C<each> work on arrays
 
 You can now use the C<keys>, C<values>, C<each> builtin functions on arrays
 (previously you could only use them on hashes).  See L<perlfunc> for details.
