@@ -1,4 +1,3 @@
-
 /*
    XS code to test the typemap entries
 
@@ -6,6 +5,8 @@
    All Rights Reserved
 
 */
+
+#define PERL_NO_GET_CONTEXT
 
 #include "EXTERN.h"   /* std perl include */
 #include "perl.h"     /* std perl include */
