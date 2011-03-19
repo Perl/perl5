@@ -257,7 +257,7 @@ See also: L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=74290>
 =item *
 
 We fixed a regression in case-insensitive matching of folded characters
-in regular expressions introduced in Perl 5.12.0.
+in regular expressions introduced in Perl 5.10.1.
 
 See also: L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=72998>
 
