@@ -3035,14 +3035,6 @@ Perl_sighandler(int sig)
 	PL_savestack_ix += 5;		/* Protect save in progress. */
 	SAVEDESTRUCTOR_X(S_unwind_handler_stack, NULL);
     }
-    if (PL_markstack_ptr < PL_markstack_max - 2) {
-	flags |= 2;
-	PL_markstack_ptr++;		/* Protect mark. */
-    }
-    if (PL_scopestack_ix < PL_scopestack_max - 3) {
-	flags |= 4;
-	PL_scopestack_ix++;
-    }
     /* sv_2cv is too complicated, try a simpler variant first: */
     if (!SvROK(PL_psig_ptr[sig]) || !(cv = MUTABLE_CV(SvRV(PL_psig_ptr[sig])))
 	|| SvTYPE(cv) != SVt_PVCV) {
@@ -3132,10 +3124,6 @@ Perl_sighandler(int sig)
 cleanup:
     /* pop any of SAVEFREESV, SAVEDESTRUCTOR_X and "save in progress" */
     PL_savestack_ix = old_ss_ix;
-    if (flags & 2)
-	PL_markstack_ptr--;
-    if (flags & 4)
-	PL_scopestack_ix -= 1;
     if (flags & 8)
 	SvREFCNT_dec(sv);
     PL_op = myop;			/* Apparently not needed... */
@@ -3221,8 +3209,7 @@ S_restore_magic(pTHX_ const void *p)
 /* clean up the mess created by Perl_sighandler().
  * Note that this is only called during an exit in a signal handler;
  * a die is trapped by the call_sv() and the SAVEDESTRUCTOR_X manually
- * skipped over. This is why we don't need to fix up the markstack and
- * scopestack - they're going to be set to 0 anyway */
+ * skipped over. */
 
 static void
 S_unwind_handler_stack(pTHX_ const void *p)
