@@ -3028,12 +3028,14 @@ Perl_sighandler(int sig)
 		exit(sig);
 	}
 
-    /* Max number of items pushed there is 3*n or 4. We cannot fix
-       infinity, so we fix 4 (in fact 5): */
-    if (PL_savestack_ix + 15 <= PL_savestack_max) {
-	flags |= 1;
-	PL_savestack_ix += 5;		/* Protect save in progress. */
-	SAVEDESTRUCTOR_X(S_unwind_handler_stack, NULL);
+    if (PL_signals &  PERL_SIGNALS_UNSAFE_FLAG) {
+	/* Max number of items pushed there is 3*n or 4. We cannot fix
+	   infinity, so we fix 4 (in fact 5): */
+	if (PL_savestack_ix + 15 <= PL_savestack_max) {
+	    flags |= 1;
+	    PL_savestack_ix += 5;		/* Protect save in progress. */
+	    SAVEDESTRUCTOR_X(S_unwind_handler_stack, NULL);
+	}
     }
     /* sv_2cv is too complicated, try a simpler variant first: */
     if (!SvROK(PL_psig_ptr[sig]) || !(cv = MUTABLE_CV(SvRV(PL_psig_ptr[sig])))
@@ -3057,9 +3059,11 @@ Perl_sighandler(int sig)
     flags |= 8;
     SAVEFREESV(sv);
 
-    /* make sure our assumption about the size of the SAVEs are correct:
-     * 3 for SAVEDESTRUCTOR_X, 2 for SAVEFREESV */
-    assert(old_ss_ix + 2 + ((flags & 1) ? 3+5 : 0)  == PL_savestack_ix);
+    if (PL_signals &  PERL_SIGNALS_UNSAFE_FLAG) {
+	/* make sure our assumption about the size of the SAVEs are correct:
+	 * 3 for SAVEDESTRUCTOR_X, 2 for SAVEFREESV */
+	assert(old_ss_ix + 2 + ((flags & 1) ? 3+5 : 0)  == PL_savestack_ix);
+    }
 
     PUSHSTACKi(PERLSI_SIGNAL);
     PUSHMARK(SP);
