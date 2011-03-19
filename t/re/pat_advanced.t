@@ -2112,6 +2112,11 @@ EOP
         ok(1, $message);  # If it didn't crash, it worked.
     }
 
+    {   # Was looping
+        watchdog(2);
+        like("\x{00DF}", qr/[\x{1E9E}_]*/i, "\"\\x{00DF}\" =~ /[\\x{1E9E}_]*/i was looping");
+    }
+
     # !!! NOTE that tests that aren't at all likely to crash perl should go
     # a ways above, above these last ones.
 

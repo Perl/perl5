@@ -6662,28 +6662,34 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 		     * create a map so that we know how many bytes in the
 		     * source to advance given that we have matched a certain
 		     * number of bytes in the fold.  This map is stored in
-		     * 'map_fold_len_back'.  The first character in the fold
-		     * has array element 1 contain the number of bytes in the
-		     * source that folded to it; the 2nd is the cumulative
-		     * number to match it; ... */
-		    U8 map_fold_len_back[UTF8_MAX_FOLD_CHAR_EXPAND+1] = { 0 };
+		     * 'map_fold_len_back'.  Let n mean the number of bytes in
+		     * the fold of the first character that we are folding.
+		     * Then map_fold_len_back[n] is set to the number of bytes
+		     * in that first character.  Similarly let m be the
+		     * corresponding number for the second character to be
+		     * folded.  Then map_fold_len_back[n+m] is set to the
+		     * number of bytes occupied by the first two source
+		     * characters. ... */
+		    U8 map_fold_len_back[UTF8_MAXBYTES_CASE+1] = { 0 };
 		    U8 folded[UTF8_MAXBYTES_CASE+1];
 		    STRLEN foldlen = 0; /* num bytes in fold of 1st char */
-		    STRLEN foldlen_for_av; /* num bytes in fold of all chars */
+		    STRLEN foldlen_for_av = 0; /* num bytes in fold of all
+						  chars */
 
 		    if (OP(n) == ANYOF || maxlen == 1 || ! lenp || ! av) {
 
 			/* Here, only need to fold the first char of the target
-			 * string */
+			 * string.  It the source wasn't utf8, is 1 byte long */
 			to_utf8_fold(utf8_p, folded, &foldlen);
 			foldlen_for_av = foldlen;
-			map_fold_len_back[1] = UTF8SKIP(utf8_p);
+			map_fold_len_back[foldlen] = (utf8_target)
+						     ? UTF8SKIP(utf8_p)
+						     : 1;
 		    }
 		    else {
 
 			/* Here, need to fold more than the first char.  Do so
 			 * up to the limits */
-			UV which_char = 0;
 			U8* source_ptr = utf8_p;    /* The source for the fold
 						       is the regex target
 						       string */
@@ -6691,8 +6697,10 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 			U8* e = utf8_p + maxlen;    /* Can't go beyond last
 						       available byte in the
 						       target string */
-			while (which_char < UTF8_MAX_FOLD_CHAR_EXPAND
-			       && source_ptr < e)
+			U8 i;
+			for (i = 0;
+			     i < UTF8_MAX_FOLD_CHAR_EXPAND && source_ptr < e;
+			     i++)
 			{
 
 			    /* Fold the next character */
@@ -6710,26 +6718,25 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 				break;
 			    }
 
-			    /* Save the first character's folded length, in
-			     * case we have to use it later */
-			    if (! foldlen) {
-				foldlen = this_char_foldlen;
-			    }
-
-			    /* Here, add the fold of this character */
+			    /* Add the fold of this character */
 			    Copy(this_char_folded,
 				 folded_ptr,
 				 this_char_foldlen,
 				 U8);
-			    which_char++;
-			    map_fold_len_back[which_char] =
-				map_fold_len_back[which_char - 1]
-				+ UTF8SKIP(source_ptr);
-			    folded_ptr += this_char_foldlen;
 			    source_ptr += UTF8SKIP(source_ptr);
+			    folded_ptr += this_char_foldlen;
+			    foldlen_for_av = folded_ptr - folded;
+
+			    /* Create map from the number of bytes in the fold
+			     * back to the number of bytes in the source.  If
+			     * the source isn't utf8, the byte count is just
+			     * the number of characters so far */
+			    map_fold_len_back[foldlen_for_av]
+						      = (utf8_target)
+							? source_ptr - utf8_p
+							: i + 1;
 			}
 			*folded_ptr = '\0';
-			foldlen_for_av = folded_ptr - folded;
 		    }
 
 
@@ -6742,6 +6749,7 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 			    SV* const sv = *av_fetch(av, i, FALSE);
 			    STRLEN len;
 			    const char * const s = SvPV_const(sv, len);
+
 			    if (len <= foldlen_for_av && memEQ(s,
 							       (char*)folded,
 							       len))
@@ -6750,10 +6758,9 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 				/* Advance the target string ptr to account for
 				 * this fold, but have to translate from the
 				 * folded length to the corresponding source
-				 * length.  The array is indexed by how many
-				 * characters in the match */
-			        *lenp = map_fold_len_back[
-					utf8_length(folded, folded + len)];
+				 * length. */
+				*lenp = map_fold_len_back[len];
+				assert(*lenp != 0);	/* Otherwise will loop */
 				match = TRUE;
 				break;
 			    }
