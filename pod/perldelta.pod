@@ -2141,6 +2141,12 @@ perlbug@perl.org does not accept email with a return-path that does
 not resolve.  So the user's address is now passed to sendmail so it's
 less likely to get stuck in a mail queue somewhere [perl #82996].
 
+=item *
+
+perlbug now always permits the sender address to be changed
+before sending - if you were having trouble sending bug reports before
+now, this should fix it, we hope.
+
 =back
 
 =head3 L<perl5db.pl>
@@ -3122,11 +3128,6 @@ provide [perl #69050].
 
 =item *
 
-Lvalue subroutines are again able to return copy-on-write scalars.  This
-had been broken since version 5.10.0 [perl #75656].
-
-=item *
-
 A regression introduced in Perl 5.12.0, making
 C<< my $x = 3; $x = length(undef) >> result in C<$x> set to C<3> has been
 fixed.  C<$x> will now be C<undef> [perl #85508].
@@ -3204,12 +3205,6 @@ of the C<@>) [perl #72090].
 
 =item *
 
-C<require> no longer causes C<caller> to return the wrong file name for
-the scope that called C<require> and other scopes higher up that had the
-same file name [perl #68712].
-
-=item *
-
 Accessing an element of a package array with a hard-coded number (as
 opposed to an arbitrary expression) would crash if the array did not exist.
 Usually the array would be autovivified during compilation, but typeglob
@@ -3217,6 +3212,16 @@ manipulation could remove it, as in these two cases which used to crash:
 
   *d = *a;  print $d[0];
   undef *d; print $d[0];
+
+=item *
+
+The C<-C> command line option, when used on the shebang line, can now be
+followed by other options [perl #72434].
+
+=item *
+
+The C<B> module was returning C<B::OP>s instead of C<B::LOGOP>s for C<entertry> [perl #80622].
+This was due to a bug in the perl core, not in C<B> itself.
 
 =back
 
@@ -3492,6 +3497,23 @@ variable were freed from within a tie method.  These have been fixed
 DESTROY methods of objects implementing ties are no longer able to crash by
 accessing the tied variable through a weak reference [perl #86328].
 
+=item *
+
+Fixed a regression of kill() when a match variable is used for the
+process ID to kill [perl #75812].
+
+=item *
+
+C<$AUTOLOAD> used to remain tainted forever if it ever became tainted. Now
+it is correctly untainted if an autoloaded method is called and the method
+name was not tainted.
+
+=item *
+
+C<sprintf> now dies when passed a tainted scalar for the format. It did
+already die for arbitrary expressions, but not for simple scalars
+[perl #82250].
+
 =back
 
 =head2 The Debugger
@@ -3534,23 +3556,14 @@ the existing line number would cause the lines to be misnumbered
 
 =back
 
-=head2 Threads, Signals
+=head2 Threads
 
 =over
 
 =item *
 
-Don't accidentally clone lexicals in scope within active stack frames in
-the parent when creating a child thread (RT #73086) (05d04d).
-
-=item *
-
-Defer signal handling when shared SV locks are held to avoid
-deadlocks (RT #74868) (65c742).
-
-=item *
-
-Within signal handlers, C<$!> is now implicitly localized.
+Perl no longer accidentally clones lexicals in scope within active stack
+frames in the parent when creating a child thread [perl #73086].
 
 =item *
 
@@ -3577,6 +3590,82 @@ separator), had the wrong reference count in child threads.
 [perl #78494] When pipes are shared between threads, the C<close> function
 (and any implicit close, such as on thread exit) no longer blocks.
 
+=item *
+
+Perl now does a timely cleanup of SVs that are cloned into a new thread but
+then discovered to be orphaned (i.e., their owners are I<not> cloned). This
+eliminates several "scalars leaked" warnings when joining threads.
+
+=back
+
+=head2 Scoping and Subroutines
+
+=over
+
+=item *
+
+Lvalue subroutines are again able to return copy-on-write scalars.  This
+had been broken since version 5.10.0 [perl #75656].
+
+=item *
+
+C<require> no longer causes C<caller> to return the wrong file name for
+the scope that called C<require> and other scopes higher up that had the
+same file name [perl #68712].
+
+=item *
+
+C<sort> with a ($$)-prototyped comparison routine used to cause the value
+of @_ to leak out of the sort.  Taking a reference to @_ within the
+sorting routine could cause a crash [perl #72334].
+
+=item *
+
+Match variables (e.g., C<$1>) no longer persist between calls to a sort
+subroutine [perl #76026].
+
+=item *
+
+Iterating with C<foreach> over an array returned by an lvalue sub now works
+[perl #23790].
+
+=item *
+
+C<$@> is now localised during calls to C<binmode> to prevent action at a
+distance [perl #78844].
+
+=item *
+
+Calling a closure prototype (what is passed to an attribute handler for a
+closure) now results in a "Closure prototype called" error message instead
+of a crash [perl #68560].
+
+=item *
+
+Mentioning a read-only lexical variable from the enclosing scope in a
+string C<eval> no longer causes the variable to become writable
+[perl #19135].
+
+=back
+
+=head2 Signals
+
+=over
+
+=item *
+
+Within signal handlers, C<$!> is now implicitly localized.
+
+=item *
+
+CHLD signals are no longer unblocked after a signal handler is called if
+they were blocked before by C<POSIX::sigprocmask> [perl #82040].
+
+=item *
+
+A signal handler called within a signal handler could cause leaks or
+double-frees.  Now fixed. [perl #76248].
+
 =back
 
 =head2 Miscellaneous Memory Leaks
@@ -3585,12 +3674,8 @@ separator), had the wrong reference count in child threads.
 
 =item *
 
-Timely cleanup of SVs that are cloned into a new thread but then
-discovered to be orphaned (i.e. their owners are -not- cloned) (e42956)
-
-=item *
-
-Plugs more memory leaks in vms.c. (9e2bec0)
+Several VMS-specific routines dealing with filesystem access were leaking
+memory.
 
 =item *
 
@@ -3616,7 +3701,8 @@ large lists [perl #48004].
 
 =item *
 
-C<use v5.8> no longer leaks memory [perl #78436].
+C<use VERSION> and C<no VERSION> no longer leak memory [perl #78436]
+[perl #69050].
 
 =item *
 
@@ -3626,23 +3712,11 @@ happened to be encoded as UTF8 internally [perl #72246].
 
 =item *
 
-A signal handler called within a signal handler could cause leaks or
-double-frees. Now fixed. [perl #76248].
-
-=item *
-
-C<use 5.42> [perl #69050],
-C<use 6> and C<no 5> no longer leak memory.
-
-=item *
-
 C<eval "BEGIN{die}"> no longer leaks memory on non-threaded builds.
 
 =back
 
-=head2 Miscellaneous
-
-XXX ‘Miscellaneous’ means things that have not been sorted out yet.
+=head2 Memory Corruption and Crashes
 
 =over
 
@@ -3653,27 +3727,8 @@ CORE::GLOBAL::glob isn't present (4984aa).
 
 =item *
 
-Fixed readline() when interrupted by signals so it no longer returns
-the "same thing" as before or random memory
-
-=item *
-
-Fixed a regression of kill() when a match variable is used for the
-process ID to kill  (RT#75812) (8af710e)
-
-=item *
-
-Fixed several subtle bugs in sort() when @_ is accessed within a subroutine
-used for sorting (RT#72334) (8f443ca)
-
-=item *
-
-Perl would segfault if the undocumented C<Internals> functions that used
-reference prototypes were called with the C<&foo()> syntax, e.g.
-C<&Internals::SvREADONLY(undef)> [perl #77776].
-
-These functions now call C<SvROK> on their arguments before dereferencing them
-with C<SvRV>, and we test for this case in F<t/lib/universal.t>.
+readline() has been fixed when interrupted by signals so it no longer
+returns the "same thing" as before or random memory.
 
 =item *
 
@@ -3686,42 +3741,18 @@ This has now been fixed [perl #31865].
 
 =item *
 
-The C<-C> command line option can now be followed by other options
-[perl #72434].
-
-=item *
-
-The C<&> C<|> C<^> bitwise operators no longer coerce read-only arguments
-[perl #20661].
-
-=item *
-
-Stringifying a scalar containing -0.0 no longer has the affect of turning
-false into true [perl #45133].
-
-=item *
-
-Malformed C<version> objects no longer cause crashes [perl #78286].
-
-=item *
-
-The interpreter no longer crashes when freeing deeply-nested arrays of
-arrays. Hashes have not been fixed yet [perl #44225].
-
-=item *
-
 The mechanism for freeing objects in globs used to leave dangling
 pointers to freed SVs, meaning Perl users could see corrupted state
 during destruction.
 
 Perl now only frees the affected slots of the GV, rather than freeing
-the GV itself. This makes sure that there are no dangling refs or
+the GV itself.  This makes sure that there are no dangling refs or
 corrupted state during destruction.
 
 =item *
 
-C<sprintf> was ignoring locales when called with constant arguments
-[perl #78632].
+The interpreter no longer crashes when freeing deeply-nested arrays of
+arrays.  Hashes have not been fixed yet [perl #44225].
 
 =item *
 
@@ -3744,40 +3775,24 @@ The C<recv> function could crash when called with the MSG_TRUNC flag
 
 =item *
 
-Iterating with C<foreach> over an array returned by an lvalue sub now works
-[perl #23790].
-
-=item *
-
-C<$@> is now localised during calls to C<binmode> to prevent action at a
-distance [perl #78844].
-
-=item *
-
 C<formline> no longer crashes when passed a tainted format picture. It also
 taints C<$^A> now if its arguments are tainted [perl #79138].
 
-=item *
+=back
 
-Calling a closure prototype (what is passed to an attribute handler for a
-closure) now results in a "Closure prototype called" error message instead
-of a crash [perl #68560].
+=head2 Fixes to Various Perl Operators
 
-=item *
-
-Mentioning a read-only lexical variable from the enclosing scope in a
-string C<eval> no longer causes the variable to become writable
-[perl #19135].
+=over
 
 =item *
 
-Match variables (e.g., C<$1>) no longer persist between calls to a sort
-subroutine [perl #76026].
+The C<&> C<|> C<^> bitwise operators no longer coerce read-only arguments
+[perl #20661].
 
 =item *
 
-The C<B> module was returning C<B::OP>s instead of C<B::LOGOP>s for C<entertry> [perl #80622].
-This was due to a bug in the perl core, not in C<B> itself.
+Stringifying a scalar containing -0.0 no longer has the affect of turning
+false into true [perl #45133].
 
 =item *
 
@@ -3786,41 +3801,14 @@ resulting in loss of precision on 64-bit platforms [perl #77456].
 
 =item *
 
-[perl #83194] Combining the vector (%v) flag and dynamic precision would
+C<sprintf> was ignoring locales when called with constant arguments
+[perl #78632].
+
+=item *
+
+Combining the vector (%v) flag and dynamic precision would
 cause sprintf to confuse the order of its arguments, making it treat the
-string as the precision and vice versa.
-
-=item *
-
-C<$AUTOLOAD> used to remain tainted forever if it ever became tainted. Now
-it is correctly untainted if an autoloaded method is called and the method
-name was not tainted.
-
-=item *
-
-C<sprintf> now dies when passed a tainted scalar for the format. It did
-already die for arbitrary expressions, but not for simple scalars
-[perl #82250].
-
-=back
-
-=head2 XXX Bugs that probably belong in other sections
-
-=over
-
-=item *
-
-perlbug now always permits the sender address to be changed
-before sending - if you were having trouble sending bug reports before
-now, this should fix it, we hope (e6eb90).
-
-=item *
-
-Fixed POSIX::strftime memory leak (RT#73520) (c4bc4aa)
-
-=item *
-
-Fix pthread include error for Time::Piece (e9f284c)
+string as the precision and vice versa [perl #83194].
 
 =back
 
@@ -3862,6 +3850,11 @@ The ref types in the typemap for XS bindings now support magical variables
 C<sv_catsv_flags> no longer calls C<mg_get> on its second argument (the
 source string) if the flags passed to it do not include SV_GMAGIC. So it
 now matches the documentation.
+
+=item *
+
+C<my_strftime> no longer leaks memory.  This fixes a memory leak in
+C<POSIX::strftime> [perl #73520].
 
 =back
 
