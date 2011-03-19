@@ -2510,6 +2510,10 @@ Fixed build process for SDK2003SP1 compilers.
 
 =item *
 
+Compilation with Visual Studio 2010 is now supported.
+
+=item *
+
 When using old 32-bit compilers, the define C<_USE_32BIT_TIME_T> will now
 be set in C<$Config{ccflags}>.  This improves portability when compiling
 XS extensions using new compilers, but for a perl compiled with old 32-bit
