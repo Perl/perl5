@@ -3433,6 +3433,29 @@ must_be_utf8:
 		    }
 		}
 	    }
+
+	    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
+		/* Update pos. We do it at the end rather than during
+		 * the upgrade, to avoid slowing down the common case
+		 * (upgrade without pos) */
+		MAGIC * mg = mg_find(sv, PERL_MAGIC_regex_global);
+		if (mg) {
+		    I32 pos = mg->mg_len;
+		    if (pos > 0 && (U32)pos > invariant_head) {
+			U8 *d = (U8*) SvPVX(sv) + invariant_head;
+			STRLEN n = (U32)pos - invariant_head;
+			while (n > 0) {
+			    if (UTF8_IS_START(*d))
+				d++;
+			    d++;
+			    n--;
+			}
+			mg->mg_len  = d - (U8*)SvPVX(sv);
+		    }
+		}
+		if ((mg = mg_find(sv, PERL_MAGIC_utf8)))
+		    magic_setutf8(sv,mg); /* clear UTF8 cache */
+	    }
 	}
     }
 
@@ -3467,11 +3490,28 @@ Perl_sv_utf8_downgrade(pTHX_ register SV *const sv, const bool fail_ok)
         if (SvCUR(sv)) {
 	    U8 *s;
 	    STRLEN len;
+	    int mg_flags = SV_GMAGIC;
 
             if (SvIsCOW(sv)) {
                 sv_force_normal_flags(sv, 0);
             }
-	    s = (U8 *) SvPV(sv, len);
+	    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
+		/* update pos */
+		MAGIC * mg = mg_find(sv, PERL_MAGIC_regex_global);
+		if (mg) {
+		    I32 pos = mg->mg_len;
+		    if (pos > 0) {
+			sv_pos_b2u(sv, &pos);
+			mg_flags = 0; /* sv_pos_b2u does get magic */
+			mg->mg_len  = pos;
+		    }
+		}
+		if ((mg = mg_find(sv, PERL_MAGIC_utf8)))
+		    magic_setutf8(sv,mg); /* clear UTF8 cache */
+
+	    }
+	    s = (U8 *) SvPV_flags(sv, len, mg_flags);
+
 	    if (!utf8_to_bytes(s, &len)) {
 	        if (fail_ok)
 		    return FALSE;
@@ -3532,7 +3572,7 @@ Perl_sv_utf8_decode(pTHX_ register SV *const sv)
     PERL_ARGS_ASSERT_SV_UTF8_DECODE;
 
     if (SvPOKp(sv)) {
-        const U8 *c;
+        const U8 *start, *c;
         const U8 *e;
 
 	/* The octets may have got themselves encoded - get them back as
@@ -3544,7 +3584,7 @@ Perl_sv_utf8_decode(pTHX_ register SV *const sv)
         /* it is actually just a matter of turning the utf8 flag on, but
          * we want to make sure everything inside is valid utf8 first.
          */
-        c = (const U8 *) SvPVX_const(sv);
+        c = start = (const U8 *) SvPVX_const(sv);
 	if (!is_utf8_string(c, SvCUR(sv)+1))
 	    return FALSE;
         e = (const U8 *) SvEND(sv);
@@ -3555,6 +3595,22 @@ Perl_sv_utf8_decode(pTHX_ register SV *const sv)
 		break;
 	    }
         }
+	if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
+	    /* adjust pos to the start of a UTF8 char sequence */
+	    MAGIC * mg = mg_find(sv, PERL_MAGIC_regex_global);
+	    if (mg) {
+		I32 pos = mg->mg_len;
+		if (pos > 0) {
+		    for (c = start + pos; c > start; c--) {
+			if (UTF8_IS_START(*c))
+			    break;
+		    }
+		    mg->mg_len  = c - start;
+		}
+	    }
+	    if ((mg = mg_find(sv, PERL_MAGIC_utf8)))
+		magic_setutf8(sv,mg); /* clear UTF8 cache */
+	}
     }
     return TRUE;
 }
@@ -13535,6 +13591,14 @@ Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 	}
 	FREETMPS;
 	LEAVE;
+	if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
+	    /* clear pos and any utf8 cache */
+	    MAGIC * mg = mg_find(sv, PERL_MAGIC_regex_global);
+	    if (mg)
+		mg->mg_len = -1;
+	    if ((mg = mg_find(sv, PERL_MAGIC_utf8)))
+		magic_setutf8(sv,mg); /* clear UTF8 cache */
+	}
 	SvUTF8_on(sv);
 	return SvPVX(sv);
     }

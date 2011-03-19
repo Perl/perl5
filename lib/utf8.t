@@ -484,4 +484,52 @@ SKIP: {
     }
 }
 
+# #80190 update pos, and cached length/position-mapping after
+# utf8 upgrade/downgrade, encode/decode
+
+for my $pos (0..5) {
+
+    my $pos1 = ($pos >= 3)  ? 2 : ($pos >= 1) ? 1 : 0;
+    my $pos2 = ($pos1 == 2) ? 3 : $pos1;
+
+    my $p;
+    my $s = "A\xc8\x81\xe8\xab\x86\x{100}";
+    chop($s);
+
+    pos($s) = $pos;
+    # also sets cache
+    is(length($s), 6,		   "(pos $pos) len before    utf8::downgrade");
+    is(pos($s),    $pos,	   "(pos $pos) pos before    utf8::downgrade");
+    utf8::downgrade($s);
+    is(length($s), 6,		   "(pos $pos) len after     utf8::downgrade");
+    is(pos($s),    $pos,	   "(pos $pos) pos after     utf8::downgrade");
+    is($s, "A\xc8\x81\xe8\xab\x86","(pos $pos) str after     utf8::downgrade");
+    utf8::decode($s);
+    is(length($s), 3,		   "(pos $pos) len after  D; utf8::decode");
+    is(pos($s),    $pos1,	   "(pos $pos) pos after  D; utf8::decode");
+    is($s, "A\x{201}\x{8ac6}",	   "(pos $pos) str after  D; utf8::decode");
+    utf8::encode($s);
+    is(length($s), 6,		   "(pos $pos) len after  D; utf8::encode");
+    is(pos($s),    $pos2,	   "(pos $pos) pos after  D; utf8::encode");
+    is($s, "A\xc8\x81\xe8\xab\x86","(pos $pos) str after  D; utf8::encode");
+
+    $s = "A\xc8\x81\xe8\xab\x86";
+
+    pos($s) = $pos;
+    is(length($s), 6,		   "(pos $pos) len before    utf8::upgrade");
+    is(pos($s),    $pos,	   "(pos $pos) pos before    utf8::upgrade");
+    utf8::upgrade($s);
+    is(length($s), 6,		   "(pos $pos) len after     utf8::upgrade");
+    is(pos($s),    $pos,	   "(pos $pos) pos after     utf8::upgrade");
+    is($s, "A\xc8\x81\xe8\xab\x86","(pos $pos) str after     utf8::upgrade");
+    utf8::decode($s);
+    is(length($s), 3,		   "(pos $pos) len after  U; utf8::decode");
+    is(pos($s),    $pos1,	   "(pos $pos) pos after  U; utf8::decode");
+    is($s, "A\x{201}\x{8ac6}",	   "(pos $pos) str after  U; utf8::decode");
+    utf8::encode($s);
+    is(length($s), 6,		   "(pos $pos) len after  U; utf8::encode");
+    is(pos($s),    $pos2,	   "(pos $pos) pos after  U; utf8::encode");
+    is($s, "A\xc8\x81\xe8\xab\x86","(pos $pos) str after  U; utf8::encode");
+}
+
 done_testing();
