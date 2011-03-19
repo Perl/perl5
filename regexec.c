@@ -6673,7 +6673,7 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 		    U8 map_fold_len_back[UTF8_MAXBYTES_CASE+1] = { 0 };
 		    U8 folded[UTF8_MAXBYTES_CASE+1];
 		    STRLEN foldlen = 0; /* num bytes in fold of 1st char */
-		    STRLEN foldlen_for_av = 0; /* num bytes in fold of all
+		    STRLEN total_foldlen = 0; /* num bytes in fold of all
 						  chars */
 
 		    if (OP(n) == ANYOF || maxlen == 1 || ! lenp || ! av) {
@@ -6681,7 +6681,7 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 			/* Here, only need to fold the first char of the target
 			 * string.  It the source wasn't utf8, is 1 byte long */
 			to_utf8_fold(utf8_p, folded, &foldlen);
-			foldlen_for_av = foldlen;
+			total_foldlen = foldlen;
 			map_fold_len_back[foldlen] = (utf8_target)
 						     ? UTF8SKIP(utf8_p)
 						     : 1;
@@ -6725,13 +6725,13 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 				 U8);
 			    source_ptr += UTF8SKIP(source_ptr);
 			    folded_ptr += this_char_foldlen;
-			    foldlen_for_av = folded_ptr - folded;
+			    total_foldlen = folded_ptr - folded;
 
 			    /* Create map from the number of bytes in the fold
 			     * back to the number of bytes in the source.  If
 			     * the source isn't utf8, the byte count is just
 			     * the number of characters so far */
-			    map_fold_len_back[foldlen_for_av]
+			    map_fold_len_back[total_foldlen]
 						      = (utf8_target)
 							? source_ptr - utf8_p
 							: i + 1;
@@ -6750,7 +6750,7 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 			    STRLEN len;
 			    const char * const s = SvPV_const(sv, len);
 
-			    if (len <= foldlen_for_av && memEQ(s,
+			    if (len <= total_foldlen && memEQ(s,
 							       (char*)folded,
 							       len))
 			    {
