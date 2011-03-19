@@ -3500,8 +3500,18 @@ accessing the tied variable through a weak reference [perl #86328].
 
 =item *
 
-Don't stamp on $DB::single, $DB::trace and $DB::signal if they
-already have values when $^P is assigned to (RT #72422) (4c0f30).
+The Perl debugger now also works in taint mode [perl #76872].
+
+=item *
+
+Subroutine redefinition works once more in the debugger [perl #48332].
+
+=item *
+
+When C<-d> is used on the shebang (C<#!>) line, the debugger now has access
+to the lines of the main program.  In the past, this sometimes worked and
+sometimes did not, depending on what order things happened to be arranged
+in memory [perl #71806].
 
 =item *
 
@@ -3510,18 +3520,8 @@ C<@DB::args> has been fixed.
 
 =item *
 
-The Perl debugger now also works in taint mode [perl #76872].
-
-=item *
-
-When C<-d> is used on the shebang (C<#!>) line, the debugger now has access
-to the lines of the main program. In the past, this sometimes worked and
-sometimes did not, depending on what order things happened to be arranged
-in memory [perl #71806].
-
-=item *
-
-Subroutine redefinition works once more in the debugger [perl #48332].
+Perl no longer stomps on $DB::single, $DB::trace and $DB::signal if they
+already have values when $^P is assigned to [perl #72422].
 
 =item *
 
