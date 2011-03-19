@@ -6741,9 +6741,8 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 
 
 		    /* Do the linear search to see if the fold is in the list
-		     * of multi-char folds.  (Useless to look if won't be able
-		     * to store that it is a multi-char fold in *lenp) */
-		    if (lenp && av) {
+		     * of multi-char folds. */
+		    if (av) {
 		        I32 i;
 			for (i = 0; i <= av_len(av); i++) {
 			    SV* const sv = *av_fetch(av, i, FALSE);
@@ -6759,8 +6758,10 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 				 * this fold, but have to translate from the
 				 * folded length to the corresponding source
 				 * length. */
-				*lenp = map_fold_len_back[len];
-				assert(*lenp != 0);	/* Otherwise will loop */
+				if (lenp) {
+				    *lenp = map_fold_len_back[len];
+				    assert(*lenp != 0);	/* Otherwise will loop */
+				}
 				match = TRUE;
 				break;
 			    }
