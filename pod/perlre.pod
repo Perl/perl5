@@ -1199,7 +1199,11 @@ X<(?()>
 
 =item C<(?(condition)yes-pattern)>
 
-Conditional expression.  C<(condition)> should be either an integer in
+Conditional expression. Matches C<yes-pattern> if C<condition> yields
+a true value, matches C<no-pattern> otherwise. A missing pattern always
+matches.
+
+C<(condition)> should be either an integer in
 parentheses (which is valid if the corresponding pair of parentheses
 matched), a look-ahead/look-behind/evaluate zero-width assertion, a
 name in angle brackets or single quotes (which is valid if a group
