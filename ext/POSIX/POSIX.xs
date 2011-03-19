@@ -219,124 +219,155 @@ char *tzname[] = { "" , "" };
 #ifdef WIN32
    /* Perl on Windows assigns WSAGetLastError() return values to errno
     * (in win32/win32sck.c).  Therefore we need to map these values
-    * back to standard symbolic names, as long as the same name isn't
-    * already defined by errno.h itself.  The Errno.pm module does
-    * a similar mapping.
+    * back to standard symbolic names, but only for those names having
+    * no existing value or an existing value >= 100. (VC++ 2010 defines
+    * a group of names with values >= 100 in its errno.h which we *do*
+    * need to redefine.) The Errno.pm module does a similar mapping.
     */
-#  ifndef EWOULDBLOCK
-#    define EWOULDBLOCK WSAEWOULDBLOCK
+#  ifdef EWOULDBLOCK
+#    undef EWOULDBLOCK
 #  endif
-#  ifndef EINPROGRESS
-#    define EINPROGRESS WSAEINPROGRESS
+#  define EWOULDBLOCK WSAEWOULDBLOCK
+#  ifdef EINPROGRESS
+#    undef EINPROGRESS
 #  endif
-#  ifndef EALREADY
-#    define EALREADY WSAEALREADY
+#  define EINPROGRESS WSAEINPROGRESS
+#  ifdef EALREADY
+#    undef EALREADY
 #  endif
-#  ifndef ENOTSOCK
-#    define ENOTSOCK WSAENOTSOCK
+#  define EALREADY WSAEALREADY
+#  ifdef ENOTSOCK
+#    undef ENOTSOCK
 #  endif
-#  ifndef EDESTADDRREQ
-#    define EDESTADDRREQ WSAEDESTADDRREQ
+#  define ENOTSOCK WSAENOTSOCK
+#  ifdef EDESTADDRREQ
+#    undef EDESTADDRREQ
 #  endif
-#  ifndef EMSGSIZE
-#    define EMSGSIZE WSAEMSGSIZE
+#  define EDESTADDRREQ WSAEDESTADDRREQ
+#  ifdef EMSGSIZE
+#    undef EMSGSIZE
 #  endif
-#  ifndef EPROTOTYPE
-#    define EPROTOTYPE WSAEPROTOTYPE
+#  define EMSGSIZE WSAEMSGSIZE
+#  ifdef EPROTOTYPE
+#    undef EPROTOTYPE
 #  endif
-#  ifndef ENOPROTOOPT
-#    define ENOPROTOOPT WSAENOPROTOOPT
+#  define EPROTOTYPE WSAEPROTOTYPE
+#  ifdef ENOPROTOOPT
+#    undef ENOPROTOOPT
 #  endif
-#  ifndef EPROTONOSUPPORT
-#    define EPROTONOSUPPORT WSAEPROTONOSUPPORT
+#  define ENOPROTOOPT WSAENOPROTOOPT
+#  ifdef EPROTONOSUPPORT
+#    undef EPROTONOSUPPORT
 #  endif
-#  ifndef ESOCKTNOSUPPORT
-#    define ESOCKTNOSUPPORT WSAESOCKTNOSUPPORT
+#  define EPROTONOSUPPORT WSAEPROTONOSUPPORT
+#  ifdef ESOCKTNOSUPPORT
+#    undef ESOCKTNOSUPPORT
 #  endif
-#  ifndef EOPNOTSUPP
-#    define EOPNOTSUPP WSAEOPNOTSUPP
+#  define ESOCKTNOSUPPORT WSAESOCKTNOSUPPORT
+#  ifdef EOPNOTSUPP
+#    undef EOPNOTSUPP
 #  endif
-#  ifndef EPFNOSUPPORT
-#    define EPFNOSUPPORT WSAEPFNOSUPPORT
+#  define EOPNOTSUPP WSAEOPNOTSUPP
+#  ifdef EPFNOSUPPORT
+#    undef EPFNOSUPPORT
 #  endif
-#  ifndef EAFNOSUPPORT
-#    define EAFNOSUPPORT WSAEAFNOSUPPORT
+#  define EPFNOSUPPORT WSAEPFNOSUPPORT
+#  ifdef EAFNOSUPPORT
+#    undef EAFNOSUPPORT
 #  endif
-#  ifndef EADDRINUSE
-#    define EADDRINUSE WSAEADDRINUSE
+#  define EAFNOSUPPORT WSAEAFNOSUPPORT
+#  ifdef EADDRINUSE
+#    undef EADDRINUSE
 #  endif
-#  ifndef EADDRNOTAVAIL
-#    define EADDRNOTAVAIL WSAEADDRNOTAVAIL
+#  define EADDRINUSE WSAEADDRINUSE
+#  ifdef EADDRNOTAVAIL
+#    undef EADDRNOTAVAIL
 #  endif
-#  ifndef ENETDOWN
-#    define ENETDOWN WSAENETDOWN
+#  define EADDRNOTAVAIL WSAEADDRNOTAVAIL
+#  ifdef ENETDOWN
+#    undef ENETDOWN
 #  endif
-#  ifndef ENETUNREACH
-#    define ENETUNREACH WSAENETUNREACH
+#  define ENETDOWN WSAENETDOWN
+#  ifdef ENETUNREACH
+#    undef ENETUNREACH
 #  endif
-#  ifndef ENETRESET
-#    define ENETRESET WSAENETRESET
+#  define ENETUNREACH WSAENETUNREACH
+#  ifdef ENETRESET
+#    undef ENETRESET
 #  endif
-#  ifndef ECONNABORTED
-#    define ECONNABORTED WSAECONNABORTED
+#  define ENETRESET WSAENETRESET
+#  ifdef ECONNABORTED
+#    undef ECONNABORTED
 #  endif
-#  ifndef ECONNRESET
-#    define ECONNRESET WSAECONNRESET
+#  define ECONNABORTED WSAECONNABORTED
+#  ifdef ECONNRESET
+#    undef ECONNRESET
 #  endif
-#  ifndef ENOBUFS
-#    define ENOBUFS WSAENOBUFS
+#  define ECONNRESET WSAECONNRESET
+#  ifdef ENOBUFS
+#    undef ENOBUFS
 #  endif
-#  ifndef EISCONN
-#    define EISCONN WSAEISCONN
+#  define ENOBUFS WSAENOBUFS
+#  ifdef EISCONN
+#    undef EISCONN
 #  endif
-#  ifndef ENOTCONN
-#    define ENOTCONN WSAENOTCONN
+#  define EISCONN WSAEISCONN
+#  ifdef ENOTCONN
+#    undef ENOTCONN
 #  endif
-#  ifndef ESHUTDOWN
-#    define ESHUTDOWN WSAESHUTDOWN
+#  define ENOTCONN WSAENOTCONN
+#  ifdef ESHUTDOWN
+#    undef ESHUTDOWN
 #  endif
-#  ifndef ETOOMANYREFS
-#    define ETOOMANYREFS WSAETOOMANYREFS
+#  define ESHUTDOWN WSAESHUTDOWN
+#  ifdef ETOOMANYREFS
+#    undef ETOOMANYREFS
 #  endif
-#  ifndef ETIMEDOUT
-#    define ETIMEDOUT WSAETIMEDOUT
+#  define ETOOMANYREFS WSAETOOMANYREFS
+#  ifdef ETIMEDOUT
+#    undef ETIMEDOUT
 #  endif
-#  ifndef ECONNREFUSED
-#    define ECONNREFUSED WSAECONNREFUSED
+#  define ETIMEDOUT WSAETIMEDOUT
+#  ifdef ECONNREFUSED
+#    undef ECONNREFUSED
 #  endif
-#  ifndef ELOOP
-#    define ELOOP WSAELOOP
+#  define ECONNREFUSED WSAECONNREFUSED
+#  ifdef ELOOP
+#    undef ELOOP
 #  endif
-#  ifndef ENAMETOOLONG
-#    define ENAMETOOLONG WSAENAMETOOLONG
+#  define ELOOP WSAELOOP
+#  ifdef EHOSTDOWN
+#    undef EHOSTDOWN
 #  endif
-#  ifndef EHOSTDOWN
-#    define EHOSTDOWN WSAEHOSTDOWN
+#  define EHOSTDOWN WSAEHOSTDOWN
+#  ifdef EHOSTUNREACH
+#    undef EHOSTUNREACH
 #  endif
-#  ifndef EHOSTUNREACH
-#    define EHOSTUNREACH WSAEHOSTUNREACH
+#  define EHOSTUNREACH WSAEHOSTUNREACH
+#  ifdef EPROCLIM
+#    undef EPROCLIM
 #  endif
-#  ifndef ENOTEMPTY
-#    define ENOTEMPTY WSAENOTEMPTY
+#  define EPROCLIM WSAEPROCLIM
+#  ifdef EUSERS
+#    undef EUSERS
 #  endif
-#  ifndef EPROCLIM
-#    define EPROCLIM WSAEPROCLIM
+#  define EUSERS WSAEUSERS
+#  ifdef EDQUOT
+#    undef EDQUOT
 #  endif
-#  ifndef EUSERS
-#    define EUSERS WSAEUSERS
+#  define EDQUOT WSAEDQUOT
+#  ifdef ESTALE
+#    undef ESTALE
 #  endif
-#  ifndef EDQUOT
-#    define EDQUOT WSAEDQUOT
+#  define ESTALE WSAESTALE
+#  ifdef EREMOTE
+#    undef EREMOTE
 #  endif
-#  ifndef ESTALE
-#    define ESTALE WSAESTALE
+#  define EREMOTE WSAEREMOTE
+#  ifdef EDISCON
+#    undef EDISCON
 #  endif
-#  ifndef EREMOTE
-#    define EREMOTE WSAEREMOTE
-#  endif
-#  ifndef EDISCON
-#    define EDISCON WSAEDISCON
-#  endif
+#  define EDISCON WSAEDISCON
 #endif
 
 typedef int SysRet;

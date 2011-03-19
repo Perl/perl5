@@ -229,6 +229,9 @@ sub write_errno_pm {
     if ($IsMSWin32) {
 	print CPPI "#include <winsock.h>\n";
 	foreach $err (keys %wsa) {
+	    print CPPI "#if defined($err) && $err >= 100\n";
+	    print CPPI "#undef $err\n";
+	    print CPPI "#endif\n";
 	    print CPPI "#ifndef $err\n";
 	    print CPPI "#define $err WSA$err\n";
 	    print CPPI "#endif\n";

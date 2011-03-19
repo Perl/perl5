@@ -82,10 +82,6 @@
 extern "C" {
 #endif
 
-#ifndef ENOTSOCK
-#define ENOTSOCK	WSAENOTSOCK
-#endif
-
 #ifdef USE_SOCKETS_AS_HANDLES
 
 #ifndef PERL_FD_SETSIZE

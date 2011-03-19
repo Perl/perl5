@@ -525,17 +525,6 @@ void win32_wait_for_children(pTHX);
 
 #define EXEC_ARGV_CAST(x) ((const char *const *) x)
 
-#if !defined(ECONNABORTED) && defined(WSAECONNABORTED)
-#define ECONNABORTED WSAECONNABORTED
-#endif
-#if !defined(ECONNRESET) && defined(WSAECONNRESET)
-#define ECONNRESET WSAECONNRESET
-#endif
-#if !defined(EAFNOSUPPORT) && defined(WSAEAFNOSUPPORT)
-#define EAFNOSUPPORT WSAEAFNOSUPPORT
-#endif
-/* Why not needed for ECONNREFUSED? --abe */
-
 DllExport void *win32_signal_context(void);
 #define PERL_GET_SIG_CONTEXT win32_signal_context()
 
