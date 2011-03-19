@@ -3394,46 +3394,65 @@ error message, too [perl #77692].
 
 =back
 
-=head2 Ties and Other Magic
+=head2 Ties, Overloading and Other Magic
 
 =over
 
 =item *
 
-FETCH is no longer called needlessly on some tied variables.
-
-=item *
-
 Overloading now works properly in conjunction with tied
-variables. What formerly happened was that most ops checked their
+variables.  What formerly happened was that most ops checked their
 arguments for overloading I<before> checking for magic, so for example
 an overloaded object returned by a tied array access would usually be
-treated as not overloaded (RT #57012) (6f1401, ed3b9b, 6a5f8c .. 24328f).
+treated as not overloaded [RT #57012].
 
 =item *
 
-Independently, a bug was fixed that prevented $tied-E<gt>() from
-always calling FETCH correctly (RT #8438) (7c7501)
+Various cases of magic (e.g., tie methods) being called on tied variables
+too many or too few times have been fixed:
+
+=over
 
 =item *
 
-Avoids multiple FETCH/stringify on filetest ops (40c852d)
+FETCH is no longer called on tied variables in void context.
 
 =item *
 
-Fixed issue with string C<eval> not detecting taint of overloaded/tied
-arguments (RT #75716) (895b760)
+C<$tied-E<gt>()> did not always call FETCH [perl #8438].
 
 =item *
 
-Fix potential crashes of string C<eval> when evaluating a object with
-overloaded stringification by creating a stringified copy when necessary
-(3e5c018)
+Filetest operators and C<y///> and C<tr///> were calling FETCH too
+many times.
 
 =item *
 
-Fixed bug where overloaded stringification could remove tainting
-(RT #75716) (a02ec77)
+The C<=> operator used to ignore magic on its right-hand side if the
+scalar happened to hold a typeglob (if a typeglob was the last thing
+returned from or assigned to a tied scalar) [perl #77498].
+
+=item *
+
+Dereference operators used to ignore magic if the argument was a
+reference already (e.g., from a previous FETCH) [perl #72144].
+
+=item *
+
+C<splice> now calls set-magic (so changes made
+by C<splice @ISA> are respected by method calls) [perl #78400].
+
+=back
+
+=item *
+
+String C<eval> now detects taintedness of overloaded or tied
+arguments [perl #75716].
+
+=item *
+
+String C<eval> and regular expression matches against objects with string
+overloading no longer cause memory corruption or crashes [perl 77084].
 
 =item *
 
@@ -3442,30 +3461,14 @@ arguments.
 
 =item *
 
-A possible string corruption when doing regular expression matches on overloaded
-objects has been fixed [perl #77084].
+C<< E<lt>exprE<gt> >> always respects overloading now if the expression is
+overloaded.
 
-=item *
-
-Magic applied to variables in the main package no longer affects other packages.
-See L</Magic variables outside the main package> above [perl #76138].
-
-=item *
-
-The C<y///> or C<tr///> operator now calls get-magic (e.g., the C<FETCH>
-method of a tie) on its left-hand side just once, not twice [perl #76814].
-
-=item *
-
-C<splice> now calls set-magic. This means that, for instance, changes made
-by C<splice @ISA> are respected by method calls [perl #78400].
-
-=item *
-
-The C<=> operator used to ignore magic (e.g., tie methods) on its
-right-hand side if the scalar happened to hold a typeglob. This could
-happen if a typeglob was the last thing returned from or assigned to a tied
-scalar [perl #77498].
+Due to the way that 'E<lt>E<gt> as glob' was parsed differently from
+'E<lt>E<gt> as filehandle' from 5.6 onwards, something like C<< E<lt>$foo[0]E<gt> >> did
+not handle overloading, even if C<$foo[0]> was an overloaded object.  This
+was contrary to the documentation for overload, and meant that C<< E<lt>E<gt> >>
+could not be used as a general overloaded iterator operator.
 
 =item *
 
@@ -3474,20 +3477,15 @@ The fallback behaviour of overloading on binary operators was asymmetric
 
 =item *
 
-Sometimes magic (ties, tainted, etc.) attached to variables could cause an
-object to last longer than it should, or cause a crash if a tied variable
-were freed from within a tie method. These have been fixed [perl #81230].
+Magic applied to variables in the main package no longer affects other packages.
+See L</Magic variables outside the main package> above [perl #76138].
 
 =item *
 
-C<< E<lt>exprE<gt> >> always respects overloading now if the expression is
-overloaded.
-
-Due to the way that 'E<lt>E<gt> as glob' was parsed differently from
-'E<lt>E<gt> as filehandle' from 5.6 onwards, something like C<< E<lt>$foo[0]E<gt> >> did
-not handle overloading, even if C<$foo[0]> was an overloaded object. This
-was contrary to the documentation for overload, and meant that C<< E<lt>E<gt> >>
-could not be used as a general overloaded iterator operator.
+Sometimes magic (ties, taintedness, etc.) attached to variables could cause
+an object to last longer than it should, or cause a crash if a tied
+variable were freed from within a tie method.  These have been fixed
+[perl #81230].
 
 =item *
 
