@@ -3860,6 +3860,10 @@ C<POSIX::strftime> [perl #73520].
 
 =head1 Known Problems
 
+XXX Many of these have probably already been solved.  There are also
+unresolved BBC articles linked to #77718 that are awaiting CPAN
+releases.  These may need to be listed here.
+
 =over 4
 
 =item *
