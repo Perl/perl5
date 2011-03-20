@@ -800,6 +800,12 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	xhv->xhv_keys++; /* HvTOTALKEYS(hv)++ */
 	if (!counter) {				/* initial entry? */
 	} else if (xhv->xhv_keys > xhv->xhv_max) {
+		/* Use only the old HvKEYS(hv) > HvMAX(hv) condition to limit
+		   bucket splits on a rehashed hash, as we're not going to
+		   split it again, and if someone is lucky (evil) enough to
+		   get all the keys in one list they could exhaust our memory
+		   as we repeatedly double the number of buckets on every
+		   entry. Linear search feels a less worse thing to do.  */
 	    hsplit(hv);
 	} else if(!HvREHASH(hv)) {
 	    U32 n_links = 1;
@@ -808,12 +814,6 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		n_links++;
 
 	    if (n_links > HV_MAX_LENGTH_BEFORE_SPLIT) {
-		/* Use only the old HvKEYS(hv) > HvMAX(hv) condition to limit
-		   bucket splits on a rehashed hash, as we're not going to
-		   split it again, and if someone is lucky (evil) enough to
-		   get all the keys in one list they could exhaust our memory
-		   as we repeatedly double the number of buckets on every
-		   entry. Linear search feels a less worse thing to do.  */
 		hsplit(hv);
 	    }
 	}
