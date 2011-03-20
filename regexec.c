@@ -6628,31 +6628,19 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 		else if (flags & ANYOF_LOC_NONBITMAP_FOLD) {
 
 		    /* Here, we need to test if the fold of the target string
-		     * matches.  In the case of a multi-char fold that is
-		     * caught by regcomp.c, it has stored all such folds into
-		     * 'av'; we linearly check to see if any match the target
-		     * string (folded).   We know that the originals were each
-		     * one character, but we don't currently know how many
-		     * characters/bytes each folded to, except we do know that
-		     * there are small limits imposed by Unicode.  XXX A
-		     * performance enhancement would be to have regcomp.c store
-		     * the max number of chars/bytes that are in an av entry,
-		     * as, say the 0th element.  Even better would be to have a
-		     * hash of the few characters that can start a multi-char
-		     * fold to the max number of chars of those folds.
-		     *
-		     * Further down, if there isn't a
-		     * match in the av, we will check if there is another
-		     * fold-type match.  For that, we also need the fold, but
-		     * only the first character.  No sense in folding it twice,
-		     * so we do it here, even if there isn't any multi-char
-		     * fold, so we always fold at least the first character.
-		     * If the node is a straight ANYOF node, or there is only
-		     * one character available in the string, or if there isn't
-		     * any av, that's all we have to fold.  In the case of a
-		     * multi-char fold, we do have guarantees in Unicode that
-		     * it can only expand up to so many characters and so many
-		     * bytes.  We keep track so don't exceed either.
+		     * matches.  The non-multi char folds have all been moved to
+                     * the compilation phase, and the multi-char folds have
+                     * been stored by regcomp into 'av'; we linearly check to
+                     * see if any match the target string (folded).   We know
+                     * that the originals were each one character, but we don't
+                     * currently know how many characters/bytes each folded to,
+                     * except we do know that there are small limits imposed by
+                     * Unicode.  XXX A performance enhancement would be to have
+                     * regcomp.c store the max number of chars/bytes that are
+                     * in an av entry, as, say the 0th element.  Even better
+                     * would be to have a hash of the few characters that can
+                     * start a multi-char fold to the max number of chars of
+                     * those folds.
 		     *
 		     * If there is a match, we will need to advance (if lenp is
 		     * specified) the match pointer in the target string.  But
