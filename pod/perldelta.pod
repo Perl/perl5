@@ -168,7 +168,7 @@ C<CPAN> has been upgraded from version 1.94_65 to 1.9600.
 
 =item *
 
-C<CPANPLUS> has been upgraded from version 0.9101 to 0.9102
+C<CPANPLUS> has been upgraded from version 0.9101 to 0.9103
 
 =item *
 
