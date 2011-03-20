@@ -67,12 +67,7 @@ sub run_test($$$$) {
     my ($test, $count, $todo, $debug) = @_;
 
     $debug = "" unless $DEBUG;
-    $todo = "Known problem" if $todo;
-
-    TODO: {
-	local $::TODO = $todo ? "Known problem" : undef;
-	ok(eval $test, "$test; $debug");
-    }
+    ok(eval $test, "$test; $debug");
 }
 
 my %tests;          # The final set of tests. keys are the code points to test

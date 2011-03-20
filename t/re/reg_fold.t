@@ -56,9 +56,7 @@ while (<$fh>) {
                 my $eval = "my \$c = $lhs; $upgrade\$c =~ $rhs";
                 #print __LINE__, ": $eval\n";
                 push @tests, qq[ok(eval '$eval', '$eval - $comment')];
-                if (! $swap && ($cp eq '0390' || $cp eq '03B0')) {
-                    $tests[-1]="TODO: { local \$::TODO='[13:41] <BinGOs> cue *It is all Greek to me* joke.';\n$tests[-1] }"
-                } elsif ($charclass && @folded > 1 && $swap && ! $upgrade && ! $fold_above_latin1) {
+                if ($charclass && @folded > 1 && $swap && ! $upgrade && ! $fold_above_latin1) {
                     $tests[-1]="TODO: { local \$::TODO='Multi-char, non-utf8 folded inside character class [ ] doesnt work';\n$tests[-1] }"
                 } elsif (! $upgrade && $cpv >= 128 && $cpv <= 255 && $cpv != 0xb5) {
                     $tests[-1]="TODO: { local \$::TODO='Most non-utf8 latin1 doesnt work';\n$tests[-1] }"
