@@ -143,6 +143,7 @@ typedef struct RExC_state_t {
     I32		recurse_count;		/* Number of recurse regops */
     I32		in_lookbehind;
     I32		contains_locale;
+    I32		override_recoding;
 #if ADD_TO_REGEXEC
     char 	*starttry;		/* -Dr: where regtry was called. */
 #define RExC_starttry	(pRExC_state->starttry)
@@ -192,6 +193,7 @@ typedef struct RExC_state_t {
 #define RExC_recurse_count	(pRExC_state->recurse_count)
 #define RExC_in_lookbehind	(pRExC_state->in_lookbehind)
 #define RExC_contains_locale	(pRExC_state->contains_locale)
+#define RExC_override_recoding	(pRExC_state->override_recoding)
 
 
 #define	ISMULT1(c)	((c) == '*' || (c) == '+' || (c) == '?')
