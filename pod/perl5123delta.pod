@@ -34,7 +34,8 @@ constant expressions.
 
 Module::Build should be more reliably pass its tests under cygwin.
 
-lvalue sub return values are now COW.
+Lvalue subroutines are again able to return copy-on-write scalars.  This
+had been broken since version 5.10.0.
 
 =head1 Platform Specific Notes
 
