@@ -938,9 +938,6 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
 	    cl_anything(pRExC_state, cl);
 	}
 
-        /* Take the union */
-	cl->flags |= or_with->flags;
-
 	if (ANYOF_NONBITMAP(or_with)) {
 
 	    /* Use the added node's outside-the-bit-map match if there isn't a
@@ -955,6 +952,9 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
 	    else if (ARG(cl) != ARG(or_with)) {
 		cl->flags |= ANYOF_UNICODE_ALL;
 	    }
+
+        /* Take the union */
+	cl->flags |= or_with->flags;
 	}
     }
 }
