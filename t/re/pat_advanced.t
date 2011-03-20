@@ -1007,18 +1007,7 @@ sub run_tests {
         # If remove the limitation in regcomp code these should work
         # differently
         undef $w;
-        eval q [ok "\N{LONG-STR}" =~ /^\N{TOO-LONG-STR}$/, 'Verify that too long a string fails gracefully'];
-        ok $w && $w =~ /Using just the first characters returned/, 'Verify that got too-long string warning in \N{} that exceeds the limit';
-        undef $w;
-        eval q [ok "\N{LONG-STR}" =~ /^\N{TOO-LONG-STR}$/i, 'Verify under folding that too long a string fails gracefully'];
-        ok $w && $w =~ /Using just the first characters returned/, 'Verify under folding that got too-long string warning in \N{} that exceeds the limit';
-        undef $w;
-        eval q [ok "\N{TOO-LONG-STR}" !~ /^\N{TOO-LONG-STR}$/, 'Verify that too long a string doesnt work'];
-        ok $w && $w =~ /Using just the first characters returned/, 'Verify that got too-long string warning in \N{} that exceeds the limit';
-        undef $w;
-        eval q [ok "\N{TOO-LONG-STR}" !~ /^\N{TOO-LONG-STR}$/i, 'Verify under folding that too long a string doesnt work'];
-        ok $w && $w =~ /Using just the first characters returned/i, 'Verify under folding that got too-long string warning in \N{} that exceeds the limit';
-        undef $w;
+        eval q [ok "\N{TOO-LONG-STR}" =~ /^\N{TOO-LONG-STR}$/, 'Verify that what once was too long a string works'];
         eval 'q(syntax error) =~ /\N{MALFORMED}/';
         ok $@ && $@ =~ /Malformed/, 'Verify that malformed utf8 gives an error';
         undef $w;

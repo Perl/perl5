@@ -4613,6 +4613,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
     RExC_seen_zerolen = *exp == '^' ? -1 : 0;
     RExC_seen_evals = 0;
     RExC_extralen = 0;
+    RExC_override_recoding = 0;
 
     /* First pass: determine size, legality. */
     RExC_parse = exp;
@@ -7794,168 +7795,55 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp, U32 dept
         ret = (regnode *) &RExC_parse;	/* Invalid regnode pointer */
     }
     else {	/* Not a char class */
-	char *s;	    /* String to put in generated EXACT node */
-	STRLEN len = 0;	    /* Its current byte length */
+
+	/* What is done here is to convert this to a sub-pattern of the form
+	 * (?:\x{char1}\x{char2}...)
+	 * and then call reg recursively.  That way, it retains its atomicness,
+	 * while not having to worry about special handling that some code
+	 * points may have.  toke.c has converted the original Unicode values
+	 * to native, so that we can just pass on the hex values unchanged.  We
+	 * do have to set a flag to keep recoding from happening in the
+	 * recursion */
+
+	SV * substitute_parse = newSVpvn_flags("?:", 2, SVf_UTF8|SVs_TEMP);
+	STRLEN len;
 	char *endchar;	    /* Points to '.' or '}' ending cur char in the input
 			       stream */
-	ret = reg_node(pRExC_state,
-			   (U8) ((! FOLD) ? EXACT
-					  : (LOC)
-					     ? EXACTFL
-					     : (MORE_ASCII_RESTRICTED)
-					       ? EXACTFA
-					       : (AT_LEAST_UNI_SEMANTICS)
-					         ? EXACTFU
-					         : EXACTF));
-	s= STRING(ret);
+	char *orig_end = RExC_end;
 
-	/* Exact nodes can hold only a U8 length's of text = 255.  Loop through
-	 * the input which is of the form now 'c1.c2.c3...}' until find the
-	 * ending brace or exceed length 255.  The characters that exceed this
-	 * limit are dropped.  The limit could be relaxed should it become
-	 * desirable by reparsing this as (?:\N{NAME}), so could generate
-	 * multiple EXACT nodes, as is done for just regular input.  But this
-	 * is primarily a named character, and not intended to be a huge long
-	 * string, so 255 bytes should be good enough */
-	while (1) {
-	    STRLEN length_of_hex;
-	    I32 grok_flags = PERL_SCAN_ALLOW_UNDERSCORES
-			    | PERL_SCAN_DISALLOW_PREFIX
-			    | (SIZE_ONLY ? PERL_SCAN_SILENT_ILLDIGIT : 0);
-	    UV cp;  /* Ord of current character */
-	    bool use_this_char_fold = FOLD;
+	while (RExC_parse < endbrace) {
 
 	    /* Code points are separated by dots.  If none, there is only one
 	     * code point, and is terminated by the brace */
 	    endchar = RExC_parse + strcspn(RExC_parse, ".}");
 
-	    /* The values are Unicode even on EBCDIC machines */
-	    length_of_hex = (STRLEN)(endchar - RExC_parse);
-	    cp = grok_hex(RExC_parse, &length_of_hex, &grok_flags, NULL);
-	    if ( length_of_hex == 0 
-		|| length_of_hex != (STRLEN)(endchar - RExC_parse) )
-	    {
-		RExC_parse += length_of_hex;	    /* Includes all the valid */
-		RExC_parse += (RExC_orig_utf8)	/* point to after 1st invalid */
-				? UTF8SKIP(RExC_parse)
-				: 1;
-		/* Guard against malformed utf8 */
-		if (RExC_parse >= endchar) RExC_parse = endchar;
-		vFAIL("Invalid hexadecimal number in \\N{U+...}");
-	    }    
-
-	    /* XXX ? Change to ANYOF node
-	    if (FOLD
-		&& (cp > 255 || (! MORE_ASCII_RESTRICTED && ! LOC))
-		&& is_TRICKYFOLD_cp(cp))
-	    {
-	    }
-	    */
-
-	    /* Under /aa, we can't mix ASCII with non- in a fold.  If we are
-	     * folding, and the source isn't ASCII, look through all the
-	     * characters it folds to.  If any one of them is ASCII, forbid
-	     * this fold.  (cp is uni, so the 127 below is correct even for
-	     * EBCDIC).  Similarly under locale rules, we don't mix under 256
-	     * with above 255.  XXX It really doesn't make sense to have \N{}
-	     * which means a Unicode rules under locale.  I (khw) think this
-	     * should be warned about, but the counter argument is that people
-	     * who have programmed around Perl's earlier lack of specifying the
-	     * rules and used \N{} to force Unicode things in a local
-	     * environment shouldn't get suddenly a warning */
-	    if (use_this_char_fold) {
-		if (LOC && cp < 256) {	/* Fold not known until run-time */
-		    use_this_char_fold = FALSE;
-		}
-		else if ((cp > 127 && MORE_ASCII_RESTRICTED)
-		         || (cp > 255 && LOC))
-		{
-		U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
-		U8* s = tmpbuf;
-		U8* e;
-		STRLEN foldlen;
-
-		(void) toFOLD_uni(cp, tmpbuf, &foldlen);
-		e = s + foldlen;
-
-		while (s < e) {
-		    if (isASCII(*s)
-			|| (LOC && (UTF8_IS_INVARIANT(*s)
-				    || UTF8_IS_DOWNGRADEABLE_START(*s))))
-		    {
-			use_this_char_fold = FALSE;
-			break;
-		    }
-		    s += UTF8SKIP(s);
-		}
-		}
-	    }
-
-	    if (! use_this_char_fold) {	/* Not folding, just append to the
-					   string */
-		STRLEN unilen;
-
-		/* Quit before adding this character if would exceed limit */
-		if (len + UNISKIP(cp) > U8_MAX) break;
-
-		unilen = reguni(pRExC_state, cp, s);
-		if (unilen > 0) {
-		    s   += unilen;
-		    len += unilen;
-		}
-	    } else {	/* Folding, output the folded equivalent */
-		STRLEN foldlen,numlen;
-		U8 tmpbuf[UTF8_MAXBYTES_CASE+1], *foldbuf;
-		cp = toFOLD_uni(cp, tmpbuf, &foldlen);
-
-		/* Quit before exceeding size limit */
-		if (len + foldlen > U8_MAX) break;
-		
-		for (foldbuf = tmpbuf;
-		    foldlen;
-		    foldlen -= numlen) 
-		{
-		    cp = utf8_to_uvchr(foldbuf, &numlen);
-		    if (numlen > 0) {
-			const STRLEN unilen = reguni(pRExC_state, cp, s);
-			s       += unilen;
-			len     += unilen;
-			/* In EBCDIC the numlen and unilen can differ. */
-			foldbuf += numlen;
-			if (numlen >= foldlen)
-			    break;
-		    }
-		    else
-			break; /* "Can't happen." */
-		}                          
-	    }
+	    /* Convert to notation the rest of the code understands */
+	    sv_catpv(substitute_parse, "\\x{");
+	    sv_catpvn(substitute_parse, RExC_parse, endchar - RExC_parse);
+	    sv_catpv(substitute_parse, "}");
 
 	    /* Point to the beginning of the next character in the sequence. */
 	    RExC_parse = endchar + 1;
-
-	    /* Quit if no more characters */
-	    if (RExC_parse >= endbrace) break;
 	}
+	sv_catpv(substitute_parse, ")");
 
+	RExC_parse = SvPV(substitute_parse, len);
 
-	if (SIZE_ONLY) {
-	    if (RExC_parse < endbrace) {
-		ckWARNreg(RExC_parse - 1,
-			  "Using just the first characters returned by \\N{}");
-	    }
-
-	    RExC_size += STR_SZ(len);
-	} else {
-	    STR_LEN(ret) = len;
-	    RExC_emit += STR_SZ(len);
+	/* Don't allow empty number */
+	if (len < 8) {
+	    vFAIL("Invalid hexadecimal number in \\N{U+...}");
 	}
+	RExC_end = RExC_parse + len;
 
-	RExC_parse = endbrace + 1;
+	/* The values are Unicode, and therefore not subject to recoding */
+	RExC_override_recoding = 1;
 
-	*flagp |= HASWIDTH; /* Not SIMPLE, as that causes the engine to fail
-			       with malformed in t/re/pat_advanced.t */
-	RExC_parse --;
-	Set_Node_Cur_Length(ret); /* MJD */
+	ret = reg(pRExC_state, 1, flagp, depth+1);
+
+	RExC_parse = endbrace;
+	RExC_end = orig_end;
+	RExC_override_recoding = 0;
+
 	nextchar(pRExC_state);
     }
 
@@ -8775,7 +8663,7 @@ tryagain:
 			    goto recode_encoding;
 			break;
 		    recode_encoding:
-			{
+			if (! RExC_override_recoding) {
 			    SV* enc = PL_encoding;
 			    ender = reg_recode((const char)(U8)ender, &enc);
 			    if (!enc && SIZE_ONLY)
@@ -9765,7 +9653,7 @@ parseit:
 		    break;
 		}
 	    recode_encoding:
-		{
+		if (! RExC_override_recoding) {
 		    SV* enc = PL_encoding;
 		    value = reg_recode((const char)(U8)value, &enc);
 		    if (!enc && SIZE_ONLY)

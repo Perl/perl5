@@ -5296,14 +5296,6 @@ removed in a future version.
 Currently all but the first one are discarded when used in a regular
 expression pattern bracketed character class.
 
-=item Using just the first characters returned by \N{}
-
-(W) A charnames handler may return a sequence of characters.  There is a
-finite limit as to the number of characters that can be used, which this
-sequence exceeded.  In the message, the characters in the sequence are
-separated by dots, and each is shown by its ordinal in hex.  Anything to
-the left of the C<HERE> was retained; anything to the right was discarded.
-
 =item Using !~ with %s doesn't make sense
 
 (F) Using the C<!~> operator with C<s///r>, C<tr///r> or C<y///r> is

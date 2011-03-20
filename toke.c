@@ -3140,12 +3140,22 @@ S_scan_const(pTHX_ char *start)
 
 		    if (PL_lex_inpat) {
 
-			/* Pass through to the regex compiler unchanged.  The
-			 * reason we evaluated the number above is to make sure
-			 * there wasn't a syntax error. */
+			/* On non-EBCDIC platforms, pass through to the regex
+			 * compiler unchanged.  The reason we evaluated the
+			 * number above is to make sure there wasn't a syntax
+			 * error.  But on EBCDIC we convert to native so
+			 * downstream code can continue to assume it's native
+			 */
 			s -= 5;	    /* Include the '\N{U+' */
+#ifdef EBCDIC
+			d += my_snprintf(d, e - s + 1 + 1,  /* includes the }
+							       and the \0 */
+				    "\\N{U+%X}",
+				    (unsigned int) UNI_TO_NATIVE(uv));
+#else
 			Copy(s, d, e - s + 1, char);	/* 1 = include the } */
 			d += e - s + 1;
+#endif
 		    }
 		    else {  /* Not a pattern: convert the hex to string */
 
@@ -3239,10 +3249,13 @@ S_scan_const(pTHX_ char *start)
 			    }
 
 			    /* Convert first code point to hex, including the
-			     * boiler plate before it */
+			     * boiler plate before it.  For all these, we
+			     * convert to native format so that downstream code
+			     * can continue to assume the input is native */
 			    output_length =
 				my_snprintf(hex_string, sizeof(hex_string),
-					    "\\N{U+%X", (unsigned int) uv);
+					    "\\N{U+%X",
+					    (unsigned int) UNI_TO_NATIVE(uv));
 
 			    /* Make sure there is enough space to hold it */
 			    d = off + SvGROW(sv, off
@@ -3267,7 +3280,8 @@ S_scan_const(pTHX_ char *start)
 
 				output_length =
 				    my_snprintf(hex_string, sizeof(hex_string),
-						".%X", (unsigned int) uv);
+					    ".%X",
+					    (unsigned int) UNI_TO_NATIVE(uv));
 
 				d = off + SvGROW(sv, off
 						     + output_length
