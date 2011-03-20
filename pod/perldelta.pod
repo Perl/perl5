@@ -208,6 +208,10 @@ C<File::Glob> has been upgraded from version 1.11 to 1.12.
 
 =item *
 
+C<GDBM_File> has been upgraded from version 1.13 to 1.14.
+
+=item *
+
 C<Hash::Util> has been upgraded from version 0.10 to 0.11.
 
 =item *
@@ -249,6 +253,10 @@ C<Module::CoreList> has been upgraded from version 2.45 to 2.46.
 =item *
 
 C<mro> has been upgraded from version 1.06 to 1.07.
+
+=item *
+
+C<NDBM_File> has been upgraded from version 1.11 to 1.12.
 
 =item *
 
