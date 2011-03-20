@@ -8472,6 +8472,14 @@ tryagain:
 	    RExC_parse++;
 
 	defchar: {
+	    typedef enum {
+		char_s = 1,
+		upsilon_1,
+		upsilon_2,
+		iota_1,
+		iota_2,
+	    } char_state;
+	    char_state latest_char_state = 0;
 	    register STRLEN len;
 	    register UV ender;
 	    register char *p;
@@ -8708,55 +8716,196 @@ tryagain:
 		 * putting it in a special node keeps regexec from having to
 		 * deal with a non-utf8 multi-char fold */
 		if (FOLD
-		    && (ender > 255 || (! MORE_ASCII_RESTRICTED && ! LOC))
-		    && is_TRICKYFOLD_cp(ender))
+		    && (ender > 255 || (! MORE_ASCII_RESTRICTED && ! LOC)))
 		{
-		    /* If is in middle of outputting characters into an
-		     * EXACTish node, go output what we have so far, and
-		     * position the parse so that this will be called again
-		     * immediately */
-		    if (len) {
-			p  = oldp;
-			goto loopdone;
-		    }
-		    else {
+		    /* We look for either side of the fold.  For example \xDF
+		     * folds to 'ss'.  We look for both the single character
+		     * \xDF and the sequence 'ss'.  When we find something that
+		     * could be one of those, we stop and flush whatever we
+		     * have output so far into the EXACTish node that was being
+		     * built.  Then restore the input pointer to what it was.
+		     * regatom will return that EXACT node, and will be called
+		     * again, positioned so the first character is the one in
+		     * question, which we return in a different node type.
+		     * The multi-char folds are a sequence, so the occurrence
+		     * of the first character in that sequence doesn't
+		     * necessarily mean that what follows is the rest of the
+		     * sequence.  We keep track of that with a state machine,
+		     * with the state being set to the latest character
+		     * processed before the current one.  Most characters will
+		     * set the state to 0, but if one occurs that is part of a
+		     * potential tricky fold sequence, the state is set to that
+		     * character, and the next loop iteration sees if the state
+		     * should progress towards the final folded-from character,
+		     * or if it was a false alarm.  If it turns out to be a
+		     * false alarm, the character(s) will be output in a new
+		     * EXACTish node, and join_exact() will later combine them.
+		     * In the case of the 'ss' sequence, which is more common
+		     * and more easily checked, some look-ahead is done to
+		     * save time by ruling-out some false alarms */
+		    switch (ender) {
+			default:
+			    latest_char_state = 0;
+			    break;
+			case 's':
+			case 'S':
+			     if (AT_LEAST_UNI_SEMANTICS) {
+				if (latest_char_state == char_s) {  /* 'ss' */
+				    ender = LATIN_SMALL_LETTER_SHARP_S;
+				    goto do_tricky;
+				}
+				else if (p < RExC_end) {
 
-			/* Here we are ready to output our tricky fold
-			 * character.  What's done is to pretend it's in a
-			 * [bracketed] class, and let the code that deals with
-			 * those handle it, as that code has all the
-			 * intelligence necessary.  First save the current
-			 * parse state, get rid of the already allocated EXACT
-			 * node that the ANYOFV node will replace, and point
-			 * the parse to a buffer which we fill with the
-			 * character we want the regclass code to think is
-			 * being parsed */
-			char* const oldregxend = RExC_end;
-			char tmpbuf[2];
-			RExC_emit = orig_emit;
-			RExC_parse = tmpbuf;
-			if (UTF) {
-			    tmpbuf[0] = UTF8_TWO_BYTE_HI(ender);
-			    tmpbuf[1] = UTF8_TWO_BYTE_LO(ender);
-			    RExC_end = RExC_parse + 2;
+				    /* Look-ahead at the next character.  If it
+				     * is also an s, we handle as a sharp s
+				     * tricky regnode.  */
+				    if (*p == 's' || *p == 'S') {
+
+					/* But first flush anything in the
+					 * EXACTish buffer */
+					if (len != 0) {
+					    p = oldp;
+					    goto loopdone;
+					}
+					p++;	/* Account for swallowing this
+						   's' up */
+					ender = LATIN_SMALL_LETTER_SHARP_S;
+					goto do_tricky;
+				    }
+					/* Here, the next character is not a
+					 * literal 's', but still could
+					 * evaluate to one if part of a \o{},
+					 * \x or \OCTAL-DIGIT.  The minimum
+					 * length required for that is 4, eg
+					 * \x53 or \123 */
+				    else if (*p == '\\'
+					     && p < RExC_end - 4
+					     && (isDIGIT(*(p + 1))
+						 || *(p + 1) == 'x'
+						 || *(p + 1) == 'o' ))
+				    {
+
+					/* Here, it could be an 's', too much
+					 * bother to figure it out here.  Flush
+					 * the buffer if any; when come back
+					 * here, set the state so know that the
+					 * previous char was an 's' */
+					if (len != 0) {
+					    latest_char_state = 0;
+					    p = oldp;
+					    goto loopdone;
+					}
+					latest_char_state = char_s;
+					break;
+				    }
+				}
+			    }
+
+			    /* Here, can't be an 'ss' sequence, or at least not
+			     * one that could fold to/from the sharp ss */
+			    latest_char_state = 0;
+			    break;
+			case 0x03C5:	/* First char in upsilon series */
+			    if (p < RExC_end - 4) { /* Need >= 4 bytes left */
+				latest_char_state = upsilon_1;
+				if (len != 0) {
+				    p = oldp;
+				    goto loopdone;
+				}
+			    }
+			    else {
+				latest_char_state = 0;
+			    }
+			    break;
+			case 0x03B9:	/* First char in iota series */
+			    if (p < RExC_end - 4) {
+				latest_char_state = iota_1;
+				if (len != 0) {
+				    p = oldp;
+				    goto loopdone;
+				}
+			    }
+			    else {
+				latest_char_state = 0;
+			    }
+			    break;
+			case 0x0308:
+			    if (latest_char_state == upsilon_1) {
+				latest_char_state = upsilon_2;
+			    }
+			    else if (latest_char_state == iota_1) {
+				latest_char_state = iota_2;
+			    }
+			    else {
+				latest_char_state = 0;
+			    }
+			    break;
+			case 0x301:
+			    if (latest_char_state == upsilon_2) {
+				ender = GREEK_SMALL_LETTER_UPSILON_WITH_DIALYTIKA_AND_TONOS;
+				goto do_tricky;
+			    }
+			    else if (latest_char_state == iota_2) {
+				ender = GREEK_SMALL_LETTER_IOTA_WITH_DIALYTIKA_AND_TONOS;
+				goto do_tricky;
+			    }
+			    latest_char_state = 0;
+			    break;
+
+			/* These are the tricky fold characters.  Flush any
+			 * buffer first. */
+			case GREEK_SMALL_LETTER_UPSILON_WITH_DIALYTIKA_AND_TONOS:
+			case GREEK_SMALL_LETTER_IOTA_WITH_DIALYTIKA_AND_TONOS:
+			case LATIN_SMALL_LETTER_SHARP_S:
+			case LATIN_CAPITAL_LETTER_SHARP_S:
+			case 0x1FD3:
+			case 0x1FE3:
+			    if (len != 0) {
+				p = oldp;
+				goto loopdone;
+			    }
+			    /* FALL THROUGH */
+			do_tricky: {
+			    char* const oldregxend = RExC_end;
+			    U8 tmpbuf[UTF8_MAXBYTES+1];
+
+			    /* Here, we know we need to generate a special
+			     * regnode, and 'ender' contains the tricky
+			     * character.  What's done is to pretend it's in a
+			     * [bracketed] class, and let the code that deals
+			     * with those handle it, as that code has all the
+			     * intelligence necessary.  First save the current
+			     * parse state, get rid of the already allocated
+			     * but empty EXACT node that the ANYOFV node will
+			     * replace, and point the parse to a buffer which
+			     * we fill with the character we want the regclass
+			     * code to think is being parsed */
+			    RExC_emit = orig_emit;
+			    RExC_parse = (char *) tmpbuf;
+			    if (UTF) {
+				U8 *d = uvchr_to_utf8(tmpbuf, ender);
+				*d = '\0';
+				RExC_end = (char *) d;
+			    }
+			    else {
+				tmpbuf[0] = ender;
+				tmpbuf[1] = '\0';
+				RExC_end = RExC_parse + 1;
+			    }
+
+			    ret = regclass(pRExC_state,depth+1);
+
+			    /* Here, have parsed the buffer.  Reset the parse to
+			     * the actual input, and return */
+			    RExC_end = oldregxend;
+			    RExC_parse = p - 1;
+
+			    Set_Node_Offset(ret, RExC_parse);
+			    Set_Node_Cur_Length(ret);
+			    nextchar(pRExC_state);
+			    *flagp |= HASWIDTH|SIMPLE;
+			    return ret;
 			}
-			else {
-			    tmpbuf[0] = (char) ender;
-			    RExC_end = RExC_parse + 1;
-			}
-
-			ret = regclass(pRExC_state,depth+1);
-
-			/* Here, have parsed the buffer.  Reset the parse to
-			 * the actual input, and return */
-			RExC_end = oldregxend;
-			RExC_parse = p - 1;
-
-			Set_Node_Offset(ret, RExC_parse);
-			Set_Node_Cur_Length(ret);
-			nextchar(pRExC_state);
-			*flagp |= HASWIDTH|SIMPLE;
-			return ret;
 		    }
 		}
 
@@ -8892,8 +9041,9 @@ tryagain:
 		     }
 		     len--;
 		}
-		else
+		else {
 		    REGC((char)ender, s++);
+		}
 	    }
 	loopdone:   /* Jumped to when encounters something that shouldn't be in
 		       the node */
