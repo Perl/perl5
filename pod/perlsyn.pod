@@ -626,28 +626,70 @@ the C<..> and C<...> flip-flop operators.
 
 In those cases the value of EXPR is used directly as a boolean.
 
-Furthermore:
+Furthermore, Perl inspects the operands of the binary boolean operators to
+decide whether to use smart matching for each one by applying the above test to
+the operands:
 
 =over 4
 
 =item *
 
 If EXPR is C<... && ...> or C<... and ...>, the test
-is applied recursively to both arguments. If I<both>
-arguments pass the test, then the argument is treated
-as boolean.
+is applied recursively to both operands. If I<both>
+operands pass the test, then the expression is treated
+as boolean; otherwise, smart matching is used.
 
 =item *
 
 If EXPR is C<... || ...>, C<... // ...> or C<... or ...>, the test
-is applied recursively to the first argument.
+is applied recursively to the first operand (which may be a
+higher-precedence AND operator, for example). If the first operand
+is to use smart matching, then both operands will do so; if it is
+not, then the second argument will not be either.
 
 =back
 
 These rules look complicated, but usually they will do what
-you want. For example you could write:
+you want. For example:
 
     when (/^\d+$/ && $_ < 75) { ... }
+
+will be treated as a boolean match because the rules say both a regex match and
+an explicit test on $_ will be treated as boolean.
+
+Also:
+
+    when ([qw(foo bar)] && /baz/) { ... }
+
+will use smart matching because only I<one> of the operands is a boolean; the
+other uses smart matching, and that wins.
+
+Further:
+
+    when ([qw(foo bar)] || /^baz/) { ... }
+
+will use smart matching (only the first operand is considered), whereas
+
+    when (/^baz/ || [qw(foo bar)]) { ... }
+
+will test only the regex, which causes both operands to be treated as boolean.
+Watch out for this one, then, because an arrayref is always a true value, which
+makes it effectively redundant.
+
+Tautologous boolean operators are still going to be optimised away. Don't be
+tempted to write
+
+    when ('foo' or 'bar') { ... }
+
+This will optimise down to C<'foo'>, so C<'bar'> will never be considered (even
+though the rules say to use a smart match on C<'foo'>). For an alternation like
+this, an array ref will work, because this will instigate smart matching:
+
+    when ([qw(foo bar)] { ... }
+
+This is somewhat equivalent to the C-style switch statement's fallthrough
+functionality (not to be confused with I<Perl's> fallthrough functionality - see
+below), wherein the same block is used for several C<case> statements.
 
 Another useful shortcut is that, if you use a literal array
 or hash as the argument to C<given>, it is turned into a
