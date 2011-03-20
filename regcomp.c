@@ -945,12 +945,19 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
 	     * outside the bitmap, but what they match outside is not the same
 	     * pointer, and hence not easily compared until XXX we extend
 	     * inversion lists this far), give up and allow the start class to
-	     * match everything outside the bitmap */
+	     * match everything outside the bitmap.  If that stuff is all above
+	     * 255, can just set UNICODE_ALL, otherwise caould be anything. */
 	    if (! ANYOF_NONBITMAP(cl)) {
 		ARG_SET(cl, ARG(or_with));
 	    }
 	    else if (ARG(cl) != ARG(or_with)) {
-		cl->flags |= ANYOF_UNICODE_ALL;
+
+		if ((or_with->flags & ANYOF_NONBITMAP_NON_UTF8)) {
+		    cl_anything(pRExC_state, cl);
+		}
+		else {
+		    cl->flags |= ANYOF_UNICODE_ALL;
+		}
 	    }
 
         /* Take the union */
