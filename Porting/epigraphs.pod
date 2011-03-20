@@ -21,13 +21,13 @@ Consult your favorite dictionary for details.
 
 L<Announced on 2011-02-20 by Ævar Arnfjörð Bjarmason|http://www.nntp.perl.org/group/perl.perl5.porters/2011/02/msg169340.html>
 
-    Skalat maðr rúnar rísta, 
-    nema ráða vel kunni. 
-    Þat verðr mörgum manni, 
-    es of myrkvan staf villisk. 
-    Sák á telgðu talkni 
-    tíu launstafi ristna. 
-    Þat hefr lauka lindi 
+    Skalat maðr rúnar rísta,
+    nema ráða vel kunni.
+    Þat verðr mörgum manni,
+    es of myrkvan staf villisk.
+    Sák á telgðu talkni
+    tíu launstafi ristna.
+    Þat hefr lauka lindi
     langs ofrtrega fengit.
 
 =head2 v5.13.9 - John F Kennedy, L<Inaugural Address January 20, 1961|http://en.wikisource.org/wiki/John_F._Kennedy%27s_Inaugural_Address>
@@ -146,7 +146,7 @@ Softly, lest any one should have opened his window at the sound of the
 rusty bolt, I struggled through this till I gained a view of the open
 grounds.  Here I found that the brushwood spread a good way up the
 park, uniting with the wood that approached the little temple I have
-described. 
+described.
 
 =head2 v5.13.4 - Lewis Carroll, "Alice's Adventures in Wonderland"
 
