@@ -258,7 +258,7 @@ suite.
 
 When building Perl with the mingw64 x64 cross-compiler C<incpath>,
 C<libpth>, C<ldflags>, C<lddlflags> and C<ldflags_nolargefiles> values
-in F<Config.pm> and F<Config_heavy.pl> were not previously not being set
+in F<Config.pm> and F<Config_heavy.pl> were not previously being set
 correctly because, with that compiler, the include and lib directories
 are not immediately below C<$(CCHOME)>.
 
