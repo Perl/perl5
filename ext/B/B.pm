@@ -16,25 +16,27 @@ require Exporter;
 
 BEGIN {
     $B::VERSION = '1.29';
+    @B::EXPORT_OK = ();
 
-    @B::EXPORT_OK = qw(minus_c ppname save_BEGINs
-		       class peekop cast_I32 cstring cchar hash threadsv_names
-		       main_root main_start main_cv svref_2object opnumber
-		       sub_generation amagic_generation perlstring
-		       walkoptree_slow walkoptree walkoptree_exec walksymtable
-		       parents comppadlist sv_undef compile_stats timing_info
-		       begin_av init_av check_av end_av regex_padav dowarn
-		       defstash curstash warnhook diehook inc_gv @optype
-		       @specialsv_name
-		   );
-    push @B::EXPORT_OK, qw(unitcheck_av) if $] > 5.009;
+    # Our BOOT code needs $VERSION set, and will append to @EXPORT_OK.
+    # Want our constants loaded before the compiler meets OPf_KIDS below, as
+    # the combination of having the constant stay a Proxy Constant Subroutine
+    # and its value being inlined saves a little over .5K
 
-    # All the above in this BEGIN, because our BOOT code needs $VERSION set,
-    # and will append to @EXPORT_OK. And we need to run the BOOT code before
-    # we see OPf_KIDS below.
     require XSLoader;
     XSLoader::load();
 }
+
+push @B::EXPORT_OK, (qw(minus_c ppname save_BEGINs
+			class peekop cast_I32 cstring cchar hash threadsv_names
+			main_root main_start main_cv svref_2object opnumber
+			sub_generation amagic_generation perlstring
+			walkoptree_slow walkoptree walkoptree_exec walksymtable
+			parents comppadlist sv_undef compile_stats timing_info
+			begin_av init_av check_av end_av regex_padav dowarn
+			defstash curstash warnhook diehook inc_gv @optype
+			@specialsv_name
+		      ), $] > 5.009 && 'unitcheck_av');
 
 @B::SV::ISA = 'B::OBJECT';
 @B::NULL::ISA = 'B::SV';
