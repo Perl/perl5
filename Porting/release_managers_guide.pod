@@ -910,7 +910,6 @@ the following files:
 
     MANIFEST
     Makefile.SH
-    pod.lst
     pod/perl.pod
     vms/descrip_mms.template
     win32/Makefile
