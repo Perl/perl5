@@ -464,7 +464,17 @@ code>.
 
 =head1 Acknowledgements
 
-XXX The list of people to thank goes here.
+Perl 5.13.11 represents approximately one month of development since Perl
+5.13.10 and contains approximately 80,000 lines of changes across 549 files from
+31 authors and committers:
+
+Alastair Douglas, Arvan, Boris Ratner, brian d foy, Chris 'BinGOs' Williams,
+Craig A. Berry, David Golden, David Leadbeater, David Mitchell, Father
+Chrysostomos, Florian Ragwitz, Jan Dubois, Karl Williamson, Kevin Ryde, Leon
+Brocard, Leon Timmermans, Michael Stevens, Michael Witten, Moritz Lenz, Nicholas
+Clark, Paul Johnson, Peter John Acklam, Reini Urban, Robin Barker, Steve Hay,
+Sullivan Beck, Tony Cook, Vadim Konovalov, Yves Orton, Zefram and Ævar Arnfjörð
+Bjarmason
 
 =head1 Reporting Bugs
 
