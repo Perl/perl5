@@ -7632,7 +7632,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 }
 
 
-/* reg_namedseq(pRExC_state,UVp)
+/* reg_namedseq(pRExC_state,UVp, UV depth)
    
    This is expected to be called by a parser routine that has 
    recognized '\N' and needs to handle the rest. RExC_parse is
@@ -7675,7 +7675,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
    Parsing failures will generate a fatal error via vFAIL(...)
  */
 STATIC regnode *
-S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp)
+S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp, U32 depth)
 {
     char * endbrace;    /* '}' following the name */
     regnode *ret = NULL;
@@ -8439,7 +8439,7 @@ tryagain:
             Also this makes sure that things like /\N{BLAH}+/ and 
             \N{BLAH} being multi char Just Happen. dmq*/
             ++RExC_parse;
-            ret= reg_namedseq(pRExC_state, NULL, flagp); 
+            ret= reg_namedseq(pRExC_state, NULL, flagp, depth);
             break;
 	case 'k':    /* Handle \k<NAME> and \k'NAME' */
 	parse_named_seq:
@@ -9640,7 +9640,7 @@ parseit:
                     from earlier versions, OTOH that behaviour was broken
                     as well. */
                     UV v; /* value is register so we cant & it /grrr */
-                    if (reg_namedseq(pRExC_state, &v, NULL)) {
+                    if (reg_namedseq(pRExC_state, &v, NULL, depth)) {
                         goto parseit;
                     }
                     value= v; 
