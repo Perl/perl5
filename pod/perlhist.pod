@@ -450,6 +450,7 @@ the strings?).
  Zefram   5.13.8        2010-Dec-20
  Jesse    5.13.9        2011-Jan-20
  Ævar     5.13.10       2011-Feb-20
+ Florian  5.13.11       2011-Mar-20
 
 =head2 SELECTED RELEASE SIZES
 
