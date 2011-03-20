@@ -10026,6 +10026,18 @@ parseit:
 			add_alternate(&unicode_alternate, foldbuf, foldlen);
 		    end_multi_fold: ;
 		    }
+
+		    /* This is special-cased, as it is the only letter which
+		     * has both a multi-fold and single-fold in Latin1.  All
+		     * the other chars that have single and multi-folds are
+		     * always in utf8, and the utf8 folding algorithm catches
+		     * them */
+		    if (! LOC && j == LATIN_CAPITAL_LETTER_SHARP_S) {
+			stored += set_regclass_bit(pRExC_state,
+					ret,
+					LATIN_SMALL_LETTER_SHARP_S,
+					&l1_fold_invlist, &unicode_alternate);
+		    }
 		}
 		else {
 		    /* Single character fold.  Add everything in its fold
