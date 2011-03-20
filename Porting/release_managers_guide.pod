@@ -398,7 +398,7 @@ Look at the previous L<perldelta> for how to write the opening
 paragraph of the Acknowledgements section. To get the amount of
 changed files and number of lines use this command:
 
-  $ git diff --shortstat v5.13.8..v5.13.9 | \
+  $ git diff --shortstat v5.13.8..HEAD | \
     ./perl -Ilib -nE 'my ($files, $insert, $delete) = /(\d+)/ga; say "$files files and ", $insert + $delete, " lines changed"'
 
 Making sure to round off the number of lines changed.
