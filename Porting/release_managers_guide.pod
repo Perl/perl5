@@ -391,14 +391,14 @@ Finalize the perldelta.  In particular, fill in the Acknowledgements
 section.  You can generate a list of contributors with checkAUTHORS.pl.
 For example:
 
-  $ git log --pretty=fuller v5.13.2..HEAD | \
+  $ git log --pretty=fuller v5.13.${last}..HEAD | \
     perl Porting/checkAUTHORS.pl --who -
 
 Look at the previous L<perldelta> for how to write the opening
 paragraph of the Acknowledgements section. To get the amount of
 changed files and number of lines use this command:
 
-  $ git diff --shortstat v5.13.8..HEAD | \
+  $ git diff --shortstat v5.13.${last}..HEAD | \
     ./perl -Ilib -nE 'my ($files, $insert, $delete) = /(\d+)/ga; say "$files files and ", $insert + $delete, " lines changed"'
 
 Making sure to round off the number of lines changed.
