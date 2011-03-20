@@ -1419,11 +1419,11 @@ cannot see lexicals in the enclosing scope; C<eval STRING> does.  It's the
 same, however, in that it does reparse the file every time you call it,
 so you probably don't want to do this inside a loop.
 
-If C<do> cannot read the file, it returns undef and sets C<$!> to the
-error.  If C<do> can read the file but cannot compile it, it
-returns undef and sets an error message in C<$@>.   If the file is
-successfully compiled, C<do> returns the value of the last expression
-evaluated.
+If C<do> can read the file but cannot compile it, it returns undef and sets
+an error message in C<$@>.  If C<do> cannot read the file, it returns undef
+and sets C<$!> to the error.  Always check C<$@> first, as compilation
+could fail in a way that also sets C<$!>.  If the file is successfully
+compiled, C<do> returns the value of the last expression evaluated.
 
 Inclusion of library modules is better done with the
 C<use> and C<require> operators, which also do automatic error checking
