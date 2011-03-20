@@ -728,7 +728,15 @@ S_cl_anything(const RExC_state_t *pRExC_state, struct regnode_charclass_class *c
 
     ANYOF_BITMAP_SETALL(cl);
     cl->flags = ANYOF_CLASS|ANYOF_EOS|ANYOF_UNICODE_ALL
-		|ANYOF_LOC_NONBITMAP_FOLD|ANYOF_NON_UTF8_LATIN1_ALL;
+		|ANYOF_LOC_NONBITMAP_FOLD|ANYOF_NON_UTF8_LATIN1_ALL
+		    /* Even though no bitmap is in use here, we need to set
+		     * the flag below so an AND with a node that does have one
+		     * doesn't lose that one.  The flag should get cleared if
+		     * the other one doesn't; and the code in regexec.c is
+		     * structured so this being set when not needed does no
+		     * harm.  It seemed a little cleaner to set it here than do
+		     * a special case in cl_and() */
+		|ANYOF_NONBITMAP_NON_UTF8;
 
     /* If any portion of the regex is to operate under locale rules,
      * initialization includes it.  The reason this isn't done for all regexes

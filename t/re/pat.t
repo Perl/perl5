@@ -1030,7 +1030,6 @@ sub run_tests {
 
         my $message = '\p property after empty * match';
         {
-            local $::TODO = "Bug 77414";
             like("1", qr/\s*\pN/, $message);
             like("-", qr/\s*\p{Dash}/, $message);
             like(" ", qr/\w*\p{Blank}/, $message);
