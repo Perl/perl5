@@ -10610,16 +10610,18 @@ sub filter_old_style_case_folding {
         }
 
         # C: complete, F: full, or I: dotted uppercase I -> dotless lowercase
-        # I are all full foldings
-        if ($type eq 'C' || $type eq 'F' || $type eq 'I') {
-            $_ = "$range; Case_Folding; $map";
+        # I are all full foldings; S is single-char.  For S, there is always
+        # an F entry, so we must allow multiple values for the same code
+        # point.  Fortunately this table doesn't need further manipulation
+        # which would preclude using multiple-values.  The S is now included
+        # so that _swash_inversion_hash() is able to construct closures
+        # without having to worry about F mappings.
+        if ($type eq 'C' || $type eq 'F' || $type eq 'I' || $type eq 'S') {
+            $_ = "$range; Case_Folding; $CMD_DELIM$REPLACE_CMD=$MULTIPLE$CMD_DELIM$map";
         }
         else {
             $_ = "";
-            if ($type ne 'S') {
-               $file->carp_bad_line('Expecting C F I S or T in second field');
-               return;
-            }
+            $file->carp_bad_line('Expecting C F I S or T in second field');
         }
 
         # C and S are simple foldings, but simple case folding is not needed
