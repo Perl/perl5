@@ -2112,7 +2112,9 @@ EOP
         ok(1, $message);  # If it didn't crash, it worked.
     }
 
-    {   # Was looping
+    SKIP: {   # Was looping
+        skip('Triggers thread clone SEGV. See #86550')
+	  if $::running_as_thread;
         watchdog(10);   # Use a bigger value for busy systems
         like("\x{00DF}", qr/[\x{1E9E}_]*/i, "\"\\x{00DF}\" =~ /[\\x{1E9E}_]*/i was looping");
     }
