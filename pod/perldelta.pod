@@ -193,7 +193,7 @@ C<Math::BigInt::FastCalc> has been upgraded from version 0.24_02 to 0.28
 
 C<Module::Build> has been upgraded from version 0.37_05 to 0.3800
 
-=item
+=item *
 
 C<Module::CoreList> has been upgraded from version 2.45 to 2.46.
 
