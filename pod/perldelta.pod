@@ -220,6 +220,10 @@ C<Hash::Util::FieldHash> has been upgraded from version 1.08 to 1.09.
 
 =item *
 
+C<HTTP::Tiny> has been upgraded from version 0.010 to 0.011.
+
+=item *
+
 C<I18N::Langinfo> has been upgraded from version 0.07 to 0.08.
 
 =item *

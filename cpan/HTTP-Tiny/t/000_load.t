@@ -11,11 +11,10 @@
 use strict;
 use warnings;
 
-use Test::More tests => 1;
+use Test::More 0.88 tests => 1;
 
-BEGIN {
-    use_ok('HTTP::Tiny');
-}
+require_ok('HTTP::Tiny');
 
-diag("HTTP::Tiny $HTTP::Tiny::VERSION, Perl $], $^X");
+local $HTTP::Tiny::VERSION = $HTTP::Tiny::VERSION || 'from repo';
+note("HTTP::Tiny $HTTP::Tiny::VERSION, Perl $], $^X");
 

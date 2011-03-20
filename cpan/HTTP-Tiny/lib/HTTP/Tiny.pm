@@ -9,7 +9,7 @@
 #
 package HTTP::Tiny;
 BEGIN {
-  $HTTP::Tiny::VERSION = '0.010';
+  $HTTP::Tiny::VERSION = '0.011';
 }
 use strict;
 use warnings;
@@ -759,7 +759,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.010
+version 0.011
 
 =head1 SYNOPSIS
 
@@ -1051,13 +1051,15 @@ L<LWP::UserAgent>
 
 =back
 
-=for :stopwords CPAN AnnoCPAN RT CPANTS Kwalitee diff IRC
+=for :stopwords cpan testmatrix url annocpan anno bugtracker rt cpants kwalitee diff irc mailto metadata placeholders
 
 =head1 SUPPORT
 
 =head2 Bugs / Feature Requests
 
-Please report any bugs or feature requests on the bugtracker website L<http://rt.cpan.org/Public/Dist/Display.html?Name=HTTP-Tiny> or by email to 'bug-http-tiny at rt.cpan.org'. I will be notified, and then you'll automatically be notified of progress on your bug as I make changes.
+Please report any bugs or feature requests by email to C<bug-http-tiny at rt.cpan.org>, or through
+the web interface at L<http://rt.cpan.org/Public/Dist/Display.html?Name=HTTP-Tiny>. You will be automatically notified of any
+progress on the request by the system.
 
 =head2 Source Code
 
