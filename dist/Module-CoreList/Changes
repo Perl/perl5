@@ -1,4 +1,6 @@
-  - Resolved RT #59511 
+2.46 Sun Mar 20 2011
+  - Resolved RT #59511
+  - Updated for v5.13.11
 
 2.45 Sun Feb 20 2011
   - Bumped the version number and data for the 5.13.10 release
