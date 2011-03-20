@@ -58,8 +58,8 @@ overriding C<caller()> incorrectly.
 =item C<CPANPLUS>
 
 A patch to F<cpanp-run-perl> has been backported from CPANPLUS C<0.9004>. This
-resolves L<[perl #55964]|http://rt.perl.org/rt3/Ticket/Display.html?id=55964>
-and L<[perl #57106]|http://rt.perl.org/rt3/Ticket/Display.html?id=57106>, both
+resolves L<RT #55964|http://rt.cpan.org/Public/Bug/Display.html?id=55964>
+and L<RT #57106|http://rt.cpan.org/Public/Bug/Display.html?id=57106>, both
 of which related to failures to install distributions that use
 C<Module::Install::DSL>.
 
