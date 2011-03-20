@@ -317,7 +317,7 @@ struct regnode_charclass_class {
  * only, with some work, they could be put in the next-node field, or in an
  * unused bit of the classflags field. */
 
-#define ANYOF_LOCALE		 0x01
+#define ANYOF_LOCALE		 0x01	    /* /l modifier */
 
 /* The fold is calculated and stored in the bitmap where possible at compile
  * time.  However there are two cases where it isn't possible.  These share
