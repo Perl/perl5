@@ -17,6 +17,21 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.13.11 - Walt Whitman, L<Leaves of Grass|http://en.wikipedia.org/wiki/Leaves_of_Grass>
+
+L<Announced on 2011-02-20 by Florian Ragwitz|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2011-03/msg00560.html>
+
+  When the full-grown poet came,
+  Out spake pleased Nature (the round impassive globe, with all its
+      shows of day and night,) saying, He is mine;
+  But out spake too the Soul of man, proud, jealous and unreconciled,
+      Nay he is mine alone;
+  --Then the full-grown poet stood between the two, and took each
+      by the hand;
+  And to-day and ever so stands, as blender, uniter, tightly holding hands,
+  Which he will never release until he reconciles the two,
+  And wholly and joyously blends them.
+
 =head2 v5.13.10 - Egill Skalla-Grímsson, L<Egils saga Skalla-Grímssonar|http://www.heimskringla.no/wiki/Egils_saga_Skalla-Gr%C3%ADmssonar>
 
 L<Announced on 2011-02-20 by Ævar Arnfjörð Bjarmason|http://www.nntp.perl.org/group/perl.perl5.porters/2011/02/msg169340.html>
