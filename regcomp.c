@@ -727,7 +727,6 @@ S_cl_anything(const RExC_state_t *pRExC_state, struct regnode_charclass_class *c
     PERL_ARGS_ASSERT_CL_ANYTHING;
 
     ANYOF_BITMAP_SETALL(cl);
-    ANYOF_CLASS_ZERO(cl);	/* all bits set, so class is irrelevant */
     cl->flags = ANYOF_CLASS|ANYOF_EOS|ANYOF_UNICODE_ALL
 		|ANYOF_LOC_NONBITMAP_FOLD|ANYOF_NON_UTF8_LATIN1_ALL;
 
@@ -739,7 +738,11 @@ S_cl_anything(const RExC_state_t *pRExC_state, struct regnode_charclass_class *c
      * parts of it may not work properly, it is safest to avoid locale unless
      * necessary. */
     if (RExC_contains_locale) {
+	ANYOF_CLASS_SETALL(cl);	    /* /l uses class */
 	cl->flags |= ANYOF_LOCALE;
+    }
+    else {
+	ANYOF_CLASS_ZERO(cl);	    /* Only /l uses class now */
     }
 }
 
