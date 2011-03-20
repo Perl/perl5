@@ -1258,17 +1258,18 @@ Deparsing of C<our> followed by a variable with funny characters
 
 =item *
 
-C<Carp> has been upgraded from version 1.18 to 1.19.
+C<Carp> has been upgraded from version 1.15 to 1.19.
 
 L<Carp> now detects incomplete L<caller()|perlfunc/"caller EXPR"> overrides and
-avoids using bogus C<@DB::args>. To provide backtraces, Carp relies on
-particular behaviour of the caller built-in. Carp now detects if other code has
+avoids using bogus C<@DB::args>.  To provide backtraces,
+Carp relies on particular behaviour of the C<caller>
+built-in.  Carp now detects if other code has
 overridden this with an incomplete implementation, and modifies its backtrace
-accordingly. Previously incomplete overrides would cause incorrect values in
-backtraces (best case), or obscure fatal errors (worst case)
+accordingly.  Previously incomplete overrides would cause incorrect values
+in backtraces (best case), or obscure fatal errors (worst case).
 
 This fixes certain cases of C<Bizarre copy of ARRAY> caused by modules
-overriding C<caller()> incorrectly.
+overriding C<caller()> incorrectly (5.12.2).
 
 It now also avoids using regular expressions that cause perl to
 load its Unicode tables, in order to avoid the 'BEGIN not safe after
@@ -1317,7 +1318,13 @@ Major highlights:
 
 =item *
 
-C<CPANPLUS> has been upgraded from version 0.90 to 0.9102.
+C<CPANPLUS> has been upgraded from version 0.90 to 0.9103.
+
+A change to F<cpanp-run-perl>
+resolves L<RT #55964|http://rt.cpan.org/Public/Bug/Display.html?id=55964>
+and L<RT #57106|http://rt.cpan.org/Public/Bug/Display.html?id=57106>, both
+of which related to failures to install distributions that use
+C<Module::Install::DSL> (5.12.2).
 
 A dependency on Config was not recognised as a
 core module dependency.  This has been fixed.
@@ -1447,6 +1454,16 @@ C<File::Find> has been upgraded from version 1.15 to 1.18.
 
 It improves handling of backslashes on Windows, so that paths like
 F<c:\dir\/file> are no longer generated [perl #71710].
+
+=item *
+
+C<File::Spec> has been upgraded from version 3.31 to 3.33.
+
+Several portability fixes were made in C<File::Spec::VMS>: a colon is now
+recognized as a delimiter in native filespecs; caret-escaped delimiters are
+recognized for better handling of extended filespecs; C<catpath()> returns
+an empty directory rather than the current directory if the input directory
+name is empty; C<abs2rel()> properly handles Unix-style input (5.12.2).
 
 =item *
 
@@ -1877,7 +1894,8 @@ one's own code's behaviour without stomping on anybody else.
 
 =head3 INSTALL explicitly states the requirement for C89
 
-This was already true but it's now Officially Stated For The Record.
+This was already true but it's now Officially Stated For The Record
+(5.12.2).
 
 =head3 Explanation of C<\xI<HH>> and C<\oI<OOO>> escapes
 
@@ -1887,7 +1905,7 @@ character escapes.
 =head3 C<-0I<NNN>> switch
 
 In L<perlrun>, the behavior of the C<-0NNN> switch for C<-0400> or higher
-has been clarified.
+has been clarified (5.12.2).
 
 =head3 Maintenance policy
 
@@ -1897,7 +1915,7 @@ maintenance branches (5.12.1).
 =head3 Deprecation policy
 
 L<perlpolicy> now contains the policy on compatibility and deprecation
-along with definitions of terms like "deprecation".
+along with definitions of terms like "deprecation" (5.12.2).
 
 =head3 New descriptions in L<perldiag>
 
@@ -2151,9 +2169,13 @@ less likely to get stuck in a mail queue somewhere [perl #82996].
 
 =item *
 
-perlbug now always permits the sender address to be changed
-before sending - if you were having trouble sending bug reports before
-now, this should fix it, we hope.
+L<perlbug> now always gives the reporter a chance to change the email
+address it guesses for them (5.12.2).
+
+=item *
+
+L<perlbug> should no longer warn about uninitialized values when using the C<-d>
+and C<-v> options (5.12.2).
 
 =back
 
@@ -2225,6 +2247,16 @@ larger value, configure with:
 
 where N is the desired size in bytes; it should probably be a multiple of
 your page size.
+
+=item *
+
+An "incompatible operand types" error in ternary expressions when building
+with C<clang> has been fixed (5.12.2).
+
+=item *
+
+Perl now skips setuid C<File::Copy> tests on partitions it detects to be mounted
+as C<nosuid> (5.12.2).
 
 =back
 
@@ -2405,6 +2437,27 @@ Perl distribution. It was officially discontinued in an earlier version.
 
 =head2 Platform-Specific Notes
 
+=head3 AIX
+
+=over
+
+=item *
+
+F<README.aix> has been updated with information about the XL C/C++ V11 compiler
+suite (5.12.2).
+
+=back
+
+=head3 ARM
+
+=over
+
+=item *
+
+The C<d_u32align> configuration probe on ARM has been fixed (5.12.2).
+
+=back
+
 =head3 Cygwin
 
 =over 4
@@ -2548,6 +2601,25 @@ Record-oriented files (record format variable or variable with fixed control)
 opened for write by the perlio layer will now be line-buffered to prevent the
 introduction of spurious line breaks whenever the perlio buffer fills up.
 
+=item *
+
+F<git_version.h> is now installed on VMS. This was an oversight in v5.12.0 which
+caused some extensions to fail to build (5.12.2).
+
+=item *
+
+Several memory leaks in L<stat()|perlfunc/"stat FILEHANDLE"> have been fixed (5.12.2).
+
+=item *
+
+A memory leak in C<Perl_rename()> due to a double allocation has been
+fixed (5.12.2).
+
+=item *
+
+A memory leak in C<vms_fid_to_name()> (used by C<realpath()> and
+C<realname()>) has been fixed (5.12.2).
+
 =back
 
 =head3 Windows
@@ -2576,6 +2648,14 @@ compilers.
 
 C<$Config{gccversion}> is now set correctly when perl is built using the
 mingw64 compiler from L<http://mingw64.org> [perl #73754].
+
+=item *
+
+When building Perl with the mingw64 x64 cross-compiler C<incpath>,
+C<libpth>, C<ldflags>, C<lddlflags> and C<ldflags_nolargefiles> values
+in F<Config.pm> and F<Config_heavy.pl> were not previously being set
+correctly because, with that compiler, the include and lib directories
+are not immediately below C<$(CCHOME)> (5.12.2).
 
 =item *
 
@@ -3070,7 +3150,7 @@ A pattern like C<(?:(o){2})?> no longer causes a "panic" error
 =item *
 
 A fatal error in regular expressions containing C<(.*?)> when processing
-UTF-8 data has been fixed [perl #75680].
+UTF-8 data has been fixed [perl #75680] (5.12.2).
 
 =item *
 
@@ -3173,7 +3253,7 @@ the label to be associated also with the first statement inside the eval
 =item *
 
 The C<no 5.13.2;> form of C<no> no longer tries to turn on features or
-pragmata (i.e., strict) [perl #70075].
+pragmata (i.e., strict) [perl #70075] (5.12.2).
 
 =item *
 
@@ -3187,7 +3267,7 @@ provide [perl #69050].
 
 A regression introduced in Perl 5.12.0, making
 C<< my $x = 3; $x = length(undef) >> result in C<$x> set to C<3> has been
-fixed.  C<$x> will now be C<undef> [perl #85508].
+fixed.  C<$x> will now be C<undef> [perl #85508] (5.12.2).
 
 =item *
 
@@ -3509,6 +3589,11 @@ reference already (e.g., from a previous FETCH) [perl #72144].
 C<splice> now calls set-magic (so changes made
 by C<splice @ISA> are respected by method calls) [perl #78400].
 
+=item *
+
+In-memory files created by C<open $fh, 'E<gt>' \$buffer> were not calling
+FETCH/STORE at all [perl #43789] (5.12.2).
+
 =back
 
 =item *
@@ -3604,7 +3689,7 @@ in memory [perl #71806].
 =item *
 
 A possible memory leak when using L<caller()|perlfunc/"caller EXPR"> to set
-C<@DB::args> has been fixed.
+C<@DB::args> has been fixed (5.12.2).
 
 =item *
 
@@ -3740,12 +3825,7 @@ double-frees.  Now fixed. [perl #76248].
 
 =item *
 
-Several VMS-specific routines dealing with filesystem access were leaking
-memory.
-
-=item *
-
-Several memory leaks when loading XS modules were fixed.
+Several memory leaks when loading XS modules were fixed (5.12.2).
 
 =item *
 
@@ -3767,7 +3847,7 @@ large lists [perl #48004].
 
 =item *
 
-C<use VERSION> and C<no VERSION> no longer leak memory [perl #78436]
+C<use I<VERSION>> and C<no I<VERSION>> no longer leak memory [perl #78436]
 [perl #69050].
 
 =item *
@@ -3789,7 +3869,7 @@ C<eval "BEGIN{die}"> no longer leaks memory on non-threaded builds.
 =item *
 
 glob() no longer crashes when %File::Glob:: is empty and
-CORE::GLOBAL::glob isn't present (4984aa).
+CORE::GLOBAL::glob isn't present [perl #75464] (5.12.2).
 
 =item *
 
@@ -3851,6 +3931,14 @@ Filetests don't always expect an op on the stack, so we now use
 TOPs only if we're sure that we're not stat'ing the _ filehandle.
 This is indicated by OPf_KIDS (as checked in ck_ftst) [perl #74542]
 (5.12.1).
+
+=item *
+
+C<unpack()> now handles scalar context correctly for C<%32H> and C<%32u>,
+fixing a potential crash.  C<split()> would crash because the third item
+on the stack wasn't the regular expression it expected.  C<unpack("%2H",
+...)> would return both the unpacked result and the checksum on the stack,
+as would C<unpack("%2u", ...)> [perl #73814] (5.12.2).
 
 =back
 
@@ -3939,6 +4027,17 @@ XSUB.h now correctly redefines fgets under PERL_IMPLICIT_SYS [perl #55049]
 
 XS code using C<fputc()> or C<fputs()>: on Windows could cause an error
 due to their arguments being swapped [perl #72704] (5.12.1).
+
+=item *
+
+A possible segfault in the C<T_PRTOBJ> default typemap has been fixed
+(5.12.2).
+
+=item *
+
+A bug that could cause "Unknown error" messages when
+C<call_sv(code, G_EVAL)> is called from an XS destructor has been fixed
+(5.12.2).
 
 =back
 
