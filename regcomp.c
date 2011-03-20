@@ -8465,7 +8465,13 @@ tryagain:
 	/* FALL THROUGH */
 
     default:
-        outer_default:{
+        outer_default:
+
+            parse_start = RExC_parse - 1;
+
+	    RExC_parse++;
+
+	defchar: {
 	    register STRLEN len;
 	    register UV ender;
 	    register char *p;
@@ -8474,11 +8480,6 @@ tryagain:
 	    U8 tmpbuf[UTF8_MAXBYTES_CASE+1], *foldbuf;
 	    regnode * orig_emit;
 
-            parse_start = RExC_parse - 1;
-
-	    RExC_parse++;
-
-	defchar:
 	    ender = 0;
 	    orig_emit = RExC_emit; /* Save the original output node position in
 				      case we need to output a different node
