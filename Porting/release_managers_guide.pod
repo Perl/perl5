@@ -603,10 +603,7 @@ I<You MUST SKIP this step for SNAPSHOT>
 
 Tag the release (e.g.):
 
-    $ git tag v5.11.0 -m'First release of the v5.11 series!'
-
-(Adjust the syntax appropriately if you're working on Win32, i.e. use
-C<-m "..."> rather than C<-m'...'>.)
+    $ git tag v5.11.0 -m "First release of the v5.11 series!"
 
 It is VERY important that from this point forward, you not push
 your git changes to the Perl master repository.  If anything goes
