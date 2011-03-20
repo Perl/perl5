@@ -1114,7 +1114,7 @@ over time are given in C<CPAN::Meta::History>.
 
 =item *
 
-C<HTTP::Tiny> 0.010 has been added as a dual-life module.  It is a very
+C<HTTP::Tiny> 0.011 has been added as a dual-life module.  It is a very
 small, simple HTTP/1.1 client designed for simple GET requests and file
 mirroring.  It has has been added to enable CPAN.pm and CPANPLUS to
 "bootstrap" HTTP access to CPAN using pure Perl without relying on external
@@ -1248,7 +1248,8 @@ change of package (relative to the previous nextstate), or a change of
 C<%^H> or other state, and a label.  Previously the label was emitted
 first, but now the label is emitted last (5.12.1).
 
-The C<no 5.13.2> or similar form is now correctly handled by B::Deparse.
+The C<no 5.13.2> or similar form is now correctly handled by B::Deparse
+(5.12.3).
 
 B::Deparse now properly handles the code that applies a conditional
 pattern match against implicit C<$_> as it was fixed in [perl #20444].
@@ -2543,12 +2544,12 @@ perl's malloc instead [perl #75742].
 =head3 OpenVOS
 
 perl now builds again with OpenVOS (formerly known as Stratus VOS)
-[perl #78132].
+[perl #78132] (5.12.3).
 
 =head3 Solaris
 
 DTrace is now supported on Solaris. There used to be build failures, but
-these have been fixed [perl #73630].
+these have been fixed [perl #73630] (5.12.3).
 
 =head3 VMS
 
@@ -2587,7 +2588,12 @@ which has always explicitly used C<0666> as the permission mask.
 To avoid this, C<0777> is now passed as the permissions to C<open()>.  In the
 VMS CRTL, C<0777> has a special meaning over and above intersecting with the
 current umask; specifically, it allows Unix syscalls to preserve native default
-permissions.
+permissions (5.12.3).
+
+=item *
+
+Spurious record boundaries are no longer
+introduced by the PerlIO layer during output (5.12.3).
 
 =item *
 
@@ -3756,7 +3762,7 @@ eliminates several "scalars leaked" warnings when joining threads.
 =item *
 
 Lvalue subroutines are again able to return copy-on-write scalars.  This
-had been broken since version 5.10.0 [perl #75656].
+had been broken since version 5.10.0 [perl #75656] (5.12.2).
 
 =item *
 
