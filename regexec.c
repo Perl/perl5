@@ -3625,20 +3625,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		char *e = PL_regeol;
 
 		if (! foldEQ_utf8_flags(s, 0,  ln, cBOOL(UTF_PATTERN),
-			       l, &e, 0,  utf8_target, fold_utf8_flags)) {
-		     /* One more case for the sharp s:
-		      * pack("U0U*", 0xDF) =~ /ss/i,
-		      * the 0xC3 0x9F are the UTF-8
-		      * byte sequence for the U+00DF. */
-
-		     if (!(utf8_target &&
-		           toLOWER(s[0]) == 's' &&
-			   ln >= 2 &&
-			   toLOWER(s[1]) == 's' &&
-			   (U8)l[0] == 0xC3 &&
-			   e - l >= 2 &&
-			   (U8)l[1] == 0x9F))
-			  sayNO;
+			       l, &e, 0,  utf8_target, fold_utf8_flags))
+		{
+		    sayNO;
 		}
 		locinput = e;
 		nextchr = UCHARAT(locinput);
