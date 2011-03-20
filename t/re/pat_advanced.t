@@ -2113,7 +2113,7 @@ EOP
     }
 
     {   # Was looping
-        watchdog(2);
+        watchdog(10);   # Use a bigger value for busy systems
         like("\x{00DF}", qr/[\x{1E9E}_]*/i, "\"\\x{00DF}\" =~ /[\\x{1E9E}_]*/i was looping");
     }
 
