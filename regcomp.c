@@ -8006,27 +8006,6 @@ tryagain:
 	RExC_parse++;
 	vFAIL("Quantifier follows nothing");
 	break;
-    case LATIN_SMALL_LETTER_SHARP_S:
-    case UTF8_TWO_BYTE_HI_nocast(LATIN_SMALL_LETTER_SHARP_S):
-    case UTF8_TWO_BYTE_HI_nocast(IOTA_D_T):
-#if UTF8_TWO_BYTE_HI_nocast(UPSILON_D_T) != UTF8_TWO_BYTE_HI_nocast(IOTA_D_T)
-#error The beginning utf8 byte of IOTA_D_T and UPSILON_D_T unexpectedly differ.  Other instances in this code should have the case statement below.
-    case UTF8_TWO_BYTE_HI_nocast(UPSILON_D_T):
-#endif
-        do_foldchar:
-        if (!LOC && FOLD) {
-            U32 len,cp;
-	    len=0; /* silence a spurious compiler warning */
-            if ((cp = what_len_TRICKYFOLD_safe(RExC_parse,RExC_end,UTF,len))) {
-                *flagp |= HASWIDTH; /* could be SIMPLE too, but needs a handler in regexec.regrepeat */
-                RExC_parse+=len-1; /* we get one from nextchar() as well. :-( */
-                ret = reganode(pRExC_state, FOLDCHAR, cp);
-                Set_Node_Length(ret, 1); /* MJD */
-                nextchar(pRExC_state); /* kill whitespace under /x */
-                return ret;
-            }
-        }
-        goto outer_default;
     case '\\':
 	/* Special Escapes
 
@@ -8041,10 +8020,6 @@ tryagain:
 	   literal text handling code.
 	*/
 	switch ((U8)*++RExC_parse) {
-	case LATIN_SMALL_LETTER_SHARP_S:
-	case UTF8_TWO_BYTE_HI_nocast(LATIN_SMALL_LETTER_SHARP_S):
-	case UTF8_TWO_BYTE_HI_nocast(IOTA_D_T):
-	           goto do_foldchar;	    
 	/* Special Escapes */
 	case 'A':
 	    RExC_seen_zerolen++;
@@ -8465,7 +8440,6 @@ tryagain:
 	/* FALL THROUGH */
 
     default:
-        outer_default:
 
             parse_start = RExC_parse - 1;
 
@@ -8512,11 +8486,6 @@ tryagain:
 		if (RExC_flags & RXf_PMf_EXTENDED)
 		    p = regwhite( pRExC_state, p );
 		switch ((U8)*p) {
-		case LATIN_SMALL_LETTER_SHARP_S:
-		case UTF8_TWO_BYTE_HI_nocast(LATIN_SMALL_LETTER_SHARP_S):
-		case UTF8_TWO_BYTE_HI_nocast(IOTA_D_T):
-		           if (LOC || !FOLD || !is_TRICKYFOLD_safe(p,RExC_end,UTF))
-		                goto normal_default;
 		case '^':
 		case '$':
 		case '.':
@@ -8541,11 +8510,6 @@ tryagain:
 
 		    switch ((U8)*++p) {
 		    /* These are all the special escapes. */
-                    case LATIN_SMALL_LETTER_SHARP_S:
-                    case UTF8_TWO_BYTE_HI_nocast(LATIN_SMALL_LETTER_SHARP_S):
-                    case UTF8_TWO_BYTE_HI_nocast(IOTA_D_T):
-    		           if (LOC || !FOLD || !is_TRICKYFOLD_safe(p,RExC_end,UTF))
-    		                goto normal_default;		    
 		    case 'A':             /* Start assertion */
 		    case 'b': case 'B':   /* Word-boundary assertion*/
 		    case 'C':             /* Single char !DANGEROUS! */
