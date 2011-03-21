@@ -8447,13 +8447,14 @@ tryagain:
 
 	defchar: {
 	    typedef enum {
-		char_s = 1,
+		generic_char = 0,
+		char_s,
 		upsilon_1,
 		upsilon_2,
 		iota_1,
 		iota_2,
 	    } char_state;
-	    char_state latest_char_state = 0;
+	    char_state latest_char_state = generic_char;
 	    register STRLEN len;
 	    register UV ender;
 	    register char *p;
@@ -8709,7 +8710,7 @@ tryagain:
 		     * save time by ruling-out some false alarms */
 		    switch (ender) {
 			default:
-			    latest_char_state = 0;
+			    latest_char_state = generic_char;
 			    break;
 			case 's':
 			case 'S':
@@ -8755,7 +8756,7 @@ tryagain:
 					 * here, set the state so know that the
 					 * previous char was an 's' */
 					if (len != 0) {
-					    latest_char_state = 0;
+					    latest_char_state = generic_char;
 					    p = oldp;
 					    goto loopdone;
 					}
@@ -8767,7 +8768,7 @@ tryagain:
 
 			    /* Here, can't be an 'ss' sequence, or at least not
 			     * one that could fold to/from the sharp ss */
-			    latest_char_state = 0;
+			    latest_char_state = generic_char;
 			    break;
 			case 0x03C5:	/* First char in upsilon series */
 			    if (p < RExC_end - 4) { /* Need >= 4 bytes left */
@@ -8778,7 +8779,7 @@ tryagain:
 				}
 			    }
 			    else {
-				latest_char_state = 0;
+				latest_char_state = generic_char;
 			    }
 			    break;
 			case 0x03B9:	/* First char in iota series */
@@ -8790,7 +8791,7 @@ tryagain:
 				}
 			    }
 			    else {
-				latest_char_state = 0;
+				latest_char_state = generic_char;
 			    }
 			    break;
 			case 0x0308:
@@ -8801,7 +8802,7 @@ tryagain:
 				latest_char_state = iota_2;
 			    }
 			    else {
-				latest_char_state = 0;
+				latest_char_state = generic_char;
 			    }
 			    break;
 			case 0x301:
@@ -8813,7 +8814,7 @@ tryagain:
 				ender = GREEK_SMALL_LETTER_IOTA_WITH_DIALYTIKA_AND_TONOS;
 				goto do_tricky;
 			    }
-			    latest_char_state = 0;
+			    latest_char_state = generic_char;
 			    break;
 
 			/* These are the tricky fold characters.  Flush any
