@@ -138,6 +138,14 @@ standard, are now always legal internally.  But inputting or outputting
 them will work the same as for the non-legal Unicode code points, as the
 Unicode standard says they are illegal for "open interchange".
 
+=head3 Unicode database files not installed
+
+The Unicode database files are no longer installed with Perl.  This
+doesn't affect any functionality in Perl and saves significant disk
+space.  If you previously were explicitly opening and reading those
+files, you can download them from
+L<http://www.unicode.org/Public/zipped/6.0.0/>.
+
 =head2 Regular Expressions
 
 =head3 C<(?^...)> construct to signify default modifiers
