@@ -5,16 +5,16 @@
 [ this is a template for a new perldelta file. Any text flagged as
 XXX needs to be processed before release. ]
 
-perldelta - what is new for perl v5.14.0
+perldelta - what is new for perl v5.XXX.XXX
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.12.0 release and
-the 5.14.0 release.
+This document describes differences between the 5.XXX.XXX release and
+the 5.XXX.XXX release.
 
-If you are upgrading from an earlier release such as 5.10.0, first read
-L<perl5120delta>, which describes differences between 5.10.0 and
-5.12.0.
+If you are upgrading from an earlier release such as 5.YYY.YYY, first read
+L<perl5YYYdelta>, which describes differences between 5.ZZZ.ZZZ and
+5.YYY.YYY.
 
 =head1 Notice
 
