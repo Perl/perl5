@@ -110,12 +110,23 @@ point.
 
 See L<charnames> for details on all these changes.
 
+=head3 New warnings categories for problematic (non-)Unicode code points.
+
+Three new warnings subcategories of "utf8" have been added.  These
+allow you to turn off some "utf8" warnings, while allowing
+others warnings to remain on.  The three categories are:
+C<surrogate> when UTF-16 surrogates are encountered;
+C<nonchar> when Unicode non-character code points are encountered;
+and C<non_unicode> when code points that are above the legal Unicode
+maximum of 0x10FFFF are encountered.
+
 =head3 Any unsigned value can be encoded as a character
 
 With this release, Perl is adopting a model that any unsigned value can
 be treated as a code point and encoded internally (as utf8) without
 warnings - not just the code points that are legal in Unicode.
-However, unless utf8 warnings have been
+However, unless utf8 or the corresponding sub-category (see previous
+item) warnings have been
 explicitly lexically turned off, outputting or performing a
 Unicode-defined operation (such as upper-casing) on such a code point
 will generate a warning.  Attempting to input these using strict rules
@@ -126,16 +137,6 @@ erroneously considered illegal in places by Perl, contrary to the Unicode
 standard, are now always legal internally.  But inputting or outputting
 them will work the same as for the non-legal Unicode code points, as the
 Unicode standard says they are illegal for "open interchange".
-
-=head3 New warnings categories for problematic (non-)Unicode code points.
-
-Three new warnings subcategories of "utf8" have been added.  These
-allow you to turn off some "utf8" warnings, while allowing
-others warnings to remain on.  The three categories are:
-C<surrogate> when UTF-16 surrogates are encountered;
-C<nonchar> when Unicode non-character code points are encountered;
-and C<non_unicode> when code points that are above the legal Unicode
-maximum of 0x10FFFF are encountered.
 
 =head2 Regular Expressions
 
