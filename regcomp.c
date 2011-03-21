@@ -7680,9 +7680,6 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp, U32 dept
 {
     char * endbrace;    /* '}' following the name */
     regnode *ret = NULL;
-#ifdef DEBUGGING
-    char* parse_start = RExC_parse - 2;	    /* points to the '\N' */
-#endif
     char* p;
 
     GET_RE_DEBUG_FLAGS_DECL;
