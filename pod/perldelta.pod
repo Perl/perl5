@@ -847,6 +847,12 @@ a deprecation warning is raised if that character isn't an ASCII character.
 Also, a deprecation warning is raised for C<"\c{"> (which is the same
 as simply saying C<";">).
 
+=head2 C<"\b{"> and C<"\B{">
+
+In regular expressions, a literal C<"{"> immediately following a C<"\b">
+(not in a bracketed character class) or a C<"\B{"> is now deprecated
+to allow for its future use by Perl itself.
+
 =head2 Deprecation warning added for deprecated-in-core .pl libs
 
 This is a mandatory warning, not obeying -X or lexical warning bits.
