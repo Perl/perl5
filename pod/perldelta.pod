@@ -9,11 +9,13 @@ perldelta - what is new for perl v5.14.0
 This document describes differences between the 5.12.0 release and
 the 5.14.0 release.
 
+If you are upgrading from an earlier release such as 5.10.0, first read
+L<perl5120delta>, which describes differences between 5.10.0 and
+5.12.0.
+
 Some of the bug fixes in this release have been backported to subsequent
 releases of 5.12.x. Those are indicated with the 5.12.x version in
 parentheses.
-
-XXX Go through the perl512*delta files and do that.
 
 =head1 Notice
 
