@@ -12,14 +12,14 @@ my $deprecated;
 
 sub added {
   my ($mod, $old_v, $new_v) = @_;
-  say "=item C<$mod>\n";
-  say "Version $new_v has been added to the Perl core.\n";
+  say "=item *\n";
+  say "C<$mod> $new_v has been added to the Perl core.\n";
 }
 
 sub updated {
   my ($mod, $old_v, $new_v) = @_;
-  say "=item C<$mod>\n";
-  say "Upgraded from version $old_v to $new_v.\n";
+  say "=item *\n";
+  say "C<$mod> has been upgraded from version $old_v to $new_v.\n";
   if ( $deprecated->{$mod} ) {
     say "NOTE: C<$mod> is deprecated and may be removed from a future version of Perl.\n";
   }
@@ -27,8 +27,8 @@ sub updated {
 
 sub removed {
   my ($mod, $old_v, $new_v) = @_;
-  say "=item C<$mod>\n";
-  say "Removed from the Perl core.  Prior version was $old_v.\n";
+  say "=item *\n";
+  say "C<$mod> has been removed from the Perl core.  Prior version was $old_v.\n";
 }
 
 sub generate_section {
