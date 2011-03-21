@@ -909,11 +909,9 @@ function is used on a handle without an explicit C<*>.
 
 This feature is being deprecated due to its many issues, as documented in
 L<perlunicode/User-Defined Case Mappings (for serious hackers only)>.
-It is planned to remove this feature in Perl 5.16.  A CPAN module
-providing improved functionality is being prepared for release by the
-time 5.14 is.
-
-XXX What module is that?
+It is planned to remove this feature in Perl 5.16.  A CPAN module,
+L<Unicode::Casing>, providing improved functionality is being prepared for
+release by the time 5.14 is available.
 
 =head2 Deprecated modules
 
