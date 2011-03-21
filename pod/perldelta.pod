@@ -519,20 +519,16 @@ example
  m/\p{ASCII_Hex_Digit}+/i
 
 could previously match non-ASCII characters because of the Unicode
-matching rules.  There were a number of bugs in this feature until an
-earlier release in the 5.13 series.  Now this release reverts, and
-removes the feature completely except for the few properties where
-people have come to expect it, namely the ones where casing is an
-integral part of their functionality, such as C<m/\p{Uppercase}/i> and
-C<m/\p{Lowercase}/i>, both of which match the exact same code points,
-namely those matched by C<m/\p{Cased}/i>.  Details are in
-L<perlrecharclass/Unicode Properties>.
-
-XXX The mention of ‘until an earlier release in the 5.13 series’ needs to
-change, but I do not fully understand what happened here.
+matching rules (although there were a number of bugs with this).  Now
+matching under C</i> gives the same results as non-C</i> matching except
+for those few properties where people have come to expect differences,
+namely the ones where casing is an integral part of their meaning, such
+as C<m/\p{Uppercase}/i> and C<m/\p{Lowercase}/i>, both of which match
+the exact same code points, namely those matched by C<m/\p{Cased}/i>.
+Details are in L<perlrecharclass/Unicode Properties>.
 
 User-defined property handlers that need to match differently under
-C</i> must change to read the new boolean parameter passed to it which is
+C</i> must change to read the new boolean parameter passed to them which is
 non-zero if case-insensitive matching is in effect or 0 otherwise.  See
 L<perluniprops/User-Defined Character Properties>.
 
