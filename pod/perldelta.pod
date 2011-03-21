@@ -389,6 +389,13 @@ Eliminated use of C<exists> on array elements which has been deprecated.
 
 =item *
 
+L<ODBM_File> has been upgraded from version 1.10 to version 1.11.
+
+The XS code is now compiled with C<PERL_NO_GET_CONTEXT>, which will aid
+performance under ithreads.
+
+=item *
+
 L<PerlIO::encoding> has been upgraded from version 0.14 to 0.15
 
 =item *
