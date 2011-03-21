@@ -496,13 +496,6 @@ In addition to the sections that follow, see L</C API Changes>.
 
 =head2 Regular Expressions and String Escapes
 
-=head3 C<\cI<X>>
-
-The backslash-c construct was designed as a way of specifying
-non-printable characters, but there were no restrictions (on ASCII
-platforms) on what the character following the C<c> could be.  Now, that
-character must be one of the ASCII characters.
-
 =head3 \400-\777
 
 Use of C<\400>-C<\777> in regexes in certain circumstances has given
@@ -844,6 +837,15 @@ Omitting a space between a regular expression operator or
 its modifiers and the following word is deprecated.  For
 example, C<< m/foo/sand $bar >> will still be parsed
 as C<< m/foo/s and $bar >> but will issue a warning.
+
+=head2 C<\cI<X>>
+
+The backslash-c construct was designed as a way of specifying
+non-printable characters, but there were no restrictions (on ASCII
+platforms) on what the character following the C<c> could be.  Now,
+a deprecation warning is raised if that character isn't an ASCII character.
+Also, a deprecation warning is raised for C<"\c{"> (which is the same
+as simply saying C<";">).
 
 =head2 Deprecation warning added for deprecated-in-core .pl libs
 
