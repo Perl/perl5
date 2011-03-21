@@ -3629,7 +3629,7 @@ eliminates several "scalars leaked" warnings when joining threads.
 =item *
 
 Lvalue subroutines are again able to return copy-on-write scalars.  This
-had been broken since version 5.10.0 [perl #75656] (5.12.2).
+had been broken since version 5.10.0 [perl #75656] (5.12.3).
 
 =item *
 
