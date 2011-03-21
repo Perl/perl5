@@ -3927,11 +3927,6 @@ See also: L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=67694>
 
 =item *
 
-Bug fixes involving CvGV reference counting break Sub::Name.  A
-patch has been sent upstream to the maintainer
-
-=item *
-
 readline() returns an empty string instead of undef when it is
 interrupted by a signal
 
