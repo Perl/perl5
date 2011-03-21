@@ -3919,6 +3919,10 @@ C<call_sv(code, G_EVAL)> is called from an XS destructor has been fixed
 XXX Many of these have probably already been solved.  There are also
 unresolved BBC articles linked to #77718 that are awaiting CPAN
 releases.  These may need to be listed here.
+See also #84444.  Enbugger may also need to be listed if there is no new
+release in time (see #82152).
+JJORE/overload-eval-0.08.tar.gz appears to be broken, too.  See
+http://www.nntp.perl.org/group/perl.perl5.porters/2010/11/msg165773.html
 
 =over 4
 
