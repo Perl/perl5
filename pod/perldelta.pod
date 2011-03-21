@@ -32,8 +32,7 @@ L<Corrigendum #8|http://www.unicode.org/versions/corrigendum8.html>,
 with one exception noted below.
 See L<http://unicode.org/versions/Unicode6.0.0> for details on the new
 release.  Perl does not support any Unicode provisional properties,
-including the new ones for this release, but their database files are
-packaged with Perl.
+including the new ones for this release.
 
 Unicode 6.0 has chosen to use the name C<BELL> for the character at U+1F514,
 which is a symbol that looks like a bell, and is used in Japanese cell
