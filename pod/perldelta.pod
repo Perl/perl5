@@ -2830,7 +2830,7 @@ internal storage and manipulation of code points that are problematic
 in some situations.  Hence, the default actions for these functions has
 been complemented to allow these code points.  The new flags are
 documented in L<perlapi>.  Code that requires the problematic code
-points to be rejected needs to change to use these flags.  Some flag
+points to be rejected needs to change to use the new flags.  Some flag
 names are retained for backward source compatibility, though they do
 nothing, as they are now the default.  However the flags
 C<UNICODE_ALLOW_FDD0>, C<UNICODE_ALLOW_FFFF>, C<UNICODE_ILLEGAL>, and
@@ -2840,7 +2840,8 @@ should be handled, which is now described in
 L<perlunicode/Non-character code points>.  See also L</Selected Bug Fixes>.
 
 XXX Which bugs in particular? Selected Bug Fixes is too long for this link
-to be meaningful right now.
+to be meaningful right now
+I don't see the bugs in that section currently -- khw
 
 =head2 Deprecated C APIs
 
