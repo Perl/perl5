@@ -536,7 +536,7 @@ L<perluniprops/User-Defined Character Properties>.
 
 Now, a Unicode property match specified in the pattern will indicate
 that the pattern is meant for matching according to Unicode rules, the way
-C<\x{}> does.
+C<\N{}> does.
 
 =head3 Regular expressions retain their localeness when interpolated
 
