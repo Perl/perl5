@@ -4572,6 +4572,7 @@ regen/reentr.pl			Reentrant interfaces
 regen/regcharclass.pl		Generate regcharclass.h from inline data
 regen/regcomp.pl		Builder of regnodes.h
 regen/regen_lib.pl		Common file routines for generator scripts
+regen/uconfig_h.pl		generate uconfig.h (requires /bin/sh)
 regen/warnings.pl		Program to write warnings.h and lib/warnings.pm
 regexec.c			Regular expression evaluator
 regexp.h			Public declarations for the above

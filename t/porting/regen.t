@@ -28,7 +28,7 @@ if ( $^O eq "VMS" ) {
 }
 
 my $in_regen_pl = 17; # I can't see a clean way to calculate this automatically.
-my @files = qw(perly.act perly.h perly.tab keywords.c keywords.h);
+my @files = qw(perly.act perly.h perly.tab keywords.c keywords.h uconfig.h);
 my @progs = qw(Porting/makemeta regen/regcharclass.pl regen/mk_PL_charclass.pl);
 
 plan (tests => $in_regen_pl + @files + @progs);

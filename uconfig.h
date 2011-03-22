@@ -4684,3 +4684,8 @@
 #define Uid_t int		/* UID type */
 
 #endif
+
+/* Generated from:
+ * 323778627146f2762cd41f4dd1db6659f59006ec9bcaaf6bcc645d0380dda938 config_h.SH
+ * 0a1e8a170495d354031144ac47835fc8f8fc03739bc761d973cc3a4aa347797e uconfig.sh
+ * ex: set ro: */
