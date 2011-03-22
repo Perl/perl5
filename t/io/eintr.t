@@ -45,7 +45,8 @@ if (exists $ENV{PERLIO} && $ENV{PERLIO} =~ /stdio/  ) {
 # On FreeBSD, writes to pipes of 8192 bytes or more use a mechanism
 # that is not interruptible (see perl #85842 and #84688).
 
-if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'freebsd') {
+if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'freebsd' || 
+     ($^O eq 'solaris' && $Config{osvers} eq '2.8') ) {
 	skip_all('various portability issues');
 	exit 0;
 }
