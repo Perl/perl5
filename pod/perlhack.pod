@@ -807,6 +807,10 @@ F<t/harness>. This means you can say
     nmake test TEST_FILES="op/*.t"
     nmake test TEST_SWITCHES="-torture" TEST_FILES="op/*.t"
 
+=item * test-notty test_notty
+
+Sets PERL_SKIP_TTY_TEST to true before running normal test.
+
 =back
 
 =head2 Parallel tests
@@ -826,9 +830,6 @@ to C<make> utilities to interact with their job schedulers.
 Note that currently some test scripts may fail when run in parallel (most
 notably C<ext/IO/t/io_dir.t>). If necessary, run just the failing scripts
 again sequentially and see if the failures go away.
-=item * test-notty test_notty
-
-Sets PERL_SKIP_TTY_TEST to true before running normal test.
 
 =head2 Running tests by hand
 
