@@ -75,12 +75,12 @@ Thank you!
 
 =head1 BUG REPORTING
 
-If you want to report a bug in Perl you must use the F<perlbug> command
+If you want to report a bug in Perl, you must use the F<perlbug> command
 line tool. This tool will ensure that your bug report includes all the
 relevant system and configuration information.
 
 To browse existing Perl bugs and patches, you can use the web interface
-at L<http://rt.perl.org>.
+at L<http://rt.perl.org/>.
 
 Please check the archive of the perl5-porters list (see below) and/or
 the bug tracking system before submitting a bug report. Often, you'll
@@ -139,7 +139,7 @@ You may access the repository over the web. This allows you to browse
 the tree, see recent commits, subscribe to RSS feeds for the changes,
 search for particular commits and more. You may access it at
 L<http://perl5.git.perl.org/perl.git>. A mirror of the repository is
-found at L<http://github.com/mirrors/perl>
+found at L<http://github.com/mirrors/perl>.
 
 =head2 Read access via rsync
 
@@ -153,7 +153,7 @@ tree for the bleadperl branch and all maintenance branches:
     $ rsync -avz rsync://perl5.git.perl.org/perl-5.6.x .
     $ rsync -avz rsync://perl5.git.perl.org/perl-5.005xx .
 
-(Add the C<--delete> option to remove leftover files)
+(Add the C<--delete> option to remove leftover files.)
 
 To get a full list of the available sync points:
 
@@ -244,9 +244,9 @@ if your submission will consist of a series of commits.
 
 The first line of the commit message should be a short description
 without a period. It should be no longer than the subject line of an
-E-Mail, 50 characters being a good rule of thumb.
+email, 50 characters being a good rule of thumb.
 
-A lot of Git tools (Gitweb, GitHub, git log --pretty=oneline, ..) will
+A lot of Git tools (Gitweb, GitHub, git log --pretty=oneline, ...) will
 only display the first line (cut off at 50 characters) when presenting
 commit summaries.
 
@@ -377,7 +377,7 @@ extra paren, e.g. "if (a && (b = c)) ..."
 
 =head3 Test suite
 
-If your patch changes code (rather than just changing documentation)
+If your patch changes code (rather than just changing documentation),
 you should also include one or more test cases which illustrate the bug
 you're fixing or validate the new functionality you're adding. In
 general, you should update an existing test file rather than create a
@@ -468,7 +468,7 @@ Some core modules also live on CPAN and are maintained outside of the
 Perl core. When the author updates the module, the updates are simply
 copied into the core.
 
-Module in the F<cpan/> directory of the source tree are maintained
+Modules in the F<cpan/> directory of the source tree are maintained
 outside of the Perl core. See that module's listing on documentation or
 its listing on L<http://search.cpan.org/> for more information on
 reporting bugs and submitting patches.
@@ -624,7 +624,7 @@ without further notice.
 
 =head3 Is the implementation generic enough to be portable?
 
-The worst patches make use of a system-specific features. It's highly
+The worst patches make use of system-specific features. It's highly
 unlikely that non-portable additions to the Perl language will be
 accepted.
 
@@ -694,12 +694,12 @@ Since we don't know if require works, or even subroutines, use ad hoc
 tests for these two. Step carefully to avoid using the feature being
 tested.
 
-=item * F<t/cmd>, F<t/run> F<t/io>, and F<t/op>
+=item * F<t/cmd>, F<t/run>, F<t/io> and F<t/op>
 
 Now that basic require() and subroutines are tested, you can use the
 F<t/test.pl> library.
 
-You can also use certain libraries like Config conditionally , but be
+You can also use certain libraries like Config conditionally, but be
 sure to skip the test gracefully if it's not there.
 
 =item * Everything else
@@ -709,8 +709,8 @@ used. You can also use the full suite of core modules in the tests.
 
 =back
 
-When you say "make test" Perl uses the F<t/TEST> program to run the
-test suite (except under Win32 where it uses F<t/harness> instead.) All
+When you say "make test", Perl uses the F<t/TEST> program to run the
+test suite (except under Win32 where it uses F<t/harness> instead). All
 tests are run from the F<t/> directory, B<not> the directory which
 contains the test. This causes some problems with the tests in F<lib/>,
 so here's some opportunity for some patching.
@@ -766,7 +766,7 @@ F<testname.valgrind>.
 
 =item * test.torture torturetest
 
-Run all the usual tests and some extra tests. As of Perl 5.8.0 the only
+Run all the usual tests and some extra tests. As of Perl 5.8.0, the only
 extra tests are Abigail's JAPHs, F<t/japh/abigail.t>.
 
 You can also run the torture test with F<t/harness> by giving
@@ -824,7 +824,7 @@ non-conflicting test scripts itself, and there is no standard interface
 to C<make> utilities to interact with their job schedulers.
 
 Note that currently some test scripts may fail when run in parallel (most
-notably C<ext/IO/t/io_dir.t>). If necessary run just the failing scripts
+notably C<ext/IO/t/io_dir.t>). If necessary, run just the failing scripts
 again sequentially and see if the failures go away.
 =item * test-notty test_notty
 
@@ -832,8 +832,8 @@ Sets PERL_SKIP_TTY_TEST to true before running normal test.
 
 =head2 Running tests by hand
 
-You can run part of the test suite by hand by using one the following
-commands from the F<t/> directory :
+You can run part of the test suite by hand by using one of the following
+commands from the F<t/> directory:
 
     ./perl -I../lib TEST list-of-.t-files
 
@@ -841,18 +841,18 @@ or
 
     ./perl -I../lib harness list-of-.t-files
 
-(if you don't specify test scripts, the whole test suite will be run.)
+(If you don't specify test scripts, the whole test suite will be run.)
 
 =head2 Using F<t/harness> for testing
 
-If you use C<harness> for testing you have several command line options
+If you use C<harness> for testing, you have several command line options
 available to you. The arguments are as follows, and are in the order
 that they must appear if used together.
 
     harness -v -torture -re=pattern LIST OF FILES TO TEST
     harness -v -torture -re LIST OF PATTERNS TO MATCH
 
-If C<LIST OF FILES TO TEST> is omitted the file list is obtained from
+If C<LIST OF FILES TO TEST> is omitted, the file list is obtained from
 the manifest. The file list may include shell wildcards which will be
 expanded out.
 
@@ -884,7 +884,7 @@ are obtained from the MANIFEST.
 
 You can run an individual test by a command similar to
 
-    ./perl -I../lib patho/to/foo.t
+    ./perl -I../lib path/to/foo.t
 
 except that the harnesses set up some environment variables that may
 affect the execution of the test:
@@ -893,13 +893,13 @@ affect the execution of the test:
 
 =item * PERL_CORE=1
 
-indicates that we're running this test part of the perl core test
+indicates that we're running this test as part of the perl core test
 suite. This is useful for modules that have a dual life on CPAN.
 
 =item * PERL_DESTRUCT_LEVEL=2
 
 is set to 2 if it isn't set already (see
-L<perlhacktips/PERL_DESTRUCT_LEVEL>)
+L<perlhacktips/PERL_DESTRUCT_LEVEL>).
 
 =item * PERL
 
@@ -1014,14 +1014,14 @@ Perl development in general works.
 The CPAN testers ( http://testers.cpan.org/ ) are a group of volunteers
 who test CPAN modules on a variety of platforms.
 
-Perl Smokers (http://www.nntp.perl.org/group/perl.daily-build and
+Perl Smokers ( http://www.nntp.perl.org/group/perl.daily-build/ and
 http://www.nntp.perl.org/group/perl.daily-build.reports/ )
 automatically test Perl source releases on platforms with various
 configurations.
 
 Both efforts welcome volunteers. In order to get involved in smoke
 testing of the perl itself visit
-L<http://search.cpan.org/dist/Test-Smoke>. In order to start smoke
+L<http://search.cpan.org/dist/Test-Smoke/>. In order to start smoke
 testing CPAN modules visit
 L<http://search.cpan.org/dist/CPANPLUS-YACSmoke/> or
 L<http://search.cpan.org/dist/minismokebox/> or
@@ -1077,7 +1077,7 @@ with a few others here and there) begin with an epigramic inscription
 that alludes, indirectly and metaphorically, to the material you're
 about to read.
 
-Quotations are taken from writings of J.R.R Tolkien pertaining to his
+Quotations are taken from writings of J.R.R. Tolkien pertaining to his
 Legendarium, almost always from I<The Lord of the Rings>. Chapters and
 page numbers are given using the following editions:
 
