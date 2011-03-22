@@ -8849,8 +8849,8 @@ tryagain:
 				*d = '\0';
 				RExC_end = (char *) d;
 			    }
-			    else {
-				tmpbuf[0] = ender;
+			    else {  /* ender above 255 already excluded */
+				tmpbuf[0] = (U8) ender;
 				tmpbuf[1] = '\0';
 				RExC_end = RExC_parse + 1;
 			    }
