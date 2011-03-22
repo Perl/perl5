@@ -908,7 +908,12 @@ would be intersecting with nothing (resulting in an empty set).
 
 =head2 User-Defined Case Mappings (for serious hackers only)
 
-You can also define your own mappings to be used in C<lc()>,
+B<This featured is deprecated and is scheduled to be removed in Perl
+5.16.>
+The CPAN module L<Unicode::Casings> provides better functionality
+without the drawbacks described below.
+
+You can define your own mappings to be used in C<lc()>,
 C<lcfirst()>, C<uc()>, and C<ucfirst()> (or their string-inlined versions,
 C<\L>, C<\l>, C<\U>, and C<\u>).  The mappings are currently only valid
 on strings encoded in UTF-8, but see below for a partial workaround for
@@ -1025,7 +1030,8 @@ in the ToLower example, and in the ToUpper example, use
 
 A big caveat to the above trick, and to this whole mechanism in general,
 is that they work only on strings encoded in UTF-8.  You can partially
-get around this by using C<use subs>.  For example:
+get around this by using C<use subs>.  (But better to just convert to
+use L<Unicode::Casing>.)  For example:
 
  use subs qw(uc ucfirst lc lcfirst);
 
@@ -1072,7 +1078,7 @@ The C<lc()> example shows how you can add context-dependent casing. Note
 that context-dependent casing suffers from the problem that the string
 passed to the casing function may not have sufficient context to make
 the proper choice. And, it will not be called for C<\l>, C<\L>, C<\u>,
-and C<\U>.
+and C<\U>. (Again, use L<Unicode::Casing> instead.)
 
 =head2 Character Encodings for Input and Output
 
