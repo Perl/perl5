@@ -1215,7 +1215,7 @@ A bug was fixed regarding the exit code of extract_archive.
 
 =item *
 
-C<ptar> has a new option to allow safe
+The C<ptar> utility has a new option to allow safe
 creation of tarballs without world-writable files on Windows, allowing those
 archives to be uploaded to CPAN.
 
@@ -1590,8 +1590,13 @@ is a core module as of perl 5.8.7.
 
 =item *
 
-C<NDBM_File> and C<ODBM_File> have been upgraded from 1.08 to 1.11, and
-from 1.08 to 1.09, respectively.
+C<NDBM_File> has been upgraded from version 1.08 to 1.11.
+
+This fixes a memory leak when DBM filters are used.
+
+=item *
+
+C<ODBM_File> have been upgraded from version 1.08 to 1.09.
 
 This fixes a memory leak when DBM filters are used.
 
@@ -1798,10 +1803,13 @@ work when exported (5.12.1).
 
 =item *
 
-C<warnings> and C<warnings::register> have been upgraded from version 1.09
-to 1.11 and from version 1.01 to 1.02 respectively.
+C<warnings> has been upgraded from version 1.09 to 1.11.
 
 Calling C<use warnings> without arguments is now significantly more efficient.
+
+=item *
+
+C<warnings::register> have been upgraded from version 1.01 to 1.02.
 
 It is now possible to register warning categories other than the names of
 packages using C<warnings::register>.  See L<perllexwarn> for more information.
@@ -1839,11 +1847,17 @@ needed should be installed from CPAN instead.
 
 =over
 
-=item C<Class::ISA>
+=item *
 
-=item C<Pod::Plainer>
+C<Class::ISA> has been removed from the Perl core. Prior version was 0.36.
 
-=item C<Switch>
+=item *
+
+C<Pod::Plainer> has been removed from the Perl core. Prior version was 1.02.
+
+=item *
+
+C<Switch> has been removed from the Perl core. Prior version was 2.16.
 
 =back
 
