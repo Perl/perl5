@@ -44,7 +44,7 @@ Doubling the C</a> regular expression modifier increases its effect,
 so that in case-insensitive matching, no ASCII character will match a
 non-ASCII character.  For example, normally,
 
-    'k' =~ /\N{KELVIN SIGN}/
+    'k' =~ /\N{KELVIN SIGN}/i
 
 will match; it won't under C</aa>.
 
