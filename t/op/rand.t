@@ -133,7 +133,7 @@ DIAG
 
 
     #   NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
-    # This test will fail .1% of the time on a normal system.
+    # This test will fail .006% of the time on a normal system.
     #				also
     # This test asks you to see these hints 100% of the time!
     #   NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
@@ -178,7 +178,7 @@ DIAG
     # (eight bits per rep)
     $dev = abs ($bits - $reps * 4) / sqrt($reps * 2);
 
-    ok( $dev < 3.3 );
+    ok( $dev < 4.0 );
 
     if ($dev < 1.96) {
 	print "# Your rand seems fine. If this test failed\n";
