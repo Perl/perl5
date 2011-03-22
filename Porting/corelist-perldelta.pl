@@ -5,6 +5,7 @@ use warnings;
 use lib 'Porting';
 use Maintainers qw/%Modules/;
 use Module::CoreList;
+use Getopt::Long;
 
 my $deprecated;
 
@@ -50,53 +51,75 @@ sub generate_section {
 
 #--------------------------------------------------------------------------#
 
-my $corelist = \%Module::CoreList::version;
-my @versions = sort keys %$corelist;
+sub run {
+  my %opt = (mode => 'generate');
 
-# by default, compare latest two version in CoreList;
-my ($old, $new) = @ARGV;
-$old ||= $versions[-2];
-$new ||= $versions[-1];
-$deprecated = $Module::CoreList::deprecated{$new};
+  GetOptions(\%opt,
+    'mode|m:s', # 'generate'
+  );
 
-my (@new,@deprecated,@removed,@pragmas,@modules);
+  if ( $opt{mode} eq 'generate' ) {
+    # by default, compare latest two version in CoreList;
+    my @versions = sort keys %Module::CoreList::version;
+    my ($old, $new) = @ARGV;
+    $old ||= $versions[-2];
+    $new ||= $versions[-1];
 
-# %Modules defines what is currently in core
-for my $k ( keys %Modules ) {
-  next unless exists $corelist->{$new}{$k};
-  my $old_ver = $corelist->{$old}{$k};
-  my $new_ver = $corelist->{$new}{$k};
-  # in core but not in last corelist
-  if ( ! exists $corelist->{$old}{$k} ) {
-    push @new, [$k, undef, $new_ver];
+    do_generate($old => $new);
   }
-  # otherwise just pragmas or modules
   else {
+    die "Unrecognized mode '$opt{mode}'\n";
+  }
+
+  exit 0;
+}
+
+sub do_generate {
+  my ($old, $new) = @_;
+  my $corelist = \%Module::CoreList::version;
+
+  $deprecated = $Module::CoreList::deprecated{$new};
+
+  my (@new,@deprecated,@removed,@pragmas,@modules);
+
+  # %Modules defines what is currently in core
+  for my $k ( keys %Modules ) {
+    next unless exists $corelist->{$new}{$k};
     my $old_ver = $corelist->{$old}{$k};
     my $new_ver = $corelist->{$new}{$k};
-    next unless defined $old_ver && defined $new_ver && $old_ver ne $new_ver;
-    my $tuple = [ $k, $old_ver, $new_ver ];
-    if ( $k eq lc $k ) {
-      push @pragmas, $tuple;
+    # in core but not in last corelist
+    if ( ! exists $corelist->{$old}{$k} ) {
+      push @new, [$k, undef, $new_ver];
     }
+    # otherwise just pragmas or modules
     else {
-      push @modules, $tuple;
+      my $old_ver = $corelist->{$old}{$k};
+      my $new_ver = $corelist->{$new}{$k};
+      next unless defined $old_ver && defined $new_ver && $old_ver ne $new_ver;
+      my $tuple = [ $k, $old_ver, $new_ver ];
+      if ( $k eq lc $k ) {
+        push @pragmas, $tuple;
+      }
+      else {
+        push @modules, $tuple;
+      }
     }
   }
-}
 
-# in old corelist, but not this one => removed
-# N.B. This is exhaustive -- not just what's in %Modules, so modules removed from
-# distributions will show up here, too.  Some person will have to review to see what's
-# important. That's the best we can do without a historical Maintainers.pl
-for my $k ( keys %{ $corelist->{$old} } ) {
-  if ( ! exists $corelist->{$new}{$k} ) {
-    push @removed, [$k, $corelist->{$old}{$k}, undef];
+  # in old corelist, but not this one => removed
+  # N.B. This is exhaustive -- not just what's in %Modules, so modules removed from
+  # distributions will show up here, too.  Some person will have to review to see what's
+  # important. That's the best we can do without a historical Maintainers.pl
+  for my $k ( keys %{ $corelist->{$old} } ) {
+    if ( ! exists $corelist->{$new}{$k} ) {
+      push @removed, [$k, $corelist->{$old}{$k}, undef];
+    }
   }
+
+  generate_section("New Modules and Pragmata", \&added, @new);
+  generate_section("Pragmata Changes", \&updated, @pragmas);
+  generate_section("Updated Modules", \&updated, @modules);
+  generate_section("Removed Modules and Pragmata", \&removed, @removed);
 }
 
-generate_section("New Modules and Pragmata", \&added, @new);
-generate_section("Pragmata Changes", \&updated, @pragmas);
-generate_section("Updated Modules", \&updated, @modules);
-generate_section("Removed Modules and Pragmata", \&removed, @removed);
-
+run;
