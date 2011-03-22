@@ -132,12 +132,9 @@ EOM
     return $cooked;
 }
 
-sub read_only_bottom_close_and_rename {
-    my ($fh, $sources) = @_;
-    my $name = *{$fh}->{name};
-    my $lang = *{$fh}->{lang};
-    die "No final name specified at open time for $name"
-	unless *{$fh}->{final_name};
+sub read_only_bottom {
+    my ($sources, $lang) = @_;
+
     my $comment;
     if ($sources) {
 	$comment = "Generated from:\n";
@@ -148,14 +145,25 @@ sub read_only_bottom_close_and_rename {
     }
     $comment .= "ex: set ro:";
 
-    if ($lang eq 'Perl') {
+    if (defined $lang && $lang eq 'Perl') {
 	$comment =~ s/^/# /mg;
     } else {
 	$comment =~ s/^/ * /mg;
 	$comment =~ s! \* !/* !;
 	$comment .= " */";
     }
-    print $fh "\n$comment\n";
+    return "$comment\n";
+}
+
+sub read_only_bottom_close_and_rename {
+    my ($fh, $sources) = @_;
+    my $name = *{$fh}->{name};
+    my $lang = *{$fh}->{lang};
+    die "No final name specified at open time for $name"
+	unless *{$fh}->{final_name};
+
+    print $fh "\n", read_only_bottom($sources, $lang);
+
     safer_close($fh);
     rename_if_different($name, *{$fh}->{final_name});
 }
