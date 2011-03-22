@@ -1177,7 +1177,7 @@ prerequisites and version constraints as defined in the L<CPAN::Meta::Spec>.
 
 =back
 
-=head2 Selected Module and Pragma Updates
+=head2 Updated Modules and Pragma
 
 =over 4
 
