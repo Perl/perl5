@@ -183,4 +183,8 @@ generate_uudmap$(_O): generate_uudmap.c
 generate_uudmap$(_X): generate_uudmap$(_O)
 	$(LD) -o generate_uudmap $(LDFLAGS) generate_uudmap$(_O) $(LIBS)
 
+microtest: microperl
+	- cd t && (rm -f perl; ln -s ../microperl perl) \
+	  && ./perl TEST base/*.t cmd/*.t
+
 # That's it, folks!
