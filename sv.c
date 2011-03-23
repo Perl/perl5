@@ -10375,8 +10375,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 	    break;
 #endif
 	case 'l':
+	    ++q;
 #if defined(HAS_QUAD) || defined(HAS_LONG_DOUBLE)
-	    if (*++q == 'l') {	/* lld, llf */
+	    if (*q == 'l') {	/* lld, llf */
 		intsize = 'q';
 		++q;
 	    }
