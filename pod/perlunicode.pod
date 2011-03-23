@@ -977,9 +977,8 @@ subroutine.  But this will only be valid on Perls that use the same Unicode
 version.  Another option would be to have your subroutine read the official
 mapping file(s) and overwrite the affected code points.
 
-If you have only a few mappings to change you can use the
-following trick (but see below for a big caveat), here illustrated for
-Turkish:
+If you have only a few mappings to change, starting in 5.14 you can use the
+following trick, here illustrated for Turkish.
 
     use Config;
     use charnames ":full";
@@ -992,7 +991,7 @@ Turkish:
     }
 
 This takes the official mappings and overrides just one, for "LATIN SMALL
-LETTER I".  Each hash key must be the string of bytes that form the UTF-8
+LETTER I".  The keys to the hash must be the bytes that form the UTF-8
 (on EBCDIC platforms, UTF-EBCDIC) of the character, as illustrated by
 the inverse function.
 
@@ -1032,6 +1031,19 @@ A big caveat to the above trick, and to this whole mechanism in general,
 is that they work only on strings encoded in UTF-8.  You can partially
 get around this by using C<use subs>.  (But better to just convert to
 use L<Unicode::Casing>.)  For example:
+(The trick illustrated here does work in earlier releases, but only if all the
+characters you want to override have ordinal values of 256 or higher, or
+if you use the other tricks given just below.)
+
+The mappings are in effect only for the package they are defined in, and only
+on scalars that have been marked as having Unicode characters, for example by
+using C<utf8::upgrade()>.  Although probably not advisable, you can
+cause the mappings to be used globally by importing into C<CORE::GLOBAL>
+(see L<CORE>).
+
+You can partially get around the restriction that the source strings
+must be in utf8 by using C<use subs> (or by importing with C<CORE::GLOBAL>
+importation) by:
 
  use subs qw(uc ucfirst lc lcfirst);
 
@@ -1070,15 +1082,16 @@ C<ToLower()> functions you have defined.
 (For Turkish, there are other required functions: C<ucfirst>, C<lcfirst>,
 and C<ToTitle>. These are very similar to the ones given above.)
 
-The reason this is a partial work-around is that it doesn't affect the C<\l>,
-C<\L>, C<\u>, and C<\U> case change operations, which still require the source
-to be encoded in utf8 (see L</The "Unicode Bug">).
+The reason this is a partial fix is that it doesn't affect the C<\l>,
+C<\L>, C<\u>, and C<\U> case change operations in regular expressions,
+which still require the source to be encoded in utf8 (see L</The "Unicode
+Bug">). (Again, use L<Unicode::Casing> instead.)
 
 The C<lc()> example shows how you can add context-dependent casing. Note
 that context-dependent casing suffers from the problem that the string
 passed to the casing function may not have sufficient context to make
 the proper choice. And, it will not be called for C<\l>, C<\L>, C<\u>,
-and C<\U>. (Again, use L<Unicode::Casing> instead.)
+and C<\U>.
 
 =head2 Character Encodings for Input and Output
 
