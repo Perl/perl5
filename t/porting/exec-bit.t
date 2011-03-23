@@ -11,6 +11,10 @@ if ( $^O eq "MSWin32" ) {
   skip_all( "-x on MSWin32 only indicates file has executable suffix. Try Cygwin?" );
 }
 
+if ( $^O eq "VMS" ) {
+  skip_all( "Filename case may not be preserved and other porting issues." );
+}
+
 plan('no_plan');
 
 use ExtUtils::Manifest qw(maniread);
