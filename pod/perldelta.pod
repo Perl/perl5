@@ -1138,7 +1138,7 @@ reading F<META.json> files in CPAN distributions.
 
 =item *
 
-C<Module::Metadata> 1.000003 has been added as a dual-life module.  It gathers
+C<Module::Metadata> 1.000004 has been added as a dual-life module.  It gathers
 package and POD information from Perl module files.  It is a standalone module
 based on Module::Build::ModuleInfo for use by other module installation
 toolchain components.  Module::Build::ModuleInfo has been deprecated in
