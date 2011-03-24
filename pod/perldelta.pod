@@ -1430,6 +1430,10 @@ Exporter no longer overrides C<$SIG{__WARN__}> [perl #74472]
 
 =item *
 
+C<ExtUtils::CBuilder> has been upgraded from version 0.27 to 0.280202.
+
+=item *
+
 C<ExtUtils::Command> has been upgraded from version 1.16 to 1.17.
 
 =item *
