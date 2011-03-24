@@ -1514,7 +1514,7 @@ closed or invalid.
 
 =item *
 
-C<IPC::Cmd> has been upgraded from version 0.54 to 0.68.
+C<IPC::Cmd> has been upgraded from version 0.54 to 0.70.
 
 Resolves an issue with splitting Win32 command lines.  An argument
 consisting of the single character "0" used to be omitted (CPAN RT #62961).
