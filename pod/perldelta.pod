@@ -1232,6 +1232,10 @@ Pax extended headers are now skipped.
 
 =item *
 
+C<AutoLoader> has been upgraded from version 5.70 to 5.71.
+
+=item *
+
 C<B> has been upgraded from version 1.23 to 1.29.
 
 It no longer crashes when taking apart a C<y///> containing characters
