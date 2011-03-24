@@ -1443,6 +1443,10 @@ constants onto the package's C<@EXPORT_OK>.
 
 =item *
 
+C<ExtUtils::MakeMaker> has been upgraded from version 6.56 to 6.57_05.
+
+=item *
+
 C<ExtUtils::Manifest> has been upgraded from version 1.57 to 1.58.
 
 =item *
