@@ -1506,6 +1506,10 @@ as the documentation has always claimed.
 
 =item *
 
+C<I18N::LangTags> has been upgraded from version 0.35 to 0.35_01.
+
+=item *
+
 C<if> has been upgraded from version 0.05 to 0.0601.
 
 =item *
