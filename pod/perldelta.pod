@@ -1270,6 +1270,10 @@ Deparsing of C<our> followed by a variable with funny characters
 
 =item *
 
+C<B::Lint> has been upgraded from version 1.11_01 to 1.13.
+
+=item *
+
 C<base> has been upgraded from version 2.15 to 2.16.
 
 =item *
