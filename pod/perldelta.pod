@@ -1707,6 +1707,10 @@ Calling C<< Tie::Hash-E<gt>TIEHASH() >> used to loop forever.  Now it C<croak>s.
 
 =item *
 
+C<Time::Piece> has been upgraded from version 1.15_01 to 1.20_01.
+
+=item *
+
 C<Unicode::Collate> has been upgraded from version 0.52_01 to 0.73.
 
 Unicode::Collate has been updated to use Unicode 6.0.0.
