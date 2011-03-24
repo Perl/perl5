@@ -1252,7 +1252,7 @@ It no longer produces mangled output with the C<-tree> option
 
 =item *
 
-C<B::Deparse> has been upgraded from version 0.96 to 1.02.
+C<B::Deparse> has been upgraded from version 0.96 to 1.03.
 
 The deparsing of a nextstate op has changed when it has both a
 change of package (relative to the previous nextstate), or a change of
