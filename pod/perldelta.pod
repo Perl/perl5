@@ -1443,7 +1443,7 @@ constants onto the package's C<@EXPORT_OK>.
 
 =item *
 
-C<File::DosGlob> has been upgraded from version 1.01 to 1.03.
+C<File::DosGlob> has been upgraded from version 1.01 to 1.04.
 
 It allows patterns containing literal parentheses (they no longer need to
 be escaped).  On Windows, it no longer
