@@ -1270,7 +1270,7 @@ Deparsing of C<our> followed by a variable with funny characters
 
 =item *
 
-C<Carp> has been upgraded from version 1.15 to 1.19.
+C<Carp> has been upgraded from version 1.15 to 1.20.
 
 L<Carp> now detects incomplete L<caller()|perlfunc/"caller EXPR"> overrides and
 avoids using bogus C<@DB::args>.  To provide backtraces,
