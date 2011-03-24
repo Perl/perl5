@@ -1556,6 +1556,10 @@ It also prevents C<sqrt($int)> from crashing under C<use bigrat;>
 
 =item *
 
+C<Memoize> has been upgraded from version 1.01_03 to 1.02.
+
+=item *
+
 C<MIME::Base64> has been upgraded from 3.08 to 3.13.
 
 Includes new functions to calculate the length of encoded and decoded
