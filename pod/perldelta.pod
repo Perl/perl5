@@ -1803,7 +1803,7 @@ work when exported (5.12.1).
 
 =item *
 
-C<warnings> has been upgraded from version 1.09 to 1.11.
+C<warnings> has been upgraded from version 1.09 to 1.12.
 
 Calling C<use warnings> without arguments is now significantly more efficient.
 
