@@ -1232,6 +1232,10 @@ Pax extended headers are now skipped.
 
 =item *
 
+C<Attribute::Handlers> has been upgraded from version 0.87 to 0.89.
+
+=item *
+
 C<autodie> has been upgraded from version 2.06_01 to 2.1001.
 
 =item *
