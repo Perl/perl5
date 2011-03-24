@@ -1596,6 +1596,10 @@ This fixes a memory leak when DBM filters are used.
 
 =item *
 
+C<Net::Ping> has been upgraded from version 2.36 to 2.38.
+
+=item *
+
 C<NEXT> has been upgraded from version 0.64 to 0.65.
 
 =item *
