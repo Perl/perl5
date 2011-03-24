@@ -910,7 +910,7 @@ would be intersecting with nothing (resulting in an empty set).
 
 B<This featured is deprecated and is scheduled to be removed in Perl
 5.16.>
-The CPAN module L<Unicode::Casings> provides better functionality
+The CPAN module L<Unicode::Casing> provides better functionality
 without the drawbacks described below.
 
 You can define your own mappings to be used in C<lc()>,
