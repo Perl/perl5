@@ -1499,7 +1499,7 @@ recursively locking hashes that have undefined values [perl #74280].
 
 =item *
 
-C<I18N::Langinfo> has been upgraded from version 0.03 to 0.07.
+C<I18N::Langinfo> has been upgraded from version 0.03 to 0.08.
 
 C<langinfo()> now defaults to using C<$_> if there is no argument given, just
 as the documentation has always claimed.
