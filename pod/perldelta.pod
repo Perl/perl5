@@ -1816,6 +1816,10 @@ packages using C<warnings::register>.  See L<perllexwarn> for more information.
 
 =item *
 
+C<XSLoader> has been upgraded from version 0.10 to 0.13.
+
+=item *
+
 C<VMS::DCLsym> has been upgraded from version 1.03 to 1.05.
 
 Two bugs have been fixed [perl #84086]:
