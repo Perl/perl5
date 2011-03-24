@@ -1358,6 +1358,10 @@ C<Dumpxs> no longer crashes with globs returned by C<*$io_ref>
 
 =item *
 
+C<DB_File> has been upgraded from version 1.820 to 1.821.
+
+=item *
+
 C<Devel::DProf> has been upgraded from version 20080331.00 to 20110228.00.
 
 Merely loading C<Devel::DProf> now no longer triggers profiling to start.
