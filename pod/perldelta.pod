@@ -1486,6 +1486,10 @@ user.
 
 =item *
 
+C<Filter::Simple> has been upgraded from version 0.84 to 0.86.
+
+=item *
+
 C<GDBM_File> has been upgraded from 1.10 to 1.14.
 
 This fixes a memory leak when DBM filters are used.
