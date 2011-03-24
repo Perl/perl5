@@ -1625,6 +1625,10 @@ has data to read [perl #78716].
 
 =item *
 
+C<Pod::Perldoc> has been upgraded from version 3.15_02 to 3.15_03.
+
+=item *
+
 C<Pod::Simple> has been upgraded from version 3.13 to 3.16.
 
 =item *
