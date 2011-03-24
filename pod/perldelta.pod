@@ -2102,7 +2102,7 @@ split mostly from the NOTES section of the pod2man man page.
 
 =head3 L<perlsource>, L<perlinterp>, L<perlhacktut>, and L<perlhacktips>
 
-See L</L<perlhack> and perlrepository revamp>, below.
+See L</perlhack and perlrepository revamp>, below.
 
 =head2 Changes to Existing Documentation
 
@@ -2226,7 +2226,7 @@ C<use locale> affects formats.
 L<overload>'s documentation has practically undergone a rewrite. It
 is now much more straightforward and clear.
 
-=head3 L<perlhack> and perlrepository revamp
+=head3 perlhack and perlrepository revamp
 
 The L<perlhack> and perlrepository documents have been heavily edited and
 split up into several new documents.
