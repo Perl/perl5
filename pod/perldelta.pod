@@ -1590,6 +1590,10 @@ is a core module as of perl 5.8.7.
 
 =item *
 
+C<Module::Load> has been upgraded from version 0.16 to 0.18.
+
+=item *
+
 C<Module::Load::Conditional> has been upgraded from version 0.34 to 0.44.
 
 =item *
