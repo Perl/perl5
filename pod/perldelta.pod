@@ -1546,6 +1546,10 @@ messages are not suppressed (CPAN RT #34182).
 
 =item *
 
+C<Log::Message::Simple> has been upgraded from version 0.06 to 0.08.
+
+=item *
+
 C<Math::BigInt> has been upgraded from version 1.89_01 to 1.994.
 
 This fixes, among other things, incorrect results when computing binomial
