@@ -1581,7 +1581,7 @@ still generated, as well.
 
 =item *
 
-C<Module::CoreList> has been upgraded from version 2.29 to XXX.
+C<Module::CoreList> has been upgraded from version 2.29 to 2.47.
 
 Besides listing the updated core modules of this release, it also stops listing
 the C<Filespec> module.  That module never existed in core.  The scripts
