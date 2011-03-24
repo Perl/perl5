@@ -1232,6 +1232,10 @@ Pax extended headers are now skipped.
 
 =item *
 
+C<autodie> has been upgraded from version 2.06_01 to 2.1001.
+
+=item *
+
 C<AutoLoader> has been upgraded from version 5.70 to 5.71.
 
 =item *
