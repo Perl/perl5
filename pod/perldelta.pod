@@ -1290,7 +1290,7 @@ errors' error that will ensue if there has been a syntax error
 
 =item *
 
-C<CGI> has been upgraded from version 3.48 to 3.51.
+C<CGI> has been upgraded from version 3.48 to 3.52.
 
 This provides the following security fixes: the MIME boundary in 
 multipart_init is now random and the handling of 
