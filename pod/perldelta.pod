@@ -1556,6 +1556,10 @@ It also prevents C<sqrt($int)> from crashing under C<use bigrat;>
 
 =item *
 
+C<Math::BigInt::FastCalc> has been upgraded from version 0.19 to 0.28.
+
+=item *
+
 C<Math::BigRat> has been upgraded from version 0.24 to 0.26_02.
 
 =item *
