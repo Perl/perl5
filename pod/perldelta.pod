@@ -1687,6 +1687,10 @@ during freezing [perl #80074].
 
 =item *
 
+C<Term::ANSIColor> has been upgraded from version 2.02 to 3.00.
+
+=item *
+
 C<Term::UI> has been upgraded from version 0.20 to 0.26.
 
 =item *
