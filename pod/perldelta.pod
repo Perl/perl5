@@ -1270,6 +1270,10 @@ Deparsing of C<our> followed by a variable with funny characters
 
 =item *
 
+C<bignum> has been upgraded from version 0.23 to 0.26.
+
+=item *
+
 C<Carp> has been upgraded from version 1.15 to 1.20.
 
 L<Carp> now detects incomplete L<caller()|perlfunc/"caller EXPR"> overrides and
