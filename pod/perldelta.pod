@@ -1600,7 +1600,7 @@ C<Object::Accessor> has been upgraded from version 0.36 to 0.38.
 
 =item *
 
-C<ODBM_File> have been upgraded from version 1.08 to 1.09.
+C<ODBM_File> have been upgraded from version 1.07 to 1.10.
 
 This fixes a memory leak when DBM filters are used.
 
