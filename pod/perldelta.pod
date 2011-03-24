@@ -1371,6 +1371,10 @@ profiling and reporting.
 
 =item *
 
+C<Devel::SelfStubber> has been upgraded from version 1.03 to 1.05.
+
+=item *
+
 C<diagnostics> has been upgraded from version 1.19 to 1.22.
 
 It now renders pod links slightly better, and has been taught to find
