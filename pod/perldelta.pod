@@ -1610,7 +1610,7 @@ This fixes a memory leak when DBM filters are used.
 
 =item *
 
-C<overload> has been upgraded from 1.11 to 1.12.
+C<overload> has been upgraded from 1.10 to 1.12.
 
 C<overload::Method> can now handle subroutines that are themselves blessed
 into overloaded classes [perl #71998].
