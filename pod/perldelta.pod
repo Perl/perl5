@@ -1611,6 +1611,10 @@ The documentation has greatly improved. See L</Documentation> below.
 
 =item *
 
+C<parent> has been upgraded from version 0.223 to 0.225.
+
+=item *
+
 C<Parse::CPAN::Meta> has been upgraded from version 1.40 to 1.4401.
 
 The latest Parse::CPAN::Meta can now read YAML and JSON files using
