@@ -1479,7 +1479,7 @@ name is empty; C<abs2rel()> properly handles Unix-style input (5.12.2).
 
 =item *
 
-C<File::stat> has been upgraded from 1.02 to 1.04.
+C<File::stat> has been upgraded from 1.02 to 1.05.
 
 The C<-x> and C<-X> file test operators now work correctly under the root
 user.
