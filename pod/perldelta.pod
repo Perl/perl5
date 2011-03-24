@@ -1486,7 +1486,7 @@ user.
 
 =item *
 
-C<GDBM_File> has been upgraded from 1.10 to 1.13.
+C<GDBM_File> has been upgraded from 1.10 to 1.14.
 
 This fixes a memory leak when DBM filters are used.
 
