@@ -1707,6 +1707,10 @@ Calling C<< Tie::Hash-E<gt>TIEHASH() >> used to loop forever.  Now it C<croak>s.
 
 =item *
 
+C<Time::HiRes> has been upgraded from version 1.9719 to 1.9721_01.
+
+=item *
+
 C<Time::Local> has been upgraded from version 1.1901_01 to 1.2000.
 
 =item *
