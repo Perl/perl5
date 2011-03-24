@@ -1705,6 +1705,10 @@ C<threads> has been upgraded from version 1.75 to 1.83.
 
 =item *
 
+C<threads::shared> has been upgraded from version 1.32 to 1.36.
+
+=item *
+
 C<Tie::Hash> has been upgraded from version 1.03 to 1.04.
 
 Calling C<< Tie::Hash-E<gt>TIEHASH() >> used to loop forever.  Now it C<croak>s.
