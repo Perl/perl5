@@ -1443,6 +1443,10 @@ constants onto the package's C<@EXPORT_OK>.
 
 =item *
 
+C<ExtUtils::Manifest> has been upgraded from version 1.57 to 1.58.
+
+=item *
+
 C<ExtUtils::ParseXS> has been upgraded from version 2.21 to 2.2209.
 
 =item *
