@@ -1726,7 +1726,7 @@ C<Module::Load::Conditional> has been upgraded from version 0.34 to 0.44.
 
 =item *
 
-C<NDBM_File> has been upgraded from version 1.08 to 1.11.
+C<NDBM_File> has been upgraded from version 1.08 to 1.12.
 
 This fixes a memory leak when DBM filters are used.
 
