@@ -1345,6 +1345,10 @@ CPANPLUS now includes support for META.json and MYMETA.json.
 
 =item *
 
+C<CPANPLUS::Dist::Build> has been upgraded from version 0.46 to 0.54.
+
+=item *
+
 C<Data::Dumper> has been upgraded from version 2.125 to 2.130_02.
 
 The indentation used to be off when C<$Data::Dumper::Terse> was set. This
