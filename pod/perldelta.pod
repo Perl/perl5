@@ -1625,6 +1625,10 @@ has data to read [perl #78716].
 
 =item *
 
+C<Pod::Simple> has been upgraded from version 3.13 to 3.16.
+
+=item *
+
 C<POSIX> has been upgraded from 1.19 to 1.23.
 
 It now includes constants for POSIX signal constants.
