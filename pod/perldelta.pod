@@ -1499,6 +1499,10 @@ recursively locking hashes that have undefined values [perl #74280].
 
 =item *
 
+C<I18N::Collate> has been upgraded from version 1.01 to 1.02.
+
+=item *
+
 C<I18N::Langinfo> has been upgraded from version 0.03 to 0.08.
 
 C<langinfo()> now defaults to using C<$_> if there is no argument given, just
