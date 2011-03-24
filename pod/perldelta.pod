@@ -1701,6 +1701,10 @@ semaphores: C<down_nb> and C<down_force>.
 
 =item *
 
+C<Thread::Queue> has been upgraded from version 2.11 to 2.12.
+
+=item *
+
 C<threads> has been upgraded from version 1.75 to 1.83.
 
 =item *
