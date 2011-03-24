@@ -1232,7 +1232,7 @@ Pax extended headers are now skipped.
 
 =item *
 
-C<B> has been upgraded from version 1.23 to 1.27.
+C<B> has been upgraded from version 1.23 to 1.29.
 
 It no longer crashes when taking apart a C<y///> containing characters
 outside the octet range or compiled in a C<use utf8> scope.
