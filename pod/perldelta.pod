@@ -1462,7 +1462,7 @@ Dragonfly BSD for the C<http> and C<ftp> schemes.
 
 =item *
 
-C<File::Find> has been upgraded from version 1.15 to 1.18.
+C<File::Find> has been upgraded from version 1.15 to 1.19.
 
 It improves handling of backslashes on Windows, so that paths like
 F<c:\dir\/file> are no longer generated [perl #71710].
