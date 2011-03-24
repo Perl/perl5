@@ -1252,6 +1252,10 @@ It no longer produces mangled output with the C<-tree> option
 
 =item *
 
+C<B::Debug> has been upgraded from version 1.12 to 1.16.
+
+=item *
+
 C<B::Deparse> has been upgraded from version 0.96 to 1.03.
 
 The deparsing of a nextstate op has changed when it has both a
