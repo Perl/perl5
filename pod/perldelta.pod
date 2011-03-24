@@ -1687,6 +1687,10 @@ during freezing [perl #80074].
 
 =item *
 
+C<Term::UI> has been upgraded from version 0.20 to 0.26.
+
+=item *
+
 C<Test::Harness> has been upgraded from version 3.17 to 3.23.
 
 =item *
