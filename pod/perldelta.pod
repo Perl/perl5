@@ -1611,6 +1611,10 @@ The documentation has greatly improved. See L</Documentation> below.
 
 =item *
 
+C<Params::Check> has been upgraded from version 0.26 to 0.28.
+
+=item *
+
 C<parent> has been upgraded from version 0.223 to 0.225.
 
 =item *
