@@ -1521,7 +1521,7 @@ consisting of the single character "0" used to be omitted (CPAN RT #62961).
 
 =item *
 
-C<IPC::Open3> has been upgraded from 1.05 to 1.08.
+C<IPC::Open3> has been upgraded from 1.05 to 1.09.
 
 C<open3> now produces an error if the C<exec> call fails, allowing this
 condition to be distinguished from a child process that exited with a
