@@ -1533,7 +1533,7 @@ descriptor now works [perl #76474].
 
 =item *
 
-C<Locale::Maketext> has been upgraded from version 1.14 to 1.17.
+C<Locale::Maketext> has been upgraded from version 1.14 to 1.19.
 
 Locale::Maketext now supports external caches.
 
