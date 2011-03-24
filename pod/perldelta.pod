@@ -1443,6 +1443,10 @@ constants onto the package's C<@EXPORT_OK>.
 
 =item *
 
+C<File::CheckTree> has been upgraded from version 4.4 to 4.41.
+
+=item *
+
 C<File::DosGlob> has been upgraded from version 1.01 to 1.04.
 
 It allows patterns containing literal parentheses (they no longer need to
