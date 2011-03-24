@@ -1701,6 +1701,10 @@ semaphores: C<down_nb> and C<down_force>.
 
 =item *
 
+C<threads> has been upgraded from version 1.75 to 1.83.
+
+=item *
+
 C<Tie::Hash> has been upgraded from version 1.03 to 1.04.
 
 Calling C<< Tie::Hash-E<gt>TIEHASH() >> used to loop forever.  Now it C<croak>s.
