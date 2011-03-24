@@ -1533,6 +1533,10 @@ descriptor now works [perl #76474].
 
 =item *
 
+C<IPC::SysV> has been upgraded from version 2.01 to 2.03.
+
+=item *
+
 C<lib> has been upgraded from version 0.62 to 0.63.
 
 =item *
