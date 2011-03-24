@@ -1687,6 +1687,10 @@ during freezing [perl #80074].
 
 =item *
 
+C<Test::Harness> has been upgraded from version 3.17 to 3.23.
+
+=item *
+
 C<Test::Simple> has been upgraded from version 0.94 to 0.98.
 
 Among many other things, subtests without a C<plan> or C<no_plan> now have an
