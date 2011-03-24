@@ -1546,6 +1546,10 @@ messages are not suppressed (CPAN RT #34182).
 
 =item *
 
+C<Log::Message> has been upgraded from version 0.02 to 0.04.
+
+=item *
+
 C<Log::Message::Simple> has been upgraded from version 0.06 to 0.08.
 
 =item *
