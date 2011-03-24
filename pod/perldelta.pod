@@ -1242,7 +1242,7 @@ reduction in functionality.
 
 =item *
 
-C<B::Concise> has been upgraded from version 0.78 to 0.82.
+C<B::Concise> has been upgraded from version 0.78 to 0.83.
 
 B::Concise marks rv2sv, rv2av and rv2hv ops with the new OPpDEREF flag
 as "DREFed".
