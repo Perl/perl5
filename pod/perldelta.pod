@@ -1492,7 +1492,7 @@ This fixes a memory leak when DBM filters are used.
 
 =item *
 
-C<Hash::Util> has been upgraded from 0.07 to 0.10.
+C<Hash::Util> has been upgraded from 0.07 to 0.11.
 
 Hash::Util no longer emits spurious "uninitialized" warnings when
 recursively locking hashes that have undefined values [perl #74280].
