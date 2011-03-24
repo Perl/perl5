@@ -1443,6 +1443,10 @@ constants onto the package's C<@EXPORT_OK>.
 
 =item *
 
+C<ExtUtils::ParseXS> has been upgraded from version 2.21 to 2.2209.
+
+=item *
+
 C<File::CheckTree> has been upgraded from version 4.4 to 4.41.
 
 =item *
