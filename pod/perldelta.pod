@@ -1396,6 +1396,10 @@ New SHA-512/224 and SHA-512/256 transforms (ref. NIST Draft FIPS 180-4
 
 =item *
 
+C<Dumpvalue> has been upgraded from version 1.13 to 1.16.
+
+=item *
+
 C<DynaLoader> has been upgraded from version 1.10 to 1.13.
 
 It fixes a buffer overflow when passed a very long file name.
