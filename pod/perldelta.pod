@@ -1304,6 +1304,10 @@ It has been updated to use bzip2 1.0.6.
 
 =item *
 
+C<Compress::Raw::Zlib> has been upgraded from version 2.024 to 2.033.
+
+=item *
+
 C<CPAN> has been upgraded from version 1.94_56 to 1.9600.
 
 Major highlights:
