@@ -1774,6 +1774,10 @@ This fixes a memory leak when DBM filters are used.
 
 =item *
 
+C<Opcode> has been upgraded from version 1.15 to 1.18.
+
+=item *
+
 C<overload> has been upgraded from 1.10 to 1.12.
 
 C<overload::Method> can now handle subroutines that are themselves blessed
