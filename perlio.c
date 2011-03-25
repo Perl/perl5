@@ -4544,10 +4544,8 @@ PerlIOCrlf_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 		 PerlIOBase(f)->flags);
 #endif
     {
-      /* Enable the first CRLF capable layer you can find, but if none
-       * found, the one we just pushed is fine.  This results in at
-       * any given moment at most one CRLF-capable layer being enabled
-       * in the whole layer stack. */
+      /* If the old top layer is a CRLF layer, reactivate it (if
+       * necessary) and remove this new layer from the stack */
 	 PerlIO *g = PerlIONext(f);
 	 if (PerlIOValid(g)) {
 	      PerlIOl *b = PerlIOBase(g);
