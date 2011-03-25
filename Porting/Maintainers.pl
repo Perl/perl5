@@ -1924,7 +1924,7 @@ use File::Glob qw(:case);
 				lib/vars{.pm,.t,_carp.t}
 				lib/vmsish.{pm,t}
 			    ],
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'blead',
 	},
 );
 
