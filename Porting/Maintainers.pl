@@ -1371,6 +1371,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
+    'overload' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[lib/overload{.pm,.t,64.t}],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Package::Constants' =>
 	{
 	'MAINTAINER'	=> 'kane',
@@ -2149,7 +2156,6 @@ use File::Glob qw(:case);
 				lib/open.{pm,t}
 				lib/open2.pl
 				lib/open3.pl
-				lib/overload{.pm,.t,64.t}
 				lib/overload/numbers.pm
 				lib/overloading.{pm,t}
 				lib/perl5db.{pl,t}
