@@ -1738,6 +1738,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
+    'Tie::Memoize' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/Tie-Memoize],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Tie::RefHash' =>
 	{
 	'MAINTAINER'	=> 'nuffin',
@@ -1910,7 +1917,6 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
-				ext/Tie-Memoize/
 				ext/XS-APItest/
 				ext/XS-Typemap/
 				ext/attributes/
