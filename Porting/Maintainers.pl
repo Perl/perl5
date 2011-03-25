@@ -809,6 +809,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
+    'File::Find' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[lib/File/Find.pm lib/File/Find],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'File::Glob' =>
 	{
 	'MAINTAINER'	=> 'p5p',
@@ -2031,8 +2038,6 @@ use File::Glob qw(:case);
 				lib/ExtUtils/XSSymSet.pm
 				lib/ExtUtils/t/Embed.t
 				lib/ExtUtils/typemap
-				lib/File/Find.pm
-				lib/File/Find/
 				lib/File/stat.{pm,t}
 				lib/FileHandle.{pm,t}
 				lib/FindBin.{pm,t}
