@@ -811,6 +811,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> undef,
 	},
 
+    'GDBM_File' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/GDBM_File],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Fcntl' =>
 	{
 	'MAINTAINER'	=> 'p5p',
@@ -1784,7 +1791,6 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
-				ext/GDBM_File/
 				ext/Hash-Util-FieldHash/
 				ext/Hash-Util/
 				ext/I18N-Langinfo/
