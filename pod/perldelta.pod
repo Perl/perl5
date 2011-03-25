@@ -1861,6 +1861,10 @@ It adds several version::vxs::* routines to the default share.
 
 =item *
 
+C<SDBM_File> has been upgraded from version 1.06 to 1.09.
+
+=item *
+
 C<SelfLoader> has been upgraded from 1.17 to 1.18.
 
 It now works in taint mode [perl #72062].
