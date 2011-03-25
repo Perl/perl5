@@ -1306,6 +1306,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
+    'PerlIO::scalar' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/PerlIO-scalar],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'PerlIO::via::QuotedPrint' =>
 	{
 	'MAINTAINER'	=> 'elizabeth',
@@ -1868,7 +1875,6 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
-				ext/PerlIO-scalar/
 				ext/PerlIO-via/
 				ext/SDBM_File/
 				ext/Socket/
