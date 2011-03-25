@@ -570,6 +570,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
+    'diagnostics' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[lib/diagnostics.{pm,t}],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Digest' =>
 	{
 	'MAINTAINER'	=> 'gaas',
@@ -2118,7 +2125,6 @@ use File::Glob qw(:case);
 				lib/ctime.pl
 				lib/dbm_filter_util.pl
 				lib/deprecate.pm
-				lib/diagnostics.{pm,t}
 				lib/dotsh.pl
 				lib/dumpvar.{pl,t}
 				lib/exceptions.pl
