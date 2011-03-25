@@ -1662,6 +1662,13 @@ use File::Glob qw(:case);
 	'DEPRECATED'	=> 5.011,
 	},
 
+    'sigtrap' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[lib/sigtrap.{pm,t}],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Socket' =>
 	{
 	'MAINTAINER'	=> 'p5p',
@@ -2162,7 +2169,6 @@ use File::Glob qw(:case);
 				lib/perl5db/
 				lib/pwd.pl
 				lib/shellwords.pl
-				lib/sigtrap.{pm,t}
 				lib/sort.{pm,t}
 				lib/stat.pl
 				lib/strict.{pm,t}
