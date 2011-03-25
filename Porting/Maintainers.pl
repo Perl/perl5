@@ -563,6 +563,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
+    'DynaLoader' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/DynaLoader],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Encode' =>
 	{
 	'MAINTAINER'	=> 'dankogai',
@@ -1749,7 +1756,6 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
-				ext/DynaLoader/
 				ext/Errno
 				ext/Fcntl/
 				ext/File-Glob/
