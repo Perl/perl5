@@ -1415,6 +1415,10 @@ profiling and reporting.
 
 =item *
 
+C<Devel::Peek> has been upgraded from version 1.04 to 1.07.
+
+=item *
+
 C<Devel::SelfStubber> has been upgraded from version 1.03 to 1.05.
 
 =item *
