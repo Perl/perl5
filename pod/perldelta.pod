@@ -1561,6 +1561,10 @@ F<c:\dir\/file> are no longer generated [perl #71710].
 
 =item *
 
+C<File::Glob> has been upgraded from version 1.07 to 1.12.
+
+=item *
+
 C<File::Spec> has been upgraded from version 3.31 to 3.33.
 
 Several portability fixes were made in C<File::Spec::VMS>: a colon is now
