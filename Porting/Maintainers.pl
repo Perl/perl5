@@ -1224,6 +1224,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
+    'ODBM_File' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/ODBM_File],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Package::Constants' =>
 	{
 	'MAINTAINER'	=> 'kane',
@@ -1833,7 +1840,6 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
-				ext/ODBM_File/
 				ext/Opcode/
 				ext/POSIX/
 				ext/Pod-Html/
