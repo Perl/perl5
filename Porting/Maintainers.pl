@@ -1231,6 +1231,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
+    'Opcode' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/Opcode],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Package::Constants' =>
 	{
 	'MAINTAINER'	=> 'kane',
@@ -1840,7 +1847,6 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
-				ext/Opcode/
 				ext/POSIX/
 				ext/Pod-Html/
 				ext/PerlIO-encoding/
