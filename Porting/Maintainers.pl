@@ -759,6 +759,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> undef,
 	},
 
+    'FileCache' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/FileCache],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Filter::Simple' =>
 	{
 	'MAINTAINER'	=> 'smueller',
@@ -1777,8 +1784,6 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
-				ext/FileCache/lib
-				ext/FileCache/t
 				ext/GDBM_File/
 				ext/Hash-Util-FieldHash/
 				ext/Hash-Util/
