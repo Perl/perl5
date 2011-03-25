@@ -336,6 +336,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
+    'Carp' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[lib/Carp.{pm,t} lib/Carp/Heavy.pm],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'CGI' =>
 	{
 	'MAINTAINER'	=> 'lstein',
@@ -1961,8 +1968,6 @@ use File::Glob qw(:case);
 	'FILES'		=> q[
 				ext/XS-APItest/
 				lib/CORE.pod
-				lib/Carp.{pm,t}
-				lib/Carp/Heavy.pm
 				lib/Class/Struct.{pm,t}
 				lib/Config.t
 				lib/Config/Extensions.{pm,t}
