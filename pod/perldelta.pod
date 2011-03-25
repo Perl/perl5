@@ -3684,6 +3684,42 @@ This is part of the change to allow the internal use of any code point
 
 =item *
 
+Case-insensitive C<"/i"> regular expression matching of Unicode
+characters which match multiple characters now works much more as
+intended.  For example
+
+ "\N{LATIN SMALL LIGATURE FFI}" =~ /ffi/ui
+
+and
+
+ "ffi" =~ /\N{LATIN SMALL LIGATURE FFI}/ui
+
+are both true.  Previously, there were many bugs with this feature.
+What hasn't been fixed are the places where the pattern contains the
+multiple characters, but the characters are split up by other things,
+such as in
+
+ "\N{LATIN SMALL LIGATURE FFI}" =~ /(f)(f)i/ui
+
+or
+
+ "\N{LATIN SMALL LIGATURE FFI}" =~ /ffi*/ui
+
+or
+
+ "\N{LATIN SMALL LIGATURE FFI}" =~ /[a-f][f-m][g-z]/ui
+
+None of these match.
+
+Also, this matching doesn't fully conform to the current Unicode
+standard, which asks that the matching be made upon the NFD
+(Normalization Form .ecomposed) of the text.  However, as of this
+writing, March 2010, the Unicode standard is currently in flux about
+what they will recommend doing with regard to such cases.  It may be
+that they will throw out the whole concept of multi-character matches.
+
+=item *
+
 Naming a deprecated character in \N{...} no longer leaks memory.
 
 =item *
