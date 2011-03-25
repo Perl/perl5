@@ -256,6 +256,16 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
+    'B' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/B],
+	'EXCLUDED'	=> [ qw[B/Concise.pm
+				t/concise.t]
+			   ],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'B::Concise' =>
 	{
 	'MAINTAINER'	=> 'smccam',
@@ -1732,39 +1742,6 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
-				ext/B/B.pm
-				ext/B/typemap
-				ext/B/Makefile.PL
-				ext/B/defsubs_h.PL
-				ext/B/O.pm
-				ext/B/B.xs
-				ext/B/B/Terse.pm
-				ext/B/B/Showlex.pm
-				ext/B/B/Xref.pm
-				ext/B/t/f_map
-				ext/B/t/showlex.t
-				ext/B/t/o.t
-				ext/B/t/optree_varinit.t
-				ext/B/t/concise-xs.t
-				ext/B/t/optree_check.t
-				ext/B/t/OptreeCheck.pm
-				ext/B/t/optree_specials.t
-				ext/B/t/f_sort.t
-				ext/B/t/pragma.t
-				ext/B/t/f_sort
-				ext/B/t/b.t
-				ext/B/t/optree_samples.t
-				ext/B/t/optree_concise.t
-				ext/B/t/optree_constants.t
-				ext/B/t/optree_sort.t
-				ext/B/t/terse.t
-				ext/B/t/xref.t
-				ext/B/t/f_map.t
-				ext/B/t/optree_misc.t
-				ext/B/t/walkoptree.t
-				ext/B/hints/openbsd.pl
-				ext/B/hints/darwin.pl
-
 				ext/Devel-Peek/
 				ext/DynaLoader/
 				ext/Errno
