@@ -765,6 +765,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> undef,
 	},
 
+    'File::Basename' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[lib/File/Basename.{pm,t}],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'File::CheckTree' =>
 	{
 	'MAINTAINER'	=> 'p5p',
@@ -2003,7 +2010,6 @@ use File::Glob qw(:case);
 				lib/ExtUtils/XSSymSet.pm
 				lib/ExtUtils/t/Embed.t
 				lib/ExtUtils/typemap
-				lib/File/Basename.{pm,t}
 				lib/File/Compare.{pm,t}
 				lib/File/Copy.{pm,t}
 				lib/File/DosGlob.{pm,t}
