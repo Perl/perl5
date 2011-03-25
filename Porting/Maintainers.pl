@@ -597,6 +597,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
+    'DirHandle' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[lib/DirHandle.{pm,t}],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Dumpvalue' =>
 	{
 	'MAINTAINER'	=> 'p5p',
@@ -1985,7 +1992,6 @@ use File::Glob qw(:case);
 				lib/Config.t
 				lib/Config/Extensions.{pm,t}
 				lib/DB.{pm,t}
-				lib/DirHandle.{pm,t}
 				lib/English.{pm,t}
 				lib/ExtUtils/Embed.pm
 				lib/ExtUtils/XSSymSet.pm
