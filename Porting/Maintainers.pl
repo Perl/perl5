@@ -1481,6 +1481,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
+    're' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/re],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Safe' =>
 	{
 	'MAINTAINER'	=> 'rgarcia',
@@ -1939,7 +1946,6 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
 				ext/XS-APItest/
-				ext/re/
 				lib/AnyDBM_File.{pm,t}
 				lib/Benchmark.{pm,t}
 				lib/CORE.pod
