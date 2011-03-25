@@ -848,6 +848,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
+    'Hash::Util' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/Hash-Util],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'HTTP::Tiny' =>
 	{
 	'MAINTAINER'	=> 'dagolden',
@@ -1798,7 +1805,6 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
-				ext/Hash-Util/
 				ext/I18N-Langinfo/
 				ext/IPC-Open2/
 				ext/IPC-Open3/
