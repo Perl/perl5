@@ -320,6 +320,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
+    'Benchmark' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[lib/Benchmark.{pm,t}],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'bignum' =>
 	{
 	'MAINTAINER'	=> 'rafl',
@@ -1953,7 +1960,6 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
 				ext/XS-APItest/
-				lib/Benchmark.{pm,t}
 				lib/CORE.pod
 				lib/Carp.{pm,t}
 				lib/Carp/Heavy.pm
