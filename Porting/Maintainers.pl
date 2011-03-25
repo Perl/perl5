@@ -916,6 +916,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> undef,
 	},
 
+    'FindBin' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[lib/FindBin.{pm,t}],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'GDBM_File' =>
 	{
 	'MAINTAINER'	=> 'p5p',
@@ -2052,7 +2059,6 @@ use File::Glob qw(:case);
 				lib/ExtUtils/XSSymSet.pm
 				lib/ExtUtils/t/Embed.t
 				lib/ExtUtils/typemap
-				lib/FindBin.{pm,t}
 				lib/Getopt/Std.{pm,t}
 				lib/Internals.t
 				lib/Module/Build/ConfigData.pm
