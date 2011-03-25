@@ -512,6 +512,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
+    'Devel::Peek' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/Devel-Peek],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Devel::PPPort' =>
 	{
 	'MAINTAINER'	=> 'mhx',
@@ -1742,7 +1749,6 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
-				ext/Devel-Peek/
 				ext/DynaLoader/
 				ext/Errno
 				ext/Fcntl/
