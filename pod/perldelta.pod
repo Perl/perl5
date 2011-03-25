@@ -1813,6 +1813,10 @@ has data to read [perl #78716].
 
 =item *
 
+C<PerlIO::via> has been upgraded from version 0.09 to 0.11.
+
+=item *
+
 C<Pod::LaTeX> has been upgraded from version 0.58 to 0.59.
 
 =item *
