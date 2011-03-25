@@ -1421,7 +1421,7 @@ use File::Glob qw(:case);
     'PerlIO' =>
 	{
 	'MAINTAINER'	=> 'p5p',
-	'FILES'		=> q[ext/PerlIO],
+	'FILES'		=> q[lib/PerlIO.pm],
 	'UPSTREAM'	=> undef,
 	},
 
@@ -2072,7 +2072,6 @@ use File::Glob qw(:case);
 				lib/Net/netent.{pm,t}
 				lib/Net/protoent.{pm,t}
 				lib/Net/servent.{pm,t}
-				lib/PerlIO.pm
 				lib/Pod/Functions.pm
 				lib/Pod/t/Functions.t
 				lib/Pod/t/InputObjects.t
