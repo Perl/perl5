@@ -639,6 +639,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> undef,
 	},
 
+    'English' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[lib/English.{pm,t}],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Env' =>
 	{
 	'MAINTAINER'	=> 'p5p',
@@ -1992,7 +1999,6 @@ use File::Glob qw(:case);
 				lib/Config.t
 				lib/Config/Extensions.{pm,t}
 				lib/DB.{pm,t}
-				lib/English.{pm,t}
 				lib/ExtUtils/Embed.pm
 				lib/ExtUtils/XSSymSet.pm
 				lib/ExtUtils/t/Embed.t
