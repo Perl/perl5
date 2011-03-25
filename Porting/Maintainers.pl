@@ -797,6 +797,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> undef,
 	},
 
+    'Fcntl' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/Fcntl],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Getopt::Long' =>
 	{
 	'MAINTAINER'	=> 'jv',
@@ -1763,7 +1770,6 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
-				ext/Fcntl/
 				ext/File-Glob/
 				ext/FileCache/lib
 				ext/FileCache/t
