@@ -100,7 +100,6 @@ no_index:
     - lib/version.pm
     - lib/version.pod
     - lib/version.t
-    - pod/perldoc.pod
     - pod/perlfilter.pod
     - Porting/Maintainers.pm
     - Porting/perldelta_template.pod
