@@ -1192,6 +1192,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
+    'NDBM_File' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/NDBM_File],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Net::Ping' =>
 	{
 	'MAINTAINER'	=> 'smpeters',
@@ -1826,7 +1833,6 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
-				ext/NDBM_File/
 				ext/ODBM_File/
 				ext/Opcode/
 				ext/POSIX/
