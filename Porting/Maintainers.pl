@@ -1961,6 +1961,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'first-come',
 	},
 
+    'Unicode::UCD' =>
+	{
+	'MAINTAINER'	=> 'blead',
+	'FILES'		=> q[lib/Unicode/UCD.{pm,t}],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Version::Requirements' =>
 	{
 	'MAINTAINER'	=> 'rjbs',
@@ -2127,7 +2134,6 @@ use File::Glob qw(:case);
 				lib/Time/tm.pm
 				lib/UNIVERSAL.pm
 				lib/Unicode/README
-				lib/Unicode/UCD.{pm,t}
 				lib/User/grent.{pm,t}
 				lib/User/pwent.{pm,t}
 				lib/abbrev.pl
