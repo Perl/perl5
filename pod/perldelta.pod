@@ -494,7 +494,7 @@ restriction, so \p{foo::bar} could call foo::bar() if it existed. Now this
 convention has been enforced.
 
 Also, Perl no longer allows a tainted regular expression to invoke a
-user-defined. It simply dies instead [perl #82616].
+user-defined property. It simply dies instead [perl #82616].
 
 =head1 Incompatible Changes
 
