@@ -1543,6 +1543,10 @@ C<Fcntl> has been upgraded from version 1.06 to 1.11.
 
 =item *
 
+C<File::Basename> has been upgraded from version 2.78 to 2.81.
+
+=item *
+
 C<File::CheckTree> has been upgraded from version 4.4 to 4.41.
 
 =item *
