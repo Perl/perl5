@@ -1947,6 +1947,10 @@ Calling C<< Tie::Hash-E<gt>TIEHASH() >> used to loop forever.  Now it C<croak>s.
 
 =item *
 
+C<Tie::Hash::NamedCapture> has been upgraded from version 0.06 to 0.08.
+
+=item *
+
 C<Tie::RefHash> has been upgraded from version 1.38 to 1.39.
 
 =item *
