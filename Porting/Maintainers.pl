@@ -864,6 +864,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
+    'FileHandle' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[lib/FileHandle.{pm,t}],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Filter::Simple' =>
 	{
 	'MAINTAINER'	=> 'smueller',
@@ -2045,7 +2052,6 @@ use File::Glob qw(:case);
 				lib/ExtUtils/XSSymSet.pm
 				lib/ExtUtils/t/Embed.t
 				lib/ExtUtils/typemap
-				lib/FileHandle.{pm,t}
 				lib/FindBin.{pm,t}
 				lib/Getopt/Std.{pm,t}
 				lib/Internals.t
