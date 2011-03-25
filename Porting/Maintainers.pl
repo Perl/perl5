@@ -725,6 +725,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
+    'File::Glob' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/File-Glob],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'File::Path' =>
 	{
 	'MAINTAINER'	=> 'dland',
@@ -1770,7 +1777,6 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
-				ext/File-Glob/
 				ext/FileCache/lib
 				ext/FileCache/t
 				ext/GDBM_File/
