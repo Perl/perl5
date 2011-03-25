@@ -359,6 +359,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
+        'Class::Struct' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[lib/Class/Struct.{pm,t}],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Compress::Raw::Bzip2' =>
 	{
 	'MAINTAINER'	=> 'pmqs',
@@ -1968,7 +1975,6 @@ use File::Glob qw(:case);
 	'FILES'		=> q[
 				ext/XS-APItest/
 				lib/CORE.pod
-				lib/Class/Struct.{pm,t}
 				lib/Config.t
 				lib/Config/Extensions.{pm,t}
 				lib/DB.{pm,t}
