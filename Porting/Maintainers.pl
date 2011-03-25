@@ -943,6 +943,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
+    'IPC::Open3' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/IPC-Open3],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'IPC::SysV' =>
 	{
 	'MAINTAINER'	=> 'mhx',
@@ -1819,7 +1826,6 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
-				ext/IPC-Open3/
 				ext/NDBM_File/
 				ext/ODBM_File/
 				ext/Opcode/
