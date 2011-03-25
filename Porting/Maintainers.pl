@@ -185,6 +185,13 @@ use File::Glob qw(:case);
 
 %Modules = (
 
+    'AnyDBM_File' =>
+	{
+	'MAINTAINERS'	=> 'p5p',
+	'FILES'		=> q[lib/AnyDBM_File.{pm,t}],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Archive::Extract' =>
 	{
 	'MAINTAINER'	=> 'kane',
@@ -1946,7 +1953,6 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
 				ext/XS-APItest/
-				lib/AnyDBM_File.{pm,t}
 				lib/Benchmark.{pm,t}
 				lib/CORE.pod
 				lib/Carp.{pm,t}
