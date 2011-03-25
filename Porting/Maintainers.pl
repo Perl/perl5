@@ -530,6 +530,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> undef,
 	},
 
+    'DBM_Filter' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[lib/DBM_Filter.pm lib/DBM_Filter],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Devel::DProf' =>
 	{
 	'MAINTAINER'	=> 'rafl',
@@ -1978,8 +1985,6 @@ use File::Glob qw(:case);
 				lib/Config.t
 				lib/Config/Extensions.{pm,t}
 				lib/DB.{pm,t}
-				lib/DBM_Filter.pm
-				lib/DBM_Filter/
 				lib/DirHandle.{pm,t}
 				lib/English.{pm,t}
 				lib/ExtUtils/Embed.pm
