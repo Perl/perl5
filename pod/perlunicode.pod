@@ -1792,14 +1792,14 @@ you can change to use any earlier one.
 
 Download the files in the version of Unicode that you want from the Unicode web
 site L<http://www.unicode.org>).  These should replace the existing files in
-C<\$Config{privlib}>/F<unicore>.  (C<\%Config> is available from the Config
-module.)  Follow the instructions in F<README.perl> in that directory to change
-some of their names, and then run F<make>.
+F<lib/unicore> in the perl source tree.  Follow the instructions in
+F<README.perl> in that directory to change some of their names, and then build
+perl (see F<INSTALL>).
 
-It is even possible to download them to a different directory, and then change
-F<utf8_heavy.pl> in the directory C<\$Config{privlib}> to point to the new
-directory, or maybe make a copy of that directory before making the change, and
-using C<@INC> or the C<-I> run-time flag to switch between versions at will
+It is even possible to copy the built files to a different directory, and then
+change F<utf8_heavy.pl> in the directory C<\$Config{privlib}> to point to the
+new directory, or maybe make a copy of that directory before making the change,
+and using C<@INC> or the C<-I> run-time flag to switch between versions at will
 (but because of caching, not in the middle of a process), but all this is
 beyond the scope of these instructions.
 
