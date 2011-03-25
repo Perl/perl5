@@ -779,6 +779,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
+    'File::Copy' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[lib/File/Copy.{pm,t}],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'File::CheckTree' =>
 	{
 	'MAINTAINER'	=> 'p5p',
@@ -2017,7 +2024,6 @@ use File::Glob qw(:case);
 				lib/ExtUtils/XSSymSet.pm
 				lib/ExtUtils/t/Embed.t
 				lib/ExtUtils/typemap
-				lib/File/Copy.{pm,t}
 				lib/File/DosGlob.{pm,t}
 				lib/File/Find.pm
 				lib/File/Find/
