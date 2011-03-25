@@ -1527,6 +1527,10 @@ C<ExtUtils::ParseXS> has been upgraded from version 2.21 to 2.2209.
 
 =item *
 
+C<Fcntl> has been upgraded from version 1.06 to 1.11.
+
+=item *
+
 C<File::CheckTree> has been upgraded from version 4.4 to 4.41.
 
 =item *
