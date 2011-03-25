@@ -838,6 +838,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> undef,
 	},
 
+    'File::stat' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[lib/File/stat.{pm,t}],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'File::Temp' =>
 	{
 	'MAINTAINER'	=> 'tjenness',
@@ -2038,7 +2045,6 @@ use File::Glob qw(:case);
 				lib/ExtUtils/XSSymSet.pm
 				lib/ExtUtils/t/Embed.t
 				lib/ExtUtils/typemap
-				lib/File/stat.{pm,t}
 				lib/FileHandle.{pm,t}
 				lib/FindBin.{pm,t}
 				lib/Getopt/Std.{pm,t}
