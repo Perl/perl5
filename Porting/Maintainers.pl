@@ -876,6 +876,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
+    'I18N::Langinfo' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/I18N-Langinfo],
+	'UPSTREAM'	=> 'blead',
+	},
+
     # Sean has donated it to us.
     # Nothing has changed since his last CPAN release.
     # (not strictly true: there have been some trivial typo fixes; DAPM 6/2009)
@@ -1805,7 +1812,6 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
-				ext/I18N-Langinfo/
 				ext/IPC-Open2/
 				ext/IPC-Open3/
 				ext/NDBM_File/
