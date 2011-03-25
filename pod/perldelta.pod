@@ -1599,6 +1599,10 @@ recursively locking hashes that have undefined values [perl #74280].
 
 =item *
 
+C<Hash::Util::FieldHash> has been upgraded from version 1.04 to 1.09.
+
+=item *
+
 C<I18N::Collate> has been upgraded from version 1.01 to 1.02.
 
 =item *
