@@ -1199,6 +1199,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
+    'mro' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/mro],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'NDBM_File' =>
 	{
 	'MAINTAINER'	=> 'p5p',
@@ -1932,7 +1939,6 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
 				ext/XS-APItest/
-				ext/mro/
 				ext/re/
 				lib/AnyDBM_File.{pm,t}
 				lib/Benchmark.{pm,t}
