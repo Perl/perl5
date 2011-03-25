@@ -1368,6 +1368,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> undef,
 	},
 
+    'Pod::Html' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/Pod-Html],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Pod::LaTeX' =>
 	{
 	'MAINTAINER'	=> 'tjenness',
@@ -1854,7 +1861,6 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
-				ext/Pod-Html/
 				ext/PerlIO-encoding/
 				ext/PerlIO-scalar/
 				ext/PerlIO-via/
