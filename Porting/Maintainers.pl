@@ -1515,6 +1515,13 @@ use File::Glob qw(:case);
 	'DEPRECATED'	=> 5.011,
 	},
 
+    'Socket' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/Socket],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Storable' =>
 	{
 	'MAINTAINER'	=> 'ams',
@@ -1889,7 +1896,6 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
-				ext/Socket/
 				ext/Sys-Hostname/
 				ext/Tie-Hash-NamedCapture/
 				ext/Tie-Memoize/
