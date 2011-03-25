@@ -1794,7 +1794,7 @@ C<Opcode> has been upgraded from version 1.15 to 1.18.
 
 =item *
 
-C<overload> has been upgraded from 1.10 to 1.12.
+C<overload> has been upgraded from 1.10 to 1.13.
 
 C<overload::Method> can now handle subroutines that are themselves blessed
 into overloaded classes [perl #71998].
