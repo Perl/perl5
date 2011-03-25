@@ -212,6 +212,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
+    'attributes' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/attributes],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'autodie' =>
 	{
 	'MAINTAINER'	=> 'pjf',
@@ -1925,7 +1932,6 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
 				ext/XS-APItest/
-				ext/attributes/
 				ext/mro/
 				ext/re/
 				lib/AnyDBM_File.{pm,t}
