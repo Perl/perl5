@@ -1183,6 +1183,10 @@ prerequisites and version constraints as defined in the L<CPAN::Meta::Spec>.
 
 =item *
 
+C<attributes> has been upgraded from version 0.12 to 0.14.
+
+=item *
+
 C<Archive::Extract> has been upgraded from version 0.38 to 0.48.
 
 Updates since 0.38 include: a safe print method that guards
