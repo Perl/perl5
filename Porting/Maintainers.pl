@@ -1432,6 +1432,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
+    'POSIX' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/POSIX],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Safe' =>
 	{
 	'MAINTAINER'	=> 'rgarcia',
@@ -1847,7 +1854,6 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
-				ext/POSIX/
 				ext/Pod-Html/
 				ext/PerlIO-encoding/
 				ext/PerlIO-scalar/
