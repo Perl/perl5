@@ -1899,6 +1899,10 @@ during freezing [perl #80074].
 
 =item *
 
+C<Sys::Hostname> has been upgraded from version 1.11 to 1.16.
+
+=item *
+
 C<Term::ANSIColor> has been upgraded from version 2.02 to 3.00.
 
 =item *
