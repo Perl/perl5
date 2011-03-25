@@ -794,6 +794,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
+    'File::DosGlob' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[lib/File/DosGlob.{pm,t}],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'File::Fetch' =>
 	{
 	'MAINTAINER'	=> 'kane',
@@ -2024,7 +2031,6 @@ use File::Glob qw(:case);
 				lib/ExtUtils/XSSymSet.pm
 				lib/ExtUtils/t/Embed.t
 				lib/ExtUtils/typemap
-				lib/File/DosGlob.{pm,t}
 				lib/File/Find.pm
 				lib/File/Find/
 				lib/File/stat.{pm,t}
