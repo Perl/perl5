@@ -1731,6 +1731,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'first-come',
 	},
 
+    'Tie::Hash::NamedCapture' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/Tie-Hash-NamedCapture],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Tie::RefHash' =>
 	{
 	'MAINTAINER'	=> 'nuffin',
@@ -1903,7 +1910,6 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
-				ext/Tie-Hash-NamedCapture/
 				ext/Tie-Memoize/
 				ext/XS-APItest/
 				ext/XS-Typemap/
