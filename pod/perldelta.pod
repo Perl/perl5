@@ -1456,6 +1456,10 @@ New SHA-512/224 and SHA-512/256 transforms (ref. NIST Draft FIPS 180-4
 
 =item *
 
+C<DirHandle> has been upgraded from version 1.03 to 1.04.
+
+=item *
+
 C<Dumpvalue> has been upgraded from version 1.13 to 1.16.
 
 =item *
