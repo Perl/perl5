@@ -1885,6 +1885,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'first-come',
 	},
 
+    'Tie::Hash' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[lib/Tie/Hash.{pm,t}],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Tie::Hash::NamedCapture' =>
 	{
 	'MAINTAINER'	=> 'p5p',
@@ -2112,7 +2119,6 @@ use File::Glob qw(:case);
 				lib/Tie/ExtraHash.t
 				lib/Tie/Handle.pm
 				lib/Tie/Handle/
-				lib/Tie/Hash.{pm,t}
 				lib/Tie/Scalar.{pm,t}
 				lib/Tie/StdHandle.pm
 				lib/Tie/SubstrHash.{pm,t}
