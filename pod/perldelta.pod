@@ -1644,13 +1644,9 @@ C<if> has been upgraded from version 0.05 to 0.0601.
 
 C<IO> has been upgraded from version 1.25_02 to 1.25_04.
 
-=item *
-
-C<IO::Select> has been upgraded from version 1.17 to 1.20.
-
-It now allows IO::Handle objects (and objects in derived classes) to be
-removed from an IO::Select set even if the underlying file descriptor is
-closed or invalid.
+This version of C<IO> includes a new C<IO::Select>, which now allows IO::Handle
+objects (and objects in derived classes) to be removed from an IO::Select set
+even if the underlying file descriptor is closed or invalid.
 
 =item *
 
