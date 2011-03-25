@@ -1802,6 +1802,10 @@ L<CPAN::Meta::YAML> and L<JSON::PP>, which are now part of the Perl core.
 
 =item *
 
+C<PerlIO::encoding> has been upgraded from version 0.12 to 0.14.
+
+=item *
+
 C<PerlIO::scalar> has been upgraded from 0.07 to 0.11.
 
 A C<read> after a C<seek> beyond the end of the string no longer thinks it
