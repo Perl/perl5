@@ -1883,6 +1883,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
+    'XS::Typemap' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/XS-Typemap],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'XSLoader' =>
 	{
 	'MAINTAINER'	=> 'saper',
@@ -1918,7 +1925,6 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
 				ext/XS-APItest/
-				ext/XS-Typemap/
 				ext/attributes/
 				ext/mro/
 				ext/re/
