@@ -3662,20 +3662,19 @@ again and, if the entries are re-created too many times, dies with a
 
 =item *
 
-What has become known as the "Unicode Bug" is mostly resolved in this release.
-Under C<use feature 'unicode_strings'>, the internal storage format of a
-string no longer affects the external semantics.  There are two known
-exceptions.  User-defined case changing functions, which are planned to
-be deprecated in 5.14, require utf8-encoded strings to function; and the
-character C<LATIN SMALL LETTER SHARP S> in regular expression
-case-insensitive matching has a somewhat different set of bugs depending
-on the internal storage format.  Case-insensitive matching of all
-characters that have multi-character matches, as this one does, is
-problematical in Perl [perl #58182].
+What has become known as the "Unicode Bug" is essentially resolved in
+this release.  Under C<use feature 'unicode_strings'> (which is
+automatically selected by C<use 5.012> and above), the internal
+storage format of a string no longer affects the external semantics.
+The exception is that the now-deprecated user-defined case changing
+functions require utf8-encoded strings to function.  The CPAN module
+L<Unicode::Casing> has been written to replace this feature, without its
+drawacks, and the feature is scheduled to be removed in 5.16 [perl
+#58182].
 
 =item *
 
-The handling of Unicode non-characters has changed.
+The handling of Unicode non-character code points has changed.
 Previously they were mostly considered illegal, except that only one of
 the 66 of them was known about in places.  The Unicode standard
 considers them legal, but forbids the "open interchange" of them.
