@@ -953,6 +953,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
+    'Getopt::Std' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[lib/Getopt/Std.{pm,t}],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Hash::Util::FieldHash' =>
 	{
 	'MAINTAINER'	=> 'p5p',
@@ -2059,7 +2066,6 @@ use File::Glob qw(:case);
 				lib/ExtUtils/XSSymSet.pm
 				lib/ExtUtils/t/Embed.t
 				lib/ExtUtils/typemap
-				lib/Getopt/Std.{pm,t}
 				lib/Internals.t
 				lib/Module/Build/ConfigData.pm
 				lib/Net/hostent.{pm,t}
