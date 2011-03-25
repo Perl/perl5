@@ -2106,6 +2106,10 @@ C<Win32::GetProductInfo>, C<Win32::GetOSDisplayName>.
 The names returned by C<Win32::GetOSName> and C<Win32::GetOSDisplayName>
 have been corrected.
 
+=item *
+
+C<XS::Typemap> has been upgraded from version 0.03 to 0.05.
+
 =back
 
 =head2 Removed Modules and Pragmata
