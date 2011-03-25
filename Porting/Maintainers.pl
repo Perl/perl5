@@ -1488,6 +1488,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
+    'SDBM_File' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/SDBM_File],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'SelfLoader' =>
 	{
 	'MAINTAINER'	=> 'smueller',
@@ -1882,7 +1889,6 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
-				ext/SDBM_File/
 				ext/Socket/
 				ext/Sys-Hostname/
 				ext/Tie-Hash-NamedCapture/
