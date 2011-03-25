@@ -598,6 +598,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
+    'Errno' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/Errno],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Exporter' =>
 	{
 	'MAINTAINER'	=> 'ferreira',
@@ -1756,7 +1763,6 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
-				ext/Errno
 				ext/Fcntl/
 				ext/File-Glob/
 				ext/FileCache/lib
