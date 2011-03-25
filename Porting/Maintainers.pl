@@ -1531,6 +1531,13 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
+    'Sys::Hostname' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'FILES'		=> q[ext/Sys-Hostname],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Sys::Syslog' =>
 	{
 	'MAINTAINER'	=> 'saper',
@@ -1896,7 +1903,6 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'p5p',
 	'FILES'		=> q[
-				ext/Sys-Hostname/
 				ext/Tie-Hash-NamedCapture/
 				ext/Tie-Memoize/
 				ext/XS-APItest/
