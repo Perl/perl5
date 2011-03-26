@@ -841,7 +841,7 @@ Perl_utf8_length(pTHX_ const U8 *s, const U8 *e)
 	    Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8),
 			     "%s in %s", unees, OP_DESC(PL_op));
 	else
-	    Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8), unees);
+	    Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8), "%s", unees);
     }
 
     return len;
@@ -953,7 +953,7 @@ Perl_bytes_cmp_utf8(pTHX_ const U8 *b, STRLEN blen, const U8 *u, STRLEN ulen)
 			Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8),
 					 "%s in %s", unees, OP_DESC(PL_op));
 		    else
-			Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8), unees);
+			Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8), "%s", unees);
 		    return -2; /* Really want to return undef :-)  */
 		}
 	    } else {
