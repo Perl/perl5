@@ -2555,7 +2555,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
 	/* This is safe against NULLs: */
 	ReREFCNT_dec(PM_GETRE(PL_reg_curpm));
 	/* PM_reg_curpm owns a reference to this regexp.  */
-	ReREFCNT_inc(rx);
+	(void)ReREFCNT_inc(rx);
 #endif
 	PM_SETRE(PL_reg_curpm, rx);
 	PL_reg_oldcurpm = PL_curpm;
@@ -5401,7 +5401,7 @@ NULL
 		rex = (struct regexp *)SvANY(rex_sv);
 		rexi = RXi_GET(rex);
 		cur_curlyx = cur_eval->u.eval.prev_curlyx;
-		ReREFCNT_inc(rex_sv);
+		(void)ReREFCNT_inc(rex_sv);
 		st->u.eval.cp = regcppush(0);	/* Save *all* the positions. */
 
 		/* rex was changed so update the pointer in PL_reglastparen and PL_reglastcloseparen */
