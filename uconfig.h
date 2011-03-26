@@ -4262,7 +4262,7 @@
  */
 #define	IVTYPE		long		/**/
 #define	UVTYPE		unsigned long		/**/
-#define	I8TYPE		char		/**/
+#define	I8TYPE		signed char		/**/
 #define	U8TYPE		unsigned char		/**/
 #define	I16TYPE		short	/**/
 #define	U16TYPE		unsigned short	/**/
@@ -4687,5 +4687,5 @@
 
 /* Generated from:
  * 323778627146f2762cd41f4dd1db6659f59006ec9bcaaf6bcc645d0380dda938 config_h.SH
- * e2fe24c48912191bb7514cbd185016bb4cf5fe5e29b5effc78b3885a7f8d07a7 uconfig.sh
+ * c59d2b1fc6a313e8ff46597b14976c14307b9504013fb059305440a127074130 uconfig.sh
  * ex: set ro: */
