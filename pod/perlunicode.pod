@@ -1616,6 +1616,12 @@ I<except> C<[[:ascii:]]>.
 
 =item *
 
+In C<quotemeta> or its inline equivalent C<\Q>,  all characters whose
+code points are above 127 are not quoted in UTF-8 encoded strings, but
+all are quoted in UTF-8 strings.
+
+=item *
+
 User-defined case change mappings.  You can create a C<ToUpper()> function, for
 example, which overrides Perl's built-in case mappings.  The scalar must be
 encoded in utf8 for your function to actually be invoked.
@@ -1651,8 +1657,9 @@ cause Perl to use Unicode semantics on all string operations within the
 scope of the feature subpragma.  Regular expressions compiled in its
 scope retain that behavior even when executed or compiled into larger
 regular expressions outside the scope.  (The pragma does not, however,
-affect user-defined case changing operations.  These still require a
-UTF-8 encoded string to operate.)
+affect the C<quotemeta> behavior.  Not does it affect the deprecated
+user-defined case changing operations.  These still require a UTF-8
+encoded string to operate.)
 
 In Perl 5.12, the subpragma affected casing changes, but not regular
 expressions.  See L<perlfunc/lc> for details on how this pragma works in
