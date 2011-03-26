@@ -88,7 +88,16 @@ $ret = call_goto_ref($VALID);
 is($ret, $value, 'goto &$function_ref; from a sub called without arglist');
 
 
-use XS::APItest qw(mycroak);
+BEGIN {
+    use Config;
+    if ($Config{extensions} =~ m{XS/APItest}) {
+	eval q[use XS::APItest qw(mycroak); 1]
+	    or die "use XS::APItest: $@\n";
+    }
+    else {
+	*mycroak = sub { die @_ };
+    }
+}
 
 sub goto_croak { goto &mycroak }
 
