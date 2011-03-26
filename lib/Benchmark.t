@@ -8,7 +8,7 @@ BEGIN {
 use warnings;
 use strict;
 use vars qw($foo $bar $baz $ballast);
-use Test::More tests => 194;
+use Test::More tests => 196;
 
 use Benchmark qw(:all);
 
@@ -61,8 +61,12 @@ my $threesecs = countit(0, $coderef);
 isa_ok($threesecs, 'Benchmark', "countit 0, CODEREF");
 isnt ($baz, 0, "benchmarked code was run");
 my $in_threesecs = $threesecs->iters;
-print "# $in_threesecs iterations\n";
+print "# in_threesecs=$in_threesecs iterations\n";
 ok ($in_threesecs > 0, "iters returned positive iterations");
+my $cpu = $threesecs->[1] + $threesecs->[2]; # user + sys 
+cmp_ok($cpu, '>=', 3.0, "3s cpu is at least 3s");
+$in_threesecs *= (3/$cpu); # adjust because may not have run for exactly 3s
+print "# in_threesecs=$in_threesecs adjusted iterations\n";
 
 my $estimate = int (100 * $in_threesecs / 3) / 100;
 print "# from the 3 second run estimate $estimate iterations in 1 second...\n";
@@ -71,8 +75,12 @@ my $onesec = countit(1, $coderef);
 isa_ok($onesec, 'Benchmark', "countit 1, CODEREF");
 isnt ($baz, 0, "benchmarked code was run");
 my $in_onesec = $onesec->iters;
-print "# $in_onesec iterations\n";
+print "# in_onesec=$in_onesec iterations\n";
 ok ($in_onesec > 0, "iters returned positive iterations");
+$cpu = $onesec->[1] + $onesec->[2]; # user + sys 
+cmp_ok($cpu, '>=', 1.0, "1s cpu is at least 1s");
+$in_onesec *= (1/$cpu); # adjust because may not have run for exactly 1s
+print "# in_onesec=$in_onesec adjusted iterations\n";
 
 {
   my $difference = $in_onesec - $estimate;
