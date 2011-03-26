@@ -876,7 +876,7 @@ my %why_obsolete;    # Documentation only
 
     my $other_properties = 'other properties';
     my $contributory = "Used by Unicode internally for generating $other_properties and not intended to be used stand-alone";
-    my $why_no_expand  = "Deprecated by Unicode: less useful than UTF-specific calculations",
+    my $why_no_expand  = "Deprecated by Unicode.  These are characters that expand to more than one character in the specified normalization form, but whether they actually take up more bytes or not depends on the encoding being used.  For example, a UTF-8 encoded character may expand to a different number of bytes than a UTF-32 encoded character.";
 
     %why_deprecated = (
         'Grapheme_Link' => 'Deprecated by Unicode:  Duplicates ccc=vr (Canonical_Combining_Class=Virama)',
