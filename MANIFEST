@@ -5115,6 +5115,7 @@ t/uni/write.t			See if Unicode formats work
 t/win32/system.t		See if system works in Win*
 t/win32/system_tests		Test runner for system.t
 t/x2p/s2p.t			See if s2p/psed work
+uconfig64.sh			Configuration script for microperl for LP64
 uconfig.h			Configuration header for microperl
 uconfig.sh			Configuration script for microperl
 universal.c			The default UNIVERSAL package methods
