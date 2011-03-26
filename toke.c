@@ -6597,7 +6597,7 @@ Perl_yylex(pTHX)
 		    goto safe_bareword;
 
 		{
-		    OP *const_op = newSVOP(OP_CONST, 0, SvREFCNT_inc(sv));
+		    OP *const_op = newSVOP(OP_CONST, 0, SvREFCNT_inc_NN(sv));
 		    const_op->op_private = OPpCONST_BARE;
 		    rv2cv_op = newCVREF(0, const_op);
 		}
