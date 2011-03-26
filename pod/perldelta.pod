@@ -3662,15 +3662,30 @@ again and, if the entries are re-created too many times, dies with a
 
 =item *
 
-What has become known as the "Unicode Bug" is essentially resolved in
+What has become known as the "Unicode Bug" is almost completely resolved in
 this release.  Under C<use feature 'unicode_strings'> (which is
 automatically selected by C<use 5.012> and above), the internal
 storage format of a string no longer affects the external semantics.
-The exception is that the now-deprecated user-defined case changing
+[perl #58182].
+
+There are two known exceptions:
+
+=over
+
+=item 1
+
+The now-deprecated user-defined case changing
 functions require utf8-encoded strings to function.  The CPAN module
 L<Unicode::Casing> has been written to replace this feature, without its
-drawacks, and the feature is scheduled to be removed in 5.16 [perl
-#58182].
+drawacks, and the feature is scheduled to be removed in 5.16
+
+=item 2
+
+C<quotemeta> (and its in-line equivalent C<\Q>) also can give different
+results if a string is encoded in UTF-8 or not.  See
+L<perlunicode/The "Unicode Bug">.
+
+=back
 
 =item *
 
