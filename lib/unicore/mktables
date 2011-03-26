@@ -13254,9 +13254,10 @@ the properties are listed enclosed in (parentheses).
 
 An installation can choose to allow any of these to be matched by downloading
 the Unicode database from L<http://www.unicode.org/Public/> to
-C<\$Config{privlib}>/F<unicore/>, changing the controlling lists contained in
-the program C<\$Config{privlib}>/F<unicore/mktables> and then re-running
-F<mktables>.  (C<\%Config> is available from the Config module).
+C<\$Config{privlib}>/F<unicore/> in the Perl source tree, changing the
+controlling lists contained in the program
+C<\$Config{privlib}>/F<unicore/mktables> and then re-compiling and installing.
+(C<\%Config> is available from the Config module).
 
 =head1 Files in the I<To> directory (for serious hackers only)
 
