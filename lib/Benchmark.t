@@ -303,6 +303,7 @@ sub check_graph_consistency {
         $slowr, $slowratet, $slowslow, $slowfastt,
         $fastr, $fastratet, $fastslowt, $fastfast)
         = @_;
+    note("calling check_graph_consistency from line " . (caller(1))[2]);
     my $all_passed = 1;
     $all_passed
       &= is ($slowc, $slowr, "left col tag should be top row tag");
