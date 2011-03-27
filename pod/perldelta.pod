@@ -3229,7 +3229,8 @@ its design was insufficient for reliably getting the lexical C<$_> at
 run-time.
 
 Use the new C<find_rundefsv> function or the C<UNDERBAR> macro
-instead. They directly return the right SV representing C<$_>, whether it's
+instead.  They directly return the right SV
+representing C<$_>, whether it's
 lexical or dynamic.
 
 =item C<CALL_FPTR> and C<CPERLscope>
@@ -3315,12 +3316,12 @@ cause perl to crash whenever the glob's contents were accessed
 =item *
 
 PerlIO no longer crashes when called recursively, e.g., from a signal
-handler. Now it just leaks memory [perl #75556].
+handler.  Now it just leaks memory [perl #75556].
 
 =item *
 
 Most I/O functions were not warning for unopened handles unless the
-'closed' and 'unopened' warnings categories were both enabled. Now only
+'closed' and 'unopened' warnings categories were both enabled.  Now only
 C<use warnings 'unopened'> is necessary to trigger these warnings (as was
 always meant to be the case).
 
@@ -3394,7 +3395,7 @@ unrecognized escape sequences, passed-through.
 
 A regular expression match in the right-hand side of a global substitution
 (C<s///g>) that is in the same scope will no longer cause match variables
-to have the wrong values on subsequent iterations. This can happen when an
+to have the wrong values on subsequent iterations.  This can happen when an
 array or hash subscript is interpolated in the right-hand side, as in
 C<s|(.)|@a{ print($1), /./ }|g> [perl #19078].
 
@@ -3447,7 +3448,7 @@ point it is.
 =item *
 
 The C<(?|...)> regular expression construct no longer crashes if the final
-branch has more sets of capturing parentheses than any other branch. This
+branch has more sets of capturing parentheses than any other branch.  This
 was fixed in Perl 5.10.1 for the case of a single branch, but that fix did
 not take multiple branches into account [perl #84746].
 
@@ -3513,7 +3514,7 @@ to turn into
 
   $text =~ /phoo/
 
-at compile time. Now it correctly matches against C<$_> [perl #20444].
+at compile time.  Now it correctly matches against C<$_> [perl #20444].
 
 =item *
 
@@ -3555,7 +3556,8 @@ is no longer treated as a constant [perl #63540].
 
 =item *
 
-C<state> can now be used with attributes. It used to mean the same thing as
+C<state> can now be used with attributes.  It
+used to mean the same thing as
 C<my> if attributes were present [perl #68658].
 
 =item *
@@ -3634,7 +3636,7 @@ the assignment contained a subroutine.
 
 C<PL_isarev>, which is accessible to Perl via C<mro::get_isarev> is now
 updated properly when packages are deleted or removed from the C<@ISA> of
-other classes. This allows many packages to be created and deleted without
+other classes.  This allows many packages to be created and deleted without
 causing a memory leak [perl #75176].
 
 =back
@@ -3670,7 +3672,7 @@ means the following code will no longer crash:
 =item *
 
 Assigning a glob to a PVLV used to convert it to a plain string. Now it
-works correctly, and a PVLV can hold a glob. This would happen when a
+works correctly, and a PVLV can hold a glob.  This would happen when a
 nonexistent hash or array element was passed to a subroutine:
 
   sub { $_[0] = *foo }->($hash{key});
@@ -3692,7 +3694,7 @@ cases.
 During the restoration of a localised typeglob on scope exit, any
 destructors called as a result would be able to see the typeglob in an
 inconsistent state, containing freed entries, which could result in a
-crash. This would affect code like this:
+crash.  This would affect code like this:
 
   local *@;
   eval { die bless [] }; # puts an object in $@
@@ -3701,7 +3703,7 @@ crash. This would affect code like this:
   }
 
 Now the glob entries are cleared before any destructors are called. This
-also means that destructors can vivify entries in the glob. So perl tries
+also means that destructors can vivify entries in the glob.  So perl tries
 again and, if the entries are re-created too many times, dies with a
 'panic: gp_free...' error message.
 
@@ -3728,7 +3730,7 @@ There are two known exceptions:
 The now-deprecated user-defined case changing
 functions require utf8-encoded strings to function.  The CPAN module
 L<Unicode::Casing> has been written to replace this feature, without its
-drawacks, and the feature is scheduled to be removed in 5.16
+drawbacks, and the feature is scheduled to be removed in 5.16.
 
 =item 2
 
