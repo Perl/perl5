@@ -721,13 +721,14 @@ functions:
 
 Due to this bug fix [perl #75904], functions
 using the C<(*)>, C<(;$)> and C<(;*)> prototypes
-are parsed with higher precedence than before. So in the following example:
+are parsed with higher precedence than before.  So
+in the following example:
 
   sub foo($);
   foo $a < $b;
 
 the second line is now parsed correctly as C<< foo($a) < $b >>, rather than
-C<< foo($a < $b) >>. This happens when one of these operators is used in
+C<< foo($a < $b) >>.  This happens when one of these operators is used in
 an unparenthesised argument:
 
   < > <= >= lt gt le ge
@@ -758,7 +759,7 @@ as numbers [perl #57706].
 =head3 Negative zero
 
 Negative zero (-0.0), when converted to a string, now becomes "0" on all
-platforms. It used to become "-0" on some, but "0" on others.
+platforms.  It used to become "-0" on some, but "0" on others.
 
 If you still need to determine whether a zero is negative, use
 C<sprintf("%g", $zero) =~ /^-/> or the L<Data::Float> module on CPAN.
@@ -767,8 +768,9 @@ C<sprintf("%g", $zero) =~ /^-/> or the L<Data::Float> module on CPAN.
 
 Previously C<my $pi := 4;> was exactly equivalent to C<my $pi : = 4;>,
 with the C<:> being treated as the start of an attribute list, ending before
-the C<=>. The use of C<:=> to mean C<: => was deprecated in 5.12.0, and is now
-a syntax error. This will allow the future use of C<:=> as a new token.
+the C<=>.  The use of C<:=> to mean C<: => was deprecated in 5.12.0, and is
+now a syntax error.  This will allow the future use of C<:=> as a new
+token.
 
 We find no Perl 5 code on CPAN using this construction, outside the core's
 tests for it, so we believe that this change will have very little impact on
@@ -784,27 +786,27 @@ the C<=>.
 
 On systems other than Windows that do not have
 a C<fchdir> function, newly-created threads no
-longer inherit directory handles from their parent threads. Such programs
+longer inherit directory handles from their parent threads.  Such programs
 would usually have crashed anyway [perl #75154].
 
 =head3 C<close> on shared pipes
 
 The C<close> function no longer waits for the child process to exit if the
 underlying file descriptor is still in use by another thread, to avoid
-deadlocks. It returns true in such cases.
+deadlocks.  It returns true in such cases.
 
 =head3 fork() emulation will not wait for signalled children
 
 On Windows parent processes would not terminate until all forked
 childred had terminated first.  However, C<kill('KILL', ...)> is
 inherently unstable on pseudo-processes, and C<kill('TERM', ...)>
-might not get delivered if the child if blocked in a system call.
+might not get delivered if the child is blocked in a system call.
 
 To avoid the deadlock and still provide a safe mechanism to terminate
 the hosting process, Perl will now no longer wait for children that
 have been sent a SIGTERM signal.  It is up to the parent process to
 waitpid() for these children if child clean-up processing must be
-allowed to finish. However, it is also the responsibility of the
+allowed to finish.  However, it is also the responsibility of the
 parent then to avoid the deadlock by making sure the child process
 can't be blocked on I/O either.
 
@@ -819,7 +821,7 @@ Several long-standing typos and naming confusions in Policy_sh.SH have
 been fixed, standardizing on the variable names used in config.sh.
 
 This will change the behavior of Policy.sh if you happen to have been
-accidentally relying on the Policy.sh incorrect behavior.
+accidentally relying on its incorrect behavior.
 
 =head3 Perl source code is read in text mode on Windows
 
