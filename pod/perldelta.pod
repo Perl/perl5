@@ -627,6 +627,15 @@ not make C<defined %hash> false, hence C<defined %hash> is not valid code to
 determine whether an arbitrary hash is empty.  Instead, use the behaviour
 that an empty C<%hash> always returns false in a scalar context.
 
+=head3 Clearing stashes
+
+Stash list assignment C<%foo:: = ()> used to make the stash anonymous
+temporarily while it was being emptied. Consequently, any of its
+subroutines referenced elsewhere would become anonymous (showing up as
+"(unknown)" in C<caller>). Now they retain their package names, such that
+C<caller> will return the original sub name if there is still a reference
+to its typeglob, or "foo::__ANON__" otherwise [perl #79208].
+
 =head3 Dereferencing typeglobs
 
 If you assign a typeglob to a scalar variable:
@@ -666,15 +675,6 @@ assignment has no effect.
 
 See L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=77810> for even
 more detail.
-
-=head3 Clearing stashes
-
-Stash list assignment C<%foo:: = ()> used to make the stash anonymous
-temporarily while it was being emptied. Consequently, any of its
-subroutines referenced elsewhere would become anonymous (showing up as
-"(unknown)" in C<caller>). Now they retain their package names, such that
-C<caller> will return the original sub name if there is still a reference
-to its typeglob, or "foo::__ANON__" otherwise [perl #79208].
 
 =head3 Magic variables outside the main package
 
