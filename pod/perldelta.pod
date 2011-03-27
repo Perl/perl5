@@ -4419,7 +4419,7 @@ that release's perldelta.
 
 C<split> no longer modifies C<@_> when called in scalar or void context.
 In void context it now produces a "Useless use of split" warning.
-This was also a perl 5.12.0 changed which missed the perldelta.
+This was also a perl 5.12.0 changed that missed the perldelta.
 
 =head1 Obituary
 
