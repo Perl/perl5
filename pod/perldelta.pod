@@ -40,9 +40,9 @@ phones.  This conflicts with the long-standing Perl usage of having
 C<BELL> mean the ASCII C<BEL> character, U+0007.  In Perl 5.14,
 C<\N{BELL}> will continue to mean U+0007, but its use will generate a
 deprecated warning message, unless such warnings are turned off.  The
-new name for U+0007 in Perl will be C<ALERT>, which corresponds nicely
-with the existing shorthand sequence for it, C<"\a">.  C<\N{BEL}> will
-mean U+0007, with no warning given.  The character at U+1F514 will not
+new name for U+0007 in Perl is C<ALERT>, which corresponds nicely
+with the existing shorthand sequence for it, C<"\a">.  C<\N{BEL}>
+means U+0007, with no warning given.  The character at U+1F514 will not
 have a name in 5.14, but can be referred to by C<\N{U+1F514}>.  The plan
 is that in Perl 5.16, C<\N{BELL}> will refer to U+1F514, and so all code
 that uses C<\N{BELL}> should convert by then to using C<\N{ALERT}>,
@@ -372,11 +372,11 @@ result of stringifying the object.
 
 =head3 Assignment to C<$0> sets the legacy process name with C<prctl()> on Linux
 
-On Linux the legacy process name will be set with L<prctl(2)>, in
+On Linux the legacy process name is now set with L<prctl(2)>, in
 addition to altering the POSIX name via C<argv[0]> as perl has done
-since version 4.000. Now system utilities that read the legacy process
+since version 4.000.  Now system utilities that read the legacy process
 name such as ps, top and killall will recognize the name you set when
-assigning to C<$0>. The string you supply will be cut off at 16 bytes,
+assigning to C<$0>.  The string you supply will be cut off at 16 bytes;
 this is a limitation imposed by Linux.
 
 =head3 C<srand()> now returns the seed
