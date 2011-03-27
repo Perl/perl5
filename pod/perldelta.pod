@@ -688,6 +688,19 @@ such as signal handlers being wiped when modules were loaded, etc.
 This has been fixed (or the feature has been removed, depending on how you see
 it).
 
+=head3 local($_) will strip all magic from $_
+
+local() on scalar variables will give them a new value, but keep all
+their magic intact.  This has proven to be problematic for the default
+scalar variable $_, where L<perlsub> recommends that any subroutine
+that assigns to $_ should localize it first.  This would throw an
+exception if $_ is aliased to a read-only variable, and could have
+various unintentional side-effects in general.
+
+Therefore, as an exception to the general rule, local($_) will not
+only assign a new value to $_, but also remove all existing magic from
+it as well.
+
 =head2 Changes to Syntax or to Perl Operators
 
 =head3 C<given> return values
