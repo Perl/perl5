@@ -4005,8 +4005,9 @@ Creating a new thread when directory handles were open used to cause a
 crash, because the handles were not cloned, but simply passed to the new
 thread, resulting in a double free.
 
-Now directory handles are cloned properly, on systems that have a C<fchdir>
-function. On other systems, new threads simply do not inherit directory
+Now directory handles are cloned properly, on Windows
+and on systems that have a C<fchdir> function.  On other
+systems, new threads simply do not inherit directory
 handles from their parent threads [perl #75154].
 
 =item *
