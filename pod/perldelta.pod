@@ -639,9 +639,9 @@ allows subsequent assignments to C<$glob> to
 overwrite the glob.  The original glob, however, is
 immutable.
 
-Many Perl operators did not distinguish between these two types of globs.
+Some Perl operators did not distinguish between these two types of globs.
 This would result in strange behaviour in edge cases: C<untie $scalar>
-would do nothing if the last thing assigned to the scalar was a glob
+would not untie the scalar if the last thing assigned to it was a glob
 (because it treated it as C<untie *$scalar>, which unties a handle).
 Assignment to a glob slot (e.g., C<*$glob = \@some_array>) would simply
 assign C<\@some_array> to C<$glob>.
