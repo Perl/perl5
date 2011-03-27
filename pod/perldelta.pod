@@ -3872,6 +3872,10 @@ by C<splice @ISA> are respected by method calls) [perl #78400].
 In-memory files created by C<open $fh, 'E<gt>' \$buffer> were not calling
 FETCH/STORE at all [perl #43789] (5.12.2).
 
+=item *
+
+utf8::is_utf8 now respects get-magic (e.g. $1) (5.12.1).
+
 =back
 
 =item *
@@ -3938,10 +3942,6 @@ name was not tainted.
 C<sprintf> now dies when passed a tainted scalar for the format. It did
 already die for arbitrary expressions, but not for simple scalars
 [perl #82250].
-
-=item *
-
-utf8::is_utf8 now respects get-magic (e.g. $1) (5.12.1).
 
 =back
 
