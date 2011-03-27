@@ -4023,7 +4023,8 @@ separator), had the wrong reference count in child threads.
 =item *
 
 Perl now does a timely cleanup of SVs that are cloned into a new thread but
-then discovered to be orphaned (i.e., their owners are I<not> cloned). This
+then discovered to be orphaned (i.e., their
+owners are I<not> cloned).  This
 eliminates several "scalars leaked" warnings when joining threads.
 
 =back
@@ -4094,7 +4095,7 @@ they were blocked before by C<POSIX::sigprocmask> [perl #82040].
 =item *
 
 A signal handler called within a signal handler could cause leaks or
-double-frees.  Now fixed. [perl #76248].
+double-frees.  Now fixed [perl #76248].
 
 =back
 
@@ -4112,7 +4113,7 @@ L<substr()|perlfunc/"substr EXPR,OFFSET,LENGTH,REPLACEMENT">,
 L<pos()|perlfunc/"index STR,SUBSTR,POSITION">, L<keys()|perlfunc/"keys HASH">,
 and L<vec()|perlfunc/"vec EXPR,OFFSET,BITS"> could, when used in combination
 with lvalues, result in leaking the scalar value they operate on, and cause its
-destruction to happen too late. This has now been fixed.
+destruction to happen too late.  This has now been fixed.
 
 =item *
 
@@ -4289,7 +4290,7 @@ The ref types in the typemap for XS bindings now support magical variables
 =item *
 
 C<sv_catsv_flags> no longer calls C<mg_get> on its second argument (the
-source string) if the flags passed to it do not include SV_GMAGIC. So it
+source string) if the flags passed to it do not include SV_GMAGIC.  So it
 now matches the documentation.
 
 =item *
