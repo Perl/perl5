@@ -4402,6 +4402,12 @@ You can now use the C<keys>, C<values>, C<each> builtin functions on arrays
 This is actually a change introduced in perl 5.12.0, but it was missed from
 that release's perldelta.
 
+=head2 C<split> and C<@_>
+
+C<split> no longer modifies C<@_> when called in scalar or void context.
+In void context it now produces a "Useless use of split" warning.
+This was also a perl 5.12.0 changed which missed the perldelta.
+
 =head1 Obituary
 
 Randy Kobes, creator of the kobesearch alternative to search.cpan.org and
