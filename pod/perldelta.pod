@@ -3939,7 +3939,7 @@ name was not tainted.
 
 =item *
 
-C<sprintf> now dies when passed a tainted scalar for the format. It did
+C<sprintf> now dies when passed a tainted scalar for the format.  It did
 already die for arbitrary expressions, but not for simple scalars
 [perl #82250].
 
@@ -3978,8 +3978,8 @@ already have values when $^P is assigned to [perl #72422].
 
 C<#line> directives in string evals were not properly updating the arrays
 of lines of code (C<< @{"_<..."} >>) that the debugger (or any debugging or
-profiling module) uses. In threaded builds, they were not being updated at
-all. In non-threaded builds, the line number was ignored, so any change to
+profiling module) uses.  In threaded builds, they were not being updated at
+all.  In non-threaded builds, the line number was ignored, so any change to
 the existing line number would cause the lines to be misnumbered
 [perl #79442].
 
