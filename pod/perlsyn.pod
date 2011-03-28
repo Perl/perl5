@@ -281,7 +281,7 @@ the C<next> statement.
 
 Extension modules can also hook into the Perl parser to define new
 kinds of compound statement.  These are introduced by a keyword which
-the extension recognises, and the syntax following the keyword is
+the extension recognizes, and the syntax following the keyword is
 defined entirely by the extension.  If you are an implementor, see
 L<perlapi/PL_keyword_plugin> for the mechanism.  If you are using such
 a module, see the module's documentation for details of the syntax that
@@ -426,7 +426,7 @@ is therefore visible only within the loop.  Otherwise, the variable is
 implicitly local to the loop and regains its former value upon exiting
 the loop.  If the variable was previously declared with C<my>, it uses
 that variable instead of the global one, but it's still localized to
-the loop.  This implicit localisation occurs I<only> in a C<foreach>
+the loop.  This implicit localization occurs I<only> in a C<foreach>
 loop.
 X<my> X<local>
 
@@ -676,12 +676,12 @@ will test only the regex, which causes both operands to be treated as boolean.
 Watch out for this one, then, because an arrayref is always a true value, which
 makes it effectively redundant.
 
-Tautologous boolean operators are still going to be optimised away. Don't be
+Tautologous boolean operators are still going to be optimized away. Don't be
 tempted to write
 
     when ('foo' or 'bar') { ... }
 
-This will optimise down to C<'foo'>, so C<'bar'> will never be considered (even
+This will optimize down to C<'foo'>, so C<'bar'> will never be considered (even
 though the rules say to use a smart match on C<'foo'>). For an alternation like
 this, an array ref will work, because this will instigate smart matching:
 
