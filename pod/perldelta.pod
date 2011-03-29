@@ -1851,7 +1851,7 @@ C<PerlIO::via> has been upgraded from version 0.09 to 0.11.
 
 =item *
 
-C<Pod::Html> has been upgraded from version 1.09 to 1.1.
+C<Pod::Html> has been upgraded from version 1.09 to 1.11.
 
 =item *
 
