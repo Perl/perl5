@@ -600,7 +600,7 @@ numbers or as a result of 0/0. '+inf' and '-inf' represent plus respectively
 minus infinity. You will get '+inf' when dividing a positive number by 0, and
 '-inf' when dividing any negative number by 0.
 
-=head1 CAVAETS
+=head1 CAVEATS
 
 =over 2
 

@@ -594,7 +594,7 @@ Using methods that do not modify, but testthe contents works:
 See the documentation about the copy constructor and C<=> in overload, as
 well as the documentation in BigInt for further details.
 
-=head1 CAVAETS
+=head1 CAVEATS
 
 =over 2
 

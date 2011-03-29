@@ -503,7 +503,7 @@ This prints out the name and version of all modules used and then exits.
 
 =back
 
-=head1 CAVAETS
+=head1 CAVEATS
 
 =over 2
 
