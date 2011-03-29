@@ -11738,12 +11738,11 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
     dVAR;
     struct regexp *const r = (struct regexp *)SvANY(rx);
     regexp_internal *reti;
-    int len, npar;
+    int len;
     RXi_GET_DECL(r,ri);
 
     PERL_ARGS_ASSERT_REGDUPE_INTERNAL;
     
-    npar = r->nparens+1;
     len = ProgLen(ri);
     
     Newxc(reti, sizeof(regexp_internal) + len*sizeof(regnode), char, regexp_internal);
