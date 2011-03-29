@@ -3,7 +3,7 @@ use strict;
 require Exporter;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION = 1.10;
+$VERSION = 1.11;
 @ISA = qw(Exporter);
 @EXPORT = qw(pod2html htmlify);
 @EXPORT_OK = qw(anchorify);
@@ -362,7 +362,7 @@ sub pod2html {
     # set some variables to their default values if necessary
     my $pod;
     unless (@ARGV && $ARGV[0]) {
-	if ($Podfile) {
+	if ($Podfile and $Podfile ne '-') {
 	    open $pod, '<', $Podfile
 		or die "$0: cannot open $Podfile file for input: $!\n";
 	} else {
@@ -422,8 +422,13 @@ sub pod2html {
     }
 
     # open the output file
-    open my $html, '>', $Htmlfile
-	or die "$0: cannot open $Htmlfile file for output: $!\n";
+    my $html;
+    if($Htmlfile and $Htmlfile ne '-') {
+        open $html, ">", $Htmlfile
+            or die "$0: cannot open $Htmlfile file for output: $!\n";
+    } else {
+        open $html, ">-";
+    }
 
     # put a title in the HTML file if one wasn't specified
     if ($Title eq '') {
@@ -890,7 +895,7 @@ sub scan_podpath {
 
 	    # scan each .pod and .pm file for =item directives
 	    foreach $pod (@files) {
-		open my $fh, '<', '$dirname/$pod'
+		open my $fh, '<', "$dirname/$pod"
 		    or die "$0: error opening $dirname/$pod for input: $!\n";
 		@poddata = <$fh>;
 		close $fh;
