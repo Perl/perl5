@@ -164,6 +164,14 @@ EOT
 	;;
 esac
 
+: is Cwd static or dynamic
+static_cwd='define'
+for f in $dynamic_ext; do
+   case $f in
+       Cwd) static_cwd='undef' ;;
+   esac
+done
+
 : Prepare dependency lists for Makefile.
 dynamic_list=' '
 dynamic_ext_re="lib/auto/re/re.$dlext"
@@ -551,10 +559,14 @@ perl$(OBJ_EXT): git_version.h
 # Making utilities and translators require Cwd.  If we have dynamic
 # loading, we only need miniperl and Cwd.$dlext.  If we have static
 # loading, we need to build perl first.
-case "$usedl" in
-define)
+case "$usedl$static_cwd" in
+defineundef)
     util_deps='$(MINIPERL_EXE) $(CONFIGPM) lib/auto/Cwd/Cwd$(DLSUFFIX) FORCE'
      x2p_deps='$(MINIPERL_EXE) $(CONFIGPM) $(dynamic_ext) FORCE'
+    ;;
+definedefine)
+    util_deps='$(PERL_EXE) $(CONFIGPM) FORCE'
+     x2p_deps='$(PERL_EXE) $(CONFIGPM) $(dynamic_ext) FORCE'
     ;;
 *)  util_deps='$(PERL_EXE) $(CONFIGPM) FORCE'
      x2p_deps='$(PERL_EXE) $(CONFIGPM) FORCE'
