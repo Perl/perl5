@@ -294,11 +294,16 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
     dTHX;
 #endif
     Malloc_t ptr;
+#if defined(PERL_TRACK_MEMPOOL) || defined(HAS_64K_LIMIT) || defined(DEBUGGING)
     MEM_SIZE total_size = 0;
+#endif
 
     /* Even though calloc() for zero bytes is strange, be robust. */
-    if (size && (count <= MEM_SIZE_MAX / size))
+    if (size && (count <= MEM_SIZE_MAX / size)) {
+#if defined(PERL_TRACK_MEMPOOL) || defined(HAS_64K_LIMIT) || defined(DEBUGGING)
 	total_size = size * count;
+#endif
+    }
     else
 	Perl_croak_nocontext("%s", PL_memory_wrap);
 #ifdef PERL_TRACK_MEMPOOL
