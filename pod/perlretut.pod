@@ -1871,9 +1871,11 @@ instance,
 It does not protect C<$> or C<@>, so that variables can still be
 substituted.
 
-C<\Q>, C<\L>, C<\U> and C<\E> are actually part of the syntax of regular
-expression I<literals>, and are not part of regexp syntax proper.  So they
-do not work in interpolated patterns.
+C<\Q>, C<\L>, C<\l>, C<\U>, C<\u> and C<\E> are actually part of
+double-quotish syntax, and not part of regexp syntax proper.  They will
+work if they appear in a regular expression embeddded directly in a
+program, but not when contained in a string that is interpolated in a
+pattern.
 
 With the advent of 5.6.0, Perl regexps can handle more than just the
 standard ASCII character set.  Perl now supports I<Unicode>, a standard
