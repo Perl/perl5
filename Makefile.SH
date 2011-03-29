@@ -188,8 +188,6 @@ for f in $dynamic_ext; do
 $this_target: lib/auto/List/Util/Util.$dlext" ;;
 	Unicode/Normalize) extra_dep="$extra_dep
 $this_target: uni.data" ;;
-	Text/ParseWords) extra_dep="$extra_dep
-$this_target: lib/auto/Scalar/Util.$dlext" ;;
     esac
 done
 
