@@ -904,7 +904,6 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     register XPVHV* xhv;
     register HE *entry;
     register HE **oentry;
-    HE *const *first_entry;
     bool is_utf8 = (k_flags & HVhek_UTF8) ? TRUE : FALSE;
     int masked_flags;
 
@@ -983,7 +982,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
     masked_flags = (k_flags & HVhek_MASK);
 
-    first_entry = oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)];
+    oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)];
     entry = *oentry;
     for (; entry; oentry = &HeNEXT(entry), entry = *oentry) {
 	SV *sv;
@@ -1610,7 +1609,6 @@ S_clear_placeholders(pTHX_ HV *hv, U32 items)
     i = HvMAX(hv);
     do {
 	/* Loop down the linked list heads  */
-	bool first = TRUE;
 	HE **oentry = &(HvARRAY(hv))[i];
 	HE *entry;
 
@@ -1632,7 +1630,6 @@ S_clear_placeholders(pTHX_ HV *hv, U32 items)
 		}
 	    } else {
 		oentry = &HeNEXT(entry);
-		first = FALSE;
 	    }
 	}
     } while (--i >= 0);
@@ -2636,7 +2633,6 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
     register XPVHV* xhv;
     HE *entry;
     register HE **oentry;
-    HE **first;
     bool is_utf8 = FALSE;
     int k_flags = 0;
     const char * const save = str;
@@ -2677,7 +2673,7 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
     } */
     xhv = (XPVHV*)SvANY(PL_strtab);
     /* assert(xhv_array != 0) */
-    first = oentry = &(HvARRAY(PL_strtab))[hash & (I32) HvMAX(PL_strtab)];
+    oentry = &(HvARRAY(PL_strtab))[hash & (I32) HvMAX(PL_strtab)];
     if (he) {
 	const HE *const he_he = &(he->shared_he_he);
         for (entry = *oentry; entry; oentry = &HeNEXT(entry), entry = *oentry) {
