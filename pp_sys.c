@@ -419,7 +419,6 @@ PP(pp_warn)
 {
     dVAR; dSP; dMARK;
     SV *exsv;
-    const char *pv;
     STRLEN len;
     if (SP - MARK > 1) {
 	dTARGET;
@@ -436,7 +435,7 @@ PP(pp_warn)
 	exsv = TOPs;
     }
 
-    if (SvROK(exsv) || (pv = SvPV_const(exsv, len), len)) {
+    if (SvROK(exsv) || (SvPV_const(exsv, len), len)) {
 	/* well-formed exception supplied */
     }
     else if (SvROK(ERRSV)) {
@@ -459,7 +458,6 @@ PP(pp_die)
 {
     dVAR; dSP; dMARK;
     SV *exsv;
-    const char *pv;
     STRLEN len;
 #ifdef VMS
     VMSISH_HUSHED  = VMSISH_HUSHED || (PL_op->op_private & OPpHUSH_VMSISH);
@@ -474,7 +472,7 @@ PP(pp_die)
 	exsv = TOPs;
     }
 
-    if (SvROK(exsv) || (pv = SvPV_const(exsv, len), len)) {
+    if (SvROK(exsv) || (SvPV_const(exsv, len), len)) {
 	/* well-formed exception supplied */
     }
     else if (SvROK(ERRSV)) {
