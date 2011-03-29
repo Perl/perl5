@@ -166,9 +166,11 @@ esac
 
 : is Cwd static or dynamic
 static_cwd='define'
+list_util_dep='$(PERL_EXE)'
 for f in $dynamic_ext; do
    case $f in
        Cwd) static_cwd='undef' ;;
+       List/Util) list_util_dep=lib/auto/List/Util/Util.$dlext
    esac
 done
 
@@ -185,7 +187,7 @@ for f in $dynamic_ext; do
     : Parallel makes reveal that we have some interdependencies
     case $f in
 	Math/BigInt/FastCalc|Devel/NYTProf) extra_dep="$extra_dep
-$this_target: lib/auto/List/Util/Util.$dlext" ;;
+$this_target: $list_util_dep" ;;
 	Unicode/Normalize) extra_dep="$extra_dep
 $this_target: uni.data" ;;
     esac
