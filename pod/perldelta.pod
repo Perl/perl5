@@ -1320,7 +1320,7 @@ C<Benchmark> has been upgraded from version 1.11 to 1.12.
 
 =item *
 
-C<bignum> has been upgraded from version 0.23 to 0.26.
+C<bignum> has been upgraded from version 0.23 to 0.27.
 
 =item *
 
