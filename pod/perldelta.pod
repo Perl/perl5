@@ -3210,11 +3210,8 @@ C<UNICODE_ALLOW_FDD0>, C<UNICODE_ALLOW_FFFF>, C<UNICODE_ILLEGAL>, and
 C<UNICODE_IS_ILLEGAL> have been removed, as they stem from a
 fundamentally broken model of how the Unicode non-character code points
 should be handled, which is now described in
-L<perlunicode/Non-character code points>.  See also L</Selected Bug Fixes>.
-
-XXX Which bugs in particular? Selected Bug Fixes is too long for this link
-to be meaningful right now
-I don't see the bugs in that section currently -- khw
+L<perlunicode/Non-character code points>.  See also the Unicode section
+under L</Selected Bug Fixes>.
 
 =head2 Deprecated C APIs
 
