@@ -996,6 +996,26 @@ peep_xop(pTHX_ OP *o, OP *oldop)
     av_push(MY_CXT.xop_record, newSVpvf("oldop:%"UVxf, PTR2UV(oldop)));
 }
 
+static I32
+filter_call(pTHX_ int idx, SV *buf_sv, int maxlen)
+{
+    SV   *my_sv = FILTER_DATA(idx);
+    char *p;
+    char *end;
+    int n = FILTER_READ(idx + 1, buf_sv, maxlen);
+
+    if (n<=0) return n;
+
+    p = SvPV_force_nolen(buf_sv);
+    end = p + SvCUR(buf_sv);
+    while (p < end) {
+	if (*p == 'o') *p = 'e';
+	p++;
+    }
+    return SvCUR(buf_sv);
+}
+
+
 XS(XS_XS__APItest__XSUB_XS_VERSION_undef);
 XS(XS_XS__APItest__XSUB_XS_VERSION_empty);
 XS(XS_XS__APItest__XSUB_XS_APIVERSION_invalid);
@@ -2749,6 +2769,11 @@ PROTOTYPE: $
 CODE:
     PERL_UNUSED_VAR(items);
     croak("postinc called as a function");
+
+void
+filter()
+CODE:
+    filter_add(filter_call, NULL);
 
 BOOT:
 {

@@ -3090,7 +3090,7 @@ Perl_sv_compile_2op_is_broken(pTHX_ SV *sv, OP **startop, const char *code,
     PERL_ARGS_ASSERT_SV_COMPILE_2OP_IS_BROKEN;
 
     ENTER_with_name("eval");
-    lex_start(sv, NULL, 0);
+    lex_start(sv, NULL, LEX_START_SAME_FILTER);
     SAVETMPS;
     /* switch to eval mode */
 
@@ -3957,7 +3957,7 @@ PP(pp_entereval)
     TAINT_PROPER("eval");
 
     ENTER_with_name("eval");
-    lex_start(sv, NULL, 0);
+    lex_start(sv, NULL, LEX_START_SAME_FILTER);
     SAVETMPS;
 
     /* switch to eval mode */
