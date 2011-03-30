@@ -1409,13 +1409,7 @@ surrogates, which are not real Unicode code points.
 
 Regular expression pattern matching may surprise you if you're not
 accustomed to Unicode.  Starting in Perl 5.14, there are a number of
-modifiers available that control this.  For convenience, they will be
-referred to in this section using the notation, e.g., C<"/a"> even
-though in 5.14, they are not usable in a postfix form after the
-(typical) trailing slash of a regular expression.  (In 5.14, they are
-usable only infix, for example by C</(?a:foo)/>, or by setting them to
-apply across a scope by, e.g., C<use re '/a';>.  It is planned to lift
-this restriction in 5.16.)
+modifiers available that control this.
 
 The C<"/l"> modifier says that the regular expression should match based
 on whatever locale is in effect at execution time.  For example, C<\w>
