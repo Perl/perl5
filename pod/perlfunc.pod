@@ -4552,6 +4552,11 @@ Or:
 Will both leave the sentence as is. Normally, when accepting string input from
 the user, quotemeta() or C<\Q> must be used.
 
+In Perl 5.14, all characters whose code points are above 127 are not
+quoted in UTF-8 encoded strings, but all are quoted in UTF-8 strings.
+It is planned to change this behavior in 5.16, but the exact rules
+haven't been determined yet.
+
 =item rand EXPR
 X<rand> X<random>
 
