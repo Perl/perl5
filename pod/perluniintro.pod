@@ -93,25 +93,40 @@ character.  Firstly, there are unallocated code points within
 otherwise used blocks.  Secondly, there are special Unicode control
 characters that do not represent true characters.
 
-A common myth about Unicode is that it is "16-bit", that is,
-Unicode is only represented as C<0x10000> (or 65536) characters from
-C<0x0000> to C<0xFFFF>.  B<This is untrue.>  Since Unicode 2.0 (July
+When Unicode was first conceived, it was thought that all the world's
+characters could be represented using a 16-bit word; that is a maximum of
+C<0x10000> (or 65536) characters from C<0x0000> to C<0xFFFF> would be
+needed.  This soon proved to be false, and since Unicode 2.0 (July
 1996), Unicode has been defined all the way up to 21 bits (C<0x10FFFF>),
-and since Unicode 3.1 (March 2001), characters have been defined
-beyond C<0xFFFF>.  The first C<0x10000> characters are called the
-I<Plane 0>, or the I<Basic Multilingual Plane> (BMP).  With Unicode
-3.1, 17 (yes, seventeen) planes in all were defined--but they are
-nowhere near full of defined characters, yet.
+and Unicode 3.1 (March 2001) defined the first characters above C<0xFFFF>.
+The first C<0x10000> characters are called the I<Plane 0>, or the
+I<Basic Multilingual Plane> (BMP).  With Unicode 3.1, 17 (yes,
+seventeen) planes in all were defined--but they are nowhere near full of
+defined characters, yet.
 
-Another myth is about Unicode blocks--that they have something to
-do with languages--that each block would define the characters used
-by a language or a set of languages.  B<This is also untrue.>
+When a new language is being encoded, Unicode generally will choose a
+C<block> of consecutive unallocated code points for its characters.  So
+far, the number of code points in these blocks has always been evenly
+divisible by 16.  Extras in a block, not currently needed, are left
+unallocated, for future growth.  But there have been occasions when
+a later relase needed more code points than available extras, and a new
+block had to allocated somewhere else, not contiguous to the initial one
+to handle the overflow.  Thus, it became apparent early on that "block"
+wasn't an adequate organizing principal, and so the C<script> property
+was created.  Those code points that are in overflow blocks can still
+have the same script as the original ones.  The script concept fits more
+closely with natural language: there is C<Latin> script, C<Greek>
+script, and so on; and there are several artificial scripts, like
+C<Common> for characters that are used in multiple scripts, such as
+mathematical symbols.  Scripts usually span varied parts of several
+blocks.  For more information about scripts, see L<perlunicode/Scripts>.
 The division into blocks exists, but it is almost completely
-accidental--an artifact of how the characters have been and
-still are allocated.  Instead, there is a concept called I<scripts>, which is
-more useful: there is C<Latin> script, C<Greek> script, and so on.  Scripts
-usually span varied parts of several blocks.  For more information about
-scripts, see L<perlunicode/Scripts>.
+accidental--an artifact of how the characters have been and still are
+allocated.  (Note that this paragraph has oversimplified things for the
+sake of this being an introduction.  Unicode doesn't really encode
+languages, but the writing systems for them--their scripts; and one
+script can be used by many languages.  Unicode also encodes things that
+aren't really about languages, such as symbols like C<BAGGAGE CLAIM>.)
 
 The Unicode code points are just abstract numbers.  To input and
 output these abstract numbers, the numbers must be I<encoded> or
