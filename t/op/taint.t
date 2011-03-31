@@ -17,7 +17,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 770;
+plan tests => 774;
 
 $| = 1;
 
@@ -2129,6 +2129,19 @@ end
     eval { "A" =~ /\p{$prop}/};
     like($@, qr/Insecure user-defined property \\p{main::IsA}/,
 	    "user-defined property: tainted case");
+}
+
+{
+    # [perl #87336] lc/uc(first) failing to taint the returned string
+    my $source = "foo$TAINT";
+    my $dest = lc $source;
+    is_tainted $dest, "lc(tainted) taints its return value";
+    $dest = lcfirst $source;
+    is_tainted $dest, "lcfirst(tainted) taints its return value";
+    $dest = uc $source;
+    is_tainted $dest, "uc(tainted) taints its return value";
+    $dest = ucfirst $source;
+    is_tainted $dest, "ucfirst(tainted) taints its return value";
 }
 
 # This may bomb out with the alarm signal so keep it last
