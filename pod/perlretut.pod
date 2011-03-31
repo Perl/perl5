@@ -1931,7 +1931,7 @@ One can also use short names or restrict names to a certain alphabet:
     print "\N{sigma} is Greek sigma\n";
 
 A list of full names can be found in F<NamesList.txt> in the Unicode standard
-(available at L<http://www.unicode.org/Public/6.0.0/ucd/>).
+(available at L<http://www.unicode.org/Public/UNIDATA/>).
 
 The answer to requirement 2), as of 5.6.0, is that a regexp uses Unicode
 characters. Internally, this is encoded to bytes using either UTF-8 or a
