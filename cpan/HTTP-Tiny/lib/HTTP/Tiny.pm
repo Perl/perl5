@@ -9,7 +9,7 @@
 #
 package HTTP::Tiny;
 BEGIN {
-  $HTTP::Tiny::VERSION = '0.011';
+  $HTTP::Tiny::VERSION = '0.012';
 }
 use strict;
 use warnings;
@@ -62,6 +62,7 @@ sub mirror {
     my $tempfile = $file . int(rand(2**31));
     open my $fh, ">", $tempfile
         or Carp::croak(qq/Error: Could not open temporary file $tempfile for downloading: $!/);
+    binmode $fh;
     $args->{data_callback} = sub { print {$fh} $_[0] };
     my $response = $self->request('GET', $url, $args);
     close $fh
@@ -759,7 +760,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.011
+version 0.012
 
 =head1 SYNOPSIS
 
@@ -1015,6 +1016,8 @@ always be set to C<close>.
 
 Direct C<https> connections are supported only if L<IO::Socket::SSL> is
 installed.  There is no support for C<https> connections via proxy.
+Any SSL certificate that matches the host is accepted -- SSL certificates
+are not verified against certificate authorities.
 
 =item *
 
