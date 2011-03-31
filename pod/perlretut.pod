@@ -367,8 +367,9 @@ character, or the match fails.  Then
 Now, even C<[0-9]> can be a bother to write multiple times, so in the
 interest of saving keystrokes and making regexps more readable, Perl
 has several abbreviations for common character classes, as shown below.
-Since the introduction of Unicode, these character classes match more
-than just a few characters in the ISO 8859-1 range.
+Since the introduction of Unicode, unless the C<//a> modifier is in
+effect, these character classes match more than just a few characters in
+the ASCII range.
 
 =over 4
 
@@ -408,6 +409,15 @@ in effect, as explained below).
 regardless of whether the modifier C<//s> is in effect.
 
 =back
+
+The C<//a> modifier, available starting in Perl 5.14,  is used to
+restrict the matches of \d, \s, and \w to just those in the ASCII range.
+It is useful to keep your program from being needlessly exposed to full
+Unicode (and its accompanying security considerations) when all you want
+is to process English-like text.  (The "a" may be doubled, C<//aa>, to
+provide even more restrictions, preventing case-insensitive matching of
+ASCII with non-ASCII characters; otherwise a Unicode "Kelvin Sign"
+would caselessly match a "k" or "K".)
 
 The C<\d\s\w\D\S\W> abbreviations can be used both inside and outside
 of character classes.  Here are some in use:
@@ -1643,6 +1653,10 @@ which is the correct answer.  This example illustrates that it is
 important not only to match what is desired, but to reject what is not
 desired.
 
+(There are other regexp modifiers that are available, such as
+C<//o>, C<//d>, and C<//l>, but their specialized uses are beyond the
+scope of this introduction.  )
+
 =head3 Search and replace
 
 Regular expressions also play a big role in I<search and replace>
@@ -1911,11 +1925,18 @@ One can also use short names or restrict names to a certain alphabet:
 A list of full names can be found in F<NamesList.txt> in the Unicode standard
 (available at L<http://www.unicode.org/Public/UNIDATA/>).
 
-The answer to requirement 2), as of 5.6.0, is that a regexp uses Unicode
-characters. Internally, this is encoded to bytes using either UTF-8 or a
-native 8 bit encoding, depending on the history of the string, but
-conceptually it is a sequence of characters, not bytes. See
-L<perlunitut> for a tutorial about that.
+The answer to requirement 2), as of 5.6.0, is that a regexp (mostly)
+uses Unicode characters.  (For messy backward compatibility reasons,
+most but not all semantics of a match will assume Unicode, unless,
+starting in Perl 5.14, you tell it to use full Unicode.  You can do this
+explicitly by using the C<//u> modifier, or you can ask Perl to use the
+modifier implicitly for all regexes in a scope by using C<use 5.012> (or
+higher) or C<use feature 'unicode_strings'>.)  If you want to handle
+Unicode properly, you should ensure that one of these is the case.)
+Internally, this is encoded to bytes using either UTF-8 or a native 8
+bit encoding, depending on the history of the string, but conceptually
+it is a sequence of characters, not bytes. See L<perlunitut> for a
+tutorial about that.
 
 Let us now discuss Unicode character classes.  Just as with Unicode
 characters, there are named Unicode character classes represented by the
@@ -1993,11 +2014,12 @@ character classes.  These have the form C<[:name:]>, with C<name> the
 name of the POSIX class.  The POSIX classes are C<alpha>, C<alnum>,
 C<ascii>, C<cntrl>, C<digit>, C<graph>, C<lower>, C<print>, C<punct>,
 C<space>, C<upper>, and C<xdigit>, and two extensions, C<word> (a Perl
-extension to match C<\w>), and C<blank> (a GNU extension).  If
-Unicode is enabled (see C<perlunicode/The "Unicode Bug">),
-then these classes are defined the same as their
-corresponding Perl Unicode classes: C<[:upper:]> is the same as
-C<\p{IsUpper}>, etc.  The C<[:digit:]>, C<[:word:]>, and
+extension to match C<\w>), and C<blank> (a GNU extension).  The C<//a>
+modifier restricts these to matching just in the ASCII range; otherwise
+they can match the same as their corresponding Perl Unicode classes:
+C<[:upper:]> is the same as C<\p{IsUpper}>, etc.  (There are some
+exceptions and gotchas with this; see L<perlrecharclass> for a full
+discussion.) The C<[:digit:]>, C<[:word:]>, and
 C<[:space:]> correspond to the familiar C<\d>, C<\w>, and C<\s>
 character classes.  To negate a POSIX class, put a C<^> in front of
 the name, so that, e.g., C<[:^digit:]> corresponds to C<\D> and, under
