@@ -176,7 +176,7 @@ In addition to the metacharacters, there are some ASCII characters
 which don't have printable character equivalents and are instead
 represented by I<escape sequences>.  Common examples are C<\t> for a
 tab, C<\n> for a newline, C<\r> for a carriage return and C<\a> for a
-bell.  If your string is better thought of as a sequence of arbitrary
+bell (or alert).  If your string is better thought of as a sequence of arbitrary
 bytes, the octal escape sequence, e.g., C<\033>, or hexadecimal escape
 sequence, e.g., C<\x1B> may be a more natural representation for your
 bytes.  Here are some examples of escapes:
