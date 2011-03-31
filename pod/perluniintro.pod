@@ -670,14 +670,14 @@ C<$a> will stay byte-encoded.
 
 Sometimes you might really need to know the byte length of a string
 instead of the character length. For that use either the
-C<Encode::encode_utf8()> function or the (deprecated) C<bytes> pragma
+C<Encode::encode_utf8()> function or the C<bytes> pragma
 and the C<length()> function:
 
     my $unicode = chr(0x100);
     print length($unicode), "\n"; # will print 1
     require Encode;
     print length(Encode::encode_utf8($unicode)), "\n"; # will print 2
-    use bytes;                    # DEPRECATED!
+    use bytes;
     print length($unicode), "\n"; # will also print 2
                                   # (the 0xC4 0x80 of the UTF-8)
     no bytes;
