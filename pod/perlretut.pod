@@ -1506,31 +1506,6 @@ single line C<//s>, multi-line C<//m>, case-insensitive C<//i> and
 extended C<//x> modifiers.  There are a few more things you might
 want to know about matching operators.
 
-=head3 Optimizing pattern evaluation
-
-We pointed out earlier that variables in regexps are substituted
-before the regexp is evaluated:
-
-    $pattern = 'Seuss';
-    while (<>) {
-        print if /$pattern/;
-    }
-
-This will print any lines containing the word C<Seuss>.  It is not as
-efficient as it could be, however, because Perl has to re-evaluate
-(or compile) C<$pattern> each time through the loop.  If C<$pattern> won't be
-changing over the lifetime of the script, we can add the C<//o>
-modifier, which directs Perl to only perform variable substitutions
-once:
-
-    #!/usr/bin/perl
-    #    Improved simple_grep
-    $regexp = shift;
-    while (<>) {
-        print if /$regexp/o;  # a good deal faster
-    }
-
-
 =head3 Prohibiting substitution
 
 If you change C<$pattern> after the first substitution happens, Perl
@@ -1713,7 +1688,7 @@ the following program to replace it:
     $regexp = shift;
     $replacement = shift;
     while (<>) {
-        s/$regexp/$replacement/go;
+        s/$regexp/$replacement/g;
         print;
     }
     ^D
@@ -1721,9 +1696,10 @@ the following program to replace it:
     % simple_replace regexp regex perlretut.pod
 
 In C<simple_replace> we used the C<s///g> modifier to replace all
-occurrences of the regexp on each line and the C<s///o> modifier to
-compile the regexp only once.  As with C<simple_grep>, both the
-C<print> and the C<s/$regexp/$replacement/go> use C<$_> implicitly.
+occurrences of the regexp on each line.  (Even though the regular
+expression appears in a loop, Perl is smart enough to compile it
+only once.)  As with C<simple_grep>, both the
+C<print> and the C<s/$regexp/$replacement/g> use C<$_> implicitly.
 
 If you don't want C<s///> to change your original variable you can use
 the non-destructive substitute modifier, C<s///r>.  This changes the
@@ -2040,8 +2016,8 @@ Whew! That is all the rest of the characters and character classes.
 
 =head2 Compiling and saving regular expressions
 
-In Part 1 we discussed the C<//o> modifier, which compiles a regexp
-just once.  This suggests that a compiled regexp is some data structure
+In Part 1 we mentioned that Perl compiles a regexp into a compact
+sequence of opcodes.  Thus, a compiled regexp is a data structure
 that can be stored once and used again and again.  The regexp quote
 C<qr//> does exactly that: C<qr/string/> compiles the C<string> as a
 regexp and transforms the result into a form that can be assigned to a
@@ -2116,7 +2092,7 @@ multiple patterns:
     $pattern = join '|', @regexp;
 
     while ($line = <>) {
-        print $line if $line =~ /$pattern/o;
+        print $line if $line =~ /$pattern/;
     }
     ^D
 
@@ -2735,7 +2711,7 @@ combination with embedded code.
 
    %count = ();
    "supercalifragilisticexpialidoceous" =~
-       /([aeiou])(?{ $count{$1}++; })(*FAIL)/oi;
+       /([aeiou])(?{ $count{$1}++; })(*FAIL)/i;
    printf "%3d '%s'\n", $count{$_}, $_ for (sort keys %count);
 
 The pattern begins with a class matching a subset of letters.  Whenever
