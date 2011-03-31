@@ -686,7 +686,7 @@ and the C<length()> function:
 
 How Do I Find Out What Encoding a File Has?
 
-Try L<Encode::Guess>.
+You might try L<Encode::Guess>, but it has a number of limitations.
 
 =item *
 
