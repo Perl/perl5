@@ -84,7 +84,7 @@ locale considers decimal digits.  Only when neither a Unicode interpretation
 nor locale prevails does C<\d> match only the digits '0' to '9' alone.
 
 Unicode digits may cause some confusion, and some security issues.  In UTF-8
-strings, unless the C<"a"> regular expression modifier is specified,
+strings, unless the C</a> regular expression modifier is specified,
 C<\d> matches the same characters matched by
 C<\p{General_Category=Decimal_Number}>, or synonymously,
 C<\p{General_Category=Digit}>.  Starting with Unicode version 4.1, this is the
@@ -188,7 +188,7 @@ vertical whitespace. Furthermore, if the source string is not in UTF-8 format,
 and any locale or EBCDIC code page that is in effect doesn't include them, the
 next line (ASCII-platform C<"\x85">) and the no-break space (ASCII-platform
 C<"\xA0">) characters are not matched by C<\s>, but are by C<\v> and C<\h>
-respectively.  If the C<"a"> modifier is not in effect and the source
+respectively.  If the C</a> modifier is not in effect and the source
 string is in UTF-8 format, both the next line and the no-break space 
 are matched by C<\s>.
 
@@ -232,7 +232,7 @@ page is in effect that changes the C<\s> matching).
 =item [1]
 
 NEXT LINE and NO-BREAK SPACE only match C<\s> if the source string is in
-UTF-8 format and the C<"a"> modifier is not in effect, or if the locale 
+UTF-8 format and the C</a> modifier is not in effect, or if the locale
 or EBCDIC code page in effect includes them.
 
 =back
@@ -565,10 +565,10 @@ and any C<\p> property name can be prefixed with "Is" such as C<\p{IsAlpha}>.)
 Both the C<\p> forms are unaffected by any locale in effect, or whether
 the string is in UTF-8 format or not, or whether the platform is EBCDIC or not.
 In contrast, the POSIX character classes are affected, unless the
-regular expression is compiled with the C<"a"> modifier.  If the C<"a">
+regular expression is compiled with the C</a> modifier.  If the C</a>
 modifier is not in effect, and the source string is in UTF-8 format, the
 POSIX classes behave like their "Full-range" Unicode counterparts.  If
-C<"a"> modifier is in effect; or the source string is not in UTF-8
+C</a> modifier is in effect; or the source string is not in UTF-8
 format, and no locale is in effect, and the platform is not EBCDIC, all
 the POSIX classes behave like their ASCII-range counterparts.
 Otherwise, they behave based on the rules of the locale or EBCDIC code
@@ -716,7 +716,7 @@ the backslash sequences C<\b> and C<\B> are defined in terms of C<\w>
 and C<\W>, they also are affected.)
 
 Starting in Perl 5.14, if the regular expression is compiled with the
-C<"a"> modifier, the behavior doesn't differ regardless of any other
+C</a> modifier, the behavior doesn't differ regardless of any other
 factors.  C<\d> matches the 10 digits 0-9; C<\D> any character but those
 10; C<\s>, exactly the five characters "[ \f\n\r\t]"; C<\w> only the 63
 characters "[A-Za-z0-9_]"; and the C<"[[:posix:]]"> classes only the
@@ -730,7 +730,7 @@ encoded in utf8 (usually as a result of including a literal character
 whose code point is above 255), or if it contains a C<\N{U+...}> or
 C<\N{I<name>}> construct, or (starting in Perl 5.14) if it was compiled
 in the scope of a C<S<use feature "unicode_strings">> pragma and not in
-the scope of a C<S<use locale>> pragma, or has the C<"u"> regular
+the scope of a C<S<use locale>> pragma, or has the C</u> regular
 expression modifier.
 
 Note that one can specify C<"use re '/l'"> for example, for any regular
@@ -744,7 +744,7 @@ affects only ASCII platforms, and only when matching against characters
 whose code points are between 128 and 255 inclusive.  See
 L<perlunicode/The "Unicode Bug">.
 
-For portability reasons, unless the C<"a"> modifier is specified,
+For portability reasons, unless the C</a> modifier is specified,
 it may be better to not use C<\w>, C<\d>, C<\s> or the POSIX character
 classes and use the Unicode properties instead.
 
