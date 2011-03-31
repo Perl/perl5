@@ -402,6 +402,11 @@ but also digits and characters from non-roman scripts
 The period '.' matches any character but "\n" (unless the modifier C<//s> is
 in effect, as explained below).
 
+=item *
+
+\N, like the period, matches any character but "\n", but it does so
+regardless of whether the modifier C<//s> is in effect.
+
 =back
 
 The C<\d\s\w\D\S\W> abbreviations can be used both inside and outside
