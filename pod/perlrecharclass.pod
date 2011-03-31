@@ -107,7 +107,8 @@ have different values.  For example, BENGALI DIGIT FOUR (U+09EA) looks
 very much like an ASCII DIGIT EIGHT (U+0038).
 
 It may be useful for security purposes for an application to require that all
-digits in a row be from the same script.   See L<Unicode::UCD/charscript()>.
+digits in a row be from the same script.  This can be checked by using
+L<Unicode::UCD/num()>.
 
 Any character not matched by C<\d> is matched by C<\D>.
 
