@@ -1726,7 +1726,8 @@ C<print> and the C<s/$regexp/$replacement/go> use C<$_> implicitly.
 
 If you don't want C<s///> to change your original variable you can use
 the non-destructive substitute modifier, C<s///r>.  This changes the
-behavior so that C<s///r> returns the final substituted string:
+behavior so that C<s///r> returns the final substituted string
+(instead of the number of substitutions):
 
     $x = "I like dogs.";
     $y = $x =~ s/dogs/cats/r;
