@@ -8,6 +8,7 @@ $VERSION = '0.280202';
 @ISA = qw(ExtUtils::CBuilder::Base);
 
 use File::Spec::Functions qw(catfile catdir);
+use Config;
 
 # We do prelink, but don't want the parent to redo it.
 
@@ -45,6 +46,20 @@ sub arg_include_dirs {
   return unless @dirs;
 
   return ('/include=(' . join(',', @dirs) . ')');
+}
+
+# We override the compile method because we consume the includes and defines
+# parts of ccflags in the process of compiling but don't save those parts
+# anywhere, so $self->{config}{ccflags} needs to be reset for each compile
+# operation.  
+
+sub compile {
+  my ($self, %args) = @_;
+
+  $self->{config}{ccflags} = $Config{ccflags};
+  $self->{config}{ccflags} = $ENV{CFLAGS} if defined $ENV{CFLAGS};
+
+  return $self->SUPER::compile(%args);
 }
 
 sub _do_link {
