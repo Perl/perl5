@@ -1552,7 +1552,8 @@ the regexp in the I<last successful match> is used instead.  So we have
 
 =head3 Global matching
 
-The final two modifiers C<//g> and C<//c> concern multiple matches.
+The final two modifiers we will disccuss here,
+C<//g> and C<//c>, concern multiple matches.
 The modifier C<//g> stands for global matching and allows the
 matching operator to match within a string as many times as possible.
 In scalar context, successive invocations against a string will have
@@ -1896,8 +1897,8 @@ to know 1) how to represent Unicode characters in a regexp and 2) that
 a matching operation will treat the string to be searched as a sequence
 of characters, not bytes.  The answer to 1) is that Unicode characters
 greater than C<chr(255)> are represented using the C<\x{hex}> notation, because
-\x hex (without curly braces) doesn't go further than 255.  Starting in Perl
-5.14, if you're an octal fan, you can also use C<\o{oct}>.
+\x hex (without curly braces) doesn't go further than 255.  (Starting in Perl
+5.14, if you're an octal fan, you can also use C<\o{oct}>.)
 
     /\x{263a}/;  # match a Unicode smiley face :)
 
@@ -1953,6 +1954,8 @@ example, to match lower and uppercase characters,
     $x =~ /^\p{IsLower}/;   # doesn't match, lowercase char class
     $x =~ /^\P{IsLower}/;   # matches, char class sans lowercase
 
+(The "Is" is optional.)
+
 Here is the association between some Perl named classes and the
 traditional Unicode classes:
 
@@ -2002,7 +2005,7 @@ never have to use the compound forms, but sometimes it is necessary, and their
 use can make your code easier to understand.
 
 C<\X> is an abbreviation for a character class that comprises
-a Unicode I<extended grapheme cluster>.  This represents a "logical character",
+a Unicode I<extended grapheme cluster>.  This represents a "logical character":
 what appears to be a single character, but may be represented internally by more
 than one.  As an example, using the Unicode full names, e.g., S<C<A + COMBINING
 RING>> is a grapheme cluster with base character C<A> and combining character
@@ -2184,7 +2187,7 @@ example is
 This style of commenting has been largely superseded by the raw,
 freeform commenting that is allowed with the C<//x> modifier.
 
-The modifiers C<//i>, C<//m>, C<//s> and C<//x> (or any
+Most modifiers, such as C<//i>, C<//m>, C<//s> and C<//x> (or any
 combination thereof) can also be embedded in
 a regexp using C<(?i)>, C<(?m)>, C<(?s)>, and C<(?x)>.  For instance,
 
