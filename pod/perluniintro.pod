@@ -343,10 +343,8 @@ many encodings have several aliases.  Note that the C<:utf8> layer
 must always be specified exactly like that; it is I<not> subject to
 the loose matching of encoding names. Also note that currently C<:utf8> is unsafe for
 input, because it accepts the data without validating that it is indeed valid
-UTF8; you should instead use C<:encoding(UTF-8)> (unfortunately this
-specification needs to be in all upper-case with the dash to get the
-safety checking; C<:encoding(utf-8)>, for example, doesn't do the
-checking).
+UTF-8; you should instead use C<:encoding(utf-8)> (with or without a
+hyphen).
 
 See L<PerlIO> for the C<:utf8> layer, L<PerlIO::encoding> and
 L<Encode::PerlIO> for the C<:encoding()> layer, and
