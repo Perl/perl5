@@ -44,7 +44,7 @@ Here are some examples:
  "ab" =~  /^.$/     # No match (dot matches one character)
 
 =head2 Backslash sequences
-X<\w> X<\W> X<\s> X<\S> X<\d> X<\D> X<\p> X<\P> 
+X<\w> X<\W> X<\s> X<\S> X<\d> X<\D> X<\p> X<\P>
 X<\N> X<\v> X<\V> X<\h> X<\H>
 X<word> X<whitespace>
 
@@ -75,40 +75,49 @@ character classes, see L<perlrebackslash>.)
 =head3 Digits
 
 C<\d> matches a single character considered to be a decimal I<digit>.
-What is considered a decimal digit depends on several factors, detailed
-below in L</Locale, EBCDIC, Unicode and UTF-8>.  If those factors
-indicate a Unicode interpretation, C<\d> not only matches the digits
-'0' - '9', but also Arabic, Devanagari, and digits from other languages.
-Otherwise, if a locale is in effect, it matches whatever characters that
-locale considers decimal digits.  Only when neither a Unicode interpretation
-nor locale prevails does C<\d> match only the digits '0' to '9' alone.
+If the C</a> modifier in effect, it matches [0-9].  Otherwise, it
+matches anything that is matched by C<\p{Digit}>, which includes [0-9].
+(An unlikely possible exception is that under locale matching rules, the
+current locale might not have [0-9] matched by C<\d>, and/or might match
+other characters whose code point is less than 256.  Such a locale
+definition would be in violation of the C language standard, but Perl
+doesn't currently assume anything in regard to this.)
 
-Unicode digits may cause some confusion, and some security issues.  In UTF-8
-strings, unless the C</a> regular expression modifier is specified,
-C<\d> matches the same characters matched by
-C<\p{General_Category=Decimal_Number}>, or synonymously,
-C<\p{General_Category=Digit}>.  Starting with Unicode version 4.1, this is the
-same set of characters matched by C<\p{Numeric_Type=Decimal}>.  
+What this means is that unless the C</a> modifier is in effect C<\d> not
+only matches the digits '0' - '9', but also Arabic, Devanagari, and
+digits from other languages.  This may cause some confusion, and some
+security issues.
 
+Some digits that C<\d> matches look like some of the [0-9] ones, but
+have different values.  For example, BENGALI DIGIT FOUR (U+09EA) looks
+very much like an ASCII DIGIT EIGHT (U+0038).  An application that
+is expecting only the ASCII digits might be misled, or if the match is
+C<\d+>, the matched string might contain a mixture of digits from
+different writing systems that look like they signify a number different
+than they actually do. L<Unicode::UCD/num()> can be used to safely
+calculate the value, returning C<undef> if the input string contains
+such a mixture.
+
+What C<\p{Digit}> means (and hence C<\d> except under the C</a>
+modifier) is C<\p{General_Category=Decimal_Number}>, or synonymously,
+C<\p{General_Category=Digit}>.  Starting with Unicode version 4.1, this
+is the same set of characters matched by C<\p{Numeric_Type=Decimal}>.
 But Unicode also has a different property with a similar name,
 C<\p{Numeric_Type=Digit}>, which matches a completely different set of
-characters.  These characters are things such as subscripts.
+characters.  These characters are things such as C<CIRCLED DIGIT ONE>
+or subscripts, or are from writing systems that lack all ten digits.
 
-The design intent is for C<\d> to match all digits (and no other characters)
-that can be used with "normal" big-endian positional decimal syntax, whereby a
-sequence of such digits {N0, N1, N2, ...Nn} has the numeric value (...(N0 * 10
-+ N1) * 10 + N2) * 10 ... + Nn).  In Unicode 5.2, the Tamil digits (U+0BE6 -
-U+0BEF) can also legally be used in old-style Tamil numbers in which they would
-appear no more than one in a row, separated by characters that mean "times 10",
-"times 100", etc.  (See L<http://www.unicode.org/notes/tn21>.)
+The design intent is for C<\d> to exactly match the set of characters
+that can safely be used with "normal" big-endian positional decimal
+syntax, where, for example 123 means one 'hundred', plus two 'tens',
+plus three 'ones'.  This positional notation does not necessarily apply
+to characters that match the other type of "digit",
+C<\p{Numeric_Type=Digit}>, and so C<\d> doesn't match them.
 
-Some non-European digits that C<\d> matches look like European ones, but
-have different values.  For example, BENGALI DIGIT FOUR (U+09EA) looks
-very much like an ASCII DIGIT EIGHT (U+0038).
-
-It may be useful for security purposes for an application to require that all
-digits in a row be from the same script.  This can be checked by using
-L<Unicode::UCD/num()>.
+In Unicode 5.2, the Tamil digits (U+0BE6 - U+0BEF) can also legally be
+used in old-style Tamil numbers in which they would appear no more than
+one in a row, separated by characters that mean "times 10", "times 100",
+etc.  (See L<http://www.unicode.org/notes/tn21>.)
 
 Any character not matched by C<\d> is matched by C<\D>.
 
@@ -117,21 +126,52 @@ Any character not matched by C<\d> is matched by C<\D>.
 A C<\w> matches a single alphanumeric character (an alphabetic character, or a
 decimal digit) or a connecting punctuation character, such as an
 underscore ("_").  It does not match a whole word.  To match a whole
-word, use C<\w+>.  This isn't the same thing as matching an English word, but 
+word, use C<\w+>.  This isn't the same thing as matching an English word, but
 in the ASCII range it is the same as a string of Perl-identifier
-characters.  What is considered a
-word character depends on several factors, detailed below in L</Locale,
-EBCDIC, Unicode and UTF-8>.  If those factors indicate a Unicode
-interpretation, C<\w> matches the characters considered word
-characters in the Unicode database. That is, it not only matches ASCII letters,
-but also Thai letters, Greek letters, etc.  This includes connector
+characters.
+
+=over
+
+=item If the C</a> modifier is in effect ...
+
+C<\w> matches the 63 characters [a-zA-Z0-9_].
+
+=item otherwise ...
+
+=over
+
+=item For code points above 255 ...
+
+C<\w> matches the same as C<\p{Word}> matches in this range.  That is,
+it matches Thai letters, Greek letters, etc.  This includes connector
 punctuation (like the underscore) which connect two words together, or
 diacritics, such as a C<COMBINING TILDE> and the modifier letters, which
-are generally used to add auxiliary markings to letters.   If a Unicode
-interpretation is not indicated, C<\w> matches those characters considered
-word characters by the current locale or EBCDIC code page.  Without a
-locale or EBCDIC code page, C<\w> matches the underscore and ASCII letters 
-and digits. 
+are generally used to add auxiliary markings to letters.
+
+=item For code points below 256 ...
+
+=over
+
+=item if locale rules are in effect ...
+
+C<\w> matches the platform's native underscore character plus whatever
+the locale considers to be alphanumeric.
+
+=item if Unicode rules are in effect or if on an EBCDIC platform ...
+
+C<\w> matches exactly what C<\p{Word}> matches.
+
+=item otherwise ...
+
+C<\w> matches [a-zA-Z0-9_].
+
+=back
+
+=back
+
+=back
+
+Which rules apply are determined as described in L<perlre/Which character set modifier is in effect?>.
 
 There are a number of security issues with the full Unicode list of word
 characters.  See L<http://unicode.org/reports/tr36>.
@@ -145,30 +185,62 @@ Any character not matched by C<\w> is matched by C<\W>.
 
 =head3 Whitespace
 
-C<\s> matches any single character considered whitespace.  The exact
-set of characters matched by C<\s> depends on several factors, detailed
-below in L</Locale, EBCDIC, Unicode and UTF-8>.  If those factors
-indicate a Unicode interpretation, C<\s> matches what is considered
-whitespace in the Unicode database; the complete list is in the table
-below. Otherwise, if a locale or EBCDIC code page is in effect,
-C<\s> matches whatever is considered whitespace by the current locale or
-EBCDIC code page. Without a locale or EBCDIC code page, C<\s> matches
-the horizontal tab (C<\t>), the newline (C<\n>), the form feed (C<\f>),
-the carriage return (C<\r>), and the space.  (Note that it doesn't match
-the vertical tab, C<\cK>.)  Perhaps the most notable possible surprise
-is that C<\s> matches a non-breaking space B<only> if a Unicode
-interpretation is indicated, or the locale or EBCDIC code page that is
-in effect happens to have that character.
+C<\s> matches any single character considered whitespace.
+
+=over
+
+=item If the C</a> modifier is in effect ...
+
+C<\s> matches the 5 characters [\t\n\f\r ]; that is, the horizontal tab,
+the newline, the form feed, the carriage return, and the space.  (Note
+that it doesn't match the vertical tab, C<\cK> on ASCII platforms.)
+
+=item otherwise ...
+
+=over
+
+=item For code points above 255 ...
+
+C<\s> matches exactly the code points above 255 shown with an "s" column
+in the table below.
+
+=item For code points below 256 ...
+
+=over
+
+=item if locale rules are in effect ...
+
+C<\s> matches whatever the locale considers to be whitespace.  Note that
+this is likely to include the vertical space, unlike non-locale C<\s>
+matching.
+
+=item if Unicode rules are in effect or if on an EBCDIC platform ...
+
+C<\s> matches exactly the characters shown with an "s" column in the
+table below.
+
+=item otherwise ...
+
+C<\s> matches [\t\n\f\r ].
+Note that this list doesn't include the non-breaking space.
+
+=back
+
+=back
+
+=back
+
+Which rules apply are determined as described in L<perlre/Which character set modifier is in effect?>.
 
 Any character not matched by C<\s> is matched by C<\S>.
 
 C<\h> matches any character considered horizontal whitespace;
-this includes the space and tab characters and several others 
+this includes the space and tab characters and several others
 listed in the table below.  C<\H> matches any character
 not considered horizontal whitespace.
 
 C<\v> matches any character considered vertical whitespace;
-this includes the carriage return and line feed characters (newline) 
+this includes the carriage return and line feed characters (newline)
 plus several other characters, all listed in the table below.
 C<\V> matches any character not considered vertical whitespace.
 
@@ -178,22 +250,16 @@ sequence. Therefore, it cannot be used inside a bracketed character
 class; use C<\v> instead (vertical whitespace).
 Details are discussed in L<perlrebackslash>.
 
-Note that unlike C<\s>, C<\d> and C<\w>, C<\h> and C<\v> always match
+Note that unlike C<\s> (and C<\d> and C<\w>), C<\h> and C<\v> always match
 the same characters, without regard to other factors, such as whether the
 source string is in UTF-8 format.
 
-One might think that C<\s> is equivalent to C<[\h\v]>. This is not true.  The
-vertical tab (C<"\x0b">) is not matched by C<\s>, it is however considered
-vertical whitespace. Furthermore, if the source string is not in UTF-8 format,
-and any locale or EBCDIC code page that is in effect doesn't include them, the
-next line (ASCII-platform C<"\x85">) and the no-break space (ASCII-platform
-C<"\xA0">) characters are not matched by C<\s>, but are by C<\v> and C<\h>
-respectively.  If the C</a> modifier is not in effect and the source
-string is in UTF-8 format, both the next line and the no-break space 
-are matched by C<\s>.
+One might think that C<\s> is equivalent to C<[\h\v]>. This is not true.
+For example, the vertical tab (C<"\x0b">) is not matched by C<\s>, it is
+however considered vertical whitespace.
 
 The following table is a complete listing of characters matched by
-C<\s>, C<\h> and C<\v> as of Unicode 5.2.
+C<\s>, C<\h> and C<\v> as of Unicode 6.0.
 
 The first column gives the code point of the character (in hex format),
 the second column gives the (Unicode) name. The third column indicates
@@ -231,15 +297,11 @@ page is in effect that changes the C<\s> matching).
 
 =item [1]
 
-NEXT LINE and NO-BREAK SPACE only match C<\s> if the source string is in
-UTF-8 format and the C</a> modifier is not in effect, or if the locale
-or EBCDIC code page in effect includes them.
+NEXT LINE and NO-BREAK SPACE may or may not match C<\s> depending
+on the rules in effect.  See
+L<the beginning of this section|/Whitespace>.
 
 =back
-
-It is worth noting that C<\d>, C<\w>, etc, match single characters, not
-complete numbers or words. To match a number (that consists of digits),
-use C<\d+>; to match a word, use C<\w+>.
 
 =head3 \N
 
@@ -274,9 +336,13 @@ C</\pLl/> is valid, but means something different.
 It matches a two character string: a letter (Unicode property C<\pL>),
 followed by a lowercase C<l>.
 
+If neither the C</a> modifier nor locale rules are in effect, the use of
+a Unicode property will force the regular expression into using Unicode
+rules.
+
 Note that almost all properties are immune to case-insensitive matching.
 That is, adding a C</i> regular expression modifier does not change what
-they match.  There are two sets affected.  The first set is
+they match.  There are two sets that are affected.  The first set is
 C<Uppercase_Letter>,
 C<Lowercase_Letter>,
 and C<Titlecase_Letter>,
@@ -289,8 +355,8 @@ all of which match C<Cased> under C</i> matching.
 (The difference between these sets is that some things, such as Roman
 Numerals, come in both upper and lower case so they are C<Cased>, but
 aren't considered to be letters, so they aren't C<Cased_Letter>s. They're
-actually C<Letter_Number>s.) 
-This set also includes its subsets C<PosixUpper> and C<PosixLower>, both 
+actually C<Letter_Number>s.)
+This set also includes its subsets C<PosixUpper> and C<PosixLower>, both
 of which under C</i> matching match C<PosixAlpha>.
 
 For more details on Unicode properties, see L<perlunicode/Unicode
@@ -324,6 +390,10 @@ L<perlunicode/User-Defined Character Properties>.
                            # Thai Unicode class.
  "a"  =~  /\P{Lao}/ # Match, as "a" is not a Laotian character.
 
+It is worth emphasizing that C<\d>, C<\w>, etc, match single characters, not
+complete numbers or words. To match a number (that consists of digits),
+use C<\d+>; to match a word, use C<\w+>.  But be aware of the security
+considerations in doing so, as mentioned above.
 
 =head2 Bracketed Character Classes
 
@@ -459,7 +529,7 @@ Unicode letters.
 
 This syntax make the caret a special character inside a bracketed character
 class, but only if it is the first character of the class. So if you want
-the caret as one of the characters to match, either escape the caret or 
+the caret as one of the characters to match, either escape the caret or
 else not list it first.
 
 Examples:
@@ -504,8 +574,7 @@ X<lower> X<print> X<punct> X<space> X<upper> X<word> X<xdigit>
 POSIX character classes have the form C<[:class:]>, where I<class> is
 name, and the C<[:> and C<:]> delimiters. POSIX character classes only appear
 I<inside> bracketed character classes, and are a convenient and descriptive
-way of listing a group of characters, though they can suffer from
-portability issues (see below and L<Locale, EBCDIC, Unicode and UTF-8>).
+way of listing a group of characters.
 
 Be careful about the syntax,
 
@@ -517,7 +586,7 @@ Be careful about the syntax,
 
 The latter pattern would be a character class consisting of a colon,
 and the letters C<a>, C<l>, C<p> and C<h>.
-POSIX character classes can be part of a larger bracketed character class.  
+POSIX character classes can be part of a larger bracketed character class.
 For example,
 
  [01[:alpha:]%]
@@ -552,42 +621,74 @@ the table, matches only characters in the ASCII character set.
 The other counterpart, in the column labelled "Full-range Unicode", matches any
 appropriate characters in the full Unicode character set.  For example,
 C<\p{Alpha}> matches not just the ASCII alphabetic characters, but any
-character in the entire Unicode character set considered alphabetic.  
+character in the entire Unicode character set considered alphabetic.
 The column labelled "backslash sequence" is a (short) synonym for
 the Full-range Unicode form.
 
 (Each of the counterparts has various synonyms as well.
 L<perluniprops/Properties accessible through \p{} and \P{}> lists all
-synonyms, plus all characters matched by each ASCII-range property.  
+synonyms, plus all characters matched by each ASCII-range property.
 For example, C<\p{AHex}> is a synonym for C<\p{ASCII_Hex_Digit}>,
 and any C<\p> property name can be prefixed with "Is" such as C<\p{IsAlpha}>.)
 
-Both the C<\p> forms are unaffected by any locale in effect, or whether
-the string is in UTF-8 format or not, or whether the platform is EBCDIC or not.
-In contrast, the POSIX character classes are affected, unless the
-regular expression is compiled with the C</a> modifier.  If the C</a>
-modifier is not in effect, and the source string is in UTF-8 format, the
-POSIX classes behave like their "Full-range" Unicode counterparts.  If
-C</a> modifier is in effect; or the source string is not in UTF-8
-format, and no locale is in effect, and the platform is not EBCDIC, all
-the POSIX classes behave like their ASCII-range counterparts.
-Otherwise, they behave based on the rules of the locale or EBCDIC code
-page.
+Both the C<\p> counterparts always assume Unicode rules are in effect.
+On ASCII platforms, this means they assume that the code points from 128
+to 255 are Latin-1, and that means that using them under locale rules is
+unwise unless the locale is guaranteed to be Latin-1.  In contrast, the
+POSIX character classes are useful under locale rules.  They are
+affected by the actual rules in effect, as follows:
 
-It is proposed to change this behavior in a future release of Perl so that the
-the UTF-8-ness of the source string will be irrelevant to the behavior of the
-POSIX character classes.  This means they will always behave in strict
-accordance with the official POSIX standard.  That is, if either locale or
-EBCDIC code page is present, they will behave in accordance with those; if
-absent, the classes will match only their ASCII-range counterparts.  If you
-wish to comment on this proposal, send email to C<perl5-porters@perl.org>.
+=over
+
+=item If the C</a> modifier, is in effect ...
+
+Each of the POSIX classes matches exactly the same as their ASCII-range
+counterparts.
+
+=item otherwise ...
+
+=over
+
+=item For code points above 255 ...
+
+The POSIX class matches the same as its Full-range counterpart.
+
+=item For code points below 256 ...
+
+=over
+
+=item if locale rules are in effect ...
+
+The POSIX class matches according to the locale.
+
+=item if Unicode rules are in effect or if on an EBCDIC platform ...
+
+The POSIX class matches the same as the Full-range counterpart.
+
+=item otherwise ...
+
+The POSIX class matches the same as the ASCII range counterpart.
+
+=back
+
+=back
+
+=back
+
+Which rules apply are determined as described in L<perlre/Which character set modifier is in effect?>.
+
+It is proposed to change this behavior in a future release of Perl so that
+whether or not Unicode rules are in effect would not change the
+behavior:  Outside of locale or an EBCDIC code page, the POSIX classes
+would behave like their ASCII-range counterparts.  If you wish to
+comment on this proposal, send email to C<perl5-porters@perl.org>.
 
  [[:...:]]      ASCII-range          Full-range  backslash  Note
                  Unicode              Unicode     sequence
  -----------------------------------------------------
    alpha      \p{PosixAlpha}       \p{XPosixAlpha}
    alnum      \p{PosixAlnum}       \p{XPosixAlnum}
-   ascii      \p{ASCII}          
+   ascii      \p{ASCII}
    blank      \p{PosixBlank}       \p{XPosixBlank}  \h      [1]
                                    or \p{HorizSpace}        [1]
    cntrl      \p{PosixCntrl}       \p{XPosixCntrl}          [2]
@@ -600,7 +701,7 @@ wish to comment on this proposal, send email to C<perl5-porters@perl.org>.
    space      \p{PosixSpace}       \p{XPosixSpace}          [6]
    upper      \p{PosixUpper}       \p{XPosixUpper}
    word       \p{PosixWord}        \p{XPosixWord}   \w
-   xdigit     \p{ASCII_Hex_Digit}  \p{XPosixXDigit}
+   xdigit     \p{PosixXDigit}      \p{XPosixXDigit}
 
 =over 4
 
@@ -612,12 +713,12 @@ C<\p{Blank}> and C<\p{HorizSpace}> are synonyms.
 
 Control characters don't produce output as such, but instead usually control
 the terminal somehow: for example, newline and backspace are control characters.
-In the ASCII range, characters whose ordinals are between 0 and 31 inclusive,
+In the ASCII range, characters whose code points are between 0 and 31 inclusive,
 plus 127 (C<DEL>) are control characters.
 
 On EBCDIC platforms, it is likely that the code page will define C<[[:cntrl:]]>
 to be the EBCDIC equivalents of the ASCII controls, plus the controls
-that in Unicode have ordinals from 128 through 159.
+that in Unicode have code pointss from 128 through 159.
 
 =item [3]
 
@@ -646,13 +747,14 @@ C<\p{XPosixPunct}> and (in Unicode mode) C<[[:punct:]]>, match what
 C<\p{PosixPunct}> matches in the ASCII range, plus what C<\p{Punct}>
 matches.  This is different than strictly matching according to
 C<\p{Punct}>.  Another way to say it is that
-for a UTF-8 string, C<[[:punct:]]> matches all characters that Unicode
-considers punctuation, plus all ASCII-range characters that Unicode
-considers symbols.
+if Unicode rules are in effect, C<[[:punct:]]> matches all characters
+that Unicode considers punctuation, plus all ASCII-range characters that
+Unicode considers symbols.
 
 =item [6]
 
-C<\p{SpacePerl}> and C<\p{Space}> differ only in that C<\p{Space}> additionally
+C<\p{SpacePerl}> and C<\p{Space}> differ only in that in non-locale
+matching, C<\p{Space}> additionally
 matches the vertical tab, C<\cK>.   Same for the two ASCII-only range forms.
 
 =back
@@ -678,13 +780,12 @@ Some examples:
  [[:^word:]]    \P{PerlWord}    \P{XPosixWord}    \W
 
 The backslash sequence can mean either ASCII- or Full-range Unicode,
-depending on various factors.  See L</Locale, EBCDIC, Unicode and UTF-8>
-below.
+depending on various factors as described in L<perlre/Which character set modifier is in effect?>.
 
 =head4 [= =] and [. .]
 
 Perl recognizes the POSIX character classes C<[=class=]> and
-C<[.class.]>, but does not (yet?) support them.  Any attempt to use 
+C<[.class.]>, but does not (yet?) support them.  Any attempt to use
 either construct raises an exception.
 
 =head4 Examples
@@ -701,66 +802,3 @@ either construct raises an exception.
 			  # hex digit.  The result matches all
 			  # characters except the letters 'a' to 'f' and
 			  # 'A' to 'F'.
-
-
-=head2 Locale, EBCDIC, Unicode and UTF-8
-
-Some of the character classes have a somewhat different behaviour
-depending on the internal encoding of the source string, whether the regular
-expression is marked as having Unicode semantics, whatever locale is in
-effect, and whether the program is running on an EBCDIC platform.
-
-C<\w>, C<\d>, C<\s> and the POSIX character classes (and their
-negations, including C<\W>, C<\D>, C<\S>) have this behaviour.  (Since
-the backslash sequences C<\b> and C<\B> are defined in terms of C<\w>
-and C<\W>, they also are affected.)
-
-Starting in Perl 5.14, if the regular expression is compiled with the
-C</a> modifier, the behavior doesn't differ regardless of any other
-factors.  C<\d> matches the 10 digits 0-9; C<\D> any character but those
-10; C<\s>, exactly the five characters "[ \f\n\r\t]"; C<\w> only the 63
-characters "[A-Za-z0-9_]"; and the C<"[[:posix:]]"> classes only the
-appropriate ASCII characters, the same characters as are matched by the
-corresponding C<\p{}> property given in the "ASCII-range Unicode" column
-in the table above.  (The behavior of all of their complements follows
-the same paradigm.)
-
-Otherwise, a regular expression is marked for Unicode semantics if it is
-encoded in utf8 (usually as a result of including a literal character
-whose code point is above 255), or if it contains a C<\N{U+...}> or
-C<\N{I<name>}> construct, or (starting in Perl 5.14) if it was compiled
-in the scope of a C<S<use feature "unicode_strings">> pragma and not in
-the scope of a C<S<use locale>> pragma, or has the C</u> regular
-expression modifier.
-
-Note that one can specify C<"use re '/l'"> for example, for any regular
-expression modifier, and this has precedence over either of the
-C<S<use feature "unicode_strings">> or C<S<use locale>> pragmas.
-
-The differences in behavior between locale and non-locale semantics
-can affect any character whose code point is 255 or less.  The
-differences in behavior between Unicode and non-Unicode semantics
-affects only ASCII platforms, and only when matching against characters
-whose code points are between 128 and 255 inclusive.  See
-L<perlunicode/The "Unicode Bug">.
-
-For portability reasons, unless the C</a> modifier is specified,
-it may be better to not use C<\w>, C<\d>, C<\s> or the POSIX character
-classes and use the Unicode properties instead.
-
-That way you can control whether you want matching of characters in
-the ASCII character set alone, or whether to match Unicode characters.
-C<S<use feature "unicode_strings">> allows seamless Unicode behavior
-no matter the internal encodings, but won't allow restricting
-to ASCII characters only.
-
-=head4 Examples
-
- $str =  "\xDF";      # $str is not in UTF-8 format.
- $str =~ /^\w/;       # No match, as $str isn't in UTF-8 format.
- $str .= "\x{0e0b}";  # Now $str is in UTF-8 format.
- $str =~ /^\w/;       # Match! $str is now in UTF-8 format.
- chop $str;
- $str =~ /^\w/;       # Still a match! $str remains in UTF-8 format.
-
-=cut
