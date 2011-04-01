@@ -1143,7 +1143,7 @@ over time are given in C<CPAN::Meta::History>.
 
 =item *
 
-C<HTTP::Tiny> 0.011 has been added as a dual-life module.  It is a very
+C<HTTP::Tiny> 0.012 has been added as a dual-life module.  It is a very
 small, simple HTTP/1.1 client designed for simple GET requests and file
 mirroring.  It has has been added to enable CPAN.pm and CPANPLUS to
 "bootstrap" HTTP access to CPAN using pure Perl without relying on external
