@@ -3953,6 +3953,12 @@ C<sprintf> now dies when passed a tainted scalar for the format.  It did
 already die for arbitrary expressions, but not for simple scalars
 [perl #82250].
 
+=item *
+
+C<lc>, C<uc>, C<lcfirst> and C<ucfirst> no longer return untainted strings
+when the argument is tainted.  This has been broken since perl 5.8.9
+[perl #87336].
+
 =back
 
 =head2 The Debugger
