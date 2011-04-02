@@ -370,22 +370,7 @@ no string left to it, so it matches 0 times.
 =head2 More matching
 
 There are a few more things you might want to know about matching
-operators.  In the code
-
-    $pattern = 'Seuss';
-    while (<>) {
-        print if /$pattern/;
-    }
-
-Perl has to re-evaluate C<$pattern> each time through the loop.  If
-C<$pattern> won't be changing, use the C<//o> modifier, to only
-perform variable substitutions once.  If you don't want any
-substitutions at all, use the special delimiter C<m''>:
-
-    @pattern = ('Seuss');
-    m/@pattern/; # matches 'Seuss'
-    m'@pattern'; # matches the literal string '@pattern'
-
+operators.
 The global modifier C<//g> allows the matching operator to match
 within a string as many times as possible.  In scalar context,
 successive matches against a string will have C<//g> jump from match
