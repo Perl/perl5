@@ -7,7 +7,7 @@
 #	Windows SDK 64-bit compiler and tools
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl513.dll).  Also makes individual DLLs for the XS extensions.
+# (perl514.dll).  Also makes individual DLLs for the XS extensions.
 #
 
 ##
@@ -39,7 +39,7 @@ INST_TOP	*= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-#INST_VER	*= \5.13.11
+#INST_VER	*= \5.14.0
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -170,7 +170,7 @@ CCTYPE		*= GCC
 # set this to additionally provide a statically linked perl-static.exe.
 # Note that dynamic loading will not work with this perl, so you must
 # include required modules statically using the STATIC_EXT or ALL_STATIC
-# variables below. A static library perl513s.lib will also be created.
+# variables below. A static library perl514s.lib will also be created.
 # Ordinary perl.exe is not affected by this option.
 #
 #BUILD_STATIC	*= define
@@ -803,8 +803,8 @@ CFGH_TMPL	= config_H.gc64nox
 CFGSH_TMPL	= config.gc
 CFGH_TMPL	= config_H.gc
 .ENDIF
-PERLIMPLIB	= ..\libperl513$(a)
-PERLSTATICLIB	= ..\libperl513s$(a)
+PERLIMPLIB	= ..\libperl514$(a)
+PERLSTATICLIB	= ..\libperl514s$(a)
 
 .ELSE
 
@@ -820,9 +820,9 @@ CFGH_TMPL	= config_H.vc
 
 # makedef.pl must be updated if this changes, and this should normally
 # only change when there is an incompatible revision of the public API.
-PERLIMPLIB	*= ..\perl513$(a)
-PERLSTATICLIB	*= ..\perl513s$(a)
-PERLDLL		= ..\perl513.dll
+PERLIMPLIB	*= ..\perl514$(a)
+PERLSTATICLIB	*= ..\perl514s$(a)
+PERLDLL		= ..\perl514.dll
 
 XCOPY		= xcopy /f /r /i /d /y
 RCOPY		= xcopy /f /r /i /e /d /y

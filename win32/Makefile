@@ -5,7 +5,7 @@
 #	Windows SDK 64-bit compiler and tools
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl513.dll).  Also makes individual DLLs for the XS extensions.
+# (perl514.dll).  Also makes individual DLLs for the XS extensions.
 #
 
 ##
@@ -37,7 +37,7 @@ INST_TOP	= $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-#INST_VER	= \5.13.11
+#INST_VER	= \5.14.0
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -152,7 +152,7 @@ CCTYPE		= MSVC60
 # set this to additionally provide a statically linked perl-static.exe.
 # Note that dynamic loading will not work with this perl, so you must
 # include required modules statically using the STATIC_EXT or ALL_STATIC
-# variables below. A static library perl513s.lib will also be created.
+# variables below. A static library perl514s.lib will also be created.
 # Ordinary perl.exe is not affected by this option.
 #
 #BUILD_STATIC	= define
@@ -516,9 +516,9 @@ $(o).dll:
 
 # makedef.pl must be updated if this changes, and this should normally
 # only change when there is an incompatible revision of the public API.
-PERLIMPLIB	= ..\perl513.lib
-PERLSTATICLIB	= ..\perl513s.lib
-PERLDLL		= ..\perl513.dll
+PERLIMPLIB	= ..\perl514.lib
+PERLSTATICLIB	= ..\perl514s.lib
+PERLDLL		= ..\perl514.dll
 
 MINIPERL	= ..\miniperl.exe
 MINIDIR		= .\mini
