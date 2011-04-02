@@ -19,7 +19,7 @@ contains that word:
     "Hello World" =~ /World/;  # matches
 
 In this statement, C<World> is a regex and the C<//> enclosing
-C</World/> tells perl to search a string for a match.  The operator
+C</World/> tells Perl to search a string for a match.  The operator
 C<=~> associates the string with the regex match and produces a true
 value if the regex matched, or false if the regex did not match.  In
 our case, C<World> matches the second word in C<"Hello World">, so the
@@ -58,7 +58,7 @@ statement to be true:
     "Hello World" =~ /o W/;    # matches, ' ' is an ordinary char
     "Hello World" =~ /World /; # doesn't match, no ' ' at end
 
-perl will always match at the earliest possible point in the string:
+Perl will always match at the earliest possible point in the string:
 
     "Hello World" =~ /o/;       # matches 'o' in 'Hello'
     "That hat is red" =~ /hat/; # matches 'hat' in 'That'
@@ -235,11 +235,11 @@ boundary.
 
 We can match different character strings with the B<alternation>
 metacharacter C<'|'>.  To match C<dog> or C<cat>, we form the regex
-C<dog|cat>.  As before, perl will try to match the regex at the
+C<dog|cat>.  As before, Perl will try to match the regex at the
 earliest possible point in the string.  At each character position,
-perl will first try to match the first alternative, C<dog>.  If
-C<dog> doesn't match, perl will then try the next alternative, C<cat>.
-If C<cat> doesn't match either, then the match fails and perl moves to
+Perl will first try to match the first alternative, C<dog>.  If
+C<dog> doesn't match, Perl will then try the next alternative, C<cat>.
+If C<cat> doesn't match either, then the match fails and Perl moves to
 the next position in the string.  Some examples:
 
     "cats and dogs" =~ /cat|dog|bird/;  # matches "cat"
@@ -377,7 +377,7 @@ operators.  In the code
         print if /$pattern/;
     }
 
-perl has to re-evaluate C<$pattern> each time through the loop.  If
+Perl has to re-evaluate C<$pattern> each time through the loop.  If
 C<$pattern> won't be changing, use the C<//o> modifier, to only
 perform variable substitutions once.  If you don't want any
 substitutions at all, use the special delimiter C<m''>:
