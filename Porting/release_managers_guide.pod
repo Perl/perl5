@@ -296,6 +296,14 @@ to an earlier release. When releasing a stable perl version, the C<PERL_API_*>
 constants C<MUST NOT> be changed as we aim to guarantee binary compatibility
 in maint branches.
 
+
+
+Test your changes:
+
+    $ ./Configure -des -Dusedevel
+    $ make
+    $ make test
+
 Commit your changes:
 
     $ git st
