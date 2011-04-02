@@ -21,7 +21,7 @@ false if the match succeeds, and true if it fails.
 
     $var !~ /foo/;
 
-C<m/pattern/msixpogc> searches a string for a pattern match,
+C<m/pattern/msixpogcdual> searches a string for a pattern match,
 applying the given options.
 
     m  Multiline mode - ^ and $ match internal lines
@@ -33,17 +33,23 @@ applying the given options.
     o  compile pattern Once
     g  Global - all occurrences
     c  don't reset pos on failed matches when using /g
+    a  restrict \d, \s, \w and [:posix:] to match ASCII only
+    aa (two a's) also /i matches exclude ASCII/non-ASCII
+    l  match according to current locale
+    u  match according to Unicode rules
+    d  match according to native rules unless something indicates
+       Unicode
 
 If 'pattern' is an empty string, the last I<successfully> matched
 regex is used. Delimiters other than '/' may be used for both this
 operator and the following ones. The leading C<m> can be omitted
 if the delimiter is '/'.
 
-C<qr/pattern/msixpo> lets you store a regex in a variable,
+C<qr/pattern/msixpodual> lets you store a regex in a variable,
 or pass one around. Modifiers as for C<m//>, and are stored
 within the regex.
 
-C<s/pattern/replacement/msixpogce> substitutes matches of
+C<s/pattern/replacement/msixpogcedual> substitutes matches of
 'pattern' with 'replacement'. Modifiers as for C<m//>,
 with two additions:
 
