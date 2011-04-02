@@ -173,7 +173,7 @@ POSIX character classes and their Unicode and Perl equivalents:
  punct   PosixPunct       XPosixPunct            Punctuation and Symbols
                                                    in ASCII-range; just
                                                    punct outside it
- space   PosixSpace       XPosixSpace   [\s\cK]  Whitespace
+ space   PosixSpace       XPosixSpace            [\s\cK]
          PerlSpace        XPerlSpace    \s       Perl's whitespace def'n
  upper   PosixUpper       XPosixUpper            Uppercase characters
  word    PerlWord         XPosixWord    \w       Alnum + Unicode marks +
