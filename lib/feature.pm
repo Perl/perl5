@@ -1,6 +1,6 @@
 package feature;
 
-our $VERSION = '1.19';
+our $VERSION = '1.20';
 
 # (feature name) => (internal name, used in %^H)
 my %feature = (
@@ -22,6 +22,7 @@ my %feature_bundle = (
     "5.11" => [qw(switch say state unicode_strings)],
     "5.12" => [qw(switch say state unicode_strings)],
     "5.13" => [qw(switch say state unicode_strings)],
+    "5.14" => [qw(switch say state unicode_strings)],
 );
 
 # special case
