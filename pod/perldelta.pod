@@ -3850,10 +3850,6 @@ too many or too few times have been fixed:
 
 =item *
 
-FETCH is no longer called on tied variables in void context.
-
-=item *
-
 C<$tied-E<gt>()> did not always call FETCH [perl #8438].
 
 =item *
