@@ -23,6 +23,11 @@ This document briefly describes Perl under Mac OS X.
 The latest Perl release (5.12.3 as of this writing) builds without changes
 under all versions of Mac OS X from 10.3 "Panther" onwards. 
 
+In order to build your own version of Perl you will need 'make'
+this is part of the Apples developer tools (you only need the 'unix tools'),
+usually supplied with Mac OS install DVDs. You do not need the latest 
+version of Xcode (which is now charged for) in order to install make.
+
 Earlier Mac OS X releases (10.2 "Jaguar" and older) did not include a
 completely thread-safe libc, so threading is not fully supported. Also,
 earlier releases included a buggy libdb, so some of the DB_File tests
