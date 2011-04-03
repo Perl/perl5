@@ -190,14 +190,6 @@ in the current release of Perl by making the test ignore the broken locale.
 If you need to use the eu_ES locale, you should contact Apple support.
 
 
-=head2 Carbon
-
-MacPerl ships with a number of modules that are used to access the
-classic MacOS toolbox. Many of these modules have been updated to use
-Mac OS X's newer "Carbon" toolbox, and are available from CPAN in the
-"Mac::Carbon" module.
-
-
 =head2 Cocoa
 
 There are two ways to use Cocoa from Perl. Apple's PerlObjCBridge
