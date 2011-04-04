@@ -3717,6 +3717,17 @@ also means that destructors can vivify entries in the glob.  So perl tries
 again and, if the entries are re-created too many times, dies with a
 'panic: gp_free...' error message.
 
+=item *
+
+If a typeglob is freed while a subroutine attached to it is still
+referenced elsewhere, the subroutine is renamed to __ANON__ in the same
+package, unless the package has been undefined, in which case the __ANON__
+package is used.  This could cause packages to be autovivified in some
+cases; e.g., if the package had been deleted.  Now this is no longer the
+case.  The __ANON__ package is now used also when the original package is
+no longer attached to the symbol table.  This avoids memory leaks in some
+cases [perl #87664].
+
 =back
 
 =head2 Unicode
