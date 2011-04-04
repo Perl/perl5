@@ -1561,7 +1561,7 @@ C<Fcntl> has been upgraded from version 1.06 to 1.11.
 
 =item *
 
-C<File::Basename> has been upgraded from version 2.78 to 2.81.
+C<File::Basename> has been upgraded from version 2.78 to 2.82.
 
 =item *
 
