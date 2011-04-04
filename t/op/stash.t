@@ -7,7 +7,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan( tests => 51 );
+plan( tests => 53 );
 
 # Used to segfault (bug #15479)
 fresh_perl_like(
@@ -135,6 +135,19 @@ SKIP: {
     { local $TODO = 'STASHES not anonymized';
 	is($st, q/__ANON__/, "...and an __ANON__ stash");
     }
+
+    my $sub = do {
+	package six;
+	\&{"six"}
+    };
+    my $stash_glob = delete $::{"six::"};
+    # Now free the GV while the stash still exists (though detached)
+    delete $$stash_glob{"six"};
+    $gv = B::svref_2object($sub)->GV;
+    ok($gv->isa(q/B::GV/),
+       'anonymised CV whose stash is detached still has a GV');
+    is $gv->STASH->NAME, '__ANON__',
+     'CV anonymised when its stash is detached becomes __ANON__::__ANON__';
 
     # CvSTASH should be null on a named sub if the stash has been deleted
     {

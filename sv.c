@@ -5991,7 +5991,8 @@ S_anonymise_cv_maybe(pTHX_ GV *gv, CV* cv)
     }
 
     /* if not, anonymise: */
-    stash  = GvSTASH(gv) ? HvNAME(GvSTASH(gv)) : NULL;
+    stash  = GvSTASH(gv) && HvNAME(GvSTASH(gv))
+              ? HvENAME(GvSTASH(gv)) : NULL;
     gvname = Perl_newSVpvf(aTHX_ "%s::__ANON__",
 					stash ? stash : "__ANON__");
     anongv = gv_fetchsv(gvname, GV_ADDMULTI, SVt_PVCV);
