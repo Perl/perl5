@@ -197,7 +197,7 @@ sub bin_int_test {
 }
 
 our $TODO;
-my  $todo = 'bug #87726';
+my  $todo = 'bug #87708';
 {
     local $TODO = $todo;
     bin_test '**',  2, 3, 8;
