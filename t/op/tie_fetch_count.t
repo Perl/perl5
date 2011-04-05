@@ -1,13 +1,13 @@
 #!./perl
 # Tests counting number of FETCHes.
 #
-# See Bug #76814.
+# See Bugs #76814 and #87708.
 
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 94);
+    plan (tests => 172);
 }
 
 use strict;
@@ -15,14 +15,25 @@ use warnings;
 
 my $count = 0;
 
-sub TIESCALAR {bless \do {my $var = $_ [1]} => $_ [0];}
-sub FETCH {$count ++; ${$_ [0]}}
+# Usage:
+#   tie $var, "main", $val;          # FETCH returns $val
+#   tie $var, "main", $val1, $val2;  # FETCH returns the values in order,
+#                                    # one at a time, repeating the last
+#                                    # when the list is exhausted.
+sub TIESCALAR {my $pack = shift; bless [@_], $pack;}
+sub FETCH {$count ++; @{$_ [0]} == 1 ? ${$_ [0]}[0] : shift @{$_ [0]}}
 sub STORE {1;}
 
 
 sub check_count {
     my $op = shift;
-    is $count, 1, "FETCH called just once using '$op'";
+    my $expected = shift() // 1;
+    is $count, $expected,
+        "FETCH called " . (
+          $expected == 1 ? "just once" : 
+          $expected == 2 ? "twice"     :
+                           "$count times"
+        ) . " using '$op'";
     $count = 0;
 }
 
@@ -161,5 +172,89 @@ $dummy  = %$var3        ; check_count '%{}';
 
 tie my $var5 => 'main', sub {1};
 $dummy  = &$var5        ; check_count '&{}';
+
+
+###############################################
+#        Tests for  $foo binop $foo           #
+###############################################
+
+# These test that binary ops call FETCH twice if the same scalar is used
+# for both operands. They also test that both return values from
+# FETCH are used.
+
+sub bin_test {
+    my $op = shift;
+    tie my $var, "main", @_[0..$#_-1];
+    is(eval "\$var $op \$var", pop, "retval of \$var $op \$var");
+    check_count $op, 2;
+}
+sub bin_int_test {
+    my $op = shift;
+    tie my $var, "main", @_[0..$#_-1];
+    is(eval "use integer; \$var $op \$var", pop,
+       "retval of \$var $op \$var under use integer");
+    check_count "$op under use integer", 2;
+}
+
+our $TODO;
+my  $todo = 'bug #87726';
+{
+    local $TODO = $todo;
+    bin_test '**',  2, 3, 8;
+    bin_test '*' ,  2, 3, 6;
+    bin_test '/' , 10, 2, 5;
+    bin_test '%' , 11, 2, 1;
+    bin_test 'x' , 11, 2, 1111;
+    bin_test '-' , 11, 2, 9;
+    bin_test '<<', 11, 2, 44;
+    bin_test '>>', 44, 2, 11;
+    bin_test '<' ,  1, 2, 1;
+    bin_test '>' , 44, 2, 1;
+    bin_test '<=', 44, 2, "";
+    bin_test '>=',  1, 2, "";
+    bin_test '!=',  1, 2, 1;
+    bin_test '<=>', 1, 2, -1;
+    bin_test 'le',  4, 2, "";
+    bin_test 'lt',  1, 2, 1;
+    bin_test 'gt',  4, 2, 1;
+    bin_test 'ge',  1, 2, "";
+    bin_test 'eq',  1, 2, "";
+    bin_test 'ne',  1, 2, 1;
+    bin_test 'cmp', 1, 2, -1;
+    bin_test '&' ,  1, 2, 0;
+    bin_test '|' ,  1, 2, 3;
+}
+bin_test '.' ,  1, 2, 12;
+{
+    local $TODO = $todo ;
+    bin_test '==',  1, 2, "";
+    bin_test '+' ,  1, 2, 3;
+    bin_int_test '*' ,  2, 3, 6;
+    bin_int_test '/' , 10, 2, 5;
+    bin_int_test '%' , 11, 2, 1;
+    # For these two, one of the tests in bin_int_test passes and the other
+    # fails, so we spell them out for now.
+    #bin_int_test '+' ,  1, 2, 3;
+    #bin_int_test '-' , 11, 2, 9;
+    {
+        use integer;
+        tie my $var, "main", 1, 2;
+        is($var + $var, 3, 'retval of $var + $var under use integer');
+        { local $TODO; check_count '+ under use integer',  2; }
+        tie $var, "main", 11, 2;
+        is($var - $var, 9, 'retval of $var - $var under use integer');
+        { local $TODO; check_count '- under use integer',  2; }
+    }
+    bin_int_test '<' ,  1, 2, 1;
+    bin_int_test '>' , 44, 2, 1;
+    bin_int_test '<=', 44, 2, "";
+    bin_int_test '>=',  1, 2, "";
+    bin_int_test '==',  1, 2, "";
+    bin_int_test '!=',  1, 2, 1;
+    bin_int_test '<=>', 1, 2, -1;
+    tie $var, "main", 1, 4;
+    cmp_ok(atan2($var, $var), '<', .3, 'retval of atan2 $var, $var');
+    check_count 'atan2',  2;
+}
 
 __DATA__
