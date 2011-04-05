@@ -2048,7 +2048,9 @@ of an array in Perl. The two have nothing to do with each other.
 
 Deprecated in Perl 5.
 
-Removed in Perl 5.10.
+Removed in Perl 5.10. The alias C<$OFMT> was removed in Perl 5.005.
+
+=item $MULTILINE_MATCHING
 
 =item $*
 X<$*>
@@ -2060,7 +2062,7 @@ You should use the C</s> and C</m> regexp modifiers instead.
 
 Deprecated in Perl 5.
 
-Removed in Perl 5.10.
+Removed in Perl 5.10. The alias C<$MULTILINE_MATCHING> was removed in Perl 5.005.
 
 =item $ARRAY_BASE
 
@@ -2084,7 +2086,7 @@ block. Now it is always lexically scoped.
 
 Mnemonic: [ begins subscripts.
 
-Deprecated in Perl 5.12.
+Deprecated in Perl 5.12. The alias C<$ARRAY_BASE> was removed in Perl 5.005.
 
 =item $OLD_PERL_VERSION
 
@@ -2108,7 +2110,7 @@ for a convenient way to fail if the running Perl interpreter is too old.
 
 Mnemonic: Is this version of perl in the right bracket?
 
-Deprecated in Perl 5.6.
+Deprecated in Perl 5.6. The alias C<$OLD_PERL_VERSION> was removed in Perl 5.6.
 
 =back
 
