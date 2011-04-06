@@ -84,6 +84,7 @@ struct magic_state {
     I32 mgs_ss_ix;
     U32 mgs_magical;
     bool mgs_readonly;
+    bool mgs_bumped;
 };
 /* MGS is typedef'ed to struct magic_state in perl.h */
 
@@ -92,12 +93,20 @@ S_save_magic(pTHX_ I32 mgs_ix, SV *sv)
 {
     dVAR;
     MGS* mgs;
+    bool bumped = FALSE;
 
     PERL_ARGS_ASSERT_SAVE_MAGIC;
 
-    /* guard against sv having being freed midway by holding a private
-       reference. */
-    SvREFCNT_inc_simple_void_NN(sv);
+    /* we shouldn't really be called here with RC==0, but it can sometimes
+     * happen via mg_clear() (which also shouldn't be called when RC==0,
+     * but it can happen). Handle this case gracefully(ish) by not RC++
+     * and thus avoiding the resultant double free */
+    if (SvREFCNT(sv) > 0) {
+    /* guard against sv getting freed midway through the mg clearing,
+     * by holding a private reference for the duration. */
+	SvREFCNT_inc_simple_void_NN(sv);
+	bumped = TRUE;
+    }
 
     assert(SvMAGICAL(sv));
     /* Turning READONLY off for a copy-on-write scalar (including shared
@@ -112,6 +121,7 @@ S_save_magic(pTHX_ I32 mgs_ix, SV *sv)
     mgs->mgs_magical = SvMAGICAL(sv);
     mgs->mgs_readonly = SvREADONLY(sv) != 0;
     mgs->mgs_ss_ix = PL_savestack_ix;   /* points after the saved destructor */
+    mgs->mgs_bumped = bumped;
 
     SvMAGICAL_off(sv);
     SvREADONLY_off(sv);
@@ -3147,6 +3157,7 @@ S_restore_magic(pTHX_ const void *p)
     dVAR;
     MGS* const mgs = SSPTR(PTR2IV(p), MGS*);
     SV* const sv = mgs->mgs_sv;
+    bool bumped;
 
     if (!sv)
         return;
@@ -3178,6 +3189,7 @@ S_restore_magic(pTHX_ const void *p)
 	}
     }
 
+    bumped = mgs->mgs_bumped;
     mgs->mgs_sv = NULL;  /* mark the MGS structure as restored */
 
     /* If we're still on top of the stack, pop us off.  (That condition
@@ -3196,21 +3208,23 @@ S_restore_magic(pTHX_ const void *p)
         assert((popval & SAVE_MASK) == SAVEt_ALLOC);
         PL_savestack_ix -= popval >> SAVE_TIGHT_SHIFT;
     }
-    if (SvREFCNT(sv) == 1) {
-	/* We hold the last reference to this SV, which implies that the
-	   SV was deleted as a side effect of the routines we called.
-	   So artificially keep it alive a bit longer.
-	   We avoid turning on the TEMP flag, which can cause the SV's
-	   buffer to get stolen (and maybe other stuff). */
-	int was_temp = SvTEMP(sv);
-	sv_2mortal(sv);
-	if (!was_temp) {
-	    SvTEMP_off(sv);
+    if (bumped) {
+	if (SvREFCNT(sv) == 1) {
+	    /* We hold the last reference to this SV, which implies that the
+	       SV was deleted as a side effect of the routines we called.
+	       So artificially keep it alive a bit longer.
+	       We avoid turning on the TEMP flag, which can cause the SV's
+	       buffer to get stolen (and maybe other stuff). */
+	    int was_temp = SvTEMP(sv);
+	    sv_2mortal(sv);
+	    if (!was_temp) {
+		SvTEMP_off(sv);
+	    }
+	    SvOK_off(sv);
 	}
-	SvOK_off(sv);
+	else
+	    SvREFCNT_dec(sv); /* undo the inc in S_save_magic() */
     }
-    else
-	SvREFCNT_dec(sv); /* undo the inc in S_save_magic() */
 }
 
 /* clean up the mess created by Perl_sighandler().
