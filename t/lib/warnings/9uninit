@@ -577,8 +577,8 @@ Use of uninitialized value $g1 in integer ge (>=) at - line 16.
 Use of uninitialized value $m1 in integer ge (>=) at - line 16.
 Use of uninitialized value $g1 in integer eq (==) at - line 17.
 Use of uninitialized value $m1 in integer eq (==) at - line 17.
-Use of uninitialized value $g1 in integer ne (!=) at - line 18.
 Use of uninitialized value $m1 in integer ne (!=) at - line 18.
+Use of uninitialized value $g1 in integer ne (!=) at - line 18.
 Use of uninitialized value $m1 in integer comparison (<=>) at - line 19.
 Use of uninitialized value $g1 in integer comparison (<=>) at - line 19.
 Use of uninitialized value $m1 in integer negation (-) at - line 20.
