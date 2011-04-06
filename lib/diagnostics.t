@@ -1,13 +1,18 @@
-#!./perl
+#!./perl -w
 
 BEGIN {
     chdir '..' if -d '../pod' && -d '../t';
     @INC = 'lib';
 }
 
-use Test::More tests => 7;
+use Test::More tests => 8;
 
-BEGIN { use_ok('diagnostics') }
+BEGIN {
+    my $w;
+    $SIG{__WARN__} = sub { $w = shift };
+    use_ok('diagnostics');
+    is $w, undef, 'no warnings when loading diagnostics.pm';
+}
 
 require base;
 
