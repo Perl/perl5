@@ -2983,7 +2983,7 @@ PP(pp_i_lt)
     dVAR; dSP;
     tryAMAGICbin_MG(lt_amg, AMGf_set);
     {
-      dPOPTOPiirl_halfmg;
+      dPOPTOPiirl_nomg;
       SETs(boolSV(left < right));
       RETURN;
     }
@@ -2994,7 +2994,7 @@ PP(pp_i_gt)
     dVAR; dSP;
     tryAMAGICbin_MG(gt_amg, AMGf_set);
     {
-      dPOPTOPiirl_halfmg;
+      dPOPTOPiirl_nomg;
       SETs(boolSV(left > right));
       RETURN;
     }
@@ -3005,7 +3005,7 @@ PP(pp_i_le)
     dVAR; dSP;
     tryAMAGICbin_MG(le_amg, AMGf_set);
     {
-      dPOPTOPiirl_halfmg;
+      dPOPTOPiirl_nomg;
       SETs(boolSV(left <= right));
       RETURN;
     }
@@ -3016,7 +3016,7 @@ PP(pp_i_ge)
     dVAR; dSP;
     tryAMAGICbin_MG(ge_amg, AMGf_set);
     {
-      dPOPTOPiirl_halfmg;
+      dPOPTOPiirl_nomg;
       SETs(boolSV(left >= right));
       RETURN;
     }
@@ -3027,7 +3027,7 @@ PP(pp_i_eq)
     dVAR; dSP;
     tryAMAGICbin_MG(eq_amg, AMGf_set);
     {
-      dPOPTOPiirl_halfmg;
+      dPOPTOPiirl_nomg;
       SETs(boolSV(left == right));
       RETURN;
     }
@@ -3038,7 +3038,7 @@ PP(pp_i_ne)
     dVAR; dSP;
     tryAMAGICbin_MG(ne_amg, AMGf_set);
     {
-      dPOPTOPiirl_halfmg;
+      dPOPTOPiirl_nomg;
       SETs(boolSV(left != right));
       RETURN;
     }
@@ -3049,7 +3049,7 @@ PP(pp_i_ncmp)
     dVAR; dSP; dTARGET;
     tryAMAGICbin_MG(ncmp_amg, 0);
     {
-      dPOPTOPiirl_halfmg;
+      dPOPTOPiirl_nomg;
       I32 value;
 
       if (left > right)
