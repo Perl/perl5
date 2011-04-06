@@ -3005,7 +3005,7 @@ PP(pp_i_le)
     dVAR; dSP;
     tryAMAGICbin_MG(le_amg, AMGf_set);
     {
-      dPOPTOPiirl_nomg;
+      dPOPTOPiirl_halfmg;
       SETs(boolSV(left <= right));
       RETURN;
     }
