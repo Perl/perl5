@@ -251,8 +251,8 @@ bin_test '.' ,  1, 2, 12;
     bin_int_test '>=',  1, 2, "";
     bin_int_test '==',  1, 2, "";
     bin_int_test '!=',  1, 2, 1;
-    bin_int_test '<=>', 1, 2, -1;
 }
+bin_int_test '<=>', 1, 2, -1;
 tie $var, "main", 1, 4;
 cmp_ok(atan2($var, $var), '<', .3, 'retval of atan2 $var, $var');
 check_count 'atan2',  2;

@@ -3049,7 +3049,7 @@ PP(pp_i_ncmp)
     dVAR; dSP; dTARGET;
     tryAMAGICbin_MG(ncmp_amg, 0);
     {
-      dPOPTOPiirl_nomg;
+      dPOPTOPiirl_halfmg;
       I32 value;
 
       if (left > right)
