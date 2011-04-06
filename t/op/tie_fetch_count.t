@@ -245,8 +245,8 @@ bin_test '.' ,  1, 2, 12;
         is($var - $var, 9, 'retval of $var - $var under use integer');
         { local $TODO; check_count '- under use integer',  2; }
     }
-    bin_int_test '<' ,  1, 2, 1;
 }
+bin_int_test '<' ,  1, 2, 1;
 bin_int_test '>' , 44, 2, 1;
 bin_int_test '<=', 44, 2, "";
 bin_int_test '>=',  1, 2, "";
