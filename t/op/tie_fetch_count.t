@@ -232,20 +232,9 @@ bin_test '.' ,  1, 2, 12;
     bin_int_test '*' ,  2, 3, 6;
     bin_int_test '/' , 10, 2, 5;
     bin_int_test '%' , 11, 2, 1;
-    # For these two, one of the tests in bin_int_test passes and the other
-    # fails, so we spell them out for now.
-    #bin_int_test '+' ,  1, 2, 3;
-    #bin_int_test '-' , 11, 2, 9;
-    {
-        use integer;
-        tie my $var, "main", 1, 2;
-        is($var + $var, 3, 'retval of $var + $var under use integer');
-        { local $TODO; check_count '+ under use integer',  2; }
-        tie $var, "main", 11, 2;
-        is($var - $var, 9, 'retval of $var - $var under use integer');
-        { local $TODO; check_count '- under use integer',  2; }
-    }
 }
+bin_int_test '+' ,  1, 2, 3;
+bin_int_test '-' , 11, 2, 9;
 bin_int_test '<' ,  1, 2, 1;
 bin_int_test '>' , 44, 2, 1;
 bin_int_test '<=', 44, 2, "";

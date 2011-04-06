@@ -355,9 +355,10 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
     SV *leftsv = CAT2(X,s);				\
     IV left = USE_LEFT(leftsv) ? SvIV(leftsv) : 0
 #define dPOPXiirl_ul_nomg(X) \
-    IV right = POPi;					\
+    SV *rightsv = POPs;					\
     SV *leftsv = CAT2(X,s);				\
-    IV left = USE_LEFT(leftsv) ? SvIV_nomg(leftsv) : 0
+    IV left = USE_LEFT(leftsv) ? SvIV_nomg(leftsv) : 0;	\
+    IV right = SvIV(rightsv)
 
 #define dPOPPOPssrl	dPOPXssrl(POP)
 #define dPOPPOPnnrl	dPOPXnnrl(POP)

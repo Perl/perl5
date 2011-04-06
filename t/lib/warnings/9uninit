@@ -556,10 +556,10 @@ $v = $m1 != $g1;
 $v = $m1 <=> $g1;
 $v = -$m1;
 EXPECT
-Use of uninitialized value $g1 in integer addition (+) at - line 6.
 Use of uninitialized value $m1 in integer addition (+) at - line 6.
-Use of uninitialized value $g1 in integer subtraction (-) at - line 7.
+Use of uninitialized value $g1 in integer addition (+) at - line 6.
 Use of uninitialized value $m1 in integer subtraction (-) at - line 7.
+Use of uninitialized value $g1 in integer subtraction (-) at - line 7.
 Use of uninitialized value $g1 in integer multiplication (*) at - line 8.
 Use of uninitialized value $m1 in integer multiplication (*) at - line 8.
 Use of uninitialized value $g1 in integer division (/) at - line 9.
