@@ -248,8 +248,8 @@ bin_test '.' ,  1, 2, 12;
     bin_int_test '<' ,  1, 2, 1;
     bin_int_test '>' , 44, 2, 1;
     bin_int_test '<=', 44, 2, "";
-    bin_int_test '>=',  1, 2, "";
 }
+bin_int_test '>=',  1, 2, "";
 bin_int_test '==',  1, 2, "";
 bin_int_test '!=',  1, 2, 1;
 bin_int_test '<=>', 1, 2, -1;
