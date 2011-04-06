@@ -246,8 +246,8 @@ bin_test '.' ,  1, 2, 12;
         { local $TODO; check_count '- under use integer',  2; }
     }
     bin_int_test '<' ,  1, 2, 1;
-    bin_int_test '>' , 44, 2, 1;
 }
+bin_int_test '>' , 44, 2, 1;
 bin_int_test '<=', 44, 2, "";
 bin_int_test '>=',  1, 2, "";
 bin_int_test '==',  1, 2, "";

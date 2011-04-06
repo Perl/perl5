@@ -569,8 +569,8 @@ Use of uninitialized value $m1 in integer modulus (%) at - line 11.
 Use of uninitialized value $m2 in integer modulus (%) at - line 12.
 Use of uninitialized value $g1 in integer lt (<) at - line 13.
 Use of uninitialized value $m1 in integer lt (<) at - line 13.
-Use of uninitialized value $g1 in integer gt (>) at - line 14.
 Use of uninitialized value $m1 in integer gt (>) at - line 14.
+Use of uninitialized value $g1 in integer gt (>) at - line 14.
 Use of uninitialized value $m1 in integer le (<=) at - line 15.
 Use of uninitialized value $g1 in integer le (<=) at - line 15.
 Use of uninitialized value $m1 in integer ge (>=) at - line 16.
