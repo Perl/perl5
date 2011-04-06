@@ -1594,7 +1594,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	case NALNUMU:
 	    REXEC_FBC_CSCAN_PRELOAD(
 		LOAD_UTF8_CHARCLASS_ALNUM(),
-		swash_fetch(PL_utf8_alnum,(U8*)s, utf8_target),
+		!swash_fetch(PL_utf8_alnum,(U8*)s, utf8_target),
                 ! isWORDCHAR_L1((U8) *s)
 	    );
 	    break;
