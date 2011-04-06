@@ -3082,7 +3082,7 @@ PP(pp_atan2)
     dVAR; dSP; dTARGET;
     tryAMAGICbin_MG(atan2_amg, 0);
     {
-      dPOPTOPnnrl_nomg;
+      dPOPTOPnnrl_halfmg;
       SETn(Perl_atan2(left, right));
       RETURN;
     }

@@ -370,6 +370,11 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 #define dPOPTOPnnrl_ul	dPOPXnnrl_ul(TOP)
 #define dPOPTOPnnrl_nomg \
     NV right = SvNV_nomg(TOPs); NV left = (sp--, SvNV_nomg(TOPs))
+#ifdef PERL_CORE
+# define dPOPTOPnnrl_halfmg \
+    NV left  = SvNV_nomg(TOPm1s); \
+    NV right = TOPs == TOPm1s ? SvNV(TOPs) : SvNV_nomg(TOPs); sp--
+#endif
 #define dPOPTOPiirl	dPOPXiirl(TOP)
 #define dPOPTOPiirl_ul	dPOPXiirl_ul(TOP)
 #define dPOPTOPiirl_ul_nomg dPOPXiirl_ul_nomg(TOP)
