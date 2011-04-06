@@ -910,8 +910,8 @@ $v = oct $m1;
 $v = oct;
 $v = length; # does not warn
 EXPECT
-Use of uninitialized value $g1 in atan2 at - line 5.
 Use of uninitialized value $m1 in atan2 at - line 5.
+Use of uninitialized value $g1 in atan2 at - line 5.
 Use of uninitialized value $m1 in sin at - line 6.
 Use of uninitialized value $m1 in cos at - line 7.
 Use of uninitialized value $m1 in rand at - line 8.
