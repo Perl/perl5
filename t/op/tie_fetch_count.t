@@ -231,10 +231,7 @@ bin_test '.' ,  1, 2, 12;
     bin_test '+' ,  1, 2, 3;
 }
 bin_int_test '*' ,  2, 3, 6;
-{
-    local $TODO = $todo ;
-    bin_int_test '/' , 10, 2, 5;
-}
+bin_int_test '/' , 10, 2, 5;
 bin_int_test '%' , 11, 2, 1;
 bin_int_test '+' ,  1, 2, 3;
 bin_int_test '-' , 11, 2, 9;

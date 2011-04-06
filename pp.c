@@ -2846,15 +2846,14 @@ PP(pp_i_multiply)
 
 PP(pp_i_divide)
 {
-    IV num;
     dVAR; dSP; dATARGET;
     tryAMAGICbin_MG(div_amg, AMGf_assign);
     {
       dPOPTOPssrl;
-      IV value = SvIV_nomg(right);
+      IV num = SvIV_nomg(left);
+      IV value = left==right ? SvIV(right) : SvIV_nomg(right);
       if (value == 0)
 	  DIE(aTHX_ "Illegal division by zero");
-      num = SvIV_nomg(left);
 
       /* avoid FPE_INTOVF on some platforms when num is IV_MIN */
       if (value == -1)
