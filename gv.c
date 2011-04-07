@@ -959,8 +959,9 @@ Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags)
     if (!tmpgv)
 	return NULL;
     stash = GvHV(tmpgv);
+    if (!HvNAME_get(stash))
+	hv_name_set(stash, name, namelen, 0);
     assert(stash);
-    assert(HvNAME_get(stash));
     return stash;
 }
 
