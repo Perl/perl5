@@ -689,6 +689,16 @@ Use of uninitialized value $g1 in subtraction (-) at - line 20.
 Use of uninitialized value $m1 in subtraction (-) at - line 20.
 ########
 use warnings 'uninitialized';
+sub TIESCALAR{bless[]}
+sub FETCH { undef }
+
+tie my $m1, "";
+my $v = $m1 + $m1;
+EXPECT
+Use of uninitialized value $m1 in addition (+) at - line 6.
+Use of uninitialized value $m1 in addition (+) at - line 6.
+########
+use warnings 'uninitialized';
 my ($m1, $v);
 our ($g1);
 
