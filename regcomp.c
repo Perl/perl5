@@ -972,10 +972,10 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
 		    cl->flags |= ANYOF_UNICODE_ALL;
 		}
 	    }
+	}
 
         /* Take the union */
 	cl->flags |= or_with->flags;
-	}
     }
 }
 
