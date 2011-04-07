@@ -225,10 +225,7 @@ my  $todo = 'bug #87708';
     bin_test '|' ,  1, 2, 3;
 }
 bin_test '.' ,  1, 2, 12;
-{
-    local $TODO = $todo ;
-    bin_test '==',  1, 2, "";
-}
+bin_test '==',  1, 2, "";
 bin_test '+' ,  1, 2, 3;
 bin_int_test '*' ,  2, 3, 6;
 bin_int_test '/' , 10, 2, 5;

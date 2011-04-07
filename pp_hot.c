@@ -342,6 +342,18 @@ PP(pp_eq)
 	RETURN;
     }
 #endif
+    if (TOPs == TOPm1s && SvGMAGICAL(TOPs)) {
+	SV * const svl = sv_newmortal();
+	/* Print the uninitialized warning now, so it includes the vari-
+	   able name. */
+	if (!SvOK(TOPs)) {
+	    if (ckWARN(WARN_UNINITIALIZED)) report_uninit(TOPs);
+	    sv_setiv(svl,0);
+	}
+	else sv_setsv_flags(svl, TOPs, 0);
+	SvGETMAGIC(TOPs);
+	TOPm1s = svl;
+    }
 #ifdef PERL_PRESERVE_IVUV
     SvIV_please_nomg(TOPs);
     if (SvIOK(TOPs)) {
