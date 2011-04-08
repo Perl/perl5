@@ -196,34 +196,29 @@ sub bin_int_test {
     check_count "$op under use integer", 2;
 }
 
-our $TODO;
-my  $todo = 'bug #87708';
-{
-    local $TODO = $todo;
-    bin_test '**',  2, 3, 8;
-    bin_test '*' ,  2, 3, 6;
-    bin_test '/' , 10, 2, 5;
-    bin_test '%' , 11, 2, 1;
-    bin_test 'x' , 11, 2, 1111;
-    bin_test '-' , 11, 2, 9;
-    bin_test '<<', 11, 2, 44;
-    bin_test '>>', 44, 2, 11;
-    bin_test '<' ,  1, 2, 1;
-    bin_test '>' , 44, 2, 1;
-    bin_test '<=', 44, 2, "";
-    bin_test '>=',  1, 2, "";
-    bin_test '!=',  1, 2, 1;
-    bin_test '<=>', 1, 2, -1;
-    bin_test 'le',  4, 2, "";
-    bin_test 'lt',  1, 2, 1;
-    bin_test 'gt',  4, 2, 1;
-    bin_test 'ge',  1, 2, "";
-    bin_test 'eq',  1, 2, "";
-    bin_test 'ne',  1, 2, 1;
-    bin_test 'cmp', 1, 2, -1;
-    bin_test '&' ,  1, 2, 0;
-    bin_test '|' ,  1, 2, 3;
-}
+bin_test '**',  2, 3, 8;
+bin_test '*' ,  2, 3, 6;
+bin_test '/' , 10, 2, 5;
+bin_test '%' , 11, 2, 1;
+bin_test 'x' , 11, 2, 1111;
+bin_test '-' , 11, 2, 9;
+bin_test '<<', 11, 2, 44;
+bin_test '>>', 44, 2, 11;
+bin_test '<' ,  1, 2, 1;
+bin_test '>' , 44, 2, 1;
+bin_test '<=', 44, 2, "";
+bin_test '>=',  1, 2, "";
+bin_test '!=',  1, 2, 1;
+bin_test '<=>', 1, 2, -1;
+bin_test 'le',  4, 2, "";
+bin_test 'lt',  1, 2, 1;
+bin_test 'gt',  4, 2, 1;
+bin_test 'ge',  1, 2, "";
+bin_test 'eq',  1, 2, "";
+bin_test 'ne',  1, 2, 1;
+bin_test 'cmp', 1, 2, -1;
+bin_test '&' ,  1, 2, 0;
+bin_test '|' ,  1, 2, 3;
 bin_test '.' ,  1, 2, 12;
 bin_test '==',  1, 2, "";
 bin_test '+' ,  1, 2, 3;

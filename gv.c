@@ -2077,9 +2077,21 @@ Perl_try_amagic_bin(pTHX_ int method, int flags) {
 	    return TRUE;
 	}
     }
+    if(left==right && SvGMAGICAL(left)) {
+	SV * const left = sv_newmortal();
+	*(sp-1) = left;
+	/* Print the uninitialized warning now, so it includes the vari-
+	   able name. */
+	if (!SvOK(right)) {
+	    if (ckWARN(WARN_UNINITIALIZED)) report_uninit(right);
+	    sv_setsv_flags(left, &PL_sv_no, 0);
+	}
+	else sv_setsv_flags(left, right, 0);
+	SvGETMAGIC(right);
+    }
     if (flags & AMGf_numeric) {
-	if (SvROK(left))
-	    *(sp-1) = sv_2num(left);
+	if (SvROK(TOPm1s))
+	    *(sp-1) = sv_2num(TOPm1s);
 	if (SvROK(right))
 	    *sp     = sv_2num(right);
     }
