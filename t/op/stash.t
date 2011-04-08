@@ -69,7 +69,7 @@ ok( eval q{ no warnings 'deprecated'; defined %schoenmaker:: }, 'works in eval("
 }
 
 SKIP: {
-    eval { require B; 1 } or skip "no B", 27;
+    eval { require B; 1 } or skip "no B", 29;
 
     *b = \&B::svref_2object;
     my $CVf_ANON = B::CVf_ANON();
