@@ -8457,8 +8457,9 @@ Perl_ck_split(pTHX_ OP *o)
 	Perl_croak(aTHX_ "panic: ck_split");
     kid = kid->op_sibling;
     op_free(cLISTOPo->op_first);
-    cLISTOPo->op_first = kid;
-    if (!kid) {
+    if (kid)
+	cLISTOPo->op_first = kid;
+    else {
 	cLISTOPo->op_first = kid = newSVOP(OP_CONST, 0, newSVpvs(" "));
 	cLISTOPo->op_last = kid; /* There was only one element previously */
     }
