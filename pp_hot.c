@@ -501,19 +501,6 @@ PP(pp_add)
     svl = TOPm1s;
 
     useleft = USE_LEFT(svl);
-    if(useleft && svr == svl && SvGMAGICAL(svl)) {
-	/* Print the uninitialized warning now, so it includes the vari-
-	   able name. */
-	if (!SvOK(svl)) {
-	    if (ckWARN(WARN_UNINITIALIZED)) report_uninit(svl);
-	    useleft = 0;
-	}
-	/* Non-magical sv_mortalcopy */
-	svl = sv_newmortal();
-	sv_setsv_flags(svl, svr, 0);
-	SvGETMAGIC(svr);
-    }
-
 #ifdef PERL_PRESERVE_IVUV
     /* We must see if we can perform the addition with integers if possible,
        as the integer code detects overflow while the NV code doesn't.
