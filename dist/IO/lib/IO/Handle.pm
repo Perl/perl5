@@ -265,10 +265,16 @@ use Symbol;
 use SelectSaver;
 use IO ();	# Load the XS module
 
+# Since perl will automatically require IO::File if needed, but also
+# initialises IO::File's @ISA as part of the core we must ensure
+# IO::File is loaded if IO::Handle is. This avoids effectively
+# "half-loading" IO::File.
+require IO::File;
+
 require Exporter;
 @ISA = qw(Exporter);
 
-$VERSION = "1.30";
+$VERSION = "1.31";
 $VERSION = eval $VERSION;
 
 @EXPORT_OK = qw(
