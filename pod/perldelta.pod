@@ -793,6 +793,12 @@ If it is absolutely necessary to have empty attribute lists (for example,
 because of a code generator) then avoid the error by adding a space before
 the C<=>.
 
+=head3 Change in the parsing of identifiers
+
+Characters outside the Unicode "XIDStart" set are no longer allowed at the
+beginning of an identifier.  This affects that certain accents and marks
+that normally follow an alphabetic character.
+
 =head2 Threads and Processes
 
 =head3 Directory handles not copied to threads
@@ -3541,12 +3547,6 @@ compiled [perl #83364].
 
 The parser no longer hangs when encountering certain Unicode characters,
 such as U+387 [perl #74022].
-
-=item *
-
-Several contexts no longer allow a Unicode character to begin a word
-that should never begin words, for an example an accent that must follow
-another character previously could precede all other characters.
 
 =item *
 
