@@ -3897,13 +3897,21 @@ utf8::is_utf8 now respects get-magic (e.g. $1) (5.12.1).
 
 =item *
 
+Non-commutative binary operators used to swap their operands if the same
+tied scalar was used for both operands and returned a different value for
+each FETCH. For instance, if C<$t> returned 2 the first time and 3 the
+second, then C<$t/$t> would evaluate to 1.5. This has been fixed
+[perl #87708].
+
+=item *
+
 String C<eval> now detects taintedness of overloaded or tied
 arguments [perl #75716].
 
 =item *
 
 String C<eval> and regular expression matches against objects with string
-overloading no longer cause memory corruption or crashes [perl 77084].
+overloading no longer cause memory corruption or crashes [perl #77084].
 
 =item *
 
