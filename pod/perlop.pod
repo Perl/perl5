@@ -1328,8 +1328,10 @@ Options (specified by the following modifiers) are:
         that ${^PREMATCH}, ${^MATCH}, ${^POSTMATCH} will be defined.
     o	Compile pattern only once.
     l   Use the locale
-    u   Use Unicode semantics
-    a   Use ASCII for \d, \s, \w
+    u   Use Unicode rules
+    a   Use ASCII for \d, \s, \w; specifying two a's further restricts
+        /i matching so that no ASCII character will match a non-ASCII
+        one
     d   Use Unicode or native charset, as in 5.12 and earlier
 
 If a precompiled pattern is embedded in a larger pattern then the effect
@@ -1338,11 +1340,11 @@ modifier has is not propagated, being restricted to those patterns
 explicitly using it.
 
 The last four modifiers listed above, added in Perl 5.14,
-control the character set semantics.  They are documented in
-L<perlre/Modifiers>.
+control the character set semantics.
 
 See L<perlre> for additional information on valid syntax for STRING, and
-for a detailed look at the semantics of regular expressions.
+for a detailed look at the semantics of regular expressions.  In
+particular, all the modifiers are further explained in L<perlre/Modifiers>.
 
 =item m/PATTERN/msixpodualgc
 X<m> X<operator, match>
@@ -1385,7 +1387,7 @@ the trailing delimiter.  This avoids expensive run-time recompilations,
 and is useful when the value you are interpolating won't change over
 the life of the script.  However, mentioning C</o> constitutes a promise
 that you won't change the variables in the pattern.  If you change them,
-Perl won't even notice.  See also L<"qr/STRING/msixpodual">.
+Perl won't even notice.
 
 =item The empty pattern //
 
