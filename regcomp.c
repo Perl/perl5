@@ -730,15 +730,7 @@ S_cl_anything(const RExC_state_t *pRExC_state, struct regnode_charclass_class *c
 
     ANYOF_BITMAP_SETALL(cl);
     cl->flags = ANYOF_CLASS|ANYOF_EOS|ANYOF_UNICODE_ALL
-		|ANYOF_LOC_NONBITMAP_FOLD|ANYOF_NON_UTF8_LATIN1_ALL
-		    /* Even though no bitmap is in use here, we need to set
-		     * the flag below so an AND with a node that does have one
-		     * doesn't lose that one.  The flag should get cleared if
-		     * the other one doesn't; and the code in regexec.c is
-		     * structured so this being set when not needed does no
-		     * harm.  It seemed a little cleaner to set it here than do
-		     * a special case in cl_and() */
-		|ANYOF_NONBITMAP_NON_UTF8;
+		|ANYOF_LOC_NONBITMAP_FOLD|ANYOF_NON_UTF8_LATIN1_ALL;
 
     /* If any portion of the regex is to operate under locale rules,
      * initialization includes it.  The reason this isn't done for all regexes
@@ -841,6 +833,8 @@ S_cl_and(struct regnode_charclass_class *cl,
 	}
     }
     else {   /* and'd node is not inverted */
+	U8 outside_bitmap_but_not_utf8; /* Temp variable */
+
 	if (! ANYOF_NONBITMAP(and_with)) {
 
             /* Here 'and_with' doesn't match anything outside the bitmap
@@ -859,14 +853,18 @@ S_cl_and(struct regnode_charclass_class *cl,
 	    /* Here, 'and_with' does match something outside the bitmap, and cl
 	     * doesn't have a list of things to match outside the bitmap.  If
              * cl can match all code points above 255, the intersection will
-             * be those above-255 code points that 'and_with' matches.  There
-             * may be false positives from code points in 'and_with' that are
-             * outside the bitmap but below 256, but those get sorted out
-             * after the synthetic start class succeeds).  If cl can't match
-             * all Unicode code points, it means here that it can't match *
-             * anything outside the bitmap, so we leave the bitmap empty */
+             * be those above-255 code points that 'and_with' matches.  If cl
+             * can't match all Unicode code points, it means that it can't
+             * match anything outside the bitmap (since the 'if' that got us
+             * into this block tested for that), so we leave the bitmap empty.
+             */
 	    if (cl->flags & ANYOF_UNICODE_ALL) {
 		ARG_SET(cl, ARG(and_with));
+
+                /* and_with's ARG may match things that don't require UTF8.
+                 * And now cl's will too, in spite of this being an 'and'.  See
+                 * the comments below about the kludge */
+		cl->flags |= and_with->flags & ANYOF_NONBITMAP_NON_UTF8;
 	    }
 	}
 	else {
@@ -876,8 +874,33 @@ S_cl_and(struct regnode_charclass_class *cl,
 	}
 
 
-        /* Take the intersection of the two sets of flags */
+        /* Take the intersection of the two sets of flags.  However, the
+         * ANYOF_NONBITMAP_NON_UTF8 flag is treated as an 'or'.  This is a
+         * kludge around the fact that this flag is not treated like the others
+         * which are initialized in cl_anything().  The way the optimizer works
+         * is that the synthetic start class (SSC) is initialized to match
+         * anything, and then the first time a real node is encountered, its
+         * values are AND'd with the SSC's with the result being the values of
+         * the real node.  However, there are paths through the optimizer where
+         * the AND never gets called, so those initialized bits are set
+         * inappropriately, which is not usually a big deal, as they just cause
+         * false positives in the SSC, which will just mean a probably
+         * imperceptible slow down in execution.  However this bit has a
+         * higher false positive consequence in that it can cause utf8.pm,
+         * utf8_heavy.pl ... to be loaded when not necessary, which is a much
+         * bigger slowdown and also causes significant extra memory to be used.
+         * In order to prevent this, the code now takes a different tack.  The
+         * bit isn't set unless some part of the regular expression needs it,
+         * but once set it won't get cleared.  This means that these extra
+         * modules won't get loaded unless there was some path through the
+         * pattern that would have required them anyway, and  so any false
+         * positives that occur by not ANDing them out when they could be
+         * aren't as severe as they would be if we treated this bit like all
+         * the others */
+        outside_bitmap_but_not_utf8 = (cl->flags | and_with->flags)
+                                      & ANYOF_NONBITMAP_NON_UTF8;
 	cl->flags &= and_with->flags;
+	cl->flags |= outside_bitmap_but_not_utf8;
     }
 }
 
