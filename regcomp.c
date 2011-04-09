@@ -9426,21 +9426,17 @@ S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8
 	    case 'I': case 'i':
 	    case 'L': case 'l':
 	    case 'T': case 't':
-		/* These all are targets of multi-character folds, which can
-		 * occur with only non-Latin1 characters in the fold, so they
-		 * can match if the target string isn't UTF-8 */
-		ANYOF_FLAGS(node) |= ANYOF_NONBITMAP_NON_UTF8;
-		break;
 	    case 'A': case 'a':
 	    case 'H': case 'h':
 	    case 'J': case 'j':
 	    case 'N': case 'n':
 	    case 'W': case 'w':
 	    case 'Y': case 'y':
-		/* These all are targets of multi-character folds, which occur
-		 * only with a non-Latin1 character as part of the fold, so
-		 * they can't match unless the target string is in UTF-8, so no
-		 * action here is necessary */
+                /* These all are targets of multi-character folds from code
+                 * points that require UTF8 to express, so they can't match
+                 * unless the target string is in UTF-8, so no action here is
+                 * necessary, as regexec.c properly handles the general case
+                 * for UTF-8 matching */
 		break;
 	    default:
 		/* Use deprecated warning to increase the chances of this
