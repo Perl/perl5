@@ -960,12 +960,15 @@ EXPECT
 # toke.c
 use warnings 'syntax' ;
 my $a = qr/foo/du;
-$a = qr/foo/laai;
+$a = qr/foo/lai;
 $a = qr/foo/lil;
+$a = qr/foo/aia;
+$a = qr/foo/aaia;
 no warnings 'syntax' ;
 my $a = qr/foo/du;
 EXPECT
 Regexp modifiers "/d" and "/u" are mutually exclusive at - line 3, near "= "
 Regexp modifiers "/l" and "/a" are mutually exclusive at - line 4, near "= "
 Regexp modifier "/l" may not appear twice at - line 5, near "= "
-BEGIN not safe after errors--compilation aborted at - line 6.
+Regexp modifier "/a" may appear a maximum of twice at - line 7, near "= "
+BEGIN not safe after errors--compilation aborted at - line 8.

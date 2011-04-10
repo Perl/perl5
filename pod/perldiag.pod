@@ -4014,15 +4014,16 @@ discovered.
 (P) The regular expression engine got confused by what the regular
 expression compiler gave it.
 
+=item Regexp modifier "/%c" may appear a maximum of twice
+
 =item Regexp modifier "/%c" may not appear twice
 
-(F syntax) The regular expression pattern had one of the
-mutually exclusive modifiers repeated.  Remove all but one of the
-occurrences.
+(F syntax) The regular expression pattern had too many occurrences
+of the specified modifier.  Remove the extraneous ones.
 
 =item Regexp modifiers "/%c" and "/%c" are mutually exclusive
 
-(F syntax) The regular expression pattern had more than one of the
+(F syntax) The regular expression pattern had more than one of these
 mutually exclusive modifiers.  Retain only the modifier that is
 supposed to be there.
 

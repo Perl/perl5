@@ -8877,17 +8877,21 @@ S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s, char* charse
 	    if (*((*s) + 1) == 'n') {
 		goto deprecate;
 	    }
-	    if (*((*s) + 1) == ASCII_RESTRICT_PAT_MOD) {
-		/* Doubled modifier implies more restricted */
-		set_regex_charset(pmfl, REGEX_ASCII_MORE_RESTRICTED_CHARSET);
-		(*s)++;
-	    }
-	    else {
+
+	    if (! *charset) {
 		set_regex_charset(pmfl, REGEX_ASCII_RESTRICTED_CHARSET);
 	    }
-	    if (*charset) { /* Do this after the increment of *s in /aa, so
-			       the return advances the ptr correctly */
-		goto multiple_charsets;
+	    else {
+
+		/* Error if previous modifier wasn't an 'a', but if it was, see
+		 * if, and accept, a second occurrence (only) */
+		if (*charset != 'a'
+		    || get_regex_charset(*pmfl)
+			!= REGEX_ASCII_RESTRICTED_CHARSET)
+		{
+			goto multiple_charsets;
+		}
+		set_regex_charset(pmfl, REGEX_ASCII_MORE_RESTRICTED_CHARSET);
 	    }
 	    *charset = c;
 	    break;
@@ -8911,6 +8915,9 @@ S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s, char* charse
     multiple_charsets:
 	if (*charset != c) {
 	    yyerror(Perl_form(aTHX_ "Regexp modifiers \"/%c\" and \"/%c\" are mutually exclusive", *charset, c));
+	}
+	else if (c == 'a') {
+	    yyerror("Regexp modifier \"/a\" may appear a maximum of twice");
 	}
 	else {
 	    yyerror(Perl_form(aTHX_ "Regexp modifier \"/%c\" may not appear twice", c));
