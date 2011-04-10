@@ -64,8 +64,11 @@ my @death =
  '/(?^-i)foo/' => 'Sequence (?^-...) not recognized in regex; marked by {#} in m/(?^-{#}i)foo/',
  '/(?^d:foo)/' => 'Sequence (?^d...) not recognized in regex; marked by {#} in m/(?^d{#}:foo)/',
  '/(?^d)foo/' => 'Sequence (?^d...) not recognized in regex; marked by {#} in m/(?^d{#})foo/',
- '/(?^lu:foo)/' => 'Sequence (?^lu...) not recognized in regex; marked by {#} in m/(?^lu{#}:foo)/',
- '/(?^lu)foo/' => 'Sequence (?^lu...) not recognized in regex; marked by {#} in m/(?^lu{#})foo/',
+ '/(?^lu:foo)/' => 'Regexp modifiers "/l" and "/u" are mutually exclusive in regex; marked by {#} in m/(?^lu{#}:foo)/',
+ '/(?^lu)foo/' => 'Regexp modifiers "/l" and "/u" are mutually exclusive in regex; marked by {#} in m/(?^lu{#})foo/',
+'/(?da:foo)/' => 'Regexp modifiers "/d" and "/a" are mutually exclusive in regex; marked by {#} in m/(?da{#}:foo)/',
+'/(?lil:foo)/' => 'Regexp modifier "/l" may not appear twice in regex; marked by {#} in m/(?lil{#}:foo)/',
+'/(?aaia:foo)/' => 'Regexp modifier "/a" may appear a maximum of twice in regex; marked by {#} in m/(?aaia{#}:foo)/',
 
  '/((x)/' => 'Unmatched ( in regex; marked by {#} in m/({#}(x)/',
 

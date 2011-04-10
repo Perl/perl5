@@ -1510,4 +1510,11 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 ^m?(\D)(.*)\1$	5b5	n	-	-
 ^m?(\d)(.*)\1$	5b5	y	$1	5
 ^m?(\d)(.*)\1$	aba	n	-	-
+
+# 17F is 'Long s';  This makes sure the a's in /aa can be separate
+/s/ai	\x{17F}	y	$&	\x{17F}
+/s/aia	\x{17F}	n	-	-
+/s/aia	S	y	$&	S
+/(?aia:s)/	\x{17F}	n	-	-
+/(?aia:s)/	S	y	$&	S
 # vim: softtabstop=0 noexpandtab

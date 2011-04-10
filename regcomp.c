@@ -7070,7 +7070,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    {
                 U32 posflags = 0, negflags = 0;
 	        U32 *flagsp = &posflags;
-                bool has_charset_modifier = 0;
+                char has_charset_modifier = '\0';
 		regex_charset cs = (RExC_utf8 || RExC_uni_semantics)
 				    ? REGEX_UNICODE_CHARSET
 				    : REGEX_DEPENDS_CHARSET;
@@ -7082,40 +7082,50 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     switch (*RExC_parse) {
 	            CASE_STD_PMMOD_FLAGS_PARSE_SET(flagsp);
                     case LOCALE_PAT_MOD:
-                        if (has_charset_modifier || flagsp == &negflags) {
+                        if (has_charset_modifier) {
+			    goto excess_modifier;
+			}
+			else if (flagsp == &negflags) {
                             goto fail_modifiers;
                         }
 			cs = REGEX_LOCALE_CHARSET;
-                        has_charset_modifier = 1;
+                        has_charset_modifier = LOCALE_PAT_MOD;
 			RExC_contains_locale = 1;
                         break;
                     case UNICODE_PAT_MOD:
-                        if (has_charset_modifier || flagsp == &negflags) {
+                        if (has_charset_modifier) {
+			    goto excess_modifier;
+			}
+			else if (flagsp == &negflags) {
                             goto fail_modifiers;
                         }
 			cs = REGEX_UNICODE_CHARSET;
-                        has_charset_modifier = 1;
+                        has_charset_modifier = UNICODE_PAT_MOD;
                         break;
                     case ASCII_RESTRICT_PAT_MOD:
-                        if (has_charset_modifier || flagsp == &negflags) {
+                        if (flagsp == &negflags) {
                             goto fail_modifiers;
                         }
-			if (*(RExC_parse + 1) == ASCII_RESTRICT_PAT_MOD) {
+                        if (has_charset_modifier) {
+                            if (cs != REGEX_ASCII_RESTRICTED_CHARSET) {
+                                goto excess_modifier;
+                            }
 			    /* Doubled modifier implies more restricted */
-			    cs = REGEX_ASCII_MORE_RESTRICTED_CHARSET;
-			    RExC_parse++;
-			}
+                            cs = REGEX_ASCII_MORE_RESTRICTED_CHARSET;
+                        }
 			else {
 			    cs = REGEX_ASCII_RESTRICTED_CHARSET;
 			}
-                        has_charset_modifier = 1;
+                        has_charset_modifier = ASCII_RESTRICT_PAT_MOD;
                         break;
                     case DEPENDS_PAT_MOD:
                         if (has_use_defaults
-                            || has_charset_modifier
                             || flagsp == &negflags)
                         {
                             goto fail_modifiers;
+			}
+			else if (has_charset_modifier) {
+			    goto excess_modifier;
                         }
 
 			/* The dual charset means unicode semantics if the
@@ -7125,8 +7135,20 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			cs = (RExC_utf8 || RExC_uni_semantics)
 			     ? REGEX_UNICODE_CHARSET
 			     : REGEX_DEPENDS_CHARSET;
-                        has_charset_modifier = 1;
+                        has_charset_modifier = DEPENDS_PAT_MOD;
                         break;
+		    excess_modifier:
+			RExC_parse++;
+			if (has_charset_modifier == ASCII_RESTRICT_PAT_MOD) {
+			    vFAIL2("Regexp modifier \"/%c\" may appear a maximum of twice", ASCII_RESTRICT_PAT_MOD);
+			}
+			else if (has_charset_modifier == *(RExC_parse - 1)) {
+			    vFAIL2("Regexp modifier \"/%c\" may not appear twice", *(RExC_parse - 1));
+			}
+			else {
+			    vFAIL3("Regexp modifiers \"/%c\" and \"/%c\" are mutually exclusive", has_charset_modifier, *(RExC_parse - 1));
+			}
+			/*NOTREACHED*/
                     case ONCE_PAT_MOD: /* 'o' */
                     case GLOBAL_PAT_MOD: /* 'g' */
 			if (SIZE_ONLY && ckWARN(WARN_REGEXP)) {
