@@ -547,18 +547,8 @@ Perl_op_clear(pTHX_ OP *o)
     PERL_ARGS_ASSERT_OP_CLEAR;
 
 #ifdef PERL_MAD
-    /* if (o->op_madprop && o->op_madprop->mad_next)
-       abort(); */
-    /* FIXME for MAD - if I uncomment these two lines t/op/pack.t fails with
-       "modification of a read only value" for a reason I can't fathom why.
-       It's the "" stringification of $_, where $_ was set to '' in a foreach
-       loop, but it defies simplification into a small test case.
-       However, commenting them out has caused ext/List/Util/t/weak.t to fail
-       the last test.  */
-    /*
-      mad_free(o->op_madprop);
-      o->op_madprop = 0;
-    */
+    mad_free(o->op_madprop);
+    o->op_madprop = 0;
 #endif    
 
  retry:
