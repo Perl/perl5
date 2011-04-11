@@ -4,7 +4,7 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.17";
+our $VERSION     = "0.18";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = ('regmust',
                     qw(is_regexp regexp_pattern
@@ -145,9 +145,26 @@ sub bits {
 	} elsif ($s =~ s/^\///) {
 	    my $reflags = $^H{reflags} || 0;
 	    my $seen_charset;
-	    while ($s =~ m/( aa | . )/gx) {
+	    while ($s =~ m/( . )/gx) {
                 $_ = $1;
 		if (/[adul]/) {
+                    # The 'a' may be repeated; hide this from the rest of the
+                    # code by counting and getting rid of all of them, then
+                    # changing to 'aa' if there is a repeat.
+                    if ($_ eq 'a') {
+                        my $sav_pos = pos $s;
+                        my $a_count = $s =~ s/a//g;
+                        pos $s = $sav_pos - 1;  # -1 because got rid of the 'a'
+                        if ($a_count > 2) {
+			    require Carp;
+                            Carp::carp(
+                            qq 'The "a" flag may only appear a maximum of twice'
+                            );
+                        }
+                        elsif ($a_count == 2) {
+                            $_ = 'aa';
+                        }
+                    }
 		    if ($on) {
 			if ($seen_charset) {
 			    require Carp;
@@ -155,12 +172,6 @@ sub bits {
                                 Carp::carp(
                                 qq 'The "$seen_charset" and "$_" flags '
                                 .qq 'are exclusive'
-                                );
-                            }
-                            elsif ($seen_charset eq 'a') {
-                                Carp::carp(
-                                qq 'The "a" flag may only appear twice if '
-                                .qq 'adjacent, like "aa"'
                                 );
                             }
                             else {

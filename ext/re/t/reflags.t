@@ -10,9 +10,9 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 58;
+use Test::More tests => 53;
 
-my @flags = qw( a d l u aa );
+my @flags = qw( a d l u );
 
 use re '/i';
 ok "Foo" =~ /foo/, 'use re "/i"';
@@ -118,6 +118,16 @@ ok "A\n\n" =~ / a.$/sm, 'use re "/xi" in combination with explicit /sm';
 }
 no re '/x';
 
+# Verify one and two a's work
+use re '/ia';
+is qr//, '(?^ai:)', 'use re "/ia"';
+no re '/ia';
+is qr//, '(?^:)', 'no re "/ia"';
+use re '/aai';
+is qr//, '(?^aai:)', 'use re "/aai"';
+no re '/aai';
+is qr//, '(?^:)', 'no re "/aai"';
+
 # use re "/adul" combinations
 {
   my $w;
@@ -150,9 +160,9 @@ no re '/x';
   }
 
   $w = "";
-  eval "use re '/axa'";
-  like $w, qr/The "a" flag may only appear twice if adjacent, like "aa"/,
-    "warning with eval \"use re \"/axa\"";
+  eval "use re '/axaa'";
+  like $w, qr/The "a" flag may only appear a maximum of twice/,
+    "warning with eval \"use re \"/axaa\"";
 
 
 }
