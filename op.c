@@ -3139,8 +3139,7 @@ Perl_newMADsv(pTHX_ char key, SV* sv)
 MADPROP *
 Perl_newMADPROP(pTHX_ char key, char type, void* val, I32 vlen)
 {
-    MADPROP *mp;
-    Newxz(mp, 1, MADPROP);
+    MADPROP *const mp = (MADPROP *) PerlMemShared_malloc(sizeof(MADPROP));
     mp->mad_next = 0;
     mp->mad_key = key;
     mp->mad_vlen = vlen;
@@ -3177,7 +3176,7 @@ Perl_mad_free(pTHX_ MADPROP* mp)
 	PerlIO_printf(PerlIO_stderr(), "Unrecognized mad\n");
 	break;
     }
-    Safefree(mp);
+    PerlMemShared_free(mp);
 }
 
 #endif
