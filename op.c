@@ -9303,6 +9303,47 @@ Perl_rpeep(pTHX_ register OP *o)
     SAVEOP();
     SAVEVPTR(PL_curcop);
     for (; o; o = o->op_next) {
+#if defined(PERL_MAD) && defined(USE_ITHREADS)
+	MADPROP *mp = o->op_madprop;
+	while (mp) {
+	    if (mp->mad_type == MAD_OP && mp->mad_vlen) {
+		OP *prop_op = (OP *) mp->mad_val;
+		/* I *think* that this is roughly the right thing to do. It
+		   seems that sometimes the optree hooked into the madprops
+		   doesn't have its next pointers set, so it's not possible to
+		   use them to locate all the OPs needing a fixup. Possibly
+		   it's a bit overkill calling LINKLIST to do this, when we
+		   could instead iterate over the OPs (without changing them)
+		   the way op_linklist does internally. However, I'm not sure
+		   if there are corner cases where we have a chain of partially
+		   linked OPs. Or even if we do, does that matter? Or should
+		   we always iterate on op_first,op_next? */
+		LINKLIST(prop_op);
+		do {
+		    if (prop_op->op_opt)
+			break;
+		    prop_op->op_opt = 1;
+		    switch (prop_op->op_type) {
+		    case OP_CONST:
+		    case OP_HINTSEVAL:
+		    case OP_METHOD_NAMED:
+			/* Duplicate the "relocate sv to the pad for thread
+			   safety" code, as otherwise an opfree of this madprop
+			   in the wrong thread will free the SV to the wrong
+			   interpreter.  */
+			if (((SVOP *)prop_op)->op_sv) {
+			    const PADOFFSET ix = pad_alloc(OP_CONST, SVs_PADTMP);
+			    sv_setsv(PAD_SVl(ix),((SVOP *)prop_op)->op_sv);
+			    SvREFCNT_dec(((SVOP *)prop_op)->op_sv);
+			    ((SVOP *)prop_op)->op_sv = NULL;
+			}
+			break;
+		    }
+		} while ((prop_op = prop_op->op_next));
+	    }
+	    mp = mp->mad_next;
+	}
+#endif
 	if (o->op_opt)
 	    break;
 	/* By default, this op has now been optimised. A couple of cases below
