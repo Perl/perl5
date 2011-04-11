@@ -2683,8 +2683,16 @@ S_fold_constants(pTHX_ register OP *o)
     case 0:
 	CALLRUNOPS(aTHX);
 	sv = *(PL_stack_sp--);
-	if (o->op_targ && sv == PAD_SV(o->op_targ))	/* grab pad temp? */
+	if (o->op_targ && sv == PAD_SV(o->op_targ)) {	/* grab pad temp? */
+#ifdef PERL_MAD
+	    /* Can't simply swipe the SV from the pad, because that relies on
+	       the op being freed "real soon now". Under MAD, this doesn't
+	       happen (see the #ifdef below).  */
+	    sv = newSVsv(sv);
+#else
 	    pad_swipe(o->op_targ,  FALSE);
+#endif
+	}
 	else if (SvTEMP(sv)) {			/* grab mortal temp? */
 	    SvREFCNT_inc_simple_void(sv);
 	    SvTEMP_off(sv);
