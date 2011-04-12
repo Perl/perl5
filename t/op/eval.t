@@ -465,8 +465,10 @@ cmp_ok(length $@, '==', 0, 'length of $@ after eval');
 
 # Check if eval { 1 }; completely resets $@
 SKIP: {
-    skip("Can't load Devel::Peek: $@", 2)
-	unless eval "use Devel::Peek; 1;";
+    skip_if_miniperl('no dynamic loading on miniperl, no Devel::Peek', 2);
+    require Config;
+    skip('Devel::Peek was not built', 2)
+	unless $Config::Config{extensions} =~ /\bDevel\/Peek\b/;
 
     my $tempfile = tempfile();
     open $prog, ">", $tempfile or die "Can't create test file";
