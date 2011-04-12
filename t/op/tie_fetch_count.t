@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 172);
+    plan (tests => 174);
 }
 
 use strict;
@@ -219,6 +219,7 @@ bin_test 'ne',  1, 2, 1;
 bin_test 'cmp', 1, 2, -1;
 bin_test '&' ,  1, 2, 0;
 bin_test '|' ,  1, 2, 3;
+bin_test '^' ,  3, 5, 6;
 bin_test '.' ,  1, 2, 12;
 bin_test '==',  1, 2, "";
 bin_test '+' ,  1, 2, 3;
