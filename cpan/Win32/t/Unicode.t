@@ -1,6 +1,7 @@
 use strict;
 use Test;
 use Cwd qw(cwd);
+use Config qw(%Config);
 use Win32;
 
 BEGIN {
@@ -45,10 +46,12 @@ Win32::CreateFile($file);
 ok(-f Win32::GetANSIPathName($file));
 
 # readdir() returns ANSI form of Unicode filename
+# but on cygwin-1.7 the utf-8 form.
 ok(opendir(my $dh, Win32::GetANSIPathName($dir)));
 while ($_ = readdir($dh)) {
     next if /^\./;
-    ok($file, Win32::GetLongPathName("$dir\\$_"));
+    skip($^O eq 'cygwin' and $Config{osvers} ge "1.7" ? "do not test cygwin utf8 readdir()" : 0,
+         $file, Win32::GetLongPathName("$dir\\$_"));
 }
 closedir($dh);
 
