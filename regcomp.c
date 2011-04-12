@@ -7140,13 +7140,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    excess_modifier:
 			RExC_parse++;
 			if (has_charset_modifier == ASCII_RESTRICT_PAT_MOD) {
-			    vFAIL2("Regexp modifier \"/%c\" may appear a maximum of twice", ASCII_RESTRICT_PAT_MOD);
+			    vFAIL2("Regexp modifier \"%c\" may appear a maximum of twice", ASCII_RESTRICT_PAT_MOD);
 			}
 			else if (has_charset_modifier == *(RExC_parse - 1)) {
-			    vFAIL2("Regexp modifier \"/%c\" may not appear twice", *(RExC_parse - 1));
+			    vFAIL2("Regexp modifier \"%c\" may not appear twice", *(RExC_parse - 1));
 			}
 			else {
-			    vFAIL3("Regexp modifiers \"/%c\" and \"/%c\" are mutually exclusive", has_charset_modifier, *(RExC_parse - 1));
+			    vFAIL3("Regexp modifiers \"%c\" and \"%c\" are mutually exclusive", has_charset_modifier, *(RExC_parse - 1));
 			}
 			/*NOTREACHED*/
                     case ONCE_PAT_MOD: /* 'o' */
