@@ -9,7 +9,7 @@ require ExtUtils::MM_Unix;
 require ExtUtils::MM_Win32;
 our @ISA = qw( ExtUtils::MM_Unix );
 
-our $VERSION = '6.57_05';
+our $VERSION = '6.57_06';
 
 
 =head1 NAME
@@ -119,22 +119,48 @@ sub maybe_command {
 =item dynamic_lib
 
 Use the default to produce the *.dll's.
-But for new archdir dll's use the same rebase address if the old exists.
+Add the dll size to F<$vendorarch/auto/.rebase>, which stores the
+next available imagebase.
+
+If an old dll exists and .rebase is empty, use the same rebase address
+for new archdir dll's.
 
 =cut
 
 sub dynamic_lib {
     my($self, %attribs) = @_;
     my $s = ExtUtils::MM_Unix::dynamic_lib($self, %attribs);
+    return $s unless $s;
     my $ori = "$self->{INSTALLARCHLIB}/auto/$self->{FULLEXT}/$self->{BASEEXT}.$self->{DLEXT}";
+    my $rebase = "$self->{INSTALLVENDORARCH}/auto/.rebase";
+    my $imagebase;
+    if (-f $rebase) {
+      $imagebase = `/bin/cat $rebase`;
+      chomp $imagebase;
+    }
     if (-e $ori) {
-        my $imagebase = `/bin/objdump -p $ori | /bin/grep ImageBase | /bin/cut -c12-`;
-        chomp $imagebase;
-        if ($imagebase gt "40000000") {
-            my $LDDLFLAGS = $self->{LDDLFLAGS};
-            $LDDLFLAGS =~ s/-Wl,--enable-auto-image-base/-Wl,--image-base=0x$imagebase/;
-            $s =~ s/ \$\(LDDLFLAGS\) / $LDDLFLAGS /m;
-        }
+      $imagebase = `/bin/objdump -p $ori | /bin/grep ImageBase | /bin/cut -c12-`;
+      chomp $imagebase;
+      if ($imagebase gt "40000000" and $imagebase lt "80000000") {
+	my $LDDLFLAGS = $self->{LDDLFLAGS};
+	$LDDLFLAGS =~ s/-Wl,--enable-auto-image-base/-Wl,--image-base=0x$imagebase/;
+	$s =~ s/ \$\(LDDLFLAGS\) / $LDDLFLAGS /m;
+      }
+    } elsif ($imagebase gt "40000000" and $imagebase lt "80000000") {
+      my $LDDLFLAGS = $self->{LDDLFLAGS};
+      $LDDLFLAGS =~ s/-Wl,--enable-auto-image-base/-Wl,--image-base=0x$imagebase/ or
+      	$LDDLFLAGS .= " -Wl,--image-base=0x$imagebase";
+      $s =~ s/ \$\(LDDLFLAGS\) / $LDDLFLAGS /m;
+      # Need a tempfile, because gmake expands $_ in the perl cmdline
+      open F, ">", "_rebase.pl";
+      print F qq(/new base = (.+), new size = (.+)/ && printf("%x\\n",hex(\$1)+hex(\$2)););
+      close F;
+      # TODO Here we create all DLL's per project with the same imagebase. We'd need
+      # a better tool to inc the imagebase.
+      $s .= "\t/bin/rebase -v -b 0x$imagebase \$@ | ";
+      $s .= "\$(FULLPERL) -n _rebase.pl > \$(INSTALLVENDORARCH)/auto/.rebase\n";
+    } else {
+      warn "Hint: run perlrebase to initialize $rebase\n";
     }
     $s;
 }
