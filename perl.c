@@ -2201,17 +2201,17 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #ifdef PERL_MAD
     {
 	const char *s;
-    if ((s = PerlEnv_getenv("PERL_XMLDUMP"))) {
+    if ((s = PerlEnv_getenv("PERL_JSONDUMP"))) {
 	PL_madskills = 1;
 	PL_minus_c = 1;
 	if (!s || !s[0])
-	    PL_xmlfp = PerlIO_stdout();
+	    PL_jsonfp = PerlIO_stdout();
 	else {
-	    PL_xmlfp = PerlIO_open(s, "w");
-	    if (!PL_xmlfp)
+	    PL_jsonfp = PerlIO_open(s, "w");
+	    if (!PL_jsonfp)
 		Perl_croak(aTHX_ "Can't open %s", s);
 	}
-	my_setenv("PERL_XMLDUMP", NULL);	/* hide from subprocs */
+	my_setenv("PERL_JSONDUMP", NULL);	/* hide from subprocs */
     }
     }
 
@@ -2349,8 +2349,8 @@ S_run_body(pTHX_ I32 oldscope)
 
     if (!PL_restartop) {
 #ifdef PERL_MAD
-	if (PL_xmlfp) {
-	    xmldump_all();
+	if (PL_jsonfp) {
+	    jsondump_all();
 	    exit(0);	/* less likely to core dump than my_exit(0) */
 	}
 #endif

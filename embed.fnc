@@ -2454,30 +2454,30 @@ Apno     |Size_t |my_strlcpy     |NULLOK char *dst|NULLOK const char *src|Size_t
 
 #ifdef PERL_MAD
 #if defined(PERL_IN_DUMP_C)
-sf	|void	|xmldump_attr	|I32 level|NN PerlIO *file|NN const char* pat \
+sf	|void	|jsondump_attr	|I32 level|NN PerlIO *file|NN const char* pat \
 				|...
 #endif
-Mfp	|void	|xmldump_indent	|I32 level|NN PerlIO *file|NN const char* pat \
+Mfp	|void	|jsondump_indent	|I32 level|NN PerlIO *file|NN const char* pat \
 				|...
-Mp	|void	|xmldump_vindent|I32 level|NN PerlIO *file|NN const char* pat \
+Mp	|void	|jsondump_vindent|I32 level|NN PerlIO *file|NN const char* pat \
 				|NULLOK va_list *args
-Mp	|void	|xmldump_all
-p	|void	|xmldump_all_perl	|bool justperl
-Mp	|void	|xmldump_packsubs	|NN const HV* stash
-p	|void	|xmldump_packsubs_perl	|NN const HV* stash|bool justperl
-Mp	|void	|xmldump_sub	|NN const GV* gv
-Mp	|void	|xmldump_sub_perl	|NN const GV* gv|bool justperl
-Mp	|void	|xmldump_form	|NN const GV* gv
-Mp	|void	|xmldump_eval
-Mp	|char*	|sv_catxmlsv	|NN SV *dsv|NN SV *ssv
-Mp	|char*	|sv_catxmlpvn	|NN SV *dsv|NN const char *pv|STRLEN len|int utf8
-Mp	|char*	|sv_catxmlpv	|NN SV *dsv|NN const char *pv|int utf8
-Mp	|char*	|sv_xmlpeek	|NN SV* sv
-Mp	|void	|do_pmop_xmldump|I32 level|NN PerlIO *file \
+Mp	|void	|jsondump_all
+p	|void	|jsondump_all_perl	|bool justperl
+Mp	|void	|jsondump_packsubs	|NN const HV* stash
+p	|void	|jsondump_packsubs_perl	|NN const HV* stash|bool justperl
+Mp	|void	|jsondump_sub	|NN const GV* gv
+Mp	|void	|jsondump_sub_perl	|NN const GV* gv|bool justperl
+Mp	|void	|jsondump_form	|NN const GV* gv
+Mp	|void	|jsondump_eval
+Mp	|char*	|sv_catjsonsv	|NN SV *dsv|NN SV *ssv
+Mp	|char*	|sv_catjsonpvn	|NN SV *dsv|NN const char *pv|STRLEN len|int utf8
+Mp	|char*	|sv_catjsonpv	|NN SV *dsv|NN const char *pv|int utf8
+Mp	|char*	|sv_jsonpeek	|NN SV* sv
+Mp	|void	|do_pmop_jsondump|I32 level|NN PerlIO *file \
 				|NULLOK const PMOP *pm
-Mp	|void	|pmop_xmldump	|NULLOK const PMOP* pm
-Mp	|void	|do_op_xmldump	|I32 level|NN PerlIO *file|NULLOK const OP *o
-Mp	|void	|op_xmldump	|NN const OP *o
+Mp	|void	|pmop_jsondump	|NULLOK const PMOP* pm
+Mp	|void	|do_op_jsondump	|I32 level|NN PerlIO *file|NULLOK const OP *o
+Mp	|void	|op_jsondump	|NN const OP *o
 
 Mp	|TOKEN*	|newTOKEN	|I32 optype|YYSTYPE lval \
 				|NULLOK MADPROP* madprop

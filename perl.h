@@ -5028,9 +5028,9 @@ struct tempsym; /* defined in pp_pack.c */
 #endif
 #ifndef PERL_MAD
 #  undef PL_madskills
-#  undef PL_xmlfp
+#  undef PL_jsonfp
 #  define PL_madskills 0
-#  define PL_xmlfp 0
+#  define PL_jsonfp 0
 #endif
 
 /* Now include all the 'global' variables

@@ -5459,11 +5459,11 @@ STATIC SV*	S_pm_description(pTHX_ const PMOP *pm)
 
 STATIC UV	S_sequence_num(pTHX_ const OP *o);
 #  if defined(PERL_MAD)
-STATIC void	S_xmldump_attr(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
+STATIC void	S_jsondump_attr(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
 			__attribute__format__(__printf__,pTHX_3,pTHX_4)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
-#define PERL_ARGS_ASSERT_XMLDUMP_ATTR	\
+#define PERL_ARGS_ASSERT_JSONDUMP_ATTR	\
 	assert(file); assert(pat)
 
 #  endif
@@ -7119,15 +7119,56 @@ STATIC void	S_mem_log_common(enum mem_log_type mlt, const UV n, const UV typesiz
 #if defined(PERL_MAD)
 PERL_CALLCONV void	Perl_addmad(pTHX_ MADPROP* tm, MADPROP** root, char slot);
 PERL_CALLCONV void	Perl_append_madprops(pTHX_ MADPROP* tm, OP* o, char slot);
-PERL_CALLCONV void	Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
+PERL_CALLCONV void	Perl_do_op_jsondump(pTHX_ I32 level, PerlIO *file, const OP *o)
 			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_DO_OP_XMLDUMP	\
+#define PERL_ARGS_ASSERT_DO_OP_JSONDUMP	\
 	assert(file)
 
-PERL_CALLCONV void	Perl_do_pmop_xmldump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
+PERL_CALLCONV void	Perl_do_pmop_jsondump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
 			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_DO_PMOP_XMLDUMP	\
+#define PERL_ARGS_ASSERT_DO_PMOP_JSONDUMP	\
 	assert(file)
+
+PERL_CALLCONV void	Perl_jsondump_all(pTHX);
+PERL_CALLCONV void	Perl_jsondump_all_perl(pTHX_ bool justperl);
+PERL_CALLCONV void	Perl_jsondump_eval(pTHX);
+PERL_CALLCONV void	Perl_jsondump_form(pTHX_ const GV* gv)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_JSONDUMP_FORM	\
+	assert(gv)
+
+PERL_CALLCONV void	Perl_jsondump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
+			__attribute__format__(__printf__,pTHX_3,pTHX_4)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_JSONDUMP_INDENT	\
+	assert(file); assert(pat)
+
+PERL_CALLCONV void	Perl_jsondump_packsubs(pTHX_ const HV* stash)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_JSONDUMP_PACKSUBS	\
+	assert(stash)
+
+PERL_CALLCONV void	Perl_jsondump_packsubs_perl(pTHX_ const HV* stash, bool justperl)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_JSONDUMP_PACKSUBS_PERL	\
+	assert(stash)
+
+PERL_CALLCONV void	Perl_jsondump_sub(pTHX_ const GV* gv)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_JSONDUMP_SUB	\
+	assert(gv)
+
+PERL_CALLCONV void	Perl_jsondump_sub_perl(pTHX_ const GV* gv, bool justperl)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_JSONDUMP_SUB_PERL	\
+	assert(gv)
+
+PERL_CALLCONV void	Perl_jsondump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *args)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_JSONDUMP_VINDENT	\
+	assert(file); assert(pat)
 
 PERL_CALLCONV void	Perl_mad_free(pTHX_ MADPROP* mp);
 PERL_CALLCONV int	Perl_madlex(pTHX);
@@ -7145,9 +7186,9 @@ PERL_CALLCONV OP *	Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, O
 PERL_CALLCONV TOKEN*	Perl_newTOKEN(pTHX_ I32 optype, YYSTYPE lval, MADPROP* madprop);
 PERL_CALLCONV void	Perl_op_getmad(pTHX_ OP* from, OP* o, char slot);
 PERL_CALLCONV void	Perl_op_getmad_weak(pTHX_ OP* from, OP* o, char slot);
-PERL_CALLCONV void	Perl_op_xmldump(pTHX_ const OP *o)
+PERL_CALLCONV void	Perl_op_jsondump(pTHX_ const OP *o)
 			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_OP_XMLDUMP	\
+#define PERL_ARGS_ASSERT_OP_JSONDUMP	\
 	assert(o)
 
 PERL_CALLCONV OP*	Perl_package(pTHX_ OP* o)
@@ -7160,29 +7201,29 @@ PERL_CALLCONV void	Perl_pad_peg(const char* s)
 #define PERL_ARGS_ASSERT_PAD_PEG	\
 	assert(s)
 
-PERL_CALLCONV void	Perl_pmop_xmldump(pTHX_ const PMOP* pm);
+PERL_CALLCONV void	Perl_pmop_jsondump(pTHX_ const PMOP* pm);
 PERL_CALLCONV void	Perl_prepend_madprops(pTHX_ MADPROP* mp, OP* o, char slot);
-PERL_CALLCONV char*	Perl_sv_catxmlpv(pTHX_ SV *dsv, const char *pv, int utf8)
+PERL_CALLCONV char*	Perl_sv_catjsonpv(pTHX_ SV *dsv, const char *pv, int utf8)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_SV_CATXMLPV	\
+#define PERL_ARGS_ASSERT_SV_CATJSONPV	\
 	assert(dsv); assert(pv)
 
-PERL_CALLCONV char*	Perl_sv_catxmlpvn(pTHX_ SV *dsv, const char *pv, STRLEN len, int utf8)
+PERL_CALLCONV char*	Perl_sv_catjsonpvn(pTHX_ SV *dsv, const char *pv, STRLEN len, int utf8)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_SV_CATXMLPVN	\
+#define PERL_ARGS_ASSERT_SV_CATJSONPVN	\
 	assert(dsv); assert(pv)
 
-PERL_CALLCONV char*	Perl_sv_catxmlsv(pTHX_ SV *dsv, SV *ssv)
+PERL_CALLCONV char*	Perl_sv_catjsonsv(pTHX_ SV *dsv, SV *ssv)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_SV_CATXMLSV	\
+#define PERL_ARGS_ASSERT_SV_CATJSONSV	\
 	assert(dsv); assert(ssv)
 
-PERL_CALLCONV char*	Perl_sv_xmlpeek(pTHX_ SV* sv)
+PERL_CALLCONV char*	Perl_sv_jsonpeek(pTHX_ SV* sv)
 			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_SV_XMLPEEK	\
+#define PERL_ARGS_ASSERT_SV_JSONPEEK	\
 	assert(sv)
 
 PERL_CALLCONV void	Perl_token_free(pTHX_ TOKEN *tk)
@@ -7199,47 +7240,6 @@ PERL_CALLCONV OP *	Perl_utilize(pTHX_ int aver, I32 floor, OP* version, OP* idop
 			__attribute__nonnull__(pTHX_4);
 #define PERL_ARGS_ASSERT_UTILIZE	\
 	assert(idop)
-
-PERL_CALLCONV void	Perl_xmldump_all(pTHX);
-PERL_CALLCONV void	Perl_xmldump_all_perl(pTHX_ bool justperl);
-PERL_CALLCONV void	Perl_xmldump_eval(pTHX);
-PERL_CALLCONV void	Perl_xmldump_form(pTHX_ const GV* gv)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_XMLDUMP_FORM	\
-	assert(gv)
-
-PERL_CALLCONV void	Perl_xmldump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
-			__attribute__format__(__printf__,pTHX_3,pTHX_4)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
-#define PERL_ARGS_ASSERT_XMLDUMP_INDENT	\
-	assert(file); assert(pat)
-
-PERL_CALLCONV void	Perl_xmldump_packsubs(pTHX_ const HV* stash)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_XMLDUMP_PACKSUBS	\
-	assert(stash)
-
-PERL_CALLCONV void	Perl_xmldump_packsubs_perl(pTHX_ const HV* stash, bool justperl)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_XMLDUMP_PACKSUBS_PERL	\
-	assert(stash)
-
-PERL_CALLCONV void	Perl_xmldump_sub(pTHX_ const GV* gv)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_XMLDUMP_SUB	\
-	assert(gv)
-
-PERL_CALLCONV void	Perl_xmldump_sub_perl(pTHX_ const GV* gv, bool justperl)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_XMLDUMP_SUB_PERL	\
-	assert(gv)
-
-PERL_CALLCONV void	Perl_xmldump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *args)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
-#define PERL_ARGS_ASSERT_XMLDUMP_VINDENT	\
-	assert(file); assert(pat)
 
 #endif
 #if defined(PERL_NEED_MY_BETOH16)

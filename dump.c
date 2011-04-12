@@ -2249,75 +2249,142 @@ Perl_debprofdump(pTHX)
 
 #ifdef PERL_MAD
 /*
- *    XML variants of most of the above routines
+ *    JSON variants of most of the above routines
  */
 
 STATIC void
-S_xmldump_attr(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
+S_jsondump_attr(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
 {
     va_list args;
 
-    PERL_ARGS_ASSERT_XMLDUMP_ATTR;
+    PERL_ARGS_ASSERT_JSONDUMP_ATTR;
 
     PerlIO_printf(file, "\n    ");
     va_start(args, pat);
-    xmldump_vindent(level, file, pat, &args);
+    jsondump_vindent(level, file, pat, &args);
     va_end(args);
 }
 
 
 void
-Perl_xmldump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
+Perl_jsondump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
 {
     va_list args;
-    PERL_ARGS_ASSERT_XMLDUMP_INDENT;
+    PERL_ARGS_ASSERT_JSONDUMP_INDENT;
     va_start(args, pat);
-    xmldump_vindent(level, file, pat, &args);
+    jsondump_vindent(level, file, pat, &args);
     va_end(args);
 }
 
 void
-Perl_xmldump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *args)
+Perl_jsondump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *args)
 {
-    PERL_ARGS_ASSERT_XMLDUMP_VINDENT;
+    PERL_ARGS_ASSERT_JSONDUMP_VINDENT;
 
     PerlIO_printf(file, "%*s", (int)(level*PL_dumpindent), "");
     PerlIO_vprintf(file, pat, *args);
 }
 
-void
-Perl_xmldump_all(pTHX)
-{
-    xmldump_all_perl(FALSE);
+static void
+Perl_jsondump_indent_pair_common(pTHX_ I32 level, PerlIO *file, const char *name, const char *value, STRLEN len, Bool utf8) {
+    unsigned int c;
+    const char * const e = value + len;
+    STRLEN cl;
+
+    PerlIO_printf(file, "%*s", (int)(level*PL_dumpindent), "");
+    PerlIO_printf(file, "\"%s\":\"", name);
+    while (value < e) {
+	if (utf8) {
+	    c = utf8_to_uvchr((U8*)value, &cl);
+	    if (cl == 0) {
+		croak("Invalid UTF8 string");
+	    }
+
+	    value += cl;
+	}
+	else {
+	    c = (*value++ & 0xFF);
+	}
+	if (c >= ' ' && c <= '~') {
+	    PerlIO_putc(file, c);
+	}
+	else if (c <= \xFF) {
+	    PerlIO_printf(file, "\\x%02X", c);
+	}
+	else if (c <= \xFFFF) {
+	    PerlIO_printf(file, "\\u%04X", c);
+	}
+	else {
+	    /* not sure what to do here */
+	}
+    }
 }
 
 void
-Perl_xmldump_all_perl(pTHX_ bool justperl PERL_UNUSED_DECL)
+Perl_jsondump_indent_pair(pTHX_ I32 level, PerlIO *file, const char *name, const char *value)
 {
-    PerlIO_setlinebuf(PL_xmlfp);
+    Perl_jsondump_indent_pair_common(aTHX_, level, file, name, value, strlen(value), 0);
+}
+
+void
+Perl_jsondump_indent_pairsv(pTHX_ I32 level, PerlIO *file, const char *name, const SV *value)
+{
+    STRLEN len;
+    const char *p = SvPV(value, len);
+    Perl_jsondump_indent_pair_common(aTHX_, level, file, name, p, len, SvUTF8(value));
+}
+
+void
+Perl_jsondump_indent_pairf(pTHX_ I32 level, PerlIO *file, const char *name, const char *format, ...)
+{
+    SV *sv = newSV();
+    va_list args;
+
+    va_start(args, format);
+    sv_catpvf(sv, format, args);
+    va_end(args);
+    Perl_jsondump_indent_pair_sv(aTHX_, level, file, name, sv);
+
+    /* mortal might work, but we create a lot of SVs for a complex program
+       here, so release early */
+    SvREFCNT_dec(sv);
+}
+
+
+
+void
+Perl_jsondump_all(pTHX)
+{
+    jsondump_all_perl(FALSE);
+}
+
+void
+Perl_jsondump_all_perl(pTHX_ bool justperl PERL_UNUSED_DECL)
+{
+    PerlIO_setlinebuf(PL_jsonfp);
     if (PL_main_root)
-	op_xmldump(PL_main_root);
-    /* someday we might call this, when it outputs XML: */
-    /* xmldump_packsubs_perl(PL_defstash, justperl); */
-    if (PL_xmlfp != (PerlIO*)PerlIO_stdout())
-	PerlIO_close(PL_xmlfp);
-    PL_xmlfp = 0;
+	op_jsondump(PL_main_root);
+    /* someday we might call this, when it outputs JSON: */
+    /* jsondump_packsubs_perl(PL_defstash, justperl); */
+    if (PL_jsonfp != (PerlIO*)PerlIO_stdout())
+	PerlIO_close(PL_jsonfp);
+    PL_jsonfp = 0;
 }
 
 void
-Perl_xmldump_packsubs(pTHX_ const HV *stash)
+Perl_jsondump_packsubs(pTHX_ const HV *stash)
 {
-    PERL_ARGS_ASSERT_XMLDUMP_PACKSUBS;
-    xmldump_packsubs_perl(stash, FALSE);
+    PERL_ARGS_ASSERT_JSONDUMP_PACKSUBS;
+    jsondump_packsubs_perl(stash, FALSE);
 }
 
 void
-Perl_xmldump_packsubs_perl(pTHX_ const HV *stash, bool justperl)
+Perl_jsondump_packsubs_perl(pTHX_ const HV *stash, bool justperl)
 {
     I32	i;
     HE	*entry;
 
-    PERL_ARGS_ASSERT_XMLDUMP_PACKSUBS_PERL;
+    PERL_ARGS_ASSERT_JSONDUMP_PACKSUBS_PERL;
 
     if (!HvARRAY(stash))
 	return;
@@ -2328,83 +2395,83 @@ Perl_xmldump_packsubs_perl(pTHX_ const HV *stash, bool justperl)
 	    if (SvTYPE(gv) != SVt_PVGV || !GvGP(gv))
 		continue;
 	    if (GvCVu(gv))
-		xmldump_sub_perl(gv, justperl);
+		jsondump_sub_perl(gv, justperl);
 	    if (GvFORM(gv))
-		xmldump_form(gv);
+		jsondump_form(gv);
 	    if (HeKEY(entry)[HeKLEN(entry)-1] == ':'
 		&& (hv = GvHV(gv)) && hv != PL_defstash)
-		xmldump_packsubs_perl(hv, justperl);	/* nested package */
+		jsondump_packsubs_perl(hv, justperl);	/* nested package */
 	}
     }
 }
 
 void
-Perl_xmldump_sub(pTHX_ const GV *gv)
+Perl_jsondump_sub(pTHX_ const GV *gv)
 {
-    PERL_ARGS_ASSERT_XMLDUMP_SUB;
-    xmldump_sub_perl(gv, FALSE);
+    PERL_ARGS_ASSERT_JSONDUMP_SUB;
+    jsondump_sub_perl(gv, FALSE);
 }
 
 void
-Perl_xmldump_sub_perl(pTHX_ const GV *gv, bool justperl)
+Perl_jsondump_sub_perl(pTHX_ const GV *gv, bool justperl)
 {
     SV * sv;
 
-    PERL_ARGS_ASSERT_XMLDUMP_SUB_PERL;
+    PERL_ARGS_ASSERT_JSONDUMP_SUB_PERL;
 
     if (justperl && (CvISXSUB(GvCV(gv)) || !CvROOT(GvCV(gv))))
 	return;
 
     sv = sv_newmortal();
     gv_fullname3(sv, gv, NULL);
-    Perl_xmldump_indent(aTHX_ 0, PL_xmlfp, "\nSUB %s = ", SvPVX(sv));
+    Perl_jsondump_indent(aTHX_ 0, PL_jsonfp, "\nSUB %s = ", SvPVX(sv));
     if (CvXSUB(GvCV(gv)))
-	Perl_xmldump_indent(aTHX_ 0, PL_xmlfp, "(xsub 0x%"UVxf" %d)\n",
+	Perl_jsondump_indent(aTHX_ 0, PL_jsonfp, "(xsub 0x%"UVxf" %d)\n",
 	    PTR2UV(CvXSUB(GvCV(gv))),
 	    (int)CvXSUBANY(GvCV(gv)).any_i32);
     else if (CvROOT(GvCV(gv)))
-	op_xmldump(CvROOT(GvCV(gv)));
+	op_jsondump(CvROOT(GvCV(gv)));
     else
-	Perl_xmldump_indent(aTHX_ 0, PL_xmlfp, "<undef>\n");
+	Perl_jsondump_indent(aTHX_ 0, PL_jsonfp, "<undef>\n");
 }
 
 void
-Perl_xmldump_form(pTHX_ const GV *gv)
+Perl_jsondump_form(pTHX_ const GV *gv)
 {
     SV * const sv = sv_newmortal();
 
-    PERL_ARGS_ASSERT_XMLDUMP_FORM;
+    PERL_ARGS_ASSERT_JSONDUMP_FORM;
 
     gv_fullname3(sv, gv, NULL);
-    Perl_xmldump_indent(aTHX_ 0, PL_xmlfp, "\nFORMAT %s = ", SvPVX(sv));
+    Perl_jsondump_indent(aTHX_ 0, PL_jsonfp, "\nFORMAT %s = ", SvPVX(sv));
     if (CvROOT(GvFORM(gv)))
-	op_xmldump(CvROOT(GvFORM(gv)));
+	op_jsondump(CvROOT(GvFORM(gv)));
     else
-	Perl_xmldump_indent(aTHX_ 0, PL_xmlfp, "<undef>\n");
+	Perl_jsondump_indent(aTHX_ 0, PL_jsonfp, "<undef>\n");
 }
 
 void
-Perl_xmldump_eval(pTHX)
+Perl_jsondump_eval(pTHX)
 {
-    op_xmldump(PL_eval_root);
+    op_jsondump(PL_eval_root);
 }
 
 char *
-Perl_sv_catxmlsv(pTHX_ SV *dsv, SV *ssv)
+Perl_sv_catjsonsv(pTHX_ SV *dsv, SV *ssv)
 {
-    PERL_ARGS_ASSERT_SV_CATXMLSV;
-    return sv_catxmlpvn(dsv, SvPVX(ssv), SvCUR(ssv), SvUTF8(ssv));
+    PERL_ARGS_ASSERT_SV_CATJSONSV;
+    return sv_catjsonpvn(dsv, SvPVX(ssv), SvCUR(ssv), SvUTF8(ssv));
 }
 
 char *
-Perl_sv_catxmlpv(pTHX_ SV *dsv, const char *pv, int utf8)
+Perl_sv_catjsonpv(pTHX_ SV *dsv, const char *pv, int utf8)
 {
-    PERL_ARGS_ASSERT_SV_CATXMLPV;
-    return sv_catxmlpvn(dsv, pv, strlen(pv), utf8);
+    PERL_ARGS_ASSERT_SV_CATJSONPV;
+    return sv_catjsonpvn(dsv, pv, strlen(pv), utf8);
 }
 
 char *
-Perl_sv_catxmlpvn(pTHX_ SV *dsv, const char *pv, STRLEN len, int utf8)
+Perl_sv_catjsonpvn(pTHX_ SV *dsv, const char *pv, STRLEN len, int utf8)
 {
     unsigned int c;
     const char * const e = pv + len;
@@ -2412,7 +2479,7 @@ Perl_sv_catxmlpvn(pTHX_ SV *dsv, const char *pv, STRLEN len, int utf8)
     STRLEN dsvcur;
     STRLEN cl;
 
-    PERL_ARGS_ASSERT_SV_CATXMLPVN;
+    PERL_ARGS_ASSERT_SV_CATJSONPVN;
 
     sv_catpvs(dsv,"");
     dsvcur = SvCUR(dsv);	/* in case we have to restart */
@@ -2487,7 +2554,7 @@ Perl_sv_catxmlpvn(pTHX_ SV *dsv, const char *pv, STRLEN len, int utf8)
 	case 0x9d:
 	case 0x9e:
 	case 0x9f:
-	    Perl_sv_catpvf(aTHX_ dsv, "STUPIDXML(#x%X)", c);
+	    Perl_sv_catpvf(aTHX_ dsv, "STUPIDJSON(#x%X)", c);
 	    break;
 	case '<':
 	    sv_catpvs(dsv, "&lt;");
@@ -2516,7 +2583,7 @@ Perl_sv_catxmlpvn(pTHX_ SV *dsv, const char *pv, STRLEN len, int utf8)
 		(c >= 0xDC00 && c <= 0xDFFF) ||
 		(c >= 0xFFF0 && c <= 0xFFFF) ||
 		 c > 0x10ffff)
-		Perl_sv_catpvf(aTHX_ dsv, "STUPIDXML(#x%X)", c);
+		Perl_sv_catpvf(aTHX_ dsv, "STUPIDJSON(#x%X)", c);
 	    else
 		Perl_sv_catpvf(aTHX_ dsv, "&#x%X;", c);
 	}
@@ -2531,13 +2598,13 @@ Perl_sv_catxmlpvn(pTHX_ SV *dsv, const char *pv, STRLEN len, int utf8)
 }
 
 char *
-Perl_sv_xmlpeek(pTHX_ SV *sv)
+Perl_sv_jsonpeek(pTHX_ SV *sv)
 {
     SV * const t = sv_newmortal();
     STRLEN n_a;
     int unref = 0;
 
-    PERL_ARGS_ASSERT_SV_XMLPEEK;
+    PERL_ARGS_ASSERT_SV_JSONPEEK;
 
     sv_utf8_upgrade(t);
     sv_setpvs(t, "");
@@ -2672,7 +2739,7 @@ Perl_sv_xmlpeek(pTHX_ SV *sv)
 
     if (SvPOKp(sv)) {
 	if (SvPVX(sv)) {
-	    sv_catxmlsv(t, sv);
+	    sv_catjsonsv(t, sv);
 	}
     }
     else if (SvNOKp(sv)) {
@@ -2697,68 +2764,69 @@ Perl_sv_xmlpeek(pTHX_ SV *sv)
 }
 
 void
-Perl_do_pmop_xmldump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
+Perl_do_pmop_jsondump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
 {
-    PERL_ARGS_ASSERT_DO_PMOP_XMLDUMP;
+    PERL_ARGS_ASSERT_DO_PMOP_JSONDUMP;
 
     if (!pm) {
-	Perl_xmldump_indent(aTHX_ level, file, "<pmop/>\n");
+	Perl_jsondump_indent(aTHX_ level, file, "<pmop/>\n");
 	return;
     }
-    Perl_xmldump_indent(aTHX_ level, file, "<pmop \n");
+    Perl_jsondump_indent(aTHX_ level, file, "<pmop \n");
     level++;
     if (PM_GETRE(pm)) {
 	REGEXP *const r = PM_GETRE(pm);
 	SV * const tmpsv = newSVpvn_utf8("", 0, TRUE);
-	sv_catxmlsv(tmpsv, MUTABLE_SV(r));
-	Perl_xmldump_indent(aTHX_ level, file, "pre=\"%s\"\n",
+	sv_catjsonsv(tmpsv, MUTABLE_SV(r));
+	Perl_jsondump_indent(aTHX_ level, file, "pre=\"%s\"\n",
 	     SvPVX(tmpsv));
 	SvREFCNT_dec(tmpsv);
-	Perl_xmldump_indent(aTHX_ level, file, "when=\"%s\"\n",
+	Perl_jsondump_indent(aTHX_ level, file, "when=\"%s\"\n",
 	     (pm->op_private & OPpRUNTIME) ? "RUN" : "COMP");
     }
     else
-	Perl_xmldump_indent(aTHX_ level, file, "pre=\"\" when=\"RUN\"\n");
+	Perl_jsondump_indent(aTHX_ level, file, "pre=\"\" when=\"RUN\"\n");
     if (pm->op_pmflags || (PM_GETRE(pm) && RX_CHECK_SUBSTR(PM_GETRE(pm)))) {
 	SV * const tmpsv = pm_description(pm);
-	Perl_xmldump_indent(aTHX_ level, file, "pmflags=\"%s\"\n", SvCUR(tmpsv) ? SvPVX(tmpsv) + 1 : "");
+	Perl_jsondump_indent(aTHX_ level, file, "pmflags=\"%s\"\n", SvCUR(tmpsv) ? SvPVX(tmpsv) + 1 : "");
 	SvREFCNT_dec(tmpsv);
     }
 
     level--;
     if (pm->op_type != OP_PUSHRE && pm->op_pmreplrootu.op_pmreplroot) {
-	Perl_xmldump_indent(aTHX_ level, file, ">\n");
-	Perl_xmldump_indent(aTHX_ level+1, file, "<pm_repl>\n");
-	do_op_xmldump(level+2, file, pm->op_pmreplrootu.op_pmreplroot);
-	Perl_xmldump_indent(aTHX_ level+1, file, "</pm_repl>\n");
-	Perl_xmldump_indent(aTHX_ level, file, "</pmop>\n");
+	Perl_jsondump_indent(aTHX_ level, file, ">\n");
+	Perl_jsondump_indent(aTHX_ level+1, file, "<pm_repl>\n");
+	do_op_jsondump(level+2, file, pm->op_pmreplrootu.op_pmreplroot);
+	Perl_jsondump_indent(aTHX_ level+1, file, "</pm_repl>\n");
+	Perl_jsondump_indent(aTHX_ level, file, "</pmop>\n");
     }
     else
-	Perl_xmldump_indent(aTHX_ level, file, "/>\n");
+	Perl_jsondump_indent(aTHX_ level, file, "/>\n");
 }
 
 void
-Perl_pmop_xmldump(pTHX_ const PMOP *pm)
+Perl_pmop_jsondump(pTHX_ const PMOP *pm)
 {
-    do_pmop_xmldump(0, PL_xmlfp, pm);
+    do_pmop_jsondump(0, PL_jsonfp, pm);
 }
 
 void
-Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
+Perl_do_op_jsondump(pTHX_ I32 level, PerlIO *file, const OP *o)
 {
     UV      seq;
     int     contents = 0;
 
-    PERL_ARGS_ASSERT_DO_OP_XMLDUMP;
+    PERL_ARGS_ASSERT_DO_OP_JSONDUMP;
 
     if (!o)
 	return;
     seq = sequence_num(o);
-    Perl_xmldump_indent(aTHX_ level, file,
-	"<op_%s seq=\"%"UVuf" -> ",
-	     OP_NAME(o),
-	              seq);
+    Perl_jsondump_indent(aTHX_ level, file, "{");
     level++;
+    Perl_jsondump_indent_pairf(aTHX_ level, file, "type", "op_%s", OP_NAME(o));
+    PerlIO_putc(file, ',');
+    Perl_jsondump_indent_pairf(aTHX_ level, file, "seq", "%"UVuf, seq);
+    PerlIO_putc(file, ',');
     if (o->op_next)
 	PerlIO_printf(file, seq ? "%"UVuf"\"" : "(%"UVuf")\"",
 		      sequence_num(o->op_next));
@@ -2978,7 +3046,7 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	if (o->op_flags & OPf_MOD && o->op_private & OPpLVAL_INTRO)
 	    sv_catpv(tmpsv, ",INTRO");
 	if (SvCUR(tmpsv))
-	    S_xmldump_attr(aTHX_ level, file, "private=\"%s\"", SvPVX(tmpsv) + 1);
+	    S_jsondump_attr(aTHX_ level, file, "private=\"%s\"", SvPVX(tmpsv) + 1);
 	SvREFCNT_dec(tmpsv);
     }
 
@@ -2990,7 +3058,7 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
     case OP_GVSV:
     case OP_GV:
 #ifdef USE_ITHREADS
-	S_xmldump_attr(aTHX_ level, file, "padix=\"%" IVdf "\"", (IV)cPADOPo->op_padix);
+	S_jsondump_attr(aTHX_ level, file, "padix=\"%" IVdf "\"", (IV)cPADOPo->op_padix);
 #else
 	if (cSVOPo->op_sv) {
 	    SV * const tmpsv1 = newSVpvn_utf8(NULL, 0, TRUE);
@@ -3002,12 +3070,12 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	    SAVEFREESV(tmpsv2);
 	    gv_fullname3(tmpsv1, MUTABLE_GV(cSVOPo->op_sv), NULL);
 	    s = SvPV(tmpsv1,len);
-	    sv_catxmlpvn(tmpsv2, s, len, 1);
-	    S_xmldump_attr(aTHX_ level, file, "gv=\"%s\"", SvPV(tmpsv2, len));
+	    sv_catjsonpvn(tmpsv2, s, len, 1);
+	    S_jsondump_attr(aTHX_ level, file, "gv=\"%s\"", SvPV(tmpsv2, len));
 	    LEAVE;
 	}
 	else
-	    S_xmldump_attr(aTHX_ level, file, "gv=\"NULL\"");
+	    S_jsondump_attr(aTHX_ level, file, "gv=\"NULL\"");
 #endif
 	break;
     case OP_CONST:
@@ -3016,7 +3084,7 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 #ifndef USE_ITHREADS
 	/* with ITHREADS, consts are stored in the pad, and the right pad
 	 * may not be active here, so skip */
-	S_xmldump_attr(aTHX_ level, file, "%s", sv_xmlpeek(cSVOPo_sv));
+	S_jsondump_attr(aTHX_ level, file, "%s", sv_jsonpeek(cSVOPo_sv));
 #endif
 	break;
     case OP_ANONCODE:
@@ -3024,32 +3092,32 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	    contents = 1;
 	    PerlIO_printf(file, ">\n");
 	}
-	do_op_xmldump(level+1, file, CvROOT(cSVOPo_sv));
+	do_op_jsondump(level+1, file, CvROOT(cSVOPo_sv));
 	break;
     case OP_NEXTSTATE:
     case OP_DBSTATE:
 	if (CopLINE(cCOPo))
-	    S_xmldump_attr(aTHX_ level, file, "line=\"%"UVuf"\"",
+	    S_jsondump_attr(aTHX_ level, file, "line=\"%"UVuf"\"",
 			     (UV)CopLINE(cCOPo));
 	if (CopSTASHPV(cCOPo))
-	    S_xmldump_attr(aTHX_ level, file, "package=\"%s\"",
+	    S_jsondump_attr(aTHX_ level, file, "package=\"%s\"",
 			     CopSTASHPV(cCOPo));
 	if (CopLABEL(cCOPo))
-	    S_xmldump_attr(aTHX_ level, file, "label=\"%s\"",
+	    S_jsondump_attr(aTHX_ level, file, "label=\"%s\"",
 			     CopLABEL(cCOPo));
 	break;
     case OP_ENTERLOOP:
-	S_xmldump_attr(aTHX_ level, file, "redo=\"");
+	S_jsondump_attr(aTHX_ level, file, "redo=\"");
 	if (cLOOPo->op_redoop)
 	    PerlIO_printf(file, "%"UVuf"\"", sequence_num(cLOOPo->op_redoop));
 	else
 	    PerlIO_printf(file, "DONE\"");
-	S_xmldump_attr(aTHX_ level, file, "next=\"");
+	S_jsondump_attr(aTHX_ level, file, "next=\"");
 	if (cLOOPo->op_nextop)
 	    PerlIO_printf(file, "%"UVuf"\"", sequence_num(cLOOPo->op_nextop));
 	else
 	    PerlIO_printf(file, "DONE\"");
-	S_xmldump_attr(aTHX_ level, file, "last=\"");
+	S_jsondump_attr(aTHX_ level, file, "last=\"");
 	if (cLOOPo->op_lastop)
 	    PerlIO_printf(file, "%"UVuf"\"", sequence_num(cLOOPo->op_lastop));
 	else
@@ -3061,7 +3129,7 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
     case OP_GREPWHILE:
     case OP_OR:
     case OP_AND:
-	S_xmldump_attr(aTHX_ level, file, "other=\"");
+	S_jsondump_attr(aTHX_ level, file, "other=\"");
 	if (cLOGOPo->op_other)
 	    PerlIO_printf(file, "%"UVuf"\"", sequence_num(cLOGOPo->op_other));
 	else
@@ -3074,7 +3142,7 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
     case OP_LEAVEWRITE:
     case OP_SCOPE:
 	if (o->op_private & OPpREFCOUNTED)
-	    S_xmldump_attr(aTHX_ level, file, "refcnt=\"%"UVuf"\"", (UV)o->op_targ);
+	    S_jsondump_attr(aTHX_ level, file, "refcnt=\"%"UVuf"\"", (UV)o->op_targ);
 	break;
     default:
 	break;
@@ -3089,50 +3157,50 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	    contents = 1;
 	    PerlIO_printf(file, ">\n");
 	}
-	Perl_xmldump_indent(aTHX_ level, file, "<madprops>\n");
+	Perl_jsondump_indent(aTHX_ level, file, "<madprops>\n");
 	level++;
 	while (mp) {
 	    char tmp = mp->mad_key;
 	    sv_setpvs(tmpsv,"\"");
 	    if (tmp)
-		sv_catxmlpvn(tmpsv, &tmp, 1, 0);
+		sv_catjsonpvn(tmpsv, &tmp, 1, 0);
 	    if ((tmp == '_') || (tmp == '#')) /* '_' '#' whitespace belong to the previous token. */
-		sv_catxmlpvn(tmpsv, &prevkey, 1, 0);
+		sv_catjsonpvn(tmpsv, &prevkey, 1, 0);
 	    else
 		prevkey = tmp;
 	    sv_catpv(tmpsv, "\"");
 	    switch (mp->mad_type) {
 	    case MAD_NULL:
 		sv_catpv(tmpsv, "NULL");
-		Perl_xmldump_indent(aTHX_ level, file, "<mad_null key=%s/>\n", SvPVX(tmpsv));
+		Perl_jsondump_indent(aTHX_ level, file, "<mad_null key=%s/>\n", SvPVX(tmpsv));
 		break;
 	    case MAD_PV:
 		sv_catpv(tmpsv, " val=\"");
-		sv_catxmlpvn(tmpsv, (char*)mp->mad_val, mp->mad_vlen,1);
+		sv_catjsonpvn(tmpsv, (char*)mp->mad_val, mp->mad_vlen,1);
 		sv_catpv(tmpsv, "\"");
-		Perl_xmldump_indent(aTHX_ level, file, "<mad_pv key=%s/>\n", SvPVX(tmpsv));
+		Perl_jsondump_indent(aTHX_ level, file, "<mad_pv key=%s/>\n", SvPVX(tmpsv));
 		break;
 	    case MAD_SV:
 		sv_catpv(tmpsv, " val=\"");
-		sv_catxmlsv(tmpsv, MUTABLE_SV(mp->mad_val));
+		sv_catjsonsv(tmpsv, MUTABLE_SV(mp->mad_val));
 		sv_catpv(tmpsv, "\"");
-		Perl_xmldump_indent(aTHX_ level, file, "<mad_sv key=%s/>\n", SvPVX(tmpsv));
+		Perl_jsondump_indent(aTHX_ level, file, "<mad_sv key=%s/>\n", SvPVX(tmpsv));
 		break;
 	    case MAD_OP:
 		if ((OP*)mp->mad_val) {
-		    Perl_xmldump_indent(aTHX_ level, file, "<mad_op key=%s>\n", SvPVX(tmpsv));
-		    do_op_xmldump(level+1, file, (OP*)mp->mad_val);
-		    Perl_xmldump_indent(aTHX_ level, file, "</mad_op>\n");
+		    Perl_jsondump_indent(aTHX_ level, file, "<mad_op key=%s>\n", SvPVX(tmpsv));
+		    do_op_jsondump(level+1, file, (OP*)mp->mad_val);
+		    Perl_jsondump_indent(aTHX_ level, file, "</mad_op>\n");
 		}
 		break;
 	    default:
-		Perl_xmldump_indent(aTHX_ level, file, "<mad_unk key=%s/>\n", SvPVX(tmpsv));
+		Perl_jsondump_indent(aTHX_ level, file, "<mad_unk key=%s/>\n", SvPVX(tmpsv));
 		break;
 	    }
 	    mp = mp->mad_next;
 	}
 	level--;
-	Perl_xmldump_indent(aTHX_ level, file, "</madprops>\n");
+	Perl_jsondump_indent(aTHX_ level, file, "</madprops>\n");
 
 	SvREFCNT_dec(tmpsv);
     }
@@ -3146,7 +3214,7 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	    contents = 1;
 	    PerlIO_printf(file, ">\n");
 	}
-	do_pmop_xmldump(level, file, cPMOPo);
+	do_pmop_jsondump(level, file, cPMOPo);
 	break;
     default:
 	break;
@@ -3159,21 +3227,21 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	    PerlIO_printf(file, ">\n");
 	}
 	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling)
-	    do_op_xmldump(level, file, kid);
+	    do_op_jsondump(level, file, kid);
     }
 
     if (contents)
-	Perl_xmldump_indent(aTHX_ level-1, file, "</op_%s>\n", OP_NAME(o));
+	Perl_jsondump_indent(aTHX_ level-1, file, "</op_%s>\n", OP_NAME(o));
     else
 	PerlIO_printf(file, " />\n");
 }
 
 void
-Perl_op_xmldump(pTHX_ const OP *o)
+Perl_op_jsondump(pTHX_ const OP *o)
 {
-    PERL_ARGS_ASSERT_OP_XMLDUMP;
+    PERL_ARGS_ASSERT_OP_JSONDUMP;
 
-    do_op_xmldump(0, PL_xmlfp, o);
+    do_op_jsondump(0, PL_jsonfp, o);
 }
 #endif
 

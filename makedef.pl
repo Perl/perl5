@@ -460,8 +460,8 @@ unless ($define{'PERL_TRACK_MEMPOOL'}) {
 unless ($define{PERL_MAD}) {
     ++$skip{$_} foreach qw(
 		    PL_madskills
-		    PL_xmlfp
-			 );
+		    PL_jsonfp
+		    );
 }
 
 unless ($define{'MULTIPLICITY'}) {

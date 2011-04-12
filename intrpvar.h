@@ -759,7 +759,11 @@ PERLVARI(I, ppid,	IV,	0)
 #ifdef PERL_MAD
 PERLVARI(I, madskills,	bool,	FALSE)	/* preserve all syntactic info */
 					/* (MAD = Misc Attribute Decoration) */
+<<<<<<< HEAD
 PERLVARI(I, xmlfp,	PerlIO *, NULL)
+=======
+PERLVARI(Ijsonfp, PerlIO *,NULL)
+>>>>>>> bf20e1f... WIP XML -> JSON
 #endif
 
 #ifdef PL_OP_SLAB_ALLOC
