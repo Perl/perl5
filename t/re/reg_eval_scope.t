@@ -131,8 +131,10 @@ SKIP: {
     # The remaining TODO tests crash, which will display an error dialog
     # on Windows that has to be manually dismissed.  We don't want this
     # to happen for release builds: 5.14.x, 5.16.x etc.
+    # On UNIX, they produce ugly 'Aborted' shell output mixed in with the
+    # test harness output, so skip on all platforms.
     skip "Don't run crashing TODO test on release build", 3
-	if $::TODO && $^O eq "MSWin32" && (int($]*1000) & 1) == 0;
+	if $::TODO && (int($]*1000) & 1) == 0;
 
     fresh_perl_is <<'CODE', '45', { stderr => 1 }, '(?{last})';
      {  my $a=4; my $b=5; "a" =~ /(?{last})a/ }; print $a,$b
