@@ -2353,7 +2353,7 @@ test_coplabel()
     PREINIT:
 	COP *cop;
         char *label;
-        int len, utf8;
+        STRLEN len; U32 utf8;
     CODE:
 	cop = &PL_compiling;
 	Perl_store_cop_label(aTHX_ cop, "foo", 3, 0);
