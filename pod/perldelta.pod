@@ -3802,7 +3802,7 @@ None of these match.
 
 Also, this matching doesn't fully conform to the current Unicode
 standard, which asks that the matching be made upon the NFD
-(Normalization Form .ecomposed) of the text.  However, as of this
+(Normalization Form Decomposed) of the text.  However, as of this
 writing, March 2010, the Unicode standard is currently in flux about
 what they will recommend doing with regard to such cases.  It may be
 that they will throw out the whole concept of multi-character matches.
