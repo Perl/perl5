@@ -4021,6 +4021,13 @@ expression compiler gave it.
 (F syntax, regexp) The regular expression pattern had too many occurrences
 of the specified modifier.  Remove the extraneous ones.
 
+=item Regexp modifier "%c" may not appear after the "-"
+
+(F regexp) Turning off the given modifier has the side effect of turning
+on another one.  Perl currently doesn't allow this.  Reword the regular
+expression to use the modifier you want to turn on (and place it before
+the minus), instead of the one you want to turn off.
+
 =item Regexp modifiers "/%c" and "/%c" are mutually exclusive
 
 (F syntax, regexp) The regular expression pattern had more than one of these
@@ -4168,8 +4175,7 @@ where the problem was discovered. See L<perlre>.
 <-- HERE shows in the regular expression about where the problem was
 discovered.  This happens when using the C<(?^...)> construct to tell
 Perl to use the default regular expression modifiers, and you
-redundantly specify a default modifier; or having a modifier that can't
-be turned off (such as C<"p"> or C<"l">) after a minus.  For other
+redundantly specify a default modifier.  For other
 causes, see L<perlre>.
 
 =item Sequence \%s... not terminated in regex; marked by <-- HERE in m/%s/

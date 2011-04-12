@@ -7086,7 +7086,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			    goto excess_modifier;
 			}
 			else if (flagsp == &negflags) {
-                            goto fail_modifiers;
+                            goto neg_modifier;
                         }
 			cs = REGEX_LOCALE_CHARSET;
                         has_charset_modifier = LOCALE_PAT_MOD;
@@ -7097,14 +7097,14 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			    goto excess_modifier;
 			}
 			else if (flagsp == &negflags) {
-                            goto fail_modifiers;
+                            goto neg_modifier;
                         }
 			cs = REGEX_UNICODE_CHARSET;
                         has_charset_modifier = UNICODE_PAT_MOD;
                         break;
                     case ASCII_RESTRICT_PAT_MOD:
                         if (flagsp == &negflags) {
-                            goto fail_modifiers;
+                            goto neg_modifier;
                         }
                         if (has_charset_modifier) {
                             if (cs != REGEX_ASCII_RESTRICTED_CHARSET) {
@@ -7119,10 +7119,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         has_charset_modifier = ASCII_RESTRICT_PAT_MOD;
                         break;
                     case DEPENDS_PAT_MOD:
-                        if (has_use_defaults
-                            || flagsp == &negflags)
-                        {
+                        if (has_use_defaults) {
                             goto fail_modifiers;
+			}
+			else if (flagsp == &negflags) {
+                            goto neg_modifier;
 			}
 			else if (has_charset_modifier) {
 			    goto excess_modifier;
@@ -7148,6 +7149,10 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			else {
 			    vFAIL3("Regexp modifiers \"%c\" and \"%c\" are mutually exclusive", has_charset_modifier, *(RExC_parse - 1));
 			}
+			/*NOTREACHED*/
+		    neg_modifier:
+			RExC_parse++;
+			vFAIL2("Regexp modifier \"%c\" may not appear after the \"-\"", *(RExC_parse - 1));
 			/*NOTREACHED*/
                     case ONCE_PAT_MOD: /* 'o' */
                     case GLOBAL_PAT_MOD: /* 'g' */

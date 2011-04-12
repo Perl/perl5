@@ -69,6 +69,7 @@ my @death =
 '/(?da:foo)/' => 'Regexp modifiers "d" and "a" are mutually exclusive in regex; marked by {#} in m/(?da{#}:foo)/',
 '/(?lil:foo)/' => 'Regexp modifier "l" may not appear twice in regex; marked by {#} in m/(?lil{#}:foo)/',
 '/(?aaia:foo)/' => 'Regexp modifier "a" may appear a maximum of twice in regex; marked by {#} in m/(?aaia{#}:foo)/',
+'/(?i-l:foo)/' => 'Regexp modifier "l" may not appear after the "-" in regex; marked by {#} in m/(?i-l{#}:foo)/',
 
  '/((x)/' => 'Unmatched ( in regex; marked by {#} in m/({#}(x)/',
 
