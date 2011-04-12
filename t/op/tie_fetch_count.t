@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 174);
+    plan (tests => 208);
 }
 
 use strict;
@@ -22,7 +22,7 @@ my $count = 0;
 #                                    # when the list is exhausted.
 sub TIESCALAR {my $pack = shift; bless [@_], $pack;}
 sub FETCH {$count ++; @{$_ [0]} == 1 ? ${$_ [0]}[0] : shift @{$_ [0]}}
-sub STORE {1;}
+sub STORE { unshift @{$_[0]}, $_[1] }
 
 
 sub check_count {
@@ -182,18 +182,34 @@ $dummy  = &$var5        ; check_count '&{}';
 # for both operands. They also test that both return values from
 # FETCH are used.
 
-sub bin_test {
+my %mutators = map { ($_ => 1) } qw(. + - * / % ** << >> & | ^);
+
+
+sub _bin_test {
+    my $int = shift;
     my $op = shift;
-    tie my $var, "main", @_[0..$#_-1];
-    is(eval "\$var $op \$var", pop, "retval of \$var $op \$var");
-    check_count $op, 2;
+    my $exp = pop;
+    my @fetches = @_;
+
+    $int = $int ? 'use integer; ' : '';
+
+    tie my $var, "main", @fetches;
+    is(eval "$int\$var $op \$var", $exp, "retval of $int\$var $op \$var");
+    check_count "$int$op", 2;
+
+    return unless $mutators{$op};
+
+    tie my $var2, "main", @fetches;
+    is(eval "$int \$var2 $op= \$var2", $exp, "retval of $int \$var2 $op= \$var2");
+    check_count "$int$op=", 3;
 }
+
+sub bin_test {
+    _bin_test(0, @_);
+}
+
 sub bin_int_test {
-    my $op = shift;
-    tie my $var, "main", @_[0..$#_-1];
-    is(eval "use integer; \$var $op \$var", pop,
-       "retval of \$var $op \$var under use integer");
-    check_count "$op under use integer", 2;
+    _bin_test(1, @_);
 }
 
 bin_test '**',  2, 3, 8;
