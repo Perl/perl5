@@ -130,12 +130,14 @@ fresh_perl_is(<<'EOI', 'ok', { }, 'Bug #41138');
     print 'ok';
 EOI
 
-
 # [perl #45053] Memory corruption with heavy module loading in threads
 #
 # run-time usage of newCONSTSUB (as done by the IO boot code) wasn't
-# thread-safe - got occasional coredumps or malloc corruption
-{
+# thread-safe - got occasional coredumps or malloc corruption.
+# On cygwin it even hangs.
+SKIP: {
+    skip "[perl #45053] on cygwin", 1 if $^O eq 'cygwin';
+
     local $SIG{__WARN__} = sub {};   # Ignore any thread creation failure warnings
     my @t;
     for (1..100) {
