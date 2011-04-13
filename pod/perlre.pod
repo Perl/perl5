@@ -155,6 +155,16 @@ effect when the regular expression is executed.  And if a regular
 expression is interpolated into a larger one, the original's rules
 continue to apply to it, and only it.
 
+Note that the modifiers affect only pattern matching, and do not extend
+to any replacement done.  For example,
+
+ s/foo/\Ubar/l
+
+will uppercase "bar", but the C</l> does not affect how the C<\U>
+operates.  If C<use locale> is in effect, the C<\U> will use locale
+rules; if C<use feature 'unicode_strings'> is in effect, it will
+use Unicode rules, etc.
+
 =head4 /l
 
 means to use the current locale's rules (see L<perllocale>) when pattern
@@ -178,6 +188,12 @@ is.
 
 This modifier may be specified to be the default by C<use locale>, but
 see L</Which character set modifier is in effect?>.
+
+Note that what C</l> essentially means is "if there is a locale, use
+it".  It does not set up the locale.  For that, it needs to execute
+within the scope of C<use locale> after a C<setlocale()>.  Otherwise the
+default "C" or "POSIX" locale is used, which should be equivalent to
+ASCII (though some platforms violate this.)
 X</l>
 
 =head4 /u
@@ -331,7 +347,9 @@ Otherwise, C<L<use locale|perllocale>> sets the default modifier to C</l>;
 and C<L<use feature 'unicode_strings|feature>> or
 C<L<use 5.012|perlfunc/use VERSION>> (or higher) set the default to
 C</u> when not in the same scope as either C<L<use locale|perllocale>>
-or C<L<use bytes|bytes>> .
+or C<L<use bytes|bytes>>.  Unlike the mechanisms mentioned outside this
+paragraph, these affect operations besides regular expressions pattern
+matching, and so give more consistent results with other operators.
 
 If none of the above apply, for backwards compatibility reasons, the
 C</d> modifier is the one in effect by default.  As this can lead to
