@@ -220,8 +220,7 @@ octal digits.  One problem with this form is that it can look exactly like an
 old-style backreference (see
 L</Disambiguation rules between old-style octal escapes and backreferences>
 below.)  You can avoid this by making the first of the three digits always a
-zero, but that makes \077 the largest ordinal unambiguously specifiable by this
-form.
+zero, but that makes \077 the largest code point specifiable.
 
 In some contexts, a backslash followed by two or even one octal digits may be
 interpreted as an octal escape, sometimes with a warning, and because of some
@@ -365,8 +364,9 @@ New in perl 5.10.0 are the classes C<\h> and C<\v> which match horizontal
 and vertical whitespace characters.
 
 The exact set of characters matched by C<\d>, C<\s>, and C<\w> varies
-depending on various pragma and regular expression modifiers.  See
-L<perlre>.
+depending on various pragma and regular expression modifiers.  It is
+possible to restrict the match to the ASCII range by using the C</a>
+regular expression modifier.  See L<perlrecharclass>.
 
 The uppercase variants (C<\W>, C<\D>, C<\S>, C<\H>, and C<\V>) are
 character classes that match, respectively, any character that isn't a
