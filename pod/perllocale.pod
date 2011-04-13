@@ -4,6 +4,9 @@ perllocale - Perl locale handling (internationalization and localization)
 
 =head1 DESCRIPTION
 
+Locales these days have been mostly been supplanted by Unicode, but Perl
+continues to support them.  See L</Unicode and UTF-8> below.
+
 Perl supports language-specific notions of data such as "is this
 a letter", "what is the uppercase equivalent of this letter", and
 "which of these letters comes first".  These are important issues,
@@ -567,9 +570,9 @@ to your surprise--that "|" moves from the ispunct() class to isalpha().
 
 B<Note:> A broken or malicious C<LC_CTYPE> locale definition may result
 in clearly ineligible characters being considered to be alphanumeric by
-your application.  For strict matching of (mundane) letters and
+your application.  For strict matching of (mundane) ASCII letters and
 digits--for example, in command strings--locale-aware applications
-should use C<\w> inside a C<no locale> block.  See L<"SECURITY">.
+should use C<\w> with the C</a> regular expression modifier.  See L<"SECURITY">.
 
 =head2 Category LC_NUMERIC: Numeric Formatting
 
@@ -606,7 +609,7 @@ See also L<I18N::Langinfo> and C<RADIXCHAR>.
 
 =head2 Category LC_MONETARY: Formatting of monetary amounts
 
-The C standard defines the C<LC_MONETARY> category, but no function
+The C standard defines the C<LC_MONETARY> category, but not a function
 that is affected by its contents.  (Those with experience of standards
 committees will recognize that the working group decided to punt on the
 issue.)  Consequently, Perl takes no notice of it.  If you really want
@@ -999,17 +1002,57 @@ criticized as incomplete, ungainly, and having too large a granularity.
 to have them apply to a single thread, window group, or whatever.)  They
 also have a tendency, like standards groups, to divide the world into
 nations, when we all know that the world can equally well be divided
-into bankers, bikers, gamers, and so on.  But, for now, it's the only
-standard we've got.  This may be construed as a bug.
+into bankers, bikers, gamers, and so on.
 
 =head1 Unicode and UTF-8
 
-The support of Unicode is new starting from Perl version 5.6, and
-more fully implemented in the version 5.8.  See L<perluniintro> and
-L<perlunicode> for more details.
+The support of Unicode is new starting from Perl version 5.6, and more fully
+implemented in version 5.8, and later.  See L<perluniintro>.  Perl tries to
+work with both Unicode and locales.  But, of course, there are problems.
 
-Usually locale settings and Unicode do not affect each other, but
-there are exceptions, see L<perlunicode/Locales> for examples.
+Perl does not handle multi-byte locales, such as have been used for various
+Asian languages, such as Big5 or Shift JIS.  However, the multi-byte,
+increasingly common, UTF-8 locales, if properly implemented, tend to work
+reasonably well in Perl, simply because both they and Perl store the
+characters that take up multiple bytes the same way.
+
+Perl generally takes the tack to use locale rules on code points that can fit
+in a single byte, and Unicode rules for those that can't (though this wasn't
+uniformly applied prior to Perl 5.14).  This prevents many problems in locales
+that aren't UTF-8.  Suppose the locale is ISO8859-7, Greek.  The character at
+0xD7 there is a capital Chi. But in the ISO8859-1 locale, Latin1, it is a
+multiplication sign.  The POSIX regular expression character class
+C<[[:alpha:]]> will magically match 0xD7 in the Greek locale, but not in the
+Latin, even if the string is encoded in UTF-8, which normally would imply
+Unicode.  (The "U" in UTF-8 stands for Unicode.)
+
+However, there are places where this breaks down.  Certain constructs are
+for Unicode only, such as C<\p{Alpha}>.  They assume that 0xD7 always has the
+Unicode meaning (or its equivalent on EBCDIC platforms).  Since Latin1 is a
+subset of Unicode, 0xD7 is the multiplication sign in Unicode, so C<\p{Alpha}>
+will not match it, regardless of locale.  A similar issue happens with
+C<\N{...}>.  Therefore, it is a bad idea to use C<\p{}> or C<\N{}> under
+locale unless you know that the locale is always going to be ISO8859-1 or a
+UTF-8 one.  Use the POSIX character classes instead.
+
+The same problem ensues if you enable automatic UTF-8-ification of your
+standard file handles, default C<open()> layer, and C<@ARGV> on non-ISO8859-1,
+non-UTF-8 locales (by using either the C<-C> command line switch or the
+C<PERL_UNICODE> environment variable; see L<perlrun> for the documentation of
+the C<-C> switch).  Things are read in as UTF-8 which would normally imply a
+Unicode interpretation, but the presence of locale causes them to be
+interpreted in that locale, so a 0xD7 code point in the input will have meant
+the multiplication sign, but won't be interpreted by Perl that way in the
+Greek locale.  Again, this is not a problem if you know that the locales are
+always going to be ISO8859-1 or UTF-8.
+
+Vendor locales are notoriously buggy, and it is difficult for Perl to
+test its locale handling code because it interacts with code that Perl
+has no control over, therefore the local handling code in Perl may be buggy
+as well.  But if you do have locales that work, it may be worthwhile using
+them, keeping in mind the gotchas already mentioned.  Locale collation
+is faster than L<Unicode::Collate>, for example, and you gain access
+to things such as the currency symbol and days of the week.
 
 =head1 BUGS
 
@@ -1039,5 +1082,3 @@ L<POSIX/strtod>, L<POSIX/strxfrm>.
 Jarkko Hietaniemi's original F<perli18n.pod> heavily hacked by Dominic
 Dunlop, assisted by the perl5-porters.  Prose worked over a bit by
 Tom Christiansen.
-
-Last update: Thu Jun 11 08:44:13 MDT 1998
