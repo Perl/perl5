@@ -8,7 +8,7 @@ BEGIN {
 
 use strict qw(refs subs);
 
-plan(213);
+plan(217);
 
 # Test glob operations.
 
@@ -692,6 +692,60 @@ is (runperl(
  eval { my $foo; !%$foo ? 1 : 0;    }; ok !$@, '!%$undef ? 1 : 0';
 }
 
+# RT #88330
+# Make sure that a leaked thinggy with multiple weak references to
+# it doesn't trigger a panic with multiple rounds of global cleanup
+# (Perl_sv_clean_all).
+
+SKIP: {
+    skip_if_miniperl('no Scalar::Util under miniperl', 4);
+
+    local $ENV{PERL_DESTRUCT_LEVEL} = 2;
+
+    # we do all permutations of array/hash, 1ref/2ref, to account
+    # for the different way backref magic is stored
+
+    fresh_perl_is(<<'EOF', 'ok', { stderr => 1 }, 'array with 1 weak ref');
+use Scalar::Util qw(weaken);
+my $r = [];
+Internals::SvREFCNT(@$r, 9);
+my $r1 = $r;
+weaken($r1);
+print "ok";
+EOF
+
+    fresh_perl_is(<<'EOF', 'ok', { stderr => 1 }, 'array with 2 weak refs');
+use Scalar::Util qw(weaken);
+my $r = [];
+Internals::SvREFCNT(@$r, 9);
+my $r1 = $r;
+weaken($r1);
+my $r2 = $r;
+weaken($r2);
+print "ok";
+EOF
+
+    fresh_perl_is(<<'EOF', 'ok', { stderr => 1 }, 'hash with 1 weak ref');
+use Scalar::Util qw(weaken);
+my $r = {};
+Internals::SvREFCNT(%$r, 9);
+my $r1 = $r;
+weaken($r1);
+print "ok";
+EOF
+
+    fresh_perl_is(<<'EOF', 'ok', { stderr => 1 }, 'hash with 2 weak refs');
+use Scalar::Util qw(weaken);
+my $r = {};
+Internals::SvREFCNT(%$r, 9);
+my $r1 = $r;
+weaken($r1);
+my $r2 = $r;
+weaken($r2);
+print "ok";
+EOF
+
+}
 
 # Bit of a hack to make test.pl happy. There are 3 more tests after it leaves.
 $test = curr_test();

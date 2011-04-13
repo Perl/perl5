@@ -5719,6 +5719,17 @@ Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
     if (!av)
 	return;
 
+    /* after multiple passes through Perl_sv_clean_all() for a thinngy
+     * that has badly leaked, the backref array may have gotten freed,
+     * since we only protect it against 1 round of cleanup */
+    if (SvIS_FREED(av)) {
+	if (PL_in_clean_all) /* All is fair */
+	    return;
+	Perl_croak(aTHX_
+		   "panic: magic_killbackrefs (freed backref AV/SV)");
+    }
+
+
     is_array = (SvTYPE(av) == SVt_PVAV);
     if (is_array) {
 	assert(!SvIS_FREED(av));
