@@ -1066,7 +1066,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		return NULL;
 
 	    len = name_cursor - name;
-	    if (len > 0) {
+	    if (name_cursor > nambeg) { /* Skip for initial :: or ' */
 		const char *key;
 		if (*name_cursor == ':') {
 		    key = name;
@@ -1109,8 +1109,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 
 	    if (*name_cursor == ':')
 		name_cursor++;
-	    name_cursor++;
-	    name = name_cursor;
+	    name = name_cursor+1;
 	    if (name == name_end)
 		return gv
 		    ? gv : MUTABLE_GV(*hv_fetchs(PL_defstash, "main::", TRUE));

@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 use warnings;
-plan(tests => 27);
+plan(tests => 39);
 
 {
     package New;
@@ -154,37 +154,47 @@ for(
    code => '*clone:: = \%outer::',
  },
 ) {
- fresh_perl_is
-   q~
-     @left::ISA = 'outer::inner';
-     @right::ISA = 'clone::inner';
-     {package outer::inner}
+ for my $tail ('inner', 'inner::', 'inner::::') {
+  fresh_perl_is
+    q~
+      my $tail = shift;
+      @left::ISA = "outer::$tail";
+      @right::ISA = "clone::$tail";
+      eval "package outer::$tail";
 
-    __code__;
+     __code__;
 
-     print "ok 1", "\n" if left->isa("clone::inner");
-     print "ok 2", "\n" if right->isa("outer::inner");
-   ~ =~ s\__code__\$$_{code}\r,
-  "ok 1\nok 2\n",
-   {},
-  "replacing nonexistent nested packages by $$_{name} updates isa caches";
+      print "ok 1", "\n" if left->isa("clone::$tail");
+      print "ok 2", "\n" if right->isa("outer::$tail");
+      print "ok 3", "\n" if right->isa("clone::$tail");
+      print "ok 4", "\n" if left->isa("outer::$tail");
+    ~ =~ s\__code__\$$_{code}\r,
+   "ok 1\nok 2\nok 3\nok 4\n",
+    { args => [$tail] },
+   "replacing nonexistent nested packages by $$_{name} updates isa caches"
+     ." ($tail)";
 
- # Same test but with the subpackage autovivified after the assignment
- fresh_perl_is
-   q~
-     @left::ISA = 'outer::inner';
-     @right::ISA = 'clone::inner';
+  # Same test but with the subpackage autovivified after the assignment
+  fresh_perl_is
+    q~
+      my $tail = shift;
+      @left::ISA = "outer::$tail";
+      @right::ISA = "clone::$tail";
 
-    __code__;
+     __code__;
 
-     eval q{package outer::inner};
+      eval qq{package outer::$tail};
 
-     print "ok 1", "\n" if left->isa("clone::inner");
-     print "ok 2", "\n" if right->isa("outer::inner");
-   ~ =~ s\__code__\$$_{code}\r,
-  "ok 1\nok 2\n",
-   {},
-  "Giving nonexistent packages multiple effective names by $$_{name}";
+      print "ok 1", "\n" if left->isa("clone::$tail");
+      print "ok 2", "\n" if right->isa("outer::$tail");
+      print "ok 3", "\n" if right->isa("clone::$tail");
+      print "ok 4", "\n" if left->isa("outer::$tail");
+    ~ =~ s\__code__\$$_{code}\r,
+   "ok 1\nok 2\nok 3\nok 4\n",
+    { args => [$tail] },
+   "Giving nonexistent packages multiple effective names by $$_{name}"
+     . " ($tail)";
+ }
 }
 
 no warnings; # temporary; there seems to be a scoping bug, as this does not

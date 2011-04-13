@@ -7,7 +7,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan( tests => 53 );
+plan( tests => 54 );
 
 # Used to segfault (bug #15479)
 fresh_perl_like(
@@ -304,3 +304,11 @@ fresh_perl_is(
       "setting stash name during undef has no effect";
 }
 
+# [perl #88134] incorrect package structure
+{
+    package Bear::;
+    sub baz{1}
+    package main;
+    ok eval { Bear::::baz() },
+     'packages ending with :: are self-consistent';
+}
