@@ -701,6 +701,15 @@ Therefore, as an exception to the general rule, local($_) will not
 only assign a new value to $_, but also remove all existing magic from
 it as well.
 
+=head3 Parsing of package and variable names
+
+The parsing of the names of packages and package variables has changed, in
+that multiple adjacent pairs of colons (as in foo::::bar) are all treated
+as package separators.
+
+Regardless of this change, the exact parsing of package separators has
+never been guaranteed and is subject to change in future Perl versions.
+
 =head2 Changes to Syntax or to Perl Operators
 
 =head3 C<given> return values
@@ -3728,6 +3737,11 @@ cases; e.g., if the package had been deleted.  Now this is no longer the
 case.  The __ANON__ package is now used also when the original package is
 no longer attached to the symbol table.  This avoids memory leaks in some
 cases [perl #87664].
+
+=item *
+
+Subroutines and package variables inside a package whose name ends with
+"::" can now be accessed with a fully qualified name.
 
 =back
 
