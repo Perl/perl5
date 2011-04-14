@@ -265,12 +265,6 @@ use Symbol;
 use SelectSaver;
 use IO ();	# Load the XS module
 
-# Since perl will automatically require IO::File if needed, but also
-# initialises IO::File's @ISA as part of the core we must ensure
-# IO::File is loaded if IO::Handle is. This avoids effectively
-# "half-loading" IO::File.
-require IO::File;
-
 require Exporter;
 @ISA = qw(Exporter);
 
@@ -315,7 +309,18 @@ $VERSION = eval $VERSION;
 
 sub new {
     my $class = ref($_[0]) || $_[0] || "IO::Handle";
-    @_ == 1 or croak "usage: $class->new()";
+    if (@_ != 1) {
+	# Since perl will automatically require IO::File if needed, but
+	# also initialises IO::File's @ISA as part of the core we must
+	# ensure IO::File is loaded if IO::Handle is. This avoids effect-
+	# ively "half-loading" IO::File.
+	if ($] > 5.013 && $class eq 'IO::File' && !$INC{"IO/File.pm"}) {
+	    require IO::File;
+	    shift;
+	    return IO::File::->new(@_);
+	}
+	croak "usage: $class->new()";
+    }
     my $io = gensym;
     bless $io, $class;
 }

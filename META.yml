@@ -77,6 +77,7 @@ no_index:
     - dist/IO/t/io_dir.t
     - dist/IO/t/io_dup.t
     - dist/IO/t/io_file.t
+    - dist/IO/t/io_file_export.t
     - dist/IO/t/io_linenum.t
     - dist/IO/t/io_multihomed.t
     - dist/IO/t/io_pipe.t
