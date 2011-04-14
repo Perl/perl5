@@ -4683,6 +4683,7 @@ time64_config.h			64 bit clean time.h (configuration)
 time64.h			64 bit clean time.h (header)
 t/io/argv.t			See if ARGV stuff works
 t/io/binmode.t			See if binmode() works
+t/io/bom.t			See if scripts can start with a byte order mark
 t/io/crlf.t			See if :crlf works
 t/io/crlf_through.t		See if pipe passes data intact with :crlf
 t/io/data.t			See if DATA works

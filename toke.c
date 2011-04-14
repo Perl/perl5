@@ -4792,7 +4792,13 @@ Perl_yylex(pTHX)
 		      *(U8*)s == 0xEF ||
 		      *(U8*)s >= 0xFE ||
 		      s[1] == 0)) {
-		bof = PerlIO_tell(PL_rsfp) == (Off_t)SvCUR(PL_linestr);
+		IV offset = (IV)PerlIO_tell(PL_rsfp);
+		bof = (offset == SvCUR(PL_linestr));
+#if defined(PERLIO_USING_CRLF) && defined(PERL_TEXTMODE_SCRIPTS)
+		/* offset may include swallowed CR */
+		if (!bof)
+		    bof = (offset == SvCUR(PL_linestr)+1);
+#endif
 		if (bof) {
 		    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 		    s = swallow_bom((U8*)s);
