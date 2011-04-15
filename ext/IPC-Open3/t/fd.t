@@ -5,6 +5,10 @@ BEGIN {
 	print "1..0 # Skip: not perlio\n";
 	exit 0;
     }
+    if ($^O eq 'VMS') {
+        print "1..0 # Skip: needs porting, perhaps imitating Win32 mechanisms\n";
+	exit 0;
+    }
     require "../../t/test.pl";
 }
 use strict;
