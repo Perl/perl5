@@ -1377,16 +1377,36 @@ If "'" is the delimiter, no interpolation is performed on the PATTERN.
 When using a character valid in an identifier, whitespace is required
 after the C<m>.
 
-PATTERN may contain variables, which will be interpolated (and the
-pattern recompiled) every time the pattern search is evaluated, except
+PATTERN may contain variables, which will be interpolated
+every time the pattern search is evaluated, except
 for when the delimiter is a single quote.  (Note that C<$(>, C<$)>, and
 C<$|> are not interpolated because they look like end-of-string tests.)
-If you want such a pattern to be compiled only once, add a C</o> after
-the trailing delimiter.  This avoids expensive run-time recompilations,
-and is useful when the value you are interpolating won't change over
-the life of the script.  However, mentioning C</o> constitutes a promise
-that you won't change the variables in the pattern.  If you change them,
-Perl won't even notice.
+Perl will not recompile the pattern unless an interpolated
+variable that it contains changes.  You can force Perl to skip the
+test and never recompile by adding a C</o> (which stands for "once")
+after the trailing delimiter.
+Once upon a time, Perl would recompile regular expressions
+unnecessarily, and this modifier was useful to tell it not to do so, in the
+interests of speed.  But now, the only reasons to use C</o> are either:
+
+=over
+
+=item 1
+
+The variables are thousands of characters long and you know that they
+don't change, and you need to wring out the last little bit of speed by
+having Perl skip testing for that.  (There is a maintenance penalty for
+doing this, as mentioning C</o> constitutes a promise that you won't
+change the variables in the pattern.  If you change them, Perl won't
+even notice.)
+
+=item 2
+
+you want the pattern to use the initial values of the variables
+regardless of whether they change or not.  (But there are saner ways
+of accomplishing this than using C</o>.)
+
+=back
 
 =item The empty pattern //
 
