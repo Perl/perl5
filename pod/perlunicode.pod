@@ -276,14 +276,14 @@ And finally, C<scalar reverse()> reverses by character rather than by byte.
 
 =head2 Unicode Character Properties
 
-Most Unicode character properties are accessible by using regular expressions.
-They are used (like bracketed character classes) by using the C<\p{}> "matches
-property" construct and the C<\P{}> negation, "doesn't match property".
-
-Note that the only time that Perl considers a sequence of individual code
+(The only time that Perl considers a sequence of individual code
 points as a single logical character is in the C<\X> construct, already
 mentioned above.   Therefore "character" in this discussion means a single
-Unicode code point.
+Unicode code point.)
+
+Very nearly all Unicode character properties are accessible through
+regular expressions by using the C<\p{}> "matches property" construct
+and the C<\P{}> "doesn't match property" for its negation.
 
 For instance, C<\p{Uppercase}> matches any single character with the Unicode
 "Uppercase" property, while C<\p{L}> matches any character with a
@@ -299,7 +299,7 @@ This formality is needed when properties are not binary; that is, if they can
 take on more values than just True and False.  For example, the Bidi_Class (see
 L</"Bidirectional Character Types"> below), can take on several different
 values, such as Left, Right, Whitespace, and others.  To match these, one needs
-to specify the property name (Bidi_Class) and the value being matched against
+to specify the property name (Bidi_Class), AND the value being matched against
 (Left, Right, etc.).  This is done, as in the examples above, by having the
 two components separated by an equal sign (or interchangeably, a colon), like
 C<\p{Bidi_Class: Left}>.
@@ -361,8 +361,6 @@ of which under C</i> matching match C<PosixAlpha>.
 (The difference between these sets is that some things, such as Roman
 numerals, come in both upper and lower case so they are C<Cased>, but aren't considered
 letters, so they aren't C<Cased_Letter>s.)
-L<perluniprops> includes a notation for all forms that have C</i>
-differences.
 
 =head3 B<General_Category>
 
@@ -1319,7 +1317,7 @@ Legacy, fixed-width encodings defined by the ISO 10646 standard.  UCS-2 is a 16-
 encoding.  Unlike UTF-16, UCS-2 is not extensible beyond C<U+FFFF>,
 because it does not use surrogates.  UCS-4 is a 32-bit encoding,
 functionally identical to UTF-32 (the difference being that
-UCS-4 does forbids neither surrogates nor code points larger than 0x10_FFFF).
+UCS-4 forbids neither surrogates nor code points larger than 0x10_FFFF).
 
 =item *
 
@@ -1358,7 +1356,7 @@ lax rules are being used, and will warn (using the warning category
 "non_unicode", which is a sub-category of "utf8") if an attempt is made to
 operate on or output them.  For example, C<uc(0x11_0000)> will generate
 this warning, returning the input parameter as its result, as the upper
-case of all non-Unicode code points is the code point itself.
+case of every non-Unicode code point is the code point itself.
 
 =head2 Security Implications of Unicode
 
