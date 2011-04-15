@@ -167,7 +167,8 @@ Mnemonic: I<c>ontrol character.
 
 =head3 Named or numbered characters and character sequences
 
-Unicode characters have a Unicode name and numeric ordinal value.  Use the
+Unicode characters have a Unicode name and numeric code point (ordinal)
+value.  Use the
 C<\N{}> construct to specify a character by either of these values.
 Certain sequences of characters also have names.
 
@@ -177,7 +178,7 @@ load the Unicode names of the characters; otherwise Perl will complain.
 
 To specify a character by Unicode code point, use the form C<\N{U+I<code
 point>}>, where I<code point> is a number in hexadecimal that gives the
-ordinal number that Unicode has assigned to the desired character.  It is
+code point that Unicode has assigned to the desired character.  It is
 customary but not required to use leading zeros to pad the number to 4
 digits.  Thus C<\N{U+0041}> means C<LATIN CAPITAL LETTER A>, and you will
 rarely see it written without the two leading zeros.  C<\N{U+0041}> means
@@ -209,7 +210,7 @@ meaning by the regex engine, and will match "as is".
 =head3 Octal escapes
 
 There are two forms of octal escapes.  Each is used to specify a character by
-its ordinal, specified in octal notation.
+its code point specified in octal notation.
 
 One form, available starting in Perl 5.14 looks like C<\o{...}>, where the dots
 represent one or more octal digits.  It can be used for any Unicode character.
@@ -235,7 +236,7 @@ a character without special meaning by the regex engine, and will match
 "as is".
 
 To summarize, the C<\o{}> form is always safe to use, and the other form is
-safe to use for ordinals up through \077 when you use exactly three digits to
+safe to use for code points through \077 when you use exactly three digits to
 specify them.
 
 Mnemonic: I<0>ctal or I<o>ctal.
@@ -285,7 +286,7 @@ takes only the first three for the octal escape; the rest are matched as is.
 
 =back
 
-You can the force a backreference interpretation always by using the C<\g{...}>
+You can force a backreference interpretation always by using the C<\g{...}>
 form.  You can the force an octal interpretation always by using the C<\o{...}>
 form, or for numbers up through \077 (= 63 decimal), by using three digits,
 beginning with a "0".
@@ -328,7 +329,7 @@ functions C<lcfirst> and C<ucfirst>.
 To uppercase or lowercase several characters, one might want to use
 C<\L> or C<\U>, which will lowercase/uppercase all characters following
 them, until either the end of the pattern or the next occurrence of
-C<\E>, whatever comes first. They provide functionality similar to what
+C<\E>, whichever comes first. They provide functionality similar to what
 the functions C<lc> and C<uc> provide.
 
 C<\Q> is used to escape all characters following, up to the next C<\E>
