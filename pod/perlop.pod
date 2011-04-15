@@ -1150,7 +1150,7 @@ Having fewer than 3 digits may lead to a misleading warning message that says
 that what follows is ignored.  For example, C<"\128"> in the ASCII character set
 is equivalent to the two characters C<"\n8">, but the warning C<Illegal octal
 digit '8' ignored> will be thrown.  To avoid this warning, make sure to pad
-your octal number with C<0>s: C<"\0128">.
+your octal number with C<0>'s: C<"\0128">.
 
 =item [8]
 
@@ -1274,7 +1274,7 @@ This operator quotes (and possibly compiles) its I<STRING> as a regular
 expression.  I<STRING> is interpolated the same way as I<PATTERN>
 in C<m/PATTERN/>.  If "'" is used as the delimiter, no interpolation
 is done.  Returns a Perl value which may be used instead of the
-corresponding C</STRING/msixpo> expression. The returned value is a
+corresponding C</STRING/msixpodual> expression. The returned value is a
 normalized version of the original pattern. It magically differs from
 a string containing the same characters: C<ref(qr/x/)> returns "Regexp",
 even though dereferencing the result returns undef.
@@ -1296,7 +1296,7 @@ The result may be used as a subpattern in a match:
     $string =~ $re;		# or used standalone
     $string =~ /$re/;		# or this way
 
-Since Perl may compile the pattern at the moment of execution of qr()
+Since Perl may compile the pattern at the moment of execution of the qr()
 operator, using qr() may have speed advantages in some situations,
 notably if the result of qr() is used standalone:
 
@@ -1335,7 +1335,7 @@ Options (specified by the following modifiers) are:
     d   Use Unicode or native charset, as in 5.12 and earlier
 
 If a precompiled pattern is embedded in a larger pattern then the effect
-of 'msixp' will be propagated appropriately.  The effect of the 'o'
+of 'msixpluad' will be propagated appropriately.  The effect the 'o'
 modifier has is not propagated, being restricted to those patterns
 explicitly using it.
 
@@ -1344,7 +1344,8 @@ control the character set semantics.
 
 See L<perlre> for additional information on valid syntax for STRING, and
 for a detailed look at the semantics of regular expressions.  In
-particular, all the modifiers are further explained in L<perlre/Modifiers>.
+particular, all the modifiers execpt C</o> are further explained in
+L<perlre/Modifiers>.  C</o> is described in the next section.
 
 =item m/PATTERN/msixpodualgc
 X<m> X<operator, match>
@@ -1362,7 +1363,7 @@ rather tightly.)  See also L<perlre>.  See L<perllocale> for
 discussion of additional considerations that apply when C<use locale>
 is in effect.
 
-Options are as described in C<qr//>; in addition, the following match
+Options are as described in C<qr//> above; in addition, the following match
 process modifiers are available:
 
  g  Match globally, i.e., find all occurrences.
