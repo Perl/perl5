@@ -45,7 +45,9 @@ isa_ok( $base, 'ExtUtils::CBuilder::Base' );
 }
 
 {
-    my $path_to_perl = File::Spec->catfile( '', qw| usr bin perl | );
+    my $path_to_perl = $^O eq 'VMS' 
+                       ? 'perl_root:[000000]perl.exe' 
+                       : File::Spec->catfile( '', qw| usr bin perl | );
     local $^X = $path_to_perl;
     is(
         ExtUtils::CBuilder::Base::find_perl_interpreter(),
