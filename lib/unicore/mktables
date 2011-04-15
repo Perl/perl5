@@ -13032,7 +13032,7 @@ Perl extension.  There is some detail about Blocks, Scripts, General_Category,
 and Bidi_Class in L<perlunicode>, but to find out about the intricacies of the
 Unicode properties, refer to the Unicode standard.  A good starting place is
 L<$unicode_reference_url>.  More information on the Perl extensions is in
-L<perlrecharclass>.
+L<perlunicode/Other Properties>.
 
 Note that you can define your own properties; see
 L<perlunicode/"User-Defined Character Properties">.
@@ -13097,8 +13097,8 @@ adjacent to (but within) the braces and the colon or equal sign.
 
 =back
 
-Some properties are considered obsolete, but still available.  There are
-several varieties of obsolescence:
+Some properties are considered obsolete by Unicode, but still available.
+There are several varieties of obsolescence:
 
 =over 4
 
@@ -13118,8 +13118,8 @@ table.
 =item Deprecated
 
 An obsolete property may be deprecated, perhaps because its original intent
-has been replaced by another property or because its specification was somehow
-defective.  This means that its use is strongly
+has been replaced by another property, or because its specification was
+somehow defective.  This means that its use is strongly
 discouraged, so much so that a warning will be issued if used, unless the
 regular expression is in the scope of a C<S<no warnings 'deprecated'>>
 statement.  $A_bold_deprecated flags each such entry in the table, and
@@ -13228,6 +13228,7 @@ $zero_matches
 
 A few properties are accessible in Perl via various function calls only.
 These are:
+
  Lowercase_Mapping          lc() and lcfirst()
  Titlecase_Mapping          ucfirst()
  Uppercase_Mapping          uc()
