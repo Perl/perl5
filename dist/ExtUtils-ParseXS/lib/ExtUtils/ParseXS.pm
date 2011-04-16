@@ -1648,6 +1648,29 @@ sub fetch_para {
       chomp $self->{lastline};
       $self->{lastline} =~ s/^\s+$//;
     }
+
+    # This chunk of code strips out (and parses) embedded TYPEMAP blocks
+    # which support a HEREdoc-alike block syntax.
+    # This is special cased from the usual paragraph-handler logic
+    # due to the HEREdoc-ish syntax.
+    if ($self->{lastline} =~ /^TYPEMAP\s*:\s*<<\s*(?:(["'])(.+?)\1|([^\s'"]+))\s*;?\s*$/) {
+      my $end_marker = quotemeta(defined($1) ? $2 : $3);
+      my @tmaplines;
+      while (1) {
+        $self->{lastline} = <$FH>;
+        death("Error: Unterminated typemap") if not defined $self->{lastline};
+        last if $self->{lastline} =~ /^$end_marker\s*$/;
+        push @tmaplines, $self->{lastline};
+      }
+
+      my $tmapcode = join "", @tmaplines;
+      my $tmap = ExtUtils::Typemaps->new(string => $tmapcode);
+      $self->{typemap}->merge(typemap => $tmap, replace => 1);
+
+      last unless defined($self->{lastline} = <$FH>);
+      next;
+    }
+
     if ($self->{lastline} !~ /^\s*#/ ||
     # CPP directives:
     #    ANSI:    if ifdef ifndef elif else endif define undef
