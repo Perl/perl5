@@ -16,7 +16,6 @@ our (@ISA, @EXPORT_OK);
   C_string
   valid_proto_string
   process_typemaps
-  process_single_typemap
   make_targetable
   map_type
   standard_XS_defs
@@ -42,7 +41,6 @@ ExtUtils::ParseXS::Utilities - Subroutines used with ExtUtils::ParseXS
     C_string
     valid_proto_string
     process_typemaps
-    process_single_typemap
     make_targetable
     map_type
     standard_XS_defs
@@ -281,8 +279,7 @@ Process all typemap files.
 
 =item * Arguments
 
-  my ($type_kind_ref, $proto_letter_ref, $input_expr_ref, $output_expr_ref) =
-    process_typemaps( $args{typemap}, $pwd );
+  my $typemaps_object = process_typemaps( $args{typemap}, $pwd );
       
 List of two elements:  C<typemap> element from C<%args>; current working
 directory.
