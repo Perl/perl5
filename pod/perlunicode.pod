@@ -1291,7 +1291,8 @@ format".
 Surrogates have no meaning in Unicode outside their use in pairs to
 represent other code points.  However, Perl allows them to be
 represented individually internally, for example by saying
-C<chr(0xD801)>, so that the all code points, not just those valid for open interchange, are
+C<chr(0xD801)>, so that all code points, not just those valid for open
+interchange, are
 representable.  Unicode does define semantics for them, such as their
 General Category is "Cs".  But because their use is somewhat dangerous,
 Perl will warn (using the warning category "surrogate", which is a
@@ -1306,7 +1307,7 @@ UTF-32, UTF-32BE, UTF-32LE
 
 The UTF-32 family is pretty much like the UTF-16 family, expect that
 the units are 32-bit, and therefore the surrogate scheme is not
-needed.  UTF-32 is a fixed-width encoding  The BOM signatures are
+needed.  UTF-32 is a fixed-width encoding.  The BOM signatures are
 C<0x00 0x00 0xFE 0xFF> for BE and C<0xFF 0xFE 0x00 0x00> for LE.
 
 =item *
@@ -1693,7 +1694,7 @@ F<README.perl> in that directory to change some of their names, and then build
 perl (see F<INSTALL>).
 
 It is even possible to copy the built files to a different directory, and then
-change F<utf8_heavy.pl> in the directory C<\$Config{privlib}> to point to the
+change F<utf8_heavy.pl> in the directory C<$Config{privlib}> to point to the
 new directory, or maybe make a copy of that directory before making the change,
 and using C<@INC> or the C<-I> run-time flag to switch between versions at will
 (but because of caching, not in the middle of a process), but all this is
@@ -1792,7 +1793,7 @@ compared with the 10 ASCII characters matching C<d>).
 
 =head2 Problems on EBCDIC platforms
 
-There are a several known problems with Perl on EBCDIC platforms.  If you
+There are several known problems with Perl on EBCDIC platforms.  If you
 want to use Perl there, send email to perlbug@perl.org.
 
 In earlier versions, when byte and character data were concatenated,
