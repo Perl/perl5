@@ -93,7 +93,7 @@ sub new {
 sub _init {
   my $self = shift;
   if (defined $self->{string}) {
-    $self->_parse(\($self->{string}));
+    $self->_parse(\($self->{string}), $self->{lineno_offset}, $self->{fake_filename});
     delete $self->{string};
   }
   elsif (defined $self->{file} and -e $self->{file}) {
@@ -102,7 +102,7 @@ sub _init {
              . $self->{file} . "' for reading: $!";
     local $/ = undef;
     my $string = <$fh>;
-    $self->_parse(\$string, $self->{file});
+    $self->_parse(\$string, $self->{lineno_offset}, $self->{file});
   }
 }
 
@@ -816,6 +816,8 @@ sub validate {
 sub _parse {
   my $self = shift;
   my $stringref = shift;
+  my $lineno_offset = shift;
+  $lineno_offset = 0 if not defined $lineno_offset;
   my $filename = shift;
   $filename = '<string>' if not defined $filename;
 
@@ -830,7 +832,7 @@ sub _parse {
   # TODO order of sections, multiple sections of same type
   # Heavily influenced by ExtUtils::ParseXS
   my $section = 'typemap';
-  my $lineno = 0;
+  my $lineno = $lineno_offset;
   my $junk = "";
   my $current = \$junk;
   my @input_expr;
