@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 use warnings;
-plan(tests => 39);
+plan(tests => 52);
 
 {
     package New;
@@ -154,13 +154,13 @@ for(
    code => '*clone:: = \%outer::',
  },
 ) {
- for my $tail ('inner', 'inner::', 'inner::::') {
+ for my $tail ('inner', 'inner::', 'inner:::', 'inner::::') {
   fresh_perl_is
     q~
       my $tail = shift;
       @left::ISA = "outer::$tail";
       @right::ISA = "clone::$tail";
-      eval "package outer::$tail";
+      bless [], "outer::$tail"; # autovivify the stash
 
      __code__;
 
@@ -183,7 +183,7 @@ for(
 
      __code__;
 
-      eval qq{package outer::$tail};
+      bless [], "outer::$tail";
 
       print "ok 1", "\n" if left->isa("clone::$tail");
       print "ok 2", "\n" if right->isa("outer::$tail");
@@ -358,3 +358,45 @@ is eval { 'Subclass'->womp }, 'clumpren',
  is frump brumkin, "good bye",
   'detached stashes lose all names corresponding to the containing stash';
 }
+
+# Crazy edge cases involving packages ending with a single :
+@Colon::ISA = 'Organ:'; # pun intended!
+bless [], "Organ:"; # autovivify the stash
+ok "Colon"->isa("Organ:"), 'class isa "class:"';
+{ no strict 'refs'; *{"Organ:::"} = *Organ:: }
+ok "Colon"->isa("Organ"),
+ 'isa(foo) when inheriting from "class:" which is an alias for foo';
+{
+ no warnings;
+ # The next line of code is *not* normative. If the structure changes,
+ # this line needs to change, too.
+ my $foo = delete $Organ::{":"};
+ ok !Colon->isa("Organ"),
+  'class that isa "class:" no longer isa foo if "class:" has been deleted';
+}
+@Colon::ISA = ':';
+bless [], ":";
+ok "Colon"->isa(":"), 'class isa ":"';
+{ no strict 'refs'; *{":::"} = *Punctuation:: }
+ok "Colon"->isa("Punctuation"),
+ 'isa(foo) when inheriting from ":" which is an alias for foo';
+@Colon::ISA = 'Organ:';
+bless [], "Organ:";
+{
+ no strict 'refs';
+ my $life_raft = \%{"Organ:::"};
+ *{"Organ:::"} = \%Organ::;
+ ok "Colon"->isa("Organ"),
+  'isa(foo) when inheriting from "class:" after hash-to-glob assignment';
+}
+@Colon::ISA = 'O:';
+bless [], "O:";
+{
+ no strict 'refs';
+ my $life_raft = \%{"O:::"};
+ *{"O:::"} = "Organ::";
+ ok "Colon"->isa("Organ"),
+  'isa(foo) when inheriting from "class:" after string-to-glob assignment';
+}
+
+

@@ -1026,7 +1026,11 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	if (HeVAL(entry) && HvENAME_get(hv)) {
 		gv = (GV *)HeVAL(entry);
 		if (keysv) key = SvPV(keysv, klen);
-		if (klen > 1 && key[klen-2] == ':' && key[klen-1] == ':'
+		if ((
+		     (klen > 1 && key[klen-2] == ':' && key[klen-1] == ':')
+		      ||
+		     (klen == 1 && key[0] == ':')
+		    )
 		 && (klen != 6 || hv!=PL_defstash || memNE(key,"main::",6))
 		 && SvTYPE(gv) == SVt_PVGV && (stash = GvHV((GV *)gv))
 		 && HvENAME_get(stash)) {
@@ -1780,7 +1784,8 @@ S_hfreeentries(pTHX_ HV *hv)
 		) {
 		    STRLEN klen;
 		    const char * const key = HePV(oentry,klen);
-		    if (klen > 1 && key[klen-1]==':' && key[klen-2]==':') {
+		    if ((klen > 1 && key[klen-1]==':' && key[klen-2]==':')
+		     || (klen == 1 && key[0] == ':')) {
 			mro_package_moved(
 			 NULL, GvHV(HeVAL(oentry)),
 			 (GV *)HeVAL(oentry), 0

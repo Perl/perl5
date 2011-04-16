@@ -959,8 +959,16 @@ Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags)
     if (!tmpgv)
 	return NULL;
     stash = GvHV(tmpgv);
-    if (!HvNAME_get(stash))
+    if (!(flags & ~GV_NOADD_MASK) && !stash) return NULL;
+    if (!HvNAME_get(stash)) {
 	hv_name_set(stash, name, namelen, 0);
+	
+	/* FIXME: This is a repeat of logic in gv_fetchpvn_flags */
+	/* If the containing stash has multiple effective
+	   names, see that this one gets them, too. */
+	if (HvAUX(GvSTASH(tmpgv))->xhv_name_count)
+	    mro_package_moved(stash, NULL, tmpgv, 1);
+    }
     assert(stash);
     return stash;
 }
