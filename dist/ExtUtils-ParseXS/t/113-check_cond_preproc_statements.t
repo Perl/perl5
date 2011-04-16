@@ -7,12 +7,13 @@ use File::Spec;
 use File::Temp qw( tempdir );
 use Test::More tests => 13;
 use lib qw( lib t/lib );
+use ExtUtils::ParseXS;
 use ExtUtils::ParseXS::Utilities qw(
     check_conditional_preprocessor_statements
 );
 use PrimitiveCapture;
 
-my $self = {};
+my $self = bless({} => 'ExtUtils::ParseXS');
 $self->{line} = [];
 $self->{XSStack} = [];
 $self->{XSStack}->[0] = {};

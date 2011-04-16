@@ -8,6 +8,7 @@ use File::Spec;
 use File::Temp qw( tempdir );
 use Test::More tests =>  7;
 use lib qw( lib t/lib );
+use ExtUtils::ParseXS;
 use ExtUtils::ParseXS::Utilities qw(
     Warn
     blurt
@@ -15,7 +16,7 @@ use ExtUtils::ParseXS::Utilities qw(
 );
 use PrimitiveCapture;
 
-my $self = {};
+my $self = bless({} => 'ExtUtils::ParseXS');
 $self->{line} = [];
 $self->{line_no} = [];
 

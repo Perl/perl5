@@ -24,6 +24,7 @@ use ExtUtils::ParseXS::Utilities qw(
   analyze_preprocessor_statements
   set_cond
   Warn
+  CurrentLineNumber
   blurt
   death
   check_conditional_preprocessor_statements
@@ -272,7 +273,7 @@ EOM
       $self->{XSStack}->[$XSS_work_idx]{varname} = $cpp_next_tmp++;
     }
 
-    death( $self,
+    $self->death(
       "Code is not inside a function"
         ." (maybe last function was ended by a blank line "
         ." followed by a statement on column one?)")
@@ -322,14 +323,14 @@ EOM
         and $self->{ret_type} =~ s/^(.*?\w.*?)\s*\b(\w+\s*\(.*)/$1/s;
 
     # a function definition needs at least 2 lines
-    blurt( $self, "Error: Function definition too short '$self->{ret_type}'"), next PARAGRAPH
+    $self->blurt("Error: Function definition too short '$self->{ret_type}'"), next PARAGRAPH
       unless @{ $self->{line} };
 
     my $externC = 1 if $self->{ret_type} =~ s/^extern "C"\s+//;
     my $static  = 1 if $self->{ret_type} =~ s/^static\s+//;
 
     my $func_header = shift(@{ $self->{line} });
-    blurt( $self, "Error: Cannot parse function definition from '$func_header'"), next PARAGRAPH
+    $self->blurt("Error: Cannot parse function definition from '$func_header'"), next PARAGRAPH
       unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*(const)?\s*(;\s*)?$/s;
 
     my ($class, $orig_args);
@@ -625,7 +626,7 @@ EOF
 
         if ($self->check_keyword("PPCODE")) {
           $self->print_section();
-          death( $self, "PPCODE must be last thing") if @{ $self->{line} };
+          $self->death("PPCODE must be last thing") if @{ $self->{line} };
           print "\tLEAVE;\n" if $self->{ScopeThisXSUB};
           print "\tPUTBACK;\n\treturn;\n";
         }
@@ -766,14 +767,13 @@ EOF
 #    ENDHANDLERS
 EOF
       if ($self->check_keyword("CASE")) {
-        blurt( $self, "Error: No `CASE:' at top of function")
+        $self->blurt("Error: No `CASE:' at top of function")
           unless $self->{condnum};
         $_ = "CASE: $_";    # Restore CASE: label
         next;
       }
       last if $_ eq "$END:";
-      death( $self,
-        /^$self->{BLOCK_re}/o ? "Misplaced `$1:'" : "Junk at end of function ($_)");
+      $self->death(/^$self->{BLOCK_re}/o ? "Misplaced `$1:'" : "Junk at end of function ($_)");
     }
 
     print Q(<<"EOF") if $self->{except};
@@ -1035,7 +1035,7 @@ sub process_keyword {
 sub CASE_handler {
   my $self = shift;
   $_ = shift;
-  blurt( $self, "Error: `CASE:' after unconditional `CASE:'")
+  $self->blurt("Error: `CASE:' after unconditional `CASE:'")
     if $self->{condnum} && $self->{cond} eq '';
   $self->{cond} = $_;
   trim_whitespace($self->{cond});
@@ -1070,10 +1070,10 @@ sub INPUT_handler {
 
     s/\s+/ /g;
     my ($var_type, $var_addr, $var_name) = /^(.*?[^&\s])\s*(\&?)\s*\b(\w+)$/s
-      or blurt( $self, "Error: invalid argument declaration '$ln'"), next;
+      or $self->blurt("Error: invalid argument declaration '$ln'"), next;
 
     # Check for duplicate definitions
-    blurt( $self, "Error: duplicate definition of argument '$var_name' ignored"), next
+    $self->blurt("Error: duplicate definition of argument '$var_name' ignored"), next
       if $self->{arg_list}->{$var_name}++
         or defined $self->{argtype_seen}->{$var_name} and not $self->{processing_arg_with_types};
 
@@ -1097,6 +1097,8 @@ sub INPUT_handler {
 
     if ($self->{var_num}) {
       my $typemap = $self->{typemap}->get_typemap(ctype => $var_type);
+      $self->death("Could not find a typemap for C type '$var_type'")
+        if not $typemap;
       $self->{proto_arg}->[$self->{var_num}] = ($typemap && $typemap->proto) || "\$";
     }
     $self->{func_args} =~ s/\b($var_name)\b/&$1/ if $var_addr;
@@ -1143,7 +1145,7 @@ sub OUTPUT_handler {
       next;
     }
     my ($outarg, $outcode) = /^\s*(\S+)\s*(.*?)\s*$/s;
-    blurt( $self, "Error: duplicate OUTPUT argument '$outarg' ignored"), next
+    $self->blurt("Error: duplicate OUTPUT argument '$outarg' ignored"), next
       if $self->{outargs}->{$outarg}++;
     if (!$self->{gotRETVAL} and $outarg eq 'RETVAL') {
       # deal with RETVAL last
@@ -1151,9 +1153,9 @@ sub OUTPUT_handler {
       $self->{gotRETVAL} = 1;
       next;
     }
-    blurt( $self, "Error: OUTPUT $outarg not an argument"), next
+    $self->blurt("Error: OUTPUT $outarg not an argument"), next
       unless defined($self->{args_match}->{$outarg});
-    blurt( $self, "Error: No input definition for OUTPUT argument '$outarg' - ignored"), next
+    $self->blurt("Error: No input definition for OUTPUT argument '$outarg' - ignored"), next
       unless defined $self->{var_types}->{$outarg};
     $self->{var_num} = $self->{args_match}->{$outarg};
     if ($outcode) {
@@ -1324,7 +1326,7 @@ sub FALLBACK_handler {
   );
 
   # check for valid FALLBACK value
-  death( $self, "Error: FALLBACK: TRUE/FALSE/UNDEF") unless exists $map{uc $_};
+  $self->death("Error: FALLBACK: TRUE/FALSE/UNDEF") unless exists $map{uc $_};
 
   $self->{Fallback} = $map{uc $_};
 }
@@ -1337,14 +1339,14 @@ sub REQUIRE_handler {
 
   trim_whitespace($Ver);
 
-  death( $self, "Error: REQUIRE expects a version number")
+  $self->death("Error: REQUIRE expects a version number")
     unless $Ver;
 
   # check that the version number is of the form n.n
-  death( $self, "Error: REQUIRE: expected a number, got '$Ver'")
+  $self->death("Error: REQUIRE: expected a number, got '$Ver'")
     unless $Ver =~ /^\d+(\.\d*)?/;
 
-  death( $self, "Error: xsubpp $Ver (or better) required--this is only $VERSION.")
+  $self->death("Error: xsubpp $Ver (or better) required--this is only $VERSION.")
     unless $VERSION >= $Ver;
 }
 
@@ -1358,7 +1360,7 @@ sub VERSIONCHECK_handler {
   trim_whitespace($_);
 
   # check for ENABLE/DISABLE
-  death( $self, "Error: VERSIONCHECK: ENABLE/DISABLE")
+  $self->death("Error: VERSIONCHECK: ENABLE/DISABLE")
     unless /^(ENABLE|DISABLE)/i;
 
   $self->{WantVersionChk} = 1 if $1 eq 'ENABLE';
@@ -1372,7 +1374,7 @@ sub PROTOTYPE_handler {
 
   my $specified;
 
-  death( $self, "Error: Only 1 PROTOTYPE definition allowed per xsub")
+  $self->death("Error: Only 1 PROTOTYPE definition allowed per xsub")
     if $self->{proto_in_this_xsub}++;
 
   for (;  !/^$self->{BLOCK_re}/o;  $_ = shift(@{ $self->{line} })) {
@@ -1388,7 +1390,7 @@ sub PROTOTYPE_handler {
     else {
       # remove any whitespace
       s/\s+//g;
-      death( $self, "Error: Invalid prototype '$_'")
+      $self->death("Error: Invalid prototype '$_'")
         unless valid_proto_string($_);
       $self->{ProtoThisXSUB} = C_string($_);
     }
@@ -1404,11 +1406,11 @@ sub SCOPE_handler {
   my $self = shift;
   $_ = shift;
 
-  death( $self, "Error: Only 1 SCOPE declaration allowed per xsub")
+  $self->death("Error: Only 1 SCOPE declaration allowed per xsub")
     if $self->{scope_in_this_xsub}++;
 
   trim_whitespace($_);
-  death("Error: SCOPE: ENABLE/DISABLE")
+  $self->death("Error: SCOPE: ENABLE/DISABLE")
       unless /^(ENABLE|DISABLE)\b/i;
   $self->{ScopeThisXSUB} = ( uc($1) eq 'ENABLE' );
 }
@@ -1423,7 +1425,7 @@ sub PROTOTYPES_handler {
   trim_whitespace($_);
 
   # check for ENABLE/DISABLE
-  death("Error: PROTOTYPES: ENABLE/DISABLE")
+  $self->death("Error: PROTOTYPES: ENABLE/DISABLE")
     unless /^(ENABLE|DISABLE)/i;
 
   $self->{WantPrototypes} = 1 if $1 eq 'ENABLE';
@@ -1457,14 +1459,14 @@ sub INCLUDE_handler {
 
   trim_whitespace($_);
 
-  death( $self, "INCLUDE: filename missing")
+  $self->death("INCLUDE: filename missing")
     unless $_;
 
-  death( $self, "INCLUDE: output pipe is illegal")
+  $self->death("INCLUDE: output pipe is illegal")
     if /^\s*\|/;
 
   # simple minded recursion detector
-  death( $self, "INCLUDE loop detected")
+  $self->death("INCLUDE loop detected")
     if $self->{IncludedFiles}->{$_};
 
   ++$self->{IncludedFiles}->{$_} unless /\|\s*$/;
@@ -1483,7 +1485,7 @@ sub INCLUDE_handler {
   $FH = Symbol::gensym();
 
   # open the new file
-  open ($FH, "$_") or death( $self, "Cannot open '$_': $!");
+  open ($FH, "$_") or $self->death("Cannot open '$_': $!");
 
   print Q(<<"EOF");
 #
@@ -1525,10 +1527,10 @@ sub INCLUDE_COMMAND_handler {
 
   $_ = QuoteArgs($_) if $^O eq 'VMS';
 
-  death( $self, "INCLUDE_COMMAND: command missing")
+  $self->death("INCLUDE_COMMAND: command missing")
     unless $_;
 
-  death( $self, "INCLUDE_COMMAND: pipes are illegal")
+  $self->death("INCLUDE_COMMAND: pipes are illegal")
     if /^\s*\|/ or /\|\s*$/;
 
   $self->PushXSStack( IsPipe => 1 );
@@ -1541,7 +1543,7 @@ sub INCLUDE_COMMAND_handler {
 
   # open the new file
   open ($FH, "-|", "$_")
-    or death( $self, "Cannot run command '$_' to include its output: $!");
+    or $self->death( $self, "Cannot run command '$_' to include its output: $!");
 
   print Q(<<"EOF");
 #
@@ -1618,7 +1620,7 @@ sub fetch_para {
   my $self = shift;
 
   # parse paragraph
-  death("Error: Unterminated `#if/#ifdef/#ifndef'")
+  $self->death("Error: Unterminated `#if/#ifdef/#ifndef'")
     if !defined $self->{lastline} && $self->{XSStack}->[-1]{type} eq 'if';
   @{ $self->{line} } = ();
   @{ $self->{line_no} } = ();
@@ -1643,7 +1645,7 @@ sub fetch_para {
       while ($self->{lastline} = <$FH>) {
         last if ($self->{lastline} =~ /^=cut\s*$/);
       }
-      death("Error: Unterminated pod") unless $self->{lastline};
+      $self->death("Error: Unterminated pod") unless $self->{lastline};
       $self->{lastline} = <$FH>;
       chomp $self->{lastline};
       $self->{lastline} =~ s/^\s+$//;
@@ -1658,13 +1660,17 @@ sub fetch_para {
       my @tmaplines;
       while (1) {
         $self->{lastline} = <$FH>;
-        death("Error: Unterminated typemap") if not defined $self->{lastline};
+        $self->death("Error: Unterminated typemap") if not defined $self->{lastline};
         last if $self->{lastline} =~ /^$end_marker\s*$/;
         push @tmaplines, $self->{lastline};
       }
 
       my $tmapcode = join "", @tmaplines;
-      my $tmap = ExtUtils::Typemaps->new(string => $tmapcode);
+      my $tmap = ExtUtils::Typemaps->new(
+        string => $tmapcode,
+        lineno_offset => $self->CurrentLineNumber()+1,
+        fake_filename => $self->{filename},
+      );
       $self->{typemap}->merge(typemap => $tmap, replace => 1);
 
       last unless defined($self->{lastline} = <$FH>);
@@ -1756,7 +1762,7 @@ sub generate_init {
   my $typemaps = $self->{typemap};
 
   $type = tidy_type($type);
-  blurt( $self, "Error: '$type' not in typemap"), return
+  $self->blurt("Error: '$type' not in typemap"), return
     unless $typemaps->get_typemap(ctype => $type);
 
   ($ntype = $type) =~ s/\s*\*/Ptr/g;
@@ -1775,7 +1781,7 @@ sub generate_init {
   $type =~ tr/:/_/ unless $self->{hiertype};
 
   my $inputmap = $typemaps->get_inputmap(xstype => $xstype);
-  blurt( $self, "Error: No INPUT definition for type '$type', typekind '" . $type->xstype . "' found"), return
+  $self->blurt("Error: No INPUT definition for type '$type', typekind '" . $type->xstype . "' found"), return
     unless defined $inputmap;
 
   my $expr = $inputmap->cleaned_code;
@@ -1783,9 +1789,9 @@ sub generate_init {
   if ($expr =~ /DO_ARRAY_ELEM/) {
     my $subtypemap  = $typemaps->get_typemap(ctype => $subtype);
     my $subinputmap = $typemaps->get_inputmap(xstype => $subtypemap->xstype);
-    blurt( $self, "Error: '$subtype' not in typemap"), return
+    $self->blurt("Error: '$subtype' not in typemap"), return
       unless $subtypemap;
-    blurt( $self, "Error: No INPUT definition for type '$subtype', typekind '" . $subtypemap->xstype . "' found"), return
+    $self->blurt("Error: No INPUT definition for type '$subtype', typekind '" . $subtypemap->xstype . "' found"), return
       unless $subinputmap;
     my $subexpr = $subinputmap->cleaned_code;
     $subexpr =~ s/\$type/\$subtype/g;
@@ -1859,9 +1865,9 @@ sub generate_output {
   else {
     my $typemap   = $typemaps->get_typemap(ctype => $type);
     my $outputmap = $typemaps->get_outputmap(xstype => $typemap->xstype);
-    blurt( $self, "Error: '$type' not in typemap"), return
+    $self->blurt("Error: '$type' not in typemap"), return
       unless $typemap;
-    blurt( $self, "Error: No OUTPUT definition for type '$type', typekind '" . $typemap->xstype . "' found"), return
+    $self->blurt("Error: No OUTPUT definition for type '$type', typekind '" . $typemap->xstype . "' found"), return
       unless $outputmap;
     ($ntype = $type) =~ s/\s*\*/Ptr/g;
     $ntype =~ s/\(\)//g;
@@ -1872,9 +1878,9 @@ sub generate_output {
     if ($expr =~ /DO_ARRAY_ELEM/) {
       my $subtypemap   = $typemaps->get_typemap(ctype => $subtype);
       my $suboutputmap = $typemaps->get_outputmap(xstype => $subtypemap->xstype);
-      blurt( $self, "Error: '$subtype' not in typemap"), return
+      $self->blurt("Error: '$subtype' not in typemap"), return
         unless $subtypemap;
-      blurt( $self, "Error: No OUTPUT definition for type '$subtype', typekind '" . $subtypemap->xstype . "' found"), return
+      $self->blurt("Error: No OUTPUT definition for type '$subtype', typekind '" . $subtypemap->xstype . "' found"), return
         unless $suboutputmap;
       my $subexpr = $suboutputmap->cleaned_code;
       $subexpr =~ s/ntype/subtype/g;
