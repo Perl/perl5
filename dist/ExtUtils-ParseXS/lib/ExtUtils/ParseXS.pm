@@ -84,7 +84,7 @@ sub process_file {
   }
   @{ $self->{XSStack} } = ({type => 'none'});
   $self->{InitFileCode} = [ @ExtUtils::ParseXS::Constants::InitFileCode ];
-  $self->{Overload}     = $ExtUtils::ParseXS::Constants::Overload;
+  $self->{Overload}     = 0;
   $self->{errors}       = 0;
   $self->{Fallback}     = $ExtUtils::ParseXS::Constants::Fallback;
 
