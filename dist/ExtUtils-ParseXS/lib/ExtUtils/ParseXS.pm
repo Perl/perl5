@@ -42,7 +42,7 @@ $VERSION = eval $VERSION if $VERSION =~ /_/;
 # them into $self led to build problems.  In most cases, strings being
 # 'eval'-ed contain the variables' names hard-coded.
 our (
-  $FH, $Package, $func_name, $Full_func_name, $pname, $ALIAS,
+  $Package, $func_name, $Full_func_name, $pname, $ALIAS,
 );
 
 our $self = bless {} => __PACKAGE__;
@@ -67,6 +67,7 @@ sub process_file {
     prototypes      => 0,
     typemap         => [],
     versioncheck    => 1,
+    FH              => Symbol::gensym(),
     %options,
   );
   $args{except} = $args{except} ? ' TRY' : '';
@@ -83,7 +84,6 @@ sub process_file {
   }
   @{ $self->{XSStack} } = ({type => 'none'});
   $self->{InitFileCode} = [ @ExtUtils::ParseXS::Constants::InitFileCode ];
-  $FH                   = $ExtUtils::ParseXS::Constants::FH;
   $self->{Overload}     = $ExtUtils::ParseXS::Constants::Overload;
   $self->{errors}       = $ExtUtils::ParseXS::Constants::errors;
   $self->{Fallback}     = $ExtUtils::ParseXS::Constants::Fallback;
@@ -192,10 +192,10 @@ EOM
 
   # Open the input file (using $self->{filename} which
   # is a basename'd $args{filename} due to chdir above)
-  open($FH, $self->{filename}) or die "cannot open $self->{filename}: $!\n";
+  open($self->{FH}, '<', $self->{filename}) or die "cannot open $self->{filename}: $!\n";
 
   firstmodule:
-  while (<$FH>) {
+  while (readline($self->{FH})) {
     if (/^=/) {
       my $podstartline = $.;
       do {
@@ -219,7 +219,7 @@ EOM
           next firstmodule
         }
 
-      } while (<$FH>);
+      } while (readline($self->{FH}));
       # At this point $. is at end of file so die won't state the start
       # of the problem, and as we haven't yet read any lines &death won't
       # show the correct line in the message either.
@@ -978,7 +978,7 @@ EOF
   chdir($orig_cwd);
   select($orig_fh);
   untie *PSEUDO_STDOUT if tied *PSEUDO_STDOUT;
-  close $FH;
+  close $self->{FH};
 
   return 1;
 }
@@ -1445,7 +1445,7 @@ sub PushXSStack {
           LineNo          => $self->{line_no},
           Filename        => $self->{filename},
           Filepathname    => $self->{filepathname},
-          Handle          => $FH,
+          Handle          => $self->{FH},
           IsPipe          => scalar($self->{filename} =~ /\|\s*$/),
           %args,
          });
@@ -1482,10 +1482,10 @@ sub INCLUDE_handler {
 
   $self->PushXSStack();
 
-  $FH = Symbol::gensym();
+  $self->{FH} = Symbol::gensym();
 
   # open the new file
-  open ($FH, "$_") or $self->death("Cannot open '$_': $!");
+  open ($self->{FH}, '<', $_) or $self->death("Cannot open '$_': $!");
 
   print Q(<<"EOF");
 #
@@ -1500,7 +1500,7 @@ EOF
   # non-blank line
 
   # skip leading blank lines
-  while (<$FH>) {
+  while (readline($self->{FH})) {
     last unless /^\s*$/;
   }
 
@@ -1535,14 +1535,14 @@ sub INCLUDE_COMMAND_handler {
 
   $self->PushXSStack( IsPipe => 1 );
 
-  $FH = Symbol::gensym();
+  $self->{FH} = Symbol::gensym();
 
   # If $^X is used in INCLUDE_COMMAND, we know it's supposed to be
   # the same perl interpreter as we're currently running
   s/^\s*\$\^X/$^X/;
 
   # open the new file
-  open ($FH, "-|", "$_")
+  open ($self->{FH}, "-|", $_)
     or $self->death( $self, "Cannot run command '$_' to include its output: $!");
 
   print Q(<<"EOF");
@@ -1559,7 +1559,7 @@ EOF
   # non-blank line
 
   # skip leading blank lines
-  while (<$FH>) {
+  while (readline($self->{FH})) {
     last unless /^\s*$/;
   }
 
@@ -1579,9 +1579,9 @@ sub PopFile {
   --$self->{IncludedFiles}->{$self->{filename}}
     unless $isPipe;
 
-  close $FH;
+  close $self->{FH};
 
-  $FH         = $data->{Handle};
+  $self->{FH}         = $data->{Handle};
   # $filename is the leafname, which for some reason isused for diagnostic
   # messages, whereas $filepathname is the full pathname, and is used for
   # #line directives.
@@ -1615,7 +1615,7 @@ sub Q {
   $text;
 }
 
-# Read next xsub into @{ $self->{line} } from ($lastline, <$FH>).
+# Read next xsub into @{ $self->{line} } from ($lastline, readline($self->{FH})).
 sub fetch_para {
   my $self = shift;
 
@@ -1642,11 +1642,11 @@ sub fetch_para {
   for (;;) {
     # Skip embedded PODs
     while ($self->{lastline} =~ /^=/) {
-      while ($self->{lastline} = <$FH>) {
+      while ($self->{lastline} = readline($self->{FH})) {
         last if ($self->{lastline} =~ /^=cut\s*$/);
       }
       $self->death("Error: Unterminated pod") unless $self->{lastline};
-      $self->{lastline} = <$FH>;
+      $self->{lastline} = readline($self->{FH});
       chomp $self->{lastline};
       $self->{lastline} =~ s/^\s+$//;
     }
@@ -1659,7 +1659,7 @@ sub fetch_para {
       my $end_marker = quotemeta(defined($1) ? $2 : $3);
       my @tmaplines;
       while (1) {
-        $self->{lastline} = <$FH>;
+        $self->{lastline} = readline($self->{FH});
         $self->death("Error: Unterminated typemap") if not defined $self->{lastline};
         last if $self->{lastline} =~ /^$end_marker\s*$/;
         push @tmaplines, $self->{lastline};
@@ -1673,7 +1673,7 @@ sub fetch_para {
       );
       $self->{typemap}->merge(typemap => $tmap, replace => 1);
 
-      last unless defined($self->{lastline} = <$FH>);
+      last unless defined($self->{lastline} = readline($self->{FH}));
       next;
     }
 
@@ -1691,11 +1691,11 @@ sub fetch_para {
     }
 
     # Read next line and continuation lines
-    last unless defined($self->{lastline} = <$FH>);
+    last unless defined($self->{lastline} = readline($self->{FH}));
     $self->{lastline_no} = $.;
     my $tmp_line;
     $self->{lastline} .= $tmp_line
-      while ($self->{lastline} =~ /\\$/ && defined($tmp_line = <$FH>));
+      while ($self->{lastline} =~ /\\$/ && defined($tmp_line = readline($self->{FH})));
 
     chomp $self->{lastline};
     $self->{lastline} =~ s/^\s+$//;

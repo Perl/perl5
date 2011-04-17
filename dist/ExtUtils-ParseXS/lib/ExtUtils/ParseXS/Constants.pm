@@ -25,7 +25,6 @@ Nothing is exported.  Use fully qualified variable names.
 
 # FIXME: THESE ARE NOT CONSTANTS!
 our @InitFileCode;
-our $FH              = Symbol::gensym();
 our $Overload        = 0;
 our $errors          = 0;
 
