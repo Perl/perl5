@@ -2,13 +2,20 @@
 use strict;
 use warnings;
 
-use Test::More tests => 38;
+use Test::More tests => 43;
 use ExtUtils::Typemaps;
+
+# empty typemap
+SCOPE: {
+  ok(ExtUtils::Typemaps->new()->is_empty(), "This is an empty typemap");
+}
 
 # typemap only
 SCOPE: {
   my $map = ExtUtils::Typemaps->new();
   $map->add_typemap(ctype => 'unsigned int', xstype => 'T_IV');
+  ok(!$map->is_empty(), "This is not an empty typemap");
+
   is($map->as_string(), <<'HERE', "Simple typemap matches expectations");
 TYPEMAP
 unsigned int	T_IV
@@ -19,6 +26,7 @@ HERE
   is($type->ctype, 'unsigned int');
   is($type->xstype, 'T_IV');
   is($type->tidy_ctype, 'unsigned int');
+
 
   # test failure
   ok(!$map->get_typemap(ctype => 'foo'), "Access to nonexistent typemap doesn't die");
@@ -34,8 +42,9 @@ HERE
 # typemap & input
 SCOPE: {
   my $map = ExtUtils::Typemaps->new();
-  $map->add_typemap(ctype => 'unsigned int', xstype => 'T_UV');
   $map->add_inputmap(xstype => 'T_UV', code => '$var = ($type)SvUV($arg);');
+  ok(!$map->is_empty(), "This is not an empty typemap");
+  $map->add_typemap(ctype => 'unsigned int', xstype => 'T_UV');
   is($map->as_string(), <<'HERE', "Simple typemap (with input) matches expectations");
 TYPEMAP
 unsigned int	T_UV
@@ -64,8 +73,9 @@ HERE
 # typemap & output
 SCOPE: {
   my $map = ExtUtils::Typemaps->new();
-  $map->add_typemap(ctype => 'unsigned int', xstype => 'T_UV');
   $map->add_outputmap(xstype => 'T_UV', code => 'sv_setuv($arg, (UV)$var);');
+  ok(!$map->is_empty(), "This is not an empty typemap");
+  $map->add_typemap(ctype => 'unsigned int', xstype => 'T_UV');
   is($map->as_string(), <<'HERE', "Simple typemap (with output) matches expectations");
 TYPEMAP
 unsigned int	T_UV
@@ -92,6 +102,7 @@ SCOPE: {
   $map->add_typemap(ctype => 'unsigned int', xstype => 'T_UV');
   $map->add_inputmap(xstype => 'T_UV', code => '$var = ($type)SvUV($arg);');
   $map->add_outputmap(xstype => 'T_UV', code => 'sv_setuv($arg, (UV)$var);');
+  ok(!$map->is_empty(), "This is not an empty typemap");
   is($map->as_string(), <<'HERE', "Simple typemap (with in- & output) matches expectations");
 TYPEMAP
 unsigned int	T_UV

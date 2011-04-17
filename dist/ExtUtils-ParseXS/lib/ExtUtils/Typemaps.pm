@@ -635,6 +635,19 @@ sub merge {
   return 1;
 }
 
+=head2 is_empty
+
+Returns a bool indicating whether this typemap is entirely empty.
+
+=cut
+
+sub is_empty {
+  my $self = shift;
+
+  return @{ $self->{typemap_section} } == 0
+      && @{ $self->{input_section} } == 0
+      && @{ $self->{output_section} } == 0;
+}
 
 =head2 _get_typemap_hash
 
