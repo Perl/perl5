@@ -1788,9 +1788,9 @@ sub generate_init {
   # Note: This gruesome bit either needs heavy rethinking or documentation. I vote for the former. --Steffen
   if ($expr =~ /DO_ARRAY_ELEM/) {
     my $subtypemap  = $typemaps->get_typemap(ctype => $subtype);
+    $self->blurt("Error: C type '$subtype' not in typemap"), return
+      if not $subtypemap;
     my $subinputmap = $typemaps->get_inputmap(xstype => $subtypemap->xstype);
-    $self->blurt("Error: '$subtype' not in typemap"), return
-      unless $subtypemap;
     $self->blurt("Error: No INPUT definition for type '$subtype', typekind '" . $subtypemap->xstype . "' found"), return
       unless $subinputmap;
     my $subexpr = $subinputmap->cleaned_code;
@@ -1864,9 +1864,9 @@ sub generate_output {
   }
   else {
     my $typemap   = $typemaps->get_typemap(ctype => $type);
+    $self->blurt("Could not find a typemap for C type '$type'"), return
+      if not $typemap;
     my $outputmap = $typemaps->get_outputmap(xstype => $typemap->xstype);
-    $self->blurt("Error: '$type' not in typemap"), return
-      unless $typemap;
     $self->blurt("Error: No OUTPUT definition for type '$type', typekind '" . $typemap->xstype . "' found"), return
       unless $outputmap;
     ($ntype = $type) =~ s/\s*\*/Ptr/g;
@@ -1877,9 +1877,9 @@ sub generate_output {
     my $expr = $outputmap->cleaned_code;
     if ($expr =~ /DO_ARRAY_ELEM/) {
       my $subtypemap   = $typemaps->get_typemap(ctype => $subtype);
+      $self->blurt("Could not find a typemap for C type '$subtype'"), return
+        if not $subtypemap;
       my $suboutputmap = $typemaps->get_outputmap(xstype => $subtypemap->xstype);
-      $self->blurt("Error: '$subtype' not in typemap"), return
-        unless $subtypemap;
       $self->blurt("Error: No OUTPUT definition for type '$subtype', typekind '" . $subtypemap->xstype . "' found"), return
         unless $suboutputmap;
       my $subexpr = $suboutputmap->cleaned_code;
