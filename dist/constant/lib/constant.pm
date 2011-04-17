@@ -4,7 +4,7 @@ use strict;
 use warnings::register;
 
 use vars qw($VERSION %declared);
-$VERSION = '1.20';
+$VERSION = '1.21';
 
 #=======================================================================
 
@@ -116,6 +116,12 @@ sub import {
 	    $declared{$full_name}++;
 	    if ($multiple || @_ == 1) {
 		my $scalar = $multiple ? $constants->{$name} : $_[0];
+
+		# Work around perl bug #xxxxx: Sub names (actually glob
+		# names in general) ignore the UTF8 flag. So we have to
+		# turn it off to get the "right" symbol table entry.
+		utf8::is_utf8 $name and utf8::encode $name;
+
 		# The constant serves to optimise this entire block out on
 		# 5.8 and earlier.
 		if (_CAN_PCS && $symtab && !exists $symtab->{$name}) {
