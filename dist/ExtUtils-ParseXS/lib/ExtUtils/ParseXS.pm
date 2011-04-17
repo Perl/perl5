@@ -86,7 +86,7 @@ sub process_file {
   $self->{InitFileCode} = [ @ExtUtils::ParseXS::Constants::InitFileCode ];
   $self->{Overload}     = 0;
   $self->{errors}       = 0;
-  $self->{Fallback}     = $ExtUtils::ParseXS::Constants::Fallback;
+  $self->{Fallback}     = '&PL_sv_undef';
 
   # Most of the 1500 lines below uses these globals.  We'll have to
   # clean this up sometime, probably.  For now, we just pull them out
