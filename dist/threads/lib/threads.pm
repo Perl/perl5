@@ -134,7 +134,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.82
+This document describes threads version 1.83
 
 =head1 SYNOPSIS
 
