@@ -227,11 +227,11 @@ presenting another potential security issue.  See
 L<http://unicode.org/reports/tr36> for a detailed discussion of Unicode
 security issues.
 
-On EBCDIC platforms, which already are equivalent to Latin-1 (at least
-the ones that Perl handles), this modifier changes behavior only when
+On the EBCDIC platforms that Perl handles, the native character set is
+equivalent to Latin-1.  Thus this modifier changes behavior only when
 the C<"/i"> modifier is also specified, and it turns out it affects only
 two characters, giving them full Unicode semantics: the C<MICRO SIGN>
-will match the Greek capital and small letters C<MU>; otherwise not; and
+will match the Greek capital and small letters C<MU>, otherwise not; and
 the C<LATIN CAPITAL LETTER SHARP S> will match any of C<SS>, C<Ss>,
 C<sS>, and C<ss>, otherwise not.
 
@@ -255,7 +255,7 @@ With it, one can write C<\d> with confidence that it will only match
 ASCII characters, and should the need arise to match beyond ASCII, you
 can use C<\p{Digit}>, or C<\p{Word}> for C<\w>.  There are similar
 C<\p{...}> constructs that can match white space and Posix classes
-beyond ASCII.  See L<perlrecharclass>.
+beyond ASCII.  See L<perlrecharclass/POSIX Character Classes>.
 
 As you would expect, this modifier causes, for example, C<\D> to mean
 the same thing as C<[^0-9]>; in fact, all non-ASCII characters match
@@ -335,21 +335,22 @@ expression depends on a fairly complex set of interactions.  As
 explained below in L</Extended Patterns> it is possible to explicitly
 specify modifiers that apply only to portions of a regular expression.
 The innermost always has priority over any outer ones, and one applying
-to the whole expression has priority over any default settings that are
-described in the next few paragraphs.
+to the whole expression has priority over any of the default settings that are
+described in the remainder of this section.
 
 The C<L<use re 'E<sol>foo'|re/'E<sol>flags' mode">> pragma can be used to set
 default modifiers (including these) for regular expressions compiled
 within its scope.  This pragma has precedence over the other pragmas
-that change the defaults, as listed below.
+listed below that change the defaults.
 
 Otherwise, C<L<use locale|perllocale>> sets the default modifier to C</l>;
 and C<L<use feature 'unicode_strings|feature>> or
 C<L<use 5.012|perlfunc/use VERSION>> (or higher) set the default to
 C</u> when not in the same scope as either C<L<use locale|perllocale>>
-or C<L<use bytes|bytes>>.  Unlike the mechanisms mentioned outside this
-paragraph, these affect operations besides regular expressions pattern
-matching, and so give more consistent results with other operators.
+or C<L<use bytes|bytes>>.  Unlike the mechanisms mentioned above, these
+affect operations besides regular expressions pattern matching, and so
+give more consistent results with other operators, including using
+C<\U>, C<\l>, etc. in substitution replacements.
 
 If none of the above apply, for backwards compatibility reasons, the
 C</d> modifier is the one in effect by default.  As this can lead to
