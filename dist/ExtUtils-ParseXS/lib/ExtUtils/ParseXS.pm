@@ -85,7 +85,7 @@ sub process_file {
   @{ $self->{XSStack} } = ({type => 'none'});
   $self->{InitFileCode} = [ @ExtUtils::ParseXS::Constants::InitFileCode ];
   $self->{Overload}     = $ExtUtils::ParseXS::Constants::Overload;
-  $self->{errors}       = $ExtUtils::ParseXS::Constants::errors;
+  $self->{errors}       = 0;
   $self->{Fallback}     = $ExtUtils::ParseXS::Constants::Fallback;
 
   # Most of the 1500 lines below uses these globals.  We'll have to

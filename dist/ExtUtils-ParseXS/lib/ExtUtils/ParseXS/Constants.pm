@@ -26,8 +26,6 @@ Nothing is exported.  Use fully qualified variable names.
 # FIXME: THESE ARE NOT CONSTANTS!
 our @InitFileCode;
 our $Overload        = 0;
-our $errors          = 0;
-
 our $Fallback        = '&PL_sv_undef'; # FIXME Check: Is this a constant?
 
 # Note that to reduce maintenance, $PrototypeRegexp is used
