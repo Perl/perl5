@@ -24,7 +24,7 @@ use ExtUtils::ParseXS::Utilities qw(
   analyze_preprocessor_statements
   set_cond
   Warn
-  CurrentLineNumber
+  current_line_number
   blurt
   death
   check_conditional_preprocessor_statements
@@ -1668,7 +1668,7 @@ sub fetch_para {
       my $tmapcode = join "", @tmaplines;
       my $tmap = ExtUtils::Typemaps->new(
         string => $tmapcode,
-        lineno_offset => $self->CurrentLineNumber()+1,
+        lineno_offset => $self->current_line_number()+1,
         fake_filename => $self->{filename},
       );
       $self->{typemap}->merge(typemap => $tmap, replace => 1);

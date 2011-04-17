@@ -22,7 +22,7 @@ our (@ISA, @EXPORT_OK);
   analyze_preprocessor_statements
   set_cond
   Warn
-  CurrentLineNumber
+  current_line_number
   blurt
   death
   check_conditional_preprocessor_statements
@@ -629,7 +629,7 @@ sub set_cond {
   return $cond;
 }
 
-=head2 C<CurrentLineNumber()>
+=head2 C<current_line_number()>
 
 =over 4
 
@@ -649,7 +649,7 @@ The current line number.
 
 =cut
 
-sub CurrentLineNumber {
+sub current_line_number {
   my $self = shift;
   my $line_number = $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} } -1];
   return $line_number;
@@ -671,7 +671,7 @@ sub CurrentLineNumber {
 
 sub Warn {
   my $self = shift;
-  my $warn_line_number = $self->CurrentLineNumber();
+  my $warn_line_number = $self->current_line_number();
   print STDERR "@_ in $self->{filename}, line $warn_line_number\n";
 }
 
