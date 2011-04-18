@@ -185,7 +185,7 @@ C<use feature "unicode_strings"> pragmas that are in effect at the time
 of compiling the regular expression.
 
 The C</a> regular expression modifier restricts C<\s>, C<\d> and C<\w> and
-the Posix (C<[[:posix:]]>) character classes to the ASCII range.  Their
+the POSIX (C<[[:posix:]]>) character classes to the ASCII range.  Their
 complements and C<\b> and C<\B> are correspondingly
 affected.  Otherwise, C</a> behaves like the C</u> modifier, in that
 case-insensitive matching uses Unicode semantics.
