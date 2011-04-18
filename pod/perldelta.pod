@@ -1183,7 +1183,7 @@ generation task.
 
 C<CPAN::Meta> version 2.110440 has been added as a dual-life module.  It
 provides a standard library to read, interpret and write CPAN distribution
-metadata files (e.g. META.json and META.yml) which describes a
+metadata files (e.g., META.json and META.yml) which describes a
 distribution, its contents, and the requirements for building it and
 installing it.  The latest CPAN distribution metadata specification is
 included as C<CPAN::Meta::Spec> and notes on changes in the specification
@@ -1213,8 +1213,8 @@ favor of this module instead.
 =item *
 
 C<Perl::OSType> 1.002 has been added as a dual-life module.  It maps Perl
-operating system names (e.g. 'dragonfly' or 'MSWin32') to more generic types
-with standardized names (e.g.  "Unix" or "Windows").  It has been refactored
+operating system names (e.g., 'dragonfly' or 'MSWin32') to more generic types
+with standardized names (e.g., "Unix" or "Windows").  It has been refactored
 out of Module::Build and ExtUtils::CBuilder and consolidates such mappings into
 a single location for easier maintenance.
 
@@ -2714,7 +2714,7 @@ See L<http://www.tishler.net/jason/software/rebase/rebase-2.4.2.README> for more
 
 =item *
 
-Support for the standard cygwin dll prefix, which is e.g. needed for FFI's
+Support for the standard cygwin dll prefix, which is e.g., needed for FFI's
 
 =item *
 
@@ -3939,7 +3939,7 @@ FETCH/STORE at all [perl #43789] (5.12.2).
 
 =item *
 
-utf8::is_utf8 now respects get-magic (e.g. $1) (5.12.1).
+utf8::is_utf8 now respects get-magic (e.g., $1) (5.12.1).
 
 =back
 
