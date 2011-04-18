@@ -939,7 +939,7 @@ parentheses, like this:
     for $x (qw(a b c)) { ... }
 
 This is being deprecated because C<qw(a b c)> is supposed to mean
-C<"a", "b", "c"> not C<("a", "b", "c")>. I.e. this doesn't compile:
+C<"a", "b", "c"> not C<("a", "b", "c")>. I.e., this doesn't compile:
 
     for my $i "a", "b", "c" { }
 
@@ -957,7 +957,7 @@ Note that this does not change the behavior of cases like:
     use POSIX qw(setlocale localeconv)
     our @EXPORT = qw(foo bar baz);
 
-Where a list with our without parentheses could have been provided.
+Where a list with or without parentheses could have been provided.
 
 =head2 C<\N{BELL}>
 
