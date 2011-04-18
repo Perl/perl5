@@ -5446,10 +5446,10 @@ S_deref_plain_array(pTHX_ AV *ary)
 #else
 # define DEREF_PLAIN_ARRAY(ary)            \
    (                                        \
-     PL_Sv = (SV *)(ary);                    \
+     PL_Sv = (SV *)(ary),                    \
      SvTYPE(PL_Sv) == SVt_PVAV                \
       ? (AV *)PL_Sv                            \
-      : S_deref_plain_array(aTHX_ (AV *)PL_Sv); \
+      : S_deref_plain_array(aTHX_ (AV *)PL_Sv)  \
    )
 #endif
 
