@@ -292,6 +292,7 @@ my @non_v    = ();
 my @v_others = ();
 my $in_v     = 0;
 my %Data     = ();
+my $quote;
 
 
 my %seen_quotes;
@@ -323,11 +324,11 @@ my %seen_quotes;
 	push(@non_v, "#$_"); # not a name='value' line
 	next;
     }
-    my $quote = $2;
     if ($in_v) { 
         $val .= $_;
     }
     else { 
+	$quote = $2;
         ($name,$val) = ($1,$3); 
     }
     $in_v = $val !~ /$quote\n/;
