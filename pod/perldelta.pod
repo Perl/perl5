@@ -55,7 +55,7 @@ C<\N{BEL}>, or C<"\a"> before upgrading.
 This release provides full functionality for C<use feature
 'unicode_strings'>.  Under its scope, all string operations executed and
 regular expressions compiled (even if executed outside its scope) have
-Unicode semantics.  See L<feature>.
+Unicode semantics.  See L<feature/"the 'unicode_strings' feature">.
 
 This feature avoids most forms of the "Unicode Bug" (See
 L<perlunicode/The "Unicode Bug"> for details.)  If there is a
