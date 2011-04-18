@@ -164,8 +164,10 @@ esac
 # plibpth to bypass this check.
 case "$plibpth" in
 '') plibpth=`gcc -print-search-dirs | grep libraries |
-	cut -f2- -d= | tr ':' $trnl | grep -v 'gcc'`
-    plibpth="$plibpth"  # Collapse all entries on one line
+	cut -f2- -d= | tr ':' $trnl | grep -v 'gcc' | sed -e 's:/$::'`
+    set X $plibpth # Collapse all entries on one line
+    shift
+    plibpth="$*"
     ;;
 esac
 
