@@ -19,7 +19,9 @@ parentheses.
 
 =head1 Notice
 
-XXX Any important notices here
+As described in L<perlpolicy>, the release of Perl 5.14.0 marks the
+official end of support for Perl 5.10.  Users of Perl 5.10 or earlier
+should consider upgrading to a more recent release of Perl.
 
 =head1 Core Enhancements
 
@@ -39,14 +41,14 @@ which is a symbol that looks like a bell, and is used in Japanese cell
 phones.  This conflicts with the long-standing Perl usage of having
 C<BELL> mean the ASCII C<BEL> character, U+0007.  In Perl 5.14,
 C<\N{BELL}> will continue to mean U+0007, but its use will generate a
-deprecated warning message, unless such warnings are turned off.  The
+deprecation warning message, unless such warnings are turned off.  The
 new name for U+0007 in Perl is C<ALERT>, which corresponds nicely
 with the existing shorthand sequence for it, C<"\a">.  C<\N{BEL}>
 means U+0007, with no warning given.  The character at U+1F514 will not
-have a name in 5.14, but can be referred to by C<\N{U+1F514}>.  The plan
-is that in Perl 5.16, C<\N{BELL}> will refer to U+1F514, and so all code
-that uses C<\N{BELL}> should convert by then to using C<\N{ALERT}>,
-C<\N{BEL}>, or C<"\a"> instead.
+have a name in 5.14, but can be referred to by C<\N{U+1F514}>. 
+In Perl 5.16, C<\N{BELL}> will refer to U+1F514; all code
+that uses C<\N{BELL}> should be converted to use C<\N{ALERT}>,
+C<\N{BEL}>, or C<"\a"> before upgrading.
 
 =head3 Full functionality for C<use feature 'unicode_strings'>
 
@@ -80,27 +82,26 @@ of code points are given names.  C<\N{...}> now recognizes these.
 =item *
 
 C<\N{}>, C<charnames::vianame>, C<charnames::viacode> now know about every
-character in Unicode.  Previously, they didn't know about the Hangul syllables
+character in Unicode.  In earlier releases of Perl, they didn't know about the Hangul syllables
 nor a number of CJK (Chinese/Japanese/Korean) characters.
 
 =item *
 
-In the past, it was ineffective to override one of Perl's abbreviations
-with your own custom alias.  Now it works.
+It is now possible to override Perl's abbreviations with your own custom aliases.
 
 =item *
 
-You can also create a custom alias of the ordinal of a
+You can now create a custom alias of the ordinal of a
 character, known by C<\N{...}>, C<charnames::vianame()>, and
-C<charnames::viacode()>.  Previously, an alias had to be to an official
-Unicode character name.  This made it impossible to create an alias for
-a code point that had no name, such as those reserved for private
+C<charnames::viacode()>.  Previously, aliases had to be to official
+Unicode character names.  This made it impossible to create an alias for
+unnamed code points, such as those reserved for private
 use.
 
 =item *
 
-A new function, C<charnames::string_vianame()>, has been added.
-This function is a run-time version of C<\N{...}>, returning the string
+The new function C<charnames::string_vianame()>
+is a run-time version of C<\N{...}>, returning the string
 of characters whose Unicode name is its parameter.  It can handle
 Unicode named character sequences, whereas the pre-existing
 C<charnames::vianame()> cannot, as the latter returns a single code
@@ -132,37 +133,41 @@ Unicode-defined operation (such as upper-casing) on such a code point
 will generate a warning.  Attempting to input these using strict rules
 (such as with the C<:encoding('UTF-8')> layer) will continue to fail.
 Prior to this release the handling was very inconsistent, and incorrect
-in places.  Also, the Unicode non-characters, some of which previously were
-erroneously considered illegal in places by Perl, contrary to the Unicode
-standard, are now always legal internally.  But inputting or outputting
-them will work the same as for the non-legal Unicode code points, as the
-Unicode standard says they are illegal for "open interchange".
+in places.  
+
+Unicode non-characters, some of which previously were erroneously
+considered illegal in places by Perl, contrary to the Unicode standard,
+are now always legal internally.  Inputting or outputting them will
+work the same as for the non-legal Unicode code points, as the Unicode
+standard says they are illegal for "open interchange".
 
 =head3 Unicode database files not installed
 
 The Unicode database files are no longer installed with Perl.  This
 doesn't affect any functionality in Perl and saves significant disk
-space.  If you previously were explicitly opening and reading those
-files, you can download them from
+space.  If you need these files, you can download them from
 L<http://www.unicode.org/Public/zipped/6.0.0/>.
 
 =head2 Regular Expressions
 
-=head3 C<(?^...)> construct to signify default modifiers
+=head3 C<(?^...)> construct signifies default modifiers
 
-An ASCII caret (also called a "circumflex accent") C<"^">
-immediately following a C<"(?"> in a regular expression
-now means that the subexpression does not inherit the
-surrounding modifiers such as C</i>, but reverts to the
-Perl defaults.  Any modifiers following the caret override the defaults.
+An ASCII caret  C<"^"> immediately following a C<"(?"> in a regular
+expression now means that the subexpression does not inherit surrounding
+modifiers such as C</i>, but reverts to the Perl defaults.  Any modifiers
+following the caret override the defaults.
 
-The stringification of regular expressions now uses this
-notation.  E.g., before, C<qr/hlagh/i> would be stringified as
-C<(?i-xsm:hlagh)>, but now it's stringified as C<(?^i:hlagh)>.
+Stringification of regular expressions now uses this notation.  E.g.,
+before, C<qr/hlagh/i> would be stringified as C<(?i-xsm:hlagh)>, but
+now it's stringified as C<(?^i:hlagh)>.
 
 The main purpose of this is to allow tests that rely on the
 stringification not to have to change when new modifiers are added.
 See L<perlre/Extended Patterns>.
+
+This change is likely to break code which compares stringified regular
+expressions with fixed strings containing C<?-xism>.
+
 
 =head3 C</d>, C</l>, C</u>, C</a>, and C</aa> modifiers
 
@@ -185,12 +190,17 @@ complements and C<\b> and C<\B> are correspondingly
 affected.  Otherwise, C</a> behaves like the C</u> modifier, in that
 case-insensitive matching uses Unicode semantics.
 
-The C</aa> modifier is like C</a>, except that, in case-insensitive matching, no ASCII character will match a
-non-ASCII character.  For example,
+The C</aa> modifier is like C</a>, except that, in case-insensitive
+matching, no ASCII character will match a non-ASCII character.
+For example,
 
     'k' =~ /\N{KELVIN SIGN}/ai
 
-will match; it won't under C</aa>.
+will match.
+
+    'k' =~ /\N{KELVIN SIGN}/aai
+
+will not match.
 
 See L<perlre/Modifiers> for more detail.
 
@@ -254,7 +264,8 @@ C<delete> on an entry of C<%+> or C<%->.
 =head3 Array and hash container functions accept references
 
 All built-in functions that operate directly on array or hash
-containers now also accept hard references to arrays or hashes:
+containers now also accept unblessed hard references to arrays
+or hashes:
 
   |----------------------------+---------------------------|
   | Traditional syntax         | Terse syntax              |
@@ -289,6 +300,8 @@ For C<keys>, C<values>, C<each>, when overloaded dereferencing is
 present, the overloaded dereference is used instead of dereferencing the
 underlying reftype.  Warnings are issued about assumptions made in
 ambiguous cases.
+
+XXX TODO - fix this once the code is fixed 
 
 =head3 Single term prototype
 
@@ -332,6 +345,10 @@ C<tie>, C<tied> and C<untie> can now be overridden [perl #75902].
 Several changes have been made to the way C<die>, C<warn>, and C<$@>
 behave, in order to make them more reliable and consistent.
 
+=over
+
+=item * 
+
 When an exception is thrown inside an C<eval>, the exception is no
 longer at risk of being clobbered by code running during unwinding
 (e.g., destructors).  Previously, the exception was written into C<$@>
@@ -360,6 +377,8 @@ always emitted as a warning, leaving the surrounding C<$@> untouched.
 In addition to object destructors, this also affects any function call
 performed by XS code using the C<G_KEEPERR> flag.
 
+=item * 
+
 Warnings for C<warn> can now be objects, in the same way as exceptions
 for C<die>.  If an object-based warning gets the default handling,
 of writing to standard error, it is stringified as
@@ -368,11 +387,13 @@ a C<$SIG{__WARN__}> handler will now receive an
 object-based warning as an object, where previously it was passed the
 result of stringifying the object.
 
+=back
+
 =head2 Other Enhancements
 
 =head3 Assignment to C<$0> sets the legacy process name with C<prctl()> on Linux
 
-On Linux the legacy process name is now set with L<prctl(2)>, in
+On Linux the legacy process name is now set with C<prctl(2)>, in
 addition to altering the POSIX name via C<argv[0]> as perl has done
 since version 4.000.  Now system utilities that read the legacy process
 name such as ps, top and killall will recognize the name you set when
@@ -383,7 +404,7 @@ this is a limitation imposed by Linux.
 
 This allows programs that need to have repeatable results not to have to come
 up with their own seed-generating mechanism.  Instead, they can use C<srand()>
-and stash the return value for future use.  Typical is a test program which
+and stash the return value for future use.  One example is a test program which
 has too many combinations to test comprehensively in the time available to it
 each run.  It can test a random subset each time and, should there be a failure,
 log the seed used for that run so that it can later be used to reproduce the
@@ -452,7 +473,7 @@ method support still works as expected:
   open my $fh, ">", $file;
   $fh->autoflush(1);        # IO::File not loaded
 
-=head3 IPv6 support
+=head3 Improved IPv6 support
 
 The C<Socket> module provides new affordances for IPv6,
 including implementations of the C<Socket::getaddrinfo()> and
@@ -487,13 +508,13 @@ See L</Internal Changes>.
 
 =head2 User-defined regular expression properties
 
-In L<perlunicode/"User-Defined Character Properties">, it says you can
+L<perlunicode/"User-Defined Character Properties"> documented that you can
 create custom properties by defining subroutines whose names begin with
 "In" or "Is".  However, Perl did not actually enforce that naming
-restriction, so \p{foo::bar} could call foo::bar() if it existed.  Now this
-convention has been enforced.
+restriction, so \p{foo::bar} could call foo::bar() if it existed.  The documented
+convention is now enforced.
 
-Also, Perl no longer allows a tainted regular expression to invoke a
+Also, Perl no longer allows tainted regular expressions to invoke a
 user-defined property.  It simply dies instead [perl #82616].
 
 =head1 Incompatible Changes
@@ -506,23 +527,25 @@ In addition to the sections that follow, see L</C API Changes>.
 
 =head3 \400-\777
 
-Use of C<\400>-C<\777> in regexes in certain circumstances has given
-different, anomalous behavior than their use in all other
-double-quote-like contexts.   Since 5.10.1, a deprecated warning message
-has been raised when this happens.  Now, all double-quote-like contexts
-have the same behavior, namely to be equivalent to C<\x{100}> -
-C<\x{1FF}>, with no deprecation warning.  Use of these values in the
-command line option C<"-0"> retains the current meaning to slurp input
-files whole; previously, this was documented only for C<"-0777">.  It is
-recommended, however, because of various ambiguities, to use the new
-C<\o{...}> construct to represent characters in octal.
+In certain circumstances, C<\400>-C<\777> in regexes have behaved
+differently than they behave in all other double-quote-like contexts.
+Since 5.10.1, Perl has issued a deprecation warning when this happens.
+Now, these literals behave the same in all double-quote-like contexts,
+namely to be equivalent to C<\x{100}> - C<\x{1FF}>, with no deprecation
+warning.
+
+Use of C<\400>-C<\777> in the command line option C<"-0"> retain their
+conventional meaning.  They slurp whole input files; previously, this
+was documented only for C<"-0777">.
+
+Because of various ambiguities, you should use the new
+C<\o{...}> construct to represent characters in octal instead.
 
 =head3 Most C<\p{}> properties are now immune to case-insensitive matching
 
 For most Unicode properties, it doesn't make sense to have them match
-differently under C</i> case-insensitive matching than not.  And doing
-so leads to unexpected results and potential security holes.  For
-example
+differently under C</i> case-insensitive matching.  Doing so can lead
+to unexpected results and potential security holes.  For example
 
  m/\p{ASCII_Hex_Digit}+/i
 
@@ -535,10 +558,10 @@ as C<m/\p{Uppercase}/i> and C<m/\p{Lowercase}/i>, both of which match
 the exact same code points, namely those matched by C<m/\p{Cased}/i>.
 Details are in L<perlrecharclass/Unicode Properties>.
 
-User-defined property handlers that need to match differently under
-C</i> must change to read the new boolean parameter passed to them which is
-non-zero if case-insensitive matching is in effect or 0 otherwise.  See
-L<perluniprops/User-Defined Character Properties>.
+User-defined property handlers that need to match differently under C</i>
+must be changed to read the new boolean parameter passed to them which
+is non-zero if case-insensitive matching is in effect or 0 otherwise.
+See L<perluniprops/User-Defined Character Properties>.
 
 =head3 \p{} implies Unicode semantics
 
@@ -581,17 +604,16 @@ And then use C<$modifiers> instead of C<-xism>.
 
 =head3 Run-time code blocks in regular expressions inherit pragmata
 
-Code blocks in regular expressions (C<(?{...})> and C<(??{...})>) used not
-to inherit any pragmata (strict, warnings, etc.) if the regular expression
+Code blocks in regular expressions (C<(?{...})> and C<(??{...})>) previously
+did not inherit pragmata (strict, warnings, etc.) if the regular expression
 was compiled at run time as happens in cases like these two:
 
   use re 'eval';
   $foo =~ $bar; # when $bar contains (?{...})
   $foo =~ /$bar(?{ $finished = 1 })/;
 
-This was a bug, which has now been fixed.  But
-it has the potential to break
-any code that was relying on it.
+This bug has now been fixed, but code which relied on the buggy behavior
+may need to be fixed to account for the correct behavior.
 
 =head2 Stashes and Package Variables
 
@@ -601,14 +623,14 @@ In the following:
 
     tie @a, ...;
     {
-	local @a;
-	# here, @a is a now a new, untied array
+	    local @a;
+	    # here, @a is a now a new, untied array
     }
     # here, @a refers again to the old, tied array
 
-The new local array used to be made tied too, which was fairly pointless,
-and has now been fixed.  This fix could however potentially cause a change
-in behaviour of some code.
+Earlier versions of perl incorrectly tied the new local array.  This has
+now been fixed.  This fix could however potentially cause a change in
+behaviour of some code.
 
 =head3 Stashes are now always defined
 
@@ -617,7 +639,7 @@ defined in that package.
 
 This is a side effect of removing a special case kludge in the tokeniser,
 added for 5.10.0, to hide side effects of changes to the internal storage of
-hashes that drastically reduce their memory usage overhead.
+hashes.  The fix drastically reduces hashes' memory overhead.
 
 Calling defined on a stash has been deprecated since 5.6.0, warned on
 lexicals since 5.6.0, and warned for stashes (and other package
@@ -643,10 +665,9 @@ If you assign a typeglob to a scalar variable:
     $glob = *foo;
 
 the glob that is copied to C<$glob> is marked with a special flag
-indicating that the glob is just a copy.  This
-allows subsequent assignments to C<$glob> to
-overwrite the glob.  The original glob, however, is
-immutable.
+indicating that the glob is just a copy.  This allows subsequent
+assignments to C<$glob> to overwrite the glob.  The original glob,
+however, is immutable.
 
 Some Perl operators did not distinguish between these two types of globs.
 This would result in strange behaviour in edge cases: C<untie $scalar>
@@ -673,7 +694,7 @@ The C<*$glob> on the second line returns a new immutable glob. That new
 glob is made an alias to C<*bar>.  Then it is discarded. So the second
 assignment has no effect.
 
-See L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=77810> for even
+See L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=77810> for
 more detail.
 
 =head3 Magic variables outside the main package
@@ -890,13 +911,13 @@ In regular expressions, a literal C<"{"> immediately following a C<"\b">
 (not in a bracketed character class) or a C<"\B{"> is now deprecated
 to allow for its future use by Perl itself.
 
-=head2 Deprecation warning added for deprecated-in-core .pl libs
+=head2 Deprecation warning added for deprecated-in-core Perl 4-era .pl libraries
 
 This is a mandatory warning, not obeying -X or lexical warning bits.
 The warning is modelled on that supplied by deprecate.pm for
 deprecated-in-core .pm libraries.  It points to the specific CPAN
-distribution that contains the .pl libraries.  The CPAN version, of
-course, does not generate the warning.
+distribution that contains the .pl libraries.  The CPAN versions, of
+course, do not generate the warning.
 
 =head2 List assignment to C<$[>
 
@@ -917,13 +938,13 @@ parentheses, like this:
 
     for $x (qw(a b c)) { ... }
 
-=head2 C<\N{BELL}> is deprecated
+=head2 C<\N{BELL}>
 
 This is because Unicode is using that name for a different character.
 See L</Unicode Version 6.0 is now supported (mostly)> for more
 explanation.
 
-=head2 C<?PATTERN?> is deprecated
+=head2 C<?PATTERN?>
 
 C<?PATTERN?> (without the initial m) has been deprecated and now produces
 a warning.  This is to allow future use of C<?> in new operators.
@@ -946,7 +967,7 @@ function is used on a handle without an explicit C<*>.
 
 This feature is being deprecated due to its many issues, as documented in
 L<perlunicode/User-Defined Case Mappings (for serious hackers only)>.
-It is planned to remove this feature in Perl 5.16.  Instead use the CPAN module
+This feature will be removed in Perl 5.16.  Instead use the CPAN module
 L<Unicode::Casing>, which provides improved functionality.
 
 =head2 Deprecated modules
@@ -979,8 +1000,8 @@ just install C<Task::Deprecations::5_14>.
 
 =item L<Devel::DProf>
 
-We strongly recommend that you install and used L<Devel::NYTProf> in
-preference, as it offers significantly improved profiling and reporting.
+We strongly recommend that you install and used L<Devel::NYTProf> instead
+of this module, as it offers significantly improved profiling and reporting.
 
 =back
 
@@ -1015,12 +1036,12 @@ the regex to utf8 is necessary but that isn't known when the compilation begins.
 
 =head2 String appending is 100 times faster
 
-When doing a lot of string appending, perl could end up allocating a lot more
-memory than needed in a very inefficient way, if perl was configured to use the
-system's C<malloc> implementation instead of its own.
+When doing a lot of string appending, perls built to use the system's
+C<malloc> could end up allocating a lot more memory than needed in a
+very inefficient way.
 
-C<sv_grow>, which is what's being used to allocate more memory if necessary
-when appending to a string, has now been taught how to round up the memory
+C<sv_grow>, the function used to allocate more memory if necessary
+when appending to a string, has been taught how to round up the memory
 it requests to a certain geometric progression, making it much faster on
 certain platforms and configurations.  On Win32, it's now about 100 times
 faster.
@@ -1028,29 +1049,20 @@ faster.
 =head2 Eliminate C<PL_*> accessor functions under ithreads
 
 When C<MULTIPLICITY> was first developed, and interpreter state moved into
-an interpreter struct, thread and interpreter local C<PL_*> variables were
-defined as macros that called accessor functions, returning the address of
-the value, outside of the perl core.  The intent was to allow members
-within the interpreter struct to change size without breaking binary
-compatibility, so that bug fixes could be merged to a maintenance branch
-that necessitated such a size change.
-
-However, some non-core code defines C<PERL_CORE>, sometimes intentionally
-to bypass this mechanism for speed reasons, sometimes for other reasons but
-with the inadvertent side effect of bypassing this mechanism.  As some of
-this code is widespread in production use, the result is that the core
-I<can't> change the size of members of the interpreter struct, as it will
-break such modules compiled against a previous release on that maintenance
-branch.  The upshot is that this mechanism is redundant, and well-behaved
-code is penalised by it.  Hence it can and should be removed (and has
-been).
+an interpreter struct, thread and interpreter local C<PL_*> variables
+were defined as macros that called accessor functions, returning the
+address of the value, outside of the perl core.  The intent was to allow
+members within the interpreter struct to change size without breaking
+binary compatibility, so that bug fixes could be merged to a maintenance
+branch that necessitated such a size change.  This mechanism was redundant
+and penalised well-behaved code. It has been removed.
 
 =head2 Freeing weak references
 
-When an object has many weak references to it, freeing that object
+When there are many weak references to an object, freeing that object
 can under some some circumstances take O(N^2) time to free (where N is the
-number of references).  The number of circumstances has been reduced
-[perl #75254]
+number of references).  The number of circumstances in which this can happen
+has been reduced [perl #75254]
 
 =head2 Lexical array and hash assignments
 
@@ -1094,10 +1106,9 @@ uses Exporter but doesn't use this functionality.
 
 =head2 Memory savings for weak references
 
-For weak references, the common case of just a single weak reference per
-referent has been optimised to reduce the
-storage required.  In this case it
-saves the equivalent of one small Perl array per referent.
+For weak references, the common case of just a single weak reference
+per referent has been optimised to reduce the storage required.  In this
+case it saves the equivalent of one small Perl array per referent.
 
 =head2 C<%+> and C<%-> use less memory
 
@@ -1167,8 +1178,8 @@ binaries like F<curl> or F<wget>.
 
 =item *
 
-C<JSON::PP> 2.27105 has been added as a dual-life module, for the sake of
-reading F<META.json> files in CPAN distributions.
+C<JSON::PP> 2.27105 has been added as a dual-life module to allow CPAN
+clients to read F<META.json> files in CPAN distributions.
 
 =item *
 
@@ -1930,7 +1941,7 @@ backtrace [perl #72340].
 
 C<Socket> has been upgraded from version 1.87 to 1.94.
 
-See L</IPv6 support>, above.
+See L</Improved IPv6 support>, above.
 
 =item *
 
@@ -2164,8 +2175,9 @@ C<XS::Typemap> has been upgraded from version 0.03 to 0.05.
 
 =head2 Removed Modules and Pragmata
 
-The following modules have been removed from the core distribution, and if
-needed should be installed from CPAN instead.
+As promised in Perl 5.12.0's release notes, the following modules have
+been removed from the core distribution, and if needed should be installed
+from CPAN instead.
 
 =over
 
@@ -2214,24 +2226,22 @@ See L</perlhack and perlrepository revamp>, below.
 
 =head3 L<perlmodlib> is now complete
 
-The perlmodlib page that came with Perl 5.12.0 was missing a lot of
+The perlmodlib page that came with Perl 5.12.0 was missing a number of
 modules, due to a bug in the script that generates the list.  This has been
 fixed [perl #74332] (5.12.1).
 
-=head3 Replace wrong tr/// table in L<perlebcdic>
+=head3 Replace incorrect tr/// table in L<perlebcdic>
 
 L<perlebcdic> contains a helpful table to use in tr/// to convert
-between EBCDIC and Latin1/ASCII.  Unfortunately, the table was the
-inverse of the one it describes, though the code that used the table
-worked correctly for the specific example given.
+between EBCDIC and Latin1/ASCII.  The table was the inverse of the one
+it describes, though the code that used the table worked correctly for
+the specific example given.
 
-The table has been changed to its inverse, and the sample code changed
-to correspond, as this is easier for the person trying to follow the
-instructions since deriving the old table is somewhat more complicated.
+The table has been corrected, and the sample code changed to correspond.
 
-The table has also been changed to hex from octal, as that is more the norm
-these days, and the recipes in the pod altered to print out leading
-zeros to make all the values the same length.
+The table has also been changed to hex from octal and the recipes in the
+pod have been altered to print out leading zeros to make all the values
+the same length.
 
 =head3 Tricks for user-defined casing
 
@@ -2240,7 +2250,7 @@ and otherwise tweak the way perl handles upper-, lower- and other-case
 conversions on Unicode data, and how to provide scoped changes to alter
 one's own code's behaviour without stomping on anybody else.
 
-=head3 INSTALL explicitly states the requirement for C89
+=head3 INSTALL explicitly states that Perl requires a C89 compiler
 
 This was already true but it's now Officially Stated For The Record
 (5.12.2).
@@ -2334,20 +2344,16 @@ is now much more straightforward and clear.
 
 =head3 perlhack and perlrepository revamp
 
-The L<perlhack> and perlrepository documents have been heavily edited and
-split up into several new documents.
-
 The L<perlhack> document is now much shorter, and focuses on the Perl 5
-development process and submitting patches
-to Perl.  The technical content has
-been moved to several new documents, L<perlsource>, L<perlinterp>,
-L<perlhacktut>, and L<perlhacktips>.  This technical content has only been
-lightly edited.
+development process and submitting patches to Perl.  The technical content
+has been moved to several new documents, L<perlsource>, L<perlinterp>,
+L<perlhacktut>, and L<perlhacktips>.  This technical content has only
+been lightly edited.
 
-The perlrepository document has been renamed to
-L<perlgit>.  This new document is just a how-to
-on using git with the Perl source code.  Any other content
-that used to be in perlrepository has been moved to perlhack.
+The perlrepository document has been renamed to L<perlgit>.  This new
+document is just a how-to on using git with the Perl source code.
+Any other content that used to be in perlrepository has been moved
+to L<perlhack>.
 
 =head3 Time::Piece examples
 
@@ -2560,9 +2566,9 @@ above.
 
 =item *
 
-CCINCDIR and CCLIBDIR for the mingw64
-cross-compiler are now correctly under
-$(CCHOME)\mingw\include and \lib rather than immediately below $(CCHOME).
+CCINCDIR and CCLIBDIR for the mingw64 cross-compiler are now correctly
+under $(CCHOME)\mingw\include and \lib rather than immediately below
+$(CCHOME).
 
 This means the 'incpath', 'libpth', 'ldflags', 'lddlflags' and
 'ldflags_nolargefiles' values in Config.pm and Config_heavy.pl are now
@@ -2628,10 +2634,9 @@ Perl now builds on AIX 4.2 (5.12.1).
 
 =item Apollo DomainOS
 
-The last vestiges of support for this platform have been excised from the
-Perl distribution.  It was officially discontinued
-in version 5.12.0.  It had
-not worked for years before that.
+The last vestiges of support for this platform have been excised from
+the Perl distribution.  It was officially discontinued in version 5.12.0.
+It had not worked for years before that.
 
 =item MacOS Classic
 
@@ -2762,7 +2767,7 @@ default.
 
 =back
 
-=head3 Recent OpenBSDs now use perl's malloc
+=head3 OpenBSD
 
 =over
 
@@ -4456,10 +4461,10 @@ This was also a perl 5.12.0 changed that missed the perldelta.
 
 =head1 Obituary
 
-Randy Kobes, creator of the kobesearch alternative to search.cpan.org and
-contributor/maintainer to several core Perl toolchain modules, passed away
-on September 18, 2010 after a battle with lung cancer.  His contributions
-to the Perl community will be missed.
+Randy Kobes, creator of http://kobesearch.cpan.org/ and
+contributor/maintainer to several core Perl toolchain modules, passed
+away on September 18, 2010 after a battle with lung cancer.  The community
+was richer for his involvement. He will be missed.
 
 =head1 Acknowledgements
 
