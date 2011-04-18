@@ -35,15 +35,7 @@ case "$osvers" in
 		d_dlopen=$define
 		d_dlerror=$define
 		cccdlflags="-DPIC -fPIC $cccdlflags"
-		lddlflags="-shared $lddlflags"
-		# gcc 4.6 doesn't support --whole-archive, but check for it
-		# if the user chooses a new compiler later, this is pointless
-		echo 'int f(void) { return 0; }' >try.c
-		if ${cc:-cc} $cccdlflags -c try.c -otry.o 2>&1 &&
-                   ${cc:-cc} --whole-archive $lddlflags try.o -otry.so 2>&1 ; then
-		    lddlflags="--whole-archive $lddlflags"
-		fi
-		rm try.c try.o try.so 2>/dev/null
+		lddlflags="--whole-archive -shared $lddlflags"
 		rpathflag="-Wl,-rpath,"
 		case "$osvers" in
 		1.[0-5]*)
