@@ -14,7 +14,7 @@
 -4,			4 5 6 7,	0 1 2 3
 EOF
 
-print "1..", 13 + 2*@tests, "\n";
+print "1..", 14 + 2*@tests, "\n";
 die "blech" unless @tests;
 
 @x = (1,2,3);
@@ -44,8 +44,10 @@ if (join(':',@x) eq '1:2:3:1:2:3:4') {print "ok 6\n";} else {print "not ok 6\n";
 # test autovivification
 push @$undef1, 1, 2, 3;
 if (join(':',@$undef1) eq '1:2:3') {print "ok 7\n";} else {print "not ok 7\n";}
-push $undef2, 1, 2, 3;
-if (join(':',@$undef2) eq '1:2:3') {print "ok 8\n";} else {print "not ok 8\n";}
+
+# test push on undef (error)
+eval { push $undef2, 1, 2, 3 };
+if ($@ =~ /Not an ARRAY/) {print "ok 8\n";} else {print "not ok 8\n";}
 
 # test constant
 use constant CONST_ARRAYREF => [qw/a b c/];
@@ -60,7 +62,10 @@ $hashref = { };
 eval { push $hashref, 0, 1, 2, 3 };
 if ( $@ && $@ =~ /Not an ARRAY reference/ ) {print "ok 11\n"} else {print "not ok 11 # \$\@ = $@\n"}
 
-$test = 12;
+eval { push bless([]), 0, 1, 2, 3 };
+if ( $@ && $@ =~ /Not an unblessed ARRAY reference/ ) {print "ok 12\n"} else {print "not ok 12 # \$\@ = $@\n"}
+
+$test = 13;
 
 # test context
 {

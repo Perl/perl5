@@ -1451,11 +1451,11 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* lslice */
 	Perl_ck_fun,		/* anonlist */
 	Perl_ck_fun,		/* anonhash */
-	Perl_ck_push,		/* splice */
-	Perl_ck_push,		/* push */
+	Perl_ck_fun,		/* splice */
+	Perl_ck_fun,		/* push */
 	Perl_ck_shift,		/* pop */
 	Perl_ck_shift,		/* shift */
-	Perl_ck_push,		/* unshift */
+	Perl_ck_fun,		/* unshift */
 	Perl_ck_sort,		/* sort */
 	Perl_ck_fun,		/* reverse */
 	Perl_ck_grep,		/* grepstart */

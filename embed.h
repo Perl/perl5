@@ -969,7 +969,6 @@
 #define ck_method(a)		Perl_ck_method(aTHX_ a)
 #define ck_null(a)		Perl_ck_null(aTHX_ a)
 #define ck_open(a)		Perl_ck_open(aTHX_ a)
-#define ck_push(a)		Perl_ck_push(aTHX_ a)
 #define ck_readline(a)		Perl_ck_readline(aTHX_ a)
 #define ck_repeat(a)		Perl_ck_repeat(aTHX_ a)
 #define ck_require(a)		Perl_ck_require(aTHX_ a)

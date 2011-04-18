@@ -93,7 +93,7 @@ splice @Foo::ISA, 0, 0, 'Bar';
 print "not " if !Foo->isa('Bar');
 print "ok 20\n";
 
-# Test vivification
-splice( $new_arrayref, 0, 0, 1, 2, 3 );
-print "not " unless j(@$new_arrayref) eq j(1,2,3);
+# Test undef first arg
+eval { splice( $new_arrayref, 0, 0, 1, 2, 3 ) };
+print "not " unless $@ && $@ =~ /Not an ARRAY/;
 print "ok 21\n";

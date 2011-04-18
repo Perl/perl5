@@ -3050,6 +3050,12 @@ find out what kind of ref it really was.  See L<perlref>.
 a reference to something else instead.  You can use the ref() function
 to find out what kind of ref it really was.  See L<perlref>.
 
+=item Not an unblessed ARRAY reference
+
+(F) You passed a reference to a blessed array to C<push>, C<shift> or
+another array function.  These only accept unblessed array references
+or arrays beginning explicitly with C<@>.
+
 =item Not a SCALAR reference
 
 (F) Perl was trying to evaluate a reference to a scalar value, but found
