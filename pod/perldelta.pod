@@ -32,7 +32,7 @@ should consider upgrading to a more recent release of Perl.
 Perl comes with the Unicode 6.0 data base updated with
 L<Corrigendum #8|http://www.unicode.org/versions/corrigendum8.html>,
 with one exception noted below.
-See L<http://unicode.org/versions/Unicode6.0.0> for details on the new
+See L<http://unicode.org/versions/Unicode6.0.0/> for details on the new
 release.  Perl does not support any Unicode provisional properties,
 including the new ones for this release.
 
@@ -57,8 +57,8 @@ This release provides full functionality for C<use feature
 regular expressions compiled (even if executed outside its scope) have
 Unicode semantics.  See L<feature/"the 'unicode_strings' feature">.
 
-This feature avoids most forms of the "Unicode Bug" (See
-L<perlunicode/The "Unicode Bug"> for details.)  If there is a
+This feature avoids most forms of the "Unicode Bug" (see
+L<perlunicode/The "Unicode Bug"> for details).  If there is a
 possibility that your code will process Unicode strings, you are
 B<strongly> encouraged to use this subpragma to avoid nasty surprises.
 
@@ -81,7 +81,7 @@ of code points are given names.  C<\N{...}> now recognizes these.
 
 =item *
 
-C<\N{}>, C<charnames::vianame>, C<charnames::viacode> now know about every
+C<\N{}>, C<charnames::vianame> and C<charnames::viacode> now know about every
 character in Unicode.  In earlier releases of Perl, they didn't know about the Hangul syllables
 nor a number of CJK (Chinese/Japanese/Korean) characters.
 
@@ -115,7 +115,7 @@ See L<charnames> for details on all these changes.
 
 Three new warnings subcategories of "utf8" have been added.  These
 allow you to turn off some "utf8" warnings, while allowing
-others warnings to remain on.  The three categories are:
+other warnings to remain on.  The three categories are:
 C<surrogate> when UTF-16 surrogates are encountered;
 C<nonchar> when Unicode non-character code points are encountered;
 and C<non_unicode> when code points that are above the legal Unicode
@@ -152,7 +152,7 @@ L<http://www.unicode.org/Public/zipped/6.0.0/>.
 
 =head3 C<(?^...)> construct signifies default modifiers
 
-An ASCII caret  C<"^"> immediately following a C<"(?"> in a regular
+An ASCII caret C<"^"> immediately following a C<"(?"> in a regular
 expression now means that the subexpression does not inherit surrounding
 modifiers such as C</i>, but reverts to the Perl defaults.  Any modifiers
 following the caret override the defaults.
@@ -222,7 +222,7 @@ This is particularly useful with C<map>.  See L<perlop> for more examples.
 It is now safe to use regular expressions within C<(?{...})> and
 C<(??{...})> code blocks inside regular expressions.
 
-These block are still experimental, however, and still have problems with
+These blocks are still experimental, however, and still have problems with
 lexical (C<my>) variables and abnormal exiting.
 
 =head3 C<use re '/flags';>
@@ -431,7 +431,7 @@ L<perlmod/"BEGIN, UNITCHECK, CHECK, INIT and END">.
 The syntax C<-dI<B<:>foo>> was extended in 5.6.1 to make C<-dI<:fooB<=bar>>>
 equivalent to C<-MDevel::foo=bar>, which expands
 internally to C<use Devel::foo 'bar';>.
-F<perl> now allows prefixing the module name with C<->, with the same
+Perl now allows prefixing the module name with C<->, with the same
 semantics as C<-M>, I<i.e.>
 
 =over 4
