@@ -404,4 +404,7 @@ typedef enum opcode {
 #define OP_IS_FILETEST_ACCESS(op)	\
 	((op) >= OP_FTRREAD && (op) <= OP_FTEEXEC)
 
+#define OP_IS_NUMCOMPARE(op)	\
+	((op) >= OP_LT && (op) <= OP_I_NCMP)
+
 /* ex: set ro: */
