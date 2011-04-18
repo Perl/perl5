@@ -225,7 +225,18 @@ sub pairs (@) {
 
 my @charsets = qw(d u a aa);
 my $current_locale = POSIX::setlocale( &POSIX::LC_ALL, "C") // "";
-push @charsets, 'l' if $current_locale eq 'C';
+if ($current_locale eq 'C') {
+    use locale;
+
+    # Some locale implementations don't have the 128-255 characters all
+    # mean nothing.  Skip the locale tests in that situation.
+    for my $i (128 .. 255) {
+        my $char = chr($i);
+        goto bad_locale if uc($char) ne $char || lc($char) ne $char;
+    }
+    push @charsets, 'l';
+bad_locale:
+}
 
 # Finally ready to do the tests
 my $count=0;
