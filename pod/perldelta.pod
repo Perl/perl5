@@ -1389,6 +1389,13 @@ C<Compress::Raw::Zlib> has been upgraded from version 2.024 to 2.033.
 
 =item *
 
+C<constant> has been upgraded from version 1.20 to 1.21.
+
+Unicode constants work once more.  They have been broken since perl 5.10.0
+[CPAN RT #67525].
+
+=item *
+
 C<CPAN> has been upgraded from version 1.94_56 to 1.9600.
 
 Major highlights:
