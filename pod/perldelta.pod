@@ -14,7 +14,7 @@ L<perl5120delta>, which describes differences between 5.10.0 and
 5.12.0.
 
 Some of the bug fixes in this release have been backported to subsequent
-releases of 5.12.x. Those are indicated with the 5.12.x version in
+releases of 5.12.x.  Those are indicated with the 5.12.x version in
 parentheses.
 
 =head1 Notice
@@ -171,7 +171,7 @@ expressions with fixed strings containing C<?-xism>.
 
 =head3 C</d>, C</l>, C</u>, C</a>, and C</aa> modifiers
 
-Four new regular expression modifiers have been added. These are mutually
+Four new regular expression modifiers have been added.  These are mutually
 exclusive; one only can be turned on at a time.
 
 The C</l> modifier says to compile the regular expression as if it were
@@ -333,7 +333,7 @@ in addition to the already supported C<0x...> and C<0b...>
 syntax [perl #76296].
 
 C, Ruby, Python and PHP already supported this syntax, and it makes
-Perl more internally consistent. A round-trip with C<eval sprintf
+Perl more internally consistent.  A round-trip with C<eval sprintf
 "%#X", 0x10> now returns C<16>, the way C<eval sprintf "%#x", 0x10> does.
 
 =head3 Overridable tie functions
@@ -422,7 +422,7 @@ So, for example, on any modern machine, C<sprintf('%hhd', 257)> returns '1'.
 =head3 New global variable C<${^GLOBAL_PHASE}>
 
 A new global variable, C<${^GLOBAL_PHASE}>, has been added to allow
-introspection of the current phase of the perl interpreter. It's explained in
+introspection of the current phase of the perl interpreter.  It's explained in
 detail in L<perlvar/"${^GLOBAL_PHASE}"> and
 L<perlmod/"BEGIN, UNITCHECK, CHECK, INIT and END">.
 
@@ -652,9 +652,9 @@ that an empty C<%hash> always returns false in a scalar context.
 =head3 Clearing stashes
 
 Stash list assignment C<%foo:: = ()> used to make the stash anonymous
-temporarily while it was being emptied. Consequently, any of its
+temporarily while it was being emptied.  Consequently, any of its
 subroutines referenced elsewhere would become anonymous (showing up as
-"(unknown)" in C<caller>). Now they retain their package names, such that
+"(unknown)" in C<caller>).  Now they retain their package names, such that
 C<caller> will return the original sub name if there is still a reference
 to its typeglob, or "foo::__ANON__" otherwise [perl #79208].
 
@@ -690,8 +690,8 @@ following code, for instance:
     $glob = *foo;
     *$glob = *bar;
 
-The C<*$glob> on the second line returns a new immutable glob. That new
-glob is made an alias to C<*bar>.  Then it is discarded. So the second
+The C<*$glob> on the second line returns a new immutable glob.  That new
+glob is made an alias to C<*bar>.  Then it is discarded.  So the second
 assignment has no effect.
 
 See L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=77810> for
@@ -736,7 +736,7 @@ never been guaranteed and is subject to change in future Perl versions.
 =head3 C<given> return values
 
 C<given> blocks now return the last evaluated
-expression, or an empty list if the block was exited by C<break>. Thus you
+expression, or an empty list if the block was exited by C<break>.  Thus you
 can now write:
 
     my $type = do {
@@ -994,7 +994,7 @@ L<Unicode::Casing>, which provides improved functionality.
 =head2 Deprecated modules
 
 The following modules will be removed from the core distribution in a
-future release, and should be installed from CPAN instead. Distributions
+future release, and should be installed from CPAN instead.  Distributions
 on CPAN which require these should add them to their prerequisites.  The
 core versions of these modules will issue a deprecation warning.
 
@@ -1041,7 +1041,7 @@ of how to recreate such issues.
 =head2 Optimisation of shift; and pop; calls without arguments
 
 Two fewer OPs are used for shift and pop calls with no argument (with
-implicit C<@_>). This change makes C<shift;> 5% faster than C<shift @_;>
+implicit C<@_>).  This change makes C<shift;> 5% faster than C<shift @_;>
 on non-threaded perls and 25% faster on threaded.
 
 =head2 Optimisation of regexp engine string comparison work
@@ -1076,7 +1076,7 @@ address of the value, outside of the perl core.  The intent was to allow
 members within the interpreter struct to change size without breaking
 binary compatibility, so that bug fixes could be merged to a maintenance
 branch that necessitated such a size change.  This mechanism was redundant
-and penalised well-behaved code. It has been removed.
+and penalised well-behaved code.  It has been removed.
 
 =head2 Freeing weak references
 
@@ -1464,7 +1464,7 @@ C<CPANPLUS::Dist::Build> has been upgraded from version 0.46 to 0.54.
 
 C<Data::Dumper> has been upgraded from version 2.125 to 2.130_02.
 
-The indentation used to be off when C<$Data::Dumper::Terse> was set. This
+The indentation used to be off when C<$Data::Dumper::Terse> was set.  This
 has been fixed [perl #73604].
 
 This upgrade also fixes a crash when using custom sort functions that might
@@ -1872,7 +1872,7 @@ C<overload> has been upgraded from 1.10 to 1.13.
 C<overload::Method> can now handle subroutines that are themselves blessed
 into overloaded classes [perl #71998].
 
-The documentation has greatly improved. See L</Documentation> below.
+The documentation has greatly improved.  See L</Documentation> below.
 
 =item *
 
@@ -2178,7 +2178,7 @@ C<VMS::DCLsym> has been upgraded from version 1.03 to 1.05.
 Two bugs have been fixed [perl #84086]:
 
 The symbol table name was lost when tying a hash, due to a thinko in
-C<TIEHASH>. The result was that all tied hashes interacted with the
+C<TIEHASH>.  The result was that all tied hashes interacted with the
 local symbol table.
 
 Unless a symbol table name had been explicitly specified in the call
@@ -2211,15 +2211,15 @@ from CPAN instead.
 
 =item *
 
-C<Class::ISA> has been removed from the Perl core. Prior version was 0.36.
+C<Class::ISA> has been removed from the Perl core.  Prior version was 0.36.
 
 =item *
 
-C<Pod::Plainer> has been removed from the Perl core. Prior version was 1.02.
+C<Pod::Plainer> has been removed from the Perl core.  Prior version was 1.02.
 
 =item *
 
-C<Switch> has been removed from the Perl core. Prior version was 2.16.
+C<Switch> has been removed from the Perl core.  Prior version was 2.16.
 
 =back
 
@@ -2515,7 +2515,7 @@ of the constant may not be known at the time the program is written
 Previously, if none of the C<gethostbyaddr>, C<gethostbyname> and
 C<gethostent> functions were implemented on a given platform, they would
 all die with the message 'Unsupported socket function "gethostent" called',
-with analogous messages for C<getnet*> and C<getserv*>. This has been
+with analogous messages for C<getnet*> and C<getserv*>.  This has been
 corrected.
 
 =item *
@@ -2728,7 +2728,7 @@ Updated build hints file
 
 =item * 
 
-FreeBSD 7 no longer contains F</usr/bin/objformat>. At build time,
+FreeBSD 7 no longer contains F</usr/bin/objformat>.  At build time,
 Perl now skips the F<objformat> check for versions 7 and higher and
 assumes ELF (5.12.1).
 
@@ -3137,7 +3137,7 @@ functions have been added to the API.
 They allow extension authors to find and remove magic attached to
 scalars based on both the magic type and the magic virtual table, similar to how
 C<sv_magicext()> attaches magic of a certain type and with a given virtual table
-to a scalar. This eliminates the need for extensions to walk the list of
+to a scalar.  This eliminates the need for extensions to walk the list of
 C<MAGIC> pointers of an C<SV> to find the magic that belongs to them.
 
 =head3 C<find_rundefsv>
@@ -3237,7 +3237,7 @@ API.
 
 =head3 Calling conventions for C<newFOROP> and C<newWHILEOP>
 
-The way the parser handles labels has been cleaned up and refactored. As a
+The way the parser handles labels has been cleaned up and refactored.  As a
 result, the C<newFOROP()> constructor function no longer takes a parameter
 stating what label is to go in the state op.
 
@@ -3724,7 +3724,7 @@ means the following code will no longer crash:
 
 =item *
 
-Assigning a glob to a PVLV used to convert it to a plain string. Now it
+Assigning a glob to a PVLV used to convert it to a plain string.  Now it
 works correctly, and a PVLV can hold a glob.  This would happen when a
 nonexistent hash or array element was passed to a subroutine:
 
@@ -3755,7 +3755,7 @@ crash.  This would affect code like this:
     local $@; # boom
   }
 
-Now the glob entries are cleared before any destructors are called. This
+Now the glob entries are cleared before any destructors are called.  This
 also means that destructors can vivify entries in the glob.  So perl tries
 again and, if the entries are re-created too many times, dies with a
 'panic: gp_free...' error message.
@@ -3862,7 +3862,7 @@ Naming a deprecated character in \N{...} no longer leaks memory.
 
 =item *
 
-We fixed a bug that could cause \N{} constructs followed by a single . to
+We fixed a bug that could cause \N{} constructs followed by a single .  to
 be parsed incorrectly [perl #74978] (5.12.1).
 
 =item *
@@ -3947,8 +3947,8 @@ utf8::is_utf8 now respects get-magic (e.g. $1) (5.12.1).
 
 Non-commutative binary operators used to swap their operands if the same
 tied scalar was used for both operands and returned a different value for
-each FETCH. For instance, if C<$t> returned 2 the first time and 3 the
-second, then C<$t/$t> would evaluate to 1.5. This has been fixed
+each FETCH.  For instance, if C<$t> returned 2 the first time and 3 the
+second, then C<$t/$t> would evaluate to 1.5.  This has been fixed
 [perl #87708].
 
 =item *
@@ -4006,7 +4006,7 @@ process ID to kill [perl #75812].
 
 =item *
 
-C<$AUTOLOAD> used to remain tainted forever if it ever became tainted. Now
+C<$AUTOLOAD> used to remain tainted forever if it ever became tainted.  Now
 it is correctly untainted if an autoloaded method is called and the method
 name was not tainted.
 
@@ -4267,7 +4267,7 @@ crash [perl #78674].
 =item *
 
 Calling C<< ->import >> on a class lacking an import method could corrupt
-the stack, resulting in strange behaviour. For instance,
+the stack, resulting in strange behaviour.  For instance,
 
   push @a, "foo", $b = bar->import;
 
@@ -4280,7 +4280,7 @@ The C<recv> function could crash when called with the MSG_TRUNC flag
 
 =item *
 
-C<formline> no longer crashes when passed a tainted format picture. It also
+C<formline> no longer crashes when passed a tainted format picture.  It also
 taints C<$^A> now if its arguments are tainted [perl #79138].
 
 =item *
@@ -4353,7 +4353,7 @@ C<G_KEEPERR> flag is present [perl #3719].
 
 The XS multicall API no longer causes subroutines to lose reference counts
 if called via the multicall interface from within those very subroutines.
-This affects modules like List::Util. Calling one of its functions with an
+This affects modules like List::Util.  Calling one of its functions with an
 active subroutine as the first argument could cause a crash [perl #78070].
 
 =item *
@@ -4415,7 +4415,7 @@ http://www.nntp.perl.org/group/perl.perl5.porters/2010/11/msg165773.html
 =item *
 
 C<List::Util::first> misbehaves in the presence of a lexical C<$_>
-(typically introduced by C<my $_> or implicitly by C<given>). The variable
+(typically introduced by C<my $_> or implicitly by C<given>).  The variable
 which gets set for each iteration is the package variable C<$_>, not the
 lexical C<$_>.
 
@@ -4433,7 +4433,7 @@ interrupted by a signal
 
 =item *
 
-Test-Harness was updated from 3.17 to 3.21 for this release. A rewrite
+Test-Harness was updated from 3.17 to 3.21 for this release.  A rewrite
 in how it handles non-Perl tests (in 3.17_01) broke argument passing to
 non-Perl tests with L<prove> (RT #59186), and required that non-Perl
 tests be run as C<prove ./test.sh> instead of C<prove test.sh> These
@@ -4448,12 +4448,12 @@ C<version> now prevents object methods from being called as class methods
 =item *
 
 The changes in L<substr()|perlfunc/"substr EXPR,OFFSET,LENGTH,REPLACEMENT">
-broke C<HTML::Parser> <= 3.66. A fixed C<HTML::Parser> is available as versions
+broke C<HTML::Parser> <= 3.66.  A fixed C<HTML::Parser> is available as versions
 3.67 on CPAN.
 
 =item *
 
-The changes in prototype handling break C<Switch>. A patch has been sent
+The changes in prototype handling break C<Switch>.  A patch has been sent
 upstream and will hopefully appear on CPAN soon.
 
 =item *
@@ -4492,7 +4492,7 @@ This was also a perl 5.12.0 changed that missed the perldelta.
 Randy Kobes, creator of http://kobesearch.cpan.org/ and
 contributor/maintainer to several core Perl toolchain modules, passed
 away on September 18, 2010 after a battle with lung cancer.  The community
-was richer for his involvement. He will be missed.
+was richer for his involvement.  He will be missed.
 
 =head1 Acknowledgements
 
@@ -4513,11 +4513,11 @@ analysed by the Perl porting team.
 
 If the bug you are reporting has security implications, which make it
 inappropriate to send to a publicly archived mailing list, then please send
-it to perl5-security-report@perl.org. This points to a closed subscription
+it to perl5-security-report@perl.org.  This points to a closed subscription
 unarchived mailing list, which includes all the core committers, who be able
 to help assess the impact of issues, figure out a resolution, and help
 co-ordinate the release of patches to mitigate or fix the problem across all
-platforms on which Perl is supported. Please only use this address for
+platforms on which Perl is supported.  Please only use this address for
 security issues in the Perl core, not for modules independently
 distributed on CPAN.
 
