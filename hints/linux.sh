@@ -165,8 +165,7 @@ esac
 case "$plibpth" in
 '') plibpth=`gcc -print-search-dirs | grep libraries |
 	cut -f2- -d= | tr ':' $trnl | grep -v 'gcc'`
-    set $plibpth
-    plibpth="$@"  # Collapse all entries on one line
+    plibpth="$plibpth"  # Collapse all entries on one line
     ;;
 esac
 
