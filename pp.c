@@ -5400,6 +5400,7 @@ static AV *
 S_deref_plain_array(pTHX_ AV *ary)
 {
     if (SvTYPE(ary) == SVt_PVAV) return ary;
+    SvGETMAGIC((SV *)ary);
     if (!SvROK(ary) || SvTYPE(SvRV(ary)) != SVt_PVAV)
 	Perl_die(aTHX_ "Not an ARRAY reference");
     else if (SvOBJECT(SvRV(ary)))
