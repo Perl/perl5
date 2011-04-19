@@ -1467,10 +1467,10 @@ convert a core file into an executable. That's why you should now invoke
 it as C<CORE::dump()>, if you don't want to be warned against a possible
 typo.
 
-=item each HASH (or HASHREF)
+=item each HASH
 X<each> X<hash, iterator>
 
-=item each ARRAY (or ARRAYREF)
+=item each ARRAY
 X<array, iterator>
 
 When called in list context, returns a 2-element list consisting of the key
@@ -1509,15 +1509,12 @@ but in a different order:
         print "$key=$value\n";
     }
 
-When given a reference to a hash or array, the argument will be
-dereferenced automatically.
+Starting with Perl 5.14, C<each> can take a reference to an unblessed hash
+or array.  The argument will be dereferenced automatically.  This aspect of
+C<each> is considered highly experimental.  The exact behaviour may change
+in a future version of Perl.
 
     while (($key,$value) = each $hashref) { ... }
-
-If the reference is a blessed object that overrides either C<%{}> or
-C<@{}>, the override will be used instead of dereferencing the underlying
-variable type.  If both overrides are provided, C<%{}> will be the default.
-If this is not desired, you must dereference the argument yourself.
 
 See also C<keys>, C<values> and C<sort>.
 
@@ -2641,10 +2638,10 @@ separated by the value of EXPR, and returns that new string.  Example:
 Beware that unlike C<split>, C<join> doesn't take a pattern as its
 first argument.  Compare L</split>.
 
-=item keys HASH (or HASHREF)
+=item keys HASH
 X<keys> X<key>
 
-=item keys ARRAY (or ARRAYREF)
+=item keys ARRAY
 
 Returns a list consisting of all the keys of the named hash, or the indices
 of an array. (In scalar context, returns the number of keys or indices.)
@@ -2701,16 +2698,13 @@ C<keys> in this way (but you needn't worry about doing this by accident,
 as trying has no effect). C<keys @array> in an lvalue context is a syntax
 error.
 
-When given a reference to a hash or array, the argument will be
-dereferenced automatically.
+Starting with Perl 5.14, C<keys> can take a reference to an unblessed hash
+or array.  The argument will be dereferenced automatically.  This aspect of
+C<keys> is considered highly experimental.  The exact behaviour may change
+in a future version of Perl.
 
     for (keys $hashref) { ... }
     for (keys $obj->get_arrayref) { ... }
-
-If the reference is a blessed object that overrides either C<%{}> or
-C<@{}>, the override will be used instead of dereferencing the underlying
-variable type.  If both overrides are provided, C<%{}> will be the default.
-If this is not desired, you must dereference the argument yourself.
 
 See also C<each>, C<values> and C<sort>.
 
@@ -4372,7 +4366,7 @@ On systems that support a close-on-exec flag on files, that flag is set
 on all newly opened file descriptors whose C<fileno>s are I<higher> than 
 the current value of $^F (by default 2 for C<STDERR>).  See L<perlvar/$^F>.
 
-=item pop ARRAY (or ARRAYREF)
+=item pop ARRAY
 X<pop> X<stack>
 
 =item pop
@@ -4384,8 +4378,10 @@ Returns the undefined value if the array is empty, although this may also
 happen at other times.  If ARRAY is omitted, pops the C<@ARGV> array in the
 main program, but the C<@_> array in subroutines, just like C<shift>.
 
-If given a reference to an array, the argument will be dereferenced
-automatically.
+Starting with Perl 5.14, C<pop> can take a reference to an unblessed array.
+The argument will be dereferenced automatically.  This aspect of C<pop> is
+considered highly experimental.  The exact behaviour may change in a future
+version of Perl.
 
 =item pos SCALAR
 X<pos> X<match, position>
@@ -4481,7 +4477,7 @@ C<qw//>) or if its arguments cannot be adequately expressed by a prototype
 does not really behave like a Perl function.  Otherwise, the string
 describing the equivalent prototype is returned.
 
-=item push ARRAY (or ARRAYREF),LIST
+=item push ARRAY,LIST
 X<push> X<stack>
 
 Treats ARRAY as a stack, and pushes the values of LIST
@@ -4495,8 +4491,10 @@ LIST.  Has the same effect as
 but is more efficient.  Returns the number of elements in the array following
 the completed C<push>.
 
-If given a reference to an array, the argument will be dereferenced
-automatically.
+Starting with Perl 5.14, C<push> can take a reference to an unblessed
+array.  The argument will be dereferenced automatically.  This aspect of
+C<push> is considered highly experimental.  The exact behaviour may change
+in a future version of Perl.
 
 =item q/STRING/
 
@@ -5395,7 +5393,7 @@ An example disabling Nagle's algorithm on a socket:
     use Socket qw(IPPROTO_TCP TCP_NODELAY);
     setsockopt($socket, IPPROTO_TCP, TCP_NODELAY, 1);
 
-=item shift ARRAY (or ARRAYREF)
+=item shift ARRAY
 X<shift>
 
 =item shift
@@ -5408,8 +5406,10 @@ C<@ARGV> array outside a subroutine and also within the lexical scopes
 established by the C<eval STRING>, C<BEGIN {}>, C<INIT {}>, C<CHECK {}>,
 C<UNITCHECK {}> and C<END {}> constructs.
 
-If given a reference to an array, the argument will be dereferenced
-automatically.
+Starting with Perl 5.14, C<shift> can take a reference to an unblessed
+array.  The argument will be dereferenced automatically.  This aspect of
+C<shift> is considered highly experimental.  The exact behaviour may change
+in a future version of Perl.
 
 See also C<unshift>, C<push>, and C<pop>.  C<shift> and C<unshift> do the
 same thing to the left end of an array that C<pop> and C<push> do to the
@@ -5742,14 +5742,14 @@ eliminate any C<NaN>s from the input list.
 
     @result = sort { $a <=> $b } grep { $_ == $_ } @input;
 
-=item splice ARRAY (or ARRAYREF),OFFSET,LENGTH,LIST
+=item splice ARRAY,OFFSET,LENGTH,LIST
 X<splice>
 
-=item splice ARRAY (or ARRAYREF),OFFSET,LENGTH
+=item splice ARRAY,OFFSET,LENGTH
 
-=item splice ARRAY (or ARRAYREF),OFFSET
+=item splice ARRAY,OFFSET
 
-=item splice ARRAY (or ARRAYREF)
+=item splice ARRAY
 
 Removes the elements designated by OFFSET and LENGTH from an array, and
 replaces them with the elements of LIST, if any.  In list context,
@@ -5763,9 +5763,6 @@ except for -LENGTH elements at the end of the array.
 If both OFFSET and LENGTH are omitted, removes everything. If OFFSET is
 past the end of the array, Perl issues a warning, and splices at the
 end of the array.
-
-If given a reference to an array, the argument will be dereferenced
-automatically.
 
 The following equivalences hold (assuming C<< $[ == 0 and $#a >= $i >> )
 
@@ -5787,6 +5784,11 @@ Example, assuming array lengths are passed before arrays:
         return 1;
     }
     if (&aeq($len,@foo[1..$len],0+@bar,@bar)) { ... }
+
+Starting with Perl 5.14, C<splice> can take a reference to an unblessed
+array.  The argument will be dereferenced automatically.  This aspect of
+C<splice> is considered highly experimental.  The exact behaviour may
+change in a future version of Perl.
 
 =item split /PATTERN/,EXPR,LIMIT
 X<split>
@@ -7254,7 +7256,7 @@ X<untie>
 Breaks the binding between a variable and a package.  (See C<tie>.)
 Has no effect if the variable is not tied.
 
-=item unshift ARRAY (or ARRAYREF),LIST
+=item unshift ARRAY,LIST
 X<unshift>
 
 Does the opposite of a C<shift>.  Or the opposite of a C<push>,
@@ -7267,8 +7269,10 @@ Note the LIST is prepended whole, not one element at a time, so the
 prepended elements stay in the same order.  Use C<reverse> to do the
 reverse.
 
-If given a reference to an array, the argument will be dereferenced
-automatically.
+Starting with Perl 5.14, C<unshift> can take a reference to an unblessed
+array.  The argument will be dereferenced automatically.  This aspect of
+C<unshift> is considered highly experimental.  The exact behaviour may
+change in a future version of Perl.
 
 =item use Module VERSION LIST
 X<use> X<module> X<import>
@@ -7435,10 +7439,10 @@ files.  On systems that don't support futimes(2), passing filehandles raises
 an exception.  Filehandles must be passed as globs or glob references to be
 recognized; barewords are considered filenames.
 
-=item values HASH (or HASHREF)
+=item values HASH
 X<values>
 
-=item values ARRAY (or ARRAYREF)
+=item values ARRAY
 
 Returns a list consisting of all the values of the named hash, or the values
 of an array. (In a scalar context, returns the number of values.)
@@ -7466,16 +7470,13 @@ modify the contents of the hash:
     for (values %hash)      { s/foo/bar/g }   # modifies %hash values
     for (@hash{keys %hash}) { s/foo/bar/g }   # same
 
-When given a reference to a hash or array, the argument will be
-dereferenced automatically.
+Starting with Perl 5.14, C<values> can take a reference to an unblessed
+hash or array.  The argument will be dereferenced automatically.  This
+aspect of C<values> is considered highly experimental.  The exact behaviour
+may change in a future version of Perl.
 
     for (values $hashref) { ... }
     for (values $obj->get_arrayref) { ... }
-
-If the reference is a blessed object that overrides either C<%{}> or
-C<@{}>, the override will be used instead of dereferencing the underlying
-variable type.  If both overrides are provided, C<%{}> will be the default.
-If this is not desired, you must dereference the argument yourself.
 
 See also C<keys>, C<each>, and C<sort>.
 
