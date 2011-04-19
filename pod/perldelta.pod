@@ -2039,7 +2039,7 @@ The L<threads> pragma has been upgraded from version 1.75 to 1.83.
 
 =item *
 
-The L<threads::shared> pragma has been upgraded from version 1.32 to 1.36.
+The L<threads::shared> pragma has been upgraded from version 1.32 to 1.37.
 
 =item *
 
