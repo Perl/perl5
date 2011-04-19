@@ -3628,8 +3628,9 @@ followed by other options [perl #72434].
 
 =item *
 
-The C<B> module was returning C<B::OP>s instead of C<B::LOGOP>s for C<entertry> [perl #80622].
-This was due to a bug in the Perl core, not in C<B> itself.
+The C<B> module was returning C<B::OP>s instead of C<B::LOGOP>s for
+C<entertry> [perl #80622].  This was due to a bug in the Perl core,
+not in C<B> itself.
 
 =back
 
@@ -3853,8 +3854,8 @@ Naming a deprecated character in C<\N{I<NAME>}> no longer leaks memory.
 
 =item *
 
-We fixed a bug that could cause C<\N{I<NAME>}> constructs followed by a single C<".">
-to be parsed incorrectly [perl #74978] (5.12.1).
+We fixed a bug that could cause C<\N{I<NAME>}> constructs followed by
+a single C<"."> to be parsed incorrectly [perl #74978] (5.12.1).
 
 =item *
 
