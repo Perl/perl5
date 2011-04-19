@@ -72,13 +72,13 @@ appropriate, and B<at least one> of the following must be true:
 
 =over 4
 
-=item *
+=item 1
 
 B<The locale-determining environment variables (see L<"ENVIRONMENT">)
 must be correctly set up> at the time the application is started, either
-by yourself or by whoever set up your system account.
+by yourself or by whoever set up your system account; or
 
-=item *
+=item 2
 
 B<The application must set its own locale> using the method described in
 L<The setlocale function>.
@@ -90,7 +90,17 @@ L<The setlocale function>.
 =head2 The use locale pragma
 
 By default, Perl ignores the current locale.  The S<C<use locale>>
-pragma tells Perl to use the current locale for some operations:
+pragma tells Perl to use the current locale for some operations.
+
+The current locale is set at execution time by
+L<setlocale()|/The setlocale function> described below.  If that function
+hasn't yet been called in the course of the program's execution, the
+current locale is that which was determined by the L<"ENVIRONMENT"> in
+effect at the start of the program, except that
+C<L<LC_NUMERIC|/Category LC_NUMERIC: Numeric Formatting>> is always
+initialized to the C locale (mentioned under L<Finding locales>).
+
+The operations that are affected by locale are:
 
 =over 4
 
@@ -178,7 +188,7 @@ subsequent call to setlocale().
 
 If no second argument is provided and the category is LC_ALL, the
 result is implementation-dependent.  It may be a string of
-concatenated locales names (separator also implementation-dependent)
+concatenated locale names (separator also implementation-dependent)
 or a single locale name.  Please consult your setlocale(3) man page for
 details.
 
@@ -249,6 +259,8 @@ the POSIX standard.  They define the B<default locale> in which
 every program starts in the absence of locale information in its
 environment.  (The I<default> default locale, if you will.)  Its language
 is (American) English and its character codeset ASCII.
+B<Warning>. The C locale delivered by some vendors may not
+actually exactly match what the C standard calls for.  So beware.
 
 B<NOTE>: Not all systems have the "POSIX" locale (not all systems are
 POSIX-conformant), so use "C" when you need explicitly to specify this
@@ -1085,4 +1097,4 @@ L<POSIX/strtod>, L<POSIX/strxfrm>.
 
 Jarkko Hietaniemi's original F<perli18n.pod> heavily hacked by Dominic
 Dunlop, assisted by the perl5-porters.  Prose worked over a bit by
-Tom Christiansen.
+Tom Christiansen, and updated by Perl 5 porters.
