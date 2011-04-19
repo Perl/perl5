@@ -4478,7 +4478,59 @@ was richer for his involvement.  He will be missed.
 
 =head1 Acknowledgements
 
-XXX The list of people to thank goes here.
+
+Perl 5.14.0 represents one year of development since
+Perl 5.12.0 and contains nearly 550,000 lines of changes across nearly
+3,000 files from 150 authors and committers.
+
+Perl continues to flourish into its third decade thanks to a vibrant
+community of users and developers.  The following people are known to
+have contributed the improvements that became Perl 5.14.0:
+
+A. Sinan Unur, Aaron Crane, Abhijit Menon-Sen, Abigail, Alastair Douglas,
+Alex Davies, Alex Vandiver, Alexander Alekseev, Alexander Hartmaier,
+Alexandr Ciornii, Ali Polatel, Allen Smith, Andreas König, Andrew
+Rodland, Andy Armstrong, Andy Dougherty, Aristotle Pagaltzis, Arkturuz,
+Arvan, Ben Morrow, Bo Lindbergh, Boris Ratner, Brad Gilbert, Bram,
+brian d foy, Brian Phillips, Casey West, Charles Bailey, Chas. Owens,
+Chip Salzenberg, Chris 'BinGOs' Williams, chromatic, Craig A. Berry,
+Curtis Jewell, Dagfinn Ilmari Mannsåker, Dan Dascalescu, Dave Rolsky,
+David Caldwell, David Cantrell, David Golden, David Leadbeater, David
+Mitchell, David Wheeler, Eric Brine, Father Chrysostomos, Fingle
+Nark, Florian Ragwitz, Frank Wiegand, Franz Fasching, Gene Sullivan,
+George Greer, Gerard Goossen, Gisle Aas, Goro Fuji, Grant McLean,
+gregor herrmann, H.Merijn Brand, Hongwen Qiu, Hugo van der Sanden, Ian
+Goodacre, James E Keenan, James Mastros, Jan Dubois, Jay Hannah, Jerry
+D. Hedden, Jesse Vincent, Jim Cromie, Jirka HruÅ¡ka, John Peacock,
+Joshua ben Jore, Joshua Pritikin, Karl Williamson, Kevin Ryde, kmx,
+Lars Dɪᴇᴄᴋᴏᴡ 迪拉斯, Larwan Berke, Leon Brocard, Leon
+Timmermans, Lubomir Rintel, Lukas Mai, Maik Hentsche, Marty Pauley,
+Marvin Humphrey, Matt Johnson, Matt S Trout, Max Maischein, Michael
+Breen, Michael Fig, Michael G Schwern, Michael Parker, Michael Stevens,
+Michael Witten, Mike Kelly, Moritz Lenz, Nicholas Clark, Nick Cleaton,
+Nick Johnston, Nicolas Kaiser, Niko Tyni, Noirin Shirley, Nuno Carvalho,
+Paul Evans, Paul Green, Paul Johnson, Paul Marquess, Peter J. Holzer,
+Peter John Acklam, Peter Martini, Philippe Bruhat (BooK), Piotr Fusik,
+Rafael Garcia-Suarez, Rainer Tammer, Reini Urban, Renee Baecker, Ricardo
+Signes, Richard Möhn, Richard Soderberg, Rob Hoelz, Robin Barker,
+Ruslan Zakirov, Salvador Fandiño, Salvador Ortiz Garcia, Shlomi Fish,
+Sinan Unur, Sisyphus, Slaven Rezic, Steffen Müller, Steve Hay, Steve
+Peters, Steven Schubiger, Sullivan Beck, Tatsuhiko Miyagawa, Tim Bunce,
+Todd Rinaldo, Tom Christiansen, Tom Hukins, Tony Cook, Tye McQueen, Vadim
+Konovalov, Vernon Lyon, Vincent Pit, Walt Mankowski, Wolfram Humann,
+Yves Orton, Zefram, Zsbán Ambrus and Ævar Arnfjörð Bjarmason.
+
+This is woefully incomplete as it's automatically generated from version
+control history.  In particular, it doesn't include the names of the
+(very much appreciated) contributors who reported issues in previous
+versions of Perl that helped make Perl 5.14.0 better. For a more complete
+list of all of Perl's historical contributors, please see the C<AUTHORS>
+file in the Perl 5.14.0 distribution.
+
+Many of the changes included in this version originated in the CPAN
+modules included in Perl's core. We're grateful to the entire CPAN
+community for helping Perl to flourish.
+
 
 =head1 Reporting Bugs
 
