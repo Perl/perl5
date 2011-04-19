@@ -2850,60 +2850,43 @@ these have been fixed [perl #73630] (5.12.3).
 
 =item *
 
-It's now possible to build extensions on older (pre 7.3-2) VMS systems.
-
-DCL symbol length was limited to 1K up until about seven years or
-so ago, but there was no particularly deep reason to prevent those
-older systems from configuring and building Perl (5.12.1).
+Extension building on older (pre 7.3-2) VMS systems was broken because
+configure.com hit the DCL symbol length limit of 1K.  We now work within
+this limit when assembling the list of extensions in the core build (5.12.1).
 
 =item *
 
-We fixed the previously-broken B<-Uuseperlio> build on VMS.
-
-We were checking a variable that doesn't exist in the non-default
-case of disabling perlio.  Now we look at it only when it exists (5.12.1).
-
-=item *
-
-We fixed the B<-Uuseperlio> command-line option in F<configure.com>.
-
-Formerly it only worked if you went through all the questions
-interactively and explicitly answered no (5.12.1).
+We fixed configuring and building Perl with B<-Uuseperlio> (5.12.1).
 
 =item *
 
 C<PerlIOUnix_open> now honours the default permissions on VMS.
 
-When C<perlio> became the default and C<unixio> became the default bottom layer,
+When C<perlio> became the default and C<unix> became the default bottom layer,
 the most common path for creating files from Perl became C<PerlIOUnix_open>,
-which has always explicitly used C<0666> as the permission mask.
-
-To avoid this, C<0777> is now passed as the permissions to open().  In the
-VMS CRTL, C<0777> has a special meaning over and above intersecting with the
-current umask; specifically, it allows Unix syscalls to preserve native default
-permissions (5.12.3).
-
-=item *
-
-Spurious record boundaries are no longer
-introduced by the PerlIO layer during output (5.12.3).
+which has always explicitly used C<0666> as the permission mask.  This prevents
+inheriting permissions from RMS defaults and ACLs, so to avoid that problem,
+we now pass C<0777> to C<open()>.  In theVMS CRTL, C<0777> has a special
+meaning over and above intersecting with the current umask; specifically, it
+allows Unix syscalls to preserve native default permissions (5.12.3).
 
 =item *
 
-The shortening of symbols longer than 31 characters in the C sources is
-now done by the compiler rather than by L<xsubpp(1)> (which could do so only 
-for generated symbols in XS code).
+The shortening of symbols longer than 31 characters in the core C sources
+and in extensions is now by default done by the C compiler rather than by
+xsubpp (which could only do so for generated symbols in XS code).  You can
+reenable xsubpp's symbol shortening by configuring with -Uuseshortenedsymbols,
+but you'll have some work to do to get the core sources to compile.
 
 =item *
 
 Record-oriented files (record format variable or variable with fixed control)
-opened for write by the perlio layer will now be line-buffered to prevent the
+opened for write by the C<perlio> layer will now be line-buffered to prevent the
 introduction of spurious line breaks whenever the perlio buffer fills up.
 
 =item *
 
-F<git_version.h> is now installed on VMS.  This
-was an oversight in v5.12.0 which
+F<git_version.h> is now installed on VMS.  This was an oversight in v5.12.0 which
 caused some extensions to fail to build (5.12.2).
 
 =item *
