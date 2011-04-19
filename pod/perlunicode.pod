@@ -11,7 +11,8 @@ implement the Unicode standard or the accompanying technical reports
 from cover to cover, Perl does support many Unicode features.
 
 People who want to learn to use Unicode in Perl, should probably read
-the L<Perl Unicode tutorial, perlunitut|perlunitut>, before reading
+the L<Perl Unicode tutorial, perlunitut|perlunitut> and
+L<perluniintro>, before reading
 this reference document.
 
 Also, the use of Unicode may present security issues that aren't obvious.
@@ -90,7 +91,8 @@ without additional information from the user, Perl decides in favor of
 compatibility and chooses to use byte semantics.
 
 When C<use locale> is in effect (which overrides
-C<use feature 'unicode_strings'>), Perl uses the semantics associated
+C<use feature 'unicode_strings'> in the same scope), Perl uses the
+semantics associated
 with the current locale.  Otherwise, Perl uses the platform's native
 byte semantics for characters whose code points are less than 256, and
 Unicode semantics for those greater than 255.  On EBCDIC platforms, this
