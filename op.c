@@ -1690,6 +1690,7 @@ Perl_op_lvalue(pTHX_ OP *o, I32 type)
 	break;
 
     case OP_KEYS:
+    case OP_RKEYS:
 	if (type != OP_SASSIGN)
 	    goto nomod;
 	goto lvalue_func;

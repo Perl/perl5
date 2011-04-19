@@ -4850,6 +4850,12 @@ PP(pp_rkeys)
 	    PL_op_desc[PL_op->op_type] );
     }
 
+    if (PL_op->op_flags & OPf_SPECIAL && SvTYPE(sv) == SVt_PVAV)
+	DIE(aTHX_
+	   "Can't modify %s in %s",
+	    PL_op_desc[PL_op->op_type], PL_op_desc[PL_op->op_next->op_type]
+	);
+
     /* Delegate to correct function for op type */
     PUSHs(sv);
     if (PL_op->op_type == OP_RKEYS || PL_op->op_type == OP_RVALUES) {

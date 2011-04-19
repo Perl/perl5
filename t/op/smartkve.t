@@ -131,6 +131,14 @@ ok(defined $empty,
   'Vivify: $empty (after keys $empty->{hash}) is HASHREF');
 ok(!defined $empty->{hash}      ,   'Vivify: $empty->{hash} is undef');
 
+# Keys -- lvalue
+$_{foo} = "bar";
+keys \%_ = 65;
+is scalar %_, '1/128', 'keys $hashref as lvalue';
+eval 'keys \@_ = 65';
+like $@, qr/Can't modify keys on reference in scalar assignment/,
+  'keys $arrayref as lvalue dies';
+
 # Keys -- errors
 $errpat = qr/
  (?-x:Type of argument to keys on reference must be unblessed hashref or)
