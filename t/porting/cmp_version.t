@@ -70,6 +70,7 @@ my %skip;
 
 my %skip_versions = (
     # 'some/sample/file.pm' => [ '1.23', '1.24' ],
+    'dist/threads/lib/threads.pm' => [ '1.83' ],
 );
 
 my $skip_dirs = qr{^(?:t/lib|cpan)};
