@@ -278,6 +278,9 @@ C<delete> on an entry of C<%+> or C<%->.
 
 =head3 Array and hash container functions accept references
 
+B<Warning:> This feature is considered experimental, as the exact behaviour
+may change in a future version of Perl.
+
 All builtin functions that operate directly on array or hash
 containers now also accept unblessed hard references to arrays
 or hashes:
@@ -307,14 +310,6 @@ C<@{}> or C<%{}>:
 
   for ( keys %{$hoh->{genres}{artists}} ) {...} # old way 
   for ( keys $hoh->{genres}{artists}    ) {...} # new way 
-
-For C<push>, C<unshift>, and C<splice>, the reference autovivifies
-if it is not defined, just as if it were wrapped with C<@{}>.
-
-For C<keys>, C<values>, C<each>, when overloaded dereferencing is
-present, the overloaded dereference is used instead of dereferencing the
-underlying reftype.  Warnings are issued about assumptions made in
-ambiguous cases.
 
 =head3 Single term prototype
 
