@@ -90,7 +90,8 @@ L<The setlocale function>.
 =head2 The use locale pragma
 
 By default, Perl ignores the current locale.  The S<C<use locale>>
-pragma tells Perl to use the current locale for some operations.
+pragma and the C</l> regular expression modifier tell Perl to use the
+current locale for some operations (C</l> for just pattern matching).
 
 The current locale is set at execution time by
 L<setlocale()|/The setlocale function> described below.  If that function
@@ -99,6 +100,8 @@ current locale is that which was determined by the L<"ENVIRONMENT"> in
 effect at the start of the program, except that
 C<L<LC_NUMERIC|/Category LC_NUMERIC: Numeric Formatting>> is always
 initialized to the C locale (mentioned under L<Finding locales>).
+If there is no valid environment, the current locale is undefined.  It
+is likely, but not necessarily, the "C" locale.
 
 The operations that are affected by locale are:
 
@@ -950,7 +953,9 @@ always in force, even if the program environment suggested otherwise
 (see L<The setlocale function>).  By default, Perl still behaves this
 way for backward compatibility.  If you want a Perl application to pay
 attention to locale information, you B<must> use the S<C<use locale>>
-pragma (see L<The use locale pragma>) to instruct it to do so.
+pragma (see L<The use locale pragma>) or for just pattern matching, the
+C</l> regular expression modifier (see L<perlre/Character set
+modifiers>) to instruct it to do so.
 
 Versions of Perl from 5.002 to 5.003 did use the C<LC_CTYPE>
 information if available; that is, C<\w> did understand what
