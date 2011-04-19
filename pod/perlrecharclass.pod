@@ -634,7 +634,7 @@ and any C<\p> property name can be prefixed with "Is" such as C<\p{IsAlpha}>.)
 Both the C<\p> counterparts always assume Unicode rules are in effect.
 On ASCII platforms, this means they assume that the code points from 128
 to 255 are Latin-1, and that means that using them under locale rules is
-unwise unless the locale is guaranteed to be Latin-1.  In contrast, the
+unwise unless the locale is guaranteed to be Latin-1 or UTF-8.  In contrast, the
 POSIX character classes are useful under locale rules.  They are
 affected by the actual rules in effect, as follows:
 
@@ -675,7 +675,8 @@ The POSIX class matches the same as the ASCII range counterpart.
 
 =back
 
-Which rules apply are determined as described in L<perlre/Which character set modifier is in effect?>.
+Which rules apply are determined as described in
+L<perlre/Which character set modifier is in effect?>.
 
 It is proposed to change this behavior in a future release of Perl so that
 whether or not Unicode rules are in effect would not change the
