@@ -93,7 +93,9 @@ TODO:
     is $gotit, 0, 'Received both signals';
 }
 
-{
+SKIP: {
+    skip("alarm cannot interrupt blocking system calls on $^O", 2)
+	if $^O eq 'MSWin32';
     # RT #88774
     # make sure the signal handler's called in an eval block *before*
     # the eval is popped
