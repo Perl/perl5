@@ -4486,7 +4486,7 @@ Nark, Florian Ragwitz, Frank Wiegand, Franz Fasching, Gene Sullivan,
 George Greer, Gerard Goossen, Gisle Aas, Goro Fuji, Grant McLean,
 gregor herrmann, H.Merijn Brand, Hongwen Qiu, Hugo van der Sanden, Ian
 Goodacre, James E Keenan, James Mastros, Jan Dubois, Jay Hannah, Jerry
-D. Hedden, Jesse Vincent, Jim Cromie, Jirka HruÅ¡ka, John Peacock,
+D. Hedden, Jesse Vincent, Jim Cromie, Jirka Hruška, John Peacock,
 Joshua ben Jore, Joshua Pritikin, Karl Williamson, Kevin Ryde, kmx,
 Lars Dɪᴇᴄᴋᴏᴡ 迪拉斯, Larwan Berke, Leon Brocard, Leon
 Timmermans, Lubomir Rintel, Lukas Mai, Maik Hentsche, Marty Pauley,
