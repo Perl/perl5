@@ -1392,7 +1392,7 @@ This fixes certain cases of "Bizarre copy of ARRAY" caused by modules
 overriding caller() incorrectly (5.12.2).
 
 It now also avoids using regular expressions that cause Perl to
-load its Unicode tables, so to avoid the "BEGIN not safe after
+load its Unicode tables, so as to avoid the "BEGIN not safe after
 errors" error that ensue if there has been a syntax error
 [perl #82854].
 
@@ -3359,7 +3359,7 @@ Perl no longer produces this warning:
 =item *
 
 Opening a glob reference via C<< open($fh, ">", \*glob) >> no longer
-causees the glob to be corrupted when the filehandle is printed to.  This would
+causes the glob to be corrupted when the filehandle is printed to.  This would
 cause Perl to crash whenever the glob's contents were accessed
 [perl #77492].
 
@@ -3373,15 +3373,15 @@ handler.  Now it just leaks memory [perl #75556].
 Most I/O functions were not warning for unopened handles unless the
 "closed" and "unopened" warnings categories were both enabled.  Now only
 C<use warnings 'unopened'> is necessary to trigger these warnings, as
-had always been the intension.
+had always been the intention.
 
 =item *
 
 There have been several fixes to PerlIO layers:
 
 When C<binmode(FH, ":crlf")> pushes the C<:crlf> layer on top of the stack,
-it no longer enables crlf layers lower in the stack so to avoid unexpected
-results [perl #38456].
+it no longer enables crlf layers lower in the stack so as to avoid
+unexpected results [perl #38456].
 
 Opening a file in C<:raw> mode now does what it advertises to do (first
 open the file, then C<binmode> it), instead of simply leaving off the top
@@ -4031,7 +4031,7 @@ Subroutine redefinition works once more in the debugger [perl #48332].
 
 When B<-d> is used on the shebang (C<#!>) line, the debugger now has access
 to the lines of the main program.  In the past, this sometimes worked and
-sometimes did not, depending on the order in which things happened to be u
+sometimes did not, depending on the order in which things happened to be
 arranged in memory [perl #71806].
 
 =item *
