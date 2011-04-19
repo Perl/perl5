@@ -2158,7 +2158,7 @@ of a code point that hasn't been assigned to another one.
 
 The L<version> pragma has been upgraded from 0.82 to 0.88.
 
-Because of a bug, now fixed, the C<is_strict()> and C<is_lax()> functions did not
+Because of a bug, now fixed, the is_strict() and is_lax() functions did not
 work when exported (5.12.1).
 
 =item *
@@ -2860,7 +2860,7 @@ When C<perlio> became the default and C<unix> became the default bottom layer,
 the most common path for creating files from Perl became C<PerlIOUnix_open>,
 which has always explicitly used C<0666> as the permission mask.  This prevents
 inheriting permissions from RMS defaults and ACLs, so to avoid that problem,
-we now pass C<0777> to C<open()>.  In theVMS CRTL, C<0777> has a special
+we now pass C<0777> to open().  In theVMS CRTL, C<0777> has a special
 meaning over and above intersecting with the current umask; specifically, it
 allows Unix syscalls to preserve native default permissions (5.12.3).
 
@@ -3794,7 +3794,7 @@ drawbacks, and the feature is scheduled to be removed in 5.16.
 
 =item 2
 
-C<quotemeta()> (and its in-line equivalent C<\Q>) can also give different
+quotemeta() (and its in-line equivalent C<\Q>) can also give different
 results depending on whether a string is encoded in UTF-8.  See
 L<perlunicode/The "Unicode Bug">.
 
@@ -4456,16 +4456,16 @@ F<Module-Install> distribution on CPAN to fail. (Specifically, F<02_mymeta.t> te
 
 =head1 Errata
 
-=head2 C<keys()>, C<values()>, and C<each()> work on arrays
+=head2 keys(), values(), and each() work on arrays
 
-You can now use the C<keys()>, C<values()>, and C<each()> builtins on arrays;
+You can now use the keys(), values(), and each() builtins on arrays;
 previously you could use them only on hashes.  See L<perlfunc> for details.
 This is actually a change introduced in perl 5.12.0, but it was missed from
 that release's L<perl5120delta>.
 
-=head2 C<split()> and C<@_>
+=head2 split() and C<@_>
 
-C<split()> no longer modifies C<@_> when called in scalar or void context.
+split() no longer modifies C<@_> when called in scalar or void context.
 In void context it now produces a "Useless use of split" warning.
 This was also a perl 5.12.0 changed that missed the perldelta.
 
