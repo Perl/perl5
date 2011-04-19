@@ -4062,6 +4062,7 @@ PP(pp_leaveeval)
     I32 optype;
     SV *namesv;
 
+    PERL_ASYNC_CHECK();
     POPBLOCK(cx,newpm);
     POPEVAL(cx);
     namesv = cx->blk_eval.old_namesv;
@@ -4183,6 +4184,7 @@ PP(pp_leavetry)
     register PERL_CONTEXT *cx;
     I32 optype;
 
+    PERL_ASYNC_CHECK();
     POPBLOCK(cx,newpm);
     POPEVAL(cx);
     PERL_UNUSED_VAR(optype);

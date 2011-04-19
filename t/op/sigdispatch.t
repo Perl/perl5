@@ -9,9 +9,9 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 15;
+plan tests => 17;
 
-watchdog(10);
+watchdog(15);
 
 $SIG{ALRM} = sub {
     die "Alarm!\n";
@@ -91,4 +91,26 @@ TODO:
         POSIX::sigsuspend($set);
     } for 1..2;
     is $gotit, 0, 'Received both signals';
+}
+
+{
+    # RT #88774
+    # make sure the signal handler's called in an eval block *before*
+    # the eval is popped
+
+    $SIG{'ALRM'} = sub { die "HANDLER CALLED\n" };
+
+    eval {
+	alarm(2);
+	select(undef,undef,undef,10);
+    };
+    alarm(0);
+    is($@, "HANDLER CALLED\n", 'block eval');
+
+    eval q{
+	alarm(2);
+	select(undef,undef,undef,10);
+    };
+    alarm(0);
+    is($@, "HANDLER CALLED\n", 'string eval');
 }
