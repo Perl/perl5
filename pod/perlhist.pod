@@ -451,6 +451,9 @@ the strings?).
  Jesse    5.13.9        2011-Jan-20
  Ævar     5.13.10       2011-Feb-20
  Florian  5.13.11       2011-Mar-20
+ Jesse    5.14.0RC1     2011-Apr-20
+
+ Jesse    5.14.0        2011-Apr-28
 
 =head2 SELECTED RELEASE SIZES
 
