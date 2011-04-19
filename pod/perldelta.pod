@@ -567,7 +567,7 @@ Details are in L<perlrecharclass/Unicode Properties>.
 User-defined property handlers that need to match differently under C</i>
 must be changed to read the new boolean parameter passed to them, which
 is non-zero if case-insensitive matching is in effect and 0 otherwise.
-See L<perluniprops/User-Defined Character Properties>.
+See L<perlunicode/User-Defined Character Properties>.
 
 =head3 \p{} implies Unicode semantics
 
@@ -2324,9 +2324,6 @@ L<Ambiguous use of %c resolved as operator %c|perldiag/"Ambiguous use of %c reso
 
 L<Ambiguous use of %c{%s} resolved to %c%s|perldiag/"Ambiguous use of %c{%s} resolved to %c%s">
 
-=item *
-
-L<Ambiguous use of %c{%s%s} resolved to %c%s%s|perldiag/"Ambiguous use of %c{%s%s} resolved to %c%s%s">
 
 =item *
 
