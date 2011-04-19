@@ -1359,9 +1359,7 @@ true if it succeeds, false if it fails.  If no string is specified
 via the C<=~> or C<!~> operator, the $_ string is searched.  (The
 string specified with C<=~> need not be an lvalue--it may be the
 result of an expression evaluation, but remember the C<=~> binds
-rather tightly.)  See also L<perlre>.  See L<perllocale> for
-discussion of additional considerations that apply when C<use locale>
-is in effect.
+rather tightly.)  See also L<perlre>.
 
 Options are as described in C<qr//> above; in addition, the following match
 process modifiers are available:
@@ -1593,8 +1591,6 @@ at run-time.  If you want the pattern compiled only once the first time
 the variable is interpolated, use the C</o> option.  If the pattern
 evaluates to the empty string, the last successfully executed regular
 expression is used instead.  See L<perlre> for further explanation on these.
-See L<perllocale> for discussion of additional considerations that apply
-when C<use locale> is in effect.
 
 Options are as with m// with the addition of the following replacement
 specific options:
