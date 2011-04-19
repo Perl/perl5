@@ -239,7 +239,7 @@ C<(??{...})> code blocks inside regular expressions.
 These blocks are still experimental, however, and still have problems with
 lexical (C<my>) variables and abnormal exiting.
 
-=head3 C<use re "/flags">
+=head3 C<use re '/flags'>
 
 The C<re> pragma now has the ability to turn on regular expression flags
 till the end of the lexical scope:
@@ -1937,7 +1937,7 @@ It now includes constants for POSIX signal constants.
 
 The L<re> pragma has been upgraded from version 0.11 to 0.18.
 
-The C<use re "/flags"> subpragma is new.
+The C<use re '/flags'> subpragma is new.
 
 The regmust() function used to crash when called on a regular expression
 belonging to a pluggable engine.  Now it croaks instead.
@@ -3535,7 +3535,7 @@ pragmata (like L<strict>) [perl #70075] (5.12.2).
 
 C<BEGIN {require 5.12.0}> now behaves as documented, rather than behaving
 identically to C<use 5.12.0>.  Previously, C<require> in a C<BEGIN> block
-was erroneously executing the C<use feature ":5.12.0"> and
+was erroneously executing the C<use feature ':5.12.0'> and
 C<use strict> behaviour, which only C<use> was documented to
 provide [perl #69050].
 
@@ -3777,7 +3777,7 @@ C<::> can now be accessed with a fully qualified name.
 =item *
 
 What has become known as "the Unicode Bug" is almost completely resolved in
-this release.  Under C<use feature "unicode_strings"> (which is
+this release.  Under C<use feature 'unicode_strings'> (which is
 automatically selected by C<use 5.012> and above), the internal
 storage format of a string no longer affects the external semantics.
 [perl #58182].
@@ -4209,7 +4209,7 @@ happened to be encoded as UTF8 internally [perl #72246].
 
 =item *
 
-C<eval "BEGIN{die}"> no longer leaks memory on non-threaded builds.
+C<eval 'BEGIN{die}'> no longer leaks memory on non-threaded builds.
 
 =back
 
