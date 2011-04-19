@@ -4394,13 +4394,8 @@ C<call_sv(code, G_EVAL)> is called from an XS destructor has been fixed
 
 =head1 Known Problems
 
-XXX Many of these have probably already been solved.  There are also
-unresolved BBC articles linked to #77718 that are awaiting CPAN
-releases.  These may need to be listed here.
-See also #84444.  Enbugger may also need to be listed if there is no new
-release in time (see #82152).
-JJORE/overload-eval-0.08.tar.gz appears to be broken, too.  See
-http://www.nntp.perl.org/group/perl.perl5.porters/2010/11/msg165773.html
+This is a list of significant unresolved issues which are regressions
+from earlier versions of Perl or which affect widely-used CPAN modules.
 
 =over 4
 
@@ -4430,27 +4425,16 @@ L<version> now prevents object methods from being called as class methods
 
 =item *
 
-The changes in L<substr()|perlfunc/"substr EXPR,OFFSET,LENGTH,REPLACEMENT">
-broke C<HTML::Parser> <= 3.66.  A fixed C<HTML::Parser> is available as versions
-3.67 on CPAN.
-
-=item *
-
 The changes in prototype handling break L<Switch>.  A patch has been sent
 upstream and will hopefully appear on CPAN soon.
 
 =item *
 
-The upgrade to F<Encode-2.40> has caused some tests in the F<libwww-perl> distribution
-on CPAN to fail. (Specifically, F<base/message-charset.t> tests 33-36 in version
-5.836 of that distribution now fail.)
-
-=item *
-
-The upgrade to F<ExtUtils-MakeMaker-6.57_05> has caused some tests in the
-F<Module-Install> distribution on CPAN to fail. (Specifically, F<02_mymeta.t> tests
-5 and 21l; F<18_all_from.t> tests 6 and 15; F<19_authors.t> tests 5, 13, 21, and
-29; and F<20_authors_with_special_characters.t> tests 6, 15, and 23 in version
+The upgrade to F<ExtUtils-MakeMaker-6.57_05> has caused
+some tests in the F<Module-Install> distribution on CPAN to
+fail. (Specifically, F<02_mymeta.t> tests 5 and 21l; F<18_all_from.t>
+tests 6 and 15; F<19_authors.t> tests 5, 13, 21, and 29; and
+F<20_authors_with_special_characters.t> tests 6, 15, and 23 in version
 1.00 of that distribution now fail.)
 
 =back
