@@ -544,7 +544,8 @@ L<Unicode Normalization Forms|http://www.unicode.org/unicode/reports/tr15> and
 sections on case mapping in the L<Unicode Standard|http://www.unicode.org>.
 
 As of Perl 5.8.0, the "Full" case-folding of I<Case
-Mappings/SpecialCasing> is implemented, but bugs remain in C<qr//i> with them.
+Mappings/SpecialCasing> is implemented, but bugs remain in C<qr//i> with them,
+mostly fixed by 5.14.
 
 =item *
 
@@ -784,8 +785,14 @@ L<http://www.cl.cam.ac.uk/~mgk25/unicode.html>
 
 How Does Unicode Work With Traditional Locales?
 
-In Perl, not very well.  Avoid using locales through the C<locale>
-pragma.  Use only one or the other.  But see L<perlrun> for the
+Perl tries to keep the two separated.  Code points that are above 255
+are treated as Unicode; those below 256, generally as locale.  This
+works reasonably well except in some case-insensitive regular expression
+pattern matches that in Unicode would cross the 255/256 boundary.  These
+are disallowed.
+Also, the C<\p{}> and C<\N{}> constructs silently assume Unicode values
+even for code points below 256.
+See also L<perlrun> for the
 description of the C<-C> switch and its environment counterpart,
 C<$ENV{PERL_UNICODE}> to see how to enable various Unicode features,
 for example by using locale settings.
