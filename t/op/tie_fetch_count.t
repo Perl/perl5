@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 209);
+    plan (tests => 210);
 }
 
 use strict;
@@ -165,6 +165,7 @@ $dummy  = @$var2        ; check_count '@{}';
 $dummy  = shift $var2   ; check_count 'shift arrayref';
 tie my $var3 => 'main', {};
 $dummy  = %$var3        ; check_count '%{}';
+$dummy  = keys $var3    ; check_count 'keys hashref';
 {
     no strict 'refs';
     tie my $var4 => 'main', **;
