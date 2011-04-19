@@ -1,8 +1,9 @@
 #!./perl -w
 
 #
-# Compare the current Perl source tree and a given tag for modules that
-# have identical version numbers but different contents.
+# Compare the current Perl source tree against the version at the most
+# recent tag, for modules that have identical version numbers but
+# different contents. Skips cpan/.
 #
 # Original by slaven@rezic.de, modified by jhi and matt.w.johnson@gmail.com
 #
