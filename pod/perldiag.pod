@@ -4660,10 +4660,10 @@ certain type.  Arrays must be @NAME or C<@{EXPR}>.  Hashes must be
 %NAME or C<%{EXPR}>.  No implicit dereferencing is allowed--use the
 {EXPR} forms as an explicit dereference.  See L<perlref>.
 
-=item Type of argument to %s must be hashref or arrayref
+=item Type of argument to %s must be unblessed hashref or arrayref
 
-(F) You called C<keys>, C<values> or C<each> with an argument that was
-expected to be a reference to a hash or a reference to an array.
+(F) You called C<keys>, C<values> or C<each> with a scalar argument that
+was not a reference to an unblessed hash or array.
 
 =item umask not implemented
 

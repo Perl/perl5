@@ -9171,11 +9171,16 @@ Perl_ck_each(pTHX_ OP *o)
 		CHANGE_TYPE(o, array_type);
 		break;
 	    case OP_CONST:
-		if (kid->op_private == OPpCONST_BARE)
-		    /* we let ck_fun treat as hash */
+		if (kid->op_private == OPpCONST_BARE
+		 || !SvROK(cSVOPx_sv(kid))
+		 || (  SvTYPE(SvRV(cSVOPx_sv(kid))) != SVt_PVAV
+		    && SvTYPE(SvRV(cSVOPx_sv(kid))) != SVt_PVHV  )
+		   )
+		    /* we let ck_fun handle it */
 		    break;
 	    default:
 		CHANGE_TYPE(o, ref_type);
+		scalar(kid);
 	}
     }
     /* if treating as a reference, defer additional checks to runtime */

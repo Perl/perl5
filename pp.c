@@ -4836,51 +4836,17 @@ PP(pp_rkeys)
     dSP;
     dPOPss;
 
-    if (!SvOK(sv))
-	RETURN;
+    SvGETMAGIC(sv);
 
-    if (SvROK(sv)) {
-	SvGETMAGIC(sv);
-	if (SvAMAGIC(sv)) {
-	    /* N.B.: AMG macros return sv if no overloading is found */
-	    SV *maybe_hv = AMG_CALLunary(sv, to_hv_amg);
-	    SV *maybe_av = AMG_CALLunary(sv, to_av_amg);
-	    if ( maybe_hv != sv && maybe_av != sv ) {
-		Perl_ck_warner(aTHX_ packWARN(WARN_AMBIGUOUS), "%s",
-		    Perl_form(aTHX_ "Ambiguous overloaded argument to %s resolved as %%{}",
-			PL_op_desc[PL_op->op_type]
-		    )
-		);
-		sv = maybe_hv;
-	    }
-	    else if ( maybe_av != sv ) {
-		if ( SvTYPE(SvRV(sv)) == SVt_PVHV ) {
-		    /* @{} overload, but underlying reftype is HV */
-		    Perl_ck_warner(aTHX_ packWARN(WARN_AMBIGUOUS), "%s",
-			Perl_form(aTHX_ "Ambiguous overloaded argument to %s resolved as @{}",
-			    PL_op_desc[PL_op->op_type]
-			)
-		    );
-		}
-		sv = maybe_av;
-	    }
-	    else if ( maybe_hv != sv ) {
-		if ( SvTYPE(SvRV(sv)) == SVt_PVAV ) {
-		    /* %{} overload, but underlying reftype is AV */
-		    Perl_ck_warner(aTHX_ packWARN(WARN_AMBIGUOUS), "%s",
-			Perl_form(aTHX_ "Ambiguous overloaded argument to %s resolved as %%{}",
-			    PL_op_desc[PL_op->op_type]
-			)
-		    );
-		}
-		sv = maybe_hv;
-	    }
-	}
-	sv = SvRV(sv);
-    }
-
-    if ( SvTYPE(sv) != SVt_PVHV && SvTYPE(sv) != SVt_PVAV ) {
-	DIE(aTHX_ "Type of argument to %s must be hashref or arrayref",
+    if (
+         !SvROK(sv)
+      || (sv = SvRV(sv),
+            (SvTYPE(sv) != SVt_PVHV && SvTYPE(sv) != SVt_PVAV)
+          || SvOBJECT(sv)
+         )
+    ) {
+	DIE(aTHX_
+	   "Type of argument to %s must be unblessed hashref or arrayref",
 	    PL_op_desc[PL_op->op_type] );
     }
 
