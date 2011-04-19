@@ -4578,6 +4578,13 @@ returns a random integer between C<0> and C<9>, inclusive.
 large or too small, then your version of Perl was probably compiled
 with the wrong number of RANDBITS.)
 
+B<C<rand()> is not cryptographically secure.  You should not rely
+on it in security-sensitive situations.>  As of this writing, a
+number of third-party CPAN modules offer random number generators
+intended by their authors to be cryptographically secure,
+including: L<Math::Random::Secure>, L<Math::Random::MT::Perl>, and
+L<Math::TrulyRandom>.
+
 =item read FILEHANDLE,SCALAR,LENGTH,OFFSET
 X<read> X<file, read>
 
