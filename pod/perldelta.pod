@@ -40,12 +40,12 @@ Unicode 6.0 has chosen to use the name C<BELL> for the character at U+1F514,
 which is a symbol that looks like a bell, and is used in Japanese cell
 phones.  This conflicts with the long-standing Perl usage of having
 C<BELL> mean the ASCII C<BEL> character, U+0007.  In Perl 5.14,
-C<\N{BELL}> continue to mean U+0007, but its use generates a
+C<\N{BELL}> continues to mean U+0007, but its use generates a
 deprecation warning message unless such warnings are turned off.  The
 new name for U+0007 in Perl is C<ALERT>, which corresponds nicely
 with the existing shorthand sequence for it, C<"\a">.  C<\N{BEL}>
 means U+0007, with no warning given.  The character at U+1F514 has no
-have a name in 5.14, but can be referred to by C<\N{U+1F514}>. 
+name in 5.14, but can be referred to by C<\N{U+1F514}>. 
 In Perl 5.16, C<\N{BELL}> will refer to U+1F514; all code
 that uses C<\N{BELL}> should be converted to use C<\N{ALERT}>,
 C<\N{BEL}>, or C<"\a"> before upgrading.
@@ -93,7 +93,7 @@ It is now possible to override Perl's abbreviations with your own custom aliases
 =item *
 
 You can now create a custom alias of the ordinal of a
-character, known by C<\N{...}>, C<charnames::vianame()>, and
+character, known by C<\N{I<NAME>}>, C<charnames::vianame()>, and
 C<charnames::viacode()>.  Previously, aliases had to be to official
 Unicode character names.  This made it impossible to create an alias for
 unnamed code points, such as those reserved for private
@@ -102,7 +102,7 @@ use.
 =item *
 
 The new function charnames::string_vianame() is a run-time version
-of C<\N{...}>, returning the string of characters whose Unicode
+of C<\N{I<NAME>}}>, returning the string of characters whose Unicode
 name is its parameter.  It can handle Unicode named character
 sequences, whereas the pre-existing charnames::vianame() cannot,
 as the latter returns a single code point.
@@ -721,9 +721,9 @@ such as signal handlers being wiped when modules were loaded, etc.
 This has been fixed (or the feature has been removed, depending on how you see
 it).
 
-=head3 local($_) strip all magic from $_
+=head3 local($_) strips all magic from $_
 
-local() on scalar variables gives them a new value but keep all
+local() on scalar variables gives them a new value but keeps all
 their magic intact.  This has proven problematic for the default
 scalar variable $_, where L<perlsub> recommends that any subroutine
 that assigns to $_ should first localize it.  This would throw an
@@ -887,13 +887,13 @@ accidentally relying on its incorrect behaviour.
 =head3 Perl source code is read in text mode on Windows
 
 Perl scripts used to be read in binary mode on Windows for the benefit
-of the C<ByteLoader> module (which is no longer part of core Perl).  This
+of the L<ByteLoader> module (which is no longer part of core Perl).  This
 had the side-effect of breaking various operations on the C<DATA> filehandle,
 including seek()/tell(), and even simply reading from C<DATA> after filehandles
 have been flushed by a call to system(), backticks, fork() etc.
 
 The default build options for Windows have been changed to read Perl source
-code on Windows in text mode now.  C<ByteLoader> will (hopefully) be updated on
+code on Windows in text mode now.  L<ByteLoader> will (hopefully) be updated on
 CPAN to automatically handle this situation [perl #28106].
 
 =head1 Deprecations
@@ -985,7 +985,7 @@ The match-once functionality is still available in the form of C<m?PATTERN?>.
 =head2 Tie functions on scalars holding typeglobs
 
 Calling a tie function (C<tie>, C<tied>, C<untie>) with a scalar argument
-acts on a gc if the scalar happens to hold a typeglob.
+acts on a filehandle if the scalar happens to hold a typeglob.
 
 This is a long-standing bug that will be removed in Perl 5.16, as
 there is currently no way to tie the scalar itself when it holds
@@ -1414,7 +1414,7 @@ newlines embedded in header values has been improved.
 
 L<Compress::Raw::Bzip2> has been upgraded from version 2.024 to 2.033.
 
-It has been updated to use L<bzip2> 1.0.6.
+It has been updated to use L<bzip2(1)> 1.0.6.
 
 =item *
 
@@ -1447,7 +1447,7 @@ Major highlights:
 
 =item * iron out all known bugs in configure_requires
 
-=item * support for distributions compressed with L<bzip2>
+=item * support for distributions compressed with L<bzip2(1)>
 
 =item * allow F<Foo/Bar.pm> on the command line to mean C<Foo::Bar>
 
@@ -1532,7 +1532,7 @@ It is now safe to use this module in combination with threads.
 
 L<Digest::SHA> has been upgraded from version 5.47 to 5.61.
 
-L<shasum> now more closely mimics L<sha1sum>/L<md5sum>.
+L<shasum> now more closely mimics L<sha1sum(1)>/L<md5sum(1)>.
 
 L<Addfile> accepts all POSIX filenames.
 
@@ -1575,7 +1575,7 @@ L<Errno> has been upgraded from version 1.11 to 1.13.
 
 The implementation of L<Errno> has been refactored to use about 55% less memory.
 
-On some platforms with unusual header files, like Win32 L<gcc> using C<mingw64>
+On some platforms with unusual header files, like Win32 L<gcc(1)> using C<mingw64>
 headers, some constants which weren't actually error numbers have been exposed
 by L<Errno>.  This has been fixed [perl #77416].
 
@@ -1833,7 +1833,7 @@ still generated.
 L<Module::CoreList> has been upgraded from version 2.29 to 2.47.
 
 Besides listing the updated core modules of this release, it also stops listing
-the L<Filespec> module.  That module never existed in core.  The scripts
+the C<Filespec> module.  That module never existed in core.  The scripts
 generating L<Module::CoreList> confused it with L<VMS::Filespec>, which actually
 is a core module as of Perl 5.8.7.
 
@@ -1870,7 +1870,7 @@ L<Object::Accessor> has been upgraded from version 0.36 to 0.38.
 
 =item *
 
-L<ODBM_File> have been upgraded from version 1.07 to 1.10.
+L<ODBM_File> has been upgraded from version 1.07 to 1.10.
 
 This fixes a memory leak when DBM filters are used.
 
@@ -2164,7 +2164,7 @@ of a code point that hasn't been assigned to another one.
 
 The L<version> pragma has been upgraded from 0.82 to 0.88.
 
-Due to a bug, now fixed, the C<is_strict> and C<is_lax> functions did not
+Due to a bug, now fixed, the C<is_strict()> and C<is_lax()> functions did not
 work when exported (5.12.1).
 
 =item *
@@ -2202,7 +2202,7 @@ identify objects connected to the local symbol table.
 
 The L<Win32> module has been upgraded from version 0.39 to 0.44.
 
-This release has several new functions: Win32::GetSystemMetrics,
+This release has several new functions: Win32::GetSystemMetrics(),
 Win32::GetProductInfo(), Win32::GetOSDisplayName().
 
 The names returned by Win32::GetOSName() and Win32::GetOSDisplayName()
@@ -2541,7 +2541,7 @@ two-character escape.  For example, "\q{" is now emitted instead of "\q".
 
 =head1 Utility Changes
 
-=head3 L<perlbug>
+=head3 L<perlbug(1)>
 
 =over 4
 
@@ -3800,7 +3800,7 @@ drawbacks, and the feature is scheduled to be removed in 5.16.
 
 =item 2
 
-C<quotemeta> (and its in-line equivalent C<\Q>) can also give different
+C<quotemeta()> (and its in-line equivalent C<\Q>) can also give different
 results depending on whether a string is encoded in UTF-8.  See
 L<perlunicode/The "Unicode Bug">.
 
@@ -4471,16 +4471,16 @@ F<Module-Install> distribution on CPAN to fail. (Specifically, F<02_mymeta.t> te
 
 =head1 Errata
 
-=head2 C<keys>, C<values>, and C<each> work on arrays
+=head2 C<keys()>, C<values()>, and C<each()> work on arrays
 
-You can now use the C<keys>, C<values>, and C<each> builtins on arrays;
+You can now use the C<keys()>, C<values()>, and C<each()> builtins on arrays;
 previously you could use them only on hashes.  See L<perlfunc> for details.
 This is actually a change introduced in perl 5.12.0, but it was missed from
 that release's L<perl5120delta>.
 
-=head2 C<split> and C<@_>
+=head2 C<split()> and C<@_>
 
-C<split> no longer modifies C<@_> when called in scalar or void context.
+C<split()> no longer modifies C<@_> when called in scalar or void context.
 In void context it now produces a "Useless use of split" warning.
 This was also a perl 5.12.0 changed that missed the perldelta.
 
