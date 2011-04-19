@@ -405,8 +405,8 @@ was passed the result of stringifying the object.
 
 =head3 Assignment to C<$0> sets the legacy process name with prctl() on Linux
 
-On Linux the legacy process name is now set with L<prctl(2), in
-addition to altering the POSIX name via C<argv[0]> as Perl has done
+On Linux the legacy process name is now set with L<prctl(2)>, in
+addition to altering the POSIX name via C<argv[0]>, as Perl has done
 since version 4.000.  Now system utilities that read the legacy process
 name such as I<ps>, I<top>, and I<killall> recognize the name you set when
 assigning to C<$0>.  The string you supply is truncated at 16 bytes;
@@ -859,7 +859,7 @@ in use by another thread.  It returns true in such cases.
 =head3 fork() emulation will not wait for signalled children
 
 On Windows parent processes would not terminate until all forked
-childred had terminated first.  However, C<kill("KILL", ...)> is
+children had terminated first.  However, C<kill("KILL", ...)> is
 inherently unstable on pseudo-processes, and C<kill("TERM", ...)>
 might not get delivered if the child is blocked in a system call.
 
@@ -1823,7 +1823,7 @@ directly upon L<version>.  L<Module::Build::ModuleInfo> has been deprecated in
 favor of a standalone copy of it called L<Module::Metadata>.
 L<Module::Build::YAML> has been deprecated in favor of L<CPAN::Meta::YAML>.
 
-L<Module::Build now> also generates F<META.json> and F<MYMETA.json> files
+L<Module::Build> now also generates F<META.json> and F<MYMETA.json> files
 in accordance with version 2 of the CPAN distribution metadata specification,
 L<CPAN::Meta::Spec>.  The older format F<META.yml> and F<MYMETA.yml> files are
 still generated.
@@ -3364,7 +3364,7 @@ Perl no longer produces this warning:
 
 =item *
 
-Opening a glob reference via C<< open($fh, ">", \*glob)>> will no longer
+Opening a glob reference via C<< open($fh, ">", \*glob) >> will no longer
 cause the glob to be corrupted when the filehandle is printed to.  This would
 cause Perl to crash whenever the glob's contents were accessed
 [perl #77492].
@@ -3968,7 +3968,7 @@ arguments.
 C<< <expr> >> always respects overloading now if the expression is
 overloaded.
 
-Due to the way that "S<< <> as>> glob" was parsed differently from
+Due to the way that "S<< <> as >> glob" was parsed differently from
 "S<< <> as >> filehandle" from 5.6 onwards, something like C<< <$foo[0]> >> did
 not handle overloading, even if C<$foo[0]> was an overloaded object.  This
 was contrary to the documentation for L<overload>, and meant that C<< <> >>
