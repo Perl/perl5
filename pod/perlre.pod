@@ -51,7 +51,8 @@ X<regular expression, case-insensitive>
 
 Do case-insensitive pattern matching.
 
-If C<use locale> is in effect, the case map is taken from the current
+If locale matching rules are in effect, the case map is taken from the
+current
 locale for code points less than 255, and from Unicode rules for larger
 code points.  However, matches that would cross the Unicode
 rules/non-Unicode rules boundary (ords 255/256) will not succeed.  See
@@ -188,12 +189,6 @@ is.
 
 This modifier may be specified to be the default by C<use locale>, but
 see L</Which character set modifier is in effect?>.
-
-Note that what C</l> essentially means is "if there is a locale, use
-it".  It does not set up the locale.  For that, it needs to execute
-within the scope of C<use locale> after a C<setlocale()>.  Otherwise the
-default "C" or "POSIX" locale is used, which should be equivalent to
-ASCII (though some platforms violate this.)
 X</l>
 
 =head4 /u
