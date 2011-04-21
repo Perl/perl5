@@ -1023,7 +1023,7 @@ rather than by name, just install C<Task::Deprecations::5_14>.
 =item L<Devel::DProf>
 
 We strongly recommend that you install and use L<Devel::NYTProf> instead
-of L<Devel::Dprof>, as L<Devel::NYTProf> offers significantly 
+of L<Devel::DProf>, as L<Devel::NYTProf> offers significantly
 improved profiling and reporting.
 
 =back
