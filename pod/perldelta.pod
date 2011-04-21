@@ -167,7 +167,7 @@ See L<perlre/Extended Patterns>.
 This change is likely to break code that compares stringified regular
 expressions with fixed strings containing C<?-xism>.
 
-=head3 C</d>, C</l>, C</u>, C</a>, and C</aa> modifiers
+=head3 C</d>, C</l>, C</u>, and C</a> modifiers
 
 Four new regular expression modifiers have been added.  These are mutually
 exclusive: one only can be turned on at a time.
@@ -198,9 +198,7 @@ complements and C<\b> and C<\B> are correspondingly
 affected.  Otherwise, C</a> behaves like the C</u> modifier, in that
 case-insensitive matching uses Unicode semantics.
 
-=item *
-
-The C</aa> modifier is like C</a>, except that, in case-insensitive
+If the C</a> modifier is repeated, then additionally in case-insensitive
 matching, no ASCII character can match a non-ASCII character.
 For example,
 
