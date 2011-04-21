@@ -4434,6 +4434,19 @@ tests 6 and 15; F<19_authors.t> tests 5, 13, 21, and 29; and
 F<20_authors_with_special_characters.t> tests 6, 15, and 23 in version
 1.00 of that distribution now fail.)
 
+=item *
+
+On VMS, C<Time::HiRes> tests will fail due to a bug in the CRTL's
+implementation of C<setitimer>: previous timer values would be cleared
+if a timer expired but not if the timer was reset before expiring.  HP
+OpenVMS Engineering have corrected the problem and will release a patch
+in due course (Quix case # QXCM1001115136).
+
+=item *
+
+On VMS, there were a handful of C<Module::Build> test failures we didn't
+get to before the release; please watch CPAN for updates.
+
 =back
 
 =head1 Errata
