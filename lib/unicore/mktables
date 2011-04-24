@@ -11632,10 +11632,17 @@ sub compile_perl() {
                               0xFF10..0xFF19, 0xFF21..0xFF26, 0xFF41..0xFF46]);
         $Xdigit->add_description('[0-9A-Fa-f] and corresponding fullwidth versions, like U+FF10: FULLWIDTH DIGIT ZERO');
     }
-    $perl->add_match_table('PosixXDigit',
-                            Initialize => $ASCII & $Xdigit,
-                            Description => '[0-9A-Fa-f]',
-                        );
+
+    # AHex was not present in early releases
+    my $PosixXDigit = $perl->add_match_table('PosixXDigit');
+    my $AHex = property_ref('ASCII_Hex_Digit');
+    if (defined $AHex && ! $AHex->is_empty) {
+        $PosixXDigit->set_equivalent_to($AHex->table('Y'), Related => 1);
+    }
+    else {
+        $PosixXDigit->initialize($Xdigit & $ASCII);
+    }
+    $PosixXDigit->add_description('[0-9A-Fa-f]');
 
     my $dt = property_ref('Decomposition_Type');
     $dt->add_match_table('Non_Canon', Full_Name => 'Non_Canonical',
