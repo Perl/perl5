@@ -992,7 +992,7 @@ any pair of delimiters you choose.
 	* unless the delimiter is ''.
 
 Non-bracketing delimiters use the same character fore and aft, but the four
-sorts of brackets (round, angle, square, curly) will all nest, which means
+sorts of ASCII brackets (round, angle, square, curly) will all nest, which means
 that
 
 	q{foo{bar}baz}
