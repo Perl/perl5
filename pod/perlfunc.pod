@@ -7326,6 +7326,7 @@ package.  It is exactly equivalent to
     BEGIN { require Module; Module->import( LIST ); }
 
 except that Module I<must> be a bareword.
+The importation can be made conditional, see L<if>.
 
 In the peculiar C<use VERSION> form, VERSION may be either a positive
 decimal fraction such as 5.006, which will be compared to C<$]>, or a v-string
