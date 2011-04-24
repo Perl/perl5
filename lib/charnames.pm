@@ -2,7 +2,7 @@ package charnames;
 use strict;
 use warnings;
 use File::Spec;
-our $VERSION = '1.18';
+our $VERSION = '1.19';
 
 use bytes ();          # for $bytes::hint_bits
 
@@ -1339,8 +1339,8 @@ state of C<bytes>-flag as in:
 
 See L</CUSTOM ALIASES> above for restrictions on I<CHARNAME>.
 
-Of course, C<vianame> and C<viacode> would need to be overridden as
-well.
+Of course, C<vianame>, C<viacode>, and C<string_vianame> would need to be
+overridden as well.
 
 =head1 BUGS
 
