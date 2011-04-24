@@ -128,7 +128,7 @@ plus three 'ones'.  This positional notation does not necessarily apply
 to characters that match the other type of "digit",
 C<\p{Numeric_Type=Digit}>, and so C<\d> doesn't match them.
 
-In Unicode 5.2, the Tamil digits (U+0BE6 - U+0BEF) can also legally be
+The Tamil digits (U+0BE6 - U+0BEF) can also legally be
 used in old-style Tamil numbers in which they would appear no more than
 one in a row, separated by characters that mean "times 10", "times 100",
 etc.  (See L<http://www.unicode.org/notes/tn21>.)
@@ -192,8 +192,9 @@ characters.  See L<http://unicode.org/reports/tr36>.
 
 Also, for a somewhat finer-grained set of characters that are in programming
 language identifiers beyond the ASCII range, you may wish to instead use the
-more customized Unicode properties, "ID_Start", ID_Continue", "XID_Start", and
-"XID_Continue".  See L<http://unicode.org/reports/tr31>.
+more customized L</Unicode Properties>, C<\p{ID_Start}>,
+C<\p{ID_Continue}>, C<\p{XID_Start}>, and C<\p{XID_Continue}>.  See
+L<http://unicode.org/reports/tr31>.
 
 Any character not matched by C<\w> is matched by C<\W>.
 
@@ -329,7 +330,7 @@ which means to match if the property "name" for the character has that particula
 For instance, a match for a number can be written as C</\pN/> or as
 C</\p{Number}/>, or as C</\p{Number=True}/>.
 Lowercase letters are matched by the property I<Lowercase_Letter> which
-has as short form I<Ll>. They need the braces, so are written as C</\p{Ll}/> or
+has the short form I<Ll>. They need the braces, so are written as C</\p{Ll}/> or
 C</\p{Lowercase_Letter}/>, or C</\p{General_Category=Lowercase_Letter}/>
 (the underscores are optional).
 C</\pLl/> is valid, but means something different.
@@ -353,11 +354,11 @@ C<Lowercase>,
 and C<Titlecase>,
 all of which match C<Cased> under C</i> matching.
 (The difference between these sets is that some things, such as Roman
-Numerals, come in both upper and lower case so they are C<Cased>, but
+numerals, come in both upper and lower case, so they are C<Cased>, but
 aren't considered to be letters, so they aren't C<Cased_Letter>s. They're
 actually C<Letter_Number>s.)
 This set also includes its subsets C<PosixUpper> and C<PosixLower>, both
-of which under C</i> matching match C<PosixAlpha>.
+of which under C</i> match C<PosixAlpha>.
 
 For more details on Unicode properties, see L<perlunicode/Unicode
 Character Properties>; for a
@@ -503,7 +504,7 @@ of listing all characters in the range, one may use the hyphen (C<->).
 If inside a bracketed character class you have two characters separated
 by a hyphen, it's treated as if all characters between the two were in
 the class. For instance, C<[0-9]> matches any ASCII digit, and C<[a-m]>
-matches any lowercase letter from the first half of the old ASCII alphabet.
+matches any lowercase letter from the first half of the ASCII alphabet.
 
 Note that the two characters on either side of the hyphen are not
 necessarily both letters or both digits. Any character is possible,
@@ -537,13 +538,13 @@ Examples:
 It is also possible to instead list the characters you do not want to
 match. You can do so by using a caret (C<^>) as the first character in the
 character class. For instance, C<[^a-z]> matches any character that is not a
-lowercase ASCII letter, which therefore includes almost a hundred thousand
-Unicode letters.  The class is said to be "negated" or "inverted".
+lowercase ASCII letter, which therefore includes more than a million
+Unicode code points.  The class is said to be "negated" or "inverted".
 
 This syntax make the caret a special character inside a bracketed character
 class, but only if it is the first character of the class. So if you want
 the caret as one of the characters to match, either escape the caret or
-else not list it first.
+else don't list it first.
 
 In inverted bracketed character classes, Perl ignores the Unicode rules
 that normally say that a given character matches a sequence of multiple
@@ -711,7 +712,7 @@ C<[-!"#%&'()*,./:;?@[\\\]_{}]>.  That is, it is missing C<[$+E<lt>=E<gt>^`|~]>.
 This is because Unicode splits what POSIX considers to be punctuation into two
 categories, Punctuation and Symbols.
 
-C<\p{XPosixPunct}> and (in Unicode mode) C<[[:punct:]]>, match what
+C<\p{XPosixPunct}> and (under Unicode rules) C<[[:punct:]]>, match what
 C<\p{PosixPunct}> matches in the ASCII range, plus what C<\p{Punct}>
 matches.  This is different than strictly matching according to
 C<\p{Punct}>.  Another way to say it is that
