@@ -13,6 +13,7 @@
 #
 #
 # run perl regen.pl after editing this file
+# Also update perlredebguts.pod
 
 
 
