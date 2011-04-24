@@ -651,65 +651,6 @@ character in the entire Unicode character set considered alphabetic.
 The column labelled "backslash sequence" is a (short) synonym for
 the Full-range Unicode form.
 
-(Each of the counterparts has various synonyms as well.
-L<perluniprops/Properties accessible through \p{} and \P{}> lists all
-synonyms, plus all characters matched by each ASCII-range property.
-For example, C<\p{AHex}> is a synonym for C<\p{ASCII_Hex_Digit}>,
-and any C<\p> property name can be prefixed with "Is" such as C<\p{IsAlpha}>.)
-
-Both the C<\p> counterparts always assume Unicode rules are in effect.
-On ASCII platforms, this means they assume that the code points from 128
-to 255 are Latin-1, and that means that using them under locale rules is
-unwise unless the locale is guaranteed to be Latin-1 or UTF-8.  In contrast, the
-POSIX character classes are useful under locale rules.  They are
-affected by the actual rules in effect, as follows:
-
-=over
-
-=item If the C</a> modifier, is in effect ...
-
-Each of the POSIX classes matches exactly the same as their ASCII-range
-counterparts.
-
-=item otherwise ...
-
-=over
-
-=item For code points above 255 ...
-
-The POSIX class matches the same as its Full-range counterpart.
-
-=item For code points below 256 ...
-
-=over
-
-=item if locale rules are in effect ...
-
-The POSIX class matches according to the locale.
-
-=item if Unicode rules are in effect or if on an EBCDIC platform ...
-
-The POSIX class matches the same as the Full-range counterpart.
-
-=item otherwise ...
-
-The POSIX class matches the same as the ASCII range counterpart.
-
-=back
-
-=back
-
-=back
-
-Which rules apply are determined as described in
-L<perlre/Which character set modifier is in effect?>.
-
-It is proposed to change this behavior in a future release of Perl so that
-whether or not Unicode rules are in effect would not change the
-behavior:  Outside of locale or an EBCDIC code page, the POSIX classes
-would behave like their ASCII-range counterparts.  If you wish to
-comment on this proposal, send email to C<perl5-porters@perl.org>.
-
  [[:...:]]      ASCII-range          Full-range  backslash  Note
                  Unicode              Unicode     sequence
  -----------------------------------------------------
@@ -786,10 +727,64 @@ matches the vertical tab, C<\cK>.   Same for the two ASCII-only range forms.
 
 =back
 
-There are various other synonyms that can be used for these besides
-C<\p{HorizSpace}> and \C<\p{XPosixBlank}>.  For example,
-C<\p{PosixAlpha}> can be written as C<\p{Alpha}>.  All are listed
-in L<perluniprops/Properties accessible through \p{} and \P{}>.
+There are various other synonyms that can be used besides the names
+listed in the table.  For example, C<\p{PosixAlpha}> can be written as
+C<\p{Alpha}>.  All are listed in
+L<perluniprops/Properties accessible through \p{} and \P{}>,
+plus all characters matched by each ASCII-range property.
+
+Both the C<\p> counterparts always assume Unicode rules are in effect.
+On ASCII platforms, this means they assume that the code points from 128
+to 255 are Latin-1, and that means that using them under locale rules is
+unwise unless the locale is guaranteed to be Latin-1 or UTF-8.  In contrast, the
+POSIX character classes are useful under locale rules.  They are
+affected by the actual rules in effect, as follows:
+
+=over
+
+=item If the C</a> modifier, is in effect ...
+
+Each of the POSIX classes matches exactly the same as their ASCII-range
+counterparts.
+
+=item otherwise ...
+
+=over
+
+=item For code points above 255 ...
+
+The POSIX class matches the same as its Full-range counterpart.
+
+=item For code points below 256 ...
+
+=over
+
+=item if locale rules are in effect ...
+
+The POSIX class matches according to the locale.
+
+=item if Unicode rules are in effect or if on an EBCDIC platform ...
+
+The POSIX class matches the same as the Full-range counterpart.
+
+=item otherwise ...
+
+The POSIX class matches the same as the ASCII range counterpart.
+
+=back
+
+=back
+
+=back
+
+Which rules apply are determined as described in
+L<perlre/Which character set modifier is in effect?>.
+
+It is proposed to change this behavior in a future release of Perl so that
+whether or not Unicode rules are in effect would not change the
+behavior:  Outside of locale or an EBCDIC code page, the POSIX classes
+would behave like their ASCII-range counterparts.  If you wish to
+comment on this proposal, send email to C<perl5-porters@perl.org>.
 
 =head4 Negation of POSIX character classes
 X<character class, negation>
