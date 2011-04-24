@@ -72,6 +72,20 @@ character classes, see L<perlrebackslash>.)
  \pP, \p{Prop}  Match a character that has the given Unicode property.
  \PP, \P{Prop}  Match a character that doesn't have the Unicode property
 
+=head3 \N
+
+C<\N> is new in 5.12, and is experimental.  It, like the dot, matches any
+character that is not a newline. The difference is that C<\N> is not influenced
+by the I<single line> regular expression modifier (see L</The dot> above).  Note
+that the form C<\N{...}> may mean something completely different.  When the
+C<{...}> is a L<quantifier|perlre/Quantifiers>, it means to match a non-newline
+character that many times.  For example, C<\N{3}> means to match 3
+non-newlines; C<\N{5,}> means to match 5 or more non-newlines.  But if C<{...}>
+is not a legal quantifier, it is presumed to be a named character.  See
+L<charnames> for those.  For example, none of C<\N{COLON}>, C<\N{4F}>, and
+C<\N{F4}> contain legal quantifiers, so Perl will try to find characters whose
+names are respectively C<COLON>, C<4F>, and C<F4>.
+
 =head3 Digits
 
 C<\d> matches a single character considered to be a decimal I<digit>.
@@ -302,20 +316,6 @@ on the rules in effect.  See
 L<the beginning of this section|/Whitespace>.
 
 =back
-
-=head3 \N
-
-C<\N> is new in 5.12, and is experimental.  It, like the dot, matches any
-character that is not a newline. The difference is that C<\N> is not influenced
-by the I<single line> regular expression modifier (see L</The dot> above).  Note
-that the form C<\N{...}> may mean something completely different.  When the
-C<{...}> is a L<quantifier|perlre/Quantifiers>, it means to match a non-newline
-character that many times.  For example, C<\N{3}> means to match 3
-non-newlines; C<\N{5,}> means to match 5 or more non-newlines.  But if C<{...}>
-is not a legal quantifier, it is presumed to be a named character.  See
-L<charnames> for those.  For example, none of C<\N{COLON}>, C<\N{4F}>, and
-C<\N{F4}> contain legal quantifiers, so Perl will try to find characters whose
-names are respectively C<COLON>, C<4F>, and C<F4>.
 
 =head3 Unicode Properties
 
