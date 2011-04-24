@@ -139,6 +139,7 @@
 #define Perl_pp_reach Perl_pp_rkeys
 #define Perl_pp_rvalues Perl_pp_rkeys
 #define Perl_pp_transr Perl_pp_trans
+#define Perl_pp_aelemfast_lex Perl_pp_aelemfast
 START_EXTERN_C
 
 #ifndef DOINIT
@@ -515,6 +516,7 @@ EXTCONST char* const PL_op_name[] = {
 	"rkeys",
 	"rvalues",
 	"transr",
+	"aelemfast_lex",
 };
 #endif
 
@@ -892,6 +894,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"keys on reference",
 	"values on reference",
 	"transliteration (tr///)",
+	"constant lexical array element",
 };
 #endif
 
@@ -1283,6 +1286,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_rkeys,
 	Perl_pp_rvalues,	/* implemented by Perl_pp_rkeys */
 	Perl_pp_transr,	/* implemented by Perl_pp_trans */
+	Perl_pp_aelemfast_lex,	/* implemented by Perl_pp_aelemfast */
 }
 #endif
 #ifdef PERL_PPADDR_INITED
@@ -1671,6 +1675,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_each,		/* rkeys */
 	Perl_ck_each,		/* rvalues */
 	Perl_ck_match,		/* transr */
+	Perl_ck_null,		/* aelemfast_lex */
 }
 #endif
 #ifdef PERL_CHECK_INITED
@@ -2053,6 +2058,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00001b08,	/* rkeys */
 	0x00001b08,	/* rvalues */
 	0x00001804,	/* transr */
+	0x00013040,	/* aelemfast_lex */
 };
 #endif
 

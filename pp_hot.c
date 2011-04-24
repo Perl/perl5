@@ -671,7 +671,7 @@ PP(pp_add)
 PP(pp_aelemfast)
 {
     dVAR; dSP;
-    AV * const av = PL_op->op_flags & OPf_SPECIAL
+    AV * const av = PL_op->op_type == OP_AELEMFAST_LEX
 	? MUTABLE_AV(PAD_SV(PL_op->op_targ)) : GvAVn(cGVOP_gv);
     const U32 lval = PL_op->op_flags & OPf_MOD;
     SV** const svp = av_fetch(av, PL_op->op_private, lval);

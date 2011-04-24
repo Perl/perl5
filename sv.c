@@ -13865,21 +13865,20 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	    break;
 	return varname(gv, '$', 0, NULL, 0, FUV_SUBSCRIPT_NONE);
 
-    case OP_AELEMFAST:
-	if (obase->op_flags & OPf_SPECIAL) { /* lexical array */
-	    if (match) {
-		SV **svp;
-		AV *av = MUTABLE_AV(PAD_SV(obase->op_targ));
-		if (!av || SvRMAGICAL(av))
-		    break;
-		svp = av_fetch(av, (I32)obase->op_private, FALSE);
-		if (!svp || *svp != uninit_sv)
-		    break;
-	    }
-	    return varname(NULL, '$', obase->op_targ,
-		    NULL, (I32)obase->op_private, FUV_SUBSCRIPT_ARRAY);
+    case OP_AELEMFAST_LEX:
+	if (match) {
+	    SV **svp;
+	    AV *av = MUTABLE_AV(PAD_SV(obase->op_targ));
+	    if (!av || SvRMAGICAL(av))
+		break;
+	    svp = av_fetch(av, (I32)obase->op_private, FALSE);
+	    if (!svp || *svp != uninit_sv)
+		break;
 	}
-	else {
+	return varname(NULL, '$', obase->op_targ,
+		       NULL, (I32)obase->op_private, FUV_SUBSCRIPT_ARRAY);
+    case OP_AELEMFAST:
+	{
 	    gv = cGVOPx_gv(obase);
 	    if (!gv)
 		break;

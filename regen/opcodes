@@ -540,3 +540,5 @@ rvalues		values on reference			ck_each		t%	S
 
 # y///r
 transr		transliteration (tr///)	ck_match	is"	S
+
+aelemfast_lex	constant lexical array element	ck_null		d0	A S

@@ -123,6 +123,7 @@ my @raw_alias = (
 		 Perl_pp_ehostent => [qw(enetent eprotoent eservent
 					 spwent epwent sgrent egrent)],
 		 Perl_pp_shostent => [qw(snetent sprotoent sservent)],
+		 Perl_pp_aelemfast => ['aelemfast_lex'],
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {

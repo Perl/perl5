@@ -731,3 +731,10 @@ values $!;
 ####
 # readpipe with complex expression
 readpipe $a + $b;
+####
+# aelemfast
+$b::a[0] = 1;
+####
+# aelemfast for a lexical
+my @a;
+$a[0] = 1;

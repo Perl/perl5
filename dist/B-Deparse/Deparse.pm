@@ -2917,22 +2917,25 @@ sub pp_gv {
     return $self->gv_name($gv);
 }
 
+sub pp_aelemfast_lex {
+    my $self = shift;
+    my($op, $cx) = @_;
+    my $name = $self->padname($op->targ);
+    $name =~ s/^@/\$/;
+    return $name . "[" .  ($op->private + $self->{'arybase'}) . "]";
+}
+
 sub pp_aelemfast {
     my $self = shift;
     my($op, $cx) = @_;
-    my $name;
-    if ($op->flags & OPf_SPECIAL) { # optimised PADAV
-	$name = $self->padname($op->targ);
-	$name =~ s/^@/\$/;
-    }
-    else {
-	my $gv = $self->gv_or_padgv($op);
-	$name = $self->gv_name($gv);
-	$name = $self->{'curstash'}."::$name"
-	    if $name !~ /::/ && $self->lex_in_scope('@'.$name);
-	$name = '$' . $name;
-    }
+    # optimised PADAV, pre 5.15
+    return $self->pp_aelemfast_lex(@_) if ($op->flags & OPf_SPECIAL);
 
+    my $gv = $self->gv_or_padgv($op);
+    my $name = $self->gv_name($gv);
+    $name = $self->{'curstash'}."::$name"
+	if $name !~ /::/ && $self->lex_in_scope('@'.$name);
+    $name = '$' . $name;
     return $name . "[" .  ($op->private + $self->{'arybase'}) . "]";
 }
 

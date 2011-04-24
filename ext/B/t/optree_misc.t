@@ -15,12 +15,14 @@ plan tests => 6;
 SKIP: {
 skip "no perlio in this build", 4 unless $Config::Config{useperlio};
 
-# The regression this is testing is that the first aelemfast, derived
+# The regression this was testing is that the first aelemfast, derived
 # from a lexical array, is supposed to be a BASEOP "<0>", while the
 # second, from a global, is an SVOP "<$>" or a PADOP "<#>" depending
 # on threading. In buggy versions, both showed up as SVOPs/PADOPs. See
 # B.xs:cc_opclass() for the relevant code.
 
+# All this is much simpler, now that aelemfast_lex has been broken out from
+# aelemfast
 checkOptree ( name	=> 'OP_AELEMFAST opclass',
 	      code	=> sub { my @x; our @y; $x[0] + $y[0]},
 	      strip_open_hints => 1,
@@ -35,7 +37,7 @@ checkOptree ( name	=> 'OP_AELEMFAST opclass',
 # 6        <;> nextstate(main 636 optree_misc.t:25) v:>,<,%,{ ->7
 # 9        <2> add[t6] sK/2 ->a
 # -           <1> ex-aelem sK/2 ->8
-# 7              <0> aelemfast[@x:634,636] sR* ->8
+# 7              <0> aelemfast_lex[@x:634,636] sR ->8
 # -              <0> ex-const s ->-
 # -           <1> ex-aelem sK/2 ->9
 # -              <1> ex-rv2av sKR/1 ->-
@@ -52,7 +54,7 @@ EOT_EOT
 # 6        <;> nextstate(main 636 optree_misc.t:27) v:>,<,%,{ ->7
 # 9        <2> add[t4] sK/2 ->a
 # -           <1> ex-aelem sK/2 ->8
-# 7              <0> aelemfast[@x:634,636] sR* ->8
+# 7              <0> aelemfast_lex[@x:634,636] sR ->8
 # -              <0> ex-const s ->-
 # -           <1> ex-aelem sK/2 ->9
 # -              <1> ex-rv2av sKR/1 ->-

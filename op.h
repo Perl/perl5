@@ -130,7 +130,6 @@ Deprecated.  Use C<GIMME_V> instead.
 				    defined()*/
 				/*  On OP_DBSTATE, indicates breakpoint
 				 *    (runtime property) */
-				/*  On OP_AELEMFAST, indicates pad var */
 				/*  On OP_REQUIRE, was seen as CORE::require */
 				/*  On OP_ENTERWHEN, there's no condition */
 				/*  On OP_BREAK, an implicit break */

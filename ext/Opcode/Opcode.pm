@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.18";
+$VERSION = "1.19";
 
 use Carp;
 use Exporter ();
@@ -308,7 +308,7 @@ invert_opset function.
 
     rv2sv sassign
 
-    rv2av aassign aelem aelemfast aslice av2arylen
+    rv2av aassign aelem aelemfast aelemfast_lex aslice av2arylen
 
     rv2hv helem hslice each values keys exists delete aeach akeys avalues
     boolkeys reach rvalues rkeys

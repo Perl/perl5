@@ -125,9 +125,11 @@ cc_opclass(pTHX_ const OP *o)
 	return ((o->op_private & OPpASSIGN_BACKWARDS) ? OPc_UNOP : OPc_BINOP);
 
     if (o->op_type == OP_AELEMFAST) {
+#if PERL_VERSION <= 14
 	if (o->op_flags & OPf_SPECIAL)
 	    return OPc_BASEOP;
 	else
+#endif
 #ifdef USE_ITHREADS
 	    return OPc_PADOP;
 #else

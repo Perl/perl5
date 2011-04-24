@@ -571,8 +571,7 @@ Perl_op_clear(pTHX_ OP *o)
     case OP_GVSV:
     case OP_GV:
     case OP_AELEMFAST:
-	if (! (o->op_type == OP_AELEMFAST && o->op_flags & OPf_SPECIAL)) {
-	    /* not an OP_PADAV replacement */
+	{
 	    GV *gv = (o->op_type == OP_GV || o->op_type == OP_GVSV)
 #ifdef USE_ITHREADS
 			&& PL_curpad
@@ -1069,6 +1068,7 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_SPRINTF:
     case OP_AELEM:
     case OP_AELEMFAST:
+    case OP_AELEMFAST_LEX:
     case OP_ASLICE:
     case OP_HELEM:
     case OP_HSLICE:
@@ -1654,6 +1654,7 @@ Perl_op_lvalue(pTHX_ OP *o, I32 type)
 	break;
 
     case OP_AELEMFAST:
+    case OP_AELEMFAST_LEX:
 	localize = -1;
 	PL_modcount++;
 	break;
@@ -9538,10 +9539,10 @@ Perl_rpeep(pTHX_ register OP *o)
 		    if (o->op_type == OP_GV) {
 			gv = cGVOPo_gv;
 			GvAVn(gv);
+			o->op_type = OP_AELEMFAST;
 		    }
 		    else
-			o->op_flags |= OPf_SPECIAL;
-		    o->op_type = OP_AELEMFAST;
+			o->op_type = OP_AELEMFAST_LEX;
 		}
 		break;
 	    }
