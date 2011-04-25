@@ -412,7 +412,7 @@ Perl_mg_clear(pTHX_ SV *sv)
     return 0;
 }
 
-MAGIC*
+static MAGIC*
 S_mg_findext_flags(pTHX_ const SV *sv, int type, const MGVTBL *vtbl, U32 flags)
 {
     PERL_UNUSED_CONTEXT;
