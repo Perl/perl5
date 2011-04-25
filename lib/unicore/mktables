@@ -11552,8 +11552,8 @@ sub compile_perl() {
                                 );
     $XPerlSpace->add_alias('SpacePerl');    # A pre-existing synonym
     my $PerlSpace = $perl->add_match_table('PerlSpace',
-                            Description => '\s, restricted to ASCII',
-                            Initialize => $XPerlSpace & $ASCII,
+                        Description => '\s, restricted to ASCII = [ \f\n\r\t]',
+                        Initialize => $XPerlSpace & $ASCII,
                             );
 
 
