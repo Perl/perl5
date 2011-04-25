@@ -579,7 +579,7 @@ EOM
 		*" -xarch=generic64 is deprecated, use -m64 "*)
 		    getconfccflags=`echo $getconfccflags | sed -e 's/xarch=generic64/m64/'`
 		    getconfldflags=`echo $getconfldflags | sed -e 's/xarch=generic64/m64/'`
-		    getconflddlflags=`echo $getconfldllflags | sed -e 's/xarch=generic64/m64/'`
+		    getconflddlflags=`echo $getconflddlflags | sed -e 's/xarch=generic64/m64/'`
 		    ;;
 		esac
 		ccflags="$ccflags $getconfccflags"
