@@ -152,13 +152,13 @@ sub dynamic_lib {
       	$LDDLFLAGS .= " -Wl,--image-base=0x$imagebase";
       $s =~ s/ \$\(LDDLFLAGS\) / $LDDLFLAGS /m;
       # Need a tempfile, because gmake expands $_ in the perl cmdline
-      open F, ">", "_rebase.pl";
+      open F, ">", "_rebase";
       print F qq(/new base = (.+), new size = (.+)/ && printf("%x\\n",hex(\$1)+hex(\$2)););
       close F;
       # TODO Here we create all DLL's per project with the same imagebase. We'd need
       # a better tool to inc the imagebase.
       $s .= "\t/bin/rebase -v -b 0x$imagebase \$@ | ";
-      $s .= "\$(FULLPERL) -n _rebase.pl > \$(INSTALLVENDORARCH)/auto/.rebase\n";
+      $s .= "\$(FULLPERL) -n _rebase > \$(INSTALLVENDORARCH)/auto/.rebase\n";
     } else {
       warn "Hint: run perlrebase to initialize $rebase\n";
     }
