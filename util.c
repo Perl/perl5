@@ -4950,14 +4950,18 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 
     if ( SvNOK(ver) && !( SvPOK(ver) && sv_len(ver) == 3 ) )
     {
+	STRLEN len;
+
 	/* may get too much accuracy */ 
 	char tbuf[64];
 #ifdef USE_LOCALE_NUMERIC
-	char *loc = setlocale(LC_NUMERIC, "C");
+	char *loc = savepv(setlocale(LC_NUMERIC, NULL));
+	setlocale(LC_NUMERIC, "C");
 #endif
-	STRLEN len = my_snprintf(tbuf, sizeof(tbuf), "%.9"NVff, SvNVX(ver));
+	len = my_snprintf(tbuf, sizeof(tbuf), "%.9"NVff, SvNVX(ver));
 #ifdef USE_LOCALE_NUMERIC
 	setlocale(LC_NUMERIC, loc);
+	Safefree(loc);
 #endif
 	while (tbuf[len-1] == '0' && len > 0) len--;
 	if ( tbuf[len-1] == '.' ) len--; /* eat the trailing decimal */

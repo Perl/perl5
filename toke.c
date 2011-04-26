@@ -2193,11 +2193,13 @@ S_force_version(pTHX_ char *s, int guessing)
         if (*d == ';' || isSPACE(*d) || *d == '{' || *d == '}' || !*d) {
 	    SV *ver;
 #ifdef USE_LOCALE_NUMERIC
-	    char *loc = setlocale(LC_NUMERIC, "C");
+	    char *loc = savepv(setlocale(LC_NUMERIC, NULL));
+	    setlocale(LC_NUMERIC, "C");
 #endif
             s = scan_num(s, &pl_yylval);
 #ifdef USE_LOCALE_NUMERIC
 	    setlocale(LC_NUMERIC, loc);
+	    Safefree(loc);
 #endif
             version = pl_yylval.opval;
 	    ver = cSVOPx(version)->op_sv;
