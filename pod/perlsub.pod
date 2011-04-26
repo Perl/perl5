@@ -217,7 +217,7 @@ X<recursion>
 Not only does the C<&> form make the argument list optional, it also
 disables any prototype checking on arguments you do provide.  This
 is partly for historical reasons, and partly for having a convenient way
-to cheat if you know what you're doing.  See L<Prototypes> below.
+to cheat if you know what you're doing.  See L</Prototypes> below.
 X<&>
 
 Subroutines whose names are in all upper case are reserved to the Perl
