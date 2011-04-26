@@ -13,7 +13,7 @@ between threads must be explicit.  The user-level interface for I<ithreads>
 uses the L<threads> class.
 
 B<NOTE>: There was another older Perl threading flavor called the 5.005 model
-that used the L<Threads> class.  This old model was known to have problems, is
+that used the L<threads> class.  This old model was known to have problems, is
 deprecated, and was removed for release 5.10.  You are
 strongly encouraged to migrate any existing 5.005 threads code to the new
 model as soon as possible.
@@ -1043,7 +1043,7 @@ give you the full POSIX API).  For example, there is no way to
 guarantee that a signal sent to a multi-threaded Perl application
 will get intercepted by any particular thread.  (However, a recently
 added feature does provide the capability to send signals between
-threads.  See L<threads/"THREAD SIGNALLING> for more details.)
+threads.  See L<threads/THREAD SIGNALLING> for more details.)
 
 =head1 Thread-Safety of System Libraries
 
