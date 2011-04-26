@@ -1348,7 +1348,7 @@ Perl runs under Unix Systems Services or USS.
 =item chcp
 
 B<chcp> is supported as a shell utility for displaying and changing 
-one's code page.  See also L<chcp>.
+one's code page.  See also L<chcp(1)>.
 
 =item dataset access
 
