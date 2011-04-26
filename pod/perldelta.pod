@@ -771,7 +771,7 @@ using the C<(*)>, C<(;$)> and C<(;*)> prototypes
 are parsed with higher precedence than before.  So
 in the following example:
 
-  sub foo($);
+  sub foo(;$);
   foo $a < $b;
 
 the second line is now parsed correctly as C<< foo($a) < $b >>, rather than
@@ -787,6 +787,7 @@ an unparenthesised argument:
   .. ...
   ?:
   = += -= *= etc.
+  , =>
 
 =head3 Smart-matching against array slices
 
@@ -914,7 +915,12 @@ In regular expressions, a literal C<"{"> immediately following a C<"\b">
 (not in a bracketed character class) or a C<"\B{"> is now deprecated
 to allow for its future use by Perl itself.
 
-=head2 Deprecation warning added for deprecated-in-core Perl 4-era .pl libraries
+=head2 Perl 4-era .pl libraries
+
+Perl bundles a handful of library files that predate Perl 5.
+This bundling is now deprecated for most of these files, which are now
+available from CPAN.  The affected files now warn when run, if they were
+installed as part of the core.
 
 This is a mandatory warning, not obeying B<-X> or lexical warning bits.
 The warning is modelled on that supplied by F<deprecate.pm> for
@@ -941,26 +947,18 @@ parentheses like this:
 
     for $x (qw(a b c)) { ... }
 
-This is being deprecated because C<qw(a b c)> is supposed to mean
-C<"a", "b", "c"> not C<("a", "b", "c")>. In other words, this doesn't compile:
-
-    for my $i "a", "b", "c" { }
-
-So neither should this:
-
-    for my $i qw(a b c) {}
-
-But these both work:
-
-    for my $i ("a", "b", "c") { }
-    for my $i (qw(a b c)) {}
+This is being deprecated because the parentheses in C<for $i (1,2,3) { ... }>
+are not part of expression syntax.  They are part of the statement
+syntax, with the C<for> statement wanting literal parentheses.
+The synthetic parentheses that a C<qw> expression acquired were only
+intended to be treated as part of expression syntax.
 
 Note that this does not change the behaviour of cases like:
 
-    use POSIX qw(setlocale localeconv)
+    use POSIX qw(setlocale localeconv);
     our @EXPORT = qw(foo bar baz);
 
-Where a list with or without parentheses could have been provided.
+where parentheses were never required around the expression.
 
 =head2 C<\N{BELL}>
 
@@ -996,16 +994,16 @@ L<Unicode::Casing>, which provides improved functionality.
 
 =head2 Deprecated modules
 
-The following modules will be removed from the core distribution in a
+The following module will be removed from the core distribution in a
 future release, and should be installed from CPAN instead.  Distributions
-on CPAN that require these should add them to their prerequisites.  The
-core versions of these modules now issue a deprecation warning.
+on CPAN that require this should add it to their prerequisites.  The
+core version of these module now issues a deprecation warning.
 
 If you ship a packaged version of Perl, either alone or as part of a
 larger system, then you should carefully consider the repercussions of
 core module deprecations.  You may want to consider shipping your default
-build of Perl with packages for some or all deprecated modules that
-install into C<vendor> or C<site> Perl library directories.  This will
+build of Perl with a package for the deprecated module that
+installs into C<vendor> or C<site> Perl library directories.  This will
 inhibit the deprecation warnings.
 
 Alternatively, you may want to consider patching F<lib/deprecate.pm>
@@ -1016,9 +1014,9 @@ installation of a single package provides the given functionality, to
 a later release where the system administrator needs to know to install
 multiple packages to get that same functionality.
 
-You can silence these deprecation warnings by installing the modules
-in question from CPAN.  To install the latest version of all of them,
-just install C<Task::Deprecations::5_14>.
+You can silence these deprecation warnings by installing the module
+in question from CPAN.  To install the latest version of it by role
+rather than by name, just install C<Task::Deprecations::5_14>.
 
 =over
 
@@ -2351,6 +2349,10 @@ The documentation for the C<SvTRUE> macro in
 L<perlapi> was simply wrong in stating that
 get-magic is not processed.  It has been corrected.
 
+=head3 op manipulation functions
+
+Several API functions that process optrees have been newly documented.
+
 =head3 L<perlvar> revamp
 
 L<perlvar> reorders the variables and groups them by topic.  Each variable
@@ -2962,45 +2964,47 @@ it is correctly allocated and initialised.
 
 =head3 New parsing functions
 
-Several functions have been added for parsing statements or multiple
-statements:
+Several functions have been added for parsing Perl statements and
+expressions.  These functions are meant to be used by XS code invoked
+during Perl parsing, in a recursive-descent manner, to allow modules to
+augment the standard Perl syntax.
 
 =over
 
 =item *
 
-C<parse_fullstmt> parses a complete Perl statement.
+L<parse_stmtseq()|perlapi/parse_stmtseq>
+parses a sequence of statements, up to closing brace or EOF.
 
 =item *
 
-C<parse_stmtseq> parses a sequence of statements, up
-to closing brace or EOF.
+L<parse_fullstmt()|perlapi/parse_fullstmt>
+parses a complete Perl statement, including optional label.
 
 =item *
 
-C<parse_block> parses a block [perl #78222].
+L<parse_barestmt()|perlapi/parse_barestmt>
+parses a statement without a label.
 
 =item *
 
-C<parse_barestmt> parses a statement
-without a label.
+L<parse_block()|perlapi/parse_block>
+parses a code block.
 
 =item *
 
-C<parse_label> parses a statement label, separate from statements.
+L<parse_label()|perlapi/parse_label>
+parses a statement label, separate from statements.
 
-=back
+=item *
 
-The
 L<C<parse_fullexpr()>|perlapi/parse_fullexpr>,
 L<C<parse_listexpr()>|perlapi/parse_listexpr>,
 L<C<parse_termexpr()>|perlapi/parse_termexpr>, and
 L<C<parse_arithexpr()>|perlapi/parse_arithexpr>
-functions have been added to the API.  They run
-recursive-descent parsing of expressions at various precedence levels.
-They are expected to be used by syntax plugins.
+parse expressions at various precedence levels.
 
-See L<perlapi> for details.
+=back
 
 =head3 Hints hash API
 
@@ -3189,7 +3193,7 @@ exception if they don't match.
 =head3 Perl_fetch_cop_label
 
 The first argument of the C API function C<Perl_fetch_cop_label> has changed
-from C<struct refcounted he *> to C<COP *>, to insulate the user from
+from C<struct refcounted_he *> to C<COP *>, to insulate the user from
 implementation details.
 
 This API function was marked as "may change", and likely isn't in use outside
@@ -4376,7 +4380,7 @@ due to their arguments being swapped [perl #72704] (5.12.1).
 
 =item *
 
-A possible segfault in the C<T_PRTOBJ> default typemap has been fixed
+A possible segfault in the C<T_PTROBJ> default typemap has been fixed
 (5.12.2).
 
 =item *
