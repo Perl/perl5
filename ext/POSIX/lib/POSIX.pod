@@ -375,7 +375,7 @@ Use method C<IO::Handle::getc()> instead, or see L<perlfunc/read>.
 
 =item fgetpos
 
-Use method C<IO::Seekable::getpos()> instead, or see L<L/seek>.
+Use method C<IO::Seekable::getpos()> instead, or see L<perlfunc/seek>.
 
 =item fgets
 
