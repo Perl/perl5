@@ -26,7 +26,7 @@ conversions.
 
 To limit the number of decimal places in your numbers, you can use the
 C<printf> or C<sprintf> function.  See
-L<perlop/"Floating Point Arithmetic"> for more details.
+L<perlop/"Floating-point Arithmetic"> for more details.
 
 	printf "%.2f", 10/3;
 
