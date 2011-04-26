@@ -2415,7 +2415,6 @@ Perl_magic_setregexp(pTHX_ SV *sv, MAGIC *mg)
 	SvVALID_off(sv);
     } else {
 	assert(type == PERL_MAGIC_fm);
-	SvCOMPILED_off(sv);
     }
     return sv_unmagic(sv, type);
 }

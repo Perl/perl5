@@ -1627,7 +1627,6 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     case SVt_PVCV:
     case SVt_PVFM:
 	append_flags(d, CvFLAGS(sv), cv_flags_names);
-	if (SvCOMPILED(sv))	sv_catpv(d, "COMPILED,");
 	break;
     case SVt_PVHV:
 	append_flags(d, flags, hv_flags_names);
