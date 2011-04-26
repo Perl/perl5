@@ -2,7 +2,7 @@ package base;
 
 use strict 'vars';
 use vars qw($VERSION);
-$VERSION = '2.16';
+$VERSION = '2.17';
 $VERSION = eval $VERSION;
 
 # constant.pm is slow
@@ -224,8 +224,8 @@ in the base package, setting it to the string C<-1, set by base.pm>.
 
 C<base> will also initialize the fields if one of the base classes has it.
 Multiple inheritance of fields is B<NOT> supported, if two or more base classes
-each have inheritable fields the 'base' pragma will croak. See L<fields>,
-L<public> and L<protected> for a description of this feature.
+each have inheritable fields the 'base' pragma will croak. See L<fields>
+for a description of this feature.
 
 The base class' C<import> method is B<not> called.
 
