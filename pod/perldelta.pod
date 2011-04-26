@@ -278,13 +278,15 @@ XXX Changes which affect the interface available to C<XS> code go here.
 Other significant internal changes for future core maintainers should
 be noted as well.
 
-[ List each test improvement as a =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+The compiled representation of formats is now stored via the mg_ptr of
+their PERL_MAGIC_fm. Previously it was stored in the string buffer,
+beyond SvLEN(), the regular end of the string. SvCOMPILED() and
+SvCOMPILED_{on,off}() now exist solely for compatibility for XS code.
+The first is always 0, the other two now no-ops.
 
 =back
 

@@ -388,8 +388,6 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVpav_REIFY 	0x80000000  /* can become real */
 /* PVHV */
 #define SVphv_HASKFLAGS	0x80000000  /* keys have flag byte after hash */
-/* PVFM */
-#define SVpfm_COMPILED	0x80000000  /* FORMLINE is compiled */
 /* PVGV when SVpbm_VALID is true */
 #define SVpbm_TAIL	0x80000000
 /* RV upwards. However, SVf_ROK and SVp_IOK are exclusive  */
@@ -923,9 +921,11 @@ the scalar's value cannot change unless written to.
 #define SvSCREAM_on(sv)		(SvFLAGS(sv) |= SVp_SCREAM)
 #define SvSCREAM_off(sv)	(SvFLAGS(sv) &= ~SVp_SCREAM)
 
-#define SvCOMPILED(sv)		(SvFLAGS(sv) & SVpfm_COMPILED)
-#define SvCOMPILED_on(sv)	(SvFLAGS(sv) |= SVpfm_COMPILED)
-#define SvCOMPILED_off(sv)	(SvFLAGS(sv) &= ~SVpfm_COMPILED)
+#ifndef PERL_CORE
+#  define SvCOMPILED(sv)	0
+#  define SvCOMPILED_on(sv)
+#  define SvCOMPILED_off(sv)
+#endif
 
 #define SvEVALED(sv)		(SvFLAGS(sv) & SVrepl_EVAL)
 #define SvEVALED_on(sv)		(SvFLAGS(sv) |= SVrepl_EVAL)
