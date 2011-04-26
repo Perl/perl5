@@ -6,7 +6,7 @@ version::Internals - Perl extension for Version Objects
 
 Overloaded version objects for all modern versions of Perl.  This documents
 the internal data representation and underlying code for version.pm.  See
-L<version.pod> for daily usage.  This document is only useful for users
+L<version> for daily usage.  This document is only useful for users
 interested in the gory details.
 
 =head1 WHAT IS A VERSION?
@@ -245,7 +245,7 @@ helpful:
 Because of the nature of the Perl parsing and tokenizing routines,
 certain initialization values B<must> be quoted in order to correctly
 parse as the intended version, especially when using the L<declare> or
-L<qv> methods.  While you do not have to quote decimal numbers when
+L</qv()> methods.  While you do not have to quote decimal numbers when
 creating version objects, it is always safe to quote B<all> initial values
 when using version.pm methods, as this will ensure that what you type is
 what is used.
