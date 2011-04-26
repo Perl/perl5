@@ -580,7 +580,7 @@ C<MIME::Lite> also includes a method for sending these things.
 
 	$msg->send;
 
-This defaults to using L<sendmail> but can be customized to use
+This defaults to using L<sendmail(1)> but can be customized to use
 SMTP via L<Net::SMTP>.
 
 =head2 How do I read mail?
