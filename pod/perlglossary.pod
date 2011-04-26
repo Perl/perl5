@@ -1938,7 +1938,7 @@ a big language, it turns out small.  Go figure.
 
 =item mode
 
-In the context of the L<stat> syscall, refers to the field holding
+In the context of the L<stat(2)> syscall, refers to the field holding
 the L</permission bits> and the type of the L</file>.
 
 =item modifier
@@ -2986,7 +2986,7 @@ A program technique that lets you evaluate an L</expression> and then,
 based on the value of the expression, do a multiway branch to the
 appropriate piece of code for that value.  Also called a "case
 structure", named after the similar Pascal construct.  See
-L<perlsyn/"Switch statements">.
+See L<perlsyn/Basic BLOCKs>.
 
 =item symbol
 
