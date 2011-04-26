@@ -862,8 +862,8 @@ C<use strict 'refs'> forbids such practice.
 Another way to create anonymous filehandles is with the Symbol
 module or with the IO::Handle module and its ilk.  These modules
 have the advantage of not hiding different types of the same name
-during the local().  See the bottom of L<perlfunc/"open FILEHANDLE">
-for an example.
+during the local().  See the bottom of L<perlfunc/open> for an
+example.
 
 =head1 SEE ALSO
 
