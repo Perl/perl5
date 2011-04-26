@@ -2736,6 +2736,7 @@ integral value.  However, C<use integer; ~0> is C<-1> on two's-complement
 machines.
 
 =head2 Floating-point Arithmetic
+
 X<floating-point> X<floating point> X<float> X<real>
 
 While C<use integer> provides integer-only arithmetic, there is no
