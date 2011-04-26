@@ -547,19 +547,16 @@ PP(pp_formline)
     bool item_is_utf8 = FALSE;
     bool targ_is_utf8 = FALSE;
     SV * nsv = NULL;
-    OP * parseres = NULL;
     const char *fmt;
 
     if (!SvMAGICAL(tmpForm) || !SvCOMPILED(tmpForm)) {
 	if (SvREADONLY(tmpForm)) {
 	    SvREADONLY_off(tmpForm);
-	    parseres = doparseform(tmpForm);
+	    doparseform(tmpForm);
 	    SvREADONLY_on(tmpForm);
 	}
 	else
-	    parseres = doparseform(tmpForm);
-	if (parseres)
-	    return parseres;
+	    doparseform(tmpForm);
     }
     SvPV_force(PL_formtarget, len);
     if (SvTAINTED(tmpForm))
@@ -4917,7 +4914,7 @@ PP(pp_break)
 	RETURNOP(cx->blk_givwhen.leave_op);
 }
 
-STATIC OP *
+static void
 S_doparseform(pTHX_ SV *sv)
 {
     STRLEN len;
@@ -5132,8 +5129,7 @@ S_doparseform(pTHX_ SV *sv)
     SvCOMPILED_on(sv);
 
     if (unchopnum && repeat)
-        DIE(aTHX_ "Repeated format line will never terminate (~~ and @#)");
-    return 0;
+        Perl_die(aTHX_ "Repeated format line will never terminate (~~ and @#)");
 }
 
 
