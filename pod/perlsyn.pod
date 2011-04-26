@@ -522,6 +522,7 @@ Such constructs are quite frequently used, because older versions
 of Perl had no official C<switch> statement.
 
 =head2 Switch statements
+
 X<switch> X<case> X<given> X<when> X<default>
 
 Starting from Perl 5.10, you can say
