@@ -334,7 +334,7 @@ A C<fork()> failure may result in the following tests failing:
   ext/IO/lib/IO/t/io_sock.t
   ext/IO/lib/IO/t/io_unix.t
 
-See comment on fork in L<Miscellaneous> below.
+See comment on fork in L</Miscellaneous> below.
 
 =head1 Specific features of the Cygwin port
 
@@ -375,7 +375,7 @@ L<http://www.okisoft.co.jp/esc/utf8-cygwin/>
 When a file is opened it is in either text or binary mode.  In text mode
 a file is subject to CR/LF/Ctrl-Z translations.  With Cygwin, the default
 mode for an C<open()> is determined by the mode of the mount that underlies
-the file. See C<Cygwin::is_binmount()>. Perl provides a C<binmode()> function
+the file. See L<Cygwin::is_binmount()>. Perl provides a C<binmode()> function
 to set binary mode on files that otherwise would be treated as text.
 C<sysopen()> with the C<O_TEXT> flag sets text mode on files that otherwise
 would be treated as binary:
