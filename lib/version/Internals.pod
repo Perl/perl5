@@ -440,7 +440,7 @@ With Perl >= 5.6.2, you can also use a line like this:
 and it will again work (i.e. give the error message as above), even with
 releases of Perl which do not normally support v-strings (see L<version/What about v-strings> below).  This has to do with that fact that C<use> only checks
 to see if the second term I<looks like a number> and passes that to the
-replacement L<UNIVERSAL::VERSION>.  This is not true in Perl 5.005_04,
+replacement L<UNIVERSAL::VERSION|UNIVERSAL/VERSION>.  This is not true in Perl 5.005_04,
 however, so you are B<strongly encouraged> to always use a Decimal version
 in your code, even for those versions of Perl which support the Dotted-Decimal
 version.
