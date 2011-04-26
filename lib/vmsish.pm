@@ -1,6 +1,6 @@
 package vmsish;
 
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 
 =head1 NAME
 
@@ -107,7 +107,7 @@ more serious, and are not suppressed.
 
 =back
 
-See L<perlmod/Pragmatic Modules>.
+See L<perlmod/Perl Modules>.
 
 =cut
 
