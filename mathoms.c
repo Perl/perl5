@@ -604,7 +604,7 @@ Perl_gv_efullname3(pTHX_ SV *sv, const GV *gv, const char *prefix)
 /*
 =for apidoc gv_fetchmethod
 
-See L<gv_fetchmethod_autoload>.
+See L</gv_fetchmethod_autoload>.
 
 =cut
 */
