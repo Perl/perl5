@@ -2445,7 +2445,7 @@ X<gmtime> X<UTC> X<Greenwich>
 
 =item gmtime
 
-Works just like L<localtime> but the returned values are
+Works just like L</localtime> but the returned values are
 localized for the standard Greenwich time zone.
 
 Note: When called in list context, $isdst, the last value
@@ -7173,7 +7173,7 @@ Undefines the value of EXPR, which must be an lvalue.  Use only on a
 scalar value, an array (using C<@>), a hash (using C<%>), a subroutine
 (using C<&>), or a typeglob (using C<*>).  Saying C<undef $hash{$key}>
 will probably not do what you expect on most predefined variables or
-DBM list values, so don't do that; see L<delete>.  Always returns the
+DBM list values, so don't do that; see L</delete>.  Always returns the
 undefined value.  You can omit the EXPR, in which case nothing is
 undefined, but you still get an undefined value that you could, for
 instance, return from a subroutine, assign to a variable, or pass as a

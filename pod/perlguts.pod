@@ -1125,7 +1125,7 @@ is activated whenever the hash is accessed with a key specified as
 an C<SV> through the functions C<hv_store_ent>, C<hv_fetch_ent>,
 C<hv_delete_ent>, and C<hv_exists_ent>.  Accessing the key as a string
 through the functions without the C<..._ent> suffix circumvents the
-hook.  See L<Hash::Util::Fieldhash/Guts> for a detailed description.
+hook.  See L<Hash::Util::FieldHash/GUTS> for a detailed description.
 
 Note that because multiple extensions may be using C<PERL_MAGIC_ext>
 or C<PERL_MAGIC_uvar> magic, it is important for extensions to take
