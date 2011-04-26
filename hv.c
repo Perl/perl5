@@ -1548,20 +1548,19 @@ Perl_hv_clear(pTHX_ HV *hv)
 		}
 	    }
 	}
-	goto reset;
     }
+    else {
+	hfreeentries(hv);
+	HvPLACEHOLDERS_set(hv, 0);
+	if (HvARRAY(hv))
+	    Zero(HvARRAY(hv), xhv->xhv_max+1 /* HvMAX(hv)+1 */, HE*);
 
-    hfreeentries(hv);
-    HvPLACEHOLDERS_set(hv, 0);
-    if (HvARRAY(hv))
-	Zero(HvARRAY(hv), xhv->xhv_max+1 /* HvMAX(hv)+1 */, HE*);
+	if (SvRMAGICAL(hv))
+	    mg_clear(MUTABLE_SV(hv));
 
-    if (SvRMAGICAL(hv))
-	mg_clear(MUTABLE_SV(hv));
-
-    HvHASKFLAGS_off(hv);
-    HvREHASH_off(hv);
-    reset:
+	HvHASKFLAGS_off(hv);
+	HvREHASH_off(hv);
+    }
     if (SvOOK(hv)) {
         if(HvENAME_get(hv))
             mro_isa_changed_in(hv);
