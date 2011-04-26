@@ -872,7 +872,7 @@ http://perl5.git.perl.org/perl.git/blob/HEAD:/Porting/Glossary
 =item myconfig()
 
 Returns a textual summary of the major perl configuration values.
-See also C<-V> in L<perlrun/Switches>.
+See also C<-V> in L<perlrun/Command Switches>.
 
 =item config_sh()
 
@@ -892,7 +892,7 @@ printed on a separate line in the form:
   name='value';
 
 Names which are unknown are output as C<name='UNKNOWN';>.
-See also C<-V:name> in L<perlrun/Switches>.
+See also C<-V:name> in L<perlrun/Command Switches>.
 
 =item bincompat_options()
 
