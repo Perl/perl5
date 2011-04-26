@@ -186,7 +186,7 @@ Note that not all features of Perl are available under these
 environments. This depends on the features the I<extender> - most
 probably RSX - decided to implement.
 
-Cf. L<Prerequisites>.
+Cf. L</Prerequisites>.
 
 =head2 Prerequisites
 
@@ -475,10 +475,10 @@ should be done "correctly".
 =head2 C<``> and pipe-C<open> do not work under DOS.
 
 This may a variant of just L<"I cannot run external programs">, or a
-deeper problem. Basically: you I<need> RSX (see L<"Prerequisites">)
+deeper problem. Basically: you I<need> RSX (see L</Prerequisites>)
 for these commands to work, and you may need a port of F<sh.exe> which
 understands command arguments. One of such ports is listed in
-L<"Prerequisites"> under RSX. Do not forget to set variable
+L</Prerequisites> under RSX. Do not forget to set variable
 C<L<"PERL_SH_DIR">> as well.
 
 DPMI is required for RSX.
@@ -1521,11 +1521,11 @@ Here is the sample C file:
 
 =head2 Some C</> became C<\> in pdksh.
 
-You have a very old pdksh. See L<Prerequisites>.
+You have a very old pdksh. See L</Prerequisites>.
 
 =head2 C<'errno'> - unresolved external
 
-You do not have MT-safe F<db.lib>. See L<Prerequisites>.
+You do not have MT-safe F<db.lib>. See L</Prerequisites>.
 
 =head2 Problems with tr or sed
 
@@ -1538,11 +1538,11 @@ broke the build of extensions.
 
 =head2 Library ... not found
 
-You did not run C<omflibs>. See L<Prerequisites>.
+You did not run C<omflibs>. See L</Prerequisites>.
 
 =head2 Segfault in make
 
-You use an old version of GNU make. See L<Prerequisites>.
+You use an old version of GNU make. See L</Prerequisites>.
 
 =head2 op/sprintf test failure
 
@@ -2604,7 +2604,7 @@ are F<cmd.exe> and F<sh.exe>. Having perl build itself would be impossible
 with F<cmd.exe> as a shell, thus I picked up C<sh.exe>. This assures almost
 100% compatibility with the scripts coming from *nix. As an added benefit 
 this works as well under DOS if you use DOS-enabled port of pdksh 
-(see L<"Prerequisites">).
+(see L</Prerequisites>).
 
 B<Disadvantages:> currently F<sh.exe> of pdksh calls external programs
 via fork()/exec(), and there is I<no> functioning exec() on
