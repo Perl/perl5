@@ -1336,7 +1336,7 @@ where FALLBACK can take any of the three values TRUE, FALSE, or
 UNDEF.  If you do not set any FALLBACK value when using OVERLOAD,
 it defaults to UNDEF.  FALLBACK is not used except when one or 
 more functions using OVERLOAD have been defined.  Please see
-L<overload/Fallback> for more details.
+L<overload/fallback> for more details.
 
 =head2 The INTERFACE: Keyword
 
