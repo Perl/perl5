@@ -4,7 +4,7 @@ designed to be readable as is.
 
 =head1 NAME
 
-README.tru64 - Perl version 5 on Tru64 (formerly known as Digital UNIX formerly known as DEC OSF/1) systems
+perltru64 - Perl version 5 on Tru64 (formerly known as Digital UNIX formerly known as DEC OSF/1) systems
 
 =head1 DESCRIPTION
 

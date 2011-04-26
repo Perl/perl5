@@ -5,7 +5,7 @@ about pod in pod/perlpod.pod or the short summary in the INSTALL file.
 
 =head1 NAME
 
-README.os390 - building and installing Perl for OS/390 and z/OS
+perlos390 - building and installing Perl for OS/390 and z/OS
 
 =head1 SYNOPSIS
 

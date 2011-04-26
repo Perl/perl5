@@ -4,7 +4,7 @@ specially designed to be readable as is.
 
 =head1 NAME
 
-README.vos - Perl for Stratus VOS
+perlvos - Perl for Stratus VOS
 
 =head1 SYNOPSIS
 

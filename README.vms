@@ -4,7 +4,7 @@ specially designed to be readable as is.
 
 =head1 NAME
 
-README.vms - Configuring, building, testing, and installing perl on VMS
+perlvms - Configuring, building, testing, and installing perl on VMS
 
 =head1 SYNOPSIS
 

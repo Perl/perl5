@@ -217,7 +217,6 @@ pod/perldiag.pod	=item type mismatch	1
 pod/perldiag.pod	Verbatim line length including indents exceeds 80 by	2
 pod/perldoc.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perldsc.pod	Verbatim line length including indents exceeds 80 by	4
-pod/perlebcdic.pod	Apparent broken link	1
 pod/perlebcdic.pod	Verbatim line length including indents exceeds 80 by	273
 pod/perlembed.pod	Verbatim line length including indents exceeds 80 by	27
 pod/perlfaq2.pod	Verbatim line length including indents exceeds 80 by	1
@@ -269,17 +268,15 @@ pod/perlpacktut.pod	Verbatim line length including indents exceeds 80 by	6
 pod/perlperf.pod	Verbatim line length including indents exceeds 80 by	154
 pod/perlpodspec.pod	Verbatim line length including indents exceeds 80 by	9
 pod/perlpodstyle.pod	Verbatim line length including indents exceeds 80 by	1
-pod/perlport.pod	Apparent broken link	27
+pod/perlport.pod	Apparent broken link	2
 pod/perlreapi.pod	Verbatim line length including indents exceeds 80 by	17
 pod/perlrebackslash.pod	Verbatim line length including indents exceeds 80 by	1
 pod/perlref.pod	Verbatim line length including indents exceeds 80 by	1
 pod/perlreguts.pod	Verbatim line length including indents exceeds 80 by	17
 pod/perlrequick.pod	Verbatim line length including indents exceeds 80 by	3
 pod/perlretut.pod	Verbatim line length including indents exceeds 80 by	13
-pod/perlrun.pod	Apparent broken link	3
 pod/perlrun.pod	Verbatim line length including indents exceeds 80 by	2
 pod/perlsec.pod	Verbatim line length including indents exceeds 80 by	1
-pod/perlsolaris.pod	Apparent broken link	1
 pod/perlsolaris.pod	Verbatim line length including indents exceeds 80 by	14
 pod/perlsource.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perlsub.pod	? Should you be using F<...> or maybe L<...> instead of	3
@@ -318,8 +315,6 @@ utils/libnetcfg	Apparent broken link	1
 vms/ext/filespec.pm	Verbatim line length including indents exceeds 80 by	1
 x2p/a2p.pod	empty section in previous paragraph	2
 x2p/psed	unresolved internal link	3
-readme.vms	Apparent broken link	1
-readme.vms	Verbatim line length including indents exceeds 80 by	1
 lib/benchmark.pm	Verbatim line length including indents exceeds 80 by	4
 lib/cpan/debug.pm	There is no NAME	1
 lib/cpan/handleconfig.pm	=head2 without preceding higher level	1

@@ -7,7 +7,7 @@ INSTALL file.
 
 =head1 NAME
 
-README.vmesa - building and installing Perl for VM/ESA.
+perlvmesa - building and installing Perl for VM/ESA.
 
 =head1 SYNOPSIS
 
