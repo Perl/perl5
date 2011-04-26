@@ -2361,7 +2361,7 @@ usually called within the sources as C<whatever(...)>.
 
 This does not need a interpreter context, so the definition has no
 C<pTHX>, and it follows that callers don't use C<aTHX>.  (See
-L<perlguts/Background and PERL_IMPLICIT_CONTEXT>.)
+L</Background and PERL_IMPLICIT_CONTEXT>.)
 
 =item r
 
