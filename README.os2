@@ -2548,8 +2548,9 @@ it has the same effect.)
 
 B<REMARK>.  C<LIBPATHSTRICT>, C<BEGINLIBPATH> and C<ENDLIBPATH> are
 not environment variables, although F<cmd.exe> emulates them on C<SET
-...> lines.  From Perl they may be accessed by L<Cwd::extLibpath> and
-L<Cwd::extLibpath_set>.
+...> lines.  From Perl they may be accessed by
+L<Cwd::extLibpath|/Cwd::extLibpath([type])> and
+L<Cwd::extLibpath_set|/Cwd::extLibpath_set( path [, type ] )>.
 
 =head2 DLL forwarder generation
 
