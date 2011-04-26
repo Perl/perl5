@@ -1786,11 +1786,11 @@ when the program is done:
 The STDIN filehandle used by the command is inherited from Perl's STDIN.
 For example:
 
-    open BLAM, "blam" || die "Can't open: $!";
-    open STDIN, "<&BLAM";
-    print `sort`;
+    open SPLAT, "stuff"    or die "can't open stuff: $!";
+    open STDIN, "<&SPLAT"  or die "can't dupe SPLAT: $!";
+    print STDOUT `sort`;
 
-will print the sorted contents of the file "blam".
+will print the sorted contents of the file named F<"stuff">.
 
 Using single-quote as a delimiter protects the command from Perl's
 double-quote interpolation, passing it on to the shell instead:
