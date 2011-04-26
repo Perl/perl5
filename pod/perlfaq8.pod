@@ -374,7 +374,7 @@ try to guess passwords, but don't (can't) guarantee quick success.
 
 If you're worried about users selecting bad passwords, you should
 proactively check when they try to change their password (by modifying
-passwd(1), for example).
+L<passwd(1)>, for example).
 
 =head2 How do I start a process in the background?
 
@@ -482,8 +482,8 @@ If perl was installed correctly and your shadow library was written
 properly, the C<getpw*()> functions described in L<perlfunc> should in
 theory provide (read-only) access to entries in the shadow password
 file.  To change the file, make a new shadow password file (the format
-varies from system to system--see L<passwd> for specifics) and use
-C<pwd_mkdb(8)> to install it (see L<pwd_mkdb> for more details).
+varies from system to system--see L<passwd(1)> for specifics) and use
+C<pwd_mkdb(8)> to install it (see L<pwd_mkdb(8)> for more details).
 
 =head2 How do I set the time and date?
 
@@ -986,7 +986,7 @@ module for other solutions.
 
 =item *
 
-Open /dev/tty and use the TIOCNOTTY ioctl on it.  See L<tty>
+Open /dev/tty and use the TIOCNOTTY ioctl on it.  See L<tty(1)>
 for details.  Or better yet, you can just use the C<POSIX::setsid()>
 function, so you don't have to worry about process groups.
 
