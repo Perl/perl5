@@ -684,7 +684,7 @@ The F<t/test.pl> library provides some of the features of
 L<Test::More>, but avoids loading most modules and uses as few core
 features as possible.
 
-If you write your own test, use the L<Test Anything Protocol|TAP>.
+If you write your own test, use the L<Test Anything Protocol|http://testanything.org>.
 
 =over 4
 
