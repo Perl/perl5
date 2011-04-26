@@ -393,7 +393,7 @@ by checking $FORMAT_LINES_LEFT before each write() and print the footer
 yourself if necessary.
 
 Here's another strategy: Open a pipe to yourself, using C<open(MYSELF, "|-")>
-(see L<perlfunc/"open FILEHANDLE">) and always write() to MYSELF instead of STDOUT.
+(see L<perlfunc/open>) and always write() to MYSELF instead of STDOUT.
 Have your child process massage its STDIN to rearrange headers and footers
 however you like.  Not very convenient, but doable.
 
