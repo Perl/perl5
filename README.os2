@@ -151,7 +151,7 @@ versions of EMX.
 
 =item *
 
-You need a separate perl executable F<perl__.exe> (see L<perl__.exe>)
+You need a separate perl executable F<perl__.exe> (see L</perl__.exe>)
 if you want to use PM code in your application (as Perl/Tk or OpenGL
 Perl modules do) without having a text-mode window present.
 
