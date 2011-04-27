@@ -696,7 +696,7 @@ stack implements the C equivalent of, for example:
         ...
     }
 
-See L<perlguts/"Localizing Changes"> for how to use the save stack.
+See L<perlguts/"Localizing changes"> for how to use the save stack.
 
 =head1 MILLIONS OF MACROS
 
