@@ -5,7 +5,7 @@ use strict;
 use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-$VERSION = '3.33';
+$VERSION = '3.34';
 $VERSION = eval $VERSION;
 
 @ISA = qw(File::Spec::Unix);
@@ -231,7 +231,7 @@ sub splitpath {
 
 =item splitdir
 
-The opposite of L<catdir()|File::Spec/catdir()>.
+The opposite of L<catdir()|File::Spec/catdir>.
 
     @dirs = File::Spec->splitdir( $directories );
 
