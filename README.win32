@@ -849,7 +849,7 @@ find a mailer on your system).
 Norton AntiVirus interferes with the build process, particularly if
 set to "AutoProtect, All Files, when Opened". Unlike large applications
 the perl build process opens and modifies a lot of files. Having the
-the AntiVirus scan each and every one slows build the process significantly.
+AntiVirus scan each and every one slows build the process significantly.
 Worse, with PERLIO=stdio the build process fails with peculiar messages
 as the virus checker interacts badly with miniperl.exe writing configure
 files (it seems to either catch file part written and treat it as suspicious,

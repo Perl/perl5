@@ -457,7 +457,7 @@ You may get a warning when doing a threaded build:
   between types "unsigned char*" and "const void*" is not allowed.
 
 The exact line number may vary, but if the warning (W) comes from a line
-line this
+this:
 
   hent = PerlSock_gethostbyaddr(addr, (Netdb_hlen_t) addrlen, addrtype);
 

@@ -1160,7 +1160,7 @@ works on platforms that have a native encoding currently of either ASCII/Latin1
 or EBCDIC, each of which allow specification of 256 characters.  In general, if
 the number is 255 (0xFF, 0377) or below, Perl interprets this in the platform's
 native encoding.  If the number is 256 (0x100, 0400) or above, Perl interprets
-it as as a Unicode code point and the result is the corresponding Unicode
+it as a Unicode code point and the result is the corresponding Unicode
 character.  For example C<\x{50}> and C<\o{120}> both are the number 80 in
 decimal, which is less than 256, so the number is interpreted in the native
 character set encoding.  In ASCII the character in the 80th position (indexed

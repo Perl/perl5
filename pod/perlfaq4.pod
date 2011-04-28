@@ -1569,7 +1569,7 @@ such as C<push>, C<pop>, C<shift>, C<unshift>, or C<splice> to do
 that.
 
 Sometimes, however, linked lists can be useful in situations where you
-want to "shard" an array so you have have many small arrays instead of
+want to "shard" an array so you have many small arrays instead of
 a single big array. You can keep arrays longer than Perl's largest
 array index, lock smaller arrays separately in threaded programs,
 reallocate less memory, or quickly insert elements in the middle of

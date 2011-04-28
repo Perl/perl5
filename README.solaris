@@ -612,7 +612,7 @@ and dies.  Therefore the SunOS 4.1 hints file explicitly sets the
 ld to be /usr/bin/ld.
 
 As of Perl 5.8.1 the dynamic loading of libraries (DynaLoader, XSLoader)
-also seems to have become broken in in SunOS 4.x.  Therefore the default
+also seems to have become broken in SunOS 4.x.  Therefore the default
 is to build Perl statically.
 
 Running the test suite in SunOS 4.1 is a bit tricky since the

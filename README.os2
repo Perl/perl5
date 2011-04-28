@@ -1223,7 +1223,7 @@ necessary external C libraries from F<.lib> format to F<.a> format: run one of
   emximp -o foo.a foo.lib
 
 whichever is appropriate.)  Also, make sure that the DLLs for external
-libraries are usable with with executables compiled without C<-Zmtd> options.
+libraries are usable with executables compiled without C<-Zmtd> options.
 
 When you are sure that only a few subdirectories
 lead to failures, you may want to add C<-j4> option to C<make> to speed up
