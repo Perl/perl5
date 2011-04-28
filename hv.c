@@ -3273,6 +3273,7 @@ to this function: no action occurs and a null pointer is returned.
 struct refcounted_he *
 Perl_refcounted_he_inc(pTHX_ struct refcounted_he *he)
 {
+    dVAR;
     if (he) {
 	HINTS_REFCNT_LOCK;
 	he->refcounted_he_refcnt++;
