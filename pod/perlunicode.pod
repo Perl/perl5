@@ -1693,7 +1693,7 @@ Download the files in the desired version of Unicode from the Unicode web
 site L<http://www.unicode.org>).  These should replace the existing files in
 F<lib/unicore> in the Perl source tree.  Follow the instructions in
 F<README.perl> in that directory to change some of their names, and then build
-perl (see F<INSTALL>).
+perl (see L<INSTALL>).
 
 It is even possible to copy the built files to a different directory, and then
 change F<utf8_heavy.pl> in the directory C<$Config{privlib}> to point to the
