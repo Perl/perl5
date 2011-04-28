@@ -604,21 +604,18 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	}
     }
 
-    if (HvREHASH(hv)) {
-	PERL_HASH_INTERNAL(hash, key, klen);
-	/* We don't have a pointer to the hv, so we have to replicate the
-	   flag into every HEK, so that hv_iterkeysv can see it.  */
-	/* And yes, you do need this even though you are not "storing" because
-	   you can flip the flags below if doing an lval lookup.  (And that
-	   was put in to give the semantics Andreas was expecting.)  */
+    if (HvREHASH(hv) || (!hash && !(keysv && (SvIsCOW_shared_hash(keysv)))))
+	PERL_HASH_INTERNAL_(hash, key, klen, HvREHASH(hv));
+    else if (!hash)
+	hash = SvSHARED_HASH(keysv);
+
+    /* We don't have a pointer to the hv, so we have to replicate the
+       flag into every HEK, so that hv_iterkeysv can see it.
+       And yes, you do need this even though you are not "storing" because
+       you can flip the flags below if doing an lval lookup.  (And that
+       was put in to give the semantics Andreas was expecting.)  */
+    if (HvREHASH(hv))
 	flags |= HVhek_REHASH;
-    } else if (!hash) {
-        if (keysv && (SvIsCOW_shared_hash(keysv))) {
-            hash = SvSHARED_HASH(keysv);
-        } else {
-            PERL_HASH(hash, key, klen);
-        }
-    }
 
     masked_flags = (flags & HVhek_MASK);
 
@@ -970,15 +967,10 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
         HvHASKFLAGS_on(MUTABLE_SV(hv));
     }
 
-    if (HvREHASH(hv)) {
-	PERL_HASH_INTERNAL(hash, key, klen);
-    } else if (!hash) {
-        if (keysv && (SvIsCOW_shared_hash(keysv))) {
-            hash = SvSHARED_HASH(keysv);
-        } else {
-            PERL_HASH(hash, key, klen);
-        }
-    }
+    if (HvREHASH(hv) || (!hash && !(keysv && (SvIsCOW_shared_hash(keysv)))))
+	PERL_HASH_INTERNAL_(hash, key, klen, HvREHASH(hv));
+    else if (!hash)
+	hash = SvSHARED_HASH(keysv);
 
     masked_flags = (k_flags & HVhek_MASK);
 
