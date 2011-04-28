@@ -1104,6 +1104,10 @@ table:
    \c^      chr(30)
    \c?      chr(127)
 
+In other words, it's the character whose code point has had 64 xor'd with
+its uppercase.  C<\c?> is DELETE because C<ord("@") ^ 64> is 127, and
+C<\c@> is NULL because the ord of "@" is 64, so xor'ing 64 itself produces 0.
+
 Also, C<\c\I<X>> yields C< chr(28) . "I<X>"> for any I<X>, but cannot come at the
 end of a string, because the backslash would be parsed as escaping the end
 quote.
@@ -1116,8 +1120,8 @@ sequences mean on both ASCII and EBCDIC platforms.
 Use of any other character following the "c" besides those listed above is
 discouraged, and some are deprecated with the intention of removing
 those in Perl 5.16.  What happens for any of these
-other characters currently though, is that the value is derived by inverting
-the 7th bit (0x40).
+other characters currently though, is that the value is derived by xor'ing
+with the seventh bit, which is 64.
 
 To get platform independent controls, you can use C<\N{...}>.
 
