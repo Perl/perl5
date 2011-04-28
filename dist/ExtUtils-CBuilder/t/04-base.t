@@ -1,7 +1,7 @@
 #! perl -w
 
 use strict;
-use Test::More tests => 50;
+use Test::More tests => 64;
 use Config;
 use Cwd;
 use File::Path qw( mkpath );
@@ -327,6 +327,29 @@ is_deeply( $mksymlists_args,
     },
     "_prepare_mksymlists_args(): got expected arguments for Mksymlists",
 );
+
+my %testvars = (
+    CFLAGS  => 'ccflags',
+    LDFLAGS => 'ldflags',
+);
+
+while (my ($VAR, $var) = each %testvars) {
+    local $ENV{$VAR};
+    $base = ExtUtils::CBuilder::Base->new( quiet => 1 );
+    ok( $base, "ExtUtils::CBuilder::Base->new() returned true value" );
+    isa_ok( $base, 'ExtUtils::CBuilder::Base' );
+    like($base->{config}{$var}, qr/\Q$Config{$var}/,
+        "honours $var from Config.pm");
+
+    $ENV{$VAR} = "-foo -bar";
+    $base = ExtUtils::CBuilder::Base->new( quiet => 1 );
+    ok( $base, "ExtUtils::CBuilder::Base->new() returned true value" );
+    isa_ok( $base, 'ExtUtils::CBuilder::Base' );
+    like($base->{config}{$var}, qr/\Q$ENV{$VAR}/,
+        "honours $VAR from the environment");
+    like($base->{config}{$var}, qr/\Q$Config{$var}/,
+        "doesn't override $var from Config.pm with $VAR from the environment");
+}
 
 #####
 
