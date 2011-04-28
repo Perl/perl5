@@ -425,6 +425,23 @@ the strings?).
  Ricardo  5.12.3-RC3    2011-Jan-17
  Ricardo  5.12.3        2011-Jan-21
 
+ Leon     5.13.0        2010-Apr-20     The 5.13 development track
+ Ricardo  5.13.1        2010-May-20
+ Matt     5.13.2        2010-Jun-22
+ David G  5.13.3        2010-Jul-20
+ Florian  5.13.4        2010-Aug-20
+ Steve    5.13.5        2010-Sep-19
+ Miyagawa 5.13.6        2010-Oct-20
+ BinGOs   5.13.7        2010-Nov-20
+ Zefram   5.13.8        2010-Dec-20
+ Jesse    5.13.9        2011-Jan-20
+ Ævar     5.13.10       2011-Feb-20
+ Florian  5.13.11       2011-Mar-20
+ Jesse    5.14.0RC1     2011-Apr-20
+ Jesse    5.14.0RC2     2011-May-04
+
+ Jesse    5.14.0        2011-May-11
+
 =head2 SELECTED RELEASE SIZES
 
 For example the notation "core: 212  29" in the release 1.000 means that
