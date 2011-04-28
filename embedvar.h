@@ -715,8 +715,6 @@
 #define PL_GYes			(my_vars->GYes)
 #define PL_appctx		(my_vars->Gappctx)
 #define PL_Gappctx		(my_vars->Gappctx)
-#define PL_charclass		(my_vars->Gcharclass)
-#define PL_Gcharclass		(my_vars->Gcharclass)
 #define PL_check		(my_vars->Gcheck)
 #define PL_Gcheck		(my_vars->Gcheck)
 #define PL_csighandlerp		(my_vars->Gcsighandlerp)
@@ -807,7 +805,6 @@
 #define PL_GNo			PL_No
 #define PL_GYes			PL_Yes
 #define PL_Gappctx		PL_appctx
-#define PL_Gcharclass		PL_charclass
 #define PL_Gcheck		PL_check
 #define PL_Gcsighandlerp	PL_csighandlerp
 #define PL_Gcurinterp		PL_curinterp

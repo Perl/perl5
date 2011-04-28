@@ -116,7 +116,6 @@ PERLVAR(Gwatch_pvx, char*)
 PERLVAR(Gppaddr, Perl_ppaddr_t*) /* or opcode.h */
 PERLVAR(Gcheck,  Perl_check_t *) /* or opcode.h */
 PERLVARA(Gfold_locale, 256, unsigned char) /* or perl.h */
-PERLVARA(Gcharclass, 256, U32)
 #endif
 
 #ifdef PERL_NEED_APPCTX

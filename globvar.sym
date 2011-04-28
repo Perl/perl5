@@ -5,6 +5,7 @@
 
 bincompat_options
 block_type
+charclass
 check
 core_reg_engine
 fold

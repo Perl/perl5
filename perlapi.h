@@ -111,8 +111,6 @@ END_EXTERN_C
 #define PL_Yes			(*Perl_GYes_ptr(NULL))
 #undef  PL_appctx
 #define PL_appctx		(*Perl_Gappctx_ptr(NULL))
-#undef  PL_charclass
-#define PL_charclass		(*Perl_Gcharclass_ptr(NULL))
 #undef  PL_check
 #define PL_check		(*Perl_Gcheck_ptr(NULL))
 #undef  PL_csighandlerp
