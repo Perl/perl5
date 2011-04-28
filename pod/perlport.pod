@@ -1394,8 +1394,8 @@ subdirectories named after the suffix.  Hence files are translated:
 The Unix emulation library's translation of filenames to native assumes
 that this sort of translation is required, and it allows a user-defined list
 of known suffixes that it will transpose in this fashion.  This may
-seem transparent, but consider that with these rules C<foo/bar/baz.h>
-and C<foo/bar/h/baz> both map to C<foo.bar.h.baz>, and that C<readdir> and
+seem transparent, but consider that with these rules F<foo/bar/baz.h>
+and F<foo/bar/h/baz> both map to F<foo.bar.h.baz>, and that C<readdir> and
 C<glob> cannot and do not attempt to emulate the reverse mapping.  Other
 C<.>'s in filenames are translated to C</>.
 
