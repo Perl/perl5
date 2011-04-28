@@ -1818,7 +1818,7 @@ OUTPUT code fragments should be used to map a given C type to a Perl value.
 The section labels C<TYPEMAP>, C<INPUT>, or C<OUTPUT> must begin
 in the first column on a line by themselves, and must be in uppercase.
 
-The default typemap in the C<lib/ExtUtils> directory of the Perl source
+The default typemap in the F<lib/ExtUtils> directory of the Perl source
 contains many useful types which can be used by Perl extensions.  Some
 extensions define additional typemaps which they keep in their own directory.
 These additional typemaps may reference INPUT and OUTPUT maps in the main
@@ -1983,7 +1983,7 @@ The MY_CXT_INIT macro initialises storage for the C<my_cxt_t> struct.
 It I<must> be called exactly once, typically in a BOOT: section. If you
 are maintaining multiple interpreters, it should be called once in each
 interpreter instance, except for interpreters cloned from existing ones.
-(But see C<MY_CXT_CLONE> below.)
+(But see L<MY_CXT_CLONE> below.)
 
 =item dMY_CXT
 
