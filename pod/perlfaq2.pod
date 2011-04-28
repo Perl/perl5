@@ -228,8 +228,10 @@ There are many good books on Perl. See the L<perlbook> documentation or
 
 =head2 Which magazines have Perl content?
 
-The I<Perl-Zeitung> is a German-speaking magazine for Perl beginners
-(see http://perl-zeitung.at.tf ).
+There's also I<$foo Magazin>, a German magazine dedicated to Perl, at
+( http://www.foo-magazin.de ). The I<Perl-Zeitung> is another
+German-speaking magazine for Perl beginners (see
+http://perl-zeitung.at.tf ). 
 
 Magazines that frequently carry quality articles on Perl include
 I<Unix Review> ( http://www.unixreview.com/ ), I<Linux Magazine> (
