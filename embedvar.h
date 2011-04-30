@@ -753,8 +753,6 @@
 #define PL_Gop_seq		(my_vars->Gop_seq)
 #define PL_op_sequence		(my_vars->Gop_sequence)
 #define PL_Gop_sequence		(my_vars->Gop_sequence)
-#define PL_patleave		(my_vars->Gpatleave)
-#define PL_Gpatleave		(my_vars->Gpatleave)
 #define PL_perlio_debug_fd	(my_vars->Gperlio_debug_fd)
 #define PL_Gperlio_debug_fd	(my_vars->Gperlio_debug_fd)
 #define PL_perlio_fd_refcnt	(my_vars->Gperlio_fd_refcnt)
@@ -824,7 +822,6 @@
 #define PL_Gop_mutex		PL_op_mutex
 #define PL_Gop_seq		PL_op_seq
 #define PL_Gop_sequence		PL_op_sequence
-#define PL_Gpatleave		PL_patleave
 #define PL_Gperlio_debug_fd	PL_perlio_debug_fd
 #define PL_Gperlio_fd_refcnt	PL_perlio_fd_refcnt
 #define PL_Gperlio_fd_refcnt_size	PL_perlio_fd_refcnt_size

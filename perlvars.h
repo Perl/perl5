@@ -37,7 +37,6 @@ PERLVAR(Gthr_key,	perl_key)	/* key to retrieve per-thread struct */
 PERLVARISC(GYes,	"1")
 PERLVARISC(GNo,		"")
 PERLVARISC(Ghexdigit,	"0123456789abcdef0123456789ABCDEF")
-PERLVARISC(Gpatleave,	"\\.^$@dDwWsSbB+*?|()-nrtfeaxc0123456789[{]}")
 
 /* XXX does anyone even use this? */
 PERLVARI(Gdo_undump,	bool,	FALSE)	/* -u or dump seen? */

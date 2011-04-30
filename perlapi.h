@@ -149,8 +149,6 @@ END_EXTERN_C
 #define PL_op_seq		(*Perl_Gop_seq_ptr(NULL))
 #undef  PL_op_sequence
 #define PL_op_sequence		(*Perl_Gop_sequence_ptr(NULL))
-#undef  PL_patleave
-#define PL_patleave		(*Perl_Gpatleave_ptr(NULL))
 #undef  PL_perlio_debug_fd
 #define PL_perlio_debug_fd	(*Perl_Gperlio_debug_fd_ptr(NULL))
 #undef  PL_perlio_fd_refcnt
