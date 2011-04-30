@@ -4830,13 +4830,6 @@ typedef void (*XSINIT_t) (pTHX);
 typedef void (*ATEXIT_t) (pTHX_ void*);
 typedef void (*XSUBADDR_t) (pTHX_ CV *);
 
-/* Set up PERLVAR macros for populating structs */
-#define PERLVAR(var,type) type var;
-#define PERLVARA(var,n,type) type var[n];
-#define PERLVARI(var,type,init) type var;
-#define PERLVARIC(var,type,init) type var;
-#define PERLVARISC(var,init) const char var[sizeof(init)];
-
 typedef OP* (*Perl_ppaddr_t)(pTHX);
 typedef OP* (*Perl_check_t) (pTHX_ OP*);
 typedef void(*Perl_ophook_t)(pTHX_ OP*);
@@ -4875,51 +4868,64 @@ typedef struct exitlistentry {
 				STRINGIFY(PERL_API_VERSION) "." \
 				STRINGIFY(PERL_API_SUBVERSION)
 
-#ifdef PERL_GLOBAL_STRUCT
-struct perl_vars {
-#  include "perlvars.h"
+#if !defined(MULTIPLICITY)
+
+struct interpreter {
+    char broiled;
 };
 
-#  ifdef PERL_CORE
-#    ifndef PERL_GLOBAL_STRUCT_PRIVATE
-EXT struct perl_vars PL_Vars;
-EXT struct perl_vars *PL_VarsPtr INIT(&PL_Vars);
-#      undef PERL_GET_VARS
-#      define PERL_GET_VARS() PL_VarsPtr
-#    endif /* !PERL_GLOBAL_STRUCT_PRIVATE */
-#  else /* PERL_CORE */
-#    if !defined(__GNUC__) || !defined(WIN32)
-EXT
-#    endif /* WIN32 */
-struct perl_vars *PL_VarsPtr;
-#    define PL_Vars (*((PL_VarsPtr) \
-		       ? PL_VarsPtr : (PL_VarsPtr = Perl_GetVars(aTHX))))
-#  endif /* PERL_CORE */
-#endif /* PERL_GLOBAL_STRUCT */
+#else
 
-#if defined(MULTIPLICITY)
 /* If we have multiple interpreters define a struct
    holding variables which must be per-interpreter
    If we don't have threads anything that would have
    be per-thread is per-interpreter.
 */
 
+/* Set up PERLVAR macros for populating structs */
+#  define PERLVAR(var,type) type var;
+#  define PERLVARA(var,n,type) type var[n];
+#  define PERLVARI(var,type,init) type var;
+#  define PERLVARIC(var,type,init) type var;
+#  define PERLVARISC(var,init) const char var[sizeof(init)];
+
 struct interpreter {
 #  include "intrpvar.h"
 };
 
-#else
-struct interpreter {
-    char broiled;
+#  ifdef PERL_GLOBAL_STRUCT
+/* MULTIPLICITY is automatically defined when PERL_GLOBAL_STRUCT is defined,
+   hence it's safe and sane to nest this within #ifdef MULTIPLICITY  */
+
+struct perl_vars {
+#    include "perlvars.h"
 };
-#endif /* MULTIPLICITY */
+
+#    ifdef PERL_CORE
+#      ifndef PERL_GLOBAL_STRUCT_PRIVATE
+EXT struct perl_vars PL_Vars;
+EXT struct perl_vars *PL_VarsPtr INIT(&PL_Vars);
+#        undef PERL_GET_VARS
+#        define PERL_GET_VARS() PL_VarsPtr
+#      endif /* !PERL_GLOBAL_STRUCT_PRIVATE */
+#    else /* PERL_CORE */
+#      if !defined(__GNUC__) || !defined(WIN32)
+EXT
+#      endif /* WIN32 */
+struct perl_vars *PL_VarsPtr;
+#      define PL_Vars (*((PL_VarsPtr) \
+		       ? PL_VarsPtr : (PL_VarsPtr = Perl_GetVars(aTHX))))
+#    endif /* PERL_CORE */
+#  endif /* PERL_GLOBAL_STRUCT */
 
 /* Done with PERLVAR macros for now ... */
-#undef PERLVAR
-#undef PERLVARA
-#undef PERLVARI
-#undef PERLVARIC
-#undef PERLVARISC
+#  undef PERLVAR
+#  undef PERLVARA
+#  undef PERLVARI
+#  undef PERLVARIC
+#  undef PERLVARISC
+
+#endif /* MULTIPLICITY */
 
 struct tempsym; /* defined in pp_pack.c */
 
