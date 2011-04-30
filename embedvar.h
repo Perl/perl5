@@ -709,10 +709,6 @@
 
 #if defined(PERL_GLOBAL_STRUCT)
 
-#define PL_No			(my_vars->GNo)
-#define PL_GNo			(my_vars->GNo)
-#define PL_Yes			(my_vars->GYes)
-#define PL_GYes			(my_vars->GYes)
 #define PL_appctx		(my_vars->Gappctx)
 #define PL_Gappctx		(my_vars->Gappctx)
 #define PL_check		(my_vars->Gcheck)
@@ -729,8 +725,6 @@
 #define PL_Gfold_locale		(my_vars->Gfold_locale)
 #define PL_global_struct_size	(my_vars->Gglobal_struct_size)
 #define PL_Gglobal_struct_size	(my_vars->Gglobal_struct_size)
-#define PL_hexdigit		(my_vars->Ghexdigit)
-#define PL_Ghexdigit		(my_vars->Ghexdigit)
 #define PL_hints_mutex		(my_vars->Ghints_mutex)
 #define PL_Ghints_mutex		(my_vars->Ghints_mutex)
 #define PL_interp_size		(my_vars->Ginterp_size)
@@ -800,8 +794,6 @@
 
 #else /* !PERL_GLOBAL_STRUCT */
 
-#define PL_GNo			PL_No
-#define PL_GYes			PL_Yes
 #define PL_Gappctx		PL_appctx
 #define PL_Gcheck		PL_check
 #define PL_Gcsighandlerp	PL_csighandlerp
@@ -810,7 +802,6 @@
 #define PL_Gdollarzero_mutex	PL_dollarzero_mutex
 #define PL_Gfold_locale		PL_fold_locale
 #define PL_Gglobal_struct_size	PL_global_struct_size
-#define PL_Ghexdigit		PL_hexdigit
 #define PL_Ghints_mutex		PL_hints_mutex
 #define PL_Ginterp_size		PL_interp_size
 #define PL_Ginterp_size_5_10_0	PL_interp_size_5_10_0

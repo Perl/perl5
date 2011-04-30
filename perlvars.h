@@ -32,12 +32,6 @@ PERLVAR(Gcurinterp,	PerlInterpreter *)
 PERLVAR(Gthr_key,	perl_key)	/* key to retrieve per-thread struct */
 #endif
 
-/* constants (these are not literals to facilitate pointer comparisons)
- * (PERLVARISC really does create variables, despite its looks) */
-PERLVARISC(GYes,	"1")
-PERLVARISC(GNo,		"")
-PERLVARISC(Ghexdigit,	"0123456789abcdef0123456789ABCDEF")
-
 /* XXX does anyone even use this? */
 PERLVARI(Gdo_undump,	bool,	FALSE)	/* -u or dump seen? */
 

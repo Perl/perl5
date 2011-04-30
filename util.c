@@ -5800,18 +5800,15 @@ Perl_init_global_struct(pTHX)
 #  undef PERLVARA
 #  undef PERLVARI
 #  undef PERLVARIC
-#  undef PERLVARISC
 #  define PERLVAR(var,type) /**/
 #  define PERLVARA(var,n,type) /**/
 #  define PERLVARI(var,type,init) plvarsp->var = init;
 #  define PERLVARIC(var,type,init) plvarsp->var = init;
-#  define PERLVARISC(var,init) Copy(init, plvarsp->var, sizeof(init), char);
 #  include "perlvars.h"
 #  undef PERLVAR
 #  undef PERLVARA
 #  undef PERLVARI
 #  undef PERLVARIC
-#  undef PERLVARISC
 #  ifdef PERL_GLOBAL_STRUCT
     plvarsp->Gppaddr =
 	(Perl_ppaddr_t*)

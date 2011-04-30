@@ -367,7 +367,7 @@ sub readvars(\%$$@) {
 	or die "embed.pl: Can't open $file: $!\n";
     while (<FILE>) {
 	s/[ \t]*#.*//;		# Delete comments.
-	if (/PERLVARA?I?S?C?\($pre(\w+)/) {
+	if (/PERLVARA?I?C?\($pre(\w+)/) {
 	    my $sym = $1;
 	    $sym = $pre . $sym if $keep_pre;
 	    warn "duplicate symbol $sym while processing $file line $.\n"
@@ -667,14 +667,11 @@ START_EXTERN_C
 #undef PERLVARA
 #undef PERLVARI
 #undef PERLVARIC
-#undef PERLVARISC
 #define PERLVAR(v,t)	EXTERN_C t* Perl_##v##_ptr(pTHX);
 #define PERLVARA(v,n,t)	typedef t PL_##v##_t[n];			\
 			EXTERN_C PL_##v##_t* Perl_##v##_ptr(pTHX);
 #define PERLVARI(v,t,i)	PERLVAR(v,t)
 #define PERLVARIC(v,t,i) PERLVAR(v, const t)
-#define PERLVARISC(v,i)	typedef const char PL_##v##_t[sizeof(i)];	\
-			EXTERN_C PL_##v##_t* Perl_##v##_ptr(pTHX);
 
 #include "perlvars.h"
 
@@ -682,7 +679,6 @@ START_EXTERN_C
 #undef PERLVARA
 #undef PERLVARI
 #undef PERLVARIC
-#undef PERLVARISC
 
 END_EXTERN_C
 
@@ -709,7 +705,6 @@ EXTCONST void * const PL_force_link_funcs[] = {
 #define PERLVARA(v,n,t)	PERLVAR(v,t)
 #define PERLVARI(v,t,i)	PERLVAR(v,t)
 #define PERLVARIC(v,t,i) PERLVAR(v,t)
-#define PERLVARISC(v,i) PERLVAR(v,char)
 
 /* In Tru64 (__DEC && __osf__) the cc option -std1 causes that one
  * cannot cast between void pointers and function pointers without
@@ -734,7 +729,6 @@ EXTCONST void * const PL_force_link_funcs[] = {
 #undef PERLVARA
 #undef PERLVARI
 #undef PERLVARIC
-#undef PERLVARISC
 };
 #endif	/* DOINIT */
 
@@ -792,19 +786,15 @@ START_EXTERN_C
 #define PERLVARA(v,n,t)	PL_##v##_t* Perl_##v##_ptr(pTHX)		\
 			{ dVAR; PERL_UNUSED_CONTEXT; return &(PL_##v); }
 #undef PERLVARIC
-#undef PERLVARISC
 #define PERLVARIC(v,t,i)	\
 			const t* Perl_##v##_ptr(pTHX)		\
 			{ PERL_UNUSED_CONTEXT; return (const t *)&(PL_##v); }
-#define PERLVARISC(v,i)	PL_##v##_t* Perl_##v##_ptr(pTHX)	\
-			{ dVAR; PERL_UNUSED_CONTEXT; return &(PL_##v); }
 #include "perlvars.h"
 
 #undef PERLVAR
 #undef PERLVARA
 #undef PERLVARI
 #undef PERLVARIC
-#undef PERLVARISC
 
 END_EXTERN_C
 

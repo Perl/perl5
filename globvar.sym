@@ -3,6 +3,8 @@
 # *** Only structures/arrays with constant initializers should go here.
 # *** Usual globals initialized at runtime should be added in *var*.h.
 
+No
+Yes
 bincompat_options
 block_type
 charclass
@@ -12,6 +14,7 @@ fold
 fold_latin1
 fold_locale
 freq
+hexdigit
 keyword_plugin
 magic_data
 magic_vtables
