@@ -159,8 +159,8 @@ PERLVARI(Gglobal_struct_size,	U16,	sizeof(struct perl_vars))
 /* This will be useful for subsequent releases, because this has to be the
    same in your libperl as in main(), else you have a mismatch and must abort.
 */
-PERLVARI(Ginterp_size_5_10_0, U16,
-	 PERL_INTERPRETER_SIZE_UPTO_MEMBER(PERL_LAST_5_10_0_INTERP_MEMBER))
+PERLVARI(Ginterp_size_5_16_0, U16,
+	 PERL_INTERPRETER_SIZE_UPTO_MEMBER(PERL_LAST_5_16_0_INTERP_MEMBER))
 #endif
 
 /*

@@ -708,6 +708,9 @@ PERLVARI(Iunlockhook,	share_proc_t,	PERL_UNLOCK_HOOK)
 
 PERLVARI(Ithreadhook,	thrhook_proc_t,	Perl_nothreadhook)
 
+/* Can shared object be destroyed */
+PERLVARI(Idestroyhook, destroyable_proc_t, Perl_sv_destroyable)
+
 #ifndef PERL_MICRO
 PERLVARI(Isignalhook,	despatch_signals_proc_t, Perl_despatch_signals)
 #endif
@@ -718,11 +721,30 @@ PERLVARI(Irehash_seed, UV, 0)		/* 582 hash initializer */
 
 PERLVARI(Iisarev, HV*, NULL) /* Reverse map of @ISA dependencies */
 
+/* Register of known Method Resolution Orders.
+   What this actually points to is an implementation detail (it may change to
+   a structure incorporating a reference count - use mro_get_from_name to
+   retrieve a C<struct mro_alg *>  */
+PERLVAR(Iregistered_mros, HV *)
+
+/* Compile-time block start/end hooks */
+PERLVAR(Iblockhooks, AV *)
+
+/* Everything that folds to a given character, for case insensitivity regex
+ * matching */
+PERLVARI(Iutf8_foldclosures,	HV *, NULL)
+
+/* List of characters that participate in folds (except marks, etc in
+ * multi-char folds) */
+PERLVARI(Iutf8_foldable,	HV *, NULL)
+
+PERLVAR(Icustom_ops, HV *)      /* custom op registrations */
+
 /* The last unconditional member of the interpreter structure when 5.10.0 was
    released. The offset of the end of this is baked into a global variable in 
    any shared perl library which will allow a sanity test in future perl
    releases.  */
-#define PERL_LAST_5_10_0_INTERP_MEMBER	Iisarev
+#define PERL_LAST_5_16_0_INTERP_MEMBER	Icustom_ops
 
 #ifdef PERL_IMPLICIT_CONTEXT
 PERLVARI(Imy_cxt_size, int, 0)		/* size of PL_my_cxt_list */
@@ -764,32 +786,9 @@ PERLVARI(Islabs, I32**, NULL)	/* Array of slabs that have been allocated */
 PERLVARI(Islab_count, U32, 0)	/* Size of the array */
 #endif
 
-/* Can shared object be destroyed */
-PERLVARI(Idestroyhook, destroyable_proc_t, Perl_sv_destroyable)
-
 #ifdef DEBUG_LEAKING_SCALARS
 PERLVARI(Isv_serial, U32, 0) /* SV serial number, used in sv.c */
 #endif
-
-/* Register of known Method Resolution Orders.
-   What this actually points to is an implementation detail (it may change to
-   a structure incorporating a reference count - use mro_get_from_name to
-   retrieve a C<struct mro_alg *>  */
-PERLVAR(Iregistered_mros, HV *)
-
-/* Compile-time block start/end hooks */
-PERLVAR(Iblockhooks, AV *)
-
-
-/* Everything that folds to a given character, for case insensitivity regex
- * matching */
-PERLVARI(Iutf8_foldclosures,	HV *, NULL)
-
-/* List of characters that participate in folds (except marks, etc in
- * multi-char folds) */
-PERLVARI(Iutf8_foldable,	HV *, NULL)
-
-PERLVAR(Icustom_ops, HV *)      /* custom op registrations */
 
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */
