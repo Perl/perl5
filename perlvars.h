@@ -145,24 +145,6 @@ PERLVARI(Gveto_cleanup,	int, FALSE)	/* exit without cleanup */
 PERLVARI(Grunops_std,	runops_proc_t,	Perl_runops_standard)
 PERLVARI(Grunops_dbg,	runops_proc_t,	Perl_runops_debug)
 
-#if defined(MULTIPLICITY)
-#  define PERL_INTERPRETER_SIZE_UPTO_MEMBER(member)			\
-    STRUCT_OFFSET(struct interpreter, member) +				\
-    sizeof(((struct interpreter*)0)->member)
-
-/* These might be useful.  */
-PERLVARI(Ginterp_size,	U16,	sizeof(struct interpreter))
-#if defined(PERL_GLOBAL_STRUCT)
-PERLVARI(Gglobal_struct_size,	U16,	sizeof(struct perl_vars))
-#endif
-
-/* This will be useful for subsequent releases, because this has to be the
-   same in your libperl as in main(), else you have a mismatch and must abort.
-*/
-PERLVARI(Ginterp_size_5_16_0, U16,
-	 PERL_INTERPRETER_SIZE_UPTO_MEMBER(PERL_LAST_5_16_0_INTERP_MEMBER))
-#endif
-
 /*
 =for apidoc AmUx|Perl_keyword_plugin_t|PL_keyword_plugin
 

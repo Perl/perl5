@@ -4916,6 +4916,20 @@ struct interpreter {
 #  include "intrpvar.h"
 };
 
+EXTCONST U16 PL_interp_size
+  INIT(sizeof(struct interpreter));
+
+#  define PERL_INTERPRETER_SIZE_UPTO_MEMBER(member)			\
+    STRUCT_OFFSET(struct interpreter, member) +				\
+    sizeof(((struct interpreter*)0)->member)
+
+/* This will be useful for subsequent releases, because this has to be the
+   same in your libperl as in main(), else you have a mismatch and must abort.
+*/
+EXTCONST U16 PL_interp_size_5_16_0
+  INIT(PERL_INTERPRETER_SIZE_UPTO_MEMBER(PERL_LAST_5_16_0_INTERP_MEMBER));
+
+
 #  ifdef PERL_GLOBAL_STRUCT
 /* MULTIPLICITY is automatically defined when PERL_GLOBAL_STRUCT is defined,
    hence it's safe and sane to nest this within #ifdef MULTIPLICITY  */
@@ -4923,6 +4937,9 @@ struct interpreter {
 struct perl_vars {
 #    include "perlvars.h"
 };
+
+EXTCONST U16 PL_global_struct_size
+  INIT(sizeof(struct perl_vars));
 
 #    ifdef PERL_CORE
 #      ifndef PERL_GLOBAL_STRUCT_PRIVATE

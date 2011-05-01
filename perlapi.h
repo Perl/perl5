@@ -113,14 +113,8 @@ END_EXTERN_C
 #define PL_dollarzero_mutex	(*Perl_Gdollarzero_mutex_ptr(NULL))
 #undef  PL_fold_locale
 #define PL_fold_locale		(*Perl_Gfold_locale_ptr(NULL))
-#undef  PL_global_struct_size
-#define PL_global_struct_size	(*Perl_Gglobal_struct_size_ptr(NULL))
 #undef  PL_hints_mutex
 #define PL_hints_mutex		(*Perl_Ghints_mutex_ptr(NULL))
-#undef  PL_interp_size
-#define PL_interp_size		(*Perl_Ginterp_size_ptr(NULL))
-#undef  PL_interp_size_5_16_0
-#define PL_interp_size_5_16_0	(*Perl_Ginterp_size_5_16_0_ptr(NULL))
 #undef  PL_keyword_plugin
 #define PL_keyword_plugin	(*Perl_Gkeyword_plugin_ptr(NULL))
 #undef  PL_malloc_mutex

@@ -14,7 +14,10 @@ fold
 fold_latin1
 fold_locale
 freq
+global_struct_size
 hexdigit
+interp_size
+interp_size_5_16_0
 keyword_plugin
 magic_data
 magic_vtables

@@ -723,14 +723,8 @@
 #define PL_Gdollarzero_mutex	(my_vars->Gdollarzero_mutex)
 #define PL_fold_locale		(my_vars->Gfold_locale)
 #define PL_Gfold_locale		(my_vars->Gfold_locale)
-#define PL_global_struct_size	(my_vars->Gglobal_struct_size)
-#define PL_Gglobal_struct_size	(my_vars->Gglobal_struct_size)
 #define PL_hints_mutex		(my_vars->Ghints_mutex)
 #define PL_Ghints_mutex		(my_vars->Ghints_mutex)
-#define PL_interp_size		(my_vars->Ginterp_size)
-#define PL_Ginterp_size		(my_vars->Ginterp_size)
-#define PL_interp_size_5_16_0	(my_vars->Ginterp_size_5_16_0)
-#define PL_Ginterp_size_5_16_0	(my_vars->Ginterp_size_5_16_0)
 #define PL_keyword_plugin	(my_vars->Gkeyword_plugin)
 #define PL_Gkeyword_plugin	(my_vars->Gkeyword_plugin)
 #define PL_malloc_mutex		(my_vars->Gmalloc_mutex)
@@ -797,10 +791,7 @@
 #define PL_Gdo_undump		PL_do_undump
 #define PL_Gdollarzero_mutex	PL_dollarzero_mutex
 #define PL_Gfold_locale		PL_fold_locale
-#define PL_Gglobal_struct_size	PL_global_struct_size
 #define PL_Ghints_mutex		PL_hints_mutex
-#define PL_Ginterp_size		PL_interp_size
-#define PL_Ginterp_size_5_16_0	PL_interp_size_5_16_0
 #define PL_Gkeyword_plugin	PL_keyword_plugin
 #define PL_Gmalloc_mutex	PL_malloc_mutex
 #define PL_Gmmap_page_size	PL_mmap_page_size
