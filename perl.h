@@ -4200,6 +4200,18 @@ extern char **	environ;	/* environment variables supplied via exec */
 #  endif
 #endif
 
+#define PERL_PATCHLEVEL_H_IMPLICIT
+#include "patchlevel.h"
+#undef PERL_PATCHLEVEL_H_IMPLICIT
+
+#define PERL_VERSION_STRING	STRINGIFY(PERL_REVISION) "." \
+				STRINGIFY(PERL_VERSION) "." \
+				STRINGIFY(PERL_SUBVERSION)
+
+#define PERL_API_VERSION_STRING	STRINGIFY(PERL_API_REVISION) "." \
+				STRINGIFY(PERL_API_VERSION) "." \
+				STRINGIFY(PERL_API_SUBVERSION)
+
 START_EXTERN_C
 
 /* handy constants */
@@ -4262,6 +4274,17 @@ EXTCONST char PL_cshname[]
   INIT(CSH);
 #  define PL_cshlen	(sizeof(CSH "") - 1)
 #endif
+
+/* These are baked at compile time into any shared perl library.
+   In future releases this will allow us in main() to sanity test the
+   library we're linking against.  */
+
+EXTCONST U8 PL_revision
+  INIT(PERL_REVISION);
+EXTCONST U8 PL_version
+  INIT(PERL_VERSION);
+EXTCONST U8 PL_subversion
+  INIT(PERL_SUBVERSION);
 
 EXTCONST char PL_uuemap[65]
   INIT("`!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_");
@@ -4868,18 +4891,6 @@ typedef struct exitlistentry {
 #if defined(KILL_BY_SIGPRC)
 #  define  FAKE_DEFAULT_SIGNAL_HANDLERS
 #endif
-
-#define PERL_PATCHLEVEL_H_IMPLICIT
-#include "patchlevel.h"
-#undef PERL_PATCHLEVEL_H_IMPLICIT
-
-#define PERL_VERSION_STRING	STRINGIFY(PERL_REVISION) "." \
-				STRINGIFY(PERL_VERSION) "." \
-				STRINGIFY(PERL_SUBVERSION)
-
-#define PERL_API_VERSION_STRING	STRINGIFY(PERL_API_REVISION) "." \
-				STRINGIFY(PERL_API_VERSION) "." \
-				STRINGIFY(PERL_API_SUBVERSION)
 
 #if !defined(MULTIPLICITY)
 

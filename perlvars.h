@@ -145,15 +145,6 @@ PERLVARI(Gveto_cleanup,	int, FALSE)	/* exit without cleanup */
 PERLVARI(Grunops_std,	runops_proc_t,	Perl_runops_standard)
 PERLVARI(Grunops_dbg,	runops_proc_t,	Perl_runops_debug)
 
-
-/* These are baked at compile time into any shared perl library.
-   In future 5.10.x releases this will allow us in main() to sanity test the
-   library we're linking against.  */
-
-PERLVARI(Grevision,	U8,	PERL_REVISION)
-PERLVARI(Gversion,	U8,	PERL_VERSION)
-PERLVARI(Gsubversion,	U8,	PERL_SUBVERSION)
-
 #if defined(MULTIPLICITY)
 #  define PERL_INTERPRETER_SIZE_UPTO_MEMBER(member)			\
     STRUCT_OFFSET(struct interpreter, member) +				\

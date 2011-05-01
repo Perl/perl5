@@ -757,8 +757,6 @@
 #define PL_Gperlio_mutex	(my_vars->Gperlio_mutex)
 #define PL_ppaddr		(my_vars->Gppaddr)
 #define PL_Gppaddr		(my_vars->Gppaddr)
-#define PL_revision		(my_vars->Grevision)
-#define PL_Grevision		(my_vars->Grevision)
 #define PL_runops_dbg		(my_vars->Grunops_dbg)
 #define PL_Grunops_dbg		(my_vars->Grunops_dbg)
 #define PL_runops_std		(my_vars->Grunops_std)
@@ -777,8 +775,6 @@
 #define PL_Gsig_trapped		(my_vars->Gsig_trapped)
 #define PL_sigfpe_saved		(my_vars->Gsigfpe_saved)
 #define PL_Gsigfpe_saved	(my_vars->Gsigfpe_saved)
-#define PL_subversion		(my_vars->Gsubversion)
-#define PL_Gsubversion		(my_vars->Gsubversion)
 #define PL_sv_placeholder	(my_vars->Gsv_placeholder)
 #define PL_Gsv_placeholder	(my_vars->Gsv_placeholder)
 #define PL_thr_key		(my_vars->Gthr_key)
@@ -787,8 +783,6 @@
 #define PL_Gtimesbase		(my_vars->Gtimesbase)
 #define PL_use_safe_putenv	(my_vars->Guse_safe_putenv)
 #define PL_Guse_safe_putenv	(my_vars->Guse_safe_putenv)
-#define PL_version		(my_vars->Gversion)
-#define PL_Gversion		(my_vars->Gversion)
 #define PL_veto_cleanup		(my_vars->Gveto_cleanup)
 #define PL_Gveto_cleanup	(my_vars->Gveto_cleanup)
 #define PL_watch_pvx		(my_vars->Gwatch_pvx)
@@ -820,7 +814,6 @@
 #define PL_Gperlio_fd_refcnt_size	PL_perlio_fd_refcnt_size
 #define PL_Gperlio_mutex	PL_perlio_mutex
 #define PL_Gppaddr		PL_ppaddr
-#define PL_Grevision		PL_revision
 #define PL_Grunops_dbg		PL_runops_dbg
 #define PL_Grunops_std		PL_runops_std
 #ifdef OS2
@@ -831,12 +824,10 @@
 #define PL_Gsig_ignoring	PL_sig_ignoring
 #define PL_Gsig_trapped		PL_sig_trapped
 #define PL_Gsigfpe_saved	PL_sigfpe_saved
-#define PL_Gsubversion		PL_subversion
 #define PL_Gsv_placeholder	PL_sv_placeholder
 #define PL_Gthr_key		PL_thr_key
 #define PL_Gtimesbase		PL_timesbase
 #define PL_Guse_safe_putenv	PL_use_safe_putenv
-#define PL_Gversion		PL_version
 #define PL_Gveto_cleanup	PL_veto_cleanup
 #define PL_Gwatch_pvx		PL_watch_pvx
 
