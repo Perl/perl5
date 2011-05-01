@@ -4251,6 +4251,12 @@ EXTCONST char PL_No[]
 EXTCONST char PL_hexdigit[]
   INIT("0123456789abcdef0123456789ABCDEF");
 
+/* This is constant on most architectures, a global on OS/2 */
+#ifndef OS2
+EXTCONST char PL_sh_path[]
+  INIT(SH_PATH); /* full path of shell */
+#endif
+
 #ifdef CSH
 EXTCONST char PL_cshname[]
   INIT(CSH);

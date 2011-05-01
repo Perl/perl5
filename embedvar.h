@@ -763,8 +763,10 @@
 #define PL_Grunops_dbg		(my_vars->Grunops_dbg)
 #define PL_runops_std		(my_vars->Grunops_std)
 #define PL_Grunops_std		(my_vars->Grunops_std)
+#ifdef OS2
 #define PL_sh_path		(my_vars->Gsh_path)
 #define PL_Gsh_path		(my_vars->Gsh_path)
+#endif
 #define PL_sig_defaulting	(my_vars->Gsig_defaulting)
 #define PL_Gsig_defaulting	(my_vars->Gsig_defaulting)
 #define PL_sig_handlers_initted	(my_vars->Gsig_handlers_initted)
@@ -821,7 +823,9 @@
 #define PL_Grevision		PL_revision
 #define PL_Grunops_dbg		PL_runops_dbg
 #define PL_Grunops_std		PL_runops_std
+#ifdef OS2
 #define PL_Gsh_path		PL_sh_path
+#endif
 #define PL_Gsig_defaulting	PL_sig_defaulting
 #define PL_Gsig_handlers_initted	PL_sig_handlers_initted
 #define PL_Gsig_ignoring	PL_sig_ignoring
