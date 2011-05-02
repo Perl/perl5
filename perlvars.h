@@ -131,7 +131,7 @@ PERLVARI(Gmy_cxt_index, int, 0)
 PERLVAR(Ghints_mutex, perl_mutex)    /* Mutex for refcounted he refcounting */
 #endif
 
-#if defined(USE_ITHREADS)
+#if defined(USE_ITHREADS) && defined(USE_PERLIO)
 PERLVAR(Gperlio_mutex, perl_mutex)    /* Mutex for perlio fd refcounts */
 #endif
 
