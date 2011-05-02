@@ -554,13 +554,7 @@ PP(pp_formline)
     }
 
     if(!mg) {
-	if (SvREADONLY(tmpForm)) {
-	    SvREADONLY_off(tmpForm);
-	    mg = doparseform(tmpForm);
-	    SvREADONLY_on(tmpForm);
-	}
-	else
-	    mg = doparseform(tmpForm);
+	mg = doparseform(tmpForm);
 	assert(mg);
     }
     fpc = (U32*)mg->mg_ptr;
@@ -4923,7 +4917,7 @@ static MAGIC *
 S_doparseform(pTHX_ SV *sv)
 {
     STRLEN len;
-    register char *s = SvPV_force(sv, len);
+    register char *s = SvPV(sv, len);
     register char * const send = s + len;
     register char *base = NULL;
     register I32 skipspaces = 0;

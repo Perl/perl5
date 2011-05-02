@@ -61,7 +61,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 20;
 
 # number of tests in section 3
-my $bug_tests = 4 + 3 * 3 * 5 * 2 * 3 + 2 + 2 + 1;
+my $bug_tests = 4 + 3 * 3 * 5 * 2 * 3 + 2 + 2 + 1 + 1;
 
 # number of tests in section 4
 my $hmb_tests = 35;
@@ -637,6 +637,15 @@ format =
 .
 
 write;
+EOP
+
+fresh_perl_is(<<'EOP', ">ARRAY<\ncrunch_eth\n", {stderr => 1}, '#79532 - formline coerces its arguments');
+use strict;
+use warnings;
+my $zamm = ['crunch_eth'];
+formline $zamm;
+printf ">%s<\n", ref $zamm;
+print "$zamm->[0]\n";
 EOP
 
 #############################
