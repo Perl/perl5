@@ -5274,22 +5274,22 @@ This calls the select(2) syscall with the bit masks specified, which
 can be constructed using C<fileno> and C<vec>, along these lines:
 
     $rin = $win = $ein = '';
-    vec($rin,fileno(STDIN),1) = 1;
-    vec($win,fileno(STDOUT),1) = 1;
+    vec($rin, fileno(STDIN),  1) = 1;
+    vec($win, fileno(STDOUT), 1) = 1;
     $ein = $rin | $win;
 
 If you want to select on many filehandles, you may wish to write a
 subroutine like this:
 
     sub fhbits {
-        my(@fhlist) = split(' ',$_[0]);
-        my($bits);
-        for (@fhlist) {
-            vec($bits,fileno($_),1) = 1;
+        my @fhlist = @_;
+        my $bits = "";
+        for my $fh (@fhlist) {
+            vec($bits, fileno($fh), 1) = 1;
         }
-        $bits;
+        return $bits;
     }
-    $rin = fhbits('STDIN TTY SOCK');
+    $rin = fhbits(*STDIN, *TTY, *MYSOCK);
 
 The usual idiom is:
 
@@ -5316,7 +5316,7 @@ Note that whether C<select> gets restarted after signals (say, SIGALRM)
 is implementation-dependent.  See also L<perlport> for notes on the
 portability of C<select>.
 
-On error, C<select> behaves like select(2): it returns
+On error, C<select> behaves just like select(2): it returns
 -1 and sets C<$!>.
 
 On some Unixes, select(2) may report a socket file
@@ -5324,6 +5324,9 @@ descriptor as "ready for reading" when no data is available, and
 thus a subsequent read blocks. This can be avoided if you always use 
 O_NONBLOCK on the socket. See select(2) and fcntl(2) for further
 details.
+
+The standard C<IO::Select> module provides a user-friendlier interface
+to C<select>, mostly because it does all the bit-mask work for you.
 
 B<WARNING>: One should not attempt to mix buffered I/O (like C<read>
 or <FH>) with C<select>, except as permitted by POSIX, and even
