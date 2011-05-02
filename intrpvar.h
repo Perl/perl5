@@ -251,16 +251,19 @@ PERLVAR(Ilocalizing,	U8)		/* are we processing a local() list? */
 PERLVAR(Icolorset,	bool)		/* from regcomp.c */
 PERLVAR(Iin_eval,	U8)		/* trap "fatal" errors? */
 PERLVAR(Itainted,	bool)		/* using variables controlled by $< */
-
-/* current phase the interpreter is in */
-PERLVARI(Iphase,	enum perl_phase, PERL_PHASE_CONSTRUCT)
+PERLVAR(Itainting,	bool)		/* doing taint checks */
 
 /* This value may be set when embedding for full cleanup  */
 /* 0=none, 1=full, 2=full with checks */
 /* mod_perl is special, and also assigns a meaning -1 */
 PERLVARI(Iperl_destruct_level,	signed char,	0)
 
+/* current phase the interpreter is in */
+PERLVARI(Iphase,	enum perl_phase, PERL_PHASE_CONSTRUCT)
+
 PERLVAR(Iperldb,	U32)
+
+PERLVAR(Isignals,	U32)	/* Using which pre-5.8 signals */
 
 /* pseudo environmental stuff */
 PERLVAR(Iorigargc,	int)
@@ -297,14 +300,12 @@ The C variable which corresponds to Perl's $^W warning variable.
 */
 
 PERLVAR(Idowarn,	U8)
-     /* Space for a U8  */
 PERLVAR(Isawampersand,	bool)		/* must save all match strings */
 PERLVAR(Iunsafe,	bool)
 PERLVAR(Iexit_flags,	U8)		/* was exit() unexpected, etc. */
 PERLVAR(Isrand_called,	bool)
-/* Part of internal state, but makes the 16th 1 byte variable in a row.  */
-PERLVAR(Itainting,	bool)		/* doing taint checks */
 PERLVARI(Iin_load_module, bool, FALSE)	/* to prevent recursions in PerlIO_find_layer */
+     /* Space for a U16  */
 PERLVAR(Iinplace,	char *)
 PERLVAR(Ie_script,	SV *)
 
@@ -689,10 +690,6 @@ PERLVARI(Iunitcheckav_save, AV*, NULL)	/* save UNITCHECK{}s when compiling */
 
 PERLVARI(Iclocktick, long, 0)	/* this many times() ticks in a second */
 
-PERLVAR(Isignals, U32)	/* Using which pre-5.8 signals */
-
-PERLVAR(Ireentrant_retint, int)	/* Integer return value from reentrant functions */
-
 PERLVAR(Istashcache,	HV *)		/* Cache to speed up S_method_common */
 
 /* Hooks to shared SVs and locks. */
@@ -740,11 +737,13 @@ PERLVARI(Iutf8_foldable,	HV *, NULL)
 
 PERLVAR(Icustom_ops, HV *)      /* custom op registrations */
 
+PERLVAR(Ireentrant_retint, int)	/* Integer return value from reentrant functions */
+
 /* The last unconditional member of the interpreter structure when 5.10.0 was
    released. The offset of the end of this is baked into a global variable in 
    any shared perl library which will allow a sanity test in future perl
    releases.  */
-#define PERL_LAST_5_16_0_INTERP_MEMBER	Icustom_ops
+#define PERL_LAST_5_16_0_INTERP_MEMBER	Ireentrant_retint
 
 #ifdef PERL_IMPLICIT_CONTEXT
 PERLVARI(Imy_cxt_size, int, 0)		/* size of PL_my_cxt_list */
