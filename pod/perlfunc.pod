@@ -4417,34 +4417,39 @@ L<perlop>.
 =item print FILEHANDLE LIST
 X<print>
 
+=item print FILEHANDLE
+
 =item print LIST
 
 =item print
 
 Prints a string or a list of strings.  Returns true if successful.
-FILEHANDLE may be a scalar variable containing
-the name of or a reference to the filehandle, thus introducing
-one level of indirection.  (NOTE: If FILEHANDLE is a variable and
-the next token is a term, it may be misinterpreted as an operator
-unless you interpose a C<+> or put parentheses around the arguments.)
-If FILEHANDLE is omitted, prints to standard output by default, or
-to the last selected output channel; see L</select>.  If LIST is
-also omitted, prints C<$_> to the currently selected output handle.
-To set the default output handle to something other than STDOUT
-use the select operation.  The current value of C<$,> (if any) is
-printed between each LIST item.  The current value of C<$\> (if
-any) is printed after the entire LIST has been printed.  Because
-print takes a LIST, anything in the LIST is evaluated in list
-context, and any subroutine that you call will have one or more of
-its expressions evaluated in list context.  Also be careful not to
-follow the print keyword with a left parenthesis unless you want
-the corresponding right parenthesis to terminate the arguments to
-the print; put parentheses around all the arguments 
-(or interpose a C<+>, but that doesn't look as good).
+FILEHANDLE may be a scalar variable containing the name of or a reference
+to the filehandle, thus introducing one level of indirection.  (NOTE: If
+FILEHANDLE is a variable and the next token is a term, it may be
+misinterpreted as an operator unless you interpose a C<+> or put
+parentheses around the arguments.) If FILEHANDLE is omitted, prints to
+standard output by default, or to the last selected output channel; see
+L</select>.  If LIST is omitted, prints C<$_> to the currently selected
+output handle.  To use FILEHANDLE alone to print the content of C<$_> to
+it, you must be a real filehandle like C<FH>, not an indirect one like
+C<$fh>.  To set the default output handle to something other than STDOUT,
+use the select operation.
 
-Note that if you're storing FILEHANDLEs in an array, or if you're using
-any other expression more complex than a scalar variable to retrieve it,
-you will have to use a block returning the filehandle value instead:
+The current value of C<$,> (if any) is printed between each LIST item.
+The current value of C<$\> (if any) is printed after the entire LIST has
+been printed.  Because print takes a LIST, anything in the LIST is
+evaluated in list context, and any subroutine that you call will have
+one or more of its expressions evaluated in list context.  Also be
+careful not to follow the print keyword with a left parenthesis unless
+you want the corresponding right parenthesis to terminate the arguments
+to the print; put parentheses around all arguments (or interpose a C<+>,
+but that doesn't look as good).
+
+Note that if you're storing handles in an array, or if you're using any
+other expression more complex than a scalar variable to retrieve it, you
+will have to use a block returning the filehandle value instead, in which
+case the LIST may not be omitted:
 
     print { $files[$i] } "stuff\n";
     print { $OK ? STDOUT : STDERR } "stuff\n";
@@ -4455,15 +4460,21 @@ L<perlipc> for more on signal handling.
 =item printf FILEHANDLE FORMAT, LIST
 X<printf>
 
+=item printf FILEHANDLE
+
 =item printf FORMAT, LIST
 
+=item printf
+
 Equivalent to C<print FILEHANDLE sprintf(FORMAT, LIST)>, except that C<$\>
-(the output record separator) is not appended.  The first argument
-of the list will be interpreted as the C<printf> format. See C<sprintf>
-for an explanation of the format argument.  If C<use locale> is in effect,
-and POSIX::setlocale() has been called, the character used for the decimal
+(the output record separator) is not appended.  The first argument of the
+list will be interpreted as the C<printf> format. See C<sprintf> for an
+explanation of the format argument.    If you omit the LIST, C<$_> is used;
+to use FILEHANDLE without a LIST, you must use a real filehandle like
+C<FH>, not an indirect one like C<$fh>.  If C<use locale> is in effect and
+POSIX::setlocale() has been called, the character used for the decimal
 separator in formatted floating-point numbers is affected by the LC_NUMERIC
-locale.  See L<perllocale> and L<POSIX>.
+locale setting.  See L<perllocale> and L<POSIX>.
 
 Don't fall into the trap of using a C<printf> when a simple
 C<print> would do.  The C<print> is more efficient and less
@@ -5128,16 +5139,19 @@ The substitution operator.  See L<perlop/"Regexp Quote-Like Operators">.
 =item say FILEHANDLE LIST
 X<say>
 
+=item say FILEHANDLE
+
 =item say LIST
 
 =item say
 
-Just like C<print>, but implicitly appends a newline.
-C<say LIST> is simply an abbreviation for C<{ local $\ = "\n"; print
-LIST }>.
+Just like C<print>, but implicitly appends a newline.  C<say LIST> is
+simply an abbreviation for C<{ local $\ = "\n"; print LIST }>.  To use
+FILEHANDLE without a LIST to print the contents of C<$_> to it, you must
+use a real filehandle like C<FH>, not an indirect one like C<$fh>.
 
-This keyword is available only when the "say" feature is
-enabled: see L<feature>.
+This keyword is available only when the C<"say"> feature is
+enabled; see L<feature>.
 
 =item scalar EXPR
 X<scalar> X<context>
