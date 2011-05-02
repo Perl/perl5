@@ -45,6 +45,8 @@ regkind
 reg_name
 reg_extflags_name
 revision
+runops_dbg
+runops_std
 sig_name
 sig_num
 simple

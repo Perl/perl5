@@ -141,10 +141,6 @@ END_EXTERN_C
 #define PL_perlio_mutex		(*Perl_Gperlio_mutex_ptr(NULL))
 #undef  PL_ppaddr
 #define PL_ppaddr		(*Perl_Gppaddr_ptr(NULL))
-#undef  PL_runops_dbg
-#define PL_runops_dbg		(*Perl_Grunops_dbg_ptr(NULL))
-#undef  PL_runops_std
-#define PL_runops_std		(*Perl_Grunops_std_ptr(NULL))
 #undef  PL_sh_path
 #define PL_sh_path		(*Perl_Gsh_path_ptr(NULL))
 #undef  PL_sig_defaulting

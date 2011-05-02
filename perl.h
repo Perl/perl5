@@ -5049,6 +5049,14 @@ END_EXTERN_C
 
 START_EXTERN_C
 
+/* dummy variables that hold pointers to both runops functions, thus forcing
+ * them *both* to get linked in (useful for Peek.xs, debugging etc) */
+
+EXTCONST runops_proc_t PL_runops_std
+  INIT(Perl_runops_standard);
+EXTCONST runops_proc_t PL_runops_dbg
+  INIT(Perl_runops_debug);
+
 /* PERL_GLOBAL_STRUCT_PRIVATE wants to keep global data like the
  * magic vtables const, but this is incompatible with SWIG which
  * does want to modify the vtables. */
