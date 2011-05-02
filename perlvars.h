@@ -24,6 +24,9 @@
  * the appropriate export list for win32. */
 
 /* global state */
+#if defined(USE_ITHREADS)
+PERLVAR(Gop_mutex,	perl_mutex)	/* Mutex for op refcounting */
+#endif
 PERLVAR(Gcurinterp,	PerlInterpreter *)
 					/* currently running interpreter
 					 * (initial parent interpreter under
@@ -35,50 +38,8 @@ PERLVAR(Gthr_key,	perl_key)	/* key to retrieve per-thread struct */
 /* XXX does anyone even use this? */
 PERLVARI(Gdo_undump,	bool,	FALSE)	/* -u or dump seen? */
 
-#if defined(MYMALLOC) && defined(USE_ITHREADS)
-PERLVAR(Gmalloc_mutex,	perl_mutex)	/* Mutex for malloc */
-#endif
-
-#if defined(USE_ITHREADS)
-PERLVAR(Gop_mutex,	perl_mutex)	/* Mutex for op refcounting */
-#endif
-
-#ifdef USE_ITHREADS
-PERLVAR(Gdollarzero_mutex, perl_mutex)	/* Modifying $0 */
-#endif
-
-
-/* This is constant on most architectures, a global on OS/2 */
-#ifdef OS2
-PERLVARI(Gsh_path, char *, SH_PATH) /* full path of shell */
-#endif
-
-#ifndef PERL_MICRO
-/* If Perl has to ignore SIGPFE, this is its saved state.
- * See perl.h macros PERL_FPU_INIT and PERL_FPU_{PRE,POST}_EXEC. */
-PERLVAR(Gsigfpe_saved,	Sighandler_t)
-#endif
-
-/* Restricted hashes placeholder value.
- * The contents are never used, only the address. */
-PERLVAR(Gsv_placeholder, SV)
-
-#ifndef PERL_MICRO
-PERLVARI(Gcsighandlerp,	Sighandler_t, Perl_csighandler)	/* Pointer to C-level sighandler */
-#endif
-
 #ifndef PERL_USE_SAFE_PUTENV
 PERLVARI(Guse_safe_putenv, bool, TRUE)
-#endif
-
-#ifdef USE_PERLIO
-PERLVARI(Gperlio_fd_refcnt, int*, 0) /* Pointer to array of fd refcounts.  */
-PERLVARI(Gperlio_fd_refcnt_size, int, 0) /* Size of the array */
-PERLVARI(Gperlio_debug_fd, int, 0) /* the fd to write perlio debug into, 0 means not set yet */
-#endif
-
-#ifdef HAS_MMAP
-PERLVARI(Gmmap_page_size, IV, 0)
 #endif
 
 #if defined(FAKE_PERSISTENT_SIGNAL_HANDLERS)||defined(FAKE_DEFAULT_SIGNAL_HANDLERS)
@@ -97,6 +58,37 @@ PERLVARA(Gsig_defaulting, SIG_SIZE, int)
 PERLVARI(Gsig_trapped, int, 0)
 #endif
 
+#ifndef PERL_MICRO
+/* If Perl has to ignore SIGPFE, this is its saved state.
+ * See perl.h macros PERL_FPU_INIT and PERL_FPU_{PRE,POST}_EXEC. */
+PERLVAR(Gsigfpe_saved,	Sighandler_t)
+PERLVARI(Gcsighandlerp,	Sighandler_t, Perl_csighandler)	/* Pointer to C-level sighandler */
+#endif
+
+/* This is constant on most architectures, a global on OS/2 */
+#ifdef OS2
+PERLVARI(Gsh_path, char *, SH_PATH) /* full path of shell */
+#endif
+
+#ifdef USE_PERLIO
+
+#  if defined(USE_ITHREADS)
+PERLVAR(Gperlio_mutex, perl_mutex)    /* Mutex for perlio fd refcounts */
+#  endif
+
+PERLVARI(Gperlio_fd_refcnt, int*, 0) /* Pointer to array of fd refcounts.  */
+PERLVARI(Gperlio_fd_refcnt_size, int, 0) /* Size of the array */
+PERLVARI(Gperlio_debug_fd, int, 0) /* the fd to write perlio debug into, 0 means not set yet */
+#endif
+
+#ifdef HAS_MMAP
+PERLVARI(Gmmap_page_size, IV, 0)
+#endif
+
+#if defined(USE_ITHREADS)
+PERLVAR(Ghints_mutex, perl_mutex)    /* Mutex for refcounted he refcounting */
+#endif
+
 #ifdef DEBUGGING
 PERLVAR(Gwatch_pvx, char*)
 #endif
@@ -111,9 +103,6 @@ PERLVARA(Gfold_locale, 256, unsigned char) /* or perl.h */
 PERLVAR(Gappctx, void*) /* the application context */
 #endif
 
-PERLVAR(Gop_sequence, HV*) /* dump.c */
-PERLVARI(Gop_seq, UV, 0) /* dump.c */
-
 #if defined(HAS_TIMES) && defined(PERL_NEED_TIMESBASE)
 PERLVAR(Gtimesbase, struct tms)
 #endif
@@ -125,14 +114,6 @@ PERLVAR(Gtimesbase, struct tms)
 PERLVAR(Gmy_ctx_mutex, perl_mutex)
 # endif
 PERLVARI(Gmy_cxt_index, int, 0)
-#endif
-
-#if defined(USE_ITHREADS)
-PERLVAR(Ghints_mutex, perl_mutex)    /* Mutex for refcounted he refcounting */
-#endif
-
-#if defined(USE_ITHREADS) && defined(USE_PERLIO)
-PERLVAR(Gperlio_mutex, perl_mutex)    /* Mutex for perlio fd refcounts */
 #endif
 
 /* this is currently set without MUTEX protection, so keep it a type which
@@ -193,3 +174,18 @@ the Perl core) will normally return C<KEYWORD_PLUGIN_DECLINE>.
 */
 
 PERLVARI(Gkeyword_plugin, Perl_keyword_plugin_t, Perl_keyword_plugin_standard)
+
+PERLVAR(Gop_sequence, HV*) /* dump.c */
+PERLVARI(Gop_seq, UV, 0) /* dump.c */
+
+#ifdef USE_ITHREADS
+PERLVAR(Gdollarzero_mutex, perl_mutex)	/* Modifying $0 */
+#endif
+
+/* Restricted hashes placeholder value.
+ * The contents are never used, only the address. */
+PERLVAR(Gsv_placeholder, SV)
+
+#if defined(MYMALLOC) && defined(USE_ITHREADS)
+PERLVAR(Gmalloc_mutex,	perl_mutex)	/* Mutex for malloc */
+#endif
