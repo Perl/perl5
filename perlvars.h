@@ -68,7 +68,7 @@ PERLVARI(Gcsighandlerp,	Sighandler_t, Perl_csighandler)	/* Pointer to C-level si
 #endif
 
 #ifndef PERL_USE_SAFE_PUTENV
-PERLVARI(Guse_safe_putenv, int, 1)
+PERLVARI(Guse_safe_putenv, bool, TRUE)
 #endif
 
 #ifdef USE_PERLIO
