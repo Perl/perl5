@@ -16,6 +16,9 @@
 #    define USE_UTF8_IN_NAMES (PL_hints & HINT_UTF8)
 #endif
 
+#define to_uni_fold(c, p, lenp) _to_uni_fold_flags(c, p, lenp, 1)
+#define to_utf8_fold(c, p, lenp) _to_utf8_fold_flags(c, p, lenp, 1)
+
 /* Source backward compatibility. */
 #define uvuni_to_utf8(d, uv)		uvuni_to_utf8_flags(d, uv, 0)
 #define is_utf8_string_loc(s, len, ep)	is_utf8_string_loclen(s, len, ep, 0)

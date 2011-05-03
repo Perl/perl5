@@ -21,6 +21,8 @@ Perl__append_range_to_invlist
 Perl__new_invlist
 Perl__swash_inversion_hash
 Perl__swash_to_invlist
+Perl__to_uni_fold_flags
+Perl__to_utf8_fold_flags
 Perl_amagic_call
 Perl_amagic_deref_call
 Perl_apply_attrs_string
@@ -732,7 +734,6 @@ Perl_sys_term
 Perl_taint_env
 Perl_taint_proper
 Perl_tmps_grow
-Perl_to_uni_fold
 Perl_to_uni_lower
 Perl_to_uni_lower_lc
 Perl_to_uni_title
@@ -740,7 +741,6 @@ Perl_to_uni_title_lc
 Perl_to_uni_upper
 Perl_to_uni_upper_lc
 Perl_to_utf8_case
-Perl_to_utf8_fold
 Perl_to_utf8_lower
 Perl_to_utf8_title
 Perl_to_utf8_upper

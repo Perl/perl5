@@ -1341,12 +1341,12 @@ Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
 }
 
 UV
-Perl_to_uni_fold(pTHX_ UV c, U8* p, STRLEN *lenp)
+Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
 {
-    PERL_ARGS_ASSERT_TO_UNI_FOLD;
+    PERL_ARGS_ASSERT__TO_UNI_FOLD_FLAGS;
 
     uvchr_to_utf8(p, c);
-    return to_utf8_fold(p, p, lenp);
+    return _to_utf8_fold_flags(p, p, lenp, flags);
 }
 
 /* for now these all assume no locale info available for Unicode > 255 */
@@ -1799,7 +1799,7 @@ of the result.
 
 The "swashp" is a pointer to the swash to use.
 
-Both the special and normal mappings are stored lib/unicore/To/Foo.pl,
+Both the special and normal mappings are stored in lib/unicore/To/Foo.pl,
 and loaded by SWASHNEW, using lib/utf8_heavy.pl.  The special (usually,
 but not always, a multicharacter mapping), is tried first.
 
@@ -2026,15 +2026,20 @@ The first character of the foldcased version is returned
 
 =cut */
 
+/* Not currently externally documented is 'flags', which currently is non-zero
+ * if full case folds are to be used; otherwise simple folds */
+
 UV
-Perl_to_utf8_fold(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
+Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
 {
+    const char *specials = (flags) ? "utf8::ToSpecFold" : NULL;
+
     dVAR;
 
-    PERL_ARGS_ASSERT_TO_UTF8_FOLD;
+    PERL_ARGS_ASSERT__TO_UTF8_FOLD_FLAGS;
 
     return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
-                             &PL_utf8_tofold, "ToFold", "utf8::ToSpecFold");
+                             &PL_utf8_tofold, "ToFold", specials);
 }
 
 /* Note:
