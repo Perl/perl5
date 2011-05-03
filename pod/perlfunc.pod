@@ -6161,15 +6161,30 @@ whatever the default integer size is on your platform (usually 32 or 64
 bits), but you can override this to use instead one of the standard C types,
 as supported by the compiler used to build Perl:
 
-   l           interpret integer as C type "long" or "unsigned long"
+   hh          interpret integer as C type "char" or "unsigned char"
+	       on Perl 5.14 or later
    h           interpret integer as C type "short" or "unsigned short"
-   q, L or ll  interpret integer as C type "long long", "unsigned long long".
-               or "quads" (typically 64-bit integers)
+   j	       intepret integer as C type "intmax_t" on Perl 5.14 
+	       or later, and only with a C99 compiler (unportable)
+   l           interpret integer as C type "long" or "unsigned long"
+   q, L, or ll interpret integer as C type "long long", "unsigned long long",
+               or "quad" (typically 64-bit integers)
+   t	       intepret integer as C type "ptrdiff_t" on Perl 5.14 or later
+   z	       intepret integer as C type "size_t" on Perl 5.14 or later
 
-The last will raise an exception if Perl does not understand "quads" in your
-installation. (This requires either that the platform natively support quads,
-or that Perl were specifically compiled to support quads.) You can find out
-whether your Perl supports quads via L<Config>:
+As of 5.14, none of these raises an exception if they are not supported on
+your platform.  However, if warnings are enabled, a warning of the
+C<printf> warning class is issued on an unsupported conversion flag.  
+Should you instead prefer an exception, do this:
+
+    use warnings FATAL => "printf";
+
+If you would like to know about a version dependency before you
+start running the program, put something like this at its top:
+
+    use 5.014;  # for hh/j/t/z/ printf modifiers
+
+You can find out whether your Perl supports quads via L<Config>:
 
     use Config;
     if ($Config{use64bitint} eq "define" || $Config{longsize} >= 8) {
