@@ -10453,10 +10453,10 @@ parseit:
         /* Store any computed multi-char folds only if we are allowing
          * them */
         if (allow_full_fold) {
-	av_store(av, 2, MUTABLE_SV(unicode_alternate));
-	if (unicode_alternate) { /* This node is variable length */
-	    OP(ret) = ANYOFV;
-	}
+            av_store(av, 2, MUTABLE_SV(unicode_alternate));
+            if (unicode_alternate) { /* This node is variable length */
+                OP(ret) = ANYOFV;
+            }
         }
         else {
             av_store(av, 2, NULL);
