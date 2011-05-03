@@ -1544,8 +1544,6 @@ Perl_hv_clear(pTHX_ HV *hv)
     else {
 	hfreeentries(hv);
 	HvPLACEHOLDERS_set(hv, 0);
-	if (HvARRAY(hv))
-	    Zero(HvARRAY(hv), xhv->xhv_max+1 /* HvMAX(hv)+1 */, HE*);
 
 	if (SvRMAGICAL(hv))
 	    mg_clear(MUTABLE_SV(hv));
@@ -1745,17 +1743,10 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
     if (SvOOK(hv)) {
       struct xpvhv_aux * const aux = HvAUX(hv);
       struct mro_meta *meta;
-      bool zeroed = FALSE;
 
       if ((name = HvENAME_get(hv))) {
-	if (PL_phase != PERL_PHASE_DESTRUCT) {
-	    /* This must come at this point in case
-	       mro_isa_changed_in dies. */
-	    Zero(HvARRAY(hv), xhv->xhv_max+1 /* HvMAX(hv)+1 */, HE*);
-	    zeroed = TRUE;
-
+	if (PL_phase != PERL_PHASE_DESTRUCT)
 	    mro_isa_changed_in(hv);
-	}
         if (PL_stashcache)
 	    (void)hv_delete(
 	            PL_stashcache, name, HvENAMELEN_get(hv), G_DISCARD
@@ -1789,8 +1780,6 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
       }
       if (!aux->xhv_name_u.xhvnameu_name && ! aux->xhv_backreferences)
 	SvFLAGS(hv) &= ~SVf_OOK;
-      else if (!zeroed)
-	Zero(HvARRAY(hv), xhv->xhv_max+1 /* HvMAX(hv)+1 */, HE*);
     }
     if (!SvOOK(hv)) {
 	Safefree(HvARRAY(hv));
