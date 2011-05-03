@@ -45,9 +45,14 @@ if (exists $ENV{PERLIO} && $ENV{PERLIO} =~ /stdio/  ) {
 # On FreeBSD, writes to pipes of 8192 bytes or more use a mechanism
 # that is not interruptible (see perl #85842 and #84688).
 # "close during print" also hangs on Solaris 8 (but not 10 or 11).
+#
+# Also skip on release builds, to avoid other possibly problematic
+# platforms
 
 if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'freebsd' || 
-     ($^O eq 'solaris' && $Config{osvers} eq '2.8') ) {
+     ($^O eq 'solaris' && $Config{osvers} eq '2.8')
+	|| ((int($]*1000) & 1) == 0)
+) {
 	skip_all('various portability issues');
 	exit 0;
 }
