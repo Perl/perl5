@@ -9552,6 +9552,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
     IV namedclass;
     char *rangebegin = NULL;
     bool need_class = 0;
+    bool allow_full_fold = TRUE;   /* Assume wants multi-char folding */
     SV *listsv = NULL;
     STRLEN initial_listsv_len = 0; /* Kind of a kludge to see if it is more
 				      than just initialized.  */
@@ -9608,6 +9609,16 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
 	RExC_parse++;
 	if (!SIZE_ONLY)
 	    ANYOF_FLAGS(ret) |= ANYOF_INVERT;
+
+        /* We have decided to not allow multi-char folds in inverted character
+         * classes, due to the confusion that can happen, even with classes
+         * that are designed for a non-Unicode world:  You have the peculiar
+         * case that:
+            "s s" =~ /^[^\xDF]+$/i => Y
+            "ss"  =~ /^[^\xDF]+$/i => N
+         *
+         * See [perl #89750] */
+        allow_full_fold = FALSE;
     }
 
     if (SIZE_ONLY) {
@@ -10136,7 +10147,8 @@ parseit:
 		/* Get its fold */
 		U8 foldbuf[UTF8_MAXBYTES_CASE+1];
 		STRLEN foldlen;
-		const UV f = to_uni_fold(j, foldbuf, &foldlen);
+		const UV f =
+                    _to_uni_fold_flags(j, foldbuf, &foldlen, allow_full_fold);
 
 		if (foldlen > (STRLEN)UNISKIP(f)) {
 
@@ -10437,10 +10449,18 @@ parseit:
 	 * used later (regexec.c:S_reginclass()). */
 	av_store(av, 0, listsv);
 	av_store(av, 1, NULL);
+
+        /* Store any computed multi-char folds only if we are allowing
+         * them */
+        if (allow_full_fold) {
 	av_store(av, 2, MUTABLE_SV(unicode_alternate));
 	if (unicode_alternate) { /* This node is variable length */
 	    OP(ret) = ANYOFV;
 	}
+        }
+        else {
+            av_store(av, 2, NULL);
+        }
 	rv = newRV_noinc(MUTABLE_SV(av));
 	n = add_data(pRExC_state, 1, "s");
 	RExC_rxi->data->data[n] = (void*)rv;

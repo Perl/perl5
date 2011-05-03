@@ -1517,4 +1517,9 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 /s/aia	S	y	$&	S
 /(?aia:s)/	\x{17F}	n	-	-
 /(?aia:s)/	S	y	$&	S
+
+# Normally 1E9E generates a multi-char fold, but not in inverted class;
+# See [perl #89750].  This makes sure that the simple fold gets generated
+# in that case, to DF.
+/[^\x{1E9E}]/i	\x{DF}	n	-	-
 # vim: softtabstop=0 noexpandtab

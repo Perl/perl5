@@ -452,6 +452,8 @@ foreach my $test (sort { numerically } keys %tests) {
           foreach my $bracketed (0, 1) {   # Put rhs in [...], or not
             foreach my $inverted (0,1) {
                 next if $inverted && ! $bracketed;  # inversion only valid in [^...]
+                next if $inverted && @target != 1;  # [perl #89750] multi-char
+                                                    # not valid in [^...]
 
               # In some cases, add an extra character that doesn't fold, and
               # looks ok in the output.
