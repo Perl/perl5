@@ -4253,10 +4253,9 @@ PERL_CALLCONV UV	Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, S
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_4)
-			__attribute__nonnull__(pTHX_5)
-			__attribute__nonnull__(pTHX_6);
+			__attribute__nonnull__(pTHX_5);
 #define PERL_ARGS_ASSERT_TO_UTF8_CASE	\
-	assert(p); assert(ustrp); assert(swashp); assert(normal); assert(special)
+	assert(p); assert(ustrp); assert(swashp); assert(normal)
 
 PERL_CALLCONV UV	Perl_to_utf8_fold(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
 			__attribute__nonnull__(pTHX_1)
