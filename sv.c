@@ -6054,9 +6054,12 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 	if (type >= SVt_PVMG) {
 	    /* Free back-references before magic, in case the magic calls
 	     * Perl code that has weak references to sv. */
-	    if (type == SVt_PVHV)
+	    if (type == SVt_PVHV) {
 		Perl_hv_kill_backrefs(aTHX_ MUTABLE_HV(sv));
-	    if (type == SVt_PVMG && SvPAD_OUR(sv)) {
+		if (SvMAGIC(sv))
+		    mg_free(sv);
+	    }
+	    else if (type == SVt_PVMG && SvPAD_OUR(sv)) {
 		SvREFCNT_dec(SvOURSTASH(sv));
 	    } else if (SvMAGIC(sv)) {
 		/* Free back-references before other types of magic. */
