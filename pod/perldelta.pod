@@ -2320,6 +2320,13 @@ L<Ambiguous use of %c resolved as operator %c|perldiag/"Ambiguous use of %c reso
 
 L<Ambiguous use of %c{%s} resolved to %c%s|perldiag/"Ambiguous use of %c{%s} resolved to %c%s">
 
+=item *
+
+L<Ambiguous use of %c{%s[...]} resolved to %c%s[...]|perldiag/"Ambiguous use of %c{%s[...]} resolved to %c%s[...]">
+
+=item *
+
+L<Ambiguous use of %c{%s{...}} resolved to %c%s{...}|perldiag/"Ambiguous use of %c{%s{...}} resolved to %c%s{...}">
 
 =item *
 
@@ -3073,8 +3080,8 @@ side-chains of the optree.
 
 The following functions/macros have been added to the API.  The C<*_nomg>
 macros are equivalent to their non-C<_nomg> variants, except that they ignore
-C<get-magic>.  Those ending in C<_flags> allow one to specify whether
-C<get-magic> is processed.
+get-magic.  Those ending in C<_flags> allow one to specify whether
+get-magic is processed.
 
   sv_2bool_flags
   SvTRUE_nomg
@@ -3920,7 +3927,7 @@ reference already (such as from a previous FETCH) [perl #72144].
 
 =item *
 
-C<splice> now calls C<set-magic> (so changes made
+C<splice> now calls set-magic (so changes made
 by C<splice @ISA> are respected by method calls) [perl #78400].
 
 =item *
@@ -3930,7 +3937,7 @@ FETCH/STORE at all [perl #43789] (5.12.2).
 
 =item *
 
-utf8::is_utf8() now respects C<get-magic> (like C<$1>) (5.12.1).
+utf8::is_utf8() now respects get-magic (like C<$1>) (5.12.1).
 
 =back
 
@@ -4419,11 +4426,6 @@ interrupted by a signal.
 
 =item *
 
-L<version> now prevents object methods from being called as class methods
-(d808b68)
-
-=item *
-
 The changes in prototype handling break L<Switch>.  A patch has been sent
 upstream and will hopefully appear on CPAN soon.
 
@@ -4464,7 +4466,7 @@ that release's L<perl5120delta>.
 
 split() no longer modifies C<@_> when called in scalar or void context.
 In void context it now produces a "Useless use of split" warning.
-This was also a perl 5.12.0 changed that missed the perldelta.
+This was also a perl 5.12.0 change that missed the perldelta.
 
 =head1 Obituary
 
