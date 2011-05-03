@@ -72,7 +72,11 @@ are split between groupings, or when one or more are quantified.  Thus
  # be even if it did!!
  "\N{LATIN SMALL LIGATURE FI}" =~ /(f)(i)/i;      # Doesn't match!
 
-Also, this matching doesn't fully conform to the current Unicode
+Perl doesn't match multiple characters in an inverted bracketed
+character class, which otherwise could be highly confusing.  See
+L<perlrecharclass/Negation>.
+
+Also, Perl matching doesn't fully conform to the current Unicode C</i>
 recommendations, which ask that the matching be made upon the NFD
 (Normalization Form Decomposed) of the text.  However, Unicode is
 in the process of reconsidering and revising their recommendations.

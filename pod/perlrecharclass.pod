@@ -401,7 +401,7 @@ The third form of character class you can use in Perl regular expressions
 is the bracketed character class.  In its simplest form, it lists the characters
 that may be matched, surrounded by square brackets, like this: C<[aeiou]>.
 This matches one of C<a>, C<e>, C<i>, C<o> or C<u>.  Like the other
-character classes, exactly one character is matched. To match
+character classes, exactly one character is matched.* To match
 a longer string consisting of characters mentioned in the character
 class, follow the character class with a L<quantifier|perlre/Quantifiers>.  For
 instance, C<[aeiou]+> matches one or more lowercase English vowels.
@@ -416,6 +416,19 @@ Examples:
  "ae" =~  /^[aeiou]$/      # No match, a character class only matches
                            # a single character.
  "ae" =~  /^[aeiou]+$/     # Match, due to the quantifier.
+
+ -------
+
+* There is an exception to a bracketed character class matching a only a
+single character.  When the class is to match caselessely under C</i>
+matching rules, and a character inside the class matches a
+multiple-character sequence caselessly under Unicode rules, the class
+(when not L<inverted|/Negation>) will also match that sequence.  For
+example, Unicode says that the letter C<LATIN SMALL LETTER SHARP S>
+should match the sequence C<ss> under C</i> rules.  Thus,
+
+ 'ss' =~ /\A\N{LATIN SMALL LETTER SHARP S}\z/i             # Matches
+ 'ss' =~ /\A[aeioust\N{LATIN SMALL LETTER SHARP S}]\z/i    # Matches
 
 =head3 Special Characters Inside a Bracketed Character Class
 
@@ -525,12 +538,25 @@ It is also possible to instead list the characters you do not want to
 match. You can do so by using a caret (C<^>) as the first character in the
 character class. For instance, C<[^a-z]> matches any character that is not a
 lowercase ASCII letter, which therefore includes almost a hundred thousand
-Unicode letters.
+Unicode letters.  The class is said to be "negated" or "inverted".
 
 This syntax make the caret a special character inside a bracketed character
 class, but only if it is the first character of the class. So if you want
 the caret as one of the characters to match, either escape the caret or
 else not list it first.
+
+In inverted bracketed character classes, Perl ignores the Unicode rules
+that normally say that a given character matches a sequence of multiple
+characters under caseless C</i> matching, which otherwise could be
+highly confusing:
+
+ "ss" =~ /^[^\xDF]+$/ui;
+
+This should match any sequences of characters that aren't C<\xDF> nor
+what C<\xDF> matches under C</i>.  C<"s"> isn't C<\xDF>, but Unicode
+says that C<"ss"> is what C<\xDF> matches under C</i>.  So which one
+"wins"? Do you fail the match because the string has C<ss> or accept it
+because it has an C<s> followed by another C<s>?
 
 Examples:
 
@@ -765,7 +791,7 @@ C<\p{HorizSpace}> and \C<\p{XPosixBlank}>.  For example,
 C<\p{PosixAlpha}> can be written as C<\p{Alpha}>.  All are listed
 in L<perluniprops/Properties accessible through \p{} and \P{}>.
 
-=head4 Negation
+=head4 Negation of POSIX character classes
 X<character class, negation>
 
 A Perl extension to the POSIX character class is the ability to

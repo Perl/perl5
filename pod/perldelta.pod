@@ -56,6 +56,8 @@ This release provides full functionality for C<use feature
 'unicode_strings'>.  Under its scope, all string operations executed and
 regular expressions compiled (even if executed outside its scope) have
 Unicode semantics.  See L<feature/"the 'unicode_strings' feature">.
+However, see L</Inverted bracketed character classes and multi-character folds>,
+below.
 
 This feature avoids most forms of the "Unicode Bug" (see
 L<perlunicode/The "Unicode Bug"> for details).  If there is any
@@ -528,6 +530,29 @@ Perl 5.14.0 is not binary-compatible with any previous stable release.
 In addition to the sections that follow, see L</C API Changes>.
 
 =head2 Regular Expressions and String Escapes
+
+=head3 Inverted bracketed character classes and multi-character folds
+
+Some characters match a sequence of two or three characters in C</i>
+regular expression matching under Unicode rules.  One example is
+C<LATIN SMALL LETTER SHARP S> which matches the sequence C<ss>.
+
+ 'ss' =~ /\A[\N{LATIN SMALL LETTER SHARP S}]\z/i  # Matches
+
+This, however, can lead to very counter-intuitive results, especially
+when inverted.  Because of this, Perl 5.14 does not use multi-character C</i>
+matching in inverted character classes.
+
+ 'ss' =~ /\A[^\N{LATIN SMALL LETTER SHARP S}]+\z/i  # ???
+
+This should match any sequences of characters that aren't the C<SHARP S>
+nor what C<SHARP S> matches under C</i>.  C<"s"> isn't C<SHARP S>, but
+Unicode says that C<"ss"> is what C<SHARP S> matches under C</i>.  So
+which one "wins"? Do you fail the match because the string has C<ss> or
+accept it because it has an C<s> followed by another C<s>?
+
+Earlier releases of Perl did allow this multi-character matching,
+but due to bugs, it mostly did not work.
 
 =head3 \400-\777
 
