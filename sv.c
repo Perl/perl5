@@ -5528,16 +5528,13 @@ Perl_sv_rvweaken(pTHX_ SV *const sv)
  * store it directly in the HvAUX or mg_obj slot, avoiding the need to
  * allocate an AV. (Whether the slot holds an AV tells us whether this is
  * active.)
- *
- * If an HV's backref is stored in magic, it is moved back to HvAUX.
  */
 
 /* A discussion about the backreferences array and its refcount:
  *
  * The AV holding the backreferences is pointed to either as the mg_obj of
- * PERL_MAGIC_backref, or in the specific case of a HV that has the hv_aux
- * structure, from the xhv_backreferences field. (A HV without hv_aux will
- * have the standard magic instead.) The array is created with a refcount
+ * PERL_MAGIC_backref, or in the specific case of a HV, from the
+ * xhv_backreferences field. The array is created with a refcount
  * of 2. This means that if during global destruction the array gets
  * picked on before its parent to have its refcount decremented by the
  * random zapper, it won't actually be freed, meaning it's still there for
@@ -5565,21 +5562,6 @@ Perl_sv_add_backref(pTHX_ SV *const tsv, SV *const sv)
 
     if (SvTYPE(tsv) == SVt_PVHV) {
 	svp = (SV**)Perl_hv_backreferences_p(aTHX_ MUTABLE_HV(tsv));
-
-	if (!*svp) {
-	    if ((mg = mg_find(tsv, PERL_MAGIC_backref))) {
-		/* Aha. They've got it stowed in magic instead.
-		 * Move it back to xhv_backreferences */
-		*svp = mg->mg_obj;
-		/* Stop mg_free decreasing the reference count.  */
-		mg->mg_obj = NULL;
-		/* Stop mg_free even calling the destructor, given that
-		   there's no AV to free up.  */
-		mg->mg_virtual = 0;
-		sv_unmagic(tsv, PERL_MAGIC_backref);
-		mg = NULL;
-	    }
-	}
     } else {
 	if (! ((mg =
 	    (SvMAGICAL(tsv) ? mg_find(tsv, PERL_MAGIC_backref) : NULL))))
@@ -5637,10 +5619,11 @@ Perl_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
 
     PERL_ARGS_ASSERT_SV_DEL_BACKREF;
 
-    if (SvTYPE(tsv) == SVt_PVHV && SvOOK(tsv)) {
-	svp = (SV**)Perl_hv_backreferences_p(aTHX_ MUTABLE_HV(tsv));
+    if (SvTYPE(tsv) == SVt_PVHV) {
+	if (SvOOK(tsv))
+	    svp = (SV**)Perl_hv_backreferences_p(aTHX_ MUTABLE_HV(tsv));
     }
-    if (!svp || !*svp) {
+    else {
 	MAGIC *const mg
 	    = SvMAGICAL(tsv) ? mg_find(tsv, PERL_MAGIC_backref) : NULL;
 	svp =  mg ? &(mg->mg_obj) : NULL;
