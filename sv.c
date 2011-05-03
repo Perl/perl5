@@ -6102,6 +6102,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		PL_last_swash_hv = NULL;
 	    }
 	    Perl_hv_undef_flags(aTHX_ MUTABLE_HV(sv), HV_NAME_SETALL);
+	    assert(!HvARRAY((HV*)sv));
 	    break;
 	case SVt_PVAV:
 	    {
