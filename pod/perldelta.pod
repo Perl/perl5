@@ -1839,7 +1839,6 @@ L<Module::Load::Conditional> has been upgraded from version 0.34 to 0.44.
 
 The L<mro> pragma has been upgraded from version 1.02 to 1.07.
 
-
 =item *
 
 L<NDBM_File> has been upgraded from version 1.08 to 1.12.
@@ -4433,7 +4432,7 @@ upstream and will hopefully appear on CPAN soon.
 
 The upgrade to F<ExtUtils-MakeMaker-6.57_05> has caused
 some tests in the F<Module-Install> distribution on CPAN to
-fail. (Specifically, F<02_mymeta.t> tests 5 and 21l; F<18_all_from.t>
+fail. (Specifically, F<02_mymeta.t> tests 5 and 21; F<18_all_from.t>
 tests 6 and 15; F<19_authors.t> tests 5, 13, 21, and 29; and
 F<20_authors_with_special_characters.t> tests 6, 15, and 23 in version
 1.00 of that distribution now fail.)
@@ -4476,7 +4475,6 @@ away on September 18, 2010 after a battle with lung cancer.  The community
 was richer for his involvement.  He will be missed.
 
 =head1 Acknowledgements
-
 
 Perl 5.14.0 represents one year of development since
 Perl 5.12.0 and contains nearly 550,000 lines of changes across nearly
@@ -4529,7 +4527,6 @@ file in the Perl 5.14.0 distribution.
 Many of the changes included in this version originated in the CPAN
 modules included in Perl's core. We're grateful to the entire CPAN
 community for helping Perl to flourish.
-
 
 =head1 Reporting Bugs
 
