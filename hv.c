@@ -1631,6 +1631,7 @@ STATIC void
 S_hfreeentries(pTHX_ HV *hv)
 {
     int attempts = 100;
+    STRLEN i = 0;
     const bool mpm = PL_phase != PERL_PHASE_DESTRUCT && HvENAME(hv);
 
     PERL_ARGS_ASSERT_HFREEENTRIES;
@@ -1638,72 +1639,63 @@ S_hfreeentries(pTHX_ HV *hv)
     if (!HvARRAY(hv))
 	return;
 
-    /* we may need multiple attempts to empty the hash,
-     * since destructors may add things back. */
+    /* keep looping until all keys are removed. This may take multiple
+     * passes through the array, since destructors may add things back. */
 
-    while (1) {
+    while (((XPVHV*)SvANY(hv))->xhv_keys) {
 	struct xpvhv_aux *iter;
 	HE *entry;
-	STRLEN i = 0;
+	HE ** array;
 
-	/* free all entries in all slots */
-	for (;;) {
-	    HE ** const array = HvARRAY(hv);
-
-	    if ( !((XPVHV*) SvANY(hv))->xhv_keys)
-		break;
-
-	    if (SvOOK(hv) && ((iter = HvAUX(hv)))
-		&& ((entry = iter->xhv_eiter)) )
-	    {
-		/* the iterator may get resurrected after each
-		 * destructor call, so check each time */
-		if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
-		    HvLAZYDEL_off(hv);
-		    hv_free_ent(hv, entry);
-		}
-		iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
-		iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
-	    }
-
-	    entry = array[i];
-	    if (entry) {
-		/* Detach this entry. Note that destructors may be
-		 * called which will manipulate this hash, so make sure
-		 * its internal structure remains consistent throughout */
-		array[i] = HeNEXT(entry);
-		((XPVHV*) SvANY(hv))->xhv_keys--;
-
-		if (   mpm && HeVAL(entry) && isGV(HeVAL(entry))
-		    && GvHV(HeVAL(entry)) && HvENAME(GvHV(HeVAL(entry)))
-		) {
-		    STRLEN klen;
-		    const char * const key = HePV(entry,klen);
-		    if ((klen > 1 && key[klen-1]==':' && key[klen-2]==':')
-		     || (klen == 1 && key[0] == ':')) {
-			mro_package_moved(
-			 NULL, GvHV(HeVAL(entry)),
-			 (GV *)HeVAL(entry), 0
- 			);
-		    }
-		}
+	if (SvOOK(hv) && ((iter = HvAUX(hv)))
+	    && ((entry = iter->xhv_eiter)) )
+	{
+	    /* the iterator may get resurrected after each
+	     * destructor call, so check each time */
+	    if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
+		HvLAZYDEL_off(hv);
 		hv_free_ent(hv, entry);
 		/* warning: at this point HvARRAY may have been
 		 * re-allocated, HvMAX changed etc */
-		continue;
 	    }
-	    if (i++ >= HvMAX(hv))
-		break;
+	    iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
+	    iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
 	}
 
-	if (((XPVHV*) SvANY(hv))->xhv_keys == 0)
-	    /* Good. No-one added anything this time round.  */
-	    break;
+	array = HvARRAY(hv);
+	entry = array[i];
+	if (entry) {
+	    /* Detach and free this entry. Note that destructors may be
+	     * called which will manipulate this hash, so make sure
+	     * its internal structure remains consistent throughout */
+	    array[i] = HeNEXT(entry);
+	    ((XPVHV*) SvANY(hv))->xhv_keys--;
 
-	if (--attempts == 0) {
-	    Perl_die(aTHX_ "panic: hfreeentries failed to free hash - something is repeatedly re-creating entries");
+	    if (   mpm && HeVAL(entry) && isGV(HeVAL(entry))
+		&& GvHV(HeVAL(entry)) && HvENAME(GvHV(HeVAL(entry)))
+	    ) {
+		STRLEN klen;
+		const char * const key = HePV(entry,klen);
+		if ((klen > 1 && key[klen-1]==':' && key[klen-2]==':')
+		 || (klen == 1 && key[0] == ':')) {
+		    mro_package_moved(
+		     NULL, GvHV(HeVAL(entry)),
+		     (GV *)HeVAL(entry), 0
+		    );
+		}
+	    }
+	    hv_free_ent(hv, entry);
+	    /* warning: at this point HvARRAY may have been
+	     * re-allocated, HvMAX changed etc */
+	    continue;
 	}
-    }
+	if (i++ >= HvMAX(hv)) {
+	    i = 0;
+	    if (--attempts == 0) {
+		Perl_die(aTHX_ "panic: hfreeentries failed to free hash - something is repeatedly re-creating entries");
+	    }
+	}
+    } /* while */
 }
 
 /*
