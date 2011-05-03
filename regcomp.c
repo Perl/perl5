@@ -9611,9 +9611,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
 	    ANYOF_FLAGS(ret) |= ANYOF_INVERT;
 
         /* We have decided to not allow multi-char folds in inverted character
-         * classes, due to the confusion that can happen, even with classes
-         * that are designed for a non-Unicode world:  You have the peculiar
-         * case that:
+	 * classes, due to the confusion that can happen, especially with
+	 * classes that are designed for a non-Unicode world:  You have the
+	 * peculiar case that:
             "s s" =~ /^[^\xDF]+$/i => Y
             "ss"  =~ /^[^\xDF]+$/i => N
          *
