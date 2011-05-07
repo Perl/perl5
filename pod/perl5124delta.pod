@@ -26,6 +26,11 @@ C<lc>, C<uc>, C<lcfirst>, and C<ucfirst> no longer return untainted strings
 when the argument is tainted. This has been broken since perl 5.8.9
 [perl #87336].
 
+=head1 Documentation
+
+Updated the documentation for rand() in L<perlfunc> to note that it is not
+cryptographically secure.
+
 =head1 Platform Specific Notes
 
 =over 4
