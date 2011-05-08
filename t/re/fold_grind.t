@@ -446,6 +446,10 @@ foreach my $test (sort { numerically } keys %tests) {
           # XXX Doesn't currently test multi-char folds in pattern
           next if @pattern != 1;
 
+          # See if works on what could be a simple trie.
+          $eval = "my \$c = \"$lhs\"; my \$p = qr/$rhs|xyz/i$charset;$upgrade_target$upgrade_pattern \$c $op \$p";
+          run_test($eval, ++$count, "", "");
+
           my $okays = 0;
           my $this_iteration = 0;
 
