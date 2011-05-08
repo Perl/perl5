@@ -3048,20 +3048,17 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                 }
                             } else {
 /* 
-    Currently we do not believe that the trie logic can
-    handle case insensitive matching properly when the
-    pattern is not unicode (thus forcing unicode semantics).
+    Currently the trie logic handles case insensitive matching properly only
+    when the pattern is UTF-8 and the node is EXACTFU (thus forcing unicode
+    semantics).
 
     If/when this is fixed the following define can be swapped
     in below to fully enable trie logic.
 
-    XXX It may work if not UTF and/or /a (AT_LEAST_UNI_SEMANTICS) but perhaps
-    not /aa
-
 #define TRIE_TYPE_IS_SAFE 1
 
 */
-#define TRIE_TYPE_IS_SAFE ((UTF && UNI_SEMANTICS) || optype==EXACT)
+#define TRIE_TYPE_IS_SAFE ((UTF && optype == EXACTFU) || optype==EXACT)
 
                                 if ( last && TRIE_TYPE_IS_SAFE ) {
                                     make_trie( pRExC_state, 
