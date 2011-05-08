@@ -48,9 +48,9 @@ typedef enum {
 #define _RXf_PMf_CHARSET_SHIFT ((RXf_PMf_STD_PMMOD_SHIFT)+5)
 #define RXf_PMf_CHARSET (7 << (_RXf_PMf_CHARSET_SHIFT)) /* 3 bits */
 
-/* embed.pl doesn't yet know how to handle static inline functions, so
-   manually decorate them here with gcc-style attributes.
-*/
+/* Manually decorate these functions here with gcc-style attributes just to
+ * avoid making the regex_charset typedef global, which it would need to be for
+ * proto.h to understand it */
 PERL_STATIC_INLINE void
 set_regex_charset(U32 * const flags, const regex_charset cs)
     __attribute__nonnull__(1);
