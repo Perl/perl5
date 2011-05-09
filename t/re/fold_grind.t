@@ -443,9 +443,6 @@ foreach my $test (sort { numerically } keys %tests) {
             run_test($eval, ++$count, "", "");
           }
 
-          # XXX Doesn't currently test multi-char folds in pattern
-          next if @pattern != 1;
-
           # See if works on what could be a simple trie.
           $eval = "my \$c = \"$lhs\"; my \$p = qr/$rhs|xyz/i$charset;$upgrade_target$upgrade_pattern \$c $op \$p";
           run_test($eval, ++$count, "", "");
@@ -454,6 +451,8 @@ foreach my $test (sort { numerically } keys %tests) {
           my $this_iteration = 0;
 
           foreach my $bracketed (0, 1) {   # Put rhs in [...], or not
+            next if $bracketed && @pattern != 1;    # bracketed makes these
+                                                    # or's instead of a sequence
             foreach my $inverted (0,1) {
                 next if $inverted && ! $bracketed;  # inversion only valid in [^...]
                 next if $inverted && @target != 1;  # [perl #89750] multi-char
@@ -491,6 +490,10 @@ foreach my $test (sort { numerically } keys %tests) {
                                         ? "(${rhs},?)"
                                         : "((${rhs})+,?)";
                     foreach my $quantifier ("", '?', '*', '+', '{1,3}') {
+
+                      # Perhaps should be TODOs, as are unimplemented, but
+                      # maybe will never be implemented
+                      next if @pattern != 1 && $quantifier;
 
                       # A ? or * quantifier normally causes the thing to be
                       # able to match a null string
