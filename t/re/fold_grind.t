@@ -103,13 +103,15 @@ while (<$fh>) {
         # XXX better to use reverse fold of these instead of uc
         my @uc_folded = map { ord uc chr $_ } @folded;
 
-        # Include three code points that are handled internally by the regex
+        # Include code points that are handled internally by the regex
         # engine specially, plus all non-above-255 multi folds (which actually
         # the only one is already included in the three, but this makes sure)
         # And if any member of the fold is not the same range type as the
         # source, add it directly to the tests.  It needs to be an array of an
         # array, so that it is distinguished from multiple single folds
-        if ($from == 0xDF || $from == 0x390 || $from == 0x3B0
+        if ($from == 0xDF
+            || $from == 0x390 || $from == 0x3B0
+            || $from == 0x1FD3 || $from == 0x1FE3
             || $from_range_type != $Unicode
             || grep { range_type($_) != $from_range_type } @folded)
         {
