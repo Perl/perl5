@@ -601,7 +601,6 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	    frequency = PL_freq[s[i]];
 	}
     }
-    BmFLAGS(sv) = (U8)flags;
     BmRARE(sv) = s[rarest];
     BmPREVIOUS(sv) = rarest;
     BmUSEFUL(sv) = 100;			/* Initial value */

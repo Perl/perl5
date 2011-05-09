@@ -1294,13 +1294,10 @@ the scalar's value cannot change unless written to.
 /* SvPOKp not SvPOK in the assertion because the string can be tainted! eg
    perl -T -e '/$^X/'
 */
+
+#define BmFLAGS(sv)		(SvTAIL(sv) ? FBMcf_TAIL : 0)
+
 #if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
-#  define BmFLAGS(sv)							\
-	(*({ SV *const _bmflags = MUTABLE_SV(sv);			\
-		assert(SvTYPE(_bmflags) == SVt_PVGV);			\
-		assert(SvVALID(_bmflags));				\
-	    &(((XPVGV*) SvANY(_bmflags))->xnv_u.xbm_s.xbm_flags);	\
-	 }))
 #  define BmRARE(sv)							\
 	(*({ SV *const _bmrare = MUTABLE_SV(sv);			\
 		assert(SvTYPE(_bmrare) == SVt_PVGV);			\
@@ -1321,7 +1318,6 @@ the scalar's value cannot change unless written to.
 	    &(((XPVGV*) SvANY(_bmprevious))->xnv_u.xbm_s.xbm_previous);	\
 	 }))
 #else
-#  define BmFLAGS(sv)		((XPVGV*) SvANY(sv))->xnv_u.xbm_s.xbm_flags
 #  define BmRARE(sv)		((XPVGV*) SvANY(sv))->xnv_u.xbm_s.xbm_rare
 #  define BmUSEFUL(sv)		((XPVGV*) SvANY(sv))->xiv_u.xivu_i32
 #  define BmPREVIOUS(sv)	((XPVGV*) SvANY(sv))->xnv_u.xbm_s.xbm_previous
