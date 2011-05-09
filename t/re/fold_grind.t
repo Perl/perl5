@@ -285,8 +285,7 @@ foreach my $test (sort { numerically } keys %tests) {
                             $test,
                             join("", @x_target),
                             join("", @x_pattern);
-    #print $progress, "\n";
-    #diag $progress;
+    #note $progress;
 
     # Now grind out tests, using various combinations.
     foreach my $charset (@charsets) {
