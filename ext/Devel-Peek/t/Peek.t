@@ -816,7 +816,6 @@ unless ($Config{useithreads}) {
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_bm
     MG_TYPE = PERL_MAGIC_bm\\(B\\)
-  FLAGS = 0
   RARE = \d+
   PREVIOUS = 1
   USEFUL = 100
@@ -834,7 +833,6 @@ unless ($Config{useithreads}) {
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_bm
     MG_TYPE = PERL_MAGIC_bm\\(B\\)
-  FLAGS = 0
   RARE = \d+
   PREVIOUS = 1
   USEFUL = 100

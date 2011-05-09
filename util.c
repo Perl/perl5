@@ -804,7 +804,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	}
       check_end:
 	if ( s == bigend
-	     && (BmFLAGS(littlestr) & FBMcf_TAIL)
+	     && SvTAIL(littlestr)
 	     && memEQ((char *)(bigend - littlelen),
 		      (char *)(oldlittle - littlelen), littlelen) )
 	    return (char*)bigend - littlelen;

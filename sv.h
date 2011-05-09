@@ -1295,7 +1295,9 @@ the scalar's value cannot change unless written to.
    perl -T -e '/$^X/'
 */
 
-#define BmFLAGS(sv)		(SvTAIL(sv) ? FBMcf_TAIL : 0)
+#ifndef PERL_CORE
+#  define BmFLAGS(sv)		(SvTAIL(sv) ? FBMcf_TAIL : 0)
+#endif
 
 #if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define BmRARE(sv)							\
