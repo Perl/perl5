@@ -8872,13 +8872,14 @@ tryagain:
 			    break;
 
 			/* These are the tricky fold characters.  Flush any
-			 * buffer first. */
+			 * buffer first. (When adding to this list, also should
+			 * add them to fold_grind.t to make sure get tested) */
 			case GREEK_SMALL_LETTER_UPSILON_WITH_DIALYTIKA_AND_TONOS:
 			case GREEK_SMALL_LETTER_IOTA_WITH_DIALYTIKA_AND_TONOS:
 			case LATIN_SMALL_LETTER_SHARP_S:
 			case LATIN_CAPITAL_LETTER_SHARP_S:
-			case 0x1FD3:
-			case 0x1FE3:
+			case 0x1FD3: /* GREEK SMALL LETTER IOTA WITH DIALYTIKA AND OXIA */
+			case 0x1FE3: /* GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA */
 			    if (len != 0) {
 				p = oldp;
 				goto loopdone;

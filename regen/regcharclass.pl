@@ -729,7 +729,7 @@ VERTWS: Vertical Whitespace: \v \V
 0x2029          # PARAGRAPH SEPARATOR
 
 
-TRICKYFOLD: Problematic fold case letters.
+TRICKYFOLD: Problematic fold case letters.  When adding to this list, also should add them to regcomp.c and fold_grind.t
 => generic cp generic-cp generic-both :fast safe
 0x00DF	# LATIN SMALL LETTER SHARP S
 0x0390	# GREEK SMALL LETTER IOTA WITH DIALYTIKA AND TONOS
