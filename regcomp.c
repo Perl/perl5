@@ -8821,6 +8821,9 @@ tryagain:
 			    latest_char_state = generic_char;
 			    break;
 			case 0x03C5:	/* First char in upsilon series */
+			case 0x03A5:	/* Also capital UPSILON, which folds to
+					   03C5, and hence exhibits the same
+					   problem */
 			    if (p < RExC_end - 4) { /* Need >= 4 bytes left */
 				latest_char_state = upsilon_1;
 				if (len != 0) {
@@ -8833,6 +8836,7 @@ tryagain:
 			    }
 			    break;
 			case 0x03B9:	/* First char in iota series */
+			case 0x0399:	/* Also capital IOTA */
 			    if (p < RExC_end - 4) {
 				latest_char_state = iota_1;
 				if (len != 0) {
