@@ -2959,7 +2959,11 @@ dist/ExtUtils-Install/Changes				ExtUtils-Install change log
 dist/ExtUtils-Install/lib/ExtUtils/Installed.pm		Information on installed extensions
 dist/ExtUtils-Install/lib/ExtUtils/Install.pm		Handles 'make install' on extensions
 dist/ExtUtils-Install/lib/ExtUtils/Packlist.pm		Manipulates .packlist files
+dist/ExtUtils-Install/lib/ExtUtils/Perllocal/Entry.pm	Parse/generate perllocal.pod
+dist/ExtUtils-Install/lib/ExtUtils/Perllocal/Parser.pm	Parse/generate perllocal.pod
+dist/ExtUtils-Install/lib/ExtUtils/Perllocal.pm		Parse/generate perllocal.pod
 dist/ExtUtils-Install/t/can_write_dir.t			Does the _can_write_dir function of ExtUtils::Install work properly?
+dist/ExtUtils-Install/t/data/perllocal.pod		Test data for ExtUtils::Perllocal
 dist/ExtUtils-Install/t/Installapi2.t			See if new api for ExtUtils::Install::install() works
 dist/ExtUtils-Install/t/Installed.t			See if ExtUtils::Installed works
 dist/ExtUtils-Install/t/Install.t			See if ExtUtils::Install works
@@ -2968,6 +2972,7 @@ dist/ExtUtils-Install/t/lib/MakeMaker/Test/Setup/BFD.pm	MakeMaker test utilities
 dist/ExtUtils-Install/t/lib/MakeMaker/Test/Utils.pm	MakeMaker test utilities
 dist/ExtUtils-Install/t/lib/TieOut.pm			Testing library to capture prints
 dist/ExtUtils-Install/t/Packlist.t			See if Packlist works
+dist/ExtUtils-Install/t/Perllocal.t			See if Perllocal works
 dist/ExtUtils-Manifest/lib/ExtUtils/Manifest.pm			Utilities to write MANIFEST files
 dist/ExtUtils-Manifest/lib/ExtUtils/MANIFEST.SKIP		The default MANIFEST.SKIP
 dist/ExtUtils-Manifest/t/Manifest.t				See if ExtUtils::Manifest works
