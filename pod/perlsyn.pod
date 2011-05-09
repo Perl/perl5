@@ -337,17 +337,17 @@ which is Perl short-hand for the more explicitly written version:
 Note that if there were a C<continue> block on the above code, it would
 get executed only on lines discarded by the regex (since redo skips the
 continue block). A continue block is often used to reset line counters
-or C<?pat?> one-time matches:
+or C<m?pat?> one-time matches:
 
     # inspired by :1,$g/fred/s//WILMA/
     while (<>) {
-	?(fred)?    && s//WILMA $1 WILMA/;
-	?(barney)?  && s//BETTY $1 BETTY/;
-	?(homer)?   && s//MARGE $1 MARGE/;
+	m?(fred)?    && s//WILMA $1 WILMA/;
+	m?(barney)?  && s//BETTY $1 BETTY/;
+	m?(homer)?   && s//MARGE $1 MARGE/;
     } continue {
 	print "$ARGV $.: $_";
-	close ARGV  if eof();		# reset $.
-	reset	    if eof();		# reset ?pat?
+	close ARGV  if eof;		# reset $.
+	reset	    if eof;		# reset ?pat?
     }
 
 If the word C<while> is replaced by the word C<until>, the sense of the
