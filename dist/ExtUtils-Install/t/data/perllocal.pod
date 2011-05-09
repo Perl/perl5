@@ -1,0 +1,352 @@
+=head2 Wed Nov  3 20:46:45 2010: C<Module> L<Module::CoreList|Module::CoreList>
+ 
+=over 4
+ 
+=item *
+
+C<EXE_FILES: corelist>
+ 
+=item *
+
+C<LINKTYPE: dynamic>
+ 
+=item *
+
+C<VERSION: 2.40>
+ 
+=item *
+
+C<installed into: /usr/local/share/perl/5.10.1>
+ 
+=back
+
+=head2 Sun Nov  7 16:42:24 2010: C<Module> L<Class::XSAccessor|Class::XSAccessor>
+ 
+=over 4
+ 
+=item *
+
+C<EXE_FILES: >
+ 
+=item *
+
+C<LINKTYPE: dynamic>
+ 
+=item *
+
+C<VERSION: 1.09>
+ 
+=item *
+
+C<installed into: /usr/local/share/perl/5.10.1>
+ 
+=back
+
+=head2 Thu Dec 30 14:35:32 2010: C<Module> L<Parallel::ForkManager|Parallel::ForkManager>
+ 
+=over 4
+ 
+=item *
+
+C<EXE_FILES: >
+ 
+=item *
+
+C<LINKTYPE: dynamic>
+ 
+=item *
+
+C<VERSION: 0.7.9>
+ 
+=item *
+
+C<installed into: /usr/local/share/perl/5.10.1>
+ 
+=back
+
+=head2 Fri Dec 31 10:29:08 2010: C<Module> L<Graph::Easy|Graph::Easy>
+ 
+=over 4
+ 
+=item *
+
+C<EXE_FILES: bin/graph-easy>
+ 
+=item *
+
+C<LINKTYPE: dynamic>
+ 
+=item *
+
+C<VERSION: 0.70>
+ 
+=item *
+
+C<installed into: /usr/local/share/perl/5.10.1>
+ 
+=back
+
+=head2 Fri Dec 31 10:31:32 2010: C<Module> L<Class::XSAccessor|Class::XSAccessor>
+ 
+=over 4
+ 
+=item *
+
+C<EXE_FILES: >
+ 
+=item *
+
+C<LINKTYPE: dynamic>
+ 
+=item *
+
+C<VERSION: 1.11>
+ 
+=item *
+
+C<installed into: /usr/local/share/perl/5.10.1>
+ 
+=back
+
+=head2 Fri Dec 31 14:18:33 2010: C<Module> L<Statistics::Test::Sequence|Statistics::Test::Sequence>
+ 
+=over 4
+ 
+=item *
+
+C<EXE_FILES: >
+ 
+=item *
+
+C<LINKTYPE: dynamic>
+ 
+=item *
+
+C<VERSION: 0.01>
+ 
+=item *
+
+C<installed into: /usr/local/share/perl/5.10.1>
+ 
+=back
+
+=head2 Fri Dec 31 14:18:35 2010: C<Module> L<Math::Random::MT|Math::Random::MT>
+ 
+=over 4
+ 
+=item *
+
+C<EXE_FILES: >
+ 
+=item *
+
+C<LINKTYPE: dynamic>
+ 
+=item *
+
+C<VERSION: 1.12>
+ 
+=item *
+
+C<installed into: /usr/local/share/perl/5.10.1>
+ 
+=back
+
+=head2 Fri Dec 31 14:18:37 2010: C<Module> L<Statistics::Test::RandomWalk|Statistics::Test::RandomWalk>
+ 
+=over 4
+ 
+=item *
+
+C<EXE_FILES: >
+ 
+=item *
+
+C<LINKTYPE: dynamic>
+ 
+=item *
+
+C<VERSION: 0.01>
+ 
+=item *
+
+C<installed into: /usr/local/share/perl/5.10.1>
+ 
+=back
+
+=head2 Fri Dec 31 14:30:35 2010: C<Module> L<Text::FindIndent|Text::FindIndent>
+ 
+=over 4
+ 
+=item *
+
+C<EXE_FILES: >
+ 
+=item *
+
+C<LINKTYPE: dynamic>
+ 
+=item *
+
+C<VERSION: 0.09>
+ 
+=item *
+
+C<installed into: /usr/local/share/perl/5.10.1>
+ 
+=back
+
+=head2 Fri Dec 31 17:06:52 2010: C<Module> L<Math::Symbolic|Math::Symbolic>
+ 
+=over 4
+ 
+=item *
+
+C<EXE_FILES: >
+ 
+=item *
+
+C<LINKTYPE: dynamic>
+ 
+=item *
+
+C<VERSION: 0.606>
+ 
+=item *
+
+C<installed into: /usr/local/share/perl/5.10.1>
+ 
+=back
+
+=head2 Fri Dec 31 17:16:31 2010: C<Module> L<Regexp::Common|Regexp::Common>
+ 
+=over 4
+ 
+=item *
+
+C<EXE_FILES: >
+ 
+=item *
+
+C<LINKTYPE: dynamic>
+ 
+=item *
+
+C<VERSION: 2010010201>
+ 
+=item *
+
+C<installed into: /usr/local/share/perl/5.10.1>
+ 
+=back
+
+=head2 Sat Jan  8 15:03:09 2011: C<Module> L<Algorithm::QuadTree|Algorithm::QuadTree>
+ 
+=over 4
+ 
+=item *
+
+C<EXE_FILES: >
+ 
+=item *
+
+C<LINKTYPE: dynamic>
+ 
+=item *
+
+C<VERSION: 0.1>
+ 
+=item *
+
+C<installed into: /usr/local/share/perl/5.10.1>
+ 
+=back
+
+=head2 Sat Jan  8 18:23:47 2011: C<Module> L<Devel::NYTProf|Devel::NYTProf>
+ 
+=over 4
+ 
+=item *
+
+C<EXE_FILES: bin/nytprofhtml bin/nytprofcsv bin/nytprofcg bin/nytprofmerge>
+ 
+=item *
+
+C<LINKTYPE: dynamic>
+ 
+=item *
+
+C<VERSION: 4.06>
+ 
+=item *
+
+C<installed into: /usr/local/share/perl/5.10.1>
+ 
+=back
+
+=head2 Sat Jan  8 19:08:57 2011: C<Module> L<Algorithm::SpatialIndex|Algorithm::SpatialIndex>
+ 
+=over 4
+ 
+=item *
+
+C<EXE_FILES: >
+ 
+=item *
+
+C<LINKTYPE: dynamic>
+ 
+=item *
+
+C<VERSION: 0.01>
+ 
+=item *
+
+C<installed into: /usr/local/share/perl/5.10.1>
+ 
+=back
+
+=head2 Wed Jan 19 13:51:49 2011: C<Module> L<ExtUtils::CBuilder|ExtUtils::CBuilder>
+ 
+=over 4
+ 
+=item *
+
+C<EXE_FILES: >
+ 
+=item *
+
+C<LINKTYPE: dynamic>
+ 
+=item *
+
+C<VERSION: 0.2802>
+ 
+=item *
+
+C<installed into: /usr/local/share/perl/5.10.1>
+ 
+=back
+
+=head2 Wed Jan 19 13:51:52 2011: C<Module> L<ExtUtils::ParseXS|ExtUtils::ParseXS>
+ 
+=over 4
+ 
+=item *
+
+C<EXE_FILES: >
+ 
+=item *
+
+C<LINKTYPE: dynamic>
+ 
+=item *
+
+C<VERSION: 2.2206>
+ 
+=item *
+
+C<installed into: /usr/local/share/perl/5.10.1>
+ 
+=back
+
