@@ -3423,13 +3423,6 @@ repeatedly, but each time something re-created entries in the glob. Most
 likely the glob contains an object with a reference back to the glob and a
 destructor that adds a new object to the glob.
 
-=item panic: hfreeentries failed to free hash
-
-(P) The internal routine used to clear a hash's entries tried repeatedly,
-but each time something added more entries to the hash. Most likely the hash
-contains an object with a reference back to the hash and a destructor that
-adds a new object to the hash.
-
 =item panic: INTERPCASEMOD
 
 (P) The lexer got into a bad state at a case modifier.

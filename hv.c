@@ -1630,7 +1630,6 @@ S_clear_placeholders(pTHX_ HV *hv, U32 items)
 STATIC void
 S_hfreeentries(pTHX_ HV *hv)
 {
-    int attempts = 100;
     STRLEN i = 0;
     const bool mpm = PL_phase != PERL_PHASE_DESTRUCT && HvENAME(hv);
 
@@ -1689,12 +1688,8 @@ S_hfreeentries(pTHX_ HV *hv)
 	     * re-allocated, HvMAX changed etc */
 	    continue;
 	}
-	if (i++ >= HvMAX(hv)) {
+	if (i++ >= HvMAX(hv))
 	    i = 0;
-	    if (--attempts == 0) {
-		Perl_die(aTHX_ "panic: hfreeentries failed to free hash - something is repeatedly re-creating entries");
-	    }
-	}
     } /* while */
 }
 
