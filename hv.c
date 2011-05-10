@@ -1470,7 +1470,6 @@ Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
     val = HeVAL(entry);
     if (val && isGV(val) && isGV_with_GP(val) && GvCVu(val) && HvENAME(hv))
         mro_method_changed_in(hv);	/* deletion of method from stash */
-    SvREFCNT_dec(val);
     if (HeKLEN(entry) == HEf_SVKEY) {
 	SvREFCNT_dec(HeKEY_sv(entry));
 	Safefree(HeKEY_hek(entry));
@@ -1480,6 +1479,7 @@ Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
     else
 	Safefree(HeKEY_hek(entry));
     del_HE(entry);
+    SvREFCNT_dec(val);
 }
 
 
