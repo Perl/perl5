@@ -137,6 +137,10 @@ static const char * const local_patches[] = {
 	,"uncommitted-changes"
 #endif
 	PERL_GIT_UNPUSHED_COMMITS    	/* do not remove this line */
+        ,"Bug#55162 File::Spec::case_tolerant performance"
+        ,"CYG15 static Win32CORE"
+        ,"CYG17 cyg-1.7 paths-utf8" 
+        ,"0c612ce82 Fix building static extensions on cygwin, -UUSEIMPORTLIB"
 	,NULL
 };
 
