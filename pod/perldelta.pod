@@ -4445,8 +4445,8 @@ See also: L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=67694>
 
 =item *
 
-readline() returns an empty string instead of undef when it is
-interrupted by a signal.
+readline() returns an empty string instead of a cached previous value
+when it is interrupted by a signal
 
 =item *
 
