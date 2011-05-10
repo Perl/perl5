@@ -5322,6 +5322,11 @@ STATIC struct xpvhv_aux*	S_hv_auxinit(HV *hv)
 	assert(hv)
 
 STATIC SV*	S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen, int k_flags, I32 d_flags, U32 hash);
+STATIC SV*	S_hv_free_ent_ret(pTHX_ HV *hv, HE *entryK)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_HV_FREE_ENT_RET	\
+	assert(hv)
+
 STATIC void	S_hv_magic_check(HV *hv, bool *needs_copy, bool *needs_store)
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(2)
@@ -5365,6 +5370,14 @@ PERL_CALLCONV void	Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_KILL_BACKREFS	\
 	assert(sv)
+
+#endif
+#if defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C)
+PERL_CALLCONV SV*	Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_HFREE_NEXT_ENTRY	\
+	assert(hv); assert(indexp)
 
 #endif
 #if defined(PERL_IN_LOCALE_C)

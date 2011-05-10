@@ -1457,16 +1457,17 @@ Perl_hv_copy_hints_hv(pTHX_ HV *const ohv)
     return hv;
 }
 
-void
-Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
+/* like hv_free_ent, but returns the SV rather than freeing it */
+STATIC SV*
+S_hv_free_ent_ret(pTHX_ HV *hv, register HE *entry)
 {
     dVAR;
     SV *val;
 
-    PERL_ARGS_ASSERT_HV_FREE_ENT;
+    PERL_ARGS_ASSERT_HV_FREE_ENT_RET;
 
     if (!entry)
-	return;
+	return NULL;
     val = HeVAL(entry);
     if (val && isGV(val) && isGV_with_GP(val) && GvCVu(val) && HvENAME(hv))
         mro_method_changed_in(hv);	/* deletion of method from stash */
@@ -1479,6 +1480,21 @@ Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
     else
 	Safefree(HeKEY_hek(entry));
     del_HE(entry);
+    return val;
+}
+
+
+void
+Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
+{
+    dVAR;
+    SV *val;
+
+    PERL_ARGS_ASSERT_HV_FREE_ENT;
+
+    if (!entry)
+	return;
+    val = hv_free_ent_ret(hv, entry);
     SvREFCNT_dec(val);
 }
 
@@ -1630,68 +1646,84 @@ S_clear_placeholders(pTHX_ HV *hv, U32 items)
 STATIC void
 S_hfreeentries(pTHX_ HV *hv)
 {
-    STRLEN i = 0;
-    const bool mpm = PL_phase != PERL_PHASE_DESTRUCT && HvENAME(hv);
+    STRLEN index = 0;
+    SV* sv;
 
     PERL_ARGS_ASSERT_HFREEENTRIES;
 
-    if (!HvARRAY(hv))
+    if (!((XPVHV*)SvANY(hv))->xhv_keys)
 	return;
 
-    /* keep looping until all keys are removed. This may take multiple
-     * passes through the array, since destructors may add things back. */
+    while ( ((sv = Perl_hfree_next_entry(aTHX_ hv, &index))) ) {
+	SvREFCNT_dec(sv);
+    }
+}
 
-    while (((XPVHV*)SvANY(hv))->xhv_keys) {
-	struct xpvhv_aux *iter;
-	HE *entry;
-	HE ** array;
 
-	if (SvOOK(hv) && ((iter = HvAUX(hv)))
-	    && ((entry = iter->xhv_eiter)) )
-	{
-	    /* the iterator may get resurrected after each
-	     * destructor call, so check each time */
-	    if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
-		HvLAZYDEL_off(hv);
-		hv_free_ent(hv, entry);
-		/* warning: at this point HvARRAY may have been
-		 * re-allocated, HvMAX changed etc */
-	    }
-	    iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
-	    iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
-	}
+/* hfree_next_entry()
+ * For use only by S_hfreeentries() and sv_clear().
+ * Delete the next available HE from hv and return the associated SV.
+ * Returns null on empty hash.
+ * indexp is a pointer to the current index into HvARRAY. The index should
+ * initially be set to 0. hfree_next_entry() may update it.  */
 
-	array = HvARRAY(hv);
-	entry = array[i];
-	if (entry) {
-	    /* Detach and free this entry. Note that destructors may be
-	     * called which will manipulate this hash, so make sure
-	     * its internal structure remains consistent throughout */
-	    array[i] = HeNEXT(entry);
-	    ((XPVHV*) SvANY(hv))->xhv_keys--;
+SV*
+Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
+{
+    struct xpvhv_aux *iter;
+    HE *entry;
+    HE ** array;
+#ifdef DEBUGGING
+    STRLEN orig_index = *indexp;
+#endif
 
-	    if (   mpm && HeVAL(entry) && isGV(HeVAL(entry))
-		&& GvHV(HeVAL(entry)) && HvENAME(GvHV(HeVAL(entry)))
-	    ) {
-		STRLEN klen;
-		const char * const key = HePV(entry,klen);
-		if ((klen > 1 && key[klen-1]==':' && key[klen-2]==':')
-		 || (klen == 1 && key[0] == ':')) {
-		    mro_package_moved(
-		     NULL, GvHV(HeVAL(entry)),
-		     (GV *)HeVAL(entry), 0
-		    );
-		}
-	    }
+    PERL_ARGS_ASSERT_HFREE_NEXT_ENTRY;
+
+    if (!((XPVHV*)SvANY(hv))->xhv_keys)
+	return NULL;
+
+    if (SvOOK(hv) && ((iter = HvAUX(hv)))
+	&& ((entry = iter->xhv_eiter)) )
+    {
+	/* the iterator may get resurrected after each
+	 * destructor call, so check each time */
+	if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
+	    HvLAZYDEL_off(hv);
 	    hv_free_ent(hv, entry);
 	    /* warning: at this point HvARRAY may have been
 	     * re-allocated, HvMAX changed etc */
-	    continue;
 	}
-	if (i++ >= HvMAX(hv))
-	    i = 0;
-    } /* while */
+	iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
+	iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
+    }
+
+    array = HvARRAY(hv);
+    assert(array);
+    while ( ! ((entry = array[*indexp])) ) {
+	if ((*indexp)++ >= HvMAX(hv))
+	    *indexp = 0;
+	assert(*indexp != orig_index);
+    }
+    array[*indexp] = HeNEXT(entry);
+    ((XPVHV*) SvANY(hv))->xhv_keys--;
+
+    if (   PL_phase != PERL_PHASE_DESTRUCT && HvENAME(hv)
+	&& HeVAL(entry) && isGV(HeVAL(entry))
+	&& GvHV(HeVAL(entry)) && HvENAME(GvHV(HeVAL(entry)))
+    ) {
+	STRLEN klen;
+	const char * const key = HePV(entry,klen);
+	if ((klen > 1 && key[klen-1]==':' && key[klen-2]==':')
+	 || (klen == 1 && key[0] == ':')) {
+	    mro_package_moved(
+	     NULL, GvHV(HeVAL(entry)),
+	     (GV *)HeVAL(entry), 0
+	    );
+	}
+    }
+    return hv_free_ent_ret(hv, entry);
 }
+
 
 /*
 =for apidoc hv_undef
