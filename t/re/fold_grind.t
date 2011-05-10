@@ -63,11 +63,27 @@ sub numerically {
     return $a <=> $b
 }
 
-sub run_test($$$$) {
-    my ($test, $count, $todo, $debug) = @_;
+# Significant time is saved by not outputting each test but grouping the
+# output into subtests
+my $okays;          # Number of ok's in current subtest
+my $this_iteration; # Number of possible tests in current subtest
+my $count=0;        # Number of subtests = number of total tests
+
+sub run_test($$$) {
+    my ($test, $todo, $debug) = @_;
 
     $debug = "" unless $DEBUG;
-    ok(eval $test, "$test; $debug");
+    my $res = eval $test;
+
+    if (!$res || $ENV{PERL_DEBUG_FULL_TEST}) {
+      # Failed or debug; output the result
+      $count++;
+      ok($res, "$test; $debug");
+    } else {
+      # Just count the test as passed
+      $okays++;
+    }
+    $this_iteration++;
 }
 
 my %tests;          # The final set of tests. keys are the code points to test
@@ -239,7 +255,6 @@ bad_locale:
 }
 
 # Finally ready to do the tests
-my $count=0;
 foreach my $test (sort { numerically } keys %tests) {
 
   my $previous_target;
@@ -300,6 +315,8 @@ foreach my $test (sort { numerically } keys %tests) {
 
     # Now grind out tests, using various combinations.
     foreach my $charset (@charsets) {
+      $okays = 0;
+      $this_iteration = 0;
 
       # To cut down somewhat on the enormous quantity of tests this currently
       # runs, skip some for some of the character sets whose results aren't
@@ -442,25 +459,22 @@ foreach my $test (sort { numerically } keys %tests) {
                       && ! ($charset eq 'd' && (! $upgrade_target || ! $upgrade_pattern))
                       );
           my $eval = "my \$c = \"$lhs$rhs\"; my \$p = qr/(?$charset:^($rhs)\\1\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-          run_test($eval, ++$count, $todo, "");
+          run_test($eval, $todo, "");
 
           $eval = "my \$c = \"$lhs$rhs\"; my \$p = qr/(?$charset:^(?<grind>$rhs)\\k<grind>\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-          run_test($eval, ++$count, $todo, "");
+          run_test($eval, $todo, "");
 
           if ($lhs ne $rhs) {
             $eval = "my \$c = \"$rhs$lhs\"; my \$p = qr/(?$charset:^($rhs)\\1\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-            run_test($eval, ++$count, "", "");
+            run_test($eval, "", "");
 
             $eval = "my \$c = \"$rhs$lhs\"; my \$p = qr/(?$charset:^(?<grind>$rhs)\\k<grind>\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-            run_test($eval, ++$count, "", "");
+            run_test($eval, "", "");
           }
 
           # See if works on what could be a simple trie.
           $eval = "my \$c = \"$lhs\"; my \$p = qr/$rhs|xyz/i$charset;$upgrade_target$upgrade_pattern \$c $op \$p";
-          run_test($eval, ++$count, "", "");
-
-          my $okays = 0;
-          my $this_iteration = 0;
+          run_test($eval, "", "");
 
           foreach my $bracketed (0, 1) {   # Put rhs in [...], or not
             next if $bracketed && @pattern != 1;    # bracketed makes these
@@ -611,13 +625,14 @@ foreach my $test (sort { numerically } keys %tests) {
               }
             }
           }
-
-          unless($ENV{PERL_DEBUG_FULL_TEST}) {
-            $count++;
-            is $okays, $this_iteration, "Subtests okay for "
-              .  "charset=$charset, utf8_pattern=$utf8_pattern";
-          }
         }
+      }
+      unless($ENV{PERL_DEBUG_FULL_TEST}) {
+        $count++;
+        is $okays, $this_iteration, "$okays subtests ok for"
+          . " /$charset,"
+          . ' target="' . join("", @x_target) . '",'
+          . ' pat="' . join("", @x_pattern) . '"';
       }
     }
   }
