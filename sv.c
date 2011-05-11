@@ -6023,6 +6023,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
     SV* iter_sv = NULL;
     SV* next_sv = NULL;
     register SV *sv = orig_sv;
+    STRLEN hash_index;
 
     PERL_ARGS_ASSERT_SV_CLEAR;
 
@@ -6104,6 +6105,36 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 	    if (PL_last_swash_hv == (const HV *)sv) {
 		PL_last_swash_hv = NULL;
 	    }
+	    if (HvTOTALKEYS((HV*)sv) > 0) {
+		const char *name;
+		/* this statement should match the one at the beginning of
+		 * hv_undef_flags() */
+		if (   PL_phase != PERL_PHASE_DESTRUCT
+		    && (name = HvNAME((HV*)sv)))
+		{
+		    if (PL_stashcache)
+			(void)hv_delete(PL_stashcache, name,
+			    HvNAMELEN_get((HV*)sv), G_DISCARD);
+		    hv_name_set((HV*)sv, NULL, 0, 0);
+		}
+
+		/* save old iter_sv in unused SvSTASH field */
+		assert(!SvOBJECT(sv));
+		SvSTASH(sv) = (HV*)iter_sv;
+		iter_sv = sv;
+
+		/* XXX ideally we should save the old value of hash_index
+		 * too, but I can't think of any place to hide it. The
+		 * effect of not saving it is that for freeing hashes of
+		 * hashes, we become quadratic in scanning the HvARRAY of
+		 * the top hash looking for new entries to free; but
+		 * hopefully this will be dwarfed by the freeing of all
+		 * the nested hashes. */
+		hash_index = 0;
+		next_sv = Perl_hfree_next_entry(aTHX_ (HV*)sv, &hash_index);
+		goto get_next_sv; /* process this new sv */
+	    }
+	    /* free empty hash */
 	    Perl_hv_undef_flags(aTHX_ MUTABLE_HV(sv), HV_NAME_SETALL);
 	    assert(!HvARRAY((HV*)sv));
 	    break;
@@ -6252,6 +6283,26 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		    /* restore previous value, squirrelled away */
 		    iter_sv = AvARRAY(av)[AvMAX(av)];
 		    Safefree(AvALLOC(av));
+		    goto free_body;
+		}
+	    } else if (SvTYPE(iter_sv) == SVt_PVHV) {
+		sv = Perl_hfree_next_entry(aTHX_ (HV*)iter_sv, &hash_index);
+		if (!sv) { /* no more elements of current HV to free */
+		    sv = iter_sv;
+		    type = SvTYPE(sv);
+		    /* Restore previous value of iter_sv, squirrelled away.
+		    /* Check whether someone has in the meantime used the
+		     * "unused" SvSTASH slot. If so, we'll just have to
+		     * abandon the old sv */
+		    iter_sv = SvOBJECT(sv) ? NULL : (SV*)SvSTASH(sv);
+
+		    /* ideally we should restore the old hash_index here,
+		     * but we don't currently save the old value */
+		    hash_index = 0;
+
+		    /* free any remaining detritus from the hash struct */
+		    Perl_hv_undef_flags(aTHX_ MUTABLE_HV(sv), HV_NAME_SETALL);
+		    assert(!HvARRAY((HV*)sv));
 		    goto free_body;
 		}
 	    }

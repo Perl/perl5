@@ -1753,6 +1753,8 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
        allocate an array for storing the effective name. We can skip that
        during global destruction, as it does not matter where the CVs point
        if they will be freed anyway. */
+    /* note that the code following prior to hfreeentries is duplicated
+     * in sv_clear(), and changes here should be done there too */
     if (PL_phase != PERL_PHASE_DESTRUCT && (name = HvNAME(hv))) {
         if (PL_stashcache)
 	    (void)hv_delete(PL_stashcache, name, HvNAMELEN_get(hv), G_DISCARD);
