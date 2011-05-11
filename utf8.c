@@ -2681,7 +2681,6 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
 	/* Each element in the range is to be inverted */
 	for (inverse = min; inverse <= max; inverse++) {
 	    AV* list;
-	    SV* element;
 	    SV** listp;
 	    IV i;
 	    bool found_key = FALSE;
@@ -2717,14 +2716,12 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
 
 	    /* Make sure there is a mapping to itself on the list */
 	    if (! found_key) {
-		element = newSVuv(val);
-		av_push(list, element);
+		av_push(list, newSVuv(val));
 	    }
 
 
 	    /* Simply add the value to the list */
-	    element = newSVuv(inverse);
-	    av_push(list, element);
+	    av_push(list, newSVuv(inverse));
 
 	    /* swash_get() increments the value of val for each element in the
 	     * range.  That makes more compact tables possible.  You can
