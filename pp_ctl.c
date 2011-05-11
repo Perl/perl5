@@ -3467,9 +3467,10 @@ S_doopen_pm(pTHX_ SV *name)
     PERL_ARGS_ASSERT_DOOPEN_PM;
 
     if (namelen > 3 && memEQs(p + namelen - 3, 3, ".pm")) {
-	SV *const pmcsv = sv_mortalcopy(name);
+	SV *const pmcsv = sv_newmortal();
 	Stat_t pmcstat;
 
+	SvSetSV_nosteal(pmcsv,name);
 	sv_catpvn(pmcsv, "c", 1);
 
 	if (PerlLIO_stat(SvPV_nolen_const(pmcsv), &pmcstat) >= 0)
