@@ -1651,9 +1651,6 @@ S_hfreeentries(pTHX_ HV *hv)
 
     PERL_ARGS_ASSERT_HFREEENTRIES;
 
-    if (!((XPVHV*)SvANY(hv))->xhv_keys)
-	return;
-
     while ( ((sv = Perl_hfree_next_entry(aTHX_ hv, &index))) ) {
 	SvREFCNT_dec(sv);
     }
@@ -1679,9 +1676,6 @@ Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
 
     PERL_ARGS_ASSERT_HFREE_NEXT_ENTRY;
 
-    if (!((XPVHV*)SvANY(hv))->xhv_keys)
-	return NULL;
-
     if (SvOOK(hv) && ((iter = HvAUX(hv)))
 	&& ((entry = iter->xhv_eiter)) )
     {
@@ -1696,6 +1690,9 @@ Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
 	iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
 	iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
     }
+
+    if (!((XPVHV*)SvANY(hv))->xhv_keys)
+	return NULL;
 
     array = HvARRAY(hv);
     assert(array);
