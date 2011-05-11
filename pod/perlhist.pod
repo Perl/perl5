@@ -439,8 +439,9 @@ the strings?).
  Florian  5.13.11       2011-Mar-20
  Jesse    5.14.0RC1     2011-Apr-20
  Jesse    5.14.0RC2     2011-May-04
+ Jesse    5.14.0RC3     2011-May-11
 
- Jesse    5.14.0        2011-May-11
+ Jesse    5.14.0        2011-May-14
 
 =head2 SELECTED RELEASE SIZES
 
