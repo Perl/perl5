@@ -6290,11 +6290,9 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		if (!sv) { /* no more elements of current HV to free */
 		    sv = iter_sv;
 		    type = SvTYPE(sv);
-		    /* Restore previous value of iter_sv, squirrelled away.
-		    /* Check whether someone has in the meantime used the
-		     * "unused" SvSTASH slot. If so, we'll just have to
-		     * abandon the old sv */
-		    iter_sv = SvOBJECT(sv) ? NULL : (SV*)SvSTASH(sv);
+		    /* Restore previous value of iter_sv, squirrelled away */
+		    assert(!SvOBJECT(sv));
+		    iter_sv = (SV*)SvSTASH(sv);
 
 		    /* ideally we should restore the old hash_index here,
 		     * but we don't currently save the old value */
