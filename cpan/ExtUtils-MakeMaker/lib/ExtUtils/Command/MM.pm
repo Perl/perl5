@@ -10,7 +10,7 @@ our @ISA = qw(Exporter);
 
 our @EXPORT  = qw(test_harness pod2man perllocal_install uninstall 
                   warn_if_old_packlist);
-our $VERSION = '6.58';
+our $VERSION = '6.58_01';
 
 my $Is_VMS = $^O eq 'VMS';
 
@@ -205,6 +205,22 @@ sub perllocal_install {
     # fit all the args on a single command line.
     my @mod_info = $Is_VMS ? split /\|/, <STDIN>
                            : @ARGV;
+
+    if (not eval "require ExtUtils::Perllocal; require ExtUtils::Perllocal::Entry; 1;") {
+        return _legacy_perllocal_install($type, $name, @mod_info);
+    }
+    else {
+        my $pod = ExtUtils::Perllocal::Entry->new(
+            type => $type, name => $name, 'time' => time(),
+            data => {@mod_info}
+        )->as_pod;
+        print $pod;
+        return 1;
+    }
+}
+
+sub _legacy_perllocal_install {
+    my ($type, $name, @mod_info) = @_;
 
     my $pod;
     $pod = sprintf <<POD, scalar localtime;
