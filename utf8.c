@@ -2702,7 +2702,7 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
 		}
 	    }
 
-	    for (i = 0; i < av_len(list); i++) {
+	    for (i = 0; i <= av_len(list); i++) {
 		SV** entryp = av_fetch(list, i, FALSE);
 		SV* entry;
 		if (entryp == NULL) {
