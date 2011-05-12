@@ -5960,7 +5960,9 @@ END
         # Here we assume we were called after have gone through the whole
         # file.  If we actually generated anything for each map type, add its
         # respective header and trailer
+        my $specials_name = "";
         if (@multi_code_point_maps) {
+            $specials_name = "utf8::ToSpec$name";
             $pre_body .= <<END;
 
 # Some code points require special handling because their mappings are each to
@@ -5970,7 +5972,7 @@ END
 # Each key is the string of N bytes that together make up the UTF-8 encoding
 # for the code point.  (i.e. the same as looking at the code point's UTF-8
 # under "use bytes").  Each value is the UTF-8 of the translation, for speed.
-%utf8::ToSpec$name = (
+\%$specials_name = (
 END
             $pre_body .= join("\n", @multi_code_point_maps) . "\n);\n";
         }
@@ -6194,6 +6196,11 @@ END
 # map to.
 \$utf8::SwashInfo{'To$name'}{'format'} = '$format'; # $map_table_formats{$format}
 END
+        if ($specials_name) {
+        $return .= <<END;
+\$utf8::SwashInfo{'To$name'}{'specials_name'} = '$specials_name'; # Name of hash of special mappings
+END
+        }
         my $default_map = $default_map{$addr};
         $return .= "\$utf8::SwashInfo{'To$name'}{'missing'} = '$default_map';";
 
@@ -13283,8 +13290,8 @@ are:
 
 @map_tables_actually_output
 
-Each of the files in this directory defines two hash entries to help reading
-programs decipher it.  One of them looks like this:
+Each of the files in this directory defines several hash entries to help
+reading programs decipher it.  One of them looks like this:
 
     \$utf8::SwashInfo{'ToNAME'}{'format'} = 's';
 
@@ -13299,7 +13306,7 @@ This format applies only to the entries in the main body of the table.
 Entries defined in hashes or ones that are missing from the list can have a
 different format.
 
-The value that the missing entries have is given by the other SwashInfo hash
+The value that the missing entries have is given by another SwashInfo hash
 entry line; it looks like this:
 
     \$utf8::SwashInfo{'ToNAME'}{'missing'} = 'NaN';
@@ -13310,6 +13317,11 @@ value is the special string C<< <code point> >>, it means that the value for
 any missing code point is the code point itself.  This happens, for example,
 in the file for Uppercase_Mapping (To/Upper.pl), in which code points like the
 character 'A', are missing because the uppercase of 'A' is itself.
+
+Finally, if the file contains a hash for special case entries, its name is
+specified by an entry that looks like this:
+
+    \$utf8::SwashInfo{'ToNAME'}{'specials_name'} = 'utf8::ToSpecNAME';
 
 =head1 SEE ALSO
 
