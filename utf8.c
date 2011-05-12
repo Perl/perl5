@@ -1853,22 +1853,6 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
 
     if (!*swashp) /* load on-demand */
          *swashp = swash_init("utf8", normal, &PL_sv_undef, 4, 0);
-    /* This is the beginnings of a skeleton of code to read the info section
-     * that is in all the swashes in case we ever want to do that, so one can
-     * read things whose maps aren't code points, and whose default if missing
-     * is not to the code point itself.  This was just to see if it actually
-     * worked.  Details on what the possibilities are are in perluniprops.pod
-	HV * const hv = get_hv("utf8::SwashInfo", 0);
-	if (hv) {
-	 SV **svp;
-	 svp = hv_fetch(hv, (const char*)normal, strlen(normal), FALSE);
-	     const char *s;
-
-	      HV * const this_hash = SvRV(*svp);
-		svp = hv_fetch(this_hash, "type", strlen("type"), FALSE);
-	      s = SvPV_const(*svp, len);
-	}
-    }*/
 
     if (special) {
          /* It might be "special" (sometimes, but not always,
