@@ -63,8 +63,7 @@ sub croak { require Carp; Carp::croak(@_) }
         ## $none is undocumented, so I'm (khw) trying to do some documentation
         ## of it now.  It appears to be if there is a mapping in an input file
         ## that maps to 'XXXX', then that is replaced by $none+1, expressed in
-        ## hexadecimal.  The only place I found it possibly used was in
-        ## S_pmtrans in op.c.
+        ## hexadecimal.  It is used somehow in tr///.
         ##
         ## To make the parsing of $type clear, this code takes the a rather
         ## unorthodox approach of last'ing out of the block once we have the
