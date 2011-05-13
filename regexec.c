@@ -6726,9 +6726,12 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 			    STRLEN len;
 			    const char * const s = SvPV_const(sv, len);
 
-			    if (len <= total_foldlen && memEQ(s,
-							       (char*)folded,
-							       len))
+			    if (len <= total_foldlen
+				&& memEQ(s, (char*)folded, len)
+
+				   /* If 0, means matched a partial char. See
+				    * [perl #90536] */
+				&& map_fold_len_back[len])
 			    {
 
 				/* Advance the target string ptr to account for
@@ -6737,7 +6740,6 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 				 * length. */
 				if (lenp) {
 				    *lenp = map_fold_len_back[len];
-				    assert(*lenp != 0);	/* Otherwise will loop */
 				}
 				match = TRUE;
 				break;

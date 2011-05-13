@@ -2108,6 +2108,10 @@ EOP
         like("\x{00DF}", qr/[\x{1E9E}_]*/i, "\"\\x{00DF}\" =~ /[\\x{1E9E}_]*/i was looping");
     }
 
+    {   # Bug #90536, caused failed assertion
+        unlike("s\N{U+DF}", qr/^\x{00DF}/i, "\"s\\N{U+DF}\", qr/^\\x{00DF}/i");
+    }
+
     # !!! NOTE that tests that aren't at all likely to crash perl should go
     # a ways above, above these last ones.
 
