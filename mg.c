@@ -1362,7 +1362,6 @@ int
 Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_ARGS_ASSERT_MAGIC_CLEARSIG;
-    PERL_UNUSED_ARG(sv);
 
     magic_setsig(NULL, mg);
     return sv_unmagic(sv, mg->mg_type);
