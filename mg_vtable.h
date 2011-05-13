@@ -59,232 +59,83 @@ enum {		/* pass one of these to get_vtbl */
 */
 
 #ifdef DOINIT
-EXT_MGVTBL PL_vtbl_sv
-  = { Perl_magic_get, Perl_magic_set, Perl_magic_len, 0, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_sv;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_env
-  = { 0, Perl_magic_set_all_env, 0, Perl_magic_clear_all_env, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_env;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_envelem
-  = { 0, Perl_magic_setenv, 0, Perl_magic_clearenv, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_envelem;
-#endif
-
+EXT_MGVTBL PL_magic_vtables[] = {
+  { Perl_magic_get, Perl_magic_set, Perl_magic_len, 0, 0, 0, 0, 0 },
+  { 0, Perl_magic_set_all_env, 0, Perl_magic_clear_all_env, 0, 0, 0, 0 },
+  { 0, Perl_magic_setenv, 0, Perl_magic_clearenv, 0, 0, 0, 0 },
 #ifndef PERL_MICRO
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_sigelem
-  = { Perl_magic_getsig, Perl_magic_setsig, 0, Perl_magic_clearsig, 0, 0, 0, 0 };
+  { Perl_magic_getsig, Perl_magic_setsig, 0, Perl_magic_clearsig, 0, 0, 0, 0 },
 #else
-EXT_MGVTBL PL_vtbl_sigelem;
+  { 0, 0, 0, 0, 0, 0, 0, 0 },
 #endif
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_pack
-  = { 0, 0, Perl_magic_sizepack, Perl_magic_wipepack, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_pack;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_packelem
-  = { Perl_magic_getpack, Perl_magic_setpack, 0, Perl_magic_clearpack, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_packelem;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_dbline
-  = { 0, Perl_magic_setdbline, 0, 0, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_dbline;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_isa
-  = { 0, Perl_magic_setisa, 0, Perl_magic_clearisa, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_isa;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_isaelem
-  = { 0, Perl_magic_setisa, 0, 0, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_isaelem;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_arylen
-  = { (int (*)(pTHX_ SV *, MAGIC *))Perl_magic_getarylen, Perl_magic_setarylen, 0, 0, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_arylen;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_arylen_p
-  = { 0, 0, 0, 0, Perl_magic_freearylen_p, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_arylen_p;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_mglob
-  = { 0, Perl_magic_setmglob, 0, 0, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_mglob;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_nkeys
-  = { Perl_magic_getnkeys, Perl_magic_setnkeys, 0, 0, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_nkeys;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_taint
-  = { Perl_magic_gettaint, Perl_magic_settaint, 0, 0, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_taint;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_substr
-  = { Perl_magic_getsubstr, Perl_magic_setsubstr, 0, 0, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_substr;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_vec
-  = { Perl_magic_getvec, Perl_magic_setvec, 0, 0, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_vec;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_pos
-  = { Perl_magic_getpos, Perl_magic_setpos, 0, 0, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_pos;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_bm
-  = { 0, Perl_magic_setregexp, 0, 0, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_bm;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_fm
-  = { 0, Perl_magic_setregexp, 0, 0, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_fm;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_uvar
-  = { Perl_magic_getuvar, Perl_magic_setuvar, 0, 0, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_uvar;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_defelem
-  = { Perl_magic_getdefelem, Perl_magic_setdefelem, 0, 0, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_defelem;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_regexp
-  = { 0, Perl_magic_setregexp, 0, 0, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_regexp;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_regdata
-  = { 0, 0, Perl_magic_regdata_cnt, 0, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_regdata;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_regdatum
-  = { Perl_magic_regdatum_get, Perl_magic_regdatum_set, 0, 0, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_regdatum;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_amagic
-  = { 0, Perl_magic_setamagic, 0, 0, Perl_magic_setamagic, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_amagic;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_amagicelem
-  = { 0, Perl_magic_setamagic, 0, 0, Perl_magic_setamagic, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_amagicelem;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_backref
-  = { 0, 0, 0, 0, Perl_magic_killbackrefs, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_backref;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_ovrld
-  = { 0, 0, 0, 0, Perl_magic_freeovrld, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_ovrld;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_utf8
-  = { 0, Perl_magic_setutf8, 0, 0, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_utf8;
-#endif
-
+  { 0, 0, Perl_magic_sizepack, Perl_magic_wipepack, 0, 0, 0, 0 },
+  { Perl_magic_getpack, Perl_magic_setpack, 0, Perl_magic_clearpack, 0, 0, 0, 0 },
+  { 0, Perl_magic_setdbline, 0, 0, 0, 0, 0, 0 },
+  { 0, Perl_magic_setisa, 0, Perl_magic_clearisa, 0, 0, 0, 0 },
+  { 0, Perl_magic_setisa, 0, 0, 0, 0, 0, 0 },
+  { (int (*)(pTHX_ SV *, MAGIC *))Perl_magic_getarylen, Perl_magic_setarylen, 0, 0, 0, 0, 0, 0 },
+  { 0, 0, 0, 0, Perl_magic_freearylen_p, 0, 0, 0 },
+  { 0, Perl_magic_setmglob, 0, 0, 0, 0, 0, 0 },
+  { Perl_magic_getnkeys, Perl_magic_setnkeys, 0, 0, 0, 0, 0, 0 },
+  { Perl_magic_gettaint, Perl_magic_settaint, 0, 0, 0, 0, 0, 0 },
+  { Perl_magic_getsubstr, Perl_magic_setsubstr, 0, 0, 0, 0, 0, 0 },
+  { Perl_magic_getvec, Perl_magic_setvec, 0, 0, 0, 0, 0, 0 },
+  { Perl_magic_getpos, Perl_magic_setpos, 0, 0, 0, 0, 0, 0 },
+  { 0, Perl_magic_setregexp, 0, 0, 0, 0, 0, 0 },
+  { 0, Perl_magic_setregexp, 0, 0, 0, 0, 0, 0 },
+  { Perl_magic_getuvar, Perl_magic_setuvar, 0, 0, 0, 0, 0, 0 },
+  { Perl_magic_getdefelem, Perl_magic_setdefelem, 0, 0, 0, 0, 0, 0 },
+  { 0, Perl_magic_setregexp, 0, 0, 0, 0, 0, 0 },
+  { 0, 0, Perl_magic_regdata_cnt, 0, 0, 0, 0, 0 },
+  { Perl_magic_regdatum_get, Perl_magic_regdatum_set, 0, 0, 0, 0, 0, 0 },
+  { 0, Perl_magic_setamagic, 0, 0, Perl_magic_setamagic, 0, 0, 0 },
+  { 0, Perl_magic_setamagic, 0, 0, Perl_magic_setamagic, 0, 0, 0 },
+  { 0, 0, 0, 0, Perl_magic_killbackrefs, 0, 0, 0 },
+  { 0, 0, 0, 0, Perl_magic_freeovrld, 0, 0, 0 },
+  { 0, Perl_magic_setutf8, 0, 0, 0, 0, 0, 0 },
 #ifdef USE_LOCALE_COLLATE
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_collxfrm
-  = { 0, Perl_magic_setcollxfrm, 0, 0, 0, 0, 0, 0 };
+  { 0, Perl_magic_setcollxfrm, 0, 0, 0, 0, 0, 0 },
 #else
-EXT_MGVTBL PL_vtbl_collxfrm;
+  { 0, 0, 0, 0, 0, 0, 0, 0 },
 #endif
+  { 0, Perl_magic_sethint, 0, Perl_magic_clearhint, 0, 0, 0, 0 },
+  { 0, 0, 0, Perl_magic_clearhints, 0, 0, 0, 0 }
+};
+#else
+EXT_MGVTBL PL_magic_vtables[];
 #endif
 
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_hintselem
-  = { 0, Perl_magic_sethint, 0, Perl_magic_clearhint, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_hintselem;
-#endif
-
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_hints
-  = { 0, 0, 0, Perl_magic_clearhints, 0, 0, 0, 0 };
-#else
-EXT_MGVTBL PL_vtbl_hints;
-#endif
-
+#define PL_vtbl_amagic PL_magic_vtables[want_vtbl_amagic]
+#define PL_vtbl_amagicelem PL_magic_vtables[want_vtbl_amagicelem]
+#define PL_vtbl_arylen PL_magic_vtables[want_vtbl_arylen]
+#define PL_vtbl_arylen_p PL_magic_vtables[want_vtbl_arylen_p]
+#define PL_vtbl_backref PL_magic_vtables[want_vtbl_backref]
+#define PL_vtbl_bm PL_magic_vtables[want_vtbl_bm]
+#define PL_vtbl_collxfrm PL_magic_vtables[want_vtbl_collxfrm]
+#define PL_vtbl_dbline PL_magic_vtables[want_vtbl_dbline]
+#define PL_vtbl_defelem PL_magic_vtables[want_vtbl_defelem]
+#define PL_vtbl_env PL_magic_vtables[want_vtbl_env]
+#define PL_vtbl_envelem PL_magic_vtables[want_vtbl_envelem]
+#define PL_vtbl_fm PL_magic_vtables[want_vtbl_fm]
+#define PL_vtbl_hints PL_magic_vtables[want_vtbl_hints]
+#define PL_vtbl_hintselem PL_magic_vtables[want_vtbl_hintselem]
+#define PL_vtbl_isa PL_magic_vtables[want_vtbl_isa]
+#define PL_vtbl_isaelem PL_magic_vtables[want_vtbl_isaelem]
+#define PL_vtbl_mglob PL_magic_vtables[want_vtbl_mglob]
+#define PL_vtbl_nkeys PL_magic_vtables[want_vtbl_nkeys]
+#define PL_vtbl_ovrld PL_magic_vtables[want_vtbl_ovrld]
+#define PL_vtbl_pack PL_magic_vtables[want_vtbl_pack]
+#define PL_vtbl_packelem PL_magic_vtables[want_vtbl_packelem]
+#define PL_vtbl_pos PL_magic_vtables[want_vtbl_pos]
+#define PL_vtbl_regdata PL_magic_vtables[want_vtbl_regdata]
+#define PL_vtbl_regdatum PL_magic_vtables[want_vtbl_regdatum]
+#define PL_vtbl_regexp PL_magic_vtables[want_vtbl_regexp]
+#define PL_vtbl_sigelem PL_magic_vtables[want_vtbl_sigelem]
+#define PL_vtbl_substr PL_magic_vtables[want_vtbl_substr]
+#define PL_vtbl_sv PL_magic_vtables[want_vtbl_sv]
+#define PL_vtbl_taint PL_magic_vtables[want_vtbl_taint]
+#define PL_vtbl_utf8 PL_magic_vtables[want_vtbl_utf8]
+#define PL_vtbl_uvar PL_magic_vtables[want_vtbl_uvar]
+#define PL_vtbl_vec PL_magic_vtables[want_vtbl_vec]
 
 /* ex: set ro: */

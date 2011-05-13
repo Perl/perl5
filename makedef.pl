@@ -349,7 +349,6 @@ if ($PLATFORM eq 'wince') {
 		     PL_numeric_name
 		     PL_numeric_radix_sv
 		     PL_numeric_standard
-		     PL_vtbl_collxfrm
 		     Perl_sv_collxfrm
 		     setgid
 		     setuid

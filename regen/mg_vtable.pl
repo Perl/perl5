@@ -90,9 +90,14 @@ print $h <<'EOH';
     local
 */
 
+#ifdef DOINIT
+EXT_MGVTBL PL_magic_vtables[] = {
 EOH
 
+my @vtable_names;
+
 while (my ($name, $data) = splice @sig, 0, 2) {
+    push @vtable_names, $name;
     my @funcs = map {
 	$data->{$_} ? "Perl_magic_$data->{$_}" : 0;
     } qw(get set len clear free copy dup local);
@@ -100,17 +105,28 @@ while (my ($name, $data) = splice @sig, 0, 2) {
     $funcs[0] = "(int (*)(pTHX_ SV *, MAGIC *))" . $funcs[0] if $data->{const};
     my $funcs = join ", ", @funcs;
 
+    # Because we can't have a , after the last {...}
+    my $comma = @sig ? ',' : '';
+
     print $h "$data->{cond}\n" if $data->{cond};
-    print $h <<"EOT";
-#ifdef DOINIT
-EXT_MGVTBL PL_vtbl_$name
-  = { $funcs };
+    print $h "  { $funcs }$comma\n";
+    print $h <<"EOH" if $data->{cond};
 #else
-EXT_MGVTBL PL_vtbl_$name;
+  { 0, 0, 0, 0, 0, 0, 0, 0 }$comma
 #endif
-EOT
-    print $h "#endif\n" if $data->{cond};
-    print $h "\n";
+EOH
 }
+
+print $h <<'EOH';
+};
+#else
+EXT_MGVTBL PL_magic_vtables[];
+#endif
+
+EOH
+
+
+print $h "#define PL_vtbl_$_ PL_magic_vtables[want_vtbl_$_]\n"
+    foreach sort @vtable_names;
 
 read_only_bottom_close_and_rename($h);
