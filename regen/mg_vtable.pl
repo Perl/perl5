@@ -61,6 +61,17 @@ my $h = open_new('mg_vtable.h', '>',
 		 { by => 'regen/mg_vtable.pl', file => 'mg_vtable.h',
 		   style => '*' });
 
+{
+    my @names = map {"want_vtbl_$_"} grep {!ref $_} @sig;
+    local $" = ",\n    ";
+    print $h <<"EOH";
+enum {		/* pass one of these to get_vtbl */
+    @names
+};
+
+EOH
+}
+
 print $h <<'EOH';
 /* These all need to be 0, not NULL, as NULL can be (void*)0, which is a
  * pointer to data, whereas we're assigning pointers to functions, which are

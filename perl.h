@@ -4803,41 +4803,6 @@ typedef enum {
     /* update exp_name[] in toke.c if adding to this enum */
 } expectation;
 
-enum {		/* pass one of these to get_vtbl */
-    want_vtbl_sv,
-    want_vtbl_env,
-    want_vtbl_envelem,
-    want_vtbl_sigelem,
-    want_vtbl_pack,
-    want_vtbl_packelem,
-    want_vtbl_dbline,
-    want_vtbl_isa,
-    want_vtbl_isaelem,
-    want_vtbl_arylen,
-    want_vtbl_mglob,
-    want_vtbl_nkeys,
-    want_vtbl_taint,
-    want_vtbl_substr,
-    want_vtbl_vec,
-    want_vtbl_pos,
-    want_vtbl_bm,
-    want_vtbl_fm,
-    want_vtbl_uvar,
-    want_vtbl_defelem,
-    want_vtbl_regexp,
-    want_vtbl_collxfrm,
-    want_vtbl_amagic,
-    want_vtbl_amagicelem,
-    want_vtbl_regdata,
-    want_vtbl_regdatum,
-    want_vtbl_backref,
-    want_vtbl_utf8,
-    want_vtbl_arylen_p,
-    want_vtbl_hintselem,
-    want_vtbl_hints
-};
-
-
 /* Hints are now stored in a dedicated U32, so the bottom 8 bits are no longer
    special and there is no need for HINT_PRIVATE_MASK for COPs
    However, bitops store HINT_INTEGER in their op_private.  */
