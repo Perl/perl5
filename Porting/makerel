@@ -142,6 +142,7 @@ my @writables = qw(
     global.sym
     overload.c
     overload.h
+    mg_vtable.h
     perlapi.h
     perlapi.c
     cpan/Devel-PPPort/module2.c

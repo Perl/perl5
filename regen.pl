@@ -16,6 +16,7 @@ use strict;
 # Which scripts to run.
 
 my @scripts = qw(
+mg_vtable.pl
 opcode.pl
 overload.pl
 reentr.pl

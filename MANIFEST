@@ -4125,6 +4125,7 @@ metaconfig.SH			Control file for the metaconfig process
 META.yml			Distribution meta-data in YAML
 mg.c				Magic code
 mg.h				Magic header
+mg_vtable.h			Generated magic vtable data
 minimod.pl			Writes lib/ExtUtils/Miniperl.pm
 miniperlmain.c			Basic perl w/o dynamic loading or extensions
 mkppport			A script that distributes ppport.h
@@ -4573,6 +4574,7 @@ regcomp.h			Private declarations for above
 regcomp.sym			Data for regnodes.h
 regen/embed.pl			Produces {embed,embedvar,proto}.h, global.sym
 regen/keywords.pl		Program to write keywords.h
+regen/mg_vtable.pl		generate mg_vtable.h
 regen/mk_PL_charclass.pl	Populate the PL_charclass table
 regen/opcode.pl			Opcode header generator
 regen/opcodes			Opcode data
