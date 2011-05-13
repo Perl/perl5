@@ -27,4 +27,6 @@ sv_unmagic_bar($sv);
 ok !mg_find_foo($sv), 'foo magic still removed';
 ok !mg_find_bar($sv), '... and bar magic is removed too';
 
+is(test_get_vtbl(), 0, 'get_vtbl(-1) returns NULL');
+
 done_testing;
