@@ -65,7 +65,6 @@ vtbl_pos
 vtbl_regdata
 vtbl_regdatum
 vtbl_regexp
-vtbl_sig
 vtbl_sigelem
 vtbl_substr
 vtbl_sv

@@ -3749,9 +3749,6 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
     case want_vtbl_envelem:
 	result = &PL_vtbl_envelem;
 	break;
-    case want_vtbl_sig:
-	result = &PL_vtbl_sig;
-	break;
 #ifndef PERL_MICRO
     case want_vtbl_sigelem:
 	result = &PL_vtbl_sigelem;

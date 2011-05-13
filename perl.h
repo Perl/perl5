@@ -4807,7 +4807,6 @@ enum {		/* pass one of these to get_vtbl */
     want_vtbl_sv,
     want_vtbl_env,
     want_vtbl_envelem,
-    want_vtbl_sig,
     want_vtbl_sigelem,
     want_vtbl_pack,
     want_vtbl_packelem,
@@ -5167,18 +5166,6 @@ MGVTBL_SET(
     Perl_magic_setenv,
     0,
     Perl_magic_clearenv,
-    0,
-    0,
-    0,
-    0
-);
-
-MGVTBL_SET(
-    PL_vtbl_sig,
-    0,
-    0,
-    0,
-    0,
     0,
     0,
     0,

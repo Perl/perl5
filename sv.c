@@ -5343,9 +5343,6 @@ Perl_sv_magic(pTHX_ register SV *const sv, SV *const obj, const int how,
     case PERL_MAGIC_qr:
 	vtable = &PL_vtbl_regexp;
 	break;
-    case PERL_MAGIC_sig:
-	vtable = &PL_vtbl_sig;
-	break;
 #ifndef PERL_MICRO
     case PERL_MAGIC_sigelem:
 	vtable = &PL_vtbl_sigelem;
@@ -5360,6 +5357,7 @@ Perl_sv_magic(pTHX_ register SV *const sv, SV *const obj, const int how,
     case PERL_MAGIC_vec:
 	vtable = &PL_vtbl_vec;
 	break;
+    case PERL_MAGIC_sig:
     case PERL_MAGIC_arylen_p:
     case PERL_MAGIC_rhash:
     case PERL_MAGIC_symtab:
