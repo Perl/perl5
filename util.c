@@ -3752,9 +3752,11 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
     case want_vtbl_sig:
 	result = &PL_vtbl_sig;
 	break;
+#ifndef PERL_MICRO
     case want_vtbl_sigelem:
 	result = &PL_vtbl_sigelem;
 	break;
+#endif
     case want_vtbl_pack:
 	result = &PL_vtbl_pack;
 	break;

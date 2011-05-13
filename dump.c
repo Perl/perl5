@@ -1295,7 +1295,9 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
             else if (v == &PL_vtbl_env)        s = "env";
             else if (v == &PL_vtbl_envelem)    s = "envelem";
             else if (v == &PL_vtbl_sig)        s = "sig";
+#ifndef PERL_MICRO
             else if (v == &PL_vtbl_sigelem)    s = "sigelem";
+#endif
             else if (v == &PL_vtbl_pack)       s = "pack";
             else if (v == &PL_vtbl_packelem)   s = "packelem";
             else if (v == &PL_vtbl_dbline)     s = "dbline";

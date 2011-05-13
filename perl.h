@@ -5185,20 +5185,7 @@ MGVTBL_SET(
     0
 );
 
-#ifdef PERL_MICRO
-MGVTBL_SET(
-    PL_vtbl_sigelem,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0
-);
-
-#else
+#ifndef PERL_MICRO
 MGVTBL_SET(
     PL_vtbl_sigelem,
     Perl_magic_getsig,
