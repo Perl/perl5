@@ -5108,12 +5108,6 @@ START_EXTERN_C
 #  define EXT_MGVTBL EXT MGVTBL
 #endif
 
-#ifdef DOINIT
-#  define MGVTBL_SET(var,a,b,c,d,e,f,g,h) EXT_MGVTBL var = {a,b,c,d,e,f,g,h}
-#else
-#  define MGVTBL_SET(var,a,b,c,d,e,f,g,h) EXT_MGVTBL var
-#endif
-
 #include "mg_vtable.h"
 #include "overload.h"
 

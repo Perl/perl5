@@ -68,8 +68,7 @@ print $h <<'EOH';
  * (although most, but not all, compilers are prepared to do it)
  */
 
-/* args are:
-    vtable
+/* order is:
     get
     set
     len
@@ -88,14 +87,16 @@ while (my ($name, $data) = splice @sig, 0, 2) {
     } qw(get set len clear free copy dup local);
 
     $funcs[0] = "(int (*)(pTHX_ SV *, MAGIC *))" . $funcs[0] if $data->{const};
-    my $funcs = join ",\n    ", @funcs;
+    my $funcs = join ", ", @funcs;
 
     print $h "$data->{cond}\n" if $data->{cond};
     print $h <<"EOT";
-MGVTBL_SET(
-    PL_vtbl_$name,
-    $funcs
-);
+#ifdef DOINIT
+EXT_MGVTBL PL_vtbl_$name
+  = { $funcs };
+#else
+EXT_MGVTBL PL_vtbl_$name;
+#endif
 EOT
     print $h "#endif\n" if $data->{cond};
     print $h "\n";
