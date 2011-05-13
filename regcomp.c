@@ -8683,6 +8683,7 @@ tryagain:
 			    break;
 			case 's':
 			case 'S':
+			case 0x17F: /* LATIN SMALL LETTER LONG S */
 			     if (AT_LEAST_UNI_SEMANTICS) {
 				if (latest_char_state == char_s) {  /* 'ss' */
 				    ender = LATIN_SMALL_LETTER_SHARP_S;
