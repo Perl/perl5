@@ -63,6 +63,7 @@ my $h = open_new('mg_vtable.h', '>',
 
 {
     my @names = map {"want_vtbl_$_"} grep {!ref $_} @sig;
+    push @names, 'magic_vtable_max';
     local $" = ",\n    ";
     print $h <<"EOH";
 enum {		/* pass one of these to get_vtbl */
@@ -91,7 +92,7 @@ print $h <<'EOH';
 */
 
 #ifdef DOINIT
-EXT_MGVTBL PL_magic_vtables[] = {
+EXT_MGVTBL PL_magic_vtables[magic_vtable_max] = {
 EOH
 
 my @vtable_names;
@@ -120,7 +121,7 @@ EOH
 print $h <<'EOH';
 };
 #else
-EXT_MGVTBL PL_magic_vtables[];
+EXT_MGVTBL PL_magic_vtables[magic_vtable_max];
 #endif
 
 EOH

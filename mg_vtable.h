@@ -38,7 +38,8 @@ enum {		/* pass one of these to get_vtbl */
     want_vtbl_utf8,
     want_vtbl_collxfrm,
     want_vtbl_hintselem,
-    want_vtbl_hints
+    want_vtbl_hints,
+    magic_vtable_max
 };
 
 /* These all need to be 0, not NULL, as NULL can be (void*)0, which is a
@@ -59,7 +60,7 @@ enum {		/* pass one of these to get_vtbl */
 */
 
 #ifdef DOINIT
-EXT_MGVTBL PL_magic_vtables[] = {
+EXT_MGVTBL PL_magic_vtables[magic_vtable_max] = {
   { Perl_magic_get, Perl_magic_set, Perl_magic_len, 0, 0, 0, 0, 0 },
   { 0, Perl_magic_set_all_env, 0, Perl_magic_clear_all_env, 0, 0, 0, 0 },
   { 0, Perl_magic_setenv, 0, Perl_magic_clearenv, 0, 0, 0, 0 },
@@ -102,7 +103,7 @@ EXT_MGVTBL PL_magic_vtables[] = {
   { 0, 0, 0, Perl_magic_clearhints, 0, 0, 0, 0 }
 };
 #else
-EXT_MGVTBL PL_magic_vtables[];
+EXT_MGVTBL PL_magic_vtables[magic_vtable_max];
 #endif
 
 #define PL_vtbl_amagic PL_magic_vtables[want_vtbl_amagic]
