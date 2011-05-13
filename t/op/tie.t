@@ -925,29 +925,6 @@ fileno FOO; tie @a, "FOO"
 EXPECT
 Can't locate object method "TIEARRAY" via package "FOO" at - line 5.
 ########
-
-# Deprecation warnings for tie $handle
-
-use warnings 'deprecated';
-$SIG{__WARN__} = sub { $w = shift };
-$handle = *foo;
-eval { tie $handle, "" };
-print $w =~ /^Use of tie on a handle without \* is deprecated/
-  ? "ok tie\n" : "$w\n";
-$handle = *bar;
-tied $handle;
-print $w =~ /^Use of tied on a handle without \* is deprecated/
-  ? "ok tied\n" : "$w\n";
-$handle = *baz;
-untie $handle;
-print $w =~ /^Use of untie on a handle without \* is deprecated/
-  ? "ok untie\n" : "$w\n";
-
-EXPECT
-ok tie
-ok tied
-ok untie
-########
 #
 # STORE freeing tie'd AV
 sub TIEARRAY  { bless [] }

@@ -145,9 +145,6 @@ Return the SV from the GV.
 #define GVf_IMPORTED_HV	  0x40
 #define GVf_IMPORTED_CV	  0x80
 
-/* Temporary flag for the tie $handle deprecation warnings. */
-#define GVf_TIEWARNED	0x100
-
 #define GvINTRO(gv)		(GvFLAGS(gv) & GVf_INTRO)
 #define GvINTRO_on(gv)		(GvFLAGS(gv) |= GVf_INTRO)
 #define GvINTRO_off(gv)		(GvFLAGS(gv) &= ~GVf_INTRO)
