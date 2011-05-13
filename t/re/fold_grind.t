@@ -244,7 +244,7 @@ my $current_locale = POSIX::setlocale( &POSIX::LC_ALL, "C") // "";
 if ($current_locale eq 'C') {
     use locale;
 
-    # Some locale implementations don't have the 128-255 characters all
+    # Some locale implementations don't have the range 128-255 characters all
     # mean nothing.  Skip the locale tests in that situation.
     for my $i (128 .. 255) {
         my $char = chr($i);
@@ -281,6 +281,10 @@ foreach my $test (sort { numerically } keys %tests) {
     my @target, my @pattern;
     @target = (ref $target) ? @$target : $target;
     @pattern = (ref $pattern) ? @$pattern : $pattern;
+
+    # We are testing just folds to/from a single character.  If our pairs
+    # happens to generate multi/multi, skip.
+    next if @target > 1 && @pattern > 1;
 
     # Have to convert non-utf8 chars to native char set
     @target = map { $_ > 255 ? $_ : ord latin1_to_native(chr($_)) } @target;
