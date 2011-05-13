@@ -552,7 +552,6 @@ do_clean_named_io_objs(pTHX_ SV *const sv)
 }
 
 /* Void wrapper to pass to visit() */
-/* XXX
 static void
 do_curse(pTHX_ SV * const sv) {
     if ((PL_stderrgv && GvGP(PL_stderrgv) && (SV*)GvIO(PL_stderrgv) == sv)
@@ -560,7 +559,6 @@ do_curse(pTHX_ SV * const sv) {
 	return;
     (void)curse(sv, 0);
 }
-*/
 
 /*
 =for apidoc sv_clean_objs
