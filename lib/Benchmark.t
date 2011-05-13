@@ -122,7 +122,7 @@ is ($auto, $default, 'timestr ($diff, "auto") matches timestr ($diff)');
     is (timestr ($diff, 'none'), '', "none suppresses output");
 
     my $noc = timestr ($diff, 'noc');
-    like ($noc, qr/$wallclock +wallclock secs? +\( *$usr +usr +\+ +$sys +sys += +$cpu +CPU\)/, 'timestr ($diff, "noc")');
+    like ($noc, qr/$wallclock +wallclock secs? +\( *$usr +usr +\+ +$sys +sys += +\d+\.\d\d +CPU\)/, 'timestr ($diff, "noc")');
 
     my $nop = timestr ($diff, 'nop');
     like ($nop, qr/$wallclock +wallclock secs? +\( *$cusr +cusr +\+ +$csys +csys += +\d+\.\d\d +CPU\)/, 'timestr ($diff, "nop")');
