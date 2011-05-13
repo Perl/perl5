@@ -1007,3 +1007,17 @@ tie $x, "";
 print "ok\n";
 EXPECT
 ok
+########
+
+# tied() should still work on tied scalars after glob assignment
+sub TIESCALAR {bless[]}
+sub FETCH {*foo}
+sub f::TIEHANDLE{bless[],f}
+tie *foo, "f";
+tie $rin, "";
+[$rin]; # call FETCH
+print ref tied $rin, "\n";
+print ref tied *$rin, "\n";
+EXPECT
+main
+f
