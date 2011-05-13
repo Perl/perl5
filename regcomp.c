@@ -8838,6 +8838,9 @@ tryagain:
 			    break;
 			case 0x03B9:	/* First char in iota series */
 			case 0x0399:	/* Also capital IOTA */
+			case 0x1FBE:	/* GREEK PROSGEGRAMMENI folds to 3B9 */
+			case 0x0345:	/* COMBINING GREEK YPOGEGRAMMENI folds
+					   to 3B9 */
 			    if (p < RExC_end - 4) {
 				latest_char_state = iota_1;
 				if (len != 0) {
