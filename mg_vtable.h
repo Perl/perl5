@@ -134,9 +134,9 @@ MGVTBL_SET(
     0
 );
 
-MGVTBL_SET_CONST_MAGIC_GET(
+MGVTBL_SET(
     PL_vtbl_arylen,
-    Perl_magic_getarylen,
+    (int (*)(pTHX_ SV *, MAGIC *))Perl_magic_getarylen,
     Perl_magic_setarylen,
     0,
     0,

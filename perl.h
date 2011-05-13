@@ -5110,12 +5110,8 @@ START_EXTERN_C
 
 #ifdef DOINIT
 #  define MGVTBL_SET(var,a,b,c,d,e,f,g,h) EXT_MGVTBL var = {a,b,c,d,e,f,g,h}
-/* Like MGVTBL_SET but with the get magic having a const MG* */
-#  define MGVTBL_SET_CONST_MAGIC_GET(var,a,b,c,d,e,f,g,h) EXT_MGVTBL var \
-    = {(int (*)(pTHX_ SV *, MAGIC *))a,b,c,d,e,f,g,h}
 #else
 #  define MGVTBL_SET(var,a,b,c,d,e,f,g,h) EXT_MGVTBL var
-#  define MGVTBL_SET_CONST_MAGIC_GET(var,a,b,c,d,e,f,g,h) EXT_MGVTBL var
 #endif
 
 #include "mg_vtable.h"

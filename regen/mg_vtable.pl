@@ -18,6 +18,7 @@ BEGIN {
     require 'regen/regen_lib.pl';
 }
 
+# These have a subtly different "namespace" from the magic types.
 my @sig =
     (
      'sv' => {get => 'get', set => 'set', len => 'len'},
@@ -82,15 +83,16 @@ print $h <<'EOH';
 EOH
 
 while (my ($name, $data) = splice @sig, 0, 2) {
-    my $funcs = join ",\n    ", map {
+    my @funcs = map {
 	$data->{$_} ? "Perl_magic_$data->{$_}" : 0;
     } qw(get set len clear free copy dup local);
 
-    my $set_macro = $data->{const} ? 'MGVTBL_SET_CONST_MAGIC_GET' : 'MGVTBL_SET';
+    $funcs[0] = "(int (*)(pTHX_ SV *, MAGIC *))" . $funcs[0] if $data->{const};
+    my $funcs = join ",\n    ", @funcs;
 
     print $h "$data->{cond}\n" if $data->{cond};
     print $h <<"EOT";
-$set_macro(
+MGVTBL_SET(
     PL_vtbl_$name,
     $funcs
 );
