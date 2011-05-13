@@ -4814,7 +4814,6 @@ enum {		/* pass one of these to get_vtbl */
     want_vtbl_isa,
     want_vtbl_isaelem,
     want_vtbl_arylen,
-    want_vtbl_glob,
     want_vtbl_mglob,
     want_vtbl_nkeys,
     want_vtbl_taint,
@@ -4833,7 +4832,6 @@ enum {		/* pass one of these to get_vtbl */
     want_vtbl_regdatum,
     want_vtbl_backref,
     want_vtbl_utf8,
-    want_vtbl_symtab,
     want_vtbl_arylen_p,
     want_vtbl_hintselem,
     want_vtbl_hints
