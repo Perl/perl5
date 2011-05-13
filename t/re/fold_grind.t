@@ -449,15 +449,7 @@ foreach my $test (sort { numerically } keys %tests) {
           my $op = '=~';
           $op = '!~' if $should_fail;
 
-          # I'm afraid this was derived from trial and error.
-          my $todo = ($test == 0xdf
-                      && $lhs =~ /DF/
-                      && $uni_semantics
-                      && ($charset eq 'u' || $charset eq 'a' || $charset eq 'd')
-                      && ! (($charset eq 'u' || $charset eq 'a')
-                            && (($upgrade_target eq "") != ($upgrade_pattern eq "")))
-                      && ! ($charset eq 'd' && (! $upgrade_target || ! $upgrade_pattern))
-                      );
+          my $todo = 0;  # No longer any todo's
           my $eval = "my \$c = \"$lhs$rhs\"; my \$p = qr/(?$charset:^($rhs)\\1\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
           run_test($eval, $todo, "");
 
