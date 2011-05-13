@@ -18,6 +18,17 @@ use warnings;
 use Encode;
 use POSIX;
 
+# Special-cased characters in the .c's that we want to make sure get tested.
+my %be_sure_to_test = (
+        "\xDF" => 1, # LATIN_SMALL_LETTER_SHARP_S
+        "\x{1E9E}" => 1, # LATIN_CAPITAL_LETTER_SHARP_S
+        "\x{390}" => 1, # GREEK_SMALL_LETTER_IOTA_WITH_DIALYTIKA_AND_TONOS
+        "\x{3B0}" => 1, # GREEK_SMALL_LETTER_UPSILON_WITH_DIALYTIKA_AND_TONOS
+        "\x{1FD3}" => 1, # GREEK SMALL LETTER IOTA WITH DIALYTIKA AND OXIA
+        "\x{1FE3}" => 1, # GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA
+    );
+
+
 # Tests both unicode and not, so make sure not implicitly testing unicode
 no feature 'unicode_strings';
 
@@ -52,7 +63,7 @@ my $skip_apparently_redundant = ! $ENV{PERL_RUN_SLOW_TESTS};
 # output for debugging purposes.
 
 sub range_type {
-    my $ord = shift;
+    my $ord = ord shift;
 
     return $ASCII if $ord < 128;
     return $Latin1 if $ord < 256;
@@ -86,14 +97,141 @@ sub run_test($$$) {
     $this_iteration++;
 }
 
-my %tests;          # The final set of tests. keys are the code points to test
-my %simple_folds;
-my %multi_folds;
+my %has_test_by_participants;   # Makes sure has tests for each range and each
+                                # number of characters that fold to the same
+                                # thing
+my %has_test_by_byte_count; # Makes sure has tests for each combination of
+                            # n bytes folds to m bytes
 
-# First, analyze the current Unicode's folding rules
-my %folded_from;
+my %tests; # The set of tests.
+# Each key is a code point that folds to something else.
+# Each value is a list of things that the key folds to.  If the 'thing' is a
+# single code point, it is that ordinal.  If it is a multi-char fold, it is an
+# ordered list of the code points in that fold.  Here's an example for 'S':
+#  '83' => [ 115, 383 ]
+#
+# And one for a multi-char fold: \xDF
+#  223 => [
+#            [  # 'ss'
+#                83,
+#                83
+#            ],
+#            [  # 'SS'
+#                115,
+#                115
+#            ],
+#            [  # LATIN SMALL LETTER LONG S
+#                383,
+#                383
+#            ],
+#          7838 # LATIN_CAPITAL_LETTER_SHARP_S
+#        ],
+
+my %inverse_folds;  # keys are strings of the folded-to;
+                    # values are lists of characters that fold to them
+
+sub add_test($@) {
+    my ($to, @from) = @_;
+
+    # Called to cause the input to be tested by adding to %tests.  @from is
+    # the list of characters that fold to the string $to.  @from should be
+    # sorted so the lowest code point is first....
+    # The input is in string form; %tests uses code points, so have to
+    # convert.
+
+    my $to_chars = length $to;
+    my @test_to;        # List of tests for $to
+
+    if ($to_chars == 1) {
+        @test_to = ord $to;
+    }
+    else {
+        push @test_to, [ map { ord $_ } split "", $to ];
+
+        # For multi-char folds, we also test that things that can fold to each
+        # individual character in the fold also work.  If we were testing
+        # comprehensively, we would try every combination of upper and lower
+        # case in the fold, but it will have to suffice to avoid running
+        # forever to make sure that each thing that folds to these is tested
+        # at least once.  Because of complement matching, we need to do both
+        # the folded, and the folded-from.
+        # We first look at each character in the multi-char fold, and save how
+        # many characters fold to it; and also the maximum number of such
+        # folds
+        my @folds_to_count;     # 0th char in fold is index 0 ...
+        my $max_folds_to = 0;
+
+        for (my $i = 0; $i < $to_chars; $i++) {
+            my $to_char = substr($to, $i, 1);
+            if (exists $inverse_folds{$to_char}) {
+                $folds_to_count[$i] = scalar @{$inverse_folds{$to_char}};
+                $max_folds_to = $folds_to_count[$i] if $max_folds_to < $folds_to_count[$i];
+            }
+            else {
+                $folds_to_count[$i] = 0;
+            }
+        }
+
+        # We will need to generate as many tests as the maximum number of
+        # folds, so that each fold will have at least one test.
+        for (my $i = 0; $i < $max_folds_to; $i++) {
+            my @this_test_to;   # Assemble a single test
+
+            # For each character in the multi-char fold ...
+            for (my $j = 0; $j < $to_chars; $j++) {
+                my $this_char = substr($to, $j, 1);
+
+                # Use its corresponding inverse fold, if available.
+                if ($i < $folds_to_count[$j]) {
+                    push @this_test_to, ord $inverse_folds{$this_char}[$i];
+                }
+                else {  # Or else itself.
+                    push @this_test_to, ord $this_char;
+                }
+            }
+
+            # Add this test to the list
+            push @test_to, [ @this_test_to ];
+        }
+
+        # Here, have assembled all the tests for the multi-char fold.  Sort so
+        # lowest code points are first for consistency and aesthetics in
+        # output.  We know there are at least two characters in the fold, but
+        # I haven't bothered to worry about sorting on an optional third
+        # character if the first two are identical.
+        @test_to = sort { ($a->[0] == $b->[0])
+                           ? $a->[1] <=> $b->[1]
+                           : $a->[0] <=> $b->[0]
+                        } @test_to;
+    }
+
+
+    # This test is from n bytes to m bytes.  Record that so won't try to add
+    # another test that does the same.
+    use bytes;
+    my $to_bytes = length $to;
+    foreach my $from_map (@from) {
+        $has_test_by_byte_count{length $from_map}{$to_bytes} = $to;
+    }
+    no bytes;
+
+    my $ord_smallest_from = ord shift @from;
+    if (exists $tests{$ord_smallest_from}) {
+        die "There are already tests for $ord_smallest_from"
+    };
+
+    # Add in the fold tests,
+    push @{$tests{$ord_smallest_from}}, @test_to;
+
+    # Then any remaining froms in the equivalence class.
+    push @{$tests{$ord_smallest_from}}, map { ord $_ } @from;
+}
+
+# Read the Unicode rules file and construct inverse mappings from it
+
 my $file="../lib/unicore/CaseFolding.txt";
 open my $fh, "<", $file or die "Failed to read '$file': $!";
+
 while (<$fh>) {
     chomp;
 
@@ -101,115 +239,96 @@ while (<$fh>) {
     #0130; F; 0069 0307; # LATIN CAPITAL LETTER I WITH DOT ABOVE
 
     my ($line, $comment) = split / \s+ \# \s+ /x, $_;
-    next if $line eq "" || substr($line, 0, 1) eq '#';
-    my ($hex_from, $fold_type, @folded) = split /[\s;]+/, $line;
+    next if $line eq "" || $line =~ /^#/;
+    my ($hex_from, $fold_type, @hex_folded) = split /[\s;]+/, $line;
 
-    my $from = hex $hex_from;
+    next if $fold_type eq 'T';  # Perl doesn't do Turkish folding
+    next if $fold_type eq 'S';  # If Unicode's tables are correct, the F
+                                # should be a superset of S
 
-    if ($fold_type eq 'F') {
-         my $from_range_type = range_type($from);
-
-        # If we were testing comprehensively, we would try every combination
-        # of upper and lower case in the fold, but it is quite likely that if
-        # the code can handle all combinations if it can handle the cases
-        # where everything is upper and when everything is lower.  Because of
-        # complement matching, we need to do both.  And we use the
-        # reverse-fold instead of uppercase.
-        @folded = map { hex $_ } @folded;
-        # XXX better to use reverse fold of these instead of uc
-        my @uc_folded = map { ord uc chr $_ } @folded;
-
-        # Include code points that are handled internally by the regex
-        # engine specially, plus all non-above-255 multi folds (which actually
-        # the only one is already included in the three, but this makes sure)
-        # And if any member of the fold is not the same range type as the
-        # source, add it directly to the tests.  It needs to be an array of an
-        # array, so that it is distinguished from multiple single folds
-        if ($from == 0xDF
-            || $from == 0x390 || $from == 0x3B0
-            || $from == 0x1FD3 || $from == 0x1FE3
-            || $from_range_type != $Unicode
-            || grep { range_type($_) != $from_range_type } @folded)
-        {
-            $tests{$from} = [ [ @folded ], [ @uc_folded ] ];
-        }
-        else {
-
-            # The only multi-char non-utf8 fold is DF, which is handled above,
-            # so here chr() must be utf8.  Get the number of bytes in each.
-            # This is because the optimizer cares about length differences.
-            my $from_length = length encode('UTF-8', chr($from));
-            my $to_length = length encode('UTF-8', pack 'U*', @folded);
-            push @{$multi_folds{$from_length}{$to_length}}, { $from => [ [ @folded ], [ @uc_folded ] ] };
-        }
-    }
-
-    # Perl only deals with C and F folds
-    next if $fold_type ne 'C';
-
-    # C folds are single-char $from to single-char $folded, in chr terms
-    # folded_from{'s'} = [ 'S', \N{LATIN SMALL LETTER LONG S} ]
-    push @{$folded_from{hex $folded[0]}}, $from;
+    my $folded_str = pack ("U0U*", map { hex $_ } @hex_folded);
+    push @{$inverse_folds{$folded_str}}, chr hex $hex_from;
 }
 
-# Now try to sort the single char folds into equivalence classes that are
-# likely to have identical successes and failures.  Any fold that crosses
-# range types is suspect, and is automatically tested.  Otherwise, store by
-# the number of characters that participate in a fold.  Likely all folds in a
-# range type that fold to each other like B->b->B will have identical success
-# and failure; similarly all folds that have three characters participating
-# are likely to have the same successes and failures, etc.
-foreach my $folded (sort numerically keys %folded_from) {
-    my $target_range_type  = range_type($folded);
-    my $count = @{$folded_from{$folded}};
+# Analyze the data and generate tests to get adequate test coverage.  We sort
+# things so that smallest code points are done first.
+TO:
+foreach my $to (sort { (length $a == length $b)
+                        ? $a cmp $b
+                        : length $a <=> length $b
+                    } keys %inverse_folds) {
 
-    # Automatically test any fold that crosses range types
-    if (grep { range_type($_) != $target_range_type } @{$folded_from{$folded}})
-    {
-        $tests{$folded} = $folded_from{$folded};
-    }
-    else {
-        push @{$simple_folds{$target_range_type}{$count}},
-               { $folded => $folded_from{$folded} };
-    }
-}
+    # Within each fold, sort so that the smallest code points are done first
+    @{$inverse_folds{$to}} = sort { $a cmp $b } @{$inverse_folds{$to}};
+    my @from = @{$inverse_folds{$to}};
 
-foreach my $from_length (keys %multi_folds) {
-    foreach my $fold_length (keys %{$multi_folds{$from_length}}) {
-        #print __LINE__, ref $multi_folds{$from_length}{$fold_length}, Dumper $multi_folds{$from_length}{$fold_length};
-        foreach my $test (@{$multi_folds{$from_length}{$fold_length}}) {
-            #print __LINE__, ": $from_length, $fold_length, $test:\n";
-            my ($target, $pattern) = each %$test;
-            #print __LINE__, ": $target: $pattern\n";
-            $tests{$target} = $pattern;
-            last if $skip_apparently_redundant;
+    # Just add it to the tests if doing complete coverage
+    if (! $skip_apparently_redundant) {
+        add_test($to, @from);
+        next TO;
+    }
+
+    my $to_chars = length $to;
+    my $to_range_type = range_type(substr($to, 0, 1));
+
+    # If this is required to be tested, do so.  We check for these first, as
+    # they will take up slots of byte-to-byte combinations that we otherwise
+    # would have to have other tests to get.
+    foreach my $from_map (@from) {
+        if (exists $be_sure_to_test{$from_map}) {
+            add_test($to, @from);
+            next TO;
         }
     }
-}
 
-# Add in tests for single character folds.  Add tests for each range type,
-# and within those tests for each number of characters participating in a
-# fold.  Thus B->b has two characters participating.  But K->k and Kelvin
-# Sign->k has three characters participating.  So we would make sure that
-# there is a test for 3 chars, 4 chars, ... .  (Note that the 'k' example is a
-# bad one because it crosses range types, so is automatically tested.  In the
-# Unicode range there are various of these 3 and 4 char classes, but aren't as
-# easily described as the 'k' one.)
-foreach my $type (keys %simple_folds) {
-    foreach my $count (keys %{$simple_folds{$type}}) {
-        foreach my $test (@{$simple_folds{$type}{$count}}) {
-            my ($target, $pattern) = each %$test;
-            $tests{$target} = $pattern;
-            last if $skip_apparently_redundant;
+    # If the fold contains heterogeneous range types, is suspect and should be
+    # tested.
+    if ($to_chars > 1) {
+        foreach my $char (split "", $to) {
+            if (range_type($char) != $to_range_type) {
+                add_test($to, @from);
+                next TO;
+            }
+        }
+    }
+
+    # If the mapping crosses range types, is suspect and should be tested
+    foreach my $from_map (@from) {
+        if (range_type($from_map) != $to_range_type) {
+            add_test($to, @from);
+            next TO;
+        }
+    }
+
+    # Here, all components of the mapping are in the same range type.  For
+    # single character folds, we test one case in each range type that has 2
+    # particpants, 3 particpants, etc.
+    if ($to_chars == 1) {
+        if (! exists $has_test_by_participants{scalar @from}{$to_range_type}) {
+            add_test($to, @from);
+            $has_test_by_participants{scalar @from}{$to_range_type} = $to;
+            next TO;
+        }
+    }
+
+    # We also test all combinations of mappings from m to n bytes.  This is
+    # because the regex optimizer cares.  (Don't bother worrying about that
+    # Latin1 chars will occupy a different number of bytes under utf8, as
+    # there are plenty of other cases that catch these byte numbers.)
+    use bytes;
+    my $to_bytes = length $to;
+    foreach my $from_map (@from) {
+        if (! exists $has_test_by_byte_count{length $from_map}{$to_bytes}) {
+            add_test($to, @from);
+            next TO;
         }
     }
 }
 
 # For each range type, test additionally a character that folds to itself
-$tests{0x3A} = [ 0x3A ];
-$tests{0xF7} = [ 0xF7 ];
-$tests{0x2C7} = [ 0x2C7 ];
-
+add_test(chr 0x3A, chr 0x3A);
+add_test(chr 0xF7, chr 0xF7);
+add_test(chr 0x2C7, chr 0x2C7);
 
 # To cut down on the number of tests
 my $has_tested_aa_above_latin1;
