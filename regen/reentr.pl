@@ -51,7 +51,7 @@ my %map = (
 # Example #3: S_CBI   means type func_r(const char*, char*, int)
 
 
-my $h = safer_open('reentr.h-new', 'reentr.h');
+my $h = open_new('reentr.h');
 print $h read_only_top(lang => 'C', by => 'regen/reentr.pl',
 		       from => 'data in regen/reentr.pl',
 		       file => 'reentr.h', style => '*',
@@ -782,7 +782,7 @@ read_only_bottom_close_and_rename($h);
 
 # Prepare to write the reentr.c.
 
-my $c = safer_open('reentr.c-new', 'reentr.c');
+my $c = open_new('reentr.c');
 my $top = read_only_top(lang => 'C', by => 'regen/reentr.pl',
 			from => 'data in regen/reentr.pl',
 			file => 'reentr.c', style => '*',

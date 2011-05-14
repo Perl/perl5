@@ -30,10 +30,10 @@ while (<DATA>) {
   push @names, $name;
 }
 
-my $c = safer_open('overload.c-new', 'overload.c');
-my $h = safer_open('overload.h-new', 'overload.h');
+my $c = open_new('overload.c');
+my $h = open_new('overload.h');
 mkdir("lib/overload", 0777) unless -d 'lib/overload';
-my $p = safer_open('lib/overload/numbers.pm-new', 'lib/overload/numbers.pm');
+my $p = open_new('lib/overload/numbers.pm');
 
 print $p read_only_top(lang => 'Perl', by => 'regen/overload.pl',
 		       file => 'lib/overload/numbers.pm', copyright => [2008]);

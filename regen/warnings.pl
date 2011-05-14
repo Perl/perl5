@@ -260,8 +260,8 @@ if (@ARGV && $ARGV[0] eq "tree")
     exit ;
 }
 
-my $warn = safer_open('warnings.h-new', 'warnings.h');
-my $pm = safer_open('lib/warnings.pm-new', 'lib/warnings.pm');
+my $warn = open_new('warnings.h');
+my $pm = open_new('lib/warnings.pm');
 
 print $pm read_only_top(lang => 'Perl', by => 'regen/warnings.pl');
 print $warn read_only_top(lang => 'C', by => 'regen/warnings.pl'), <<'EOM';

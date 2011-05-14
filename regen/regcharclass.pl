@@ -621,7 +621,7 @@ if ( !caller ) {
     if ( $path eq '-' ) {
         $out_fh= \*STDOUT;
     } else {
-	$out_fh = safer_open( "$path-new", $path );
+	$out_fh = open_new( $path );
     }
     print $out_fh read_only_top( lang => 'C', by => $0,
 				 file => 'regcharclass.h', style => '*',

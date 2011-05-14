@@ -20,8 +20,8 @@ BEGIN {
     require 'regen/regen_lib.pl';
 }
 
-my $oc = safer_open('opcode.h-new', 'opcode.h');
-my $on = safer_open('opnames.h-new', 'opnames.h');
+my $oc = open_new('opcode.h');
+my $on = open_new('opnames.h');
 
 # Read data.
 
@@ -441,7 +441,7 @@ sub gen_op_is_macro {
     }
 }
 
-my $pp = safer_open('pp_proto.h-new', 'pp_proto.h');
+my $pp = open_new('pp_proto.h');
 
 print $pp read_only_top(lang => 'C', by => 'opcode.pl', from => 'its data');
 

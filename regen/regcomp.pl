@@ -125,7 +125,7 @@ EXTCONST U8 PL_${varname}_bitmask[] = {
 EOP
 }
 
-my $out = safer_open('regnodes.h-new', 'regnodes.h');
+my $out = open_new('regnodes.h');
 
 print $out read_only_top(lang => 'C', by => 'regen/regcomp.pl',
 			 from => 'regcomp.sym');

@@ -222,7 +222,7 @@ my @C1 = qw(
                 APC
             );
 
-my $out_fh = safer_open('l1_char_class_tab.h-new', 'l1_char_class_tab.h');
+my $out_fh = open_new('l1_char_class_tab.h');
 print $out_fh read_only_top(lang => 'C', style => '*', by => $0, from => $file);
 
 # Output the table using fairly short names for each char.

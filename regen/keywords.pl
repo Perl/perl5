@@ -13,8 +13,8 @@ use Devel::Tokenizer::C 0.05;
 
 require 'regen/regen_lib.pl';
 
-my $h = safer_open('keywords.h-new', 'keywords.h');
-my $c = safer_open('keywords.c-new', 'keywords.c');
+my $h = open_new('keywords.h');
+my $c = open_new('keywords.c');
 
 print $h read_only_top(lang => 'C', by => 'regen/keywords.pl',
 		       from => 'its data', file => 'keywords.h', style => '*',

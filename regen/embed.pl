@@ -187,7 +187,7 @@ sub walk_table (&@) {
 	$F = $filename;
     }
     else {
-	$F = safer_open("$filename-new", $filename);
+	$F = open_new($filename);
 	print $F do_not_edit ($filename);
     }
     foreach (@embed) {
@@ -202,7 +202,7 @@ sub walk_table (&@) {
 
 # generate proto.h
 {
-    my $pr = safer_open('proto.h-new', 'proto.h');
+    my $pr = open_new('proto.h');
     print $pr do_not_edit ("proto.h"), "START_EXTERN_C\n";
     my $ret;
 
@@ -416,7 +416,7 @@ sub multoff ($$) {
     return hide("PL_$pre$sym", "PL_$sym");
 }
 
-my $em = safer_open('embed.h-new', 'embed.h');
+my $em = open_new('embed.h');
 
 print $em do_not_edit ("embed.h"), <<'END';
 /* (Doing namespace management portably in C is really gross.) */
@@ -575,7 +575,7 @@ END
 
 read_only_bottom_close_and_rename($em);
 
-$em = safer_open('embedvar.h-new', 'embedvar.h');
+$em = open_new('embedvar.h');
 
 print $em do_not_edit ("embedvar.h"), <<'END';
 /* (Doing namespace management portably in C is really gross.) */
@@ -654,8 +654,8 @@ END
 
 read_only_bottom_close_and_rename($em);
 
-my $capi = safer_open('perlapi.c-new', 'perlapi.c');
-my $capih = safer_open('perlapi.h-new', 'perlapi.h');
+my $capi = open_new('perlapi.c');
+my $capih = open_new('perlapi.h');
 
 print $capih do_not_edit ("perlapi.h"), <<'EOT';
 /* declare accessor functions for Perl variables */
