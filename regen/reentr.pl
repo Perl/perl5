@@ -50,13 +50,17 @@ my %map = (
 # Example #2: S_SBIE  means type func_r(type, char*, int, int*)
 # Example #3: S_CBI   means type func_r(const char*, char*, int)
 
+sub open_print_header {
+    my ($file, $quote) = @_;
+    return open_new($file, '>',
+		    { by => 'regen/reentr.pl',
+		      from => 'data in regen/reentr.pl',
+		      file => $file, style => '*',
+		      copyright => [2002, 2003, 2005 .. 2007],
+		      quote => $quote });
+}
 
-my $h = open_new('reentr.h', '>',
-		 { by => 'regen/reentr.pl',
-		   from => 'data in regen/reentr.pl',
-		   file => 'reentr.h', style => '*',
-		   copyright => [2002, 2003, 2005 .. 2007]});
-
+my $h = open_print_header('reentr.h');
 print $h <<EOF;
 #ifndef REENTR_H
 #define REENTR_H
@@ -782,11 +786,7 @@ read_only_bottom_close_and_rename($h);
 
 # Prepare to write the reentr.c.
 
-my $c = open_new('reentr.c', '>',
-		 {by => 'regen/reentr.pl', from => 'data in regen/reentr.pl',
-		  file => 'reentr.c', style => '*',
-		  copyright => [2002, 2003, 2005 .. 2007],
-		  quote => <<'EOQ'});
+my $c = open_print_header('reentr.c', <<'EOQ');
  *
  * "Saruman," I said, standing away from him, "only one hand at a time can
  *  wield the One, and you know that well, so do not trouble to say we!"
