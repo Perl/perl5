@@ -40,17 +40,16 @@ my $unflagged_pointers;
 # implicit interpreter context argument.
 #
 
-sub do_not_edit
-{
+sub open_print_header {
     my ($file, $quote) = @_;
 
-    return read_only_top(lang => ($file =~ /\.[ch]$/ ? 'C' : 'Perl'),
-			 file => $file, style => '*', by => 'regen/embed.pl',
-			 from => ['data in embed.fnc', 'regen/embed.pl',
-				  'regen/opcodes', 'intrpvar.h', 'perlvars.h'],
-			 final => "\nEdit those files and run 'make regen_headers' to effect changes.\n",
-			 copyright => [1993 .. 2009], quote => $quote);
-} # do_not_edit
+    return open_new($file, '>',
+		    { file => $file, style => '*', by => 'regen/embed.pl',
+		      from => ['data in embed.fnc', 'regen/embed.pl',
+			       'regen/opcodes', 'intrpvar.h', 'perlvars.h'],
+		      final => "\nEdit those files and run 'make regen_headers' to effect changes.\n",
+		      copyright => [1993 .. 2009], quote => $quote });
+}
 
 open IN, "embed.fnc" or die $!;
 
@@ -187,8 +186,7 @@ sub walk_table (&@) {
 	$F = $filename;
     }
     else {
-	$F = open_new($filename);
-	print $F do_not_edit ($filename);
+	$F = open_print_header($filename);
     }
     foreach (@embed) {
 	my @outs = &{$function}(@$_);
@@ -202,8 +200,8 @@ sub walk_table (&@) {
 
 # generate proto.h
 {
-    my $pr = open_new('proto.h');
-    print $pr do_not_edit ("proto.h"), "START_EXTERN_C\n";
+    my $pr = open_print_header("proto.h");
+    print $pr "START_EXTERN_C\n";
     my $ret;
 
     foreach (@embed) {
@@ -416,9 +414,9 @@ sub multoff ($$) {
     return hide("PL_$pre$sym", "PL_$sym");
 }
 
-my $em = open_new('embed.h');
+my $em = open_print_header('embed.h');
 
-print $em do_not_edit ("embed.h"), <<'END';
+print $em <<'END';
 /* (Doing namespace management portably in C is really gross.) */
 
 /* By defining PERL_NO_SHORT_NAMES (not done by default) the short forms
@@ -575,9 +573,9 @@ END
 
 read_only_bottom_close_and_rename($em);
 
-$em = open_new('embedvar.h');
+$em = open_print_header('embedvar.h');
 
-print $em do_not_edit ("embedvar.h"), <<'END';
+print $em <<'END';
 /* (Doing namespace management portably in C is really gross.) */
 
 /*
@@ -654,10 +652,9 @@ END
 
 read_only_bottom_close_and_rename($em);
 
-my $capi = open_new('perlapi.c');
-my $capih = open_new('perlapi.h');
+my $capih = open_print_header('perlapi.h');
 
-print $capih do_not_edit ("perlapi.h"), <<'EOT';
+print $capih <<'EOT';
 /* declare accessor functions for Perl variables */
 #ifndef __perlapi_h__
 #define __perlapi_h__
@@ -763,7 +760,7 @@ EOT
 
 read_only_bottom_close_and_rename($capih);
 
-my $warning = do_not_edit ("perlapi.c", <<'EOQ');
+my $capi = open_print_header('perlapi.c', <<'EOQ');
  *
  *
  * Up to the threshold of the door there mounted a flight of twenty-seven
@@ -775,7 +772,7 @@ my $warning = do_not_edit ("perlapi.c", <<'EOQ');
  */
 EOQ
 
-print $capi $warning, <<'EOT';
+print $capi <<'EOT';
 #include "EXTERN.h"
 #include "perl.h"
 #include "perlapi.h"
