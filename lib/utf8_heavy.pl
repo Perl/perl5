@@ -70,6 +70,10 @@ sub croak { require Carp; Carp::croak(@_) }
         ## info we need. Were this to be a subroutine, the 'last' would just
         ## be a 'return'.
         ##
+        #   If a problem is found $type is returned;
+        #   Upon success, a new (or cached) blessed object is returned with
+        #   keys TYPE, BITS, EXTRAS, LIST, and NONE with values having the
+        #   same meanings as the input parameters.
         my $file; ## file to load data from, and also part of the %Cache key.
         my $ListSorted = 0;
 
