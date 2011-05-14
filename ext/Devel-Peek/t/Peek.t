@@ -814,7 +814,7 @@ unless ($Config{useithreads}) {
   CUR = 5
   LEN = \d+
   MAGIC = $ADDR
-    MG_VIRTUAL = &PL_vtbl_bm
+    MG_VIRTUAL = &PL_vtbl_regexp
     MG_TYPE = PERL_MAGIC_bm\\(B\\)
     MG_LEN = 256
     MG_PTR = $ADDR "(?:\\\\\d){256}"
@@ -833,7 +833,7 @@ unless ($Config{useithreads}) {
   CUR = 5
   LEN = \d+
   MAGIC = $ADDR
-    MG_VIRTUAL = &PL_vtbl_bm
+    MG_VIRTUAL = &PL_vtbl_regexp
     MG_TYPE = PERL_MAGIC_bm\\(B\\)
     MG_LEN = 256
     MG_PTR = $ADDR "(?:\\\\\d){256}"

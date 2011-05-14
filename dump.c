@@ -1308,8 +1308,6 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
             else if (v == &PL_vtbl_substr)     s = "substr";
             else if (v == &PL_vtbl_vec)        s = "vec";
             else if (v == &PL_vtbl_pos)        s = "pos";
-            else if (v == &PL_vtbl_bm)         s = "bm";
-            else if (v == &PL_vtbl_fm)         s = "fm";
             else if (v == &PL_vtbl_uvar)       s = "uvar";
             else if (v == &PL_vtbl_defelem)    s = "defelem";
 #ifdef USE_LOCALE_COLLATE

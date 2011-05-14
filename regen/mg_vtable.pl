@@ -129,7 +129,7 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max];
 
 EOH
 
-print $h @aliases, "\n";;
+print $h (sort @aliases), "\n";
 
 print $h "#define PL_vtbl_$_ PL_magic_vtables[want_vtbl_$_]\n"
     foreach sort @vtable_names;
