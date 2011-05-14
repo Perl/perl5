@@ -24,8 +24,6 @@ enum {		/* pass one of these to get_vtbl */
     want_vtbl_substr,
     want_vtbl_vec,
     want_vtbl_pos,
-    want_vtbl_bm,
-    want_vtbl_fm,
     want_vtbl_uvar,
     want_vtbl_defelem,
     want_vtbl_regexp,
@@ -82,8 +80,6 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max] = {
   { Perl_magic_getsubstr, Perl_magic_setsubstr, 0, 0, 0, 0, 0, 0 },
   { Perl_magic_getvec, Perl_magic_setvec, 0, 0, 0, 0, 0, 0 },
   { Perl_magic_getpos, Perl_magic_setpos, 0, 0, 0, 0, 0, 0 },
-  { 0, Perl_magic_setregexp, 0, 0, 0, 0, 0, 0 },
-  { 0, Perl_magic_setregexp, 0, 0, 0, 0, 0, 0 },
   { Perl_magic_getuvar, Perl_magic_setuvar, 0, 0, 0, 0, 0, 0 },
   { Perl_magic_getdefelem, Perl_magic_setdefelem, 0, 0, 0, 0, 0, 0 },
   { 0, Perl_magic_setregexp, 0, 0, 0, 0, 0, 0 },
@@ -105,6 +101,9 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max] = {
 #else
 EXT_MGVTBL PL_magic_vtables[magic_vtable_max];
 #endif
+
+#define want_vtbl_bm want_vtbl_regexp
+#define want_vtbl_fm want_vtbl_regexp
 
 #define PL_vtbl_amagic PL_magic_vtables[want_vtbl_amagic]
 #define PL_vtbl_amagicelem PL_magic_vtables[want_vtbl_amagicelem]

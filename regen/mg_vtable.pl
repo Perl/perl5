@@ -39,11 +39,9 @@ my @sig =
      'substr' => {get => 'getsubstr', set => 'setsubstr'},
      'vec' => {get => 'getvec', set => 'setvec'},
      'pos' => {get => 'getpos', set => 'setpos'},
-     'bm' => {set => 'setregexp'},
-     'fm' => {set => 'setregexp'},
      'uvar' => {get => 'getuvar', set => 'setuvar'},
      'defelem' => {get => 'getdefelem', set => 'setdefelem'},
-     'regexp' => {set => 'setregexp'},
+     'regexp' => {set => 'setregexp', alias => [qw(bm fm)]},
      'regdata' => {len => 'regdata_cnt'},
      'regdatum' => {get => 'regdatum_get', set => 'regdatum_set'},
      'amagic' => {set => 'setamagic', free => 'setamagic'},
@@ -96,6 +94,7 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max] = {
 EOH
 
 my @vtable_names;
+my @aliases;
 
 while (my ($name, $data) = splice @sig, 0, 2) {
     push @vtable_names, $name;
@@ -116,6 +115,10 @@ while (my ($name, $data) = splice @sig, 0, 2) {
   { 0, 0, 0, 0, 0, 0, 0, 0 }$comma
 #endif
 EOH
+    foreach(@{$data->{alias}}) {
+	push @aliases, "#define want_vtbl_$_ want_vtbl_$name\n";
+	push @vtable_names, $_;
+    }
 }
 
 print $h <<'EOH';
@@ -126,6 +129,7 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max];
 
 EOH
 
+print $h @aliases, "\n";;
 
 print $h "#define PL_vtbl_$_ PL_magic_vtables[want_vtbl_$_]\n"
     foreach sort @vtable_names;
