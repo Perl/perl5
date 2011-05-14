@@ -24,6 +24,4 @@ system $command and die "`$command` failed, \$?=$?";
 
 my $fh = open_new($uconfig_h, '>>');
 
-print $fh "\n", read_only_bottom([$ENV{CONFIG_SH}, 'config_h.SH']);
-
-close_and_rename($fh);
+read_only_bottom_close_and_rename($fh, [$ENV{CONFIG_SH}, 'config_h.SH']);

@@ -130,8 +130,12 @@ EOM
     return $cooked;
 }
 
-sub read_only_bottom {
-    my ($sources, $lang) = @_;
+sub read_only_bottom_close_and_rename {
+    my ($fh, $sources) = @_;
+    my $name = *{$fh}->{name};
+    my $lang = *{$fh}->{lang};
+    die "No final name specified at open time for $name"
+	unless *{$fh}->{final_name};
 
     my $comment;
     if ($sources) {
@@ -150,17 +154,7 @@ sub read_only_bottom {
 	$comment =~ s! \* !/* !;
 	$comment .= " */";
     }
-    return "$comment\n";
-}
-
-sub read_only_bottom_close_and_rename {
-    my ($fh, $sources) = @_;
-    my $name = *{$fh}->{name};
-    my $lang = *{$fh}->{lang};
-    die "No final name specified at open time for $name"
-	unless *{$fh}->{final_name};
-
-    print $fh "\n", read_only_bottom($sources, $lang);
+    print $fh "\n$comment\n";
 
     close_and_rename($fh);
 }
