@@ -12833,19 +12833,20 @@ sub make_pod () {
                                                       : ""));
         @block_warning = << "END";
 
-Matches in the Block property have shortcuts that begin with 'In_'.  For
-example, \\p{Block=Latin1} can be written as \\p{In_Latin1}.  For backward
-compatibility, if there is no conflict with another shortcut, these may also
-be written as \\p{Latin1} or \\p{Is_Latin1}.  But, N.B., there are numerous
-such conflicting shortcuts.  Use of these forms for Block is discouraged, and
-are flagged as such, not only because of the potential confusion as to what is
-meant, but also because a later release of Unicode may preempt the shortcut,
-and your program would no longer be correct.  Use the 'In_' form instead to
-avoid this, or even more clearly, use the compound form, e.g.,
-\\p{blk:latin1}.  See L<perlunicode/"Blocks"> for more information about this.
+Matches in the Block property have shortcuts that begin with "In_".  For
+example, C<\\p{Block=Latin1}> can be written as C<\\p{In_Latin1}>.  For
+backward compatibility, if there is no conflict with another shortcut, these
+may also be written as C<\\p{Latin1}> or C<\\p{Is_Latin1}>.  But, N.B., there
+are numerous such conflicting shortcuts.  Use of these forms for Block is
+discouraged, and are flagged as such, not only because of the potential
+confusion as to what is meant, but also because a later release of Unicode may
+preempt the shortcut, and your program would no longer be correct.  Use the
+"In_" form instead to avoid this, or even more clearly, use the compound form,
+e.g., C<\\p{blk:latin1}>.  See L<perlunicode/"Blocks"> for more information
+about this.
 END
     }
-    my $text = "If an entry has flag(s) at its beginning, like '$DEPRECATED', the 'Is_' form has the same flag(s)";
+    my $text = "If an entry has flag(s) at its beginning, like \"$DEPRECATED\", the \"Is_\" form has the same flag(s)";
     $text = "$exception_message $text" if $has_Is_conflicts;
 
     # And the 'Is_ line';
@@ -12887,7 +12888,7 @@ END
 
         $zero_matches = <<END;
 
-=head2 Legal \\p{} and \\P{} constructs that match no characters
+=head2 Legal C<\\p{}> and C<\\P{}> constructs that match no characters
 
 Unicode has some property-value pairs that currently don't match anything.
 This happens generally either because they are obsolete, or for symmetry with
@@ -13037,8 +13038,9 @@ There are many properties in Unicode, and Perl provides access to almost all of
 them, as well as some additional extensions and short-cut synonyms.
 
 And just about all of the few that aren't accessible through the Perl
-core are accessible through the modules: Unicode::Normalize and
-Unicode::UCD, and for Unihan properties, via the CPAN module Unicode::Unihan.
+core are accessible through the modules: L<Unicode::Normalize> and
+L<Unicode::UCD>, and for Unihan properties, via the CPAN module
+L<Unicode::Unihan>.
 
 This document merely lists all available properties and does not attempt to
 explain what each property really means.  There is a brief description of each
@@ -13051,30 +13053,30 @@ L<perlunicode/Other Properties>.
 Note that you can define your own properties; see
 L<perlunicode/"User-Defined Character Properties">.
 
-=head1 Properties accessible through \\p{} and \\P{}
+=head1 Properties accessible through C<\\p{}> and C<\\P{}>
 
-The Perl regular expression \\p{} and \\P{} constructs give access to most of
-the Unicode character properties.  The table below shows all these constructs,
-both single and compound forms.
+The Perl regular expression C<\\p{}> and C<\\P{}> constructs give access to
+most of the Unicode character properties.  The table below shows all these
+constructs, both single and compound forms.
 
 B<Compound forms> consist of two components, separated by an equals sign or a
 colon.  The first component is the property name, and the second component is
 the particular value of the property to match against, for example,
-'\\p{Script: Greek}' and '\\p{Script=Greek}' both mean to match characters
+C<\\p{Script: Greek}> and C<\\p{Script=Greek}> both mean to match characters
 whose Script property is Greek.
 
-B<Single forms>, like '\\p{Greek}', are mostly Perl-defined shortcuts for
+B<Single forms>, like C<\\p{Greek}>, are mostly Perl-defined shortcuts for
 their equivalent compound forms.  The table shows these equivalences.  (In our
-example, '\\p{Greek}' is a just a shortcut for '\\p{Script=Greek}'.)
+example, C<\\p{Greek}> is a just a shortcut for C<\\p{Script=Greek}>.)
 There are also a few Perl-defined single forms that are not shortcuts for a
-compound form.  One such is \\p{Word}.  These are also listed in the table.
+compound form.  One such is C<\\p{Word}>.  These are also listed in the table.
 
 In parsing these constructs, Perl always ignores Upper/lower case differences
-everywhere within the {braces}.  Thus '\\p{Greek}' means the same thing as
-'\\p{greek}'.  But note that changing the case of the 'p' or 'P' before the
-left brace completely changes the meaning of the construct, from "match" (for
-'\\p{}') to "doesn't match" (for '\\P{}').  Casing in this document is for
-improved legibility.
+everywhere within the {braces}.  Thus C<\\p{Greek}> means the same thing as
+C<\\p{greek}>.  But note that changing the case of the C<"p"> or C<"P"> before
+the left brace completely changes the meaning of the construct, from "match"
+(for C<\\p{}>) to "doesn't match" (for C<\\P{}>).  Casing in this document is
+for improved legibility.
 
 Also, white space, hyphens, and underscores are also normally ignored
 everywhere between the {braces}, and hence can be freely added or removed
@@ -13084,7 +13086,7 @@ means that tighter (stricter) rules are used for that entry:
 
 =over 4
 
-=item Single form (\\p{name}) tighter rules:
+=item Single form (C<\\p{name}>) tighter rules:
 
 White space, hyphens, and underscores ARE significant
 except for:
@@ -13100,7 +13102,7 @@ except for:
 That means, for example, that you can freely add or remove white space
 adjacent to (but within) the braces without affecting the meaning.
 
-=item Compound form (\\p{name=value} or \\p{name:value}) tighter rules:
+=item Compound form (C<\\p{name=value}> or C<\\p{name:value}>) tighter rules:
 
 The tighter rules given above for the single form apply to everything to the
 right of the colon or equals; the looser rules still apply to everything to
@@ -13155,7 +13157,7 @@ flags each such entry in the table.
 
 @block_warning
 
-The table below has two columns.  The left column contains the \\p{}
+The table below has two columns.  The left column contains the C<\\p{}>
 constructs to look up, possibly preceded by the flags mentioned above; and
 the right column contains information about them, like a description, or
 synonyms.  It shows both the single and compound forms for each property that
@@ -13184,7 +13186,7 @@ in the second column.  Under case-insensitive matching they match the
 same code pode points as the property "other_property".
 
 There is no description given for most non-Perl defined properties (See
-$unicode_reference_url for that).
+L<$unicode_reference_url> for that).
 
 For compactness, 'B<*>' is used as a wildcard instead of showing all possible
 combinations.  For example, entries like:
@@ -13196,10 +13198,11 @@ for the latter is also valid for the former.  Similarly,
 
  \\p{Is_*}                                   \\p{*}
 
-means that if and only if, for example, \\p{Foo} exists, then \\p{Is_Foo} and
-\\p{IsFoo} are also valid and all mean the same thing.  And similarly,
-\\p{Foo=Bar} means the same as \\p{Is_Foo=Bar} and \\p{IsFoo=Bar}.  '*' here
-is restricted to something not beginning with an underscore.
+means that if and only if, for example, C<\\p{Foo}> exists, then
+C<\\p{Is_Foo}> and C<\\p{IsFoo}> are also valid and all mean the same thing.
+And similarly, C<\\p{Foo=Bar}> means the same as C<\\p{Is_Foo=Bar}> and
+C<\\p{IsFoo=Bar}>.  "*" here is restricted to something not beginning with an
+underscore.
 
 Also, in binary properties, 'Yes', 'T', and 'True' are all synonyms for 'Y'.
 And 'No', 'F', and 'False' are all synonyms for 'N'.  The table shows 'Y*' and
@@ -13247,9 +13250,9 @@ These are:
  Titlecase_Mapping          ucfirst()
  Uppercase_Mapping          uc()
 
-Case_Folding is accessible through the /i modifier in regular expressions.
+Case_Folding is accessible through the C</i> modifier in regular expressions.
 
-The Name property is accessible through the \\N{} interpolation in
+The Name property is accessible through the C<\\N{}> interpolation in
 double-quoted strings and regular expressions, but both usages require a C<use
 charnames;> to be specified, which also contains related functions viacode(),
 vianame(), and string_vianame().
@@ -13281,7 +13284,7 @@ code points to their respective values.  As part of its build process,
 Perl constructs tables containing these mappings for all properties that it
 deals with.  Some, but not all, of these are written out into files.
 Those written out are in the directory C<\$Config{privlib}>/F<unicore/To/>
-(%Config is available from the Config module).
+(C<%Config> is available from the C<Config> module).
 
 Perl reserves the right to change the format and even the existence of any of
 those files without notice, except the ones that were in existence prior to
@@ -13295,8 +13298,8 @@ reading programs decipher it.  One of them looks like this:
 
     \$utf8::SwashInfo{'ToNAME'}{'format'} = 's';
 
-where 'NAME' is a name to indicate the property.  For backwards compatibility,
-this is not necessarily the property's official Unicode name.  (The 'To' is
+where "NAME" is a name to indicate the property.  For backwards compatibility,
+this is not necessarily the property's official Unicode name.  (The "To" is
 also for backwards compatibility.)  The hash entry gives the format of the
 mapping fields of the table, currently one of the following:
 
@@ -13312,11 +13315,11 @@ entry line; it looks like this:
     \$utf8::SwashInfo{'ToNAME'}{'missing'} = 'NaN';
 
 This example line says that any Unicode code points not explicitly listed in
-the file have the value 'NaN' under the property indicated by NAME.  If the
+the file have the value "NaN" under the property indicated by NAME.  If the
 value is the special string C<< <code point> >>, it means that the value for
 any missing code point is the code point itself.  This happens, for example,
 in the file for Uppercase_Mapping (To/Upper.pl), in which code points like the
-character 'A', are missing because the uppercase of 'A' is itself.
+character "A", are missing because the uppercase of "A" is itself.
 
 Finally, if the file contains a hash for special case entries, its name is
 specified by an entry that looks like this:
