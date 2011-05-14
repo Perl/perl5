@@ -62,13 +62,19 @@ sub rename_if_different {
 
 # Open a new file.
 sub open_new {
-    my ($final_name) = @_;
+    my ($final_name, $mode) = @_;
     my $name = $final_name . '-new';
-    if (-f $name) {
-	unlink $name or die "$name exists but can't unlink: $!";
-    }
     my $fh = gensym;
-    open $fh, ">$name" or die "Can't create $name: $!";
+    if (!defined $mode or $mode eq '>') {
+	if (-f $name) {
+	    unlink $name or die "$name exists but can't unlink: $!";
+	}
+	open $fh, ">$name" or die "Can't create $name: $!";
+    } elsif ($mode eq '>>') {
+	open $fh, ">>$name" or die "Can't append to $name: $!";
+    } else {
+	die "Unhandled open mode '$mode#";
+    }
     *{$fh}->{name} = $name;
     *{$fh}->{final_name} = $final_name;
     *{$fh}->{lang} = ($final_name =~ /\.(?:c|h|tab|act)$/ ? 'C' : 'Perl');
