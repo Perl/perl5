@@ -782,15 +782,14 @@ read_only_bottom_close_and_rename($h);
 
 # Prepare to write the reentr.c.
 
-my $c = open_new('reentr.c');
-my $top = read_only_top(lang => 'C', by => 'regen/reentr.pl',
-			from => 'data in regen/reentr.pl',
-			file => 'reentr.c', style => '*',
-			copyright => [2002, 2003, 2005 .. 2007]);
-
-$top =~ s! \*/\n! *
+my $c = open_new('reentr.c', '>',
+		 {by => 'regen/reentr.pl', from => 'data in regen/reentr.pl',
+		  file => 'reentr.c', style => '*',
+		  copyright => [2002, 2003, 2005 .. 2007],
+		  quote => <<'EOQ'});
+ *
  * "Saruman," I said, standing away from him, "only one hand at a time can
- *  wield the One, and you know that well, so do not trouble to say we\!"
+ *  wield the One, and you know that well, so do not trouble to say we!"
  *
  * This file contains a collection of automatically created wrappers
  * (created by running reentr.pl) for reentrant (thread-safe) versions of
@@ -799,9 +798,9 @@ $top =~ s! \*/\n! *
  * care about the differences between various platforms' idiosyncrasies
  * regarding these reentrant interfaces.  
  */
-!s;
+EOQ
 
-print $c $top, <<"EOF";
+print $c <<"EOF";
 #include "EXTERN.h"
 #define PERL_IN_REENTR_C
 #include "perl.h"

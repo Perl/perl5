@@ -40,16 +40,16 @@ my $unflagged_pointers;
 # implicit interpreter context argument.
 #
 
-sub do_not_edit ($)
+sub do_not_edit
 {
-    my $file = shift;
+    my ($file, $quote) = @_;
 
     return read_only_top(lang => ($file =~ /\.[ch]$/ ? 'C' : 'Perl'),
 			 file => $file, style => '*', by => 'regen/embed.pl',
 			 from => ['data in embed.fnc', 'regen/embed.pl',
 				  'regen/opcodes', 'intrpvar.h', 'perlvars.h'],
 			 final => "\nEdit those files and run 'make regen_headers' to effect changes.\n",
-			 copyright => [1993 .. 2009]);
+			 copyright => [1993 .. 2009], quote => $quote);
 } # do_not_edit
 
 open IN, "embed.fnc" or die $!;
@@ -763,8 +763,8 @@ EOT
 
 read_only_bottom_close_and_rename($capih);
 
-my $warning = do_not_edit ("perlapi.c");
-$warning =~ s! \*/\n! *
+my $warning = do_not_edit ("perlapi.c", <<'EOQ');
+ *
  *
  * Up to the threshold of the door there mounted a flight of twenty-seven
  * broad stairs, hewn by some unknown art of the same black stone.  This
@@ -773,7 +773,7 @@ $warning =~ s! \*/\n! *
  *     [p.577 of _The Lord of the Rings_, III/x: "The Voice of Saruman"]
  *
  */
-!;
+EOQ
 
 print $capi $warning, <<'EOT';
 #include "EXTERN.h"

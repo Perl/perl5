@@ -129,6 +129,7 @@ EOM
 	? wrap('# ', '# ', $raw) . "\n" : wrap('/* ', $style, $raw) . " */\n\n";
     $cooked =~ tr/\0/ /; # Don't break Larry's name etc
     $cooked =~ s/ +$//mg; # Remove all trailing spaces
+    $cooked =~ s! \*/\n!$args{quote}!s if $args{quote};
     return $cooked;
 }
 
