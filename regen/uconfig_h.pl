@@ -26,5 +26,4 @@ my $fh = open_new($uconfig_h, '>>');
 
 print $fh "\n", read_only_bottom([$ENV{CONFIG_SH}, 'config_h.SH']);
 
-safer_close($fh);
-rename_if_different($uconfig_h_new, $uconfig_h);
+close_and_rename($fh);

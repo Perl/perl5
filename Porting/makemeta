@@ -18,7 +18,6 @@ BEGIN {
 
 
 my $file = "META.yml";
-my $new_file = "META.yml-new";
 
 use Maintainers qw(%Modules get_module_files get_module_pat);
 
@@ -73,5 +72,4 @@ no_index:
 @files
 EOI
 
-safer_close($fh);
-rename_if_different($new_file, $file);
+close_and_rename($fh);
