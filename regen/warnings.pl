@@ -260,11 +260,11 @@ if (@ARGV && $ARGV[0] eq "tree")
     exit ;
 }
 
-my $warn = open_new('warnings.h');
-my $pm = open_new('lib/warnings.pm');
+my ($warn, $pm) = map {
+    open_new($_, '>', { by => 'regen/warnings.pl' });
+} 'warnings.h', 'lib/warnings.pm';
 
-print $pm read_only_top(lang => 'Perl', by => 'regen/warnings.pl');
-print $warn read_only_top(lang => 'C', by => 'regen/warnings.pl'), <<'EOM';
+print $warn <<'EOM';
 
 #define Off(x)			((x) / 8)
 #define Bit(x)			(1 << ((x) % 8))

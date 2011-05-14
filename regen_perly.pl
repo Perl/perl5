@@ -97,13 +97,13 @@ my ($actlines, $tablines) = extract($clines);
 
 $tablines .= make_type_tab($y_file, $tablines);
 
-my $read_only = read_only_top(lang => 'C', by => $0, from => $y_file);
+my ($act_fh, $tab_fh, $h_fh) = map {
+    open_new($_, '>', { by => $0, from => $y_file });
+} $act_file, $tab_file, $h_file;
 
-my $act_fh = open_new($act_file);
-print $act_fh $read_only, $actlines;
+print $act_fh $actlines;
 
-my $tab_fh = open_new($tab_file);
-print $tab_fh $read_only, $tablines;
+print $tab_fh $tablines;
 
 unlink $tmpc_file;
 
@@ -112,9 +112,6 @@ unlink $tmpc_file;
 # C<#line 188 "perlytmp.h"> gets picked up by make depend, so remove them.
 
 open my $tmph_fh, '<', $tmph_file or die "Can't open $tmph_file: $!\n";
-my $h_fh = open_new($h_file);
-
-print $h_fh $read_only;
 
 my $endcore_done = 0;
 # Token macros need to be generated manually on bison 2.4

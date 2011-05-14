@@ -13,14 +13,12 @@ use Devel::Tokenizer::C 0.05;
 
 require 'regen/regen_lib.pl';
 
-my $h = open_new('keywords.h');
-my $c = open_new('keywords.c');
-
-print $h read_only_top(lang => 'C', by => 'regen/keywords.pl',
-		       from => 'its data', file => 'keywords.h', style => '*',
-		       copyright => [1994 .. 1997, 1999 .. 2002, 2005 .. 2007]);
-print $c read_only_top(lang => 'C', by => 'regen/keywords.pl',
-		       from => 'its data', style => '*');
+my $h = open_new('keywords.h', '>',
+		 { by => 'regen/keywords.pl', from => 'its data',
+		   file => 'keywords.h', style => '*',
+		   copyright => [1994 .. 1997, 1999 .. 2002, 2005 .. 2007]});
+my $c = open_new('keywords.c', '>',
+		 { by => 'regen/keywords.pl', from => 'its data', style => '*'});
 
 my %by_strength;
 

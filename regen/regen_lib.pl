@@ -34,8 +34,9 @@ sub safer_unlink {
 
 # Open a new file.
 sub open_new {
-    my ($final_name, $mode) = @_;
+    my ($final_name, $mode, $header) = @_;
     my $name = $final_name . '-new';
+    my $lang = $final_name =~ /\.(?:c|h|tab|act)$/ ? 'C' : 'Perl';
     my $fh = gensym;
     if (!defined $mode or $mode eq '>') {
 	if (-f $name) {
@@ -49,8 +50,9 @@ sub open_new {
     }
     *{$fh}->{name} = $name;
     *{$fh}->{final_name} = $final_name;
-    *{$fh}->{lang} = ($final_name =~ /\.(?:c|h|tab|act)$/ ? 'C' : 'Perl');
+    *{$fh}->{lang} = $lang;
     binmode $fh;
+    print $fh read_only_top(lang => $lang, %$header) if $header;
     $fh;
 }
 

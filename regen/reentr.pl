@@ -51,11 +51,11 @@ my %map = (
 # Example #3: S_CBI   means type func_r(const char*, char*, int)
 
 
-my $h = open_new('reentr.h');
-print $h read_only_top(lang => 'C', by => 'regen/reentr.pl',
-		       from => 'data in regen/reentr.pl',
-		       file => 'reentr.h', style => '*',
-		       copyright => [2002, 2003, 2005 .. 2007]);
+my $h = open_new('reentr.h', '>',
+		 { by => 'regen/reentr.pl',
+		   from => 'data in regen/reentr.pl',
+		   file => 'reentr.h', style => '*',
+		   copyright => [2002, 2003, 2005 .. 2007]});
 
 print $h <<EOF;
 #ifndef REENTR_H

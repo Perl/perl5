@@ -222,8 +222,8 @@ my @C1 = qw(
                 APC
             );
 
-my $out_fh = open_new('l1_char_class_tab.h');
-print $out_fh read_only_top(lang => 'C', style => '*', by => $0, from => $file);
+my $out_fh = open_new('l1_char_class_tab.h', '>',
+		      {style => '*', by => $0, from => $file});
 
 # Output the table using fairly short names for each char.
 for my $ord (0..255) {
