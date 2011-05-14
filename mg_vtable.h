@@ -40,6 +40,43 @@ enum {		/* pass one of these to get_vtbl */
     magic_vtable_max
 };
 
+#ifdef DOINIT
+EXTCONST char *PL_magic_vtable_names[magic_vtable_max] = {
+    "sv",
+    "env",
+    "envelem",
+    "sigelem",
+    "pack",
+    "packelem",
+    "dbline",
+    "isa",
+    "isaelem",
+    "arylen",
+    "arylen_p",
+    "mglob",
+    "nkeys",
+    "taint",
+    "substr",
+    "vec",
+    "pos",
+    "uvar",
+    "defelem",
+    "regexp",
+    "regdata",
+    "regdatum",
+    "amagic",
+    "amagicelem",
+    "backref",
+    "ovrld",
+    "utf8",
+    "collxfrm",
+    "hintselem",
+    "hints"
+};
+#else
+EXTCONST char *PL_magic_vtable_names[magic_vtable_max];
+#endif
+
 /* These all need to be 0, not NULL, as NULL can be (void*)0, which is a
  * pointer to data, whereas we're assigning pointers to functions, which are
  * not the same beast. ANSI doesn't allow the assignment from one to the other.

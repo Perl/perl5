@@ -1290,39 +1290,11 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
 			 "  MAGIC = 0x%"UVxf"\n", PTR2UV(mg));
  	if (mg->mg_virtual) {
             const MGVTBL * const v = mg->mg_virtual;
- 	    const char *s;
- 	    if      (v == &PL_vtbl_sv)         s = "sv";
-            else if (v == &PL_vtbl_env)        s = "env";
-            else if (v == &PL_vtbl_envelem)    s = "envelem";
-#ifndef PERL_MICRO
-            else if (v == &PL_vtbl_sigelem)    s = "sigelem";
-#endif
-            else if (v == &PL_vtbl_pack)       s = "pack";
-            else if (v == &PL_vtbl_packelem)   s = "packelem";
-            else if (v == &PL_vtbl_dbline)     s = "dbline";
-            else if (v == &PL_vtbl_isa)        s = "isa";
-            else if (v == &PL_vtbl_arylen)     s = "arylen";
-            else if (v == &PL_vtbl_mglob)      s = "mglob";
-            else if (v == &PL_vtbl_nkeys)      s = "nkeys";
-            else if (v == &PL_vtbl_taint)      s = "taint";
-            else if (v == &PL_vtbl_substr)     s = "substr";
-            else if (v == &PL_vtbl_vec)        s = "vec";
-            else if (v == &PL_vtbl_pos)        s = "pos";
-            else if (v == &PL_vtbl_uvar)       s = "uvar";
-            else if (v == &PL_vtbl_defelem)    s = "defelem";
-#ifdef USE_LOCALE_COLLATE
-	    else if (v == &PL_vtbl_collxfrm)   s = "collxfrm";
-#endif
-	    else if (v == &PL_vtbl_amagic)     s = "amagic";
-	    else if (v == &PL_vtbl_amagicelem) s = "amagicelem";
-	    else if (v == &PL_vtbl_backref)    s = "backref";
-	    else if (v == &PL_vtbl_utf8)       s = "utf8";
-            else if (v == &PL_vtbl_arylen_p)   s = "arylen_p";
-            else if (v == &PL_vtbl_hintselem)  s = "hintselem";
-            else if (v == &PL_vtbl_hints)      s = "hints";
-	    else			       s = NULL;
-	    if (s)
-	        Perl_dump_indent(aTHX_ level, file, "    MG_VIRTUAL = &PL_vtbl_%s\n", s);
+	    if (v >= PL_magic_vtables
+		&& v < PL_magic_vtables + magic_vtable_max) {
+		const U32 i = v - PL_magic_vtables;
+	        Perl_dump_indent(aTHX_ level, file, "    MG_VIRTUAL = &PL_vtbl_%s\n", PL_magic_vtable_names[i]);
+	    }
 	    else
 	        Perl_dump_indent(aTHX_ level, file, "    MG_VIRTUAL = 0x%"UVxf"\n", PTR2UV(v));
         }

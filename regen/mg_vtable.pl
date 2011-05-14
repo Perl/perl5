@@ -60,13 +60,22 @@ my $h = open_new('mg_vtable.h', '>',
 		   style => '*' });
 
 {
-    my @names = map {"want_vtbl_$_"} grep {!ref $_} @sig;
-    push @names, 'magic_vtable_max';
-    local $" = ",\n    ";
+    my @names = grep {!ref $_} @sig;
+    my $want = join ",\n    ", (map {"want_vtbl_$_"} @names), 'magic_vtable_max';
+    my $names = join qq{",\n    "}, @names;
+
     print $h <<"EOH";
 enum {		/* pass one of these to get_vtbl */
-    @names
+    $want
 };
+
+#ifdef DOINIT
+EXTCONST char *PL_magic_vtable_names[magic_vtable_max] = {
+    "$names"
+};
+#else
+EXTCONST char *PL_magic_vtable_names[magic_vtable_max];
+#endif
 
 EOH
 }
