@@ -12373,6 +12373,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	if (*s == term && memEQ(s,PL_tokenbuf,len)) {
 	    STRLEN off = PL_bufend - 1 - SvPVX_const(PL_linestr);
 	    *(SvPVX(PL_linestr) + off ) = ' ';
+	    lex_grow_linestr(SvCUR(PL_linestr) + SvCUR(herewas) + 1);
 	    sv_catsv(PL_linestr,herewas);
 	    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 	    s = SvPVX(PL_linestr) + off; /* In case PV of PL_linestr moved. */
