@@ -50,7 +50,7 @@ my %dirs;
 
 @dirs  = map { "    - $_" } sort { lc $a cmp lc $b } @dirs;
 
-my $fh = safer_open($new_file);
+my $fh = safer_open($new_file, $file);
 
 local $" = "\n";
 print $fh <<"EOI";
