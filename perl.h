@@ -5072,6 +5072,15 @@ START_EXTERN_C
 #endif
 
 #include "mg_vtable.h"
+
+#ifdef DOINIT
+EXTCONST U8 PL_magic_data[256] =
+#include "mg_data.h"
+;
+#else
+EXTCONST U8 PL_magic_data[256];
+#endif
+
 #include "overload.h"
 
 END_EXTERN_C

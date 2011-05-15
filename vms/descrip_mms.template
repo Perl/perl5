@@ -508,16 +508,16 @@ perlmini.c : perl.c
 perlmini$(O) : perlmini.c
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-bitcount.h : uudmap.h 
+bitcount.h mg_data.h : uudmap.h 
 	@ $(NOOP)
 
 uudmap.h : generate_uudmap$(E)
-	MCR SYS$DISK:[]generate_uudmap$(E) uudmap.h bitcount.h
+	MCR SYS$DISK:[]generate_uudmap$(E) uudmap.h bitcount.h mg_data.h
 
 generate_uudmap$(E) : generate_uudmap$(O) $(CRTL)
 	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoFull/NoCross/Exe=$(MMS$TARGET) generate_uudmap$(O) $(CRTLOPTS)
 
-generate_uudmap$(O) : generate_uudmap.c
+generate_uudmap$(O) : generate_uudmap.c mg_raw.h
         $(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
 # The following files are built in one go by gen_shrfls.pl:
@@ -1756,7 +1756,7 @@ doop$(O) : doop.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 dump$(O) : dump.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
-globals$(O) : globals.c uudmap.h bitcount.h $(h)
+globals$(O) : globals.c uudmap.h bitcount.h mg_data.h $(h)
         $(CC) $(CORECFLAGS) $(MMS$SOURCE)
 gv$(O) : gv.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
@@ -1891,6 +1891,7 @@ tidy : cleanlis
 	- If F$Search("perlmain.c;-1")   .nes."" Then Purge/NoConfirm/Log perlmain.c
 	- If F$Search("uudmap.h;-1")   .nes."" Then Purge/NoConfirm/Log uudmap.h
 	- If F$Search("bitcount.h;-1")   .nes."" Then Purge/NoConfirm/Log bitcount.h
+	- If F$Search("mg_data.h;-1")   .nes."" Then Purge/NoConfirm/Log mg_data.h
 	- If F$Search("Perlshr_Gbl*.Mar;-1")   .nes."" Then Purge/NoConfirm/Log Perlshr_Gbl*.Mar
 	- If F$Search("[.ext.Opcode...];-1").nes."" Then Purge/NoConfirm/Log [.ext.Opcode]
 	- If F$Search("[.vms.ext...]*.C;-1").nes."" Then Purge/NoConfirm/Log [.vms.ext...]*.C
@@ -1924,6 +1925,7 @@ clean : tidy cleantest
 	- If F$Search("perlmini.c")   .nes."" Then Delete/NoConfirm/Log perlmini.c;*
 	- If F$Search("uudmap.h")   .nes."" Then Delete/NoConfirm/Log uudmap.h;*
 	- If F$Search("bitcount.h")   .nes."" Then Delete/NoConfirm/Log bitcount.h;*
+	- If F$Search("mg_data.h")   .nes."" Then Delete/NoConfirm/Log md_data.h;*
 	- If F$Search("Perlshr_Gbl*.Mar")   .nes."" Then Delete/NoConfirm/Log Perlshr_Gbl*.Mar;*
 	- If F$Search("*.TS").nes."" Then Delete/NoConfirm/Log *.TS;*
 	- If F$Search("[.vms.ext...]*.C").nes."" Then Delete/NoConfirm/Log [.vms.ext...]*.C;*

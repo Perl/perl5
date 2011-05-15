@@ -18,6 +18,77 @@ BEGIN {
     require 'regen/regen_lib.pl';
 }
 
+my @mg =
+    (
+     sv => { char => '\0', vtable => 'sv', desc => 'Special scalar variable' },
+     overload => { char => 'A', vtable => 'amagic', desc => '%OVERLOAD hash' },
+     overload_elem => { char => 'a', vtable => 'amagicelem',
+			desc => '%OVERLOAD hash element' },
+     overload_table => { char => 'c', vtable => 'ovrld',
+			 desc => 'Holds overload table (AMT) on stash' },
+     bm => { char => 'B', vtable => 'regexp',
+	     desc => 'Boyer-Moore (fast string search)' },
+     regdata => { char => 'D', vtable => 'regdata',
+		  desc => 'Regex match position data (@+ and @- vars)' },
+     regdatum => { char => 'd', vtable => 'regdatum',
+		   desc => 'Regex match position data element' },
+     env => { char => 'E', vtable => 'env', desc => '%ENV hash' },
+     envelem => { char => 'e', vtable => 'envelem',
+		  desc => '%ENV hash element' },
+     fm => { char => 'f', vtable => 'regdata',
+	     desc => "Formline ('compiled' format)" },
+     regex_global => { char => 'g', vtable => 'mglob',
+		       desc => 'm//g target / study()ed string' },
+     hints => { char => 'H', vtable => 'hints', desc => '%^H hash' },
+     hintselem => { char => 'h', vtable => 'hintselem',
+		    desc => '%^H hash element' },
+     isa => { char => 'I', vtable => 'isa', desc => '@ISA array' },
+     isaelem => { char => 'i', vtable => 'isaelem',
+		  desc => '@ISA array element' },
+     nkeys => { char => 'k', vtable => 'nkeys',
+		desc => 'scalar(keys()) lvalue' },
+     dbfile => { char => 'L', vtable => 'dbline',
+		 desc => 'Debugger %_<filename' },
+     dbline => { char => 'l', desc => 'Debugger %_<filename element' },
+     shared => { char => 'N', desc => 'Shared between threads',
+		 unknown_to_sv_magic => 1 },
+     shared_scalar => { char => 'n', desc => 'Shared between threads',
+			unknown_to_sv_magic => 1 },
+     collxfrm => { char => 'o', vtable => 'collxfrm',
+		   desc => 'Locale transformation' },
+     tied => { char => 'P', vtable => 'pack', desc => 'Tied array or hash' },
+     tiedelem => { char => 'p', vtable => 'packelem',
+		   desc => 'Tied array or hash element' },
+     tiedscalar => { char => 'q', vtable => 'packelem',
+		     desc => 'Tied scalar or handle' },
+     qr => { char => 'r', vtable => 'regexp', desc => 'precompiled qr// regex' },
+     sig => { char => 'S', desc => '%SIG hash' },
+     sigelem => { char => 's', vtable => 'sigelem',
+		  desc => '%SIG hash element' },
+     taint => { char => 't', vtable => 'taint', desc => 'Taintedness' },
+     uvar => { char => 'U', vtable => 'uvar',
+	       desc => 'Available for use by extensions' },
+     uvar_elem => { char => 'u', desc => 'Reserved for use by extensions',
+		    unknown_to_sv_magic => 1 },
+     vec => { char => 'v', vtable => 'vec', desc => 'vec() lvalue' },
+     vstring => { char => 'V', desc => 'SV was vstring literal' },
+     utf8 => { char => 'w', vtable => 'utf8',
+	       desc => 'Cached UTF-8 information' },
+     substr => { char => 'x', vtable => 'substr', desc => 'substr() lvalue' },
+     defelem => { char => 'y', vtable => 'defelem',
+		  desc => 'Shadow "foreach" iterator variable / smart parameter vivification' },
+     arylen => { char => '#', vtable => 'arylen',
+		 desc => 'Array length ($#ary)' },
+     pos => { char => '.', vtable => 'pos', desc => 'pos() lvalue' },
+     backref => { char => '<', vtable => 'backref',
+		  desc => 'for weak ref data' },
+     symtab => { char => ':', desc => 'extra data for symbol tables' },
+     rhash => { char => '%', desc => 'extra data for restricted hashes' },
+     arylen_p => { char => '@', desc => 'to move arylen out of XPVAV' },
+     ext => { char => '~', desc => 'Available for use by extensions' },
+     checkcall => { char => ']', desc => 'inlining/mutation of call to this CV'},
+);
+
 # These have a subtly different "namespace" from the magic types.
 my @sig =
     (
@@ -55,16 +126,39 @@ my @sig =
      'hints' => {clear => 'clearhints'},
 );
 
-my $h = open_new('mg_vtable.h', '>',
-		 { by => 'regen/mg_vtable.pl', file => 'mg_vtable.h',
-		   style => '*' });
+my ($vt, $raw) = map {
+    open_new($_, '>',
+	     { by => 'regen/mg_vtable.pl', file => $_, style => '*' });
+} 'mg_vtable.h', 'mg_raw.h';
+
+# Of course, it would be *much* easier if we could output this table directly
+# here and now. However, for our sins, we try to support EBCDIC, which wouldn't
+# be *so* bad, except that there are (at least) 3 EBCDIC charset variants, and
+# they don't agree on the code point for '~'. Which we use. Great.
+# So we have to get the local build runtime to sort our table in character order
+# (And of course, just to be helpful, in POSIX BC '~' is \xFF, so we can't even
+# simplify the C code by assuming that the last element of the array is
+# predictable)
+
+{
+    while (my ($name, $data) = splice @mg, 0, 2) {
+	my $i = ord eval qq{"$data->{char}"};
+	unless ($data->{unknown_to_sv_magic}) {
+	    my $vtable = $data->{vtable}
+		? "want_vtbl_$data->{vtable}" : 'magic_vtable_max';
+	    my $comment = "/* $name '$data->{char}' $data->{desc} */";
+	    $comment =~ s/([\\"])/\\$1/g;
+	    print $raw qq{    { '$data->{char}', "$vtable",\n      "$comment" },\n};
+	}
+    }
+}
 
 {
     my @names = grep {!ref $_} @sig;
     my $want = join ",\n    ", (map {"want_vtbl_$_"} @names), 'magic_vtable_max';
     my $names = join qq{",\n    "}, @names;
 
-    print $h <<"EOH";
+    print $vt <<"EOH";
 enum {		/* pass one of these to get_vtbl */
     $want
 };
@@ -80,7 +174,7 @@ EXTCONST char *PL_magic_vtable_names[magic_vtable_max];
 EOH
 }
 
-print $h <<'EOH';
+print $vt <<'EOH';
 /* These all need to be 0, not NULL, as NULL can be (void*)0, which is a
  * pointer to data, whereas we're assigning pointers to functions, which are
  * not the same beast. ANSI doesn't allow the assignment from one to the other.
@@ -117,9 +211,9 @@ while (my ($name, $data) = splice @sig, 0, 2) {
     # Because we can't have a , after the last {...}
     my $comma = @sig ? ',' : '';
 
-    print $h "$data->{cond}\n" if $data->{cond};
-    print $h "  { $funcs }$comma\n";
-    print $h <<"EOH" if $data->{cond};
+    print $vt "$data->{cond}\n" if $data->{cond};
+    print $vt "  { $funcs }$comma\n";
+    print $vt <<"EOH" if $data->{cond};
 #else
   { 0, 0, 0, 0, 0, 0, 0, 0 }$comma
 #endif
@@ -130,7 +224,7 @@ EOH
     }
 }
 
-print $h <<'EOH';
+print $vt <<'EOH';
 };
 #else
 EXT_MGVTBL PL_magic_vtables[magic_vtable_max];
@@ -138,9 +232,9 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max];
 
 EOH
 
-print $h (sort @aliases), "\n";
+print $vt (sort @aliases), "\n";
 
-print $h "#define PL_vtbl_$_ PL_magic_vtables[want_vtbl_$_]\n"
+print $vt "#define PL_vtbl_$_ PL_magic_vtables[want_vtbl_$_]\n"
     foreach sort @vtable_names;
 
-read_only_bottom_close_and_rename($h);
+read_only_bottom_close_and_rename($_) foreach $vt, $raw;

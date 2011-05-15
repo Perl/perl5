@@ -13,6 +13,7 @@ fold_latin1
 fold_locale
 freq
 keyword_plugin
+magic_data
 magic_vtables
 magic_vtable_names
 memory_wrap

@@ -630,12 +630,14 @@ done
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
-globals$(OBJ_EXT): uudmap.h bitcount.h
+globals$(OBJ_EXT): uudmap.h bitcount.h mg_data.h
 
-uudmap.h: bitcount.h
+uudmap.h mg_data.h: bitcount.h
 
 bitcount.h: generate_uudmap$(HOST_EXE_EXT)
-	$(RUN) ./generate_uudmap$(HOST_EXE_EXT) uudmap.h bitcount.h
+	$(RUN) ./generate_uudmap$(HOST_EXE_EXT) uudmap.h bitcount.h mg_data.h
+
+generate_uudmap$(OBJ_EXT): mg_raw.h
 
 generate_uudmap$(HOST_EXE_EXT): generate_uudmap$(OBJ_EXT)
 	$(CC) -o generate_uudmap$(EXE_EXT) $(LDFLAGS) generate_uudmap$(OBJ_EXT) $(libs)
@@ -1224,7 +1226,7 @@ veryclean:	_verycleaner _mopup _clobber
 
 # Do not 'make _mopup' directly.
 _mopup:
-	rm -f *$(OBJ_EXT) *$(LIB_EXT) all perlmain.c opmini.c perlmini.c uudmap.h generate_uudmap$(EXE_EXT) bitcount.h
+	rm -f *$(OBJ_EXT) *$(LIB_EXT) all perlmain.c opmini.c perlmini.c uudmap.h generate_uudmap$(EXE_EXT) bitcount.h mg_data.h
 	-rmdir .depending
 	-@test -f extra.pods && rm -f `cat extra.pods`
 	-@test -f vms/README_vms.pod && rm -f vms/README_vms.pod

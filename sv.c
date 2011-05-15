@@ -5239,6 +5239,7 @@ Perl_sv_magic(pTHX_ register SV *const sv, SV *const obj, const int how,
     dVAR;
     const MGVTBL *vtable;
     MAGIC* mg;
+    unsigned int vtable_index;
 
     PERL_ARGS_ASSERT_SV_MAGIC;
 
@@ -5279,120 +5280,17 @@ Perl_sv_magic(pTHX_ register SV *const sv, SV *const obj, const int how,
 	}
     }
 
-    switch (how) {
-    case PERL_MAGIC_sv:
-	vtable = &PL_vtbl_sv;
-	break;
-    case PERL_MAGIC_overload:
-        vtable = &PL_vtbl_amagic;
-        break;
-    case PERL_MAGIC_overload_elem:
-        vtable = &PL_vtbl_amagicelem;
-        break;
-    case PERL_MAGIC_overload_table:
-        vtable = &PL_vtbl_ovrld;
-        break;
-    case PERL_MAGIC_regdata:
-	vtable = &PL_vtbl_regdata;
-	break;
-    case PERL_MAGIC_regdatum:
-	vtable = &PL_vtbl_regdatum;
-	break;
-    case PERL_MAGIC_env:
-	vtable = &PL_vtbl_env;
-	break;
-    case PERL_MAGIC_envelem:
-	vtable = &PL_vtbl_envelem;
-	break;
-    case PERL_MAGIC_regex_global:
-	vtable = &PL_vtbl_mglob;
-	break;
-    case PERL_MAGIC_isa:
-	vtable = &PL_vtbl_isa;
-	break;
-    case PERL_MAGIC_isaelem:
-	vtable = &PL_vtbl_isaelem;
-	break;
-    case PERL_MAGIC_nkeys:
-	vtable = &PL_vtbl_nkeys;
-	break;
-    case PERL_MAGIC_dbline:
-	vtable = &PL_vtbl_dbline;
-	break;
-#ifdef USE_LOCALE_COLLATE
-    case PERL_MAGIC_collxfrm:
-        vtable = &PL_vtbl_collxfrm;
-        break;
-#endif /* USE_LOCALE_COLLATE */
-    case PERL_MAGIC_tied:
-	vtable = &PL_vtbl_pack;
-	break;
-    case PERL_MAGIC_tiedelem:
-    case PERL_MAGIC_tiedscalar:
-	vtable = &PL_vtbl_packelem;
-	break;
-    case PERL_MAGIC_fm:
-    case PERL_MAGIC_bm:
-    case PERL_MAGIC_qr:
-	vtable = &PL_vtbl_regexp;
-	break;
-#ifndef PERL_MICRO
-    case PERL_MAGIC_sigelem:
-	vtable = &PL_vtbl_sigelem;
-	break;
-#endif
-    case PERL_MAGIC_taint:
-	vtable = &PL_vtbl_taint;
-	break;
-    case PERL_MAGIC_uvar:
-	vtable = &PL_vtbl_uvar;
-	break;
-    case PERL_MAGIC_vec:
-	vtable = &PL_vtbl_vec;
-	break;
-    case PERL_MAGIC_dbfile:
-    case PERL_MAGIC_sig:
-    case PERL_MAGIC_arylen_p:
-    case PERL_MAGIC_rhash:
-    case PERL_MAGIC_symtab:
-    case PERL_MAGIC_vstring:
-    case PERL_MAGIC_checkcall:
-	vtable = NULL;
-	break;
-    case PERL_MAGIC_utf8:
-	vtable = &PL_vtbl_utf8;
-	break;
-    case PERL_MAGIC_substr:
-	vtable = &PL_vtbl_substr;
-	break;
-    case PERL_MAGIC_defelem:
-	vtable = &PL_vtbl_defelem;
-	break;
-    case PERL_MAGIC_arylen:
-	vtable = &PL_vtbl_arylen;
-	break;
-    case PERL_MAGIC_pos:
-	vtable = &PL_vtbl_pos;
-	break;
-    case PERL_MAGIC_backref:
-	vtable = &PL_vtbl_backref;
-	break;
-    case PERL_MAGIC_hintselem:
-	vtable = &PL_vtbl_hintselem;
-	break;
-    case PERL_MAGIC_hints:
-	vtable = &PL_vtbl_hints;
-	break;
-    case PERL_MAGIC_ext:
-	/* Reserved for use by extensions not perl internals.	        */
-	/* Useful for attaching extension internal data to perl vars.	*/
-	/* Note that multiple extensions may clash if magical scalars	*/
-	/* etc holding private data from one are passed to another.	*/
-	vtable = NULL;
-	break;
-    default:
+    if (how < 0 || how > C_ARRAY_LENGTH(PL_magic_data)
+	|| (vtable_index = PL_magic_data[how]) > magic_vtable_max)
 	Perl_croak(aTHX_ "Don't know how to handle magic of type \\%o", how);
-    }
+
+    /* PERL_MAGIC_ext is reserved for use by extensions not perl internals.
+       Useful for attaching extension internal data to perl vars.
+       Note that multiple extensions may clash if magical scalars
+       etc holding private data from one are passed to another. */
+
+    vtable = (vtable_index == magic_vtable_max)
+	? NULL : PL_magic_vtables + vtable_index;
 
     /* Rest of work is done else where */
     mg = sv_magicext(sv,obj,how,vtable,name,namlen);
