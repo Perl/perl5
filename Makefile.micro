@@ -177,7 +177,9 @@ uutil$(_O):	$(HE) util.c
 uperlapi$(_O):	$(HE) perlapi.c perlapi.h
 	$(CC) $(CCFLAGS) -o $@ $(CFLAGS) perlapi.c
 
-uudmap.h bitcount.h mg_data.h: generate_uudmap$(_X)
+uudmap.h mg_data.h: bitcount.h
+
+bitcount.h: generate_uudmap$(_X)
 	$(RUN) ./generate_uudmap$(_X) uudmap.h bitcount.h mg_data.h
 
 generate_uudmap$(_O): generate_uudmap.c
