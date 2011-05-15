@@ -13,10 +13,16 @@
  */
 
 #define PERL_MAGIC_sv             '\0' /* Special scalar variable */
+#define PERL_MAGIC_arylen         '#' /* Array length ($#ary) */
+#define PERL_MAGIC_rhash          '%' /* extra data for restricted hashes */
+#define PERL_MAGIC_pos            '.' /* pos() lvalue */
+#define PERL_MAGIC_symtab         ':' /* extra data for symbol tables */
+#define PERL_MAGIC_backref        '<' /* for weak ref data */
+#define PERL_MAGIC_arylen_p       '@' /* to move arylen out of XPVAV */
 #define PERL_MAGIC_overload       'A' /* %OVERLOAD hash */
 #define PERL_MAGIC_overload_elem  'a' /* %OVERLOAD hash element */
-#define PERL_MAGIC_overload_table 'c' /* Holds overload table (AMT) on stash */
 #define PERL_MAGIC_bm             'B' /* Boyer-Moore (fast string search) */
+#define PERL_MAGIC_overload_table 'c' /* Holds overload table (AMT) on stash */
 #define PERL_MAGIC_regdata        'D' /* Regex match position data
                                          (@+ and @- vars) */
 #define PERL_MAGIC_regdatum       'd' /* Regex match position data element */
@@ -43,87 +49,81 @@
 #define PERL_MAGIC_taint          't' /* Taintedness */
 #define PERL_MAGIC_uvar           'U' /* Available for use by extensions */
 #define PERL_MAGIC_uvar_elem      'u' /* Reserved for use by extensions */
-#define PERL_MAGIC_vec            'v' /* vec() lvalue */
 #define PERL_MAGIC_vstring        'V' /* SV was vstring literal */
+#define PERL_MAGIC_vec            'v' /* vec() lvalue */
 #define PERL_MAGIC_utf8           'w' /* Cached UTF-8 information */
 #define PERL_MAGIC_substr         'x' /* substr() lvalue */
 #define PERL_MAGIC_defelem        'y' /* Shadow "foreach" iterator variable /
                                          smart parameter vivification */
-#define PERL_MAGIC_arylen         '#' /* Array length ($#ary) */
-#define PERL_MAGIC_pos            '.' /* pos() lvalue */
-#define PERL_MAGIC_backref        '<' /* for weak ref data */
-#define PERL_MAGIC_symtab         ':' /* extra data for symbol tables */
-#define PERL_MAGIC_rhash          '%' /* extra data for restricted hashes */
-#define PERL_MAGIC_arylen_p       '@' /* to move arylen out of XPVAV */
-#define PERL_MAGIC_ext            '~' /* Available for use by extensions */
 #define PERL_MAGIC_checkcall      ']' /* inlining/mutation of call to this CV */
+#define PERL_MAGIC_ext            '~' /* Available for use by extensions */
 
 enum {		/* pass one of these to get_vtbl */
-    want_vtbl_sv,
-    want_vtbl_env,
-    want_vtbl_envelem,
-    want_vtbl_sigelem,
-    want_vtbl_pack,
-    want_vtbl_packelem,
-    want_vtbl_dbline,
-    want_vtbl_isa,
-    want_vtbl_isaelem,
-    want_vtbl_arylen,
-    want_vtbl_arylen_p,
-    want_vtbl_mglob,
-    want_vtbl_nkeys,
-    want_vtbl_taint,
-    want_vtbl_substr,
-    want_vtbl_vec,
-    want_vtbl_pos,
-    want_vtbl_uvar,
-    want_vtbl_defelem,
-    want_vtbl_regexp,
-    want_vtbl_regdata,
-    want_vtbl_regdatum,
     want_vtbl_amagic,
     want_vtbl_amagicelem,
+    want_vtbl_arylen,
+    want_vtbl_arylen_p,
     want_vtbl_backref,
-    want_vtbl_ovrld,
-    want_vtbl_utf8,
     want_vtbl_collxfrm,
-    want_vtbl_hintselem,
+    want_vtbl_dbline,
+    want_vtbl_defelem,
+    want_vtbl_env,
+    want_vtbl_envelem,
     want_vtbl_hints,
+    want_vtbl_hintselem,
+    want_vtbl_isa,
+    want_vtbl_isaelem,
+    want_vtbl_mglob,
+    want_vtbl_nkeys,
+    want_vtbl_ovrld,
+    want_vtbl_pack,
+    want_vtbl_packelem,
+    want_vtbl_pos,
+    want_vtbl_regdata,
+    want_vtbl_regdatum,
+    want_vtbl_regexp,
+    want_vtbl_sigelem,
+    want_vtbl_substr,
+    want_vtbl_sv,
+    want_vtbl_taint,
+    want_vtbl_utf8,
+    want_vtbl_uvar,
+    want_vtbl_vec,
     magic_vtable_max
 };
 
 #ifdef DOINIT
 EXTCONST char *PL_magic_vtable_names[magic_vtable_max] = {
-    "sv",
-    "env",
-    "envelem",
-    "sigelem",
-    "pack",
-    "packelem",
-    "dbline",
-    "isa",
-    "isaelem",
-    "arylen",
-    "arylen_p",
-    "mglob",
-    "nkeys",
-    "taint",
-    "substr",
-    "vec",
-    "pos",
-    "uvar",
-    "defelem",
-    "regexp",
-    "regdata",
-    "regdatum",
     "amagic",
     "amagicelem",
+    "arylen",
+    "arylen_p",
     "backref",
-    "ovrld",
-    "utf8",
     "collxfrm",
+    "dbline",
+    "defelem",
+    "env",
+    "envelem",
+    "hints",
     "hintselem",
-    "hints"
+    "isa",
+    "isaelem",
+    "mglob",
+    "nkeys",
+    "ovrld",
+    "pack",
+    "packelem",
+    "pos",
+    "regdata",
+    "regdatum",
+    "regexp",
+    "sigelem",
+    "substr",
+    "sv",
+    "taint",
+    "utf8",
+    "uvar",
+    "vec"
 };
 #else
 EXTCONST char *PL_magic_vtable_names[magic_vtable_max];
@@ -148,44 +148,44 @@ EXTCONST char *PL_magic_vtable_names[magic_vtable_max];
 
 #ifdef DOINIT
 EXT_MGVTBL PL_magic_vtables[magic_vtable_max] = {
-  { Perl_magic_get, Perl_magic_set, Perl_magic_len, 0, 0, 0, 0, 0 },
-  { 0, Perl_magic_set_all_env, 0, Perl_magic_clear_all_env, 0, 0, 0, 0 },
-  { 0, Perl_magic_setenv, 0, Perl_magic_clearenv, 0, 0, 0, 0 },
-#ifndef PERL_MICRO
-  { Perl_magic_getsig, Perl_magic_setsig, 0, Perl_magic_clearsig, 0, 0, 0, 0 },
-#else
-  { 0, 0, 0, 0, 0, 0, 0, 0 },
-#endif
-  { 0, 0, Perl_magic_sizepack, Perl_magic_wipepack, 0, 0, 0, 0 },
-  { Perl_magic_getpack, Perl_magic_setpack, 0, Perl_magic_clearpack, 0, 0, 0, 0 },
-  { 0, Perl_magic_setdbline, 0, 0, 0, 0, 0, 0 },
-  { 0, Perl_magic_setisa, 0, Perl_magic_clearisa, 0, 0, 0, 0 },
-  { 0, Perl_magic_setisa, 0, 0, 0, 0, 0, 0 },
+  { 0, Perl_magic_setamagic, 0, 0, Perl_magic_setamagic, 0, 0, 0 },
+  { 0, Perl_magic_setamagic, 0, 0, Perl_magic_setamagic, 0, 0, 0 },
   { (int (*)(pTHX_ SV *, MAGIC *))Perl_magic_getarylen, Perl_magic_setarylen, 0, 0, 0, 0, 0, 0 },
   { 0, 0, 0, 0, Perl_magic_freearylen_p, 0, 0, 0 },
-  { 0, Perl_magic_setmglob, 0, 0, 0, 0, 0, 0 },
-  { Perl_magic_getnkeys, Perl_magic_setnkeys, 0, 0, 0, 0, 0, 0 },
-  { Perl_magic_gettaint, Perl_magic_settaint, 0, 0, 0, 0, 0, 0 },
-  { Perl_magic_getsubstr, Perl_magic_setsubstr, 0, 0, 0, 0, 0, 0 },
-  { Perl_magic_getvec, Perl_magic_setvec, 0, 0, 0, 0, 0, 0 },
-  { Perl_magic_getpos, Perl_magic_setpos, 0, 0, 0, 0, 0, 0 },
-  { Perl_magic_getuvar, Perl_magic_setuvar, 0, 0, 0, 0, 0, 0 },
-  { Perl_magic_getdefelem, Perl_magic_setdefelem, 0, 0, 0, 0, 0, 0 },
-  { 0, Perl_magic_setregexp, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, Perl_magic_regdata_cnt, 0, 0, 0, 0, 0 },
-  { Perl_magic_regdatum_get, Perl_magic_regdatum_set, 0, 0, 0, 0, 0, 0 },
-  { 0, Perl_magic_setamagic, 0, 0, Perl_magic_setamagic, 0, 0, 0 },
-  { 0, Perl_magic_setamagic, 0, 0, Perl_magic_setamagic, 0, 0, 0 },
   { 0, 0, 0, 0, Perl_magic_killbackrefs, 0, 0, 0 },
-  { 0, 0, 0, 0, Perl_magic_freeovrld, 0, 0, 0 },
-  { 0, Perl_magic_setutf8, 0, 0, 0, 0, 0, 0 },
 #ifdef USE_LOCALE_COLLATE
   { 0, Perl_magic_setcollxfrm, 0, 0, 0, 0, 0, 0 },
 #else
   { 0, 0, 0, 0, 0, 0, 0, 0 },
 #endif
+  { 0, Perl_magic_setdbline, 0, 0, 0, 0, 0, 0 },
+  { Perl_magic_getdefelem, Perl_magic_setdefelem, 0, 0, 0, 0, 0, 0 },
+  { 0, Perl_magic_set_all_env, 0, Perl_magic_clear_all_env, 0, 0, 0, 0 },
+  { 0, Perl_magic_setenv, 0, Perl_magic_clearenv, 0, 0, 0, 0 },
+  { 0, 0, 0, Perl_magic_clearhints, 0, 0, 0, 0 },
   { 0, Perl_magic_sethint, 0, Perl_magic_clearhint, 0, 0, 0, 0 },
-  { 0, 0, 0, Perl_magic_clearhints, 0, 0, 0, 0 }
+  { 0, Perl_magic_setisa, 0, Perl_magic_clearisa, 0, 0, 0, 0 },
+  { 0, Perl_magic_setisa, 0, 0, 0, 0, 0, 0 },
+  { 0, Perl_magic_setmglob, 0, 0, 0, 0, 0, 0 },
+  { Perl_magic_getnkeys, Perl_magic_setnkeys, 0, 0, 0, 0, 0, 0 },
+  { 0, 0, 0, 0, Perl_magic_freeovrld, 0, 0, 0 },
+  { 0, 0, Perl_magic_sizepack, Perl_magic_wipepack, 0, 0, 0, 0 },
+  { Perl_magic_getpack, Perl_magic_setpack, 0, Perl_magic_clearpack, 0, 0, 0, 0 },
+  { Perl_magic_getpos, Perl_magic_setpos, 0, 0, 0, 0, 0, 0 },
+  { 0, 0, Perl_magic_regdata_cnt, 0, 0, 0, 0, 0 },
+  { Perl_magic_regdatum_get, Perl_magic_regdatum_set, 0, 0, 0, 0, 0, 0 },
+  { 0, Perl_magic_setregexp, 0, 0, 0, 0, 0, 0 },
+#ifndef PERL_MICRO
+  { Perl_magic_getsig, Perl_magic_setsig, 0, Perl_magic_clearsig, 0, 0, 0, 0 },
+#else
+  { 0, 0, 0, 0, 0, 0, 0, 0 },
+#endif
+  { Perl_magic_getsubstr, Perl_magic_setsubstr, 0, 0, 0, 0, 0, 0 },
+  { Perl_magic_get, Perl_magic_set, Perl_magic_len, 0, 0, 0, 0, 0 },
+  { Perl_magic_gettaint, Perl_magic_settaint, 0, 0, 0, 0, 0, 0 },
+  { 0, Perl_magic_setutf8, 0, 0, 0, 0, 0, 0 },
+  { Perl_magic_getuvar, Perl_magic_setuvar, 0, 0, 0, 0, 0, 0 },
+  { Perl_magic_getvec, Perl_magic_setvec, 0, 0, 0, 0, 0, 0 }
 };
 #else
 EXT_MGVTBL PL_magic_vtables[magic_vtable_max];

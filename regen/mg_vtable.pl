@@ -18,7 +18,7 @@ BEGIN {
     require 'regen/regen_lib.pl';
 }
 
-my @mg =
+my %mg =
     (
      sv => { char => '\0', vtable => 'sv', readonly_acceptable => 1,
 	     desc => 'Special scalar variable' },
@@ -105,7 +105,7 @@ my @mg =
 );
 
 # These have a subtly different "namespace" from the magic types.
-my @sig =
+my %sig =
     (
      'sv' => {get => 'get', set => 'set', len => 'len'},
      'env' => {set => 'set_all_env', clear => 'clear_all_env'},
@@ -156,7 +156,7 @@ print $vt <<'EOH';
 EOH
 
 my $longest = 0;
-foreach (grep {!ref $_} @mg) {
+foreach (keys %mg) {
     $longest = length $_ if length $_ > $longest;
 }
 
@@ -172,8 +172,16 @@ foreach (grep {!ref $_} @mg) {
 {
     my $longest_p1 = $longest + 1;
 
-    while (my ($name, $data) = splice @mg, 0, 2) {
-	my $i = ord eval qq{"$data->{char}"};
+    my %mg_order;
+    while (my ($name, $data) = each %mg) {
+	my $byte = eval qq{"$data->{char}"};
+	$data->{byte} = $byte;
+	$mg_order{(uc $byte) . $byte} = $name;
+    }
+    foreach (sort keys %mg_order) {
+	my $name = $mg_order{$_};
+	my $data = $mg{$name};
+	my $i = ord $data->{byte};
 	unless ($data->{unknown_to_sv_magic}) {
 	    my $value = $data->{vtable}
 		? "want_vtbl_$data->{vtable}" : 'magic_vtable_max';
@@ -199,8 +207,8 @@ foreach (grep {!ref $_} @mg) {
     }
 }
 
+my @names = sort keys %sig;
 {
-    my @names = grep {!ref $_} @sig;
     my $want = join ",\n    ", (map {"want_vtbl_$_"} @names), 'magic_vtable_max';
     my $names = join qq{",\n    "}, @names;
 
@@ -246,7 +254,8 @@ EOH
 my @vtable_names;
 my @aliases;
 
-while (my ($name, $data) = splice @sig, 0, 2) {
+while (my $name = shift @names) {
+    my $data = $sig{$name};
     push @vtable_names, $name;
     my @funcs = map {
 	$data->{$_} ? "Perl_magic_$data->{$_}" : 0;
@@ -256,7 +265,7 @@ while (my ($name, $data) = splice @sig, 0, 2) {
     my $funcs = join ", ", @funcs;
 
     # Because we can't have a , after the last {...}
-    my $comma = @sig ? ',' : '';
+    my $comma = @names ? ',' : '';
 
     print $vt "$data->{cond}\n" if $data->{cond};
     print $vt "  { $funcs }$comma\n";
