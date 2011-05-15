@@ -6,7 +6,7 @@
  * Any changes made here will be lost!
  */
 
-    { '\0', "want_vtbl_sv",
+    { '\0', "want_vtbl_sv | PERL_MAGIC_READONLY_ACCEPTABLE",
       "/* sv '\\0' Special scalar variable */" },
     { 'A', "want_vtbl_amagic",
       "/* overload 'A' %OVERLOAD hash */" },
@@ -14,7 +14,7 @@
       "/* overload_elem 'a' %OVERLOAD hash element */" },
     { 'c', "want_vtbl_ovrld",
       "/* overload_table 'c' Holds overload table (AMT) on stash */" },
-    { 'B', "want_vtbl_regexp | PERL_MAGIC_VALUE_MAGIC",
+    { 'B', "want_vtbl_regexp | PERL_MAGIC_READONLY_ACCEPTABLE | PERL_MAGIC_VALUE_MAGIC",
       "/* bm 'B' Boyer-Moore (fast string search) */" },
     { 'D', "want_vtbl_regdata",
       "/* regdata 'D' Regex match position data (@+ and @- vars) */" },
@@ -24,9 +24,9 @@
       "/* env 'E' %ENV hash */" },
     { 'e', "want_vtbl_envelem",
       "/* envelem 'e' %ENV hash element */" },
-    { 'f', "want_vtbl_regdata | PERL_MAGIC_VALUE_MAGIC",
+    { 'f', "want_vtbl_regdata | PERL_MAGIC_READONLY_ACCEPTABLE | PERL_MAGIC_VALUE_MAGIC",
       "/* fm 'f' Formline ('compiled' format) */" },
-    { 'g', "want_vtbl_mglob | PERL_MAGIC_VALUE_MAGIC",
+    { 'g', "want_vtbl_mglob | PERL_MAGIC_READONLY_ACCEPTABLE | PERL_MAGIC_VALUE_MAGIC",
       "/* regex_global 'g' m//g target / study()ed string */" },
     { 'H', "want_vtbl_hints",
       "/* hints 'H' %^H hash */" },
@@ -74,7 +74,7 @@
       "/* arylen '#' Array length ($#ary) */" },
     { '.', "want_vtbl_pos | PERL_MAGIC_VALUE_MAGIC",
       "/* pos '.' pos() lvalue */" },
-    { '<', "want_vtbl_backref | PERL_MAGIC_VALUE_MAGIC",
+    { '<', "want_vtbl_backref | PERL_MAGIC_READONLY_ACCEPTABLE | PERL_MAGIC_VALUE_MAGIC",
       "/* backref '<' for weak ref data */" },
     { ':', "magic_vtable_max | PERL_MAGIC_VALUE_MAGIC",
       "/* symtab ':' extra data for symbol tables */" },

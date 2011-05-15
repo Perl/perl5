@@ -20,13 +20,15 @@ BEGIN {
 
 my @mg =
     (
-     sv => { char => '\0', vtable => 'sv', desc => 'Special scalar variable' },
+     sv => { char => '\0', vtable => 'sv', readonly_acceptable => 1,
+	     desc => 'Special scalar variable' },
      overload => { char => 'A', vtable => 'amagic', desc => '%OVERLOAD hash' },
      overload_elem => { char => 'a', vtable => 'amagicelem',
 			desc => '%OVERLOAD hash element' },
      overload_table => { char => 'c', vtable => 'ovrld',
 			 desc => 'Holds overload table (AMT) on stash' },
      bm => { char => 'B', vtable => 'regexp', value_magic => 1,
+	     readonly_acceptable => 1,
 	     desc => 'Boyer-Moore (fast string search)' },
      regdata => { char => 'D', vtable => 'regdata',
 		  desc => 'Regex match position data (@+ and @- vars)' },
@@ -36,8 +38,9 @@ my @mg =
      envelem => { char => 'e', vtable => 'envelem',
 		  desc => '%ENV hash element' },
      fm => { char => 'f', vtable => 'regdata', value_magic => 1,
-	     desc => "Formline ('compiled' format)" },
+	     readonly_acceptable => 1, desc => "Formline ('compiled' format)" },
      regex_global => { char => 'g', vtable => 'mglob', value_magic => 1,
+		       readonly_acceptable => 1,
 		       desc => 'm//g target / study()ed string' },
      hints => { char => 'H', vtable => 'hints', desc => '%^H hash' },
      hintselem => { char => 'h', vtable => 'hintselem',
@@ -89,7 +92,7 @@ my @mg =
      pos => { char => '.', vtable => 'pos', value_magic => 1,
 	      desc => 'pos() lvalue' },
      backref => { char => '<', vtable => 'backref', value_magic => 1,
-		  desc => 'for weak ref data' },
+		  readonly_acceptable => 1, desc => 'for weak ref data' },
      symtab => { char => ':', value_magic => 1,
 		 desc => 'extra data for symbol tables' },
      rhash => { char => '%', value_magic => 1,
@@ -158,6 +161,8 @@ my ($vt, $raw) = map {
 	unless ($data->{unknown_to_sv_magic}) {
 	    my $value = $data->{vtable}
 		? "want_vtbl_$data->{vtable}" : 'magic_vtable_max';
+	    $value .= ' | PERL_MAGIC_READONLY_ACCEPTABLE'
+		if $data->{readonly_acceptable};
 	    $value .= ' | PERL_MAGIC_VALUE_MAGIC' if $data->{value_magic};
 	    my $comment = "/* $name '$data->{char}' $data->{desc} */";
 	    $comment =~ s/([\\"])/\\$1/g;

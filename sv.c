@@ -5239,9 +5239,24 @@ Perl_sv_magic(pTHX_ register SV *const sv, SV *const obj, const int how,
     dVAR;
     const MGVTBL *vtable;
     MAGIC* mg;
+    unsigned int flags;
     unsigned int vtable_index;
 
     PERL_ARGS_ASSERT_SV_MAGIC;
+
+    if (how < 0 || how > C_ARRAY_LENGTH(PL_magic_data)
+	|| ((flags = PL_magic_data[how]),
+	    (vtable_index = flags & PERL_MAGIC_VTABLE_MASK)
+	    > magic_vtable_max))
+	Perl_croak(aTHX_ "Don't know how to handle magic of type \\%o", how);
+
+    /* PERL_MAGIC_ext is reserved for use by extensions not perl internals.
+       Useful for attaching extension internal data to perl vars.
+       Note that multiple extensions may clash if magical scalars
+       etc holding private data from one are passed to another. */
+
+    vtable = (vtable_index == magic_vtable_max)
+	? NULL : PL_magic_vtables + vtable_index;
 
 #ifdef PERL_OLD_COPY_ON_WRITE
     if (SvIsCOW(sv))
@@ -5254,11 +5269,7 @@ Perl_sv_magic(pTHX_ register SV *const sv, SV *const obj, const int how,
 	    !(SvFAKE(sv) && SvTYPE(sv) < SVt_PVMG)
 
 	    && IN_PERL_RUNTIME
-	    && how != PERL_MAGIC_regex_global
-	    && how != PERL_MAGIC_bm
-	    && how != PERL_MAGIC_fm
-	    && how != PERL_MAGIC_sv
-	    && how != PERL_MAGIC_backref
+	    && !PERL_MAGIC_TYPE_READONLY_ACCEPTABLE(how)
 	   )
 	{
 	    Perl_croak_no_modify(aTHX);
@@ -5279,19 +5290,6 @@ Perl_sv_magic(pTHX_ register SV *const sv, SV *const obj, const int how,
 	    return;
 	}
     }
-
-    if (how < 0 || how > C_ARRAY_LENGTH(PL_magic_data)
-	|| ((vtable_index = PL_magic_data[how] & PERL_MAGIC_VTABLE_MASK)
-	    > magic_vtable_max))
-	Perl_croak(aTHX_ "Don't know how to handle magic of type \\%o", how);
-
-    /* PERL_MAGIC_ext is reserved for use by extensions not perl internals.
-       Useful for attaching extension internal data to perl vars.
-       Note that multiple extensions may clash if magical scalars
-       etc holding private data from one are passed to another. */
-
-    vtable = (vtable_index == magic_vtable_max)
-	? NULL : PL_magic_vtables + vtable_index;
 
     /* Rest of work is done else where */
     mg = sv_magicext(sv,obj,how,vtable,name,namlen);
