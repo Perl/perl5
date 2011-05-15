@@ -18,9 +18,6 @@ BEGIN {
     require 'regen/regen_lib.pl';
 }
 
-# Update the magic_names table in dump.c when adding/amending these
-# (effectively, that's a TODO)
-
 my @mg =
     (
      sv => { char => '\0', vtable => 'sv', readonly_acceptable => 1,
@@ -144,10 +141,10 @@ my @sig =
      'hints' => {clear => 'clearhints'},
 );
 
-my ($vt, $raw) = map {
+my ($vt, $raw, $names) = map {
     open_new($_, '>',
 	     { by => 'regen/mg_vtable.pl', file => $_, style => '*' });
-} 'mg_vtable.h', 'mg_raw.h';
+} 'mg_vtable.h', 'mg_raw.h', 'mg_names.c';
 
 print $vt <<'EOH';
 /* These constants should be used in preference to raw characters
@@ -173,6 +170,8 @@ foreach (grep {!ref $_} @mg) {
 # predictable)
 
 {
+    my $longest_p1 = $longest + 1;
+
     while (my ($name, $data) = splice @mg, 0, 2) {
 	my $i = ord eval qq{"$data->{char}"};
 	unless ($data->{unknown_to_sv_magic}) {
@@ -192,6 +191,11 @@ foreach (grep {!ref $_} @mg) {
 	$comment =~ s/\n/\n$leader/s;
 	printf $vt "#define PERL_MAGIC_%-${longest}s '%s' /* %s */\n",
 	    $name, $data->{char}, $comment;
+
+	my $char = $data->{char};
+	$char =~ s/([\\"])/\\$1/g;
+	printf $names qq[\t{ PERL_MAGIC_%-${longest_p1}s "%s(%s)" },\n],
+	    "$name,", $name, $char;
     }
 }
 
@@ -283,4 +287,4 @@ print $vt "#define PL_vtbl_$_ PL_magic_vtables[want_vtbl_$_]\n"
 # 63, not 64, As we rely on the last possible value to mean "NULL vtable"
 die "Too many vtable names" if @vtable_names > 63;
 
-read_only_bottom_close_and_rename($_) foreach $vt, $raw;
+read_only_bottom_close_and_rename($_) foreach $vt, $raw, $names;
