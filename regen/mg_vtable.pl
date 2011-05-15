@@ -18,6 +18,9 @@ BEGIN {
     require 'regen/regen_lib.pl';
 }
 
+# Update the magic_names table in dump.c when adding/amending these
+# (effectively, that's a TODO)
+
 my @mg =
     (
      sv => { char => '\0', vtable => 'sv', readonly_acceptable => 1,
@@ -31,7 +34,7 @@ my @mg =
 	     readonly_acceptable => 1,
 	     desc => 'Boyer-Moore (fast string search)' },
      regdata => { char => 'D', vtable => 'regdata',
-		  desc => 'Regex match position data (@+ and @- vars)' },
+		  desc => "Regex match position data\n(\@+ and \@- vars)" },
      regdatum => { char => 'd', vtable => 'regdatum',
 		   desc => 'Regex match position data element' },
      env => { char => 'E', vtable => 'env', desc => '%ENV hash' },
@@ -86,7 +89,7 @@ my @mg =
      substr => { char => 'x', vtable => 'substr',  value_magic => 1,
 		 desc => 'substr() lvalue' },
      defelem => { char => 'y', vtable => 'defelem', value_magic => 1,
-		  desc => 'Shadow "foreach" iterator variable / smart parameter vivification' },
+		  desc => "Shadow \"foreach\" iterator variable /\nsmart parameter vivification" },
      arylen => { char => '#', vtable => 'arylen', value_magic => 1,
 		 desc => 'Array length ($#ary)' },
      pos => { char => '.', vtable => 'pos', value_magic => 1,
@@ -146,6 +149,20 @@ my ($vt, $raw) = map {
 	     { by => 'regen/mg_vtable.pl', file => $_, style => '*' });
 } 'mg_vtable.h', 'mg_raw.h';
 
+print $vt <<'EOH';
+/* These constants should be used in preference to raw characters
+ * when using magic. Note that some perl guts still assume
+ * certain character properties of these constants, namely that
+ * isUPPER() and toLOWER() may do useful mappings.
+ */
+
+EOH
+
+my $longest = 0;
+foreach (grep {!ref $_} @mg) {
+    $longest = length $_ if length $_ > $longest;
+}
+
 # Of course, it would be *much* easier if we could output this table directly
 # here and now. However, for our sins, we try to support EBCDIC, which wouldn't
 # be *so* bad, except that there are (at least) 3 EBCDIC charset variants, and
@@ -166,8 +183,15 @@ my ($vt, $raw) = map {
 	    $value .= ' | PERL_MAGIC_VALUE_MAGIC' if $data->{value_magic};
 	    my $comment = "/* $name '$data->{char}' $data->{desc} */";
 	    $comment =~ s/([\\"])/\\$1/g;
+	    $comment =~ tr/\n/ /;
 	    print $raw qq{    { '$data->{char}', "$value",\n      "$comment" },\n};
 	}
+
+	my $comment = $data->{desc};
+	my $leader = ' ' x ($longest + 27);
+	$comment =~ s/\n/\n$leader/s;
+	printf $vt "#define PERL_MAGIC_%-${longest}s '%s' /* %s */\n",
+	    $name, $data->{char}, $comment;
     }
 }
 
@@ -177,6 +201,7 @@ my ($vt, $raw) = map {
     my $names = join qq{",\n    "}, @names;
 
     print $vt <<"EOH";
+
 enum {		/* pass one of these to get_vtbl */
     $want
 };
