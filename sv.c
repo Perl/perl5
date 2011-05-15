@@ -5281,7 +5281,8 @@ Perl_sv_magic(pTHX_ register SV *const sv, SV *const obj, const int how,
     }
 
     if (how < 0 || how > C_ARRAY_LENGTH(PL_magic_data)
-	|| (vtable_index = PL_magic_data[how]) > magic_vtable_max)
+	|| ((vtable_index = PL_magic_data[how] & PERL_MAGIC_VTABLE_MASK)
+	    > magic_vtable_max))
 	Perl_croak(aTHX_ "Don't know how to handle magic of type \\%o", how);
 
     /* PERL_MAGIC_ext is reserved for use by extensions not perl internals.

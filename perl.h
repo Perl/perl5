@@ -5071,6 +5071,11 @@ START_EXTERN_C
 #  define EXT_MGVTBL EXT MGVTBL
 #endif
 
+#define PERL_MAGIC_VALUE_MAGIC 0x80
+#define PERL_MAGIC_VTABLE_MASK 0x3F
+#define PERL_MAGIC_TYPE_IS_VALUE_MAGIC(t) \
+    (PL_magic_data[(U8)(t)] & PERL_MAGIC_VALUE_MAGIC)
+
 #include "mg_vtable.h"
 
 #ifdef DOINIT

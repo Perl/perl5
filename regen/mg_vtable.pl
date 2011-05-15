@@ -26,7 +26,7 @@ my @mg =
 			desc => '%OVERLOAD hash element' },
      overload_table => { char => 'c', vtable => 'ovrld',
 			 desc => 'Holds overload table (AMT) on stash' },
-     bm => { char => 'B', vtable => 'regexp',
+     bm => { char => 'B', vtable => 'regexp', value_magic => 1,
 	     desc => 'Boyer-Moore (fast string search)' },
      regdata => { char => 'D', vtable => 'regdata',
 		  desc => 'Regex match position data (@+ and @- vars)' },
@@ -35,9 +35,9 @@ my @mg =
      env => { char => 'E', vtable => 'env', desc => '%ENV hash' },
      envelem => { char => 'e', vtable => 'envelem',
 		  desc => '%ENV hash element' },
-     fm => { char => 'f', vtable => 'regdata',
+     fm => { char => 'f', vtable => 'regdata', value_magic => 1,
 	     desc => "Formline ('compiled' format)" },
-     regex_global => { char => 'g', vtable => 'mglob',
+     regex_global => { char => 'g', vtable => 'mglob', value_magic => 1,
 		       desc => 'm//g target / study()ed string' },
      hints => { char => 'H', vtable => 'hints', desc => '%^H hash' },
      hintselem => { char => 'h', vtable => 'hintselem',
@@ -45,7 +45,7 @@ my @mg =
      isa => { char => 'I', vtable => 'isa', desc => '@ISA array' },
      isaelem => { char => 'i', vtable => 'isaelem',
 		  desc => '@ISA array element' },
-     nkeys => { char => 'k', vtable => 'nkeys',
+     nkeys => { char => 'k', vtable => 'nkeys', value_magic => 1,
 		desc => 'scalar(keys()) lvalue' },
      dbfile => { char => 'L', vtable => 'dbline',
 		 desc => 'Debugger %_<filename' },
@@ -54,39 +54,51 @@ my @mg =
 		 unknown_to_sv_magic => 1 },
      shared_scalar => { char => 'n', desc => 'Shared between threads',
 			unknown_to_sv_magic => 1 },
-     collxfrm => { char => 'o', vtable => 'collxfrm',
+     collxfrm => { char => 'o', vtable => 'collxfrm', value_magic => 1,
 		   desc => 'Locale transformation' },
-     tied => { char => 'P', vtable => 'pack', desc => 'Tied array or hash' },
+     tied => { char => 'P', vtable => 'pack',
+	       value_magic => 1, # treat as value, so 'local @tied' isn't tied
+	       desc => 'Tied array or hash' },
      tiedelem => { char => 'p', vtable => 'packelem',
 		   desc => 'Tied array or hash element' },
      tiedscalar => { char => 'q', vtable => 'packelem',
 		     desc => 'Tied scalar or handle' },
-     qr => { char => 'r', vtable => 'regexp', desc => 'precompiled qr// regex' },
+     qr => { char => 'r', vtable => 'regexp', value_magic => 1, 
+	     desc => 'precompiled qr// regex' },
      sig => { char => 'S', desc => '%SIG hash' },
      sigelem => { char => 's', vtable => 'sigelem',
 		  desc => '%SIG hash element' },
-     taint => { char => 't', vtable => 'taint', desc => 'Taintedness' },
+     taint => { char => 't', vtable => 'taint', value_magic => 1,
+		desc => 'Taintedness' },
      uvar => { char => 'U', vtable => 'uvar',
 	       desc => 'Available for use by extensions' },
      uvar_elem => { char => 'u', desc => 'Reserved for use by extensions',
 		    unknown_to_sv_magic => 1 },
-     vec => { char => 'v', vtable => 'vec', desc => 'vec() lvalue' },
-     vstring => { char => 'V', desc => 'SV was vstring literal' },
-     utf8 => { char => 'w', vtable => 'utf8',
+     vec => { char => 'v', vtable => 'vec', value_magic => 1,
+	      desc => 'vec() lvalue' },
+     vstring => { char => 'V', value_magic => 1,
+		  desc => 'SV was vstring literal' },
+     utf8 => { char => 'w', vtable => 'utf8', value_magic => 1,
 	       desc => 'Cached UTF-8 information' },
-     substr => { char => 'x', vtable => 'substr', desc => 'substr() lvalue' },
-     defelem => { char => 'y', vtable => 'defelem',
+     substr => { char => 'x', vtable => 'substr',  value_magic => 1,
+		 desc => 'substr() lvalue' },
+     defelem => { char => 'y', vtable => 'defelem', value_magic => 1,
 		  desc => 'Shadow "foreach" iterator variable / smart parameter vivification' },
-     arylen => { char => '#', vtable => 'arylen',
+     arylen => { char => '#', vtable => 'arylen', value_magic => 1,
 		 desc => 'Array length ($#ary)' },
-     pos => { char => '.', vtable => 'pos', desc => 'pos() lvalue' },
-     backref => { char => '<', vtable => 'backref',
+     pos => { char => '.', vtable => 'pos', value_magic => 1,
+	      desc => 'pos() lvalue' },
+     backref => { char => '<', vtable => 'backref', value_magic => 1,
 		  desc => 'for weak ref data' },
-     symtab => { char => ':', desc => 'extra data for symbol tables' },
-     rhash => { char => '%', desc => 'extra data for restricted hashes' },
-     arylen_p => { char => '@', desc => 'to move arylen out of XPVAV' },
+     symtab => { char => ':', value_magic => 1,
+		 desc => 'extra data for symbol tables' },
+     rhash => { char => '%', value_magic => 1,
+		desc => 'extra data for restricted hashes' },
+     arylen_p => { char => '@', value_magic => 1,
+		   desc => 'to move arylen out of XPVAV' },
      ext => { char => '~', desc => 'Available for use by extensions' },
-     checkcall => { char => ']', desc => 'inlining/mutation of call to this CV'},
+     checkcall => { char => ']', value_magic => 1,
+		    desc => 'inlining/mutation of call to this CV'},
 );
 
 # These have a subtly different "namespace" from the magic types.
@@ -144,11 +156,12 @@ my ($vt, $raw) = map {
     while (my ($name, $data) = splice @mg, 0, 2) {
 	my $i = ord eval qq{"$data->{char}"};
 	unless ($data->{unknown_to_sv_magic}) {
-	    my $vtable = $data->{vtable}
+	    my $value = $data->{vtable}
 		? "want_vtbl_$data->{vtable}" : 'magic_vtable_max';
+	    $value .= ' | PERL_MAGIC_VALUE_MAGIC' if $data->{value_magic};
 	    my $comment = "/* $name '$data->{char}' $data->{desc} */";
 	    $comment =~ s/([\\"])/\\$1/g;
-	    print $raw qq{    { '$data->{char}', "$vtable",\n      "$comment" },\n};
+	    print $raw qq{    { '$data->{char}', "$value",\n      "$comment" },\n};
 	}
     }
 }
@@ -236,5 +249,8 @@ print $vt (sort @aliases), "\n";
 
 print $vt "#define PL_vtbl_$_ PL_magic_vtables[want_vtbl_$_]\n"
     foreach sort @vtable_names;
+
+# 63, not 64, As we rely on the last possible value to mean "NULL vtable"
+die "Too many vtable names" if @vtable_names > 63;
 
 read_only_bottom_close_and_rename($_) foreach $vt, $raw;

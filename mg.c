@@ -164,42 +164,6 @@ Perl_mg_magical(pTHX_ SV *sv)
     }
 }
 
-
-/* is this container magic (%ENV, $1 etc), or value magic (pos, taint etc)? */
-
-STATIC bool
-S_is_container_magic(const MAGIC *mg)
-{
-    assert(mg);
-    switch (mg->mg_type) {
-    case PERL_MAGIC_bm:
-    case PERL_MAGIC_fm:
-    case PERL_MAGIC_regex_global:
-    case PERL_MAGIC_nkeys:
-#ifdef USE_LOCALE_COLLATE
-    case PERL_MAGIC_collxfrm:
-#endif
-    case PERL_MAGIC_qr:
-    case PERL_MAGIC_taint:
-    case PERL_MAGIC_vec:
-    case PERL_MAGIC_vstring:
-    case PERL_MAGIC_utf8:
-    case PERL_MAGIC_substr:
-    case PERL_MAGIC_defelem:
-    case PERL_MAGIC_arylen:
-    case PERL_MAGIC_pos:
-    case PERL_MAGIC_backref:
-    case PERL_MAGIC_arylen_p:
-    case PERL_MAGIC_rhash:
-    case PERL_MAGIC_symtab:
-    case PERL_MAGIC_tied: /* treat as value, so 'local @tied' isn't tied */
-    case PERL_MAGIC_checkcall:
-	return 0;
-    default:
-	return 1;
-    }
-}
-
 /*
 =for apidoc mg_get
 
@@ -296,7 +260,8 @@ Perl_mg_set(pTHX_ SV *sv)
 	    mg->mg_flags &= ~MGf_GSKIP;	/* setting requires another read */
 	    (SSPTR(mgs_ix, MGS*))->mgs_magical = 0;
 	}
-	if (PL_localizing == 2 && (!S_is_container_magic(mg) || sv == DEFSV))
+	if (PL_localizing == 2
+	    && (PERL_MAGIC_TYPE_IS_VALUE_MAGIC(mg->mg_type) || sv == DEFSV))
 	    continue;
 	if (vtbl && vtbl->svt_set)
 	    vtbl->svt_set(aTHX_ sv, mg);
@@ -526,7 +491,7 @@ Perl_mg_localize(pTHX_ SV *sv, SV *nsv, bool setmagic)
 
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	const MGVTBL* const vtbl = mg->mg_virtual;
-	if (!S_is_container_magic(mg))
+	if (PERL_MAGIC_TYPE_IS_VALUE_MAGIC(mg->mg_type))
 	    continue;
 		
 	if ((mg->mg_flags & MGf_LOCAL) && vtbl->svt_local)
