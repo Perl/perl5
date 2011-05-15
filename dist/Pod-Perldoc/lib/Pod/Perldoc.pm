@@ -12,7 +12,7 @@ use File::Spec::Functions qw(catfile catdir splitdir);
 use vars qw($VERSION @Pagers $Bindir $Pod2man
   $Temp_Files_Created $Temp_File_Lifetime
 );
-$VERSION = '3.15_03';
+$VERSION = '3.15_04';
 #..........................................................................
 
 BEGIN {  # Make a DEBUG constant very first thing...
@@ -746,7 +746,7 @@ sub grand_search_init {
                 for ($i = 0; $trn = $ENV{'DCL$PATH;'.$i}; $i++) {
                     push(@searchdirs,$trn);
                 }
-                push(@searchdirs,'perl_root:[lib.pod]')  # installed pods
+                push(@searchdirs,'perl_root:[lib.pods]')  # installed pods
             }
             else {
                 push(@searchdirs, grep(-d, split($Config{path_sep},
