@@ -2692,8 +2692,8 @@ PP(pp_goto)
 	    SAVEFREESV(cv); /* later, undo the 'avoid premature free' hack */
 	    if (CvISXSUB(cv)) {
 		OP* const retop = cx->blk_sub.retop;
-		SV **newsp;
-		I32 gimme;
+		SV **newsp __attribute__unused__;
+		I32 gimme __attribute__unused__;
 		if (reified) {
 		    I32 index;
 		    for (index=0; index<items; index++)
@@ -4840,7 +4840,7 @@ PP(pp_leavewhen)
 {
     dVAR; dSP;
     register PERL_CONTEXT *cx;
-    I32 gimme;
+    I32 gimme __attribute__unused__;
     SV **newsp;
     PMOP *newpm;
 
