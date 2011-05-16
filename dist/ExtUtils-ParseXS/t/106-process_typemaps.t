@@ -21,7 +21,7 @@ my $startdir  = cwd();
         ($type_kind_ref, $proto_letter_ref, $input_expr_ref, $output_expr_ref)
             = process_typemaps( $typemap, $tdir );
     };
-    like( $@, qr/Can't find $typemap in $tdir/, #'
+    like( $@, qr/Can't find \Q$typemap\E in \Q$tdir\E/, #'
         "Got expected result for no typemap in current directory" );
     chdir $startdir;
 }
@@ -38,7 +38,7 @@ my $startdir  = cwd();
         ($type_kind_ref, $proto_letter_ref, $input_expr_ref, $output_expr_ref)
             = process_typemaps( $typemap, $tdir );
     };
-    like( $@, qr/Can't find pseudo in $tdir/, #'
+    like( $@, qr/Can't find pseudo in \Q$tdir\E/, #'
         "Got expected result for no typemap in current directory" );
     chdir $startdir;
 }
