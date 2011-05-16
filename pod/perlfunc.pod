@@ -2411,6 +2411,29 @@ An example to test whether Nagle's algorithm is turned on on a socket:
     print "Nagle's algorithm is turned ", $nodelay ? "off\n" : "on\n";
 
 
+=item given EXPR BLOCK
+X<given>
+
+=item given BLOCK
+
+C<given> is analogous to the C<switch> keyword in other languages. C<given>
+and C<when> are used in Perl to implement C<switch>/C<case> like statements.
+For example:
+
+    given ($fruit) {
+        when (/apples?/) {
+            print "I like apples."
+        }
+        when (/oranges?/) {
+            print "I don't like oranges."
+        }
+        default {
+            print "I don't like anything"
+        }
+    }
+
+See L<perlsyn/"Switch statements"> for detailed information.
+
 =item glob EXPR
 X<glob> X<wildcard> X<filename, expansion> X<expand>
 
@@ -7868,6 +7891,29 @@ warnings (even the so-called mandatory ones).  An example:
 See L<perlvar> for details on setting C<%SIG> entries, and for more
 examples.  See the Carp module for other kinds of warnings using its
 carp() and cluck() functions.
+
+=item when EXPR BLOCK
+X<when>
+
+=item when BLOCK
+
+C<when> is analogous to the C<case> keyword in other languages. C<given>
+and C<when> are used in Perl to implement C<switch>/C<case> like statements.
+For example:
+
+    given ($fruit) {
+        when (/apples?/) {
+            print "I like apples."
+        }
+        when (/oranges?/) {
+            print "I don't like oranges."
+        }
+        default {
+            print "I don't like anything"
+        }
+    }
+
+See L<perlsyn/"Switch statements"> for detailed information.
 
 =item write FILEHANDLE
 X<write>
