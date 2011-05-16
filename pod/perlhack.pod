@@ -59,8 +59,8 @@ via email.
 Assuming your patch consists of a single git commit, you can send it to
 perlbug with this command line:
 
-  % git format-patch HEAD^1..HEAD
-  % perlbug -s '[PATCH] `git log --pretty=format:%s HEAD^1..HEAD`' -f 0001-*.patch
+  % git format-patch -1
+  % perlbug -s "[PATCH] $(git log -1 --format=%s HEAD)" -f 0001-*.patch
 
 The perlbug program will ask you a few questions about your email
 address and the patch you're submitting. Once you've answered them you
