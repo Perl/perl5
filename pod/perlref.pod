@@ -74,11 +74,12 @@ reference that the backslash returned.  Here are some examples:
     $coderef   = \&handler;
     $globref   = \*foo;
 
-It isn't possible to create a true reference to an IO handle (filehandle
-or dirhandle) using the backslash operator.  The most you can get is a
-reference to a typeglob, which is actually a complete symbol table entry.
-But see the explanation of the C<*foo{THING}> syntax below.  However,
-you can still use type globs and globrefs as though they were IO handles.
+Using the backslash operator, you can't create a true reference to an IO
+handle (filehandle plus dirhandle).  You can do it with the C<*foo{THING}>
+syntax, described below.  Using the backslash, the closest you can get is a
+reference to a typeglob (a complete symbol table entry).  For historical
+reasons, if you use a glob as an IO handle, Perl uses the IO handle inside
+the glob, so this is usually good enough.
 
 =item 2.
 X<array, anonymous> X<[> X<[]> X<square bracket>
