@@ -271,14 +271,11 @@ anonymous scalar if $foo hasn't been used yet.  This might change in a
 future release.
 
 C<*foo{IO}> is an alternative to the C<*HANDLE> mechanism given in
-L<perldata/"Typeglobs and Filehandles"> for passing filehandles
-into or out of subroutines, or storing into larger data structures.
-Its disadvantage is that it won't create a new filehandle for you.
-Its advantage is that you have less risk of clobbering more than
-you want to with a typeglob assignment.  (It still conflates file
-and directory handles, though.)  However, if you assign the incoming
-value to a scalar instead of a typeglob as we do in the examples
-below, there's no risk of that happening.
+L<perldata/"Typeglobs and Filehandles"> for passing filehandles and/or
+dirhandles into or out of subroutines, or storing into larger data
+structures.  Its advantage is it avoids any possible unexpected consequences
+of typeglob assignment.  But if all you do is assign the incoming parameter
+to a scalar, as shown below, either works.
 
     splutter(*STDOUT);		# pass the whole glob
     splutter(*STDOUT{IO});	# pass both file and dir handles
