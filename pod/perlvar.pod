@@ -480,7 +480,7 @@ Execution of any C<CHECK> blocks.
 
 =item INIT
 
-Similar to "CHECK", but for C<INIT>-blocks, not C<CHECK> blocks.
+Execution of any C<INIT> blocks.
 
 =item RUN
 
