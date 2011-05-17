@@ -6024,6 +6024,7 @@ S_invlist_trim(pTHX_ HV* const invlist)
  * etc */
 
 #define ELEMENT_IN_INVLIST_SET(i) (! ((i) & 1))
+#define PREV_ELEMENT_IN_INVLIST_SET(i) ! ELEMENT_IN_INVLIST_SET(i)
 
 #ifndef PERL_IN_XSUB_RE
 void
@@ -6190,9 +6191,9 @@ S_invlist_union(pTHX_ HV* const a, HV* const b)
     /* Here, we are finished going through at least one of the lists, which
      * means there is something remaining in at most one.  We check if the list
      * that hasn't been exhausted is positioned such that we are in the middle
-     * of a range in its set or not.  (We are in the set if the next item in
-     * the array marks the beginning of something not in the set)   If in the
-     * set, we decrement 'count'; if 0, there is potentially more to output.
+     * of a range in its set or not.  (i_a and i_b point to the element beyond
+     * the one we care about.) If in the set, we decrement 'count'; if 0, there
+     * is potentially more to output.
      * There are four cases:
      *	1) Both weren't in their sets, count is 0, and remains 0.  What's left
      *	   in the union is entirely from the non-exhausted set.
@@ -6202,12 +6203,12 @@ S_invlist_union(pTHX_ HV* const a, HV* const b)
      *	   that
      *	3) the exhausted was in its set, non-exhausted isn't, count is 1.
      *	   Nothing further should be output because the union includes
-     *	   everything from the exhausted set.  Not decrementing insures that.
+     *	   everything from the exhausted set.  Not decrementing ensures that.
      *	4) the exhausted wasn't in its set, non-exhausted is, count is 1;
      *	   decrementing to 0 insures that we look at the remainder of the
      *	   non-exhausted set */
-    if ((i_a != len_a && ! ELEMENT_IN_INVLIST_SET(i_a))
-	|| (i_b != len_b && ! ELEMENT_IN_INVLIST_SET(i_b)))
+    if ((i_a != len_a && PREV_ELEMENT_IN_INVLIST_SET(i_a))
+	|| (i_b != len_b && PREV_ELEMENT_IN_INVLIST_SET(i_b)))
     {
 	count--;
     }
