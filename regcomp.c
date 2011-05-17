@@ -6256,7 +6256,8 @@ S_invlist_intersection(pTHX_ HV* const a, HV* const b)
     /* Return the intersection of two inversion lists.  The basis for this
      * comes from "Unicode Demystified" Chapter 13 by Richard Gillam, published
      * by Addison-Wesley, and explained at some length there.  The preface says
-     * to incorporate its examples into your code at your own risk.
+     * to incorporate its examples into your code at your own risk.  In fact,
+     * it had bugs
      *
      * The algorithm is like a merge sort, and is essentially the same as the
      * union above
@@ -6297,17 +6298,17 @@ S_invlist_intersection(pTHX_ HV* const a, HV* const b)
 		       array */
 	bool cp_in_set;	/* Is it in the input list's set or not */
 
-	/* We need to take one or the other of the two inputs for the union.
-	 * Since we are merging two sorted lists, we take the smaller of the
-	 * next items.  In case of a tie, we take the one that is not in its
-	 * set first (a difference from the union algorithm).  If we took one
-	 * in the set first, it would increment the count, possibly to 2 which
-	 * would cause it to be output as starting a range in the intersection,
-	 * and the next time through we would take that same number, and output
-	 * it again as ending the set.  By doing it the opposite of this, we
-	 * there is no possibility that the count will be momentarily
-	 * incremented to 2.  (In a tie and both are in the set or both not in
-	 * the set, it doesn't matter which we take first.) */
+	/* We need to take one or the other of the two inputs for the
+	 * intersection.  Since we are merging two sorted lists, we take the
+	 * smaller of the next items.  In case of a tie, we take the one that
+	 * is not in its set first (a difference from the union algorithm).  If
+	 * we took one in the set first, it would increment the count, possibly
+	 * to 2 which would cause it to be output as starting a range in the
+	 * intersection, and the next time through we would take that same
+	 * number, and output it again as ending the set.  By doing it the
+	 * opposite of this, there is no possibility that the count will be
+	 * momentarily incremented to 2.  (In a tie and both are in the set or
+	 * both not in the set, it doesn't matter which we take first.) */
 	if (array_a[i_a] < array_b[i_b]
 	    || (array_a[i_a] == array_b[i_b] && ! ELEMENT_IN_INVLIST_SET(i_a)))
 	{
@@ -6336,19 +6337,32 @@ S_invlist_intersection(pTHX_ HV* const a, HV* const b)
 	}
     }
 
-    /* Here, we are finished going through at least one of the sets, which
-     * means there is something remaining in at most one.  See the comments in
-     * the union code */
-    if ((i_a != len_a && ! ELEMENT_IN_INVLIST_SET(i_a))
-	|| (i_b != len_b && ! ELEMENT_IN_INVLIST_SET(i_b)))
+    /* Here, we are finished going through at least one of the lists, which
+     * means there is something remaining in at most one.  We check if the list
+     * that has been exhausted is positioned such that we are in the middle
+     * of a range in its set or not.  (i_a and i_b point to elements 1 beyond
+     * the ones we care about.)  There are four cases:
+     *	1) Both weren't in their sets, count is 0, and remains 0.  There's
+     *	   nothing left in the intersection.
+     *	2) Both were in their sets, count is 2 and perhaps is incremented to
+     *	   above 2.  What should be output is exactly that which is in the
+     *	   non-exhausted set, as everything it has is also in the intersection
+     *	   set, and everything it doesn't have can't be in the intersection
+     *	3) The exhausted was in its set, non-exhausted isn't, count is 1, and
+     *	   gets incremented to 2.  Like the previous case, the intersection is
+     *	   everything that remains in the non-exhausted set.
+     *	4) the exhausted wasn't in its set, non-exhausted is, count is 1, and
+     *	   remains 1.  And the intersection has nothing more. */
+    if ((i_a == len_a && PREV_ELEMENT_IN_INVLIST_SET(i_a))
+	|| (i_b == len_b && PREV_ELEMENT_IN_INVLIST_SET(i_b)))
     {
-	count--;
+	count++;
     }
 
     /* The final length is what we've output so far plus what else is in the
-     * intersection.  Only one of the subexpressions below will be non-zero */
+     * intersection.  At most one of the subexpressions below will be non-zero */
     len_r = i_r;
-    if (count == 2) {
+    if (count >= 2) {
 	len_r += (len_a - i_a) + (len_b - i_b);
     }
 
@@ -6361,7 +6375,7 @@ S_invlist_intersection(pTHX_ HV* const a, HV* const b)
     }
 
     /* Finish outputting any remaining */
-    if (count == 2) { /* Only one of will have a non-zero copy count */
+    if (count >= 2) { /* At most one will have a non-zero copy count */
 	IV copy_count;
 	if ((copy_count = len_a - i_a) > 0) {
 	    Copy(array_a + i_a, array_r + i_r, copy_count, UV);
