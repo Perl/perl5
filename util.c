@@ -573,6 +573,8 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
     SvNOK_off(sv);
     SvVALID_on(sv);
     if (len > 2) {
+	/* Shorter strings are special-cased in Perl_fbm_instr(), and don't use
+	   the BM table.  */
 	const unsigned char *sb;
 	const U8 mlen = (len>255) ? 255 : (U8)len;
 	register U8 *table;
@@ -647,9 +649,10 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	return NULL;
     }
 
-    if (littlelen <= 2) {		/* Special-cased */
-
-	if (littlelen == 1) {
+    switch (littlelen) { /* Special cases for 0, 1 and 2  */
+    case 0:
+	return (char*)big;		/* Cannot be SvTAIL! */
+    case 1:
 	    if (SvTAIL(littlestr) && !multiline) { /* Anchor only! */
 		/* Know that bigend != big.  */
 		if (bigend[-1] == '\n')
@@ -665,11 +668,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	    if (SvTAIL(littlestr))
 		return (char *) bigend;
 	    return NULL;
-	}
-	if (!littlelen)
-	    return (char*)big;		/* Cannot be SvTAIL! */
-
-	/* littlelen is 2 */
+    case 2:
 	if (SvTAIL(littlestr) && !multiline) {
 	    if (bigend[-1] == '\n' && bigend[-2] == *little)
 		return (char*)bigend - 2;
@@ -729,7 +728,10 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	if (SvTAIL(littlestr) && (*bigend == *little))
 	    return (char *)bigend;	/* bigend is already decremented. */
 	return NULL;
+    default:
+	break; /* Only lengths 0 1 and 2 have special-case code.  */
     }
+
     if (SvTAIL(littlestr) && !multiline) {	/* tail anchored? */
 	s = bigend - littlelen;
 	if (s >= big && bigend[-1] == '\n' && *s == *little
