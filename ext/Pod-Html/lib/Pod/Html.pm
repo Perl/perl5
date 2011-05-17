@@ -140,13 +140,6 @@ infile is specified.
 
 List of page names (eg, "perlfunc") which contain linkable C<=item>s.
 
-=item netscape
-
-    --netscape
-    --nonetscape
-
-B<Deprecated>, has no effect. For backwards compatibility only.
-
 =item outfile
 
     --outfile=name
@@ -644,7 +637,7 @@ sub usage {
 Usage:  $0 --help --htmlroot=<name> --infile=<name> --outfile=<name>
            --podpath=<name>:...:<name> --podroot=<name>
            --libpods=<name>:...:<name> --recurse --verbose --index
-           --netscape --norecurse --noindex --cachedir=<name>
+           --norecurse --noindex --cachedir=<name>
 
   --backlink     - set text for "back to top" links (default: none).
   --cachedir     - directory for the item and directory cache files.
@@ -675,7 +668,6 @@ Usage:  $0 --help --htmlroot=<name> --infile=<name> --outfile=<name>
                    (default behaviour).
   --title        - title that will appear in resulting html file.
   --[no]verbose  - self-explanatory (off by default).
-  --[no]netscape - deprecated, has no effect. for backwards compatibility only.
 
 END_OF_USAGE
 
@@ -684,7 +676,7 @@ END_OF_USAGE
 sub parse_command_line {
     my ($opt_backlink,$opt_cachedir,$opt_css,$opt_flush,$opt_header,$opt_help,
 	$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,$opt_libpods,
-	$opt_netscape,$opt_outfile,$opt_podpath,$opt_podroot,$opt_quiet,
+	$opt_outfile,$opt_podpath,$opt_podroot,$opt_quiet,
 	$opt_recurse,$opt_title,$opt_verbose,$opt_hiddendirs);
 
     unshift @ARGV, split ' ', $Config{pod2html} if $Config{pod2html};
@@ -701,7 +693,6 @@ sub parse_command_line {
 			    'index!'     => \$opt_index,
 			    'infile=s'   => \$opt_infile,
 			    'libpods=s'  => \$opt_libpods,
-			    'netscape!'  => \$opt_netscape,
 			    'outfile=s'  => \$opt_outfile,
 			    'podpath=s'  => \$opt_podpath,
 			    'podroot=s'  => \$opt_podroot,
