@@ -689,42 +689,31 @@ to its typeglob and "foo::__ANON__" otherwise [perl #79208].
 
 =head3 Dereferencing typeglobs
 
-If you assign a typeglob to a scalar variable:
+A typeglob "value" actually is, and always has been, a kind of reference.
+It really is just a pointer to the symbol data of the original symbol table
+entry it was "copied" from.  Thus a copy of a typeglob can be used to get
+and set entries in the typeglob it was copied from.  This much is unchanged.
 
-    $glob = *foo;
+In previous versions of Perl, attempting to perform aliasing through a copy
+of a typeglob did not work reliably because the C<*{}> operator on a
+typeglob copy had no effect.  For example, this code to modify C<@foo>
+through a typeglob used to fail, but now works:
 
-the glob that is copied to C<$glob> is marked with a special flag
-indicating that the glob is just a copy.  This allows subsequent
-assignments to C<$glob> to overwrite the glob.  The original glob,
-however, is immutable.
+    my $glob = *foo;
+    *$glob = ['hello'];    # this used not to work right
+    print @foo,"\n";       # now prints 'hello'
 
-Some Perl operators did not distinguish between these two types of globs.
-This would result in strange behaviour in edge cases: C<untie $scalar>
-would not untie the scalar if the last thing assigned to it was a glob
-(because it treated it as C<untie *$scalar>, which unties a handle).
-Assignment to a glob slot (such as C<*$glob = \@some_array>) would simply
-assign C<\@some_array> to C<$glob>.
+The old broken behavior would simply assign the arrayref to C<$glob>.
 
-To fix this, the C<*{}> operator (including its C<*foo> and C<*$foo> forms)
-has been modified to make a new immutable glob if its operand is a glob
-copy.  This allows operators that make a distinction between globs and
-scalars to be modified to treat only immutable globs as globs.  (C<tie>,
-C<tied> and C<untie> have been left as they are for compatibility's sake,
-but will warn.  See L</Deprecations>.)
-
-This causes an incompatible change in code that assigns a glob to the
-return value of C<*{}> when that operator was passed a glob copy.  Take the
-following code, for instance:
-
-    $glob = *foo;
-    *$glob = *bar;
-
-The C<*$glob> on the second line returns a new immutable glob.  That new
-glob is made an alias to C<*bar>.  Then it is discarded.  So the second
-assignment has no effect.
+Another effect of the same underlying bug was that sometimes a missing
+C<*{}> would be incorrectly inferred as present.  This bug has been fixed
+for most cases.  However, for compatibility reasons, it has I<not> been
+fixed for the operators C<tie>, C<untie>, and C<tied>.  For example, after
+C<$glob = *foo>, C<tie $glob> still behaves as C<tie *foo>.  Such usage is
+deprecated, though, and will warn.  See L</Deprecations>.
 
 See L<http://rt.perl.org/rt3/Public/Bug/Display.html?id=77810> for
-more detail.
+much more detail.
 
 =head3 Magic variables outside the main package
 
