@@ -545,9 +545,9 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 {
     dVAR;
     register const U8 *s;
-    register U32 i;
+    STRLEN i;
     STRLEN len;
-    U32 rarest = 0;
+    STRLEN rarest = 0;
     U32 frequency = 256;
 
     PERL_ARGS_ASSERT_FBM_COMPILE;
@@ -606,8 +606,8 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
     BmUSEFUL(sv) = 100;			/* Initial value */
     if (flags & FBMcf_TAIL)
 	SvTAIL_on(sv);
-    DEBUG_r(PerlIO_printf(Perl_debug_log, "rarest char %c at %lu\n",
-			  BmRARE(sv),(unsigned long)BmPREVIOUS(sv)));
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "rarest char %c at %"UVuf"\n",
+			  BmRARE(sv), BmPREVIOUS(sv)));
 }
 
 /* If SvTAIL(littlestr), it has a fake '\n' at end. */
