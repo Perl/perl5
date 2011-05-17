@@ -419,8 +419,7 @@ union _xnvu {
 	U32 xhigh;
     }	    xpad_cop_seq;	/* used by pad.c for cop_sequence */
     struct {
-	U32 xbm_previous;	/* how many characters in string before rare? */
-	U8  xbm_flags;
+	I32 xbm_useful;
 	U8  xbm_rare;		/* rarest character in string */
     }	    xbm_s;		/* fields from PVBM */
 };
@@ -428,7 +427,6 @@ union _xnvu {
 union _xivu {
     IV	    xivu_iv;		/* integer value */
     UV	    xivu_uv;
-    I32	    xivu_i32;		/* BmUSEFUL */
     HEK *   xivu_namehek;	/* xpvlv, xpvgv: GvNAME */
 };
 
@@ -1311,18 +1309,18 @@ the scalar's value cannot change unless written to.
 	    assert(SvTYPE(_bmuseful) == SVt_PVGV);			\
 	    assert(SvVALID(_bmuseful));					\
 	    assert(!SvIOK(_bmuseful));					\
-	    &(((XPVGV*) SvANY(_bmuseful))->xiv_u.xivu_i32);		\
+	    &(((XPVGV*) SvANY(_bmuseful))->xnv_u.xbm_s.xbm_useful);	\
 	 }))
 #  define BmPREVIOUS(sv)						\
     (*({ SV *const _bmprevious = MUTABLE_SV(sv);			\
 		assert(SvTYPE(_bmprevious) == SVt_PVGV);		\
 		assert(SvVALID(_bmprevious));				\
-	    &(((XPVGV*) SvANY(_bmprevious))->xnv_u.xbm_s.xbm_previous);	\
+	    &(((XPVGV*) SvANY(_bmprevious))->xiv_u.xivu_uv);		\
 	 }))
 #else
 #  define BmRARE(sv)		((XPVGV*) SvANY(sv))->xnv_u.xbm_s.xbm_rare
-#  define BmUSEFUL(sv)		((XPVGV*) SvANY(sv))->xiv_u.xivu_i32
-#  define BmPREVIOUS(sv)	((XPVGV*) SvANY(sv))->xnv_u.xbm_s.xbm_previous
+#  define BmUSEFUL(sv)		((XPVGV*) SvANY(sv))->xnv_u.xbm_s.xbm_useful
+#  define BmPREVIOUS(sv)	((XPVGV*) SvANY(sv))->xiv_u.xivu_uv
 
 #endif
 

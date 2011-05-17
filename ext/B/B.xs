@@ -1370,8 +1370,13 @@ MODULE = B	PACKAGE = B::IV
 #define PVMG_stash_ix	sv_SVp | offsetof(struct xpvmg, xmg_stash)
 
 #if PERL_VERSION >= 10
+#  if PERL_VERSION > 14
+#    define PVBM_useful_ix	sv_I32p | offsetof(struct xpvgv, xnv_u.xbm_s.xbm_useful)
+#    define PVBM_previous_ix	sv_UVp | offsetof(struct xpvuv, xuv_uv)
+#  else
 #define PVBM_useful_ix	sv_I32p | offsetof(struct xpvgv, xiv_u.xivu_i32)
 #define PVBM_previous_ix    sv_U32p | offsetof(struct xpvgv, xnv_u.xbm_s.xbm_previous)
+#  endif
 #define PVBM_rare_ix	sv_U8p | offsetof(struct xpvgv, xnv_u.xbm_s.xbm_rare)
 #else
 #define PVBM_useful_ix	sv_I32p | offsetof(struct xpvbm, xbm_useful)
