@@ -9,7 +9,6 @@
 # Input files:
 #    unicore/CombiningClass.pl (or unicode/CombiningClass.pl)
 #    unicore/Decomposition.pl (or unicode/Decomposition.pl)
-#    unicore/CompositionExclusions.txt (or unicode/CompExcl.txt)
 #
 # Output files:
 #    unfcan.h
@@ -54,13 +53,24 @@ our %Single;	# $codepoint => 1          : singletons
 our %NonStD;	# $codepoint => 1          : non-starter decompositions
 our %Comp2nd;	# $codepoint => 1          : may be composed with a prev char.
 
-# from Unicode database
+# from core Unicode database
 our $Combin = do "unicore/CombiningClass.pl"
     || do "unicode/CombiningClass.pl"
     || croak "$PACKAGE: CombiningClass.pl not found";
 our $Decomp = do "unicore/Decomposition.pl"
     || do "unicode/Decomposition.pl"
     || croak "$PACKAGE: Decomposition.pl not found";
+
+# CompositionExclusions.txt since Unicode 3.2.0
+our @CompEx = qw(
+    0958 0959 095A 095B 095C 095D 095E 095F 09DC 09DD 09DF 0A33 0A36
+    0A59 0A5A 0A5B 0A5E 0B5C 0B5D 0F43 0F4D 0F52 0F57 0F5C 0F69 0F76
+    0F78 0F93 0F9D 0FA2 0FA7 0FAC 0FB9 FB1D FB1F FB2A FB2B FB2C FB2D
+    FB2E FB2F FB30 FB31 FB32 FB33 FB34 FB35 FB36 FB38 FB39 FB3A FB3B
+    FB3C FB3E FB40 FB41 FB43 FB44 FB46 FB47 FB48 FB49 FB4A FB4B FB4C
+    FB4D FB4E 2ADC 1D15E 1D15F 1D160 1D161 1D162 1D163 1D164 1D1BB
+    1D1BC 1D1BD 1D1BE 1D1BF 1D1C0
+);
 
 # definition of Hangul constants
 use constant SBase  => 0xAC00;
@@ -91,27 +101,6 @@ sub decomposeHangul {
 }
 
 ########## getting full decomposition ##########
-{
-    my($f, $fh);
-    foreach my $d (@INC) {
-	$f = File::Spec->catfile($d, "unicore", "CompositionExclusions.txt");
-	last if open($fh, $f);
-	$f = File::Spec->catfile($d, "unicore", "CompExcl.txt");
-	last if open($fh, $f);
-	$f = File::Spec->catfile($d, "unicode", "CompExcl.txt");
-	last if open($fh, $f);
-	$f = undef;
-    }
-    croak "$PACKAGE: neither unicore/CompositionExclusions.txt "
-	. "nor unicode/CompExcl.txt is found in @INC" unless defined $f;
-
-    while (<$fh>) {
-	next if /^#/ or /^$/;
-	s/#.*//;
-	$Exclus{ hex($1) } = 1 if /([0-9A-Fa-f]+)/;
-    }
-    close $fh;
-}
 
 ## converts string "hhhh hhhh hhhh" to a numeric list
 ## (hex digits separated by spaces)
@@ -137,23 +126,32 @@ while ($Decomp =~ /(.+)/g) {
 
     foreach my $u ($ini .. $end) {
 	$Compat{$u} = $dec;
+	$Canon{$u} = $dec if ! $compat;
+    }
+}
 
-	if (! $compat) {
-	    $Canon{$u} = $dec;
+for my $s (@CompEx) {
+    my $u = hex $s;
+    next if !$Canon{$u}; # not assigned
+    next if $u == 0xFB1D && !$Canon{0x1D15E}; # 3.0.1 before Corrigendum #2
+    $Exclus{$u} = 1;
+}
 
-	    if (@$dec == 2) {
-		if ($Combin{ $dec->[0] }) {
-		    $NonStD{$u} = 1;
-		} else {
-		    $Compos{ $dec->[0] }{ $dec->[1] } = $u;
-		    $Comp2nd{ $dec->[1] } = 1 if ! $Exclus{$u};
-		}
-	    } elsif (@$dec == 1) {
-		$Single{$u} = 1;
-	    } else {
-		croak("Weird Canonical Decomposition of U+$tab[0]");
-	    }
+foreach my $u (keys %Canon) {
+    my $dec = $Canon{$u};
+
+    if (@$dec == 2) {
+	if ($Combin{ $dec->[0] }) {
+	    $NonStD{$u} = 1;
+	} else {
+	    $Compos{ $dec->[0] }{ $dec->[1] } = $u;
+	    $Comp2nd{ $dec->[1] } = 1 if ! $Exclus{$u};
 	}
+    } elsif (@$dec == 1) {
+	$Single{$u} = 1;
+    } else {
+	my $h = sprintf '%04X', $u;
+	croak("Weird Canonical Decomposition of U+$h");
     }
 }
 

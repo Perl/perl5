@@ -13,7 +13,7 @@ use Carp;
 
 no warnings 'utf8';
 
-our $VERSION = '1.10';
+our $VERSION = '1.12';
 our $PACKAGE = __PACKAGE__;
 
 our @EXPORT = qw( NFC NFD NFKC NFKD );
@@ -548,8 +548,8 @@ normalization implemented by this module depends on your perl's version.
      5.8.7-5.8.8          4.1.0
        5.10.0             5.0.0
     5.8.9, 5.10.1         5.1.0
-    5.12.0-5.12.2         5.2.0
-   (5.13.7-5.13.11)        6.0.0
+    5.12.0-5.12.3         5.2.0
+       5.14.0             6.0.0
 
 =item Correction of decomposition mapping
 

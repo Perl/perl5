@@ -19,7 +19,7 @@ BEGIN {
 use Test;
 use strict;
 use warnings;
-BEGIN { plan tests => 211 };
+BEGIN { plan tests => 217 };
 use Unicode::Normalize qw(:all);
 ok(1); # If we made it this far, we're ok.
 
@@ -48,6 +48,8 @@ ok(getCanon(0xAE00), _pack_U(0x1100, 0x1173, 0x11AF));
 ok(getCanon(0x212C), undef);
 ok(getCanon(0x3243), undef);
 ok(getCanon(0xFA2D), _pack_U(0x9DB4));
+
+# 20
 
 ok(getCompat(   0), undef);
 ok(getCompat(0x29), undef);
@@ -83,6 +85,8 @@ ok(getComposite(0x1173, 0x11AF), undef);
 ok(getComposite(0xAC00, 0x11A7), undef);
 ok(getComposite(0xAC00, 0x11A8), 0xAC01);
 ok(getComposite(0xADF8, 0x11AF), 0xAE00);
+
+# 53
 
 sub uprops {
   my $uv = shift;
@@ -120,6 +124,8 @@ ok(uprops(0xF900), 'xSnFbDmCKyG'); # CJK COMPATIBILITY IDEOGRAPH-F900
 ok(uprops(0xFB4E), 'XsnFbDmCKyG'); # HEBREW LETTER PE WITH RAFE
 ok(uprops(0xFF71), 'xsnfbdmcKyG'); # HALFWIDTH KATAKANA LETTER A
 
+# 71
+
 ok(decompose(""), "");
 ok(decompose("A"), "A");
 ok(decompose("", 1), "");
@@ -132,6 +138,8 @@ ok(decompose(hexU("304C FF76")), hexU("304B 3099 FF76"));
 ok(decompose(hexU("1E14 AC01"), 1), hexU("0045 0304 0300 1100 1161 11A8"));
 ok(decompose(hexU("AC00 AE00"), 1), hexU("1100 1161 1100 1173 11AF"));
 ok(decompose(hexU("304C FF76"), 1), hexU("304B 3099 30AB"));
+
+# 81
 
 # don't modify the source
 my $sDec = "\x{FA19}";
@@ -165,6 +173,8 @@ my $sCom = "\x{304B}\x{3099}";
 ok(compose($sCom), "\x{304C}");
 ok($sCom, "\x{304B}\x{3099}");
 
+# 100
+
 ok(composeContiguous(""), "");
 ok(composeContiguous("A"), "A");
 ok(composeContiguous(hexU("0061 0300")),      hexU("00E0"));
@@ -179,6 +189,8 @@ ok(composeContiguous(hexU("0061 0313 0300")), hexU("0061 0313 0300"));
 my $sCtg = "\x{30DB}\x{309A}";
 ok(composeContiguous($sCtg), "\x{30DD}");
 ok($sCtg, "\x{30DB}\x{309A}");
+
+# 111
 
 sub answer { defined $_[0] ? $_[0] ? "YES" : "NO" : "MAYBE" }
 
@@ -220,6 +232,8 @@ ok(answer(checkNFKC(hexU("0041 0327 030A"))), "MAYBE"); # A+cedilla+ring
 ok(answer(checkNFKC(hexU("0041 030A 0327"))), "NO");    # A+ring+cedilla
 ok(answer(check("NFKC", hexU("20 C1 212B 300"))), "NO");
 
+# 145
+
 "012ABC" =~ /(\d+)(\w+)/;
 ok("012" eq NFC $1 && "ABC" eq NFC $2);
 
@@ -239,6 +253,8 @@ ok(getCompat("0192"), _pack_U(0x41, 0x300));
 ok(getComposite("065", "0768"), 192);
 ok(isNFD_NO ("0192"));
 ok(isNFKD_NO("0192"));
+
+# 156
 
 # DEVANAGARI LETTER QA
 ok(isExclusion("02392"));
@@ -276,6 +292,8 @@ ok(getCanon("044032"),  _pack_U(0x1100, 0x1161));
 ok(getCompat("044032"), _pack_U(0x1100, 0x1161));
 ok(getComposite("04352", "04449"), 0xAC00);
 
+# 182
+
 # string with 22 combining characters: (0x300..0x315)
 my $str_cc22 = _pack_U(0x3041, 0x300..0x315, 0x3042);
 ok(decompose($str_cc22), $str_cc22);
@@ -302,6 +320,8 @@ ok(NFKC($str_cc40), $str_cc40);
 ok(FCD($str_cc40), $str_cc40);
 ok(FCC($str_cc40), $str_cc40);
 
+# 202
+
 my $precomp = hexU("304C 304E 3050 3052 3054");
 my $combseq = hexU("304B 3099 304D 3099 304F 3099 3051 3099 3053 3099");
 ok(decompose($precomp x 5),  $combseq x 5);
@@ -319,4 +339,21 @@ ok(decompose($precomp . $notcomp),     $combseq . $notcomp);
 ok(decompose($precomp . $notcomp x 5), $combseq . $notcomp x 5);
 ok(decompose($precomp . $notcomp x10), $combseq . $notcomp x10);
 
+# 211
 
+my $preUnicode3_1 = !defined getCanon(0x1D15E);
+my $preUnicode3_2 = !defined getCanon(0x2ADC);
+
+# HEBREW LETTER YOD WITH HIRIQ
+ok($preUnicode3_1 xor isExclusion(0xFB1D));
+ok($preUnicode3_1 xor isComp_Ex  (0xFB1D));
+
+# MUSICAL SYMBOL HALF NOTE
+ok($preUnicode3_1 xor isExclusion(0x1D15E));
+ok($preUnicode3_1 xor isComp_Ex  (0x1D15E));
+
+# FORKING
+ok($preUnicode3_2 xor isExclusion(0x2ADC));
+ok($preUnicode3_2 xor isComp_Ex  (0x2ADC));
+
+# 217
