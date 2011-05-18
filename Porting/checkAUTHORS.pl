@@ -677,6 +677,7 @@ me\100davidglasser.net                  glasser\100tang-eleven-seventy-nine.mit.
 merijnb\100iloquent.nl                  merijnb\100ms.com
 +                                       merijnb\100iloquent.com
 merlyn\100stonehenge.com                merlyn\100gadget.cscaper.com
+mestre.smash\100gmail.com               smash\100cpan.org
 mgjv\100comdyn.com.au                   mgjv\100tradingpost.com.au
 mlh\100swl.msd.ray.com                  webtools\100uewrhp03.msd.ray.com
 michael.schroeder\100informatik.uni-erlangen.de mls\100suse.de
