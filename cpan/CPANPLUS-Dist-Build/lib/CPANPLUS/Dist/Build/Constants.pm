@@ -8,8 +8,8 @@ BEGIN {
 
     require Exporter;
     use vars    qw[$VERSION @ISA @EXPORT];
-  
-    $VERSION    = '0.54';
+
+    $VERSION    = '0.56';
     @ISA        = qw[Exporter];
     @EXPORT     = qw[ BUILD_DIR BUILD ];
 }
@@ -18,18 +18,18 @@ BEGIN {
 use constant BUILD_DIR      => sub { return @_
                                         ? File::Spec->catdir($_[0], '_build')
                                         : '_build';
-                            }; 
+                            };
 use constant BUILD          => sub { my $file = @_
                                         ? File::Spec->catfile($_[0], 'Build')
                                         : 'Build';
-                                        
+
                                      ### on VMS, '.com' is appended when
                                      ### creating the Build file
-                                     $file .= '.com' if $^O eq 'VMS';     
-                                     
+                                     $file .= '.com' if $^O eq 'VMS';
+
                                      return $file;
                             };
-                            
+
 1;
 
 =head1 NAME
