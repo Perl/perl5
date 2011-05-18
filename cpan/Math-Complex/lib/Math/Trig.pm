@@ -10,14 +10,14 @@ package Math::Trig;
 use 5.005;
 use strict;
 
-use Math::Complex 1.56;
+use Math::Complex 1.57;
 use Math::Complex qw(:trig :pi);
 
 use vars qw($VERSION $PACKAGE @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
 @ISA = qw(Exporter);
 
-$VERSION = 1.20;
+$VERSION = 1.21;
 
 my @angcnv = qw(rad2deg rad2grad
 		deg2rad deg2grad
@@ -166,19 +166,13 @@ sub great_circle_distance {
 sub great_circle_direction {
     my ( $theta0, $phi0, $theta1, $phi1 ) = @_;
 
-    my $distance = great_circle_distance($theta0, $phi0, $theta1, $phi1);
-
     my $lat0 = pip2 - $phi0;
     my $lat1 = pip2 - $phi1;
 
-    my $direction =
- 	acos_real((sin($lat1) - sin($lat0) * cos($distance)) /
-		  (cos($lat0) * sin($distance)));
-  
-    $direction = pi2 - $direction
-	if sin($theta1 - $theta0) < 0;
-
-    return rad2rad($direction);
+    return rad2rad(pi2 -
+	atan2(sin($theta0-$theta1) * cos($lat1),
+		cos($lat0) * sin($lat1) -
+		    sin($lat0) * cos($lat1) * cos($theta0-$theta1)));
 }
 
 *great_circle_bearing         = \&great_circle_direction;
@@ -755,8 +749,9 @@ L<Math::Complex>
 
 =head1 AUTHORS
 
-Jarkko Hietaniemi <F<jhi!at!iki.fi>> and 
-Raphael Manfredi <F<Raphael_Manfredi!at!pobox.com>>.
+Jarkko Hietaniemi <F<jhi!at!iki.fi>>,
+Raphael Manfredi <F<Raphael_Manfredi!at!pobox.com>>,
+Zefram <zefram@fysh.org>
 
 =head1 LICENSE
 

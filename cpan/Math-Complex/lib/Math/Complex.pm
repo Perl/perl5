@@ -11,7 +11,7 @@ use strict;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $Inf $ExpInf);
 
-$VERSION = 1.56;
+$VERSION = 1.57;
 
 use Config;
 
@@ -129,10 +129,16 @@ my @pi = qw(pi pi2 pi4 pip2 pip4 Inf);
 );
 
 use overload
+	'='	=> \&_copy,
+	'+='	=> \&_plus,
 	'+'	=> \&_plus,
+	'-='	=> \&_minus,
 	'-'	=> \&_minus,
+	'*='	=> \&_multiply,
 	'*'	=> \&_multiply,
+	'/='	=> \&_divide,
 	'/'	=> \&_divide,
+	'**='	=> \&_power,
 	'**'	=> \&_power,
 	'=='	=> \&_numeq,
 	'<=>'	=> \&_spaceship,
@@ -215,6 +221,19 @@ sub _emake {
     }
 
     return ($p, $q);
+}
+
+sub _copy {
+    my $self = shift;
+    my $clone = {%$self};
+    if ($self->{'cartesian'}) {
+	$clone->{'cartesian'} = [@{$self->{'cartesian'}}];
+    }
+    if ($self->{'polar'}) {
+	$clone->{'polar'} = [@{$self->{'polar'}}];
+    }
+    bless $clone,__PACKAGE__;
+    return $clone;
 }
 
 #
@@ -1539,7 +1558,7 @@ sub _stringify_polar {
 
         if (defined $format) {
 	    $r     = sprintf($format, $r);
-	    $theta = sprintf($format, $theta) unless defined $theta;
+	    $theta = sprintf($format, $t) unless defined $theta;
 	} else {
 	    $theta = $t unless defined $theta;
 	}
@@ -2077,9 +2096,10 @@ L<Math::Trig>
 
 =head1 AUTHORS
 
-Daniel S. Lewart <F<lewart!at!uiuc.edu>>
-Jarkko Hietaniemi <F<jhi!at!iki.fi>>
-Raphael Manfredi <F<Raphael_Manfredi!at!pobox.com>>
+Daniel S. Lewart <F<lewart!at!uiuc.edu>>,
+Jarkko Hietaniemi <F<jhi!at!iki.fi>>,
+Raphael Manfredi <F<Raphael_Manfredi!at!pobox.com>>,
+Zefram <zefram@fysh.org>
 
 =head1 LICENSE
 

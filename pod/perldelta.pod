@@ -91,6 +91,14 @@ XXX
 
 =item *
 
+C<Math::Complex> has been upgraded from version 1.56 to version 1.57.
+
+Correct copy constructor usage.
+Fix polarwise formatting with numeric format specifier.
+More stable C<great_circle_direction> algorithm.
+
+=item *
+
 C<Time::HiRes> has been upgraded from version 1.9721_01 to version 1.9722.
 
 Portability fix, and avoiding some compiler warnings.
