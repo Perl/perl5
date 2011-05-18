@@ -30,11 +30,6 @@ The outline of a typical release cycle is as follows:
 
     ...time passes...
 
-    an occasional snapshot is released, that still identifies itself as
-	5.10.1
-
-    ...time passes...
-
     a few weeks before the release, a number of steps are performed,
 	including bumping the version to 5.10.2
 
@@ -51,8 +46,8 @@ The outline of a typical release cycle is as follows:
 
 =head1 DETAILS
 
-Some of the tasks described below apply to all four types of 
-release of Perl. (snapshot, RC, final release of maint, final 
+Some of the tasks described below apply to all three types of
+release of Perl. (RC, final release of maint, final
 release of blead). Some of these tasks apply only to a subset
 of these release types.  If a step does not apply to a given 
 type of release, you will see a notation to that effect at
@@ -61,13 +56,6 @@ the beginning of the step.
 =head2 Release types
 
 =over 4
-
-=item Snapshot
-
-A snapshot is intended to encourage in-depth testing from time-to-time,
-for example after a key point in the stabilisation of a branch. It
-requires fewer steps than a full release, and the version number of perl in
-the tarball will usually be the same as that of the previous release.
 
 =item Release Candidate (RC)
 
@@ -102,8 +90,6 @@ hoops you need to jump through:
 =over 4
 
 =item PAUSE account
-
-I<SKIP this step for SNAPSHOT>
 
 Make sure you have a PAUSE account suitable for uploading a perl release.
 If you don't have a PAUSE account, then request one:
@@ -144,11 +130,10 @@ resolve the issue.
 
 =item Quotation for release announcement epigraph
 
-I<SKIP this step for SNAPSHOT and RC>
+I<SKIP this step for RC>
 
 For a numbered blead or maint release of perl, you will need a quotation 
-to use as an epigraph to your release announcement.  (There's no harm
-in having one for a snapshot, but it's not required).
+to use as an epigraph to your release announcement.
 
 
 =back
@@ -164,8 +149,6 @@ done in the run up to a release.
 =over 4
 
 =item *
-
-I<You MAY SKIP this step for SNAPSHOT>
 
 Ensure that dual-life CPAN modules are synchronised with CPAN.  Basically,
 run the following:
@@ -190,8 +173,6 @@ have some extra changes.
 
 =item *
 
-I<You MAY SKIP this step for SNAPSHOT>
-
 Ensure dual-life CPAN modules are stable, which comes down to:
 
     for each module that fails its regression tests on $current
@@ -214,8 +195,6 @@ Ensure dual-life CPAN modules are stable, which comes down to:
 
 =item *
 
-I<You MAY SKIP this step for SNAPSHOT>
-
 Similarly, monitor the smoking of core tests, and try to fix.  See
 L<http://doc.procura.nl/smoke/index.html> for a summary. See also
 L<http://www.nntp.perl.org/group/perl.daily-build.reports/> which has
@@ -223,14 +202,10 @@ the raw reports.
 
 =item *
 
-I<You MAY SKIP this step for SNAPSHOT>
-
 Similarly, monitor the smoking of perl for compiler warnings, and try to
 fix.
 
 =item *
-
-I<You MAY SKIP this step for SNAPSHOT>
 
 Get perldelta in a mostly finished state.
 
@@ -239,8 +214,6 @@ every section it lists is, if necessary, populated and complete. Copy
 edit the whole document.
 
 =item *
-
-I<You MUST SKIP this step for SNAPSHOT>
 
 Bump the version number (e.g. from 5.12.0 to 5.12.1).
 
@@ -322,8 +295,6 @@ version number.
 
 =item *
 
-I<You MUST SKIP this step for SNAPSHOT>
-
 Review and update INSTALL to account for the change in version number;
 in particular, the "Coexistence with earlier versions of perl 5" section.
 
@@ -333,8 +304,6 @@ development cycle. For blead releases, it needs to refer to the previous blead
 release.
 
 =item *
-
-I<You MUST SKIP this step for SNAPSHOT>
 
 Update the F<Changes> file to contain the git log command which would show
 all the changes in this release. You will need assume the existence of a
@@ -369,8 +338,6 @@ XXX think of other configurations that need testing.
 
 =item *
 
-I<You MAY SKIP this step for SNAPSHOT>
-
 L<perlport> has a section currently named I<Supported Platforms> that
 indicates which platforms are known to build in the current release.
 If necessary update the list and the indicated version number.
@@ -379,8 +346,8 @@ If necessary update the list and the indicated version number.
 
 =head2 Building a release - on the day
 
-This section describes the actions required to make a release (or snapshot
-etc) that are performed on the actual day.
+This section describes the actions required to make a release
+that are performed on the actual day.
 
 =over 4
 
@@ -396,8 +363,6 @@ For a blead release, if you did not bump the perl version number as part
 of I<advance actions>, do that now.
 
 =item *
-
-I<You MAY SKIP this step for SNAPSHOT>
 
 Finalize the perldelta.  In particular, fill in the Acknowledgements
 section.  You can generate a list of contributors with checkAUTHORS.pl.
@@ -448,8 +413,6 @@ and porting tools:
     $ ./Configure -Dusedevel -des && make
 
 =item *
-
-I<You MUST SKIP this step for SNAPSHOT>
 
 Update C<Module::CoreList> with module version data for the new release.
 
@@ -548,8 +511,6 @@ If manicheck turns up anything wrong, update MANIFEST and begin this step again.
 
 =item *
 
-I<You MUST SKIP this step for SNAPSHOT>
-
 Add an entry to F<pod/perlhist.pod> with the current date, e.g.:
 
     David    5.10.1-RC1    2009-Aug-06
@@ -565,7 +526,7 @@ Be sure to commit your changes:
 
 =item *
 
-I<You MUST SKIP this step for SNAPSHOT or BLEAD release>
+I<You MUST SKIP this step for a BLEAD release>
 
 Update F<patchlevel.h> to add a C<-RC1>-or-whatever string; or, if this is
 a final release, remove it. For example:
@@ -611,8 +572,6 @@ Push all your recent commits:
 
 =item *
 
-I<You MUST SKIP this step for SNAPSHOT>
-
 Tag the release (e.g.):
 
     $ git tag v5.11.0 -m "First release of the v5.11 series!"
@@ -633,7 +592,6 @@ the tarball and directory name:
     $ git clean -xdf		# make sure perl and git agree on files
     $ git status		# and there's nothing lying around
 
-    $ perl Porting/makerel -b -s `git describe` # for a snapshot
     $ perl Porting/makerel -b -s RC1            # for a release candidate
     $ perl Porting/makerel -b                   # for a final release
 
@@ -773,10 +731,6 @@ Install an XS module, for example:
 
 =item *
 
-I<If you're building a SNAPSHOT, you should STOP HERE>
-
-=item *
-
 Check that the L<perlbug> utility works. Try the following:
 
     $ bin/perlbug
@@ -855,7 +809,7 @@ time to publish the tag you created earlier to the public git repo (e.g.):
 
 =item *
 
-I<You MUST SKIP this step for SNAPSHOT or BLEAD release>
+I<You MUST SKIP this step for BLEAD release>
 
 Disarm the F<patchlevel.h> change; for example,
 
