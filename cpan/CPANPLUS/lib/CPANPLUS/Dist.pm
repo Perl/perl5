@@ -313,7 +313,7 @@ sub find_configure_requires {
         defaults => $mod->status->$meth || {},
       );
 
-      my @possibles = do { defined $mod->status->extract 
+      my @possibles = do { defined $mod->status->extract
                            ? ( META_JSON->( $mod->status->extract ),
                                META_YML->( $mod->status->extract ) )
                            : ()
@@ -363,7 +363,7 @@ sub find_mymeta_requires {
         defaults => $mod->status->$meth || {},
       );
 
-      my @possibles = do { defined $mod->status->extract 
+      my @possibles = do { defined $mod->status->extract
                            ? ( MYMETA_JSON->( $mod->status->extract ),
                                MYMETA_YML->( $mod->status->extract ) )
                            : ()
@@ -418,6 +418,9 @@ sub _prereqs_from_meta_file {
 
         ### Parse::CPAN::Meta uses exceptions for errors
         ### hash returned in list context!!!
+
+        local $ENV{PERL_JSON_BACKEND};
+
         my ($doc) = eval { Parse::CPAN::Meta::LoadFile( $meta ) };
 
         unless( $doc ) {
@@ -465,6 +468,9 @@ sub _prereqs_from_meta_json {
 
         ### Parse::CPAN::Meta uses exceptions for errors
         ### hash returned in list context!!!
+
+        local $ENV{PERL_JSON_BACKEND};
+
         my ($doc) = eval { Parse::CPAN::Meta->load_file( $meta ) };
 
         unless( $doc ) {

@@ -63,7 +63,7 @@ sub new {
     unless( $obj->_id ) {
         error(loc("No '%1' specified -- No CPANPLUS object associated!",'_id'));
         return;
-    } 
+    }
 
     ### rebless object ###
     return bless $obj, $class;

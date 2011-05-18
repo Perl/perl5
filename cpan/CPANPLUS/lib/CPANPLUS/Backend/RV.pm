@@ -117,7 +117,7 @@ sub _ok { return shift->ok }
 ### this allows people to not have to explicitly say
 ### if( $rv->ok ) { foo() }
 ### XXX add an explicit stringify, so it doesn't fall back to "bool"? :(
-use overload bool       => \&_ok, 
+use overload bool       => \&_ok,
 #             '""'       => \&_stringify,
              fallback   => 1;
 
@@ -133,10 +133,10 @@ This module by Jos Boumans E<lt>kane@cpan.orgE<gt>.
 
 =head1 COPYRIGHT
 
-The CPAN++ interface (of which this module is a part of) is copyright (c) 
+The CPAN++ interface (of which this module is a part of) is copyright (c)
 2001 - 2007, Jos Boumans E<lt>kane@cpan.orgE<gt>. All rights reserved.
 
-This library is free software; you may redistribute and/or modify it 
+This library is free software; you may redistribute and/or modify it
 under the same terms as Perl itself.
 
 =cut

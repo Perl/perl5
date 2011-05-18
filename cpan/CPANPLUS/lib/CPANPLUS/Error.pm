@@ -79,17 +79,17 @@ BEGIN {
 
     for my $func ( @EXPORT ) {
         no strict 'refs';
-        
+
         my $prefix  = 'cp_';
         my $name    = $func;
         $name       =~ s/^$prefix//g;
-        
+
         *$func = sub {
                         my $msg     = shift;
-                        
+
                         ### no point storing non-messages
                         return unless defined $msg;
-                        
+
                         $log->store(
                                 message => $msg,
                                 tag     => uc $name,

@@ -28,7 +28,7 @@ CPANPLUS::Module::Checksums
 
 =head1 DESCRIPTION
 
-This is a class that provides functions for checking the checksum 
+This is a class that provides functions for checking the checksum
 of a distribution. Should not be loaded directly, but used via the
 interface provided via C<CPANPLUS::Module>.
 
@@ -102,7 +102,7 @@ sub _validate_checksum {
     } else {
         msg(loc("Archive size is not known for '%1'",$self->package),$verbose);
     }
-    
+
     my $sha = $href->{ $self->package }->{'sha256'};
 
     unless( defined $sha ) {

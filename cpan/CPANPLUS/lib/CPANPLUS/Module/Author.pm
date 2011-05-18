@@ -195,7 +195,7 @@ sub distributions {
         my $dist = CPANPLUS::Module::Fake->new(
                         module  =>  do { my $m = $mod->package_name( $name );
                                          $m =~ s/-/::/g; $m;
-                                    },      
+                                    },
                         version =>  $mod->package_version(  $name ),
                         package =>  $name,
                         path    =>  $mod->path,     # same author after all
