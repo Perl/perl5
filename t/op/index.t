@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use strict;
-plan( tests => 120 );
+plan( tests => 122 );
 
 run_tests() unless caller;
 
@@ -223,5 +223,11 @@ is($^A, '', '$^A is empty');
 formline PVBM2;
 is($^A, 'bang', "formline isn't confused by index compilation");
 is(index('bang', PVBM2), 0, "index isn't confused by format compilation");
+
+{
+    use constant perl => "rules";
+    is(index("perl rules", perl), 5, 'first index of a constant works');
+    is(index("rules 1 & 2", perl), 0, 'second index of the same constant works');
+}
 
 }

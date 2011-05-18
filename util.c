@@ -559,6 +559,9 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
     if (SvSCREAM(sv))
 	return;
 
+    if (SvVALID(sv))
+	return;
+
     if (flags & FBMcf_TAIL) {
 	MAGIC * const mg = SvUTF8(sv) && SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : NULL;
 	sv_catpvs(sv, "\n");		/* Taken into account in fbm_instr() */
