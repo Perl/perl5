@@ -302,7 +302,7 @@ if ($Build{toc}) {
 	    return;
 	  }
 	}
-	warn "$0: $file: cannot find =head1 NAME\n" unless $Quiet;
+	warn "$0: NOTE: cannot find '=head1 NAME' in:\n  $file\n" unless $Quiet;
       }
     }
   }
