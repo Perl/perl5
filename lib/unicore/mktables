@@ -10270,7 +10270,7 @@ END
                             # http://www.unicode.org/versions/corrigendum8.html
             $fields[$BIDI] = "AL";
         }
-        elsif ($^V lt v5.15.0) { # For 5.16 will convert to use Unicode's name
+        elsif ($^V lt v5.17.0) { # For 5.18 will convert to use Unicode's name
             $fields[$CHARNAME] = "";
         }
 
