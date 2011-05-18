@@ -46,8 +46,8 @@ The outline of a typical release cycle is as follows:
 
 =head1 DETAILS
 
-Some of the tasks described below apply to all three types of
-release of Perl. (RC, final release of maint, final
+Some of the tasks described below apply to all four types of
+release of Perl. (blead, RC, final release of maint, final
 release of blead). Some of these tasks apply only to a subset
 of these release types.  If a step does not apply to a given 
 type of release, you will see a notation to that effect at
@@ -67,7 +67,11 @@ removing the RC status from F<patchlevel.h>, etc). If faults are found,
 then the fixes should be put into a new release candidate, never directly
 into a final release.
 
-=item Stable/Maint release
+
+=item Stable/Maint release (MAINT).
+
+A release with an even version number, and subversion number > 0, such as
+5.14.1 or 5.14.2.
 
 At this point you should have a working release candidate with few or no
 changes since.
@@ -75,10 +79,21 @@ changes since.
 It's essentially the same procedure as for making a release candidate, but
 with a whole bunch of extra post-release steps.
 
-=item Blead release
+=item A blead point release (BLEAD-POINT)
+
+A release with an odd version number, such as 5.15.0 or 5.15.1.
+
+This isn't for production, so it has less stability requirements than for
+other release types, and isn't preceded by RC releases. Other than that,
+it is similar to a MAINT release.
+
+=item Blead final release (BLEAD-FINAL)
+
+A release with an even version number, and subversion number == 0, such as
+5.14.0. That is to say, ite the big new release once per year.
 
 It's essentially the same procedure as for making a release candidate, but
-with a whole bunch of extra post-release steps.
+with a whole bunch of extra post-release steps, even more than for MAINT.
 
 =back
 
@@ -132,7 +147,7 @@ resolve the issue.
 
 I<SKIP this step for RC>
 
-For a numbered blead or maint release of perl, you will need a quotation 
+For all except an RC release of perl, you will need a quotation
 to use as an epigraph to your release announcement.
 
 
@@ -165,7 +180,7 @@ To see which core distro versions differ from the current CPAN versions:
 
     $ ./perl -Ilib Porting/core-cpan-diff -x -a
 
-If you are making a maint release, run C<core-cpan-diff> on both blead and
+If you are making a MAINT release, run C<core-cpan-diff> on both blead and
 maint, then diff the two outputs. Compare this with what you expect, and if
 necessary, fix things up. For example, you might think that both blead
 and maint are synchronised with a particular CPAN module, but one might
@@ -217,7 +232,7 @@ edit the whole document.
 
 Bump the version number (e.g. from 5.12.0 to 5.12.1).
 
-For a blead release, this can happen on the day of the release.  For a
+For a BLEAD-POINT release, this can happen on the day of the release.  For a
 release candidate for a stable perl, this should happen a week or two
 before the first release candidate to allow sufficient time for testing and
 smoking with the target version built into the perl executable. For
@@ -262,10 +277,11 @@ this line in README.vms needs special handling:
 
     rename perl-5^.10^.1.dir perl-5_10_1.dir
 
-When doing a blead release, also make sure the C<PERL_API_*> constants in
-F<patchlevel.h> are in sync with the version you're releasing, unless you're
+When doing a BLEAD-POINT or BLEAD-FINAL release, also make sure the
+C<PERL_API_*> constants in F<patchlevel.h> are in sync with the version
+you're releasing, unless you're
 absolutely sure the release you're about to make is 100% binary compatible
-to an earlier release. When releasing a stable perl version, the C<PERL_API_*>
+to an earlier release. When releasing a MAINT perl version, the C<PERL_API_*>
 constants C<MUST NOT> be changed as we aim to guarantee binary compatibility
 in maint branches.
 
@@ -298,10 +314,17 @@ version number.
 Review and update INSTALL to account for the change in version number;
 in particular, the "Coexistence with earlier versions of perl 5" section.
 
-Be particularly careful with the section "Upgrading from 5.X.Y or earlier". For
-stable releases, this needs to refer to the last release in the previous
-development cycle. For blead releases, it needs to refer to the previous blead
-release.
+Be particularly careful with the section "Upgrading from 5.X.Y or earlier".
+The "X.Y" needs to be changed to the most recent version that we are
+I<not> binary compatible with.
+
+For MAINT and BLEAD-FINAL releases, this needs to refer to the last
+release in the previous development cycle (so for example, for a 5.14.x
+release, this would be 5.13.11).
+
+For BLEAD-POINT releases, it needs to refer to the previous BLEAD-POINT
+release (so for 5.15.3 this would be 5.15.2).
+
 
 =item *
 
@@ -344,6 +367,8 @@ If necessary update the list and the indicated version number.
 
 =back
 
+
+
 =head2 Building a release - on the day
 
 This section describes the actions required to make a release
@@ -359,8 +384,8 @@ up-to-date.
 
 =item *
 
-For a blead release, if you did not bump the perl version number as part
-of I<advance actions>, do that now.
+For a BLEAD-POINT release, if you did not bump the perl version number as
+part of I<advance actions>, do that now.
 
 =item *
 
@@ -407,8 +432,7 @@ unpushed commits etc):
 
 =item *
 
-If not already built, Configure and build perl so that you have a Makefile
-and porting tools:
+Configure and build perl so that you have a Makefile and porting tools:
 
     $ ./Configure -Dusedevel -des && make
 
@@ -416,7 +440,7 @@ and porting tools:
 
 Update C<Module::CoreList> with module version data for the new release.
 
-Note that if this is a maint release, you should run the following actions
+Note that if this is a MAINT release, you should run the following actions
 from the maint branch, but commit the C<CoreList.pm> changes in
 I<blead> and subsequently cherry-pick it.  XXX need a better example
 
@@ -490,7 +514,7 @@ Make sure that the script has correctly updated the C<CAVEATS> section
 =back
 
 Finally, commit the new version of Module::CoreList:
-(unless this is for maint; in which case commit it blead first, then
+(unless this is for MAINT; in which case commit it to blead first, then
 cherry-pick it back).
 
     $ git commit -m 'Update Module::CoreList for 5.x.y' dist/Module-CoreList/lib/Module/CoreList.pm
@@ -526,7 +550,7 @@ Be sure to commit your changes:
 
 =item *
 
-I<You MUST SKIP this step for a BLEAD release>
+I<You MUST SKIP this step for a BLEAD-POINT release>
 
 Update F<patchlevel.h> to add a C<-RC1>-or-whatever string; or, if this is
 a final release, remove it. For example:
@@ -576,7 +600,7 @@ Tag the release (e.g.):
 
     $ git tag v5.11.0 -m "First release of the v5.11 series!"
 
-It is VERY important that from this point forward, you not push
+It is B<VERY> important that from this point forward, you not push
 your git changes to the Perl master repository.  If anything goes
 wrong before you publish your newly-created tag, you can delete
 and recreate it.  Once you push your tag, we're stuck with it
@@ -759,12 +783,12 @@ based on (or at least the last commit of any consequence).
 Then check that the smoke tests pass (particularly on Win32). If not, go
 back and fix things.
 
-Note that for I<BLEAD> releases this may not be practical. It takes a
+Note that for I<BLEAD-POINT> releases this may not be practical. It takes a
 long time for the smokers to catch up, especially the Win32
-smokers. This is why we have a RC cycle for I<MAINT> releases, but for
-I<BLEAD> releases sometimes the best you can do is to plead with
-people on IRC to test stuff on their platforms, fire away, and then
-hope for the best.
+smokers. This is why we have a RC cycle for I<MAINT> and I<BLEAD-FINAL>
+releases, but for I<BLEAD-POINT> releases sometimes the best you can do is
+to plead with people on IRC to test stuff on their platforms, fire away,
+and then hope for the best.
 
 =item *
 
@@ -809,7 +833,7 @@ time to publish the tag you created earlier to the public git repo (e.g.):
 
 =item *
 
-I<You MUST SKIP this step for BLEAD release>
+I<You MUST SKIP this step for BLEAD-POINT release>
 
 Disarm the F<patchlevel.h> change; for example,
 
@@ -918,11 +942,11 @@ previous version bump.
 
 =item *
 
-I<You MUST SKIP this step for RC, BLEAD>
+I<You MUST SKIP this step for RC, BLEAD-POINT, MAINT>
 
-If this was the first release of a new maint series, (5.x.0 where x is
-even) then bump the version in the blead branch in git, e.g. 5.12.0 to
-5.13.0.
+If this was a BLEAD-FINAL release (i.e. the first release of a new maint
+series, 5.x.0 where x is even), then bump the version in the blead branch
+in git, e.g. 5.12.0 to 5.13.0.
 
 First, add a new feature bundle to F<lib/feature.pm>, initially by just
 copying the exiting entry, and bump the file's $VERSION; e.g.
@@ -938,11 +962,11 @@ Finally, push the changes.
 
 =item *
 
-I<You MUST SKIP this step for RC, BLEAD>
+I<You MUST SKIP this step for RC, BLEAD-POINT, MAINT>
 
-If this was the first release of a new maint series, (5.x.0 where x is
-even), then create a new maint branch based on the commit tagged as
-the current release.
+If this was a BLEAD-FINAL release (i.e. the first release of a new maint
+series, 5.x.0 where x is even), then create a new maint branch based on
+the commit tagged as the current release.
 
 Assuming you're using git 1.7.x or newer:
 
@@ -951,7 +975,7 @@ Assuming you're using git 1.7.x or newer:
 
 =item *
 
-I<You MUST SKIP this step for RC, BLEAD>
+I<You MUST SKIP this step for RC, BLEAD-POINT>
 
 Copy the perldelta.pod for this release into the other branches; for
 example:
