@@ -26,7 +26,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 ($] < 5.009 ? 'PMf_SKIPWHITE' : qw(RXf_SKIPWHITE)),
 	 ($] < 5.011 ? 'CVf_LOCKED' : 'OPpREVERSE_INPLACE'),
 	 ($] < 5.013 ? () : 'PMf_NONDESTRUCT');
-$VERSION = "1.03";
+$VERSION = "1.04";
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -2404,6 +2404,9 @@ sub pp_syscall { listop(@_, "syscall") }
 sub pp_glob {
     my $self = shift;
     my($op, $cx) = @_;
+    if ($op->flags & OPf_SPECIAL) {
+	return $self->deparse($op->first->sibling);
+    }
     my $text = $self->dq($op->first->sibling);  # skip pushmark
     if ($text =~ /^\$?(\w|::|\`)+$/ # could look like a readline
 	or $text =~ /[<>]/) {
@@ -3393,14 +3396,6 @@ sub pp_entersub {
 	    return $prefix . $amper. $kid;
 	}
     } else {
-	# glob() invocations can be translated into calls of
-	# CORE::GLOBAL::glob with a second parameter, a number.
-	# Reverse this.
-	if ($kid eq "CORE::GLOBAL::glob") {
-	    $kid = "glob";
-	    $args =~ s/\s*,[^,]+$//;
-	}
-
 	# It's a syntax error to call CORE::GLOBAL::foo without a prefix,
 	# so it must have been translated from a keyword call. Translate
 	# it back.
