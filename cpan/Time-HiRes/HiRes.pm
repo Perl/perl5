@@ -23,7 +23,7 @@ require DynaLoader;
 		 stat
 		);
 
-$VERSION = '1.9721_01';
+$VERSION = '1.9722';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -584,6 +584,8 @@ Copyright (c) 1996-2002 Douglas E. Wegscheid.  All rights reserved.
 
 Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007, 2008 Jarkko Hietaniemi.
 All rights reserved.
+
+Copyright (C) 2011 Andrew Main (Zefram) <zefram@fysh.org>
 
 This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

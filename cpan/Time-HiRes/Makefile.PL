@@ -768,6 +768,27 @@ sub doMakefile {
         realclean => { FILES=> 'const-c.inc const-xs.inc' },
     );
 
+    if ($^O eq "MSWin32" && !(grep { /\ALD[A-Z]*=/ } @ARGV)) {
+	my $libperl = $Config{libperl} || "";
+	my $gccversion = $Config{gccversion} || "";
+	if ($gccversion =~ /\A3\.4\.[0-9]+/ and $libperl =~ /\.lib\z/) {
+	    # Avoid broken linkage with ActivePerl, by linking directly
+	    # against the Perl DLL rather than the import library.
+	    (my $llibperl = "-l$libperl") =~ s/\.lib\z//;
+	    my $lddlflags = $Config{lddlflags} || "";
+	    my $ldflags = $Config{ldflags} || "";
+	    s/-L(?:".*?"|\S+)//g foreach $lddlflags, $ldflags;
+	    my $libdirs = join ' ',
+		map { s/(?<!\\)((?:\\\\)*")/\\$1/g; qq[-L"$_"] }
+		@Config{qw/bin sitebin/};
+	    push @makefileopts, macro => {
+		LDDLFLAGS => "$lddlflags $libdirs $llibperl",
+		LDFLAGS => "$ldflags $libdirs $llibperl",
+		PERL_ARCHIVE => "",
+	    };
+	}
+    }
+
     if ($ENV{PERL_CORE}) {
 	push @makefileopts, MAN3PODS => {};
     }

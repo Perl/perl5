@@ -91,6 +91,12 @@ XXX
 
 =item *
 
+C<Time::HiRes> has been upgraded from version 1.9721_01 to version 1.9722.
+
+Portability fix, and avoiding some compiler warnings.
+
+=item *
+
 XXX
 
 =back
