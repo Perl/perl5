@@ -161,16 +161,22 @@ package DB_File ;
 use warnings;
 use strict;
 our ($VERSION, @ISA, @EXPORT, $AUTOLOAD, $DB_BTREE, $DB_HASH, $DB_RECNO);
-our ($db_version, $use_XSLoader, $splice_end_array, $Error);
+our ($db_version, $use_XSLoader, $splice_end_array_no_length, $splice_end_array, $Error);
 use Carp;
 
 
-$VERSION = "1.821" ;
+$VERSION = "1.822" ;
 $VERSION = eval $VERSION; # needed for dev releases
 
 {
-    local $SIG{__WARN__} = sub {$splice_end_array = "@_";};
+    local $SIG{__WARN__} = sub {$splice_end_array_no_length = "@_";};
     my @a =(1); splice(@a, 3);
+    $splice_end_array_no_length = 
+        ($splice_end_array_no_length =~ /^splice\(\) offset past end of array at /);
+}      
+{
+    local $SIG{__WARN__} = sub {$splice_end_array = "@_";};
+    my @a =(1); splice(@a, 3, 1);
     $splice_end_array = 
         ($splice_end_array =~ /^splice\(\) offset past end of array at /);
 }      
@@ -342,6 +348,7 @@ sub SPLICE
 	$offset = 0;
     }
 
+    my $has_length = @_;
     my $length = @_ ? shift : 0;
     # Carping about definedness comes _after_ the OFFSET sanity check.
     # This is so we get the same error messages as Perl's splice().
@@ -371,7 +378,7 @@ sub SPLICE
     if ($offset > $size) {
  	$offset = $size;
 	warnings::warnif('misc', 'splice() offset past end of array')
-            if $splice_end_array;
+            if $has_length ? $splice_end_array : $splice_end_array_no_length;
     }
 
     # 'If LENGTH is omitted, removes everything from OFFSET onward.'

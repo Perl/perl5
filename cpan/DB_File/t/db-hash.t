@@ -1,11 +1,11 @@
 #!./perl 
- 
+
 use warnings;
 use strict;
 use Config;
  
 BEGIN {
-    if($ENV{PERL_CORE}) {
+    if(-d "lib" && -f "TEST") {
         if ($Config{'extensions'} !~ /\bDB_File\b/ ) {
             print "1..0 # Skip: DB_File was not built\n";
             exit 0;

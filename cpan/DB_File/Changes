@@ -1,5 +1,10 @@
 
 
+1.822 12 March 2011
+
+   * Keep DB_File's warnings in sync with perl's
+     [rt.cpan.org #66339] 
+
 1.821 10 January 2011
 
    * Fixed typos & spelling errors.
