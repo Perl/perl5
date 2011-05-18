@@ -61,3 +61,5 @@
 /perl5150delta.pod
 /perlapi.pod
 /perlintern.pod
+*.html
+*.man
