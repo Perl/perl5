@@ -25,6 +25,17 @@ require 5.010;
   }
 }
 
+# make it clearer when we haven't run to completion, as we can be quite
+# noisy when things are working ok
+
+sub my_die {
+    print STDERR "$0: ", @_;
+    print STDERR "\n" unless $_[-1] =~ /\n\z/;
+    print STDERR "ABORTED\n";
+    exit 255;
+}
+
+
 $masterpodfile = abs_from_top('pod.lst');
 
 # Generate any/all of these files
@@ -109,7 +120,7 @@ if ($Verbose) {
 
 # process pod.lst
 
-open my $master, '<', $masterpodfile or die "$0: Can't open $masterpodfile: $!";
+open my $master, '<', $masterpodfile or my_die "Can't open $masterpodfile: $!";
 
 my ($delta_source, $delta_target);
 
@@ -124,7 +135,7 @@ foreach (<$master>) {
     my %flags = (header => 1);
     $flags{toc_omit} = 1 if $flags =~ tr/o//d;
     $flags{aux} = 1 if $flags =~ tr/a//d;
-    die "$0: Unknown flag found in heading line: $_" if length $flags;
+    my_die "Unknown flag found in heading line: $_" if length $flags;
     push @Master, [\%flags, $2];
 
   } elsif (/^(\S*)\s+(\S+)\s+(.*)/) {
@@ -156,12 +167,12 @@ foreach (<$master>) {
     } else {
       $Pods{$filename} = $desc;
     }
-    die "$0: Unknown flag found in section line: $_" if length $flags;
+    my_die "Unknown flag found in section line: $_" if length $flags;
     push @Master, [\%flags, $filename, $desc];
   } elsif (/^$/) {
     push @Master, undef;
   } else {
-    die "$0: Malformed line: $_" if $1 =~ tr/A-Z//;
+    my_die "Malformed line: $_" if $1 =~ tr/A-Z//;
   }
 }
 if (defined $delta_source) {
@@ -171,10 +182,10 @@ if (defined $delta_source) {
     # with sources being in the same directory.
     $Copies{$delta_target} = $delta_source;
   } else {
-    die "$0: delta source defined but not target";
+    my_die "delta source defined but not target";
   }
 } elsif (defined $delta_target) {
-  die "$0: delta target defined but not source";
+  my_die "delta target defined but not source";
 }
 
 close $master;
@@ -203,7 +214,7 @@ close $master;
   # Things we copy to won't be in MANIFEST
 
   my $filename = abs_from_top('MANIFEST');
-  open my $mani, '<', $filename or die "$0: opening $filename failed: $!";
+  open my $mani, '<', $filename or my_die "opening $filename failed: $!";
   while (<$mani>) {
     if (m!^pod/([^.]+\.pod)\s+!i) {
       push @manipods, $1;
@@ -212,12 +223,12 @@ close $master;
       push @manireadmes, "perl$1.pod";
     }
   }
-  close $mani or die $!;
+  close $mani or my_die "close MANIFEST: $!\n";
   @manipods{@manipods} = @manipods;
   @manireadmes{@manireadmes} = @manireadmes;
 
   $filename = abs_from_top('pod/perl.pod');
-  open my $perlpod, '<', $filename or die "$0: opening $filename failed: $!\n";
+  open my $perlpod, '<', $filename or my_die "opening $filename failed: $!\n";
   while (<$perlpod>) {
     if (/^For ease of access, /../^\(If you're intending /) {
       if (/^\s+(perl\S*)\s+\w/) {
@@ -225,8 +236,8 @@ close $master;
       }
     }
   }
-  close $perlpod or die $!;
-  die "$0: could not find the pod listing of perl.pod\n"
+  close $perlpod or my_die "close perlpod: $!\n";
+  my_die "could not find the pod listing of perl.pod\n"
     unless @perlpods;
   @perlpods{@perlpods} = @perlpods;
 
@@ -307,7 +318,7 @@ if ($Build{toc}) {
     }
   }
 
-  die "$0: no pods" unless @modpods;
+  my_die "Can't find any pods!\n" unless @modpods;
 
   my %done;
   for (@modpods) {
@@ -429,7 +440,7 @@ sub podset {
 
     local $/ = '';
 
-    open my $fh, '<', $file or die "Can't open file '$file' for $pod: $!";
+    open my $fh, '<', $file or my_die "Can't open file '$file' for $pod: $!";
 
     while(<$fh>) {
 	tr/\015//d;
@@ -524,7 +535,7 @@ sub generate_perlpod {
       # blank line
       push @output, "\n";
     } else {
-      die "$0: Illegal length " . scalar @$_;
+      my_die "Illegal length " . scalar @$_;
     }
   }
   # want at least 2 spaces padding
@@ -659,7 +670,7 @@ sub do_perlpod {
 		   )+
 		  }
 	  {$1 . join "", &generate_perlpod}mxe) {
-    die "$0: Failed to insert amendments in do_perlpod";
+    my_die "Failed to insert amendments in do_perlpod";
   }
   $pod;
 }
@@ -667,7 +678,7 @@ sub do_perlpod {
 sub do_podmak {
   my ($name, $body) = @_;
   foreach my $variable (qw(pod man html tex)) {
-    die "$0: could not find $variable in $name"
+    my_die "could not find $variable in $name"
       unless $body =~ s{\n\U$variable\E = (?:[^\n]*\\\n)*[^\n]*}
 	{"\n" . generate_pod_mak ($variable)}se;
   }
@@ -680,7 +691,7 @@ sub do_vms {
   verify_contiguous($name, $makefile, 'pod assignments');
   $makefile =~ s/\0+/join "\n", '', &generate_descrip_mms_1/se;
 
-  die "$0: $name contains NUL bytes" if $makefile =~ /\0/;
+  my_die "$name contains NUL bytes" if $makefile =~ /\0/;
 
 # Looking for the macro defining the current perldelta:
 #PERLDELTA_CURRENT = [.pod]perl5139delta.pod
@@ -744,10 +755,10 @@ while (my ($target, $name) = each %Targets) {
   print "Now processing $name\n" if $Verbose;
   if ($target ne "toc") {
     local $/;
-    open my $thing, '<', $name or die "Can't open $name: $!";
+    open my $thing, '<', $name or my_die "Can't open $name: $!";
     binmode $thing;
     $orig = <$thing>;
-    die "$0: $name contains NUL bytes" if $orig =~ /\0/;
+    my_die "$name contains NUL bytes" if $orig =~ /\0/;
   }
 
   my $new = do {
@@ -767,16 +778,16 @@ while (my ($target, $name) = each %Targets) {
       printf "not ok %d # $name is up to date\n", $built + 1;
       next;
     }
-    $mode = (stat $name)[2] // die "$0: Can't stat $name: $!";
-    rename $name, "$name.old" or die "$0: Can't rename $name to $name.old: $!";
+    $mode = (stat $name)[2] // my_die "Can't stat $name: $!";
+    rename $name, "$name.old" or my_die "Can't rename $name to $name.old: $!";
   }
 
-  open my $thing, '>', $name or die "$0: Can't open $name for writing: $!";
+  open my $thing, '>', $name or my_die "Can't open $name for writing: $!";
   binmode $thing;
-  print $thing $new or die "$0: print to $name failed: $!";
-  close $thing or die "$0: close $name failed: $!";
+  print $thing $new or my_die "print to $name failed: $!";
+  close $thing or my_die "close $name failed: $!";
   if (defined $mode) {
-    chmod $mode & 0777, $name or die "$0: can't chmod $mode $name: $!";
+    chmod $mode & 0777, $name or my_die "can't chmod $mode $name: $!";
   }
 }
 
