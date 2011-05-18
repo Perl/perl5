@@ -5,11 +5,12 @@ use Config;
 
 my $db_file;
 BEGIN {
-    eval "use Test::More";
-    if ($@) {
+    if (not eval "use Test::More; 1") {
         print "1..0 # Skip: Test::More not available\n";
         die "Test::More not available\n";
     }
+
+    plan(skip_all => "these tests needs Perl 5.5+") if $] < 5.005;
 
     use Config;
     foreach (qw/SDBM_File GDBM_File ODBM_File NDBM_File DB_File/) {
@@ -40,20 +41,31 @@ can_ok( 'XSLoader' => 'load' );
 can_ok( 'XSLoader' => 'bootstrap_inherit' );
 
 # Check error messages
-foreach (['Thwack', 'package Thwack; XSLoader::load(); 1'],
-	 ['Zlott', 'package Thwack; XSLoader::load("Zlott"); 1'],
-	) {
-    my ($should_load, $codestr) = @$_;
-    is(eval $codestr, undef, "eval '$codestr' should die");
+my @cases = (
+    [ 'Thwack', 'package Thwack; XSLoader::load(); 1'        ],
+    [ 'Zlott' , 'package Thwack; XSLoader::load("Zlott"); 1' ],
+);
 
+for my $case (@cases) {
+    my ($should_load, $codestr) = @$case;
+    my $diag;
+
+    # determine the expected diagnostic
     if ($Config{usedl}) {
-	like( $@, qr/^Can't locate loadable object for module $should_load in \@INC/,
-	      "calling XSLoader::load() under a package with no XS part" );
+        if ($case->[0] eq "Thwack" and ($] == 5.008004 or $] == 5.008005)) {
+            # these versions had bugs with chained C<goto &>
+            $diag = "Usage: DynaLoader::bootstrap\\(module\\)";
+        } else {
+            # normal diagnostic for a perl with dynamic loading
+            $diag = "Can't locate loadable object for module $should_load in \@INC";
+        }
+    } else {
+        # a perl with no dynamic loading
+        $diag = "Can't load module $should_load, dynamic loading not available in this perl.";
     }
-    else {
-	like( $@, qr/^Can't load module $should_load, dynamic loading not available in this perl./,
-	      "calling XSLoader::load() under a package with no XS part" );
-    }
+
+    is(eval $codestr, undef, "eval '$codestr' should die");
+    like($@, qr/^$diag/, "calling XSLoader::load() under a package with no XS part");
 }
 
 # Now try to load well known XS modules
@@ -65,10 +77,10 @@ for my $module (sort keys %modules) {
     local $SIG{__WARN__} = sub { $warnings = $_[0] };
 
     SKIP: {
-        skip "$module not available", 4 if $extensions !~ /\b$module\b/;
+        skip "$module not available", 3 if $extensions !~ /\b$module\b/;
 
         eval qq{ package $module; XSLoader::load('$module', "12345678"); };
-        like( $@, "/^$module object version \\S+ does not match bootstrap parameter (?:12345678|0)/",
+        like( $@, "/^$module object version \\S+ does not match bootstrap parameter 12345678/",
                 "calling XSLoader::load() with a XS module and an incorrect version" );
 
         eval qq{ package $module; XSLoader::load('$module'); };

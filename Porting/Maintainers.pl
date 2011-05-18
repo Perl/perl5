@@ -2071,7 +2071,7 @@ use File::Glob qw(:case);
     'XSLoader' =>
 	{
 	'MAINTAINER'	=> 'saper',
-	'DISTRIBUTION'	=> 'SAPER/XSLoader-0.10.tar.gz',
+	'DISTRIBUTION'	=> 'SAPER/XSLoader-0.15.tar.gz',
 	'FILES'		=> q[dist/XSLoader],
 	'EXCLUDED'	=> [ qr{^eg/},
 			     qw{t/pod.t
