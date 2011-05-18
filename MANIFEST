@@ -175,6 +175,7 @@ cpan/CGI/t/carp.t			See if CGI::Carp works
 cpan/CGI/t/charset.t			See if CGI::Carp works
 cpan/CGI/t/checkbox_group.t		See if CGI.pm works
 cpan/CGI/t/cookie.t			See if CGI::Cookie works
+cpan/CGI/t/delete.t			See if CGI.pm works
 cpan/CGI/t/Dump.t			See if CGI->Dump works
 cpan/CGI/t/end_form.t			See if CGI.pm works
 cpan/CGI/t/form.t			See if CGI.pm works
@@ -197,6 +198,7 @@ cpan/CGI/t/start_end_asterisk.t		See if CGI.pm works
 cpan/CGI/t/start_end_end.t		See if CGI.pm works
 cpan/CGI/t/start_end_start.t		See if CGI.pm works
 cpan/CGI/t/switch.t			See if CGI::Switch still loads
+cpan/CGI/t/tmpdir.t			See if CGI.pm works
 cpan/CGI/t/unescapeHTML.t		See if CGI::unescapeHTML() works
 cpan/CGI/t/uploadInfo.t			See if CGI.pm works
 cpan/CGI/t/upload_post_text.txt		Test data for CGI.pm

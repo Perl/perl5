@@ -1,5 +1,5 @@
 package CGI;
-require 5.006;
+require 5.008001;
 use Carp 'croak';
 
 # See the bottom of this file for the POD documentation.  Search for the
@@ -20,7 +20,7 @@ use Carp 'croak';
 
 # The revision is no longer being updated since moving to git. 
 $CGI::revision = '$Id: CGI.pm,v 1.266 2009/07/30 16:32:34 lstein Exp $';
-$CGI::VERSION='3.52';
+$CGI::VERSION='3.54';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -648,9 +648,9 @@ sub init {
 	  last METHOD;
       }
 
-      # If method is GET or HEAD, fetch the query from
+      # If method is GET, HEAD or DELETE, fetch the query from
       # the environment.
-      if ($is_xforms || $meth=~/^(GET|HEAD)$/) {
+      if ($is_xforms || $meth=~/^(GET|HEAD|DELETE)$/) {
 	  if ($MOD_PERL) {
 	    $query_string = $self->r->args;
 	  } else {
@@ -4524,7 +4524,7 @@ HTML "standards".
 
      $query = CGI->new;
 
-This will parse the input (from both POST and GET methods) and store
+This will parse the input (from POST, GET and DELETE methods) and store
 it into a perl5 object called $query. 
 
 Any filehandles from file uploads will have their position reset to 
