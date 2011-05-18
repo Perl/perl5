@@ -1287,8 +1287,6 @@ the scalar's value cannot change unless written to.
 		 } STMT_END
 #endif
 
-#define PERL_FBM_TABLE_OFFSET 1	/* Number of bytes between EOS and table */
-
 /* SvPOKp not SvPOK in the assertion because the string can be tainted! eg
    perl -T -e '/$^X/'
 */
