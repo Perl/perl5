@@ -1,67 +1,1474 @@
 #!/usr/bin/perl -w
 
-require './test.pl';
-
 use strict;
+use warnings;
+use feature 'unicode_strings';
 
-{
-    package My::Pod::Checker;
-    use strict;
-    use parent 'Pod::Checker';
+use Carp;
+use Digest;
+use File::Find;
+use File::Spec;
+use Scalar::Util;
+use Text::Tabs;
 
-    use vars '@errors'; # a bad, bad hack!
+BEGIN {
+    require '../regen/regen_lib.pl';
+}
 
-    sub poderror {
-        my $self = shift;
-        my $opts;
-        if (ref $_[0]) {
-            $opts = shift;
-        };
-        ++($self->{_NUM_ERRORS})
-            if(!$opts || ($opts->{-severity} && $opts->{-severity} eq 'ERROR'));
-        ++($self->{_NUM_WARNINGS})
-            if(!$opts || ($opts->{-severity} && $opts->{-severity} eq 'WARNING'));
-        push @errors, $opts;
-    };
+sub DEBUG { 0 };
+
+=pod
+
+=head1 NAME
+
+podcheck.t - Look for possible problems in the Perl pods
+
+=head1 SYNOPSIS
+
+ cd t
+ ./perl -I../lib porting/podcheck.t [--show_all] [--cpan] [--counts]
+                                                            [ FILE ...]
+ ./perl -I../lib porting/podcheck.t --regen
+
+=head1 DESCRIPTION
+
+podcheck.t is an extension of Pod::Checker.  It looks for pod errors and
+potential errors in the files given as arguments, or if none specified, in all
+pods in the distribution workspace, except those in the cpan directory (unless
+C<--cpan> is specified).  It does additional checking beyond that done by
+Pod::Checker, and keeps a database of known potential problems, and will
+fail a pod only if the number of such problems differs from that given in the
+database.  It also suppresses the C<(section) deprecated> message from
+Pod::Checker, since specifying the man page section number is quite proper to do.
+
+The additional checks it makes are:
+
+=over
+
+=item Cross-pod link checking
+
+Pod::Checker verifies that links to an internal target in a pod are not
+broken.  podcheck.t extends that (when called without FILE arguments) to
+external links.  It does this by gathering up all the possible targets in the
+workspace, and cross-checking them.  The database has a list of known targets
+outside the workspace, so podcheck.t will not raise a warning for
+using those.  It also checks that a non-broken link points to just one target.
+(The destination pod could have two targets with the same name.)
+
+=item An internal link that isn't so specified
+
+If a link is broken, but there is an existing internal target of the same
+name, it is likely that the internal target was meant, and the C<"/"> is
+missing from the C<LE<lt>E<gt>> pod command.
+
+=item Verbatim paragraphs that wrap in an 80 column window
+
+It's annoying to have lines wrap when displaying pod documentation in a
+terminal window.  This checks that all such lines fit, and for those that
+don't, it tells you how much needs to be cut in order to fit.  However,
+if you're fixing these, keep in mind that some terminal/pager combinations
+require really a maximum of 79 or 78 columns to display properly.
+
+Often, the easiest thing to do to gain space for these is to lower the indent
+to just one space.
+
+=item Missing or duplicate NAME or missing NAME short description
+
+A pod can't be linked to unless it has a unique name.
+And a NAME should have a dash and short description after it.
+
+=item =encoding statement issues
+
+This indicates if an C<=encoding> statement should be present, or moved to the
+front of the pod.
+
+=item Items that perhaps should be links
+
+There are mentions of apparent files in the pods that perhaps should be links
+instead, using C<LE<lt>...E<gt>>
+
+=item Items that perhaps should be C<FE<lt>...E<gt>>
+
+What look like path names enclosed in C<CE<lt>...E<gt>> should perhaps have
+C<FE<lt>...E<gt>> mark-up instead.
+
+=back
+
+A number of issues raised by podcheck.t and by the base Pod::Checker are not
+really problems, but merely potential problems.  After inspecting them and
+deciding that they aren't real problems, it is possible to shut up this program
+about them, unlike base Pod::Checker.  To do this, call podcheck.t with the
+C<--regen> option to regenerate the database.  This tells it that all existing
+issues are to not be mentioned again.
+
+This isn't fool-proof.  The database merely keeps track of the number of these
+potential problems of each type for each pod.  If a new problem of a given
+type is introduced into the pod, podcheck.t will spit out all of them.  You
+then have to figure out which is the new one, and should it be changed or not.
+But doing it this way insulates the database from having to keep track of line
+numbers of problems, which may change, or the exact wording of each problem
+which might also change without affecting whether it is a problem or not.
+
+Also, if the count of potential problems of a given type for a pod decreases,
+the database must be regenerated so that it knows the new number.  The program
+gives instructions when this happens.
+
+There is currently no check that modules listed as valid in the data base
+actually are.  Thus any errors introduced there will remain there.
+
+=head1 OPTIONS
+
+=over
+
+=item --regen
+
+Regenerate the data base used by podcheck.t to include all the existing
+potential problems.  Future runs of the program will not then flag any of
+these.
+
+=item --cpan
+
+Normally, all pods in the cpan directory are skipped, except to make sure that
+any blead-upstream links to such pods are valid.
+This option will cause cpan upstream pods to be checked.
+
+=item --show_all
+
+Normally, if the number of potential problems of a given type found for a
+pod matches the expected value in the database, they will not be displayed.
+This option forces the database to be ignored during the run, so all potential
+problems are displayed and will fail their respective pod test.  Specifying
+any particular FILES to operate on automatically selects this option.
+
+=item --counts
+
+Instead of testing, this just dumps the counts of the occurrences of the
+various types of potential problems in the data base.
+
+=back
+
+=head1 FILES
+
+The database is stored in F<t/porting/known_pod_issues.dat>
+
+=head1 SEE ALSO
+
+L<Pod::Checker>
+
+=cut
+
+#####################################################
+# HOW IT WORKS (in general)
+#
+# If not called with specific files to check, the directory structure is
+# examined for files that have pods in them.  Files that might not have to be
+# fully parsed (e.g. in cpan) are parsed enough at this time to find their
+# pod's NAME, and to get a checksum.
+#
+# Those kinds of files are sorted last, but otherwise the pods are parsed with
+# the package coded here, My::Pod::Checker, which is an extension to
+# Pod::Checker that adds some tests and suppresses others that aren't
+# appropriate.  The latter module has no provision for capturing diagnostics,
+# so a package, Tie_Array_to_FH, is used to force them to be placed into an
+# array instead of printed.
+#
+# Parsing the files builds up a list of links.  The files are gone through
+# again, doing cross-link checking and outputting all saved-up problems with
+# each pod.
+#
+# Sorting the files last that potentially don't need to be fully parsed allows
+# us to not parse them unless there is a link to an internal anchor in them
+# from something that we have already parsed.  Keeping checksums allows us to
+# not parse copies of other pods.
+#
+#####################################################
+
+# 1 => Exclude low priority messages that aren't likely to be problems, and
+# has many false positives; higher numbers give more messages.
+my $Warnings_Level = 200;
+
+# To see if two pods with the same NAME are actually copies of the same pod,
+# which is not an error, it uses a checksum to save work.
+my $digest_type = "SHA-1";
+
+my $original_dir = File::Spec->rel2abs(File::Spec->curdir);
+my $data_dir = File::Spec->catdir($original_dir, 'porting');
+my $known_issues = File::Spec->catfile($data_dir, 'known_pod_issues.dat');
+my $copy_fh;
+
+my $MAX_LINE_LENGTH = 80;   # 80 columns
+my $INDENT = 8;             # default nroff indent
+
+# Our warning messages.  Better not have [('"] in them, as those are used as
+# delimiters for variable parts of the messages by poderror.
+my $line_length = "Verbatim line length including indents exceeds $MAX_LINE_LENGTH by";
+my $broken_link = "Apparent broken link";
+my $broken_internal_link = "Apparent internal link is missing its forward slash";
+my $see_not_linked = "? Should you be using L<...> instead of";
+my $C_with_slash = "? Should you be using F<...> or maybe L<...> instead of";
+my $multiple_targets = "There is more than one target";
+my $duplicate_name = "Pod NAME already used";
+my $need_encoding = "Should have =encoding statement because have non-ASCII";
+my $encoding_first = "=encoding must be first command (if present)";
+my $no_name = "There is no NAME";
+my $missing_name_description = "The NAME should have a dash and short description after it";
+
+# objects, tests, etc can't be pods, so don't look for them.
+my $non_pods = qr/\.(?:[achot]|zip|gz|bz2|jar|tar|tgz|PL|so)$/;
+
+
+# Pod::Checker messages to suppress
+my @suppressed_messages = (
+    "(section) in",                         # Checker is wrong to flag this
+    "multiple occurrence of link target",   # We catch independently the ones
+                                            # that are real problems.
+    "unescaped <>",
+);
+
+sub suppressed {
+    # Returns bool as to if input message is one that is to be suppressed
+
+    my $message = shift;
+    return grep { $message =~ /^\Q$_/i } @suppressed_messages;
+}
+
+{   # Closure to contain a simple subset of test.pl.  This is to get rid of the
+    # unnecessary 'failed at' messages that would otherwise be output pointing
+    # to a particular line in this file.
+
+    my $current_test = 0;
+    my $planned;
+
+    sub plan {
+        my %plan = @_;
+        $planned = $plan{tests};
+        print "1..$planned\n";
+        return;
+    }
+
+    sub ok {
+        my $success = shift;
+        my $message = shift;
+
+        chomp $message;
+
+        $current_test++;
+        print "not " unless $success;
+        print "ok $current_test - $message\n";
+        return;
+    }
+
+    sub skip {
+        my $why = shift;
+        my $n    = @_ ? shift : 1;
+        for (1..$n) {
+            $current_test++;
+            print "ok $current_test # skip $why\n";
+        }
+        no warnings 'exiting';
+        last SKIP;
+    }
+
+    sub note {
+        my $message = shift;
+
+        chomp $message;
+
+        print $message =~ s/^/# /mgr;
+        print "\n";
+        return;
+    }
+
+    END {
+        if ($planned && $planned != $current_test) {
+            print STDERR
+            "# Looks like you planned $planned tests but ran $current_test.\n";
+        }
+    }
 }
 
 
-use strict;
-use File::Spec;
-s{^\.\./lib$}{lib} for @INC;
-chdir '..';
-my @files;
-my $manifest = 'MANIFEST';
+# List of known potential problems by pod and type.
+my %known_problems;
 
-open my $m, '<', $manifest or die "Can't open '$manifest': $!";
+# Pods given by the keys contain an interior node that is referred to from
+# outside it.
+my %has_referred_to_node;
 
-while (<$m>) {
+my $show_counts = 0;
+my $regen = 0;
+my $show_all = 0;
+
+# Assume that are to skip anything in /cpan
+my $do_upstream_cpan = 0;
+
+while (@ARGV && substr($ARGV[0], 0, 1) eq '-') {
+    my $arg = shift @ARGV;
+
+    $arg =~ s/^--/-/; # Treat '--' the same as a single '-'
+    if ($arg eq '-regen') {
+        $regen = 1;
+    }
+    elsif ($arg eq '-cpan') {
+        $do_upstream_cpan = 1;
+    }
+    elsif ($arg eq '-show_all') {
+        $show_all = 1;
+    }
+    elsif ($arg eq '-counts') {
+        $show_counts = 1;
+    }
+    else {
+        die <<EOF;
+Unknown option '$arg'
+
+Usage: $0 [ --regen | --cpan | --show_all ] [ FILE ... ]\n"
+    --cpan     -> Include files in the cpan subdirectory.
+    --regen    -> Regenerate the data file for $0
+    --show_all -> Show all known potential problems
+    --counts   -> Don't test, but give summary counts of the currently
+                  existing database
+EOF
+    }
+}
+
+my @files = @ARGV;
+
+if (($regen + $show_all + $show_counts + $do_upstream_cpan) > 1) {
+    croak "--regen, --show_all, --cpan, and --counts are mutually exclusive";
+}
+
+my $has_input_files = @files;
+
+if ($has_input_files && ($regen || $show_counts || $do_upstream_cpan)) {
+    croak "--regen, --counts and --cpan can't be used since using specific files";
+}
+
+our %problems;  # potential problems found in this run
+
+package My::Pod::Checker {      # Extend Pod::Checker
+    use parent 'Pod::Checker';
+
+    # Uses inside out hash to protect from typos
+    # For new fields, remember to add to destructor DESTROY()
+    my %indents;            # Stack of indents from =over's in effect for
+                            # current line
+    my %current_indent;     # Current line's indent
+    my %filename;           # The pod is store in this file
+    my %skip;               # is SKIP set for this pod
+    my %in_NAME;            # true if within NAME section
+    my %in_begin;           # true if within =begin section
+    my %linkable_item;      # Bool: if the latest =item is linkable.  It isn't
+                            # for bullet and number lists
+    my %linkable_nodes;     # Pod::Checker adds all =items to its node list,
+                            # but not all =items are linkable to
+    my %seen_encoding_cmd;  # true if have =encoding earlier
+    my %command_count;      # Number of commands seen
+    my %seen_pod_cmd;       # true if have =pod earlier
+    my %warned_encoding;    # true if already have warned about =encoding
+                            # problems
+
+    sub DESTROY {
+        my $addr = Scalar::Util::refaddr $_[0];
+        delete $command_count{$addr};
+        delete $current_indent{$addr};
+        delete $filename{$addr};
+        delete $in_begin{$addr};
+        delete $indents{$addr};
+        delete $in_NAME{$addr};
+        delete $linkable_item{$addr};
+        delete $linkable_nodes{$addr};
+        delete $seen_encoding_cmd{$addr};
+        delete $seen_pod_cmd{$addr};
+        delete $skip{$addr};
+        delete $warned_encoding{$addr};
+        return;
+    }
+
+    sub new {
+        my $class = shift;
+        my $filename = shift;
+
+        my $self = $class->SUPER::new(-quiet => 1,
+                                     -warnings => $Warnings_Level);
+        my $addr = Scalar::Util::refaddr $self;
+        $command_count{$addr} = 0;
+        $current_indent{$addr} = 0;
+        $filename{$addr} = $filename;
+        $in_begin{$addr} = 0;
+        $in_NAME{$addr} = 0;
+        $linkable_item{$addr} = 0;
+        $seen_encoding_cmd{$addr} = 0;
+        $seen_pod_cmd{$addr} = 0;
+        $warned_encoding{$addr} = 0;
+        return $self;
+    }
+
+    # re's for messages that Pod::Checker outputs
+    my $location = qr/ \b (?:in|at|on|near) \s+ /xi;
+    my $optional_location = qr/ (?: $location )? /xi;
+    my $line_reference = qr/ [('"]? $optional_location line\
+                             (?: \d+ | EOF | \Q???\E | - )
+                             [)'"]? /xi;
+
+    sub poderror {  # Called to register a potential problem
+
+        # This adds an extra field to the parent hash, 'parameter'.  It is
+        # used to extract the variable parts of a message leaving just the
+        # constant skeleton.  This in turn allows the message to be
+        # categorized better, so that it shows up as a single type in our
+        # database, with the specifics of each occurrence not being stored with
+        # it.
+
+        my $self = shift;
+        my $opts = shift;
+
+        my $addr = Scalar::Util::refaddr $self;
+        return if $skip{$addr};
+
+        # Input can be a string or hash.  If a string, parse it to separate
+        # out the line number and convert to a hash for easier further
+        # processing
+        my $message;
+        if (ref $opts ne 'HASH') {
+            $message = join "", $opts, @_;
+            my $line_number;
+            if ($message =~ s/\s*($line_reference)//) {
+                ($line_number = $1) =~ s/\s*$optional_location//;
+            }
+            else {
+                $line_number = '???';
+            }
+            $opts = { -msg => $message, -line => $line_number };
+        } else {
+            $message = $opts->{'-msg'};
+
+        }
+
+        $message =~ s/^\d+\s+//;
+        return if main::suppressed($message);
+
+        $self->SUPER::poderror($opts, @_);
+
+        $opts->{parameter} = "" unless $opts->{parameter};
+
+        # The variable parts of the message tend to be enclosed in '...',
+        # "....", or (...).  Extract them and put them in an extra field,
+        # 'parameter'.  This is trickier because the matching delimiter to a
+        # '(' is its mirror, and not itself.  Text::Balanced could be used
+        # instead.
+        while ($message =~ m/ \s* $optional_location ( [('"] )/xg) {
+            my $delimiter = $1;
+            my $start = $-[0];
+            $delimiter = ')' if $delimiter eq '(';
+
+            # If there is no ending delimiter, don't consider it to be a
+            # variable part.  Most likely it is a contraction like "Don't"
+            last unless $message =~ m/\G .+? \Q$delimiter/xg;
+
+            my $length = $+[0] - $start;
+
+            # Get the part up through the closing delimiter
+            my $special = substr($message, $start, $length);
+            $special =~ s/^\s+//;   # No leading whitespace
+
+            # And add that variable part to the parameter, while removing it
+            # from the message.  This isn't a foolproof way of finding the
+            # variable part.  For example '(s)' can occur in e.g.,
+            # 'paragraph(s)'
+            if ($special ne '(s)') {
+                substr($message, $start, $length) = "";
+                pos $message = $start;
+                $opts->{-msg} = $message;
+                $opts->{parameter} .= " " if $opts->{parameter};
+                $opts->{parameter} .= $special;
+            }
+        }
+
+        # Extract any additional line number given.  This is often the
+        # beginning location of something whereas the main line number gives
+        # the ending one.
+        if ($message =~ /( $line_reference )/xi) {
+            my $line_ref = $1;
+            while ($message =~ s/\s*\Q$line_ref//) {
+                $opts->{-msg} = $message;
+                $opts->{parameter} .= " " if $opts->{parameter};
+                $opts->{parameter} .= $line_ref;
+            }
+        }
+
+        carp("Couldn't extract line number from $message") if $message =~ /line \d+/;
+        push @{$problems{$filename{$addr}}{$message}}, $opts;
+        #push @{$problems{$self->get_filename}{$message}}, $opts;
+    }
+
+    sub check_encoding {    # Does it need an =encoding statement?
+        my ($self, $paragraph, $line_num, $pod_para) = @_;
+
+        # Do nothing if there is an =encoding in the file, or if the line
+        # doesn't require an =encoding, or have already warned.
+        my $addr = Scalar::Util::refaddr $self;
+        return if $seen_encoding_cmd{$addr}
+                    || $warned_encoding{$addr}
+                    || $paragraph !~ /\P{ASCII}/;
+
+        $warned_encoding{$addr} = 1;
+        my ($file, $line) = $pod_para->file_line;
+        $self->poderror({ -line => $line, -file => $file,
+                          -msg => $need_encoding
+                        });
+        return;
+    }
+
+    sub verbatim {
+        my ($self, $paragraph, $line_num, $pod_para) = @_;
+        $self->check_encoding($paragraph, $line_num, $pod_para);
+
+        $self->SUPER::verbatim($paragraph, $line_num, $pod_para);
+
+        # Pick up the name, since the parent class doesn't in verbatim
+        # NAMEs; so treat as non-verbatim.  The parent class only allows one
+        # paragraph in a NAME section, so if there is an extra blank line, it
+        # will trigger a message, but such a blank line is harmless, so skip
+        # in that case.
+        if ($in_NAME{Scalar::Util::refaddr $self} && $paragraph =~ /\S/) {
+            $self->textblock($paragraph, $line_num, $pod_para);
+        }
+
+        my @lines = split /^/, $paragraph;
+        for my $i (0 .. @lines - 1) {
+            $lines[$i] =~ s/\s+$//;
+            my $indent = $self->get_current_indent;
+            my $exceeds = length(Text::Tabs::expand($lines[$i]))
+                          + $indent - $MAX_LINE_LENGTH;
+            next unless $exceeds > 0;
+            my ($file, $line) = $pod_para->file_line;
+            $self->poderror({ -line => $line + $i, -file => $file,
+                -msg => $line_length,
+                parameter => "+$exceeds (including " . ($indent - $INDENT) . " from =over's)",
+            });
+        }
+    }
+
+    sub textblock {
+        my ($self, $paragraph, $line_num, $pod_para) = @_;
+        $self->check_encoding($paragraph, $line_num, $pod_para);
+
+        $self->SUPER::textblock($paragraph, $line_num, $pod_para);
+
+        my ($file, $line) = $pod_para->file_line;
+        my $addr = Scalar::Util::refaddr $self;
+        if ($in_NAME{$addr}) {
+            if (! $self->name) {
+                my $text = $self->interpolate($paragraph, $line_num);
+                if ($text =~ /^\s*(\S+?)\s*$/) {
+                    $self->name($1);
+                    $self->poderror({ -line => $line, -file => $file,
+                        -msg => $missing_name_description,
+                        parameter => $1});
+                }
+            }
+        }
+        $paragraph = join " ", split /^/, $paragraph;
+
+        # Matches something that looks like a file name, but is enclosed in
+        # C<...>
+        my $C_path_re = qr{ \b ( C<
+                                # exclude regexes and 'OS/2'
+                                (?! (?: (?: s | qr | m) / ) | OS/2 > )
+                                \w+ (?: / \w+ )+ > (?: \. \w+ )? )
+                          }x;
+
+        # If looks like a reference to other documentation by containing the
+        # word 'See' and then a likely pod directive, warn.
+
+        while ($paragraph =~ m{ \b See \s+ ( ( [^L] ) <
+                                ( [^<]*? )  # The not-< excludes nested C<L<...
+                                > ) }ixg) {
+            my $construct = $1;
+            my $type = $2;
+            my $interior = $3;
+            if ($interior !~ /$non_pods/
+                && $construct !~ /$C_path_re/g) {
+                $self->poderror({ -line => $line, -file => $file,
+                    -msg => $see_not_linked,
+                    parameter => $construct
+                });
+            }
+        }
+        while ($paragraph =~ m/$C_path_re/g) {
+            my $construct = $1;
+            $self->poderror({ -line => $line, -file => $file,
+                -msg => $C_with_slash,
+                parameter => $construct
+            });
+        }
+        return;
+    }
+
+    sub command {
+        my ($self, $cmd, $paragraph, $line_num, $pod_para) = @_;
+        my $addr = Scalar::Util::refaddr $self;
+        if ($cmd eq "pod") {
+            $seen_pod_cmd{$addr}++;
+        }
+        elsif ($cmd eq "encoding") {
+            my ($file, $line) = $pod_para->file_line;
+            $seen_encoding_cmd{$addr} = 1;
+            if ($command_count{$addr} != 1 && $seen_pod_cmd{$addr}) {
+                $self->poderror({ -line => $line, -file => $file,
+                                  -msg => $encoding_first
+                                });
+            }
+        }
+        $self->check_encoding($paragraph, $line_num, $pod_para);
+
+        # Pod::Check treats all =items as linkable, but the bullet and
+        # numbered lists really aren't.  So keep our own list.  This has to be
+        # processed before SUPER is called so that the list is started before
+        # the rest of it gets parsed.
+        if ($cmd eq 'item') { # Not linkable if item begins with * or a digit
+            $linkable_item{$addr} = ($paragraph !~ / ^ \s*
+                                                   (?: [*]
+                                                   | \d+ \.? (?: \$ | \s+ )
+                                                   )/x)
+                                  ? 1
+                                  : 0;
+
+        }
+        $self->SUPER::command($cmd, $paragraph, $line_num, $pod_para);
+
+        $command_count{$addr}++;
+
+        $in_NAME{$addr} = 0;    # Will change to 1 below if necessary
+        $in_begin{$addr} = 0;   # ibid
+        if ($cmd eq 'over') {
+            my $text = $self->interpolate($paragraph, $line_num);
+            my $indent = 4; # default
+            $indent = $1 if $text && $text =~ /^\s*(\d+)\s*$/;
+            push @{$indents{$addr}}, $indent;
+            $current_indent{$addr} += $indent;
+        }
+        elsif ($cmd eq 'back') {
+            if (@{$indents{$addr}}) {
+                $current_indent{$addr} -= pop @{$indents{$addr}};
+            }
+            else {
+                 # =back without corresponding =over, but should have
+                 # warned already
+                $current_indent{$addr} = 0;
+            }
+        }
+        elsif ($cmd =~ /^head/) {
+            if (! $in_begin{$addr}) {
+
+                # If a particular formatter, then this command doesn't really
+                # apply
+                $current_indent{$addr} = 0;
+                undef @{$indents{$addr}};
+            }
+
+            my $text = $self->interpolate($paragraph, $line_num);
+            $in_NAME{$addr} = 1 if $cmd eq 'head1'
+                                   && $text && $text =~ /^NAME\b/;
+        }
+        elsif ($cmd eq 'begin') {
+            $in_begin{$addr} = 1;
+        }
+
+        return;
+    }
+
+    sub hyperlink {
+        my $self = shift;
+
+        # If the hyperlink is to an interior node of another page, save it
+        # so that we can see if we need to parse normally skipped files.
+        $has_referred_to_node{$_[0][1]{'-page'}} = 1
+                            if $_[0] && $_[0][1]{'-page'} && $_[0][1]{'-node'};
+        return $self->SUPER::hyperlink($_[0]);
+    }
+
+    sub node {
+        my $self = shift;
+        my $text = $_[0];
+        if($text) {
+            $text =~ s/\s+$//s; # strip trailing whitespace
+            $text =~ s/\s+/ /gs; # collapse whitespace
+            my $addr = Scalar::Util::refaddr $self;
+            push(@{$linkable_nodes{$addr}}, $text) if
+                                    ! $current_indent{$addr}
+                                    || $linkable_item{$addr};
+        }
+        return $self->SUPER::node($_[0]);
+    }
+
+    sub get_current_indent {
+        return $INDENT + $current_indent{Scalar::Util::refaddr $_[0]};
+    }
+
+    sub get_filename {
+        return $filename{Scalar::Util::refaddr $_[0]};
+    }
+
+    sub linkable_nodes {
+        my $linkables = $linkable_nodes{Scalar::Util::refaddr $_[0]};
+        return undef unless $linkables;
+        return @$linkables;
+    }
+
+    sub get_skip {
+        return $skip{Scalar::Util::refaddr $_[0]} // 0;
+    }
+
+    sub set_skip {
+        my $self = shift;
+        $skip{Scalar::Util::refaddr $self} = shift;
+
+        # If skipping, no need to keep the problems for it
+        delete $problems{$self->get_filename};
+        return;
+    }
+}
+
+package Tie_Array_to_FH {  # So printing actually goes to an array
+
+    my %array;
+
+    sub TIEHANDLE {
+        my $class = shift;
+        my $array_ref = shift;
+
+        my $self = bless \do{ my $anonymous_scalar }, $class;
+        $array{Scalar::Util::refaddr $self} = $array_ref;
+
+        return $self;
+    }
+
+    sub PRINT {
+        my $self = shift;
+        push @{$array{Scalar::Util::refaddr $self}}, @_;
+        return 1;
+    }
+}
+
+
+my %filename_to_checker; # Map a filename to it's pod checker object
+my %id_to_checker;      # Map a checksum to it's pod checker object
+my %nodes;              # key is filename, values are nodes in that file.
+my %nodes_first_word;   # same, but value is first word of each node
+my %valid_modules;      # List of modules known to exist outside us.
+my %digests;            # checksums of files, whose names are the keys
+my %filename_to_pod;    # Map a filename to its pod NAME
+my %files_with_unknown_issues;
+my %files_with_fixes;
+
+my $data_fh;
+open($data_fh, $known_issues) || die "Can't open $known_issues";
+
+my %counts; # For --counts param, count of each issue type
+my %suppressed_files;   # Files with at least one issue type to suppress
+
+while (<$data_fh>) {    # Read the data base
     chomp;
-    next unless /\s/;   # Ignore lines without whitespace (i.e., filename only)
-    my ($file, $separator) = /^(\S+)(\s+)/;
-	next if $file =~ /^cpan\//;
-	next unless ($file =~ /\.(?:pm|pod|pl)$/);
-	next if $file eq 'autodoc.pl';
-    push @files, $file;
-};
-@files = sort @files; # so we get consistent results
+    next if /^\s*(?:#|$)/;  # Skip comment and empty lines
+    if (/\t/) {
+        next if $show_all;
 
-sub pod_ok {
-    my ($filename) = @_;
-    local @My::Pod::Checker::errors;
-    my $checker = My::Pod::Checker->new(-quiet => 1);
-    $checker->parse_from_file($filename, undef);
-    my $error_count = $checker->num_errors();
+        # Keep track of counts of each issue type for each file
+        my ($filename, $message, $count) = split /\t/;
+        $known_problems{$filename}{$message} = $count;
 
-    if(! ok($error_count <= 0, "POD of $filename")) {
-        diag( "'$filename' contains POD errors" );
-        diag(sprintf "%s %s: %s at line %s",
-             $_->{-severity}, $_->{-file}, $_->{-msg}, $_->{-line})
-            for @My::Pod::Checker::errors;
-    };
-};
+        if ($show_counts) {
+            if ($count < 0) {   # -1 means to suppress this issue type
+                $suppressed_files{$filename} = $filename;
+            }
+            else {
+                $counts{$message} += $count;
+            }
+        }
+    }
+    else {  # Lines without a tab are modules known to be valid
+        $valid_modules{$_} = 1
+    }
+}
+close $data_fh;
 
-plan (tests => scalar @files);
+if ($show_counts) {
+    my $total = 0;
+    foreach my $message (sort keys %counts) {
+        $total += $counts{$message};
+        note(Text::Tabs::expand("$counts{$message}\t$message"));
+    }
+    note("-----\n" . Text::Tabs::expand("$total\tknown potential issues"));
+    if (%suppressed_files) {
+        note("\nFiles that have all messages of at least one type suppressed:");
+        note(join ",", keys %suppressed_files);
+    }
+    exit 0;
+}
 
-pod_ok $_
-    for @files;
+
+my %excluded_files = (
+                        "lib/unicore/mktables" => 1,
+                        "Porting/perldelta_template.pod" => 1,
+                        "autodoc.pl" => 1,
+                        "configpm" => 1,
+                        "miniperl" => 1,
+                        "perl" => 1,
+                    );
+
+# re to match files that are to be parsed only if there is an internal link
+# to them.  It does not include cpan, as whether those are parsed depends
+# on a switch.  Currently, only the stable perldelta.pod's are included.
+# These all have characters between 'perl' and 'delta'.  (Actually the
+# currently developed one matches as well, but is a duplicate of
+# perldelta.pod, so can be skipped, so fine for it to match this.
+my $only_for_interior_links_re = qr/ \b perl \d+ delta \. pod \b/x;
+
+{ # Closure
+    my $first_time = 1;
+
+    sub output_thanks ($$$$) {  # Called when an issue has been fixed
+        my $filename = shift;
+        my $original_count = shift;
+        my $current_count = shift;
+        my $message = shift;
+
+        $files_with_fixes{$filename} = 1;
+        my $return;
+        my $fixed_count = $original_count - $current_count;
+        my $a_problem = ($fixed_count == 1) ? "a problem" : "multiple problems";
+        my $another_problem = ($fixed_count == 1) ? "another problem" : "another set of problems";
+        my $diff;
+        if ($message) {
+            $diff = <<EOF;
+There were $original_count occurrences (now $current_count) in this pod of type
+"$message",
+EOF
+        } else {
+            $diff = <<EOF;
+There are no longer any problems found in this pod!
+EOF
+        }
+
+        if ($first_time) {
+            $first_time = 0;
+            $return = <<EOF;
+Thanks for fixing $a_problem!
+$diff
+Now you must teach $0 that this was fixed.
+EOF
+        }
+        else {
+            $return = <<EOF
+Thanks for fixing $another_problem.
+$diff
+EOF
+        }
+
+        return $return;
+    }
+}
+
+sub my_safer_print {    # print, with error checking for outputting to db
+    my ($fh, @lines) = @_;
+
+    if (! print $fh @lines) {
+        my $save_error = $!;
+        close($fh);
+        die "Write failure: $save_error";
+    }
+}
+
+sub extract_pod {   # Extracts just the pod from a file
+    my $filename = shift;
+
+    my @pod;
+
+    # Arrange for the output of Pod::Parser to be collected in an array we can
+    # look at instead of being printed
+    tie *ALREADY_FH, 'Tie_Array_to_FH', \@pod;
+    open my $in_fh, '<', $filename
+        or die "Can't open '$filename': $!\n";
+
+    my $parser = Pod::Parser->new();
+    $parser->parse_from_filehandle($in_fh, *ALREADY_FH);
+    close $in_fh;
+
+    return join "", @pod
+}
+
+my $digest = Digest->new($digest_type);
+
+sub is_pod_file {
+    if (-d $_) {
+        # Don't look at files in directories that are for tests, nor those
+        # beginning with a dot
+        if ($_ eq 't' || $_ =~ /^\../) {
+            $File::Find::prune = 1;
+        }
+        return;
+    }
+
+    return if $_ =~ /^\./;           # No hidden Unix files
+    return if $_ =~ $non_pods;
+
+    my $filename = $File::Find::name;
+
+    # Assumes that the path separator is exactly one character.
+    $filename =~ s/^\..//;
+
+    return if $excluded_files{$filename};
+
+    open my $candidate, '<', $_
+        or die "Can't open '$File::Find::name': $!\n";
+    my @contents = <$candidate>;
+    close $candidate;
+
+    # If the file is a .pm or .pod, having any initial '=' on a line is
+    # grounds for testing it.  Otherwise, require a head1 NAME line to view it
+    # as a potential pod
+    my $i;
+    my $found = "";
+    for ($i = 0; $i < @contents; $i++) {
+        next unless $contents[$i] =~ /^=/;
+        if ($filename =~ /\.(?:pm|pod)/) {
+            $found = 'found_some_pod_line';
+            last;
+        }
+        elsif ($contents[$i] =~ /^=head1 +NAME/) {
+            $found = 'found_NAME';
+            last;
+        }
+    }
+    if ($found) {
+        # Here, we know that the file is a pod.  Add it to the list of files
+        # to check and create a checker object for it.
+
+        push @files, $filename;
+        my $checker = My::Pod::Checker->new($filename);
+        $filename_to_checker{$filename} = $checker;
+
+        # In order to detect duplicate pods and only analyze them once, we
+        # compute checksums for the file, so don't have to do an exact
+        # compare.  Note that if the pod is just part of the file, the
+        # checksums can differ for the same pod.  That special case is handled
+        # later, since if the checksums of the whole file are the same, that
+        # case won't even come up.  We don't need the checksums for files that
+        # we parse only if there is a link to its interior, but we do need its
+        # NAME, which is also retrieved in the code below.
+        if ($filename =~ / (?: ^(cpan|lib|ext|dist)\/ )
+                            | $only_for_interior_links_re
+                        /x) {
+            $digest->add(@contents);
+            $digests{$filename} = $digest->digest;
+
+            # lib files aren't analyzed if they are duplicates of files copied
+            # there from some other directory.  But to determine this, we need
+            # to know their NAMEs.  We might as well find the NAME now while
+            # the file is open.  Similarly, cpan files aren't analyzed unless
+            # we're analyzing all of them, or this particular file is linked
+            # to by a file we are analyzing, and thus we will want to verify
+            # that the target exists in it.  We need to know at least the NAME
+            # to see if it's worth analyzing, or so we can determine if a lib
+            # file is a copy of a cpan one.
+            if ($filename =~ m{ (?: ^ (?: cpan | lib ) / )
+                                | $only_for_interior_links_re
+                                }x) {
+                if ($found eq 'found_some_pod_line') {
+                    for (;  $i < @contents; $i++) {
+                        next if $contents[$i] !~ /^=head1/;
+                        $found = 'found_NAME'
+                                        if $contents[$i] =~ /^=head1 +NAME/;
+                        last;
+                    }
+                }
+                if ($found eq 'found_NAME') {
+                    $i++;   # The NAME starts on a later line
+
+                    # Skip empty lines
+                    while ($contents[$i] !~ /\S/) { $i++ }
+
+                    # The NAME is the first non-spaces on the line up to a
+                    # comma, dash or end of line.  Otherwise, it's invalid and
+                    # this pod doesn't have a legal name that we're smart
+                    # enough to find currently.  But the  parser will later
+                    # find it if it thinks there is a legal name, and set the
+                    # name
+                    if ($contents[$i] =~ /^ \s* ( \S+?) \s* (?: [,-] | $ )/x) {
+                        my $name = $1;
+                        $checker->name($name);
+                        $id_to_checker{$name} = $checker
+                                                if $filename =~ m{^cpan/};
+                    }
+                }
+                elsif ($filename =~ m{^cpan/}) {
+                    $id_to_checker{$digests{$filename}} = $checker;
+                }
+            }
+        }
+    }
+} # End of is_pod_file()
+
+# Start of real code that isn't processing the command line.
+# Here, @files contains list of files on the command line.  If have any of
+# these, unconditionally test them, and show all the errors, even the known
+# ones, and, since not testing other pods, don't do cross-pod link tests.
+# (Could add extra code to do cross-pod tests for the ones in the list.)
+if ($has_input_files) {
+    undef %known_problems;
+    $do_upstream_cpan = 1;  # In case one of the inputs is from cpan
+
+}
+else { # No input files -- go find all the possibilities.
+    if ($regen) {
+        $copy_fh = open_new($known_issues);
+        note("Regenerating $known_issues, please be patient...");
+        print $copy_fh <<END;
+# This file is the data file for $0.
+# There are three types of lines.
+# Comment lines are white-space only or begin with a '#', like this one.  Any
+#   changes you make to the comment lines will be lost when the file is
+#   regen'd.
+# Lines without tab characters are simply NAMES of pods that the program knows
+#   will have links to them and the program does not check if those links are
+#   valid.
+# All other lines should have three fields, each separated by a tab.  The
+#   first field is the name of a pod; the second field is an error message
+#   generated by this program; and the third field is a count of how many
+#   known instances of that message there are in the pod.  -1 means that the
+#   program can expect any number of this type of message.
+END
+    }
+
+    # Move to the directory above us, but have to adjust @INC to account for
+    # that.
+    s{^\.\./lib$}{lib} for @INC;
+    chdir File::Spec->updir;
+
+    # And look in this directory and all its subdirectories
+    find( \&is_pod_file, '.');
+
+    # Add ourselves to the test
+    push @files, 't/porting/podcheck.t';
+}
+
+# Now we know how many tests there will be.
+plan (tests => scalar @files) if ! $regen;
+
+
+ # Sort file names so we get consistent results, and to put cpan last,
+ # preceeded by the ones that we don't generally parse.  This is because both
+ # these classes are generally parsed only if there is a link to the interior
+ # of them, and we have to parse all others first to guarantee that they don't
+ # have such a link. 'lib' files come just before these, as some of these are
+ # duplicates of others.  We already have figured this out when gathering the
+ # data as a special case for all such files, but this, while unnecessary,
+ # puts the derived file last in the output.  'readme' files come before those,
+ # as those also could be duplicates of others, which are considered the
+ # primary ones.  These currently aren't figured out when gathering data, so
+ # are done here.
+ @files = sort { if ($a =~ /^cpan/) {
+                    return 1 if $b !~ /^cpan/;
+                    return $a cmp $b;
+                }
+                elsif ($b =~ /^cpan/) {
+                    return -1;
+                }
+                elsif ($a =~ /$only_for_interior_links_re/) {
+                    return 1 if $b !~ /$only_for_interior_links_re/;
+                    return $a cmp $b;
+                }
+                elsif ($b =~ /$only_for_interior_links_re/) {
+                    return -1;
+                }
+                elsif ($a =~ /^lib/) {
+                    return 1 if $b !~ /^lib/;
+                    return $a cmp $b;
+                }
+                elsif ($b =~ /^lib/) {
+                    return -1;
+                } elsif ($a =~ /\breadme\b/i) {
+                    return 1 if $b !~ /\breadme\b/i;
+                    return $a cmp $b;
+                }
+                elsif ($b =~ /\breadme\b/i) {
+                    return -1;
+                }
+                else {
+                    return lc $a cmp lc $b;
+                }
+            }
+            @files;
+
+# Now go through all the files and parse them
+foreach my $filename (@files) {
+    my $parsed = 0;
+    note("parsing $filename") if DEBUG;
+
+    # We may have already figured out some things in the process of generating
+    # the file list.  If so, have a $checker object already.  But if not,
+    # generate one now.
+    my $checker = $filename_to_checker{$filename};
+    if (! $checker) {
+        $checker = My::Pod::Checker->new($filename);
+        $filename_to_checker{$filename} = $checker;
+    }
+
+    # We have set the name in the checker object if there is a possibility
+    # that no further parsing is necessary, but otherwise do the parsing now.
+    if (! $checker->name) {
+        $parsed = 1;
+        $checker->parse_from_file($filename, undef);
+    }
+
+    if ($checker->num_errors() < 0) {   # Returns negative if not a pod
+        $checker->set_skip("$filename is not a pod");
+    }
+    else {
+
+        # Here, is a pod.  See if it is one that has already been tested,
+        # or should be tested under another directory.  Use either its NAME
+        # if it has one, or a checksum if not.
+        my $name = $checker->name;
+        my $id;
+
+        if ($name) {
+            $id = $name;
+        }
+        else {
+            my $digest = Digest->new($digest_type);
+            $digest->add(extract_pod($filename));
+            $id = $digest->digest;
+        }
+
+        # If there is a match for this pod with something that we've already
+        # processed, don't process it, and output why.
+        my $prior_checker;
+        if (defined ($prior_checker = $id_to_checker{$id})
+            && $prior_checker != $checker)  # Could have defined the checker
+                                            # earlier without pursuing it
+        {
+
+            # If the pods are identical, then it's just a copy, and isn't an
+            # error.  First use the checksums we have already computed to see
+            # if the entire files are identical, which means that the pods are
+            # identical too.
+            my $prior_filename = $prior_checker->get_filename;
+            my $same = (! $name
+                        || ($digests{$prior_filename}
+                            && $digests{$filename}
+                            && $digests{$prior_filename} eq $digests{$filename}));
+
+            # If they differ, it could be that the files differ for some
+            # reason, but the pods they contain are identical.  Extract the
+            # pods and do the comparisons on just those.
+            if (! $same && $name) {
+                $same = extract_pod($prior_filename) eq extract_pod($filename);
+            }
+
+            if ($same) {
+                $checker->set_skip("The pod of $filename is a duplicate of "
+                                    . "the pod for $prior_filename");
+            } elsif ($prior_filename =~ /\breadme\b/i) {
+                $checker->set_skip("$prior_filename is a README apparently for $filename");
+            } elsif ($filename =~ /\breadme\b/i) {
+                $checker->set_skip("$filename is a README apparently for $prior_filename");
+            } else { # Here have two pods with identical names that differ
+                $prior_checker->poderror(
+                        { -msg => $duplicate_name,
+                            -line => "???",
+                            parameter => "'$filename' also has NAME '$name'"
+                        });
+                $checker->poderror(
+                    { -msg => $duplicate_name,
+                        -line => "???",
+                        parameter => "'$prior_filename' also has NAME '$name'"
+                    });
+
+                # Changing the names helps later.
+                $prior_checker->name("$name version arbitrarily numbered 1");
+                $checker->name("$name version arbitrarily numbered 2");
+            }
+
+            # In any event, don't process this pod that has the same name as
+            # another.
+            next;
+        }
+
+        # A unique pod.
+        $id_to_checker{$id} = $checker;
+
+        my $parsed_for_links = ", but parsed for its interior links";
+        if ((! $do_upstream_cpan && $filename =~ /^cpan/)
+             || $filename =~ $only_for_interior_links_re)
+        {
+            if ($filename =~ /^cpan/) {
+                $checker->set_skip("CPAN is upstream for $filename");
+            }
+            elsif ($filename =~ /perl\d+delta/) {
+                $checker->set_skip("$filename is a stable perldelta");
+            }
+            else {
+                croak("Unexpected file '$filename' encountered that has parsing for interior-linking only");
+            }
+
+            if ($name && $has_referred_to_node{$name}) {
+                $checker->set_skip($checker->get_skip() . $parsed_for_links);
+            }
+        }
+
+        # Need a name in order to process it, because not meaningful
+        # otherwise, and also can't test links to this without a name.
+        if (!defined $name) {
+            $checker->poderror( { -msg => $no_name,
+                                  -line => '???'
+                                });
+            next;
+        }
+
+        # For skipped files, just get its NAME
+        my $skip;
+        if (($skip = $checker->get_skip()) && $skip !~ /$parsed_for_links/)
+        {
+            $checker->node($name) if $name;
+        }
+        else {
+            $checker->parse_from_file($filename, undef) if ! $parsed;
+        }
+
+        # Go through everything in the file that could be an anchor that
+        # could be a link target.  Count how many there are of the same name.
+        foreach my $node ($checker->linkable_nodes) {
+            next if ! $node;        # Can be empty is like '=item *'
+            if (exists $nodes{$name}{$node}) {
+                $nodes{$name}{$node}++;
+            }
+            else {
+                $nodes{$name}{$node} = 1;
+            }
+
+            # Experiments have shown that cpan search can figure out the
+            # target of a link even if the exact wording is incorrect, as long
+            # as the first word is.  This happens frequently in perlfunc.pod,
+            # where the link will be just to the function, but the target
+            # entry also includes parameters to the function.
+            my $first_word = $node;
+            if ($first_word =~ s/^(\S+)\s+\S.*/$1/) {
+                $nodes_first_word{$name}{$first_word} = $node;
+            }
+        }
+        $filename_to_pod{$filename} = $name;
+    }
+}
+
+# Here, all files have been parsed, and all links and link targets are stored.
+# Now go through the files again and see which don't have matches.
+if (! $has_input_files) {
+    foreach my $filename (@files) {
+        next if $filename_to_checker{$filename}->get_skip;
+        my $checker = $filename_to_checker{$filename};
+        foreach my $link ($checker->hyperlink) {
+            my $linked_to_page = $link->[1]->page;
+            next unless $linked_to_page;   # intra-file checks are handled by std
+                                           # Pod::Checker
+
+            # Initialize the potential message.
+            my %problem = ( -msg => $broken_link,
+                            -line => $link->[0],
+                            parameter => "to \"$linked_to_page\"",
+                        );
+
+            # See if we have found the linked-to_file in our parse
+            if (exists $nodes{$linked_to_page}) {
+                my $node = $link->[1]->node;
+
+                # If link is only to the page-level, already have it
+                next if ! $node;
+
+                # Transform pod language to what we are expecting
+                $node =~ s,E<sol>,/,g;
+                $node =~ s/E<verbar>/|/g;
+
+                # If link is to a node that exists in the file, is ok
+                if ($nodes{$linked_to_page}{$node}) {
+
+                    # But if the page has multiple targets with the same name,
+                    # it's ambiguous which one this should be to.
+                    if ($nodes{$linked_to_page}{$node} > 1) {
+                        $problem{-msg} = $multiple_targets;
+                        $problem{parameter} = "in $linked_to_page that $node could be pointing to";
+                        $checker->poderror(\%problem);
+                    }
+                } elsif (! $nodes_first_word{$linked_to_page}{$node}) {
+
+                    # Here the link target was not found, either exactly or to
+                    # the first word.  Is an error.
+                    $problem{parameter} =~ s,"$,/$node",;
+                    $checker->poderror(\%problem);
+                }
+
+            } # Linked-to-file not in parse; maybe is in exception list
+            elsif (! exists $valid_modules{$link->[1]->page}) {
+
+                # Here, is a link to a target that we can't find.  Check if
+                # there is an internal link on the page with the target name.
+                # If so, it could be that they just forgot the initial '/'
+                if ($filename_to_pod{$filename}
+                    && $nodes{$filename_to_pod{$filename}}{$linked_to_page})
+                {
+                    $problem{-msg} =  $broken_internal_link;
+                }
+                $checker->poderror(\%problem);
+            }
+        }
+    }
+}
+
+# If regenerating the data file, start with the modules for which we don't
+# check targets
+if ($regen) {
+    foreach (sort { lc $a cmp lc $b } keys %valid_modules) {
+        my_safer_print($copy_fh, $_, "\n");
+    }
+}
+
+# Now ready to output the messages.
+foreach my $filename (@files) {
+    my $test_name = "POD of $filename";
+    SKIP: {
+        my $skip = $filename_to_checker{$filename}->get_skip // "";
+
+        if ($regen) {
+            foreach my $message ( sort keys %{$problems{$filename}}) {
+                my $count;
+
+                # Preserve a negative setting.
+                if ($known_problems{$filename}{$message}
+                    && $known_problems{$filename}{$message} < 0)
+                {
+                    $count = $known_problems{$filename}{$message};
+                }
+                else {
+                    $count = @{$problems{$filename}{$message}};
+                }
+                my_safer_print($copy_fh, "$filename\t$message\t$count\n");
+            }
+            next;
+        }
+
+        skip($skip, 1) if $skip;
+        my @diagnostics;
+        my $indent = '  ';
+
+        if ( ! $problems{$filename} && $known_problems{$filename}) {
+            push @diagnostics, output_thanks($filename,
+                            scalar keys %{$known_problems{$filename}}, 0, undef);
+        }
+        my $total_known = 0;
+        foreach my $message ( sort keys %{$problems{$filename}}) {
+            $known_problems{$filename}{$message} = 0
+                                    if ! $known_problems{$filename}{$message};
+            my $diagnostic = "";
+            my $problem_count = scalar @{$problems{$filename}{$message}};
+            $total_known += $problem_count;
+            next if $known_problems{$filename}{$message} < 0;
+            if ($problem_count > $known_problems{$filename}{$message}) {
+
+                # Here we are about to output all the messages for this type,
+                # subtract back this number we previously added in.
+                $total_known -= $problem_count;
+
+                $diagnostic .= $indent . $message;
+                if ($problem_count > 2) {
+                    $diagnostic .= "  ($problem_count occurrences)";
+                }
+                foreach my $problem (@{$problems{$filename}{$message}}) {
+                    $diagnostic .= " " if $problem_count == 1;
+                    $diagnostic .= "\n$indent$indent";
+                    $diagnostic .= "$problem->{parameter}" if $problem->{parameter};
+                    $diagnostic .= " near line $problem->{-line}";
+                    $diagnostic .= " $problem->{comment}" if $problem->{comment};
+                }
+                $diagnostic .= "\n";
+                $files_with_unknown_issues{$filename} = 1;
+            } elsif ($problem_count < $known_problems{$filename}{$message}) {
+               $diagnostic = output_thanks($filename, $known_problems{$filename}{$message}, $problem_count, $message);
+            }
+            push @diagnostics, $diagnostic if $diagnostic;
+        }
+
+        my $output = "POD of $filename";
+        $output .= ", excluding $total_known not shown known potential problems"
+                                                                if $total_known;
+        ok(@diagnostics == 0, $output);
+        if (@diagnostics) {
+            note(join "", @diagnostics,
+                                "See end of this test output for your options");
+        }
+    }
+}
+
+my $how_to = <<EOF;
+   run this test script by hand, using the following formula (on
+   Un*x-like machines):
+        cd t
+        ./perl -I../lib porting/podcheck.t --regen
+EOF
+
+if (%files_with_unknown_issues) {
+    my $were_count_files = scalar keys %files_with_unknown_issues;
+    $were_count_files = ($were_count_files == 1)
+                        ? "was $were_count_files file"
+                        : "were $were_count_files files";
+    my $message = <<EOF;
+
+HOW TO GET THIS .t TO PASS
+
+There $were_count_files that had new potential problems identified.  To get
+this .t to pass, do the following:
+
+1) If a problem is about a link to an unknown module that you know exists,
+   simply edit the file,
+   $known_issues
+   and add anywhere a line that contains just the module's name.
+   (Don't do this for a module that you aren't sure about; instead treat
+   as another type of issue and follow the instructions below.)
+
+2) For other issues, decide if each should be fixed now or not.  Fix the
+   ones you decided to, and rerun this test to verify that the fixes
+   worked.
+
+3) If there remain potential problems that you don't plan to fix right
+   now (or aren't really problems),
+$how_to
+   That should cause all current potential problems to be accepted by the
+   program, so that the next time it runs, they won't be flagged.
+EOF
+    if (%files_with_fixes) {
+        $message .= "   This step will also take care of the files that have fixes in them\n";
+    }
+
+    $message .= <<EOF;
+   For a few files, such as perltoc, certain issues will always be
+   expected, and more of the same will be added over time.  For those,
+   before you do the regen, you can edit
+   $known_issues
+   and find the entry for the module's file and specific error message,
+   and change the count of known potential problems to -1.
+EOF
+
+    note($message);
+} elsif (%files_with_fixes) {
+    note(<<EOF
+To teach this test script that the potential problems have been fixed,
+$how_to
+EOF
+    );
+}
+
+if ($regen) {
+    chdir $original_dir || die "Can't change directories to $original_dir";
+    close_and_rename($copy_fh);
+}
