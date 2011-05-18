@@ -3,7 +3,7 @@ use strict;
 use warnings;
 package CPAN::Meta::Feature;
 BEGIN {
-  $CPAN::Meta::Feature::VERSION = '2.110440';
+  $CPAN::Meta::Feature::VERSION = '2.110930';
 }
 # ABSTRACT: an optional feature provided by a CPAN distribution
 
@@ -43,7 +43,7 @@ CPAN::Meta::Feature - an optional feature provided by a CPAN distribution
 
 =head1 VERSION
 
-version 2.110440
+version 2.110930
 
 =head1 DESCRIPTION
 

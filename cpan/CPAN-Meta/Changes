@@ -1,5 +1,46 @@
 Revision history for CPAN-Meta
 
+2.110930  2011-04-02 23:31:24 America/New_York
+
+  [BUGFIX]
+
+  - Fixed a bug in the 'as_string' method that checked the module version
+    instead of the meta-spec version when conversion was requested
+    (RT #67188)
+
+2.110910  2011-04-01 08:55:30 America/New_York
+
+  [ENHANCEMENTS]
+
+  - The 1.x spec "gpl" and "lgpl" and "mozilla" license values now up-convert
+    to "open_source" because they indicate too non-specific a license.
+
+2.110580  2011-02-27 07:58:06 EST5EDT
+
+  [OTHER]
+
+  - Add explicit dependencies on JSON::PP and CPAN::Meta::YAML instead
+    of relying on Parse::CPAN::Meta to provide them (as some CPAN Testers
+    have had P::C::M installed without them somehow)
+
+  - Removed dependency on Storable as it was not a core module
+    until Perl 5.8
+
+2.110550  2011-02-24 07:17:57 EST5EDT
+
+  [OTHER]
+
+  - Added required field 'release_status' to the synopsis of
+    CPAN::Meta::Spec (RT#66118) [Oliver Mengué]
+
+2.110540  2011-02-23 15:21:16 EST5EDT
+
+  [BUGFIX]
+
+  - Had two different Parse::CPAN::Meta requirements, one in 'requires' and
+    the other in 'build_requires'. This confused some installers, so we
+    only inlude the 'requires' now.
+
 2.110440  2011-02-12 22:55:28 EST5EDT
 
   [BUGFIX]

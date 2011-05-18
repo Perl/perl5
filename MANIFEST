@@ -345,6 +345,7 @@ cpan/CPAN-Meta/t/data-fail/META-1_2.yml
 cpan/CPAN-Meta/t/data-fail/META-1_3.yml
 cpan/CPAN-Meta/t/data-fail/META-1_4.yml
 cpan/CPAN-Meta/t/data-fail/META-2.json
+cpan/CPAN-Meta/t/data/gpl-1_4.yml
 cpan/CPAN-Meta/t/data/META-1_0.yml
 cpan/CPAN-Meta/t/data/META-1_1.yml
 cpan/CPAN-Meta/t/data/META-1_2.yml

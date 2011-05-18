@@ -4,7 +4,7 @@ use strict;
 use warnings;
 package CPAN::Meta::Spec;
 BEGIN {
-  $CPAN::Meta::Spec::VERSION = '2.110440';
+  $CPAN::Meta::Spec::VERSION = '2.110930';
 }
 # ABSTRACT: specification for CPAN distribution metadata
 1;
@@ -20,7 +20,7 @@ CPAN::Meta::Spec - specification for CPAN distribution metadata
 
 =head1 VERSION
 
-version 2.110440
+version 2.110930
 
 =head1 SYNOPSIS
 
@@ -31,6 +31,7 @@ version 2.110440
       . "building, testing, and installing Perl modules. "
       . "It is meant to ... blah blah blah ...",
     version  => '0.36',
+    release_status => 'stable',
     author   => [
       'Ken Williams <kwilliams@cpan.org>',
       'Module-Build List <module-build@perl.org>', # additional contact

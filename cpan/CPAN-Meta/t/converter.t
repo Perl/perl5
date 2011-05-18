@@ -110,9 +110,22 @@ for my $f ( reverse sort @files ) {
   my $original = Parse::CPAN::Meta->load_file( $path  );
   ok( $original, "loaded META-2.json" );
   my $cmc = CPAN::Meta::Converter->new( $original );
-  my $up_converted = $cmc->convert( version => 1.4 );
-  ok ( $up_converted->{x_whatever},
+  my $down_converted = $cmc->convert( version => 1.4 );
+  ok ( $down_converted->{x_whatever},
     "down converted 'x_' as 'x_'"
+  );
+}
+
+# specific test for generalization of unclear licenses
+{
+  my $path = File::Spec->catfile('t','data','gpl-1_4.yml');
+  my $original = Parse::CPAN::Meta->load_file( $path  );
+  ok( $original, "loaded gpl-1_4.yml" );
+  my $cmc = CPAN::Meta::Converter->new( $original );
+  my $up_converted = $cmc->convert( version => 2 );
+  is_deeply ( $up_converted->{license},
+    [ "open_source" ],
+    "up converted 'gpl' to 'open_source'"
   );
 }
 
