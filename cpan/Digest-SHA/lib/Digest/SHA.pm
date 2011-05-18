@@ -7,7 +7,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 use Fcntl;
 use integer;
 
-$VERSION = '5.61';
+$VERSION = '5.62';
 
 require Exporter;
 require DynaLoader;
@@ -28,19 +28,16 @@ require DynaLoader;
 	sha512224	sha512224_base64	sha512224_hex
 	sha512256	sha512256_base64	sha512256_hex);
 
-# If possible, inherit from Digest::base (which depends on MIME::Base64)
-
-*addfile = \&Addfile;
+# If possible, inherit from Digest::base
 
 eval {
-	require MIME::Base64;
 	require Digest::base;
 	push(@ISA, 'Digest::base');
 };
-if ($@) {
-	*hexdigest = \&Hexdigest;
-	*b64digest = \&B64digest;
-}
+
+*addfile   = \&Addfile;
+*hexdigest = \&Hexdigest;
+*b64digest = \&B64digest;
 
 # The following routines aren't time-critical, so they can be left in Perl
 
