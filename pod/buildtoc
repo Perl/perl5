@@ -54,6 +54,8 @@ foreach (values %Targets) {
   $_ = abs_from_top($_);
 }
 
+# process command-line switches
+
 {
   my @files = keys %Targets;
   my $filesopts = join(" | ", map { "--build-$_" } "all", sort @files);
@@ -101,8 +103,11 @@ __USAGE__
      );
 
 if ($Verbose) {
-  print "I'm building $_\n" foreach keys %Build;
+  print "I will be building $_\n" foreach keys %Build;
 }
+
+
+# process pod.lst
 
 open my $master, '<', $masterpodfile or die "$0: Can't open $masterpodfile: $!";
 
@@ -188,7 +193,7 @@ close $master;
   }
 
   opendir my $dh, abs_from_top('pod/');
-  while (readdir $dh) {
+  while (defined ($_ = readdir $dh)) {
     next unless /\.pod\z/;
     push @disk_pods, $_;
     ++$disk_pods{$_};
