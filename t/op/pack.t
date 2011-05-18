@@ -12,7 +12,7 @@ my $no_endianness = $] > 5.009 ? '' :
 my $no_signedness = $] > 5.009 ? '' :
   "Signed/unsigned pack modifiers not available on this perl";
 
-plan tests => 14699;
+plan tests => 14700;
 
 use strict;
 use warnings qw(FATAL all);
@@ -1993,3 +1993,7 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
     my $y = runperl( prog => 'print split( /,/, unpack(q(%32u*), q(#,3,Q)), qq(\n)), qq(\n)' );
     is($y, "0\n", "split /a/, unpack('%32u*'...) didn't crash");
 }
+
+#90160
+is(eval { () = unpack "C0 U*", ""; "ok" }, "ok",
+  'medial U* on empty string');

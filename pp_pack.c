@@ -1660,7 +1660,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    break;
 	case 'U':
 	    if (len == 0) {
-                if (explicit_length) {
+                if (explicit_length && howlen != e_star) {
 		    /* Switch to "bytes in UTF-8" mode */
 		    if (symptr->flags & FLAG_DO_UTF8) utf8 = 0;
 		    else
