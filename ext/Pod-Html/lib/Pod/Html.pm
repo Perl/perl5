@@ -29,8 +29,7 @@ Pod::Html - module to convert pod files to HTML
 =head1 DESCRIPTION
 
 Converts files from pod format (see L<perlpod>) to HTML format.  It
-can automatically generate indexes and cross-references, and it keeps
-a cache of things it knows how to cross-reference.
+can automatically generate indexes and cross-references.
 
 =head1 FUNCTIONS
 
@@ -56,24 +55,12 @@ pod2html takes the following arguments:
 Adds "Back to Top" links in front of every C<head1> heading (except for
 the first).  By default, no backlinks are generated.
 
-=item cachedir
-
-    --cachedir=name
-
-Creates the item and directory caches in the given directory.
-
 =item css
 
     --css=stylesheet
 
 Specify the URL of a cascading style sheet.  Also disables all HTML/CSS
 C<style> attributes that are output by default (to avoid conflicts).
-
-=item flush
-
-    --flush
-
-Flushes the item and directory caches.
 
 =item header
 
@@ -224,8 +211,6 @@ This program is distributed under the Artistic License.
 
 =cut
 
-my($Cachedir);
-my($Dircache, $Itemcache);
 my @Begin_Stack;
 my @Libpods;
 my($Htmlroot, $Htmldir, $Htmlfile, $Htmlfileurl);
@@ -251,7 +236,7 @@ my $Paragraph;
 
 my %Sections;
 
-# Caches
+# Used to be caches, now transient hashes after removal of cache feature
 my %Pages = ();			# associative array used to find the location
 				#   of pages referenced by L<> links.
 my %Items = ();			# associative array used to find the location
@@ -265,12 +250,6 @@ my $Curdir = File::Spec->curdir;
 init_globals();
 
 sub init_globals {
-    $Cachedir = ".";		# The directory to which item and directory
-				# caches will be written.
-
-    $Dircache = "pod2htmd.tmp";
-    $Itemcache = "pod2htmi.tmp";
-
     @Begin_Stack = ();		# begin/end stack
 
     @Libpods = ();	    	# files to search for links from C<> directives
@@ -341,8 +320,6 @@ sub pod2html {
     init_globals();
 
     $Is83 = 0 if (defined (&Dos::UseLFN) && Dos::UseLFN());
-
-    # cache of %Pages and %Items from last time we ran pod2html
 
     #undef $opt_help if defined $opt_help;
 
@@ -489,10 +466,10 @@ END_OF_BLOCK
 $block
 END_OF_HEAD
 
-    # load/reload/validate/cache %Pages and %Items
-    get_cache($Dircache, $Itemcache, \@Podpath, $Podroot, $Recurse);
+    # populate %Items and %Pages
+    scan_podpath($podroot, $recurse, 0);
 
-    # scan the pod for =item directives
+   # scan the pod for =item directives
     scan_items( \%Local_Items, "", @poddata);
 
     # put an index at the top of the file.  note, if $Doindex is 0 we
@@ -637,12 +614,10 @@ sub usage {
 Usage:  $0 --help --htmlroot=<name> --infile=<name> --outfile=<name>
            --podpath=<name>:...:<name> --podroot=<name>
            --libpods=<name>:...:<name> --recurse --verbose --index
-           --norecurse --noindex --cachedir=<name>
+           --norecurse --noindex
 
   --backlink     - set text for "back to top" links (default: none).
-  --cachedir     - directory for the item and directory cache files.
   --css          - stylesheet URL
-  --flush        - flushes the item and directory caches.
   --[no]header   - produce block header/footer (default is no headers).
   --help         - prints this message.
   --hiddendirs   - search hidden directories in podpath
@@ -674,7 +649,7 @@ END_OF_USAGE
 }
 
 sub parse_command_line {
-    my ($opt_backlink,$opt_cachedir,$opt_css,$opt_flush,$opt_header,$opt_help,
+    my ($opt_backlink,$opt_css,$opt_header,$opt_help,
 	$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,$opt_libpods,
 	$opt_outfile,$opt_podpath,$opt_podroot,$opt_quiet,
 	$opt_recurse,$opt_title,$opt_verbose,$opt_hiddendirs);
@@ -682,9 +657,7 @@ sub parse_command_line {
     unshift @ARGV, split ' ', $Config{pod2html} if $Config{pod2html};
     my $result = GetOptions(
 			    'backlink=s' => \$opt_backlink,
-			    'cachedir=s' => \$opt_cachedir,
 			    'css=s'      => \$opt_css,
-			    'flush'      => \$opt_flush,
 			    'header!'    => \$opt_header,
 			    'help'       => \$opt_help,
 			    'hiddendirs!'=> \$opt_hiddendirs,
@@ -710,7 +683,6 @@ sub parse_command_line {
     @Libpods  = split(":", $opt_libpods) if defined $opt_libpods;
 
     $Backlink = $opt_backlink if defined $opt_backlink;
-    $Cachedir = $opt_cachedir if defined $opt_cachedir;
     $Css      = $opt_css      if defined $opt_css;
     $Header   = $opt_header   if defined $opt_header;
     $Htmldir  = $opt_htmldir  if defined $opt_htmldir;
@@ -724,124 +696,6 @@ sub parse_command_line {
     $Recurse  = $opt_recurse  if defined $opt_recurse;
     $Title    = $opt_title    if defined $opt_title;
     $Verbose  = $opt_verbose  if defined $opt_verbose;
-
-    warn "Flushing item and directory caches\n"
-	if $opt_verbose && defined $opt_flush;
-    $Dircache = "$Cachedir/pod2htmd.tmp";
-    $Itemcache = "$Cachedir/pod2htmi.tmp";
-    if (defined $opt_flush) {
-	1 while unlink($Dircache, $Itemcache);
-    }
-}
-
-
-my $Saved_Cache_Key;
-
-sub get_cache {
-    my($dircache, $itemcache, $podpath, $podroot, $recurse) = @_;
-    my @cache_key_args = @_;
-
-    # A first-level cache:
-    # Don't bother reading the cache files if they still apply
-    # and haven't changed since we last read them.
-
-    my $this_cache_key = cache_key(@cache_key_args);
-
-    return if $Saved_Cache_Key and $this_cache_key eq $Saved_Cache_Key;
-
-    # load the cache of %Pages and %Items if possible.  $tests will be
-    # non-zero if successful.
-    my $tests = 0;
-    if (-f $dircache && -f $itemcache) {
-	warn "scanning for item cache\n" if $Verbose;
-	$tests = load_cache($dircache, $itemcache, $podpath, $podroot);
-    }
-
-    # if we didn't succeed in loading the cache then we must (re)build
-    #  %Pages and %Items.
-    if (!$tests) {
-	warn "scanning directories in pod-path\n" if $Verbose;
-	scan_podpath($podroot, $recurse, 0);
-    }
-    $Saved_Cache_Key = cache_key(@cache_key_args);
-}
-
-sub cache_key {
-    my($dircache, $itemcache, $podpath, $podroot, $recurse) = @_;
-    return join('!', $dircache, $itemcache, $recurse,
-	@$podpath, $podroot, stat($dircache), stat($itemcache));
-}
-
-#
-# load_cache - tries to find if the caches stored in $dircache and $itemcache
-#  are valid caches of %Pages and %Items.  if they are valid then it loads
-#  them and returns a non-zero value.
-#
-sub load_cache {
-    my($dircache, $itemcache, $podpath, $podroot) = @_;
-    my($tests);
-    local $_;
-
-    $tests = 0;
-
-    open(CACHE, "<$itemcache") ||
-	die "$0: error opening $itemcache for reading: $!\n";
-    $/ = "\n";
-
-    # is it the same podpath?
-    $_ = <CACHE>;
-    chomp($_);
-    $tests++ if (join(":", @$podpath) eq $_);
-
-    # is it the same podroot?
-    $_ = <CACHE>;
-    chomp($_);
-    $tests++ if ($podroot eq $_);
-
-    # load the cache if its good
-    if ($tests != 2) {
-	close(CACHE);
-	return 0;
-    }
-
-    warn "loading item cache\n" if $Verbose;
-    while (<CACHE>) {
-	/(.*?) (.*)$/;
-	$Items{$1} = $2;
-    }
-    close(CACHE);
-
-    warn "scanning for directory cache\n" if $Verbose;
-    open(CACHE, "<$dircache") ||
-	die "$0: error opening $dircache for reading: $!\n";
-    $/ = "\n";
-    $tests = 0;
-
-    # is it the same podpath?
-    $_ = <CACHE>;
-    chomp($_);
-    $tests++ if (join(":", @$podpath) eq $_);
-
-    # is it the same podroot?
-    $_ = <CACHE>;
-    chomp($_);
-    $tests++ if ($podroot eq $_);
-
-    # load the cache if its good
-    if ($tests != 2) {
-	close(CACHE);
-	return 0;
-    }
-
-    warn "loading directory cache\n" if $Verbose;
-    while (<CACHE>) {
-	/(.*?) (.*)$/;
-	$Pages{$1} = $2;
-    }
-
-    close(CACHE);
-
-    return 1;
 }
 
 #
@@ -920,30 +774,6 @@ sub scan_podpath {
 
     chdir($pwd)
 	|| die "$0: error changing to directory $pwd: $!\n";
-
-    # cache the item list for later use
-    warn "caching items for later use\n" if $Verbose;
-    open my $cache, '>', $Itemcache
-	or die "$0: error open $Itemcache for writing: $!\n";
-
-    print $cache join(":", @Podpath) . "\n$podroot\n";
-    foreach my $key (keys %Items) {
-	print $cache "$key $Items{$key}\n";
-    }
-
-    close $cache or die "error closing $Itemcache: $!";
-
-    # cache the directory list for later use
-    warn "caching directories for later use\n" if $Verbose;
-    open $cache, '>', $Dircache
-	or die "$0: error open $Dircache for writing: $!\n";
-
-    print $cache join(":", @Podpath) . "\n$podroot\n";
-    foreach my $key (keys %Pages) {
-	print $cache "$key $Pages{$key}\n";
-    }
-
-    close $cache or die "error closing $Dircache: $!";
 }
 
 #
