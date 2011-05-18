@@ -8,12 +8,12 @@ use warnings;
 use bytes;
 
 
-use IO::Compress::RawDeflate 2.033 ;
+use IO::Compress::RawDeflate 2.035 ;
 
-use Compress::Raw::Zlib  2.033 ;
-use IO::Compress::Base::Common  2.033 qw(:Status :Parse createSelfTiedObject);
-use IO::Compress::Gzip::Constants 2.033 ;
-use IO::Compress::Zlib::Extra 2.033 ;
+use Compress::Raw::Zlib  2.035 ;
+use IO::Compress::Base::Common  2.035 qw(:Status :Parse createSelfTiedObject);
+use IO::Compress::Gzip::Constants 2.035 ;
+use IO::Compress::Zlib::Extra 2.035 ;
 
 BEGIN
 {
@@ -27,7 +27,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $GzipError);
 
-$VERSION = '2.033';
+$VERSION = '2.035';
 $GzipError = '' ;
 
 @ISA    = qw(Exporter IO::Compress::RawDeflate);
@@ -1086,7 +1086,7 @@ If the C<$z> object is associated with a file or a filehandle, C<fileno>
 will return the underlying file descriptor. Once the C<close> method is
 called C<fileno> will return C<undef>.
 
-If the C<$z> object is is associated with a buffer, this method will return
+If the C<$z> object is associated with a buffer, this method will return
 C<undef>.
 
 =head2 close

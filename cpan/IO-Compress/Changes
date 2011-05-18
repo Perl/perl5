@@ -1,7 +1,41 @@
 CHANGES
 -------
 
+  2.035 6 May 2011
+
+      * RT #67931: Test failure on Windows
+
+  2.034 2 May 2011
+
+      * Compress::Zlib
+        - Silence pod warnings.
+          [RT# 64876]
+
+        - Removed duplicate words in pod.
+
+      * IO::Compress::Base
+
+        - RT #56942: Testsuite fails when being run in parallel
+
+        - Reduce symbol import - patch from J. Nick Koston
+
+        - If the output buffer parameter passed to read has a value of
+          undef, and Append mode was specified when the file was opened,
+          and eof is reached, then the buffer paramer was left as undef.  
+          This is different from when Append isn't specified - the buffer 
+          parameter is set to an empty string.
+
+        - There area couple of issues with reading a file that contains an 
+          empty file that is compressed. 
+          Create with -- touch /tmp/empty; gzip /tmp/empty.
+          Issue 1 - eof is not true immediately. Have to read from the file
+                    to trigger eof.
+          Issue 2 - readline incorrectly returns an empty string the first 
+                    time it is called, and (correctly) undef thereafter.
+          [RT #67554]
+
   2.033 11 Jan 2011
+
       * Fixed typos & spelling errors.
         [perl# 81816]
 

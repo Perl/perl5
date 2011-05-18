@@ -6,16 +6,16 @@ use bytes;
 
 require Exporter ;
 
-use IO::Compress::RawDeflate 2.033 ;
+use IO::Compress::RawDeflate 2.035 ;
 
-use Compress::Raw::Zlib  2.033 ;
-use IO::Compress::Zlib::Constants 2.033 ;
-use IO::Compress::Base::Common  2.033 qw(createSelfTiedObject);
+use Compress::Raw::Zlib  2.035 ;
+use IO::Compress::Zlib::Constants 2.035 ;
+use IO::Compress::Base::Common  2.035 qw(createSelfTiedObject);
 
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $DeflateError);
 
-$VERSION = '2.033';
+$VERSION = '2.035';
 $DeflateError = '';
 
 @ISA    = qw(Exporter IO::Compress::RawDeflate);
@@ -774,7 +774,7 @@ If the C<$z> object is associated with a file or a filehandle, C<fileno>
 will return the underlying file descriptor. Once the C<close> method is
 called C<fileno> will return C<undef>.
 
-If the C<$z> object is is associated with a buffer, this method will return
+If the C<$z> object is associated with a buffer, this method will return
 C<undef>.
 
 =head2 close

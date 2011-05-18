@@ -9,12 +9,12 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Uncompress::RawInflate 2.033 ;
+use IO::Uncompress::RawInflate 2.035 ;
 
-use Compress::Raw::Zlib 2.033 qw( crc32 ) ;
-use IO::Compress::Base::Common 2.033 qw(:Status createSelfTiedObject);
-use IO::Compress::Gzip::Constants 2.033 ;
-use IO::Compress::Zlib::Extra 2.033 ;
+use Compress::Raw::Zlib 2.035 qw( crc32 ) ;
+use IO::Compress::Base::Common 2.035 qw(:Status createSelfTiedObject);
+use IO::Compress::Gzip::Constants 2.035 ;
+use IO::Compress::Zlib::Extra 2.035 ;
 
 require Exporter ;
 
@@ -28,7 +28,7 @@ Exporter::export_ok_tags('all');
 
 $GunzipError = '';
 
-$VERSION = '2.033';
+$VERSION = '2.035';
 
 sub new
 {
@@ -47,7 +47,7 @@ sub gunzip
 
 sub getExtraParams
 {
-    use IO::Compress::Base::Common  2.033 qw(:Parse);
+    use IO::Compress::Base::Common  2.035 qw(:Parse);
     return ( 'ParseExtra' => [1, 1, Parse_boolean,  0] ) ;
 }
 
@@ -980,7 +980,7 @@ If the C<$z> object is associated with a file or a filehandle, C<fileno>
 will return the underlying file descriptor. Once the C<close> method is
 called C<fileno> will return C<undef>.
 
-If the C<$z> object is is associated with a buffer, this method will return
+If the C<$z> object is associated with a buffer, this method will return
 C<undef>.
 
 =head2 close

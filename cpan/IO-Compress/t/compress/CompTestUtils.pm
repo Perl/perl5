@@ -25,6 +25,14 @@ sub like_eval
     like $@, @_ ;
 }
 
+BEGIN {
+    eval { 
+       require File::Temp;
+     } ;
+
+}
+
+
 {
     package LexFile ;
 
@@ -36,8 +44,9 @@ sub like_eval
         my $self = shift ;
         foreach (@_)
         {
-            # autogenerate the name unless if none supplied
-            $_ = "tst" . $index ++ . ".tmp"
+            Carp::croak "NO!!!!" if defined $_;
+            # autogenerate the name if none supplied
+            $_ = "tst" . $$ . "X" . $index ++ . ".tmp"
                 unless defined $_;
         }
         chmod 0777, @_;
@@ -58,19 +67,58 @@ sub like_eval
     package LexDir ;
 
     use File::Path;
+
+    our ($index);
+    $index = '00000';
+    our ($useTempFile) = defined &File::Temp::tempdir;
+    our ($useTempDir) = defined &File::Temp::newdir;
+    
     sub new
     {
         my $self = shift ;
-        foreach (@_) { rmtree $_ }
-        bless [ @_ ], $self ;
+
+        if ( $useTempDir)
+        {
+            foreach (@_)
+            {
+                Carp::croak "NO!!!!" if defined $_;
+                $_ = File::Temp->newdir(DIR => '.');
+            }
+            bless [ @_ ], $self ;
+        }
+        elsif ( $useTempFile)
+        {
+            foreach (@_)
+            {
+                Carp::croak "NO!!!!" if defined $_;
+                $_ = File::Temp::tempdir(DIR => '.', CLEANUP => 1);
+            }
+            bless [ @_ ], $self ;
+        }
+        else
+        {
+            foreach (@_)
+            {
+                Carp::croak "NO!!!!" if defined $_;
+                # autogenerate the name if none supplied
+                $_ = "tmpdir" . $$ . "X" . $index ++ . ".tmp" ;
+            }
+            foreach (@_) { rmtree $_; mkdir $_, 0777 }
+            bless [ @_ ], $self ;
+        }
+
     }
 
     sub DESTROY
     {
-        my $self = shift ;
-        foreach (@$self) { rmtree $_ }
+        if (! $useTempFile)
+        {
+            my $self = shift ;
+            foreach (@$self) { rmtree $_ }
+        }
     }
 }
+
 sub readFile
 {
     my $f = shift ;

@@ -6,21 +6,21 @@ require 5.004 ;
 use strict ;
 use warnings;
 
-use IO::Compress::Base::Common 2.033 ;
+use IO::Compress::Base::Common 2.035 ;
 
-use IO::File ;
+use IO::File qw(SEEK_SET SEEK_END); ;
 use Scalar::Util qw(blessed readonly);
 
 #use File::Glob;
 #require Exporter ;
-use Carp ;
-use Symbol;
+use Carp() ;
+use Symbol();
 use bytes;
 
 our (@ISA, $VERSION);
 @ISA    = qw(Exporter IO::File);
 
-$VERSION = '2.033';
+$VERSION = '2.035';
 
 #Can't locate object method "SWASHNEW" via package "utf8" (perhaps you forgot to load "utf8"?) at .../ext/Compress-Zlib/Gzip/blib/lib/Compress/Zlib/Common.pm line 16.
 
@@ -48,7 +48,7 @@ sub croakError
 {
     my $self   = shift ;
     $self->saveErrorString(0, $_[0]);
-    croak $_[0];
+    Carp::croak $_[0];
 }
 
 sub closeError
@@ -392,7 +392,7 @@ sub _def
     # finally the 1 to 1 and n to 1
     return $obj->_singleTarget($x, 1, $input, $output, @_);
 
-    croak "should not be here" ;
+    Carp::croak "should not be here" ;
 }
 
 sub _singleTarget
@@ -504,7 +504,7 @@ sub _wr2
         return $count ;
     }
 
-    croak "Should not be here";
+    Carp::croak "Should not be here";
     return undef;
 }
 
@@ -581,7 +581,7 @@ sub syswrite
     }
 
     $] >= 5.008 and ( utf8::downgrade($$buffer, 1) 
-        or croak "Wide character in " .  *$self->{ClassName} . "::write:");
+        or Carp::croak "Wide character in " .  *$self->{ClassName} . "::write:");
 
 
     if (@_ > 1) {
@@ -913,7 +913,7 @@ sub input_line_number
 sub _notAvailable
 {
     my $name = shift ;
-    return sub { croak "$name Not Available: File opened only for output" ; } ;
+    return sub { Carp::croak "$name Not Available: File opened only for output" ; } ;
 }
 
 *read     = _notAvailable('read');

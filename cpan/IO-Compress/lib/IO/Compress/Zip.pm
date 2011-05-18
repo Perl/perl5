@@ -4,26 +4,26 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.033 qw(:Status createSelfTiedObject);
-use IO::Compress::RawDeflate 2.033 ;
-use IO::Compress::Adapter::Deflate 2.033 ;
-use IO::Compress::Adapter::Identity 2.033 ;
-use IO::Compress::Zlib::Extra 2.033 ;
-use IO::Compress::Zip::Constants 2.033 ;
+use IO::Compress::Base::Common  2.035 qw(:Status createSelfTiedObject);
+use IO::Compress::RawDeflate 2.035 ;
+use IO::Compress::Adapter::Deflate 2.035 ;
+use IO::Compress::Adapter::Identity 2.035 ;
+use IO::Compress::Zlib::Extra 2.035 ;
+use IO::Compress::Zip::Constants 2.035 ;
 
 
-use Compress::Raw::Zlib  2.033 qw(crc32) ;
+use Compress::Raw::Zlib  2.035 qw(crc32) ;
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.033 ; 
+           import  IO::Compress::Adapter::Bzip2 2.035 ; 
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.033 ; 
+           import  IO::Compress::Bzip2 2.035 ; 
          } ;
 #    eval { require IO::Compress::Adapter::Lzma ; 
 #           import  IO::Compress::Adapter::Lzma 2.020 ; 
 #           require IO::Compress::Lzma ; 
-#           import  IO::Compress::Lzma 2.033 ; 
+#           import  IO::Compress::Lzma 2.035 ; 
 #         } ;
 }
 
@@ -32,7 +32,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $ZipError);
 
-$VERSION = '2.033';
+$VERSION = '2.035';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
@@ -513,8 +513,8 @@ sub getExtraParams
 {
     my $self = shift ;
 
-    use IO::Compress::Base::Common  2.033 qw(:Parse);
-    use Compress::Raw::Zlib  2.033 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+    use IO::Compress::Base::Common  2.035 qw(:Parse);
+    use Compress::Raw::Zlib  2.035 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
 
     my @Bzip2 = ();
     
@@ -1460,7 +1460,7 @@ If the C<$z> object is associated with a file or a filehandle, C<fileno>
 will return the underlying file descriptor. Once the C<close> method is
 called C<fileno> will return C<undef>.
 
-If the C<$z> object is is associated with a buffer, this method will return
+If the C<$z> object is associated with a buffer, this method will return
 C<undef>.
 
 =head2 close

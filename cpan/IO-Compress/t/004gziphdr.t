@@ -20,7 +20,7 @@ BEGIN {
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
 
-    plan tests => 910 + $extra ;
+    plan tests => 915 + $extra ;
 
     use_ok('Compress::Raw::Zlib') ;
     use_ok('IO::Compress::Gzip::Constants') ;
@@ -479,23 +479,25 @@ for my $value ( "0D", "0A", "0A0D", "0D0A", "0A0A", "0D0D")
 }
 
 {
-    # Check Minimal + no compressed data
+    title "Check Minimal + no compressed data";
     # This is the smallest possible gzip file (20 bytes)
 
     ok my $x = new IO::Compress::Gzip $name, -Minimal => 1;
-    ok $x->close ;
-    #ok GZreadFile($name) eq '' ;
+    isa_ok $x, "IO::Compress::Gzip";
+    ok $x->close, "closed" ;
 
-    ok $x = new IO::Uncompress::Gunzip $name, -Append => 1 ;
+    ok $x = new IO::Uncompress::Gunzip $name, -Append => 0 ;
+    isa_ok $x, "IO::Uncompress::Gunzip";
     my $data ;
     my $status  = 1;
 
+    ok $x->eof(), "eof" ;
     $status = $x->read($data)
         while $status >  0;
-    is $status, 0 ;
-    is $data, '';
-    ok ! $x->error() ;
-    ok $x->eof() ;
+    is $status, 0, "status == 0" ;
+    is $data, '', "empty string";
+    ok ! $x->error(), "no error" ;
+    ok $x->eof(), "eof" ;
 
     my $hdr = $x->getHeaderInfo();
     ok $hdr;
@@ -519,7 +521,7 @@ for my $value ( "0D", "0A", "0A0D", "0D0A", "0A0A", "0D0D")
 }
 
 {
-    # Header Corruption Tests
+    title "Header Corruption Tests";
 
     my $string = <<EOM;
 some text
@@ -584,8 +586,10 @@ EOM
     title "ExtraField max raw size";
     my $x ;
     my $store = "x" x GZIP_FEXTRA_MAX_SIZE ;
-    my $z = new IO::Compress::Gzip(\$x, ExtraField => $store, Strict => 0) ;
-    ok $z,  "Created IO::Compress::Gzip object" ;
+    {
+        my $z = new IO::Compress::Gzip(\$x, ExtraField => $store, Strict => 0) ;
+        ok $z,  "Created IO::Compress::Gzip object" ;
+    }
     my $gunz = new IO::Uncompress::Gunzip \$x, Strict => 0;
     ok $gunz, "Created IO::Uncompress::Gunzip object" ;
     my $hdr = $gunz->getHeaderInfo();
@@ -812,6 +816,7 @@ EOM
     my $string = <<EOM;
 some text
 EOM
+    $string = $string x 1000;
 
     my $good ;
     {
@@ -843,19 +848,21 @@ EOM
 
         foreach my $strict (0, 1)
         {
-            ok my $gunz = new IO::Uncompress::Gunzip $name, -Strict   => $strict ;
+            ok my $gunz = new IO::Uncompress::Gunzip $name, Append => 1, -Strict   => $strict ;
             my $uncomp ;
+            my $status = 1;
+            $status = $gunz->read($uncomp) while $status > 0;
             if ($strict)
             {
-                ok $gunz->read($uncomp) < 0 ;
+                cmp_ok $status, '<', 0 ;
                 like $GunzipError, "/Trailer Error: trailer truncated. Expected 8 bytes, got $got/";
             }
             else
             {
-                ok   $gunz->read($uncomp) > 0 ;
-                ok ! $GunzipError ;
+                is $status, 0, "status 0";
+                ok ! $GunzipError, "no error" ;
                 my $expected = substr($buffer, - $got);
-                is  $gunz->trailingData(),  $expected_trailing;
+                is  $gunz->trailingData(),  $expected_trailing, "trailing data";
             }
             ok $gunz->eof() ;
             ok $uncomp eq $string;
@@ -874,17 +881,20 @@ EOM
         foreach my $strict (0, 1)
         {
             ok my $gunz = new IO::Uncompress::Gunzip $name, 
+                                               Append   => 1,
                                                -Strict   => $strict ;
             my $uncomp ;
+            my $status = 1;
+            $status = $gunz->read($uncomp) while $status > 0;
             if ($strict)
             {
-                ok $gunz->read($uncomp) < 0 ;
+                cmp_ok $status, '<', 0 ;
                 my $got_len = $actual_len + 1;
                 like $GunzipError, "/Trailer Error: ISIZE mismatch. Got $got_len, expected $actual_len/";
             }
             else
             {
-                ok   $gunz->read($uncomp) > 0 ;
+                is $status, 0;
                 ok ! $GunzipError ;
                 #is   $gunz->trailingData(), substr($buffer, - $got) ;
             }
@@ -906,16 +916,19 @@ EOM
         foreach my $strict (0, 1)
         {
             ok my $gunz = new IO::Uncompress::Gunzip $name, 
+                                               -Append   => 1,
                                                -Strict   => $strict ;
             my $uncomp ;
+            my $status = 1;
+            $status = $gunz->read($uncomp) while $status > 0;
             if ($strict)
             {
-                ok $gunz->read($uncomp) < 0 ;
+                cmp_ok $status, '<', 0 ;
                 like $GunzipError, '/Trailer Error: CRC mismatch/';
             }
             else
             {
-                ok   $gunz->read($uncomp) > 0 ;
+                is $status, 0;
                 ok ! $GunzipError ;
             }
             ok ! $gunz->trailingData() ;
@@ -938,16 +951,19 @@ EOM
         foreach my $strict (0, 1)
         {
             ok my $gunz = new IO::Uncompress::Gunzip $name, 
+                                               -Append   => 1,
                                                -Strict   => $strict ;
             my $uncomp ;
+            my $status = 1;
+            $status = $gunz->read($uncomp) while $status > 0;
             if ($strict)
             {
-                ok $gunz->read($uncomp) < 0 ;
+                cmp_ok $status, '<', 0 ;
                 like $GunzipError, '/Trailer Error: CRC mismatch/';
             }
             else
             {
-                ok   $gunz->read($uncomp) > 0 ;
+                is $status, 0;
                 ok ! $GunzipError ;
             }
             ok $gunz->eof() ;

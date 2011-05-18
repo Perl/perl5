@@ -336,7 +336,8 @@ title 'inflate - check remaining buffer after Z_STREAM_END';
 
 title 'memGzip & memGunzip';
 {
-    my $name = "test.gz" ;
+    my ($name, $name1, $name2, $name3);
+    my $lex = new LexFile $name, $name1, $name2, $name3 ;
     my $buffer = <<EOM;
 some sample 
 text
@@ -368,7 +369,7 @@ EOM
 
     ok $uncomp eq $buffer ;
  
-    1 while unlink $name ;
+    #1 while unlink $name ;
 
     # now check that memGunzip can deal with it.
     my $ungzip = memGunzip($dest) ;
@@ -383,13 +384,13 @@ EOM
     is $gzerrno, 0;
 
     # write it to disk
-    ok open(FH, ">$name") ;
+    ok open(FH, ">$name1") ;
     binmode(FH);
     print FH $dest ;
     close FH ;
 
     # uncompress with gzopen
-    ok $fil = gzopen($name, "rb") ;
+    ok $fil = gzopen($name1, "rb") ;
  
     ok (($x = $fil->gzread($uncomp)) == $len) ;
  
@@ -459,7 +460,7 @@ EOM
     cmp_ok $gzerrno, "==", Z_DATA_ERROR ;
 
  
-    1 while unlink $name ;
+    #1 while unlink $name ;
 
     # check corrupt header -- too short
     $dest = "x" ;

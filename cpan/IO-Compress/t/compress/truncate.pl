@@ -226,6 +226,7 @@ sub run
                         1 while <$gz> ;
                     }
                     ok $gz->error() ;
+                    cmp_ok $gz->errorNo(), '<', 0 ;
                     ok $gz->eof() ;
                     $gz->close();
                 }
