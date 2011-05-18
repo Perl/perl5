@@ -49,7 +49,7 @@ $objDa->change(level => 1);
 ok($objDa->lt('z', $ae));
 ok($objDa->lt($ae, $ostk));
 ok($objDa->lt($ostk, $arng));
-ok($objDa->lt($arng, "\x{292}"));
+ok($objDa->lt($arng, "\x{1C0}"));
 
 # 6
 

@@ -1,5 +1,19 @@
 Revision history for Perl module Unicode::Collate.
 
+0.76  Sun May 15 10:06:59 2011
+    - updated CJK/Pinyin.pm and CJK/Stroke.pm according to CLDR 1.9.1 using
+      type='pinyin' alt='short' and type='stroke' alt='short' respectively.
+
+0.75  Sat May  7 21:07:38 2011
+    - supported ignore_level2 and rewrite.
+    - Added iglevel2.t and rewrite.t in t.
+
+0.74  Mon Mar 21 19:07:38 2011
+    - removed sw (Swahili) collation according to CLDR 1.9.
+        (removed files: Collate/Locale/sw.pl and data/sw.txt)
+    - shifted primary weights of letters > Z for some languages.
+        (affected locales: da, fi, fo, kl, nb, nn, sv)
+
 0.73  Sun Mar  6 13:24:22 2011
     - DUCET is updated (for Unicode 6.0.0) as Collate/allkeys.txt.
     ! However no maint perl has supported Unicode 6.0.0 yet;

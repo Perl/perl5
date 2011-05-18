@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 302 };
+BEGIN { plan tests => 283 };
 
 use strict;
 use warnings;
@@ -323,40 +323,16 @@ ok($objZhP->eq("E\x{302}\x{323}", "\x{1EC6}"));
 
 $objZhP->change(level => 1);
 
-ok($objZhP->lt("\x{A000}", "\x{3105}"));
+ok($objZhP->lt("\x{963F}", "\x{5730}"));
+ok($objZhP->lt("\x{5730}", "\x{7ACB}"));
+ok($objZhP->lt("\x{7ACB}", "\x{4EBA}"));
+ok($objZhP->lt("\x{4EBA}", "\x{65E5}"));
+ok($objZhP->lt("\x{65E5}", "\x{4E0A}"));
+ok($objZhP->lt("\x{4E0A}", "\x{5929}"));
+ok($objZhP->lt("\x{5929}", "\x{4E0B}"));
+ok($objZhP->lt("\x{4E0B}", "\x{65BC}"));
+ok($objZhP->lt("\x{65BC}", "\x{4E2D}"));
+ok($objZhP->lt("\x{4E2D}", "\x{7AFA}"));
+ok($objZhP->lt("\x{7AFA}", "\x{5750}"));
 
-ok($objZhP->lt("\x{3105}", "\x{3106}"));
-ok($objZhP->lt("\x{3106}", "\x{3128}"));
-ok($objZhP->lt("\x{3128}", "\x{3129}"));
-ok($objZhP->lt("\x{3129}", "\x{5416}"));
-ok($objZhP->lt("\x{5416}", "\x{963F}"));
-ok($objZhP->lt("\x{963F}", "\x{554A}"));
-ok($objZhP->lt("\x{554A}", "\x{9515}"));
-ok($objZhP->lt("\x{9515}", "\x{9312}"));
-ok($objZhP->lt("\x{9312}", "\x{55C4}"));
-ok($objZhP->lt("\x{55C4}", "\x{5391}"));
-ok($objZhP->lt("\x{5391}", "\x{54CE}"));
-ok($objZhP->lt("\x{54CE}", "\x{54C0}"));
-ok($objZhP->lt("\x{54C0}", "\x{5509}"));
-ok($objZhP->lt("\x{5509}", "\x{57C3}"));
-
-ok($objZhP->lt("\x{6FED}", "\x{FA1F}"));
-ok($objZhP->lt("\x{FA1F}", "\x{85F9}"));
-
-ok($objZhP->lt("\x{57C3}", "\x{4E00}"));
-ok($objZhP->lt("\x{4E00}", "\x{8331}"));
-
-ok($objZhP->lt("\x{8331}", "\x{682A}"));
-ok($objZhP->lt("\x{682A}", "\x{3231}"));
-ok($objZhP->lt("\x{3231}", "\x{73E0}"));
-ok($objZhP->lt("\x{73E0}", "\x{8BF8}"));
-
-ok($objZhP->lt("\x{5EA7}", "\x{888F}"));
-ok($objZhP->lt("\x{888F}", "\x{505A}"));
-ok($objZhP->lt("\x{505A}", "\x{8444}"));
-ok($objZhP->lt("\x{8444}", "\x{84D9}"));
-ok($objZhP->lt("\x{84D9}", "\x{98F5}"));
-ok($objZhP->lt("\x{98F5}", "\x{7CF3}"));
-ok($objZhP->lt("\x{7CF3}", "\x{5497}"));
-
-# 302
+# 283

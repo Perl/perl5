@@ -337,9 +337,9 @@ ok($objZhS->lt("\x{4EBA}", "\x{513F}"));
 ok($objZhS->lt("\x{513F}", "\x{5165}"));
 
 ok($objZhS->lt("\x{9E1D}", "\x{7069}"));
-ok($objZhS->lt("\x{7069}", "\x{7C72}"));
-ok($objZhS->lt("\x{7C72}", "\x{706A}"));
-ok($objZhS->lt("\x{706A}", "\x{7229}"));
+ok($objZhS->lt("\x{7069}", "\x{706A}"));
+ok($objZhS->lt("\x{706A}", "\x{7C72}"));
+ok($objZhS->lt("\x{7C72}", "\x{7229}"));
 ok($objZhS->lt("\x{7229}", "\x{9EA4}"));
 ok($objZhS->lt("\x{9EA4}", "\x{9F7E}"));
 ok($objZhS->lt("\x{9F7E}", "\x{9F49}"));

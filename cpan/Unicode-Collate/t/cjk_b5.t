@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 26 };
+BEGIN { plan tests => 28 };
 
 use strict;
 use warnings;
@@ -29,6 +29,14 @@ my $collator = Unicode::Collate->new(
     normalization => undef,
     overrideCJK => \&Unicode::Collate::CJK::Big5::weightBig5
 );
+
+sub hex_sort {
+    my @source = map pack('U', hex $_), split ' ', shift;
+    my @sorted = $collator->sort(@source);
+    return join " ", map sprintf("%04X", unpack 'U', $_), @sorted;
+}
+
+# 1
 
 $collator->change(level => 1);
 
@@ -61,3 +69,12 @@ ok($collator->lt("\x{20002}", "\x{20003}"));
 ok($collator->lt("\x{20003}", "\x{20004}"));
 ok($collator->lt("\x{20004}", "\x{20005}"));
 
+# 26
+
+ok(hex_sort('4E00 4E8C 4E09 56DB 4E94 516D 4E03 516B 4E5D 5341'),
+            '4E00 4E03 4E5D 4E8C 516B 5341 4E09 4E94 516D 56DB');
+
+ok(hex_sort('4E0C 4E8D 4F5C 5140 554A 5750 57C3 5EA7 963F 9F3D 9F3E 9F44'),
+            '5140 4F5C 5750 963F 57C3 5EA7 554A 9F3E 4E0C 4E8D 9F3D 9F44');
+
+# 28

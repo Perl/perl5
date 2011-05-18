@@ -49,7 +49,7 @@ $objFo->change(level => 1);
 ok($objFo->lt('z', $ae));
 ok($objFo->lt($ae, $ostk));
 ok($objFo->lt($ostk, $arng));
-ok($objFo->lt($arng, "\x{292}"));
+ok($objFo->lt($arng, "\x{1C0}"));
 
 # 6
 

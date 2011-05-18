@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 24 };
+BEGIN { plan tests => 26 };
 
 use strict;
 use warnings;
@@ -30,6 +30,14 @@ my $collator = Unicode::Collate->new(
     overrideCJK => \&Unicode::Collate::CJK::Stroke::weightStroke
 );
 
+sub hex_sort {
+    my @source = map pack('U', hex $_), split ' ', shift;
+    my @sorted = $collator->sort(@source);
+    return join " ", map sprintf("%04X", unpack 'U', $_), @sorted;
+}
+
+# 1
+
 $collator->change(level => 1);
 
 ok($collator->lt("\x{4E00}", "\x{4E59}"));
@@ -44,9 +52,9 @@ ok($collator->lt("\x{4EBA}", "\x{513F}"));
 ok($collator->lt("\x{513F}", "\x{5165}"));
 
 ok($collator->lt("\x{9E1D}", "\x{7069}"));
-ok($collator->lt("\x{7069}", "\x{7C72}"));
-ok($collator->lt("\x{7C72}", "\x{706A}"));
-ok($collator->lt("\x{706A}", "\x{7229}"));
+ok($collator->lt("\x{7069}", "\x{706A}"));
+ok($collator->lt("\x{706A}", "\x{7C72}"));
+ok($collator->lt("\x{7C72}", "\x{7229}"));
 ok($collator->lt("\x{7229}", "\x{9EA4}"));
 ok($collator->lt("\x{9EA4}", "\x{9F7E}"));
 ok($collator->lt("\x{9F7E}", "\x{9F49}"));
@@ -59,3 +67,12 @@ ok($collator->lt("\x{20002}", "\x{20003}"));
 ok($collator->lt("\x{20003}", "\x{20004}"));
 ok($collator->lt("\x{20004}", "\x{20005}"));
 
+# 24
+
+ok(hex_sort('4E00 4E8C 4E09 56DB 4E94 516D 4E03 516B 4E5D 5341'),
+            '4E00 4E03 4E5D 4E8C 516B 5341 4E09 4E94 516D 56DB');
+
+ok(hex_sort('4E0C 4E8D 4F5C 5140 554A 5750 57C3 5EA7 963F 9F3D 9F3E 9F44'),
+            '4E0C 4E8D 5140 4F5C 5750 963F 57C3 5EA7 554A 9F3D 9F3E 9F44');
+
+# 26

@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 25 };
+BEGIN { plan tests => 19 };
 
 use strict;
 use warnings;
@@ -30,29 +30,27 @@ my $collator = Unicode::Collate->new(
     overrideCJK => \&Unicode::Collate::CJK::Pinyin::weightPinyin
 );
 
+sub hex_sort {
+    my @source = map pack('U', hex $_), split ' ', shift;
+    my @sorted = $collator->sort(@source);
+    return join " ", map sprintf("%04X", unpack 'U', $_), @sorted;
+}
+
+# 1
+
 $collator->change(level => 1);
 
-ok($collator->lt("\x{5416}", "\x{963F}"));
-ok($collator->lt("\x{963F}", "\x{554A}"));
-ok($collator->lt("\x{554A}", "\x{9515}"));
-ok($collator->lt("\x{9515}", "\x{9312}"));
-ok($collator->lt("\x{9312}", "\x{55C4}"));
-ok($collator->lt("\x{55C4}", "\x{5391}"));
-ok($collator->lt("\x{5391}", "\x{54CE}"));
-ok($collator->lt("\x{54CE}", "\x{54C0}"));
-ok($collator->lt("\x{54C0}", "\x{5509}"));
-ok($collator->lt("\x{5509}", "\x{57C3}"));
-
-ok($collator->lt("\x{57C3}", "\x{4E00}"));
-ok($collator->lt("\x{4E00}", "\x{8331}"));
-
-ok($collator->lt("\x{5EA7}", "\x{888F}"));
-ok($collator->lt("\x{888F}", "\x{505A}"));
-ok($collator->lt("\x{505A}", "\x{8444}"));
-ok($collator->lt("\x{8444}", "\x{84D9}"));
-ok($collator->lt("\x{84D9}", "\x{98F5}"));
-ok($collator->lt("\x{98F5}", "\x{7CF3}"));
-ok($collator->lt("\x{7CF3}", "\x{5497}"));
+ok($collator->lt("\x{963F}", "\x{5730}"));
+ok($collator->lt("\x{5730}", "\x{7ACB}"));
+ok($collator->lt("\x{7ACB}", "\x{4EBA}"));
+ok($collator->lt("\x{4EBA}", "\x{65E5}"));
+ok($collator->lt("\x{65E5}", "\x{4E0A}"));
+ok($collator->lt("\x{4E0A}", "\x{5929}"));
+ok($collator->lt("\x{5929}", "\x{4E0B}"));
+ok($collator->lt("\x{4E0B}", "\x{65BC}"));
+ok($collator->lt("\x{65BC}", "\x{4E2D}"));
+ok($collator->lt("\x{4E2D}", "\x{7AFA}"));
+ok($collator->lt("\x{7AFA}", "\x{5750}"));
 
 # Ext.B
 ok($collator->lt("\x{20000}", "\x{20001}"));
@@ -61,3 +59,12 @@ ok($collator->lt("\x{20002}", "\x{20003}"));
 ok($collator->lt("\x{20003}", "\x{20004}"));
 ok($collator->lt("\x{20004}", "\x{20005}"));
 
+# 17
+
+ok(hex_sort('4E00 4E8C 4E09 56DB 4E94 516D 4E03 516B 4E5D 5341'),
+            '516B 4E8C 4E5D 516D 4E03 4E09 5341 56DB 4E94 4E00');
+
+ok(hex_sort('4E0C 4E8D 4F5C 5140 554A 5750 57C3 5EA7 963F 9F3D 9F3E 9F44'),
+            '963F 554A 57C3 4E8D 9F3E 4E0C 9F3D 5140 9F44 4F5C 5750 5EA7');
+
+# 19

@@ -38,7 +38,7 @@ our @Rest;
 
 {
     my($f, $fh);
-    foreach my $d ('.') {
+    foreach my $d (File::Spec->curdir()) {
 	$f = File::Spec->catfile($d, "Collate", "allkeys.txt");
 	last if open($fh, $f);
 	$f = undef;

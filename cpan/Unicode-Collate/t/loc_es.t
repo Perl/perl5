@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 26 };
+BEGIN { plan tests => 28 };
 
 use strict;
 use warnings;
@@ -69,3 +69,10 @@ ok($objEs->eq("n\x{303}", pack('U', 0xF1)));
 ok($objEs->eq("N\x{303}", pack('U', 0xD1)));
 
 # 26
+
+$objEs->change(level => 2, ignore_level2 => 1);
+
+ok($objEs->lt("n", "n\x{303}"));
+ok($objEs->eq("a", "a\x{303}"));
+
+# 28

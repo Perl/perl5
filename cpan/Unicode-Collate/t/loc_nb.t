@@ -49,7 +49,7 @@ $objNb->change(level => 1);
 ok($objNb->lt('z', $ae));
 ok($objNb->lt($ae, $ostk));
 ok($objNb->lt($ostk, $arng));
-ok($objNb->lt($arng, "\x{292}"));
+ok($objNb->lt($arng, "\x{1C0}"));
 
 # 6
 

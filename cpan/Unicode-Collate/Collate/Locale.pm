@@ -4,7 +4,7 @@ use strict;
 use Carp;
 use base qw(Unicode::Collate);
 
-our $VERSION = '0.73';
+our $VERSION = '0.76';
 
 use File::Spec;
 
@@ -14,7 +14,7 @@ my $PL_EXT  = '.pl';
 my %LocaleFile = map { ($_, $_) } qw(
    af ar az ca cs cy da eo es et fi fil fo fr ha haw
    hr hu hy ig is ja kk kl ko lt lv mt nb nn nso om pl ro ru
-   se sk sl sq sv sw tn to tr uk vi wo yo zh
+   se sk sl sq sv tn to tr uk vi wo yo zh
 );
    $LocaleFile{'default'}         = '';
    $LocaleFile{'de__phonebook'}   = 'de_phone';
@@ -234,7 +234,6 @@ this method returns a string C<'default'> meaning no special tailoring.
       sq                Albanian
       sr                Serbian
       sv                Swedish
-      sw                Swahili
       tn                Tswana
       to                Tonga
       tr                Turkish
@@ -261,6 +260,7 @@ ms (Malay),
 nl (Dutch),
 pt (Portuguese),
 st (Southern Sotho),
+sw (Swahili),
 xh (Xhosa),
 zu (Zulu).
 

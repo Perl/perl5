@@ -51,7 +51,7 @@ $objSv->change(level => 1);
 ok($objSv->lt('z', $arng));
 ok($objSv->lt($arng, $auml));
 ok($objSv->lt($auml, $ouml));
-ok($objSv->lt($ouml, "\x{292}"));
+ok($objSv->lt($ouml, "\x{1C0}"));
 
 # 6
 

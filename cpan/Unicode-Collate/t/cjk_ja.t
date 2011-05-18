@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 31 };
+BEGIN { plan tests => 33 };
 
 use strict;
 use warnings;
@@ -29,6 +29,14 @@ my $collator = Unicode::Collate->new(
     normalization => undef,
     overrideCJK => \&Unicode::Collate::CJK::JISX0208::weightJISX0208
 );
+
+sub hex_sort {
+    my @source = map pack('U', hex $_), split ' ', shift;
+    my @sorted = $collator->sort(@source);
+    return join " ", map sprintf("%04X", unpack 'U', $_), @sorted;
+}
+
+# 1
 
 $collator->change(level => 1);
 
@@ -58,6 +66,13 @@ ok($collator->lt("\x{20002}", "\x{20003}"));
 ok($collator->lt("\x{20003}", "\x{20004}"));
 ok($collator->lt("\x{20004}", "\x{20005}"));
 
+# 21
+
+ok(hex_sort('4E00 4E8C 4E09 56DB 4E94 516D 4E03 516B 4E5D 5341'),
+            '4E00 4E5D 4E94 4E09 56DB 4E03 5341 4E8C 516B 516D');
+
+# 22
+
 $collator->change(overrideCJK => undef);
 
 ok($collator->lt("\x{4E00}", "\x{4E01}"));
@@ -72,3 +87,9 @@ ok($collator->lt("\x{9F9D}", "\x{9F9E}"));
 ok($collator->lt("\x{9F9E}", "\x{9F9F}"));
 ok($collator->lt("\x{9F9F}", "\x{9FA0}"));
 
+# 32
+
+ok(hex_sort('4E00 4E8C 4E09 56DB 4E94 516D 4E03 516B 4E5D 5341'),
+            '4E00 4E03 4E09 4E5D 4E8C 4E94 516B 516D 5341 56DB');
+
+# 33

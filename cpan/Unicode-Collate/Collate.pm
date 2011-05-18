@@ -14,12 +14,14 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '0.73';
+our $VERSION = '0.76';
 our $PACKAGE = __PACKAGE__;
 
+### begin XS only ###
 require DynaLoader;
 our @ISA = qw(DynaLoader);
 bootstrap Unicode::Collate $VERSION;
+### end XS only ###
 
 my @Path = qw(Unicode Collate);
 my $KeyFile = "allkeys.txt";
@@ -69,6 +71,7 @@ use constant LEVEL_SEP => "\0\0";
 # This character must not be included in any stringified
 # representation of an integer.
 use constant CODE_SEP => ';';
+	# NOTE: in regex /;/ is used for $jcps!
 
 # boolean values of variable weights
 use constant NON_VAR => 0; # Non-Variable character
@@ -100,19 +103,19 @@ my (%VariableOK);
 
 our @ChangeOK = qw/
     alternate backwards level normalization rearrange
-    katakana_before_hiragana upper_before_lower
+    katakana_before_hiragana upper_before_lower ignore_level2
     overrideHangul overrideCJK preprocess UCA_Version
     hangul_terminator variable
   /;
 
 our @ChangeNG = qw/
     entry mapping table maxlength contraction
-    ignoreChar ignoreName undefChar undefName variableTable
-    versionTable alternateTable backwardsTable forwardsTable rearrangeTable
+    ignoreChar ignoreName undefChar undefName rewrite
+    versionTable alternateTable backwardsTable forwardsTable
+    rearrangeTable variableTable
     derivCode normCode rearrangeHash backwardsFlag
     suppress suppressHash
-    __useXS
-  /;
+    __useXS /; ### XS only
 # The hash key 'ignored' is deleted at v 0.21.
 # The hash key 'isShift' is deleted at v 0.23.
 # The hash key 'combining' is deleted at v 0.24.
@@ -245,11 +248,15 @@ sub new
     my $class = shift;
     my $self = bless { @_ }, $class;
 
-    if (! exists $self->{table} &&
+### begin XS only ###
+    if (! exists $self->{table}     && !defined $self->{rewrite} &&
 	!defined $self->{undefName} && !defined $self->{ignoreName} &&
 	!defined $self->{undefChar} && !defined $self->{ignoreChar}) {
 	$self->{__useXS} = \&_fetch_simple;
-    } # XS only
+    } else {
+	$self->{__useXS} = undef;
+    }
+### end XS only ###
 
     # keys of $self->{suppressHash} are $self->{suppress}.
     if ($self->{suppress} && @{ $self->{suppress} }) {
@@ -313,6 +320,7 @@ sub parseAtmark {
 sub read_table {
     my $self = shift;
 
+### begin XS only ###
     if ($self->{__useXS}) {
 	my @rest = _fetch_rest(); # complex matter need to parse
 	for my $line (@rest) {
@@ -326,6 +334,7 @@ sub read_table {
 	}
 	return;
     }
+### end XS only ###
 
     my($f, $fh);
     foreach my $d (@INC) {
@@ -359,6 +368,10 @@ sub parseEntry
     my $self = shift;
     my $line = shift;
     my($name, $entry, @uv, @key);
+
+    if (defined $self->{rewrite}) {
+	$line = $self->{rewrite}->($line);
+    }
 
     return if $line !~ /^\s*[0-9A-Fa-f]/;
 
@@ -448,7 +461,7 @@ sub splitEnt
     my $reH  = $self->{rearrangeHash};
     my $vers = $self->{UCA_Version};
     my $ver9 = $vers >= 9 && $vers <= 11;
-    my $uXS  = $self->{__useXS};
+    my $uXS  = $self->{__useXS}; ### XS only
 
     my ($str, @buf);
 
@@ -487,9 +500,11 @@ sub splitEnt
 	} elsif ($ver9) {
 	    $src[$i] = undef if $map->{ $src[$i] } &&
 			     @{ $map->{ $src[$i] } } == 0;
+### begin XS only ###
 	    if ($uXS) {
 		$src[$i] = undef if _ignorable_simple($src[$i]);
 	    }
+### end XS only ###
 	}
     }
 
@@ -569,7 +584,8 @@ sub splitEnt
 	}
 
 	# skip completely ignorable
-	if ($uXS && $jcps =~ /^[0-9]+\z/ && _ignorable_simple($jcps) ||
+
+	if ($uXS && $jcps !~ /;/ && _ignorable_simple($jcps) || ### XS only
 	    $map->{$jcps} && @{ $map->{$jcps} } == 0) {
 	    if ($wLen && @buf) {
 		$buf[-1][2] = $i + 1;
@@ -606,16 +622,17 @@ sub getWt
 {
     my $self = shift;
     my $u    = shift;
-    my $vbl  = $self->{variable};
     my $map  = $self->{mapping};
     my $der  = $self->{derivCode};
-    my $uXS  = $self->{__useXS};
+    my $uXS  = $self->{__useXS}; ### XS only
 
     return if !defined $u;
-    return map(_varCE($vbl, $_), @{ $map->{$u} })
+    return map($self->varCE($_), @{ $map->{$u} })
 	if $map->{$u};
-    return map(_varCE($vbl, $_), _fetch_simple($u))
+### begin XS only ###
+    return map($self->varCE($_), _fetch_simple($u))
 	if $uXS && _exists_simple($u);
+### end XS only ###
 
     # JCPS must not be a contraction, then it's a code point.
     if (Hangul_SIni <= $u && $u <= Hangul_SFin) {
@@ -652,22 +669,22 @@ sub getWt
 
 	    @hangulCE = map({
 		    $map->{$_} ? @{ $map->{$_} } :
-		    $uXS && _exists_simple($_) ? _fetch_simple($_) :
+		$uXS && _exists_simple($_) ? _fetch_simple($_) : ### XS only
 		    $der->($_);
 		} @decH);
 	}
-	return map _varCE($vbl, $_), @hangulCE;
+	return map $self->varCE($_), @hangulCE;
     } else {
 	my $cjk  = $self->{overrideCJK};
 	my $vers = $self->{UCA_Version};
 	if ($cjk && _isUIdeo($u, $vers)) {
 	    my @cjkCE = map _pack_override($_, $u, $der), $cjk->($u);
-	    return map _varCE($vbl, $_), @cjkCE;
+	    return map $self->varCE($_), @cjkCE;
 	}
 	if ($vers == 8 && defined $cjk && _isUIdeo($u, 0)) {
-	    return map _varCE($vbl, $_), _uideoCE_8($u);
+	    return map $self->varCE($_), _uideoCE_8($u);
 	}
-	return map _varCE($vbl, $_), $der->($u);
+	return map $self->varCE($_), $der->($u);
     }
 }
 
@@ -680,13 +697,12 @@ sub getSortKey
     my $self = shift;
     my $rEnt = $self->splitEnt(shift); # get an arrayref of JCPS
     my $vers = $self->{UCA_Version};
-    my $vbl  = $self->{variable};
     my $term = $self->{hangul_terminator};
 
     my @buf; # weight arrays
     if ($term) {
 	my $preHST = '';
-	my $termCE = _varCE($vbl, pack(VCE_TEMPLATE, NON_VAR, $term, 0,0,0));
+	my $termCE = $self->varCE(pack(VCE_TEMPLATE, NON_VAR, $term, 0,0,0));
 	foreach my $jcps (@$rEnt) {
 	    # weird things like VL, TL-contraction are not considered!
 	    my $curHST = join '', map getHST($_, $vers), split /;/, $jcps;
@@ -706,7 +722,7 @@ sub getSortKey
 	}
     }
 
-    return $self->mk_SortKey(\@buf);
+    return $self->mk_SortKey(\@buf); ### XS only
 }
 
 
@@ -1019,6 +1035,7 @@ with no parameters, the collator should do the default collation.
       hangul_terminator => $term_primary_weight,
       ignoreName => qr/$ignoreName/,
       ignoreChar => qr/$ignoreChar/,
+      ignore_level2 => $bool,
       katakana_before_hiragana => $bool,
       level => $collationLevel,
       normalization  => $normalization_form,
@@ -1026,6 +1043,7 @@ with no parameters, the collator should do the default collation.
       overrideHangul => \&overrideHangul,
       preprocess => \&preprocess,
       rearrange => \@charList,
+      rewrite => \&rewrite,
       suppress => \@charList,
       table => $filename,
       undefName => qr/$undefName/,
@@ -1179,6 +1197,18 @@ will be ignored.
 
 E.g. when 'a' and 'e' are ignorable,
 'element' is equal to 'lament' (or 'lmnt').
+
+=item ignore_level2
+
+-- see 5.1 Parametric Tailoring, UTS #10.
+
+By default, case-sensitive comparison (that is level 3 difference)
+won't ignore accents (that is level 2 difference).
+
+If the parameter is made true, accents (and other primary ignorable
+characters) are ignored, even though cases are taken into account.
+
+B<NOTE>: C<level> should be 3 or greater.
 
 =item katakana_before_hiragana
 
@@ -1342,7 +1372,7 @@ in C<table> or C<entry> is still valid.
 
 -- see 5.1 Preprocessing, UTS #10.
 
-If specified, the coderef is used to preprocess
+If specified, the coderef is used to preprocess each string
 before the formation of sort keys.
 
 ex. dropping English articles, such as "a" or "the".
@@ -1385,6 +1415,28 @@ If C<UCA_Version> is equal to or greater than 14, default is C<[]>
 B<According to the version 9 of UCA, this parameter shall not be used;
 but it is not warned at present.>
 
+=item rewrite
+
+If specified, the coderef is used to rewrite lines in C<table> or C<entry>.
+The coderef will get each line, and then should return a rewritten line
+according to the UCA file format.
+If the coderef returns an empty line, the line will be skipped.
+
+e.g. any primary ignorable characters into tertiary ignorable:
+
+    rewrite => sub {
+        my $line = shift;
+        $line =~ s/\[\.0000\..{4}\..{4}\./[.0000.0000.0000./g;
+        return $line;
+    },
+
+This example shows rewriting weights. C<rewrite> is allowed to
+affect code points, weights, and the name.
+
+B<NOTE>: C<table> is available to use another table file;
+preparing a modified table once would be more efficient than
+rewriting lines on reading an unmodified table every time.
+
 =item suppress
 
 -- see suppress contractions in 5.14.11 Special-Purpose Commands,
@@ -1416,8 +1468,8 @@ may be better to avoid namespace conflict.
 B<NOTE>: When XSUB is used, the DUCET is compiled on building this
 module, and it may save time at the run time.
 Explicit saying C<table =E<gt> 'allkeys.txt'> (or using another table),
-or using C<ignoreChar>, C<ignoreName>, C<undefChar>, or C<undefName>
-will prevent this module from using the compiled DUCET.
+or using C<ignoreChar>, C<ignoreName>, C<undefChar>, C<undefName> or
+C<rewrite> will prevent this module from using the compiled DUCET.
 
 If C<undef> is passed explicitly as the value for this key,
 no file is read (but you can define collation elements via C<entry>).
@@ -1572,16 +1624,18 @@ If C<UCA_Version> is 8, the output is slightly different.
 
 =head2 Methods for Searching
 
-B<DISCLAIMER:> If C<preprocess> or C<normalization> parameter is true
-for C<$Collator>, calling these methods (C<index>, C<match>, C<gmatch>,
-C<subst>, C<gsubst>) is croaked,
-as the position and the length might differ
-from those on the specified string.
-(And C<rearrange> and C<hangul_terminator> parameters are neglected.)
-
 The C<match>, C<gmatch>, C<subst>, C<gsubst> methods work
 like C<m//>, C<m//g>, C<s///>, C<s///g>, respectively,
 but they are not aware of any pattern, but only a literal substring.
+
+B<DISCLAIMER:> If C<preprocess> or C<normalization> parameter is true
+for C<$Collator>, calling these methods (C<index>, C<match>, C<gmatch>,
+C<subst>, C<gsubst>) is croaked, as the position and the length might
+differ from those on the specified string.
+
+C<rearrange> and C<hangul_terminator> parameters are neglected.
+C<katakana_before_hiragana> and C<upper_before_lower> don't affect
+matching and searching, as it doesn't matter whether greater or lesser.
 
 =over 4
 
@@ -1654,7 +1708,7 @@ returns an empty list.
 
 If C<$substring> matches a part of C<$string>,
 the first occurrence of the matching part is replaced by C<$replacement>
-(C<$string> is modified) and return C<$count> (always equals to C<1>).
+(C<$string> is modified) and C<$count> (always equals to C<1>) is returned.
 
 C<$replacement> can be a C<CODEREF>,
 taking the matching part as an argument,
@@ -1664,8 +1718,8 @@ and returning a string to replace the matching part
 =item C<$count = $Collator-E<gt>gsubst($string, $substring, $replacement)>
 
 If C<$substring> matches a part of C<$string>,
-all the occurrences of the matching part is replaced by C<$replacement>
-(C<$string> is modified) and return C<$count>.
+all the occurrences of the matching part are replaced by C<$replacement>
+(C<$string> is modified) and C<$count> is returned.
 
 C<$replacement> can be a C<CODEREF>,
 taking the matching part as an argument,
@@ -1676,11 +1730,28 @@ e.g.
 
   my $Collator = Unicode::Collate->new( normalization => undef, level => 1 );
                                      # (normalization => undef) is REQUIRED.
-  my $str = "Camel donkey zebra came\x{301}l CAMEL horse cAm\0E\0L...";
+  my $str = "Camel donkey zebra came\x{301}l CAMEL horse cam\0e\0l...";
   $Collator->gsubst($str, "camel", sub { "<b>$_[0]</b>" });
 
-  # now $str is "<b>Camel</b> donkey zebra <b>came\x{301}l</b> <b>CAMEL</b> horse <b>cAm\0E\0L</b>...";
+  # now $str is "<b>Camel</b> donkey zebra <b>came\x{301}l</b> <b>CAMEL</b> horse <b>cam\0e\0l</b>...";
   # i.e., all the camels are made bold-faced.
+
+   Examples: levels and ignore_level2 - what does camel match?
+  ---------------------------------------------------------------------------
+   level  ignore_level2  |  camel  Camel  came\x{301}l  c-a-m-e-l  cam\0e\0l
+  -----------------------|---------------------------------------------------
+     1        false      |   yes    yes      yes          yes        yes
+     2        false      |   yes    yes      no           yes        yes
+     3        false      |   yes    no       no           yes        yes
+     4        false      |   yes    no       no           no         yes
+  -----------------------|---------------------------------------------------
+     1        true       |   yes    yes      yes          yes        yes
+     2        true       |   yes    yes      yes          yes        yes
+     3        true       |   yes    no       yes          yes        yes
+     4        true       |   yes    no       yes          no         yes
+  ---------------------------------------------------------------------------
+   note: if variable => non-ignorable, camel doesn't match c-a-m-e-l
+         at any level.
 
 =back
 
@@ -1692,7 +1763,7 @@ e.g.
 
 =item C<$modified_collator = $Collator-E<gt>change(%new_tailoring)>
 
-Change the value of specified keys and returns the changed part.
+Changes the value of specified keys and returns the changed part.
 
     $Collator = Unicode::Collate->new(level => 4);
 

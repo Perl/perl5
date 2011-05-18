@@ -2613,7 +2613,6 @@ cpan/Unicode-Collate/Collate/Locale/sk.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/sl.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/sq.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/sv.pl			Unicode::Collate
-cpan/Unicode-Collate/Collate/Locale/sw.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/tn.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/to.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/tr.pl			Unicode::Collate
@@ -2645,6 +2644,7 @@ cpan/Unicode-Collate/t/contract.t		Unicode::Collate
 cpan/Unicode-Collate/t/default.t		Unicode::Collate
 cpan/Unicode-Collate/t/hangtype.t		Unicode::Collate
 cpan/Unicode-Collate/t/hangul.t			Unicode::Collate
+cpan/Unicode-Collate/t/iglevel2.t			Unicode::Collate
 cpan/Unicode-Collate/t/ignor.t			Unicode::Collate
 cpan/Unicode-Collate/t/illegalp.t		Unicode::Collate
 cpan/Unicode-Collate/t/illegal.t		Unicode::Collate
@@ -2719,6 +2719,7 @@ cpan/Unicode-Collate/t/overcjk0.t		Unicode::Collate
 cpan/Unicode-Collate/t/overcjk1.t		Unicode::Collate
 cpan/Unicode-Collate/t/override.t		Unicode::Collate
 cpan/Unicode-Collate/t/rearrang.t		Unicode::Collate
+cpan/Unicode-Collate/t/rewrite.t			Unicode::Collate
 cpan/Unicode-Collate/t/test.t			Unicode::Collate
 cpan/Unicode-Collate/t/trailwt.t		Unicode::Collate
 cpan/Unicode-Collate/t/variable.t		Unicode::Collate
