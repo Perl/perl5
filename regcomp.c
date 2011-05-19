@@ -10268,7 +10268,9 @@ parseit:
     /* Combine the two lists into one. */
     if (l1_fold_invlist) {
 	if (nonbitmap) {
-	    nonbitmap = invlist_union(nonbitmap, l1_fold_invlist);
+	    HV* temp = invlist_union(nonbitmap, l1_fold_invlist);
+	    invlist_destroy(nonbitmap);
+	    nonbitmap = temp;
 	}
 	else {
 	    nonbitmap = l1_fold_invlist;
