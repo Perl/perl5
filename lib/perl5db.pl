@@ -3319,7 +3319,7 @@ Return to any given position in the B<true>-history list
 
                     my $max_fd = 1024; # default if POSIX can't be loaded
                     if (eval { require POSIX }) {
-                        $max_fd = POSIX::sysconf(POSIX::_SC_OPEN_MAX());
+                        eval { $max_fd = POSIX::sysconf(POSIX::_SC_OPEN_MAX()) };
                     }
 
                     if (defined $max_fd) {
