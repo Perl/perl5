@@ -20,9 +20,6 @@ use File::Find;
 use File::Spec::Functions qw(rel2abs abs2rel catfile catdir curdir);
 use Getopt::Std;
 
-use lib 'Porting';
-use Maintainers;
-
 sub usage {
 die <<"EOF";
 usage: $0 [ -d -x ] source_dir tag_to_compare
@@ -51,15 +48,17 @@ my %dual_files;
 if ($opts{x}) {
     die "With -x, the directory must be '.'\n"
 	unless $source_dir eq '.';
-    for my $m (grep $Maintainers::Modules{$_}{CPAN},
-				keys %Maintainers::Modules)
-    {
 
+    unshift @INC, 'Porting';
+    require Maintainers;
+
+    for my $m (grep $Maintainers::Modules{$_}{CPAN},
+				keys %Maintainers::Modules) {
 	$dual_files{$_} = 1 for Maintainers::get_module_files($m);
     }
+} else {
+    chdir $source_dir or die "$0: chdir '$source_dir' failed: $!\n";
 }
-
-chdir $source_dir or die "$0: chdir '$source_dir' failed: $!\n";
 
 # Files to skip from the check for one reason or another,
 # usually because they pull in their version from some other file.
