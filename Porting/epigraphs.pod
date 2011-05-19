@@ -17,6 +17,68 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.14.0 -  L<< Larry Wall, January 12, 1988 <992@devvax.JPL.NASA.GOV> | http://groups.google.com/group/comp.sources.d/msg/5d17fa68c250b9b2 >>
+
+L<Announced on 2011-05-14 by Jesse Vincent|http://www.nntp.perl.org/group/perl.perl5.porters/2011/05/msg172326.html>
+
+At the start of any project, I'm programming primarily to please
+myself. (The two chief virtues in a programmer are laziness and
+impatience.)  After a while somebody looks over my shoulder and says,
+"That's neat. It'd be neater if it did such-and-so."  So the thing
+gets neater. Pretty soon (a year or two) I have an rn, a warp, a patch,
+or a perl. One of these years I'll have a metaconfig.
+
+I then say to myself, "I don't want my life's work to die when this
+computer is scrapped, so I should let some other people use this.  If I
+ask my company to sell this, it'll never see the light of day, and nobody
+would pay much for it anyway. If I sell it myself, I'll be in trouble with
+my company, to whom I signed my life away when I was hired. If I give it
+away, I can pretend it was worthless in the first place, so my company
+won't care. In any event, it's easier to ask forgiveness than permission."
+
+So a freely distributable program is born.
+
+=head2 v5.14.0-RC3 - American Airlines Gate Agent, last call
+
+L<Announced on 2011-05-11 by Jesse Vincent|http://www.nntp.perl.org/group/perl.perl5.porters/2011/05/msg172282.html>
+
+This is the last call for flight 1697 with service to Chicago and
+continuing service to San Francisco.  All passengers should already be
+aboard. If you aren't aboard at this time, you will be denied boarding
+and your bags will be offloaded.
+
+=head2 v5.14.0-RC2 - Greg Grandin, Fordlandia, "the Rise and Fall of Henry Ford's Forgotten Jungle City"
+
+L<Announced on 2011-05-04 by Jesse Vincent|http://www.nntp.perl.org/group/perl.perl5.porters/2011/05/msg171879.html>
+
+Over the course of nearly two decades, Ford would spend tens of millions
+of dollars founding not one but, after the plantation was defastated
+by leaf blight, two American towns, complete with central squares,
+sidewalks, indoor plumbing, hospitals, manicured lawns, movie theaters,
+swimming pools, golf courses, and, of course, Model Ts and As rolling
+down their paved streets.
+
+Back in America, newspapers kept up their drumbeat celebration, only
+obliquely referencing reports that things were not progressing as the
+company had hoped. But there was one note of skepticism. In late 1928,
+the Washington Post ran an editorial that read in its entirety: "Ford will
+govern a rubber plantation in Brazil larger than North Carolina.  This is
+the first time he has applied quantity production methods to trouble"
+
+=head2 v5.14.0-RC1 - Bill Bryson, "In a Sunburned Country"
+
+L<Announced on 2011-04-20 by Jesse Vincent|http://www.nntp.perl.org/group/perl.perl5.porters/2011/04/msg171253.html>
+
+But then Australia is such a difficult country to keep track of. On
+my first visit, some years ago, I passed the time on the long flight
+reading a history of Australian politics in the twentieth century,
+wherein I encountered the startling fact that in 1967 the prime minister,
+Harold Holt, was strolling along a beach in Victoria when he plunged into
+the surf and vanished. No trace of the poor man was ever seen again.
+This seemed doubly astounding to me--first that Australia could
+just I<lose> a prime minister (I mean, come on) and second that news of
+this had never reached me.
+
 =head2 v5.13.11 - Walt Whitman, L<Leaves of Grass|http://en.wikipedia.org/wiki/Leaves_of_Grass>
 
 L<Announced on 2011-02-20 by Florian Ragwitz|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2011-03/msg00560.html>
