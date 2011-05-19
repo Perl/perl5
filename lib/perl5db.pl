@@ -513,7 +513,7 @@ package DB;
 BEGIN {eval 'use IO::Handle'};	# Needed for flush only? breaks under miniperl
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
-$VERSION = '1.33';
+$VERSION = '1.34';
 
 $header = "perl5db.pl version $VERSION";
 
