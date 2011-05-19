@@ -76,6 +76,7 @@ perlbug(1)
 PerlIO::via::Base64
 PerlIO::via::StripHTML
 perllexwarn(1)
+perlthanks
 POD2::FR
 POD2::IT
 pod2man(1)
@@ -85,10 +86,12 @@ Pod::PXML
 poll(2)
 prctl(2)
 printf(3)
+pstruct
 ptar(1)
 ptargrep(1)
 pwd_mkdb(8)
 recvmsg(3)
+s2p
 Scalar::Readonly
 sendmail(1)
 sendmsg(3)
@@ -96,6 +99,7 @@ sha1sum(1)
 Shell::Command
 sock_init(3)
 socketpair(3)
+splain
 stat(2)
 String::Scanf
 Switch
@@ -323,8 +327,6 @@ pod/perluniintro.pod	Apparent broken link	1
 pod/perluniintro.pod	Verbatim line length including indents exceeds 80 by	3
 pod/perluniprops.pod	=item type mismatch	6
 pod/perlutil.pod	? Should you be using L<...> instead of	1
-pod/perlutil.pod	Apparent broken link	3
-pod/perlutil.pod	Apparent internal link is missing its forward slash	7
 pod/perlvar.pod	? Should you be using L<...> instead of	4
 pod/perlvar.pod	Verbatim line length including indents exceeds 80 by	9
 pod/perlvms.pod	? Should you be using F<...> or maybe L<...> instead of	1
