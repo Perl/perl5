@@ -3396,7 +3396,7 @@ sub pp_entersub {
 	    return $prefix . $amper. $kid;
 	}
     } else {
-	# It's a syntax error to call CORE::GLOBAL::foo without a prefix,
+	# It's a syntax error to call CORE::GLOBAL::foo with a prefix,
 	# so it must have been translated from a keyword call. Translate
 	# it back.
 	$kid =~ s/^CORE::GLOBAL:://;
