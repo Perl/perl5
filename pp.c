@@ -712,8 +712,7 @@ PP(pp_study)
 	    RETPUSHYES;
     }
     s = (unsigned char*)(SvPV(sv, len));
-    pos = len;
-    if (pos <= 0 || !SvPOK(sv) || SvUTF8(sv)) {
+    if (len == 0 || len > I32_MAX || !SvPOK(sv) || SvUTF8(sv)) {
 	/* No point in studying a zero length string, and not safe to study
 	   anything that doesn't appear to be a simple scalar (and hence might
 	   change between now and when the regexp engine runs without our set
@@ -721,6 +720,7 @@ PP(pp_study)
 	   stringification.  */
 	RETPUSHNO;
     }
+    pos = len;
 
     if (PL_lastscream) {
 	SvSCREAM_off(PL_lastscream);
