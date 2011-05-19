@@ -1003,9 +1003,6 @@ the scalar's value cannot change unless written to.
 	    ((XPVMG*) SvANY(sv))->xmg_u.xmg_ourstash = st;	\
 	} STMT_END
 
-#ifdef PERL_DEBUG_COW
-#else
-#endif
 #define SvRVx(sv) SvRV(sv)
 
 #ifdef PERL_DEBUG_COW
