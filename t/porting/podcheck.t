@@ -1362,10 +1362,6 @@ foreach my $filename (@files) {
         my @diagnostics;
         my $indent = '  ';
 
-        if ( ! $problems{$filename} && $known_problems{$filename}) {
-            push @diagnostics, output_thanks($filename,
-                            scalar keys %{$known_problems{$filename}}, 0, undef);
-        }
         my $total_known = 0;
         foreach my $message ( sort keys %{$problems{$filename}}) {
             $known_problems{$filename}{$message} = 0
@@ -1396,6 +1392,16 @@ foreach my $filename (@files) {
             } elsif ($problem_count < $known_problems{$filename}{$message}) {
                $diagnostic = output_thanks($filename, $known_problems{$filename}{$message}, $problem_count, $message);
             }
+            push @diagnostics, $diagnostic if $diagnostic;
+        }
+
+        # The above loop has output messages where there are current potential
+        # issues.  But it misses where there were some that have been entirely
+        # fixed.  For those, we need to look through the old issues
+        foreach my $message ( sort keys %{$known_problems{$filename}}) {
+            next if $problems{$filename}{$message};
+            next if ! $known_problems{$filename}{$message};
+            my $diagnostic = output_thanks($filename, $known_problems{$filename}{$message}, 0, $message);
             push @diagnostics, $diagnostic if $diagnostic;
         }
 
