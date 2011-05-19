@@ -1509,7 +1509,7 @@ X<@ARGV>
 The array C<@ARGV> contains the command-line arguments intended for
 the script. C<$#ARGV> is generally the number of arguments minus
 one, because C<$ARGV[0]> is the first argument, I<not> the program's
-command name itself. See C<$0> for the command name.
+command name itself. See L</$0> for the command name.
 
 =item ARGV
 X<ARGV>
@@ -1631,7 +1631,7 @@ want to read in record mode is probably unusable in line mode.)
 Non-VMS systems do normal I/O, so it's safe to mix record and
 non-record reads of a file.
 
-See also L<perlport/"Newlines">. Also see C<$.>.
+See also L<perlport/"Newlines">. Also see L</$.>.
 
 Mnemonic: / delimits line boundaries when quoting poetry.
 
@@ -1821,7 +1821,7 @@ Finally, C<$?> may be set to non-0 value if the external program
 F</cdrom/install> fails. The upper eight bits reflect specific error
 conditions encountered by the program (the program's C<exit()> value).
 The lower eight bits reflect mode of failure, like signal death and
-core dump information. See C<wait(2)> for details. In contrast to
+core dump information. See L<wait(2)> for details. In contrast to
 C<$!> and C<$^E>, which are set only if error condition is detected,
 the variable C<$?> is set on each C<wait> or pipe C<close>,
 overwriting the old value. This is more like C<$@>, which on every
@@ -2091,7 +2091,7 @@ Deprecated in Perl 5.12.
 =item $]
 X<$]> X<$OLD_PERL_VERSION>
 
-See C<$^V> for a more modern representation of the Perl version that allows
+See L</$^V> for a more modern representation of the Perl version that allows
 accurate string comparisons.
 
 The version + patchlevel / 1000 of the Perl interpreter. This variable

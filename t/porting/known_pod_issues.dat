@@ -117,6 +117,7 @@ Unicode::Casing
 Unicode::Semantics
 Unicode::Unihan
 unzip(1)
+wait(2)
 waitpid(3)
 wget(1)
 Win32::Locale
@@ -324,7 +325,6 @@ pod/perlunifaq.pod	empty section in previous paragraph	1
 pod/perluniintro.pod	Verbatim line length including indents exceeds 80 by	3
 pod/perluniprops.pod	=item type mismatch	6
 pod/perlutil.pod	? Should you be using L<...> instead of	1
-pod/perlvar.pod	? Should you be using L<...> instead of	4
 pod/perlvar.pod	Verbatim line length including indents exceeds 80 by	9
 pod/perlvms.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perlvms.pod	? Should you be using L<...> instead of	1
