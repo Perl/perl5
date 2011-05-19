@@ -324,7 +324,7 @@ pod/perluniintro.pod	Verbatim line length including indents exceeds 80 by	3
 pod/perluniprops.pod	=item type mismatch	6
 pod/perlutil.pod	? Should you be using L<...> instead of	1
 pod/perlutil.pod	Apparent broken link	3
-pod/perlutil.pod	Apparent internal link is missing its forward slash	5
+pod/perlutil.pod	Apparent internal link is missing its forward slash	7
 pod/perlvar.pod	? Should you be using L<...> instead of	4
 pod/perlvar.pod	Verbatim line length including indents exceeds 80 by	9
 pod/perlvms.pod	? Should you be using F<...> or maybe L<...> instead of	1
@@ -334,6 +334,7 @@ pod/perlwin32.pod	Verbatim line length including indents exceeds 80 by	12
 pod/perlxs.pod	Apparent internal link is missing its forward slash	1
 pod/perlxs.pod	Verbatim line length including indents exceeds 80 by	4
 pod/perlxstut.pod	Verbatim line length including indents exceeds 80 by	10
+Porting/epigraphs.pod	Entity number out of range E<0x2014>	1
 Porting/epigraphs.pod	Verbatim line length including indents exceeds 80 by	3
 Porting/expand-macro.pl	Verbatim line length including indents exceeds 80 by	2
 Porting/how_to_write_a_perldelta.pod	There is no NAME	1
