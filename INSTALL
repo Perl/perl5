@@ -36,7 +36,7 @@ any prefix location by adding "-Dprefix='/some/dir'" to Configure's args.
 To explicitly name the perl binary, use the command
 "make install PERLNAME=myperl".
 
-Building perl from source requires an ANSI compliant C-Compiler.
+Building perl from source requires an ANSI compliant C compiler.
 A minimum of C89 is required. Some features available in C99 will
 be probed for and used when found. The perl build process does not
 rely on anything more than C89.
@@ -629,7 +629,7 @@ This would have the effect of setting the following:
     $vendorman3direxp	/usr/man/man3
 
 Note how in this example, the vendor-supplied directories are in the
-/usr hierarchy, while the directories reserved for the end-user are in
+/usr hierarchy, while the directories reserved for the end user are in
 the /usr/local hierarchy.
 
 The entire installed library hierarchy is installed in locations with
@@ -844,7 +844,7 @@ eg.
        sh Configure -Dinc_version_list="5.15.0/x86_64-linux 5.14.0" ...
 
 When using the newer perl, you can add these paths again in the
-$PERL5LIB environment variable or with perl's -I runtime option.
+PERL5LIB environment variable or with perl's -I runtime option.
 
 =head2 Building Perl outside of the source directory
 
@@ -1021,7 +1021,7 @@ you have gdbm installed in any of (/usr/local, /opt/local, /usr/gnu,
 
 =item BerkeleyDB in /usr/local/BerkeleyDB
 
-The version of BerkeleyDB distributed by sleepycat.com installs in a
+The version of BerkeleyDB distributed by Oracle installs in a
 version-specific directory by default, typically something like
 /usr/local/BerkeleyDB.4.7.  To have Configure find that, you need to add
 -I/usr/local/BerkeleyDB.4.7/include to cc flags, as in the previous example,
@@ -1240,7 +1240,7 @@ You will then have to rebuild by running
 
 =item config.over and config.arch
 
-You can also supply a shell script config.over to over-ride
+You can also supply a shell script config.over to override
 Configure's guesses.  It will get loaded up at the very end, just
 before config.sh is created.  You have to be careful with this,
 however, as Configure does no checking that your changes make sense.
@@ -1267,7 +1267,7 @@ If you have any additional changes to make to the C compiler command
 line, they can be made in cflags.SH.  For instance, to turn off the
 optimizer on toke.c, find the line in the switch structure for
 toke.c and put the command optimize='-g' before the ;; .  You
-can also edit cflags directly, but beware that your changes will be
+can also edit cflags.SH directly, but beware that your changes will be
 lost the next time you run Configure.
 
 To explore various ways of changing ccflags from within a hint file,
@@ -1443,7 +1443,7 @@ If you run into dynamic loading problems, check your setting of
 the LD_LIBRARY_PATH environment variable.  If you're creating a static
 Perl library (libperl.a rather than libperl.so) it should build
 fine with LD_LIBRARY_PATH unset, though that may depend on details
-of your local set-up.
+of your local setup.
 
 =item nm extraction
 
@@ -1501,7 +1501,7 @@ test process to avoid the problem.
 =item .*_r() prototype NOT found
 
 On a related note, if you see a bunch of complaints like the above about
-reentrant functions - specifically networking-related ones - being present
+reentrant functions -- specifically networking-related ones -- being present
 but without prototypes available, check to see if BIND 8.1 (or possibly
 other BIND 8 versions) is (or has been) installed. They install
 header files such as netdb.h into places such as /usr/local/include (or into
@@ -1554,7 +1554,7 @@ Configure.
 If the libs variable looks correct, you might have the
 L<"nm extraction"> problem discussed above.
 
-If you stil have missing routines or undefined symbols, you probably
+If you still have missing routines or undefined symbols, you probably
 need to add some library or other, or you need to undefine some feature
 that Configure thought was there but is defective or incomplete.  If
 you used a hint file, see if it has any relevant advice.  You can also
@@ -1565,7 +1565,7 @@ look through through config.h for likely suspects.
 Some compilers will not compile or optimize the larger files (such as
 toke.c) without some extra switches to use larger jump offsets or
 allocate larger internal tables.  You can customize the switches for
-each file in cflags.  It's okay to insert rules for specific files into
+each file in cflags.SH.  It's okay to insert rules for specific files into
 makefile since a default rule only takes effect in the absence of a
 specific rule.
 
@@ -1685,7 +1685,7 @@ Genix may need to use libc rather than libc_s, or #undef VARARGS.
 
 NCR Tower 32 (OS 2.01.01) may need -W2,-Sl,2000 and #undef MKDIR.
 
-UTS may need one or more of -K or -g, and undef LSTAT.
+UTS may need one or more of -K or -g, and #undef LSTAT.
 
 FreeBSD can fail the ext/IPC/SysV/t/sem.t test if SysV IPC has not been
 configured in the kernel.  Perl tries to detect this, though, and
@@ -1715,7 +1715,7 @@ up and used, and secondly because the primary way of configuring Perl
 (using the rather large Unix-tool-dependent Configure script) is not
 awfully well suited for cross-compilation.  However, starting from
 version 5.8.0, the Configure script also knows one way of supporting
-cross-compilation support, please keep reading.
+cross-compilation support, so please keep reading.
 
 See the following files for more information about compiling Perl for
 the particular platforms:
@@ -1975,7 +1975,7 @@ The tests may fail for the following reasons:
 other than the user running the tests, or by root (uid 0).
 
 This failure can happen if the Perl source code distribution is
-unpacked in such a way that the user ids in the distribution package
+unpacked in such a way that the user IDs in the distribution package
 are used as-is.  Some tar programs do this.
 
 (2) If the directory the tests are being run in is writable by group or
@@ -2080,49 +2080,49 @@ make install will install the following:
 			will be a link to perl.
 	suidperl,
 	    sperl5.n.n	If you requested setuid emulation.
-	a2p          	awk-to-perl translator
+	a2p          	awk-to-perl translator.
 
     scripts
 
 	cppstdin	This is used by the deprecated switch perl -P, if
 			your cc -E can't read from stdin.
 	c2ph, pstruct	Scripts for handling C structures in header files.
-	config_data	Manage Module::Build-like module configuration
+	config_data	Manage Module::Build-like module configuration.
 	corelist	Shows versions of modules that come with different
-			versions of perl
-	cpan		The CPAN shell
-	cpan2dist	The CPANPLUS distribution creator
-	cpanp		The CPANPLUS shell
-	cpanp-run-perl	An helper for cpanp
-	dprofpp		Perl code profiler post-processor
-	enc2xs		Encoding module generator
-	find2perl	find-to-perl translator
-	h2ph		Extract constants and simple macros from C headers
+			versions of perl.
+	cpan		The CPAN shell.
+	cpan2dist	The CPANPLUS distribution creator.
+	cpanp		The CPANPLUS shell.
+	cpanp-run-perl	A helper for cpanp.
+	dprofpp		Perl code profiler post-processor.
+	enc2xs		Encoding module generator.
+	find2perl	find-to-perl translator.
+	h2ph		Extract constants and simple macros from C headers.
 	h2xs		Converts C .h header files to Perl extensions.
 	instmodsh	A shell to examine installed modules.
 	libnetcfg	Configure libnet.
 	perlbug		Tool to report bugs in Perl.
 	perldoc		Tool to read perl's pod documentation.
-	perlivp		Perl Installation Verification Procedure
+	perlivp		Perl Installation Verification Procedure.
 	piconv		A Perl implementation of the encoding conversion
-			utility iconv
-	pl2pm		Convert Perl 4 .pl files to Perl 5 .pm modules
+			utility iconv.
+	pl2pm		Convert Perl 4 .pl files to Perl 5 .pm modules.
 	pod2html,	Converters from perl's pod documentation format
 	pod2latex, 	to other useful formats.
 	pod2man,
 	pod2text,
 	pod2usage
-	podchecker	POD syntax checker
-	podselect	Prints sections of POD documentation
-	prove		A command-line tool for running tests
-	psed		A Perl implementation of sed
-	ptar		A Perl implementation of tar
-	ptardiff	A diff for tar archives
-	ptargrep	A grep for tar archives
-	s2p		sed-to-perl translator
-	shasum		A tool to print or check SHA checksums
-	splain		Describe Perl warnings and errors
-	xsubpp		Compiler to convert Perl XS code into C code
+	podchecker	POD syntax checker.
+	podselect	Prints sections of POD documentation.
+	prove		A command-line tool for running tests.
+	psed		A Perl implementation of sed.
+	ptar		A Perl implementation of tar.
+	ptardiff	A diff for tar archives.
+	ptargrep	A grep for tar archives.
+	s2p		sed-to-perl translator.
+	shasum		A tool to print or check SHA checksums.
+	splain		Describe Perl warnings and errors.
+	xsubpp		Compiler to convert Perl XS code into C code.
 
     library files
 
@@ -2172,7 +2172,7 @@ header files in /usr/include into files that can be easily interpreted
 by perl.  These files will be placed in the architecture-dependent
 library ($archlib) directory you specified to Configure.
 
-Note:  Due to differences in the C and perl languages, the conversion
+Note: Due to differences in the C and perl languages, the conversion
 of the header files is not perfect.  You will probably have to
 hand-edit some of the converted files to get them to parse correctly.
 For example, h2ph breaks spectacularly on type casting and certain
@@ -2219,7 +2219,7 @@ available in TeX format.  Type
 
 =head1 Starting all over again
 
-If you wish to re-build perl from the same build directory, you should
+If you wish to rebuild perl from the same build directory, you should
 clean it out with the command
 
 	make distclean
@@ -2233,7 +2233,7 @@ your old config.sh and Policy.sh files.
 
 If you are upgrading from a previous version of perl, or if you
 change systems or compilers or make other significant changes, or if
-you are experiencing difficulties building perl, you should not re-use
+you are experiencing difficulties building perl, you should not reuse
 your old config.sh.
 
 If your reason to reuse your old config.sh is to save your particular
@@ -2267,11 +2267,11 @@ an accurate description of your problem to perlbug@perl.org
 If Configure itself fails, and does not generate a config.sh file
 (needed to run C<./myconfig>), then please mail perlbug@perl.org the
 description of how Configure fails along with details of your system
-- for example the output from running C<uname -a>
+-- for example the output from running C<uname -a>
 
 Please try to make your message brief but clear.  Brief, clear bug
 reports tend to get answered more quickly.  Please don't worry if your
-written English is not great - what matters is how well you describe
+written English is not great -- what matters is how well you describe
 the important technical details of the problem you have encountered,
 not whether your grammar and spelling is flawless.
 
@@ -2280,7 +2280,7 @@ config.sh or a complete Configure or make log) unless absolutely
 necessary.  Do not include a complete transcript of your build
 session.  Just include the failing commands, the relevant error
 messages, and whatever preceding commands are necessary to give the
-appropriate context.  Plain text should usually be sufficient--fancy
+appropriate context.  Plain text should usually be sufficient -- fancy
 attachments or encodings may actually reduce the number of people who
 read your message.  Your message will get relayed to over 400
 subscribers around the world so please try to keep it brief but clear.
