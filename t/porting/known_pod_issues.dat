@@ -282,7 +282,6 @@ pod/perlre.pod	? Should you be using L<...> instead of	2
 pod/perlre.pod	Verbatim line length including indents exceeds 80 by	11
 pod/perlreapi.pod	Verbatim line length including indents exceeds 80 by	17
 pod/perlrebackslash.pod	Verbatim line length including indents exceeds 80 by	1
-pod/perlrecharclass.pod	Apparent broken link	1
 pod/perlref.pod	Verbatim line length including indents exceeds 80 by	1
 pod/perlreguts.pod	Verbatim line length including indents exceeds 80 by	17
 pod/perlrequick.pod	Verbatim line length including indents exceeds 80 by	3
