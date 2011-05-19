@@ -2022,7 +2022,7 @@ Mnemonic: Where was the syntax error "at"?
 =head2 Deprecated and removed variables
 
 Deprecating a variable announces the intent of the perl maintainers to
-eventually remove the variable from the langauge. It may still be
+eventually remove the variable from the language. It may still be
 available despite its status. Using a deprecated variable triggers
 a warning.
 

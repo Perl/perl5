@@ -176,7 +176,7 @@ i_sysmode='undef'
 
 # There was a bug in memcmp (which was fixed a while ago) which sometimes
 # fails to provide the correct compare status (it is data dependant). I
-# don't wnat to figure out if you are building with the correct version or
+# don't want to figure out if you are building with the correct version or
 # not, so just pretend there is no memcmp (since perl has its own handy
 # substitute).
 #

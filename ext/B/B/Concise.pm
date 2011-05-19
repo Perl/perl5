@@ -1255,7 +1255,7 @@ usual convention for Arabic numerals, and the default.
 
 =item B<-littleendian>
 
-Print seqence numbers with the least significant digit first.  This is
+Print sequence numbers with the least significant digit first.  This is
 obviously mutually exclusive with bigendian.
 
 =back

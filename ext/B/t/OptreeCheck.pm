@@ -975,7 +975,7 @@ sub OptreeCheck::gentest {
 sub OptreeCheck::processExamples {
     my @files = @_;
 
-    # gets array of paragraphs, which should be code-samples.  Theyre
+    # gets array of paragraphs, which should be code-samples.  They're
     # turned into optreeCheck tests,
 
     foreach my $file (@files) {

@@ -4385,7 +4385,7 @@ pod/perlhack.pod		Perl hackers guide
 pod/perlhacktips.pod		Tips for Perl core C code hacking
 pod/perlhacktut.pod		Walk through the creation of a simple C code patch
 pod/perlhist.pod		Perl history records
-pod/perlinterp.pod		Overview of the Perl intepreter source and how it works
+pod/perlinterp.pod		Overview of the Perl interpreter source and how it works
 pod/perlintro.pod		Perl introduction for beginners
 pod/perliol.pod			C API for Perl's implementation of IO in Layers
 pod/perlipc.pod			Perl interprocess communication

@@ -516,7 +516,7 @@ END_EVAL_TEST
     # test that the CV compiled for the eval is freed by checking that no additional 
     # reference to outside lexicals are made.
     my $x;
-    is(Internals::SvREFCNT($x), 1, "originally only 1 referece");
+    is(Internals::SvREFCNT($x), 1, "originally only 1 reference");
     eval '$x';
     is(Internals::SvREFCNT($x), 1, "execution eval doesn't create new references");
 }

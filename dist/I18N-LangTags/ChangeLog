@@ -137,7 +137,7 @@ Revision history for Perl module I18N::LangTags.
 
 	* Release 0.21
 
-	* extract_language_tags and locale2langauge_tag now
+	* extract_language_tags and locale2language_tag now
 	return untainted output.  Useful if you feed tainted
 	things, like $ENV{'LANG'}.
 	

@@ -705,7 +705,7 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'nwclark',
 	 # Nick has confirmed that while we have diverged from CPAN,
 	 # this package isn't primarily maintained in core
-	 # Another release wll happen "Sometime"
+	 # Another release will happen "Sometime"
 	 'DISTRIBUTION'	=> '',#'NWCLARK/ExtUtils-Constant-0.16.tar.gz',
 	'FILES'		=> q[cpan/ExtUtils-Constant],
 	'EXCLUDED'	=> [ qw{ lib/ExtUtils/Constant/Aaargh56Hash.pm

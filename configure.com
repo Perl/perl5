@@ -2066,7 +2066,7 @@ $     if f$type(use5005threads) .nes. ""
 $     then
 $         if use5005threads .or. use5005threads .eqs. "define" then bool_dflt="n"
 $     endif
-$     rp = "Use the newer intepreter-based ithreads? [''bool_dflt'] "
+$     rp = "Use the newer interpreter-based ithreads? [''bool_dflt'] "
 $     GOSUB myread
 $     use_ithreads=ans
 $     if use_ithreads 

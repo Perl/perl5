@@ -590,7 +590,7 @@ our $to_trace = 0;
 
 # This is for a rarely used development feature that allows you to compare two
 # versions of the Unicode standard without having to deal with changes caused
-# by the code points introduced in the later verson.  Change the 0 to a SINGLE
+# by the code points introduced in the later version.  Change the 0 to a SINGLE
 # dotted Unicode release number (e.g. 2.1).  Only code points introduced in
 # that release and earlier will be used; later ones are thrown away.  You use
 # the version number of the earliest one you want to compare; then run this

@@ -71,7 +71,7 @@ use Storable ();
 	eval {
 		Storable::freeze( $badfreeze );
 	};
-	ok( $@, 'Storable dies correctly when STORABLE_freeze returns a referece' );
+	ok( $@, 'Storable dies correctly when STORABLE_freeze returns a reference' );
 	# Check for a unique substring of the error message
 	ok( $@ =~ /cannot return references/, 'Storable dies with the expected error' );
 

@@ -25,7 +25,7 @@ Due to a bleadperl optimization (Dave Mitchell, circa may 04), the
 private flags /1, /2 are gone in blead (for the cases covered)
 
 When the optree stuff was integrated into 5.8.6, these tests failed,
-and were todo'd.  Theyre now done, by version-specific tweaking in
+and were todo'd.  They're now done, by version-specific tweaking in
 mkCheckRex(), therefore the skip is removed too.
 
 =for gentest

@@ -6214,13 +6214,13 @@ as supported by the compiler used to build Perl:
    hh          interpret integer as C type "char" or "unsigned char"
 	       on Perl 5.14 or later
    h           interpret integer as C type "short" or "unsigned short"
-   j	       intepret integer as C type "intmax_t" on Perl 5.14 
+   j	       interpret integer as C type "intmax_t" on Perl 5.14 
 	       or later, and only with a C99 compiler (unportable)
    l           interpret integer as C type "long" or "unsigned long"
    q, L, or ll interpret integer as C type "long long", "unsigned long long",
                or "quad" (typically 64-bit integers)
-   t	       intepret integer as C type "ptrdiff_t" on Perl 5.14 or later
-   z	       intepret integer as C type "size_t" on Perl 5.14 or later
+   t	       interpret integer as C type "ptrdiff_t" on Perl 5.14 or later
+   z	       interpret integer as C type "size_t" on Perl 5.14 or later
 
 As of 5.14, none of these raises an exception if they are not supported on
 your platform.  However, if warnings are enabled, a warning of the
