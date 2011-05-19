@@ -1,6 +1,5 @@
 #!/usr/bin/perl -w
 
-#
 # cmpVERSION - compare the current Perl source tree and a given tag
 # for modules that have identical version numbers but different contents.
 #
@@ -16,8 +15,7 @@ use strict;
 
 use ExtUtils::MakeMaker;
 use File::Compare;
-use File::Find;
-use File::Spec::Functions qw(rel2abs abs2rel catfile catdir curdir);
+use File::Spec::Functions qw(catfile catdir devnull);
 use Getopt::Std;
 
 sub usage {
@@ -36,7 +34,7 @@ die "$0: '$source_dir' does not look like a Perl directory\n"
 die "$0: '$source_dir' is a Perl directory but does not look like Git working directory\n"
     unless -d catdir($source_dir, ".git");
 
-my $null = $^O eq 'MSWin32' ? 'nul' : '/dev/null';
+my $null = devnull();
 
 my $tag_exists = `git --no-pager tag -l $tag_to_compare 2>$null`;
 chomp $tag_exists;
