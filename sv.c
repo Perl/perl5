@@ -6049,10 +6049,12 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 	    goto free_head;
 	}
 
-	if (SvOBJECT(sv)) {
-	    if (!curse(sv, 1)) goto get_next_sv;
-	}
+	assert(!SvOBJECT(sv) || type >= SVt_PVMG); /* objs are always >= MG */
+
 	if (type >= SVt_PVMG) {
+	    if (SvOBJECT(sv)) {
+		if (!curse(sv, 1)) goto get_next_sv;
+	    }
 	    /* Free back-references before magic, in case the magic calls
 	     * Perl code that has weak references to sv. */
 	    if (type == SVt_PVHV) {
