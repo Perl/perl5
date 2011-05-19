@@ -6,7 +6,6 @@
 # with -d option, output the diffs too
 # with -x option, exclude dual-life modules (after all, there are tools
 #                 like core-cpan-diff that can already deal with them)
-#                 With this option, one of the directories must be '.'.
 #
 # Original by slaven@rezic.de, modified by jhi and matt.w.johnson@gmail.com.
 #
@@ -15,23 +14,30 @@ use strict;
 
 use ExtUtils::MakeMaker;
 use File::Compare;
-use File::Spec::Functions qw(catfile catdir devnull);
+use File::Spec::Functions qw(devnull);
 use Getopt::Long;
 
-my ($diffs, $exclude_dual);
+my ($diffs, $exclude_dual, $tag_to_compare);
 unless (GetOptions('diffs' => \$diffs,
 		   'exclude|x' => \$exclude_dual,
-		   ) && @ARGV == 2) {
-    die "usage: $0 [ -d -x ] source_dir tag_to_compare";
+		   'tag=s' => \$tag_to_compare,
+		   ) && @ARGV == 0) {
+    die "usage: $0 [ -d -x --tag TAG]";
 }
 
-my ($source_dir, $tag_to_compare) = @ARGV[0,1];
-die "$0: '$source_dir' does not look like a Perl directory\n"
-    unless -f catfile($source_dir, "perl.h") && -d catdir($source_dir, "Porting");
-die "$0: '$source_dir' is a Perl directory but does not look like Git working directory\n"
-    unless -d catdir($source_dir, ".git");
+die "$0: This does not look like a Perl directory\n"
+    unless -f "perl.h" && -d "Porting";
+die "$0: 'This is a Perl directory but does not look like Git working directory\n"
+    unless -d ".git";
 
 my $null = devnull();
+
+unless (defined $tag_to_compare) {
+    # Thanks to David Golden for this suggestion.
+
+    $tag_to_compare = `git describe --abbrev=0`;
+    chomp $tag_to_compare;
+}
 
 my $tag_exists = `git --no-pager tag -l $tag_to_compare 2>$null`;
 chomp $tag_exists;
@@ -41,9 +47,6 @@ die "$0: '$tag_to_compare' is not a known Git tag\n"
 
 my %dual_files;
 if ($exclude_dual) {
-    die "With -x, the directory must be '.'\n"
-	unless $source_dir eq '.';
-
     unshift @INC, 'Porting';
     require Maintainers;
 
@@ -51,8 +54,6 @@ if ($exclude_dual) {
 				keys %Maintainers::Modules) {
 	$dual_files{$_} = 1 for Maintainers::get_module_files($m);
     }
-} else {
-    chdir $source_dir or die "$0: chdir '$source_dir' failed: $!\n";
 }
 
 # Files to skip from the check for one reason or another,
