@@ -728,10 +728,6 @@ PP(pp_study)
     }
     PL_lastscream = SvREFCNT_inc_simple(sv);
 
-    s = (unsigned char*)(SvPV(sv, len));
-    pos = len;
-    if (pos <= 0)
-	RETPUSHNO;
     if (pos > PL_maxscream) {
 	if (PL_maxscream < 0) {
 	    PL_maxscream = pos + 80;
