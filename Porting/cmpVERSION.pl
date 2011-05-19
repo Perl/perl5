@@ -16,17 +16,14 @@ use strict;
 use ExtUtils::MakeMaker;
 use File::Compare;
 use File::Spec::Functions qw(catfile catdir devnull);
-use Getopt::Std;
+use Getopt::Long;
 
-sub usage {
-die <<"EOF";
-usage: $0 [ -d -x ] source_dir tag_to_compare
-EOF
+my ($diffs, $exclude_dual);
+unless (GetOptions('diffs' => \$diffs,
+		   'exclude|x' => \$exclude_dual,
+		   ) && @ARGV == 2) {
+    die "usage: $0 [ -d -x ] source_dir tag_to_compare";
 }
-
-my %opts;
-getopts('dx', \%opts) or usage;
-@ARGV == 2 or usage;
 
 my ($source_dir, $tag_to_compare) = @ARGV[0,1];
 die "$0: '$source_dir' does not look like a Perl directory\n"
@@ -43,7 +40,7 @@ die "$0: '$tag_to_compare' is not a known Git tag\n"
     unless $tag_exists eq $tag_to_compare;
 
 my %dual_files;
-if ($opts{x}) {
+if ($exclude_dual) {
     die "With -x, the directory must be '.'\n"
 	unless $source_dir eq '.';
 
@@ -124,7 +121,7 @@ for (sort @output_files) {
     print "$_\n";
 }
 
-exit unless $opts{d};
+exit unless $diffs;
 
 for (sort @output_diffs) {
     print "\n";
