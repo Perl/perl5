@@ -33,6 +33,8 @@ h2xs:		h2xs.PL ../config.sh
 
 instmodsh:	instmodsh.PL ../config.sh
 
+json_pp:	json_pp.PL ../config.sh
+
 perlbug:	perlbug.PL ../config.sh ../patchlevel.h
 
 perldoc:	perldoc.PL ../config.sh
