@@ -1775,6 +1775,12 @@ is not the same as
 as after matching the A but failing on the B the C<(*THEN)> verb will
 backtrack and try C; but the C<(*PRUNE)> verb will simply fail.
 
+=back
+
+=item Verbs without an argument
+
+=over 4
+
 =item C<(*COMMIT)>
 X<(*COMMIT)>
 
@@ -1795,12 +1801,6 @@ outputs
 In other words, once the C<(*COMMIT)> has been entered, and if the pattern
 does not match, the regex engine will not try any further matching on the
 rest of the string.
-
-=back
-
-=item Verbs without an argument
-
-=over 4
 
 =item C<(*FAIL)> C<(*F)>
 X<(*FAIL)> X<(*F)>
