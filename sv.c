@@ -6054,6 +6054,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 	if (type >= SVt_PVMG) {
 	    if (SvOBJECT(sv)) {
 		if (!curse(sv, 1)) goto get_next_sv;
+		type = SvTYPE(sv); /* destructor may have changed it */
 	    }
 	    /* Free back-references before magic, in case the magic calls
 	     * Perl code that has weak references to sv. */
