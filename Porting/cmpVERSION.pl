@@ -4,8 +4,10 @@
 # for modules that have identical version numbers but different contents.
 #
 # with -d option, output the diffs too
-# with -x option, exclude dual-life modules (after all, there are tools
-#                 like core-cpan-diff that can already deal with them)
+# with -x option, exclude files from modules where blead is not upstream
+#
+# (after all, there are tools like core-cpan-diff that can already deal with
+# them)
 #
 # Original by slaven@rezic.de, modified by jhi and matt.w.johnson@gmail.com.
 #
@@ -17,9 +19,9 @@ use File::Compare;
 use File::Spec::Functions qw(devnull);
 use Getopt::Long;
 
-my ($diffs, $exclude_dual, $tag_to_compare);
+my ($diffs, $exclude_upstream, $tag_to_compare);
 unless (GetOptions('diffs' => \$diffs,
-		   'exclude|x' => \$exclude_dual,
+		   'exclude|x' => \$exclude_upstream,
 		   'tag=s' => \$tag_to_compare,
 		   ) && @ARGV == 0) {
     die "usage: $0 [ -d -x --tag TAG]";
@@ -45,14 +47,15 @@ chomp $tag_exists;
 die "$0: '$tag_to_compare' is not a known Git tag\n"
     unless $tag_exists eq $tag_to_compare;
 
-my %dual_files;
-if ($exclude_dual) {
+my %upstream_files;
+if ($exclude_upstream) {
     unshift @INC, 'Porting';
     require Maintainers;
 
-    for my $m (grep $Maintainers::Modules{$_}{CPAN},
-				keys %Maintainers::Modules) {
-	$dual_files{$_} = 1 for Maintainers::get_module_files($m);
+    for my $m (grep {!defined $Maintainers::Modules{$_}{UPSTREAM}
+			 or $Maintainers::Modules{$_}{UPSTREAM} ne 'blead'}
+	       keys %Maintainers::Modules) {
+	$upstream_files{$_} = 1 for Maintainers::get_module_files($m);
     }
 }
 
@@ -76,7 +79,7 @@ my @module_diffs = grep {
     /\.pm$/ &&
     (!defined($this_dir) || ($this_dir !~ $skip_dirs)) &&
     !exists $skip{$_} &&
-    !exists $dual_files{$_}
+    !exists $upstream_files{$_}
 } @all_diffs;
 
 my (@output_files, @output_diffs);
