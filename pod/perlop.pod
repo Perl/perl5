@@ -212,8 +212,14 @@ example, C<0666 & ~027> is 0640.  (See also L<Integer Arithmetic> and
 L<Bitwise String Operators>.)  Note that the width of the result is
 platform-dependent: ~0 is 32 bits wide on a 32-bit platform, but 64
 bits wide on a 64-bit platform, so if you are expecting a certain bit
-width, remember to use the & operator to mask off the excess bits.
+width, remember to use the "&" operator to mask off the excess bits.
 X<~> X<negation, binary>
+
+When complementing strings, if all characters have ordinal values under
+256, then their complements will, also.  But if they do not, all
+characters will be in either 32- or 64-bit complements, depending on your
+architecture.  So for example, C<~"\x{3B1}"> is C<"\x{FFFF_FC4E}"> on
+32-bit machines and C<"\x{FFFF_FFFF_FFFF_FC4E}"> on 64-bit machines.
 
 Unary "+" has no effect whatsoever, even on strings.  It is useful
 syntactically for separating a function name from a parenthesized expression
