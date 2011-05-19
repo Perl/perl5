@@ -761,16 +761,8 @@ sub queue_includes_from
 # non-GCC?) C compilers, but gcc uses additional include directories.
 sub inc_dirs
 {
-    my $from_gcc    = `LC_ALL=C $Config{cc} -v 2>&1`;
-    if( !( $from_gcc =~ s:^Reading specs from (.*?)/specs\b.*:$1/include:s ) )
-    { # gcc-4+ :
-       $from_gcc   = `LC_ALL=C $Config{cc} -print-search-dirs 2>&1`;
-       if ( !($from_gcc =~ s/^install:\s*([^\s]+[^\s\/])([\s\/]*).*$/$1\/include/s) )
-       {
-           $from_gcc = '';
-       };
-    };
-    length($from_gcc) ? ($from_gcc, $from_gcc . "-fixed", $Config{usrinc}) : ($Config{usrinc});
+    my $from_gcc   = `LC_ALL=C $Config{cc} -v -E - < /dev/null 2>&1 | awk '/^#include/, /^End of search list/' | grep '^ '`;
+    length($from_gcc) ? (split(' ', $from_gcc), $Config{usrinc}) : ($Config{usrinc});
 }
 
 
