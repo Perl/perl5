@@ -216,7 +216,7 @@ a number is a different quantity than it really is.  For example,
 C<BENGALI DIGIT FOUR> (U+09EA) looks very much like an
 C<ASCII DIGIT EIGHT> (U+0038).  And, C<\d+>, may match strings of digits
 that are a mixture from different writing systems, creating a security
-issue.  L<Unicode::UCD/num()> can be used to sort this out.
+issue.  L<Unicode::UCDE<sol>num()|Unicode::UCD/num> can be used to sort this out.
 
 Also, case-insensitive matching works on the full set of Unicode
 characters.  The C<KELVIN SIGN>, for example matches the letters "k" and
@@ -337,7 +337,7 @@ The innermost always has priority over any outer ones, and one applying
 to the whole expression has priority over any of the default settings that are
 described in the remainder of this section.
 
-The C<L<use re 'E<sol>foo'|re/'E<sol>flags' mode">> pragma can be used to set
+The C<L<use re 'E<sol>foo'|re/"'/flags' mode">> pragma can be used to set
 default modifiers (including these) for regular expressions compiled
 within its scope.  This pragma has precedence over the other pragmas
 listed below that change the defaults.
