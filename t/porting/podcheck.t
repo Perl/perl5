@@ -1401,6 +1401,7 @@ foreach my $filename (@files) {
         foreach my $message ( sort keys %{$known_problems{$filename}}) {
             next if $problems{$filename}{$message};
             next if ! $known_problems{$filename}{$message};
+            next if $known_problems{$filename}{$message} < 0; # Preserve negs
             my $diagnostic = output_thanks($filename, $known_problems{$filename}{$message}, 0, $message);
             push @diagnostics, $diagnostic if $diagnostic;
         }
