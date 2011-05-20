@@ -243,7 +243,8 @@ BEGIN {
 #
 # subs_declared
 # keys are names of subs for which we've printed declarations.
-# That means we can omit parentheses from the arguments.
+# That means we can omit parentheses from the arguments. It also means we
+# need to put CORE:: on core functions of the same name.
 #
 # subs_deparsed
 # Keeps track of fully qualified names of all deparsed subs.
@@ -1017,12 +1018,13 @@ sub maybe_parens_unop {
  	if ($name eq "umask" && $kid =~ /^\d+$/) {
 	    $kid = sprintf("%#o", $kid);
 	}
-	return "$name($kid)";
+	return $self->keyword($name) . "($kid)";
     } else {
 	$kid = $self->deparse($kid, 16);
  	if ($name eq "umask" && $kid =~ /^\d+$/) {
 	    $kid = sprintf("%#o", $kid);
 	}
+	$name = $self->keyword($name);
 	if (substr($kid, 0, 1) eq "\cS") {
 	    # use kid's parens
 	    return $name . substr($kid, 1);
@@ -1521,10 +1523,28 @@ sub pp_setstate { pp_nextstate(@_) }
 
 sub pp_unstack { return "" } # see also leaveloop
 
+sub keyword {
+    my $self = shift;
+    my $name = shift;
+    return $name if $name =~ /^CORE::/; # just in case
+    if (
+      $name !~ /^(?:chom?p|exec|system)\z/
+       && !defined eval{prototype "CORE::$name"}
+    ) { return $name }
+    if (
+	exists $self->{subs_declared}{$name}
+	 or
+	exists &{"$self->{curstash}::$name"}
+    ) {
+	return "CORE::$name"
+    }
+    return $name;
+}
+
 sub baseop {
     my $self = shift;
     my($op, $cx, $name) = @_;
-    return $name;
+    return $self->keyword($name);
 }
 
 sub pp_stub {
@@ -1600,7 +1620,7 @@ sub pp_not {
     my $self = shift;
     my($op, $cx) = @_;
     if ($cx <= 4) {
-	$self->pfixop($op, $cx, "not ", 4);
+	$self->pfixop($op, $cx, $self->keyword("not")." ", 4);
     } else {
 	$self->pfixop($op, $cx, "!", 21);	
     }
@@ -1626,7 +1646,8 @@ sub unop {
 
 	return $self->maybe_parens_unop($name, $kid, $cx);
     } else {
-	return $name .  ($op->flags & OPf_SPECIAL ? "()" : "");
+	return $self->keyword($name)
+	  . ($op->flags & OPf_SPECIAL ? "()" : "");
     }
 }
 
@@ -1951,7 +1972,7 @@ sub pp_last { loopex(@_, "last") }
 sub pp_next { loopex(@_, "next") }
 sub pp_redo { loopex(@_, "redo") }
 sub pp_goto { loopex(@_, "goto") }
-sub pp_dump { loopex(@_, "dump") }
+sub pp_dump { loopex(@_, $_[0]->keyword("dump")) }
 
 sub ftst {
     my $self = shift;
@@ -2284,9 +2305,10 @@ sub listop {
     my(@exprs);
     my $parens = ($cx >= 5) || $self->{'parens'};
     my $kid = $op->first->sibling;
-    return $name if null $kid;
+    return $self->keyword($name) if null $kid;
     my $first;
     $name = "socketpair" if $name eq "sockpair";
+    my $fullname = $self->keyword($name);
     my $proto = prototype("CORE::$name");
     if (defined $proto
 	&& $proto =~ /^;?\*/
@@ -2310,12 +2332,13 @@ sub listop {
 	push @exprs, $self->deparse($kid, 6);
     }
     if ($name eq "reverse" && ($op->private & OPpREVERSE_INPLACE)) {
-	return "$exprs[0] = $name" . ($parens ? "($exprs[0])" : " $exprs[0]");
+	return "$exprs[0] = $fullname"
+	         . ($parens ? "($exprs[0])" : " $exprs[0]");
     }
     if ($parens) {
-	return "$name(" . join(", ", @exprs) . ")";
+	return "$fullname(" . join(", ", @exprs) . ")";
     } else {
-	return "$name " . join(", ", @exprs);
+	return "$fullname " . join(", ", @exprs);
     }
 }
 
@@ -2436,10 +2459,11 @@ sub pp_truncate {
         $fh = "+$fh" if not $parens and substr($fh, 0, 1) eq "(";
     }
     my $len = $self->deparse($kid->sibling, 6);
+    my $name = $self->keyword('truncate');
     if ($parens) {
-	return "truncate($fh, $len)";
+	return "$name($fh, $len)";
     } else {
-	return "truncate $fh, $len";
+	return "$name $fh, $len";
     }
 }
 
@@ -2474,10 +2498,11 @@ sub indirop {
 	$expr = $self->deparse($kid, 6);
 	push @exprs, $expr;
     }
-    my $name2 = $name;
+    my $name2;
     if ($name eq "sort" && $op->private & OPpSORT_REVERSE) {
-	$name2 = 'reverse sort';
+	$name2 = $self->keyword('reverse') . ' ' . $self->keyword('sort');
     }
+    else { $name2 = $self->keyword($name) }
     if ($name eq "sort" && ($op->private & OPpSORT_INPLACE)) {
 	return "$exprs[0] = $name2 $indir $exprs[0]";
     }

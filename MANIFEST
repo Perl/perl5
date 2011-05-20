@@ -2836,6 +2836,7 @@ dist/base/t/sigdie.t		See if base works with SIGDIE
 dist/base/t/version.t		See if base works with versions
 dist/base/t/warnings.t		See if base works with warnings
 dist/B-Deparse/Deparse.pm	Compiler Deparse backend
+dist/B-Deparse/t/core.t		See if B::Deparse knows when to use CORE::
 dist/B-Deparse/t/deparse.t	See if B::Deparse works
 dist/bignum/lib/bigint.pm		bigint
 dist/bignum/lib/bignum.pm		bignum
