@@ -881,7 +881,7 @@ use File::Glob qw(:case);
     'Filter::Simple' =>
 	{
 	'MAINTAINER'	=> 'smueller',
-	'DISTRIBUTION'	=> 'SMUELLER/Filter-Simple-0.85.tar.gz',
+	'DISTRIBUTION'	=> 'SMUELLER/Filter-Simple-0.87.tar.gz',
 	'FILES'		=> q[dist/Filter-Simple],
 	'EXCLUDED'	=> [ qw(Makefile.PL),
 			     qr{^demo/}
