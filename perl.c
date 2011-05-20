@@ -1706,6 +1706,18 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef USE_FAST_STDIO
 			     " USE_FAST_STDIO"
 #  endif	       
+#  ifdef USE_LOCALE
+			     " USE_LOCALE"
+#  endif
+#  ifdef USE_LOCALE_COLLATE
+			     " USE_LOCALE_COLLATE"
+#  endif
+#  ifdef USE_LOCALE_CTYPE
+			     " USE_LOCALE_CTYPE"
+#  endif
+#  ifdef USE_LOCALE_NUMERIC
+			     " USE_LOCALE_NUMERIC"
+#  endif
 #  ifdef USE_PERL_ATOF
 			     " USE_PERL_ATOF"
 #  endif	       
