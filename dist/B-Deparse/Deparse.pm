@@ -1659,6 +1659,7 @@ sub pp_chr { maybe_targmy(@_, \&unop, "chr") }
 sub pp_each { unop(@_, "each") }
 sub pp_values { unop(@_, "values") }
 sub pp_keys { unop(@_, "keys") }
+{ no strict 'refs'; *{"pp_r$_"} = *{"pp_$_"} for qw< keys each values >; }
 sub pp_boolkeys { 
     # no name because its an optimisation op that has no keyword
     unop(@_,"");
