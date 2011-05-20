@@ -2855,8 +2855,9 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
 	     * express the capitalization, for example, of all consecutive
 	     * letters with a single line: 0061\t007A\t0041 This maps 0061 to
 	     * 0041, 0062 to 0042, etc.  I (khw) have never understood 'none',
-	     * and it's not documented, and perhaps not even currently used,
-	     * but I copied the semantics from swash_get(), just in case */
+	     * and it's not documented; it appears to be used only in
+	     * implementing tr//; I copied the semantics from swash_get(), just
+	     * in case */
 	    if (!none || val < none) {
 		++val;
 	    }
