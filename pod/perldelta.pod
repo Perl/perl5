@@ -91,11 +91,19 @@ XXX
 
 =item *
 
+L<B> has been upgraded from version 1.29 to version 1.30.
+
+=item *
+
 L<Math::Complex> has been upgraded from version 1.56 to version 1.57.
 
 Correct copy constructor usage.
 Fix polarwise formatting with numeric format specifier.
 More stable C<great_circle_direction> algorithm.
+
+=item *
+
+L<Storable> has been upgraded from version 2.27 to version 2.28.
 
 =item *
 
