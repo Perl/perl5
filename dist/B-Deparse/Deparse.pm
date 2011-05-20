@@ -4869,14 +4869,6 @@ from the Perl core to fix.
 
 =item *
 
-If a keyword is over-ridden, and your program explicitly calls
-the built-in version by using CORE::keyword, the output of B::Deparse
-will not reflect this. If you run the resulting code, it will call
-the over-ridden version rather than the built-in one. (Maybe there
-should be an option to B<always> print keyword calls as C<CORE::name>.)
-
-=item *
-
 Some constants don't print correctly either with or without B<-d>.
 For instance, neither B::Deparse nor Data::Dumper know how to print
 dual-valued scalars correctly, as in:
