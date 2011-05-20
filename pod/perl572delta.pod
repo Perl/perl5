@@ -151,7 +151,7 @@ C<$^N>, which contains the most-recently closed group (submatch).
 
 =item *
 
-L<utime> now supports C<utime undef, undef, @files> to change the
+L<perlfunc/utime> now supports C<utime undef, undef, @files> to change the
 file timestamps to the current time.
 
 =item *
@@ -249,7 +249,7 @@ L<Time::Seconds> - a simple API to convert seconds to other date values
 
 =item *
 
-L<UnicodeCD> - Unicode Character Database
+L<Unicode::UCD> - Unicode Character Database
 
 =back
 

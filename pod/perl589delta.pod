@@ -1228,7 +1228,7 @@ Hanssen).
 
 =item *
 
-L<reverse> function documentation received scalar context examples.
+C<reverse> function documentation received scalar context examples.
 
 =back
 
@@ -1259,7 +1259,7 @@ L<perlsub> example is updated to use a lexical variable for C<opendir> syntax.
 L<perlvar> fixes confusion about real GID C<$(> and effective GID C<$)>. 
 
 Perl thread tutorial example is fixed in section
-L<perlthrtut/Queues: Passing Data Around> and L<perlothrtut>.
+L<perlthrtut/Queues: Passing Data Around> and L<perlthrtut>.
 
 L<perlhack> documentation extensively improved by Jarkko Hietaniemi and others.
 
