@@ -10,20 +10,22 @@ BEGIN {
 use strict;
 use Devel::Peek;
 use File::Temp qw(tempdir);
+use File::Spec;
 
 my %hash = map +($_ => 1), ("a".."z");
 
 my $tmp_dir = tempdir(CLEANUP => 1);
+my $tmp_file = File::Spec->catfile($tmp_dir, 'dump');
 
 sub riter {
     local *OLDERR;
     open(OLDERR, ">&STDERR") || die "Can't dup STDERR: $!";
-    open(STDERR, ">", "$tmp_dir/dump") ||
-        die "Could not open '$tmp_dir/dump' for write: $^E";
+    open(STDERR, ">", $tmp_file) ||
+        die "Could not open '$tmp_file' for write: $^E";
     Dump(\%hash);
     open(STDERR, ">&OLDERR") || die "Can't dup OLDERR: $!";
-    open(my $fh, "<", "$tmp_dir/dump") ||
-        die "Could not open '$tmp_dir/dump' for read: $^E";
+    open(my $fh, "<", $tmp_file) ||
+        die "Could not open '$tmp_file' for read: $^E";
     local $/;
     my $dump = <$fh>;
     my ($riter) = $dump =~ /^\s*RITER\s*=\s*(\d+)/m or
