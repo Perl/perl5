@@ -702,3 +702,6 @@ glob('a,');
 each $@;
 keys $~;
 values $!;
+####
+# readpipe with complex expression
+readpipe $a + $b;

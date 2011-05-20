@@ -3834,7 +3834,10 @@ sub pp_backtick {
     # skip pushmark if it exists (readpipe() vs ``)
     my $child = $op->first->sibling->isa('B::NULL')
 	? $op->first : $op->first->sibling;
-    return single_delim("qx", '`', $self->dq($child));
+    if ($self->pure_string($child)) {
+	return single_delim("qx", '`', $self->dq($child, 1));
+    }
+    unop($self, @_, "readpipe");
 }
 
 sub dquote {
