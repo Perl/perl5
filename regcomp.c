@@ -5983,6 +5983,7 @@ S_invlist_destroy(pTHX_ HV* const invlist)
 	UV *list = INT2PTR(UV *, SvUV(*list_ptr)); /* PERL_POISON needs lvalue */
 	Safefree(list);
     }
+    SvREFCNT_dec(invlist);
 }
 
 STATIC void
