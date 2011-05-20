@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 
+#
 # cmpVERSION - compare the current Perl source tree and a given tag
 # for modules that have identical version numbers but different contents.
 #
@@ -13,9 +14,9 @@
 # Adaptation to produce TAP by Abigail, folded back into this file by Nicholas
 
 use strict;
+use 5.006;
 
 use ExtUtils::MakeMaker;
-use File::Compare;
 use File::Spec::Functions qw(devnull);
 use Getopt::Long;
 
@@ -87,82 +88,93 @@ if ($tap) {
 
 my $skip_dirs = qr|^t/lib|;
 
-my @all_diffs = `git --no-pager diff --name-only $tag_to_compare`;
-chomp @all_diffs;
+sub pm_file_from_xs {
+    my $xs = shift;
 
-my @module_diffs = grep {
-    my $this_dir;
-    $this_dir = $1 if m/^(.*)\//;
-    /\.pm$/ &&
-    (!defined($this_dir) || ($this_dir !~ $skip_dirs)) &&
-    !exists $skip{$_} &&
-    !exists $upstream_files{$_}
-} @all_diffs;
+    # First try a .pm at the same level as the .xs file, with the same basename
+    my $pm = $xs;
+    $pm =~ s/xs\z/pm/;
+    return $pm if -f $pm;
 
-unless (@module_diffs) {
+    # Try for a (different) .pm at the same level, based on the directory name:
+    my ($path) = $xs =~ m!^(.*)/!;
+    my ($last) = $path =~ m!([^-/]+)\z!;
+    $pm = "$path/$last.pm";
+    return $pm if -f $pm;
+
+    # Try to work out the extension's full package, and look for a .pm in lib/
+    # based on that:
+    ($last) = $path =~ m!([^/]+)\z!;
+    $last =~ tr !-!/!;
+    $pm = "$path/lib/$last.pm";
+    return $pm if -f $pm;
+
+    die "No idea which .pm file corresponds to '$xs', so aborting";
+}
+
+# Key is the .pm file from which we check the version.
+# Value is a reference to an array of files to check for differences
+# The trivial case is a pure perl module, where the array holds one element,
+# the perl module's file. The "fun" comes with XS modules, and the real fun
+# with XS modules with more than one XS file, and "interesting" layouts.
+
+my %module_diffs;
+
+foreach (`git --no-pager diff --name-only $tag_to_compare`) {
+    chomp;
+    next unless m/^(.*)\//;
+    my $this_dir = $1;
+    next if $this_dir =~ $skip_dirs || exists $skip{$_};
+    next if exists $upstream_files{$_};
+    if (/\.pm\z/) {
+	push @{$module_diffs{$_}}, $_;
+    } elsif (/\.xs\z/) {
+	push @{$module_diffs{pm_file_from_xs($_)}}, $_;
+    }
+}
+
+unless (%module_diffs) {
     print "1..1\nok 1 - No difference found\n" if $tap;
     exit;
 }
 
-printf "1..%d\n" => scalar @module_diffs if $tap;
+printf "1..%d\n" => scalar keys %module_diffs if $tap;
 
 my $count;
 my $diff_cmd = "git --no-pager diff $tag_to_compare ";
 my (@diff);
 
-foreach my $pm_file (sort @module_diffs) {
-    # --tap does diff inline, --diff does it at the end.
-    @diff = () if $tap;
-    (my $xs_file = $pm_file) =~ s/\.pm$/.xs/;
-    my $pm_eq = compare_git_file($pm_file, $tag_to_compare);
-    next unless defined $pm_eq;
-    my $xs_eq = 1;
-    if (-e $xs_file) {
-        $xs_eq = compare_git_file($xs_file, $tag_to_compare);
-        next unless defined $xs_eq;
-    }
-    next if ($pm_eq && $xs_eq);
+foreach my $pm_file (sort keys %module_diffs) {
+    # git has already told us that the files differ, so no need to grab each as
+    # a blob from git, and do the comparison ourselves.
     my $pm_version = eval {MM->parse_version($pm_file)};
     my $orig_pm_content = get_file_from_git($pm_file, $tag_to_compare);
     my $orig_pm_version = eval {MM->parse_version(\$orig_pm_content)};
-    next if ( ! defined $pm_version || ! defined $orig_pm_version );
-    next if ( $pm_version eq 'undef' || $orig_pm_version eq 'undef' ); # sigh
-    next if $pm_version ne $orig_pm_version;
-    next if exists $skip_versions{$pm_file}
-	 and grep $pm_version eq $_, @{$skip_versions{$pm_file}};
-    push @diff, $pm_file unless $pm_eq;
-    push @diff, $xs_file unless $xs_eq;
-}
-continue {
-    if (@diff) {
+    
+    if ((!defined $pm_version || !defined $orig_pm_version)
+	|| ($pm_version eq 'undef' || $orig_pm_version eq 'undef') # sigh
+	|| ($pm_version ne $orig_pm_version) # good
+	|| (exists $skip_versions{$pm_file}
+	    and grep $pm_version eq $_, @{$skip_versions{$pm_file}})
+       ) {
+        printf "ok %d - %s\n", ++$count, $pm_file if $tap;
+    } else {
 	if ($tap) {
-	    foreach (@diff) {
+	    foreach (sort @{$module_diffs{$pm_file}}) {
 		print "# $_" for `$diff_cmd '$_'`;
 	    }
 	    printf "not ok %d - %s\n", ++$count, $pm_file;
 	} else {
+	    push @diff, @{$module_diffs{$pm_file}};
 	    print "$pm_file\n";
 	}
     }
-    elsif ($tap) {
-        printf "ok %d - %s\n", ++$count, $pm_file;
-    }
-}
-
-sub compare_git_file {
-    my ($file, $tag) = @_;
-    open(my $orig_fh, "-|", "git --no-pager show $tag:$file 2>$null");
-    return undef if eof($orig_fh);
-    my $is_eq = compare($file, $orig_fh) == 0;
-    close($orig_fh);
-    return $is_eq;
 }
 
 sub get_file_from_git {
     my ($file, $tag) = @_;
-    local $/ = undef;
-    my $file_content = `git --no-pager show $tag:$file 2>$null`;
-    return $file_content;
+    local $/;
+    return scalar `git --no-pager show $tag:$file 2>$null`;
 }
 
 if ($diffs) {
