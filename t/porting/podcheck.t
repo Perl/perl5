@@ -497,7 +497,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
             }
         }
 
-        carp("Couldn't extract line number from $message") if $message =~ /line \d+/;
+        Carp::carp("Couldn't extract line number from $message") if $message =~ /line \d+/;
         push @{$problems{$filename{$addr}}{$message}}, $opts;
         #push @{$problems{$self->get_filename}{$message}}, $opts;
     }
