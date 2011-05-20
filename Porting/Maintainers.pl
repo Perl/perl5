@@ -214,7 +214,7 @@ use File::Glob qw(:case);
     'Attribute::Handlers' =>
 	{
 	'MAINTAINER'	=> 'rgarcia',
-	'DISTRIBUTION'	=> 'SMUELLER/Attribute-Handlers-0.88.tar.gz',
+	'DISTRIBUTION'	=> 'SMUELLER/Attribute-Handlers-0.91.tar.gz',
 	'FILES'		=> q[dist/Attribute-Handlers],
 	'UPSTREAM'	=> 'blead',
 	},
