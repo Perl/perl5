@@ -103,6 +103,10 @@ More stable C<great_circle_direction> algorithm.
 
 =item *
 
+L<PerlIO::encoding> has been upgraded from version 0.14 to 0.15
+
+=item *
+
 L<Storable> has been upgraded from version 2.27 to version 2.28.
 
 =item *
