@@ -121,7 +121,7 @@ wait(2)
 waitpid(3)
 wget(1)
 Win32::Locale
-dist/Attribute-Handlers/lib/Attribute/Handlers.pm	Verbatim line length including indents exceeds 80 by	19
+dist/attribute-handlers/lib/attribute/handlers.pm	Verbatim line length including indents exceeds 80 by	19
 dist/base/lib/fields.pm	Verbatim line length including indents exceeds 80 by	1
 dist/bignum/lib/bigint.pm	Apparent broken link	1
 dist/bignum/lib/bigint.pm	Verbatim line length including indents exceeds 80 by	1
@@ -129,67 +129,67 @@ dist/bignum/lib/bignum.pm	Apparent broken link	1
 dist/bignum/lib/bignum.pm	Verbatim line length including indents exceeds 80 by	1
 dist/bignum/lib/bigrat.pm	Apparent broken link	1
 dist/constant/lib/constant.pm	Apparent broken link	2
-dist/Cwd/lib/File/Spec.pm	Verbatim line length including indents exceeds 80 by	1
-dist/Cwd/lib/File/Spec/Mac.pm	Verbatim line length including indents exceeds 80 by	9
-dist/Cwd/lib/File/Spec/Unix.pm	Verbatim line length including indents exceeds 80 by	1
-dist/Cwd/lib/File/Spec/VMS.pm	Verbatim line length including indents exceeds 80 by	1
-dist/Cwd/lib/File/Spec/Win32.pm	Verbatim line length including indents exceeds 80 by	1
-dist/Data-Dumper/Dumper.pm	? Should you be using L<...> instead of	1
-dist/Data-Dumper/Dumper.pm	Verbatim line length including indents exceeds 80 by	2
-dist/ExtUtils-Install/lib/ExtUtils/Installed.pm	Verbatim line length including indents exceeds 80 by	2
-dist/Filter-Simple/lib/Filter/Simple.pm	Verbatim paragraph in NAME section	1
-dist/I18N-LangTags/lib/I18N/LangTags.pm	Verbatim line length including indents exceeds 80 by	2
-dist/IO/IO.pm	Verbatim line length including indents exceeds 80 by	1
-dist/IO/lib/IO/Socket/INET.pm	Verbatim line length including indents exceeds 80 by	5
-dist/Locale-Maketext/lib/Locale/Maketext.pod	No items in =over / =back list	1
-dist/Locale-Maketext/lib/Locale/Maketext.pod	Verbatim line length including indents exceeds 80 by	1
-dist/Locale-Maketext/lib/Locale/Maketext/TPJ13.pod	No items in =over / =back list	3
-dist/Math-BigInt/lib/Math/BigFloat.pm	Apparent broken link	7
-dist/Math-BigInt/lib/Math/BigFloat.pm	Apparent internal link is missing its forward slash	6
-dist/Math-BigInt/lib/Math/BigFloat.pm	Verbatim line length including indents exceeds 80 by	28
-dist/Math-BigInt/lib/Math/BigInt.pm	Apparent broken link	5
-dist/Math-BigInt/lib/Math/BigInt.pm	Apparent internal link is missing its forward slash	7
-dist/Math-BigInt/lib/Math/BigInt.pm	Verbatim line length including indents exceeds 80 by	122
-dist/Math-BigInt/lib/Math/BigInt.pm	empty section in previous paragraph	1
-dist/Math-BigInt/lib/Math/BigInt/CalcEmu.pm	Apparent broken link	1
-dist/Math-BigInt/lib/Math/BigInt/CalcEmu.pm	empty section in previous paragraph	3
-dist/Math-BigRat/lib/Math/BigRat.pm	Apparent broken link	3
-dist/Math-BigRat/lib/Math/BigRat.pm	Apparent internal link is missing its forward slash	1
-dist/Math-BigRat/lib/Math/BigRat.pm	Verbatim line length including indents exceeds 80 by	7
-dist/Module-CoreList/blib/script/corelist	Verbatim line length including indents exceeds 80 by	1
-dist/Module-CoreList/lib/Module/CoreList.pm	Verbatim line length including indents exceeds 80 by	4
-dist/Net-Ping/lib/Net/Ping.pm	Verbatim line length including indents exceeds 80 by	2
-dist/Safe/Safe.pm	Verbatim line length including indents exceeds 80 by	1
-dist/Safe/Safe.pm	empty section in previous paragraph	1
-dist/SelfLoader/lib/SelfLoader.pm	Verbatim line length including indents exceeds 80 by	14
-dist/Storable/Storable.pm	Verbatim line length including indents exceeds 80 by	4
-dist/Thread-Queue/lib/Thread/Queue.pm	Verbatim line length including indents exceeds 80 by	4
+dist/cwd/lib/file/spec.pm	Verbatim line length including indents exceeds 80 by	1
+dist/cwd/lib/file/spec/mac.pm	Verbatim line length including indents exceeds 80 by	9
+dist/cwd/lib/file/spec/unix.pm	Verbatim line length including indents exceeds 80 by	1
+dist/cwd/lib/file/spec/vms.pm	Verbatim line length including indents exceeds 80 by	1
+dist/cwd/lib/file/spec/win32.pm	Verbatim line length including indents exceeds 80 by	1
+dist/data-dumper/dumper.pm	? Should you be using L<...> instead of	1
+dist/data-dumper/dumper.pm	Verbatim line length including indents exceeds 80 by	2
+dist/extutils-install/lib/extutils/installed.pm	Verbatim line length including indents exceeds 80 by	2
+dist/filter-simple/lib/filter/simple.pm	Verbatim paragraph in NAME section	1
+dist/i18n-langtags/lib/i18n/langtags.pm	Verbatim line length including indents exceeds 80 by	2
+dist/io/io.pm	Verbatim line length including indents exceeds 80 by	1
+dist/io/lib/io/socket/inet.pm	Verbatim line length including indents exceeds 80 by	5
+dist/locale-maketext/lib/locale/maketext.pod	No items in =over / =back list	1
+dist/locale-maketext/lib/locale/maketext.pod	Verbatim line length including indents exceeds 80 by	1
+dist/locale-maketext/lib/locale/maketext/tpj13.pod	No items in =over / =back list	3
+dist/math-bigint/lib/math/bigfloat.pm	Apparent broken link	7
+dist/math-bigint/lib/math/bigfloat.pm	Apparent internal link is missing its forward slash	6
+dist/math-bigint/lib/math/bigfloat.pm	Verbatim line length including indents exceeds 80 by	28
+dist/math-bigint/lib/math/bigint.pm	Apparent broken link	5
+dist/math-bigint/lib/math/bigint.pm	Apparent internal link is missing its forward slash	7
+dist/math-bigint/lib/math/bigint.pm	Verbatim line length including indents exceeds 80 by	122
+dist/math-bigint/lib/math/bigint.pm	empty section in previous paragraph	1
+dist/math-bigint/lib/math/bigint/calcemu.pm	Apparent broken link	1
+dist/math-bigint/lib/math/bigint/calcemu.pm	empty section in previous paragraph	3
+dist/math-bigrat/lib/math/bigrat.pm	Apparent broken link	3
+dist/math-bigrat/lib/math/bigrat.pm	Apparent internal link is missing its forward slash	1
+dist/math-bigrat/lib/math/bigrat.pm	Verbatim line length including indents exceeds 80 by	7
+dist/module-corelist/blib/script/corelist	Verbatim line length including indents exceeds 80 by	1
+dist/module-corelist/lib/module/corelist.pm	Verbatim line length including indents exceeds 80 by	4
+dist/net-ping/lib/net/ping.pm	Verbatim line length including indents exceeds 80 by	2
+dist/safe/safe.pm	Verbatim line length including indents exceeds 80 by	1
+dist/safe/safe.pm	empty section in previous paragraph	1
+dist/selfloader/lib/selfloader.pm	Verbatim line length including indents exceeds 80 by	14
+dist/storable/storable.pm	Verbatim line length including indents exceeds 80 by	4
+dist/thread-queue/lib/thread/queue.pm	Verbatim line length including indents exceeds 80 by	4
 dist/threads-shared/lib/threads/shared.pm	? Should you be using L<...> instead of	1
 dist/threads/lib/threads.pm	Verbatim line length including indents exceeds 80 by	3
-ext/B/B.pm	Verbatim line length including indents exceeds 80 by	1
-ext/B/B/Concise.pm	Verbatim line length including indents exceeds 80 by	1
-ext/Devel-Peek/Peek.pm	? Should you be using L<...> instead of	2
-ext/Devel-Peek/Peek.pm	Verbatim line length including indents exceeds 80 by	2
-ext/DynaLoader/DynaLoader.pm	Verbatim line length including indents exceeds 80 by	1
-ext/File-Glob/Glob.pm	Verbatim line length including indents exceeds 80 by	15
-ext/Hash-Util-FieldHash/lib/Hash/Util/FieldHash.pm	? Should you be using L<...> instead of	1
-ext/Hash-Util-FieldHash/lib/Hash/Util/FieldHash.pm	Verbatim line length including indents exceeds 80 by	2
-ext/I18N-Langinfo/Langinfo.pm	Verbatim line length including indents exceeds 80 by	1
-ext/Opcode/Opcode.pm	Verbatim line length including indents exceeds 80 by	10
-ext/POSIX/lib/POSIX.pod	Verbatim line length including indents exceeds 80 by	29
+ext/b/b.pm	Verbatim line length including indents exceeds 80 by	1
+ext/b/b/concise.pm	Verbatim line length including indents exceeds 80 by	1
+ext/devel-peek/peek.pm	? Should you be using L<...> instead of	2
+ext/devel-peek/peek.pm	Verbatim line length including indents exceeds 80 by	2
+ext/dynaloader/dynaloader.pm	Verbatim line length including indents exceeds 80 by	1
+ext/file-glob/glob.pm	Verbatim line length including indents exceeds 80 by	15
+ext/hash-util-fieldhash/lib/hash/util/fieldhash.pm	? Should you be using L<...> instead of	1
+ext/hash-util-fieldhash/lib/hash/util/fieldhash.pm	Verbatim line length including indents exceeds 80 by	2
+ext/i18n-langinfo/langinfo.pm	Verbatim line length including indents exceeds 80 by	1
+ext/opcode/opcode.pm	Verbatim line length including indents exceeds 80 by	10
+ext/posix/lib/posix.pod	Verbatim line length including indents exceeds 80 by	29
 ext/re/re.pm	Verbatim line length including indents exceeds 80 by	6
-ext/VMS-DCLsym/DCLsym.pm	? Should you be using L<...> instead of	1
-ext/VMS-DCLsym/DCLsym.pm	Verbatim line length including indents exceeds 80 by	1
-ext/VMS-Stdio/Stdio.pm	Verbatim line length including indents exceeds 80 by	1
-ext/XS-APItest/APItest.pm	Verbatim line length including indents exceeds 80 by	1
-INSTALL	? Should you be using F<...> or maybe L<...> instead of	1
-INSTALL	Verbatim line length including indents exceeds 80 by	10
+ext/vms-dclsym/dclsym.pm	? Should you be using L<...> instead of	1
+ext/vms-dclsym/dclsym.pm	Verbatim line length including indents exceeds 80 by	1
+ext/vms-stdio/stdio.pm	Verbatim line length including indents exceeds 80 by	1
+ext/xs-apitest/apitest.pm	Verbatim line length including indents exceeds 80 by	1
+install	? Should you be using F<...> or maybe L<...> instead of	1
+install	Verbatim line length including indents exceeds 80 by	10
 installhtml	Verbatim line length including indents exceeds 80 by	5
-os2/OS2/OS2-ExtAttr/ExtAttr.pm	? Should you be using F<...> or maybe L<...> instead of	1
-os2/OS2/OS2-Process/Process.pm	Apparent broken link	4
-os2/OS2/OS2-Process/Process.pm	Verbatim line length including indents exceeds 80 by	27
-os2/OS2/OS2-REXX/DLL/DLL.pm	Verbatim line length including indents exceeds 80 by	2
-os2/OS2/OS2-REXX/REXX.pm	Verbatim line length including indents exceeds 80 by	1
+os2/os2/os2-extattr/extattr.pm	? Should you be using F<...> or maybe L<...> instead of	1
+os2/os2/os2-process/process.pm	Apparent broken link	4
+os2/os2/os2-process/process.pm	Verbatim line length including indents exceeds 80 by	27
+os2/os2/os2-rexx/dll/dll.pm	Verbatim line length including indents exceeds 80 by	2
+os2/os2/os2-rexx/rexx.pm	Verbatim line length including indents exceeds 80 by	1
 pod/perl.pod	Verbatim line length including indents exceeds 80 by	9
 pod/perlaix.pod	Verbatim line length including indents exceeds 80 by	11
 pod/perlapi.pod	? Should you be using L<...> instead of	87
@@ -213,7 +213,7 @@ pod/perldebug.pod	? Should you be using L<...> instead of	2
 pod/perldebug.pod	Verbatim line length including indents exceeds 80 by	3
 pod/perldelta.pod	Apparent broken link	1
 pod/perldelta.pod	Apparent internal link is missing its forward slash	4
-pod/perldelta.pod	Pod NAME already used	1
+pod/perldelta.pod	Pod NAME already used	2
 pod/perldiag.pod	=item type mismatch	1
 pod/perldiag.pod	Verbatim line length including indents exceeds 80 by	2
 pod/perldoc.pod	? Should you be using F<...> or maybe L<...> instead of	1
@@ -306,7 +306,6 @@ pod/perlthrtut.pod	Verbatim line length including indents exceeds 80 by	5
 pod/perltie.pod	Verbatim line length including indents exceeds 80 by	13
 pod/perltoc.pod	? Should you be using L<...> instead of	-1
 pod/perltoc.pod	Apparent broken link	-1
-pod/perltoc.pod	Apparent internal link is missing its forward slash	-1
 pod/perltoc.pod	Should have =encoding statement because have non-ASCII	-1
 pod/perltoc.pod	Verbatim line length including indents exceeds 80 by	-1
 pod/perltoc.pod	empty section in previous paragraph	-1
@@ -333,56 +332,59 @@ pod/perlwin32.pod	Verbatim line length including indents exceeds 80 by	12
 pod/perlxs.pod	Apparent internal link is missing its forward slash	1
 pod/perlxs.pod	Verbatim line length including indents exceeds 80 by	4
 pod/perlxstut.pod	Verbatim line length including indents exceeds 80 by	10
-Porting/epigraphs.pod	Entity number out of range E<0x2014>	1
-Porting/epigraphs.pod	Verbatim line length including indents exceeds 80 by	3
-Porting/expand-macro.pl	Verbatim line length including indents exceeds 80 by	2
-Porting/how_to_write_a_perldelta.pod	There is no NAME	1
-Porting/how_to_write_a_perldelta.pod	Verbatim line length including indents exceeds 80 by	3
-Porting/pumpkin.pod	Verbatim line length including indents exceeds 80 by	9
-Porting/release_managers_guide.pod	? Should you be using L<...> instead of	2
-Porting/release_managers_guide.pod	Verbatim line length including indents exceeds 80 by	11
-Porting/release_managers_guide.pod	Verbatim paragraph in NAME section	1
-Porting/release_schedule.pod	There is no NAME	1
-symbian/PerlUtil.pod	Verbatim line length including indents exceeds 80 by	4
+porting/epigraphs.pod	Entity number out of range E<0x2014>	1
+porting/epigraphs.pod	Verbatim line length including indents exceeds 80 by	3
+porting/expand-macro.pl	Verbatim line length including indents exceeds 80 by	2
+porting/how_to_write_a_perldelta.pod	There is no NAME	1
+porting/how_to_write_a_perldelta.pod	Verbatim line length including indents exceeds 80 by	3
+porting/perldelta_template.pod	Apparent broken link	5
+porting/perldelta_template.pod	Pod NAME already used	1
+porting/perldelta_template.pod	Verbatim line length including indents exceeds 80 by	1
+porting/pumpkin.pod	Verbatim line length including indents exceeds 80 by	9
+porting/release_managers_guide.pod	? Should you be using L<...> instead of	2
+porting/release_managers_guide.pod	Verbatim line length including indents exceeds 80 by	11
+porting/release_managers_guide.pod	Verbatim paragraph in NAME section	1
+porting/release_schedule.pod	There is no NAME	1
+symbian/perlutil.pod	Verbatim line length including indents exceeds 80 by	4
 utils/c2ph	Verbatim line length including indents exceeds 80 by	44
 utils/libnetcfg	Apparent broken link	1
-vms/ext/Filespec.pm	Verbatim line length including indents exceeds 80 by	1
+vms/ext/filespec.pm	Verbatim line length including indents exceeds 80 by	1
 x2p/a2p.pod	empty section in previous paragraph	2
 x2p/psed	unresolved internal link	3
-README.vms	Apparent broken link	1
-README.vms	Verbatim line length including indents exceeds 80 by	1
-lib/Benchmark.pm	Verbatim line length including indents exceeds 80 by	4
-lib/CPAN/Debug.pm	There is no NAME	1
-lib/CPAN/HandleConfig.pm	=head2 without preceding higher level	1
-lib/CPAN/HandleConfig.pm	There is no NAME	1
-lib/Class/Struct.pm	? Should you be using L<...> instead of	1
-lib/Class/Struct.pm	Verbatim line length including indents exceeds 80 by	7
-lib/Config.pod	? Should you be using L<...> instead of	24
-lib/Config.pod	nested commands F<...F<...>...>	3
-lib/DB.pm	Verbatim line length including indents exceeds 80 by	2
-lib/DBM_Filter.pm	Verbatim line length including indents exceeds 80 by	1
-lib/DBM_Filter/compress.pm	Verbatim line length including indents exceeds 80 by	1
-lib/DBM_Filter/encode.pm	Verbatim line length including indents exceeds 80 by	1
-lib/DBM_Filter/int32.pm	Verbatim line length including indents exceeds 80 by	1
-lib/DBM_Filter/null.pm	Verbatim line length including indents exceeds 80 by	1
-lib/DBM_Filter/utf8.pm	Verbatim line length including indents exceeds 80 by	1
-lib/English.pm	Verbatim line length including indents exceeds 80 by	1
-lib/Exporter.pm	Verbatim line length including indents exceeds 80 by	2
-lib/ExtUtils/Embed.pm	Verbatim line length including indents exceeds 80 by	2
-lib/ExtUtils/XSSymSet.pm	Verbatim line length including indents exceeds 80 by	1
-lib/File/Basename.pm	? Should you be using L<...> instead of	1
-lib/File/Basename.pm	Verbatim line length including indents exceeds 80 by	2
-lib/File/Find.pm	? Should you be using L<...> instead of	1
-lib/File/Find.pm	Verbatim line length including indents exceeds 80 by	1
-lib/Getopt/Std.pm	Verbatim line length including indents exceeds 80 by	1
-lib/PerlIO.pm	Verbatim line length including indents exceeds 80 by	2
-lib/Pod/Text/Overstrike.pm	Verbatim line length including indents exceeds 80 by	1
-lib/Term/ReadLine.pm	Verbatim line length including indents exceeds 80 by	1
-lib/Tie/Array.pm	Verbatim line length including indents exceeds 80 by	1
-lib/Tie/Hash.pm	Verbatim line length including indents exceeds 80 by	3
-lib/Tie/Scalar.pm	Verbatim line length including indents exceeds 80 by	1
-lib/Unicode/UCD.pm	? Should you be using F<...> or maybe L<...> instead of	1
-lib/Unicode/UCD.pm	Verbatim line length including indents exceeds 80 by	1
+readme.vms	Apparent broken link	1
+readme.vms	Verbatim line length including indents exceeds 80 by	1
+lib/benchmark.pm	Verbatim line length including indents exceeds 80 by	4
+lib/cpan/debug.pm	There is no NAME	1
+lib/cpan/handleconfig.pm	=head2 without preceding higher level	1
+lib/cpan/handleconfig.pm	There is no NAME	1
+lib/class/struct.pm	? Should you be using L<...> instead of	1
+lib/class/struct.pm	Verbatim line length including indents exceeds 80 by	7
+lib/config.pod	? Should you be using L<...> instead of	24
+lib/config.pod	nested commands F<...F<...>...>	3
+lib/db.pm	Verbatim line length including indents exceeds 80 by	2
+lib/dbm_filter.pm	Verbatim line length including indents exceeds 80 by	1
+lib/dbm_filter/compress.pm	Verbatim line length including indents exceeds 80 by	1
+lib/dbm_filter/encode.pm	Verbatim line length including indents exceeds 80 by	1
+lib/dbm_filter/int32.pm	Verbatim line length including indents exceeds 80 by	1
+lib/dbm_filter/null.pm	Verbatim line length including indents exceeds 80 by	1
+lib/dbm_filter/utf8.pm	Verbatim line length including indents exceeds 80 by	1
+lib/english.pm	Verbatim line length including indents exceeds 80 by	1
+lib/exporter.pm	Verbatim line length including indents exceeds 80 by	2
+lib/extutils/embed.pm	Verbatim line length including indents exceeds 80 by	2
+lib/extutils/xssymset.pm	Verbatim line length including indents exceeds 80 by	1
+lib/file/basename.pm	? Should you be using L<...> instead of	1
+lib/file/basename.pm	Verbatim line length including indents exceeds 80 by	2
+lib/file/find.pm	? Should you be using L<...> instead of	1
+lib/file/find.pm	Verbatim line length including indents exceeds 80 by	1
+lib/getopt/std.pm	Verbatim line length including indents exceeds 80 by	1
+lib/perlio.pm	Verbatim line length including indents exceeds 80 by	2
+lib/pod/text/overstrike.pm	Verbatim line length including indents exceeds 80 by	1
+lib/term/readline.pm	Verbatim line length including indents exceeds 80 by	1
+lib/tie/array.pm	Verbatim line length including indents exceeds 80 by	1
+lib/tie/hash.pm	Verbatim line length including indents exceeds 80 by	3
+lib/tie/scalar.pm	Verbatim line length including indents exceeds 80 by	1
+lib/unicode/ucd.pm	? Should you be using F<...> or maybe L<...> instead of	1
+lib/unicode/ucd.pm	Verbatim line length including indents exceeds 80 by	1
 lib/deprecate.pm	Verbatim line length including indents exceeds 80 by	2
 lib/integer.pm	Verbatim line length including indents exceeds 80 by	1
 lib/overload.pm	Apparent broken link	1
@@ -392,9 +394,9 @@ lib/perl5db.pl	Verbatim line length including indents exceeds 80 by	1
 lib/strict.pm	Verbatim line length including indents exceeds 80 by	1
 lib/utf8.pm	Verbatim line length including indents exceeds 80 by	4
 lib/version.pod	Verbatim line length including indents exceeds 80 by	2
-lib/version/Internals.pod	? Should you be using L<...> instead of	1
-lib/version/Internals.pod	Apparent broken link	1
-lib/version/Internals.pod	Verbatim line length including indents exceeds 80 by	2
+lib/version/internals.pod	? Should you be using L<...> instead of	1
+lib/version/internals.pod	Apparent broken link	1
+lib/version/internals.pod	Verbatim line length including indents exceeds 80 by	2
 lib/vmsish.pm	Verbatim line length including indents exceeds 80 by	1
 pod/perl5123delta.pod	Pod NAME already used	1
-cpan/List-Util/XS.pp	Pod NAME already used	1
+cpan/list-util/xs.pp	Pod NAME already used	1

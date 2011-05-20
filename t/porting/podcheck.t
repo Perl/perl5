@@ -287,6 +287,13 @@ sub suppressed {
     }
 }
 
+# This is to get this to work across multiple file systems, including those
+# that are not case sensitive.  The db is stored in lower case, and all file
+# name comparisons are done that way.
+sub canonicalize($) {
+    return lc File::Spec->canonpath(shift);
+}
+
 
 # List of known potential problems by pod and type.
 my %known_problems;
@@ -497,7 +504,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
             }
         }
 
-        Carp::carp("Couldn't extract line number from $message") if $message =~ /line \d+/;
+        Carp::carp("Couldn't extract line number from '$message'") if $message =~ /line \d+/;
         push @{$problems{$filename{$addr}}{$message}}, $opts;
         #push @{$problems{$self->get_filename}{$message}}, $opts;
     }
@@ -818,6 +825,12 @@ my %excluded_files = (
                         "perl" => 1,
                     );
 
+# Convert to more generic form.
+foreach my $file (keys %excluded_files) {
+    $excluded_files{canonicalize($excluded_files{$file})}
+                                                    = $excluded_files{$file};
+}
+
 # re to match files that are to be parsed only if there is an internal link
 # to them.  It does not include cpan, as whether those are parsed depends
 # on a switch.  Currently, only the stable perldelta.pod's are included.
@@ -919,7 +932,7 @@ sub is_pod_file {
     # Assumes that the path separator is exactly one character.
     $filename =~ s/^\..//;
 
-    return if $excluded_files{$filename};
+    return if $excluded_files{canonicalize($filename)};
 
     open my $candidate, '<', $_
         or die "Can't open '$File::Find::name': $!\n";
@@ -1051,7 +1064,7 @@ END
     find( \&is_pod_file, '.');
 
     # Add ourselves to the test
-    push @files, 't/porting/podcheck.t';
+    push @files, "t/porting/podcheck.t";
 }
 
 # Now we know how many tests there will be.
@@ -1337,6 +1350,7 @@ if ($regen) {
 # Now ready to output the messages.
 foreach my $filename (@files) {
     my $test_name = "POD of $filename";
+    my $canonical = canonicalize($filename);
     SKIP: {
         my $skip = $filename_to_checker{$filename}->get_skip // "";
 
@@ -1345,15 +1359,15 @@ foreach my $filename (@files) {
                 my $count;
 
                 # Preserve a negative setting.
-                if ($known_problems{$filename}{$message}
-                    && $known_problems{$filename}{$message} < 0)
+                if ($known_problems{$canonical}{$message}
+                    && $known_problems{$canonical}{$message} < 0)
                 {
-                    $count = $known_problems{$filename}{$message};
+                    $count = $known_problems{$canonical}{$message};
                 }
                 else {
                     $count = @{$problems{$filename}{$message}};
                 }
-                my_safer_print($copy_fh, "$filename\t$message\t$count\n");
+                my_safer_print($copy_fh, canonicalize($filename) . "\t$message\t$count\n");
             }
             next;
         }
@@ -1364,13 +1378,13 @@ foreach my $filename (@files) {
 
         my $total_known = 0;
         foreach my $message ( sort keys %{$problems{$filename}}) {
-            $known_problems{$filename}{$message} = 0
-                                    if ! $known_problems{$filename}{$message};
+            $known_problems{$canonical}{$message} = 0
+                                    if ! $known_problems{$canonical}{$message};
             my $diagnostic = "";
             my $problem_count = scalar @{$problems{$filename}{$message}};
             $total_known += $problem_count;
-            next if $known_problems{$filename}{$message} < 0;
-            if ($problem_count > $known_problems{$filename}{$message}) {
+            next if $known_problems{$canonical}{$message} < 0;
+            if ($problem_count > $known_problems{$canonical}{$message}) {
 
                 # Here we are about to output all the messages for this type,
                 # subtract back this number we previously added in.
@@ -1389,8 +1403,8 @@ foreach my $filename (@files) {
                 }
                 $diagnostic .= "\n";
                 $files_with_unknown_issues{$filename} = 1;
-            } elsif ($problem_count < $known_problems{$filename}{$message}) {
-               $diagnostic = output_thanks($filename, $known_problems{$filename}{$message}, $problem_count, $message);
+            } elsif ($problem_count < $known_problems{$canonical}{$message}) {
+               $diagnostic = output_thanks($filename, $known_problems{$canonical}{$message}, $problem_count, $message);
             }
             push @diagnostics, $diagnostic if $diagnostic;
         }
@@ -1398,11 +1412,11 @@ foreach my $filename (@files) {
         # The above loop has output messages where there are current potential
         # issues.  But it misses where there were some that have been entirely
         # fixed.  For those, we need to look through the old issues
-        foreach my $message ( sort keys %{$known_problems{$filename}}) {
+        foreach my $message ( sort keys %{$known_problems{$canonical}}) {
             next if $problems{$filename}{$message};
-            next if ! $known_problems{$filename}{$message};
-            next if $known_problems{$filename}{$message} < 0; # Preserve negs
-            my $diagnostic = output_thanks($filename, $known_problems{$filename}{$message}, 0, $message);
+            next if ! $known_problems{$canonical}{$message};
+            next if $known_problems{$canonical}{$message} < 0; # Preserve negs
+            my $diagnostic = output_thanks($filename, $known_problems{$canonical}{$message}, 0, $message);
             push @diagnostics, $diagnostic if $diagnostic;
         }
 
