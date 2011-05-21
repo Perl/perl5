@@ -960,6 +960,7 @@ Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags)
 	return NULL;
     stash = GvHV(tmpgv);
     if (!(flags & ~GV_NOADD_MASK) && !stash) return NULL;
+    assert(stash);
     if (!HvNAME_get(stash)) {
 	hv_name_set(stash, name, namelen, 0);
 	
@@ -969,7 +970,6 @@ Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags)
 	if (HvAUX(GvSTASH(tmpgv))->xhv_name_count)
 	    mro_package_moved(stash, NULL, tmpgv, 1);
     }
-    assert(stash);
     return stash;
 }
 
