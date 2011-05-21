@@ -183,6 +183,19 @@ EOCODE
   is $deparsed, $code, 'our $funny_Unicode_chars';
 }
 
+# [perl #62500]
+$a =
+  `$^X $path "-MO=Deparse" -e "BEGIN{*CORE::GLOBAL::require=sub{1}}" 2>&1`;
+$a =~ s/-e syntax OK\n//g;
+is($a, <<'EOCODF', "CORE::GLOBAL::require override causing panick");
+sub BEGIN {
+    *CORE::GLOBAL::require = sub {
+        1;
+    }
+    ;
+}
+EOCODF
+
 done_testing();
 
 __DATA__
