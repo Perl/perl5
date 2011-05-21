@@ -117,7 +117,7 @@ sub import {
 	    if ($multiple || @_ == 1) {
 		my $scalar = $multiple ? $constants->{$name} : $_[0];
 
-		# Work around perl bug #xxxxx: Sub names (actually glob
+		# Work around perl bug #31991: Sub names (actually glob
 		# names in general) ignore the UTF8 flag. So we have to
 		# turn it off to get the "right" symbol table entry.
 		utf8::is_utf8 $name and utf8::encode $name;
