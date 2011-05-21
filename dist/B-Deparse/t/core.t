@@ -35,7 +35,7 @@ my @nary = (
           setprotoent shift sin sleep sprintf splice sqrt
           srand stat system tell tied telldir uc utime umask
           unpack unlink unshift untie ucfirst values warn write )],
- # binary, but not circumfix
+ # binary, but not infix
      [qw( atan2 accept bind binmode chop chomp chmod chown crypt
           connect die exec flock formline getpriority gethostbyaddr
           getnetbyaddr getservbyname getservbyport index join kill
