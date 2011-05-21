@@ -1,8 +1,20 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.42 2010/12/31 22:48:48 dankogai Exp dankogai $
+# $Id: Changes,v 2.43 2011/05/21 23:14:43 dankogai Exp dankogai $
 #
-$Revision: 2.42 $ $Date: 2010/12/31 22:48:48 $
+$Revision: 2.43 $ $Date: 2011/05/21 23:14:43 $
+! lib/Encode/Alias.pm
+  Addressed RT#68361: Encode::Bytes x-mac-... aliases missing
+  https://rt.cpan.org/Ticket/Display.html?id=68361
+! Encode.pm
+  Applied the 0001-Fix-typo-in-pod.patch
+  https://rt.cpan.org/Ticket/Update.html?id=64381
+  Addressed RT#65796 Deep recursion error finding invalid charset
+  https://rt.cpan.org/Ticket/Update.html?id=65796
+  Applied a jumbo doc patch by Tom Christiansen
+  Message-Id: <14795.1304618434@chthon>
+
+2.42 2010/12/31 22:48:48
 ! Encode.xs
 ! Unicode/Unicode.xs
   Applied: RT#64371: Update for 5.14 API changes
