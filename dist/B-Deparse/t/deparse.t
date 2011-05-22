@@ -170,6 +170,18 @@ eval <<EOFCODE and test($x);
    1
 EOFCODE
 
+# Exotic sub declarations
+$a = `$^X $path "-MO=Deparse" -e "sub ::::{}sub ::::::{}" 2>&1`;
+$a =~ s/-e syntax OK\n//g;
+is($a, <<'EOCODG', "sub :::: and sub ::::::");
+sub :::: {
+    
+}
+sub :::::: {
+    
+}
+EOCODG
+
 # [perl #33752]
 {
   my $code = <<"EOCODE";
