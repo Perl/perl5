@@ -1088,7 +1088,7 @@ use File::Glob qw(:case);
     'JSON::PP' =>
 	{
 	'MAINTAINER'	=> 'makamaka',
-	'DISTRIBUTION'	=> 'MAKAMAKA/JSON-PP-2.27105.tar.gz',
+	'DISTRIBUTION'	=> 'MAKAMAKA/JSON-PP-2.27200.tar.gz',
 	'FILES'		=> q[cpan/JSON-PP],
 	'EXCLUDED'	=> [
 		't/900_pod.t',    # Pod testing
