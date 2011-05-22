@@ -1108,7 +1108,7 @@ and penalised well-behaved code.  It has been removed.
 =head2 Freeing weak references
 
 When there are many weak references to an object, freeing that object
-can under some circumstances take O(I<NE<0xB2>>) time to free, where 
+can under some circumstances take O(I<N*N>) time to free, where
 I<N> is the number of references.  The circumstances in which this can happen
 have been reduced [perl #75254]
 
