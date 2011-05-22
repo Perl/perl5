@@ -481,7 +481,7 @@ sub stash_subs {
     else {
 	$pack =~ s/(::)?$/::/;
 	no strict 'refs';
-	$stash = \%$pack;
+	$stash = \%{"main::$pack"};
     }
     my %stash = svref_2object($stash)->ARRAY;
     while (my ($key, $val) = each %stash) {
