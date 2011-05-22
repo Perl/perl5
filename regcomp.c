@@ -10299,6 +10299,7 @@ parseit:
 	    HV* temp = invlist_union(nonbitmap, l1_fold_invlist);
 	    invlist_destroy(nonbitmap);
 	    nonbitmap = temp;
+	    invlist_destroy(l1_fold_invlist);
 	}
 	else {
 	    nonbitmap = l1_fold_invlist;
