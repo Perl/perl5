@@ -718,12 +718,15 @@ PP(pp_study)
 	    RETPUSHYES;
     }
     s = (unsigned char*)(SvPV(sv, len));
-    if (len == 0 || len > I32_MAX || !SvPOK(sv) || SvUTF8(sv)) {
+    if (len == 0 || len > I32_MAX || !SvPOK(sv) || SvUTF8(sv) || SvVALID(sv)) {
 	/* No point in studying a zero length string, and not safe to study
 	   anything that doesn't appear to be a simple scalar (and hence might
 	   change between now and when the regexp engine runs without our set
 	   magic ever running) such as a reference to an object with overloaded
-	   stringification.  */
+	   stringification.  Also refuse to study an FBM scalar, as this gives
+	   more flexibility in SV flag usage.  No real-world code would ever
+	   end up studying an FBM scalar, so this isn't a real pessimisation.
+	*/
 	RETPUSHNO;
     }
     pos = len;
