@@ -2268,10 +2268,12 @@ Perl_sv_2iv_flags(pTHX_ register SV *const sv, const I32 flags)
     if (!sv)
 	return 0;
     if (SvGMAGICAL(sv) || (SvTYPE(sv) == SVt_PVGV && SvVALID(sv))) {
-	/* FBMs use the same flag bit as SVf_IVisUV, so must let them
-	   cache IVs just in case. In practice it seems that they never
-	   actually anywhere accessible by user Perl code, let alone get used
-	   in anything other than a string context.  */
+	/* FBMs use the space for SvIVX and SvNVX for other purposes, and use
+	   the same flag bit as SVf_IVisUV, so must not let them cache IVs.
+	   In practice they are extremely unlikely to actually get anywhere
+	   accessible by user Perl code - the only way that I'm aware of is when
+	   a constant subroutine which is used as the second argument to index.
+	*/
 	if (flags & SV_GMAGIC)
 	    mg_get(sv);
 	if (SvIOKp(sv))
@@ -2355,8 +2357,8 @@ Perl_sv_2uv_flags(pTHX_ register SV *const sv, const I32 flags)
     if (!sv)
 	return 0;
     if (SvGMAGICAL(sv) || (SvTYPE(sv) == SVt_PVGV && SvVALID(sv))) {
-	/* FBMs use the same flag bit as SVf_IVisUV, so must let them
-	   cache IVs just in case.  */
+	/* FBMs use the space for SvIVX and SvNVX for other purposes, and use
+	   the same flag bit as SVf_IVisUV, so must not let them cache IVs.  */
 	if (flags & SV_GMAGIC)
 	    mg_get(sv);
 	if (SvIOKp(sv))
@@ -2435,8 +2437,8 @@ Perl_sv_2nv_flags(pTHX_ register SV *const sv, const I32 flags)
     if (!sv)
 	return 0.0;
     if (SvGMAGICAL(sv) || (SvTYPE(sv) == SVt_PVGV && SvVALID(sv))) {
-	/* FBMs use the same flag bit as SVf_IVisUV, so must let them
-	   cache IVs just in case.  */
+	/* FBMs use the space for SvIVX and SvNVX for other purposes, and use
+	   the same flag bit as SVf_IVisUV, so must not let them cache NVs.  */
 	if (flags & SV_GMAGIC)
 	    mg_get(sv);
 	if (SvNOKp(sv))
