@@ -1082,7 +1082,8 @@ _test_prep:
 
 test_prep_pre: preplibrary utilities $(nonxs_ext)
 
-test_prep: test_prep_pre miniperl$(EXE_EXT) $(unidatafiles) perl$(EXE_EXT) $(dynamic_ext) $(TEST_PERL_DLL) x2p/s2p
+test_prep: test_prep_pre miniperl$(EXE_EXT) $(unidatafiles) perl$(EXE_EXT) \
+	$(dynamic_ext) $(TEST_PERL_DLL) x2p/s2p x2p/find2perl
 	PERL=./perl $(MAKE) _test_prep
 
 _test_tty:
