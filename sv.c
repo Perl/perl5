@@ -2267,7 +2267,7 @@ Perl_sv_2iv_flags(pTHX_ register SV *const sv, const I32 flags)
     dVAR;
     if (!sv)
 	return 0;
-    if (SvGMAGICAL(sv) || (SvTYPE(sv) == SVt_PVGV && SvVALID(sv))) {
+    if (SvGMAGICAL(sv) || SvVALID(sv)) {
 	/* FBMs use the space for SvIVX and SvNVX for other purposes, and use
 	   the same flag bit as SVf_IVisUV, so must not let them cache IVs.
 	   In practice they are extremely unlikely to actually get anywhere
@@ -2356,7 +2356,7 @@ Perl_sv_2uv_flags(pTHX_ register SV *const sv, const I32 flags)
     dVAR;
     if (!sv)
 	return 0;
-    if (SvGMAGICAL(sv) || (SvTYPE(sv) == SVt_PVGV && SvVALID(sv))) {
+    if (SvGMAGICAL(sv) || SvVALID(sv)) {
 	/* FBMs use the space for SvIVX and SvNVX for other purposes, and use
 	   the same flag bit as SVf_IVisUV, so must not let them cache IVs.  */
 	if (flags & SV_GMAGIC)
@@ -2436,7 +2436,7 @@ Perl_sv_2nv_flags(pTHX_ register SV *const sv, const I32 flags)
     dVAR;
     if (!sv)
 	return 0.0;
-    if (SvGMAGICAL(sv) || (SvTYPE(sv) == SVt_PVGV && SvVALID(sv))) {
+    if (SvGMAGICAL(sv) || SvVALID(sv)) {
 	/* FBMs use the space for SvIVX and SvNVX for other purposes, and use
 	   the same flag bit as SVf_IVisUV, so must not let them cache NVs.  */
 	if (flags & SV_GMAGIC)
