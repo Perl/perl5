@@ -842,7 +842,7 @@ unless ($Config{useithreads}) {
 
     do_test('regular string constant', beer,
 'SV = PV\\($ADDR\\) at $ADDR
-  REFCNT = 4
+  REFCNT = 5
   FLAGS = \\(PADMY,POK,READONLY,pPOK\\)
   PV = $ADDR "foamy"\\\0
   CUR = 5
@@ -853,7 +853,23 @@ unless ($Config{useithreads}) {
 
     do_test('string constant now studied', beer,
 'SV = PVMG\\($ADDR\\) at $ADDR
-  REFCNT = 5
+  REFCNT = 6
+  FLAGS = \\(PADMY,SMG,POK,READONLY,pPOK,SCREAM\\)
+  IV = 0
+  NV = 0
+  PV = $ADDR "foamy"\\\0
+  CUR = 5
+  LEN = \d+
+  MAGIC = $ADDR
+    MG_VIRTUAL = &PL_vtbl_mglob
+    MG_TYPE = PERL_MAGIC_regex_global\\(g\\)
+');
+
+    is (eval 'index "not too foamy", beer', 8, 'correct index');
+
+    do_test('string constant still studied', beer,
+'SV = PVMG\\($ADDR\\) at $ADDR
+  REFCNT = 6
   FLAGS = \\(PADMY,SMG,POK,READONLY,pPOK,SCREAM\\)
   IV = 0
   NV = 0
