@@ -414,7 +414,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
     # re's for messages that Pod::Checker outputs
     my $location = qr/ \b (?:in|at|on|near) \s+ /xi;
     my $optional_location = qr/ (?: $location )? /xi;
-    my $line_reference = qr/ [('"]? $optional_location line\
+    my $line_reference = qr/ [('"]? $optional_location \b line \s+
                              (?: \d+ | EOF | \Q???\E | - )
                              [)'"]? /xi;
 
