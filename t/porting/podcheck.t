@@ -938,91 +938,74 @@ sub is_pod_file {
 
     return if $excluded_files{canonicalize($filename)};
 
-    open my $candidate, '<', $_
-        or die "Can't open '$File::Find::name': $!\n";
-    my @contents = <$candidate>;
-    close $candidate;
+    my $contents = do {
+        local $/;
+        open my $candidate, '<', $_
+            or die "Can't open '$File::Find::name': $!\n";
+        <$candidate>;
+    };
 
     # If the file is a .pm or .pod, having any initial '=' on a line is
     # grounds for testing it.  Otherwise, require a head1 NAME line to view it
     # as a potential pod
-    my $i;
-    my $found = "";
-    for ($i = 0; $i < @contents; $i++) {
-        next unless $contents[$i] =~ /^=/;
-        if ($filename =~ /\.(?:pm|pod)/) {
-            $found = 'found_some_pod_line';
-            last;
-        }
-        elsif ($contents[$i] =~ /^=head1 +NAME/) {
-            $found = 'found_NAME';
-            last;
-        }
+    if ($filename =~ /\.(?:pm|pod)/) {
+        return unless $contents =~ /^=/m;
+    } else {
+        return unless $contents =~ /^=head1 +NAME/m;
     }
-    if ($found) {
-        # Here, we know that the file is a pod.  Add it to the list of files
-        # to check and create a checker object for it.
 
-        push @files, $filename;
-        my $checker = My::Pod::Checker->new($filename);
-        $filename_to_checker{$filename} = $checker;
+    # Here, we know that the file is a pod.  Add it to the list of files
+    # to check and create a checker object for it.
 
-        # In order to detect duplicate pods and only analyze them once, we
-        # compute checksums for the file, so don't have to do an exact
-        # compare.  Note that if the pod is just part of the file, the
-        # checksums can differ for the same pod.  That special case is handled
-        # later, since if the checksums of the whole file are the same, that
-        # case won't even come up.  We don't need the checksums for files that
-        # we parse only if there is a link to its interior, but we do need its
-        # NAME, which is also retrieved in the code below.
-        if ($filename =~ / (?: ^(cpan|lib|ext|dist)\/ )
+    push @files, $filename;
+    my $checker = My::Pod::Checker->new($filename);
+    $filename_to_checker{$filename} = $checker;
+
+    # In order to detect duplicate pods and only analyze them once, we
+    # compute checksums for the file, so don't have to do an exact
+    # compare.  Note that if the pod is just part of the file, the
+    # checksums can differ for the same pod.  That special case is handled
+    # later, since if the checksums of the whole file are the same, that
+    # case won't even come up.  We don't need the checksums for files that
+    # we parse only if there is a link to its interior, but we do need its
+    # NAME, which is also retrieved in the code below.
+
+    if ($filename =~ / (?: ^(cpan|lib|ext|dist)\/ )
+                        | $only_for_interior_links_re
+                    /x) {
+        $digest->add($contents);
+        $digests{$filename} = $digest->digest;
+
+        # lib files aren't analyzed if they are duplicates of files copied
+        # there from some other directory.  But to determine this, we need
+        # to know their NAMEs.  We might as well find the NAME now while
+        # the file is open.  Similarly, cpan files aren't analyzed unless
+        # we're analyzing all of them, or this particular file is linked
+        # to by a file we are analyzing, and thus we will want to verify
+        # that the target exists in it.  We need to know at least the NAME
+        # to see if it's worth analyzing, or so we can determine if a lib
+        # file is a copy of a cpan one.
+        if ($filename =~ m{ (?: ^ (?: cpan | lib ) / )
                             | $only_for_interior_links_re
-                        /x) {
-            $digest->add(@contents);
-            $digests{$filename} = $digest->digest;
-
-            # lib files aren't analyzed if they are duplicates of files copied
-            # there from some other directory.  But to determine this, we need
-            # to know their NAMEs.  We might as well find the NAME now while
-            # the file is open.  Similarly, cpan files aren't analyzed unless
-            # we're analyzing all of them, or this particular file is linked
-            # to by a file we are analyzing, and thus we will want to verify
-            # that the target exists in it.  We need to know at least the NAME
-            # to see if it's worth analyzing, or so we can determine if a lib
-            # file is a copy of a cpan one.
-            if ($filename =~ m{ (?: ^ (?: cpan | lib ) / )
-                                | $only_for_interior_links_re
-                                }x) {
-                if ($found eq 'found_some_pod_line') {
-                    for (;  $i < @contents; $i++) {
-                        next if $contents[$i] !~ /^=head1/;
-                        $found = 'found_NAME'
-                                        if $contents[$i] =~ /^=head1 +NAME/;
-                        last;
-                    }
+                            }x) {
+            if ($contents =~ /^=head1 +NAME.*/mg) {
+                # The NAME is the first non-spaces on the line up to a
+                # comma, dash or end of line.  Otherwise, it's invalid and
+                # this pod doesn't have a legal name that we're smart
+                # enough to find currently.  But the  parser will later
+                # find it if it thinks there is a legal name, and set the
+                # name
+                if ($contents =~ /\G    # continue from the line after =head1
+                                  \s*   # ignore any empty lines
+                                  ^ \s* ( \S+?) \s* (?: [,-] | $ )/mx) {
+                    my $name = $1;
+                    $checker->name($name);
+                    $id_to_checker{$name} = $checker
+                        if $filename =~ m{^cpan/};
                 }
-                if ($found eq 'found_NAME') {
-                    $i++;   # The NAME starts on a later line
-
-                    # Skip empty lines
-                    while ($contents[$i] !~ /\S/) { $i++ }
-
-                    # The NAME is the first non-spaces on the line up to a
-                    # comma, dash or end of line.  Otherwise, it's invalid and
-                    # this pod doesn't have a legal name that we're smart
-                    # enough to find currently.  But the  parser will later
-                    # find it if it thinks there is a legal name, and set the
-                    # name
-                    if ($contents[$i] =~ /^ \s* ( \S+?) \s* (?: [,-] | $ )/x) {
-                        my $name = $1;
-                        $checker->name($name);
-                        $id_to_checker{$name} = $checker
-                                                if $filename =~ m{^cpan/};
-                    }
-                }
-                elsif ($filename =~ m{^cpan/}) {
-                    $id_to_checker{$digests{$filename}} = $checker;
-                }
+            }
+            elsif ($filename =~ m{^cpan/}) {
+                $id_to_checker{$digests{$filename}} = $checker;
             }
         }
     }
