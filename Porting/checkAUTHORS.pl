@@ -831,6 +831,7 @@ stef\100mongueurs.net                   stef\100payrard.net
 +                                       properler\100freesurf.fr
 +                                       stef\100francenet.fr
 sthoenna\100efn.org                     ysth\100raven.shiftboard.com
+sisyphus1\100optusnet.com.au            sisyphus\100cpan.org
 
 tassilo.parseval\100post.rwth-aachen.de tassilo.von.parseval\100rwth-aachen.de
 tchrist\100perl.com                     tchrist\100mox.perl.com
