@@ -80,7 +80,7 @@ The Windows SDK can be downloaded from L<http://www.microsoft.com/>.
 The MinGW64 compiler is available at L<http://sourceforge.net/projects/mingw-w64>.
 The latter is actually a cross-compiler targeting Win64. There's also a trimmed
 down compiler (no java, or gfortran) suitable for building perl available at:
-L<http://strawberryperl.com/package/kmx/64_gcctoolchain/mingw64-w64-20100123-kmx-v2.zip>
+L<http://strawberryperl.com/package/kmx/64_gcctoolchain/>
 
 NOTE: If you're using a 32-bit compiler to build perl on a 64-bit Windows
 operating system, then you should set the WIN64 environment variable to "undef".
@@ -362,9 +362,7 @@ may end up building against the installed perl's lib/CORE directory rather
 than the one being tested.
 
 You will have to make sure that CCTYPE is set correctly and that
-CCHOME points to wherever you installed your compiler. If building with
-gcc-4.x.x, you'll also need to uncomment the assignment to GCC_4XX and
-uncomment the assignment to the appropriate GCCHELPERDLL in the makefile.mk.
+CCHOME points to wherever you installed your compiler.
 
 If building with the cross-compiler provided by
 mingw-w64.sourceforge.net you'll need to uncomment the line that sets

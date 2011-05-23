@@ -200,22 +200,6 @@ CCHOME		*= $(MSVCDIR)
 .ENDIF
 
 #
-# If building with gcc-4.x.x (or x86_64-w64-mingw32-gcc-4.x.x), then
-# uncomment  the following assignment to GCC_4XX, make sure that CCHOME
-# has been set correctly above, and uncomment the appropriate
-# GCCHELPERDLL line.
-# The name of the dll can change, depending upon which vendor has supplied
-# your 4.x.x compiler, and upon the values of "x".
-# (The dll will be in your mingw/bin folder, so check there if you're
-# unsure about the correct name.)
-# Without these corrections, the op/taint.t test script will fail.
-#
-#GCC_4XX		*= define
-#GCCHELPERDLL	*= $(CCHOME)\bin\libgcc_s_sjlj-1.dll
-#GCCHELPERDLL	*= $(CCHOME)\bin\libgcc_s_dw2-1.dll
-#GCCHELPERDLL	*= $(CCHOME)\bin\libgcc_s_1.dll
-
-#
 # uncomment this if you are using x86_64-w64-mingw32 cross-compiler
 # ie if your gcc executable is called 'x86_64-w64-mingw32-gcc'
 # instead of the usual 'gcc'.
@@ -1623,10 +1607,19 @@ test-prep : all utils ..\pod\perltoc.pod
 .ELSE
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
 .ENDIF
+
 .IF "$(CCTYPE)" == "GCC"
-.IF "$(GCC_4XX)" == "define"
-	$(XCOPY) $(GCCHELPERDLL) ..\t\$(NULL)
-.ENDIF
+# If building with gcc versions 4.x.x or greater, then
+# the GCC helper DLL will also need copied to the test directory.
+# The name of the dll can change, depending upon which vendor has supplied
+# your compiler, and upon the values of "x".
+# libstdc++-6.dll is copied if it exists as it, too, may then be needed.
+# Without this copying, the op/taint.t test script will fail.
+	if exist $(CCHOME)\bin\libgcc_s_sjlj-1.dll $(XCOPY) $(CCHOME)\bin\libgcc_s_sjlj-1.dll ..\t\$(NULL)
+	if exist $(CCHOME)\bin\libgcc_s_dw2-1.dll $(XCOPY) $(CCHOME)\bin\libgcc_s_dw2-1.dll ..\t\$(NULL)
+	if exist $(CCHOME)\bin\libgcc_s_1.dll $(XCOPY) $(CCHOME)\bin\libgcc_s_1.dll ..\t\$(NULL)
+	if exist $(CCHOME)\bin\w64gcc_s_sjlj-1.dll $(XCOPY) $(CCHOME)\bin\w64gcc_s_sjlj-1.dll ..\t\$(NULL)
+	if exist $(CCHOME)\bin\libstdc++-6.dll $(XCOPY) $(CCHOME)\bin\libstdc++-6.dll ..\t\$(NULL)
 .ENDIF
 
 test : $(RIGHTMAKE) test-prep
