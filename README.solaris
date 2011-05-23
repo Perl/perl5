@@ -143,17 +143,24 @@ shipped with SunOS4 will not do.
 Several tools needed to build perl are located in /usr/ccs/bin/:  ar,
 as, ld, and make.  Make sure that /usr/ccs/bin/ is in your PATH.
 
-You need to make sure the following packages are installed
-(this info is extracted from the Solaris FAQ):
+
+On all the released versions of Solaris (8, 9 and 10) you need to make sure the following packages are installed (this info is extracted from the Solaris FAQ):
 
 for tools (sccs, lex, yacc, make, nm, truss, ld, as): SUNWbtool,
 SUNWsprot, SUNWtoo
 
 for libraries & headers: SUNWhea, SUNWarc, SUNWlibm, SUNWlibms, SUNWdfbh,
-SUNWcg6h, SUNWxwinc, SUNWolinc
+SUNWcg6h, SUNWxwinc
+
+Additionaly, on Solaris 8 and 9 you also need:
 
 for 64 bit development: SUNWarcx, SUNWbtoox, SUNWdplx, SUNWscpux,
 SUNWsprox, SUNWtoox, SUNWlmsx, SUNWlmx, SUNWlibCx
+
+And only on Solaris 8 you also need:
+
+for libraries & headers: SUNWolinc
+
 
 If you are in doubt which package contains a file you are missing,
 try to find an installation that has that file. Then do a
