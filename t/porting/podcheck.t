@@ -823,6 +823,10 @@ my %excluded_files = (
                         "configpm" => 1,
                         "miniperl" => 1,
                         "perl" => 1,
+
+                        # It would be nice if we didn't have to skip this,
+                        # but the errors in it are too variable.
+                        "pod/perltoc.pod" => 1,
                     );
 
 # Convert to more generic form.
