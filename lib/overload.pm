@@ -1,6 +1,6 @@
 package overload;
 
-our $VERSION = '1.14';
+our $VERSION = '1.15';
 
 sub nil {}
 
@@ -877,7 +877,8 @@ skipped.
 There are exceptions to the above rules for dereference operations
 (which, if Step 1 fails, always fall back to the normal, built-in
 implementations - see Dereferencing), and for C<~~> (which has its
-own set of rules - see L<Matching>).
+own set of rules - see C<Matching> under L</Overloadable Operations>
+above).
 
 Note on Step 7: some operators have a different semantic depending
 on the type of their operands.

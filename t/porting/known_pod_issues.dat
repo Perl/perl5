@@ -346,7 +346,6 @@ lib/tie/scalar.pm	Verbatim line length including indents exceeds 80 by	1
 lib/unicode/ucd.pm	Verbatim line length including indents exceeds 80 by	1
 lib/deprecate.pm	Verbatim line length including indents exceeds 80 by	2
 lib/integer.pm	Verbatim line length including indents exceeds 80 by	1
-lib/overload.pm	Apparent broken link	1
 lib/overload.pm	Verbatim line length including indents exceeds 80 by	1
 lib/perl5db.pl	? Should you be using L<...> instead of	1
 lib/perl5db.pl	Verbatim line length including indents exceeds 80 by	1
