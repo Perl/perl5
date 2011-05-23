@@ -778,4 +778,42 @@ SKIP: {
      or diag $@;
 }
 
+use constant perl => 'rules';
+
+unless ($Config{useithreads}) {
+    # These end up as copies in pads under ithreads, which rather defeats the
+    # the point of what we're trying to test here.
+
+    do_test('regular string constant', perl,
+'SV = PV\\($ADDR\\) at $ADDR
+  REFCNT = 3
+  FLAGS = \\(PADMY,POK,READONLY,pPOK\\)
+  PV = $ADDR "rules"\\\0
+  CUR = 5
+  LEN = \d+
+');
+
+    eval 'index "", perl';
+
+    # FIXME - really this shouldn't say EVALED. It's a false posistive on
+    # 0x40000000 being used for several things, not a flag for "I'm in a string
+    # eval"
+
+    do_test('string constant now an FBM', perl,
+'SV = PVGV\\($ADDR\\) at $ADDR
+  REFCNT = 3
+  FLAGS = \\(PADMY,SMG,POK,READONLY,pPOK,VALID,EVALED\\)
+  PV = $ADDR "rules"\\\0
+  CUR = 5
+  LEN = \d+
+  MAGIC = $ADDR
+    MG_VIRTUAL = &PL_vtbl_bm
+    MG_TYPE = PERL_MAGIC_bm\\(B\\)
+  FLAGS = 0
+  RARE = \d+
+  PREVIOUS = 1
+  USEFUL = 100
+');
+}
+
 done_testing();
