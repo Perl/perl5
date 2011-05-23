@@ -1710,7 +1710,7 @@ executed, the next starting point will be where the cursor was when the
 C<(*SKIP)> was executed.
 
 =item C<(*MARK:NAME)> C<(*:NAME)>
-X<(*MARK)> C<(*MARK:NAME)> C<(*:NAME)>
+X<(*MARK)> X<(*MARK:NAME)> X<(*:NAME)>
 
 This zero-width pattern can be used to mark the point reached in a string
 when a certain part of the pattern has been successfully matched. This
