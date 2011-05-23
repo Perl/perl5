@@ -55,7 +55,7 @@ $| = 1;
 plan(1);
 
 # Ok all preparation is done
-diag <<"EOF"
+note <<"EOF"
 Found keys '$first_key' and '$second_key' on chain $riter
 Will now iterato to key '$first_key' then delete '$first_key' and '$second_key'.
 EOF
@@ -64,6 +64,6 @@ EOF
 delete $hash{$first_key};
 delete $hash{$second_key};
 
-diag "Now iterating into freed memory\n";
+note "Now iterating into freed memory\n";
 1 for each %hash;
 ok(1, "Survived!");
