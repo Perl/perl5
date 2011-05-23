@@ -778,7 +778,10 @@ SKIP: {
      or diag $@;
 }
 
-use constant perl => 'rules';
+use constant {
+    perl => 'rules',
+    beer => 'foamy',
+};
 
 unless ($Config{useithreads}) {
     # These end up as copies in pads under ithreads, which rather defeats the
@@ -813,6 +816,31 @@ unless ($Config{useithreads}) {
   RARE = \d+
   PREVIOUS = 1
   USEFUL = 100
+');
+
+    do_test('regular string constant', beer,
+'SV = PV\\($ADDR\\) at $ADDR
+  REFCNT = 4
+  FLAGS = \\(PADMY,POK,READONLY,pPOK\\)
+  PV = $ADDR "foamy"\\\0
+  CUR = 5
+  LEN = \d+
+');
+
+    is(study beer, 1, "Our studies were successful");
+
+    do_test('string constant now studied', beer,
+'SV = PVMG\\($ADDR\\) at $ADDR
+  REFCNT = 5
+  FLAGS = \\(PADMY,SMG,POK,READONLY,pPOK,SCREAM\\)
+  IV = 0
+  NV = 0
+  PV = $ADDR "foamy"\\\0
+  CUR = 5
+  LEN = \d+
+  MAGIC = $ADDR
+    MG_VIRTUAL = &PL_vtbl_mglob
+    MG_TYPE = PERL_MAGIC_regex_global\\(g\\)
 ');
 }
 
