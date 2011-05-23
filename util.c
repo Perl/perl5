@@ -2759,12 +2759,6 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
       default, binary, low-level mode; see PerlIOBuf_open(). */
    PerlLIO_setmode((*mode == 'r'), O_BINARY);
 #endif 
-
-	if ((tmpgv = gv_fetchpvs("$", GV_ADD|GV_NOTQUAL, SVt_PV))) {
-	    SvREADONLY_off(GvSV(tmpgv));
-	    sv_setiv(GvSV(tmpgv), PerlProc_getpid());
-	    SvREADONLY_on(GvSV(tmpgv));
-	}
 #ifdef THREADS_HAVE_PIDS
 	PL_ppid = (IV)getppid();
 #endif

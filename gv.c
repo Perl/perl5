@@ -1469,6 +1469,9 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 #endif
 	    goto magicalize;
 
+	case '$':		/* $$ */
+	    SvREADONLY_on(GvSVn(gv));
+	    goto magicalize;
 	case '!':		/* $! */
 	    GvMULTI_on(gv);
 	    /* If %! has been used, automatically load Errno.pm. */

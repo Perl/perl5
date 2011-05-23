@@ -4155,11 +4155,6 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 #endif /* !PERL_MICRO */
     }
     TAINT_NOT;
-    if ((tmpgv = gv_fetchpvs("$", GV_ADD|GV_NOTQUAL, SVt_PV))) {
-        SvREADONLY_off(GvSV(tmpgv));
-	sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());
-        SvREADONLY_on(GvSV(tmpgv));
-    }
 #ifdef THREADS_HAVE_PIDS
     PL_ppid = (IV)getppid();
 #endif

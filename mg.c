@@ -1114,6 +1114,10 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	if (PL_ors_sv)
 	    sv_copypv(sv, PL_ors_sv);
 	break;
+    case '$': /* $$ */
+	sv_setiv(sv, (IV)PerlProc_getpid());
+	break;
+
     case '!':
 	{
 	dSAVE_ERRNO;
