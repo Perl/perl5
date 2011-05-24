@@ -554,7 +554,7 @@ values to global (meaning package) variables.  It does I<not> create
 a local variable.  This is known as dynamic scoping.  Lexical scoping
 is done with C<my>, which works more like C's auto declarations.
 
-Some types of lvalues can be localized as well : hash and array elements
+Some types of lvalues can be localized as well: hash and array elements
 and slices, conditionals (provided that their result is always
 localizable), and symbolic references.  As for simple variables, this
 creates new, dynamically scoped values.
