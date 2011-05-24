@@ -1298,27 +1298,27 @@ the scalar's value cannot change unless written to.
 #if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define BmRARE(sv)							\
 	(*({ SV *const _bmrare = MUTABLE_SV(sv);			\
-		assert(SvTYPE(_bmrare) == SVt_PVGV);			\
+		assert(SvTYPE(_bmrare) == SVt_PVMG);			\
 		assert(SvVALID(_bmrare));				\
-	    &(((XPVGV*) SvANY(_bmrare))->xnv_u.xbm_s.xbm_rare);		\
+	    &(((XPVMG*) SvANY(_bmrare))->xnv_u.xbm_s.xbm_rare);		\
 	 }))
 #  define BmUSEFUL(sv)							\
 	(*({ SV *const _bmuseful = MUTABLE_SV(sv);			\
-	    assert(SvTYPE(_bmuseful) == SVt_PVGV);			\
+	    assert(SvTYPE(_bmuseful) == SVt_PVMG);			\
 	    assert(SvVALID(_bmuseful));					\
 	    assert(!SvIOK(_bmuseful));					\
-	    &(((XPVGV*) SvANY(_bmuseful))->xnv_u.xbm_s.xbm_useful);	\
+	    &(((XPVMG*) SvANY(_bmuseful))->xnv_u.xbm_s.xbm_useful);	\
 	 }))
 #  define BmPREVIOUS(sv)						\
     (*({ SV *const _bmprevious = MUTABLE_SV(sv);			\
-		assert(SvTYPE(_bmprevious) == SVt_PVGV);		\
+		assert(SvTYPE(_bmprevious) == SVt_PVMG);		\
 		assert(SvVALID(_bmprevious));				\
-	    &(((XPVGV*) SvANY(_bmprevious))->xiv_u.xivu_uv);		\
+	    &(((XPVMG*) SvANY(_bmprevious))->xiv_u.xivu_uv);		\
 	 }))
 #else
-#  define BmRARE(sv)		((XPVGV*) SvANY(sv))->xnv_u.xbm_s.xbm_rare
-#  define BmUSEFUL(sv)		((XPVGV*) SvANY(sv))->xnv_u.xbm_s.xbm_useful
-#  define BmPREVIOUS(sv)	((XPVGV*) SvANY(sv))->xiv_u.xivu_uv
+#  define BmRARE(sv)		((XPVMG*) SvANY(sv))->xnv_u.xbm_s.xbm_rare
+#  define BmUSEFUL(sv)		((XPVMG*) SvANY(sv))->xnv_u.xbm_s.xbm_useful
+#  define BmPREVIOUS(sv)	((XPVMG*) SvANY(sv))->xiv_u.xivu_uv
 
 #endif
 

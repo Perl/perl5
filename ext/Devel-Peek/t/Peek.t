@@ -807,7 +807,7 @@ unless ($Config{useithreads}) {
     # eval"
 
     do_test('string constant now an FBM', perl,
-'SV = PVGV\\($ADDR\\) at $ADDR
+'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 5
   FLAGS = \\(PADMY,SMG,POK,READONLY,pPOK,VALID,EVALED\\)
   PV = $ADDR "rules"\\\0
@@ -826,7 +826,7 @@ unless ($Config{useithreads}) {
     is(study perl, '', "Not allowed to study an FBM");
 
     do_test('string constant still an FBM', perl,
-'SV = PVGV\\($ADDR\\) at $ADDR
+'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 5
   FLAGS = \\(PADMY,SMG,POK,READONLY,pPOK,VALID,EVALED\\)
   PV = $ADDR "rules"\\\0

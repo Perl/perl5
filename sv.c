@@ -4088,8 +4088,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 	/* case SVt_BIND: */
     case SVt_PVLV:
     case SVt_PVGV:
-	/* SvVALID means that this PVGV is playing at being an FBM.  */
-
     case SVt_PVMG:
 	if (SvGMAGICAL(sstr) && (flags & SV_GMAGIC)) {
 	    mg_get(sstr);

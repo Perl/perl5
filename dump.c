@@ -1647,8 +1647,6 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		sv_catpv(d, " ),");
 	    }
 	}
-	if (SvTAIL(sv))		sv_catpv(d, "TAIL,");
-	if (SvVALID(sv))	sv_catpv(d, "VALID,");
 	/* FALL THROUGH */
     default:
     evaled_or_uv:
@@ -1656,6 +1654,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (SvIsUV(sv) && !(flags & SVf_ROK))	sv_catpv(d, "IsUV,");
 	break;
     case SVt_PVMG:
+	if (SvTAIL(sv))		sv_catpv(d, "TAIL,");
+	if (SvVALID(sv))	sv_catpv(d, "VALID,");
 	if (SvPAD_TYPED(sv))	sv_catpv(d, "TYPED,");
 	if (SvPAD_OUR(sv))	sv_catpv(d, "OUR,");
 	/* FALL THROUGH */
@@ -1798,6 +1798,12 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	}
 	if (SvSTASH(sv))
 	    do_hv_dump(level, file, "  STASH", SvSTASH(sv));
+
+	if ((type == SVt_PVMG || type == SVt_PVLV) && SvVALID(sv)) {
+	    Perl_dump_indent(aTHX_ level, file, "  RARE = %u\n", (U8)BmRARE(sv));
+	    Perl_dump_indent(aTHX_ level, file, "  PREVIOUS = %"UVuf"\n", (UV)BmPREVIOUS(sv));
+	    Perl_dump_indent(aTHX_ level, file, "  USEFUL = %"IVdf"\n", (IV)BmUSEFUL(sv));
+	}
     }
 
     /* Dump type-specific SV fields */
@@ -2088,11 +2094,6 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    if (LvTYPE(sv) != 't' && LvTYPE(sv) != 'T')
 		do_sv_dump(level+1, file, LvTARG(sv), nest+1, maxnest,
 		    dumpops, pvlim);
-	}
-	if (SvVALID(sv)) {
-	    Perl_dump_indent(aTHX_ level, file, "  RARE = %u\n", (U8)BmRARE(sv));
-	    Perl_dump_indent(aTHX_ level, file, "  PREVIOUS = %"UVuf"\n", (UV)BmPREVIOUS(sv));
-	    Perl_dump_indent(aTHX_ level, file, "  USEFUL = %"IVdf"\n", (IV)BmUSEFUL(sv));
 	}
 	if (!isGV_with_GP(sv))
 	    break;

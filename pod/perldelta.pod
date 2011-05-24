@@ -611,6 +611,13 @@ be noted as well.
 
 =item *
 
+When empting a hash of its elements (e.g. via undef(%h), or %h=()), HvARRAY
+field is no longer temporarily zeroed.  Any destructors called on the freed
+elements see the remaining elements. Thus, %h=() becomes more like C<delete
+$h{$_} for keys %h>.
+
+=item *
+
 The compiled representation of formats is now stored via the mg_ptr of
 their PERL_MAGIC_fm. Previously it was stored in the string buffer,
 beyond SvLEN(), the regular end of the string. SvCOMPILED() and
@@ -619,10 +626,10 @@ The first is always 0, the other two now no-ops.
 
 =item *
 
-When empting a hash of its elements (e.g. via undef(%h), or %h=()), HvARRAY
-field is no longer temporarily zeroed.  Any destructors called on the freed
-elements see the remaining elements. Thus, %h=() becomes more like C<delete
-$h{$_} for keys %h>.
+Boyer-Moore compiled scalars are now PVMGs, and the Boyer-Moore tables are now
+stored via the mg_ptr of their PERL_MAGIC_bm. Previously they were PVGVs, with
+the tables stored in the string buffer, beyond SvLEN(). This eliminates the
+last place where the core stores data beyond SvLEN().
 
 =back
 

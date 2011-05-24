@@ -95,7 +95,7 @@ my $t = <<'EOT_EOT';
 # 5        <@> index[t2] sK/2 ->6
 # -           <0> ex-pushmark s ->3
 # 3           <$> const[PV "foo"] s ->4
-# 4           <$> const[GV "foo"] s ->5
+# 4           <$> const[PVMG "foo"] s ->5
 # -        <1> ex-rv2sv sKRM*/1 ->7
 # 6           <#> gvsv[*_] s ->7
 EOT_EOT
@@ -107,7 +107,7 @@ my $nt = <<'EONT_EONT';
 # 5        <@> index[t1] sK/2 ->6
 # -           <0> ex-pushmark s ->3
 # 3           <$> const(PV "foo") s ->4
-# 4           <$> const(GV "foo") s ->5
+# 4           <$> const(PVMG "foo") s ->5
 # -        <1> ex-rv2sv sKRM*/1 ->7
 # 6           <$> gvsv(*_) s ->7
 EONT_EONT
