@@ -378,11 +378,10 @@ perform the upgrade if necessary.  See C<svtype>.
 /* This is only set true on a PVGV when it's playing "PVBM", but is tested for
    on any regular scalar (anything <= PVLV) */
 #define SVpbm_VALID	0x40000000
-/* ??? */
+/* Only used in toke.c on an SV stored in PL_lex_repl */
 #define SVrepl_EVAL	0x40000000  /* Replacement part of s///e */
 
 /* IV, PVIV, PVNV, PVMG, PVGV and (I assume) PVLV  */
-/* Presumably IVs aren't stored in pads */
 #define SVf_IVisUV	0x80000000  /* use XPVUV instead of XPVIV */
 /* PVAV */
 #define SVpav_REIFY 	0x80000000  /* can become real */
