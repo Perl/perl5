@@ -61,7 +61,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 20;
 
 # number of tests in section 3
-my $bug_tests = 4 + 3 * 3 * 5 * 2 * 3 + 2 + 2 + 1 + 1;
+my $bug_tests = 4 + 3 * 3 * 5 * 2 * 3 + 2 + 6 + 2 + 1 + 1;
 
 # number of tests in section 4
 my $hmb_tests = 35;
@@ -609,6 +609,53 @@ close STDOUT_DUP;
 
 *CmT =  *{$::{Comment}}{FORMAT};
 ok  defined *{$::{CmT}}{FORMAT}, "glob assign";
+
+
+# RT #91032: Check that "non-real" strings like tie and overload work,
+# especially that they re-compile the pattern on each FETCH, and that
+# they don't overrun the buffer
+
+
+{
+    package RT91032;
+
+    sub TIESCALAR { bless [] }
+    my $i = 0;
+    sub FETCH { $i++; "A$i @> Z\n" }
+
+    use overload '""' => \&FETCH;
+
+    tie my $f, 'RT91032';
+
+    formline $f, "a";
+    formline $f, "bc";
+    ::is $^A, "A1  a Z\nA2 bc Z\n", "RT 91032: tied";
+    $^A = '';
+
+    my $g = bless []; # has overloaded stringify
+    formline $g, "de";
+    formline $g, "f";
+    ::is $^A, "A3 de Z\nA4  f Z\n", "RT 91032: overloaded";
+    $^A = '';
+
+    my $h = [];
+    formline $h, "junk1";
+    formline $h, "junk2";
+    ::is ref($h), 'ARRAY', "RT 91032: array ref still a ref";
+    ::like "$h", qr/^ARRAY\(0x[0-9a-f]+\)$/, "RT 91032: array stringifies ok";
+    ::is $^A, "$h$h","RT 91032: stringified array";
+    $^A = '';
+
+    # used to overwrite the ~~ in the *original SV with spaces. Naughty!
+
+    my $orig = my $format = "^<<<<< ~~\n";
+    my $abc = "abc";
+    formline $format, $abc;
+    $^A ='';
+    ::is $format, $orig, "RT91032: don't overwrite orig format string";
+
+}
+
 
 SKIP: {
     skip_if_miniperl('miniperl does not support scalario');

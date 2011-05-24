@@ -523,6 +523,7 @@ PP(pp_formline)
 {
     dVAR; dSP; dMARK; dORIGMARK;
     register SV * const tmpForm = *++MARK;
+    SV *formsv;
     register U32 *fpc;
     register char *t;
     const char *f;
@@ -538,35 +539,30 @@ PP(pp_formline)
     NV value;
     bool gotsome = FALSE;
     STRLEN len;
-    const STRLEN fudge = SvPOKp(tmpForm)
-			? (SvCUR(tmpForm) * (IN_BYTES ? 1 : 3) + 1) : 0;
+    STRLEN fudge;
     bool item_is_utf8 = FALSE;
     bool targ_is_utf8 = FALSE;
     SV * nsv = NULL;
     const char *fmt;
     MAGIC *mg = NULL;
 
-    if (SvTYPE(tmpForm) >= SVt_PVMG) {
-	/* This might, of course, still return NULL.  */
-	mg = mg_find(tmpForm, PERL_MAGIC_fm);
-    } else {
-	sv_upgrade(tmpForm, SVt_PVMG);
-    }
+    mg = doparseform(tmpForm);
 
-    if(!mg) {
-	mg = doparseform(tmpForm);
-	assert(mg);
-    }
     fpc = (U32*)mg->mg_ptr;
+    /* the actual string the format was compiled from.
+     * with overload etc, this may not match tmpForm */
+    formsv = mg->mg_obj;
+
 
     SvPV_force(PL_formtarget, len);
-    if (SvTAINTED(tmpForm))
+    if (SvTAINTED(tmpForm) || SvTAINTED(formsv))
 	SvTAINTED_on(PL_formtarget);
     if (DO_UTF8(PL_formtarget))
 	targ_is_utf8 = TRUE;
+    fudge = (SvCUR(formsv) * (IN_BYTES ? 1 : 3) + 1);
     t = SvGROW(PL_formtarget, len + fudge + 1);  /* XXX SvCUR bad */
     t += len;
-    f = SvPV_const(tmpForm, len);
+    f = SvPV_const(formsv, len);
 
     for (;;) {
 	DEBUG_f( {
@@ -607,7 +603,7 @@ PP(pp_formline)
 
 	case FF_LITERAL:
 	    arg = *fpc++;
-	    if (targ_is_utf8 && !SvUTF8(tmpForm)) {
+	    if (targ_is_utf8 && !SvUTF8(formsv)) {
 		SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
 		*t = '\0';
 		sv_catpvn_utf8_upgrade(PL_formtarget, f, arg, nsv);
@@ -615,7 +611,7 @@ PP(pp_formline)
 		f += arg;
 		break;
 	    }
-	    if (!targ_is_utf8 && DO_UTF8(tmpForm)) {
+	    if (!targ_is_utf8 && DO_UTF8(formsv)) {
 		SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
 		*t = '\0';
 		sv_utf8_upgrade_flags_grow(PL_formtarget, SV_GMAGIC, fudge + 1);
@@ -4921,7 +4917,7 @@ S_doparseform(pTHX_ SV *sv)
 {
     STRLEN len;
     register char *s = SvPV(sv, len);
-    register char * const send = s + len;
+    register char *send;
     register char *base = NULL;
     register I32 skipspaces = 0;
     bool noblank   = FALSE;
@@ -4934,12 +4930,42 @@ S_doparseform(pTHX_ SV *sv)
     bool ischop;
     bool unchopnum = FALSE;
     int maxops = 12; /* FF_LINEMARK + FF_END + 10 (\0 without preceding \n) */
-    MAGIC *mg;
+    MAGIC *mg = NULL;
+    SV *sv_copy;
 
     PERL_ARGS_ASSERT_DOPARSEFORM;
 
     if (len == 0)
 	Perl_croak(aTHX_ "Null picture in formline");
+
+    if (SvTYPE(sv) >= SVt_PVMG) {
+	/* This might, of course, still return NULL.  */
+	mg = mg_find(sv, PERL_MAGIC_fm);
+    } else {
+	sv_upgrade(sv, SVt_PVMG);
+    }
+
+    if (mg) {
+	/* still the same as previously-compiled string? */
+	SV *old = mg->mg_obj;
+	if ( !(!!SvUTF8(old) ^ !!SvUTF8(sv))
+	      && len == SvCUR(old)
+	      && strnEQ(SvPVX(old), SvPVX(sv), len)
+	)
+	    return mg;
+
+	Safefree(mg->mg_ptr);
+	mg->mg_ptr = NULL;
+	SvREFCNT_dec(old);
+	mg->mg_obj = NULL;
+    }
+    else
+	mg = sv_magicext(sv, NULL, PERL_MAGIC_fm, &PL_vtbl_fm, NULL, 0);
+
+    sv_copy = newSVpvn_utf8(s, len, SvUTF8(sv));
+    s = SvPV(sv_copy, len); /* work on the copy, not the original */
+    send = s + len;
+
 
     /* estimate the buffer size needed */
     for (base = s; s <= send; s++) {
@@ -5121,16 +5147,10 @@ S_doparseform(pTHX_ SV *sv)
     assert (fpc <= fops + maxops); /* ensure our buffer estimate was valid */
     arg = fpc - fops;
 
-    /* If we pass the length in to sv_magicext() it will copy the buffer for us.
-       We don't need that, so by setting the length on return we "donate" the
-       buffer to the magic, avoiding an allocation. We could realloc() the
-       buffer to the exact size used, but that feels like it's not worth it
-       (particularly if the rumours are true and some realloc() implementations
-       don't shrink blocks). However, set the true length used in mg_len so that
-       mg_dup only allocates and copies what's actually needed.  */
-    mg = sv_magicext(sv, NULL, PERL_MAGIC_fm, &PL_vtbl_fm,
-		     (const char *const) fops, 0);
+    mg->mg_ptr = (char *) fops;
     mg->mg_len = arg * sizeof(U32);
+    mg->mg_obj = sv_copy;
+    mg->mg_flags |= MGf_REFCOUNTED;
 
     if (unchopnum && repeat)
         Perl_die(aTHX_ "Repeated format line will never terminate (~~ and @#)");
