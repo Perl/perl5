@@ -795,8 +795,7 @@ Perl_find_rundefsv(pTHX)
     po = pad_findlex("$_", find_runcv(NULL), PL_curcop->cop_seq, 1,
 	    NULL, &namesv, &flags);
 
-    if (po == NOT_IN_PAD
-	|| (SvFLAGS(namesv) & (SVpad_NAME|SVpad_OUR)) == (SVpad_NAME|SVpad_OUR))
+    if (po == NOT_IN_PAD || SvPAD_OUR(namesv))
 	return DEFSV;
 
     return PAD_SVl(po);

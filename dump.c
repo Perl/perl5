@@ -1601,10 +1601,11 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		   (int)(PL_dumpindent*level), "", (IV)SvREFCNT(sv),
 		   (int)(PL_dumpindent*level), "");
 
-    if (!(flags & SVpad_NAME && (type == SVt_PVMG || type == SVt_PVNV))) {
+    if (!((flags & SVpad_NAME) == SVpad_NAME
+	  && (type == SVt_PVMG || type == SVt_PVNV))) {
 	if (flags & SVs_PADSTALE)	sv_catpv(d, "PADSTALE,");
     }
-    if (!(flags & SVpad_NAME && type == SVt_PVMG)) {
+    if (!((flags & SVpad_NAME) == SVpad_NAME && type == SVt_PVMG)) {
 	if (flags & SVs_PADTMP)	sv_catpv(d, "PADTMP,");
 	if (flags & SVs_PADMY)	sv_catpv(d, "PADMY,");
     }
@@ -1728,7 +1729,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	PerlIO_putc(file, '\n');
     }
 
-    if ((type == SVt_PVNV || type == SVt_PVMG) && SvFLAGS(sv) & SVpad_NAME) {
+    if ((type == SVt_PVNV || type == SVt_PVMG)
+	&& (SvFLAGS(sv) & SVpad_NAME) == SVpad_NAME) {
 	Perl_dump_indent(aTHX_ level, file, "  COP_LOW = %"UVuf"\n",
 			 (UV) COP_SEQ_RANGE_LOW(sv));
 	Perl_dump_indent(aTHX_ level, file, "  COP_HIGH = %"UVuf"\n",
