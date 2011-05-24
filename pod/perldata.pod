@@ -417,7 +417,7 @@ end of file.  Any following text is ignored.
 Text after __DATA__ may be read via the filehandle C<PACKNAME::DATA>,
 where C<PACKNAME> is the package that was current when the __DATA__
 token was encountered.  The filehandle is left open pointing to the
-contents after __DATA__.  It is the program's responsibility to
+line after __DATA__.  It is the program's responsibility to
 C<close DATA> when it is done reading from it.  For compatibility with
 older scripts written before __DATA__ was introduced, __END__ behaves
 like __DATA__ in the top level script (but not in files loaded with
