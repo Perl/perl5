@@ -367,8 +367,21 @@ perform the upgrade if necessary.  See C<svtype>.
 
 /* PVHV */
 #define SVphv_SHAREKEYS 0x20000000  /* PVHV keys live on shared string table */
-/* PVNV, PVMG, presumably only inside pads */
-#define SVpad_NAME	0x40000000  /* This SV is a name in the PAD, so
+
+/* PVNV, PVMG only, and only used in pads. Should be safe to test on any scalar
+   SV, as the core is careful to avoid setting both.
+
+   SVf_POK, SVp_POK also set:
+   0x00004400   Normal
+   0x0000C400   Studied (SvSCREAM)
+   0x40004400   FBM compiled (SvVALID)
+   0x4000C400   pad name.
+
+   0x00008000   GV with GP
+   0x00008800   RV with PCS imported
+*/
+#define SVpad_NAME	(SVp_SCREAM|SVpbm_VALID)
+				    /* This SV is a name in the PAD, so
 				       SVpad_TYPED, SVpad_OUR and SVpad_STATE
 				       apply */
 /* PVAV */
