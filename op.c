@@ -5103,7 +5103,8 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	    if (k1->op_type == OP_READDIR
 		  || k1->op_type == OP_GLOB
 		  || (k1->op_type == OP_NULL && k1->op_targ == OP_GLOB)
-		  || k1->op_type == OP_EACH)
+                 || k1->op_type == OP_EACH
+                 || k1->op_type == OP_AEACH)
 	    {
 		warnop = ((k1->op_type == OP_NULL)
 			  ? (OPCODE)k1->op_targ : k1->op_type);
@@ -5347,7 +5348,8 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
 		if (k1 && (k1->op_type == OP_READDIR
 		      || k1->op_type == OP_GLOB
 		      || (k1->op_type == OP_NULL && k1->op_targ == OP_GLOB)
-		      || k1->op_type == OP_EACH))
+                     || k1->op_type == OP_EACH
+                     || k1->op_type == OP_AEACH))
 		    expr = newUNOP(OP_DEFINED, 0, expr);
 		break;
 	    }
@@ -5435,7 +5437,8 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop,
 		if (k1 && (k1->op_type == OP_READDIR
 		      || k1->op_type == OP_GLOB
 		      || (k1->op_type == OP_NULL && k1->op_targ == OP_GLOB)
-		      || k1->op_type == OP_EACH))
+                     || k1->op_type == OP_EACH
+                     || k1->op_type == OP_AEACH))
 		    expr = newUNOP(OP_DEFINED, 0, expr);
 		break;
 	    }
