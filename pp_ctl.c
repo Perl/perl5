@@ -523,23 +523,23 @@ PP(pp_formline)
 {
     dVAR; dSP; dMARK; dORIGMARK;
     register SV * const tmpForm = *++MARK;
-    SV *formsv;
-    register U32 *fpc;
-    register char *t;
-    const char *f;
+    SV *formsv;		    /* contains text of original format */
+    register U32 *fpc;	    /* format ops program counter */
+    register char *t;	    /* current append position in target string */
+    const char *f;	    /* current position in format string */
     register I32 arg;
-    register SV *sv = NULL;
-    const char *item = NULL;
-    I32 itemsize  = 0;
-    I32 fieldsize = 0;
-    I32 lines = 0;
-    bool chopspace = (strchr(PL_chopset, ' ') != NULL);
-    const char *chophere = NULL;
-    char *linemark = NULL;
+    register SV *sv = NULL; /* current item */
+    const char *item = NULL;/* string value of current item */
+    I32 itemsize  = 0;	    /* length of current item, possibly truncated */
+    I32 fieldsize = 0;	    /* width of current field */
+    I32 lines = 0;	    /* number of lines that have been output */
+    bool chopspace = (strchr(PL_chopset, ' ') != NULL); /* does $: have space */
+    const char *chophere = NULL; /* where to chop current item */
+    char *linemark = NULL;  /* pos of start of line in output */
     NV value;
-    bool gotsome = FALSE;
+    bool gotsome = FALSE;   /* seen at least one non-blank item on this line */
     STRLEN len;
-    STRLEN fudge;
+    STRLEN fudge;	    /* estimate of output size in bytes */
     bool item_is_utf8 = FALSE;
     bool targ_is_utf8 = FALSE;
     SV * nsv = NULL;
@@ -848,7 +848,7 @@ PP(pp_formline)
 		    const int ch = *t++ = *s++;
 		    if (iscntrl(ch))
 #else
-			if ( !((*t++ = *s++) & ~31) )
+		    if ( !((*t++ = *s++) & ~31) )
 #endif
 			    t[-1] = ' ';
 		}
@@ -4918,17 +4918,17 @@ S_doparseform(pTHX_ SV *sv)
     STRLEN len;
     register char *s = SvPV(sv, len);
     register char *send;
-    register char *base = NULL;
-    register I32 skipspaces = 0;
-    bool noblank   = FALSE;
-    bool repeat    = FALSE;
-    bool postspace = FALSE;
+    register char *base = NULL; /* start of current field */
+    register I32 skipspaces = 0; /* number of contiguous spaces seen */
+    bool noblank   = FALSE; /* ~ or ~~ seen on this line */
+    bool repeat    = FALSE; /* ~~ seen on this line */
+    bool postspace = FALSE; /* a text field may need right padding */
     U32 *fops;
     register U32 *fpc;
-    U32 *linepc = NULL;
+    U32 *linepc = NULL;	    /* position of last FF_LINEMARK */
     register I32 arg;
-    bool ischop;
-    bool unchopnum = FALSE;
+    bool ischop;	    /* it's a ^ rather than a @ */
+    bool unchopnum = FALSE; /* at least one @ (i.e. non-chop) num field seen */
     int maxops = 12; /* FF_LINEMARK + FF_END + 10 (\0 without preceding \n) */
     MAGIC *mg = NULL;
     SV *sv_copy;
@@ -5061,7 +5061,7 @@ S_doparseform(pTHX_ SV *sv)
 
 	    base = s - 1;
 	    *fpc++ = FF_FETCH;
-	    if (*s == '*') {
+	    if (*s == '*') { /*  @* or ^*  */
 		s++;
 		*fpc++ = 2;  /* skip the @* or ^* */
 		if (ischop) {
@@ -5070,7 +5070,7 @@ S_doparseform(pTHX_ SV *sv)
 		} else
 		    *fpc++ = FF_LINEGLOB;
 	    }
-	    else if (*s == '#' || (*s == '.' && s[1] == '#')) {
+	    else if (*s == '#' || (*s == '.' && s[1] == '#')) { /* @###, ^### */
 		arg = ischop ? 512 : 0;
 		base = s - 1;
 		while (*s == '#')
@@ -5103,7 +5103,7 @@ S_doparseform(pTHX_ SV *sv)
 		*fpc++ = (U16)arg;
                 unchopnum |= ! ischop;
 	    }
-	    else {
+	    else {				/* text field */
 		I32 prespace = 0;
 		bool ismore = FALSE;
 
@@ -5130,7 +5130,7 @@ S_doparseform(pTHX_ SV *sv)
 		*fpc++ = ischop ? FF_CHECKCHOP : FF_CHECKNL;
 
 		if (prespace)
-		    *fpc++ = (U16)prespace;
+		    *fpc++ = (U16)prespace; /* add SPACE or HALFSPACE */
 		*fpc++ = FF_ITEM;
 		if (ismore)
 		    *fpc++ = FF_MORE;
