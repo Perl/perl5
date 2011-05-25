@@ -1922,12 +1922,18 @@ This variable was added in Perl 5.10.
 =item $!
 X<$!> X<$ERRNO> X<$OS_ERROR>
 
-If used numerically, yields the current value of the C C<errno>
-variable, or in other words, if a system or library call fails, it
-sets this variable. This means that the value of C<$!> is meaningful
-only I<immediately> after a B<failure>:
+When referenced, C<$!> retrieves the current value
+of the C C<errno> integer variable.
+If C<$!> is assigned a numerical value, that value is stored in C<errno>.
+When referenced as a string, C<$!> yields the system error string
+corresponding to C<errno>.
 
-	if (open my $fh, "<", $filename) {
+Many system or library calls set C<errno> if they fail,
+to indicate the cause of failure.  They usually do B<not>
+set C<errno> to zero if they succeed.  This means C<errno>,
+hence C<$!>, is meaningful only I<immediately> after a B<failure>:
+
+    if (open my $fh, "<", $filename) {
 		# Here $! is meaningless.
 		...
     }
@@ -1937,16 +1943,13 @@ only I<immediately> after a B<failure>:
 		# Already here $! might be meaningless.
     }
     # Since here we might have either success or failure,
-    # here $! is meaningless.
+    # $! is meaningless.
 
-The I<meaningless> stands for anything: zero, non-zero,
-C<undef>. A successful system or library call does B<not> set the
-variable to zero.
-
-If used as a string, yields the corresponding system error string. You
-can assign a number to C<$!> to set I<errno> if, for instance, you
-want C<"$!"> to return the string for error I<n>, or you want to set
-the exit value for the C<die()> operator.
+Here, I<meaningless> means that C<$!> may be unrelated to the outcome
+of the C<open()> operator.  Assignment to C<$!> is similarly ephemeral.
+It can be used immediately before invoking the C<die()> operator,
+to set the exit value, or to inspect the system error string
+corresponding to error I<n>, or to restore C<$!> to a meaningful state.
 
 Mnemonic: What just went bang?
 
