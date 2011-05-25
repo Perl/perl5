@@ -213,8 +213,9 @@ my $encoding_first = "=encoding must be first command (if present)";
 my $no_name = "There is no NAME";
 my $missing_name_description = "The NAME should have a dash and short description after it";
 
-# objects, tests, etc can't be pods, so don't look for them.
-my $non_pods = qr/\.(?:[achot]|zip|gz|bz2|jar|tar|tgz|PL|so)$/;
+# objects, tests, etc can't be pods, so don't look for them. Also skip
+# files output by the patch program.
+my $non_pods = qr/\.(?:[achot]|zip|gz|bz2|jar|tar|tgz|PL|so|orig|rej)$/;
 
 
 # Pod::Checker messages to suppress
