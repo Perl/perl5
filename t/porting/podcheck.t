@@ -780,7 +780,7 @@ my %files_with_unknown_issues;
 my %files_with_fixes;
 
 my $data_fh;
-open($data_fh, $known_issues) || die "Can't open $known_issues";
+open $data_fh, '<:bytes', $known_issues or die "Can't open $known_issues";
 
 my %counts; # For --counts param, count of each issue type
 my %suppressed_files;   # Files with at least one issue type to suppress
@@ -915,7 +915,7 @@ sub extract_pod {   # Extracts just the pod from a file
     # Arrange for the output of Pod::Parser to be collected in an array we can
     # look at instead of being printed
     tie *ALREADY_FH, 'Tie_Array_to_FH', \@pod;
-    open my $in_fh, '<', $filename
+    open my $in_fh, '<:bytes', $filename
         or die "Can't open '$filename': $!\n";
 
     my $parser = Pod::Parser->new();
@@ -949,7 +949,7 @@ sub is_pod_file {
 
     my $contents = do {
         local $/;
-        open my $candidate, '<', $_
+        open my $candidate, '<:bytes', $_
             or die "Can't open '$File::Find::name': $!\n";
         <$candidate>;
     };
