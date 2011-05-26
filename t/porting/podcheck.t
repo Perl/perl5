@@ -939,6 +939,8 @@ sub extract_pod {   # Extracts just the pod from a file
 my $digest = Digest->new($digest_type);
 
 sub is_pod_file {
+    # If $_ is a pod file, add it to the lists and do other prep work.
+
     if (-d $_) {
         # Don't look at files in directories that are for tests, nor those
         # beginning with a dot
@@ -1037,6 +1039,8 @@ sub is_pod_file {
             }
         }
     }
+
+    return;
 } # End of is_pod_file()
 
 # Start of real code that isn't processing the command line.
