@@ -14,6 +14,7 @@ use Cwd;
 use File::Spec;
 use File::Spec::Unix;
 use Getopt::Long;
+use Pod::Simple::XHTML::LocalPodLinks;
 
 use locale;	# make \w work right in non-ASCII lands
 
@@ -50,10 +51,10 @@ pod2html takes the following arguments:
 
 =item backlink
 
-    --backlink="Back to Top"
+    --backlink
 
-Adds "Back to Top" links in front of every C<head1> heading (except for
-the first).  By default, no backlinks are generated.
+Turns every C<head1> heading into a link back to the top of the page.
+By default, no backlinks are generated.
 
 =item css
 
@@ -318,59 +319,32 @@ sub pod2html {
     # parse the command-line parameters
     parse_command_line();
 
-    # escape the backlink argument (same goes for title but is done later...)
-    $Backlink = html_escape($Backlink) if defined $Backlink;
+    # set options for the parser
+    my $parser = Pod::Simple::XHTML::LocalPodLinks->new();
+    $parser->backlink($Backlink);
+    $parser->html_css($Css);
+    # hiddendirs
+    # htmldir
+    # htmlroot
+    $parser->index($Doindex);
+    # infile below (input)
+    # libpods?
+    $parser->output_string(\my $output); # written to file later
+    # podpath
+    # podroot
+    # quiet (opt in ::xhtml maybe?)
+    # recurse
+    $Title = html_escape($Title);
+    $parser->force_title($Title); # implement default title generator in ::xhtml
+    # verbose
+    $parser->html_doctype('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">');
 
-    # set some variables to their default values if necessary
-    my $pod;
+    my $input;
     unless (@ARGV && $ARGV[0]) {
 	if ($Podfile and $Podfile ne '-') {
-	    open $pod, '<', $Podfile
-		or die "$0: cannot open $Podfile file for input: $!\n";
+	    $input = $Podfile;
 	} else {
-	    open $pod, '-';
-	}
-    } else {
-	$Podfile = $ARGV[0];  # XXX: might be more filenames
-	$pod = *ARGV;
-    }
-    $Htmlfile = "-" unless $Htmlfile;	# stdout
-    $Htmlroot = "" if $Htmlroot eq "/";	# so we don't get a //
-    $Htmldir =~ s#/\z## ;               # so we don't get a //
-    if (  $Htmlroot eq ''
-       && defined( $Htmldir )
-       && $Htmldir ne ''
-       && substr( $Htmlfile, 0, length( $Htmldir ) ) eq $Htmldir
-       )
-    {
-	# Set the 'base' url for this file, so that we can use it
-	# as the location from which to calculate relative links
-	# to other files. If this is '', then absolute links will
-	# be used throughout.
-        $Htmlfileurl= "$Htmldir/" . substr( $Htmlfile, length( $Htmldir ) + 1);
-    }
-
-    # read the pod a paragraph at a time
-    warn "Scanning for sections in input file(s)\n" if $Verbose;
-    $/ = "";
-    my @poddata  = <$pod>;
-    close $pod;
-
-    # be eol agnostic
-    for (@poddata) {
-	if (/\r/) {
-	    if (/\r\n/) {
-		@poddata = map { s/\r\n/\n/g;
-				 /\n\n/ ?
-				     map { "$_\n\n" } split /\n\n/ :
-				     $_ } @poddata;
-	    } else {
-		@poddata = map { s/\r/\n/g;
-				 /\n\n/ ?
-				     map { "$_\n\n" } split /\n\n/ :
-				     $_ } @poddata;
-	    }
-	    last;
+	    $input = '-';
 	}
     }
 
@@ -417,46 +391,28 @@ sub pod2html {
     if ($Title) {
 	$Title =~ s/\s*\(.*\)//;
     } else {
-	warn "$0: no title for $Podfile.\n" unless $Quiet;
-	$Podfile =~ /^(.*)(\.[^.\/]+)?\z/s;
-	$Title = ($Podfile eq "-" ? 'No Title' : $1);
-	warn "using $Title" if $Verbose;
-    }
-    $Title = html_escape($Title);
-
-    my $csslink = '';
-    my $bodystyle = ' style="background-color: white"';
-    my $tdstyle = ' style="background-color: #cccccc"';
-
-    if ($Css) {
-      $csslink = qq(\n<link rel="stylesheet" href="$Css" type="text/css" />);
-      $csslink =~ s,\\,/,g;
-      $csslink =~ s,(/.):,$1|,;
-      $bodystyle = '';
-      $tdstyle = '';
+	$Podfile = $ARGV[0];
+	$input = *ARGV;
     }
 
-      my $block = $Header ? <<END_OF_BLOCK : '';
-<table border="0" width="100%" cellspacing="0" cellpadding="3">
-<tr><td class="block"$tdstyle valign="middle">
-<big><strong><span class="block">&nbsp;$Title</span></strong></big>
-</td></tr>
-</table>
-END_OF_BLOCK
+    warn "Converting input file $Podfile\n" if $Verbose;
+    $parser->parse_file($input);
 
-    print $html <<END_OF_HEAD;
-<?xml version="1.0" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<title>$Title</title>$csslink
-<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<link rev="made" href="mailto:$Config{perladmin}" />
-</head>
-
-<body$bodystyle>
-$block
-END_OF_HEAD
+#    $Htmlfile = "-" unless $Htmlfile;	# stdout
+#    $Htmlroot = "" if $Htmlroot eq "/";	# so we don't get a //
+#    $Htmldir =~ s#/\z## ;               # so we don't get a //
+#    if (  $Htmlroot eq ''
+#       && defined( $Htmldir )
+#       && $Htmldir ne ''
+#       && substr( $Htmlfile, 0, length( $Htmldir ) ) eq $Htmldir
+#       )
+#    {
+#	# Set the 'base' url for this file, so that we can use it
+#	# as the location from which to calculate relative links
+#	# to other files. If this is '', then absolute links will
+#	# be used throughout.
+#        $Htmlfileurl= "$Htmldir/" . substr( $Htmlfile, length( $Htmldir ) + 1);
+#    }
 
     # populate %Items and %Pages
     scan_podpath($podroot, $recurse, 0);
@@ -464,27 +420,6 @@ END_OF_HEAD
    # scan the pod for =item directives
     scan_items( \%Local_Items, "", @poddata);
 
-    # put an index at the top of the file.  note, if $Doindex is 0 we
-    # still generate an index, but surround it with an html comment.
-    # that way some other program can extract it if desired.
-    $index =~ s/--+/-/g;
-
-    my $hr = ($Doindex and $index) ? qq(<hr name="index" />) : "";
-
-    unless ($Doindex)
-    {
-        $index = qq(<!--\n$index\n-->\n);
-    }
-
-    print $html <<"END_OF_INDEX";
-
-<!-- INDEX BEGIN -->
-<div name="index">
-<p><a name=\"__index__\"></a></p>
-$index
-$hr
-</div>
-<!-- INDEX END -->
 
 END_OF_INDEX
 
@@ -647,7 +582,7 @@ sub parse_command_line {
 
     unshift @ARGV, split ' ', $Config{pod2html} if $Config{pod2html};
     my $result = GetOptions(
-			    'backlink=s' => \$opt_backlink,
+			    'backlink!' => \$opt_backlink,
 			    'css=s'      => \$opt_css,
 			    'help'       => \$opt_help,
 			    'hiddendirs!'=> \$opt_hiddendirs,
