@@ -62,14 +62,6 @@ the first).  By default, no backlinks are generated.
 Specify the URL of a cascading style sheet.  Also disables all HTML/CSS
 C<style> attributes that are output by default (to avoid conflicts).
 
-=item header
-
-    --header
-    --noheader
-
-Creates header and footer blocks containing the text of the C<NAME>
-section.  By default, no headers are generated.
-
 =item help
 
     --help
@@ -618,7 +610,6 @@ Usage:  $0 --help --htmlroot=<name> --infile=<name> --outfile=<name>
 
   --backlink     - set text for "back to top" links (default: none).
   --css          - stylesheet URL
-  --[no]header   - produce block header/footer (default is no headers).
   --help         - prints this message.
   --hiddendirs   - search hidden directories in podpath
   --htmldir      - directory for resulting HTML files.
@@ -649,7 +640,7 @@ END_OF_USAGE
 }
 
 sub parse_command_line {
-    my ($opt_backlink,$opt_css,$opt_header,$opt_help,
+    my ($opt_backlink,$opt_css,$opt_help,
 	$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,$opt_libpods,
 	$opt_outfile,$opt_podpath,$opt_podroot,$opt_quiet,
 	$opt_recurse,$opt_title,$opt_verbose,$opt_hiddendirs);
@@ -658,7 +649,6 @@ sub parse_command_line {
     my $result = GetOptions(
 			    'backlink=s' => \$opt_backlink,
 			    'css=s'      => \$opt_css,
-			    'header!'    => \$opt_header,
 			    'help'       => \$opt_help,
 			    'hiddendirs!'=> \$opt_hiddendirs,
 			    'htmldir=s'  => \$opt_htmldir,
@@ -684,7 +674,6 @@ sub parse_command_line {
 
     $Backlink = $opt_backlink if defined $opt_backlink;
     $Css      = $opt_css      if defined $opt_css;
-    $Header   = $opt_header   if defined $opt_header;
     $Htmldir  = $opt_htmldir  if defined $opt_htmldir;
     $Htmlroot = $opt_htmlroot if defined $opt_htmlroot;
     $Doindex  = $opt_index    if defined $opt_index;
