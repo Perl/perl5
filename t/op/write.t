@@ -61,7 +61,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 20;
 
 # number of tests in section 3
-my $bug_tests = 4 + 3 * 3 * 5 * 2 * 3 + 2 + 6 + 2 + 1 + 1;
+my $bug_tests = 4 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 2 + 1 + 1;
 
 # number of tests in section 4
 my $hmb_tests = 35;
@@ -542,9 +542,13 @@ for my $tref ( @NumTests ){
 			  "$base\nMoo!\n",) {
 	foreach (['^*', qr/(.+)/], ['@*', qr/(.*?)$/s]) {
 	  my ($format, $re) = @$_;
+	  $format = "1^*2 3${format}4";
 	  foreach my $class ('', 'Count') {
-	    my $name = "$first, $second $format $class";
+	    my $name = qq{swrite("$format", "$first", "$second") class="$class"};
 	    $name =~ s/\n/\\n/g;
+	    $name =~ s{(.)}{
+			ord($1) > 126 ? sprintf("\\x{%x}",ord($1)) : $1
+		    }ge;
 
 	    $first =~ /(.+)/ or die $first;
 	    my $expect = "1${1}2";
@@ -555,12 +559,12 @@ for my $tref ( @NumTests ){
 	      my $copy1 = $first;
 	      my $copy2;
 	      tie $copy2, $class, $second;
-	      is swrite("1^*2 3${format}4", $copy1, $copy2), $expect, $name;
+	      is swrite("$format", $copy1, $copy2), $expect, $name;
 	      my $obj = tied $copy2;
 	      is $obj->[1], 1, 'value read exactly once';
 	    } else {
 	      my ($copy1, $copy2) = ($first, $second);
-	      is swrite("1^*2 3${format}4", $copy1, $copy2), $expect, $name;
+	      is swrite("$format", $copy1, $copy2), $expect, $name;
 	    }
 	  }
 	}
@@ -654,6 +658,29 @@ ok  defined *{$::{CmT}}{FORMAT}, "glob assign";
     $^A ='';
     ::is $format, $orig, "RT91032: don't overwrite orig format string";
 
+    # check that ~ and ~~ are displayed correctly as whitespace,
+    # under the influence of various different types of border
+
+    for my $n (1,2) {
+	for my $lhs (' ', 'Y', '^<<<', '^|||', '^>>>') {
+	    for my $rhs ('', ' ', 'Z', '^<<<', '^|||', '^>>>') {
+		my $fmt = "^<B$lhs" . ('~' x $n) . "$rhs\n";
+		my $sfmt = ($fmt =~ s/~/ /gr);
+		my ($a, $bc, $stop);
+		($a, $bc, $stop) = ('a', 'bc', 's');
+		# $stop is to stop '~~' deleting the whole line
+		formline $sfmt, $stop, $a, $bc;
+		my $exp = $^A;
+		$^A = '';
+		($a, $bc, $stop) = ('a', 'bc', 's');
+		formline $fmt, $stop, $a, $bc;
+		my $got = $^A;
+		$^A = '';
+		$fmt =~ s/\n/\\n/;
+		::is($got, $exp, "chop munging: [$fmt]");
+	    }
+	}
+    }
 }
 
 

@@ -604,9 +604,23 @@ PP(pp_formline)
 	case FF_LITERAL:
 	    arg = *fpc++;
 	    if (targ_is_utf8 && !SvUTF8(formsv)) {
+		char *s;
 		SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
 		*t = '\0';
-		sv_catpvn_utf8_upgrade(PL_formtarget, f, arg, nsv);
+
+		/* this is an unrolled sv_catpvn_utf8_upgrade(),
+		 * but with the addition of s/~/ /g */
+		if (!(nsv))
+		    nsv = newSVpvn_flags(f, arg, SVs_TEMP);
+		else
+		    sv_setpvn(nsv, f, arg);
+		SvUTF8_off(nsv);
+		for (s = SvPVX(nsv); s <= SvEND(nsv); s++)
+		    if (*s == '~')
+			*s = ' ';
+		sv_utf8_upgrade(nsv);
+		sv_catsv(PL_formtarget, nsv);
+
 		t = SvEND(PL_formtarget);
 		f += arg;
 		break;
@@ -618,8 +632,10 @@ PP(pp_formline)
 		t = SvEND(PL_formtarget);
 		targ_is_utf8 = TRUE;
 	    }
-	    while (arg--)
-		*t++ = *f++;
+	    while (arg--) {
+		*t++ = (*f == '~') ? ' ' : *f;
+		f++;
+	    }
 	    break;
 
 	case FF_SKIP:
@@ -4951,16 +4967,21 @@ S_doparseform(pTHX_ SV *sv)
 	if ( !(!!SvUTF8(old) ^ !!SvUTF8(sv))
 	      && len == SvCUR(old)
 	      && strnEQ(SvPVX(old), SvPVX(sv), len)
-	)
+	) {
+	    DEBUG_f(PerlIO_printf(Perl_debug_log,"Re-using compiled format\n"));
 	    return mg;
+	}
 
+	DEBUG_f(PerlIO_printf(Perl_debug_log, "Re-compiling format\n"));
 	Safefree(mg->mg_ptr);
 	mg->mg_ptr = NULL;
 	SvREFCNT_dec(old);
 	mg->mg_obj = NULL;
     }
-    else
+    else {
+	DEBUG_f(PerlIO_printf(Perl_debug_log, "Compiling format\n"));
 	mg = sv_magicext(sv, NULL, PERL_MAGIC_fm, &PL_vtbl_fm, NULL, 0);
+    }
 
     sv_copy = newSVpvn_utf8(s, len, SvUTF8(sv));
     s = SvPV(sv_copy, len); /* work on the copy, not the original */
@@ -4994,10 +5015,10 @@ S_doparseform(pTHX_ SV *sv)
 	case '~':
 	    if (*s == '~') {
 		repeat = TRUE;
-		*s = ' ';
+		skipspaces++;
+		s++;
 	    }
 	    noblank = TRUE;
-	    s[-1] = ' ';
 	    /* FALL THROUGH */
 	case ' ': case '\t':
 	    skipspaces++;
