@@ -14,6 +14,7 @@ use Cwd;
 use File::Spec;
 use File::Spec::Unix;
 use Getopt::Long;
+use Pod::Simple::Search;
 use Pod::Simple::XHTML::LocalPodLinks;
 
 use locale;	# make \w work right in non-ASCII lands
@@ -204,6 +205,17 @@ This program is distributed under the Artistic License.
 
 =cut
 
+# NOTES
+# old pod::html tried to create links in preformatted text of all occurences
+# of perl.*
+# and tries to handle implicit
+# links in C<> text (see process_puretext), and links to RFC
+
+# use ::Search and find all POD docs and perldocs, store in %Pages/%Items,
+# modify ::Xhtml's perldoc_url_pre/postfix to link successfully
+
+# write test cases for pod::html to try and understand all the linkings
+
 my @Libpods;
 my($Htmlroot, $Htmldir, $Htmlfile);
 my($Podfile, @Podpath, $Podroot);
@@ -227,7 +239,12 @@ my %Pages = ();			# associative array used to find the location
 my %Items = ();			# associative array used to find the location
 				#   of =item directives referenced by L<> links
 
-my %Local_Items;
+# %Pages: page name => path to page 
+# e.g., { Pod::Simple => /path/to/Pod/Simple,
+#         AFileThatHasPOD => /path/to/the/file }
+# %Items: =item's text => path to file in which =item is located
+# e.g., { $" => /path/to/perlvar,
+#         Item in target pod => '' }
 
 my $Curdir = File::Spec->curdir;
 
@@ -251,14 +268,7 @@ sub init_globals {
     $Verbose = 0;		# not verbose by default
     $Doindex = 1;   	    	# non-zero if we should generate an index
     $Backlink = 0;		# no backlinks added by default
-
-    @Items_Seen = ();	        # for multiples of the same item in perlfunc
-    %Items_Named = ();
     $Title = '';		# title to give the pod(s)
-
-    %Sections = ();		# sections within this page
-
-    %Local_Items = ();
 }
 
 sub pod2html {
@@ -275,19 +285,10 @@ sub pod2html {
     my $parser = Pod::Simple::XHTML::LocalPodLinks->new();
     $parser->backlink($Backlink);
     $parser->html_css($Css);
-    $parser->hiddendirs($HiddenDirs); # in ::LPL
-    $parser->htmldir($Htmldir); # in ::LPL
-    $parser->htmlroot($Htmlroot); # in ::LPL
     $parser->index($Doindex);
-    $parser->libpods(@Libpods); #in ::LPL
     $parser->output_string(\my $output); # written to file later
-    $parser->podpath(@Podpath); # in ::LPL
-    $parser->podroot($Podroot); # in ::LPL
-    $parser->quiet($Quiet); # in ::LPL
-    $parser->recurse($Recurse); # in ::LPL
      # TODO: implement default title generator in ::xhtml
     $parser->force_title(html_escape($Title));
-    $parser->verbose($Verbose); # in ::LPL
     $parser->html_doctype('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">');
 
     my $input;
