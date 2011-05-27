@@ -5827,10 +5827,9 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
  * this file.  An inversion list is here implemented as a malloc'd C array with
  * some added info.  More will be coming when functionality is added later.
  *
- * It is currently implemented as an HV to the outside world, but is actually
- * an SV pointing to an array of UVs that the SV thinks are bytes.  This allows
- * us to have an array of UV whose memory management is automatically handled
- * by the existing facilities for SV's.
+ * It is currently implemented as an SV pointing to an array of UVs that the SV
+ * thinks are bytes.  This allows us to have an array of UV whose memory
+ * management is automatically handled by the existing facilities for SV's.
  *
  * Some of the methods should always be private to the implementation, and some
  * should eventually be made public */
@@ -5838,7 +5837,7 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 #define INVLIST_INITIAL_LEN 10
 
 PERL_STATIC_INLINE UV*
-S_invlist_array(pTHX_ HV* const invlist)
+S_invlist_array(pTHX_ SV* const invlist)
 {
     /* Returns the pointer to the inversion list's array.  Every time the
      * length changes, this needs to be called in case malloc or realloc moved
@@ -5850,7 +5849,7 @@ S_invlist_array(pTHX_ HV* const invlist)
 }
 
 PERL_STATIC_INLINE UV
-S_invlist_len(pTHX_ HV* const invlist)
+S_invlist_len(pTHX_ SV* const invlist)
 {
     /* Returns the current number of elements in the inversion list's array */
 
@@ -5860,7 +5859,7 @@ S_invlist_len(pTHX_ HV* const invlist)
 }
 
 PERL_STATIC_INLINE UV
-S_invlist_max(pTHX_ HV* const invlist)
+S_invlist_max(pTHX_ SV* const invlist)
 {
     /* Returns the maximum number of elements storable in the inversion list's
      * array, without having to realloc() */
@@ -5871,7 +5870,7 @@ S_invlist_max(pTHX_ HV* const invlist)
 }
 
 PERL_STATIC_INLINE void
-S_invlist_set_len(pTHX_ HV* const invlist, const UV len)
+S_invlist_set_len(pTHX_ SV* const invlist, const UV len)
 {
     /* Sets the current number of elements stored in the inversion list */
 
@@ -5881,7 +5880,7 @@ S_invlist_set_len(pTHX_ HV* const invlist, const UV len)
 }
 
 PERL_STATIC_INLINE void
-S_invlist_set_max(pTHX_ HV* const invlist, const UV max)
+S_invlist_set_max(pTHX_ SV* const invlist, const UV max)
 {
 
     /* Sets the maximum number of elements storable in the inversion list
@@ -5897,7 +5896,7 @@ S_invlist_set_max(pTHX_ HV* const invlist, const UV max)
 }
 
 #ifndef PERL_IN_XSUB_RE
-HV*
+SV*
 Perl__new_invlist(pTHX_ IV initial_size)
 {
 
@@ -5910,12 +5909,12 @@ Perl__new_invlist(pTHX_ IV initial_size)
     }
 
     /* Allocate the initial space */
-    return (HV *) newSV(initial_size * sizeof(UV));
+    return newSV(initial_size * sizeof(UV));
 }
 #endif
 
 PERL_STATIC_INLINE void
-S_invlist_destroy(pTHX_ HV* const invlist)
+S_invlist_destroy(pTHX_ SV* const invlist)
 {
    /* Inversion list destructor */
 
@@ -5925,7 +5924,7 @@ S_invlist_destroy(pTHX_ HV* const invlist)
 }
 
 STATIC void
-S_invlist_extend(pTHX_ HV* const invlist, const UV new_max)
+S_invlist_extend(pTHX_ SV* const invlist, const UV new_max)
 {
     /* Grow the maximum size of an inversion list */
 
@@ -5935,7 +5934,7 @@ S_invlist_extend(pTHX_ HV* const invlist, const UV new_max)
 }
 
 PERL_STATIC_INLINE void
-S_invlist_trim(pTHX_ HV* const invlist)
+S_invlist_trim(pTHX_ SV* const invlist)
 {
     PERL_ARGS_ASSERT_INVLIST_TRIM;
 
@@ -5953,7 +5952,7 @@ S_invlist_trim(pTHX_ HV* const invlist)
 
 #ifndef PERL_IN_XSUB_RE
 void
-Perl__append_range_to_invlist(pTHX_ HV* const invlist, const UV start, const UV end)
+Perl__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV end)
 {
    /* Subject to change or removal.  Append the range from 'start' to 'end' at
     * the end of the inversion list.  The range must be above any existing
@@ -6024,8 +6023,8 @@ Perl__append_range_to_invlist(pTHX_ HV* const invlist, const UV start, const UV 
 }
 #endif
 
-STATIC HV*
-S_invlist_union(pTHX_ HV* const a, HV* const b)
+STATIC SV*
+S_invlist_union(pTHX_ SV* const a, SV* const b)
 {
     /* Return a new inversion list which is the union of two inversion lists.
      * The basis for this comes from "Unicode Demystified" Chapter 13 by
@@ -6045,7 +6044,7 @@ S_invlist_union(pTHX_ HV* const a, HV* const b)
     UV len_a = invlist_len(a);	/* length of a's array */
     UV len_b = invlist_len(b);
 
-    HV* u;			/* the resulting union */
+    SV* u;			/* the resulting union */
     UV* array_u;
     UV len_u;
 
@@ -6175,8 +6174,8 @@ S_invlist_union(pTHX_ HV* const a, HV* const b)
     return u;
 }
 
-STATIC HV*
-S_invlist_intersection(pTHX_ HV* const a, HV* const b)
+STATIC SV*
+S_invlist_intersection(pTHX_ SV* const a, SV* const b)
 {
     /* Return the intersection of two inversion lists.  The basis for this
      * comes from "Unicode Demystified" Chapter 13 by Richard Gillam, published
@@ -6193,7 +6192,7 @@ S_invlist_intersection(pTHX_ HV* const a, HV* const b)
     UV len_a = invlist_len(a);	/* length of a's array */
     UV len_b = invlist_len(b);
 
-    HV* r;		     /* the resulting intersection */
+    SV* r;		     /* the resulting intersection */
     UV* array_r;
     UV len_r;
 
@@ -6313,8 +6312,8 @@ S_invlist_intersection(pTHX_ HV* const a, HV* const b)
     return r;
 }
 
-STATIC HV*
-S_add_range_to_invlist(pTHX_ HV* invlist, const UV start, const UV end)
+STATIC SV*
+S_add_range_to_invlist(pTHX_ SV* invlist, const UV start, const UV end)
 {
     /* Add the range from 'start' to 'end' inclusive to the inversion list's
      * set.  A pointer to the inversion list is returned.  This may actually be
@@ -6322,8 +6321,8 @@ S_add_range_to_invlist(pTHX_ HV* invlist, const UV start, const UV end)
      * passed in inversion list can be NULL, in which case a new one is created
      * with just the one range in it */
 
-    HV* range_invlist;
-    HV* added_invlist;
+    SV* range_invlist;
+    SV* added_invlist;
     UV len;
 
     if (invlist == NULL) {
@@ -6359,8 +6358,8 @@ S_add_range_to_invlist(pTHX_ HV* invlist, const UV start, const UV end)
     return added_invlist;
 }
 
-PERL_STATIC_INLINE HV*
-S_add_cp_to_invlist(pTHX_ HV* invlist, const UV cp) {
+PERL_STATIC_INLINE SV*
+S_add_cp_to_invlist(pTHX_ SV* invlist, const UV cp) {
     return add_range_to_invlist(invlist, cp, cp);
 }
 
@@ -9303,7 +9302,7 @@ case ANYOF_N##NAME:                                                            \
     break
 
 STATIC U8
-S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8 value, HV** invlist_ptr, AV** alternate_ptr)
+S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8 value, SV** invlist_ptr, AV** alternate_ptr)
 {
 
     /* Handle the setting of folds in the bitmap for non-locale ANYOF nodes.
@@ -9443,7 +9442,7 @@ S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8
 
 
 PERL_STATIC_INLINE U8
-S_set_regclass_bit(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8 value, HV** invlist_ptr, AV** alternate_ptr)
+S_set_regclass_bit(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8 value, SV** invlist_ptr, AV** alternate_ptr)
 {
     /* This inline function sets a bit in the bitmap if not already set, and if
      * appropriate, its fold, returning the number of bits that actually
@@ -9512,7 +9511,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
     UV n;
 
     /* code points this node matches that can't be stored in the bitmap */
-    HV* nonbitmap = NULL;
+    SV* nonbitmap = NULL;
 
     /* The items that are to match that aren't stored in the bitmap, but are a
      * result of things that are stored there.  This is the fold closure of
@@ -9528,7 +9527,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
      * that matches.  A 2nd list is used so that the 'nonbitmap' list is kept
      * empty unless there is something whose fold we don't know about, and will
      * have to go out to the disk to find. */
-    HV* l1_fold_invlist = NULL;
+    SV* l1_fold_invlist = NULL;
 
     /* List of multi-character folds that are matched by this node */
     AV* unicode_alternate  = NULL;
@@ -10039,7 +10038,7 @@ parseit:
     if (FOLD && nonbitmap) {
 	UV i;
 
-	HV* fold_intersection;
+	SV* fold_intersection;
 	UV* fold_list;
 
 	/* This is a list of all the characters that participate in folds
@@ -10221,7 +10220,7 @@ parseit:
     /* Combine the two lists into one. */
     if (l1_fold_invlist) {
 	if (nonbitmap) {
-	    HV* temp = invlist_union(nonbitmap, l1_fold_invlist);
+	    SV* temp = invlist_union(nonbitmap, l1_fold_invlist);
 	    invlist_destroy(nonbitmap);
 	    nonbitmap = temp;
 	    invlist_destroy(l1_fold_invlist);

@@ -2867,7 +2867,7 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
     return ret;
 }
 
-HV*
+SV*
 Perl__swash_to_invlist(pTHX_ SV* const swash)
 {
 
@@ -2889,7 +2889,7 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
     const STRLEN bits  = SvUV(*bitssvp);
     const STRLEN octets = bits >> 3; /* if bits == 1, then octets == 0 */
 
-    HV* invlist;
+    SV* invlist;
 
     PERL_ARGS_ASSERT__SWASH_TO_INVLIST;
 
