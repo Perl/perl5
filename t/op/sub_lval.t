@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>75;
+plan tests=>90;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -503,7 +503,7 @@ is ($Tie_Array::val[0], "value");
 TODO: {
     local $TODO = 'test explicit return of lval expr';
 
-    # subs are corrupted copies from tests 1-~4
+    # subs are corrupted copies from tests 1-~18
     sub bad_get_lex : lvalue { return $in };
     sub bad_get_st  : lvalue { return $blah }
 
@@ -525,6 +525,51 @@ TODO: {
     ++bad_get_st;
 
     is($blah, 8, "yada");
+
+    ++bad_get_lex;
+    cmp_ok($in, '==', 8);
+
+    bad_id(bad_get_st) = 10;
+    cmp_ok($blah, '==', 10);
+
+    bad_id(bad_get_lex) = 10;
+    cmp_ok($in, '==', 10);
+
+    ++bad_id(bad_get_st);
+    cmp_ok($blah, '==', 11);
+
+    ++bad_id(bad_get_lex);
+    cmp_ok($in, '==', 11);
+
+    bad_id1(bad_get_st) = 20;
+    cmp_ok($blah, '==', 20);
+
+    bad_id1(bad_get_lex) = 20;
+    cmp_ok($in, '==', 20);
+
+    ++bad_id1(bad_get_st);
+    cmp_ok($blah, '==', 21);
+
+    ++bad_id1(bad_get_lex);
+    cmp_ok($in, '==', 21);
+
+    bad_inc(bad_get_st);
+    cmp_ok($blah, '==', 22);
+
+    bad_inc(bad_get_lex);
+    cmp_ok($in, '==', 22);
+
+    bad_inc(bad_id(bad_get_st));
+    cmp_ok($blah, '==', 23);
+
+    bad_inc(bad_id(bad_get_lex));
+    cmp_ok($in, '==', 23);
+
+    ++bad_inc(bad_id1(bad_id(bad_get_st)));
+    cmp_ok($blah, '==', 25);
+
+    ++bad_inc(bad_id1(bad_id(bad_get_lex)));
+    cmp_ok($in, '==', 25);
 }
 
 { # bug #23790
