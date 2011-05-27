@@ -205,7 +205,7 @@ This program is distributed under the Artistic License.
 =cut
 
 my @Libpods;
-my($Htmlroot, $Htmldir, $Htmlfile, $Htmlfileurl);
+my($Htmlroot, $Htmldir, $Htmlfile);
 my($Podfile, @Podpath, $Podroot);
 my $Css;
 
@@ -217,8 +217,7 @@ my $Doindex;
 
 my $Backlink;
 
-my(%Items_Named, @Items_Seen); # keep?
- my($Title);
+my($Title);
 
 my %Sections; # fill with search's results of target pod
 
@@ -241,10 +240,6 @@ sub init_globals {
     $Htmldir = "";	    	# The directory to which the html pages
 				# will (eventually) be written.
     $Htmlfile = "";		# write to stdout by default
-    $Htmlfileurl = "";		# The url that other files would use to
-				# refer to this file.  This is only used
-				# to make relative urls that point to
-				# other files.
 
     $Podfile = "";		# read from stdin by default
     @Podpath = ();		# list of directories containing library pods.
@@ -280,20 +275,19 @@ sub pod2html {
     my $parser = Pod::Simple::XHTML::LocalPodLinks->new();
     $parser->backlink($Backlink);
     $parser->html_css($Css);
-    $parser->hiddendirs($Hiddendirs);
-    # htmldir
-    # htmlroot
+    $parser->hiddendirs($HiddenDirs); # in ::LPL
+    $parser->htmldir($Htmldir); # in ::LPL
+    $parser->htmlroot($Htmlroot); # in ::LPL
     $parser->index($Doindex);
-    # infile below (input)
-    # libpods?
+    $parser->libpods(@Libpods); #in ::LPL
     $parser->output_string(\my $output); # written to file later
-    # podpath
-    # podroot
-    # quiet (opt in ::xhtml maybe?)
-    # recurse
-    $Title = html_escape($Title);
-    $parser->force_title($Title); # implement default title generator in ::xhtml
-    # verbose
+    $parser->podpath(@Podpath); # in ::LPL
+    $parser->podroot($Podroot); # in ::LPL
+    $parser->quiet($Quiet); # in ::LPL
+    $parser->recurse($Recurse); # in ::LPL
+     # TODO: implement default title generator in ::xhtml
+    $parser->force_title(html_escape($Title));
+    $parser->verbose($Verbose); # in ::LPL
     $parser->html_doctype('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">');
 
     my $input;
@@ -312,6 +306,7 @@ sub pod2html {
     $parser->parse_file($input);
 
     # Write output to file
+#    $Htmlfile = "-" unless $Htmlfile;	# stdout
     # open > $Htmlfile...
 }
 
