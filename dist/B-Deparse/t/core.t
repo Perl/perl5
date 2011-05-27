@@ -1,11 +1,15 @@
 #!./perl
 
 BEGIN {
-    unshift @INC, 't','../../t';
-    require 'test.pl';
-    skip_all_without_dynamic_extension('B');
+    require Config;
+    if (($Config::Config{extensions} !~ /\bB\b/) ){
+        print "1..0 # Skip -- Perl configured without B module\n";
+        exit 0;
+    }
 }
 
+use strict;
+use Test::More;
 
 # Many functions appear in multiple lists, so that shift() and shift(foo)
 # are both tested.
@@ -55,10 +59,6 @@ my @nary = (
      [qw( msgrcv open socketpair splice )]
 );
 
-my $tests = @bin + 13;
-$tests += @$_ for @nary;
-plan $tests;
-
 use B::Deparse;
 my $deparse = new B::Deparse;
 
@@ -69,7 +69,7 @@ sub CORE_test {
   import subs $keyword;
   ::like
       $deparse->coderef2text(
-         eval "sub { () = $expr }" or die "$@in $expr"
+         eval "no strict 'vars'; sub { () = $expr }" or die "$@in $expr"
       ),
       qr/\sCORE::$keyword.*;/,
       $name||$keyword  
@@ -78,7 +78,8 @@ sub CORE_test {
 for my $argc(0..$#nary) {
  for(@{$nary[$argc]}) {
   CORE_test
-     $_,    "CORE::$_(" . join(',',map "\$$_", (undef,"a".."z")[1..$argc]) . ")",
+     $_,
+    "CORE::$_(" . join(',',map "\$$_", (undef,"a".."z")[1..$argc]) . ")",
     "$_, $argc argument" . "s"x($argc != 1);
  }
 }
@@ -103,3 +104,5 @@ CORE_test readpipe => 'CORE::readpipe $a+$b', 'readpipe';
 # Tests for prefixing feature.pm-enabled keywords with CORE:: when
 # feature.pm is not enabled are in deparse.t, as they fit that for-
 # mat better.
+
+done_testing();
