@@ -1018,14 +1018,8 @@ PP(pp_formline)
 	    arg = *fpc++;
 	    if (gotsome) {
 		if (arg) {		/* repeat until fields exhausted? */
-		    *t = '\0';
-		    SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
-		    lines += FmLINES(PL_formtarget);
-		    if (targ_is_utf8)
-			SvUTF8_on(PL_formtarget);
-		    FmLINES(PL_formtarget) = lines;
-		    SP = ORIGMARK;
-		    RETURNOP(cLISTOP->op_first);
+		    fpc--;
+		    goto end;
 		}
 	    }
 	    else {
@@ -1062,13 +1056,17 @@ PP(pp_formline)
 		break;
 	    }
 	case FF_END:
+	end:
 	    *t = '\0';
 	    SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
 	    if (targ_is_utf8)
 		SvUTF8_on(PL_formtarget);
 	    FmLINES(PL_formtarget) += lines;
 	    SP = ORIGMARK;
-	    RETPUSHYES;
+	    if (fpc[-1] == FF_BLANK)
+		RETURNOP(cLISTOP->op_first);
+	    else
+		RETPUSHYES;
 	}
     }
 }
