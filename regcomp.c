@@ -6339,7 +6339,6 @@ S_add_range_to_invlist(pTHX_ SV* invlist, const UV start, const UV end)
      * with just the one range in it */
 
     SV* range_invlist;
-    SV* added_invlist;
     UV len;
 
     if (invlist == NULL) {
@@ -6364,15 +6363,12 @@ S_add_range_to_invlist(pTHX_ SV* invlist, const UV start, const UV end)
     range_invlist = _new_invlist(2);
     _append_range_to_invlist(range_invlist, start, end);
 
-    invlist_union(invlist, range_invlist, &added_invlist);
+    invlist_union(invlist, range_invlist, &invlist);
 
     /* The passed in list can be freed, as well as our temporary */
     invlist_destroy(range_invlist);
-    if (invlist != added_invlist) {
-	invlist_destroy(invlist);
-    }
 
-    return added_invlist;
+    return invlist;
 }
 
 PERL_STATIC_INLINE SV*
