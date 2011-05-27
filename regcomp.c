@@ -6023,10 +6023,12 @@ Perl__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV 
 }
 #endif
 
-STATIC SV*
-S_invlist_union(pTHX_ SV* const a, SV* const b)
+STATIC void
+S_invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
 {
-    /* Return a new inversion list which is the union of two inversion lists.
+    /* Take the union of two inversion lists and point 'result' to it.  If
+     * 'result' on input points to one of the two lists, the reference count to
+     * that list will be decremented.
      * The basis for this comes from "Unicode Demystified" Chapter 13 by
      * Richard Gillam, published by Addison-Wesley, and explained at some
      * length there.  The preface says to incorporate its examples into your
@@ -6037,7 +6039,8 @@ S_invlist_union(pTHX_ SV* const a, SV* const b)
      * XXX A potential performance improvement is to keep track as we go along
      * if only one of the inputs contributes to the result, meaning the other
      * is a subset of that one.  In that case, we can skip the final copy and
-     * return the larger of the input lists */
+     * return the larger of the input lists, but then outside code might need
+     * to keep track of whether to free the input list or not */
 
     UV* array_a = invlist_array(a);   /* a's array */
     UV* array_b = invlist_array(b);
@@ -6171,17 +6174,25 @@ S_invlist_union(pTHX_ SV* const a, SV* const b)
 	}
     }
 
-    return u;
+    /*  We may be removing a reference to one of the inputs */
+    if (&a == output || &b == output) {
+	SvREFCNT_dec(*output);
+    }
+
+    *output = u;
+    return;
 }
 
-STATIC SV*
-S_invlist_intersection(pTHX_ SV* const a, SV* const b)
+STATIC void
+S_invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
 {
-    /* Return the intersection of two inversion lists.  The basis for this
-     * comes from "Unicode Demystified" Chapter 13 by Richard Gillam, published
-     * by Addison-Wesley, and explained at some length there.  The preface says
-     * to incorporate its examples into your code at your own risk.  In fact,
-     * it had bugs
+    /* Take the intersection of two inversion lists and point 'i' to it.  If
+     * 'i' on input points to one of the two lists, the reference count to that
+     * list will be decremented.
+     * The basis for this comes from "Unicode Demystified" Chapter 13 by
+     * Richard Gillam, published by Addison-Wesley, and explained at some
+     * length there.  The preface says to incorporate its examples into your
+     * code at your own risk.  In fact, it had bugs
      *
      * The algorithm is like a merge sort, and is essentially the same as the
      * union above
@@ -6309,7 +6320,13 @@ S_invlist_intersection(pTHX_ SV* const a, SV* const b)
 	}
     }
 
-    return r;
+    /*  We may be removing a reference to one of the inputs */
+    if (&a == i || &b == i) {
+	SvREFCNT_dec(*i);
+    }
+
+    *i = r;
+    return;
 }
 
 STATIC SV*
@@ -6347,7 +6364,7 @@ S_add_range_to_invlist(pTHX_ SV* invlist, const UV start, const UV end)
     range_invlist = _new_invlist(2);
     _append_range_to_invlist(range_invlist, start, end);
 
-    added_invlist = invlist_union(invlist, range_invlist);
+    invlist_union(invlist, range_invlist, &added_invlist);
 
     /* The passed in list can be freed, as well as our temporary */
     invlist_destroy(range_invlist);
@@ -10076,7 +10093,7 @@ parseit:
 	    * be checked.  Get the intersection of this class and all the
 	    * possible characters that are foldable.  This can quickly narrow
 	    * down a large class */
-	fold_intersection = invlist_intersection(PL_utf8_foldable, nonbitmap);
+	invlist_intersection(PL_utf8_foldable, nonbitmap, &fold_intersection);
 
 	/* Now look at the foldable characters in this class individually */
 	fold_list = invlist_array(fold_intersection);
@@ -10220,9 +10237,7 @@ parseit:
     /* Combine the two lists into one. */
     if (l1_fold_invlist) {
 	if (nonbitmap) {
-	    SV* temp = invlist_union(nonbitmap, l1_fold_invlist);
-	    invlist_destroy(nonbitmap);
-	    nonbitmap = temp;
+	    invlist_union(nonbitmap, l1_fold_invlist, &nonbitmap);
 	    invlist_destroy(l1_fold_invlist);
 	}
 	else {

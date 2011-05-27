@@ -1310,13 +1310,13 @@ EsMR	|SV*	|add_range_to_invlist	|NULLOK SV* invlist|const UV start|const UV end
 EiMR	|UV*	|invlist_array	|NN SV* const invlist
 EiM	|void	|invlist_destroy	|NN SV* const invlist
 EsM	|void	|invlist_extend    |NN SV* const invlist|const UV len
-EsMR	|SV*	|invlist_intersection	|NN SV* const a|NN SV* const b
+EsM	|void	|invlist_intersection	|NN SV* const a|NN SV* const b|NN SV** i
 EiMR	|UV	|invlist_len	|NN SV* const invlist
 EiMR	|UV	|invlist_max	|NN SV* const invlist
 EiM	|void	|invlist_set_len	|NN SV* const invlist|const UV len
 EiM	|void	|invlist_set_max	|NN SV* const invlist|const UV max
 EiM	|void	|invlist_trim	|NN SV* const invlist
-EsMR	|SV*	|invlist_union	|NN SV* const a|NN SV* const b
+EsM	|void	|invlist_union	|NN SV* const a|NN SV* const b|NN SV** output
 #endif
 Ap	|void	|taint_env
 Ap	|void	|taint_proper	|NULLOK const char* f|NN const char *const s

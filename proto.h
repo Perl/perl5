@@ -6057,12 +6057,12 @@ STATIC void	S_invlist_extend(pTHX_ SV* const invlist, const UV len)
 #define PERL_ARGS_ASSERT_INVLIST_EXTEND	\
 	assert(invlist)
 
-STATIC SV*	S_invlist_intersection(pTHX_ SV* const a, SV* const b)
-			__attribute__warn_unused_result__
+STATIC void	S_invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
 			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_INVLIST_INTERSECTION	\
-	assert(a); assert(b)
+	assert(a); assert(b); assert(i)
 
 PERL_STATIC_INLINE UV	S_invlist_len(pTHX_ SV* const invlist)
 			__attribute__warn_unused_result__
@@ -6091,12 +6091,12 @@ PERL_STATIC_INLINE void	S_invlist_trim(pTHX_ SV* const invlist)
 #define PERL_ARGS_ASSERT_INVLIST_TRIM	\
 	assert(invlist)
 
-STATIC SV*	S_invlist_union(pTHX_ SV* const a, SV* const b)
-			__attribute__warn_unused_result__
+STATIC void	S_invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
 			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_INVLIST_UNION	\
-	assert(a); assert(b)
+	assert(a); assert(b); assert(output)
 
 STATIC U32	S_join_exact(pTHX_ struct RExC_state_t *pRExC_state, regnode *scan, I32 *min, U32 flags, regnode *val, U32 depth)
 			__attribute__nonnull__(pTHX_1)
