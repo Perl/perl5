@@ -85,7 +85,6 @@ my \@patches = (
 print OUT <<'!NO!SUBS!';
 
 use warnings;
-no warnings 'once'; # Eventually, the $::opt_ stuff should get cleaned up
 use strict;
 use Config;
 use File::Spec;		# keep perlbug Perl 5.005 compatible
@@ -170,7 +169,7 @@ my( $file, $usefile, $cc, $address, $bugaddress, $testaddress, $thanksaddress,
     $fh, $me, $body, $andcc, %REP, $ok, $thanks, $progname,
     $Is_MSWin32, $Is_Linux, $Is_VMS, $Is_OpenBSD,
     $report_about_module, $category, $severity,
-
+    %opt,
 );
 
 my $perl_version = $^V ? sprintf("%vd", $^V) : $];
@@ -179,9 +178,9 @@ my $config_tag2 = "$perl_version - $Config{cf_time}";
 
 Init();
 
-if ($::opt_h) { Help(); exit; }
-if ($::opt_d) { Dump(*STDOUT); exit; }
-if (!-t STDIN && !($ok and not $::opt_n)) {
+if ($opt{h}) { Help(); exit; }
+if ($opt{d}) { Dump(*STDOUT); exit; }
+if (!-t STDIN && !($ok and not $opt{n})) {
     paraprint <<"EOF";
 Please use $progname interactively. If you want to
 include a file, you can use the -f switch.
@@ -190,7 +189,7 @@ EOF
 }
 
 Query();
-Edit() unless $usefile || ($ok and not $::opt_n);
+Edit() unless $usefile || ($ok and not $opt{n});
 NowWhat();
 if ($outfile) {
     save_message_to_disk($outfile);
@@ -255,7 +254,7 @@ sub Init {
     $Is_Linux = lc($^O) eq 'linux';
     $Is_OpenBSD = lc($^O) eq 'openbsd';
 
-    if (!getopts("Adhva:s:b:f:F:r:e:SCc:to:n:T")) { Help(); exit; };
+    if (!getopts("Adhva:s:b:f:F:r:e:SCc:to:n:T", \%opt)) { Help(); exit; };
 
     # This comment is needed to notify metaconfig that we are
     # using the $perladmin, $cf_by, and $cf_time definitions.
@@ -273,50 +272,50 @@ sub Init {
 
     if (basename ($0) =~ /^perlthanks/i) {
 	# invoked as perlthanks
-	$::opt_T = 1;
-	$::opt_C = 1; # don't send a copy to the local admin
+	$opt{T} = 1;
+	$opt{C} = 1; # don't send a copy to the local admin
     }
 
-    if ($::opt_T) {
+    if ($opt{T}) {
 	$thanks = 'thanks';
     }
     
     $progname = $thanks ? 'perlthanks' : 'perlbug';
     # Target address
-    $address = $::opt_a || ($::opt_t ? $testaddress
+    $address = $opt{a} || ($opt{t} ? $testaddress
 			    : $thanks ? $thanksaddress : $bugaddress);
 
     # Users address, used in message and in From and Reply-To headers
-    $from = $::opt_r || "";
+    $from = $opt{r} || "";
 
     # Include verbose configuration information
-    $verbose = $::opt_v || 0;
+    $verbose = $opt{v} || 0;
 
     # Subject of bug-report message
-    $subject = $::opt_s || "";
+    $subject = $opt{s} || "";
 
     # Send a file
-    $usefile = ($::opt_f || 0);
+    $usefile = ($opt{f} || 0);
 
     # File to send as report
-    $file = $::opt_f || "";
+    $file = $opt{f} || "";
 
     # File to output to
-    $outfile = $::opt_F || "";
+    $outfile = $opt{F} || "";
 
     # Body of report
-    $body = $::opt_b || "";
+    $body = $opt{b} || "";
 	
     # Editor
-    $ed = $::opt_e || $ENV{VISUAL} || $ENV{EDITOR} || $ENV{EDIT}
+    $ed = $opt{e} || $ENV{VISUAL} || $ENV{EDITOR} || $ENV{EDIT}
 	|| ($Is_VMS && "edit/tpu")
 	|| ($Is_MSWin32 && "notepad")
 	|| "vi";
 
     # Not OK - provide build failure template by finessing OK report
-    if ($::opt_n) {
-	if (substr($::opt_n, 0, 2) eq 'ok' )	{
-	    $::opt_o = substr($::opt_n, 1);
+    if ($opt{n}) {
+	if (substr($opt{n}, 0, 2) eq 'ok' )	{
+	    $opt{o} = substr($opt{n}, 1);
 	} else {
 	    Help();
 	    exit();
@@ -325,10 +324,10 @@ sub Init {
 
     # OK - send "OK" report for build on this system
     $ok = '';
-    if ($::opt_o) {
-	if ($::opt_o eq 'k' or $::opt_o eq 'kay') {
+    if ($opt{o}) {
+	if ($opt{o} eq 'k' or $opt{o} eq 'kay') {
 	    my $age = time - $patchlevel_date;
-	    if ($::opt_o eq 'k' and $age > 60 * 24 * 60 * 60 ) {
+	    if ($opt{o} eq 'k' and $age > 60 * 24 * 60 * 60 ) {
 		my $date = localtime $patchlevel_date;
 		print <<"EOF";
 "perlbug -ok" and "perlbug -nok" do not report on Perl versions which
@@ -339,14 +338,14 @@ EOF
 		exit();
 	    }
 	    # force these options
-	    unless ($::opt_n) {
-		$::opt_S = 1; # don't prompt for send
-		$::opt_b = 1; # we have a body
+	    unless ($opt{n}) {
+		$opt{S} = 1; # don't prompt for send
+		$opt{b} = 1; # we have a body
 		$body = "Perl reported to build OK on this system.\n";
 	    }
-	    $::opt_C = 1; # don't send a copy to the local admin
-	    $::opt_s = 1; # we have a subject line
-	    $subject = ($::opt_n ? 'Not ' : '')
+	    $opt{C} = 1; # don't send a copy to the local admin
+	    $opt{s} = 1; # we have a subject line
+	    $subject = ($opt{n} ? 'Not ' : '')
 		    . "OK: perl $perl_version ${patch_tags}on"
 		    ." $::Config{'archname'} $::Config{'osvers'} $subject";
 	    $ok = 'ok';
@@ -361,9 +360,9 @@ EOF
     # we don't really want it. We'll just take it if we have to.)
     #
     # This has to be after the $ok stuff above because of the way
-    # that $::opt_C is forced.
-    $cc = $::opt_C ? "" : (
-	$::opt_c || $::Config{'perladmin'}
+    # that $opt{C} is forced.
+    $cc = $opt{C} ? "" : (
+	$opt{c} || $::Config{'perladmin'}
 	|| $::Config{'cf_email'} || $::Config{'cf_by'}
     );
 
@@ -449,7 +448,7 @@ EOF
     }
 
     # Prompt for return address, if needed
-    unless ($::opt_r) {
+    unless ($opt{r}) {
 	# Try and guess return address
 	my $guess;
 
@@ -500,7 +499,7 @@ EOF
     }
 
     # Prompt for administrator address, unless an override was given
-    if( !$::opt_C and !$::opt_c ) {
+    if( !$opt{C} and !$opt{c} ) {
 	my $description =  <<EOF;
 $0 can send a copy of this report to your local perl
 administrator.  If the address below is wrong, please correct it,
@@ -523,7 +522,7 @@ EOF
 
     # Prompt for editor, if no override is given
 editor:
-    unless ($::opt_e || $::opt_f || $::opt_b) {
+    unless ($opt{e} || $opt{f} || $opt{b}) {
 
     my $description;
 
@@ -651,7 +650,7 @@ EOF
     # Generate report
     open(REP,">$filename") or die "Unable to create report file '$filename': $!\n";
     my $reptype = !$ok ? ($thanks ? 'thank-you' : 'bug')
-	: $::opt_n ? "build failure" : "success";
+	: $opt{n} ? "build failure" : "success";
 
     print REP <<EOF;
 This is a $reptype report for perl from $from,
@@ -720,7 +719,7 @@ EFF
     module=$report_about_module
 EFF
     }
-    if ($::opt_A) {
+    if ($opt{A}) {
 	print OUT <<EFF;
     ack=no
 EFF
@@ -819,7 +818,7 @@ EOF
                 return;
             }
         }
-        return if ( $ok and not $::opt_n ) || $body;
+        return if ( $ok and not $opt{n} ) || $body;
 
         # Check that we have a report that has some, eh, report in it.
 
@@ -850,7 +849,7 @@ sub Cancel {
 
 sub NowWhat {
     # Report is done, prompt for further action
-    if( !$::opt_S ) {
+    if( !$opt{S} ) {
 	while(1) {
 	    my $menu = <<EOF;
 
