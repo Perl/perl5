@@ -5830,13 +5830,15 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
  * this file.  An inversion list is here implemented as a malloc'd C array with
  * some added info.  More will be coming when functionality is added later.
  *
+ * It is currently implemented as an HV to the outside world, but is actually
+ * an SV pointing to an array of UVs that the SV thinks are bytes.  This allows
+ * us to have an array of UV whose memory management is automatically handled
+ * by the existing facilities for SV's.
+ *
  * Some of the methods should always be private to the implementation, and some
  * should eventually be made public */
 
 #define INVLIST_INITIAL_LEN 10
-#define INVLIST_ARRAY_KEY "array"
-#define INVLIST_MAX_KEY "max"
-#define INVLIST_LEN_KEY "len"
 
 PERL_STATIC_INLINE UV*
 S_invlist_array(pTHX_ HV* const invlist)
@@ -5845,30 +5847,9 @@ S_invlist_array(pTHX_ HV* const invlist)
      * length changes, this needs to be called in case malloc or realloc moved
      * it */
 
-    SV** list_ptr = hv_fetchs(invlist, INVLIST_ARRAY_KEY, FALSE);
-
     PERL_ARGS_ASSERT_INVLIST_ARRAY;
 
-    if (list_ptr == NULL) {
-	Perl_croak(aTHX_ "panic: inversion list without a '%s' element",
-							    INVLIST_ARRAY_KEY);
-    }
-
-    return INT2PTR(UV *, SvUV(*list_ptr));
-}
-
-PERL_STATIC_INLINE void
-S_invlist_set_array(pTHX_ HV* const invlist, const UV* const array)
-{
-    PERL_ARGS_ASSERT_INVLIST_SET_ARRAY;
-
-    /* Sets the array stored in the inversion list to the memory beginning with
-     * the parameter */
-
-    if (hv_stores(invlist, INVLIST_ARRAY_KEY, newSVuv(PTR2UV(array))) == NULL) {
-	Perl_croak(aTHX_ "panic: can't store '%s' entry in inversion list",
-							    INVLIST_ARRAY_KEY);
-    }
+    return (UV *) SvPVX(invlist);
 }
 
 PERL_STATIC_INLINE UV
@@ -5876,16 +5857,9 @@ S_invlist_len(pTHX_ HV* const invlist)
 {
     /* Returns the current number of elements in the inversion list's array */
 
-    SV** len_ptr = hv_fetchs(invlist, INVLIST_LEN_KEY, FALSE);
-
     PERL_ARGS_ASSERT_INVLIST_LEN;
 
-    if (len_ptr == NULL) {
-	Perl_croak(aTHX_ "panic: inversion list without a '%s' element",
-							    INVLIST_LEN_KEY);
-    }
-
-    return SvUV(*len_ptr);
+    return SvCUR(invlist) / sizeof(UV);
 }
 
 PERL_STATIC_INLINE UV
@@ -5894,16 +5868,9 @@ S_invlist_max(pTHX_ HV* const invlist)
     /* Returns the maximum number of elements storable in the inversion list's
      * array, without having to realloc() */
 
-    SV** max_ptr = hv_fetchs(invlist, INVLIST_MAX_KEY, FALSE);
-
     PERL_ARGS_ASSERT_INVLIST_MAX;
 
-    if (max_ptr == NULL) {
-	Perl_croak(aTHX_ "panic: inversion list without a '%s' element",
-							    INVLIST_MAX_KEY);
-    }
-
-    return SvUV(*max_ptr);
+    return SvLEN(invlist) / sizeof(UV);
 }
 
 PERL_STATIC_INLINE void
@@ -5913,14 +5880,7 @@ S_invlist_set_len(pTHX_ HV* const invlist, const UV len)
 
     PERL_ARGS_ASSERT_INVLIST_SET_LEN;
 
-    if (len != 0 && len > invlist_max(invlist)) {
-	Perl_croak(aTHX_ "panic: Can't make '%s=%"UVuf"' more than %s=%"UVuf" in inversion list", INVLIST_LEN_KEY, len, INVLIST_MAX_KEY, invlist_max(invlist));
-    }
-
-    if (hv_stores(invlist, INVLIST_LEN_KEY, newSVuv(len)) == NULL) {
-	Perl_croak(aTHX_ "panic: can't store '%s' entry in inversion list",
-							    INVLIST_LEN_KEY);
-    }
+    SvCUR_set(invlist, len * sizeof(UV));
 }
 
 PERL_STATIC_INLINE void
@@ -5933,13 +5893,10 @@ S_invlist_set_max(pTHX_ HV* const invlist, const UV max)
     PERL_ARGS_ASSERT_INVLIST_SET_MAX;
 
     if (max < invlist_len(invlist)) {
-	Perl_croak(aTHX_ "panic: Can't make '%s=%"UVuf"' less than %s=%"UVuf" in inversion list", INVLIST_MAX_KEY, invlist_len(invlist), INVLIST_LEN_KEY, invlist_max(invlist));
+	Perl_croak(aTHX_ "panic: Can't make max size '%"UVuf"' less than current length %"UVuf" in inversion list", invlist_max(invlist), invlist_len(invlist));
     }
 
-    if (hv_stores(invlist, INVLIST_MAX_KEY, newSVuv(max)) == NULL) {
-	Perl_croak(aTHX_ "panic: can't store '%s' entry in inversion list",
-							    INVLIST_LEN_KEY);
-    }
+    SvLEN_set(invlist, max * sizeof(UV));
 }
 
 #ifndef PERL_IN_XSUB_RE
@@ -5951,22 +5908,12 @@ Perl__new_invlist(pTHX_ IV initial_size)
      * space to store 'initial_size' elements.  If that number is negative, a
      * system default is used instead */
 
-    HV* invlist = newHV();
-    UV* list;
-
     if (initial_size < 0) {
 	initial_size = INVLIST_INITIAL_LEN;
     }
 
     /* Allocate the initial space */
-    Newx(list, initial_size, UV);
-    invlist_set_array(invlist, list);
-
-    /* set_len has to come before set_max, as the latter inspects the len */
-    invlist_set_len(invlist, 0);
-    invlist_set_max(invlist, initial_size);
-
-    return invlist;
+    return (HV *) newSV(initial_size * sizeof(UV));
 }
 #endif
 
@@ -5975,42 +5922,19 @@ S_invlist_destroy(pTHX_ HV* const invlist)
 {
    /* Inversion list destructor */
 
-    SV** list_ptr = hv_fetchs(invlist, INVLIST_ARRAY_KEY, FALSE);
-
     PERL_ARGS_ASSERT_INVLIST_DESTROY;
 
-    if (list_ptr != NULL) {
-	UV *list = INT2PTR(UV *, SvUV(*list_ptr)); /* PERL_POISON needs lvalue */
-	Safefree(list);
-    }
     SvREFCNT_dec(invlist);
 }
 
 STATIC void
 S_invlist_extend(pTHX_ HV* const invlist, const UV new_max)
 {
-    /* Change the maximum size of an inversion list (up or down) */
-
-    UV* orig_array;
-    UV* array;
-    const UV old_max = invlist_max(invlist);
+    /* Grow the maximum size of an inversion list */
 
     PERL_ARGS_ASSERT_INVLIST_EXTEND;
 
-    if (old_max == new_max) {	/* If a no-op */
-	return;
-    }
-
-    array = orig_array = invlist_array(invlist);
-    Renew(array, new_max, UV);
-
-    /* If the size change moved the list in memory, set the new one */
-    if (array != orig_array) {
-	invlist_set_array(invlist, array);
-    }
-
-    invlist_set_max(invlist, new_max);
-
+    SvGROW((SV *)invlist, new_max * sizeof(UV));
 }
 
 PERL_STATIC_INLINE void
@@ -6021,7 +5945,7 @@ S_invlist_trim(pTHX_ HV* const invlist)
     /* Change the length of the inversion list to how many entries it currently
      * has */
 
-    invlist_extend(invlist, invlist_len(invlist));
+    SvPV_shrink_to_cur((SV *) invlist);
 }
 
 /* An element is in an inversion list iff its index is even numbered: 0, 2, 4,

@@ -882,7 +882,6 @@
 #define invlist_intersection(a,b)	S_invlist_intersection(aTHX_ a,b)
 #define invlist_len(a)		S_invlist_len(aTHX_ a)
 #define invlist_max(a)		S_invlist_max(aTHX_ a)
-#define invlist_set_array(a,b)	S_invlist_set_array(aTHX_ a,b)
 #define invlist_set_len(a,b)	S_invlist_set_len(aTHX_ a,b)
 #define invlist_set_max(a,b)	S_invlist_set_max(aTHX_ a,b)
 #define invlist_trim(a)		S_invlist_trim(aTHX_ a)
