@@ -500,10 +500,11 @@ is($@, "", "element of tied array");
 
 is ($Tie_Array::val[0], "value");
 
-TODO: {
-    local $TODO = 'test explicit return of lval expr';
 
-    # subs are corrupted copies from tests 1-~18
+# Test explicit return of lvalue expression
+{
+    # subs are copies from tests 1-~18 with an explicit return added.
+    # They used not to work, which is why they are ‘badly’ named.
     sub bad_get_lex : lvalue { return $in };
     sub bad_get_st  : lvalue { return $blah }
 
