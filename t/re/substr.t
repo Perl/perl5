@@ -24,7 +24,7 @@ $SIG{__WARN__} = sub {
 
 BEGIN { require './test.pl'; }
 
-plan(362);
+plan(363);
 
 run_tests() unless caller;
 
@@ -745,3 +745,20 @@ ok eval {
  }
  1
 }, 'UTF8 cache is reset when TARG is reused [perl #77692]';
+
+{
+    my $result_3363;
+    sub a_3363 {
+        my ($word, $replace) = @_;
+        my $ref = \substr($word, 0, 1);
+        $$ref = $replace;
+        if ($replace eq "b") {
+            $result_3363 = $word;
+        } else {
+            a_3363($word, "b");
+        }
+    }
+    a_3363($_, "v") for "test";
+
+    is($result_3363, "best", "ref-to-substr retains lvalue-ness under recursion [perl #3363]");
+}
