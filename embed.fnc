@@ -1310,7 +1310,6 @@ EsM	|void	|invlist_extend    |NN HV* const invlist|const UV len
 EsMR	|HV*	|invlist_intersection	|NN HV* const a|NN HV* const b
 EiMR	|UV	|invlist_len	|NN HV* const invlist
 EiMR	|UV	|invlist_max	|NN HV* const invlist
-EiM	|void	|invlist_set_array	|NN HV* const invlist|NN const UV* const array
 EiM	|void	|invlist_set_len	|NN HV* const invlist|const UV len
 EiM	|void	|invlist_set_max	|NN HV* const invlist|const UV max
 EiM	|void	|invlist_trim	|NN HV* const invlist
