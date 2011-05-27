@@ -10059,7 +10059,7 @@ parseit:
 	     * compilation of Perl itself before the Unicode tables are
 	     * generated) */
 	    if (invlist_len(PL_utf8_foldable) == 0) {
-		PL_utf8_foldclosures = _new_invlist(0);
+		PL_utf8_foldclosures = newHV();
 	    } else {
 		/* If the folds haven't been read in, call a fold function
 		    * to force that */
