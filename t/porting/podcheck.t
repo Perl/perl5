@@ -926,7 +926,9 @@ sub extract_pod {   # Extracts just the pod from a file
     open my $in_fh, '<:bytes', $filename
 
         # The file should already have been opened once to get here, so if
-        # fails, just die.
+        # fails, just die.  It's possible that a transitory file containing a
+        # pod would get here, but not bothering to add code for that very
+        # unlikely event.
         or die "Can't open '$filename': $!\n";
 
     my $parser = Pod::Parser->new();
@@ -965,11 +967,14 @@ sub is_pod_file {
         my $candidate;
         if (! open $candidate, '<:bytes', $_) {
 
-            # If it is a broken symbolic link, just skip the file, as it
-            # is probably just a build problem; certainly not a file that
-            # we would want to check the pod of.  Otherwise fail it here
-            # and no reason to process it further.
-            ok(0, "Can't open '$filename': $!") if ! -l $filename;
+            # If a transitory file was found earlier, the open could fail
+            # legitimately and we just skip the file; also skip it if it is a
+            # broken symbolic link, as it is probably just a build problem;
+            # certainly not a file that we would want to check the pod of.
+            # Otherwise fail it here and no reason to process it further.
+            # (But the test count will be off too)
+            ok(0, "Can't open '$filename': $!")
+                                            if -e $filename && ! -l $filename;
             return;
         }
         <$candidate>;
