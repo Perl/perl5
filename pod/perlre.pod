@@ -1168,16 +1168,17 @@ C<local>ization are undone, so that
 
   $_ = 'a' x 8;
   m<
-     (?{ $cnt = 0 })                   # Initialize $cnt.
+     (?{ $cnt = 0 })               # Initialize $cnt.
      (
        a
        (?{
-           local $cnt = $cnt + 1;      # Update $cnt, backtracking-safe.
+           local $cnt = $cnt + 1;  # Update $cnt,
+                                   # backtracking-safe.
        })
      )*
      aaaa
-     (?{ $res = $cnt })                # On success copy to
-                                       # non-localized location.
+     (?{ $res = $cnt })            # On success copy to
+                                   # non-localized location.
    >x;
 
 will set C<$res = 4>.  Note that after the match, C<$cnt> returns to the globally
@@ -1253,15 +1254,15 @@ where the C<code> ends are currently somewhat convoluted.
 
 The following pattern matches a parenthesized group:
 
-  $re = qr{
-             \(
-             (?:
-                (?> [^()]+ )       # Non-parens without backtracking
-              |
-                (??{ $re })        # Group with matching parens
-             )*
-             \)
-          }x;
+ $re = qr{
+            \(
+            (?:
+               (?> [^()]+ )  # Non-parens without backtracking
+             |
+               (??{ $re })   # Group with matching parens
+            )*
+            \)
+         }x;
 
 See also C<(?PARNO)> for a different, more efficient way to accomplish
 the same task.
@@ -1305,15 +1306,15 @@ included.
 The following pattern matches a function foo() which may contain
 balanced parentheses as the argument.
 
-  $re = qr{ (                    # paren group 1 (full function)
+  $re = qr{ (                   # paren group 1 (full function)
               foo
-              (                  # paren group 2 (parens)
+              (                 # paren group 2 (parens)
                 \(
-                  (              # paren group 3 (contents of parens)
+                  (             # paren group 3 (contents of parens)
                   (?:
-                   (?> [^()]+ )  # Non-parens without backtracking
+                   (?> [^()]+ ) # Non-parens without backtracking
                   |
-                   (?2)          # Recurse to start of paren group 2
+                   (?2)         # Recurse to start of paren group 2
                   )*
                   )
                 \)
@@ -1696,8 +1697,8 @@ executing the (*SKIP) pattern.
 Compare the following to the examples in C<(*PRUNE)>; note the string
 is twice as long:
 
-    'aaabaaab' =~ /a+b?(*SKIP)(?{print "$&\n"; $count++})(*FAIL)/;
-    print "Count=$count\n";
+ 'aaabaaab' =~ /a+b?(*SKIP)(?{print "$&\n"; $count++})(*FAIL)/;
+ print "Count=$count\n";
 
 outputs
 
@@ -1790,8 +1791,8 @@ into on failure it causes the match to fail outright. No further attempts
 to find a valid match by advancing the start pointer will occur again.
 For example,
 
-    'aaabaaab' =~ /a+b?(*COMMIT)(?{print "$&\n"; $count++})(*FAIL)/;
-    print "Count=$count\n";
+ 'aaabaaab' =~ /a+b?(*COMMIT)(?{print "$&\n"; $count++})(*FAIL)/;
+ print "Count=$count\n";
 
 outputs
 
@@ -2181,7 +2182,7 @@ However, long experience has shown that many programming tasks may
 be significantly simplified by using repeated subexpressions that
 may match zero-length substrings.  Here's a simple example being:
 
-    @chars = split //, $string;                  # // is not magic in split
+    @chars = split //, $string;           # // is not magic in split
     ($whitewashed = $string) =~ s/()/ /g; # parens avoid magic s// /
 
 Thus Perl allows such constructs, by I<forcefully breaking
