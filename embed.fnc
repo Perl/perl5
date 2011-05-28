@@ -1313,7 +1313,6 @@ EsM	|void	|invlist_intersection	|NN SV* const a|NN SV* const b|NN SV** i
 EiMR	|UV	|invlist_len	|NN SV* const invlist
 EiMR	|UV	|invlist_max	|NN SV* const invlist
 EiM	|void	|invlist_set_len	|NN SV* const invlist|const UV len
-EiM	|void	|invlist_set_max	|NN SV* const invlist|const UV max
 EiM	|void	|invlist_trim	|NN SV* const invlist
 EsM	|void	|invlist_union	|NN SV* const a|NN SV* const b|NN SV** output
 #endif

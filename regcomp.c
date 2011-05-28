@@ -5879,22 +5879,6 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len)
     SvCUR_set(invlist, len * sizeof(UV));
 }
 
-PERL_STATIC_INLINE void
-S_invlist_set_max(pTHX_ SV* const invlist, const UV max)
-{
-
-    /* Sets the maximum number of elements storable in the inversion list
-     * without having to realloc() */
-
-    PERL_ARGS_ASSERT_INVLIST_SET_MAX;
-
-    if (max < invlist_len(invlist)) {
-	Perl_croak(aTHX_ "panic: Can't make max size '%"UVuf"' less than current length %"UVuf" in inversion list", invlist_max(invlist), invlist_len(invlist));
-    }
-
-    SvLEN_set(invlist, max * sizeof(UV));
-}
-
 #ifndef PERL_IN_XSUB_RE
 SV*
 Perl__new_invlist(pTHX_ IV initial_size)

@@ -6076,11 +6076,6 @@ PERL_STATIC_INLINE void	S_invlist_set_len(pTHX_ SV* const invlist, const UV len)
 #define PERL_ARGS_ASSERT_INVLIST_SET_LEN	\
 	assert(invlist)
 
-PERL_STATIC_INLINE void	S_invlist_set_max(pTHX_ SV* const invlist, const UV max)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_INVLIST_SET_MAX	\
-	assert(invlist)
-
 PERL_STATIC_INLINE void	S_invlist_trim(pTHX_ SV* const invlist)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_INVLIST_TRIM	\
