@@ -282,7 +282,7 @@ pod/perlperf.pod	Verbatim line length including indents exceeds 80 by	154
 pod/perlpodspec.pod	Verbatim line length including indents exceeds 80 by	9
 pod/perlpodstyle.pod	Verbatim line length including indents exceeds 80 by	1
 pod/perlport.pod	Apparent broken link	27
-pod/perlre.pod	? Should you be using L<...> instead of	2
+pod/perlre.pod	? Should you be using L<...> instead of	1
 pod/perlre.pod	Verbatim line length including indents exceeds 80 by	11
 pod/perlreapi.pod	Verbatim line length including indents exceeds 80 by	17
 pod/perlrebackslash.pod	Verbatim line length including indents exceeds 80 by	1

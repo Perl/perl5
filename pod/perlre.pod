@@ -1738,7 +1738,7 @@ failing the match and has provided its own name to use, the C<$REGERROR>
 variable will be set to the name of the most recently executed
 C<(*MARK:NAME)>.
 
-See C<(*SKIP)> for more details.
+See L</(*SKIP)> for more details.
 
 As a shortcut C<(*MARK:NAME)> can be written C<(*:NAME)>.
 
