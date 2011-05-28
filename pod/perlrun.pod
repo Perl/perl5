@@ -314,6 +314,7 @@ same effect as B<-CSDL>.  In other words, the standard I/O handles and
 the default C<open()> layer are UTF-8-fied I<but> only if the locale
 environment variables indicate a UTF-8 locale.  This behaviour follows
 the I<implicit> (and problematic) UTF-8 behaviour of Perl 5.8.0.
+(See L<perl581delta/UTF-8 no longer default under UTF-8 locales>.)
 
 You can use B<-C0> (or C<"0"> for C<PERL_UNICODE>) to explicitly
 disable all the above Unicode features.
