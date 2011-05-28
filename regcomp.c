@@ -6341,7 +6341,7 @@ S_add_range_to_invlist(pTHX_ SV* invlist, const UV start, const UV end)
 
     invlist_union(invlist, range_invlist, &invlist);
 
-    /* The passed in list can be freed, as well as our temporary */
+    /* The temporary can be freed */
     SvREFCNT_dec(range_invlist);
 
     return invlist;
