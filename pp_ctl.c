@@ -889,14 +889,16 @@ PP(pp_formline)
 	    {
 		const bool oneline = fpc[-1] == FF_LINESNGL;
 		const char *s = item = SvPV_const(sv, len);
+		const char *const send = s + len;
+		STRLEN to_copy = len;
+		const U8 *source = (const U8 *) s;
+		U8 *tmp = NULL;
+
 		item_is_utf8 = DO_UTF8(sv);
 		itemsize = len;
-		if (itemsize) {
-		    STRLEN to_copy = itemsize;
-		    const char *const send = s + len;
-		    const U8 *source = (const U8 *) s;
-		    U8 *tmp = NULL;
-
+		if (!itemsize)
+		    break;
+		{
 		    gotsome = TRUE;
 		    chophere = s + itemsize;
 		    while (s < send) {
