@@ -892,7 +892,6 @@ PP(pp_formline)
 		const bool oneline = fpc[-1] == FF_LINESNGL;
 		const char *s = item = SvPV_const(sv, len);
 		const char *const send = s + len;
-		U8 *tmp = NULL;
 
 		item_is_utf8 = DO_UTF8(sv);
 		itemsize = len;
@@ -917,6 +916,10 @@ PP(pp_formline)
 			}
 		    }
 		}
+	    }
+
+	    {
+		U8 *tmp = NULL;
 		if (targ_is_utf8 && !item_is_utf8) {
 		    source = tmp = bytes_to_utf8(source, &to_copy);
 		    SvCUR_set(PL_formtarget,
