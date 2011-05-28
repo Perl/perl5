@@ -5825,7 +5825,8 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 /* This section of code defines the inversion list object and its methods.  The
  * interfaces are highly subject to change, so as much as possible is static to
  * this file.  An inversion list is here implemented as a malloc'd C array with
- * some added info.  More will be coming when functionality is added later.
+ * some added info that is placed as UVs at the beginning in a header portion.
+ * More will be coming when functionality is added later.
  *
  * It is currently implemented as an SV pointing to an array of UVs that the SV
  * thinks are bytes.  This allows us to have an array of UV whose memory
@@ -5834,8 +5835,12 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
  * Some of the methods should always be private to the implementation, and some
  * should eventually be made public */
 
-#define TO_INTERNAL_SIZE(x) (x * sizeof(UV))	/* Internally things are UVs */
-#define FROM_INTERNAL_SIZE(x) (x / sizeof(UV))
+#define HEADER_LENGTH 0
+
+/* Internally things are UVs */
+#define TO_INTERNAL_SIZE(x) ((x + HEADER_LENGTH) * sizeof(UV))
+#define FROM_INTERNAL_SIZE(x) ((x / sizeof(UV)) - HEADER_LENGTH)
+
 #define INVLIST_INITIAL_LEN 10
 
 PERL_STATIC_INLINE UV*
@@ -5847,7 +5852,7 @@ S_invlist_array(pTHX_ SV* const invlist)
 
     PERL_ARGS_ASSERT_INVLIST_ARRAY;
 
-    return (UV *) SvPVX(invlist);
+    return (UV *) (SvPVX(invlist) + TO_INTERNAL_SIZE(0));
 }
 
 PERL_STATIC_INLINE UV
@@ -5890,12 +5895,17 @@ Perl__new_invlist(pTHX_ IV initial_size)
      * space to store 'initial_size' elements.  If that number is negative, a
      * system default is used instead */
 
+    SV* new_list;
+
     if (initial_size < 0) {
 	initial_size = INVLIST_INITIAL_LEN;
     }
 
     /* Allocate the initial space */
-    return newSV(TO_INTERNAL_SIZE(initial_size));
+    new_list = newSV(TO_INTERNAL_SIZE(initial_size));
+    invlist_set_len(new_list, 0);
+
+    return new_list;
 }
 #endif
 
@@ -6352,6 +6362,7 @@ S_add_cp_to_invlist(pTHX_ SV* invlist, const UV cp) {
     return add_range_to_invlist(invlist, cp, cp);
 }
 
+#undef HEADER_LENGTH
 #undef INVLIST_INITIAL_LENGTH
 #undef TO_INTERNAL_SIZE
 #undef FROM_INTERNAL_SIZE
