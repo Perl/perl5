@@ -6,7 +6,28 @@ HISTORY - public release history for Data::Dumper
 
 =over 8
 
-=item 2.130 (date here)
+=item 2.131 (May 27 2011)
+
+Essentially the same as version 2.130_02, but a production release.
+
+=item 2.130_03 (May 20 2011)
+
+Essentially the same as version 2.130_02, but a CPAN release
+for the eventual 2.131.
+
+=item 2.130_02
+
+This was only shipped with the perl core, never released to CPAN.
+
+Convert overload.t to Test::More
+
+Fix some spelling errors
+
+Fix some compiler warnings
+
+Fix an out of bounds write in Data-Dumper with malformed utf8 input
+
+=item 2.130 (Nov 20 2010)
 
 C<Dumpxs> can now handle malformed UTF-8.
 
@@ -106,7 +127,7 @@ Minor release to fix Makefile.PL not accepting MakeMaker args.
 
 =item 2.08  (7 December 1997)
 
-Glob dumps don't output superfluous 'undef' anymore.
+Glob dumps don't output superflous 'undef' anymore.
 
 Fixes from Gisle Aas <gisle@aas.no> to make Dumper() work with
 overloaded strings in recent perls, and his new testsuite.

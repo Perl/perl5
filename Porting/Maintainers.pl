@@ -511,7 +511,7 @@ use File::Glob qw(:case);
     'Data::Dumper' =>
 	{
 	'MAINTAINER'	=> 'p5p', # Not gsar. Not ilyam. Not really smueller
-	'DISTRIBUTION'	=> 'SMUELLER/Data-Dumper-2.128.tar.gz',
+	'DISTRIBUTION'	=> 'SMUELLER/Data-Dumper-2.131.tar.gz',
 	'FILES'		=> q[dist/Data-Dumper],
 	'UPSTREAM'	=> 'blead',
 	},
