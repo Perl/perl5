@@ -850,7 +850,7 @@ construct because 1) question marks are rare in older regular
 expressions, and 2) whenever you see one, you should stop and
 "question" exactly what is going on.  That's psychology....
 
-=over 10
+=over 4
 
 =item C<(?#text)>
 X<(?#)>
@@ -1619,7 +1619,7 @@ Use C<local> to localize changes to them to a specific scope if necessary.
 If a pattern does not contain a special backtracking verb that allows an
 argument, then C<$REGERROR> and C<$REGMARK> are not touched at all.
 
-=over 4
+=over 3
 
 =item Verbs that take an argument
 
