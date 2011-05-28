@@ -545,6 +545,8 @@ PP(pp_formline)
     SV * nsv = NULL;
     const char *fmt;
     MAGIC *mg = NULL;
+    U8 *source;		    /* source of bytes to append */
+    STRLEN to_copy;	    /* how may bytes to append */
 
     mg = doparseform(tmpForm);
 
@@ -890,8 +892,6 @@ PP(pp_formline)
 		const bool oneline = fpc[-1] == FF_LINESNGL;
 		const char *s = item = SvPV_const(sv, len);
 		const char *const send = s + len;
-		STRLEN to_copy = len;
-		const U8 *source = (const U8 *) s;
 		U8 *tmp = NULL;
 
 		item_is_utf8 = DO_UTF8(sv);
@@ -900,6 +900,8 @@ PP(pp_formline)
 		    break;
 		gotsome = TRUE;
 		chophere = s + itemsize;
+		source = (U8 *) s;
+		to_copy = len;
 		while (s < send) {
 		    if (*s++ == '\n') {
 			if (oneline) {
