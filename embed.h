@@ -876,7 +876,6 @@
 #define cl_is_anything		S_cl_is_anything
 #define cl_or			S_cl_or
 #define invlist_array(a)	S_invlist_array(aTHX_ a)
-#define invlist_destroy(a)	S_invlist_destroy(aTHX_ a)
 #define invlist_extend(a,b)	S_invlist_extend(aTHX_ a,b)
 #define invlist_intersection(a,b,c)	S_invlist_intersection(aTHX_ a,b,c)
 #define invlist_len(a)		S_invlist_len(aTHX_ a)

@@ -6047,11 +6047,6 @@ PERL_STATIC_INLINE UV*	S_invlist_array(pTHX_ SV* const invlist)
 #define PERL_ARGS_ASSERT_INVLIST_ARRAY	\
 	assert(invlist)
 
-PERL_STATIC_INLINE void	S_invlist_destroy(pTHX_ SV* const invlist)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_INVLIST_DESTROY	\
-	assert(invlist)
-
 STATIC void	S_invlist_extend(pTHX_ SV* const invlist, const UV len)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_INVLIST_EXTEND	\

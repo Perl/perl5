@@ -5913,16 +5913,6 @@ Perl__new_invlist(pTHX_ IV initial_size)
 }
 #endif
 
-PERL_STATIC_INLINE void
-S_invlist_destroy(pTHX_ SV* const invlist)
-{
-   /* Inversion list destructor */
-
-    PERL_ARGS_ASSERT_INVLIST_DESTROY;
-
-    SvREFCNT_dec(invlist);
-}
-
 STATIC void
 S_invlist_extend(pTHX_ SV* const invlist, const UV new_max)
 {
