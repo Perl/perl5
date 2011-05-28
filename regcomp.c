@@ -6366,7 +6366,7 @@ S_add_range_to_invlist(pTHX_ SV* invlist, const UV start, const UV end)
     invlist_union(invlist, range_invlist, &invlist);
 
     /* The passed in list can be freed, as well as our temporary */
-    invlist_destroy(range_invlist);
+    SvREFCNT_dec(range_invlist);
 
     return invlist;
 }
@@ -10229,14 +10229,14 @@ parseit:
 		}
 	    }
 	}
-	invlist_destroy(fold_intersection);
+	SvREFCNT_dec(fold_intersection);
     }
 
     /* Combine the two lists into one. */
     if (l1_fold_invlist) {
 	if (nonbitmap) {
 	    invlist_union(nonbitmap, l1_fold_invlist, &nonbitmap);
-	    invlist_destroy(l1_fold_invlist);
+	    SvREFCNT_dec(l1_fold_invlist);
 	}
 	else {
 	    nonbitmap = l1_fold_invlist;
@@ -10397,7 +10397,7 @@ parseit:
 				   start, end);
 	    }
 	}
-	invlist_destroy(nonbitmap);
+	SvREFCNT_dec(nonbitmap);
     }
 
     if (SvCUR(listsv) == initial_listsv_len && ! unicode_alternate) {
