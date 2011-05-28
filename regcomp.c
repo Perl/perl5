@@ -5834,6 +5834,8 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
  * Some of the methods should always be private to the implementation, and some
  * should eventually be made public */
 
+#define TO_INTERNAL_SIZE(x) (x * sizeof(UV))	/* Internally things are UVs */
+#define FROM_INTERNAL_SIZE(x) (x / sizeof(UV))
 #define INVLIST_INITIAL_LEN 10
 
 PERL_STATIC_INLINE UV*
@@ -5855,7 +5857,7 @@ S_invlist_len(pTHX_ SV* const invlist)
 
     PERL_ARGS_ASSERT_INVLIST_LEN;
 
-    return SvCUR(invlist) / sizeof(UV);
+    return FROM_INTERNAL_SIZE(SvCUR(invlist));
 }
 
 PERL_STATIC_INLINE UV
@@ -5866,7 +5868,7 @@ S_invlist_max(pTHX_ SV* const invlist)
 
     PERL_ARGS_ASSERT_INVLIST_MAX;
 
-    return SvLEN(invlist) / sizeof(UV);
+    return FROM_INTERNAL_SIZE(SvLEN(invlist));
 }
 
 PERL_STATIC_INLINE void
@@ -5876,7 +5878,7 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len)
 
     PERL_ARGS_ASSERT_INVLIST_SET_LEN;
 
-    SvCUR_set(invlist, len * sizeof(UV));
+    SvCUR_set(invlist, TO_INTERNAL_SIZE(len));
 }
 
 #ifndef PERL_IN_XSUB_RE
@@ -5893,7 +5895,7 @@ Perl__new_invlist(pTHX_ IV initial_size)
     }
 
     /* Allocate the initial space */
-    return newSV(initial_size * sizeof(UV));
+    return newSV(TO_INTERNAL_SIZE(initial_size));
 }
 #endif
 
@@ -5904,7 +5906,7 @@ S_invlist_extend(pTHX_ SV* const invlist, const UV new_max)
 
     PERL_ARGS_ASSERT_INVLIST_EXTEND;
 
-    SvGROW((SV *)invlist, new_max * sizeof(UV));
+    SvGROW((SV *)invlist, TO_INTERNAL_SIZE(new_max));
 }
 
 PERL_STATIC_INLINE void
@@ -6351,6 +6353,8 @@ S_add_cp_to_invlist(pTHX_ SV* invlist, const UV cp) {
 }
 
 #undef INVLIST_INITIAL_LENGTH
+#undef TO_INTERNAL_SIZE
+#undef FROM_INTERNAL_SIZE
 
 /* End of inversion list object */
 
