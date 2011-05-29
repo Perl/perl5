@@ -153,21 +153,6 @@ http://rakudo.org ).
 
 See L<perlhist> for a history of Perl revisions.
 
-=head2 What was Ponie?
-
-(contributed by brian d foy)
-
-Ponie stands for "Perl On the New Internal Engine", started by Arthur
-Bergman from Fotango in 2003, and subsequently run as a project of The
-Perl Foundation. It was abandoned in 2006
-( http://www.nntp.perl.org/group/perl.ponie.dev/487 ).
-
-Instead of using the current Perl internals, Ponie aimed to create a
-new one that would provide a translation path from Perl 5 to Perl 6
-(or anything else that targets Parrot, actually). You would have been
-able to just keep using Perl 5 with Parrot, the virtual machine which
-will compile and run Perl 6 bytecode.
-
 =head2 What is Perl 6?
 
 At The Second O'Reilly Open Source Software Convention, Larry Wall
