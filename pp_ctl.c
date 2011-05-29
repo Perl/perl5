@@ -629,7 +629,7 @@ PP(pp_formline)
 	    }
 	    if (!targ_is_utf8 && item_is_utf8) {
 		SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
-		sv_utf8_upgrade_flags_grow(PL_formtarget, 0, fudge + 1);
+		sv_utf8_upgrade_flags_grow(PL_formtarget, 0, arg);
 		t = SvEND(PL_formtarget);
 		targ_is_utf8 = TRUE;
 	    }
@@ -814,8 +814,7 @@ PP(pp_formline)
 		if (item_is_utf8) {
 		    if (!targ_is_utf8) {
 			SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
-			sv_utf8_upgrade_flags_grow(PL_formtarget, 0,
-								    fudge + 1);
+			sv_utf8_upgrade_flags_grow(PL_formtarget, 0, arg);
 			t = SvEND(PL_formtarget);
 			targ_is_utf8 = TRUE;
 		    }
@@ -933,7 +932,7 @@ PP(pp_formline)
 		    assert (item_is_utf8 == targ_is_utf8);
 		}
 		SvGROW(PL_formtarget,
-		       SvCUR(PL_formtarget) + to_copy + fudge + 1);
+		       SvCUR(PL_formtarget) + to_copy + 1);
 		t = SvPVX(PL_formtarget) + SvCUR(PL_formtarget);
 
 		Copy(source, t, to_copy, char);
@@ -1042,6 +1041,7 @@ PP(pp_formline)
 	    }
 	case FF_END:
 	end:
+	    assert(t < SvPVX_const(PL_formtarget) + SvLEN(PL_formtarget));
 	    *t = '\0';
 	    SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
 	    if (targ_is_utf8)
