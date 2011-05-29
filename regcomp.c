@@ -5952,7 +5952,7 @@ S_invlist_trim(pTHX_ SV* const invlist)
  * etc */
 
 #define ELEMENT_IN_INVLIST_SET(i) (! ((i) & 1))
-#define PREV_ELEMENT_IN_INVLIST_SET(i) ! ELEMENT_IN_INVLIST_SET(i)
+#define PREV_ELEMENT_IN_INVLIST_SET(i) (! ELEMENT_IN_INVLIST_SET(i))
 
 #ifndef PERL_IN_XSUB_RE
 void
